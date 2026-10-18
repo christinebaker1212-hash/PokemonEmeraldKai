@@ -208,7 +208,16 @@ static void LoadConfig(void)
         else if (strcmp(key, "last_room") == 0) snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", val);
         else if (strcmp(key, "last_room_key") == 0 && strlen(val) == MP_ROOM_KEY_SIZE * 2) snprintf(gMpConfig.lastRoomKey, sizeof(gMpConfig.lastRoomKey), "%s", val);
         else if (strcmp(key, "last_host_name") == 0) snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", val);
-        else if (strcmp(key, "sprite") == 0) gMpConfig.app.base = ParseChoice(val, MP_Avatar_BaseName, MP_BASE_COUNT);
+        else if (strcmp(key, "sprite") == 0)
+        {
+            char lower[64];
+            int i;
+            for (i = 0; val[i] && i < 63; i++)
+                lower[i] = (val[i] == ' ') ? '_' : tolower((unsigned char)val[i]);
+            lower[i] = 0;
+            if (!MP_Avatar_ParseSpriteName(lower, &gMpConfig.app))
+                gMpConfig.app.base = MP_BASE_DEFAULT;
+        }
         else if (strcmp(key, "custom_sprite") == 0) snprintf(gMpConfig.customSprite, sizeof(gMpConfig.customSprite), "%s", val);
         else if (strcmp(key, "skin") == 0) gMpConfig.app.skin = ParseChoice(val, MP_Avatar_SkinName, MP_SKIN_COUNT);
         else if (strcmp(key, "outfit") == 0) gMpConfig.app.outfit = ParseChoice(val, MP_Avatar_ColorName, MP_COLOR_COUNT);
@@ -235,7 +244,7 @@ void MP_SaveConfig(void)
     FILE *f;
     char sprite[32], skin[32], outfit[32], accent[32];
 
-    LowerName(sprite, MP_Avatar_BaseName(gMpConfig.app.base));
+    MP_Avatar_SpriteConfigName(&gMpConfig.app, sprite, sizeof(sprite));
     LowerName(skin, MP_Avatar_SkinName(gMpConfig.app.skin));
     LowerName(outfit, MP_Avatar_ColorName(gMpConfig.app.outfit));
     LowerName(accent, MP_Avatar_ColorName(gMpConfig.app.accent));
@@ -246,7 +255,7 @@ void MP_SaveConfig(void)
         "; Moemon Emerald Kai Co-op settings. The game writes this file itself;\n"
         "; everything here can be changed in game (START > CO-OP).\n"
         "name = %s\n"
-        "; sprite = default, brendan, may, rs_brendan, rs_may or custom\n"
+        "; sprite = default, brendan, may, rs_brendan, rs_may, custom, or any sprite name from START > CO-OP (e.g. hiker, steven)\n"
         "sprite = %s\ncustom_sprite = %s\n"
         "; skin = default, porcelain, light, tan, brown, dark, deep\n"
         "skin = %s\n"

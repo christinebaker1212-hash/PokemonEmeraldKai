@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
 #include "battle_anim.h"
@@ -1285,6 +1286,9 @@ static void LinkOpponentHandleDrawTrainerPic(void)
         }
     }
 
+    // Moemon Co-op: the opponent's chosen character
+    if (gNetLinkActive && MP_Battle_OpponentFrontPic() != 0xFFFF)
+        trainerPicId = MP_Battle_OpponentFrontPic();
     DecompressTrainerFrontPic(trainerPicId, gActiveBattler);
     SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
     gBattlerSpriteIds[gActiveBattler] = CreateSprite(&gMultiuseSpriteTemplate,

@@ -64,11 +64,11 @@ static void PrintAscii(u8 windowId, const char *ascii, u8 x, u8 y)
     AddTextPrinterParameterized(windowId, FONT_SMALL, buf, x, y, TEXT_SKIP_DRAW, NULL);
 }
 
-static u8 NumChoices(u8 row)
+static u16 NumChoices(u8 row)
 {
     switch (row)
     {
-    case ROW_SPRITE: return MP_Avatar_LocalCustomBlob() ? MP_BASE_COUNT : MP_BASE_COUNT - 1;
+    case ROW_SPRITE: return MP_Avatar_ChoiceCount();
     case ROW_SKIN:   return MP_SKIN_COUNT;
     default:         return MP_COLOR_COUNT;
     }
@@ -167,7 +167,7 @@ static void DrawMenu(u8 windowId, u8 cursor)
         PrintAscii(windowId, line, 8, y);
         switch (row)
         {
-        case ROW_SPRITE: snprintf(line, sizeof(line), "%s", MP_Avatar_BaseName(*RowValue(row))); break;
+        case ROW_SPRITE: snprintf(line, sizeof(line), "%s", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app))); break;
         case ROW_SKIN:   snprintf(line, sizeof(line), "%s", MP_Avatar_SkinName(*RowValue(row))); break;
         default:         snprintf(line, sizeof(line), "%s", MP_Avatar_ColorName(*RowValue(row))); break;
         }
@@ -237,7 +237,20 @@ static void Task_CoopMenu(u8 taskId)
             tState = 2;
             break;
         }
-        else if (tCursor != ROW_CLOSE && tCursor != ROW_ONLINE && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+        else if (tCursor == ROW_SPRITE && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
+        {
+            // Many sprites: Left/Right steps (hold to scroll), L/R jumps by 10
+            u16 n = NumChoices(ROW_SPRITE);
+            u16 c = MP_Avatar_GetChoice(&gMpConfig.app);
+            u16 step = JOY_REPEAT(L_BUTTON | R_BUTTON) ? 10 : 1;
+            if (JOY_REPEAT(DPAD_RIGHT | R_BUTTON))
+                c = (c + step) % n;
+            else
+                c = (c + n - (step % n)) % n;
+            MP_Avatar_SetChoice(&gMpConfig.app, c);
+            changed = TRUE;
+        }
+        else if (tCursor != ROW_CLOSE && tCursor != ROW_ONLINE && tCursor != ROW_SPRITE && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
         {
             u8 *v = RowValue(tCursor);
             u8 n = NumChoices(tCursor);

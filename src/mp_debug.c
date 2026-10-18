@@ -110,6 +110,8 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(2);
     if (strcmp(name, "message") == 0)
         return MP_Setup_ScreenIs(4);
+    if (strcmp(name, "battle") == 0)
+        return gMain.inBattle;
     if (strcmp(name, "nofade") == 0)
         return !gPaletteFade.active;
     return 0;

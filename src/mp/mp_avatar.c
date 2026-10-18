@@ -72,8 +72,13 @@ static const u16 sColorPresets[MP_COLOR_COUNT][2] = {
 };
 
 static const char *const sBaseNames[MP_BASE_COUNT] = {
-    "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM",
+    "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM", "NPC",
 };
+
+#include "constants/trainers.h"
+#include "mp_sprite_catalog.h"
+
+extern const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[];
 static const char *const sSkinNames[MP_SKIN_COUNT] = {
     "DEFAULT", "PORCELAIN", "LIGHT", "TAN", "BROWN", "DARK", "DEEP",
 };
@@ -84,6 +89,170 @@ static const char *const sColorNames[MP_COLOR_COUNT] = {
 const char *MP_Avatar_BaseName(u8 base) { return base < MP_BASE_COUNT ? sBaseNames[base] : "?"; }
 const char *MP_Avatar_SkinName(u8 skin) { return skin < MP_SKIN_COUNT ? sSkinNames[skin] : "?"; }
 const char *MP_Avatar_ColorName(u8 c) { return c < MP_COLOR_COUNT ? sColorNames[c] : "?"; }
+
+const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId)
+{
+    u16 i;
+    for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
+        if (sSpriteCatalog[i].gfxId == gfxId)
+            return &sSpriteCatalog[i];
+    return NULL;
+}
+
+// Choices: DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY, [CUSTOM], catalog...
+static u16 NumBaseChoices(void)
+{
+    return MP_Avatar_LocalCustomBlob() ? MP_BASE_CUSTOM + 1 : MP_BASE_CUSTOM;
+}
+
+u16 MP_Avatar_ChoiceCount(void)
+{
+    return NumBaseChoices() + ARRAY_COUNT(sSpriteCatalog);
+}
+
+u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
+{
+    u16 i;
+    if (app->base == MP_BASE_NPC)
+    {
+        for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
+            if (sSpriteCatalog[i].gfxId == app->gfxId)
+                return NumBaseChoices() + i;
+        return 0;
+    }
+    if (app->base < NumBaseChoices())
+        return app->base;
+    return 0;
+}
+
+void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
+{
+    if (choice < NumBaseChoices())
+    {
+        app->base = (u8)choice;
+        app->gfxId = 0;
+    }
+    else if (choice - NumBaseChoices() < ARRAY_COUNT(sSpriteCatalog))
+    {
+        app->base = MP_BASE_NPC;
+        app->gfxId = sSpriteCatalog[choice - NumBaseChoices()].gfxId;
+    }
+}
+
+const char *MP_Avatar_ChoiceName(u16 choice)
+{
+    if (choice < NumBaseChoices())
+        return sBaseNames[choice];
+    if (choice - NumBaseChoices() < ARRAY_COUNT(sSpriteCatalog))
+        return sSpriteCatalog[choice - NumBaseChoices()].name;
+    return "?";
+}
+
+static void ToConfigName(char *dst, const char *src, int len)
+{
+    int i;
+    for (i = 0; src[i] && i < len - 1; i++)
+    {
+        char c = src[i];
+        dst[i] = (c == ' ') ? '_' : (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
+    }
+    dst[i] = 0;
+}
+
+void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len)
+{
+    if (app->base == MP_BASE_NPC && MP_Avatar_FindCatalog(app->gfxId))
+        ToConfigName(out, MP_Avatar_FindCatalog(app->gfxId)->name, len);
+    else
+        ToConfigName(out, MP_Avatar_BaseName(app->base == MP_BASE_NPC ? MP_BASE_DEFAULT : app->base), len);
+}
+
+int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
+{
+    char buf[40];
+    u16 i;
+    for (i = 0; i < MP_BASE_NPC; i++)
+    {
+        ToConfigName(buf, sBaseNames[i], sizeof(buf));
+        if (strcmp(buf, name) == 0)
+        {
+            app->base = (u8)i;
+            app->gfxId = 0;
+            return TRUE;
+        }
+    }
+    for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
+    {
+        ToConfigName(buf, sSpriteCatalog[i].name, sizeof(buf));
+        if (strcmp(buf, name) == 0)
+        {
+            app->base = MP_BASE_NPC;
+            app->gfxId = sSpriteCatalog[i].gfxId;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
+{
+    if (MP_Avatar_FindCatalog(gfxId) == NULL)
+        return NULL;
+    return gObjectEventGraphicsInfoPointers[gfxId];
+}
+
+u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
+{
+    const struct MpSpriteEntry *e;
+    switch (app->base)
+    {
+    case MP_BASE_BRENDAN:    return TRAINER_PIC_BRENDAN;
+    case MP_BASE_MAY:        return TRAINER_PIC_MAY;
+    case MP_BASE_RS_BRENDAN: return TRAINER_PIC_RS_BRENDAN;
+    case MP_BASE_RS_MAY:     return TRAINER_PIC_RS_MAY;
+    case MP_BASE_NPC:
+        e = MP_Avatar_FindCatalog(app->gfxId);
+        if (e && e->frontPic != MP_PIC_NONE)
+            return e->frontPic;
+        break;
+    }
+    return 0xFFFF;
+}
+
+u16 MP_Avatar_LocalFrontPic(void)
+{
+    return MP_Avatar_FrontPicFor(&gMpConfig.app);
+}
+
+u16 MP_LocalFrontPicOr(u16 defaultPic)
+{
+    u16 pic = MP_Avatar_LocalFrontPic();
+    return pic == 0xFFFF ? defaultPic : pic;
+}
+
+u16 MP_LocalBackPicOr(u16 defaultPic)
+{
+    u16 pic = MP_Avatar_LocalBackPic();
+    return pic == 0xFFFF ? defaultPic : pic;
+}
+
+u16 MP_Avatar_LocalBackPic(void)
+{
+    const struct MpSpriteEntry *e;
+    switch (gMpConfig.app.base)
+    {
+    case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
+    case MP_BASE_MAY:        return TRAINER_BACK_PIC_MAY;
+    case MP_BASE_RS_BRENDAN: return TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN;
+    case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
+    case MP_BASE_NPC:
+        e = MP_Avatar_FindCatalog(gMpConfig.app.gfxId);
+        if (e && e->backPic != MP_PIC_NONE)
+            return e->backPic;
+        break;
+    }
+    return 0xFFFF;
+}
 
 // ---------------------------------------------------------------------------
 // Graphics info storage: [0] = local custom avatar, [1 + id] = remote players
@@ -98,7 +267,7 @@ static bool8 sLocalHasCustomBlob;
 static bool8 sAvatarInit;
 static void RebuildLocal(void);
 
-static const struct ObjectEventGraphicsInfo *GetBaseInfo(u8 base, u8 gender, u8 avatarMode)
+static const struct ObjectEventGraphicsInfo *GetBaseInfo(u8 base, u16 gfxId, u8 gender, u8 avatarMode)
 {
     if (avatarMode != MP_AVATAR_FOOT)
     {
@@ -113,6 +282,7 @@ static const struct ObjectEventGraphicsInfo *GetBaseInfo(u8 base, u8 gender, u8 
     }
     switch (base)
     {
+    case MP_BASE_NPC:        return NpcInfo(gfxId) ? NpcInfo(gfxId) : (gender == FEMALE ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal);
     case MP_BASE_BRENDAN:    return &gObjectEventGraphicsInfo_BrendanNormal;
     case MP_BASE_MAY:        return &gObjectEventGraphicsInfo_MayNormal;
     case MP_BASE_RS_BRENDAN: return &gObjectEventGraphicsInfo_RubySapphireBrendan;
@@ -164,6 +334,15 @@ void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u
         memcpy(dst, customGfx + MP_CUSTOM_TILES_SIZE, 32);
         return;
     }
+    if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
+    {
+        const u16 *pal = MP_GetObjectEventPaletteData(NpcInfo(app->gfxId)->paletteTag);
+        if (pal)
+        {
+            memcpy(dst, pal, 32);
+            return;
+        }
+    }
     memcpy(dst, GetOrigBasePalette(app->base, app->gender, avatarMode), 32);
     if (avatarMode != MP_AVATAR_UNDERWATER)
         ApplyRecolor(app, dst);
@@ -172,12 +351,23 @@ void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u
 // Builds a graphics info for the given appearance into sMpGfxInfo[slot]
 static void BuildGfxInfo(int slot, const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode)
 {
-    const struct ObjectEventGraphicsInfo *base = GetBaseInfo(app->base, app->gender, avatarMode);
+    const struct ObjectEventGraphicsInfo *base = GetBaseInfo(app->base, app->gfxId, app->gender, avatarMode);
     struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[slot];
     int i;
 
     *info = *base;
-    if (avatarMode == MP_AVATAR_FOOT)
+    if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
+    {
+        // NPC sheets have 9 walking frames: running reuses them with the
+        // player's animation table. Size, shape and shadow stay the NPC's own.
+        const struct ObjectEventGraphicsInfo *anims = (app->gender == FEMALE) ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal;
+        for (i = 0; i < MP_CUSTOM_FRAMES; i++)
+            sMpFrames[slot][i] = base->images[i % 9];
+        info->images = sMpFrames[slot];
+        info->anims = anims->anims;
+        info->inanimate = FALSE;
+    }
+    else if (avatarMode == MP_AVATAR_FOOT)
     {
         // Every on-foot avatar gets 18 frames (9 walk + 9 run) and the player anim table
         const struct ObjectEventGraphicsInfo *anims = (app->gender == FEMALE) ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal;

@@ -82,6 +82,13 @@ bool8 MP_Battle_IsActive(void)
     return sNet.battleActive;
 }
 
+u16 MP_Battle_OpponentFrontPic(void)
+{
+    if (!sNet.battleActive || sNet.peer >= MP_MAX_PLAYERS || !gMpPlayers[sNet.peer].present)
+        return 0xFFFF;
+    return MP_Avatar_FrontPicFor(&gMpPlayers[sNet.peer].app);
+}
+
 // ---------------------------------------------------------------------------
 // Link layer
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "scanline_effect.h"
 #include "palette.h"
 #include "task.h"
@@ -1898,7 +1899,10 @@ static void CreateTrainerCardTrainerPic(void)
     }
     else
     {
-        CreateTrainerCardTrainerPicSprite(FacilityClassToPicIndex(sTrainerPicFacilityClass[sData->cardType][sData->trainerCard.gender]),
+        u16 picId = FacilityClassToPicIndex(sTrainerPicFacilityClass[sData->cardType][sData->trainerCard.gender]);
+        if (!sData->isLink)
+            picId = MP_LocalFrontPicOr(picId); // Moemon Co-op: the character picked in START > CO-OP
+        CreateTrainerCardTrainerPicSprite(picId,
                     TRUE,
                     sTrainerPicOffset[sData->isHoenn][sData->trainerCard.gender][0],
                     sTrainerPicOffset[sData->isHoenn][sData->trainerCard.gender][1],

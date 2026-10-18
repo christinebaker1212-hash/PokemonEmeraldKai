@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_transition.h"
 #include "battle_transition_frontier.h"
@@ -2593,7 +2594,7 @@ static void Mugshots_CreateTrainerPics(struct Task *task)
                                                   sMugshotsOpponentCoords[mugshotId][0] - 32,
                                                   sMugshotsOpponentCoords[mugshotId][1] + 42,
                                                   0, gDecompressionBuffer);
-    task->tPlayerSpriteId = CreateTrainerSprite(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender),
+    task->tPlayerSpriteId = CreateTrainerSprite(MP_LocalFrontPicOr(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender)), // Moemon Co-op
                                                 DISPLAY_WIDTH + 32,
                                                 106,
                                                 0, gDecompressionBuffer);

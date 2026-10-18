@@ -23,7 +23,17 @@ enum {
     MP_BASE_RS_BRENDAN,
     MP_BASE_RS_MAY,
     MP_BASE_CUSTOM,       // custom PNG sprite sheet
+    MP_BASE_NPC,          // any overworld sprite from the catalog (MpAppearance.gfxId)
     MP_BASE_COUNT
+};
+
+struct MpSpriteEntry
+{
+    u16 gfxId;
+    const char *name;
+    u8 frontPic;    // trainer card / battle front pic, MP_PIC_NONE = default
+    u8 backPic;     // battle back pic, MP_PIC_NONE = default
+    u8 gender;
 };
 
 #define MP_SKIN_COUNT   7
@@ -203,6 +213,20 @@ const u8 *MP_Avatar_LocalCustomBlob(void);
 u32 MP_Avatar_LocalCustomBlobSize(void);
 bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size);
 const char *MP_Avatar_BaseName(u8 base);
+// Sprite choices shown in START > CO-OP: the bases, then every catalog sprite
+u16 MP_Avatar_ChoiceCount(void);
+u16 MP_Avatar_GetChoice(const struct MpAppearance *app);
+void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice);
+const char *MP_Avatar_ChoiceName(u16 choice);
+int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app); // TRUE when found
+void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len);
+const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId);
+// Trainer pics for the trainer card and battles (0xFFFF = game default)
+u16 MP_Avatar_LocalFrontPic(void);
+u16 MP_Avatar_LocalBackPic(void);
+u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app);
+u16 MP_LocalFrontPicOr(u16 defaultPic);
+u16 MP_LocalBackPicOr(u16 defaultPic);
 const char *MP_Avatar_SkinName(u8 skin);
 const char *MP_Avatar_ColorName(u8 color);
 
@@ -234,6 +258,7 @@ void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney);
 void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Battle_OnPlayerLeft(u8 id);
 bool8 MP_Battle_IsActive(void);
+u16 MP_Battle_OpponentFrontPic(void);   // 0xFFFF = default
 void MP_Battle_FrameUpdate(void);
 void NetLink_Open(void);
 void NetLink_Close(void);
