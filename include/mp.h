@@ -227,6 +227,7 @@ u16 MP_Avatar_LocalBackPic(void);
 u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app);
 u16 MP_LocalFrontPicOr(u16 defaultPic);
 u16 MP_LocalBackPicOr(u16 defaultPic);
+bool8 MP_LocalHidesTrainerBack(void);   // picked character has no battle back sprite
 const char *MP_Avatar_SkinName(u8 skin);
 const char *MP_Avatar_ColorName(u8 color);
 

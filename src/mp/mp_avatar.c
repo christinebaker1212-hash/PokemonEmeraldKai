@@ -236,6 +236,11 @@ u16 MP_LocalBackPicOr(u16 defaultPic)
     return pic == 0xFFFF ? defaultPic : pic;
 }
 
+bool8 MP_LocalHidesTrainerBack(void)
+{
+    return gMpConfig.app.base == MP_BASE_NPC && MP_Avatar_LocalBackPic() == 0xFFFF;
+}
+
 u16 MP_Avatar_LocalBackPic(void)
 {
     const struct MpSpriteEntry *e;
@@ -327,19 +332,259 @@ static void ApplyRecolor(const struct MpAppearance *app, u16 *pal)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Automatic recolor for sprites whose palettes don't follow the Brendan/May
+// layout (NPCs, custom sprites). Skin tones are found by hue/saturation and
+// replaced shade by shade; the most used clothing hue becomes the OUTFIT color
+// and the second one the ACCENT color, keeping each color's shading.
+
+static void RgbToHsv(u16 c, int *h, int *s, int *v)
+{
+    int r = (c & 0x1F) * 255 / 31, g = ((c >> 5) & 0x1F) * 255 / 31, b = ((c >> 10) & 0x1F) * 255 / 31;
+    int max = r > g ? (r > b ? r : b) : (g > b ? g : b);
+    int min = r < g ? (r < b ? r : b) : (g < b ? g : b);
+    int d = max - min;
+    *v = max;
+    *s = max ? d * 255 / max : 0;
+    if (d == 0)
+        *h = 0;
+    else if (max == r)
+        *h = (60 * (g - b) / d + 360) % 360;
+    else if (max == g)
+        *h = 60 * (b - r) / d + 120;
+    else
+        *h = 60 * (r - g) / d + 240;
+}
+
+static u16 HsvToRgb(int h, int s, int v)
+{
+    int r, g, b, f, p, q, t;
+    if (s < 0) s = 0; if (s > 255) s = 255;
+    if (v < 0) v = 0; if (v > 255) v = 255;
+    h = ((h % 360) + 360) % 360;
+    f = (h % 60) * 255 / 60;
+    p = v * (255 - s) / 255;
+    q = v * (255 - s * f / 255) / 255;
+    t = v * (255 - s * (255 - f) / 255) / 255;
+    switch (h / 60)
+    {
+    case 0:  r = v; g = t; b = p; break;
+    case 1:  r = q; g = v; b = p; break;
+    case 2:  r = p; g = v; b = t; break;
+    case 3:  r = p; g = q; b = v; break;
+    case 4:  r = t; g = p; b = v; break;
+    default: r = v; g = p; b = q; break;
+    }
+    return RGB(r * 31 / 255, g * 31 / 255, b * 31 / 255);
+}
+
+static void CountTileUsage(const u8 *tiles, u32 bytes, u32 counts[16])
+{
+    u32 i;
+    for (i = 0; i < bytes; i++)
+    {
+        counts[tiles[i] & 0xF]++;
+        counts[tiles[i] >> 4]++;
+    }
+}
+
+// Counts colors in rows [y0, y1) of one 4bpp frame laid out as wTiles x hTiles tiles
+static void CountRegionUsage(const u8 *tiles, int wTiles, int hTiles, int y0, int y1, u32 counts[16])
+{
+    int ty, tx, py, px;
+    for (ty = 0; ty < hTiles; ty++)
+        for (tx = 0; tx < wTiles; tx++)
+        {
+            const u8 *tile = tiles + (ty * wTiles + tx) * 32;
+            for (py = 0; py < 8; py++)
+            {
+                int y = ty * 8 + py;
+                if (y < y0 || y >= y1)
+                    continue;
+                for (px = 0; px < 8; px++)
+                {
+                    u8 b = tile[(py * 8 + px) / 2];
+                    counts[(px & 1) ? (b >> 4) : (b & 0xF)]++;
+                }
+            }
+        }
+}
+
+// Finds the first and last rows with visible pixels in one frame
+static void VisibleRows(const u8 *tiles, int wTiles, int hTiles, int *top, int *bottom)
+{
+    int y;
+    *top = -1;
+    *bottom = -1;
+    for (y = 0; y < hTiles * 8; y++)
+    {
+        u32 row[16] = {0}, i, any = 0;
+        CountRegionUsage(tiles, wTiles, hTiles, y, y + 1, row);
+        for (i = 1; i < 16; i++)
+            any |= row[i];
+        if (any)
+        {
+            if (*top < 0)
+                *top = y;
+            *bottom = y;
+        }
+    }
+    if (*top < 0)
+    {
+        *top = 0;
+        *bottom = hTiles * 8 - 1;
+    }
+}
+
+// Head (hair/hat) and body (clothes) color usage of a front-facing frame
+static void CountHeadAndBody(const u8 *tiles, int wTiles, int hTiles, u32 head[16], u32 body[16])
+{
+    int top, bottom, h;
+    VisibleRows(tiles, wTiles, hTiles, &top, &bottom);
+    h = bottom - top + 1;
+    CountRegionUsage(tiles, wTiles, hTiles, top, top + h * 3 / 10, head);
+    CountRegionUsage(tiles, wTiles, hTiles, top + h * 4 / 10, top + h * 9 / 10, body);
+}
+
+static bool8 IsSkinTone(int h, int s, int v)
+{
+    return h >= 5 && h <= 45 && s >= 25 && s <= 175 && v >= 110;
+}
+
+static void RecolorCluster(u16 *pal, const u8 *members, int n, u16 target)
+{
+    int th, ts, tv, i, maxV = 1, maxS = 1;
+    RgbToHsv(target, &th, &ts, &tv);
+    for (i = 0; i < n; i++)
+    {
+        int h, s, v;
+        RgbToHsv(pal[members[i]], &h, &s, &v);
+        if (v > maxV) maxV = v;
+        if (s > maxS) maxS = s;
+    }
+    for (i = 0; i < n; i++)
+    {
+        int h, s, v;
+        RgbToHsv(pal[members[i]], &h, &s, &v);
+        pal[members[i]] = HsvToRgb(th, ts * s / maxS, v * tv / maxV);
+    }
+}
+
+// counts: whole sprite; body/head: the clothes and hair/hat parts of the front frame
+static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 counts[16], const u32 body[16], const u32 head[16])
+{
+    u8 skin[16], nSkin = 0, i, j;
+    u32 binWeight[12], bodyWeight[12], headWeight[12];
+    s8 bin[16];
+    int best = -1, second = -1;
+
+    if (app->skin == 0 && app->outfit == 0 && app->accent == 0)
+        return;
+    memset(binWeight, 0, sizeof(binWeight));
+    memset(bodyWeight, 0, sizeof(bodyWeight));
+    memset(headWeight, 0, sizeof(headWeight));
+    for (i = 1; i < 16; i++)
+    {
+        int h, s, v;
+        bin[i] = -1;
+        if (counts[i] == 0)
+            continue;
+        RgbToHsv(pal[i], &h, &s, &v);
+        if (IsSkinTone(h, s, v))
+            skin[nSkin++] = i;
+        else if (s >= 60 && v >= 40)
+        {
+            bin[i] = ((h + 15) / 30) % 12;
+            binWeight[bin[i]] += counts[i];
+            bodyWeight[bin[i]] += body[i];
+            headWeight[bin[i]] += head[i];
+        }
+    }
+
+    if (app->skin > 0 && app->skin < MP_SKIN_COUNT && nSkin > 0)
+    {
+        // Lightest skin shade first
+        for (i = 0; i < nSkin; i++)
+            for (j = i + 1; j < nSkin; j++)
+            {
+                int h1, s1, v1, h2, s2, v2;
+                RgbToHsv(pal[skin[i]], &h1, &s1, &v1);
+                RgbToHsv(pal[skin[j]], &h2, &s2, &v2);
+                if (v2 > v1)
+                {
+                    u8 t = skin[i];
+                    skin[i] = skin[j];
+                    skin[j] = t;
+                }
+            }
+        for (i = 0; i < nSkin; i++)
+            pal[skin[i]] = sSkinPresets[app->skin][nSkin == 1 ? 0 : (i * 2 + (nSkin - 1) / 2) / (nSkin - 1)];
+    }
+
+    if (getenv("MOEMON_DEBUG_RECOLOR"))
+        for (i = 1; i < 16; i++)
+        {
+            int h, s2, v;
+            RgbToHsv(pal[i], &h, &s2, &v);
+            printf("[recolor] %2d rgb=%04x h=%3d s=%3d v=%3d all=%4u body=%4u head=%4u bin=%d\n", i, pal[i], h, s2, v, counts[i], body[i], head[i], bin[i]);
+        }
+    // OUTFIT: the main clothing hue (body rows); ACCENT: hair/hat (head rows).
+    // Fall back to overall usage when a region has no clear color.
+    for (i = 0; i < 12; i++)
+        if (bodyWeight[i] && (best < 0 || bodyWeight[i] > bodyWeight[best]))
+            best = i;
+    for (i = 0; i < 12; i++)
+        if (i != best && headWeight[i] && (second < 0 || headWeight[i] > headWeight[second]))
+            second = i;
+    for (i = 0; i < 12 && best < 0; i++)
+        if (binWeight[i] && (best < 0 || binWeight[i] > binWeight[best]))
+            best = i;
+    for (i = 0; i < 12 && second < 0; i++)
+        if (i != best && binWeight[i] && (second < 0 || binWeight[i] > binWeight[second]))
+            second = i;
+    if (best >= 0 && app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
+    {
+        u8 members[16], n = 0;
+        for (i = 1; i < 16; i++)
+            if (bin[i] == best)
+                members[n++] = i;
+        RecolorCluster(pal, members, n, sColorPresets[app->outfit][0]);
+    }
+    if (second >= 0 && app->accent > 0 && app->accent < MP_COLOR_COUNT)
+    {
+        u8 members[16], n = 0;
+        for (i = 1; i < 16; i++)
+            if (bin[i] == second)
+                members[n++] = i;
+        RecolorCluster(pal, members, n, sColorPresets[app->accent][0]);
+    }
+}
+
 void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode, u16 *dst)
 {
     if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_CUSTOM && customGfx)
     {
+        u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
         memcpy(dst, customGfx + MP_CUSTOM_TILES_SIZE, 32);
+        CountTileUsage(customGfx, 9 * 256, counts);
+        CountHeadAndBody(customGfx, 2, 4, head, body);
+        AutoRecolor(app, dst, counts, body, head);
         return;
     }
     if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
     {
-        const u16 *pal = MP_GetObjectEventPaletteData(NpcInfo(app->gfxId)->paletteTag);
+        const struct ObjectEventGraphicsInfo *npc = NpcInfo(app->gfxId);
+        const u16 *pal = MP_GetObjectEventPaletteData(npc->paletteTag);
         if (pal)
         {
+            u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+            int h = npc->height;
+            u8 f;
             memcpy(dst, pal, 32);
+            for (f = 0; f < 9; f++)
+                CountTileUsage(npc->images[f].data, npc->images[f].size, counts);
+            CountHeadAndBody(npc->images[0].data, npc->width / 8, h / 8, head, body);
+            AutoRecolor(app, dst, counts, body, head);
             return;
         }
     }

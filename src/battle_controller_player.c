@@ -2339,16 +2339,18 @@ static void PlayerHandleDrawTrainerPic(void)
     else
     {
         // Moemon Co-op: the character picked in START > CO-OP
-    if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive)
-        trainerPicId = MP_LocalBackPicOr(trainerPicId);
-    DecompressTrainerBackPic(trainerPicId, gActiveBattler);
+        if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive)
+            trainerPicId = MP_LocalBackPicOr(trainerPicId);
+        DecompressTrainerBackPic(trainerPicId, gActiveBattler);
         SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
         gBattlerSpriteIds[gActiveBattler] = CreateSprite(&gMultiuseSpriteTemplate, xPos, yPos, GetBattlerSpriteSubpriority(gActiveBattler));
 
         gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = gActiveBattler;
         gSprites[gBattlerSpriteIds[gActiveBattler]].x2 = DISPLAY_WIDTH;
         gSprites[gBattlerSpriteIds[gActiveBattler]].sSpeedX = -2;
-        gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+        gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;        // Moemon Co-op: characters without a back sprite stay off screen (the ball still flies in)
+        if ((!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive) && MP_LocalHidesTrainerBack())
+            gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
     }
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
@@ -2391,6 +2393,8 @@ static void PlayerHandleTrainerSlide(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].x2 = -96;
     gSprites[gBattlerSpriteIds[gActiveBattler]].sSpeedX = 2;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    if ((!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive) && MP_LocalHidesTrainerBack()) // Moemon Co-op
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBankSpriteCallbackDummy2;
 }
