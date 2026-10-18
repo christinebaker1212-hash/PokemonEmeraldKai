@@ -29,6 +29,7 @@ enum {
     ROW_SKIN,
     ROW_OUTFIT,
     ROW_ACCENT,
+    ROW_EDIT,
     ROW_CLOSE,
     ROW_COUNT
 };
@@ -37,10 +38,10 @@ enum {
 
 static const struct WindowTemplate sCoopWindowTemplate = {
     .bg = 0,
-    .tilemapLeft = 17,
+    .tilemapLeft = 14,
     .tilemapTop = 1,
-    .width = 12,
-    .height = 14,
+    .width = 15,
+    .height = 15,
     .paletteNum = 15,
     .baseBlock = 0x8,
 };
@@ -52,7 +53,7 @@ static const struct WindowTemplate sPlayersWindowTemplate = {
     .width = 28,
     .height = 2,
     .paletteNum = 15,
-    .baseBlock = 0x8 + 13 * 14,
+    .baseBlock = 0x8 + 15 * 15,
 };
 
 static const u8 sTextColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
@@ -134,7 +135,7 @@ static void DrawPlayersWindow(u8 windowId)
 
 static void DrawMenu(u8 windowId, u8 cursor)
 {
-    static const char *const labels[] = {"", "SPRITE", "SKIN", "OUTFIT", "ACCENT", "SAVE AND CLOSE"};
+    static const char *const labels[] = {"", "SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "SAVE AND CLOSE"};
     char line[64];
     u8 row;
 
@@ -153,7 +154,7 @@ static void DrawMenu(u8 windowId, u8 cursor)
             u8 arrow[] = {0xEF, EOS};
             AddTextPrinterParameterized(windowId, FONT_SMALL, arrow, 1, y, TEXT_SKIP_DRAW, NULL);
         }
-        if (row == ROW_CLOSE)
+        if (row == ROW_CLOSE || row == ROW_EDIT)
         {
             PrintAscii(windowId, labels[row], 9, y);
             continue;
@@ -225,6 +226,32 @@ static void Task_CoopMenu(u8 taskId)
             PlaySE(SE_SELECT);
             DrawMenu(tWindow, tCursor);
         }
+        else if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON))
+        {
+            // Save the current character as an editable sheet, then open the
+            // editor and the sprites folder
+            extern int Platform_OpenPath(const char *relPath);
+            char path[200], msg[300];
+            PlaySE(SE_SELECT);
+            MP_SaveConfig();
+            if (MP_Avatar_ExportLocal(path, sizeof(path)))
+            {
+                Platform_OpenPath("Sprite Editor.html");
+                Platform_OpenPath("sprites");
+                snprintf(msg, sizeof(msg), "Your look was saved in the game's\nsprites folder for the Sprite Editor.\fEdit it there, then drag the saved\nfile onto this window to wear it!");
+            }
+            else
+                snprintf(msg, sizeof(msg), "Couldn't save the sprite sheet. Is the game folder read-only?");
+            ClearStdWindowAndFrame(tWindow, TRUE);
+            ClearStdWindowAndFrame(tPlayers, TRUE);
+            RemoveWindow(tWindow);
+            RemoveWindow(tPlayers);
+            ScriptUnfreezeObjectEvents();
+            UnlockPlayerFieldControls();
+            DestroyTask(taskId);
+            MP_ShowNotice(msg);
+            return;
+        }
         else if (tCursor == ROW_ONLINE && JOY_NEW(A_BUTTON))
         {
             PlaySE(SE_SELECT);
@@ -250,7 +277,7 @@ static void Task_CoopMenu(u8 taskId)
             MP_Avatar_SetChoice(&gMpConfig.app, c);
             changed = TRUE;
         }
-        else if (tCursor != ROW_CLOSE && tCursor != ROW_ONLINE && tCursor != ROW_SPRITE && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+        else if (tCursor != ROW_CLOSE && tCursor != ROW_ONLINE && tCursor != ROW_SPRITE && tCursor != ROW_EDIT && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
         {
             u8 *v = RowValue(tCursor);
             u8 n = NumChoices(tCursor);
@@ -295,6 +322,7 @@ void MP_OpenMenu(void)
 {
     u8 taskId;
     LockPlayerFieldControls();
+    MP_Avatar_RefreshPackList();   // pick up sheets saved since the last time
     taskId = CreateTask(Task_CoopMenu, 80);
     gTasks[taskId].tCursor = MP_Lobby_InRoom() ? ROW_SPRITE : ROW_ONLINE;
 }

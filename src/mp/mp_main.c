@@ -98,6 +98,8 @@ static u8 AsciiCharToGame(char c)
     case '%': return CHAR_PERCENT;
     case '"': return CHAR_DBL_QUOTE_LEFT;
     case '\n': return CHAR_NEWLINE;
+    case '\f': return CHAR_PROMPT_CLEAR;   // next page (wait for A)
+    case '_': return CHAR_SPACE;
     }
     return 0xFF;
 }

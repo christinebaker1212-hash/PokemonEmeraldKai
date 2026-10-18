@@ -73,13 +73,14 @@ void MP_OnFileDropped(const char *path)
         MP_Avatar_ApplyLocal();
         MP_SendAppearance();
         PlaySE(SE_SUCCESS);
-        snprintf(msg, sizeof(msg), "Sprite sheet loaded!\nYou're now wearing %s.",
+        snprintf(msg, sizeof(msg), "Sprite sheet loaded!\nYou're now wearing %.20s.",
                  MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)) + 2);
     }
     else
     {
         PlaySE(SE_FAILURE);
-        snprintf(msg, sizeof(msg), "That isn't a sprite sheet.\n(%s)", err);
+        snprintf(msg, sizeof(msg), "That file isn't a sprite sheet from\nthe Sprite Editor.");
+        printf("[mp] %s\n", err);
     }
     MP_ShowNotice(msg);
 }
