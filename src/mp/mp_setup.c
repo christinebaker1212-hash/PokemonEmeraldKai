@@ -1,0 +1,1186 @@
+// Moemon Co-op: the HOST / JOIN / PLAY SOLO screen shown after pressing START
+// on the title screen. Hosting needs only a server name (and an optional
+// password); joining is picking a server from the list. Servers live on the
+// online lobby built into the game, or on the local network as a fallback.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "mp_net.h"
+#include "global.h"
+#include "mp.h"
+#include "bg.h"
+#include "gpu_regs.h"
+#include "main.h"
+#include "main_menu.h"
+#include "menu.h"
+#include "naming_screen.h"
+#include "walda_phrase.h"
+#include "palette.h"
+#include "scanline_effect.h"
+#include "sound.h"
+#include "sprite.h"
+#include "string_util.h"
+#include "task.h"
+#include "text.h"
+#include "text_window.h"
+#include "window.h"
+#include "constants/characters.h"
+#include "constants/rgb.h"
+#include "constants/songs.h"
+
+#define FRAME_TILE   0x1F0
+#define FRAME_PAL    14
+#define TEXT_PAL     15
+#define LINE_H       16
+#define LIST_ROWS    5
+#define REFRESH_FRAMES (60 * 3)
+#define LOCAL_PORT_TRIES 5
+
+enum {
+    WIN_TITLE,
+    WIN_MAIN,
+    WIN_HELP,
+    WIN_COUNT
+};
+
+static const struct WindowTemplate sWindowTemplates[] = {
+    // The title sits on the background (no frame); the others are framed boxes
+    [WIN_TITLE] = { .bg = 0, .tilemapLeft = 1, .tilemapTop = 0, .width = 28, .height = 2, .paletteNum = TEXT_PAL, .baseBlock = 1 },
+    [WIN_MAIN]  = { .bg = 0, .tilemapLeft = 2, .tilemapTop = 3, .width = 26, .height = 10, .paletteNum = TEXT_PAL, .baseBlock = 1 + 56 },
+    [WIN_HELP]  = { .bg = 0, .tilemapLeft = 2, .tilemapTop = 15, .width = 26, .height = 4, .paletteNum = TEXT_PAL, .baseBlock = 1 + 56 + 260 },
+    DUMMY_WIN_TEMPLATE
+};
+
+static const struct BgTemplate sBgTemplates[] = {
+    { .bg = 0, .charBaseIndex = 2, .mapBaseIndex = 31, .screenSize = 0, .paletteMode = 0, .priority = 0, .baseTile = 0 },
+};
+
+static const u16 sBgColor[] = {RGB(8, 14, 22)};
+// Dark text with a light shadow on the white boxes; white text on the background
+static const u8 sColorNormal[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sColorDim[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};     // help text: same contrast
+static const u8 sColorDisabled[] = {TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_WHITE};
+static const u8 sColorAccent[] = {TEXT_COLOR_WHITE, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sColorError[] = {TEXT_COLOR_WHITE, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sColorTitle[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY};
+
+// Screens
+enum {
+    SCR_MAIN,
+    SCR_HOST,
+    SCR_JOIN,
+    SCR_WORKING,
+    SCR_MESSAGE,
+};
+
+// Main screen choices
+enum {
+    MAIN_CONTINUE,     // already in a server (came back to the title screen)
+    MAIN_LEAVE,
+    MAIN_REJOIN,
+    MAIN_HOST,
+    MAIN_JOIN,
+    MAIN_SOLO,
+};
+
+// Host form rows
+enum {
+    HOST_NAME,
+    HOST_PASSWORD,
+    HOST_LISTED,
+    HOST_START,
+    HOST_BACK,
+    HOST_ROWS
+};
+
+// What a "working" screen is waiting for
+enum {
+    WORK_HOST_ONLINE,
+    WORK_HOST_LOCAL,
+    WORK_JOIN,
+};
+
+// Where to go after a message
+enum {
+    AFTER_MAIN,
+    AFTER_HOST,
+    AFTER_JOIN,
+    AFTER_PLAY,
+};
+
+#define MAX_JOIN_ENTRIES (1 + MP_LIST_MAX + MP_LAN_MAX_GAMES)
+
+struct JoinEntry
+{
+    struct MpLanRoom room;
+    bool8 isLan;
+    bool8 byName;
+};
+
+static EWRAM_DATA struct
+{
+    bool8 active;
+    u8 screen;
+    u8 cursor;
+    u8 scroll;
+    u8 mainItems[6];
+    u8 mainCount;
+    // host form
+    u8 roomName[WALDA_PHRASE_LENGTH + 1];      // game charset
+    u8 password[WALDA_PHRASE_LENGTH + 1];
+    bool8 listed;
+    u8 hostCursor;
+    // join list
+    struct JoinEntry entries[MAX_JOIN_ENTRIES];
+    u8 entryCount;
+    u8 joinCursor;
+    bool8 onlineTried;
+    bool8 onlineFailed;
+    u16 refreshTimer;
+    u8 pendingJoin;            // entry index waiting for a password
+    // working / message
+    u8 work;
+    u16 workTimer;
+    u8 after;
+    u8 message[200];
+    bool8 messageIsError;
+    // text entry return
+    u8 returnTo;               // 0 none, 1 = host name, 2 = host password, 3 = join password, 4 = join by name, 5 = join by name password
+} sSetup;
+
+static void Task_Setup(u8 taskId);
+static void DrawScreen(void);
+static void CB2_ReturnFromTextEntry(void);
+
+// ---------------------------------------------------------------------------
+// Text helpers
+
+static void Print(u8 win, const char *ascii, u8 x, u8 y, const u8 *color)
+{
+    u8 buf[128];
+    MP_AsciiToGame(buf, ascii, 120);
+    AddTextPrinterParameterized3(win, FONT_NORMAL, x, y, color, TEXT_SKIP_DRAW, buf);
+}
+
+static void PrintGame(u8 win, const u8 *str, u8 x, u8 y, const u8 *color)
+{
+    AddTextPrinterParameterized3(win, FONT_NORMAL, x, y, color, TEXT_SKIP_DRAW, str);
+}
+
+static void PrintRight(u8 win, const char *ascii, u8 rightX, u8 y, const u8 *color)
+{
+    u8 buf[64];
+    MP_AsciiToGame(buf, ascii, 60);
+    AddTextPrinterParameterized3(win, FONT_NORMAL, rightX - GetStringWidth(FONT_NORMAL, buf, 0), y, color, TEXT_SKIP_DRAW, buf);
+}
+
+static void DrawCursor(u8 win, u8 y)
+{
+    u8 arrow[] = {CHAR_RIGHT_ARROW, EOS};
+    AddTextPrinterParameterized3(win, FONT_NORMAL, 2, y, sColorNormal, TEXT_SKIP_DRAW, arrow);
+}
+
+// Word-wraps an ASCII message into the help/main window
+static void PrintWrapped(u8 win, const char *ascii, u8 y, u8 width, const u8 *color)
+{
+    char line[96];
+    const char *p = ascii;
+    while (*p)
+    {
+        int n = 0, lastSpace = -1;
+        u8 buf[100];
+        while (p[n] && p[n] != '\n')
+        {
+            line[n] = p[n];
+            line[n + 1] = 0;
+            MP_AsciiToGame(buf, line, 95);
+            if (GetStringWidth(FONT_NORMAL, buf, 0) > width && lastSpace > 0)
+            {
+                n = lastSpace;
+                break;
+            }
+            if (p[n] == ' ')
+                lastSpace = n;
+            n++;
+            if (n >= 90)
+                break;
+        }
+        line[n] = 0;
+        Print(win, line, 4, y, color);
+        y += LINE_H;
+        p += n;
+        while (*p == ' ' || *p == '\n')
+            p++;
+    }
+}
+
+static void GameToAsciiTrim(char *dst, const u8 *src, int max)
+{
+    int n;
+    MP_GameToAscii(dst, src, max);
+    // trim spaces
+    n = (int)strlen(dst);
+    while (n > 0 && dst[n - 1] == ' ')
+        dst[--n] = 0;
+    if (dst[0] == ' ')
+    {
+        int i = 0;
+        while (dst[i] == ' ')
+            i++;
+        memmove(dst, dst + i, strlen(dst + i) + 1);
+    }
+}
+
+static bool8 HasSaveFile(void)
+{
+    return gSaveBlock2Ptr->playerName[0] != EOS && gSaveBlock2Ptr->playerName[0] != 0;
+}
+
+static void DefaultRoomName(void)
+{
+    char ascii[32];
+    if (gMpConfig.lastHostName[0])
+    {
+        MP_AsciiToGame(sSetup.roomName, gMpConfig.lastHostName, WALDA_PHRASE_LENGTH);
+        return;
+    }
+    if (HasSaveFile())
+    {
+        char name[16];
+        MP_GameToAscii(name, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        GameToAsciiTrim(name, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        snprintf(ascii, sizeof(ascii), "%s's Game", name);
+    }
+    else
+        snprintf(ascii, sizeof(ascii), "Moemon Co-op");
+    MP_AsciiToGame(sSetup.roomName, ascii, WALDA_PHRASE_LENGTH);
+}
+
+// ---------------------------------------------------------------------------
+// Screen setup
+
+static void VBlankCB_Setup(void)
+{
+    LoadOam();
+    ProcessSpriteCopyRequests();
+    TransferPlttBuffer();
+}
+
+static void CB2_Setup(void)
+{
+    RunTasks();
+    AnimateSprites();
+    BuildOamBuffer();
+    UpdatePaletteFade();
+}
+
+static void InitGraphics(void)
+{
+    u8 i;
+    SetVBlankCallback(NULL);
+    SetGpuReg(REG_OFFSET_DISPCNT, 0);
+    DmaClearLarge16(3, (void *)VRAM, VRAM_SIZE, 0x1000);
+    DmaClear32(3, OAM, OAM_SIZE);
+    DmaClear16(3, PLTT, PLTT_SIZE);
+    ResetBgsAndClearDma3BusyFlags(0);
+    InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
+    ChangeBgX(0, 0, BG_COORD_SET);
+    ChangeBgY(0, 0, BG_COORD_SET);
+    InitWindows(sWindowTemplates);
+    DeactivateAllTextPrinters();
+    ResetPaletteFade();
+    ScanlineEffect_Stop();
+    ResetTasks();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    SetGpuReg(REG_OFFSET_WININ, 0);
+    SetGpuReg(REG_OFFSET_WINOUT, 0);
+    LoadPalette(sBgColor, BG_PLTT_ID(0), sizeof(sBgColor));
+    LoadPalette(gStandardMenuPalette, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
+    LoadUserWindowBorderGfx(WIN_TITLE, FRAME_TILE, BG_PLTT_ID(FRAME_PAL));
+    for (i = 0; i < WIN_COUNT; i++)
+    {
+        FillWindowPixelBuffer(i, PIXEL_FILL(i == WIN_TITLE ? 0 : 1));
+        PutWindowTilemap(i);
+        if (i != WIN_TITLE)
+            DrawStdFrameWithCustomTileAndPalette(i, FALSE, FRAME_TILE, FRAME_PAL);
+    }
+    CopyBgTilemapBufferToVram(0);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    ShowBg(0);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+    SetVBlankCallback(VBlankCB_Setup);
+    SetMainCallback2(CB2_Setup);
+    CreateTask(Task_Setup, 0);
+}
+
+// ---------------------------------------------------------------------------
+// Main screen
+
+static void BuildMainItems(void)
+{
+    sSetup.mainCount = 0;
+    if (MP_Lobby_InRoom() || MP_Lobby_State() == MP_LOBBY_RECONNECT_WAIT)
+    {
+        sSetup.mainItems[sSetup.mainCount++] = MAIN_CONTINUE;
+        sSetup.mainItems[sSetup.mainCount++] = MAIN_LEAVE;
+        return;
+    }
+    if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0])
+        sSetup.mainItems[sSetup.mainCount++] = MAIN_REJOIN;
+    sSetup.mainItems[sSetup.mainCount++] = MAIN_HOST;
+    sSetup.mainItems[sSetup.mainCount++] = MAIN_JOIN;
+    sSetup.mainItems[sSetup.mainCount++] = MAIN_SOLO;
+}
+
+static void MainItemLabel(u8 item, char *out, int len)
+{
+    switch (item)
+    {
+    case MAIN_CONTINUE: snprintf(out, len, "CONTINUE"); break;
+    case MAIN_LEAVE:    snprintf(out, len, "LEAVE THE SERVER"); break;
+    case MAIN_REJOIN:   snprintf(out, len, "REJOIN %s", gMpConfig.lastRoom); break;
+    case MAIN_HOST:     snprintf(out, len, "HOST A GAME"); break;
+    case MAIN_JOIN:     snprintf(out, len, "JOIN A GAME"); break;
+    default:            snprintf(out, len, "PLAY SOLO"); break;
+    }
+}
+
+static const char *MainItemHelp(u8 item)
+{
+    switch (item)
+    {
+    case MAIN_CONTINUE: return "Keep playing together on this server.";
+    case MAIN_LEAVE:    return "Disconnect and choose again.";
+    case MAIN_REJOIN:   return "Join the server you played on last time.";
+    case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
+    case MAIN_JOIN:     return "Find a friend's server and hop in.";
+    default:            return "Play alone. You can go online later from START > CO-OP.";
+    }
+}
+
+static void DrawMain(void)
+{
+    u8 i;
+    char label[48];
+
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    if (MP_Lobby_InRoom())
+    {
+        snprintf(label, sizeof(label), "You're on %s", MP_Lobby_RoomName());
+        Print(WIN_MAIN, label, 4, 1, sColorAccent);
+    }
+    for (i = 0; i < sSetup.mainCount; i++)
+    {
+        u8 y = 1 + LINE_H * (i + (MP_Lobby_InRoom() ? 1 : 0));
+        MainItemLabel(sSetup.mainItems[i], label, sizeof(label));
+        Print(WIN_MAIN, label, 14, y, sColorNormal);
+        if (i == sSetup.cursor)
+            DrawCursor(WIN_MAIN, y);
+    }
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    PrintWrapped(WIN_HELP, MainItemHelp(sSetup.mainItems[sSetup.cursor]), 0, 200, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+// ---------------------------------------------------------------------------
+// Messages and working screens
+
+static void ShowMessage(const char *ascii, bool8 isError, u8 after)
+{
+    snprintf((char *)sSetup.message, sizeof(sSetup.message), "%s", ascii);
+    sSetup.messageIsError = isError;
+    sSetup.after = after;
+    sSetup.screen = SCR_MESSAGE;
+    PlaySE(isError ? SE_FAILURE : SE_SUCCESS);
+    DrawScreen();
+}
+
+static void StartWorking(u8 work)
+{
+    sSetup.work = work;
+    sSetup.workTimer = 0;
+    sSetup.screen = SCR_WORKING;
+    DrawScreen();
+}
+
+static void DrawWorking(void)
+{
+    char text[96];
+    static const char *const dots[] = {"", ".", "..", "..."};
+    char room[MP_ROOM_NAME_MAX + 1];
+
+    GameToAsciiTrim(room, sSetup.roomName, WALDA_PHRASE_LENGTH);
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    switch (sSetup.work)
+    {
+    case WORK_HOST_ONLINE:
+    case WORK_HOST_LOCAL:
+        snprintf(text, sizeof(text), "Opening %s%s", room, dots[(sSetup.workTimer / 20) % 4]);
+        break;
+    default:
+        snprintf(text, sizeof(text), "Joining %s%s", MP_Lobby_RoomName()[0] ? MP_Lobby_RoomName() : "server", dots[(sSetup.workTimer / 20) % 4]);
+        break;
+    }
+    Print(WIN_MAIN, text, 4, 1 + LINE_H, sColorNormal);
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    Print(WIN_HELP, "B: Cancel", 4, 1, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+static void DrawMessage(void)
+{
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    PrintWrapped(WIN_MAIN, (const char *)sSetup.message, 1, 196, sSetup.messageIsError ? sColorError : sColorNormal);
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    Print(WIN_HELP, "A: OK", 4, 1, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+static const char *LobbyErrorText(u8 err)
+{
+    switch (err)
+    {
+    case MP_LOBBY_ERR_NAME_TAKEN:   return "Someone is already using that server name. Try a different one!";
+    case MP_LOBBY_ERR_NOT_FOUND:    return "That server isn't open anymore. Check the name, or ask your friend to host again.";
+    case MP_LOBBY_ERR_BAD_PASSWORD: return "Wrong password. Ask the host for it and try again.";
+    case MP_LOBBY_ERR_FULL:         return "That server is full (4 players).";
+    case MP_LOBBY_ERR_VERSION:      return "That server is running a different version of the game. Everyone needs the same version.";
+    case MP_LOBBY_ERR_BAD_NAME:     return "Server names can use letters, numbers, spaces and - . ! ? ' &";
+    case MP_LOBBY_ERR_SLOW_DOWN:    return "Too many wrong passwords. Wait a few seconds and try again.";
+    case MP_LOBBY_ERR_SERVER_FULL:  return "The online lobby is busy right now. Try again in a minute.";
+    default:                        return "Couldn't connect. Check your internet connection and try again.";
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Host form
+
+static void DrawHost(void)
+{
+    u8 i;
+    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "SHOW IN LIST", "START HOSTING", "BACK"};
+    static const char *const help[] = {
+        "The name your friends will look for.",
+        "Optional. Friends need it to join.",
+        "NO hides it: friends must type the exact name.",
+        "Open the server and start playing!",
+        "Go back.",
+    };
+
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    for (i = 0; i < HOST_ROWS; i++)
+    {
+        u8 y = 1 + LINE_H * i;
+        Print(WIN_MAIN, labels[i], 14, y, sColorNormal);
+        if (i == HOST_NAME)
+            PrintGame(WIN_MAIN, sSetup.roomName, 104, y, sColorAccent);
+        else if (i == HOST_PASSWORD)
+        {
+            if (sSetup.password[0] == EOS)
+                Print(WIN_MAIN, "(none)", 104, y, sColorDisabled);
+            else
+                PrintGame(WIN_MAIN, sSetup.password, 104, y, sColorAccent);
+        }
+        else if (i == HOST_LISTED)
+        {
+            u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
+            PrintGame(WIN_MAIN, lt, 104, y, sColorDim);
+            Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sColorAccent);
+            PrintGame(WIN_MAIN, rt, 140, y, sColorDim);
+        }
+        if (i == sSetup.hostCursor)
+            DrawCursor(WIN_MAIN, y);
+    }
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    PrintWrapped(WIN_HELP, help[sSetup.hostCursor], 0, 200, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+static bool8 StartLocalServer(void)
+{
+    int i;
+    char addr[32];
+    for (i = 0; i < LOCAL_PORT_TRIES; i++)
+    {
+        int port = MP_DEFAULT_PORT + i;
+        if (MPServer_IsRunning() || MPServer_Start(port, TRUE) == 0)
+        {
+            snprintf(addr, sizeof(addr), "127.0.0.1:%d", port);
+            MP_Lobby_Connect(addr, TRUE);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+static void BeginHosting(bool8 online)
+{
+    char room[MP_ROOM_NAME_MAX + 1], password[WALDA_PHRASE_LENGTH + 1];
+    GameToAsciiTrim(room, sSetup.roomName, WALDA_PHRASE_LENGTH);
+    MP_GameToAscii(password, sSetup.password, WALDA_PHRASE_LENGTH);
+
+    if (!MPNet_IsValidRoomName(room))
+    {
+        ShowMessage(LobbyErrorText(MP_LOBBY_ERR_BAD_NAME), TRUE, AFTER_HOST);
+        return;
+    }
+    snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", room);
+    if (online)
+    {
+        MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+        MP_Lobby_CreateRoom(room, password, !sSetup.listed);
+        StartWorking(WORK_HOST_ONLINE);
+    }
+    else
+    {
+        if (!StartLocalServer())
+        {
+            ShowMessage("Couldn't start a server on this PC. Is another copy of the game already hosting?", TRUE, AFTER_HOST);
+            return;
+        }
+        MP_Lobby_CreateRoom(room, password, !sSetup.listed);
+        StartWorking(WORK_HOST_LOCAL);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Join list
+
+static void RefreshJoinList(void)
+{
+    struct MpLanRoom tmp[MP_LIST_MAX > MP_LAN_MAX_GAMES ? MP_LIST_MAX : MP_LAN_MAX_GAMES];
+    int n, i;
+    u8 prevCount = sSetup.entryCount;
+
+    sSetup.entryCount = 0;
+    // First row: join a hidden server by typing its name
+    memset(&sSetup.entries[0], 0, sizeof(sSetup.entries[0]));
+    sSetup.entries[0].byName = TRUE;
+    sSetup.entryCount = 1;
+
+    if (MP_Lobby_State() == MP_LOBBY_READY || MP_Lobby_ListReady())
+    {
+        n = MP_Lobby_GetList(tmp, MP_LIST_MAX);
+        for (i = 0; i < n && sSetup.entryCount < MAX_JOIN_ENTRIES; i++)
+        {
+            struct JoinEntry *e = &sSetup.entries[sSetup.entryCount++];
+            memset(e, 0, sizeof(*e));
+            e->room = tmp[i];
+        }
+    }
+    n = MPLan_Poll(tmp, MP_LAN_MAX_GAMES);
+    for (i = 0; i < n && sSetup.entryCount < MAX_JOIN_ENTRIES; i++)
+    {
+        struct JoinEntry *e;
+        int k;
+        bool8 dup = FALSE;
+        // A server hosted by this PC through the online lobby also answers here? No:
+        // only local servers answer, but skip exact duplicates just in case.
+        for (k = 1; k < sSetup.entryCount; k++)
+            if (sSetup.entries[k].isLan && strcmp(sSetup.entries[k].room.name, tmp[i].name) == 0)
+                dup = TRUE;
+        if (dup)
+            continue;
+        e = &sSetup.entries[sSetup.entryCount++];
+        memset(e, 0, sizeof(*e));
+        e->room = tmp[i];
+        e->isLan = TRUE;
+    }
+    if (sSetup.joinCursor >= sSetup.entryCount)
+        sSetup.joinCursor = sSetup.entryCount - 1;
+    // Start on the first server when the list fills in for the first time
+    if (prevCount <= 1 && sSetup.entryCount > 1 && sSetup.joinCursor == 0)
+        sSetup.joinCursor = 1;
+}
+
+static void DrawJoin(void)
+{
+    u8 i;
+    char line[48];
+    const char *help;
+
+    if (sSetup.joinCursor < sSetup.scroll)
+        sSetup.scroll = sSetup.joinCursor;
+    if (sSetup.joinCursor >= sSetup.scroll + LIST_ROWS)
+        sSetup.scroll = sSetup.joinCursor - LIST_ROWS + 1;
+
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    for (i = 0; i < LIST_ROWS && sSetup.scroll + i < sSetup.entryCount; i++)
+    {
+        struct JoinEntry *e = &sSetup.entries[sSetup.scroll + i];
+        u8 y = 1 + LINE_H * i;
+        if (e->byName)
+            Print(WIN_MAIN, "JOIN BY NAME...", 14, y, sColorAccent);
+        else
+        {
+            const u8 *color = (e->room.version != MP_PROTOCOL_VERSION || e->room.players >= e->room.maxPlayers) ? sColorDisabled : sColorNormal;
+            Print(WIN_MAIN, e->room.name, 14, y, color);
+            snprintf(line, sizeof(line), "%s%d/%d", e->isLan ? "HOME " : "", e->room.players, e->room.maxPlayers);
+            PrintRight(WIN_MAIN, line, 196, y, color);
+            if (e->room.flags & MP_ROOM_FLAG_LOCKED)
+            {
+                u8 lock[16];
+                MP_AsciiToGame(lock, "LOCKED", 10);
+                AddTextPrinterParameterized3(WIN_MAIN, FONT_SMALL, 118, y + 1, sColorDim, TEXT_SKIP_DRAW, lock);
+            }
+        }
+        if (sSetup.scroll + i == sSetup.joinCursor)
+            DrawCursor(WIN_MAIN, y);
+    }
+    if (sSetup.scroll > 0)
+    {
+        u8 up[] = {CHAR_UP_ARROW, EOS};
+        PrintGame(WIN_MAIN, up, 200, 1, sColorDim);
+    }
+    if (sSetup.scroll + LIST_ROWS < sSetup.entryCount)
+    {
+        u8 down[] = {CHAR_DOWN_ARROW, EOS};
+        PrintGame(WIN_MAIN, down, 200, 1 + LINE_H * (LIST_ROWS - 1), sColorDim);
+    }
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+
+    if (sSetup.entryCount <= 1)
+    {
+        if (sSetup.onlineFailed || !MP_HasOnlineLobby())
+            help = "No servers found on your home network yet. Still looking...";
+        else
+            help = "Looking for servers... Ask a friend to host one!";
+    }
+    else if (sSetup.joinCursor == 0)
+        help = "For hidden servers: type the exact name.";
+    else if (sSetup.onlineFailed)
+        help = "Online lobby unreachable. Showing home network only.";
+    else
+        help = "A: Join  B: Back   LOCKED servers need a password.";
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    PrintWrapped(WIN_HELP, help, 0, 200, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+static void EnterJoinList(void)
+{
+    sSetup.screen = SCR_JOIN;
+    sSetup.joinCursor = 0;
+    sSetup.scroll = 0;
+    sSetup.entryCount = 0;
+    sSetup.onlineFailed = FALSE;
+    sSetup.refreshTimer = 0;
+    MPLan_StartSearch();
+    if (MP_HasOnlineLobby())
+    {
+        if (MP_Lobby_State() != MP_LOBBY_READY)
+            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+        MP_Lobby_RequestList();
+    }
+    RefreshJoinList();
+    DrawScreen();
+}
+
+static void JoinEntryNow(u8 index)
+{
+    struct JoinEntry *e = &sSetup.entries[index];
+    char password[WALDA_PHRASE_LENGTH + 1];
+    char addr[96];
+
+    MP_GameToAscii(password, sSetup.password, WALDA_PHRASE_LENGTH);
+    if (e->isLan)
+    {
+        snprintf(addr, sizeof(addr), "%s:%d", e->room.host, e->room.port);
+        MP_Lobby_Connect(addr, FALSE);
+    }
+    else if (MP_Lobby_State() != MP_LOBBY_READY)
+        MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+    MP_Lobby_JoinRoom(e->room.name, password);
+    MP_AsciiToGame(sSetup.roomName, e->room.name, WALDA_PHRASE_LENGTH);
+    StartWorking(WORK_JOIN);
+}
+
+// ---------------------------------------------------------------------------
+
+static void DrawScreen(void)
+{
+    FillWindowPixelBuffer(WIN_TITLE, PIXEL_FILL(0));
+    switch (sSetup.screen)
+    {
+    case SCR_HOST:    Print(WIN_TITLE, "HOST A GAME", 12, 2, sColorTitle); break;
+    case SCR_JOIN:    Print(WIN_TITLE, "JOIN A GAME", 12, 2, sColorTitle); break;
+    default:          Print(WIN_TITLE, "PLAY WITH FRIENDS", 12, 2, sColorTitle); break;
+    }
+    CopyWindowToVram(WIN_TITLE, COPYWIN_GFX);
+    switch (sSetup.screen)
+    {
+    case SCR_MAIN:    DrawMain(); break;
+    case SCR_HOST:    DrawHost(); break;
+    case SCR_JOIN:    DrawJoin(); break;
+    case SCR_WORKING: DrawWorking(); break;
+    case SCR_MESSAGE: DrawMessage(); break;
+    }
+}
+
+static void OpenTextEntry(u8 which, u8 template, u8 *buffer)
+{
+    sSetup.returnTo = which;
+    PlaySE(SE_SELECT);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[0] = 1; // fading out to the text entry
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[1] = template;
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[2] = (buffer == sSetup.roomName) ? 0 : 1;
+}
+
+static void Finish(void)
+{
+    MPLan_StopSearch();
+    if (!MP_Lobby_InRoom() && MP_Lobby_State() != MP_LOBBY_RECONNECT_WAIT)
+        MP_Lobby_Disconnect(); // the lobby connection used for the server list
+    MP_SaveConfig();
+    sSetup.active = FALSE;
+    FadeOutBGM(4);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[0] = 2; // fading out to the main menu
+}
+
+static void HandleMain(void)
+{
+    if (JOY_NEW(DPAD_UP) && sSetup.cursor > 0)
+    {
+        sSetup.cursor--;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(DPAD_DOWN) && sSetup.cursor + 1 < sSetup.mainCount)
+    {
+        sSetup.cursor++;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(A_BUTTON | START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        switch (sSetup.mainItems[sSetup.cursor])
+        {
+        case MAIN_CONTINUE:
+            Finish();
+            break;
+        case MAIN_LEAVE:
+            MP_Lobby_Disconnect();
+            MPServer_Stop();
+            sSetup.cursor = 0;
+            BuildMainItems();
+            DrawScreen();
+            break;
+        case MAIN_REJOIN:
+        {
+            u8 key[MP_ROOM_KEY_SIZE];
+            int i;
+            for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
+            {
+                unsigned v = 0;
+                sscanf(gMpConfig.lastRoomKey + i * 2, "%2x", &v);
+                key[i] = (u8)v;
+            }
+            if (!MP_HasOnlineLobby())
+            {
+                EnterJoinList();
+                break;
+            }
+            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            MP_Lobby_JoinRoomWithKey(gMpConfig.lastRoom, key);
+            MP_AsciiToGame(sSetup.roomName, gMpConfig.lastRoom, WALDA_PHRASE_LENGTH);
+            StartWorking(WORK_JOIN);
+            break;
+        }
+        case MAIN_HOST:
+            sSetup.screen = SCR_HOST;
+            sSetup.hostCursor = HOST_START;
+            DrawScreen();
+            break;
+        case MAIN_JOIN:
+            memset(sSetup.password, EOS, sizeof(sSetup.password));
+            EnterJoinList();
+            break;
+        default:
+            Finish();
+            break;
+        }
+    }
+}
+
+static void HandleHost(void)
+{
+    if (JOY_NEW(DPAD_UP))
+    {
+        sSetup.hostCursor = (sSetup.hostCursor == 0) ? HOST_ROWS - 1 : sSetup.hostCursor - 1;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(DPAD_DOWN))
+    {
+        sSetup.hostCursor = (sSetup.hostCursor + 1) % HOST_ROWS;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (sSetup.hostCursor == HOST_LISTED && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
+    {
+        sSetup.listed = !sSetup.listed;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sSetup.screen = SCR_MAIN;
+        DrawScreen();
+    }
+    else if (JOY_NEW(A_BUTTON | START_BUTTON))
+    {
+        switch (sSetup.hostCursor)
+        {
+        case HOST_NAME:
+            OpenTextEntry(1, NAMING_SCREEN_COOP_ROOM, sSetup.roomName);
+            break;
+        case HOST_PASSWORD:
+            OpenTextEntry(2, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+            break;
+        case HOST_START:
+            PlaySE(SE_SELECT);
+            BeginHosting(MP_HasOnlineLobby());
+            break;
+        case HOST_BACK:
+            PlaySE(SE_SELECT);
+            sSetup.screen = SCR_MAIN;
+            DrawScreen();
+            break;
+        }
+    }
+}
+
+static void HandleJoin(void)
+{
+    // Keep the list fresh
+    if (++sSetup.refreshTimer >= REFRESH_FRAMES)
+    {
+        sSetup.refreshTimer = 0;
+        MPLan_StartSearch();
+        if (MP_HasOnlineLobby())
+        {
+            if (MP_Lobby_State() == MP_LOBBY_ERROR || MP_Lobby_State() == MP_LOBBY_OFF)
+            {
+                sSetup.onlineFailed = TRUE;
+                MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            }
+            MP_Lobby_RequestList();
+        }
+    }
+    if (MP_Lobby_State() == MP_LOBBY_ERROR)
+        sSetup.onlineFailed = TRUE;
+    if ((sSetup.refreshTimer % 20) == 10)
+    {
+        u8 before = sSetup.entryCount;
+        RefreshJoinList();
+        if (MP_Lobby_ListReady() && MP_Lobby_State() == MP_LOBBY_READY)
+            sSetup.onlineFailed = FALSE;
+        if (before != sSetup.entryCount || (sSetup.refreshTimer % 60) == 10)
+            DrawScreen();
+    }
+
+    if (JOY_REPEAT(DPAD_UP) && sSetup.joinCursor > 0)
+    {
+        sSetup.joinCursor--;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_REPEAT(DPAD_DOWN) && sSetup.joinCursor + 1 < sSetup.entryCount)
+    {
+        sSetup.joinCursor++;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        MPLan_StopSearch();
+        MP_Lobby_Disconnect();
+        sSetup.screen = SCR_MAIN;
+        DrawScreen();
+    }
+    else if (JOY_NEW(A_BUTTON))
+    {
+        struct JoinEntry *e = &sSetup.entries[sSetup.joinCursor];
+        if (e->byName)
+        {
+            memset(sSetup.roomName, EOS, sizeof(sSetup.roomName));
+            OpenTextEntry(4, NAMING_SCREEN_COOP_ROOM, sSetup.roomName);
+            return;
+        }
+        if (e->room.version != MP_PROTOCOL_VERSION)
+        {
+            ShowMessage(LobbyErrorText(MP_LOBBY_ERR_VERSION), TRUE, AFTER_JOIN);
+            return;
+        }
+        if (e->room.players >= e->room.maxPlayers)
+        {
+            ShowMessage(LobbyErrorText(MP_LOBBY_ERR_FULL), TRUE, AFTER_JOIN);
+            return;
+        }
+        PlaySE(SE_SELECT);
+        sSetup.pendingJoin = sSetup.joinCursor;
+        memset(sSetup.password, EOS, sizeof(sSetup.password));
+        if (e->room.flags & MP_ROOM_FLAG_LOCKED)
+            OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+        else
+            JoinEntryNow(sSetup.joinCursor);
+    }
+}
+
+static void OnRoomJoined(void)
+{
+    char text[160];
+    int i;
+    const u8 *key = MP_Lobby_RoomKey();
+
+    snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", MP_Lobby_RoomName());
+    for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
+        snprintf(gMpConfig.lastRoomKey + i * 2, 3, "%02x", key[i]);
+    MP_SaveConfig();
+    MPLan_StopSearch();
+    if (sSetup.work == WORK_HOST_ONLINE)
+        snprintf(text, sizeof(text), "%s is open! Friends can join it from JOIN A GAME%s.",
+                 MP_Lobby_RoomName(), sSetup.listed ? "" : " > JOIN BY NAME");
+    else if (sSetup.work == WORK_HOST_LOCAL)
+        snprintf(text, sizeof(text), "%s is open on your home network. Friends on the same Wi-Fi can join it from JOIN A GAME.%s",
+                 MP_Lobby_RoomName(), MP_HasOnlineLobby() ? " (The online lobby couldn't be reached.)" : "");
+    else
+        snprintf(text, sizeof(text), "You joined %s! Load your save or start a new game, and you'll see your friends in the world.",
+                 MP_Lobby_RoomName());
+    ShowMessage(text, FALSE, AFTER_PLAY);
+}
+
+static void HandleWorking(void)
+{
+    u8 state = MP_Lobby_State();
+    sSetup.workTimer++;
+    if ((sSetup.workTimer % 20) == 0)
+        DrawScreen();
+
+    if (state == MP_LOBBY_IN_ROOM)
+    {
+        OnRoomJoined();
+        return;
+    }
+    if (state == MP_LOBBY_ERROR)
+    {
+        u8 err = MP_Lobby_Error();
+        // Online lobby down: host on the local network instead
+        if (sSetup.work == WORK_HOST_ONLINE && err == MP_LOBBY_ERR_UNREACHABLE)
+        {
+            MP_Lobby_Disconnect();
+            BeginHosting(FALSE);
+            return;
+        }
+        if (sSetup.work == WORK_HOST_LOCAL)
+            MPServer_Stop();
+        MP_Lobby_Disconnect();
+        ShowMessage(LobbyErrorText(err), TRUE, sSetup.work == WORK_JOIN ? AFTER_JOIN : AFTER_HOST);
+        return;
+    }
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        MP_Lobby_Disconnect();
+        if (sSetup.work == WORK_HOST_LOCAL)
+            MPServer_Stop();
+        if (sSetup.work == WORK_JOIN)
+            EnterJoinList();
+        else
+        {
+            sSetup.screen = SCR_HOST;
+            DrawScreen();
+        }
+    }
+}
+
+static void HandleMessage(void)
+{
+    if (!JOY_NEW(A_BUTTON | B_BUTTON | START_BUTTON))
+        return;
+    PlaySE(SE_SELECT);
+    switch (sSetup.after)
+    {
+    case AFTER_PLAY:
+        Finish();
+        break;
+    case AFTER_HOST:
+        sSetup.screen = SCR_HOST;
+        DrawScreen();
+        break;
+    case AFTER_JOIN:
+        EnterJoinList();
+        break;
+    default:
+        sSetup.screen = SCR_MAIN;
+        BuildMainItems();
+        sSetup.cursor = 0;
+        DrawScreen();
+        break;
+    }
+}
+
+static void Task_Setup(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    switch (data[0])
+    {
+    case 0: // running
+        if (gPaletteFade.active)
+            return;
+        switch (sSetup.screen)
+        {
+        case SCR_MAIN:    HandleMain(); break;
+        case SCR_HOST:    HandleHost(); break;
+        case SCR_JOIN:    HandleJoin(); break;
+        case SCR_WORKING: HandleWorking(); break;
+        case SCR_MESSAGE: HandleMessage(); break;
+        }
+        break;
+    case 1: // fading out to the keyboard
+        if (!gPaletteFade.active)
+        {
+            u8 template = data[1];
+            u8 *buffer = data[2] ? sSetup.password : sSetup.roomName;
+            DestroyTask(taskId);
+            FreeAllWindowBuffers();
+            DoNamingScreen(template, buffer, 0, 0, 0, CB2_ReturnFromTextEntry);
+        }
+        break;
+    case 2: // fading out to the main menu
+        if (!gPaletteFade.active)
+        {
+            DestroyTask(taskId);
+            FreeAllWindowBuffers();
+            SetMainCallback2(CB2_InitMainMenu);
+        }
+        break;
+    }
+}
+
+static void CB2_ReturnFromTextEntry(void)
+{
+    u8 which = sSetup.returnTo;
+    sSetup.returnTo = 0;
+    InitGraphics();
+    switch (which)
+    {
+    case 1:
+    case 2:
+        sSetup.screen = SCR_HOST;
+        DrawScreen();
+        break;
+    case 3: // password for the chosen server
+        sSetup.screen = SCR_JOIN;
+        JoinEntryNow(sSetup.pendingJoin);
+        break;
+    case 4: // joined by name: now the password
+    {
+        char room[MP_ROOM_NAME_MAX + 1];
+        GameToAsciiTrim(room, sSetup.roomName, WALDA_PHRASE_LENGTH);
+        if (room[0] == 0)
+        {
+            EnterJoinList();
+            break;
+        }
+        memset(sSetup.password, EOS, sizeof(sSetup.password));
+        sSetup.returnTo = 5;
+        DestroyTask(FindTaskIdByFunc(Task_Setup));
+        FreeAllWindowBuffers();
+        DoNamingScreen(NAMING_SCREEN_COOP_PASSWORD, sSetup.password, 0, 0, 0, CB2_ReturnFromTextEntry);
+        break;
+    }
+    case 5:
+    {
+        char room[MP_ROOM_NAME_MAX + 1], password[WALDA_PHRASE_LENGTH + 1];
+        GameToAsciiTrim(room, sSetup.roomName, WALDA_PHRASE_LENGTH);
+        MP_GameToAscii(password, sSetup.password, WALDA_PHRASE_LENGTH);
+        if (MP_Lobby_State() != MP_LOBBY_READY)
+            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+        MP_Lobby_JoinRoom(room, password);
+        StartWorking(WORK_JOIN);
+        break;
+    }
+    default:
+        sSetup.screen = SCR_MAIN;
+        DrawScreen();
+        break;
+    }
+}
+
+void CB2_InitCoopSetup(void)
+{
+    // Automated tests and the debug quick start skip this screen
+    if (getenv("MOEMON_COOP_AUTO") || getenv("MOEMON_SKIP_COOP_SETUP"))
+    {
+        SetMainCallback2(CB2_InitMainMenu);
+        return;
+    }
+    memset(&sSetup, 0, sizeof(sSetup));
+    memset(sSetup.roomName, EOS, sizeof(sSetup.roomName));
+    memset(sSetup.password, EOS, sizeof(sSetup.password));
+    sSetup.active = TRUE;
+    sSetup.listed = TRUE;
+    DefaultRoomName();
+    BuildMainItems();
+    sSetup.screen = SCR_MAIN;
+    InitGraphics();
+    DrawScreen();
+    PlayBGM(MUS_RG_UNION_ROOM);
+}
+
+// ---------------------------------------------------------------------------
+// MOEMON_COOP_AUTO=host:NAME[:PASSWORD] / join:NAME[:PASSWORD] / hostlan:NAME[:PASSWORD]
+// connects without the menu (automated tests). MOEMON_LOBBY picks the lobby.
+
+void MP_AutoSession_Update(void)
+{
+    static bool8 sDone;
+    const char *env;
+    char buf[96], *mode, *name, *password;
+
+    if (sDone)
+        return;
+    sDone = TRUE;
+    env = getenv("MOEMON_COOP_AUTO");
+    if (!env)
+        return;
+    snprintf(buf, sizeof(buf), "%s", env);
+    mode = strtok(buf, ":");
+    name = strtok(NULL, ":");
+    password = strtok(NULL, ":");
+    if (!mode || !name)
+        return;
+    if (strcmp(mode, "hostlan") == 0)
+    {
+        int i;
+        char addr[32];
+        for (i = 0; i < LOCAL_PORT_TRIES; i++)
+            if (MPServer_Start(MP_DEFAULT_PORT + i, TRUE) == 0)
+            {
+                snprintf(addr, sizeof(addr), "127.0.0.1:%d", MP_DEFAULT_PORT + i);
+                MP_Lobby_Connect(addr, TRUE);
+                break;
+            }
+        MP_Lobby_CreateRoom(name, password ? password : "", FALSE);
+        return;
+    }
+    MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+    if (strcmp(mode, "host") == 0)
+        MP_Lobby_CreateRoom(name, password ? password : "", FALSE);
+    else
+        MP_Lobby_JoinRoom(name, password ? password : "");
+}

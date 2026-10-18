@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "title_screen.h"
 #include "sprite.h"
@@ -825,8 +826,9 @@ static void Task_TitleScreenPhase3(u8 taskId)
 
 static void CB2_GoToMainMenu(void)
 {
+    // Moemon Co-op: HOST / JOIN / PLAY SOLO comes before the main menu
     if (!UpdatePaletteFade())
-        SetMainCallback2(CB2_InitMainMenu);
+        SetMainCallback2(CB2_InitCoopSetup);
 }
 
 static void CB2_GoToCopyrightScreen(void)

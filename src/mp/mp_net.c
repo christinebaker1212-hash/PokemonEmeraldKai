@@ -1,4 +1,4 @@
-// Moemon Co-op: TCP transport, message framing, client and relay server.
+// Moemon Co-op: TCP transport, message framing, client, LAN discovery.
 // Frame format: u16 length (little endian, counts type + payload), u8 type, payload.
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,32 +6,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <ws2tcpip.h>
-typedef SOCKET mp_sock;
-#define MP_BADSOCK INVALID_SOCKET
-#define mp_closesock closesocket
-#define MP_WOULDBLOCK(e) ((e) == WSAEWOULDBLOCK || (e) == WSAEINPROGRESS || (e) == WSAEALREADY)
-static int mp_lasterr(void) { return WSAGetLastError(); }
-#else
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-typedef int mp_sock;
-#define MP_BADSOCK (-1)
-#define mp_closesock close
-#define MP_WOULDBLOCK(e) ((e) == EWOULDBLOCK || (e) == EAGAIN || (e) == EINPROGRESS)
-static int mp_lasterr(void) { return errno; }
-#endif
-
+#include "mp_sock.h"
 #include "mp_net.h"
 
 static char sLastError[160];
@@ -52,7 +27,7 @@ const char *MPNet_LastError(void)
     return sLastError;
 }
 
-static void SetNonBlocking(mp_sock s)
+void MPSock_SetNonBlocking(mp_sock s)
 {
 #ifdef _WIN32
     u_long mode = 1;
@@ -64,6 +39,7 @@ static void SetNonBlocking(mp_sock s)
     {
         int one = 1;
         setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (const char *)&one, sizeof(one));
+        setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (const char *)&one, sizeof(one));
     }
 }
 
@@ -86,19 +62,7 @@ int MPNet_Init(void)
 // ---------------------------------------------------------------------------
 // Connection buffers (shared by client and server)
 
-#define RECVBUF_SIZE (MP_MAX_MSG * 8)
-
-struct MpConn {
-    mp_sock sock;
-    int connecting;
-    uint8_t recv[RECVBUF_SIZE];
-    int recvLen;
-    uint8_t *send;
-    int sendLen;
-    int sendCap;
-};
-
-static void Conn_Reset(struct MpConn *c)
+void MPConn_Reset(struct MpConn *c)
 {
     if (c->sock != MP_BADSOCK)
         mp_closesock(c->sock);
@@ -108,7 +72,7 @@ static void Conn_Reset(struct MpConn *c)
     c->sendLen = 0;
 }
 
-static void Conn_Queue(struct MpConn *c, uint8_t type, const void *data, uint16_t len)
+void MPConn_Queue(struct MpConn *c, uint8_t type, const void *data, uint16_t len)
 {
     int need = c->sendLen + 3 + len;
     uint16_t frameLen = (uint16_t)(len + 1);
@@ -131,7 +95,7 @@ static void Conn_Queue(struct MpConn *c, uint8_t type, const void *data, uint16_
 }
 
 // Returns -1 on a fatal error
-static int Conn_Flush(struct MpConn *c)
+int MPConn_Flush(struct MpConn *c)
 {
     while (c->sendLen > 0)
     {
@@ -152,7 +116,7 @@ static int Conn_Flush(struct MpConn *c)
 }
 
 // Returns -1 if the connection closed
-static int Conn_Fill(struct MpConn *c)
+int MPConn_Fill(struct MpConn *c)
 {
     for (;;)
     {
@@ -178,7 +142,7 @@ static int Conn_Fill(struct MpConn *c)
 }
 
 // Pops one frame. Returns 1 if a frame was popped, 0 if none, -1 on garbage.
-static int Conn_Pop(struct MpConn *c, uint8_t *type, uint8_t *buf, uint16_t *len)
+int MPConn_Pop(struct MpConn *c, uint8_t *type, uint8_t *buf, uint16_t *len)
 {
     uint16_t frameLen;
     if (c->recvLen < 3)
@@ -226,7 +190,7 @@ int MPNet_Connect(const char *host, int port)
         mp_sock s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (s == MP_BADSOCK)
             continue;
-        SetNonBlocking(s);
+        MPSock_SetNonBlocking(s);
         rc = connect(s, ai->ai_addr, (int)ai->ai_addrlen);
         if (rc == 0 || MP_WOULDBLOCK(mp_lasterr()))
         {
@@ -254,12 +218,12 @@ void MPNet_ClientSend(uint8_t type, const void *data, uint16_t len)
 {
     if (sClientStatus == MPNET_DISCONNECTED)
         return;
-    Conn_Queue(&sClient, type, data, len);
+    MPConn_Queue(&sClient, type, data, len);
 }
 
 void MPNet_ClientClose(void)
 {
-    Conn_Reset(&sClient);
+    MPConn_Reset(&sClient);
     sClientStatus = MPNET_DISCONNECTED;
 }
 
@@ -300,12 +264,12 @@ int MPNet_ClientPoll(uint8_t *type, uint8_t *buf, uint16_t *len)
         sClient.connecting = 0;
     }
 
-    if (Conn_Flush(&sClient) < 0)
+    if (MPConn_Flush(&sClient) < 0)
     {
         Client_Fail("send failed");
         return 0;
     }
-    rc = Conn_Pop(&sClient, type, buf, len);
+    rc = MPConn_Pop(&sClient, type, buf, len);
     if (rc == 1)
         return 1;
     if (rc < 0)
@@ -313,16 +277,16 @@ int MPNet_ClientPoll(uint8_t *type, uint8_t *buf, uint16_t *len)
         Client_Fail("bad data from server");
         return 0;
     }
-    if (Conn_Fill(&sClient) < 0)
+    if (MPConn_Fill(&sClient) < 0)
     {
         // Deliver what we still have buffered before reporting the close
-        rc = Conn_Pop(&sClient, type, buf, len);
+        rc = MPConn_Pop(&sClient, type, buf, len);
         if (rc == 1)
             return 1;
         Client_Fail("server closed the connection");
         return 0;
     }
-    rc = Conn_Pop(&sClient, type, buf, len);
+    rc = MPConn_Pop(&sClient, type, buf, len);
     if (rc < 0)
     {
         Client_Fail("bad data from server");
@@ -331,315 +295,322 @@ int MPNet_ClientPoll(uint8_t *type, uint8_t *buf, uint16_t *len)
     return rc;
 }
 
-// ---------------------------------------------------------------------------
-// Relay server
-//
-// The server knows very little about the game: it assigns player ids, caches
-// each player's HELLO/STATE/custom sprite so late joiners see everyone, and
-// forwards peer-to-peer RELAY messages (used for challenges and battles).
 
-struct MpServerSlot {
-    struct MpConn conn;
-    int used;
-    int helloDone;
-    uint8_t hello[MP_HELLO_SIZE];
-    uint8_t state[MP_WIRESTATE_SIZE];
-    int hasState;
-    uint8_t *gfx;
-    uint16_t gfxLen;
+// ---------------------------------------------------------------------------
+// Addresses
+
+void MPNet_ParseAddress(const char *addr, char *host, int hostLen, int *port)
+{
+    const char *colon;
+    int n;
+
+    while (*addr == ' ')
+        addr++;
+    if (addr[0] == '[')
+    {
+        const char *end = strchr(addr, ']');
+        if (end)
+        {
+            n = (int)(end - addr - 1);
+            if (n >= hostLen)
+                n = hostLen - 1;
+            memcpy(host, addr + 1, n);
+            host[n] = 0;
+            if (end[1] == ':' && atoi(end + 2) > 0)
+                *port = atoi(end + 2);
+            return;
+        }
+    }
+    colon = strchr(addr, ':');
+    // More than one ':' means a bare IPv6 address without a port
+    if (colon && strchr(colon + 1, ':') == NULL)
+    {
+        n = (int)(colon - addr);
+        if (n >= hostLen)
+            n = hostLen - 1;
+        memcpy(host, addr, n);
+        host[n] = 0;
+        if (atoi(colon + 1) > 0)
+            *port = atoi(colon + 1);
+        return;
+    }
+    snprintf(host, hostLen, "%s", addr);
+}
+
+// ---------------------------------------------------------------------------
+// SHA-256 (public domain style implementation, FIPS 180-4)
+
+static const uint32_t sK[64] = {
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
-static mp_sock sListen = MP_BADSOCK;
-static struct MpServerSlot sSlots[MP_MAX_PLAYERS];
-static uint8_t sSrvBuf[MP_MAX_MSG + 8];
-static uint8_t sMsgBuf[MP_MAX_MSG + 8];
+#define ROR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
 
-int MPServer_IsRunning(void)
+static void Sha256Block(uint32_t h[8], const uint8_t *p)
 {
-    return sListen != MP_BADSOCK;
+    uint32_t w[64], a, b, c, d, e, f, g, hh;
+    int i;
+    for (i = 0; i < 16; i++)
+        w[i] = ((uint32_t)p[i * 4] << 24) | ((uint32_t)p[i * 4 + 1] << 16) | ((uint32_t)p[i * 4 + 2] << 8) | p[i * 4 + 3];
+    for (i = 16; i < 64; i++)
+    {
+        uint32_t s0 = ROR(w[i - 15], 7) ^ ROR(w[i - 15], 18) ^ (w[i - 15] >> 3);
+        uint32_t s1 = ROR(w[i - 2], 17) ^ ROR(w[i - 2], 19) ^ (w[i - 2] >> 10);
+        w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+    }
+    a = h[0]; b = h[1]; c = h[2]; d = h[3]; e = h[4]; f = h[5]; g = h[6]; hh = h[7];
+    for (i = 0; i < 64; i++)
+    {
+        uint32_t S1 = ROR(e, 6) ^ ROR(e, 11) ^ ROR(e, 25);
+        uint32_t ch = (e & f) ^ (~e & g);
+        uint32_t t1 = hh + S1 + ch + sK[i] + w[i];
+        uint32_t S0 = ROR(a, 2) ^ ROR(a, 13) ^ ROR(a, 22);
+        uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
+        uint32_t t2 = S0 + maj;
+        hh = g; g = f; f = e; e = d + t1; d = c; c = b; b = a; a = t1 + t2;
+    }
+    h[0] += a; h[1] += b; h[2] += c; h[3] += d; h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
 }
 
-int MPServer_PlayerCount(void)
+void MPNet_Sha256(const void *data, int len, uint8_t out[32])
 {
+    uint32_t h[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+    const uint8_t *p = (const uint8_t *)data;
+    uint8_t tail[128];
+    uint64_t bits = (uint64_t)len * 8;
+    int i, rem, tailLen;
+
+    while (len >= 64)
+    {
+        Sha256Block(h, p);
+        p += 64;
+        len -= 64;
+    }
+    rem = len;
+    memset(tail, 0, sizeof(tail));
+    memcpy(tail, p, rem);
+    tail[rem] = 0x80;
+    tailLen = (rem < 56) ? 64 : 128;
+    for (i = 0; i < 8; i++)
+        tail[tailLen - 1 - i] = (uint8_t)(bits >> (i * 8));
+    Sha256Block(h, tail);
+    if (tailLen == 128)
+        Sha256Block(h, tail + 64);
+    for (i = 0; i < 8; i++)
+    {
+        out[i * 4] = h[i] >> 24;
+        out[i * 4 + 1] = h[i] >> 16;
+        out[i * 4 + 2] = h[i] >> 8;
+        out[i * 4 + 3] = h[i];
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Rooms
+
+static int IsRoomChar(char c)
+{
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+        || c == ' ' || c == '-' || c == '.' || c == '!' || c == '?' || c == '\'' || c == '&';
+}
+
+int MPNet_IsValidRoomName(const char *name)
+{
+    int i, len = (int)strlen(name), letters = 0;
+    if (len < 1 || len > MP_ROOM_NAME_MAX || name[0] == ' ' || name[len - 1] == ' ')
+        return 0;
+    for (i = 0; i < len; i++)
+    {
+        if (!IsRoomChar(name[i]))
+            return 0;
+        if (name[i] != ' ')
+            letters++;
+    }
+    return letters > 0;
+}
+
+void MPNet_RoomKey(const char *roomName, const char *password, uint8_t out[MP_ROOM_KEY_SIZE])
+{
+    char buf[MP_ROOM_NAME_MAX + 2 + 128];
     int i, n = 0;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (sSlots[i].used && sSlots[i].helloDone)
-            n++;
-    return n;
+    for (i = 0; roomName[i] && n < MP_ROOM_NAME_MAX; i++)
+    {
+        char c = roomName[i];
+        buf[n++] = (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c;
+    }
+    buf[n++] = '\n';
+    for (i = 0; password[i] && i < 120; i++)
+        buf[n++] = password[i];
+    MPNet_Sha256(buf, n, out);
 }
 
-int MPServer_Start(int port)
+// ---------------------------------------------------------------------------
+// Local network discovery (client side).
+// Probe:  "MOEMON?" u16 version
+// Answer: "MOEMON!" u16 version, u16 tcpPort, u8 count, rooms (see MPMSG_S_ROOM_LIST)
+
+#ifdef _WIN32
+#include <iphlpapi.h>
+#else
+#include <ifaddrs.h>
+#include <net/if.h>
+#endif
+
+static mp_sock sLanSock = MP_BADSOCK;
+static struct MpLanRoom sLanRooms[MP_LAN_MAX_GAMES];
+static int sLanCount;
+
+static void LanSendTo(uint32_t addrHostOrder, const uint8_t *probe, int len)
 {
-    struct sockaddr_in6 addr6;
-    struct sockaddr_in addr4;
-    int one = 1, i;
+    struct sockaddr_in to;
+    memset(&to, 0, sizeof(to));
+    to.sin_family = AF_INET;
+    to.sin_port = htons(MP_DISCOVERY_PORT);
+    to.sin_addr.s_addr = htonl(addrHostOrder);
+    sendto(sLanSock, (const char *)probe, len, 0, (struct sockaddr *)&to, sizeof(to));
+}
+
+void MPLan_StartSearch(void)
+{
+    uint8_t probe[9] = {'M', 'O', 'E', 'M', 'O', 'N', '?', MP_PROTOCOL_VERSION & 0xFF, MP_PROTOCOL_VERSION >> 8};
+    int one = 1;
 
     MPNet_Init();
-    if (sListen != MP_BADSOCK)
-        return 0;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    if (sLanSock == MP_BADSOCK)
     {
-        memset(&sSlots[i], 0, sizeof(sSlots[i]));
-        sSlots[i].conn.sock = MP_BADSOCK;
-    }
-
-    // Prefer a dual stack IPv6 socket, fall back to IPv4
-    sListen = socket(AF_INET6, SOCK_STREAM, 0);
-    if (sListen != MP_BADSOCK)
-    {
-        int zero = 0;
-        setsockopt(sListen, SOL_SOCKET, SO_REUSEADDR, (const char *)&one, sizeof(one));
-        setsockopt(sListen, IPPROTO_IPV6, IPV6_V6ONLY, (const char *)&zero, sizeof(zero));
-        memset(&addr6, 0, sizeof(addr6));
-        addr6.sin6_family = AF_INET6;
-        addr6.sin6_addr = in6addr_any;
-        addr6.sin6_port = htons((uint16_t)port);
-        if (bind(sListen, (struct sockaddr *)&addr6, sizeof(addr6)) != 0)
-        {
-            mp_closesock(sListen);
-            sListen = MP_BADSOCK;
-        }
-    }
-    if (sListen == MP_BADSOCK)
-    {
-        sListen = socket(AF_INET, SOCK_STREAM, 0);
-        if (sListen == MP_BADSOCK)
-            return -1;
-        setsockopt(sListen, SOL_SOCKET, SO_REUSEADDR, (const char *)&one, sizeof(one));
-        memset(&addr4, 0, sizeof(addr4));
-        addr4.sin_family = AF_INET;
-        addr4.sin_addr.s_addr = htonl(INADDR_ANY);
-        addr4.sin_port = htons((uint16_t)port);
-        if (bind(sListen, (struct sockaddr *)&addr4, sizeof(addr4)) != 0)
-        {
-            snprintf(sLastError, sizeof(sLastError), "port %d is already in use", port);
-            mp_closesock(sListen);
-            sListen = MP_BADSOCK;
-            return -1;
-        }
-    }
-    if (listen(sListen, 8) != 0)
-    {
-        mp_closesock(sListen);
-        sListen = MP_BADSOCK;
-        return -1;
-    }
-    SetNonBlocking(sListen);
-    MPNet_Log("server listening on port %d (up to %d players)", port, MP_MAX_PLAYERS);
-    return 0;
-}
-
-void MPServer_Stop(void)
-{
-    int i;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-    {
-        Conn_Reset(&sSlots[i].conn);
-        free(sSlots[i].conn.send);
-        free(sSlots[i].gfx);
-        memset(&sSlots[i], 0, sizeof(sSlots[i]));
-        sSlots[i].conn.sock = MP_BADSOCK;
-    }
-    if (sListen != MP_BADSOCK)
-        mp_closesock(sListen);
-    sListen = MP_BADSOCK;
-}
-
-static void Srv_SendTo(int id, uint8_t type, const void *data, uint16_t len)
-{
-    if (sSlots[id].used)
-        Conn_Queue(&sSlots[id].conn, type, data, len);
-}
-
-// Sends "u8 fromId + data" to everyone except `except`
-static void Srv_BroadcastWithId(int except, uint8_t type, uint8_t fromId, const void *data, uint16_t len)
-{
-    int i;
-    sSrvBuf[0] = fromId;
-    memcpy(sSrvBuf + 1, data, len);
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (i != except && sSlots[i].used && sSlots[i].helloDone)
-            Srv_SendTo(i, type, sSrvBuf, (uint16_t)(len + 1));
-}
-
-static void Srv_Drop(int id)
-{
-    uint8_t b = (uint8_t)id;
-    int wasJoined = sSlots[id].helloDone;
-    MPNet_Log("player %d left", id);
-    Conn_Reset(&sSlots[id].conn);
-    free(sSlots[id].gfx);
-    sSlots[id].gfx = NULL;
-    sSlots[id].gfxLen = 0;
-    sSlots[id].used = 0;
-    sSlots[id].helloDone = 0;
-    sSlots[id].hasState = 0;
-    if (wasJoined)
-    {
-        int i;
-        for (i = 0; i < MP_MAX_PLAYERS; i++)
-            if (sSlots[i].used && sSlots[i].helloDone)
-                Srv_SendTo(i, MPMSG_S_PLAYER_LEAVE, &b, 1);
-    }
-}
-
-static void Srv_HandleMessage(int id, uint8_t type, uint8_t *data, uint16_t len)
-{
-    struct MpServerSlot *slot = &sSlots[id];
-    int i;
-
-    switch (type)
-    {
-    case MPMSG_C_HELLO:
-    case MPMSG_C_INFO:
-        if (len < MP_HELLO_SIZE)
+        sLanSock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sLanSock == MP_BADSOCK)
             return;
-        if (type == MPMSG_C_HELLO)
+        setsockopt(sLanSock, SOL_SOCKET, SO_BROADCAST, (const char *)&one, sizeof(one));
+        MPSock_SetNonBlocking(sLanSock);
+    }
+    sLanCount = 0;
+    LanSendTo(0xFFFFFFFF, probe, sizeof(probe));       // limited broadcast
+    LanSendTo(0x7F000001, probe, sizeof(probe));       // a game hosting on this same PC
+
+    // Directed broadcast on every network adapter (Windows only sends the
+    // limited broadcast through one adapter)
+#ifdef _WIN32
+    {
+        ULONG size = 16 * 1024;
+        IP_ADAPTER_ADDRESSES *list = (IP_ADAPTER_ADDRESSES *)malloc(size);
+        if (list && GetAdaptersAddresses(AF_INET, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, NULL, list, &size) == NO_ERROR)
         {
-            uint16_t ver = data[0] | (data[1] << 8);
-            uint8_t welcome[2];
-            if (ver != MP_PROTOCOL_VERSION)
+            IP_ADAPTER_ADDRESSES *a;
+            for (a = list; a; a = a->Next)
             {
-                uint8_t reason = MP_REJECT_VERSION;
-                Srv_SendTo(id, MPMSG_S_REJECT, &reason, 1);
-                Conn_Flush(&slot->conn);
-                Srv_Drop(id);
-                return;
-            }
-            welcome[0] = (uint8_t)id;
-            welcome[1] = MP_MAX_PLAYERS;
-            Srv_SendTo(id, MPMSG_S_WELCOME, welcome, 2);
-            // Tell the newcomer about everyone already here
-            for (i = 0; i < MP_MAX_PLAYERS; i++)
-            {
-                if (i == id || !sSlots[i].used || !sSlots[i].helloDone)
+                IP_ADAPTER_UNICAST_ADDRESS *u;
+                if (a->OperStatus != IfOperStatusUp)
                     continue;
-                sSrvBuf[0] = (uint8_t)i;
-                memcpy(sSrvBuf + 1, sSlots[i].hello, MP_HELLO_SIZE);
-                Srv_SendTo(id, MPMSG_S_PLAYER_INFO, sSrvBuf, MP_HELLO_SIZE + 1);
-                if (sSlots[i].gfx)
+                for (u = a->FirstUnicastAddress; u; u = u->Next)
                 {
-                    sSrvBuf[0] = (uint8_t)i;
-                    memcpy(sSrvBuf + 1, sSlots[i].gfx, sSlots[i].gfxLen);
-                    Srv_SendTo(id, MPMSG_S_CUSTOM_GFX, sSrvBuf, (uint16_t)(sSlots[i].gfxLen + 1));
-                }
-                if (sSlots[i].hasState)
-                {
-                    sSrvBuf[0] = (uint8_t)i;
-                    memcpy(sSrvBuf + 1, sSlots[i].state, MP_WIRESTATE_SIZE);
-                    Srv_SendTo(id, MPMSG_S_STATE, sSrvBuf, MP_WIRESTATE_SIZE + 1);
+                    struct sockaddr_in *sin = (struct sockaddr_in *)u->Address.lpSockaddr;
+                    uint32_t ip, mask;
+                    if (sin->sin_family != AF_INET || u->OnLinkPrefixLength == 0 || u->OnLinkPrefixLength > 30)
+                        continue;
+                    ip = ntohl(sin->sin_addr.s_addr);
+                    mask = 0xFFFFFFFFu << (32 - u->OnLinkPrefixLength);
+                    LanSendTo(ip | ~mask, probe, sizeof(probe));
                 }
             }
-            slot->helloDone = 1;
-            MPNet_Log("player %d joined", id);
         }
-        if (!slot->helloDone)
-            return;
-        memcpy(slot->hello, data, MP_HELLO_SIZE);
-        Srv_BroadcastWithId(id, MPMSG_S_PLAYER_INFO, (uint8_t)id, slot->hello, MP_HELLO_SIZE);
-        break;
-    case MPMSG_C_STATE:
-        if (!slot->helloDone || len < MP_WIRESTATE_SIZE)
-            return;
-        memcpy(slot->state, data, MP_WIRESTATE_SIZE);
-        slot->hasState = 1;
-        Srv_BroadcastWithId(id, MPMSG_S_STATE, (uint8_t)id, data, MP_WIRESTATE_SIZE);
-        break;
-    case MPMSG_C_CUSTOM_GFX:
-        if (!slot->helloDone || len == 0 || len > MP_MAX_MSG - 8)
-            return;
-        free(slot->gfx);
-        slot->gfx = (uint8_t *)malloc(len);
-        memcpy(slot->gfx, data, len);
-        slot->gfxLen = len;
-        Srv_BroadcastWithId(id, MPMSG_S_CUSTOM_GFX, (uint8_t)id, data, len);
-        break;
-    case MPMSG_C_RELAY:
+        free(list);
+    }
+#else
     {
-        uint8_t target;
-        if (!slot->helloDone || len < 2)
-            return;
-        target = data[0];
-        if (target >= MP_MAX_PLAYERS || !sSlots[target].used || !sSlots[target].helloDone)
-            return;
-        sSrvBuf[0] = (uint8_t)id;
-        memcpy(sSrvBuf + 1, data + 1, len - 1);
-        Srv_SendTo(target, MPMSG_S_RELAY, sSrvBuf, len);
-        break;
+        struct ifaddrs *ifs = NULL, *it;
+        if (getifaddrs(&ifs) == 0)
+        {
+            for (it = ifs; it; it = it->ifa_next)
+            {
+                if (!it->ifa_addr || it->ifa_addr->sa_family != AF_INET || !(it->ifa_flags & IFF_BROADCAST) || !it->ifa_broadaddr)
+                    continue;
+                LanSendTo(ntohl(((struct sockaddr_in *)it->ifa_broadaddr)->sin_addr.s_addr), probe, sizeof(probe));
+            }
+            freeifaddrs(ifs);
+        }
     }
-    case MPMSG_C_PING:
-        Srv_SendTo(id, MPMSG_S_PONG, data, len);
-        break;
-    }
+#endif
 }
 
-void MPServer_Poll(void)
+static void LanAddRoom(const char *host, int port, const char *name, uint8_t players, uint8_t maxPlayers, uint8_t flags, uint16_t version)
 {
     int i;
-    uint8_t type;
-    uint16_t len;
-
-    if (sListen == MP_BADSOCK)
+    struct MpLanRoom *r;
+    for (i = 0; i < sLanCount; i++)
+    {
+        // Same game seen through two adapters (or loopback + LAN address)
+        if (strcmp(sLanRooms[i].name, name) == 0 && sLanRooms[i].port == port)
+        {
+            if (strcmp(host, "127.0.0.1") == 0)
+                snprintf(sLanRooms[i].host, sizeof(sLanRooms[i].host), "%s", host);
+            return;
+        }
+    }
+    if (sLanCount >= MP_LAN_MAX_GAMES)
         return;
+    r = &sLanRooms[sLanCount++];
+    snprintf(r->name, sizeof(r->name), "%s", name);
+    snprintf(r->host, sizeof(r->host), "%s", host);
+    r->port = port;
+    r->players = players;
+    r->maxPlayers = maxPlayers;
+    r->flags = flags;
+    r->version = version;
+}
 
-    // Accept new players
-    for (;;)
+int MPLan_Poll(struct MpLanRoom *out, int max)
+{
+    uint8_t buf[1500];
+    int guard, i;
+
+    for (guard = 0; sLanSock != MP_BADSOCK && guard < 64; guard++)
     {
-        mp_sock s = accept(sListen, NULL, NULL);
-        if (s == MP_BADSOCK)
+        struct sockaddr_in from;
+        mp_socklen fromLen = sizeof(from);
+        int n = (int)recvfrom(sLanSock, (char *)buf, sizeof(buf), 0, (struct sockaddr *)&from, &fromLen);
+        int pos, count, port;
+        char host[64];
+        if (n <= 0)
             break;
-        for (i = 0; i < MP_MAX_PLAYERS; i++)
-            if (!sSlots[i].used)
-                break;
-        SetNonBlocking(s);
-        if (i == MP_MAX_PLAYERS)
-        {
-            struct MpConn tmp;
-            uint8_t reason = MP_REJECT_FULL;
-            memset(&tmp, 0, sizeof(tmp));
-            tmp.sock = s;
-            Conn_Queue(&tmp, MPMSG_S_REJECT, &reason, 1);
-            Conn_Flush(&tmp);
-            mp_closesock(s);
-            free(tmp.send);
-            MPNet_Log("rejected a player: server full");
+        if (n < 12 || memcmp(buf, "MOEMON!", 7) != 0)
             continue;
+        port = buf[9] | (buf[10] << 8);
+        count = buf[11];
+        inet_ntop(AF_INET, &from.sin_addr, host, sizeof(host));
+        pos = 12;
+        for (i = 0; i < count; i++)
+        {
+            char name[MP_ROOM_NAME_MAX + 1];
+            int len;
+            if (pos >= n)
+                break;
+            len = buf[pos++];
+            if (len > MP_ROOM_NAME_MAX || pos + len + 5 > n)
+                break;
+            memcpy(name, buf + pos, len);
+            name[len] = 0;
+            pos += len;
+            LanAddRoom(host, port, name, buf[pos], buf[pos + 1], buf[pos + 2], buf[pos + 3] | (buf[pos + 4] << 8));
+            pos += 5;
         }
-        sSlots[i].used = 1;
-        sSlots[i].helloDone = 0;
-        sSlots[i].hasState = 0;
-        sSlots[i].conn.sock = s;
-        sSlots[i].conn.recvLen = 0;
-        sSlots[i].conn.sendLen = 0;
-        MPNet_Log("connection accepted into slot %d", i);
     }
+    for (i = 0; i < sLanCount && i < max; i++)
+        out[i] = sLanRooms[i];
+    return i;
+}
 
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-    {
-        int rc;
-        if (!sSlots[i].used)
-            continue;
-        if (Conn_Fill(&sSlots[i].conn) < 0)
-        {
-            while (sSlots[i].used && Conn_Pop(&sSlots[i].conn, &type, sMsgBuf, &len) == 1)
-                Srv_HandleMessage(i, type, sMsgBuf, len);
-            Srv_Drop(i);
-            continue;
-        }
-        for (;;)
-        {
-            rc = Conn_Pop(&sSlots[i].conn, &type, sMsgBuf, &len);
-            if (rc != 1)
-                break;
-            Srv_HandleMessage(i, type, sMsgBuf, len);
-            if (!sSlots[i].used)
-                break;
-        }
-        if (rc < 0 && sSlots[i].used)
-            Srv_Drop(i);
-    }
-
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (sSlots[i].used && Conn_Flush(&sSlots[i].conn) < 0)
-            Srv_Drop(i);
+void MPLan_StopSearch(void)
+{
+    if (sLanSock != MP_BADSOCK)
+        mp_closesock(sLanSock);
+    sLanSock = MP_BADSOCK;
+    sLanCount = 0;
 }

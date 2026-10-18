@@ -364,6 +364,10 @@ case KEY_##key:  keys |= key; break;
 
 static u16 keys;
 
+// Moemon Co-op: keyboard typing (src/platform/text_input.c)
+void Platform_TextInputEvent(const char *utf8);
+int Platform_TextInputKeyDown(int sym, int mod);
+
 void ProcessEvents(void)
 {
     SDL_Event event;
@@ -399,7 +403,12 @@ void ProcessEvents(void)
                 break;
             }
             break;
+        case SDL_TEXTINPUT:
+            Platform_TextInputEvent(event.text.text);
+            break;
         case SDL_KEYDOWN:
+            if (Platform_TextInputKeyDown(event.key.keysym.sym, event.key.keysym.mod))
+                break;
             switch (event.key.keysym.sym)
             {
             HANDLE_KEYDOWN(A_BUTTON)
@@ -731,6 +740,22 @@ static void TestHarnessStep(void)
         else if (strcmp(cmd, "shot") == 0)
         {
             Platform_SaveScreenshot(arg);
+        }
+        else if (strcmp(cmd, "type") == 0)
+        {
+            // type TEXT   (\n = Enter, \b = Backspace)
+            void Platform_QueueTypedText(const char *text);
+            char text[200];
+            const char *src = line + 5;
+            int n = 0;
+            while (*src && *src != '\n' && *src != '\r' && n < 199)
+            {
+                if (src[0] == '\\' && src[1] == 'n') { text[n++] = '\n'; src += 2; }
+                else if (src[0] == '\\' && src[1] == 'b') { text[n++] = '\b'; src += 2; }
+                else text[n++] = *src++;
+            }
+            text[n] = 0;
+            Platform_QueueTypedText(text);
         }
         else if (strcmp(cmd, "log") == 0)
         {

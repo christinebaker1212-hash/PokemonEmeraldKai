@@ -1,17 +1,15 @@
-// Moemon Emerald Kai Co-op: standalone relay server.
-// Run this on any PC (or a cheap VPS) that all players can reach, then set
-// "server = <this machine's address>" in everyone's moemon_coop.ini.
+// Moemon Emerald Kai Co-op: online lobby server.
+//
+// Run this once on an always-on computer that everyone can reach (for example
+// a free cloud VM, see tools/mp_server/DEPLOY.md). Players never need to know
+// its address: it is built into the game with  make ... LOBBY=<address>.
+// Hosts create a named room (with an optional password), friends pick it from
+// the list, and all game traffic is relayed here, so nobody has to open ports.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#ifdef _WIN32
-#include <windows.h>
-static void SleepMs(int ms) { Sleep(ms); }
-#else
-#include <unistd.h>
-static void SleepMs(int ms) { usleep(ms * 1000); }
-#endif
+#include <time.h>
 #include "../../src/mp/mp_net.h"
 
 static volatile int sRunning = 1;
@@ -20,39 +18,47 @@ static void OnSignal(int sig) { (void)sig; sRunning = 0; }
 int main(int argc, char **argv)
 {
     int port = MP_DEFAULT_PORT;
-    int i, lastCount = -1;
+    int lan = 0;
+    int i, lastPlayers = -1, lastRooms = -1;
 
     for (i = 1; i < argc; i++)
     {
         if ((strcmp(argv[i], "--port") == 0 || strcmp(argv[i], "-p") == 0) && i + 1 < argc)
             port = atoi(argv[++i]);
+        else if (strcmp(argv[i], "--lan") == 0)
+            lan = 1;
         else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
         {
-            printf("usage: %s [--port N]   (default port %d)\n", argv[0], MP_DEFAULT_PORT);
+            printf("usage: %s [--port N] [--lan]\n"
+                   "  --port N  TCP port to listen on (default %d)\n"
+                   "  --lan     also answer local network searches (UDP %d)\n",
+                   argv[0], MP_DEFAULT_PORT, MP_DISCOVERY_PORT);
             return 0;
         }
     }
     signal(SIGINT, OnSignal);
     signal(SIGTERM, OnSignal);
-    printf("Moemon Emerald Kai Co-op server (protocol %d)\n", MP_PROTOCOL_VERSION);
-    if (MPServer_Start(port) != 0)
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);
+#endif
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    printf("Moemon Emerald Kai Co-op lobby server (protocol %d)\n", MP_PROTOCOL_VERSION);
+    if (MPServer_Start(port, lan) != 0)
     {
-        printf("Could not start the server: %s\n", MPNet_LastError());
+        printf("Could not start: port %d is in use or not allowed.\n", port);
         return 1;
     }
-    printf("Players connect with  server = <this computer's IP>  and  port = %d\n", port);
-    printf("Internet play: forward TCP port %d on your router to this computer.\n", port);
-    printf("Press Ctrl+C to stop.\n");
+    printf("Listening on TCP port %d. Press Ctrl+C to stop.\n", port);
     while (sRunning)
     {
+        MPServer_Wait(50);
         MPServer_Poll();
-        if (MPServer_PlayerCount() != lastCount)
+        if (MPServer_PlayerCount() != lastPlayers || MPServer_RoomCount() != lastRooms)
         {
-            lastCount = MPServer_PlayerCount();
-            printf("Players online: %d/%d\n", lastCount, MP_MAX_PLAYERS);
-            fflush(stdout);
+            lastPlayers = MPServer_PlayerCount();
+            lastRooms = MPServer_RoomCount();
+            printf("Rooms: %d  Players: %d\n", lastRooms, lastPlayers);
         }
-        SleepMs(2);
     }
     MPServer_Stop();
     printf("Server stopped.\n");

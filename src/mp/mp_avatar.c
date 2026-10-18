@@ -254,6 +254,16 @@ const u8 *MP_Avatar_LocalCustomBlob(void)
     return sLocalHasCustomBlob ? sLocalCustomBlob : NULL;
 }
 
+u32 MP_Avatar_LocalCustomBlobSize(void)
+{
+    return sLocalHasCustomBlob ? MP_CUSTOM_BLOB_SIZE : 0;
+}
+
+bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size)
+{
+    return data != NULL && size == MP_CUSTOM_BLOB_SIZE;
+}
+
 static struct MpAppearance GetLocalAppearance(void)
 {
     struct MpAppearance app = gMpConfig.app;

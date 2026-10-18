@@ -1,24 +1,43 @@
-// Moemon Co-op: low level networking (TCP framing, client + relay server).
+// Moemon Co-op: low level networking (TCP framing, client, lobby + relay server).
 // This header is plain C and must not depend on the game's headers so that the
-// standalone server (tools/mp_server) can be built from the same sources.
+// standalone lobby server (tools/mp_server) can be built from the same sources.
 #ifndef GUARD_MP_NET_H
 #define GUARD_MP_NET_H
 
 #include <stdint.h>
 
-#define MP_PROTOCOL_VERSION 3
-#define MP_DEFAULT_PORT     27015
+#define MP_PROTOCOL_VERSION 4
+#define MP_DEFAULT_PORT     27015      // TCP: lobby server
+#define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
 #define MP_MAX_PLAYERS      4
 #define MP_MAX_MSG          8192
+
+// Lobby address built into the game. Players never see or type it.
+// Override at build time with  make ... LOBBY=my.server.com  (or LOBBY=1.2.3.4:27015),
+// or per player with  lobby = ...  in moemon_coop.ini.
+#ifndef MP_DEFAULT_LOBBY
+#define MP_DEFAULT_LOBBY ""
+#endif
+
+// ---------------------------------------------------------------------------
+// Connection flow
+//   1. Client connects to a lobby server (the online one, or a game hosting on the LAN).
+//   2. Lobby phase: LIST rooms, CREATE a room (name + password) or JOIN one.
+//   3. Once in a room, the client sends HELLO when its save file is loaded and
+//      plays as before. The server relays everything only within the room.
 
 // Message types, client -> server
 enum {
     MPMSG_C_HELLO = 1,        // MpHello
     MPMSG_C_STATE = 2,        // MpWireState
-    MPMSG_C_CUSTOM_GFX = 3,   // raw custom sprite blob
-    MPMSG_C_RELAY = 4,        // u8 targetId, then opaque peer payload
+    MPMSG_C_BLOB = 3,         // u8 kind, u32 totalLen, u32 offset, data (chunked big data, e.g. sprites)
+    MPMSG_C_RELAY = 4,        // u8 targetId (0xFF = everyone in the room), then opaque peer payload
     MPMSG_C_INFO = 5,         // MpHello (appearance/name update)
     MPMSG_C_PING = 6,
+    MPMSG_C_ROOM_LIST = 7,    // (nothing)
+    MPMSG_C_ROOM_CREATE = 8,  // u16 version, str name, u8 hasPassword, u8[32] key, u8 hidden
+    MPMSG_C_ROOM_JOIN = 9,    // u16 version, str name, u8[32] key
+    MPMSG_C_ROOM_LEAVE = 10,
 };
 
 // Message types, server -> client
@@ -28,19 +47,46 @@ enum {
     MPMSG_S_PLAYER_INFO = 22, // u8 id, MpHello
     MPMSG_S_PLAYER_LEAVE = 23,// u8 id
     MPMSG_S_STATE = 24,       // u8 id, MpWireState
-    MPMSG_S_CUSTOM_GFX = 25,  // u8 id, blob
+    MPMSG_S_BLOB = 25,        // u8 id, then the same payload as MPMSG_C_BLOB
     MPMSG_S_RELAY = 26,       // u8 fromId, opaque peer payload
     MPMSG_S_PONG = 27,
+    MPMSG_S_ROOM_LIST = 28,   // u8 count, then per room: str name, u8 players, u8 max, u8 flags, u16 version
+    MPMSG_S_ROOM_OK = 29,     // str name, u8 players, u8 created
+    MPMSG_S_ROOM_ERROR = 30,  // u8 reason
 };
+
+// "str" on the wire = u8 length + that many ASCII bytes (no terminator)
+#define MP_ROOM_NAME_MAX   16
+#define MP_ROOM_KEY_SIZE   32
+#define MP_ROOM_FLAG_LOCKED  1   // needs a password
 
 enum {
     MP_REJECT_FULL = 1,
     MP_REJECT_VERSION = 2,
+    MP_REJECT_NO_ROOM = 3,
 };
+
+enum {
+    MP_ROOM_ERR_NONE,
+    MP_ROOM_ERR_NAME_TAKEN,
+    MP_ROOM_ERR_NOT_FOUND,
+    MP_ROOM_ERR_BAD_PASSWORD,
+    MP_ROOM_ERR_FULL,
+    MP_ROOM_ERR_VERSION,
+    MP_ROOM_ERR_BAD_NAME,
+    MP_ROOM_ERR_SERVER_FULL,
+    MP_ROOM_ERR_SLOW_DOWN,
+};
+
+// Big data kinds (MPMSG_C_BLOB)
+#define MP_BLOB_SPRITES    0
+#define MP_BLOB_KINDS      1
+#define MP_BLOB_MAX_SIZE   (192 * 1024)
+#define MP_BLOB_CHUNK      (MP_MAX_MSG - 64)
 
 // Wire structs are serialized by hand (little endian), these are just sizes.
 #define MP_NAME_LEN        8   // game charset, EOS (0xFF) padded
-#define MP_HELLO_SIZE      (2 + MP_NAME_LEN + 4 + 8)
+#define MP_HELLO_SIZE      (2 + MP_NAME_LEN + 4 + 16)
 #define MP_WIRESTATE_SIZE  16
 
 // ---- Client ----
@@ -58,13 +104,36 @@ void MPNet_ClientSend(uint8_t type, const void *data, uint16_t len);
 int MPNet_ClientPoll(uint8_t *type, uint8_t *buf, uint16_t *len);
 void MPNet_ClientClose(void);
 const char *MPNet_LastError(void);
+// Splits "host:port" (or "[v6]:port"); port stays as given when absent.
+void MPNet_ParseAddress(const char *addr, char *host, int hostLen, int *port);
 
-// ---- Relay server (can run inside the game or standalone) ----
-int MPServer_Start(int port);
+// Room key: SHA-256 of "<lowercase room name>\n<password>". The server never sees passwords.
+void MPNet_RoomKey(const char *roomName, const char *password, uint8_t out[MP_ROOM_KEY_SIZE]);
+void MPNet_Sha256(const void *data, int len, uint8_t out[32]);
+int MPNet_IsValidRoomName(const char *name);
+
+// ---- Lobby + relay server (runs standalone, or inside a game hosting on the LAN) ----
+int MPServer_Start(int port, int lanDiscovery);
 void MPServer_Poll(void);
 void MPServer_Stop(void);
 int MPServer_IsRunning(void);
 int MPServer_PlayerCount(void);
+int MPServer_RoomCount(void);
+// Standalone server: wait up to `ms` for network activity (0 = just poll)
+void MPServer_Wait(int ms);
+
+// ---- Local network discovery (client side) ----
+#define MP_LAN_MAX_GAMES 8
+struct MpLanRoom {
+    char name[MP_ROOM_NAME_MAX + 1];
+    uint8_t players, maxPlayers, flags;
+    uint16_t version;
+    char host[64];
+    int port;
+};
+void MPLan_StartSearch(void);         // sends a broadcast probe; call again to refresh
+int MPLan_Poll(struct MpLanRoom *out, int max); // returns the rooms found so far
+void MPLan_StopSearch(void);
 
 // Logging hook (printf style). Defaults to stdout.
 void MPNet_Log(const char *fmt, ...);

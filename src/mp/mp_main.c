@@ -1,4 +1,4 @@
-// Moemon Co-op: client core (config, connection, player roster, local state)
+// Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,18 +18,21 @@
 #include "string_util.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
-#define RECONNECT_FRAMES (60 * 8)
 #define STATE_HEARTBEAT_FRAMES 30
+#define PING_FRAMES (60 * 5)
+#define CONNECT_TIMEOUT_FRAMES (60 * 6)
+#define RECONNECT_FRAMES (60 * 3)
+
+_Static_assert(MP_BLOB_KINDS == ARRAY_COUNT(((struct MpPlayer *)0)->blobBuf), "update MpPlayer blob arrays");
 
 struct MpConfig gMpConfig;
 struct MpPlayer gMpPlayers[MP_MAX_PLAYERS];
 s8 gMpLocalId = -1;
 
 static bool8 sInitDone;
-static bool8 sWantConnect;
 static bool8 sHelloSent;
-static u32 sReconnectTimer;
 static u32 sHeartbeat;
+static u32 sPingTimer;
 static struct MpState sLastSentState;
 static u16 sStateSeq;
 static u8 sEmoteCounter;
@@ -38,45 +41,115 @@ static char sStatus[96] = "OFFLINE";
 static u8 sMsgBuf[MP_MAX_MSG + 8];
 
 // ---------------------------------------------------------------------------
+// Lobby session
+
+enum {
+    REQ_NONE,
+    REQ_CREATE,
+    REQ_JOIN,
+};
+
+static struct
+{
+    u8 state;                 // MP_LOBBY_*
+    u8 error;                 // MP_LOBBY_ERR_*
+    char host[128];
+    int port;
+    bool8 isLocal;            // our own LAN server
+    u32 timer;
+    // room we are in (or asking for)
+    u8 request;
+    char room[MP_ROOM_NAME_MAX + 1];
+    u8 key[MP_ROOM_KEY_SIZE];
+    bool8 locked;
+    bool8 hidden;
+    bool8 wantRoom;           // stay in this room: rejoin after a dropped connection
+    bool8 reconnecting;
+    // room list
+    struct MpLanRoom list[MP_LIST_MAX];
+    u8 listCount;
+    bool8 listReady;
+} sLobby;
+
+// ---------------------------------------------------------------------------
 // Text helpers (ASCII <-> game charset)
+
+static u8 AsciiCharToGame(char c)
+{
+    if (c >= 'A' && c <= 'Z') return CHAR_A + (c - 'A');
+    if (c >= 'a' && c <= 'z') return CHAR_a + (c - 'a');
+    if (c >= '0' && c <= '9') return CHAR_0 + (c - '0');
+    switch (c)
+    {
+    case ' ': return CHAR_SPACE;
+    case '!': return CHAR_EXCL_MARK;
+    case '?': return CHAR_QUESTION_MARK;
+    case '.': return CHAR_PERIOD;
+    case '-': return CHAR_HYPHEN;
+    case '/': return CHAR_SLASH;
+    case ',': return CHAR_COMMA;
+    case ':': return CHAR_COLON;
+    case '\'': return CHAR_SGL_QUOTE_RIGHT;
+    case '(': return CHAR_LEFT_PAREN;
+    case ')': return CHAR_RIGHT_PAREN;
+    case '&': return CHAR_AMPERSAND;
+    case '+': return CHAR_PLUS;
+    case '=': return CHAR_EQUALS;
+    case '%': return CHAR_PERCENT;
+    case '"': return CHAR_DBL_QUOTE_LEFT;
+    case '\n': return CHAR_NEWLINE;
+    }
+    return 0xFF;
+}
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen)
 {
     int i, n = 0;
     for (i = 0; src[i] && n < maxLen; i++)
     {
-        char c = src[i];
-        u8 g;
-        if (c >= 'A' && c <= 'Z') g = CHAR_A + (c - 'A');
-        else if (c >= 'a' && c <= 'z') g = CHAR_a + (c - 'a');
-        else if (c >= '0' && c <= '9') g = CHAR_0 + (c - '0');
-        else if (c == ' ') g = CHAR_SPACE;
-        else if (c == '!') g = CHAR_EXCL_MARK;
-        else if (c == '?') g = CHAR_QUESTION_MARK;
-        else if (c == '.') g = CHAR_PERIOD;
-        else if (c == '-') g = CHAR_HYPHEN;
-        else continue;
-        dst[n++] = g;
+        u8 g = AsciiCharToGame(src[i]);
+        if (g != 0xFF)
+            dst[n++] = g;
     }
     dst[n] = EOS;
+}
+
+static char GameCharToAscii(u8 g)
+{
+    if (g >= CHAR_A && g <= CHAR_Z) return 'A' + (g - CHAR_A);
+    if (g >= CHAR_a && g <= CHAR_z) return 'a' + (g - CHAR_a);
+    if (g >= CHAR_0 && g <= CHAR_9) return '0' + (g - CHAR_0);
+    switch (g)
+    {
+    case CHAR_EXCL_MARK: return '!';
+    case CHAR_QUESTION_MARK: return '?';
+    case CHAR_PERIOD: return '.';
+    case CHAR_HYPHEN: return '-';
+    case CHAR_SLASH: return '/';
+    case CHAR_COMMA: return ',';
+    case CHAR_COLON: return ':';
+    case CHAR_SGL_QUOTE_RIGHT: case CHAR_SGL_QUOTE_LEFT: return '\'';
+    case CHAR_LEFT_PAREN: return '(';
+    case CHAR_RIGHT_PAREN: return ')';
+    case CHAR_AMPERSAND: return '&';
+    case CHAR_PLUS: return '+';
+    case CHAR_EQUALS: return '=';
+    case CHAR_PERCENT: return '%';
+    case CHAR_DBL_QUOTE_LEFT: case CHAR_DBL_QUOTE_RIGHT: return '"';
+    }
+    return ' ';
 }
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen)
 {
     int i;
     for (i = 0; i < maxLen && src[i] != EOS; i++)
-    {
-        u8 g = src[i];
-        if (g >= CHAR_A && g <= CHAR_Z) dst[i] = 'A' + (g - CHAR_A);
-        else if (g >= CHAR_a && g <= CHAR_z) dst[i] = 'a' + (g - CHAR_a);
-        else if (g >= CHAR_0 && g <= CHAR_9) dst[i] = '0' + (g - CHAR_0);
-        else dst[i] = ' ';
-    }
+        dst[i] = GameCharToAscii(src[i]);
     dst[i] = 0;
 }
 
 // ---------------------------------------------------------------------------
-// Config file
+// Config file (appearance and preferences; nothing network related is needed)
 
 static char *Trim(char *s)
 {
@@ -102,56 +175,23 @@ static int ParseChoice(const char *v, const char *(*nameFn)(u8), int count)
     return atoi(v) < count ? atoi(v) : 0;
 }
 
-static void WriteDefaultConfig(void)
+static const char *ConfigPath(void)
 {
-    FILE *f = fopen(CONFIG_FILE, "w");
-    if (!f)
-        return;
-    fprintf(f,
-        "; Moemon Emerald Kai Co-op settings\n"
-        "; enabled = 1 to play online\n"
-        "enabled = 1\n"
-        "; host = 1 makes this game run the server too (other players connect to your IP)\n"
-        "host = 0\n"
-        "; address of the server (the host's IP or domain name)\n"
-        "server = 127.0.0.1\n"
-        "port = %d\n"
-        "; name shown above your head (empty = your trainer name)\n"
-        "name =\n"
-        "; sprite = default, brendan, may, rs_brendan, rs_may or custom\n"
-        "sprite = default\n"
-        "; custom_sprite = path to a 144x32 or 288x32 PNG (used when sprite = custom)\n"
-        "custom_sprite =\n"
-        "; skin = default, porcelain, light, tan, brown, dark, deep\n"
-        "skin = default\n"
-        "; outfit / accent = default, red, blue, green, yellow, purple, pink, orange, black, white, teal\n"
-        "outfit = default\n"
-        "accent = default\n"
-        "; how many tiles a player in Trainer Mode can see\n"
-        "trainer_range = 4\n",
-        MP_DEFAULT_PORT);
-    fclose(f);
+    return getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : CONFIG_FILE;
 }
 
 static void LoadConfig(void)
 {
     FILE *f;
     char line[512];
-    const char *path = getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : CONFIG_FILE;
 
     memset(&gMpConfig, 0, sizeof(gMpConfig));
     gMpConfig.enabled = TRUE;
-    gMpConfig.port = MP_DEFAULT_PORT;
     gMpConfig.trainerRange = 4;
-    strcpy(gMpConfig.server, "127.0.0.1");
 
-    f = fopen(path, "r");
+    f = fopen(ConfigPath(), "r");
     if (!f)
-    {
-        if (!getenv("MOEMON_COOP_CONFIG"))
-            WriteDefaultConfig();
         return;
-    }
     while (fgets(line, sizeof(line), f))
     {
         char *eq, *key, *val;
@@ -163,11 +203,11 @@ static void LoadConfig(void)
         *eq = 0;
         key = Trim(line);
         val = Trim(eq + 1);
-        if (strcmp(key, "enabled") == 0) gMpConfig.enabled = atoi(val) != 0;
-        else if (strcmp(key, "host") == 0) gMpConfig.host = atoi(val) != 0;
-        else if (strcmp(key, "server") == 0) snprintf(gMpConfig.server, sizeof(gMpConfig.server), "%s", val);
-        else if (strcmp(key, "port") == 0) gMpConfig.port = atoi(val) > 0 ? atoi(val) : MP_DEFAULT_PORT;
+        if (strcmp(key, "lobby") == 0) snprintf(gMpConfig.lobby, sizeof(gMpConfig.lobby), "%s", val);
         else if (strcmp(key, "name") == 0) snprintf(gMpConfig.name, sizeof(gMpConfig.name), "%s", val);
+        else if (strcmp(key, "last_room") == 0) snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", val);
+        else if (strcmp(key, "last_room_key") == 0 && strlen(val) == MP_ROOM_KEY_SIZE * 2) snprintf(gMpConfig.lastRoomKey, sizeof(gMpConfig.lastRoomKey), "%s", val);
+        else if (strcmp(key, "last_host_name") == 0) snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", val);
         else if (strcmp(key, "sprite") == 0) gMpConfig.app.base = ParseChoice(val, MP_Avatar_BaseName, MP_BASE_COUNT);
         else if (strcmp(key, "custom_sprite") == 0) snprintf(gMpConfig.customSprite, sizeof(gMpConfig.customSprite), "%s", val);
         else if (strcmp(key, "skin") == 0) gMpConfig.app.skin = ParseChoice(val, MP_Avatar_SkinName, MP_SKIN_COUNT);
@@ -194,27 +234,47 @@ void MP_SaveConfig(void)
 {
     FILE *f;
     char sprite[32], skin[32], outfit[32], accent[32];
-    const char *path = getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : CONFIG_FILE;
 
     LowerName(sprite, MP_Avatar_BaseName(gMpConfig.app.base));
     LowerName(skin, MP_Avatar_SkinName(gMpConfig.app.skin));
     LowerName(outfit, MP_Avatar_ColorName(gMpConfig.app.outfit));
     LowerName(accent, MP_Avatar_ColorName(gMpConfig.app.accent));
-    f = fopen(path, "w");
+    f = fopen(ConfigPath(), "w");
     if (!f)
         return;
     fprintf(f,
-        "; Moemon Emerald Kai Co-op settings\n"
-        "enabled = %d\nhost = %d\nserver = %s\nport = %d\nname = %s\n"
+        "; Moemon Emerald Kai Co-op settings. The game writes this file itself;\n"
+        "; everything here can be changed in game (START > CO-OP).\n"
+        "name = %s\n"
         "; sprite = default, brendan, may, rs_brendan, rs_may or custom\n"
         "sprite = %s\ncustom_sprite = %s\n"
         "; skin = default, porcelain, light, tan, brown, dark, deep\n"
         "skin = %s\n"
         "; outfit / accent = default, red, blue, green, yellow, purple, pink, orange, black, white, teal\n"
-        "outfit = %s\naccent = %s\ntrainer_range = %d\n",
-        gMpConfig.enabled, gMpConfig.host, gMpConfig.server, gMpConfig.port, gMpConfig.name,
-        sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange);
+        "outfit = %s\naccent = %s\n"
+        "; how many tiles a player holding the BATTLE FLAG can see\n"
+        "trainer_range = %d\n"
+        "; remembered for the next session\n"
+        "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
+        "; advanced: use a different online lobby server (address or address:port)\n"
+        "lobby = %s\n",
+        gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
     fclose(f);
+}
+
+const char *MP_OnlineLobbyAddress(void)
+{
+    if (getenv("MOEMON_LOBBY"))
+        return getenv("MOEMON_LOBBY");
+    if (gMpConfig.lobby[0])
+        return gMpConfig.lobby;
+    return MP_DEFAULT_LOBBY;
+}
+
+bool8 MP_HasOnlineLobby(void)
+{
+    return MP_OnlineLobbyAddress()[0] != 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -243,20 +303,28 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->seq = GetU16(p + 14);
 }
 
+#define APPEARANCE_SIZE 16
+
 static void PackAppearance(const struct MpAppearance *a, u8 *p)
 {
+    memset(p, 0, APPEARANCE_SIZE);
     p[0] = a->base; p[1] = a->skin; p[2] = a->outfit; p[3] = a->accent;
-    p[4] = a->gender; p[5] = a->hasCustom; p[6] = 0; p[7] = 0;
+    p[4] = a->gender; p[5] = a->hasCustom;
+    PutU16(p + 6, a->gfxId);
+    p[8] = a->trainerPic;
 }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
 {
+    memset(a, 0, sizeof(*a));
     a->base = p[0] < MP_BASE_COUNT ? p[0] : 0;
     a->skin = p[1] < MP_SKIN_COUNT ? p[1] : 0;
     a->outfit = p[2] < MP_COLOR_COUNT ? p[2] : 0;
     a->accent = p[3] < MP_COLOR_COUNT ? p[3] : 0;
     a->gender = p[4] ? FEMALE : MALE;
     a->hasCustom = p[5];
+    a->gfxId = GetU16(p + 6);
+    a->trainerPic = p[8];
 }
 
 static void GetLocalName(u8 *dst)
@@ -416,20 +484,45 @@ static void SendLocalState(bool8 force)
     sLastSentState = s;
 }
 
+// Sends big data (custom sprites) in chunks
+void MP_SendBlob(u8 kind, const void *data, u32 len)
+{
+    static u8 chunk[MP_BLOB_CHUNK + 16];
+    u32 off;
+    if (!MP_IsConnected() || len == 0 || len > MP_BLOB_MAX_SIZE)
+        return;
+    for (off = 0; off < len; off += MP_BLOB_CHUNK)
+    {
+        u32 n = len - off;
+        if (n > MP_BLOB_CHUNK)
+            n = MP_BLOB_CHUNK;
+        chunk[0] = kind;
+        PutU32(chunk + 1, len);
+        PutU32(chunk + 5, off);
+        memcpy(chunk + 9, (const u8 *)data + off, n);
+        MPNet_ClientSend(MPMSG_C_BLOB, chunk, n + 9);
+    }
+}
+
+static void SendLocalBlobs(void)
+{
+    if (MP_Avatar_LocalCustomBlob())
+        MP_SendBlob(MP_BLOB_SPRITES, MP_Avatar_LocalCustomBlob(), MP_Avatar_LocalCustomBlobSize());
+}
+
 void MP_SendAppearance(void)
 {
     u8 hello[MP_HELLO_SIZE];
-    if (MPNet_ClientStatus() != MPNET_CONNECTED || gMpLocalId < 0)
+    if (!MP_IsConnected())
         return;
-    if (MP_Avatar_LocalCustomBlob())
-        MPNet_ClientSend(MPMSG_C_CUSTOM_GFX, MP_Avatar_LocalCustomBlob(), MP_CUSTOM_BLOB_SIZE);
+    SendLocalBlobs();
     BuildHello(hello);
     MPNet_ClientSend(MPMSG_C_INFO, hello, sizeof(hello));
 }
 
 void MP_SendRelay(u8 target, const void *data, u16 len)
 {
-    u8 *buf = sMsgBuf;
+    static u8 buf[MP_MAX_MSG + 8];
     if (MPNet_ClientStatus() != MPNET_CONNECTED || len + 1 > MP_MAX_MSG)
         return;
     buf[0] = target;
@@ -442,7 +535,10 @@ void MP_SendRelay(u8 target, const void *data, u16 len)
 
 static void ClearPlayer(u8 id)
 {
+    u8 k;
     free(gMpPlayers[id].customGfx);
+    for (k = 0; k < MP_BLOB_KINDS; k++)
+        free(gMpPlayers[id].blobBuf[k]);
     memset(&gMpPlayers[id], 0, sizeof(gMpPlayers[id]));
 }
 
@@ -462,6 +558,7 @@ static void ResetRoster(void)
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         HandlePlayerLeft(i);
     gMpLocalId = -1;
+    sHelloSent = FALSE;
 }
 
 u8 MP_ConnectedCount(void)
@@ -483,26 +580,79 @@ const char *MP_StatusText(void)
     return sStatus;
 }
 
+static void OnBlobComplete(u8 id, u8 kind)
+{
+    struct MpPlayer *p = &gMpPlayers[id];
+    if (kind == MP_BLOB_SPRITES)
+    {
+        if (!MP_Avatar_IsValidBlob(p->blobBuf[kind], p->blobTotal[kind]))
+            return;
+        free(p->customGfx);
+        p->customGfx = p->blobBuf[kind];
+        p->customGfxSize = p->blobTotal[kind];
+        p->blobBuf[kind] = NULL;
+        p->appearanceVersion++;
+        MP_Overworld_OnAppearanceChanged(id);
+    }
+}
+
+static void HandleBlobChunk(const u8 *data, u16 len)
+{
+    u8 id, kind;
+    u32 total, off, n;
+    struct MpPlayer *p;
+
+    if (len < 10)
+        return;
+    id = data[0];
+    kind = data[1];
+    total = GetU32(data + 2);
+    off = GetU32(data + 6);
+    n = len - 10;
+    if (id >= MP_MAX_PLAYERS || id == gMpLocalId || kind >= MP_BLOB_KINDS
+     || total == 0 || total > MP_BLOB_MAX_SIZE || off + n > total)
+        return;
+    p = &gMpPlayers[id];
+    if (off == 0)
+    {
+        free(p->blobBuf[kind]);
+        p->blobBuf[kind] = malloc(total);
+        p->blobTotal[kind] = total;
+        p->blobHave[kind] = 0;
+    }
+    if (!p->blobBuf[kind] || p->blobTotal[kind] != total || p->blobHave[kind] != off)
+        return;
+    memcpy(p->blobBuf[kind] + off, data + 10, n);
+    p->blobHave[kind] += n;
+    if (p->blobHave[kind] == total)
+        OnBlobComplete(id, kind);
+}
+
+static void Lobby_OnMessage(u8 type, const u8 *data, u16 len);
+
 static void HandleMessage(u8 type, u8 *data, u16 len)
 {
     u8 id;
     switch (type)
     {
+    case MPMSG_S_ROOM_LIST:
+    case MPMSG_S_ROOM_OK:
+    case MPMSG_S_ROOM_ERROR:
+        Lobby_OnMessage(type, data, len);
+        break;
     case MPMSG_S_WELCOME:
         if (len < 1)
             return;
         gMpLocalId = data[0];
         snprintf(sStatus, sizeof(sStatus), "ONLINE (PLAYER %d)", gMpLocalId + 1);
-        MPNet_Log("joined server as player %d", gMpLocalId + 1);
-        if (MP_Avatar_LocalCustomBlob())
-            MPNet_ClientSend(MPMSG_C_CUSTOM_GFX, MP_Avatar_LocalCustomBlob(), MP_CUSTOM_BLOB_SIZE);
+        MPNet_Log("joined \"%s\" as player %d", sLobby.room, gMpLocalId + 1);
+        SendLocalBlobs();
         SendLocalState(TRUE);
         break;
     case MPMSG_S_REJECT:
-        snprintf(sStatus, sizeof(sStatus), (len && data[0] == MP_REJECT_FULL) ? "SERVER FULL" : "VERSION MISMATCH");
-        MPNet_Log("server rejected us: %s", sStatus);
-        MPNet_ClientClose();
-        sReconnectTimer = RECONNECT_FRAMES * 4;
+        MPNet_Log("server rejected us (%d)", len ? data[0] : 0);
+        if (len && data[0] == MP_REJECT_NO_ROOM)
+            sHelloSent = FALSE; // we'll say hello again after rejoining
         break;
     case MPMSG_S_PLAYER_INFO:
     {
@@ -553,25 +703,343 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         MP_Overworld_OnRemoteState(id, &old);
         break;
     }
-    case MPMSG_S_CUSTOM_GFX:
-        if (len < 1 + MP_CUSTOM_BLOB_SIZE || data[0] >= MP_MAX_PLAYERS || data[0] == gMpLocalId)
-            return;
-        id = data[0];
-        if (!gMpPlayers[id].customGfx)
-            gMpPlayers[id].customGfx = malloc(MP_CUSTOM_BLOB_SIZE);
-        memcpy(gMpPlayers[id].customGfx, data + 1, MP_CUSTOM_BLOB_SIZE);
-
-        gMpPlayers[id].present = TRUE;
-        gMpPlayers[id].appearanceVersion++;
-        MP_Overworld_OnAppearanceChanged(id);
+    case MPMSG_S_BLOB:
+        HandleBlobChunk(data, len);
         break;
     case MPMSG_S_RELAY:
         if (len < 2 || data[0] >= MP_MAX_PLAYERS)
             return;
-        if (data[1] >= MPR_LINK_PLAYER)
-            MP_Battle_OnRelay(data[0], data + 1, len - 1);
-        else
-            MP_Trainer_OnRelay(data[0], data + 1, len - 1);
+        MP_DispatchRelay(data[0], data + 1, len - 1);
+        break;
+    }
+}
+
+// Routes peer messages to the module that owns the message id
+void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
+{
+    if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
+        MP_Battle_OnRelay(from, data, len);
+    else if (data[0] < MPR_LINK_PLAYER)
+        MP_Trainer_OnRelay(from, data, len);
+}
+
+// ---------------------------------------------------------------------------
+// Lobby
+
+u8 MP_Lobby_State(void) { return sLobby.state; }
+u8 MP_Lobby_Error(void) { return sLobby.error; }
+const char *MP_Lobby_RoomName(void) { return sLobby.room; }
+bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
+bool8 MP_Lobby_InRoom(void) { return sLobby.state == MP_LOBBY_IN_ROOM; }
+
+static void SetError(u8 err)
+{
+    sLobby.error = err;
+    sLobby.state = MP_LOBBY_ERROR;
+    sLobby.request = REQ_NONE;
+}
+
+static void OpenConnection(void)
+{
+    MPNet_ClientClose();
+    ResetRoster();
+    sLobby.timer = 0;
+    if (MPNet_Connect(sLobby.host, sLobby.port) != 0)
+    {
+        MPNet_Log("%s", MPNet_LastError());
+        SetError(MP_LOBBY_ERR_UNREACHABLE);
+        return;
+    }
+    sLobby.state = MP_LOBBY_CONNECTING;
+    snprintf(sStatus, sizeof(sStatus), "CONNECTING...");
+}
+
+void MP_Lobby_Connect(const char *address, bool8 isLocal)
+{
+    char host[128];
+    int port = MP_DEFAULT_PORT;
+    MPNet_ParseAddress(address, host, sizeof(host), &port);
+    memset(&sLobby, 0, sizeof(sLobby));
+    snprintf(sLobby.host, sizeof(sLobby.host), "%s", host);
+    sLobby.port = port;
+    sLobby.isLocal = isLocal;
+    MPNet_Log("connecting to lobby %s:%d", host, port);
+    OpenConnection();
+}
+
+void MP_Lobby_Disconnect(void)
+{
+    if (MPNet_ClientStatus() != MPNET_DISCONNECTED && sLobby.state == MP_LOBBY_IN_ROOM)
+        MPNet_ClientSend(MPMSG_C_ROOM_LEAVE, NULL, 0);
+    MPNet_ClientPoll(&(u8){0}, sMsgBuf, &(u16){0}); // flush the leave message
+    MPNet_ClientClose();
+    ResetRoster();
+    memset(&sLobby, 0, sizeof(sLobby));
+    snprintf(sStatus, sizeof(sStatus), "OFFLINE");
+}
+
+void MP_Lobby_RequestList(void)
+{
+    sLobby.listReady = FALSE;
+    if (MPNet_ClientStatus() == MPNET_CONNECTED)
+        MPNet_ClientSend(MPMSG_C_ROOM_LIST, NULL, 0);
+}
+
+bool8 MP_Lobby_ListReady(void)
+{
+    return sLobby.listReady;
+}
+
+int MP_Lobby_GetList(struct MpLanRoom *out, int max)
+{
+    int i;
+    for (i = 0; i < sLobby.listCount && i < max; i++)
+        out[i] = sLobby.list[i];
+    return i;
+}
+
+static int PutStr(u8 *out, const char *s)
+{
+    int n = (int)strlen(s);
+    if (n > MP_ROOM_NAME_MAX)
+        n = MP_ROOM_NAME_MAX;
+    out[0] = (u8)n;
+    memcpy(out + 1, s, n);
+    return n + 1;
+}
+
+static void SendRoomRequest(void)
+{
+    u8 buf[64];
+    int n = 0;
+    PutU16(buf, MP_PROTOCOL_VERSION);
+    n = 2;
+    n += PutStr(buf + n, sLobby.room);
+    if (sLobby.request == REQ_CREATE)
+    {
+        buf[n++] = sLobby.locked;
+        memcpy(buf + n, sLobby.key, MP_ROOM_KEY_SIZE);
+        n += MP_ROOM_KEY_SIZE;
+        buf[n++] = sLobby.hidden;
+        MPNet_ClientSend(MPMSG_C_ROOM_CREATE, buf, n);
+    }
+    else
+    {
+        memcpy(buf + n, sLobby.key, MP_ROOM_KEY_SIZE);
+        n += MP_ROOM_KEY_SIZE;
+        MPNet_ClientSend(MPMSG_C_ROOM_JOIN, buf, n);
+    }
+    sLobby.timer = 0;
+}
+
+static void StartRequest(u8 req, const char *room, const char *password, bool8 hidden)
+{
+    snprintf(sLobby.room, sizeof(sLobby.room), "%s", room);
+    MPNet_RoomKey(room, password ? password : "", sLobby.key);
+    sLobby.locked = (password && password[0]) ? TRUE : FALSE;
+    sLobby.hidden = hidden;
+    sLobby.request = req;
+    sLobby.error = MP_LOBBY_ERR_NONE;
+    if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
+    {
+        if (MPNet_ClientStatus() != MPNET_CONNECTED)
+        {
+            OpenConnection(); // the request goes out once connected
+            return;
+        }
+        sLobby.state = MP_LOBBY_WAITING;
+        SendRoomRequest();
+    }
+}
+
+void MP_Lobby_CreateRoom(const char *room, const char *password, bool8 hidden)
+{
+    StartRequest(REQ_CREATE, room, password, hidden);
+}
+
+void MP_Lobby_JoinRoom(const char *room, const char *password)
+{
+    StartRequest(REQ_JOIN, room, password, FALSE);
+}
+
+// Rejoin a server from last time with the remembered key (no password needed)
+void MP_Lobby_JoinRoomWithKey(const char *room, const u8 *key)
+{
+    StartRequest(REQ_JOIN, room, "", FALSE);
+    memcpy(sLobby.key, key, MP_ROOM_KEY_SIZE);
+    if (sLobby.state == MP_LOBBY_WAITING)
+        SendRoomRequest(); // the first request went out with the wrong key; resend
+}
+
+const u8 *MP_Lobby_RoomKey(void)
+{
+    return sLobby.key;
+}
+
+static int GetStr(const u8 *data, u16 len, int *pos, char *out, int max)
+{
+    int n;
+    if (*pos >= len)
+        return 0;
+    n = data[(*pos)++];
+    if (n > max || *pos + n > len)
+        return 0;
+    memcpy(out, data + *pos, n);
+    out[n] = 0;
+    *pos += n;
+    return 1;
+}
+
+static void Lobby_OnMessage(u8 type, const u8 *data, u16 len)
+{
+    switch (type)
+    {
+    case MPMSG_S_ROOM_LIST:
+    {
+        int pos = 1, i, count;
+        if (len < 1)
+            return;
+        count = data[0];
+        sLobby.listCount = 0;
+        for (i = 0; i < count && sLobby.listCount < MP_LIST_MAX; i++)
+        {
+            struct MpLanRoom *r = &sLobby.list[sLobby.listCount];
+            memset(r, 0, sizeof(*r));
+            if (!GetStr(data, len, &pos, r->name, MP_ROOM_NAME_MAX) || pos + 5 > len)
+                break;
+            r->players = data[pos];
+            r->maxPlayers = data[pos + 1];
+            r->flags = data[pos + 2];
+            r->version = data[pos + 3] | (data[pos + 4] << 8);
+            pos += 5;
+            snprintf(r->host, sizeof(r->host), "%s", sLobby.host);
+            r->port = sLobby.port;
+            sLobby.listCount++;
+        }
+        sLobby.listReady = TRUE;
+        break;
+    }
+    case MPMSG_S_ROOM_OK:
+    {
+        int pos = 0;
+        char name[MP_ROOM_NAME_MAX + 1];
+        if (!GetStr(data, len, &pos, name, MP_ROOM_NAME_MAX))
+            return;
+        snprintf(sLobby.room, sizeof(sLobby.room), "%s", name); // server's spelling
+        sLobby.state = MP_LOBBY_IN_ROOM;
+        sLobby.request = REQ_NONE;
+        sLobby.wantRoom = TRUE;
+        sLobby.reconnecting = FALSE;
+        snprintf(sStatus, sizeof(sStatus), "IN %s", name);
+        snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", name);
+        break;
+    }
+    case MPMSG_S_ROOM_ERROR:
+    {
+        u8 reason = len ? data[0] : 0;
+        // Rejoining after a dropped connection, but the room closed meanwhile
+        // (everyone dropped, or the server restarted): open it again.
+        if (sLobby.reconnecting && sLobby.request == REQ_JOIN && reason == MP_ROOM_ERR_NOT_FOUND)
+        {
+            sLobby.request = REQ_CREATE;
+            SendRoomRequest();
+            return;
+        }
+        if (sLobby.reconnecting && sLobby.request == REQ_CREATE && reason == MP_ROOM_ERR_NAME_TAKEN)
+        {
+            sLobby.request = REQ_JOIN;
+            SendRoomRequest();
+            return;
+        }
+        switch (reason)
+        {
+        case MP_ROOM_ERR_NAME_TAKEN:   SetError(MP_LOBBY_ERR_NAME_TAKEN); break;
+        case MP_ROOM_ERR_NOT_FOUND:    SetError(MP_LOBBY_ERR_NOT_FOUND); break;
+        case MP_ROOM_ERR_BAD_PASSWORD: SetError(MP_LOBBY_ERR_BAD_PASSWORD); break;
+        case MP_ROOM_ERR_FULL:         SetError(MP_LOBBY_ERR_FULL); break;
+        case MP_ROOM_ERR_VERSION:      SetError(MP_LOBBY_ERR_VERSION); break;
+        case MP_ROOM_ERR_BAD_NAME:     SetError(MP_LOBBY_ERR_BAD_NAME); break;
+        case MP_ROOM_ERR_SLOW_DOWN:    SetError(MP_LOBBY_ERR_SLOW_DOWN); break;
+        default:                       SetError(MP_LOBBY_ERR_SERVER_FULL); break;
+        }
+        sLobby.wantRoom = FALSE;
+        sLobby.reconnecting = FALSE;
+        break;
+    }
+    }
+}
+
+// Runs the connection state machine once per frame
+static void Lobby_Update(void)
+{
+    int status = MPNet_ClientStatus();
+
+    switch (sLobby.state)
+    {
+    case MP_LOBBY_CONNECTING:
+        if (status == MPNET_CONNECTED)
+        {
+            sLobby.state = MP_LOBBY_READY;
+            snprintf(sStatus, sizeof(sStatus), "CONNECTED");
+            if (sLobby.request != REQ_NONE)
+            {
+                sLobby.state = MP_LOBBY_WAITING;
+                SendRoomRequest();
+            }
+        }
+        else if (status == MPNET_DISCONNECTED || ++sLobby.timer > CONNECT_TIMEOUT_FRAMES)
+        {
+            MPNet_ClientClose();
+            if (sLobby.wantRoom)
+            {
+                sLobby.state = MP_LOBBY_RECONNECT_WAIT;
+                sLobby.timer = 0;
+            }
+            else
+                SetError(MP_LOBBY_ERR_UNREACHABLE);
+        }
+        break;
+    case MP_LOBBY_WAITING:
+        if (status == MPNET_DISCONNECTED && sLobby.wantRoom)
+        {
+            sLobby.state = MP_LOBBY_RECONNECT_WAIT;
+            sLobby.timer = 0;
+        }
+        else if (status == MPNET_DISCONNECTED)
+            SetError(MP_LOBBY_ERR_UNREACHABLE);
+        else if (++sLobby.timer > CONNECT_TIMEOUT_FRAMES * 2)
+        {
+            MPNet_ClientClose();
+            SetError(MP_LOBBY_ERR_UNREACHABLE);
+        }
+        break;
+    case MP_LOBBY_READY:
+        if (status == MPNET_DISCONNECTED)
+            SetError(MP_LOBBY_ERR_UNREACHABLE);
+        break;
+    case MP_LOBBY_IN_ROOM:
+        if (status == MPNET_DISCONNECTED)
+        {
+            MPNet_Log("connection to the lobby lost, reconnecting");
+            ResetRoster();
+            snprintf(sStatus, sizeof(sStatus), "RECONNECTING...");
+            sLobby.state = MP_LOBBY_RECONNECT_WAIT;
+            sLobby.timer = 0;
+        }
+        break;
+    case MP_LOBBY_RECONNECT_WAIT:
+        if (++sLobby.timer >= RECONNECT_FRAMES)
+        {
+            sLobby.reconnecting = TRUE;
+            sLobby.request = REQ_JOIN;
+            OpenConnection();
+            if (sLobby.state == MP_LOBBY_ERROR) // could not even start: keep trying
+            {
+                sLobby.state = MP_LOBBY_RECONNECT_WAIT;
+                sLobby.timer = 0;
+            }
+            sLobby.reconnecting = TRUE;
+        }
         break;
     }
 }
@@ -586,28 +1054,7 @@ void MP_Init(void)
     LoadConfig();
     MPNet_Init();
     MP_Avatar_Init();
-    if (gMpConfig.enabled && gMpConfig.host)
-    {
-        if (MPServer_Start(gMpConfig.port) != 0)
-            MPNet_Log("could not start server: %s", MPNet_LastError());
-    }
-    sWantConnect = gMpConfig.enabled;
-    snprintf(sStatus, sizeof(sStatus), gMpConfig.enabled ? "WAITING TO CONNECT" : "OFFLINE (DISABLED)");
-}
-
-static void TryConnect(void)
-{
-    const char *host = gMpConfig.server;
-    MPNet_Log("connecting to %s:%d", host, gMpConfig.port);
-    snprintf(sStatus, sizeof(sStatus), "CONNECTING...");
-    if (MPNet_Connect(host, gMpConfig.port) != 0)
-    {
-        snprintf(sStatus, sizeof(sStatus), "CANNOT REACH SERVER");
-        MPNet_Log("%s", MPNet_LastError());
-        // Name lookups can be slow, so retry those much less often
-        sReconnectTimer = strstr(MPNet_LastError(), "resolve") ? RECONNECT_FRAMES * 8 : RECONNECT_FRAMES;
-    }
-    sHelloSent = FALSE;
+    snprintf(sStatus, sizeof(sStatus), "OFFLINE");
 }
 
 void MP_FrameUpdate(void)
@@ -620,36 +1067,27 @@ void MP_FrameUpdate(void)
         MP_Init();
 
     MPServer_Poll();
+    MP_AutoSession_Update();
 
-    if (!sWantConnect)
+    if (sLobby.state == MP_LOBBY_OFF)
         return;
-
-    // Wait until a save is loaded so we know our name and gender
-    if (MPNet_ClientStatus() == MPNET_DISCONNECTED)
-    {
-        if (gMpLocalId >= 0 || sHelloSent)
-        {
-            ResetRoster();
-            sHelloSent = FALSE;
-            snprintf(sStatus, sizeof(sStatus), "DISCONNECTED - RETRYING");
-            if (sReconnectTimer == 0)
-                sReconnectTimer = RECONNECT_FRAMES;
-        }
-        if (!MP_IsInOverworld())
-            return;
-        if (sReconnectTimer > 0)
-        {
-            sReconnectTimer--;
-            return;
-        }
-        TryConnect();
-        return;
-    }
 
     for (guard = 0; guard < 512 && MPNet_ClientPoll(&type, sMsgBuf, &len); guard++)
         HandleMessage(type, sMsgBuf, len);
 
-    if (MPNet_ClientStatus() == MPNET_CONNECTED && !sHelloSent)
+    Lobby_Update();
+
+    if (MPNet_ClientStatus() != MPNET_CONNECTED)
+        return;
+
+    if (++sPingTimer >= PING_FRAMES)
+    {
+        sPingTimer = 0;
+        MPNet_ClientSend(MPMSG_C_PING, NULL, 0);
+    }
+
+    // Say hello once we're in a room and a save file is loaded (name, gender)
+    if (sLobby.state == MP_LOBBY_IN_ROOM && !sHelloSent && MP_IsInOverworld())
     {
         u8 hello[MP_HELLO_SIZE];
         MP_Avatar_Init();

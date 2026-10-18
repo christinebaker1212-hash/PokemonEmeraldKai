@@ -14,6 +14,7 @@
 #include "event_object_movement.h"
 #include "event_data.h"
 #include "constants/songs.h"
+#include "platform_text.h"
 #include "pokemon_storage_system.h"
 #include "graphics.h"
 #include "sound.h"
@@ -41,6 +42,7 @@ enum {
     INPUT_LR_BUTTON,
     INPUT_SELECT,
     INPUT_START,
+    INPUT_TYPED,   // Moemon Co-op: a key typed on a real keyboard
 };
 
 #define KBROW_COUNT 4
@@ -407,6 +409,7 @@ void DoNamingScreen(u8 templateNum, u8 *destBuffer, u16 monSpecies, u16 monGende
         sNamingScreen->monPersonality = monPersonality;
         sNamingScreen->destBuffer = destBuffer;
         sNamingScreen->returnCallback = returnCallback;
+        Platform_SetTextInput(TRUE); // Moemon Co-op: real keyboard typing
 
         if (templateNum == NAMING_SCREEN_PLAYER)
             StartTimer1();
@@ -701,6 +704,7 @@ static bool8 MainState_Exit(void)
         if (sNamingScreen->templateNum == NAMING_SCREEN_PLAYER)
             SeedRngAndSetTrainerId();
 #endif
+        Platform_SetTextInput(FALSE);
         SetMainCallback2(sNamingScreen->returnCallback);
         DestroyTask(FindTaskIdByFunc(Task_NamingScreen));
 #ifdef PORTABLE
@@ -1455,11 +1459,74 @@ static bool8 (*const sKeyboardKeyHandlers[])(u8) =
     [KEY_ROLE_OK]        = KeyboardKeyHandler_OK,
 };
 
+static u8 AsciiToNamingChar(int c)
+{
+    if (c >= 'A' && c <= 'Z') return CHAR_A + (c - 'A');
+    if (c >= 'a' && c <= 'z') return CHAR_a + (c - 'a');
+    if (c >= '0' && c <= '9') return CHAR_0 + (c - '0');
+    switch (c)
+    {
+    case ' ': return CHAR_SPACE;
+    case '!': return CHAR_EXCL_MARK;
+    case '?': return CHAR_QUESTION_MARK;
+    case '.': return CHAR_PERIOD;
+    case '-': return CHAR_HYPHEN;
+    case '/': return CHAR_SLASH;
+    case ',': return CHAR_COMMA;
+    case ':': return CHAR_COLON;
+    case '\'': return CHAR_SGL_QUOTE_RIGHT;
+    case '"': return CHAR_DBL_QUOTE_LEFT;
+    case '&': return CHAR_AMPERSAND;
+    case '(': return CHAR_LEFT_PAREN;
+    case ')': return CHAR_RIGHT_PAREN;
+    case '+': return CHAR_PLUS;
+    case '=': return CHAR_EQUALS;
+    case '%': return CHAR_PERCENT;
+    }
+    return EOS;
+}
+
+static void Task_HandleInput(u8);
+static u8 GetPreviousTextCaretPosition(void);
+static void BufferCharacter(u8);
+
+// Moemon Co-op: a key typed on a real keyboard
+static bool8 HandleTypedKey(int typed)
+{
+    u8 ch;
+    if (typed == TYPED_ENTER)
+    {
+        TryStartButtonFlash(BUTTON_OK, TRUE, FALSE);
+        PlaySE(SE_SELECT);
+        sNamingScreen->state = STATE_PRESSED_OK;
+        return TRUE;
+    }
+    if (typed == TYPED_BACKSPACE)
+    {
+        DeleteTextCharacter();
+        return FALSE;
+    }
+    ch = AsciiToNamingChar(typed);
+    if (ch == EOS)
+        return FALSE;
+    // Full: ignore further typing (Enter confirms)
+    if (GetPreviousTextCaretPosition() == sNamingScreen->template->maxChars - 1
+     && sNamingScreen->textBuffer[sNamingScreen->template->maxChars - 1] != EOS)
+        return FALSE;
+    BufferCharacter(ch);
+    DrawTextEntry();
+    CopyBgTilemapBufferToVram(3);
+    PlaySE(SE_SELECT);
+    return FALSE;
+}
+
 static bool8 HandleKeyboardEvent(void)
 {
     u8 input = GetInputEvent();
     u8 keyRole = GetKeyRoleAtCursorPos();
 
+    if (input == INPUT_TYPED)
+        return HandleTypedKey(gTasks[FindTaskIdByFunc(Task_HandleInput)].data[3]);
     if (input == INPUT_SELECT)
     {
         return SwapKeyboardPage();
@@ -1540,6 +1607,7 @@ static bool8 SwapKeyboardPage(void)
 #define tState data[0]
 #define tKeyboardEvent data[1]
 #define tButtonId data[2]
+#define tTypedChar data[3]
 
 
 static void Input_Disabled(struct Task *);
@@ -1587,7 +1655,17 @@ static void Input_Disabled(struct Task *task)
 
 static void Input_Enabled(struct Task *task)
 {
+    int typed;
     task->tKeyboardEvent = INPUT_NONE;
+
+    // Moemon Co-op: real keyboard typing
+    typed = Platform_PopTypedChar();
+    if (typed != 0)
+    {
+        task->tKeyboardEvent = INPUT_TYPED;
+        task->tTypedChar = typed;
+        return;
+    }
 
     if (JOY_NEW(A_BUTTON))
         task->tKeyboardEvent = INPUT_A_BUTTON;
@@ -1733,6 +1811,8 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_CAUGHT_MON] = DrawMonTextEntryBox,
     [NAMING_SCREEN_NICKNAME]   = DrawMonTextEntryBox,
     [NAMING_SCREEN_WALDA]      = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_COOP_ROOM]     = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_COOP_PASSWORD] = DrawNormalTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -1858,6 +1938,14 @@ static void BufferCharacter(u8 ch)
 static void SaveInputText(void)
 {
     u8 i;
+
+    // Moemon Co-op: these may be left empty or start with a space
+    if (sNamingScreen->templateNum >= NAMING_SCREEN_COOP_ROOM)
+    {
+        StringCopyN(sNamingScreen->destBuffer, sNamingScreen->textBuffer, sNamingScreen->template->maxChars + 1);
+        sNamingScreen->destBuffer[sNamingScreen->template->maxChars] = EOS;
+        return;
+    }
 
     for (i = 0; i < sNamingScreen->template->maxChars; i++)
     {
@@ -2135,6 +2223,32 @@ static const struct NamingScreenTemplate sWaldaWordsScreenTemplate =
     .title = gText_TellHimTheWords,
 };
 
+// Moemon Co-op
+static const u8 sText_CoopServerName[] = _("SERVER NAME?");
+static const u8 sText_CoopPassword[] = _("PASSWORD? (or leave blank)");
+
+static const struct NamingScreenTemplate sCoopRoomTemplate =
+{
+    .copyExistingString = TRUE,
+    .maxChars = WALDA_PHRASE_LENGTH,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 11,
+    .title = sText_CoopServerName,
+};
+
+static const struct NamingScreenTemplate sCoopPasswordTemplate =
+{
+    .copyExistingString = TRUE,
+    .maxChars = WALDA_PHRASE_LENGTH,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_LOWER,
+    .unused = 11,
+    .title = sText_CoopPassword,
+};
+
 static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
 {
     [NAMING_SCREEN_PLAYER]     = &sPlayerNamingScreenTemplate,
@@ -2142,6 +2256,8 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_CAUGHT_MON] = &sMonNamingScreenTemplate,
     [NAMING_SCREEN_NICKNAME]   = &sMonNamingScreenTemplate,
     [NAMING_SCREEN_WALDA]      = &sWaldaWordsScreenTemplate,
+    [NAMING_SCREEN_COOP_ROOM]     = &sCoopRoomTemplate,
+    [NAMING_SCREEN_COOP_PASSWORD] = &sCoopPasswordTemplate,
 };
 
 static const struct OamData sOam_8x8 =

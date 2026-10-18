@@ -37,7 +37,8 @@ struct MpAppearance
     u8 accent;   // 0 = sprite default
     u8 gender;   // save file gender, used for bike/surf sprites
     u8 hasCustom;
-    u8 pad[2];
+    u16 gfxId;      // any overworld sprite (MP_BASE_NPC)
+    u8 trainerPic;  // trainer card / battle front pic (0xFF = automatic)
 };
 
 // Avatar modes sent over the network
@@ -97,16 +98,21 @@ struct MpPlayer
     u32 otId;
     struct MpAppearance app;
     struct MpState state;
-    u8 *customGfx;            // MP_CUSTOM_BLOB_SIZE bytes or NULL
+    u8 *customGfx;            // custom sprite data or NULL
+    u32 customGfxSize;
     u32 appearanceVersion;    // bumped whenever appearance/custom gfx changes
+    u8 *blobBuf[1];           // big data being received (MP_BLOB_KINDS)
+    u32 blobTotal[1];
+    u32 blobHave[1];
 };
 
 struct MpConfig
 {
     bool8 enabled;
-    bool8 host;
-    char server[128];
-    int port;
+    char lobby[128];          // override of the built-in online lobby address
+    char lastRoom[24];
+    char lastRoomKey[65];     // hex SHA-256 room key (not the password)
+    char lastHostName[24];
     char name[32];
     struct MpAppearance app;
     char customSprite[256];
@@ -117,7 +123,58 @@ extern struct MpConfig gMpConfig;
 extern struct MpPlayer gMpPlayers[MP_MAX_PLAYERS];
 extern s8 gMpLocalId;   // -1 when not connected
 
+// Lobby session (mp_main.c)
+enum {
+    MP_LOBBY_OFF,
+    MP_LOBBY_CONNECTING,
+    MP_LOBBY_READY,           // connected, not in a room
+    MP_LOBBY_WAITING,         // create/join sent
+    MP_LOBBY_IN_ROOM,
+    MP_LOBBY_RECONNECT_WAIT,  // lost the connection, will rejoin the same room
+    MP_LOBBY_ERROR,
+};
+
+enum {
+    MP_LOBBY_ERR_NONE,
+    MP_LOBBY_ERR_UNREACHABLE,
+    MP_LOBBY_ERR_NAME_TAKEN,
+    MP_LOBBY_ERR_NOT_FOUND,
+    MP_LOBBY_ERR_BAD_PASSWORD,
+    MP_LOBBY_ERR_FULL,
+    MP_LOBBY_ERR_VERSION,
+    MP_LOBBY_ERR_BAD_NAME,
+    MP_LOBBY_ERR_SLOW_DOWN,
+    MP_LOBBY_ERR_SERVER_FULL,
+};
+
+#define MP_LIST_MAX 24
+struct MpLanRoom;
+void MP_Lobby_Connect(const char *address, bool8 isLocal);
+void MP_Lobby_Disconnect(void);
+u8 MP_Lobby_State(void);
+u8 MP_Lobby_Error(void);
+void MP_Lobby_RequestList(void);
+bool8 MP_Lobby_ListReady(void);
+int MP_Lobby_GetList(struct MpLanRoom *out, int max);
+void MP_Lobby_CreateRoom(const char *room, const char *password, bool8 hidden);
+void MP_Lobby_JoinRoom(const char *room, const char *password);
+void MP_Lobby_JoinRoomWithKey(const char *room, const u8 *key);
+const u8 *MP_Lobby_RoomKey(void);
+const char *MP_Lobby_RoomName(void);
+bool8 MP_Lobby_IsLocalHost(void);
+bool8 MP_Lobby_InRoom(void);
+const char *MP_OnlineLobbyAddress(void);
+bool8 MP_HasOnlineLobby(void);
+
+// mp_setup.c (title screen HOST / JOIN / SOLO screen)
+void CB2_InitCoopSetup(void);
+void MP_AutoSession_Update(void);
+
 // mp_main.c
+void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
+void MP_SendBlob(u8 kind, const void *data, u32 len);
+void MP_DispatchRelay(u8 from, const u8 *data, u16 len);
 void MP_Init(void);
 void MP_FrameUpdate(void);
 bool8 MP_IsConnected(void);
@@ -142,6 +199,8 @@ void MP_Avatar_BuildRemote(u8 id);   // rebuild a remote player's gfx info + pal
 void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode, u16 *dst);
 bool8 MP_Avatar_LoadCustomPng(const char *path, u8 *blob, char *err, int errLen);
 const u8 *MP_Avatar_LocalCustomBlob(void);
+u32 MP_Avatar_LocalCustomBlobSize(void);
+bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size);
 const char *MP_Avatar_BaseName(u8 base);
 const char *MP_Avatar_SkinName(u8 skin);
 const char *MP_Avatar_ColorName(u8 color);
@@ -202,6 +261,8 @@ enum {
     MPR_LINK_BLOCK,        // block data
     MPR_LINK_SYNC,         // standby / close barrier
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
+    MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
+    MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)
 };
 
 #endif // GUARD_MP_H
