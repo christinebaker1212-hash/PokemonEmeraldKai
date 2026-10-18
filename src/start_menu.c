@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "platform/display.h" // Moemon Kai PC: START > DISPLAY
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "battle_pyramid_bag.h"
@@ -64,7 +65,8 @@ enum
     MENU_ACTION_REST_FRONTIER,
     MENU_ACTION_RETIRE_FRONTIER,
     MENU_ACTION_PYRAMID_BAG,
-    MENU_ACTION_COOP
+    MENU_ACTION_COOP,
+    MENU_ACTION_DISPLAY, // Moemon Kai PC
 };
 
 // Save status
@@ -107,6 +109,8 @@ static bool8 StartMenuBattlePyramidRetireCallback(void);
 static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuCoopCallback(void);
 static const u8 sText_MenuCoop[] = _("CO-OP");
+static bool8 StartMenuDisplayCallback(void); // Moemon Kai PC
+static const u8 sText_MenuDisplay[] = _("DISPLAY");
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -194,6 +198,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_OPTION]          = {gText_MenuOption,  {.u8_void = StartMenuOptionCallback}},
     [MENU_ACTION_EXIT]            = {gText_MenuExit,    {.u8_void = StartMenuExitCallback}},
     [MENU_ACTION_COOP]            = {sText_MenuCoop,    {.u8_void = StartMenuCoopCallback}},
+    [MENU_ACTION_DISPLAY]         = {sText_MenuDisplay, {.u8_void = StartMenuDisplayCallback}},
     [MENU_ACTION_RETIRE_SAFARI]   = {gText_MenuRetire,  {.u8_void = StartMenuSafariZoneRetireCallback}},
     [MENU_ACTION_PLAYER_LINK]     = {gText_MenuPlayer,  {.u8_void = StartMenuLinkModePlayerNameCallback}},
     [MENU_ACTION_REST_FRONTIER]   = {gText_MenuRest,    {.u8_void = StartMenuSaveCallback}},
@@ -338,9 +343,13 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_PLAYER);
     AddStartMenuAction(MENU_ACTION_SAVE);
     AddStartMenuAction(MENU_ACTION_OPTION);
+    AddStartMenuAction(MENU_ACTION_DISPLAY); // Moemon Kai PC
     if (gMpConfig.enabled)
         AddStartMenuAction(MENU_ACTION_COOP);
-    AddStartMenuAction(MENU_ACTION_EXIT);
+    // Moemon Kai PC: the menu window fits 9 entries; when full, EXIT is left
+    // out (B or START still close the menu).
+    if (sNumStartMenuActions < ARRAY_COUNT(sCurrentStartMenuActions))
+        AddStartMenuAction(MENU_ACTION_EXIT);
 }
 
 static void BuildSafariZoneStartMenu(void)
@@ -351,6 +360,7 @@ static void BuildSafariZoneStartMenu(void)
     AddStartMenuAction(MENU_ACTION_BAG);
     AddStartMenuAction(MENU_ACTION_PLAYER);
     AddStartMenuAction(MENU_ACTION_OPTION);
+    AddStartMenuAction(MENU_ACTION_DISPLAY); // Moemon Kai PC
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 
@@ -626,7 +636,8 @@ static bool8 HandleStartMenuInput(void)
             && gMenuCallback != StartMenuExitCallback
             && gMenuCallback != StartMenuSafariZoneRetireCallback
             && gMenuCallback != StartMenuBattlePyramidRetireCallback
-            && gMenuCallback != StartMenuCoopCallback)
+            && gMenuCallback != StartMenuCoopCallback
+            && gMenuCallback != StartMenuDisplayCallback)
         {
            FadeScreen(FADE_TO_BLACK, 0);
         }
@@ -757,6 +768,15 @@ static bool8 StartMenuCoopCallback(void)
     RemoveExtraStartMenuWindows();
     HideStartMenu();
     MP_OpenMenu();
+    return TRUE;
+}
+
+// Moemon Kai PC: DISPLAY SETTINGS window over the field, like CO-OP
+static bool8 StartMenuDisplayCallback(void)
+{
+    RemoveExtraStartMenuWindows();
+    HideStartMenu();
+    Display_OpenFieldSettingsMenu();
     return TRUE;
 }
 
