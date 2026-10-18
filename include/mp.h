@@ -168,6 +168,7 @@ bool8 MP_HasOnlineLobby(void);
 
 // mp_setup.c (title screen HOST / JOIN / SOLO screen)
 void CB2_InitCoopSetup(void);
+void CB2_InitCoopSetupFromField(void);
 void MP_AutoSession_Update(void);
 
 // mp_main.c

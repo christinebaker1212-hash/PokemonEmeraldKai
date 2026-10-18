@@ -121,6 +121,7 @@ struct JoinEntry
 static EWRAM_DATA struct
 {
     bool8 active;
+    bool8 fromField;           // opened from START > CO-OP during the game
     u8 screen;
     u8 cursor;
     u8 scroll;
@@ -332,19 +333,19 @@ static void BuildMainItems(void)
         sSetup.mainItems[sSetup.mainCount++] = MAIN_REJOIN;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_HOST;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_JOIN;
-    sSetup.mainItems[sSetup.mainCount++] = MAIN_SOLO;
+    sSetup.mainItems[sSetup.mainCount++] = MAIN_SOLO;   // "BACK" when opened during the game
 }
 
 static void MainItemLabel(u8 item, char *out, int len)
 {
     switch (item)
     {
-    case MAIN_CONTINUE: snprintf(out, len, "CONTINUE"); break;
+    case MAIN_CONTINUE: snprintf(out, len, sSetup.fromField ? "BACK TO THE GAME" : "CONTINUE"); break;
     case MAIN_LEAVE:    snprintf(out, len, "LEAVE THE SERVER"); break;
     case MAIN_REJOIN:   snprintf(out, len, "REJOIN %s", gMpConfig.lastRoom); break;
     case MAIN_HOST:     snprintf(out, len, "HOST A GAME"); break;
     case MAIN_JOIN:     snprintf(out, len, "JOIN A GAME"); break;
-    default:            snprintf(out, len, "PLAY SOLO"); break;
+    default:            snprintf(out, len, sSetup.fromField ? "BACK" : "PLAY SOLO"); break;
     }
 }
 
@@ -357,7 +358,7 @@ static const char *MainItemHelp(u8 item)
     case MAIN_REJOIN:   return "Join the server you played on last time.";
     case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
     case MAIN_JOIN:     return "Find a friend's server and hop in.";
-    default:            return "Play alone. You can go online later from START > CO-OP.";
+    default:            return sSetup.fromField ? "Return to the game." : "Play alone. You can go online later from START > CO-OP.";
     }
 }
 
@@ -741,7 +742,8 @@ static void Finish(void)
         MP_Lobby_Disconnect(); // the lobby connection used for the server list
     MP_SaveConfig();
     sSetup.active = FALSE;
-    FadeOutBGM(4);
+    if (!sSetup.fromField)
+        FadeOutBGM(4);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[FindTaskIdByFunc(Task_Setup)].data[0] = 2; // fading out to the main menu
 }
@@ -956,6 +958,8 @@ static void OnRoomJoined(void)
     else if (sSetup.work == WORK_HOST_LOCAL)
         snprintf(text, sizeof(text), "%s is open on your home network. Friends on the same Wi-Fi can join it from JOIN A GAME.%s",
                  MP_Lobby_RoomName(), MP_HasOnlineLobby() ? " (The online lobby couldn't be reached.)" : "");
+    else if (sSetup.fromField)
+        snprintf(text, sizeof(text), "You joined %s! Your friends will appear in the world.", MP_Lobby_RoomName());
     else
         snprintf(text, sizeof(text), "You joined %s! Load your save or start a new game, and you'll see your friends in the world.",
                  MP_Lobby_RoomName());
@@ -1060,12 +1064,12 @@ static void Task_Setup(u8 taskId)
             DoNamingScreen(template, buffer, 0, 0, 0, CB2_ReturnFromTextEntry);
         }
         break;
-    case 2: // fading out to the main menu
+    case 2: // fading out to the main menu (or back to the game)
         if (!gPaletteFade.active)
         {
             DestroyTask(taskId);
             FreeAllWindowBuffers();
-            SetMainCallback2(CB2_InitMainMenu);
+            SetMainCallback2(sSetup.fromField ? gMain.savedCallback : CB2_InitMainMenu);
         }
         break;
     }
@@ -1121,15 +1125,10 @@ static void CB2_ReturnFromTextEntry(void)
     }
 }
 
-void CB2_InitCoopSetup(void)
+static void InitSetup(bool8 fromField)
 {
-    // Automated tests and the debug quick start skip this screen
-    if (getenv("MOEMON_COOP_AUTO") || getenv("MOEMON_SKIP_COOP_SETUP"))
-    {
-        SetMainCallback2(CB2_InitMainMenu);
-        return;
-    }
     memset(&sSetup, 0, sizeof(sSetup));
+    sSetup.fromField = fromField;
     memset(sSetup.roomName, EOS, sizeof(sSetup.roomName));
     memset(sSetup.password, EOS, sizeof(sSetup.password));
     sSetup.active = TRUE;
@@ -1139,7 +1138,24 @@ void CB2_InitCoopSetup(void)
     sSetup.screen = SCR_MAIN;
     InitGraphics();
     DrawScreen();
-    PlayBGM(MUS_RG_UNION_ROOM);
+    if (!fromField)
+        PlayBGM(MUS_RG_UNION_ROOM);
+}
+
+void CB2_InitCoopSetup(void)
+{
+    // Automated tests skip this screen
+    if (getenv("MOEMON_COOP_AUTO") || getenv("MOEMON_SKIP_COOP_SETUP"))
+    {
+        SetMainCallback2(CB2_InitMainMenu);
+        return;
+    }
+    InitSetup(FALSE);
+}
+
+void CB2_InitCoopSetupFromField(void)
+{
+    InitSetup(TRUE);
 }
 
 // ---------------------------------------------------------------------------
@@ -1183,4 +1199,15 @@ void MP_AutoSession_Update(void)
         MP_Lobby_CreateRoom(name, password ? password : "", FALSE);
     else
         MP_Lobby_JoinRoom(name, password ? password : "");
+}
+
+// Test harness helpers
+bool8 MP_Setup_IsReady(void)
+{
+    return sSetup.active && !gPaletteFade.active && FuncIsActiveTask(Task_Setup);
+}
+
+bool8 MP_Setup_ScreenIs(int screen)
+{
+    return MP_Setup_IsReady() && sSetup.screen == screen;
 }

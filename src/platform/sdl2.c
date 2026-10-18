@@ -54,6 +54,11 @@ static bool sTestMode = false;
 static u16 sTestKeys = 0;
 static int sTestWait = 0;
 static int sMashCount = 0, sMashInterval = 0;
+// waitfor / pressuntil: wait for a named game state (see MP_TestCondition)
+static char sUntilName[32];
+static int sUntilFrames = 0;
+static u16 sUntilKeys = 0;
+extern int MP_TestCondition(const char *name);
 static u16 sMashKeys = 0;
 static unsigned long sFrameCounter = 0;
 static char sShotDir[400] = ".";
@@ -686,6 +691,32 @@ static void TestHarnessStep(void)
 {
     char line[256];
 
+    if (sUntilName[0])
+    {
+        if (MP_TestCondition(sUntilName))
+        {
+            sUntilName[0] = 0;
+            sTestKeys = 0;
+            printf("[test] frame %lu: reached state\n", sFrameCounter);
+            fflush(stdout);
+        }
+        else
+        {
+            if (--sUntilFrames <= 0)
+            {
+                printf("[test] frame %lu: TIMEOUT waiting for %s\n", sFrameCounter, sUntilName);
+                fflush(stdout);
+                sUntilName[0] = 0;
+            }
+            else if (sUntilKeys)
+            {
+                // tap the keys every 45 frames
+                int phase = sUntilFrames % 45;
+                sTestKeys = (phase < 3) ? sUntilKeys : 0;
+            }
+            return;
+        }
+    }
     if (sTestWait > 0)
     {
         --sTestWait;
@@ -740,6 +771,25 @@ static void TestHarnessStep(void)
         else if (strcmp(cmd, "shot") == 0)
         {
             Platform_SaveScreenshot(arg);
+        }
+        else if (strcmp(cmd, "waitfor") == 0 || strcmp(cmd, "pressuntil") == 0)
+        {
+            // waitfor NAME [MAXFRAMES]   /   pressuntil KEYS NAME [MAXFRAMES]
+            char name[32] = "";
+            int maxFrames = 3000;
+            if (strcmp(cmd, "waitfor") == 0)
+            {
+                sscanf(line, "%*s %31s %d", name, &maxFrames);
+                sUntilKeys = 0;
+            }
+            else
+            {
+                sscanf(line, "%*s %*s %31s %d", name, &maxFrames);
+                sUntilKeys = ParseTestKeys(arg);
+            }
+            snprintf(sUntilName, sizeof(sUntilName), "%s", name);
+            sUntilFrames = maxFrames;
+            return;
         }
         else if (strcmp(cmd, "type") == 0)
         {

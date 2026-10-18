@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp.h"
+#include "palette.h"
 #include "constants/characters.h"
 #include "main.h"
 #include "pokemon.h"
@@ -89,4 +91,26 @@ void MP_DebugQuickStartNewGame(void)
     SetLastHealLocationWarp(HEAL_LOCATION_OLDALE_TOWN);
     SetWarpDestination(group, num, WARP_ID_NONE, x, y);
     WarpIntoMap();
+}
+
+// Test harness conditions (src/platform/sdl2.c: waitfor / pressuntil)
+bool8 MP_Setup_IsReady(void);
+bool8 MP_Setup_ScreenIs(int screen);
+int MP_TestCondition(const char *name)
+{
+    if (strcmp(name, "setup") == 0)
+        return MP_Setup_IsReady();
+    if (strcmp(name, "field") == 0)
+        return MP_IsLocalFree();
+    if (strcmp(name, "online") == 0)
+        return MP_IsConnected() && MP_ConnectedCount() >= 2;
+    if (strcmp(name, "inroom") == 0)
+        return MP_Lobby_InRoom();
+    if (strcmp(name, "joinlist") == 0)
+        return MP_Setup_ScreenIs(2);
+    if (strcmp(name, "message") == 0)
+        return MP_Setup_ScreenIs(4);
+    if (strcmp(name, "nofade") == 0)
+        return !gPaletteFade.active;
+    return 0;
 }

@@ -15,10 +15,16 @@
 #include "window.h"
 #include "constants/songs.h"
 #include "constants/characters.h"
+#include "field_screen_effect.h"
+#include "field_weather.h"
+#include "constants/field_weather.h"
+#include "overworld.h"
+#include "start_menu.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 enum {
+    ROW_ONLINE,
     ROW_SPRITE,
     ROW_SKIN,
     ROW_OUTFIT,
@@ -128,7 +134,7 @@ static void DrawPlayersWindow(u8 windowId)
 
 static void DrawMenu(u8 windowId, u8 cursor)
 {
-    static const char *const labels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "SAVE AND CLOSE"};
+    static const char *const labels[] = {"", "SPRITE", "SKIN", "OUTFIT", "ACCENT", "SAVE AND CLOSE"};
     char line[64];
     u8 row;
 
@@ -150,6 +156,11 @@ static void DrawMenu(u8 windowId, u8 cursor)
         if (row == ROW_CLOSE)
         {
             PrintAscii(windowId, labels[row], 9, y);
+            continue;
+        }
+        if (row == ROW_ONLINE)
+        {
+            PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER..." : "GO ONLINE...", 9, y);
             continue;
         }
         snprintf(line, sizeof(line), "%s", labels[row]);
@@ -214,7 +225,19 @@ static void Task_CoopMenu(u8 taskId)
             PlaySE(SE_SELECT);
             DrawMenu(tWindow, tCursor);
         }
-        else if (tCursor != ROW_CLOSE && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+        else if (tCursor == ROW_ONLINE && JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            MP_SaveConfig();
+            ClearStdWindowAndFrame(tWindow, TRUE);
+            ClearStdWindowAndFrame(tPlayers, TRUE);
+            RemoveWindow(tWindow);
+            RemoveWindow(tPlayers);
+            FadeScreen(FADE_TO_BLACK, 0);
+            tState = 2;
+            break;
+        }
+        else if (tCursor != ROW_CLOSE && tCursor != ROW_ONLINE && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
         {
             u8 *v = RowValue(tCursor);
             u8 n = NumChoices(tCursor);
@@ -243,6 +266,15 @@ static void Task_CoopMenu(u8 taskId)
         }
         break;
     }
+    case 2: // to the HOST / JOIN screen
+        if (!gPaletteFade.active)
+        {
+            CleanupOverworldWindowsAndTilemaps();
+            gMain.savedCallback = CB2_ReturnToFieldWithOpenMenu;
+            DestroyTask(taskId);
+            SetMainCallback2(CB2_InitCoopSetupFromField);
+        }
+        break;
     }
 }
 
@@ -251,5 +283,5 @@ void MP_OpenMenu(void)
     u8 taskId;
     LockPlayerFieldControls();
     taskId = CreateTask(Task_CoopMenu, 80);
-    gTasks[taskId].tCursor = 0;
+    gTasks[taskId].tCursor = MP_Lobby_InRoom() ? ROW_SPRITE : ROW_ONLINE;
 }
