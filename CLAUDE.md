@@ -1,0 +1,33 @@
+# Moemon Emerald Kai Co-op: notes for Claude
+
+Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
+Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
+
+Read `BUILDING_COOP.md` first for the architecture and build steps. The player
+docs are in `dist_extras/README.txt` (shipped next to the exe).
+
+## Key locations
+- `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
+- `include/mp.h`: shared co-op API. `src/mp/mp_net.h` holds the protocol (bump `MP_PROTOCOL_VERSION` on changes)
+- `tools/mp_server/`: standalone relay server
+- `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
+- `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
+- Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
+
+## Building
+- Linux: `make linux -j$(nproc)` (needs libsdl2-dev and libpng-dev)
+- Windows: `make winwsl -j$(nproc)` with x86_64-w64-mingw32-gcc and the SDL2 mingw package in ./SDL2
+
+## Headless testing
+`src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
+(commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, quit).
+`MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
+`MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
+`MOEMON_TEST_FPS=120` keeps several clients roughly in sync.
+Verified this way: 4-player overworld sync, nametags, custom PNG sprite,
+BATTLE FLAG -> spot -> walk up -> link battle -> rewards and whiteout, save/continue.
+
+## Not yet done or verified
+- The Windows exe has never been run on real Windows (it was cross-compiled)
+- Double/multi battles and trading are not networked
+- Remote players aren't shown across warps (only the same map or connected maps)
