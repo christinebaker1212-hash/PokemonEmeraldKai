@@ -116,3 +116,20 @@ int MP_TestCondition(const char *name)
         return !gPaletteFade.active;
     return 0;
 }
+
+// Test harness: "mp COMMAND ARG"
+void MP_OnFileDropped(const char *path);
+void MP_TestCommand(const char *cmd, const char *arg)
+{
+    if (strcmp(cmd, "export") == 0)
+    {
+        char path[200];
+        bool8 ok = MP_Avatar_ExportLocal(path, sizeof(path));
+        printf("[test] export %s: %s\n", path, ok ? "ok" : "FAILED");
+    }
+    else if (strcmp(cmd, "drop") == 0)
+    {
+        MP_OnFileDropped(arg);
+    }
+    fflush(stdout);
+}

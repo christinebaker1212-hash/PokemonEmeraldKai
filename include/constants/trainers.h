@@ -109,6 +109,9 @@
 #define TRAINER_PIC_LEAF                  90
 #define TRAINER_PIC_RS_BRENDAN            91
 #define TRAINER_PIC_RS_MAY                92
+// Moemon Co-op: custom pictures from sprite packs (filled at runtime)
+#define TRAINER_PIC_MP_LOCAL              93
+#define TRAINER_PIC_MP_OPPONENT           94
 
 // The player back pics are assumed to alternate according to the gender values (MALE/FEMALE)
 #define TRAINER_BACK_PIC_BRENDAN                0
@@ -119,6 +122,7 @@
 #define TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY      5
 #define TRAINER_BACK_PIC_WALLY                  6
 #define TRAINER_BACK_PIC_STEVEN                 7
+#define TRAINER_BACK_PIC_MP_LOCAL               8  // Moemon Co-op: sprite pack back pic
 
 #define FACILITY_CLASS_HIKER                 0x0
 #define FACILITY_CLASS_AQUA_GRUNT_M          0x1

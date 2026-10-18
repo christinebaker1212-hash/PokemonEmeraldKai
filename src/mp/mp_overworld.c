@@ -422,10 +422,10 @@ static bool8 IsSlotUsedByOtherRemote(u8 id, u8 slot)
 static void EnsurePalette(u8 id, u16 *palOut)
 {
     struct RemoteObj *r = &sRemote[id];
-    struct MpPlayer *p = &gMpPlayers[id];
+    
     u8 slot = MP_FindSpritePaletteTag(TAG_REMOTE_PAL_BASE + id, OBJ_PALSLOT_COUNT);
 
-    MP_Avatar_GetPalette(&p->app, p->customGfx, AvatarModeOf(id), palOut);
+    MP_Avatar_GetRemotePalette(id, AvatarModeOf(id), palOut);
 
     if (slot == 0xFF && r->palSlot < OBJ_PALSLOT_COUNT && r->palSlot != 0 && !IsSlotUsedByOtherRemote(id, r->palSlot))
         slot = r->palSlot; // keep the borrowed slot
@@ -681,6 +681,7 @@ void MP_Overworld_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    MP_Notice_Update();
     if (sAppliedGender != gSaveBlock2Ptr->playerGender)
     {
         sAppliedGender = gSaveBlock2Ptr->playerGender;

@@ -129,6 +129,16 @@ extern const struct MonCoords gTrainerBackPicCoords[];
 extern const struct CompressedSpriteSheet gTrainerBackPicTable[]; // functionally unused
 extern const struct CompressedSpritePalette gTrainerBackPicPaletteTable[];
 
+// Moemon Co-op: runtime data for TRAINER_PIC_MP_* / TRAINER_BACK_PIC_MP_LOCAL
+// (LZ77 streams, see MP_Pack_WriteLz77Literal)
+#define MP_PIC_LZ_WORDS ((4 + TRAINER_PIC_SIZE + TRAINER_PIC_SIZE / 8 + 8) / 4)
+#define MP_PAL_LZ_WORDS 16
+extern u32 gMpTrainerFrontPicLz[2][MP_PIC_LZ_WORDS];
+extern u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
+extern u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
+extern u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
+extern const struct SpriteFrameImage gMpTrainerBackFrames[4];
+
 extern const u8 gEnemyMonElevation[NUM_SPECIES];
 
 extern const union AnimCmd *const *const gMonFrontAnimsPtrTable[];

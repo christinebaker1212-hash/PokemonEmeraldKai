@@ -86,7 +86,7 @@ u16 MP_Battle_OpponentFrontPic(void)
 {
     if (!sNet.battleActive || sNet.peer >= MP_MAX_PLAYERS || !gMpPlayers[sNet.peer].present)
         return 0xFFFF;
-    return MP_Avatar_FrontPicFor(&gMpPlayers[sNet.peer].app);
+    return MP_Avatar_RemoteFrontPic(sNet.peer);
 }
 
 // ---------------------------------------------------------------------------

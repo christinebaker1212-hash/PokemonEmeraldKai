@@ -388,6 +388,14 @@ void ProcessEvents(void)
         case SDL_TEXTINPUT:
             Platform_TextInputEvent(event.text.text);
             break;
+        case SDL_DROPFILE:
+            // Moemon Co-op: drop a sprite sheet onto the window to wear it
+            {
+                extern void MP_OnFileDropped(const char *path);
+                MP_OnFileDropped(event.drop.file);
+                SDL_free(event.drop.file);
+            }
+            break;
         case SDL_KEYDOWN:
             if (Platform_TextInputKeyDown(event.key.keysym.sym, event.key.keysym.mod))
                 break;
@@ -766,6 +774,14 @@ static void TestHarnessStep(void)
             }
             text[n] = 0;
             Platform_QueueTypedText(text);
+        }
+        else if (strcmp(cmd, "mp") == 0)
+        {
+            // mp COMMAND [ARG]: game-side test commands (src/mp_debug.c)
+            extern void MP_TestCommand(const char *cmd, const char *arg);
+            char a2[200] = "";
+            sscanf(line, "%*s %*s %199s", a2);
+            MP_TestCommand(arg, a2);
         }
         else if (strcmp(cmd, "rendershot") == 0)
         {

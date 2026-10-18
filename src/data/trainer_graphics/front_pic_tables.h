@@ -93,6 +93,8 @@ const struct MonCoords gTrainerFrontPicCoords[] =
     [TRAINER_PIC_LEAF] = {.size = 8, .y_offset = 1},
     [TRAINER_PIC_RS_BRENDAN] = {.size = 8, .y_offset = 1},
     [TRAINER_PIC_RS_MAY] = {.size = 8, .y_offset = 1},
+    [TRAINER_PIC_MP_LOCAL] = {.size = 8, .y_offset = 1},     // Moemon Co-op
+    [TRAINER_PIC_MP_OPPONENT] = {.size = 8, .y_offset = 1},
 };
 
 #define TRAINER_SPRITE(trainerPic, sprite, size) [TRAINER_PIC_##trainerPic] = {sprite, size, TRAINER_PIC_##trainerPic}
@@ -192,6 +194,8 @@ const struct CompressedSpriteSheet gTrainerFrontPicTable[] =
     TRAINER_SPRITE(LEAF, gTrainerFrontPic_Leaf, TRAINER_PIC_SIZE),
     TRAINER_SPRITE(RS_BRENDAN, gTrainerFrontPic_RubySapphireBrendan, TRAINER_PIC_SIZE),
     TRAINER_SPRITE(RS_MAY, gTrainerFrontPic_RubySapphireMay, TRAINER_PIC_SIZE),
+    TRAINER_SPRITE(MP_LOCAL, gMpTrainerFrontPicLz[0], TRAINER_PIC_SIZE),     // Moemon Co-op
+    TRAINER_SPRITE(MP_OPPONENT, gMpTrainerFrontPicLz[1], TRAINER_PIC_SIZE),
 };
 
 #define TRAINER_PAL(trainerPic, pal) [TRAINER_PIC_##trainerPic] = {pal, TRAINER_PIC_##trainerPic}
@@ -291,4 +295,6 @@ const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[] =
     TRAINER_PAL(LEAF, gTrainerPalette_Leaf),
     TRAINER_PAL(RS_BRENDAN, gTrainerPalette_RubySapphireBrendan),
     TRAINER_PAL(RS_MAY, gTrainerPalette_RubySapphireMay),
+    TRAINER_PAL(MP_LOCAL, gMpTrainerFrontPalLz[0]),     // Moemon Co-op
+    TRAINER_PAL(MP_OPPONENT, gMpTrainerFrontPalLz[1]),
 };

@@ -465,4 +465,6 @@ const union AnimCmd *const *const gTrainerFrontAnimsPtrTable[] =
     [TRAINER_PIC_LEAF] = sAnims_Leaf,
     [TRAINER_PIC_RS_BRENDAN] = sAnims_RubySapphireBrendan,
     [TRAINER_PIC_RS_MAY] = sAnims_RubySapphireMay,
+    [TRAINER_PIC_MP_LOCAL] = sAnims_RubySapphireMay,      // Moemon Co-op: one frame
+    [TRAINER_PIC_MP_OPPONENT] = sAnims_RubySapphireMay,
 };

@@ -470,6 +470,8 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #define OBJ_EVENT_PAL_TAG_RS_MAY                  0x1123
 #define OBJ_EVENT_PAL_TAG_NONE                    0x11FF
 #define OBJ_EVENT_PAL_TAG_MP_LOCAL                0x1130
+#define OBJ_EVENT_PAL_TAG_MP_PACK                 0x1131
+#define OBJ_EVENT_PAL_TAG_MP_PACK_DIVE            0x1132
 
 #include "data/object_events/object_event_graphics_info_pointers.h"
 #include "data/field_effects/field_effect_object_template_pointers.h"
@@ -518,6 +520,8 @@ static struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPal_RubySapphireBrendan,   OBJ_EVENT_PAL_TAG_RS_BRENDAN},
     {gObjectEventPal_RubySapphireMay,       OBJ_EVENT_PAL_TAG_RS_MAY},
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_LOCAL}, // Moemon Co-op custom local avatar
+    {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK},  // Moemon Co-op sprite pack
+    {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK_DIVE},
 #ifdef BUGFIX
     {NULL,                                  OBJ_EVENT_PAL_TAG_NONE},
 #else
@@ -1930,6 +1934,12 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u8 graphicsId)
 
     if (MP_IsMpGraphicsId(graphicsId))
         return MP_GetGraphicsInfo(graphicsId);
+    {
+        // Moemon Co-op: sprite pack bike/surf/fishing/... for the player
+        const struct ObjectEventGraphicsInfo *packInfo = MP_Avatar_LocalStateInfo(graphicsId);
+        if (packInfo)
+            return packInfo;
+    }
 
     if (graphicsId == OBJ_EVENT_GFX_BARD)
     {

@@ -2,7 +2,6 @@
 // Generated from src/data/object_events (only sprites with full 9-frame walking
 // animations). Each entry: graphics id, menu name, trainer card / battle front
 // pic, battle back pic, and which default sprites (bike, surf...) to fall back to.
-#define MP_PIC_NONE 0xFF
 
 static const struct MpSpriteEntry sSpriteCatalog[] = {
     {OBJ_EVENT_GFX_RED, "RED", TRAINER_PIC_RED, TRAINER_BACK_PIC_RED, MALE},

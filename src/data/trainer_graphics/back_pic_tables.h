@@ -8,11 +8,14 @@ const struct MonCoords gTrainerBackPicCoords[] =
     [TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY] = {.size = 8, .y_offset = 4},
     [TRAINER_BACK_PIC_WALLY] = {.size = 8, .y_offset = 4},
     [TRAINER_BACK_PIC_STEVEN] = {.size = 8, .y_offset = 4},
+    [TRAINER_BACK_PIC_MP_LOCAL] = {.size = 8, .y_offset = 4},   // Moemon Co-op
 };
 
 // this table goes functionally unused, since none of these pics are compressed
 // and the place they would get extracted to gets overwritten later anyway
 // the casts are so they'll play nice with the strict struct definition
+static const u32 sMpZeroLz[2] = {0, 0};
+
 const struct CompressedSpriteSheet gTrainerBackPicTable[] =
 {
     [TRAINER_BACK_PIC_BRENDAN] = {
@@ -55,6 +58,13 @@ const struct CompressedSpriteSheet gTrainerBackPicTable[] =
         .size = TRAINER_PIC_SIZE * ARRAY_COUNT(gTrainerBackPicTable_Steven),
         .tag = TRAINER_BACK_PIC_STEVEN,
     },
+    // Moemon Co-op: points at zeros so the (pointless) decompression in
+    // DecompressTrainerBackPic does nothing; the frames come from gMpTrainerBackFrames
+    [TRAINER_BACK_PIC_MP_LOCAL] = {
+        .data = (const u32 *)sMpZeroLz,
+        .size = TRAINER_PIC_SIZE * 4,
+        .tag = TRAINER_BACK_PIC_MP_LOCAL,
+    },
 };
 
 #define TRAINER_BACK_PAL(trainerPic, pal) [TRAINER_BACK_PIC_##trainerPic] = {pal, TRAINER_BACK_PIC_##trainerPic}
@@ -69,4 +79,5 @@ const struct CompressedSpritePalette gTrainerBackPicPaletteTable[] =
     TRAINER_BACK_PAL(RUBY_SAPPHIRE_MAY, gTrainerPalette_RubySapphireMay),
     TRAINER_BACK_PAL(WALLY, gTrainerPalette_Wally),
     TRAINER_BACK_PAL(STEVEN, gTrainerPalette_Steven),
+    TRAINER_BACK_PAL(MP_LOCAL, gMpTrainerBackPalLz),   // Moemon Co-op
 };

@@ -27,6 +27,8 @@ enum {
     MP_BASE_COUNT
 };
 
+#define MP_PIC_NONE 0xFF
+
 struct MpSpriteEntry
 {
     u16 gfxId;
@@ -95,9 +97,6 @@ struct MpState
     u16 seq;
 };
 
-#define MP_CUSTOM_FRAMES     18
-#define MP_CUSTOM_TILES_SIZE (MP_CUSTOM_FRAMES * 256)
-#define MP_CUSTOM_BLOB_SIZE  (MP_CUSTOM_TILES_SIZE + 32)
 
 struct MpPlayer
 {
@@ -207,8 +206,13 @@ bool8 MP_IsMpGraphicsId(u8 graphicsId);
 const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId);
 void MP_Avatar_ApplyLocal(void);     // recolor + refresh the local player sprite
 void MP_Avatar_BuildRemote(u8 id);   // rebuild a remote player's gfx info + palette
-void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode, u16 *dst);
-bool8 MP_Avatar_LoadCustomPng(const char *path, u8 *blob, char *err, int errLen);
+void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst);
+const u16 *MP_Avatar_OriginalPalette(u16 tag);
+const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId); // sprite pack bike/surf/...
+u16 MP_Avatar_RemoteFrontPic(u8 id);
+void MP_Avatar_RefreshPackList(void);
+bool8 MP_Avatar_ExportLocal(char *pathOut, int len);
+bool8 MP_Avatar_InstallPack(const char *src, char *err, int errLen);
 const u8 *MP_Avatar_LocalCustomBlob(void);
 u32 MP_Avatar_LocalCustomBlobSize(void);
 bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size);
@@ -275,6 +279,11 @@ bool8 NetLink_IsMaster(void);
 
 // mp_menu.c
 void MP_OpenMenu(void);
+
+// mp_notify.c
+void MP_ShowNotice(const char *ascii);
+void MP_Notice_Update(void);
+void MP_OnFileDropped(const char *path);
 
 // relay message ids (first byte of peer payloads)
 enum {

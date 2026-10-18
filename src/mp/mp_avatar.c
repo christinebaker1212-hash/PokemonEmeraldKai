@@ -1,7 +1,14 @@
-// Moemon Co-op: player appearance (base sprite, skin tone, outfit colors, custom PNG sprites)
+// Moemon Co-op: player appearance (base sprite, NPC sprites, skin tone, outfit
+// colors, sprite packs) for the local player and the remote players.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#ifdef _WIN32
+#include <direct.h>
+#endif
 
 #define STBI_ONLY_PNG
 #define STBI_NO_HDR
@@ -13,13 +20,18 @@
 
 #include "global.h"
 #include "mp.h"
+#include "mp_pack.h"
+#include "mp_gfx_externs.h"
+#include "data.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "field_weather.h"
 #include "palette.h"
 #include "sprite.h"
+#include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 #include "constants/rgb.h"
+#include "constants/trainers.h"
 
 #define OBJ_EVENT_PAL_TAG_BRENDAN           0x1100
 #define OBJ_EVENT_PAL_TAG_MAY               0x1110
@@ -27,25 +39,32 @@
 #define OBJ_EVENT_PAL_TAG_RS_BRENDAN        0x1122
 #define OBJ_EVENT_PAL_TAG_RS_MAY            0x1123
 #define OBJ_EVENT_PAL_TAG_MP_LOCAL          0x1130
+#define OBJ_EVENT_PAL_TAG_MP_PACK           0x1131
+#define OBJ_EVENT_PAL_TAG_MP_PACK_DIVE      0x1132
+
+#define PACK_DIR "sprites"
+#define MAX_PACK_FILES 32
 
 const u16 *MP_GetObjectEventPaletteData(u16 tag);
 void MP_SetObjectEventPaletteData(u16 tag, const u16 *data);
 
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanNormal;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanMachBike;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanAcroBike;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanSurfing;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BrendanUnderwater;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayNormal;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayMachBike;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayAcroBike;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MaySurfing;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_MayUnderwater;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RubySapphireBrendan;
-extern const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RubySapphireMay;
+extern const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[];
+
+// Runtime trainer pictures from sprite packs (see include/data.h)
+u32 gMpTrainerFrontPicLz[2][MP_PIC_LZ_WORDS];
+u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
+u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
+u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
+const struct SpriteFrameImage gMpTrainerBackFrames[4] = {
+    {gMpTrainerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpTrainerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpTrainerBackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpTrainerBackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+};
 
 // ---------------------------------------------------------------------------
-// Presets. Skin replaces palette indices 1-3, outfit 12-13, accent 10-11.
+// Presets. For Brendan/May, skin replaces palette indices 1-3, outfit 12-13,
+// accent 10-11. Other sprites are recolored automatically (see AutoRecolor).
 
 static const u16 sSkinPresets[MP_SKIN_COUNT][3] = {
     {0, 0, 0},                                                  // default
@@ -74,17 +93,14 @@ static const u16 sColorPresets[MP_COLOR_COUNT][2] = {
 static const char *const sBaseNames[MP_BASE_COUNT] = {
     "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM", "NPC",
 };
-
-#include "constants/trainers.h"
-#include "mp_sprite_catalog.h"
-
-extern const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[];
 static const char *const sSkinNames[MP_SKIN_COUNT] = {
     "DEFAULT", "PORCELAIN", "LIGHT", "TAN", "BROWN", "DARK", "DEEP",
 };
 static const char *const sColorNames[MP_COLOR_COUNT] = {
     "DEFAULT", "RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "PINK", "ORANGE", "BLACK", "WHITE", "TEAL",
 };
+
+#include "mp_sprite_catalog.h"
 
 const char *MP_Avatar_BaseName(u8 base) { return base < MP_BASE_COUNT ? sBaseNames[base] : "?"; }
 const char *MP_Avatar_SkinName(u8 skin) { return skin < MP_SKIN_COUNT ? sSkinNames[skin] : "?"; }
@@ -99,52 +115,218 @@ const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId)
     return NULL;
 }
 
-// Choices: DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY, [CUSTOM], catalog...
-static u16 NumBaseChoices(void)
+static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
 {
-    return MP_Avatar_LocalCustomBlob() ? MP_BASE_CUSTOM + 1 : MP_BASE_CUSTOM;
+    if (MP_Avatar_FindCatalog(gfxId) == NULL)
+        return NULL;
+    return gObjectEventGraphicsInfoPointers[gfxId];
 }
+
+// ---------------------------------------------------------------------------
+// Local sprite pack and the pack files in the "sprites" folder
+
+static u8 *sLocalPackBlob;
+static u32 sLocalPackSize;
+static struct MpPack sLocalPack;
+static bool8 sLocalHasPack;
+static char sPackFiles[MAX_PACK_FILES][160];
+static char sPackNames[MAX_PACK_FILES][24];
+static u8 sPackFileCount;
+static u32 sLocalVersion;      // bumped when the local look changes
+static bool8 sAvatarInit;
+
+static void RebuildLocal(void);
+
+static bool8 HasPngExtension(const char *name)
+{
+    size_t n = strlen(name);
+    return n > 4 && (strcmp(name + n - 4, ".png") == 0 || strcmp(name + n - 4, ".PNG") == 0);
+}
+
+static void MakePackName(const char *path, char *out, int len)
+{
+    const char *base = path, *p;
+    int i = 0;
+    for (p = path; *p; p++)
+        if (*p == '/' || *p == '\\')
+            base = p + 1;
+    out[i++] = '*';
+    out[i++] = ' ';
+    for (p = base; *p && *p != '.' && i < len - 1; p++)
+        out[i++] = (*p == '_') ? ' ' : toupper((unsigned char)*p);
+    out[i] = 0;
+}
+
+void MP_Avatar_RefreshPackList(void)
+{
+    DIR *d = opendir(PACK_DIR);
+    struct dirent *e;
+    sPackFileCount = 0;
+    if (d)
+    {
+        while ((e = readdir(d)) != NULL && sPackFileCount < MAX_PACK_FILES)
+        {
+            if (e->d_name[0] == '.' || !HasPngExtension(e->d_name))
+                continue;
+            snprintf(sPackFiles[sPackFileCount], sizeof(sPackFiles[0]), "%s/%s", PACK_DIR, e->d_name);
+            MakePackName(e->d_name, sPackNames[sPackFileCount], sizeof(sPackNames[0]));
+            sPackFileCount++;
+        }
+        closedir(d);
+    }
+    // A pack set in the ini outside the folder still shows up
+    if (gMpConfig.customSprite[0] && sPackFileCount < MAX_PACK_FILES)
+    {
+        u8 i;
+        for (i = 0; i < sPackFileCount; i++)
+            if (strcmp(sPackFiles[i], gMpConfig.customSprite) == 0)
+                break;
+        if (i == sPackFileCount)
+        {
+            snprintf(sPackFiles[i], sizeof(sPackFiles[0]), "%s", gMpConfig.customSprite);
+            MakePackName(gMpConfig.customSprite, sPackNames[i], sizeof(sPackNames[0]));
+            sPackFileCount++;
+        }
+    }
+}
+
+static void UnloadLocalPack(void)
+{
+    free(sLocalPackBlob);
+    sLocalPackBlob = NULL;
+    sLocalPackSize = 0;
+    sLocalHasPack = FALSE;
+    memset(&sLocalPack, 0, sizeof(sLocalPack));
+}
+
+static bool8 LoadLocalPack(const char *path, char *err, int errLen)
+{
+    u32 size;
+    u8 *blob = MP_Pack_LoadFile(path, &size, err, errLen);
+    struct MpPack pack;
+    if (!blob)
+        return FALSE;
+    if (!MP_Pack_Parse(blob, size, &pack))
+    {
+        free(blob);
+        snprintf(err, errLen, "%s could not be read", path);
+        return FALSE;
+    }
+    UnloadLocalPack();
+    sLocalPackBlob = blob;
+    sLocalPackSize = size;
+    sLocalPack = pack;
+    sLocalHasPack = TRUE;
+    return TRUE;
+}
+
+static bool8 LocalPackActive(void)
+{
+    return sLocalHasPack && gMpConfig.app.hasCustom;
+}
+
+const u8 *MP_Avatar_LocalCustomBlob(void)
+{
+    return LocalPackActive() ? sLocalPackBlob : NULL;
+}
+
+u32 MP_Avatar_LocalCustomBlobSize(void)
+{
+    return LocalPackActive() ? sLocalPackSize : 0;
+}
+
+bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size)
+{
+    struct MpPack pack;
+    return MP_Pack_Parse(data, size, &pack);
+}
+
+static const struct MpPack *LocalPack(void)
+{
+    return LocalPackActive() ? &sLocalPack : NULL;
+}
+
+// Parsed pack of a remote player, or NULL
+static const struct MpPack *RemotePack(u8 id, struct MpPack *buf)
+{
+    struct MpPlayer *p = &gMpPlayers[id];
+    if (!p->app.hasCustom || !p->customGfx || !MP_Pack_Parse(p->customGfx, p->customGfxSize, buf))
+        return NULL;
+    return buf;
+}
+
+// ---------------------------------------------------------------------------
+// Sprite choices (START > CO-OP > SPRITE): bases, catalog sprites, then packs
+
+#define NUM_BASE_CHOICES MP_BASE_CUSTOM   // DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY
 
 u16 MP_Avatar_ChoiceCount(void)
 {
-    return NumBaseChoices() + ARRAY_COUNT(sSpriteCatalog);
+    return NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + sPackFileCount;
 }
 
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
 {
     u16 i;
+    if (app->hasCustom && sLocalHasPack)
+    {
+        for (i = 0; i < sPackFileCount; i++)
+            if (strcmp(sPackFiles[i], gMpConfig.customSprite) == 0)
+                return NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + i;
+    }
     if (app->base == MP_BASE_NPC)
     {
         for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
             if (sSpriteCatalog[i].gfxId == app->gfxId)
-                return NumBaseChoices() + i;
+                return NUM_BASE_CHOICES + i;
         return 0;
     }
-    if (app->base < NumBaseChoices())
-        return app->base;
-    return 0;
+    return app->base < NUM_BASE_CHOICES ? app->base : 0;
 }
 
 void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
 {
-    if (choice < NumBaseChoices())
+    if (choice < NUM_BASE_CHOICES)
     {
         app->base = (u8)choice;
         app->gfxId = 0;
+        app->hasCustom = FALSE;
     }
-    else if (choice - NumBaseChoices() < ARRAY_COUNT(sSpriteCatalog))
+    else if (choice < NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog))
     {
         app->base = MP_BASE_NPC;
-        app->gfxId = sSpriteCatalog[choice - NumBaseChoices()].gfxId;
+        app->gfxId = sSpriteCatalog[choice - NUM_BASE_CHOICES].gfxId;
+        app->hasCustom = FALSE;
     }
+    else if (choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog) < sPackFileCount)
+    {
+        const char *path = sPackFiles[choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog)];
+        char err[160];
+        if (LoadLocalPack(path, err, sizeof(err)))
+        {
+            snprintf(gMpConfig.customSprite, sizeof(gMpConfig.customSprite), "%s", path);
+            app->base = sLocalPack.base == MP_BASE_CUSTOM ? MP_BASE_DEFAULT : sLocalPack.base;
+            app->gfxId = sLocalPack.gfxId;
+            app->hasCustom = TRUE;
+        }
+        else
+        {
+            printf("[mp] sprite pack not loaded: %s\n", err);
+        }
+    }
+    if (!app->hasCustom)
+        gMpConfig.customSprite[0] = 0;
+    sLocalVersion++;
 }
 
 const char *MP_Avatar_ChoiceName(u16 choice)
 {
-    if (choice < NumBaseChoices())
+    if (choice < NUM_BASE_CHOICES)
         return sBaseNames[choice];
-    if (choice - NumBaseChoices() < ARRAY_COUNT(sSpriteCatalog))
-        return sSpriteCatalog[choice - NumBaseChoices()].name;
+    if (choice < NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog))
+        return sSpriteCatalog[choice - NUM_BASE_CHOICES].name;
+    if (choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog) < sPackFileCount)
+        return sPackNames[choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog)];
     return "?";
 }
 
@@ -164,7 +346,7 @@ void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int l
     if (app->base == MP_BASE_NPC && MP_Avatar_FindCatalog(app->gfxId))
         ToConfigName(out, MP_Avatar_FindCatalog(app->gfxId)->name, len);
     else
-        ToConfigName(out, MP_Avatar_BaseName(app->base == MP_BASE_NPC ? MP_BASE_DEFAULT : app->base), len);
+        ToConfigName(out, MP_Avatar_BaseName(app->base >= MP_BASE_CUSTOM ? MP_BASE_DEFAULT : app->base), len);
 }
 
 int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
@@ -176,7 +358,7 @@ int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
         ToConfigName(buf, sBaseNames[i], sizeof(buf));
         if (strcmp(buf, name) == 0)
         {
-            app->base = (u8)i;
+            app->base = (i == MP_BASE_CUSTOM) ? MP_BASE_DEFAULT : (u8)i;
             app->gfxId = 0;
             return TRUE;
         }
@@ -192,144 +374,6 @@ int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
         }
     }
     return FALSE;
-}
-
-static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
-{
-    if (MP_Avatar_FindCatalog(gfxId) == NULL)
-        return NULL;
-    return gObjectEventGraphicsInfoPointers[gfxId];
-}
-
-u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
-{
-    const struct MpSpriteEntry *e;
-    switch (app->base)
-    {
-    case MP_BASE_BRENDAN:    return TRAINER_PIC_BRENDAN;
-    case MP_BASE_MAY:        return TRAINER_PIC_MAY;
-    case MP_BASE_RS_BRENDAN: return TRAINER_PIC_RS_BRENDAN;
-    case MP_BASE_RS_MAY:     return TRAINER_PIC_RS_MAY;
-    case MP_BASE_NPC:
-        e = MP_Avatar_FindCatalog(app->gfxId);
-        if (e && e->frontPic != MP_PIC_NONE)
-            return e->frontPic;
-        break;
-    }
-    return 0xFFFF;
-}
-
-u16 MP_Avatar_LocalFrontPic(void)
-{
-    return MP_Avatar_FrontPicFor(&gMpConfig.app);
-}
-
-u16 MP_LocalFrontPicOr(u16 defaultPic)
-{
-    u16 pic = MP_Avatar_LocalFrontPic();
-    return pic == 0xFFFF ? defaultPic : pic;
-}
-
-u16 MP_LocalBackPicOr(u16 defaultPic)
-{
-    u16 pic = MP_Avatar_LocalBackPic();
-    return pic == 0xFFFF ? defaultPic : pic;
-}
-
-bool8 MP_LocalHidesTrainerBack(void)
-{
-    return gMpConfig.app.base == MP_BASE_NPC && MP_Avatar_LocalBackPic() == 0xFFFF;
-}
-
-u16 MP_Avatar_LocalBackPic(void)
-{
-    const struct MpSpriteEntry *e;
-    switch (gMpConfig.app.base)
-    {
-    case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
-    case MP_BASE_MAY:        return TRAINER_BACK_PIC_MAY;
-    case MP_BASE_RS_BRENDAN: return TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN;
-    case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
-    case MP_BASE_NPC:
-        e = MP_Avatar_FindCatalog(gMpConfig.app.gfxId);
-        if (e && e->backPic != MP_PIC_NONE)
-            return e->backPic;
-        break;
-    }
-    return 0xFFFF;
-}
-
-// ---------------------------------------------------------------------------
-// Graphics info storage: [0] = local custom avatar, [1 + id] = remote players
-
-#define NUM_MP_GFX (1 + MP_MAX_PLAYERS)
-static struct ObjectEventGraphicsInfo sMpGfxInfo[NUM_MP_GFX];
-static struct SpriteFrameImage sMpFrames[NUM_MP_GFX][MP_CUSTOM_FRAMES];
-static u16 sOrigPalBrendan[16], sOrigPalMay[16], sOrigPalRSBrendan[16], sOrigPalRSMay[16];
-static u16 sLocalPalBrendan[16], sLocalPalMay[16], sLocalPalCustom[16];
-static u8 sLocalCustomBlob[MP_CUSTOM_BLOB_SIZE];
-static bool8 sLocalHasCustomBlob;
-static bool8 sAvatarInit;
-static void RebuildLocal(void);
-
-static const struct ObjectEventGraphicsInfo *GetBaseInfo(u8 base, u16 gfxId, u8 gender, u8 avatarMode)
-{
-    if (avatarMode != MP_AVATAR_FOOT)
-    {
-        bool8 female = (gender == FEMALE);
-        switch (avatarMode)
-        {
-        case MP_AVATAR_MACH_BIKE: return female ? &gObjectEventGraphicsInfo_MayMachBike : &gObjectEventGraphicsInfo_BrendanMachBike;
-        case MP_AVATAR_ACRO_BIKE: return female ? &gObjectEventGraphicsInfo_MayAcroBike : &gObjectEventGraphicsInfo_BrendanAcroBike;
-        case MP_AVATAR_SURF:      return female ? &gObjectEventGraphicsInfo_MaySurfing : &gObjectEventGraphicsInfo_BrendanSurfing;
-        default:                  return female ? &gObjectEventGraphicsInfo_MayUnderwater : &gObjectEventGraphicsInfo_BrendanUnderwater;
-        }
-    }
-    switch (base)
-    {
-    case MP_BASE_NPC:        return NpcInfo(gfxId) ? NpcInfo(gfxId) : (gender == FEMALE ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal);
-    case MP_BASE_BRENDAN:    return &gObjectEventGraphicsInfo_BrendanNormal;
-    case MP_BASE_MAY:        return &gObjectEventGraphicsInfo_MayNormal;
-    case MP_BASE_RS_BRENDAN: return &gObjectEventGraphicsInfo_RubySapphireBrendan;
-    case MP_BASE_RS_MAY:     return &gObjectEventGraphicsInfo_RubySapphireMay;
-    default:                 return gender == FEMALE ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal;
-    }
-}
-
-static const u16 *GetOrigBasePalette(u8 base, u8 gender, u8 avatarMode)
-{
-    if (avatarMode == MP_AVATAR_UNDERWATER)
-        return MP_GetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_PLAYER_UNDERWATER);
-    if (avatarMode != MP_AVATAR_FOOT)
-        return gender == FEMALE ? sOrigPalMay : sOrigPalBrendan;
-    switch (base)
-    {
-    case MP_BASE_BRENDAN:    return sOrigPalBrendan;
-    case MP_BASE_MAY:        return sOrigPalMay;
-    case MP_BASE_RS_BRENDAN: return sOrigPalRSBrendan;
-    case MP_BASE_RS_MAY:     return sOrigPalRSMay;
-    default:                 return gender == FEMALE ? sOrigPalMay : sOrigPalBrendan;
-    }
-}
-
-static void ApplyRecolor(const struct MpAppearance *app, u16 *pal)
-{
-    if (app->skin > 0 && app->skin < MP_SKIN_COUNT)
-    {
-        pal[1] = sSkinPresets[app->skin][0];
-        pal[2] = sSkinPresets[app->skin][1];
-        pal[3] = sSkinPresets[app->skin][2];
-    }
-    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
-    {
-        pal[12] = sColorPresets[app->outfit][0];
-        pal[13] = sColorPresets[app->outfit][1];
-    }
-    if (app->accent > 0 && app->accent < MP_COLOR_COUNT)
-    {
-        pal[10] = sColorPresets[app->accent][0];
-        pal[11] = sColorPresets[app->accent][1];
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -560,99 +604,263 @@ static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 coun
     }
 }
 
-void MP_Avatar_GetPalette(const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode, u16 *dst)
+// ---------------------------------------------------------------------------
+// Avatar states. The remote avatar modes (MP_AVATAR_*) are the first five.
+
+enum {
+    ST_FOOT,
+    ST_MACH_BIKE,
+    ST_ACRO_BIKE,
+    ST_SURF,
+    ST_UNDERWATER,
+    ST_FIELD_MOVE,
+    ST_FISHING,
+    ST_WATERING,
+    ST_DECORATING,
+    ST_COUNT
+};
+
+static const u8 sStatePackSlot[ST_COUNT] = {
+    PACK_WALK, PACK_MACH_BIKE, PACK_ACRO_BIKE, PACK_SURF, PACK_DIVE,
+    PACK_FIELD_MOVE, PACK_FISHING, PACK_WATERING, PACK_DECORATE,
+};
+
+static const struct ObjectEventGraphicsInfo *const sDefaultStateInfo[ST_COUNT][GENDER_COUNT] = {
+    [ST_FOOT]       = {&gObjectEventGraphicsInfo_BrendanNormal, &gObjectEventGraphicsInfo_MayNormal},
+    [ST_MACH_BIKE]  = {&gObjectEventGraphicsInfo_BrendanMachBike, &gObjectEventGraphicsInfo_MayMachBike},
+    [ST_ACRO_BIKE]  = {&gObjectEventGraphicsInfo_BrendanAcroBike, &gObjectEventGraphicsInfo_MayAcroBike},
+    [ST_SURF]       = {&gObjectEventGraphicsInfo_BrendanSurfing, &gObjectEventGraphicsInfo_MaySurfing},
+    [ST_UNDERWATER] = {&gObjectEventGraphicsInfo_BrendanUnderwater, &gObjectEventGraphicsInfo_MayUnderwater},
+    [ST_FIELD_MOVE] = {&gObjectEventGraphicsInfo_BrendanFieldMove, &gObjectEventGraphicsInfo_MayFieldMove},
+    [ST_FISHING]    = {&gObjectEventGraphicsInfo_BrendanFishing, &gObjectEventGraphicsInfo_MayFishing},
+    [ST_WATERING]   = {&gObjectEventGraphicsInfo_BrendanWatering, &gObjectEventGraphicsInfo_MayWatering},
+    [ST_DECORATING] = {&gObjectEventGraphicsInfo_BrendanDecorating, &gObjectEventGraphicsInfo_MayDecorating},
+};
+
+// Player graphics ids that sprite packs can replace, per state
+static const u8 sStateGfxIds[ST_COUNT][GENDER_COUNT] = {
+    [ST_FOOT]       = {OBJ_EVENT_GFX_BRENDAN_NORMAL, OBJ_EVENT_GFX_MAY_NORMAL},
+    [ST_MACH_BIKE]  = {OBJ_EVENT_GFX_BRENDAN_MACH_BIKE, OBJ_EVENT_GFX_MAY_MACH_BIKE},
+    [ST_ACRO_BIKE]  = {OBJ_EVENT_GFX_BRENDAN_ACRO_BIKE, OBJ_EVENT_GFX_MAY_ACRO_BIKE},
+    [ST_SURF]       = {OBJ_EVENT_GFX_BRENDAN_SURFING, OBJ_EVENT_GFX_MAY_SURFING},
+    [ST_UNDERWATER] = {OBJ_EVENT_GFX_BRENDAN_UNDERWATER, OBJ_EVENT_GFX_MAY_UNDERWATER},
+    [ST_FIELD_MOVE] = {OBJ_EVENT_GFX_BRENDAN_FIELD_MOVE, OBJ_EVENT_GFX_MAY_FIELD_MOVE},
+    [ST_FISHING]    = {OBJ_EVENT_GFX_BRENDAN_FISHING, OBJ_EVENT_GFX_MAY_FISHING},
+    [ST_WATERING]   = {OBJ_EVENT_GFX_BRENDAN_WATERING, OBJ_EVENT_GFX_MAY_WATERING},
+    [ST_DECORATING] = {OBJ_EVENT_GFX_BRENDAN_DECORATING, OBJ_EVENT_GFX_MAY_DECORATING},
+};
+
+static const struct ObjectEventGraphicsInfo *DefaultInfo(u8 state, u8 gender)
 {
-    if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_CUSTOM && customGfx)
+    return sDefaultStateInfo[state][gender == FEMALE ? FEMALE : MALE];
+}
+
+static bool8 PackHasState(const struct MpPack *pack, u8 state)
+{
+    return pack && pack->slot[sStatePackSlot[state]] != NULL;
+}
+
+// Graphics info storage:
+//   [0]                  local player on foot (OBJ_EVENT_GFX_MP_LOCAL)
+//   [1 + id]             remote players
+//   [LOCAL_STATE(st)]    local player's bike/surf/... from a sprite pack
+#define LOCAL_STATE(st) (1 + MP_MAX_PLAYERS + (st) - 1)
+#define NUM_MP_GFX (1 + MP_MAX_PLAYERS + ST_COUNT - 1)
+#define MAX_FRAMES 27
+
+static struct ObjectEventGraphicsInfo sMpGfxInfo[NUM_MP_GFX];
+static struct SpriteFrameImage sMpFrames[NUM_MP_GFX][MAX_FRAMES];
+static u32 sLocalStateBuilt[ST_COUNT];
+static u16 sOrigPalBrendan[16], sOrigPalMay[16], sOrigPalRSBrendan[16], sOrigPalRSMay[16];
+static u16 sLocalPalBrendan[16], sLocalPalMay[16], sLocalPalCustom[16], sLocalPalPack[16], sLocalPalPackDive[16];
+
+// Fills an info for one state. Palette fields are set by the callers.
+static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const struct MpPack *pack, u8 state)
+{
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[gfxSlot];
+    const struct ObjectEventGraphicsInfo *def = DefaultInfo(state, app->gender);
+    int i;
+
+    if (PackHasState(pack, state))
     {
-        u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-        memcpy(dst, customGfx + MP_CUSTOM_TILES_SIZE, 32);
-        CountTileUsage(customGfx, 9 * 256, counts);
-        CountHeadAndBody(customGfx, 2, 4, head, body);
-        AutoRecolor(app, dst, counts, body, head);
+        u8 slot = sStatePackSlot[state];
+        u32 frameBytes = MP_Pack_FrameBytes(slot);
+        *info = *def;
+        if (state == ST_FOOT)
+        {
+            // 9 walking + 9 running frames (running reuses walking if missing)
+            const u8 *run = pack->slot[PACK_RUN] ? pack->slot[PACK_RUN] : pack->slot[PACK_WALK];
+            for (i = 0; i < 9; i++)
+            {
+                sMpFrames[gfxSlot][i].data = pack->slot[PACK_WALK] + i * frameBytes;
+                sMpFrames[gfxSlot][i].size = frameBytes;
+                sMpFrames[gfxSlot][9 + i].data = run + i * frameBytes;
+                sMpFrames[gfxSlot][9 + i].size = frameBytes;
+            }
+        }
+        else
+        {
+            for (i = 0; i < gMpPackSlots[slot].frames && i < MAX_FRAMES; i++)
+            {
+                sMpFrames[gfxSlot][i].data = pack->slot[slot] + i * frameBytes;
+                sMpFrames[gfxSlot][i].size = frameBytes;
+            }
+        }
+        info->images = sMpFrames[gfxSlot];
+        info->size = frameBytes;
         return;
     }
-    if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
+
+    if (state != ST_FOOT)
+    {
+        *info = *def;
+        return;
+    }
+
+    // On foot without a pack: the chosen character
+    {
+        const struct ObjectEventGraphicsInfo *base;
+        const struct ObjectEventGraphicsInfo *anims = DefaultInfo(ST_FOOT, app->gender);
+        bool8 hasRunFrames;
+        switch (app->base)
+        {
+        case MP_BASE_NPC:        base = NpcInfo(app->gfxId) ? NpcInfo(app->gfxId) : anims; break;
+        case MP_BASE_BRENDAN:    base = &gObjectEventGraphicsInfo_BrendanNormal; break;
+        case MP_BASE_MAY:        base = &gObjectEventGraphicsInfo_MayNormal; break;
+        case MP_BASE_RS_BRENDAN: base = &gObjectEventGraphicsInfo_RubySapphireBrendan; break;
+        case MP_BASE_RS_MAY:     base = &gObjectEventGraphicsInfo_RubySapphireMay; break;
+        default:                 base = anims; break;
+        }
+        hasRunFrames = (base == &gObjectEventGraphicsInfo_BrendanNormal || base == &gObjectEventGraphicsInfo_MayNormal);
+        *info = *base;
+        for (i = 0; i < 18; i++)
+            sMpFrames[gfxSlot][i] = base->images[hasRunFrames ? i : (i % 9)];
+        info->images = sMpFrames[gfxSlot];
+        info->anims = anims->anims;   // player animations (walk + run)
+        info->inanimate = FALSE;
+        if (app->base != MP_BASE_NPC)
+        {
+            info->size = 256;
+            info->width = 16;
+            info->height = 32;
+            info->oam = anims->oam;
+            info->subspriteTables = anims->subspriteTables;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Palettes
+
+static void ApplyRecolor(const struct MpAppearance *app, u16 *pal)
+{
+    if (app->skin > 0 && app->skin < MP_SKIN_COUNT)
+    {
+        pal[1] = sSkinPresets[app->skin][0];
+        pal[2] = sSkinPresets[app->skin][1];
+        pal[3] = sSkinPresets[app->skin][2];
+    }
+    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
+    {
+        pal[12] = sColorPresets[app->outfit][0];
+        pal[13] = sColorPresets[app->outfit][1];
+    }
+    if (app->accent > 0 && app->accent < MP_COLOR_COUNT)
+    {
+        pal[10] = sColorPresets[app->accent][0];
+        pal[11] = sColorPresets[app->accent][1];
+    }
+}
+
+// Pack overworld palette, recolored using the walking frames (or any slot).
+// Diving has its own palette and is never recolored (like the default one).
+static void PackPalette(const struct MpAppearance *app, const struct MpPack *pack, u8 state, u16 *dst)
+{
+    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+    u8 slot, front = PACK_SLOT_COUNT;
+    if (state == ST_UNDERWATER)
+    {
+        memcpy(dst, pack->pal[PACK_PAL_DIVE], 32);
+        return;
+    }
+    memcpy(dst, pack->pal[PACK_PAL_OVERWORLD], 32);
+    for (slot = 0; slot < PACK_FRONT; slot++)
+        if (pack->slot[slot] && gMpPackSlots[slot].palette == PACK_PAL_OVERWORLD)
+        {
+            CountTileUsage(pack->slot[slot], MP_Pack_SlotBytes(slot), counts);
+            if (front == PACK_SLOT_COUNT)
+                front = slot;
+        }
+    if (front == PACK_SLOT_COUNT)
+        return;
+    CountHeadAndBody(pack->slot[front], gMpPackSlots[front].w / 8, gMpPackSlots[front].h / 8, head, body);
+    AutoRecolor(app, dst, counts, body, head);
+}
+
+// Palette of a character in a state (no pack)
+static void StatePalette(const struct MpAppearance *app, u8 state, u16 *dst)
+{
+    bool8 female = (app->gender == FEMALE);
+    if (state == ST_UNDERWATER)
+    {
+        memcpy(dst, MP_GetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_PLAYER_UNDERWATER), 32);
+        return;
+    }
+    if (state == ST_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
     {
         const struct ObjectEventGraphicsInfo *npc = NpcInfo(app->gfxId);
         const u16 *pal = MP_GetObjectEventPaletteData(npc->paletteTag);
         if (pal)
         {
             u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-            int h = npc->height;
             u8 f;
             memcpy(dst, pal, 32);
             for (f = 0; f < 9; f++)
                 CountTileUsage(npc->images[f].data, npc->images[f].size, counts);
-            CountHeadAndBody(npc->images[0].data, npc->width / 8, h / 8, head, body);
+            CountHeadAndBody(npc->images[0].data, npc->width / 8, npc->height / 8, head, body);
             AutoRecolor(app, dst, counts, body, head);
             return;
         }
     }
-    memcpy(dst, GetOrigBasePalette(app->base, app->gender, avatarMode), 32);
-    if (avatarMode != MP_AVATAR_UNDERWATER)
-        ApplyRecolor(app, dst);
-}
-
-// Builds a graphics info for the given appearance into sMpGfxInfo[slot]
-static void BuildGfxInfo(int slot, const struct MpAppearance *app, const u8 *customGfx, u8 avatarMode)
-{
-    const struct ObjectEventGraphicsInfo *base = GetBaseInfo(app->base, app->gfxId, app->gender, avatarMode);
-    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[slot];
-    int i;
-
-    *info = *base;
-    if (avatarMode == MP_AVATAR_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
-    {
-        // NPC sheets have 9 walking frames: running reuses them with the
-        // player's animation table. Size, shape and shadow stay the NPC's own.
-        const struct ObjectEventGraphicsInfo *anims = (app->gender == FEMALE) ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal;
-        for (i = 0; i < MP_CUSTOM_FRAMES; i++)
-            sMpFrames[slot][i] = base->images[i % 9];
-        info->images = sMpFrames[slot];
-        info->anims = anims->anims;
-        info->inanimate = FALSE;
-    }
-    else if (avatarMode == MP_AVATAR_FOOT)
-    {
-        // Every on-foot avatar gets 18 frames (9 walk + 9 run) and the player anim table
-        const struct ObjectEventGraphicsInfo *anims = (app->gender == FEMALE) ? &gObjectEventGraphicsInfo_MayNormal : &gObjectEventGraphicsInfo_BrendanNormal;
-        bool8 hasRunFrames = (base == &gObjectEventGraphicsInfo_BrendanNormal || base == &gObjectEventGraphicsInfo_MayNormal);
-
-        for (i = 0; i < MP_CUSTOM_FRAMES; i++)
-        {
-            if (app->base == MP_BASE_CUSTOM && customGfx)
-            {
-                sMpFrames[slot][i].data = customGfx + i * 256;
-                sMpFrames[slot][i].size = 256;
-            }
-            else
-            {
-                sMpFrames[slot][i] = base->images[hasRunFrames ? i : (i % 9)];
-            }
-        }
-        info->images = sMpFrames[slot];
-        info->anims = anims->anims;
-        info->size = 256;
-        info->width = 16;
-        info->height = 32;
-        info->oam = anims->oam;
-        info->subspriteTables = anims->subspriteTables;
-    }
-
-    if (slot == 0)
-    {
-        info->paletteSlot = PALSLOT_PLAYER;
-        if (avatarMode == MP_AVATAR_FOOT)
-            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_LOCAL;
-    }
+    if (state == ST_FOOT && app->base == MP_BASE_RS_BRENDAN)
+        memcpy(dst, sOrigPalRSBrendan, 32);
+    else if (state == ST_FOOT && app->base == MP_BASE_RS_MAY)
+        memcpy(dst, sOrigPalRSMay, 32);
+    else if (state == ST_FOOT && app->base == MP_BASE_BRENDAN)
+        memcpy(dst, sOrigPalBrendan, 32);
+    else if (state == ST_FOOT && app->base == MP_BASE_MAY)
+        memcpy(dst, sOrigPalMay, 32);
     else
-    {
-        // The overworld code assigns the real palette slot after spawning
-        info->paletteSlot = PALSLOT_NPC_1;
-        info->paletteTag = 0x1380 + slot;
-        info->disableReflectionPaletteLoad = TRUE;
-    }
+        memcpy(dst, female ? sOrigPalMay : sOrigPalBrendan, 32);
+    ApplyRecolor(app, dst);
 }
+
+// Unrecolored palette for a tag (Brendan/May palettes are recolored in place)
+const u16 *MP_Avatar_OriginalPalette(u16 tag)
+{
+    switch (tag)
+    {
+    case OBJ_EVENT_PAL_TAG_BRENDAN: return sOrigPalBrendan;
+    case OBJ_EVENT_PAL_TAG_MAY:     return sOrigPalMay;
+    }
+    return MP_GetObjectEventPaletteData(tag);
+}
+
+void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst)
+{
+    struct MpPack buf;
+    const struct MpPack *pack = RemotePack(id, &buf);
+    struct MpAppearance app = gMpPlayers[id].app;
+    if (avatarMode >= ST_COUNT)
+        avatarMode = ST_FOOT;
+    if (PackHasState(pack, avatarMode))
+        PackPalette(&app, pack, avatarMode, dst);
+    else
+        StatePalette(&app, avatarMode, dst);
+}
+
+// ---------------------------------------------------------------------------
+// Local player
 
 void MP_Avatar_Init(void)
 {
@@ -665,45 +873,34 @@ void MP_Avatar_Init(void)
     memcpy(sLocalPalBrendan, sOrigPalBrendan, 32);
     memcpy(sLocalPalMay, sOrigPalMay, 32);
     memcpy(sLocalPalCustom, sOrigPalBrendan, 32);
+    memcpy(sLocalPalPack, sOrigPalBrendan, 32);
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_BRENDAN, sLocalPalBrendan);
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MAY, sLocalPalMay);
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_LOCAL, sLocalPalCustom);
+    MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_PACK, sLocalPalPack);
+    memcpy(sLocalPalPackDive, sOrigPalBrendan, 32);
+    MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_PACK_DIVE, sLocalPalPackDive);
 
-    sLocalHasCustomBlob = FALSE;
+    if (gMpConfig.app.base == MP_BASE_CUSTOM)
+        gMpConfig.app.base = MP_BASE_DEFAULT;   // old ini files
+    gMpConfig.app.hasCustom = FALSE;
     if (gMpConfig.customSprite[0])
     {
         char err[160];
-        if (MP_Avatar_LoadCustomPng(gMpConfig.customSprite, sLocalCustomBlob, err, sizeof(err)))
-            sLocalHasCustomBlob = TRUE;
+        if (LoadLocalPack(gMpConfig.customSprite, err, sizeof(err)))
+            gMpConfig.app.hasCustom = TRUE;
         else
-            printf("[mp] custom sprite not loaded: %s\n", err);
+            printf("[mp] sprite pack not loaded: %s\n", err);
     }
-    if (gMpConfig.app.base == MP_BASE_CUSTOM && !sLocalHasCustomBlob)
-        gMpConfig.app.base = MP_BASE_DEFAULT;
-    gMpConfig.app.hasCustom = sLocalHasCustomBlob;
+    MP_Avatar_RefreshPackList();
     sAvatarInit = TRUE;
-}
-
-const u8 *MP_Avatar_LocalCustomBlob(void)
-{
-    return sLocalHasCustomBlob ? sLocalCustomBlob : NULL;
-}
-
-u32 MP_Avatar_LocalCustomBlobSize(void)
-{
-    return sLocalHasCustomBlob ? MP_CUSTOM_BLOB_SIZE : 0;
-}
-
-bool8 MP_Avatar_IsValidBlob(const u8 *data, u32 size)
-{
-    return data != NULL && size == MP_CUSTOM_BLOB_SIZE;
 }
 
 static struct MpAppearance GetLocalAppearance(void)
 {
     struct MpAppearance app = gMpConfig.app;
     app.gender = gSaveBlock2Ptr->playerGender;
-    if (app.base == MP_BASE_DEFAULT)
+    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM)
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     return app;
 }
@@ -714,8 +911,8 @@ bool8 MP_LocalUsesCustomAvatar(void)
     if (!sAvatarInit)
         return FALSE;
     app = GetLocalAppearance();
-    if (app.base == MP_BASE_CUSTOM)
-        return sLocalHasCustomBlob;
+    if (PackHasState(LocalPack(), ST_FOOT))
+        return TRUE;
     return !((app.base == MP_BASE_BRENDAN && app.gender == MALE) || (app.base == MP_BASE_MAY && app.gender == FEMALE));
 }
 
@@ -734,16 +931,48 @@ const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId)
     return &sMpGfxInfo[slot];
 }
 
-// Rebuilds the local palettes and custom avatar graphics info
+// Sprite pack replacements for the player's bike/surf/... graphics ids
+const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
+{
+    u8 st, g;
+    const struct MpPack *pack = LocalPack();
+    if (!pack || !sAvatarInit)
+        return NULL;
+    for (st = ST_MACH_BIKE; st < ST_COUNT; st++)
+    {
+        for (g = 0; g < GENDER_COUNT; g++)
+        {
+            if (sStateGfxIds[st][g] != graphicsId)
+                continue;
+            if (!PackHasState(pack, st))
+                return NULL;
+            if (sLocalStateBuilt[st] != sLocalVersion + 1)
+            {
+                struct MpAppearance app = GetLocalAppearance();
+                struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[LOCAL_STATE(st)];
+                BuildStateInfo(LOCAL_STATE(st), &app, pack, st);
+                info->paletteSlot = PALSLOT_PLAYER;
+                info->paletteTag = (st == ST_UNDERWATER) ? OBJ_EVENT_PAL_TAG_MP_PACK_DIVE : OBJ_EVENT_PAL_TAG_MP_PACK;
+                sLocalStateBuilt[st] = sLocalVersion + 1;
+            }
+            return &sMpGfxInfo[LOCAL_STATE(st)];
+        }
+    }
+    return NULL;
+}
+
+// Rebuilds the local palettes and graphics
 static void RebuildLocal(void)
 {
-    struct MpAppearance app;
-    struct MpAppearance genderApp;
+    struct MpAppearance app, genderApp;
+    const struct MpPack *pack;
 
     MP_Avatar_Init();
     app = GetLocalAppearance();
+    pack = LocalPack();
+    sLocalVersion++;
 
-    // Bike/surf/etc sprites use the save file gender's palette, recolored
+    // Default bike/surf/etc sprites use the save file gender's palette, recolored
     genderApp = app;
     genderApp.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     memcpy(sLocalPalBrendan, sOrigPalBrendan, 32);
@@ -753,8 +982,17 @@ static void RebuildLocal(void)
     else
         ApplyRecolor(&genderApp, sLocalPalBrendan);
 
-    MP_Avatar_GetPalette(&app, MP_Avatar_LocalCustomBlob(), MP_AVATAR_FOOT, sLocalPalCustom);
-    BuildGfxInfo(0, &app, MP_Avatar_LocalCustomBlob(), MP_AVATAR_FOOT);
+    StatePalette(&app, ST_FOOT, sLocalPalCustom);
+    if (pack)
+    {
+        PackPalette(&app, pack, ST_FOOT, sLocalPalPack);
+        PackPalette(&app, pack, ST_UNDERWATER, sLocalPalPackDive);
+    }
+
+    BuildStateInfo(0, &app, pack, ST_FOOT);
+    sMpGfxInfo[0].paletteSlot = PALSLOT_PLAYER;
+    sMpGfxInfo[0].paletteTag = PackHasState(pack, ST_FOOT) ? OBJ_EVENT_PAL_TAG_MP_PACK : OBJ_EVENT_PAL_TAG_MP_LOCAL;
+    memset(sLocalStateBuilt, 0, sizeof(sLocalStateBuilt));
 }
 
 // Rebuilds the local avatar and refreshes the player sprite
@@ -772,133 +1010,238 @@ void MP_Avatar_ApplyLocal(void)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Remote players
+
 void MP_Avatar_BuildRemote(u8 id)
 {
     struct MpPlayer *p = &gMpPlayers[id];
     struct MpAppearance app = p->app;
-    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT)
+    struct MpPack buf;
+    const struct MpPack *pack = RemotePack(id, &buf);
+    u8 mode = p->hasState ? p->state.avatarMode : MP_AVATAR_FOOT;
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[1 + id];
+
+    if (mode >= ST_COUNT)
+        mode = ST_FOOT;
+    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT || app.base == MP_BASE_CUSTOM)
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
-    if (app.base == MP_BASE_CUSTOM && !p->customGfx)
-        app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
-    BuildGfxInfo(1 + id, &app, p->customGfx, p->hasState ? p->state.avatarMode : MP_AVATAR_FOOT);
+    BuildStateInfo(1 + id, &app, pack, mode);
+    // The overworld code assigns the real palette slot after spawning
+    info->paletteSlot = PALSLOT_NPC_1;
+    info->paletteTag = 0x1380 + 1 + id;
+    info->disableReflectionPaletteLoad = TRUE;
 }
 
 // ---------------------------------------------------------------------------
-// Custom PNG sprite sheets.
-// Layout: 16x32 frames side by side. 9 frames (144x32, walking only; running
-// reuses them) or 18 frames (288x32, 9 walking + 9 running), in the same order
-// as graphics/object_events/pics/people/brendan/walking.png + running.png.
-// Up to 15 colors plus transparency. Transparent pixels (alpha < 128), or the
-// color of the top-left pixel when the image has no alpha, become color 0.
+// Trainer pictures (trainer card, battles)
 
-bool8 MP_Avatar_LoadCustomPng(const char *path, u8 *blob, char *err, int errLen)
+u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
 {
-    int w, h, comp, frames, x, y, i;
-    unsigned char *px;
-    u32 colors[16];
-    int numColors = 1;
-    bool8 hasAlpha = FALSE;
-    u32 keyColor;
-    u16 *pal = (u16 *)(blob + MP_CUSTOM_TILES_SIZE);
+    const struct MpSpriteEntry *e;
+    switch (app->base)
+    {
+    case MP_BASE_BRENDAN:    return TRAINER_PIC_BRENDAN;
+    case MP_BASE_MAY:        return TRAINER_PIC_MAY;
+    case MP_BASE_RS_BRENDAN: return TRAINER_PIC_RS_BRENDAN;
+    case MP_BASE_RS_MAY:     return TRAINER_PIC_RS_MAY;
+    case MP_BASE_NPC:
+        e = MP_Avatar_FindCatalog(app->gfxId);
+        if (e && e->frontPic != MP_PIC_NONE)
+            return e->frontPic;
+        break;
+    }
+    return 0xFFFF;
+}
+
+// Loads a pack's FRONT picture into runtime slot 0 (local) or 1 (opponent)
+static void LoadPackFront(const struct MpAppearance *app, const struct MpPack *pack, int which)
+{
+    u16 pal[16];
+    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+    memcpy(pal, pack->pal[PACK_PAL_FRONT], 32);
+    CountTileUsage(pack->slot[PACK_FRONT], TRAINER_PIC_SIZE, counts);
+    CountHeadAndBody(pack->slot[PACK_FRONT], 8, 8, head, body);
+    AutoRecolor(app, pal, counts, body, head);
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[which], pack->slot[PACK_FRONT], TRAINER_PIC_SIZE);
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[which], pal, 32);
+}
+
+u16 MP_Avatar_LocalFrontPic(void)
+{
+    const struct MpPack *pack = LocalPack();
+    struct MpAppearance app = GetLocalAppearance();
+    if (pack && pack->slot[PACK_FRONT])
+    {
+        LoadPackFront(&app, pack, 0);
+        return TRAINER_PIC_MP_LOCAL;
+    }
+    return MP_Avatar_FrontPicFor(&gMpConfig.app);
+}
+
+u16 MP_Avatar_RemoteFrontPic(u8 id)
+{
+    struct MpPack buf;
+    const struct MpPack *pack;
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return 0xFFFF;
+    pack = RemotePack(id, &buf);
+    if (pack && pack->slot[PACK_FRONT])
+    {
+        LoadPackFront(&gMpPlayers[id].app, pack, 1);
+        return TRAINER_PIC_MP_OPPONENT;
+    }
+    return MP_Avatar_FrontPicFor(&gMpPlayers[id].app);
+}
+
+u16 MP_LocalFrontPicOr(u16 defaultPic)
+{
+    u16 pic = MP_Avatar_LocalFrontPic();
+    return pic == 0xFFFF ? defaultPic : pic;
+}
+
+u16 MP_Avatar_LocalBackPic(void)
+{
+    const struct MpPack *pack = LocalPack();
+    const struct MpSpriteEntry *e;
+
+    if (pack && pack->slot[PACK_BACK])
+    {
+        struct MpAppearance app = GetLocalAppearance();
+        u16 pal[16];
+        u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+        memcpy(gMpTrainerBackTiles, pack->slot[PACK_BACK], sizeof(gMpTrainerBackTiles));
+        memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
+        CountTileUsage(pack->slot[PACK_BACK], TRAINER_PIC_SIZE, counts);
+        CountHeadAndBody(pack->slot[PACK_BACK], 8, 8, head, body);
+        AutoRecolor(&app, pal, counts, body, head);
+        MP_Pack_WriteLz77Literal((u8 *)gMpTrainerBackPalLz, pal, 32);
+        return TRAINER_BACK_PIC_MP_LOCAL;
+    }
+    switch (gMpConfig.app.base)
+    {
+    case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
+    case MP_BASE_MAY:        return TRAINER_BACK_PIC_MAY;
+    case MP_BASE_RS_BRENDAN: return TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN;
+    case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
+    case MP_BASE_NPC:
+        e = MP_Avatar_FindCatalog(gMpConfig.app.gfxId);
+        if (e && e->backPic != MP_PIC_NONE)
+            return e->backPic;
+        break;
+    }
+    return 0xFFFF;
+}
+
+u16 MP_LocalBackPicOr(u16 defaultPic)
+{
+    u16 pic = MP_Avatar_LocalBackPic();
+    return pic == 0xFFFF ? defaultPic : pic;
+}
+
+bool8 MP_LocalHidesTrainerBack(void)
+{
+    return gMpConfig.app.base == MP_BASE_NPC && MP_Avatar_LocalBackPic() == 0xFFFF;
+}
+
+// ---------------------------------------------------------------------------
+// Sprite packs: exporting for the editor, installing dropped files
+
+static void EnsurePackDir(void)
+{
+#ifdef _WIN32
+    _mkdir(PACK_DIR);
+#else
+    mkdir(PACK_DIR, 0755);
+#endif
+}
+
+// Writes the current character (with the active pack) as an editable PNG
+bool8 MP_Avatar_ExportLocal(char *pathOut, int len)
+{
+    struct MpAppearance app = GetLocalAppearance();
+    char name[40];
+    EnsurePackDir();
+    MP_Avatar_SpriteConfigName(&app, name, sizeof(name));
+    if (LocalPack() && gMpConfig.customSprite[0])
+        snprintf(pathOut, len, "%s", gMpConfig.customSprite); // edit the pack in place
+    else
+        snprintf(pathOut, len, "%s/my_%s.png", PACK_DIR, name);
+    return MP_Pack_Export(pathOut, app.base, app.gfxId, app.gender, LocalPack());
+}
+
+static bool8 FileExists(const char *path)
+{
     FILE *f = fopen(path, "rb");
-    unsigned char *fileData;
-    long fileSize;
-
-    if (!f)
-    {
-        snprintf(err, errLen, "cannot open %s", path);
-        return FALSE;
-    }
-    fseek(f, 0, SEEK_END);
-    fileSize = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    fileData = malloc(fileSize);
-    if (fread(fileData, 1, fileSize, f) != (size_t)fileSize)
-    {
+    if (f)
         fclose(f);
-        free(fileData);
-        snprintf(err, errLen, "cannot read %s", path);
+    return f != NULL;
+}
+
+// Copies a dropped PNG into the sprites folder and wears it.
+// Returns FALSE (with a reason) when the file isn't a sprite sheet.
+bool8 MP_Avatar_InstallPack(const char *src, char *err, int errLen)
+{
+    u32 size;
+    u8 *blob = MP_Pack_LoadFile(src, &size, err, errLen);
+    const char *base = src, *p;
+    char dst[200], stem[96];
+    int i, n = 0;
+    FILE *in, *out;
+    u16 choice;
+
+    if (!blob)
+        return FALSE;
+    free(blob);
+    for (p = src; *p; p++)
+        if (*p == '/' || *p == '\\')
+            base = p + 1;
+    for (p = base; *p && *p != '.' && n < 60; p++)
+        stem[n++] = (isalnum((unsigned char)*p) || *p == '_' || *p == '-') ? *p : '_';
+    stem[n] = 0;
+    if (n == 0)
+        snprintf(stem, sizeof(stem), "sprite");
+    EnsurePackDir();
+    snprintf(dst, sizeof(dst), "%s/%s.png", PACK_DIR, stem);
+    // Same file dropped again (e.g. re-saved from the editor): replace it
+    in = fopen(src, "rb");
+    if (!in)
+    {
+        snprintf(err, errLen, "can't read %s", src);
         return FALSE;
     }
-    fclose(f);
-    px = stbi_load_from_memory(fileData, (int)fileSize, &w, &h, &comp, 4);
-    free(fileData);
-    if (!px)
+    if (FileExists(dst) && strcmp(dst, src) != 0)
+        remove(dst);
+    out = fopen(dst, "wb");
+    if (out)
     {
-        snprintf(err, errLen, "%s is not a valid PNG", path);
+        char buf[4096];
+        size_t got;
+        while ((got = fread(buf, 1, sizeof(buf), in)) > 0)
+            fwrite(buf, 1, got, out);
+        fclose(out);
+    }
+    fclose(in);
+    if (!out)
+    {
+        snprintf(err, errLen, "can't write %s", dst);
         return FALSE;
     }
-    if (h != 32 || (w != 144 && w != 288))
+    MP_Avatar_RefreshPackList();
+    for (i = 0; i < sPackFileCount; i++)
+        if (strcmp(sPackFiles[i], dst) == 0)
+            break;
+    if (i == sPackFileCount)
     {
-        snprintf(err, errLen, "sprite sheet must be 144x32 or 288x32 (got %dx%d)", w, h);
-        stbi_image_free(px);
+        snprintf(err, errLen, "sprites folder is full");
         return FALSE;
     }
-    frames = w / 16;
-    for (i = 0; i < w * h; i++)
-        if (px[i * 4 + 3] < 255)
-            hasAlpha = TRUE;
-    keyColor = px[0] | (px[1] << 8) | (px[2] << 16);
-    memset(blob, 0, MP_CUSTOM_BLOB_SIZE);
-    colors[0] = 0xFFFFFFFF;
-
-    for (y = 0; y < 32; y++)
+    choice = NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + i;
+    MP_Avatar_SetChoice(&gMpConfig.app, choice);
+    if (!gMpConfig.app.hasCustom)
     {
-        for (x = 0; x < w; x++)
-        {
-            unsigned char *p = px + (y * w + x) * 4;
-            u32 rgb = p[0] | (p[1] << 8) | (p[2] << 16);
-            int index = 0, frame, fx, tile, tx, ty;
-            u8 *tileData;
-            bool8 transparent = hasAlpha ? (p[3] < 128) : (rgb == keyColor);
-
-            if (!transparent)
-            {
-                // Quantize to 5 bits per channel to merge near-identical colors
-                u32 q = (p[0] >> 3) | ((p[1] >> 3) << 5) | ((p[2] >> 3) << 10);
-                for (index = 1; index < numColors; index++)
-                    if (colors[index] == q)
-                        break;
-                if (index == numColors)
-                {
-                    if (numColors == 16)
-                    {
-                        snprintf(err, errLen, "sprite sheet has more than 15 colors");
-                        stbi_image_free(px);
-                        return FALSE;
-                    }
-                    colors[numColors++] = q;
-                }
-            }
-            frame = x / 16;
-            fx = x % 16;
-            tx = fx / 8;
-            ty = y / 8;
-            tile = ty * 2 + tx;
-            tileData = blob + frame * 256 + tile * 32;
-            {
-                int pxIndex = (y % 8) * 8 + (fx % 8);
-                if (pxIndex & 1)
-                    tileData[pxIndex / 2] |= index << 4;
-                else
-                    tileData[pxIndex / 2] |= index;
-            }
-        }
-    }
-    stbi_image_free(px);
-
-    if (frames == 9)
-        memcpy(blob + 9 * 256, blob, 9 * 256);
-
-    pal[0] = RGB(14, 24, 20);
-    for (i = 1; i < 16; i++)
-        pal[i] = (i < numColors) ? (u16)colors[i] : 0;
-    // Nametags draw with colors 14 (fill) and 15 (outline); keep them readable
-    // only if the sheet doesn't use them.
-    if (numColors <= 14)
-    {
-        pal[14] = RGB(31, 31, 31);
-        pal[15] = RGB(0, 0, 0);
+        snprintf(err, errLen, "couldn't load %s", dst);
+        return FALSE;
     }
     return TRUE;
 }
