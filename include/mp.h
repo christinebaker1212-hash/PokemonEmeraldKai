@@ -198,6 +198,7 @@ bool8 MP_IsLocalFree(void);
 u8 MP_GetPartyTopLevel(void);
 void MP_GetLocalState(struct MpState *state);
 void MP_TriggerLocalEmote(u8 kind);
+void MP_Emote_FromStick(u8 dir);
 u8 MP_ConnectedCount(void);
 
 // mp_avatar.c

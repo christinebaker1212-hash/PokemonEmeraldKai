@@ -31,6 +31,12 @@ SDL_Thread *mainLoopThread;
 SDL_sem *vBlankSemaphore;
 SDL_atomic_t isFrameAvailable;
 bool speedUp = false;
+static void UpdateTimeScale(void);
+// Moemon Kai PC: game controllers (src/platform/gamepad.c)
+void Gamepad_Init(void);
+int Gamepad_HandleEvent(const SDL_Event *e);
+u16 Gamepad_Poll(int *fastForward);
+static bool sPadFastForward;
 bool isRunning = true;
 bool paused = false;
 double simTime = 0;
@@ -119,6 +125,11 @@ int main(int argc, char **argv)
 
     if (Display_Init("Moemon Emerald Kai Co-op") != 0)
         return 1;
+    {
+        void Gamepad_Init(void);
+        if (!sTestMode)
+            Gamepad_Init();
+    }
 
     simTime = curGameTime = lastGameTime = SDL_GetPerformanceCounter();
 
@@ -369,6 +380,8 @@ void ProcessEvents(void)
     {
         if (Display_HandleEvent(&event)) // F11 / Alt+Enter fullscreen, resizes
             continue;
+        if (Gamepad_HandleEvent(&event)) // controllers plugged in / out
+            continue;
         switch (event.type)
         {
         case SDL_QUIT:
@@ -391,7 +404,7 @@ void ProcessEvents(void)
                 if (speedUp)
                 {
                     speedUp = false;
-                    timeScale = 1.0;
+                    UpdateTimeScale();
                     //SDL_ClearQueuedAudio(1);
                     //SDL_PauseAudio(0);
                 }
@@ -440,7 +453,7 @@ void ProcessEvents(void)
                 if (!speedUp)
                 {
                     speedUp = true;
-                    timeScale = 5.0;
+                    UpdateTimeScale();
                     //SDL_PauseAudio(1);
                 }
                 break;
@@ -450,73 +463,32 @@ void ProcessEvents(void)
     }
 }
 
-#ifdef _WIN32
-#define STICK_THRESHOLD 0.5f
-u16 GetXInputKeys()
+
+static void UpdateTimeScale(void)
 {
-    XINPUT_STATE state;
-    ZeroMemory(&state, sizeof(XINPUT_STATE));
-
-    DWORD dwResult = XInputGetState(0, &state);
-    u16 xinputKeys = 0;
-
-    if (dwResult == ERROR_SUCCESS)
-    {
-        /* A */      xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) >> 12;
-        /* B */      xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) >> 13;
-        /* Start */  xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) >> 1;
-        /* Select */ xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) >> 3;
-        /* L */      xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) << 1;
-        /* R */      xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) >> 1;
-        /* Up */     xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) << 6;
-        /* Down */   xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) << 6;
-        /* Left */   xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) << 3;
-        /* Right */  xinputKeys |= (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) << 1;
-
-
-        /* Control Stick */
-        float xAxis = (float)state.Gamepad.sThumbLX / (float)SHRT_MAX;
-        float yAxis = (float)state.Gamepad.sThumbLY / (float)SHRT_MAX;
-
-        if (xAxis < -STICK_THRESHOLD) xinputKeys |= DPAD_LEFT;
-        if (xAxis >  STICK_THRESHOLD) xinputKeys |= DPAD_RIGHT;
-        if (yAxis < -STICK_THRESHOLD) xinputKeys |= DPAD_DOWN;
-        if (yAxis >  STICK_THRESHOLD) xinputKeys |= DPAD_UP;
-
-
-        /* Speedup */
-        // Note: 'speedup' variable is only (un)set on keyboard input
-        double oldTimeScale = timeScale;
-        timeScale = (state.Gamepad.bRightTrigger > 0x80 || speedUp) ? 5.0 : 1.0;
-
-        if (oldTimeScale != timeScale)
-        {
-            if (timeScale > 1.0)
-            {
-                SDL_PauseAudio(1);
-            }
-            else
-            {
-                SDL_ClearQueuedAudio(1);
-                SDL_PauseAudio(0);
-            }
-        }
-    }
-
-    return xinputKeys;
+    double want = (speedUp || sPadFastForward) ? 5.0 : 1.0;
+    timeScale = want;
 }
-#endif // _WIN32
 
 u16 Platform_GetKeyInput(void)
 {
+    int ff = 0;
+    u16 padKeys;
     if (sTestMode)
-        return sTestKeys;
-#ifdef _WIN32
-    u16 gamepadKeys = GetXInputKeys();
-    return (gamepadKeys != 0) ? gamepadKeys : keys;
-#endif
-
-    return keys;
+    {
+        int Gamepad_TestActive(void);
+        if (!Gamepad_TestActive())
+            return sTestKeys;
+        SDL_JoystickUpdate();
+        return sTestKeys | Gamepad_Poll(&ff);
+    }
+    padKeys = Gamepad_Poll(&ff);
+    if ((bool)ff != sPadFastForward)
+    {
+        sPadFastForward = ff;
+        UpdateTimeScale();
+    }
+    return keys | padKeys;
 }
 
 void VDraw(void)
@@ -840,6 +812,14 @@ static void TestHarnessStep(void)
             Display_TestCommand(arg, n);
             printf("[test] frame %lu: display %s %d\n", sFrameCounter, arg, n);
             fflush(stdout);
+        }
+        else if (strcmp(cmd, "vpad") == 0 || strcmp(cmd, "vbtn") == 0 || strcmp(cmd, "vaxis") == 0 || strcmp(cmd, "vuse") == 0)
+        {
+            // virtual controller: vpad [nintendo] / vbtn south|east|west|north|start|lb|... 0|1 / vaxis lx|ly|rx|ry|lt|rt -100..100
+            void Gamepad_TestCommand(const char *cmd, const char *arg, int value);
+            int v = 0;
+            sscanf(line, "%*s %*s %d", &v);
+            Gamepad_TestCommand(cmd, arg, v);
         }
         else if (strcmp(cmd, "log") == 0)
         {

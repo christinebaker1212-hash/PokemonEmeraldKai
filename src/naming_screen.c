@@ -2100,6 +2100,12 @@ static void PrintControls(void)
     CopyWindowToVram(sNamingScreen->windows[WIN_BANNER], COPYWIN_FULL);
 }
 
+// Moemon Kai PC: lets the controller code know the keyboard screen is up
+bool8 NamingScreen_IsActive(void)
+{
+    return gMain.callback2 == CB2_NamingScreen;
+}
+
 static void CB2_NamingScreen(void)
 {
     RunTasks();

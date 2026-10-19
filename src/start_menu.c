@@ -110,7 +110,7 @@ static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuCoopCallback(void);
 static const u8 sText_MenuCoop[] = _("CO-OP");
 static bool8 StartMenuDisplayCallback(void); // Moemon Kai PC
-static const u8 sText_MenuDisplay[] = _("DISPLAY");
+static const u8 sText_MenuDisplay[] = _("SETTINGS");
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);

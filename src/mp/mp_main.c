@@ -434,6 +434,13 @@ void MP_TriggerLocalEmote(u8 kind)
     sEmoteCounter = (sEmoteCounter + 1) & 0xF;
 }
 
+// Right stick flick on a controller (0 up, 1 right, 2 down, 3 left)
+void MP_Emote_FromStick(u8 dir)
+{
+    (void)dir;
+    MP_TriggerLocalEmote(MP_EMOTE_EXCLAMATION);
+}
+
 static struct MpState sLastLocalState;
 
 void MP_GetLocalState(struct MpState *s)

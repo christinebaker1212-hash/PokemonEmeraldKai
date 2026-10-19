@@ -21,6 +21,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "platform/gamepad.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "link.h"
@@ -332,6 +333,7 @@ static void Task_JoinCheck(u8 taskId)
             break;
         }
         SetNameVar(sCoop.requester);
+        Gamepad_Rumble(40, 200);
         StringExpandPlaceholders(sText, sText_JoinPrompt);
         ShowFieldMessage(sText);
         sCoop.prompting = TRUE;

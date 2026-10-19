@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "platform/gamepad.h"
 #include "battle.h"
 #include "battle_setup.h"
 #include "battle_transition.h"
@@ -1238,6 +1239,7 @@ static const u8 *ConfigureTrainerBattle(const u8 *data)
 
 void ConfigureAndSetUpOneTrainerBattle(u8 trainerObjEventId, const u8 *trainerScript)
 {
+    Gamepad_Rumble(40, 150); // Moemon Kai PC: spotted by a trainer
     gSelectedObjectEvent = trainerObjEventId;
     gSpecialVar_LastTalked = gObjectEvents[trainerObjEventId].localId;
     BattleSetup_ConfigureTrainerBattle(trainerScript + 1);

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "platform/gamepad.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_transition.h"
@@ -1026,6 +1027,7 @@ static void UNUSED TestBattleTransition(u8 transitionId)
 
 void BattleTransition_StartOnField(u8 transitionId)
 {
+    Gamepad_Rumble(70, 300); // Moemon Kai PC: a battle starts
     gMain.callback2 = CB2_OverworldBasic;
     LaunchBattleTransitionTask(transitionId);
 }
