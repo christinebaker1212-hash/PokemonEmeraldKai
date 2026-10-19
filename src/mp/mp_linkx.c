@@ -793,7 +793,7 @@ void MP_Linkx_Update(void)
 // CO-OP > UNION ROOM
 
 enum { SC_HUB, SC_PICK, SC_DAYCARE, SC_WAIT };
-enum { HUB_CARD, HUB_BASE, HUB_MIX, HUB_DAYCARE, HUB_BACK, HUB_COUNT };
+enum { HUB_CARD, HUB_BASE, HUB_MIX, HUB_DAYCARE, HUB_BLENDER, HUB_CRUSH, HUB_BACK, HUB_COUNT };
 
 static EWRAM_DATA struct
 {
@@ -836,12 +836,14 @@ static void Draw(void)
     {
     case SC_HUB:
     {
-        static const char *const sRows[HUB_COUNT] = {"TRAINER CARDS", "VISIT A SECRET BASE", "MIX RECORDS", "DAY CARE", "BACK"};
+        static const char *const sRows[HUB_COUNT] = {"TRAINER CARDS", "VISIT A SECRET BASE", "MIX RECORDS", "DAY CARE", "BERRY BLENDER", "BERRY CRUSH", "BACK"};
         static const char *const sHelp[HUB_COUNT] = {
             "Look at a friend's TRAINER CARD.",
             "Walk into a friend's SECRET BASE, wherever you are.",
             "TV shows, SECRET BASES and more mix by themselves while friends are online. Mix now?",
             "A POKEMON alone in your DAY CARE can make an EGG with one alone in a friend's.",
+            "Blend BERRIES into POKEBLOCKS with friends, wherever you are.",
+            "Mash A with friends to crush BERRIES into BERRY POWDER.",
             "Back to the CO-OP menu.",
         };
         MpUi_Begin("UNION ROOM");
@@ -1065,6 +1067,22 @@ static void Task_Union(u8 taskId)
         }
         else if (sUi.cursor == HUB_DAYCARE)
             Go(SC_DAYCARE);
+        else if (sUi.cursor == HUB_BLENDER || sUi.cursor == HUB_CRUSH)
+        {
+            u8 which = sUi.cursor;
+            if (gMain.callback2 != CB2_Overworld)
+            {
+                PlaySE(SE_FAILURE);
+                snprintf(sUi.note, sizeof(sUi.note), "Head outside first.");
+                break;
+            }
+            CloseUi(taskId);
+            if (which == HUB_CRUSH)
+                MP_Minigame_HostCrush();
+            else
+                MP_Minigame_HostBlender();
+            return;
+        }
         break;
     case SC_PICK:
         if (sUi.cursor >= sUi.friendCount)

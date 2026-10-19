@@ -37,6 +37,19 @@
 #include "constants/items.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "mp.h"
+
+// Moemon Co-op: BERRY CRUSH with friends online. These link calls go to the
+// relay stand-in in mp_minigame.c while a co-op game is on.
+#define GetLinkPlayerCount()         (MP_Crush_Active() ? MP_Crush_NumPlayers() : GetLinkPlayerCount())
+#define GetMultiplayerId()           (MP_Crush_Active() ? MP_Crush_LocalSlot() : GetMultiplayerId())
+#define Rfu_SetLinkStandbyCallback() (MP_Crush_Active() ? MP_Crush_Standby() : Rfu_SetLinkStandbyCallback())
+#define SetCloseLinkCallback()       (MP_Crush_Active() ? MP_Crush_Standby() : SetCloseLinkCallback())
+#define IsLinkTaskFinished()         (MP_Crush_Active() ? MP_Crush_TaskFinished() : IsLinkTaskFinished())
+#define SendBlock(a, b, c)           (MP_Crush_Active() ? MP_Crush_SendBlock((b), (c)) : SendBlock((a), (b), (c)))
+#define GetBlockReceivedStatus()     (MP_Crush_Active() ? MP_Crush_BlockStatus() : GetBlockReceivedStatus())
+#define ResetBlockReceivedFlags()    (MP_Crush_Active() ? MP_Crush_ResetBlocks() : ResetBlockReceivedFlags())
+#define Rfu_SendPacket(p)            (MP_Crush_Active() ? MP_Crush_SendPacket(p) : Rfu_SendPacket(p))
 
 #define MAX_TIME (10 * 60 * 60) // Timer can go up to 9:59:59
 
@@ -974,6 +987,7 @@ static u32 QuitBerryCrush(MainCallback exitCallback)
     DestroyTask(sGame->taskId);
     FREE_AND_SET_NULL(sGame);
     SetMainCallback2(exitCallback);
+    MP_Crush_Finish(); // Moemon Co-op
     if (exitCallback == CB2_ReturnToField)
     {
         gTextFlags.autoScroll = TRUE;
@@ -997,7 +1011,7 @@ void StartBerryCrush(MainCallback exitCallback)
     u8 playerCount = 0;
     u8 multiplayerId;
 
-    if (!gReceivedRemoteLinkPlayers || gWirelessCommType == 0)
+    if (!MP_Crush_Active() && (!gReceivedRemoteLinkPlayers || gWirelessCommType == 0))
     {
         // Link disconnected
         ERROR_EXIT(exitCallback);
@@ -1140,9 +1154,18 @@ static void MainCB(void)
 
 static void MainTask(u8 taskId)
 {
+    if (MP_Crush_Broken() && sGame->cmdCallback != Cmd_Quit) // Moemon Co-op: a friend left
+    {
+        sGame->cmdCallback = NULL;
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        QuitBerryCrush(NULL);
+        return;
+    }
     if (sGame->cmdCallback)
         sGame->cmdCallback(sGame, sGame->commandArgs);
 
+    if (!sGame) // Moemon Co-op: Cmd_Quit freed it (the GBA reads 0 at NULL and gets away with it)
+        return;
     UpdateGame(sGame);
 }
 
@@ -1245,8 +1268,11 @@ static s32 ShowGameDisplay(void)
         CopyBgTilemapBufferToVram(3);
         break;
     case 8:
-        LoadWirelessStatusIndicatorSpriteGfx();
-        CreateWirelessStatusIndicatorSprite(0,  0);
+        if (!MP_Crush_Active()) // Moemon Co-op: no Wireless Adapter
+        {
+            LoadWirelessStatusIndicatorSpriteGfx();
+            CreateWirelessStatusIndicatorSprite(0,  0);
+        }
         CreateGameSprites(game);
         SetGpuReg(REG_OFFSET_BG1VOFS, -gSpriteCoordOffsetY);
         ChangeBgX(1, 0, BG_COORD_SET);
@@ -1319,7 +1345,8 @@ static s32 HideGameDisplay(void)
         ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
         break;
     case 6:
-        DestroyWirelessStatusIndicatorSprite();
+        if (!MP_Crush_Active())
+            DestroyWirelessStatusIndicatorSprite();
         DestroyGameSprites(game);
         DigitObjUtil_Free();
         break;
@@ -1510,7 +1537,8 @@ static void UpdateInputEffects(struct BerryCrushGame *game, struct BerryCrushGam
                 gfx->sparkleSprites[i]->callback = SpriteCB_Sparkle_Init;
                 gfx->sparkleSprites[i]->x = sSparkleCoords[i][0] + 120;
                 gfx->sparkleSprites[i]->y = sSparkleCoords[i][1] + 136 - (yModifier * 4);
-                gfx->sparkleSprites[i]->x2 = sSparkleCoords[i][0] + (sSparkleCoords[i][0] / (xModifier * 4));
+                // Moemon Co-op: the GBA shrugs off dividing by 0 here; a PC crashes
+                gfx->sparkleSprites[i]->x2 = sSparkleCoords[i][0] + (xModifier ? sSparkleCoords[i][0] / (xModifier * 4) : 0);
                 gfx->sparkleSprites[i]->y2 = sSparkleCoords[i][1];
                 if (linkState->bigSparkle)
                     StartSpriteAnim(gfx->sparkleSprites[i], 1);
@@ -3236,6 +3264,8 @@ static u32 Cmd_SaveGame(struct BerryCrushGame *game, u8 *args)
     case 2:
         if (!IsLinkTaskFinished())
             return 0;
+        if (MP_Crush_Active())
+            break; // Moemon Co-op: no link save (save as usual afterwards)
         DrawDialogueFrame(0, FALSE);
         AddTextPrinterParameterized2(0, FONT_NORMAL, gText_SavingDontTurnOffPower, 0, 0, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY);
         CopyWindowToVram(0, COPYWIN_FULL);
@@ -3440,6 +3470,12 @@ static u32 Cmd_Quit(struct BerryCrushGame *game, u8 *args)
 {
     QuitBerryCrush(NULL);
     return 0;
+}
+
+// Moemon Co-op test harness: the "play again?" YES/NO is up
+bool8 MP_Crush_DebugAsking(void)
+{
+    return sGame && sGame->cmdCallback == Cmd_AskPlayAgain && sGame->cmdState == 2;
 }
 
 static void ResetGame(struct BerryCrushGame *game)

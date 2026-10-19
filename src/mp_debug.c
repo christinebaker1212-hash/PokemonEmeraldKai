@@ -142,6 +142,11 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(4);
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
+    if (strcmp(name, "crushask") == 0)
+    {
+        bool8 MP_Crush_DebugAsking(void);
+        return MP_Crush_DebugAsking();
+    }
     if (strcmp(name, "nofade") == 0)
         return !gPaletteFade.active;
     if (strcmp(name, "action") == 0)
@@ -360,6 +365,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Gift_OpenMenu(void);
         MP_Gift_OpenMenu();
+    }
+    else if (strcmp(cmd, "blender") == 0)
+    {
+        // blender - invite everyone online to the BERRY BLENDER
+        MP_Minigame_HostBlender();
+    }
+    else if (strcmp(cmd, "crush") == 0)
+    {
+        // crush - invite everyone online to BERRY CRUSH
+        MP_Minigame_HostCrush();
+    }
+    else if (strcmp(cmd, "pokeblocks") == 0)
+    {
+        int i;
+        printf("[test] pokeblocks:");
+        for (i = 0; i < POKEBLOCKS_COUNT; i++)
+            if (gSaveBlock1Ptr->pokeblocks[i].color)
+                printf(" [c%d %d/%d/%d/%d/%d f%d]", gSaveBlock1Ptr->pokeblocks[i].color, gSaveBlock1Ptr->pokeblocks[i].spicy,
+                       gSaveBlock1Ptr->pokeblocks[i].dry, gSaveBlock1Ptr->pokeblocks[i].sweet, gSaveBlock1Ptr->pokeblocks[i].bitter,
+                       gSaveBlock1Ptr->pokeblocks[i].sour, gSaveBlock1Ptr->pokeblocks[i].feel);
+        printf("  berries: cheri %d pecha %d\n", CountTotalItemQuantityInBag(ITEM_CHERI_BERRY), CountTotalItemQuantityInBag(ITEM_PECHA_BERRY));
+    }
+    else if (strcmp(cmd, "union") == 0)
+    {
+        void MP_Linkx_OpenUnion(void);
+        MP_Linkx_OpenUnion();
     }
     else if (strcmp(cmd, "gatcha") == 0)
     {

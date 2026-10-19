@@ -58,3 +58,19 @@ EventScript_MpVisitSecretBase::
 	setvar VAR_SECRET_BASE_INITIALIZED, 0
 	waitstate
 	end
+
+@ Moemon Co-op: BERRY BLENDER with friends (mp_minigame.c sets VAR_0x8004)
+EventScript_MpBerryBlender::
+	lockall
+	fadescreen FADE_TO_BLACK
+	special DoBerryBlending
+	releaseall
+	end
+
+@ Moemon Co-op: BERRY CRUSH with friends (mp_minigame.c)
+EventScript_MpBerryCrush::
+	lockall
+	fadescreen FADE_TO_BLACK
+	special MP_StartBerryCrush
+	releaseall
+	end

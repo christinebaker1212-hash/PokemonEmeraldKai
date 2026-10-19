@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "overworld.h"
 #include "berry_blender.h"
 #include "bg.h"
@@ -248,6 +249,17 @@ static s16 sDebug_GameTimeStage;
 
 COMMON_DATA u8 gInGameOpponentsNo = 0;
 
+// Moemon Co-op: our seat (friends online sit in the NPC seats, mp_minigame.c)
+static u8 sMpWaitMsg;
+static u8 BlenderLocalId(void)
+{
+    if (MP_Blender_Active())
+        return MP_Blender_LocalSlot();
+    if (gReceivedRemoteLinkPlayers)
+        return GetMultiplayerId();
+    return 0;
+}
+
 static const u16 sBlenderCenter_Pal[] = INCGFX_U16("graphics/berry_blender/center.png", ".gbapal");
 static const u8 sBlenderCenter_Tilemap[] = INCBIN_U8("graphics/berry_blender/center_map.bin");
 static const u16 sBlenderOuter_Pal[] = INCGFX_U16("graphics/berry_blender/outer.png", ".gbapal");
@@ -285,6 +297,7 @@ static const u8 *const sBlenderOpponentsNames[] =
 static const u8 sText_PressAToStart[] = _("Press the A Button to start.");
 static const u8 sText_PleaseWaitAWhile[] = _("Please wait a while.");
 static const u8 sText_CommunicationStandby[] = _("Communication standby…");
+static const u8 sText_MpWaitingForFriends[] = _("Waiting for your friends to\nchoose their BERRIES…");
 static const u8 sText_WouldLikeToBlendAnotherBerry[] = _("Would you like to blend another BERRY?");
 static const u8 sText_RunOutOfBerriesForBlending[] = _("You've run out of BERRIES for\nblending in the BERRY BLENDER.\p");
 static const u8 sText_YourPokeblockCaseIsFull[] = _("Your {POKEBLOCK} CASE is full.\p");
@@ -1269,6 +1282,8 @@ static void InitLocalPlayers(u8 opponentsNum)
         gLinkPlayers[3].language = GAME_LANGUAGE;
         break;
     }
+    if (MP_Blender_Active()) // Moemon Co-op: friends' names in the seats
+        MP_Blender_FillNames();
 }
 
 static void StartBlender(void)
@@ -1604,11 +1619,8 @@ static void SetPlayerIdMaps(void)
 static void PrintPlayerNames(void)
 {
     s32 i, xPos;
-    u32 playerId = 0;
+    u32 playerId = BlenderLocalId();
     u8 text[20];
-
-    if (gReceivedRemoteLinkPlayers)
-        playerId = GetMultiplayerId();
 
     for (i = 0; i < BLENDER_MAX_PLAYERS; i++)
     {
@@ -1641,9 +1653,19 @@ static void CB2_StartBlenderLocal(void)
     case 0:
         SetWirelessCommType0();
         InitBlenderBgs();
+        sMpWaitMsg = 0;
+        if (MP_Blender_Active())
+        {
+            // Moemon Co-op: tell friends our BERRY; theirs arrive before the throw
+            SetPlayerBerryData(MP_Blender_LocalSlot(), gSpecialVar_ItemId);
+            MP_Blender_SendBerry(gSpecialVar_ItemId);
+        }
+        else
+        {
         SetPlayerBerryData(0, gSpecialVar_ItemId);
         ConvertItemToBlenderBerry(&sBerryBlender->blendedBerries[0], gSpecialVar_ItemId);
         SetOpponentsBerryData(gSpecialVar_ItemId, sBerryBlender->numPlayers, &sBerryBlender->blendedBerries[0]);
+        }
 
         for (i = 0; i < BLENDER_MAX_PLAYERS; i++)
         {
@@ -1686,6 +1708,22 @@ static void CB2_StartBlenderLocal(void)
             sBerryBlender->mainState = 8;
         break;
     case 8:
+        if (MP_Blender_Active())
+        {
+            // Moemon Co-op: wait for everyone's BERRY
+            u16 items[BLENDER_MAX_PLAYERS];
+            if (!MP_Blender_Ready(items))
+            {
+                if (sMpWaitMsg == 0 && PrintMessage(&sBerryBlender->textState, sText_MpWaitingForFriends, 0))
+                    sMpWaitMsg = 1;
+                break;
+            }
+            for (i = 0; i < sBerryBlender->numPlayers; i++)
+                if (items[i] != ITEM_NONE)
+                    SetPlayerBerryData(i, items[i]);
+            sBerryBlender->textState = 0;
+            ClearDialogWindowAndFrameToTransparent(WIN_MSG, TRUE);
+        }
         sBerryBlender->mainState = 11;
         sBerryBlender->playerToThrowBerry = 0;
         break;
@@ -1776,7 +1814,9 @@ static void CB2_StartBlenderLocal(void)
         sBerryBlender->slowdownTimer = 0;
         SetMainCallback2(CB2_PlayBlender);
 
-        if (gSpecialVar_0x8004 == 1)
+        if (MP_Blender_Active())
+            ; // Moemon Co-op: friends play the other seats
+        else if (gSpecialVar_0x8004 == 1)
         {
             if (!FlagGet(FLAG_HIDE_LILYCOVE_CONTEST_HALL_BLEND_MASTER))
                 sBerryBlender->opponentTaskIds[0] = CreateTask(Task_HandleBerryMaster, 10);
@@ -1784,7 +1824,7 @@ static void CB2_StartBlenderLocal(void)
                 sBerryBlender->opponentTaskIds[0] = CreateTask(sLocalOpponentTasks[0], 10);
         }
 
-        if (gSpecialVar_0x8004 > 1)
+        else if (gSpecialVar_0x8004 > 1)
         {
             for (i = 0; i < gSpecialVar_0x8004; i++)
                 sBerryBlender->opponentTaskIds[i] = CreateTask(sLocalOpponentTasks[i], 10 + i);
@@ -2091,18 +2131,37 @@ static void UpdateOpponentScores(void)
     if (gSpecialVar_0x8004 != 0)
     {
         // Local game, "send" players score to itself
+        u8 me = BlenderLocalId();
         if (gSendCmd[BLENDER_COMM_SCORE] != 0)
         {
-            gRecvCmds[0][BLENDER_COMM_SCORE] = gSendCmd[BLENDER_COMM_SCORE];
-            gRecvCmds[0][BLENDER_COMM_INPUT_STATE] = LINKCMD_BLENDER_SEND_KEYS;
+            gRecvCmds[me][BLENDER_COMM_SCORE] = gSendCmd[BLENDER_COMM_SCORE];
+            gRecvCmds[me][BLENDER_COMM_INPUT_STATE] = LINKCMD_BLENDER_SEND_KEYS;
+            if (MP_Blender_Active())
+                MP_Blender_SendHit(gSendCmd[BLENDER_COMM_SCORE]);
             gSendCmd[BLENDER_COMM_SCORE] = 0;
+        }
+        if (MP_Blender_Active())
+        {
+            // Moemon Co-op: friends' hits from the relay
+            for (i = 0; i < sBerryBlender->numPlayers; i++)
+            {
+                u16 hit;
+                if (i == me)
+                    continue;
+                hit = MP_Blender_TakeHit(i);
+                if (hit != 0)
+                {
+                    gRecvCmds[i][BLENDER_COMM_SCORE] = hit;
+                    StartSpriteAnim(&gSprites[sBerryBlender->playerArrowSpriteIds[i]], sBerryBlender->playerIdToArrowId[i] + 4);
+                }
+            }
         }
 
         // Local game, simulate NPCs sending keys
         // Their actual inputs are handled by Task_HandleOpponent
-        for (i = 1; i < BLENDER_MAX_PLAYERS; i++)
+        for (i = 0; i < BLENDER_MAX_PLAYERS; i++)
         {
-            if (gRecvCmds[i][BLENDER_COMM_SCORE] != 0)
+            if (i != me && gRecvCmds[i][BLENDER_COMM_SCORE] != 0)
                 gRecvCmds[i][BLENDER_COMM_INPUT_STATE] = LINKCMD_BLENDER_SEND_KEYS;
         }
     }
@@ -2168,10 +2227,7 @@ static void HandlePlayerInput(void)
 {
     u8 arrowId;
     bool8 pressedA = FALSE;
-    u8 playerId = 0;
-
-    if (gReceivedRemoteLinkPlayers)
-        playerId = GetMultiplayerId();
+    u8 playerId = BlenderLocalId();
 
     arrowId = sBerryBlender->playerIdToArrowId[playerId];
 
@@ -2212,6 +2268,26 @@ static void HandlePlayerInput(void)
         sBerryBlender->perfectOpponents ^= 1;
 }
 
+// Moemon Co-op: the leader's arrow, speed and progress bar for everyone
+static void MpBlenderSync(void)
+{
+    u16 arrow, progress;
+    s16 speed;
+    if (!MP_Blender_Active())
+        return;
+    if (MP_Blender_IsLeader())
+    {
+        MP_Blender_SendState(sBerryBlender->arrowPos, sBerryBlender->speed, sBerryBlender->progressBarValue);
+    }
+    else if (MP_Blender_TakeState(&arrow, &speed, &progress))
+    {
+        s16 diff = (s16)(arrow - sBerryBlender->arrowPos);
+        sBerryBlender->arrowPos += diff / 2;
+        sBerryBlender->speed = speed;
+        sBerryBlender->progressBarValue = progress;
+    }
+}
+
 static void CB2_PlayBlender(void)
 {
     UpdateBlenderCenter();
@@ -2222,14 +2298,31 @@ static void CB2_PlayBlender(void)
     HandlePlayerInput();
     SetLinkDebugValues((u16)(sBerryBlender->speed), sBerryBlender->progressBarValue);
     UpdateOpponentScores();
+    MpBlenderSync();
     TryUpdateProgressBar(sBerryBlender->progressBarValue, MAX_PROGRESS_BAR);
     UpdateRPM(sBerryBlender->speed);
     RestoreBgCoords();
     ProcessLinkPlayerCmds();
-    if (sBerryBlender->gameEndState == 0 && sBerryBlender->maxProgressBarValue >= MAX_PROGRESS_BAR)
+    if (sBerryBlender->gameEndState == 0 && MP_Blender_Active() && !MP_Blender_IsLeader())
+    {
+        // Moemon Co-op: the leader says when it's over, with the final numbers
+        u16 rpm;
+        u32 time;
+        if (MP_Blender_TakeEnd(&rpm, &time, &sBerryBlender->scores[0][0]))
+        {
+            sBerryBlender->maxRPM = rpm;
+            sBerryBlender->gameFrameTime = time;
+            sBerryBlender->progressBarValue = MAX_PROGRESS_BAR;
+            sBerryBlender->gameEndState = 1;
+            SetMainCallback2(CB2_EndBlenderGame);
+        }
+    }
+    else if (sBerryBlender->gameEndState == 0 && sBerryBlender->maxProgressBarValue >= MAX_PROGRESS_BAR)
     {
         sBerryBlender->progressBarValue = MAX_PROGRESS_BAR;
         sBerryBlender->gameEndState = 1;
+        if (MP_Blender_Active())
+            MP_Blender_SendEnd(sBerryBlender->maxRPM, sBerryBlender->gameFrameTime, &sBerryBlender->scores[0][0]);
         SetMainCallback2(CB2_EndBlenderGame);
     }
 
@@ -2567,7 +2660,7 @@ static void CB2_EndBlenderGame(void)
     {
     case 1:
         m4aMPlayTempoControl(&gMPlayInfo_BGM, 256);
-        for (i = 0; i < gSpecialVar_0x8004; i++)
+        for (i = 0; i < gSpecialVar_0x8004 && !MP_Blender_Active(); i++)
         {
             DestroyTask(sBerryBlender->opponentTaskIds[i]);
         }
@@ -2655,7 +2748,7 @@ static void CB2_EndBlenderGame(void)
     case 6:
         if (PrintBlendingResults())
         {
-            if (gInGameOpponentsNo == 0)
+            if (gInGameOpponentsNo == 0 || MP_Blender_Active())
                 IncrementGameStat(GAME_STAT_POKEBLOCKS_WITH_FRIENDS);
             else
                 IncrementGameStat(GAME_STAT_POKEBLOCKS);
@@ -2664,6 +2757,13 @@ static void CB2_EndBlenderGame(void)
         }
         break;
     case 7:
+        if (MP_Blender_Active())
+        {
+            // Moemon Co-op: one blend per invite
+            sBerryBlender->yesNoAnswer = 1;
+            sBerryBlender->gameEndState = 11;
+            break;
+        }
         if (PrintMessage(&sBerryBlender->textState, sText_WouldLikeToBlendAnotherBerry, GetPlayerTextSpeedDelay()))
             sBerryBlender->gameEndState++;
         break;
@@ -2981,6 +3081,7 @@ static void CB2_CheckPlayAgainLocal(void)
                 SetMainCallback2(DoBerryBlending);
             else
                 SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            MP_Blender_Finish();
 
             FreeAllWindowBuffers();
             UnsetBgTilemapBuffer(2);
@@ -3665,10 +3766,7 @@ static void SortScores(void)
     for (i = 0; i < sBerryBlender->numPlayers; i++)
         sBerryBlender->playerPlaces[i] = places[i];
 
-    if (!gReceivedRemoteLinkPlayers)
-        playerId = 0;
-    else
-        playerId = GetMultiplayerId();
+    playerId = BlenderLocalId();
 
     for (i = 0; i < sBerryBlender->numPlayers; i++)
     {

@@ -537,8 +537,42 @@ enum {
     MPR_TOURNEY_FIRST = 140,   // battle tournament (mp_tourney.c)
     MPR_SOCIAL_FIRST = 160,    // pranks, piggyback... (mp_social.c, mp_piggy.c)
     MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
+    MPR_MINIGAME_FIRST = 200,  // berry blender / berry crush with friends (mp_minigame.c)
 };
 
+
+// mp_minigame.c: BERRY BLENDER with friends (UNION ROOM)
+void MP_Minigame_Update(void);
+void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Minigame_OnPlayerLeft(u8 id);
+void MP_Minigame_HostBlender(void);
+bool8 MP_Blender_Active(void);
+u8 MP_Blender_LocalSlot(void);
+u8 MP_Blender_NumPlayers(void);
+bool8 MP_Blender_IsLeader(void);
+void MP_Blender_FillNames(void);
+void MP_Blender_SendBerry(u16 item);
+bool8 MP_Blender_Ready(u16 *items);
+void MP_Blender_SendHit(u16 score);
+u16 MP_Blender_TakeHit(u8 slot);
+void MP_Blender_SendState(u16 arrow, s16 speed, u16 progress);
+bool8 MP_Blender_TakeState(u16 *arrow, s16 *speed, u16 *progress);
+void MP_Blender_SendEnd(u16 rpm, u32 time, const u16 *scores);
+bool8 MP_Blender_TakeEnd(u16 *rpm, u32 *time, u16 *scores);
+void MP_Blender_Finish(void);
+void MP_Minigame_HostCrush(void);
+bool8 MP_Crush_Active(void);
+u8 MP_Crush_NumPlayers(void);
+u8 MP_Crush_LocalSlot(void);
+bool8 MP_Crush_Broken(void);
+void MP_Crush_Standby(void);
+bool8 MP_Crush_TaskFinished(void);
+bool8 MP_Crush_SendBlock(const void *src, u16 size);
+u8 MP_Crush_BlockStatus(void);
+void MP_Crush_ResetBlocks(void);
+void MP_Crush_SendPacket(void *data);
+void MP_Crush_Finish(void);
+void MP_StartBerryCrush(void);
 
 // mp_linkx.c: record mixing, Secret Base visits, Trainer Cards, Day Care eggs,
 // shared roamers and weather, Hall of Fame together, the UNION ROOM page

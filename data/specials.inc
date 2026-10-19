@@ -547,3 +547,4 @@ gSpecials::
 	def_special MP_Repel_CheckAnother
 	def_special MP_Repel_UseAnother
 	def_special MP_SecretBase_FixExit
+	def_special MP_StartBerryCrush, waitstate=1
