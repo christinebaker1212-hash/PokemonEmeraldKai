@@ -34,6 +34,9 @@ spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win wit
 and move learning, loss, disconnect).
 Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.
+Phase 1 co-op: emotes/phrases (bubbles seen remotely), GO TO FRIEND, Town/Fly map heads, door
+labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge
+(test: MOEMON_DEBUG_WARP=11,3,5,3 / 11,3,5,4, MOEMON_DEBUG_PARTY=283:46, `mp badges`).
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)
