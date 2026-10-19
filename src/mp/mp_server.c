@@ -727,9 +727,15 @@ int MPServer_Start(int port, int lanDiscovery)
     return 0;
 }
 
+int MPServer_Port(void)
+{
+    return MPServer_IsRunning() ? sPort : 0;
+}
+
 void MPServer_Stop(void)
 {
     int i;
+    MPPortMap_Close(); // close the router port opened for this server
     for (i = 0; i < MAX_CONNS; i++)
         Drop(i);
     if (sListen != MP_BADSOCK)

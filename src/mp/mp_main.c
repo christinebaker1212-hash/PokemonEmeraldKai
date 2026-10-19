@@ -310,6 +310,38 @@ const char *MP_OnlineLobbyAddress(void)
     return MP_DEFAULT_LOBBY;
 }
 
+// Invite code for a game hosted on this PC: from the router's public address,
+// or (last resort) from a Radmin VPN / Hamachi address. "" when there is none.
+static char sVpnName[24];
+
+const char *MP_VpnName(void)
+{
+    return sVpnName;
+}
+
+const char *MP_InviteCode(void)
+{
+    static char sVpnCode[16];
+    static int sVpnPort;
+    if (!MPServer_IsRunning())
+        return "";
+    if (MPPortMap_State() == MP_PM_OPEN)
+        return MPPortMap_InviteCode();
+    if (MPPortMap_State() != MP_PM_FAILED)
+        return "";
+    if (sVpnPort != MPServer_Port())
+    {
+        char addr[32];
+        unsigned a, b, c, d;
+        sVpnCode[0] = 0;
+        sVpnPort = MPServer_Port();
+        if (MPNet_FindVpnAddress(addr, sizeof(addr), sVpnName, sizeof(sVpnName))
+         && sscanf(addr, "%u.%u.%u.%u", &a, &b, &c, &d) == 4)
+            MPNet_MakeInviteCode((a << 24) | (b << 16) | (c << 8) | d, sVpnPort, sVpnCode, sizeof(sVpnCode));
+    }
+    return sVpnCode;
+}
+
 bool8 MP_HasOnlineLobby(void)
 {
     return MP_OnlineLobbyAddress()[0] != 0;

@@ -116,6 +116,7 @@ int MPNet_IsValidRoomName(const char *name);
 int MPServer_Start(int port, int lanDiscovery);
 void MPServer_Poll(void);
 void MPServer_Stop(void);
+int MPServer_Port(void);
 int MPServer_IsRunning(void);
 int MPServer_PlayerCount(void);
 int MPServer_RoomCount(void);
@@ -134,6 +135,28 @@ struct MpLanRoom {
 void MPLan_StartSearch(void);         // sends a broadcast probe; call again to refresh
 int MPLan_Poll(struct MpLanRoom *out, int max); // returns the rooms found so far
 void MPLan_StopSearch(void);
+
+// Opening the host's router (src/mp/mp_portmap.c). Runs on a background thread.
+enum { MP_PM_IDLE, MP_PM_WORKING, MP_PM_OPEN, MP_PM_FAILED };
+enum { MP_PM_NONE, MP_PM_UPNP, MP_PM_NATPMP };
+enum {
+    MP_PM_ERR_NO_ROUTER,   // no UPnP / NAT-PMP answer (turned off in the router)
+    MP_PM_ERR_REFUSED,     // the router said no
+    MP_PM_ERR_CGNAT,       // the internet provider shares one address between homes
+};
+void MPPortMap_Open(int internalPort);
+void MPPortMap_Close(void);            // removes the mapping
+int MPPortMap_State(void);
+int MPPortMap_Error(void);
+int MPPortMap_Method(void);
+const char *MPPortMap_InviteCode(void);    // "K7QM-3XPA" while open, else ""
+const char *MPPortMap_PublicAddress(void);
+int MPPortMap_ExternalPort(void);
+// Invite codes: a public IPv4 address + one of 8 game ports in 8 characters
+void MPNet_MakeInviteCode(uint32_t ip, int port, char *out, int len);
+int MPNet_ParseInviteCode(const char *code, uint32_t *ip, int *port);
+// Radmin VPN (26.x) / Hamachi (25.x) adapter address, the last resort
+int MPNet_FindVpnAddress(char *out, int len, char *nameOut, int nameLen);
 
 // Logging hook (printf style). Defaults to stdout.
 void MPNet_Log(const char *fmt, ...);

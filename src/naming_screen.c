@@ -1813,6 +1813,7 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_WALDA]      = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_ROOM]     = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_PASSWORD] = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_COOP_CODE]     = DrawNormalTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -2232,6 +2233,18 @@ static const struct NamingScreenTemplate sWaldaWordsScreenTemplate =
 // Moemon Co-op
 static const u8 sText_CoopServerName[] = _("SERVER NAME?");
 static const u8 sText_CoopPassword[] = _("PASSWORD? (or leave blank)");
+static const u8 sText_CoopCode[] = _("INVITE CODE?");
+
+static const struct NamingScreenTemplate sCoopCodeTemplate =
+{
+    .copyExistingString = TRUE,
+    .maxChars = 9,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 11,
+    .title = sText_CoopCode,
+};
 
 static const struct NamingScreenTemplate sCoopRoomTemplate =
 {
@@ -2264,6 +2277,7 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_WALDA]      = &sWaldaWordsScreenTemplate,
     [NAMING_SCREEN_COOP_ROOM]     = &sCoopRoomTemplate,
     [NAMING_SCREEN_COOP_PASSWORD] = &sCoopPasswordTemplate,
+    [NAMING_SCREEN_COOP_CODE]     = &sCoopCodeTemplate,
 };
 
 static const struct OamData sOam_8x8 =

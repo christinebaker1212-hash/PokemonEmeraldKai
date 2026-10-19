@@ -24,6 +24,9 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (SDL2 native PC port)
   * `mp_coop.c`: walk-up co-op Double Battles vs NPC trainers (runs the stock
     `BATTLE_TYPE_TOWER_LINK_MULTI` link mode over `mp_battle.c`)
   * `mp_notify.c`: field notices, sprite PNG drag and drop
+  * `mp_portmap.c`: opens the host's router (UPnP IGD / NAT-PMP, background thread,
+    leased + cleaned up), CGNAT check, invite codes (public IPv4 + port in 8
+    base-32 characters), Radmin VPN / Hamachi fallback
   * `mp_overworld.c`: remote player objects, movement replay, nametags, surf blobs
   * `mp_trainer.c`: BATTLE FLAG trainer mode and the challenge handshake
   * `mp_battle.c`: network implementation of the link block API (routed from
@@ -47,7 +50,7 @@ online lobby address (players can also use `lobby.txt` or `lobby =` in the ini).
 Linux and Windows builds share `build/pc64`; clean it (or move it aside) when
 switching between them.
 
-Server: `cd tools/mp_server && gcc -O2 -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c`
+Server: `cd tools/mp_server && gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c`
 (Windows: `x86_64-w64-mingw32-gcc ... -lws2_32 -liphlpapi -static`). Deploying it:
 `tools/mp_server/DEPLOY.md`.
 

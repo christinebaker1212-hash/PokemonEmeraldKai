@@ -1,19 +1,37 @@
-# Putting the Moemon Co-op lobby online
+# The standalone Moemon Co-op server (optional)
 
-The lobby server lets players find each other by server name and carries
-their game data. It's one small program with no dependencies. It uses very
-little CPU and bandwidth: a few kilobytes per second per player, more while
-someone watches a battle.
+You don't need this to play online. When a player chooses HOST A GAME, the
+game becomes the server, opens the router by itself (UPnP / NAT-PMP) and
+shows an invite code. The port is closed again when they stop hosting.
 
-One person sets it up once. Everyone else only needs its address in
-`lobby.txt` next to the game.
+This program is for groups that want a server that's always there, even when
+the usual host is offline. It's the same server the game runs, with a lobby
+where players pick a game by name.
+
+## Easiest: on a PC at home
+
+Run `moemon_server.exe` (Windows) or `./moemon_server_linux` (Linux). It
+opens TCP port 27015 on the router automatically and prints an invite code:
+
+```
+Router port opened. Invite code for players: K7QM-3XPA  (address 203.0.113.7:27015)
+```
+
+Players type that code in JOIN A GAME > ENTER INVITE CODE, or put the
+address in `lobby.txt` to see every game on the server by name. Press Ctrl+C
+(or close the window) to stop; the router port is closed again. Use
+`--no-router` if you forward the port yourself.
+
+If it can't open the router, see "PLAYING OVER THE INTERNET" in README.txt.
+
+## Alternative: a cloud machine
 
 ## What it needs
 
 - A machine that stays on and has a public IP address.
 - TCP port **27015** open to the internet (or any port you pick with `--port`).
 
-## Option A: a free cloud machine (recommended)
+### Setting one up
 
 Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
 `e2-micro` free tier are both enough. The steps are the same everywhere:
@@ -27,7 +45,7 @@ Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
    ```sh
    sudo apt-get update && sudo apt-get install -y gcc git
    git clone <this repository> moemon && cd moemon/tools/mp_server
-   gcc -O2 -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c
+   gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c
    sudo cp moemon_server /usr/local/bin/
    ```
 
@@ -43,7 +61,7 @@ Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
    After=network-online.target
 
    [Service]
-   ExecStart=/usr/local/bin/moemon_server --port 27015
+   ExecStart=/usr/local/bin/moemon_server --port 27015 --no-router
    Restart=always
    DynamicUser=yes
 
@@ -60,7 +78,7 @@ Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
 
 6. Note the machine's **public IP** from the provider's console.
 
-## Option B: a PC at home that's always on
+### Or forward the port yourself
 
 1. Run `moemon_server.exe` (Windows) or `./moemon_server` (Linux/macOS).
    Allow it through the Windows firewall when asked.

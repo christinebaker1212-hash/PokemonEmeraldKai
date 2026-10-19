@@ -104,3 +104,9 @@ int Platform_TextInputKeyDown(int sym, int mod)
 }
 
 #endif // PLATFORM_SDL2
+
+// Moemon Co-op: put text (an invite code) on the system clipboard
+void Platform_SetClipboardText(const char *text)
+{
+    SDL_SetClipboardText(text);
+}

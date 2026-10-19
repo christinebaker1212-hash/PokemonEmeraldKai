@@ -99,6 +99,7 @@ enum {
     WORK_HOST_ONLINE,
     WORK_HOST_LOCAL,
     WORK_JOIN,
+    WORK_CODE,          // connecting to an invite code
 };
 
 // Where to go after a message
@@ -116,6 +117,7 @@ struct JoinEntry
     struct MpLanRoom room;
     bool8 isLan;
     bool8 byName;
+    bool8 byCode;
 };
 
 static EWRAM_DATA struct
@@ -144,7 +146,10 @@ static EWRAM_DATA struct
     u8 work;
     u16 workTimer;
     u8 after;
-    u8 message[200];
+    u8 message[240];
+    u8 inviteCode[WALDA_PHRASE_LENGTH + 1];
+    char codeHost[24];
+    int codePort;
     bool8 messageIsError;
     // text entry return
     u8 returnTo;               // 0 none, 1 = host name, 2 = host password, 3 = join password, 4 = join by name, 5 = join by name password
@@ -353,7 +358,14 @@ static const char *MainItemHelp(u8 item)
 {
     switch (item)
     {
-    case MAIN_CONTINUE: return "Keep playing together on this server.";
+    case MAIN_CONTINUE:
+        if (MP_InviteCode()[0])
+        {
+            static char sHelp[96];
+            snprintf(sHelp, sizeof(sHelp), "Keep playing together. Your invite code for friends: %s", MP_InviteCode());
+            return sHelp;
+        }
+        return "Keep playing together on this server.";
     case MAIN_LEAVE:    return "Disconnect and choose again.";
     case MAIN_REJOIN:   return "Join the server you played on last time.";
     case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
@@ -422,10 +434,15 @@ static void DrawWorking(void)
     case WORK_HOST_LOCAL:
         snprintf(text, sizeof(text), "Opening %s%s", room, dots[(sSetup.workTimer / 20) % 4]);
         break;
+    case WORK_CODE:
+        snprintf(text, sizeof(text), "Finding your friend's game%s", dots[(sSetup.workTimer / 20) % 4]);
+        break;
     default:
         snprintf(text, sizeof(text), "Joining %s%s", MP_Lobby_RoomName()[0] ? MP_Lobby_RoomName() : "server", dots[(sSetup.workTimer / 20) % 4]);
         break;
     }
+    if (sSetup.work == WORK_HOST_LOCAL && MP_Lobby_State() == MP_LOBBY_IN_ROOM)
+        snprintf(text, sizeof(text), "Opening your game to the internet%s", dots[(sSetup.workTimer / 20) % 4]);
     Print(WIN_MAIN, text, 4, 1 + LINE_H, sColorNormal);
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
@@ -547,6 +564,7 @@ static void BeginHosting(bool8 online)
             return;
         }
         MP_Lobby_CreateRoom(room, password, !sSetup.listed);
+        MPPortMap_Open(MPServer_Port()); // open the router so friends anywhere can join
         StartWorking(WORK_HOST_LOCAL);
     }
 }
@@ -561,10 +579,11 @@ static void RefreshJoinList(void)
     u8 prevCount = sSetup.entryCount;
 
     sSetup.entryCount = 0;
-    // First row: join a hidden server by typing its name
-    memset(&sSetup.entries[0], 0, sizeof(sSetup.entries[0]));
-    sSetup.entries[0].byName = TRUE;
-    sSetup.entryCount = 1;
+    // First rows: an invite code from a friend, or a hidden server's name
+    memset(&sSetup.entries[0], 0, sizeof(sSetup.entries[0]) * 2);
+    sSetup.entries[0].byCode = TRUE;
+    sSetup.entries[1].byName = TRUE;
+    sSetup.entryCount = 2;
 
     if (MP_Lobby_State() == MP_LOBBY_READY || MP_Lobby_ListReady())
     {
@@ -584,7 +603,7 @@ static void RefreshJoinList(void)
         bool8 dup = FALSE;
         // A server hosted by this PC through the online lobby also answers here? No:
         // only local servers answer, but skip exact duplicates just in case.
-        for (k = 1; k < sSetup.entryCount; k++)
+        for (k = 2; k < sSetup.entryCount; k++)
             if (sSetup.entries[k].isLan && strcmp(sSetup.entries[k].room.name, tmp[i].name) == 0)
                 dup = TRUE;
         if (dup)
@@ -597,8 +616,8 @@ static void RefreshJoinList(void)
     if (sSetup.joinCursor >= sSetup.entryCount)
         sSetup.joinCursor = sSetup.entryCount - 1;
     // Start on the first server when the list fills in for the first time
-    if (prevCount <= 1 && sSetup.entryCount > 1 && sSetup.joinCursor == 0)
-        sSetup.joinCursor = 1;
+    if (prevCount <= 2 && sSetup.entryCount > 2 && sSetup.joinCursor == 0)
+        sSetup.joinCursor = 2;
 }
 
 static void DrawJoin(void)
@@ -617,7 +636,9 @@ static void DrawJoin(void)
     {
         struct JoinEntry *e = &sSetup.entries[sSetup.scroll + i];
         u8 y = 1 + LINE_H * i;
-        if (e->byName)
+        if (e->byCode)
+            Print(WIN_MAIN, "ENTER INVITE CODE...", 14, y, sColorAccent);
+        else if (e->byName)
             Print(WIN_MAIN, "JOIN BY NAME...", 14, y, sColorAccent);
         else
         {
@@ -647,15 +668,17 @@ static void DrawJoin(void)
     }
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
 
-    if (sSetup.entryCount <= 1)
+    if (sSetup.joinCursor == 0)
+        help = "Type the invite code your friend sent you (like K7QM-3XPA). Works from anywhere.";
+    else if (sSetup.joinCursor == 1)
+        help = "For hidden servers: type the exact name.";
+    else if (sSetup.entryCount <= 2)
     {
         if (sSetup.onlineFailed || !MP_HasOnlineLobby())
             help = "No servers found on your home network yet. Still looking...";
         else
             help = "Looking for servers... Ask a friend to host one!";
     }
-    else if (sSetup.joinCursor == 0)
-        help = "For hidden servers: type the exact name.";
     else if (sSetup.onlineFailed)
         help = "Online lobby unreachable. Showing home network only.";
     else
@@ -732,7 +755,7 @@ static void OpenTextEntry(u8 which, u8 template, u8 *buffer)
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[FindTaskIdByFunc(Task_Setup)].data[0] = 1; // fading out to the text entry
     gTasks[FindTaskIdByFunc(Task_Setup)].data[1] = template;
-    gTasks[FindTaskIdByFunc(Task_Setup)].data[2] = (buffer == sSetup.roomName) ? 0 : 1;
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[2] = (buffer == sSetup.roomName) ? 0 : (buffer == sSetup.inviteCode) ? 2 : 1;
 }
 
 static void Finish(void)
@@ -915,6 +938,12 @@ static void HandleJoin(void)
     else if (JOY_NEW(A_BUTTON))
     {
         struct JoinEntry *e = &sSetup.entries[sSetup.joinCursor];
+        if (e->byCode)
+        {
+            memset(sSetup.inviteCode, EOS, sizeof(sSetup.inviteCode));
+            OpenTextEntry(6, NAMING_SCREEN_COOP_CODE, sSetup.inviteCode);
+            return;
+        }
         if (e->byName)
         {
             memset(sSetup.roomName, EOS, sizeof(sSetup.roomName));
@@ -941,9 +970,36 @@ static void HandleJoin(void)
     }
 }
 
+// What a home host is told: the invite code, or why there isn't one
+static void HostingMessage(char *text, int len)
+{
+    extern void Platform_SetClipboardText(const char *text);
+    const char *code = MP_InviteCode();
+    if (MPPortMap_State() == MP_PM_OPEN)
+    {
+        Platform_SetClipboardText(code);
+        snprintf(text, len, "%s is open to the world! Invite code: %s (copied). Send it to friends: they choose JOIN A GAME, then ENTER INVITE CODE.",
+                 MP_Lobby_RoomName(), code);
+    }
+    else if (code[0])
+    {
+        Platform_SetClipboardText(code);
+        snprintf(text, len, "Your router couldn't be opened, so this uses %s. Invite code: %s (copied). Friends must join your %s network first.",
+                 MP_VpnName(), code, MP_VpnName());
+    }
+    else
+    {
+        const char *why = MPPortMap_Error() == MP_PM_ERR_CGNAT ? "Your internet provider shares one address between many homes"
+                        : MPPortMap_Error() == MP_PM_ERR_REFUSED ? "Your router refused to open the game's port"
+                        : "Your router has automatic port opening (UPnP) turned off";
+        snprintf(text, len, "%s is open on your home network. %s, so friends elsewhere can't reach you. See README: UPnP / Radmin VPN.",
+                 MP_Lobby_RoomName(), why);
+    }
+}
+
 static void OnRoomJoined(void)
 {
-    char text[160];
+    char text[240];
     int i;
     const u8 *key = MP_Lobby_RoomKey();
 
@@ -956,8 +1012,7 @@ static void OnRoomJoined(void)
         snprintf(text, sizeof(text), "%s is open! Friends can join it from JOIN A GAME%s.",
                  MP_Lobby_RoomName(), sSetup.listed ? "" : " > JOIN BY NAME");
     else if (sSetup.work == WORK_HOST_LOCAL)
-        snprintf(text, sizeof(text), "%s is open on your home network. Friends on the same Wi-Fi can join it from JOIN A GAME.%s",
-                 MP_Lobby_RoomName(), MP_HasOnlineLobby() ? " (The online lobby couldn't be reached.)" : "");
+        HostingMessage(text, sizeof(text));
     else if (sSetup.fromField)
         snprintf(text, sizeof(text), "You joined %s! Your friends will appear in the world.", MP_Lobby_RoomName());
     else
@@ -975,7 +1030,52 @@ static void HandleWorking(void)
 
     if (state == MP_LOBBY_IN_ROOM)
     {
+        // Hosting at home: wait for the router (at most ~15 s)
+        if (sSetup.work == WORK_HOST_LOCAL && MPPortMap_State() == MP_PM_WORKING && sSetup.workTimer < 60 * 15)
+            return;
         OnRoomJoined();
+        return;
+    }
+    // Ask the friend's server for its game once connected (and again now and then)
+    if (sSetup.work == WORK_CODE && state == MP_LOBBY_READY && !MP_Lobby_ListReady() && (sSetup.workTimer % 45) == 1)
+        MP_Lobby_RequestList();
+    if (sSetup.work == WORK_CODE && state == MP_LOBBY_READY && MP_Lobby_ListReady())
+    {
+        struct MpLanRoom rooms[MP_LIST_MAX];
+        int n = MP_Lobby_GetList(rooms, MP_LIST_MAX);
+        struct JoinEntry *e = &sSetup.entries[0];
+        MPNet_Log("invite code: %d game(s) at %s:%d", n, sSetup.codeHost, sSetup.codePort);
+        if (n <= 0)
+        {
+            MP_Lobby_Disconnect();
+            ShowMessage("Your friend's PC answered, but nobody is hosting there right now.", TRUE, AFTER_JOIN);
+            return;
+        }
+        // The friend's own server has their one game on it
+        memset(e, 0, sizeof(*e));
+        e->room = rooms[0];
+        e->isLan = TRUE;
+        snprintf(e->room.host, sizeof(e->room.host), "%s", sSetup.codeHost);
+        e->room.port = sSetup.codePort;
+        sSetup.entryCount = 1;
+        if (e->room.version != MP_PROTOCOL_VERSION)
+        {
+            MP_Lobby_Disconnect();
+            ShowMessage(LobbyErrorText(MP_LOBBY_ERR_VERSION), TRUE, AFTER_JOIN);
+            return;
+        }
+        sSetup.pendingJoin = 0;
+        memset(sSetup.password, EOS, sizeof(sSetup.password));
+        if (e->room.flags & MP_ROOM_FLAG_LOCKED)
+            OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+        else
+            JoinEntryNow(0);
+        return;
+    }
+    if (sSetup.work == WORK_CODE && sSetup.workTimer > 60 * 12)
+    {
+        MP_Lobby_Disconnect();
+        ShowMessage("Couldn't reach your friend's game. Check the code, and ask them to make sure they're still hosting.", TRUE, AFTER_JOIN);
         return;
     }
     if (state == MP_LOBBY_ERROR)
@@ -991,7 +1091,10 @@ static void HandleWorking(void)
         if (sSetup.work == WORK_HOST_LOCAL)
             MPServer_Stop();
         MP_Lobby_Disconnect();
-        ShowMessage(LobbyErrorText(err), TRUE, sSetup.work == WORK_JOIN ? AFTER_JOIN : AFTER_HOST);
+        if (sSetup.work == WORK_CODE)
+            ShowMessage("Couldn't reach your friend's game. Check the code, and ask them to make sure they're still hosting.", TRUE, AFTER_JOIN);
+        else
+            ShowMessage(LobbyErrorText(err), TRUE, sSetup.work == WORK_JOIN ? AFTER_JOIN : AFTER_HOST);
         return;
     }
     if (JOY_NEW(B_BUTTON))
@@ -1000,7 +1103,7 @@ static void HandleWorking(void)
         MP_Lobby_Disconnect();
         if (sSetup.work == WORK_HOST_LOCAL)
             MPServer_Stop();
-        if (sSetup.work == WORK_JOIN)
+        if (sSetup.work == WORK_JOIN || sSetup.work == WORK_CODE)
             EnterJoinList();
         else
         {
@@ -1058,7 +1161,7 @@ static void Task_Setup(u8 taskId)
         if (!gPaletteFade.active)
         {
             u8 template = data[1];
-            u8 *buffer = data[2] ? sSetup.password : sSetup.roomName;
+            u8 *buffer = data[2] == 2 ? sSetup.inviteCode : data[2] ? sSetup.password : sSetup.roomName;
             DestroyTask(taskId);
             FreeAllWindowBuffers();
             DoNamingScreen(template, buffer, 0, 0, 0, CB2_ReturnFromTextEntry);
@@ -1105,6 +1208,33 @@ static void CB2_ReturnFromTextEntry(void)
         DestroyTask(FindTaskIdByFunc(Task_Setup));
         FreeAllWindowBuffers();
         DoNamingScreen(NAMING_SCREEN_COOP_PASSWORD, sSetup.password, 0, 0, 0, CB2_ReturnFromTextEntry);
+        break;
+    }
+    case 6: // invite code typed
+    {
+        char code[24], addr[48];
+        uint32_t ip;
+        int port;
+        GameToAsciiTrim(code, sSetup.inviteCode, WALDA_PHRASE_LENGTH);
+        MPNet_Log("invite code entered: \"%s\"", code);
+        sSetup.screen = SCR_JOIN;
+        if (code[0] == 0)
+        {
+            EnterJoinList();
+            break;
+        }
+        if (!MPNet_ParseInviteCode(code, &ip, &port))
+        {
+            ShowMessage("That invite code doesn't look right. Check it with your friend and try again. (It looks like K7QM-3XPA.)", TRUE, AFTER_JOIN);
+            break;
+        }
+        snprintf(addr, sizeof(addr), "%u.%u.%u.%u:%d", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255, port);
+        snprintf(sSetup.codeHost, sizeof(sSetup.codeHost), "%u.%u.%u.%u", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255);
+        sSetup.codePort = port;
+        MPLan_StopSearch();
+        MP_Lobby_Connect(addr, FALSE);
+        MP_Lobby_RequestList();
+        StartWorking(WORK_CODE);
         break;
     }
     case 5:

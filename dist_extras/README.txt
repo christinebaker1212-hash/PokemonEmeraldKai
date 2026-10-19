@@ -22,39 +22,47 @@ QUICK START
 2. Start MoemonEmeraldKaiCoop.exe and press START on the title screen.
 3. Choose:
      HOST A GAME  - type a server name (and a password if you want one),
-                    then START HOSTING.
-     JOIN A GAME  - pick your friend's server from the list, or choose
-                    JOIN BY NAME... and type the server name. Type the
-                    password if the host set one.
+                    then START HOSTING. The game opens your router by
+                    itself and shows an INVITE CODE like K7QM-3XPA.
+                    It's copied, so just paste it to your friends.
+     JOIN A GAME  - choose ENTER INVITE CODE... and type the code your
+                    friend sent, then the password if they set one.
+                    Friends on the same Wi-Fi also show up in the list.
      PLAY SOLO    - play alone. You can go online later from START > CO-OP.
 4. Load your save or start a new game. That's it.
 
 Typing works with the real keyboard (Ctrl+V pastes). The game remembers the
-last server, so next time JOIN offers it straight away.
-
-How players find each other:
-  * Same home network: servers show up in the JOIN list automatically.
-  * Over the internet: the game uses an online lobby server. One person
-    sets it up once (see "THE ONLINE LOBBY" below), writes its address in
-    lobby.txt, and shares the folder. After that nobody types any addresses
-    and nobody needs port forwarding or VPN apps.
-  * No lobby set up yet? HOST still works: the host's own PC becomes the
-    server. Friends on the same network see it in the list. Friends over
-    the internet need the host to forward TCP port 27015, and then put the
-    host's public IP address in their lobby.txt.
+last server, so next time JOIN offers it straight away. While you host, the
+invite code is also shown at the bottom of START > CO-OP.
 
 
-THE ONLINE LOBBY (one-time setup, for one person)
--------------------------------------------------
-moemon_server.exe (Windows) / moemon_server (Linux) is a small program that
-introduces players to each other and passes their game data along. Run it
-on any PC that is always on and reachable from the internet, for example a
-free cloud machine. Both are in the "server" folder, with step-by-step
-instructions in server\DEPLOY.md.
+PLAYING OVER THE INTERNET
+-------------------------
+No cloud server, port forwarding or VPN app is needed in most homes:
 
-Then open lobby.txt in this folder, replace the example line with the
-server's address (for example 203.0.113.7 or myserver.example.com, add
-:port if it isn't 27015), save, and give everyone this folder.
+  * When you host, the game asks your router to open its port (UPnP, or
+    NAT-PMP on Apple routers) and works out your home's internet address.
+    That becomes the invite code. Friends anywhere in the world type it.
+  * When you stop hosting or close the game, the port is closed again.
+    If the game ever crashes, the router closes it by itself within two
+    hours, and the next time you start the game it cleans up.
+  * Windows may ask whether to allow the game through the firewall the
+    first time you host. Choose Allow (private and public networks).
+
+If the game says it couldn't open your router:
+  1. Turn on "UPnP" in your router's settings page (often under Advanced,
+     NAT or Gaming), then host again. This fixes most cases.
+  2. If it says your internet provider shares one address between many
+     homes (called CGNAT, common on mobile and some fiber connections),
+     nobody can reach your PC directly. Let a friend with a normal
+     connection host instead, or use the last resort below.
+  3. Last resort: Radmin VPN (free). The host and every friend install it;
+     the host creates a network in it and friends join that network. Then
+     host again: the game notices Radmin VPN and gives you an invite code
+     that works inside that network.
+
+Advanced: lobby.txt can point the game at a lobby server instead (see the
+"server" folder and server\DEPLOY.md). You don't need one for normal play.
 
 
 TEAMING UP FOR A DOUBLE BATTLE
@@ -170,12 +178,12 @@ FILES
 -----
   MoemonEmeraldKaiCoop.exe   the game
   SDL2.dll                   needed by the game
-  lobby.txt                  online lobby address (see above)
+  lobby.txt                  optional lobby server address (advanced)
   moemon_coop.ini            your co-op settings (written by the game)
   moemon_display.ini         display settings (written by the game)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
-  server\                    the lobby server + DEPLOY.md (one person needs it)
+  server\                    optional standalone server + DEPLOY.md
 
 Everyone should run the same version. A different version is refused
 with a message saying so.

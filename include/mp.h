@@ -174,6 +174,8 @@ const char *MP_Lobby_RoomName(void);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_InRoom(void);
 const char *MP_OnlineLobbyAddress(void);
+const char *MP_InviteCode(void);   // for a game hosted on this PC, "" if none
+const char *MP_VpnName(void);      // "Radmin VPN" / "Hamachi" when the code uses one
 bool8 MP_HasOnlineLobby(void);
 
 // mp_setup.c (title screen HOST / JOIN / SOLO screen)
