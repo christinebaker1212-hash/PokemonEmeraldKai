@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "random.h"
 #include "mp.h"
 #include "map_name_popup.h"
 #include "platform/gamepad.h"
@@ -111,6 +112,8 @@ enum {
 #define RESULT_WAIT_FRAMES (60 * 15)
 #define LOSE_TEXT_MAX 240
 #define MODE_WILD 0xFE   // sCoop.mode of a co-op wild double
+u8 gMpWildDoublePercent = 30;   // co-op wild battles that are 2 on 2 (debug: mp wilddouble N)
+bool8 MP_RollExtraLandMon(struct Pokemon *out);   // wild_encounter.c
 
 struct LearnLater
 {
@@ -177,9 +180,14 @@ static struct
     u8 wildReply;          // 0 = none yet, MPR_COOP_WILD_OK / _NO
     u16 wildTimer;
     s8 wildFrom;           // the friend whose battle we're waiting to join, -1 = nobody
-    struct Pokemon wildMon;   // the one wild Pokémon both players battle
+    struct Pokemon wildMon;   // the wild Pokémon both players battle
+    struct Pokemon wildMon2;  // a second one (2-on-2), or nothing
+    bool8 wildDouble;
+    // Co-op wild catches (the master's game records them): up to one per wild Pokémon
+    struct Pokemon catches[2];
+    u8 catchOwner[2];         // CAUGHT_MINE / CAUGHT_PARTNER (the partner's game: all CAUGHT_MINE)
+    u8 catchCount;
     u8 caught;             // CAUGHT_*
-    struct Pokemon caughtMon;
 } sCoop = { .requester = -1, .declinedBy = -1, .wildFrom = -1 };
 
 static EWRAM_DATA u8 sText[160];
@@ -486,6 +494,7 @@ static void ArrangeLocalParty(void)
 static void BeginCoopBattle(bool8 isMaster, u8 partner)
 {
     sCoop.caught = CAUGHT_NONE;
+    sCoop.catchCount = 0;
     sCoop.isMaster = isMaster;
     sCoop.partner = partner;
     sCoop.money = 0;
@@ -645,8 +654,8 @@ static void KeepOwnLearnEntries(u8 base)
 static void SendResult(void)
 {
     // id, outcome, money(4), leveled, learnCount, learn entries (3 bytes), 3 Pokémon
-    // then u8 caughtForPartner + 1 Pokémon (co-op wild doubles)
-    u8 *buf = Alloc(8 + MAX_LEARN * 3 + sizeof(struct Pokemon) * (MULTI_PARTY_SIZE + 1) + 1);
+    // then u8 count + that many Pokémon the partner caught (co-op wild battles)
+    u8 *buf = Alloc(8 + MAX_LEARN * 3 + sizeof(struct Pokemon) * (MULTI_PARTY_SIZE + 2) + 1);
     u16 len = 0;
     u8 i, count = 0;
 
@@ -674,11 +683,20 @@ static void SendResult(void)
     }
     memcpy(buf + len, &gPlayerParty[MULTI_PARTY_SIZE], sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
     len += sizeof(struct Pokemon) * MULTI_PARTY_SIZE;
-    if (sCoop.caught == CAUGHT_PARTNER)
+    count = 0;
+    for (i = 0; i < sCoop.catchCount; i++)
+        if (sCoop.catchOwner[i] == CAUGHT_PARTNER)
+            count++;
+    if (count)
     {
-        buf[len++] = 1;
-        memcpy(buf + len, &sCoop.caughtMon, sizeof(struct Pokemon));
-        len += sizeof(struct Pokemon);
+        buf[len++] = count;
+        for (i = 0; i < sCoop.catchCount; i++)
+        {
+            if (sCoop.catchOwner[i] != CAUGHT_PARTNER)
+                continue;
+            memcpy(buf + len, &sCoop.catches[i], sizeof(struct Pokemon));
+            len += sizeof(struct Pokemon);
+        }
     }
     if (PlayerValid(sCoop.partner))
         Send(sCoop.partner, buf, len);
@@ -765,20 +783,20 @@ static void CB2_MpCoopEvolve(void)
     CB2_MpCoopFinish();
 }
 
-static void GiveCaughtMon(void)
+static void GiveCaughtMon(struct Pokemon *caughtMon)
 {
     char msg[96], nick[16];
     u8 nickGame[POKEMON_NAME_LENGTH + 1];
-    u16 species = GetMonData(&sCoop.caughtMon, MON_DATA_SPECIES);
+    u16 species = GetMonData(caughtMon, MON_DATA_SPECIES);
     u16 nat = SpeciesToNationalPokedexNum(species);
     u8 result;
 
     if (species == SPECIES_NONE || species >= NUM_SPECIES)
         return;
-    GetMonData(&sCoop.caughtMon, MON_DATA_NICKNAME, nickGame);
+    GetMonData(caughtMon, MON_DATA_NICKNAME, nickGame);
     nickGame[POKEMON_NAME_LENGTH] = EOS;
     MP_GameToAscii(nick, nickGame, POKEMON_NAME_LENGTH);
-    result = GiveMonToPlayer(&sCoop.caughtMon);
+    result = GiveMonToPlayer(caughtMon);
     GetSetPokedexFlag(nat, FLAG_SET_SEEN);
     GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
     if (result == MON_GIVEN_TO_PARTY)
@@ -791,26 +809,22 @@ static void GiveCaughtMon(void)
     MPNet_Log("co-op wild: caught species %d (%s)", species, result == MON_CANT_GIVE ? "no room" : "given");
 }
 
-// After a co-op wild double: the catch goes to whoever threw the ball, and
+// After a co-op wild battle: each catch goes to whoever threw the ball, and
 // each catch or win is counted once for the team
 static void FinishWild(void)
 {
-    u8 level = GetMonData(&sCoop.wildMon, MON_DATA_LEVEL);
-    if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught == CAUGHT_MINE)
+    u8 i;
+    for (i = 0; i < sCoop.catchCount; i++)
     {
-        level = GetMonData(&sCoop.caughtMon, MON_DATA_LEVEL);
-        GiveCaughtMon();
+        if (sCoop.catchOwner[i] != CAUGHT_MINE)
+            continue;
+        GiveCaughtMon(&sCoop.catches[i]);
+        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, GetMonData(&sCoop.catches[i], MON_DATA_LEVEL));
     }
-    if (sCoop.isMaster)
-    {
-        // CB2_EndWildBattle counts the battle for the leader: not the partner's catch
-        if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught != CAUGHT_MINE)
-            gBattleOutcome = 0;
-    }
-    else if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught == CAUGHT_MINE)
-    {
-        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, level);
-    }
+    // CB2_EndWildBattle counts the leader's battle: the catches are counted above
+    if (sCoop.isMaster && sCoop.outcome == B_OUTCOME_CAUGHT)
+        gBattleOutcome = 0;
+    sCoop.catchCount = 0;
     sCoop.caught = CAUGHT_NONE;
     gMpCoopWild = FALSE;
 }
@@ -1171,6 +1185,8 @@ bool8 MP_Coop_TryWildTeamUp(void)
     if (target < 0)
         return FALSE;
     sCoop.wildMon = gEnemyParty[0];
+    // Now and then a second Pokémon jumps out too: 2 on 2 (1 on 1 each is more common)
+    sCoop.wildDouble = (Random() % 100) < gMpWildDoublePercent && MP_RollExtraLandMon(&sCoop.wildMon2);
 
     LockPlayerFieldControls();
     FreezeObjectEvents();
@@ -1226,16 +1242,32 @@ void MP_Coop_SetWildEnemyParty(void)
 {
     ZeroEnemyPartyMons();
     gEnemyParty[0] = sCoop.wildMon;
+    if (sCoop.wildDouble)
+        gEnemyParty[1] = sCoop.wildMon2;   // MP_Coop_ArrangeEnemyParty puts it on the right
+}
+
+// Both games: a co-op wild battle against two wild Pokémon (the right one is enemy party slot 3)
+bool8 MP_Coop_WildHasTwo(void)
+{
+    return gMpCoopWild && GetMonData(&gEnemyParty[3], MON_DATA_SPECIES) != SPECIES_NONE;
+}
+
+// Both games: after a catch, is the other wild Pokémon still out?
+bool8 MP_Coop_OtherWildOut(u8 caughtBattler)
+{
+    u8 other = BATTLE_PARTNER(caughtBattler);
+    return gMpCoopWild && !(gAbsentBattlerFlags & gBitTable[other]) && gBattleMons[other].hp != 0;
 }
 
 // Cmd_givecaughtmon in a co-op wild double (the master's game decides)
 void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon)
 {
-    if (!sCoop.isMaster)
+    if (!sCoop.isMaster || sCoop.catchCount >= ARRAY_COUNT(sCoop.catches))
         return;
-    sCoop.caughtMon = *mon;
     // The master's Pokémon are battle party slots 0-2, the partner's 3-5
-    sCoop.caught = throwerPartyIndex < MULTI_PARTY_SIZE ? CAUGHT_MINE : CAUGHT_PARTNER;
+    sCoop.catches[sCoop.catchCount] = *mon;
+    sCoop.catchOwner[sCoop.catchCount] = throwerPartyIndex < MULTI_PARTY_SIZE ? CAUGHT_MINE : CAUGHT_PARTNER;
+    sCoop.catchCount++;
 }
 
 static bool8 CanJoinWild(void)
@@ -1405,11 +1437,17 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
                 memcpy(sCoop.resultMons, data + pos, sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
                 sCoop.gotResult = TRUE;
                 pos += sizeof(struct Pokemon) * MULTI_PARTY_SIZE;
-                // We caught a wild Pokémon
-                if (gMpCoopWild && pos + 1 + sizeof(struct Pokemon) <= len && data[pos] == 1)
+                // We caught wild Pokémon
+                if (gMpCoopWild && pos < len)
                 {
-                    memcpy(&sCoop.caughtMon, data + pos + 1, sizeof(struct Pokemon));
-                    sCoop.caught = CAUGHT_MINE;
+                    u8 n = data[pos++], k;
+                    for (k = 0; k < n && k < ARRAY_COUNT(sCoop.catches) && pos + sizeof(struct Pokemon) <= len; k++)
+                    {
+                        memcpy(&sCoop.catches[k], data + pos, sizeof(struct Pokemon));
+                        sCoop.catchOwner[k] = CAUGHT_MINE;
+                        pos += sizeof(struct Pokemon);
+                    }
+                    sCoop.catchCount = k;
                 }
             }
         }

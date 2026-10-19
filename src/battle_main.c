@@ -3661,7 +3661,7 @@ static void BattleIntroOpponent2SendsOutMonAnimation(void)
     {
         if (GetBattlerPosition(gActiveBattler) == position)
         {
-            if (gMpCoopWild)
+            if (gMpCoopWild && !MP_Coop_WildHasTwo())
             {
                 // Moemon Co-op: one wild Pokémon against two friends. The other
                 // opponent slot stays empty, as if it had fainted.

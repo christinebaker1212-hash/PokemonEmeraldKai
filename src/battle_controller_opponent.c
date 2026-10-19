@@ -1987,6 +1987,13 @@ static void OpponentHandleEndBounceEffect(void)
 
 static void OpponentHandleSpriteInvisibility(void)
 {
+    if (gMpCoopWild && gBattleBufferA[gActiveBattler][1] == 2)
+    {
+        // Moemon Co-op: a caught wild Pokemon leaves (its sprite went into the ball)
+        SetHealthboxSpriteInvisible(gHealthboxSpriteIds[gActiveBattler]);
+        OpponentBufferExecCompleted();
+        return;
+    }
     if (IsBattlerSpritePresent(gActiveBattler))
     {
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = gBattleBufferA[gActiveBattler][1];

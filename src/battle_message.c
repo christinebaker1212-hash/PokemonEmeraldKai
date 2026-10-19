@@ -383,6 +383,9 @@ static const u8 sText_WildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appear
 static const u8 sText_LegendaryPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!\p");
 static const u8 sText_WildPkmnAppearedPause[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!{PAUSE 127}");
 static const u8 sText_MpCoopWildGo[] = _("Team up and take it on!");
+static const u8 sText_MpCoopGotcha[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}{PLAY_BGM MUS_CAUGHT}\p");
+static const u8 sText_MpCoopUsedItem[] = _("{B_LINK_SCR_TRAINER_NAME} used\n{B_LAST_ITEM}!");
+static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
 static const u8 sText_Trainer1WantsToBattle[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME}\nwould like to battle!\p");
 static const u8 sText_LinkTrainerWantsToBattle[] = _("{B_LINK_OPPONENT1_NAME}\nwants to battle!");
@@ -1992,7 +1995,8 @@ void BufferStringBattle(u16 stringID)
             {
                 if (gMpCoopWild)
                 {
-                    stringPtr = sText_WildPkmnAppeared; // Moemon Co-op: one wild Pokemon, two friends
+                    // Moemon Co-op: one or two wild Pokemon, two friends
+                    stringPtr = MP_Coop_WildHasTwo() ? sText_TwoWildPkmnAppeared : sText_WildPkmnAppeared;
                 }
                 else if (gMpCoopBattle)
                 {
@@ -2249,6 +2253,26 @@ void BufferStringBattle(u16 stringID)
                 }
             }
         }
+        break;
+    case STRINGID_PLAYERUSEDITEM:
+        // Moemon Co-op: the friend who used it, not this game's player
+        if (gMpCoopBattle)
+        {
+            gBattleScripting.battler = gActiveBattler;
+            stringPtr = sText_MpCoopUsedItem;
+        }
+        else
+        {
+            stringPtr = sText_PlayerUsedItem;
+        }
+        break;
+    case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
+        // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,
+        // and with the other still out the battle goes on (no caught music)
+        if (gMpCoopWild)
+            stringPtr = MP_Coop_OtherWildOut(gBattlerTarget) ? sText_MpCoopGotchaGoOn : sText_MpCoopGotcha;
+        else
+            stringPtr = sText_GotchaPkmnCaughtPlayer;
         break;
     default: // load a string from the table
         if (stringID >= BATTLESTRINGS_COUNT)

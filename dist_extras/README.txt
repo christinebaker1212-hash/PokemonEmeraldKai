@@ -117,9 +117,11 @@ WILD BATTLES TOGETHER
   the closest friend who is also standing in grass (within about a screen
   of you) jumps into the battle with you. There's nothing to accept: it just
   happens, as long as they're free (not in a menu, a battle or a trade).
-* It's two of you against one wild Moemon. Both of you get EXP.
+* It's two of you against one wild Moemon, and now and then two of them
+  jump out at once (2 on 2). Both of you get EXP.
 * You can throw POKe BALLS (only Balls: other items can't be used). Whoever
-  throws the Ball that catches it gets the Moemon.
+  throws the Ball that catches it gets the Moemon. Against two, catching one
+  doesn't end the battle: the other one is still there to catch or beat.
 * Friends further away (or not in the grass) don't join: you battle alone,
   like normal.
 

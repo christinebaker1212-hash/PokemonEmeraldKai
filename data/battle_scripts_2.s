@@ -87,8 +87,11 @@ BattleScript_SuccessBallThrowEnd::
 	finishturn
 
 @ Moemon Co-op: a catch in a co-op wild double. The catcher gets it after the battle.
+@ With two wild Pokémon, catching the first one doesn't end the battle.
 BattleScript_MpCoopBallCaught::
 	incrementgamestat GAME_STAT_POKEMON_CAPTURES
+	various BS_TARGET, VARIOUS_MP_COOP_CAUGHT_ONE
+	ptrvalue BattleScript_MpCoopBallCaughtGoOn
 	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
 	waitmessage B_WAIT_TIME_LONG
 	givecaughtmon
@@ -96,6 +99,13 @@ BattleScript_MpCoopBallCaught::
 	endlinkbattle
 	waitmessage B_WAIT_TIME_LONG
 	finishturn
+
+BattleScript_MpCoopBallCaughtGoOn::
+	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
+	waitmessage B_WAIT_TIME_LONG
+	givecaughtmon
+	various BS_ATTACKER, VARIOUS_MP_COOP_REMOVE_CAUGHT
+	finishaction
 
 BattleScript_WallyBallThrow::
 	printstring STRINGID_GOTCHAPKMNCAUGHTWALLY

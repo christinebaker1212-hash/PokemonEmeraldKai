@@ -1207,14 +1207,36 @@ static void LinkPartnerHandlePaletteFade(void)
     LinkPartnerBufferExecCompleted();
 }
 
+// Moemon Co-op: in a co-op wild battle, show the friend's POKé BALL throw too
+// (a catch must take the wild Pokémon off this screen as well)
+static void LinkPartnerCompleteOnSpecialAnimDone(void)
+{
+    if (!gDoingBattleAnim || !gBattleSpritesDataPtr->healthBoxesData[gActiveBattler].specialAnimActive)
+        LinkPartnerBufferExecCompleted();
+}
+
+static void LinkPartnerThrowBall(u8 ballThrowCaseId)
+{
+    gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
+    gDoingBattleAnim = TRUE;
+    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gBattlerTarget, B_ANIM_BALL_THROW);
+    gBattlerControllerFuncs[gActiveBattler] = LinkPartnerCompleteOnSpecialAnimDone;
+}
+
 static void LinkPartnerHandleSuccessBallThrowAnim(void)
 {
-    LinkPartnerBufferExecCompleted();
+    if (gMpCoopWild)
+        LinkPartnerThrowBall(BALL_3_SHAKES_SUCCESS);
+    else
+        LinkPartnerBufferExecCompleted();
 }
 
 static void LinkPartnerHandleBallThrowAnim(void)
 {
-    LinkPartnerBufferExecCompleted();
+    if (gMpCoopWild)
+        LinkPartnerThrowBall(gBattleBufferA[gActiveBattler][1]);
+    else
+        LinkPartnerBufferExecCompleted();
 }
 
 static void LinkPartnerHandlePause(void)

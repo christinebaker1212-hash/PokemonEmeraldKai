@@ -61,7 +61,10 @@ free friend standing in grass within 8x6 tiles (no prompt), 2 players vs 1 wild 
 opponent slot starts absent). POKé BALLS work (only balls); the catch goes to the thrower via the
 result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11, `mp wild 288:3`,
 `mp item 1 2`, `waitfor action`, `mp party`. Verified: catch by the joining player, knock-out win
-(EXP for both), friend out of range -> normal single battle. Also gym rematches and tournaments.
+(EXP for both), friend out of range -> normal single battle. 2-on-2 (30%, gMpWildDoublePercent, debug `mp wilddouble N`): second mon from
+wild_encounter.c MP_RollExtraLandMon on the right (enemy slot 3); a catch with the other still out runs
+BattleScript_MpCoopBallCaughtGoOn (VARIOUS_MP_COOP_CAUGHT_ONE/REMOVE_CAUGHT). Only the link master runs battle scripts:
+visuals for both screens must go through controller emits (sprite invisibility value 2 = caught, link partner ball throw). Also gym rematches and tournaments.
 
 Batch 3 (mp_linkx.c): record mixing over relay (record_mixing.c MP_RecordMix_*, mp_battle.c
 NetLink_BeginRecordMix fakes a 2-4 player link), friend Secret Base visits (secret_base.c MP_SecretBase_*,

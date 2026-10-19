@@ -370,6 +370,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         MP_Social_Open();
     }
+    else if (strcmp(cmd, "wilddouble") == 0)
+    {
+        extern u8 gMpWildDoublePercent;
+        gMpWildDoublePercent = arg[0] ? atoi(arg) : 100;
+    }
     else if (strcmp(cmd, "save") == 0)
     {
         u8 TrySavingData(u8 saveType);

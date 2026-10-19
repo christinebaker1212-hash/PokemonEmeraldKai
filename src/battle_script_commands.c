@@ -6535,6 +6535,30 @@ static void Cmd_various(void)
         BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, gMpCoopBattle ? MP_Coop_VictorySong() : MUS_VICTORY_TRAINER, TRUE);
         MarkBattlerForControllerExec(gActiveBattler);
         break;
+    case VARIOUS_MP_COOP_CAUGHT_ONE:
+        // Moemon Co-op: the caught one's name for "Gotcha!", and with two wild
+        // Pokemon, is the other one still out?
+        PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, gBattlerTarget, gBattlerPartyIndexes[gBattlerTarget]);
+        if (MP_Coop_OtherWildOut(gBattlerTarget))
+            gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
+        else
+            gBattlescriptCurrInstr += 3 + sizeof(void *);   // the script pointer (ptrvalue)
+        return;
+    case VARIOUS_MP_COOP_REMOVE_CAUGHT:
+    {
+        // Moemon Co-op: the caught Pokemon (already gone into its ball) leaves the battle
+        u16 zero = 0;
+        gBattleMons[gBattlerTarget].hp = 0;
+        SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_HP, &zero);
+        gAbsentBattlerFlags |= gBitTable[gBattlerTarget];
+        // Both screens: its health bar goes (2 = the co-op "caught" value), the battle music comes back
+        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, GetBattleBGM(), TRUE);
+        MarkBattlerForControllerExec(gActiveBattler);
+        gActiveBattler = gBattlerTarget;
+        BtlController_EmitSpriteInvisibility(B_COMM_TO_CONTROLLER, 2);
+        MarkBattlerForControllerExec(gActiveBattler);
+        break;
+    }
     }
 
     gBattlescriptCurrInstr += 3;

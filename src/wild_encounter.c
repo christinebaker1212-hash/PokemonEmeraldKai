@@ -976,3 +976,23 @@ static void ApplyCleanseTagEncounterRateMod(u32 *encRate)
     if (GetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM) == ITEM_CLEANSE_TAG)
         *encRate = *encRate * 2 / 3;
 }
+
+// Moemon Co-op: a second Pokémon from this map's grass for a 2-on-2 co-op wild
+// battle (mp_coop.c). gEnemyParty[0] is kept as it was.
+bool8 MP_RollExtraLandMon(struct Pokemon *out)
+{
+    u16 headerId = GetCurrentMapWildMonHeaderId();
+    const struct WildPokemonInfo *info;
+    struct Pokemon keep;
+    u8 index, level;
+
+    if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].landMonsInfo) == NULL)
+        return FALSE;
+    keep = gEnemyParty[0];
+    index = ChooseWildMonIndex_Land();
+    level = ChooseWildMonLevel(&info->wildPokemon[index]);
+    CreateWildMon(MP_Events_MaybeOutbreak(info->wildPokemon[index].species), level);
+    *out = gEnemyParty[0];
+    gEnemyParty[0] = keep;
+    return TRUE;
+}

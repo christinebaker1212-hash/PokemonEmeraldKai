@@ -358,6 +358,8 @@ enum BattleScriptOpcode
 #define VARIOUS_PALACE_TRY_ESCAPE_STATUS        24
 #define VARIOUS_SET_TELEPORT_OUTCOME            25
 #define VARIOUS_PLAY_TRAINER_DEFEATED_MUSIC     26
+#define VARIOUS_MP_COOP_CAUGHT_ONE              27   // Moemon Co-op: jumps if the other wild Pokemon is still out
+#define VARIOUS_MP_COOP_REMOVE_CAUGHT           28   // Moemon Co-op: the caught one leaves, the battle goes on
 
 // Cmd_manipulatedmg
 #define DMG_CHANGE_SIGN            0

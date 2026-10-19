@@ -577,6 +577,8 @@ bool8 MP_Coop_IsMaster(void);
 extern bool8 gMpCoopWild;            // TRUE while a co-op wild double runs (on both games)
 bool8 MP_Coop_TryWildTeamUp(void);   // a land wild encounter: team up with the closest friend in the grass
 void MP_Coop_SetWildEnemyParty(void);
+bool8 MP_Coop_WildHasTwo(void);
+bool8 MP_Coop_OtherWildOut(u8 caughtBattler);
 void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon);
 void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c
 void MP_StartNormalWildBattle(void);                 // battle_setup.c

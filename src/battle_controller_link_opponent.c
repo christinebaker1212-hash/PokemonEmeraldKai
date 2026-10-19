@@ -236,7 +236,7 @@ static void Intro_WaitForShinyAnimAndHealthbox(void)
     if (healthboxAnimDone)
     {
         // Moemon Co-op: in a co-op wild double the partner slot stays empty
-        if ((twoMons || !IsBattlerSpriteVisible(BATTLE_PARTNER(gActiveBattler))) && !gMpCoopWild)
+        if ((twoMons || !IsBattlerSpriteVisible(BATTLE_PARTNER(gActiveBattler))) && !(gMpCoopWild && !MP_Coop_WildHasTwo()))
         {
             if (!gBattleSpritesDataPtr->healthBoxesData[gActiveBattler].finishedShinyMonAnim)
                 return;
@@ -1810,6 +1810,13 @@ static void LinkOpponentHandleEndBounceEffect(void)
 
 static void LinkOpponentHandleSpriteInvisibility(void)
 {
+    if (gMpCoopWild && gBattleBufferA[gActiveBattler][1] == 2)
+    {
+        // Moemon Co-op: a caught wild Pokemon leaves (its sprite went into the ball)
+        SetHealthboxSpriteInvisible(gHealthboxSpriteIds[gActiveBattler]);
+        LinkOpponentBufferExecCompleted();
+        return;
+    }
     if (IsBattlerSpritePresent(gActiveBattler))
     {
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = gBattleBufferA[gActiveBattler][1];
