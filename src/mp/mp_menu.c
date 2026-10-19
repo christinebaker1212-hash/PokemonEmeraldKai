@@ -558,8 +558,8 @@ static void Task_CoopMenu(u8 taskId)
         tWindow = AddWindow(&sCoopWindowTemplate);
         tPlayers = AddWindow(&sPlayersWindowTemplate);
         MpTheme_Push();
-        PutWindowTilemap(tWindow);
-        PutWindowTilemap(tPlayers);
+        DrawStdWindowFrame(tWindow, FALSE);
+        DrawStdWindowFrame(tPlayers, FALSE);
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
         tState++;

@@ -338,6 +338,7 @@ static void GivePrize(struct Result *res)
 #define SPIN_FRAMES  330
 
 #define TAG_ICON     0x7200     // + slot: item icons
+#define ITEM_ICON_OFFSET 4      // centers an item picture in its cell
 #define TAG_FRAME    0x7240
 #define TAG_ARROW    0x7241
 #define TAG_CONFETTI 0x7242
@@ -378,9 +379,8 @@ static const u16 sCellPals[R_COUNT][5] = {
 static const u16 sRarityFlash[R_COUNT] = {RGB(24, 24, 26), RGB(14, 31, 14), RGB(14, 24, 31), RGB(29, 16, 31), RGB(31, 29, 10)};
 
 // Background: 1-2 stripes, 3 band, 4 gold line
-static const u16 sBg3Pal[] = {0, RGB(5, 2, 11), RGB(7, 3, 14), RGB(2, 1, 6), RGB(31, 24, 6)};
 
-static const u16 sSpritePal[16] = {
+static u16 sSpritePalThemed[16] = {
     0, RGB(31, 27, 8), RGB(31, 31, 31), RGB(31, 12, 18), RGB(10, 26, 31), RGB(12, 30, 12), RGB(28, 14, 31), RGB(31, 20, 4),
     0, 0, 0, 0, 0, 0, 0, 0,
 };
@@ -487,7 +487,7 @@ static void LoadGeneratedGfx(void)
     {
         static u8 frame[32 * 16], arrow[32 * 4], confetti[32 * 4];
         struct SpriteSheet sheet;
-        struct SpritePalette pal = {sSpritePal, TAG_FRAME};
+        struct SpritePalette pal = {sSpritePalThemed, TAG_FRAME};
         memset(frame, 0, sizeof(frame));
         for (y = 0; y < 32; y++)
             for (x = 0; x < 32; x++)
@@ -648,8 +648,11 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
         *isMon = FALSE;
         if (id < MAX_SPRITES)
         {
+            // The 24x24 picture sits in the top-left of its 32x32 sprite
             gSprites[id].x = x;
             gSprites[id].y = y;
+            gSprites[id].x2 = ITEM_ICON_OFFSET;
+            gSprites[id].y2 = ITEM_ICON_OFFSET;
         }
     }
     if (id < MAX_SPRITES)
@@ -804,7 +807,7 @@ static void DrawMenu(void)
         [MENU_BACK] = "BACK",
     };
     static const char *const sInfo[] = {
-        [MENU_FREE] = "This week's free 10-pull! One RARE+ for sure.",
+        [MENU_FREE] = "Free this week! One RARE+ for sure.",
         [MENU_ONE]  = "Uses 1 pull.",
         [MENU_TEN]  = "Uses 10 pulls. One RARE+ guaranteed!",
         [MENU_BACK] = "Back to the DAILY menu.",
@@ -1204,6 +1207,39 @@ static void Task_Gatcha(u8 taskId)
     }
 }
 
+static u16 MixColor(u16 a, u16 b, int f)
+{
+    int r = (a & 31) + (((int)(b & 31)) - (int)(a & 31)) * f / 256;
+    int g = ((a >> 5) & 31) + (((int)((b >> 5) & 31)) - (int)((a >> 5) & 31)) * f / 256;
+    int bl = ((a >> 10) & 31) + (((int)((b >> 10) & 31)) - (int)((a >> 10) & 31)) * f / 256;
+    return RGB(r, g, bl);
+}
+
+// Panels, stripes and highlights in the colors of the player's window frame
+// (OPTIONS > FRAME), like the other co-op menus. Rarity colors stay as they are.
+static void LoadThemedPalettes(void)
+{
+    u16 theme[16], text[16], bg3[5];
+    u16 accent;
+    MpTheme_BuildPalette(theme);
+    accent = theme[MPT_BORDER];
+    memcpy(text, sTextPal, sizeof(text));
+    text[TC_SHADOW] = theme[MPT_SHADOW];
+    text[TC_GREY] = theme[MPT_GREY];
+    text[TC_PANEL] = theme[MPT_BG];
+    text[TC_GOLD] = theme[MPT_GOLD];
+    text[TC_DIM] = MixColor(theme[MPT_BG], theme[MPT_GREY], 128);
+    LoadPalette(text, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
+    LoadPalette(text, BG_PLTT_ID(0), PLTT_SIZEOF(1));
+    bg3[0] = 0;
+    bg3[1] = MixColor(0, accent, 34);    // stripes
+    bg3[2] = MixColor(0, accent, 50);
+    bg3[3] = MixColor(0, accent, 16);    // band behind the reel
+    bg3[4] = theme[MPT_GOLD];            // its trim
+    LoadPalette(bg3, BG_PLTT_ID(BG3_PAL), sizeof(bg3));
+    sSpritePalThemed[1] = theme[MPT_GOLD];   // selector frame and arrow
+}
+
 static void CB2_InitGatcha(void)
 {
     u8 i;
@@ -1242,11 +1278,9 @@ static void CB2_InitGatcha(void)
     FreeAllSpritePalettes();
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
 
-    LoadPalette(sTextPal, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
-    LoadPalette(sTextPal, BG_PLTT_ID(0), PLTT_SIZEOF(1));
+    LoadThemedPalettes();
     for (i = 0; i < R_COUNT; i++)
         LoadPalette(sCellPals[i], BG_PLTT_ID(CELL_PAL0 + i), sizeof(sCellPals[i]));
-    LoadPalette(sBg3Pal, BG_PLTT_ID(BG3_PAL), sizeof(sBg3Pal));
     LoadGeneratedGfx();
 
     // Background: stripes, with a dark band and gold lines behind the reel

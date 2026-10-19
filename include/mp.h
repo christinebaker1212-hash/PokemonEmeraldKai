@@ -340,6 +340,7 @@ const u8 *MP_Dex_CaughtBy(u16 nationalNum);
 #define MPUI_ROWS 7
 // Co-op menu theme (mp_ui.c): colors of the swapped-in text palette
 enum { MPT_BG = 1, MPT_TEXT, MPT_SHADOW, MPT_RED, MPT_GREEN = 6, MPT_BLUE = 8, MPT_BAND = 10, MPT_GOLD, MPT_SEL, MPT_GREY, MPT_BORDER, MPT_BAND2 };
+void MpTheme_BuildPalette(u16 *pal16);   // from the player's window frame (OPTIONS > FRAME)
 void MpTheme_Push(void);
 void MpTheme_Pop(void);
 void MpTheme_Panel(u8 windowId, u8 bandHeight);

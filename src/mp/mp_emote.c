@@ -338,9 +338,22 @@ static bool8 AnyBubbleShown(void)
 
 static bool8 CreateBubbleSprites(struct Bubble *b)
 {
-    struct SpritePalette pal = {sBubblePal, TAG_BUBBLE_PAL};
+    static u16 sPal[16];
+    struct SpritePalette pal = {sPal, TAG_BUBBLE_PAL};
     u8 half;
 
+    if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) == 0xFF)
+    {
+        // Toasts take the co-op menu colors (from the player's window frame)
+        u16 theme[16];
+        MpTheme_BuildPalette(theme);
+        memcpy(sPal, sBubblePal, sizeof(sPal));
+        sPal[5] = theme[MPT_BG];
+        sPal[6] = theme[MPT_TEXT];
+        sPal[7] = theme[MPT_SHADOW];
+        sPal[8] = theme[MPT_BORDER];
+        sPal[9] = theme[MPT_BAND];
+    }
     if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) == 0xFF && LoadSpritePalette(&pal) == 0xFF)
         return FALSE;
     BuildBubble(b);

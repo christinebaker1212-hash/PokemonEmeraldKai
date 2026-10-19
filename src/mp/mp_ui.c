@@ -45,24 +45,81 @@ static s16 sScrollTop = -1, sScrollCount, sSelY = -1;
 // palette (BG palette 15) is swapped while a co-op menu is open. Text printed
 // with the default colors (2 on 1, shadow 3) comes out white on navy.
 
-static const u16 sThemePal[16] = {
-    [0]           = 0,
-    [MPT_BG]      = RGB(4, 4, 12),
-    [MPT_TEXT]    = RGB(31, 31, 31),
-    [MPT_SHADOW]  = RGB(1, 1, 5),
-    [MPT_RED]     = RGB(31, 12, 12),
-    [5]           = RGB(12, 3, 4),
-    [MPT_GREEN]   = RGB(12, 30, 12),
-    [7]           = RGB(3, 10, 3),
-    [MPT_BLUE]    = RGB(12, 24, 31),
-    [9]           = RGB(2, 6, 13),
-    [MPT_BAND]    = RGB(11, 4, 19),
-    [MPT_GOLD]    = RGB(31, 25, 6),
-    [MPT_SEL]     = RGB(10, 9, 25),
-    [MPT_GREY]    = RGB(19, 19, 25),
-    [MPT_BORDER]  = RGB(22, 16, 3),
-    [MPT_BAND2]   = RGB(17, 8, 26),
-};
+static u16 sThemePal[16];
+
+#define C_R(c) ((c) & 31)
+#define C_G(c) (((c) >> 5) & 31)
+#define C_B(c) (((c) >> 10) & 31)
+
+// a + (b - a) * f / 256
+static u16 Mix(u16 a, u16 b, int f)
+{
+    int r = C_R(a) + (C_R(b) - C_R(a)) * f / 256;
+    int g = C_G(a) + (C_G(b) - C_G(a)) * f / 256;
+    int bl = C_B(a) + (C_B(b) - C_B(a)) * f / 256;
+    return RGB(r, g, bl);
+}
+
+// The main color of the player's chosen window frame (OPTIONS > FRAME): the
+// colorful shade that covers the most of it
+static u16 FrameAccent(bool8 *colorful)
+{
+    const struct TilesPal *frame = GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType);
+    u32 count[16] = {0}, best = 0;
+    u16 accent = RGB(16, 16, 20);
+    int i, k;
+    for (i = 0; i < 0x120; i++)
+    {
+        count[frame->tiles[i] & 15]++;
+        count[frame->tiles[i] >> 4]++;
+    }
+    *colorful = FALSE;
+    for (k = 1; k < 16; k++)
+    {
+        u16 c = frame->pal[k];
+        int mx = max(C_R(c), max(C_G(c), C_B(c))), mn = min(C_R(c), min(C_G(c), C_B(c)));
+        u32 score = count[k] * (mx - mn + 1);
+        if (count[k] == 0 || mx < 8)
+            continue;
+        if (score > best)
+        {
+            best = score;
+            accent = c;
+            *colorful = (mx - mn) >= 6;
+        }
+    }
+    // Same hue at full brightness, so dark and light frames both work
+    {
+        int mx = max(C_R(accent), max(C_G(accent), C_B(accent)));
+        if (mx > 0)
+            accent = RGB(C_R(accent) * 31 / mx, C_G(accent) * 31 / mx, C_B(accent) * 31 / mx);
+    }
+    return accent;
+}
+
+// The co-op menu colors, worked out from the player's window frame
+void MpTheme_BuildPalette(u16 *pal)
+{
+    bool8 colorful;
+    u16 a = FrameAccent(&colorful);
+    pal[0] = 0;
+    pal[MPT_BG] = Mix(0, a, 58);          // dark panel in the frame's color
+    pal[MPT_TEXT] = RGB(31, 31, 31);
+    pal[MPT_SHADOW] = Mix(0, a, 18);
+    pal[MPT_RED] = RGB(31, 12, 12);
+    pal[5] = RGB(12, 3, 4);
+    pal[MPT_GREEN] = RGB(12, 30, 12);
+    pal[7] = RGB(3, 10, 3);
+    pal[MPT_BLUE] = RGB(12, 24, 31);
+    pal[9] = RGB(2, 6, 13);
+    pal[MPT_BAND] = Mix(0, a, 112);       // title band
+    pal[MPT_GOLD] = colorful ? Mix(a, RGB(31, 31, 31), 150) : RGB(31, 25, 6);   // highlights
+    pal[MPT_SEL] = Mix(0, a, 92);         // selected row
+    pal[MPT_GREY] = Mix(RGB(21, 21, 23), a, 40);
+    pal[MPT_BORDER] = a;
+    pal[MPT_BAND2] = Mix(0, a, 150);
+}
+
 static u16 sSavedPal[16];
 static bool8 sThemeOn;
 
@@ -79,6 +136,7 @@ void MpTheme_Push(void)
     if (sThemeOn)
         return;
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(15)], sSavedPal, PLTT_SIZE_4BPP);
+    MpTheme_BuildPalette(sThemePal);
     WritePal15(sThemePal);
     sThemeOn = TRUE;
 }
@@ -91,35 +149,26 @@ void MpTheme_Pop(void)
     sThemeOn = FALSE;
 }
 
-// The panel: navy fill, gold trim with rounded corners, optional title band
+// The panel: a fill in the frame's color and an optional title band. The
+// player's own window frame goes around it (DrawStdWindowFrame).
 void MpTheme_Panel(u8 windowId, u8 bandHeight)
 {
     int w = GetWindowAttribute(windowId, WINDOW_WIDTH) * 8;
-    int h = GetWindowAttribute(windowId, WINDOW_HEIGHT) * 8;
     FillWindowPixelBuffer(windowId, PIXEL_FILL(MPT_BG));
     if (bandHeight)
     {
-        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND), 1, 1, w - 2, bandHeight);
-        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND2), 1, 1, w - 2, 1);
-        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 1, bandHeight, w - 2, 1);
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND), 0, 0, w, bandHeight);
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND2), 0, 0, w, 1);
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 0, bandHeight, w, 1);
     }
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), 0, 0, w, 1);
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), 0, h - 1, w, 1);
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), 0, 0, 1, h);
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), w - 1, 0, 1, h);
-    // Rounded corners
-    FillWindowPixelRect(windowId, PIXEL_FILL(0), 0, 0, 1, 1);
-    FillWindowPixelRect(windowId, PIXEL_FILL(0), w - 1, 0, 1, 1);
-    FillWindowPixelRect(windowId, PIXEL_FILL(0), 0, h - 1, 1, 1);
-    FillWindowPixelRect(windowId, PIXEL_FILL(0), w - 1, h - 1, 1, 1);
 }
 
 // The highlight behind the selected row: a lit bar with a gold edge
 void MpTheme_SelBar(u8 windowId, int y, int h)
 {
     int w = GetWindowAttribute(windowId, WINDOW_WIDTH) * 8;
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_SEL), 3, y, w - 6, h);
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 3, y, 2, h);
+    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_SEL), 1, y, w - 2, h);
+    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 1, y, 2, h);
 }
 
 void MpTheme_Print(u8 windowId, u8 font, const u8 *str, int x, int y, u8 fg, u8 bg)
@@ -155,6 +204,8 @@ void MpUi_Open(void)
     sHelp = AddWindow(&sHelpTemplate);
     PutWindowTilemap(sMain);
     PutWindowTilemap(sHelp);
+    DrawStdWindowFrame(sMain, FALSE);
+    DrawStdWindowFrame(sHelp, FALSE);
     MpTheme_Panel(sMain, 13);
     MpTheme_Panel(sHelp, 0);
     CopyWindowToVram(sMain, COPYWIN_FULL);
@@ -203,7 +254,7 @@ void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
     {
         u8 arrow[] = {0xEF, EOS};
         MpTheme_SelBar(sMain, y, ROW_H - 1);
-        MpTheme_Print(sMain, FONT_SMALL, arrow, 7, y, MPT_GOLD, bg);
+        MpTheme_Print(sMain, FONT_SMALL, arrow, 6, y, MPT_GOLD, bg);
         sSelY = y;
     }
     StringCopyN(cut, left, sizeof(cut) - 1);
