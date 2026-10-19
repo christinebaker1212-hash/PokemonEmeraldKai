@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "script.h"
 #include "pokedex.h"
 #include "mp.h"
 #include "palette.h"
@@ -192,6 +193,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (b = 0; b < 8; b++)
             printf(" %d", FlagGet(FLAG_BADGE01_GET + b));
         printf("  money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+    }
+    else if (strcmp(cmd, "ctx") == 0)
+    {
+        extern int Platform_InputContext(void);
+        printf("[test] ctx %d free %d overworld %d locked %d script %d fade %d\n", Platform_InputContext(), MP_IsLocalFree(),
+               MP_IsInOverworld(), ArePlayerFieldControlsLocked(), ScriptContext_IsEnabled(), gPaletteFade.active);
     }
     else if (strcmp(cmd, "battleflag") == 0)
     {

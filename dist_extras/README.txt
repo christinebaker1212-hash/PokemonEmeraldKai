@@ -125,6 +125,22 @@ PVP: THE BATTLE FLAG
   and no EXP is gained, like Cable Club battles.
 
 
+TRADING, THE SHARED PC AND DAILY GIFTS (START > CO-OP)
+-----------------------------------------------------
+TRADE...      Trade with a friend anywhere: a Pokemon, up to two kinds of
+              items and money, in any mix. Both of you pick your side, choose
+              READY, then confirm. Pokemon that evolve by trading evolve.
+SHARED PC...  A PC that belongs to the server: anyone can put Pokemon and
+              items in, and anyone can take them out. It's kept on the host's
+              PC, so it's still there the next time the same server name and
+              password are hosted.
+DAILY GIFT... Send each friend online today's gift once a day. They get the
+              gift and you get a thank-you bonus (bigger with more players).
+              The gift changes every day.
+Pokemon you get from a friend keep their original trainer (they gain more
+EXP, but very high levels may not obey you until you have more badges).
+
+
 POKEMON THAT FOLLOW YOU
 -----------------------
 Open the POKEMON menu, pick a Pokemon with the cursor and press SELECT:

@@ -271,14 +271,14 @@ static void Draw(void)
     u8 left[64], right[24];
 
     if (sPc.mode == MODE_PICK_PARTY)
-        MpUi_Begin("SHARED PC: PUT IN WHICH POKeMON?");
+        MpUi_Begin("SHARED PC: PUT IN WHICH POK~MON?");
     else if (sPc.mode == MODE_PICK_BAG)
         MpUi_Begin("SHARED PC: PUT IN WHICH ITEM?");
     else
     {
         u8 tabs[40];
         MpUi_Begin("SHARED PC");
-        MP_AsciiToGame(tabs, sPc.tab == TAB_MONS ? "[POKeMON]  ITEMS" : "POKeMON  [ITEMS]", 36);
+        MP_AsciiToGame(tabs, sPc.tab == TAB_MONS ? "POK~MON   (L/R: ITEMS)" : "ITEMS   (L/R: POK~MON)", 36);
         MpUi_TitleRight(tabs);
     }
 
@@ -318,7 +318,7 @@ static void Draw(void)
         }
         else if (i == 0)
         {
-            MpUi_RowAscii(row, sel, sPc.tab == TAB_MONS ? "PUT IN A POKeMON..." : "PUT IN AN ITEM...", NULL);
+            MpUi_RowAscii(row, sel, sPc.tab == TAB_MONS ? "PUT IN A POK~MON..." : "PUT IN AN ITEM...", NULL);
         }
         else if (sPc.tab == TAB_MONS)
         {
@@ -342,7 +342,7 @@ static void Draw(void)
         }
     }
     if (sPc.mode == MODE_LIST && count == 1)
-        MpUi_TextAscii(2, sPc.tab == TAB_MONS ? "No POKeMON stored yet." : "No items stored yet.");
+        MpUi_TextAscii(2, sPc.tab == TAB_MONS ? "No POK~MON stored yet." : "No items stored yet.");
     MpUi_End();
 
     if (sPc.note[0])
@@ -362,7 +362,7 @@ static void Draw(void)
     else if (sPc.mode == MODE_WAIT)
         MpUi_HelpAscii("One moment...");
     else if (sPc.mode == MODE_LIST)
-        MpUi_HelpAscii(sPc.tab == TAB_MONS ? "A: TAKE  L/R: ITEMS  B: CLOSE" : "A: TAKE  L/R: POKeMON  B: CLOSE");
+        MpUi_HelpAscii(sPc.tab == TAB_MONS ? "A: TAKE  L/R: ITEMS  B: CLOSE" : "A: TAKE  L/R: POK~MON  B: CLOSE");
     else
         MpUi_HelpAscii("A: PUT IN  B: BACK");
 }
@@ -481,7 +481,7 @@ static void HandlePickInput(void)
         if (usable && UsableMonCount() <= 1)
         {
             PlaySE(SE_FAILURE);
-            SetNote("You need to keep at least one POKeMON that can battle.");
+            SetNote("You need to keep at least one POK~MON that can battle.");
         }
         else if (sPc.monCount >= MP_STORE_MONS)
         {

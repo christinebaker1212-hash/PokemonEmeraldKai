@@ -101,6 +101,17 @@ static EWRAM_DATA struct
 } sTrade = {0};
 
 static void Task_Trade(u8 taskId);
+static bool8 sInit;
+static void ResetTrade(void);
+
+static void InitIfNeeded(void)
+{
+    if (sInit)
+        return;
+    sInit = TRUE;
+    sTrade.askedBy = -1;
+    ResetTrade();
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -296,7 +307,7 @@ static void MoneyText(u32 money, u8 *dst)
 
 static void DrawTrading(void)
 {
-    static const char *const labels[] = {"MON ", "ITEM ", "ITEM ", "$ "};
+    static const char *const labels[] = {"MON ", "ITEM ", "ITEM ", "MONEY "};
     char title[48], them[16];
     u8 i, left[64], right[48], tmp[48];
     MP_GameToAscii(them, sTrade.partnerName, PLAYER_NAME_LENGTH);
@@ -347,7 +358,7 @@ static void DrawTrading(void)
     else if (sTrade.state == ST_COMMITTED)
         MpUi_HelpAscii("Trading...");
     else if (sTrade.cursor == ROW_MON)
-        MpUi_HelpAscii("LEFT/RIGHT: pick a POKeMON from your party");
+        MpUi_HelpAscii("LEFT/RIGHT: pick a POK~MON from your party");
     else if (sTrade.cursor == ROW_ITEM1 || sTrade.cursor == ROW_ITEM2)
         MpUi_HelpAscii("LEFT/RIGHT: item   L/R: how many");
     else if (sTrade.cursor == ROW_MONEY)
@@ -446,7 +457,7 @@ static bool8 CanReceive(char *why, int whyLen)
     if (sTrade.mine.monSlot != 0xFF && !sTrade.mine.isEgg && UsableMons(sTrade.mine.monSlot) == 0
      && (sTrade.theirs.species == SPECIES_NONE || sTrade.theirs.isEgg))
     {
-        snprintf(why, whyLen, "Keep at least one POKeMON that can battle.");
+        snprintf(why, whyLen, "Keep at least one POK~MON that can battle.");
         return FALSE;
     }
     if (GetMoney(&gSaveBlock1Ptr->money) - sTrade.mine.money + sTrade.theirs.money > 999999)
@@ -812,6 +823,7 @@ static void Task_Trade(u8 taskId)
 
 void MP_Trade_OpenMenu(void)
 {
+    InitIfNeeded();
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
         MP_ShowNotice("Go online (START > CO-OP) to trade with friends.");
@@ -833,6 +845,7 @@ void MP_Trade_OpenMenu(void)
 
 void MP_Trade_OnRelay(u8 from, const u8 *data, u16 len)
 {
+    InitIfNeeded();
     if (from >= MP_MAX_PLAYERS || len < 1)
         return;
     switch (data[0])
@@ -941,6 +954,7 @@ void MP_Trade_OnRelay(u8 from, const u8 *data, u16 len)
 // Every frame while online: show a friend's trade request once we're free
 void MP_Trade_Update(void)
 {
+    InitIfNeeded();
     if (sTrade.askedBy < 0)
         return;
     if (!gMpPlayers[sTrade.askedBy].present)

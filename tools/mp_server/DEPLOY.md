@@ -45,7 +45,7 @@ Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
    ```sh
    sudo apt-get update && sudo apt-get install -y gcc git
    git clone <this repository> moemon && cd moemon/tools/mp_server
-   gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c
+   gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c ../../src/mp/mp_store.c
    sudo cp moemon_server /usr/local/bin/
    ```
 
@@ -115,6 +115,9 @@ address in, so even `lobby.txt` isn't needed.
 - Passwords never leave the players' PCs in plain text: the server only sees
   a hash of server name + password. Wrong guesses are slowed down.
 - Empty servers are removed when their last player leaves.
+- Each server's SHARED PC, team goals and achievements are saved as
+  `coop_store_<id>.dat` in the folder the server runs in (or `MOEMON_STORE_DIR`).
+  Keep those files to keep everyone's shared PC.
 - Limits: 512 connections and 256 servers at once, 4 players per server.
 - `--lan` also makes the server answer local network searches (UDP 27016),
   useful when it runs on a PC on the same network as the players.

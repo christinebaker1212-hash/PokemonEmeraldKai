@@ -37,6 +37,8 @@ and remote followers seen by the other client.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), GO TO FRIEND, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge
 (test: MOEMON_DEBUG_WARP=11,3,5,3 / 11,3,5,4, MOEMON_DEBUG_PARTY=283:46, `mp badges`).
+Phase 2: shared PC (put/take Pokémon and items, `MOEMON_STORE_DIR`), trade with money/items and a
+trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name tag and follower.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)

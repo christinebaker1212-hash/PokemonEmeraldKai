@@ -196,7 +196,7 @@ void MP_Dex_OnRelay(u8 from, const u8 *data, u16 len)
                 name[PLAYER_NAME_LENGTH] = EOS;
                 GetSpeciesName(species, NationalPokedexNumToSpecies(nat));
                 StringCopy(text, name);
-                MP_AsciiToGame(text + StringLength(text), " caught", 10);
+                MP_AsciiToGame(text + StringLength(text), " got", 10);
                 {
                     u8 nl[] = {CHAR_NEWLINE, EOS};
                     StringAppend(text, nl);

@@ -123,7 +123,7 @@ static void Draw(void)
     if (sGiftUi.note[0])
         MpUi_HelpAscii(sGiftUi.note);
     else
-        MpUi_HelpAscii("Send each friend a gift once a day.  A: SEND  B: CLOSE");
+        MpUi_HelpAscii("One gift per friend each day.  A: SEND  B: CLOSE");
 }
 
 static void Close(void)
@@ -161,7 +161,7 @@ static void Task_Gift(u8 taskId)
         else if (SentToday(id))
         {
             PlaySE(SE_FAILURE);
-            snprintf(sGiftUi.note, sizeof(sGiftUi.note), "You already sent them a gift today. Come back tomorrow!");
+            snprintf(sGiftUi.note, sizeof(sGiftUi.note), "Already sent today. Come back tomorrow!");
         }
         else
         {

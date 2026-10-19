@@ -100,6 +100,10 @@ static u8 AsciiCharToGame(char c)
     case '\n': return CHAR_NEWLINE;
     case '\f': return CHAR_PROMPT_CLEAR;   // next page (wait for A)
     case '_': return CHAR_SPACE;
+    case '<': return CHAR_LEFT_ARROW;
+    case '>': return CHAR_RIGHT_ARROW;
+    case '$': return CHAR_CURRENCY;
+    case '~': return CHAR_e_ACUTE;      // as in POK~MON
     }
     return 0xFF;
 }
