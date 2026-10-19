@@ -14,7 +14,8 @@
 //   Overworld   left stick pushed all the way = run (with Running Shoes),
 //               west button (X / Square / Y) = toggle auto-run,
 //               north button (Y / Triangle / X) = CO-OP menu,
-//               right stick = emotes and quick phrases.
+//               right stick = emotes and quick phrases,
+//               LT / RT held = quick emote / phrase pick (direction, then let go).
 //   Text, menus and battles   LT (hold) = repeat A, to get through text fast.
 //               In battles and menus the west button is B and the north
 //               button is SELECT.
@@ -41,6 +42,8 @@ static int sInited;
 static u32 sPrevButtons;     // bit per SDL button, all pads merged
 static int sPrevEmote = -1;
 static int sTurbo;
+static int sTrigger[2];      // LT, RT held (last poll)
+static int sQuickTrigger = -1; // the trigger that opened a quick pick, until it's let go
 // Controller selector: -1 = every controller drives the game
 static SDL_JoystickID sSelected = -1;
 static char sSelectedGuid[64];      // remembered between sessions
@@ -316,6 +319,11 @@ void Gamepad_StartSelect(void) { sListening = 1; }
 void Gamepad_CancelSelect(void) { sListening = 0; }
 int Gamepad_IsSelecting(void) { return sListening; }
 
+int Gamepad_TriggerHeld(int right)
+{
+    return sTrigger[right ? 1 : 0];
+}
+
 int Gamepad_Count(void)
 {
     int i, n = 0;
@@ -435,7 +443,22 @@ u16 Gamepad_Poll(int *fastForward)
     if (!any)
     {
         sPrevButtons = 0;
+        sTrigger[0] = sTrigger[1] = 0;
         return 0;
+    }
+    {
+        int lHeld = lt > TRIGGER_ON, rHeld = rt > TRIGGER_ON;
+        int lNew = lHeld && !sTrigger[0], rNew = rHeld && !sTrigger[1];
+        sTrigger[0] = lHeld;
+        sTrigger[1] = rHeld;
+        if (sQuickTrigger >= 0 && !sTrigger[sQuickTrigger])
+            sQuickTrigger = -1;
+        // LT / RT in the overworld: quick emote / phrase pick (open while held)
+        if (Platform_InputContext() == INPUT_CONTEXT_OVERWORLD && sQuickTrigger < 0 && (lNew || rNew))
+        {
+            sQuickTrigger = rNew ? 1 : 0;
+            Platform_ContextAction(rNew ? INPUT_ACTION_QUICK_PHRASES : INPUT_ACTION_QUICK_EMOTES);
+        }
     }
     if (sSuppress)
     {
@@ -520,8 +543,8 @@ u16 Gamepad_Poll(int *fastForward)
         default:
             if (buttons & west)  keys |= B_BUTTON;
             if (buttons & north) keys |= SELECT_BUTTON;
-            // LT held: tap A over and over to get through text
-            if (lt > TRIGGER_ON)
+            // LT held: tap A over and over to get through text (not while it holds a quick pick open)
+            if (lt > TRIGGER_ON && sQuickTrigger != 0)
             {
                 if (++sTurbo >= TURBO_PERIOD)
                     sTurbo = 0;

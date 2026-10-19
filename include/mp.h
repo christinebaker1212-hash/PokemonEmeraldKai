@@ -377,6 +377,7 @@ bool8 NetLink_IsMaster(void);
 void MP_OpenMenu(void);
 enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
+void MP_OpenQuickPick(bool8 phrases);   // controller LT / RT held: quick emote / phrase pick
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 
 // Emotes and phrases (mp_emote.c)

@@ -32,6 +32,8 @@ enum {
     INPUT_ACTION_EMOTE_LEFT,
     INPUT_ACTION_EMOTE_MENU,   // right stick click: START > CO-OP > EMOTES
     INPUT_ACTION_EMOTE_KEY1,   // keyboard 1-8: emotes and your phrases
+    INPUT_ACTION_QUICK_EMOTES = INPUT_ACTION_EMOTE_KEY1 + 8,   // LT held: quick emote pick
+    INPUT_ACTION_QUICK_PHRASES,                                // RT held: quick phrase pick
 };
 #define INPUT_ACTION_EMOTE_KEY_COUNT 8
 
@@ -57,5 +59,6 @@ int Gamepad_IsSelecting(void);
 void Gamepad_CycleSelected(int dir);       // ALL -> each connected controller -> ALL
 const char *Gamepad_SelectedName(void);    // "ALL CONTROLLERS" or a controller name
 int Gamepad_Count(void);
+int Gamepad_TriggerHeld(int right);        // LT (0) / RT (1) pressed past halfway on any controller
 
 #endif // GUARD_PLATFORM_GAMEPAD_H

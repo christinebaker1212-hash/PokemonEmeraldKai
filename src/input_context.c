@@ -42,6 +42,10 @@ void Platform_ContextAction(int action)
         PlaySE(SE_WIN_OPEN);
         MP_OpenMenuPage(MP_MENU_PAGE_EMOTES);
         break;
+    case INPUT_ACTION_QUICK_EMOTES:
+    case INPUT_ACTION_QUICK_PHRASES:
+        MP_OpenQuickPick(action == INPUT_ACTION_QUICK_PHRASES);
+        break;
     default:
         if (action >= INPUT_ACTION_EMOTE_KEY1 && action < INPUT_ACTION_EMOTE_KEY1 + INPUT_ACTION_EMOTE_KEY_COUNT)
             MP_Emote_Hotkey(action - INPUT_ACTION_EMOTE_KEY1);

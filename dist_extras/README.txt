@@ -457,7 +457,12 @@ others) and it just works, even mid-game. The buttons are set up for you:
 
 The other buttons change with what's on screen:
   Walking around    stick pushed all the way = run, X/Square = auto-run
-                    on/off, Y/Triangle = CO-OP menu
+                    on/off, Y/Triangle = CO-OP menu, right stick = emotes
+                    (click it for the EMOTES page)
+                    L2/LT (hold) = quick emotes, R2/RT (hold) = quick
+                    phrases: push a direction, then let go to send it
+                    (A sends right away, B cancels). An empty phrase slot
+                    offers a ready-made phrase instead.
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
                     X/Square = B, Y/Triangle = SELECT
   Naming screen     X/Square = delete, Y/Triangle = switch letters

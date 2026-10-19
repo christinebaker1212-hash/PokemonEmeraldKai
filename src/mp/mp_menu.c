@@ -1220,3 +1220,136 @@ void MP_OpenMenu(void)
 {
     MP_OpenMenuPage(MP_MENU_PAGE_MAIN);
 }
+
+// ---------------------------------------------------------------------------
+// Controller quick pick: hold LT (emotes) or RT (phrases) in the overworld,
+// push a direction (D-Pad or left stick), let go of the trigger to send it.
+// A sends right away, B or letting go with nothing picked cancels.
+
+#include "platform/gamepad.h"
+
+#define qPhrases data[0]
+#define qWindow  data[1]
+#define qSel     data[2]   // -1 nothing yet, else 0 up, 1 right, 2 down, 3 left
+
+static const u8 sQuickArrows[4] = {CHAR_UP_ARROW, CHAR_RIGHT_ARROW, CHAR_DOWN_ARROW, CHAR_LEFT_ARROW};
+// Emotes by direction (the same as a right stick flick): ! heart ? music
+static const u8 sQuickEmoteKey[4] = {0, 2, 1, 3};
+static const char *const sQuickEmoteNames[4] = {"!", "HEART", "?", "MUSIC"};
+// Empty phrase slots offer a stock phrase instead
+static const u8 sQuickStock[4] = {6, 0, 3, 5};   // Hello! Follow me! Thank you! Good game!
+
+static void QuickPickRowText(bool8 phrases, u8 dir, u8 *out, int maxW)
+{
+    int len;
+    if (!phrases)
+        MP_AsciiToGame(out, sQuickEmoteNames[dir], 20);
+    else if (MP_Emote_PhraseIsEmpty(dir))
+        MP_AsciiToGame(out, MP_Emote_QuickPhrase(sQuickStock[dir]), 60);
+    else
+    {
+        u8 text[160];
+        int i, n = 0;
+        MP_Emote_PhraseText(dir, text);
+        for (i = 0; text[i] != EOS && n < 70; i++)
+            out[n++] = (text[i] == CHAR_NEWLINE) ? CHAR_SPACE : text[i];
+        out[n] = EOS;
+    }
+    for (len = StringLength(out); len > 1 && GetStringWidth(FONT_SMALL_NARROW, out, 0) > maxW; len--)
+        out[len - 1] = EOS;
+}
+
+static void QuickPickDraw(s16 *data)
+{
+    u8 win = qWindow, dir, buf[96], arrow[2] = {0, EOS};
+    int w = (qPhrases ? 28 : 12) * 8;
+    MpTheme_Panel(win, 12);
+    sTxtFg = MPT_GOLD;
+    sTxtBg = MPT_BAND;
+    PrintAscii(win, qPhrases ? "PHRASES   pick one, let go of R2" : "EMOTES", 4, 0);
+    sTxtBg = MPT_BG;
+    for (dir = 0; dir < 4; dir++)
+    {
+        u8 y = 1 + LINE_H * (dir + 1) + 2;
+        sTxtFg = (qSel == dir) ? MPT_GOLD : MPT_TEXT;
+        sTxtBg = (qSel == dir) ? MPT_SEL : MPT_BG;
+        if (qSel == dir)
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 2, y - 1, w - 4, LINE_H);
+        arrow[0] = sQuickArrows[dir];
+        MText(win, FONT_SMALL, arrow, 4, y);
+        QuickPickRowText(qPhrases, dir, buf, w - 24);
+        MText(win, FONT_SMALL_NARROW, buf, 16, y);
+    }
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+static void QuickPickClose(u8 taskId, bool8 send)
+{
+    s16 *data = gTasks[taskId].data;
+    bool8 phrases = qPhrases;
+    s16 sel = qSel;
+    ClearStdWindowAndFrame(qWindow, TRUE);
+    RemoveWindow(qWindow);
+    MpTheme_Pop();
+    UnlockPlayerFieldControls();
+    DestroyTask(taskId);
+    if (!send || sel < 0)
+        return;
+    // After closing, so you see your own bubble
+    if (!phrases)
+        MP_Emote_Hotkey(sQuickEmoteKey[sel]);
+    else if (MP_Emote_PhraseIsEmpty(sel))
+        MP_Emote_SayQuick(sQuickStock[sel]);
+    else
+        MP_Emote_SayPhrase(sel);
+}
+
+static void Task_QuickPick(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    s16 sel = qSel;
+    if (JOY_HELD(DPAD_UP))
+        sel = 0;
+    else if (JOY_HELD(DPAD_RIGHT))
+        sel = 1;
+    else if (JOY_HELD(DPAD_DOWN))
+        sel = 2;
+    else if (JOY_HELD(DPAD_LEFT))
+        sel = 3;
+    if (sel != qSel)
+    {
+        qSel = sel;
+        PlaySE(SE_SELECT);
+        QuickPickDraw(data);
+    }
+    if (JOY_NEW(B_BUTTON))
+        QuickPickClose(taskId, FALSE);
+    else if (JOY_NEW(A_BUTTON) || !Gamepad_TriggerHeld(qPhrases))
+        QuickPickClose(taskId, TRUE);
+}
+
+void MP_OpenQuickPick(bool8 phrases)
+{
+    static const struct WindowTemplate sTemplates[2] = {
+        {.bg = 0, .tilemapLeft = 1, .tilemapTop = 11, .width = 12, .height = 8, .paletteNum = 15, .baseBlock = 0x8},
+        {.bg = 0, .tilemapLeft = 1, .tilemapTop = 11, .width = 28, .height = 8, .paletteNum = 15, .baseBlock = 0x8},
+    };
+    u8 taskId;
+    s16 *data;
+    if (FindTaskIdByFunc(Task_QuickPick) != TASK_NONE || FindTaskIdByFunc(Task_CoopMenu) != TASK_NONE)
+        return;
+    LockPlayerFieldControls();
+    HideMapNamePopUpWindow();   // it shares window tiles with this one
+    LoadMessageBoxAndBorderGfx();
+    MpTheme_Push();
+    taskId = CreateTask(Task_QuickPick, 80);
+    data = gTasks[taskId].data;
+    qPhrases = phrases != 0;
+    qSel = -1;
+    qWindow = AddWindow(&sTemplates[qPhrases]);
+    DrawStdWindowFrame(qWindow, FALSE);
+    QuickPickDraw(data);
+    PlaySE(SE_WIN_OPEN);
+}
