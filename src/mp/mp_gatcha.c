@@ -856,10 +856,29 @@ static void PutPixel(u8 *tiles, int tilesPerRow, int x, int y, u8 c)
         *b = (*b & 0xF0) | c;
 }
 
+// Background: diagonal stripes, the dark band behind the reel, gold lines
+// (loaded again after the full-screen rays borrowed their VRAM)
+static void LoadBg3Tiles(void)
+{
+    static u8 sBgTiles[32 * 4];
+    u8 *buf = sBgTiles;
+    int x, y;
+    memset(buf, 0, sizeof(sBgTiles));
+    for (y = 0; y < 8; y++)
+        for (x = 0; x < 8; x++)
+        {
+            PutPixel(buf, 1, x, y, ((x + y) / 4) % 2 ? 1 : 2);                       // tile 0
+            PutPixel(buf + 32, 1, x, y, 3);                                          // tile 1
+            PutPixel(buf + 64, 1, x, y, y <= 1 ? 4 : 3);      // tile 2: gold line, band below it
+            PutPixel(buf + 96, 1, x, y, y >= 6 ? 4 : 3);      // tile 3: band, gold line below it
+        }
+    LoadBgTiles(3, buf, 32 * 4, BG3_TILE);
+}
+
 static void LoadGeneratedGfx(void)
 {
     // The tile copies are queued for VBlank, so the buffers must stay around
-    static u8 sCellTiles[32 * 16], sBgTiles[32 * 4];
+    static u8 sCellTiles[32 * 16], sBgTiles[1];
     u8 *buf = sCellTiles;
     int x, y;
 
@@ -883,18 +902,8 @@ static void LoadGeneratedGfx(void)
         }
     LoadBgTiles(1, buf, 32 * 16, CELL_TILE);
 
-    // Background: diagonal stripes, the dark band behind the reel, gold lines
-    buf = sBgTiles;
-    memset(buf, 0, sizeof(sBgTiles));
-    for (y = 0; y < 8; y++)
-        for (x = 0; x < 8; x++)
-        {
-            PutPixel(buf, 1, x, y, ((x + y) / 4) % 2 ? 1 : 2);                       // tile 0
-            PutPixel(buf + 32, 1, x, y, 3);                                          // tile 1
-            PutPixel(buf + 64, 1, x, y, y <= 1 ? 4 : 3);      // tile 2: gold line, band below it
-            PutPixel(buf + 96, 1, x, y, y >= 6 ? 4 : 3);      // tile 3: band, gold line below it
-        }
-    LoadBgTiles(3, buf, 32 * 4, BG3_TILE);
+    (void)sBgTiles;
+    LoadBg3Tiles();
 
     // Sprites: the selector frame, arrows, confetti
     {
@@ -1113,6 +1122,119 @@ static void UpdateRays(u16 speed, u16 targetScale)
     if (sG->rayScale < targetScale)
         sG->rayScale += (targetScale - sG->rayScale + 7) / 8;
     SetOamMatrixRotationScaling(gSprites[sG->raySprite].oam.matrixNum, sG->rayScale, sG->rayScale, sG->rayRot);
+}
+
+// ---------------------------------------------------------------------------
+// Full-screen light rays behind a legendary (the showcase): an affine
+// background (mode 1, BG2) with a 128x128 burst drawn 2.5x big, so the beams
+// reach every corner while it spins. It borrows BG3's tile block (BG3 can't
+// show in mode 1 anyway) and gives it back afterwards.
+
+#define BIGRAY_CHARBASE 2
+#define BIGRAY_MAPBASE  26
+#define BIGRAY_COL_A    (BG_PLTT_ID(10) + 1)   // the two beam colors (8bpp indices)
+#define BIGRAY_COL_B    (BG_PLTT_ID(10) + 2)
+#define BIGRAY_COL_CORE (BG_PLTT_ID(10) + 3)
+
+static bool8 sBigRays;
+static u16 sBigRayRot, sBigRayScale;
+static s16 sBigRayCx, sBigRayCy;
+
+static void SetBgColor(u16 index, u16 color)
+{
+    gPlttBufferUnfaded[index] = color;
+    gPlttBufferFaded[index] = color;
+}
+
+static void StartBigRays(s16 cx, s16 cy)
+{
+    static u8 tiles[16 * 16 * 64];
+    static u8 map[16 * 16];
+    int x, y;
+    if (sBigRays)
+        return;
+    memset(tiles, 0, sizeof(tiles));
+    for (y = 0; y < 128; y++)
+        for (x = 0; x < 128; x++)
+        {
+            float dx = x - 63.5f, dy = y - 63.5f, re = dx, im = dy, r2 = dx * dx + dy * dy, r8;
+            int k;
+            u8 c = 0;
+            // (dx + i dy)^8: sin(8a) * r^8. Beams where it's well above 0 (one
+            // color) or well below (the other): 16 beams, two colors in turn
+            for (k = 0; k < 3; k++)
+            {
+                float nr = re * re - im * im, ni = 2 * re * im;
+                re = nr;
+                im = ni;
+            }
+            r8 = r2 * r2 * r2 * r2;
+            if (im > 0.30f * r8)
+                c = 1;
+            else if (im < -0.30f * r8)
+                c = 2;
+            if (r2 < 7 * 7)
+                c = 3;
+            if (c)
+                tiles[((y / 8) * 16 + x / 8) * 64 + (y % 8) * 8 + (x % 8)] = BG_PLTT_ID(10) + c;
+        }
+    for (x = 0; x < 256; x++)
+        map[x] = x;
+    LoadBgTiles(3, tiles, sizeof(tiles), 0);   // BG3's tile block: BIGRAY_CHARBASE
+    memcpy((void *)(BG_VRAM + BIGRAY_MAPBASE * 0x800), map, sizeof(map));
+    SetGpuReg(REG_OFFSET_BG2CNT, BGCNT_PRIORITY(3) | BGCNT_CHARBASE(BIGRAY_CHARBASE) | BGCNT_SCREENBASE(BIGRAY_MAPBASE) | BGCNT_AFF128x128);
+    sBigRayRot = 0;
+    sBigRayScale = 0x100;
+    sBigRayCx = cx;
+    sBigRayCy = cy;
+    sBigRays = TRUE;
+    SetGpuReg(REG_OFFSET_DISPCNT, (GetGpuReg(REG_OFFSET_DISPCNT) & ~7) | DISPCNT_MODE_1 | DISPCNT_BG2_ON);
+}
+
+static void StopBigRays(void)
+{
+    if (!sBigRays)
+        return;
+    sBigRays = FALSE;
+    SetGpuReg(REG_OFFSET_DISPCNT, (GetGpuReg(REG_OFFSET_DISPCNT) & ~(7 | DISPCNT_BG2_ON)) | DISPCNT_MODE_0);
+    LoadBg3Tiles();
+    SetBgColor(0, 0);
+}
+
+// Spins the beams and cycles their colors (h: rainbow position)
+static void UpdateBigRays(u16 speed, u16 h)
+{
+    s32 pa, pb, pc, pd, scale, cx, cy, refX, refY;
+    u8 a;
+    if (!sBigRays)
+        return;
+    sBigRayRot += speed;
+    if (sBigRayScale < 0x280)
+        sBigRayScale += (0x280 - sBigRayScale + 7) / 8;   // bursts out, then 2.5x
+    scale = sBigRayScale;
+    a = sBigRayRot >> 8;
+    // Screen -> texture: rotate the other way and shrink by the scale
+    pa = Cos(a, 256) * 256 / scale;
+    pb = Sin(a, 256) * 256 / scale;
+    pc = -Sin(a, 256) * 256 / scale;
+    pd = Cos(a, 256) * 256 / scale;
+    cx = sBigRayCx + sShakeX;
+    cy = sBigRayCy + sShakeY;
+    // The texture's middle (64,64) lands on (cx,cy)
+    refX = 64 * 256 - (pa * cx + pb * cy);
+    refY = 64 * 256 - (pc * cx + pd * cy);
+    SetGpuReg(REG_OFFSET_BG2PA, (u16)pa);
+    SetGpuReg(REG_OFFSET_BG2PB, (u16)pb);
+    SetGpuReg(REG_OFFSET_BG2PC, (u16)pc);
+    SetGpuReg(REG_OFFSET_BG2PD, (u16)pd);
+    SetGpuReg(REG_OFFSET_BG2X_L, (u16)refX);
+    SetGpuReg(REG_OFFSET_BG2X_H, (u16)(refX >> 16) & 0x0FFF);
+    SetGpuReg(REG_OFFSET_BG2Y_L, (u16)refY);
+    SetGpuReg(REG_OFFSET_BG2Y_H, (u16)(refY >> 16) & 0x0FFF);
+    SetBgColor(BIGRAY_COL_A, MixColor(Hue(h), RGB(31, 31, 31), 110));
+    SetBgColor(BIGRAY_COL_B, MixColor(Hue(h + 96), RGB(31, 31, 31), 110));
+    SetBgColor(BIGRAY_COL_CORE, RGB(31, 31, 31));
+    SetBgColor(0, MixColor(RGB(2, 1, 6), Hue(h + 48), 60));   // between the beams
 }
 
 static void DestroyRays(void)
@@ -2306,7 +2428,7 @@ static void UpdateEvent(void)
             gSprites[sG->legendPic].data[1] = 48;
             SetLegendColors(0, 0);
         }
-        PlayBGM(ex ? MUS_RG_ENCOUNTER_DEOXYS : MUS_VS_REGI);
+        PlayBGM(ex ? MUS_RG_HALL_OF_FAME : MUS_HALL_OF_FAME);   // happy and triumphant
         PlaySE(SE_M_EARTHQUAKE);
         sG->shake = 30;
     }
@@ -2346,6 +2468,9 @@ static void EndShowcase(void)
     struct Result *r = &sG->results[sG->best];
     sG->showcase = FALSE;
     DestroyLegendPic();
+    StopBigRays();
+    CreateRays();   // the usual beams behind the prize box
+    sG->rayScale = 0x200;
     ShowBg(1);
     HideReelSprites(FALSE);
     PutWindowTilemap(WIN_TITLE);
@@ -2368,6 +2493,7 @@ static void ClearHype(void)
     u8 i;
     if (sG->showcase)
         EndShowcase();
+    StopBigRays();
     DestroyLegendPic();
     DestroyRays();
     DestroyStamp();
@@ -2443,8 +2569,8 @@ static void ShowReveal(void)
             snprintf(line, sizeof(line), "%s! %s", a, r->note[0] ? r->note : "");
             DrawHelp(line);
         }
-        if (sG->raySprite < MAX_SPRITES)
-            gSprites[sG->raySprite].y = 92;
+        DestroyRays();
+        StartBigRays(REEL_CX, 92);
         PlayCry_Normal(DefSpecies(r->def), 0);
     }
     else
@@ -2583,6 +2709,7 @@ static void CB2_Gatcha(void)
 
 static void FreeScene(void)
 {
+    sBigRays = FALSE;
     DestroyLegendPic();
     DestroyRays();
     DestroyStamp();
@@ -2817,6 +2944,7 @@ static void Task_Gatcha(u8 taskId)
             {
                 // Rainbow everything, and stars raining down (EX: twice as many, and faster)
                 u16 h = sG->timer * (best == R_EX ? 8 : 4);
+                UpdateBigRays(best == R_EX ? 0x220 : 0x160, h);
                 Bg3Rainbow(h);
                 if (best == R_EX)
                 {
