@@ -195,6 +195,49 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "gatcharig") == 0)
+    {
+        // gatcharig N - the next MoeGatcha pull is this rarity (0 common .. 4 ultra); gatcharig N P also gives P pulls
+        void MP_Gatcha_Rig(s8 rarity);
+        void MP_Gatcha_AddPulls(s32 n);
+        int r = 0, p = 0;
+        sscanf(arg, "%d %d", &r, &p);
+        MP_Gatcha_Rig(r);
+        if (p)
+            MP_Gatcha_AddPulls(p);
+    }
+    else if (strcmp(cmd, "sprites") == 0)
+    {
+        // sprites - every sprite in use: position, size, tile and palette
+        int i;
+        for (i = 0; i < MAX_SPRITES; i++)
+        {
+            struct Sprite *sp = &gSprites[i];
+            if (!sp->inUse)
+                continue;
+            printf("[test] spr %2d x %d y %d x2 %d y2 %d shape %d size %d tile %d pal %d tag %04x ptag %04x inv %d cb %p\n", i, sp->x, sp->y, sp->x2, sp->y2,
+                   sp->oam.shape, sp->oam.size, sp->oam.tileNum, sp->oam.paletteNum, sp->template ? sp->template->tileTag : 0,
+                   sp->template ? sp->template->paletteTag : 0, sp->invisible, (void *)sp->callback);
+        }
+    }
+    else if (strcmp(cmd, "objtiles") == 0)
+    {
+        // objtiles TILE WIDTH_TILES HEIGHT_TILES - print sprite tiles from VRAM as hex digits
+        int t = 0, w = 4, h = 4, x, y;
+        sscanf(arg, "%d %d %d", &t, &w, &h);
+        for (y = 0; y < h * 8; y++)
+        {
+            char line[80];
+            for (x = 0; x < w * 8 && x < 64; x++)
+            {
+                const u8 *tile = (const u8 *)(OBJ_VRAM0) + (t + (y / 8) * w + x / 8) * 32;
+                u8 c = (tile[(y % 8) * 4 + (x % 8) / 2] >> ((x & 1) * 4)) & 15;
+                line[x] = "0123456789ABCDEF"[c];
+            }
+            line[x] = 0;
+            printf("[test] %s\n", line);
+        }
+    }
     else if (strcmp(cmd, "follow") == 0)
     {
         // follow N - party Pokémon N walks with you (like SELECT in the party menu)

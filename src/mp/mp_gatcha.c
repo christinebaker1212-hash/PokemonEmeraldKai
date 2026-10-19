@@ -7,6 +7,10 @@
 // Pity: a SUPER RARE or better at least every 40 pulls, an ULTRA RARE at least
 // every 120. A 10-pull always has at least one RARE or better.
 // Event Moemon carry the moves of real Generation 3 event Pokémon.
+// Banners (L/R): STANDARD, PICKUP (a featured event Moemon each week),
+// TRAINING (candies, vitamins) and POKé BALLS, each with its own pity count.
+// SUPER/ULTRA RAREs: a "?" box that looks RARE, maybe a stop one short, a
+// charge-up with color changes, then a burst with rays, a stamp and confetti.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,6 +50,8 @@
 #include "fieldmap.h"
 #include "new_game.h"
 #include "save.h"
+#include "trainer_pokemon_sprites.h"
+#include "trig.h"
 #include "constants/songs.h"
 #include "constants/species.h"
 #include "constants/region_map_sections.h"
@@ -340,6 +346,13 @@ static void PityKeys(char *sr, char *ur)
     }
 }
 
+static s8 sRig = -1;   // test builds: force the next pull's best rarity (mp gatcharig N)
+
+void MP_Gatcha_Rig(s8 rarity)
+{
+    sRig = rarity;
+}
+
 static u8 RollRarity(bool8 rarePlus)
 {
     char srKey[24], urKey[24];
@@ -361,6 +374,11 @@ static u8 RollRarity(bool8 rarePlus)
         rarity = R_SUPER;
     if (rarePlus && rarity < R_RARE)
         rarity = R_RARE;
+    if (sRig >= 0 && sRig < R_COUNT)
+    {
+        rarity = sRig;
+        sRig = -1;
+    }
     MP_SaveData_Set(srKey, rarity >= R_SUPER ? 0 : sinceSuper + 1);
     MP_SaveData_Set(urKey, rarity == R_ULTRA ? 0 : sinceUltra + 1);
     return rarity;
@@ -538,7 +556,7 @@ static const u16 sTextPal[16] = {
     RGB(23, 23, 25), RGB(12, 30, 12), RGB(12, 22, 31), RGB(28, 14, 31), RGB(31, 28, 6),
     RGB(4, 3, 11), RGB(31, 25, 6), RGB(13, 13, 19), 0, 0, 0, 0,
 };
-enum { TC_WHITE = 1, TC_SHADOW, TC_GREY, TC_RARITY, TC_PANEL = 9, TC_GOLD, TC_DIM };
+enum { TC_WHITE = 1, TC_SHADOW, TC_GREY, TC_RARITY, TC_PANEL = 9, TC_GOLD, TC_DIM, TC_BANNER };
 
 // Cells: 1 border, 2 fill, 3 top shine, 4 bottom shade
 static const u16 sCellPals[R_COUNT][5] = {
@@ -557,7 +575,7 @@ static u16 sSpritePalThemed[16] = {
     0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-enum { GS_FADE_IN, GS_MENU, GS_SPIN, GS_REVEAL, GS_GRID, GS_EXIT };
+enum { GS_FADE_IN, GS_MENU, GS_SPIN, GS_NUDGE, GS_HYPE, GS_REVEAL, GS_GRID, GS_EXIT };
 
 #define NO_CELL (-0x7FFFFFFF)   // a live icon slot that shows nothing (cells can be negative)
 
@@ -566,12 +584,14 @@ struct LiveIcon
     s32 cell;          // NO_CELL: none
     u8 spriteId;
     bool8 isMon;
+    bool8 mystery;     // shows "?" (the big prize before it's revealed)
 };
 
 struct ReelCell
 {
     const struct PrizeDef *def;
     u8 rarity;
+    u8 shown;          // the box color shown: a big prize starts out looking RARE
 };
 
 struct GatchaState
@@ -595,6 +615,17 @@ struct GatchaState
     u8 frameSprite, arrowTop, arrowBottom;
     u16 bgScroll;
     u8 flashes;
+    // The big reveal (SUPER RARE and up)
+    s32 prizeCell;
+    bool8 mystery;      // the prize box shows "?" until the burst
+    bool8 nudge;        // the reel stops one short, then clicks onto it
+    u16 hypeTimer;
+    u8 raySprite;
+    u16 rayRot, rayScale;
+    u8 stampSprites[3];
+    u16 stampTimer;
+    s16 shake;          // amplitude in 1/16 px
+    u16 pickupPic;      // the featured Moemon on the PICKUP banner (0xFFFF: none)
 };
 
 static EWRAM_DATA struct GatchaState *sG = NULL;
@@ -736,8 +767,378 @@ static void SpawnConfetti(u8 count)
         gSprites[id].data[0] = (s16)(Random() % 96) - 48;
         gSprites[id].data[1] = -(s16)(40 + Random() % 40);
         gSprites[id].oam.priority = 0;
+        gSprites[id].coordOffsetEnabled = TRUE;
         StartSpriteAnim(&gSprites[id], i % 4);
     }
+}
+
+static u16 MixColor(u16 a, u16 b, int f);
+static void LoadThemedPalettes(void);
+static void DrawMenu(void);
+static void ShowReveal(void);
+
+// ---------------------------------------------------------------------------
+// The big reveal: light rays, a stamp, sparkles, shaking, rainbow colors
+
+#define TAG_RAYS   0x7243
+#define TAG_STAMP  0x7244
+#define RAY_COL_IN  8      // TAG_FRAME palette: ray colors
+#define RAY_COL_OUT 9
+
+static u8 sRayTiles[64 * 64 / 2];
+static u8 sStampTiles[3 * 64 * 32 / 2];
+static u16 sStampPal[16] = {0, RGB(31, 24, 4), RGB(12, 6, 0), RGB(3, 2, 6), RGB(31, 31, 18)};
+static s8 sShakeX, sShakeY;
+static u16 sBg3Hofs;
+
+static const struct OamData sOamRays = {
+    .affineMode = ST_OAM_AFFINE_DOUBLE, .shape = SPRITE_SHAPE(64x64), .size = SPRITE_SIZE(64x64), .priority = 3,
+};
+static const struct OamData sOamStamp = {
+    .affineMode = ST_OAM_AFFINE_DOUBLE, .shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 0,
+};
+
+// Bright rainbow color, h = 0..191
+static u16 Hue(u16 h)
+{
+    u8 f = h % 32;
+    switch ((h / 32) % 6)
+    {
+    case 0:  return RGB(31, f, 0);
+    case 1:  return RGB(31 - f, 31, 0);
+    case 2:  return RGB(0, 31, f);
+    case 3:  return RGB(0, 31 - f, 31);
+    case 4:  return RGB(f, 0, 31);
+    default: return RGB(31, 0, 31 - f);
+    }
+}
+
+// One color of a loaded sprite palette
+static void SetSprCol(u16 tag, u8 idx, u16 color)
+{
+    u8 slot = IndexOfSpritePaletteTag(tag);
+    if (slot == 0xFF)
+        return;
+    gPlttBufferUnfaded[OBJ_PLTT_ID(slot) + idx] = color;
+    gPlttBufferFaded[OBJ_PLTT_ID(slot) + idx] = color;
+}
+
+// A 64x64 burst of 16 light rays
+static void BuildRayTiles(void)
+{
+    int x, y;
+    memset(sRayTiles, 0, sizeof(sRayTiles));
+    for (y = 0; y < 64; y++)
+        for (x = 0; x < 64; x++)
+        {
+            float dx = x - 31.5f, dy = y - 31.5f, re = dx, im = dy, r2 = dx * dx + dy * dy;
+            int k;
+            u8 c = 0;
+            // (dx + i dy)^8: its sign gives 16 wedges around the middle
+            for (k = 0; k < 3; k++)
+            {
+                float nr = re * re - im * im, ni = 2 * re * im;
+                re = nr;
+                im = ni;
+            }
+            // Thin beams: sin(8a) > 0.45, a bit wider near the middle
+            {
+                float r4 = r2 * r2, r8 = r4 * r4;
+                if (r2 < 31 * 31 && im > (r2 < 12 * 12 ? 0.1f : 0.45f) * r8)
+                    c = r2 < 14 * 14 ? RAY_COL_IN : RAY_COL_OUT;
+            }
+            if (r2 < 6 * 6)
+                c = RAY_COL_IN;
+            if (c)
+                PutPixel(sRayTiles, 8, x, y, c);
+        }
+}
+
+static void SetDarken(u8 level)
+{
+    if (level)
+    {
+        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_TGT1_BG3 | BLDCNT_EFFECT_DARKEN);
+        SetGpuReg(REG_OFFSET_BLDY, level);
+    }
+    else
+    {
+        SetGpuReg(REG_OFFSET_BLDCNT, 0);
+        SetGpuReg(REG_OFFSET_BLDY, 0);
+    }
+}
+
+static void SetRayColors(u16 inner, u16 outer)
+{
+    SetSprCol(TAG_FRAME, RAY_COL_IN, inner);
+    SetSprCol(TAG_FRAME, RAY_COL_OUT, outer);
+}
+
+static void RayColorsFor(u8 rarity)
+{
+    u16 c = sRarityFlash[rarity];
+    SetRayColors(MixColor(c, RGB(31, 31, 31), 170), c);
+}
+
+static void CreateRays(void)
+{
+    struct SpriteSheet sheet = {sRayTiles, sizeof(sRayTiles), TAG_RAYS};
+    struct SpriteTemplate t = {
+        .tileTag = TAG_RAYS, .paletteTag = TAG_FRAME, .oam = &sOamRays,
+        .anims = gDummySpriteAnimTable, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+    };
+    if (sG->raySprite < MAX_SPRITES)
+        return;
+    if (GetSpriteTileStartByTag(TAG_RAYS) == 0xFFFF && LoadSpriteSheet(&sheet) == 0)
+        return;
+    sG->raySprite = CreateSprite(&t, REEL_CX, REEL_TOP + 16, 10);
+    if (sG->raySprite == MAX_SPRITES)
+        return;
+    gSprites[sG->raySprite].affineAnimPaused = TRUE;
+    gSprites[sG->raySprite].coordOffsetEnabled = TRUE;
+    sG->rayRot = 0;
+    sG->rayScale = 0x60;
+}
+
+static void UpdateRays(u16 speed, u16 targetScale)
+{
+    if (sG->raySprite >= MAX_SPRITES)
+        return;
+    sG->rayRot += speed;
+    if (sG->rayScale < targetScale)
+        sG->rayScale += (targetScale - sG->rayScale + 7) / 8;
+    SetOamMatrixRotationScaling(gSprites[sG->raySprite].oam.matrixNum, sG->rayScale, sG->rayScale, sG->rayRot);
+}
+
+static void DestroyRays(void)
+{
+    if (sG->raySprite < MAX_SPRITES)
+    {
+        FreeSpriteOamMatrix(&gSprites[sG->raySprite]);
+        DestroySprite(&gSprites[sG->raySprite]);
+    }
+    sG->raySprite = MAX_SPRITES;
+    FreeSpriteTilesByTag(TAG_RAYS);
+}
+
+// Sparkles: little stars that float up out of the prize box
+static void SpriteCB_Sparkle(struct Sprite *sprite)
+{
+    // data: 0-1 speed (1/16 px), 2-3 sub-pixel, 4 age, 5 life
+    sprite->data[2] += sprite->data[0];
+    sprite->data[3] += sprite->data[1];
+    sprite->x2 = sprite->data[2] / 16;
+    sprite->y2 = sprite->data[3] / 16;
+    sprite->invisible = sprite->data[4] > sprite->data[5] - 12 && (sprite->data[4] & 2);
+    if (++sprite->data[4] > sprite->data[5])
+        DestroySprite(sprite);
+}
+
+static void SpawnSparkles(u8 count, bool8 burst)
+{
+    struct SpriteTemplate t = {
+        .tileTag = TAG_CONFETTI, .paletteTag = TAG_FRAME, .oam = &gOamData_AffineOff_ObjNormal_8x8,
+        .anims = sAnims_Confetti, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCB_Sparkle,
+    };
+    u8 i;
+    for (i = 0; i < count; i++)
+    {
+        u8 id = CreateSprite(&t, REEL_CX + (Random() % 28) - 14, REEL_TOP + 16 + (Random() % 20) - 10, 1);
+        if (id == MAX_SPRITES)
+            return;
+        if (burst)
+        {
+            // Out in all directions
+            u8 a = Random();
+            gSprites[id].data[0] = Cos(a, 40 + Random() % 30);
+            gSprites[id].data[1] = Sin(a, 40 + Random() % 30);
+            gSprites[id].data[5] = 30 + Random() % 15;
+        }
+        else
+        {
+            gSprites[id].data[0] = (s16)(Random() % 16) - 8;
+            gSprites[id].data[1] = -(s16)(14 + Random() % 20);
+            gSprites[id].data[5] = 40 + Random() % 20;
+        }
+        gSprites[id].oam.priority = 0;
+        gSprites[id].coordOffsetEnabled = TRUE;
+        StartSpriteAnim(&gSprites[id], 1);   // the star
+    }
+}
+
+// Stars raining down the whole screen (ULTRA RARE)
+static void SpawnFallingStar(void)
+{
+    struct SpriteTemplate t = {
+        .tileTag = TAG_CONFETTI, .paletteTag = TAG_FRAME, .oam = &gOamData_AffineOff_ObjNormal_8x8,
+        .anims = sAnims_Confetti, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCB_Sparkle,
+    };
+    u8 id = CreateSprite(&t, Random() % DISPLAY_WIDTH, -4, 1);
+    if (id == MAX_SPRITES)
+        return;
+    gSprites[id].data[0] = -(s16)(4 + Random() % 8);
+    gSprites[id].data[1] = 28 + Random() % 20;
+    gSprites[id].data[5] = 100;
+    gSprites[id].oam.priority = 0;
+    StartSpriteAnim(&gSprites[id], 1);
+}
+
+// The stamp: "SUPER RARE!!" in big letters (double size, outlined), as three
+// 64x32 sprites that zoom in and land with a bounce
+static void BuildStampTiles(const char *text)
+{
+    static const struct WindowTemplate sTmp = {.bg = 0, .tilemapLeft = 0, .tilemapTop = 0, .width = 16, .height = 2, .paletteNum = TEXT_PAL, .baseBlock = 0x300};
+    static u8 px[32][192];
+    u8 buf[32], colors[3] = {0, 1, 2};
+    u8 win = AddWindow(&sTmp);
+    const u8 *src;
+    int w, pad, x, y, k;
+
+    memset(px, 0, sizeof(px));
+    memset(sStampTiles, 0, sizeof(sStampTiles));
+    if (win == WINDOW_NONE)
+        return;
+    FillWindowPixelBuffer(win, PIXEL_FILL(0));
+    MP_AsciiToGame(buf, text, 30);
+    w = GetStringWidth(FONT_NORMAL, buf, 0);
+    if (w > 94)
+        w = 94;
+    AddTextPrinterParameterized3(win, FONT_NORMAL, 0, 0, colors, TEXT_SKIP_DRAW, buf);
+    src = gWindows[win].tileData;
+    pad = (192 - w * 2) / 2;
+    for (y = 0; y < 32; y++)
+        for (x = 0; x < 192; x++)
+        {
+            int sx = (x - pad) / 2, sy = y / 2;
+            u8 c;
+            if (x < pad || sx >= w)
+                continue;
+            c = (src[((sy / 8) * 16 + sx / 8) * 32 + (sy % 8) * 4 + (sx % 8) / 2] >> ((sx & 1) * 4)) & 15;
+            if (c == 1)
+                c = (y < 15) ? 4 : 1;   // lighter top half
+            px[y][x] = c;
+        }
+    RemoveWindow(win);
+    // Dark outline around the letters
+    for (y = 0; y < 32; y++)
+        for (x = 0; x < 192; x++)
+        {
+            int dx, dy;
+            if (px[y][x])
+                continue;
+            for (dy = -1; dy <= 1; dy++)
+                for (dx = -1; dx <= 1; dx++)
+                {
+                    int nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < 192 && ny >= 0 && ny < 32 && px[ny][nx] && px[ny][nx] != 5)
+                        px[y][x] = 5;   // marked, made 3 below (so it doesn't spread)
+                }
+        }
+    for (k = 0; k < 3; k++)
+        for (y = 0; y < 32; y++)
+            for (x = 0; x < 64; x++)
+            {
+                u8 c = px[y][k * 64 + x];
+                if (c == 5)
+                    c = 3;
+                if (c)
+                    PutPixel(sStampTiles + k * 1024, 8, x, y, c);
+            }
+}
+
+static void CreateStamp(u8 rarity)
+{
+    struct SpriteSheet sheet = {sStampTiles, sizeof(sStampTiles), TAG_STAMP};
+    struct SpritePalette pal = {sStampPal, TAG_STAMP};
+    struct SpriteTemplate t = {
+        .tileTag = TAG_STAMP, .paletteTag = TAG_STAMP, .oam = &sOamStamp,
+        .anims = gDummySpriteAnimTable, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+    };
+    u8 k;
+    BuildStampTiles(rarity == R_ULTRA ? "ULTRA RARE!!!" : "SUPER RARE!!");
+    if (rarity == R_ULTRA)
+    {
+        sStampPal[1] = RGB(31, 22, 2);
+        sStampPal[4] = RGB(31, 31, 16);
+        sStampPal[2] = RGB(14, 6, 0);
+    }
+    else
+    {
+        sStampPal[1] = RGB(25, 8, 31);
+        sStampPal[4] = RGB(31, 22, 31);
+        sStampPal[2] = RGB(9, 1, 14);
+    }
+    FreeSpriteTilesByTag(TAG_STAMP);
+    FreeSpritePaletteByTag(TAG_STAMP);
+    if (LoadSpriteSheet(&sheet) == 0 || LoadSpritePalette(&pal) == 0xFF)
+        return;
+    for (k = 0; k < 3; k++)
+    {
+        u8 id = CreateSprite(&t, REEL_CX, 22, 0);
+        sG->stampSprites[k] = id;
+        if (id == MAX_SPRITES)
+            continue;
+        gSprites[id].sheetTileStart += k * 32;
+        gSprites[id].oam.tileNum += k * 32;
+        gSprites[id].affineAnimPaused = TRUE;
+        gSprites[id].coordOffsetEnabled = TRUE;
+    }
+    sG->stampTimer = 0;
+}
+
+// Zooms in from 2.5x, overshoots a little and settles
+static void UpdateStamp(void)
+{
+    static const u16 sScales[] = {0x280, 0x240, 0x200, 0x1C0, 0x180, 0x150, 0x128, 0x108, 0xF0, 0xE4, 0xE8, 0xF4, 0x100};
+    u16 t = sG->stampTimer++, scale;
+    u8 k;
+    scale = t < ARRAY_COUNT(sScales) ? sScales[t] : 0x100 + Sin((t * 6) & 0xFF, 8);   // then it breathes
+    for (k = 0; k < 3; k++)
+    {
+        u8 id = sG->stampSprites[k];
+        if (id >= MAX_SPRITES)
+            continue;
+        SetOamMatrixRotationScaling(gSprites[id].oam.matrixNum, scale, scale, 0);
+        gSprites[id].x = REEL_CX + ((k - 1) * 64 * scale) / 0x100;
+    }
+}
+
+static void DestroyStamp(void)
+{
+    u8 k;
+    for (k = 0; k < 3; k++)
+    {
+        if (sG->stampSprites[k] < MAX_SPRITES)
+        {
+            FreeSpriteOamMatrix(&gSprites[sG->stampSprites[k]]);
+            DestroySprite(&gSprites[sG->stampSprites[k]]);
+        }
+        sG->stampSprites[k] = MAX_SPRITES;
+    }
+    FreeSpriteTilesByTag(TAG_STAMP);
+    FreeSpritePaletteByTag(TAG_STAMP);
+}
+
+// The prize box glows brighter and dimmer
+static void PulseCell(u8 rarity, u16 t)
+{
+    u16 pal[5];
+    u8 i;
+    int f = 80 + Sin((t * 12) & 0xFF, 70);
+    for (i = 0; i < 5; i++)
+        pal[i] = i ? MixColor(sCellPals[rarity][i], RGB(31, 31, 31), f) : 0;
+    LoadPalette(pal, BG_PLTT_ID(CELL_PAL0 + rarity), sizeof(pal));
+}
+
+static void Bg3Rainbow(u16 h)
+{
+    u16 bg3[5];
+    bg3[0] = 0;
+    bg3[1] = MixColor(0, Hue(h), 120);
+    bg3[2] = MixColor(0, Hue(h + 16), 160);
+    bg3[3] = MixColor(0, Hue(h + 96), 50);
+    bg3[4] = Hue(h + 48);
+    LoadPalette(bg3, BG_PLTT_ID(BG3_PAL), sizeof(bg3));
 }
 
 // ---------------------------------------------------------------------------
@@ -775,6 +1176,7 @@ static void MakeTeaser(struct ReelCell *c)
     u16 r = Random() % 100;
     c->rarity = r < 14 ? R_ULTRA : r < 34 ? R_SUPER : r < 56 ? R_RARE : r < 78 ? R_UNCOMMON : R_COMMON;
     c->def = PickFromPool(c->rarity);
+    c->shown = c->rarity;
 }
 
 static void GenerateAhead(s32 upTo)
@@ -828,10 +1230,10 @@ static void DestroyLive(struct LiveIcon *l, u8 slot)
     l->cell = NO_CELL;
 }
 
-static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *isMon)
+static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *isMon, bool8 mystery)
 {
     u8 id;
-    if (def->kind == K_MON)
+    if (def->kind == K_MON && !mystery)
     {
         const struct EventMon *e = &sEventMons[def->id];
         LoadMonIconPalette(e->species);   // only the palettes in use: item icons need theirs too
@@ -843,7 +1245,7 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
     else
     {
         *isMon = FALSE;
-        u16 item = def->kind == K_SET ? sSets[def->id][0] : def->id;   // a set shows its first item
+        u16 item = mystery ? ITEM_NONE : def->kind == K_SET ? sSets[def->id][0] : def->id;   // ITEM_NONE: "?"; a set shows its first item
         id = AddItemIconSprite(TAG_ICON + slot, TAG_ITEM_PAL + item, item);
         if (id < MAX_SPRITES && IndexOfSpritePaletteTag(TAG_ITEM_PAL + item) == 0xFF)
         {
@@ -866,6 +1268,7 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
     {
         gSprites[id].oam.priority = 1;
         gSprites[id].subpriority = 2;
+        gSprites[id].coordOffsetEnabled = TRUE;   // shakes with the screen
     }
     return id;
 }
@@ -882,7 +1285,7 @@ static void UpdateReel(void)
     GenerateAhead(last + 2);
     // BG1: cell boxes. Screen x of cell i's left edge = REEL_CX - 16 + i*32 - pos
     for (i = first - 1; i <= last + 1; i++)
-        DrawCellTiles(sBg1Map, i * 4, REEL_TOP / 8, Cell(i)->rarity, TRUE);
+        DrawCellTiles(sBg1Map, i * 4, REEL_TOP / 8, Cell(i)->shown, TRUE);
     CopyBgTilemapBufferToVram(1);
     sBg1Hofs = (FloorF(sG->pos) - (REEL_CX - CELL_W / 2)) & 511;
     SetGpuReg(REG_OFFSET_BG1VOFS, 0);
@@ -898,15 +1301,17 @@ static void UpdateReel(void)
     {
         struct LiveIcon *l;
         s16 x = REEL_CX + i * CELL_W - FloorF(sG->pos);
+        bool8 mystery = sG->mystery && i == sG->prizeCell;
         slot = ((i % 16) + 16) % 16;
         l = &sG->live[slot];
-        if (l->cell != i)
+        if (l->cell != i || l->mystery != mystery)
         {
             DestroyLive(l, slot);
             if (Cell(i)->def == NULL)   // never filled in: give it a prize to show
                 MakeTeaser(Cell(i));
-            l->spriteId = CreateIcon(Cell(i)->def, slot, x, REEL_TOP + 16, &l->isMon);
+            l->spriteId = CreateIcon(Cell(i)->def, slot, x, REEL_TOP + 16, &l->isMon, mystery);
             l->cell = i;
+            l->mystery = mystery;
         }
         if (l->spriteId < MAX_SPRITES)
             gSprites[l->spriteId].x = x;
@@ -952,8 +1357,11 @@ static void PrintCenteredAscii(u8 win, u8 font, int y, u8 bg, u8 fg, const char 
 
 static void DrawHeader(void)
 {
-    char line[64];
-    s32 sinceSuper = MP_SaveData_Get(PITY_SR_KEY), sinceUltra = MP_SaveData_Get(PITY_UR_KEY);
+    char line[64], srKey[24], urKey[24];
+    s32 sinceSuper, sinceUltra;
+    PityKeys(srKey, urKey);
+    sinceSuper = MP_SaveData_Get(srKey);
+    sinceUltra = MP_SaveData_Get(urKey);
 
     FillWindowPixelBuffer(WIN_TITLE, PIXEL_FILL(0));
     PrintAscii(WIN_TITLE, FONT_NORMAL, 2, 1, 0, TC_GOLD, "MOEGATCHA");
@@ -993,6 +1401,15 @@ static void DrawHelp(const char *s)
     CopyWindowToVram(WIN_HELP, COPYWIN_FULL);
 }
 
+// The "?" box: only its (fake) rarity shows
+static void DrawMysteryLine(u8 shown)
+{
+    FillWindowPixelBuffer(WIN_NAME, PIXEL_FILL(TC_PANEL));
+    PrintCenteredAscii(WIN_NAME, FONT_SMALL, 2, TC_PANEL, TC_RARITY + shown, sRarityNames[shown]);
+    PrintCenteredAscii(WIN_NAME, FONT_NORMAL, 14, TC_PANEL, TC_RARITY + shown, "? ? ?");
+    CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
+}
+
 static void DrawNameLine(const struct PrizeDef *def, u8 rarity, u32 amount, bool8 big)
 {
     u8 name[48];
@@ -1013,6 +1430,84 @@ static void BuildMenu(void)
     sG->menuRows[sG->menuCount++] = MENU_BACK;
     if (sG->cursor >= sG->menuCount)
         sG->cursor = 0;
+}
+
+// The banner's name between L and R, and what it's about
+static void DrawBannerLine(void)
+{
+    char line[48];
+    int width = sBanner == BANNER_PICKUP ? 156 : 24 * 8;   // the featured Moemon stands on the right
+    u8 buf[48];
+    FillWindowPixelBuffer(WIN_NAME, PIXEL_FILL(TC_PANEL));
+    PrintAscii(WIN_NAME, FONT_SMALL, 4, 2, TC_PANEL, TC_GREY, "< L");
+    if (sBanner != BANNER_PICKUP)
+        PrintAscii(WIN_NAME, FONT_SMALL, 24 * 8 - 4 - 14, 2, TC_PANEL, TC_GREY, "R >");
+    else
+        PrintAscii(WIN_NAME, FONT_SMALL, width - 14, 2, TC_PANEL, TC_GREY, "R >");
+    MP_AsciiToGame(buf, sBanners[sBanner].name, 40);
+    Print(WIN_NAME, FONT_SMALL, (width - GetStringWidth(FONT_SMALL, buf, 0)) / 2, 2, TC_PANEL, TC_BANNER, buf);
+    if (sBanner == BANNER_PICKUP)
+    {
+        u8 name[POKEMON_NAME_LENGTH + 1];
+        char a[16];
+        GetSpeciesName(name, sEventMons[PickupFeatured()].species);
+        MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
+        snprintf(line, sizeof(line), "%s: UR rate x2!", a);
+    }
+    else
+        snprintf(line, sizeof(line), "%s", sBanners[sBanner].tagline);
+    MP_AsciiToGame(buf, line, 44);
+    {
+        u8 font = GetStringWidth(FONT_NORMAL, buf, 0) > width - 8 ? FONT_SMALL : FONT_NORMAL;
+        Print(WIN_NAME, font, (width - GetStringWidth(font, buf, 0)) / 2, font == FONT_NORMAL ? 14 : 16, TC_PANEL, TC_WHITE, buf);
+    }
+    CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
+}
+
+static void SpriteCB_PickupPic(struct Sprite *sprite)
+{
+    sprite->data[0]++;
+    sprite->y2 = Sin((sprite->data[0] * 3) & 0xFF, 3);
+}
+
+// The featured Moemon of the week, standing next to the PICKUP banner
+static void ShowPickupPic(void)
+{
+    if (sG->pickupPic != 0xFFFF)
+    {
+        FreeAndDestroyMonPicSprite(sG->pickupPic);
+        sG->pickupPic = 0xFFFF;
+    }
+    if (sBanner == BANNER_PICKUP)
+    {
+        u16 species = sEventMons[PickupFeatured()].species;
+        const struct CompressedSpritePalette *pal = GetMonSpritePalStructFromOtIdPersonality(species, 0, 0);
+        u16 id = CreateMonPicSprite_HandleDeoxys(species, 0, 0, TRUE, 222, 104, 0, pal->tag);
+        if (id < MAX_SPRITES)
+        {
+            gSprites[id].oam.priority = 0;
+            gSprites[id].callback = SpriteCB_PickupPic;
+            gSprites[id].coordOffsetEnabled = TRUE;
+            sG->pickupPic = id;
+        }
+    }
+}
+
+// L/R: another banner. The reel fills up with that banner's prizes
+static void SwitchBanner(s8 dir)
+{
+    s32 c = CenterCell(), i;
+    sBanner = (sBanner + BANNER_COUNT + dir) % BANNER_COUNT;
+    PlaySE(SE_DEX_PAGE);
+    LoadThemedPalettes();
+    for (i = c - 8; i <= sG->genUpTo; i++)
+        MakeTeaser(Cell(i));
+    DestroyAllLive();
+    UpdateReel();
+    ShowPickupPic();
+    BeginNormalPaletteFade(PALETTES_BG, 0, 8, 0, sBanners[sBanner].accent ? sBanners[sBanner].accent : RGB(31, 31, 31));
+    DrawHeader();
+    DrawMenu();
 }
 
 static void DrawMenu(void)
@@ -1045,10 +1540,22 @@ static void DrawMenu(void)
     }
     PrintAscii(WIN_MENU, FONT_SMALL, 8, 28, TC_PANEL, TC_GREY, sInfo[sG->menuRows[sG->cursor]]);
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-    DrawHelp("ODDS  C 55%  U 28%  R 12%  SR 4.5%  UR 0.5%");
-    FillWindowPixelBuffer(WIN_NAME, PIXEL_FILL(TC_PANEL));
-    PrintCenteredAscii(WIN_NAME, FONT_SMALL, 2, TC_PANEL, TC_GREY, "Event Moemon, items and money!");
-    PrintCenteredAscii(WIN_NAME, FONT_NORMAL, 14, TC_PANEL, TC_WHITE, MP_Gatcha_Pulls() > 0 || FreeTenAvailable() ? "Feeling lucky?" : "Earn pulls with team achievements!");
+    {
+        // ODDS  C 55%  U 28%  R 12%  SR 4.5%  UR 0.5%
+        static const char *const sShort[R_COUNT] = {"C", "U", "R", "SR", "UR"};
+        char odds[80];
+        int n = snprintf(odds, sizeof(odds), "ODDS ");
+        for (i = 0; i < R_COUNT; i++)
+        {
+            u16 pm = sBanners[sBanner].perMille[i];
+            if (pm % 10)
+                n += snprintf(odds + n, sizeof(odds) - n, " %s %d.%d%%", sShort[i], pm / 10, pm % 10);
+            else
+                n += snprintf(odds + n, sizeof(odds) - n, " %s %d%%", sShort[i], pm / 10);
+        }
+        DrawHelp(odds);
+    }
+    DrawBannerLine();
     CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
 }
 
@@ -1058,13 +1565,13 @@ static void SetReelClip(bool8 on)
     {
         SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(REEL_LEFT, REEL_RIGHT));
         SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(0, DISPLAY_HEIGHT));
-        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ);
-        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG3);
+        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_ALL);
+        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG3 | WINOUT_WIN01_CLR);
     }
     else
     {
-        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ);
-        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ);
+        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_ALL);
+        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
     }
 }
 
@@ -1116,18 +1623,35 @@ static void StartSpin(u8 count)
     for (i = 5; i <= SPIN_CELLS + 8; i++)   // up to genUpTo below: those count as filled in
         MakeTeaser(Cell(center + i));
     Cell(prizeCell)->def = sG->results[best].def;
-    Cell(prizeCell)->rarity = sG->results[best].rarity;
+    Cell(prizeCell)->rarity = Cell(prizeCell)->shown = sG->results[best].rarity;
     // So close! The big one sits right next to it
     if (sG->results[best].rarity < R_ULTRA)
     {
-        Cell(prizeCell + 1)->rarity = R_ULTRA;
+        Cell(prizeCell + 1)->rarity = Cell(prizeCell + 1)->shown = R_ULTRA;
         Cell(prizeCell + 1)->def = PickFromPool(R_ULTRA);
-        Cell(prizeCell - 1)->rarity = R_SUPER;
+        Cell(prizeCell - 1)->rarity = Cell(prizeCell - 1)->shown = R_SUPER;
         Cell(prizeCell - 1)->def = PickFromPool(R_SUPER);
     }
+    // SUPER RARE and up: a "?" box that looks RARE... and doesn't stay that way
+    sG->prizeCell = prizeCell;
+    sG->mystery = sG->results[best].rarity >= R_SUPER;
+    sG->nudge = FALSE;
+    if (sG->mystery)
+    {
+        Cell(prizeCell)->shown = R_RARE;
+        sG->nudge = sG->results[best].rarity == R_ULTRA || (Random() & 1);
+        if (sG->nudge)
+        {
+            // It seems to stop on a dud first
+            Cell(prizeCell - 1)->rarity = Cell(prizeCell - 1)->shown = R_COMMON;
+            Cell(prizeCell - 1)->def = PickFromPool(R_COMMON);
+        }
+    }
+    if (sG->pickupPic != 0xFFFF)
+        gSprites[sG->pickupPic].invisible = TRUE;
     sG->genUpTo = prizeCell + 8;
     sG->spinFrom = sG->pos;
-    sG->spinTo = prizeCell * CELL_W;
+    sG->spinTo = (prizeCell - (sG->nudge ? 1 : 0)) * CELL_W;
     sG->timer = 0;
     sG->lastCenter = center;
     sG->state = GS_SPIN;
@@ -1139,6 +1663,73 @@ static void StartSpin(u8 count)
     DrawHeader();
 }
 
+static void StartHype(void)
+{
+    sG->state = GS_HYPE;
+    sG->hypeTimer = 0;
+    FadeOutBGM(4);
+    CreateRays();
+    RayColorsFor(R_RARE);
+    PlaySE(SE_M_CHARGE);
+}
+
+// The "?" box turns into the next rarity
+static void Upgrade(u8 rarity)
+{
+    LoadPalette(sCellPals[Cell(sG->prizeCell)->shown], BG_PLTT_ID(CELL_PAL0 + Cell(sG->prizeCell)->shown), sizeof(sCellPals[0]));
+    Cell(sG->prizeCell)->shown = rarity;
+    PlaySE(rarity == R_ULTRA ? SE_M_COSMIC_POWER : SE_SHINY);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 13, 0, sRarityFlash[rarity]);
+    RayColorsFor(rarity);
+    SpawnSparkles(rarity == R_ULTRA ? 18 : 12, TRUE);
+    DrawMysteryLine(rarity);
+    sG->shake += rarity == R_ULTRA ? 40 : 24;
+}
+
+// Before the burst: the screen darkens, the box glows and changes color,
+// light rays spin up, sparkles rise and everything shakes harder and harder
+static void UpdateHype(void)
+{
+    u8 best = sG->results[sG->best].rarity;
+    u16 t = ++sG->hypeTimer, end = best == R_ULTRA ? 116 : 68;
+    UpdateReel();
+    SetDarken(t / 2 < 11 ? t / 2 : 11);
+    PulseCell(Cell(sG->prizeCell)->shown, t);
+    UpdateRays(0x180 + t * 10, 0x80 + (t * 3 < 0x100 ? t * 3 : 0x100));
+    if (t % 3 == 0)
+        SpawnSparkles(1, FALSE);
+    if (sG->shake < (best == R_ULTRA ? 40 : 24))
+        sG->shake++;
+    if (t == 34)
+        Upgrade(R_SUPER);
+    if (best == R_ULTRA && t == 76)
+        Upgrade(R_ULTRA);
+    if (best == R_ULTRA && t > 76)
+        SetRayColors(MixColor(Hue(t * 6), RGB(31, 31, 31), 150), Hue(t * 6 + 96));
+    if (t == end - 10)
+        PlaySE(SE_M_HYPER_BEAM);
+    if (t >= end)
+        ShowReveal();
+}
+
+// Back to normal after a big reveal
+static void ClearHype(void)
+{
+    u8 i;
+    DestroyRays();
+    DestroyStamp();
+    sG->shake = 0;
+    SetDarken(0);
+    LoadThemedPalettes();
+    for (i = 0; i < R_COUNT; i++)
+        LoadPalette(sCellPals[i], BG_PLTT_ID(CELL_PAL0 + i), sizeof(sCellPals[i]));
+    if (sG->hypeTimer)
+    {
+        sG->hypeTimer = 0;
+        PlayBGM(MUS_GAME_CORNER);
+    }
+}
+
 static void ShowReveal(void)
 {
     struct Result *r = &sG->results[sG->best];
@@ -1146,6 +1737,21 @@ static void ShowReveal(void)
     static const u8 sConfetti[R_COUNT] = {0, 4, 10, 24, 48};
 
     SetReelClip(FALSE);
+    if (sG->mystery)
+    {
+        // The burst: the "?" opens, white flash, a big shake and the stamp
+        u8 i;
+        sG->mystery = FALSE;
+        Cell(sG->prizeCell)->shown = r->rarity;
+        for (i = 0; i < R_COUNT; i++)
+            LoadPalette(sCellPals[i], BG_PLTT_ID(CELL_PAL0 + i), sizeof(sCellPals[i]));
+        UpdateReel();
+        SetDarken(0);
+        sG->shake = 72;
+        CreateStamp(r->rarity);
+        SpawnSparkles(20, TRUE);
+        PlaySE(SE_M_EXPLOSION);
+    }
     DrawNameLine(r->def, r->rarity, r->amount, TRUE);
     FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
     PrintCenteredAscii(WIN_MENU, FONT_SMALL, 6, TC_PANEL, TC_GREY, r->note[0] ? r->note : (r->def->kind == K_MONEY ? "Ka-ching!" : "It's yours!"));
@@ -1157,8 +1763,11 @@ static void ShowReveal(void)
         PlayFanfare(sFanfares[r->rarity]);
     else
         PlaySE(SE_SUCCESS);
-    BeginNormalPaletteFade(PALETTES_ALL, 0, r->rarity >= R_SUPER ? 16 : 10, 0, sRarityFlash[r->rarity]);
-    sG->flashes = r->rarity == R_ULTRA ? 3 : r->rarity == R_SUPER ? 1 : 0;
+    if (r->rarity >= R_SUPER)
+        BeginNormalPaletteFade(PALETTES_ALL, 1, 16, 0, RGB_WHITE);   // blinding
+    else
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 10, 0, sRarityFlash[r->rarity]);
+    sG->flashes = r->rarity == R_ULTRA ? 6 : r->rarity == R_SUPER ? 3 : 0;
     SpawnConfetti(sConfetti[r->rarity]);
     sG->state = GS_REVEAL;
     sG->timer = 0;
@@ -1200,7 +1809,7 @@ static void ShowGrid(void)
         s16 x, y;
         GridCellPos(i, &x, &y);
         DrawCellTiles(sBg1Map, (x - 16) / 8, (y - 16) / 8, sG->results[i].rarity, FALSE);
-        sG->gridIcons[i] = CreateIcon(sG->results[i].def, 16 + i, x, y, &sG->gridIconMon[i]);
+        sG->gridIcons[i] = CreateIcon(sG->results[i].def, 16 + i, x, y, &sG->gridIconMon[i], FALSE);
     }
     CopyBgTilemapBufferToVram(1);
     gSprites[sG->arrowTop].invisible = TRUE;
@@ -1242,6 +1851,8 @@ static void HideGrid(void)
 static void BackToMenu(void)
 {
     sG->state = GS_MENU;
+    if (sG->pickupPic != 0xFFFF)
+        gSprites[sG->pickupPic].invisible = FALSE;
     BuildMenu();
     DrawMenu();
     DrawHeader();
@@ -1253,7 +1864,12 @@ static void BackToMenu(void)
 
 static void VBlankCB_Gatcha(void)
 {
-    SetGpuReg(REG_OFFSET_BG1HOFS, sBg1Hofs);
+    SetGpuReg(REG_OFFSET_BG0HOFS, (u16)(-sShakeX) & 511);
+    SetGpuReg(REG_OFFSET_BG0VOFS, (u16)(-sShakeY) & 511);
+    SetGpuReg(REG_OFFSET_BG1HOFS, (sBg1Hofs - sShakeX) & 511);
+    SetGpuReg(REG_OFFSET_BG1VOFS, (u16)(-sShakeY) & 511);
+    SetGpuReg(REG_OFFSET_BG3HOFS, (sBg3Hofs - sShakeX) & 511);
+    SetGpuReg(REG_OFFSET_BG3VOFS, (u16)(-sShakeY) & 511);
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
@@ -1269,6 +1885,14 @@ static void CB2_Gatcha(void)
 
 static void FreeScene(void)
 {
+    DestroyRays();
+    DestroyStamp();
+    if (sG->pickupPic != 0xFFFF)
+        FreeAndDestroyMonPicSprite(sG->pickupPic);
+    sG->pickupPic = 0xFFFF;
+    sShakeX = sShakeY = 0;
+    gSpriteCoordOffsetX = gSpriteCoordOffsetY = 0;
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
     DestroyAllLive();
     FreeMonIconPalettes();
     FreeAllWindowBuffers();
@@ -1298,8 +1922,20 @@ static void Task_Gatcha(u8 taskId)
 {
     sG->bgScroll++;
     // Sideways only: the diagonal stripes still slide, the dark band stays put
-    SetGpuReg(REG_OFFSET_BG3HOFS, sG->bgScroll / 2);
-    SetGpuReg(REG_OFFSET_BG3VOFS, 0);
+    sBg3Hofs = sG->bgScroll / 2;
+    // The screen shakes with the big reveals (sprites now, the backgrounds in VBlank)
+    if (sG->shake > 0)
+    {
+        s16 amp = sG->shake / 16 + 1;
+        sShakeX = (s16)(Random() % (2 * amp + 1)) - amp;
+        sShakeY = (s16)(Random() % (2 * amp + 1)) - amp;
+        if (sG->shake < 12)
+            sShakeX = sShakeY = 0;
+    }
+    else
+        sShakeX = sShakeY = 0;
+    gSpriteCoordOffsetX = sShakeX;
+    gSpriteCoordOffsetY = sShakeY;
 
     switch (sG->state)
     {
@@ -1311,7 +1947,9 @@ static void Task_Gatcha(u8 taskId)
     case GS_MENU:
         sG->pos += 0.5f;   // idle drift
         UpdateReel();
-        if (JOY_NEW(DPAD_ANY))
+        if (JOY_NEW(L_BUTTON | R_BUTTON))
+            SwitchBanner(JOY_NEW(R_BUTTON) ? 1 : -1);
+        else if (JOY_NEW(DPAD_ANY))
         {
             u8 c = sG->cursor;
             if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
@@ -1380,29 +2018,92 @@ static void Task_Gatcha(u8 taskId)
                 PlaySE(SE_BALL_TRAY_BALL);
                 sG->lastTickFrame = sG->timer;
             }
-            DrawNameLine(Cell(center)->def, Cell(center)->rarity, Cell(center)->def->qty, FALSE);
+            if (sG->mystery && center == sG->prizeCell)
+                DrawMysteryLine(Cell(center)->shown);
+            else
+                DrawNameLine(Cell(center)->def, Cell(center)->shown, Cell(center)->def->qty, FALSE);
         }
-        if (sG->timer >= SPIN_FRAMES + 20)
-            ShowReveal();
+        if (sG->timer >= SPIN_FRAMES + (sG->nudge ? 0 : 20))
+        {
+            if (sG->nudge)
+            {
+                sG->state = GS_NUDGE;
+                sG->timer = 0;
+            }
+            else if (sG->mystery)
+                StartHype();
+            else
+                ShowReveal();
+        }
         break;
     }
+    case GS_NUDGE:
+        // It stopped one short... a heartbeat... and clicks onto the next one
+        sG->timer++;
+        UpdateReel();
+        if (sG->timer == 1 || sG->timer == 16)
+            PlaySE(SE_M_DETECT);
+        gSprites[sG->arrowTop].x2 = (sG->timer < 36) ? (s16)(Random() % 3) - 1 : 0;
+        if (sG->timer >= 36)
+        {
+            u16 t = sG->timer - 36;
+            float f = t >= 12 ? 1.0f : (float)t / 12;
+            f = 1 - (1 - f) * (1 - f);
+            sG->pos = (sG->prizeCell - 1) * CELL_W + CELL_W * f;
+            if (t == 0)
+                PlaySE(SE_BALL_TRAY_BALL);
+            if (t == 12)
+            {
+                PlaySE(SE_M_SWORDS_DANCE);
+                DrawMysteryLine(Cell(sG->prizeCell)->shown);
+                StartHype();
+            }
+        }
+        break;
+    case GS_HYPE:
+        UpdateHype();
+        break;
     case GS_REVEAL:
+    {
+        u8 best = sG->results[sG->best].rarity;
         sG->timer++;
         if (sG->flashes && !gPaletteFade.active && sG->timer > 20)
         {
             sG->flashes--;
-            BeginNormalPaletteFade(PALETTES_ALL, 0, 14, 0, sRarityFlash[sG->results[sG->best].rarity]);
-            SpawnConfetti(16);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 14, 0, best == R_ULTRA ? Hue(Random() % 192) : sRarityFlash[best]);
+            SpawnConfetti(best >= R_SUPER ? 20 : 16);
+        }
+        if (best >= R_SUPER)
+        {
+            UpdateRays(best == R_ULTRA ? 0x400 : 0x300, 0x200);
+            UpdateStamp();
+            if (sG->shake > 0)
+                sG->shake -= 2;
+            if (sG->timer % 9 == 0)
+                SpawnSparkles(3, TRUE);
+            if (best == R_ULTRA)
+            {
+                // Rainbow everything, and stars raining down
+                u16 h = sG->timer * 4;
+                Bg3Rainbow(h);
+                SetSprCol(TAG_STAMP, 1, Hue(h));
+                SetSprCol(TAG_STAMP, 4, MixColor(Hue(h), RGB(31, 31, 31), 150));
+                SetRayColors(MixColor(Hue(h + 64), RGB(31, 31, 31), 150), Hue(h + 128));
+                if (sG->timer % 4 == 0)
+                    SpawnFallingStar();
+            }
         }
         if (sG->timer > 45 && !gPaletteFade.active && JOY_NEW(A_BUTTON | B_BUTTON))
         {
             PlaySE(SE_SELECT);
+            ClearHype();
             if (sG->resultCount == 10)
                 ShowGrid();
             else
                 BackToMenu();
         }
         break;
+    }
     case GS_GRID:
     {
         u8 c = sG->cursor;
@@ -1456,7 +2157,7 @@ static void LoadThemedPalettes(void)
     u16 accent, white = RGB(31, 31, 31), gold;
     int mx, mn;
     MpTheme_BuildPalette(theme);
-    accent = theme[MPT_BORDER];
+    accent = sBanners[sBanner].accent ? sBanners[sBanner].accent : theme[MPT_BORDER];
     mx = max(accent & 31, max((accent >> 5) & 31, (accent >> 10) & 31));
     mn = min(accent & 31, min((accent >> 5) & 31, (accent >> 10) & 31));
     gold = (mx - mn >= 6) ? MixColor(accent, white, 150) : RGB(31, 25, 6);
@@ -1466,6 +2167,7 @@ static void LoadThemedPalettes(void)
     text[TC_PANEL] = MixColor(0, accent, 58);
     text[TC_GOLD] = gold;
     text[TC_DIM] = MixColor(text[TC_PANEL], text[TC_GREY], 128);
+    text[TC_BANNER] = MixColor(accent, white, 110);
     LoadPalette(text, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
     LoadPalette(text, BG_PLTT_ID(0), PLTT_SIZEOF(1));
     bg3[0] = 0;
@@ -1502,6 +2204,11 @@ static void CB2_InitGatcha(void)
         ChangeBgY(i, 0, BG_COORD_SET);
     }
     sG = AllocZeroed(sizeof(*sG));
+    sG->raySprite = MAX_SPRITES;
+    sG->stampSprites[0] = sG->stampSprites[1] = sG->stampSprites[2] = MAX_SPRITES;
+    sG->pickupPic = 0xFFFF;
+    sShakeX = sShakeY = 0;
+    SetupPickup();
     memset(sIconItem, 0, sizeof(sIconItem));
     sBg1Map = AllocZeroed(64 * 32 * 2);
     sBg3Map = AllocZeroed(32 * 32 * 2);
@@ -1520,6 +2227,7 @@ static void CB2_InitGatcha(void)
     for (i = 0; i < R_COUNT; i++)
         LoadPalette(sCellPals[i], BG_PLTT_ID(CELL_PAL0 + i), sizeof(sCellPals[i]));
     LoadGeneratedGfx();
+    BuildRayTiles();
 
     // Background: stripes, with a dark band and gold lines behind the reel
     {
@@ -1559,8 +2267,10 @@ static void CB2_InitGatcha(void)
 
     sG->frameSprite = CreateSprite(&frameT, REEL_CX, REEL_TOP + 16, 0);
     gSprites[sG->frameSprite].oam.priority = 1;
+    gSprites[sG->frameSprite].coordOffsetEnabled = TRUE;
     sG->arrowTop = CreateSprite(&arrowT, REEL_CX, REEL_TOP - 3, 0);
     gSprites[sG->arrowTop].vFlip = TRUE;
+    gSprites[sG->arrowTop].coordOffsetEnabled = TRUE;
     gSprites[sG->arrowTop].data[0] = 1;   // bobs 1px: stays between the gold line and the boxes
     sG->arrowBottom = CreateSprite(&arrowT, REEL_CX, REEL_TOP + 38, 0);
     gSprites[sG->arrowBottom].invisible = TRUE;   // the name panel sits right under the reel
@@ -1569,6 +2279,7 @@ static void CB2_InitGatcha(void)
     DrawHeader();
     DrawMenu();
     UpdateReel();
+    ShowPickupPic();
     SetReelClip(TRUE);
 
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP | DISPCNT_WIN0_ON);

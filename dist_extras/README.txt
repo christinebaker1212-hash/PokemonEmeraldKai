@@ -192,15 +192,24 @@ ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
                MOEGATCHA pull.
 MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                it races past prizes and slowly clicks down onto yours.
-               Five rarities: COMMON 55%, UNCOMMON
-               28%, RARE 12%, SUPER RARE 4.5%, ULTRA RARE 0.5%. The top ones
-               include event Moemon with the moves of real event Pokemon
-               (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C Deoxys, the
-               Pokemon Box eggs), shiny event Moemon, Master Balls and
-               jackpots. Pity: a SUPER RARE or better at least every 40 pulls
+               L/R switches banners:
+                 STANDARD    event Moemon, items and money (always there)
+                 PICKUP      one featured event Moemon a week (Jirachi,
+                             Latias, Mew, Lugia, Celebi, Latios, Ho-Oh) at
+                             double the ULTRA RARE rate, 1 in 4 shiny
+                 TRAINING    Rare Candies, vitamins, PP Ups, Lucky Egg...
+                 POKE BALLS  Net, Dive, Nest, Repeat, Timer, Luxury,
+                             Premier and Master Balls
+               Five rarities: COMMON 55%, UNCOMMON 28%, RARE 12%, SUPER
+               RARE 4.5%, ULTRA RARE 0.5% (the odds of each banner are on
+               its bottom line). Event Moemon carry the moves of the real
+               events (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C
+               Deoxys, the ticket legends, the Pokemon Box eggs). Pity, kept
+               per banner: a SUPER RARE or better at least every 40 pulls
                and an ULTRA RARE at least every 120. A 10-pull always has a
-               RARE or better, and everyone gets one FREE 10-pull every week.
-               The game saves by itself after every pull, so prizes are safe.
+               RARE or better, and everyone gets one FREE 10-pull every week
+               (use it on any banner). SUPER and ULTRA RAREs get the full
+               show. The game saves by itself after every pull.
 Didn't finish the goals or win the race? You get a consolation prize picked
 for what you're short of: Rare Candy if your team is behind, healing items if
 you're low, Poke Balls if you're out.
