@@ -109,7 +109,8 @@ enum {
 #define MP_EMOTE_HEART        3
 #define MP_EMOTE_NOTE         4   // the music note bubble (combos, chat log)
 
-#define MP_NUM_PHRASES   4    // custom phrases per player
+#define MP_NUM_PHRASES   16   // custom phrases per player (4 pages of 4 in the quick pick)
+#define MP_QUICK_STOCK_SLOTS 4   // the first MINE page offers ready-made phrases in empty slots
 #define MP_PHRASE_WORDS  4    // easy chat words per phrase
 
 struct MpState
@@ -164,7 +165,7 @@ struct MpConfig
     u8 trainerRange;
     u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
     u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
-    u8 quickStock[MP_NUM_PHRASES];   // R2 quick pick: the stock phrase an empty phrase slot offers
+    u8 quickStock[MP_QUICK_STOCK_SLOTS];   // R2 quick pick: the stock phrase an empty phrase slot offers
     u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
@@ -380,7 +381,7 @@ void MP_OpenMenu(void);
 enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
 // Quick pick (emotes and phrases around the player): hold 0 LT/Q, 1 RT/E (let go to send), -1 stays open
-enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_PHRASES = 0xFF };
+enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_MINE_LAST = MP_QUICK_PAGE_MINE + MP_NUM_PHRASES / 4 - 1, MP_QUICK_PAGE_PHRASES = 0xFF };
 void MP_OpenQuickPick(u8 page, s8 hold);
 void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);

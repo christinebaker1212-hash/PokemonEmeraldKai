@@ -193,8 +193,8 @@ void MP_Social_OnEmote(u8 id, u8 kind)
 // Scribbles on signs (kept by the server: 4 words and the writer's name).
 // A ready-made phrase is word 0 = SCRIBBLE_STOCK and word 1 = its number.
 #define SCRIBBLE_STOCK 0xFFFE
-#define SCRIBBLE_ROWS  (MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES + 2)
-#define SCRIBBLE_ERASE (MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
+#define SCRIBBLE_ROWS  (sUi.mineCount + MP_NUM_STOCK_PHRASES + 2)   // your phrases (the ones made), ready-made, ERASE, BACK
+#define SCRIBBLE_ERASE (sUi.mineCount + MP_NUM_STOCK_PHRASES)
 
 static void SignKey(char *out, int size, u8 group, u8 num, s16 x, s16 y, const char *part)
 {
@@ -397,6 +397,8 @@ static EWRAM_DATA struct
     u8 target;
     s16 signX, signY;
     char note[80];
+    u8 mine[MP_NUM_PHRASES];   // SCRIBBLE: the phrase slots that have a phrase
+    u8 mineCount;
 } sUi = {0};
 
 static bool8 RevengeOn(u8 id)
@@ -445,34 +447,26 @@ static void Draw(void)
         MpUi_HelpAscii("{UPDOWN} SCROLL   {B} BACK");
         break;
     case SC_SCRIBBLE:
-        // Your 4 phrases, the ready-made ones, ERASE, BACK
+        // Your phrases, the ready-made ones, ERASE, BACK
         MpUi_Begin("SCRIBBLE WHAT?");
         first = MpUi_ScrollFor(sUi.cursor, SCRIBBLE_ROWS, &sUi.scroll);
         for (i = first; i < SCRIBBLE_ROWS && i < first + MPUI_ROWS; i++)
         {
             u8 text[96], left[100];
             u8 row = i - first;
-            if (i >= MP_NUM_PHRASES)
+            if (i >= sUi.mineCount)
             {
-                if (i < MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
-                    MpUi_RowAscii(row, i == sUi.cursor, MP_Emote_StockPhrase(i - MP_NUM_PHRASES), NULL);
+                if (i < sUi.mineCount + MP_NUM_STOCK_PHRASES)
+                    MpUi_RowAscii(row, i == sUi.cursor, MP_Emote_StockPhrase(i - sUi.mineCount), NULL);
                 else
                     MpUi_RowAscii(row, i == sUi.cursor, i == SCRIBBLE_ERASE ? "ERASE THE SCRIBBLE" : "BACK", NULL);
                 continue;
             }
-            if (MP_Emote_PhraseIsEmpty(i))
-            {
-                snprintf(line, sizeof(line), "%d (empty phrase)", i + 1);
-                MpUi_RowAscii(row, i == sUi.cursor, line, NULL);
-                continue;
-            }
-            MP_Emote_PhraseText(i, text);
+            MP_Emote_PhraseText(sUi.mine[i], text);
             for (count = 0; text[count] != EOS; count++)
                 if (text[count] == CHAR_NEWLINE)
                     text[count] = CHAR_SPACE;
-            left[0] = CHAR_1 + i;
-            left[1] = CHAR_SPACE;
-            StringCopy(left + 2, text);
+            StringCopy(left, text);
             MpUi_Row(row, i == sUi.cursor, left, NULL);
         }
         MpUi_End();
@@ -578,8 +572,13 @@ static void Task_Social(u8 taskId)
                 snprintf(sUi.note, sizeof(sUi.note), "Stand in front of a sign and face it first.");
             else
             {
+                u8 k;
                 RequestMapSigns();
                 Go(SC_SCRIBBLE);
+                sUi.mineCount = 0;
+                for (k = 0; k < MP_NUM_PHRASES; k++)
+                    if (!MP_Emote_PhraseIsEmpty(k))
+                        sUi.mine[sUi.mineCount++] = k;
             }
             break;
         case HUB_PRANK:
@@ -613,27 +612,21 @@ static void Task_Social(u8 taskId)
         sUi.cursor = HUB_LOG;
         break;
     case SC_SCRIBBLE:
-        if (sUi.cursor < MP_NUM_PHRASES)
+        if (sUi.cursor < sUi.mineCount)
         {
             u16 words[MP_PHRASE_WORDS];
             u8 k;
-            if (MP_Emote_PhraseIsEmpty(sUi.cursor))
-            {
-                PlaySE(SE_FAILURE);
-                snprintf(sUi.note, sizeof(sUi.note), "Make that phrase first (EMOTES & PHRASES).");
-                break;
-            }
             for (k = 0; k < MP_PHRASE_WORDS; k++)
-                words[k] = gMpConfig.phrases[sUi.cursor][k];
+                words[k] = gMpConfig.phrases[sUi.mine[sUi.cursor]][k];
             WriteScribble(sUi.signX, sUi.signY, words, gSaveBlock2Ptr->playerName);
             PlaySE(SE_M_SKETCH);
             Close(taskId);
             MP_ShowNotice("You scribbled on the sign. Friends will see it when they read it.");
             return;
         }
-        if (sUi.cursor < MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
+        if (sUi.cursor < sUi.mineCount + MP_NUM_STOCK_PHRASES)
         {
-            u16 words[MP_PHRASE_WORDS] = {SCRIBBLE_STOCK, sUi.cursor - MP_NUM_PHRASES, EC_EMPTY_WORD, EC_EMPTY_WORD};
+            u16 words[MP_PHRASE_WORDS] = {SCRIBBLE_STOCK, sUi.cursor - sUi.mineCount, EC_EMPTY_WORD, EC_EMPTY_WORD};
             WriteScribble(sUi.signX, sUi.signY, words, gSaveBlock2Ptr->playerName);
             PlaySE(SE_M_SKETCH);
             Close(taskId);

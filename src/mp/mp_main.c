@@ -287,15 +287,15 @@ static void LoadConfig(void)
         {
             char *p = val;
             int i;
-            for (i = 0; i < MP_NUM_PHRASES; i++)
+            for (i = 0; i < MP_QUICK_STOCK_SLOTS; i++)
                 gMpConfig.quickStock[i] = (u8)strtoul(p, &p, 10) % MP_Emote_QuickPhraseCount();
         }
-        else if (strncmp(key, "phrase", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_NUM_PHRASES && key[7] == 0)
+        else if (strncmp(key, "phrase", 6) == 0 && atoi(key + 6) >= 1 && atoi(key + 6) <= MP_NUM_PHRASES)
         {
             char *p = val;
-            int w;
+            int w, n = atoi(key + 6) - 1;
             for (w = 0; w < MP_PHRASE_WORDS; w++)
-                gMpConfig.phrases[key[6] - '1'][w] = (u16)strtoul(p, &p, 16);
+                gMpConfig.phrases[n][w] = (u16)strtoul(p, &p, 16);
         }
     }
     fclose(f);
@@ -346,7 +346,7 @@ void MP_SaveConfig(void)
         "welcome = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
-        "; your 4 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
+        "; your 16 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.lobby);

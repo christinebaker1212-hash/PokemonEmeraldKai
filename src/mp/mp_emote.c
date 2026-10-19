@@ -3,7 +3,7 @@
 //   !  ?  heart   the game's own field-effect icons, sent in the player state
 //   note ...      and phrases: a speech bubble, sent as a relay message
 //
-// Each player has 4 custom phrases made in the game's word editor (the one
+// Each player has 16 custom phrases made in the game's word editor (the one
 // used for the TRAINER profile), plus a list of quick phrases. Use them from
 // CO-OP menu > EMOTES, the number keys 1-8 or a controller's right stick.
 #include <stdio.h>
@@ -715,7 +715,7 @@ void MP_Emote_SayQuick(u8 i)
 }
 
 // ---------------------------------------------------------------------------
-// Custom phrases (4 words each, made in the word editor)
+// Custom phrases (16 of them, 4 words each, made in the word editor)
 
 bool8 MP_Emote_PhraseIsEmpty(u8 slot)
 {
@@ -762,7 +762,7 @@ static void Task_ReopenEmoteMenu(u8 taskId)
     if (IsWeatherNotFadingIn() == TRUE)
     {
         DestroyTask(taskId);
-        MP_OpenQuickPickAt(MP_QUICK_PAGE_MINE, -1, sEditSlot);   // back on the phrase you edited
+        MP_OpenQuickPickAt(MP_QUICK_PAGE_MINE + sEditSlot / 4, -1, sEditSlot % 4);   // back on the phrase you edited
     }
 }
 

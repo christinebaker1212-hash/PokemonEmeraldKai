@@ -33,8 +33,9 @@ point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs s
 spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
 and move learning, loss, disconnect).
 Emote / phrase pick (mp_menu.c MP_OpenQuickPick, the only emote screen): LT/RT or Q/E held = held mode (release sends),
-right-stick click / SOCIAL > EMOTES = sticky (A sends, B closes). Pages EMOTES, MINE + 4 stock groups (L/R); SELECT
-(pad west) swaps/pins gMpConfig.quickStock (ini quick_stock), START (pad north) edits MINE (INPUT_CONTEXT_QUICKPICK).
+right-stick click / SOCIAL > EMOTES = sticky (A sends, B closes). Pages EMOTES, MINE 1-4 (16 phrases, MP_NUM_PHRASES,
+ini phrase1-16; MINE n shows once page n-1 has one) + 4 stock groups (L/R); SELECT (pad west) swaps/pins
+gMpConfig.quickStock (first MINE page only, ini quick_stock), START (pad north) edits MINE (INPUT_CONTEXT_QUICKPICK).
 Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`, `vbtn rstick 1`. Button icons (mp_buttons.c, hooked into text.c DrawKeypadIcon): CHAR_KEYPAD_ICON chars draw the last used
 controller's buttons (gamepad.c Gamepad_IconFamily; art graphics/moemon/buttons/buttons.png -> tools/moemon_buttons/build.py
 -> src/mp/mp_buttons_data.h). Co-op ASCII text writes them as {A} {B} {L} {R} {START} {SELECT} {LEFTRIGHT} {LT} {WEST}...

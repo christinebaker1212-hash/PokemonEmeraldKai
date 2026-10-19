@@ -1182,8 +1182,9 @@ void MP_OpenMenu(void)
 
 // ---------------------------------------------------------------------------
 // Quick pick: emotes and phrases around the player, one per direction (D-Pad or
-// left stick). Pages (LB/RB, L/R keys): EMOTES, MINE (your 4 phrases; an empty
-// slot offers a ready-made phrase) and the ready-made phrases in groups of 4.
+// left stick). Pages (LB/RB, L/R keys): EMOTES, MINE (your 16 phrases on up to 4
+// pages; an empty slot on the first offers a ready-made phrase) and the
+// ready-made phrases in groups of 4. MINE 2-4 show once the page before has one.
 //   Held (LT/RT, or Q/E on the keyboard): let go to send the picked one.
 //   Open (right stick click, CO-OP > SOCIAL): A sends, B closes.
 // MINE: west button (SELECT) swaps an empty slot's ready-made phrase, north
@@ -1198,14 +1199,43 @@ void MP_OpenMenu(void)
 #define qWin(i)  data[4 + (i)]   // 4 directions + the bar
 
 enum { QUICK_UP, QUICK_RIGHT, QUICK_DOWN, QUICK_LEFT, QUICK_BAR, QUICK_WINDOWS };
-#define QUICK_PAGES (2 + 4)   // EMOTES, MINE, 4 groups of ready-made phrases
+#define QUICK_MINE_PAGES (MP_NUM_PHRASES / 4)
+#define QUICK_STOCK_FIRST (MP_QUICK_PAGE_MINE_LAST + 1)
+#define QUICK_PAGES (QUICK_STOCK_FIRST + 4)   // EMOTES, MINE 1-4, 4 groups of ready-made phrases
 
 static u8 sQuickPhrasePage = MP_QUICK_PAGE_MINE;   // the last phrase page, remembered
 static const u8 sQuickArrows[4] = {CHAR_UP_ARROW, CHAR_RIGHT_ARROW, CHAR_DOWN_ARROW, CHAR_LEFT_ARROW};
 // Emotes by direction (the same as a right stick flick): ! heart ? music
 static const u8 sQuickEmoteKey[4] = {0, 2, 1, 3};
 static const char *const sQuickEmoteNames[4] = {"!  SURPRISED", "HEART", "?  CONFUSED", "MUSIC"};
-static const char *const sQuickPageNames[QUICK_PAGES] = {"EMOTES", "MINE", "GREET", "MOVE", "BATTLE", "MORE"};
+static const char *const sQuickStockNames[4] = {"GREET", "MOVE", "BATTLE", "MORE"};
+
+static bool8 IsMinePage(u8 page)
+{
+    return page >= MP_QUICK_PAGE_MINE && page <= MP_QUICK_PAGE_MINE_LAST;
+}
+
+static u8 MineSlot(u8 page, u8 dir)
+{
+    return (page - MP_QUICK_PAGE_MINE) * 4 + dir;
+}
+
+static bool8 MinePageUsed(u8 page)
+{
+    u8 d;
+    for (d = 0; d < 4; d++)
+        if (!MP_Emote_PhraseIsEmpty(MineSlot(page, d)))
+            return TRUE;
+    return FALSE;
+}
+
+// MINE 2-4 show up once the page before them has a phrase (or they have one)
+static bool8 QuickPageShown(u8 page)
+{
+    if (!IsMinePage(page) || page == MP_QUICK_PAGE_MINE)
+        return TRUE;
+    return MinePageUsed(page - 1) || MinePageUsed(page);
+}
 
 // Around the player (the camera keeps them in the middle of the screen): up and
 // down are wide one-line boxes, left and right two-line boxes beside them, and
@@ -1223,7 +1253,15 @@ static int QuickStockIndex(u8 page, u8 dir)
 {
     if (page == MP_QUICK_PAGE_MINE)
         return MP_Emote_PhraseIsEmpty(dir) ? gMpConfig.quickStock[dir] % MP_Emote_QuickPhraseCount() : -1;
-    return ((page - 2) * 4 + dir) % MP_Emote_QuickPhraseCount();
+    if (IsMinePage(page))
+        return -1;
+    return ((page - QUICK_STOCK_FIRST) * 4 + dir) % MP_Emote_QuickPhraseCount();
+}
+
+// An empty phrase slot on MINE 2-4 (nothing to send yet)
+static bool8 QuickEmptySlot(u8 page, u8 dir)
+{
+    return IsMinePage(page) && page != MP_QUICK_PAGE_MINE && MP_Emote_PhraseIsEmpty(MineSlot(page, dir));
 }
 
 // Up to two lines (left / right boxes) or one
@@ -1241,11 +1279,13 @@ static void QuickChoiceText(u8 page, u8 dir, u8 *line1, u8 *line2, bool8 twoLine
     stock = QuickStockIndex(page, dir);
     if (stock >= 0)
         MP_AsciiToGame(line1, MP_Emote_QuickPhrase(stock), 60);
+    else if (QuickEmptySlot(page, dir))
+        MP_AsciiToGame(line1, "- empty -", 20);
     else
     {
         // Your phrase: words 1-2 and 3-4
         u8 *dst = line1;
-        MP_Emote_PhraseText(dir, text);
+        MP_Emote_PhraseText(MineSlot(page, dir), text);
         for (i = 0; text[i] != EOS && n < 70; i++)
         {
             if (text[i] == CHAR_NEWLINE && twoLines)
@@ -1269,7 +1309,7 @@ static void QuickDrawChoice(s16 *data, u8 dir)
     u8 win = qWin(dir), l1[96], l2[96], arrow[2] = {sQuickArrows[dir], EOS};
     const struct WindowTemplate *t = &sQuickWins[dir];
     bool8 sel = (qSel == dir), twoLines = t->height >= 3;
-    bool8 stock = qPage == MP_QUICK_PAGE_MINE && QuickStockIndex(qPage, dir) >= 0;
+    bool8 stock = (qPage == MP_QUICK_PAGE_MINE && QuickStockIndex(qPage, dir) >= 0) || QuickEmptySlot(qPage, dir);
     int w = t->width * 8;
     MpTheme_Panel(win, 0);
     if (sel)
@@ -1299,18 +1339,25 @@ static void QuickDrawBar(s16 *data)
     int x = 3, i;
     MpTheme_Panel(win, 0);
     {
-        u8 lb[] = {CHAR_LEFT_ARROW, EOS}, rb[] = {CHAR_RIGHT_ARROW, EOS};
-        MText(win, FONT_SMALL, lb, x, 1);
-        x += 9;
-        for (i = 0; i < QUICK_PAGES; i++)
+        for (i = 0; i < 2 + 4; i++)   // EMOTES, MINE (n), then the ready-made groups
         {
-            sTxtFg = (i == qPage) ? MPT_GOLD : MPT_GREY;
-            MP_AsciiToGame(buf, sQuickPageNames[i], 20);
+            char name[12];
+            bool8 on = i == 0 ? qPage == MP_QUICK_PAGE_EMOTES
+                     : i == 1 ? IsMinePage(qPage) : qPage == QUICK_STOCK_FIRST + i - 2;
+            if (i == 0)
+                snprintf(name, sizeof(name), "EMOTES");
+            else if (i == 1 && IsMinePage(qPage) && qPage != MP_QUICK_PAGE_MINE)
+                snprintf(name, sizeof(name), "MINE %d", qPage - MP_QUICK_PAGE_MINE + 1);
+            else if (i == 1)
+                snprintf(name, sizeof(name), "MINE");
+            else
+                snprintf(name, sizeof(name), "%s", sQuickStockNames[i - 2]);
+            sTxtFg = on ? MPT_GOLD : MPT_GREY;
+            MP_AsciiToGame(buf, name, 20);
             MText(win, FONT_SMALL_NARROW, buf, x, 1);
             x += GetStringWidth(FONT_SMALL_NARROW, buf, 0) + 6;
         }
         sTxtFg = MPT_TEXT;
-        MText(win, FONT_SMALL, rb, x - 3, 1);
         MP_AsciiToGame(buf, pages, 20);
         sTxtFg = MPT_GREY;
         MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
@@ -1321,6 +1368,8 @@ static void QuickDrawBar(s16 *data)
         snprintf(send, sizeof(send), "pick, {A} send  {B} close");
     if (qPage == MP_QUICK_PAGE_MINE)
         snprintf(hint, sizeof(hint), "%s    %s swap  %s edit", send, west, north);
+    else if (IsMinePage(qPage))
+        snprintf(hint, sizeof(hint), "%s    %s edit", send, north);
     else if (qPage != MP_QUICK_PAGE_EMOTES)
         snprintf(hint, sizeof(hint), "%s    %s pin to MINE", send, west);
     else
@@ -1367,7 +1416,7 @@ static void QuickPickClose(u8 taskId, bool8 send)
     else if ((stock = QuickStockIndex(page, sel)) >= 0)
         MP_Emote_SayQuick(stock);
     else
-        MP_Emote_SayPhrase(sel);
+        MP_Emote_SayPhrase(MineSlot(page, sel));
 }
 
 static void Task_QuickPick(u8 taskId)
@@ -1380,7 +1429,7 @@ static void Task_QuickPick(u8 taskId)
         // To the word editor for the picked phrase
         if (!gPaletteFade.active)
         {
-            u8 slot = qSel;
+            u8 slot = MineSlot(qPage, qSel);
             DestroyTask(taskId);
             MP_Emote_EditPhraseFromField(slot);
         }
@@ -1411,14 +1460,16 @@ static void Task_QuickPick(u8 taskId)
     }
     else if (JOY_NEW(A_BUTTON) || (qHold >= 0 && !Gamepad_TriggerHeld(qHold)))
     {
-        if (qHold < 0 && qSel < 0)
-            PlaySE(SE_FAILURE);   // open: pick a direction first
+        if ((qHold < 0 && qSel < 0) || (qHold < 0 && QuickEmptySlot(qPage, qSel)))
+            PlaySE(SE_FAILURE);   // open: pick a direction (with something to say) first
         else
             QuickPickClose(taskId, TRUE);
     }
     else if (JOY_NEW(L_BUTTON | R_BUTTON))
     {
-        qPage = (qPage + (JOY_NEW(R_BUTTON) ? 1 : QUICK_PAGES - 1)) % QUICK_PAGES;
+        do
+            qPage = (qPage + (JOY_NEW(R_BUTTON) ? 1 : QUICK_PAGES - 1)) % QUICK_PAGES;
+        while (!QuickPageShown(qPage));
         if (qPage != MP_QUICK_PAGE_EMOTES)
             sQuickPhrasePage = qPage;
         PlaySE(SE_SELECT);
@@ -1427,7 +1478,8 @@ static void Task_QuickPick(u8 taskId)
     else if (qPage != MP_QUICK_PAGE_EMOTES && JOY_NEW(SELECT_BUTTON))
     {
         // MINE: the next ready-made phrase for an empty slot; other pages: put this one on MINE
-        if (qSel < 0 || (qPage == MP_QUICK_PAGE_MINE && !MP_Emote_PhraseIsEmpty(qSel)))
+        if (qSel < 0 || (qPage == MP_QUICK_PAGE_MINE && !MP_Emote_PhraseIsEmpty(qSel))
+         || (IsMinePage(qPage) && qPage != MP_QUICK_PAGE_MINE))
             PlaySE(SE_FAILURE);
         else
         {
@@ -1442,7 +1494,7 @@ static void Task_QuickPick(u8 taskId)
                 MP_ShowNotice("Pinned. It shows on MINE while that phrase slot is empty.");
         }
     }
-    else if (qPage == MP_QUICK_PAGE_MINE && JOY_NEW(START_BUTTON))
+    else if (IsMinePage(qPage) && JOY_NEW(START_BUTTON))
     {
         if (qSel < 0)
             PlaySE(SE_FAILURE);
@@ -1470,6 +1522,8 @@ void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel)
     taskId = CreateTask(Task_QuickPick, 80);
     data = gTasks[taskId].data;
     qPage = (page == MP_QUICK_PAGE_PHRASES) ? sQuickPhrasePage : page % QUICK_PAGES;
+    if (!QuickPageShown(qPage))
+        qPage = MP_QUICK_PAGE_MINE;
     qSel = sel;
     qFade = FALSE;
     qHold = hold;

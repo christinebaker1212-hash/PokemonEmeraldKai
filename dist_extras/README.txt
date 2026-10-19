@@ -244,8 +244,8 @@ Days change at midnight UTC so friends in different countries share them.
 HANGING OUT (CO-OP menu > SOCIAL)
 ------------------------------------
 EMOTES & PHRASES  Opens the emote / phrase pick around you (same as Q / E or
-                  L2 / R2, see the controls). Keys 1-8 send emotes and your
-                  phrases straight away.
+                  L2 / R2, see the controls). Keys 1-4 send emotes and keys
+                  5-8 your first four phrases straight away.
                   Do the same emote as a friend close by at the same moment
                   for a COMBO (DOUBLE SHOCK!!, TRUE FRIENDS!, DUET!...).
 CHAT LOG          Everything said and emoted, and the news pop-ups.
@@ -487,11 +487,13 @@ The other buttons change with what's on screen:
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).
-                    R2 pages (LB/RB): MINE (your 4 phrases) and ready-made
-                    ones (GREET, MOVE, BATTLE, MORE). An empty phrase slot
-                    on MINE offers a ready-made phrase: X/Square swaps it,
-                    or pick one on another page and press X/Square to pin
-                    it there. Y/Triangle on MINE edits that phrase.
+                    R2 pages (LB/RB): MINE (up to 16 of your own phrases,
+                    4 per page; MINE 2, 3 and 4 show up as you fill the
+                    page before) and ready-made ones (GREET, MOVE, BATTLE,
+                    MORE). An empty slot on the first MINE page offers a
+                    ready-made phrase: X/Square swaps it, or pick one on
+                    another page and press X/Square to pin it there.
+                    Y/Triangle on a MINE page edits that phrase.
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
                     X/Square = B, Y/Triangle = SELECT
   Naming screen     X/Square = delete, Y/Triangle = switch letters
