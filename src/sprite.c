@@ -1636,6 +1636,11 @@ u8 IndexOfSpritePaletteTag(u16 tag)
     for (i = gReservedSpritePaletteCount; i < 16; i++)
         if (sSpritePaletteTags[i] == tag)
             return i;
+    // Moemon Co-op: the co-op overlay palette may sit in a borrowed reserved slot
+    if (tag == 0x53C0)
+        for (i = 0; i < gReservedSpritePaletteCount && i < 16; i++)
+            if (sSpritePaletteTags[i] == tag)
+                return i;
 
     return 0xFF;
 }
@@ -1773,6 +1778,13 @@ u8 MP_AllocSpritePalette(u16 tag, u8 minSlot)
     if (i != 0xFF)
         sSpritePaletteTags[i] = tag;
     return i;
+}
+
+// Moemon Co-op: tag a fixed slot (a borrowed NPC reflection slot)
+void MP_ClaimSpritePaletteSlot(u16 tag, u8 slot)
+{
+    if (slot < 16)
+        sSpritePaletteTags[slot] = tag;
 }
 
 // Moemon Co-op: a sprite's frame images were just swapped (live avatar change

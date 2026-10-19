@@ -48,6 +48,10 @@ Welcome note (mp_setup.c HOST_NOTE, ini `welcome = a|b`, mp_main.c SendWelcome/S
 creator sends it on a new player's info; shown via MP_ShowNotice once on the map. Harness condition `notice`.
 Pings (mp_ping.c, MPR_PING, INPUT_ACTION_PING: V / left stick click): bubble slot PING_SLOT in mp_emote.c, blinking inset
 edge arrow via mp_compass.c MP_Compass_PointAt. Test: `vbtn lstick 1`, run2.sh WARP_B for a second start position.
+TEAM PHOTO (mp_photo.c, SOCIAL > TEAM PHOTO, MPR_PHOTO): 2+ players on the same map, front pics via
+mp_avatar.c MP_Avatar_PlayerFront, frame captured from Platform_GetFrame and saved 3x with mp_pack.c MP_WritePng to
+photos/. Debug `mp photo`, harness condition `photo`. The co-op overlay palette (MP_TAG_UI_PAL) borrows an NPC reflection
+slot when slots 12-15 are full (sprite.c MP_ClaimSpritePaletteSlot + IndexOfSpritePaletteTag) and skips weather tinting.
 Joined frames (mp_ui.c MP_FrameJoin_*): co-op windows that touch get joint tiles at BG0 tiles 0x2F0-0x2FE.
 Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.

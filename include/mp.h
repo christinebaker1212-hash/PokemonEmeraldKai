@@ -386,9 +386,15 @@ void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);
 
 // mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
+#define MP_TAG_UI_PAL 0x53C0   // the co-op overlay sprite palette (mp_emote.c)
+u8 MP_Overworld_FreeBorrowSlot(void);
 void MP_Ping_Place(void);
 void MP_Ping_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Ping_Update(void);
+const char *MP_Photo_Check(void);
+void MP_Photo_Start(void);
+void MP_Photo_OnRelay(u8 from, const u8 *data, u16 len);
+bool8 MP_Photo_Done(void);
 // mp_emote.c / mp_compass.c helpers for it
 void MP_Emote_PingBubble(u8 slot, const u8 *text, s16 tileX, s16 tileY);   // text NULL = hide
 void MP_Compass_PointAt(u8 slot, u8 colorPlayer, s32 dx, s32 dy, bool8 show);
@@ -628,6 +634,7 @@ enum {
     MPR_DEX_FIRST = 84,        // shared Pokedex (mp_dex.c)
     MPR_WELCOME = 90,          // the room creator's welcome note for a friend who joined (mp_main.c)
     MPR_PING = 91,             // "look here!": u8 mapGroup, mapNum, s16 x, y (mp_ping.c)
+    MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

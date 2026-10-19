@@ -617,6 +617,11 @@ static bool8 WritePng(const char *path, const u8 *rgba, int w, int h, const char
     return TRUE;
 }
 
+bool8 MP_WritePng(const char *path, const u8 *rgba, int w, int h, const char *text)
+{
+    return WritePng(path, rgba, w, h, text);
+}
+
 bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const struct MpPack *pack)
 {
     struct MpAppearance app = *appIn;

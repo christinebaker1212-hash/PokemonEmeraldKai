@@ -385,7 +385,7 @@ void MP_Social_OnRelay(u8 from, const u8 *data, u16 len)
 // Screens
 
 enum { SC_HUB, SC_LOG, SC_SCRIBBLE, SC_PRANK_WHO, SC_PRANK_WHAT };
-enum { HUB_EMOTES, HUB_LOG, HUB_SCRIBBLE, HUB_PRANK, HUB_CLOSE, HUB_COUNT };
+enum { HUB_EMOTES, HUB_LOG, HUB_SCRIBBLE, HUB_PRANK, HUB_PHOTO, HUB_CLOSE, HUB_COUNT };
 
 static EWRAM_DATA struct
 {
@@ -412,7 +412,7 @@ static void Draw(void)
     {
     case SC_HUB:
     {
-        static const char *const sRows[] = {"EMOTES & PHRASES...", "CHAT LOG...", "SCRIBBLE ON A SIGN...", "PRANK A FRIEND...", "CLOSE"};
+        static const char *const sRows[] = {"EMOTES & PHRASES...", "CHAT LOG...", "SCRIBBLE ON A SIGN...", "PRANK A FRIEND...", "TEAM PHOTO", "CLOSE"};
         MpUi_Begin("SOCIAL");
         for (i = 0; i < HUB_COUNT; i++)
             MpUi_RowAscii(i, i == sUi.cursor, sRows[i], NULL);
@@ -591,6 +591,18 @@ static void Task_Social(u8 taskId)
                 Go(SC_PRANK_WHO);
             }
             break;
+        case HUB_PHOTO:
+        {
+            const char *why = MP_Photo_Check();
+            if (why)
+            {
+                snprintf(sUi.note, sizeof(sUi.note), "%s", why);
+                break;
+            }
+            Close(taskId);
+            MP_Photo_Start();
+            return;
+        }
         default:
             Close(taskId);
             return;

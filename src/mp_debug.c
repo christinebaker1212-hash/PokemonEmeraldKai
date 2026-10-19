@@ -135,6 +135,8 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
+    if (strcmp(name, "photo") == 0)
+        return MP_Photo_Done();
     if (strcmp(name, "notice") == 0)
     {
         bool8 MP_Notice_Active(void);
@@ -381,6 +383,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int b;
         for (b = 0; b < 4; b++)
             printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
+    }
+    else if (strcmp(cmd, "photo") == 0)
+    {
+        const char *why = MP_Photo_Check();
+        if (why)
+            printf("[test] photo: %s\n", why);
+        else
+            MP_Photo_Start();
     }
     else if (strcmp(cmd, "wilddouble") == 0)
     {

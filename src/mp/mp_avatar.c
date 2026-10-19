@@ -1515,6 +1515,19 @@ bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal)
     return TRUE;
 }
 
+// A player's front picture as others see it (-1 = me), for the TEAM PHOTO
+bool8 MP_Avatar_PlayerFront(s8 id, u8 *tiles, u16 *pal)
+{
+    struct MpPack buf;
+    bool8 canRecolor;
+    if (id < 0 || id == gMpLocalId || id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return MP_Avatar_PreviewFront(tiles, pal);
+    if (BuildFront(&gMpPlayers[id].app, id, RemotePack(id, &buf), tiles, pal, TRUE))
+        return TRUE;
+    FrontChoiceTiles(gMpPlayers[id].app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, tiles, pal, &canRecolor);
+    return TRUE;
+}
+
 bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal)
 {
     struct MpAppearance app = GetLocalAppearance();

@@ -51,7 +51,7 @@ void MP_FieldClearVBlankHBlankCallbacks(void);
 #define LABEL_SLOT(id) (1 + MP_MAX_PLAYERS + (id))
 #define PING_SLOT(id)  (1 + MP_MAX_PLAYERS * 2 + (id))
 #define TAG_BUBBLE    0x53A0                 // + slot * 2 + half
-#define TAG_BUBBLE_PAL 0x53C0
+#define TAG_BUBBLE_PAL MP_TAG_UI_PAL
 
 enum { COL_CLEAR, COL_FILL, COL_TEXT, COL_SHADOW, COL_EDGE };
 
@@ -438,7 +438,19 @@ bool8 MP_Emote_LoadUiPalette(void)
         sPal[8] = theme[MPT_BORDER];   // the frame's color
         sPal[9] = theme[MPT_BAND];
     }
-    return LoadSpritePalette(&pal) != 0xFF;
+    if (LoadSpritePalette(&pal) != 0xFF)
+        return TRUE;
+    {
+        // No free slot (weather, field effects and friends' colors use them up):
+        // borrow an NPC reflection slot like the friends' palettes do
+        void MP_ClaimSpritePaletteSlot(u16 tag, u8 slot);
+        u8 slot = MP_Overworld_FreeBorrowSlot();
+        if (slot == 0xFF)
+            return FALSE;
+        MP_ClaimSpritePaletteSlot(TAG_BUBBLE_PAL, slot);
+        LoadPalette(sPal, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
+        return TRUE;
+    }
 }
 
 static bool8 CreateBubbleSprites(struct Bubble *b)
@@ -541,7 +553,7 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         s->x = x - 32 + half * 64;
         s->y = y;
         if (b->toast)
-            s->invisible = ArePlayerFieldControlsLocked();   // not on top of menus and messages
+            s->invisible = ArePlayerFieldControlsLocked();
         else
             s->invisible = b->atTile ? FALSE : os->invisible;
         s->subpriority = b->atTile ? 1 : 0;

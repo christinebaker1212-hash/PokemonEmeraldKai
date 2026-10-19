@@ -441,7 +441,18 @@ static bool8 IsSlotUsedByOtherRemote(u8 id, u8 slot)
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != id && sRemote[i].spawned && sRemote[i].palSlot == slot)
             return TRUE;
-    return FALSE;
+    // The co-op overlay palette (bubbles, toasts, compass) may have borrowed one too
+    return MP_FindSpritePaletteTag(MP_TAG_UI_PAL, 0) == slot;
+}
+
+// A reflection slot no remote player uses, for the overlay palette (0xFF = none)
+u8 MP_Overworld_FreeBorrowSlot(void)
+{
+    s8 i;
+    for (i = ARRAY_COUNT(sBorrowableSlots) - 1; i >= 0; i--)
+        if (!IsSlotUsedByOtherRemote(0xFF, sBorrowableSlots[i]))
+            return sBorrowableSlots[i];
+    return 0xFF;
 }
 
 static void EnsurePalette(u8 id, u16 *palOut)

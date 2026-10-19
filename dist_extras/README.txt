@@ -260,6 +260,11 @@ PRANK A FRIEND    Costs a MOEGATCHA pull: Magikarp follower (1 min),
                   backwards controls (15 sec), confetti cannon, whoopee
                   cushion. The victim gets a free REVENGE prank for 2 minutes.
                   Nobody can be pranked twice in a row, or during a battle.
+TEAM PHOTO        With friends on the same map: everyone's trainer picture
+                  lines up on a stage with your names, the place and the date,
+                  framed like an instant photo. It's saved as a PNG in the
+                  "photos" folder next to the game, and the friends in it
+                  get a note.
 PIGGYBACK         Face a friend and press A: hop on their back and ride along
                   wherever they go (SURF, doors and FLY too). B hops off.
 TOGETHER          Stay within about a screen of a friend and the TOGETHER
