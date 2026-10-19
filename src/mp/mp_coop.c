@@ -21,6 +21,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "platform/gamepad.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -380,6 +381,7 @@ static void Task_JoinCheck(u8 taskId)
             // "Hey, I only have one POKéMON!"
             SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_ONE_MON);
             sCoop.requester = -1;
+            HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
             ShowFieldMessage(sText_OneMon);
             tState = JOIN_ONE_MON;
             break;
@@ -387,6 +389,7 @@ static void Task_JoinCheck(u8 taskId)
         SetNameVar(sCoop.requester);
         Gamepad_Rumble(40, 200);
         StringExpandPlaceholders(sText, sText_JoinPrompt);
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sText);
         sCoop.prompting = TRUE;
         tState = JOIN_PRINT;
@@ -944,6 +947,7 @@ static void Task_AskerMessage(u8 taskId)
     switch (tState)
     {
     case 0:
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sText);
         tState++;
         break;
@@ -1068,6 +1072,7 @@ static bool8 TryAsk(void)
         LockPlayerFieldControls();
         SetNameVar(i);
         StringExpandPlaceholders(sText, sText_Asking);
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sText);
         MPNet_Log("co-op: asking player %d to team up", i + 1);
         return TRUE;

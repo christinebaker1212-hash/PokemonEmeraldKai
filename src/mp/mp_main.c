@@ -456,6 +456,8 @@ bool8 MP_IsInOverworld(void)
     return gMain.callback2 == CB2_Overworld;
 }
 
+bool8 MP_IsBattleTransitionRunning(void);   // battle_transition.c
+
 bool8 MP_IsLocalFree(void)
 {
     if (!MP_IsInOverworld() || gPaletteFade.active)
@@ -552,7 +554,8 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
-    if (MP_Battle_IsActive() || gMain.inBattle)
+    // From the moment the battle transition starts, so others see it right away
+    if (MP_Battle_IsActive() || gMain.inBattle || MP_IsBattleTransitionRunning())
         s->flags |= MPF_IN_BATTLE;
     if (MP_Coop_IsChallenged())
         s->flags |= MPF_CHALLENGED;

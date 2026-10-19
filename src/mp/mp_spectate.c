@@ -11,6 +11,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "main.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
@@ -309,6 +310,9 @@ static void StopWatching(void)
     // Back to the overworld exactly where we were
     if (MP_IsInOverworld())
     {
+        // The battle's music played over ours: start the map's music again
+        // (it only restarts when it thinks a different song is playing)
+        Overworld_ResetMapMusic();
         Overworld_PlaySpecialMapMusic();
         UnlockPlayerFieldControls();
     }
@@ -488,6 +492,7 @@ static void Task_WatchPrompt(u8 taskId)
     switch (tState)
     {
     case 0:
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sPrompt);
         tState++;
         break;

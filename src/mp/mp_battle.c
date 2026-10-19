@@ -6,6 +6,7 @@
 // carry the data through the relay server to the opponent.
 #include "global.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "main.h"
 #include "link.h"
 #include "battle.h"
@@ -273,6 +274,7 @@ static void Task_ShowResultMessage(u8 taskId)
         if (gPaletteFade.active || !MP_IsInOverworld() || ScriptContext_IsEnabled())
             break;
         LockPlayerFieldControls();
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sResultText);
         data[0]++;
         break;

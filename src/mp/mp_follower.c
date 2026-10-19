@@ -14,6 +14,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "main.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -476,6 +477,7 @@ static void Task_FollowerTalk(u8 taskId)
     switch (data[0])
     {
     case 0:
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(gStringVar4);
         data[0]++;
         break;

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "main.h"
 #include "field_message_box.h"
 #include "palette.h"
@@ -26,6 +27,7 @@ static void Task_Notice(u8 taskId)
         if (!MP_IsLocalFree())
             break;
         LockPlayerFieldControls();
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         ShowFieldMessage(sNoticeText);
         data[0]++;
         break;

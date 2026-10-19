@@ -4783,3 +4783,9 @@ static bool8 FrontierSquaresScroll_End(struct Task *task)
 #undef tScrollYDir
 #undef tScrollUpdateFlag
 #undef tSquareNum
+
+// Moemon Co-op: a battle transition is on screen (the player counts as in battle)
+bool8 MP_IsBattleTransitionRunning(void)
+{
+    return FuncIsActiveTask(Task_BattleTransition);
+}

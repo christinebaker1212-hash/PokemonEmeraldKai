@@ -194,6 +194,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "menu") == 0)
+    {
+        // menu PAGE - open the CO-OP menu on a page (0 main, 1 look, ...)
+        void MP_OpenMenuPageAt(u8 page, u8 cursor);
+        int page = 0;
+        sscanf(arg, "%d", &page);
+        MP_OpenMenuPageAt(page, 0);
+    }
     else if (strcmp(cmd, "item") == 0)
     {
         // item ID QTY - put items in the bag

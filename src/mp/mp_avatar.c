@@ -1006,14 +1006,26 @@ static void RebuildLocal(void)
 // Rebuilds the local avatar and refreshes the player sprite
 void MP_Avatar_ApplyLocal(void)
 {
+    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes);
+    bool8 onField = MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
+                 && gObjectEvents[gPlayerAvatar.objectEventId].active;
+    u32 oldBytes = 0;
+
+    // The sprite's tile block was sized for the old look
+    if (onField && gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].images)
+        oldBytes = gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].images->size;
     RebuildLocal();
-    if (MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
-     && gObjectEvents[gPlayerAvatar.objectEventId].active)
+    if (onField)
     {
         struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
         u8 gfx = GetPlayerAvatarGraphicsIdByCurrentState();
         if (gfx != 0 || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_ON_FOOT))
+        {
             ObjectEventSetGraphicsId(player, gfx);
+            StartSpriteAnim(&gSprites[player->spriteId], GetFaceDirectionAnimNum(player->facingDirection));
+            // Show it now, even with the menu open (the player is frozen)
+            MP_SpriteRefreshImages(&gSprites[player->spriteId], oldBytes);
+        }
         UpdateSpritePaletteWithWeather(PALSLOT_PLAYER);
     }
 }

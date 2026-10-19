@@ -1774,3 +1774,32 @@ u8 MP_AllocSpritePalette(u16 tag, u8 minSlot)
         sSpritePaletteTags[i] = tag;
     return i;
 }
+
+// Moemon Co-op: a sprite's frame images were just swapped (live avatar change
+// in the CO-OP menu). Give it a bigger tile block if the new frames need one,
+// then upload the current frame right away, even while the sprite is frozen.
+void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes)
+{
+    const union AnimCmd *cmd;
+    u16 oldTiles = oldFrameBytes / TILE_SIZE_4BPP;
+    u16 newTiles;
+
+    if (!sprite->inUse || sprite->usingSheet || sprite->images == NULL)
+        return;
+    newTiles = sprite->images->size / TILE_SIZE_4BPP;
+    if (newTiles > oldTiles)
+    {
+        s16 tile = AllocSpriteTiles(newTiles);
+        u16 i;
+        if (tile < 0)
+            return;   // no room: it updates once the map reloads
+        for (i = 0; i < oldTiles; i++)
+            FREE_SPRITE_TILE(sprite->oam.tileNum + i);
+        sprite->oam.tileNum = tile;
+    }
+    cmd = &sprite->anims[sprite->animNum][0];   // the pose it's standing in
+    if (cmd->type >= 0)
+        RequestSpriteFrameImageCopy(cmd->frame.imageValue, sprite->oam.tileNum, sprite->images);
+    else
+        RequestSpriteFrameImageCopy(0, sprite->oam.tileNum, sprite->images);
+}
