@@ -13,6 +13,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "battle.h"
 #include "save.h"
 #include "palette.h"
 #include "constants/characters.h"
@@ -369,6 +370,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "social") == 0)
     {
         MP_Social_Open();
+    }
+    else if (strcmp(cmd, "bhp") == 0)
+    {
+        int b;
+        for (b = 0; b < 4; b++)
+            printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
     }
     else if (strcmp(cmd, "wilddouble") == 0)
     {
