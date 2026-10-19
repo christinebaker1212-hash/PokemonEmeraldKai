@@ -46,6 +46,8 @@ mp_quickstart.c MP_QuickStart_Apply at the end of NewGameInitData): the end stat
 for both genders, starter at the level the two intro battles give, start at Littleroot 7,17. Harness condition `naming`.
 Welcome note (mp_setup.c HOST_NOTE, ini `welcome = a|b`, mp_main.c SendWelcome/ShowWelcome, MPR_WELCOME): the room
 creator sends it on a new player's info; shown via MP_ShowNotice once on the map. Harness condition `notice`.
+Pings (mp_ping.c, MPR_PING, INPUT_ACTION_PING: V / left stick click): bubble slot PING_SLOT in mp_emote.c, blinking inset
+edge arrow via mp_compass.c MP_Compass_PointAt. Test: `vbtn lstick 1`, run2.sh WARP_B for a second start position.
 Joined frames (mp_ui.c MP_FrameJoin_*): co-op windows that touch get joint tiles at BG0 tiles 0x2F0-0x2FE.
 Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.

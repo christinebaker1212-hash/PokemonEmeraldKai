@@ -45,10 +45,11 @@ void MP_FieldClearVBlankHBlankCallbacks(void);
 #define BUBBLE_TIME   (60 * 3)
 #define BUBBLE_TEXT   96
 #define LINE_H        12
-#define NUM_BUBBLES   (2 + MP_MAX_PLAYERS * 2) // 0 = you, 1 + id = remote players, door labels, toast
+#define NUM_BUBBLES   (2 + MP_MAX_PLAYERS * 3) // 0 = you, 1 + id = remote players, door labels, pings, toast
 #define TOAST_SLOT    (NUM_BUBBLES - 1)
 #define TOAST_TIME    (60 * 4)
 #define LABEL_SLOT(id) (1 + MP_MAX_PLAYERS + (id))
+#define PING_SLOT(id)  (1 + MP_MAX_PLAYERS * 2 + (id))
 #define TAG_BUBBLE    0x53A0                 // + slot * 2 + half
 #define TAG_BUBBLE_PAL 0x53C0
 
@@ -901,6 +902,32 @@ static void UpdateDoorLabel(u8 id)
     b->timer = 2;   // kept alive every frame while it applies
 }
 
+// A ping's bubble over a tile (mp_ping.c keeps it alive every frame it applies)
+void MP_Emote_PingBubble(u8 slot, const u8 *text, s16 tileX, s16 tileY)
+{
+    struct Bubble *b;
+    InitIfNeeded();
+    if (slot >= MP_MAX_PLAYERS)
+        return;
+    b = &sBubbles[PING_SLOT(slot)];
+    b->atTile = TRUE;
+    if (text == NULL)
+    {
+        b->timer = 0;
+        return;
+    }
+    if (b->tileX != tileX || b->tileY != tileY || StringCompare(b->text, text) != 0)
+    {
+        memset(b->text, EOS, sizeof(b->text));
+        StringCopyN(b->text, text, BUBBLE_TEXT - 1);
+        b->note = FALSE;
+        b->dirty = TRUE;
+    }
+    b->tileX = tileX;
+    b->tileY = tileY;
+    b->timer = 2;
+}
+
 // A short note at the top of the screen for a few seconds (game text, 2 lines max)
 void MP_Toast(const u8 *text)
 {
@@ -937,10 +964,12 @@ void MP_Emote_Update(void)
         return;
     ShowSpeedNotice();
     UpdateBubble(&sBubbles[TOAST_SLOT], gPlayerAvatar.objectEventId);
+    MP_Ping_Update();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         UpdateDoorLabel(i);
         UpdateBubble(&sBubbles[LABEL_SLOT(i)], gPlayerAvatar.objectEventId);
+        UpdateBubble(&sBubbles[PING_SLOT(i)], gPlayerAvatar.objectEventId);
     }
     UpdateBubble(&sBubbles[0], gPlayerAvatar.objectEventId);
     for (i = 0; i < MP_MAX_PLAYERS; i++)

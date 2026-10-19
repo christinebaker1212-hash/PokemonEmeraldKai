@@ -188,11 +188,84 @@ static bool8 FriendOffset(u8 id, s32 *dx, s32 *dy, bool8 *onScreen)
     }
 }
 
+// Extra arrows (pings): slot 0..MP_MAX_PLAYERS-1, drawn in a player's color, blinking
+#define TAG_COMPASS_EXTRA (TAG_COMPASS + MP_MAX_PLAYERS)
+#define PING_INSET 9
+static u8 sExtra[MP_MAX_PLAYERS] = {MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES};
+
+static bool8 ExtraValid(u8 slot)
+{
+    u8 s = sExtra[slot];
+    return s < MAX_SPRITES && gSprites[s].inUse && gSprites[s].callback == SpriteCB_Compass && gSprites[s].data[0] == 0x80 + slot;
+}
+
+static void HideExtra(u8 slot)
+{
+    if (ExtraValid(slot))
+    {
+        DestroySprite(&gSprites[sExtra[slot]]);
+        FreeSpriteTilesByTag(TAG_COMPASS_EXTRA + slot);
+    }
+    sExtra[slot] = MAX_SPRITES;
+}
+
+void MP_Compass_PointAt(u8 slot, u8 colorPlayer, s32 dx, s32 dy, bool8 show)
+{
+    s32 x, y;
+    if (slot >= MP_MAX_PLAYERS || colorPlayer >= MP_MAX_PLAYERS)
+        return;
+    if (!show || (dx == 0 && dy == 0) || ArePlayerFieldControlsLocked())
+    {
+        HideExtra(slot);
+        return;
+    }
+    if (!sBuilt)
+    {
+        u8 p;
+        BuildAll();
+        for (p = 0; p < MP_MAX_PLAYERS; p++)
+            sSprites[p] = MAX_SPRITES;
+    }
+    // A little inside the friends' arrows, so a ping next to its friend reads as a double arrow
+    if (abs(dx) * EDGE_Y > abs(dy) * EDGE_X)
+    {
+        x = SCREEN_CX + (dx > 0 ? EDGE_X - PING_INSET : -(EDGE_X - PING_INSET));
+        y = SCREEN_CY + dy * (EDGE_X - PING_INSET) / abs(dx);
+    }
+    else
+    {
+        y = SCREEN_CY + (dy > 0 ? EDGE_Y - PING_INSET : -(EDGE_Y - PING_INSET));
+        x = SCREEN_CX + dx * (EDGE_Y - PING_INSET) / abs(dy);
+    }
+    if (!ExtraValid(slot))
+    {
+        struct SpriteSheet sheet = {sTiles[colorPlayer], sizeof(sTiles[colorPlayer]), TAG_COMPASS_EXTRA + slot};
+        struct SpriteTemplate t = {
+            .tileTag = TAG_COMPASS_EXTRA + slot, .paletteTag = TAG_COMPASS_PAL, .oam = &sOam,
+            .anims = sAnims, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCB_Compass,
+        };
+        if (!MP_Emote_LoadUiPalette())
+            return;
+        FreeSpriteTilesByTag(TAG_COMPASS_EXTRA + slot);
+        if (LoadSpriteSheet(&sheet) == 0)
+            return;
+        sExtra[slot] = CreateSprite(&t, x, y, 0);
+        if (sExtra[slot] == MAX_SPRITES)
+            return;
+        gSprites[sExtra[slot]].data[0] = 0x80 + slot;
+    }
+    gSprites[sExtra[slot]].x = x;
+    gSprites[sExtra[slot]].y = y;
+    gSprites[sExtra[slot]].invisible = (gMain.vblankCounter1 / 10) & 1;   // blinks: a ping, not a friend
+    if (gSprites[sExtra[slot]].animNum != DirFor(dx, dy))
+        StartSpriteAnim(&gSprites[sExtra[slot]], DirFor(dx, dy));
+}
+
 bool8 MP_Compass_AnyShown(void)
 {
     u8 p;
     for (p = 0; p < MP_MAX_PLAYERS; p++)
-        if (sBuilt && SpriteValid(p))
+        if ((sBuilt && SpriteValid(p)) || ExtraValid(p))
             return TRUE;
     return FALSE;
 }

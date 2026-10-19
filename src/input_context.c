@@ -49,6 +49,9 @@ void Platform_ContextAction(int action)
     case INPUT_ACTION_QUICK_PHRASES:
         MP_OpenQuickPick(MP_QUICK_PAGE_PHRASES, 1);
         break;
+    case INPUT_ACTION_PING:
+        MP_Ping_Place();
+        break;
     default:
         if (action >= INPUT_ACTION_EMOTE_KEY1 && action < INPUT_ACTION_EMOTE_KEY1 + INPUT_ACTION_EMOTE_KEY_COUNT)
             MP_Emote_Hotkey(action - INPUT_ACTION_EMOTE_KEY1);

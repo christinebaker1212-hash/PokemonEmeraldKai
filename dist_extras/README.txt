@@ -249,6 +249,10 @@ EMOTES & PHRASES  Opens the emote / phrase pick around you (same as Q / E or
                   Do the same emote as a friend close by at the same moment
                   for a COMBO (DOUBLE SHOCK!!, TRUE FRIENDS!, DUET!...).
 CHAT LOG          Everything said and emoted, and the news pop-ups.
+PINGS             V (or left stick click) puts "NAME: Look here!" over the
+                  tile in front of you: an item, a person, a path. Friends on
+                  the same map see it for a few seconds, with a blinking arrow
+                  at the edge of the screen while it's out of view.
 SCRIBBLE          Stand facing a sign and leave one of your phrases (or a
                   ready-made one like "Over here!") on it.
                   Friends see it after the sign's own text.
@@ -452,7 +456,7 @@ CONTROLS (keyboard)
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R
   C = CO-OP menu          1-8 = emotes and your phrases
-  Q (hold) = quick emotes E (hold) = quick phrases
+  V = "look here!" ping   Q (hold) = quick emotes   E (hold) = quick phrases
             (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
 
@@ -473,7 +477,8 @@ The other buttons change with what's on screen:
   Walking around    stick pushed all the way = run, X/Square = auto-run
                     on/off, Y/Triangle = CO-OP menu, right stick = emotes
                     (click it to open the emote / phrase pick and leave
-                    it open: A sends, B closes)
+                    it open: A sends, B closes), left stick click =
+                    "look here!" ping on the tile in front of you
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).

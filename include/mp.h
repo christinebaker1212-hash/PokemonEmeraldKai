@@ -384,6 +384,14 @@ enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_PHRASES = 0xFF };
 void MP_OpenQuickPick(u8 page, s8 hold);
 void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);
+
+// mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
+void MP_Ping_Place(void);
+void MP_Ping_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Ping_Update(void);
+// mp_emote.c / mp_compass.c helpers for it
+void MP_Emote_PingBubble(u8 slot, const u8 *text, s16 tileX, s16 tileY);   // text NULL = hide
+void MP_Compass_PointAt(u8 slot, u8 colorPlayer, s32 dx, s32 dy, bool8 show);
 void MP_Emote_EditPhraseFromField(u8 slot);   // word editor, then back to the field (screen already faded)
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 
@@ -619,6 +627,7 @@ enum {
     MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
     MPR_DEX_FIRST = 84,        // shared Pokedex (mp_dex.c)
     MPR_WELCOME = 90,          // the room creator's welcome note for a friend who joined (mp_main.c)
+    MPR_PING = 91,             // "look here!": u8 mapGroup, mapNum, s16 x, y (mp_ping.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)
