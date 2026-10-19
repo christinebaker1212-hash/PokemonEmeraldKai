@@ -2233,12 +2233,12 @@ static const struct NamingScreenTemplate sWaldaWordsScreenTemplate =
 // Moemon Co-op
 static const u8 sText_CoopServerName[] = _("SERVER NAME?");
 static const u8 sText_CoopPassword[] = _("PASSWORD? (or leave blank)");
-static const u8 sText_CoopCode[] = _("INVITE CODE?");
+static const u8 sText_CoopCode[] = _("CODE OR IP?");
 
 static const struct NamingScreenTemplate sCoopCodeTemplate =
 {
     .copyExistingString = TRUE,
-    .maxChars = 9,
+    .maxChars = 15,   // an invite code, or a VPN address like 26.222.37.153
     .iconFunction = 0,
     .addGenderIcon = FALSE,
     .initialPage = KBPAGE_LETTERS_UPPER,

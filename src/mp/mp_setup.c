@@ -637,7 +637,7 @@ static void DrawJoin(void)
         struct JoinEntry *e = &sSetup.entries[sSetup.scroll + i];
         u8 y = 1 + LINE_H * i;
         if (e->byCode)
-            Print(WIN_MAIN, "ENTER INVITE CODE...", 14, y, sColorAccent);
+            Print(WIN_MAIN, "ENTER CODE OR IP...", 14, y, sColorAccent);
         else if (e->byName)
             Print(WIN_MAIN, "JOIN BY NAME...", 14, y, sColorAccent);
         else
@@ -975,17 +975,26 @@ static void HostingMessage(char *text, int len)
 {
     extern void Platform_SetClipboardText(const char *text);
     const char *code = MP_InviteCode();
+    char vpn[48], vpnName[32];
     if (MPPortMap_State() == MP_PM_OPEN)
     {
         Platform_SetClipboardText(code);
-        snprintf(text, len, "%s is open to the world! Invite code: %s (copied). Send it to friends: they choose JOIN A GAME, then ENTER INVITE CODE.",
-                 MP_Lobby_RoomName(), code);
+        if (MPNet_FindVpnAddress(vpn, sizeof(vpn), vpnName, sizeof(vpnName)))
+            snprintf(text, len, "%s is open to the world! Invite code: %s (copied). Friends type it in JOIN A GAME > ENTER CODE OR IP. On %s they can type %s.",
+                     MP_Lobby_RoomName(), code, vpnName, vpn);
+        else
+            snprintf(text, len, "%s is open to the world! Invite code: %s (copied). Send it to friends: they choose JOIN A GAME, then ENTER CODE OR IP.",
+                     MP_Lobby_RoomName(), code);
     }
     else if (code[0])
     {
         Platform_SetClipboardText(code);
-        snprintf(text, len, "Your router couldn't be opened, so this uses %s. Invite code: %s (copied). Friends must join your %s network first.",
-                 MP_VpnName(), code, MP_VpnName());
+        if (MPNet_FindVpnAddress(vpn, sizeof(vpn), vpnName, sizeof(vpnName)))
+            snprintf(text, len, "Your router couldn't be opened, so this uses %s. Friends on your %s network type %s (or code %s, copied).",
+                     MP_VpnName(), MP_VpnName(), vpn, code);
+        else
+            snprintf(text, len, "Your router couldn't be opened, so this uses %s. Invite code: %s (copied). Friends must join your %s network first.",
+                     MP_VpnName(), code, MP_VpnName());
     }
     else
     {
@@ -1223,11 +1232,23 @@ static void CB2_ReturnFromTextEntry(void)
             EnterJoinList();
             break;
         }
+        // A plain address works too (Radmin VPN / Hamachi: 26.x.x.x, 25.x.x.x)
+        {
+            unsigned a, b, c, d, pt = MP_DEFAULT_PORT;
+            int n = sscanf(code, "%u.%u.%u.%u:%u", &a, &b, &c, &d, &pt);
+            if (n >= 4 && a < 256 && b < 256 && c < 256 && d < 256 && pt > 0 && pt < 65536)
+            {
+                ip = (a << 24) | (b << 16) | (c << 8) | d;
+                port = (int)pt;
+                goto haveAddress;
+            }
+        }
         if (!MPNet_ParseInviteCode(code, &ip, &port))
         {
-            ShowMessage("That invite code doesn't look right. Check it with your friend and try again. (It looks like K7QM-3XPA.)", TRUE, AFTER_JOIN);
+            ShowMessage("That invite code doesn't look right. Check it with your friend and try again. (It looks like K7QM-3XPA, or an address like 26.12.34.56.)", TRUE, AFTER_JOIN);
             break;
         }
+    haveAddress:
         snprintf(addr, sizeof(addr), "%u.%u.%u.%u:%d", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255, port);
         snprintf(sSetup.codeHost, sizeof(sSetup.codeHost), "%u.%u.%u.%u", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255);
         sSetup.codePort = port;

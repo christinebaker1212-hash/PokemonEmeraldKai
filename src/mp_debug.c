@@ -185,6 +185,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "badges") == 0)
+    {
+        int b;
+        printf("[test] badges:");
+        for (b = 0; b < 8; b++)
+            printf(" %d", FlagGet(FLAG_BADGE01_GET + b));
+        printf("  money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+    }
     else if (strcmp(cmd, "objs") == 0)
     {
         void MP_Overworld_DebugDump(void);

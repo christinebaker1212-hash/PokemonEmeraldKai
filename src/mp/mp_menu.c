@@ -128,13 +128,18 @@ static void DrawPlayersWindow(u8 windowId)
         }
     }
     AddTextPrinterParameterized(windowId, FONT_SMALL, buf, 2, 1, TEXT_SKIP_DRAW, NULL);
-    // Hosting on this PC: the code friends type to join
-    if (MP_InviteCode()[0])
+    // Buddy bonus, and when hosting on this PC the code friends type to join
+    if (MP_InviteCode()[0] || MP_BuddyBonusPercent())
     {
-        u8 code[32];
-        char ascii[32];
-        snprintf(ascii, sizeof(ascii), "CODE %s", MP_InviteCode());
-        MP_AsciiToGame(code, ascii, 30);
+        u8 code[48];
+        char ascii[48];
+        if (MP_InviteCode()[0] && MP_BuddyBonusPercent())
+            snprintf(ascii, sizeof(ascii), "+%d%%  CODE %s", MP_BuddyBonusPercent(), MP_InviteCode());
+        else if (MP_InviteCode()[0])
+            snprintf(ascii, sizeof(ascii), "CODE %s", MP_InviteCode());
+        else
+            snprintf(ascii, sizeof(ascii), "BONUS +%d%%", MP_BuddyBonusPercent());
+        MP_AsciiToGame(code, ascii, 44);
         AddTextPrinterParameterized(windowId, FONT_SMALL, code, 28 * 8 - 2 - GetStringWidth(FONT_SMALL, code, 0), 1, TEXT_SKIP_DRAW, NULL);
     }
     CopyWindowToVram(windowId, COPYWIN_FULL);

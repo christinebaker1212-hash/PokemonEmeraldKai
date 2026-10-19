@@ -96,6 +96,26 @@ struct LearnLater
     u16 move;
 };
 
+const u8 *MP_FindTrainerEndScript(u16 trainerId);   // battle_setup.c
+static const u8 *sPendingScript;   // a gym leader's badge script to run for the partner
+
+// The badge a gym leader gives (0: not a gym leader)
+static u16 GymBadgeFlag(u16 trainerId)
+{
+    switch (trainerId)
+    {
+    case TRAINER_ROXANNE_1:       return FLAG_BADGE01_GET;
+    case TRAINER_BRAWLY_1:        return FLAG_BADGE02_GET;
+    case TRAINER_WATTSON_1:       return FLAG_BADGE03_GET;
+    case TRAINER_FLANNERY_1:      return FLAG_BADGE04_GET;
+    case TRAINER_NORMAN_1:        return FLAG_BADGE05_GET;
+    case TRAINER_WINONA_1:        return FLAG_BADGE06_GET;
+    case TRAINER_TATE_AND_LIZA_1: return FLAG_BADGE07_GET;
+    case TRAINER_JUAN_1:          return FLAG_BADGE08_GET;
+    }
+    return 0;
+}
+
 static struct
 {
     // Challenged player
@@ -738,9 +758,27 @@ static void CB2_MpCoopFinish(void)
         // can still battle them on their own later.
         if (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_DOUBLE)
             FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+        // Gym leaders: the partner gets the badge too. Their own copy of the
+        // leader's "you won" script runs once back on the field.
+        else if (GymBadgeFlag(sCoop.trainerId) && !FlagGet(GymBadgeFlag(sCoop.trainerId)))
+        {
+            sPendingScript = MP_FindTrainerEndScript(sCoop.trainerId);
+            if (sPendingScript)
+                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+        }
     }
     Overworld_ResetMapMusic();
     SetMainCallback2(CB2_ReturnToField);
+}
+
+// Runs the gym leader's badge script for the partner (from MP_Coop_Update)
+static void TryRunPendingScript(void)
+{
+    if (sPendingScript == NULL || !MP_IsLocalFree() || ScriptContext_IsEnabled())
+        return;
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(sPendingScript);
+    sPendingScript = NULL;
 }
 
 void MP_Coop_OnBattleAborted(void)
@@ -964,8 +1002,12 @@ static void UpdateAsking(void)
 
 // ---------------------------------------------------------------------------
 
+static void TryRunPendingScript(void);
+
 void MP_Coop_Update(void)
 {
+    TryRunPendingScript();
+
     // Challenge over (the script ended without a battle)
     if (sCoop.challenged && !sCoop.prompting && MP_IsLocalFree())
         EndChallenge(DECLINE_TOO_LATE);

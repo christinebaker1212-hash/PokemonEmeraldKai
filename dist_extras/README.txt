@@ -46,8 +46,8 @@ No cloud server, port forwarding or VPN app is needed in most homes:
   * When you stop hosting or close the game, the port is closed again.
     If the game ever crashes, the router closes it by itself within two
     hours, and the next time you start the game it cleans up.
-  * Windows may ask whether to allow the game through the firewall the
-    first time you host. Choose Allow (private and public networks).
+  * Windows asks whether to allow the game through the firewall the first
+    time you host. Tick BOTH private and public networks, then Allow.
 
 If the game says it couldn't open your router:
   1. Turn on "UPnP" in your router's settings page (often under Advanced,
@@ -60,6 +60,21 @@ If the game says it couldn't open your router:
      the host creates a network in it and friends join that network. Then
      host again: the game notices Radmin VPN and gives you an invite code
      that works inside that network.
+
+If a friend can't connect:
+  * Internet games never show up in your friend's JOIN list (that list is
+    only for the same home network). Your friend must choose JOIN A GAME >
+    ENTER CODE OR IP and type the invite code.
+  * Windows Firewall is the usual cause. Windows asks the first time you
+    host, with only "Private networks" ticked, but Windows 11 often counts
+    home networks as "Public", and Radmin VPN's network is always "Public".
+    Fix (once, on the host's PC): Windows Security > Firewall & network
+    protection > Allow an app through firewall > Change settings > find
+    the game and tick both Private and Public. If the game is listed more
+    than once, tick every entry.
+  * VPN apps (Surfshark, NordVPN...) can get in the way: turn them off.
+  * With Radmin VPN, friends can also type the host's Radmin address
+    (26.x.x.x, shown when you host) instead of the code.
 
 Advanced: lobby.txt can point the game at a lobby server instead (see the
 "server" folder and server\DEPLOY.md). You don't need one for normal play.

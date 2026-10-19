@@ -3399,6 +3399,14 @@ static void Cmd_getexp(void)
                         i = STRINGID_EMPTYSTRING4;
                     }
 
+                    // Moemon Co-op: buddy bonus for playing together ("gained a boosted")
+                    if (MP_BuddyBonusPercent() && gBattleMoveDamage)
+                    {
+                        gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_BuddyBonusPercent())) / 100;
+                        if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3))
+                            i = STRINGID_ABOOSTED;
+                    }
+
                     // get exp getter battler
                     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
                     {
@@ -5666,6 +5674,7 @@ static void Cmd_getmoneyreward(void)
     u32 moneyReward = GetTrainerMoneyToGive(gTrainerBattleOpponent_A);
     if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
         moneyReward += GetTrainerMoneyToGive(gTrainerBattleOpponent_B);
+    moneyReward = moneyReward * (100 + MP_BuddyBonusPercent()) / 100; // Moemon Co-op: buddy bonus
 
     AddMoney(&gSaveBlock1Ptr->money, moneyReward);
     if (gMpCoopBattle)

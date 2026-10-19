@@ -326,6 +326,7 @@ void MP_Friends_LocationName(u8 id, u8 *dst);
 u16 MP_Friends_Destination(u8 id);
 bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
+u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
 
 // Shared Pokédex (mp_dex.c)

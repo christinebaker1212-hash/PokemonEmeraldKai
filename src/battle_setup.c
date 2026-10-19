@@ -1938,3 +1938,43 @@ u16 CountBattledRematchTeams(u16 trainerId)
 
     return i;
 }
+
+// Moemon Co-op: the event script a trainer's battle continues with (the gym
+// leader's "you won the badge" script), found in the trainer's object script on
+// the current map. NULL if there isn't one.
+#define MP_SCR_OP_TRAINERBATTLE 0x5C
+const u8 *MP_FindTrainerEndScript(u16 trainerId)
+{
+    const struct MapEvents *ev = gMapHeader.events;
+    u8 i;
+    if (!ev)
+        return NULL;
+    for (i = 0; i < ev->objectEventCount; i++)
+    {
+        const u8 *s = ev->objectEvents[i].script;
+        u8 k;
+        if (s == NULL)
+            continue;
+        // The battle command is at or near the start of the trainer's script
+        for (k = 0; k < 48; k++)
+        {
+            const u8 *c = s + k;
+            u8 mode = c[1], ptrsBefore;
+            if (c[0] != MP_SCR_OP_TRAINERBATTLE || (c[2] | (c[3] << 8)) != trainerId)
+                continue;
+            if (mode == TRAINER_BATTLE_CONTINUE_SCRIPT || mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC)
+                ptrsBefore = 2;
+            else if (mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE || mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
+                ptrsBefore = 3;
+            else
+                return NULL;
+            {
+                const u8 *p = c + 6 + ptrsBefore * sizeof(void *);
+                const u8 *script;
+                memcpy(&script, p, sizeof(script));
+                return script;
+            }
+        }
+    }
+    return NULL;
+}

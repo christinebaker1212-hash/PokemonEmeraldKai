@@ -98,3 +98,24 @@ bool8 MP_Friends_GoTo(u8 id)
     DoTeleportTileWarp();
     return TRUE;
 }
+
+// Buddy bonus: extra EXP and prize money for playing together.
+// +5% for every friend online, +10% more for every friend on your map (or a
+// map right next to it). With 3 friends right there it's +45%.
+u16 MP_BuddyBonusPercent(void)
+{
+    u8 i;
+    u16 pct = 0;
+    if (!MP_IsConnected() || gMpLocalId < 0)
+        return 0;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        s16 x, y;
+        if (i == gMpLocalId || !gMpPlayers[i].present || !gMpPlayers[i].hasInfo)
+            continue;
+        pct += 5;
+        if (gMpPlayers[i].hasState && MP_GetRemoteMapPos(i, &x, &y))
+            pct += 10;
+    }
+    return pct;
+}
