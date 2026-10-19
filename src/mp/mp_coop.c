@@ -185,10 +185,10 @@ static struct
 static EWRAM_DATA u8 sText[160];
 
 static const u8 sText_JoinPrompt[] = _("{STR_VAR_1} wants to join for a\nDouble Battle! Is this OK?");
-static const u8 sText_OneMon[] = _("Hey, I only have one POKéMON!\nLet's go one on one!");
+static const u8 sText_OneMon[] = _("Hey, I only have one MOéMON!\nLet's go one on one!");
 static const u8 sText_Asking[] = _("Asking {STR_VAR_1} to team up for a\nDouble Battle… (B: never mind)");
 static const u8 sText_SaidNo[] = _("{STR_VAR_1} wants to battle alone\nthis time.");
-static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nPOKéMON. It's a one-on-one battle!");
+static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nMOéMON. It's a one-on-one battle!");
 static const u8 sText_TooLate[] = _("Too late! {STR_VAR_1}'s battle has\nalready started.");
 static const u8 sText_Busy[] = _("{STR_VAR_1} can't team up right now.");
 static const u8 sText_Left[] = _("{STR_VAR_1} left the game.");
@@ -378,7 +378,7 @@ static void Task_JoinCheck(u8 taskId)
         }
         if (gTrainers[sCoop.trainerId].partySize <= 1)
         {
-            // "Hey, I only have one POKéMON!"
+            // "Hey, I only have one MOéMON!"
             SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_ONE_MON);
             sCoop.requester = -1;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer

@@ -244,6 +244,7 @@ u16 MP_Avatar_ChoiceCount(void);
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app);
 void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice);
 const char *MP_Avatar_ChoiceName(u16 choice);
+void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *savedPack);
 int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app); // TRUE when found
 void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len);
 const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId);

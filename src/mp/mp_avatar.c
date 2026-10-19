@@ -460,6 +460,24 @@ void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
     sLocalVersion++;
 }
 
+// Puts back the sprite (and sprite pack) of a saved look (LOOK > REVERT, SELECT)
+void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *savedPack)
+{
+    struct MpAppearance tmp = *saved;
+    u16 i;
+    if (saved->hasCustom && savedPack[0])
+    {
+        for (i = 0; i < sPackFileCount; i++)
+            if (strcmp(sPackFiles[i], savedPack) == 0)
+            {
+                MP_Avatar_SetChoice(&gMpConfig.app, NUM_BASE_CHOICES + CATALOG_COUNT + i);
+                return;
+            }
+    }
+    tmp.hasCustom = FALSE;
+    MP_Avatar_SetChoice(&gMpConfig.app, MP_Avatar_GetChoice(&tmp));
+}
+
 const char *MP_Avatar_ChoiceName(u16 choice)
 {
     if (choice < NUM_BASE_CHOICES)

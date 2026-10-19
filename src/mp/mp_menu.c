@@ -34,7 +34,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
-enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
+enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
@@ -242,7 +242,7 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
-    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
+    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "EDIT SPRITES...", "SAVE LOOK", "REVERT"};
     char line[64];
     u8 row;
 
@@ -327,7 +327,7 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             else
                 PrintAscii(windowId, "BACK", 8, y);
         }
-        else if (row == ROW_EDIT || row == ROW_BACK)
+        else if (row == ROW_EDIT || row == ROW_SAVE || row == ROW_REVERT)
         {
             PrintAscii(windowId, lookLabels[row], 8, y);
         }
@@ -369,22 +369,30 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
-    else if (page == MP_MENU_PAGE_LOOK && (cursor == ROW_SPRITE || cursor == ROW_FRONT || cursor == ROW_BACKPIC || cursor == ROW_HAIR))
+    else if (page == MP_MENU_PAGE_LOOK)
     {
         // The full name (the row cuts long ones), who drew it, and the keys
         char ascii[160];
         u8 buf[170];
         MpTheme_Panel(windowId, 0);
         if (cursor == ROW_SPRITE)
-            snprintf(ascii, sizeof(ascii), "%s     L/R: 10 AT A TIME", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
+            snprintf(ascii, sizeof(ascii), "%s   L/R: 10   SELECT: undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_FRONT && MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel)[0])
             snprintf(ascii, sizeof(ascii), "ID PIC: %s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
         else if (cursor == ROW_FRONT)
-            snprintf(ascii, sizeof(ascii), "ID PIC (trainer card, battles): %s   L/R: 10", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "ID PIC: %s   L/R: 10   SELECT: undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
         else if (cursor == ROW_BACKPIC)
-            snprintf(ascii, sizeof(ascii), "BK PIC (your back in battles): %s", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "BK PIC: %s   SELECT: undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+        else if (cursor == ROW_HAIR)
+            snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   SELECT: undo");
+        else if (cursor <= ROW_ACCENT)
+            snprintf(ascii, sizeof(ascii), "Left/Right: change   SELECT: undo");
+        else if (cursor == ROW_EDIT)
+            snprintf(ascii, sizeof(ascii), "Draw your own look in the Sprite Editor.");
+        else if (cursor == ROW_SAVE)
+            snprintf(ascii, sizeof(ascii), "Keep this look and go back. (B does too.)");
         else
-            snprintf(ascii, sizeof(ascii), "HAIR also colors a hat if the sprite wears one.");
+            snprintf(ascii, sizeof(ascii), "Undo every change made since you opened LOOK.");
         MP_AsciiToGame(buf, ascii, 150);
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -532,17 +540,48 @@ static void CloseMenu(u8 taskId)
     DestroyTask(taskId);
 }
 
+static void Look_Snapshot(void);
+
 static void GoToPage(s16 *data, u8 page, u8 cursor)
 {
     tPage = page;
     tCursor = cursor;
     tChoice = 0;
     if (page == MP_MENU_PAGE_LOOK)
+    {
+        Look_Snapshot();
         Preview_Show(cursor == ROW_BACKPIC);
+    }
     else
         Preview_Hide();
     DrawMenu(tWindow, tPage, tCursor, tChoice);
     DrawBottom(tPlayers, tPage, tCursor);
+}
+
+// The look when LOOK was opened, for REVERT and SELECT (undo one row)
+static struct MpAppearance sLookBefore;
+static char sLookBeforePack[sizeof(gMpConfig.customSprite)];
+
+static void Look_Snapshot(void)
+{
+    sLookBefore = gMpConfig.app;
+    memcpy(sLookBeforePack, gMpConfig.customSprite, sizeof(sLookBeforePack));
+}
+
+// Puts one row (or every row) back the way it was. TRUE when something changed.
+static bool8 Look_Undo(u8 row)
+{
+    struct MpAppearance *app = &gMpConfig.app, before = *app;
+    bool8 all = (row == ROW_REVERT);
+    if (all || row == ROW_SPRITE)
+        MP_Avatar_RestoreSprite(&sLookBefore, sLookBeforePack);
+    if (all || row == ROW_FRONT)   app->frontSel = sLookBefore.frontSel;
+    if (all || row == ROW_BACKPIC) app->backSel = sLookBefore.backSel;
+    if (all || row == ROW_SKIN)    app->skin = sLookBefore.skin;
+    if (all || row == ROW_HAIR)    app->hair = sLookBefore.hair;
+    if (all || row == ROW_OUTFIT)  app->outfit = sLookBefore.outfit;
+    if (all || row == ROW_ACCENT)  app->accent = sLookBefore.accent;
+    return memcmp(&before, app, sizeof(before)) != 0;
 }
 
 static void HandleLookInput(u8 taskId)
@@ -603,10 +642,19 @@ static void HandleLookInput(u8 taskId)
         *v = JOY_REPEAT(DPAD_RIGHT) ? (*v + 1) % n : (*v + n - 1) % n;
         changed = TRUE;
     }
-    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == ROW_BACK))
+    else if ((JOY_NEW(SELECT_BUTTON) && tCursor <= ROW_ACCENT) || (JOY_NEW(A_BUTTON) && tCursor == ROW_REVERT))
     {
-        PlaySE(SE_SELECT);
+        // Undo this row (SELECT) or everything (REVERT)
+        if (Look_Undo(tCursor))
+            changed = TRUE;
+        else
+            PlaySE(SE_FAILURE);
+    }
+    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == ROW_SAVE))
+    {
+        PlaySE(SE_SAVE);
         MP_SaveConfig();
+        Look_Snapshot();
         GoToPage(data, MP_MENU_PAGE_MAIN, MAIN_LOOK);
     }
     if (changed)
@@ -760,7 +808,10 @@ static void Task_CoopMenu(u8 taskId)
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
         if (tPage == MP_MENU_PAGE_LOOK)
+        {
+            Look_Snapshot();
             Preview_Show(tCursor == ROW_BACKPIC);
+        }
         tState++;
         break;
     case 1:

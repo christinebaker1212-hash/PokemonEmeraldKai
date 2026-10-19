@@ -89,12 +89,12 @@ TEAMING UP FOR A DOUBLE BATTLE
 * When your friend finishes reading the trainer's speech, they get:
   "<you> wants to join for a Double Battle! Is this OK?"  YES / NO
   This message can't be skipped or sped up, so nobody says yes by accident.
-* Trainers with only one Pokemon refuse: "Hey, I only have one POKeMON!
+* Trainers with only one Moemon refuse: "Hey, I only have one MOEMON!
   Let's go one on one!" and the battle goes ahead normally.
-* Each player brings their first three healthy Pokemon and picks their own
-  moves. Both players get the full prize money and EXP for their Pokemon.
+* Each player brings their first three healthy Moemon and picks their own
+  moves. Both players get the full prize money and EXP for their Moemon.
   Evolutions happen on each player's game after the battle.
-* A Pokemon that already knows four moves can't stop the battle to learn a
+* A Moemon that already knows four moves can't stop the battle to learn a
   new one. After the battle you're asked if you want to teach it a move,
   and the Move Reminder screen opens.
 * If you lose, both of you black out. If someone disconnects, the battle is
@@ -108,13 +108,13 @@ TEAMING UP FOR A DOUBLE BATTLE
 
 WILD BATTLES TOGETHER
 ---------------------
-* Walking in tall grass with a friend nearby? When a wild Pokemon jumps out,
+* Walking in tall grass with a friend nearby? When a wild Moemon jumps out,
   the closest friend who is also standing in grass (within about a screen
   of you) jumps into the battle with you. There's nothing to accept: it just
   happens, as long as they're free (not in a menu, a battle or a trade).
-* It's two of you against one wild Pokemon. Both of you get EXP.
+* It's two of you against one wild Moemon. Both of you get EXP.
 * You can throw POKe BALLS (only Balls: other items can't be used). Whoever
-  throws the Ball that catches it gets the Pokemon.
+  throws the Ball that catches it gets the Moemon.
 * Friends further away (or not in the grass) don't join: you battle alone,
   like normal.
 
@@ -153,23 +153,23 @@ PVP: THE BATTLE FLAG
   into your line of sight you get a "!", walk up to them and a link battle
   starts. Press B to pack the flag up.
 * Winner gets 1/10 of the loser's money plus a random Poke Ball. The loser
-  pays that and wakes up at their last Pokemon Center. HP/PP are restored
+  pays that and wakes up at their last Moemon Center. HP/PP are restored
   and no EXP is gained, like Cable Club battles.
 
 
 TRADING, THE SHARED PC AND DAILY GIFTS (CO-OP menu)
 -----------------------------------------------------
-TRADE...      Trade with a friend anywhere: a Pokemon, up to two kinds of
+TRADE...      Trade with a friend anywhere: a Moemon, up to two kinds of
               items and money, in any mix. Both of you pick your side, choose
-              READY, then confirm. Pokemon that evolve by trading evolve.
-SHARED PC...  A PC that belongs to the server: anyone can put Pokemon and
+              READY, then confirm. Moemon that evolve by trading evolve.
+SHARED PC...  A PC that belongs to the server: anyone can put Moemon and
               items in, and anyone can take them out. It's kept on the host's
               PC, so it's still there the next time the same server name and
               password are hosted.
 DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.
-Pokemon you get from a friend keep their original trainer (they gain more
+Moemon you get from a friend keep their original trainer (they gain more
 EXP, but very high levels may not obey you until you have more badges).
 
 
@@ -187,7 +187,7 @@ STREAK         Play 10 minutes with a friend online every day to build your
                co-op streak. Rewards grow each day; it's on your TRAINER CARD.
 WEEKLY RACE    A different challenge every week with a leaderboard. The
                winner gets RARE CANDY x3, money and a MOEGATCHA pull.
-ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
+ACHIEVEMENTS   Team milestones (Moemon caught together, trainers beaten,
                co-op wins, badges, trades, gifts). Each gives every player a
                MOEGATCHA pull.
 MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
@@ -263,7 +263,7 @@ THE GAME'S OWN LINK FEATURES, ONLINE
 RECORD MIXING   Happens by itself while friends are online (when someone
                 joins, then every 20 minutes): TV shows, SECRET BASES, the
                 Old Man's songs, Dewford trends, Battle Tower trainers and
-                the rest, just like mixing records at a POKEMON CENTER.
+                the rest, just like mixing records at a MOEMON CENTER.
                 (SECRET BASES only arrive once you have SECRET POWER, like in
                 the original.)
 SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
@@ -271,7 +271,7 @@ SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
                 battle its owner). Leaving puts you outside it, on its route.
 TRAINER CARDS   CO-OP menu > FRIENDS > pick a friend > TRAINER CARD (both
                 sides).
-DAY CARE        A POKEMON left alone at your DAY CARE can make an EGG with one
+DAY CARE        A MOEMON left alone at your DAY CARE can make an EGG with one
                 left alone at a friend's. Each of you gets your own EGG from
                 the DAY CARE MAN.
 ROAMERS         Latias/Latios roam the same routes for everyone, so you can
@@ -302,14 +302,14 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Battle: on the move list, R shows each move's power, accuracy and kind
   (PHYS./SPEC./STATUS). At FIGHT/BAG, L throws the same kind of Ball as last
   time (wild battles). In a co-op battle, R shows your partner's team.
-* Summary screen: the stat your Pokemon's nature raises is red, the one it
-  lowers is blue. SELECT on the first page renames a Pokemon you caught.
+* Summary screen: the stat your Moemon's nature raises is red, the one it
+  lowers is blue. SELECT on the first page renames a Moemon you caught.
 * Bag: in KEY ITEMS, press L or R on an item to put it on that button (like
   SELECT's REGISTER). On the map, L / R use them.
-* Hold SELECT on the map to pick which Pokemon follows you (a quick tap of
+* Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
 * When a REPEL wears off you're asked if you want to use another one.
-* PC: R on a Pokemon in a box takes it into your party; R on a party Pokemon
+* PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).
 * CO-OP menu > MOVE TUTOR: the Move Tutor's service anywhere, still one
   HEART SCALE per move.
@@ -321,11 +321,11 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   matches show how healthy your team is before you say READY.
 
 
-POKEMON THAT FOLLOW YOU
+MOEMON THAT FOLLOW YOU
 -----------------------
-Open the POKEMON menu, pick a Pokemon with the cursor and press SELECT:
+Open the MOEMON menu, pick a Moemon with the cursor and press SELECT:
 it walks behind you. Press SELECT on it again to put it back in its Ball.
-All 386 Pokemon have their own walking sprites (with female and form
+All 386 Moemon have their own walking sprites (with female and form
 differences). Talk to it (A) and it's happy to see you. Other players see
 your follower walking behind you too. It hides while you surf or dive and
 comes back when you land. The choice is remembered in moemon_coop.ini.
@@ -346,11 +346,14 @@ DRESSING UP (CO-OP menu > LOOK)
   SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
            ID and back pictures together. (The extra Showdown pictures and
            your own drawn sprites keep their own colors.)
+  SAVE LOOK   keep the look and go back (B does the same).
+  REVERT      undo every change made since you opened LOOK.
+  SELECT on a row puts just that one back the way it was.
 The picture next to the menu shows your ID PIC (or BK PIC on that row) as
-you change it. Everyone sees your look right away. SAVE AND CLOSE remembers it.
+you change it. Everyone sees your look right away.
 
 Characters without a battle back sprite: in battle your trainer isn't shown
-(your Pokemon still are), unless you pick a BK PIC. You can also draw one in
+(your Moemon still are), unless you pick a BK PIC. You can also draw one in
 the Sprite Editor.
 
 OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
@@ -372,7 +375,7 @@ In the editor you can:
   * pick the character it's based on (this is how you edit an existing
     trainer or NPC, e.g. give the Hiker a battle back sprite),
   * paint every animation: walking, running, Mach Bike, Acro Bike, surfing,
-    diving, fishing, field moves (using items/Pokemon), watering,
+    diving, fishing, field moves (using items/Moemon), watering,
     decorating, the TRAINER CARD picture and the battle back sprite,
   * import a picture into any frame, copy/paste/flip frames, undo/redo,
   * preview the walk cycle, and keep each group within 15 colors.

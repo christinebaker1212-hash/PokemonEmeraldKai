@@ -79,9 +79,7 @@ ow woman_5 SSS....OOOHHH..
 ow big_man SSS..AAOO.HHH..
 ow old_woman SSS.HHHOO.AA...
 ow granny SSS.......HHH..
-ow scientist_1 SSS.OOO.AA.HHO.
-ow scientist_2 SSS..A.OOO.HH..
-ow devon_staff SSS....OOOHHH..
+ow scientist SSS.OOO.AA.HHO.
 ow clerk SSS....OOOHHHA.
 ow receptionist SSS.AA.HHHOOOA.
 ow judge SSS.HHHOOOAAA..

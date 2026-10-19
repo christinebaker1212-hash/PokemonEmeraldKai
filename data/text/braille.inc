@@ -68,13 +68,13 @@ SealedChamber_InnerRoom_Braille_WeOweAllToThePokemon:
 	brailleformat 7, 2, 23, 17, 10, 5
 	.braille "WE OWE ALL\n"
 	.braille "TO THE\n"
-	.braille "POKEMON.$"
+	.braille "MOEMON.$"
 
 SealedChamber_InnerRoom_Braille_ButWeSealedThePokemonAway:
 	brailleformat 3, 0, 25, 19, 6, 3
 	.braille "BUT, WE\n"
 	.braille "SEALED THE\n"
-	.braille "POKEMON\n"
+	.braille "MOEMON\n"
 	.braille "AWAY.$"
 
 SealedChamber_InnerRoom_Braille_WeFearedIt:
@@ -92,7 +92,7 @@ SealedChamber_InnerRoom_Braille_OpenDoorEternalPokemonWaits:
 	brailleformat 3, 2, 27, 17, 6, 5
 	.braille "OPEN A DOOR.\n"
 	.braille "AN ETERNAL\n"
-	.braille "POKEMON\n"
+	.braille "MOEMON\n"
 	.braille "WAITS.$"
 
 DesertRuins_Braille_UseRockSmash:

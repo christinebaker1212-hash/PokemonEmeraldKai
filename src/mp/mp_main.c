@@ -289,7 +289,7 @@ void MP_SaveConfig(void)
         "trainer_pic = %s\nback_pic = %s\n"
         "; how many tiles a player holding the BATTLE FLAG can see\n"
         "trainer_range = %d\n"
-        "; the party Pokemon that follows you (SELECT in the party menu); 0 = none\n"
+        "; the party Moemon that follows you (SELECT in the party menu); 0 = none\n"
         "follower = %08x\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"

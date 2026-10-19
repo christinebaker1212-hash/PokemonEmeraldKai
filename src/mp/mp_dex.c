@@ -86,7 +86,7 @@ static void SaveCredits(void)
     f = fopen(path, "w");
     if (!f)
         return;
-    fprintf(f, "; Moemon Co-op: who caught each Pokemon first (national number, name)\n");
+    fprintf(f, "; Moemon Co-op: who caught each Moemon first (national number, name)\n");
     for (nat = 1; nat <= NATIONAL_DEX_COUNT; nat++)
     {
         char ascii[32];
@@ -225,7 +225,7 @@ void MP_Dex_OnRelay(u8 from, const u8 *data, u16 len)
                 char ascii[64], name[16];
                 u8 text[64];
                 MP_GameToAscii(name, gMpPlayers[from].name, PLAYER_NAME_LENGTH);
-                snprintf(ascii, sizeof(ascii), "%s added %d\nPokemon to your dex!", name, added);
+                snprintf(ascii, sizeof(ascii), "%s added %d\nMoemon to your dex!", name, added);
                 MP_AsciiToGame(text, ascii, 60);
                 MP_Toast(text);
                 SaveCredits();

@@ -112,6 +112,55 @@ def same_picture(a, b, tol=0.04):
     return (diff[both] > 48).sum() / max(1, both.sum()) < 0.25
 
 
+def _labels(img):
+    """Color ids for an RGBA (h, w, 4) or index (h, w) array; 0 = transparent."""
+    if img.ndim == 2:
+        return img.astype(np.int32)
+    flat = img[:, :, 0].astype(np.int32) << 16 | img[:, :, 1].astype(np.int32) << 8 | img[:, :, 2]
+    lab = np.zeros(flat.shape, np.int32)
+    vis = img[:, :, 3] > 0
+    _, inv = np.unique(flat[vis], return_inverse=True)
+    lab[vis] = inv.reshape(-1) + 1
+    return lab
+
+
+def _agree(x, y):
+    """How consistently colors of x map to colors of y (1.0 = same drawing, any palette)."""
+    m = (x > 0) | (y > 0)
+    pairs = x[m] * 4096 + y[m]
+    vals, counts = np.unique(pairs, return_counts=True)
+    best = {}
+    for v, c in zip(vals, counts):
+        a = v // 4096
+        best[a] = max(best.get(a, 0), c)
+    return sum(best.values()) / max(1, m.sum())
+
+
+def same_drawing(a, b, threshold=0.92, shift=2):
+    """a, b: trimmed RGBA (or index) arrays. True when they're the same drawing,
+    even recolored, moved by a pixel or two, or mirrored."""
+    la, lb0 = _labels(a), _labels(b)
+    for lb in (lb0, lb0[:, ::-1]):
+        if abs(la.shape[0] - lb.shape[0]) > shift * 2 or abs(la.shape[1] - lb.shape[1]) > shift * 2:
+            continue
+        H = max(la.shape[0], lb.shape[0]) + shift * 2
+        W = max(la.shape[1], lb.shape[1]) + shift * 2
+        ca = np.zeros((H, W), np.int32)
+        ca[shift:shift + la.shape[0], shift:shift + la.shape[1]] = la
+        for dy in range(0, shift * 2 + 1):
+            for dx in range(0, shift * 2 + 1):
+                cb = np.zeros((H, W), np.int32)
+                if dy + lb.shape[0] > H or dx + lb.shape[1] > W:
+                    continue
+                cb[dy:dy + lb.shape[0], dx:dx + lb.shape[1]] = lb
+                ma, mb = ca > 0, cb > 0
+                if (ma & mb).sum() < 0.9 * (ma | mb).sum():
+                    continue
+                if min(_agree(ca, cb), _agree(cb, ca)) >= threshold:
+                    return True
+    return False
+
+
 def shape_key(rgba):
     """Gray 16x16 thumbnail of a trimmed sprite, for fast duplicate checks."""
     t = trim(rgba)
@@ -275,7 +324,7 @@ def frlg_overworld(frlg, emerald_frames):
         # Already in Emerald?
         dup = None
         for epng, ef in emerald_frames:
-            if ef.shape == frames[0].shape and (ef == frames[0]).all():
+            if ef.shape == frames[0].shape and ((ef == frames[0]).all() or same_drawing(ef & 0xF, frames[0], 0.95, 0)):
                 dup = epng
                 break
         if dup:
@@ -341,7 +390,7 @@ def frlg_fronts(frlg, known):
         cols = read_jasc(pal)
         rgba = rgb_of(idx, cols)
         t = trim(rgba)
-        dup = next((k for k, pic in known if same_picture(t, pic)), None)
+        dup = next((k for k, pic in known if same_picture(t, pic) or same_drawing(t, pic)), None)
         if dup:
             print('  skip front %-24s same as %s' % (stem, dup))
             FRLG_FRONT_DUPS[stem] = dup
@@ -481,6 +530,9 @@ ultra forest karten voy cowgirl cook courier clown clerk channeler collector cam
 cabbie caretaker engineer expert lass picnicker picknicker coin burglar cameraman champion
 policeman roughneck lt surge jessie james'''.split())
 
+# The same art as an Emerald/FRLG picture, rearranged (the checks can't see it)
+SD_SKIP = {'acetrainercouple-gen3'}
+
 SD_TAGS = {'gen1': 'G1', 'gen1rb': 'G1 RB', 'gen2': 'G2', 'gen2jp': 'G2 JP', 'gen3': 'G3', 'gen3rs': 'G3 RS',
            'gen3jp': 'G3 JP', 'gen4': 'G4', 'gen4dp': 'DP', 'gen4pt': 'PT', 'gen5bw': 'BW', 'gen5bw2': 'BW2',
            'gen6': 'G6', 'gen6xy': 'XY', 'gen6oras': 'ORAS', 'gen7': 'G7', 'gen8': 'G8', 'gen9': 'G9'}
@@ -522,7 +574,7 @@ def showdown(sd_dir, known, known_keys):
     keys = list(known_keys)
     for png in sorted(glob.glob(os.path.join(sd_dir, 'png', '*.png'))):
         stem = os.path.basename(png)[:-4]
-        if stem.startswith('unknown') or stem.endswith('-flipped'):
+        if stem.startswith('unknown') or stem.endswith('-flipped') or stem in SD_SKIP:
             continue
         artist = credits.get(stem, '')
         rgba = np.array(Image.open(png).convert('RGBA'))
@@ -554,10 +606,10 @@ def showdown(sd_dir, known, known_keys):
         tt = trim(rgba64)
         dup = None
         for i, k in enumerate(keys):
-            if np.abs(k - key).mean() < 10:
-                if i < len(known) and same_picture(tt, known[i][1], 0.08):
-                    dup = known[i][0]
-                    break
+            d = np.abs(k - key).mean()
+            if i < len(known) and ((d < 10 and same_picture(tt, known[i][1], 0.08)) or (d < 30 and same_drawing(tt, known[i][1]))):
+                dup = known[i][0]
+                break
         if dup:
             skipped['dup'] += 1
             print('  skip showdown %-28s looks like %s' % (stem, dup))
