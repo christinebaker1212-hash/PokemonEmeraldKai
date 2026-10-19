@@ -234,7 +234,9 @@ Days change at midnight UTC so friends in different countries share them.
 
 HANGING OUT (CO-OP menu > SOCIAL)
 ------------------------------------
-EMOTES & PHRASES  Emotes, quick lines and your four phrases (keys 1-8 too).
+EMOTES & PHRASES  Opens the emote / phrase pick around you (same as Q / E or
+                  L2 / R2, see the controls). Keys 1-8 send emotes and your
+                  phrases straight away.
                   Do the same emote as a friend close by at the same moment
                   for a COMBO (DOUBLE SHOCK!!, TRUE FRIENDS!, DUET!...).
 CHAT LOG          Everything said and emoted, and the news pop-ups.
@@ -440,6 +442,8 @@ CONTROLS (keyboard)
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R
   C = CO-OP menu          1-8 = emotes and your phrases
+  Q (hold) = quick emotes E (hold) = quick phrases
+            (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
 
 
@@ -458,7 +462,8 @@ others) and it just works, even mid-game. The buttons are set up for you:
 The other buttons change with what's on screen:
   Walking around    stick pushed all the way = run, X/Square = auto-run
                     on/off, Y/Triangle = CO-OP menu, right stick = emotes
-                    (click it for the EMOTES page)
+                    (click it to open the emote / phrase pick and leave
+                    it open: A sends, B closes)
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).

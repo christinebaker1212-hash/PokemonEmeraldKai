@@ -15,6 +15,8 @@ int Platform_InputContext(void)
 {
     if (NamingScreen_IsActive())
         return INPUT_CONTEXT_NAMING;
+    if (MP_QuickPickOpen())
+        return INPUT_CONTEXT_QUICKPICK;
     if (gMain.inBattle)
         return INPUT_CONTEXT_BATTLE;
     if (MP_IsInOverworld())
@@ -39,12 +41,13 @@ void Platform_ContextAction(int action)
         MP_Emote_FromStick(action - INPUT_ACTION_EMOTE_UP);
         break;
     case INPUT_ACTION_EMOTE_MENU:
-        PlaySE(SE_WIN_OPEN);
-        MP_OpenMenuPage(MP_MENU_PAGE_EMOTES);
+        MP_OpenQuickPick(MP_QUICK_PAGE_EMOTES, -1);
         break;
     case INPUT_ACTION_QUICK_EMOTES:
+        MP_OpenQuickPick(MP_QUICK_PAGE_EMOTES, 0);
+        break;
     case INPUT_ACTION_QUICK_PHRASES:
-        MP_OpenQuickPick(action == INPUT_ACTION_QUICK_PHRASES);
+        MP_OpenQuickPick(MP_QUICK_PAGE_PHRASES, 1);
         break;
     default:
         if (action >= INPUT_ACTION_EMOTE_KEY1 && action < INPUT_ACTION_EMOTE_KEY1 + INPUT_ACTION_EMOTE_KEY_COUNT)

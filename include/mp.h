@@ -378,7 +378,11 @@ bool8 NetLink_IsMaster(void);
 void MP_OpenMenu(void);
 enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
-void MP_OpenQuickPick(bool8 phrases);   // controller LT / RT held: quick emote / phrase pick
+// Quick pick (emotes and phrases around the player): hold 0 LT/Q, 1 RT/E (let go to send), -1 stays open
+enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_PHRASES = 0xFF };
+void MP_OpenQuickPick(u8 page, s8 hold);
+void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
+bool8 MP_QuickPickOpen(void);
 void MP_Emote_EditPhraseFromField(u8 slot);   // word editor, then back to the field (screen already faded)
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 

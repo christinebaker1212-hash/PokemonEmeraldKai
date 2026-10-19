@@ -548,7 +548,7 @@ static void Task_Social(u8 taskId)
         {
         case HUB_EMOTES:
             Close(taskId);
-            MP_OpenMenuPageAt(MP_MENU_PAGE_EMOTES, 0);
+            MP_OpenQuickPick(MP_QUICK_PAGE_EMOTES, -1);
             return;
         case HUB_LOG:
             Go(SC_LOG);

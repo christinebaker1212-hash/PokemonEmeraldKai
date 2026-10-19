@@ -550,6 +550,25 @@ int Platform_TakeSpeedNotice(void)
     return n;
 }
 
+// Q / E held on the keyboard: the quick emote / phrase pick (like LT / RT). It opens
+// after a moment, so typing words with Q or E in them doesn't pop it up.
+#define QUICK_KEY_DELAY 8
+static void KeyboardQuickHolds(void)
+{
+    static int sHeldFrames[2];
+    static const SDL_Scancode sKeys[2] = {SDL_SCANCODE_Q, SDL_SCANCODE_E};
+    const Uint8 *state = SDL_GetKeyboardState(NULL);
+    int i;
+    for (i = 0; i < 2; i++)
+    {
+        int held = state[sKeys[i]] && !(SDL_GetModState() & (KMOD_CTRL | KMOD_ALT | KMOD_GUI));
+        sHeldFrames[i] = held ? sHeldFrames[i] + 1 : 0;
+        Gamepad_SetKeyHold(i, sHeldFrames[i] >= QUICK_KEY_DELAY);
+        if (sHeldFrames[i] == QUICK_KEY_DELAY && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
+            Platform_ContextAction(i ? INPUT_ACTION_QUICK_PHRASES : INPUT_ACTION_QUICK_EMOTES);
+    }
+}
+
 u16 Platform_GetKeyInput(void)
 {
     int ff = 0;
@@ -563,6 +582,7 @@ u16 Platform_GetKeyInput(void)
         return sTestKeys | Gamepad_Poll(&ff);
     }
     padKeys = Gamepad_Poll(&ff);
+    KeyboardQuickHolds();
     if ((bool)ff != sPadFastForward)
     {
         sPadFastForward = ff;

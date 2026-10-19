@@ -21,6 +21,7 @@ enum {
     INPUT_CONTEXT_TEXT,        // a message or script is running in the overworld
     INPUT_CONTEXT_BATTLE,
     INPUT_CONTEXT_NAMING,      // the keyboard / naming screen
+    INPUT_CONTEXT_QUICKPICK,   // the emote / phrase pick around the player is open
 };
 
 // Extra actions the platform asks the game to run (Platform_ContextAction)
@@ -59,6 +60,7 @@ int Gamepad_IsSelecting(void);
 void Gamepad_CycleSelected(int dir);       // ALL -> each connected controller -> ALL
 const char *Gamepad_SelectedName(void);    // "ALL CONTROLLERS" or a controller name
 int Gamepad_Count(void);
-int Gamepad_TriggerHeld(int right);        // LT (0) / RT (1) pressed past halfway on any controller
+int Gamepad_TriggerHeld(int right);        // LT/Q (0) or RT/E (1) held: a controller trigger or the keyboard key
+void Gamepad_SetKeyHold(int which, int held);
 
 #endif // GUARD_PLATFORM_GAMEPAD_H

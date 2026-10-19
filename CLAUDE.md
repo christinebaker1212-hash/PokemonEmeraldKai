@@ -32,9 +32,10 @@ and a local `tools/mp_server` build. `MOEMON_DEBUG_PARTY=280:15+` makes a Pokém
 point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs seen by others,
 spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
 and move learning, loss, disconnect).
-Controller quick picks (mp_menu.c MP_OpenQuickPick, gamepad.c sQuickTrigger): LT/RT held in the overworld, radial
-around the player; RT pages MINE + 4 stock groups, west swaps/pins gMpConfig.quickStock (ini quick_stock), north edits.
-Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`. Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
+Emote / phrase pick (mp_menu.c MP_OpenQuickPick, the only emote screen): LT/RT or Q/E held = held mode (release sends),
+right-stick click / SOCIAL > EMOTES = sticky (A sends, B closes). Pages EMOTES, MINE + 4 stock groups (L/R); SELECT
+(pad west) swaps/pins gMpConfig.quickStock (ini quick_stock), START (pad north) edits MINE (INPUT_CONTEXT_QUICKPICK).
+Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`, `vbtn rstick 1`. Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), FRIENDS > GO TO, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge

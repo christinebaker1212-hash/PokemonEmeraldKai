@@ -16,7 +16,8 @@
 //               north button (Y / Triangle / X) = CO-OP menu,
 //               right stick = emotes and quick phrases,
 //               LT / RT held = quick emote / phrase pick (direction, then let go;
-//               LB / RB flip pages, west swaps a ready-made phrase, north edits).
+//               LB / RB flip pages, west swaps a ready-made phrase, north edits);
+//               right stick click = the same pick, staying open (A sends).
 //   Text, menus and battles   LT (hold) = repeat A, to get through text fast.
 //               In battles and menus the west button is B and the north
 //               button is SELECT.
@@ -320,9 +321,16 @@ void Gamepad_StartSelect(void) { sListening = 1; }
 void Gamepad_CancelSelect(void) { sListening = 0; }
 int Gamepad_IsSelecting(void) { return sListening; }
 
+static int sKeyHold[2];   // Q / E held on the keyboard (sdl2.c)
+
+void Gamepad_SetKeyHold(int which, int held)
+{
+    sKeyHold[which ? 1 : 0] = held != 0;
+}
+
 int Gamepad_TriggerHeld(int right)
 {
-    return sTrigger[right ? 1 : 0];
+    return sTrigger[right ? 1 : 0] || sKeyHold[right ? 1 : 0];
 }
 
 int Gamepad_Count(void)
@@ -541,14 +549,12 @@ u16 Gamepad_Poll(int *fastForward)
             if (buttons & west)  keys |= B_BUTTON;       // backspace
             if (buttons & north) keys |= SELECT_BUTTON;  // switch letters
             break;
+        case INPUT_CONTEXT_QUICKPICK:
+            // The emote / phrase pick: west = swap / pin a ready-made phrase, north = edit (mp_menu.c)
+            if (buttons & west)  keys |= SELECT_BUTTON;
+            if (buttons & north) keys |= START_BUTTON;
+            break;
         default:
-            if (sQuickTrigger >= 0)
-            {
-                // A quick pick is open: west = swap / pin a stock phrase, north = edit (see mp_menu.c)
-                if (buttons & west)  keys |= SELECT_BUTTON;
-                if (buttons & north) keys |= START_BUTTON;
-                break;
-            }
             if (buttons & west)  keys |= B_BUTTON;
             if (buttons & north) keys |= SELECT_BUTTON;
             // LT held: tap A over and over to get through text (not while it holds a quick pick open)

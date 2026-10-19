@@ -737,14 +737,13 @@ void MP_Emote_SayPhrase(u8 slot)
 
 static EWRAM_DATA u16 sEditWords[MP_PHRASE_WORDS] = {0};
 static EWRAM_DATA u8 sEditSlot = 0;
-static EWRAM_DATA bool8 sEditFromField = FALSE;   // back to walking around, not the EMOTES page
 
 static void Task_ReopenEmoteMenu(u8 taskId)
 {
     if (IsWeatherNotFadingIn() == TRUE)
     {
         DestroyTask(taskId);
-        MP_OpenMenuPageAt(MP_MENU_PAGE_EMOTES, 1 + sEditSlot);   // back on the phrase row
+        MP_OpenQuickPickAt(MP_QUICK_PAGE_MINE, -1, sEditSlot);   // back on the phrase you edited
     }
 }
 
@@ -762,8 +761,7 @@ static void CB2_AfterPhraseEdit(void)
         gMpConfig.phrases[sEditSlot][i] = sEditWords[i];
     MP_SaveConfig();
     MP_FieldClearVBlankHBlankCallbacks();
-    gFieldCallback = sEditFromField ? FieldCB_ReturnToFieldNoScript : FieldCB_ReturnToEmoteMenu;
-    sEditFromField = FALSE;
+    gFieldCallback = FieldCB_ReturnToEmoteMenu;
     SetMainCallback2(CB2_ReturnToField);
 }
 
@@ -778,10 +776,10 @@ void MP_Emote_EditPhrase(u8 slot)
     DoEasyChatScreen(EASY_CHAT_TYPE_MP_PHRASE, sEditWords, CB2_AfterPhraseEdit, EASY_CHAT_PERSON_DISPLAY_NONE);
 }
 
+// From the quick pick (MINE page); the editor comes back to it
 void MP_Emote_EditPhraseFromField(u8 slot)
 {
     MP_Emote_EditPhrase(slot);
-    sEditFromField = TRUE;
 }
 
 // Keys 1-8 and the right stick (see src/input_context.c)
