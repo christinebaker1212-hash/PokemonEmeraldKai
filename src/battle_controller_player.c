@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
@@ -97,6 +98,7 @@ static void PlayerCmdEnd(void);
 static void PlayerBufferRunCommand(void);
 static void HandleInputChooseTarget(void);
 static void HandleInputChooseMove(void);
+static bool8 sMpMoveInfo;   // Moemon Co-op QoL: move info view (R)
 static void MoveSelectionCreateCursorAt(u8, u8);
 static void MoveSelectionDestroyCursorAt(u8);
 static void MoveSelectionDisplayPPNumber(void);
@@ -478,6 +480,16 @@ static void HandleInputChooseMove(void)
         gPlayerDpadHoldFrames++;
     else
         gPlayerDpadHoldFrames = 0;
+
+    // Moemon Co-op QoL: R flips between PP/type and power/accuracy/category
+    if (JOY_NEW(R_BUTTON))
+    {
+        sMpMoveInfo = !sMpMoveInfo;
+        PlaySE(SE_SELECT);
+        MoveSelectionDisplayPPNumber();
+        MoveSelectionDisplayMoveType();
+        return;
+    }
 
     if (JOY_NEW(A_BUTTON))
     {
@@ -1477,6 +1489,44 @@ static void MoveSelectionDisplayPPString(void)
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
 }
 
+// Moemon Co-op QoL: R on the move list shows power, accuracy and category
+
+static void MpPutAscii(const char *s, u8 window)
+{
+    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+    MP_AsciiToGame(gDisplayedStringBattle, s, 40);
+    BattlePutTextOnWindow(gDisplayedStringBattle, window);
+}
+
+static void MpDisplayMoveInfo(void)
+{
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    const struct BattleMove *m = &gBattleMoves[moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]];
+    char buf[24];
+    u8 *txtPtr;
+
+    MpPutAscii("POW", B_WIN_PP);
+    if (m->power > 1)
+        snprintf(buf, sizeof(buf), "%3d", m->power);
+    else
+        snprintf(buf, sizeof(buf), " --");
+    MpPutAscii(buf, B_WIN_PP_REMAINING);
+
+    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);   // small font label
+    {
+        void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+        const char *cat = m->power == 0 ? "STATUS" : IS_TYPE_PHYSICAL(m->type) ? "PHYS." : "SPEC.";
+        if (m->accuracy == 0)
+            snprintf(buf, sizeof(buf), "%s  --", cat);
+        else
+            snprintf(buf, sizeof(buf), "%s %d%%", cat, m->accuracy);
+        // "TYPE/" label swapped for the category, accuracy after it
+        MP_AsciiToGame(gDisplayedStringBattle, buf, 20);
+    }
+    (void)txtPtr;
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+}
+
 static void MoveSelectionDisplayPPNumber(void)
 {
     u8 *txtPtr;
@@ -1484,6 +1534,12 @@ static void MoveSelectionDisplayPPNumber(void)
 
     if (gBattleBufferA[gActiveBattler][2] == TRUE) // check if we didn't want to display PP number
         return;
+    if (sMpMoveInfo)
+    {
+        MpDisplayMoveInfo();
+        return;
+    }
+    MoveSelectionDisplayPPString();
 
     SetPPNumbersPaletteInMoveSelection();
     moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
@@ -1498,6 +1554,9 @@ static void MoveSelectionDisplayMoveType(void)
 {
     u8 *txtPtr;
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+
+    if (sMpMoveInfo && gBattleBufferA[gActiveBattler][2] != TRUE)
+        return;   // MpDisplayMoveInfo drew this window
 
     txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
     *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;

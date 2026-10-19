@@ -3388,17 +3388,37 @@ static void PrintRibbonCount(void)
     PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_RIBBON_COUNT), text, x, 1, 0, 0);
 }
 
+// Moemon Co-op QoL: the stat a nature raises is red, the one it lowers blue
+// (text palette 6: 5 red / 9 light red, 8 blue / 11 light blue, 1 black / 2 grey)
+static void NatureColoredStat(u8 *dst, u16 value, u8 digits, u8 stat)
+{
+    s8 effect = gNatureStatTable[sMonSummaryScreen->summary.nature][stat];
+    u8 *p = dst;
+    if (effect != 0)
+    {
+        *p++ = EXT_CTRL_CODE_BEGIN; *p++ = EXT_CTRL_CODE_COLOR; *p++ = effect > 0 ? 5 : 8;
+        *p++ = EXT_CTRL_CODE_BEGIN; *p++ = EXT_CTRL_CODE_SHADOW; *p++ = effect > 0 ? 9 : 11;
+    }
+    p = ConvertIntToDecimalStringN(p, value, STR_CONV_MODE_RIGHT_ALIGN, digits);
+    if (effect != 0)
+    {
+        *p++ = EXT_CTRL_CODE_BEGIN; *p++ = EXT_CTRL_CODE_COLOR; *p++ = 1;
+        *p++ = EXT_CTRL_CODE_BEGIN; *p++ = EXT_CTRL_CODE_SHADOW; *p++ = 2;
+        *p = EOS;
+    }
+}
+
 static void BufferLeftColumnStats(void)
 {
     u8 *currentHPString = Alloc(8);
     u8 *maxHPString = Alloc(8);
-    u8 *attackString = Alloc(8);
-    u8 *defenseString = Alloc(8);
+    u8 *attackString = Alloc(24);
+    u8 *defenseString = Alloc(24);
 
     ConvertIntToDecimalStringN(currentHPString, sMonSummaryScreen->summary.currentHP, STR_CONV_MODE_RIGHT_ALIGN, 3);
     ConvertIntToDecimalStringN(maxHPString, sMonSummaryScreen->summary.maxHP, STR_CONV_MODE_RIGHT_ALIGN, 3);
-    ConvertIntToDecimalStringN(attackString, sMonSummaryScreen->summary.atk, STR_CONV_MODE_RIGHT_ALIGN, 7);
-    ConvertIntToDecimalStringN(defenseString, sMonSummaryScreen->summary.def, STR_CONV_MODE_RIGHT_ALIGN, 7);
+    NatureColoredStat(attackString, sMonSummaryScreen->summary.atk, 7, 0);
+    NatureColoredStat(defenseString, sMonSummaryScreen->summary.def, 7, 1);
 
     DynamicPlaceholderTextUtil_Reset();
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, currentHPString);
@@ -3420,9 +3440,9 @@ static void PrintLeftColumnStats(void)
 
 static void BufferRightColumnStats(void)
 {
-    ConvertIntToDecimalStringN(gStringVar1, sMonSummaryScreen->summary.spatk, STR_CONV_MODE_RIGHT_ALIGN, 3);
-    ConvertIntToDecimalStringN(gStringVar2, sMonSummaryScreen->summary.spdef, STR_CONV_MODE_RIGHT_ALIGN, 3);
-    ConvertIntToDecimalStringN(gStringVar3, sMonSummaryScreen->summary.speed, STR_CONV_MODE_RIGHT_ALIGN, 3);
+    NatureColoredStat(gStringVar1, sMonSummaryScreen->summary.spatk, 3, 3);
+    NatureColoredStat(gStringVar2, sMonSummaryScreen->summary.spdef, 3, 4);
+    NatureColoredStat(gStringVar3, sMonSummaryScreen->summary.speed, 3, 2);
 
     DynamicPlaceholderTextUtil_Reset();
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, gStringVar1);
