@@ -574,6 +574,23 @@ void MP_Crush_SendPacket(void *data);
 void MP_Crush_Finish(void);
 void MP_StartBerryCrush(void);
 
+// mp_grouplink.c: 2-4 player link over the relay (link CONTESTS)
+bool8 MP_Group_Active(void);
+u8 MP_Group_GetMultiplayerId(void);
+u8 MP_Group_GetPlayerCount(void);
+bool8 MP_Group_IsMaster(void);
+bool8 MP_Group_SendBlock(const void *src, u16 size);
+u8 MP_Group_GetBlockReceivedStatus(void);
+void MP_Group_ResetBlockReceivedFlag(u8 who);
+bool8 MP_Group_IsTaskFinished(void);
+void MP_Group_SetStandbyCallback(void);
+void MP_Group_SetCloseCallback(void);
+void MP_Group_Close(void);
+void MP_Group_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Group_OnPlayerLeft(u8 id);
+void MP_Group_Update(void);
+bool8 MP_Contest_TryLinkup(void);
+
 // mp_linkx.c: record mixing, Secret Base visits, Trainer Cards, Day Care eggs,
 // shared roamers and weather, Hall of Fame together, the UNION ROOM page
 void MP_Linkx_Update(void);

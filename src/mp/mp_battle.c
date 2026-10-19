@@ -100,6 +100,8 @@ static u8 PeerLinkId(void)
 
 u8 NetLink_GetMultiplayerId(void)
 {
+    if (MP_Group_Active())
+        return MP_Group_GetMultiplayerId();
     return sNet.linkId;
 }
 
@@ -107,6 +109,8 @@ static u8 sMixCount;   // record mixing with up to 4 players (mp_linkx.c)
 
 u8 NetLink_GetPlayerCount(void)
 {
+    if (MP_Group_Active())
+        return MP_Group_GetPlayerCount();
     return sMixCount ? sMixCount : 2;
 }
 
@@ -141,6 +145,8 @@ void NetLink_FillLocalLinkPlayer(struct LinkPlayer *out)
 
 bool8 NetLink_IsMaster(void)
 {
+    if (MP_Group_Active())
+        return MP_Group_IsMaster();
     return sNet.linkId == 0;
 }
 
@@ -160,6 +166,8 @@ void NetLink_Open(void)
 {
     u8 buf[1 + sizeof(struct LinkPlayer)];
 
+    if (MP_Group_Active())
+        return;
     gLinkPlayers[sNet.linkId] = gLocalLinkPlayer;
     gLocalLinkPlayer.id = sNet.linkId;
     gLocalLinkPlayer.linkType = LINKTYPE_BATTLE;
@@ -176,11 +184,18 @@ void NetLink_Open(void)
 
 void NetLink_Close(void)
 {
+    if (MP_Group_Active())
+    {
+        MP_Group_Close();
+        return;
+    }
     gReceivedRemoteLinkPlayers = FALSE;
 }
 
 bool8 NetLink_SendBlock(const void *src, u16 size)
 {
+    if (MP_Group_Active())
+        return MP_Group_SendBlock(src, size);
     if (size > BLOCK_BUFFER_SIZE)
         size = BLOCK_BUFFER_SIZE;
     // The GBA link also hands every sender its own block
@@ -206,17 +221,26 @@ static void UpdateSync(void)
 
 bool8 NetLink_IsTaskFinished(void)
 {
+    if (MP_Group_Active())
+        return MP_Group_IsTaskFinished();
     UpdateSync();
     return sNet.pendingSync == 0;
 }
 
 u8 NetLink_GetBlockReceivedStatus(void)
 {
+    if (MP_Group_Active())
+        return MP_Group_GetBlockReceivedStatus();
     return (sNet.recvFlags[0] ? 1 : 0) | (sNet.recvFlags[1] ? 2 : 0);
 }
 
 void NetLink_ResetBlockReceivedFlag(u8 who)
 {
+    if (MP_Group_Active())
+    {
+        MP_Group_ResetBlockReceivedFlag(who);
+        return;
+    }
     if (who < 2)
         sNet.recvFlags[who] = FALSE;
 }
@@ -236,12 +260,22 @@ static void SendSync(u8 kind)
 
 void NetLink_SetStandbyCallback(void)
 {
+    if (MP_Group_Active())
+    {
+        MP_Group_SetStandbyCallback();
+        return;
+    }
     if (sNet.pendingSync == 0)
         SendSync(1);
 }
 
 void NetLink_SetCloseCallback(void)
 {
+    if (MP_Group_Active())
+    {
+        MP_Group_SetCloseCallback();
+        return;
+    }
     if (sNet.pendingSync == 0)
         SendSync(2);
 }

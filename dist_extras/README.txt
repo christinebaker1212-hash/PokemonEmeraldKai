@@ -265,6 +265,20 @@ WEATHER         Routes 119 and 123's weather, and the abnormal weather after
 HALL OF FAME    Entering the HALL OF FAME shows the teams of the friends online
                 after yours, and they stand with you at the end. They get a
                 MOEGATCHA pull for cheering.
+BERRY BLENDER   UNION ROOM > BERRY BLENDER asks every friend online. Everyone
+                who joins picks a BERRY from their own BAG and you blend
+                together, wherever you are (friends take the other seats).
+                Everyone gets the same POKEBLOCK. You need a POKEBLOCK CASE.
+BERRY CRUSH     UNION ROOM > BERRY CRUSH: mash A together to crush BERRIES into
+                BERRY POWDER. You need the POWDER JAR. You can play again
+                if everyone says YES.
+CONTESTS        Go to the LINK CONTEST counter in Lilycove's CONTEST HALL (the
+                right receptionist) and enter the same contest as your friends.
+                While "Please wait" is up, the game waits for friends online
+                who picked the same contest, then you all go on stage
+                together (the game fills the empty spots, as in the original).
+                It starts once every friend online is ready, or 10 seconds
+                after the last one got ready. B cancels.
 
 
 HANDY EXTRAS (they save time, they don't make the game easier)

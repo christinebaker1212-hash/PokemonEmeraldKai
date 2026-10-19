@@ -1121,6 +1121,8 @@ void ResetBlockReceivedFlags(void)
     {
         NetLink_ResetBlockReceivedFlag(0);
         NetLink_ResetBlockReceivedFlag(1);
+        NetLink_ResetBlockReceivedFlag(2); // Moemon Co-op: group links (contests) have up to 4
+        NetLink_ResetBlockReceivedFlag(3);
         return;
     }
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "main.h"
 #include "battle.h"
 #include "battle_records.h"
@@ -711,6 +712,8 @@ void TryContestGModeLinkup(void)
 {
     gLinkType = LINKTYPE_CONTEST_GMODE;
     gBattleTypeFlags = 0;
+    if (MP_Contest_TryLinkup()) // Moemon Co-op: friends online at the counter
+        return;
     CreateLinkupTask(4, 4);
 }
 
@@ -718,6 +721,8 @@ void TryContestEModeLinkup(void)
 {
     gLinkType = LINKTYPE_CONTEST_EMODE;
     gBattleTypeFlags = 0;
+    if (MP_Contest_TryLinkup()) // Moemon Co-op: friends online at the counter
+        return;
     CreateLinkupTask(2, 4);
 }
 

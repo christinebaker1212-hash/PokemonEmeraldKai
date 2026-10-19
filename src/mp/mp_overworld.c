@@ -1,6 +1,8 @@
 // Moemon Co-op: remote players in the overworld (object events, movement replay, nametags)
 #include "global.h"
 #include "mp.h"
+#include "contest.h"
+#include "constants/contest.h"
 #include "main.h"
 #include "overworld.h"
 #include "event_object_movement.h"
@@ -645,7 +647,8 @@ static void UpdateRemote(u8 id)
     s16 x, y;
     u16 pal[16];
 
-    if (!p->present || !p->hasState || !p->hasInfo || !MP_GetRemoteMapPos(id, &x, &y))
+    // In a link CONTEST the game shows the contestants itself
+    if (!p->present || !p->hasState || !p->hasInfo || !MP_GetRemoteMapPos(id, &x, &y) || (gLinkContestFlags & LINK_CONTEST_FLAG_IS_LINK))
     {
         if (r->spawned)
         {
