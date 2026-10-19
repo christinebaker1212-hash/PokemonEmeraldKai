@@ -540,3 +540,5 @@ gSpecials::
 	def_special RemoveRecordsWindow
 	def_special CloseDeptStoreElevatorWindow
 	def_special TrySetBattleTowerLinkType
+	def_special MP_Coop_JoinCheck
+	def_special MP_Coop_PrepareLearnMove

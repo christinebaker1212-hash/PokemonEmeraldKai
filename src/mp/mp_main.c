@@ -417,7 +417,7 @@ void MP_GetLocalState(struct MpState *s)
 static void CollectLocalState(struct MpState *s)
 {
     *s = sLastLocalState;
-    s->flags &= ~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED);
+    s->flags &= ~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED | MPF_CHALLENGED);
 
     if (MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
      && gObjectEvents[gPlayerAvatar.objectEventId].active)
@@ -462,6 +462,8 @@ static void CollectLocalState(struct MpState *s)
     }
     if (MP_Battle_IsActive() || gMain.inBattle)
         s->flags |= MPF_IN_BATTLE;
+    if (MP_Coop_IsChallenged())
+        s->flags |= MPF_CHALLENGED;
     if (MP_Trainer_IsActive())
         s->flags |= MPF_TRAINER_MODE;
     if (MP_Trainer_IsEngaged() || MP_Battle_IsActive())
@@ -561,6 +563,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Trainer_OnPlayerLeft(id);
     MP_Battle_OnPlayerLeft(id);
     MP_Spectate_OnPlayerLeft(id);
+    MP_Coop_OnPlayerLeft(id);
     ClearPlayer(id);
 }
 
@@ -733,6 +736,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Battle_OnRelay(from, data, len);
     else if (data[0] >= MPR_SPECTATE_FIRST && data[0] < MPR_COOP_FIRST)
         MP_Spectate_OnRelay(from, data, len);
+    else if (data[0] >= MPR_COOP_FIRST && data[0] < MPR_COOP_FIRST + 20)
+        MP_Coop_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1114,6 +1119,7 @@ void MP_FrameUpdate(void)
     MP_Battle_FrameUpdate();
     if (gMpLocalId >= 0)
     {
+        MP_Coop_Update();
         SendLocalState(FALSE);
         MP_Spectate_FrameUpdate();
     }

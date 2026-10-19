@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
 #include "battle_anim.h"
@@ -1294,7 +1295,11 @@ static void OpponentHandleDrawTrainerPic(void)
         trainerPicId = gTrainers[gTrainerBattleOpponent_A].trainerPic;
     }
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_MULTI | BATTLE_TYPE_TWO_OPPONENTS))
+    if (gMpCoopBattle)
+    {
+        xPos = 176; // Moemon Co-op: one trainer in the middle
+    }
+    else if (gBattleTypeFlags & (BATTLE_TYPE_MULTI | BATTLE_TYPE_TWO_OPPONENTS))
     {
         if ((GetBattlerPosition(gActiveBattler) & BIT_FLANK) != 0) // second mon
             xPos = 152;
@@ -1318,6 +1323,9 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    // Moemon Co-op: the trainer is drawn for both opponent slots; show it once
+    if (gMpCoopBattle && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
 }

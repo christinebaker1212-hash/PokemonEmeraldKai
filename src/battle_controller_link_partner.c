@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
 #include "battle_anim.h"
@@ -1138,9 +1139,13 @@ static void LinkPartnerHandleDrawTrainerPic(void)
         trainerPicId = gLinkPlayers[GetBattlerMultiplayerId(gActiveBattler)].gender;
     }
 
+    if (gMpCoopBattle) // Moemon Co-op: the partner's chosen character
+        trainerPicId = MP_Coop_PartnerBackPicOr(trainerPicId);
     DecompressTrainerBackPic(trainerPicId, gActiveBattler);
     SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
     gBattlerSpriteIds[gActiveBattler] = CreateSprite(&gMultiuseSpriteTemplate, xPos, (8 - gTrainerBackPicCoords[trainerPicId].size) * 4 + 80, GetBattlerSpriteSubpriority(gActiveBattler));
+    if (gMpCoopBattle && MP_Coop_PartnerHidesBack()) // picked character has no back sprite
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
 
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = gActiveBattler;
     gSprites[gBattlerSpriteIds[gActiveBattler]].x2 = DISPLAY_WIDTH;
@@ -1366,6 +1371,9 @@ static void LinkPartnerHandleHealthBarUpdate(void)
 
 static void LinkPartnerHandleExpUpdate(void)
 {
+    // Moemon Co-op: keep our copy of this Pokémon in step with the owner's game
+    if (gMpCoopBattle)
+        MP_Coop_MirrorExp(gActiveBattler, gBattleBufferA[gActiveBattler][1], T1_READ_16(&gBattleBufferA[gActiveBattler][2]));
     LinkPartnerBufferExecCompleted();
 }
 
@@ -1558,6 +1566,8 @@ static void LinkPartnerHandleIntroTrainerBallThrow(void)
         trainerPicId = gLinkPlayers[GetBattlerMultiplayerId(gActiveBattler)].gender;
     }
 
+    if (gMpCoopBattle)
+        trainerPicId = MP_Coop_PartnerBackPicOr(trainerPicId);
     LoadCompressedPalette(gTrainerBackPicPaletteTable[trainerPicId].data, OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
 
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = paletteNum;

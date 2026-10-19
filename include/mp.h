@@ -75,6 +75,7 @@ enum {
 #define MPF_TRAINER_MODE   (1 << 2)
 #define MPF_IN_BATTLE      (1 << 3)
 #define MPF_ENGAGED        (1 << 4)   // spotting/being spotted/battling
+#define MPF_CHALLENGED     (1 << 5)   // an NPC trainer challenged them: others can walk up and join
 
 // Emote kinds (low nibble of the emote byte, high nibble is a counter)
 #define MP_EMOTE_NONE         0
@@ -228,6 +229,8 @@ const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId);
 // Trainer pics for the trainer card and battles (0xFFFF = game default)
 u16 MP_Avatar_LocalFrontPic(void);
 u16 MP_Avatar_LocalBackPic(void);
+u16 MP_Avatar_RemoteBackPic(u8 id);      // co-op partner
+bool8 MP_Avatar_RemoteHidesBack(u8 id);
 u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app);
 u16 MP_LocalFrontPicOr(u16 defaultPic);
 u16 MP_LocalBackPicOr(u16 defaultPic);
@@ -265,6 +268,8 @@ void MP_Battle_OnPlayerLeft(u8 id);
 bool8 MP_Battle_IsActive(void);
 u16 MP_Battle_OpponentFrontPic(void);   // 0xFFFF = default
 void MP_Battle_FrameUpdate(void);
+void MP_Battle_OpenLink(u8 peer, bool8 isMaster);  // co-op battles: link layer only
+void MP_Battle_CloseLink(void);
 void NetLink_Open(void);
 void NetLink_Close(void);
 u8 NetLink_GetMultiplayerId(void);
@@ -288,6 +293,31 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Spectate_OnPlayerLeft(u8 id);
 void MP_Spectate_FrameUpdate(void);
 bool8 MP_Spectate_TryInteract(void);
+
+// mp_coop.c (walk up to a challenged player to team up for a Double Battle)
+extern bool8 gMpCoopBattle;          // TRUE while a co-op battle runs (on both games)
+void MP_Coop_Update(void);
+void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Coop_OnPlayerLeft(u8 id);
+bool8 MP_Coop_IsChallenged(void);
+bool8 MP_Coop_IsBusy(void);          // asking / being asked / in a co-op battle
+void MP_Coop_OnTrainerConfigured(void);
+void MP_Coop_OnStartTrainerBattle(void);
+void MP_Coop_OnBattleAborted(void);
+bool8 MP_Coop_IsMaster(void);
+void MP_Coop_ArrangeEnemyParty(void);
+u16 MP_Coop_TrainerPic(void);
+u16 MP_Coop_PartnerBackPicOr(u16 defaultPic);
+bool8 MP_Coop_PartnerHidesBack(void);
+const u8 *MP_Coop_LoseText(void);    // NULL = use the game's
+void MP_Coop_RecordLearnLater(u8 partyIndex, u16 move);
+void MP_Coop_RecordMoney(u32 amount);
+bool8 MP_Coop_IsTradedMon(u8 partyIndex);
+u16 MP_Coop_VictorySong(void);
+void MP_Coop_MirrorExp(u8 battler, u8 monId, s16 gainedExp);
+void CB2_MpCoopEndBattle(void);
+void MP_Coop_JoinCheck(void);        // special, after the trainer's intro speech
+void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 
 // mp_notify.c
 void MP_ShowNotice(const char *ascii);

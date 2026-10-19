@@ -123,6 +123,7 @@
 #define TRAINER_BACK_PIC_WALLY                  6
 #define TRAINER_BACK_PIC_STEVEN                 7
 #define TRAINER_BACK_PIC_MP_LOCAL               8  // Moemon Co-op: sprite pack back pic
+#define TRAINER_BACK_PIC_MP_PARTNER             9  // Moemon Co-op: co-op partner's sprite pack back pic
 
 #define FACILITY_CLASS_HIKER                 0x0
 #define FACILITY_CLASS_AQUA_GRUNT_M          0x1

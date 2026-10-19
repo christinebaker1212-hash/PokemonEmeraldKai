@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
@@ -1988,7 +1989,11 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
+                if (gMpCoopBattle)
+                {
+                    stringPtr = sText_Trainer1WantsToBattle; // Moemon Co-op: one NPC trainer
+                }
+                else if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
                 {
                     stringPtr = sText_TwoTrainersWantToBattle;
                 }
@@ -2054,7 +2059,9 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
             {
-                if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
+                if (gMpCoopBattle)
+                    stringPtr = sText_Trainer1SentOutTwoPkmn;
+                else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
                     stringPtr = sText_TwoTrainersSentPkmn;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
                     stringPtr = sText_TwoTrainersSentPkmn;
@@ -2119,7 +2126,11 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
+                if (gMpCoopBattle)
+                {
+                    stringPtr = sText_Trainer1SentOutPkmn2;
+                }
+                else if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
                 {
                     if (gBattleScripting.battler == 1)
                         stringPtr = sText_Trainer1SentOutPkmn2;

@@ -138,6 +138,9 @@ extern u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
 extern u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
 extern u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
 extern const struct SpriteFrameImage gMpTrainerBackFrames[4];
+extern u32 gMpPartnerBackPalLz[MP_PAL_LZ_WORDS];
+extern u8 gMpPartnerBackTiles[4 * TRAINER_PIC_SIZE];
+extern const struct SpriteFrameImage gMpPartnerBackFrames[4];
 
 extern const u8 gEnemyMonElevation[NUM_SPECIES];
 

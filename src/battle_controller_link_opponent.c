@@ -1289,6 +1289,12 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     // Moemon Co-op: the opponent's chosen character
     if (gNetLinkActive && MP_Battle_OpponentFrontPic() != 0xFFFF)
         trainerPicId = MP_Battle_OpponentFrontPic();
+    // Moemon Co-op: teamed up against an NPC trainer
+    if (gMpCoopBattle)
+    {
+        trainerPicId = MP_Coop_TrainerPic();
+        xPos = 176;
+    }
     DecompressTrainerFrontPic(trainerPicId, gActiveBattler);
     SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
     gBattlerSpriteIds[gActiveBattler] = CreateSprite(&gMultiuseSpriteTemplate,
@@ -1301,6 +1307,8 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    if (gMpCoopBattle && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
 }
@@ -1309,7 +1317,9 @@ static void LinkOpponentHandleTrainerSlide(void)
 {
     u32 trainerPicId;
 
-    if (gActiveBattler == 1)
+    if (gMpCoopBattle)
+        trainerPicId = MP_Coop_TrainerPic();
+    else if (gActiveBattler == 1)
         trainerPicId = GetFrontierTrainerFrontSpriteId(gTrainerBattleOpponent_A);
     else
         trainerPicId = GetFrontierTrainerFrontSpriteId(gTrainerBattleOpponent_B);

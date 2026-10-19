@@ -9,6 +9,7 @@ const struct MonCoords gTrainerBackPicCoords[] =
     [TRAINER_BACK_PIC_WALLY] = {.size = 8, .y_offset = 4},
     [TRAINER_BACK_PIC_STEVEN] = {.size = 8, .y_offset = 4},
     [TRAINER_BACK_PIC_MP_LOCAL] = {.size = 8, .y_offset = 4},   // Moemon Co-op
+    [TRAINER_BACK_PIC_MP_PARTNER] = {.size = 8, .y_offset = 4}, // Moemon Co-op
 };
 
 // this table goes functionally unused, since none of these pics are compressed
@@ -65,6 +66,11 @@ const struct CompressedSpriteSheet gTrainerBackPicTable[] =
         .size = TRAINER_PIC_SIZE * 4,
         .tag = TRAINER_BACK_PIC_MP_LOCAL,
     },
+    [TRAINER_BACK_PIC_MP_PARTNER] = {
+        .data = (const u32 *)sMpZeroLz,
+        .size = TRAINER_PIC_SIZE * 4,
+        .tag = TRAINER_BACK_PIC_MP_PARTNER,
+    },
 };
 
 #define TRAINER_BACK_PAL(trainerPic, pal) [TRAINER_BACK_PIC_##trainerPic] = {pal, TRAINER_BACK_PIC_##trainerPic}
@@ -80,4 +86,5 @@ const struct CompressedSpritePalette gTrainerBackPicPaletteTable[] =
     TRAINER_BACK_PAL(WALLY, gTrainerPalette_Wally),
     TRAINER_BACK_PAL(STEVEN, gTrainerPalette_Steven),
     TRAINER_BACK_PAL(MP_LOCAL, gMpTrainerBackPalLz),   // Moemon Co-op
+    TRAINER_BACK_PAL(MP_PARTNER, gMpPartnerBackPalLz), // Moemon Co-op
 };

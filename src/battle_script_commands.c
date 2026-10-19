@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_message.h"
 #include "battle_anim.h"
@@ -3267,7 +3268,7 @@ static void Cmd_getexp(void)
     switch (gBattleScripting.getexpState)
     {
     case 0: // check if should receive exp at all
-        if (GetBattlerSide(gBattlerFainted) != B_SIDE_OPPONENT || (gBattleTypeFlags &
+        if (GetBattlerSide(gBattlerFainted) != B_SIDE_OPPONENT || (!gMpCoopBattle && gBattleTypeFlags &
              (BATTLE_TYPE_LINK
               | BATTLE_TYPE_RECORDED_LINK
               | BATTLE_TYPE_TRAINER_HILL
@@ -3378,7 +3379,9 @@ static void Cmd_getexp(void)
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
-                    if (IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId]))
+                    // Moemon Co-op: the partner's Pokémon are theirs, not traded
+                    if (gMpCoopBattle ? MP_Coop_IsTradedMon(gBattleStruct->expGetterMonId)
+                                      : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId]))
                     {
                         // check if the Pokémon doesn't belong to the player
                         if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3)
@@ -5385,6 +5388,12 @@ static void Cmd_handlelearnnewmove(void)
     {
         gBattlescriptCurrInstr = nothingToLearnPtr;
     }
+    else if (learnMove == MON_HAS_MAX_MOVES && gMpCoopBattle)
+    {
+        // Moemon Co-op: nobody stops the battle to forget a move; offered afterwards
+        MP_Coop_RecordLearnLater(gBattleStruct->expGetterMonId, gMoveToLearn);
+        gBattlescriptCurrInstr = BattleScript_MpCoopLearnMoveLater;
+    }
     else if (learnMove == MON_HAS_MAX_MOVES)
     {
         gBattlescriptCurrInstr += DSIZE8BIT + DSIZEPTR + DSIZEPTR + DSIZE8BIT;
@@ -5659,6 +5668,8 @@ static void Cmd_getmoneyreward(void)
         moneyReward += GetTrainerMoneyToGive(gTrainerBattleOpponent_B);
 
     AddMoney(&gSaveBlock1Ptr->money, moneyReward);
+    if (gMpCoopBattle)
+        MP_Coop_RecordMoney(moneyReward); // the partner gets the same prize
     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff1, 5, moneyReward);
 
     gBattlescriptCurrInstr++;
@@ -6511,7 +6522,7 @@ static void Cmd_various(void)
             gBattleOutcome = B_OUTCOME_MON_TELEPORTED;
         break;
     case VARIOUS_PLAY_TRAINER_DEFEATED_MUSIC:
-        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, MUS_VICTORY_TRAINER, TRUE);
+        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, gMpCoopBattle ? MP_Coop_VictorySong() : MUS_VICTORY_TRAINER, TRUE);
         MarkBattlerForControllerExec(gActiveBattler);
         break;
     }

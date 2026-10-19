@@ -2942,6 +2942,38 @@ BattleScript_PayDayMoneyAndPickUpItems::
 	pickup
 	end2
 
+@ Moemon Co-op: two players beat an NPC trainer together (link battle)
+BattleScript_MpCoopTrainerBattleWon::
+	playtrainerdefeatbgm BS_ATTACKER
+	printstring STRINGID_PLAYERDEFEATEDTRAINER1
+	trainerslidein BS_ATTACKER
+	waitstate
+	printstring STRINGID_TRAINER1LOSETEXT
+	getmoneyreward
+	printstring STRINGID_PLAYERGOTMONEY
+	waitmessage B_WAIT_TIME_LONG
+	endlinkbattle
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ Moemon Co-op: both players are out of Pokémon
+BattleScript_MpCoopBattleLost::
+	printstring STRINGID_PLAYERWHITEOUT
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_PLAYERWHITEOUT2
+	waitmessage B_WAIT_TIME_LONG
+	endlinkbattle
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ Moemon Co-op: a Pokémon that knows four moves gets to learn the new one after the battle
+BattleScript_MpCoopLearnMoveLater::
+	buffermovetolearn
+	printstring STRINGID_TRYTOLEARNMOVE1
+	printstring STRINGID_TRYTOLEARNMOVE2
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_TryLearnMoveLoop
+
 BattleScript_LocalBattleLost::
 	jumpifbattletype BATTLE_TYPE_DOME, BattleScript_CheckDomeDrew
 	jumpifbattletype BATTLE_TYPE_FRONTIER, BattleScript_LocalBattleLostPrintTrainersWinText

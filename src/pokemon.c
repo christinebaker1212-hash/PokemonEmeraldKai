@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "malloc.h"
 #include "apprentice.h"
 #include "battle.h"
@@ -2082,6 +2083,15 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .oam = &gOamData_BattleSpritePlayerSide,
         .anims = NULL,
         .images = gMpTrainerBackFrames,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_MP_PARTNER] = {   // Moemon Co-op: co-op partner's sprite pack back pic
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gMpPartnerBackFrames,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
         .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
@@ -6467,7 +6477,7 @@ u16 GetBattleBGM(void)
     {
         return MUS_VS_REGI;
     }
-    else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
+    else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK) && !gMpCoopBattle)
     {
         return MUS_VS_TRAINER;
     }

@@ -223,4 +223,8 @@ extern const u8 BattleScript_ActionWatchesCarefully[];
 extern const u8 BattleScript_ActionGetNear[];
 extern const u8 BattleScript_ActionThrowPokeblock[];
 
+extern const u8 BattleScript_MpCoopTrainerBattleWon[];
+extern const u8 BattleScript_MpCoopBattleLost[];
+extern const u8 BattleScript_MpCoopLearnMoveLater[];
+
 #endif // GUARD_BATTLE_SCRIPTS_H

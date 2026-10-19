@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_bg.h"
 #include "battle_main.h"
@@ -1044,6 +1045,8 @@ void InitLinkBattleVsScreen(u8 taskId)
                     DrawLinkBattleParticipantPokeballs(taskId, linkPlayer->id, 1, 2, 8);
                     break;
                 case 3:
+                    if (gMpCoopBattle) // Moemon Co-op: one NPC trainer fills both opponent slots
+                        break;
                     BattlePutTextOnWindow(name, B_WIN_VS_MULTI_PLAYER_4);
                     DrawLinkBattleParticipantPokeballs(taskId, linkPlayer->id, 2, 2, 8);
                     break;

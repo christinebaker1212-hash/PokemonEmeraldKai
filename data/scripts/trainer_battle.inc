@@ -102,6 +102,9 @@ EventScript_ShowTrainerIntroMsg::
 	special ShowTrainerIntroSpeech
 	waitmessage
 	waitbuttonpress
+	@ Moemon Co-op: a player who walked up may ask to join for a Double Battle
+	special MP_Coop_JoinCheck
+	waitstate
 	special TryPrepareSecondApproachingTrainer
 	goto_if_eq VAR_RESULT, TRUE, EventScript_TrainerApproach
 	goto EventScript_DoTrainerBattle
@@ -126,3 +129,18 @@ Std_MsgboxAutoclose::
 	waitbuttonpress
 	release
 	return
+
+@ Moemon Co-op: Pokémon that couldn't learn a move during a co-op battle
+EventScript_MpCoopLearnMove::
+	lockall
+EventScript_MpCoopLearnMoveNext::
+	special MP_Coop_PrepareLearnMove
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MpCoopLearnMoveEnd
+	msgbox gStringVar4, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_MpCoopLearnMoveNext
+	special TeachMoveRelearnerMove
+	waitstate
+	goto EventScript_MpCoopLearnMoveNext
+EventScript_MpCoopLearnMoveEnd::
+	releaseall
+	end

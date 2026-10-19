@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_setup.h"
 #include "battle_transition.h"
@@ -1136,7 +1137,16 @@ void SetMapVarsToTrainer(void)
     }
 }
 
+static const u8 *ConfigureTrainerBattle(const u8 *data);
+
 const u8 *BattleSetup_ConfigureTrainerBattle(const u8 *data)
+{
+    const u8 *script = ConfigureTrainerBattle(data);
+    MP_Coop_OnTrainerConfigured(); // Moemon Co-op: others may walk up and join
+    return script;
+}
+
+static const u8 *ConfigureTrainerBattle(const u8 *data)
 {
     InitTrainerBattleVariables();
     sTrainerBattleMode = TrainerBattleLoadArg8(data);
@@ -1351,6 +1361,7 @@ void BattleSetup_StartTrainerBattle(void)
     sShouldCheckTrainerBScript = FALSE;
     gWhichTrainerToFaceAfterBattle = 0;
     gMain.savedCallback = CB2_EndTrainerBattle;
+    MP_Coop_OnStartTrainerBattle(); // Moemon Co-op: a player joined for a Double Battle
 
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InTrainerHillChallenge())
         DoBattlePyramidTrainerHillBattle();
@@ -1556,6 +1567,8 @@ const u8 *GetTrainerALoseText(void)
 
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
         string = GetSecretBaseTrainerLoseText();
+    else if (MP_Coop_LoseText() != NULL) // Moemon Co-op: sent by the challenged player
+        string = MP_Coop_LoseText();
     else
         string = sTrainerADefeatSpeech;
 

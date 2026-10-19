@@ -51,7 +51,7 @@ void MP_DebugSetupNameAndGender(void)
 // Called at the end of NewGameInitData in quick-start mode
 void MP_DebugQuickStartNewGame(void)
 {
-    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18"
+    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18+" (+ = about to level up)
     const char *mapEnv = getenv("MOEMON_DEBUG_WARP");     // "group,num,x,y"
     int group = MAP_GROUP(MAP_OLDALE_TOWN), num = MAP_NUM(MAP_OLDALE_TOWN), x = 10, y = 10;
     char buf[256];
@@ -82,6 +82,11 @@ void MP_DebugQuickStartNewGame(void)
         if (sscanf(tok, "%d:%d", &species, &level) >= 1 && species > 0 && species < NUM_SPECIES)
         {
             CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+            if (strchr(tok, '+') && level < MAX_LEVEL) // "280:15+" = one exp point short of the next level
+            {
+                u32 exp = gExperienceTables[gSpeciesInfo[species].growthRate][level + 1] - 1;
+                SetMonData(&gPlayerParty[slot], MON_DATA_EXP, &exp);
+            }
             slot++;
         }
     }

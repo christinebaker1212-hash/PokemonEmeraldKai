@@ -84,7 +84,7 @@ bool8 MP_Battle_IsActive(void)
 
 u16 MP_Battle_OpponentFrontPic(void)
 {
-    if (!sNet.battleActive || sNet.peer >= MP_MAX_PLAYERS || !gMpPlayers[sNet.peer].present)
+    if (gMpCoopBattle || !sNet.battleActive || sNet.peer >= MP_MAX_PLAYERS || !gMpPlayers[sNet.peer].present)
         return 0xFFFF;
     return MP_Avatar_RemoteFrontPic(sNet.peer);
 }
@@ -428,6 +428,27 @@ void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney)
     sNet.startTask = CreateTask(Task_StartMpBattle, 1);
 }
 
+// Co-op double battles start their own battle; they only need the link layer
+void MP_Battle_OpenLink(u8 peer, bool8 isMaster)
+{
+    memset(&sNet, 0, sizeof(sNet));
+    sNet.peer = peer;
+    sNet.linkId = isMaster ? 0 : 1;
+    sNet.battleActive = TRUE;
+    sNet.startTask = TASK_NONE;
+    StringCopyN(sNet.oppName, gMpPlayers[peer].name, MP_NAME_LEN);
+    sNet.oppName[MP_NAME_LEN] = EOS;
+    gNetLinkActive = TRUE;
+    gWirelessCommType = 0;
+    gReceivedRemoteLinkPlayers = FALSE;
+    MPNet_Log("co-op battle link with player %d (we are link %s)", peer + 1, isMaster ? "master" : "slave");
+}
+
+void MP_Battle_CloseLink(void)
+{
+    FinishBattle();
+}
+
 // ---------------------------------------------------------------------------
 // Network messages
 
@@ -490,6 +511,7 @@ static void AbortBattleToField(void)
         gBattleTypeFlags = 0;
         LoadPlayerParty();
         FinishBattle();
+        MP_Coop_OnBattleAborted();
         StringCopy(sResultText, sNet.oppName);
         Append(sResultText, " disconnected. The battle was called off.");
         gFieldCallback = FieldCB_MpResult;
@@ -498,6 +520,7 @@ static void AbortBattleToField(void)
     else
     {
         FinishBattle();
+        MP_Coop_OnBattleAborted();
     }
 }
 

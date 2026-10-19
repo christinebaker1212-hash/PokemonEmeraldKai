@@ -594,7 +594,14 @@ void CB2_InitBattle(void)
     AllocateMonSpritesGfx();
     RecordedBattle_ClearFrontierPassFlag();
 
-    if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
+    if (gMpCoopBattle)
+    {
+        // Moemon Co-op: two players vs an NPC trainer, no party showcase screen
+        HandleLinkBattleSetup();
+        CB2_InitBattleInternal();
+        gBattleCommunication[MULTIUSE_STATE] = 0;
+    }
+    else if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
     {
         if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
         {
@@ -684,7 +691,7 @@ static void CB2_InitBattleInternal(void)
     SetVBlankCallback(VBlankCB_Battle);
     SetUpBattleVarsAndBirchZigzagoon();
 
-    if (gBattleTypeFlags & BATTLE_TYPE_MULTI && gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER)
+    if (gBattleTypeFlags & BATTLE_TYPE_MULTI && (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER || gMpCoopBattle))
         SetMainCallback2(CB2_HandleStartMultiPartnerBattle);
     else if (gBattleTypeFlags & BATTLE_TYPE_MULTI && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
         SetMainCallback2(CB2_HandleStartMultiPartnerBattle);
@@ -693,7 +700,13 @@ static void CB2_InitBattleInternal(void)
     else
         SetMainCallback2(CB2_HandleStartBattle);
 
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED)))
+    if (gMpCoopBattle && MP_Coop_IsMaster())
+    {
+        // Moemon Co-op: the master builds the trainer's party and sends it over
+        CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
+        MP_Coop_ArrangeEnemyParty();
+    }
+    else if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED)))
     {
         CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
         if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
@@ -1198,12 +1211,24 @@ static void CB2_HandleStartMultiPartnerBattle(void)
                 gLinkPlayers[1].id = 2;
                 gLinkPlayers[2].id = 1;
                 gLinkPlayers[3].id = 3;
+                if (gMpCoopBattle)
+                {
+                    // Moemon Co-op: both opponent slots are the one NPC trainer
+                    StringCopyN(gLinkPlayers[2].name, gTrainers[gTrainerBattleOpponent_A].trainerName, PLAYER_NAME_LENGTH);
+                    gLinkPlayers[2].name[PLAYER_NAME_LENGTH] = EOS;
+                    StringCopy(gLinkPlayers[3].name, gLinkPlayers[2].name);
+                    gLinkPlayers[2].language = gLinkPlayers[3].language = GAME_LANGUAGE;
+                    gLinkPlayers[2].gender = gLinkPlayers[3].gender = MALE;
+                }
+                else
+                {
                 GetFrontierTrainerName(gLinkPlayers[2].name, gTrainerBattleOpponent_A);
                 GetFrontierTrainerName(gLinkPlayers[3].name, gTrainerBattleOpponent_B);
                 GetBattleTowerTrainerLanguage(&language, gTrainerBattleOpponent_A);
                 gLinkPlayers[2].language = language;
                 GetBattleTowerTrainerLanguage(&language, gTrainerBattleOpponent_B);
                 gLinkPlayers[3].language = language;
+                }
 
                 if (IsLinkTaskFinished())
                 {
@@ -1397,7 +1422,8 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         // Finish, start battle
         if (BattleInitAllSprites(&gBattleCommunication[SPRITES_INIT_STATE1], &gBattleCommunication[SPRITES_INIT_STATE2]))
         {
-            TrySetLinkBattleTowerEnemyPartyLevel();
+            if (!gMpCoopBattle)
+                TrySetLinkBattleTowerEnemyPartyLevel();
             gPreBattleCallback1 = gMain.callback1;
             gMain.callback1 = BattleMainCB1;
             SetMainCallback2(BattleMainCB2);
@@ -2184,7 +2210,7 @@ void CB2_InitEndLinkBattle(void)
     SetVBlankCallback(NULL);
     gBattleTypeFlags &= ~BATTLE_TYPE_LINK_IN_BATTLE;
 
-    if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
+    if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER || gMpCoopBattle)
     {
         SetMainCallback2(gMain.savedCallback);
         FreeBattleResources();
@@ -4962,7 +4988,15 @@ static void HandleEndTurn_BattleWon(void)
 {
     gCurrentActionFuncId = 0;
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
+    if (gMpCoopBattle)
+    {
+        // Moemon Co-op: the trainer's defeat speech and prize money, then end the link
+        BattleStopLowHpSound();
+        gBattleOutcome &= ~B_OUTCOME_LINK_BATTLE_RAN;
+        gBattlerAttacker = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        gBattlescriptCurrInstr = BattleScript_MpCoopTrainerBattleWon;
+    }
+    else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
     {
         gSpecialVar_Result = gBattleOutcome;
         gBattleTextBuff1[0] = gBattleOutcome;
@@ -5020,7 +5054,13 @@ static void HandleEndTurn_BattleLost(void)
 {
     gCurrentActionFuncId = 0;
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
+    if (gMpCoopBattle)
+    {
+        gBattleOutcome &= ~B_OUTCOME_LINK_BATTLE_RAN;
+        gBattlerAttacker = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+        gBattlescriptCurrInstr = BattleScript_MpCoopBattleLost;
+    }
+    else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
     {
         if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
         {
@@ -5167,7 +5207,8 @@ static void FreeResetData_ReturnToOvOrDoEvolutions(void)
     }
 #endif
         ResetSpriteData();
-        if (gLeveledUpInBattle == 0 || gBattleOutcome != B_OUTCOME_WON)
+        // Moemon Co-op: evolutions run after the link closes (CB2_MpCoopEndBattle)
+        if (gLeveledUpInBattle == 0 || gBattleOutcome != B_OUTCOME_WON || gMpCoopBattle)
         {
             gBattleMainFunc = ReturnFromBattleToOverworld;
             return;

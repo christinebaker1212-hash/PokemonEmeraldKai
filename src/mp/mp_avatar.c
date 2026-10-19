@@ -55,6 +55,14 @@ u32 gMpTrainerFrontPicLz[2][MP_PIC_LZ_WORDS];
 u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
 u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
 u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
+u32 gMpPartnerBackPalLz[MP_PAL_LZ_WORDS];
+u8 gMpPartnerBackTiles[4 * TRAINER_PIC_SIZE];
+const struct SpriteFrameImage gMpPartnerBackFrames[4] = {
+    {gMpPartnerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartnerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartnerBackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartnerBackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+};
 const struct SpriteFrameImage gMpTrainerBackFrames[4] = {
     {gMpTrainerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
     {gMpTrainerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
@@ -1100,37 +1108,71 @@ u16 MP_LocalFrontPicOr(u16 defaultPic)
     return pic == 0xFFFF ? defaultPic : pic;
 }
 
-u16 MP_Avatar_LocalBackPic(void)
+// Copies a pack's BACK frames (recolored for the appearance) into a back pic slot
+static void LoadPackBack(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u32 *palLz)
 {
-    const struct MpPack *pack = LocalPack();
-    const struct MpSpriteEntry *e;
+    struct MpAppearance app = *appIn;
+    u16 pal[16];
+    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+    memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
+    memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
+    CountTileUsage(pack->slot[PACK_BACK], TRAINER_PIC_SIZE, counts);
+    CountHeadAndBody(pack->slot[PACK_BACK], 8, 8, head, body);
+    AutoRecolor(&app, pal, counts, body, head);
+    MP_Pack_WriteLz77Literal((u8 *)palLz, pal, 32);
+}
 
-    if (pack && pack->slot[PACK_BACK])
-    {
-        struct MpAppearance app = GetLocalAppearance();
-        u16 pal[16];
-        u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-        memcpy(gMpTrainerBackTiles, pack->slot[PACK_BACK], sizeof(gMpTrainerBackTiles));
-        memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
-        CountTileUsage(pack->slot[PACK_BACK], TRAINER_PIC_SIZE, counts);
-        CountHeadAndBody(pack->slot[PACK_BACK], 8, 8, head, body);
-        AutoRecolor(&app, pal, counts, body, head);
-        MP_Pack_WriteLz77Literal((u8 *)gMpTrainerBackPalLz, pal, 32);
-        return TRAINER_BACK_PIC_MP_LOCAL;
-    }
-    switch (gMpConfig.app.base)
+static u16 BackPicForBase(const struct MpAppearance *app)
+{
+    const struct MpSpriteEntry *e;
+    switch (app->base)
     {
     case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
     case MP_BASE_MAY:        return TRAINER_BACK_PIC_MAY;
     case MP_BASE_RS_BRENDAN: return TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN;
     case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
     case MP_BASE_NPC:
-        e = MP_Avatar_FindCatalog(gMpConfig.app.gfxId);
+        e = MP_Avatar_FindCatalog(app->gfxId);
         if (e && e->backPic != MP_PIC_NONE)
             return e->backPic;
         break;
     }
     return 0xFFFF;
+}
+
+u16 MP_Avatar_LocalBackPic(void)
+{
+    const struct MpPack *pack = LocalPack();
+
+    if (pack && pack->slot[PACK_BACK])
+    {
+        struct MpAppearance app = GetLocalAppearance();
+        LoadPackBack(&app, pack, gMpTrainerBackTiles, gMpTrainerBackPalLz);
+        return TRAINER_BACK_PIC_MP_LOCAL;
+    }
+    return BackPicForBase(&gMpConfig.app);
+}
+
+// Another player's battle back pic (co-op partner), 0xFFFF = game default
+u16 MP_Avatar_RemoteBackPic(u8 id)
+{
+    struct MpPack buf;
+    const struct MpPack *pack;
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return 0xFFFF;
+    pack = RemotePack(id, &buf);
+    if (pack && pack->slot[PACK_BACK])
+    {
+        LoadPackBack(&gMpPlayers[id].app, pack, gMpPartnerBackTiles, gMpPartnerBackPalLz);
+        return TRAINER_BACK_PIC_MP_PARTNER;
+    }
+    return BackPicForBase(&gMpPlayers[id].app);
+}
+
+bool8 MP_Avatar_RemoteHidesBack(u8 id)
+{
+    return id < MP_MAX_PLAYERS && gMpPlayers[id].present && gMpPlayers[id].app.base == MP_BASE_NPC
+        && MP_Avatar_RemoteBackPic(id) == 0xFFFF;
 }
 
 u16 MP_LocalBackPicOr(u16 defaultPic)
