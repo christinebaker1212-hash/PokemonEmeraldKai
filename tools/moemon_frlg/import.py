@@ -545,7 +545,9 @@ def showdown(sd_dir, known, known_keys):
                 continue
         else:
             if h > 64:
-                t = t[:64]   # keep the head, lose the feet
+                # Taller than a GBA trainer picture: cropping would cut the legs off
+                skipped['size'] += 1
+                continue
             idx, palette, changed = quantize15(t)
         rgba64 = rgb_of(place64(idx), palette)
         key = shape_key(rgba64)
@@ -686,7 +688,7 @@ def main():
     fr.append('#define MP_FRLG_FRAME_COUNT %d' % len(frames))
     fr.append('static const u8 sMpFrlgFrameTiles[] = INCBIN_U8("graphics/moemon/ext/frame_tiles.bin");')
     fr.append('static const u16 sMpFrlgFramePals[] = INCBIN_U16("graphics/moemon/ext/frame_pals.bin");')
-    with open(os.path.join(ROOT, 'src/mp_frlg_frames.h'), 'w') as f:
+    with open(os.path.join(ROOT, 'src/mp/mp_frlg_frames.h'), 'w') as f:
         f.write('\n'.join(fr) + '\n')
     print('done: %d overworld, %d fronts (%d FRLG + %d Showdown), %d backs, %d frames' % (
         len(ow), len(all_fronts), len(fronts), len(sdf), len(backs), len(frames)))

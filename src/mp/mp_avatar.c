@@ -72,8 +72,8 @@ const struct SpriteFrameImage gMpTrainerBackFrames[4] = {
 };
 
 // ---------------------------------------------------------------------------
-// Presets. For Brendan/May, skin replaces palette indices 1-3, outfit 12-13,
-// accent 10-11. Other sprites are recolored automatically (see AutoRecolor).
+// Presets. Which palette colors each sprite recolors is mapped by hand
+// (tools/moemon_frlg/colormaps.txt, see RecolorByMap).
 
 static const u16 sSkinPresets[MP_SKIN_COUNT][3] = {
     {0, 0, 0},                                                  // default
@@ -574,79 +574,6 @@ static u16 HsvToRgb(int h, int s, int v)
     return RGB(r * 31 / 255, g * 31 / 255, b * 31 / 255);
 }
 
-static void CountTileUsage(const u8 *tiles, u32 bytes, u32 counts[16])
-{
-    u32 i;
-    for (i = 0; i < bytes; i++)
-    {
-        counts[tiles[i] & 0xF]++;
-        counts[tiles[i] >> 4]++;
-    }
-}
-
-// Counts colors in rows [y0, y1) of one 4bpp frame laid out as wTiles x hTiles tiles
-static void CountRegionUsage(const u8 *tiles, int wTiles, int hTiles, int y0, int y1, u32 counts[16])
-{
-    int ty, tx, py, px;
-    for (ty = 0; ty < hTiles; ty++)
-        for (tx = 0; tx < wTiles; tx++)
-        {
-            const u8 *tile = tiles + (ty * wTiles + tx) * 32;
-            for (py = 0; py < 8; py++)
-            {
-                int y = ty * 8 + py;
-                if (y < y0 || y >= y1)
-                    continue;
-                for (px = 0; px < 8; px++)
-                {
-                    u8 b = tile[(py * 8 + px) / 2];
-                    counts[(px & 1) ? (b >> 4) : (b & 0xF)]++;
-                }
-            }
-        }
-}
-
-// Finds the first and last rows with visible pixels in one frame
-static void VisibleRows(const u8 *tiles, int wTiles, int hTiles, int *top, int *bottom)
-{
-    int y;
-    *top = -1;
-    *bottom = -1;
-    for (y = 0; y < hTiles * 8; y++)
-    {
-        u32 row[16] = {0}, i, any = 0;
-        CountRegionUsage(tiles, wTiles, hTiles, y, y + 1, row);
-        for (i = 1; i < 16; i++)
-            any |= row[i];
-        if (any)
-        {
-            if (*top < 0)
-                *top = y;
-            *bottom = y;
-        }
-    }
-    if (*top < 0)
-    {
-        *top = 0;
-        *bottom = hTiles * 8 - 1;
-    }
-}
-
-// Head (hair/hat) and body (clothes) color usage of a front-facing frame
-static void CountHeadAndBody(const u8 *tiles, int wTiles, int hTiles, u32 head[16], u32 body[16])
-{
-    int top, bottom, h;
-    VisibleRows(tiles, wTiles, hTiles, &top, &bottom);
-    h = bottom - top + 1;
-    CountRegionUsage(tiles, wTiles, hTiles, top, top + h * 3 / 10, head);
-    CountRegionUsage(tiles, wTiles, hTiles, top + h * 4 / 10, top + h * 9 / 10, body);
-}
-
-static bool8 IsSkinTone(int h, int s, int v)
-{
-    return h >= 5 && h <= 45 && s >= 25 && s <= 175 && v >= 110;
-}
-
 static bool8 WantsRecolor(const struct MpAppearance *app)
 {
     return app->skin || app->outfit || app->accent || app->hair;
@@ -669,174 +596,75 @@ static void RecolorClusterEx(u16 *pal, const u8 *members, int n, u16 target, boo
         int h, s, v;
         RgbToHsv(pal[members[i]], &h, &s, &v);
         // Gray or white shades (a white hat) take the target's saturation
-        pal[members[i]] = HsvToRgb(th, (fullSat || maxS < 48) ? ts : ts * s / maxS, v * tv / maxV);
+        pal[members[i]] = HsvToRgb(th, (fullSat || maxS < 80) ? ts : ts * s / maxS, v * tv / maxV);
     }
 }
 
-static void RecolorCluster(u16 *pal, const u8 *members, int n, u16 target)
+// ---------------------------------------------------------------------------
+// Hand-mapped colors (tools/moemon_frlg/colormaps.txt): for each sprite and
+// picture, which palette colors are skin (S), hair (H), outfit (O) and
+// accent (A). Sprites without a map (Showdown pictures, sprite packs) keep
+// their colors.
+
+enum { CMAP_OW, CMAP_FRONT, CMAP_BACK };
+
+struct MpColorMap
 {
-    RecolorClusterEx(pal, members, n, target, FALSE);
+    u8 kind;
+    const char *cfg;
+    const char *map;   // 15 letters for palette colors 1-15
+};
+
+#include "mp_color_maps.h"
+
+static const char *FindColorMap(u8 kind, const char *cfg)
+{
+    u16 i;
+    for (i = 0; i < ARRAY_COUNT(sMpColorMaps); i++)
+        if (sMpColorMaps[i].kind == kind && strcmp(sMpColorMaps[i].cfg, cfg) == 0)
+            return sMpColorMaps[i].map;
+    return NULL;
 }
 
-// Colors used mostly on the head (hair or a hat): at least 60% of their
-// pixels in the head rows, and not skin, the outline or a tiny eye color.
-static u8 FindHairColors(const u16 *pal, const u32 counts[16], const u32 body[16], const u32 head[16], u8 *members)
+static u8 MapMembers(const char *map, char role, u8 *members)
 {
-    u32 total = 0;
-    u8 i, n = 0, outline = 0;
-    int darkest = 999;
-    for (i = 1; i < 16; i++)
-    {
-        int h, s, v;
-        total += head[i] + body[i];
-        if (counts[i] == 0)
-            continue;
-        RgbToHsv(pal[i], &h, &s, &v);
-        if (v < darkest)
-        {
-            darkest = v;
-            outline = i;
-        }
-    }
-    for (i = 1; i < 16; i++)
-    {
-        int h, s, v;
-        u32 here = head[i] + body[i];
-        if (counts[i] == 0 || here == 0 || i == outline || head[i] * 10 < here * 6 || head[i] * 40 < total)
-            continue;
-        RgbToHsv(pal[i], &h, &s, &v);
-        if (IsSkinTone(h, s, v) || v < 20)
-            continue;
-        members[n++] = i;
-    }
+    u8 i, n = 0;
+    for (i = 0; i < 15 && map[i]; i++)
+        if (map[i] == role)
+            members[n++] = i + 1;
     return n;
 }
 
-// counts: whole sprite; body/head: the clothes and hair/hat parts of the front frame
-static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 counts[16], const u32 body[16], const u32 head[16])
+static void RecolorByMap(const struct MpAppearance *app, u16 *pal, const char *map)
 {
-    u8 skin[16], nSkin = 0, i, j, hair[16], nHair;
-    u32 binWeight[12], bodyWeight[12];
-    s8 bin[16];
-    bool8 isHair[16];
-    int best = -1, second = -1;
-
-    if (!WantsRecolor(app))
+    u8 members[16], n, i, j;
+    if (map == NULL || !WantsRecolor(app))
         return;
-    memset(binWeight, 0, sizeof(binWeight));
-    memset(bodyWeight, 0, sizeof(bodyWeight));
-    memset(isHair, 0, sizeof(isHair));
-    nHair = FindHairColors(pal, counts, body, head, hair);
-    for (i = 0; i < nHair; i++)
-        isHair[hair[i]] = TRUE;
-    for (i = 1; i < 16; i++)
+    if (app->skin > 0 && app->skin < MP_SKIN_COUNT && (n = MapMembers(map, 'S', members)) > 0)
     {
-        int h, s, v;
-        bin[i] = -1;
-        if (counts[i] == 0)
-            continue;
-        RgbToHsv(pal[i], &h, &s, &v);
-        if (IsSkinTone(h, s, v))
-            skin[nSkin++] = i;
-        else if (!isHair[i] && s >= 60 && v >= 40)
-        {
-            bin[i] = ((h + 15) / 30) % 12;
-            binWeight[bin[i]] += counts[i];
-            bodyWeight[bin[i]] += body[i];
-        }
-    }
-
-    if (app->skin > 0 && app->skin < MP_SKIN_COUNT && nSkin > 0)
-    {
-        // Lightest skin shade first
-        for (i = 0; i < nSkin; i++)
-            for (j = i + 1; j < nSkin; j++)
+        // Lightest shade first, then the preset's three shades spread over them
+        for (i = 0; i < n; i++)
+            for (j = i + 1; j < n; j++)
             {
                 int h1, s1, v1, h2, s2, v2;
-                RgbToHsv(pal[skin[i]], &h1, &s1, &v1);
-                RgbToHsv(pal[skin[j]], &h2, &s2, &v2);
+                RgbToHsv(pal[members[i]], &h1, &s1, &v1);
+                RgbToHsv(pal[members[j]], &h2, &s2, &v2);
                 if (v2 > v1)
                 {
-                    u8 t = skin[i];
-                    skin[i] = skin[j];
-                    skin[j] = t;
+                    u8 t = members[i];
+                    members[i] = members[j];
+                    members[j] = t;
                 }
             }
-        for (i = 0; i < nSkin; i++)
-            pal[skin[i]] = sSkinPresets[app->skin][nSkin == 1 ? 0 : (i * 2 + (nSkin - 1) / 2) / (nSkin - 1)];
+        for (i = 0; i < n; i++)
+            pal[members[i]] = sSkinPresets[app->skin][n == 1 ? 0 : (i * 2 + (n - 1) / 2) / (n - 1)];
     }
-
-    if (getenv("MOEMON_DEBUG_RECOLOR"))
-        for (i = 1; i < 16; i++)
-        {
-            int h, s2, v;
-            RgbToHsv(pal[i], &h, &s2, &v);
-            printf("[recolor] %2d rgb=%04x h=%3d s=%3d v=%3d all=%4u body=%4u head=%4u bin=%d hair=%d\n", i, pal[i], h, s2, v, counts[i], body[i], head[i], bin[i], isHair[i]);
-        }
-    // OUTFIT: the main clothing hue (body rows); ACCENT: the second one.
-    // Fall back to overall usage when the body has no clear color.
-    for (i = 0; i < 12; i++)
-        if (bodyWeight[i] && (best < 0 || bodyWeight[i] > bodyWeight[best]))
-            best = i;
-    for (i = 0; i < 12 && best < 0; i++)
-        if (binWeight[i] && (best < 0 || binWeight[i] > binWeight[best]))
-            best = i;
-    for (i = 0; i < 12; i++)
-        if (i != best && bodyWeight[i] && (second < 0 || bodyWeight[i] > bodyWeight[second]))
-            second = i;
-    for (i = 0; i < 12 && second < 0; i++)
-        if (i != best && binWeight[i] && (second < 0 || binWeight[i] > binWeight[second]))
-            second = i;
-    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
-    {
-        u8 members[16], n = 0;
-        u32 colored = best >= 0 ? bodyWeight[best] : 0, gray = 0;
-        u8 grays[16], nGray = 0, outline = 0;
-        int darkest = 999;
-        // Gray, black or white clothes (a suit, a lab coat) when they cover more of the body
-        for (i = 1; i < 16; i++)
-        {
-            int h, s2, v;
-            if (counts[i] == 0)
-                continue;
-            RgbToHsv(pal[i], &h, &s2, &v);
-            if (v < darkest)
-            {
-                darkest = v;
-                outline = i;
-            }
-        }
-        for (i = 1; i < 16; i++)
-        {
-            int h, s2, v;
-            if (counts[i] == 0 || bin[i] >= 0 || isHair[i] || i == outline)
-                continue;
-            RgbToHsv(pal[i], &h, &s2, &v);
-            if (IsSkinTone(h, s2, v) || s2 >= 60 || v < 25 || body[i] * 2 < head[i] + body[i])
-                continue;
-            grays[nGray++] = i;
-            gray += body[i];
-        }
-        if (nGray > 0 && gray > colored * 2)
-            RecolorClusterEx(pal, grays, nGray, sColorPresets[app->outfit][0], TRUE);
-        else if (best >= 0)
-        {
-            for (i = 1; i < 16; i++)
-                if (bin[i] == best)
-                    members[n++] = i;
-            RecolorCluster(pal, members, n, sColorPresets[app->outfit][0]);
-        }
-    }
-    if (second >= 0 && app->accent > 0 && app->accent < MP_COLOR_COUNT)
-    {
-        u8 members[16], n = 0;
-        for (i = 1; i < 16; i++)
-            if (bin[i] == second)
-                members[n++] = i;
-        RecolorCluster(pal, members, n, sColorPresets[app->accent][0]);
-    }
-    if (nHair > 0 && app->hair > 0 && app->hair < MP_HAIR_COUNT)
-        RecolorClusterEx(pal, hair, nHair, sHairPresets[app->hair], TRUE);
+    if (app->hair > 0 && app->hair < MP_HAIR_COUNT && (n = MapMembers(map, 'H', members)) > 0)
+        RecolorClusterEx(pal, members, n, sHairPresets[app->hair], FALSE);
+    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT && (n = MapMembers(map, 'O', members)) > 0)
+        RecolorClusterEx(pal, members, n, sColorPresets[app->outfit][0], FALSE);
+    if (app->accent > 0 && app->accent < MP_COLOR_COUNT && (n = MapMembers(map, 'A', members)) > 0)
+        RecolorClusterEx(pal, members, n, sColorPresets[app->accent][0], FALSE);
 }
 
 // ---------------------------------------------------------------------------
@@ -987,58 +815,22 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
 // ---------------------------------------------------------------------------
 // Palettes
 
+// Brendan/May (and their bike, surf... sprites, which share the palette) and the RS ones
 static void ApplyRecolor(const struct MpAppearance *app, u16 *pal)
 {
-    if (app->skin > 0 && app->skin < MP_SKIN_COUNT)
+    switch (app->base)
     {
-        pal[1] = sSkinPresets[app->skin][0];
-        pal[2] = sSkinPresets[app->skin][1];
-        pal[3] = sSkinPresets[app->skin][2];
-    }
-    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
-    {
-        pal[12] = sColorPresets[app->outfit][0];
-        pal[13] = sColorPresets[app->outfit][1];
-    }
-    if (app->accent > 0 && app->accent < MP_COLOR_COUNT)
-    {
-        pal[10] = sColorPresets[app->accent][0];
-        pal[11] = sColorPresets[app->accent][1];
-    }
-    if (app->hair > 0 && app->hair < MP_HAIR_COUNT)
-    {
-        // Brendan: his beanie (his hair hides under it); May: her hair
-        static const u8 sBrendanHair[] = {5, 9}, sMayHair[] = {7, 8};
-        if (app->base == MP_BASE_BRENDAN)
-            RecolorClusterEx(pal, sBrendanHair, 2, sHairPresets[app->hair], TRUE);
-        else if (app->base == MP_BASE_MAY)
-            RecolorClusterEx(pal, sMayHair, 2, sHairPresets[app->hair], TRUE);
+    case MP_BASE_BRENDAN:    RecolorByMap(app, pal, FindColorMap(CMAP_OW, "brendan")); break;
+    case MP_BASE_MAY:        RecolorByMap(app, pal, FindColorMap(CMAP_OW, "may")); break;
+    case MP_BASE_RS_BRENDAN: RecolorByMap(app, pal, FindColorMap(CMAP_OW, "rs_brendan")); break;
+    case MP_BASE_RS_MAY:     RecolorByMap(app, pal, FindColorMap(CMAP_OW, "rs_may")); break;
     }
 }
 
-// Pack overworld palette, recolored using the walking frames (or any slot).
-// Diving has its own palette and is never recolored (like the default one).
+// Pack overworld palette (drawn by the player: kept as drawn)
 static void PackPalette(const struct MpAppearance *app, const struct MpPack *pack, u8 state, u16 *dst)
 {
-    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-    u8 slot, front = PACK_SLOT_COUNT;
-    if (state == ST_UNDERWATER)
-    {
-        memcpy(dst, pack->pal[PACK_PAL_DIVE], 32);
-        return;
-    }
-    memcpy(dst, pack->pal[PACK_PAL_OVERWORLD], 32);
-    for (slot = 0; slot < PACK_FRONT; slot++)
-        if (pack->slot[slot] && gMpPackSlots[slot].palette == PACK_PAL_OVERWORLD)
-        {
-            CountTileUsage(pack->slot[slot], MP_Pack_SlotBytes(slot), counts);
-            if (front == PACK_SLOT_COUNT)
-                front = slot;
-        }
-    if (front == PACK_SLOT_COUNT)
-        return;
-    CountHeadAndBody(pack->slot[front], gMpPackSlots[front].w / 8, gMpPackSlots[front].h / 8, head, body);
-    AutoRecolor(app, dst, counts, body, head);
+    memcpy(dst, pack->pal[state == ST_UNDERWATER ? PACK_PAL_DIVE : PACK_PAL_OVERWORLD], 32);
 }
 
 // Palette of a character in a state (no pack)
@@ -1052,17 +844,13 @@ static void StatePalette(const struct MpAppearance *app, u8 state, u16 *dst)
     }
     if (state == ST_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
     {
-        const struct ObjectEventGraphicsInfo *npc = NpcInfo(app->gfxId);
         const u16 *pal = MP_Avatar_NpcPalette(app->gfxId);
         if (pal)
         {
-            u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-            u8 f;
+            char cfg[48];
             memcpy(dst, pal, 32);
-            for (f = 0; f < 9; f++)
-                CountTileUsage(npc->images[f].data, npc->images[f].size, counts);
-            CountHeadAndBody(npc->images[0].data, npc->width / 8, npc->height / 8, head, body);
-            AutoRecolor(app, dst, counts, body, head);
+            MP_Avatar_SpriteConfigName(app, cfg, sizeof(cfg));
+            RecolorByMap(app, dst, FindColorMap(CMAP_OW, cfg));
             return;
         }
     }
@@ -1332,9 +1120,7 @@ const char *MP_Avatar_FrontSelArtist(u16 sel)
 
 bool8 MP_Avatar_FrontSelRecolors(u16 sel)
 {
-    if (sel > EMERALD_FRONT_COUNT && sel <= FRONT_CHOICES)
-        return sMpExtFronts[sel - 1 - EMERALD_FRONT_COUNT].recolor;
-    return TRUE;
+    return sel == 0 || FindColorMap(CMAP_FRONT, MP_Avatar_FrontSelConfigName(sel)) != NULL;
 }
 
 const char *MP_Avatar_FrontSelConfigName(u16 sel)
@@ -1483,51 +1269,45 @@ static bool8 BackChoiceTiles(int b, u8 *tiles, u16 *pal)
     return TRUE;
 }
 
-// Recolors a 64x64 picture's palette for a look (head/body from its first frame)
-static void RecolorPic(const struct MpAppearance *app, const u8 *tiles, u16 *pal)
-{
-    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-    CountTileUsage(tiles, TRAINER_PIC_SIZE, counts);
-    CountHeadAndBody(tiles, 8, 8, head, body);
-    AutoRecolor(app, pal, counts, body, head);
-}
-
 // The look's front picture. FALSE = nothing picked (the game's default)
 static bool8 BuildFront(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
 {
     struct MpAppearance app = Resolved(appIn);
     bool8 canRecolor = TRUE;
+    int c = FrontChoice(&app);
     if (!app.frontSel && pack && pack->slot[PACK_FRONT])
     {
         memcpy(tiles, pack->slot[PACK_FRONT], TRAINER_PIC_SIZE);
         memcpy(pal, pack->pal[PACK_PAL_FRONT], 32);
+        return TRUE;
     }
-    else if (!FrontChoiceTiles(FrontChoice(&app), tiles, pal, &canRecolor))
+    if (!FrontChoiceTiles(c, tiles, pal, &canRecolor))
     {
         // Characters without a picture show Brendan/May, in the look's colors
         if (!recolor || !WantsRecolor(&app))
             return FALSE;
-        FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, tiles, pal, &canRecolor);
+        c = app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN;
+        FrontChoiceTiles(c, tiles, pal, &canRecolor);
     }
     if (recolor && canRecolor)
-        RecolorPic(&app, tiles, pal);
+        RecolorByMap(&app, pal, FindColorMap(CMAP_FRONT, MP_Avatar_FrontSelConfigName(c + 1)));
     return TRUE;
 }
 
 static bool8 BuildBack(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
 {
     struct MpAppearance app = Resolved(appIn);
+    int b = BackChoice(&app);
     if (!app.backSel && pack && pack->slot[PACK_BACK])
     {
         memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
         memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
+        return TRUE;
     }
-    else if (!BackChoiceTiles(BackChoice(&app), tiles, pal))
-    {
+    if (!BackChoiceTiles(b, tiles, pal))
         return FALSE;
-    }
     if (recolor)
-        RecolorPic(&app, tiles, pal);
+        RecolorByMap(&app, pal, FindColorMap(CMAP_BACK, MP_Avatar_BackSelConfigName(b + 1)));
     return TRUE;
 }
 
@@ -1651,6 +1431,87 @@ u16 MP_LocalBackPicOr(u16 defaultPic)
 bool8 MP_LocalHidesTrainerBack(void)
 {
     return gMpConfig.app.base == MP_BASE_NPC && MP_Avatar_LocalBackPic() == 0xFFFF;
+}
+
+// ---------------------------------------------------------------------------
+// Test harness: writes every recolorable sprite and picture with its palette
+// (for tools/moemon_frlg/colormaps.py). index.txt: kind cfg width height frames file
+
+static void DumpAsset(FILE *idx, const char *dir, const char *kind, const char *cfg, int w, int h,
+                      const u8 *const *frames, int nFrames, const u16 *pal)
+{
+    char path[300];
+    FILE *f;
+    int i;
+    snprintf(path, sizeof(path), "%s/%s_%s.bin", dir, kind, cfg);
+    f = fopen(path, "wb");
+    if (!f)
+        return;
+    for (i = 0; i < nFrames; i++)
+        fwrite(frames[i], 1, w * h / 2, f);
+    fwrite(pal, 1, 32, f);
+    fclose(f);
+    fprintf(idx, "%s %s %d %d %d %s_%s.bin\n", kind, cfg, w, h, nFrames, kind, cfg);
+}
+
+void MP_Avatar_DumpColorAssets(const char *dir)
+{
+    char path[300], cfg[48];
+    FILE *idx;
+    u16 i, pal[16];
+    const u8 *fr[3];
+    static const struct { const char *cfg; const struct ObjectEventGraphicsInfo *info; u16 tag; } sBases[] = {
+        {"brendan", &gObjectEventGraphicsInfo_BrendanNormal, OBJ_EVENT_PAL_TAG_BRENDAN},
+        {"may", &gObjectEventGraphicsInfo_MayNormal, OBJ_EVENT_PAL_TAG_MAY},
+        {"rs_brendan", &gObjectEventGraphicsInfo_RubySapphireBrendan, OBJ_EVENT_PAL_TAG_RS_BRENDAN},
+        {"rs_may", &gObjectEventGraphicsInfo_RubySapphireMay, OBJ_EVENT_PAL_TAG_RS_MAY},
+    };
+
+    MP_Avatar_Init();
+    snprintf(path, sizeof(path), "%s/index.txt", dir);
+    idx = fopen(path, "w");
+    if (!idx)
+    {
+        printf("[test] dumpcolors: can't write %s\n", path);
+        return;
+    }
+    for (i = 0; i < ARRAY_COUNT(sBases); i++)
+    {
+        const struct ObjectEventGraphicsInfo *info = sBases[i].info;
+        fr[0] = info->images[0].data; fr[1] = info->images[1].data; fr[2] = info->images[2].data;
+        DumpAsset(idx, dir, "ow", sBases[i].cfg, info->width, info->height, fr, 3, MP_Avatar_OriginalPalette(sBases[i].tag));
+    }
+    for (i = 0; i < CATALOG_COUNT; i++)
+    {
+        const struct MpSpriteEntry *e = CatalogAt(i);
+        const struct ObjectEventGraphicsInfo *info = MP_Avatar_NpcInfo(e->gfxId);
+        struct MpAppearance app;
+        if (!info || !MP_Avatar_NpcPalette(e->gfxId))
+            continue;
+        memset(&app, 0, sizeof(app));
+        app.base = MP_BASE_NPC;
+        app.gfxId = e->gfxId;
+        MP_Avatar_SpriteConfigName(&app, cfg, sizeof(cfg));
+        fr[0] = info->images[0].data; fr[1] = info->images[1].data; fr[2] = info->images[2].data;
+        DumpAsset(idx, dir, "ow", cfg, info->width, info->height, fr, 3, MP_Avatar_NpcPalette(e->gfxId));
+    }
+    for (i = 1; i <= FRONT_CHOICES; i++)
+    {
+        bool8 canRecolor;
+        if (!FrontChoiceTiles(i - 1, sPicBuf, pal, &canRecolor) || !canRecolor)
+            continue;
+        fr[0] = sPicBuf;
+        DumpAsset(idx, dir, "front", MP_Avatar_FrontSelConfigName(i), 64, 64, fr, 1, pal);
+    }
+    for (i = 1; i <= BACK_CHOICES; i++)
+    {
+        if (!BackChoiceTiles(i - 1, sPicBuf, pal))
+            continue;
+        fr[0] = sPicBuf;
+        DumpAsset(idx, dir, "back", MP_Avatar_BackSelConfigName(i), 64, 64, fr, 1, pal);
+    }
+    fclose(idx);
+    printf("[test] dumpcolors: wrote %s\n", path);
 }
 
 // ---------------------------------------------------------------------------

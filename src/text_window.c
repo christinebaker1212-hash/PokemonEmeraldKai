@@ -57,6 +57,8 @@ static const u16 sTextWindowPalettes[][16] =
     INCGFX_U16("graphics/text_window/text_pal4.pal", ".gbapal")
 };
 
+#include "mp/mp_frlg_frames.h"   // Moemon Kai
+
 static const struct TilesPal sWindowFrames[WINDOW_FRAMES_COUNT] =
 {
     {gTextWindowFrame1_Gfx, gTextWindowFrame1_Pal},
@@ -78,8 +80,19 @@ static const struct TilesPal sWindowFrames[WINDOW_FRAMES_COUNT] =
     {sTextWindowFrame17_Gfx, sTextWindowFrame17_Pal},
     {sTextWindowFrame18_Gfx, sTextWindowFrame18_Pal},
     {sTextWindowFrame19_Gfx, sTextWindowFrame19_Pal},
-    {sTextWindowFrame20_Gfx, sTextWindowFrame20_Pal}
+    {sTextWindowFrame20_Gfx, sTextWindowFrame20_Pal},
+    // Moemon Kai: the FireRed/LeafGreen frames Emerald doesn't have
+    {sMpFrlgFrameTiles + 0 * 0x120, sMpFrlgFramePals + 0 * 16},
+    {sMpFrlgFrameTiles + 1 * 0x120, sMpFrlgFramePals + 1 * 16},
+    {sMpFrlgFrameTiles + 2 * 0x120, sMpFrlgFramePals + 2 * 16},
+    {sMpFrlgFrameTiles + 3 * 0x120, sMpFrlgFramePals + 3 * 16},
+    {sMpFrlgFrameTiles + 4 * 0x120, sMpFrlgFramePals + 4 * 16},
+    {sMpFrlgFrameTiles + 5 * 0x120, sMpFrlgFramePals + 5 * 16},
+    {sMpFrlgFrameTiles + 6 * 0x120, sMpFrlgFramePals + 6 * 16},
+    {sMpFrlgFrameTiles + 7 * 0x120, sMpFrlgFramePals + 7 * 16},
+    {sMpFrlgFrameTiles + 8 * 0x120, sMpFrlgFramePals + 8 * 16},
 };
+_Static_assert(MP_FRLG_FRAME_COUNT == 9, "update WINDOW_FRAMES_COUNT and sWindowFrames");
 
 // code
 const struct TilesPal *GetWindowFrameTilesPal(u8 id)

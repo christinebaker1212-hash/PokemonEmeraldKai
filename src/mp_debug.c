@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "text_window.h"
 #include "daycare.h"
 #include "pokemon_summary_screen.h"
 #include "item.h"
@@ -175,6 +176,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         ZeroEnemyPartyMons();
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
+    }
+    else if (strcmp(cmd, "dumpcolors") == 0)
+    {
+        // dumpcolors DIR - sprites and pictures for tools/moemon_frlg/colormaps.py
+        void MP_Avatar_DumpColorAssets(const char *dir);
+        MP_Avatar_DumpColorAssets(arg);
     }
     else if (strcmp(cmd, "card") == 0)
     {
@@ -366,10 +373,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "frame") == 0)
     {
-        // frame N - OPTIONS > FRAME (0-19)
+        // frame N - OPTIONS > FRAME (0-28; 20+ are the FireRed/LeafGreen ones)
         int n = 0;
         sscanf(arg, "%d", &n);
-        gSaveBlock2Ptr->optionsWindowFrameType = n % 20;
+        gSaveBlock2Ptr->optionsWindowFrameType = n % WINDOW_FRAMES_COUNT;
     }
     else if (strcmp(cmd, "daily") == 0)
     {

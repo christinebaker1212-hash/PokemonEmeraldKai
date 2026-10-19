@@ -331,17 +331,34 @@ your follower walking behind you too. It hides while you surf or dive and
 comes back when you land. The choice is remembered in moemon_coop.ini.
 
 
-DRESSING UP (CO-OP menu)
----------------------------
-  SPRITE   any trainer or NPC in the game (Left/Right, L/R jump 10).
-           It's used everywhere: walking, running, biking, surfing,
-           diving, fishing, field moves, the TRAINER CARD and battles.
-           Animations a sprite doesn't have use Brendan's/May's.
-  SKIN     skin tone      OUTFIT / ACCENT   clothing colors
-Everyone sees your look right away. SAVE AND CLOSE remembers it.
+DRESSING UP (CO-OP menu > LOOK)
+---------------------------------
+  SPRITE   any trainer or NPC from Emerald or FireRed/LeafGreen that walks
+           in all four directions (Left/Right, L/R jump 10). It's used
+           everywhere: walking, running, biking, surfing, diving, fishing,
+           field moves. Animations a sprite doesn't have use Brendan's/May's.
+  ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
+           default) uses the one that goes with your sprite; or pick any
+           other: Emerald's, FireRed/LeafGreen's, or one of the extra
+           pictures from Pokemon Showdown (L/R jump 10).
+  BK PIC   your back in battles: MATCH, or Brendan, May, Red, Leaf, Wally,
+           Steven, the Old Man or the Poke Dude.
+  SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
+           ID and back pictures together. (The extra Showdown pictures and
+           your own drawn sprites keep their own colors.)
+The picture next to the menu shows your ID PIC (or BK PIC on that row) as
+you change it. Everyone sees your look right away. SAVE AND CLOSE remembers it.
 
 Characters without a battle back sprite: in battle your trainer isn't shown
-(your Pokemon still are). You can draw one in the Sprite Editor.
+(your Pokemon still are), unless you pick a BK PIC. You can also draw one in
+the Sprite Editor.
+
+OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
+
+Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
+A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
+G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
+by Beliot419.
 
 
 SPRITE EDITOR
