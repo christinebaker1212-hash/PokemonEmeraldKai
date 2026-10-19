@@ -6,7 +6,7 @@
 #define MP_EXT_OW_COUNT 52
 #define MP_EXT_FRONT_COUNT 254
 #define MP_EXT_FRONT_FRLG_COUNT 64
-#define MP_EXT_BACK_COUNT 2
+#define MP_EXT_BACK_COUNT 16
 #define MP_EXT_FRAME_COUNT 9
 
 static const struct MpExtOverworld sMpExtOverworld[MP_EXT_OW_COUNT] = {
@@ -417,7 +417,21 @@ static const char *const sMpEmeraldFrontNames[][2] = {
     {"RS MAY", "rs_may"},
 };
 
-static const char *const sMpExtBackNames[MP_EXT_BACK_COUNT] = {
-    "OLD MAN",
-    "POKE DUDE",
+static const char *const sMpExtBackNames[MP_EXT_BACK_COUNT][2] = {
+    {"OLD MAN", "frlg_old_man"},
+    {"POKE DUDE", "frlg_poke_dude"},
+    {"LUCAS", "pt_lucas"},
+    {"DAWN", "pt_dawn"},
+    {"BARRY", "pt_barry"},
+    {"CHERYL", "pt_cheryl"},
+    {"RILEY", "pt_riley"},
+    {"MARLEY", "pt_marley"},
+    {"BUCK", "pt_buck"},
+    {"MIRA", "pt_mira"},
+    {"LUCAS DP", "pt_lucas_dp"},
+    {"DAWN DP", "pt_dawn_dp"},
+    {"BARRY DP", "pt_barry_dp"},
+    {"GOLD", "gsc_gold"},
+    {"GSC BOY", "gsc_boy"},
+    {"KRIS", "gsc_kris"},
 };

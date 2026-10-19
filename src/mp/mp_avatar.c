@@ -1186,7 +1186,7 @@ const char *MP_Avatar_BackSelName(u8 sel)
     if (sel < EMERALD_BACK_COUNT)
         return sEmeraldBackNames[sel][0];
     if (sel < BACK_CHOICES)
-        return sMpExtBackNames[sel - EMERALD_BACK_COUNT];
+        return sMpExtBackNames[sel - EMERALD_BACK_COUNT][0];
     return "?";
 }
 
@@ -1200,9 +1200,8 @@ const char *MP_Avatar_BackSelConfigName(u8 sel)
     sel--;
     if (sel < EMERALD_BACK_COUNT)
         return sEmeraldBackNames[sel][1];
-    snprintf(buf, sizeof(buf), "frlg_");
-    ToConfigName(buf + 5, sMpExtBackNames[sel - EMERALD_BACK_COUNT], sizeof(buf) - 5);
-    return buf;
+    (void)buf;
+    return sMpExtBackNames[sel - EMERALD_BACK_COUNT][1];
 }
 
 u8 MP_Avatar_ParseBackSel(const char *name)

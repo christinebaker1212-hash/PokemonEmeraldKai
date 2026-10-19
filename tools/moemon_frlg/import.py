@@ -24,6 +24,7 @@ import sys
 import numpy as np
 from PIL import Image
 
+HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUT = os.path.join(ROOT, 'graphics', 'moemon', 'ext')
 
@@ -415,7 +416,86 @@ def frlg_backs(frlg):
         tiles = b''.join(to_4bpp(idx[i * 64:i * 64 + 64, :64], 64, 64) for i in range(4))
         if frames < 4:
             tiles += to_4bpp(idx[0:64, :64], 64, 64) * (4 - frames)
-        out.append({'name': name, 'tiles': tiles, 'pal': gba_pal(read_jasc(pal))})
+        out.append({'name': name, 'cfg': 'frlg_' + name.lower().replace(' ', '_'), 'tiles': tiles,
+                    'pal': gba_pal(read_jasc(pal))})
+    return out
+
+
+# Platinum / Diamond-Pearl and Gold/Silver/Crystal back pictures from extra_backs.png
+# (a sheet ripped by MufasaKong, "no credits needed"). Platinum backs are 80x80
+# with 5 frames: cut to 64x64 and to Emerald's 4 frames (ready, wind-up, throw,
+# standing). The Gen 2 ones are a single 48x48 frame.
+EXTRA_BACK_CELLS = [
+    ('LUCAS', 5, 106), ('DAWN', 410, 106), ('BARRY', 5, 204), ('CHERYL', 410, 204),
+    ('RILEY', 5, 302), ('MARLEY', 410, 302), ('BUCK', 5, 400), ('MIRA', 410, 400),
+    ('LUCAS DP', 5, 498), ('DAWN DP', 410, 498), ('BARRY DP', 5, 596),
+]
+EXTRA_BACK_GEN2 = [('GOLD', 10, 15), ('GSC BOY', 74, 15), ('KRIS', 202, 15)]
+PT_FRAME_ORDER = (1, 2, 3, 0)   # Emerald slots 0-3 <- Platinum frames
+
+
+def _index_frames(frames_rgba):
+    """Shared 15-color palette for several RGBA frames -> index arrays, palette."""
+    cols = {}
+    for f in frames_rgba:
+        vis = f[:, :, 3] > 0
+        for c in map(tuple, (f[:, :, :3][vis] & 0xF8)):
+            cols[c] = cols.get(c, 0) + 1
+    if len(cols) > 15:
+        raise ValueError('more than 15 colors')
+    order = sorted(cols, key=lambda c: -cols[c])
+    lut = {c: i + 1 for i, c in enumerate(order)}
+    out = []
+    for f in frames_rgba:
+        idx = np.zeros(f.shape[:2], np.uint8)
+        vis = f[:, :, 3] > 0
+        rgb = f[:, :, :3] & 0xF8
+        for y, x in zip(*np.where(vis)):
+            idx[y, x] = lut[tuple(rgb[y, x])]
+        out.append(idx)
+    return out, [(0, 0, 0)] + order + [(0, 0, 0)] * (15 - len(order))
+
+
+def extra_backs(path):
+    sheet = np.array(Image.open(path).convert('RGBA')).astype(np.int32)
+    out = []
+    for name, x, y in EXTRA_BACK_CELLS:
+        frames = []
+        for i in PT_FRAME_ORDER:
+            cell = sheet[y:y + 80, x + i * 81:x + i * 81 + 80].copy()
+            bg = cell[0, 0, :3].copy()
+            cell[(cell[:, :, :3] == bg).all(2)] = 0
+            frames.append(cell.astype(np.uint8))
+        union = np.zeros((80, 80), np.int32)
+        for f in frames:
+            union += f[:, :, 3] > 0
+        # The 64x64 window that keeps the most of the four frames (head always in)
+        top = int(np.where(union.any(1))[0].min())
+        y0 = min(top, 16)
+        x0 = max(range(17), key=lambda v: union[y0:y0 + 64, v:v + 64].sum())
+        frames = [f[y0:y0 + 64, x0:x0 + 64] for f in frames]
+        idx, pal = _index_frames(frames)
+        out.append({'name': name, 'cfg': 'pt_' + name.lower().replace(' ', '_'),
+                    'tiles': b''.join(to_4bpp(i, 64, 64) for i in idx), 'pal': gba_pal(pal),
+                    'rgba': [rgb_of(i, pal) for i in idx]})
+    for name, x, y in EXTRA_BACK_GEN2:
+        cell = sheet[y:y + 48, x:x + 48].copy().astype(np.uint8)
+        # The white around the trainer is the background: flood it from the edges
+        white = (cell[:, :, :3] == cell[0, 0, :3]).all(2)
+        seen = np.zeros(white.shape, bool)
+        stack = [(yy, xx) for yy in range(48) for xx in (0, 47)] + [(yy, xx) for xx in range(48) for yy in (0, 47)]
+        while stack:
+            yy, xx = stack.pop()
+            if 0 <= yy < 48 and 0 <= xx < 48 and white[yy, xx] and not seen[yy, xx]:
+                seen[yy, xx] = True
+                stack += [(yy + 1, xx), (yy - 1, xx), (yy, xx + 1), (yy, xx - 1)]
+        cell[seen] = 0
+        frame = np.zeros((64, 64, 4), np.uint8)
+        frame[16:64, 8:56] = cell     # feet on the ground, like Emerald's backs
+        idx, pal = _index_frames([frame])
+        out.append({'name': name, 'cfg': 'gsc_' + name.lower().replace('gsc ', '').replace(' ', '_'),
+                    'tiles': to_4bpp(idx[0], 64, 64) * 4, 'pal': gba_pal(pal),
+                    'rgba': [rgb_of(idx[0], pal)]})
     return out
 
 
@@ -648,7 +728,7 @@ def main():
         im[64 - t.shape[0]:, (64 - t.shape[1]) // 2:(64 - t.shape[1]) // 2 + t.shape[1]] = t[:64, :64]
         known_keys.append(shape_key(im))
     sdf = showdown(sd, known, known_keys)
-    backs = frlg_backs(frlg)
+    backs = frlg_backs(frlg) + extra_backs(os.path.join(HERE, 'extra_backs.png'))
     frames = frlg_frames(frlg)
     print('FRLG window frames: %d' % len(frames))
 
@@ -727,9 +807,9 @@ def main():
         h.append('    {%s, %s},' % (c_str(pretty), c_str(n.lower())))
     h.append('};')
     h.append('')
-    h.append('static const char *const sMpExtBackNames[MP_EXT_BACK_COUNT] = {')
+    h.append('static const char *const sMpExtBackNames[MP_EXT_BACK_COUNT][2] = {')
     for b in backs:
-        h.append('    %s,' % c_str(b['name']))
+        h.append('    {%s, %s},' % (c_str(b['name']), c_str(b['cfg'])))
     h.append('};')
     h.append('')
     with open(os.path.join(ROOT, 'src/mp/mp_ext_gfx.h'), 'w') as f:

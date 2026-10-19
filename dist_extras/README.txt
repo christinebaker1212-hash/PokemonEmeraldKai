@@ -342,7 +342,9 @@ DRESSING UP (CO-OP menu > LOOK)
            other: Emerald's, FireRed/LeafGreen's, or one of the extra
            pictures from Pokemon Showdown (L/R jump 10).
   BK PIC   your back in battles: MATCH, Brendan, May, Red, Leaf, Wally,
-           Steven, the Old Man, the Poke Dude, or NONE (hidden).
+           Steven, the Old Man, the Poke Dude, the Platinum and Diamond/
+           Pearl ones (Lucas, Dawn, Barry, Cheryl, Riley, Marley, Buck, Mira),
+           Gold, Kris and a Gold/Silver boy, or NONE (hidden).
   SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
            ID and back pictures together. (The extra Showdown pictures and
            your own drawn sprites keep their own colors.)
@@ -362,6 +364,8 @@ the Sprite Editor.
 OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
+The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
+by MufasaKong.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.
