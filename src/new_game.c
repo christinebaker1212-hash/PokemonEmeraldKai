@@ -52,6 +52,7 @@ static void ClearFrontierRecord(void);
 static void WarpToTruck(void);
 bool8 MP_DebugQuickStartEnabled(void);
 void MP_DebugQuickStartNewGame(void);
+void MP_QuickStart_Apply(void);
 static void ResetMiniGamesRecords(void);
 
 EWRAM_DATA bool8 gDifferentSaveFile = FALSE;
@@ -209,6 +210,7 @@ void NewGameInitData(void)
     RunScriptImmediately(EventScript_ResetAllMapFlags);
     if (MP_DebugQuickStartEnabled())
         MP_DebugQuickStartNewGame();
+    MP_QuickStart_Apply();   // Moemon Co-op: SKIP THE INTRO (mp_quickstart.c)
     ResetMiniGamesRecords();
     InitUnionRoomChatRegisteredTexts();
     InitLilycoveLady();

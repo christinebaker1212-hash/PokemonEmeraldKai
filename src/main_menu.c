@@ -222,6 +222,8 @@ static s8 NewGameBirchSpeech_ProcessGenderMenuInput(void);
 static void NewGameBirchSpeech_ClearGenderWindow(u8, u8);
 static void Task_NewGameBirchSpeech_WhatsYourName(u8);
 static void Task_NewGameBirchSpeech_LetMeSeeYou(u8);
+static void Task_NewGameBirchSpeech_AskSkip(u8);
+static void Task_NewGameBirchSpeech_AfterSkip(u8);
 static void Task_NewGameBirchSpeech_SlideOutOldGenderSprite(u8);
 static void Task_NewGameBirchSpeech_SlideInNewGenderSprite(u8);
 static void Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint(u8);
@@ -1586,7 +1588,8 @@ static void Task_NewGameBirchSpeech_SlideInNewGenderSprite(u8 taskId)
 // the player: the LOOK menu (mp_intro.c), then back here for the name.
 static const u8 sText_Birch_LetMeSeeYou[] = _("Ah, I see!\pHmm… Forgive me, my eyes aren't\nwhat they used to be.\pCome a little closer and let me\nget a good look at you!");
 static const u8 sText_Birch_AfterLook[] = _("Ah, there you are! Splendid!\nNow I'll know you anywhere.\pAll right. What's your name?");
-static bool8 sReturnFromLook;
+enum { RETURN_TO_NAME, RETURN_TO_LOOK, RETURN_TO_SKIP };
+static u8 sReturnTo;
 static bool8 sLookSeen;   // the player pic shows the look from now on
 void CB2_MpIntroLook(void);
 
@@ -1628,7 +1631,7 @@ static void Task_NewGameBirchSpeech_AfterLook(u8 taskId)
 
 void CB2_NewGameBirchSpeech_ReturnFromLook(void)
 {
-    sReturnFromLook = TRUE;
+    sReturnTo = RETURN_TO_LOOK;
     sLookSeen = TRUE;
     CB2_NewGameBirchSpeech_ReturnFromNamingScreen();
 }
@@ -1762,12 +1765,108 @@ static void Task_NewGameBirchSpeech_WaitForSpriteFadeInAndTextPrinter(u8 taskId)
         {
             gSprites[gTasks[taskId].tBirchSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
             gSprites[gTasks[taskId].tLotadSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
-            NewGameBirchSpeech_StartFadeOutTarget1InTarget2(taskId, 2);
-            NewGameBirchSpeech_StartFadePlatformIn(taskId, 1);
-            gTasks[taskId].tTimer = 64;
-            gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+            gSprites[gTasks[taskId].tBirchSpriteId].oam.objMode = ST_OAM_OBJ_NORMAL;   // Moemon Co-op: ask first
+            gSprites[gTasks[taskId].tLotadSpriteId].oam.objMode = ST_OAM_OBJ_NORMAL;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_AskSkip;
         }
     }
+}
+
+// Moemon Co-op: SKIP THE INTRO. Birch offers to skip ahead: pick and name a
+// starter now and begin in LITTLEROOT as if the rival battle, the POKéDEX and
+// the RUNNING SHOES were done (mp_quickstart.c sets that up in NewGameInitData).
+static const u8 sText_Birch_AskSkip[] = _("Oh, one more thing!\pIf you'd rather not wait, I can give\nyou your very first MOéMON right now.\pYou'd set out from LITTLEROOT with\nyour POKéDEX and RUNNING SHOES,\lready to go!\pWould you like to skip ahead?");
+static const u8 sText_Birch_AfterSkip[] = _("Splendid! {STR_VAR_1} looks raring\nto go!\pYour very own adventure is about\nto unfold.\pTake courage, and leap into the\nworld of MOéMON where dreams,\ladventure, and friendships await!\pWell, I'll be expecting you later.\nCome see me in my POKéMON LAB.\p");
+static u16 sSkipSpecies;
+static u8 sSkipNickname[POKEMON_NAME_LENGTH + 1];
+void CB2_ChooseStarter(void);
+u16 GetStarterPokemon(u16 chosenStarterId);
+void MP_QuickStart_Set(u16 species, const u8 *nickname);   // mp_quickstart.c
+
+static void Task_NewGameBirchSpeech_StartAreYouReady(u8 taskId)
+{
+    gSprites[gTasks[taskId].tBirchSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
+    gSprites[gTasks[taskId].tLotadSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
+    NewGameBirchSpeech_StartFadeOutTarget1InTarget2(taskId, 2);
+    NewGameBirchSpeech_StartFadePlatformIn(taskId, 1);
+    gTasks[taskId].tTimer = 64;
+    gTasks[taskId].func = Task_NewGameBirchSpeech_AreYouReady;
+}
+
+static void CB2_NewGameBirchSpeech_SkipNamed(void)
+{
+    u8 name[POKEMON_NAME_LENGTH + 1];
+    GetSpeciesName(name, sSkipSpecies);
+    if (sSkipNickname[0] == EOS)
+        StringCopy(sSkipNickname, name);   // left empty: keeps its own name
+    MP_QuickStart_Set(sSkipSpecies, StringCompare(name, sSkipNickname) == 0 ? NULL : sSkipNickname);
+    StringCopy(gStringVar1, sSkipNickname);
+    sReturnTo = RETURN_TO_SKIP;
+    CB2_NewGameBirchSpeech_ReturnFromNamingScreen();
+}
+
+static void CB2_NewGameBirchSpeech_SkipStarterChosen(void)
+{
+    sSkipSpecies = GetStarterPokemon(gSpecialVar_Result);
+    GetSpeciesName(sSkipNickname, sSkipSpecies);
+    DoNamingScreen(NAMING_SCREEN_NICKNAME, sSkipNickname, sSkipSpecies, 0, 0, CB2_NewGameBirchSpeech_SkipNamed);
+}
+
+static void Task_NewGameBirchSpeech_GoToStarter(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        FreeAllWindowBuffers();
+        FreeAndDestroyMonPicSprite(gTasks[taskId].tLotadSpriteId);
+        DestroyTask(taskId);
+        gMain.savedCallback = CB2_NewGameBirchSpeech_SkipStarterChosen;
+        SetMainCallback2(CB2_ChooseStarter);
+    }
+}
+
+static void Task_NewGameBirchSpeech_ProcessSkipYesNo(u8 taskId)
+{
+    switch (Menu_ProcessInputNoWrapClearOnChoose())
+    {
+    case 0:
+        PlaySE(SE_SELECT);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_GoToStarter;
+        break;
+    case MENU_B_PRESSED:
+    case 1:
+        PlaySE(SE_SELECT);
+        MP_QuickStart_Set(SPECIES_NONE, NULL);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_StartAreYouReady;
+        break;
+    }
+}
+
+static void Task_NewGameBirchSpeech_WaitAskSkip(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessSkipYesNo;
+    }
+}
+
+static void Task_NewGameBirchSpeech_AskSkip(u8 taskId)
+{
+    NewGameBirchSpeech_ClearWindow(0);
+    StringExpandPlaceholders(gStringVar4, sText_Birch_AskSkip);
+    AddTextPrinterForMessage(TRUE);
+    gTasks[taskId].func = Task_NewGameBirchSpeech_WaitAskSkip;
+}
+
+// Back from naming the starter: the send-off, then the player shrinks away as usual
+static void Task_NewGameBirchSpeech_AfterSkip(u8 taskId)
+{
+    NewGameBirchSpeech_ClearWindow(0);
+    StringExpandPlaceholders(gStringVar4, sText_Birch_AfterSkip);
+    AddTextPrinterForMessage(TRUE);
+    gTasks[taskId].tIsDoneFadingSprites = TRUE;
+    gTasks[taskId].func = Task_NewGameBirchSpeech_ShrinkPlayer;
 }
 
 static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
@@ -2371,8 +2470,10 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
     if (gTasks[taskId].tTimer-- <= 0)
     {
         NewGameBirchSpeech_ShowDialogueWindow(0, 1);
-        gTasks[taskId].func = sReturnFromLook ? Task_NewGameBirchSpeech_AfterLook : Task_NewGameBirchSpeech_SoItsPlayerName;
-        sReturnFromLook = FALSE;
+        gTasks[taskId].func = sReturnTo == RETURN_TO_LOOK ? Task_NewGameBirchSpeech_AfterLook
+                            : sReturnTo == RETURN_TO_SKIP ? Task_NewGameBirchSpeech_AfterSkip
+                            : Task_NewGameBirchSpeech_SoItsPlayerName;
+        sReturnTo = RETURN_TO_NAME;
     }
 }
 

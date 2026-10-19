@@ -33,6 +33,9 @@ QUICK START
 4. Load your save or start a new game. That's it.
    In a new game, PROF. BIRCH asks to see you right after "boy or girl?":
    that's the LOOK menu, so you can dress your trainer before the adventure.
+   Before you leave, he offers to SKIP AHEAD: say YES to pick and name your
+   first MOEMON right there and start in LITTLEROOT with the POKEDEX, POKE
+   BALLS and RUNNING SHOES, as if you'd already beaten your rival on Route 103.
 
 Typing works with the real keyboard (Ctrl+V pastes). The game remembers the
 last server, so next time JOIN offers it straight away. While you host, the
@@ -242,7 +245,8 @@ EMOTES & PHRASES  Opens the emote / phrase pick around you (same as Q / E or
                   Do the same emote as a friend close by at the same moment
                   for a COMBO (DOUBLE SHOCK!!, TRUE FRIENDS!, DUET!...).
 CHAT LOG          Everything said and emoted, and the news pop-ups.
-SCRIBBLE          Stand facing a sign and leave one of your phrases on it.
+SCRIBBLE          Stand facing a sign and leave one of your phrases (or a
+                  ready-made one like "Over here!") on it.
                   Friends see it after the sign's own text.
 PRANK A FRIEND    Costs a MOEGATCHA pull: Magikarp follower (1 min),
                   backwards controls (15 sec), confetti cannon, whoopee
