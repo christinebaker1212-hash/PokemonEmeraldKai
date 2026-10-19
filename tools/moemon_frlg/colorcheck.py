@@ -134,7 +134,7 @@ def main():
             continue
         _, _, frames, cols = load(dump, l)
         pal = [rgb5(int(r) >> 3, int(g) >> 3, int(b) >> 3) for r, g, b in cols]
-        scale = 3 if kind == 'ow' else 1
+        scale = 4 if kind == 'ow' else 2
         imgs = [to_img(frames[0], pal, scale)] + [to_img(frames[0], recolor(pal, maps[(kind, cfg)], lk, P), scale) for lk in LOOKS]
         w = sum(i.width for i in imgs) + 3 * len(imgs)
         cell = Image.new('RGB', (max(w, 150), imgs[0].height + 12), (255, 255, 255))
@@ -148,11 +148,11 @@ def main():
     if not tiles:
         print('nothing mapped yet')
         return
-    per_row = 6 if tiles[0].height > 100 else 8
+    per_row = max(1, 2200 // (max(t.width for t in tiles) + 6))
     cw = max(t.width for t in tiles) + 6
     ch = max(t.height for t in tiles) + 6
     page = 0
-    rows_per_page = 6
+    rows_per_page = 5
     for start in range(0, len(tiles), per_row * rows_per_page):
         chunk = tiles[start:start + per_row * rows_per_page]
         rows = (len(chunk) + per_row - 1) // per_row
