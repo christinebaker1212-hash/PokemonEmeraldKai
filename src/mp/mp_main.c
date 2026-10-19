@@ -139,6 +139,7 @@ static char GameCharToAscii(u8 g)
     case CHAR_RIGHT_PAREN: return ')';
     case CHAR_AMPERSAND: return '&';
     case CHAR_PLUS: return '+';
+    case CHAR_e_ACUTE: return '~';      // back to e-acute in MP_AsciiToGame
     case CHAR_EQUALS: return '=';
     case CHAR_PERCENT: return '%';
     case CHAR_DBL_QUOTE_LEFT: case CHAR_DBL_QUOTE_RIGHT: return '"';
@@ -1230,6 +1231,7 @@ void MP_FrameUpdate(void)
         MP_Coop_Update();
         MP_Dex_Update();
         MP_Trade_Update();
+        MP_Events_Update();
         SendLocalState(FALSE);
         MP_Spectate_FrameUpdate();
     }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "constants/battle.h"
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
@@ -199,6 +200,51 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern int Platform_InputContext(void);
         printf("[test] ctx %d free %d overworld %d locked %d script %d fade %d\n", Platform_InputContext(), MP_IsLocalFree(),
                MP_IsInOverworld(), ArePlayerFieldControlsLocked(), ScriptContext_IsEnabled(), gPaletteFade.active);
+    }
+    else if (strcmp(cmd, "event") == 0)
+    {
+        // event trainer|coop|wild|catch LEVEL|trade|gift [count]
+        char what[16] = "";
+        int n = 1, level = 10, i;
+        sscanf(arg, "%15s %d %d", what, &n, &level);
+        for (i = 0; i < n; i++)
+        {
+            if (strcmp(what, "trainer") == 0) MP_Events_OnTrainerWin();
+            else if (strcmp(what, "coop") == 0) MP_Events_OnCoopWin((u8)level);
+            else if (strcmp(what, "wild") == 0) MP_Events_OnWildEnd(B_OUTCOME_WON, level);
+            else if (strcmp(what, "catch") == 0) MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, level);
+            else if (strcmp(what, "trade") == 0) MP_Events_OnTrade();
+            else if (strcmp(what, "gift") == 0) MP_Events_OnGiftSent();
+        }
+    }
+    else if (strcmp(cmd, "savedata") == 0)
+    {
+        // savedata KEY VALUE (KEY may contain TODAY, replaced by today's date)
+        char key[64] = "", out[64];
+        int v = 0;
+        char *t;
+        sscanf(arg, "%63s %d", key, &v);
+        if ((t = strstr(key, "TODAY")))
+        {
+            *t = 0;
+            snprintf(out, sizeof(out), "%s%d%s", key, (int)MP_Today(), t + 5);
+        }
+        else
+            snprintf(out, sizeof(out), "%s", key);
+        MP_SaveData_Set(out, v);
+        printf("[test] savedata %s = %d\n", out, v);
+    }
+    else if (strcmp(cmd, "goals") == 0)
+    {
+        void MP_Events_DebugGoals(void);
+        MP_Events_DebugGoals();
+    }
+    else if (strcmp(cmd, "outbreak") == 0)
+    {
+        int i, hits = 0;
+        for (i = 0; i < 1000; i++)
+            hits += MP_Events_MaybeOutbreak(SPECIES_ZIGZAGOON) != SPECIES_ZIGZAGOON;
+        printf("[test] outbreak hits %d/1000 here\n", hits);
     }
     else if (strcmp(cmd, "battleflag") == 0)
     {

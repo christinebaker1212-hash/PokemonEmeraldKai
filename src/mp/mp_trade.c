@@ -522,6 +522,7 @@ static void ApplyTrade(void)
         }
     }
     PlaySE(SE_SUCCESS);
+    MP_Events_OnTrade();
     MP_GameToAscii(them, sTrade.partnerName, PLAYER_NAME_LENGTH);
     snprintf(msg, sizeof(msg), "Trade with %s complete!", them);
     MPNet_Log("trade with player %d complete", sTrade.partner + 1);

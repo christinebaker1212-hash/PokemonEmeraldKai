@@ -114,27 +114,29 @@ void MP_SaveData_Add(const char *key, s32 delta)
     MP_SaveData_Set(key, MP_SaveData_Get(key) + delta);
 }
 
-// Today's date as YYYYMMDD (the PC's local time), for daily things
+// Dates for daily things. UTC, so friends in different countries share
+// the same day. MOEMON_DEBUG_DATE=YYYYMMDD overrides it for testing.
 #include <time.h>
 s32 MP_Today(void)
 {
     time_t now = time(NULL);
-    struct tm *t = localtime(&now);
+    struct tm *t = gmtime(&now);
     if (getenv("MOEMON_DEBUG_DATE"))
         return (s32)atoi(getenv("MOEMON_DEBUG_DATE"));
     return (t->tm_year + 1900) * 10000 + (t->tm_mon + 1) * 100 + t->tm_mday;
 }
 
-// Days since 2000-01-01 for a YYYYMMDD date
+// Days since 2000-01-01 for a YYYYMMDD date (no time zones involved)
 s32 MP_DayNumber(s32 yyyymmdd)
 {
-    struct tm t;
-    memset(&t, 0, sizeof(t));
-    t.tm_year = yyyymmdd / 10000 - 1900;
-    t.tm_mon = (yyyymmdd / 100) % 100 - 1;
-    t.tm_mday = yyyymmdd % 100;
-    t.tm_hour = 12;
-    return (s32)((mktime(&t) - 946728000) / 86400);
+    s32 y = yyyymmdd / 10000, m = (yyyymmdd / 100) % 100, d = yyyymmdd % 100;
+    s32 era, yoe, doy, doe;
+    y -= m <= 2;
+    era = (y >= 0 ? y : y - 399) / 400;
+    yoe = y - era * 400;
+    doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+    doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return era * 146097 + doe - 719468 - 10957;   // days since 1970, then since 2000
 }
 
 // Week number (weeks start on Monday), the same for everyone in the week

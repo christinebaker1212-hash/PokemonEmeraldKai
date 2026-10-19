@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle_setup.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
@@ -451,7 +452,11 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
     if (gMapHeader.mapLayoutId != LAYOUT_BATTLE_FRONTIER_BATTLE_PIKE_ROOM_WILD_MONS && flags & WILD_CHECK_KEEN_EYE && !IsAbilityAllowingEncounter(level))
         return FALSE;
 
-    CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
+    // Moemon Co-op: today's outbreak species shows up often on its route
+    if (area == WILD_AREA_LAND)
+        CreateWildMon(MP_Events_MaybeOutbreak(wildMonInfo->wildPokemon[wildMonIndex].species), level);
+    else
+        CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
     return TRUE;
 }
 

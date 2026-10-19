@@ -1292,6 +1292,16 @@ static void PrintPokeblockStringOnCard(void)
 {
     if (sData->cardType != CARD_TYPE_FRLG && sData->trainerCard.pokeblocksWithFriends)
         PrintStatOnBackOfCard(3, gText_PokeblocksWithFriends, sData->textNumLinkPokeblocks, sTrainerCardStatColors);
+    // Moemon Co-op: the play-together streak (link Pokeblocks can't happen in this version)
+    else if (sData->cardType != CARD_TYPE_FRLG && MP_Events_StreakDays() > 0)
+    {
+        static const u8 sText_CoopStreak[] = _("CO-OP STREAK");
+        static const u8 sText_Days[] = _("{STR_VAR_1} DAYS");
+        u8 days[16];
+        ConvertIntToDecimalStringN(gStringVar1, MP_Events_StreakDays(), STR_CONV_MODE_LEFT_ALIGN, 4);
+        StringExpandPlaceholders(days, sText_Days);
+        PrintStatOnBackOfCard(3, sText_CoopStreak, days, sTrainerCardStatColors);
+    }
 }
 
 static void BufferLinkContestNum(void)

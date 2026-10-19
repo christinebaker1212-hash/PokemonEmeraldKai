@@ -796,7 +796,7 @@ static void TestHarnessStep(void)
             // mp COMMAND [ARG]: game-side test commands (src/mp_debug.c)
             extern void MP_TestCommand(const char *cmd, const char *arg);
             char a2[200] = "";
-            sscanf(line, "%*s %*s %199s", a2);
+            sscanf(line, "%*s %*s %199[^\n]", a2);   // the rest of the line
             MP_TestCommand(arg, a2);
         }
         else if (strcmp(cmd, "rendershot") == 0)

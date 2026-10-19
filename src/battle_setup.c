@@ -609,6 +609,7 @@ static void CB2_EndWildBattle(void)
 {
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
+    MP_Events_OnWildEnd(gBattleOutcome, GetMonData(&gEnemyParty[0], MON_DATA_LEVEL)); // Moemon Co-op: team goals
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {
@@ -1393,6 +1394,7 @@ static void CB2_EndTrainerBattle(void)
         {
             RegisterTrainerInMatchCall();
             SetBattledTrainersFlags();
+            MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
         }
     }
 }
@@ -1413,6 +1415,7 @@ static void CB2_EndRematchBattle(void)
         RegisterTrainerInMatchCall();
         SetBattledTrainersFlags();
         HandleRematchVarsOnBattleEnd();
+        MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
     }
 }
 

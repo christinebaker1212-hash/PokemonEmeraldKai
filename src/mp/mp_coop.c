@@ -734,6 +734,13 @@ static void CB2_MpCoopFinish(void)
               (unsigned)GetMonData(&gPlayerParty[0], MON_DATA_EXP), (unsigned)GetMoney(&gSaveBlock1Ptr->money), sCoop.learnCount);
     gSpecialVar_Result = sCoop.outcome;
     gBattleOutcome = sCoop.outcome;
+    if (sCoop.outcome == B_OUTCOME_WON)
+    {
+        if (sCoop.isMaster)
+            MP_Events_OnCoopWin(sCoop.partner); // counted once, by the battle leader
+        else
+            MP_Events_OnTrainerWin(); // the leader's game counts it in CB2_EndTrainerBattle
+    }
     if (sCoop.learnCount != 0 && !IsLoss(sCoop.outcome))
         sCoop.learnPromptPending = TRUE;
     else

@@ -141,6 +141,32 @@ Pokemon you get from a friend keep their original trainer (they gain more
 EXP, but very high levels may not obey you until you have more badges).
 
 
+PLAYING TOGETHER EVERY DAY (START > CO-OP > DAILY)
+--------------------------------------------------
+TEAM GOALS     Three new goals every day for everyone on your server, like
+               "Beat 9 trainers as a team". Targets grow with the number of
+               players online today. The co-op battle goal is partner by
+               partner ("Win a co-op battle with BOB and CARL"), so with three
+               players everyone teams up with everyone. Every finished goal
+               rewards everyone; all three give a MOEGATCHA pull.
+OUTBREAK       One Moemon appears a lot on one route today (more often with
+               more players online). It's announced when you connect.
+STREAK         Play 10 minutes with a friend online every day to build your
+               co-op streak. Rewards grow each day; it's on your TRAINER CARD.
+WEEKLY RACE    A different challenge every week with a leaderboard. The
+               winner gets RARE CANDY x3, money and a MOEGATCHA pull.
+ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
+               co-op wins, badges, trades, gifts). Each gives every player a
+               MOEGATCHA pull.
+MOEGATCHA      Spend pulls for an event Moemon with the moves of a real event
+               Pokemon (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C Deoxys,
+               the Pokemon Box eggs), items, or money.
+Didn't finish the goals or win the race? You get a consolation prize picked
+for what you're short of: Rare Candy if your team is behind, healing items if
+you're low, Poke Balls if you're out.
+Days change at midnight UTC so friends in different countries share them.
+
+
 POKEMON THAT FOLLOW YOU
 -----------------------
 Open the POKEMON menu, pick a Pokemon with the cursor and press SELECT:

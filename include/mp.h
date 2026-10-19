@@ -378,6 +378,17 @@ void MP_Trade_Update(void);
 void MP_Gift_OpenMenu(void);
 void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len);
 
+// Daily goals, streak, outbreak, achievements, weekly race (mp_events.c)
+void MP_Events_Update(void);
+void MP_Events_OnTrainerWin(void);
+void MP_Events_OnCoopWin(u8 partner);
+void MP_Events_OnWildEnd(u8 outcome, u8 level);
+void MP_Events_OnTrade(void);
+void MP_Events_OnGiftSent(void);
+u16 MP_Events_MaybeOutbreak(u16 species);
+s32 MP_Events_StreakDays(void);
+void MP_Daily_OpenMenu(void);
+
 // mp_spectate.c (watching other players' battles)
 bool8 MP_Spectate_IsWatching(void);
 bool8 MP_Spectate_IsStreaming(void);

@@ -203,7 +203,7 @@ static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"EMOTES...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY GIFT...", "LOOK...", "", "CLOSE"};
+    static const char *const mainLabels[] = {"EMOTES...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY...", "LOOK...", "", "CLOSE"};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -508,7 +508,7 @@ static void HandleMainInput(u8 taskId)
         break;
     case MAIN_DAILY:
         CloseMenu(taskId);
-        MP_Gift_OpenMenu();
+        MP_Daily_OpenMenu();
         break;
     case MAIN_LOOK:
         GoToPage(data, MP_MENU_PAGE_LOOK, ROW_SPRITE);

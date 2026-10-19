@@ -171,6 +171,7 @@ static void Task_Gift(u8 taskId)
             MP_SendRelay(id, buf, sizeof(buf));
             SentKey(id, key, sizeof(key));
             MP_SaveData_Set(key, 1);
+            MP_Events_OnGiftSent();
             MP_GameToAscii(name, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
             snprintf(sGiftUi.note, sizeof(sGiftUi.note), "You sent %s a gift!", name);
             PlaySE(SE_SUCCESS);
