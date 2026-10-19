@@ -32,7 +32,9 @@ and a local `tools/mp_server` build. `MOEMON_DEBUG_PARTY=280:15+` makes a Pokém
 point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs seen by others,
 spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
 and move learning, loss, disconnect).
-Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
+Controller quick picks (mp_menu.c MP_OpenQuickPick, gamepad.c sQuickTrigger): LT/RT held in the overworld, radial
+around the player; RT pages MINE + 4 stock groups, west swaps/pins gMpConfig.quickStock (ini quick_stock), north edits.
+Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`. Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), FRIENDS > GO TO, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge
@@ -41,7 +43,8 @@ Phase 2: shared PC (put/take Pokémon and items, `MOEMON_STORE_DIR`), trade with
 trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name tag and follower.
 Phase 3 (mp_events.c, mp_gatcha.c): goals/toasts/MoeGatcha/streak with `mp event ...`, `mp savedata`, `mp gatcharig N` (0 N .. 6 EX; 5 = legendary event),
 `mp goals`, `mp pickup N` (0-18), harness `letters WORD`, MOEMON_DEBUG_DATE; `AllowSmallTweaks = 1` in the ini enables
-the MoeGatcha typed codes (mp_gatcha.c CheckTypedCodes, off by default, only from the file); partner-by-partner co-op goal checked with three clients (run4-style).
+the MoeGatcha typed codes (mp_gatcha.c CheckTypedCodes, off by default, only from the file) and typing "speed" anywhere
+(5x until "slow"; text_input.c CheckTypedWords -> sdl2.c Platform_SetSpeedUp, harness `letters speed`); partner-by-partner co-op goal checked with three clients (run4-style).
 Phase 4: co-op wild battles (mp_coop.c, `MP_Coop_TryWildTeamUp`): a land encounter pulls in the closest
 free friend standing in grass within 8x6 tiles (no prompt), 2 players vs 1 wild Pokémon (the right
 opponent slot starts absent). POKé BALLS work (only balls); the catch goes to the thrower via the

@@ -460,9 +460,13 @@ The other buttons change with what's on screen:
                     on/off, Y/Triangle = CO-OP menu, right stick = emotes
                     (click it for the EMOTES page)
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
-                    phrases: push a direction, then let go to send it
-                    (A sends right away, B cancels). An empty phrase slot
-                    offers a ready-made phrase instead.
+                    phrases. They appear around you; push a direction,
+                    then let go to send it (A sends right away, B cancels).
+                    R2 pages (LB/RB): MINE (your 4 phrases) and ready-made
+                    ones (GREET, MOVE, BATTLE, MORE). An empty phrase slot
+                    on MINE offers a ready-made phrase: X/Square swaps it,
+                    or pick one on another page and press X/Square to pin
+                    it there. Y/Triangle on MINE edits that phrase.
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
                     X/Square = B, Y/Triangle = SELECT
   Naming screen     X/Square = delete, Y/Triangle = switch letters

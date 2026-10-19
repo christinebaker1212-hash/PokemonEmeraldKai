@@ -15,7 +15,8 @@
 //               west button (X / Square / Y) = toggle auto-run,
 //               north button (Y / Triangle / X) = CO-OP menu,
 //               right stick = emotes and quick phrases,
-//               LT / RT held = quick emote / phrase pick (direction, then let go).
+//               LT / RT held = quick emote / phrase pick (direction, then let go;
+//               LB / RB flip pages, west swaps a ready-made phrase, north edits).
 //   Text, menus and battles   LT (hold) = repeat A, to get through text fast.
 //               In battles and menus the west button is B and the north
 //               button is SELECT.
@@ -541,6 +542,13 @@ u16 Gamepad_Poll(int *fastForward)
             if (buttons & north) keys |= SELECT_BUTTON;  // switch letters
             break;
         default:
+            if (sQuickTrigger >= 0)
+            {
+                // A quick pick is open: west = swap / pin a stock phrase, north = edit (see mp_menu.c)
+                if (buttons & west)  keys |= SELECT_BUTTON;
+                if (buttons & north) keys |= START_BUTTON;
+                break;
+            }
             if (buttons & west)  keys |= B_BUTTON;
             if (buttons & north) keys |= SELECT_BUTTON;
             // LT held: tap A over and over to get through text (not while it holds a quick pick open)

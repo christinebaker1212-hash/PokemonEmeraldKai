@@ -33,6 +33,7 @@ SDL_Thread *mainLoopThread;
 SDL_sem *vBlankSemaphore;
 SDL_atomic_t isFrameAvailable;
 bool speedUp = false;
+#define SPEED_UP_SCALE 5.0
 static void UpdateTimeScale(void);
 // Moemon Kai PC: game controllers (src/platform/gamepad.c)
 void Gamepad_Init(void);
@@ -179,7 +180,8 @@ int main(int argc, char **argv)
         curGameTime = SDL_GetPerformanceCounter();
         deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
         // Moemon Co-op QoL: holding START in a script seen before plays it at 4x
-        timeScale = MP_Qol_SkipActive() ? 4.0 : 1.0;
+        // Small tweak (AllowSmallTweaks = 1): typing "speed" plays at 5x until "slow"
+        timeScale = MP_Qol_SkipActive() ? 4.0 : (speedUp ? SPEED_UP_SCALE : 1.0);
         deltaTime *= timeScale; //apply speedup
 
         if (sTestMode)
@@ -523,8 +525,29 @@ void ProcessEvents(void)
 
 static void UpdateTimeScale(void)
 {
-    // Moemon Co-op: no fast forward (it would desync players); always normal speed
-    timeScale = 1.0;
+    // Moemon Co-op: no fast forward button (typing "speed" is a small tweak, see Platform_SetSpeedUp)
+    timeScale = speedUp ? SPEED_UP_SCALE : 1.0;
+}
+
+// Typing "speed" (only with AllowSmallTweaks = 1 in moemon_coop.ini) / "slow"
+static int sSpeedNotice;   // 1 on, 2 off: shown by the game (Platform_TakeSpeedNotice)
+void Platform_SetSpeedUp(int on)
+{
+    bool8 MP_SmallTweaksAllowed(void);
+    if (on && !MP_SmallTweaksAllowed())
+        return;
+    if ((bool)on == speedUp)
+        return;
+    speedUp = on != 0;
+    UpdateTimeScale();
+    sSpeedNotice = on ? 1 : 2;
+}
+
+int Platform_TakeSpeedNotice(void)
+{
+    int n = sSpeedNotice;
+    sSpeedNotice = 0;
+    return n;
 }
 
 u16 Platform_GetKeyInput(void)

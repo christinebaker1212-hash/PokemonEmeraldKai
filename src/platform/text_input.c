@@ -109,8 +109,34 @@ int Platform_TextInputKeyDown(int sym, int mod)
 static char sLetters[32];
 static int sLetterHead, sLetterCount;
 
+// Typed anywhere outside text entry: "speed" / "slow" (AllowSmallTweaks = 1)
+static void CheckTypedWords(char c)
+{
+    static char sTail[8];
+    void Platform_SetSpeedUp(int on);
+    int n = (int)strlen(sTail);
+    if (n == (int)sizeof(sTail) - 1)
+    {
+        memmove(sTail, sTail + 1, n);
+        n--;
+    }
+    sTail[n++] = c;
+    sTail[n] = 0;
+    if (n >= 5 && memcmp(sTail + n - 5, "speed", 5) == 0)
+    {
+        Platform_SetSpeedUp(1);
+        sTail[0] = 0;
+    }
+    else if (n >= 4 && memcmp(sTail + n - 4, "slow", 4) == 0)
+    {
+        Platform_SetSpeedUp(0);
+        sTail[0] = 0;
+    }
+}
+
 void Platform_PushLetter(char c)
 {
+    CheckTypedWords(c);
     if (sLetterCount == (int)sizeof(sLetters))
     {
         sLetterHead = (sLetterHead + 1) % (int)sizeof(sLetters);

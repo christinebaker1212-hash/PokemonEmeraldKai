@@ -1222,67 +1222,184 @@ void MP_OpenMenu(void)
 }
 
 // ---------------------------------------------------------------------------
-// Controller quick pick: hold LT (emotes) or RT (phrases) in the overworld,
-// push a direction (D-Pad or left stick), let go of the trigger to send it.
-// A sends right away, B or letting go with nothing picked cancels.
+// Controller quick pick: hold LT (emotes) or RT (phrases) in the overworld.
+// The choices sit around the player, one per direction (D-Pad or left stick);
+// let go of the trigger to send the picked one. A sends right away, B (or
+// letting go with nothing picked) cancels.
+// RT pages (LB / RB): MINE (your 4 phrases; an empty slot offers a ready-made
+// phrase) and the ready-made phrases in groups of 4. On MINE the west button
+// swaps an empty slot's ready-made phrase and north edits the phrase; on the
+// other pages west pins the picked phrase to that direction on MINE.
 
 #include "platform/gamepad.h"
 
 #define qPhrases data[0]
-#define qWindow  data[1]
-#define qSel     data[2]   // -1 nothing yet, else 0 up, 1 right, 2 down, 3 left
+#define qSel     data[1]   // -1 nothing yet, else 0 up, 1 right, 2 down, 3 left
+#define qFade    data[2]   // fading out to the word editor
+#define qWin(i)  data[3 + (i)]   // 4 directions + the bar
 
+enum { QUICK_UP, QUICK_RIGHT, QUICK_DOWN, QUICK_LEFT, QUICK_BAR, QUICK_WINDOWS };
+#define QUICK_PAGES (1 + 4)   // MINE + 4 groups of ready-made phrases
+
+static u8 sQuickPage;   // remembered between picks
 static const u8 sQuickArrows[4] = {CHAR_UP_ARROW, CHAR_RIGHT_ARROW, CHAR_DOWN_ARROW, CHAR_LEFT_ARROW};
 // Emotes by direction (the same as a right stick flick): ! heart ? music
 static const u8 sQuickEmoteKey[4] = {0, 2, 1, 3};
-static const char *const sQuickEmoteNames[4] = {"!", "HEART", "?", "MUSIC"};
-// Empty phrase slots offer a stock phrase instead
-static const u8 sQuickStock[4] = {6, 0, 3, 5};   // Hello! Follow me! Thank you! Good game!
+static const char *const sQuickEmoteNames[4] = {"!  SURPRISED", "HEART", "?  CONFUSED", "MUSIC"};
+static const char *const sQuickPageNames[QUICK_PAGES] = {"MINE", "GREET", "MOVE", "BATTLE", "MORE"};
 
-static void QuickPickRowText(bool8 phrases, u8 dir, u8 *out, int maxW)
+// Around the player (the camera keeps them in the middle of the screen):
+// up and down are wide one-line boxes, left and right two-line boxes beside them
+static const struct WindowTemplate sQuickPhraseWins[QUICK_WINDOWS] = {
+    [QUICK_UP]    = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 2,  .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8},
+    [QUICK_RIGHT] = {.bg = 0, .tilemapLeft = 17, .tilemapTop = 7,  .width = 12, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 52},
+    [QUICK_DOWN]  = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 13, .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 88},
+    [QUICK_LEFT]  = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 7,  .width = 12, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 140},
+    [QUICK_BAR]   = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 17, .width = 28, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 176},
+};
+static const struct WindowTemplate sQuickEmoteWins[QUICK_WINDOWS] = {
+    [QUICK_UP]    = {.bg = 0, .tilemapLeft = 10, .tilemapTop = 4,  .width = 10, .height = 2, .paletteNum = 15, .baseBlock = 0x8},
+    [QUICK_RIGHT] = {.bg = 0, .tilemapLeft = 17, .tilemapTop = 8,  .width = 8,  .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 20},
+    [QUICK_DOWN]  = {.bg = 0, .tilemapLeft = 10, .tilemapTop = 13, .width = 10, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 36},
+    [QUICK_LEFT]  = {.bg = 0, .tilemapLeft = 5,  .tilemapTop = 8,  .width = 8,  .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 56},
+    [QUICK_BAR]   = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 17, .width = 28, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 72},
+};
+
+// The ready-made phrase behind a direction on a page (-1: your own phrase)
+static int QuickStockIndex(u8 page, u8 dir)
 {
-    int len;
-    if (!phrases)
-        MP_AsciiToGame(out, sQuickEmoteNames[dir], 20);
-    else if (MP_Emote_PhraseIsEmpty(dir))
-        MP_AsciiToGame(out, MP_Emote_QuickPhrase(sQuickStock[dir]), 60);
-    else
-    {
-        u8 text[160];
-        int i, n = 0;
-        MP_Emote_PhraseText(dir, text);
-        for (i = 0; text[i] != EOS && n < 70; i++)
-            out[n++] = (text[i] == CHAR_NEWLINE) ? CHAR_SPACE : text[i];
-        out[n] = EOS;
-    }
-    for (len = StringLength(out); len > 1 && GetStringWidth(FONT_SMALL_NARROW, out, 0) > maxW; len--)
-        out[len - 1] = EOS;
+    if (page == 0)
+        return MP_Emote_PhraseIsEmpty(dir) ? gMpConfig.quickStock[dir] % MP_Emote_QuickPhraseCount() : -1;
+    return ((page - 1) * 4 + dir) % MP_Emote_QuickPhraseCount();
 }
 
-static void QuickPickDraw(s16 *data)
+// Up to two lines (left / right boxes) or one
+static void QuickChoiceText(bool8 phrases, u8 dir, u8 *line1, u8 *line2, bool8 twoLines, int maxW)
 {
-    u8 win = qWindow, dir, buf[96], arrow[2] = {0, EOS};
-    int w = (qPhrases ? 28 : 12) * 8;
-    MpTheme_Panel(win, 12);
-    sTxtFg = MPT_GOLD;
-    sTxtBg = MPT_BAND;
-    PrintAscii(win, qPhrases ? "PHRASES   pick one, let go of R2" : "EMOTES", 4, 0);
-    sTxtBg = MPT_BG;
-    for (dir = 0; dir < 4; dir++)
+    int stock, len, i, n = 0;
+    u8 text[160];
+    u8 *lines[2] = {line1, line2};
+    line1[0] = line2[0] = EOS;
+    if (!phrases)
     {
-        u8 y = 1 + LINE_H * (dir + 1) + 2;
-        sTxtFg = (qSel == dir) ? MPT_GOLD : MPT_TEXT;
-        sTxtBg = (qSel == dir) ? MPT_SEL : MPT_BG;
-        if (qSel == dir)
-            FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 2, y - 1, w - 4, LINE_H);
-        arrow[0] = sQuickArrows[dir];
-        MText(win, FONT_SMALL, arrow, 4, y);
-        QuickPickRowText(qPhrases, dir, buf, w - 24);
-        MText(win, FONT_SMALL_NARROW, buf, 16, y);
+        MP_AsciiToGame(line1, sQuickEmoteNames[dir], 20);
+        return;
     }
+    stock = QuickStockIndex(sQuickPage, dir);
+    if (stock >= 0)
+        MP_AsciiToGame(line1, MP_Emote_QuickPhrase(stock), 60);
+    else
+    {
+        // Your phrase: words 1-2 and 3-4
+        u8 *dst = line1;
+        MP_Emote_PhraseText(dir, text);
+        for (i = 0; text[i] != EOS && n < 70; i++)
+        {
+            if (text[i] == CHAR_NEWLINE)
+            {
+                if (twoLines)
+                {
+                    *dst = EOS;
+                    dst = line2;
+                    n = 0;
+                    continue;
+                }
+                dst[n++] = CHAR_SPACE;
+            }
+            else
+                dst[n++] = text[i];
+            dst[n] = EOS;
+        }
+        if (dst == line1 || !twoLines)
+            dst[n] = EOS;
+    }
+    for (i = 0; i < 2; i++)
+        for (len = StringLength(lines[i]); len > 1 && GetStringWidth(FONT_SMALL_NARROW, lines[i], 0) > maxW; len--)
+            lines[i][len - 1] = EOS;
+}
+
+static void QuickDrawChoice(s16 *data, u8 dir)
+{
+    u8 win = qWin(dir), l1[96], l2[96], arrow[2] = {sQuickArrows[dir], EOS};
+    const struct WindowTemplate *t = &(qPhrases ? sQuickPhraseWins : sQuickEmoteWins)[dir];
+    bool8 sel = (qSel == dir), twoLines = t->height >= 3;
+    bool8 stock = qPhrases && QuickStockIndex(sQuickPage, dir) >= 0;
+    int w = t->width * 8;
+    MpTheme_Panel(win, 0);
+    if (sel)
+        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, 0, w, t->height * 8);
+    sTxtBg = sel ? MPT_SEL : MPT_BG;
+    sTxtFg = sel ? MPT_GOLD : MPT_TEXT;
+    MText(win, FONT_SMALL, arrow, 2, twoLines ? 6 : 1);
+    QuickChoiceText(qPhrases, dir, l1, l2, twoLines, w - 16);
+    // Ready-made phrases on MINE are a little dimmer than your own
+    if (!sel && stock && sQuickPage == 0)
+        sTxtFg = MPT_GREY;
+    MText(win, FONT_SMALL_NARROW, l1, 13, (twoLines && l2[0] == EOS) ? 6 : 1);
+    if (l2[0] != EOS)
+        MText(win, FONT_SMALL_NARROW, l2, 13, 12);
     sTxtFg = MPT_TEXT;
     sTxtBg = MPT_BG;
     CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+// The bar: the pages (RT) and what the face buttons do right now
+static void QuickDrawBar(s16 *data)
+{
+    u8 win = qWin(QUICK_BAR), buf[96];
+    bool8 nintendo = Gamepad_EffectiveNintendoLayout();
+    const char *west = nintendo ? "Y" : "X", *north = nintendo ? "X" : "Y";
+    char hint[64];
+    int x = 3, i;
+    MpTheme_Panel(win, 0);
+    if (!qPhrases)
+    {
+        PrintAscii(win, "EMOTES", x, 1);
+        snprintf(hint, sizeof(hint), "pick, let go of L2   B: cancel");
+    }
+    else
+    {
+        u8 lb[] = {CHAR_LEFT_ARROW, EOS}, rb[] = {CHAR_RIGHT_ARROW, EOS};
+        MText(win, FONT_SMALL, lb, x, 1);
+        x += 8;
+        for (i = 0; i < QUICK_PAGES; i++)
+        {
+            sTxtFg = (i == sQuickPage) ? MPT_GOLD : MPT_GREY;
+            MP_AsciiToGame(buf, sQuickPageNames[i], 20);
+            MText(win, FONT_SMALL_NARROW, buf, x, 1);
+            x += GetStringWidth(FONT_SMALL_NARROW, buf, 0) + 3;
+        }
+        sTxtFg = MPT_TEXT;
+        MText(win, FONT_SMALL, rb, x - 2, 1);
+        if (sQuickPage == 0)
+            snprintf(hint, sizeof(hint), "%s swap  %s edit", west, north);
+        else
+            snprintf(hint, sizeof(hint), "%s pin to MINE", west);
+    }
+    MP_AsciiToGame(buf, hint, 60);
+    sTxtFg = MPT_GREY;
+    MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
+    sTxtFg = MPT_TEXT;
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+static void QuickDrawAll(s16 *data)
+{
+    u8 i;
+    for (i = 0; i < 4; i++)
+        QuickDrawChoice(data, i);
+    QuickDrawBar(data);
+}
+
+static void QuickRemoveWindows(s16 *data)
+{
+    u8 i;
+    for (i = 0; i < QUICK_WINDOWS; i++)
+    {
+        ClearStdWindowAndFrame(qWin(i), TRUE);
+        RemoveWindow(qWin(i));
+    }
+    MpTheme_Pop();
 }
 
 static void QuickPickClose(u8 taskId, bool8 send)
@@ -1290,9 +1407,8 @@ static void QuickPickClose(u8 taskId, bool8 send)
     s16 *data = gTasks[taskId].data;
     bool8 phrases = qPhrases;
     s16 sel = qSel;
-    ClearStdWindowAndFrame(qWindow, TRUE);
-    RemoveWindow(qWindow);
-    MpTheme_Pop();
+    int stock;
+    QuickRemoveWindows(data);
     UnlockPlayerFieldControls();
     DestroyTask(taskId);
     if (!send || sel < 0)
@@ -1300,8 +1416,8 @@ static void QuickPickClose(u8 taskId, bool8 send)
     // After closing, so you see your own bubble
     if (!phrases)
         MP_Emote_Hotkey(sQuickEmoteKey[sel]);
-    else if (MP_Emote_PhraseIsEmpty(sel))
-        MP_Emote_SayQuick(sQuickStock[sel]);
+    else if ((stock = QuickStockIndex(sQuickPage, sel)) >= 0)
+        MP_Emote_SayQuick(stock);
     else
         MP_Emote_SayPhrase(sel);
 }
@@ -1310,46 +1426,102 @@ static void Task_QuickPick(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
     s16 sel = qSel;
+
+    if (qFade)
+    {
+        // To the word editor for the picked phrase
+        if (!gPaletteFade.active)
+        {
+            u8 slot = qSel;
+            DestroyTask(taskId);
+            MP_Emote_EditPhraseFromField(slot);
+        }
+        return;
+    }
     if (JOY_HELD(DPAD_UP))
-        sel = 0;
+        sel = QUICK_UP;
     else if (JOY_HELD(DPAD_RIGHT))
-        sel = 1;
+        sel = QUICK_RIGHT;
     else if (JOY_HELD(DPAD_DOWN))
-        sel = 2;
+        sel = QUICK_DOWN;
     else if (JOY_HELD(DPAD_LEFT))
-        sel = 3;
+        sel = QUICK_LEFT;
     if (sel != qSel)
     {
+        s16 old = qSel;
         qSel = sel;
         PlaySE(SE_SELECT);
-        QuickPickDraw(data);
+        if (old >= 0)
+            QuickDrawChoice(data, old);
+        QuickDrawChoice(data, sel);
     }
+
     if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
         QuickPickClose(taskId, FALSE);
+    }
     else if (JOY_NEW(A_BUTTON) || !Gamepad_TriggerHeld(qPhrases))
         QuickPickClose(taskId, TRUE);
+    else if (qPhrases && JOY_NEW(L_BUTTON | R_BUTTON))
+    {
+        sQuickPage = (sQuickPage + (JOY_NEW(R_BUTTON) ? 1 : QUICK_PAGES - 1)) % QUICK_PAGES;
+        PlaySE(SE_SELECT);
+        QuickDrawAll(data);
+    }
+    else if (qPhrases && JOY_NEW(SELECT_BUTTON))
+    {
+        // MINE: the next ready-made phrase for an empty slot; other pages: put this one on MINE
+        if (qSel < 0 || (sQuickPage == 0 && !MP_Emote_PhraseIsEmpty(qSel)))
+            PlaySE(SE_FAILURE);
+        else
+        {
+            if (sQuickPage == 0)
+                gMpConfig.quickStock[qSel] = (gMpConfig.quickStock[qSel] + 1) % MP_Emote_QuickPhraseCount();
+            else
+                gMpConfig.quickStock[qSel] = QuickStockIndex(sQuickPage, qSel);
+            MP_SaveConfig();
+            PlaySE(SE_BALL_TRAY_ENTER);
+            QuickDrawChoice(data, qSel);
+            if (sQuickPage != 0 && !MP_Emote_PhraseIsEmpty(qSel))
+                MP_ShowNotice("Pinned. It shows on MINE while that phrase slot is empty.");
+        }
+    }
+    else if (qPhrases && JOY_NEW(START_BUTTON))
+    {
+        if (sQuickPage != 0 || qSel < 0)
+            PlaySE(SE_FAILURE);
+        else
+        {
+            PlaySE(SE_SELECT);
+            QuickRemoveWindows(data);
+            FadeScreen(FADE_TO_BLACK, 0);
+            qFade = TRUE;
+        }
+    }
 }
 
 void MP_OpenQuickPick(bool8 phrases)
 {
-    static const struct WindowTemplate sTemplates[2] = {
-        {.bg = 0, .tilemapLeft = 1, .tilemapTop = 11, .width = 12, .height = 8, .paletteNum = 15, .baseBlock = 0x8},
-        {.bg = 0, .tilemapLeft = 1, .tilemapTop = 11, .width = 28, .height = 8, .paletteNum = 15, .baseBlock = 0x8},
-    };
-    u8 taskId;
+    const struct WindowTemplate *wins = phrases ? sQuickPhraseWins : sQuickEmoteWins;
+    u8 taskId, i;
     s16 *data;
     if (FindTaskIdByFunc(Task_QuickPick) != TASK_NONE || FindTaskIdByFunc(Task_CoopMenu) != TASK_NONE)
         return;
     LockPlayerFieldControls();
-    HideMapNamePopUpWindow();   // it shares window tiles with this one
+    HideMapNamePopUpWindow();   // it shares window tiles with these
     LoadMessageBoxAndBorderGfx();
     MpTheme_Push();
     taskId = CreateTask(Task_QuickPick, 80);
     data = gTasks[taskId].data;
     qPhrases = phrases != 0;
     qSel = -1;
-    qWindow = AddWindow(&sTemplates[qPhrases]);
-    DrawStdWindowFrame(qWindow, FALSE);
-    QuickPickDraw(data);
+    qFade = FALSE;
+    for (i = 0; i < QUICK_WINDOWS; i++)
+    {
+        qWin(i) = AddWindow(&wins[i]);
+        DrawStdWindowFrame(qWin(i), FALSE);
+    }
+    QuickDrawAll(data);
     PlaySE(SE_WIN_OPEN);
 }

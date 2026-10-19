@@ -197,6 +197,10 @@ static void LoadConfig(void)
     gMpConfig.enabled = TRUE;
     gMpConfig.trainerRange = 4;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
+    gMpConfig.quickStock[0] = 0;   // Hello!
+    gMpConfig.quickStock[1] = 4;   // Follow me!
+    gMpConfig.quickStock[2] = 2;   // Thank you!
+    gMpConfig.quickStock[3] = 3;   // Good game!
 
     f = fopen(ConfigPath(), "r");
     if (!f)
@@ -247,6 +251,13 @@ static void LoadConfig(void)
         }
         else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
+        else if (strcmp(key, "quick_stock") == 0)
+        {
+            char *p = val;
+            int i;
+            for (i = 0; i < MP_NUM_PHRASES; i++)
+                gMpConfig.quickStock[i] = (u8)strtoul(p, &p, 10) % MP_Emote_QuickPhraseCount();
+        }
         else if (strncmp(key, "phrase", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_NUM_PHRASES && key[7] == 0)
         {
             char *p = val;
@@ -310,6 +321,9 @@ void MP_SaveConfig(void)
         for (i = 0; i < MP_NUM_PHRASES; i++)
             fprintf(f, "phrase%d = %04x %04x %04x %04x\n", i + 1, gMpConfig.phrases[i][0], gMpConfig.phrases[i][1],
                 gMpConfig.phrases[i][2], gMpConfig.phrases[i][3]);
+        fprintf(f, "; ready-made phrases R2 offers for empty phrase slots (0-%d)\nquick_stock = %d %d %d %d\n",
+            MP_Emote_QuickPhraseCount() - 1, gMpConfig.quickStock[0], gMpConfig.quickStock[1],
+            gMpConfig.quickStock[2], gMpConfig.quickStock[3]);
     }
     {
         int i;
@@ -495,6 +509,11 @@ bool8 MP_IsInOverworld(void)
 }
 
 bool8 MP_IsBattleTransitionRunning(void);   // battle_transition.c
+
+bool8 MP_SmallTweaksAllowed(void)
+{
+    return gMpConfig.smallTweaks;
+}
 
 bool8 MP_IsLocalFree(void)
 {

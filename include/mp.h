@@ -163,6 +163,7 @@ struct MpConfig
     u8 trainerRange;
     u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
     u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
+    u8 quickStock[MP_NUM_PHRASES];   // R2 quick pick: the stock phrase an empty phrase slot offers
     u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
@@ -378,6 +379,7 @@ void MP_OpenMenu(void);
 enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
 void MP_OpenQuickPick(bool8 phrases);   // controller LT / RT held: quick emote / phrase pick
+void MP_Emote_EditPhraseFromField(u8 slot);   // word editor, then back to the field (screen already faded)
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 
 // Emotes and phrases (mp_emote.c)

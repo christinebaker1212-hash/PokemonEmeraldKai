@@ -102,9 +102,12 @@ static const char *const sNoteBitmap[] = {
 };
 
 // Quick phrases (any player can use them; they're sent as text)
+// Ready-made phrases, 4 per group (the controller's R2 quick pick shows them by group)
 static const char *const sQuickPhrases[] = {
-    "Follow me!", "Wait for me!", "Over here!", "Thank you!", "Let's battle!",
-    "Good game!", "Hello!", "See you!", "Help!", "Nice!", "Let's team up!", "Be right back!",
+    "Hello!", "See you!", "Thank you!", "Good game!",          // GREET
+    "Follow me!", "Wait for me!", "Over here!", "Let's go!",   // MOVE
+    "Let's battle!", "Let's team up!", "Nice!", "Help!",       // BATTLE
+    "Yes!", "No!", "Be right back!", "Hurry up!",              // MORE
 };
 
 static void SpriteCB_Bubble(struct Sprite *sprite)
@@ -734,6 +737,7 @@ void MP_Emote_SayPhrase(u8 slot)
 
 static EWRAM_DATA u16 sEditWords[MP_PHRASE_WORDS] = {0};
 static EWRAM_DATA u8 sEditSlot = 0;
+static EWRAM_DATA bool8 sEditFromField = FALSE;   // back to walking around, not the EMOTES page
 
 static void Task_ReopenEmoteMenu(u8 taskId)
 {
@@ -758,7 +762,8 @@ static void CB2_AfterPhraseEdit(void)
         gMpConfig.phrases[sEditSlot][i] = sEditWords[i];
     MP_SaveConfig();
     MP_FieldClearVBlankHBlankCallbacks();
-    gFieldCallback = FieldCB_ReturnToEmoteMenu;
+    gFieldCallback = sEditFromField ? FieldCB_ReturnToFieldNoScript : FieldCB_ReturnToEmoteMenu;
+    sEditFromField = FALSE;
     SetMainCallback2(CB2_ReturnToField);
 }
 
@@ -771,6 +776,12 @@ void MP_Emote_EditPhrase(u8 slot)
         sEditWords[i] = gMpConfig.phrases[sEditSlot][i];
     CleanupOverworldWindowsAndTilemaps();
     DoEasyChatScreen(EASY_CHAT_TYPE_MP_PHRASE, sEditWords, CB2_AfterPhraseEdit, EASY_CHAT_PERSON_DISPLAY_NONE);
+}
+
+void MP_Emote_EditPhraseFromField(u8 slot)
+{
+    MP_Emote_EditPhrase(slot);
+    sEditFromField = TRUE;
 }
 
 // Keys 1-8 and the right stick (see src/input_context.c)
@@ -901,6 +912,18 @@ void MP_Toast(const u8 *text)
     b->dirty = TRUE;
 }
 
+// Speed up on / off (typed "speed" / "slow", src/platform/sdl2.c)
+static void ShowSpeedNotice(void)
+{
+    int Platform_TakeSpeedNotice(void);
+    int n = Platform_TakeSpeedNotice();
+    u8 text[64];
+    if (!n)
+        return;
+    MP_AsciiToGame(text, n == 1 ? "Speed up ON (type SLOW to stop)" : "Normal speed", 60);
+    MP_Toast(text);
+}
+
 // Every overworld frame, after the camera moved
 void MP_Emote_Update(void)
 {
@@ -908,6 +931,7 @@ void MP_Emote_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    ShowSpeedNotice();
     UpdateBubble(&sBubbles[TOAST_SLOT], gPlayerAvatar.objectEventId);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
