@@ -413,6 +413,12 @@ static void CreateWildMon(u16 species, u8 level)
     }
 
     CreateMonWithNature(&gEnemyParty[0], species, level, USE_RANDOM_IVS, PickWildMonNature());
+    // Moemon Co-op: TOGETHER Lv2+ gives extra tries at a shiny
+    {
+        u8 tries = MP_Together_ShinyRerolls();
+        while (tries-- > 0 && !IsMonShiny(&gEnemyParty[0]))
+            CreateMonWithNature(&gEnemyParty[0], species, level, USE_RANDOM_IVS, PickWildMonNature());
+    }
 }
 #ifdef BUGFIX
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr, count)

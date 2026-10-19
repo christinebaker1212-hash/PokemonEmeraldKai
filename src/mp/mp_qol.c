@@ -251,8 +251,11 @@ void MP_Qol_Update(void)
         sRootScript = NULL;
         sRootSeen = FALSE;
     }
-    if (sSignActive && !ScriptContext_IsEnabled())
+    if (sSignActive && !ScriptContext_IsEnabled() && MP_IsInOverworld())
+    {
         sSignActive = FALSE;
+        MP_Social_AfterSign();   // a friend's scribble on that sign
+    }
 }
 
 // Hold START in a script you've seen before: faster, and text moves along

@@ -500,6 +500,7 @@ void MP_Emote_OnRemoteIcon(u8 id, struct ObjectEvent *obj, u8 kind)
     if (kind != MP_EMOTE_NONE && id < MP_MAX_PLAYERS)
         sBubbles[1 + id].timer = 0;   // the icon replaces their bubble
     StartIcon(obj, kind);
+    MP_Social_OnEmote(id, kind);
 }
 
 enum { SAY_TEXT, SAY_NOTE };
@@ -538,6 +539,19 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
     }
     text[i] = EOS;
     ShowBubble(1 + from, text, data[1] == SAY_NOTE);
+    if (data[1] == SAY_NOTE)
+        MP_Social_OnEmote(from, MP_EMOTE_NOTE);
+    else
+        MP_Social_LogSay(from, text);
+}
+
+// A bubble over a player (combos, pranks)
+void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text)
+{
+    if (playerId == gMpLocalId)
+        ShowBubble(0, text, FALSE);
+    else if (playerId < MP_MAX_PLAYERS)
+        ShowBubble(1 + playerId, text, FALSE);
 }
 
 static bool8 CanEmote(void)
@@ -553,6 +567,8 @@ void MP_Emote_Icon(u8 kind)
     InitIfNeeded();
     sBubbles[0].timer = 0;
     StartIcon(&gObjectEvents[gPlayerAvatar.objectEventId], kind);
+    if (gMpLocalId >= 0)
+        MP_Social_OnEmote(gMpLocalId, kind);
 }
 
 void MP_Emote_Note(void)
@@ -561,6 +577,8 @@ void MP_Emote_Note(void)
         return;
     ShowBubble(0, NULL, TRUE);
     SendSay(SAY_NOTE, NULL);
+    if (gMpLocalId >= 0)
+        MP_Social_OnEmote(gMpLocalId, MP_EMOTE_NOTE);
 }
 
 void MP_Emote_SayText(const u8 *text)
@@ -569,6 +587,8 @@ void MP_Emote_SayText(const u8 *text)
         return;
     ShowBubble(0, text, FALSE);
     SendSay(SAY_TEXT, text);
+    if (gMpLocalId >= 0)
+        MP_Social_LogSay(gMpLocalId, text);
 }
 
 u8 MP_Emote_QuickPhraseCount(void)
@@ -785,6 +805,7 @@ static void UpdateDoorLabel(u8 id)
 // A short note at the top of the screen for a few seconds (game text, 2 lines max)
 void MP_Toast(const u8 *text)
 {
+    MP_Social_LogToast(text);
     struct Bubble *b;
     InitIfNeeded();
     b = &sBubbles[TOAST_SLOT];

@@ -195,6 +195,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "emote") == 0)
+    {
+        // emote N - like the number keys (0 !, 1 ?, 2 heart, 3 note, 4-7 phrases)
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        MP_Emote_Hotkey(n);
+    }
+    else if (strcmp(cmd, "social") == 0)
+    {
+        MP_Social_Open();
+    }
     else if (strcmp(cmd, "repel") == 0)
     {
         // repel - one step of REPEL left, and another REPEL in the bag

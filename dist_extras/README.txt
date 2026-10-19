@@ -204,6 +204,32 @@ you're low, Poke Balls if you're out.
 Days change at midnight UTC so friends in different countries share them.
 
 
+HANGING OUT (START > CO-OP > SOCIAL)
+------------------------------------
+EMOTES & PHRASES  Emotes, quick lines and your four phrases (keys 1-8 too).
+                  Do the same emote as a friend close by at the same moment
+                  for a COMBO (DOUBLE SHOCK!!, TRUE FRIENDS!, DUET!...).
+CHAT LOG          Everything said and emoted, and the news pop-ups.
+SCRIBBLE          Stand facing a sign and leave one of your phrases on it.
+                  Friends see it after the sign's own text.
+PRANK A FRIEND    Costs a MOEGATCHA pull: Magikarp follower (1 min),
+                  backwards controls (15 sec), confetti cannon, whoopee
+                  cushion. The victim gets a free REVENGE prank for 2 minutes.
+                  Nobody can be pranked twice in a row, or during a battle.
+PIGGYBACK         Face a friend and press A: hop on their back and ride along
+                  wherever they go (SURF, doors and FLY too). B hops off.
+TOGETHER          Stay within about a screen of a friend and the TOGETHER
+                  meter fills: Lv1 EXP +3%, Lv2 EXP +6% and better shiny odds,
+                  Lv3 EXP +10%. A bit more with more friends close, never past
+                  +14%. Shown at the bottom of the CO-OP menu.
+CATCH-UP          Fewer badges than a friend online? +10% EXP per badge behind
+                  (up to +30%).
+WHERE IS EVERYONE Colored arrows at the screen edge point to friends you can't
+                  see (red, blue, green, yellow by player).
+BETTING           When you watch a friend's battle you can bet $500 on them to
+                  win or lose. Right: double back. Leave early: bet lost.
+
+
 HANDY EXTRAS (they save time, they don't make the game easier)
 ---------------------------------------------------------------
 * Battle: on the move list, R shows each move's power, accuracy and kind

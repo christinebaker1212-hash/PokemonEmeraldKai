@@ -380,6 +380,8 @@ u16 MP_Follower_LocalDex(bool8 *female)
     LoadLocalChoice();
     mon = FindLocalFollower();
     *female = FALSE;
+    if (MP_Prank_MagikarpActive())
+        return NATIONAL_DEX_MAGIKARP;   // Moemon Co-op prank: everyone sees a Magikarp
     if (!mon || GetMonData(mon, MON_DATA_HP) == 0)
         return 0;
     *female = GetMonGender(mon) == MON_FEMALE;
@@ -426,14 +428,14 @@ bool8 MP_Follower_LocalTile(s16 *x, s16 *y)
 
 static bool8 LocalHidden(void)
 {
-    return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER)) != 0;
+    return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER)) != 0 || MP_Piggy_IsRiding();
 }
 
 static bool8 RemoteHidden(u8 id)
 {
     u8 mode = gMpPlayers[id].state.avatarMode;
     // Holding the BATTLE FLAG: no follower either, so they blend in
-    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & MPF_TRAINER_MODE);
+    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & (MPF_TRAINER_MODE | MPF_RIDING));
 }
 
 // Every overworld frame (src/overworld.c, before sprites are drawn)

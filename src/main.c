@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "crt0.h"
 #include "malloc.h"
 #include "link.h"
@@ -272,6 +273,16 @@ static void ReadKeys(void)
 #else
     u16 keyInput = Platform_GetKeyInput();
 #endif
+    // Moemon Co-op: the BACKWARDS CONTROLS prank swaps the D-pad for a while
+    if (MP_Prank_BackwardsActive())
+    {
+        u16 dpad = keyInput & DPAD_ANY;
+        keyInput &= ~DPAD_ANY;
+        if (dpad & DPAD_LEFT)  keyInput |= DPAD_RIGHT;
+        if (dpad & DPAD_RIGHT) keyInput |= DPAD_LEFT;
+        if (dpad & DPAD_UP)    keyInput |= DPAD_DOWN;
+        if (dpad & DPAD_DOWN)  keyInput |= DPAD_UP;
+    }
     gMain.newKeysRaw = keyInput & ~gMain.heldKeysRaw;
     gMain.newKeys = gMain.newKeysRaw;
     gMain.newAndRepeatedKeys = gMain.newKeysRaw;

@@ -385,7 +385,7 @@ static void PackState(const struct MpState *s, u8 *p)
     p[6] = s->facing; p[7] = s->elevation; p[8] = s->avatarMode; p[9] = s->speed;
     p[10] = s->flags; p[11] = s->topLevel; p[12] = s->partyCount; p[13] = s->emote;
     PutU16(p + 14, s->seq);
-    PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = 0;
+    PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -395,7 +395,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->facing = p[6]; s->elevation = p[7]; s->avatarMode = p[8]; s->speed = p[9];
     s->flags = p[10]; s->topLevel = p[11]; s->partyCount = p[12]; s->emote = p[13];
     s->seq = GetU16(p + 14);
-    s->followerDex = GetU16(p + 16); s->followerFlags = p[18];
+    s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
 }
 
 #define APPEARANCE_SIZE 16
@@ -559,11 +559,14 @@ static void CollectLocalState(struct MpState *s)
         s->flags |= MPF_IN_BATTLE;
     if (MP_Coop_IsChallenged())
         s->flags |= MPF_CHALLENGED;
+    if (MP_Piggy_IsRiding())
+        s->flags |= MPF_RIDING;
     if (MP_Trainer_IsActive())
         s->flags |= MPF_TRAINER_MODE;
     if (MP_Trainer_IsEngaged() || MP_Battle_IsActive())
         s->flags |= MPF_ENGAGED;
     s->topLevel = MP_GetPartyTopLevel();
+    s->badges = MP_Badges();
     s->partyCount = gPlayerPartyCount;
     s->emote = (sEmoteCounter << 4) | sEmoteKind;
     {
@@ -579,7 +582,8 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
     return a->mapGroup != b->mapGroup || a->mapNum != b->mapNum || a->x != b->x || a->y != b->y
         || a->facing != b->facing || a->elevation != b->elevation || a->avatarMode != b->avatarMode
         || a->speed != b->speed || a->flags != b->flags || a->topLevel != b->topLevel
-        || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags;
+        || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags
+        || a->badges != b->badges;
 }
 
 static void SendLocalState(bool8 force)
@@ -661,6 +665,7 @@ static void HandlePlayerLeft(u8 id)
         return;
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
+    MP_Piggy_OnPlayerLeft(id);
     MP_Trainer_OnPlayerLeft(id);
     MP_Battle_OnPlayerLeft(id);
     MP_Spectate_OnPlayerLeft(id);
@@ -852,6 +857,10 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Gift_OnRelay(from, data, len);
     else if (data[0] >= MPR_TOURNEY_FIRST && data[0] < MPR_TOURNEY_FIRST + 20)
         MP_Tourney_OnRelay(from, data, len);
+    else if (data[0] >= MPR_SOCIAL_FIRST + 5 && data[0] < MPR_SOCIAL_FIRST + 10)
+        MP_Piggy_OnRelay(from, data, len);
+    else if (data[0] >= MPR_SOCIAL_FIRST && data[0] < MPR_SOCIAL_FIRST + 5)
+        MP_Social_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1199,6 +1208,8 @@ void MP_FrameUpdate(void)
     if (!sInitDone)
         MP_Init();
     MP_Qol_Update();
+    MP_Social_Update();
+    MP_Together_Update();
 
     MPServer_Poll();
     MP_AutoSession_Update();

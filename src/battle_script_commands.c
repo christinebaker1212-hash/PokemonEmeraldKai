@@ -3400,9 +3400,10 @@ static void Cmd_getexp(void)
                     }
 
                     // Moemon Co-op: buddy bonus for playing together ("gained a boosted")
-                    if (MP_BuddyBonusPercent() && gBattleMoveDamage)
+                    if (MP_ExpBonusPercent() && gBattleMoveDamage)
                     {
-                        gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_BuddyBonusPercent())) / 100;
+                        // buddy bonus + TOGETHER (capped) + badge catch-up
+                        gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_ExpBonusPercent())) / 100;
                         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3))
                             i = STRINGID_ABOOSTED;
                     }

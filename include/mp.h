@@ -76,12 +76,14 @@ enum {
 #define MPF_IN_BATTLE      (1 << 3)
 #define MPF_ENGAGED        (1 << 4)   // spotting/being spotted/battling
 #define MPF_CHALLENGED     (1 << 5)   // an NPC trainer challenged them: others can walk up and join
+#define MPF_RIDING         (1 << 6)   // riding piggyback on another player
 
 // Emote kinds (low nibble of the emote byte, high nibble is a counter)
 #define MP_EMOTE_NONE         0
 #define MP_EMOTE_EXCLAMATION  1
 #define MP_EMOTE_QUESTION     2
 #define MP_EMOTE_HEART        3
+#define MP_EMOTE_NOTE         4   // the music note bubble (combos, chat log)
 
 #define MP_NUM_PHRASES   4    // custom phrases per player
 #define MP_PHRASE_WORDS  4    // easy chat words per phrase
@@ -103,6 +105,7 @@ struct MpState
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
     u8 followerFlags;  // bit 0: female
+    u8 badges;         // how many gym badges (catch-up bonus)
 };
 
 
@@ -328,6 +331,36 @@ bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
+void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text);
+// mp_social.c
+void MP_Social_Open(void);
+void MP_Compass_Update(void);   // mp_compass.c
+// mp_piggy.c
+bool8 MP_Piggy_IsRiding(void);
+void MP_Piggy_FieldInput(u16 newKeys);
+void MP_Piggy_Update(void);
+void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Piggy_OnPlayerLeft(u8 id);
+bool8 MP_Piggy_TryInteract(void);
+// mp_together.c
+void MP_Together_Update(void);
+u8 MP_Together_Level(void);
+u8 MP_Together_Meter(void);
+u16 MP_Together_ExpPercent(void);
+u8 MP_Together_ShinyRerolls(void);
+u16 MP_CatchUpPercent(void);
+u16 MP_ExpBonusPercent(void);
+u8 MP_Badges(void);
+void MP_Social_Update(void);
+void MP_Social_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Social_Log(const char *who, const char *text);
+void MP_Social_LogSay(u8 id, const u8 *gameText);
+void MP_Social_LogToast(const u8 *gameText);
+void MP_Social_OnEmote(u8 id, u8 kind);
+void MP_Social_OnSignRead(s16 x, s16 y);
+void MP_Social_AfterSign(void);
+bool8 MP_Prank_MagikarpActive(void);
+bool8 MP_Prank_BackwardsActive(void);
 
 // Shared Pokédex (mp_dex.c)
 extern bool8 gMpDexApplying;
@@ -498,6 +531,8 @@ enum {
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)
     MPR_EVENT_FIRST = 120,     // goals, race, achievements (mp_events.c)
     MPR_TOURNEY_FIRST = 140,   // battle tournament (mp_tourney.c)
+    MPR_SOCIAL_FIRST = 160,    // pranks, piggyback... (mp_social.c, mp_piggy.c)
+    MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
 };
 
 #endif // GUARD_MP_H

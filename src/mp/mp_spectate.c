@@ -11,6 +11,9 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "money.h"
+#include "battle.h"
+#include "constants/battle.h"
 #include "map_name_popup.h"
 #include "main.h"
 #include "event_object_lock.h"
@@ -221,9 +224,11 @@ static void Stream_Update(void)
     if (!LocalInBattle())
     {
         u8 i;
+        // The result goes along, for anyone who bet on it
+        u8 end[2] = {MPR_SPEC_END, gBattleOutcome & 0x7F};
         for (i = 0; i < MP_MAX_PLAYERS; i++)
             if (sStream.viewers & (1 << i))
-                SendSimple(i, MPR_SPEC_END);
+                MP_SendRelay(i, end, 2);
         sStream.viewers = 0;
         return;
     }
@@ -302,8 +307,44 @@ static void Banner(u16 *buf, const char *text, bool8 bottom)
     DrawText(buf, (FRAME_W - (int)strlen(text) * 4) / 2, y0 + 2, text, 0xFFFF, 1);
 }
 
+// ---------------------------------------------------------------------------
+// Betting: put money on the player you watch (win: double back)
+
+#define BET_STAKE 500
+
+static s32 sBetStake;
+static bool8 sBetOnWin;
+
+static void ResolveBet(u8 outcome)
+{
+    char msg[96], name[16];
+    if (sBetStake == 0)
+        return;
+    MP_GameToAscii(name, sWatch.name, MP_NAME_LEN);
+    if (outcome == 0)
+    {
+        AddMoney(&gSaveBlock1Ptr->money, sBetStake);
+        snprintf(msg, sizeof(msg), "No result for %s's battle.\nYour $%d bet was returned.", name, (int)sBetStake);
+    }
+    else if ((outcome == B_OUTCOME_WON) == sBetOnWin)
+    {
+        AddMoney(&gSaveBlock1Ptr->money, sBetStake * 2);
+        snprintf(msg, sizeof(msg), "You won your bet on %s!\n+$%d", name, (int)sBetStake);
+    }
+    else
+        snprintf(msg, sizeof(msg), "You lost your bet on %s.\n-$%d", name, (int)sBetStake);
+    MP_Events_QueueToast(msg);
+    MP_Social_Log("BET", msg);
+    sBetStake = 0;
+}
+
 static void StopWatching(void)
 {
+    if (sBetStake && !sWatch.ending)
+    {
+        MP_Events_QueueToast("You walked away early:\nyour bet is lost.");
+        sBetStake = 0;
+    }
     if (sWatch.target != 0xFF && gMpPlayers[sWatch.target].present)
         SendSimple(sWatch.target, MPR_SPEC_LEAVE);
     sWatch.target = 0xFF;
@@ -341,6 +382,7 @@ const u16 *MP_Spectate_WatchFrame(u16 keys)
         return NULL;
     if (!MP_IsConnected() || !gMpPlayers[sWatch.target].present)
     {
+        ResolveBet(0);   // they left: the bet is returned
         StopWatching();
         MP_ShowNotice("The battle you were watching\nisn't available anymore.");
         return NULL;
@@ -462,7 +504,10 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len)
         break;
     case MPR_SPEC_END:
         if (from == sWatch.target)
+        {
             sWatch.ending = TRUE;
+            ResolveBet(len >= 2 ? data[1] : 0);
+        }
         break;
     }
 }
@@ -485,6 +530,8 @@ void MP_Spectate_FrameUpdate(void)
 #define tTarget data[1]
 
 static EWRAM_DATA u8 sPrompt[96];
+
+static void OpenBetMenu(u8 target);
 
 static void Task_WatchPrompt(u8 taskId)
 {
@@ -511,8 +558,12 @@ static void Task_WatchPrompt(u8 taskId)
         HideFieldMessageBox();
         if (answer == 0 && gMpPlayers[tTarget].present && (gMpPlayers[tTarget].state.flags & MPF_IN_BATTLE))
         {
+            // Bet on it?
+            u8 t = tTarget;
             UnlockPlayerFieldControls();
-            StartWatching(tTarget);
+            DestroyTask(taskId);
+            OpenBetMenu(t);
+            return;
         }
         else
             UnlockPlayerFieldControls();
@@ -520,6 +571,66 @@ static void Task_WatchPrompt(u8 taskId)
         break;
     }
     }
+}
+
+static EWRAM_DATA struct { u8 target; u16 cursor; } sBetUi = {0};
+
+static void DrawBetMenu(void)
+{
+    char name[16], line[48];
+    MP_GameToAscii(name, gMpPlayers[sBetUi.target].name, MP_NAME_LEN);
+    MpUi_Begin("PLACE A BET?");
+    snprintf(line, sizeof(line), "$%d says %s WINS", BET_STAKE, name);
+    MpUi_RowAscii(0, sBetUi.cursor == 0, line, NULL);
+    snprintf(line, sizeof(line), "$%d says %s LOSES", BET_STAKE, name);
+    MpUi_RowAscii(1, sBetUi.cursor == 1, line, NULL);
+    MpUi_RowAscii(2, sBetUi.cursor == 2, "JUST WATCH", NULL);
+    MpUi_End();
+    MpUi_HelpAscii("Right: double back. Leave early and the bet is lost.");
+}
+
+static void Task_BetMenu(u8 taskId)
+{
+    if (MpUi_MoveCursor(&sBetUi.cursor, 3))
+    {
+        DrawBetMenu();
+        return;
+    }
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        u8 choice = JOY_NEW(B_BUTTON) ? 2 : sBetUi.cursor;
+        PlaySE(SE_SELECT);
+        MpUi_Close();
+        DestroyTask(taskId);
+        if (!gMpPlayers[sBetUi.target].present || !(gMpPlayers[sBetUi.target].state.flags & MPF_IN_BATTLE))
+        {
+            MP_ShowNotice("That battle is already over.");
+            return;
+        }
+        sBetStake = 0;
+        if (choice < 2)
+        {
+            if (!IsEnoughMoney(&gSaveBlock1Ptr->money, BET_STAKE))
+            {
+                MP_ShowNotice("You don't have enough money to bet.");
+                return;
+            }
+            RemoveMoney(&gSaveBlock1Ptr->money, BET_STAKE);
+            sBetStake = BET_STAKE;
+            sBetOnWin = (choice == 0);
+            PlaySE(SE_SHOP);
+        }
+        StartWatching(sBetUi.target);
+    }
+}
+
+static void OpenBetMenu(u8 target)
+{
+    sBetUi.target = target;
+    sBetUi.cursor = 2;
+    MpUi_Open();
+    CreateTask(Task_BetMenu, 80);
+    DrawBetMenu();
 }
 
 // Called from the overworld update; TRUE when it started the prompt

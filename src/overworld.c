@@ -1450,6 +1450,12 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
     struct FieldInput inputStruct;
 
     UpdatePlayerAvatarTransitionState();
+    // Moemon Co-op: riding piggyback, you only hop off (B)
+    if (MP_Piggy_IsRiding() && !ArePlayerFieldControlsLocked())
+    {
+        MP_Piggy_FieldInput(newKeys);
+        return;
+    }
     FieldClearPlayerInput(&inputStruct);
     FieldGetPlayerInput(&inputStruct, newKeys, heldKeys);
     if (!ArePlayerFieldControlsLocked())
@@ -1482,6 +1488,8 @@ static void OverworldBasic(void)
     CameraUpdate();
     UpdateCameraPanning();
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
+    MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
+    MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     BuildOamBuffer();
     UpdatePaletteFade();

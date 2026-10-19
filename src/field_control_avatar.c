@@ -276,6 +276,7 @@ static const u8 *GetInteractionScript(struct MapPosition *position, u8 metatileB
     if (script != NULL)
     {
         MP_Qol_SignStarted();   // Moemon Co-op QoL: signs print instantly
+        MP_Social_OnSignRead(position->x, position->y);   // Moemon Co-op: friends' scribbles
         return script;
     }
 
@@ -1034,4 +1035,19 @@ int SetCableClubWarp(void)
     MapGridGetMetatileBehaviorAt(position.x, position.y);  //unnecessary
     SetupWarp(&gMapHeader, GetWarpEventAtMapPosition(&gMapHeader, &position), &position);
     return 0;
+}
+
+// Moemon Co-op: is the player facing a sign (a background event with a
+// script)? Its tile is the key for scribbles.
+bool8 MP_FacingSign(s16 *x, s16 *y)
+{
+    struct MapPosition position;
+    const struct BgEvent *bgEvent;
+    GetInFrontOfPlayerPosition(&position);
+    bgEvent = GetBackgroundEventAtPosition(&gMapHeader, position.x - MAP_OFFSET, position.y - MAP_OFFSET, position.elevation);
+    if (bgEvent == NULL || bgEvent->kind > BG_EVENT_PLAYER_FACING_WEST || bgEvent->bgUnion.script == NULL)
+        return FALSE;
+    *x = position.x;
+    *y = position.y;
+    return TRUE;
 }

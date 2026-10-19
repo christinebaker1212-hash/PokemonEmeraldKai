@@ -703,7 +703,7 @@ void MP_Overworld_Update(void)
     if (!MP_IsInOverworld())
         return;
     MP_Notice_Update();
-    if (!MP_Spectate_TryInteract())
+    if (!MP_Spectate_TryInteract() && !MP_Piggy_TryInteract())
         MP_Follower_TryInteract();
     if (sAppliedGender != gSaveBlock2Ptr->playerGender)
     {

@@ -139,16 +139,18 @@ static void DrawPlayersWindow(u8 windowId)
     }
     MText(windowId, FONT_SMALL, buf, 2, 1);
     // Buddy bonus, and when hosting on this PC the code friends type to join
-    if (MP_InviteCode()[0] || MP_BuddyBonusPercent())
+    if (MP_InviteCode()[0] || MP_ExpBonusPercent())
     {
         u8 code[48];
         char ascii[48];
-        if (MP_InviteCode()[0] && MP_BuddyBonusPercent())
-            snprintf(ascii, sizeof(ascii), "+%d%%  CODE %s", MP_BuddyBonusPercent(), MP_InviteCode());
+        if (MP_InviteCode()[0] && MP_ExpBonusPercent())
+            snprintf(ascii, sizeof(ascii), "+%d%%  CODE %s", MP_ExpBonusPercent(), MP_InviteCode());
         else if (MP_InviteCode()[0])
             snprintf(ascii, sizeof(ascii), "CODE %s", MP_InviteCode());
+        else if (MP_Together_Level())
+            snprintf(ascii, sizeof(ascii), "TOGETHER Lv%d  EXP +%d%%", MP_Together_Level(), MP_ExpBonusPercent());
         else
-            snprintf(ascii, sizeof(ascii), "BONUS +%d%%", MP_BuddyBonusPercent());
+            snprintf(ascii, sizeof(ascii), "EXP +%d%%", MP_ExpBonusPercent());
         MP_AsciiToGame(code, ascii, 44);
         MText(windowId, FONT_SMALL, code, 28 * 8 - 2 - GetStringWidth(FONT_SMALL, code, 0), 1);
     }
@@ -213,7 +215,7 @@ static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"EMOTES...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY...", "TOURNAMENT...", "MOVE TUTOR...", "LOOK...", ""};
+    static const char *const mainLabels[] = {"SOCIAL...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY...", "TOURNAMENT...", "MOVE TUTOR...", "LOOK...", ""};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -517,7 +519,8 @@ static void HandleMainInput(u8 taskId)
     switch (tCursor)
     {
     case MAIN_EMOTES:
-        GoToPage(data, MP_MENU_PAGE_EMOTES, EMO_ICON);
+        CloseMenu(taskId);
+        MP_Social_Open();
         break;
     case MAIN_TRADE:
         CloseMenu(taskId);
