@@ -204,6 +204,30 @@ you're low, Poke Balls if you're out.
 Days change at midnight UTC so friends in different countries share them.
 
 
+HANDY EXTRAS (they save time, they don't make the game easier)
+---------------------------------------------------------------
+* Battle: on the move list, R shows each move's power, accuracy and kind
+  (PHYS./SPEC./STATUS). At FIGHT/BAG, L throws the same kind of Ball as last
+  time (wild battles). In a co-op battle, R shows your partner's team.
+* Summary screen: the stat your Pokemon's nature raises is red, the one it
+  lowers is blue. SELECT on the first page renames a Pokemon you caught.
+* Bag: in KEY ITEMS, press L or R on an item to put it on that button (like
+  SELECT's REGISTER). On the map, L / R use them.
+* Hold SELECT on the map to pick which Pokemon follows you (a quick tap of
+  SELECT still uses your registered item).
+* When a REPEL wears off you're asked if you want to use another one.
+* PC: R on a Pokemon in a box takes it into your party; R on a party Pokemon
+  stores it (you pick the box).
+* START > CO-OP > MOVE TUTOR: the Move Tutor's service anywhere, still one
+  HEART SCALE per move.
+* Item descriptions show in the shared PC and in trades.
+* Signs and lines you've already read appear instantly. Hold START during a
+  scene or conversation you've already seen to play it 4x faster (questions
+  and menus still wait for you).
+* Coming online shows what your team did while you were away. Tournament
+  matches show how healthy your team is before you say READY.
+
+
 POKEMON THAT FOLLOW YOU
 -----------------------
 Open the POKEMON menu, pick a Pokemon with the cursor and press SELECT:
