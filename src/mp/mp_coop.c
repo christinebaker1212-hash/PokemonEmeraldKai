@@ -382,7 +382,7 @@ static void Task_JoinCheck(u8 taskId)
             SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_ONE_MON);
             sCoop.requester = -1;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-            ShowFieldMessage(sText_OneMon);
+            MP_ShowFieldMessageFitted(sText_OneMon);
             tState = JOIN_ONE_MON;
             break;
         }
@@ -390,7 +390,7 @@ static void Task_JoinCheck(u8 taskId)
         Gamepad_Rumble(40, 200);
         StringExpandPlaceholders(sText, sText_JoinPrompt);
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sText);
+        MP_ShowFieldMessageFitted(sText);
         sCoop.prompting = TRUE;
         tState = JOIN_PRINT;
         // fall through
@@ -948,7 +948,7 @@ static void Task_AskerMessage(u8 taskId)
     {
     case 0:
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sText);
+        MP_ShowFieldMessageFitted(sText);
         tState++;
         break;
     case 1:
@@ -1073,7 +1073,7 @@ static bool8 TryAsk(void)
         SetNameVar(i);
         StringExpandPlaceholders(sText, sText_Asking);
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sText);
+        MP_ShowFieldMessageFitted(sText);
         MPNet_Log("co-op: asking player %d to team up", i + 1);
         return TRUE;
     }

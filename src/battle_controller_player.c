@@ -114,7 +114,7 @@ static void MpShowPartnerTeam(void)
 
     *p++ = EXT_CTRL_CODE_BEGIN;
     *p++ = EXT_CTRL_CODE_FONT;
-    *p++ = FONT_SMALL;
+    *p++ = FONT_SMALL_NARROW;   // three short lines fit the prompt box
     for (i = 0; i < MULTI_PARTY_SIZE; i++)
     {
         struct Pokemon *mon = &gPlayerParty[half + i];
@@ -148,7 +148,7 @@ static void MpShowPartnerTeam(void)
         p += StringLength(p);
     }
     if (lines == 0)
-        MP_AsciiToGame(p, "Your partner has no POK~MON left.", 40);
+        MP_AsciiToGame(p, "Partner: no POK~MON left.", 40);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
 }
 

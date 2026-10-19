@@ -42,6 +42,10 @@
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/rgb.h"
+#include "battle_pyramid.h"
+#include "fieldmap.h"
+#include "new_game.h"
+#include "save.h"
 #include "constants/songs.h"
 #include "constants/species.h"
 #include "constants/region_map_sections.h"
@@ -50,7 +54,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 u8 MP_GiveMonKeepOT(struct Pokemon *mon);
 void MP_FieldClearVBlankHBlankCallbacks(void);
-void MP_Daily_OpenMenu(void);
+void MP_OpenMenuAtGatcha(void);
 void MPNet_Log(const char *fmt, ...);
 
 #define PULLS_KEY     "gatcha:pulls"
@@ -332,8 +336,8 @@ static void GivePrize(struct Result *res)
 #define REEL_CX      120        // the selector
 #define REEL_TOP     40         // y of the reel cells
 #define REEL_CELLS   128        // ring buffer of cells
-#define REEL_LEFT    24         // sprites are clipped to this strip
-#define REEL_RIGHT   216
+#define REEL_LEFT    0          // the reel runs edge to edge
+#define REEL_RIGHT   DISPLAY_WIDTH
 #define SPIN_CELLS   44         // how far a pull travels
 #define SPIN_FRAMES  330
 
@@ -387,9 +391,11 @@ static u16 sSpritePalThemed[16] = {
 
 enum { GS_FADE_IN, GS_MENU, GS_SPIN, GS_REVEAL, GS_GRID, GS_EXIT };
 
+#define NO_CELL (-0x7FFFFFFF)   // a live icon slot that shows nothing (cells can be negative)
+
 struct LiveIcon
 {
-    s16 cell;          // -1: none
+    s32 cell;          // NO_CELL: none
     u8 spriteId;
     bool8 isMon;
 };
@@ -424,6 +430,9 @@ struct GatchaState
 };
 
 static EWRAM_DATA struct GatchaState *sG = NULL;
+// The reel's BG scroll is set in VBlank, together with the sprites (OAM), so
+// the boxes and the prizes in them always move on the same frame
+static u16 sBg1Hofs;
 static EWRAM_DATA u16 *sBg1Map = NULL;
 static EWRAM_DATA u16 *sBg3Map = NULL;
 
@@ -478,8 +487,8 @@ static void LoadGeneratedGfx(void)
         {
             PutPixel(buf, 1, x, y, ((x + y) / 4) % 2 ? 1 : 2);                       // tile 0
             PutPixel(buf + 32, 1, x, y, 3);                                          // tile 1
-            PutPixel(buf + 64, 1, x, y, y >= 6 ? 4 : ((x + y) / 4) % 2 ? 1 : 2);      // tile 2: line below stripes
-            PutPixel(buf + 96, 1, x, y, y <= 1 ? 4 : ((x + y) / 4) % 2 ? 1 : 2);      // tile 3: line above stripes
+            PutPixel(buf + 64, 1, x, y, y <= 1 ? 4 : 3);      // tile 2: gold line, band below it
+            PutPixel(buf + 96, 1, x, y, y >= 6 ? 4 : 3);      // tile 3: band, gold line below it
         }
     LoadBgTiles(3, buf, 32 * 4, BG3_TILE);
 
@@ -614,22 +623,41 @@ static s32 CenterCell(void)
     return FloorF((sG->pos + CELL_W / 2) / CELL_W);
 }
 
+#define TAG_ITEM_PAL 0x7300   // + item id: icons of the same item share one palette
+
+static u16 sIconItem[16 + 10];   // the item each icon slot shows (reel slots, then the grid)
+
+static void FreeItemPalIfUnused(u16 item)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sIconItem); i++)
+        if (sIconItem[i] == item)
+            return;
+    FreeSpritePaletteByTag(TAG_ITEM_PAL + item);
+}
+
+static void DestroyItemIcon(u8 spriteId, u8 slot)
+{
+    u16 item = sIconItem[slot];
+    DestroySprite(&gSprites[spriteId]);
+    FreeSpriteTilesByTag(TAG_ICON + slot);
+    sIconItem[slot] = 0;
+    if (item)
+        FreeItemPalIfUnused(item);
+}
+
 static void DestroyLive(struct LiveIcon *l, u8 slot)
 {
-    if (l->cell < 0)
+    if (l->cell == NO_CELL)
         return;
     if (l->spriteId < MAX_SPRITES)
     {
         if (l->isMon)
             FreeAndDestroyMonIconSprite(&gSprites[l->spriteId]);
         else
-        {
-            DestroySprite(&gSprites[l->spriteId]);
-            FreeSpriteTilesByTag(TAG_ICON + slot);
-            FreeSpritePaletteByTag(TAG_ICON + slot);
-        }
+            DestroyItemIcon(l->spriteId, slot);
     }
-    l->cell = -1;
+    l->cell = NO_CELL;
 }
 
 static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *isMon)
@@ -639,15 +667,25 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
     {
         const struct EventMon *e = &sEventMons[def->id];
         LoadMonIconPalette(e->species);   // only the palettes in use: item icons need theirs too
-        id = CreateMonIcon(e->species, SpriteCB_MonIcon, x, y - 4, 1, 0, TRUE);
+        if (IndexOfSpritePaletteTag(gMonIconPaletteTable[gMonIconPaletteIndices[e->species]].tag) == 0xFF)
+            return MAX_SPRITES;
+        id = CreateMonIcon(e->species, SpriteCB_MonIcon, x, y - 4, 1, 0, FALSE);   // FALSE: Kai has no DEOXYS form icons
         *isMon = TRUE;
     }
     else
     {
-        id = AddItemIconSprite(TAG_ICON + slot, TAG_ICON + slot, def->id);
         *isMon = FALSE;
+        id = AddItemIconSprite(TAG_ICON + slot, TAG_ITEM_PAL + def->id, def->id);
+        if (id < MAX_SPRITES && IndexOfSpritePaletteTag(TAG_ITEM_PAL + def->id) == 0xFF)
+        {
+            // No palette slot left: an empty box looks better than garbage
+            DestroySprite(&gSprites[id]);
+            FreeSpriteTilesByTag(TAG_ICON + slot);
+            id = MAX_SPRITES;
+        }
         if (id < MAX_SPRITES)
         {
+            sIconItem[slot] = def->id;
             // The 24x24 picture sits in the top-left of its 32x32 sprite
             gSprites[id].x = x;
             gSprites[id].y = y;
@@ -677,14 +715,14 @@ static void UpdateReel(void)
     for (i = first - 1; i <= last + 1; i++)
         DrawCellTiles(sBg1Map, i * 4, REEL_TOP / 8, Cell(i)->rarity, TRUE);
     CopyBgTilemapBufferToVram(1);
-    SetGpuReg(REG_OFFSET_BG1HOFS, (FloorF(sG->pos) - (REEL_CX - CELL_W / 2)) & 511);
+    sBg1Hofs = (FloorF(sG->pos) - (REEL_CX - CELL_W / 2)) & 511;
     SetGpuReg(REG_OFFSET_BG1VOFS, 0);
 
     // Sprites
     for (slot = 0; slot < 16; slot++)
     {
         struct LiveIcon *l = &sG->live[slot];
-        if (l->cell >= 0 && (l->cell < first || l->cell > last || ((l->cell % 16) + 16) % 16 != slot))
+        if (l->cell != NO_CELL && (l->cell < first || l->cell > last || ((l->cell % 16) + 16) % 16 != slot))
             DestroyLive(l, slot);
     }
     for (i = first; i <= last; i++)
@@ -771,8 +809,16 @@ static void DrawHeader(void)
 
 static void DrawHelp(const char *s)
 {
+    u8 buf[160];
+    u8 font = FONT_SMALL;
+    int len, maxW = 30 * 8 - 8;
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(TC_PANEL));
-    PrintAscii(WIN_HELP, FONT_SMALL, 4, 2, TC_PANEL, TC_GREY, s);
+    MP_AsciiToGame(buf, s, 150);
+    if (GetStringWidth(font, buf, 0) > maxW)
+        font = FONT_SMALL_NARROW;
+    for (len = StringLength(buf); len > 1 && GetStringWidth(font, buf, 0) > maxW; len--)
+        buf[len - 1] = EOS;
+    Print(WIN_HELP, font, 4, 2, TC_PANEL, TC_GREY, buf);
     CopyWindowToVram(WIN_HELP, COPYWIN_FULL);
 }
 
@@ -810,7 +856,7 @@ static void DrawMenu(void)
         [MENU_FREE] = "Free this week! One RARE+ for sure.",
         [MENU_ONE]  = "Uses 1 pull.",
         [MENU_TEN]  = "Uses 10 pulls. One RARE+ guaranteed!",
-        [MENU_BACK] = "Back to the DAILY menu.",
+        [MENU_BACK] = "Back to the CO-OP menu.",
     };
     u8 i;
     FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
@@ -854,6 +900,23 @@ static void SetReelClip(bool8 on)
 // ---------------------------------------------------------------------------
 // Pulling
 
+// The prizes are already in the bag/party and the pulls are spent: save the
+// game right away so quitting without saving can't lose them
+static void SaveAfterPull(void)
+{
+    u8 status;
+    SaveMapView();
+    PausePyramidChallenge();
+    if (gDifferentSaveFile == TRUE)
+    {
+        status = TrySavingData(SAVE_OVERWRITE_DIFFERENT_FILE);
+        gDifferentSaveFile = FALSE;
+    }
+    else
+        status = TrySavingData(SAVE_NORMAL);
+    MPNet_Log("gatcha: saved after the pull (status %d)", status);
+}
+
 static void StartSpin(u8 count)
 {
     u8 i, best = 0;
@@ -875,6 +938,7 @@ static void StartSpin(u8 count)
     }
     sG->best = best;
     MPNet_Log("gatcha: %d pull(s), best rarity %d", count, sG->results[best].rarity);
+    SaveAfterPull();
 
     // New cells past the visible part of the reel, and the prize where it stops
     prizeCell = center + SPIN_CELLS;
@@ -959,7 +1023,7 @@ static void ShowGrid(void)
     DestroyAllLive();
     FreeMonIconPalettes();   // ten prizes may need ten item palettes
     ClearBg1();
-    SetGpuReg(REG_OFFSET_BG1HOFS, 0);
+    sBg1Hofs = 0;
     for (i = 0; i < 10; i++)
     {
         s16 x, y;
@@ -987,11 +1051,7 @@ static void HideGrid(void)
         if (sG->gridIconMon[i])
             FreeAndDestroyMonIconSprite(&gSprites[sG->gridIcons[i]]);
         else
-        {
-            DestroySprite(&gSprites[sG->gridIcons[i]]);
-            FreeSpriteTilesByTag(TAG_ICON + 16 + i);
-            FreeSpritePaletteByTag(TAG_ICON + 16 + i);
-        }
+            DestroyItemIcon(sG->gridIcons[i], 16 + i);
         sG->gridIcons[i] = MAX_SPRITES;
     }
     ClearBg1();
@@ -1004,7 +1064,7 @@ static void HideGrid(void)
     {
         u8 s;
         for (s = 0; s < 16; s++)
-            sG->live[s].cell = -1;
+            sG->live[s].cell = NO_CELL;
     }
 }
 
@@ -1022,6 +1082,7 @@ static void BackToMenu(void)
 
 static void VBlankCB_Gatcha(void)
 {
+    SetGpuReg(REG_OFFSET_BG1HOFS, sBg1Hofs);
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
@@ -1045,13 +1106,13 @@ static void FreeScene(void)
     TRY_FREE_AND_SET_NULL(sG);
 }
 
-static void Task_ReopenDaily(u8 taskId)
+static void Task_ReopenCoopMenu(u8 taskId)
 {
     if (IsWeatherNotFadingIn() == TRUE)
     {
         DestroyTask(taskId);
         UnlockPlayerFieldControls();
-        MP_Daily_OpenMenu();
+        MP_OpenMenuAtGatcha();
     }
 }
 
@@ -1059,14 +1120,15 @@ static void FieldCB_ReturnFromGatcha(void)
 {
     LockPlayerFieldControls();
     FadeInFromBlack();
-    CreateTask(Task_ReopenDaily, 80);
+    CreateTask(Task_ReopenCoopMenu, 80);
 }
 
 static void Task_Gatcha(u8 taskId)
 {
     sG->bgScroll++;
+    // Sideways only: the diagonal stripes still slide, the dark band stays put
     SetGpuReg(REG_OFFSET_BG3HOFS, sG->bgScroll / 2);
-    SetGpuReg(REG_OFFSET_BG3VOFS, sG->bgScroll / 4);
+    SetGpuReg(REG_OFFSET_BG3VOFS, 0);
 
     switch (sG->state)
     {
@@ -1125,7 +1187,7 @@ static void Task_Gatcha(u8 taskId)
             else
             {
                 PlaySE(SE_FAILURE);
-                DrawHelp(row == MENU_TEN ? "A 10-pull takes 10 pulls. Team achievements give more!" : "No pulls left. Team achievements give more!");
+                DrawHelp(row == MENU_TEN ? "Not enough pulls for x10. Team achievements give more!" : "No pulls left. Team achievements give more!");
             }
         }
         break;
@@ -1269,6 +1331,7 @@ static void CB2_InitGatcha(void)
         ChangeBgY(i, 0, BG_COORD_SET);
     }
     sG = AllocZeroed(sizeof(*sG));
+    memset(sIconItem, 0, sizeof(sIconItem));
     sBg1Map = AllocZeroed(64 * 32 * 2);
     sBg3Map = AllocZeroed(32 * 32 * 2);
     SetBgTilemapBuffer(1, sBg1Map);
@@ -1293,13 +1356,15 @@ static void CB2_InitGatcha(void)
         for (y = 0; y < 32; y++)
             for (x = 0; x < 32; x++)
             {
+                // The band runs from y=32 to 79: the boxes (y=42-70) sit in its middle,
+                // with room above them for the selector arrow
                 u16 tile = BG3_TILE;                                   // stripes
-                if (y == REEL_TOP / 8 - 2)
-                    tile = BG3_TILE + 2;                               // gold line below
-                else if (y > REEL_TOP / 8 - 2 && y < REEL_TOP / 8 + 4)
+                if (y == REEL_TOP / 8 - 1)
+                    tile = BG3_TILE + 2;                               // gold line, band
+                else if (y >= REEL_TOP / 8 && y < REEL_TOP / 8 + 4)
                     tile = BG3_TILE + 1;                               // band
                 else if (y == REEL_TOP / 8 + 4)
-                    tile = BG3_TILE + 3;                               // gold line above
+                    tile = BG3_TILE + 3;                               // band, gold line
                 sBg3Map[y * 32 + x] = tile | (BG3_PAL << 12);
             }
         CopyBgTilemapBufferToVram(3);
@@ -1314,7 +1379,7 @@ static void CB2_InitGatcha(void)
     CopyBgTilemapBufferToVram(0);
 
     for (i = 0; i < 16; i++)
-        sG->live[i].cell = -1;
+        sG->live[i].cell = NO_CELL;
     for (i = 0; i < 10; i++)
         sG->gridIcons[i] = MAX_SPRITES;
     sG->genUpTo = -8;
@@ -1323,9 +1388,9 @@ static void CB2_InitGatcha(void)
 
     sG->frameSprite = CreateSprite(&frameT, REEL_CX, REEL_TOP + 16, 0);
     gSprites[sG->frameSprite].oam.priority = 1;
-    sG->arrowTop = CreateSprite(&arrowT, REEL_CX, REEL_TOP - 6, 0);
+    sG->arrowTop = CreateSprite(&arrowT, REEL_CX, REEL_TOP - 3, 0);
     gSprites[sG->arrowTop].vFlip = TRUE;
-    gSprites[sG->arrowTop].data[0] = 2;
+    gSprites[sG->arrowTop].data[0] = 1;   // bobs 1px: stays between the gold line and the boxes
     sG->arrowBottom = CreateSprite(&arrowT, REEL_CX, REEL_TOP + 38, 0);
     gSprites[sG->arrowBottom].invisible = TRUE;   // the name panel sits right under the reel
 

@@ -43,7 +43,7 @@ void MP_FieldClearVBlankHBlankCallbacks(void);
 #define BUBBLE_W      128
 #define BUBBLE_H      32
 #define BUBBLE_TIME   (60 * 3)
-#define BUBBLE_TEXT   64
+#define BUBBLE_TEXT   96
 #define LINE_H        12
 #define NUM_BUBBLES   (2 + MP_MAX_PLAYERS * 2) // 0 = you, 1 + id = remote players, door labels, toast
 #define TOAST_SLOT    (NUM_BUBBLES - 1)
@@ -71,10 +71,14 @@ static bool8 sInit;
 static u8 sPixels[BUBBLE_W * BUBBLE_H];
 static u8 sTiles[2][64 * 32 / 2];
 
+// One sprite palette for all co-op overlays (bubbles, toasts and the compass
+// arrows), so they don't take palette slots the map's people need
 static const u16 sBubblePal[16] = {
     RGB(0, 0, 0), RGB(31, 31, 31), RGB(7, 7, 8), RGB(20, 20, 21), RGB(9, 9, 11),
     // Toasts, in the co-op menu style (filled in from the player's window frame)
     RGB(4, 4, 12), RGB(31, 31, 31), RGB(1, 1, 5), RGB(31, 25, 6), RGB(11, 4, 19),
+    // Compass arrows: red, blue, green, yellow players, outline
+    RGB(31, 8, 8), RGB(8, 16, 31), RGB(6, 26, 6), RGB(31, 27, 4), RGB(2, 2, 4),
 };
 
 static const struct OamData sOam_Bubble = {
@@ -190,10 +194,79 @@ static int LineWidth(const u8 *s, int len)
     return w;
 }
 
+#define TEXT_MAX_W (BUBBLE_W - 8)
+
+// Wraps the text into 2 lines that fit in the bubble, breaking at spaces;
+// text that still doesn't fit ends in ".."
+static void FitText(const u8 *in, u8 *out, int outSize)
+{
+    int n = 0, line = 0, lineW = 0, i = 0;
+    while (in[i] != EOS && n < outSize - 4)
+    {
+        // Next word (up to a space or line break)
+        int j = i, wordW = 0, k;
+        if (in[i] == CHAR_NEWLINE)
+        {
+            if (++line >= 2)
+                break;
+            out[n++] = CHAR_NEWLINE;
+            lineW = 0;
+            i++;
+            continue;
+        }
+        if (in[i] == CHAR_SPACE)
+        {
+            if (lineW > 0 && lineW + 3 <= TEXT_MAX_W)
+            {
+                out[n++] = CHAR_SPACE;
+                lineW += 3;
+            }
+            i++;
+            continue;
+        }
+        while (in[j] != EOS && in[j] != CHAR_SPACE && in[j] != CHAR_NEWLINE)
+            wordW += GlyphWidth(in[j++]);
+        if (lineW + wordW > TEXT_MAX_W && lineW > 0)
+        {
+            // Start a new line (drop the space we just added)
+            if (n > 0 && out[n - 1] == CHAR_SPACE)
+                n--;
+            if (++line >= 2)
+                goto cut;
+            out[n++] = CHAR_NEWLINE;
+            lineW = 0;
+        }
+        for (k = i; k < j && n < outSize - 4; k++)
+        {
+            int gw = GlyphWidth(in[k]);
+            if (lineW + gw > TEXT_MAX_W)
+            {
+                if (++line >= 2)
+                    goto cut;
+                out[n++] = CHAR_NEWLINE;
+                lineW = 0;
+            }
+            out[n++] = in[k];
+            lineW += gw;
+        }
+        i = j;
+    }
+    out[n] = EOS;
+    return;
+cut:
+    // Make room for ".." at the end of the last line
+    while (n > 0 && out[n - 1] != CHAR_NEWLINE && lineW + 2 * GlyphWidth(CHAR_PERIOD) > TEXT_MAX_W)
+        lineW -= GlyphWidth(out[--n]);
+    out[n++] = CHAR_PERIOD;
+    out[n++] = CHAR_PERIOD;
+    out[n] = EOS;
+}
+
 static void BuildBubble(struct Bubble *b)
 {
     const u8 *lines[2];
     int lens[2], nLines, i, x, y, w = 0, h, left, top, bottom;
+    u8 fitted[BUBBLE_TEXT + 8];
 
     memset(sPixels, 0, sizeof(sPixels));
     if (b->note)
@@ -204,7 +277,8 @@ static void BuildBubble(struct Bubble *b)
     }
     else
     {
-        nLines = SplitLines(b->text, lines, lens);
+        FitText(b->text, fitted, sizeof(fitted));
+        nLines = SplitLines(fitted, lines, lens);
         if (nLines == 0)
             return;
         for (i = 0; i < nLines; i++)
@@ -254,7 +328,7 @@ static void BuildBubble(struct Bubble *b)
         for (i = 0; i < nLines; i++)
         {
             int lw = LineWidth(lines[i], lens[i]), k;
-            int cx = left + 3 + (w - lw) / 2;
+            int cx = left + 3 + (lw < w ? (w - lw) / 2 : 0);
             for (k = 0; k < lens[i] && cx < left + w + 3; k++)
                 cx += DrawGlyph(cx, top - 1 + i * LINE_H, lines[i][k]);
         }
@@ -336,13 +410,13 @@ static bool8 AnyBubbleShown(void)
     return FALSE;
 }
 
-static bool8 CreateBubbleSprites(struct Bubble *b)
+// Loads the shared overlay palette; returns FALSE when no slot is free
+bool8 MP_Emote_LoadUiPalette(void)
 {
     static u16 sPal[16];
     struct SpritePalette pal = {sPal, TAG_BUBBLE_PAL};
-    u8 half;
-
-    if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) == 0xFF)
+    if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
+        return TRUE;
     {
         // Toasts take the co-op menu colors (from the player's window frame)
         u16 theme[16];
@@ -354,7 +428,14 @@ static bool8 CreateBubbleSprites(struct Bubble *b)
         sPal[8] = theme[MPT_BORDER];   // the frame's color
         sPal[9] = theme[MPT_BAND];
     }
-    if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) == 0xFF && LoadSpritePalette(&pal) == 0xFF)
+    return LoadSpritePalette(&pal) != 0xFF;
+}
+
+static bool8 CreateBubbleSprites(struct Bubble *b)
+{
+    u8 half;
+
+    if (!MP_Emote_LoadUiPalette())
         return FALSE;
     BuildBubble(b);
     for (half = 0; half < 2; half++)
@@ -449,7 +530,10 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         struct Sprite *s = &gSprites[b->spriteId[half]];
         s->x = x - 32 + half * 64;
         s->y = y;
-        s->invisible = (b->atTile || b->toast) ? FALSE : os->invisible;
+        if (b->toast)
+            s->invisible = ArePlayerFieldControlsLocked();   // not on top of menus and messages
+        else
+            s->invisible = b->atTile ? FALSE : os->invisible;
         s->subpriority = b->atTile ? 1 : 0;
         s->coordOffsetEnabled = !b->toast;
         if (b->toast)
@@ -836,7 +920,7 @@ void MP_Emote_Update(void)
         u8 obj = (i != gMpLocalId && gMpPlayers[i].present) ? MP_GetRemoteObjectEventId(i) : OBJECT_EVENTS_COUNT;
         UpdateBubble(&sBubbles[1 + i], obj);
     }
-    if (!AnyBubbleShown() && IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
+    if (!AnyBubbleShown() && !MP_Compass_AnyShown() && IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
         FreeSpritePaletteByTag(TAG_BUBBLE_PAL);
 }
 

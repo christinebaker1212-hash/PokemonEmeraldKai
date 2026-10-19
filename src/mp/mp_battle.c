@@ -103,9 +103,40 @@ u8 NetLink_GetMultiplayerId(void)
     return sNet.linkId;
 }
 
+static u8 sMixCount;   // record mixing with up to 4 players (mp_linkx.c)
+
 u8 NetLink_GetPlayerCount(void)
 {
-    return 2;
+    return sMixCount ? sMixCount : 2;
+}
+
+// Run the vanilla record mixing code against a fake link of `count` players
+bool8 NetLink_BeginRecordMix(u8 linkId, u8 count)
+{
+    if (sNet.battleActive || gNetLinkActive)
+        return FALSE;
+    sNet.linkId = linkId;
+    sMixCount = count;
+    gNetLinkActive = TRUE;
+    return TRUE;
+}
+
+void NetLink_EndRecordMix(void)
+{
+    sMixCount = 0;
+    gNetLinkActive = FALSE;
+}
+
+void NetLink_FillLocalLinkPlayer(struct LinkPlayer *out)
+{
+    memset(out, 0, sizeof(*out));
+    out->trainerId = gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
+                   | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | (gSaveBlock2Ptr->playerTrainerId[3] << 24);
+    StringCopy(out->name, gSaveBlock2Ptr->playerName);
+    out->gender = gSaveBlock2Ptr->playerGender;
+    out->language = gGameLanguage;
+    out->version = gGameVersion + 0x4000;
+    out->lp_field_2 = 0x8000;
 }
 
 bool8 NetLink_IsMaster(void)
@@ -275,7 +306,7 @@ static void Task_ShowResultMessage(u8 taskId)
             break;
         LockPlayerFieldControls();
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sResultText);
+        MP_ShowFieldMessageFitted(sResultText);
         data[0]++;
         break;
     case 1:

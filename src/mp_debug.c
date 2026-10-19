@@ -195,6 +195,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "follow") == 0)
+    {
+        // follow N - party Pokémon N walks with you (like SELECT in the party menu)
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        printf("[test] follow %d -> %d\n", n, MP_Follower_Toggle(&gPlayerParty[n % PARTY_SIZE]));
+    }
     else if (strcmp(cmd, "emote") == 0)
     {
         // emote N - like the number keys (0 !, 1 ?, 2 heart, 3 note, 4-7 phrases)

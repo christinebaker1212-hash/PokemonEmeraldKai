@@ -16,6 +16,7 @@ int Display_HandleEvent(const SDL_Event *event);
 // if the renderer has to be recreated).
 void Display_UploadFrame(const void *pixels);
 int Display_NeedsPresent(void);
+int Display_GetRefreshRate(void);
 void Display_Present(void);
 // Test harness helpers
 int Display_SaveOutputBMP(const char *path);

@@ -16,16 +16,12 @@
 #include "constants/rgb.h"
 
 #define TAG_COMPASS     0x5490   // + player
-#define TAG_COMPASS_PAL 0x5498
+#define TAG_COMPASS_PAL 0x53C0   // the shared overlay palette (mp_emote.c)
 #define SCREEN_CX       120
 #define SCREEN_CY       80
 #define EDGE_X          108      // how far from the center the arrows sit
 #define EDGE_Y          66
 
-// Player colors: 1 red, 2 blue, 3 green, 4 yellow; 5 outline
-static const u16 sPal[16] = {
-    0, RGB(31, 8, 8), RGB(8, 16, 31), RGB(6, 26, 6), RGB(31, 27, 4), RGB(2, 2, 4),
-};
 
 static const struct OamData sOam = {
     .shape = SPRITE_SHAPE(8x8),
@@ -94,7 +90,7 @@ static void BuildArrow(u8 *tile, int dx, int dy, u8 color)
                         filled = 1;
                 }
                 if (filled)
-                    Put(tile, x, y, 5);
+                    Put(tile, x, y, 14);
             }
     }
 }
@@ -104,7 +100,7 @@ static void BuildAll(void)
     u8 p, d;
     for (p = 0; p < MP_MAX_PLAYERS; p++)
         for (d = 0; d < 8; d++)
-            BuildArrow(sTiles[p][d], sDirs[d][0], sDirs[d][1], 1 + (p % 4));
+            BuildArrow(sTiles[p][d], sDirs[d][0], sDirs[d][1], 10 + (p % 4));
     sBuilt = TRUE;
 }
 
@@ -133,12 +129,11 @@ static bool8 Show(u8 p, s16 x, s16 y, u8 dir)
     if (!SpriteValid(p))
     {
         struct SpriteSheet sheet = {sTiles[p], sizeof(sTiles[p]), TAG_COMPASS + p};
-        struct SpritePalette pal = {sPal, TAG_COMPASS_PAL};
         struct SpriteTemplate t = {
             .tileTag = TAG_COMPASS + p, .paletteTag = TAG_COMPASS_PAL, .oam = &sOam,
             .anims = sAnims, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCB_Compass,
         };
-        if (IndexOfSpritePaletteTag(TAG_COMPASS_PAL) == 0xFF && LoadSpritePalette(&pal) == 0xFF)
+        if (!MP_Emote_LoadUiPalette())
             return FALSE;
         if (GetSpriteTileStartByTag(TAG_COMPASS + p) == 0xFFFF && LoadSpriteSheet(&sheet) == 0)
             return FALSE;
@@ -191,6 +186,15 @@ static bool8 FriendOffset(u8 id, s32 *dx, s32 *dy, bool8 *onScreen)
             - (gRegionMapEntries[mine].y * 2 + gRegionMapEntries[mine].height);
         return *dx != 0 || *dy != 0;
     }
+}
+
+bool8 MP_Compass_AnyShown(void)
+{
+    u8 p;
+    for (p = 0; p < MP_MAX_PLAYERS; p++)
+        if (sBuilt && SpriteValid(p))
+            return TRUE;
+    return FALSE;
 }
 
 // Every overworld frame, after the camera moved

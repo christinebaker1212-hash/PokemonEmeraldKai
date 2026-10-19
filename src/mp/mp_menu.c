@@ -28,12 +28,14 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_DAILY, MAIN_TOURNEY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 enum { ROW_SPRITE, ROW_SKIN, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
+#define VISIBLE_ROWS 9   // more rows than this scroll
 extern const u8 EventScript_MpMoveRelearner[];
+void MP_Gatcha_Open(void);
 #define MENU_W 12   // tiles; the window sits right of the player so you can see your look change
 
 static const struct WindowTemplate sCoopWindowTemplate = {
@@ -137,22 +139,26 @@ static void DrawPlayersWindow(u8 windowId)
             StringAppend(buf, lvl);
         }
     }
-    MText(windowId, FONT_SMALL, buf, 2, 1);
-    // Buddy bonus, and when hosting on this PC the code friends type to join
-    if (MP_InviteCode()[0] || MP_ExpBonusPercent())
     {
-        u8 code[48];
-        char ascii[48];
-        if (MP_InviteCode()[0] && MP_ExpBonusPercent())
-            snprintf(ascii, sizeof(ascii), "+%d%%  CODE %s", MP_ExpBonusPercent(), MP_InviteCode());
-        else if (MP_InviteCode()[0])
-            snprintf(ascii, sizeof(ascii), "CODE %s", MP_InviteCode());
-        else if (MP_Together_Level())
-            snprintf(ascii, sizeof(ascii), "TOGETHER Lv%d  EXP +%d%%", MP_Together_Level(), MP_ExpBonusPercent());
-        else
-            snprintf(ascii, sizeof(ascii), "EXP +%d%%", MP_ExpBonusPercent());
-        MP_AsciiToGame(code, ascii, 44);
-        MText(windowId, FONT_SMALL, code, 28 * 8 - 2 - GetStringWidth(FONT_SMALL, code, 0), 1);
+        // Buddy bonus, and when hosting on this PC the code friends type to join (on the right)
+        int rightW = 0;
+        if (MP_InviteCode()[0] || MP_ExpBonusPercent())
+        {
+            u8 code[48];
+            char ascii[48];
+            if (MP_InviteCode()[0] && MP_ExpBonusPercent())
+                snprintf(ascii, sizeof(ascii), "+%d%%  CODE %s", MP_ExpBonusPercent(), MP_InviteCode());
+            else if (MP_InviteCode()[0])
+                snprintf(ascii, sizeof(ascii), "CODE %s", MP_InviteCode());
+            else if (MP_Together_Level())
+                snprintf(ascii, sizeof(ascii), "TOGETHER Lv%d  EXP +%d%%", MP_Together_Level(), MP_ExpBonusPercent());
+            else
+                snprintf(ascii, sizeof(ascii), "EXP +%d%%", MP_ExpBonusPercent());
+            MP_AsciiToGame(code, ascii, 44);
+            rightW = GetStringWidth(FONT_SMALL, code, 0);
+            MText(windowId, FONT_SMALL, code, 28 * 8 - 2 - rightW, 1);
+        }
+        MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4 - (rightW ? rightW + 8 : 0), 1, sTxtFg, sTxtBg);
     }
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
@@ -213,9 +219,19 @@ static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
     MText(windowId, FONT_SMALL_NARROW, line, 8, y);
 }
 
+static u8 sScroll, sPageShown = 0xFF;
+
+// A small triangle at the right edge: more rows above or below
+static void DrawScrollArrow(u8 windowId, int y, bool8 up)
+{
+    int i, cx = MENU_W * 8 - 6;
+    for (i = 0; i < 3; i++)
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_TEXT), cx - i, up ? y + i : y + 2 - i, i * 2 + 1, 1);
+}
+
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY...", "TOURNAMENT...", "MOVE TUTOR...", "LOOK...", ""};
+    static const char *const mainLabels[] = {"SOCIAL...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "MOEGATCHA...", "DAILY...", "TOURNAMENT...", "MOVE TUTOR...", "LOOK...", ""};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -237,17 +253,33 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
     sTxtFg = MPT_TEXT;
     sTxtBg = MPT_BG;
 
-    for (row = 0; row < RowCount(page); row++)
+    // Keep the cursor in view when the page has more rows than fit
     {
-        u8 y = 1 + LINE_H * (row + 1) + 2;
+        u8 count = RowCount(page);
+        if (sPageShown != page)
+            sScroll = 0;
+        sPageShown = page;
+        if (cursor < sScroll)
+            sScroll = cursor;
+        if (cursor >= sScroll + VISIBLE_ROWS)
+            sScroll = cursor - VISIBLE_ROWS + 1;
+        if (count <= VISIBLE_ROWS)
+            sScroll = 0;
+        if (sScroll > 0)
+            DrawScrollArrow(windowId, LINE_H + 3, TRUE);
+        if (sScroll + VISIBLE_ROWS < count)
+            DrawScrollArrow(windowId, 1 + LINE_H * (VISIBLE_ROWS + 1) + 2, FALSE);
+    }
+    for (row = sScroll; row < RowCount(page) && row < sScroll + VISIBLE_ROWS; row++)
+    {
+        u8 y = 1 + LINE_H * (row - sScroll + 1) + 2;
         sTxtFg = MPT_TEXT;
         sTxtBg = MPT_BG;
         if (row == cursor)
         {
-            // The lit bar and gold text mark the selection (no room for an arrow)
-            MpTheme_SelBar(windowId, y, LINE_H);
-            sTxtBg = MPT_SEL;
-            sTxtFg = MPT_GOLD;
+            // The game's own cursor
+            u8 arrow[] = {0xEF /* ▶ */, EOS};
+            MText(windowId, FONT_SMALL, arrow, 1, y);
         }
         if (page == MP_MENU_PAGE_MAIN)
         {
@@ -328,7 +360,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
                 StringAppend(buf, town);
             }
         }
-        MText(windowId, FONT_SMALL, buf, 2, 1);
+        MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
     else if (page == MP_MENU_PAGE_EMOTES)
@@ -336,7 +368,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         u8 buf[80];
         MpTheme_Panel(windowId, 0);
         MP_AsciiToGame(buf, "A: SAY IT   SELECT: EDIT PHRASE   KEYS 1-8", 70);
-        MText(windowId, FONT_SMALL, buf, 2, 1);
+        MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
     else
@@ -534,6 +566,10 @@ static void HandleMainInput(u8 taskId)
         CloseMenu(taskId);
         MP_Daily_OpenMenu();
         break;
+    case MAIN_GATCHA:
+        CloseMenu(taskId);
+        MP_Gatcha_Open();
+        break;
     case MAIN_TOURNEY:
         CloseMenu(taskId);
         MP_Tourney_OpenMenu();
@@ -567,6 +603,9 @@ static void Task_CoopMenu(u8 taskId)
     case 0:
         tWindow = AddWindow(&sCoopWindowTemplate);
         tPlayers = AddWindow(&sPlayersWindowTemplate);
+        // The map name sign shares the frame's palette slot: load the player's frame again
+        HideMapNamePopUpWindow();
+        LoadMessageBoxAndBorderGfx();
         MpTheme_Push();
         DrawStdWindowFrame(tWindow, FALSE);
         DrawStdWindowFrame(tPlayers, FALSE);
@@ -639,6 +678,12 @@ void MP_OpenMenuPage(u8 page)
     gTasks[taskId].tPage = page;
     if (page == MP_MENU_PAGE_MAIN)
         gTasks[taskId].tCursor = MP_Lobby_InRoom() ? MAIN_EMOTES : MAIN_ONLINE;
+}
+
+// Back from the MOEGATCHA screen
+void MP_OpenMenuAtGatcha(void)
+{
+    MP_OpenMenuPageAt(MP_MENU_PAGE_MAIN, MAIN_GATCHA);
 }
 
 void MP_OpenMenu(void)

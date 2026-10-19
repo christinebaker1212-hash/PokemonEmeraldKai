@@ -25,6 +25,7 @@
 #include "constants/songs.h"
 #include "constants/characters.h"
 
+void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 u8 MP_GiveMonKeepOT(struct Pokemon *mon);
 
@@ -433,6 +434,7 @@ static void HandleListInput(void)
         PlaySE(SE_SELECT);
         if (sPc.cursor == 0 && sPc.tab == TAB_MONS)
         {
+            CalculatePlayerPartyCount();
             sPc.mode = MODE_PICK_PARTY;
             sPc.cursor = sPc.scroll = 0;
         }

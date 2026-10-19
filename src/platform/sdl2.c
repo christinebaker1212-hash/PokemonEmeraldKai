@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 #ifdef _WIN32
@@ -168,10 +169,10 @@ int main(int argc, char **argv)
     internalClock.status = SIIRTCINFO_24HOUR;
     UpdateInternalClock();
 
-    bool isGameStepDrawn = false;
     while (isRunning)
     {
         double deltaTime;
+        bool lockstep = false;
 
         ProcessEvents();
 
@@ -221,30 +222,80 @@ int main(int argc, char **argv)
 
         if (!paused)
         {
-            accumulator += deltaTime;
+            // Frame pacing. With vsync on a ~60/120/144Hz monitor the loop runs once per
+            // refresh; then exactly one game frame every N refreshes is perfectly smooth
+            // (an accumulator would sometimes run 0 or 2 frames and stutter). If vsync
+            // doesn't really wait, or the game hitched, fall back to the accumulator.
+            static double sAvgDelta = 1.0 / 60.0;
+            static int sRefresh, sRefreshCheck, sRefreshPhase;
+            double realDelta = deltaTime / timeScale;
+            int steps, perGameFrame = 0, i;
 
-            isGameStepDrawn = false;
+            sAvgDelta = sAvgDelta * 0.95 + (realDelta < 0.1 ? realDelta : 0.1) * 0.05;
+            if (sRefreshCheck-- <= 0)
+            {
+                sRefresh = Display_GetRefreshRate();
+                sRefreshCheck = 120;
+            }
+            if (Display_GetVSync() && timeScale == 1.0 && sRefresh >= 55)
+            {
+                int n = (sRefresh + 30) / 60;
+                if (n >= 1 && n <= 4 && abs(sRefresh - 60 * n) <= 2
+                 && sAvgDelta > 0.8 / sRefresh && sAvgDelta < 1.25 / sRefresh)
+                    perGameFrame = n;
+            }
 
-            while (accumulator >= fixedTimestep)
+            if (perGameFrame && realDelta < 2.5 / 60.0)
+            {
+                lockstep = true;
+                steps = (++sRefreshPhase >= perGameFrame) ? 1 : 0;
+                if (steps)
+                    sRefreshPhase = 0;
+                accumulator = 0;
+            }
+            else
+            {
+                accumulator += deltaTime;
+                steps = (int)(accumulator / fixedTimestep);
+                if (steps > 8)   // way behind (window dragged, PC busy): don't try to catch up
+                {
+                    steps = 8;
+                    accumulator = steps * fixedTimestep;
+                }
+                accumulator -= steps * fixedTimestep;
+            }
+
+            // MOEMON_FPS_LOG=1: print game frames per second (pacing check)
+            {
+                static int sLog = -1, sCount;
+                static Uint64 sLast;
+                if (sLog < 0)
+                    sLog = getenv("MOEMON_FPS_LOG") != NULL;
+                if (sLog)
+                {
+                    Uint64 now = SDL_GetPerformanceCounter();
+                    sCount += steps;
+                    if (sLast == 0)
+                        sLast = now;
+                    if (now - sLast >= SDL_GetPerformanceFrequency())
+                    {
+                        printf("[fps] %d game frames/s (refresh %d, lockstep %d)\n", sCount, sRefresh, perGameFrame);
+                        sCount = 0;
+                        sLast = now;
+                    }
+                }
+            }
+            for (i = 0; i < steps; i++)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
                 if (SpectateStep())
-                {
-                    accumulator -= fixedTimestep;
                     continue;
-                }
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
-                if (!isGameStepDrawn)
-                {
+                if (i == steps - 1)   // only the frame that will be shown is drawn
                     VDraw();
-                    //SDL_RenderClear(sdlRenderer);
-                    isGameStepDrawn = true;
-                }
                 RunDMAsAndVBlank();
-
-                accumulator -= fixedTimestep;
             }
 
             //samples per frame is 701, that gets multipled by two when being queued and then multipled by four because samples are float32 which are 4 bytes long hence the divide by 8
@@ -262,7 +313,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Display_NeedsPresent())
+        if (Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);

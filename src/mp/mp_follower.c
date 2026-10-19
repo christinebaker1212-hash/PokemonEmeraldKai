@@ -480,7 +480,7 @@ static void Task_FollowerTalk(u8 taskId)
     {
     case 0:
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(gStringVar4);
+        MP_ShowFieldMessageFitted(gStringVar4);
         data[0]++;
         break;
     case 1:

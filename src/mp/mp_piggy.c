@@ -232,7 +232,7 @@ static void Task_RidePrompt(u8 taskId)
     {
     case 0:
         HideMapNamePopUpWindow();
-        ShowFieldMessage(sPrompt);
+        MP_ShowFieldMessageFitted(sPrompt);
         tState++;
         break;
     case 1:

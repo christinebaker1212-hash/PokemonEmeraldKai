@@ -10,6 +10,7 @@
 #include "map_name_popup.h"
 #include "menu.h"
 #include "item.h"
+#include "field_message_box.h"
 #include "palette.h"
 #include "script.h"
 #include "sound.h"
@@ -27,6 +28,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 #define MAIN_H 13
 #define ROW_H  12
 #define ROW_Y0 16
+#define HELP_H 3   // tiles: two lines of small text
 
 static const struct WindowTemplate sMainTemplate = {
     .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = MAIN_W, .height = MAIN_H,
@@ -34,12 +36,13 @@ static const struct WindowTemplate sMainTemplate = {
 };
 
 static const struct WindowTemplate sHelpTemplate = {
-    .bg = 0, .tilemapLeft = 1, .tilemapTop = 16, .width = MAIN_W, .height = 2,
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 16, .width = MAIN_W, .height = HELP_H,
     .paletteNum = 15, .baseBlock = 0x8 + MAIN_W * MAIN_H,
 };
 
 static u8 sMain = WINDOW_NONE, sHelp = WINDOW_NONE;
 static s16 sScrollTop = -1, sScrollCount, sSelY = -1;
+static s16 sTitleEnd;   // x where the title text ends
 
 // ---------------------------------------------------------------------------
 // Theme: a dark navy panel with a gold trim and a purple title band. The text
@@ -194,6 +197,7 @@ void MpUi_Open(void)
         return;
     LockPlayerFieldControls();
     HideMapNamePopUpWindow();
+    LoadMessageBoxAndBorderGfx();   // the map name sign shares the frame's palette slot
     MpTheme_Push();
     sMain = AddWindow(&sMainTemplate);
     sHelp = AddWindow(&sHelpTemplate);
@@ -223,18 +227,30 @@ void MpUi_Close(void)
 
 void MpUi_Begin(const char *title)
 {
-    u8 buf[64];
+    u8 buf[96];
     sScrollTop = -1;
     sSelY = -1;
     MpTheme_Panel(sMain, 13);
-    MP_AsciiToGame(buf, title, 60);
-    MpTheme_Print(sMain, FONT_SMALL, buf, 6, 1, MPT_GOLD, MPT_BAND);
+    MP_AsciiToGame(buf, title, 92);
+    MpUi_PrintWrapped(sMain, buf, 6, 1, MAIN_W * 8 - 12, 1, MPT_GOLD, MPT_BAND);
+    sTitleEnd = 6 + GetStringWidth(FONT_SMALL, buf, 0);
 }
 
 // Text on the right end of the title line (e.g. "POKéMON  ITEMS" tabs)
 void MpUi_TitleRight(const u8 *text)
 {
-    MpTheme_Print(sMain, FONT_SMALL, text, MAIN_W * 8 - 6 - GetStringWidth(FONT_SMALL, text, 0), 1, MPT_TEXT, MPT_BAND);
+    u8 cut[64];
+    u8 font = FONT_SMALL;
+    int len, room = MAIN_W * 8 - 6 - (sTitleEnd + 8);
+    StringCopyN(cut, text, sizeof(cut) - 1);
+    cut[sizeof(cut) - 1] = EOS;
+    if (GetStringWidth(font, cut, 0) > room)
+        font = FONT_SMALL_NARROW;
+    for (len = StringLength(cut); len > 1 && GetStringWidth(font, cut, 0) > room; len--)
+        cut[len - 1] = EOS;
+    if (room <= 0)
+        return;
+    MpTheme_Print(sMain, font, cut, MAIN_W * 8 - 6 - GetStringWidth(font, cut, 0), 1, MPT_TEXT, MPT_BAND);
 }
 
 // One row: left text, and optional right-aligned text. Long left text is cut.
@@ -242,24 +258,35 @@ void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
 {
     u8 y = ROW_Y0 + row * ROW_H;
     u8 cut[80];
-    int maxW = MAIN_W * 8 - 22 - (right ? GetStringWidth(FONT_SMALL_NARROW, right, 0) + 8 : 4);
+    u8 rcut[64];
+    int maxW, len2;
+    if (right)
+    {
+        // Right text gets at most half the row
+        StringCopyN(rcut, right, sizeof(rcut) - 1);
+        rcut[sizeof(rcut) - 1] = EOS;
+        for (len2 = StringLength(rcut); len2 > 1 && GetStringWidth(FONT_SMALL_NARROW, rcut, 0) > MAIN_W * 4; len2--)
+            rcut[len2 - 1] = EOS;
+        right = rcut;
+    }
+    maxW = MAIN_W * 8 - 22 - (right ? GetStringWidth(FONT_SMALL_NARROW, right, 0) + 8 : 4);
     int len;
-    u8 bg = selected ? MPT_SEL : MPT_BG;
+    u8 bg = MPT_BG;
     if (selected)
     {
-        u8 arrow[] = {0xEF, EOS};
-        MpTheme_SelBar(sMain, y, ROW_H - 1);
-        MpTheme_Print(sMain, FONT_SMALL, arrow, 6, y, MPT_GOLD, bg);
+        // The game's own cursor
+        u8 arrow[] = {0xEF /* ▶ */, EOS};
+        MpTheme_Print(sMain, FONT_SMALL, arrow, 6, y, MPT_TEXT, bg);
         sSelY = y;
     }
     StringCopyN(cut, left, sizeof(cut) - 1);
     cut[sizeof(cut) - 1] = EOS;
     for (len = StringLength(cut); len > 1 && GetStringWidth(FONT_SMALL_NARROW, cut, 0) > maxW; len--)
         cut[len - 1] = EOS;
-    MpTheme_Print(sMain, FONT_SMALL_NARROW, cut, 15, y, selected ? MPT_GOLD : MPT_TEXT, bg);
+    MpTheme_Print(sMain, FONT_SMALL_NARROW, cut, 15, y, MPT_TEXT, bg);
     if (right)
         MpTheme_Print(sMain, FONT_SMALL_NARROW, right, MAIN_W * 8 - 12 - GetStringWidth(FONT_SMALL_NARROW, right, 0), y,
-                      selected ? MPT_TEXT : MPT_GREY, bg);
+                      MPT_GREY, bg);
 }
 
 void MpUi_RowAscii(u8 row, bool8 selected, const char *left, const char *right)
@@ -274,9 +301,9 @@ void MpUi_RowAscii(u8 row, bool8 selected, const char *left, const char *right)
 // A line of text anywhere in the list area (row = 0..MPUI_ROWS-1)
 void MpUi_TextAscii(u8 row, const char *text)
 {
-    u8 buf[96];
-    MP_AsciiToGame(buf, text, 92);
-    MpTheme_Print(sMain, FONT_SMALL, buf, 15, ROW_Y0 + row * ROW_H, MPT_TEXT, MPT_BG);
+    u8 buf[160];
+    MP_AsciiToGame(buf, text, 156);
+    MpUi_PrintWrapped(sMain, buf, 15, ROW_Y0 + row * ROW_H, MAIN_W * 8 - 15 - 6, 1, MPT_TEXT, MPT_BG);
 }
 
 void MpUi_End(void)
@@ -292,17 +319,112 @@ void MpUi_End(void)
     CopyWindowToVram(sMain, COPYWIN_FULL);
 }
 
+// Splits text into lines no wider than maxW (breaking at spaces); returns how many
+// lines it needs. Only the first maxLines are written.
+static int WrapText(const u8 *text, u8 font, int maxW, u8 out[][128], int maxLines)
+{
+    int lines = 0, i = 0;
+    while (text[i] != EOS)
+    {
+        u8 line[128];
+        int n = 0, lastSpace = -1, lastSpaceSrc = -1, j = i;
+        while (text[j] == CHAR_SPACE)
+            j++;
+        i = j;
+        if (text[i] == EOS)
+            break;
+        for (;;)
+        {
+            u8 c = text[j];
+            if (c == EOS || c == CHAR_NEWLINE || n >= 126)
+                break;
+            line[n] = c;
+            line[n + 1] = EOS;
+            if (GetStringWidth(font, line, 0) > maxW)
+            {
+                if (lastSpace > 0)
+                {
+                    n = lastSpace;
+                    j = lastSpaceSrc;
+                }
+                break;
+            }
+            if (c == CHAR_SPACE)
+            {
+                lastSpace = n;
+                lastSpaceSrc = j;
+            }
+            n++;
+            j++;
+        }
+        if (n == 0 && text[j] != EOS && text[j] != CHAR_NEWLINE)   // a single character wider than the line: take it anyway
+        {
+            line[n++] = text[j];
+            j++;
+        }
+        line[n] = EOS;
+        if (lines < maxLines)
+            StringCopy(out[lines], line);
+        lines++;
+        i = j;
+        if (text[i] == CHAR_NEWLINE)
+            i++;
+    }
+    return lines;
+}
+
+// Prints text in two lines at most in a window `width` pixels wide, picking the
+// narrow font and cutting it short with "..." only when it really doesn't fit.
+void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int maxLines, u8 fg, u8 bg)
+{
+    u8 lines[4][128];
+    u8 font = FONT_SMALL;
+    int count, i;
+    if (maxLines > 4)
+        maxLines = 4;
+    count = WrapText(text, font, width, lines, maxLines);
+    if (count > maxLines)
+    {
+        font = FONT_SMALL_NARROW;
+        count = WrapText(text, font, width, lines, maxLines);
+    }
+    if (count > maxLines)
+    {
+        // Still too long: end the last line with "..."
+        u8 *last = lines[maxLines - 1];
+        static const u8 sDots[] = {CHAR_PERIOD, CHAR_PERIOD, CHAR_PERIOD, EOS};
+        int len = StringLength(last);
+        for (;;)
+        {
+            u8 tmp[132];
+            StringCopy(tmp, last);
+            StringAppend(tmp, sDots);
+            if (len <= 1 || GetStringWidth(font, tmp, 0) <= width)
+            {
+                StringCopy(last, tmp);
+                break;
+            }
+            last[--len] = EOS;
+        }
+        count = maxLines;
+    }
+    for (i = 0; i < count; i++)
+        MpTheme_Print(windowId, font, lines[i], x, y + i * 12, fg, bg);
+}
+
 void MpUi_Help(const u8 *text)
 {
+    if (sHelp == WINDOW_NONE)
+        return;
     MpTheme_Panel(sHelp, 0);
-    MpTheme_Print(sHelp, FONT_SMALL, text, 4, 1, MPT_GREY, MPT_BG);
+    MpUi_PrintWrapped(sHelp, text, 4, 0, MAIN_W * 8 - 8, 2, MPT_GREY, MPT_BG);
     CopyWindowToVram(sHelp, COPYWIN_FULL);
 }
 
 void MpUi_HelpAscii(const char *ascii)
 {
-    u8 buf[96];
-    MP_AsciiToGame(buf, ascii, 92);
+    u8 buf[200];
+    MP_AsciiToGame(buf, ascii, 196);
     MpUi_Help(buf);
 }
 
@@ -346,14 +468,87 @@ void MpUi_Qty(u8 *dst, u32 qty)
 void MpUi_HelpItem(u16 item)
 {
     const u8 *desc = GetItemDescription(item);
-    u8 buf[160];
+    u8 buf[200];
     int i, n = 0;
     for (i = 0; desc[i] != EOS && n < (int)sizeof(buf) - 1; i++)
         buf[n++] = (desc[i] == CHAR_NEWLINE) ? CHAR_SPACE : desc[i];
     buf[n] = EOS;
-    while (n > 1 && GetStringWidth(FONT_SMALL_NARROW, buf, 0) > MAIN_W * 8 - 8)
-        buf[--n] = EOS;
-    MpTheme_Panel(sHelp, 0);
-    MpTheme_Print(sHelp, FONT_SMALL_NARROW, buf, 4, 1, MPT_GREY, MPT_BG);
-    CopyWindowToVram(sHelp, COPYWIN_FULL);
+    MpUi_Help(buf);
+}
+
+// ---------------------------------------------------------------------------
+// Field message box text: wrapped to the box width, two lines per page (the
+// game waits for A between pages). Text with special codes is left alone.
+
+#define MSGBOX_TEXT_W 208
+
+static void FitMessageBoxText(u8 *dst, int dstSize, const u8 *src)
+{
+    int n = 0, i = 0, lineStart = 0, lineOnPage = 0;
+    for (i = 0; src[i] != EOS; i++)
+        if (src[i] == EXT_CTRL_CODE_BEGIN || src[i] == PLACEHOLDER_BEGIN)
+        {
+            StringCopyN(dst, src, dstSize - 1);
+            dst[dstSize - 1] = EOS;
+            return;
+        }
+    i = 0;
+    while (src[i] != EOS && n < dstSize - 2)
+    {
+        u8 c = src[i];
+        if (c == CHAR_NEWLINE || c == CHAR_PROMPT_SCROLL || c == CHAR_PROMPT_CLEAR)
+        {
+            if (c == CHAR_NEWLINE && lineOnPage == 0)
+                dst[n++] = CHAR_NEWLINE, lineOnPage = 1;
+            else
+                dst[n++] = CHAR_PROMPT_CLEAR, lineOnPage = 0;
+            lineStart = n;
+            i++;
+            continue;
+        }
+        if (c == CHAR_SPACE && n == lineStart)
+        {
+            i++;   // no spaces at the start of a line
+            continue;
+        }
+        {
+            // The next word, with the space before it
+            int j = i, k, w;
+            u8 tmp[256];
+            int t = 0;
+            if (src[j] == CHAR_SPACE)
+                j++;
+            while (src[j] != EOS && src[j] != CHAR_SPACE && src[j] != CHAR_NEWLINE
+                && src[j] != CHAR_PROMPT_SCROLL && src[j] != CHAR_PROMPT_CLEAR)
+                j++;
+            for (k = lineStart; k < n && t < 200; k++)
+                tmp[t++] = dst[k];
+            for (k = i; k < j && t < 250; k++)
+                tmp[t++] = src[k];
+            tmp[t] = EOS;
+            w = GetStringWidth(FONT_NORMAL, tmp, 0);
+            if (w > MSGBOX_TEXT_W && n > lineStart)
+            {
+                // Break before this word
+                dst[n++] = lineOnPage == 0 ? CHAR_NEWLINE : CHAR_PROMPT_CLEAR;
+                lineOnPage ^= 1;
+                lineStart = n;
+                if (src[i] == CHAR_SPACE)
+                    i++;
+                continue;
+            }
+            for (k = i; k < j && n < dstSize - 2; k++)
+                dst[n++] = src[k];
+            i = j;
+        }
+    }
+    dst[n] = EOS;
+}
+
+void MP_ShowFieldMessageFitted(const u8 *text)
+{
+    static u8 sExpanded[400], sFitted[440];
+    StringExpandPlaceholders(sExpanded, text);
+    FitMessageBoxText(sFitted, sizeof(sFitted), sExpanded);
+    ShowFieldMessage(sFitted);
 }

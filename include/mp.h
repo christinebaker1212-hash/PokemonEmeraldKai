@@ -335,6 +335,8 @@ void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text);
 // mp_social.c
 void MP_Social_Open(void);
 void MP_Compass_Update(void);   // mp_compass.c
+bool8 MP_Compass_AnyShown(void);
+bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
 bool8 MP_Piggy_IsRiding(void);
 void MP_Piggy_FieldInput(u16 newKeys);
@@ -391,6 +393,8 @@ void MpUi_End(void);
 void MpUi_Help(const u8 *text);
 void MpUi_HelpAscii(const char *ascii);
 void MpUi_HelpItem(u16 item);   // the item's description on the help line
+void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int maxLines, u8 fg, u8 bg);
+void MP_ShowFieldMessageFitted(const u8 *text);   // ShowFieldMessage, wrapped to the box with pages
 bool8 MpUi_MoveCursor(u16 *cursor, u16 count);
 u16 MpUi_ScrollFor(u16 cursor, u16 count, u16 *scroll);
 void MpUi_Qty(u8 *dst, u32 qty);

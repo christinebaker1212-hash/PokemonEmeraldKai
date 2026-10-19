@@ -28,7 +28,7 @@ static void Task_Notice(u8 taskId)
             break;
         LockPlayerFieldControls();
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sNoticeText);
+        MP_ShowFieldMessageFitted(sNoticeText);
         data[0]++;
         break;
     case 1:

@@ -189,8 +189,9 @@ WEEKLY RACE    A different challenge every week with a leaderboard. The
 ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
                co-op wins, badges, trades, gifts). Each gives every player a
                MOEGATCHA pull.
-MOEGATCHA      Spend pulls on the prize reel: it races past prizes and slowly
-               clicks down onto yours. Five rarities: COMMON 55%, UNCOMMON
+MOEGATCHA      (START > CO-OP > MOEGATCHA) Spend pulls on the prize reel:
+               it races past prizes and slowly clicks down onto yours.
+               Five rarities: COMMON 55%, UNCOMMON
                28%, RARE 12%, SUPER RARE 4.5%, ULTRA RARE 0.5%. The top ones
                include event Moemon with the moves of real event Pokemon
                (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C Deoxys, the
@@ -198,6 +199,7 @@ MOEGATCHA      Spend pulls on the prize reel: it races past prizes and slowly
                jackpots. Pity: a SUPER RARE or better at least every 40 pulls
                and an ULTRA RARE at least every 120. A 10-pull always has a
                RARE or better, and everyone gets one FREE 10-pull every week.
+               The game saves by itself after every pull, so prizes are safe.
 Didn't finish the goals or win the race? You get a consolation prize picked
 for what you're short of: Rare Candy if your team is behind, healing items if
 you're low, Poke Balls if you're out.

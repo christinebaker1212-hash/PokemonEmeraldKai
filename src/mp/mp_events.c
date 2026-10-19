@@ -29,6 +29,7 @@
 #include "event_data.h"
 #include "item.h"
 #include "main.h"
+#include "script.h"
 #include "money.h"
 #include "overworld.h"
 #include "pokemon.h"
@@ -80,7 +81,7 @@ static void UpdateToasts(void)
 {
     if (sToastTimer)
         sToastTimer--;
-    if (sToastTimer == 0 && sToastCount && MP_IsInOverworld())
+    if (sToastTimer == 0 && sToastCount && MP_IsInOverworld() && !ArePlayerFieldControlsLocked())
     {
         u8 text[100];
         MP_AsciiToGame(text, sToasts[sToastHead], 96);
@@ -1028,7 +1029,7 @@ void MP_Events_Update(void)
             char msg[96], where[64];
             TodaysOutbreak(&sp, &map);
             OutbreakText(where, sizeof(where));
-            snprintf(msg, sizeof(msg), "Outbreak today:\n%s", where);
+            snprintf(msg, sizeof(msg), "Outbreak today: %s", where);
             QueueToast(msg);
         }
     }
@@ -1065,7 +1066,7 @@ void MP_Events_Update(void)
 // START > CO-OP > DAILY
 
 enum { DS_HUB, DS_RACE, DS_ACHIEVEMENTS };
-enum { ROW_GIFTS, ROW_GOAL1, ROW_GOAL2, ROW_GOAL3, ROW_OUTBREAK, ROW_STREAK, ROW_RACE, ROW_ACH, ROW_GATCHA, ROW_CLOSE, ROW_COUNT };
+enum { ROW_GIFTS, ROW_GOAL1, ROW_GOAL2, ROW_GOAL3, ROW_OUTBREAK, ROW_STREAK, ROW_RACE, ROW_ACH, ROW_CLOSE, ROW_COUNT };
 
 static EWRAM_DATA struct
 {
@@ -1159,10 +1160,6 @@ static void DrawHub(void)
             break;
         case ROW_ACH:
             snprintf(left, sizeof(left), "ACHIEVEMENTS...");
-            break;
-        case ROW_GATCHA:
-            snprintf(left, sizeof(left), "MOEGATCHA...");
-            snprintf(right, sizeof(right), "%d pull%s", (int)MP_Gatcha_Pulls(), MP_Gatcha_Pulls() == 1 ? "" : "s");
             break;
         default:
             snprintf(left, sizeof(left), "CLOSE");
@@ -1292,11 +1289,6 @@ static void Task_Daily(u8 taskId)
                 PlaySE(SE_SELECT);
                 CloseDaily();
                 MP_Gift_OpenMenu();
-                return;
-            case ROW_GATCHA:
-                PlaySE(SE_SELECT);
-                CloseDaily();
-                MP_Gatcha_Open();
                 return;
             case ROW_RACE:
                 PlaySE(SE_SELECT);

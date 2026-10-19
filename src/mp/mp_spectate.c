@@ -540,7 +540,7 @@ static void Task_WatchPrompt(u8 taskId)
     {
     case 0:
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        ShowFieldMessage(sPrompt);
+        MP_ShowFieldMessageFitted(sPrompt);
         tState++;
         break;
     case 1:

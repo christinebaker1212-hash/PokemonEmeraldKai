@@ -1405,3 +1405,52 @@ static void SanitizeEmeraldBattleTowerRecord(struct EmeraldBattleTowerRecord *ds
 
     CalcEmeraldBattleTowerChecksum(dst);
 }
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: online record mixing (mp_linkx.c). The link player table and
+// multiplayer id are set up by the caller (NetLink_BeginRecordMix), so the
+// vanilla mixing code runs unchanged. Daycare mail swapping is left out: it
+// needs every player to apply the exact same swap at the same time.
+
+u32 MP_RecordMix_RecordSize(void)
+{
+    return sizeof(struct PlayerRecordEmerald);
+}
+
+void MP_RecordMix_Prepare(void *dest)
+{
+    union PlayerRecord *saved = sSentRecord;
+    bool8 active[NUM_NORMAL_TVSHOW_SLOTS];
+    u8 i;
+
+    // Keep our own new TV shows watchable at home (vanilla marks them aired)
+    for (i = 0; i < NUM_NORMAL_TVSHOW_SLOTS; i++)
+        active[i] = gSaveBlock1Ptr->tvShows[i].common.active;
+    memset(dest, 0, sizeof(union PlayerRecord));
+    sSentRecord = dest;
+    PrepareExchangePacket();
+    sSentRecord = saved;
+    for (i = 0; i < NUM_NORMAL_TVSHOW_SLOTS; i++)
+        gSaveBlock1Ptr->tvShows[i].common.active = active[i];
+    memset(&((struct PlayerRecordEmerald *)dest)->daycareMail, 0, sizeof(struct RecordMixingDaycareMail));
+}
+
+// records: MAX_LINK_PLAYERS records, MP_RecordMix_RecordSize() apart
+void MP_RecordMix_Receive(void *records, u8 multiplayerId)
+{
+    union PlayerRecord *saved = sReceivedRecords;
+    sReceivedRecords = records;
+    SetSrcLookupPointers();
+    ReceiveSecretBasesData(sReceivedRecords->emerald.secretBases, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveTvShowsData(sReceivedRecords->emerald.tvShows, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceivePokeNewsData(sReceivedRecords->emerald.pokeNews, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveOldManData(&sReceivedRecords->emerald.oldMan, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveDewfordTrendData(sReceivedRecords->emerald.dewfordTrends, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveBattleTowerData(&sReceivedRecords->emerald.battleTowerRecord, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveGiftItem(&sReceivedRecords->emerald.giftItem, multiplayerId);
+    ReceiveLilycoveLadyData(&sReceivedRecords->emerald.lilycoveLady, sizeof(sReceivedRecords->emerald), multiplayerId);
+    ReceiveApprenticeData(sReceivedRecords->emerald.apprentices, sizeof(sReceivedRecords->emerald), (u8)multiplayerId);
+    ReceiveRankingHallRecords(&sReceivedRecords->emerald.hallRecords, sizeof(sReceivedRecords->emerald), (u8)multiplayerId);
+    sReceivedRecords = saved;
+    FlagSet(FLAG_SYS_MIX_RECORD);
+}

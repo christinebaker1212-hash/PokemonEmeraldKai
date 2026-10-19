@@ -762,6 +762,19 @@ void Display_UploadFrame(const void *pixels)
     sDirty = 1;
 }
 
+// The monitor's refresh rate in Hz (0 if unknown)
+int Display_GetRefreshRate(void)
+{
+    SDL_DisplayMode mode;
+    int display;
+    if (sWindow == NULL)
+        return 0;
+    display = SDL_GetWindowDisplayIndex(sWindow);
+    if (display < 0 || SDL_GetCurrentDisplayMode(display, &mode) != 0)
+        return 0;
+    return mode.refresh_rate;
+}
+
 int Display_NeedsPresent(void)
 {
     return sDirty;
