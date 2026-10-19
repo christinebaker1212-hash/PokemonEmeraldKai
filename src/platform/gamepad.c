@@ -8,7 +8,7 @@
 //                        pads use bottom = A, right = B. START > SETTINGS can
 //                        force either layout.
 //   Start / Options / +  START        Back / Share / -   SELECT
-//   LB / RB              L / R        RT (hold)          fast forward
+//   LB / RB              L / R
 //
 // The other buttons depend on what's on screen (Platform_InputContext):
 //   Overworld   left stick pushed all the way = run (with Running Shoes),
@@ -388,7 +388,7 @@ static float Axis(SDL_GameController *pad, SDL_GameControllerAxis a)
 
 #define BTN(b) (1u << (b))
 
-// Reads every controller. Returns GBA keys; *fastForward is set while RT is held.
+// Reads every controller. Returns GBA keys (*fastForward is always 0 now).
 u16 Gamepad_Poll(int *fastForward)
 {
     u16 keys = 0;
@@ -474,8 +474,7 @@ u16 Gamepad_Poll(int *fastForward)
         if (ly >  STICK_DEAD) keys |= DPAD_DOWN;
     }
 
-    if (rt > TRIGGER_ON)
-        *fastForward = 1;
+    (void)rt; // RT used to be fast forward; there's no fast forward any more
 
     {
         u32 west = BTN(nintendo ? SDL_CONTROLLER_BUTTON_Y : SDL_CONTROLLER_BUTTON_X);

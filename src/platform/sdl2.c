@@ -401,15 +401,6 @@ void ProcessEvents(void)
             HANDLE_KEYUP(DPAD_DOWN)
             HANDLE_KEYUP(DPAD_LEFT)
             HANDLE_KEYUP(DPAD_RIGHT)
-            case SDLK_SPACE:
-                if (speedUp)
-                {
-                    speedUp = false;
-                    UpdateTimeScale();
-                    //SDL_ClearQueuedAudio(1);
-                    //SDL_PauseAudio(0);
-                }
-                break;
             }
             break;
         case SDL_TEXTINPUT:
@@ -457,14 +448,6 @@ void ProcessEvents(void)
                  && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
                     Platform_ContextAction(INPUT_ACTION_EMOTE_KEY1 + (event.key.keysym.sym - SDLK_1));
                 break;
-            case SDLK_SPACE:
-                if (!speedUp)
-                {
-                    speedUp = true;
-                    UpdateTimeScale();
-                    //SDL_PauseAudio(1);
-                }
-                break;
             }
             break;
         }
@@ -474,8 +457,8 @@ void ProcessEvents(void)
 
 static void UpdateTimeScale(void)
 {
-    double want = (speedUp || sPadFastForward) ? 5.0 : 1.0;
-    timeScale = want;
+    // Moemon Co-op: no fast forward (it would desync players); always normal speed
+    timeScale = 1.0;
 }
 
 u16 Platform_GetKeyInput(void)

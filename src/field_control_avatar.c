@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle_setup.h"
 #include "bike.h"
 #include "coord_event_weather.h"
@@ -310,6 +311,7 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
         script = GetObjectEventScriptPointerByObjectEventId(objectEventId);
 
     script = GetRamScript(gSpecialVar_LastTalked, script);
+    script = MP_Rematch_ScriptForObject(script); // Moemon Co-op: team rematches with gym leaders
     return script;
 }
 

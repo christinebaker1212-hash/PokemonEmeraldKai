@@ -237,7 +237,7 @@ moemon_display.ini and moemon_controls.ini.
 CONTROLS (keyboard)
 -------------------
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
-  Backslash (\) = SELECT  A = L      S = R      Space (hold) = fast forward
+  Backslash (\) = SELECT  A = L      S = R
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
 
 
@@ -248,7 +248,7 @@ others) and it just works, even mid-game. The buttons are set up for you:
 
   D-Pad / left stick     move              Start / Options / +   START
   A / B                  A / B (*)         Back / Share / -      SELECT
-  LB / RB                L / R             RT (hold)             fast forward
+  LB / RB                L / R
 
   (*) Nintendo-style pads use the buttons labeled A and B. Xbox and
       PlayStation pads use the bottom button for A and the right one for B.

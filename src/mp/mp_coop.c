@@ -765,6 +765,9 @@ static void CB2_MpCoopFinish(void)
         // can still battle them on their own later.
         if (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_DOUBLE)
             FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+        // A team rematch with a gym leader: the partner gets the reward too
+        else if (MP_Rematch_IsRematchTrainer(sCoop.trainerId))
+            MP_Rematch_Reward();
         // Gym leaders: the partner gets the badge too. Their own copy of the
         // leader's "you won" script runs once back on the field.
         else if (GymBadgeFlag(sCoop.trainerId) && !FlagGet(GymBadgeFlag(sCoop.trainerId)))

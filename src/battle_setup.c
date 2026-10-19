@@ -1981,3 +1981,15 @@ const u8 *MP_FindTrainerEndScript(u16 trainerId)
     }
     return NULL;
 }
+
+// Moemon Co-op: the trainer a script battles (0 if it doesn't start with a battle)
+u16 MP_TrainerIdInScript(const u8 *s)
+{
+    u8 k;
+    if (s == NULL)
+        return 0;
+    for (k = 0; k < 48; k++)
+        if (s[k] == MP_SCR_OP_TRAINERBATTLE && s[k + 1] <= TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
+            return s[k + 2] | (s[k + 3] << 8);
+    return 0;
+}

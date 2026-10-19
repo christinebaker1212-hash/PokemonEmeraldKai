@@ -612,4 +612,14 @@ extern const u8 EventScript_TradeCenter_Chair0[];
 extern const u8 EventScript_ConfirmLeaveCableClubRoom[];
 extern const u8 EventScript_TerminateLink[];
 
+// Moemon Co-op
+extern const u8 MpRematch_EventScript_Roxanne[];
+extern const u8 MpRematch_EventScript_Brawly[];
+extern const u8 MpRematch_EventScript_Wattson[];
+extern const u8 MpRematch_EventScript_Flannery[];
+extern const u8 MpRematch_EventScript_Norman[];
+extern const u8 MpRematch_EventScript_Winona[];
+extern const u8 MpRematch_EventScript_TateAndLiza[];
+extern const u8 MpRematch_EventScript_Juan[];
+
 #endif // GUARD_EVENT_SCRIPTS_H

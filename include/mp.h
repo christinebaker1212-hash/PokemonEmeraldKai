@@ -389,6 +389,13 @@ u16 MP_Events_MaybeOutbreak(u16 species);
 s32 MP_Events_StreakDays(void);
 void MP_Daily_OpenMenu(void);
 
+// Team rematches with gym leaders (mp_rematch.c)
+const u8 *MP_Rematch_ScriptForObject(const u8 *script);
+bool8 MP_Rematch_IsRematchTrainer(u16 trainer);
+void MP_Rematch_Reward(void);
+void MP_Rematch_IsEndgame(void);
+void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+
 // mp_spectate.c (watching other players' battles)
 bool8 MP_Spectate_IsWatching(void);
 bool8 MP_Spectate_IsStreaming(void);
