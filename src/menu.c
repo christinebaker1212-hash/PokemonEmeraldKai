@@ -249,7 +249,22 @@ void ClearStdWindowAndFrame(u8 windowId, bool8 copyToVram)
         CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
+// Moemon Co-op: co-op windows that meet get joined frames (mp_ui.c)
+void MP_FrameJoin_Save(u8 bg, u8 left, u8 top, u8 width, u8 height, u16 *saved);
+void MP_FrameJoin_Apply(u8 bg, u8 left, u8 top, u8 width, u8 height, const u16 *saved);
+void MP_FrameJoin_Clear(u8 bg, u8 left, u8 top, u8 width, u8 height, const u16 *saved);
+
+static void WindowFunc_DrawStandardFrame_(u8 bg, u8 tilemapLeft, u8 tilemapTop, u8 width, u8 height, u8 paletteNum);
+
 static void WindowFunc_DrawStandardFrame(u8 bg, u8 tilemapLeft, u8 tilemapTop, u8 width, u8 height, u8 paletteNum)
+{
+    u16 saved[2 * 34] = {0};
+    MP_FrameJoin_Save(bg, tilemapLeft, tilemapTop, width, height, saved);
+    WindowFunc_DrawStandardFrame_(bg, tilemapLeft, tilemapTop, width, height, paletteNum);
+    MP_FrameJoin_Apply(bg, tilemapLeft, tilemapTop, width, height, saved);
+}
+
+static void WindowFunc_DrawStandardFrame_(u8 bg, u8 tilemapLeft, u8 tilemapTop, u8 width, u8 height, u8 paletteNum)
 {
     int i;
 
@@ -413,7 +428,10 @@ static void WindowFunc_DrawDialogueFrame(u8 bg, u8 tilemapLeft, u8 tilemapTop, u
 
 static void WindowFunc_ClearStdWindowAndFrame(u8 bg, u8 tilemapLeft, u8 tilemapTop, u8 width, u8 height, u8 paletteNum)
 {
+    u16 saved[2 * 34] = {0};
+    MP_FrameJoin_Save(bg, tilemapLeft, tilemapTop, width, height, saved);
     FillBgTilemapBufferRect(bg, 0, tilemapLeft - 1, tilemapTop - 1, width + 2, height + 2, STD_WINDOW_PALETTE_NUM);
+    MP_FrameJoin_Clear(bg, tilemapLeft, tilemapTop, width, height, saved);   // Moemon Co-op
 }
 
 static void WindowFunc_ClearDialogWindowAndFrame(u8 bg, u8 tilemapLeft, u8 tilemapTop, u8 width, u8 height, u8 paletteNum)

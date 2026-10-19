@@ -552,3 +552,183 @@ void MP_ShowFieldMessageFitted(const u8 *text)
     FitMessageBoxText(sFitted, sizeof(sFitted), sExpanded);
     ShowFieldMessage(sFitted);
 }
+
+// ---------------------------------------------------------------------------
+// Joined frames: where two co-op windows meet (one's bottom edge on the row
+// above the other's top edge, or both edges on the same row), the frame art's
+// see-through rows let the map show through as a thin gap. While a co-op menu
+// is up, the frames there are drawn with joint tiles instead (menu.c calls
+// these from the standard frame draw / clear).
+#include "bg.h"
+
+#define JOIN_BASE     0x2F0   // BG0 tiles 0x2F0-0x2FE (free in the field layout: tiles 0x8000-0xDFFF)
+#define STD_WINDOW_PALETTE_NUM   14      // as in menu.c
+#define STD_WINDOW_BASE_TILE_NUM 0x214
+#define JOIN_EXT_DOWN 0       // + 0..2: bottom edge tiles 6..8, filled to the bottom
+#define JOIN_EXT_UP   3       // + 0..2: top edge tiles 0..2, filled to the top
+#define JOIN_MERGED   6       // + (bottom 0..2) * 3 + top 0..2: one shared row
+
+static bool8 JoinUsable(u8 bg)
+{
+    return sThemeOn && GetBgAttribute(bg, BG_ATTR_CHARBASEINDEX) == 2 && GetBgAttribute(bg, BG_ATTR_MAPBASEINDEX) == 31;
+}
+
+static u8 Px(const u8 *t, int x, int y)
+{
+    u8 b = t[y * 4 + x / 2];
+    return (x & 1) ? b >> 4 : b & 0xF;
+}
+
+static void SetPx(u8 *t, int x, int y, u8 v)
+{
+    u8 *b = &t[y * 4 + x / 2];
+    *b = (x & 1) ? (*b & 0x0F) | (v << 4) : (*b & 0xF0) | v;
+}
+
+static void LoadJoinTiles(u8 bg)
+{
+    static u8 sJoinTiles[15][32];
+    const u8 *frame = (const u8 *)GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles;
+    int i, j, x, y;
+    for (i = 0; i < 3; i++)
+    {
+        u8 *down = sJoinTiles[JOIN_EXT_DOWN + i], *up = sJoinTiles[JOIN_EXT_UP + i];
+        memcpy(down, frame + (6 + i) * 32, 32);
+        memcpy(up, frame + i * 32, 32);
+        for (x = 0; x < 8; x++)
+        {
+            // See-through pixels under the last drawn one take its color (and above the first one)
+            for (y = 7; y >= 0 && !Px(down, x, y); y--)
+                ;
+            if (y >= 0)
+                for (j = y + 1; j < 8; j++)
+                    SetPx(down, x, j, Px(down, x, y));
+            for (y = 0; y < 8 && !Px(up, x, y); y++)
+                ;
+            if (y < 8)
+                for (j = y - 1; j >= 0; j--)
+                    SetPx(up, x, j, Px(up, x, y));
+        }
+        for (j = 0; j < 3; j++)
+        {
+            u8 *m = sJoinTiles[JOIN_MERGED + i * 3 + j];
+            memcpy(m, frame + (6 + i) * 32, 16);          // the upper window's bottom edge, top half
+            memcpy(m + 16, frame + j * 32 + 16, 16);      // the lower window's top edge, bottom half
+        }
+    }
+    LoadBgTiles(bg, sJoinTiles, sizeof(sJoinTiles), JOIN_BASE);
+}
+
+// The standard frame piece (0-8) at a tilemap entry, or -1
+static int FramePiece(u16 entry)
+{
+    int t = (entry & 0x3FF) - STD_WINDOW_BASE_TILE_NUM;
+    return ((entry >> 12) == STD_WINDOW_PALETTE_NUM && t >= 0 && t <= 8) ? t : -1;
+}
+
+static int JoinPiece(u16 entry)
+{
+    int t = (entry & 0x3FF) - JOIN_BASE;
+    return ((entry >> 12) == STD_WINDOW_PALETTE_NUM && t >= 0 && t < 15) ? t : -1;
+}
+
+static u16 Entry(int tile)
+{
+    return tile | (STD_WINDOW_PALETTE_NUM << 12);
+}
+
+// Before a frame is drawn: the tiles under its top and bottom rows
+void MP_FrameJoin_Save(u8 bg, u8 left, u8 top, u8 width, u8 height, u16 *saved)
+{
+    u16 *map = GetBgTilemapBuffer(bg);
+    int x, i = 0;
+    if (!map || !JoinUsable(bg))
+        return;
+    for (x = left - 1; x <= left + width; x++, i++)
+    {
+        saved[i * 2] = (top >= 1 && x >= 0 && x < 32) ? map[(top - 1) * 32 + x] : 0;
+        saved[i * 2 + 1] = (top + height < 32 && x >= 0 && x < 32) ? map[(top + height) * 32 + x] : 0;
+    }
+}
+
+// After it is drawn: joint tiles where it meets another frame
+void MP_FrameJoin_Apply(u8 bg, u8 left, u8 top, u8 width, u8 height, const u16 *saved)
+{
+    u16 *map = GetBgTilemapBuffer(bg);
+    int x, i = 0, rt = top - 1, rb = top + height;
+    bool8 any = FALSE;
+    if (!map || !JoinUsable(bg))
+        return;
+    for (x = left - 1; x <= left + width; x++, i++)
+    {
+        int edge = (x == left - 1) ? 0 : (x == left + width) ? 2 : 1;   // which corner / edge piece
+        int old, p;
+        if (x < 0 || x >= 32)
+            continue;
+        // Top row: on another frame's bottom edge, or just under it
+        if (rt >= 0)
+        {
+            old = FramePiece(saved[i * 2]);
+            if (old >= 6)
+            {
+                map[rt * 32 + x] = Entry(JOIN_BASE + JOIN_MERGED + (old - 6) * 3 + edge);
+                any = TRUE;
+            }
+            else if (rt >= 1 && (p = FramePiece(map[(rt - 1) * 32 + x])) >= 6)
+            {
+                map[(rt - 1) * 32 + x] = Entry(JOIN_BASE + JOIN_EXT_DOWN + p - 6);
+                map[rt * 32 + x] = Entry(JOIN_BASE + JOIN_EXT_UP + edge);
+                any = TRUE;
+            }
+        }
+        // Bottom row: on another frame's top edge, or just over it
+        if (rb < 32)
+        {
+            old = FramePiece(saved[i * 2 + 1]);
+            if (old >= 0 && old <= 2)
+            {
+                map[rb * 32 + x] = Entry(JOIN_BASE + JOIN_MERGED + edge * 3 + old);
+                any = TRUE;
+            }
+            else if (rb + 1 < 32 && (p = FramePiece(map[(rb + 1) * 32 + x])) >= 0 && p <= 2)
+            {
+                map[rb * 32 + x] = Entry(JOIN_BASE + JOIN_EXT_DOWN + edge);
+                map[(rb + 1) * 32 + x] = Entry(JOIN_BASE + JOIN_EXT_UP + p);
+                any = TRUE;
+            }
+        }
+    }
+    if (any)
+        LoadJoinTiles(bg);
+}
+
+// After a frame is cleared: the frame it was joined to gets its own edge back
+void MP_FrameJoin_Clear(u8 bg, u8 left, u8 top, u8 width, u8 height, const u16 *saved)
+{
+    u16 *map = GetBgTilemapBuffer(bg);
+    int x, i = 0, rt = top - 1, rb = top + height;
+    if (!map || !JoinUsable(bg))
+        return;
+    for (x = left - 1; x <= left + width; x++, i++)
+    {
+        int j;
+        if (x < 0 || x >= 32)
+            continue;
+        if (rt >= 0)
+        {
+            j = JoinPiece(saved[i * 2]);
+            if (j >= JOIN_MERGED)
+                map[rt * 32 + x] = Entry(STD_WINDOW_BASE_TILE_NUM + 6 + (j - JOIN_MERGED) / 3);
+            if (rt >= 1 && (j = JoinPiece(map[(rt - 1) * 32 + x])) >= JOIN_EXT_DOWN && j < JOIN_EXT_UP)
+                map[(rt - 1) * 32 + x] = Entry(STD_WINDOW_BASE_TILE_NUM + 6 + j - JOIN_EXT_DOWN);
+        }
+        if (rb < 32)
+        {
+            j = JoinPiece(saved[i * 2 + 1]);
+            if (j >= JOIN_MERGED)
+                map[rb * 32 + x] = Entry(STD_WINDOW_BASE_TILE_NUM + (j - JOIN_MERGED) % 3);
+            if (rb + 1 < 32 && (j = JoinPiece(map[(rb + 1) * 32 + x])) >= JOIN_EXT_UP && j < JOIN_MERGED)
+                map[(rb + 1) * 32 + x] = Entry(STD_WINDOW_BASE_TILE_NUM + j - JOIN_EXT_UP);
+        }
+    }
+}
