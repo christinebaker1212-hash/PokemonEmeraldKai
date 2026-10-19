@@ -28,12 +28,13 @@ QUICK START
      JOIN A GAME  - choose ENTER INVITE CODE... and type the code your
                     friend sent, then the password if they set one.
                     Friends on the same Wi-Fi also show up in the list.
-     PLAY SOLO    - play alone. You can go online later from START > CO-OP.
+     PLAY SOLO    - play alone. Go online later from the CO-OP menu (C key, or
+                    Y/Triangle on a controller).
 4. Load your save or start a new game. That's it.
 
 Typing works with the real keyboard (Ctrl+V pastes). The game remembers the
 last server, so next time JOIN offers it straight away. While you host, the
-invite code is also shown at the bottom of START > CO-OP.
+invite code is also shown at the bottom of the CO-OP menu.
 
 
 PLAYING OVER THE INTERNET
@@ -126,7 +127,7 @@ you have all eight badges). Your friend joins the usual way, by standing next
 to you and facing you. Both of you get a reward for winning.
 
 
-TOURNAMENT (START > CO-OP > TOURNAMENT)
+TOURNAMENT (CO-OP menu > TOURNAMENT)
 ---------------------------------------
 A quick battle tournament between everyone online. Everyone battles everyone
 once, a few matches at a time; with an odd number of players someone sits out
@@ -156,7 +157,7 @@ PVP: THE BATTLE FLAG
   and no EXP is gained, like Cable Club battles.
 
 
-TRADING, THE SHARED PC AND DAILY GIFTS (START > CO-OP)
+TRADING, THE SHARED PC AND DAILY GIFTS (CO-OP menu)
 -----------------------------------------------------
 TRADE...      Trade with a friend anywhere: a Pokemon, up to two kinds of
               items and money, in any mix. Both of you pick your side, choose
@@ -172,7 +173,7 @@ Pokemon you get from a friend keep their original trainer (they gain more
 EXP, but very high levels may not obey you until you have more badges).
 
 
-PLAYING TOGETHER EVERY DAY (START > CO-OP > DAILY)
+PLAYING TOGETHER EVERY DAY (CO-OP menu > DAILY)
 --------------------------------------------------
 TEAM GOALS     Three new goals every day for everyone on your server, like
                "Beat 9 trainers as a team". Targets grow with the number of
@@ -189,7 +190,7 @@ WEEKLY RACE    A different challenge every week with a leaderboard. The
 ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
                co-op wins, badges, trades, gifts). Each gives every player a
                MOEGATCHA pull.
-MOEGATCHA      (START > CO-OP > MOEGATCHA) Spend pulls on the prize reel:
+MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                it races past prizes and slowly clicks down onto yours.
                Five rarities: COMMON 55%, UNCOMMON
                28%, RARE 12%, SUPER RARE 4.5%, ULTRA RARE 0.5%. The top ones
@@ -206,7 +207,7 @@ you're low, Poke Balls if you're out.
 Days change at midnight UTC so friends in different countries share them.
 
 
-HANGING OUT (START > CO-OP > SOCIAL)
+HANGING OUT (CO-OP menu > SOCIAL)
 ------------------------------------
 EMOTES & PHRASES  Emotes, quick lines and your four phrases (keys 1-8 too).
                   Do the same emote as a friend close by at the same moment
@@ -246,7 +247,7 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Pokemon in a box takes it into your party; R on a party Pokemon
   stores it (you pick the box).
-* START > CO-OP > MOVE TUTOR: the Move Tutor's service anywhere, still one
+* CO-OP menu > MOVE TUTOR: the Move Tutor's service anywhere, still one
   HEART SCALE per move.
 * Item descriptions show in the shared PC and in trades.
 * Signs and lines you've already read appear instantly. Hold START during a
@@ -266,7 +267,7 @@ your follower walking behind you too. It hides while you surf or dive and
 comes back when you land. The choice is remembered in moemon_coop.ini.
 
 
-DRESSING UP (START > CO-OP)
+DRESSING UP (CO-OP menu)
 ---------------------------
   SPRITE   any trainer or NPC in the game (Left/Right, L/R jump 10).
            It's used everywhere: walking, running, biking, surfing,
@@ -281,7 +282,7 @@ Characters without a battle back sprite: in battle your trainer isn't shown
 
 SPRITE EDITOR
 -------------
-START > CO-OP > EDIT SPRITES... saves your current character as a sprite
+CO-OP menu > EDIT SPRITES... saves your current character as a sprite
 sheet in the "sprites" folder and opens "Sprite Editor.html" in your web
 browser (it works offline).
 
@@ -327,6 +328,7 @@ CONTROLS (keyboard)
 -------------------
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R
+  C = CO-OP menu          1-8 = emotes and your phrases
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
 
 

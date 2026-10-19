@@ -123,7 +123,7 @@ struct JoinEntry
 static EWRAM_DATA struct
 {
     bool8 active;
-    bool8 fromField;           // opened from START > CO-OP during the game
+    bool8 fromField;           // opened from CO-OP menu during the game
     u8 screen;
     u8 cursor;
     u8 scroll;
@@ -370,7 +370,7 @@ static const char *MainItemHelp(u8 item)
     case MAIN_REJOIN:   return "Join the server you played on last time.";
     case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
     case MAIN_JOIN:     return "Find a friend's server and hop in.";
-    default:            return sSetup.fromField ? "Return to the game." : "Play alone. You can go online later from START > CO-OP.";
+    default:            return sSetup.fromField ? "Return to the game." : "Play alone. Go online later with the C key / Y button.";
     }
 }
 

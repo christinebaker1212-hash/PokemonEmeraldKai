@@ -1,4 +1,4 @@
-// Moemon Co-op: START > CO-OP > TOURNAMENT. A quick battle tournament
+// Moemon Co-op: CO-OP menu > TOURNAMENT. A quick battle tournament
 // between everyone online, using the PvP link battles (friendly: no money
 // changes hands and nobody blacks out).
 //
@@ -627,7 +627,7 @@ void MP_Tourney_OpenMenu(void)
     InitIfNeeded();
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (START > CO-OP) to hold a battle tournament.");
+        MP_ShowNotice("Go online (CO-OP menu: C key or Y button) to hold a battle tournament.");
         return;
     }
     if (sT.state == TS_RUNNING || sT.state == TS_DONE)

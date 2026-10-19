@@ -2490,7 +2490,7 @@ static void PlayerHandleDrawTrainerPic(void)
     // Use the back pic in any other scenario.
     else
     {
-        // Moemon Co-op: the character picked in START > CO-OP
+        // Moemon Co-op: the character picked in CO-OP menu
         if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive)
             trainerPicId = MP_LocalBackPicOr(trainerPicId);
         DecompressTrainerBackPic(trainerPicId, gActiveBattler);
@@ -2534,7 +2534,7 @@ static void PlayerHandleTrainerSlide(void)
         trainerPicId = gSaveBlock2Ptr->playerGender + TRAINER_BACK_PIC_BRENDAN;
     }
 
-    // Moemon Co-op: the character picked in START > CO-OP
+    // Moemon Co-op: the character picked in CO-OP menu
     if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) || gNetLinkActive)
         trainerPicId = MP_LocalBackPicOr(trainerPicId);
     DecompressTrainerBackPic(trainerPicId, gActiveBattler);

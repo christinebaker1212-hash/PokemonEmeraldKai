@@ -1,4 +1,4 @@
-// Moemon Co-op: overworld sprites players can pick (START > CO-OP > SPRITE).
+// Moemon Co-op: overworld sprites players can pick (CO-OP menu > SPRITE).
 // Generated from src/data/object_events (only sprites with full 9-frame walking
 // animations). Each entry: graphics id, menu name, trainer card / battle front
 // pic, battle back pic, and which default sprites (bike, surf...) to fall back to.

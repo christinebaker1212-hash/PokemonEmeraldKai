@@ -1,4 +1,4 @@
-// Moemon Co-op: START > CO-OP > SOCIAL.
+// Moemon Co-op: CO-OP menu > SOCIAL.
 //   * Chat log: everything said and emoted, and the news pop-ups
 //   * Emote combos: two players doing the same emote together get a big one
 //   * Scribbles: leave one of your phrases on a signpost for friends to read

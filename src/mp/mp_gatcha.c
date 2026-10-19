@@ -96,7 +96,7 @@ struct EventMon
     bool8 fateful;         // Mew/Deoxys obey only when met in a fateful encounter
 };
 
-enum { EV_JIRACHI, EV_MEW, EV_CELEBI, EV_DEOXYS, EV_ZIGZAGOON, EV_PICHU, EV_SKITTY, EV_SWABLU };
+enum { EV_JIRACHI, EV_MEW, EV_CELEBI, EV_DEOXYS, EV_ZIGZAGOON, EV_PICHU, EV_SKITTY, EV_SWABLU, EV_LATIAS, EV_LATIOS, EV_LUGIA, EV_HOOH };
 
 // Movesets of real Generation 3 event Pokémon
 static const struct EventMon sEventMons[] = {
@@ -108,9 +108,14 @@ static const struct EventMon sEventMons[] = {
     [EV_PICHU]     = {"BOX PICHU", SPECIES_PICHU, 5, {MOVE_THUNDER_SHOCK, MOVE_CHARM, MOVE_SURF, MOVE_NONE}, NULL, 0, FALSE},
     [EV_SKITTY]    = {"BOX SKITTY", SPECIES_SKITTY, 5, {MOVE_GROWL, MOVE_TACKLE, MOVE_TAIL_WHIP, MOVE_PAY_DAY}, NULL, 0, FALSE},
     [EV_SWABLU]    = {"BOX SWABLU", SPECIES_SWABLU, 5, {MOVE_PECK, MOVE_GROWL, MOVE_FALSE_SWIPE, MOVE_NONE}, NULL, 0, FALSE},
+    // EON TICKET and MYSTIC TICKET encounters
+    [EV_LATIAS]    = {"SOUTHERN LATIAS", SPECIES_LATIAS, 50, {MOVE_MIST_BALL, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_CHARM}, NULL, 0, FALSE},
+    [EV_LATIOS]    = {"SOUTHERN LATIOS", SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, NULL, 0, FALSE},
+    [EV_LUGIA]     = {"NAVEL ROCK LUGIA", SPECIES_LUGIA, 70, {MOVE_RECOVER, MOVE_HYDRO_PUMP, MOVE_RAIN_DANCE, MOVE_SWIFT}, NULL, 0, TRUE},
+    [EV_HOOH]      = {"NAVEL ROCK HO-OH", SPECIES_HO_OH, 70, {MOVE_RECOVER, MOVE_FIRE_BLAST, MOVE_SUNNY_DAY, MOVE_SWIFT}, NULL, 0, TRUE},
 };
 
-enum { K_ITEM, K_MONEY, K_MON };
+enum { K_ITEM, K_MONEY, K_MON, K_SET };   // K_SET: several items at once (sSets)
 
 struct PrizeDef
 {
@@ -125,6 +130,14 @@ struct PrizeDef
 #define MONEY(m, w)   {K_MONEY, ITEM_AMULET_COIN, m, w, FALSE}
 #define MON(e, w)     {K_MON, e, 1, w, FALSE}
 #define SHINY(e, w)   {K_MON, e, 1, w, TRUE}
+#define SET(n, q, w)  {K_SET, n, q, w, FALSE}
+
+enum { SET_VITAMINS, SET_BALLS };
+static const u16 sSets[][6] = {
+    [SET_VITAMINS] = {ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CALCIUM, ITEM_ZINC, ITEM_CARBOS},
+    [SET_BALLS]    = {ITEM_NET_BALL, ITEM_DIVE_BALL, ITEM_NEST_BALL, ITEM_REPEAT_BALL, ITEM_TIMER_BALL, ITEM_LUXURY_BALL},
+};
+static const char *const sSetNames[] = {[SET_VITAMINS] = "VITAMIN SET", [SET_BALLS] = "BALL SET"};
 
 static const struct PrizeDef sCommon[] = {
     ITEM(ITEM_POKE_BALL, 10, 10), ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_SUPER_POTION, 5, 10),
@@ -155,13 +168,123 @@ static const struct PrizeDef sUltra[] = {
     ITEM(ITEM_MASTER_BALL, 3, 6), MONEY(200000, 6),
 };
 
-static const struct { const struct PrizeDef *defs; u8 count; } sPools[R_COUNT] = {
-    {sCommon, ARRAY_COUNT(sCommon)},
-    {sUncommon, ARRAY_COUNT(sUncommon)},
-    {sRare, ARRAY_COUNT(sRare)},
-    {sSuper, ARRAY_COUNT(sSuper)},
-    {sUltra, ARRAY_COUNT(sUltra)},
+// TRAINING banner: build your Moemon up
+static const struct PrizeDef sTrainCommon[] = {
+    ITEM(ITEM_RARE_CANDY, 1, 14), ITEM(ITEM_HP_UP, 1, 6), ITEM(ITEM_PROTEIN, 1, 6), ITEM(ITEM_IRON, 1, 6),
+    ITEM(ITEM_CALCIUM, 1, 6), ITEM(ITEM_ZINC, 1, 6), ITEM(ITEM_CARBOS, 1, 6),
 };
+static const struct PrizeDef sTrainUncommon[] = {
+    ITEM(ITEM_RARE_CANDY, 2, 14), ITEM(ITEM_HP_UP, 2, 5), ITEM(ITEM_PROTEIN, 2, 5), ITEM(ITEM_IRON, 2, 5),
+    ITEM(ITEM_CALCIUM, 2, 5), ITEM(ITEM_ZINC, 2, 5), ITEM(ITEM_CARBOS, 2, 5), ITEM(ITEM_PP_UP, 1, 8),
+};
+static const struct PrizeDef sTrainRare[] = {
+    ITEM(ITEM_RARE_CANDY, 5, 14), ITEM(ITEM_HP_UP, 5, 3), ITEM(ITEM_PROTEIN, 5, 3), ITEM(ITEM_IRON, 5, 3),
+    ITEM(ITEM_CALCIUM, 5, 3), ITEM(ITEM_ZINC, 5, 3), ITEM(ITEM_CARBOS, 5, 3), ITEM(ITEM_PP_UP, 3, 8),
+    ITEM(ITEM_LUCKY_EGG, 1, 5), ITEM(ITEM_MACHO_BRACE, 1, 5), ITEM(ITEM_EXP_SHARE, 1, 5),
+};
+static const struct PrizeDef sTrainSuper[] = {
+    ITEM(ITEM_RARE_CANDY, 15, 14), ITEM(ITEM_PP_MAX, 3, 10), SET(SET_VITAMINS, 3, 12),
+};
+static const struct PrizeDef sTrainUltra[] = {
+    ITEM(ITEM_RARE_CANDY, 50, 10), SET(SET_VITAMINS, 10, 10), ITEM(ITEM_PP_MAX, 10, 6),
+};
+
+// BALL banner: special and hard-to-find POKé BALLS
+static const struct PrizeDef sBallCommon[] = {
+    ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_NET_BALL, 3, 8), ITEM(ITEM_DIVE_BALL, 3, 8), ITEM(ITEM_NEST_BALL, 3, 8),
+    ITEM(ITEM_REPEAT_BALL, 3, 8), ITEM(ITEM_TIMER_BALL, 3, 8), ITEM(ITEM_PREMIER_BALL, 3, 8), ITEM(ITEM_LUXURY_BALL, 1, 6),
+};
+static const struct PrizeDef sBallUncommon[] = {
+    ITEM(ITEM_ULTRA_BALL, 5, 10), ITEM(ITEM_NET_BALL, 5, 6), ITEM(ITEM_DIVE_BALL, 5, 6), ITEM(ITEM_NEST_BALL, 5, 6),
+    ITEM(ITEM_REPEAT_BALL, 5, 6), ITEM(ITEM_TIMER_BALL, 5, 6), ITEM(ITEM_LUXURY_BALL, 3, 8), ITEM(ITEM_PREMIER_BALL, 10, 6),
+};
+static const struct PrizeDef sBallRare[] = {
+    ITEM(ITEM_ULTRA_BALL, 15, 10), ITEM(ITEM_LUXURY_BALL, 8, 8), ITEM(ITEM_NET_BALL, 10, 5), ITEM(ITEM_DIVE_BALL, 10, 5),
+    ITEM(ITEM_NEST_BALL, 10, 5), ITEM(ITEM_REPEAT_BALL, 10, 5), ITEM(ITEM_TIMER_BALL, 10, 5), SET(SET_BALLS, 3, 8),
+};
+static const struct PrizeDef sBallSuper[] = {
+    ITEM(ITEM_MASTER_BALL, 1, 14), SET(SET_BALLS, 10, 8), ITEM(ITEM_LUXURY_BALL, 30, 6),
+};
+static const struct PrizeDef sBallUltra[] = {
+    ITEM(ITEM_MASTER_BALL, 3, 10), ITEM(ITEM_MASTER_BALL, 5, 4), SET(SET_BALLS, 30, 6),
+};
+
+// PICKUP banner: one featured event Moemon a week, filled in by SetupPickup()
+static const u8 sPickupOrder[] = {EV_JIRACHI, EV_LATIAS, EV_MEW, EV_LUGIA, EV_CELEBI, EV_LATIOS, EV_HOOH};
+static struct PrizeDef sPickupUltra[2];
+static struct PrizeDef sPickupSuper[ARRAY_COUNT(sPickupOrder) - 1 + 4];
+static const struct PrizeDef sPickupRare[] = {
+    MON(EV_ZIGZAGOON, 6), MON(EV_PICHU, 6), MON(EV_SKITTY, 6), MON(EV_SWABLU, 6),
+    ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_PP_UP, 2, 8), MONEY(15000, 8),
+};
+
+enum { BANNER_STANDARD, BANNER_PICKUP, BANNER_TRAINING, BANNER_BALLS, BANNER_COUNT };
+
+struct Pool { const struct PrizeDef *defs; u8 count; };
+
+struct BannerDef
+{
+    const char *name;
+    const char *tagline;
+    struct Pool pools[R_COUNT];
+    u16 perMille[R_COUNT];   // chance of each rarity, out of 1000
+    u16 accent;              // color of the stripes and panels
+};
+
+static struct BannerDef sBanners[BANNER_COUNT] = {
+    [BANNER_STANDARD] = {
+        "STANDARD", "Event Moemon, items and money!",
+        {{sCommon, ARRAY_COUNT(sCommon)}, {sUncommon, ARRAY_COUNT(sUncommon)}, {sRare, ARRAY_COUNT(sRare)},
+         {sSuper, ARRAY_COUNT(sSuper)}, {sUltra, ARRAY_COUNT(sUltra)}},
+        {550, 280, 120, 45, 5}, 0,
+    },
+    [BANNER_PICKUP] = {
+        "PICKUP", NULL,   // tagline names the featured Moemon
+        {{sCommon, ARRAY_COUNT(sCommon)}, {sUncommon, ARRAY_COUNT(sUncommon)}, {sPickupRare, ARRAY_COUNT(sPickupRare)},
+         {sPickupSuper, ARRAY_COUNT(sPickupSuper)}, {sPickupUltra, ARRAY_COUNT(sPickupUltra)}},
+        {520, 280, 140, 50, 10}, RGB(31, 10, 20),
+    },
+    [BANNER_TRAINING] = {
+        "TRAINING", "RARE CANDIES and vitamins!",
+        {{sTrainCommon, ARRAY_COUNT(sTrainCommon)}, {sTrainUncommon, ARRAY_COUNT(sTrainUncommon)}, {sTrainRare, ARRAY_COUNT(sTrainRare)},
+         {sTrainSuper, ARRAY_COUNT(sTrainSuper)}, {sTrainUltra, ARRAY_COUNT(sTrainUltra)}},
+        {550, 280, 120, 45, 5}, RGB(31, 17, 2),
+    },
+    [BANNER_BALLS] = {
+        "POKE BALLS", "Rare and special POK~ BALLS!",
+        {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
+         {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}},
+        {550, 280, 120, 45, 5}, RGB(6, 18, 31),
+    },
+};
+
+static u8 sBanner;   // the banner shown (kept between visits)
+
+static u8 PickupFeatured(void)
+{
+    return sPickupOrder[MP_WeekNumber() % ARRAY_COUNT(sPickupOrder)];
+}
+
+// This week's PICKUP: the featured one as the ULTRA RARE (1 in 4 shiny), the
+// other headliners as SUPER RAREs
+static void SetupPickup(void)
+{
+    u8 feat = PickupFeatured(), i, n = 0;
+    sPickupUltra[0] = (struct PrizeDef)MON(feat, 75);
+    sPickupUltra[1] = (struct PrizeDef)SHINY(feat, 25);
+    for (i = 0; i < ARRAY_COUNT(sPickupOrder); i++)
+        if (sPickupOrder[i] != feat)
+            sPickupSuper[n++] = (struct PrizeDef)MON(sPickupOrder[i], 6);
+    sPickupSuper[n++] = (struct PrizeDef)SHINY(EV_ZIGZAGOON, 3);
+    sPickupSuper[n++] = (struct PrizeDef)SHINY(EV_PICHU, 3);
+    sPickupSuper[n++] = (struct PrizeDef)SHINY(EV_SKITTY, 3);
+    sPickupSuper[n++] = (struct PrizeDef)SHINY(EV_SWABLU, 3);
+}
+
+static const struct Pool *BannerPool(u8 rarity)
+{
+    return &sBanners[sBanner].pools[rarity];
+}
 
 struct Result
 {
@@ -188,33 +311,58 @@ static bool8 FreeTenAvailable(void)
 
 static const struct PrizeDef *PickFromPool(u8 rarity)
 {
+    const struct Pool *pool = BannerPool(rarity);
     u16 total = 0, i, pick;
-    for (i = 0; i < sPools[rarity].count; i++)
-        total += sPools[rarity].defs[i].weight;
+    for (i = 0; i < pool->count; i++)
+        total += pool->defs[i].weight;
     pick = Random() % total;
-    for (i = 0; i < sPools[rarity].count; i++)
+    for (i = 0; i < pool->count; i++)
     {
-        if (pick < sPools[rarity].defs[i].weight)
-            return &sPools[rarity].defs[i];
-        pick -= sPools[rarity].defs[i].weight;
+        if (pick < pool->defs[i].weight)
+            return &pool->defs[i];
+        pick -= pool->defs[i].weight;
     }
-    return &sPools[rarity].defs[0];
+    return &pool->defs[0];
+}
+
+// Each banner keeps its own pity count (STANDARD keeps the old keys)
+static void PityKeys(char *sr, char *ur)
+{
+    if (sBanner == BANNER_STANDARD)
+    {
+        strcpy(sr, PITY_SR_KEY);
+        strcpy(ur, PITY_UR_KEY);
+    }
+    else
+    {
+        sprintf(sr, "%s%d", PITY_SR_KEY, sBanner);
+        sprintf(ur, "%s%d", PITY_UR_KEY, sBanner);
+    }
 }
 
 static u8 RollRarity(bool8 rarePlus)
 {
-    s32 sinceSuper = MP_SaveData_Get(PITY_SR_KEY), sinceUltra = MP_SaveData_Get(PITY_UR_KEY);
+    char srKey[24], urKey[24];
+    const u16 *pm = sBanners[sBanner].perMille;
+    s32 sinceSuper, sinceUltra;
     u16 r = Random() % 1000;
-    u8 rarity = r < 5 ? R_ULTRA : r < 50 ? R_SUPER : r < 170 ? R_RARE : r < 450 ? R_UNCOMMON : R_COMMON;
+    u8 rarity;
 
+    PityKeys(srKey, urKey);
+    sinceSuper = MP_SaveData_Get(srKey);
+    sinceUltra = MP_SaveData_Get(urKey);
+    rarity = r < pm[R_ULTRA] ? R_ULTRA
+           : r < pm[R_ULTRA] + pm[R_SUPER] ? R_SUPER
+           : r < pm[R_ULTRA] + pm[R_SUPER] + pm[R_RARE] ? R_RARE
+           : r < pm[R_ULTRA] + pm[R_SUPER] + pm[R_RARE] + pm[R_UNCOMMON] ? R_UNCOMMON : R_COMMON;
     if (sinceUltra + 1 >= UR_PITY)
         rarity = R_ULTRA;
     else if (sinceSuper + 1 >= SR_PITY && rarity < R_SUPER)
         rarity = R_SUPER;
     if (rarePlus && rarity < R_RARE)
         rarity = R_RARE;
-    MP_SaveData_Set(PITY_SR_KEY, rarity >= R_SUPER ? 0 : sinceSuper + 1);
-    MP_SaveData_Set(PITY_UR_KEY, rarity == R_ULTRA ? 0 : sinceUltra + 1);
+    MP_SaveData_Set(srKey, rarity >= R_SUPER ? 0 : sinceSuper + 1);
+    MP_SaveData_Set(urKey, rarity == R_ULTRA ? 0 : sinceUltra + 1);
     return rarity;
 }
 
@@ -230,6 +378,11 @@ static void PrizeName(const struct PrizeDef *def, u32 amount, u8 *dst)
     else if (def->kind == K_MON)
     {
         snprintf(buf, sizeof(buf), "%s%s", def->shiny ? "SHINY " : "", sEventMons[def->id].title);
+        MP_AsciiToGame(dst, buf, 30);
+    }
+    else if (def->kind == K_SET)
+    {
+        snprintf(buf, sizeof(buf), "%s x%u", sSetNames[def->id], (unsigned)def->qty);
         MP_AsciiToGame(dst, buf, 30);
     }
     else
@@ -313,6 +466,21 @@ static void GivePrize(struct Result *res)
     case K_MON:
         GiveEventMon(def, res);
         break;
+    case K_SET:
+    {
+        u8 i, missed = 0;
+        for (i = 0; i < ARRAY_COUNT(sSets[0]); i++)
+            if (!AddBagItem(sSets[def->id][i], def->qty))
+                missed++;
+        if (missed)
+        {
+            AddMoney(&gSaveBlock1Ptr->money, 1000 * missed);
+            snprintf(res->note, sizeof(res->note), "Some didn't fit: $%d instead.", 1000 * missed);
+        }
+        else
+            snprintf(res->note, sizeof(res->note), "x%u of each of the six!", (unsigned)def->qty);
+        break;
+    }
     default:
         if (!AddBagItem(def->id, def->qty))
         {
@@ -675,8 +843,9 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
     else
     {
         *isMon = FALSE;
-        id = AddItemIconSprite(TAG_ICON + slot, TAG_ITEM_PAL + def->id, def->id);
-        if (id < MAX_SPRITES && IndexOfSpritePaletteTag(TAG_ITEM_PAL + def->id) == 0xFF)
+        u16 item = def->kind == K_SET ? sSets[def->id][0] : def->id;   // a set shows its first item
+        id = AddItemIconSprite(TAG_ICON + slot, TAG_ITEM_PAL + item, item);
+        if (id < MAX_SPRITES && IndexOfSpritePaletteTag(TAG_ITEM_PAL + item) == 0xFF)
         {
             // No palette slot left: an empty box looks better than garbage
             DestroySprite(&gSprites[id]);
@@ -685,7 +854,7 @@ static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *i
         }
         if (id < MAX_SPRITES)
         {
-            sIconItem[slot] = def->id;
+            sIconItem[slot] = item;
             // The 24x24 picture sits in the top-left of its 32x32 sprite
             gSprites[id].x = x;
             gSprites[id].y = y;
@@ -734,6 +903,8 @@ static void UpdateReel(void)
         if (l->cell != i)
         {
             DestroyLive(l, slot);
+            if (Cell(i)->def == NULL)   // never filled in: give it a prize to show
+                MakeTeaser(Cell(i));
             l->spriteId = CreateIcon(Cell(i)->def, slot, x, REEL_TOP + 16, &l->isMon);
             l->cell = i;
         }
@@ -942,7 +1113,7 @@ static void StartSpin(u8 count)
 
     // New cells past the visible part of the reel, and the prize where it stops
     prizeCell = center + SPIN_CELLS;
-    for (i = 5; i < SPIN_CELLS + 8; i++)
+    for (i = 5; i <= SPIN_CELLS + 8; i++)   // up to genUpTo below: those count as filled in
         MakeTeaser(Cell(center + i));
     Cell(prizeCell)->def = sG->results[best].def;
     Cell(prizeCell)->rarity = sG->results[best].rarity;

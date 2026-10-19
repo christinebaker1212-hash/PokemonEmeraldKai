@@ -1915,3 +1915,10 @@ u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor)
     RestoreTextColors(&fg, &bg, &shadow);
     return gCurGlyph.width;
 }
+
+// Moemon Co-op QoL: is this window's printer still putting characters down
+// (not waiting for a button, not done)?
+bool8 MP_TextPrinterIsPrintingChars(u8 windowId)
+{
+    return sTextPrinters[windowId].active && sTextPrinters[windowId].state == RENDER_STATE_HANDLE_CHAR;
+}

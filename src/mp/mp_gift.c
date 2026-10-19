@@ -1,4 +1,4 @@
-// Moemon Co-op: START > CO-OP > DAILY GIFT. Once a day you can send each
+// Moemon Co-op: CO-OP menu > DAILY GIFT. Once a day you can send each
 // friend online today's gift. They get the gift; you get a thank-you bonus
 // that grows with the number of players online. The gift changes every day.
 #include <stdio.h>
@@ -186,7 +186,7 @@ void MP_Gift_OpenMenu(void)
 {
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (START > CO-OP) to send gifts to friends.");
+        MP_ShowNotice("Go online (CO-OP menu: C key or Y button) to send gifts to friends.");
         return;
     }
     memset(&sGiftUi, 0, sizeof(sGiftUi));

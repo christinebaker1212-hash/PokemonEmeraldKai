@@ -490,7 +490,8 @@ u8 GetPlayerTextSpeedDelay(void)
 u8 AddStartMenuWindow(u8 numActions)
 {
     if (sStartMenuWindowId == WINDOW_NONE)
-        sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 2, 15, 0x139);
+        // Moemon Kai PC: one tile wider (SETTINGS), and 9 entries fit without the margins
+        sStartMenuWindowId = AddWindowParameterized(0, 21, 1, 8, numActions > 8 ? numActions * 2 : (numActions * 2) + 2, 15, 0x139);
     return sStartMenuWindowId;
 }
 

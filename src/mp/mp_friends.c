@@ -1,4 +1,4 @@
-// Moemon Co-op: where your friends are, and START > CO-OP > GO TO FRIEND.
+// Moemon Co-op: where your friends are, and CO-OP menu > GO TO FRIEND.
 //
 // GO TO FRIEND flies you to the friend's town, or to the visited town nearest
 // to them, like Fly does (only towns you've been to).

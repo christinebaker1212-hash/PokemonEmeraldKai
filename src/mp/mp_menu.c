@@ -231,7 +231,7 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "MOEGATCHA...", "DAILY...", "TOURNAMENT...", "MOVE TUTOR...", "LOOK...", ""};
+    static const char *const mainLabels[] = {"SOCIAL", "GO TO FRIEND", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "MOVE TUTOR", "LOOK", ""};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -284,7 +284,7 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         if (page == MP_MENU_PAGE_MAIN)
         {
             if (row == MAIN_ONLINE)
-                PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER..." : "GO ONLINE...", 8, y);
+                PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER" : "GO ONLINE", 8, y);
             else
                 PrintAscii(windowId, mainLabels[row], 8, y);
         }

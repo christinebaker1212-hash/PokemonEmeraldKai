@@ -1,4 +1,4 @@
-// Moemon Co-op: playing together every day. START > CO-OP > DAILY.
+// Moemon Co-op: playing together every day. CO-OP menu > DAILY.
 //
 //   * Team goals: three new goals every day for everyone on the server. The
 //     targets grow with the number of players who've been online today, and
@@ -1063,7 +1063,7 @@ void MP_Events_Update(void)
 }
 
 // ---------------------------------------------------------------------------
-// START > CO-OP > DAILY
+// CO-OP menu > DAILY
 
 enum { DS_HUB, DS_RACE, DS_ACHIEVEMENTS };
 enum { ROW_GIFTS, ROW_GOAL1, ROW_GOAL2, ROW_GOAL3, ROW_OUTBREAK, ROW_STREAK, ROW_RACE, ROW_ACH, ROW_CLOSE, ROW_COUNT };
@@ -1329,7 +1329,7 @@ void MP_Daily_OpenMenu(void)
 {
     if (!Online())
     {
-        MP_ShowNotice("Daily goals, the race and achievements are shared with your server. Go online (START > CO-OP) first.");
+        MP_ShowNotice("Daily goals, the race and achievements are shared with your server. Go online (CO-OP menu: C key or Y button) first.");
         return;
     }
     memset(&sDaily, 0, sizeof(sDaily));

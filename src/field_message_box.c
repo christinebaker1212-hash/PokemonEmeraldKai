@@ -11,6 +11,9 @@ static EWRAM_DATA u8 sFieldMessageBoxMode = 0;
 
 static void ExpandStringAndStartDrawFieldMessage(const u8 *, bool32);
 static void StartDrawFieldMessage(void);
+static bool8 sMpInstantText;
+static void MpFinishPageNow(void);
+bool8 MP_TextPrinterIsPrintingChars(u8 windowId);
 
 void InitFieldMessageBox(void)
 {
@@ -38,6 +41,8 @@ static void Task_DrawFieldMessage(u8 taskId)
             task->tState++;
             break;
         case 2:
+            if (sMpInstantText)
+                MpFinishPageNow();   // Moemon Co-op QoL
             if (RunTextPrintersAndIsPrinter0Active() != TRUE)
             {
                 sFieldMessageBoxMode = FIELD_MESSAGE_BOX_HIDDEN;
@@ -116,13 +121,33 @@ bool8 ShowFieldMessageFromBuffer(void)
     return TRUE;
 }
 
-// Moemon Co-op QoL: signs and lines read before print instantly
+// Moemon Co-op QoL: signs and lines read before print instantly. The printer
+// starts as usual and is run to the end of each page once the box is drawn
+// (printing it all right away would be wiped by the box being drawn).
+
 static void MpAddFieldTextPrinter(bool32 allowSkippingDelayWithButtonPress)
 {
+    sMpInstantText = FALSE;
     if (allowSkippingDelayWithButtonPress)
-        AddTextPrinterWithCustomSpeedForMessage(TRUE, MP_Qol_FieldTextSpeed(GetPlayerTextSpeedDelay()));
+    {
+        u8 speed = MP_Qol_FieldTextSpeed(GetPlayerTextSpeedDelay());
+        sMpInstantText = (speed == 0);
+        AddTextPrinterWithCustomSpeedForMessage(TRUE, sMpInstantText ? 1 : speed);
+    }
     else
         AddTextPrinterForMessage(FALSE);
+}
+
+// Prints the rest of the current page at once (stops at "wait for A")
+static void MpFinishPageNow(void)
+{
+    int i;
+    for (i = 0; i < 2048; i++)
+    {
+        if (!MP_TextPrinterIsPrintingChars(0))
+            break;
+        RunTextPrinters();
+    }
 }
 
 static void ExpandStringAndStartDrawFieldMessage(const u8 *str, bool32 allowSkippingDelayWithButtonPress)

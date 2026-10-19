@@ -264,7 +264,7 @@ static const struct MpPack *RemotePack(u8 id, struct MpPack *buf)
 }
 
 // ---------------------------------------------------------------------------
-// Sprite choices (START > CO-OP > SPRITE): bases, catalog sprites, then packs
+// Sprite choices (CO-OP menu > SPRITE): bases, catalog sprites, then packs
 
 #define NUM_BASE_CHOICES MP_BASE_CUSTOM   // DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY
 

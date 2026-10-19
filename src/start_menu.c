@@ -344,12 +344,8 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_SAVE);
     AddStartMenuAction(MENU_ACTION_OPTION);
     AddStartMenuAction(MENU_ACTION_DISPLAY); // Moemon Kai PC
-    if (gMpConfig.enabled)
-        AddStartMenuAction(MENU_ACTION_COOP);
-    // Moemon Kai PC: the menu window fits 9 entries; when full, EXIT is left
-    // out (B or START still close the menu).
-    if (sNumStartMenuActions < ARRAY_COUNT(sCurrentStartMenuActions))
-        AddStartMenuAction(MENU_ACTION_EXIT);
+    // Moemon Co-op: CO-OP isn't here; its own button opens it (C, or Y/Triangle)
+    AddStartMenuAction(MENU_ACTION_EXIT);
 }
 
 static void BuildSafariZoneStartMenu(void)
@@ -463,6 +459,12 @@ static void RemoveExtraStartMenuWindows(void)
     }
 }
 
+// Moemon Kai PC: y of the first entry (no top margin when 9 entries must fit)
+static u8 StartMenuTopY(void)
+{
+    return sNumStartMenuActions > 8 ? 1 : 9;
+}
+
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
 {
     s8 index = *pIndex;
@@ -471,12 +473,12 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
     {
         if (sStartMenuItems[sCurrentStartMenuActions[index]].func.u8_void == StartMenuPlayerNameCallback)
         {
-            PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 9);
+            PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + StartMenuTopY());
         }
         else
         {
             StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
-            AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + StartMenuTopY(), TEXT_SKIP_DRAW, NULL);
         }
 
         index++;
@@ -525,7 +527,7 @@ static bool32 InitStartMenuStep(void)
             sInitStartMenuData[0]++;
         break;
     case 5:
-        sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 9, 16, sNumStartMenuActions, sStartMenuCursorPos);
+        sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, StartMenuTopY(), 16, sNumStartMenuActions, sStartMenuCursorPos);
         CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_MAP);
         return TRUE;
     }

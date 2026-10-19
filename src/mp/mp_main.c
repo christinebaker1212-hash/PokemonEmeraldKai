@@ -269,9 +269,9 @@ void MP_SaveConfig(void)
         return;
     fprintf(f,
         "; Moemon Emerald Kai Co-op settings. The game writes this file itself;\n"
-        "; everything here can be changed in game (START > CO-OP).\n"
+        "; everything here can be changed in game (CO-OP menu).\n"
         "name = %s\n"
-        "; sprite = default, brendan, may, rs_brendan, rs_may, custom, or any sprite name from START > CO-OP (e.g. hiker, steven)\n"
+        "; sprite = default, brendan, may, rs_brendan, rs_may, custom, or any sprite name from the CO-OP menu (e.g. hiker, steven)\n"
         "sprite = %s\ncustom_sprite = %s\n"
         "; skin = default, porcelain, light, tan, brown, dark, deep\n"
         "skin = %s\n"
@@ -285,7 +285,7 @@ void MP_SaveConfig(void)
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
-        "; your 4 CO-OP phrases (made in START > CO-OP > EMOTES; word codes, ffff = empty)\n",
+        "; your 4 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
     {

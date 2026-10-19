@@ -5,7 +5,7 @@
 //
 // Each player has 4 custom phrases made in the game's word editor (the one
 // used for the TRAINER profile), plus a list of quick phrases. Use them from
-// START > CO-OP > EMOTES, the number keys 1-8 or a controller's right stick.
+// CO-OP menu > EMOTES, the number keys 1-8 or a controller's right stick.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

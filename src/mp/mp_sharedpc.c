@@ -1,4 +1,4 @@
-// Moemon Co-op: START > CO-OP > SHARED PC, and the client side of the room
+// Moemon Co-op: CO-OP menu > SHARED PC, and the client side of the room
 // storage (mp_store.c on the server).
 //
 // The shared PC belongs to the server: Pokémon and items put in by anyone
@@ -607,7 +607,7 @@ void MP_SharedPc_Open(void)
 {
     if (!CanUseStore())
     {
-        MP_ShowNotice("The shared PC belongs to the server. Go online (START > CO-OP) to use it.");
+        MP_ShowNotice("The shared PC belongs to the server. Go online (CO-OP menu: C key or Y button) to use it.");
         return;
     }
     memset(&sPc, 0, sizeof(sPc));
