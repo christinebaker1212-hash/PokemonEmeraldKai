@@ -394,6 +394,14 @@ const u8 *MP_Rematch_ScriptForObject(const u8 *script);
 bool8 MP_Rematch_IsRematchTrainer(u16 trainer);
 void MP_Rematch_Reward(void);
 void MP_Rematch_IsEndgame(void);
+
+// Battle tournament (mp_tourney.c)
+extern bool8 gMpFriendlyBattle;
+void MP_Tourney_OpenMenu(void);
+void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Tourney_Update(void);
+void MP_Tourney_OnBattleResult(u8 outcome);
+void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // mp_spectate.c (watching other players' battles)

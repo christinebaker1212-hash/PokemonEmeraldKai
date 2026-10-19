@@ -318,6 +318,24 @@ static void CB2_MpReturnFromBattle(void)
     FinishBattle();
     sResultText[0] = EOS;
 
+    // Tournament matches are friendly: no money, nobody blacks out
+    if (gMpFriendlyBattle)
+    {
+        StringCopy(sResultText, gSaveBlock2Ptr->playerName);
+        if (outcome == B_OUTCOME_WON)
+            Append(sResultText, " won the match against ");
+        else if (outcome == B_OUTCOME_DREW)
+            Append(sResultText, " tied the match against ");
+        else
+            Append(sResultText, " lost the match against ");
+        StringAppend(sResultText, sNet.oppName);
+        AppendRaw(sResultText, CHAR_EXCL_MARK);
+        MP_Tourney_OnBattleResult(outcome == B_OUTCOME_WON || outcome == B_OUTCOME_DREW ? outcome : B_OUTCOME_LOST);
+        gFieldCallback = FieldCB_MpResult;
+        SetMainCallback2(CB2_ReturnToField);
+        return;
+    }
+
     if (outcome == B_OUTCOME_WON)
     {
         u32 prize = sNet.oppMoney / 10;
@@ -512,6 +530,8 @@ static void AbortBattleToField(void)
         LoadPlayerParty();
         FinishBattle();
         MP_Coop_OnBattleAborted();
+        if (gMpFriendlyBattle)
+            MP_Tourney_OnBattleResult(B_OUTCOME_WON); // they left the match
         StringCopy(sResultText, sNet.oppName);
         Append(sResultText, " disconnected. The battle was called off.");
         gFieldCallback = FieldCB_MpResult;

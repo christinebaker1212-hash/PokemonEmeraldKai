@@ -847,6 +847,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Trade_OnRelay(from, data, len);
     else if (data[0] >= MPR_GIFT_FIRST && data[0] < MPR_EVENT_FIRST)
         MP_Gift_OnRelay(from, data, len);
+    else if (data[0] >= MPR_TOURNEY_FIRST && data[0] < MPR_TOURNEY_FIRST + 20)
+        MP_Tourney_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1232,6 +1234,7 @@ void MP_FrameUpdate(void)
         MP_Dex_Update();
         MP_Trade_Update();
         MP_Events_Update();
+        MP_Tourney_Update();
         SendLocalState(FALSE);
         MP_Spectate_FrameUpdate();
     }

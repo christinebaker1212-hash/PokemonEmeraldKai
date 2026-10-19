@@ -629,6 +629,12 @@ static void GiveConsolation(const char *why)
     QueueToast(msg);
 }
 
+// For the tournament: a consolation prize picked for what you're short of
+void MP_Events_Consolation(const char *why)
+{
+    GiveConsolation(why);
+}
+
 // ---------------------------------------------------------------------------
 // Events from the game
 
