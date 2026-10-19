@@ -38,7 +38,7 @@ extern u8 gFieldLinkPlayerCount;
 extern u8 gLocalLinkPlayerId;
 
 enum {
-    GL_PLAYER = MPR_MINIGAME_FIRST + 10, // u8 session, struct LinkPlayer
+    GL_PLAYER = MPR_MINIGAME_FIRST + 14, // u8 session, struct LinkPlayer (200-213 are mp_minigame.c)
     GL_BLOCK,                            // u8 session, u16 size, data
     GL_SYNC,                             // u8 session, u8 kind, u16 seq
     CT_READY,                            // u8 category (0xFF = not ready any more)

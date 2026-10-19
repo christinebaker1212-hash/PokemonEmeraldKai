@@ -278,7 +278,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "gatcharig") == 0)
     {
-        // gatcharig N - the next MoeGatcha pull is this rarity (0 common .. 4 ultra); gatcharig N P also gives P pulls
+        // gatcharig N - the next MoeGatcha pull is this rarity (0 N, 1 U, 2 R, 3 SR, 4 SSR, 5 UR, 6 EX); gatcharig N P also gives P pulls
         void MP_Gatcha_Rig(s8 rarity);
         void MP_Gatcha_AddPulls(s32 n);
         int r = 0, p = 0;

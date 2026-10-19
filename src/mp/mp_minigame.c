@@ -57,6 +57,8 @@ enum {
     MG_SYNC,                        // crush: u8 session, u16 seq (sync point reached)
     MG_BLOCK,                       // crush: u8 session, u16 size, data
     MG_PACKET,                      // crush: u8 session, u16 packet[RFU_PACKET_SIZE]
+    MG_NEWS,                        // -> all: big news to show as a toast (ASCII), e.g. a MOEGATCHA UR
+    // up to MPR_MINIGAME_FIRST + 13; mp_grouplink.c has the rest
 };
 
 enum { GAME_BLENDER, GAME_CRUSH };
@@ -1020,6 +1022,18 @@ void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len)
             QueuePacket(slot, packet);
         }
         break;
+    case MG_NEWS:
+    {
+        char text[80];
+        u8 buf[80];
+        u16 n = len - 1 < sizeof(text) - 1 ? len - 1 : sizeof(text) - 1;
+        memcpy(text, data + 1, n);
+        text[n] = 0;
+        MP_AsciiToGame(buf, text, sizeof(buf) - 1);
+        MP_Toast(buf);
+        PlaySE(SE_M_COSMIC_POWER);
+        break;
+    }
     case MG_END:
         if (sMg.role == ROLE_PLAYING && data[1] == sMg.session && len >= 8 + MAX_SEATS * 3 * 2)
         {
@@ -1035,6 +1049,20 @@ void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len)
         }
         break;
     }
+}
+
+// Big news for everyone online (shown as a toast)
+void MP_Minigame_SendNews(const char *ascii)
+{
+    u8 msg[80];
+    u16 n = strlen(ascii);
+    if (!MP_IsConnected())
+        return;
+    if (n > sizeof(msg) - 2)
+        n = sizeof(msg) - 2;
+    msg[0] = MG_NEWS;
+    memcpy(msg + 1, ascii, n);
+    MP_SendRelay(0xFF, msg, n + 1);
 }
 
 void MP_Minigame_OnPlayerLeft(u8 id)

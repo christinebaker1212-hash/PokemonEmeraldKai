@@ -561,6 +561,7 @@ void MP_Blender_SendEnd(u16 rpm, u32 time, const u16 *scores);
 bool8 MP_Blender_TakeEnd(u16 *rpm, u32 *time, u16 *scores);
 void MP_Blender_Finish(void);
 void MP_Minigame_HostCrush(void);
+void MP_Minigame_SendNews(const char *ascii);
 bool8 MP_Crush_Active(void);
 u8 MP_Crush_NumPlayers(void);
 u8 MP_Crush_LocalSlot(void);

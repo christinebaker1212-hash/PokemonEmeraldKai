@@ -866,9 +866,9 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Social_OnRelay(from, data, len);
     else if (data[0] >= MPR_LINKX_FIRST && data[0] < MPR_LINKX_FIRST + 20)
         MP_Linkx_OnRelay(from, data, len);
-    else if (data[0] >= MPR_MINIGAME_FIRST && data[0] < MPR_MINIGAME_FIRST + 10)
+    else if (data[0] >= MPR_MINIGAME_FIRST && data[0] < MPR_MINIGAME_FIRST + 14)
         MP_Minigame_OnRelay(from, data, len);
-    else if (data[0] >= MPR_MINIGAME_FIRST + 10 && data[0] < MPR_MINIGAME_FIRST + 20)
+    else if (data[0] >= MPR_MINIGAME_FIRST + 14 && data[0] < MPR_MINIGAME_FIRST + 20)
         MP_Group_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
