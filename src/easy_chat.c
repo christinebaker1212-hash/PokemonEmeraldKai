@@ -425,6 +425,11 @@ struct
     },
 };
 
+// Moemon Co-op
+static const u8 sText_MpPhraseTitle[] = _("CO-OP PHRASE");
+static const u8 sText_MpPhraseInstructions[] = _("to say to your friends.");
+static const u8 sText_MpPhraseConfirm[] = _("The phrase");
+
 static const struct EasyChatScreenTemplate sEasyChatScreenTemplates[] = {
     {
         .type = EASY_CHAT_TYPE_PROFILE,
@@ -676,6 +681,18 @@ static const struct EasyChatScreenTemplate sEasyChatScreenTemplates[] = {
         .instructionsText1 = gText_CombineFourWordsOrPhrases,
         .instructionsText2 = gText_AndFillOutTheQuestionnaire,
         .confirmText1 = gText_TheAnswer,
+        .confirmText2 = gText_IsAsShownOkay,
+    },
+    { // Moemon Co-op: a phrase shown above your head to other players
+        .type = EASY_CHAT_TYPE_MP_PHRASE,
+        .numColumns = 2,
+        .numRows = 2,
+        .frameId = FRAMEID_GENERAL_2x2,
+        .fourFooterOptions = FALSE,
+        .titleText = sText_MpPhraseTitle,
+        .instructionsText1 = gText_CombineFourWordsOrPhrases,
+        .instructionsText2 = sText_MpPhraseInstructions,
+        .confirmText1 = sText_MpPhraseConfirm,
         .confirmText2 = gText_IsAsShownOkay,
     },
 };

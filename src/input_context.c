@@ -38,5 +38,13 @@ void Platform_ContextAction(int action)
     case INPUT_ACTION_EMOTE_LEFT:
         MP_Emote_FromStick(action - INPUT_ACTION_EMOTE_UP);
         break;
+    case INPUT_ACTION_EMOTE_MENU:
+        PlaySE(SE_WIN_OPEN);
+        MP_OpenMenuPage(MP_MENU_PAGE_EMOTES);
+        break;
+    default:
+        if (action >= INPUT_ACTION_EMOTE_KEY1 && action < INPUT_ACTION_EMOTE_KEY1 + INPUT_ACTION_EMOTE_KEY_COUNT)
+            MP_Emote_Hotkey(action - INPUT_ACTION_EMOTE_KEY1);
+        break;
     }
 }

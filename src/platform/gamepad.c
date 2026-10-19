@@ -491,6 +491,8 @@ u16 Gamepad_Poll(int *fastForward)
             }
             if (pressed & north)
                 Platform_ContextAction(INPUT_ACTION_COOP_MENU);
+            if (pressed & BTN(SDL_CONTROLLER_BUTTON_RIGHTSTICK))
+                Platform_ContextAction(INPUT_ACTION_EMOTE_MENU);
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
                 run = 1;
             if (sAutoRun && (keys & DPAD_ANY))

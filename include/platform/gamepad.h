@@ -30,7 +30,10 @@ enum {
     INPUT_ACTION_EMOTE_RIGHT,
     INPUT_ACTION_EMOTE_DOWN,
     INPUT_ACTION_EMOTE_LEFT,
+    INPUT_ACTION_EMOTE_MENU,   // right stick click: START > CO-OP > EMOTES
+    INPUT_ACTION_EMOTE_KEY1,   // keyboard 1-8: emotes and your phrases
 };
+#define INPUT_ACTION_EMOTE_KEY_COUNT 8
 
 // Implemented by the game (src/input_context.c)
 int Platform_InputContext(void);

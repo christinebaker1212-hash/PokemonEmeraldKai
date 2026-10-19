@@ -23,6 +23,7 @@
 #include "platform/display_sdl.h"
 #include "platform/framedraw.h"
 #include "platform/system.h"
+#include "platform/gamepad.h"
 
 extern void (*const gIntrTable[])(void);
 
@@ -448,6 +449,13 @@ void ProcessEvents(void)
                 {
                     paused = !paused;
                 }
+                break;
+            case SDLK_1: case SDLK_2: case SDLK_3: case SDLK_4:
+            case SDLK_5: case SDLK_6: case SDLK_7: case SDLK_8:
+                // Moemon Co-op: emotes (1-4) and your phrases (5-8)
+                if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
+                 && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
+                    Platform_ContextAction(INPUT_ACTION_EMOTE_KEY1 + (event.key.keysym.sym - SDLK_1));
                 break;
             case SDLK_SPACE:
                 if (!speedUp)

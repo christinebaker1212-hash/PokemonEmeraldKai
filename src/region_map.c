@@ -2030,3 +2030,61 @@ static void CB_ExitFlyMap(void)
         break;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: GO TO FRIEND. Picks the visited town nearest to a mapsec
+// (the town itself when it's been visited) and sets the Fly warp to it.
+
+static bool8 MpTownVisited(mapsec_u16_t town)
+{
+    return town <= MAPSEC_EVER_GRANDE_CITY && FlagGet(FLAG_VISITED_LITTLEROOT_TOWN + (town - MAPSEC_LITTLEROOT_TOWN));
+}
+
+// Returns MAPSEC_NONE when no visited town is near (unknown place, nothing visited)
+mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec)
+{
+    mapsec_u16_t town, best = MAPSEC_NONE;
+    s32 bestDist = 0x7FFFFFFF, cx, cy;
+    const struct RegionMapLocation *loc;
+
+    if (mapsec >= MAPSEC_NONE)
+        return MAPSEC_NONE;
+    if (MpTownVisited(mapsec))
+        return mapsec;
+    loc = &gRegionMapEntries[mapsec];
+    if (loc->width == 0 || loc->height == 0)
+        return MAPSEC_NONE; // not on the map (secret bases, special rooms)
+    cx = loc->x * 2 + loc->width;
+    cy = loc->y * 2 + loc->height;
+    for (town = MAPSEC_LITTLEROOT_TOWN; town <= MAPSEC_EVER_GRANDE_CITY; town++)
+    {
+        const struct RegionMapLocation *t = &gRegionMapEntries[town];
+        s32 dx = t->x * 2 + t->width - cx, dy = t->y * 2 + t->height - cy;
+        s32 d = dx * dx + dy * dy;
+        if (MpTownVisited(town) && d < bestDist)
+        {
+            bestDist = d;
+            best = town;
+        }
+    }
+    return best;
+}
+
+void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
+{
+    switch (town)
+    {
+    case MAPSEC_LITTLEROOT_TOWN:
+        SetWarpDestinationToHealLocation(gSaveBlock2Ptr->playerGender == MALE ? HEAL_LOCATION_LITTLEROOT_TOWN_BRENDANS_HOUSE : HEAL_LOCATION_LITTLEROOT_TOWN_MAYS_HOUSE);
+        break;
+    case MAPSEC_EVER_GRANDE_CITY:
+        SetWarpDestinationToHealLocation(HEAL_LOCATION_EVER_GRANDE_CITY);
+        break;
+    default:
+        if (sMapHealLocations[town][2] != HEAL_LOCATION_NONE)
+            SetWarpDestinationToHealLocation(sMapHealLocations[town][2]);
+        else
+            SetWarpDestinationToMapWarp(sMapHealLocations[town][0], sMapHealLocations[town][1], WARP_ID_NONE);
+        break;
+    }
+}

@@ -373,7 +373,7 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
     tag->x = objSprite->x + objSprite->x2;
     tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10 - (r->tagBattle ? 12 : 0);
     tag->oam.paletteNum = r->palSlot;
-    tag->invisible = objSprite->invisible;
+    tag->invisible = objSprite->invisible || MP_Emote_RemoteBubbleShown(id);
 }
 
 // ---------------------------------------------------------------------------
@@ -683,13 +683,7 @@ static void UpdateRemote(u8 id)
     if (p->state.emote != r->lastEmote)
     {
         r->lastEmote = p->state.emote;
-        if ((p->state.emote & 0xF) == MP_EMOTE_EXCLAMATION)
-        {
-            gFieldEffectArguments[0] = obj->localId;
-            gFieldEffectArguments[1] = obj->mapNum;
-            gFieldEffectArguments[2] = obj->mapGroup;
-            FieldEffectStart(FLDEFF_EXCLAMATION_MARK_ICON);
-        }
+        MP_Emote_OnRemoteIcon(id, obj, p->state.emote & 0xF);
     }
 
     UpdateNametag(id, obj, pal);

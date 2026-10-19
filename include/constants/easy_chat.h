@@ -22,6 +22,7 @@
 #define EASY_CHAT_TYPE_QUIZ_SET_ANSWER         18
 #define EASY_CHAT_TYPE_APPRENTICE              19
 #define EASY_CHAT_TYPE_QUESTIONNAIRE           20
+#define EASY_CHAT_TYPE_MP_PHRASE               21 // Moemon Co-op: CO-OP phrases
 
 #define EASY_CHAT_PERSON_REPORTER_MALE   0
 #define EASY_CHAT_PERSON_REPORTER_FEMALE 1

@@ -80,6 +80,11 @@ enum {
 // Emote kinds (low nibble of the emote byte, high nibble is a counter)
 #define MP_EMOTE_NONE         0
 #define MP_EMOTE_EXCLAMATION  1
+#define MP_EMOTE_QUESTION     2
+#define MP_EMOTE_HEART        3
+
+#define MP_NUM_PHRASES   4    // custom phrases per player
+#define MP_PHRASE_WORDS  4    // easy chat words per phrase
 
 struct MpState
 {
@@ -130,6 +135,7 @@ struct MpConfig
     char customSprite[256];
     u8 trainerRange;
     u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
+    u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
 };
 
 extern struct MpConfig gMpConfig;
@@ -290,6 +296,36 @@ bool8 NetLink_IsMaster(void);
 
 // mp_menu.c
 void MP_OpenMenu(void);
+enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS };
+void MP_OpenMenuPage(u8 page);
+void MP_OpenMenuPageAt(u8 page, u8 cursor);
+
+// Emotes and phrases (mp_emote.c)
+struct ObjectEvent;
+void MP_Emote_Update(void);
+void MP_Emote_Icon(u8 kind);
+void MP_Emote_Note(void);
+void MP_Emote_SayText(const u8 *text);
+void MP_Emote_SayQuick(u8 i);
+u8 MP_Emote_QuickPhraseCount(void);
+const char *MP_Emote_QuickPhrase(u8 i);
+bool8 MP_Emote_PhraseIsEmpty(u8 slot);
+void MP_Emote_PhraseText(u8 slot, u8 *dst);
+void MP_Emote_SayPhrase(u8 slot);
+void MP_Emote_EditPhrase(u8 slot);
+void MP_Emote_Hotkey(u8 n);
+void MP_Emote_OnRemoteIcon(u8 id, struct ObjectEvent *obj, u8 kind);
+void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len);
+bool8 MP_Emote_RemoteBubbleShown(u8 id);
+void MP_Emote_OnPlayerLeft(u8 id);
+
+// Friends' whereabouts, GO TO FRIEND (mp_friends.c)
+u8 MP_Friends_List(u8 *ids);
+u16 MP_Friends_Mapsec(u8 id);
+void MP_Friends_LocationName(u8 id, u8 *dst);
+u16 MP_Friends_Destination(u8 id);
+bool8 MP_Friends_GoTo(u8 id);
+bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 
 // mp_spectate.c (watching other players' battles)
 bool8 MP_Spectate_IsWatching(void);
@@ -354,6 +390,9 @@ enum {
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)
+    MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
+    MPR_DEX_FIRST = 84,        // shared Pokedex (mp_dex.c)
+    MPR_SOCIAL_END = 100,
 };
 
 #endif // GUARD_MP_H

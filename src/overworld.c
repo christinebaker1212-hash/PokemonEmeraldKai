@@ -1482,6 +1482,7 @@ static void OverworldBasic(void)
     CameraUpdate();
     UpdateCameraPanning();
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
+    MP_Emote_Update();
     BuildOamBuffer();
     UpdatePaletteFade();
     UpdateTilesetAnimations();
@@ -3270,4 +3271,10 @@ static void SpriteCB_LinkPlayer(struct Sprite *sprite)
         sprite->invisible = ((sprite->data[7] & 4) >> 2);
         sprite->data[7]++;
     }
+}
+
+// Moemon Co-op: returning to the field from co-op screens
+void MP_FieldClearVBlankHBlankCallbacks(void)
+{
+    FieldClearVBlankHBlankCallbacks();
 }

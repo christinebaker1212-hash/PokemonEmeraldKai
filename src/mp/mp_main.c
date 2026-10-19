@@ -190,6 +190,7 @@ static void LoadConfig(void)
     memset(&gMpConfig, 0, sizeof(gMpConfig));
     gMpConfig.enabled = TRUE;
     gMpConfig.trainerRange = 4;
+    memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
 
     f = fopen(ConfigPath(), "r");
     if (!f)
@@ -230,6 +231,13 @@ static void LoadConfig(void)
             gMpConfig.trainerRange = (r < 1) ? 1 : (r > 8 ? 8 : r);
         }
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
+        else if (strncmp(key, "phrase", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_NUM_PHRASES && key[7] == 0)
+        {
+            char *p = val;
+            int w;
+            for (w = 0; w < MP_PHRASE_WORDS; w++)
+                gMpConfig.phrases[key[6] - '1'][w] = (u16)strtoul(p, &p, 16);
+        }
     }
     fclose(f);
 }
@@ -271,9 +279,16 @@ void MP_SaveConfig(void)
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
-        "lobby = %s\n",
+        "lobby = %s\n"
+        "; your 4 CO-OP phrases (made in START > CO-OP > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
+    {
+        int i;
+        for (i = 0; i < MP_NUM_PHRASES; i++)
+            fprintf(f, "phrase%d = %04x %04x %04x %04x\n", i + 1, gMpConfig.phrases[i][0], gMpConfig.phrases[i][1],
+                gMpConfig.phrases[i][2], gMpConfig.phrases[i][3]);
+    }
     fclose(f);
 }
 
@@ -474,8 +489,9 @@ void MP_TriggerLocalEmote(u8 kind)
 // Right stick flick on a controller (0 up, 1 right, 2 down, 3 left)
 void MP_Emote_FromStick(u8 dir)
 {
-    (void)dir;
-    MP_TriggerLocalEmote(MP_EMOTE_EXCLAMATION);
+    // up !, right heart, down ?, left music note
+    static const u8 sKeys[] = {0, 2, 1, 3};
+    MP_Emote_Hotkey(sKeys[dir & 3]);
 }
 
 static struct MpState sLastLocalState;
@@ -636,6 +652,7 @@ static void HandlePlayerLeft(u8 id)
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return;
     MP_Overworld_OnPlayerLeft(id);
+    MP_Emote_OnPlayerLeft(id);
     MP_Trainer_OnPlayerLeft(id);
     MP_Battle_OnPlayerLeft(id);
     MP_Spectate_OnPlayerLeft(id);
@@ -814,6 +831,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Spectate_OnRelay(from, data, len);
     else if (data[0] >= MPR_COOP_FIRST && data[0] < MPR_COOP_FIRST + 20)
         MP_Coop_OnRelay(from, data, len);
+    else if (data[0] == MPR_SAY)
+        MP_Emote_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
