@@ -661,6 +661,22 @@ bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const s
         if (npc->width == 16 && npc->height == 32)
             PutInfoFrames(atlas, PACK_WALK, npc, 0);
     }
+    else if (base == MP_BASE_CREATED && app.recipe.made)
+    {
+        // A CUSTOM trainer (LOOK > CREATE): its 32x32 field frames. Walking and
+        // running are 16 wide in the sheet, so they get the middle 16 columns.
+        const struct MpCreatedGfx *g = MP_Created_Gfx(MP_CR_CACHE_LOCAL, &app.recipe);
+        static u8 sNarrow[16 * 32 / 2];
+        int f, r;
+        for (f = 0; f < 18; f++)
+        {
+            for (r = 0; r < 4; r++)   // 4 rows of 8x8 tiles: keep tile columns 1 and 2
+                memcpy(sNarrow + r * 64, g->ow[f] + r * 128 + 32, 64);
+            PutFrame(atlas, f < 9 ? PACK_WALK : PACK_RUN, f % 9, sNarrow, g->owPal);
+        }
+        for (f = 0; f < 9; f++)
+            PutFrame(atlas, PACK_MACH_BIKE, f, g->ow[18 + f], g->owPal);
+    }
 
     // The trainer pictures picked in LOOK (or the ones that match the sprite)
     app.base = base;
@@ -694,7 +710,10 @@ bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const s
 
     {
         char name[40];
-        MP_Avatar_SpriteConfigName(&app, name, sizeof(name));
+        struct MpAppearance named = app;
+        if (named.base == MP_BASE_CREATED)   // the sheet stands on its own: Brendan/May fill in the rest
+            named.base = female ? MP_BASE_MAY : MP_BASE_BRENDAN;
+        MP_Avatar_SpriteConfigName(&named, name, sizeof(name));
         snprintf(text, sizeof(text), "base=%s", name);
     }
     ok = WritePng(path, atlas, PACK_ATLAS_W, PACK_ATLAS_H, text);

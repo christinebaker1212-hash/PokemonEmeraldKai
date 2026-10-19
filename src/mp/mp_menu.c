@@ -36,7 +36,9 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
 // LOOK > CREATE: a trainer from the parts kit (CUSTOM 1-3)
-enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_FHAIR, CR_TOP, CR_BOTTOM, CR_HAT, CR_BAG, CR_SAVE, CR_CANCEL, CREATE_COUNT };
+// Every row works the same way (like LOOK): Left/Right changes it, L/R jumps; each part's color is its own row
+enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_HAIRC, CR_FHAIR, CR_TOP, CR_TOPC, CR_BOTTOM, CR_BOTC,
+       CR_HAT, CR_HATC, CR_BAG, CR_BAGC, CR_SAVE, CR_CANCEL, CREATE_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
@@ -248,40 +250,46 @@ static struct MpCreated sCreateWork;
 static struct MpAppearance sCreateBefore; // the look when CREATE was opened (CANCEL)
 static bool8 sCreateShowBack;
 
-static const char *Create_PartName(u8 cat, bool8 withColor)
+// A part's style name, or its color name ("-" when there's only one)
+static const char *Create_PartName(u8 cat, bool8 color)
 {
-    static char buf[64];
     const struct MpCreated *r = &sCreateWork;
-    u8 style, color;
+    u8 style, col;
     bool8 optional = (cat == MP_CR_HAT || cat == MP_CR_BAG);
     switch (cat)
     {
-    case MP_CR_HAIR:   style = r->hair; color = r->hairColor; break;
-    case MP_CR_TOP:    style = r->top; color = r->topColor; break;
-    case MP_CR_BOTTOM: style = r->bottom; color = r->bottomColor; break;
-    case MP_CR_HAT:    style = r->hat; color = r->hatColor; break;
-    default:           style = r->bag; color = r->bagColor; break;
+    case MP_CR_HAIR:   style = r->hair; col = r->hairColor; break;
+    case MP_CR_TOP:    style = r->top; col = r->topColor; break;
+    case MP_CR_BOTTOM: style = r->bottom; col = r->bottomColor; break;
+    case MP_CR_HAT:    style = r->hat; col = r->hatColor; break;
+    default:           style = r->bag; col = r->bagColor; break;
     }
     if (optional)
     {
         if (style == 0)
-            return "NONE";
+            return color ? "-" : "NONE";
         style--;
     }
-    if (withColor && MP_Created_ColorCount(r->girl, cat, style) > 1)
-        snprintf(buf, sizeof(buf), "%s, %s", MP_Created_StyleName(r->girl, cat, style), MP_Created_ColorName(r->girl, cat, style, color));
-    else
-        snprintf(buf, sizeof(buf), "%s", MP_Created_StyleName(r->girl, cat, style));
-    return buf;
+    if (!color)
+        return MP_Created_StyleName(r->girl, cat, style);
+    if (MP_Created_ColorCount(r->girl, cat, style) <= 1)
+        return "-";
+    return MP_Created_ColorName(r->girl, cat, style, col);
 }
 
+// The part a row is about (0xFF: not a part row) and whether it's the color row
 static const u8 sCreateRowCat[CREATE_COUNT] = {
-    [CR_HAIR] = MP_CR_HAIR, [CR_TOP] = MP_CR_TOP, [CR_BOTTOM] = MP_CR_BOTTOM, [CR_HAT] = MP_CR_HAT, [CR_BAG] = MP_CR_BAG,
+    [CR_SLOT] = 0xFF, [CR_BODY] = 0xFF, [CR_SKIN] = 0xFF, [CR_FHAIR] = 0xFF, [CR_SAVE] = 0xFF, [CR_CANCEL] = 0xFF,
+    [CR_HAIR] = MP_CR_HAIR, [CR_HAIRC] = MP_CR_HAIR, [CR_TOP] = MP_CR_TOP, [CR_TOPC] = MP_CR_TOP,
+    [CR_BOTTOM] = MP_CR_BOTTOM, [CR_BOTC] = MP_CR_BOTTOM, [CR_HAT] = MP_CR_HAT, [CR_HATC] = MP_CR_HAT,
+    [CR_BAG] = MP_CR_BAG, [CR_BAGC] = MP_CR_BAG,
 };
+#define CREATE_IS_COLOR(row) ((row) == CR_HAIRC || (row) == CR_TOPC || (row) == CR_BOTC || (row) == CR_HATC || (row) == CR_BAGC)
 
 static void Create_PrintRow(u8 windowId, u8 row, u8 y)
 {
-    static const char *const labels[CREATE_COUNT] = {"SLOT", "BODY", "SKIN", "HAIR", "FIELD", "TOP", "BOTTOM", "HAT", "BAG", "SAVE", "CANCEL"};
+    static const char *const labels[CREATE_COUNT] = {"SLOT", "BODY", "SKIN", "HAIR", " COLOR", "FIELD", "TOP", " COLOR",
+                                                     "BOTTOM", " COLOR", "HAT", " COLOR", "BAG", " COLOR", "SAVE", "CANCEL"};
     char value[48];
     switch (row)
     {
@@ -293,9 +301,14 @@ static void Create_PrintRow(u8 windowId, u8 row, u8 y)
     case CR_CANCEL:
         PrintAscii(windowId, labels[row], 8, y);
         return;
-    default: snprintf(value, sizeof(value), "%s", Create_PartName(sCreateRowCat[row], FALSE)); break;
+    default: snprintf(value, sizeof(value), "%s", Create_PartName(sCreateRowCat[row], CREATE_IS_COLOR(row))); break;
     }
     PrintChoice(windowId, labels[row], value, y, 38);
+}
+
+static bool8 LookIsCreated(void)
+{
+    return gMpConfig.app.base == MP_BASE_CREATED && gMpConfig.app.recipe.made;
 }
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
@@ -407,6 +420,9 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             case ROW_HAIR:   snprintf(line, sizeof(line), "%s", MP_Avatar_HairName(*RowValue(row))); break;
             default:         snprintf(line, sizeof(line), "%s", MP_Avatar_ColorName(*RowValue(row))); break;
             }
+            // A CUSTOM look's colors come from its parts
+            if (row >= ROW_SKIN && row <= ROW_ACCENT && LookIsCreated())
+                snprintf(line, sizeof(line), "CREATE");
             PrintChoice(windowId, lookLabels[row], line, y, 38);
         }
     }
@@ -450,6 +466,8 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
         else if (cursor == ROW_BACKPIC)
             snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+        else if (cursor >= ROW_SKIN && cursor <= ROW_ACCENT && LookIsCreated())
+            snprintf(ascii, sizeof(ascii), "CUSTOM colors are set in CREATE. A: open it");
         else if (cursor == ROW_HAIR)
             snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   SELECT: undo");
         else if (cursor <= ROW_ACCENT)
@@ -484,7 +502,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "%s   Left/Right: change   SELECT: undo", MP_Created_SkinName(sCreateWork.skin));
             break;
         case CR_FHAIR:
-            snprintf(ascii, sizeof(ascii), "FIELD HAIR: %s%s   L/R: jump 5", MP_Created_FieldHairName(sCreateWork.fieldHair),
+            snprintf(ascii, sizeof(ascii), "FIELD HAIR: %s%s   L/R: jump", MP_Created_FieldHairName(sCreateWork.fieldHair),
                 sCreateWork.fieldHair ? "" : " (like HAIR)");
             break;
         case CR_SAVE:
@@ -494,10 +512,13 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "Back to LOOK without saving. (B does too.)");
             break;
         default:
-            if (cursor == CR_BAG)
-                snprintf(ascii, sizeof(ascii), "%s  (only on the field sprite)", Create_PartName(MP_CR_BAG, TRUE));
+            if (CREATE_IS_COLOR(cursor))
+                snprintf(ascii, sizeof(ascii), "%s color: %s   Left/Right: change", Create_PartName(sCreateRowCat[cursor], FALSE),
+                    Create_PartName(sCreateRowCat[cursor], TRUE));
+            else if (cursor == CR_BAG)
+                snprintf(ascii, sizeof(ascii), "%s  (only on the field sprite)", Create_PartName(MP_CR_BAG, FALSE));
             else
-                snprintf(ascii, sizeof(ascii), "%s   Left/Right: style  L/R: color", Create_PartName(sCreateRowCat[cursor], TRUE));
+                snprintf(ascii, sizeof(ascii), "%s   Left/Right: style  L/R: jump", Create_PartName(sCreateRowCat[cursor], FALSE));
             break;
         }
         MP_AsciiToGame(buf, ascii, 150);
@@ -701,7 +722,8 @@ static void HandleLookInput(u8 taskId)
     s16 *data = gTasks[taskId].data;
     bool8 changed = FALSE;
 
-    if (tCursor == ROW_CREATE && JOY_NEW(A_BUTTON))
+    if ((tCursor == ROW_CREATE && JOY_NEW(A_BUTTON))
+     || (tCursor >= ROW_SKIN && tCursor <= ROW_ACCENT && LookIsCreated() && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT)))
     {
         PlaySE(SE_SELECT);
         Create_Open();
@@ -843,7 +865,7 @@ static void Create_Open(void)
     Create_LoadSlot(slot);
 }
 
-// Steps a part's style (Left/Right) or color (L/R)
+// Steps a part's style or color (dir: +-1, or +-5 for L/R)
 static void Create_StepPart(u8 cat, bool8 color, int dir)
 {
     struct MpCreated *r = &sCreateWork;
@@ -863,7 +885,7 @@ static void Create_StepPart(u8 cat, bool8 color, int dir)
             return;
         n = MP_Created_ColorCount(r->girl, cat, optional ? *style - 1 : *style);
         if (n > 1)
-            *col = (*col + n + dir) % n;
+            *col = ((*col + dir) % n + n) % n;
         return;
     }
     n = MP_Created_StyleCount(r->girl, cat) + (optional ? 1 : 0);
@@ -871,7 +893,7 @@ static void Create_StepPart(u8 cat, bool8 color, int dir)
         // Keep the color when the new style has it (same name)
         const char *was = MP_Created_ColorName(r->girl, cat, optional ? *style - 1 : *style, *col);
         u8 i, nc;
-        *style = (*style + n + dir) % n;
+        *style = ((*style + dir) % n + n) % n;
         *col = 0;
         if (optional && *style == 0)
             return;
@@ -888,6 +910,8 @@ static void HandleCreateInput(u8 taskId)
     struct MpCreated before = sCreateWork;
     u8 slotBefore = sCreateSlot;
     int dir = JOY_REPEAT(DPAD_RIGHT | R_BUTTON) ? 1 : -1;
+    bool8 jump = JOY_REPEAT(L_BUTTON | R_BUTTON) && !JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT);
+    u8 cat = sCreateRowCat[tCursor];
 
     if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == CR_CANCEL))
     {
@@ -916,7 +940,7 @@ static void HandleCreateInput(u8 taskId)
         Preview_Draw(sCreateShowBack);
         return;
     }
-    if (JOY_NEW(SELECT_BUTTON) && tCursor >= CR_SKIN && tCursor <= CR_BAG)
+    if (JOY_NEW(SELECT_BUTTON) && tCursor >= CR_SKIN && tCursor <= CR_BAGC)
     {
         // Undo this row: back to the slot's saved parts (or the starting ones)
         struct MpCreated orig;
@@ -928,17 +952,23 @@ static void HandleCreateInput(u8 taskId)
         {
         case CR_SKIN:   sCreateWork.skin = orig.skin; break;
         case CR_HAIR:   sCreateWork.hair = orig.hair; sCreateWork.hairColor = orig.hairColor; break;
+        case CR_HAIRC:  if (sCreateWork.hair == orig.hair) sCreateWork.hairColor = orig.hairColor; break;
         case CR_FHAIR:  sCreateWork.fieldHair = orig.fieldHair; break;
         case CR_TOP:    sCreateWork.top = orig.top; sCreateWork.topColor = orig.topColor; break;
+        case CR_TOPC:   if (sCreateWork.top == orig.top) sCreateWork.topColor = orig.topColor; break;
         case CR_BOTTOM: sCreateWork.bottom = orig.bottom; sCreateWork.bottomColor = orig.bottomColor; break;
+        case CR_BOTC:   if (sCreateWork.bottom == orig.bottom) sCreateWork.bottomColor = orig.bottomColor; break;
         case CR_HAT:    sCreateWork.hat = orig.hat; sCreateWork.hatColor = orig.hatColor; break;
+        case CR_HATC:   if (sCreateWork.hat == orig.hat) sCreateWork.hatColor = orig.hatColor; break;
         case CR_BAG:    sCreateWork.bag = orig.bag; sCreateWork.bagColor = orig.bagColor; break;
+        case CR_BAGC:   if (sCreateWork.bag == orig.bag) sCreateWork.bagColor = orig.bagColor; break;
         }
         if (memcmp(&before, &sCreateWork, sizeof(before)) == 0)
             PlaySE(SE_FAILURE);
     }
-    else if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    else if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT) || jump)
     {
+        int step = jump ? dir * 5 : dir;
         switch (tCursor)
         {
         case CR_SLOT:
@@ -957,23 +987,15 @@ static void HandleCreateInput(u8 taskId)
         case CR_FHAIR:
         {
             u8 n = MP_Created_FieldHairCount();
-            sCreateWork.fieldHair = (sCreateWork.fieldHair + n + dir) % n;
+            sCreateWork.fieldHair = ((sCreateWork.fieldHair + step) % n + n) % n;
             break;
         }
-        case CR_HAIR: case CR_TOP: case CR_BOTTOM: case CR_HAT: case CR_BAG:
-            Create_StepPart(sCreateRowCat[tCursor], FALSE, dir);
+        default:
+            if (cat != 0xFF)
+                Create_StepPart(cat, CREATE_IS_COLOR(tCursor), step);
             break;
         }
-    }
-    else if (JOY_REPEAT(L_BUTTON | R_BUTTON) && tCursor == CR_FHAIR)
-    {
-        u8 n = MP_Created_FieldHairCount();
-        sCreateWork.fieldHair = (sCreateWork.fieldHair + n + dir * 5) % n;
-    }
-    else if (JOY_REPEAT(L_BUTTON | R_BUTTON) && tCursor >= CR_HAIR && tCursor <= CR_BAG)
-    {
-        Create_StepPart(sCreateRowCat[tCursor], TRUE, dir);
-        if (memcmp(&before, &sCreateWork, sizeof(before)) == 0)
+        if (memcmp(&before, &sCreateWork, sizeof(before)) == 0 && slotBefore == sCreateSlot && tCursor != CR_SAVE && tCursor != CR_CANCEL)
             PlaySE(SE_FAILURE);
     }
     if (memcmp(&before, &sCreateWork, sizeof(before)) != 0 || slotBefore != sCreateSlot)
