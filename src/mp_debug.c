@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "item.h"
+#include "pokemon_storage_system.h"
 #include "constants/battle.h"
 #include "script.h"
 #include "pokedex.h"
@@ -140,6 +142,11 @@ int MP_TestCondition(const char *name)
         return gMain.inBattle;
     if (strcmp(name, "nofade") == 0)
         return !gPaletteFade.active;
+    if (strcmp(name, "action") == 0)
+    {
+        bool8 MP_Test_IsChoosingAction(void);
+        return gMain.inBattle && MP_Test_IsChoosingAction();
+    }
     return 0;
 }
 
@@ -186,6 +193,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u16 nat = (u16)atoi(arg);
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "item") == 0)
+    {
+        // item ID QTY - put items in the bag
+        int id = 1, qty = 1;
+        sscanf(arg, "%d %d", &id, &qty);
+        printf("[test] item %d x%d: %s\n", id, qty, AddBagItem(id, qty) ? "ok" : "FAILED");
+    }
+    else if (strcmp(cmd, "party") == 0)
+    {
+        int i;
+        printf("[test] party:");
+        for (i = 0; i < PARTY_SIZE; i++)
+            printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+        printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));
     }
     else if (strcmp(cmd, "badges") == 0)
     {

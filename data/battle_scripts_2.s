@@ -86,6 +86,17 @@ BattleScript_SuccessBallThrowEnd::
 	setbyte gBattleOutcome, B_OUTCOME_CAUGHT
 	finishturn
 
+@ Moemon Co-op: a catch in a co-op wild double. The catcher gets it after the battle.
+BattleScript_MpCoopBallCaught::
+	incrementgamestat GAME_STAT_POKEMON_CAPTURES
+	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
+	waitmessage B_WAIT_TIME_LONG
+	givecaughtmon
+	setbyte gBattleOutcome, B_OUTCOME_CAUGHT
+	endlinkbattle
+	waitmessage B_WAIT_TIME_LONG
+	finishturn
+
 BattleScript_WallyBallThrow::
 	printstring STRINGID_GOTCHAPKMNCAUGHTWALLY
 	setbyte gBattleOutcome, B_OUTCOME_CAUGHT

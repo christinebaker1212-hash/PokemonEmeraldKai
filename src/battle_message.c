@@ -382,6 +382,7 @@ static const u8 sText_OpponentMon1Appeared[] = _("{B_OPPONENT_MON1_NAME} appeare
 static const u8 sText_WildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!\p");
 static const u8 sText_LegendaryPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!\p");
 static const u8 sText_WildPkmnAppearedPause[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!{PAUSE 127}");
+static const u8 sText_MpCoopWildGo[] = _("Team up and take it on!");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
 static const u8 sText_Trainer1WantsToBattle[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME}\nwould like to battle!\p");
 static const u8 sText_LinkTrainerWantsToBattle[] = _("{B_LINK_OPPONENT1_NAME}\nwants to battle!");
@@ -1989,7 +1990,11 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gMpCoopBattle)
+                if (gMpCoopWild)
+                {
+                    stringPtr = sText_WildPkmnAppeared; // Moemon Co-op: one wild Pokemon, two friends
+                }
+                else if (gMpCoopBattle)
                 {
                     stringPtr = sText_Trainer1WantsToBattle; // Moemon Co-op: one NPC trainer
                 }
@@ -2059,7 +2064,9 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
             {
-                if (gMpCoopBattle)
+                if (gMpCoopWild)
+                    stringPtr = sText_MpCoopWildGo;
+                else if (gMpCoopBattle)
                     stringPtr = sText_Trainer1SentOutTwoPkmn;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
                     stringPtr = sText_TwoTrainersSentPkmn;
@@ -2297,7 +2304,7 @@ static const u8 *TryGetStatusString(u8 *src)
 #define HANDLE_NICKNAME_STRING_CASE(battler, monIndex)                \
     if (GetBattlerSide(battler) != B_SIDE_PLAYER)                     \
     {                                                                   \
-        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)                     \
+        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)     \
             toCpy = sText_FoePkmnPrefix;                                \
         else                                                            \
             toCpy = sText_WildPkmnPrefix;                               \
@@ -2820,7 +2827,7 @@ static void ExpandBattleTextBuffPlaceholders(const u8 *src, u8 *dst)
             }
             else
             {
-                if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+                if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild) // Moemon Co-op
                     StringAppend(dst, sText_FoePkmnPrefix);
                 else
                     StringAppend(dst, sText_WildPkmnPrefix);

@@ -703,7 +703,10 @@ static void CB2_InitBattleInternal(void)
     if (gMpCoopBattle && MP_Coop_IsMaster())
     {
         // Moemon Co-op: the master builds the trainer's party and sends it over
-        CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
+        if (gMpCoopWild)
+            MP_Coop_SetWildEnemyParty();   // the one wild Pokemon
+        else
+            CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
         MP_Coop_ArrangeEnemyParty();
     }
     else if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED)))
@@ -3658,6 +3661,13 @@ static void BattleIntroOpponent2SendsOutMonAnimation(void)
     {
         if (GetBattlerPosition(gActiveBattler) == position)
         {
+            if (gMpCoopWild)
+            {
+                // Moemon Co-op: one wild Pokémon against two friends. The other
+                // opponent slot stays empty, as if it had fainted.
+                gAbsentBattlerFlags |= gBitTable[gActiveBattler];
+                continue;
+            }
             BtlController_EmitIntroTrainerBallThrow(B_COMM_TO_CONTROLLER);
             MarkBattlerForControllerExec(gActiveBattler);
         }
@@ -4249,7 +4259,8 @@ static void HandleTurnActionSelectionState(void)
                     if (gBattleTypeFlags & (BATTLE_TYPE_LINK
                                             | BATTLE_TYPE_FRONTIER_NO_PYRAMID
                                             | BATTLE_TYPE_EREADER_TRAINER
-                                            | BATTLE_TYPE_RECORDED_LINK))
+                                            | BATTLE_TYPE_RECORDED_LINK)
+                        && !gMpCoopWild) // Moemon Co-op: POKé BALLS work in co-op wild battles
                     {
                         RecordedBattle_ClearBattlerAction(gActiveBattler, 1);
                         gSelectionBattleScripts[gActiveBattler] = BattleScript_ActionSelectionItemsCantBeUsed;
@@ -4994,7 +5005,7 @@ static void HandleEndTurn_BattleWon(void)
         BattleStopLowHpSound();
         gBattleOutcome &= ~B_OUTCOME_LINK_BATTLE_RAN;
         gBattlerAttacker = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
-        gBattlescriptCurrInstr = BattleScript_MpCoopTrainerBattleWon;
+        gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopWildBattleWon : BattleScript_MpCoopTrainerBattleWon;
     }
     else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
     {

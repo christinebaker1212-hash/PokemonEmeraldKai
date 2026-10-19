@@ -2956,6 +2956,13 @@ BattleScript_MpCoopTrainerBattleWon::
 	waitmessage B_WAIT_TIME_LONG
 	end2
 
+@ Moemon Co-op: the two wild Pokémon are beaten
+BattleScript_MpCoopWildBattleWon::
+	playtrainerdefeatbgm BS_ATTACKER
+	endlinkbattle
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
 @ Moemon Co-op: both players are out of Pokémon
 BattleScript_MpCoopBattleLost::
 	printstring STRINGID_PLAYERWHITEOUT

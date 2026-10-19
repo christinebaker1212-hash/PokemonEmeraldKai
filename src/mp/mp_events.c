@@ -71,6 +71,11 @@ static void QueueToast(const char *ascii)
     sToastCount++;
 }
 
+void MP_Events_QueueToast(const char *ascii)
+{
+    QueueToast(ascii);
+}
+
 static void UpdateToasts(void)
 {
     if (sToastTimer)

@@ -235,7 +235,8 @@ static void Intro_WaitForShinyAnimAndHealthbox(void)
 
     if (healthboxAnimDone)
     {
-        if (twoMons || !IsBattlerSpriteVisible(BATTLE_PARTNER(gActiveBattler)))
+        // Moemon Co-op: in a co-op wild double the partner slot stays empty
+        if ((twoMons || !IsBattlerSpriteVisible(BATTLE_PARTNER(gActiveBattler))) && !gMpCoopWild)
         {
             if (!gBattleSpritesDataPtr->healthBoxesData[gActiveBattler].finishedShinyMonAnim)
                 return;
@@ -1307,8 +1308,8 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
-    if (gMpCoopBattle && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
-        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
+    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT || gMpCoopWild))
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
 }

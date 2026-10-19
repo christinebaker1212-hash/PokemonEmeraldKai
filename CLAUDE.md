@@ -41,8 +41,14 @@ Phase 2: shared PC (put/take Pokémon and items, `MOEMON_STORE_DIR`), trade with
 trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name tag and follower.
 Phase 3 (mp_events.c, mp_gatcha.c): goals/toasts/MoeGatcha/streak with `mp event ...`, `mp savedata`,
 `mp goals`, MOEMON_DEBUG_DATE; partner-by-partner co-op goal checked with three clients (run4-style).
+Phase 4: co-op wild battles (mp_coop.c, `MP_Coop_TryWildTeamUp`): a land encounter pulls in the closest
+free friend standing in grass within 8x6 tiles (no prompt), 2 players vs 1 wild Pokémon (the right
+opponent slot starts absent). POKé BALLS work (only balls); the catch goes to the thrower via the
+result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11, `mp wild 288:3`,
+`mp item 1 2`, `waitfor action`, `mp party`. Verified: catch by the joining player, knock-out win
+(EXP for both), friend out of range -> normal single battle. Also gym rematches and tournaments.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)
-- Trading is not networked; items can't be used in co-op/PvP battles
+- Only POKé BALLS (co-op wild battles) can be used in co-op battles; no items in PvP
 - Remote players aren't shown across warps (only the same map or connected maps)

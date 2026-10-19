@@ -39,6 +39,9 @@
 #include "field_message_box.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
+#include "fieldmap.h"
+#include "metatile_behavior.h"
+#include "pokedex.h"
 #include "load_save.h"
 #include "main.h"
 #include "malloc.h"
@@ -65,6 +68,7 @@ void MPNet_Log(const char *fmt, ...);
 extern const u8 EventScript_MpCoopLearnMove[];
 
 bool8 gMpCoopBattle;
+bool8 gMpCoopWild;
 
 enum {
     MPR_COOP_REQUEST = MPR_COOP_FIRST,  // asker -> challenged: may I join?
@@ -72,6 +76,22 @@ enum {
     MPR_COOP_ACCEPT,                    // challenged -> asker: u16 trainer, u8 mode, lose text
     MPR_COOP_DECLINE,                   // challenged -> asker: u8 reason
     MPR_COOP_RESULT,                    // master -> partner after the battle
+    MPR_COOP_WILD_ASK,                  // wild encounter -> closest friend in the grass: can you join?
+    MPR_COOP_WILD_OK,                   // yes (they stop and wait)
+    MPR_COOP_WILD_NO,                   // can't right now
+    MPR_COOP_WILD_GO,                   // the battle starts
+    MPR_COOP_WILD_CANCEL,               // too slow: battling alone after all
+};
+
+#define WILD_RANGE_X     8     // about one screen
+#define WILD_RANGE_Y     6
+#define WILD_ASK_FRAMES  45    // wait this long for an answer, then battle alone
+#define WILD_GO_FRAMES   180   // a friend who said yes waits this long for the battle
+
+enum {
+    CAUGHT_NONE,
+    CAUGHT_MINE,
+    CAUGHT_PARTNER,
 };
 
 enum {
@@ -89,6 +109,7 @@ enum {
 #define MAX_LEARN 8
 #define RESULT_WAIT_FRAMES (60 * 15)
 #define LOSE_TEXT_MAX 240
+#define MODE_WILD 0xFE   // sCoop.mode of a co-op wild double
 
 struct LearnLater
 {
@@ -149,7 +170,16 @@ static struct
     bool8 learnPromptPending;
     bool8 haveLoseText;
     u8 loseText[LOSE_TEXT_MAX + 1];
-} sCoop = { .requester = -1, .declinedBy = -1 };
+    // Co-op wild doubles
+    bool8 wildAsking;      // we met a wild Pokémon and asked a friend
+    u8 wildTarget;
+    u8 wildReply;          // 0 = none yet, MPR_COOP_WILD_OK / _NO
+    u16 wildTimer;
+    s8 wildFrom;           // the friend whose battle we're waiting to join, -1 = nobody
+    struct Pokemon wildMon;   // the one wild Pokémon both players battle
+    u8 caught;             // CAUGHT_*
+    struct Pokemon caughtMon;
+} sCoop = { .requester = -1, .declinedBy = -1, .wildFrom = -1 };
 
 static EWRAM_DATA u8 sText[160];
 
@@ -216,7 +246,7 @@ bool8 MP_Coop_IsChallenged(void)
 
 bool8 MP_Coop_IsBusy(void)
 {
-    return sCoop.role != ROLE_NONE || sCoop.prompting || gMpCoopBattle;
+    return sCoop.role != ROLE_NONE || sCoop.prompting || gMpCoopBattle || sCoop.wildAsking || sCoop.wildFrom >= 0;
 }
 
 bool8 MP_Coop_IsMaster(void)
@@ -249,6 +279,8 @@ const u8 *MP_Coop_LoseText(void)
 
 u16 MP_Coop_VictorySong(void)
 {
+    if (gMpCoopWild)
+        return MUS_VICTORY_WILD;
     switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
     {
     case TRAINER_CLASS_ELITE_FOUR:
@@ -450,6 +482,7 @@ static void ArrangeLocalParty(void)
 
 static void BeginCoopBattle(bool8 isMaster, u8 partner)
 {
+    sCoop.caught = CAUGHT_NONE;
     sCoop.isMaster = isMaster;
     sCoop.partner = partner;
     sCoop.money = 0;
@@ -609,7 +642,8 @@ static void KeepOwnLearnEntries(u8 base)
 static void SendResult(void)
 {
     // id, outcome, money(4), leveled, learnCount, learn entries (3 bytes), 3 Pokémon
-    u8 *buf = Alloc(8 + MAX_LEARN * 3 + sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
+    // then u8 caughtForPartner + 1 Pokémon (co-op wild doubles)
+    u8 *buf = Alloc(8 + MAX_LEARN * 3 + sizeof(struct Pokemon) * (MULTI_PARTY_SIZE + 1) + 1);
     u16 len = 0;
     u8 i, count = 0;
 
@@ -637,6 +671,12 @@ static void SendResult(void)
     }
     memcpy(buf + len, &gPlayerParty[MULTI_PARTY_SIZE], sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
     len += sizeof(struct Pokemon) * MULTI_PARTY_SIZE;
+    if (sCoop.caught == CAUGHT_PARTNER)
+    {
+        buf[len++] = 1;
+        memcpy(buf + len, &sCoop.caughtMon, sizeof(struct Pokemon));
+        len += sizeof(struct Pokemon);
+    }
     if (PlayerValid(sCoop.partner))
         Send(sCoop.partner, buf, len);
     Free(buf);
@@ -722,6 +762,56 @@ static void CB2_MpCoopEvolve(void)
     CB2_MpCoopFinish();
 }
 
+static void GiveCaughtMon(void)
+{
+    char msg[96], nick[16];
+    u8 nickGame[POKEMON_NAME_LENGTH + 1];
+    u16 species = GetMonData(&sCoop.caughtMon, MON_DATA_SPECIES);
+    u16 nat = SpeciesToNationalPokedexNum(species);
+    u8 result;
+
+    if (species == SPECIES_NONE || species >= NUM_SPECIES)
+        return;
+    GetMonData(&sCoop.caughtMon, MON_DATA_NICKNAME, nickGame);
+    nickGame[POKEMON_NAME_LENGTH] = EOS;
+    MP_GameToAscii(nick, nickGame, POKEMON_NAME_LENGTH);
+    result = GiveMonToPlayer(&sCoop.caughtMon);
+    GetSetPokedexFlag(nat, FLAG_SET_SEEN);
+    GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+    if (result == MON_GIVEN_TO_PARTY)
+        snprintf(msg, sizeof(msg), "Gotcha! %s\njoined your party!", nick);
+    else if (result == MON_GIVEN_TO_PC)
+        snprintf(msg, sizeof(msg), "Gotcha! %s\nwas sent to the PC.", nick);
+    else
+        snprintf(msg, sizeof(msg), "No room for %s\nin the PC...", nick);
+    MP_Events_QueueToast(msg);
+    MPNet_Log("co-op wild: caught species %d (%s)", species, result == MON_CANT_GIVE ? "no room" : "given");
+}
+
+// After a co-op wild double: the catch goes to whoever threw the ball, and
+// each catch or win is counted once for the team
+static void FinishWild(void)
+{
+    u8 level = GetMonData(&sCoop.wildMon, MON_DATA_LEVEL);
+    if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught == CAUGHT_MINE)
+    {
+        level = GetMonData(&sCoop.caughtMon, MON_DATA_LEVEL);
+        GiveCaughtMon();
+    }
+    if (sCoop.isMaster)
+    {
+        // CB2_EndWildBattle counts the battle for the leader: not the partner's catch
+        if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught != CAUGHT_MINE)
+            gBattleOutcome = 0;
+    }
+    else if (sCoop.outcome == B_OUTCOME_CAUGHT && sCoop.caught == CAUGHT_MINE)
+    {
+        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, level);
+    }
+    sCoop.caught = CAUGHT_NONE;
+    gMpCoopWild = FALSE;
+}
+
 static bool8 IsLoss(u8 outcome)
 {
     return outcome == B_OUTCOME_LOST || outcome == B_OUTCOME_DREW || outcome == B_OUTCOME_FORFEITED;
@@ -738,9 +828,11 @@ static void CB2_MpCoopFinish(void)
     {
         if (sCoop.isMaster)
             MP_Events_OnCoopWin(sCoop.partner); // counted once, by the battle leader
-        else
+        else if (!gMpCoopWild)
             MP_Events_OnTrainerWin(); // the leader's game counts it in CB2_EndTrainerBattle
     }
+    if (gMpCoopWild)
+        FinishWild();
     if (sCoop.learnCount != 0 && !IsLoss(sCoop.outcome))
         sCoop.learnPromptPending = TRUE;
     else
@@ -757,7 +849,7 @@ static void CB2_MpCoopFinish(void)
         SetMainCallback2(CB2_WhiteOut);
         return;
     }
-    if (sCoop.outcome == B_OUTCOME_WON)
+    if (sCoop.outcome == B_OUTCOME_WON && sCoop.mode != MODE_WILD)
     {
         AddMoney(&gSaveBlock1Ptr->money, sCoop.money);
         // Ordinary trainers count as beaten for the partner too. Story battles
@@ -794,6 +886,8 @@ static void TryRunPendingScript(void)
 void MP_Coop_OnBattleAborted(void)
 {
     gMpCoopBattle = FALSE;
+    gMpCoopWild = FALSE;
+    sCoop.caught = CAUGHT_NONE;
     sCoop.role = ROLE_NONE;
     sCoop.challenged = FALSE;
     sCoop.accepted = FALSE;
@@ -1011,12 +1105,218 @@ static void UpdateAsking(void)
 }
 
 // ---------------------------------------------------------------------------
+// Co-op wild doubles: meet a wild Pokémon while a friend is close by in the
+// grass and they jump in. No questions asked: it just happens, as long as
+// they're free (not in a menu, a battle, a trade...).
+
+static bool8 OnLandEncounterTile(s16 x, s16 y)
+{
+    return MetatileBehavior_IsLandWildEncounter(MapGridGetMetatileBehaviorAt(x, y));
+}
+
+static bool8 FriendCanJoinWild(u8 i, s16 myX, s16 myY, u16 *distance)
+{
+    const u16 needed = MPF_IN_OVERWORLD | MPF_FREE;
+    const u16 busy = MPF_IN_BATTLE | MPF_ENGAGED | MPF_TRAINER_MODE | MPF_CHALLENGED;
+    s16 rx, ry, dx, dy;
+
+    if (!PlayerValid(i) || (gMpPlayers[i].state.flags & needed) != needed || (gMpPlayers[i].state.flags & busy))
+        return FALSE;
+    if (gMpPlayers[i].state.mapGroup != gSaveBlock1Ptr->location.mapGroup
+     || gMpPlayers[i].state.mapNum != gSaveBlock1Ptr->location.mapNum)
+        return FALSE;
+    if (!MP_GetRemoteMapPos(i, &rx, &ry) || !OnLandEncounterTile(rx, ry))
+        return FALSE;
+    dx = rx > myX ? rx - myX : myX - rx;
+    dy = ry > myY ? ry - myY : myY - ry;
+    if (dx > WILD_RANGE_X || dy > WILD_RANGE_Y)
+        return FALSE;
+    *distance = dx + dy;
+    return TRUE;
+}
+
+// BattleSetup_StartWildBattle. gEnemyParty[0] holds the wild Pokémon we met.
+// TRUE: we're asking the closest friend in the grass, and the battle (co-op
+// or alone) starts in a moment.
+bool8 MP_Coop_TryWildTeamUp(void)
+{
+    struct ObjectEvent *me;
+    u16 best = 0xFFFF;
+    s8 target = -1;
+    u8 i;
+
+    if (!MP_IsConnected() || gMpLocalId < 0 || gMpCoopBattle || MP_Coop_IsBusy() || sCoop.challenged)
+        return FALSE;
+    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
+        return FALSE;
+    if (MP_Trainer_IsActive() || MP_Trainer_IsEngaged() || CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
+        return FALSE;
+    me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    if (!OnLandEncounterTile(me->currentCoords.x, me->currentCoords.y))
+        return FALSE;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        u16 d;
+        if (FriendCanJoinWild(i, me->currentCoords.x, me->currentCoords.y, &d) && d < best)
+        {
+            best = d;
+            target = i;
+        }
+    }
+    if (target < 0)
+        return FALSE;
+    sCoop.wildMon = gEnemyParty[0];
+
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    StopPlayerAvatar();
+    sCoop.wildAsking = TRUE;
+    sCoop.wildTarget = target;
+    sCoop.wildReply = 0;
+    sCoop.wildTimer = 0;
+    SendByte(target, MPR_COOP_WILD_ASK, 0);
+    MPNet_Log("co-op wild: asking player %d (distance %d) to jump in", target + 1, best);
+    return TRUE;
+}
+
+static void StartWildCoop(void)
+{
+    u8 partner = sCoop.wildTarget;
+    gTrainerBattleOpponent_A = 0;
+    gTrainerBattleOpponent_B = 0;
+    gMpCoopWild = TRUE;
+    BeginCoopBattle(TRUE, partner);
+    sCoop.mode = MODE_WILD;
+    sCoop.trainerId = 0;
+    sCoop.haveLoseText = FALSE;
+    sCoop.afterBattle = MP_EndWildBattleCallback();
+    IncrementGameStat(GAME_STAT_TOTAL_BATTLES);
+    IncrementGameStat(GAME_STAT_WILD_BATTLES);
+    SendByte(partner, MPR_COOP_WILD_GO, 0);
+    CreateTask(Task_StartJoinerBattle, 1);
+    MPNet_Log("co-op wild: battle with player %d", partner + 1);
+}
+
+static void UpdateWildAsking(void)
+{
+    sCoop.wildTimer++;
+    if (sCoop.wildReply == MPR_COOP_WILD_OK && PlayerValid(sCoop.wildTarget))
+    {
+        sCoop.wildAsking = FALSE;
+        StartWildCoop();
+    }
+    else if (sCoop.wildReply == MPR_COOP_WILD_NO || sCoop.wildTimer > WILD_ASK_FRAMES || !PlayerValid(sCoop.wildTarget))
+    {
+        if (sCoop.wildReply != MPR_COOP_WILD_NO && PlayerValid(sCoop.wildTarget))
+            SendByte(sCoop.wildTarget, MPR_COOP_WILD_CANCEL, 0);
+        sCoop.wildAsking = FALSE;
+        gEnemyParty[0] = sCoop.wildMon;
+        MPNet_Log("co-op wild: battling alone");
+        MP_StartNormalWildBattle();
+    }
+}
+
+// The master's game, building the battle: one wild Pokémon for both players
+void MP_Coop_SetWildEnemyParty(void)
+{
+    ZeroEnemyPartyMons();
+    gEnemyParty[0] = sCoop.wildMon;
+}
+
+// Cmd_givecaughtmon in a co-op wild double (the master's game decides)
+void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon)
+{
+    if (!sCoop.isMaster)
+        return;
+    sCoop.caughtMon = *mon;
+    // The master's Pokémon are battle party slots 0-2, the partner's 3-5
+    sCoop.caught = throwerPartyIndex < MULTI_PARTY_SIZE ? CAUGHT_MINE : CAUGHT_PARTNER;
+}
+
+static bool8 CanJoinWild(void)
+{
+    return MP_IsLocalFree() && !gMpCoopBattle && sCoop.role == ROLE_NONE && !sCoop.challenged
+        && !sCoop.prompting && !sCoop.wildAsking && sCoop.wildFrom < 0 && HasUsableMon()
+        && !MP_Trainer_IsEngaged() && !MP_Trainer_IsActive()
+        && !TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING);
+}
+
+static void StopWaitingForWild(void)
+{
+    sCoop.wildFrom = -1;
+    UnfreezeObjectEvents();
+    UnlockPlayerFieldControls();
+}
+
+static void OnWildRelay(u8 from, u8 id)
+{
+    switch (id)
+    {
+    case MPR_COOP_WILD_ASK:
+        if (CanJoinWild())
+        {
+            LockPlayerFieldControls();
+            FreezeObjectEvents();
+            StopPlayerAvatar();
+            sCoop.wildFrom = from;
+            sCoop.wildTimer = 0;
+            SendByte(from, MPR_COOP_WILD_OK, 0);
+        }
+        else
+        {
+            SendByte(from, MPR_COOP_WILD_NO, 0);
+        }
+        break;
+    case MPR_COOP_WILD_OK:
+    case MPR_COOP_WILD_NO:
+        if (sCoop.wildAsking && from == sCoop.wildTarget && sCoop.wildReply == 0)
+            sCoop.wildReply = id;
+        else if (id == MPR_COOP_WILD_OK)
+            SendByte(from, MPR_COOP_WILD_CANCEL, 0);   // we already gave up
+        break;
+    case MPR_COOP_WILD_GO:
+        if (sCoop.wildFrom == from)
+        {
+            sCoop.wildFrom = -1;
+            gTrainerBattleOpponent_A = 0;
+            gTrainerBattleOpponent_B = 0;
+            gMpCoopWild = TRUE;
+            BeginCoopBattle(FALSE, from);
+            sCoop.mode = MODE_WILD;
+            sCoop.trainerId = 0;
+            sCoop.haveLoseText = FALSE;
+            sCoop.afterBattle = NULL;
+            IncrementGameStat(GAME_STAT_TOTAL_BATTLES);
+            IncrementGameStat(GAME_STAT_WILD_BATTLES);
+            CreateTask(Task_StartJoinerBattle, 1);
+            MPNet_Log("co-op wild: joining player %d's battle", from + 1);
+        }
+        break;
+    case MPR_COOP_WILD_CANCEL:
+        if (sCoop.wildFrom == from)
+            StopWaitingForWild();
+        break;
+    }
+}
+
+static void UpdateWildWaiting(void)
+{
+    if (!PlayerValid(sCoop.wildFrom) || ++sCoop.wildTimer > WILD_GO_FRAMES)
+        StopWaitingForWild();
+}
+
+// ---------------------------------------------------------------------------
 
 static void TryRunPendingScript(void);
 
 void MP_Coop_Update(void)
 {
     TryRunPendingScript();
+
+    if (sCoop.wildAsking)
+        UpdateWildAsking();
+    if (sCoop.wildFrom >= 0)
+        UpdateWildWaiting();
 
     // Challenge over (the script ended without a battle)
     if (sCoop.challenged && !sCoop.prompting && MP_IsLocalFree())
@@ -1067,6 +1367,13 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             ShowAskerMessage(sReasons[reason], from);
         }
         break;
+    case MPR_COOP_WILD_ASK:
+    case MPR_COOP_WILD_OK:
+    case MPR_COOP_WILD_NO:
+    case MPR_COOP_WILD_GO:
+    case MPR_COOP_WILD_CANCEL:
+        OnWildRelay(from, data[0]);
+        break;
     case MPR_COOP_RESULT:
         if (gMpCoopBattle && !sCoop.isMaster && from == sCoop.partner && len >= 8)
         {
@@ -1092,6 +1399,13 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             {
                 memcpy(sCoop.resultMons, data + pos, sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
                 sCoop.gotResult = TRUE;
+                pos += sizeof(struct Pokemon) * MULTI_PARTY_SIZE;
+                // We caught a wild Pokémon
+                if (gMpCoopWild && pos + 1 + sizeof(struct Pokemon) <= len && data[pos] == 1)
+                {
+                    memcpy(&sCoop.caughtMon, data + pos + 1, sizeof(struct Pokemon));
+                    sCoop.caught = CAUGHT_MINE;
+                }
             }
         }
         break;
@@ -1100,6 +1414,8 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
 
 void MP_Coop_OnPlayerLeft(u8 id)
 {
+    if (sCoop.wildFrom == id)
+        StopWaitingForWild();
     if (sCoop.requester == id)
         sCoop.requester = -1;
     if (sCoop.accepted && sCoop.partner == id)

@@ -383,6 +383,7 @@ void MP_Events_Update(void);
 void MP_Events_OnTrainerWin(void);
 void MP_Events_OnCoopWin(u8 partner);
 void MP_Events_OnWildEnd(u8 outcome, u8 level);
+void MP_Events_QueueToast(const char *ascii);   // shown on the field, one after another
 void MP_Events_OnTrade(void);
 void MP_Events_OnGiftSent(void);
 u16 MP_Events_MaybeOutbreak(u16 species);
@@ -434,6 +435,12 @@ void MP_Coop_OnTrainerConfigured(void);
 void MP_Coop_OnStartTrainerBattle(void);
 void MP_Coop_OnBattleAborted(void);
 bool8 MP_Coop_IsMaster(void);
+extern bool8 gMpCoopWild;            // TRUE while a co-op wild double runs (on both games)
+bool8 MP_Coop_TryWildTeamUp(void);   // a land wild encounter: team up with the closest friend in the grass
+void MP_Coop_SetWildEnemyParty(void);
+void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon);
+void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c
+void MP_StartNormalWildBattle(void);                 // battle_setup.c
 void MP_Coop_ArrangeEnemyParty(void);
 u16 MP_Coop_TrainerPic(void);
 u16 MP_Coop_PartnerBackPicOr(u16 defaultPic);

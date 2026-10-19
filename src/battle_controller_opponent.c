@@ -1324,8 +1324,8 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
     // Moemon Co-op: the trainer is drawn for both opponent slots; show it once
-    if (gMpCoopBattle && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
-        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
+    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT || gMpCoopWild))
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
 }

@@ -6469,6 +6469,8 @@ void ClearBattleMonForms(void)
 
 u16 GetBattleBGM(void)
 {
+    if (gMpCoopWild)
+        return MUS_VS_WILD; // Moemon Co-op: wild doubles
     if (gBattleTypeFlags & BATTLE_TYPE_KYOGRE_GROUDON)
     {
         return MUS_VS_KYOGRE_GROUDON;

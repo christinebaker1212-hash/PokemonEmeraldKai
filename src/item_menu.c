@@ -3,6 +3,7 @@
 #include "battle.h"
 #include "battle_controllers.h"
 #include "battle_pyramid.h"
+#include "mp.h"
 #include "frontier_util.h"
 #include "battle_pyramid_bag.h"
 #include "berry_tag_screen.h"
@@ -1982,8 +1983,19 @@ static void ItemMenu_Cancel(u8 taskId)
     ReturnToItemList(taskId);
 }
 
+static const u8 sText_MpCoopBallsOnly[] = _("Only POKé BALLS can be used in\nco-op battles.");
+static const u8 sText_MpCoopNoItems[] = _("Items can't be used in this battle.");
+
 static void ItemMenu_UseInBattle(u8 taskId)
 {
+    // Moemon Co-op: both games must agree on everything, so only POKé BALLS
+    // (in co-op wild battles) can be used
+    if (gMpCoopBattle && !(gMpCoopWild && gSpecialVar_ItemId >= FIRST_BALL && gSpecialVar_ItemId <= LAST_BALL))
+    {
+        RemoveContextWindow();
+        DisplayItemMessage(taskId, FONT_NORMAL, gMpCoopWild ? sText_MpCoopBallsOnly : sText_MpCoopNoItems, CloseItemMessage);
+        return;
+    }
     if (GetItemBattleFunc(gSpecialVar_ItemId))
     {
         RemoveContextWindow();

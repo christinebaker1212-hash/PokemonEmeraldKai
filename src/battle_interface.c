@@ -2165,6 +2165,11 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
     s32 maxHp, currHp;
     u8 battler = gSprites[healthboxSpriteId].hMain_Battler;
 
+    // Moemon Co-op: an empty battler slot (co-op wild doubles) has no bars to draw;
+    // its max HP of 0 would divide by zero
+    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
+        return;
+
     if (elementId == HEALTHBOX_ALL && !IsDoubleBattle())
         GetBattlerSide(battler); // Pointless function call.
 
@@ -2516,7 +2521,11 @@ static u8 GetScaledExpFraction(s32 oldValue, s32 receivedValue, s32 maxValue, u8
 
 u8 GetScaledHPFraction(s16 hp, s16 maxhp, u8 scale)
 {
-    u8 result = hp * scale / maxhp;
+    u8 result;
+
+    if (maxhp <= 0) // Moemon Co-op: an empty battler slot
+        return 0;
+    result = hp * scale / maxhp;
 
     if (result == 0 && hp > 0)
         return 1;

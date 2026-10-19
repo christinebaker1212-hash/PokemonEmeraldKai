@@ -2452,7 +2452,7 @@ static void PlayerHandleSuccessBallThrowAnim(void)
 {
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = BALL_3_SHAKES_SUCCESS;
     gDoingBattleAnim = TRUE;
-    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW);
+    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gMpCoopWild ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnSpecialAnimDone;
 }
 
@@ -2462,7 +2462,7 @@ static void PlayerHandleBallThrowAnim(void)
 
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
     gDoingBattleAnim = TRUE;
-    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW);
+    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gMpCoopWild ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnSpecialAnimDone;
 }
 
@@ -3146,4 +3146,16 @@ static void PlayerHandleEndLinkBattle(void)
 
 static void PlayerCmdEnd(void)
 {
+}
+
+// Moemon Co-op test harness: waiting for the player to pick FIGHT/BAG/...
+bool8 MP_Test_IsChoosingAction(void)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        if (gBattlerControllerFuncs[b] == HandleInputChooseAction)
+            return TRUE;
+    }
+    return FALSE;
 }

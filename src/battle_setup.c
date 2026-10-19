@@ -394,6 +394,9 @@ static void CreateBattleStartTask(u8 transition, u16 song)
 
 void BattleSetup_StartWildBattle(void)
 {
+    // Moemon Co-op: the closest friend nearby in the grass jumps in
+    if (!GetSafariZoneFlag() && MP_Coop_TryWildTeamUp())
+        return;
     if (GetSafariZoneFlag())
         DoSafariBattle();
     else
@@ -1992,4 +1995,16 @@ u16 MP_TrainerIdInScript(const u8 *s)
         if (s[k] == MP_SCR_OP_TRAINERBATTLE && s[k + 1] <= TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
             return s[k + 2] | (s[k + 3] << 8);
     return 0;
+}
+
+// Moemon Co-op: after a co-op wild double, the leader finishes like a wild battle
+MainCallback MP_EndWildBattleCallback(void)
+{
+    return CB2_EndWildBattle;
+}
+
+// ...or a normal wild battle when no friend could jump in
+void MP_StartNormalWildBattle(void)
+{
+    DoStandardWildBattle();
 }

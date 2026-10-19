@@ -3376,7 +3376,7 @@ static void Cmd_getexp(void)
                         gBattleMoveDamage += gExpShareExp;
                     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
-                    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+                    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
                     // Moemon Co-op: the partner's Pokémon are theirs, not traded
@@ -9951,8 +9951,11 @@ static void Cmd_handleballthrow(void)
 
     gActiveBattler = gBattlerAttacker;
     gBattlerTarget = BATTLE_OPPOSITE(gBattlerAttacker);
+    // Moemon Co-op: in a co-op wild double, aim at whichever wild Pokémon is still there
+    if (gMpCoopWild && (gAbsentBattlerFlags & gBitTable[gBattlerTarget] || gBattleMons[gBattlerTarget].hp == 0))
+        gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
 
-    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
     {
         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
         MarkBattlerForControllerExec(gActiveBattler);
@@ -10050,7 +10053,7 @@ static void Cmd_handleballthrow(void)
         {
             BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
             MarkBattlerForControllerExec(gActiveBattler);
-            gBattlescriptCurrInstr = BattleScript_SuccessBallThrow;
+            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
             SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_POKEBALL, &gLastUsedItem);
 
             if (CalculatePlayerPartyCount() == PARTY_SIZE)
@@ -10077,7 +10080,7 @@ static void Cmd_handleballthrow(void)
 
             if (shakes == BALL_3_SHAKES_SUCCESS) // mon caught, copy of the code above
             {
-                gBattlescriptCurrInstr = BattleScript_SuccessBallThrow;
+                gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
                 SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_POKEBALL, &gLastUsedItem);
 
                 if (CalculatePlayerPartyCount() == PARTY_SIZE)
@@ -10096,6 +10099,17 @@ static void Cmd_handleballthrow(void)
 
 static void Cmd_givecaughtmon(void)
 {
+    if (gMpCoopWild)
+    {
+        // Moemon Co-op: the catcher gets it after the battle (their real party isn't loaded now)
+        struct Pokemon *mon = &gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]];
+        MP_Coop_OnWildCaught(gBattlerPartyIndexes[gBattlerAttacker], mon);
+        gBattleResults.caughtMonSpecies = GetMonData(mon, MON_DATA_SPECIES, NULL);
+        GetMonData(mon, MON_DATA_NICKNAME, gBattleResults.caughtMonNick);
+        gBattleResults.caughtMonBall = GetMonData(mon, MON_DATA_POKEBALL, NULL);
+        gBattlescriptCurrInstr++;
+        return;
+    }
     if (GiveMonToPlayer(&gEnemyParty[gBattlerPartyIndexes[BATTLE_OPPOSITE(gBattlerAttacker)]]) != MON_GIVEN_TO_PARTY)
     {
         if (!ShouldShowBoxWasFullMessage())
