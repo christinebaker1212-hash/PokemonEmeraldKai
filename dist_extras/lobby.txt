@@ -1,0 +1,5 @@
+; Online lobby server for Moemon Emerald Kai Co-op.
+; Replace the line below with your server's address (add :port if it isn't 27015),
+; save this file, and share the game folder with your friends.
+; Leave it as is to only play on your home network (or with port forwarding).
+; example.address.here

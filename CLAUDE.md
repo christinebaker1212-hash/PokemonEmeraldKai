@@ -27,7 +27,13 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 Verified this way: 4-player overworld sync, nametags, custom PNG sprite,
 BATTLE FLAG -> spot -> walk up -> link battle -> rewards and whiteout, save/continue.
 
+Two-client tests: `MOEMON_LOBBY=127.0.0.1:PORT` plus `MOEMON_COOP_AUTO=host:NAME` / `join:NAME`
+and a local `tools/mp_server` build. `MOEMON_DEBUG_PARTY=280:15+` makes a Pokémon one EXP
+point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs seen by others,
+spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
+and move learning, loss, disconnect).
+
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)
-- Double/multi battles and trading are not networked
+- Trading is not networked; items can't be used in co-op/PvP battles
 - Remote players aren't shown across warps (only the same map or connected maps)

@@ -280,6 +280,33 @@ const char *MP_OnlineLobbyAddress(void)
         return getenv("MOEMON_LOBBY");
     if (gMpConfig.lobby[0])
         return gMpConfig.lobby;
+    // lobby.txt next to the game: whoever runs the server can put its address
+    // there once and share the folder, so nobody else has to set anything
+    {
+        static char sFileLobby[128];
+        static bool8 sFileRead;
+        if (!sFileRead)
+        {
+            FILE *f = fopen("lobby.txt", "r");
+            sFileRead = TRUE;
+            if (f)
+            {
+                char line[128];
+                while (fgets(line, sizeof(line), f))
+                {
+                    char *t = Trim(line);
+                    if (t[0] && t[0] != ';' && t[0] != '#')
+                    {
+                        snprintf(sFileLobby, sizeof(sFileLobby), "%s", t);
+                        break;
+                    }
+                }
+                fclose(f);
+            }
+        }
+        if (sFileLobby[0])
+            return sFileLobby;
+    }
     return MP_DEFAULT_LOBBY;
 }
 

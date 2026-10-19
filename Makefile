@@ -124,7 +124,7 @@ ifeq ($(PORTABLE),1)
 
   ifeq ($(TARGET_OS),WINDOWS)
     OS_CFLAGS :=
-    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32
+    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi
     BUILD_FEXTENSION := .exe
   else
     OS_CFLAGS :=
@@ -242,6 +242,10 @@ else ifeq ($(PORTABLE),1)
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
   CC1 	:= $(shell $(PREFIX)gcc --print-prog-name=cc1) -quiet
   override CFLAGS += $(OS_CFLAGS) $(PLATFORM_CFLAGS) -Werror=implicit-function-declaration -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wno-trigraphs -Wimplicit -Wparentheses -Wunused -m$(BIT_WIDTH) -std=gnu99 $(LEADING_UNDERSCORE_FLAG) -fno-dce -fno-builtin -Wno-unused-function -DPORTABLE -DNONMATCHING -D UBFIX -DMODERN=$(MODERN)
+  # Moemon Co-op: built-in online lobby address, e.g. make winwsl LOBBY=1.2.3.4
+  ifneq ($(LOBBY),)
+    override CFLAGS += -DMP_DEFAULT_LOBBY='"$(LOBBY)"'
+  endif
   LIB := $(LIBPATH) -lgcc -lc
 else
   # Note: The makefile must be set up to not call these if modern == 0
