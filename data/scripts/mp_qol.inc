@@ -45,3 +45,16 @@ Text_MpMoveRelearner_UsedScale:
 Text_MpMoveRelearner_NoScale:
 	.string "The MOVE TUTOR's service needs a\n"
 	.string "HEART SCALE. You don't have any…$"
+
+@ Moemon Co-op: walking into a friend's Secret Base from the CO-OP menu
+@ (mp_linkx.c has copied it into our list and picked the exit).
+EventScript_MpVisitSecretBase::
+	lockall
+	setvar VAR_INIT_SECRET_BASE, 1
+	playse SE_EXIT
+	clearflag FLAG_HIDE_SECRET_BASE_TRAINER
+	special EnterSecretBase
+	special MP_SecretBase_FixExit
+	setvar VAR_SECRET_BASE_INITIALIZED, 0
+	waitstate
+	end

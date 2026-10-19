@@ -546,3 +546,4 @@ gSpecials::
 	def_special MP_Coop_PrepareLearnMove
 	def_special MP_Repel_CheckAnother
 	def_special MP_Repel_UseAnother
+	def_special MP_SecretBase_FixExit

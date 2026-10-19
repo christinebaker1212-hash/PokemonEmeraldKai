@@ -242,6 +242,31 @@ BETTING           When you watch a friend's battle you can bet $500 on them to
                   win or lose. Right: double back. Leave early: bet lost.
 
 
+THE GAME'S OWN LINK FEATURES, ONLINE (CO-OP menu > UNION ROOM)
+-------------------------------------------------------------
+RECORD MIXING   Happens by itself while friends are online (when someone
+                joins, then every 20 minutes): TV shows, SECRET BASES, the
+                Old Man's songs, Dewford trends, Battle Tower trainers and
+                the rest, just like mixing records at a POKEMON CENTER.
+                MIX RECORDS does it right away. (SECRET BASES only arrive once
+                you have SECRET POWER, like in the original.)
+SECRET BASES    VISIT A SECRET BASE walks you straight into a friend's base,
+                decorations and all (you can battle its owner). Leaving puts
+                you outside it, on its route.
+TRAINER CARDS   Look at a friend's TRAINER CARD (both sides).
+DAY CARE        A POKEMON left alone at your DAY CARE can make an EGG with one
+                left alone at a friend's. Each of you gets your own EGG from
+                the DAY CARE MAN. The DAY CARE page shows how well they get
+                along.
+ROAMERS         Latias/Latios roam the same routes for everyone, so you can
+                hunt them together.
+WEATHER         Routes 119 and 123's weather, and the abnormal weather after
+                the game, are the same for everyone.
+HALL OF FAME    Entering the HALL OF FAME shows the teams of the friends online
+                after yours, and they stand with you at the end. They get a
+                MOEGATCHA pull for cheering.
+
+
 HANDY EXTRAS (they save time, they don't make the game easier)
 ---------------------------------------------------------------
 * Battle: on the move list, R shows each move's power, accuracy and kind

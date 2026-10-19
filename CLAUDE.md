@@ -48,6 +48,12 @@ result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11
 `mp item 1 2`, `waitfor action`, `mp party`. Verified: catch by the joining player, knock-out win
 (EXP for both), friend out of range -> normal single battle. Also gym rematches and tournaments.
 
+Batch 3 (mp_linkx.c): record mixing over relay (record_mixing.c MP_RecordMix_*, mp_battle.c
+NetLink_BeginRecordMix fakes a 2-4 player link), friend Secret Base visits (secret_base.c MP_SecretBase_*,
+EventScript_MpVisitSecretBase), link Trainer Cards, Day Care co-op eggs (daycare.c MP_Daycare_TryCoopEgg,
+`<save>.coopegg`), shared roamer/weather, Hall of Fame friend teams. Debug: `mp mkbase 181`, `mp daycare N`,
+`mp coopegg`, `mp takeegg`, `mp hof`, `mp roamer`, `mp world`. All verified with two clients.
+
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)
 - Only POKé BALLS (co-op wild battles) can be used in co-op battles; no items in PvP

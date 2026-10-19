@@ -666,6 +666,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);
+    MP_Linkx_OnPlayerLeft(id);
     MP_Trainer_OnPlayerLeft(id);
     MP_Battle_OnPlayerLeft(id);
     MP_Spectate_OnPlayerLeft(id);
@@ -861,6 +862,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Piggy_OnRelay(from, data, len);
     else if (data[0] >= MPR_SOCIAL_FIRST && data[0] < MPR_SOCIAL_FIRST + 5)
         MP_Social_OnRelay(from, data, len);
+    else if (data[0] >= MPR_LINKX_FIRST && data[0] < MPR_LINKX_FIRST + 20)
+        MP_Linkx_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1210,6 +1213,7 @@ void MP_FrameUpdate(void)
     MP_Qol_Update();
     MP_Social_Update();
     MP_Together_Update();
+    MP_Linkx_Update();
 
     MPServer_Poll();
     MP_AutoSession_Update();

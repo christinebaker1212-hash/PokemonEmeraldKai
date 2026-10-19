@@ -244,3 +244,20 @@ void GetRoamerLocation(u8 *mapGroup, u8 *mapNum)
     *mapGroup = sRoamerLocation[MAP_GRP];
     *mapNum = sRoamerLocation[MAP_NUM];
 }
+
+// Moemon Co-op: shared roamers (mp_linkx.c). Friends' roamers move together,
+// following whoever has the lowest player number.
+bool8 MP_Roamer_Get(u8 *mapGroup, u8 *mapNum)
+{
+    *mapGroup = sRoamerLocation[MAP_GRP];
+    *mapNum = sRoamerLocation[MAP_NUM];
+    return ROAMER->active;
+}
+
+void MP_Roamer_Set(u8 mapGroup, u8 mapNum)
+{
+    if (!ROAMER->active)
+        return;
+    sRoamerLocation[MAP_GRP] = mapGroup;
+    sRoamerLocation[MAP_NUM] = mapNum;
+}

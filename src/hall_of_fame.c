@@ -1,5 +1,6 @@
 #include "global.h"
 #include "hall_of_fame.h"
+#include "mp.h"
 #include "task.h"
 #include "palette.h"
 #include "sprite.h"
@@ -101,6 +102,10 @@ static void HallOfFame_PrintMonInfo(struct HallofFameMon *currMon, u8 unused1, u
 static void HallOfFame_PrintWelcomeText(u8 unusedPossiblyWindowId, u8 unused2);
 static void HallOfFame_PrintPlayerInfo(u8 unused1, u8 unused2);
 static void Task_DoDomeConfetti(u8 taskId);
+static void Task_Hof_MpNextTeam(u8 taskId);
+static void Task_Hof_WaitMpTeamTitle(u8 taskId);
+static const u8 gText_MpTogetherWith[] = _("Together with ");
+static const u8 gText_MpExclam[] = _("!");
 static void SpriteCB_HofConfetti(struct Sprite *sprite);
 
 static const struct BgTemplate sHof_BgTemplates[] =
@@ -413,6 +418,8 @@ static bool8 InitHallOfFameScreen(void)
 #define tFrameCount         data[3]
 #define tPlayerSpriteID     data[4]
 #define tMonSpriteId(i)     data[i + 5]
+#define tMpTeam             data[11]          // Moemon Co-op: friends' teams shown so far
+#define tMpFriendSprite(i)  data[(i) + 12]    // and their characters at the end (3)
 
 void CB2_DoHallOfFameScreen(void)
 {
@@ -421,6 +428,7 @@ void CB2_DoHallOfFameScreen(void)
         u8 taskId = CreateTask(Task_Hof_InitMonData, 0);
         gTasks[taskId].tDontSaveData = FALSE;
         sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+        MP_Linkx_HofBegin();   // Moemon Co-op: friends online send their teams
     }
 }
 
@@ -630,9 +638,63 @@ static void Task_Hof_TryDisplayAnotherMon(u8 taskId)
         }
         else
         {
-            gTasks[taskId].func = Task_Hof_PaletteFadeAndPrintWelcomeText;
+            gTasks[taskId].func = Task_Hof_MpNextTeam;
+            gTasks[taskId].tFrameCount = 60;
         }
     }
+}
+
+// Moemon Co-op: after your team, each friend's team parades in too
+static void Task_Hof_MpNextTeam(u8 taskId)
+{
+    u8 name[PLAYER_NAME_LENGTH + 1], text[64];
+    u16 i, pic;
+
+    if (gTasks[taskId].tFrameCount != 0)
+    {
+        gTasks[taskId].tFrameCount--;
+        return;
+    }
+    if (gTasks[taskId].tMpTeam >= MP_Linkx_HofFriendCount()
+     || !MP_Linkx_HofFriend(gTasks[taskId].tMpTeam, (u8 *)sHofMonPtr, name, &pic))
+    {
+        gTasks[taskId].func = Task_Hof_PaletteFadeAndPrintWelcomeText;
+        return;
+    }
+    gTasks[taskId].tMpTeam++;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u8 spriteId = gTasks[taskId].tMonSpriteId(i);
+        if (spriteId != SPRITE_NONE)
+        {
+            FreeOamMatrix(gSprites[spriteId].oam.matrixNum);
+            FreeAndDestroyMonPicSprite(spriteId);
+        }
+        gTasks[taskId].tMonSpriteId(i) = SPRITE_NONE;
+    }
+    sHofFadePalettes = 0;
+    gTasks[taskId].tMonNumber = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (sHofMonPtr->mon[i].species != SPECIES_NONE)
+            gTasks[taskId].tMonNumber++;
+    gTasks[taskId].tDisplayedMonId = 0;
+    // "Together with BOB!"
+    StringCopy(text, gText_MpTogetherWith);
+    StringAppend(text, name);
+    StringAppend(text, gText_MpExclam);
+    FillWindowPixelBuffer(0, PIXEL_FILL(0));
+    PutWindowTilemap(0);
+    AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, text, 0xD0), 1, sMonInfoTextColors, 0, text);
+    CopyWindowToVram(0, COPYWIN_FULL);
+    PlaySE(SE_APPLAUSE);
+    gTasks[taskId].tFrameCount = 0;
+    gTasks[taskId].func = gTasks[taskId].tMonNumber ? Task_Hof_WaitMpTeamTitle : Task_Hof_MpNextTeam;
+}
+
+static void Task_Hof_WaitMpTeamTitle(u8 taskId)
+{
+    if (++gTasks[taskId].tFrameCount >= 90)
+        gTasks[taskId].func = Task_Hof_DisplayMon;
 }
 
 static void Task_Hof_PaletteFadeAndPrintWelcomeText(u8 taskId)
@@ -698,7 +760,24 @@ static void Task_Hof_DisplayPlayer(u8 taskId)
     ShowBg(0);
     ShowBg(1);
     ShowBg(3);
-    gTasks[taskId].tPlayerSpriteID = CreateTrainerPicSprite(PlayerGenderToFrontTrainerPicId_Debug(gSaveBlock2Ptr->playerGender, TRUE), TRUE, 120, 72, 6, TAG_NONE);
+    gTasks[taskId].tPlayerSpriteID = CreateTrainerPicSprite(MP_LocalFrontPicOr(PlayerGenderToFrontTrainerPicId_Debug(gSaveBlock2Ptr->playerGender, TRUE)), TRUE, 120, 72, 6, TAG_NONE);
+    {
+        // Moemon Co-op: the friends whose teams were shown stand with you
+        u8 i, name[PLAYER_NAME_LENGTH + 1];
+        u16 pic;
+        for (i = 0; i < 3; i++)
+        {
+            gTasks[taskId].tMpFriendSprite(i) = SPRITE_NONE;
+            if (i < gTasks[taskId].tMpTeam && MP_Linkx_HofFriend(i, NULL, name, &pic) && pic != 0xFFFF)
+            {
+                gTasks[taskId].tMpFriendSprite(i) = CreateTrainerPicSprite(pic, TRUE, 144 - i * 44, 80, 7 + i, TAG_NONE);
+                if (gTasks[taskId].tMpFriendSprite(i) != SPRITE_NONE && gTasks[taskId].tMpFriendSprite(i) < MAX_SPRITES)
+                    gSprites[gTasks[taskId].tMpFriendSprite(i)].oam.priority = 1;
+                else
+                    gTasks[taskId].tMpFriendSprite(i) = SPRITE_NONE;
+            }
+        }
+    }
     AddWindow(&sHof_WindowTemplate);
     LoadWindowGfx(1, gSaveBlock2Ptr->optionsWindowFrameType, 0x21D, BG_PLTT_ID(13));
     LoadPalette(GetTextWindowPalette(1), BG_PLTT_ID(14), PLTT_SIZE_4BPP);
@@ -760,6 +839,9 @@ static void Task_Hof_HandleExit(u8 taskId)
         }
 
         FreeAndDestroyTrainerPicSprite(gTasks[taskId].tPlayerSpriteID);
+        for (i = 0; i < 3; i++)
+            if (gTasks[taskId].tMpFriendSprite(i) != SPRITE_NONE)
+                FreeAndDestroyTrainerPicSprite(gTasks[taskId].tMpFriendSprite(i));
         HideBg(0);
         HideBg(1);
         HideBg(3);
@@ -787,6 +869,8 @@ static void StartCredits(void)
 #undef tFrameCount
 #undef tPlayerSpriteID
 #undef tMonSpriteId
+#undef tMpTeam
+#undef tMpFriendSprite
 
 #define tCurrTeamNo     data[0]
 #define tCurrPageNo     data[1]
@@ -1509,4 +1593,27 @@ static void Task_DoDomeConfetti(u8 taskId)
         gSpecialVar_0x8005 = 0xFFFF;
         break;
     }
+}
+
+// Moemon Co-op: your team as the Hall of Fame shows it, for friends' ceremonies
+// (PARTY_SIZE entries of struct HallofFameMon, 20 bytes each)
+u16 MP_Hof_BuildTeam(u8 *out)
+{
+    struct HallofFameTeam *team = (struct HallofFameTeam *)out;
+    u16 i, j;
+    memset(team, 0, sizeof(*team));
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u8 nickname[POKEMON_NAME_LENGTH + 1];
+        if (!GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
+            continue;
+        team->mon[i].species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+        team->mon[i].tid = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
+        team->mon[i].personality = GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY);
+        team->mon[i].lvl = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+        GetMonData(&gPlayerParty[i], MON_DATA_NICKNAME, nickname);
+        for (j = 0; j < POKEMON_NAME_LENGTH; j++)
+            team->mon[i].nickname[j] = nickname[j];
+    }
+    return sizeof(*team);
 }

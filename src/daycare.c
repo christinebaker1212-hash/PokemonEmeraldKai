@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "pokemon.h"
 #include "battle.h"
 #include "daycare.h"
@@ -725,6 +726,8 @@ static void RemoveEggFromDayCare(struct DayCare *daycare)
 
 void RejectEggFromDayCare(void)
 {
+    struct Pokemon unused;
+    MP_Linkx_TakePendingEgg(&unused);   // Moemon Co-op
     RemoveEggFromDayCare(&gSaveBlock1Ptr->daycare);
 }
 
@@ -801,24 +804,42 @@ static u16 DetermineEggSpeciesAndParentSlots(struct DayCare *daycare, u8 *parent
     return eggSpecies;
 }
 
-static void _GiveEggFromDaycare(struct DayCare *daycare)
+static void BuildDaycareEgg(struct DayCare *daycare, struct Pokemon *egg)
 {
-    struct Pokemon egg;
     u16 species;
     u8 parentSlots[DAYCARE_MON_COUNT];
     bool8 isEgg;
 
     species = DetermineEggSpeciesAndParentSlots(daycare, parentSlots);
     AlterEggSpeciesWithIncenseItem(&species, daycare);
-    SetInitialEggData(&egg, species, daycare);
-    InheritIVs(&egg, daycare);
-    BuildEggMoveset(&egg, &daycare->mons[parentSlots[1]].mon, &daycare->mons[parentSlots[0]].mon);
+    SetInitialEggData(egg, species, daycare);
+    InheritIVs(egg, daycare);
+    BuildEggMoveset(egg, &daycare->mons[parentSlots[1]].mon, &daycare->mons[parentSlots[0]].mon);
 
     if (species == SPECIES_PICHU)
-        GiveVoltTackleIfLightBall(&egg, daycare);
+        GiveVoltTackleIfLightBall(egg, daycare);
 
     isEgg = TRUE;
-    SetMonData(&egg, MON_DATA_IS_EGG, &isEgg);
+    SetMonData(egg, MON_DATA_IS_EGG, &isEgg);
+}
+
+static void _GiveEggFromDaycare(struct DayCare *daycare)
+{
+    struct Pokemon egg;
+
+    // Moemon Co-op: an EGG made with a friend's DAY CARE POKéMON
+    if (daycare == &gSaveBlock1Ptr->daycare && MP_Linkx_TakePendingEgg(&egg))
+        ;
+    else if (CountPokemonInDaycare(daycare) == 1)
+    {
+        // The other parent was a friend's but the EGG got lost: make it from ours alone
+        struct DayCare tmp = *daycare;
+        u8 s = GetBoxMonData(&tmp.mons[0].mon, MON_DATA_SANITY_HAS_SPECIES) ? 0 : 1;
+        tmp.mons[s ^ 1] = tmp.mons[s];
+        BuildDaycareEgg(&tmp, &egg);
+    }
+    else
+        BuildDaycareEgg(daycare, &egg);
     gPlayerParty[PARTY_SIZE - 1] = egg;
     CompactPartySlots();
     CalculatePlayerPartyCount();
@@ -893,6 +914,9 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
         if (compatibility > (Random() * 100u) / USHRT_MAX)
             TriggerPendingDaycareEgg();
     }
+    // Moemon Co-op: one POKéMON here and one in a friend's DAY CARE can make an EGG
+    else if (daycare == &gSaveBlock1Ptr->daycare && daycare->offspringPersonality == 0 && validEggs == 1)
+        MP_Daycare_TryCoopEgg(daycare);
 
     // Try to hatch Egg
     if (++daycare->stepCounter == 255)
@@ -1295,4 +1319,53 @@ void ChooseSendDaycareMon(void)
 {
     ChooseMonForDaycare();
     gMain.savedCallback = CB2_ReturnToField;
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: DAY CARE POKéMON of friends who are online (mp_linkx.c)
+
+// How well two POKéMON get along (0, 20, 50 or 70), as the DAY CARE MAN says
+u8 MP_Daycare_Compatibility(const struct BoxPokemon *a, const struct BoxPokemon *b)
+{
+    struct DayCare tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    tmp.mons[0].mon = *a;
+    tmp.mons[1].mon = *b;
+    return GetDaycareCompatibilityScore(&tmp);
+}
+
+// Every 256 steps with one POKéMON left here: maybe an EGG with the best
+// matching friend's DAY CARE POKéMON. Each of you gets your own EGG.
+void MP_Daycare_TryCoopEgg(struct DayCare *daycare)
+{
+    u8 s = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_SANITY_HAS_SPECIES) ? 0 : 1;
+    u8 i, best = 0xFF, bestScore = 0;
+    struct BoxPokemon friendMon;
+    struct DayCare tmp;
+    struct Pokemon egg;
+
+    if ((daycare->mons[s].steps & 0xFF) != 0xFF)
+        return;
+    for (i = 0; i < 4; i++)
+    {
+        u8 score;
+        if (!MP_Linkx_FriendDaycareMon(i, &friendMon))
+            continue;
+        score = MP_Daycare_Compatibility(&daycare->mons[s].mon, &friendMon);
+        if (score > bestScore)
+        {
+            bestScore = score;
+            best = i;
+        }
+    }
+    if (best == 0xFF || bestScore <= (Random() * 100u) / USHRT_MAX)
+        return;
+    MP_Linkx_FriendDaycareMon(best, &friendMon);
+    memset(&tmp, 0, sizeof(tmp));
+    tmp.mons[0] = daycare->mons[s];
+    tmp.mons[1].mon = friendMon;
+    _TriggerPendingDaycareEgg(&tmp);   // also sets FLAG_PENDING_DAYCARE_EGG
+    BuildDaycareEgg(&tmp, &egg);
+    daycare->offspringPersonality = tmp.offspringPersonality;
+    MP_Linkx_SetPendingEgg(&egg, best);
 }

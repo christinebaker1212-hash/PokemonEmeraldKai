@@ -539,4 +539,20 @@ enum {
     MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
 };
 
+
+// mp_linkx.c: record mixing, Secret Base visits, Trainer Cards, Day Care eggs,
+// shared roamers and weather, Hall of Fame together, the UNION ROOM page
+void MP_Linkx_Update(void);
+void MP_Linkx_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Linkx_OnPlayerLeft(u8 id);
+void MP_Linkx_OpenUnion(void);
+u16 MP_Linkx_CardPicOr(u16 defaultPic);
+bool8 MP_Linkx_FriendDaycareMon(u8 id, struct BoxPokemon *out);
+void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId);
+bool8 MP_Linkx_TakePendingEgg(struct Pokemon *egg);
+void MP_Daycare_TryCoopEgg(struct DayCare *daycare);
+void MP_Linkx_HofBegin(void);
+u8 MP_Linkx_HofFriendCount(void);
+bool8 MP_Linkx_HofFriend(u8 i, u8 *team, u8 *name, u16 *pic);
+
 #endif // GUARD_MP_H

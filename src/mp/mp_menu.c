@@ -28,7 +28,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_UNION, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 enum { ROW_SPRITE, ROW_SKIN, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
@@ -231,7 +231,7 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL", "GO TO FRIEND", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "MOVE TUTOR", "LOOK", ""};
+    static const char *const mainLabels[] = {"SOCIAL", "GO TO FRIEND", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "UNION ROOM", "MOVE TUTOR", "LOOK", ""};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -570,6 +570,10 @@ static void HandleMainInput(u8 taskId)
         CloseMenu(taskId);
         MP_Gatcha_Open();
         break;
+    case MAIN_UNION:
+        CloseMenu(taskId);
+        MP_Linkx_OpenUnion();
+        break;
     case MAIN_TOURNEY:
         CloseMenu(taskId);
         MP_Tourney_OpenMenu();
@@ -678,6 +682,12 @@ void MP_OpenMenuPage(u8 page)
     gTasks[taskId].tPage = page;
     if (page == MP_MENU_PAGE_MAIN)
         gTasks[taskId].tCursor = MP_Lobby_InRoom() ? MAIN_EMOTES : MAIN_ONLINE;
+}
+
+// Back from the UNION ROOM page
+void MP_OpenMenuAtUnion(void)
+{
+    MP_OpenMenuPageAt(MP_MENU_PAGE_MAIN, MAIN_UNION);
 }
 
 // Back from the MOEGATCHA screen

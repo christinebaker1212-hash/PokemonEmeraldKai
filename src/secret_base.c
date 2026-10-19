@@ -2072,3 +2072,99 @@ void CheckInteractedWithFriendsSandOrnament(void)
             break;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: visit a friend's Secret Base straight from the CO-OP menu
+// (mp_linkx.c). Their base is copied into our list like record mixing does,
+// then we walk in through its entrance, so leaving puts us outside it.
+
+static EWRAM_DATA s16 sMpBaseExit[4] = {0};   // map group, map num, x, y
+
+// The entrance of a base on the routes, from the maps' events
+static bool8 MP_FindSecretBaseEntrance(u8 secretBaseId, s16 *group, s16 *num, s16 *x, s16 *y)
+{
+    static const u16 sMaps[] = {
+        MAP_ROUTE110, MAP_ROUTE111, MAP_ROUTE113, MAP_ROUTE114, MAP_ROUTE115, MAP_ROUTE116, MAP_ROUTE118,
+        MAP_ROUTE119, MAP_ROUTE120, MAP_ROUTE121, MAP_ROUTE123, MAP_ROUTE125, MAP_ROUTE127,
+    };
+    u16 m, i;
+    for (m = 0; m < ARRAY_COUNT(sMaps); m++)
+    {
+        const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(sMaps[m] >> 8, sMaps[m] & 0xFF);
+        const struct MapEvents *events = header->events;
+        for (i = 0; i < events->bgEventCount; i++)
+        {
+            if (events->bgEvents[i].kind == BG_EVENT_SECRET_BASE && events->bgEvents[i].bgUnion.secretBaseId == secretBaseId)
+            {
+                *group = sMaps[m] >> 8;
+                *num = sMaps[m] & 0xFF;
+                *x = events->bgEvents[i].x;
+                *y = events->bgEvents[i].y;
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+// Our own base as a friend would get it (with our current party for its battle)
+const struct SecretBase *MP_SecretBase_Own(void)
+{
+    SetPlayerSecretBaseParty();
+    return &gSaveBlock1Ptr->secretBases[0];
+}
+
+// Keeps a friend's base in our list. Returns its slot, or 0xFF if it can't be kept
+u8 MP_SecretBase_Store(const struct SecretBase *base, u8 version, u8 language)
+{
+    struct SecretBase copy = *base;
+    u8 i, slot = 0xFF;
+    s16 g, n, x, y;
+
+    if (base->secretBaseId == 0 || base->secretBaseId == gSaveBlock1Ptr->secretBases[0].secretBaseId
+     || !MP_FindSecretBaseEntrance(base->secretBaseId, &g, &n, &x, &y))
+        return 0xFF;
+    // Same spot or same owner: replace it
+    for (i = 1; i < SECRET_BASES_COUNT && slot == 0xFF; i++)
+        if (gSaveBlock1Ptr->secretBases[i].secretBaseId == base->secretBaseId
+         || (gSaveBlock1Ptr->secretBases[i].secretBaseId != 0 && SecretBasesHaveSameTrainerId(&gSaveBlock1Ptr->secretBases[i], &copy)))
+            slot = i;
+    for (i = 1; i < SECRET_BASES_COUNT && slot == 0xFF; i++)
+        if (gSaveBlock1Ptr->secretBases[i].secretBaseId == 0)
+            slot = i;
+    for (i = SECRET_BASES_COUNT - 1; i > 0 && slot == 0xFF; i--)
+        if (gSaveBlock1Ptr->secretBases[i].registryStatus != REGISTERED)
+            slot = i;
+    if (slot == 0xFF)
+        slot = SECRET_BASES_COUNT - 1;
+    // Another base in the same spot would hide this one
+    for (i = 1; i < SECRET_BASES_COUNT; i++)
+        if (i != slot && gSaveBlock1Ptr->secretBases[i].secretBaseId == base->secretBaseId)
+            ClearSecretBase(&gSaveBlock1Ptr->secretBases[i]);
+    SaveSecretBase(slot, &copy, version, language);
+    gSaveBlock1Ptr->secretBases[slot].registryStatus = GetNumRegisteredSecretBases() < 10 ? REGISTERED : UNREGISTERED;
+    gSaveBlock1Ptr->secretBases[slot].toRegister = FALSE;
+    return slot;
+}
+
+// Before EventScript_MpVisitSecretBase: which base, and where we come out
+bool8 MP_SecretBase_PrepareVisit(u8 slot)
+{
+    s16 g, n, x, y;
+    if (slot == 0 || slot >= SECRET_BASES_COUNT || gSaveBlock1Ptr->secretBases[slot].secretBaseId == 0
+     || !MP_FindSecretBaseEntrance(gSaveBlock1Ptr->secretBases[slot].secretBaseId, &g, &n, &x, &y))
+        return FALSE;
+    sCurSecretBaseId = gSaveBlock1Ptr->secretBases[slot].secretBaseId;
+    VarSet(VAR_CURRENT_SECRET_BASE, slot);
+    sMpBaseExit[0] = g;
+    sMpBaseExit[1] = n;
+    sMpBaseExit[2] = x;
+    sMpBaseExit[3] = y + 1;   // the spot in front of the entrance
+    return TRUE;
+}
+
+// special, right after EnterSecretBase: come out in front of their entrance
+void MP_SecretBase_FixExit(void)
+{
+    SetDynamicWarpWithCoords(0, sMpBaseExit[0], sMpBaseExit[1], WARP_ID_NONE, sMpBaseExit[2], sMpBaseExit[3]);
+}

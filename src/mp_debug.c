@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "daycare.h"
 #include "pokemon_summary_screen.h"
 #include "item.h"
 #include "pokemon_storage_system.h"
@@ -194,6 +195,81 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u16 nat = (u16)atoi(arg);
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "mkbase") == 0)
+    {
+        // mkbase ID - make our own Secret Base there (181 = a tree on Route 110), with a few decorations
+        struct SecretBase *b = &gSaveBlock1Ptr->secretBases[0];
+        int id = 181;
+        sscanf(arg, "%d", &id);
+        memset(b, 0, sizeof(*b));
+        b->secretBaseId = id;
+        b->gender = gSaveBlock2Ptr->playerGender;
+        memcpy(b->trainerName, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        memcpy(b->trainerId, gSaveBlock2Ptr->playerTrainerId, TRAINER_ID_LENGTH);
+        b->language = GAME_LANGUAGE;
+        b->decorations[0] = 1;  b->decorationPositions[0] = 0x34;   // a desk
+        b->decorations[1] = 85; b->decorationPositions[1] = 0x52;   // a doll
+        FlagSet(FLAG_RECEIVED_SECRET_POWER);
+        printf("[test] base %d\n", id);
+    }
+    else if (strcmp(cmd, "daycare") == 0)
+    {
+        // daycare N - leave party POKéMON N at the DAY CARE
+        void StoreSelectedPokemonInDaycare(void);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        gSpecialVar_0x8004 = n;
+        StoreSelectedPokemonInDaycare();
+        printf("[test] daycare: %d in it\n", CountPokemonInDaycare(&gSaveBlock1Ptr->daycare));
+    }
+    else if (strcmp(cmd, "coopegg") == 0)
+    {
+        // coopegg - walk 256 steps' worth until a co-op EGG comes (up to 200 tries)
+        int i;
+        for (i = 0; i < 200 && gSaveBlock1Ptr->daycare.offspringPersonality == 0; i++)
+        {
+            gSaveBlock1Ptr->daycare.mons[0].steps |= 0xFF;
+            gSaveBlock1Ptr->daycare.mons[1].steps |= 0xFF;
+            MP_Daycare_TryCoopEgg(&gSaveBlock1Ptr->daycare);
+        }
+        printf("[test] coopegg after %d tries: pending %d\n", i, gSaveBlock1Ptr->daycare.offspringPersonality != 0);
+    }
+    else if (strcmp(cmd, "takeegg") == 0)
+    {
+        void GiveEggFromDaycare(void);
+        GiveEggFromDaycare();
+        printf("[test] took the egg\n");
+    }
+    else if (strcmp(cmd, "hof") == 0)
+    {
+        // hof - straight into the Hall of Fame (it saves a record)
+        void CB2_DoHallOfFameScreen(void);
+        SetMainCallback2(CB2_DoHallOfFameScreen);
+    }
+    else if (strcmp(cmd, "roamer") == 0)
+    {
+        void InitRoamer(void);
+        gSpecialVar_0x8004 = 0;
+        InitRoamer();
+        printf("[test] roamer started\n");
+    }
+    else if (strcmp(cmd, "world") == 0)
+    {
+        bool8 MP_Roamer_Get(u8 *mapGroup, u8 *mapNum);
+        u8 g = 0, n = 0;
+        bool8 r = MP_Roamer_Get(&g, &n);
+        printf("[test] world: stage %d abnormal %d roamer %d at %d.%d bases:", gSaveBlock1Ptr->weatherCycleStage,
+               VarGet(VAR_ABNORMAL_WEATHER_LOCATION), r, g, n);
+        for (n = 0; n < 20; n++)
+            printf(" %d", gSaveBlock1Ptr->secretBases[n].secretBaseId);
+        printf(" tv0kind %d\n", gSaveBlock1Ptr->tvShows[5].common.kind);
+    }
+    else if (strcmp(cmd, "setstage") == 0)
+    {
+        int v = 0;
+        sscanf(arg, "%d", &v);
+        gSaveBlock1Ptr->weatherCycleStage = v;
     }
     else if (strcmp(cmd, "gatcharig") == 0)
     {

@@ -1912,6 +1912,8 @@ static void CreateTrainerCardTrainerPic(void)
         u16 picId = FacilityClassToPicIndex(sTrainerPicFacilityClass[sData->cardType][sData->trainerCard.gender]);
         if (!sData->isLink)
             picId = MP_LocalFrontPicOr(picId); // Moemon Co-op: the character picked in CO-OP menu
+        else
+            picId = MP_Linkx_CardPicOr(picId); // Moemon Co-op: a friend's card shows their character
         CreateTrainerCardTrainerPicSprite(picId,
                     TRUE,
                     sTrainerPicOffset[sData->isHoenn][sData->trainerCard.gender][0],
