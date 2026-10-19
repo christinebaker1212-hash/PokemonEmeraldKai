@@ -1220,24 +1220,28 @@ static u16 MixColor(u16 a, u16 b, int f)
 static void LoadThemedPalettes(void)
 {
     u16 theme[16], text[16], bg3[5];
-    u16 accent;
+    u16 accent, white = RGB(31, 31, 31), gold;
+    int mx, mn;
     MpTheme_BuildPalette(theme);
     accent = theme[MPT_BORDER];
+    mx = max(accent & 31, max((accent >> 5) & 31, (accent >> 10) & 31));
+    mn = min(accent & 31, min((accent >> 5) & 31, (accent >> 10) & 31));
+    gold = (mx - mn >= 6) ? MixColor(accent, white, 150) : RGB(31, 25, 6);
     memcpy(text, sTextPal, sizeof(text));
-    text[TC_SHADOW] = theme[MPT_SHADOW];
-    text[TC_GREY] = theme[MPT_GREY];
-    text[TC_PANEL] = theme[MPT_BG];
-    text[TC_GOLD] = theme[MPT_GOLD];
-    text[TC_DIM] = MixColor(theme[MPT_BG], theme[MPT_GREY], 128);
+    text[TC_SHADOW] = MixColor(0, accent, 18);
+    text[TC_GREY] = MixColor(RGB(21, 21, 23), accent, 40);
+    text[TC_PANEL] = MixColor(0, accent, 58);
+    text[TC_GOLD] = gold;
+    text[TC_DIM] = MixColor(text[TC_PANEL], text[TC_GREY], 128);
     LoadPalette(text, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
     LoadPalette(text, BG_PLTT_ID(0), PLTT_SIZEOF(1));
     bg3[0] = 0;
     bg3[1] = MixColor(0, accent, 34);    // stripes
     bg3[2] = MixColor(0, accent, 50);
     bg3[3] = MixColor(0, accent, 16);    // band behind the reel
-    bg3[4] = theme[MPT_GOLD];            // its trim
+    bg3[4] = gold;                       // its trim
     LoadPalette(bg3, BG_PLTT_ID(BG3_PAL), sizeof(bg3));
-    sSpritePalThemed[1] = theme[MPT_GOLD];   // selector frame and arrow
+    sSpritePalThemed[1] = gold;              // selector frame and arrow
 }
 
 static void CB2_InitGatcha(void)

@@ -97,27 +97,21 @@ static u16 FrameAccent(bool8 *colorful)
     return accent;
 }
 
-// The co-op menu colors, worked out from the player's window frame
+// The co-op menu colors: white panels and dark text like the game's own
+// menus (std_menu.pal), with light accents in the color of the player's
+// window frame for the title band and the selected row
 void MpTheme_BuildPalette(u16 *pal)
 {
     bool8 colorful;
     u16 a = FrameAccent(&colorful);
-    pal[0] = 0;
-    pal[MPT_BG] = Mix(0, a, 58);          // dark panel in the frame's color
-    pal[MPT_TEXT] = RGB(31, 31, 31);
-    pal[MPT_SHADOW] = Mix(0, a, 18);
-    pal[MPT_RED] = RGB(31, 12, 12);
-    pal[5] = RGB(12, 3, 4);
-    pal[MPT_GREEN] = RGB(12, 30, 12);
-    pal[7] = RGB(3, 10, 3);
-    pal[MPT_BLUE] = RGB(12, 24, 31);
-    pal[9] = RGB(2, 6, 13);
-    pal[MPT_BAND] = Mix(0, a, 112);       // title band
-    pal[MPT_GOLD] = colorful ? Mix(a, RGB(31, 31, 31), 150) : RGB(31, 25, 6);   // highlights
-    pal[MPT_SEL] = Mix(0, a, 92);         // selected row
-    pal[MPT_GREY] = Mix(RGB(21, 21, 23), a, 40);
-    pal[MPT_BORDER] = a;
-    pal[MPT_BAND2] = Mix(0, a, 150);
+    u16 white = RGB(31, 31, 31);
+    CpuCopy16(gStandardMenuPalette, pal, PLTT_SIZE_4BPP);   // 1 white, 2 dark grey, 3 light grey...
+    pal[MPT_BAND] = Mix(white, a, 64);                         // title band
+    pal[MPT_BAND2] = Mix(white, a, 120);                       // its top line
+    pal[MPT_SEL] = Mix(white, a, 52);                          // selected row
+    pal[MPT_GOLD] = colorful ? Mix(0, a, 120) : RGB(7, 7, 8);  // highlighted text (dark, in the frame's color)
+    pal[MPT_GREY] = RGB(14, 14, 15);                           // less important text
+    pal[MPT_BORDER] = a;                                       // accent lines
 }
 
 static u16 sSavedPal[16];
@@ -159,7 +153,7 @@ void MpTheme_Panel(u8 windowId, u8 bandHeight)
     {
         FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND), 0, 0, w, bandHeight);
         FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BAND2), 0, 0, w, 1);
-        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 0, bandHeight, w, 1);
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), 0, bandHeight, w, 1);
     }
 }
 
@@ -168,7 +162,7 @@ void MpTheme_SelBar(u8 windowId, int y, int h)
 {
     int w = GetWindowAttribute(windowId, WINDOW_WIDTH) * 8;
     FillWindowPixelRect(windowId, PIXEL_FILL(MPT_SEL), 1, y, w - 2, h);
-    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_GOLD), 1, y, 2, h);
+    FillWindowPixelRect(windowId, PIXEL_FILL(MPT_BORDER), 1, y, 2, h);
 }
 
 void MpTheme_Print(u8 windowId, u8 font, const u8 *str, int x, int y, u8 fg, u8 bg)

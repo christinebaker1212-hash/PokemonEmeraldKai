@@ -73,7 +73,7 @@ static u8 sTiles[2][64 * 32 / 2];
 
 static const u16 sBubblePal[16] = {
     RGB(0, 0, 0), RGB(31, 31, 31), RGB(7, 7, 8), RGB(20, 20, 21), RGB(9, 9, 11),
-    // Toasts, in the co-op menu style: navy, white text, dark shadow, gold trim, purple band
+    // Toasts, in the co-op menu style (filled in from the player's window frame)
     RGB(4, 4, 12), RGB(31, 31, 31), RGB(1, 1, 5), RGB(31, 25, 6), RGB(11, 4, 19),
 };
 
@@ -348,10 +348,10 @@ static bool8 CreateBubbleSprites(struct Bubble *b)
         u16 theme[16];
         MpTheme_BuildPalette(theme);
         memcpy(sPal, sBubblePal, sizeof(sPal));
-        sPal[5] = theme[MPT_BG];
-        sPal[6] = theme[MPT_TEXT];
-        sPal[7] = theme[MPT_SHADOW];
-        sPal[8] = theme[MPT_BORDER];
+        sPal[5] = theme[MPT_BG];       // white
+        sPal[6] = theme[MPT_TEXT];     // dark grey
+        sPal[7] = theme[MPT_SHADOW];   // light grey
+        sPal[8] = theme[MPT_BORDER];   // the frame's color
         sPal[9] = theme[MPT_BAND];
     }
     if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) == 0xFF && LoadSpritePalette(&pal) == 0xFF)
