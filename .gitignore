@@ -51,3 +51,5 @@ pokeemerald64.exe
 moemon_server
 moemon_server.exe
 .claude/worktrees/
+coop_store_*.dat
+__pycache__/
