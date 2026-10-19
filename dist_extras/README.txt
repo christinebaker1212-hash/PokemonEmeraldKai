@@ -31,6 +31,8 @@ QUICK START
      PLAY SOLO    - play alone. Go online later from the CO-OP menu (C key, or
                     Y/Triangle on a controller).
 4. Load your save or start a new game. That's it.
+   In a new game, PROF. BIRCH asks to see you right after "boy or girl?":
+   that's the LOOK menu, so you can dress your trainer before the adventure.
 
 Typing works with the real keyboard (Ctrl+V pastes). The game remembers the
 last server, so next time JOIN offers it straight away. While you host, the

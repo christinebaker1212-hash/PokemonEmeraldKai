@@ -1,6 +1,7 @@
 #include "global.h"
 #include "trainer_pokemon_sprites.h"
 #include "bg.h"
+#include "mp.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "constants/trainers.h"
@@ -220,6 +221,7 @@ static void NewGameBirchSpeech_ShowGenderMenu(void);
 static s8 NewGameBirchSpeech_ProcessGenderMenuInput(void);
 static void NewGameBirchSpeech_ClearGenderWindow(u8, u8);
 static void Task_NewGameBirchSpeech_WhatsYourName(u8);
+static void Task_NewGameBirchSpeech_LetMeSeeYou(u8);
 static void Task_NewGameBirchSpeech_SlideOutOldGenderSprite(u8);
 static void Task_NewGameBirchSpeech_SlideInNewGenderSprite(u8);
 static void Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint(u8);
@@ -1518,13 +1520,13 @@ static void Task_NewGameBirchSpeech_ChooseGender(u8 taskId)
             PlaySE(SE_SELECT);
             gSaveBlock2Ptr->playerGender = gender;
             NewGameBirchSpeech_ClearGenderWindow(1, 1);
-            gTasks[taskId].func = Task_NewGameBirchSpeech_WhatsYourName;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_LetMeSeeYou;   // Moemon Co-op: LOOK first
             break;
         case FEMALE:
             PlaySE(SE_SELECT);
             gSaveBlock2Ptr->playerGender = gender;
             NewGameBirchSpeech_ClearGenderWindow(1, 1);
-            gTasks[taskId].func = Task_NewGameBirchSpeech_WhatsYourName;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_LetMeSeeYou;   // Moemon Co-op: LOOK first
             break;
     }
     gender2 = Menu_GetCursorPos();
@@ -1578,6 +1580,66 @@ static void Task_NewGameBirchSpeech_SlideInNewGenderSprite(u8 taskId)
             gTasks[taskId].func = Task_NewGameBirchSpeech_ChooseGender;
         }
     }
+}
+
+// Moemon Co-op: after the boy/girl question, PROF. BIRCH takes a good look at
+// the player: the LOOK menu (mp_intro.c), then back here for the name.
+static const u8 sText_Birch_LetMeSeeYou[] = _("Ah, I see!\pHmm… Forgive me, my eyes aren't\nwhat they used to be.\pCome a little closer and let me\nget a good look at you!");
+static const u8 sText_Birch_AfterLook[] = _("Ah, there you are! Splendid!\nNow I'll know you anywhere.\pAll right. What's your name?");
+static bool8 sReturnFromLook;
+static bool8 sLookSeen;   // the player pic shows the look from now on
+void CB2_MpIntroLook(void);
+
+static void Task_NewGameBirchSpeech_GoToLook(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        FreeAllWindowBuffers();
+        FreeAndDestroyMonPicSprite(gTasks[taskId].tLotadSpriteId);
+        DestroyTask(taskId);
+        SetMainCallback2(CB2_MpIntroLook);
+    }
+}
+
+static void Task_NewGameBirchSpeech_WaitToGoToLook(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active() && JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_GoToLook;
+    }
+}
+
+static void Task_NewGameBirchSpeech_LetMeSeeYou(u8 taskId)
+{
+    NewGameBirchSpeech_ClearWindow(0);
+    StringExpandPlaceholders(gStringVar4, sText_Birch_LetMeSeeYou);
+    AddTextPrinterForMessage(TRUE);
+    gTasks[taskId].func = Task_NewGameBirchSpeech_WaitToGoToLook;
+}
+
+static void Task_NewGameBirchSpeech_AfterLook(u8 taskId)
+{
+    NewGameBirchSpeech_ClearWindow(0);
+    StringExpandPlaceholders(gStringVar4, sText_Birch_AfterLook);
+    AddTextPrinterForMessage(TRUE);
+    gTasks[taskId].func = Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint;
+}
+
+void CB2_NewGameBirchSpeech_ReturnFromLook(void)
+{
+    sReturnFromLook = TRUE;
+    sLookSeen = TRUE;
+    CB2_NewGameBirchSpeech_ReturnFromNamingScreen();
+}
+
+// Backdrop for the LOOK step (mp_intro.c)
+void NewGameBirchSpeech_LoadBackdrop(u8 bg)
+{
+    LZ77UnCompVram(sBirchSpeechShadowGfx, (u8 *)BG_CHAR_ADDR(GetBgAttribute(bg, BG_ATTR_CHARBASEINDEX)));
+    LZ77UnCompVram(sBirchSpeechBgMap, (u8 *)BG_SCREEN_ADDR(GetBgAttribute(bg, BG_ATTR_MAPBASEINDEX)));
+    LoadPalette(sBirchSpeechBgPals, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
+    LoadPalette(&sBirchSpeechBgGradientPal[1], BG_PLTT_ID(0) + 1, PLTT_SIZEOF(8));
 }
 
 static void Task_NewGameBirchSpeech_WhatsYourName(u8 taskId)
@@ -1901,12 +1963,17 @@ static void AddBirchSpeechObjects(u8 taskId)
     gSprites[lotadSpriteId].oam.priority = 0;
     gSprites[lotadSpriteId].invisible = TRUE;
     gTasks[taskId].tLotadSpriteId = lotadSpriteId;
-    brendanSpriteId = CreateTrainerSprite(FacilityClassToPicIndex(FACILITY_CLASS_BRENDAN), 120, 60, 0, &gDecompressionBuffer[0]);
+    // Moemon Co-op: after the LOOK step the player's picture shows their look
+    brendanSpriteId = CreateTrainerSprite(sLookSeen && gSaveBlock2Ptr->playerGender == MALE
+                                          ? MP_LocalFrontPicOr(FacilityClassToPicIndex(FACILITY_CLASS_BRENDAN))
+                                          : FacilityClassToPicIndex(FACILITY_CLASS_BRENDAN), 120, 60, 0, &gDecompressionBuffer[0]);
     gSprites[brendanSpriteId].callback = SpriteCB_Null;
     gSprites[brendanSpriteId].invisible = TRUE;
     gSprites[brendanSpriteId].oam.priority = 0;
     gTasks[taskId].tBrendanSpriteId = brendanSpriteId;
-    maySpriteId = CreateTrainerSprite(FacilityClassToPicIndex(FACILITY_CLASS_MAY), 120, 60, 0, &gDecompressionBuffer[TRAINER_PIC_SIZE]);
+    maySpriteId = CreateTrainerSprite(sLookSeen && gSaveBlock2Ptr->playerGender == FEMALE
+                                      ? MP_LocalFrontPicOr(FacilityClassToPicIndex(FACILITY_CLASS_MAY))
+                                      : FacilityClassToPicIndex(FACILITY_CLASS_MAY), 120, 60, 0, &gDecompressionBuffer[TRAINER_PIC_SIZE]);
     gSprites[maySpriteId].callback = SpriteCB_Null;
     gSprites[maySpriteId].invisible = TRUE;
     gSprites[maySpriteId].oam.priority = 0;
@@ -2304,7 +2371,8 @@ static void Task_NewGameBirchSpeech_ReturnFromNamingScreenShowTextbox(u8 taskId)
     if (gTasks[taskId].tTimer-- <= 0)
     {
         NewGameBirchSpeech_ShowDialogueWindow(0, 1);
-        gTasks[taskId].func = Task_NewGameBirchSpeech_SoItsPlayerName;
+        gTasks[taskId].func = sReturnFromLook ? Task_NewGameBirchSpeech_AfterLook : Task_NewGameBirchSpeech_SoItsPlayerName;
+        sReturnFromLook = FALSE;
     }
 }
 

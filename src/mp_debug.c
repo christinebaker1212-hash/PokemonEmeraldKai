@@ -133,6 +133,11 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
+    if (strcmp(name, "introlook") == 0)
+    {
+        bool8 MP_IntroLook_Active(void);
+        return MP_IntroLook_Active();
+    }
     if (strcmp(name, "online") == 0)
         return MP_IsConnected() && MP_ConnectedCount() >= 2;
     if (strcmp(name, "inroom") == 0)

@@ -46,6 +46,8 @@ extern const u8 EventScript_MpMoveRelearner[];
 void MP_Gatcha_Open(void);
 #define MENU_W 12   // tiles; the window sits right of the player so you can see your look change
 
+static void (*sIntroDone)(void);   // set while LOOK is open in the new game's intro
+
 static const struct WindowTemplate sCoopWindowTemplate = {
     .bg = 0,
     .tilemapLeft = 17,
@@ -288,7 +290,8 @@ static bool8 LookIsCreated(void)
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
-    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...", "EDIT SPRITES...", "SAVE LOOK", "REVERT"};
+    const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...", "EDIT SPRITES...",
+                                             sIntroDone ? "ALL DONE!" : "SAVE LOOK", "REVERT"};
     char line[64];
     u8 row;
 
@@ -435,10 +438,14 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "{LEFTRIGHT} change   {SELECT} undo");
         else if (cursor == ROW_CREATE)
             snprintf(ascii, sizeof(ascii), "Make your own trainer (CUSTOM 1-3).");
+        else if (cursor == ROW_EDIT && sIntroDone)
+            snprintf(ascii, sizeof(ascii), "The Sprite Editor opens later from START > CO-OP > LOOK.");
         else if (cursor == ROW_EDIT)
             snprintf(ascii, sizeof(ascii), "Draw your own look in the Sprite Editor.");
+        else if (cursor == ROW_SAVE && sIntroDone)
+            snprintf(ascii, sizeof(ascii), "Show PROF. BIRCH your look. ({B} does too.)");
         else if (cursor == ROW_SAVE)
-            snprintf(ascii, sizeof(ascii), "Keep this look and go back. (B does too.)");
+            snprintf(ascii, sizeof(ascii), "Keep this look and go back. ({B} does too.)");
         else
             snprintf(ascii, sizeof(ascii), "Undo every change made since you opened LOOK.");
         MP_AsciiToGame(buf, ascii, 150);
@@ -682,6 +689,11 @@ static void HandleLookInput(u8 taskId)
         GoToPage(data, MP_MENU_PAGE_CREATE, CR_SLOT);
         return;
     }
+    if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON) && sIntroDone)
+    {
+        PlaySE(SE_FAILURE);   // no editor during the new game's intro
+        return;
+    }
     if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON))
     {
         // Save the current character as an editable sheet, then open the
@@ -759,6 +771,15 @@ static void HandleLookInput(u8 taskId)
         PlaySE(SE_SAVE);
         MP_SaveConfig();
         Look_Snapshot();
+        if (sIntroDone)
+        {
+            // The new game's intro: back to PROF. BIRCH
+            void (*done)(void) = sIntroDone;
+            sIntroDone = NULL;
+            CloseMenu(taskId);
+            done();
+            return;
+        }
         GoToPage(data, MP_MENU_PAGE_MAIN, MAIN_LOOK);
     }
     if (changed)
@@ -1104,6 +1125,13 @@ static void Task_CoopMenu(u8 taskId)
         }
         break;
     }
+}
+
+// The new game's intro (mp_intro.c): just LOOK (and CREATE), then onDone
+void MP_OpenLookForIntro(void (*onDone)(void))
+{
+    sIntroDone = onDone;
+    MP_OpenMenuPage(MP_MENU_PAGE_LOOK);
 }
 
 void MP_OpenMenuPageAt(u8 page, u8 cursor)
