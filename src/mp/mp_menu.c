@@ -20,6 +20,7 @@
 #include "constants/field_weather.h"
 #include "overworld.h"
 #include "start_menu.h"
+#include "map_name_popup.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
@@ -35,12 +36,13 @@ enum {
 };
 
 #define LINE_H 14
+#define MENU_W 12   // tiles; the window sits right of the player so you can see your look change
 
 static const struct WindowTemplate sCoopWindowTemplate = {
     .bg = 0,
-    .tilemapLeft = 14,
+    .tilemapLeft = 17,
     .tilemapTop = 1,
-    .width = 15,
+    .width = MENU_W,
     .height = 15,
     .paletteNum = 15,
     .baseBlock = 0x8,
@@ -53,7 +55,7 @@ static const struct WindowTemplate sPlayersWindowTemplate = {
     .width = 28,
     .height = 2,
     .paletteNum = 15,
-    .baseBlock = 0x8 + 15 * 15,
+    .baseBlock = 0x8 + MENU_W * 15,
 };
 
 static const u8 sTextColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
@@ -164,8 +166,11 @@ static void DrawMenu(u8 windowId, u8 cursor)
             PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER..." : "GO ONLINE...", 9, y);
             continue;
         }
-        snprintf(line, sizeof(line), "%s", labels[row]);
-        PrintAscii(windowId, line, 8, y);
+        {
+            u8 lab[16];
+            MP_AsciiToGame(lab, labels[row], 14);
+            AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, lab, 7, y, TEXT_SKIP_DRAW, NULL);
+        }
         switch (row)
         {
         case ROW_SPRITE: snprintf(line, sizeof(line), "%s", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app))); break;
@@ -175,10 +180,14 @@ static void DrawMenu(u8 windowId, u8 cursor)
         {
             u8 val[40];
             u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
+            int len;
             MP_AsciiToGame(val, line, 30);
-            AddTextPrinterParameterized(windowId, FONT_SMALL, lt, 40, y, TEXT_SKIP_DRAW, NULL);
-            AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, val, 47, y, TEXT_SKIP_DRAW, NULL);
-            AddTextPrinterParameterized(windowId, FONT_SMALL, rt, 48 + GetStringWidth(FONT_SMALL_NARROW, val, 0), y, TEXT_SKIP_DRAW, NULL);
+            // Long names are cut to fit the narrow window
+            for (len = StringLength(val); len > 1 && GetStringWidth(FONT_SMALL_NARROW, val, 0) > MENU_W * 8 - 56; len--)
+                val[len - 1] = EOS;
+            AddTextPrinterParameterized(windowId, FONT_SMALL, lt, 38, y, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, val, 45, y, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(windowId, FONT_SMALL, rt, 46 + GetStringWidth(FONT_SMALL_NARROW, val, 0), y, TEXT_SKIP_DRAW, NULL);
         }
     }
     CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -322,6 +331,7 @@ void MP_OpenMenu(void)
 {
     u8 taskId;
     LockPlayerFieldControls();
+    HideMapNamePopUpWindow(); // it shares window tiles with this menu
     MP_Avatar_RefreshPackList();   // pick up sheets saved since the last time
     taskId = CreateTask(Task_CoopMenu, 80);
     gTasks[taskId].tCursor = MP_Lobby_InRoom() ? ROW_SPRITE : ROW_ONLINE;
