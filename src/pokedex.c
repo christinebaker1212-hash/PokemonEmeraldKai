@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle_main.h"
 #include "bg.h"
 #include "data.h"
@@ -273,6 +274,7 @@ static void Task_HandleCaughtMonPageInput(u8);
 static void Task_ExitCaughtMonPage(u8);
 static void SpriteCB_SlideCaughtMonToCenter(struct Sprite *sprite);
 static void PrintMonInfo(u32 num, u32, u32 owned, u32 newEntry);
+static void MpUpdateCategoryLine(void);
 static void PrintMonHeight(u16 height, u8 left, u8 top);
 static void PrintMonWeight(u16 weight, u8 left, u8 top);
 static void ResetOtherVideoRegisters(u16);
@@ -3366,6 +3368,7 @@ static void FreeInfoScreenWindowAndBgBuffers(void)
 
 static void Task_HandleInfoScreenInput(u8 taskId)
 {
+    MpUpdateCategoryLine();
     if (gTasks[taskId].tScrolling)
     {
         // Scroll up/down
@@ -4103,6 +4106,38 @@ static void SpriteCB_SlideCaughtMonToCenter(struct Sprite *sprite)
 #undef tPersonalityHi
 
 // u32 value is re-used, but passed as a bool that's TRUE if national dex is enabled
+// Moemon Co-op: for Pokémon a friend caught, the category line takes turns
+// with "CAUGHT BY <name>"
+static EWRAM_DATA u16 sMpInfoNatNum = 0;
+static EWRAM_DATA u8 sMpInfoCategory[32] = {0};
+static EWRAM_DATA u16 sMpInfoTimer = 0;
+
+static void MpPrintCategoryLine(bool8 showCatcher)
+{
+    u8 text[40];
+    const u8 *by = MP_Dex_CaughtBy(sMpInfoNatNum);
+    FillWindowPixelRect(0, PIXEL_FILL(0), 0x60, 0x29, DISPLAY_WIDTH - 0x60 - 0x10, 16);
+    if (showCatcher && by != NULL)
+    {
+        static const u8 sText_CaughtBy[] = _("CAUGHT BY ");
+        StringCopy(text, sText_CaughtBy);
+        StringAppendN(text, by, PLAYER_NAME_LENGTH);
+        PrintInfoScreenText(text, 0x64, 0x29);
+    }
+    else
+        PrintInfoScreenText(sMpInfoCategory, 0x64, 0x29);
+    CopyWindowToVram(0, COPYWIN_GFX);
+}
+
+static void MpUpdateCategoryLine(void)
+{
+    if (sMpInfoNatNum == 0 || MP_Dex_CaughtBy(sMpInfoNatNum) == NULL)
+        return;
+    sMpInfoTimer++;
+    if (sMpInfoTimer % 120 == 0)
+        MpPrintCategoryLine((sMpInfoTimer / 120) & 1);
+}
+
 static void PrintMonInfo(u32 num, u32 value, u32 owned, u32 newEntry)
 {
     u8 str[16];
@@ -4136,6 +4171,10 @@ static void PrintMonInfo(u32 num, u32 value, u32 owned, u32 newEntry)
         category = gText_5MarksPokemon;
     }
     PrintInfoScreenText(category, 0x64, 0x29);
+    StringCopyN(sMpInfoCategory, category, sizeof(sMpInfoCategory) - 1);
+    sMpInfoCategory[sizeof(sMpInfoCategory) - 1] = EOS;
+    sMpInfoNatNum = owned ? num : 0;
+    sMpInfoTimer = 0;
     PrintInfoScreenText(gText_HTHeight, 0x60, 0x39);
     PrintInfoScreenText(gText_WTWeight, 0x60, 0x49);
     if (owned)
@@ -4311,11 +4350,15 @@ s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
         }
         break;
     case FLAG_SET_SEEN:
+        if (!(gSaveBlock2Ptr->pokedex.seen[index] & mask))
+            MP_Dex_OnLocalFlag(nationalDexNo + 1, FALSE); // Moemon Co-op: shared Pokédex
         gSaveBlock2Ptr->pokedex.seen[index] |= mask;
         gSaveBlock1Ptr->seen1[index] |= mask;
         gSaveBlock1Ptr->seen2[index] |= mask;
         break;
     case FLAG_SET_CAUGHT:
+        if (!(gSaveBlock2Ptr->pokedex.owned[index] & mask))
+            MP_Dex_OnLocalFlag(nationalDexNo + 1, TRUE); // Moemon Co-op: shared Pokédex
         gSaveBlock2Ptr->pokedex.owned[index] |= mask;
         break;
     }

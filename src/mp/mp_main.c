@@ -833,6 +833,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Coop_OnRelay(from, data, len);
     else if (data[0] == MPR_SAY)
         MP_Emote_OnRelay(from, data, len);
+    else if (data[0] >= MPR_DEX_FIRST && data[0] < MPR_DEX_FIRST + 4)
+        MP_Dex_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1215,6 +1217,7 @@ void MP_FrameUpdate(void)
     if (gMpLocalId >= 0)
     {
         MP_Coop_Update();
+        MP_Dex_Update();
         SendLocalState(FALSE);
         MP_Spectate_FrameUpdate();
     }

@@ -326,6 +326,14 @@ void MP_Friends_LocationName(u8 id, u8 *dst);
 u16 MP_Friends_Destination(u8 id);
 bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
+void MP_Toast(const u8 *text);
+
+// Shared Pokédex (mp_dex.c)
+extern bool8 gMpDexApplying;
+void MP_Dex_OnLocalFlag(u16 nationalNum, bool8 caught);
+void MP_Dex_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Dex_Update(void);
+const u8 *MP_Dex_CaughtBy(u16 nationalNum);
 
 // mp_spectate.c (watching other players' battles)
 bool8 MP_Spectate_IsWatching(void);

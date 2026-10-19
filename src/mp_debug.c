@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "pokedex.h"
 #include "mp.h"
 #include "palette.h"
 #include "constants/characters.h"
@@ -168,6 +169,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
             FieldInitRegionMap(CB2_ReturnToField);
         else
             SetMainCallback2(CB2_OpenFlyMap);
+    }
+    else if (strcmp(cmd, "dexcatch") == 0 || strcmp(cmd, "dexsee") == 0)
+    {
+        // dexcatch NATIONAL_NUMBER: as if you caught (or saw) it
+        u16 nat = (u16)atoi(arg);
+        GetSetPokedexFlag(nat, FLAG_SET_SEEN);
+        if (cmd[3] == 'c')
+            GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+        printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "dexget") == 0)
+    {
+        u16 nat = (u16)atoi(arg);
+        printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
+        printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
     else if (strcmp(cmd, "objs") == 0)
     {

@@ -45,7 +45,9 @@ void MP_FieldClearVBlankHBlankCallbacks(void);
 #define BUBBLE_TIME   (60 * 3)
 #define BUBBLE_TEXT   64
 #define LINE_H        12
-#define NUM_BUBBLES   (1 + MP_MAX_PLAYERS * 2) // 0 = you, 1 + id = remote players, then door labels
+#define NUM_BUBBLES   (2 + MP_MAX_PLAYERS * 2) // 0 = you, 1 + id = remote players, door labels, toast
+#define TOAST_SLOT    (NUM_BUBBLES - 1)
+#define TOAST_TIME    (60 * 4)
 #define LABEL_SLOT(id) (1 + MP_MAX_PLAYERS + (id))
 #define TAG_BUBBLE    0x53A0                 // + slot * 2 + half
 #define TAG_BUBBLE_PAL 0x53C0
@@ -60,6 +62,7 @@ struct Bubble
     bool8 dirty;            // text changed, redraw the tiles
     u8 spriteId[2];         // left and right 64x32 halves
     bool8 atTile;           // door label: shown over a map tile, not a person
+    bool8 toast;            // a note at the top of the screen (no tail)
     s16 tileX, tileY;       // that tile (map coords with MAP_OFFSET)
 };
 
@@ -226,13 +229,16 @@ static void BuildBubble(struct Bubble *b)
                 Put(x, y, edge ? COL_EDGE : COL_FILL);
         }
     // Tail
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < 3 && !b->toast; i++)
         for (x = BUBBLE_W / 2 - 3 + i; x <= BUBBLE_W / 2 + 2 - i; x++)
             Put(x, bottom + i, (x == BUBBLE_W / 2 - 3 + i || x == BUBBLE_W / 2 + 2 - i) ? COL_EDGE : COL_FILL);
-    for (x = BUBBLE_W / 2 - 2; x <= BUBBLE_W / 2 + 1; x++)
-        Put(x, bottom, COL_FILL);
-    Put(BUBBLE_W / 2 - 1, bottom + 3, COL_EDGE);
-    Put(BUBBLE_W / 2, bottom + 3, COL_EDGE);
+    if (!b->toast)
+    {
+        for (x = BUBBLE_W / 2 - 2; x <= BUBBLE_W / 2 + 1; x++)
+            Put(x, bottom, COL_FILL);
+        Put(BUBBLE_W / 2 - 1, bottom + 3, COL_EDGE);
+        Put(BUBBLE_W / 2, bottom + 3, COL_EDGE);
+    }
 
     if (b->note)
     {
@@ -389,7 +395,12 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         RedrawBubble(b);
 
     os = &gSprites[gObjectEvents[ownerObj].spriteId];
-    if (b->atTile)
+    if (b->toast)
+    {
+        x = DISPLAY_WIDTH / 2;
+        y = 18;
+    }
+    else if (b->atTile)
     {
         // Over the door: the tail points at the top of the tile
         SetSpritePosToMapCoords(b->tileX, b->tileY, &x, &y);
@@ -406,8 +417,11 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         struct Sprite *s = &gSprites[b->spriteId[half]];
         s->x = x - 32 + half * 64;
         s->y = y;
-        s->invisible = b->atTile ? FALSE : os->invisible;
+        s->invisible = (b->atTile || b->toast) ? FALSE : os->invisible;
         s->subpriority = b->atTile ? 1 : 0;
+        s->coordOffsetEnabled = !b->toast;
+        if (b->toast)
+            s->oam.priority = 0;
     }
     if (b->timer == 0)
         DestroyBubbleSprites(b);
@@ -736,6 +750,20 @@ static void UpdateDoorLabel(u8 id)
     b->timer = 2;   // kept alive every frame while it applies
 }
 
+// A short note at the top of the screen for a few seconds (game text, 2 lines max)
+void MP_Toast(const u8 *text)
+{
+    struct Bubble *b;
+    InitIfNeeded();
+    b = &sBubbles[TOAST_SLOT];
+    memset(b->text, EOS, sizeof(b->text));
+    StringCopyN(b->text, text, BUBBLE_TEXT - 1);
+    b->note = FALSE;
+    b->toast = TRUE;
+    b->timer = TOAST_TIME;
+    b->dirty = TRUE;
+}
+
 // Every overworld frame, after the camera moved
 void MP_Emote_Update(void)
 {
@@ -743,6 +771,7 @@ void MP_Emote_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    UpdateBubble(&sBubbles[TOAST_SLOT], gPlayerAvatar.objectEventId);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         UpdateDoorLabel(i);
