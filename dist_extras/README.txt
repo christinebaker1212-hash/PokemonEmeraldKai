@@ -101,7 +101,38 @@ TEAMING UP FOR A DOUBLE BATTLE
 * Ordinary trainers count as beaten for both players. Story battles (gym
   leaders, rivals, villains) only count for the challenged player, so the
   partner can still get their badge by battling them on their own later.
-* Items can't be used during a co-op battle (same as Cable Club battles).
+* Items can't be used during a co-op trainer battle (same as Cable Club
+  battles).
+
+
+WILD BATTLES TOGETHER
+---------------------
+* Walking in tall grass with a friend nearby? When a wild Pokemon jumps out,
+  the closest friend who is also standing in grass (within about a screen
+  of you) jumps into the battle with you. There's nothing to accept: it just
+  happens, as long as they're free (not in a menu, a battle or a trade).
+* It's two of you against one wild Pokemon. Both of you get EXP.
+* You can throw POKe BALLS (only Balls: other items can't be used). Whoever
+  throws the Ball that catches it gets the Pokemon.
+* Friends further away (or not in the grass) don't join: you battle alone,
+  like normal.
+
+
+TEAM GYM REMATCHES
+------------------
+Talk to a gym leader you've already beaten while a friend is on the same
+map: they offer a team rematch with their strongest team (even stronger once
+you have all eight badges). Your friend joins the usual way, by standing next
+to you and facing you. Both of you get a reward for winning.
+
+
+TOURNAMENT (START > CO-OP > TOURNAMENT)
+---------------------------------------
+A quick battle tournament between everyone online. Everyone battles everyone
+once, a few matches at a time; with an odd number of players someone sits out
+each round, but everyone plays the same number of matches. These are friendly
+battles: no money changes hands and nobody blacks out. The champion gets the
+best prize, second place a MOEGATCHA pull, everyone else a consolation prize.
 
 
 WATCHING BATTLES
@@ -158,9 +189,15 @@ WEEKLY RACE    A different challenge every week with a leaderboard. The
 ACHIEVEMENTS   Team milestones (Pokemon caught together, trainers beaten,
                co-op wins, badges, trades, gifts). Each gives every player a
                MOEGATCHA pull.
-MOEGATCHA      Spend pulls for an event Moemon with the moves of a real event
-               Pokemon (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C Deoxys,
-               the Pokemon Box eggs), items, or money.
+MOEGATCHA      Spend pulls on the prize reel: it races past prizes and slowly
+               clicks down onto yours. Five rarities: COMMON 55%, UNCOMMON
+               28%, RARE 12%, SUPER RARE 4.5%, ULTRA RARE 0.5%. The top ones
+               include event Moemon with the moves of real event Pokemon
+               (WISHMKR Jirachi, AURA Mew, AGETO Celebi, SPACE C Deoxys, the
+               Pokemon Box eggs), shiny event Moemon, Master Balls and
+               jackpots. Pity: a SUPER RARE or better at least every 40 pulls
+               and an ULTRA RARE at least every 120. A 10-pull always has a
+               RARE or better, and everyone gets one FREE 10-pull every week.
 Didn't finish the goals or win the race? You get a consolation prize picked
 for what you're short of: Rare Candy if your team is behind, healing items if
 you're low, Poke Balls if you're out.
