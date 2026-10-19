@@ -646,7 +646,11 @@ static void UpdateRemote(u8 id)
     if (!p->present || !p->hasState || !p->hasInfo || !MP_GetRemoteMapPos(id, &x, &y))
     {
         if (r->spawned)
+        {
+            MPNet_Log("[mp] despawn remote %d (present %d state %d info %d map %d.%d)", id, p->present, p->hasState,
+                      p->hasInfo, p->state.mapGroup, p->state.mapNum);
             Despawn(id);
+        }
         return;
     }
 
@@ -748,4 +752,31 @@ void MP_Overworld_Reset(void)
     InitIfNeeded();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         MP_Overworld_OnPlayerLeft(i);
+}
+
+// Test harness: "mp objs" prints the remote player objects
+void MP_Overworld_DebugDump(void)
+{
+    u8 i;
+    InitIfNeeded();
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        struct RemoteObj *r = &sRemote[i];
+        struct ObjectEvent *o;
+        printf("[test] slot %d present %d state %d info %d map %d.%d xy %d,%d spawned %d obj %d inOverworld %d local %d\n", i,
+               gMpPlayers[i].present, gMpPlayers[i].hasState, gMpPlayers[i].hasInfo, gMpPlayers[i].state.mapGroup,
+               gMpPlayers[i].state.mapNum, gMpPlayers[i].state.x, gMpPlayers[i].state.y, r->spawned, r->objId,
+               MP_IsInOverworld(), gMpLocalId);
+        if (!r->spawned || r->objId >= OBJECT_EVENTS_COUNT)
+            continue;
+        o = &gObjectEvents[r->objId];
+        printf("[test] remote %d obj %d active %d invisible %d coords %d,%d gfx %d sprite %d", i, r->objId, o->active,
+               o->invisible, o->currentCoords.x, o->currentCoords.y, o->graphicsId, o->spriteId);
+        if (o->spriteId < MAX_SPRITES)
+        {
+            struct Sprite *s = &gSprites[o->spriteId];
+            printf(" inUse %d sinv %d xy %d,%d pal %d prio %d", s->inUse, s->invisible, s->x, s->y, s->oam.paletteNum, s->oam.priority);
+        }
+        printf("\n");
+    }
 }

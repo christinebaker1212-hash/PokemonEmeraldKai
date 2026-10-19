@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "main.h"
 #include "text.h"
 #include "menu.h"
@@ -102,6 +103,9 @@ static void FreeRegionMapCursorSprite(void);
 static void HideRegionMapPlayerIcon(void);
 static void UnhideRegionMapPlayerIcon(void);
 static void SpriteCB_PlayerIconMapZoomed(struct Sprite *sprite);
+static void MpCreateFriendIcons(void);
+static void MpPlaceFriendIcons(void);
+static void MpDestroyFriendIcons(void);
 static void SpriteCB_PlayerIconMapFull(struct Sprite *sprite);
 static void SpriteCB_PlayerIcon(struct Sprite *sprite);
 static void VBlankCB_FlyMap(void);
@@ -638,6 +642,7 @@ void FreeRegionMapIconResources(void)
         FreeSpriteTilesByTag(sRegionMap->playerIconTileTag);
         FreeSpritePaletteByTag(sRegionMap->playerIconPaletteTag);
     }
+    MpDestroyFriendIcons();
 }
 
 u8 DoRegionMapInputCallback(void)
@@ -1477,6 +1482,7 @@ void CreateRegionMapPlayerIcon(u16 tileTag, u16 paletteTag)
         sRegionMap->playerIconSprite->y = sRegionMap->playerIconSpritePosY * 16 - 0x42;
         sRegionMap->playerIconSprite->callback = SpriteCB_PlayerIconMapZoomed;
     }
+    MpCreateFriendIcons();
 }
 
 static void HideRegionMapPlayerIcon(void)
@@ -1486,6 +1492,7 @@ static void HideRegionMapPlayerIcon(void)
         sRegionMap->playerIconSprite->invisible = TRUE;
         sRegionMap->playerIconSprite->callback = SpriteCallbackDummy;
     }
+    MpPlaceFriendIcons(); // hidden too while the player icon is
 }
 
 static void UnhideRegionMapPlayerIcon(void)
@@ -1509,6 +1516,7 @@ static void UnhideRegionMapPlayerIcon(void)
             sRegionMap->playerIconSprite->invisible = FALSE;
         }
     }
+    MpPlaceFriendIcons();
 }
 
 #define sY       data[0]
@@ -2087,4 +2095,129 @@ void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
             SetWarpDestinationToMapWarp(sMapHealLocations[town][0], sMapHealLocations[town][1], WARP_ID_NONE);
         break;
     }
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: friends' heads on the Town Map, PokéNav map and Fly map.
+// A friend's head sits in the middle of the area they're in, tinted blue so
+// it's told apart from yours.
+
+#define TAG_MP_FRIEND_ICON   0x5400   // + friend slot (tiles)
+#define TAG_MP_FRIEND_PAL    0x5410   // + gender
+
+static EWRAM_DATA u8 sMpFriendSprite[MP_MAX_PLAYERS] = {0};
+static EWRAM_DATA u8 sMpFriendCount = 0;
+static EWRAM_DATA u8 sMpFriendIds[MP_MAX_PLAYERS] = {0};
+static EWRAM_DATA struct SpriteTemplate sMpFriendTmpl[MP_MAX_PLAYERS] = {0};
+
+static void SpriteCB_MpFriendZoomed(struct Sprite *sprite)
+{
+    s16 sx, sy;
+    sprite->x2 = -2 * sRegionMap->scrollX;
+    sprite->y2 = -2 * sRegionMap->scrollY;
+    sy = sprite->y + sprite->y2 + sprite->centerToCornerVecY;
+    sx = sprite->x + sprite->x2 + sprite->centerToCornerVecX;
+    sprite->invisible = (sy < -8 || sy > DISPLAY_HEIGHT + 8 || sx < -8 || sx > DISPLAY_WIDTH + 8);
+}
+
+static void LoadMpFriendPalette(u8 gender)
+{
+    u16 pal[16];
+    u8 i;
+    struct SpritePalette sp = {pal, TAG_MP_FRIEND_PAL + gender};
+    const u16 *src = gender == FEMALE ? sRegionMapPlayerIcon_MayPal : sRegionMapPlayerIcon_BrendanPal;
+    if (IndexOfSpritePaletteTag(sp.tag) != 0xFF)
+        return;
+    for (i = 0; i < 16; i++)
+    {
+        u16 c = src[i];
+        u16 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+        r = r * 2 / 3;
+        g = g * 5 / 6;
+        b = b + (31 - b) / 2;
+        pal[i] = r | (g << 5) | (b << 10);
+    }
+    LoadSpritePalette(&sp);
+}
+
+static void MpPlaceFriendIcons(void)
+{
+    u8 i, j;
+    for (i = 0; i < sMpFriendCount; i++)
+    {
+        struct Sprite *sprite;
+        mapsec_u16_t sec;
+        const struct RegionMapLocation *loc;
+        s16 px, py;
+        u8 same = 0;
+        if (sMpFriendSprite[i] >= MAX_SPRITES || gSprites[sMpFriendSprite[i]].template != &sMpFriendTmpl[i])
+            continue;
+        sprite = &gSprites[sMpFriendSprite[i]];
+        sec = MP_Friends_Mapsec(sMpFriendIds[i]);
+        if (sec >= MAPSEC_NONE || gRegionMapEntries[sec].width == 0
+         || sRegionMap->playerIconSprite == NULL || sRegionMap->playerIconSprite->callback == SpriteCallbackDummy)
+        {
+            sprite->invisible = TRUE;
+            sprite->callback = SpriteCallbackDummy;
+            continue;
+        }
+        loc = &gRegionMapEntries[sec];
+        px = loc->x + loc->width / 2 + MAPCURSOR_X_MIN;
+        py = loc->y + loc->height / 2 + MAPCURSOR_Y_MIN;
+        // Friends in the same place are spread out a little
+        for (j = 0; j < i; j++)
+            if (MP_Friends_Mapsec(sMpFriendIds[j]) == sec)
+                same++;
+        if (sRegionMap->zoomed)
+        {
+            sprite->x = px * 16 - 0x30 + same * 6;
+            sprite->y = py * 16 - 0x42 - same * 4;
+            sprite->callback = SpriteCB_MpFriendZoomed;
+        }
+        else
+        {
+            sprite->x = px * 8 + 4 + same * 3;
+            sprite->y = py * 8 + 4 - same * 2;
+            sprite->x2 = sprite->y2 = 0;
+            sprite->callback = SpriteCallbackDummy;
+        }
+        sprite->invisible = FALSE;
+    }
+}
+
+static void MpCreateFriendIcons(void)
+{
+    u8 i;
+    MpDestroyFriendIcons();
+    if (!MP_IsConnected())
+        return;
+    sMpFriendCount = MP_Friends_List(sMpFriendIds);
+    for (i = 0; i < sMpFriendCount; i++)
+    {
+        u8 gender = gMpPlayers[sMpFriendIds[i]].app.gender == FEMALE ? FEMALE : MALE;
+        struct SpriteSheet sheet = {gender == FEMALE ? sRegionMapPlayerIcon_MayGfx : sRegionMapPlayerIcon_BrendanGfx, 0x80, TAG_MP_FRIEND_ICON + i};
+        struct SpriteTemplate tmpl = {TAG_MP_FRIEND_ICON + i, TAG_MP_FRIEND_PAL + gender, &sRegionMapPlayerIconOam,
+                                      sRegionMapPlayerIconAnimTable, NULL, gDummySpriteAffineAnimTable, SpriteCallbackDummy};
+        sMpFriendTmpl[i] = tmpl;
+        LoadMpFriendPalette(gender);
+        LoadSpriteSheet(&sheet);
+        sMpFriendSprite[i] = CreateSprite(&sMpFriendTmpl[i], 0, 0, 2);
+    }
+    MpPlaceFriendIcons();
+}
+
+static void MpDestroyFriendIcons(void)
+{
+    u8 i;
+    for (i = 0; i < sMpFriendCount; i++)
+    {
+        if (sMpFriendSprite[i] < MAX_SPRITES && gSprites[sMpFriendSprite[i]].inUse
+         && gSprites[sMpFriendSprite[i]].template == &sMpFriendTmpl[i])
+            DestroySprite(&gSprites[sMpFriendSprite[i]]);
+        sMpFriendSprite[i] = MAX_SPRITES;
+        FreeSpriteTilesByTag(TAG_MP_FRIEND_ICON + i);
+    }
+    FreeSpritePaletteByTag(TAG_MP_FRIEND_PAL + MALE);
+    FreeSpritePaletteByTag(TAG_MP_FRIEND_PAL + FEMALE);
+    sMpFriendCount = 0;
 }

@@ -62,6 +62,23 @@ void MP_DebugQuickStartNewGame(void)
     FlagSet(FLAG_SYS_B_DASH);
     FlagSet(FLAG_RECEIVED_RUNNING_SHOES);
     FlagSet(FLAG_ADVENTURE_STARTED);
+    // MOEMON_DEBUG_FLAGS: extra flags to set, e.g. "0x870,0x876" or "visited" (every town)
+    {
+        const char *flags = getenv("MOEMON_DEBUG_FLAGS");
+        if (flags && strcmp(flags, "visited") == 0)
+        {
+            u16 f;
+            for (f = FLAG_VISITED_LITTLEROOT_TOWN; f <= FLAG_VISITED_EVER_GRANDE_CITY; f++)
+                FlagSet(f);
+        }
+        else if (flags)
+        {
+            char fb[256], *tok;
+            snprintf(fb, sizeof(fb), "%s", flags);
+            for (tok = strtok(fb, ","); tok; tok = strtok(NULL, ","))
+                FlagSet((u16)strtoul(tok, NULL, 0));
+        }
+    }
     VarSet(VAR_LITTLEROOT_INTRO_STATE, 7);
     VarSet(VAR_LITTLEROOT_TOWN_STATE, 4);
     VarSet(VAR_BIRCH_LAB_STATE, 5);
@@ -141,6 +158,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         ZeroEnemyPartyMons();
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
+    }
+    else if (strcmp(cmd, "townmap") == 0 || strcmp(cmd, "flymap") == 0)
+    {
+        extern void FieldInitRegionMap(MainCallback callback);
+        extern void CB2_OpenFlyMap(void);
+        extern void CB2_ReturnToField(void);
+        if (cmd[0] == 't')
+            FieldInitRegionMap(CB2_ReturnToField);
+        else
+            SetMainCallback2(CB2_OpenFlyMap);
+    }
+    else if (strcmp(cmd, "objs") == 0)
+    {
+        void MP_Overworld_DebugDump(void);
+        MP_Overworld_DebugDump();
     }
     else if (strcmp(cmd, "drop") == 0)
     {

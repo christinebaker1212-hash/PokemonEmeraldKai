@@ -31,6 +31,8 @@
 #include "constants/songs.h"
 #include "constants/characters.h"
 #include "constants/rgb.h"
+#include "constants/maps.h"
+#include "fieldmap.h"
 #include "script.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
@@ -43,9 +45,10 @@ void MP_FieldClearVBlankHBlankCallbacks(void);
 #define BUBBLE_TIME   (60 * 3)
 #define BUBBLE_TEXT   64
 #define LINE_H        12
-#define NUM_BUBBLES   (1 + MP_MAX_PLAYERS)   // 0 = you, 1 + id = remote players
+#define NUM_BUBBLES   (1 + MP_MAX_PLAYERS * 2) // 0 = you, 1 + id = remote players, then door labels
+#define LABEL_SLOT(id) (1 + MP_MAX_PLAYERS + (id))
 #define TAG_BUBBLE    0x53A0                 // + slot * 2 + half
-#define TAG_BUBBLE_PAL 0x53B0
+#define TAG_BUBBLE_PAL 0x53C0
 
 enum { COL_CLEAR, COL_FILL, COL_TEXT, COL_SHADOW, COL_EDGE };
 
@@ -56,6 +59,8 @@ struct Bubble
     u16 timer;              // frames left; 0 = no bubble
     bool8 dirty;            // text changed, redraw the tiles
     u8 spriteId[2];         // left and right 64x32 halves
+    bool8 atTile;           // door label: shown over a map tile, not a person
+    s16 tileX, tileY;       // that tile (map coords with MAP_OFFSET)
 };
 
 static EWRAM_DATA struct Bubble sBubbles[NUM_BUBBLES];
@@ -384,15 +389,25 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         RedrawBubble(b);
 
     os = &gSprites[gObjectEvents[ownerObj].spriteId];
-    x = os->x + os->x2;
-    y = os->y + os->y2 + os->centerToCornerVecY - 16 + 2;   // bubble bottom just above the head
+    if (b->atTile)
+    {
+        // Over the door: the tail points at the top of the tile
+        SetSpritePosToMapCoords(b->tileX, b->tileY, &x, &y);
+        x += 8;
+        y -= 12;
+    }
+    else
+    {
+        x = os->x + os->x2;
+        y = os->y + os->y2 + os->centerToCornerVecY - 16 + 2;   // bubble bottom just above the head
+    }
     for (half = 0; half < 2; half++)
     {
         struct Sprite *s = &gSprites[b->spriteId[half]];
         s->x = x - 32 + half * 64;
         s->y = y;
-        s->invisible = os->invisible;
-        s->subpriority = 0;
+        s->invisible = b->atTile ? FALSE : os->invisible;
+        s->subpriority = b->atTile ? 1 : 0;
     }
     if (b->timer == 0)
         DestroyBubbleSprites(b);
@@ -624,6 +639,103 @@ void MP_Emote_Hotkey(u8 n)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Door labels: a friend's name over the door of the building they're in (or
+// over the way out, when you're inside and they're outside).
+
+static bool8 MapLeadsTo(const struct MapHeader *from, u8 group, u8 num)
+{
+    s32 i;
+    if (from->connections)
+        for (i = 0; i < from->connections->count; i++)
+            if (from->connections->connections[i].mapGroup == group && from->connections->connections[i].mapNum == num)
+                return TRUE;
+    if (from->events)
+        for (i = 0; i < from->events->warpCount; i++)
+            if (from->events->warps[i].mapGroup == group && from->events->warps[i].mapNum == num)
+                return TRUE;
+    return FALSE;
+}
+
+// Finds the warp on the current map nearest to you that leads to (group, num),
+// directly or through one more map
+static bool8 FindDoorTo(u8 group, u8 num, s16 *outX, s16 *outY)
+{
+    const struct MapEvents *ev = gMapHeader.events;
+    struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s32 i, bestDist = 0x7FFFFFFF;
+    bool8 found = FALSE;
+    if (!ev)
+        return FALSE;
+    for (i = 0; i < ev->warpCount; i++)
+    {
+        const struct WarpEvent *w = &ev->warps[i];
+        bool8 leads;
+        s32 dx, dy;
+        if (w->mapGroup == MAP_GROUP(MAP_DYNAMIC) && w->mapNum == MAP_NUM(MAP_DYNAMIC))
+            continue;
+        leads = (w->mapGroup == group && w->mapNum == num);
+        if (!leads && MP_IsValidMap(w->mapGroup, w->mapNum))
+            leads = MapLeadsTo(Overworld_GetMapHeaderByGroupAndId(w->mapGroup, w->mapNum), group, num);
+        if (!leads)
+            continue;
+        dx = w->x + MAP_OFFSET - me->currentCoords.x;
+        dy = w->y + MAP_OFFSET - me->currentCoords.y;
+        if (dx * dx + dy * dy < bestDist)
+        {
+            bestDist = dx * dx + dy * dy;
+            *outX = w->x + MAP_OFFSET;
+            *outY = w->y + MAP_OFFSET;
+            found = TRUE;
+        }
+    }
+    return found;
+}
+
+static void UpdateDoorLabel(u8 id)
+{
+    struct Bubble *b = &sBubbles[LABEL_SLOT(id)];
+    struct MpPlayer *p = &gMpPlayers[id];
+    struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x, y, dx, dy;
+    u8 name[PLAYER_NAME_LENGTH + 1];
+
+    b->atTile = TRUE;
+    b->timer = 0;
+    if (id == gMpLocalId || !p->present || !p->hasInfo || !p->hasState
+     || MP_GetRemoteObjectEventId(id) < OBJECT_EVENTS_COUNT       // you can see them already
+     || !MP_IsValidMap(p->state.mapGroup, p->state.mapNum)
+     || (p->state.mapGroup == gSaveBlock1Ptr->location.mapGroup && p->state.mapNum == gSaveBlock1Ptr->location.mapNum)
+     || !FindDoorTo(p->state.mapGroup, p->state.mapNum, &x, &y))
+        return;
+    dx = x - me->currentCoords.x;
+    dy = y - me->currentCoords.y;
+    if (dx < -9 || dx > 9 || dy < -7 || dy > 7)
+        return; // off screen
+    StringCopyN(name, p->name, PLAYER_NAME_LENGTH);
+    name[PLAYER_NAME_LENGTH] = EOS;
+    // Two friends behind the same door: put the second one a line higher
+    {
+        u8 j;
+        for (j = 0; j < id; j++)
+        {
+            struct Bubble *o = &sBubbles[LABEL_SLOT(j)];
+            if (o->timer && o->tileX == x && o->tileY == y - 0)
+                y--;
+        }
+    }
+    if (b->tileX != x || b->tileY != y || StringCompare(b->text, name) != 0)
+    {
+        memset(b->text, EOS, sizeof(b->text));
+        StringCopy(b->text, name);
+        b->note = FALSE;
+        b->dirty = TRUE;
+    }
+    b->tileX = x;
+    b->tileY = y;
+    b->timer = 2;   // kept alive every frame while it applies
+}
+
 // Every overworld frame, after the camera moved
 void MP_Emote_Update(void)
 {
@@ -631,6 +743,11 @@ void MP_Emote_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        UpdateDoorLabel(i);
+        UpdateBubble(&sBubbles[LABEL_SLOT(i)], gPlayerAvatar.objectEventId);
+    }
     UpdateBubble(&sBubbles[0], gPlayerAvatar.objectEventId);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
@@ -655,5 +772,7 @@ void MP_Emote_OnPlayerLeft(u8 id)
     {
         sBubbles[1 + id].timer = 0;
         DestroyBubbleSprites(&sBubbles[1 + id]);
+        sBubbles[LABEL_SLOT(id)].timer = 0;
+        DestroyBubbleSprites(&sBubbles[LABEL_SLOT(id)]);
     }
 }
