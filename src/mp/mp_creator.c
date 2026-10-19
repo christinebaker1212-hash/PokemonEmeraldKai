@@ -13,7 +13,7 @@
 #include "global.h"
 #include "mp.h"
 
-enum { CR_VIEW_FRONT, CR_VIEW_BACK, CR_VIEW_WALK, CR_VIEW_RUN, CR_VIEW_BIKE, CR_VIEW_COUNT };
+enum { CR_VIEW_FRONT, CR_VIEW_BACK, CR_VIEW_COUNT };
 #define CR_CAT_COUNT MP_CR_CAT_COUNT
 
 struct CrStyle

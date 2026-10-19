@@ -19,6 +19,7 @@ Every piece is baked into Emerald's 27 frames (32x32) with a color role per pale
 mp_creator.c stacks them for a recipe (the same steps as render() below).
 """
 import colorsys
+import json
 import os
 import re
 import sys
@@ -107,12 +108,21 @@ class OldParts:
         self.offsets = [int(x) for x in re.findall(r'\d+', body)]
         body = re.search(r'sCrBase\[2\]\[\d+\]\[CR_VIEW_COUNT\] = \{(.*?)\};', h, re.S).group(1)
         nums = [int(x) for x in re.findall(r'\d+', body)]
-        self.base = [[nums[(g * 4 + s) * 5:(g * 4 + s) * 5 + 5] for s in range(4)] for g in range(2)]
+        # Walking parts: tools/moemon_creator/gen4_ow.bin; their indexes follow the pictures' so image() reads both
+        ow = json.load(open(os.path.join(HERE, 'gen4_ow.json')))
+        walk_first, blob_end = len(self.offsets), len(self.blob)
+        self.blob += open(os.path.join(HERE, 'gen4_ow.bin'), 'rb').read()
+        self.offsets += [o + blob_end for o in ow['offsets']]
+
+        def walk(v):
+            return [NONE if i == NONE else i + walk_first for i in v]
+        self.base = [[nums[(g * 4 + s) * 2:(g * 4 + s) * 2 + 2] + walk(ow['base'][g * 4 + s]) for s in range(4)]
+                     for g in range(2)]
         body = re.search(r'sCrStyles\[\] = \{(.*?)\};', h, re.S).group(1)
         self.styles = [(n.lower(), int(a), int(b)) for n, a, b in re.findall(r'\{"([^"]*)", (\d+), (\d+)\}', body)]
         body = re.search(r'sCrColors\[\] = \{(.*?)\};\n', h, re.S).group(1)
-        self.colors = [(n.lower(), [int(x) for x in imgs.split(',')])
-                       for n, imgs in re.findall(r'\{"([^"]*)", \{([^}]*)\}\}', body)]
+        self.colors = [(n.lower(), [int(x) for x in imgs.split(',')] + walk(ow['colors'].get(str(ci), [NONE] * 3)))
+                       for ci, (n, imgs) in enumerate(re.findall(r'\{"([^"]*)", \{([^}]*)\}\}', body))]
         body = re.search(r'sCrCatStyles\[2\]\[CR_CAT_COUNT\]\[2\] = \{(.*?)\};', h, re.S).group(1)
         nums = [int(x) for x in re.findall(r'\d+', body)]
         self.cat = {(g, c): (nums[(gi * 5 + ci) * 2], nums[(gi * 5 + ci) * 2 + 1])

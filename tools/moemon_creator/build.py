@@ -3,8 +3,10 @@
 
 Usage: build.py KIT_DIR
   KIT_DIR  the "pokemon png" folder of the trainer customization kit
-Writes graphics/moemon/creator/parts.bin (every part, every view, at 1x) and
-src/mp/mp_creator_data.h (names, styles, colors and where each image is).
+Writes graphics/moemon/creator/parts.bin (every part's ID and back picture, at 1x) and
+src/mp/mp_creator_data.h (names, styles, colors and where each image is). The game draws
+field sprites from the Gen 3 kit instead (build_ow.py), which only borrows a few of this
+kit's walking parts: those go to tools/moemon_creator/gen4_ow.bin + gen4_ow.json.
 
 Views (all 1x, kit art is drawn at 2x):
   front  80x80               (the game fits it into a 64x64 trainer picture)
@@ -13,6 +15,7 @@ Views (all 1x, kit art is drawn at 2x):
 Image format: u16 w, u16 h, u8 colors, u8 0, u16 palette[colors] (RGB555),
 then runs of (u8 count 1-255, u8 color; 0 = transparent) over the rows.
 """
+import json
 import os
 import re
 import sys
@@ -130,38 +133,80 @@ class Builder:
                     styles.append((style, len(colors), len(named)))
                     for n, paths in named:
                         colors.append((n, [self.image(v, g, paths[v]) if v in paths else 0xFFFF for v in VIEWS]))
-        os.makedirs(os.path.join(ROOT, 'graphics/moemon/creator'), exist_ok=True)
-        with open(os.path.join(ROOT, 'graphics/moemon/creator/parts.bin'), 'wb') as f:
-            f.write(self.blob)
-        h.append('#define CR_IMG_COUNT %d' % len(self.offsets))
-        h.append('static const u32 sCrImgOffset[CR_IMG_COUNT] = {')
-        for i in range(0, len(self.offsets), 12):
-            h.append('    ' + ', '.join(str(o) for o in self.offsets[i:i + 12]) + ',')
-        h.append('};')
-        h.append('')
-        h.append('// [gender][skin][view]')
-        h.append('static const u16 sCrBase[2][%d][CR_VIEW_COUNT] = {' % len(SKINS))
-        for gi in range(2):
-            h.append('    {' + ', '.join('{%s}' % ', '.join(map(str, bases[gi * len(SKINS) + s])) for s in range(len(SKINS))) + '},')
-        h.append('};')
-        h.append('static const char *const sCrSkinNames[%d] = {%s};' % (len(SKINS), ', '.join('"%s"' % s.upper() for s in SKINS)))
-        h.append('')
-        h.append('static const struct CrStyle sCrStyles[] = {')
-        for name, fc, n in styles:
-            h.append('    {"%s", %d, %d},' % (name.upper(), fc, n))
-        h.append('};')
-        h.append('static const struct CrColor sCrColors[] = {')
-        for name, imgs in colors:
-            h.append('    {"%s", {%s}},' % (name.upper(), ', '.join(map(str, imgs))))
-        h.append('};')
-        h.append('// First style and number of styles: [gender][category]')
-        h.append('static const u16 sCrCatStyles[2][CR_CAT_COUNT][2] = {')
-        for g in 'mf':
-            h.append('    {' + ', '.join('{%d, %d}' % first[(g, c)] for c in CATS) + '},')
-        h.append('};')
-        with open(os.path.join(ROOT, 'src/mp/mp_creator_data.h'), 'w') as f:
-            f.write('\n'.join(h) + '\n')
-        print('%d images, %.1f KB' % (len(self.offsets), len(self.blob) / 1024))
+        images = [self.blob[o:(self.offsets[i + 1] if i + 1 < len(self.offsets) else len(self.blob))]
+                  for i, o in enumerate(self.offsets)]
+        write(images, bases, styles, colors, first)
+
+
+def write(images, bases, styles, colors, first):
+    """images: encoded images; bases: [gender * skins + skin][view]; styles: (name, first color, count);
+    colors: (name, [image per view]); first: (gender, cat) -> (first style, count)."""
+    NONE = 0xFFFF
+    nskins = len(bases) // 2
+    # Walking parts build_ow.py borrows: the bases, the first top's first color (to find the head), hats
+    # and bags (their colors come from the walking sprite, they aren't on the pictures)
+    keep = set()
+    for g in 'mf':
+        f, n = first[(g, 'tops')]
+        keep.add(styles[f][1])
+        for cat in ('hats', 'bags'):
+            f, n = first[(g, cat)]
+            for st in styles[f:f + n]:
+                keep.update(range(st[1], st[1] + st[2]))
+    blob, offsets = bytearray(), []
+
+    def add(blob, offsets, i):
+        if i == NONE:
+            return NONE
+        offsets.append(len(blob))
+        blob += images[i]
+        return len(offsets) - 1
+    base_pics = [[add(blob, offsets, b[v]) for v in (0, 1)] for b in bases]
+    color_pics = [(name, [add(blob, offsets, imgs[v]) for v in (0, 1)]) for name, imgs in colors]
+    ow_blob, ow_offsets = bytearray(), []
+    ow = {'base': [[add(ow_blob, ow_offsets, b[v]) for v in (2, 3, 4)] for b in bases],
+          'colors': {str(ci): [add(ow_blob, ow_offsets, imgs[v]) for v in (2, 3, 4)]
+                     for ci, (name, imgs) in enumerate(colors) if ci in keep}}
+    ow['offsets'] = ow_offsets
+    os.makedirs(os.path.join(ROOT, 'graphics/moemon/creator'), exist_ok=True)
+    with open(os.path.join(ROOT, 'graphics/moemon/creator/parts.bin'), 'wb') as f:
+        f.write(blob)
+    with open(os.path.join(HERE, 'gen4_ow.bin'), 'wb') as f:
+        f.write(ow_blob)
+    with open(os.path.join(HERE, 'gen4_ow.json'), 'w') as f:
+        json.dump(ow, f, separators=(',', ':'))
+    h = ['// Moemon Co-op: trainer creator parts, generated by tools/moemon_creator/build.py. Do not edit.',
+         '// Art: the trainer customization kit (ID and back pictures).', '']
+    h.append('#define CR_IMG_COUNT %d' % len(offsets))
+    h.append('static const u32 sCrImgOffset[CR_IMG_COUNT] = {')
+    for i in range(0, len(offsets), 12):
+        h.append('    ' + ', '.join(str(o) for o in offsets[i:i + 12]) + ',')
+    h.append('};')
+    h.append('')
+    h.append('// [gender][skin][view]')
+    h.append('static const u16 sCrBase[2][%d][CR_VIEW_COUNT] = {' % nskins)
+    for gi in range(2):
+        h.append('    {' + ', '.join('{%s}' % ', '.join(map(str, base_pics[gi * nskins + s])) for s in range(nskins)) + '},')
+    h.append('};')
+    h.append('static const char *const sCrSkinNames[%d] = {%s};' % (nskins, ', '.join('"%s"' % s.upper() for s in SKINS)))
+    h.append('')
+    h.append('static const struct CrStyle sCrStyles[] = {')
+    for name, fc, n in styles:
+        h.append('    {"%s", %d, %d},' % (name.upper(), fc, n))
+    h.append('};')
+    h.append('static const struct CrColor sCrColors[] = {')
+    for name, imgs in color_pics:
+        h.append('    {"%s", {%s}},' % (name.upper(), ', '.join(map(str, imgs))))
+    h.append('};')
+    h.append('// First style and number of styles: [gender][category]')
+    h.append('static const u16 sCrCatStyles[2][CR_CAT_COUNT][2] = {')
+    for g in 'mf':
+        h.append('    {' + ', '.join('{%d, %d}' % first[(g, c)] for c in CATS) + '},')
+    h.append('};')
+    with open(os.path.join(ROOT, 'src/mp/mp_creator_data.h'), 'w') as f:
+        f.write('\n'.join(h) + '\n')
+    print('%d pictures, %.1f KB; %d walking parts for build_ow.py, %.1f KB'
+          % (len(offsets), len(blob) / 1024, len(ow_offsets), len(ow_blob) / 1024))
 
 
 if __name__ == '__main__':
