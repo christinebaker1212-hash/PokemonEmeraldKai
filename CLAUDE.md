@@ -32,6 +32,8 @@ and a local `tools/mp_server` build. `MOEMON_DEBUG_PARTY=280:15+` makes a Pokém
 point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs seen by others,
 spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
 and move learning, loss, disconnect).
+Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
+and remote followers seen by the other client.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)

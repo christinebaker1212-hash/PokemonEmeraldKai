@@ -33,11 +33,15 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (SDL2 native PC port)
     `link.c` when `gNetLinkActive`), so the stock link battle code runs over
     the internet. Also PvP rewards and the whiteout.
   * `mp_menu.c`: START > CO-OP menu
+  * `mp_follower.c`: follower Pokémon (SELECT in the party menu). Plain sprites
+    that trail their owner; frames are in `graphics/moemon/followers/followers.bin`,
+    cut from the overworld sheets by `tools/moemon_followers/slice.py`
+    (re-run it to regenerate the bin and `src/data/mp_followers.h`).
   * `mp_debug.c` + harness in `src/platform/sdl2.c`: headless test mode
     (`MOEMON_TEST=script`, `MOEMON_DEBUG_QUICKSTART=1`, ...)
 
 * **Display** (`src/platform/display.c`, `src/display_menu.c`): borderless
-  fullscreen, pixel-perfect / sharp-fit / stretch scaling, filters, START > DISPLAY.
+  fullscreen, pixel-perfect / sharp-fit / stretch scaling, filters, START > SETTINGS.
 
 ## Build
 Linux: `sudo apt install build-essential libpng-dev libsdl2-dev` then `make linux -j$(nproc)`

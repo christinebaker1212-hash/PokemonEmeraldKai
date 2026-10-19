@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "malloc.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -1256,12 +1257,55 @@ u8 GetPartyMenuType(void)
     return gPartyMenu.menuType;
 }
 
+// Moemon Co-op: SELECT on a Pokémon in the field party menu makes it walk behind you
+static const u8 sText_MpFollowerOn[] = _("{STR_VAR_1} will walk with you!");
+static const u8 sText_MpFollowerOff[] = _("{STR_VAR_1} went back to its BALL.");
+static const u8 sText_MpFollowerNone[] = _("{STR_VAR_1} can't walk with you.");
+
+static bool8 TryToggleFollower(u8 taskId, s8 *slotPtr)
+{
+    struct Pokemon *mon;
+    const u8 *text;
+
+    if (!JOY_NEW(SELECT_BUTTON) || gPartyMenu.menuType != PARTY_MENU_TYPE_FIELD
+     || gPartyMenu.action != PARTY_ACTION_CHOOSE_MON || sPartyMenuInternal->chooseHalf
+     || *slotPtr < 0 || *slotPtr >= gPlayerPartyCount || MenuHelpers_IsLinkActive())
+        return FALSE;
+    mon = &gPlayerParty[*slotPtr];
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return FALSE;
+    GetMonNickname(mon, gStringVar1);
+    if (!MP_Follower_IsFollowing(mon) && !MP_Follower_HasGraphics(mon))
+    {
+        PlaySE(SE_FAILURE);
+        text = sText_MpFollowerNone;
+    }
+    else if (MP_Follower_Toggle(mon))
+    {
+        PlayCry_Normal(GetMonData(mon, MON_DATA_SPECIES), 0);
+        text = sText_MpFollowerOn;
+    }
+    else
+    {
+        PlaySE(SE_BALL);
+        text = sText_MpFollowerOff;
+    }
+    StringExpandPlaceholders(gStringVar4, text);
+    StringAppend(gStringVar4, gText_PauseUntilPress);
+    DisplayPartyMenuMessage(gStringVar4, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+    return TRUE;
+}
+
 void Task_HandleChooseMonInput(u8 taskId)
 {
     if (!gPaletteFade.active && MenuHelpers_ShouldWaitForLinkRecv() != TRUE)
     {
         s8 *slotPtr = GetCurrentPartySlotPtr();
 
+        if (TryToggleFollower(taskId, slotPtr))
+            return;
         switch (PartyMenuButtonHandler(slotPtr))
         {
         case A_BUTTON: // Selected mon

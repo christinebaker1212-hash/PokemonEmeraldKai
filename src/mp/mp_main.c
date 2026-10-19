@@ -229,6 +229,7 @@ static void LoadConfig(void)
             int r = atoi(val);
             gMpConfig.trainerRange = (r < 1) ? 1 : (r > 8 ? 8 : r);
         }
+        else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
     }
     fclose(f);
 }
@@ -265,11 +266,13 @@ void MP_SaveConfig(void)
         "outfit = %s\naccent = %s\n"
         "; how many tiles a player holding the BATTLE FLAG can see\n"
         "trainer_range = %d\n"
+        "; the party Pokemon that follows you (SELECT in the party menu); 0 = none\n"
+        "follower = %08x\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n",
-        gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange,
+        gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
     fclose(f);
 }
@@ -362,6 +365,7 @@ static void PackState(const struct MpState *s, u8 *p)
     p[6] = s->facing; p[7] = s->elevation; p[8] = s->avatarMode; p[9] = s->speed;
     p[10] = s->flags; p[11] = s->topLevel; p[12] = s->partyCount; p[13] = s->emote;
     PutU16(p + 14, s->seq);
+    PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = 0;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -371,6 +375,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->facing = p[6]; s->elevation = p[7]; s->avatarMode = p[8]; s->speed = p[9];
     s->flags = p[10]; s->topLevel = p[11]; s->partyCount = p[12]; s->emote = p[13];
     s->seq = GetU16(p + 14);
+    s->followerDex = GetU16(p + 16); s->followerFlags = p[18];
 }
 
 #define APPEARANCE_SIZE 16
@@ -537,6 +542,11 @@ static void CollectLocalState(struct MpState *s)
     s->topLevel = MP_GetPartyTopLevel();
     s->partyCount = gPlayerPartyCount;
     s->emote = (sEmoteCounter << 4) | sEmoteKind;
+    {
+        bool8 female;
+        s->followerDex = MP_Follower_LocalDex(&female);
+        s->followerFlags = female ? 1 : 0;
+    }
     sLastLocalState = *s;
 }
 
@@ -545,7 +555,7 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
     return a->mapGroup != b->mapGroup || a->mapNum != b->mapNum || a->x != b->x || a->y != b->y
         || a->facing != b->facing || a->elevation != b->elevation || a->avatarMode != b->avatarMode
         || a->speed != b->speed || a->flags != b->flags || a->topLevel != b->topLevel
-        || a->emote != b->emote;
+        || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags;
 }
 
 static void SendLocalState(bool8 force)

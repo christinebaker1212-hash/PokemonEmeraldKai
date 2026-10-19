@@ -96,6 +96,8 @@ struct MpState
     u8 partyCount;
     u8 emote;
     u16 seq;
+    u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
+    u8 followerFlags;  // bit 0: female
 };
 
 
@@ -127,6 +129,7 @@ struct MpConfig
     struct MpAppearance app;
     char customSprite[256];
     u8 trainerRange;
+    u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
 };
 
 extern struct MpConfig gMpConfig;
@@ -296,6 +299,16 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Spectate_OnPlayerLeft(u8 id);
 void MP_Spectate_FrameUpdate(void);
 bool8 MP_Spectate_TryInteract(void);
+
+// Follower Pokémon (mp_follower.c)
+struct Pokemon;
+void MP_Follower_Update(void);
+bool8 MP_Follower_TryInteract(void);
+bool8 MP_Follower_Toggle(struct Pokemon *mon);
+bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
+bool8 MP_Follower_HasGraphics(struct Pokemon *mon);
+u16 MP_Follower_LocalDex(bool8 *female);
+bool8 MP_Follower_LocalTile(s16 *x, s16 *y);
 
 // mp_coop.c (walk up to a challenged player to team up for a Double Battle)
 extern bool8 gMpCoopBattle;          // TRUE while a co-op battle runs (on both games)

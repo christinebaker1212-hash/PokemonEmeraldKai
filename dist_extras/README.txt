@@ -109,6 +109,16 @@ PVP: THE BATTLE FLAG
   and no EXP is gained, like Cable Club battles.
 
 
+POKEMON THAT FOLLOW YOU
+-----------------------
+Open the POKEMON menu, pick a Pokemon with the cursor and press SELECT:
+it walks behind you. Press SELECT on it again to put it back in its Ball.
+All 386 Pokemon have their own walking sprites (with female and form
+differences). Talk to it (A) and it's happy to see you. Other players see
+your follower walking behind you too. It hides while you surf or dive and
+comes back when you land. The choice is remembered in moemon_coop.ini.
+
+
 DRESSING UP (START > CO-OP)
 ---------------------------
   SPRITE   any trainer or NPC in the game (Left/Right, L/R jump 10).
@@ -146,8 +156,8 @@ differently; nobody's version overwrites anyone else's.
 Older 144x32 / 288x32 walking sheets still work.
 
 
-DISPLAY (START > DISPLAY)
--------------------------
+SETTINGS (START > SETTINGS)
+---------------------------
   FULLSCREEN    borderless fullscreen (also F11 or Alt+Enter)
   WINDOW SCALE  1x to 10x
   SCALING       PIXEL PERFECT (whole-number zoom, sharpest),
@@ -155,8 +165,15 @@ DISPLAY (START > DISPLAY)
                 STRETCH (fills the screen exactly)
   FILTER        OFF, SCANLINES, LCD GRID
   VSYNC         on/off
+  CONTROLLER    which controller plays. Press A on this row, then press
+                any button on the controller you want; that one is used
+                from then on (it's remembered). Left/Right goes back to
+                ALL CONTROLLERS.
+  PAD BUTTONS   AUTO, NINTENDO (A = right button) or XBOX (A = bottom)
+  STICK RUN     push the stick all the way to run (on/off)
+  RUMBLE        on/off
 The window can also be resized freely. Settings are kept in
-moemon_display.ini.
+moemon_display.ini and moemon_controls.ini.
 
 
 CONTROLS (keyboard)
@@ -164,7 +181,28 @@ CONTROLS (keyboard)
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R      Space (hold) = fast forward
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
-  An Xbox-style controller also works.
+
+
+CONTROLS (controller)
+---------------------
+Plug in any controller (Xbox, PlayStation, Switch Pro, 8BitDo and most
+others) and it just works, even mid-game. The buttons are set up for you:
+
+  D-Pad / left stick     move              Start / Options / +   START
+  A / B                  A / B (*)         Back / Share / -      SELECT
+  LB / RB                L / R             RT (hold)             fast forward
+
+  (*) Nintendo-style pads use the buttons labeled A and B. Xbox and
+      PlayStation pads use the bottom button for A and the right one for B.
+
+The other buttons change with what's on screen:
+  Walking around    stick pushed all the way = run, X/Square = auto-run
+                    on/off, Y/Triangle = CO-OP menu
+  Text and menus    LT (hold) = keep pressing A, to get through text fast;
+                    X/Square = B, Y/Triangle = SELECT
+  Naming screen     X/Square = delete, Y/Triangle = switch letters
+Controllers rumble when a trainer spots you, when a battle starts and when
+a friend asks you to team up.
 
 
 USING YOUR EXISTING SAVE

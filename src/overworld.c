@@ -1481,6 +1481,7 @@ static void OverworldBasic(void)
     AnimateSprites();
     CameraUpdate();
     UpdateCameraPanning();
+    MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
     BuildOamBuffer();
     UpdatePaletteFade();
     UpdateTilesetAnimations();
