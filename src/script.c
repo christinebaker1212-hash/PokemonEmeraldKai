@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "script.h"
 #include "event_data.h"
 #include "mystery_gift.h"
@@ -262,6 +263,7 @@ bool8 ScriptContext_RunScript(void)
 // Sets up a new script in the global context and enables the context
 void ScriptContext_SetupScript(const u8 *ptr)
 {
+    MP_Qol_OnScriptStart(ptr);   // Moemon Co-op QoL: scripts seen before can be sped through
     InitScriptContext(&sGlobalScriptContext, gScriptCmdTable, gScriptCmdTableEnd);
     SetupBytecodeScript(&sGlobalScriptContext, ptr);
     LockPlayerFieldControls();

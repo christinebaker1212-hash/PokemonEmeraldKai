@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "main.h"
 #include "m4a.h"
@@ -872,7 +873,7 @@ bool16 TextPrinterWaitWithDownArrow(struct TextPrinter *textPrinter)
     else
     {
         TextPrinterDrawDownArrow(textPrinter);
-        if (JOY_NEW(A_BUTTON | B_BUTTON))
+        if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())   // Moemon Co-op QoL: START skips seen scripts
         {
             result = TRUE;
             PlaySE(SE_SELECT);
@@ -890,7 +891,7 @@ bool16 TextPrinterWait(struct TextPrinter *textPrinter)
     }
     else
     {
-        if (JOY_NEW(A_BUTTON | B_BUTTON))
+        if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())
         {
             result = TRUE;
             PlaySE(SE_SELECT);

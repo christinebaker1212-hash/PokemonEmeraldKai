@@ -1,4 +1,5 @@
 #include "global.h"
+#include "naming_screen.h"
 #include "main.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -200,6 +201,8 @@ static void CopyMonToSummaryStruct(struct Pokemon *);
 static bool8 ExtractMonDataToSummaryStruct(struct Pokemon *);
 static void SetDefaultTilemaps(void);
 static void CloseSummaryScreen(u8);
+static bool8 MpCanRename(void);
+static void Task_MpStartRename(u8 taskId);
 static void Task_HandleInput(u8);
 static void ChangeSummaryPokemon(u8, s8);
 static void Task_ChangeSummaryMon(u8);
@@ -1505,6 +1508,70 @@ static void FreeSummaryScreen(void)
     Free(sMonSummaryScreen);
 }
 
+// ---------------------------------------------------------------------------
+// Moemon Co-op QoL: SELECT on the info page renames a Pokémon you caught
+
+static EWRAM_DATA struct
+{
+    u8 mode;
+    void *mons;
+    u8 monIndex;
+    u8 maxMonIndex;
+    void (*callback)(void);
+    u8 name[POKEMON_NAME_LENGTH + 1];
+} sMpRename = {0};
+
+static bool8 MpCanRename(void)
+{
+    return sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
+        && (sMonSummaryScreen->mode == SUMMARY_MODE_NORMAL || sMonSummaryScreen->mode == SUMMARY_MODE_BOX)
+        && !gMain.inBattle && !sMonSummaryScreen->summary.isEgg && DoesMonOTMatchOwner()
+        && !(gBattleTypeFlags & BATTLE_TYPE_LINK);
+}
+
+static void CB2_MpAfterRename(void)
+{
+    if (sMpRename.mons != NULL)
+    {
+        if (sMpRename.mode == SUMMARY_MODE_BOX)
+            SetBoxMonData(&((struct BoxPokemon *)sMpRename.mons)[sMpRename.monIndex], MON_DATA_NICKNAME, sMpRename.name);
+        else
+            SetMonData(&((struct Pokemon *)sMpRename.mons)[sMpRename.monIndex], MON_DATA_NICKNAME, sMpRename.name);
+    }
+    ShowPokemonSummaryScreen(sMpRename.mode, sMpRename.mons, sMpRename.monIndex, sMpRename.maxMonIndex, sMpRename.callback);
+}
+
+static void Task_MpStartRename(u8 taskId)
+{
+    struct Pokemon *mon;
+    if (gPaletteFade.active)
+        return;
+    sMpRename.mode = sMonSummaryScreen->mode;
+    sMpRename.mons = sMonSummaryScreen->monList.mons;
+    sMpRename.monIndex = sMonSummaryScreen->curMonIndex;
+    sMpRename.maxMonIndex = sMonSummaryScreen->maxMonIndex;
+    sMpRename.callback = sMonSummaryScreen->callback;
+    mon = &sMonSummaryScreen->currentMon;
+    GetMonData(mon, MON_DATA_NICKNAME, sMpRename.name);
+    sMpRename.name[POKEMON_NAME_LENGTH] = EOS;
+    SummaryScreen_DestroyAnimDelayTask();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    StopCryAndClearCrySongs();
+    m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 0x100);
+    if (gMonSpritesGfxPtr == NULL)
+        DestroyMonSpritesGfxManager(MON_SPR_GFX_MANAGER_A);
+    {
+        u16 species = GetMonData(mon, MON_DATA_SPECIES);
+        u16 gender = GetMonGender(mon);
+        u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
+        FreeSummaryScreen();
+        sMonSummaryScreen = NULL;
+        DestroyTask(taskId);
+        DoNamingScreen(NAMING_SCREEN_NICKNAME, sMpRename.name, species, gender, personality, CB2_MpAfterRename);
+    }
+}
+
 static void BeginCloseSummaryScreen(u8 taskId)
 {
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
@@ -1571,6 +1638,14 @@ static void Task_HandleInput(u8 taskId)
             StopPokemonAnimations();
             PlaySE(SE_SELECT);
             BeginCloseSummaryScreen(taskId);
+        }
+        else if (JOY_NEW(SELECT_BUTTON) && MpCanRename())
+        {
+            // Moemon Co-op QoL: rename your own Pokémon from here (like the Name Rater)
+            StopPokemonAnimations();
+            PlaySE(SE_SELECT);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_MpStartRename;
         }
     }
 }

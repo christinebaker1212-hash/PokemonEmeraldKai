@@ -9,6 +9,7 @@
 #include "event_object_lock.h"
 #include "map_name_popup.h"
 #include "menu.h"
+#include "item.h"
 #include "palette.h"
 #include "script.h"
 #include "sound.h"
@@ -339,4 +340,20 @@ void MpUi_Qty(u8 *dst, u32 qty)
 {
     dst[0] = CHAR_x;
     ConvertIntToDecimalStringN(dst + 1, qty, STR_CONV_MODE_LEFT_ALIGN, 4);
+}
+
+// The help line shows an item's description (its lines joined into one)
+void MpUi_HelpItem(u16 item)
+{
+    const u8 *desc = GetItemDescription(item);
+    u8 buf[160];
+    int i, n = 0;
+    for (i = 0; desc[i] != EOS && n < (int)sizeof(buf) - 1; i++)
+        buf[n++] = (desc[i] == CHAR_NEWLINE) ? CHAR_SPACE : desc[i];
+    buf[n] = EOS;
+    while (n > 1 && GetStringWidth(FONT_SMALL_NARROW, buf, 0) > MAIN_W * 8 - 8)
+        buf[--n] = EOS;
+    MpTheme_Panel(sHelp, 0);
+    MpTheme_Print(sHelp, FONT_SMALL_NARROW, buf, 4, 1, MPT_GREY, MPT_BG);
+    CopyWindowToVram(sHelp, COPYWIN_FULL);
 }

@@ -544,3 +544,5 @@ gSpecials::
 	def_special MP_Rematch_Reward
 	def_special MP_Rematch_IsEndgame
 	def_special MP_Coop_PrepareLearnMove
+	def_special MP_Repel_CheckAnother
+	def_special MP_Repel_UseAnother

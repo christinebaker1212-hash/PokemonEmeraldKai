@@ -357,12 +357,21 @@ void MpUi_TextAscii(u8 row, const char *text);
 void MpUi_End(void);
 void MpUi_Help(const u8 *text);
 void MpUi_HelpAscii(const char *ascii);
+void MpUi_HelpItem(u16 item);   // the item's description on the help line
 bool8 MpUi_MoveCursor(u16 *cursor, u16 count);
 u16 MpUi_ScrollFor(u16 cursor, u16 count, u16 *scroll);
 void MpUi_Qty(u8 *dst, u32 qty);
 
 // Data kept next to the save file (mp_savedata.c)
 s32 MP_SaveData_Get(const char *key);
+u16 MP_RegisteredItem(u8 slot);            // item_menu.c: key items on L (0) / R (1)
+bool8 MP_UseRegisteredItemSlot(u8 slot);
+bool8 MP_Qol_OpenFollowerPicker(void);     // mp_qol.c
+void MP_Qol_OnScriptStart(const u8 *script);
+void MP_Qol_SignStarted(void);
+void MP_Qol_Update(void);
+bool8 MP_Qol_SkipActive(void);
+u8 MP_Qol_FieldTextSpeed(u8 normalSpeed);
 void MP_SaveData_Set(const char *key, s32 value);
 void MP_SaveData_Add(const char *key, s32 delta);
 s32 MP_Today(void);              // YYYYMMDD, local time

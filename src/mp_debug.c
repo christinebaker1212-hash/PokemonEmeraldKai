@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "pokemon_summary_screen.h"
 #include "item.h"
 #include "pokemon_storage_system.h"
 #include "constants/battle.h"
@@ -193,6 +194,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u16 nat = (u16)atoi(arg);
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "repel") == 0)
+    {
+        // repel - one step of REPEL left, and another REPEL in the bag
+        VarSet(VAR_REPEL_STEP_COUNT, 1);
+        MP_SaveData_Set("repel:last", ITEM_REPEL);
+        AddBagItem(ITEM_REPEL, 1);
+    }
+    else if (strcmp(cmd, "summary") == 0)
+    {
+        extern void CB2_ReturnToField(void);
+        ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, 0, gPlayerPartyCount - 1, CB2_ReturnToField);
     }
     else if (strcmp(cmd, "frame") == 0)
     {

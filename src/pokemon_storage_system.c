@@ -7109,6 +7109,12 @@ static u8 InBoxInput_Normal(void)
             break;
         }
 
+        // Moemon Co-op QoL: R takes the Pokémon straight into the party
+        if (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR
+         && !sIsMonBeingMoved && sStorage->boxOption != OPTION_MOVE_ITEMS && sStorage->boxOption != OPTION_DEPOSIT
+         && sStorage->displayMonSpecies != SPECIES_NONE)
+            return INPUT_WITHDRAW;
+
         if ((JOY_NEW(A_BUTTON)) && SetSelectionMenuTexts())
         {
             if (!sAutoActionOn)
@@ -7382,6 +7388,12 @@ static u8 HandleInput_InParty(void)
             }
             break;
         }
+
+        // Moemon Co-op QoL: R stores the Pokémon (choose the box, the current one is picked)
+        if (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR
+         && !sIsMonBeingMoved && sStorage->boxOption != OPTION_MOVE_ITEMS && sCursorPosition < PARTY_SIZE
+         && sStorage->displayMonSpecies != SPECIES_NONE)
+            return INPUT_DEPOSIT;
 
         if (JOY_NEW(A_BUTTON))
         {

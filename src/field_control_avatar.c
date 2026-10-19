@@ -87,6 +87,9 @@ void FieldClearPlayerInput(struct FieldInput *input)
     input->dpadDirection = 0;
 }
 
+#define MP_SELECT_HOLD_FRAMES 20
+static u8 sMpSelectHeld;
+
 void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
 {
     u8 tileTransitionState = gPlayerAvatar.tileTransitionState;
@@ -99,8 +102,27 @@ void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
         {
             if (newKeys & START_BUTTON)
                 input->pressedStartButton = TRUE;
-            if (newKeys & SELECT_BUTTON)
-                input->pressedSelectButton = TRUE;
+            // Moemon Co-op QoL: a tap of SELECT uses the registered item (on
+            // release), holding it opens the follower picker
+            if ((heldKeys & SELECT_BUTTON) && sMpSelectHeld < 255)
+            {
+                if (++sMpSelectHeld == MP_SELECT_HOLD_FRAMES)
+                    input->input_field_1_2 = TRUE;
+            }
+            else if (!(heldKeys & SELECT_BUTTON))
+            {
+                if (sMpSelectHeld > 0 && sMpSelectHeld < MP_SELECT_HOLD_FRAMES)
+                    input->pressedSelectButton = TRUE;
+                sMpSelectHeld = 0;
+            }
+            // Moemon Co-op QoL: key items registered to L / R
+            if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL)
+            {
+                if (newKeys & L_BUTTON)
+                    input->input_field_1_0 = TRUE;
+                if (newKeys & R_BUTTON)
+                    input->input_field_1_1 = TRUE;
+            }
             if (newKeys & A_BUTTON)
                 input->pressedAButton = TRUE;
             if (newKeys & B_BUTTON)
@@ -188,6 +210,12 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     }
     if (input->pressedSelectButton && UseRegisteredKeyItemOnField() == TRUE)
         return TRUE;
+    if (input->input_field_1_2 && MP_Qol_OpenFollowerPicker() == TRUE)
+        return TRUE;
+    if (input->input_field_1_0 && MP_UseRegisteredItemSlot(0) == TRUE)
+        return TRUE;
+    if (input->input_field_1_1 && MP_UseRegisteredItemSlot(1) == TRUE)
+        return TRUE;
 
     return FALSE;
 }
@@ -246,7 +274,10 @@ static const u8 *GetInteractionScript(struct MapPosition *position, u8 metatileB
 
     script = GetInteractedBackgroundEventScript(position, metatileBehavior, direction);
     if (script != NULL)
+    {
+        MP_Qol_SignStarted();   // Moemon Co-op QoL: signs print instantly
         return script;
+    }
 
     script = GetInteractedMetatileScript(position, metatileBehavior, direction);
     if (script != NULL)

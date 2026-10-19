@@ -359,6 +359,8 @@ static void DrawTrading(void)
         MpUi_HelpAscii("Trading...");
     else if (sTrade.cursor == ROW_MON)
         MpUi_HelpAscii("LEFT/RIGHT: pick a POK~MON from your party");
+    else if ((sTrade.cursor == ROW_ITEM1 || sTrade.cursor == ROW_ITEM2) && sTrade.mine.item[sTrade.cursor - ROW_ITEM1] != ITEM_NONE)
+        MpUi_HelpItem(sTrade.mine.item[sTrade.cursor - ROW_ITEM1]);
     else if (sTrade.cursor == ROW_ITEM1 || sTrade.cursor == ROW_ITEM2)
         MpUi_HelpAscii("LEFT/RIGHT: item   L/R: how many");
     else if (sTrade.cursor == ROW_MONEY)

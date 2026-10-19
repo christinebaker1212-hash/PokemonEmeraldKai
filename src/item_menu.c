@@ -191,6 +191,8 @@ static u8 CreateBagInputHandlerTask(u8);
 static void DrawItemListBgRow(u8);
 static void BagMenu_MoveCursorCallback(s32, bool8, struct ListMenu *);
 static void BagMenu_ItemPrintCallback(u8, u32, u8);
+u16 MP_RegisteredItem(u8 slot);
+static void MP_ToggleRegisteredItem(u8 slot, u16 item);
 static void ItemMenu_UseOutOfBattle(u8);
 static void ItemMenu_Toss(u8);
 static void ItemMenu_Register(u8);
@@ -989,6 +991,14 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
             // Print registered icon
             if (gSaveBlock1Ptr->registeredItem != ITEM_NONE && gSaveBlock1Ptr->registeredItem == itemId)
                 BlitBitmapToWindow(windowId, sRegisteredSelect_Gfx, 96, y - 1, 24, 16);
+            // Moemon Co-op QoL: registered to L / R
+            else if (itemId != ITEM_NONE && (MP_RegisteredItem(0) == itemId || MP_RegisteredItem(1) == itemId))
+            {
+                void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+                u8 tag[8];
+                MP_AsciiToGame(tag, MP_RegisteredItem(0) == itemId ? "(L)" : "(R)", 6);
+                BagMenu_Print(windowId, FONT_NARROW, tag, 100, y, 0, 0, TEXT_SKIP_DRAW, COLORID_NORMAL);
+            }
         }
     }
 }
@@ -1226,6 +1236,23 @@ static void Task_BagMenu_HandleInput(u8 taskId)
             SwitchBagPocket(taskId, MENU_CURSOR_DELTA_RIGHT, FALSE);
             return;
         default:
+            // Moemon Co-op QoL: L or R on a key item registers it to that button
+            if (gBagPosition.pocket == KEYITEMS_POCKET && gBagPosition.location == ITEMMENULOCATION_FIELD
+             && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL && JOY_NEW(L_BUTTON | R_BUTTON))
+            {
+                ListMenuGetScrollAndRow(tListTaskId, scrollPos, cursorPos);
+                if (*scrollPos + *cursorPos < gBagMenu->numItemStacks[gBagPosition.pocket] - 1)
+                {
+                    u16 item = BagGetItemIdByPocketPosition(gBagPosition.pocket + 1, *scrollPos + *cursorPos);
+                    PlaySE(SE_SELECT);
+                    MP_ToggleRegisteredItem(JOY_NEW(R_BUTTON) ? 1 : 0, item);
+                    DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);
+                    LoadBagItemListBuffers(gBagPosition.pocket);
+                    tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, *scrollPos, *cursorPos);
+                    ScheduleBgCopyTilemapToVram(0);
+                }
+                return;
+            }
             if (JOY_NEW(SELECT_BUTTON))
             {
                 if (CanSwapItems() == TRUE)
@@ -2070,6 +2097,54 @@ bool8 UseRegisteredKeyItemOnField(void)
         }
     }
     ScriptContext_SetupScript(EventScript_SelectWithoutRegisteredItem);
+    return TRUE;
+}
+
+// Moemon Co-op QoL: key items registered to L and R (kept in the save's
+// sidecar file). Same as SELECT, but nothing happens when the slot is empty.
+static const char *const sRegKeys[2] = {"reg:L", "reg:R"};
+
+u16 MP_RegisteredItem(u8 slot)
+{
+    s32 item = MP_SaveData_Get(sRegKeys[slot & 1]);
+    return (item > 0 && item < ITEMS_COUNT) ? item : ITEM_NONE;
+}
+
+static void MP_ToggleRegisteredItem(u8 slot, u16 item)
+{
+    MP_SaveData_Set(sRegKeys[slot & 1], MP_RegisteredItem(slot) == item ? 0 : item);
+    // One button per item
+    if (MP_RegisteredItem(slot) == item)
+    {
+        if (MP_RegisteredItem(slot ^ 1) == item)
+            MP_SaveData_Set(sRegKeys[(slot ^ 1) & 1], 0);
+        if (gSaveBlock1Ptr->registeredItem == item)
+            gSaveBlock1Ptr->registeredItem = ITEM_NONE;
+    }
+}
+
+bool8 MP_UseRegisteredItemSlot(u8 slot)
+{
+    u16 item = MP_RegisteredItem(slot);
+    u8 taskId;
+    if (item == ITEM_NONE)
+        return FALSE;
+    if (InUnionRoom() == TRUE || CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InBattlePike() || InMultiPartnerRoom() == TRUE)
+        return FALSE;
+    if (!CheckBagHasItem(item, 1))
+    {
+        MP_SaveData_Set(sRegKeys[slot & 1], 0);
+        return FALSE;
+    }
+    HideMapNamePopUpWindow();
+    ChangeBgY_ScreenOff(0, 0, BG_COORD_SET);
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    PlayerFreeze();
+    StopPlayerAvatar();
+    gSpecialVar_ItemId = item;
+    taskId = CreateTask(GetItemFieldFunc(item), 8);
+    gTasks[taskId].tUsingRegisteredKeyItem = TRUE;
     return TRUE;
 }
 

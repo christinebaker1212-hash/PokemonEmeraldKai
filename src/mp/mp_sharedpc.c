@@ -361,6 +361,10 @@ static void Draw(void)
     }
     else if (sPc.mode == MODE_WAIT)
         MpUi_HelpAscii("One moment...");
+    else if (sPc.mode == MODE_LIST && sPc.tab != TAB_MONS && sPc.cursor >= 1 && sPc.cursor <= sPc.itemCount)
+        MpUi_HelpItem(sPc.items[sPc.cursor - 1].item);
+    else if (sPc.mode == MODE_PICK_BAG && sPc.cursor < sPc.bagCount)
+        MpUi_HelpItem(sPc.bag[sPc.cursor].item);
     else if (sPc.mode == MODE_LIST)
         MpUi_HelpAscii(sPc.tab == TAB_MONS ? "A: TAKE  L/R: ITEMS  B: CLOSE" : "A: TAKE  L/R: POK~MON  B: CLOSE");
     else

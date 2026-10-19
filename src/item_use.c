@@ -885,6 +885,7 @@ static void Task_UseRepel(u8 taskId)
     if (!IsSEPlaying())
     {
         VarSet(VAR_REPEL_STEP_COUNT, GetItemHoldEffectParam(gSpecialVar_ItemId));
+        MP_SaveData_Set("repel:last", gSpecialVar_ItemId);   // Moemon Co-op QoL: offered again when it wears off
         RemoveUsedItem();
         if (CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE)
             DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, CloseItemMessage);
@@ -970,6 +971,7 @@ void ItemUseInBattle_PokeBall(u8 taskId)
 {
     if (IsPlayerPartyAndPokemonStorageFull() == FALSE) // have room for mon?
     {
+        MP_SaveData_Set("ball:last", gSpecialVar_ItemId);   // Moemon Co-op QoL: L throws it again
         RemoveBagItem(gSpecialVar_ItemId, 1);
         if (CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE)
             Task_FadeAndCloseBagMenu(taskId);
@@ -1157,3 +1159,29 @@ void ItemUseOutOfBattle_CannotUse(u8 taskId)
 }
 
 #undef tUsingRegisteredKeyItem
+
+// Moemon Co-op QoL: "Use another REPEL?" when one wears off.
+// Special: VAR_RESULT = TRUE when the bag has another of the last one used
+// (its name goes in gStringVar1).
+void MP_Repel_CheckAnother(void)
+{
+    u16 item = MP_SaveData_Get("repel:last");
+    gSpecialVar_Result = FALSE;
+    if (item != ITEM_REPEL && item != ITEM_SUPER_REPEL && item != ITEM_MAX_REPEL)
+        return;
+    if (!CheckBagHasItem(item, 1))
+        return;
+    CopyItemName(item, gStringVar1);
+    gSpecialVar_Result = TRUE;
+}
+
+// Special: uses it (the script plays the sound and the message)
+void MP_Repel_UseAnother(void)
+{
+    u16 item = MP_SaveData_Get("repel:last");
+    if (!CheckBagHasItem(item, 1))
+        return;
+    RemoveBagItem(item, 1);
+    VarSet(VAR_REPEL_STEP_COUNT, GetItemHoldEffectParam(item));
+    CopyItemName(item, gStringVar1);
+}

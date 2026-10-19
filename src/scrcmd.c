@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "frontier_util.h"
 #include "battle_setup.h"
 #include "berry.h"
@@ -1326,7 +1327,7 @@ bool8 ScrCmd_closemessage(struct ScriptContext *ctx)
 
 static bool8 WaitForAorBPress(void)
 {
-    if (JOY_NEW(A_BUTTON))
+    if (JOY_NEW(A_BUTTON) || MP_Qol_SkipActive())
         return TRUE;
     if (JOY_NEW(B_BUTTON))
         return TRUE;

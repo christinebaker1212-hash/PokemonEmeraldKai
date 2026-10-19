@@ -1198,6 +1198,7 @@ void MP_FrameUpdate(void)
 
     if (!sInitDone)
         MP_Init();
+    MP_Qol_Update();
 
     MPServer_Poll();
     MP_AutoSession_Update();

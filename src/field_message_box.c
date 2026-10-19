@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "menu.h"
 #include "string_util.h"
 #include "task.h"
@@ -115,16 +116,25 @@ bool8 ShowFieldMessageFromBuffer(void)
     return TRUE;
 }
 
+// Moemon Co-op QoL: signs and lines read before print instantly
+static void MpAddFieldTextPrinter(bool32 allowSkippingDelayWithButtonPress)
+{
+    if (allowSkippingDelayWithButtonPress)
+        AddTextPrinterWithCustomSpeedForMessage(TRUE, MP_Qol_FieldTextSpeed(GetPlayerTextSpeedDelay()));
+    else
+        AddTextPrinterForMessage(FALSE);
+}
+
 static void ExpandStringAndStartDrawFieldMessage(const u8 *str, bool32 allowSkippingDelayWithButtonPress)
 {
     StringExpandPlaceholders(gStringVar4, str);
-    AddTextPrinterForMessage(allowSkippingDelayWithButtonPress);
+    MpAddFieldTextPrinter(allowSkippingDelayWithButtonPress);
     CreateTask_DrawFieldMessage();
 }
 
 static void StartDrawFieldMessage(void)
 {
-    AddTextPrinterForMessage(TRUE);
+    MpAddFieldTextPrinter(TRUE);
     CreateTask_DrawFieldMessage();
 }
 

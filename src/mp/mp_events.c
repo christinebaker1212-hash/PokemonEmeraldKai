@@ -712,7 +712,74 @@ static EWRAM_DATA struct
     bool8 badgesKnown;
     time_t lastTick;
     u8 lastConnected;
+    bool8 catchupPending;    // waiting for the team counters after connecting
+    u32 catchupVersion;
+    u32 snapshotVersion;
 } sEv = {0};
+
+// ---------------------------------------------------------------------------
+// Offline catch-up: what the team did while you were away
+
+static const struct { const char *key; const char *what; } sCatchup[] = {
+    {"a:caught", "%d POK~MON caught"},
+    {"a:trainers", "%d trainers beaten"},
+    {"a:coop", "%d co-op wins"},
+    {"a:badges", "%d badges"},
+    {"a:trades", "%d trades"},
+    {"a:gifts", "%d gifts"},
+};
+
+static void SaveCatchupSnapshot(void)
+{
+    u8 i;
+    char key[32];
+    for (i = 0; i < ARRAY_COUNT(sCatchup); i++)
+    {
+        snprintf(key, sizeof(key), "seen:%s", sCatchup[i].key);
+        MP_SaveData_Set(key, MP_Counter_Get(sCatchup[i].key) + 1);   // +1: 0 means never seen
+    }
+}
+
+static void UpdateCatchup(void)
+{
+    if (sEv.catchupPending && MP_Counter_Version() != sEv.catchupVersion)
+    {
+        char msg[96], part[32];
+        int n = 0, shown = 0;
+        u8 i;
+        sEv.catchupPending = FALSE;
+        msg[0] = 0;
+        for (i = 0; i < ARRAY_COUNT(sCatchup); i++)
+        {
+            char key[32];
+            s32 before, now = MP_Counter_Get(sCatchup[i].key);
+            snprintf(key, sizeof(key), "seen:%s", sCatchup[i].key);
+            before = MP_SaveData_Get(key);
+            if (before <= 0 || now - (before - 1) <= 0)
+                continue;   // first time on this server, or nothing new
+            if (shown < 2)
+            {
+                snprintf(part, sizeof(part), sCatchup[i].what, (int)(now - (before - 1)));
+                n += snprintf(msg + n, sizeof(msg) - n, "%s%s", shown ? ", " : "", part);
+            }
+            shown++;
+        }
+        if (shown > 0)
+        {
+            char toast[120];
+            snprintf(toast, sizeof(toast), "While you were away:\n%s%s", msg, shown > 2 ? "..." : "!");
+            QueueToast(toast);
+        }
+        SaveCatchupSnapshot();
+        sEv.snapshotVersion = MP_Counter_Version();
+    }
+    else if (!sEv.catchupPending && MP_Counter_Version() != sEv.snapshotVersion)
+    {
+        // Keep the snapshot current while online
+        SaveCatchupSnapshot();
+        sEv.snapshotVersion = MP_Counter_Version();
+    }
+}
 
 static void RequestAll(void)
 {
@@ -953,6 +1020,11 @@ void MP_Events_Update(void)
         }
         if (first)
         {
+            sEv.catchupPending = TRUE;
+            sEv.catchupVersion = MP_Counter_Version();
+        }
+        if (first)
+        {
             char msg[96], where[64];
             TodaysOutbreak(&sp, &map);
             OutbreakText(where, sizeof(where));
@@ -960,6 +1032,7 @@ void MP_Events_Update(void)
             QueueToast(msg);
         }
     }
+    UpdateCatchup();
     if (sEv.lastConnected != MP_ConnectedCount())
     {
         char key[40];

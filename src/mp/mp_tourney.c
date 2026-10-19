@@ -12,6 +12,7 @@
 #include "global.h"
 #include "mp.h"
 #include "item.h"
+#include "pokemon.h"
 #include "main.h"
 #include "money.h"
 #include "sound.h"
@@ -143,9 +144,41 @@ static u8 OpponentIn(u8 round, u8 id)
 // ---------------------------------------------------------------------------
 // Drawing
 
+// Ready check: how the local team looks ("4 can battle, 72% HP")
+static u8 TeamStatus(char *out, int size)
+{
+    u8 i, able = 0, fainted = 0;
+    u32 hp = 0, maxHp = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+            continue;
+        hp += GetMonData(mon, MON_DATA_HP);
+        maxHp += GetMonData(mon, MON_DATA_MAX_HP);
+        if (GetMonData(mon, MON_DATA_HP) == 0)
+            fainted++;
+        else
+            able++;
+    }
+    if (able == 0)
+        snprintf(out, size, "Your team can't battle! Heal first.");
+    else if (fainted || (maxHp && hp * 2 < maxHp))
+        snprintf(out, size, "Team: %d can battle, %d%% HP. Heal first?", able, maxHp ? (int)(hp * 100 / maxHp) : 0);
+    else
+        snprintf(out, size, "Team: %d can battle, %d%% HP. Looking good!", able, maxHp ? (int)(hp * 100 / maxHp) : 0);
+    return able;
+}
+
+static bool8 HasAbleMon(void)
+{
+    char tmp[64];
+    return TeamStatus(tmp, sizeof(tmp)) > 0;
+}
+
 static void Draw(void)
 {
-    char line[80], name[16];
+    char line[80], name[16], team[64];
     u8 i;
     sT.dirty = FALSE;
     if (!MpUi_IsOpen())
@@ -174,6 +207,8 @@ static void Draw(void)
         snprintf(line, sizeof(line), "%s is starting a battle tournament!", name);
         MpUi_TextAscii(0, line);
         MpUi_TextAscii(1, "Friendly battles: no money lost, no blacking out.");
+        TeamStatus(team, sizeof(team));
+        MpUi_TextAscii(2, team);
         MpUi_RowAscii(3, sT.cursor == 0, "JOIN", NULL);
         MpUi_RowAscii(4, sT.cursor == 1, "NO THANKS", NULL);
         MpUi_End();
@@ -222,7 +257,8 @@ static void Draw(void)
         else if (sT.state == TS_RUNNING)
             MpUi_TextAscii(MPUI_ROWS - 1, OpponentIn(sT.round, gMpLocalId) == BYE ? "You have a break this round." : "Waiting for the other matches...");
         MpUi_End();
-        MpUi_HelpAscii(sT.note[0] ? sT.note : (sT.me == ME_PROMPT ? "A: SELECT" : "B: CLOSE (the tournament goes on)"));
+        TeamStatus(team, sizeof(team));
+        MpUi_HelpAscii(sT.note[0] ? sT.note : (sT.me == ME_PROMPT ? team : "B: CLOSE (the tournament goes on)"));
         break;
     }
     }
@@ -531,6 +567,13 @@ static void Task_Tourney(u8 taskId)
         {
             if (MpUi_MoveCursor(&sT.cursor, 2))
                 sT.dirty = TRUE;
+            else if (JOY_NEW(A_BUTTON) && sT.cursor == 0 && !HasAbleMon())
+            {
+                // Ready check: nobody can battle
+                TeamStatus(sT.note, sizeof(sT.note));
+                PlaySE(SE_FAILURE);
+                sT.dirty = TRUE;
+            }
             else if (JOY_NEW(A_BUTTON) && sT.cursor == 0)
             {
                 u8 buf[3] = {MPR_T_READY, sT.tid, sT.round};

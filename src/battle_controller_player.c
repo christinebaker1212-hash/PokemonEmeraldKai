@@ -99,6 +99,74 @@ static void PlayerBufferRunCommand(void);
 static void HandleInputChooseTarget(void);
 static void HandleInputChooseMove(void);
 static bool8 sMpMoveInfo;   // Moemon Co-op QoL: move info view (R)
+static u16 sMpQuickBall;    // Moemon Co-op QoL: ball thrown with L
+static bool8 sMpPartnerGlance;   // Moemon Co-op QoL: partner's team on the prompt (R)
+
+// "TORCHIC  30/ 33 PSN" for each of the partner's Pokémon, small font
+static void MpShowPartnerTeam(void)
+{
+    static const char *const sStatus[] = {"", "SLP", "PSN", "BRN", "FRZ", "PAR", "PSN"};
+    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+    u8 partner = BATTLE_PARTNER(gActiveBattler);
+    u8 half = gBattlerPartyIndexes[partner] < MULTI_PARTY_SIZE ? 0 : MULTI_PARTY_SIZE;
+    u8 *p = gDisplayedStringBattle;
+    u8 i, lines = 0;
+
+    *p++ = EXT_CTRL_CODE_BEGIN;
+    *p++ = EXT_CTRL_CODE_FONT;
+    *p++ = FONT_SMALL;
+    for (i = 0; i < MULTI_PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[half + i];
+        u16 species = GetMonData(mon, MON_DATA_SPECIES);
+        u32 status = GetMonData(mon, MON_DATA_STATUS);
+        u16 hp = GetMonData(mon, MON_DATA_HP), maxHp = GetMonData(mon, MON_DATA_MAX_HP);
+        u8 name[POKEMON_NAME_LENGTH + 2];
+        char buf[24];
+        const char *st = "";
+        if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+            continue;
+        if (hp == 0)
+            st = "FNT";
+        else if (status & STATUS1_SLEEP)
+            st = sStatus[1];
+        else if (status & (STATUS1_POISON | STATUS1_TOXIC_POISON))
+            st = sStatus[2];
+        else if (status & STATUS1_BURN)
+            st = sStatus[3];
+        else if (status & STATUS1_FREEZE)
+            st = sStatus[4];
+        else if (status & STATUS1_PARALYSIS)
+            st = sStatus[5];
+        if (lines++)
+            *p++ = CHAR_NEWLINE;
+        GetMonData(mon, MON_DATA_NICKNAME, name);
+        StringGet_Nickname(name);
+        p = StringCopy(p, name);
+        snprintf(buf, sizeof(buf), "  %d/%d %s", hp, maxHp, st);
+        MP_AsciiToGame(p, buf, 22);
+        p += StringLength(p);
+    }
+    if (lines == 0)
+        MP_AsciiToGame(p, "Your partner has no POK~MON left.", 40);
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+}
+
+// A wild battle where the last kind of ball thrown is still in the bag
+static bool8 MpQuickBallReady(void)
+{
+    s32 ball = MP_SaveData_Get("ball:last");
+    if (ball < FIRST_BALL || ball > LAST_BALL || ball == ITEM_SAFARI_BALL || !CheckBagHasItem(ball, 1))
+        return FALSE;
+    if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
+        return FALSE;
+    if (gBattleTypeFlags & (BATTLE_TYPE_SAFARI | BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE
+                          | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED))
+        return FALSE;
+    if ((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopWild)
+        return FALSE;
+    return !IsPlayerPartyAndPokemonStorageFull();
+}
 static void MoveSelectionCreateCursorAt(u8, u8);
 static void MoveSelectionDestroyCursorAt(u8);
 static void MoveSelectionDisplayPPNumber(void);
@@ -244,6 +312,31 @@ static void HandleInputChooseAction(void)
         gPlayerDpadHoldFrames++;
     else
         gPlayerDpadHoldFrames = 0;
+
+    // Moemon Co-op QoL: in a co-op battle, R shows how your partner's team is doing
+    if (JOY_NEW(R_BUTTON) && gMpCoopBattle)
+    {
+        PlaySE(SE_SELECT);
+        sMpPartnerGlance = !sMpPartnerGlance;
+        if (sMpPartnerGlance)
+            MpShowPartnerTeam();
+        else
+        {
+            BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
+            BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+        }
+        return;
+    }
+
+    // Moemon Co-op QoL: L throws the same kind of ball as last time (wild battles)
+    if (JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL && MpQuickBallReady())
+    {
+        PlaySE(SE_SELECT);
+        sMpQuickBall = MP_SaveData_Get("ball:last");
+        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_USE_ITEM, 0);
+        PlayerBufferExecCompleted();
+        return;
+    }
 
     if (JOY_NEW(A_BUTTON))
     {
@@ -2656,6 +2749,7 @@ static void PlayerHandleChooseAction(void)
     ActionSelectionCreateCursorAt(gActionSelectionCursor[gActiveBattler], 0);
     BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+    sMpPartnerGlance = FALSE;
 }
 
 static void PlayerHandleYesNoBox(void)
@@ -2723,6 +2817,25 @@ void InitMoveSelectionsVarsAndStrings(void)
 static void PlayerHandleChooseItem(void)
 {
     s32 i;
+
+    // Moemon Co-op QoL: the quick ball (L) skips the bag
+    if (sMpQuickBall != ITEM_NONE)
+    {
+        u16 ball = sMpQuickBall;
+        sMpQuickBall = ITEM_NONE;
+        for (i = 0; i < (int)ARRAY_COUNT(gBattlePartyCurrentOrder); i++)
+            gBattlePartyCurrentOrder[i] = gBattleBufferA[gActiveBattler][1 + i];
+        if (CheckBagHasItem(ball, 1))
+        {
+            RemoveBagItem(ball, 1);
+            gSpecialVar_ItemId = ball;
+        }
+        else
+            gSpecialVar_ItemId = ITEM_NONE;
+        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, gSpecialVar_ItemId);
+        PlayerBufferExecCompleted();
+        return;
+    }
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
     gBattlerControllerFuncs[gActiveBattler] = OpenBagAndChooseItem;

@@ -45,6 +45,7 @@ double lastGameTime = 0;
 double curGameTime = 0;
 double fixedTimestep = 1.0 / 60.0; // 16.666667ms
 double timeScale = 1.0;
+bool8 MP_Qol_SkipActive(void);
 struct SiiRtcInfo internalClock;
 
 static FILE *sSaveFile = NULL;
@@ -176,6 +177,8 @@ int main(int argc, char **argv)
 
         curGameTime = SDL_GetPerformanceCounter();
         deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
+        // Moemon Co-op QoL: holding START in a script seen before plays it at 4x
+        timeScale = MP_Qol_SkipActive() ? 4.0 : 1.0;
         deltaTime *= timeScale; //apply speedup
 
         if (sTestMode)
