@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moemon Sprite Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+/* Layout: one working screen. Slot list on the left, the frame you paint in the
+   middle, colors + live preview on the right. Stacks to one column on phones. */
+:root {
+  --bg: #eef1ee;          /* page: pale grey-green, like a GBA case */
+  --panel: #ffffff;
+  --ink: #1d2a24;
+  --muted: #5c6b63;
+  --line: #d3dbd5;
+  --accent: #1e8a5a;      /* emerald */
+  --accent-ink: #ffffff;
+  --warn: #b5530e;
+  --ok: #2f7d4f;
+  --check-a: #e3e8e4;     /* transparency checkerboard */
+  --check-b: #f6f8f6;
+  --display: "Pixelify Sans", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131915; --panel: #1b231e; --ink: #e4ebe6; --muted: #98a89e; --line: #2c3830;
+    --accent: #3fbf86; --accent-ink: #0b1510; --warn: #f0a160; --ok: #6fd39b;
+    --check-a: #222b25; --check-b: #2a342e; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131915; --panel: #1b231e; --ink: #e4ebe6; --muted: #98a89e; --line: #2c3830;
+  --accent: #3fbf86; --accent-ink: #0b1510; --warn: #f0a160; --ok: #6fd39b;
+  --check-a: #222b25; --check-b: #2a342e; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 24px;
+}
+h1 { font: 700 26px/1.1 var(--display); margin: 0; letter-spacing: .5px; text-wrap: balance; }
+h2 { font: 700 13px/1.2 var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
+button, select, input[type="text"] {
+  font: 600 14px/1 var(--body); color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.top .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sub { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.app { display: grid; grid-template-columns: 230px minmax(0, 1fr) 260px; gap: 12px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+.slots { display: flex; flex-direction: column; gap: 4px; }
+.slot {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; text-align: left; padding: 8px 10px;
+  border-radius: 6px; border: 1px solid transparent; background: none; font-weight: 600;
+}
+.slot:hover { border-color: var(--line); }
+.slot.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.slot .badge { align-self: start; white-space: nowrap; }
+.slot small { grid-column: 1 / -1; color: var(--muted); font-weight: 400; font-size: 12px; }
+.badge { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; letter-spacing: .03em; }
+.badge.custom { background: var(--accent); color: var(--accent-ink); }
+.badge.empty { border: 1px dashed var(--line); color: var(--muted); }
+.frames { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.frames canvas { background: repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/8px 8px;
+  border: 2px solid var(--line); border-radius: 4px; image-rendering: pixelated; cursor: pointer; }
+.frames canvas.sel { border-color: var(--accent); }
+.frames figure { margin: 0; display: grid; gap: 2px; justify-items: center; }
+.frames figcaption { font-size: 11px; color: var(--muted); max-width: 72px; text-align: center; line-height: 1.15; }
+.stage { overflow: auto; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); padding: 10px; display: flex; justify-content: center; }
+#paint { image-rendering: pixelated; touch-action: none; cursor: crosshair;
+  background: repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/24px 24px; max-width: 100%; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 8px 0; }
+.swatches button { aspect-ratio: 1; padding: 0; border-radius: 4px; border: 2px solid var(--line); max-width: 100%; }
+.swatches button.sel { border-color: var(--ink); }
+.count { font-variant-numeric: tabular-nums; font-weight: 700; }
+.count.bad { color: var(--warn); }
+.count.good { color: var(--ok); }
+.note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.warn { color: var(--warn); font-size: 13px; margin: 6px 0 0; }
+#preview { image-rendering: pixelated; border-radius: 6px; display: block; margin: 0 auto; max-width: 100%; background: #6fb38a; }
+.steps { margin: 0; padding-left: 20px; font-size: 14px; }
+.steps li + li { margin-top: 4px; }
+.drop { position: fixed; inset: 0; background: color-mix(in srgb, var(--accent) 25%, transparent); display: grid; place-items: center;
+  font: 700 28px var(--display); color: var(--ink); z-index: 20; pointer-events: none; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 30; max-width: 90vw; }
+label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+input[type="color"] { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+@media (max-width: 1000px) { .app { grid-template-columns: 200px minmax(0, 1fr); } .side-right { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .app { grid-template-columns: minmax(0, 1fr); } .slots { flex-direction: row; flex-wrap: wrap; } .slot { flex: 1 1 140px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <h1>Moemon Sprite Editor</h1>
+    <p class="sub">Make your own trainer: walking, biking, surfing, fishing, Trainer Card and battle sprites.</p>
+  </div>
+  <div class="actions">
+    <button id="openBtn" class="primary">Open sprite sheet…</button>
+    <input id="openFile" type="file" accept="image/png" hidden>
+    <label class="field" for="baseSel">Based on
+      <select id="baseSel"></select>
+    </label>
+    <button id="newBtn">New blank sheet</button>
+    <button id="saveBtn" class="primary">Save sprite sheet</button>
+  </div>
+</div>
+
+<div class="app">
+  <nav class="panel" aria-label="Sprite slots">
+    <h2>Sprites</h2>
+    <div class="slots" id="slots"></div>
+    <p class="note">Empty slots use the character's own sprites in the game.</p>
+  </nav>
+
+  <main class="panel">
+    <div class="row" style="justify-content: space-between">
+      <h2 id="slotTitle" style="margin:0">Walking</h2>
+      <span class="note" id="slotHelp" style="margin:0"></span>
+    </div>
+    <div class="frames" id="frames" style="margin-top:10px"></div>
+    <div class="tools" role="toolbar" aria-label="Paint tools">
+      <button data-tool="pencil" class="on" title="Pencil (P)">Pencil</button>
+      <button data-tool="eraser" title="Eraser (E)">Eraser</button>
+      <button data-tool="fill" title="Fill (F)">Fill</button>
+      <button data-tool="pick" title="Pick a color (I)">Pick color</button>
+      <button id="undoBtn" title="Undo (Ctrl+Z)">Undo</button>
+      <button id="redoBtn" title="Redo (Ctrl+Y)">Redo</button>
+      <button id="gridBtn" class="on">Grid</button>
+    </div>
+    <div class="stage"><canvas id="paint" width="384" height="768"></canvas></div>
+    <div class="tools">
+      <button id="importBtn">Use an image…</button>
+      <input id="importFile" type="file" accept="image/*" hidden>
+      <button id="copyBtn">Copy frame</button>
+      <button id="pasteBtn">Paste frame</button>
+      <button id="flipBtn">Flip frame</button>
+      <button id="clearFrameBtn">Clear frame</button>
+      <button id="clearSlotBtn">Clear all frames</button>
+    </div>
+    <p class="note" id="importHelp"></p>
+  </main>
+
+  <aside class="side-right" style="display:grid; gap:12px">
+    <section class="panel">
+      <h2>Color</h2>
+      <div class="row">
+        <input type="color" id="colorPick" value="#e05050" aria-label="Paint color">
+        <span>Colors used: <span class="count" id="colorCount">0 / 15</span></span>
+      </div>
+      <div class="swatches" id="swatches"></div>
+      <p class="warn" id="colorWarn" hidden>The game shows up to 15 colors here (plus see-through). Extra colors will be merged.</p>
+      <button id="reduceBtn">Reduce to 15 colors</button>
+      <p class="note" id="groupNote"></p>
+    </section>
+    <section class="panel">
+      <h2>Preview</h2>
+      <canvas id="preview" width="192" height="160"></canvas>
+      <div class="row" style="margin-top:8px; justify-content:center" id="dirRow">
+        <button data-dir="down" class="on">Down</button>
+        <button data-dir="up">Up</button>
+        <button data-dir="left">Left</button>
+        <button data-dir="right">Right</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>In the game, open <b>START &gt; CO-OP &gt; EDIT SPRITES</b>. Your current look is saved in the game's <b>sprites</b> folder.</li>
+        <li>Open that file here (or drag it onto this page) and paint, or use your own images.</li>
+        <li>Press <b>Save sprite sheet</b>, then drag the saved file onto the game window. Your friends see it too.</li>
+      </ol>
+    </section>
+  </aside>
+</div>
+
+<div class="drop" id="drop" hidden>Drop your sprite sheet</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+// ---- Sheet layout (must match src/mp/mp_pack.h in the game) ----
+const W = 576, H = 256;
+const PAL_OW = 0, PAL_FRONT = 1, PAL_BACK = 2, PAL_DIVE = 3;
+const SLOTS = [
+  {id: "walk",  name: "Walking",          x: 0,   y: 0,   w: 16, h: 32, n: 9,  pal: PAL_OW, anim: "walk"},
+  {id: "run",   name: "Running",          x: 144, y: 0,   w: 16, h: 32, n: 9,  pal: PAL_OW, anim: "walk"},
+  {id: "deco",  name: "Decorating",       x: 288, y: 0,   w: 16, h: 32, n: 1,  pal: PAL_OW, anim: "loop"},
+  {id: "mach",  name: "Mach Bike",        x: 0,   y: 32,  w: 32, h: 32, n: 9,  pal: PAL_OW, anim: "walk"},
+  {id: "dive",  name: "Diving",           x: 288, y: 32,  w: 32, h: 32, n: 9,  pal: PAL_DIVE, anim: "walk"},
+  {id: "acro",  name: "Acro Bike",        x: 0,   y: 64,  w: 32, h: 32, n: 27, pal: PAL_OW, anim: "walk", wrap: 18},
+  {id: "water", name: "Watering",         x: 288, y: 96,  w: 32, h: 32, n: 9,  pal: PAL_OW, anim: "walk"},
+  {id: "surf",  name: "Surfing & Flying", x: 0,   y: 128, w: 32, h: 32, n: 12, pal: PAL_OW, anim: "loop"},
+  {id: "move",  name: "Using a move/item",x: 384, y: 128, w: 32, h: 32, n: 5,  pal: PAL_OW, anim: "loop"},
+  {id: "fish",  name: "Fishing",          x: 0,   y: 160, w: 32, h: 32, n: 12, pal: PAL_OW, anim: "loop"},
+  {id: "front", name: "Trainer Card",     x: 0,   y: 192, w: 64, h: 64, n: 1,  pal: PAL_FRONT, anim: "loop"},
+  {id: "back",  name: "Battle back",      x: 64,  y: 192, w: 64, h: 64, n: 4,  pal: PAL_BACK, anim: "loop"},
+];
+const WALK_LABELS = ["Face down", "Face up", "Face left", "Walk down 1", "Walk down 2", "Walk up 1", "Walk up 2", "Walk left 1", "Walk left 2"];
+const BACK_LABELS = ["Standing", "Throw 1", "Throw 2", "Throw 3"];
+const GROUP_NAMES = ["all overworld sprites (not diving)", "the Trainer Card picture", "the battle back sprite", "the diving sprite"];
+const SLOT_HELP = {
+  walk: "9 frames, 16×32. Right-facing frames are the left ones flipped.",
+  run: "Same order as walking. Empty = walking frames are used.",
+  deco: "Shown while decorating a Secret Base.",
+  mach: "Same order as walking, 32×32.",
+  acro: "27 frames: riding, wheelies and hops.",
+  dive: "Same order as walking. Has its own colors.",
+  water: "Watering berries with the Wailmer Pail.",
+  surf: "Riding a Pokémon on water and when flying.",
+  move: "Using Cut, Rock Smash and other moves outside battle.",
+  fish: "Casting and reeling in, facing each way.",
+  front: "64×64. Shown on your Trainer Card and to opponents in PvP.",
+  back: "64×64, standing then 3 throwing frames. Empty = no trainer shown in battle.",
+};
+const BASES = ["default","brendan","may","rs_brendan","rs_may","red","leaf","wally","steven","wallace","roxanne","brawly","wattson","flannery","norman","winona","tate","liza","juan","sidney","phoebe","glacia","drake","archie","maxie","aqua_grunt_m","aqua_grunt_f","magma_grunt_m","magma_grunt_f","anabel","tucker","spenser","greta","noland","lucy","brandon","scott","prof._birch","mom","youngster","lass","bug_catcher","camper","picnicker","hiker","fisherman","sailor","black_belt","beauty","gentleman","rich_boy","ninja_boy","twin","school_kid","psychic","hex_maniac","pokemaniac","expert_m","expert_f","pokefan_m","pokefan_f","swimmer_m","swimmer_f","tuber_m","tuber_f","triathlete_m","triathlete_f","reporter_m","reporter_f","cameraman","boy_1","boy_2","boy_3","girl_1","girl_2","girl_3","little_boy","little_girl","kid","game_kid","man_1","man_2","man_3","man_4","man_5","woman_1","woman_2","woman_3","woman_4","woman_5","big_man","old_man","old_woman","granny","cook","scientist_1","scientist_2","devon_staff","clerk","receptionist","attendant","judge","artist","bard","teala","saleswoman","delivery_man","pikachu","zigzagoon","skitty","kecleon","azumarill","azurill","wingull","kirlia","dusclops","sudowoodo","mew","poochyena","big_zigzagoon","latias","latios","regirock","regice","registeel","kyogre","groudon","deoxys","lugia"];
+
+// ---- State ----
+const atlas = new ImageData(W, H);   // the whole sheet, RGBA
+let slotIdx = 0, frameIdx = 0, tool = "pencil", grid = true, dir = "down";
+let color = [224, 80, 80];
+let fileName = "my_trainer";
+let clip = null;
+const undo = [], redo = [];
+
+const $ = (id) => document.getElementById(id);
+const toastEl = $("toast");
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3200);
+}
+
+// GBA colors have 5 bits per channel
+const snap = (v) => (v & 0xF8) | (v >> 5);
+function framePos(s, f) {
+  const col = s.wrap ? f % s.wrap : f, row = s.wrap ? Math.floor(f / s.wrap) : 0;
+  return [s.x + col * s.w, s.y + row * s.h];
+}
+function px(x, y) { return (y * W + x) * 4; }
+
+function slotHasPixels(s) {
+  for (let f = 0; f < s.n; f++) {
+    const [fx, fy] = framePos(s, f);
+    for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++)
+      if (atlas.data[px(fx + x, fy + y) + 3] >= 128) return true;
+  }
+  return false;
+}
+
+// ---- Colors per palette group ----
+function groupColors(pal) {
+  const counts = new Map();
+  for (const s of SLOTS) {
+    if (s.pal !== pal) continue;
+    for (let f = 0; f < s.n; f++) {
+      const [fx, fy] = framePos(s, f);
+      for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+        const i = px(fx + x, fy + y), d = atlas.data;
+        if (d[i + 3] < 128) continue;
+        const key = (snap(d[i]) << 16) | (snap(d[i + 1]) << 8) | snap(d[i + 2]);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+    }
+  }
+  return counts;
+}
+
+function medianCut(colors, max) {
+  // colors: [[r,g,b,count]]
+  let boxes = [colors];
+  while (boxes.length < max) {
+    let best = -1, bestRange = -1, bestCh = 0;
+    boxes.forEach((b, i) => {
+      if (b.length < 2) return;
+      for (let ch = 0; ch < 3; ch++) {
+        let lo = 255, hi = 0;
+        for (const c of b) { lo = Math.min(lo, c[ch]); hi = Math.max(hi, c[ch]); }
+        if (hi - lo > bestRange) { bestRange = hi - lo; best = i; bestCh = ch; }
+      }
+    });
+    if (best < 0) break;
+    const b = boxes[best].sort((p, q) => p[bestCh] - q[bestCh]);
+    const total = b.reduce((a, c) => a + c[3], 0);
+    let acc = 0, split = 1;
+    for (let k = 0; k < b.length - 1; k++) { acc += b[k][3]; if (acc * 2 >= total) { split = k + 1; break; } }
+    boxes.splice(best, 1, b.slice(0, split), b.slice(split));
+  }
+  return boxes.map((b) => {
+    let r = 0, g = 0, bl = 0, w = 0;
+    for (const c of b) { r += c[0] * c[3]; g += c[1] * c[3]; bl += c[2] * c[3]; w += c[3]; }
+    return [snap(Math.round(r / w)), snap(Math.round(g / w)), snap(Math.round(bl / w))];
+  });
+}
+
+function reduceGroup(pal) {
+  const counts = groupColors(pal);
+  if (counts.size <= 15) { toast("Already 15 colors or fewer."); return; }
+  pushUndo();
+  const cols = [...counts].map(([k, n]) => [(k >> 16) & 255, (k >> 8) & 255, k & 255, n]);
+  const pal15 = medianCut(cols, 15);
+  for (const s of SLOTS) {
+    if (s.pal !== pal) continue;
+    for (let f = 0; f < s.n; f++) {
+      const [fx, fy] = framePos(s, f);
+      for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+        const i = px(fx + x, fy + y), d = atlas.data;
+        if (d[i + 3] < 128) continue;
+        let best = 0, bd = 1e9;
+        pal15.forEach((c, j) => {
+          const dd = (c[0] - d[i]) ** 2 * 3 + (c[1] - d[i + 1]) ** 2 * 4 + (c[2] - d[i + 2]) ** 2 * 2;
+          if (dd < bd) { bd = dd; best = j; }
+        });
+        [d[i], d[i + 1], d[i + 2]] = pal15[best];
+      }
+    }
+  }
+  renderAll();
+  toast("Reduced to 15 colors.");
+}
+
+// ---- Undo (whole-sheet snapshots; the sheet is small) ----
+function pushUndo() {
+  undo.push(new Uint8ClampedArray(atlas.data));
+  if (undo.length > 60) undo.shift();
+  redo.length = 0;
+}
+function undoStep(from, to) {
+  if (!from.length) return;
+  to.push(new Uint8ClampedArray(atlas.data));
+  atlas.data.set(from.pop());
+  renderAll();
+}
+
+// ---- Rendering ----
+const paint = $("paint"), pctx = paint.getContext("2d");
+let zoom = 12;
+function cur() { return SLOTS[slotIdx]; }
+
+function frameCanvas(s, f, scale, flip) {
+  const c = document.createElement("canvas");
+  c.width = s.w; c.height = s.h;
+  const [fx, fy] = framePos(s, f);
+  const img = new ImageData(s.w, s.h);
+  for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+    const sx = flip ? s.w - 1 - x : x, i = px(fx + sx, fy + y), o = (y * s.w + x) * 4;
+    img.data.set(atlas.data.subarray(i, i + 4), o);
+  }
+  c.getContext("2d").putImageData(img, 0, 0);
+  if (scale) { c.style.width = s.w * scale + "px"; c.style.height = s.h * scale + "px"; }
+  return c;
+}
+
+function renderSlots() {
+  const box = $("slots"); box.textContent = "";
+  SLOTS.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "slot" + (i === slotIdx ? " sel" : "");
+    const has = slotHasPixels(s);
+    b.innerHTML = `<span></span><span class="badge ${has ? "custom" : "empty"}">${has ? "Custom" : "Default"}</span><small></small>`;
+    b.firstChild.textContent = s.name;
+    b.lastChild.textContent = `${s.n} frame${s.n > 1 ? "s" : ""} · ${s.w}×${s.h}`;
+    b.onclick = () => { slotIdx = i; frameIdx = 0; renderAll(); };
+    box.appendChild(b);
+  });
+}
+
+function frameLabel(s, f) {
+  if (s.anim === "walk" && s.n === 9) return WALK_LABELS[f];
+  if (s.id === "back") return BACK_LABELS[f];
+  return "Frame " + (f + 1);
+}
+
+function renderFrames() {
+  const s = cur(), box = $("frames"); box.textContent = "";
+  const scale = s.w === 64 ? 1.25 : (s.w === 32 ? 2 : 2.5);
+  for (let f = 0; f < s.n; f++) {
+    const fig = document.createElement("figure");
+    const c = frameCanvas(s, f, scale);
+    if (f === frameIdx) c.classList.add("sel");
+    c.title = frameLabel(s, f);
+    c.onclick = () => { frameIdx = f; renderAll(); };
+    const cap = document.createElement("figcaption"); cap.textContent = frameLabel(s, f);
+    fig.append(c, cap); box.appendChild(fig);
+  }
+  $("slotTitle").textContent = s.name;
+  $("slotHelp").textContent = SLOT_HELP[s.id] || "";
+}
+
+function renderPaint() {
+  const s = cur();
+  zoom = s.w === 64 ? 6 : (s.w === 32 ? 10 : 14);
+  paint.width = s.w * zoom; paint.height = s.h * zoom;
+  pctx.clearRect(0, 0, paint.width, paint.height);
+  const [fx, fy] = framePos(s, frameIdx), d = atlas.data;
+  for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+    const i = px(fx + x, fy + y);
+    if (d[i + 3] < 128) continue;
+    pctx.fillStyle = `rgb(${d[i]},${d[i + 1]},${d[i + 2]})`;
+    pctx.fillRect(x * zoom, y * zoom, zoom, zoom);
+  }
+  if (grid) {
+    pctx.strokeStyle = "rgba(0,0,0,0.12)"; pctx.lineWidth = 1; pctx.beginPath();
+    for (let x = 0; x <= s.w; x++) { pctx.moveTo(x * zoom + .5, 0); pctx.lineTo(x * zoom + .5, paint.height); }
+    for (let y = 0; y <= s.h; y++) { pctx.moveTo(0, y * zoom + .5); pctx.lineTo(paint.width, y * zoom + .5); }
+    pctx.stroke();
+    pctx.strokeStyle = "rgba(0,0,0,0.3)"; pctx.beginPath();
+    for (let x = 0; x <= s.w; x += 8) { pctx.moveTo(x * zoom + .5, 0); pctx.lineTo(x * zoom + .5, paint.height); }
+    for (let y = 0; y <= s.h; y += 8) { pctx.moveTo(0, y * zoom + .5); pctx.lineTo(paint.width, y * zoom + .5); }
+    pctx.stroke();
+  }
+}
+
+function hex(c) { return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join(""); }
+
+function renderColors() {
+  const s = cur(), counts = groupColors(s.pal);
+  const n = counts.size, el = $("colorCount");
+  el.textContent = `${n} / 15`;
+  el.className = "count " + (n > 15 ? "bad" : "good");
+  $("colorWarn").hidden = n <= 15;
+  $("reduceBtn").disabled = n <= 15;
+  $("groupNote").textContent = `These 15 colors are shared by ${GROUP_NAMES[s.pal]}.`;
+  const sw = $("swatches"); sw.textContent = "";
+  [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a)).forEach((k) => {
+    const c = [(k >> 16) & 255, (k >> 8) & 255, k & 255];
+    const b = document.createElement("button");
+    b.style.background = hex(c); b.title = hex(c);
+    b.setAttribute("aria-label", "Use color " + hex(c));
+    if (c[0] === color[0] && c[1] === color[1] && c[2] === color[2]) b.classList.add("sel");
+    b.onclick = () => setColor(c);
+    sw.appendChild(b);
+  });
+}
+
+function renderAll() { renderSlots(); renderFrames(); renderPaint(); renderColors(); renderImportHelp(); }
+
+function setColor(c) {
+  color = c.map(snap); $("colorPick").value = hex(color);
+  if (tool === "eraser" || tool === "pick") setTool("pencil");
+  renderColors();
+}
+
+// ---- Painting ----
+function cellAt(ev) {
+  const r = paint.getBoundingClientRect(), s = cur();
+  const x = Math.floor((ev.clientX - r.left) / r.width * s.w), y = Math.floor((ev.clientY - r.top) / r.height * s.h);
+  return (x >= 0 && y >= 0 && x < s.w && y < s.h) ? [x, y] : null;
+}
+function setPixel(x, y, rgba) {
+  const s = cur(), [fx, fy] = framePos(s, frameIdx);
+  atlas.data.set(rgba, px(fx + x, fy + y));
+}
+function getPixel(x, y) {
+  const s = cur(), [fx, fy] = framePos(s, frameIdx), i = px(fx + x, fy + y);
+  return Array.from(atlas.data.subarray(i, i + 4));
+}
+function flood(x0, y0, rgba) {
+  const s = cur(), target = getPixel(x0, y0).join(","), stack = [[x0, y0]], seen = new Set();
+  if (target === rgba.join(",")) return;
+  while (stack.length) {
+    const [x, y] = stack.pop(), k = y * 100 + x;
+    if (x < 0 || y < 0 || x >= s.w || y >= s.h || seen.has(k)) continue;
+    seen.add(k);
+    const p = getPixel(x, y);
+    const same = (p[3] < 128 && target.endsWith(",0")) || p.join(",") === target;
+    if (!same) continue;
+    setPixel(x, y, rgba);
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+}
+let drawing = false;
+function applyTool(ev, start) {
+  const c = cellAt(ev); if (!c) return;
+  const [x, y] = c;
+  if (tool === "pick") {
+    const p = getPixel(x, y);
+    if (p[3] >= 128) setColor(p.slice(0, 3)); else setTool("eraser");
+    return;
+  }
+  if (start) pushUndo();
+  if (tool === "fill") flood(x, y, [...color, 255]);
+  else setPixel(x, y, tool === "eraser" ? [0, 0, 0, 0] : [...color, 255]);
+  renderPaint();
+}
+paint.addEventListener("pointerdown", (ev) => { drawing = true; paint.setPointerCapture(ev.pointerId); applyTool(ev, true); });
+paint.addEventListener("pointermove", (ev) => { if (drawing && (tool === "pencil" || tool === "eraser")) applyTool(ev, false); });
+paint.addEventListener("pointerup", () => { if (drawing) { drawing = false; renderAll(); } });
+
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll("[data-tool]").forEach((b) => b.classList.toggle("on", b.dataset.tool === t));
+}
+document.querySelectorAll("[data-tool]").forEach((b) => b.onclick = () => setTool(b.dataset.tool));
+$("colorPick").oninput = (e) => {
+  const v = e.target.value; setColor([1, 3, 5].map((i) => parseInt(v.substr(i, 2), 16)));
+};
+$("undoBtn").onclick = () => undoStep(undo, redo);
+$("redoBtn").onclick = () => undoStep(redo, undo);
+$("gridBtn").onclick = (e) => { grid = !grid; e.target.classList.toggle("on", grid); renderPaint(); };
+$("reduceBtn").onclick = () => reduceGroup(cur().pal);
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undoStep(undo, redo); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") { e.preventDefault(); undoStep(redo, undo); }
+  else if (e.key === "p") setTool("pencil");
+  else if (e.key === "e") setTool("eraser");
+  else if (e.key === "f") setTool("fill");
+  else if (e.key === "i") setTool("pick");
+  else if (e.key === "ArrowRight") { frameIdx = (frameIdx + 1) % cur().n; renderAll(); }
+  else if (e.key === "ArrowLeft") { frameIdx = (frameIdx + cur().n - 1) % cur().n; renderAll(); }
+});
+
+// ---- Frame tools ----
+function readFrame() {
+  const s = cur(), [fx, fy] = framePos(s, frameIdx), out = new Uint8ClampedArray(s.w * s.h * 4);
+  for (let y = 0; y < s.h; y++) out.set(atlas.data.subarray(px(fx, fy + y), px(fx + s.w, fy + y)), y * s.w * 4);
+  return {w: s.w, h: s.h, data: out};
+}
+function writeFrame(fr) {
+  const s = cur(), [fx, fy] = framePos(s, frameIdx);
+  for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+    const i = px(fx + x, fy + y);
+    if (x < fr.w && y < fr.h) atlas.data.set(fr.data.subarray((y * fr.w + x) * 4, (y * fr.w + x) * 4 + 4), i);
+    else atlas.data.set([0, 0, 0, 0], i);
+  }
+}
+$("copyBtn").onclick = () => { clip = readFrame(); toast("Frame copied."); };
+$("pasteBtn").onclick = () => {
+  if (!clip) { toast("Copy a frame first."); return; }
+  if (clip.w !== cur().w || clip.h !== cur().h) { toast(`That frame is ${clip.w}×${clip.h}; this one is ${cur().w}×${cur().h}.`); return; }
+  pushUndo(); writeFrame(clip); renderAll();
+};
+$("flipBtn").onclick = () => {
+  pushUndo();
+  const fr = readFrame(), out = new Uint8ClampedArray(fr.data.length);
+  for (let y = 0; y < fr.h; y++) for (let x = 0; x < fr.w; x++)
+    out.set(fr.data.subarray((y * fr.w + x) * 4, (y * fr.w + x) * 4 + 4), (y * fr.w + (fr.w - 1 - x)) * 4);
+  writeFrame({w: fr.w, h: fr.h, data: out}); renderAll();
+};
+$("clearFrameBtn").onclick = () => { pushUndo(); writeFrame({w: 0, h: 0, data: new Uint8ClampedArray(0)}); renderAll(); };
+$("clearSlotBtn").onclick = () => {
+  pushUndo();
+  const keep = frameIdx;
+  for (frameIdx = 0; frameIdx < cur().n; frameIdx++) writeFrame({w: 0, h: 0, data: new Uint8ClampedArray(0)});
+  frameIdx = keep; renderAll();
+  toast(`${cur().name} cleared. The game will use the default sprites.`);
+};
+
+// ---- Using an image ----
+function renderImportHelp() {
+  const s = cur();
+  const strip = s.wrap ? `${s.wrap * s.w}×${2 * s.h} (2 rows)` : `${s.n * s.w}×${s.h}`;
+  $("importHelp").textContent = `Use an image: a ${strip} strip fills all frames; anything else is fitted into the selected frame (${s.w}×${s.h}). Transparent pixels stay see-through.`;
+}
+function loadImageData(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+      const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      resolve(ctx.getImageData(0, 0, img.width, img.height));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("not an image")); };
+    img.src = url;
+  });
+}
+// Images without transparency: the top-left color becomes see-through
+function keyOutBackground(img) {
+  const d = img.data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 255) return img;
+  const [r, g, b] = [d[0], d[1], d[2]];
+  for (let i = 0; i < d.length; i += 4) if (d[i] === r && d[i + 1] === g && d[i + 2] === b) d[i + 3] = 0;
+  return img;
+}
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = async (e) => {
+  const file = e.target.files[0]; e.target.value = "";
+  if (!file) return;
+  let img;
+  try { img = keyOutBackground(await loadImageData(file)); } catch { toast("That file isn't an image."); return; }
+  const s = cur();
+  pushUndo();
+  const stripW = (s.wrap || s.n) * s.w, stripH = (s.wrap ? 2 : 1) * s.h;
+  if (img.width === stripW && img.height === stripH) {
+    for (let f = 0; f < s.n; f++) {
+      const col = s.wrap ? f % s.wrap : f, row = s.wrap ? Math.floor(f / s.wrap) : 0;
+      const [fx, fy] = framePos(s, f);
+      for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) {
+        const si = ((row * s.h + y) * img.width + col * s.w + x) * 4;
+        atlas.data.set(img.data.subarray(si, si + 4), px(fx + x, fy + y));
+      }
+    }
+    toast(`Filled all ${s.n} frames.`);
+  } else {
+    // Fit into the frame, keeping the shape, standing on the bottom edge
+    const scale = Math.min(s.w / img.width, s.h / img.height, img.width <= s.w && img.height <= s.h ? 1 : Infinity);
+    const w = Math.max(1, Math.round(img.width * scale)), h = Math.max(1, Math.round(img.height * scale));
+    const ox = Math.floor((s.w - w) / 2), oy = s.h - h;
+    const out = new Uint8ClampedArray(s.w * s.h * 4);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const sx = Math.min(img.width - 1, Math.floor(x / scale)), sy = Math.min(img.height - 1, Math.floor(y / scale));
+      const si = (sy * img.width + sx) * 4;
+      out.set(img.data.subarray(si, si + 4), ((oy + y) * s.w + ox + x) * 4);
+    }
+    writeFrame({w: s.w, h: s.h, data: out});
+    toast(img.width === s.w && img.height === s.h ? "Image placed in the frame." : `Image resized to fit ${s.w}×${s.h}.`);
+  }
+  renderAll();
+};
+
+// ---- PNG text chunk (base character) ----
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(bytes) { let c = 0xFFFFFFFF; for (const b of bytes) c = CRC[(c ^ b) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function readBase(buf) {
+  const b = new Uint8Array(buf), dv = new DataView(buf);
+  let p = 8;
+  while (p + 12 <= b.length) {
+    const len = dv.getUint32(p), type = String.fromCharCode(...b.subarray(p + 4, p + 8));
+    if (type === "tEXt") {
+      const text = new TextDecoder("latin1").decode(b.subarray(p + 8, p + 8 + len));
+      const [k, v] = text.split("\0");
+      if (k === "MoemonPack" && v && v.startsWith("base=")) return v.slice(5);
+    }
+    if (type === "IEND") break;
+    p += 12 + len;
+  }
+  return null;
+}
+function withBase(pngBuf, base) {
+  const b = new Uint8Array(pngBuf);
+  const ihdrEnd = 8 + 12 + new DataView(pngBuf).getUint32(8);
+  const text = new TextEncoder().encode("MoemonPack\0base=" + base);
+  const chunk = new Uint8Array(12 + text.length), dv = new DataView(chunk.buffer);
+  dv.setUint32(0, text.length);
+  chunk.set([0x74, 0x45, 0x58, 0x74], 4); chunk.set(text, 8);
+  dv.setUint32(8 + text.length, crc32(chunk.subarray(4, 8 + text.length)));
+  const out = new Uint8Array(b.length + chunk.length);
+  out.set(b.subarray(0, ihdrEnd)); out.set(chunk, ihdrEnd); out.set(b.subarray(ihdrEnd), ihdrEnd + chunk.length);
+  return out;
+}
+
+// ---- Open / new / save ----
+function prettyBase(b) { return b.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase()).replace("Rs ", "RS "); }
+BASES.forEach((b) => { const o = document.createElement("option"); o.value = b; o.textContent = prettyBase(b); $("baseSel").appendChild(o); });
+
+async function openFile(file) {
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  let img;
+  try { img = await loadImageData(file); } catch { toast("That file isn't a PNG image."); return; }
+  pushUndo();
+  atlas.data.fill(0);
+  if (img.width === W && img.height === H) {
+    atlas.data.set(img.data);
+  } else if (img.height === 32 && (img.width === 144 || img.width === 288)) {
+    keyOutBackground(img);
+    for (let y = 0; y < 32; y++) atlas.data.set(img.data.subarray(y * img.width * 4, (y + 1) * img.width * 4), px(0, y));
+    toast("Old walking sheet loaded into Walking/Running.");
+  } else {
+    undoStep(undo, []);
+    toast(`This doesn't look like a sprite sheet (${img.width}×${img.height}). Use "Use an image" to put a picture into one frame.`);
+    return;
+  }
+  const base = readBase(buf);
+  if (base && BASES.includes(base)) $("baseSel").value = base;
+  fileName = file.name.replace(/\.png$/i, "");
+  slotIdx = 0; frameIdx = 0;
+  renderAll();
+  toast(`Opened ${file.name}.`);
+}
+$("openBtn").onclick = () => $("openFile").click();
+$("openFile").onchange = (e) => { openFile(e.target.files[0]); e.target.value = ""; };
+$("newBtn").onclick = () => {
+  pushUndo(); atlas.data.fill(0); fileName = "my_" + $("baseSel").value; renderAll();
+  toast("New blank sheet. Empty slots use " + prettyBase($("baseSel").value) + "'s own sprites in the game.");
+};
+$("saveBtn").onclick = () => {
+  for (let p = 0; p < 4; p++) if (groupColors(p).size > 15) {
+    toast(`${GROUP_NAMES[p][0].toUpperCase() + GROUP_NAMES[p].slice(1)} use more than 15 colors; the game will merge the extras. "Reduce to 15 colors" lets you check first.`);
+    break;
+  }
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  c.getContext("2d").putImageData(atlas, 0, 0);
+  c.toBlob(async (blob) => {
+    const png = withBase(await blob.arrayBuffer(), $("baseSel").value);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([png], {type: "image/png"}));
+    a.download = fileName.replace(/[^\w\- ]+/g, "_") + ".png";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    toast("Saved! Now drag the file onto the game window.");
+  }, "image/png");
+};
+
+// Drag a sheet anywhere onto the page
+let dragDepth = 0;
+addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; $("drop").hidden = false; });
+addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; $("drop").hidden = true; } });
+addEventListener("dragover", (e) => e.preventDefault());
+addEventListener("drop", (e) => { e.preventDefault(); dragDepth = 0; $("drop").hidden = true; openFile(e.dataTransfer.files[0]); });
+
+// ---- Preview ----
+const prev = $("preview"), vctx = prev.getContext("2d");
+document.querySelectorAll("[data-dir]").forEach((b) => b.onclick = () => {
+  dir = b.dataset.dir;
+  document.querySelectorAll("[data-dir]").forEach((x) => x.classList.toggle("on", x === b));
+});
+const WALK_SEQ = {down: [3, 0, 4, 0], up: [5, 1, 6, 1], left: [7, 2, 8, 2], right: [7, 2, 8, 2]};
+let tick = 0;
+function drawPreview() {
+  const s = cur();
+  const walkLike = s.anim === "walk" && s.n >= 9;
+  $("dirRow").hidden = !walkLike;
+  vctx.imageSmoothingEnabled = false;
+  vctx.clearRect(0, 0, prev.width, prev.height);
+  // a little grass ground
+  vctx.fillStyle = "#7cc295"; vctx.fillRect(0, 0, prev.width, prev.height);
+  vctx.fillStyle = "#6bb385";
+  for (let y = 0; y < prev.height; y += 16) for (let x = (y / 16) % 2 * 16; x < prev.width; x += 32) vctx.fillRect(x, y, 16, 16);
+  let f, flip = false;
+  if (walkLike) { const seq = WALK_SEQ[dir]; f = seq[Math.floor(tick / 8) % 4]; flip = dir === "right"; }
+  else f = Math.floor(tick / 12) % s.n;
+  const scale = s.w === 64 ? 2 : (s.w === 32 ? 4 : 4);
+  const fc = frameCanvas(s, f, 0, flip);
+  const w = s.w * scale, h = s.h * scale;
+  vctx.drawImage(fc, Math.floor((prev.width - w) / 2), Math.floor((prev.height - h) / 2), w, h);
+  if (!slotHasPixels(s)) {
+    vctx.fillStyle = "rgba(0,0,0,.55)"; vctx.font = "600 13px system-ui, sans-serif"; vctx.textAlign = "center";
+    vctx.fillText("Empty: the game uses", prev.width / 2, prev.height / 2 - 6);
+    vctx.fillText("the default sprite", prev.width / 2, prev.height / 2 + 12);
+  }
+}
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+setInterval(() => { if (!reduceMotion) tick++; drawPreview(); }, 1000 / 30);
+
+// ---- Example to start with: a small trainer so the tool shows what it does ----
+(function example() {
+  const rows = [
+    "......2222......",".....233332.....","....23333332....","....21111112....","....11411411....","....11111111....",
+    ".....111111.....","....55566555....","...5555665555...","...1555665551...","....55566555....","....77788777....",
+    "....777..777....","....88....88....",
+  ];
+  const pal = {1: [248, 200, 160], 2: [40, 40, 56], 3: [208, 56, 72], 4: [32, 32, 32], 5: [56, 120, 208], 6: [248, 248, 248], 7: [64, 64, 88], 8: [96, 56, 40]};
+  const s = SLOTS[0];
+  for (let f = 0; f < s.n; f++) {
+    const [fx, fy] = framePos(s, f);
+    const bob = (f >= 3 && f % 2 === 1) ? 1 : 0;
+    rows.forEach((r, y) => [...r].forEach((ch, x) => {
+      if (ch === ".") return;
+      atlas.data.set([...pal[ch].map(snap), 255], px(fx + x, fy + 16 + y - bob));
+    }));
+  }
+  fileName = "example_trainer";
+})();
+renderAll();
+</script>
+</body>
+</html>
