@@ -334,7 +334,9 @@ comes back when you land. The choice is remembered in moemon_coop.ini.
 DRESSING UP (CO-OP menu > LOOK)
 ---------------------------------
   SPRITE   any trainer or NPC from Emerald or FireRed/LeafGreen that walks
-           in all four directions (Left/Right, L/R jump 10). It's used
+           in all four directions (Left/Right, L/R jump 10), or CUSTOM 1-3,
+           the trainers you make in CREATE (one not made yet looks like
+           DEFAULT). It's used
            everywhere: walking, running, biking, surfing, diving, fishing,
            field moves. Animations a sprite doesn't have use Brendan's/May's.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
@@ -348,6 +350,7 @@ DRESSING UP (CO-OP menu > LOOK)
   SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
            ID and back pictures together. (The extra Showdown pictures and
            your own drawn sprites keep their own colors.)
+  CREATE...   make your own trainer from parts (see below).
   START       ID PIC and BK PIC go back to MATCH (on one of those rows, just
               that one). If the sprite has no matching picture, ID PIC becomes
               DEFAULT (Brendan/May) and BK PIC becomes NONE.
@@ -357,6 +360,16 @@ DRESSING UP (CO-OP menu > LOOK)
 The picture next to the menu shows your ID PIC (or BK PIC on that row) as
 you change it. Everyone sees your look right away.
 
+CREATE (LOOK > CREATE...) builds a trainer from parts: BODY (boy or girl),
+SKIN, HAIR, TOP, BOTTOM, HAT and BAG. Left/Right picks the style, L/R the
+color. The field sprite and the picture change as you go; START flips the
+picture between the front (ID PIC) and the back (BK PIC). SELECT puts a row
+back. SLOT picks CUSTOM 1, 2 or 3; SAVE keeps it there and puts it on you,
+CANCEL (or B) goes back to the look you had. You get a matching field
+sprite (walking, running, Mach Bike), ID picture and battle back; bags only
+show on the field sprite. Other players see it too. Your three trainers are
+kept in the co-op settings file (custom1-3).
+
 Characters without a battle back sprite: in battle your trainer isn't shown
 (your Moemon still are), unless you pick a BK PIC. You can also draw one in
 the Sprite Editor.
@@ -365,7 +378,7 @@ OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
-by MufasaKong.
+by MufasaKong. CREATE uses a fan-made trainer customization parts kit.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.

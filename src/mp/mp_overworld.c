@@ -484,10 +484,16 @@ static void EnsurePalette(u8 id, u16 *palOut)
 
 static void RefreshGraphics(u8 id, struct ObjectEvent *obj)
 {
+    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes);
     struct RemoteObj *r = &sRemote[id];
+    struct Sprite *sprite = &gSprites[obj->spriteId];
     u8 mode = AvatarModeOf(id);
+    // The tile block was sized for the old frames (walking 16x32, Mach Bike 32x32...)
+    u32 oldBytes = sprite->images ? sprite->images->size : 0;
     MP_Avatar_BuildRemote(id);
     ObjectEventSetGraphicsId(obj, OBJ_EVENT_GFX_MP_REMOTE(id));
+    if (oldBytes)
+        MP_SpriteRefreshImages(sprite, oldBytes);
     r->builtVersion = gMpPlayers[id].appearanceVersion;
     r->builtMode = mode;
 }

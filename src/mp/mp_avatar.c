@@ -123,7 +123,7 @@ static const char *const sHairNames[MP_HAIR_COUNT] = {
 };
 
 static const char *const sBaseNames[MP_BASE_COUNT] = {
-    "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM", "NPC",
+    "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM", "NPC", "CREATED",
 };
 static const char *const sSkinNames[MP_SKIN_COUNT] = {
     "DEFAULT", "PORCELAIN", "LIGHT", "TAN", "BROWN", "DARK", "DEEP",
@@ -401,13 +401,23 @@ static const struct MpPack *RemotePack(u8 id, struct MpPack *buf)
 }
 
 // ---------------------------------------------------------------------------
-// Sprite choices (CO-OP menu > SPRITE): bases, catalog sprites, then packs
+// Sprite choices (CO-OP menu > SPRITE): bases, CUSTOM 1-3 (LOOK > CREATE),
+// catalog sprites, then packs
 
 #define NUM_BASE_CHOICES MP_BASE_CUSTOM   // DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY
+#define FIRST_CUSTOM NUM_BASE_CHOICES
+#define FIRST_CATALOG (FIRST_CUSTOM + MP_CREATED_SLOTS)
+#define FIRST_PACK (FIRST_CATALOG + CATALOG_COUNT)
+
+// A CUSTOM slot that was never made looks like DEFAULT
+static bool8 IsCreated(const struct MpAppearance *app)
+{
+    return app->base == MP_BASE_CREATED && app->recipe.made;
+}
 
 u16 MP_Avatar_ChoiceCount(void)
 {
-    return NUM_BASE_CHOICES + CATALOG_COUNT + sPackFileCount;
+    return FIRST_PACK + sPackFileCount;
 }
 
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
@@ -417,13 +427,15 @@ u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
     {
         for (i = 0; i < sPackFileCount; i++)
             if (strcmp(sPackFiles[i], gMpConfig.customSprite) == 0)
-                return NUM_BASE_CHOICES + CATALOG_COUNT + i;
+                return FIRST_PACK + i;
     }
+    if (app->base == MP_BASE_CREATED)
+        return (app->created >= 1 && app->created <= MP_CREATED_SLOTS) ? FIRST_CUSTOM + app->created - 1 : 0;
     if (app->base == MP_BASE_NPC)
     {
         for (i = 0; i < CATALOG_COUNT; i++)
             if (CatalogAt(i)->gfxId == app->gfxId)
-                return NUM_BASE_CHOICES + i;
+                return FIRST_CATALOG + i;
         return 0;
     }
     return app->base < NUM_BASE_CHOICES ? app->base : 0;
@@ -437,15 +449,24 @@ void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
         app->gfxId = 0;
         app->hasCustom = FALSE;
     }
-    else if (choice < NUM_BASE_CHOICES + CATALOG_COUNT)
+    else if (choice < FIRST_CATALOG)
     {
-        app->base = MP_BASE_NPC;
-        app->gfxId = CatalogAt(choice - NUM_BASE_CHOICES)->gfxId;
+        // CUSTOM 1-3: the trainer made in LOOK > CREATE (DEFAULT until it's made)
+        app->base = MP_BASE_CREATED;
+        app->created = choice - FIRST_CUSTOM + 1;
+        app->recipe = gMpConfig.custom[app->created - 1];
+        app->gfxId = 0;
         app->hasCustom = FALSE;
     }
-    else if (choice - NUM_BASE_CHOICES - CATALOG_COUNT < sPackFileCount)
+    else if (choice < FIRST_PACK)
     {
-        const char *path = sPackFiles[choice - NUM_BASE_CHOICES - CATALOG_COUNT];
+        app->base = MP_BASE_NPC;
+        app->gfxId = CatalogAt(choice - FIRST_CATALOG)->gfxId;
+        app->hasCustom = FALSE;
+    }
+    else if (choice - FIRST_PACK < sPackFileCount)
+    {
+        const char *path = sPackFiles[choice - FIRST_PACK];
         char err[160];
         if (LoadLocalPack(path, err, sizeof(err)))
         {
@@ -474,7 +495,7 @@ void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *saved
         for (i = 0; i < sPackFileCount; i++)
             if (strcmp(sPackFiles[i], savedPack) == 0)
             {
-                MP_Avatar_SetChoice(&gMpConfig.app, NUM_BASE_CHOICES + CATALOG_COUNT + i);
+                MP_Avatar_SetChoice(&gMpConfig.app, FIRST_PACK + i);
                 return;
             }
     }
@@ -484,12 +505,15 @@ void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *saved
 
 const char *MP_Avatar_ChoiceName(u16 choice)
 {
+    static const char *const sCustomNames[MP_CREATED_SLOTS] = {"CUSTOM 1", "CUSTOM 2", "CUSTOM 3"};
     if (choice < NUM_BASE_CHOICES)
         return sBaseNames[choice];
-    if (choice < NUM_BASE_CHOICES + CATALOG_COUNT)
-        return CatalogAt(choice - NUM_BASE_CHOICES)->name;
-    if (choice - NUM_BASE_CHOICES - CATALOG_COUNT < sPackFileCount)
-        return sPackNames[choice - NUM_BASE_CHOICES - CATALOG_COUNT];
+    if (choice < FIRST_CATALOG)
+        return sCustomNames[choice - FIRST_CUSTOM];
+    if (choice < FIRST_PACK)
+        return CatalogAt(choice - FIRST_CATALOG)->name;
+    if (choice - FIRST_PACK < sPackFileCount)
+        return sPackNames[choice - FIRST_PACK];
     return "?";
 }
 
@@ -506,6 +530,11 @@ static void ToConfigName(char *dst, const char *src, int len)
 
 void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len)
 {
+    if (app->base == MP_BASE_CREATED)
+    {
+        snprintf(out, len, "custom_%d", app->created ? app->created : 1);
+        return;
+    }
     if (app->base == MP_BASE_NPC && MP_Avatar_FindCatalog(app->gfxId))
     {
         char buf[40];
@@ -520,6 +549,14 @@ int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
 {
     char buf[40];
     u16 i;
+    if (strncmp(name, "custom_", 7) == 0 && name[7] >= '1' && name[7] < '1' + MP_CREATED_SLOTS && !name[8])
+    {
+        // The recipe comes from the customN lines (MP_Avatar_Init)
+        app->base = MP_BASE_CREATED;
+        app->created = name[7] - '0';
+        app->gfxId = 0;
+        return TRUE;
+    }
     for (i = 0; i < MP_BASE_NPC; i++)
     {
         ToConfigName(buf, sBaseNames[i], sizeof(buf));
@@ -802,6 +839,28 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
         return;
     }
 
+    if (IsCreated(app) && (state == ST_FOOT || state == ST_MACH_BIKE))
+    {
+        // LOOK > CREATE: 32x32 frames built from the recipe
+        u8 cacheSlot = (gfxSlot >= 1 && gfxSlot <= MP_MAX_PLAYERS) ? gfxSlot - 1 : MP_CR_CACHE_LOCAL;
+        const struct MpCreatedGfx *g = MP_Created_Gfx(cacheSlot, &app->recipe);
+        int first = (state == ST_FOOT) ? 0 : 18, n = (state == ST_FOOT) ? 18 : 9;
+        *info = *def;
+        for (i = 0; i < n; i++)
+        {
+            sMpFrames[gfxSlot][i].data = g->ow[first + i];
+            sMpFrames[gfxSlot][i].size = sizeof(g->ow[0]);
+        }
+        info->images = sMpFrames[gfxSlot];
+        info->size = sizeof(g->ow[0]);
+        info->width = 32;
+        info->height = 32;
+        info->oam = gObjectEventGraphicsInfo_CyclingTriathleteM.oam;
+        info->subspriteTables = gObjectEventGraphicsInfo_CyclingTriathleteM.subspriteTables;
+        info->inanimate = FALSE;
+        return;
+    }
+
     if (state != ST_FOOT)
     {
         *info = *def;
@@ -862,9 +921,14 @@ static void PackPalette(const struct MpAppearance *app, const struct MpPack *pac
 }
 
 // Palette of a character in a state (no pack)
-static void StatePalette(const struct MpAppearance *app, u8 state, u16 *dst)
+static void StatePalette(const struct MpAppearance *app, u8 cacheSlot, u8 state, u16 *dst)
 {
     bool8 female = (app->gender == FEMALE);
+    if (IsCreated(app) && (state == ST_FOOT || state == ST_MACH_BIKE))
+    {
+        memcpy(dst, MP_Created_Gfx(cacheSlot, &app->recipe)->owPal, 32);
+        return;
+    }
     if (state == ST_UNDERWATER)
     {
         memcpy(dst, MP_GetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_PLAYER_UNDERWATER), 32);
@@ -923,7 +987,7 @@ void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst)
     if (PackHasState(pack, avatarMode))
         PackPalette(&app, pack, avatarMode, dst);
     else
-        StatePalette(&app, avatarMode, dst);
+        StatePalette(&app, id, avatarMode, dst);
 }
 
 // ---------------------------------------------------------------------------
@@ -950,6 +1014,12 @@ void MP_Avatar_Init(void)
 
     if (gMpConfig.app.base == MP_BASE_CUSTOM)
         gMpConfig.app.base = MP_BASE_DEFAULT;   // old ini files
+    if (gMpConfig.app.base == MP_BASE_CREATED)
+    {
+        if (gMpConfig.app.created < 1 || gMpConfig.app.created > MP_CREATED_SLOTS)
+            gMpConfig.app.created = 1;
+        gMpConfig.app.recipe = gMpConfig.custom[gMpConfig.app.created - 1];
+    }
     gMpConfig.app.hasCustom = FALSE;
     if (gMpConfig.customSprite[0])
     {
@@ -967,7 +1037,7 @@ static struct MpAppearance GetLocalAppearance(void)
 {
     struct MpAppearance app = gMpConfig.app;
     app.gender = gSaveBlock2Ptr->playerGender;
-    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM)
+    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM || (app.base == MP_BASE_CREATED && !app.recipe.made))
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     return app;
 }
@@ -1003,8 +1073,24 @@ const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
 {
     u8 st, g;
     const struct MpPack *pack = LocalPack();
-    if (!pack || !sAvatarInit)
+    if (!sAvatarInit)
         return NULL;
+    if (!pack)
+    {
+        // A created look has its own Mach Bike frames
+        struct MpAppearance app = GetLocalAppearance();
+        if (!IsCreated(&app) || (graphicsId != sStateGfxIds[ST_MACH_BIKE][MALE] && graphicsId != sStateGfxIds[ST_MACH_BIKE][FEMALE]))
+            return NULL;
+        if (sLocalStateBuilt[ST_MACH_BIKE] != sLocalVersion + 1)
+        {
+            struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[LOCAL_STATE(ST_MACH_BIKE)];
+            BuildStateInfo(LOCAL_STATE(ST_MACH_BIKE), &app, NULL, ST_MACH_BIKE);
+            info->paletteSlot = PALSLOT_PLAYER;
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;
+            sLocalStateBuilt[ST_MACH_BIKE] = sLocalVersion + 1;
+        }
+        return &sMpGfxInfo[LOCAL_STATE(ST_MACH_BIKE)];
+    }
     for (st = ST_MACH_BIKE; st < ST_COUNT; st++)
     {
         for (g = 0; g < GENDER_COUNT; g++)
@@ -1049,7 +1135,9 @@ static void RebuildLocal(void)
     else
         ApplyRecolor(&genderApp, sLocalPalBrendan);
 
-    StatePalette(&app, ST_FOOT, sLocalPalCustom);
+    StatePalette(&app, MP_CR_CACHE_LOCAL, ST_FOOT, sLocalPalCustom);
+    if (IsCreated(&app))
+        StatePalette(&app, MP_CR_CACHE_LOCAL, ST_MACH_BIKE, sLocalPalPack);   // same palette
     if (pack)
     {
         PackPalette(&app, pack, ST_FOOT, sLocalPalPack);
@@ -1103,7 +1191,8 @@ void MP_Avatar_BuildRemote(u8 id)
 
     if (mode >= ST_COUNT)
         mode = ST_FOOT;
-    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT || app.base == MP_BASE_CUSTOM)
+    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT || app.base == MP_BASE_CUSTOM
+     || (app.base == MP_BASE_CREATED && !app.recipe.made))
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     BuildStateInfo(1 + id, &app, pack, mode);
     // The overworld code assigns the real palette slot after spawning
@@ -1217,7 +1306,8 @@ u8 MP_Avatar_ParseBackSel(const char *name)
 static struct MpAppearance Resolved(const struct MpAppearance *a)
 {
     struct MpAppearance app = *a;
-    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM || app.base >= MP_BASE_COUNT)
+    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM || app.base >= MP_BASE_COUNT
+     || (app.base == MP_BASE_CREATED && !app.recipe.made))
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     return app;
 }
@@ -1309,11 +1399,18 @@ static bool8 BackChoiceTiles(int b, u8 *tiles, u16 *pal)
 }
 
 // The look's front picture. FALSE = nothing picked (the game's default)
-static bool8 BuildFront(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
+static bool8 BuildFront(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
 {
     struct MpAppearance app = Resolved(appIn);
     bool8 canRecolor = TRUE;
     int c = FrontChoice(&app);
+    if (!app.frontSel && IsCreated(&app))
+    {
+        const struct MpCreatedGfx *g = MP_Created_Gfx(cacheSlot, &app.recipe);
+        memcpy(tiles, g->front, TRAINER_PIC_SIZE);
+        memcpy(pal, g->frontPal, 32);
+        return TRUE;
+    }
     if (!app.frontSel && pack && pack->slot[PACK_FRONT])
     {
         memcpy(tiles, pack->slot[PACK_FRONT], TRAINER_PIC_SIZE);
@@ -1333,10 +1430,17 @@ static bool8 BuildFront(const struct MpAppearance *appIn, const struct MpPack *p
     return TRUE;
 }
 
-static bool8 BuildBack(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
+static bool8 BuildBack(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
 {
     struct MpAppearance app = Resolved(appIn);
     int b = BackChoice(&app);
+    if (!app.backSel && IsCreated(&app))
+    {
+        const struct MpCreatedGfx *g = MP_Created_Gfx(cacheSlot, &app.recipe);
+        memcpy(tiles, g->back, 4 * TRAINER_PIC_SIZE);
+        memcpy(pal, g->backPal, 32);
+        return TRUE;
+    }
     if (!app.backSel && pack && pack->slot[PACK_BACK])
     {
         memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
@@ -1353,30 +1457,30 @@ static bool8 BuildBack(const struct MpAppearance *appIn, const struct MpPack *pa
 static u8 sPicBuf[4 * TRAINER_PIC_SIZE];
 
 // Front pic id for a look: an Emerald pic as is, or the runtime slot 0 (local) / 1 (others)
-static u16 FrontPicId(const struct MpAppearance *appIn, const struct MpPack *pack, int which)
+static u16 FrontPicId(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, int which)
 {
     struct MpAppearance app = Resolved(appIn);
     int c = FrontChoice(&app);
-    bool8 usePack = !app.frontSel && pack && pack->slot[PACK_FRONT];
+    bool8 usePack = !app.frontSel && ((pack && pack->slot[PACK_FRONT]) || IsCreated(&app));
     u16 pal[16];
     if (!usePack && c < EMERALD_FRONT_COUNT && !WantsRecolor(&app))
         return c < 0 ? 0xFFFF : (u16)c;
-    if (!BuildFront(&app, pack, sPicBuf, pal, TRUE))
+    if (!BuildFront(&app, cacheSlot, pack, sPicBuf, pal, TRUE))
         return 0xFFFF;
     MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[which], sPicBuf, TRAINER_PIC_SIZE);
     MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[which], pal, 32);
     return which == 0 ? TRAINER_PIC_MP_LOCAL : TRAINER_PIC_MP_OPPONENT;
 }
 
-static u16 BackPicId(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u32 *palLz, u16 slotPic)
+static u16 BackPicId(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, u8 *tiles, u32 *palLz, u16 slotPic)
 {
     struct MpAppearance app = Resolved(appIn);
     int b = BackChoice(&app);
-    bool8 usePack = !app.backSel && pack && pack->slot[PACK_BACK];
+    bool8 usePack = !app.backSel && ((pack && pack->slot[PACK_BACK]) || IsCreated(&app));
     u16 pal[16];
     if (!usePack && (b < 0 || (b < EMERALD_BACK_COUNT && !WantsRecolor(&app))))
         return b < 0 ? 0xFFFF : (u16)b;
-    if (!BuildBack(&app, pack, tiles, pal, TRUE))
+    if (!BuildBack(&app, cacheSlot, pack, tiles, pal, TRUE))
         return 0xFFFF;
     MP_Pack_WriteLz77Literal((u8 *)palLz, pal, 32);
     return slotPic;
@@ -1392,19 +1496,19 @@ u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
 
 bool8 MP_Avatar_GetFrontTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal)
 {
-    return BuildFront(app, NULL, tiles, pal, FALSE);
+    return BuildFront(app, MP_CR_CACHE_LOCAL, NULL, tiles, pal, FALSE);
 }
 
 bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal)
 {
-    return BuildBack(app, NULL, tiles, pal, FALSE);
+    return BuildBack(app, MP_CR_CACHE_LOCAL, NULL, tiles, pal, FALSE);
 }
 
 bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal)
 {
     struct MpAppearance app = GetLocalAppearance();
     bool8 canRecolor;
-    if (BuildFront(&app, LocalPack(), tiles, pal, TRUE))
+    if (BuildFront(&app, MP_CR_CACHE_LOCAL, LocalPack(), tiles, pal, TRUE))
         return TRUE;
     // What the game shows by default
     FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, tiles, pal, &canRecolor);
@@ -1414,7 +1518,7 @@ bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal)
 bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal)
 {
     struct MpAppearance app = GetLocalAppearance();
-    if (!BuildBack(&app, LocalPack(), sPicBuf, pal, TRUE))
+    if (!BuildBack(&app, MP_CR_CACHE_LOCAL, LocalPack(), sPicBuf, pal, TRUE))
         return FALSE;
     memcpy(tiles, sPicBuf, TRAINER_PIC_SIZE);
     return TRUE;
@@ -1423,7 +1527,7 @@ bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal)
 u16 MP_Avatar_LocalFrontPic(void)
 {
     struct MpAppearance app = GetLocalAppearance();
-    return FrontPicId(&app, LocalPack(), 0);
+    return FrontPicId(&app, MP_CR_CACHE_LOCAL, LocalPack(), 0);
 }
 
 u16 MP_Avatar_RemoteFrontPic(u8 id)
@@ -1431,7 +1535,7 @@ u16 MP_Avatar_RemoteFrontPic(u8 id)
     struct MpPack buf;
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return 0xFFFF;
-    return FrontPicId(&gMpPlayers[id].app, RemotePack(id, &buf), 1);
+    return FrontPicId(&gMpPlayers[id].app, id, RemotePack(id, &buf), 1);
 }
 
 u16 MP_LocalFrontPicOr(u16 defaultPic)
@@ -1443,7 +1547,7 @@ u16 MP_LocalFrontPicOr(u16 defaultPic)
 u16 MP_Avatar_LocalBackPic(void)
 {
     struct MpAppearance app = GetLocalAppearance();
-    return BackPicId(&app, LocalPack(), gMpTrainerBackTiles, gMpTrainerBackPalLz, TRAINER_BACK_PIC_MP_LOCAL);
+    return BackPicId(&app, MP_CR_CACHE_LOCAL, LocalPack(), gMpTrainerBackTiles, gMpTrainerBackPalLz, TRAINER_BACK_PIC_MP_LOCAL);
 }
 
 // Another player's battle back pic (co-op partner), 0xFFFF = game default
@@ -1452,7 +1556,7 @@ u16 MP_Avatar_RemoteBackPic(u8 id)
     struct MpPack buf;
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return 0xFFFF;
-    return BackPicId(&gMpPlayers[id].app, RemotePack(id, &buf), gMpPartnerBackTiles, gMpPartnerBackPalLz, TRAINER_BACK_PIC_MP_PARTNER);
+    return BackPicId(&gMpPlayers[id].app, id, RemotePack(id, &buf), gMpPartnerBackTiles, gMpPartnerBackPalLz, TRAINER_BACK_PIC_MP_PARTNER);
 }
 
 bool8 MP_Avatar_RemoteHidesBack(u8 id)
@@ -1483,14 +1587,14 @@ void MP_Avatar_MatchPictures(struct MpAppearance *appIn, bool8 front, bool8 back
     {
         appIn->frontSel = 0;
         app = Resolved(appIn);
-        if (FrontChoice(&app) < 0 && !(pack && pack->slot[PACK_FRONT]))
+        if (FrontChoice(&app) < 0 && !(pack && pack->slot[PACK_FRONT]) && !IsCreated(&app))
             appIn->frontSel = FRONT_DEFAULT;
     }
     if (back)
     {
         appIn->backSel = 0;
         app = Resolved(appIn);
-        if (BackChoice(&app) < 0 && !(pack && pack->slot[PACK_BACK]))
+        if (BackChoice(&app) < 0 && !(pack && pack->slot[PACK_BACK]) && !IsCreated(&app))
             appIn->backSel = BACK_NONE;
     }
 }
@@ -1668,7 +1772,7 @@ bool8 MP_Avatar_InstallPack(const char *src, char *err, int errLen)
         snprintf(err, errLen, "sprites folder is full");
         return FALSE;
     }
-    choice = NUM_BASE_CHOICES + CATALOG_COUNT + i;
+    choice = FIRST_PACK + i;
     MP_Avatar_SetChoice(&gMpConfig.app, choice);
     if (!gMpConfig.app.hasCustom)
     {

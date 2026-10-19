@@ -234,6 +234,12 @@ static void LoadConfig(void)
         else if (strcmp(key, "hair") == 0) gMpConfig.app.hair = ParseChoice(val, MP_Avatar_HairName, MP_HAIR_COUNT);
         else if (strcmp(key, "trainer_pic") == 0) gMpConfig.app.frontSel = MP_Avatar_ParseFrontSel(val);
         else if (strcmp(key, "back_pic") == 0) gMpConfig.app.backSel = MP_Avatar_ParseBackSel(val);
+        else if (strncmp(key, "custom", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_CREATED_SLOTS && key[7] == 0)
+        {
+            struct MpCreated r;
+            if (MP_Created_FromHex(val, &r))
+                gMpConfig.custom[key[6] - '1'] = r;
+        }
         else if (strcmp(key, "trainer_range") == 0)
         {
             int r = atoi(val);
@@ -277,7 +283,7 @@ void MP_SaveConfig(void)
         "; Moemon Emerald Kai Co-op settings. The game writes this file itself;\n"
         "; everything here can be changed in game (CO-OP menu).\n"
         "name = %s\n"
-        "; sprite = default, brendan, may, rs_brendan, rs_may, custom, or any sprite name from the CO-OP menu (e.g. hiker, steven)\n"
+        "; sprite = default, brendan, may, rs_brendan, rs_may, custom_1..3, or any sprite name from the CO-OP menu (e.g. hiker, steven)\n"
         "sprite = %s\ncustom_sprite = %s\n"
         "; skin = default, porcelain, light, tan, brown, dark, deep\n"
         "skin = %s\n"
@@ -304,6 +310,16 @@ void MP_SaveConfig(void)
         for (i = 0; i < MP_NUM_PHRASES; i++)
             fprintf(f, "phrase%d = %04x %04x %04x %04x\n", i + 1, gMpConfig.phrases[i][0], gMpConfig.phrases[i][1],
                 gMpConfig.phrases[i][2], gMpConfig.phrases[i][3]);
+    }
+    {
+        int i;
+        char hex[2 * MP_CREATED_BYTES + 1];
+        fprintf(f, "; trainers made in CO-OP > LOOK > CREATE (sprite = custom_1..3)\n");
+        for (i = 0; i < MP_CREATED_SLOTS; i++)
+        {
+            MP_Created_ToHex(&gMpConfig.custom[i], hex);
+            fprintf(f, "custom%d = %s\n", i + 1, hex);
+        }
     }
     fprintf(f, "AllowSmallTweaks = %d\n", gMpConfig.smallTweaks ? 1 : 0);
     fclose(f);
@@ -410,7 +426,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
 }
 
-#define APPEARANCE_SIZE 16
+#define APPEARANCE_SIZE 32
 
 static void PackAppearance(const struct MpAppearance *a, u8 *p)
 {
@@ -421,6 +437,8 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     PutU16(p + 8, a->frontSel);
     p[10] = a->backSel;
     p[11] = a->hair;
+    p[12] = a->created;
+    MP_Created_Pack(&a->recipe, p + 13);   // 13 bytes
 }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
@@ -436,6 +454,10 @@ static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
     a->frontSel = GetU16(p + 8) < MP_Avatar_FrontChoiceCount() ? GetU16(p + 8) : 0;
     a->backSel = p[10] < MP_Avatar_BackChoiceCount() ? p[10] : 0;
     a->hair = p[11] < MP_HAIR_COUNT ? p[11] : 0;
+    a->created = p[12] <= MP_CREATED_SLOTS ? p[12] : 0;
+    MP_Created_Unpack(p + 13, &a->recipe);
+    if (a->base == MP_BASE_CREATED && !a->recipe.made)
+        a->base = MP_BASE_DEFAULT;
 }
 
 static void GetLocalName(u8 *dst)

@@ -1797,6 +1797,13 @@ void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes)
             FREE_SPRITE_TILE(sprite->oam.tileNum + i);
         sprite->oam.tileNum = tile;
     }
+    else if (newTiles < oldTiles)
+    {
+        // DestroySprite frees images->size worth: give the rest back now
+        u16 i;
+        for (i = newTiles; i < oldTiles; i++)
+            FREE_SPRITE_TILE(sprite->oam.tileNum + i);
+    }
     cmd = &sprite->anims[sprite->animNum][0];   // the pose it's standing in
     if (cmd->type >= 0)
         RequestSpriteFrameImageCopy(cmd->frame.imageValue, sprite->oam.tileNum, sprite->images);

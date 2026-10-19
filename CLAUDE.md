@@ -67,6 +67,11 @@ ID PIC / BK PIC choices (MpAppearance.frontSel/backSel, 0 = MATCH) load into the
 Assets: tools/moemon_frlg/import.py (pokefirered checkout + Showdown download, not in the repo) writes graphics/moemon/ext.
 Colors are hand-mapped per sprite in tools/moemon_frlg/colormaps.txt -> colormaps.py -> src/mp/mp_color_maps.h.
 To map new sprites: `mp dumpcolors DIR`, colorsheets.py (highlight sheets), colorcheck.py (test looks).
+LOOK > CREATE (mp_creator.c, mp_menu.c HandleCreateInput): CUSTOM 1-3 trainers from a parts kit. A look is a
+13-byte recipe (struct MpCreated, MpAppearance.recipe, ini custom1-3 as hex, sprite = custom_N); every client
+composes the 32x32 field frames (walk/run/Mach Bike), 64x64 front and 4-frame back from graphics/moemon/creator/parts.bin
+(tools/moemon_creator/build.py KIT_DIR; the kit isn't in the repo) and caches them per player (MP_Created_Gfx).
+Test: ini `sprite = custom_1` + `custom1 = 01010202040506030702030401`, `mp bike` / `mp bike 0`. Verified with two clients.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)

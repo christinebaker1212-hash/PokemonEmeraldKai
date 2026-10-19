@@ -359,6 +359,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         MP_Social_Open();
     }
+    else if (strcmp(cmd, "bike") == 0)
+    {
+        // bike - get on the Mach Bike (or off: bike 0)
+        extern void SetPlayerAvatarTransitionFlags(u16 flags);
+        SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT : PLAYER_AVATAR_FLAG_MACH_BIKE);
+    }
     else if (strcmp(cmd, "repel") == 0)
     {
         // repel - one step of REPEL left, and another REPEL in the bag

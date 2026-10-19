@@ -24,6 +24,7 @@ enum {
     MP_BASE_RS_MAY,
     MP_BASE_CUSTOM,       // custom PNG sprite sheet
     MP_BASE_NPC,          // any overworld sprite from the catalog (MpAppearance.gfxId)
+    MP_BASE_CREATED,      // made in LOOK > CREATE (MpAppearance.created / recipe)
     MP_BASE_COUNT
 };
 
@@ -44,6 +45,21 @@ struct MpSpriteEntry
 #define MP_COLOR_COUNT  11
 #define MP_HAIR_COUNT   15
 
+// A trainer made in LOOK > CREATE (parts of the trainer customization kit)
+#define MP_CREATED_SLOTS 3
+struct MpCreated
+{
+    u8 made;        // 0 = this slot was never saved
+    u8 girl;        // body: 0 boy, 1 girl
+    u8 skin;        // 0-3
+    u8 hair, hairColor;
+    u8 top, topColor;
+    u8 bottom, bottomColor;
+    u8 hat, hatColor;   // hat 0 = none, else style + 1
+    u8 bag, bagColor;   // bag 0 = none, else style + 1
+};
+#define MP_CREATED_BYTES 13
+
 struct MpAppearance
 {
     u8 base;
@@ -56,6 +72,8 @@ struct MpAppearance
     u16 frontSel;   // trainer card / battle front pic: 0 = matches the sprite, else 1 + front choice
     u8 backSel;     // battle back pic: 0 = matches the sprite, else 1 + back choice
     u8 hair;        // 0 = sprite default
+    u8 created;     // MP_BASE_CREATED: which CUSTOM slot (1-3), for the name
+    struct MpCreated recipe;   // MP_BASE_CREATED: the parts (everyone builds the look from them)
 };
 
 // Avatar modes sent over the network
@@ -145,6 +163,7 @@ struct MpConfig
     u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
     u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
     u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
+    struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
 
 extern struct MpConfig gMpConfig;
@@ -281,6 +300,32 @@ const u16 *MP_Avatar_NpcPalette(u16 gfxId);
 bool8 MP_Avatar_GetFrontTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal);  // not recolored
 bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal);   // 4 frames, not recolored
 
+// mp_creator.c: trainers made from the parts kit (LOOK > CREATE)
+enum { MP_CR_HAIR, MP_CR_TOP, MP_CR_BOTTOM, MP_CR_HAT, MP_CR_BAG, MP_CR_CAT_COUNT };
+struct MpCreatedGfx
+{
+    u8 ow[27][32 * 32 / 2];   // 32x32 frames: walk 0-8, run 9-17, Mach Bike 18-26 (Emerald's order)
+    u16 owPal[16];
+    u8 front[64 * 64 / 2];
+    u16 frontPal[16];
+    u8 back[4][64 * 64 / 2];   // Emerald's 4 throw frames
+    u16 backPal[16];
+};
+#define MP_CR_CACHE_LOCAL MP_MAX_PLAYERS   // cache slots: player ids, then the local player
+void MP_Created_Pack(const struct MpCreated *r, u8 *p);       // MP_CREATED_BYTES
+void MP_Created_Unpack(const u8 *p, struct MpCreated *r);
+void MP_Created_Default(struct MpCreated *r, bool8 girl);
+void MP_Created_Clamp(struct MpCreated *r);
+const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r);
+u8 MP_Created_StyleCount(bool8 girl, u8 cat);
+const char *MP_Created_StyleName(bool8 girl, u8 cat, u8 style);
+u8 MP_Created_ColorCount(bool8 girl, u8 cat, u8 style);
+const char *MP_Created_ColorName(bool8 girl, u8 cat, u8 style, u8 color);
+const char *MP_Created_SkinName(u8 skin);
+#define MP_CR_SKIN_COUNT 4
+void MP_Created_ToHex(const struct MpCreated *r, char *out);   // 27 chars
+bool8 MP_Created_FromHex(const char *s, struct MpCreated *r);
+
 // mp_overworld.c
 void MP_Overworld_Update(void);
 void MP_Overworld_OnPlayerLeft(u8 id);
@@ -327,7 +372,7 @@ bool8 NetLink_IsMaster(void);
 
 // mp_menu.c
 void MP_OpenMenu(void);
-enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS };
+enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 

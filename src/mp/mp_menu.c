@@ -34,7 +34,9 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
-enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
+enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
+// LOOK > CREATE: a trainer from the parts kit (CUSTOM 1-3)
+enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_TOP, CR_BOTTOM, CR_HAT, CR_BAG, CR_SAVE, CR_CANCEL, CREATE_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
@@ -178,6 +180,7 @@ static u8 RowCount(u8 page)
     switch (page)
     {
     case MP_MENU_PAGE_LOOK:   return LOOK_COUNT;
+    case MP_MENU_PAGE_CREATE: return CREATE_COUNT;
     case MP_MENU_PAGE_EMOTES: return EMO_COUNT;
     case MP_MENU_PAGE_FRIENDS:
     {
@@ -239,16 +242,73 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
         FillWindowPixelRect(windowId, PIXEL_FILL(MPT_TEXT), cx - i, up ? y + i : y + 2 - i, i * 2 + 1, 1);
 }
 
+// LOOK > CREATE state: the slot being made and its parts
+static u8 sCreateSlot;                    // 0-2
+static struct MpCreated sCreateWork;
+static struct MpAppearance sCreateBefore; // the look when CREATE was opened (CANCEL)
+static bool8 sCreateShowBack;
+
+static const char *Create_PartName(u8 cat, bool8 withColor)
+{
+    static char buf[64];
+    const struct MpCreated *r = &sCreateWork;
+    u8 style, color;
+    bool8 optional = (cat == MP_CR_HAT || cat == MP_CR_BAG);
+    switch (cat)
+    {
+    case MP_CR_HAIR:   style = r->hair; color = r->hairColor; break;
+    case MP_CR_TOP:    style = r->top; color = r->topColor; break;
+    case MP_CR_BOTTOM: style = r->bottom; color = r->bottomColor; break;
+    case MP_CR_HAT:    style = r->hat; color = r->hatColor; break;
+    default:           style = r->bag; color = r->bagColor; break;
+    }
+    if (optional)
+    {
+        if (style == 0)
+            return "NONE";
+        style--;
+    }
+    if (withColor && MP_Created_ColorCount(r->girl, cat, style) > 1)
+        snprintf(buf, sizeof(buf), "%s, %s", MP_Created_StyleName(r->girl, cat, style), MP_Created_ColorName(r->girl, cat, style, color));
+    else
+        snprintf(buf, sizeof(buf), "%s", MP_Created_StyleName(r->girl, cat, style));
+    return buf;
+}
+
+static const u8 sCreateRowCat[CREATE_COUNT] = {
+    [CR_HAIR] = MP_CR_HAIR, [CR_TOP] = MP_CR_TOP, [CR_BOTTOM] = MP_CR_BOTTOM, [CR_HAT] = MP_CR_HAT, [CR_BAG] = MP_CR_BAG,
+};
+
+static void Create_PrintRow(u8 windowId, u8 row, u8 y)
+{
+    static const char *const labels[CREATE_COUNT] = {"SLOT", "BODY", "SKIN", "HAIR", "TOP", "BOTTOM", "HAT", "BAG", "SAVE", "CANCEL"};
+    char value[48];
+    switch (row)
+    {
+    case CR_SLOT: snprintf(value, sizeof(value), "CUSTOM %d", sCreateSlot + 1); break;
+    case CR_BODY: snprintf(value, sizeof(value), "%s", sCreateWork.girl ? "GIRL" : "BOY"); break;
+    case CR_SKIN: snprintf(value, sizeof(value), "%s", MP_Created_SkinName(sCreateWork.skin)); break;
+    case CR_SAVE:
+    case CR_CANCEL:
+        PrintAscii(windowId, labels[row], 8, y);
+        return;
+    default: snprintf(value, sizeof(value), "%s", Create_PartName(sCreateRowCat[row], FALSE)); break;
+    }
+    PrintChoice(windowId, labels[row], value, y, 38);
+}
+
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
-    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "EDIT SPRITES...", "SAVE LOOK", "REVERT"};
+    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...", "EDIT SPRITES...", "SAVE LOOK", "REVERT"};
     char line[64];
     u8 row;
 
     MpTheme_Panel(windowId, 12);
     if (page == MP_MENU_PAGE_LOOK)
         snprintf(line, sizeof(line), "LOOK");
+    else if (page == MP_MENU_PAGE_CREATE)
+        snprintf(line, sizeof(line), "CREATE");
     else if (page == MP_MENU_PAGE_EMOTES)
         snprintf(line, sizeof(line), "EMOTES");
     else if (page == MP_MENU_PAGE_FRIENDS)
@@ -327,7 +387,11 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             else
                 PrintAscii(windowId, "BACK", 8, y);
         }
-        else if (row == ROW_EDIT || row == ROW_SAVE || row == ROW_REVERT)
+        else if (page == MP_MENU_PAGE_CREATE)
+        {
+            Create_PrintRow(windowId, row, y);
+        }
+        else if (row == ROW_CREATE || row == ROW_EDIT || row == ROW_SAVE || row == ROW_REVERT)
         {
             PrintAscii(windowId, lookLabels[row], 8, y);
         }
@@ -375,7 +439,9 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         char ascii[160];
         u8 buf[170];
         MpTheme_Panel(windowId, 0);
-        if (cursor == ROW_SPRITE)
+        if (cursor == ROW_SPRITE && gMpConfig.app.base == MP_BASE_CREATED && !gMpConfig.app.recipe.made)
+            snprintf(ascii, sizeof(ascii), "%s: not made yet (looks like DEFAULT)", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
+        else if (cursor == ROW_SPRITE)
             snprintf(ascii, sizeof(ascii), "%s   START: match pics   SELECT: undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_FRONT && MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel)[0])
             snprintf(ascii, sizeof(ascii), "%s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
@@ -387,12 +453,48 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   SELECT: undo");
         else if (cursor <= ROW_ACCENT)
             snprintf(ascii, sizeof(ascii), "Left/Right: change   SELECT: undo");
+        else if (cursor == ROW_CREATE)
+            snprintf(ascii, sizeof(ascii), "Make your own trainer (CUSTOM 1-3).");
         else if (cursor == ROW_EDIT)
             snprintf(ascii, sizeof(ascii), "Draw your own look in the Sprite Editor.");
         else if (cursor == ROW_SAVE)
             snprintf(ascii, sizeof(ascii), "Keep this look and go back. (B does too.)");
         else
             snprintf(ascii, sizeof(ascii), "Undo every change made since you opened LOOK.");
+        MP_AsciiToGame(buf, ascii, 150);
+        MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
+        CopyWindowToVram(windowId, COPYWIN_FULL);
+    }
+    else if (page == MP_MENU_PAGE_CREATE)
+    {
+        char ascii[160];
+        u8 buf[170];
+        MpTheme_Panel(windowId, 0);
+        switch (cursor)
+        {
+        case CR_SLOT:
+            snprintf(ascii, sizeof(ascii), "CUSTOM %d%s   Left/Right: slot   START: flip pic", sCreateSlot + 1,
+                gMpConfig.custom[sCreateSlot].made ? "" : " (new)");
+            break;
+        case CR_BODY:
+            snprintf(ascii, sizeof(ascii), "%s   Left/Right: change (resets the parts)", sCreateWork.girl ? "GIRL" : "BOY");
+            break;
+        case CR_SKIN:
+            snprintf(ascii, sizeof(ascii), "%s   Left/Right: change   SELECT: undo", MP_Created_SkinName(sCreateWork.skin));
+            break;
+        case CR_SAVE:
+            snprintf(ascii, sizeof(ascii), "Save as CUSTOM %d and wear it.", sCreateSlot + 1);
+            break;
+        case CR_CANCEL:
+            snprintf(ascii, sizeof(ascii), "Back to LOOK without saving. (B does too.)");
+            break;
+        default:
+            if (cursor == CR_BAG)
+                snprintf(ascii, sizeof(ascii), "%s  (only on the field sprite)", Create_PartName(MP_CR_BAG, TRUE));
+            else
+                snprintf(ascii, sizeof(ascii), "%s   Left/Right: style  L/R: color", Create_PartName(sCreateRowCat[cursor], TRUE));
+            break;
+        }
         MP_AsciiToGame(buf, ascii, 150);
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -541,17 +643,22 @@ static void CloseMenu(u8 taskId)
 }
 
 static void Look_Snapshot(void);
+static void Create_Open(void);
 
 static void GoToPage(s16 *data, u8 page, u8 cursor)
 {
+    u8 from = tPage;
     tPage = page;
     tCursor = cursor;
     tChoice = 0;
     if (page == MP_MENU_PAGE_LOOK)
     {
-        Look_Snapshot();
+        if (from != MP_MENU_PAGE_CREATE)
+            Look_Snapshot();
         Preview_Show(cursor == ROW_BACKPIC);
     }
+    else if (page == MP_MENU_PAGE_CREATE)
+        Preview_Show(sCreateShowBack);
     else
         Preview_Hide();
     DrawMenu(tWindow, tPage, tCursor, tChoice);
@@ -589,6 +696,13 @@ static void HandleLookInput(u8 taskId)
     s16 *data = gTasks[taskId].data;
     bool8 changed = FALSE;
 
+    if (tCursor == ROW_CREATE && JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        Create_Open();
+        GoToPage(data, MP_MENU_PAGE_CREATE, CR_SLOT);
+        return;
+    }
     if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON))
     {
         // Save the current character as an editable sheet, then open the
@@ -676,6 +790,183 @@ static void HandleLookInput(u8 taskId)
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
         Preview_Draw(tCursor == ROW_BACKPIC);
+    }
+}
+
+// Wears the parts being made (the field sprite and the preview show them)
+static void Create_Wear(void)
+{
+    struct MpAppearance *app = &gMpConfig.app;
+    MP_Created_Clamp(&sCreateWork);
+    app->base = MP_BASE_CREATED;
+    app->created = sCreateSlot + 1;
+    app->recipe = sCreateWork;
+    app->recipe.made = 1;
+    app->gfxId = 0;
+    app->hasCustom = FALSE;
+    app->frontSel = 0;
+    app->backSel = 0;
+    MP_Avatar_ApplyLocal();
+    MP_SendAppearance();
+}
+
+static void Create_LoadSlot(u8 slot)
+{
+    sCreateSlot = slot;
+    if (gMpConfig.custom[slot].made)
+        sCreateWork = gMpConfig.custom[slot];
+    else
+        MP_Created_Default(&sCreateWork, gSaveBlock2Ptr->playerGender == FEMALE);
+    Create_Wear();
+}
+
+static void Create_Open(void)
+{
+    u8 i, slot = 0;
+    sCreateBefore = gMpConfig.app;
+    sCreateShowBack = FALSE;
+    // The CUSTOM being worn, else the first one not made yet
+    if (gMpConfig.app.base == MP_BASE_CREATED && gMpConfig.app.created >= 1 && gMpConfig.app.created <= MP_CREATED_SLOTS)
+        slot = gMpConfig.app.created - 1;
+    else
+    {
+        for (i = 0; i < MP_CREATED_SLOTS; i++)
+            if (!gMpConfig.custom[i].made)
+                break;
+        slot = (i < MP_CREATED_SLOTS) ? i : 0;
+    }
+    Create_LoadSlot(slot);
+}
+
+// Steps a part's style (Left/Right) or color (L/R)
+static void Create_StepPart(u8 cat, bool8 color, int dir)
+{
+    struct MpCreated *r = &sCreateWork;
+    bool8 optional = (cat == MP_CR_HAT || cat == MP_CR_BAG);
+    u8 *style, *col, n;
+    switch (cat)
+    {
+    case MP_CR_HAIR:   style = &r->hair; col = &r->hairColor; break;
+    case MP_CR_TOP:    style = &r->top; col = &r->topColor; break;
+    case MP_CR_BOTTOM: style = &r->bottom; col = &r->bottomColor; break;
+    case MP_CR_HAT:    style = &r->hat; col = &r->hatColor; break;
+    default:           style = &r->bag; col = &r->bagColor; break;
+    }
+    if (color)
+    {
+        if (optional && *style == 0)
+            return;
+        n = MP_Created_ColorCount(r->girl, cat, optional ? *style - 1 : *style);
+        if (n > 1)
+            *col = (*col + n + dir) % n;
+        return;
+    }
+    n = MP_Created_StyleCount(r->girl, cat) + (optional ? 1 : 0);
+    {
+        // Keep the color when the new style has it (same name)
+        const char *was = MP_Created_ColorName(r->girl, cat, optional ? *style - 1 : *style, *col);
+        u8 i, nc;
+        *style = (*style + n + dir) % n;
+        *col = 0;
+        if (optional && *style == 0)
+            return;
+        nc = MP_Created_ColorCount(r->girl, cat, optional ? *style - 1 : *style);
+        for (i = 0; i < nc; i++)
+            if (was[0] && strcmp(MP_Created_ColorName(r->girl, cat, optional ? *style - 1 : *style, i), was) == 0)
+                *col = i;
+    }
+}
+
+static void HandleCreateInput(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    struct MpCreated before = sCreateWork;
+    u8 slotBefore = sCreateSlot;
+    int dir = JOY_REPEAT(DPAD_RIGHT | R_BUTTON) ? 1 : -1;
+
+    if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == CR_CANCEL))
+    {
+        // Back to the look you had
+        PlaySE(SE_SELECT);
+        gMpConfig.app = sCreateBefore;
+        MP_Avatar_ApplyLocal();
+        MP_SendAppearance();
+        GoToPage(data, MP_MENU_PAGE_LOOK, ROW_CREATE);
+        return;
+    }
+    if (JOY_NEW(A_BUTTON) && tCursor == CR_SAVE)
+    {
+        PlaySE(SE_SAVE);
+        sCreateWork.made = 1;
+        gMpConfig.custom[sCreateSlot] = sCreateWork;
+        Create_Wear();
+        MP_SaveConfig();
+        GoToPage(data, MP_MENU_PAGE_LOOK, ROW_SPRITE);
+        return;
+    }
+    if (JOY_NEW(START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sCreateShowBack = !sCreateShowBack;
+        Preview_Draw(sCreateShowBack);
+        return;
+    }
+    if (JOY_NEW(SELECT_BUTTON) && tCursor >= CR_SKIN && tCursor <= CR_BAG)
+    {
+        // Undo this row: back to the slot's saved parts (or the starting ones)
+        struct MpCreated orig;
+        if (gMpConfig.custom[sCreateSlot].made && gMpConfig.custom[sCreateSlot].girl == sCreateWork.girl)
+            orig = gMpConfig.custom[sCreateSlot];
+        else
+            MP_Created_Default(&orig, sCreateWork.girl);
+        switch (tCursor)
+        {
+        case CR_SKIN:   sCreateWork.skin = orig.skin; break;
+        case CR_HAIR:   sCreateWork.hair = orig.hair; sCreateWork.hairColor = orig.hairColor; break;
+        case CR_TOP:    sCreateWork.top = orig.top; sCreateWork.topColor = orig.topColor; break;
+        case CR_BOTTOM: sCreateWork.bottom = orig.bottom; sCreateWork.bottomColor = orig.bottomColor; break;
+        case CR_HAT:    sCreateWork.hat = orig.hat; sCreateWork.hatColor = orig.hatColor; break;
+        case CR_BAG:    sCreateWork.bag = orig.bag; sCreateWork.bagColor = orig.bagColor; break;
+        }
+        if (memcmp(&before, &sCreateWork, sizeof(before)) == 0)
+            PlaySE(SE_FAILURE);
+    }
+    else if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    {
+        switch (tCursor)
+        {
+        case CR_SLOT:
+            Create_LoadSlot((sCreateSlot + MP_CREATED_SLOTS + dir) % MP_CREATED_SLOTS);
+            break;
+        case CR_BODY:
+        {
+            u8 skin = sCreateWork.skin;
+            MP_Created_Default(&sCreateWork, !sCreateWork.girl);
+            sCreateWork.skin = skin;
+            break;
+        }
+        case CR_SKIN:
+            sCreateWork.skin = (sCreateWork.skin + MP_CR_SKIN_COUNT + dir) % MP_CR_SKIN_COUNT;
+            break;
+        case CR_HAIR: case CR_TOP: case CR_BOTTOM: case CR_HAT: case CR_BAG:
+            Create_StepPart(sCreateRowCat[tCursor], FALSE, dir);
+            break;
+        }
+    }
+    else if (JOY_REPEAT(L_BUTTON | R_BUTTON) && tCursor >= CR_HAIR && tCursor <= CR_BAG)
+    {
+        Create_StepPart(sCreateRowCat[tCursor], TRUE, dir);
+        if (memcmp(&before, &sCreateWork, sizeof(before)) == 0)
+            PlaySE(SE_FAILURE);
+    }
+    if (memcmp(&before, &sCreateWork, sizeof(before)) != 0 || slotBefore != sCreateSlot)
+    {
+        PlaySE(SE_SELECT);
+        if (slotBefore == sCreateSlot)
+            Create_Wear();
+        DrawMenu(tWindow, tPage, tCursor, tChoice);
+        DrawBottom(tPlayers, tPage, tCursor);
+        Preview_Draw(sCreateShowBack);
     }
 }
 
@@ -839,11 +1130,13 @@ static void Task_CoopMenu(u8 taskId)
             tChoice = 0;
             PlaySE(SE_SELECT);
             DrawMenu(tWindow, tPage, tCursor, tChoice);
-            if (tPage == MP_MENU_PAGE_FRIENDS || tPage == MP_MENU_PAGE_LOOK)
+            if (tPage == MP_MENU_PAGE_FRIENDS || tPage == MP_MENU_PAGE_LOOK || tPage == MP_MENU_PAGE_CREATE)
                 DrawBottom(tPlayers, tPage, tCursor);
             if (tPage == MP_MENU_PAGE_LOOK)
                 Preview_Draw(tCursor == ROW_BACKPIC);
         }
+        else if (tPage == MP_MENU_PAGE_CREATE)
+            HandleCreateInput(taskId);
         else if (tPage == MP_MENU_PAGE_FRIENDS)
             HandleFriendsInput(taskId);
         else if (tPage == MP_MENU_PAGE_LOOK)
