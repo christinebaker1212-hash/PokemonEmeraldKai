@@ -27,19 +27,22 @@ enum {
     MP_BASE_COUNT
 };
 
-#define MP_PIC_NONE 0xFF
+#define MP_PIC_NONE 0xFFFF
 
 struct MpSpriteEntry
 {
-    u16 gfxId;
+    u16 gfxId;      // OBJ_EVENT_GFX_*, or MP_GFX_EXT_FIRST + n for FireRed/LeafGreen sprites
     const char *name;
-    u8 frontPic;    // trainer card / battle front pic, MP_PIC_NONE = default
-    u8 backPic;     // battle back pic, MP_PIC_NONE = default
+    u16 frontPic;   // trainer card / battle front pic choice (see MP_Avatar_FrontChoiceCount), MP_PIC_NONE = default
+    u16 backPic;    // battle back pic choice, MP_PIC_NONE = default
     u8 gender;
 };
 
+#define MP_GFX_EXT_FIRST 0x8000   // overworld sprites that only exist in the CO-OP catalog
+
 #define MP_SKIN_COUNT   7
 #define MP_COLOR_COUNT  11
+#define MP_HAIR_COUNT   15
 
 struct MpAppearance
 {
@@ -50,7 +53,9 @@ struct MpAppearance
     u8 gender;   // save file gender, used for bike/surf sprites
     u8 hasCustom;
     u16 gfxId;      // any overworld sprite (MP_BASE_NPC)
-    u8 trainerPic;  // trainer card / battle front pic (0xFF = automatic)
+    u16 frontSel;   // trainer card / battle front pic: 0 = matches the sprite, else 1 + front choice
+    u8 backSel;     // battle back pic: 0 = matches the sprite, else 1 + back choice
+    u8 hair;        // 0 = sprite default
 };
 
 // Avatar modes sent over the network
@@ -253,6 +258,26 @@ u16 MP_LocalBackPicOr(u16 defaultPic);
 bool8 MP_LocalHidesTrainerBack(void);   // picked character has no battle back sprite
 const char *MP_Avatar_SkinName(u8 skin);
 const char *MP_Avatar_ColorName(u8 color);
+const char *MP_Avatar_HairName(u8 hair);
+// Separate trainer card / battle front pic and back pic choices (0 = MATCH)
+u16 MP_Avatar_FrontChoiceCount(void);          // choices + 1 (MATCH)
+const char *MP_Avatar_FrontSelName(u16 sel);   // menu name
+const char *MP_Avatar_FrontSelArtist(u16 sel); // "" unless it's credited fan art
+const char *MP_Avatar_FrontSelConfigName(u16 sel);
+u16 MP_Avatar_ParseFrontSel(const char *name);
+u8 MP_Avatar_BackChoiceCount(void);
+const char *MP_Avatar_BackSelName(u8 sel);
+const char *MP_Avatar_BackSelConfigName(u8 sel);
+u8 MP_Avatar_ParseBackSel(const char *name);
+bool8 MP_Avatar_FrontSelRecolors(u16 sel);
+// The local look's pictures as the battles show them (recolored); FALSE = none
+bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal);
+bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal);   // first frame
+// Overworld graphics of any catalog sprite (Emerald or FireRed/LeafGreen)
+const struct ObjectEventGraphicsInfo *MP_Avatar_NpcInfo(u16 gfxId);
+const u16 *MP_Avatar_NpcPalette(u16 gfxId);
+bool8 MP_Avatar_GetFrontTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal);  // not recolored
+bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal);   // 4 frames, not recolored
 
 // mp_overworld.c
 void MP_Overworld_Update(void);

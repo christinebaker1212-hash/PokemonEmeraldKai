@@ -1,5 +1,6 @@
 // Moemon Co-op: CO-OP start menu entry (status + character customization)
 #include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "mp.h"
 #include "main.h"
@@ -23,13 +24,17 @@
 #include "map_name_popup.h"
 #include "region_map.h"
 #include "constants/region_map_sections.h"
+#include "constants/trainers.h"
+#include "decompress.h"
+#include "data.h"
+#include "sprite.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
-enum { ROW_SPRITE, ROW_SKIN, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
+enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
@@ -79,9 +84,12 @@ static u16 NumChoices(u8 row)
 {
     switch (row)
     {
-    case ROW_SPRITE: return MP_Avatar_ChoiceCount();
-    case ROW_SKIN:   return MP_SKIN_COUNT;
-    default:         return MP_COLOR_COUNT;
+    case ROW_SPRITE:  return MP_Avatar_ChoiceCount();
+    case ROW_FRONT:   return MP_Avatar_FrontChoiceCount();
+    case ROW_BACKPIC: return MP_Avatar_BackChoiceCount();
+    case ROW_SKIN:    return MP_SKIN_COUNT;
+    case ROW_HAIR:    return MP_HAIR_COUNT;
+    default:          return MP_COLOR_COUNT;
     }
 }
 
@@ -91,6 +99,8 @@ static u8 *RowValue(u8 row)
     {
     case ROW_SPRITE: return &gMpConfig.app.base;
     case ROW_SKIN:   return &gMpConfig.app.skin;
+    case ROW_HAIR:   return &gMpConfig.app.hair;
+    case ROW_BACKPIC: return &gMpConfig.app.backSel;
     case ROW_OUTFIT: return &gMpConfig.app.outfit;
     default:         return &gMpConfig.app.accent;
     }
@@ -232,7 +242,7 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
-    static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
+    static const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
 
@@ -326,7 +336,10 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             switch (row)
             {
             case ROW_SPRITE: snprintf(line, sizeof(line), "%s", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app))); break;
+            case ROW_FRONT:  snprintf(line, sizeof(line), "%s", MP_Avatar_FrontSelName(gMpConfig.app.frontSel)); break;
+            case ROW_BACKPIC: snprintf(line, sizeof(line), "%s", MP_Avatar_BackSelName(gMpConfig.app.backSel)); break;
             case ROW_SKIN:   snprintf(line, sizeof(line), "%s", MP_Avatar_SkinName(*RowValue(row))); break;
+            case ROW_HAIR:   snprintf(line, sizeof(line), "%s", MP_Avatar_HairName(*RowValue(row))); break;
             default:         snprintf(line, sizeof(line), "%s", MP_Avatar_ColorName(*RowValue(row))); break;
             }
             PrintChoice(windowId, lookLabels[row], line, y, 38);
@@ -356,6 +369,26 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
+    else if (page == MP_MENU_PAGE_LOOK && (cursor == ROW_SPRITE || cursor == ROW_FRONT || cursor == ROW_BACKPIC || cursor == ROW_HAIR))
+    {
+        // The full name (the row cuts long ones), who drew it, and the keys
+        char ascii[160];
+        u8 buf[170];
+        MpTheme_Panel(windowId, 0);
+        if (cursor == ROW_SPRITE)
+            snprintf(ascii, sizeof(ascii), "%s     L/R: 10 AT A TIME", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
+        else if (cursor == ROW_FRONT && MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel)[0])
+            snprintf(ascii, sizeof(ascii), "ID PIC: %s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
+        else if (cursor == ROW_FRONT)
+            snprintf(ascii, sizeof(ascii), "ID PIC (trainer card, battles): %s   L/R: 10", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
+        else if (cursor == ROW_BACKPIC)
+            snprintf(ascii, sizeof(ascii), "BK PIC (your back in battles): %s", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+        else
+            snprintf(ascii, sizeof(ascii), "HAIR also colors a hat if the sprite wears one.");
+        MP_AsciiToGame(buf, ascii, 150);
+        MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
+        CopyWindowToVram(windowId, COPYWIN_FULL);
+    }
     else if (page == MP_MENU_PAGE_EMOTES)
     {
         u8 buf[80];
@@ -377,8 +410,111 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
 #define tChoice   data[6]   // left/right value on the EMOTE and SAY rows
 #define tEditSlot data[7]
 
+// ---------------------------------------------------------------------------
+// LOOK page preview: the trainer picture (or the back picture on BACK PIC)
+// in a panel left of the player, updated as the choices change
+
+#define PREVIEW_TAG 0x5E11
+static u8 sPreviewWin = WINDOW_NONE;
+static u8 sPreviewSprite = MAX_SPRITES;
+static ALIGNED(4) u8 sPreviewTiles[TRAINER_PIC_SIZE];
+static ALIGNED(4) u16 sPreviewPal[16];
+
+static const struct WindowTemplate sPreviewWindowTemplate = {
+    .bg = 0,
+    .tilemapLeft = 1,
+    .tilemapTop = 1,
+    .width = 10,
+    .height = 11,
+    .paletteNum = 15,
+    .baseBlock = 0x8 + MENU_W * 15 + 28 * 2,
+};
+
+static const struct OamData sPreviewOam = {
+    .shape = SPRITE_SHAPE(64x64),
+    .size = SPRITE_SIZE(64x64),
+    .priority = 0,
+};
+
+static void Preview_Draw(bool8 back)
+{
+    bool8 has;
+    u8 buf[40];
+    if (sPreviewWin == WINDOW_NONE)
+        return;
+    has = back ? MP_Avatar_PreviewBack(sPreviewTiles, sPreviewPal) : MP_Avatar_PreviewFront(sPreviewTiles, sPreviewPal);
+    MpTheme_Panel(sPreviewWin, 12);
+    sTxtFg = MPT_GOLD;
+    sTxtBg = MPT_BAND;
+    MP_AsciiToGame(buf, back ? "BACK PIC" : "ID PIC", 30);
+    MText(sPreviewWin, FONT_SMALL, buf, 4, 0);
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
+    if (!has)
+    {
+        MP_AsciiToGame(buf, "NONE:", 30);
+        MText(sPreviewWin, FONT_SMALL, buf, 6, 30);
+        MP_AsciiToGame(buf, "hidden in", 30);
+        MText(sPreviewWin, FONT_SMALL, buf, 6, 44);
+        MP_AsciiToGame(buf, "battles", 30);
+        MText(sPreviewWin, FONT_SMALL, buf, 6, 56);
+    }
+    CopyWindowToVram(sPreviewWin, COPYWIN_FULL);
+    if (sPreviewSprite != MAX_SPRITES)
+    {
+        u16 tile = GetSpriteTileStartByTag(PREVIEW_TAG);
+        u8 palIdx = IndexOfSpritePaletteTag(PREVIEW_TAG);
+        gSprites[sPreviewSprite].invisible = !has;
+        if (has && tile != 0xFFFF)
+            memcpy((void *)(OBJ_VRAM0 + tile * TILE_SIZE_4BPP), sPreviewTiles, TRAINER_PIC_SIZE);
+        if (has && palIdx != 0xFF)
+            LoadPalette(sPreviewPal, OBJ_PLTT_ID(palIdx), PLTT_SIZE_4BPP);
+    }
+}
+
+static void Preview_Show(bool8 back)
+{
+    if (sPreviewWin == WINDOW_NONE)
+    {
+        struct SpriteSheet sheet = {sPreviewTiles, TRAINER_PIC_SIZE, PREVIEW_TAG};
+        struct SpritePalette pal = {sPreviewPal, PREVIEW_TAG};
+        struct SpriteTemplate tmpl = {
+            .tileTag = PREVIEW_TAG, .paletteTag = PREVIEW_TAG, .oam = &sPreviewOam,
+            .anims = gDummySpriteAnimTable, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable,
+            .callback = SpriteCallbackDummy,
+        };
+        sPreviewWin = AddWindow(&sPreviewWindowTemplate);
+        DrawStdWindowFrame(sPreviewWin, FALSE);
+        memset(sPreviewTiles, 0, sizeof(sPreviewTiles));
+        memset(sPreviewPal, 0, sizeof(sPreviewPal));
+        if (LoadSpriteSheet(&sheet) != 0 && LoadSpritePalette(&pal) != 0xFF)
+            sPreviewSprite = CreateSprite(&tmpl, 8 + 40, 8 + 14 + 32, 0);
+        else
+            sPreviewSprite = MAX_SPRITES;
+    }
+    Preview_Draw(back);
+}
+
+static void Preview_Hide(void)
+{
+    if (sPreviewSprite != MAX_SPRITES)
+    {
+        DestroySprite(&gSprites[sPreviewSprite]);
+        sPreviewSprite = MAX_SPRITES;
+    }
+    FreeSpriteTilesByTag(PREVIEW_TAG);
+    FreeSpritePaletteByTag(PREVIEW_TAG);
+    if (sPreviewWin != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(sPreviewWin, TRUE);
+        RemoveWindow(sPreviewWin);
+        sPreviewWin = WINDOW_NONE;
+    }
+}
+
 static void CloseMenuWindows(s16 *data)
 {
+    Preview_Hide();
     ClearStdWindowAndFrame(tWindow, TRUE);
     ClearStdWindowAndFrame(tPlayers, TRUE);
     RemoveWindow(tWindow);
@@ -401,6 +537,10 @@ static void GoToPage(s16 *data, u8 page, u8 cursor)
     tPage = page;
     tCursor = cursor;
     tChoice = 0;
+    if (page == MP_MENU_PAGE_LOOK)
+        Preview_Show(cursor == ROW_BACKPIC);
+    else
+        Preview_Hide();
     DrawMenu(tWindow, tPage, tCursor, tChoice);
     DrawBottom(tPlayers, tPage, tCursor);
 }
@@ -443,11 +583,24 @@ static void HandleLookInput(u8 taskId)
         MP_Avatar_SetChoice(&gMpConfig.app, c);
         changed = TRUE;
     }
-    else if (tCursor >= ROW_SKIN && tCursor <= ROW_ACCENT && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    else if (tCursor == ROW_FRONT && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
+    {
+        // Hundreds of pictures: Left/Right steps, L/R jumps by 10
+        u16 n = NumChoices(ROW_FRONT);
+        u16 c = gMpConfig.app.frontSel;
+        u16 step = JOY_REPEAT(L_BUTTON | R_BUTTON) ? 10 : 1;
+        if (JOY_REPEAT(DPAD_RIGHT | R_BUTTON))
+            c = (c + step) % n;
+        else
+            c = (c + n - (step % n)) % n;
+        gMpConfig.app.frontSel = c;
+        changed = TRUE;
+    }
+    else if ((tCursor == ROW_BACKPIC || (tCursor >= ROW_SKIN && tCursor <= ROW_ACCENT)) && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
     {
         u8 *v = RowValue(tCursor);
         u8 n = NumChoices(tCursor);
-        *v = JOY_NEW(DPAD_RIGHT) ? (*v + 1) % n : (*v + n - 1) % n;
+        *v = JOY_REPEAT(DPAD_RIGHT) ? (*v + 1) % n : (*v + n - 1) % n;
         changed = TRUE;
     }
     else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == ROW_BACK))
@@ -462,6 +615,8 @@ static void HandleLookInput(u8 taskId)
         MP_Avatar_ApplyLocal();
         MP_SendAppearance();
         DrawMenu(tWindow, tPage, tCursor, tChoice);
+        DrawBottom(tPlayers, tPage, tCursor);
+        Preview_Draw(tCursor == ROW_BACKPIC);
     }
 }
 
@@ -604,6 +759,8 @@ static void Task_CoopMenu(u8 taskId)
         DrawStdWindowFrame(tPlayers, FALSE);
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
+        if (tPage == MP_MENU_PAGE_LOOK)
+            Preview_Show(tCursor == ROW_BACKPIC);
         tState++;
         break;
     case 1:
@@ -620,8 +777,10 @@ static void Task_CoopMenu(u8 taskId)
             tChoice = 0;
             PlaySE(SE_SELECT);
             DrawMenu(tWindow, tPage, tCursor, tChoice);
-            if (tPage == MP_MENU_PAGE_FRIENDS)
+            if (tPage == MP_MENU_PAGE_FRIENDS || tPage == MP_MENU_PAGE_LOOK)
                 DrawBottom(tPlayers, tPage, tCursor);
+            if (tPage == MP_MENU_PAGE_LOOK)
+                Preview_Draw(tCursor == ROW_BACKPIC);
         }
         else if (tPage == MP_MENU_PAGE_FRIENDS)
             HandleFriendsInput(taskId);

@@ -7,5 +7,6 @@ X(BrendanFieldMove) X(BrendanFishing) X(BrendanWatering) X(BrendanDecorating)
 X(MayNormal) X(MayMachBike) X(MayAcroBike) X(MaySurfing) X(MayUnderwater)
 X(MayFieldMove) X(MayFishing) X(MayWatering) X(MayDecorating)
 X(RubySapphireBrendan) X(RubySapphireMay)
+X(Boy1) X(LittleBoy) X(CyclingTriathleteM)
 #undef X
 #endif

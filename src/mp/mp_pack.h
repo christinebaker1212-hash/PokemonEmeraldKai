@@ -81,7 +81,8 @@ bool8 MP_Pack_Parse(const u8 *blob, u32 size, struct MpPack *out);
 u8 *MP_Pack_LoadFile(const char *path, u32 *sizeOut, char *err, int errLen);
 
 // Writes the given character (plus pack, may be NULL) as an editable pack PNG.
-bool8 MP_Pack_Export(const char *path, u8 base, u16 gfxId, u8 gender, const struct MpPack *pack);
+struct MpAppearance;
+bool8 MP_Pack_Export(const char *path, const struct MpAppearance *app, const struct MpPack *pack);
 
 // Writes "data" as a valid LZ77 stream made only of literals (the game's
 // decompressors accept it). dst needs 4 + size + size / 8 + 1 bytes.

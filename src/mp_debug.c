@@ -176,6 +176,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
     }
+    else if (strcmp(cmd, "card") == 0)
+    {
+        // card - the player's trainer card (front of it)
+        void ShowPlayerTrainerCard(void (*callback)(void));
+        void CB2_ReturnToFieldContinueScript(void);
+        ShowPlayerTrainerCard(CB2_ReturnToFieldContinueScript);
+    }
     else if (strcmp(cmd, "townmap") == 0 || strcmp(cmd, "flymap") == 0)
     {
         extern void FieldInitRegionMap(MainCallback callback);

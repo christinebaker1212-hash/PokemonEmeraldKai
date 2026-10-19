@@ -32,6 +32,7 @@
 #include "constants/event_object_movement.h"
 #include "constants/rgb.h"
 #include "constants/trainers.h"
+#include "gba/syscall.h"
 
 #define OBJ_EVENT_PAL_TAG_BRENDAN           0x1100
 #define OBJ_EVENT_PAL_TAG_MAY               0x1110
@@ -98,6 +99,29 @@ static const u16 sColorPresets[MP_COLOR_COUNT][2] = {
     {RGB(10, 26, 25), RGB(5, 18, 18)},     // teal
 };
 
+// Hair: target color (shades keep their lightness)
+static const u16 sHairPresets[MP_HAIR_COUNT] = {
+    0,                  // default
+    RGB(7, 7, 9),       // black
+    RGB(17, 11, 6),     // brown
+    RGB(22, 10, 5),     // chestnut
+    RGB(31, 27, 13),    // blonde
+    RGB(30, 15, 5),     // ginger
+    RGB(28, 6, 7),      // red
+    RGB(24, 24, 27),    // silver
+    RGB(31, 31, 31),    // white
+    RGB(8, 15, 31),     // blue
+    RGB(31, 16, 24),    // pink
+    RGB(20, 10, 29),    // purple
+    RGB(9, 23, 10),     // green
+    RGB(7, 24, 23),     // teal
+    RGB(31, 22, 4),     // gold
+};
+static const char *const sHairNames[MP_HAIR_COUNT] = {
+    "DEFAULT", "BLACK", "BROWN", "CHESTNUT", "BLONDE", "GINGER", "RED", "SILVER", "WHITE",
+    "BLUE", "PINK", "PURPLE", "GREEN", "TEAL", "GOLD",
+};
+
 static const char *const sBaseNames[MP_BASE_COUNT] = {
     "DEFAULT", "BRENDAN", "MAY", "RS BRENDAN", "RS MAY", "CUSTOM", "NPC",
 };
@@ -113,21 +137,130 @@ static const char *const sColorNames[MP_COLOR_COUNT] = {
 const char *MP_Avatar_BaseName(u8 base) { return base < MP_BASE_COUNT ? sBaseNames[base] : "?"; }
 const char *MP_Avatar_SkinName(u8 skin) { return skin < MP_SKIN_COUNT ? sSkinNames[skin] : "?"; }
 const char *MP_Avatar_ColorName(u8 c) { return c < MP_COLOR_COUNT ? sColorNames[c] : "?"; }
+const char *MP_Avatar_HairName(u8 c) { return c < MP_HAIR_COUNT ? sHairNames[c] : "?"; }
+
+// ---------------------------------------------------------------------------
+// FireRed/LeafGreen overworld sprites, extra trainer pictures (FRLG and
+// Pokemon Showdown) and back pictures, from tools/moemon_frlg/import.py
+
+struct MpExtOverworld
+{
+    const char *name;
+    u8 w, h;
+    u32 offset;     // in sExtOwTiles (9 frames)
+    s16 front;      // front choice, -1 = none
+    u8 gender;
+};
+
+struct MpExtFront
+{
+    const char *name;
+    const char *cfg;      // ini name
+    const char *artist;   // credited fan art: used as drawn, never recolored
+    u8 recolor;
+};
+
+#include "mp_ext_gfx.h"
+
+static const u8 sExtOwTiles[] = INCBIN_U8("graphics/moemon/ext/ow_tiles.bin");
+static const u16 sExtOwPals[] = INCBIN_U16("graphics/moemon/ext/ow_pals.bin");
+static const u8 sExtFrontTiles[] = INCBIN_U8("graphics/moemon/ext/front_tiles.bin");
+static const u16 sExtFrontPals[] = INCBIN_U16("graphics/moemon/ext/front_pals.bin");
+static const u8 sExtBackTiles[] = INCBIN_U8("graphics/moemon/ext/back_tiles.bin");
+static const u16 sExtBackPals[] = INCBIN_U16("graphics/moemon/ext/back_pals.bin");
+
+#define EMERALD_FRONT_COUNT TRAINER_PIC_MP_LOCAL          // Emerald's own trainer pics come first
+#define FRONT_CHOICES (EMERALD_FRONT_COUNT + MP_EXT_FRONT_COUNT)
+#define EMERALD_BACK_COUNT TRAINER_BACK_PIC_MP_LOCAL
+#define BACK_CHOICES (EMERALD_BACK_COUNT + MP_EXT_BACK_COUNT)
+
+#define CATALOG_COUNT (ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT)
+
+static struct MpSpriteEntry sExtCatalog[MP_EXT_OW_COUNT];
+static struct ObjectEventGraphicsInfo sExtInfo[MP_EXT_OW_COUNT];
+static struct SpriteFrameImage sExtFrames[MP_EXT_OW_COUNT][9];
+static bool8 sExtReady;
+
+static void InitExtCatalog(void)
+{
+    int i, f;
+    if (sExtReady)
+        return;
+    for (i = 0; i < MP_EXT_OW_COUNT; i++)
+    {
+        const struct MpExtOverworld *e = &sMpExtOverworld[i];
+        const struct ObjectEventGraphicsInfo *tmpl;
+        u32 frameBytes = e->w * e->h / 2;
+        sExtCatalog[i].gfxId = MP_GFX_EXT_FIRST + i;
+        sExtCatalog[i].name = e->name;
+        sExtCatalog[i].frontPic = e->front >= 0 ? (u16)e->front : MP_PIC_NONE;
+        sExtCatalog[i].backPic = MP_PIC_NONE;
+        sExtCatalog[i].gender = e->gender;
+        // An Emerald sprite of the same size lends its OAM shapes and animations
+        if (e->w == 32)
+            tmpl = &gObjectEventGraphicsInfo_CyclingTriathleteM;
+        else if (e->h == 16)
+            tmpl = &gObjectEventGraphicsInfo_LittleBoy;
+        else
+            tmpl = &gObjectEventGraphicsInfo_Boy1;
+        sExtInfo[i] = *tmpl;
+        for (f = 0; f < 9; f++)
+        {
+            sExtFrames[i][f].data = sExtOwTiles + e->offset + f * frameBytes;
+            sExtFrames[i][f].size = frameBytes;
+        }
+        sExtInfo[i].images = sExtFrames[i];
+        sExtInfo[i].size = frameBytes;
+        sExtInfo[i].width = e->w;
+        sExtInfo[i].height = e->h;
+        sExtInfo[i].inanimate = FALSE;
+        sExtInfo[i].tracks = TRACKS_FOOT;
+        sExtInfo[i].anims = gObjectEventGraphicsInfo_Boy1.anims;
+    }
+    sExtReady = TRUE;
+}
+
+static const struct MpSpriteEntry *CatalogAt(u16 i)
+{
+    InitExtCatalog();
+    if (i < ARRAY_COUNT(sSpriteCatalog))
+        return &sSpriteCatalog[i];
+    return &sExtCatalog[i - ARRAY_COUNT(sSpriteCatalog)];
+}
 
 const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId)
 {
     u16 i;
+    if (gfxId >= MP_GFX_EXT_FIRST)
+        return gfxId - MP_GFX_EXT_FIRST < MP_EXT_OW_COUNT ? CatalogAt(ARRAY_COUNT(sSpriteCatalog) + gfxId - MP_GFX_EXT_FIRST) : NULL;
     for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
         if (sSpriteCatalog[i].gfxId == gfxId)
             return &sSpriteCatalog[i];
     return NULL;
 }
 
-static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
+const struct ObjectEventGraphicsInfo *MP_Avatar_NpcInfo(u16 gfxId)
 {
     if (MP_Avatar_FindCatalog(gfxId) == NULL)
         return NULL;
+    if (gfxId >= MP_GFX_EXT_FIRST)
+        return &sExtInfo[gfxId - MP_GFX_EXT_FIRST];
     return gObjectEventGraphicsInfoPointers[gfxId];
+}
+
+const u16 *MP_Avatar_NpcPalette(u16 gfxId)
+{
+    const struct ObjectEventGraphicsInfo *info = MP_Avatar_NpcInfo(gfxId);
+    if (!info)
+        return NULL;
+    if (gfxId >= MP_GFX_EXT_FIRST)
+        return sExtOwPals + (gfxId - MP_GFX_EXT_FIRST) * 16;
+    return MP_GetObjectEventPaletteData(info->paletteTag);
+}
+
+static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
+{
+    return MP_Avatar_NpcInfo(gfxId);
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +403,7 @@ static const struct MpPack *RemotePack(u8 id, struct MpPack *buf)
 
 u16 MP_Avatar_ChoiceCount(void)
 {
-    return NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + sPackFileCount;
+    return NUM_BASE_CHOICES + CATALOG_COUNT + sPackFileCount;
 }
 
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
@@ -280,12 +413,12 @@ u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
     {
         for (i = 0; i < sPackFileCount; i++)
             if (strcmp(sPackFiles[i], gMpConfig.customSprite) == 0)
-                return NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + i;
+                return NUM_BASE_CHOICES + CATALOG_COUNT + i;
     }
     if (app->base == MP_BASE_NPC)
     {
-        for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
-            if (sSpriteCatalog[i].gfxId == app->gfxId)
+        for (i = 0; i < CATALOG_COUNT; i++)
+            if (CatalogAt(i)->gfxId == app->gfxId)
                 return NUM_BASE_CHOICES + i;
         return 0;
     }
@@ -300,15 +433,15 @@ void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
         app->gfxId = 0;
         app->hasCustom = FALSE;
     }
-    else if (choice < NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog))
+    else if (choice < NUM_BASE_CHOICES + CATALOG_COUNT)
     {
         app->base = MP_BASE_NPC;
-        app->gfxId = sSpriteCatalog[choice - NUM_BASE_CHOICES].gfxId;
+        app->gfxId = CatalogAt(choice - NUM_BASE_CHOICES)->gfxId;
         app->hasCustom = FALSE;
     }
-    else if (choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog) < sPackFileCount)
+    else if (choice - NUM_BASE_CHOICES - CATALOG_COUNT < sPackFileCount)
     {
-        const char *path = sPackFiles[choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog)];
+        const char *path = sPackFiles[choice - NUM_BASE_CHOICES - CATALOG_COUNT];
         char err[160];
         if (LoadLocalPack(path, err, sizeof(err)))
         {
@@ -331,10 +464,10 @@ const char *MP_Avatar_ChoiceName(u16 choice)
 {
     if (choice < NUM_BASE_CHOICES)
         return sBaseNames[choice];
-    if (choice < NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog))
-        return sSpriteCatalog[choice - NUM_BASE_CHOICES].name;
-    if (choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog) < sPackFileCount)
-        return sPackNames[choice - NUM_BASE_CHOICES - ARRAY_COUNT(sSpriteCatalog)];
+    if (choice < NUM_BASE_CHOICES + CATALOG_COUNT)
+        return CatalogAt(choice - NUM_BASE_CHOICES)->name;
+    if (choice - NUM_BASE_CHOICES - CATALOG_COUNT < sPackFileCount)
+        return sPackNames[choice - NUM_BASE_CHOICES - CATALOG_COUNT];
     return "?";
 }
 
@@ -352,7 +485,11 @@ static void ToConfigName(char *dst, const char *src, int len)
 void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len)
 {
     if (app->base == MP_BASE_NPC && MP_Avatar_FindCatalog(app->gfxId))
-        ToConfigName(out, MP_Avatar_FindCatalog(app->gfxId)->name, len);
+    {
+        char buf[40];
+        ToConfigName(buf, MP_Avatar_FindCatalog(app->gfxId)->name, sizeof(buf));
+        snprintf(out, len, "%s%s", app->gfxId >= MP_GFX_EXT_FIRST ? "frlg_" : "", buf);
+    }
     else
         ToConfigName(out, MP_Avatar_BaseName(app->base >= MP_BASE_CUSTOM ? MP_BASE_DEFAULT : app->base), len);
 }
@@ -371,13 +508,20 @@ int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
             return TRUE;
         }
     }
-    for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
+    for (i = 0; i < CATALOG_COUNT; i++)
     {
-        ToConfigName(buf, sSpriteCatalog[i].name, sizeof(buf));
+        ToConfigName(buf, CatalogAt(i)->name, sizeof(buf));
+        if (i >= ARRAY_COUNT(sSpriteCatalog))
+        {
+            // FireRed/LeafGreen sprites are saved as frlg_<name>
+            char ext[48];
+            snprintf(ext, sizeof(ext), "frlg_%s", buf);
+            snprintf(buf, sizeof(buf), "%s", ext);
+        }
         if (strcmp(buf, name) == 0)
         {
             app->base = MP_BASE_NPC;
-            app->gfxId = sSpriteCatalog[i].gfxId;
+            app->gfxId = CatalogAt(i)->gfxId;
             return TRUE;
         }
     }
@@ -503,7 +647,13 @@ static bool8 IsSkinTone(int h, int s, int v)
     return h >= 5 && h <= 45 && s >= 25 && s <= 175 && v >= 110;
 }
 
-static void RecolorCluster(u16 *pal, const u8 *members, int n, u16 target)
+static bool8 WantsRecolor(const struct MpAppearance *app)
+{
+    return app->skin || app->outfit || app->accent || app->hair;
+}
+
+// fullSat: every shade takes the target's saturation (hair, gray clothes)
+static void RecolorClusterEx(u16 *pal, const u8 *members, int n, u16 target, bool8 fullSat)
 {
     int th, ts, tv, i, maxV = 1, maxS = 1;
     RgbToHsv(target, &th, &ts, &tv);
@@ -518,23 +668,67 @@ static void RecolorCluster(u16 *pal, const u8 *members, int n, u16 target)
     {
         int h, s, v;
         RgbToHsv(pal[members[i]], &h, &s, &v);
-        pal[members[i]] = HsvToRgb(th, ts * s / maxS, v * tv / maxV);
+        // Gray or white shades (a white hat) take the target's saturation
+        pal[members[i]] = HsvToRgb(th, (fullSat || maxS < 48) ? ts : ts * s / maxS, v * tv / maxV);
     }
+}
+
+static void RecolorCluster(u16 *pal, const u8 *members, int n, u16 target)
+{
+    RecolorClusterEx(pal, members, n, target, FALSE);
+}
+
+// Colors used mostly on the head (hair or a hat): at least 60% of their
+// pixels in the head rows, and not skin, the outline or a tiny eye color.
+static u8 FindHairColors(const u16 *pal, const u32 counts[16], const u32 body[16], const u32 head[16], u8 *members)
+{
+    u32 total = 0;
+    u8 i, n = 0, outline = 0;
+    int darkest = 999;
+    for (i = 1; i < 16; i++)
+    {
+        int h, s, v;
+        total += head[i] + body[i];
+        if (counts[i] == 0)
+            continue;
+        RgbToHsv(pal[i], &h, &s, &v);
+        if (v < darkest)
+        {
+            darkest = v;
+            outline = i;
+        }
+    }
+    for (i = 1; i < 16; i++)
+    {
+        int h, s, v;
+        u32 here = head[i] + body[i];
+        if (counts[i] == 0 || here == 0 || i == outline || head[i] * 10 < here * 6 || head[i] * 40 < total)
+            continue;
+        RgbToHsv(pal[i], &h, &s, &v);
+        if (IsSkinTone(h, s, v) || v < 20)
+            continue;
+        members[n++] = i;
+    }
+    return n;
 }
 
 // counts: whole sprite; body/head: the clothes and hair/hat parts of the front frame
 static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 counts[16], const u32 body[16], const u32 head[16])
 {
-    u8 skin[16], nSkin = 0, i, j;
-    u32 binWeight[12], bodyWeight[12], headWeight[12];
+    u8 skin[16], nSkin = 0, i, j, hair[16], nHair;
+    u32 binWeight[12], bodyWeight[12];
     s8 bin[16];
+    bool8 isHair[16];
     int best = -1, second = -1;
 
-    if (app->skin == 0 && app->outfit == 0 && app->accent == 0)
+    if (!WantsRecolor(app))
         return;
     memset(binWeight, 0, sizeof(binWeight));
     memset(bodyWeight, 0, sizeof(bodyWeight));
-    memset(headWeight, 0, sizeof(headWeight));
+    memset(isHair, 0, sizeof(isHair));
+    nHair = FindHairColors(pal, counts, body, head, hair);
+    for (i = 0; i < nHair; i++)
+        isHair[hair[i]] = TRUE;
     for (i = 1; i < 16; i++)
     {
         int h, s, v;
@@ -544,12 +738,11 @@ static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 coun
         RgbToHsv(pal[i], &h, &s, &v);
         if (IsSkinTone(h, s, v))
             skin[nSkin++] = i;
-        else if (s >= 60 && v >= 40)
+        else if (!isHair[i] && s >= 60 && v >= 40)
         {
             bin[i] = ((h + 15) / 30) % 12;
             binWeight[bin[i]] += counts[i];
             bodyWeight[bin[i]] += body[i];
-            headWeight[bin[i]] += head[i];
         }
     }
 
@@ -578,29 +771,61 @@ static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 coun
         {
             int h, s2, v;
             RgbToHsv(pal[i], &h, &s2, &v);
-            printf("[recolor] %2d rgb=%04x h=%3d s=%3d v=%3d all=%4u body=%4u head=%4u bin=%d\n", i, pal[i], h, s2, v, counts[i], body[i], head[i], bin[i]);
+            printf("[recolor] %2d rgb=%04x h=%3d s=%3d v=%3d all=%4u body=%4u head=%4u bin=%d hair=%d\n", i, pal[i], h, s2, v, counts[i], body[i], head[i], bin[i], isHair[i]);
         }
-    // OUTFIT: the main clothing hue (body rows); ACCENT: hair/hat (head rows).
-    // Fall back to overall usage when a region has no clear color.
+    // OUTFIT: the main clothing hue (body rows); ACCENT: the second one.
+    // Fall back to overall usage when the body has no clear color.
     for (i = 0; i < 12; i++)
         if (bodyWeight[i] && (best < 0 || bodyWeight[i] > bodyWeight[best]))
             best = i;
-    for (i = 0; i < 12; i++)
-        if (i != best && headWeight[i] && (second < 0 || headWeight[i] > headWeight[second]))
-            second = i;
     for (i = 0; i < 12 && best < 0; i++)
         if (binWeight[i] && (best < 0 || binWeight[i] > binWeight[best]))
             best = i;
+    for (i = 0; i < 12; i++)
+        if (i != best && bodyWeight[i] && (second < 0 || bodyWeight[i] > bodyWeight[second]))
+            second = i;
     for (i = 0; i < 12 && second < 0; i++)
         if (i != best && binWeight[i] && (second < 0 || binWeight[i] > binWeight[second]))
             second = i;
-    if (best >= 0 && app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
+    if (app->outfit > 0 && app->outfit < MP_COLOR_COUNT)
     {
         u8 members[16], n = 0;
+        u32 colored = best >= 0 ? bodyWeight[best] : 0, gray = 0;
+        u8 grays[16], nGray = 0, outline = 0;
+        int darkest = 999;
+        // Gray, black or white clothes (a suit, a lab coat) when they cover more of the body
         for (i = 1; i < 16; i++)
-            if (bin[i] == best)
-                members[n++] = i;
-        RecolorCluster(pal, members, n, sColorPresets[app->outfit][0]);
+        {
+            int h, s2, v;
+            if (counts[i] == 0)
+                continue;
+            RgbToHsv(pal[i], &h, &s2, &v);
+            if (v < darkest)
+            {
+                darkest = v;
+                outline = i;
+            }
+        }
+        for (i = 1; i < 16; i++)
+        {
+            int h, s2, v;
+            if (counts[i] == 0 || bin[i] >= 0 || isHair[i] || i == outline)
+                continue;
+            RgbToHsv(pal[i], &h, &s2, &v);
+            if (IsSkinTone(h, s2, v) || s2 >= 60 || v < 25 || body[i] * 2 < head[i] + body[i])
+                continue;
+            grays[nGray++] = i;
+            gray += body[i];
+        }
+        if (nGray > 0 && gray > colored * 2)
+            RecolorClusterEx(pal, grays, nGray, sColorPresets[app->outfit][0], TRUE);
+        else if (best >= 0)
+        {
+            for (i = 1; i < 16; i++)
+                if (bin[i] == best)
+                    members[n++] = i;
+            RecolorCluster(pal, members, n, sColorPresets[app->outfit][0]);
+        }
     }
     if (second >= 0 && app->accent > 0 && app->accent < MP_COLOR_COUNT)
     {
@@ -610,6 +835,8 @@ static void AutoRecolor(const struct MpAppearance *app, u16 *pal, const u32 coun
                 members[n++] = i;
         RecolorCluster(pal, members, n, sColorPresets[app->accent][0]);
     }
+    if (nHair > 0 && app->hair > 0 && app->hair < MP_HAIR_COUNT)
+        RecolorClusterEx(pal, hair, nHair, sHairPresets[app->hair], TRUE);
 }
 
 // ---------------------------------------------------------------------------
@@ -778,6 +1005,15 @@ static void ApplyRecolor(const struct MpAppearance *app, u16 *pal)
         pal[10] = sColorPresets[app->accent][0];
         pal[11] = sColorPresets[app->accent][1];
     }
+    if (app->hair > 0 && app->hair < MP_HAIR_COUNT)
+    {
+        // Brendan: his beanie (his hair hides under it); May: her hair
+        static const u8 sBrendanHair[] = {5, 9}, sMayHair[] = {7, 8};
+        if (app->base == MP_BASE_BRENDAN)
+            RecolorClusterEx(pal, sBrendanHair, 2, sHairPresets[app->hair], TRUE);
+        else if (app->base == MP_BASE_MAY)
+            RecolorClusterEx(pal, sMayHair, 2, sHairPresets[app->hair], TRUE);
+    }
 }
 
 // Pack overworld palette, recolored using the walking frames (or any slot).
@@ -817,7 +1053,7 @@ static void StatePalette(const struct MpAppearance *app, u8 state, u16 *dst)
     if (state == ST_FOOT && app->base == MP_BASE_NPC && NpcInfo(app->gfxId))
     {
         const struct ObjectEventGraphicsInfo *npc = NpcInfo(app->gfxId);
-        const u16 *pal = MP_GetObjectEventPaletteData(npc->paletteTag);
+        const u16 *pal = MP_Avatar_NpcPalette(app->gfxId);
         if (pal)
         {
             u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
@@ -839,7 +1075,14 @@ static void StatePalette(const struct MpAppearance *app, u8 state, u16 *dst)
     else if (state == ST_FOOT && app->base == MP_BASE_MAY)
         memcpy(dst, sOrigPalMay, 32);
     else
+    {
+        // Bike, surf...: Brendan's or May's sprites, so their hair layout
+        struct MpAppearance g = *app;
         memcpy(dst, female ? sOrigPalMay : sOrigPalBrendan, 32);
+        g.base = female ? MP_BASE_MAY : MP_BASE_BRENDAN;
+        ApplyRecolor(&g, dst);
+        return;
+    }
     ApplyRecolor(app, dst);
 }
 
@@ -1054,11 +1297,114 @@ void MP_Avatar_BuildRemote(u8 id)
 }
 
 // ---------------------------------------------------------------------------
-// Trainer pictures (trainer card, battles)
+// Trainer pictures (trainer card, battles). They match the overworld sprite
+// unless LOOK > TRAINER PIC / BACK PIC picks another one, and they take the
+// same SKIN / HAIR / OUTFIT / ACCENT colors (except credited fan art).
+// Front choices: Emerald's trainer pics, then FRLG and Showdown ones.
+// Back choices: Emerald's back pics, then FRLG ones.
 
-u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
+static const char *const sEmeraldBackNames[EMERALD_BACK_COUNT][2] = {
+    {"BRENDAN", "brendan"}, {"MAY", "may"}, {"RED", "red"}, {"LEAF", "leaf"},
+    {"RS BRENDAN", "rs_brendan"}, {"RS MAY", "rs_may"}, {"WALLY", "wally"}, {"STEVEN", "steven"},
+};
+
+u16 MP_Avatar_FrontChoiceCount(void) { return FRONT_CHOICES + 1; }
+u8 MP_Avatar_BackChoiceCount(void) { return BACK_CHOICES + 1; }
+
+const char *MP_Avatar_FrontSelName(u16 sel)
+{
+    if (sel == 0)
+        return "MATCH";
+    sel--;
+    if (sel < EMERALD_FRONT_COUNT)
+        return sMpEmeraldFrontNames[sel][0];
+    if (sel < FRONT_CHOICES)
+        return sMpExtFronts[sel - EMERALD_FRONT_COUNT].name;
+    return "?";
+}
+
+const char *MP_Avatar_FrontSelArtist(u16 sel)
+{
+    if (sel > EMERALD_FRONT_COUNT && sel <= FRONT_CHOICES)
+        return sMpExtFronts[sel - 1 - EMERALD_FRONT_COUNT].artist;
+    return "";
+}
+
+bool8 MP_Avatar_FrontSelRecolors(u16 sel)
+{
+    if (sel > EMERALD_FRONT_COUNT && sel <= FRONT_CHOICES)
+        return sMpExtFronts[sel - 1 - EMERALD_FRONT_COUNT].recolor;
+    return TRUE;
+}
+
+const char *MP_Avatar_FrontSelConfigName(u16 sel)
+{
+    if (sel == 0 || sel > FRONT_CHOICES)
+        return "match";
+    sel--;
+    if (sel < EMERALD_FRONT_COUNT)
+        return sMpEmeraldFrontNames[sel][1];
+    return sMpExtFronts[sel - EMERALD_FRONT_COUNT].cfg;
+}
+
+u16 MP_Avatar_ParseFrontSel(const char *name)
+{
+    u16 i;
+    for (i = 1; i <= FRONT_CHOICES; i++)
+        if (strcmp(MP_Avatar_FrontSelConfigName(i), name) == 0)
+            return i;
+    return 0;
+}
+
+const char *MP_Avatar_BackSelName(u8 sel)
+{
+    if (sel == 0)
+        return "MATCH";
+    sel--;
+    if (sel < EMERALD_BACK_COUNT)
+        return sEmeraldBackNames[sel][0];
+    if (sel < BACK_CHOICES)
+        return sMpExtBackNames[sel - EMERALD_BACK_COUNT];
+    return "?";
+}
+
+const char *MP_Avatar_BackSelConfigName(u8 sel)
+{
+    static char buf[40];
+    if (sel == 0 || sel > BACK_CHOICES)
+        return "match";
+    sel--;
+    if (sel < EMERALD_BACK_COUNT)
+        return sEmeraldBackNames[sel][1];
+    snprintf(buf, sizeof(buf), "frlg_");
+    ToConfigName(buf + 5, sMpExtBackNames[sel - EMERALD_BACK_COUNT], sizeof(buf) - 5);
+    return buf;
+}
+
+u8 MP_Avatar_ParseBackSel(const char *name)
+{
+    u8 i;
+    for (i = 1; i <= BACK_CHOICES; i++)
+        if (strcmp(MP_Avatar_BackSelConfigName(i), name) == 0)
+            return i;
+    return 0;
+}
+
+// Default/custom bases become Brendan or May
+static struct MpAppearance Resolved(const struct MpAppearance *a)
+{
+    struct MpAppearance app = *a;
+    if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM || app.base >= MP_BASE_COUNT)
+        app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
+    return app;
+}
+
+// Front choice of a look, -1 = none (the game's default)
+static int FrontChoice(const struct MpAppearance *app)
 {
     const struct MpSpriteEntry *e;
+    if (app->frontSel)
+        return app->frontSel - 1 < FRONT_CHOICES ? app->frontSel - 1 : -1;
     switch (app->base)
     {
     case MP_BASE_BRENDAN:    return TRAINER_PIC_BRENDAN;
@@ -1067,76 +1413,18 @@ u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
     case MP_BASE_RS_MAY:     return TRAINER_PIC_RS_MAY;
     case MP_BASE_NPC:
         e = MP_Avatar_FindCatalog(app->gfxId);
-        if (e && e->frontPic != MP_PIC_NONE)
+        if (e && e->frontPic != MP_PIC_NONE && e->frontPic < FRONT_CHOICES)
             return e->frontPic;
         break;
     }
-    return 0xFFFF;
+    return -1;
 }
 
-// Loads a pack's FRONT picture into runtime slot 0 (local) or 1 (opponent)
-static void LoadPackFront(const struct MpAppearance *app, const struct MpPack *pack, int which)
-{
-    u16 pal[16];
-    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-    memcpy(pal, pack->pal[PACK_PAL_FRONT], 32);
-    CountTileUsage(pack->slot[PACK_FRONT], TRAINER_PIC_SIZE, counts);
-    CountHeadAndBody(pack->slot[PACK_FRONT], 8, 8, head, body);
-    AutoRecolor(app, pal, counts, body, head);
-    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[which], pack->slot[PACK_FRONT], TRAINER_PIC_SIZE);
-    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[which], pal, 32);
-}
-
-u16 MP_Avatar_LocalFrontPic(void)
-{
-    const struct MpPack *pack = LocalPack();
-    struct MpAppearance app = GetLocalAppearance();
-    if (pack && pack->slot[PACK_FRONT])
-    {
-        LoadPackFront(&app, pack, 0);
-        return TRAINER_PIC_MP_LOCAL;
-    }
-    return MP_Avatar_FrontPicFor(&gMpConfig.app);
-}
-
-u16 MP_Avatar_RemoteFrontPic(u8 id)
-{
-    struct MpPack buf;
-    const struct MpPack *pack;
-    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
-        return 0xFFFF;
-    pack = RemotePack(id, &buf);
-    if (pack && pack->slot[PACK_FRONT])
-    {
-        LoadPackFront(&gMpPlayers[id].app, pack, 1);
-        return TRAINER_PIC_MP_OPPONENT;
-    }
-    return MP_Avatar_FrontPicFor(&gMpPlayers[id].app);
-}
-
-u16 MP_LocalFrontPicOr(u16 defaultPic)
-{
-    u16 pic = MP_Avatar_LocalFrontPic();
-    return pic == 0xFFFF ? defaultPic : pic;
-}
-
-// Copies a pack's BACK frames (recolored for the appearance) into a back pic slot
-static void LoadPackBack(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u32 *palLz)
-{
-    struct MpAppearance app = *appIn;
-    u16 pal[16];
-    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
-    memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
-    memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
-    CountTileUsage(pack->slot[PACK_BACK], TRAINER_PIC_SIZE, counts);
-    CountHeadAndBody(pack->slot[PACK_BACK], 8, 8, head, body);
-    AutoRecolor(&app, pal, counts, body, head);
-    MP_Pack_WriteLz77Literal((u8 *)palLz, pal, 32);
-}
-
-static u16 BackPicForBase(const struct MpAppearance *app)
+static int BackChoice(const struct MpAppearance *app)
 {
     const struct MpSpriteEntry *e;
+    if (app->backSel)
+        return app->backSel - 1 < BACK_CHOICES ? app->backSel - 1 : -1;
     switch (app->base)
     {
     case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
@@ -1145,40 +1433,207 @@ static u16 BackPicForBase(const struct MpAppearance *app)
     case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
     case MP_BASE_NPC:
         e = MP_Avatar_FindCatalog(app->gfxId);
-        if (e && e->backPic != MP_PIC_NONE)
+        if (e && e->backPic != MP_PIC_NONE && e->backPic < BACK_CHOICES)
             return e->backPic;
         break;
     }
-    return 0xFFFF;
+    return -1;
+}
+
+static bool8 FrontChoiceTiles(int c, u8 *tiles, u16 *pal, bool8 *canRecolor)
+{
+    *canRecolor = TRUE;
+    if (c < 0 || c >= FRONT_CHOICES)
+        return FALSE;
+    if (c < EMERALD_FRONT_COUNT)
+    {
+        LZ77UnCompWram(gTrainerFrontPicTable[c].data, tiles);
+        LZ77UnCompWram(gTrainerFrontPicPaletteTable[c].data, pal);
+        return TRUE;
+    }
+    c -= EMERALD_FRONT_COUNT;
+    memcpy(tiles, sExtFrontTiles + c * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE);
+    memcpy(pal, sExtFrontPals + c * 16, 32);
+    *canRecolor = sMpExtFronts[c].recolor;
+    return TRUE;
+}
+
+// 4 frames in Brendan's order (stand, throw..., after the throw)
+static bool8 BackChoiceTiles(int b, u8 *tiles, u16 *pal)
+{
+    static const u8 sFiveFrameOrder[4] = {0, 1, 3, 4};   // Red and Leaf
+    int i;
+    if (b < 0 || b >= BACK_CHOICES)
+        return FALSE;
+    if (b < EMERALD_BACK_COUNT)
+    {
+        const u8 *src = (const u8 *)gTrainerBackPicTable[b].data;
+        u32 frames = gTrainerBackPicTable[b].size / TRAINER_PIC_SIZE;
+        for (i = 0; i < 4; i++)
+        {
+            u32 f = frames >= 5 ? sFiveFrameOrder[i] : ((u32)i < frames ? (u32)i : 0);
+            memcpy(tiles + i * TRAINER_PIC_SIZE, src + f * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE);
+        }
+        LZ77UnCompWram(gTrainerBackPicPaletteTable[b].data, pal);
+        return TRUE;
+    }
+    b -= EMERALD_BACK_COUNT;
+    memcpy(tiles, sExtBackTiles + b * 4 * TRAINER_PIC_SIZE, 4 * TRAINER_PIC_SIZE);
+    memcpy(pal, sExtBackPals + b * 16, 32);
+    return TRUE;
+}
+
+// Recolors a 64x64 picture's palette for a look (head/body from its first frame)
+static void RecolorPic(const struct MpAppearance *app, const u8 *tiles, u16 *pal)
+{
+    u32 counts[16] = {0}, body[16] = {0}, head[16] = {0};
+    CountTileUsage(tiles, TRAINER_PIC_SIZE, counts);
+    CountHeadAndBody(tiles, 8, 8, head, body);
+    AutoRecolor(app, pal, counts, body, head);
+}
+
+// The look's front picture. FALSE = nothing picked (the game's default)
+static bool8 BuildFront(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
+{
+    struct MpAppearance app = Resolved(appIn);
+    bool8 canRecolor = TRUE;
+    if (!app.frontSel && pack && pack->slot[PACK_FRONT])
+    {
+        memcpy(tiles, pack->slot[PACK_FRONT], TRAINER_PIC_SIZE);
+        memcpy(pal, pack->pal[PACK_PAL_FRONT], 32);
+    }
+    else if (!FrontChoiceTiles(FrontChoice(&app), tiles, pal, &canRecolor))
+    {
+        // Characters without a picture show Brendan/May, in the look's colors
+        if (!recolor || !WantsRecolor(&app))
+            return FALSE;
+        FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, tiles, pal, &canRecolor);
+    }
+    if (recolor && canRecolor)
+        RecolorPic(&app, tiles, pal);
+    return TRUE;
+}
+
+static bool8 BuildBack(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
+{
+    struct MpAppearance app = Resolved(appIn);
+    if (!app.backSel && pack && pack->slot[PACK_BACK])
+    {
+        memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
+        memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
+    }
+    else if (!BackChoiceTiles(BackChoice(&app), tiles, pal))
+    {
+        return FALSE;
+    }
+    if (recolor)
+        RecolorPic(&app, tiles, pal);
+    return TRUE;
+}
+
+static u8 sPicBuf[4 * TRAINER_PIC_SIZE];
+
+// Front pic id for a look: an Emerald pic as is, or the runtime slot 0 (local) / 1 (others)
+static u16 FrontPicId(const struct MpAppearance *appIn, const struct MpPack *pack, int which)
+{
+    struct MpAppearance app = Resolved(appIn);
+    int c = FrontChoice(&app);
+    bool8 usePack = !app.frontSel && pack && pack->slot[PACK_FRONT];
+    u16 pal[16];
+    if (!usePack && c < EMERALD_FRONT_COUNT && !WantsRecolor(&app))
+        return c < 0 ? 0xFFFF : (u16)c;
+    if (!BuildFront(&app, pack, sPicBuf, pal, TRUE))
+        return 0xFFFF;
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[which], sPicBuf, TRAINER_PIC_SIZE);
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[which], pal, 32);
+    return which == 0 ? TRAINER_PIC_MP_LOCAL : TRAINER_PIC_MP_OPPONENT;
+}
+
+static u16 BackPicId(const struct MpAppearance *appIn, const struct MpPack *pack, u8 *tiles, u32 *palLz, u16 slotPic)
+{
+    struct MpAppearance app = Resolved(appIn);
+    int b = BackChoice(&app);
+    bool8 usePack = !app.backSel && pack && pack->slot[PACK_BACK];
+    u16 pal[16];
+    if (!usePack && (b < 0 || (b < EMERALD_BACK_COUNT && !WantsRecolor(&app))))
+        return b < 0 ? 0xFFFF : (u16)b;
+    if (!BuildBack(&app, pack, tiles, pal, TRUE))
+        return 0xFFFF;
+    MP_Pack_WriteLz77Literal((u8 *)palLz, pal, 32);
+    return slotPic;
+}
+
+// The Emerald front pic that matches a look (no runtime pictures), 0xFFFF = none
+u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app)
+{
+    struct MpAppearance r = Resolved(app);
+    int c = FrontChoice(&r);
+    return (c >= 0 && c < EMERALD_FRONT_COUNT) ? (u16)c : 0xFFFF;
+}
+
+bool8 MP_Avatar_GetFrontTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal)
+{
+    return BuildFront(app, NULL, tiles, pal, FALSE);
+}
+
+bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal)
+{
+    return BuildBack(app, NULL, tiles, pal, FALSE);
+}
+
+bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal)
+{
+    struct MpAppearance app = GetLocalAppearance();
+    bool8 canRecolor;
+    if (BuildFront(&app, LocalPack(), tiles, pal, TRUE))
+        return TRUE;
+    // What the game shows by default
+    FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, tiles, pal, &canRecolor);
+    return TRUE;
+}
+
+bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal)
+{
+    struct MpAppearance app = GetLocalAppearance();
+    if (!BuildBack(&app, LocalPack(), sPicBuf, pal, TRUE))
+        return FALSE;
+    memcpy(tiles, sPicBuf, TRAINER_PIC_SIZE);
+    return TRUE;
+}
+
+u16 MP_Avatar_LocalFrontPic(void)
+{
+    struct MpAppearance app = GetLocalAppearance();
+    return FrontPicId(&app, LocalPack(), 0);
+}
+
+u16 MP_Avatar_RemoteFrontPic(u8 id)
+{
+    struct MpPack buf;
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return 0xFFFF;
+    return FrontPicId(&gMpPlayers[id].app, RemotePack(id, &buf), 1);
+}
+
+u16 MP_LocalFrontPicOr(u16 defaultPic)
+{
+    u16 pic = MP_Avatar_LocalFrontPic();
+    return pic == 0xFFFF ? defaultPic : pic;
 }
 
 u16 MP_Avatar_LocalBackPic(void)
 {
-    const struct MpPack *pack = LocalPack();
-
-    if (pack && pack->slot[PACK_BACK])
-    {
-        struct MpAppearance app = GetLocalAppearance();
-        LoadPackBack(&app, pack, gMpTrainerBackTiles, gMpTrainerBackPalLz);
-        return TRAINER_BACK_PIC_MP_LOCAL;
-    }
-    return BackPicForBase(&gMpConfig.app);
+    struct MpAppearance app = GetLocalAppearance();
+    return BackPicId(&app, LocalPack(), gMpTrainerBackTiles, gMpTrainerBackPalLz, TRAINER_BACK_PIC_MP_LOCAL);
 }
 
 // Another player's battle back pic (co-op partner), 0xFFFF = game default
 u16 MP_Avatar_RemoteBackPic(u8 id)
 {
     struct MpPack buf;
-    const struct MpPack *pack;
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return 0xFFFF;
-    pack = RemotePack(id, &buf);
-    if (pack && pack->slot[PACK_BACK])
-    {
-        LoadPackBack(&gMpPlayers[id].app, pack, gMpPartnerBackTiles, gMpPartnerBackPalLz);
-        return TRAINER_BACK_PIC_MP_PARTNER;
-    }
-    return BackPicForBase(&gMpPlayers[id].app);
+    return BackPicId(&gMpPlayers[id].app, RemotePack(id, &buf), gMpPartnerBackTiles, gMpPartnerBackPalLz, TRAINER_BACK_PIC_MP_PARTNER);
 }
 
 bool8 MP_Avatar_RemoteHidesBack(u8 id)
@@ -1221,7 +1676,7 @@ bool8 MP_Avatar_ExportLocal(char *pathOut, int len)
         snprintf(pathOut, len, "%s", gMpConfig.customSprite); // edit the pack in place
     else
         snprintf(pathOut, len, "%s/my_%s.png", PACK_DIR, name);
-    return MP_Pack_Export(pathOut, app.base, app.gfxId, app.gender, LocalPack());
+    return MP_Pack_Export(pathOut, &app, LocalPack());
 }
 
 static bool8 FileExists(const char *path)
@@ -1290,7 +1745,7 @@ bool8 MP_Avatar_InstallPack(const char *src, char *err, int errLen)
         snprintf(err, errLen, "sprites folder is full");
         return FALSE;
     }
-    choice = NUM_BASE_CHOICES + ARRAY_COUNT(sSpriteCatalog) + i;
+    choice = NUM_BASE_CHOICES + CATALOG_COUNT + i;
     MP_Avatar_SetChoice(&gMpConfig.app, choice);
     if (!gMpConfig.app.hasCustom)
     {

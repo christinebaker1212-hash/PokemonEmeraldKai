@@ -617,42 +617,15 @@ static bool8 WritePng(const char *path, const u8 *rgba, int w, int h, const char
     return TRUE;
 }
 
-static u16 DefaultFrontPic(u8 base, u16 gfxId, u8 gender)
+bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const struct MpPack *pack)
 {
-    struct MpAppearance app;
-    u16 pic;
-    memset(&app, 0, sizeof(app));
-    app.base = base;
-    app.gfxId = gfxId;
-    pic = MP_Avatar_FrontPicFor(&app);
-    if (pic == 0xFFFF && (base == MP_BASE_DEFAULT || base == MP_BASE_CUSTOM))
-        pic = (gender == FEMALE) ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN;
-    return pic;
-}
-
-static u16 DefaultBackPic(u8 base, u16 gfxId, u8 gender)
-{
-    const struct MpSpriteEntry *e;
-    switch (base)
-    {
-    case MP_BASE_BRENDAN:    return TRAINER_BACK_PIC_BRENDAN;
-    case MP_BASE_MAY:        return TRAINER_BACK_PIC_MAY;
-    case MP_BASE_RS_BRENDAN: return TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN;
-    case MP_BASE_RS_MAY:     return TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY;
-    case MP_BASE_NPC:
-        e = MP_Avatar_FindCatalog(gfxId);
-        return (e && e->backPic != MP_PIC_NONE) ? e->backPic : 0xFFFF;
-    default:
-        return gender == FEMALE ? TRAINER_BACK_PIC_MAY : TRAINER_BACK_PIC_BRENDAN;
-    }
-}
-
-bool8 MP_Pack_Export(const char *path, u8 base, u16 gfxId, u8 gender, const struct MpPack *pack)
-{
+    struct MpAppearance app = *appIn;
+    u8 base = app.base;
+    u16 gfxId = app.gfxId;
+    u8 gender = app.gender;
     u8 *atlas = calloc(PACK_ATLAS_W * PACK_ATLAS_H, 4);
     static u8 sPicBuf[64 * 64 / 2 * 4];
     u16 pal[16];
-    u16 pic;
     char text[64];
     bool8 ok;
     u8 slot;
@@ -682,27 +655,23 @@ bool8 MP_Pack_Export(const char *path, u8 base, u16 gfxId, u8 gender, const stru
     {
         PutInfoFrames(atlas, PACK_WALK, base == MP_BASE_RS_MAY ? &gObjectEventGraphicsInfo_RubySapphireMay : &gObjectEventGraphicsInfo_RubySapphireBrendan, 0);
     }
-    else if (base == MP_BASE_NPC && MP_Avatar_FindCatalog(gfxId))
+    else if (base == MP_BASE_NPC && MP_Avatar_NpcInfo(gfxId))
     {
-        const struct ObjectEventGraphicsInfo *npc = gObjectEventGraphicsInfoPointers[gfxId];
+        const struct ObjectEventGraphicsInfo *npc = MP_Avatar_NpcInfo(gfxId);
         if (npc->width == 16 && npc->height == 32)
             PutInfoFrames(atlas, PACK_WALK, npc, 0);
     }
 
-    pic = DefaultFrontPic(base, gfxId, gender);
-    if (pic != 0xFFFF)
-    {
-        LZ77UnCompWram(gTrainerFrontPicTable[pic].data, sPicBuf);
-        LZ77UnCompWram(gTrainerFrontPicPaletteTable[pic].data, pal);
+    // The trainer pictures picked in LOOK (or the ones that match the sprite)
+    app.base = base;
+    app.hasCustom = FALSE;
+    if (MP_Avatar_GetFrontTiles(&app, sPicBuf, pal))
         PutFrame(atlas, PACK_FRONT, 0, sPicBuf, pal);
-    }
-    pic = DefaultBackPic(base, gfxId, gender);
-    if (pic != 0xFFFF)
+    if (MP_Avatar_GetBackTiles(&app, sPicBuf, pal))
     {
         int i;
-        LZ77UnCompWram(gTrainerBackPicPaletteTable[pic].data, pal);
-        for (i = 0; i < 4 && (u32)(i + 1) * 2048 <= gTrainerBackPicTable[pic].size; i++)
-            PutFrame(atlas, PACK_BACK, i, (const u8 *)gTrainerBackPicTable[pic].data + i * 2048, pal);
+        for (i = 0; i < 4; i++)
+            PutFrame(atlas, PACK_BACK, i, sPicBuf + i * 2048, pal);
     }
 
     // The player's own edits on top
@@ -724,11 +693,7 @@ bool8 MP_Pack_Export(const char *path, u8 base, u16 gfxId, u8 gender, const stru
     }
 
     {
-        struct MpAppearance app;
         char name[40];
-        memset(&app, 0, sizeof(app));
-        app.base = base;
-        app.gfxId = gfxId;
         MP_Avatar_SpriteConfigName(&app, name, sizeof(name));
         snprintf(text, sizeof(text), "base=%s", name);
     }

@@ -231,6 +231,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "skin") == 0) gMpConfig.app.skin = ParseChoice(val, MP_Avatar_SkinName, MP_SKIN_COUNT);
         else if (strcmp(key, "outfit") == 0) gMpConfig.app.outfit = ParseChoice(val, MP_Avatar_ColorName, MP_COLOR_COUNT);
         else if (strcmp(key, "accent") == 0) gMpConfig.app.accent = ParseChoice(val, MP_Avatar_ColorName, MP_COLOR_COUNT);
+        else if (strcmp(key, "hair") == 0) gMpConfig.app.hair = ParseChoice(val, MP_Avatar_HairName, MP_HAIR_COUNT);
+        else if (strcmp(key, "trainer_pic") == 0) gMpConfig.app.frontSel = MP_Avatar_ParseFrontSel(val);
+        else if (strcmp(key, "back_pic") == 0) gMpConfig.app.backSel = MP_Avatar_ParseBackSel(val);
         else if (strcmp(key, "trainer_range") == 0)
         {
             int r = atoi(val);
@@ -260,12 +263,13 @@ static void LowerName(char *dst, const char *src)
 void MP_SaveConfig(void)
 {
     FILE *f;
-    char sprite[32], skin[32], outfit[32], accent[32];
+    char sprite[48], skin[32], outfit[32], accent[32], hair[32];
 
     MP_Avatar_SpriteConfigName(&gMpConfig.app, sprite, sizeof(sprite));
     LowerName(skin, MP_Avatar_SkinName(gMpConfig.app.skin));
     LowerName(outfit, MP_Avatar_ColorName(gMpConfig.app.outfit));
     LowerName(accent, MP_Avatar_ColorName(gMpConfig.app.accent));
+    LowerName(hair, MP_Avatar_HairName(gMpConfig.app.hair));
     f = fopen(ConfigPath(), "w");
     if (!f)
         return;
@@ -279,6 +283,10 @@ void MP_SaveConfig(void)
         "skin = %s\n"
         "; outfit / accent = default, red, blue, green, yellow, purple, pink, orange, black, white, teal\n"
         "outfit = %s\naccent = %s\n"
+        "; hair = default, black, brown, chestnut, blonde, ginger, red, silver, white, blue, pink, purple, green, teal, gold\n"
+        "hair = %s\n"
+        "; trainer card / battle pictures: match (same as the sprite) or a name from CO-OP > LOOK\n"
+        "trainer_pic = %s\nback_pic = %s\n"
         "; how many tiles a player holding the BATTLE FLAG can see\n"
         "trainer_range = %d\n"
         "; the party Pokemon that follows you (SELECT in the party menu); 0 = none\n"
@@ -288,7 +296,8 @@ void MP_SaveConfig(void)
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 4 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
-        gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
+        gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
+        MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
     {
         int i;
@@ -409,7 +418,9 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     p[0] = a->base; p[1] = a->skin; p[2] = a->outfit; p[3] = a->accent;
     p[4] = a->gender; p[5] = a->hasCustom;
     PutU16(p + 6, a->gfxId);
-    p[8] = a->trainerPic;
+    PutU16(p + 8, a->frontSel);
+    p[10] = a->backSel;
+    p[11] = a->hair;
 }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
@@ -422,7 +433,9 @@ static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
     a->gender = p[4] ? FEMALE : MALE;
     a->hasCustom = p[5];
     a->gfxId = GetU16(p + 6);
-    a->trainerPic = p[8];
+    a->frontSel = GetU16(p + 8) < MP_Avatar_FrontChoiceCount() ? GetU16(p + 8) : 0;
+    a->backSel = p[10] < MP_Avatar_BackChoiceCount() ? p[10] : 0;
+    a->hair = p[11] < MP_HAIR_COUNT ? p[11] : 0;
 }
 
 static void GetLocalName(u8 *dst)
