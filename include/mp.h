@@ -541,7 +541,7 @@ enum {
 };
 
 
-// mp_minigame.c: BERRY BLENDER with friends (UNION ROOM)
+// mp_minigame.c: BERRY BLENDER / BERRY CRUSH with friends (CO-OP > BERRY GAMES)
 void MP_Minigame_Update(void);
 void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Minigame_OnPlayerLeft(u8 id);
@@ -592,11 +592,12 @@ void MP_Group_Update(void);
 bool8 MP_Contest_TryLinkup(void);
 
 // mp_linkx.c: record mixing, Secret Base visits, Trainer Cards, Day Care eggs,
-// shared roamers and weather, Hall of Fame together, the UNION ROOM page
+// shared roamers and weather, Hall of Fame together, the FRIENDS / BERRY GAMES pages
 void MP_Linkx_Update(void);
 void MP_Linkx_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Linkx_OnPlayerLeft(u8 id);
-void MP_Linkx_OpenUnion(void);
+void MP_Linkx_OpenUnion(void);   // CO-OP > BERRY GAMES
+void MP_Linkx_OpenFriend(u8 id);  // CO-OP > FRIENDS > a friend
 u16 MP_Linkx_CardPicOr(u16 defaultPic);
 bool8 MP_Linkx_FriendDaycareMon(u8 id, struct BoxPokemon *out);
 void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId);

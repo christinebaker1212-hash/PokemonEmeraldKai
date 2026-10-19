@@ -242,22 +242,22 @@ BETTING           When you watch a friend's battle you can bet $500 on them to
                   win or lose. Right: double back. Leave early: bet lost.
 
 
-THE GAME'S OWN LINK FEATURES, ONLINE (CO-OP menu > UNION ROOM)
--------------------------------------------------------------
+THE GAME'S OWN LINK FEATURES, ONLINE
+------------------------------------
 RECORD MIXING   Happens by itself while friends are online (when someone
                 joins, then every 20 minutes): TV shows, SECRET BASES, the
                 Old Man's songs, Dewford trends, Battle Tower trainers and
                 the rest, just like mixing records at a POKEMON CENTER.
-                MIX RECORDS does it right away. (SECRET BASES only arrive once
-                you have SECRET POWER, like in the original.)
-SECRET BASES    VISIT A SECRET BASE walks you straight into a friend's base,
-                decorations and all (you can battle its owner). Leaving puts
-                you outside it, on its route.
-TRAINER CARDS   Look at a friend's TRAINER CARD (both sides).
+                (SECRET BASES only arrive once you have SECRET POWER, like in
+                the original.)
+SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
+                you straight into their base, decorations and all (you can
+                battle its owner). Leaving puts you outside it, on its route.
+TRAINER CARDS   CO-OP menu > FRIENDS > pick a friend > TRAINER CARD (both
+                sides).
 DAY CARE        A POKEMON left alone at your DAY CARE can make an EGG with one
                 left alone at a friend's. Each of you gets your own EGG from
-                the DAY CARE MAN. The DAY CARE page shows how well they get
-                along.
+                the DAY CARE MAN.
 ROAMERS         Latias/Latios roam the same routes for everyone, so you can
                 hunt them together.
 WEATHER         Routes 119 and 123's weather, and the abnormal weather after
@@ -265,11 +265,11 @@ WEATHER         Routes 119 and 123's weather, and the abnormal weather after
 HALL OF FAME    Entering the HALL OF FAME shows the teams of the friends online
                 after yours, and they stand with you at the end. They get a
                 MOEGATCHA pull for cheering.
-BERRY BLENDER   UNION ROOM > BERRY BLENDER asks every friend online. Everyone
+BERRY BLENDER   CO-OP menu > BERRY GAMES > BERRY BLENDER asks every friend online. Everyone
                 who joins picks a BERRY from their own BAG and you blend
                 together, wherever you are (friends take the other seats).
                 Everyone gets the same POKEBLOCK. You need a POKEBLOCK CASE.
-BERRY CRUSH     UNION ROOM > BERRY CRUSH: mash A together to crush BERRIES into
+BERRY CRUSH     BERRY GAMES > BERRY CRUSH: mash A together to crush BERRIES into
                 BERRY POWDER. You need the POWDER JAR. You can play again
                 if everyone says YES.
 CONTESTS        Go to the LINK CONTEST counter in Lilycove's CONTEST HALL (the

@@ -28,7 +28,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_UNION, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 enum { ROW_SPRITE, ROW_SKIN, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
@@ -231,7 +231,7 @@ static void DrawScrollArrow(u8 windowId, int y, bool8 up)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL", "GO TO FRIEND", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "UNION ROOM", "MOVE TUTOR", "LOOK", ""};
+    static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -242,7 +242,7 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
     else if (page == MP_MENU_PAGE_EMOTES)
         snprintf(line, sizeof(line), "EMOTES");
     else if (page == MP_MENU_PAGE_FRIENDS)
-        snprintf(line, sizeof(line), "GO TO FRIEND");
+        snprintf(line, sizeof(line), "FRIENDS");
     else if (MP_IsConnected())
         snprintf(line, sizeof(line), "CO-OP  %d/%d ONLINE", MP_ConnectedCount(), MP_MAX_PLAYERS);
     else
@@ -347,18 +347,11 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         if (n == 0)
             MP_AsciiToGame(buf, "Nobody else is online right now.", 60);
         else if (cursor >= n)
-            MP_AsciiToGame(buf, "Fly to a friend's town (towns you've been to).", 70);
+            MP_AsciiToGame(buf, "Back to the CO-OP menu.", 70);
         else
         {
-            u16 dest = MP_Friends_Destination(ids[cursor]);
-            if (dest >= MAPSEC_NONE)
-                MP_AsciiToGame(buf, "No town you've been to is near them.", 60);
-            else
-            {
-                MP_AsciiToGame(buf, "A: FLY TO ", 20);
-                GetMapName(town, dest, 0);
-                StringAppend(buf, town);
-            }
+            (void)town;
+            MP_AsciiToGame(buf, "A: GO TO, TRAINER CARD, SECRET BASE", 70);
         }
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -526,13 +519,9 @@ static void HandleFriendsInput(u8 taskId)
     }
     else if (JOY_NEW(A_BUTTON))
     {
-        if (MP_Friends_Destination(ids[tCursor]) >= MAPSEC_NONE)
-        {
-            PlaySE(SE_FAILURE);
-            return;
-        }
+        u8 who = ids[tCursor];
         CloseMenu(taskId);
-        MP_Friends_GoTo(ids[tCursor]);
+        MP_Linkx_OpenFriend(who);
     }
 }
 
@@ -570,7 +559,7 @@ static void HandleMainInput(u8 taskId)
         CloseMenu(taskId);
         MP_Gatcha_Open();
         break;
-    case MAIN_UNION:
+    case MAIN_BERRY:
         CloseMenu(taskId);
         MP_Linkx_OpenUnion();
         break;
@@ -684,10 +673,10 @@ void MP_OpenMenuPage(u8 page)
         gTasks[taskId].tCursor = MP_Lobby_InRoom() ? MAIN_EMOTES : MAIN_ONLINE;
 }
 
-// Back from the UNION ROOM page
+// Back from the BERRY GAMES page
 void MP_OpenMenuAtUnion(void)
 {
-    MP_OpenMenuPageAt(MP_MENU_PAGE_MAIN, MAIN_UNION);
+    MP_OpenMenuPageAt(MP_MENU_PAGE_MAIN, MAIN_BERRY);
 }
 
 // Back from the MOEGATCHA screen

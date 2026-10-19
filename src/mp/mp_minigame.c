@@ -1,6 +1,6 @@
 // Moemon Co-op: the BERRY BLENDER and BERRY CRUSH with friends, online.
 //
-// CO-OP > UNION ROOM > BERRY BLENDER asks every friend online. Those who say
+// CO-OP > BERRY GAMES > BERRY BLENDER asks every friend online. Those who say
 // yes pick a BERRY in their own BAG, and everyone plays the game's own Berry
 // Blender (berry_blender.c, the NPC mode) with the friends in the NPC seats:
 // their hits come over the relay instead of from the NPC tasks.
@@ -603,7 +603,7 @@ static void TryGo(void)
 }
 
 // ---------------------------------------------------------------------------
-// Invites (UNION ROOM > BERRY BLENDER)
+// Invites (CO-OP > BERRY GAMES)
 
 static void Draw(void);
 static void Task_Minigame(u8 taskId);
@@ -640,7 +640,7 @@ static void CloseUi(void)
     }
 }
 
-// From the UNION ROOM page (which has already closed)
+// From the BERRY GAMES page (which has already closed)
 static void HostGame(u8 game)
 {
     u8 i, msg[3];

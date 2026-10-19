@@ -2,11 +2,12 @@
 //
 //   * Record mixing: TV shows, Secret Bases, the Old Man's songs, Dewford's
 //     trends, Battle Tower trainers, apprentices... mix by themselves while
-//     friends are online (when someone joins, then every 20 minutes), or
-//     from CO-OP > UNION ROOM > MIX RECORDS. The game's own mixing code does
+//     friends are online (when someone joins, then every 20 minutes).
+//     The game's own mixing code does
 //     the work (record_mixing.c); this only moves the records around.
-//   * Secret Base visits: walk into a friend's base from anywhere.
-//   * Trainer Cards: look at a friend's card.
+//   * Secret Base visits: walk into a friend's base from anywhere
+//     (CO-OP > FRIENDS > a friend).
+//   * Trainer Cards: look at a friend's card (same place).
 //   * Day Care: a POKéMON alone in your DAY CARE can make an EGG with one alone
 //     in a friend's (daycare.c). Each of you gets your own EGG.
 //   * Shared roamers and weather: Latias/Latios roam the same routes for
@@ -42,6 +43,8 @@
 #include "task.h"
 #include "trainer_card.h"
 #include "constants/weather.h"
+#include "constants/region_map_sections.h"
+#include "region_map.h"
 #include "constants/flags.h"
 #include "constants/songs.h"
 #include "constants/trainers.h"
@@ -322,21 +325,8 @@ static void UpdateMix(void)
     }
 }
 
-// CO-OP > UNION ROOM > MIX RECORDS
-static void AskForMix(void)
-{
-    u8 mask = PresentMask(), lead = Lowest(mask);
-    if (lead == (u8)gMpLocalId)
-        StartMixRound(TRUE);
-    else
-    {
-        u8 b = LX_MIX_ASK;
-        MP_SendRelay(lead, &b, 1);
-    }
-}
-
 // ---------------------------------------------------------------------------
-// Trainer cards and Secret Bases (asked for from the UNION ROOM page)
+// Trainer cards and Secret Bases (asked for from CO-OP > FRIENDS)
 
 static struct
 {
@@ -790,147 +780,92 @@ void MP_Linkx_Update(void)
 }
 
 // ---------------------------------------------------------------------------
-// CO-OP > UNION ROOM
+// CO-OP > FRIENDS > (a friend): GO TO, TRAINER CARD, VISIT SECRET BASE
+// CO-OP > BERRY GAMES: BERRY BLENDER, BERRY CRUSH
 
-enum { SC_HUB, SC_PICK, SC_DAYCARE, SC_WAIT };
-enum { HUB_CARD, HUB_BASE, HUB_MIX, HUB_DAYCARE, HUB_BLENDER, HUB_CRUSH, HUB_BACK, HUB_COUNT };
+enum { SC_FRIEND, SC_BERRY, SC_WAIT };
+enum { FR_GOTO, FR_CARD, FR_BASE, FR_BACK, FR_COUNT };
+enum { BG_BLENDER, BG_CRUSH, BG_BACK, BG_COUNT };
 
 static EWRAM_DATA struct
 {
     u8 taskId;
     u8 screen;
-    u8 pickFor;        // HUB_CARD / HUB_BASE
-    u16 cursor, scroll;
-    u8 friends[MP_MAX_PLAYERS];
-    u8 friendCount;
+    u8 friend;
+    u16 cursor;
     char note[96];
 } sUi = {0};
 
 void MP_OpenMenuPageAt(u8 page, u8 cursor);
 void MP_OpenMenuAtUnion(void);
 
-static const char *CompatText(u8 score)
+static void FriendTitle(char *out, int size)
 {
-    switch (score)
-    {
-    case 70: return "Very well!";
-    case 50: return "Get along";
-    case 20: return "Not much";
-    default: return "No interest";
-    }
-}
-
-static void MonLine(const struct BoxPokemon *mon, char *out, int size)
-{
-    u8 name[POKEMON_NAME_LENGTH + 1];
-    char a[16];
-    GetSpeciesName(name, GetBoxMonData((struct BoxPokemon *)mon, MON_DATA_SPECIES));
-    MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
-    snprintf(out, size, "%s Lv%d", a, GetLevelFromBoxMonExp((struct BoxPokemon *)mon));
+    char name[16];
+    Name(sUi.friend, name);
+    snprintf(out, size, "%s", name);
 }
 
 static void Draw(void)
 {
-    u16 i;
+    char line[64];
     switch (sUi.screen)
     {
-    case SC_HUB:
+    case SC_FRIEND:
     {
-        static const char *const sRows[HUB_COUNT] = {"TRAINER CARDS", "VISIT A SECRET BASE", "MIX RECORDS", "DAY CARE", "BERRY BLENDER", "BERRY CRUSH", "BACK"};
-        static const char *const sHelp[HUB_COUNT] = {
-            "Look at a friend's TRAINER CARD.",
-            "Walk into a friend's SECRET BASE, wherever you are.",
-            "TV shows, SECRET BASES and more mix by themselves while friends are online. Mix now?",
-            "A POKEMON alone in your DAY CARE can make an EGG with one alone in a friend's.",
+        static const char *const sHelp[FR_COUNT] = {
+            "Fly to the town nearest to them (towns you've been to).",
+            "Look at their TRAINER CARD.",
+            "Walk into their SECRET BASE, wherever you are.",
+            "Back to the list of friends.",
+        };
+        u16 dest = MP_Friends_Destination(sUi.friend);
+        char right[24] = "";
+        u8 town[24];
+        if (dest < MAPSEC_NONE)
+        {
+            GetMapName(town, dest, 0);
+            MP_GameToAscii(right, town, sizeof(right) - 1);
+        }
+        FriendTitle(line, sizeof(line));
+        MpUi_Begin(line);
+        MpUi_RowAscii(FR_GOTO, sUi.cursor == FR_GOTO, "GO TO", dest < MAPSEC_NONE ? right : "-");
+        MpUi_RowAscii(FR_CARD, sUi.cursor == FR_CARD, "TRAINER CARD", NULL);
+        MpUi_RowAscii(FR_BASE, sUi.cursor == FR_BASE, "VISIT SECRET BASE", NULL);
+        MpUi_RowAscii(FR_BACK, sUi.cursor == FR_BACK, "BACK", NULL);
+        MpUi_End();
+        MpUi_HelpAscii(sUi.note[0] ? sUi.note : sHelp[sUi.cursor]);
+        break;
+    }
+    case SC_BERRY:
+    {
+        static const char *const sRows[BG_COUNT] = {"BERRY BLENDER", "BERRY CRUSH", "BACK"};
+        static const char *const sHelp[BG_COUNT] = {
             "Blend BERRIES into POKEBLOCKS with friends, wherever you are.",
             "Mash A with friends to crush BERRIES into BERRY POWDER.",
             "Back to the CO-OP menu.",
         };
-        MpUi_Begin("UNION ROOM");
-        for (i = 0; i < HUB_COUNT; i++)
+        u16 i;
+        MpUi_Begin("BERRY GAMES");
+        for (i = 0; i < BG_COUNT; i++)
             MpUi_RowAscii(i, i == sUi.cursor, sRows[i], NULL);
         MpUi_End();
         MpUi_HelpAscii(sUi.note[0] ? sUi.note : sHelp[sUi.cursor]);
         break;
     }
-    case SC_PICK:
-        MpUi_Begin(sUi.pickFor == HUB_CARD ? "WHOSE TRAINER CARD?" : "WHOSE SECRET BASE?");
-        for (i = 0; i < sUi.friendCount; i++)
-        {
-            char name[16];
-            Name(sUi.friends[i], name);
-            MpUi_RowAscii(i, i == sUi.cursor, name, NULL);
-        }
-        MpUi_RowAscii(sUi.friendCount, sUi.cursor == sUi.friendCount, "BACK", NULL);
-        MpUi_End();
-        MpUi_HelpAscii(sUi.note[0] ? sUi.note : "A: SELECT  B: BACK");
-        break;
     case SC_WAIT:
     {
-        char name[16], line[64];
+        char name[16];
         Name(sAsk.waitFrom, name);
-        MpUi_Begin("UNION ROOM");
+        FriendTitle(line, sizeof(line));
+        MpUi_Begin(line);
         snprintf(line, sizeof(line), "Asking %s...", name);
         MpUi_TextAscii(1, line);
         MpUi_End();
         MpUi_HelpAscii("B: CANCEL");
         break;
     }
-    case SC_DAYCARE:
-    {
-        struct BoxPokemon mine, theirs;
-        char line[64], right[24];
-        bool8 alone = MyLoneDaycareMon(&mine);
-        u8 row = 0, n = 0;
-        MpUi_Begin("DAY CARE WITH FRIENDS");
-        if (alone)
-        {
-            MonLine(&mine, line, sizeof(line));
-            MpUi_RowAscii(row++, FALSE, "Yours:", line);
-        }
-        else if (CountPokemonInDaycare(&gSaveBlock1Ptr->daycare) == 2)
-            MpUi_TextAscii(row++, "Yours: two POKEMON (they pair up with each other).");
-        else
-            MpUi_TextAscii(row++, "Yours: nobody at the DAY CARE right now.");
-        for (i = 0; i < MP_MAX_PLAYERS && row < MPUI_ROWS - 1; i++)
-        {
-            char name[16];
-            if (!MP_Linkx_FriendDaycareMon(i, &theirs))
-                continue;
-            Name(i, name);
-            MonLine(&theirs, line, sizeof(line) - 20);
-            snprintf(right, sizeof(right), "%s", alone ? CompatText(MP_Daycare_Compatibility(&mine, &theirs)) : "");
-            {
-                char left[64];
-                snprintf(left, sizeof(left), "%s: %s", name, line);
-                MpUi_RowAscii(row++, FALSE, left, alone ? right : NULL);
-            }
-            n++;
-        }
-        if (n == 0)
-            MpUi_TextAscii(row++, "No friend online has one POKEMON alone there.");
-        MpUi_End();
-        MpUi_HelpAscii("Leave ONE POKEMON at the DAY CARE: it can make an EGG with a friend's. B: BACK");
-        break;
     }
-    }
-}
-
-static u16 CountFor(void)
-{
-    switch (sUi.screen)
-    {
-    case SC_HUB:  return HUB_COUNT;
-    case SC_PICK: return sUi.friendCount + 1;
-    default:      return 0;
-    }
-}
-
-static void Go(u8 screen)
-{
-    sUi.screen = screen;
-    sUi.cursor = sUi.scroll = 0;
-    sUi.note[0] = 0;
 }
 
 static void CloseUi(u8 taskId)
@@ -939,14 +874,39 @@ static void CloseUi(u8 taskId)
     DestroyTask(taskId);
 }
 
-// After a friend's TRAINER CARD: back to the field and this page
-static void Task_ReopenUnion(u8 taskId)
+// Back to CO-OP > FRIENDS with this friend under the cursor
+static void BackToFriends(u8 taskId)
+{
+    u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids), i, at = 0;
+    for (i = 0; i < n; i++)
+        if (ids[i] == sUi.friend)
+            at = i;
+    CloseUi(taskId);
+    MP_OpenMenuPageAt(MP_MENU_PAGE_FRIENDS, at);
+}
+
+static void Task_LinkxUi(u8 taskId);
+
+static void OpenScreen(u8 screen)
+{
+    sUi.screen = screen;
+    sUi.cursor = 0;
+    sUi.note[0] = 0;
+    MpUi_Open();
+    sUi.taskId = CreateTask(Task_LinkxUi, 80);
+    Draw();
+}
+
+// After a friend's TRAINER CARD: back to the field and their page
+static void Task_ReopenFriend(u8 taskId)
 {
     if (IsWeatherNotFadingIn() == TRUE)
     {
         DestroyTask(taskId);
         UnlockPlayerFieldControls();
-        MP_Linkx_OpenUnion();
+        OpenScreen(SC_FRIEND);
+        sUi.cursor = FR_CARD;
+        Draw();
     }
 }
 
@@ -954,7 +914,7 @@ static void FieldCB_ReturnFromCard(void)
 {
     LockPlayerFieldControls();
     FadeInFromBlack();
-    CreateTask(Task_ReopenUnion, 80);
+    CreateTask(Task_ReopenFriend, 80);
 }
 
 static void CB2_ReturnFromCard(void)
@@ -976,151 +936,158 @@ static void Task_ShowCard(u8 taskId)
     ShowTrainerCardInLink(1, CB2_ReturnFromCard);
 }
 
-static void Task_Union(u8 taskId)
+static void UpdateWait(u8 taskId)
 {
-    if (sUi.screen == SC_WAIT)
+    if (sAsk.cardReady)
     {
-        if (sAsk.cardReady)
-        {
-            sAsk.cardReady = FALSE;
-            CloseUi(taskId);
-            LockPlayerFieldControls();
-            FadeScreen(FADE_TO_BLACK, 0);
-            CreateTask(Task_ShowCard, 80);
-            return;
-        }
-        if (sAsk.baseReady)
-        {
-            sAsk.baseReady = FALSE;
-            if (sAsk.baseSlot != 0xFF && MP_SecretBase_PrepareVisit(sAsk.baseSlot))
-            {
-                CloseUi(taskId);
-                ScriptContext_SetupScript(EventScript_MpVisitSecretBase);
-                return;
-            }
-            Go(SC_HUB);
-            sUi.cursor = HUB_BASE;
-            PlaySE(SE_FAILURE);
-            snprintf(sUi.note, sizeof(sUi.note), "%s", sAsk.baseNote);
-            Draw();
-            return;
-        }
-        if (JOY_NEW(B_BUTTON) || sFrame - sAsk.waitStart > 60 * 8 || !sAsk.waitKind)
-        {
-            bool8 timeout = !JOY_NEW(B_BUTTON);
-            sAsk.waitKind = 0;
-            Go(SC_HUB);
-            if (timeout)
-                snprintf(sUi.note, sizeof(sUi.note), "No answer. They may be busy right now.");
-            Draw();
-        }
+        sAsk.cardReady = FALSE;
+        CloseUi(taskId);
+        LockPlayerFieldControls();
+        FadeScreen(FADE_TO_BLACK, 0);
+        CreateTask(Task_ShowCard, 80);
         return;
     }
-    if (MpUi_MoveCursor(&sUi.cursor, CountFor()))
+    if (sAsk.baseReady)
+    {
+        sAsk.baseReady = FALSE;
+        if (sAsk.baseSlot != 0xFF && MP_SecretBase_PrepareVisit(sAsk.baseSlot))
+        {
+            CloseUi(taskId);
+            ScriptContext_SetupScript(EventScript_MpVisitSecretBase);
+            return;
+        }
+        sUi.screen = SC_FRIEND;
+        sUi.cursor = FR_BASE;
+        PlaySE(SE_FAILURE);
+        snprintf(sUi.note, sizeof(sUi.note), "%s", sAsk.baseNote);
+        Draw();
+        return;
+    }
+    if (JOY_NEW(B_BUTTON) || sFrame - sAsk.waitStart > 60 * 8 || !sAsk.waitKind)
+    {
+        bool8 timeout = !JOY_NEW(B_BUTTON);
+        u8 back = sAsk.waitKind == LX_BASE ? FR_BASE : FR_CARD;
+        sAsk.waitKind = 0;
+        sUi.screen = SC_FRIEND;
+        sUi.cursor = back;
+        sUi.note[0] = 0;
+        if (timeout)
+            snprintf(sUi.note, sizeof(sUi.note), "No answer. They may be busy right now.");
+        Draw();
+    }
+}
+
+static void Task_LinkxUi(u8 taskId)
+{
+    u16 count = sUi.screen == SC_FRIEND ? FR_COUNT : BG_COUNT;
+    if (sUi.screen == SC_WAIT)
+    {
+        UpdateWait(taskId);
+        return;
+    }
+    if (sUi.screen == SC_FRIEND && !gMpPlayers[sUi.friend].present)
+    {
+        // They went offline
+        PlaySE(SE_FAILURE);
+        CloseUi(taskId);
+        MP_OpenMenuPageAt(MP_MENU_PAGE_FRIENDS, 0);
+        return;
+    }
+    if (MpUi_MoveCursor(&sUi.cursor, count))
     {
         sUi.note[0] = 0;
         Draw();
         return;
     }
-    if (JOY_NEW(B_BUTTON))
+    if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && sUi.cursor == count - 1))
     {
         PlaySE(SE_SELECT);
-        if (sUi.screen == SC_HUB)
+        if (sUi.screen == SC_FRIEND)
+            BackToFriends(taskId);
+        else
         {
             CloseUi(taskId);
             MP_OpenMenuAtUnion();
-            return;
         }
-        Go(SC_HUB);
-        Draw();
         return;
     }
     if (!JOY_NEW(A_BUTTON))
         return;
     PlaySE(SE_SELECT);
-    switch (sUi.screen)
+    sUi.note[0] = 0;
+    if (sUi.screen == SC_BERRY)
     {
-    case SC_HUB:
-        if (sUi.cursor == HUB_BACK)
-        {
-            CloseUi(taskId);
-            MP_OpenMenuAtUnion();
-            return;
-        }
-        if (!MP_IsConnected() || MP_Friends_List(sUi.friends) == 0)
+        if (!MP_IsConnected() || MP_ConnectedCount() < 2)
         {
             PlaySE(SE_FAILURE);
             snprintf(sUi.note, sizeof(sUi.note), MP_IsConnected() ? "Nobody else is online right now." : "Go online first (CO-OP menu: C key or Y button).");
-            break;
         }
-        if (sUi.cursor == HUB_CARD || sUi.cursor == HUB_BASE)
+        else if (gMain.callback2 != CB2_Overworld)
         {
-            u8 pickFor = sUi.cursor;
-            sUi.friendCount = MP_Friends_List(sUi.friends);
-            Go(SC_PICK);
-            sUi.pickFor = pickFor;
+            PlaySE(SE_FAILURE);
+            snprintf(sUi.note, sizeof(sUi.note), "Head outside first.");
         }
-        else if (sUi.cursor == HUB_MIX)
-        {
-            AskForMix();
-            snprintf(sUi.note, sizeof(sUi.note), "Mixing records... You'll see a note when it's done.");
-        }
-        else if (sUi.cursor == HUB_DAYCARE)
-            Go(SC_DAYCARE);
-        else if (sUi.cursor == HUB_BLENDER || sUi.cursor == HUB_CRUSH)
+        else
         {
             u8 which = sUi.cursor;
-            if (gMain.callback2 != CB2_Overworld)
-            {
-                PlaySE(SE_FAILURE);
-                snprintf(sUi.note, sizeof(sUi.note), "Head outside first.");
-                break;
-            }
             CloseUi(taskId);
-            if (which == HUB_CRUSH)
+            if (which == BG_CRUSH)
                 MP_Minigame_HostCrush();
             else
                 MP_Minigame_HostBlender();
             return;
         }
-        break;
-    case SC_PICK:
-        if (sUi.cursor >= sUi.friendCount)
+        Draw();
+        return;
+    }
+    switch (sUi.cursor)
+    {
+    case FR_GOTO:
+    {
+        u8 who = sUi.friend;
+        if (MP_Friends_Destination(who) >= MAPSEC_NONE)
         {
-            u8 back = sUi.pickFor;
-            Go(SC_HUB);
-            sUi.cursor = back;
+            PlaySE(SE_FAILURE);
+            snprintf(sUi.note, sizeof(sUi.note), "No town you've been to is near them.");
             break;
         }
+        CloseUi(taskId);
+        MP_Friends_GoTo(who);
+        return;
+    }
+    case FR_CARD:
+    case FR_BASE:
+    {
+        u8 b = sUi.cursor == FR_CARD ? LX_CARD_REQ : LX_BASE_REQ;
+        if (sUi.cursor == FR_BASE && (CurMapIsSecretBase() || gMain.callback2 != CB2_Overworld))
         {
-            u8 who = sUi.friends[sUi.cursor];
-            u8 b = sUi.pickFor == HUB_CARD ? LX_CARD_REQ : LX_BASE_REQ;
-            if (sUi.pickFor == HUB_BASE && (CurMapIsSecretBase() || gMain.callback2 != CB2_Overworld))
-            {
-                PlaySE(SE_FAILURE);
-                snprintf(sUi.note, sizeof(sUi.note), "Head outside first.");
-                break;
-            }
-            sAsk.waitKind = sUi.pickFor == HUB_CARD ? LX_CARD : LX_BASE;
-            sAsk.waitFrom = who;
-            sAsk.waitStart = sFrame;
-            sAsk.cardReady = sAsk.baseReady = FALSE;
-            MP_SendRelay(who, &b, 1);
-            Go(SC_WAIT);
+            PlaySE(SE_FAILURE);
+            snprintf(sUi.note, sizeof(sUi.note), "Head outside first.");
+            break;
         }
+        sAsk.waitKind = sUi.cursor == FR_CARD ? LX_CARD : LX_BASE;
+        sAsk.waitFrom = sUi.friend;
+        sAsk.waitStart = sFrame;
+        sAsk.cardReady = sAsk.baseReady = FALSE;
+        MP_SendRelay(sUi.friend, &b, 1);
+        sUi.screen = SC_WAIT;
         break;
-    case SC_DAYCARE:
-        Go(SC_HUB);
-        sUi.cursor = HUB_DAYCARE;
-        break;
+    }
     }
     Draw();
 }
 
+// CO-OP > FRIENDS > a friend
+void MP_Linkx_OpenFriend(u8 id)
+{
+    memset(&sUi, 0, sizeof(sUi));
+    sUi.friend = id;
+    OpenScreen(SC_FRIEND);
+}
+
+// CO-OP > BERRY GAMES (also where the BLENDER / CRUSH lobby goes back to)
 void MP_Linkx_OpenUnion(void)
 {
     memset(&sUi, 0, sizeof(sUi));
-    MpUi_Open();
-    sUi.taskId = CreateTask(Task_Union, 80);
-    Draw();
+    OpenScreen(SC_BERRY);
 }
