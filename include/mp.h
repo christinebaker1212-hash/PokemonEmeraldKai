@@ -280,6 +280,15 @@ bool8 NetLink_IsMaster(void);
 // mp_menu.c
 void MP_OpenMenu(void);
 
+// mp_spectate.c (watching other players' battles)
+bool8 MP_Spectate_IsWatching(void);
+bool8 MP_Spectate_IsStreaming(void);
+const u16 *MP_Spectate_WatchFrame(u16 keys);
+void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Spectate_OnPlayerLeft(u8 id);
+void MP_Spectate_FrameUpdate(void);
+bool8 MP_Spectate_TryInteract(void);
+
 // mp_notify.c
 void MP_ShowNotice(const char *ascii);
 void MP_Notice_Update(void);

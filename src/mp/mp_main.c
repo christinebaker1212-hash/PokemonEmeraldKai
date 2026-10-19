@@ -460,7 +460,7 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
-    if (MP_Battle_IsActive())
+    if (MP_Battle_IsActive() || gMain.inBattle)
         s->flags |= MPF_IN_BATTLE;
     if (MP_Trainer_IsActive())
         s->flags |= MPF_TRAINER_MODE;
@@ -560,6 +560,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Overworld_OnPlayerLeft(id);
     MP_Trainer_OnPlayerLeft(id);
     MP_Battle_OnPlayerLeft(id);
+    MP_Spectate_OnPlayerLeft(id);
     ClearPlayer(id);
 }
 
@@ -730,6 +731,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
 {
     if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
         MP_Battle_OnRelay(from, data, len);
+    else if (data[0] >= MPR_SPECTATE_FIRST && data[0] < MPR_COOP_FIRST)
+        MP_Spectate_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1110,7 +1113,10 @@ void MP_FrameUpdate(void)
 
     MP_Battle_FrameUpdate();
     if (gMpLocalId >= 0)
+    {
         SendLocalState(FALSE);
+        MP_Spectate_FrameUpdate();
+    }
 
     // flush now so input latency stays low
     MPNet_ClientPoll(&type, sMsgBuf, &len) ? HandleMessage(type, sMsgBuf, len) : (void)0;

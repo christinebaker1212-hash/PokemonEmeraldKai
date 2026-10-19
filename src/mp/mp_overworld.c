@@ -12,6 +12,7 @@
 #include "palette.h"
 #include "sprite.h"
 #include "text.h"
+#include "string_util.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/field_effects.h"
@@ -52,6 +53,7 @@ struct RemoteObj
     u8 lastEmote;
     u8 tagSpriteId;
     u8 tagLevel;
+    bool8 tagBattle;
     u32 tagVersion;
     u8 blobSpriteId;
     s16 lastX, lastY;   // last position applied (current map frame)
@@ -218,11 +220,39 @@ static void PickTextColors(const u16 *pal, u8 *fg, u8 *outline)
     }
 }
 
+static bool8 IsRemoteInBattle(u8 id)
+{
+    return gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_BATTLE);
+}
+
+// Draws one centered, outlined line of small-font text at row y
+static void DrawTextLine(const u8 *text, int n, int y, u8 fg, u8 outline)
+{
+    static const s8 offs[8][2] = {{-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,-1},{-1,1},{1,1}};
+    int i, o, width = 0, x;
+    for (i = 0; i < n; i++)
+        width += (text[i] == CHAR_SPACE) ? 3 : MeasureGlyph(text[i]);
+    if (width > NAMETAG_W - 2)
+        width = NAMETAG_W - 2;
+    x = (NAMETAG_W - width) / 2;
+    for (o = 0; o < 8; o++)
+    {
+        int cx = x;
+        for (i = 0; i < n; i++)
+            cx += (text[i] == CHAR_SPACE) ? 3 : DrawGlyph(cx + offs[o][0], y + offs[o][1], text[i], outline, 0);
+    }
+    {
+        int cx = x;
+        for (i = 0; i < n; i++)
+            cx += (text[i] == CHAR_SPACE) ? 3 : DrawGlyph(cx, y, text[i], fg, 0);
+    }
+}
+
 static void BuildNametag(u8 id, const u16 *pal)
 {
     struct MpPlayer *p = &gMpPlayers[id];
     u8 text[24];
-    int i, n = 0, width = 0, x, tx, ty;
+    int i, n = 0, tx, ty;
     u8 fg, outline;
 
     for (i = 0; i < MP_NAME_LEN && p->name[i] != EOS; i++)
@@ -239,28 +269,16 @@ static void BuildNametag(u8 id, const u16 *pal)
 
     PickTextColors(pal, &fg, &outline);
     memset(sNametagPixels, 0, sizeof(sNametagPixels));
-    for (i = 0; i < n; i++)
-        width += (text[i] == CHAR_SPACE) ? 3 : MeasureGlyph(text[i]);
-    if (width > NAMETAG_W - 2)
-        width = NAMETAG_W - 2;
-    x = (NAMETAG_W - width) / 2;
-
-    // Draw an outline by stamping the glyphs in the outline color around the text
+    if (IsRemoteInBattle(id))
     {
-        static const s8 offs[8][2] = {{-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,-1},{-1,1},{1,1}};
-        int o;
-        for (o = 0; o < 8; o++)
-        {
-            int cx = x;
-            for (i = 0; i < n; i++)
-                cx += (text[i] == CHAR_SPACE) ? 3 : DrawGlyph(cx + offs[o][0], 1 + offs[o][1], text[i], outline, 0);
-        }
-        {
-            int cx = x;
-            for (i = 0; i < n; i++)
-                cx += (text[i] == CHAR_SPACE) ? 3 : DrawGlyph(cx, 1, text[i], fg, 0);
-        }
+        // Two lines: "IN BATTLE" above the name (the tag is drawn 12px higher)
+        u8 battle[16];
+        MP_AsciiToGame(battle, "IN BATTLE", 12);
+        DrawTextLine(battle, StringLength(battle), 1, fg, outline);
+        DrawTextLine(text, n, 13, fg, outline);
     }
+    else
+        DrawTextLine(text, n, 1, fg, outline);
 
     // Pack into 4bpp 1D-mapped tiles (8x4 tiles)
     memset(sNametagTiles, 0, sizeof(sNametagTiles));
@@ -333,10 +351,12 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         gSprites[r->tagSpriteId].data[0] = id + 1;
         gSprites[r->tagSpriteId].coordOffsetEnabled = TRUE;
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
+        r->tagBattle = IsRemoteInBattle(id);
         r->tagVersion = p->appearanceVersion;
         tileStart = GetSpriteTileStartByTag(TAG_NAMETAG_BASE + id);
     }
-    else if (r->tagLevel != (p->hasState ? p->state.topLevel : 0) || r->tagVersion != p->appearanceVersion)
+    else if (r->tagLevel != (p->hasState ? p->state.topLevel : 0) || r->tagVersion != p->appearanceVersion
+          || r->tagBattle != IsRemoteInBattle(id))
     {
         rebuild = TRUE;
     }
@@ -345,12 +365,13 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         BuildNametag(id, pal);
         memcpy((void *)(OBJ_VRAM0 + tileStart * TILE_SIZE_4BPP), sNametagTiles, sizeof(sNametagTiles));
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
+        r->tagBattle = IsRemoteInBattle(id);
         r->tagVersion = p->appearanceVersion;
     }
 
     tag = &gSprites[r->tagSpriteId];
     tag->x = objSprite->x + objSprite->x2;
-    tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10;
+    tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10 - (r->tagBattle ? 12 : 0);
     tag->oam.paletteNum = r->palSlot;
     tag->invisible = objSprite->invisible;
 }
@@ -682,6 +703,7 @@ void MP_Overworld_Update(void)
     if (!MP_IsInOverworld())
         return;
     MP_Notice_Update();
+    MP_Spectate_TryInteract();
     if (sAppliedGender != gSaveBlock2Ptr->playerGender)
     {
         sAppliedGender = gSaveBlock2Ptr->playerGender;

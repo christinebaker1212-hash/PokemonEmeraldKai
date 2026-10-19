@@ -62,6 +62,7 @@ static unsigned long sFrameCounter = 0;
 static char sShotDir[400] = ".";
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
+static bool SpectateStep(void);
 void Platform_SaveScreenshot(const char *name);
 
 extern void AgbMain(void);
@@ -186,6 +187,13 @@ int main(int argc, char **argv)
             }
             TestHarnessStep();
             MP_FrameUpdate();
+            if (SpectateStep())
+            {
+                AudioUpdate();
+                sFrameCounter++;
+                lastGameTime = curGameTime;
+                continue;
+            }
             ENTER_VBLANK();
             MainLoop();
             VDraw();
@@ -206,6 +214,11 @@ int main(int argc, char **argv)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
+                if (SpectateStep())
+                {
+                    accumulator -= fixedTimestep;
+                    continue;
+                }
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
                 if (!isGameStepDrawn)
@@ -648,6 +661,29 @@ void Platform_SaveScreenshot(const char *name)
     }
     printf("[test] frame %lu: screenshot %s\n", sFrameCounter, path);
     fflush(stdout);
+}
+
+const u16 *Platform_GetFrame(void)
+{
+    return sFrameImage;
+}
+
+// Moemon Co-op: while watching another player's battle the game is paused and
+// the received feed is shown instead. Returns TRUE when this frame was handled.
+static bool SpectateStep(void)
+{
+    extern bool8 MP_Spectate_IsWatching(void);
+    extern const u16 *MP_Spectate_WatchFrame(u16 keys);
+    const u16 *feed;
+    if (!MP_Spectate_IsWatching())
+        return false;
+    feed = MP_Spectate_WatchFrame(Platform_GetKeyInput());
+    if (!feed)
+        return false;   // stopped watching: run the game this frame
+    memcpy(sFrameImage, feed, sizeof(sFrameImage));
+    if (!sTestMode)
+        Display_UploadFrame(sFrameImage);
+    return true;
 }
 
 bool8 Platform_IsTestMode(void)

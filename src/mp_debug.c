@@ -8,6 +8,7 @@
 #include "palette.h"
 #include "constants/characters.h"
 #include "main.h"
+#include "battle_setup.h"
 #include "pokemon.h"
 #include "event_data.h"
 #include "overworld.h"
@@ -126,6 +127,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         char path[200];
         bool8 ok = MP_Avatar_ExportLocal(path, sizeof(path));
         printf("[test] export %s: %s\n", path, ok ? "ok" : "FAILED");
+    }
+    else if (strcmp(cmd, "wild") == 0)
+    {
+        // wild SPECIES:LEVEL - start a wild battle right now
+        int species = 263, level = 3;
+        sscanf(arg, "%d:%d", &species, &level);
+        ZeroEnemyPartyMons();
+        CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        BattleSetup_StartWildBattle();
     }
     else if (strcmp(cmd, "drop") == 0)
     {
