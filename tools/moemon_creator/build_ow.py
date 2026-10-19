@@ -156,12 +156,13 @@ class OldParts:
 
 
 def main_tones(a):
-    """The most used color of a part (not the outline) and the next different one."""
+    """The main color of a part (most pixels, weighted by brightness) and the next different one."""
     if a is None:
         return None, None
     px = a[a[..., 3] > 0][:, :3].astype(int)
     cnt = Counter(map(tuple, px.tolist()))
-    cand = [(n, c) for c, n in cnt.items() if hsv(c)[2] > 0.22]
+    # Weighted by brightness: the dark outline around long hair can outnumber the hair itself
+    cand = [(n * hsv(c)[2], c) for c, n in cnt.items() if hsv(c)[2] > 0.15]
     if not cand:
         cand = [(n, c) for c, n in cnt.items()]
     cand.sort(reverse=True)
