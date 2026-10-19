@@ -582,21 +582,27 @@ static bool8 WantsRecolor(const struct MpAppearance *app)
 // fullSat: every shade takes the target's saturation (hair, gray clothes)
 static void RecolorClusterEx(u16 *pal, const u8 *members, int n, u16 target, bool8 fullSat)
 {
-    int th, ts, tv, i, maxV = 1, maxS = 1;
+    int th, ts, tv, i, maxV = 1, maxS = 1, lightS = 0;
     RgbToHsv(target, &th, &ts, &tv);
     for (i = 0; i < n; i++)
     {
         int h, s, v;
         RgbToHsv(pal[members[i]], &h, &s, &v);
-        if (v > maxV) maxV = v;
+        if (v > maxV)
+        {
+            maxV = v;
+            lightS = s;
+        }
         if (s > maxS) maxS = s;
     }
+    // A white or gray piece (a white hat) takes the target's saturation in every shade
+    if (lightS < 80)
+        fullSat = TRUE;
     for (i = 0; i < n; i++)
     {
         int h, s, v;
         RgbToHsv(pal[members[i]], &h, &s, &v);
-        // Gray or white shades (a white hat) take the target's saturation
-        pal[members[i]] = HsvToRgb(th, (fullSat || maxS < 80) ? ts : ts * s / maxS, v * tv / maxV);
+        pal[members[i]] = HsvToRgb(th, fullSat ? ts : ts * s / maxS, v * tv / maxV);
     }
 }
 

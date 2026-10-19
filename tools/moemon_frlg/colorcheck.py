@@ -75,11 +75,15 @@ def hsv_to_rgb(h, s, v):
 
 def recolor_cluster(pal, members, target):
     th, ts, tv = rgb_to_hsv(target)
-    maxV = max([1] + [rgb_to_hsv(pal[m])[2] for m in members])
-    maxS = max([1] + [rgb_to_hsv(pal[m])[1] for m in members])
+    maxV, maxS, lightS = 1, 1, 0
     for m in members:
         h, s, v = rgb_to_hsv(pal[m])
-        pal[m] = hsv_to_rgb(th, ts if maxS < 80 else ts * s // maxS, v * tv // maxV)
+        if v > maxV:
+            maxV, lightS = v, s
+        maxS = max(maxS, s)
+    for m in members:
+        h, s, v = rgb_to_hsv(pal[m])
+        pal[m] = hsv_to_rgb(th, ts if lightS < 80 else ts * s // maxS, v * tv // maxV)
 
 
 def recolor(pal, cmap, look, P):
