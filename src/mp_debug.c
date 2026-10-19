@@ -13,6 +13,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "save.h"
 #include "palette.h"
 #include "constants/characters.h"
 #include "main.h"
@@ -133,6 +134,11 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
+    if (strcmp(name, "naming") == 0)
+    {
+        bool8 NamingScreen_IsActive(void);
+        return NamingScreen_IsActive() && !gPaletteFade.active;
+    }
     if (strcmp(name, "introlook") == 0)
     {
         bool8 MP_IntroLook_Active(void);
@@ -363,6 +369,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "social") == 0)
     {
         MP_Social_Open();
+    }
+    else if (strcmp(cmd, "save") == 0)
+    {
+        u8 TrySavingData(u8 saveType);
+        TrySavingData(SAVE_NORMAL);
     }
     else if (strcmp(cmd, "bike") == 0)
     {

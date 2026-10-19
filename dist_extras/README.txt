@@ -490,6 +490,11 @@ The game saves to "pokeemerald.sav" next to the .exe. It's the normal
 128 KB Emerald flash save, so a Moemon Emerald Kai save from mGBA should
 work: BACK IT UP, copy it next to the .exe and rename it pokeemerald.sav.
 
+Every time you save, the game first keeps your previous save as
+pokeemerald.sav.bak1 (and the two before that as .bak2 and .bak3). If a
+save ever goes wrong, close the game and rename a .bak file to
+pokeemerald.sav.
+
 
 FILES
 -----

@@ -355,8 +355,54 @@ static void ReadSaveFile(char *path)
     }
 }
 
+// Moemon Co-op: save backups. Before the save file is overwritten the old one is
+// kept as <save>.bak1 (bak1 -> bak2 -> bak3 first). A save writes the file twice,
+// so this happens at most once every 30 seconds.
+#define SAVE_BACKUPS 3
+static void BackUpSaveFile(void)
+{
+    static Uint32 sLastBackup;
+    static int sDone;
+    char from[600], to[600];
+    unsigned char buf[4096];
+    size_t n;
+    int i;
+    FILE *in, *out;
+    if (sDone && SDL_GetTicks() - sLastBackup < 30000)
+        return;
+    in = fopen(gPlatformSavePath, "rb");
+    if (in == NULL)
+        return;
+    fseek(in, 0, SEEK_END);
+    if (ftell(in) <= 0)   // a brand-new, empty file: nothing to keep
+    {
+        fclose(in);
+        return;
+    }
+    fseek(in, 0, SEEK_SET);
+    sDone = 1;
+    sLastBackup = SDL_GetTicks();
+    for (i = SAVE_BACKUPS; i > 1; i--)
+    {
+        snprintf(from, sizeof(from), "%s.bak%d", gPlatformSavePath, i - 1);
+        snprintf(to, sizeof(to), "%s.bak%d", gPlatformSavePath, i);
+        remove(to);
+        rename(from, to);
+    }
+    snprintf(to, sizeof(to), "%s.bak1", gPlatformSavePath);
+    out = fopen(to, "wb");
+    if (out != NULL)
+    {
+        while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
+            fwrite(buf, 1, n, out);
+        fclose(out);
+    }
+    fclose(in);
+}
+
 static void StoreSaveFile()
 {
+    BackUpSaveFile();
     if (sSaveFile != NULL)
     {
         fseek(sSaveFile, 0, SEEK_SET);
