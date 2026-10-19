@@ -365,10 +365,15 @@ SKIN, HAIR, TOP, BOTTOM, HAT and BAG. Left/Right picks the style, L/R the
 color. The field sprite and the picture change as you go; START flips the
 picture between the front (ID PIC) and the back (BK PIC). SELECT puts a row
 back. SLOT picks CUSTOM 1, 2 or 3; SAVE keeps it there and puts it on you,
-CANCEL (or B) goes back to the look you had. You get a matching field
-sprite (walking, running, Mach Bike), ID picture and battle back; bags only
-show on the field sprite. Other players see it too. Your three trainers are
-kept in the co-op settings file (custom1-3).
+CANCEL (or B) goes back to the look you had. Other players see it too. Your
+three trainers are kept in the co-op settings file (custom1-3).
+The field sprite (walking, running, Mach Bike) is drawn in Gen 3 style to
+match the picture: hair, hats, shirt and pants from a Gen 3 trainer kit, other
+clothes and bags from official FireRed/LeafGreen sprites (skirts, shorts, long
+coat, overalls, swimwear, Red's and Leaf's bags, the Hiker's pack), small head
+accessories (crown, glasses, cat ears...) from the picture's own parts, and
+skin in exact Gen 3 colors. FIELD picks its hairstyle: AUTO matches HAIR, or
+pick any of the 30 Gen 3 hairstyles (L/R jumps 5).
 
 Characters without a battle back sprite: in battle your trainer isn't shown
 (your Moemon still are), unless you pick a BK PIC. You can also draw one in
@@ -378,7 +383,9 @@ OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
-by MufasaKong. CREATE uses a fan-made trainer customization parts kit.
+by MufasaKong. CREATE uses a fan-made trainer customization parts kit for the
+pictures and a Gen 3 trainer kit (made for Top Down Sprite Maker) for the
+field sprites.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.

@@ -57,8 +57,9 @@ struct MpCreated
     u8 bottom, bottomColor;
     u8 hat, hatColor;   // hat 0 = none, else style + 1
     u8 bag, bagColor;   // bag 0 = none, else style + 1
+    u8 fieldHair;       // field sprite hairstyle: 0 = AUTO (matches HAIR), else 1 + a Gen 3 kit hairstyle
 };
-#define MP_CREATED_BYTES 13
+#define MP_CREATED_BYTES 14   // 13 before FIELD HAIR (still read)
 
 struct MpAppearance
 {
@@ -323,7 +324,9 @@ u8 MP_Created_ColorCount(bool8 girl, u8 cat, u8 style);
 const char *MP_Created_ColorName(bool8 girl, u8 cat, u8 style, u8 color);
 const char *MP_Created_SkinName(u8 skin);
 #define MP_CR_SKIN_COUNT 4
-void MP_Created_ToHex(const struct MpCreated *r, char *out);   // 27 chars
+void MP_Created_ToHex(const struct MpCreated *r, char *out);   // 2 * MP_CREATED_BYTES + 1 chars
+u8 MP_Created_FieldHairCount(void);              // AUTO + the Gen 3 kit hairstyles
+const char *MP_Created_FieldHairName(u8 fieldHair);
 bool8 MP_Created_FromHex(const char *s, struct MpCreated *r);
 
 // mp_overworld.c

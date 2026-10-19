@@ -36,7 +36,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
 // LOOK > CREATE: a trainer from the parts kit (CUSTOM 1-3)
-enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_TOP, CR_BOTTOM, CR_HAT, CR_BAG, CR_SAVE, CR_CANCEL, CREATE_COUNT };
+enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_FHAIR, CR_TOP, CR_BOTTOM, CR_HAT, CR_BAG, CR_SAVE, CR_CANCEL, CREATE_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
 #define LINE_H 11
@@ -281,13 +281,14 @@ static const u8 sCreateRowCat[CREATE_COUNT] = {
 
 static void Create_PrintRow(u8 windowId, u8 row, u8 y)
 {
-    static const char *const labels[CREATE_COUNT] = {"SLOT", "BODY", "SKIN", "HAIR", "TOP", "BOTTOM", "HAT", "BAG", "SAVE", "CANCEL"};
+    static const char *const labels[CREATE_COUNT] = {"SLOT", "BODY", "SKIN", "HAIR", "FIELD", "TOP", "BOTTOM", "HAT", "BAG", "SAVE", "CANCEL"};
     char value[48];
     switch (row)
     {
     case CR_SLOT: snprintf(value, sizeof(value), "CUSTOM %d", sCreateSlot + 1); break;
     case CR_BODY: snprintf(value, sizeof(value), "%s", sCreateWork.girl ? "GIRL" : "BOY"); break;
     case CR_SKIN: snprintf(value, sizeof(value), "%s", MP_Created_SkinName(sCreateWork.skin)); break;
+    case CR_FHAIR: snprintf(value, sizeof(value), "%s", MP_Created_FieldHairName(sCreateWork.fieldHair)); break;
     case CR_SAVE:
     case CR_CANCEL:
         PrintAscii(windowId, labels[row], 8, y);
@@ -481,6 +482,10 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             break;
         case CR_SKIN:
             snprintf(ascii, sizeof(ascii), "%s   Left/Right: change   SELECT: undo", MP_Created_SkinName(sCreateWork.skin));
+            break;
+        case CR_FHAIR:
+            snprintf(ascii, sizeof(ascii), "FIELD HAIR: %s%s   L/R: jump 5", MP_Created_FieldHairName(sCreateWork.fieldHair),
+                sCreateWork.fieldHair ? "" : " (like HAIR)");
             break;
         case CR_SAVE:
             snprintf(ascii, sizeof(ascii), "Save as CUSTOM %d and wear it.", sCreateSlot + 1);
@@ -923,6 +928,7 @@ static void HandleCreateInput(u8 taskId)
         {
         case CR_SKIN:   sCreateWork.skin = orig.skin; break;
         case CR_HAIR:   sCreateWork.hair = orig.hair; sCreateWork.hairColor = orig.hairColor; break;
+        case CR_FHAIR:  sCreateWork.fieldHair = orig.fieldHair; break;
         case CR_TOP:    sCreateWork.top = orig.top; sCreateWork.topColor = orig.topColor; break;
         case CR_BOTTOM: sCreateWork.bottom = orig.bottom; sCreateWork.bottomColor = orig.bottomColor; break;
         case CR_HAT:    sCreateWork.hat = orig.hat; sCreateWork.hatColor = orig.hatColor; break;
@@ -948,10 +954,21 @@ static void HandleCreateInput(u8 taskId)
         case CR_SKIN:
             sCreateWork.skin = (sCreateWork.skin + MP_CR_SKIN_COUNT + dir) % MP_CR_SKIN_COUNT;
             break;
+        case CR_FHAIR:
+        {
+            u8 n = MP_Created_FieldHairCount();
+            sCreateWork.fieldHair = (sCreateWork.fieldHair + n + dir) % n;
+            break;
+        }
         case CR_HAIR: case CR_TOP: case CR_BOTTOM: case CR_HAT: case CR_BAG:
             Create_StepPart(sCreateRowCat[tCursor], FALSE, dir);
             break;
         }
+    }
+    else if (JOY_REPEAT(L_BUTTON | R_BUTTON) && tCursor == CR_FHAIR)
+    {
+        u8 n = MP_Created_FieldHairCount();
+        sCreateWork.fieldHair = (sCreateWork.fieldHair + n + dir * 5) % n;
     }
     else if (JOY_REPEAT(L_BUTTON | R_BUTTON) && tCursor >= CR_HAIR && tCursor <= CR_BAG)
     {
