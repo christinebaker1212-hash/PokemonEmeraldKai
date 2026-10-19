@@ -279,7 +279,7 @@ static void Draw(void)
     {
         u8 tabs[40];
         MpUi_Begin("SHARED PC");
-        MP_AsciiToGame(tabs, sPc.tab == TAB_MONS ? "POK~MON   (L/R: ITEMS)" : "ITEMS   (L/R: POK~MON)", 36);
+        MP_AsciiToGame(tabs, sPc.tab == TAB_MONS ? "POK~MON   ({L}{R} ITEMS)" : "ITEMS   ({L}{R} POK~MON)", 36);
         MpUi_TitleRight(tabs);
     }
 
@@ -287,7 +287,7 @@ static void Draw(void)
     {
         MpUi_TextAscii(1, "Connecting to the shared PC...");
         MpUi_End();
-        MpUi_HelpAscii("B: CLOSE");
+        MpUi_HelpAscii("{B} CLOSE");
         return;
     }
 
@@ -357,7 +357,7 @@ static void Draw(void)
         MP_AsciiToGame(buf + StringLength(buf), "  < ", 6);
         ConvertIntToDecimalStringN(num, sPc.qty, STR_CONV_MODE_LEFT_ALIGN, 3);
         StringAppend(buf, num);
-        MP_AsciiToGame(buf + StringLength(buf), " >  A: OK  B: BACK", 20);
+        MP_AsciiToGame(buf + StringLength(buf), " >  {A} OK  {B} BACK", 20);
         MpUi_Help(buf);
     }
     else if (sPc.mode == MODE_WAIT)
@@ -367,9 +367,9 @@ static void Draw(void)
     else if (sPc.mode == MODE_PICK_BAG && sPc.cursor < sPc.bagCount)
         MpUi_HelpItem(sPc.bag[sPc.cursor].item);
     else if (sPc.mode == MODE_LIST)
-        MpUi_HelpAscii(sPc.tab == TAB_MONS ? "A: TAKE  L/R: ITEMS  B: CLOSE" : "A: TAKE  L/R: POK~MON  B: CLOSE");
+        MpUi_HelpAscii(sPc.tab == TAB_MONS ? "{A} TAKE  {L}{R} ITEMS  {B} CLOSE" : "{A} TAKE  {L}{R} POK~MON  {B} CLOSE");
     else
-        MpUi_HelpAscii("A: PUT IN  B: BACK");
+        MpUi_HelpAscii("{A} PUT IN  {B} BACK");
 }
 
 static void Close(void)

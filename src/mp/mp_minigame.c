@@ -747,7 +747,7 @@ static void Draw(void)
         {
             MpUi_TextAscii(1, "You can't play right now.");
             MpUi_End();
-            MpUi_HelpAscii(sMg.note[0] ? sMg.note : "B: BACK");
+            MpUi_HelpAscii(sMg.note[0] ? sMg.note : "{B} BACK");
             break;
         }
         for (i = 0; i < MP_MAX_PLAYERS && row < MPUI_ROWS - 2; i++)
@@ -787,7 +787,7 @@ static void Draw(void)
         snprintf(line, sizeof(line), "Waiting for %s to start...", name);
         MpUi_TextAscii(1, line);
         MpUi_End();
-        MpUi_HelpAscii("B: LEAVE");
+        MpUi_HelpAscii("{B} LEAVE");
         break;
     }
 }

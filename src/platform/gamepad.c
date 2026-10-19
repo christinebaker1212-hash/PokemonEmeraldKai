@@ -36,6 +36,7 @@
 #define TURBO_PERIOD 6       // frames per A press while LT is held
 
 static SDL_GameController *sPads[MAX_PADS];
+static int sLastInputPad;   // the controller (not the keyboard) was used last
 static int sLayout = GAMEPAD_LAYOUT_AUTO;
 static int sAnalogRun = 1;
 static int sRumble = 1;
@@ -215,6 +216,46 @@ static int UseNintendoLayout(SDL_GameController *pad)
     if (sLayout == GAMEPAD_LAYOUT_NINTENDO)
         return 1;
     return PadIsNintendo(pad);
+}
+
+static int PadIsPlayStation(SDL_GameController *pad)
+{
+    const char *name = SDL_GameControllerName(pad);
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+    switch (SDL_GameControllerGetType(pad))
+    {
+    case SDL_CONTROLLER_TYPE_PS3:
+    case SDL_CONTROLLER_TYPE_PS4:
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+    case SDL_CONTROLLER_TYPE_PS5:
+#endif
+        return 1;
+    default:
+        break;
+    }
+#endif
+    return name && (strstr(name, "PS3") || strstr(name, "PS4") || strstr(name, "PS5") || strstr(name, "PlayStation")
+                    || strstr(name, "DualShock") || strstr(name, "DualSense"));
+}
+
+void Gamepad_NoteKeyboard(void)
+{
+    sLastInputPad = 0;
+}
+
+int Gamepad_IconFamily(void)
+{
+    SDL_GameController *pad = SelectedPad();
+    int i;
+    for (i = 0; !pad && i < MAX_PADS; i++)
+        pad = sPads[i];
+    if (!pad || !sLastInputPad)
+        return GAMEPAD_ICONS_KEYBOARD;
+    if (PadIsNintendo(pad))
+        return GAMEPAD_ICONS_NINTENDO;
+    if (PadIsPlayStation(pad))
+        return GAMEPAD_ICONS_PLAYSTATION;
+    return GAMEPAD_ICONS_XBOX;
 }
 
 int Gamepad_EffectiveNintendoLayout(void)
@@ -455,6 +496,10 @@ u16 Gamepad_Poll(int *fastForward)
         sTrigger[0] = sTrigger[1] = 0;
         return 0;
     }
+    // The controller is the last thing used: button icons show its buttons
+    if (buttons || lx * lx > 0.25f || ly * ly > 0.25f || rx * rx > 0.25f || ry * ry > 0.25f
+     || lt > TRIGGER_ON || rt > TRIGGER_ON)
+        sLastInputPad = 1;
     {
         int lHeld = lt > TRIGGER_ON, rHeld = rt > TRIGGER_ON;
         int lNew = lHeld && !sTrigger[0], rNew = rHeld && !sTrigger[1];
@@ -635,7 +680,8 @@ void Gamepad_TestCommand(const char *cmd, const char *arg, int value)
         desc.type = SDL_JOYSTICK_TYPE_GAMECONTROLLER;
         desc.naxes = SDL_CONTROLLER_AXIS_MAX;
         desc.nbuttons = SDL_CONTROLLER_BUTTON_MAX;
-        desc.name = strcmp(arg, "nintendo") == 0 ? "Virtual Nintendo Switch Pad" : "Virtual Xbox Pad";
+        desc.name = strcmp(arg, "nintendo") == 0 ? "Virtual Nintendo Switch Pad"
+                  : strcmp(arg, "ps") == 0 ? "Virtual PS4 Pad" : "Virtual Xbox Pad";
         index = SDL_JoystickAttachVirtualEx(&desc);
         if (index < 0)
         {

@@ -475,6 +475,9 @@ The other buttons change with what's on screen:
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
                     X/Square = B, Y/Triangle = SELECT
   Naming screen     X/Square = delete, Y/Triangle = switch letters
+Button hints on screen show your controller's own buttons (Xbox,
+PlayStation or Nintendo) when you last used it, and the GBA buttons when
+you last used the keyboard.
 Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 

@@ -109,11 +109,38 @@ static u8 AsciiCharToGame(char c)
     return 0xFF;
 }
 
+// Button icons in co-op text: "{A}", "{START}", "{LT}"... (mp_buttons.c draws the controller's)
+static const struct { const char *name; u8 id; } sButtonTokens[] = {
+    {"A", CHAR_A_BUTTON}, {"B", CHAR_B_BUTTON}, {"L", CHAR_L_BUTTON}, {"R", CHAR_R_BUTTON},
+    {"START", CHAR_START_BUTTON}, {"SELECT", CHAR_SELECT_BUTTON},
+    {"UP", CHAR_DPAD_UP}, {"DOWN", CHAR_DPAD_DOWN}, {"LEFT", CHAR_DPAD_LEFT}, {"RIGHT", CHAR_DPAD_RIGHT},
+    {"UPDOWN", CHAR_DPAD_UPDOWN}, {"LEFTRIGHT", CHAR_DPAD_LEFTRIGHT}, {"DPAD", CHAR_DPAD_NONE},
+    {"LT", CHAR_MP_LT}, {"RT", CHAR_MP_RT}, {"LS", CHAR_MP_LS}, {"RS", CHAR_MP_RS},
+    {"WEST", CHAR_MP_WEST}, {"NORTH", CHAR_MP_NORTH},
+};
+
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen)
 {
     int i, n = 0;
     for (i = 0; src[i] && n < maxLen; i++)
     {
+        if (src[i] == '{' && n + 2 <= maxLen)
+        {
+            const char *end = strchr(src + i, '}');
+            int k, len = end ? (int)(end - src - i - 1) : -1;
+            for (k = 0; len > 0 && k < (int)ARRAY_COUNT(sButtonTokens); k++)
+            {
+                if ((int)strlen(sButtonTokens[k].name) == len && strncmp(src + i + 1, sButtonTokens[k].name, len) == 0)
+                {
+                    dst[n++] = CHAR_KEYPAD_ICON;
+                    dst[n++] = sButtonTokens[k].id;
+                    i += len + 1;
+                    break;
+                }
+            }
+            if (len > 0 && k < (int)ARRAY_COUNT(sButtonTokens))
+                continue;
+        }
         u8 g = AsciiCharToGame(src[i]);
         if (g != 0xFF)
             dst[n++] = g;

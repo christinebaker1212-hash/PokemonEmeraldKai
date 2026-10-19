@@ -123,7 +123,7 @@ static void Draw(void)
     if (sGiftUi.note[0])
         MpUi_HelpAscii(sGiftUi.note);
     else
-        MpUi_HelpAscii("One gift per friend each day.  A: SEND  B: CLOSE");
+        MpUi_HelpAscii("One gift per friend each day.  {A} SEND  {B} CLOSE");
 }
 
 static void Close(void)

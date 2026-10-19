@@ -417,7 +417,7 @@ const u16 *MP_Spectate_WatchFrame(u16 keys)
     if (sWatch.ending)
         snprintf(text, sizeof(text), "%s'S BATTLE IS OVER", name);
     else
-        snprintf(text, sizeof(text), "WATCHING %s  -  B: STOP WATCHING", name);
+        snprintf(text, sizeof(text), "WATCHING %s  -  {B} STOP WATCHING", name);
     Banner(sWatch.shown, text, FALSE);
     return sWatch.shown;
 }

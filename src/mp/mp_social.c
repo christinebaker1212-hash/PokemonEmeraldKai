@@ -408,7 +408,7 @@ static void Draw(void)
         for (i = 0; i < HUB_COUNT; i++)
             MpUi_RowAscii(i, i == sUi.cursor, sRows[i], NULL);
         MpUi_End();
-        MpUi_HelpAscii(sUi.note[0] ? sUi.note : "A: SELECT   B: CLOSE");
+        MpUi_HelpAscii(sUi.note[0] ? sUi.note : "{A} SELECT   {B} CLOSE");
         break;
     }
     case SC_LOG:
@@ -433,7 +433,7 @@ static void Draw(void)
             MpUi_RowAscii(i - first, i == sUi.cursor, line, when);
         }
         MpUi_End();
-        MpUi_HelpAscii("UP/DOWN: SCROLL   B: BACK");
+        MpUi_HelpAscii("{UPDOWN} SCROLL   {B} BACK");
         break;
     case SC_SCRIBBLE:
         MpUi_Begin("SCRIBBLE WHAT?");

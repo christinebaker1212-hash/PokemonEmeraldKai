@@ -35,7 +35,12 @@ and move learning, loss, disconnect).
 Emote / phrase pick (mp_menu.c MP_OpenQuickPick, the only emote screen): LT/RT or Q/E held = held mode (release sends),
 right-stick click / SOCIAL > EMOTES = sticky (A sends, B closes). Pages EMOTES, MINE + 4 stock groups (L/R); SELECT
 (pad west) swaps/pins gMpConfig.quickStock (ini quick_stock), START (pad north) edits MINE (INPUT_CONTEXT_QUICKPICK).
-Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`, `vbtn rstick 1`. Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
+Test with `vpad xbox`, `vaxis rt 100`, `vbtn right 1`, `vbtn rstick 1`. Button icons (mp_buttons.c, hooked into text.c DrawKeypadIcon): CHAR_KEYPAD_ICON chars draw the last used
+controller's buttons (gamepad.c Gamepad_IconFamily; art graphics/moemon/buttons/buttons.png -> tools/moemon_buttons/build.py
+-> src/mp/mp_buttons_data.h). Co-op ASCII text writes them as {A} {B} {L} {R} {START} {SELECT} {LEFTRIGHT} {LT} {WEST}...
+(MP_AsciiToGame); extra ids CHAR_MP_LT..CHAR_MP_LS. Test with `vpad xbox|ps|nintendo`.
+Joined frames (mp_ui.c MP_FrameJoin_*): co-op windows that touch get joint tiles at BG0 tiles 0x2F0-0x2FE.
+Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
 and remote followers seen by the other client.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), FRIENDS > GO TO, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge

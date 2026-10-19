@@ -344,7 +344,7 @@ static void DrawTrading(void)
         }
         else if (i == ROW_READY)
         {
-            MpUi_RowAscii(i, sel, sTrade.mine.ready ? "READY!  (A: CHANGE)" : "READY",
+            MpUi_RowAscii(i, sel, sTrade.mine.ready ? "READY!  ({A} CHANGE)" : "READY",
                           sTrade.theirs.ready ? "READY!" : "choosing...");
         }
         else
@@ -354,19 +354,19 @@ static void DrawTrading(void)
     if (sTrade.note[0])
         MpUi_HelpAscii(sTrade.note);
     else if (sTrade.state == ST_CONFIRM)
-        MpUi_HelpAscii("Both ready! Trade these?  A: YES   B: NO");
+        MpUi_HelpAscii("Both ready! Trade these?  {A} YES   {B} NO");
     else if (sTrade.state == ST_COMMITTED)
         MpUi_HelpAscii("Trading...");
     else if (sTrade.cursor == ROW_MON)
-        MpUi_HelpAscii("LEFT/RIGHT: pick a POK~MON from your party");
+        MpUi_HelpAscii("{LEFTRIGHT} pick a POK~MON from your party");
     else if ((sTrade.cursor == ROW_ITEM1 || sTrade.cursor == ROW_ITEM2) && sTrade.mine.item[sTrade.cursor - ROW_ITEM1] != ITEM_NONE)
         MpUi_HelpItem(sTrade.mine.item[sTrade.cursor - ROW_ITEM1]);
     else if (sTrade.cursor == ROW_ITEM1 || sTrade.cursor == ROW_ITEM2)
-        MpUi_HelpAscii("LEFT/RIGHT: item   L/R: how many");
+        MpUi_HelpAscii("{LEFTRIGHT} item   {L}{R} how many");
     else if (sTrade.cursor == ROW_MONEY)
-        MpUi_HelpAscii("LEFT/RIGHT: 100   L/R: 1000");
+        MpUi_HelpAscii("{LEFTRIGHT} 100   {L}{R} 1000");
     else
-        MpUi_HelpAscii("A: SELECT");
+        MpUi_HelpAscii("{A} SELECT");
 }
 
 static void Draw(void)
@@ -397,7 +397,7 @@ static void Draw(void)
         if (sTrade.friendCount == 0)
             MpUi_TextAscii(2, "Nobody else is online right now.");
         MpUi_End();
-        MpUi_HelpAscii(sTrade.note[0] ? sTrade.note : "Friends can be anywhere.  A: ASK  B: BACK");
+        MpUi_HelpAscii(sTrade.note[0] ? sTrade.note : "Friends can be anywhere.  {A} ASK  {B} BACK");
         break;
     }
     case ST_ASKING:
@@ -408,7 +408,7 @@ static void Draw(void)
         snprintf(line, sizeof(line), "Waiting for %s to answer...", name);
         MpUi_TextAscii(1, line);
         MpUi_End();
-        MpUi_HelpAscii("B: CANCEL");
+        MpUi_HelpAscii("{B} CANCEL");
         break;
     }
     case ST_ASKED:
@@ -421,7 +421,7 @@ static void Draw(void)
         MpUi_RowAscii(2, sTrade.cursor == 0, "TRADE", NULL);
         MpUi_RowAscii(3, sTrade.cursor == 1, "NO THANKS", NULL);
         MpUi_End();
-        MpUi_HelpAscii("A: SELECT");
+        MpUi_HelpAscii("{A} SELECT");
         break;
     }
     case ST_TRADING:
@@ -545,7 +545,7 @@ static void ApplyTrade(void)
     MpUi_Begin("TRADE");
     MpUi_TextAscii(1, msg);
     MpUi_End();
-    MpUi_HelpAscii("A: OK");
+    MpUi_HelpAscii("{A} OK");
     sTrade.state = ST_IDLE;
     sTrade.taskId = CreateTask(Task_Trade, 80);
     sTrade.note[0] = 1; // marks "done, waiting for A"

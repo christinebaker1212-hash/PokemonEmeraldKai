@@ -406,7 +406,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         else
         {
             (void)town;
-            MP_AsciiToGame(buf, "A: GO TO, TRAINER CARD, SECRET BASE", 70);
+            MP_AsciiToGame(buf, "{A} GO TO, TRAINER CARD, SECRET BASE", 70);
         }
         MpUi_PrintWrapped(windowId, buf, 2, 1, 28 * 8 - 4, 1, sTxtFg, sTxtBg);
         CopyWindowToVram(windowId, COPYWIN_FULL);
@@ -420,19 +420,19 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         if (cursor == ROW_SPRITE && gMpConfig.app.base == MP_BASE_CREATED && !gMpConfig.app.recipe.made)
             snprintf(ascii, sizeof(ascii), "%s: not made yet (looks like DEFAULT)", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_SPRITE)
-            snprintf(ascii, sizeof(ascii), "%s   START: match pics   SELECT: undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
+            snprintf(ascii, sizeof(ascii), "%s   {START} match pics   {SELECT} undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_FRONT && MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel)[0])
             snprintf(ascii, sizeof(ascii), "%s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
         else if (cursor == ROW_FRONT)
-            snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "%s   {START} match   {SELECT} undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
         else if (cursor == ROW_BACKPIC)
-            snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "%s   {START} match   {SELECT} undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
         else if (cursor >= ROW_SKIN && cursor <= ROW_ACCENT && LookIsCreated())
-            snprintf(ascii, sizeof(ascii), "CUSTOM colors are set in CREATE. A: open it");
+            snprintf(ascii, sizeof(ascii), "CUSTOM colors are set in CREATE. {A} open it");
         else if (cursor == ROW_HAIR)
-            snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   SELECT: undo");
+            snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   {SELECT} undo");
         else if (cursor <= ROW_ACCENT)
-            snprintf(ascii, sizeof(ascii), "Left/Right: change   SELECT: undo");
+            snprintf(ascii, sizeof(ascii), "{LEFTRIGHT} change   {SELECT} undo");
         else if (cursor == ROW_CREATE)
             snprintf(ascii, sizeof(ascii), "Make your own trainer (CUSTOM 1-3).");
         else if (cursor == ROW_EDIT)
@@ -453,17 +453,17 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         switch (cursor)
         {
         case CR_SLOT:
-            snprintf(ascii, sizeof(ascii), "CUSTOM %d%s   Left/Right: slot   START: flip pic", sCreateSlot + 1,
+            snprintf(ascii, sizeof(ascii), "CUSTOM %d%s   {LEFTRIGHT} slot   {START} flip pic", sCreateSlot + 1,
                 gMpConfig.custom[sCreateSlot].made ? "" : " (new)");
             break;
         case CR_BODY:
-            snprintf(ascii, sizeof(ascii), "%s   Left/Right: change (resets the parts)", sCreateWork.girl ? "GIRL" : "BOY");
+            snprintf(ascii, sizeof(ascii), "%s   {LEFTRIGHT} change (resets the parts)", sCreateWork.girl ? "GIRL" : "BOY");
             break;
         case CR_SKIN:
-            snprintf(ascii, sizeof(ascii), "%s   Left/Right: change   SELECT: undo", MP_Created_SkinName(sCreateWork.skin));
+            snprintf(ascii, sizeof(ascii), "%s   {LEFTRIGHT} change   {SELECT} undo", MP_Created_SkinName(sCreateWork.skin));
             break;
         case CR_FHAIR:
-            snprintf(ascii, sizeof(ascii), "FIELD HAIR: %s%s   L/R: jump", MP_Created_FieldHairName(sCreateWork.fieldHair),
+            snprintf(ascii, sizeof(ascii), "FIELD HAIR: %s%s   {L}{R} jump", MP_Created_FieldHairName(sCreateWork.fieldHair),
                 sCreateWork.fieldHair ? "" : " (like HAIR)");
             break;
         case CR_SAVE:
@@ -474,12 +474,12 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             break;
         default:
             if (CREATE_IS_COLOR(cursor))
-                snprintf(ascii, sizeof(ascii), "%s color: %s   Left/Right: change", Create_PartName(sCreateRowCat[cursor], FALSE),
+                snprintf(ascii, sizeof(ascii), "%s color: %s   {LEFTRIGHT} change", Create_PartName(sCreateRowCat[cursor], FALSE),
                     Create_PartName(sCreateRowCat[cursor], TRUE));
             else if (cursor == CR_BAG)
                 snprintf(ascii, sizeof(ascii), "%s  (only on the field sprite)", Create_PartName(MP_CR_BAG, FALSE));
             else
-                snprintf(ascii, sizeof(ascii), "%s   Left/Right: style  L/R: jump", Create_PartName(sCreateRowCat[cursor], FALSE));
+                snprintf(ascii, sizeof(ascii), "%s   {LEFTRIGHT} style  {L}{R} jump", Create_PartName(sCreateRowCat[cursor], FALSE));
             break;
         }
         MP_AsciiToGame(buf, ascii, 150);
@@ -1265,10 +1265,8 @@ static void QuickDrawChoice(s16 *data, u8 dir)
 static void QuickDrawBar(s16 *data)
 {
     u8 win = qWin(QUICK_BAR), buf[96];
-    bool8 pad = Gamepad_IsConnected(), nintendo = Gamepad_EffectiveNintendoLayout();
-    const char *west = !pad ? "SELECT" : nintendo ? "Y" : "X";
-    const char *north = !pad ? "START" : nintendo ? "X" : "Y";
-    const char *pages = pad ? "LB/RB" : "L/R";
+    // Button icons: the controller's west / north buttons are SELECT / START on the keyboard
+    const char *west = "{WEST}", *north = "{NORTH}", *pages = "{L}{R}";
     char hint[96], send[40];
     int x = 3, i;
     MpTheme_Panel(win, 0);
@@ -1292,11 +1290,11 @@ static void QuickDrawBar(s16 *data)
     if (qHold >= 0)
         snprintf(send, sizeof(send), "pick, let go to send");
     else
-        snprintf(send, sizeof(send), "pick, A: send  B: close");
+        snprintf(send, sizeof(send), "pick, {A} send  {B} close");
     if (qPage == MP_QUICK_PAGE_MINE)
-        snprintf(hint, sizeof(hint), "%s    %s: swap  %s: edit", send, west, north);
+        snprintf(hint, sizeof(hint), "%s    %s swap  %s edit", send, west, north);
     else if (qPage != MP_QUICK_PAGE_EMOTES)
-        snprintf(hint, sizeof(hint), "%s    %s: pin to MINE", send, west);
+        snprintf(hint, sizeof(hint), "%s    %s pin to MINE", send, west);
     else
         snprintf(hint, sizeof(hint), "%s", send);
     MP_AsciiToGame(buf, hint, 90);

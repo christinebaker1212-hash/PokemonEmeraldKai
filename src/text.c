@@ -1607,8 +1607,16 @@ u8 RenderTextHandleBold(u8 *pixels, u8 fontId, u8 *str)
     return 1;
 }
 
+// Moemon Co-op: the last used controller's button icons (src/mp/mp_buttons.c)
+u8 MP_ButtonIcon_Draw(u8 windowId, u8 keypadIconId, u16 x, u16 y);
+u8 MP_ButtonIcon_Width(u8 keypadIconId);
+u8 MP_ButtonIcon_Height(u8 keypadIconId);
+
 u8 DrawKeypadIcon(u8 windowId, u8 keypadIconId, u16 x, u16 y)
 {
+    u8 w = MP_ButtonIcon_Draw(windowId, keypadIconId, x, y);
+    if (w || keypadIconId >= ARRAY_COUNT(sKeypadIcons))
+        return w;
     BlitBitmapRectToWindow(
         windowId,
         sKeypadIconTiles + (sKeypadIcons[keypadIconId].tileOffset * 0x20),
@@ -1630,11 +1638,15 @@ u8 GetKeypadIconTileOffset(u8 keypadIconId)
 
 u8 GetKeypadIconWidth(u8 keypadIconId)
 {
+    if (MP_ButtonIcon_Width(keypadIconId) || keypadIconId >= ARRAY_COUNT(sKeypadIcons))
+        return MP_ButtonIcon_Width(keypadIconId);
     return sKeypadIcons[keypadIconId].width;
 }
 
 u8 GetKeypadIconHeight(u8 keypadIconId)
 {
+    if (MP_ButtonIcon_Height(keypadIconId) || keypadIconId >= ARRAY_COUNT(sKeypadIcons))
+        return MP_ButtonIcon_Height(keypadIconId);
     return sKeypadIcons[keypadIconId].height;
 }
 

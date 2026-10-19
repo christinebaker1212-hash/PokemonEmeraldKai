@@ -862,7 +862,7 @@ static void Draw(void)
         snprintf(line, sizeof(line), "Asking %s...", name);
         MpUi_TextAscii(1, line);
         MpUi_End();
-        MpUi_HelpAscii("B: CANCEL");
+        MpUi_HelpAscii("{B} CANCEL");
         break;
     }
     }

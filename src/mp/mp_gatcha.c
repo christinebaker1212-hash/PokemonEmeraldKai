@@ -2000,7 +2000,7 @@ static void DrawForce(void)
     MP_AsciiToGame(buf + StringLength(buf), " >", 4);
     Print(WIN_MENU, GetStringWidth(FONT_NORMAL, buf, 0) > 24 * 8 - 8 ? FONT_SMALL : FONT_NORMAL, 4, 24, TC_PANEL, sG->forceRow == 1 ? TC_GOLD : TC_WHITE, buf);
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-    DrawHelp("UP/DOWN, LEFT/RIGHT: CHOOSE   A: SET   B: CANCEL");
+    DrawHelp("{DPAD} CHOOSE   {A} SET   {B} CANCEL");
 }
 
 static void UpdateForce(void)
@@ -2484,7 +2484,7 @@ static void EndShowcase(void)
     if (sG->resultCount == 10)
         PrintCenteredAscii(WIN_MENU, FONT_SMALL, 20, TC_PANEL, TC_WHITE, "Your best pull of the ten!");
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-    DrawHelp(sG->resultCount == 10 ? "A: SEE ALL TEN" : "A: OK");
+    DrawHelp(sG->resultCount == 10 ? "{A} SEE ALL TEN" : "{A} OK");
 }
 
 // Back to normal after a big reveal
@@ -2581,7 +2581,7 @@ static void ShowReveal(void)
         if (sG->resultCount == 10)
             PrintCenteredAscii(WIN_MENU, FONT_SMALL, 20, TC_PANEL, TC_WHITE, "Your best pull of the ten!");
         CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-        DrawHelp(sG->resultCount == 10 ? "A: SEE ALL TEN" : "A: OK");
+        DrawHelp(sG->resultCount == 10 ? "{A} SEE ALL TEN" : "{A} OK");
     }
     if (sFanfares[r->rarity])
         PlayFanfare(sFanfares[r->rarity]);
@@ -2618,7 +2618,7 @@ static void DrawGridSelection(void)
     PrizeName(r->def, r->amount, name);
     PrintCentered(WIN_MENU, FONT_NORMAL, 18, TC_PANEL, TC_WHITE, name);
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-    DrawHelp(r->note[0] ? r->note : "D-PAD: LOOK AT EACH PRIZE      A/B: DONE");
+    DrawHelp(r->note[0] ? r->note : "{DPAD} LOOK AT EACH PRIZE      {A}{B} DONE");
 }
 
 static void ShowGrid(void)

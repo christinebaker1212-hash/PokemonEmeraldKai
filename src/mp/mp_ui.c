@@ -336,10 +336,11 @@ static int WrapText(const u8 *text, u8 font, int maxW, u8 out[][128], int maxLin
         for (;;)
         {
             u8 c = text[j];
-            if (c == EOS || c == CHAR_NEWLINE || n >= 126)
+            int len = (c == CHAR_KEYPAD_ICON && text[j + 1] != EOS) ? 2 : 1;   // a button icon: the code and its id
+            if (c == EOS || c == CHAR_NEWLINE || n + len >= 127)
                 break;
-            line[n] = c;
-            line[n + 1] = EOS;
+            memcpy(&line[n], &text[j], len);
+            line[n + len] = EOS;
             if (GetStringWidth(font, line, 0) > maxW)
             {
                 if (lastSpace > 0)
@@ -354,8 +355,8 @@ static int WrapText(const u8 *text, u8 font, int maxW, u8 out[][128], int maxLin
                 lastSpace = n;
                 lastSpaceSrc = j;
             }
-            n++;
-            j++;
+            n += len;
+            j += len;
         }
         if (n == 0 && text[j] != EOS && text[j] != CHAR_NEWLINE)   // a single character wider than the line: take it anyway
         {
@@ -405,6 +406,8 @@ void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int
                 break;
             }
             last[--len] = EOS;
+            if (len > 0 && last[len - 1] == CHAR_KEYPAD_ICON)   // not half a button icon
+                last[--len] = EOS;
         }
         count = maxLines;
     }

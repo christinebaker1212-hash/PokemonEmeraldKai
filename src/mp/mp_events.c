@@ -1185,7 +1185,7 @@ static void DrawHub(void)
     else if (sDaily.cursor == ROW_STREAK)
         MpUi_HelpAscii("Play 10 minutes with a friend each day.");
     else
-        MpUi_HelpAscii("A: SELECT  B: CLOSE");
+        MpUi_HelpAscii("{A} SELECT  {B} CLOSE");
 }
 
 static void DrawRace(void)
@@ -1222,7 +1222,7 @@ static void DrawRace(void)
         MpUi_TextAscii(MPUI_ROWS - 1, line);
     }
     MpUi_End();
-    MpUi_HelpAscii("Winner: RARE CANDY x3 + a MOEGATCHA pull.  B: BACK");
+    MpUi_HelpAscii("Winner: RARE CANDY x3 + a MOEGATCHA pull.  {B} BACK");
 }
 
 static void DrawAchievements(void)
@@ -1245,7 +1245,7 @@ static void DrawAchievements(void)
         MpUi_RowAscii(i - first, i == sDaily.cursor, a->name, r);
     }
     MpUi_End();
-    MpUi_HelpAscii("Each milestone: +1 MOEGATCHA pull for everyone.  B: BACK");
+    MpUi_HelpAscii("Each milestone: +1 MOEGATCHA pull for everyone.  {B} BACK");
 }
 
 static void Draw(void)

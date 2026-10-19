@@ -186,7 +186,7 @@ static EWRAM_DATA u8 sText[160];
 
 static const u8 sText_JoinPrompt[] = _("{STR_VAR_1} wants to join for a\nDouble Battle! Is this OK?");
 static const u8 sText_OneMon[] = _("Hey, I only have one MOéMON!\nLet's go one on one!");
-static const u8 sText_Asking[] = _("Asking {STR_VAR_1} to team up for a\nDouble Battle… (B: never mind)");
+static const u8 sText_Asking[] = _("Asking {STR_VAR_1} to team up for a\nDouble Battle… ({B_BUTTON} never mind)");
 static const u8 sText_SaidNo[] = _("{STR_VAR_1} wants to battle alone\nthis time.");
 static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nMOéMON. It's a one-on-one battle!");
 static const u8 sText_TooLate[] = _("Too late! {STR_VAR_1}'s battle has\nalready started.");

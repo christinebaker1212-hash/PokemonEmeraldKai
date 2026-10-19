@@ -471,6 +471,7 @@ void ProcessEvents(void)
             }
             break;
         case SDL_KEYDOWN:
+            Gamepad_NoteKeyboard();   // button icons: back to the keyboard's
             if (Platform_TextInputKeyDown(event.key.keysym.sym, event.key.keysym.mod))
                 break;
             if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z && !event.key.repeat

@@ -49,7 +49,7 @@ static void DrawPicker(void)
             MpUi_RowAscii(i, i == sPick.cursor, "CANCEL", NULL);
     }
     MpUi_End();
-    MpUi_HelpAscii("A: CHOOSE   B: CANCEL   (hold SELECT on the map)");
+    MpUi_HelpAscii("{A} CHOOSE   {B} CANCEL   (hold {SELECT} on the map)");
 }
 
 static void Task_Picker(u8 taskId)

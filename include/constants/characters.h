@@ -193,6 +193,13 @@
 #define CHAR_DPAD_UPDOWN    0x0A
 #define CHAR_DPAD_LEFTRIGHT 0x0B
 #define CHAR_DPAD_NONE      0x0C
+// Moemon Co-op: controller-only buttons (src/mp/mp_buttons.c draws the controller's icons)
+#define CHAR_MP_LT          0x0D   // LT / L2 / ZL
+#define CHAR_MP_RT          0x0E   // RT / R2 / ZR
+#define CHAR_MP_RS          0x0F   // right stick click
+#define CHAR_MP_WEST        0x10   // the left face button (X / Square / Y)
+#define CHAR_MP_NORTH       0x11   // the top face button (Y / Triangle / X)
+#define CHAR_MP_LS          0x12   // left stick click
 
 // CHAR_EXTRA_SYMBOL chars
 #define CHAR_UP_ARROW_2    0x00

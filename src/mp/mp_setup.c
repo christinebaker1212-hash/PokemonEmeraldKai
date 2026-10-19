@@ -446,7 +446,7 @@ static void DrawWorking(void)
     Print(WIN_MAIN, text, 4, 1 + LINE_H, sColorNormal);
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
-    Print(WIN_HELP, "B: Cancel", 4, 1, sColorDim);
+    Print(WIN_HELP, "{B} Cancel", 4, 1, sColorDim);
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
 }
 
@@ -456,7 +456,7 @@ static void DrawMessage(void)
     PrintWrapped(WIN_MAIN, (const char *)sSetup.message, 1, 196, sSetup.messageIsError ? sColorError : sColorNormal);
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
-    Print(WIN_HELP, "A: OK", 4, 1, sColorDim);
+    Print(WIN_HELP, "{A} OK", 4, 1, sColorDim);
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
 }
 
@@ -682,7 +682,7 @@ static void DrawJoin(void)
     else if (sSetup.onlineFailed)
         help = "Online lobby unreachable. Showing home network only.";
     else
-        help = "A: Join  B: Back   LOCKED servers need a password.";
+        help = "{A} Join  {B} Back   LOCKED servers need a password.";
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
     PrintWrapped(WIN_HELP, help, 0, 200, sColorDim);
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);

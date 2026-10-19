@@ -62,5 +62,9 @@ const char *Gamepad_SelectedName(void);    // "ALL CONTROLLERS" or a controller 
 int Gamepad_Count(void);
 int Gamepad_TriggerHeld(int right);        // LT/Q (0) or RT/E (1) held: a controller trigger or the keyboard key
 void Gamepad_SetKeyHold(int which, int held);
+// Which button icons to show: the last used controller's, or the keyboard's (the GBA buttons)
+enum { GAMEPAD_ICONS_KEYBOARD, GAMEPAD_ICONS_NINTENDO, GAMEPAD_ICONS_PLAYSTATION, GAMEPAD_ICONS_XBOX };
+int Gamepad_IconFamily(void);
+void Gamepad_NoteKeyboard(void);
 
 #endif // GUARD_PLATFORM_GAMEPAD_H

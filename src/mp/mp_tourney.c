@@ -199,7 +199,7 @@ static void Draw(void)
         MpUi_RowAscii(MPUI_ROWS - 2, sT.cursor == 0, "BEGIN!", NULL);
         MpUi_RowAscii(MPUI_ROWS - 1, sT.cursor == 1, "CALL IT OFF", NULL);
         MpUi_End();
-        MpUi_HelpAscii(sT.note[0] ? sT.note : "Everyone battles everyone once.  A: SELECT");
+        MpUi_HelpAscii(sT.note[0] ? sT.note : "Everyone battles everyone once.  {A} SELECT");
         break;
     case TS_INVITED:
         NameOf(sT.organizer, name);
@@ -212,7 +212,7 @@ static void Draw(void)
         MpUi_RowAscii(3, sT.cursor == 0, "JOIN", NULL);
         MpUi_RowAscii(4, sT.cursor == 1, "NO THANKS", NULL);
         MpUi_End();
-        MpUi_HelpAscii("A: SELECT");
+        MpUi_HelpAscii("{A} SELECT");
         break;
     case TS_RUNNING:
     case TS_DONE:
@@ -258,7 +258,7 @@ static void Draw(void)
             MpUi_TextAscii(MPUI_ROWS - 1, OpponentIn(sT.round, gMpLocalId) == BYE ? "You have a break this round." : "Waiting for the other matches...");
         MpUi_End();
         TeamStatus(team, sizeof(team));
-        MpUi_HelpAscii(sT.note[0] ? sT.note : (sT.me == ME_PROMPT ? team : "B: CLOSE (the tournament goes on)"));
+        MpUi_HelpAscii(sT.note[0] ? sT.note : (sT.me == ME_PROMPT ? team : "{B} CLOSE (the tournament goes on)"));
         break;
     }
     }
