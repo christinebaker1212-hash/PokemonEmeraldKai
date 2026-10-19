@@ -271,6 +271,7 @@ const char *MP_Avatar_BackSelName(u8 sel);
 const char *MP_Avatar_BackSelConfigName(u8 sel);
 u8 MP_Avatar_ParseBackSel(const char *name);
 bool8 MP_Avatar_FrontSelRecolors(u16 sel);
+void MP_Avatar_MatchPictures(struct MpAppearance *app, bool8 front, bool8 back); // MATCH, or DEFAULT (ID) / NONE (back) if there's nothing to match
 // The local look's pictures as the battles show them (recolored); FALSE = none
 bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal);
 bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal);   // first frame

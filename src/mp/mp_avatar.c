@@ -175,6 +175,10 @@ static const u16 sExtBackPals[] = INCBIN_U16("graphics/moemon/ext/back_pals.bin"
 #define BACK_CHOICES (EMERALD_BACK_COUNT + MP_EXT_BACK_COUNT)
 
 #define CATALOG_COUNT (ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT)
+// Selections: 0 = MATCH, 1..CHOICES = a picture, then DEFAULT (Brendan/May by
+// the save's gender) for ID PIC and NONE (hidden in battles) for BK PIC
+#define FRONT_DEFAULT (FRONT_CHOICES + 1)
+#define BACK_NONE (BACK_CHOICES + 1)
 
 static struct MpSpriteEntry sExtCatalog[MP_EXT_OW_COUNT];
 static struct ObjectEventGraphicsInfo sExtInfo[MP_EXT_OW_COUNT];
@@ -1120,13 +1124,15 @@ static const char *const sEmeraldBackNames[EMERALD_BACK_COUNT][2] = {
     {"RS BRENDAN", "rs_brendan"}, {"RS MAY", "rs_may"}, {"WALLY", "wally"}, {"STEVEN", "steven"},
 };
 
-u16 MP_Avatar_FrontChoiceCount(void) { return FRONT_CHOICES + 1; }
-u8 MP_Avatar_BackChoiceCount(void) { return BACK_CHOICES + 1; }
+u16 MP_Avatar_FrontChoiceCount(void) { return FRONT_DEFAULT + 1; }
+u8 MP_Avatar_BackChoiceCount(void) { return BACK_NONE + 1; }
 
 const char *MP_Avatar_FrontSelName(u16 sel)
 {
     if (sel == 0)
         return "MATCH";
+    if (sel == FRONT_DEFAULT)
+        return "DEFAULT";
     sel--;
     if (sel < EMERALD_FRONT_COUNT)
         return sMpEmeraldFrontNames[sel][0];
@@ -1144,11 +1150,15 @@ const char *MP_Avatar_FrontSelArtist(u16 sel)
 
 bool8 MP_Avatar_FrontSelRecolors(u16 sel)
 {
+    if (sel == FRONT_DEFAULT)
+        return TRUE;
     return sel == 0 || FindColorMap(CMAP_FRONT, MP_Avatar_FrontSelConfigName(sel)) != NULL;
 }
 
 const char *MP_Avatar_FrontSelConfigName(u16 sel)
 {
+    if (sel == FRONT_DEFAULT)
+        return "default";
     if (sel == 0 || sel > FRONT_CHOICES)
         return "match";
     sel--;
@@ -1160,7 +1170,7 @@ const char *MP_Avatar_FrontSelConfigName(u16 sel)
 u16 MP_Avatar_ParseFrontSel(const char *name)
 {
     u16 i;
-    for (i = 1; i <= FRONT_CHOICES; i++)
+    for (i = 1; i <= FRONT_DEFAULT; i++)
         if (strcmp(MP_Avatar_FrontSelConfigName(i), name) == 0)
             return i;
     return 0;
@@ -1170,6 +1180,8 @@ const char *MP_Avatar_BackSelName(u8 sel)
 {
     if (sel == 0)
         return "MATCH";
+    if (sel == BACK_NONE)
+        return "NONE";
     sel--;
     if (sel < EMERALD_BACK_COUNT)
         return sEmeraldBackNames[sel][0];
@@ -1181,6 +1193,8 @@ const char *MP_Avatar_BackSelName(u8 sel)
 const char *MP_Avatar_BackSelConfigName(u8 sel)
 {
     static char buf[40];
+    if (sel == BACK_NONE)
+        return "none";
     if (sel == 0 || sel > BACK_CHOICES)
         return "match";
     sel--;
@@ -1194,7 +1208,7 @@ const char *MP_Avatar_BackSelConfigName(u8 sel)
 u8 MP_Avatar_ParseBackSel(const char *name)
 {
     u8 i;
-    for (i = 1; i <= BACK_CHOICES; i++)
+    for (i = 1; i <= BACK_NONE; i++)
         if (strcmp(MP_Avatar_BackSelConfigName(i), name) == 0)
             return i;
     return 0;
@@ -1213,6 +1227,8 @@ static struct MpAppearance Resolved(const struct MpAppearance *a)
 static int FrontChoice(const struct MpAppearance *app)
 {
     const struct MpSpriteEntry *e;
+    if (app->frontSel == FRONT_DEFAULT)
+        return app->gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN;
     if (app->frontSel)
         return app->frontSel - 1 < FRONT_CHOICES ? app->frontSel - 1 : -1;
     switch (app->base)
@@ -1442,7 +1458,8 @@ u16 MP_Avatar_RemoteBackPic(u8 id)
 
 bool8 MP_Avatar_RemoteHidesBack(u8 id)
 {
-    return id < MP_MAX_PLAYERS && gMpPlayers[id].present && gMpPlayers[id].app.base == MP_BASE_NPC
+    return id < MP_MAX_PLAYERS && gMpPlayers[id].present
+        && (gMpPlayers[id].app.base == MP_BASE_NPC || gMpPlayers[id].app.backSel == BACK_NONE)
         && MP_Avatar_RemoteBackPic(id) == 0xFFFF;
 }
 
@@ -1454,7 +1471,29 @@ u16 MP_LocalBackPicOr(u16 defaultPic)
 
 bool8 MP_LocalHidesTrainerBack(void)
 {
-    return gMpConfig.app.base == MP_BASE_NPC && MP_Avatar_LocalBackPic() == 0xFFFF;
+    return (gMpConfig.app.base == MP_BASE_NPC || gMpConfig.app.backSel == BACK_NONE) && MP_Avatar_LocalBackPic() == 0xFFFF;
+}
+
+// LOOK > START: the pictures that go with the sprite; when it has none, ID PIC
+// becomes DEFAULT (Brendan/May) and BK PIC becomes NONE
+void MP_Avatar_MatchPictures(struct MpAppearance *appIn, bool8 front, bool8 back)
+{
+    struct MpAppearance app;
+    const struct MpPack *pack = (appIn == &gMpConfig.app) ? LocalPack() : NULL;
+    if (front)
+    {
+        appIn->frontSel = 0;
+        app = Resolved(appIn);
+        if (FrontChoice(&app) < 0 && !(pack && pack->slot[PACK_FRONT]))
+            appIn->frontSel = FRONT_DEFAULT;
+    }
+    if (back)
+    {
+        appIn->backSel = 0;
+        app = Resolved(appIn);
+        if (BackChoice(&app) < 0 && !(pack && pack->slot[PACK_BACK]))
+            appIn->backSel = BACK_NONE;
+    }
 }
 
 // ---------------------------------------------------------------------------

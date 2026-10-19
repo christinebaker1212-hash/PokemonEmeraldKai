@@ -341,11 +341,14 @@ DRESSING UP (CO-OP menu > LOOK)
            default) uses the one that goes with your sprite; or pick any
            other: Emerald's, FireRed/LeafGreen's, or one of the extra
            pictures from Pokemon Showdown (L/R jump 10).
-  BK PIC   your back in battles: MATCH, or Brendan, May, Red, Leaf, Wally,
-           Steven, the Old Man or the Poke Dude.
+  BK PIC   your back in battles: MATCH, Brendan, May, Red, Leaf, Wally,
+           Steven, the Old Man, the Poke Dude, or NONE (hidden).
   SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
            ID and back pictures together. (The extra Showdown pictures and
            your own drawn sprites keep their own colors.)
+  START       ID PIC and BK PIC go back to MATCH (on one of those rows, just
+              that one). If the sprite has no matching picture, ID PIC becomes
+              DEFAULT (Brendan/May) and BK PIC becomes NONE.
   SAVE LOOK   keep the look and go back (B does the same).
   REVERT      undo every change made since you opened LOOK.
   SELECT on a row puts just that one back the way it was.

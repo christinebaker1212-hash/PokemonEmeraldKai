@@ -376,13 +376,13 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         u8 buf[170];
         MpTheme_Panel(windowId, 0);
         if (cursor == ROW_SPRITE)
-            snprintf(ascii, sizeof(ascii), "%s   L/R: 10   SELECT: undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
+            snprintf(ascii, sizeof(ascii), "%s   START: match pics   SELECT: undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_FRONT && MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel)[0])
-            snprintf(ascii, sizeof(ascii), "ID PIC: %s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
+            snprintf(ascii, sizeof(ascii), "%s  Art by %s, shown as drawn", MP_Avatar_FrontSelName(gMpConfig.app.frontSel), MP_Avatar_FrontSelArtist(gMpConfig.app.frontSel));
         else if (cursor == ROW_FRONT)
-            snprintf(ascii, sizeof(ascii), "ID PIC: %s   L/R: 10   SELECT: undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.frontSel ? MP_Avatar_FrontSelName(gMpConfig.app.frontSel) : "MATCH SPRITE");
         else if (cursor == ROW_BACKPIC)
-            snprintf(ascii, sizeof(ascii), "BK PIC: %s   SELECT: undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
+            snprintf(ascii, sizeof(ascii), "%s   START: match   SELECT: undo", gMpConfig.app.backSel ? MP_Avatar_BackSelName(gMpConfig.app.backSel) : "MATCH SPRITE");
         else if (cursor == ROW_HAIR)
             snprintf(ascii, sizeof(ascii), "HAIR (a hat if it hides the hair)   SELECT: undo");
         else if (cursor <= ROW_ACCENT)
@@ -646,6 +646,17 @@ static void HandleLookInput(u8 taskId)
     {
         // Undo this row (SELECT) or everything (REVERT)
         if (Look_Undo(tCursor))
+            changed = TRUE;
+        else
+            PlaySE(SE_FAILURE);
+    }
+    else if (JOY_NEW(START_BUTTON))
+    {
+        // ID PIC / BK PIC back to the ones that go with the sprite (NONE if it has none).
+        // On those rows just that one, anywhere else both.
+        struct MpAppearance before = gMpConfig.app;
+        MP_Avatar_MatchPictures(&gMpConfig.app, tCursor != ROW_BACKPIC, tCursor != ROW_FRONT);
+        if (memcmp(&before, &gMpConfig.app, sizeof(before)) != 0)
             changed = TRUE;
         else
             PlaySE(SE_FAILURE);
