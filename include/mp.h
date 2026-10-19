@@ -397,6 +397,8 @@ u8 MP_Emote_QuickPhraseCount(void);
 const char *MP_Emote_QuickPhrase(u8 i);
 bool8 MP_Emote_PhraseIsEmpty(u8 slot);
 void MP_Emote_PhraseText(u8 slot, u8 *dst);
+#define MP_NUM_STOCK_PHRASES 16
+const char *MP_Emote_StockPhrase(u8 i);
 void MP_Emote_SayPhrase(u8 slot);
 void MP_Emote_EditPhrase(u8 slot);
 void MP_Emote_Hotkey(u8 n);

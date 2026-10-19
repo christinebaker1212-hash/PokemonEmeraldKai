@@ -115,6 +115,7 @@ struct
     [CHAR_DPAD_NONE]      = { 0x22,  8, 12 }
 };
 
+extern u8 gMpIconFont;   // Moemon Co-op (mp_buttons.c centers the controller icons on it)
 static const u8 sKeypadIconTiles[] = INCGFX_U8("graphics/fonts/keypad_icons.png", ".4bpp");
 
 static const struct FontInfo sFontInfos[] =
@@ -1114,6 +1115,7 @@ static u16 RenderText(struct TextPrinter *textPrinter)
             break;
         case CHAR_KEYPAD_ICON:
             currChar = *textPrinter->printerTemplate.currentChar++;
+            gMpIconFont = subStruct->fontId;   // Moemon Co-op: icons centered on this font's letters
             gCurGlyph.width = DrawKeypadIcon(textPrinter->printerTemplate.windowId, currChar, textPrinter->printerTemplate.currentX, textPrinter->printerTemplate.currentY);
             textPrinter->printerTemplate.currentX += gCurGlyph.width + textPrinter->printerTemplate.letterSpacing;
             return RENDER_PRINT;
@@ -1609,6 +1611,7 @@ u8 RenderTextHandleBold(u8 *pixels, u8 fontId, u8 *str)
 
 // Moemon Co-op: the last used controller's button icons (src/mp/mp_buttons.c)
 u8 MP_ButtonIcon_Draw(u8 windowId, u8 keypadIconId, u16 x, u16 y);
+u8 gMpIconFont = FONT_NORMAL;
 u8 MP_ButtonIcon_Width(u8 keypadIconId);
 u8 MP_ButtonIcon_Height(u8 keypadIconId);
 

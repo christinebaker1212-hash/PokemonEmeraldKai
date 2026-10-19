@@ -14,7 +14,16 @@
 #include "platform/gamepad.h"
 #include "mp_buttons_data.h"
 
-#define ICON_CELL_H 12   // the GBA icons' height: the icons sit centered in it
+#define ICON_CELL_H 12   // the GBA icons' height (what the text engine is told)
+extern u8 gMpIconFont;   // the font of the text being printed (text.c)
+
+// Icons sit centered on the capital letters (and their shadow): rows 3/4..11/12
+// of the line in every font, so the middle is at 7.5 (7 for the short font)
+static int IconTop(int h)
+{
+    int twiceMiddle = (gMpIconFont >= FONT_SHORT && gMpIconFont <= FONT_SHORT_COPY_3) ? 14 : 15;
+    return (twiceMiddle - h + 1) / 2;
+}
 
 enum { FACE_S, FACE_E, FACE_W, FACE_N };
 
@@ -190,5 +199,5 @@ static void DrawIcon(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overl
             *b |= (i & 1) ? v << 4 : v;
         }
     }
-    BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y + (ICON_CELL_H - h) / 2, w, h);
+    BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y + IconTop(h), w, h);
 }

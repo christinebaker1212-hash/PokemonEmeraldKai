@@ -190,7 +190,11 @@ void MP_Social_OnEmote(u8 id, u8 kind)
 }
 
 // ---------------------------------------------------------------------------
-// Scribbles on signs (kept by the server: 4 words and the writer's name)
+// Scribbles on signs (kept by the server: 4 words and the writer's name).
+// A ready-made phrase is word 0 = SCRIBBLE_STOCK and word 1 = its number.
+#define SCRIBBLE_STOCK 0xFFFE
+#define SCRIBBLE_ROWS  (MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES + 2)
+#define SCRIBBLE_ERASE (MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
 
 static void SignKey(char *out, int size, u8 group, u8 num, s16 x, s16 y, const char *part)
 {
@@ -271,9 +275,14 @@ void MP_Social_AfterSign(void)
         return;
     if (ReadScribble(sSignGroup, sSignNum, sSignX, sSignY, words, author))
     {
-        ConvertEasyChatWordsToString(text, words, 2, 2);
         MP_GameToAscii(name, author, 7);
-        MP_GameToAscii(ascii, text, 90);
+        if (words[0] == SCRIBBLE_STOCK)
+            snprintf(ascii, sizeof(ascii), "%s", MP_Emote_StockPhrase(words[1]));
+        else
+        {
+            ConvertEasyChatWordsToString(text, words, 2, 2);
+            MP_GameToAscii(ascii, text, 90);
+        }
         snprintf(line, sizeof(line), "Someone scribbled here...\n%s: %s", name, ascii);
         MP_ShowNotice(line);
     }
@@ -436,14 +445,25 @@ static void Draw(void)
         MpUi_HelpAscii("{UPDOWN} SCROLL   {B} BACK");
         break;
     case SC_SCRIBBLE:
+        // Your 4 phrases, the ready-made ones, ERASE, BACK
         MpUi_Begin("SCRIBBLE WHAT?");
-        for (i = 0; i < MP_NUM_PHRASES; i++)
+        first = MpUi_ScrollFor(sUi.cursor, SCRIBBLE_ROWS, &sUi.scroll);
+        for (i = first; i < SCRIBBLE_ROWS && i < first + MPUI_ROWS; i++)
         {
             u8 text[96], left[100];
+            u8 row = i - first;
+            if (i >= MP_NUM_PHRASES)
+            {
+                if (i < MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
+                    MpUi_RowAscii(row, i == sUi.cursor, MP_Emote_StockPhrase(i - MP_NUM_PHRASES), NULL);
+                else
+                    MpUi_RowAscii(row, i == sUi.cursor, i == SCRIBBLE_ERASE ? "ERASE THE SCRIBBLE" : "BACK", NULL);
+                continue;
+            }
             if (MP_Emote_PhraseIsEmpty(i))
             {
                 snprintf(line, sizeof(line), "%d (empty phrase)", i + 1);
-                MpUi_RowAscii(i, i == sUi.cursor, line, NULL);
+                MpUi_RowAscii(row, i == sUi.cursor, line, NULL);
                 continue;
             }
             MP_Emote_PhraseText(i, text);
@@ -453,10 +473,8 @@ static void Draw(void)
             left[0] = CHAR_1 + i;
             left[1] = CHAR_SPACE;
             StringCopy(left + 2, text);
-            MpUi_Row(i, i == sUi.cursor, left, NULL);
+            MpUi_Row(row, i == sUi.cursor, left, NULL);
         }
-        MpUi_RowAscii(MP_NUM_PHRASES, sUi.cursor == MP_NUM_PHRASES, "ERASE THE SCRIBBLE", NULL);
-        MpUi_RowAscii(MP_NUM_PHRASES + 1, sUi.cursor == MP_NUM_PHRASES + 1, "BACK", NULL);
         MpUi_End();
         MpUi_HelpAscii(sUi.note[0] ? sUi.note : "Friends see it when they read this sign.");
         break;
@@ -504,7 +522,7 @@ static u16 CountFor(void)
     {
     case SC_HUB:        return HUB_COUNT;
     case SC_LOG:        return sLogCount ? sLogCount : 1;
-    case SC_SCRIBBLE:   return MP_NUM_PHRASES + 2;
+    case SC_SCRIBBLE:   return SCRIBBLE_ROWS;
     case SC_PRANK_WHO:  return sUi.friendCount + 1;
     default:            return P_COUNT + 1;
     }
@@ -601,7 +619,16 @@ static void Task_Social(u8 taskId)
             MP_ShowNotice("You scribbled on the sign. Friends will see it when they read it.");
             return;
         }
-        if (sUi.cursor == MP_NUM_PHRASES)
+        if (sUi.cursor < MP_NUM_PHRASES + MP_NUM_STOCK_PHRASES)
+        {
+            u16 words[MP_PHRASE_WORDS] = {SCRIBBLE_STOCK, sUi.cursor - MP_NUM_PHRASES, EC_EMPTY_WORD, EC_EMPTY_WORD};
+            WriteScribble(sUi.signX, sUi.signY, words, gSaveBlock2Ptr->playerName);
+            PlaySE(SE_M_SKETCH);
+            Close(taskId);
+            MP_ShowNotice("You scribbled on the sign. Friends will see it when they read it.");
+            return;
+        }
+        if (sUi.cursor == SCRIBBLE_ERASE)
         {
             WriteScribble(sUi.signX, sUi.signY, NULL, NULL);
             Close(taskId);

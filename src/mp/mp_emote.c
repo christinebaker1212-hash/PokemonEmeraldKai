@@ -110,6 +110,12 @@ static const char *const sQuickPhrases[] = {
     "Yes!", "No!", "Be right back!", "Hurry up!",              // MORE
 };
 
+// A ready-made phrase as ASCII ("" when out of range)
+const char *MP_Emote_StockPhrase(u8 i)
+{
+    return i < ARRAY_COUNT(sQuickPhrases) ? sQuickPhrases[i] : "";
+}
+
 static void SpriteCB_Bubble(struct Sprite *sprite)
 {
     // Moved by MP_Emote_Update
