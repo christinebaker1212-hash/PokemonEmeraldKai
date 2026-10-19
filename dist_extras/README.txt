@@ -194,9 +194,18 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                it races past prizes and slowly clicks down onto yours.
                L/R switches banners:
                  STANDARD    event Moemon, items and money (always there)
-                 PICKUP      one featured legendary a week (Jirachi,
-                             Latias, Mew, Lugia, Celebi, Latios, Ho-Oh):
-                             every UR is it, every EX its shiny
+                 PICKUP      a new one every week: every UR is one of
+                             its Moemon, every EX one of them shiny. Mew &
+                             Mewtwo, Celebi, Jirachi, Dragonite, Tyranitar,
+                             Salamence, Metagross, Ditto, Eevee, Feebas,
+                             Deoxys, Hitmonlee & Hitmonchan, the three
+                             birds, the Kanto starters, the Johto starters,
+                             the three beasts, Lugia & Ho-Oh, Latios &
+                             Latias, and a random shiny week. PICKUP
+                             Moemon have OT GACHA (ID 23195); the event
+                             ones carry the real events' levels and moves.
+                             Moemon you haven't seen yet only show their
+                             shadow.
                  TRAINING    Rare Candies, vitamins, PP Ups, Lucky Egg...
                  POKE BALLS  Net, Dive, Nest, Repeat, Timer, Luxury,
                              Premier and Master Balls

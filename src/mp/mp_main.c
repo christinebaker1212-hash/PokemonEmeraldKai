@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 
 #include "mp_net.h"
@@ -235,6 +236,7 @@ static void LoadConfig(void)
             int r = atoi(val);
             gMpConfig.trainerRange = (r < 1) ? 1 : (r > 8 ? 8 : r);
         }
+        else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
         else if (strncmp(key, "phrase", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_NUM_PHRASES && key[7] == 0)
         {
@@ -294,6 +296,7 @@ void MP_SaveConfig(void)
             fprintf(f, "phrase%d = %04x %04x %04x %04x\n", i + 1, gMpConfig.phrases[i][0], gMpConfig.phrases[i][1],
                 gMpConfig.phrases[i][2], gMpConfig.phrases[i][3]);
     }
+    fprintf(f, "AllowSmallTweaks = %d\n", gMpConfig.smallTweaks ? 1 : 0);
     fclose(f);
 }
 

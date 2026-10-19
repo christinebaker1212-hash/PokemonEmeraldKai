@@ -276,6 +276,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &v);
         gSaveBlock1Ptr->weatherCycleStage = v;
     }
+    else if (strcmp(cmd, "pickup") == 0)
+    {
+        // pickup N - show PICKUP number N (0-18) instead of this week's
+        void MP_Gatcha_SetPickup(s8 n);
+        int n = -1;
+        sscanf(arg, "%d", &n);
+        MP_Gatcha_SetPickup(n);
+    }
     else if (strcmp(cmd, "gatcharig") == 0)
     {
         // gatcharig N - the next MoeGatcha pull is this rarity (0 N, 1 U, 2 R, 3 SR, 4 SSR, 5 UR, 6 EX); gatcharig N P also gives P pulls

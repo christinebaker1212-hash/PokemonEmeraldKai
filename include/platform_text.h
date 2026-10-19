@@ -11,6 +11,9 @@ void Platform_SetTextInput(int on);
 int Platform_IsTextInputOn(void);
 // Next typed ASCII character (or TYPED_*), 0 when none
 int Platform_PopTypedChar(void);
+// Letter keys pressed outside text entry (a-z), for screens that watch for typed words
+void Platform_PushLetter(char c);
+int Platform_PopLetter(void);
 // Test harness: queue text as if typed
 void Platform_QueueTypedText(const char *text);
 

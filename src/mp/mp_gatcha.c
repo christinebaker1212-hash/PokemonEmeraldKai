@@ -60,6 +60,7 @@
 #include "constants/songs.h"
 #include "constants/species.h"
 #include "constants/region_map_sections.h"
+#include "platform_text.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -114,7 +115,20 @@ struct EventMon
     bool8 fateful;         // Mew/Deoxys obey only when met in a fateful encounter
 };
 
-enum { EV_JIRACHI, EV_MEW, EV_CELEBI, EV_DEOXYS, EV_ZIGZAGOON, EV_PICHU, EV_SKITTY, EV_SWABLU, EV_LATIAS, EV_LATIOS, EV_LUGIA, EV_HOOH };
+enum {
+    EV_JIRACHI, EV_MEW, EV_CELEBI, EV_DEOXYS, EV_ZIGZAGOON, EV_PICHU, EV_SKITTY, EV_SWABLU, EV_LATIAS, EV_LATIOS, EV_LUGIA, EV_HOOH,
+    // PICKUP (OT GACHA)
+    EV_G_MEW, EV_G_MEWTWO, EV_G_CELEBI, EV_G_JIRACHI, EV_G_DRAGONITE, EV_G_TYRANITAR, EV_G_SALAMENCE, EV_G_METAGROSS,
+    EV_G_DITTO, EV_G_EEVEE, EV_G_FEEBAS, EV_G_DEOXYS, EV_G_HITMONLEE, EV_G_HITMONCHAN, EV_G_MOLTRES, EV_G_ZAPDOS,
+    EV_G_ARTICUNO, EV_G_BULBASAUR, EV_G_CHARMANDER, EV_G_SQUIRTLE, EV_G_CHIKORITA, EV_G_TOTODILE, EV_G_CYNDAQUIL,
+    EV_G_ENTEI, EV_G_RAIKOU, EV_G_SUICUNE, EV_G_LUGIA, EV_G_HOOH, EV_G_LATIOS, EV_G_LATIAS,
+    EV_RANDOM,          // a random Moemon (not legendary), picked at the pull: def->qty is the species
+    EV_RANDOM_LEGEND,   // a random legendary, picked at the pull
+};
+
+// PICKUP Moemon: OT GACHA, ID No. 23195 (secret ID 40613)
+#define GACHA_OT_ID ((40613u << 16) | 23195)
+#define NO_MOVES {MOVE_NONE, MOVE_NONE, MOVE_NONE, MOVE_NONE}   // the moves it knows at that level
 
 // Movesets of real Generation 3 event Pokémon
 static const struct EventMon sEventMons[] = {
@@ -131,6 +145,43 @@ static const struct EventMon sEventMons[] = {
     [EV_LATIOS]    = {"SOUTHERN LATIOS", SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, NULL, 0, FALSE},
     [EV_LUGIA]     = {"NAVEL ROCK LUGIA", SPECIES_LUGIA, 70, {MOVE_RECOVER, MOVE_HYDRO_PUMP, MOVE_RAIN_DANCE, MOVE_SWIFT}, NULL, 0, TRUE},
     [EV_HOOH]      = {"NAVEL ROCK HO-OH", SPECIES_HO_OH, 70, {MOVE_RECOVER, MOVE_FIRE_BLAST, MOVE_SUNNY_DAY, MOVE_SWIFT}, NULL, 0, TRUE},
+    // PICKUP. Where a real Generation 3 event existed, its level and moves
+    // (and the fateful encounter): AURA Mew, AGETO Celebi, WISHMKR Jirachi,
+    // SPACE C Deoxys, the 10th Anniversary Lv70 legends (their Lv70 moves)
+    // and the EON TICKET Latios/Latias. The rest are like an in-game gift.
+    // Title NULL: the species name.
+    [EV_G_MEW]        = {NULL, SPECIES_MEW, 10, {MOVE_POUND, MOVE_NONE, MOVE_NONE, MOVE_NONE}, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_MEWTWO]     = {NULL, SPECIES_MEWTWO, 70, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_CELEBI]     = {NULL, SPECIES_CELEBI, 10, {MOVE_CONFUSION, MOVE_RECOVER, MOVE_HEAL_BELL, MOVE_SAFEGUARD}, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_JIRACHI]    = {NULL, SPECIES_JIRACHI, 5, {MOVE_WISH, MOVE_CONFUSION, MOVE_REST, MOVE_NONE}, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_DRAGONITE]  = {NULL, SPECIES_DRAGONITE, 55, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_TYRANITAR]  = {NULL, SPECIES_TYRANITAR, 55, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_SALAMENCE]  = {NULL, SPECIES_SALAMENCE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_METAGROSS]  = {NULL, SPECIES_METAGROSS, 45, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_DITTO]      = {NULL, SPECIES_DITTO, 25, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_EEVEE]      = {NULL, SPECIES_EEVEE, 25, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_FEEBAS]     = {NULL, SPECIES_FEEBAS, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_DEOXYS]     = {NULL, SPECIES_DEOXYS, 30, {MOVE_TAUNT, MOVE_PURSUIT, MOVE_PSYCHIC, MOVE_SUPERPOWER}, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_HITMONLEE]  = {NULL, SPECIES_HITMONLEE, 25, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_HITMONCHAN] = {NULL, SPECIES_HITMONCHAN, 25, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_MOLTRES]    = {NULL, SPECIES_MOLTRES, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_ZAPDOS]     = {NULL, SPECIES_ZAPDOS, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_ARTICUNO]   = {NULL, SPECIES_ARTICUNO, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_BULBASAUR]  = {NULL, SPECIES_BULBASAUR, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_CHARMANDER] = {NULL, SPECIES_CHARMANDER, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_SQUIRTLE]   = {NULL, SPECIES_SQUIRTLE, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_CHIKORITA]  = {NULL, SPECIES_CHIKORITA, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_TOTODILE]   = {NULL, SPECIES_TOTODILE, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_CYNDAQUIL]  = {NULL, SPECIES_CYNDAQUIL, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_ENTEI]      = {NULL, SPECIES_ENTEI, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_RAIKOU]     = {NULL, SPECIES_RAIKOU, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_SUICUNE]    = {NULL, SPECIES_SUICUNE, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_LUGIA]      = {NULL, SPECIES_LUGIA, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_HOOH]       = {NULL, SPECIES_HO_OH, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_G_LATIOS]     = {NULL, SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_G_LATIAS]     = {NULL, SPECIES_LATIAS, 50, {MOVE_MIST_BALL, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_CHARM}, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_RANDOM]       = {NULL, SPECIES_NONE, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_RANDOM_LEGEND] = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
 };
 
 enum { K_ITEM, K_MONEY, K_MON, K_SET };   // K_SET: several items at once (sSets)
@@ -149,6 +200,41 @@ struct PrizeDef
 #define MON(e, w)     {K_MON, e, 1, w, FALSE}
 #define SHINY(e, w)   {K_MON, e, 1, w, TRUE}
 #define SET(n, q, w)  {K_SET, n, q, w, FALSE}
+
+static bool8 IsRandomEv(u16 ev)
+{
+    return ev == EV_RANDOM || ev == EV_RANDOM_LEGEND;
+}
+
+// The Moemon a prize gives (a random one keeps its species in qty; 0 = not picked yet)
+static u16 DefSpecies(const struct PrizeDef *def)
+{
+    return IsRandomEv(def->id) ? def->qty : sEventMons[def->id].species;
+}
+
+static const u16 sLegendDex[] = {144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386};
+
+static bool8 IsLegendSpecies(u16 species)
+{
+    u16 n = SpeciesToNationalPokedexNum(species), i;
+    for (i = 0; i < ARRAY_COUNT(sLegendDex); i++)
+        if (sLegendDex[i] == n)
+            return TRUE;
+    return FALSE;
+}
+
+static u16 RandomSpecies(bool8 legend)
+{
+    if (legend)
+        return NationalPokedexNumToSpecies(sLegendDex[Random() % ARRAY_COUNT(sLegendDex)]);
+    for (;;)
+    {
+        u16 species = NationalPokedexNumToSpecies(1 + Random() % 386);
+        if (species != SPECIES_NONE && !IsLegendSpecies(species) && species != SPECIES_UNOWN)
+            return species;
+    }
+}
+
 
 enum { SET_VITAMINS, SET_BALLS };
 static const u16 sSets[][6] = {
@@ -247,10 +333,33 @@ static const struct PrizeDef sBallEx[] = {
     ITEM(ITEM_MASTER_BALL, 10, 10), SET(SET_BALLS, 99, 6),
 };
 
-// PICKUP banner: one featured event Moemon a week, filled in by SetupPickup()
-static const u8 sPickupOrder[] = {EV_JIRACHI, EV_LATIAS, EV_MEW, EV_LUGIA, EV_CELEBI, EV_LATIOS, EV_HOOH};
-static struct PrizeDef sPickupUltra[1];   // the featured one
-static struct PrizeDef sPickupEx[1];      // ... shiny
+// PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
+// at random each time), every EX one of them shiny
+struct Pickup { u8 mons[3]; u8 count; };
+static const struct Pickup sPickups[] = {
+    {{EV_G_MEW, EV_G_MEWTWO}, 2},
+    {{EV_G_CELEBI}, 1},
+    {{EV_G_JIRACHI}, 1},
+    {{EV_G_DRAGONITE}, 1},
+    {{EV_G_TYRANITAR}, 1},
+    {{EV_G_SALAMENCE}, 1},
+    {{EV_G_METAGROSS}, 1},
+    {{EV_G_DITTO}, 1},
+    {{EV_G_EEVEE}, 1},
+    {{EV_G_FEEBAS}, 1},
+    {{EV_G_DEOXYS}, 1},
+    {{EV_G_HITMONLEE, EV_G_HITMONCHAN}, 2},
+    {{EV_G_MOLTRES, EV_G_ZAPDOS, EV_G_ARTICUNO}, 3},
+    {{EV_G_BULBASAUR, EV_G_CHARMANDER, EV_G_SQUIRTLE}, 3},
+    {{EV_G_CHIKORITA, EV_G_TOTODILE, EV_G_CYNDAQUIL}, 3},
+    {{EV_G_ENTEI, EV_G_RAIKOU, EV_G_SUICUNE}, 3},
+    {{EV_G_LUGIA, EV_G_HOOH}, 2},
+    {{EV_G_LATIOS, EV_G_LATIAS}, 2},
+    {{EV_RANDOM}, 1},   // a random SHINY Moemon (EX: a random shiny legendary)
+};
+static struct PrizeDef sPickupUltra[3];
+static struct PrizeDef sPickupEx[3];
+static u8 sPickupCount;
 static const struct PrizeDef sPickupRare[] = {
     MON(EV_ZIGZAGOON, 6), MON(EV_PICHU, 6), MON(EV_SKITTY, 6), MON(EV_SWABLU, 6),
     ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_PP_UP, 2, 8), MONEY(15000, 8),
@@ -279,7 +388,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
     [BANNER_PICKUP] = {
         "PICKUP", NULL,   // tagline names the featured Moemon
         {{sCommon, ARRAY_COUNT(sCommon)}, {sUncommon, ARRAY_COUNT(sUncommon)}, {sPickupRare, ARRAY_COUNT(sPickupRare)},
-         {sSuper, ARRAY_COUNT(sSuper)}, {sSSuper, ARRAY_COUNT(sSSuper)}, {sPickupUltra, 1}, {sPickupEx, 1}},
+         {sSuper, ARRAY_COUNT(sSuper)}, {sSSuper, ARRAY_COUNT(sSSuper)}, {sPickupUltra, 1}, {sPickupEx, 1}},   // counts set by SetupPickup
         {5150, 2800, 1350, 500, 150, 45, 5}, RGB(31, 10, 20),
     },
     [BANNER_TRAINING] = {
@@ -298,17 +407,43 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
 
 static u8 sBanner;   // the banner shown (kept between visits)
 
-static u8 PickupFeatured(void)
+static s8 sPickupOverride = -1;   // test builds: mp pickup N
+
+void MP_Gatcha_SetPickup(s8 n)
 {
-    return sPickupOrder[MP_WeekNumber() % ARRAY_COUNT(sPickupOrder)];
+    sPickupOverride = n;
 }
 
-// This week's PICKUP: every UR is the featured one, every EX its shiny
+static const struct Pickup *ThisWeeksPickup(void)
+{
+    if (sPickupOverride >= 0 && sPickupOverride < (s8)ARRAY_COUNT(sPickups))
+        return &sPickups[sPickupOverride];
+    return &sPickups[MP_WeekNumber() % ARRAY_COUNT(sPickups)];
+}
+
+static bool8 PickupIsRandom(void)
+{
+    return ThisWeeksPickup()->mons[0] == EV_RANDOM;
+}
+
+// This week's PICKUP: every UR is one of its Moemon, every EX one of them shiny
 static void SetupPickup(void)
 {
-    u8 feat = PickupFeatured();
-    sPickupUltra[0] = (struct PrizeDef)MON(feat, 1);
-    sPickupEx[0] = (struct PrizeDef)SHINY(feat, 1);
+    const struct Pickup *pu = ThisWeeksPickup();
+    u8 i;
+    sPickupCount = pu->count;
+    for (i = 0; i < pu->count; i++)
+    {
+        sPickupUltra[i] = (struct PrizeDef)MON(pu->mons[i], 1);
+        sPickupEx[i] = (struct PrizeDef)SHINY(pu->mons[i], 1);
+    }
+    if (pu->mons[0] == EV_RANDOM)
+    {
+        sPickupUltra[0] = (struct PrizeDef)SHINY(EV_RANDOM, 1);
+        sPickupEx[0] = (struct PrizeDef)SHINY(EV_RANDOM_LEGEND, 1);
+    }
+    sBanners[BANNER_PICKUP].pools[R_UR].count = pu->count;
+    sBanners[BANNER_PICKUP].pools[R_EX].count = pu->count;
 }
 
 static const struct Pool *BannerPool(u8 rarity)
@@ -372,7 +507,9 @@ static void PityKeys(char *sr, char *ssr, char *ur)
     }
 }
 
-static s8 sRig = -1;   // test builds: force the next pull's best rarity (mp gatcharig N)
+static s8 sRig = -1;   // force the next pull's rarity (mp gatcharig N, or the "open" panel)
+static const struct PrizeDef *sRigDef;   // ... and its prize (NULL: any)
+static struct PrizeDef sRandDefs[10];    // random Moemon picked for this pull
 
 void MP_Gatcha_Rig(s8 rarity)
 {
@@ -432,7 +569,22 @@ static void PrizeName(const struct PrizeDef *def, u32 amount, u8 *dst)
     }
     else if (def->kind == K_MON)
     {
-        snprintf(buf, sizeof(buf), "%s%s", def->shiny ? "SHINY " : "", sEventMons[def->id].title);
+        const char *title = sEventMons[def->id].title;
+        char species[16];
+        if (!title)
+        {
+            u8 name[POKEMON_NAME_LENGTH + 1];
+            u16 sp = DefSpecies(def);
+            if (sp == SPECIES_NONE)
+                snprintf(species, sizeof(species), "%s", def->id == EV_RANDOM_LEGEND ? "LEGEND?" : "MOEMON?");
+            else
+            {
+                GetSpeciesName(name, sp);
+                MP_GameToAscii(species, name, POKEMON_NAME_LENGTH);
+            }
+            title = species;
+        }
+        snprintf(buf, sizeof(buf), "%s%s", def->shiny ? "SHINY " : "", title);
         MP_AsciiToGame(dst, buf, 30);
     }
     else if (def->kind == K_SET)
@@ -461,17 +613,19 @@ static u32 PersonalityForShiny(u32 otId)
 static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
 {
     const struct EventMon *e = &sEventMons[def->id];
+    u16 species = DefSpecies(def);
     struct Pokemon *mon = Alloc(sizeof(struct Pokemon));
     u32 otId = e->otName ? e->otId : (gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
               | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | ((u32)gSaveBlock2Ptr->playerTrainerId[3] << 24));
     u8 i, result;
 
     if (def->shiny)
-        CreateMon(mon, e->species, e->level, USE_RANDOM_IVS, TRUE, PersonalityForShiny(otId), OT_ID_PRESET, otId);
+        CreateMon(mon, species, e->level, USE_RANDOM_IVS, TRUE, PersonalityForShiny(otId), OT_ID_PRESET, otId);
     else
-        CreateMon(mon, e->species, e->level, USE_RANDOM_IVS, FALSE, 0, e->otName ? OT_ID_PRESET : OT_ID_PLAYER_ID, e->otId);
-    for (i = 0; i < MAX_MON_MOVES; i++)
-        SetMonMoveSlot(mon, e->moves[i], i);
+        CreateMon(mon, species, e->level, USE_RANDOM_IVS, FALSE, 0, e->otName ? OT_ID_PRESET : OT_ID_PLAYER_ID, e->otId);
+    if (e->moves[0] != MOVE_NONE)   // else: the moves it knows at that level
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            SetMonMoveSlot(mon, e->moves[i], i);
     if (e->otName)
     {
         u8 ot[PLAYER_NAME_LENGTH + 1];
@@ -494,8 +648,8 @@ static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
     }
     else
     {
-        GetSetPokedexFlag(SpeciesToNationalPokedexNum(e->species), FLAG_SET_SEEN);
-        GetSetPokedexFlag(SpeciesToNationalPokedexNum(e->species), FLAG_SET_CAUGHT);
+        GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN);
+        GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_CAUGHT);
         snprintf(res->note, sizeof(res->note), result == MON_GIVEN_TO_PARTY ? "It joined your party!" : "It was sent to your PC.");
     }
     Free(mon);
@@ -665,6 +819,12 @@ struct GatchaState
     u16 stampTimer;
     s16 shake;          // amplitude in 1/16 px
     u16 pickupPic;      // the featured Moemon on the PICKUP banner (0xFFFF: none)
+    u8 pickupShown;     // which of this week's PICKUP Moemon stands there
+    u16 pickupTimer;
+    u8 forceRow;        // the "open" panel: 0 rarity, 1 prize
+    u8 forceRarity;
+    s16 forcePrize;     // -1: any
+    char typed[8];      // the last letters typed
     // A legendary UR/EX: the silhouette, then the showcase
     u16 legendPic;      // 0xFFFF: none
     u8 legendSlot;      // its sprite palette slot
@@ -1100,7 +1260,7 @@ static void CreateStamp(u8 rarity)
         .anims = gDummySpriteAnimTable, .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
     };
     u8 k;
-    bool8 legend = rarity >= R_UR && sG->results[sG->best].def->kind == K_MON;
+    bool8 legend = rarity >= R_UR && sG->results[sG->best].def->kind == K_MON && IsLegendSpecies(DefSpecies(sG->results[sG->best].def));
     switch (rarity)
     {
     case R_EX:
@@ -1291,17 +1451,49 @@ static void DestroyLive(struct LiveIcon *l, u8 slot)
     l->cell = NO_CELL;
 }
 
+static bool8 SeenSpecies(u16 species)
+{
+    return GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_SEEN);
+}
+
+// An all-dark sprite palette for Moemon not seen yet
+#define TAG_SHADOW_PAL 0x7246
+static u8 ShadowPalSlot(void)
+{
+    u8 slot = IndexOfSpritePaletteTag(TAG_SHADOW_PAL);
+    if (slot == 0xFF)
+    {
+        u16 pal[16];
+        u8 i;
+        struct SpritePalette sp = {pal, TAG_SHADOW_PAL};
+        pal[0] = 0;
+        for (i = 1; i < 16; i++)
+            pal[i] = RGB(3, 3, 6);
+        slot = LoadSpritePalette(&sp);
+    }
+    return slot;
+}
+
 static u8 CreateIcon(const struct PrizeDef *def, u8 slot, s16 x, s16 y, bool8 *isMon, bool8 mystery)
 {
     u8 id;
+    if (def->kind == K_MON && DefSpecies(def) == SPECIES_NONE)
+        mystery = TRUE;   // a random Moemon: nobody knows yet
     if (def->kind == K_MON && !mystery)
     {
-        const struct EventMon *e = &sEventMons[def->id];
-        LoadMonIconPalette(e->species);   // only the palettes in use: item icons need theirs too
-        if (IndexOfSpritePaletteTag(gMonIconPaletteTable[gMonIconPaletteIndices[e->species]].tag) == 0xFF)
+        u16 species = DefSpecies(def);
+        LoadMonIconPalette(species);   // only the palettes in use: item icons need theirs too
+        if (IndexOfSpritePaletteTag(gMonIconPaletteTable[gMonIconPaletteIndices[species]].tag) == 0xFF)
             return MAX_SPRITES;
-        id = CreateMonIcon(e->species, SpriteCB_MonIcon, x, y - 4, 1, 0, FALSE);   // FALSE: Kai has no DEOXYS form icons
+        id = CreateMonIcon(species, SpriteCB_MonIcon, x, y - 4, 1, 0, FALSE);   // FALSE: Kai has no DEOXYS form icons
         *isMon = TRUE;
+        // Not seen yet: only its shadow, so the design isn't spoiled
+        if (id < MAX_SPRITES && !SeenSpecies(species))
+        {
+            u8 shadow = ShadowPalSlot();
+            if (shadow != 0xFF)
+                gSprites[id].oam.paletteNum = shadow;
+        }
     }
     else
     {
@@ -1513,11 +1705,22 @@ static void DrawBannerLine(void)
     Print(WIN_NAME, FONT_SMALL, (width - GetStringWidth(FONT_SMALL, buf, 0)) / 2, 2, TC_PANEL, TC_BANNER, buf);
     if (sBanner == BANNER_PICKUP)
     {
-        u8 name[POKEMON_NAME_LENGTH + 1];
-        char a[16];
-        GetSpeciesName(name, sEventMons[PickupFeatured()].species);
-        MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
-        snprintf(line, sizeof(line), "Every UR is %s!", a);
+        const struct Pickup *pu = ThisWeeksPickup();
+        u8 i;
+        if (PickupIsRandom())
+            snprintf(line, sizeof(line), "UR: a random SHINY Moemon!");
+        else
+        {
+            int n = snprintf(line, sizeof(line), "UR:");
+            for (i = 0; i < pu->count; i++)
+            {
+                u8 name[POKEMON_NAME_LENGTH + 1];
+                char a[16];
+                GetSpeciesName(name, sEventMons[pu->mons[i]].species);
+                MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
+                n += snprintf(line + n, sizeof(line) - n, "%s%s", i ? "/" : " ", a);
+            }
+        }
     }
     else
         snprintf(line, sizeof(line), "%s", sBanners[sBanner].tagline);
@@ -1535,27 +1738,49 @@ static void SpriteCB_PickupPic(struct Sprite *sprite)
     sprite->y2 = Sin((sprite->data[0] * 3) & 0xFF, 3);
 }
 
-// The featured Moemon of the week, standing next to the PICKUP banner
-static void ShowPickupPic(void)
+#define TAG_PICKUP_PAL 0x7247
+
+static void DestroyPickupPic(void)
 {
     if (sG->pickupPic != 0xFFFF)
     {
         FreeAndDestroyMonPicSprite(sG->pickupPic);
+        FreeSpritePaletteByTag(TAG_PICKUP_PAL);
         sG->pickupPic = 0xFFFF;
     }
-    if (sBanner == BANNER_PICKUP)
+}
+
+// This week's PICKUP Moemon, standing next to the banner (taking turns when
+// there are several). One not seen yet is only a shadow.
+static void ShowPickupPic(void)
+{
+    DestroyPickupPic();
+    if (sBanner == BANNER_PICKUP && !PickupIsRandom())
     {
-        u16 species = sEventMons[PickupFeatured()].species;
+        const struct Pickup *pu = ThisWeeksPickup();
+        u16 species = sEventMons[pu->mons[sG->pickupShown % pu->count]].species;
+        u8 slot = AllocSpritePalette(TAG_PICKUP_PAL);
+        u16 id;
+        if (slot == 0xFF)
+            return;
         // otId 0 with personality 0 would be shiny
-        const struct CompressedSpritePalette *pal = GetMonSpritePalStructFromOtIdPersonality(species, 0, 0xFFFF0000);
-        u16 id = CreateMonPicSprite_HandleDeoxys(species, 0, 0xFFFF0000, TRUE, 222, 104, 0, pal->tag);
+        id = CreateMonPicSprite_HandleDeoxys(species, 0, 0xFFFF0000, TRUE, 222, 104, slot, TAG_NONE);
         if (id < MAX_SPRITES)
         {
             gSprites[id].oam.priority = 0;
+            gSprites[id].oam.paletteNum = slot;
             gSprites[id].callback = SpriteCB_PickupPic;
             gSprites[id].coordOffsetEnabled = TRUE;
             sG->pickupPic = id;
+            if (!SeenSpecies(species))
+            {
+                u8 i;
+                for (i = 1; i < 16; i++)
+                    gPlttBufferUnfaded[OBJ_PLTT_ID(slot) + i] = gPlttBufferFaded[OBJ_PLTT_ID(slot) + i] = RGB(3, 3, 6);
+            }
         }
+        else
+            FreeSpritePaletteByTag(TAG_PICKUP_PAL);
     }
 }
 
@@ -1628,6 +1853,118 @@ static void DrawMenu(void)
     CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
 }
 
+// ---------------------------------------------------------------------------
+// Small tweaks (AllowSmallTweaks = 1 in moemon_coop.ini): type "gimme" on this
+// screen for 999 pulls, "open" to choose the next pull
+
+#define GS_FORCE GS_EXIT + 1
+
+static void DrawForce(void)
+{
+    const struct Pool *pool = BannerPool(sG->forceRarity);
+    char line[64];
+    u8 name[48], buf[64];
+    FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
+    PrintAscii(WIN_MENU, FONT_SMALL, 4, 1, TC_PANEL, TC_GREY, "NEXT PULL");
+    snprintf(line, sizeof(line), "%c RARITY  < %s >", sG->forceRow == 0 ? '>' : ' ', sRarityNames[sG->forceRarity]);
+    PrintAscii(WIN_MENU, FONT_NORMAL, 4, 10, TC_PANEL, sG->forceRow == 0 ? TC_GOLD : TC_RARITY + sG->forceRarity, line);
+    if (sG->forcePrize < 0 || sG->forcePrize >= pool->count)
+        MP_AsciiToGame(name, "ANY", 10);
+    else
+        PrizeName(&pool->defs[sG->forcePrize], pool->defs[sG->forcePrize].qty, name);
+    snprintf(line, sizeof(line), "%c PRIZE  < ", sG->forceRow == 1 ? '>' : ' ');
+    MP_AsciiToGame(buf, line, 30);
+    StringAppend(buf, name);
+    MP_AsciiToGame(buf + StringLength(buf), " >", 4);
+    Print(WIN_MENU, GetStringWidth(FONT_NORMAL, buf, 0) > 24 * 8 - 8 ? FONT_SMALL : FONT_NORMAL, 4, 24, TC_PANEL, sG->forceRow == 1 ? TC_GOLD : TC_WHITE, buf);
+    CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
+    DrawHelp("UP/DOWN, LEFT/RIGHT: CHOOSE   A: SET   B: CANCEL");
+}
+
+static void UpdateForce(void)
+{
+    const struct Pool *pool = BannerPool(sG->forceRarity);
+    if (JOY_NEW(DPAD_UP | DPAD_DOWN))
+    {
+        sG->forceRow ^= 1;
+        PlaySE(SE_SELECT);
+        DrawForce();
+    }
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        s8 d = JOY_NEW(DPAD_RIGHT) ? 1 : -1;
+        if (sG->forceRow == 0)
+        {
+            sG->forceRarity = (sG->forceRarity + R_COUNT + d) % R_COUNT;
+            sG->forcePrize = -1;
+        }
+        else
+        {
+            // -1 (ANY), 0 .. count-1
+            sG->forcePrize += d;
+            if (sG->forcePrize < -1)
+                sG->forcePrize = pool->count - 1;
+            if (sG->forcePrize >= pool->count)
+                sG->forcePrize = -1;
+        }
+        PlaySE(SE_SELECT);
+        DrawForce();
+    }
+    else if (JOY_NEW(A_BUTTON))
+    {
+        sRig = sG->forceRarity;
+        sRigDef = sG->forcePrize >= 0 && sG->forcePrize < pool->count ? &pool->defs[sG->forcePrize] : NULL;
+        PlaySE(SE_SHOP);
+        sG->state = GS_MENU;
+        DrawMenu();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sG->state = GS_MENU;
+        DrawMenu();
+    }
+}
+
+// Reads the letters typed since the last frame (only while the menu is up)
+static void CheckTypedCodes(void)
+{
+    int c;
+    while ((c = Platform_PopLetter()) != 0)
+    {
+        u8 n = strlen(sG->typed);
+        if (n == sizeof(sG->typed) - 1)
+        {
+            memmove(sG->typed, sG->typed + 1, n);
+            n--;
+        }
+        sG->typed[n] = c;
+        sG->typed[n + 1] = 0;
+        if (!gMpConfig.smallTweaks)
+            continue;
+        n++;
+        if (n >= 5 && memcmp(sG->typed + n - 5, "gimme", 5) == 0)
+        {
+            MP_SaveData_Set(PULLS_KEY, 999);
+            PlaySE(SE_SHOP);
+            sG->typed[0] = 0;
+            DrawHeader();
+            DrawMenu();
+        }
+        else if (n >= 4 && memcmp(sG->typed + n - 4, "open", 4) == 0)
+        {
+            PlaySE(SE_SELECT);
+            sG->typed[0] = 0;
+            sG->forceRow = 0;
+            sG->forceRarity = R_UR;
+            sG->forcePrize = -1;
+            sG->state = GS_FORCE;
+            DrawForce();
+            return;
+        }
+    }
+}
+
 static void SetReelClip(bool8 on)
 {
     if (on)
@@ -1695,6 +2032,16 @@ static void StartSpin(u8 count)
         bool8 lastChance = (count == 10 && i == count - 1 && !gotRare);
         r->rarity = RollRarity(lastChance);
         r->def = PickFromPool(r->rarity);
+        if (i == 0 && sRigDef)
+            r->def = sRigDef;
+        sRigDef = NULL;
+        if (r->def->kind == K_MON && IsRandomEv(r->def->id))
+        {
+            // A random Moemon: which one is decided now
+            sRandDefs[i] = *r->def;
+            sRandDefs[i].qty = RandomSpecies(r->def->id == EV_RANDOM_LEGEND);
+            r->def = &sRandDefs[i];
+        }
         GivePrize(r);
         if (r->rarity >= R_R)
             gotRare = TRUE;
@@ -1900,7 +2247,7 @@ static void RestoreLegendColors(void)
 static void CreateLegendPic(s16 x, s16 y)
 {
     struct Result *r = &sG->results[sG->best];
-    u16 species = sEventMons[r->def->id].species;
+    u16 species = DefSpecies(r->def);
     // otId 0: personality 0 makes it shiny, 0xFFFF0000 doesn't
     u32 personality = r->def->shiny ? 0 : 0xFFFF0000;
     u8 slot;
@@ -2098,7 +2445,7 @@ static void ShowReveal(void)
         }
         if (sG->raySprite < MAX_SPRITES)
             gSprites[sG->raySprite].y = 92;
-        PlayCry_Normal(sEventMons[r->def->id].species, 0);
+        PlayCry_Normal(DefSpecies(r->def), 0);
     }
     else
     {
@@ -2239,9 +2586,7 @@ static void FreeScene(void)
     DestroyLegendPic();
     DestroyRays();
     DestroyStamp();
-    if (sG->pickupPic != 0xFFFF)
-        FreeAndDestroyMonPicSprite(sG->pickupPic);
-    sG->pickupPic = 0xFFFF;
+    DestroyPickupPic();
     sShakeX = sShakeY = 0;
     gSpriteCoordOffsetX = gSpriteCoordOffsetY = 0;
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
@@ -2313,6 +2658,15 @@ static void Task_Gatcha(u8 taskId)
     case GS_MENU:
         sG->pos += 0.5f;   // idle drift
         UpdateReel();
+        CheckTypedCodes();
+        if (sG->state != GS_MENU)
+            break;
+        if (sBanner == BANNER_PICKUP && ThisWeeksPickup()->count > 1 && ++sG->pickupTimer >= 150)
+        {
+            sG->pickupTimer = 0;
+            sG->pickupShown++;
+            ShowPickupPic();
+        }
         if (JOY_NEW(L_BUTTON | R_BUTTON))
             SwitchBanner(JOY_NEW(R_BUTTON) ? 1 : -1);
         else if (JOY_NEW(DPAD_ANY))
@@ -2425,6 +2779,11 @@ static void Task_Gatcha(u8 taskId)
                 StartHype();
             }
         }
+        break;
+    case GS_FORCE:
+        sG->pos += 0.5f;
+        UpdateReel();
+        UpdateForce();
         break;
     case GS_HYPE:
         UpdateHype();

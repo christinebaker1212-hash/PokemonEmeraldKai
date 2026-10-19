@@ -105,6 +105,32 @@ int Platform_TextInputKeyDown(int sym, int mod)
 
 #endif // PLATFORM_SDL2
 
+// Moemon Co-op: the last letter keys pressed outside text entry
+static char sLetters[32];
+static int sLetterHead, sLetterCount;
+
+void Platform_PushLetter(char c)
+{
+    if (sLetterCount == (int)sizeof(sLetters))
+    {
+        sLetterHead = (sLetterHead + 1) % (int)sizeof(sLetters);
+        sLetterCount--;
+    }
+    sLetters[(sLetterHead + sLetterCount) % (int)sizeof(sLetters)] = c;
+    sLetterCount++;
+}
+
+int Platform_PopLetter(void)
+{
+    char c;
+    if (sLetterCount == 0)
+        return 0;
+    c = sLetters[sLetterHead];
+    sLetterHead = (sLetterHead + 1) % (int)sizeof(sLetters);
+    sLetterCount--;
+    return (unsigned char)c;
+}
+
 // Moemon Co-op: put text (an invite code) on the system clipboard
 void Platform_SetClipboardText(const char *text)
 {

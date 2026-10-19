@@ -471,6 +471,12 @@ void ProcessEvents(void)
         case SDL_KEYDOWN:
             if (Platform_TextInputKeyDown(event.key.keysym.sym, event.key.keysym.mod))
                 break;
+            if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z && !event.key.repeat
+             && !(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT | KMOD_GUI)))
+            {
+                void Platform_PushLetter(char c);
+                Platform_PushLetter('a' + (event.key.keysym.sym - SDLK_a));
+            }
             switch (event.key.keysym.sym)
             {
             HANDLE_KEYDOWN(A_BUTTON)
@@ -817,6 +823,14 @@ static void TestHarnessStep(void)
             snprintf(sUntilName, sizeof(sUntilName), "%s", name);
             sUntilFrames = maxFrames;
             return;
+        }
+        else if (strcmp(cmd, "letters") == 0)
+        {
+            // letters WORD - as if those letter keys were pressed
+            void Platform_PushLetter(char c);
+            const char *src = line + 8;
+            for (; *src >= 'a' && *src <= 'z'; src++)
+                Platform_PushLetter(*src);
         }
         else if (strcmp(cmd, "type") == 0)
         {

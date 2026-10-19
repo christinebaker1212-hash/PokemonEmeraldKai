@@ -139,6 +139,7 @@ struct MpConfig
     u8 trainerRange;
     u32 followerPersonality;  // the party Pokémon that follows you (0 = none)
     u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
+    u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
 };
 
 extern struct MpConfig gMpConfig;

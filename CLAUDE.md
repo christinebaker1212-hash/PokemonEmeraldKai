@@ -40,7 +40,8 @@ labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving bot
 Phase 2: shared PC (put/take Pokémon and items, `MOEMON_STORE_DIR`), trade with money/items and a
 trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name tag and follower.
 Phase 3 (mp_events.c, mp_gatcha.c): goals/toasts/MoeGatcha/streak with `mp event ...`, `mp savedata`, `mp gatcharig N` (0 N .. 6 EX; 5 = legendary event),
-`mp goals`, MOEMON_DEBUG_DATE; partner-by-partner co-op goal checked with three clients (run4-style).
+`mp goals`, `mp pickup N` (0-18), harness `letters WORD`, MOEMON_DEBUG_DATE; `AllowSmallTweaks = 1` in the ini enables
+the MoeGatcha typed codes (mp_gatcha.c CheckTypedCodes, off by default, only from the file); partner-by-partner co-op goal checked with three clients (run4-style).
 Phase 4: co-op wild battles (mp_coop.c, `MP_Coop_TryWildTeamUp`): a land encounter pulls in the closest
 free friend standing in grass within 8x6 tiles (no prompt), 2 players vs 1 wild Pokémon (the right
 opponent slot starts absent). POKé BALLS work (only balls); the catch goes to the thrower via the
