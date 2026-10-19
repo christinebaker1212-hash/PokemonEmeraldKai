@@ -86,3 +86,9 @@ void MP_OnFileDropped(const char *path)
     }
     MP_ShowNotice(msg);
 }
+
+// Test harness condition "notice": a notice box is up
+bool8 MP_Notice_Active(void)
+{
+    return FuncIsActiveTask(Task_Notice);
+}

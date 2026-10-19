@@ -135,6 +135,11 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
+    if (strcmp(name, "notice") == 0)
+    {
+        bool8 MP_Notice_Active(void);
+        return MP_Notice_Active();
+    }
     if (strcmp(name, "naming") == 0)
     {
         bool8 NamingScreen_IsActive(void);

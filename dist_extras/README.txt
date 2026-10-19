@@ -25,6 +25,8 @@ QUICK START
                     then START HOSTING. The game opens your router by
                     itself and shows an INVITE CODE like K7QM-3XPA.
                     It's copied, so just paste it to your friends.
+                    WELCOME NOTE (optional) is two short lines your
+                    friends see when they join.
      JOIN A GAME  - choose ENTER INVITE CODE... and type the code your
                     friend sent, then the password if they set one.
                     Friends on the same Wi-Fi also show up in the list.

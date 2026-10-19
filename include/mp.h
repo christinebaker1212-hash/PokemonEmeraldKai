@@ -157,6 +157,7 @@ struct MpConfig
     char lastRoom[24];
     char lastRoomKey[65];     // hex SHA-256 room key (not the password)
     char lastHostName[24];
+    char welcome[40];             // the host's welcome note: "line 1|line 2" (ASCII)
     char name[32];
     struct MpAppearance app;
     char customSprite[256];
@@ -617,6 +618,7 @@ enum {
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)
     MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
     MPR_DEX_FIRST = 84,        // shared Pokedex (mp_dex.c)
+    MPR_WELCOME = 90,          // the room creator's welcome note for a friend who joined (mp_main.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

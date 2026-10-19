@@ -1814,6 +1814,8 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_COOP_ROOM]     = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_PASSWORD] = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_CODE]     = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_COOP_NOTE1]    = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_COOP_NOTE2]    = DrawNormalTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -2268,6 +2270,31 @@ static const struct NamingScreenTemplate sCoopPasswordTemplate =
     .title = sText_CoopPassword,
 };
 
+static const u8 sText_CoopNote1[] = _("WELCOME NOTE? (line 1)");
+static const u8 sText_CoopNote2[] = _("WELCOME NOTE? (line 2)");
+
+static const struct NamingScreenTemplate sCoopNote1Template =
+{
+    .copyExistingString = TRUE,
+    .maxChars = WALDA_PHRASE_LENGTH,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 11,
+    .title = sText_CoopNote1,
+};
+
+static const struct NamingScreenTemplate sCoopNote2Template =
+{
+    .copyExistingString = TRUE,
+    .maxChars = WALDA_PHRASE_LENGTH,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_LOWER,
+    .unused = 11,
+    .title = sText_CoopNote2,
+};
+
 static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
 {
     [NAMING_SCREEN_PLAYER]     = &sPlayerNamingScreenTemplate,
@@ -2278,6 +2305,8 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_COOP_ROOM]     = &sCoopRoomTemplate,
     [NAMING_SCREEN_COOP_PASSWORD] = &sCoopPasswordTemplate,
     [NAMING_SCREEN_COOP_CODE]     = &sCoopCodeTemplate,
+    [NAMING_SCREEN_COOP_NOTE1]    = &sCoopNote1Template,
+    [NAMING_SCREEN_COOP_NOTE2]    = &sCoopNote2Template,
 };
 
 static const struct OamData sOam_8x8 =

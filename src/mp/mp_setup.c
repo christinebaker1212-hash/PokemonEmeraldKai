@@ -33,6 +33,7 @@
 #define FRAME_PAL    14
 #define TEXT_PAL     15
 #define LINE_H       16
+#define HOST_LINE_H  13   // the host form has one more row
 #define LIST_ROWS    5
 #define REFRESH_FRAMES (60 * 3)
 #define LOCAL_PORT_TRIES 5
@@ -88,6 +89,7 @@ enum {
 enum {
     HOST_NAME,
     HOST_PASSWORD,
+    HOST_NOTE,
     HOST_LISTED,
     HOST_START,
     HOST_BACK,
@@ -148,6 +150,7 @@ static EWRAM_DATA struct
     u8 after;
     u8 message[240];
     u8 inviteCode[WALDA_PHRASE_LENGTH + 1];
+    u8 note[2][WALDA_PHRASE_LENGTH + 1];       // welcome note lines, game charset
     char codeHost[24];
     int codePort;
     bool8 messageIsError;
@@ -482,10 +485,11 @@ static const char *LobbyErrorText(u8 err)
 static void DrawHost(void)
 {
     u8 i;
-    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "SHOW IN LIST", "START HOSTING", "BACK"};
+    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "START HOSTING", "BACK"};
     static const char *const help[] = {
         "The name your friends will look for.",
         "Optional. Friends need it to join.",
+        "Optional. Two short lines your friends see when they join.",
         "NO hides it: friends must type the exact name.",
         "Open the server and start playing!",
         "Go back.",
@@ -494,7 +498,7 @@ static void DrawHost(void)
     FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
     for (i = 0; i < HOST_ROWS; i++)
     {
-        u8 y = 1 + LINE_H * i;
+        u8 y = 1 + HOST_LINE_H * i;
         Print(WIN_MAIN, labels[i], 14, y, sColorNormal);
         if (i == HOST_NAME)
             PrintGame(WIN_MAIN, sSetup.roomName, 104, y, sColorAccent);
@@ -504,6 +508,20 @@ static void DrawHost(void)
                 Print(WIN_MAIN, "(none)", 104, y, sColorDisabled);
             else
                 PrintGame(WIN_MAIN, sSetup.password, 104, y, sColorAccent);
+        }
+        else if (i == HOST_NOTE)
+        {
+            if (sSetup.note[0][0] == EOS && sSetup.note[1][0] == EOS)
+                Print(WIN_MAIN, "(none)", 104, y, sColorDisabled);
+            else
+            {
+                u8 shown[WALDA_PHRASE_LENGTH + 4];
+                static const u8 sDots[] = {CHAR_PERIOD, CHAR_PERIOD, EOS};
+                StringCopy(shown, sSetup.note[0][0] != EOS ? sSetup.note[0] : sSetup.note[1]);
+                if (sSetup.note[0][0] != EOS && sSetup.note[1][0] != EOS)
+                    StringAppend(shown, sDots);
+                PrintGame(WIN_MAIN, shown, 104, y, sColorAccent);
+            }
         }
         else if (i == HOST_LISTED)
         {
@@ -536,6 +554,35 @@ static bool8 StartLocalServer(void)
         }
     }
     return FALSE;
+}
+
+// The welcome note lives in the ini as "line 1|line 2"
+static void LoadNote(void)
+{
+    char line[2][sizeof(gMpConfig.welcome)];
+    char *bar;
+    snprintf(line[0], sizeof(line[0]), "%s", gMpConfig.welcome);
+    bar = strchr(line[0], '|');
+    line[1][0] = 0;
+    if (bar)
+    {
+        snprintf(line[1], sizeof(line[1]), "%s", bar + 1);
+        *bar = 0;
+    }
+    MP_AsciiToGame(sSetup.note[0], line[0], WALDA_PHRASE_LENGTH);
+    MP_AsciiToGame(sSetup.note[1], line[1], WALDA_PHRASE_LENGTH);
+}
+
+static void SaveNote(void)
+{
+    char a[WALDA_PHRASE_LENGTH + 1], b[WALDA_PHRASE_LENGTH + 1];
+    GameToAsciiTrim(a, sSetup.note[0], WALDA_PHRASE_LENGTH);
+    GameToAsciiTrim(b, sSetup.note[1], WALDA_PHRASE_LENGTH);
+    if (b[0])
+        snprintf(gMpConfig.welcome, sizeof(gMpConfig.welcome), "%s|%s", a, b);
+    else
+        snprintf(gMpConfig.welcome, sizeof(gMpConfig.welcome), "%s", a);
+    MP_SaveConfig();
 }
 
 static void BeginHosting(bool8 online)
@@ -755,7 +802,8 @@ static void OpenTextEntry(u8 which, u8 template, u8 *buffer)
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[FindTaskIdByFunc(Task_Setup)].data[0] = 1; // fading out to the text entry
     gTasks[FindTaskIdByFunc(Task_Setup)].data[1] = template;
-    gTasks[FindTaskIdByFunc(Task_Setup)].data[2] = (buffer == sSetup.roomName) ? 0 : (buffer == sSetup.inviteCode) ? 2 : 1;
+    gTasks[FindTaskIdByFunc(Task_Setup)].data[2] = (buffer == sSetup.roomName) ? 0 : (buffer == sSetup.inviteCode) ? 2
+                                                 : (buffer == sSetup.note[0]) ? 3 : (buffer == sSetup.note[1]) ? 4 : 1;
 }
 
 static void Finish(void)
@@ -824,6 +872,7 @@ static void HandleMain(void)
         case MAIN_HOST:
             sSetup.screen = SCR_HOST;
             sSetup.hostCursor = HOST_START;
+            LoadNote();
             DrawScreen();
             break;
         case MAIN_JOIN:
@@ -872,6 +921,9 @@ static void HandleHost(void)
             break;
         case HOST_PASSWORD:
             OpenTextEntry(2, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+            break;
+        case HOST_NOTE:
+            OpenTextEntry(7, NAMING_SCREEN_COOP_NOTE1, sSetup.note[0]);
             break;
         case HOST_START:
             PlaySE(SE_SELECT);
@@ -1170,7 +1222,8 @@ static void Task_Setup(u8 taskId)
         if (!gPaletteFade.active)
         {
             u8 template = data[1];
-            u8 *buffer = data[2] == 2 ? sSetup.inviteCode : data[2] ? sSetup.password : sSetup.roomName;
+            u8 *buffer = data[2] == 4 ? sSetup.note[1] : data[2] == 3 ? sSetup.note[0] : data[2] == 2 ? sSetup.inviteCode
+                       : data[2] ? sSetup.password : sSetup.roomName;
             DestroyTask(taskId);
             FreeAllWindowBuffers();
             DoNamingScreen(template, buffer, 0, 0, 0, CB2_ReturnFromTextEntry);
@@ -1196,8 +1249,16 @@ static void CB2_ReturnFromTextEntry(void)
     {
     case 1:
     case 2:
+    case 8:
         sSetup.screen = SCR_HOST;
+        SaveNote();
         DrawScreen();
+        break;
+    case 7: // welcome note line 1 done: now line 2
+        sSetup.returnTo = 8;
+        DestroyTask(FindTaskIdByFunc(Task_Setup));
+        FreeAllWindowBuffers();
+        DoNamingScreen(NAMING_SCREEN_COOP_NOTE2, sSetup.note[1], 0, 0, 0, CB2_ReturnFromTextEntry);
         break;
     case 3: // password for the chosen server
         sSetup.screen = SCR_JOIN;

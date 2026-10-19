@@ -57,6 +57,7 @@ static struct
     char host[128];
     int port;
     bool8 isLocal;            // our own LAN server
+    bool8 creator;            // we made the room we're in (we send the welcome note)
     u32 timer;
     // room we are in (or asking for)
     u8 request;
@@ -108,6 +109,9 @@ static u8 AsciiCharToGame(char c)
     }
     return 0xFF;
 }
+
+static void SendWelcome(u8 id);
+static void ShowWelcome(u8 from, const u8 *text, u16 len);
 
 // Button icons in co-op text: "{A}", "{START}", "{LT}"... (mp_buttons.c draws the controller's)
 static const struct { const char *name; u8 id; } sButtonTokens[] = {
@@ -248,6 +252,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "last_room") == 0) snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", val);
         else if (strcmp(key, "last_room_key") == 0 && strlen(val) == MP_ROOM_KEY_SIZE * 2) snprintf(gMpConfig.lastRoomKey, sizeof(gMpConfig.lastRoomKey), "%s", val);
         else if (strcmp(key, "last_host_name") == 0) snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", val);
+        else if (strcmp(key, "welcome") == 0) snprintf(gMpConfig.welcome, sizeof(gMpConfig.welcome), "%s", val);
         else if (strcmp(key, "sprite") == 0)
         {
             char lower[64];
@@ -337,12 +342,14 @@ void MP_SaveConfig(void)
         "follower = %08x\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
+        "; shown to friends who join a server you host (HOST A GAME > WELCOME NOTE); | starts line 2\n"
+        "welcome = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 4 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lobby);
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -874,6 +881,8 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         if (!p->present)
             memset(p, 0, sizeof(*p));
         p->present = TRUE;
+        if (!p->hasInfo)
+            SendWelcome(id);   // someone new: the host's welcome note
         p->hasInfo = TRUE;
         for (i = 0; i < MP_NAME_LEN; i++)
             p->name[i] = data[3 + i];
@@ -936,6 +945,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Coop_OnRelay(from, data, len);
     else if (data[0] == MPR_SAY)
         MP_Emote_OnRelay(from, data, len);
+    else if (data[0] == MPR_WELCOME)
+        ShowWelcome(from, data + 1, len - 1);
     else if (data[0] >= MPR_DEX_FIRST && data[0] < MPR_DEX_FIRST + 4)
         MP_Dex_OnRelay(from, data, len);
     else if (data[0] >= MPR_TRADE_FIRST && data[0] < MPR_GIFT_FIRST)
@@ -964,6 +975,37 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
 u8 MP_Lobby_State(void) { return sLobby.state; }
 u8 MP_Lobby_Error(void) { return sLobby.error; }
 const char *MP_Lobby_RoomName(void) { return sLobby.room; }
+// ---------------------------------------------------------------------------
+// Welcome note: the player who made the room sends it to each friend who joins
+
+static void SendWelcome(u8 id)
+{
+    u8 buf[2 + sizeof(gMpConfig.welcome)];
+    u16 len = strlen(gMpConfig.welcome);
+    if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
+        return;
+    buf[0] = MPR_WELCOME;
+    memcpy(buf + 1, gMpConfig.welcome, len);
+    MP_SendRelay(id, buf, 1 + len);
+}
+
+static void ShowWelcome(u8 from, const u8 *text, u16 len)
+{
+    char note[sizeof(gMpConfig.welcome)], name[16], msg[128], *bar;
+    if (from >= MP_MAX_PLAYERS || len == 0)
+        return;
+    if (len >= sizeof(note))
+        len = sizeof(note) - 1;
+    memcpy(note, text, len);
+    note[len] = 0;
+    bar = strchr(note, '|');
+    if (bar)
+        *bar = '\n';
+    MP_GameToAscii(name, gMpPlayers[from].name, MP_NAME_LEN);
+    snprintf(msg, sizeof(msg), "A note from %s, your host:\f%s", name, note);
+    MP_ShowNotice(msg);
+}
+
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
 bool8 MP_Lobby_InRoom(void) { return sLobby.state == MP_LOBBY_IN_ROOM; }
 
@@ -1074,6 +1116,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.locked = (password && password[0]) ? TRUE : FALSE;
     sLobby.hidden = hidden;
     sLobby.request = req;
+    sLobby.creator = (req == REQ_CREATE);
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
     {
