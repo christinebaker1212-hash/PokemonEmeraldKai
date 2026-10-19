@@ -73,6 +73,8 @@ static u8 sTiles[2][64 * 32 / 2];
 
 static const u16 sBubblePal[16] = {
     RGB(0, 0, 0), RGB(31, 31, 31), RGB(7, 7, 8), RGB(20, 20, 21), RGB(9, 9, 11),
+    // Toasts, in the co-op menu style: navy, white text, dark shadow, gold trim, purple band
+    RGB(4, 4, 12), RGB(31, 31, 31), RGB(1, 1, 5), RGB(31, 25, 6), RGB(11, 4, 19),
 };
 
 static const struct OamData sOam_Bubble = {
@@ -263,6 +265,23 @@ static void BuildBubble(struct Bubble *b)
                     Put(x, y, (y == top || y == bottom) ? COL_CLEAR : COL_EDGE);
                 else
                     Put(x, y, COL_CLEAR);
+    }
+
+    // Toasts use the co-op menu colors, with a purple band along the top
+    if (b->toast)
+    {
+        static const u8 sToastColor[] = {[COL_CLEAR] = 0, [COL_FILL] = 5, [COL_TEXT] = 6, [COL_SHADOW] = 7, [COL_EDGE] = 8};
+        int topRow = -1;
+        for (i = 0; i < BUBBLE_W * BUBBLE_H; i++)
+        {
+            if (sPixels[i] <= COL_EDGE)
+                sPixels[i] = sToastColor[sPixels[i]];
+            if (topRow < 0 && sPixels[i] != 0)
+                topRow = i / BUBBLE_W;
+        }
+        for (i = 0; topRow >= 0 && i < BUBBLE_W; i++)
+            if (sPixels[(topRow + 1) * BUBBLE_W + i] == 5)
+                sPixels[(topRow + 1) * BUBBLE_W + i] = 9;
     }
 
     // Two 64x32 halves, 4bpp 1D tiles

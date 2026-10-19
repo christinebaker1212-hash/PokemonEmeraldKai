@@ -194,6 +194,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] dex %d caught by %s\n", nat, MP_Dex_CaughtBy(nat) ? "a friend" : "-");
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "daily") == 0)
+    {
+        void MP_Daily_OpenMenu(void);
+        MP_Daily_OpenMenu();
+    }
+    else if (strcmp(cmd, "giftmenu") == 0)
+    {
+        void MP_Gift_OpenMenu(void);
+        MP_Gift_OpenMenu();
+    }
     else if (strcmp(cmd, "gatcha") == 0)
     {
         void MP_Gatcha_Open(void);

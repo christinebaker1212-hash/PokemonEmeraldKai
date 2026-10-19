@@ -338,6 +338,13 @@ const u8 *MP_Dex_CaughtBy(u16 nationalNum);
 
 // Co-op list windows (mp_ui.c)
 #define MPUI_ROWS 7
+// Co-op menu theme (mp_ui.c): colors of the swapped-in text palette
+enum { MPT_BG = 1, MPT_TEXT, MPT_SHADOW, MPT_RED, MPT_GREEN = 6, MPT_BLUE = 8, MPT_BAND = 10, MPT_GOLD, MPT_SEL, MPT_GREY, MPT_BORDER, MPT_BAND2 };
+void MpTheme_Push(void);
+void MpTheme_Pop(void);
+void MpTheme_Panel(u8 windowId, u8 bandHeight);
+void MpTheme_SelBar(u8 windowId, int y, int h);
+void MpTheme_Print(u8 windowId, u8 font, const u8 *str, int x, int y, u8 fg, u8 bg);
 bool8 MpUi_IsOpen(void);
 void MpUi_Open(void);
 void MpUi_Close(void);

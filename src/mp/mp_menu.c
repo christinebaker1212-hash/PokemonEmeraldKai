@@ -56,11 +56,19 @@ static const struct WindowTemplate sPlayersWindowTemplate = {
 
 static const u8 sTextColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
 
+// Text colors for the next prints (the theme: white on navy, gold when selected)
+static u8 sTxtFg = MPT_TEXT, sTxtBg = MPT_BG;
+
+static void MText(u8 windowId, u8 font, const u8 *str, int x, int y)
+{
+    MpTheme_Print(windowId, font, str, x, y, sTxtFg, sTxtBg);
+}
+
 static void PrintAscii(u8 windowId, const char *ascii, u8 x, u8 y)
 {
     u8 buf[64];
     MP_AsciiToGame(buf, ascii, 60);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, buf, x, y, TEXT_SKIP_DRAW, NULL);
+    MText(windowId, FONT_SMALL, buf, x, y);
 }
 
 static u16 NumChoices(u8 row)
@@ -88,7 +96,7 @@ static void DrawPlayersWindow(u8 windowId)
 {
     u8 buf[128];
     u8 i, n = 0;
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    MpTheme_Panel(windowId, 0);
     buf[0] = EOS;
     if (!MP_IsConnected())
     {
@@ -127,7 +135,7 @@ static void DrawPlayersWindow(u8 windowId)
             StringAppend(buf, lvl);
         }
     }
-    AddTextPrinterParameterized(windowId, FONT_SMALL, buf, 2, 1, TEXT_SKIP_DRAW, NULL);
+    MText(windowId, FONT_SMALL, buf, 2, 1);
     // Buddy bonus, and when hosting on this PC the code friends type to join
     if (MP_InviteCode()[0] || MP_BuddyBonusPercent())
     {
@@ -140,7 +148,7 @@ static void DrawPlayersWindow(u8 windowId)
         else
             snprintf(ascii, sizeof(ascii), "BONUS +%d%%", MP_BuddyBonusPercent());
         MP_AsciiToGame(code, ascii, 44);
-        AddTextPrinterParameterized(windowId, FONT_SMALL, code, 28 * 8 - 2 - GetStringWidth(FONT_SMALL, code, 0), 1, TEXT_SKIP_DRAW, NULL);
+        MText(windowId, FONT_SMALL, code, 28 * 8 - 2 - GetStringWidth(FONT_SMALL, code, 0), 1);
     }
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
@@ -169,14 +177,14 @@ static void PrintChoice(u8 windowId, const char *label, const char *value, u8 y,
     u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
     int len;
     MP_AsciiToGame(lab, label, 20);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, lab, 7, y, TEXT_SKIP_DRAW, NULL);
+    MText(windowId, FONT_SMALL_NARROW, lab, 8, y);
     MP_AsciiToGame(val, value, 60);
     // Long names are cut to fit the narrow window
     for (len = StringLength(val); len > 1 && GetStringWidth(FONT_SMALL_NARROW, val, 0) > MENU_W * 8 - valueX - 18; len--)
         val[len - 1] = EOS;
-    AddTextPrinterParameterized(windowId, FONT_SMALL, lt, valueX, y, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, val, valueX + 7, y, TEXT_SKIP_DRAW, NULL);
-    AddTextPrinterParameterized(windowId, FONT_SMALL, rt, valueX + 8 + GetStringWidth(FONT_SMALL_NARROW, val, 0), y, TEXT_SKIP_DRAW, NULL);
+    MText(windowId, FONT_SMALL, lt, valueX, y);
+    MText(windowId, FONT_SMALL_NARROW, val, valueX + 7, y);
+    MText(windowId, FONT_SMALL, rt, valueX + 8 + GetStringWidth(FONT_SMALL_NARROW, val, 0), y);
 }
 
 static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
@@ -196,9 +204,9 @@ static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
             line[n++] = (text[i] == CHAR_NEWLINE) ? CHAR_SPACE : text[i];
         line[n] = EOS;
     }
-    for (len = StringLength(line); len > 3 && GetStringWidth(FONT_SMALL_NARROW, line, 0) > MENU_W * 8 - 12; len--)
+    for (len = StringLength(line); len > 3 && GetStringWidth(FONT_SMALL_NARROW, line, 0) > MENU_W * 8 - 16; len--)
         line[len - 1] = EOS;
-    AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, line, 7, y, TEXT_SKIP_DRAW, NULL);
+    MText(windowId, FONT_SMALL_NARROW, line, 8, y);
 }
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
@@ -208,7 +216,7 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
     char line[64];
     u8 row;
 
-    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    MpTheme_Panel(windowId, 12);
     if (page == MP_MENU_PAGE_LOOK)
         snprintf(line, sizeof(line), "LOOK");
     else if (page == MP_MENU_PAGE_EMOTES)
@@ -219,22 +227,30 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         snprintf(line, sizeof(line), "CO-OP  %d/%d ONLINE", MP_ConnectedCount(), MP_MAX_PLAYERS);
     else
         snprintf(line, sizeof(line), "CO-OP  OFFLINE");
-    PrintAscii(windowId, line, 2, 1);
+    sTxtFg = MPT_GOLD;
+    sTxtBg = MPT_BAND;
+    PrintAscii(windowId, line, 4, 0);
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
 
     for (row = 0; row < RowCount(page); row++)
     {
         u8 y = 1 + LINE_H * (row + 1) + 2;
+        sTxtFg = MPT_TEXT;
+        sTxtBg = MPT_BG;
         if (row == cursor)
         {
-            u8 arrow[] = {0xEF, EOS};
-            AddTextPrinterParameterized(windowId, FONT_SMALL, arrow, 1, y, TEXT_SKIP_DRAW, NULL);
+            // The lit bar and gold text mark the selection (no room for an arrow)
+            MpTheme_SelBar(windowId, y, LINE_H);
+            sTxtBg = MPT_SEL;
+            sTxtFg = MPT_GOLD;
         }
         if (page == MP_MENU_PAGE_MAIN)
         {
             if (row == MAIN_ONLINE)
-                PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER..." : "GO ONLINE...", 9, y);
+                PrintAscii(windowId, MP_Lobby_InRoom() ? "SERVER..." : "GO ONLINE...", 8, y);
             else
-                PrintAscii(windowId, mainLabels[row], 9, y);
+                PrintAscii(windowId, mainLabels[row], 8, y);
         }
         else if (page == MP_MENU_PAGE_FRIENDS)
         {
@@ -245,14 +261,14 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
                 int len;
                 StringCopyN(name, gMpPlayers[ids[row]].name, PLAYER_NAME_LENGTH);
                 name[PLAYER_NAME_LENGTH] = EOS;
-                AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, name, 7, y, TEXT_SKIP_DRAW, NULL);
+                MText(windowId, FONT_SMALL_NARROW, name, 8, y);
                 MP_Friends_LocationName(ids[row], where);
                 for (len = StringLength(where); len > 1 && GetStringWidth(FONT_SMALL_NARROW, where, 0) > MENU_W * 8 - 46; len--)
                     where[len - 1] = EOS;
-                AddTextPrinterParameterized(windowId, FONT_SMALL_NARROW, where, 42, y, TEXT_SKIP_DRAW, NULL);
+                MText(windowId, FONT_SMALL_NARROW, where, 42, y);
             }
             else
-                PrintAscii(windowId, "BACK", 9, y);
+                PrintAscii(windowId, "BACK", 8, y);
         }
         else if (page == MP_MENU_PAGE_EMOTES)
         {
@@ -263,11 +279,11 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             else if (row == EMO_QUICK)
                 PrintChoice(windowId, "SAY", MP_Emote_QuickPhrase(row == cursor ? choice : 0), y, 24);
             else
-                PrintAscii(windowId, "BACK", 9, y);
+                PrintAscii(windowId, "BACK", 8, y);
         }
         else if (row == ROW_EDIT || row == ROW_BACK)
         {
-            PrintAscii(windowId, lookLabels[row], 9, y);
+            PrintAscii(windowId, lookLabels[row], 8, y);
         }
         else
         {
@@ -280,6 +296,8 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
             PrintChoice(windowId, lookLabels[row], line, y, 38);
         }
     }
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
     CopyWindowToVram(windowId, COPYWIN_FULL);
 }
 
@@ -289,7 +307,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
     if (page == MP_MENU_PAGE_FRIENDS)
     {
         u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids), buf[96], town[32];
-        FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+        MpTheme_Panel(windowId, 0);
         if (n == 0)
             MP_AsciiToGame(buf, "Nobody else is online right now.", 60);
         else if (cursor >= n)
@@ -306,15 +324,15 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
                 StringAppend(buf, town);
             }
         }
-        AddTextPrinterParameterized(windowId, FONT_SMALL, buf, 2, 1, TEXT_SKIP_DRAW, NULL);
+        MText(windowId, FONT_SMALL, buf, 2, 1);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
     else if (page == MP_MENU_PAGE_EMOTES)
     {
         u8 buf[80];
-        FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+        MpTheme_Panel(windowId, 0);
         MP_AsciiToGame(buf, "A: SAY IT   SELECT: EDIT PHRASE   KEYS 1-8", 70);
-        AddTextPrinterParameterized(windowId, FONT_SMALL, buf, 2, 1, TEXT_SKIP_DRAW, NULL);
+        MText(windowId, FONT_SMALL, buf, 2, 1);
         CopyWindowToVram(windowId, COPYWIN_FULL);
     }
     else
@@ -336,6 +354,7 @@ static void CloseMenuWindows(s16 *data)
     ClearStdWindowAndFrame(tPlayers, TRUE);
     RemoveWindow(tWindow);
     RemoveWindow(tPlayers);
+    MpTheme_Pop();
 }
 
 static void CloseMenu(u8 taskId)
@@ -538,8 +557,9 @@ static void Task_CoopMenu(u8 taskId)
     case 0:
         tWindow = AddWindow(&sCoopWindowTemplate);
         tPlayers = AddWindow(&sPlayersWindowTemplate);
-        DrawStdWindowFrame(tWindow, FALSE);
-        DrawStdWindowFrame(tPlayers, FALSE);
+        MpTheme_Push();
+        PutWindowTilemap(tWindow);
+        PutWindowTilemap(tPlayers);
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
         tState++;
