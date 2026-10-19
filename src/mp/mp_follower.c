@@ -431,7 +431,8 @@ static bool8 LocalHidden(void)
 static bool8 RemoteHidden(u8 id)
 {
     u8 mode = gMpPlayers[id].state.avatarMode;
-    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER;
+    // Holding the BATTLE FLAG: no follower either, so they blend in
+    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & MPF_TRAINER_MODE);
 }
 
 // Every overworld frame (src/overworld.c, before sprites are drawn)

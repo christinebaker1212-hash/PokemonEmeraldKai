@@ -116,7 +116,8 @@ PVP: THE BATTLE FLAG
 --------------------
 * You get the BATTLE FLAG (KEY ITEMS) the first time you connect. Register
   it to SELECT for quick use.
-* Use it to stand guard like an NPC trainer. When another player walks
+* Use it to stand guard like an NPC trainer. While the flag is planted your
+  name tag and follower are hidden, so you blend in. When another player walks
   into your line of sight you get a "!", walk up to them and a link battle
   starts. Press B to pack the flag up.
 * Winner gets 1/10 of the loser's money plus a random Poke Ball. The loser

@@ -814,6 +814,9 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
     case MPMSG_S_BLOB:
         HandleBlobChunk(data, len);
         break;
+    case MPMSG_S_STORE:
+        MP_Store_OnMessage(data, len);
+        break;
     case MPMSG_S_RELAY:
         if (len < 2 || data[0] >= MP_MAX_PLAYERS)
             return;
@@ -835,6 +838,10 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Emote_OnRelay(from, data, len);
     else if (data[0] >= MPR_DEX_FIRST && data[0] < MPR_DEX_FIRST + 4)
         MP_Dex_OnRelay(from, data, len);
+    else if (data[0] >= MPR_TRADE_FIRST && data[0] < MPR_GIFT_FIRST)
+        MP_Trade_OnRelay(from, data, len);
+    else if (data[0] >= MPR_GIFT_FIRST && data[0] < MPR_EVENT_FIRST)
+        MP_Gift_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1218,6 +1225,7 @@ void MP_FrameUpdate(void)
     {
         MP_Coop_Update();
         MP_Dex_Update();
+        MP_Trade_Update();
         SendLocalState(FALSE);
         MP_Spectate_FrameUpdate();
     }

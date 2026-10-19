@@ -336,6 +336,48 @@ void MP_Dex_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Dex_Update(void);
 const u8 *MP_Dex_CaughtBy(u16 nationalNum);
 
+// Co-op list windows (mp_ui.c)
+#define MPUI_ROWS 7
+bool8 MpUi_IsOpen(void);
+void MpUi_Open(void);
+void MpUi_Close(void);
+void MpUi_Begin(const char *title);
+void MpUi_TitleRight(const u8 *text);
+void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right);
+void MpUi_RowAscii(u8 row, bool8 selected, const char *left, const char *right);
+void MpUi_TextAscii(u8 row, const char *text);
+void MpUi_End(void);
+void MpUi_Help(const u8 *text);
+void MpUi_HelpAscii(const char *ascii);
+bool8 MpUi_MoveCursor(u16 *cursor, u16 count);
+u16 MpUi_ScrollFor(u16 cursor, u16 count, u16 *scroll);
+void MpUi_Qty(u8 *dst, u32 qty);
+
+// Data kept next to the save file (mp_savedata.c)
+s32 MP_SaveData_Get(const char *key);
+void MP_SaveData_Set(const char *key, s32 value);
+void MP_SaveData_Add(const char *key, s32 delta);
+s32 MP_Today(void);              // YYYYMMDD, local time
+s32 MP_DayNumber(s32 yyyymmdd);  // days since 2000-01-01
+s32 MP_WeekNumber(void);
+
+// Shared PC and room counters (mp_sharedpc.c)
+void MP_SharedPc_Open(void);
+void MP_Store_OnMessage(const u8 *data, u16 len);
+s32 MP_Counter_Get(const char *key);
+u32 MP_Counter_Version(void);
+void MP_Counter_Add(const char *key, s32 delta);
+void MP_Counter_Max(const char *key, s32 value);
+void MP_Counter_Request(const char *prefix);
+void MP_Counter_ForEach(const char *prefix, void (*fn)(const char *key, s32 value, void *arg), void *arg);
+
+// Trading (mp_trade.c) and daily gifts (mp_gift.c)
+void MP_Trade_OpenMenu(void);
+void MP_Trade_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Trade_Update(void);
+void MP_Gift_OpenMenu(void);
+void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len);
+
 // mp_spectate.c (watching other players' battles)
 bool8 MP_Spectate_IsWatching(void);
 bool8 MP_Spectate_IsStreaming(void);
@@ -402,6 +444,10 @@ enum {
     MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
     MPR_DEX_FIRST = 84,        // shared Pokedex (mp_dex.c)
     MPR_SOCIAL_END = 100,
+    MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
+    MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)
+    MPR_EVENT_FIRST = 120,     // goals, race, achievements (mp_events.c)
+    MPR_TOURNEY_FIRST = 140,   // battle tournament (mp_tourney.c)
 };
 
 #endif // GUARD_MP_H

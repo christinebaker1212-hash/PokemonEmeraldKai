@@ -7222,3 +7222,20 @@ u8 *MonSpritesGfxManager_GetSpritePtr(u8 managerId, u8 spriteNum)
         return gfx->spritePointers[spriteNum];
     }
 }
+
+// Moemon Co-op: like GiveMonToPlayer, but the Pokémon keeps its original
+// trainer (a friend's Pokémon from a trade or the shared PC)
+u8 MP_GiveMonKeepOT(struct Pokemon *mon)
+{
+    s32 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+            break;
+    }
+    if (i >= PARTY_SIZE)
+        return CopyMonToPC(mon);
+    CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
+    gPlayerPartyCount = i + 1;
+    return MON_GIVEN_TO_PARTY;
+}

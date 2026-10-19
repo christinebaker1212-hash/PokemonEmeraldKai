@@ -27,11 +27,11 @@
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_LOOK, MAIN_ONLINE, MAIN_CLOSE, MAIN_COUNT };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_DAILY, MAIN_LOOK, MAIN_ONLINE, MAIN_CLOSE, MAIN_COUNT };
 enum { ROW_SPRITE, ROW_SKIN, ROW_OUTFIT, ROW_ACCENT, ROW_EDIT, ROW_BACK, LOOK_COUNT };
 enum { EMO_ICON, EMO_PHRASE1, EMO_PHRASE4 = EMO_PHRASE1 + MP_NUM_PHRASES - 1, EMO_QUICK, EMO_BACK, EMO_COUNT };
 
-#define LINE_H 14
+#define LINE_H 12
 #define MENU_W 12   // tiles; the window sits right of the player so you can see your look change
 
 static const struct WindowTemplate sCoopWindowTemplate = {
@@ -203,7 +203,7 @@ static void PrintPhraseRow(u8 windowId, u8 slot, u8 y)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"EMOTES...", "GO TO FRIEND...", "LOOK...", "", "CLOSE"};
+    static const char *const mainLabels[] = {"EMOTES...", "GO TO FRIEND...", "TRADE...", "SHARED PC...", "DAILY GIFT...", "LOOK...", "", "CLOSE"};
     static const char *const lookLabels[] = {"SPRITE", "SKIN", "OUTFIT", "ACCENT", "EDIT SPRITES...", "BACK"};
     char line[64];
     u8 row;
@@ -497,6 +497,18 @@ static void HandleMainInput(u8 taskId)
     {
     case MAIN_EMOTES:
         GoToPage(data, MP_MENU_PAGE_EMOTES, EMO_ICON);
+        break;
+    case MAIN_TRADE:
+        CloseMenu(taskId);
+        MP_Trade_OpenMenu();
+        break;
+    case MAIN_SHARED_PC:
+        CloseMenu(taskId);
+        MP_SharedPc_Open();
+        break;
+    case MAIN_DAILY:
+        CloseMenu(taskId);
+        MP_Gift_OpenMenu();
         break;
     case MAIN_LOOK:
         GoToPage(data, MP_MENU_PAGE_LOOK, ROW_SPRITE);

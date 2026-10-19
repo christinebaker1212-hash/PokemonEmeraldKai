@@ -193,6 +193,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", FlagGet(FLAG_BADGE01_GET + b));
         printf("  money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
     }
+    else if (strcmp(cmd, "battleflag") == 0)
+    {
+        MP_Trainer_Toggle();
+    }
     else if (strcmp(cmd, "objs") == 0)
     {
         void MP_Overworld_DebugDump(void);

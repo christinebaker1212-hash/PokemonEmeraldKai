@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-#define MP_PROTOCOL_VERSION 5
+#define MP_PROTOCOL_VERSION 6
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
 #define MP_MAX_PLAYERS      4
@@ -38,6 +38,7 @@ enum {
     MPMSG_C_ROOM_CREATE = 8,  // u16 version, str name, u8 hasPassword, u8[32] key, u8 hidden
     MPMSG_C_ROOM_JOIN = 9,    // u16 version, str name, u8[32] key
     MPMSG_C_ROOM_LEAVE = 10,
+    MPMSG_C_STORE = 11,       // u8 op, ... (room storage, see mp_store.c)
 };
 
 // Message types, server -> client
@@ -53,6 +54,7 @@ enum {
     MPMSG_S_ROOM_LIST = 28,   // u8 count, then per room: str name, u8 players, u8 max, u8 flags, u16 version
     MPMSG_S_ROOM_OK = 29,     // str name, u8 players, u8 created
     MPMSG_S_ROOM_ERROR = 30,  // u8 reason
+    MPMSG_S_STORE = 31,       // u8 op, ... (room storage replies and updates)
 };
 
 // "str" on the wire = u8 length + that many ASCII bytes (no terminator)
@@ -157,6 +159,30 @@ void MPNet_MakeInviteCode(uint32_t ip, int port, char *out, int len);
 int MPNet_ParseInviteCode(const char *code, uint32_t *ip, int *port);
 // Radmin VPN (26.x) / Hamachi (25.x) adapter address, the last resort
 int MPNet_FindVpnAddress(char *out, int len, char *nameOut, int nameLen);
+
+// Room storage (mp_store.c): the shared PC and counters, saved by the server
+#define MP_STORE_MONS        60
+#define MP_STORE_MON_BYTES   112   // opaque to the server (the game stores a Pokemon + who put it in)
+#define MP_STORE_ITEMS       64
+#define MP_STORE_COUNTERS    512
+#define MP_STORE_KEY_MAX     31
+enum {
+    MP_ST_PC_LIST = 1,     // -> u8 count, (u8 slot, data)*
+    MP_ST_PC_PUT,          // data -> u8 ok, u8 slot
+    MP_ST_PC_TAKE,         // u8 slot -> u8 ok, u8 slot, data
+    MP_ST_PC_CHANGED,      // (to the room) someone put in or took a Pokemon
+    MP_ST_ITEM_LIST,       // -> u8 count, (u16 item, u16 qty)*
+    MP_ST_ITEM_PUT,        // u16 item, u16 qty -> u16 item, u16 stored
+    MP_ST_ITEM_TAKE,       // u16 item, u16 qty -> u16 item, u16 taken
+    MP_ST_ITEMS_CHANGED,   // (to the room)
+    MP_ST_CTR_ADD,         // s32 delta, str key -> (to the room) CTR_VALUE
+    MP_ST_CTR_MAX,         // s32 value, str key: keep the larger -> (to the room) CTR_VALUE
+    MP_ST_CTR_GET,         // str prefix -> CTR_VALUE* then CTR_END
+    MP_ST_CTR_VALUE,       // s32 value, str key
+    MP_ST_CTR_END,         // str prefix
+};
+typedef void (*MPStoreSendFunc)(void *ctx, int toAll, const uint8_t *data, uint16_t len);
+void MPStore_Handle(const uint8_t *roomKey, const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx);
 
 // Logging hook (printf style). Defaults to stdout.
 void MPNet_Log(const char *fmt, ...);

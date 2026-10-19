@@ -373,7 +373,9 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
     tag->x = objSprite->x + objSprite->x2;
     tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10 - (r->tagBattle ? 12 : 0);
     tag->oam.paletteNum = r->palSlot;
-    tag->invisible = objSprite->invisible || MP_Emote_RemoteBubbleShown(id);
+    // Holding the BATTLE FLAG: no name tag, so they blend in like an NPC trainer
+    tag->invisible = objSprite->invisible || MP_Emote_RemoteBubbleShown(id)
+                  || (p->hasState && (p->state.flags & MPF_TRAINER_MODE) && !r->tagBattle);
 }
 
 // ---------------------------------------------------------------------------

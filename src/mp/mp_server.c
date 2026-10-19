@@ -207,6 +207,30 @@ static void SendBlobTo(int to, uint8_t fromSlot, uint8_t kind, const struct Blob
     }
 }
 
+// Room storage replies: back to the asker, or to everyone in its room
+struct StoreCtx
+{
+    int c;
+    int room;
+};
+
+static void StoreSend(void *ctx, int toAll, const uint8_t *data, uint16_t len)
+{
+    struct StoreCtx *sx = (struct StoreCtx *)ctx;
+    int i;
+    if (!toAll)
+    {
+        SendTo(sx->c, MPMSG_S_STORE, data, len);
+        return;
+    }
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        int m = sRooms[sx->room].members[i];
+        if (m >= 0 && sConns[m] && sConns[m]->helloDone)
+            SendTo(m, MPMSG_S_STORE, data, len);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Rooms
 
@@ -546,6 +570,13 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
     }
     case MPMSG_C_PING:
         SendTo(c, MPMSG_S_PONG, data, len);
+        break;
+    case MPMSG_C_STORE:
+        if (r && sc->helloDone)
+        {
+            struct StoreCtx sx = {c, sc->room};
+            MPStore_Handle(r->key, data, len, StoreSend, &sx);
+        }
         break;
     }
 }
