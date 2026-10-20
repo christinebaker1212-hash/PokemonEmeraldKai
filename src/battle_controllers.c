@@ -783,11 +783,29 @@ static void Task_HandleSendLinkBuffersData(u8 taskId)
     switch (gTasks[taskId].tState)
     {
     case SENDTASK_STATE_INITIALIZE:
-        // Moemon Co-op: the network link needs no time to settle like the cable did
-        gTasks[taskId].tInitialDelayTimer = gNetLinkActive ? 1 : 100;
+        gTasks[taskId].tInitialDelayTimer = 100;
+        gTasks[taskId].data[9] = FALSE;
         gTasks[taskId].tState++;
         break;
     case SENDTASK_STATE_INITIAL_DELAY:
+        // Moemon Co-op: instead of the cable's fixed 100 frames, the network link
+        // starts as soon as both games are in the battle. Sooner, a block could
+        // reach a game still setting up, which clears the link buffers (a hang
+        // over the internet, where it arrives a while before that game is done).
+        if (gNetLinkActive)
+        {
+            if (!(gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE))
+                break;
+            if (!gTasks[taskId].data[9])
+            {
+                gTasks[taskId].data[9] = TRUE;
+                gTasks[taskId].tInitialDelayTimer = 60 * 15;   // in case the other game never says so
+                NetLink_SendReady();
+            }
+            if (NetLink_PeerReady() || --gTasks[taskId].tInitialDelayTimer == 0)
+                gTasks[taskId].tState++;
+            break;
+        }
         gTasks[taskId].tInitialDelayTimer--;
         if (gTasks[taskId].tInitialDelayTimer == 0)
             gTasks[taskId].tState++;
@@ -922,13 +940,23 @@ void TryReceiveLinkBattleData(void)
 
 static bool8 CopyReceivedLinkBuffersData(u8 taskId);
 
-// Moemon Co-op: on the network link, handle every message that's ready this frame
+static bool8 sTookControllerCommand;
+
+// Moemon Co-op: on the network link, handle the messages that are ready this
+// frame, but stop after a command for a controller: that controller has to run
+// it (next frame) before anything else is read. A later "done" for the same
+// battler would otherwise clear its flag before it ran (a hang when several
+// arrive at once over the internet), and the attacker/target that come with
+// the command would be overwritten by the next one.
 static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId)
 {
     int n;
     for (n = 0; n < (gNetLinkActive ? 32 : 1); n++)
-        if (!CopyReceivedLinkBuffersData(taskId))
+    {
+        sTookControllerCommand = FALSE;
+        if (!CopyReceivedLinkBuffersData(taskId) || sTookControllerCommand)
             break;
+    }
 }
 
 // FALSE when there was nothing to do (or the battler is still busy)
@@ -960,6 +988,7 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
 
             memcpy(gBattleBufferA[battler], &BYTE_TO_RECEIVE(LINK_BUFF_DATA), blockSize);
             MarkBattlerReceivedLinkData(battler);
+            sTookControllerCommand = TRUE;
 
             if (!(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
             {

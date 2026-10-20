@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdint.h>
 // Moemon Co-op: network link layer for real link battles + PvP flow and rewards.
 //
 // The decomp's link battle code is used unchanged. When gNetLinkActive is set,
@@ -68,6 +70,7 @@ static struct
     u16 mySyncSeq;
     u16 peerSyncSeq;
     u8 pendingSync;          // 0 none, 1 standby, 2 close
+    bool8 peerReady;         // the other game is in the battle (sync kind 3)
     bool8 haveRemotePlayer;
     bool8 opened;
     struct LinkPlayer remotePlayer;
@@ -96,6 +99,14 @@ u16 MP_Battle_OpponentFrontPic(void)
 // Link layer
 
 static void PumpBlocks(void);
+
+static bool8 DebugOn(void)
+{
+    static int sOn = -1;
+    if (sOn < 0)
+        sOn = getenv("MOEMON_LINKDEBUG") != NULL;
+    return sOn;
+}
 
 static u8 PeerLinkId(void)
 {
@@ -221,12 +232,27 @@ bool8 NetLink_SendBlock(const void *src, u16 size)
     {
         MPNet_Log("own link block queue overflow");
     }
+    if (DebugOn())
+        MPNet_Log("blk send %d: %02x %02x .. cmd %02x", size, ((const u8 *)src)[0], ((const u8 *)src)[1], size > 8 ? ((const u8 *)src)[8] : 0);
     sRelayBuf[0] = MPR_LINK_BLOCK;
     sRelayBuf[1] = size & 0xFF;
     sRelayBuf[2] = size >> 8;
     memcpy(sRelayBuf + 3, src, size);
     MP_SendRelay(sNet.peer, sRelayBuf, size + 3);
     return TRUE;
+}
+
+// Both games tell each other when they're in the battle (battle_controllers.c
+// waits for it before sending battle blocks)
+void NetLink_SendReady(void)
+{
+    u8 buf[4] = {MPR_LINK_SYNC, 3, 0, 0};
+    MP_SendRelay(sNet.peer, buf, sizeof(buf));
+}
+
+bool8 NetLink_PeerReady(void)
+{
+    return sNet.peerReady;
 }
 
 static void UpdateSync(void)
@@ -251,6 +277,9 @@ u8 NetLink_GetBlockReceivedStatus(void)
 {
     if (MP_Group_Active())
         return MP_Group_GetBlockReceivedStatus();
+    // The next waiting block is there as soon as the last one was taken (no frame lost)
+    if (sNet.battleActive && gNetLinkActive)
+        PumpBlocks();
     return (sNet.recvFlags[0] ? 1 : 0) | (sNet.recvFlags[1] ? 2 : 0);
 }
 
@@ -263,8 +292,8 @@ void NetLink_ResetBlockReceivedFlag(u8 who)
     }
     if (who < 2)
         sNet.recvFlags[who] = FALSE;
-    if (sNet.battleActive && gNetLinkActive)
-        PumpBlocks();   // the next waiting block is there right away (no frame lost)
+    // Not refilled here: the game reads gBlockRecvBuffer right after clearing
+    // the flag, so the next block waits until it asks again (below)
 }
 
 static void SendSync(u8 kind)
@@ -603,6 +632,8 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
             MPNet_Log("link block queue overflow");
             return;
         }
+        if (DebugOn())
+            MPNet_Log("blk recv %d: %02x %02x .. cmd %02x (q %d)", size, data[3], data[4], size > 8 ? data[11] : 0, sNet.qCount);
         b = &sNet.queue[(sNet.qHead + sNet.qCount) % BLOCK_QUEUE];
         b->size = size;
         memcpy(b->data, data + 3, size);
@@ -613,6 +644,11 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
     case MPR_LINK_SYNC:
         if (len < 4)
             return;
+        if (data[1] == 3)
+        {
+            sNet.peerReady = TRUE;
+            break;
+        }
         sNet.peerSyncSeq = data[2] | (data[3] << 8);
         UpdateSync();
         break;
@@ -658,8 +694,30 @@ void MP_Battle_OnPlayerLeft(u8 id)
     AbortBattleToField();
 }
 
+// Debug (env MOEMON_LINKDEBUG): the link's state once a second during a link battle
+static void DebugDump(void)
+{
+    static int sOn = -1;
+    static u32 sTick;
+    extern u32 gBattleControllerExecFlags;
+    extern void (*gBattleMainFunc)(void);
+    if (sOn < 0)
+        sOn = getenv("MOEMON_LINKDEBUG") != NULL;
+    if (!sOn || ++sTick % 60)
+        return;
+    MPNet_Log("linkdbg cb2=%p main=%p ms=%d exec=%08x recv=%d%d q=%d s=%d sync=%d my=%d peer=%d rlp=%d have=%d open=%d",
+              (void *)(uintptr_t)((uintptr_t)gMain.callback2 - (uintptr_t)CB2_Overworld),
+              (void *)(uintptr_t)((uintptr_t)gBattleMainFunc - (uintptr_t)CB2_Overworld),
+              gBattleCommunication[0], gBattleControllerExecFlags, sNet.recvFlags[0], sNet.recvFlags[1],
+              sNet.qCount, sNet.sCount, sNet.pendingSync, sNet.mySyncSeq, sNet.peerSyncSeq,
+              gReceivedRemoteLinkPlayers, sNet.haveRemotePlayer, sNet.opened);
+}
+
 void MP_Battle_FrameUpdate(void)
 {
     if (sNet.battleActive && gNetLinkActive)
+    {
         PumpBlocks();
+        DebugDump();
+    }
 }

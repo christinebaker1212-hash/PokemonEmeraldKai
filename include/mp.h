@@ -370,6 +370,8 @@ void NetLink_Close(void);
 u8 NetLink_GetMultiplayerId(void);
 u8 NetLink_GetPlayerCount(void);
 bool8 NetLink_SendBlock(const void *src, u16 size);
+void NetLink_SendReady(void);
+bool8 NetLink_PeerReady(void);
 bool8 NetLink_IsTaskFinished(void);
 u8 NetLink_GetBlockReceivedStatus(void);
 void NetLink_ResetBlockReceivedFlag(u8 who);
