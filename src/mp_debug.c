@@ -136,6 +136,10 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
+    if (strcmp(name, "down") == 0)
+        return MP_Rescue_Down();
+    if (strcmp(name, "helpask") == 0)
+        return MP_Rescue_Asked();
     if (strcmp(name, "photo") == 0)
         return MP_Photo_Done();
     if (strcmp(name, "notice") == 0)
@@ -408,6 +412,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             u16 m = move;
             SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1, &m);
             printf("[test] teach: slot %d move %d\n", slot, move);
+        }
+    }
+    else if (strcmp(cmd, "hp") == 0)
+    {
+        // mp hp SLOT VALUE
+        int slot = atoi(arg), v = 0;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            v = atoi(sp + 1);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u16 hp = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_HP, &hp);
+            printf("[test] hp: slot %d = %d\n", slot, v);
         }
     }
     else if (strcmp(cmd, "givebadges") == 0)

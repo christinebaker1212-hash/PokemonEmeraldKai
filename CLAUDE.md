@@ -53,6 +53,9 @@ Lend field moves (mp_lend.c, MPR_LEND): each client broadcasts the first party M
 ROCK SMASH/WATERFALL/DIVE; scrcmd.c checkpartymove falls back to the nearest friend within 4 tiles and returns MP_LEND_SLOT
 (7), which bufferpartymonnick, FldEff_FieldMoveShowMonInit, FldEff_UseStrength and PartyHasMonWithSurf understand.
 Test: Route 116 cut tree, WARP=0,31,23,7 (lender) WARP_B=0,31,21,7, `mp teach 0 15` on the lender, `mp givebadges`, `mp lend`.
+Rescue (mp_rescue.c, MPR_RESCUE): battle_setup.c asks MP_Rescue_TryStart() before CB2_WhiteOut (not link/co-op/frontier);
+the downed player returns to the field (script context cleared) with a DOWN! window, the nearest free friend within 10
+tiles gets HELP? (Revive / Max Revive / $500 / no). Harness conditions `down`, `helpask`; debug `mp hp SLOT V`, `mp item 24 2`.
 TEAM PHOTO (mp_photo.c, SOCIAL > TEAM PHOTO, MPR_PHOTO): 2+ players on the same map, front pics via
 mp_avatar.c MP_Avatar_PlayerFront, frame captured from Platform_GetFrame and saved 3x with mp_pack.c MP_WritePng to
 photos/. Debug `mp photo`, harness condition `photo`. The co-op overlay palette (MP_TAG_UI_PAL) borrows an NPC reflection

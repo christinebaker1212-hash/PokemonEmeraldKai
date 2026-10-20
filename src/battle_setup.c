@@ -616,7 +616,8 @@ static void CB2_EndWildBattle(void)
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {
-        SetMainCallback2(CB2_WhiteOut);
+        if (!MP_Rescue_TryStart()) // Moemon Co-op: a friend close by may pull you back up
+            SetMainCallback2(CB2_WhiteOut);
     }
     else
     {
@@ -634,7 +635,7 @@ static void CB2_EndScriptedWildBattle(void)
     {
         if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
-        else
+        else if (!MP_Rescue_TryStart()) // Moemon Co-op
             SetMainCallback2(CB2_WhiteOut);
     }
     else
@@ -1387,7 +1388,7 @@ static void CB2_EndTrainerBattle(void)
     {
         if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InTrainerHillChallenge())
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
-        else
+        else if (!MP_Rescue_TryStart()) // Moemon Co-op
             SetMainCallback2(CB2_WhiteOut);
     }
     else
@@ -1410,7 +1411,8 @@ static void CB2_EndRematchBattle(void)
     }
     else if (IsPlayerDefeated(gBattleOutcome) == TRUE)
     {
-        SetMainCallback2(CB2_WhiteOut);
+        if (!MP_Rescue_TryStart()) // Moemon Co-op
+            SetMainCallback2(CB2_WhiteOut);
     }
     else
     {

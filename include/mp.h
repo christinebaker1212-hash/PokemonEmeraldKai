@@ -405,6 +405,10 @@ void MP_Lend_Name(u8 *dst);
 void MP_Lend_ShowMonArgs(u32 *species, u32 *otId, u32 *personality);
 void MP_Lend_NotifyUsed(void);
 void MP_Lend_Debug(void);
+bool8 MP_Rescue_TryStart(void);
+void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len);
+bool8 MP_Rescue_Down(void);
+bool8 MP_Rescue_Asked(void);
 // mp_emote.c / mp_compass.c helpers for it
 void MP_Emote_PingBubble(u8 slot, const u8 *text, s16 tileX, s16 tileY);   // text NULL = hide
 void MP_Compass_PointAt(u8 slot, u8 colorPlayer, s32 dx, s32 dy, bool8 show);
@@ -646,6 +650,7 @@ enum {
     MPR_PING = 91,             // "look here!": u8 mapGroup, mapNum, s16 x, y (mp_ping.c)
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
+    MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

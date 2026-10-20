@@ -265,6 +265,12 @@ LEND FIELD MOVES  No CUT in your party? If a friend standing within 4 steps
                   WATERFALL or DIVE, the tree, rock, boulder or water works
                   with theirs ("ALICE's PELIPPER used SURF!") and they get a
                   note. You still need the badge for the move.
+RESCUE            Lose a battle with a friend within 10 steps and you don't
+                  black out right away: they're asked to help with a REVIVE
+                  (or MAX REVIVE) from their bag or $500 from their wallet,
+                  and your lead Moemon gets back up on the spot. If they say
+                  no, don't answer within 15 seconds, or you give up (B),
+                  you black out as usual.
 TEAM PHOTO        With friends on the same map: everyone's trainer picture
                   lines up on a stage with your names, the place and the date,
                   framed like an instant photo. It's saved as a PNG in the
