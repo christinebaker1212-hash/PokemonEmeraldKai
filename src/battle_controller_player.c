@@ -1733,7 +1733,10 @@ static void PrintLinkStandbyMsg(void)
     {
         gBattle_BG0_X = 0;
         gBattle_BG0_Y = 0;
-        BattlePutTextOnWindow(gText_LinkStandby, B_WIN_MSG);
+        // Moemon Co-op: what the partner is doing instead of "Link standby..."
+        MP_Coop_SetBattleStatus(MP_BST_DONE);
+        if (!MP_Coop_ShowStandby())
+            BattlePutTextOnWindow(gText_LinkStandby, B_WIN_MSG);
     }
 }
 
@@ -2756,6 +2759,7 @@ static void PlayerHandleChooseAction(void)
     BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
     sMpPartnerGlance = FALSE;
+    MP_Coop_SetBattleStatus(MP_BST_ACTION);   // Moemon Co-op: the partner sees what we're doing
 }
 
 static void PlayerHandleYesNoBox(void)
@@ -2798,6 +2802,7 @@ static void PlayerChooseMoveInBattlePalace(void)
 
 static void PlayerHandleChooseMove(void)
 {
+    MP_Coop_SetBattleStatus(MP_BST_MOVE);
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
     {
         *(gBattleStruct->arenaMindPoints + gActiveBattler) = 8;
@@ -2823,6 +2828,8 @@ void InitMoveSelectionsVarsAndStrings(void)
 static void PlayerHandleChooseItem(void)
 {
     s32 i;
+
+    MP_Coop_SetBattleStatus(MP_BST_BAG);
 
     // Moemon Co-op QoL: the quick ball (L) skips the bag
     if (sMpQuickBall != ITEM_NONE)
@@ -2854,6 +2861,8 @@ static void PlayerHandleChooseItem(void)
 static void PlayerHandleChoosePokemon(void)
 {
     s32 i;
+
+    MP_Coop_SetBattleStatus(MP_BST_PARTY);
 
     for (i = 0; i < (int)ARRAY_COUNT(gBattlePartyCurrentOrder); i++)
         gBattlePartyCurrentOrder[i] = gBattleBufferA[gActiveBattler][4 + i];

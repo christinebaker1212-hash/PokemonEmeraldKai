@@ -1090,6 +1090,29 @@ void ClearBehindSubstituteBit(u8 battler)
     gBattleSpritesDataPtr->battlerData[battler].behindSubstitute = 0;
 }
 
+// Moemon Co-op: the low HP beep plays three times ("doo duh" x3), then stops.
+// The sound loops every 36 frames; it comes back when another Moemon (or the
+// same one after being healed) drops into the red.
+#define LOW_HP_BEEP_FRAMES 100
+
+static void Task_StopLowHpBeep(u8 taskId)
+{
+    if (!gMain.inBattle || ++gTasks[taskId].data[0] >= LOW_HP_BEEP_FRAMES)
+    {
+        m4aSongNumStop(SE_LOW_HEALTH);
+        DestroyTask(taskId);
+    }
+}
+
+static void PlayLowHpBeep(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_StopLowHpBeep);
+    if (taskId == TASK_NONE)
+        taskId = CreateTask(Task_StopLowHpBeep, 10);
+    gTasks[taskId].data[0] = 0;
+    PlaySE(SE_LOW_HEALTH);
+}
+
 void HandleLowHpMusicChange(struct Pokemon *mon, u8 battler)
 {
     u16 hp = GetMonData(mon, MON_DATA_HP);
@@ -1099,8 +1122,7 @@ void HandleLowHpMusicChange(struct Pokemon *mon, u8 battler)
     {
         if (!gBattleSpritesDataPtr->battlerData[battler].lowHpSong)
         {
-            if (!gBattleSpritesDataPtr->battlerData[BATTLE_PARTNER(battler)].lowHpSong)
-                PlaySE(SE_LOW_HEALTH);
+            PlayLowHpBeep();
             gBattleSpritesDataPtr->battlerData[battler].lowHpSong = 1;
         }
     }

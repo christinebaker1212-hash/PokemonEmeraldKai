@@ -61,6 +61,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "battle_message.h"
 #include "trainer_hill.h"
 #include "trainer_see.h"
 #include "constants/battle.h"
@@ -90,6 +91,7 @@ enum {
     MPR_COOP_WILD_GO,                   // the battle starts
     MPR_COOP_WILD_CANCEL,               // too slow: battling alone after all
     MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer
+    MPR_COOP_BSTATUS,                   // in a co-op battle -> partner: u8 MP_BST_* (what we're choosing)
 };
 
 #define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
@@ -1572,6 +1574,77 @@ static void TryRunPendingScript(void);
 
 static u8 sHeldBy;
 
+// ---------------------------------------------------------------------------
+// Co-op battles: instead of "Link standby...", a player who has chosen sees
+// what their partner is still doing (each game sends its menu state).
+
+static u8 sMyBattleStatus, sPartnerBattleStatus;
+static bool8 sStandbyShown, sStandbyDirty, sStandbyPrinting;
+static EWRAM_DATA u8 sStandbyText[80];
+
+static const u8 sText_PartnerDeciding[] = _("{STR_VAR_1} is deciding\nwhat to do…");
+static const u8 sText_PartnerMove[] = _("{STR_VAR_1} is selecting\na move to use…");
+static const u8 sText_PartnerBag[] = _("{STR_VAR_1} is choosing\nan item to use…");
+static const u8 sText_PartnerParty[] = _("{STR_VAR_1} is choosing a\nMOéMON to switch in…");
+static const u8 sText_PartnerDone[] = _("Waiting for {STR_VAR_1}…");
+
+void MP_Coop_SetBattleStatus(u8 status)
+{
+    if (!gMpCoopBattle || status == sMyBattleStatus)
+        return;
+    sMyBattleStatus = status;
+    if (PlayerValid(sCoop.partner))
+        SendByte(sCoop.partner, MPR_COOP_BSTATUS, status);
+}
+
+static void PrintStandby(void)
+{
+    static const u8 *const sTexts[] = {
+        [MP_BST_NONE] = sText_PartnerDone,
+        [MP_BST_ACTION] = sText_PartnerDeciding,
+        [MP_BST_MOVE] = sText_PartnerMove,
+        [MP_BST_BAG] = sText_PartnerBag,
+        [MP_BST_PARTY] = sText_PartnerParty,
+        [MP_BST_DONE] = sText_PartnerDone,
+    };
+    u8 st = sPartnerBattleStatus < ARRAY_COUNT(sTexts) ? sPartnerBattleStatus : MP_BST_NONE;
+    SetNameVar(sCoop.partner);
+    StringExpandPlaceholders(sStandbyText, sTexts[st]);
+    sStandbyPrinting = TRUE;
+    BattlePutTextOnWindow(sStandbyText, B_WIN_MSG);
+    sStandbyPrinting = FALSE;
+    sStandbyShown = TRUE;
+    sStandbyDirty = FALSE;
+}
+
+// The local player chose and waits: TRUE when the partner's status was shown
+bool8 MP_Coop_ShowStandby(void)
+{
+    if (!gMpCoopBattle || !PlayerValid(sCoop.partner))
+        return FALSE;
+    PrintStandby();
+    return TRUE;
+}
+
+void MP_Coop_OnBattleMessage(void)
+{
+    if (!sStandbyPrinting)
+        sStandbyShown = FALSE;
+}
+
+static void UpdateBattleStatus(void)
+{
+    if (!gMpCoopBattle)
+    {
+        sMyBattleStatus = sPartnerBattleStatus = MP_BST_NONE;
+        sStandbyShown = FALSE;
+        return;
+    }
+    // Their status changed while we show it: redraw (once the last print is done)
+    if (sStandbyShown && sStandbyDirty && gMain.inBattle && !IsTextPrinterActive(B_WIN_MSG))
+        PrintStandby();
+}
+
 // A trainer some other player is holding while they wait for a partner
 bool8 MP_Coop_IsNpcHeld(struct ObjectEvent *obj)
 {
@@ -1617,6 +1690,7 @@ static void UpdateHeld(void)
 
 void MP_Coop_Update(void)
 {
+    UpdateBattleStatus();
     TryRunPendingScript();
     UpdateHeld();
 
@@ -1664,6 +1738,13 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
                 sHeld[from].ttl = 0;
                 MP_Emote_ClearBubbleFor(from);
             }
+        }
+        break;
+    case MPR_COOP_BSTATUS:
+        if (gMpCoopBattle && from == sCoop.partner && len >= 2 && data[1] != sPartnerBattleStatus)
+        {
+            sPartnerBattleStatus = data[1];
+            sStandbyDirty = TRUE;
         }
         break;
     case MPR_COOP_REQUEST:

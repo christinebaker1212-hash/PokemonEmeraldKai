@@ -117,6 +117,8 @@ TEAMING UP FOR A DOUBLE BATTLE
 * In co-op battles you can use healing items (Potions, status heals,
   Revives...) from the BAG on your own Moemon or your partner's, including
   ones waiting on the bench (your partner's are the gold boxes).
+* When you've picked your move first, the battle tells you what your partner
+  is doing ("ALICE is choosing an item to use...").
 * Each player brings their first three healthy Moemon and picks their own
   moves. Both players get the full prize money and EXP for their Moemon.
   Evolutions happen on each player's game after the battle.
@@ -386,6 +388,7 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   time (wild battles). In a co-op battle, R shows your partner's team.
 * Battles are quicker: messages print twice as fast as your text speed
   setting, stay up a shorter time, and A or B moves on to the next one.
+  The low HP alarm beeps three times and then stops.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon you caught.
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind

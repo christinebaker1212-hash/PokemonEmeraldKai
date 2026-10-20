@@ -107,7 +107,13 @@ The battle screen's opening window and grass overlay also move at INTRO_SLIDE_ST
 Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vanilla 64/48/32; data/*.s need a touch to
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
-enemy attack, MID text, no presses) 684 -> 476 frames. Measured from encounter to action menu: solo wild 557 ->
+enemy attack, MID text, no presses) 684 -> 476 frames.
+Low HP beep (battle_gfx_sfx_util.c PlayLowHpBeep): SE_LOW_HEALTH loops every 36 frames; Task_StopLowHpBeep stops it after
+100 (three "doo duh"s); it plays again when a Moemon newly drops into the red.
+Co-op partner status (mp_coop.c MP_Coop_SetBattleStatus, MPR_COOP_BSTATUS): the player controller reports MP_BST_ACTION/
+MOVE/BAG/PARTY/DONE; PrintLinkStandbyMsg shows "<partner> is selecting a move to use…" etc. (MP_Coop_ShowStandby) and
+redraws on change until another B_WIN_MSG text replaces it (BattlePutTextOnWindow -> MP_Coop_OnBattleMessage). PvP keeps
+"Link standby…" so the opponent can't see a switch coming. Measured from encounter to action menu: solo wild 557 ->
 497 frames, co-op wild double 947 -> 562. Harness prints "[test] action menu at frame N"; the `action` condition misses co-op.
 Autosave (mp_autosave.c, MP_Autosave_Update from MP_FrameUpdate): every gMpConfig.autosaveMinutes (ini autosave, default 5)
 of map time, 1 minute after a battle, once MP_IsLocalFree + standing still for 30 frames; skipped where the START menu has

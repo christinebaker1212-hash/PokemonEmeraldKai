@@ -3019,6 +3019,8 @@ static void ChooseTypeOfMoveUsedString(u8 *dst)
 
 void BattlePutTextOnWindow(const u8 *text, u8 windowId)
 {
+    if (windowId == B_WIN_MSG)
+        MP_Coop_OnBattleMessage();   // Moemon Co-op: the partner status line was replaced
     const struct BattleWindowText *textInfo = sBattleTextOnWindowsInfo[gBattleScripting.windowsType];
     bool32 copyToVram;
     struct TextPrinterTemplate printerTemplate;
