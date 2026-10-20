@@ -1622,6 +1622,7 @@ static void CompleteWhenChoseItem(void)
                 gMultiUsePlayerCursor = MpIsBallTarget(BATTLE_OPPOSITE(gActiveBattler)) ? BATTLE_OPPOSITE(gActiveBattler) : first;
                 gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
                 BattlePutTextOnWindow(sText_MpBallWhich, B_WIN_ACTION_PROMPT);
+                MPNet_Log("co-op: picking a ball target");
                 gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseBallTarget;
                 return;
             }

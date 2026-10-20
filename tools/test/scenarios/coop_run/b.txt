@@ -7,14 +7,8 @@ press UP 1
 wait 5
 press LEFT 1
 wait 5
-press A 1
-wait 30
-press A 1
-wait 30
-press A 1
-waitfor action 4000
-wait 60
-waitfor action 4000
+pressuntillog A 4000 co-op: intent 1
+waitfor action 8000
 wait 10
 press RIGHT 1
 wait 5

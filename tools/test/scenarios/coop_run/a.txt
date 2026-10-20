@@ -11,8 +11,8 @@ wait 5
 press DOWN 1
 wait 5
 press A 1
-waitlog 4000 wants to run
-waitfor action 4000
+waitlog 8000 wants to run
+waitfor action 8000
 wait 10
 press RIGHT 1
 wait 5

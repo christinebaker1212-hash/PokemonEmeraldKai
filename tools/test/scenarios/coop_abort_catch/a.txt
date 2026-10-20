@@ -9,6 +9,9 @@ waitlog 2000 co-op wild: battle with player
 pressuntil A action 4000
 wait 10
 press L 2
+waitlog 3000 picking a ball target
+wait 10
+press A 1
 waitlog 9000 opponent disconnected
 wait 200
 mp party

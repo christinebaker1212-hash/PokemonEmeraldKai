@@ -6,7 +6,8 @@ waitlog 3000 co-op wild: joining
 waitfor action 4000
 wait 10
 press L 2
-wait 30
+waitlog 3000 picking a ball target
+wait 10
 shot picker
 press RIGHT 1
 wait 10
