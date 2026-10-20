@@ -101,6 +101,7 @@ enum {
 #define MPF_ENGAGED        (1 << 4)   // spotting/being spotted/battling
 #define MPF_CHALLENGED     (1 << 5)   // an NPC trainer challenged them: others can walk up and join
 #define MPF_RIDING         (1 << 6)   // riding piggyback on another player
+#define MPF_IN_MENU        (1 << 7)   // in a menu (START menu and its screens, a shop, the PC...): "IN MENU" over them
 
 // Emote kinds (low nibble of the emote byte, high nibble is a counter)
 #define MP_EMOTE_NONE         0
@@ -874,6 +875,15 @@ void MP_TriCards_SetOwner(u8 battler, u8 seat);
 void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo);
 void MP_TriCards_SetBarHp(u8 battler, s32 hp, s32 maxHp);
 u8 MP_TriCards_Letter(u8 battler);
+bool8 MP_IsStartMenuOpen(void);       // start_menu.c
+struct BoxPokemon;
+void MP_SetBoxMonOtIdKeepData(struct BoxPokemon *boxMon, u32 otId);   // pokemon.c
+bool8 MP_IsBoxMonBadEgg(struct BoxPokemon *boxMon);                   // pokemon.c
+void MP_CompensateBadEggs(void);      // mp_badegg.c: after loading a save
+bool8 MP_IsScriptMenuOpen(void);      // script_menu.c
+bool8 MP_IsShopMenuOpen(void);        // shop.c
+bool8 MP_IsFieldLoadCallback(void);   // overworld.c
+bool8 MP_Menu_IsCoopMenuOpen(void);   // mp_menu.c
 u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max);
 u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
 extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers

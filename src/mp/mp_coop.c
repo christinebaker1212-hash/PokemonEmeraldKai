@@ -1994,6 +1994,8 @@ void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon)
     sCoop.catches[sCoop.catchCount] = *mon;
     sCoop.catchSeat[sCoop.catchCount] = SeatOfSlot(throwerPartyIndex);
     sCoop.catchOwner[sCoop.catchCount] = sCoop.catchSeat[sCoop.catchCount] == 0 ? CAUGHT_MINE : CAUGHT_PARTNER;
+    MPNet_Log("co-op wild: catch %d for seat %d: species %d, HP %d/%d", sCoop.catchCount, sCoop.catchSeat[sCoop.catchCount],
+              (int)GetMonData(mon, MON_DATA_SPECIES), (int)GetMonData(mon, MON_DATA_HP), (int)GetMonData(mon, MON_DATA_MAX_HP));
     sCoop.catchCount++;
 }
 

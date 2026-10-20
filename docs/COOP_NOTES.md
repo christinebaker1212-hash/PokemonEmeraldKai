@@ -273,3 +273,23 @@ B_ANIM_STATS_CHANGE with animArg2 = 0x80 | battler mask (AnimTask_StatsChange ->
 sprite copy per battler) and one line, "The party's" / "The foes'" picked per screen in BufferStringBattle
 (STRINGID_MP_GROUP_STAT_*). One target alone gets the usual message. Misses, PROTECT, CLEAR BODY etc. still show per
 target. Self-targeted buffs (Swords Dance) hit only the user, so they're unchanged. Test: coop_statgroup.
+
+## Status over the name tag, renaming
+
+"IN BATTLE" / "IN MENU" over a remote player's name (mp_overworld.c RemoteTagStatus). MPF_IN_MENU (state flag bit 7,
+mp_main.c CollectLocalState): on the field while the START menu (start_menu.c MP_IsStartMenuOpen: StartMenuTask or
+Task_ShowStartMenu), the CO-OP menu (MP_Menu_IsCoopMenuOpen) or any MpUi window, a script's multichoice or the shop's BUY/SELL menu is open; off the field on any screen that
+isn't a battle or one of the field's own load/return callbacks (overworld.c MP_IsFieldLoadCallback), so warps don't
+flash it. Renaming has no OT check: SELECT on the summary info page (MpCanRename) and the Slateport Name Rater.
+
+## BAD EGGS from co-op catches
+
+Up to protocol 23 a co-op wild catch by anyone but the host became a BAD EGG: the wild Pokémon is created in the
+host's game with the host's OT ID, and GiveMonToPlayer overwrote boxMon->otId, which is half of the substructs' XOR
+key. GiveMonToPlayer now uses MP_SetBoxMonOtIdKeepData (pokemon.c: XOR the substructs with old ^ new ID). The tests
+missed it because every test client had the same Trainer ID (`mp giveforeign SPECIES` tests it now). After loading a
+save (CB2_ContinueSavedGame), mp_badegg.c MP_CompensateBadEggs removes every BAD EGG (MP_IsBoxMonBadEgg: flag or
+checksum) from the party and PC and pays 10 MoeGatcha pulls each, once per personality ("badegg:XXXXXXXX" in the
+co-op data, in case the game isn't saved after). A party left empty takes the first healthy PC Pokémon. Debug:
+`mp badegg SLOT`, `mp compensate`. Also: a caught wild Pokémon's HP is zeroed in every game's copy (the "caught"
+SpriteInvisibility handlers), so the battle screen rebuilt after the BAG doesn't show it again.

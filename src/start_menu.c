@@ -1487,3 +1487,9 @@ void AppendToList(u8 *list, u8 *pos, u8 newEntry)
     list[*pos] = newEntry;
     (*pos)++;
 }
+
+// Moemon Co-op: the START menu is open on the field (others see "IN MENU" over this player)
+bool8 MP_IsStartMenuOpen(void)
+{
+    return FuncIsActiveTask(StartMenuTask) || FuncIsActiveTask(Task_ShowStartMenu);
+}

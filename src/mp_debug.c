@@ -683,16 +683,41 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d", &id, &qty);
         printf("[test] item %d x%d: %s\n", id, qty, AddBagItem(id, qty) ? "ok" : "FAILED");
     }
+    else if (strcmp(cmd, "badegg") == 0)
+    {
+        // badegg SLOT - break a party Pokemon the way co-op catches broke (OT ID overwritten)
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            gPlayerParty[slot].box.otId ^= 0x00010203;
+            printf("[test] badegg: slot %d species now %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES));
+        }
+    }
+    else if (strcmp(cmd, "giveforeign") == 0)
+    {
+        // giveforeign SPECIES - a Pokemon made in another player's game (another OT ID), given
+        // the way a co-op catch is (GiveMonToPlayer)
+        static struct Pokemon mon;
+        int species = atoi(arg);
+        CreateMon(&mon, species > 0 ? species : 288, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, 0x9ABC1234);
+        GiveMonToPlayer(&mon);
+        printf("[test] giveforeign: given, bad egg %d\n", (int)MP_IsBoxMonBadEgg(&gPlayerParty[CalculatePlayerPartyCount() - 1].box));
+    }
+    else if (strcmp(cmd, "compensate") == 0)
+    {
+        MP_CompensateBadEggs();
+    }
     else if (strcmp(cmd, "party") == 0)
     {
         int i;
         printf("[test] party:");
         for (i = 0; i < PARTY_SIZE; i++)
             if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
-                printf(" %d(%d/%d ball %d style %04x friend %d)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                printf(" %d(%d/%d ball %d style %04x friend %d%s)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
                        (int)GetMonData(&gPlayerParty[i], MON_DATA_HP), (int)GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP),
                        (int)GetMonData(&gPlayerParty[i], MON_DATA_POKEBALL), (int)GetMonData(&gPlayerParty[i], MON_DATA_ENCRYPT_SEPARATOR),
-                       (int)GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP));
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP),
+                       GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG) ? " BAD EGG" : "");
             else
                 printf(" 0");
         printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));

@@ -1259,3 +1259,9 @@ void CreateDecorationShop2Menu(const u16 *itemsForSale)
     SetShopItemsForSale(itemsForSale);
     SetShopMenuCallback(ScriptContext_Enable);
 }
+
+// Moemon Co-op: the shop's BUY / SELL / QUIT menu is open
+bool8 MP_IsShopMenuOpen(void)
+{
+    return FuncIsActiveTask(Task_ShopMenu);
+}

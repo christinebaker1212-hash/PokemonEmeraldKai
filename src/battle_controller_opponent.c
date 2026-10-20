@@ -2000,6 +2000,11 @@ static void OpponentHandleSpriteInvisibility(void)
     if (gMpCoopWild && gBattleBufferA[gActiveBattler][1] == 2)
     {
         // Moemon Co-op: a caught wild Pokemon leaves (its sprite went into the ball)
+        // and stays gone when the battle screen is rebuilt after the BAG or party screen
+        // (only the master's game zeroed its HP)
+        u16 zero = 0;
+        SetMonData(&gEnemyParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_HP, &zero);
+        gBattleSpritesDataPtr->battlerData[gActiveBattler].invisible = TRUE;
         SetHealthboxSpriteInvisible(gHealthboxSpriteIds[gActiveBattler]);
         OpponentBufferExecCompleted();
         return;

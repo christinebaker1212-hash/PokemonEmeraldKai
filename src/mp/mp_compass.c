@@ -285,7 +285,7 @@ void MP_Compass_Update(void)
         s32 dx, dy;
         bool8 onScreen;
         if (!MP_IsConnected() || !MP_IsInOverworld() || p == gMpLocalId || !gMpPlayers[p].present
-         || !gMpPlayers[p].hasState || (!(gMpPlayers[p].state.flags & MPF_IN_OVERWORLD) && !(gMpPlayers[p].state.flags & MPF_IN_BATTLE))
+         || !gMpPlayers[p].hasState || !(gMpPlayers[p].state.flags & (MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_IN_MENU))
          || !FriendOffset(p, &dx, &dy, &onScreen) || onScreen || ArePlayerFieldControlsLocked())
         {
             Hide(p);

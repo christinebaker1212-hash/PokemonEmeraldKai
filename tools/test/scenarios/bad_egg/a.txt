@@ -1,0 +1,6 @@
+pressuntil A field 5000
+mp giveforeign 290
+mp badegg 1
+mp compensate
+mp party
+quit

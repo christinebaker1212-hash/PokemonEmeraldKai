@@ -10431,6 +10431,7 @@ static void Cmd_givecaughtmon(void)
     {
         // Moemon Co-op: the catcher gets it after the battle (their real party isn't loaded now)
         struct Pokemon *mon = &gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]];
+        MPNet_Log("givecaughtmon: attacker %d target %d party slot %d", gBattlerAttacker, gBattlerTarget, gBattlerPartyIndexes[gBattlerTarget]);
         MP_Coop_OnWildCaught(gBattlerPartyIndexes[gBattlerAttacker], mon);
         gBattleResults.caughtMonSpecies = GetMonData(mon, MON_DATA_SPECIES, NULL);
         GetMonData(mon, MON_DATA_NICKNAME, gBattleResults.caughtMonNick);

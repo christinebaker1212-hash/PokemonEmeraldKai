@@ -163,6 +163,9 @@ WILD BATTLES TOGETHER
   partner's Ball got it first), your throw is called off and the Ball goes
   back to your BAG.
 * Balls can't be thrown when your party and the PC are both full.
+* Older versions turned a Moemon that a friend (not the host) caught into a
+  BAD EGG. That's fixed. When you load a save, any BAD EGGS in your party or
+  PC are removed and you get 10 MoeGatcha pulls for each one.
 * RUN is a team decision: you get away only if both of you choose RUN in the
   same turn (one try, with your fastest Moemon). Choosing it alone just lets
   your partner know you want to leave.
@@ -230,8 +233,9 @@ Everyone else gets a consolation prize.
 
 WATCHING BATTLES
 ----------------
-Players in a battle have "IN BATTLE" above their name. Walk up to them and
-press A, then YES to watch live. Your own game pauses while you watch.
+Players in a battle have "IN BATTLE" above their name ("IN MENU" means
+they're in the START or CO-OP menu, their BAG, a shop, the PC...). Walk up to someone
+IN BATTLE and press A, then YES to watch live. Your own game pauses while you watch.
 Press B (or START) to stop watching at any time. Watching ends by itself
 when the battle is over.
 
@@ -455,7 +459,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   the fade at the end of a battle are 30% quicker, and held items like
   LEFTOVERS (and Ingrain, Wish, Leech Seed) show a short, quick animation.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
-  lowers is blue. SELECT on the first page renames a Moemon you caught.
+  lowers is blue. SELECT on the first page renames a Moemon
+  (traded ones too; the NAME RATER in SLATEPORT renames them as well).
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
   blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).

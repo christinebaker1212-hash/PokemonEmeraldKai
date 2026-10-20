@@ -675,7 +675,7 @@ void MP_GetLocalState(struct MpState *s)
 static void CollectLocalState(struct MpState *s)
 {
     *s = sLastLocalState;
-    s->flags &= ~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED | MPF_CHALLENGED | MPF_RIDING);
+    s->flags &= (u8)~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED | MPF_CHALLENGED | MPF_RIDING | MPF_IN_MENU);
 
     if (MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
      && gObjectEvents[gPlayerAvatar.objectEventId].active)
@@ -721,6 +721,15 @@ static void CollectLocalState(struct MpState *s)
     // From the moment the battle transition starts, so others see it right away
     if (MP_Battle_IsActive() || gMain.inBattle || MP_IsBattleTransitionRunning())
         s->flags |= MPF_IN_BATTLE;
+    // In a menu: the START menu, the CO-OP menu (and its windows), a shop or a script's choice menu on the field, or any
+    // other screen (bag, party, PC boxes, POKéDEX...) that isn't a battle or a map load
+    if (!(s->flags & MPF_IN_BATTLE) && !gMain.inBattle)
+    {
+        if (MP_IsInOverworld() ? (MP_IsStartMenuOpen() || MP_IsScriptMenuOpen() || MP_IsShopMenuOpen()
+                                  || MP_Menu_IsCoopMenuOpen() || MpUi_IsOpen())
+                               : !MP_IsFieldLoadCallback())
+            s->flags |= MPF_IN_MENU;
+    }
     if (MP_Coop_IsChallenged())
         s->flags |= MPF_CHALLENGED;
     if (MP_Piggy_IsRiding())

@@ -1,0 +1,5 @@
+# one client: a Pokemon from another player's game (another OT ID, like a co-op catch) stays valid when given;
+# a BAD EGG is removed and paid for with MoeGatcha pulls
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:30,286:10"
+EXPECT_A=("giveforeign: given, bad egg 0" "bad eggs: removed 1, paid 1")

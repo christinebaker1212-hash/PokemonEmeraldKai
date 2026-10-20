@@ -1597,3 +1597,9 @@ void MP_OpenQuickPick(u8 page, s8 hold)
 {
     MP_OpenQuickPickAt(page, hold, -1);
 }
+
+// The CO-OP menu is open (others see "IN MENU" over this player)
+bool8 MP_Menu_IsCoopMenuOpen(void)
+{
+    return FuncIsActiveTask(Task_CoopMenu);
+}

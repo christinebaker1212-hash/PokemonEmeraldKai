@@ -763,3 +763,9 @@ int ScriptMenu_AdjustLeftCoordFromWidth(int left, int width)
 
     return adjustedLeft;
 }
+
+// Moemon Co-op: a script's choice menu is open (others see "IN MENU" over this player)
+bool8 MP_IsScriptMenuOpen(void)
+{
+    return FuncIsActiveTask(Task_HandleMultichoiceInput);
+}

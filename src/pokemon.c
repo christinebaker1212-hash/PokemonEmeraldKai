@@ -4523,7 +4523,11 @@ u8 GiveMonToPlayer(struct Pokemon *mon)
 
     SetMonData(mon, MON_DATA_OT_NAME, gSaveBlock2Ptr->playerName);
     SetMonData(mon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);
-    SetMonData(mon, MON_DATA_OT_ID, gSaveBlock2Ptr->playerTrainerId);
+    // Moemon Co-op: re-keyed, not just overwritten: a co-op catch was made in the host's
+    // game with the host's ID, and the ID is part of the data's encryption key (a plain
+    // write turned the catch into a BAD EGG)
+    MP_SetBoxMonOtIdKeepData(&mon->box, gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
+                             | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | ((u32)gSaveBlock2Ptr->playerTrainerId[3] << 24));
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
@@ -7301,4 +7305,29 @@ u8 MP_GiveMonKeepOT(struct Pokemon *mon)
     CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
     gPlayerPartyCount = i + 1;
     return MON_GIVEN_TO_PARTY;
+}
+
+// Moemon Co-op: a new OT ID for a Pokémon whose data stays readable. The secure
+// substructs are XORed with personality ^ otId (their order only depends on the
+// personality), so re-encrypting is one more XOR with old ID ^ new ID.
+void MP_SetBoxMonOtIdKeepData(struct BoxPokemon *boxMon, u32 otId)
+{
+    u32 i, delta = boxMon->otId ^ otId;
+    for (i = 0; i < ARRAY_COUNT(boxMon->secure.raw); i++)
+        boxMon->secure.raw[i] ^= delta;
+    boxMon->otId = otId;
+}
+
+// Moemon Co-op: a BAD EGG (its data doesn't match its checksum, or it was marked as one)
+bool8 MP_IsBoxMonBadEgg(struct BoxPokemon *boxMon)
+{
+    bool8 bad;
+    if (!boxMon->hasSpecies && !boxMon->isBadEgg)
+        return FALSE;
+    if (boxMon->isBadEgg)
+        return TRUE;
+    DecryptBoxMon(boxMon);
+    bad = CalculateBoxMonChecksum(boxMon) != boxMon->checksum;
+    EncryptBoxMon(boxMon);
+    return bad;
 }

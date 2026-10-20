@@ -53,7 +53,7 @@ struct RemoteObj
     u8 lastEmote;
     u8 tagSpriteId;
     u8 tagLevel;
-    bool8 tagBattle;
+    u8 tagStatus;           // TAG_STATUS_*: the line over the name
     u32 tagVersion;
     u8 blobSpriteId;
     s16 lastX, lastY;   // last position applied (current map frame)
@@ -225,6 +225,17 @@ static bool8 IsRemoteInBattle(u8 id)
     return gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_BATTLE);
 }
 
+// The line over a player's name: IN BATTLE, IN MENU or none
+enum { TAG_STATUS_NONE, TAG_STATUS_BATTLE, TAG_STATUS_MENU };
+static u8 RemoteTagStatus(u8 id)
+{
+    if (IsRemoteInBattle(id))
+        return TAG_STATUS_BATTLE;
+    if (gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_MENU))
+        return TAG_STATUS_MENU;
+    return TAG_STATUS_NONE;
+}
+
 // Draws one centered, outlined line of small-font text at row y
 static void DrawTextLine(const u8 *text, int n, int y, u8 fg, u8 outline)
 {
@@ -269,11 +280,11 @@ static void BuildNametag(u8 id, const u16 *pal)
 
     PickTextColors(pal, &fg, &outline);
     memset(sNametagPixels, 0, sizeof(sNametagPixels));
-    if (IsRemoteInBattle(id))
+    if (RemoteTagStatus(id) != TAG_STATUS_NONE)
     {
-        // Two lines: "IN BATTLE" above the name (the tag is drawn 12px higher)
+        // Two lines: "IN BATTLE" / "IN MENU" above the name (the tag is drawn 12px higher)
         u8 battle[16];
-        MP_AsciiToGame(battle, "IN BATTLE", 12);
+        MP_AsciiToGame(battle, RemoteTagStatus(id) == TAG_STATUS_BATTLE ? "IN BATTLE" : "IN MENU", 12);
         DrawTextLine(battle, StringLength(battle), 1, fg, outline);
         DrawTextLine(text, n, 13, fg, outline);
     }
@@ -351,12 +362,12 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         gSprites[r->tagSpriteId].data[0] = id + 1;
         gSprites[r->tagSpriteId].coordOffsetEnabled = TRUE;
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
-        r->tagBattle = IsRemoteInBattle(id);
+        r->tagStatus = RemoteTagStatus(id);
         r->tagVersion = p->appearanceVersion;
         tileStart = GetSpriteTileStartByTag(TAG_NAMETAG_BASE + id);
     }
     else if (r->tagLevel != (p->hasState ? p->state.topLevel : 0) || r->tagVersion != p->appearanceVersion
-          || r->tagBattle != IsRemoteInBattle(id))
+          || r->tagStatus != RemoteTagStatus(id))
     {
         rebuild = TRUE;
     }
@@ -365,17 +376,17 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         BuildNametag(id, pal);
         memcpy((void *)(OBJ_VRAM0 + tileStart * TILE_SIZE_4BPP), sNametagTiles, sizeof(sNametagTiles));
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
-        r->tagBattle = IsRemoteInBattle(id);
+        r->tagStatus = RemoteTagStatus(id);
         r->tagVersion = p->appearanceVersion;
     }
 
     tag = &gSprites[r->tagSpriteId];
     tag->x = objSprite->x + objSprite->x2;
-    tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10 - (r->tagBattle ? 12 : 0);
+    tag->y = objSprite->y + objSprite->y2 + objSprite->centerToCornerVecY + 10 - (r->tagStatus != TAG_STATUS_NONE ? 12 : 0);
     tag->oam.paletteNum = r->palSlot;
     // Holding the BATTLE FLAG: no name tag, so they blend in like an NPC trainer
     tag->invisible = objSprite->invisible || MP_Emote_RemoteBubbleShown(id)
-                  || (p->hasState && (p->state.flags & MPF_TRAINER_MODE) && !r->tagBattle);
+                  || (p->hasState && (p->state.flags & MPF_TRAINER_MODE) && r->tagStatus != TAG_STATUS_BATTLE);
 }
 
 // ---------------------------------------------------------------------------

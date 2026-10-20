@@ -1797,6 +1797,7 @@ void CB2_ContinueSavedGame(void)
     #endif
 
     PlayTimeCounter_Start();
+    MP_CompensateBadEggs();   // Moemon Co-op: BAD EGGS from co-op catches are removed and paid for
     ScriptContext_Init();
     UnlockPlayerFieldControls();
     InitMatchCallCounters();
@@ -3285,4 +3286,18 @@ static void SpriteCB_LinkPlayer(struct Sprite *sprite)
 void MP_FieldClearVBlankHBlankCallbacks(void)
 {
     FieldClearVBlankHBlankCallbacks();
+}
+
+// Moemon Co-op: one of the field's own loading / returning steps (a warp, coming back
+// from a menu or a battle), not a menu screen
+bool8 MP_IsFieldLoadCallback(void)
+{
+    MainCallback cb = gMain.callback2;
+    return cb == CB2_LoadMap || cb == CB2_LoadMap2 || cb == CB2_ReturnToFieldContestHall
+        || cb == CB2_ReturnToFieldCableClub || cb == CB2_LoadMapOnReturnToFieldCableClub
+        || cb == CB2_ReturnToField || cb == CB2_ReturnToFieldLocal || cb == CB2_ReturnToFieldLink
+        || cb == CB2_ReturnToFieldFromMultiplayer || cb == CB2_ReturnToFieldWithOpenMenu
+        || cb == CB2_ReturnToFieldContinueScript || cb == CB2_ReturnToFieldContinueScriptPlayMapMusic
+        || cb == CB2_ReturnToFieldFadeFromBlack || cb == CB2_ContinueSavedGame || cb == CB2_WhiteOut
+        || cb == CB2_MpWhiteOut || cb == CB2_NewGame || cb == CB2_OverworldBasic;
 }

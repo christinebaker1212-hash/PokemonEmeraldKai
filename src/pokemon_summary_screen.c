@@ -1541,7 +1541,7 @@ static void FreeSummaryScreen(void)
 }
 
 // ---------------------------------------------------------------------------
-// Moemon Co-op QoL: SELECT on the info page renames a Pokémon you caught
+// Moemon Co-op QoL: SELECT on the info page renames a Pokémon (any, not only ones you caught)
 
 static EWRAM_DATA struct
 {
@@ -1557,7 +1557,7 @@ static bool8 MpCanRename(void)
 {
     return sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
         && (sMonSummaryScreen->mode == SUMMARY_MODE_NORMAL || sMonSummaryScreen->mode == SUMMARY_MODE_BOX)
-        && !gMain.inBattle && !sMonSummaryScreen->summary.isEgg && DoesMonOTMatchOwner()
+        && !gMain.inBattle && !sMonSummaryScreen->summary.isEgg
         && !(gBattleTypeFlags & BATTLE_TYPE_LINK);
 }
 
