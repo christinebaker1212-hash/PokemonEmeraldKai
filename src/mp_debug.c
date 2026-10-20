@@ -570,6 +570,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Daily_OpenMenu(void);
         MP_Daily_OpenMenu();
     }
+    else if (strcmp(cmd, "style") == 0)
+    {
+        // style SLOT VALUE: the ball style (hex: color bits 0-3, decoration 4-11, special 12-15)
+        int slot = atoi(arg);
+        const char *sp = strchr(arg, ' ');
+        u16 v = sp ? (u16)strtol(sp + 1, NULL, 16) : 0;
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
+            printf("[test] style: slot %d = %04x\n", slot, v);
+        }
+    }
     else if (strcmp(cmd, "where") == 0)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

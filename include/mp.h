@@ -596,6 +596,8 @@ bool8 MP_BallStyle_CanColor(u8 ballId);
 bool8 MP_BallStyle_CanDecorate(u8 ballId);
 void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style);
 void MP_BallStyle_ApplyToIconPalette(u8 paletteNum, u8 ballId, u16 style);
+void MP_BallStyle_DecorateIcon(u8 spriteId, u8 ballId, u16 style);
+u8 MP_BallStyle_DecorationJump(u8 decoration, s8 dir);
 
 // mp_autosave.c: quiet saves on the map at safe moments
 void MP_Autosave_Update(void);

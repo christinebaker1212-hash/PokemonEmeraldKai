@@ -9,8 +9,10 @@
 //              anything that only knows the 12 Hoenn balls) see a POKé BALL;
 //              this game shows the special one (MP_BallStyle_DisplayItem).
 // The color recolors the red top of the ball (battle sprite, summary ball and
-// the item icon used as a preview). Decorations are drawn on top of the ball
-// in the same places; there are none until their art is added to sDecorations.
+// the item icon used as a preview). A decoration (POKé BALLS only) is a small
+// emblem drawn into the ball's own pixels: on the item icon (summary POKé BALL
+// page) and on the first frame of the battle / summary ball (the thrown and
+// opening frames only show up when catching). Art: tools/moemon_balls/decorations.py.
 #include "global.h"
 #include "mp.h"
 #include "decompress.h"
@@ -90,17 +92,15 @@ static const u8 sColorNames[MP_BALL_COLORS][8] = {
     [MP_BALL_GOLD]   = _("GOLD"),
 };
 
-// Decorations, from the labeled art sheets (none yet). Index 0 is "none".
-struct MpBallDecoration
-{
-    const u8 *name;
-    const u8 *iconGfx;      // 24x24 4bpp overlay for the item icon (preview), colors 12-15 of its palette
-    const u8 *battleGfx;    // 16x16 4bpp overlay for the battle / summary ball
-};
+// Decorations: 1..MP_DECO_COUNT (0 = none)
+#include "mp_balldeco_data.h"
 
-static const struct MpBallDecoration sDecorations[] = {
-    {NULL, NULL, NULL},
-};
+#define TAG_MP_BALL_DECO 0x5710    // + decoration: a POKé BALL sheet with it drawn in
+#define DECO_ICON_X 7              // where the 5x5 icon art goes on the 24x24 item icon
+#define DECO_ICON_Y 7
+#define DECO_BALL_X 6              // where the 3x4 ball art goes on the 16x16 ball's first frame
+#define DECO_BALL_Y 3
+#define DECO_ICON_FIRST_SLOT 12    // the item icon's palette slots 12-15 are free
 
 static const u8 sText_None[] = _("NONE");
 
@@ -113,7 +113,7 @@ u8 MP_BallStyle_Color(u16 style)
 u8 MP_BallStyle_Decoration(u16 style)
 {
     u8 d = (style >> 4) & 0xFF;
-    return d < ARRAY_COUNT(sDecorations) ? d : 0;
+    return d <= MP_DECO_COUNT ? d : 0;
 }
 
 u16 MP_BallStyle_Make(u8 color, u8 decoration)
@@ -181,7 +181,7 @@ bool8 MP_BallStyle_ItemCanColor(u16 item)
 
 bool8 MP_BallStyle_ItemCanDecorate(u16 item)
 {
-    return (item == ITEM_POKE_BALL || item == ITEM_PREMIER_BALL) && ARRAY_COUNT(sDecorations) > 1;
+    return item == ITEM_POKE_BALL;
 }
 
 // A Moemon was caught in `item`: a special ball is kept as POKé BALL + the
@@ -290,14 +290,36 @@ const u8 *MP_BallStyle_ColorName(u8 color)
 
 u8 MP_BallStyle_DecorationCount(void)
 {
-    return ARRAY_COUNT(sDecorations);   // including "none"
+    return MP_DECO_COUNT + 1;   // including "none"
 }
 
 const u8 *MP_BallStyle_DecorationName(u8 decoration)
 {
-    if (decoration == 0 || decoration >= ARRAY_COUNT(sDecorations) || !sDecorations[decoration].name)
+    static u8 sName[24];
+    if (decoration == 0 || decoration > MP_DECO_COUNT)
         return sText_None;
-    return sDecorations[decoration].name;
+    MP_AsciiToGame(sName, sDecoNames[decoration - 1], sizeof(sName) - 1);
+    return sName;
+}
+
+// L / R on the DECOR row: the first decoration of the next / previous group
+// (shapes, types, letters, numbers; "none" counts as the start of the list)
+u8 MP_BallStyle_DecorationJump(u8 decoration, s8 dir)
+{
+    s8 i, n = ARRAY_COUNT(sDecoGroupStart);
+    if (dir > 0)
+    {
+        for (i = 0; i < n; i++)
+            if (sDecoGroupStart[i] > decoration)
+                return sDecoGroupStart[i];
+        return 0;
+    }
+    if (decoration == 0)
+        return sDecoGroupStart[n - 1];
+    for (i = n - 1; i >= 0; i--)
+        if (sDecoGroupStart[i] < decoration)
+            return sDecoGroupStart[i];
+    return 0;
 }
 
 bool8 MP_BallStyle_CanColor(u8 ballId)
@@ -307,7 +329,66 @@ bool8 MP_BallStyle_CanColor(u8 ballId)
 
 bool8 MP_BallStyle_CanDecorate(u8 ballId)
 {
-    return (ballId == BALL_POKE || ballId == BALL_PREMIER) && ARRAY_COUNT(sDecorations) > 1;
+    return ballId == BALL_POKE;
+}
+
+static void PutPixel4bpp(u8 *tiles, u8 tilesWide, u8 x, u8 y, u8 c)
+{
+    u8 *p = tiles + ((y / 8) * tilesWide + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2;
+    if (x & 1)
+        *p = (*p & 0x0F) | (c << 4);
+    else
+        *p = (*p & 0xF0) | c;
+}
+
+// Decorated sheets nothing shows any more go (a battle can see a few of them)
+static void FreeUnusedDecoSheets(void)
+{
+    u8 d, i;
+    for (d = 1; d <= MP_DECO_COUNT; d++)
+    {
+        u16 start = GetSpriteTileStartByTag(TAG_MP_BALL_DECO + d);
+        bool8 used = FALSE;
+        if (start == 0xFFFF)
+            continue;
+        for (i = 0; i < MAX_SPRITES && !used; i++)
+            used = gSprites[i].inUse && gSprites[i].sheetTileStart == start;
+        if (!used)
+            FreeSpriteTilesByTag(TAG_MP_BALL_DECO + d);
+    }
+}
+
+// A POKé BALL sprite gets its own copy of the sheet with the decoration drawn
+// into the first frame, so other POKé BALLS on the screen keep the plain art
+static void DecorateBallSprite(u8 spriteId, u8 deco)
+{
+    struct Sprite *sprite = &gSprites[spriteId];
+    u16 tag = TAG_MP_BALL_DECO + deco, start = GetSpriteTileStartByTag(tag);
+    u8 x, y, i;
+
+    if (start == 0xFFFF)
+    {
+        static u8 sSheet[384];
+        struct SpriteSheet sheet = {sSheet, sizeof(sSheet), tag};
+        FreeUnusedDecoSheets();
+        LZDecompressWram(gBallSpriteSheets[BALL_POKE].data, sSheet);
+        for (y = 0; y < MP_DECO_BALL_H; y++)
+            for (x = 0; x < MP_DECO_BALL_W; x++)
+                if (sDecoArt[deco - 1].ball[y][x])
+                    PutPixel4bpp(sSheet, 2, DECO_BALL_X + x, DECO_BALL_Y + y, sDecoArt[deco - 1].ball[y][x]);
+        LoadSpriteSheet(&sheet);
+        start = GetSpriteTileStartByTag(tag);
+        if (start == 0xFFFF)
+            return;   // no room: the plain ball
+    }
+    sprite->oam.tileNum = start + (sprite->oam.tileNum - sprite->sheetTileStart);
+    sprite->sheetTileStart = start;
+    // Its colors go into the ball palette's free slots 9-15
+    for (i = 0; i < ARRAY_COUNT(sDecoBallColors); i++)
+    {
+        u16 at = OBJ_PLTT_ID(sprite->oam.paletteNum) + MP_DECO_BALL_FIRST_SLOT + i;
+        gPlttBufferUnfaded[at] = gPlttBufferFaded[at] = sDecoBallColors[i];
+    }
 }
 
 // The battle / summary ball: palette indices 1-4 are the red top
@@ -347,21 +428,45 @@ void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
         gSprites[spriteId].oam.paletteNum = slot;
         return;
     }
-    if (!MP_BallStyle_CanColor(ballId) || color == MP_BALL_RED)
-        return;
-    tag = TAG_MP_BALL_COLOR + color;
-    slot = IndexOfSpritePaletteTag(tag);
-    if (slot == 0xFF)
+    if (MP_BallStyle_CanColor(ballId) && color != MP_BALL_RED)
     {
-        static u16 sPal[16];
-        struct SpritePalette pal = {sPal, tag};
-        LZDecompressWram(gBallSpritePalettes[BALL_POKE].data, sPal);
-        RecolorBallPalette(sPal, color);
-        slot = LoadSpritePalette(&pal);
+        tag = TAG_MP_BALL_COLOR + color;
+        slot = IndexOfSpritePaletteTag(tag);
         if (slot == 0xFF)
-            return;
+        {
+            static u16 sPal[16];
+            struct SpritePalette pal = {sPal, tag};
+            LZDecompressWram(gBallSpritePalettes[BALL_POKE].data, sPal);
+            RecolorBallPalette(sPal, color);
+            slot = LoadSpritePalette(&pal);
+        }
+        if (slot != 0xFF)
+            gSprites[spriteId].oam.paletteNum = slot;
     }
-    gSprites[spriteId].oam.paletteNum = slot;
+    if (MP_BallStyle_CanDecorate(ballId) && MP_BallStyle_Decoration(style))
+        DecorateBallSprite(spriteId, MP_BallStyle_Decoration(style));
+}
+
+// The item icon (the summary's preview): the decoration drawn into its tiles
+// (a 32x32 sprite, the 24x24 art in the top-left) and its colors into slots 12-15
+void MP_BallStyle_DecorateIcon(u8 spriteId, u8 ballId, u16 style)
+{
+    u8 deco = MP_BallStyle_Decoration(style), x, y, i;
+    u8 *tiles;
+    const struct MpDecoArt *art;
+    if (spriteId >= MAX_SPRITES || deco == 0 || !MP_BallStyle_CanDecorate(ballId) || MP_BallStyle_Special(style))
+        return;
+    art = &sDecoArt[deco - 1];
+    tiles = (u8 *)(OBJ_VRAM0 + gSprites[spriteId].oam.tileNum * TILE_SIZE_4BPP);
+    for (y = 0; y < MP_DECO_ICON_SIZE; y++)
+        for (x = 0; x < MP_DECO_ICON_SIZE; x++)
+            if (art->icon[y][x])
+                PutPixel4bpp(tiles, 4, DECO_ICON_X + x, DECO_ICON_Y + y, DECO_ICON_FIRST_SLOT + art->icon[y][x] - 1);
+    for (i = 0; i < 4; i++)
+    {
+        u16 at = OBJ_PLTT_ID(gSprites[spriteId].oam.paletteNum) + DECO_ICON_FIRST_SLOT + i;
+        gPlttBufferUnfaded[at] = gPlttBufferFaded[at] = art->iconColors[i];
+    }
 }
 
 // The item icon (the preview): palette indices 7-11 are the red top

@@ -1,524 +1,227 @@
 #!/usr/bin/env python3
-"""POKé BALL decorations: 8x8 emblems drawn on a Moemon's ball (mp_ballstyle.c).
+"""POKé BALL decorations (mp_ballstyle.c): small emblems drawn into a POKé BALL.
 
     decorations.py                 writes src/mp/mp_balldeco_data.h
-    decorations.py --preview OUT   also renders a review sheet (each emblem on red / blue / premier balls)
+    decorations.py --preview OUT   also renders a review sheet on the real art
 
-Art is drawn here as text, one character per pixel ('.' = transparent), in the
-colors of PALETTE below (one shared 16-color sprite palette). Letters and digits
-come from a 5x6 font and get a dark outline.
+Each decoration has two drawings, both drawn straight into the game's own pixels:
+  icon  - up to 5x5, on the 24x24 POKé BALL item icon (the summary's POKé BALL
+          page), centered at (9,9) on the dome next to the shine
+  ball  - up to 3x3 (3x4 for letters and numbers), on the 16x16 battle / summary
+          ball, first frame only, centered at (7,5)
+Art is text, one character per pixel, '.' = untouched. Icon colors: any of
+COLORS (at most 4 per emblem: they go into icon palette slots 12-15). Ball colors:
+only BALL_COLORS (fixed slots 9-15 of the ball palette).
+Letters and numbers use a 5x5 font whose top row bends in by a pixel, as if
+the letter were wrapped over the dome.
 """
 import os, sys
 
-def rgb5(r, g, b):
-    return (r, g, b)
-
-# key -> (palette index, GBA RGB 0-31)
-PALETTE = {
-    '.': (0, (0, 0, 0)),
-    'W': (1, (31, 31, 31)),   # white
-    'K': (2, (3, 3, 6)),      # outline
-    'R': (3, (29, 5, 4)),     # red
-    'O': (4, (31, 17, 3)),    # orange
-    'Y': (5, (31, 27, 5)),    # yellow
-    'G': (6, (9, 25, 7)),     # green
-    'g': (7, (3, 14, 5)),     # dark green
-    'B': (8, (5, 11, 29)),    # blue
-    'b': (9, (14, 24, 31)),   # light blue
-    'P': (10, (18, 7, 26)),   # purple
-    'p': (11, (31, 13, 22)),  # pink
-    'N': (12, (17, 10, 4)),   # brown
-    'S': (13, (14, 14, 17)),  # gray
-    'L': (14, (24, 24, 27)),  # light gray
-    'C': (15, (5, 24, 26)),   # cyan
+COLORS = {  # GBA RGB (0-31)
+    'W': (31, 31, 31), 'K': (5, 5, 8),    'Y': (31, 30, 8),  'R': (25, 3, 3),
+    'B': (11, 21, 31), 'b': (4, 10, 26),  'G': (10, 27, 8),  'g': (3, 15, 4),
+    'P': (31, 14, 23), 'O': (31, 19, 4),  'V': (21, 11, 29), 'v': (11, 4, 17),
+    'N': (17, 10, 4),  'S': (16, 16, 19), 'L': (26, 26, 28), 'C': (6, 26, 27),
 }
+# The battle ball's palette slots 9-15 (its art uses 1-8)
+BALL_COLORS = ['W', 'Y', 'B', 'G', 'P', 'O', 'V']
+BALL_FIRST_SLOT = 9
 
-# name, art (8 rows of 8)
+def A(s):
+    return [r for r in s.strip('\n').split('\n')]
+
+# name, icon art, ball art
 SHAPES = [
-    ("STAR", """
-...KK...
-...KYK..
-KKKYYKKK
-KYYYYYYK
-.KYYYYK.
-.KYKKYK.
-KYK..KYK
-KK....KK"""),
-    ("HEART", """
-.KK..KK.
-KppKKppK
-KpWppppK
-KppppppK
-.KppppK.
-..KppK..
-...KK...
-........"""),
-    ("CIRCLE", """
-..KKKK..
-.KWWWWK.
-KWWKKWWK
-KWK..KWK
-KWK..KWK
-KWWKKWWK
-.KWWWWK.
-..KKKK.."""),
-    ("DIAMOND", """
-...KK...
-..KbbK..
-.KbWbbK.
-KbWbbbbK
-KbbbbBbK
-.KbbBbK.
-..KBBK..
-...KK..."""),
-    ("TRIANGLE", """
-........
-...KK...
-..KGGK..
-..KWGK..
-.KGGGGK.
-.KGGGGK.
-KGGGGGGK
-KKKKKKKK"""),
-    ("SQUARE", """
-KKKKKKKK
-KOOOOOOK
-KOWOOOOK
-KOOOOOOK
-KOOOOOOK
-KOOOOOOK
-KOOOOOOK
-KKKKKKKK"""),
-    ("CROSS", """
-..KKKK..
-..KRRK..
-KKKRRKKK
-KRRRRRRK
-KRRRRRRK
-KKKRRKKK
-..KRRK..
-..KKKK.."""),
-    ("SPARKLE", """
-...KK...
-...KK...
-..KWWK..
-KKWWWWKK
-KKWWWWKK
-..KWWK..
-...KK...
-...KK..."""),
-    ("RING", """
-..KKKK..
-.KYYYYK.
-KYKKKKYK
-KYK..KYK
-KYK..KYK
-KYKKKKYK
-.KYYYYK.
-..KKKK.."""),
+    ("STAR",     A("..W..\nWWWWW\n.WWW.\n.W.W."),             A(".W.\nWWW\nW.W")),
+    ("HEART",    A("WW.WW\nWWWWW\n.WWW.\n..W.."),             A("W.W\nWWW\n.W.")),
+    ("DIAMOND",  A("..B..\n.BWB.\nBBBBB\n.BBB.\n..B.."),      A(".B.\nBWB\n.B.")),
+    ("RING",     A(".WWW.\nW...W\nW...W\nW...W\n.WWW."),      A(".W.\nW.W\n.W.")),
+    ("TRIANGLE", A("..G..\n.GGG.\nGGGGG"),                    A(".G.\nGGG")),
+    ("PLUS",     A("..W..\n..W..\nWWWWW\n..W..\n..W.."),      A(".W.\nWWW\n.W.")),
+    ("SPARKLE",  A("..Y..\n.YWY.\n..Y.."),                    A(".Y.\nYWY\n.Y.")),
+    ("STRIPE",   A("WWWWW\nWWWWW"),                           A("WWW")),
+    ("DOTS",     A("W..W.\n...W.\n.W...\n....W"),             A("W.W\n...\n.W.")),
+    ("MOON",     A(".YYY.\nYY...\nYY...\nYY...\n.YYY."),      A(".YY\nY..\n.YY")),
+    ("NOTE",     A("..WWW\n..W.W\n..W.W\nWW.WW\nWW.WW"),      A(".WW\n.W.\nWW.")),
+    ("CROWN",    A("Y.Y.Y\nYYYYY\nYYYYY"),                    A("Y.Y\nYYY")),
+    ("FLOWER",   A(".P.P.\nPPYPP\n.PPP.\n..G.."),             A(".P.\nPYP\n.P.")),
+    ("CLOVER",   A(".G.G.\nGGGGG\n.GGG.\n..G.."),             A("G.G\n.G.\n.G.")),
+    ("SMILE",    A(".YYY.\nYKYKY\nYYYYY\nYKKKY\n.YYY."),      A("W.W\n...\nWWW")),
 ]
 
-# The 17 types
-ELEMENTS = [
-    ("NORMAL", """
-..KKKK..
-.KLLLLK.
-KLWLLLLK
-KLLLLLLK
-KLLLLLLK
-KLLLLSLK
-.KLLSSK.
-..KKKK.."""),
-    ("FIRE", """
-...K....
-..KRK...
-..KROK..
-.KROROK.
-KROYYORK
-KROYWYRK
-.KRYYRK.
-..KKKK.."""),
-    ("WATER", """
-...KK...
-...KbK..
-..KbBK..
-.KbBBBK.
-KbWBBBBK
-KbWBBBBK
-.KBBBBK.
-..KKKK.."""),
-    ("GRASS", """
-....KKK.
-..KKGGK.
-.KGGGgK.
-KGGWGgK.
-KGGgGK..
-KGgGGK..
-.KgKK...
-KK......"""),
-    ("ELECTRIC", """
-...KKKK.
-..KYYYK.
-.KYYYK..
-KYYYYKK.
-KKKYYYK.
-..KYYK..
-.KYYK...
-.KKK...."""),
-    ("ICE", """
-K..KK..K
-.KKbbKK.
-.KbWWbK.
-KbWbbWbK
-KbWbbWbK
-.KbWWbK.
-.KKbbKK.
-K..KK..K"""),
-    ("FIGHTING", """
-.KKKKKK.
-KOOOOOOK
-KOWOOOOK
-KOOOOOOK
-.KKKKOOK
-.KOOOOOK
-.KOOOOK.
-..KKKK.."""),
-    ("POISON", """
-.....KK.
-....KPPK
-.KK.KPPK
-KPPK.KK.
-KPWPK...
-KPPPPK..
-.KPPPK..
-..KKK..."""),
-    ("GROUND", """
-........
-...KK...
-..KNNK..
-..KNNNK.
-.KNNYNNK
-KNNNNNNK
-KNNNNNNK
-KKKKKKKK"""),
-    ("FLYING", """
-........
-KK......
-KbKK....
-KbbbKKK.
-.KbWbbbK
-.KbbbbbK
-..KKbbK.
-....KK.."""),
-    ("PSYCHIC", """
-..KKKK..
-.KppppK.
-KppKKppK
-KpK.KKpK
-KpK.KpK.
-KppK.KK.
-.KppKK..
-..KKK..."""),
-    ("BUG", """
-..K..K..
-...KK...
-.KRKKRK.
-KRRKRRRK
-KRKRKRRK
-KRRKRKRK
-.KRKRRK.
-..KKKK.."""),
-    ("ROCK", """
-..KKK...
-.KNSSKK.
-KNSSSSSK
-KSSWSSSK
-KSSSSSNK
-KNSSSNNK
-.KNNNNK.
-..KKKK.."""),
-    ("GHOST", """
-..KKKK..
-.KPPPPK.
-KPWPPWPK
-KPKPPKPK
-KPPPPPPK
-KPPPPPPK
-KPKPPKPK
-.K.KK.K."""),
-    ("DRAGON", """
-KK...KK.
-KBK.KBK.
-.KBKBK..
-.KBBBBK.
-KBWBBWBK
-KBBBBBBK
-.KBKKBK.
-..K..K.."""),
-    ("DARK", """
-..KKKK..
-.KSSKKK.
-KSSSKKKK
-KSWSKKKK
-KSSSKKKK
-KSSSKKKK
-.KSSKKK.
-..KKKK.."""),
-    ("STEEL", """
-...KK...
-.KKLLKK.
-.KLLLLK.
-KLLKKLLK
-KLLKKLLK
-.KLLLLK.
-.KKLLKK.
-...KK..."""),
+TYPES = [
+    ("NORMAL",   A(".WWW.\nWWWWW\nWWWWW\n.WWW."),             A("WW\nWW")),
+    ("FIRE",     A("..R..\n.RYR.\nRYWYR\nRYYYR\n.RRR."),      A(".O.\nOYO\nOYO")),
+    ("WATER",    A("..B..\n.BBB.\nBBWBB\nBBBBB\n.BBB."),      A(".B.\nBBB\nBBB")),
+    ("GRASS",    A("...GG\n..GGG\n.GGg.\nGGg..\ng...."),      A("..G\n.GG\nG..")),
+    ("ELECTRIC", A("..YY.\n.YY..\nYYYY.\n..YY.\n.YY.."),      A(".YY\n.Y.\nYY.")),
+    ("ICE",      A("B.B.B\n.BBB.\nBBWBB\n.BBB.\nB.B.B"),      A("B.B\n.W.\nB.B")),
+    ("FIGHTING", A(".WWW.\nWKWKW\nWWWWW\nKWWWW\n.WWW."),      A("WW.\nWWW\n.WW")),
+    ("POISON",   A(".VVV.\nVWVV.\nVVVV.\n.VV.V\n...V."),      A("VV.\nVV.\n..V")),
+    ("GROUND",   A("..N..\n.NNN.\nNNNNN"),                    A(".O.\nOOO")),
+    ("FLYING",   A("BB...\nWBBB.\n.WBBB\n..WBB\n...WW"),      A("B..\nBB.\n.BB")),
+    ("PSYCHIC",  A(".PPP.\nPWKWP\n.PPP."),                    A(".P.\nPWP\n.P.")),
+    ("BUG",      A("G...G\n.GGG.\nGgGgG\n.GGG."),             A("G.G\nGGG\n.G.")),
+    ("ROCK",     A(".SS..\nSSSS.\nSLSSS\n.SSS."),             A("OO.\nOOO")),
+    ("GHOST",    A(".VVV.\nVWVWV\nVVVVV\nV.V.V"),             A(".V.\nVVV\nV.V")),
+    ("DRAGON",   A("B...B\nBB.BB\n.BBB.\n..B.."),             A("B.B\n.B.\n.B.")),
+    ("DARK",     A(".KKK.\nKK...\nKK...\n.KKK."),             A("VV.\nV..\nVV.")),
+    ("STEEL",    A(".L.L.\nLLLLL\n.LSL.\nLLLLL\n.L.L."),      A("W.W\n.W.\nW.W")),
 ]
 
-SYMBOLS = [
-    ("NOTE", """
-...KKKK.
-...KCCK.
-...KKCK.
-...K.KK.
-.KKK.K..
-KCCCKK..
-KCCCK...
-.KKK...."""),
-    ("CROWN", """
-K..KK..K
-KYKYYKYK
-KYYYYYYK
-KYRYYRYK
-KYYYYYYK
-KKKKKKKK
-........
-........"""),
-    ("PAW", """
-.KK..KK.
-KNNKKNNK
-.KK..KK.
-K.KKKK.K
-.KNNNNK.
-KNNNNNNK
-KNNNNNNK
-.KKKKKK."""),
-    ("FLOWER", """
-..KKKK..
-.KpKKpK.
-KppKKppK
-KKKYYKKK
-KKKYYKKK
-KppKKppK
-.KpKKpK.
-..KKKK.."""),
-    ("SUN", """
-K..KK..K
-.KKYYKK.
-.KYYYYK.
-KYYWYYYK
-KYYYYYYK
-.KYYYYK.
-.KKYYKK.
-K..KK..K"""),
-    ("MOON", """
-..KKKK..
-.KYYKK..
-KYYK....
-KYK.....
-KYK.....
-KYYK....
-.KYYKK..
-..KKKK.."""),
-    ("CLOVER", """
-.KK..KK.
-KGGKKGGK
-KGGGGGGK
-.KGGGGK.
-KGGGGGGK
-KGGKKGGK
-.KK.KK..
-...K...."""),
-    ("SMILE", """
-..KKKK..
-.KYYYYK.
-KYKYYKYK
-KYYYYYYK
-KYKYYKYK
-KYYKKYYK
-.KYYYYK.
-..KKKK.."""),
-    ("POKEBALL", """
-..KKKK..
-.KRRRRK.
-KRWRRRRK
-KKKWWKKK
-KLLWWLLK
-KLLLLLLK
-.KLLLLK.
-..KKKK.."""),
-]
-
-FONT = {  # 5 wide x 6 tall
-    'A': [".###.", "#...#", "#...#", "#####", "#...#", "#...#"],
-    'B': ["####.", "#...#", "####.", "#...#", "#...#", "####."],
-    'C': [".####", "#....", "#....", "#....", "#....", ".####"],
-    'D': ["####.", "#...#", "#...#", "#...#", "#...#", "####."],
-    'E': ["#####", "#....", "####.", "#....", "#....", "#####"],
-    'F': ["#####", "#....", "####.", "#....", "#....", "#...."],
-    'G': [".####", "#....", "#.###", "#...#", "#...#", ".###."],
-    'H': ["#...#", "#...#", "#####", "#...#", "#...#", "#...#"],
-    'I': ["#####", "..#..", "..#..", "..#..", "..#..", "#####"],
-    'J': ["..###", "...#.", "...#.", "...#.", "#..#.", ".##.."],
-    'K': ["#...#", "#..#.", "###..", "#..#.", "#...#", "#...#"],
-    'L': ["#....", "#....", "#....", "#....", "#....", "#####"],
-    'M': ["#...#", "##.##", "#.#.#", "#...#", "#...#", "#...#"],
-    'N': ["#...#", "##..#", "#.#.#", "#..##", "#...#", "#...#"],
-    'O': [".###.", "#...#", "#...#", "#...#", "#...#", ".###."],
-    'P': ["####.", "#...#", "#...#", "####.", "#....", "#...."],
-    'Q': [".###.", "#...#", "#...#", "#.#.#", "#..#.", ".##.#"],
-    'R': ["####.", "#...#", "#...#", "####.", "#..#.", "#...#"],
-    'S': [".####", "#....", ".###.", "....#", "....#", "####."],
-    'T': ["#####", "..#..", "..#..", "..#..", "..#..", "..#.."],
-    'U': ["#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
-    'V': ["#...#", "#...#", "#...#", "#...#", ".#.#.", "..#.."],
-    'W': ["#...#", "#...#", "#...#", "#.#.#", "##.##", "#...#"],
-    'X': ["#...#", ".#.#.", "..#..", "..#..", ".#.#.", "#...#"],
-    'Y': ["#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."],
-    'Z': ["#####", "...#.", "..#..", ".#...", "#....", "#####"],
-    '0': [".###.", "#..##", "#.#.#", "##..#", "#...#", ".###."],
-    '1': ["..#..", ".##..", "..#..", "..#..", "..#..", ".###."],
-    '2': [".###.", "#...#", "...#.", "..#..", ".#...", "#####"],
-    '3': ["####.", "....#", ".###.", "....#", "....#", "####."],
-    '4': ["#..#.", "#..#.", "#####", "...#.", "...#.", "...#."],
-    '5': ["#####", "#....", "####.", "....#", "....#", "####."],
-    '6': [".###.", "#....", "####.", "#...#", "#...#", ".###."],
-    '7': ["#####", "....#", "...#.", "..#..", "..#..", "..#.."],
-    '8': [".###.", "#...#", ".###.", "#...#", "#...#", ".###."],
-    '9': [".###.", "#...#", "#...#", ".####", "....#", ".###."],
+# 5x5 letters for the icon, top row bent in by a pixel (wrapped over the dome)
+DOME = {
+ 'A': ".###./#...#/#####/#...#/#...#", 'B': ".##../#..#./####./#...#/####.",
+ 'C': ".###./#..../#..../#..../.####", 'D': ".##../#..#./#...#/#...#/####.",
+ 'E': ".###./#..../####./#..../#####", 'F': ".###./#..../####./#..../#....",
+ 'G': ".###./#..../#.###/#...#/.###.", 'H': ".#.#./#...#/#####/#...#/#...#",
+ 'I': ".###./..#../..#../..#../#####", 'J': "..##./...#./...#./#..#./.##..",
+ 'K': ".#.#./#.#../##.../#.#../#..#.", 'L': ".#.../#..../#..../#..../#####",
+ 'M': ".#.#./##.##/#.#.#/#...#/#...#", 'N': ".#.#./##..#/#.#.#/#..##/#...#",
+ 'O': ".###./#...#/#...#/#...#/.###.", 'P': ".##../#..#./####./#..../#....",
+ 'Q': ".###./#...#/#...#/#..#./.##.#", 'R': ".##../#..#./####./#..#./#...#",
+ 'S': ".###./#..../.###./....#/####.", 'T': ".###./..#../..#../..#../..#..",
+ 'U': ".#.#./#...#/#...#/#...#/.###.", 'V': ".#.#./#...#/.#.#./.#.#./..#..",
+ 'W': ".#.#./#...#/#.#.#/##.##/#...#", 'X': ".#.#./.#.#./..#../.#.#./#...#",
+ 'Y': ".#.#./.#.#./..#../..#../..#..", 'Z': ".###./...#./..#../.#.../#####",
+ '0': ".###./#..##/#.#.#/##..#/.###.", '1': "..#../.##../..#../..#../.###.",
+ '2': ".###./#...#/..##./.#.../#####", '3': ".###./....#/..##./....#/####.",
+ '4': ".#.#./#..#./#####/...#./...#.", '5': ".###./#..../####./....#/####.",
+ '6': ".###./#..../####./#...#/.###.", '7': ".###./....#/...#./..#../..#..",
+ '8': ".###./#...#/.###./#...#/.###.", '9': ".###./#...#/.####/....#/.###.",
+}
+# 3x4 letters for the battle ball
+SMALL = {
+ 'A': ".#./#.#/###/#.#", 'B': "##./###/#.#/##.", 'C': ".##/#../#../.##", 'D': "##./#.#/#.#/##.",
+ 'E': "###/##./#../###", 'F': "###/##./#../#..", 'G': ".##/#../#.#/.##", 'H': "#.#/###/#.#/#.#",
+ 'I': "###/.#./.#./###", 'J': "..#/..#/#.#/.#.", 'K': "#.#/##./#.#/#.#", 'L': "#../#../#../###",
+ 'M': "#.#/###/###/#.#", 'N': "##./#.#/#.#/#.#", 'O': ".#./#.#/#.#/.#.", 'P': "##./#.#/##./#..",
+ 'Q': ".#./#.#/#.#/.##", 'R': "##./#.#/##./#.#", 'S': ".##/#../..#/##.", 'T': "###/.#./.#./.#.",
+ 'U': "#.#/#.#/#.#/###", 'V': "#.#/#.#/#.#/.#.", 'W': "#.#/#.#/###/#.#", 'X': "#.#/.#./.#./#.#",
+ 'Y': "#.#/#.#/.#./.#.", 'Z': "###/..#/#../###",
+ '0': "###/#.#/#.#/###", '1': ".#./##./.#./###", '2': "##./..#/.#./###", '3': "##./.##/..#/##.",
+ '4': "#.#/#.#/###/..#", '5': "###/##./..#/##.", '6': ".##/#../###/###", '7': "###/..#/.#./.#.",
+ '8': "###/###/#.#/###", '9': "###/###/..#/##.",
 }
 
-def glyph(ch):
-    rows = FONT[ch]
-    grid = [['.'] * 8 for _ in range(8)]
-    for y, row in enumerate(rows):
-        for x, c in enumerate(row):
-            if c == '#':
-                grid[y + 1][x + 1] = 'W'
-    # outline: any empty pixel touching a letter pixel (8 neighbours)
-    out = [r[:] for r in grid]
-    for y in range(8):
-        for x in range(8):
-            if grid[y][x] != '.':
-                continue
-            for dy in (-1, 0, 1):
-                for dx in (-1, 0, 1):
-                    yy, xx = y + dy, x + dx
-                    if 0 <= yy < 8 and 0 <= xx < 8 and grid[yy][xx] == 'W':
-                        out[y][x] = 'K'
-    return "\n".join("".join(r) for r in out)
+def glyph(table, ch):
+    return [r.replace('#', 'W') for r in table[ch].split('/')]
 
-LETTERS = [("LETTER " + c, glyph(c)) for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
-DIGITS = [("NUMBER " + c, glyph(c)) for c in "0123456789"]
+LETTERS = [("LETTER " + c, glyph(DOME, c), glyph(SMALL, c)) for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
+NUMBERS = [("NUMBER " + c, glyph(DOME, c), glyph(SMALL, c)) for c in "0123456789"]
 
-GROUPS = [("SHAPES", SHAPES), ("TYPES", ELEMENTS), ("SYMBOLS", SYMBOLS), ("LETTERS", LETTERS), ("NUMBERS", DIGITS)]
+GROUPS = [("SHAPES", SHAPES), ("TYPES", TYPES), ("LETTERS", LETTERS), ("NUMBERS", NUMBERS)]
 
-def parse(art, name):
-    rows = [r.replace(' ', '.') for r in art.strip('\n').split('\n')]
-    if len(rows) != 8 or any(len(r) != 8 for r in rows):
-        raise SystemExit("%s: art must be 8x8, got %s" % (name, [len(r) for r in rows]))
-    for r in rows:
-        for c in r:
-            if c not in PALETTE:
-                raise SystemExit("%s: unknown color %r" % (name, c))
-    return rows
+ICON_BOX, BALL_W, BALL_H = 5, 3, 4
 
-def tile_4bpp(rows):
-    out = bytearray()
-    for r in rows:
-        for x in range(0, 8, 2):
-            lo = PALETTE[r[x]][0]
-            hi = PALETTE[r[x + 1]][0]
-            out.append(lo | (hi << 4))
-    return bytes(out)
+def center(art, w, h, name):
+    aw, ah = max(len(r) for r in art), len(art)
+    if aw > w or ah > h:
+        raise SystemExit("%s: %dx%d is larger than %dx%d" % (name, aw, ah, w, h))
+    ox, oy = (w - aw) // 2, (h - ah) // 2
+    grid = [['.'] * w for _ in range(h)]
+    for y, r in enumerate(art):
+        for x, c in enumerate(r):
+            grid[oy + y][ox + x] = c
+    return grid
 
-def all_decos():
-    items = []
-    for gname, lst in GROUPS:
-        for name, art in lst:
-            items.append((gname, name, parse(art, name)))
-    return items
+def items():
+    out = []
+    for g, lst in GROUPS:
+        for name, icon, ball in lst:
+            ic = center(icon, ICON_BOX, ICON_BOX, name)
+            # 3x3 ball art sits in rows 1-3 of the 3x4 box (same center as the letters' lower rows)
+            bl = center(ball, BALL_W, BALL_H, name) if len(ball) == 4 else [['.'] * 3] + center(ball, BALL_W, 3, name)
+            cols = []
+            for r in ic:
+                for c in r:
+                    if c != '.' and c not in cols:
+                        cols.append(c)
+                    if c != '.' and c not in COLORS:
+                        raise SystemExit("%s: unknown icon color %r" % (name, c))
+            if len(cols) > 4:
+                raise SystemExit("%s: icon uses %d colors (4 max)" % (name, len(cols)))
+            for r in bl:
+                for c in r:
+                    if c != '.' and c not in BALL_COLORS:
+                        raise SystemExit("%s: ball color %r isn't one of %s" % (name, c, BALL_COLORS))
+            out.append((g, name, ic, cols, bl))
+    return out
 
-def write_header(path, items):
-    pal = [0] * 16
-    for k, (i, (r, g, b)) in PALETTE.items():
-        pal[i] = r | (g << 5) | (b << 10)
-    lines = ["// Generated by tools/moemon_balls/decorations.py: POKé BALL decorations (8x8 4bpp emblems).",
-             "// Edit the art there and run it again.", "",
-             "#define MP_DECO_COUNT %d   // plus 0 = none" % len(items), "",
-             "static const u16 sDecoPalette[16] = {" + ", ".join("0x%04X" % c for c in pal) + "};", "",
-             "static const u32 sDecoTiles[MP_DECO_COUNT][8] = {"]
-    for g, name, rows in items:
-        t = tile_4bpp(rows)
-        words = [int.from_bytes(t[i:i + 4], 'little') for i in range(0, 32, 4)]
-        lines.append("    {" + ", ".join("0x%08X" % w for w in words) + "},   // " + name)
-    lines.append("};")
-    lines.append("")
-    lines.append("// ASCII names (shown in the summary's POKé BALL page) and their group")
-    lines.append("static const char *const sDecoNames[MP_DECO_COUNT] = {")
-    for g, name, rows in items:
-        lines.append('    "%s",' % name)
-    lines.append("};")
-    groups = [g for g, _ in GROUPS]
-    lines.append("")
-    lines.append("// First decoration (1-based) of each group: L / R jump between groups")
+def rgb555(c):
+    r, g, b = COLORS[c]
+    return r | (g << 5) | (b << 10)
+
+def write_header(path, its):
+    L = ["// Generated by tools/moemon_balls/decorations.py: POKé BALL decorations. Edit the art there.", "",
+         "#define MP_DECO_COUNT %d   // plus 0 = none" % len(its),
+         "#define MP_DECO_ICON_SIZE %d" % ICON_BOX,
+         "#define MP_DECO_BALL_W %d" % BALL_W, "#define MP_DECO_BALL_H %d" % BALL_H,
+         "#define MP_DECO_BALL_FIRST_SLOT %d" % BALL_FIRST_SLOT, "",
+         "// Ball palette slots %d-%d" % (BALL_FIRST_SLOT, BALL_FIRST_SLOT + len(BALL_COLORS) - 1),
+         "static const u16 sDecoBallColors[%d] = {%s};" % (len(BALL_COLORS), ", ".join("0x%04X" % rgb555(c) for c in BALL_COLORS)), "",
+         "struct MpDecoArt",
+         "{",
+         "    u8 icon[MP_DECO_ICON_SIZE][MP_DECO_ICON_SIZE];   // 0 = keep, 1-4 = iconColors[0-3] (icon palette slots 12-15)",
+         "    u16 iconColors[4];",
+         "    u8 ball[MP_DECO_BALL_H][MP_DECO_BALL_W];         // 0 = keep, else a ball palette slot",
+         "};", "",
+         "static const struct MpDecoArt sDecoArt[MP_DECO_COUNT] = {"]
+    for g, name, ic, cols, bl in its:
+        icon = ", ".join("{" + ", ".join(str(cols.index(c) + 1 if c != '.' else 0) for c in r) + "}" for r in ic)
+        colors = ", ".join("0x%04X" % rgb555(c) for c in cols) or "0"
+        ball = ", ".join("{" + ", ".join(str(BALL_FIRST_SLOT + BALL_COLORS.index(c) if c != '.' else 0) for c in r) + "}" for r in bl)
+        L.append("    {{%s}, {%s}, {%s}},   // %s" % (icon, colors, ball, name))
+    L += ["};", "", "static const char *const sDecoNames[MP_DECO_COUNT] = {"]
+    L += ['    "%s",' % name for g, name, ic, cols, bl in its]
     starts, n = [], 1
-    for gname, lst in GROUPS:
+    for g, lst in GROUPS:
         starts.append(n)
         n += len(lst)
-    lines.append("static const u8 sDecoGroupStart[] = {" + ", ".join(str(s) for s in starts) + "};")
-    lines.append("static const char *const sDecoGroupNames[] = {" + ", ".join('"%s"' % g for g in groups) + "};")
+    L += ["};", "", "// First decoration of each group (L / R jump between them)",
+          "static const u8 sDecoGroupStart[] = {%s};" % ", ".join(map(str, starts))]
     with open(path, 'w') as f:
-        f.write("\n".join(lines) + "\n")
+        f.write("\n".join(L) + "\n")
 
-def preview(path, items):
+def preview(path, its, root):
     from PIL import Image, ImageDraw
-    rgb = {k: (r * 255 // 31, g * 255 // 31, b * 255 // 31) for k, (i, (r, g, b)) in PALETTE.items()}
-    S = 6           # scale
-    cell = 16 * S + 8
-    balls = [((230, 50, 40), (250, 250, 250)), ((50, 90, 230), (250, 250, 250)), ((250, 250, 250), (250, 250, 250))]
-    cols = 10
-    rows_n = (len(items) + cols - 1) // cols
-    img = Image.new('RGB', (cols * cell * 1, rows_n * (cell + 14) + 4), (36, 40, 52))
+    def load(p):
+        im = Image.open(p); idx = im.load(); rgba = im.convert('RGBA'); px = rgba.load()
+        for y in range(im.size[1]):
+            for x in range(im.size[0]):
+                if idx[x, y] == 0:
+                    px[x, y] = (0, 0, 0, 0)
+        return rgba
+    icon = load(os.path.join(root, 'graphics/items/icons/poke_ball.png'))
+    ball = load(os.path.join(root, 'graphics/balls/poke.png')).crop((0, 0, 16, 16))
+    c8 = lambda c: tuple(v * 255 // 31 for v in COLORS[c]) + (255,)
+    S, per = 6, 12
+    cw, ch = 24 * S + 10, 24 * S + 16 * S + 30
+    rows = (len(its) + per - 1) // per
+    img = Image.new('RGBA', (per * cw + 10, rows * ch + 10), (40, 44, 56, 255))
     d = ImageDraw.Draw(img)
-    for n, (g, name, rows) in enumerate(items):
-        cx, cy = (n % cols) * cell, (n // cols) * (cell + 14)
-        top, bottom = balls[n % 3]
-        # a 16x16 ball: top half colored, bottom white, black band
-        for y in range(16):
-            for x in range(16):
-                dx, dy = x - 7.5, y - 7.5
-                if dx * dx + dy * dy > 7.2 * 7.2:
-                    continue
-                col = top if y < 7 else bottom
-                if 7 <= y <= 8 or dx * dx + dy * dy > 6.3 * 6.3:
-                    col = (20, 20, 24)
-                d.rectangle([cx + 4 + x * S, cy + 4 + y * S, cx + 4 + x * S + S - 1, cy + 4 + y * S + S - 1], fill=col)
-        for y in range(8):
-            for x in range(8):
-                k = rows[y][x]
-                if k == '.':
-                    continue
-                X, Y = cx + 4 + (x + 4) * S, cy + 4 + (y + 4) * S
-                d.rectangle([X, Y, X + S - 1, Y + S - 1], fill=rgb[k])
-        d.text((cx + 4, cy + cell - 2), name[:16], fill=(230, 230, 230))
+    for n, (g, name, ic, cols, bl) in enumerate(its):
+        a = icon.copy(); p = a.load()
+        for y in range(5):
+            for x in range(5):
+                if ic[y][x] != '.':
+                    p[7 + x, 7 + y] = c8(ic[y][x])
+        b = ball.copy(); q = b.load()
+        for y in range(4):
+            for x in range(3):
+                if bl[y][x] != '.':
+                    q[6 + x, 3 + y] = c8(bl[y][x])
+        x0, y0 = 10 + (n % per) * cw, 10 + (n // per) * ch
+        A2 = a.resize((24 * S, 24 * S), Image.NEAREST); img.paste(A2, (x0, y0), A2)
+        B2 = b.resize((16 * S, 16 * S), Image.NEAREST); img.paste(B2, (x0 + 4 * S, y0 + 24 * S), B2)
+        img.paste(a, (x0, y0 + 24 * S + 2), a); img.paste(b, (x0 + 4, y0 + 24 * S + 30), b)
+        d.text((x0, y0 + ch - 22), name, fill=(230, 230, 230))
     img.save(path)
 
 if __name__ == '__main__':
-    here = os.path.dirname(os.path.abspath(__file__))
-    root = os.path.normpath(os.path.join(here, '..', '..'))
-    items = all_decos()
-    write_header(os.path.join(root, 'src', 'mp', 'mp_balldeco_data.h'), items)
-    print("%d decorations" % len(items))
+    root = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
+    its = items()
+    write_header(os.path.join(root, 'src', 'mp', 'mp_balldeco_data.h'), its)
+    print("%d decorations" % len(its))
     if len(sys.argv) > 2 and sys.argv[1] == '--preview':
-        preview(sys.argv[2], items)
+        preview(sys.argv[2], its, root)

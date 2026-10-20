@@ -3002,6 +3002,7 @@ static void MpBall_UpdateIcon(void)
     gSprites[id].y = 6 * 8 + 4;
     gSprites[id].oam.priority = 0;
     MP_BallStyle_ApplyToIconPalette(gSprites[id].oam.paletteNum, ItemIdToBallId(item), MpBall_SelectedStyle());
+    MP_BallStyle_DecorateIcon(id, ItemIdToBallId(item), MpBall_SelectedStyle());
 }
 
 // Draws the page (body text + preview) for the current Moemon and menu state
@@ -3054,10 +3055,6 @@ static void MpBall_Draw(void)
         MP_GameToAscii(deco, MP_BallStyle_DecorationName(MP_BallStyle_Decoration(style)), sizeof(deco) - 1);
         snprintf(line, sizeof(line), MPBALL_ON(MPBALL_ROW_DECO) ? "< %s >" : "%s", deco);
         MpBall_Print(line, 52, 81, 0);
-    }
-    else if (item == ITEM_POKE_BALL || item == ITEM_PREMIER_BALL)
-    {
-        MpBall_Print("None yet", 52, 81, 0);
     }
     else
     {
@@ -3276,6 +3273,14 @@ static bool8 MpBall_HandleInput(u8 taskId)
         MpBall_ChangeValue(-1);
     else if (JOY_NEW(DPAD_RIGHT))
         MpBall_ChangeValue(1);
+    else if (JOY_NEW(L_BUTTON | R_BUTTON) && sMpBall.row == MPBALL_ROW_DECO
+          && MP_BallStyle_ItemCanDecorate(sMpBall.types[sMpBall.typeIndex]))
+    {
+        // jump between groups: shapes, types, letters, numbers
+        sMpBall.decoration = MP_BallStyle_DecorationJump(sMpBall.decoration, JOY_NEW(R_BUTTON) ? 1 : -1);
+        PlaySE(SE_SELECT);
+        MpBall_Draw();
+    }
     else if (JOY_NEW(A_BUTTON))
     {
         u16 item = sMpBall.types[sMpBall.typeIndex];
