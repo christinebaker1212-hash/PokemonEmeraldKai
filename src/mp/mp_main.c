@@ -17,6 +17,8 @@
 #include "event_object_movement.h"
 #include "constants/characters.h"
 #include "string_util.h"
+#include "constants/map_types.h"
+#include "constants/region_map_sections.h"
 #include "platform/gamepad.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
@@ -576,6 +578,27 @@ static void BuildHello(u8 *p)
 
 // ---------------------------------------------------------------------------
 // Local state
+
+// Caves and dungeons: no paid rescue patch-ups (mp_rescue.c) and no shared PC (mp_sharedpc.c)
+bool8 MP_InDungeon(void)
+{
+    static const u8 sDungeons[] = {
+        MAPSEC_GRANITE_CAVE, MAPSEC_RUSTURF_TUNNEL, MAPSEC_ABANDONED_SHIP, MAPSEC_NEW_MAUVILLE, MAPSEC_METEOR_FALLS,
+        MAPSEC_METEOR_FALLS2, MAPSEC_MT_PYRE, MAPSEC_AQUA_HIDEOUT_OLD, MAPSEC_SHOAL_CAVE, MAPSEC_SEAFLOOR_CAVERN,
+        MAPSEC_UNDERWATER_SEAFLOOR_CAVERN, MAPSEC_VICTORY_ROAD, MAPSEC_CAVE_OF_ORIGIN, MAPSEC_FIERY_PATH, MAPSEC_FIERY_PATH2,
+        MAPSEC_SEALED_CHAMBER, MAPSEC_UNDERWATER_SEALED_CHAMBER, MAPSEC_SCORCHED_SLAB, MAPSEC_ISLAND_CAVE,
+        MAPSEC_DESERT_RUINS, MAPSEC_ANCIENT_TOMB, MAPSEC_SKY_PILLAR, MAPSEC_AQUA_HIDEOUT, MAPSEC_MAGMA_HIDEOUT,
+        MAPSEC_MIRAGE_TOWER, MAPSEC_ARTISAN_CAVE, MAPSEC_MARINE_CAVE, MAPSEC_UNDERWATER_MARINE_CAVE, MAPSEC_TERRA_CAVE,
+        MAPSEC_DESERT_UNDERPASS, MAPSEC_ALTERING_CAVE,
+    };
+    u32 i;
+    if (gMapHeader.mapType == MAP_TYPE_UNDERGROUND)
+        return TRUE;
+    for (i = 0; i < ARRAY_COUNT(sDungeons); i++)
+        if (gMapHeader.regionMapSectionId == sDungeons[i])
+            return TRUE;
+    return FALSE;
+}
 
 bool8 MP_IsInOverworld(void)
 {

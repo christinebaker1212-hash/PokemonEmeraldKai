@@ -534,6 +534,7 @@ s32 MP_WeekNumber(void);
 
 // Shared PC and room counters (mp_sharedpc.c)
 void MP_SharedPc_Open(void);
+bool8 MP_InDungeon(void);   // caves and dungeons (no shared PC, no paid rescue)
 void MP_Store_OnMessage(const u8 *data, u16 len);
 s32 MP_Counter_Get(const char *key);
 u32 MP_Counter_Version(void);

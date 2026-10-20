@@ -180,7 +180,8 @@ TRADE...      Trade with a friend anywhere: a Moemon, up to two kinds of
 SHARED PC...  A PC that belongs to the server: anyone can put Moemon and
               items in, and anyone can take them out. It's kept on the host's
               PC, so it's still there the next time the same server name and
-              password are hosted.
+              password are hosted. It can't be reached from inside caves and
+              dungeons: pack what you need before you go in.
 DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.
@@ -274,9 +275,12 @@ LEND FIELD MOVES  No CUT in your party? If a friend standing within 4 steps
 RESCUE            Lose a battle with a friend within 10 steps and you don't
                   black out right away: they're asked to help. A REVIVE from
                   their bag brings your first Moemon back at half HP, a MAX
-                  REVIVE at full HP. Or they can pay to heal your whole team
-                  on the spot: $50 per Moemon plus $2 per missing HP (both of
-                  you see the price). If they say no, don't answer within 15
+                  REVIVE at full HP. While they keep watch you can also use
+                  a REVIVE from your own bag (A). Paying to heal your whole
+                  team on the spot is dear on purpose ($150 per Moemon plus
+                  $4 per missing HP, times 1 + half your badges), and in caves
+                  and dungeons there's no paying at all: only REVIVEs help, so
+                  stock up before you go in. If nobody helps within 15
                   seconds, or you give up (B), you black out as usual.
 TEAM PHOTO        With friends on the same map: everyone's trainer picture
                   lines up on a stage with your names, the place and the date,

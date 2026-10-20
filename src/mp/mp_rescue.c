@@ -14,6 +14,8 @@
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
+#include "event_data.h"
+#include "constants/flags.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
@@ -36,12 +38,13 @@
 #include "constants/songs.h"
 
 #define RESCUE_RANGE 10
-#define RESCUE_PER_MON 50     // patch-up price: per Moemon
-#define RESCUE_PER_HP 2       // ... plus per missing HP
-#define RESCUE_MAX_PRICE 9999
+#define RESCUE_PER_MON 150    // patch-up price: per Moemon
+#define RESCUE_PER_HP 4       // ... plus per missing HP, then x(1 + badges / 2)
+#define RESCUE_MAX_PRICE 60000
+#define RESCUE_NO_PATCH 0xFFFF   // in a cave or dungeon: no paid patch-up, only REVIVEs
 #define RESCUE_WAIT (15 * 60)
 
-enum { RS_ASK, RS_YES_REVIVE, RS_YES_MAX_REVIVE, RS_YES_MONEY, RS_NO, RS_BUSY };
+enum { RS_ASK, RS_YES_REVIVE, RS_YES_MAX_REVIVE, RS_YES_MONEY, RS_NO, RS_BUSY, RS_SELF };   // RS_SELF: used their own REVIVE
 
 static EWRAM_DATA struct
 {
@@ -53,8 +56,9 @@ static EWRAM_DATA struct
     u16 cursor;
     u8 options[4];
     u8 optionCount;
-    u16 price;            // patch-up price (both sides)
+    u16 price;            // patch-up price (both sides), RESCUE_NO_PATCH in a dungeon
     u8 monCount;          // Moemon on the downed team
+    bool8 selfFull;       // downed: used their own MAX REVIVE
 } sRescue = {0};
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
@@ -78,8 +82,18 @@ static void Send(u8 to, u8 kind)
     MP_SendRelay(to, buf, sizeof(buf));
 }
 
-// What it costs to patch up the whole team: RESCUE_PER_MON for each Moemon
-// plus RESCUE_PER_HP for each HP it's missing
+static int Badges(void)
+{
+    int i, n = 0;
+    for (i = 0; i < 8; i++)
+        n += FlagGet(FLAG_BADGE01_GET + i) ? 1 : 0;
+    return n;
+}
+
+// What it costs to patch up the whole team: RESCUE_PER_MON for each Moemon plus
+// RESCUE_PER_HP for each HP it's missing, times 1 + badges / 2. Dear on purpose:
+// REVIVEs bought before a trip are the cheap way back up, and down in a cave or
+// dungeon they're the only way (MP_InDungeon).
 static u16 PatchUpPrice(u8 *count)
 {
     int i, price = 0;
@@ -94,6 +108,9 @@ static u16 PatchUpPrice(u8 *count)
         (*count)++;
         price += RESCUE_PER_MON + RESCUE_PER_HP * (GetMonData(mon, MON_DATA_MAX_HP) - GetMonData(mon, MON_DATA_HP));
     }
+    if (MP_InDungeon())
+        return RESCUE_NO_PATCH;
+    price = price * (2 + Badges()) / 2;
     return min(price, RESCUE_MAX_PRICE);
 }
 
@@ -137,12 +154,21 @@ static void DrawWaiting(void)
     {
         snprintf(line, sizeof(line), "%s is close by!", who);
         MpUi_TextAscii(1, line);
-        snprintf(line, sizeof(line), "Patching up your team costs $%d.", sRescue.price);
+        if (sRescue.price == RESCUE_NO_PATCH)
+            snprintf(line, sizeof(line), "This deep, only a REVIVE can help.");
+        else
+            snprintf(line, sizeof(line), "Patching up your team costs $%d.", sRescue.price);
         MpUi_TextAscii(2, line);
         snprintf(line, sizeof(line), "Waiting for %s to help (%d)", who, (RESCUE_WAIT - sRescue.timer) / 60 + 1);
         MpUi_TextAscii(3, line);
         MpUi_End();
-        MpUi_HelpAscii("{B} GIVE UP");
+        if (CheckBagHasItem(ITEM_REVIVE, 1))
+            snprintf(line, sizeof(line), "{A} USE YOUR REVIVE (x%d)   {B} GIVE UP", (int)CountTotalItemQuantityInBag(ITEM_REVIVE));
+        else if (CheckBagHasItem(ITEM_MAX_REVIVE, 1))
+            snprintf(line, sizeof(line), "{A} USE YOUR MAX REVIVE (x%d)   {B} GIVE UP", (int)CountTotalItemQuantityInBag(ITEM_MAX_REVIVE));
+        else
+            snprintf(line, sizeof(line), "{B} GIVE UP");
+        MpUi_HelpAscii(line);
         return;
     }
     switch (sRescue.answer)
@@ -153,6 +179,13 @@ static void DrawWaiting(void)
         MpUi_TextAscii(2, line);
         MpUi_TextAscii(3, sRescue.answer == RS_YES_REVIVE ? "Your lead MOeMON is back at half HP!"
                                                            : "Your lead MOeMON is back at full HP!");
+        break;
+    case RS_SELF:
+        snprintf(line, sizeof(line), "%s kept watch while you used", who);
+        MpUi_TextAscii(1, line);
+        MpUi_TextAscii(2, sRescue.selfFull ? "your MAX REVIVE!" : "your REVIVE!");
+        MpUi_TextAscii(3, sRescue.selfFull ? "Your lead MOeMON is back at full HP!"
+                                           : "Your lead MOeMON is back at half HP!");
         break;
     case RS_YES_MONEY:
         snprintf(line, sizeof(line), "%s paid $%d to patch you up!", who, sRescue.price);
@@ -219,6 +252,16 @@ static void Task_Down(u8 taskId)
                 sRescue.answer = RS_NO;
                 Send(sRescue.friendId, RS_NO);   // never mind
             }
+            else if (JOY_NEW(A_BUTTON) && (CheckBagHasItem(ITEM_REVIVE, 1) || CheckBagHasItem(ITEM_MAX_REVIVE, 1)))
+            {
+                // Your own REVIVE (the cheaper one first) while your friend keeps watch
+                u8 buf[3] = {MPR_RESCUE, RS_SELF, 0};
+                sRescue.selfFull = !CheckBagHasItem(ITEM_REVIVE, 1);
+                RemoveBagItem(sRescue.selfFull ? ITEM_MAX_REVIVE : ITEM_REVIVE, 1);
+                buf[2] = sRescue.selfFull;
+                MP_SendRelay(sRescue.friendId, buf, sizeof(buf));
+                sRescue.answer = RS_SELF;
+            }
             else if (sRescue.timer % 60 == 0)
                 DrawWaiting();
         }
@@ -230,9 +273,9 @@ static void Task_Down(u8 taskId)
                 HealPlayerParty();
                 PlaySE(SE_USE_ITEM);
             }
-            else if (sRescue.answer == RS_YES_REVIVE || sRescue.answer == RS_YES_MAX_REVIVE)
+            else if (sRescue.answer == RS_YES_REVIVE || sRescue.answer == RS_YES_MAX_REVIVE || sRescue.answer == RS_SELF)
             {
-                ReviveLead(sRescue.answer == RS_YES_MAX_REVIVE);
+                ReviveLead(sRescue.answer == RS_YES_MAX_REVIVE || (sRescue.answer == RS_SELF && sRescue.selfFull));
                 PlaySE(SE_USE_ITEM);
             }
             else
@@ -245,7 +288,7 @@ static void Task_Down(u8 taskId)
     {
         PlaySE(SE_SELECT);
         DestroyTask(taskId);
-        if (sRescue.answer >= RS_YES_REVIVE && sRescue.answer <= RS_YES_MONEY)
+        if ((sRescue.answer >= RS_YES_REVIVE && sRescue.answer <= RS_YES_MONEY) || sRescue.answer == RS_SELF)
         {
             MpUi_Close();
             sRescue.friendId = -1;
@@ -293,6 +336,7 @@ bool8 MP_Rescue_TryStart(void)
     sRescue.timer = 0;
     sRescue.answer = 0xFF;
     sRescue.done = FALSE;
+    sRescue.selfFull = FALSE;
     sRescue.price = PatchUpPrice(&sRescue.monCount);
     {
         u8 buf[5] = {MPR_RESCUE, RS_ASK, sRescue.price & 0xFF, sRescue.price >> 8, sRescue.monCount};
@@ -334,7 +378,9 @@ static void DrawPrompt(void)
         MpUi_RowAscii(i, i == sRescue.cursor, sLabels[o], right);
     }
     MpUi_End();
-    if (sRescue.monCount > 1)
+    if (sRescue.price == RESCUE_NO_PATCH)
+        snprintf(line, sizeof(line), "%s's team is down! This deep, only a REVIVE helps.", who);
+    else if (sRescue.monCount > 1)
         snprintf(line, sizeof(line), "%s's team of %d is down close by!", who, sRescue.monCount);
     else
         snprintf(line, sizeof(line), "%s's team is down close by!", who);
@@ -391,13 +437,15 @@ void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len)
         sRescue.helperId = from;
         sRescue.cursor = 0;
         sRescue.optionCount = 0;
-        sRescue.price = len >= 5 ? min(data[2] | (data[3] << 8), RESCUE_MAX_PRICE) : RESCUE_MAX_PRICE;
+        sRescue.price = len >= 5 ? (data[2] | (data[3] << 8)) : RESCUE_MAX_PRICE;
+        if (sRescue.price != RESCUE_NO_PATCH)
+            sRescue.price = min(sRescue.price, RESCUE_MAX_PRICE);
         sRescue.monCount = len >= 5 ? data[4] : 1;
         if (CheckBagHasItem(ITEM_REVIVE, 1))
             sRescue.options[sRescue.optionCount++] = RS_YES_REVIVE;
         if (CheckBagHasItem(ITEM_MAX_REVIVE, 1))
             sRescue.options[sRescue.optionCount++] = RS_YES_MAX_REVIVE;
-        if (IsEnoughMoney(&gSaveBlock1Ptr->money, sRescue.price))
+        if (sRescue.price != RESCUE_NO_PATCH && IsEnoughMoney(&gSaveBlock1Ptr->money, sRescue.price))
             sRescue.options[sRescue.optionCount++] = RS_YES_MONEY;
         sRescue.options[sRescue.optionCount++] = RS_NO;
         PlaySE(SE_PIN);
@@ -406,12 +454,21 @@ void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len)
         CreateTask(Task_Help, 80);
         return;
     }
-    if (data[1] == RS_NO && FuncIsActiveTask(Task_Help) && from == sRescue.helperId)
+    if ((data[1] == RS_NO || data[1] == RS_SELF) && FuncIsActiveTask(Task_Help) && from == sRescue.helperId)
     {
-        // They gave up waiting
+        // They gave up waiting, or got back up with their own REVIVE
         u8 t = FindTaskIdByFunc(Task_Help);
         DestroyTask(t);
         MpUi_Close();
+        if (data[1] == RS_SELF)
+        {
+            char who[16], note[80];
+            u8 text[96];
+            PlayerName(from, who);
+            snprintf(note, sizeof(note), "%s used their own %s!", who, len >= 3 && data[2] ? "MAX REVIVE" : "REVIVE");
+            MP_AsciiToGame(text, note, sizeof(text) - 1);
+            MP_Toast(text);
+        }
         return;
     }
     // An answer to our call

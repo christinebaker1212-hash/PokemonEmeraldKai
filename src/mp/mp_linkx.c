@@ -167,10 +167,13 @@ static bool8 MixBuffers(void)
 {
     if (MP_RecordMix_RecordSize() > REC_MAX)
         return FALSE;
+    // PC memory, not the game's heap: these stay around between rounds, and taking
+    // ~27 KB of gHeap for good left battles short (a move animation's graphics
+    // failed to load and the game crashed)
     if (sMixRecv == NULL)
-        sMixRecv = AllocZeroed(REC_MAX * MAX_LINK_PLAYERS);
+        sMixRecv = calloc(1, REC_MAX * MAX_LINK_PLAYERS);
     if (sMixSend == NULL)
-        sMixSend = AllocZeroed(REC_MAX + 8 + sizeof(struct LinkPlayer) + 0x400);
+        sMixSend = calloc(1, REC_MAX + 8 + sizeof(struct LinkPlayer) + 0x400);
     return sMixRecv != NULL && sMixSend != NULL;
 }
 

@@ -610,6 +610,11 @@ void MP_SharedPc_Open(void)
         MP_ShowNotice("The shared PC belongs to the server. Go online (CO-OP menu: {COOP}) to use it.");
         return;
     }
+    if (MP_InDungeon())
+    {
+        MP_ShowNotice("The shared PC can't reach you down here. Try again once you're out of the cave or dungeon.");
+        return;
+    }
     memset(&sPc, 0, sizeof(sPc));
     sPc.pendingPartySlot = 0xFF;
     sPc.mode = MODE_LOADING;
