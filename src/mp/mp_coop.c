@@ -117,6 +117,7 @@ enum {
     DECLINE_ONE_MON,
     DECLINE_TOO_LATE,
     DECLINE_BUSY,
+    DECLINE_NO_TRIPLE,   // a third player: this trainer can't do a Triple Battle
 };
 
 enum {
@@ -309,6 +310,9 @@ static const u8 sText_SaidNo[] = _("{STR_VAR_1} wants to battle alone\nthis time
 static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nMOéMON. It's a one-on-one battle!");
 static const u8 sText_TooLate[] = _("Too late! {STR_VAR_1}'s battle has\nalready started.");
 static const u8 sText_Busy[] = _("{STR_VAR_1} can't team up right now.");
+static const u8 sText_NoTripleAsker[] = _("{STR_VAR_1}'s opponent can't do a Triple\nBattle. It's a Double Battle this time!");
+static const u8 sText_NoTripleFew[] = _("This trainer has fewer than 3 MOéMON:\nno Triple Battle. It's a Double!");
+static const u8 sText_NoTripleKind[] = _("This battle can't be a Triple Battle.\nIt's a Double!");
 static const u8 sText_Left[] = _("{STR_VAR_1} left the game.");
 static const u8 sText_WaitAsk[] = _("Wait for another trainer to join\nyou for a Double Battle?");
 static const u8 sText_Waiting[] = _("Waiting for a partner to join…\n({B_BUTTON} battle alone)");
@@ -506,12 +510,26 @@ static void EndChallenge(u8 reason)
 }
 
 // A Triple Battle needs a trainer who has 3+ Pokémon of their own (before the
-// co-op padding) and an ordinary one-trainer battle (not Twins and the like)
+// co-op padding) and an ordinary one-trainer battle (not Twins and the like;
+// rematches and battles without intro text are fine)
 static bool8 TripleEligible(void)
 {
     return gTrainers[sCoop.trainerId].partySize >= 3
         && (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
-            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC);
+            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
+            || sCoop.mode == TRAINER_BATTLE_REMATCH);
+}
+
+// Someone besides `except` who could still come and join (online, not battling).
+// Anywhere: they may be on the next route or indoors, and B starts the Double
+// Battle right away if they don't come
+static bool8 FriendAvailableExcept(s8 except)
+{
+    u8 i;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (PlayerValid(i) && i != except && gMpPlayers[i].hasState && !(gMpPlayers[i].state.flags & MPF_IN_BATTLE))
+            return TRUE;
+    return FALSE;
 }
 
 #define tState data[0]
@@ -525,6 +543,7 @@ enum {
     JOIN_WAIT_ASK,
     JOIN_WAITING,
     JOIN_WAIT_THIRD,
+    JOIN_NO_TRIPLE,
 };
 
 static void SendWait(bool8 on)
@@ -545,19 +564,6 @@ static void StopWaiting(void)
 }
 
 // Another player is on this map (someone who could come and join)
-static bool8 FriendOnMapExcept(s8 except)
-{
-    u8 i;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-    {
-        if (PlayerValid(i) && i != except
-         && gMpPlayers[i].state.mapGroup == gSaveBlock1Ptr->location.mapGroup
-         && gMpPlayers[i].state.mapNum == gSaveBlock1Ptr->location.mapNum)
-            return TRUE;
-    }
-    return FALSE;
-}
-
 static bool8 FriendOnMap(void)
 {
     u8 i;
@@ -628,10 +634,16 @@ static void AcceptRequester(void)
 // someone else is around
 static bool8 TryWaitForThird(void)
 {
-    if (!TripleEligible() || !FriendOnMapExcept(sCoop.requester))
+    // (a third who asked while we were answering the second one is already queued)
+    if (!TripleEligible() || (!PlayerValid(sCoop.requester2) && !FriendAvailableExcept(sCoop.requester)))
+    {
+        MPNet_Log("co-op: no triple (trainer %d, %d Pokemon, mode %d)", sCoop.trainerId,
+                  gTrainers[sCoop.trainerId].partySize, sCoop.mode);
         return FALSE;
+    }
     sCoop.waitingThird = TRUE;
-    sCoop.requester2 = -1;
+    if (sCoop.requester2 == sCoop.requester)
+        sCoop.requester2 = -1;
     if (sCoop.waitStage != WAIT_WAITING)
     {
         if (gSelectedObjectEvent < OBJECT_EVENTS_COUNT)
@@ -652,8 +664,27 @@ static bool8 TryWaitForThird(void)
     return TRUE;
 }
 
+// A friend is in, another is around, but this trainer can't do a Triple Battle:
+// say so before the Double Battle starts (TRUE: the note is up)
+static bool8 ShowNoTripleNote(void)
+{
+    if (TripleEligible() || !FriendAvailableExcept(sCoop.requester))
+        return FALSE;
+    HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
+    MP_ShowFieldMessageFitted(gTrainers[sCoop.trainerId].partySize < 3 ? sText_NoTripleFew : sText_NoTripleKind);
+    MPNet_Log("co-op: no triple with this trainer, told the player");
+    return TRUE;
+}
+
 static void FinishJoinCheck(u8 taskId)
 {
+    if (!sCoop.accepted && PlayerValid(sCoop.requester2))
+        SendByte(sCoop.requester2, MPR_COOP_DECLINE, DECLINE_TOO_LATE);
+    if (!sCoop.accepted)
+    {
+        sCoop.requester2 = -1;
+        sCoop.waitingThird = FALSE;
+    }
     StopWaiting();
     if (!IsFieldMessageBoxHidden())
         HideFieldMessageBox();
@@ -733,12 +764,21 @@ static void Task_JoinCheck(u8 taskId)
                     tState = JOIN_WAIT_THIRD;
                     break;
                 }
+                if (ShowNoTripleNote())
+                {
+                    data[1] = 0;
+                    tState = JOIN_NO_TRIPLE;
+                    break;
+                }
                 AcceptRequester();
             }
             else
             {
                 SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_NO);
                 sCoop.requester = -1;
+                if (PlayerValid(sCoop.requester2))
+                    SendByte(sCoop.requester2, MPR_COOP_DECLINE, DECLINE_NO);
+                sCoop.requester2 = -1;
             }
         }
         FinishJoinCheck(taskId);
@@ -762,10 +802,13 @@ static void Task_JoinCheck(u8 taskId)
             break;
         if (answer != 0)
         {
-            // Battle alone (a friend who asked meanwhile is told no)
+            // Battle alone (friends who asked meanwhile are told no)
             if (PlayerValid(sCoop.requester))
                 SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_NO);
+            if (PlayerValid(sCoop.requester2))
+                SendByte(sCoop.requester2, MPR_COOP_DECLINE, DECLINE_NO);
             sCoop.requester = -1;
+            sCoop.requester2 = -1;
             FinishJoinCheck(taskId);
             break;
         }
@@ -786,6 +829,12 @@ static void Task_JoinCheck(u8 taskId)
                 tState = JOIN_WAIT_THIRD;
                 break;
             }
+            if (ShowNoTripleNote())
+            {
+                data[1] = 0;
+                tState = JOIN_NO_TRIPLE;
+                break;
+            }
             AcceptRequester();
             FinishJoinCheck(taskId);
             break;
@@ -801,6 +850,20 @@ static void Task_JoinCheck(u8 taskId)
         {
             PlaySE(SE_SELECT);
             FinishJoinCheck(taskId);   // a single battle after all
+        }
+        break;
+    case JOIN_NO_TRIPLE:
+        // The note about no Triple Battle, then the Double Battle (A / B or a few seconds)
+        if (!PlayerValid(sCoop.requester))
+        {
+            sCoop.requester = -1;
+            FinishJoinCheck(taskId);   // they left: battle alone
+            break;
+        }
+        if (!IsTextPrinterActive(0) && (JOY_NEW(A_BUTTON | B_BUTTON) || ++data[1] >= 150))
+        {
+            AcceptRequester();
+            FinishJoinCheck(taskId);
         }
         break;
     case JOIN_WAIT_THIRD:
@@ -1051,6 +1114,8 @@ void MP_Coop_FinishTrainerParty(u16 trainerId)
 {
     u8 n = 0, target, i, ace;
     gMpEnemyLevelBonus = 0;
+    if (sCoop.count == 3)
+        return;   // a Triple Battle: the trainer's own team, never padded (3+ of their own, TripleEligible)
     while (n < PARTY_SIZE && GetMonData(&gEnemyParty[n], MON_DATA_SPECIES) != SPECIES_NONE)
         n++;
     if (n < 2)
@@ -2498,6 +2563,21 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             sCoop.requester2 = from;   // the third player
             break;
         }
+        // A third asking while we're still answering the second (or a moment before we
+        // start waiting for one): keep them for a Triple Battle instead of turning them away
+        if (sCoop.challenged && !sCoop.accepted && PlayerValid(sCoop.requester) && from != sCoop.requester
+         && !PlayerValid(sCoop.requester2) && TripleEligible())
+        {
+            sCoop.requester2 = from;
+            MPNet_Log("co-op: player %d asked too, kept for a triple", from + 1);
+            break;
+        }
+        if (sCoop.challenged && !sCoop.accepted && PlayerValid(sCoop.requester) && from != sCoop.requester
+         && !TripleEligible())
+        {
+            SendByte(from, MPR_COOP_DECLINE, DECLINE_NO_TRIPLE);
+            break;
+        }
         if (!sCoop.challenged || sCoop.accepted || sCoop.prompting
          || (sCoop.requester >= 0 && sCoop.requester != from && PlayerValid(sCoop.requester)))
             SendByte(from, MPR_COOP_DECLINE, sCoop.challenged ? DECLINE_BUSY : DECLINE_TOO_LATE);
@@ -2517,10 +2597,12 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
     case MPR_COOP_DECLINE:
         if (sCoop.role == ROLE_ASKING && from == sCoop.target)
         {
-            static const u8 *const sReasons[] = {sText_SaidNo, sText_TheyHaveOne, sText_TooLate, sText_Busy};
+            static const u8 *const sReasons[] = {sText_SaidNo, sText_TheyHaveOne, sText_TooLate, sText_Busy, sText_NoTripleAsker};
             u8 reason = len > 1 && data[1] < ARRAY_COUNT(sReasons) ? data[1] : DECLINE_BUSY;
             StopAsking();
-            sCoop.declinedBy = from;
+            // Only a real "no" stops us asking them again (busy / too late: try again)
+            if (reason == DECLINE_NO || reason == DECLINE_ONE_MON)
+                sCoop.declinedBy = from;
             ShowAskerMessage(sReasons[reason], from);
         }
         break;

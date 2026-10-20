@@ -185,9 +185,12 @@ TRIPLE BATTLES (THREE PLAYERS)
 * Trainers: once one friend has joined your battle you see "<friend> is in!
   Waiting for one more for a Triple Battle..." and the "Join me!" bubble stays
   up. A second friend who walks up and faces you joins, and the Triple Battle
-  starts. Press B to start a Double Battle right away instead. Only trainers
-  who have three or more Moemon of their own do Triple Battles (two-trainer
-  battles like the Twins stay Double Battles).
+  starts. Press B to start a Double Battle right away instead. Two friends
+  who ask at the same time both get in. Only trainers who have three or more
+  Moemon of their own do Triple Battles (their team is never padded out for
+  one, and two-trainer battles like the Twins stay Double Battles). When a
+  friend joins and another is online but the trainer can't do a Triple
+  Battle, you're told so and it's a Double Battle.
 * Each player brings two Moemon: the first two of your CO-OP TEAM (or your
   first two healthy ones). One is out, the other waits on the bench and comes
   in when the first faints or when you switch.

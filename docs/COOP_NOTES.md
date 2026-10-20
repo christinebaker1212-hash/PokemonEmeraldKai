@@ -300,3 +300,15 @@ The PC build's heap (include/malloc.h HEAP_SIZE) is 0x80000, not the GBA's 0x1C0
 pointers plus six battlers' sprite buffers filled it in battle, and the summary screen opened to forget a move then
 wrote through a NULL Alloc (crash on learning a fifth move, even in a single battle). Running out is now logged
 ("[heap] out of memory: ..."); `mp heap` prints the use. Test: solo_learn.
+
+## Triple Battle joining rules
+
+TripleEligible: the trainer's own partySize >= 3 and a one-trainer mode (SINGLE, CONTINUE_SCRIPT(_NO_MUSIC),
+SINGLE_NO_INTRO_TEXT, REMATCH). A triple's enemy party is never padded (MP_Coop_FinishTrainerParty returns for
+count 3; doubles still pad by half). Requests are sent automatically by TryAsk when a free player faces a challenged
+one, so two friends next to the host ask at once: a second request while the host is still answering the first
+(or before JOIN_WAIT_THIRD) is kept as requester2 (MPR_COOP_REQUEST handler) instead of DECLINE_BUSY, and only
+DECLINE_NO / DECLINE_ONE_MON set the asker's declinedBy (busy / too late can retry). TryWaitForThird waits when a
+third is queued or any other player is online and not battling (FriendAvailableExcept, any map). Not eligible but
+someone else around: JOIN_NO_TRIPLE shows sText_NoTripleFew / sText_NoTripleKind to the host, a third who asks gets
+DECLINE_NO_TRIPLE. Tests: tri_trainer_rush (failed on the old code), tri_no_triple (Tommy, 2 Moemon).
