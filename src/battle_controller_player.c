@@ -293,7 +293,7 @@ static void (*const sPlayerBufferCommands[CONTROLLER_CMDS_COUNT])(void) =
     [CONTROLLER_TERMINATOR_NOP]           = PlayerCmdEnd
 };
 
-static const u8 sTargetIdentities[MAX_BATTLERS_COUNT] = {B_POSITION_PLAYER_LEFT, B_POSITION_PLAYER_RIGHT, B_POSITION_OPPONENT_RIGHT, B_POSITION_OPPONENT_LEFT};
+static const u8 sTargetIdentities[DOUBLE_BATTLERS_COUNT] = {B_POSITION_PLAYER_LEFT, B_POSITION_PLAYER_RIGHT, B_POSITION_OPPONENT_RIGHT, B_POSITION_OPPONENT_LEFT};
 
 // unknown unused data
 static const u8 sUnused[] = {0x48, 0x48, 0x20, 0x5a, 0x50, 0x50, 0x50, 0x58};
@@ -474,7 +474,7 @@ static void UNUSED UnusedEndBounceEffect(void)
 static void HandleInputChooseTarget(void)
 {
     s32 i;
-    u8 identities[MAX_BATTLERS_COUNT];
+    u8 identities[DOUBLE_BATTLERS_COUNT];
     memcpy(identities, sTargetIdentities, ARRAY_COUNT(sTargetIdentities));
 
     DoBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX, 15, 1);
@@ -523,7 +523,7 @@ static void HandleInputChooseTarget(void)
         {
             u8 currSelIdentity = GetBattlerPosition(gMultiUsePlayerCursor);
 
-            for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+            for (i = 0; i < DOUBLE_BATTLERS_COUNT; i++)
             {
                 if (currSelIdentity == identities[i])
                     break;
@@ -532,9 +532,9 @@ static void HandleInputChooseTarget(void)
             {
                 if (--i < 0)
 #ifdef UBFIX
-                    i = MAX_BATTLERS_COUNT - 1;
+                    i = DOUBLE_BATTLERS_COUNT - 1;
 #else
-                    i = MAX_BATTLERS_COUNT; // UB: array out of range
+                    i = DOUBLE_BATTLERS_COUNT; // UB: array out of range
 #endif
                 gMultiUsePlayerCursor = GetBattlerAtPosition(identities[i]);
             } while (gMultiUsePlayerCursor == gBattlersCount);
@@ -569,7 +569,7 @@ static void HandleInputChooseTarget(void)
         {
             u8 currSelIdentity = GetBattlerPosition(gMultiUsePlayerCursor);
 
-            for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+            for (i = 0; i < DOUBLE_BATTLERS_COUNT; i++)
             {
                 if (currSelIdentity == identities[i])
                     break;

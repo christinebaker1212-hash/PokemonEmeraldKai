@@ -85,16 +85,22 @@ enum {
    gBattleControllerExecFlags |= gBitTable[battler] << (32 - MAX_BATTLERS_COUNT)
 
 #define MARK_BATTLE_CONTROLLER_MESSAGE_SYNCHRONIZED_OVER_LINK(battler) \
-   gBattleControllerExecFlags &= ~((1 << 28) << (battler))
+   gBattleControllerExecFlags &= ~((1u << (32 - MAX_BATTLERS_COUNT)) << (battler))
+
+// Moemon Co-op: one MAX_BATTLERS_COUNT-bit group per link player (6 x 4 = 24 bits),
+// the outbound bits above them (26-31). Vanilla's groups were 4 bits wide.
+#define EXEC_FLAGS_PLAYER_SHIFT(playerId) ((playerId) * MAX_BATTLERS_COUNT)
+#define EXEC_FLAGS_LOCAL_MASK ((1u << MAX_BATTLERS_COUNT) - 1)
+#define EXEC_FLAGS_OUTBOUND_MASK (EXEC_FLAGS_LOCAL_MASK << (32 - MAX_BATTLERS_COUNT))
 
 #define MARK_BATTLE_CONTROLLER_ACTIVE_FOR_PLAYER(battler, playerId) \
-   gBattleControllerExecFlags |= gBitTable[battler] << ((playerId) << 2)
+   gBattleControllerExecFlags |= gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(playerId)
 
 #define MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(battler, playerId) \
-   gBattleControllerExecFlags &= ~(gBitTable[battler] << ((playerId) * 4))
+   gBattleControllerExecFlags &= ~(gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(playerId))
 
 #define IS_BATTLE_CONTROLLER_ACTIVE_FOR_PLAYER(battler, playerId) \
-   (gBattleControllerExecFlags & (gBitTable[battler] << ((playerId) * 4)))
+   (gBattleControllerExecFlags & (gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(playerId)))
 
 // This actually checks if a specific controller is active on any player or if
 // *any* controller is pending sync over link communications, but the macro name
@@ -102,11 +108,12 @@ enum {
 #define IS_BATTLE_CONTROLLER_ACTIVE_OR_PENDING_SYNC_ANYWHERE(battler) \
    (gBattleControllerExecFlags & ( \
       (gBitTable[battler])       \
-    | (0xF << 28)                  \
-    | (gBitTable[battler] << 4)  \
-    | (gBitTable[battler] << 8)  \
-    | (gBitTable[battler] << 12) \
+    | EXEC_FLAGS_OUTBOUND_MASK   \
+    | (gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(1))  \
+    | (gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(2))  \
+    | (gBitTable[battler] << EXEC_FLAGS_PLAYER_SHIFT(3)) \
    ))
+_Static_assert(EXEC_FLAGS_PLAYER_SHIFT(4) <= 32 - MAX_BATTLERS_COUNT, "exec flag groups overlap the outbound bits");
 
 // Special arguments for Battle Controller functions.
 

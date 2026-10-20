@@ -815,7 +815,7 @@ void AnimTask_DestinyBondWhiteShadow(u8 taskId)
     baseY = GetBattlerSpriteCoordAttr(gBattleAnimAttacker, BATTLER_COORD_ATTR_BOTTOM);
     if (!IsContest())
     {
-        for (battler = 0; battler < MAX_BATTLERS_COUNT; battler++)
+        for (battler = 0; battler < BATTLER_SLOTS; battler++)
         {
             if (battler != gBattleAnimAttacker
              && battler != BATTLE_PARTNER(gBattleAnimAttacker)

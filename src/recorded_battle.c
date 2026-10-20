@@ -58,7 +58,7 @@ struct RecordedBattleSave
     u16 easyChatSpeech[EASY_CHAT_BATTLE_WORDS_COUNT];
     u8 recordMixFriendLanguage;
     u8 apprenticeLanguage;
-    u8 battleRecord[MAX_BATTLERS_COUNT][BATTLER_RECORD_SIZE];
+    u8 battleRecord[RECORDED_BATTLERS_COUNT][BATTLER_RECORD_SIZE];
     u32 checksum;
 };
 
@@ -67,10 +67,10 @@ STATIC_ASSERT(sizeof(struct RecordedBattleSave) <= SECTOR_COUNTER_OFFSET, Record
 
 EWRAM_DATA u32 gRecordedBattleRngSeed = 0;
 EWRAM_DATA u32 gBattlePalaceMoveSelectionRngValue = 0;
-EWRAM_DATA static u8 sBattleRecords[MAX_BATTLERS_COUNT][BATTLER_RECORD_SIZE] = {0};
-EWRAM_DATA static u16 sBattlerRecordSizes[MAX_BATTLERS_COUNT] = {0};
-EWRAM_DATA static u16 sBattlerPrevRecordSizes[MAX_BATTLERS_COUNT] = {0};
-EWRAM_DATA static u16 sBattlerSavedRecordSizes[MAX_BATTLERS_COUNT] = {0};
+EWRAM_DATA static u8 sBattleRecords[RECORDED_BATTLERS_COUNT][BATTLER_RECORD_SIZE] = {0};
+EWRAM_DATA static u16 sBattlerRecordSizes[RECORDED_BATTLERS_COUNT] = {0};
+EWRAM_DATA static u16 sBattlerPrevRecordSizes[RECORDED_BATTLERS_COUNT] = {0};
+EWRAM_DATA static u16 sBattlerSavedRecordSizes[RECORDED_BATTLERS_COUNT] = {0};
 EWRAM_DATA static u8 sRecordMode = 0;
 EWRAM_DATA static u8 sLvlMode = 0;
 EWRAM_DATA static u8 sFrontierFacility = 0;
@@ -84,7 +84,7 @@ EWRAM_DATA static u32 sBattleFlags = 0;
 EWRAM_DATA static u32 sAI_Scripts = 0;
 EWRAM_DATA static struct Pokemon sSavedPlayerParty[PARTY_SIZE] = {0};
 EWRAM_DATA static struct Pokemon sSavedOpponentParty[PARTY_SIZE] = {0};
-EWRAM_DATA static u16 sPlayerMonMoves[MAX_BATTLERS_COUNT / 2][MAX_MON_MOVES] = {0};
+EWRAM_DATA static u16 sPlayerMonMoves[RECORDED_BATTLERS_COUNT / 2][MAX_MON_MOVES] = {0};
 EWRAM_DATA static struct PlayerInfo sPlayers[MAX_LINK_PLAYERS] = {0};
 EWRAM_DATA static bool8 sIsPlaybackFinished = 0;
 EWRAM_DATA static u8 sRecordMixFriendName[PLAYER_NAME_LENGTH + 1] = {0};
@@ -108,7 +108,7 @@ void RecordedBattle_Init(u8 mode)
     sRecordMode = mode;
     sIsPlaybackFinished = FALSE;
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < RECORDED_BATTLERS_COUNT; i++)
     {
         sBattlerRecordSizes[i] = 0;
         sBattlerPrevRecordSizes[i] = 0;
@@ -186,8 +186,12 @@ void RecordedBattle_SetTrainerInfo(void)
     }
 }
 
+// Moemon Co-op: recordings keep the four-battler layout; battlers 4-5 (Triple
+// Battles) are never recorded
 void RecordedBattle_SetBattlerAction(u8 battler, u8 action)
 {
+    if (battler >= RECORDED_BATTLERS_COUNT)
+        return;
     if (sBattlerRecordSizes[battler] < BATTLER_RECORD_SIZE && sRecordMode != B_RECORD_MODE_PLAYBACK)
         sBattleRecords[battler][sBattlerRecordSizes[battler]++] = action;
 }
@@ -195,6 +199,9 @@ void RecordedBattle_SetBattlerAction(u8 battler, u8 action)
 void RecordedBattle_ClearBattlerAction(u8 battler, u8 bytesToClear)
 {
     s32 i;
+
+    if (battler >= RECORDED_BATTLERS_COUNT)
+        return;
 
     for (i = 0; i < bytesToClear; i++)
     {
@@ -208,7 +215,7 @@ void RecordedBattle_ClearBattlerAction(u8 battler, u8 bytesToClear)
 u8 RecordedBattle_GetBattlerAction(u8 battler)
 {
     // Trying to read past array or invalid action byte, battle is over.
-    if (sBattlerRecordSizes[battler] >= BATTLER_RECORD_SIZE || sBattleRecords[battler][sBattlerRecordSizes[battler]] == 0xFF)
+    if (battler >= RECORDED_BATTLERS_COUNT || sBattlerRecordSizes[battler] >= BATTLER_RECORD_SIZE || sBattleRecords[battler][sBattlerRecordSizes[battler]] == 0xFF)
     {
         gSpecialVar_Result = gBattleOutcome = B_OUTCOME_PLAYER_TELEPORTED; // hah
         ResetPaletteFadeControl();
@@ -232,7 +239,7 @@ u8 RecordedBattle_BufferNewBattlerData(u8 *dst)
     u8 i, j;
     u8 idx = 0;
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < RECORDED_BATTLERS_COUNT; i++)
     {
         if (sBattlerRecordSizes[i] != sBattlerPrevRecordSizes[i])
         {
@@ -272,7 +279,11 @@ void RecordedBattle_RecordAllBattlerData(u8 *src)
             u8 numActions = GetNextRecordedDataByte(src, &idx, &size);
 
             for (i = 0; i < numActions; i++)
-                sBattleRecords[battler][sBattlerSavedRecordSizes[battler]++] = GetNextRecordedDataByte(src, &idx, &size);
+            {
+                u8 byte = GetNextRecordedDataByte(src, &idx, &size);
+                if (battler < RECORDED_BATTLERS_COUNT && sBattlerSavedRecordSizes[battler] < BATTLER_RECORD_SIZE)
+                    sBattleRecords[battler][sBattlerSavedRecordSizes[battler]++] = byte;
+            }
         }
     }
 }
@@ -455,7 +466,7 @@ bool32 MoveRecordedBattleToSaveData(void)
         battleSave->apprenticeLanguage = gSaveBlock2Ptr->apprentices[gPartnerTrainerId - TRAINER_RECORD_MIXING_APPRENTICE].language;
     }
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < RECORDED_BATTLERS_COUNT; i++)
         for (j = 0; j < BATTLER_RECORD_SIZE; j++)
             battleSave->battleRecord[i][j] = sBattleRecords[i][j];
 
@@ -578,7 +589,7 @@ static void SetVariablesForRecordedBattle(struct RecordedBattleSave *src)
 
     gSaveBlock2Ptr->frontier.lvlMode = src->lvlMode;
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < RECORDED_BATTLERS_COUNT; i++)
         for (j = 0; j < BATTLER_RECORD_SIZE; j++)
             sBattleRecords[i][j] = src->battleRecord[i][j];
 }
@@ -690,7 +701,7 @@ void RecordedBattle_CopyBattlerMoves(void)
 {
     s32 i;
 
-    if (GetBattlerSide(gActiveBattler) == B_SIDE_OPPONENT)
+    if (GetBattlerSide(gActiveBattler) == B_SIDE_OPPONENT || gActiveBattler >= RECORDED_BATTLERS_COUNT)
         return;
     if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
         return;
@@ -712,7 +723,7 @@ void RecordedBattle_CheckMovesetChanges(u8 mode)
     if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
         return;
 
-    for (battler = 0; battler < gBattlersCount; battler++)
+    for (battler = 0; battler < gBattlersCount && battler < RECORDED_BATTLERS_COUNT; battler++)
     {
         // Player's side only
         if (GetBattlerSide(battler) != B_SIDE_OPPONENT)

@@ -770,7 +770,7 @@ static void SetAllBattlersSpritePriority(u8 priority)
 {
     u16 i;
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < BATTLER_SLOTS; i++)
     {
         u8 spriteId = GetAnimBattlerSpriteId(i);
         if (spriteId != SPRITE_NONE)

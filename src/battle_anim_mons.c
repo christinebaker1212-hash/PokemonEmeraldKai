@@ -1899,7 +1899,7 @@ static u16 GetBattlerYDeltaFromSpriteId(u8 spriteId)
     u16 species;
     u16 i;
 
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    for (i = 0; i < BATTLER_SLOTS; i++)
     {
         if (gBattlerSpriteIds[i] == spriteId)
         {

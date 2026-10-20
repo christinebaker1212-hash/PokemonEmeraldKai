@@ -38,8 +38,21 @@ enum BattlerId
     B_BATTLER_1,
     B_BATTLER_2,
     B_BATTLER_3,
+    B_BATTLER_4,   // Moemon Co-op: Triple Battles (the third player / the third foe)
+    B_BATTLER_5,
     MAX_BATTLERS_COUNT,
 };
+
+// Moemon Co-op: how many battlers a battle format uses. MAX_BATTLERS_COUNT is only
+// the capacity (6, for Triple Battles); doubles are still 4, singles 2.
+#define SINGLE_BATTLERS_COUNT 2
+#define DOUBLE_BATTLERS_COUNT 4
+#define TRIPLE_BATTLERS_COUNT 6
+// Saved recorded battles keep the original four-battler layout
+#define RECORDED_BATTLERS_COUNT 4
+// Battler slots that loops over "every battler" should cover: 4 as in vanilla (singles
+// included, where 2-3 are absent), 6 in a Triple Battle
+#define BATTLER_SLOTS ((gBattlersCount > DOUBLE_BATTLERS_COUNT) ? TRIPLE_BATTLERS_COUNT : DOUBLE_BATTLERS_COUNT)
 
 // These macros can be used with either battler ID or positions to get the partner or the opposite mon
 #define BATTLE_OPPOSITE(id) ((id) ^ BIT_SIDE)
@@ -139,8 +152,9 @@ enum BattlerId
 #define STATUS2_MULTIPLETURNS         (1 << 12)
 #define STATUS2_WRAPPED               (1 << 13 | 1 << 14 | 1 << 15)
 #define STATUS2_WRAPPED_TURN(num)     ((num) << 13)
-#define STATUS2_INFATUATION           (1 << 16 | 1 << 17 | 1 << 18 | 1 << 19)  // 4 bits, one for every battler
-#define STATUS2_INFATUATED_WITH(battler) (gBitTable[battler] << 16)
+// Moemon Co-op: one "infatuated" bit; who with is gBattlerInfatuatedWith[] (six battlers
+// don't fit in the four bits vanilla used here, 17-19 are free now)
+#define STATUS2_INFATUATION           (1 << 16)
 #define STATUS2_FOCUS_ENERGY          (1 << 20)
 #define STATUS2_TRANSFORMED           (1 << 21)
 #define STATUS2_RECHARGE              (1 << 22)
@@ -155,7 +169,10 @@ enum BattlerId
 #define STATUS2_TORMENT               (1 << 31)
 
 // These select from gStatuses3[n], which is a u32.
-#define STATUS3_LEECHSEED_BATTLER       (1 << 0 | 1 << 1) // The battler to receive HP from Leech Seed
+// Moemon Co-op: the battler that receives Leech Seed's HP, in bits 21-23 (bits 0-1 held 0-3 only)
+#define STATUS3_LEECHSEED_BATTLER       (1 << 21 | 1 << 22 | 1 << 23)
+#define STATUS3_LEECHSEED_FROM(battler) ((battler) << 21)
+#define STATUS3_LEECHSEED_SOURCE(st3)   (((st3) & STATUS3_LEECHSEED_BATTLER) >> 21)
 #define STATUS3_LEECHSEED               (1 << 2)
 #define STATUS3_ALWAYS_HITS             (1 << 3 | 1 << 4)
 #define STATUS3_ALWAYS_HITS_TURN(num)   (((num) << 3) & STATUS3_ALWAYS_HITS) // "Always Hits" is set as a 2 turn timer, i.e. next turn is the last turn when it's active
@@ -202,8 +219,8 @@ enum BattlerId
 #define HITMARKER_OBEYS                 (1 << 25) // Set after obedience check has been performed
 #define HITMARKER_NEVER_SET             (1 << 26) // Cleared as part of a large group. Never set or checked
 #define HITMARKER_CHARGING              (1 << 27)
-#define HITMARKER_FAINTED(battler)      (gBitTable[battler] << 28)
-#define HITMARKER_FAINTED2(battler)     ((1 << 28) << battler)
+// Moemon Co-op: the "fainted" markers moved out of gHitMarker's top 4 bits into
+// gBattlerFaintMarks (one bit per battler, six of them)
 
 // Per-side statuses that affect an entire party.
 // These select from gSideStatuses[n], which is a u16.

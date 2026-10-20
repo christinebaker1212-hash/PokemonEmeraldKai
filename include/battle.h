@@ -404,7 +404,7 @@ struct BattleStruct
     u8 expGetterBattlerId;
     u8 unused_5;
     u8 absentBattlerFlags;
-    u8 palaceFlags; // First 4 bits are "is <= 50% HP and not asleep" for each battler, last 4 bits are selected moves to pass to AI
+    u16 palaceFlags; // First MAX_BATTLERS_COUNT bits are "is <= 50% HP and not asleep" for each battler, then 4 bits of selected moves to pass to AI (Moemon Co-op: u16 for six battlers)
     u8 field_93; // related to choosing pokemon?
     u8 wallyBattleState;
     u8 wallyMovesState;
@@ -690,6 +690,12 @@ extern u8 gUnusedFirstBattleVar2;
 extern u16 gSideStatuses[NUM_BATTLE_SIDES];
 extern struct SideTimer gSideTimers[NUM_BATTLE_SIDES];
 extern u32 gStatuses3[MAX_BATTLERS_COUNT];
+extern u8 gBattlerInfatuatedWith[MAX_BATTLERS_COUNT];   // Moemon Co-op: who each battler is infatuated with (bit per battler)
+extern u8 gBattlerFaintMarks;                           // Moemon Co-op: was gHitMarker's HITMARKER_FAINTED bits
+// lastTakenMoveFrom is [target][attacker][2 bytes]
+#define LAST_TAKEN_MOVE_FROM_STRIDE (MAX_BATTLERS_COUNT * 2)
+// OBJ palettes reserved for the battlers' sprites (one each); six in a Triple Battle
+#define BATTLER_SPRITE_PALETTES() (gBattlersCount > DOUBLE_BATTLERS_COUNT ? TRIPLE_BATTLERS_COUNT : DOUBLE_BATTLERS_COUNT)
 extern struct DisableStruct gDisableStructs[MAX_BATTLERS_COUNT];
 extern u16 gPauseCounterBattle;
 extern u16 gPaydayMoney;

@@ -198,6 +198,8 @@ EWRAM_DATA u8 gLastHitBy[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u16 gChosenMoveByBattler[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gMoveResultFlags = 0;
 EWRAM_DATA u32 gHitMarker = 0;
+EWRAM_DATA u8 gBattlerFaintMarks = 0;            // Moemon Co-op
+EWRAM_DATA u8 gBattlerInfatuatedWith[MAX_BATTLERS_COUNT] = {0};   // Moemon Co-op
 EWRAM_DATA static u8 sUnusedBattlersArray[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gBideTarget[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gUnusedFirstBattleVar2 = 0; // Never read
@@ -688,7 +690,7 @@ static void CB2_InitBattleInternal(void)
     ResetTasks();
     DrawBattleEntryBackground();
     FreeAllSpritePalettes();
-    gReservedSpritePaletteCount = MAX_BATTLERS_COUNT;
+    gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
     SetVBlankCallback(VBlankCB_Battle);
     SetUpBattleVarsAndBirchZigzagoon();
 
@@ -1472,7 +1474,7 @@ static void CB2_PreInitMultiBattle(void)
 {
     s32 i;
     u8 playerMultiplierId;
-    s32 numPlayers = MAX_BATTLERS_COUNT;
+    s32 numPlayers = MAX_LINK_PLAYERS;
     u8 blockMask = 0xF;
     u32 *savedBattleTypeFlags;
     void (**savedCallback)(void);
@@ -2312,7 +2314,7 @@ void CB2_InitEndLinkBattle(void)
         DrawBattleEntryBackground();
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_BG2 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR);
         FreeAllSpritePalettes();
-        gReservedSpritePaletteCount = MAX_BATTLERS_COUNT;
+        gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
         SetVBlankCallback(VBlankCB_Battle);
 
         // Show end Vs screen with battle results
@@ -2516,7 +2518,7 @@ static void CB2_InitAskRecordBattle(void)
     ResetSpriteData();
     ResetTasks();
     FreeAllSpritePalettes();
-    gReservedSpritePaletteCount = MAX_BATTLERS_COUNT;
+    gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
     SetVBlankCallback(VBlankCB_Battle);
     SetMainCallback2(CB2_AskRecordBattle);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_BLACK);
@@ -3159,6 +3161,8 @@ static void BattleStartClearSetData(void)
         dataPtr[i] = 0;
 
     gHitMarker = 0;
+    gBattlerFaintMarks = 0;
+    memset(gBattlerInfatuatedWith, 0, sizeof(gBattlerInfatuatedWith));
 
     if (!(gBattleTypeFlags & BATTLE_TYPE_RECORDED))
     {
@@ -3197,17 +3201,12 @@ static void BattleStartClearSetData(void)
     gBattleStruct->wildVictorySong = 0;
     gBattleStruct->moneyMultiplier = 1;
 
-    for (i = 0; i < 8; i++)
-    {
-        *((u8 *)gBattleStruct->lastTakenMove + i) = MOVE_NONE;
-        *((u8 *)gBattleStruct->usedHeldItems + i) = ITEM_NONE;
-        *((u8 *)gBattleStruct->choicedMove + i) = MOVE_NONE;
-        *((u8 *)gBattleStruct->changedItems + i) = ITEM_NONE;
-        *(i + 0 * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-        *(i + 1 * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-        *(i + 2 * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-        *(i + 3 * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    }
+    // Moemon Co-op: sized for six battlers (vanilla cleared 8 bytes of each)
+    memset(gBattleStruct->lastTakenMove, 0, sizeof(gBattleStruct->lastTakenMove));
+    memset(gBattleStruct->usedHeldItems, 0, sizeof(gBattleStruct->usedHeldItems));
+    memset(gBattleStruct->choicedMove, 0, sizeof(gBattleStruct->choicedMove));
+    memset(gBattleStruct->changedItems, 0, sizeof(gBattleStruct->changedItems));
+    memset(gBattleStruct->lastTakenMoveFrom, 0, sizeof(gBattleStruct->lastTakenMoveFrom));
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
@@ -3274,8 +3273,12 @@ void SwitchInClearSetData(void)
 
     for (i = 0; i < gBattlersCount; i++)
     {
-        if (gBattleMons[i].status2 & STATUS2_INFATUATED_WITH(gActiveBattler))
-            gBattleMons[i].status2 &= ~STATUS2_INFATUATED_WITH(gActiveBattler);
+        if ((gBattleMons[i].status2 & STATUS2_INFATUATION) && (gBattlerInfatuatedWith[i] & gBitTable[gActiveBattler]))
+        {
+            gBattlerInfatuatedWith[i] &= ~gBitTable[gActiveBattler];
+            if (gBattlerInfatuatedWith[i] == 0)
+                gBattleMons[i].status2 &= ~STATUS2_INFATUATION;
+        }
         if ((gBattleMons[i].status2 & STATUS2_WRAPPED) && *(gBattleStruct->wrappedBy + i) == gActiveBattler)
             gBattleMons[i].status2 &= ~STATUS2_WRAPPED;
     }
@@ -3308,14 +3311,7 @@ void SwitchInClearSetData(void)
 
     *(gBattleStruct->lastTakenMove + gActiveBattler * 2 + 0) = MOVE_NONE;
     *(gBattleStruct->lastTakenMove + gActiveBattler * 2 + 1) = MOVE_NONE;
-    *(0 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(0 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(1 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(1 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(2 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(2 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(3 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(3 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
+    memset((u8 *)gBattleStruct->lastTakenMoveFrom + gActiveBattler * LAST_TAKEN_MOVE_FROM_STRIDE, 0, LAST_TAKEN_MOVE_FROM_STRIDE);   // Moemon Co-op: all six attackers
 
     gBattleStruct->palaceFlags &= ~(gBitTable[gActiveBattler]);
 
@@ -3326,8 +3322,8 @@ void SwitchInClearSetData(void)
             *(gBattleStruct->lastTakenMove + i * 2 + 0) = MOVE_NONE;
             *(gBattleStruct->lastTakenMove + i * 2 + 1) = MOVE_NONE;
         }
-        *(i * 8 + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-        *(i * 8 + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
+        *(i * LAST_TAKEN_MOVE_FROM_STRIDE + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
+        *(i * LAST_TAKEN_MOVE_FROM_STRIDE + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
     }
 
     *(u8 *)((u8 *)(&gBattleStruct->choicedMove[gActiveBattler]) + 0) = MOVE_NONE;
@@ -3356,8 +3352,12 @@ void FaintClearSetData(void)
     {
         if ((gBattleMons[i].status2 & STATUS2_ESCAPE_PREVENTION) && gDisableStructs[i].battlerPreventingEscape == gActiveBattler)
             gBattleMons[i].status2 &= ~STATUS2_ESCAPE_PREVENTION;
-        if (gBattleMons[i].status2 & STATUS2_INFATUATED_WITH(gActiveBattler))
-            gBattleMons[i].status2 &= ~STATUS2_INFATUATED_WITH(gActiveBattler);
+        if ((gBattleMons[i].status2 & STATUS2_INFATUATION) && (gBattlerInfatuatedWith[i] & gBitTable[gActiveBattler]))
+        {
+            gBattlerInfatuatedWith[i] &= ~gBitTable[gActiveBattler];
+            if (gBattlerInfatuatedWith[i] == 0)
+                gBattleMons[i].status2 &= ~STATUS2_INFATUATION;
+        }
         if ((gBattleMons[i].status2 & STATUS2_WRAPPED) && *(gBattleStruct->wrappedBy + i) == gActiveBattler)
             gBattleMons[i].status2 &= ~STATUS2_WRAPPED;
     }
@@ -3403,14 +3403,7 @@ void FaintClearSetData(void)
 
     *(gBattleStruct->lastTakenMove + gActiveBattler * 2 + 0) = MOVE_NONE;
     *(gBattleStruct->lastTakenMove + gActiveBattler * 2 + 1) = MOVE_NONE;
-    *(0 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(0 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(1 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(1 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(2 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(2 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
-    *(3 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-    *(3 * 2 + gActiveBattler * 8 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
+    memset((u8 *)gBattleStruct->lastTakenMoveFrom + gActiveBattler * LAST_TAKEN_MOVE_FROM_STRIDE, 0, LAST_TAKEN_MOVE_FROM_STRIDE);   // Moemon Co-op: all six attackers
 
     gBattleStruct->palaceFlags &= ~(gBitTable[gActiveBattler]);
 
@@ -3421,8 +3414,8 @@ void FaintClearSetData(void)
             *(gBattleStruct->lastTakenMove + i * 2 + 0) = MOVE_NONE;
             *(gBattleStruct->lastTakenMove + i * 2 + 1) = MOVE_NONE;
         }
-        *(i * 8 + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
-        *(i * 8 + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
+        *(i * LAST_TAKEN_MOVE_FROM_STRIDE + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 0) = 0;
+        *(i * LAST_TAKEN_MOVE_FROM_STRIDE + gActiveBattler * 2 + (u8 *)(gBattleStruct->lastTakenMoveFrom) + 1) = 0;
     }
 
     gBattleResources->flags->flags[gActiveBattler] = 0;

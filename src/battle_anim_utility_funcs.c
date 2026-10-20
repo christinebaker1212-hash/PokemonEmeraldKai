@@ -97,7 +97,7 @@ void AnimTask_BlendBattleAnimPalExclude(u8 taskId)
         break;
     }
 
-    for (battler = 0; battler < MAX_BATTLERS_COUNT; battler++)
+    for (battler = 0; battler < BATTLER_SLOTS; battler++)
     {
         if (battler != animBattlers[0] && battler != animBattlers[1] && IsBattlerSpriteVisible(battler))
             selectedPalettes |= 0x10000 << GetSpritePalIdxByBattler(battler);
@@ -728,7 +728,7 @@ void AnimTask_BlendNonAttackerPalettes(u8 taskId)
     int j;
     u32 selectedPalettes = 0;
 
-    for (battler = 0; battler < MAX_BATTLERS_COUNT; battler++)
+    for (battler = 0; battler < BATTLER_SLOTS; battler++)
     {
         if (gBattleAnimAttacker != battler)
             selectedPalettes |= 1 << (battler + 16);
@@ -800,7 +800,7 @@ void AnimTask_SetAllNonAttackersInvisiblity(u8 taskId)
 {
     u16 battler;
 
-    for (battler = 0; battler < MAX_BATTLERS_COUNT; battler++)
+    for (battler = 0; battler < BATTLER_SLOTS; battler++)
     {
         if (battler != gBattleAnimAttacker && IsBattlerSpriteVisible(battler))
             gSprites[gBattlerSpriteIds[battler]].invisible = gBattleAnimArgs[0];

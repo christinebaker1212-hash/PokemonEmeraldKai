@@ -591,7 +591,7 @@ void AnimTask_HorizontalShake(u8 taskId)
         break;
     case MAX_BATTLERS_COUNT: // Shake all battlers
         task->tNumBattlers = 0;
-        for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+        for (i = 0; i < BATTLER_SLOTS; i++)
         {
             if (IsBattlerSpriteVisible(i))
             {

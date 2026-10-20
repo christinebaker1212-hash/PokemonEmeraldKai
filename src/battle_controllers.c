@@ -158,7 +158,7 @@ static void InitSinglePlayerBtlControllers(void)
             gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
         }
 
-        gBattlersCount = MAX_BATTLERS_COUNT;
+        gBattlersCount = DOUBLE_BATTLERS_COUNT;
 
         BufferBattlePartyCurrentOrderBySide(0, 0);
         BufferBattlePartyCurrentOrderBySide(1, 0);
@@ -241,7 +241,7 @@ static void InitSinglePlayerBtlControllers(void)
         gBattlerControllerFuncs[B_BATTLER_3] = SetControllerToOpponent;
         gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
 
-        gBattlersCount = MAX_BATTLERS_COUNT;
+        gBattlersCount = DOUBLE_BATTLERS_COUNT;
 
         if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
         {
@@ -261,7 +261,7 @@ static void InitSinglePlayerBtlControllers(void)
                 gBattlerControllerFuncs[B_BATTLER_3] = SetControllerToOpponent;
                 gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
 
-                gBattlersCount = MAX_BATTLERS_COUNT;
+                gBattlersCount = DOUBLE_BATTLERS_COUNT;
 
                 BufferBattlePartyCurrentOrderBySide(0, 0);
                 BufferBattlePartyCurrentOrderBySide(1, 0);
@@ -447,7 +447,7 @@ static void InitLinkBtlControllers(void)
             gBattlerControllerFuncs[B_BATTLER_3] = SetControllerToLinkOpponent;
             gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
 
-            gBattlersCount = MAX_BATTLERS_COUNT;
+            gBattlersCount = DOUBLE_BATTLERS_COUNT;
         }
         else
         {
@@ -463,7 +463,7 @@ static void InitLinkBtlControllers(void)
             gBattlerControllerFuncs[B_BATTLER_2] = SetControllerToLinkOpponent;
             gBattlerPositions[B_BATTLER_2] = B_POSITION_OPPONENT_RIGHT;
 
-            gBattlersCount = MAX_BATTLERS_COUNT;
+            gBattlersCount = DOUBLE_BATTLERS_COUNT;
         }
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER || gMpCoopBattle) // Moemon Co-op: same layout
@@ -484,7 +484,7 @@ static void InitLinkBtlControllers(void)
             gBattlerControllerFuncs[B_BATTLER_3] = SetControllerToOpponent;
             gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
 
-            gBattlersCount = MAX_BATTLERS_COUNT;
+            gBattlersCount = DOUBLE_BATTLERS_COUNT;
         }
         else
         {
@@ -500,7 +500,7 @@ static void InitLinkBtlControllers(void)
             gBattlerControllerFuncs[B_BATTLER_3] = SetControllerToLinkOpponent;
             gBattlerPositions[B_BATTLER_3] = B_POSITION_OPPONENT_RIGHT;
 
-            gBattlersCount = MAX_BATTLERS_COUNT;
+            gBattlersCount = DOUBLE_BATTLERS_COUNT;
         }
 
         BufferBattlePartyCurrentOrderBySide(0, 0);
@@ -590,7 +590,7 @@ static void InitLinkBtlControllers(void)
             }
         }
 
-        gBattlersCount = MAX_BATTLERS_COUNT;
+        gBattlersCount = DOUBLE_BATTLERS_COUNT;
     }
 }
 
@@ -1122,7 +1122,7 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
                 // Behind the master: one command at a time while fast ones are involved,
                 // so the screen shows them in the master's order
                 bool8 fast = MasterMayRunAhead(BYTE_TO_RECEIVE(LINK_BUFF_DATA), battler);
-                if ((fast || sLocalFastBusy) && (gBattleControllerExecFlags & 0xF))
+                if ((fast || sLocalFastBusy) && (gBattleControllerExecFlags & EXEC_FLAGS_LOCAL_MASK))
                     return FALSE;
                 if (fast)
                     sLocalFastBusy |= gBitTable[battler];

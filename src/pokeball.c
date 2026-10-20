@@ -352,7 +352,7 @@ u8 DoPokeballSendOutAnimation(s16 pan, u8 kindOfThrow)
 
 // Moemon Co-op: the balls a Moemon is being sent out of (battle_main.c runs
 // sending out 30% faster; a thrown ball for a catch isn't one of these)
-static u8 sMpSendOutBalls[MAX_BATTLERS_COUNT] = {MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES};
+static u8 sMpSendOutBalls[MAX_BATTLERS_COUNT] = {MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES};
 
 static void MpMarkSendOutBall(u8 spriteId)
 {
