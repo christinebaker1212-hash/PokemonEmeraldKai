@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "mp.h"
 #include "naming_screen.h"
@@ -20,6 +21,7 @@
 #include "graphics.h"
 #include "international_string_util.h"
 #include "item.h"
+#include "item_icon.h"
 #include "link.h"
 #include "m4a.h"
 #include "malloc.h"
@@ -54,6 +56,7 @@ enum {
     PSS_PAGE_SKILLS,
     PSS_PAGE_BATTLE_MOVES,
     PSS_PAGE_CONTEST_MOVES,
+    PSS_PAGE_BALL,          // Moemon Co-op: the Moemon's POKé BALL (type, color, decoration)
     PSS_PAGE_COUNT,
 };
 
@@ -204,6 +207,12 @@ static void SetDefaultTilemaps(void);
 static void CloseSummaryScreen(u8);
 static bool8 MpCanRename(void);
 static void Task_MpStartRename(u8 taskId);
+static bool8 MpBall_HandleInput(u8 taskId);
+static void MpBall_ShowPage(void);
+static void MpBall_HidePage(void);
+static void MpBall_HideTitle(void);
+static void MpBall_BuildPageTilemap(void);
+static void PrintTextOnWindow(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId);
 static void Task_HandleInput(u8);
 static void ChangeSummaryPokemon(u8, s8);
 static void Task_ChangeSummaryMon(u8);
@@ -731,12 +740,15 @@ static const u8 sButtons_Gfx[][4 * TILE_SIZE_4BPP] = {
     INCGFX_U8("graphics/summary_screen/b_button.png", ".4bpp"),
 };
 
+static void MpBall_PrintPage(void);
+static void Task_MpBall_PrintPage(u8 taskId);
 static void (*const sTextPrinterFunctions[])(void) =
 {
     [PSS_PAGE_INFO] = PrintInfoPageText,
     [PSS_PAGE_SKILLS] = PrintSkillsPageText,
     [PSS_PAGE_BATTLE_MOVES] = PrintBattleMoves,
-    [PSS_PAGE_CONTEST_MOVES] = PrintContestMoves
+    [PSS_PAGE_CONTEST_MOVES] = PrintContestMoves,
+    [PSS_PAGE_BALL] = MpBall_PrintPage,
 };
 
 static const TaskFunc sTextPrinterTasks[] =
@@ -744,7 +756,8 @@ static const TaskFunc sTextPrinterTasks[] =
     [PSS_PAGE_INFO] = Task_PrintInfoPage,
     [PSS_PAGE_SKILLS] = Task_PrintSkillsPage,
     [PSS_PAGE_BATTLE_MOVES] = Task_PrintBattleMoves,
-    [PSS_PAGE_CONTEST_MOVES] = Task_PrintContestMoves
+    [PSS_PAGE_CONTEST_MOVES] = Task_PrintContestMoves,
+    [PSS_PAGE_BALL] = Task_MpBall_PrintPage,
 };
 
 static const u8 sMemoNatureTextColor[] = _("{COLOR LIGHT_RED}{SHADOW GREEN}");
@@ -1124,12 +1137,12 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
         break;
     case SUMMARY_MODE_LOCK_MOVES:
         sMonSummaryScreen->minPageIndex = 0;
-        sMonSummaryScreen->maxPageIndex = PSS_PAGE_COUNT - 1;
+        sMonSummaryScreen->maxPageIndex = PSS_PAGE_CONTEST_MOVES;
         sMonSummaryScreen->lockMovesFlag = TRUE;
         break;
     case SUMMARY_MODE_SELECT_MOVE:
         sMonSummaryScreen->minPageIndex = PSS_PAGE_BATTLE_MOVES;
-        sMonSummaryScreen->maxPageIndex = PSS_PAGE_COUNT - 1;
+        sMonSummaryScreen->maxPageIndex = PSS_PAGE_CONTEST_MOVES;
         sMonSummaryScreen->lockMonFlag = TRUE;
         break;
     }
@@ -1322,6 +1335,23 @@ static void InitBGs(void)
     ShowBg(3);
 }
 
+// Moemon Co-op: the POKé BALL page's background is the INFO page's right
+// panel with its three bar labels blanked (the page prints its own)
+static void MpBall_BuildPageTilemap(void)
+{
+    u16 *dst = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL][1];
+    const u16 *src = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0];
+    static const u8 sBarRows[] = {3, 8, 13};
+    u8 x, y, i;
+    memset(sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL], 0, sizeof(sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL]));
+    for (y = 2; y < 20; y++)
+        for (x = 10; x < 30; x++)
+            dst[y * 32 + x] = src[y * 32 + x];
+    for (i = 0; i < ARRAY_COUNT(sBarRows); i++)
+        for (x = 12; x <= 20; x++)
+            dst[sBarRows[i] * 32 + x] = src[sBarRows[i] * 32 + 21];
+}
+
 static bool8 DecompressGraphics(void)
 {
     switch (sMonSummaryScreen->switchCounter)
@@ -1352,6 +1382,7 @@ static bool8 DecompressGraphics(void)
         break;
     case 5:
         LZDecompressWram(gSummaryPage_ContestMoves_Tilemap, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_CONTEST_MOVES][1]);
+        MpBall_BuildPageTilemap();   // Moemon Co-op
         sMonSummaryScreen->switchCounter++;
         break;
     case 6:
@@ -1601,6 +1632,8 @@ static void Task_HandleInput(u8 taskId)
 {
     if (MenuHelpers_ShouldWaitForLinkRecv() != TRUE && !gPaletteFade.active)
     {
+        if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BALL && MpBall_HandleInput(taskId))
+            return;
         if (JOY_NEW(DPAD_UP))
         {
             ChangeSummaryPokemon(taskId, -1);
@@ -2809,7 +2842,6 @@ static const struct WindowTemplate sMpPromptWindowTemplate = {
 
 static void MpDrawInfoPrompts(void)
 {
-    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
     static const u8 sColors[3] = {0, 3, 4};   // white with a grey shadow, like the page titles
     u8 text[48];
     if (sMpPromptWindow == WINDOW_NONE)
@@ -2829,12 +2861,452 @@ static void MpDrawInfoPrompts(void)
     CopyWindowToVram(sMpPromptWindow, COPYWIN_FULL);
 }
 
+// ---------------------------------------------------------------------------
+// Moemon Co-op: the POKé BALL page (the fifth page). Shows the Moemon's ball;
+// A opens a small menu: TYPE (any ball in the bag), COLOR (basic POKé BALLS)
+// and DECORATION (POKé / PREMIER BALLS), with a preview. Confirming the same
+// type just restyles it; another type asks to use one of those balls.
+
+#define TAG_MP_BALL_ICON 0x56B0
+
+enum { MPBALL_ROW_TYPE, MPBALL_ROW_COLOR, MPBALL_ROW_DECO, MPBALL_ROWS };
+
+static EWRAM_DATA struct
+{
+    u8 titleWindow;
+    u8 bodyWindow;
+    u8 iconSprite;
+    bool8 editing;
+    bool8 confirming;
+    u8 row;
+    u8 typeIndex;
+    u8 typeCount;
+    u16 types[POKEBALL_COUNT];   // ball items to pick from
+    u8 color;
+    u8 decoration;
+    const char *note;            // a line shown once after a change
+} sMpBall = {0};
+
+static const struct WindowTemplate sMpBallTitleTemplate = {
+    .bg = 0, .tilemapLeft = 0, .tilemapTop = 0, .width = 11, .height = 2, .paletteNum = 6, .baseBlock = 740,
+};
+static const struct WindowTemplate sMpBallBodyTemplate = {
+    .bg = 0, .tilemapLeft = 11, .tilemapTop = 4, .width = 18, .height = 16, .paletteNum = 6, .baseBlock = 450,
+};
+
+static u16 MpBall_CurrentItem(void)
+{
+    return GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_POKEBALL);
+}
+
+static bool8 MpBall_CanEdit(void)
+{
+    return (sMonSummaryScreen->mode == SUMMARY_MODE_NORMAL || sMonSummaryScreen->mode == SUMMARY_MODE_BOX)
+        && !gMain.inBattle && !sMonSummaryScreen->summary.isEgg && !(gBattleTypeFlags & BATTLE_TYPE_LINK)
+        && gMapHeader.regionMapSectionId != MAPSEC_BATTLE_FRONTIER;   // not on Frontier rentals
+}
+
+static void MpBall_InitWindows(void)
+{
+    sMpBall.titleWindow = AddWindow(&sMpBallTitleTemplate);
+    sMpBall.bodyWindow = AddWindow(&sMpBallBodyTemplate);
+    sMpBall.iconSprite = SPRITE_NONE;
+    sMpBall.editing = FALSE;
+    sMpBall.confirming = FALSE;
+    sMpBall.note = NULL;
+    if (sMpBall.titleWindow != WINDOW_NONE)
+    {
+        u8 title[16];
+        MP_AsciiToGame(title, "POK~ BALL", sizeof(title) - 1);
+        FillWindowPixelBuffer(sMpBall.titleWindow, PIXEL_FILL(0));
+        PrintTextOnWindow(sMpBall.titleWindow, title, 2, 1, 0, 1);
+    }
+}
+
+static void MpBall_HideTitle(void)
+{
+    if (sMpBall.titleWindow != WINDOW_NONE)
+        ClearWindowTilemap(sMpBall.titleWindow);
+}
+
+static void MpBall_DestroyIcon(void)
+{
+    if (sMpBall.iconSprite != SPRITE_NONE)
+    {
+        DestroySprite(&gSprites[sMpBall.iconSprite]);
+        FreeSpriteTilesByTag(TAG_MP_BALL_ICON);
+        FreeSpritePaletteByTag(TAG_MP_BALL_ICON);
+        sMpBall.iconSprite = SPRITE_NONE;
+    }
+}
+
+// The balls to pick from: the Moemon's own and every kind in the bag
+static void MpBall_BuildTypes(void)
+{
+    u16 item, cur = MpBall_CurrentItem();
+    sMpBall.typeCount = 0;
+    sMpBall.typeIndex = 0;
+    for (item = ITEM_MASTER_BALL; item <= ITEM_PREMIER_BALL && sMpBall.typeCount < POKEBALL_COUNT; item++)
+    {
+        if (item != cur && !CheckBagHasItem(item, 1))
+            continue;
+        if (item == cur)
+            sMpBall.typeIndex = sMpBall.typeCount;
+        sMpBall.types[sMpBall.typeCount++] = item;
+    }
+    if (sMpBall.typeCount == 0)
+        sMpBall.types[sMpBall.typeCount++] = cur;
+}
+
+static u16 MpBall_SelectedItem(void)
+{
+    return sMpBall.editing ? sMpBall.types[sMpBall.typeIndex] : MpBall_CurrentItem();
+}
+
+static u16 MpBall_SelectedStyle(void)
+{
+    u8 ball = ItemIdToBallId(MpBall_SelectedItem());
+    if (!sMpBall.editing)
+        return MP_BallStyle_OfMon(&sMonSummaryScreen->currentMon);
+    return MP_BallStyle_Make(MP_BallStyle_CanColor(ball) ? sMpBall.color : 0,
+                             MP_BallStyle_CanDecorate(ball) ? sMpBall.decoration : 0);
+}
+
+static void MpBall_Print(const char *ascii, u8 x, u8 y, u8 colorId)
+{
+    u8 text[64];
+    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
+    AddTextPrinterParameterized4(sMpBall.bodyWindow, FONT_NORMAL, x, y, 0, 0, sTextColors[colorId], TEXT_SKIP_DRAW, text);
+}
+
+static void MpBall_PrintGame(const u8 *text, u8 x, u8 y, u8 colorId)
+{
+    AddTextPrinterParameterized4(sMpBall.bodyWindow, FONT_NORMAL, x, y, 0, 0, sTextColors[colorId], TEXT_SKIP_DRAW, text);
+}
+
+static void MpBall_UpdateIcon(void)
+{
+    u16 item = MpBall_SelectedItem();
+    u8 id;
+    MpBall_DestroyIcon();
+    id = AddItemIconSprite(TAG_MP_BALL_ICON, TAG_MP_BALL_ICON, item);
+    if (id == MAX_SPRITES)
+        return;
+    sMpBall.iconSprite = id;
+    gSprites[id].x = 26 * 8 + 4;
+    gSprites[id].y = 6 * 8 + 4;
+    gSprites[id].oam.priority = 0;
+    MP_BallStyle_ApplyToIconPalette(gSprites[id].oam.paletteNum, ItemIdToBallId(item), MpBall_SelectedStyle());
+}
+
+// Draws the page (body text + preview) for the current Moemon and menu state
+static void MpBall_Draw(void)
+{
+    u16 item = MpBall_SelectedItem();
+    u8 ball = ItemIdToBallId(item);
+    u16 style = MpBall_SelectedStyle();
+    char line[64];
+    u8 name[24], nameAscii[24];
+
+    if (sMpBall.bodyWindow == WINDOW_NONE)
+        return;
+    FillWindowPixelBuffer(sMpBall.bodyWindow, PIXEL_FILL(0));
+    CopyItemName(item, name);
+    MP_GameToAscii((char *)nameAscii, name, sizeof(nameAscii) - 1);
+
+    // TYPE box (rows 4-7). The row being changed shows < > around its value.
+    #define MPBALL_ON(r) (sMpBall.editing && !sMpBall.confirming && sMpBall.row == (r))
+    if (MPBALL_ON(MPBALL_ROW_TYPE) && sMpBall.typeCount > 1)
+        snprintf(line, sizeof(line), "< %s >", (char *)nameAscii);
+    else
+        snprintf(line, sizeof(line), "%s", (char *)nameAscii);
+    MpBall_Print(line, 4, 1, 0);
+    if (item == MpBall_CurrentItem())
+        snprintf(line, sizeof(line), "Current ball");
+    else
+        snprintf(line, sizeof(line), "In bag: %d", (int)CountTotalItemQuantityInBag(item));
+    MpBall_Print(line, 4, 17, 0);
+
+    // COLOR (box rows 9-12)
+    MpBall_Print("COLOR", 4, 41, 0);
+    if (MP_BallStyle_CanColor(ball))
+    {
+        char color[16];
+        MP_GameToAscii(color, MP_BallStyle_ColorName(MP_BallStyle_Color(style)), sizeof(color) - 1);
+        snprintf(line, sizeof(line), MPBALL_ON(MPBALL_ROW_COLOR) ? "< %s >" : "%s", color);
+        MpBall_Print(line, 52, 41, 0);
+    }
+    else
+    {
+        MpBall_Print("Not for this ball", 52, 41, 0);
+    }
+
+    // DECORATION (box rows 14-19)
+    MpBall_Print("DECOR", 4, 81, 0);
+    if (MP_BallStyle_CanDecorate(ball))
+    {
+        char deco[24];
+        MP_GameToAscii(deco, MP_BallStyle_DecorationName(MP_BallStyle_Decoration(style)), sizeof(deco) - 1);
+        snprintf(line, sizeof(line), MPBALL_ON(MPBALL_ROW_DECO) ? "< %s >" : "%s", deco);
+        MpBall_Print(line, 52, 81, 0);
+    }
+    else if (ball == BALL_POKE || ball == BALL_PREMIER)
+    {
+        MpBall_Print("None yet", 52, 81, 0);
+    }
+    else
+    {
+        MpBall_Print("Not for this ball", 52, 81, 0);
+    }
+    #undef MPBALL_ON
+
+    // Help lines (rows 16-19)
+    if (sMpBall.confirming)
+    {
+        snprintf(line, sizeof(line), "Use 1 %s and", (char *)nameAscii);
+        MpBall_Print(line, 4, 97, 0);
+        MpBall_Print("re-house it? {A}YES {B}NO", 4, 113, 0);
+    }
+    else if (sMpBall.editing)
+    {
+        MpBall_Print("{UPDOWN}PICK {LEFTRIGHT}CHANGE", 4, 97, 0);
+        MpBall_Print("{A}OK {B}CANCEL", 4, 113, 0);
+    }
+    else if (sMpBall.note)
+    {
+        MpBall_Print(sMpBall.note, 4, 105, 0);
+    }
+    else if (MpBall_CanEdit())
+    {
+        MpBall_Print("{A} CHANGE BALL", 4, 105, 0);
+    }
+    else
+    {
+        MpBall_Print("Can't change it now.", 4, 105, 0);
+    }
+    PutWindowTilemap(sMpBall.bodyWindow);
+    CopyWindowToVram(sMpBall.bodyWindow, COPYWIN_FULL);
+    MpBall_UpdateIcon();
+}
+
+static void MpBall_ShowPage(void)
+{
+    if (sMpBall.titleWindow != WINDOW_NONE)
+    {
+        PutWindowTilemap(sMpBall.titleWindow);
+        CopyWindowToVram(sMpBall.titleWindow, COPYWIN_FULL);
+    }
+    PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+    MpBall_Draw();
+}
+
+static void MpBall_HidePage(void)
+{
+    sMpBall.editing = FALSE;
+    sMpBall.confirming = FALSE;
+    sMpBall.note = NULL;
+    if (sMpBall.bodyWindow != WINDOW_NONE)
+        ClearWindowTilemap(sMpBall.bodyWindow);
+    ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+    MpBall_HideTitle();
+    MpBall_DestroyIcon();
+}
+
+static void MpBall_PrintPage(void)
+{
+    // Drawn when the page is shown (PutPageWindowTilemaps); a new Moemon redraws it
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BALL)
+    {
+        sMpBall.note = NULL;
+        MpBall_Draw();
+    }
+}
+
+static void Task_MpBall_PrintPage(u8 taskId)
+{
+    DestroyTask(taskId);
+}
+
+static void MpBall_RefreshCaughtBall(void)
+{
+    if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL] != SPRITE_NONE)
+        DestroySpriteAndFreeResources(&gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL]]);
+    CreateCaughtBallSprite(&sMonSummaryScreen->currentMon);
+}
+
+// Writes the new ball and style into the Moemon (party or box) and the summary copy
+static void MpBall_Apply(u16 item, u16 style)
+{
+    u16 st = style;
+    u32 it = item;
+    if (sMonSummaryScreen->isBoxMon)
+    {
+        struct BoxPokemon *box = &sMonSummaryScreen->monList.boxMons[sMonSummaryScreen->curMonIndex];
+        SetBoxMonData(box, MON_DATA_POKEBALL, &it);
+        SetBoxMonData(box, MON_DATA_ENCRYPT_SEPARATOR, &st);
+    }
+    else
+    {
+        struct Pokemon *mon = &sMonSummaryScreen->monList.mons[sMonSummaryScreen->curMonIndex];
+        SetMonData(mon, MON_DATA_POKEBALL, &it);
+        SetMonData(mon, MON_DATA_ENCRYPT_SEPARATOR, &st);
+    }
+    SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_POKEBALL, &it);
+    SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ENCRYPT_SEPARATOR, &st);
+    MpBall_RefreshCaughtBall();
+}
+
+static void MpBall_ChangeValue(s8 delta)
+{
+    u8 ball = ItemIdToBallId(sMpBall.types[sMpBall.typeIndex]);
+    switch (sMpBall.row)
+    {
+    case MPBALL_ROW_TYPE:
+        if (sMpBall.typeCount < 2)
+            return;
+        sMpBall.typeIndex = (sMpBall.typeIndex + sMpBall.typeCount + delta) % sMpBall.typeCount;
+        break;
+    case MPBALL_ROW_COLOR:
+        if (!MP_BallStyle_CanColor(ball))
+            return;
+        sMpBall.color = (sMpBall.color + MP_BALL_COLORS + delta) % MP_BALL_COLORS;
+        break;
+    case MPBALL_ROW_DECO:
+        if (!MP_BallStyle_CanDecorate(ball))
+            return;
+        sMpBall.decoration = (sMpBall.decoration + MP_BallStyle_DecorationCount() + delta) % MP_BallStyle_DecorationCount();
+        break;
+    }
+    PlaySE(SE_SELECT);
+    MpBall_Draw();
+}
+
+// Rows the selected ball can use (TYPE always)
+static bool8 MpBall_RowUsable(u8 row)
+{
+    u8 ball = ItemIdToBallId(sMpBall.types[sMpBall.typeIndex]);
+    if (row == MPBALL_ROW_COLOR)
+        return MP_BallStyle_CanColor(ball);
+    if (row == MPBALL_ROW_DECO)
+        return MP_BallStyle_CanDecorate(ball);
+    return TRUE;
+}
+
+static void MpBall_Confirm(void)
+{
+    u16 item = sMpBall.types[sMpBall.typeIndex];
+    u16 style = MpBall_SelectedStyle();
+    if (item != MpBall_CurrentItem())
+    {
+        // Another kind of ball: it costs one of them
+        RemoveBagItem(item, 1);
+        sMpBall.note = "Re-housed!";
+    }
+    else
+    {
+        sMpBall.note = "Ball restyled!";
+    }
+    MpBall_Apply(item, style);
+    PlaySE(SE_EXP_MAX);
+    sMpBall.editing = FALSE;
+    sMpBall.confirming = FALSE;
+    MpBall_Draw();
+}
+
+// TRUE when the page took the input
+static bool8 MpBall_HandleInput(u8 taskId)
+{
+    if (sMpBall.confirming)
+    {
+        if (JOY_NEW(A_BUTTON))
+            MpBall_Confirm();
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sMpBall.confirming = FALSE;
+            MpBall_Draw();
+        }
+        return TRUE;
+    }
+    if (!sMpBall.editing)
+    {
+        if (!JOY_NEW(A_BUTTON))
+            return FALSE;
+        if (!MpBall_CanEdit())
+        {
+            PlaySE(SE_FAILURE);
+            return TRUE;
+        }
+        {
+            u16 style = MP_BallStyle_OfMon(&sMonSummaryScreen->currentMon);
+            PlaySE(SE_SELECT);
+            MpBall_BuildTypes();
+            sMpBall.color = MP_BallStyle_Color(style);
+            sMpBall.decoration = MP_BallStyle_Decoration(style);
+            sMpBall.row = MPBALL_ROW_TYPE;
+            sMpBall.editing = TRUE;
+            sMpBall.note = NULL;
+            MpBall_Draw();
+        }
+        return TRUE;
+    }
+    if (JOY_NEW(DPAD_UP) || JOY_NEW(DPAD_DOWN))
+    {
+        s8 d = JOY_NEW(DPAD_UP) ? -1 : 1;
+        u8 row = sMpBall.row, tries;
+        for (tries = 0; tries < MPBALL_ROWS; tries++)
+        {
+            row = (row + MPBALL_ROWS + d) % MPBALL_ROWS;
+            if (MpBall_RowUsable(row))
+                break;
+        }
+        if (row != sMpBall.row)
+        {
+            sMpBall.row = row;
+            PlaySE(SE_SELECT);
+            MpBall_Draw();
+        }
+    }
+    else if (JOY_NEW(DPAD_LEFT))
+        MpBall_ChangeValue(-1);
+    else if (JOY_NEW(DPAD_RIGHT))
+        MpBall_ChangeValue(1);
+    else if (JOY_NEW(A_BUTTON))
+    {
+        u16 item = sMpBall.types[sMpBall.typeIndex];
+        if (item == MpBall_CurrentItem() && MpBall_SelectedStyle() == MP_BallStyle_OfMon(&sMonSummaryScreen->currentMon))
+        {
+            PlaySE(SE_SELECT);   // nothing changed
+            sMpBall.editing = FALSE;
+            MpBall_Draw();
+        }
+        else if (item != MpBall_CurrentItem())
+        {
+            PlaySE(SE_SELECT);
+            sMpBall.confirming = TRUE;
+            MpBall_Draw();
+        }
+        else
+        {
+            MpBall_Confirm();
+        }
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sMpBall.editing = FALSE;
+        MpBall_Draw();
+    }
+    return TRUE;
+}
+
 static void ResetWindows(void)
 {
     u8 i;
 
     InitWindows(sSummaryTemplate);
     sMpPromptWindow = AddWindow(&sMpPromptWindowTemplate);
+    MpBall_InitWindows();
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
@@ -3006,9 +3478,13 @@ static void PutPageWindowTilemaps(u8 page)
     ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_TITLE);
     ClearWindowTilemap(PSS_LABEL_WINDOW_BATTLE_MOVES_TITLE);
     ClearWindowTilemap(PSS_LABEL_WINDOW_CONTEST_MOVES_TITLE);
+    MpBall_HideTitle();
 
     switch (page)
     {
+    case PSS_PAGE_BALL:
+        MpBall_ShowPage();
+        break;
     case PSS_PAGE_INFO:
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
         PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
@@ -3061,6 +3537,9 @@ static void ClearPageWindowTilemaps(u8 page)
 
     switch (page)
     {
+    case PSS_PAGE_BALL:
+        MpBall_HidePage();
+        break;
     case PSS_PAGE_INFO:
         ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
         if (sMpPromptWindow != WINDOW_NONE)
@@ -4209,6 +4688,7 @@ static void CreateCaughtBallSprite(struct Pokemon *mon)
 
     LoadBallGfx(ball);
     sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL] = CreateSprite(&gBallSpriteTemplates[ball], 16, 136, 0);
+    MP_BallStyle_ApplyToBallSprite(sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL], ball, MP_BallStyle_OfMon(mon));   // Moemon Co-op
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL]].callback = SpriteCallbackDummy;
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL]].oam.priority = 3;
 }

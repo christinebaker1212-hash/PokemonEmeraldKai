@@ -526,6 +526,25 @@ s32 MP_SaveData_Get(const char *key);
 #define MP_REG_SLOTS  3   // item_menu.c: extra registered key items: L (0), R (1), pad west / F key (2)
 #define MP_REG_SELECT 3   // (the game's own SELECT item, in the chooser)
 u16 MP_RegisteredItem(u8 slot);
+// mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
+enum {
+    MP_BALL_RED, MP_BALL_BLUE, MP_BALL_GREEN, MP_BALL_YELLOW, MP_BALL_PINK, MP_BALL_PURPLE,
+    MP_BALL_ORANGE, MP_BALL_CYAN, MP_BALL_BLACK, MP_BALL_SILVER, MP_BALL_GOLD, MP_BALL_COLORS
+};
+struct BoxPokemon;
+u8 MP_BallStyle_Color(u16 style);
+u8 MP_BallStyle_Decoration(u16 style);
+u16 MP_BallStyle_Make(u8 color, u8 decoration);
+u16 MP_BallStyle_OfMon(struct Pokemon *mon);
+u16 MP_BallStyle_OfBoxMon(struct BoxPokemon *mon);
+const u8 *MP_BallStyle_ColorName(u8 color);
+u8 MP_BallStyle_DecorationCount(void);
+const u8 *MP_BallStyle_DecorationName(u8 decoration);
+bool8 MP_BallStyle_CanColor(u8 ballId);
+bool8 MP_BallStyle_CanDecorate(u8 ballId);
+void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style);
+void MP_BallStyle_ApplyToIconPalette(u8 paletteNum, u8 ballId, u16 style);
+
 // mp_autosave.c: quiet saves on the map at safe moments
 void MP_Autosave_Update(void);
 void MP_Autosave_Saved(void);   // any save happened (start menu, MoeGatcha): restart the timer

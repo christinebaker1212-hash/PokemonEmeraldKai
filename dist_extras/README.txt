@@ -377,6 +377,10 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   time (wild battles). In a co-op battle, R shows your partner's team.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon you caught.
+  The fifth page (POKé BALL) shows its ball: press A to move it to any kind
+  of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
+  blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).
+  The color shows when it's sent out in battle.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a

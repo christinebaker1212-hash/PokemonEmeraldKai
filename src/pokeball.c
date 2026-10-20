@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "decompress.h"
@@ -374,6 +375,9 @@ static void Task_DoPokeballSendOutAnim(u8 taskId)
     ballId = ItemIdToBallId(itemId);
     LoadBallGfx(ballId);
     ballSpriteId = CreateSprite(&gBallSpriteTemplates[ballId], 32, 80, 29);
+    // Moemon Co-op: the Moemon's own ball color
+    MP_BallStyle_ApplyToBallSprite(ballSpriteId, ballId, MP_BallStyle_OfMon(GetBattlerSide(battler) != B_SIDE_PLAYER
+                                   ? &gEnemyParty[gBattlerPartyIndexes[battler]] : &gPlayerParty[gBattlerPartyIndexes[battler]]));
     gSprites[ballSpriteId].data[0] = 0x80;
     gSprites[ballSpriteId].data[1] = 0;
     gSprites[ballSpriteId].data[7] = throwCaseId;
