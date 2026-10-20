@@ -1,0 +1,9 @@
+# three clients on Route 101: CARL's wild encounter pulls ALICE and BOB in (co-op wild Triple Battle), mash A to win
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=250
+EXPECT_A=("co-op battle link: 3 games, we are link 1" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games, we are link 2" "co-op: battle over, outcome 1")
+EXPECT_C=("battle with player 1 and another (triple)" "co-op exp: slot 4" "co-op: battle over, outcome 1")

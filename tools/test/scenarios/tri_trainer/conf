@@ -1,0 +1,13 @@
+# Roxanne (4 Pokemon): ALICE waits for a partner, BOB joins, ALICE keeps waiting for a third, CARL walks up
+# from the side: a co-op Triple Battle to the end, the prize for all three
+MODE=3
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+WARP_C=11,3,3,3
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("co-op: waiting for a third player" "(and another: triple)" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")

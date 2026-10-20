@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 1 3
+mp savedata ball:last 1
+waitlog 3000 co-op wild: joining
+waitfor action 4000
+wait 10
+press L 2
+waitlog 3000 picking a ball target
+wait 10
+press A 1
+pressuntillog A 15000 co-op: battle over
+wait 300
+mp party
+mp bagcount 1
+quit

@@ -189,8 +189,8 @@ static struct
     u8 count;              // seats (2 or 3)
     u8 seat;               // ours
     u8 seatPlayer[3];      // network player id of each seat
-    u16 seatBonus[3];      // master: each seat's own EXP bonus (MPR_COOP_BONUS)
-    u8 seatBonusHeard;     // bits: seats whose bonus arrived
+    u16 playerBonus[MP_MAX_PLAYERS];   // master: each friend's own EXP bonus (MPR_COOP_BONUS;
+    u8 playerBonusHeard;               // bits by player: it can come before our battle is set up)
     u8 seatLeveled[3];     // master: level-up bits per seat (own slots)
     s8 bonusFrom;          // the friend whose EXP bonus we last heard (MPR_COOP_BONUS), -1 = nobody
     u16 bonusPercent;
@@ -406,9 +406,18 @@ static u8 PartnerOfActive(void)
     return (p >= 0 && p != gMpLocalId) ? (u8)p : sCoop.partner;
 }
 
+// A triple's two allies get their own back picture slots (the later seat: slot 1)
+static u8 BackSlotOfActive(void)
+{
+    s8 seat;
+    if (sCoop.count != 3 || (seat = SeatOf(PartnerOfActive())) < 0)
+        return 0;
+    return (seat > sCoop.seat ? seat - 1 : seat) == 1 ? 1 : 0;
+}
+
 u16 MP_Coop_PartnerBackPicOr(u16 defaultPic)
 {
-    u16 pic = MP_Avatar_RemoteBackPic(PartnerOfActive());
+    u16 pic = MP_Avatar_RemoteBackPicSlot(PartnerOfActive(), BackSlotOfActive());
     return pic == 0xFFFF ? defaultPic : pic;
 }
 
@@ -840,8 +849,9 @@ u16 MP_Coop_ExpBonusFor(u8 partySlot)
     u8 seat;
     if (gMpCoopBattle && sCoop.isMaster && partySlot < PARTY_SIZE && (seat = SeatOfSlot(partySlot)) != 0 && seat < sCoop.count)
     {
-        if (sCoop.seatBonusHeard & (1 << seat))
-            return sCoop.seatBonus[seat];
+        u8 player = sCoop.seatPlayer[seat];
+        if (player < MP_MAX_PLAYERS && (sCoop.playerBonusHeard & (1 << player)))
+            return sCoop.playerBonus[player];
         MPNet_Log("co-op: no EXP bonus heard from player %d, using ours", sCoop.seatPlayer[seat]);
     }
     return MP_ExpBonusPercent();
@@ -893,7 +903,6 @@ static void BeginCoopBattleGroup(u8 seat, u8 count, const u8 *players)
     for (i = 0; i < 3; i++)
         sCoop.seatPlayer[i] = i < count ? players[i] : 0xFF;
     sCoop.partner = players[seat == 0 ? 1 : 0];
-    sCoop.seatBonusHeard = 0;
     memset(sCoop.seatLeveled, 0, sizeof(sCoop.seatLeveled));
     gIsTripleBattle = count == 3;
     gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
@@ -1287,6 +1296,7 @@ static void SendResult(void)
 
 static void FinishLink(void)
 {
+    sCoop.playerBonusHeard = 0;   // the next battle's come fresh
     gMpCoopBattle = FALSE;
     MP_Battle_CloseLink();
     gBattleTypeFlags = BATTLE_TYPE_TRAINER;
@@ -2457,13 +2467,12 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
         // sent before the link handshake, so it's here long before any EXP
         if (len >= 3)
         {
-            s8 seat = SeatOf(from);
             sCoop.bonusFrom = from;
             sCoop.bonusPercent = data[1] | (data[2] << 8);
-            if (seat > 0)
+            if (from < MP_MAX_PLAYERS)
             {
-                sCoop.seatBonus[seat] = sCoop.bonusPercent;
-                sCoop.seatBonusHeard |= 1 << seat;
+                sCoop.playerBonus[from] = sCoop.bonusPercent;
+                sCoop.playerBonusHeard |= 1 << from;
             }
         }
         break;

@@ -1078,7 +1078,7 @@ void InitBattlerHealthboxCoords(u8 battler)
     {
         // Moemon Co-op: the healthbox objects stay (all the battle code uses them)
         // but off-screen; the cards are drawn over the frame (mp_tricards.c)
-        x = 280, y = 40;
+        x = 0, y = 200;   // below the screen (x would slide them in from the right)
     }
     else if (!IsDoubleBattle())
     {

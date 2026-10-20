@@ -128,4 +128,5 @@ const union AnimCmd *const *const gTrainerBackAnimsPtrTable[] =
     [TRAINER_BACK_PIC_STEVEN] = sBackAnims_Steven,
     [TRAINER_BACK_PIC_MP_LOCAL] = sBackAnims_Brendan,   // Moemon Co-op: 4-frame throw
     [TRAINER_BACK_PIC_MP_PARTNER] = sBackAnims_Brendan,
+    [TRAINER_BACK_PIC_MP_PARTNER2] = sBackAnims_Brendan,
 };

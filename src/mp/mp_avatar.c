@@ -58,6 +58,15 @@ u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
 u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
 u32 gMpPartnerBackPalLz[MP_PAL_LZ_WORDS];
 u8 gMpPartnerBackTiles[4 * TRAINER_PIC_SIZE];
+// a Triple Battle's second ally
+u32 gMpPartner2BackPalLz[MP_PAL_LZ_WORDS];
+u8 gMpPartner2BackTiles[4 * TRAINER_PIC_SIZE];
+const struct SpriteFrameImage gMpPartner2BackFrames[4] = {
+    {gMpPartner2BackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartner2BackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartner2BackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartner2BackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+};
 const struct SpriteFrameImage gMpPartnerBackFrames[4] = {
     {gMpPartnerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
     {gMpPartnerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
@@ -1566,9 +1575,17 @@ u16 MP_Avatar_LocalBackPic(void)
 // Another player's battle back pic (co-op partner), 0xFFFF = game default
 u16 MP_Avatar_RemoteBackPic(u8 id)
 {
+    return MP_Avatar_RemoteBackPicSlot(id, 0);
+}
+
+// slot 1: a Triple Battle's second ally (its own tiles and palette)
+u16 MP_Avatar_RemoteBackPicSlot(u8 id, u8 slot)
+{
     struct MpPack buf;
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return 0xFFFF;
+    if (slot == 1)
+        return BackPicId(&gMpPlayers[id].app, id, RemotePack(id, &buf), gMpPartner2BackTiles, gMpPartner2BackPalLz, TRAINER_BACK_PIC_MP_PARTNER2);
     return BackPicId(&gMpPlayers[id].app, id, RemotePack(id, &buf), gMpPartnerBackTiles, gMpPartnerBackPalLz, TRAINER_BACK_PIC_MP_PARTNER);
 }
 

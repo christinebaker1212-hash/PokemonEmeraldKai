@@ -1,0 +1,12 @@
+# Co-op wild triple: ALICE catches one with a MASTER BALL while BOB and CARL (the master) pick RUN, then BOB
+# disconnects: the battle is called off for ALICE and CARL, ALICE keeps the catch
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=250
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+ENV_C="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("co-op: battle called off, keeping a catch" "co-op wild: caught species" "disconnected")
+EXPECT_C=("opponent disconnected" "co-op: battler")

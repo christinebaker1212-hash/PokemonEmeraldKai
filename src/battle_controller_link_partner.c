@@ -1,4 +1,5 @@
 #include "global.h"
+void MPNet_Log(const char *fmt, ...);
 #include "mp.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
@@ -1148,6 +1149,9 @@ static void LinkPartnerHandleDrawTrainerPic(void)
     gBattlerSpriteIds[gActiveBattler] = CreateSprite(&gMultiuseSpriteTemplate, xPos, (8 - gTrainerBackPicCoords[trainerPicId].size) * 4 + 80, GetBattlerSpriteSubpriority(gActiveBattler));
     if (gMpCoopBattle && MP_Coop_PartnerHidesBack()) // picked character has no back sprite
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;
+    if (gMpDebugTriple)
+        MPNet_Log("triple: b%d trainer back pic %d at %d sprite %d hidden %d", gActiveBattler, trainerPicId, xPos,
+                  gBattlerSpriteIds[gActiveBattler], gSprites[gBattlerSpriteIds[gActiveBattler]].invisible);
 
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = gActiveBattler;
     gSprites[gBattlerSpriteIds[gActiveBattler]].x2 = DISPLAY_WIDTH;

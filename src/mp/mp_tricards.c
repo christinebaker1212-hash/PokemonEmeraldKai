@@ -217,6 +217,10 @@ void MP_TriCards_Begin(void)
         sCards[i].owner = 0xFF;
     if (IndexOfSpritePaletteTag(TAG_TRICARD_PAL) == 0xFF)
         LoadSpritePalette(&sCardSpritePal);
+    // A linked triple: battler 2i belongs to link player i, the same color on every screen
+    if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+        for (i = 0; i < 3; i++)
+            sCards[i * 2].owner = i;
     sActive = TRUE;
 }
 
@@ -369,9 +373,6 @@ void MP_TriCards_Composite(u16 *frame)
                 MPNet_Log("tricards: b%d box %d state %d -> %d (cmds %d %d %d %d %d %d, main %p)", b, gHealthboxSpriteIds[b], sLastState[b], st,
                           gBattleBufferA[0][0], gBattleBufferA[1][0], gBattleBufferA[2][0], gBattleBufferA[3][0], gBattleBufferA[4][0], gBattleBufferA[5][0],
                           (void *)gBattleMainFunc);
-                MPNet_Log("tricards: sprites %d %d %d %d %d %d, boxes %d %d %d %d %d %d, atk %d tgt %d", gBattlerSpriteIds[0], gBattlerSpriteIds[1],
-                          gBattlerSpriteIds[2], gBattlerSpriteIds[3], gBattlerSpriteIds[4], gBattlerSpriteIds[5], gHealthboxSpriteIds[0], gHealthboxSpriteIds[1],
-                          gHealthboxSpriteIds[2], gHealthboxSpriteIds[3], gHealthboxSpriteIds[4], gHealthboxSpriteIds[5], gBattleAnimAttacker, gBattleAnimTarget);
                 sLastState[b] = st;
             }
         }

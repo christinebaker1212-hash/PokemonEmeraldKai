@@ -8,7 +8,8 @@ screenshots into PNGs if it's installed.
     tools/test/regress.sh coop_wild    # just one
     NOBUILD=1 OUT=/tmp/t tools/test/regress.sh
 
-Every two-client scenario also runs at the worst connection we plan for with `WORST=1`
+Three-client scenarios (`MODE=3`) use `runN.sh` (2-4 clients; `c.txt`, `WARP_C`, `ENV_C`, `EXPECT_C`).
+Every multi-client scenario also runs at the worst connection we plan for with `WORST=1`
 (250 ms each way + 80 ms jitter through lagproxy, like NA <-> JP with the relay far from both).
 `JOBS=3` runs three at once.
 
@@ -36,6 +37,11 @@ Every two-client scenario also runs at the worst connection we plan for with `WO
 | `piggyback` | BOB rides on ALICE's back into Oldale |
 | `photo` | SOCIAL > TEAM PHOTO saved |
 | `gift` | DAILY > GIFT sent, received, thanked |
+| `tri_wild` | three clients: CARL's encounter pulls ALICE and BOB in, a wild Triple Battle to the win |
+| `tri_trainer` | Roxanne: ALICE waits, BOB joins, ALICE keeps waiting, CARL joins: a trainer Triple Battle |
+| `tri_catch` | wild triple: ALICE and BOB each catch a different wild Pokemon (each gets their own) |
+| `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the gold slots are the allies') |
+| `tri_abort` | wild triple: ALICE catches one, BOB disconnects: called off, ALICE keeps the catch |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

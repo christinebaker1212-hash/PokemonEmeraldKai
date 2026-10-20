@@ -281,6 +281,7 @@ const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId);
 u16 MP_Avatar_LocalFrontPic(void);
 u16 MP_Avatar_LocalBackPic(void);
 u16 MP_Avatar_RemoteBackPic(u8 id);      // co-op partner
+u16 MP_Avatar_RemoteBackPicSlot(u8 id, u8 slot);   // slot 1: a triple's second ally
 bool8 MP_Avatar_RemoteHidesBack(u8 id);
 u16 MP_Avatar_FrontPicFor(const struct MpAppearance *app);
 u16 MP_LocalFrontPicOr(u16 defaultPic);
