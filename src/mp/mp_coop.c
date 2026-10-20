@@ -288,6 +288,11 @@ bool8 MP_Coop_IsBusy(void)
     return sCoop.role != ROLE_NONE || sCoop.prompting || sCoop.waitStage != WAIT_NONE || gMpCoopBattle || sCoop.wildAsking || sCoop.wildFrom >= 0;
 }
 
+s8 MP_Coop_PartnerId(void)
+{
+    return gMpCoopBattle ? (s8)sCoop.partner : -1;
+}
+
 bool8 MP_Coop_IsMaster(void)
 {
     return sCoop.isMaster;

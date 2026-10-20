@@ -1237,6 +1237,58 @@ static bool8 QuickPageShown(u8 page)
     return MinePageUsed(page - 1) || MinePageUsed(page);
 }
 
+// ---- For the battle pick (mp_battlechat.c): the same pages, sending only ----
+u8 MP_Quick_PageCount(void) { return QUICK_PAGES; }
+bool8 MP_Quick_PageShown(u8 page) { return QuickPageShown(page); }
+void MP_Quick_SetPhrasePage(u8 page) { if (page != MP_QUICK_PAGE_EMOTES) sQuickPhrasePage = page; }
+
+u8 MP_Quick_StartPage(u8 page)
+{
+    u8 p = (page == MP_QUICK_PAGE_PHRASES) ? sQuickPhrasePage : page % QUICK_PAGES;
+    return QuickPageShown(p) ? p : MP_QUICK_PAGE_MINE;
+}
+
+void MP_Quick_PageName(u8 page, char *out, int size)
+{
+    if (page == MP_QUICK_PAGE_EMOTES)
+        snprintf(out, size, "EMOTES");
+    else if (IsMinePage(page))
+        snprintf(out, size, page == MP_QUICK_PAGE_MINE ? "MINE" : "MINE %d", page - MP_QUICK_PAGE_MINE + 1);
+    else
+        snprintf(out, size, "%s", sQuickStockNames[(page - QUICK_STOCK_FIRST) % 4]);
+}
+
+static int QuickStockIndex(u8 page, u8 dir);
+static bool8 QuickEmptySlot(u8 page, u8 dir);
+
+// What a direction holds: MP_QUICK_EMOTE (*emoteKey: 0 ! 1 ? 2 heart 3 music; display: its
+// name in out), MP_QUICK_TEXT (the game text in out) or MP_QUICK_NONE (an empty phrase slot)
+u8 MP_Quick_Choice(u8 page, u8 dir, u8 *emoteKey, u8 *out, int outSize, bool8 display)
+{
+    int stock;
+    if (page == MP_QUICK_PAGE_EMOTES)
+    {
+        *emoteKey = sQuickEmoteKey[dir];
+        if (display && outSize > 0)
+            MP_AsciiToGame(out, sQuickEmoteNames[dir], outSize - 1);
+        return MP_QUICK_EMOTE;
+    }
+    if (QuickEmptySlot(page, dir))
+        return MP_QUICK_NONE;
+    if (outSize <= 0)
+        return MP_QUICK_TEXT;
+    if ((stock = QuickStockIndex(page, dir)) >= 0)
+        MP_AsciiToGame(out, MP_Emote_QuickPhrase(stock), outSize - 1);
+    else
+    {
+        u8 text[200];
+        MP_Emote_PhraseText(MineSlot(page, dir), text);
+        StringCopyN(out, text, outSize - 1);
+        out[outSize - 1] = EOS;
+    }
+    return MP_QUICK_TEXT;
+}
+
 // Around the player (the camera keeps them in the middle of the screen): up and
 // down are wide one-line boxes, left and right two-line boxes beside them, and
 // the bar (pages, buttons) at the bottom

@@ -117,6 +117,10 @@ TEAMING UP FOR A DOUBLE BATTLE
 * In co-op battles you can use healing items (Potions, status heals,
   Revives...) from the BAG on your own Moemon or your partner's, including
   ones waiting on the bench (your partner's are the gold boxes).
+* Emotes and quick phrases work in battle too: hold LT / RT (Q / E on the
+  keyboard), pick with the D-Pad, change page with L / R and let go to send.
+  Your bubble pops up over your Moemon on your partner's (or opponent's)
+  screen. Phrases are edited outside battle.
 * When you've picked your move first, the battle tells you what your partner
   is doing ("ALICE is choosing an item to use...").
 * Each player brings their first three healthy Moemon and picks their own

@@ -15,7 +15,7 @@ int Platform_InputContext(void)
 {
     if (NamingScreen_IsActive())
         return INPUT_CONTEXT_NAMING;
-    if (MP_QuickPickOpen())
+    if (MP_QuickPickOpen() || MP_BattleChat_IsOpen())
         return INPUT_CONTEXT_QUICKPICK;
     if (gMain.inBattle)
         return INPUT_CONTEXT_BATTLE;
@@ -26,6 +26,14 @@ int Platform_InputContext(void)
 
 void Platform_ContextAction(int action)
 {
+    // Moemon Co-op: in a battle LT / RT (Q / E) open the battle emote pick
+    if (gMain.inBattle)
+    {
+        if (action == INPUT_ACTION_QUICK_EMOTES || action == INPUT_ACTION_QUICK_PHRASES)
+            MP_BattleChat_Open(action == INPUT_ACTION_QUICK_EMOTES ? MP_QUICK_PAGE_EMOTES : MP_QUICK_PAGE_PHRASES,
+                               action == INPUT_ACTION_QUICK_EMOTES ? 0 : 1);
+        return;
+    }
     if (!MP_IsLocalFree())
         return;
     switch (action)

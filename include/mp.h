@@ -388,6 +388,24 @@ enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_MINE_LAST = MP_QU
 void MP_OpenQuickPick(u8 page, s8 hold);
 void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);
+// Battle emotes / phrases (mp_battlechat.c, mp_menu.c, mp_emote.c)
+enum { MP_QUICK_NONE, MP_QUICK_EMOTE, MP_QUICK_TEXT };
+enum { MP_BUBBLE_ICON_NONE, MP_BUBBLE_ICON_NOTE, MP_BUBBLE_ICON_HEART };
+u8 MP_Quick_PageCount(void);
+bool8 MP_Quick_PageShown(u8 page);
+void MP_Quick_SetPhrasePage(u8 page);
+u8 MP_Quick_StartPage(u8 page);
+void MP_Quick_PageName(u8 page, char *out, int size);
+u8 MP_Quick_Choice(u8 page, u8 dir, u8 *emoteKey, u8 *out, int outSize, bool8 display);
+bool8 MP_BattleChat_IsOpen(void);
+void MP_BattleChat_Open(u8 page, s8 hold);
+void MP_BattleChat_FilterKeys(void);
+u8 MP_BattleChat_LocalBattler(void);
+u8 MP_BattleChat_BattlerOf(u8 playerId);
+void MP_Emote_BattleSay(const u8 *text, u8 icon);
+void MP_Emote_BattleUpdate(void);
+s8 MP_Coop_PartnerId(void);
+s8 MP_Battle_PeerId(void);
 
 // sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
 u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);

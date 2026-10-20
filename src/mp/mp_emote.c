@@ -11,6 +11,8 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "battle.h"
+#include "battle_anim.h"
 #include "main.h"
 #include "easy_chat.h"
 #include "event_object_lock.h"
@@ -58,7 +60,8 @@ enum { COL_CLEAR, COL_FILL, COL_TEXT, COL_SHADOW, COL_EDGE };
 struct Bubble
 {
     u8 text[BUBBLE_TEXT];   // game text, CHAR_NEWLINE between lines
-    bool8 note;             // draw a music note instead of text
+    u8 note;                // MP_BUBBLE_ICON_*: a picture instead of text
+    u8 battler;             // in battle: over this battler (MAX_BATTLERS_COUNT = not a battle bubble)
     u16 timer;              // frames left; 0 = no bubble
     bool8 dirty;            // text changed, redraw the tiles
     u8 spriteId[2];         // left and right 64x32 halves
@@ -104,6 +107,18 @@ static const char *const sNoteBitmap[] = {
     ".##...##.",
 };
 
+// 9x8 heart (battle bubbles; the field shows the heart emote icon instead)
+static const char *const sHeartBitmap[] = {
+    ".##...##.",
+    "####.####",
+    "#########",
+    "#########",
+    ".#######.",
+    "..#####..",
+    "...###...",
+    "....#....",
+};
+
 // Quick phrases (any player can use them; they're sent as text)
 // Ready-made phrases, 4 per group (the controller's R2 quick pick shows them by group)
 static const char *const sQuickPhrases[] = {
@@ -131,7 +146,10 @@ static void InitIfNeeded(void)
         return;
     memset(sBubbles, 0, sizeof(sBubbles));
     for (i = 0; i < NUM_BUBBLES; i++)
+    {
         sBubbles[i].spriteId[0] = sBubbles[i].spriteId[1] = MAX_SPRITES;
+        sBubbles[i].battler = MAX_BATTLERS_COUNT;
+    }
     sInit = TRUE;
 }
 
@@ -330,10 +348,12 @@ static void BuildBubble(struct Bubble *b)
 
     if (b->note)
     {
-        for (y = 0; y < (int)ARRAY_COUNT(sNoteBitmap); y++)
-            for (x = 0; sNoteBitmap[y][x]; x++)
-                if (sNoteBitmap[y][x] == '#')
-                    Put(left + 3 + x, top + 2 + y, COL_TEXT);
+        const char *const *bitmap = b->note == MP_BUBBLE_ICON_HEART ? sHeartBitmap : sNoteBitmap;
+        int rows = b->note == MP_BUBBLE_ICON_HEART ? (int)ARRAY_COUNT(sHeartBitmap) : (int)ARRAY_COUNT(sNoteBitmap);
+        for (y = 0; y < rows; y++)
+            for (x = 0; bitmap[y][x]; x++)
+                if (bitmap[y][x] == '#')
+                    Put(left + 3 + x, top + 2 + y, b->note == MP_BUBBLE_ICON_HEART ? 15 : COL_TEXT);
     }
     else
     {
@@ -557,7 +577,7 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
 // ---------------------------------------------------------------------------
 // Showing and sending
 
-static void ShowBubble(u8 slot, const u8 *text, bool8 note)
+static void ShowBubble(u8 slot, const u8 *text, u8 note)
 {
     struct Bubble *b;
     InitIfNeeded();
@@ -568,6 +588,7 @@ static void ShowBubble(u8 slot, const u8 *text, bool8 note)
     if (text)
         StringCopyN(b->text, text, BUBBLE_TEXT - 1);
     b->note = note;
+    b->battler = MAX_BATTLERS_COUNT;
     b->timer = BUBBLE_TIME;
     b->dirty = TRUE;
 }
@@ -612,7 +633,8 @@ void MP_Emote_OnRemoteIcon(u8 id, struct ObjectEvent *obj, u8 kind)
     MP_Social_OnEmote(id, kind);
 }
 
-enum { SAY_TEXT, SAY_NOTE };
+enum { SAY_TEXT, SAY_NOTE, SAY_BATTLE };
+static void ShowBattleBubble(u8 slot, u8 battler, const u8 *text, u8 icon);   // SAY_BATTLE: u8 icon, then the text
 
 static void SendSay(u8 kind, const u8 *text)
 {
@@ -647,6 +669,20 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
         text[i] = (c >= 0xF7 && c != CHAR_NEWLINE) ? CHAR_SPACE : c;
     }
     text[i] = EOS;
+    if (data[1] == SAY_BATTLE)
+    {
+        // A bubble over their Moemon, if they're in this battle with us
+        u8 battler = MP_BattleChat_BattlerOf(from), icon = len > 2 ? data[2] : 0;
+        for (i = 0; i + 3 < len && i < BUBBLE_TEXT - 1 && data[3 + i] != EOS; i++)
+        {
+            u8 c = data[3 + i];
+            text[i] = (c >= 0xF7 && c != CHAR_NEWLINE) ? CHAR_SPACE : c;
+        }
+        text[i] = EOS;
+        if (battler < MAX_BATTLERS_COUNT)
+            ShowBattleBubble(1 + from, battler, text, icon);
+        return;
+    }
     if (data[1] == SAY_NOTE)
     {
         u8 obj = MP_GetRemoteObjectEventId(from);
@@ -660,6 +696,102 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
         ShowBubble(1 + from, text, FALSE);
         MP_Social_LogSay(from, text);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Battle bubbles (mp_battlechat.c): over the battler's Moemon
+
+static void ShowBattleBubble(u8 slot, u8 battler, const u8 *text, u8 icon)
+{
+    ShowBubble(slot, text, icon);
+    sBubbles[slot].battler = battler;
+}
+
+static void UpdateBattleBubble(struct Bubble *b)
+{
+    u8 spriteId = gBattlerSpriteIds[b->battler], half;
+    s16 x, y;
+    struct Sprite *os;
+
+    if (b->timer == 0 || spriteId >= MAX_SPRITES || !gSprites[spriteId].inUse)
+    {
+        if (HalfIsOurs(b, 0) || HalfIsOurs(b, 1))
+            DestroyBubbleSprites(b);
+        if (b->timer)
+            b->timer--;
+        return;
+    }
+    b->timer--;
+    if (!HalfIsOurs(b, 0) || !HalfIsOurs(b, 1))
+    {
+        DestroyBubbleSprites(b);
+        if (!CreateBubbleSprites(b))
+            return;
+    }
+    else if (b->dirty)
+        RedrawBubble(b);
+    os = &gSprites[spriteId];
+    x = os->x + os->x2;
+    y = os->y + os->y2 - 32 + 4;   // the tail at the top of the 64x64 picture
+    if (x < 64)
+        x = 64;
+    if (x > DISPLAY_WIDTH - 64)
+        x = DISPLAY_WIDTH - 64;
+    if (y < 16)
+        y = 16;
+    for (half = 0; half < 2; half++)
+    {
+        struct Sprite *s = &gSprites[b->spriteId[half]];
+        s->x = x - 32 + half * 64;
+        s->y = y;
+        s->coordOffsetEnabled = FALSE;
+        s->invisible = FALSE;
+        s->oam.priority = 0;
+        s->subpriority = 2;   // behind the battle emote pick
+    }
+    if (b->timer == 0)
+        DestroyBubbleSprites(b);
+}
+
+// Every frame in a battle
+void MP_Emote_BattleUpdate(void)
+{
+    u8 i;
+    bool8 any = FALSE;
+    InitIfNeeded();
+    for (i = 0; i < 1 + MP_MAX_PLAYERS; i++)
+    {
+        if (sBubbles[i].battler < MAX_BATTLERS_COUNT)
+        {
+            UpdateBattleBubble(&sBubbles[i]);
+            any |= sBubbles[i].timer > 0;
+        }
+    }
+    if (!any && !MP_BattleChat_IsOpen() && IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF && !AnyBubbleShown())
+        FreeSpritePaletteByTag(TAG_BUBBLE_PAL);
+}
+
+// This game's player says something in battle (text, or an icon with text NULL)
+void MP_Emote_BattleSay(const u8 *text, u8 icon)
+{
+    u8 buf[2 + BUBBLE_TEXT];
+    u16 len = 0;
+    InitIfNeeded();
+    ShowBattleBubble(0, MP_BattleChat_LocalBattler(), text, icon);
+    if (gMpLocalId >= 0 && text)
+        MP_Social_LogSay(gMpLocalId, text);
+    if (!MP_IsConnected())
+        return;
+    buf[0] = MPR_SAY;
+    buf[1] = SAY_BATTLE;
+    buf[2] = icon;
+    while (text && len < BUBBLE_TEXT - 2 && text[len] != EOS)
+    {
+        buf[3 + len] = text[len];
+        len++;
+    }
+    buf[3 + len] = EOS;
+    MP_SendRelay(0xFF, buf, 4 + len);
 }
 
 // A bubble over a player (combos, pranks)
@@ -1007,6 +1139,13 @@ void MP_Emote_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    // Battle bubbles end with the battle
+    for (i = 0; i < 1 + MP_MAX_PLAYERS; i++)
+        if (sBubbles[i].battler != MAX_BATTLERS_COUNT)
+        {
+            sBubbles[i].battler = MAX_BATTLERS_COUNT;
+            sBubbles[i].timer = 0;
+        }
     ShowSpeedNotice();
     UpdateBubble(&sBubbles[TOAST_SLOT], gPlayerAvatar.objectEventId);
     MP_Ping_Update();

@@ -507,7 +507,8 @@ u16 Gamepad_Poll(int *fastForward)
         if (sQuickTrigger >= 0 && !sTrigger[sQuickTrigger])
             sQuickTrigger = -1;
         // LT / RT in the overworld: quick emote / phrase pick (open while held)
-        if (Platform_InputContext() == INPUT_CONTEXT_OVERWORLD && sQuickTrigger < 0 && (lNew || rNew))
+        if ((Platform_InputContext() == INPUT_CONTEXT_OVERWORLD || Platform_InputContext() == INPUT_CONTEXT_BATTLE)
+         && sQuickTrigger < 0 && (lNew || rNew))
         {
             sQuickTrigger = rNew ? 1 : 0;
             Platform_ContextAction(rNew ? INPUT_ACTION_QUICK_PHRASES : INPUT_ACTION_QUICK_EMOTES);

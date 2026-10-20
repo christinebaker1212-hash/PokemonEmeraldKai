@@ -1449,6 +1449,8 @@ void MP_FrameUpdate(void)
 
     MPServer_Poll();
     MP_AutoSession_Update();
+    if (gMain.inBattle)
+        MP_Emote_BattleUpdate();   // battle emote bubbles (solo battles too)
 
     if (sLobby.state == MP_LOBBY_OFF)
         return;

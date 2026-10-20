@@ -637,7 +637,8 @@ static void KeyboardQuickHolds(void)
         int held = state[sKeys[i]] && !(SDL_GetModState() & (KMOD_CTRL | KMOD_ALT | KMOD_GUI));
         sHeldFrames[i] = held ? sHeldFrames[i] + 1 : 0;
         Gamepad_SetKeyHold(i, sHeldFrames[i] >= QUICK_KEY_DELAY);
-        if (sHeldFrames[i] == QUICK_KEY_DELAY && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
+        if (sHeldFrames[i] == QUICK_KEY_DELAY
+         && (Platform_InputContext() == INPUT_CONTEXT_OVERWORLD || Platform_InputContext() == INPUT_CONTEXT_BATTLE))
             Platform_ContextAction(i ? INPUT_ACTION_QUICK_PHRASES : INPUT_ACTION_QUICK_EMOTES);
     }
 }

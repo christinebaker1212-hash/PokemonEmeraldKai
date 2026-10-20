@@ -320,6 +320,9 @@ static void ReadKeys(void)
             gMain.heldKeys |= A_BUTTON;
     }
 
+    // Moemon Co-op: the battle emote pick takes the buttons while it's open
+    MP_BattleChat_FilterKeys();
+
     if (JOY_NEW(gMain.watchedKeysMask))
         gMain.watchedKeysPressed = TRUE;
 }

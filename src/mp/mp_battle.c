@@ -83,6 +83,11 @@ static struct
 static u8 sRelayBuf[BLOCK_BUFFER_SIZE + 16];
 static EWRAM_DATA u8 sResultText[256];
 
+s8 MP_Battle_PeerId(void)
+{
+    return sNet.battleActive ? (s8)sNet.peer : -1;
+}
+
 bool8 MP_Battle_IsActive(void)
 {
     return sNet.battleActive;
