@@ -2126,6 +2126,7 @@ static void SaveAfterPull(void)
     else
         status = TrySavingData(SAVE_NORMAL);
     MPNet_Log("gatcha: saved after the pull (status %d)", status);
+    MP_Autosave_Saved();
 }
 
 static bool8 IsLegend(const struct Result *r)

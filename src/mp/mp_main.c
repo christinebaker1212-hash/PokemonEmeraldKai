@@ -269,6 +269,7 @@ static void LoadConfig(void)
     memset(&gMpConfig, 0, sizeof(gMpConfig));
     gMpConfig.enabled = TRUE;
     gMpConfig.trainerRange = 4;
+    gMpConfig.autosaveMinutes = 5;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -322,6 +323,11 @@ static void LoadConfig(void)
         {
             int r = atoi(val);
             gMpConfig.trainerRange = (r < 1) ? 1 : (r > 8 ? 8 : r);
+        }
+        else if (strcmp(key, "autosave") == 0)
+        {
+            int m = atoi(val);
+            gMpConfig.autosaveMinutes = m < 0 ? 0 : (m > 60 ? 60 : m);
         }
         else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
@@ -382,6 +388,8 @@ void MP_SaveConfig(void)
         "trainer_range = %d\n"
         "; the party Moemon that follows you (SELECT in the party menu); 0 = none\n"
         "follower = %08x\n"
+        "; save quietly on the map every this many minutes, at safe moments (0 = off)\n"
+        "autosave = %d\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
         "; shown to friends who join a server you host (HOST A GAME > WELCOME NOTE); | starts line 2\n"
@@ -390,7 +398,7 @@ void MP_SaveConfig(void)
         "lobby = %s\n"
         "; your 16 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
-        MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality,
+        MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.lobby);
     {
         int i;
@@ -1416,6 +1424,7 @@ void MP_FrameUpdate(void)
     int guard;
 
     MP_Achieve_Update();        // achievements are personal: offline too
+    MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes
     MpUi_RefreshIcons();        // help lines follow keyboard / pad switches
 

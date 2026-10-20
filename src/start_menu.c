@@ -1149,6 +1149,7 @@ static u8 SaveDoSaveCallback(void)
         saveStatus = TrySavingData(SAVE_NORMAL);
     }
 
+    MP_Autosave_Saved();   // Moemon Co-op: the quiet autosave starts over
     if (saveStatus == SAVE_STATUS_OK)
         ShowSaveMessage(gText_PlayerSavedGame, SaveSuccessCallback);
     else

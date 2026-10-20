@@ -362,8 +362,8 @@ static void ReadSaveFile(char *path)
 }
 
 // Moemon Co-op: save backups. Before the save file is overwritten the old one is
-// kept as <save>.bak1 (bak1 -> bak2 -> bak3 first). A save writes the file twice,
-// so this happens at most once every 30 seconds.
+// kept as <save>.bak1 (bak1 -> bak2 -> bak3 first), at most once every 10 minutes,
+// so the autosave (mp_autosave.c) doesn't push older backups out too fast.
 #define SAVE_BACKUPS 3
 static void BackUpSaveFile(void)
 {
@@ -374,7 +374,7 @@ static void BackUpSaveFile(void)
     size_t n;
     int i;
     FILE *in, *out;
-    if (sDone && SDL_GetTicks() - sLastBackup < 30000)
+    if (sDone && SDL_GetTicks() - sLastBackup < 10 * 60 * 1000)
         return;
     in = fopen(gPlatformSavePath, "rb");
     if (in == NULL)

@@ -384,6 +384,12 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   use the item. (L and R need BUTTON MODE NORMAL in OPTION.)
 * Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
+* AUTOSAVE: the game saves itself quietly every 5 minutes on the map (and a
+  minute after a battle), the moment you're standing free. Not where the START
+  menu has no SAVE (SAFARI ZONE, BATTLE PIKE / PYRAMID, link rooms), and a new
+  game started over an older save waits until you save it by hand once.
+  moemon_coop.ini: autosave = minutes (0 = off). Older saves are kept as
+  <save>.bak1-3.
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).

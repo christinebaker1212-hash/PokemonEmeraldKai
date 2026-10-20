@@ -167,6 +167,7 @@ struct MpConfig
     u16 phrases[MP_NUM_PHRASES][MP_PHRASE_WORDS];  // easy chat words, 0xFFFF = empty
     u8 quickStock[MP_QUICK_STOCK_SLOTS];   // R2 quick pick: the stock phrase an empty phrase slot offers
     u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
+    u8 autosaveMinutes;       // mp_autosave.c: quiet save on the map every N minutes (0 = off)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
 
@@ -525,6 +526,9 @@ s32 MP_SaveData_Get(const char *key);
 #define MP_REG_SLOTS  3   // item_menu.c: extra registered key items: L (0), R (1), pad west / F key (2)
 #define MP_REG_SELECT 3   // (the game's own SELECT item, in the chooser)
 u16 MP_RegisteredItem(u8 slot);
+// mp_autosave.c: quiet saves on the map at safe moments
+void MP_Autosave_Update(void);
+void MP_Autosave_Saved(void);   // any save happened (start menu, MoeGatcha): restart the timer
 extern u8 gMpItemXPressed;   // field_control_avatar.c: the extra item button was pressed (frames left)
 bool8 MP_UseRegisteredItemSlot(u8 slot);
 bool8 MP_Qol_OpenFollowerPicker(void);     // mp_qol.c
