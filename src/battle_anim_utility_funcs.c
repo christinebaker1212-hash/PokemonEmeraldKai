@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle_anim.h"
 #include "contest.h"
 #include "gpu_regs.h"
@@ -412,6 +413,12 @@ static void AnimTask_DrawFallingWhiteLinesOnAttacker_Step(u8 taskId)
 #define tBlend            data[12]
 #define tState            data[15]
 
+// Moemon Co-op: battlers that get the stat change effect along with battler1 (a spread
+// stat move's results shown together, set by AnimTask_StatsChange), and their window sprites
+EWRAM_DATA u8 gMpStatAnimMask = 0;
+static EWRAM_DATA u8 sMpStatAnimSprites[MAX_BATTLERS_COUNT] = {0};
+static EWRAM_DATA u8 sMpStatAnimCount = 0;
+
 void InitStatsChangeAnimation(u8 taskId)
 {
     u8 i;
@@ -433,6 +440,11 @@ static void StatsChangeAnimation_Step1(u8 taskId)
     sAnimStatsChangeData->battler2 = BATTLE_PARTNER(sAnimStatsChangeData->battler1);
     if (IsContest() || (sAnimStatsChangeData->aMultipleBattlers && !IsBattlerSpriteVisible(sAnimStatsChangeData->battler2)))
         sAnimStatsChangeData->aMultipleBattlers = FALSE;
+    if (IsContest())
+        gMpStatAnimMask = 0;
+    gMpStatAnimMask &= ~(1 << sAnimStatsChangeData->battler1);
+    if (gMpStatAnimMask)
+        sAnimStatsChangeData->aMultipleBattlers = FALSE;   // the extra battlers below instead
 
     gBattle_WIN0H = 0;
     gBattle_WIN0V = 0;
@@ -446,7 +458,7 @@ static void StatsChangeAnimation_Step1(u8 taskId)
     if (!IsContest())
         SetAnimBgAttribute(1, BG_ANIM_CHAR_BASE_BLOCK, 1);
 
-    if (IsDoubleBattle() && !sAnimStatsChangeData->aMultipleBattlers)
+    if (IsDoubleBattle() && !sAnimStatsChangeData->aMultipleBattlers && !gMpStatAnimMask)
     {
         if (GetBattlerPosition(sAnimStatsChangeData->battler1) == B_POSITION_OPPONENT_RIGHT
          || GetBattlerPosition(sAnimStatsChangeData->battler1) == B_POSITION_PLAYER_LEFT)
@@ -489,6 +501,14 @@ static void StatsChangeAnimation_Step2(u8 taskId)
     {
         battlerSpriteId = gBattlerSpriteIds[sAnimStatsChangeData->battler2];
         spriteId2 = CreateInvisibleSpriteCopy(sAnimStatsChangeData->battler2, battlerSpriteId, sAnimStatsChangeData->species);
+    }
+    sMpStatAnimCount = 0;
+    if (gMpStatAnimMask)
+    {
+        u8 b;
+        for (b = 0; b < gBattlersCount; b++)
+            if ((gMpStatAnimMask & (1 << b)) && IsBattlerSpriteVisible(b))
+                sMpStatAnimSprites[sMpStatAnimCount++] = CreateInvisibleSpriteCopy(b, gBattlerSpriteIds[b], 0);
     }
 
     GetBattleAnimBg1Data(&animBgData);
@@ -617,6 +637,9 @@ static void StatsChangeAnimation_Step3(u8 taskId)
         DestroySprite(&gSprites[gTasks[taskId].tAnimSpriteId1]);
         if (gTasks[taskId].tMultipleBattlers)
             DestroySprite(&gSprites[gTasks[taskId].tAnimSpriteId2]);
+        while (sMpStatAnimCount)
+            DestroySprite(&gSprites[sMpStatAnimSprites[--sMpStatAnimCount]]);
+        gMpStatAnimMask = 0;
 
         // Restore battler 2's priority
         if (gTasks[taskId].tHidBattler2 == TRUE)

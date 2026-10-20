@@ -92,6 +92,7 @@ void HandleAction_UseMove(void)
 
     gCritMultiplier = 1;
     gBattleScripting.dmgMultiplier = 1;
+    gMpStatGroupMask = gMpStatGroupFailMask = 0;   // Moemon Co-op: spread stat moves shown together
     gBattleStruct->atkCancelerTracker = 0;
     gMoveResultFlags = 0;
     gMultiHitCounter = 0;

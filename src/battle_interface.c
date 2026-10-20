@@ -2284,7 +2284,9 @@ s32 MoveBattleBar(u8 battler, u8 healthboxSpriteId, u8 whichBar, u8 unused)
     if (whichBar == HEALTH_BAR && IS_TRIPLE_BATTLE())
     {
         struct BattleBarInfo *bar = &gBattleSpritesDataPtr->battleBars[battler];
-        s32 shown = (currentBarValue == -1 || bar->currValue < 0) ? bar->oldValue - bar->receivedValue : bar->currValue;
+        // currentBarValue is the bar's animated HP; currValue can't be used as it is
+        // fixed-point when max HP is under the bar's pixel width
+        s32 shown = (currentBarValue == -1) ? bar->oldValue - bar->receivedValue : currentBarValue;
         if (shown > bar->maxValue)
             shown = bar->maxValue;
         MP_TriCards_SetBarHp(battler, shown, bar->maxValue);

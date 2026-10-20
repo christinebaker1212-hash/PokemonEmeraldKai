@@ -252,6 +252,7 @@ enum BattleScriptOpcode
     B_SCR_OP_FINISHACTION,
     B_SCR_OP_FINISHTURN,
     B_SCR_OP_TRAINERSLIDEOUT,
+    B_SCR_OP_MPSTATGROUP,   // Moemon Co-op: spread stat moves shown together
 };
 
 // The following correspond to the struct members of BattleScripting by adding their offset

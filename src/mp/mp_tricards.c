@@ -73,6 +73,7 @@ struct Card
     bool8 dirty;
     u8 owner;           // 0-2: owner strip color, 0xFF: none (foes)
     u8 name[POKEMON_NAME_LENGTH + 1];
+    u8 letter;          // 0, or A/B/C when a card on the same side has the same name
     u8 level;
     u8 status;          // 0 none, 1 PSN, 2 PAR, 3 SLP, 4 FRZ, 5 BRN
     s32 hp, maxHp;
@@ -180,8 +181,17 @@ static void Render(struct Card *c)
         FillRect(c, 1, 1, 2, CARD_H - 2, C_OWN1 + c->owner);
         lx = 5;
     }
-    // row 1: the name
-    DrawText(c, c->name, lx, 2, CARD_W - 2);
+    // row 1: the name, and its letter at the right edge when names repeat
+    if (c->letter)
+    {
+        u8 tag[2] = {c->letter, EOS};
+        DrawText(c, c->name, lx, 2, CARD_W - 10);
+        DrawText(c, tag, CARD_W - 9, 2, CARD_W - 2);
+    }
+    else
+    {
+        DrawText(c, c->name, lx, 2, CARD_W - 2);
+    }
     // row 2: level, status, HP bar
     lv[0] = CHAR_EXTRA_SYMBOL;
     lv[1] = CHAR_LV_2;
@@ -304,6 +314,35 @@ void MP_TriCards_SetBarHp(u8 battler, s32 hp, s32 maxHp)
     }
 }
 
+// Same-named Pokémon on one side get the letters A, B, C in screen order (left
+// to right), so the target box and the cards tell them apart. A fainted one keeps
+// its card name until it is replaced, so the letters don't shift mid-battle.
+static const u8 sLetterOrder[2][3] = {
+    {B_POSITION_PLAYER_LEFT, B_POSITION_PLAYER_CENTER, B_POSITION_PLAYER_RIGHT},
+    {B_POSITION_OPPONENT_RIGHT, B_POSITION_OPPONENT_CENTER, B_POSITION_OPPONENT_LEFT},
+};
+
+u8 MP_TriCards_Letter(u8 battler)
+{
+    u8 side, i, n = 0, mine = 0xFF;
+
+    if (!sActive || !IS_TRIPLE_BATTLE() || battler >= gBattlersCount || !sCards[battler].used)
+        return 0;
+    side = GetBattlerSide(battler);
+    for (i = 0; i < 3; i++)
+    {
+        u8 b = GetBattlerAtPosition(sLetterOrder[side][i]);
+        if (b >= gBattlersCount || !sCards[b].used || StringCompare(sCards[b].name, sCards[battler].name) != 0)
+            continue;
+        if (b == battler)
+            mine = n;
+        n++;
+    }
+    if (n < 2 || mine == 0xFF)
+        return 0;
+    return CHAR_A + mine;
+}
+
 // Where battler's card goes and how see-through its fill is (0-256 opacity)
 static bool8 CardPlace(u8 battler, s16 *x, s16 *y, u16 *opacity)
 {
@@ -338,6 +377,46 @@ static inline u16 Blend(u16 fg, u16 bg, u16 a)
     u16 g = (((fg >> 5) & 31) * a + ((bg >> 5) & 31) * (256 - a)) >> 8;
     u16 b = (((fg >> 10) & 31) * a + ((bg >> 10) & 31) * (256 - a)) >> 8;
     return r | (g << 5) | (b << 10) | 0x8000;   // bit 15: opaque (ABGR1555 frame)
+}
+
+// A sprite drawn again over the frame (the emote pick and bubbles go over the cards)
+static void RedrawSprite(u16 *frame, const struct Sprite *s)
+{
+    static const u8 sDims[3][4][2] = {
+        {{8, 8}, {16, 16}, {32, 32}, {64, 64}},
+        {{16, 8}, {32, 8}, {32, 16}, {64, 32}},
+        {{8, 16}, {8, 32}, {16, 32}, {32, 64}},
+    };
+    const u8 *tiles;
+    const u16 *pal;
+    int w, h, x0, y0, px, py;
+
+    if (!s->inUse || s->invisible || s->oam.affineMode != ST_OAM_AFFINE_OFF || s->oam.shape > 2
+     || s->oam.bpp != ST_OAM_4BPP || s->oam.objMode == ST_OAM_OBJ_WINDOW)
+        return;
+    w = sDims[s->oam.shape][s->oam.size][0];
+    h = sDims[s->oam.shape][s->oam.size][1];
+    x0 = s->oam.x >= 256 ? s->oam.x - 512 : s->oam.x;
+    y0 = s->oam.y >= 160 ? s->oam.y - 256 : s->oam.y;
+    tiles = (const u8 *)(OBJ_VRAM0) + s->oam.tileNum * TILE_SIZE_4BPP;
+    pal = (const u16 *)(OBJ_PLTT) + s->oam.paletteNum * 16;
+    for (py = 0; py < h; py++)
+    {
+        int sy = y0 + py, ty = s->oam.matrixNum & ST_OAM_VFLIP ? h - 1 - py : py;
+        if (sy < 0 || sy >= DISPLAY_HEIGHT)
+            continue;
+        for (px = 0; px < w; px++)
+        {
+            int sx = x0 + px, tx = s->oam.matrixNum & ST_OAM_HFLIP ? w - 1 - px : px;
+            u8 v;
+            if (sx < 0 || sx >= DISPLAY_WIDTH)
+                continue;
+            v = tiles[((ty / 8) * (w / 8) + tx / 8) * TILE_SIZE_4BPP + (ty % 8) * 4 + (tx % 8) / 2];
+            v = (tx & 1) ? (v >> 4) : (v & 0xF);
+            if (v)
+                frame[sy * DISPLAY_WIDTH + sx] = pal[v] | 0x8000;
+        }
+    }
 }
 
 // After the GBA frame is drawn (platform VDraw): the cards over it
@@ -377,6 +456,14 @@ void MP_TriCards_Composite(u16 *frame)
         }
         if (!box->inUse || box->invisible)
             continue;
+        {
+            u8 letter = MP_TriCards_Letter(b);
+            if (letter != c->letter)
+            {
+                c->letter = letter;
+                c->dirty = TRUE;
+            }
+        }
         if (!CardPlace(b, &x0, &y0, &opacity))
             continue;
         x0 += box->x2;
@@ -405,5 +492,13 @@ void MP_TriCards_Composite(u16 *frame)
                     *dst = pal[v] | 0x8000;
             }
         }
+    }
+    // the emote pick and battle bubbles stay in front of the cards
+    {
+        u8 ids[16], n, i;
+        n = MP_Emote_BattleOverlaySprites(ids, 12);
+        n += MP_BattleChat_OverlaySprites(ids + n, 16 - n);
+        for (i = 0; i < n; i++)
+            RedrawSprite(frame, &gSprites[ids[i]]);
     }
 }

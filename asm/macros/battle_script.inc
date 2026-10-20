@@ -1253,6 +1253,14 @@
 	.byte \position
 	.endm
 
+	@ Moemon Co-op: mode 0 records a spread stat move's target and jumps to ptr
+	@ (when the move groups), mode 1 sets up the shared animation and message
+	.macro mpstatgroup mode:req, ptr=NULL
+	.byte B_SCR_OP_MPSTATGROUP
+	.byte \mode
+	ptrvalue \ptr
+	.endm
+
 /* various command changed to more readable macros*/
 	.macro cancelmultiturnmoves battler:req
 	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES

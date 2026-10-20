@@ -68,6 +68,8 @@ struct Bubble
     bool8 atTile;           // door label: shown over a map tile, not a person
     bool8 toast;            // a note at the top of the screen (no tail)
     s16 tileX, tileY;       // that tile (map coords with MAP_OFFSET)
+    s8 boxShift;            // the box's offset from the tail (a battle bubble near a screen edge)
+    u8 boxW;                // the box's width, from BuildBubble
 };
 
 static EWRAM_DATA struct Bubble sBubbles[NUM_BUBBLES];
@@ -324,6 +326,25 @@ static void BuildBubble(struct Bubble *b)
     bottom = BUBBLE_H - 4;          // the tail goes below the box
     top = bottom - h;
     left = (BUBBLE_W - (w + 6)) / 2;
+    // Moemon Co-op: a battle bubble near the screen edge slides its box over, the tail
+    // stays on the speaker (never past the box's rounded end)
+    if (b->boxShift)
+    {
+        int maxShift = (w + 6) / 2 - 6;
+        int shift = b->boxShift;
+        if (maxShift < 0)
+            maxShift = 0;
+        if (shift > maxShift)
+            shift = maxShift;
+        if (shift < -maxShift)
+            shift = -maxShift;
+        left += shift;
+        if (left < 0)
+            left = 0;
+        if (left + w + 5 > BUBBLE_W - 1)
+            left = BUBBLE_W - 1 - (w + 5);
+    }
+    b->boxW = w + 6;
 
     // Rounded box with an outline
     for (y = top; y <= bottom; y++)
@@ -589,6 +610,7 @@ static void ShowBubble(u8 slot, const u8 *text, u8 note)
         StringCopyN(b->text, text, BUBBLE_TEXT - 1);
     b->note = note;
     b->battler = MAX_BATTLERS_COUNT;
+    b->boxShift = 0;
     b->timer = BUBBLE_TIME;
     b->dirty = TRUE;
 }
@@ -734,12 +756,27 @@ static void UpdateBattleBubble(struct Bubble *b)
     os = &gSprites[spriteId];
     x = os->x + os->x2;
     y = os->y + os->y2 - 32 + 4;   // the tail at the top of the 64x64 picture
-    if (x < 64)
-        x = 64;
-    if (x > DISPLAY_WIDTH - 64)
-        x = DISPLAY_WIDTH - 64;
+    // The tail stays over the speaker's Moemon; near a screen edge the box slides
+    // back on screen instead (moving the whole bubble pointed it at the neighbor)
+    if (x < 8)
+        x = 8;
+    if (x > DISPLAY_WIDTH - 8)
+        x = DISPLAY_WIDTH - 8;
     if (y < 16)
         y = 16;
+    if (b->boxW)
+    {
+        s16 half = b->boxW / 2, shift = 0;
+        if (x - half < 2)
+            shift = 2 - (x - half);
+        else if (x + half > DISPLAY_WIDTH - 2)
+            shift = (DISPLAY_WIDTH - 2) - (x + half);
+        if (shift != b->boxShift)
+        {
+            b->boxShift = shift;
+            RedrawBubble(b);
+        }
+    }
     for (half = 0; half < 2; half++)
     {
         struct Sprite *s = &gSprites[b->spriteId[half]];
@@ -1192,4 +1229,20 @@ void MP_Emote_OnPlayerLeft(u8 id)
         sBubbles[LABEL_SLOT(id)].timer = 0;
         DestroyBubbleSprites(&sBubbles[LABEL_SLOT(id)]);
     }
+}
+
+// Moemon Co-op: the battle bubbles' sprites, which the Triple Battle cards (drawn over
+// the finished frame) paint over again so the cards never hide them
+u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max)
+{
+    u8 i, half, n = 0;
+    for (i = 0; i < NUM_BUBBLES; i++)
+    {
+        if (sBubbles[i].battler >= MAX_BATTLERS_COUNT || sBubbles[i].timer == 0)
+            continue;
+        for (half = 0; half < 2 && n < max; half++)
+            if (sBubbles[i].spriteId[half] < MAX_SPRITES)
+                ids[n++] = sBubbles[i].spriteId[half];
+    }
+    return n;
 }

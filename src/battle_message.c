@@ -394,6 +394,27 @@ static const u8 sText_MpCoopItemRevived[] = _("{B_BUFF1} was revived!");
 static const u8 sText_MpCoopItemHpCured[] = _("{B_BUFF1} was healed\nand cured!");
 static const u8 sText_MpCoopBallNoTarget[] = _("That one isn't there any more!\nThe BALL went back to the BAG.");
 static const u8 sText_MpCoopWantsToRun[] = _("{B_ATK_NAME_WITH_PREFIX} wants to run!\nEveryone has to choose RUN.");
+// Moemon Co-op: a spread stat move's one line (mpstatgroup); "The party's" or "The foes'"
+// depends on whose screen it is
+const u16 gMpStatGroupStringIds[] = {
+    STRINGID_MP_GROUP_STAT_DOWN, STRINGID_MP_GROUP_STAT_DOWN2, STRINGID_MP_GROUP_STAT_UP, STRINGID_MP_GROUP_STAT_UP2,
+    STRINGID_DEFENDERSSTATFELL, STRINGID_DEFENDERSSTATROSE,
+    STRINGID_MP_GROUP_STAT_NOLOWER, STRINGID_STATSWONTDECREASE,
+};
+static const u8 sText_MpGroupPartyNoLower[] = _("The party's {B_BUFF1}\nwon't go any lower!");
+static const u8 sText_MpGroupFoesNoLower[] = _("The foes' {B_BUFF1}\nwon't go any lower!");
+static const u8 sText_MpGroupPartyDown[] = _("The party's {B_BUFF1}\nwas lowered!");
+static const u8 sText_MpGroupPartyDown2[] = _("The party's {B_BUFF1}\nwas harshly lowered!");
+static const u8 sText_MpGroupPartyUp[] = _("The party's {B_BUFF1}\nwas raised!");
+static const u8 sText_MpGroupPartyUp2[] = _("The party's {B_BUFF1}\nwas sharply raised!");
+static const u8 sText_MpGroupFoesDown[] = _("The foes' {B_BUFF1}\nwas lowered!");
+static const u8 sText_MpGroupFoesDown2[] = _("The foes' {B_BUFF1}\nwas harshly lowered!");
+static const u8 sText_MpGroupFoesUp[] = _("The foes' {B_BUFF1}\nwas raised!");
+static const u8 sText_MpGroupFoesUp2[] = _("The foes' {B_BUFF1}\nwas sharply raised!");
+static const u8 *const sMpGroupStatTexts[2][4] = {
+    {sText_MpGroupPartyDown, sText_MpGroupPartyDown2, sText_MpGroupPartyUp, sText_MpGroupPartyUp2},
+    {sText_MpGroupFoesDown, sText_MpGroupFoesDown2, sText_MpGroupFoesUp, sText_MpGroupFoesUp2},
+};
 const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
@@ -2354,6 +2375,15 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MPCOOP_BALL_NO_TARGET:
         stringPtr = sText_MpCoopBallNoTarget;
+        break;
+    case STRINGID_MP_GROUP_STAT_DOWN:
+    case STRINGID_MP_GROUP_STAT_DOWN2:
+    case STRINGID_MP_GROUP_STAT_UP:
+    case STRINGID_MP_GROUP_STAT_UP2:
+        stringPtr = sMpGroupStatTexts[GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? 0 : 1][stringID - STRINGID_MP_GROUP_STAT_DOWN];
+        break;
+    case STRINGID_MP_GROUP_STAT_NOLOWER:
+        stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;
         break;
     case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
         // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,

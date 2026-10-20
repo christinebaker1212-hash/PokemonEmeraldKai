@@ -873,6 +873,12 @@ bool8 MP_TriCards_Active(void);
 void MP_TriCards_SetOwner(u8 battler, u8 seat);
 void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo);
 void MP_TriCards_SetBarHp(u8 battler, s32 hp, s32 maxHp);
+u8 MP_TriCards_Letter(u8 battler);
+u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max);
+u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
+extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers
+extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
+extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
 void MP_TriCards_Composite(u16 *frame);
 
 #endif // GUARD_MP_H

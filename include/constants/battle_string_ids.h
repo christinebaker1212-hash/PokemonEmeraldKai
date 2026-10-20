@@ -388,6 +388,11 @@
 #define STRINGID_MPCOOP_ITEM_HP_CURED       393
 #define STRINGID_MPCOOP_WANTS_RUN           394   // co-op wild: RUN needs everyone
 #define STRINGID_MPCOOP_BALL_NO_TARGET      395   // co-op wild: the ball's target is gone
+#define STRINGID_MP_GROUP_STAT_DOWN         396   // "The party's / The foes' DEFENSE was lowered!"
+#define STRINGID_MP_GROUP_STAT_DOWN2        397
+#define STRINGID_MP_GROUP_STAT_UP           398
+#define STRINGID_MP_GROUP_STAT_UP2          399
+#define STRINGID_MP_GROUP_STAT_NOLOWER      400   // "... won't go any lower!"
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

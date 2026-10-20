@@ -404,3 +404,15 @@ void MP_BattleChat_FilterKeys(void)
     gMain.newAndRepeatedKeys = 0;
     Update();
 }
+
+// The open pick's sprites (see MP_Emote_BattleOverlaySprites)
+u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max)
+{
+    u8 i, n = 0;
+    if (!sPick.open)
+        return 0;
+    for (i = 0; i < 2 && n < max; i++)
+        if (sPick.spriteId[i] < MAX_SPRITES)
+            ids[n++] = sPick.spriteId[i];
+    return n;
+}

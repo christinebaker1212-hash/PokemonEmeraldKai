@@ -199,6 +199,12 @@ TRIPLE BATTLES (THREE PLAYERS)
   ally has picked, your menu shows it ("ALICE: EMBER").
 * While you pick a target, the box on the right names it, with its level (a
   foe) or its exact HP (an ally). The D-Pad moves along all six.
+* Moemon with the same name on one side get a letter, left to right
+  (ZIGZAGOON A, B, C), on their cards and in the target box.
+* Moves that change a stat of everyone on one side (Growl, Tail Whip, Leer,
+  String Shot, Sweet Scent) play one animation over all of them and say it
+  once: "The party's DEFENSE was lowered!" or "The foes' ATTACK was lowered!".
+  This works in Double Battles too.
 * Prize money, EXP, catches, disconnects and RUN (all three must choose it)
   work like in Double Battles.
 

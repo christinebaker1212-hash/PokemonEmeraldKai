@@ -540,11 +540,13 @@ BattleScript_EffectStatDown::
 	statbuffchange STAT_CHANGE_ALLOW_PTR, BattleScript_StatDownEnd
 	jumpifbyte CMP_LESS_THAN, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_DECREASE, BattleScript_StatDownDoAnim
 	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_FELL_EMPTY, BattleScript_StatDownEnd
+	mpstatgroup 2, BattleScript_StatDownEnd
 	pause B_WAIT_TIME_SHORT
 	goto BattleScript_StatDownPrintString
 BattleScript_StatDownDoAnim::
 	attackanimation
 	waitanimation
+	mpstatgroup 0, BattleScript_StatDownEnd
 	setgraphicalstatchangevalues
 	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
 BattleScript_StatDownPrintString::
@@ -2943,6 +2945,20 @@ BattleScript_PayDayMoneyAndPickUpItems::
 	end2
 
 @ Moemon Co-op: two players beat an NPC trainer together (link battle)
+@ Moemon Co-op: a spread stat move's changes, one animation over every Pokemon
+@ it hit and one line ("The party's DEFENSE was lowered!"), from MOVEEND
+BattleScript_MpStatGroupShow::
+	mpstatgroup 1, BattleScript_MpStatGroupFails
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gMpStatGroupStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_MpStatGroupFails:
+	mpstatgroup 3, BattleScript_MpStatGroupDone
+	printfromtable gMpStatGroupStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_MpStatGroupDone:
+	return
+
 BattleScript_MpCoopTrainerBattleWon::
 	playtrainerdefeatbgm BS_ATTACKER
 	printstring STRINGID_PLAYERDEFEATEDTRAINER1

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "decompress.h"
@@ -484,8 +485,19 @@ void AnimTask_StatsChange(u8 taskId)
     bool16 goesDown = FALSE;
     s16 animStatId = 0;
     bool16 sharply = FALSE;
+    u16 animArg = gBattleSpritesDataPtr->animationData->animArg;
 
-    switch (gBattleSpritesDataPtr->animationData->animArg)
+    // Moemon Co-op: a spread stat move's change (mpstatgroup) carries the other
+    // battlers it covers in the high byte, flagged by bit 15
+    gMpStatAnimMask = 0;
+    if (animArg & 0x8000)
+    {
+        gMpStatAnimMask = (animArg >> 8) & 0x3F;
+        animArg &= 0xFF;
+        MPNet_Log("stat change shown together on battlers %02x", gMpStatAnimMask);
+    }
+
+    switch (animArg)
     {
     case STAT_ANIM_PLUS1 + STAT_ATK:     goesDown = FALSE;  animStatId = STAT_ANIM_PAL_ATK;      break;
     case STAT_ANIM_PLUS1 + STAT_DEF:     goesDown = FALSE;  animStatId = STAT_ANIM_PAL_DEF;      break;

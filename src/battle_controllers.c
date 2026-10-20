@@ -849,6 +849,7 @@ static u8 LinkSyncKind(u8 cmd)
     case CONTROLLER_GETMONDATA:
     case CONTROLLER_GETRAWMONDATA:
     case CONTROLLER_SETRAWMONDATA:
+    case CONTROLLER_LOADMONSPRITE:   // a wild intro: every screen slides them in together
     case CONTROLLER_DATATRANSFER:
     case CONTROLLER_DMA3TRANSFER:
     case CONTROLLER_PLAYBGM:

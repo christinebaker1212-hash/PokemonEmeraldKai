@@ -327,6 +327,7 @@ static void Cmd_removeattackerstatus1(void);
 static void Cmd_finishaction(void);
 static void Cmd_finishturn(void);
 static void Cmd_trainerslideout(void);
+static void Cmd_mpstatgroup(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -578,7 +579,8 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_REMOVEATTACKERSTATUS1]           = Cmd_removeattackerstatus1,                   //0xF5
     [B_SCR_OP_FINISHACTION]                    = Cmd_finishaction,                            //0xF6
     [B_SCR_OP_FINISHTURN]                      = Cmd_finishturn,                              //0xF7
-    [B_SCR_OP_TRAINERSLIDEOUT]                 = Cmd_trainerslideout                          //0xF8
+    [B_SCR_OP_TRAINERSLIDEOUT]                 = Cmd_trainerslideout,                         //0xF8
+    [B_SCR_OP_MPSTATGROUP]                     = Cmd_mpstatgroup,                             //0xF9
 };
 
 struct StatFractions
@@ -4592,6 +4594,13 @@ static void Cmd_moveend(void)
                 }
             }
             gBattleScripting.moveendState++;
+            // Moemon Co-op: every target is done: a spread stat move's changes, together
+            if (gMpStatGroupMask | gMpStatGroupFailMask)
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_MpStatGroupShow;
+                effect = TRUE;
+            }
             break;
         case MOVEEND_COUNT:
             break;
@@ -10698,4 +10707,138 @@ static void Cmd_trainerslideout(void)
     MarkBattlerForControllerExec(gActiveBattler);
 
     gBattlescriptCurrInstr += 2;
+}
+
+// Moemon Co-op: a stat move that hits several Pokémon on one side (Tail Whip, Growl,
+// String Shot...) shows one stat animation over all of them and one line ("The
+// party's DEFENSE was lowered!") instead of an animation and a message for each;
+// the ones whose stat can't go lower get one line too. Other failures (a miss,
+// PROTECT, CLEAR BODY...) still show as each target comes up.
+EWRAM_DATA u8 gMpStatGroupMask = 0;           // battlers whose stat changed this move
+EWRAM_DATA u8 gMpStatGroupFailMask = 0;       // battlers whose stat can't go lower
+static EWRAM_DATA u8 sMpStatGroupChanger = 0;
+
+static bool8 MpStatGroupApplies(u8 target)
+{
+    u8 i, alive = 0, mask = gMpStatGroupMask | gMpStatGroupFailMask;
+
+    if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || target >= gBattlersCount)
+        return FALSE;
+    if (!(gBattleMoves[gCurrentMove].target & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY)))
+        return FALSE;
+    if (mask)
+    {
+        // only the same change on the same side joins (a Magic Coat bounce doesn't)
+        if (gBattleScripting.statChanger != sMpStatGroupChanger)
+            return FALSE;
+        for (i = 0; i < gBattlersCount; i++)
+            if ((mask & gBitTable[i]) && GetBattlerSide(i) != GetBattlerSide(target))
+                return FALSE;
+        return TRUE;
+    }
+    for (i = 0; i < gBattlersCount; i++)
+        if (GetBattlerSide(i) == GetBattlerSide(target) && gBattleMons[i].hp != 0
+         && !(gAbsentBattlerFlags & gBitTable[i]))
+            alive++;
+    return alive >= 2;
+}
+
+static u8 MpFirstOf(u8 mask, u8 *count)
+{
+    u8 i, first = 0xFF;
+    *count = 0;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (mask & gBitTable[i])
+        {
+            if (first == 0xFF)
+                first = i;
+            (*count)++;
+        }
+    }
+    return first;
+}
+
+// mode 0 / 2: a target's stat changed / can't go lower: record it and jump, if the move groups
+// mode 1: set up the shared animation and line for the changed ones (jump if none)
+// mode 3: set up the line for the ones that can't go lower (jump if none)
+static void Cmd_mpstatgroup(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+    u8 first, count, changer = sMpStatGroupChanger, amount = GET_STAT_BUFF_VALUE(sMpStatGroupChanger);
+    bool8 down = (sMpStatGroupChanger & STAT_BUFF_NEGATIVE) != 0;
+
+    if (mode == 0 || mode == 2)
+    {
+        if (MpStatGroupApplies(gBattlerTarget))
+        {
+            if (mode == 0)
+                gMpStatGroupMask |= gBitTable[gBattlerTarget];
+            else
+                gMpStatGroupFailMask |= gBitTable[gBattlerTarget];
+            sMpStatGroupChanger = gBattleScripting.statChanger;
+            gBattlescriptCurrInstr = jumpPtr;
+        }
+        else
+        {
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        }
+        return;
+    }
+
+    first = MpFirstOf(mode == 1 ? gMpStatGroupMask : gMpStatGroupFailMask, &count);
+    if (count == 0)
+    {
+        if (mode == 1)
+            gMpStatGroupMask = 0;
+        else
+            gMpStatGroupFailMask = 0;
+        gBattlescriptCurrInstr = jumpPtr;
+        return;
+    }
+    gBattlerTarget = first;
+    gBattleScripting.statChanger = changer;
+    PREPARE_STAT_BUFFER(gBattleTextBuff1, GET_STAT_BUFF_ID(changer));
+
+    if (mode == 3)
+    {
+        gBattleCommunication[MULTISTRING_CHOOSER] = (count > 1) ? 6 : 7;
+        gMpStatGroupFailMask = 0;
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        return;
+    }
+
+    // the animation: as setgraphicalstatchangevalues, plus every battler it covers
+    gBattleScripting.animArg1 = GET_STAT_BUFF_ID(changer)
+                              + (down ? (amount >= 2 ? STAT_ANIM_MINUS2 : STAT_ANIM_MINUS1)
+                                      : (amount >= 2 ? STAT_ANIM_PLUS2 : STAT_ANIM_PLUS1));
+    gBattleScripting.animArg2 = (count > 1) ? (0x80 | gMpStatGroupMask) : 0;
+
+    if (count > 1)
+    {
+        gBattleCommunication[MULTISTRING_CHOOSER] = (down ? 0 : 2) + (amount >= 2 ? 1 : 0);
+    }
+    else
+    {
+        // only one of them changed: the usual "Foe X's DEFENSE fell!"
+        u8 index = 1;
+        u16 verb = down ? STRINGID_STATFELL : STRINGID_STATROSE;
+        gBattleTextBuff2[0] = B_BUFF_PLACEHOLDER_BEGIN;
+        if (amount >= 2)
+        {
+            u16 adverb = down ? STRINGID_STATHARSHLY : STRINGID_STATSHARPLY;
+            gBattleTextBuff2[1] = B_BUFF_STRING;
+            gBattleTextBuff2[2] = adverb;
+            gBattleTextBuff2[3] = adverb >> 8;
+            index = 4;
+        }
+        gBattleTextBuff2[index++] = B_BUFF_STRING;
+        gBattleTextBuff2[index++] = verb;
+        gBattleTextBuff2[index++] = verb >> 8;
+        gBattleTextBuff2[index] = B_BUFF_EOS;
+        gBattleCommunication[MULTISTRING_CHOOSER] = down ? 4 : 5;
+    }
+    gMpStatGroupMask = 0;
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }

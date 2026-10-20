@@ -594,6 +594,13 @@ static void MpShowTargetInfo(u8 battler)
     GetMonData(mon, MON_DATA_NICKNAME, name);
     StringGet_Nickname(name);
     StringCopy(gDisplayedStringBattle, name);
+    if (MP_TriCards_Letter(battler))
+    {
+        u8 *end = gDisplayedStringBattle + StringLength(gDisplayedStringBattle);
+        end[0] = CHAR_SPACE;
+        end[1] = MP_TriCards_Letter(battler);
+        end[2] = EOS;
+    }
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
 }
 
