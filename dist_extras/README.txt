@@ -8,7 +8,8 @@ needed. On top of Kai it adds online co-op for up to 4 players:
     walk, run, bike, surf and dive in real time, with a name tag above
     their head ("Misty Lv25").
   * Team up against NPC trainers: walk up to a friend who has just been
-    challenged and join their battle as a Double Battle.
+    challenged and join their battle as a Double Battle (three of you: a
+    Triple Battle).
   * Watch a friend's battle: walk up to someone marked IN BATTLE and press A.
   * PvP with the BATTLE FLAG.
   * Dress up as any trainer or NPC in the game, recolor them, or draw your
@@ -169,6 +170,35 @@ WILD BATTLES TOGETHER
   like normal.
 * Wild Moemon you fight together are 2 levels higher, and 60% of the time
   two of them show up.
+
+
+TRIPLE BATTLES (THREE PLAYERS)
+------------------------------
+* Three friends can fight side by side: each of you controls one Moemon, all
+  three are out at once, against up to three wild or trainer Moemon.
+* Wild: when a wild Moemon jumps out, the two closest friends standing in
+  grass nearby both jump in (usually three wild Moemon come out). With only
+  one friend around it's the usual Double Battle.
+* Trainers: once one friend has joined your battle you see "<friend> is in!
+  Waiting for one more for a Triple Battle..." and the "Join me!" bubble stays
+  up. A second friend who walks up and faces you joins, and the Triple Battle
+  starts. Press B to start a Double Battle right away instead. Only trainers
+  who have three or more Moemon of their own do Triple Battles (two-trainer
+  battles like the Twins stay Double Battles).
+* Each player brings two Moemon: the first two of your CO-OP TEAM (or your
+  first two healthy ones). One is out, the other waits on the bench and comes
+  in when the first faints or when you switch.
+* Any Moemon can target any other: there's no "too far away" in these Triple
+  Battles. Moves that hit both foes (Surf, Rock Slide...) hit all three foes
+  for 3/4 damage; Earthquake and friends hit your allies too. Helping Hand
+  lets you pick which ally to boost.
+* Your allies are the gold boxes in the party screen; you can heal any of
+  the six. Each card has a colored strip on the left: the same color is the
+  same player on everyone's screen.
+* R on the action menu shows both allies' Moemon with their HP, and once an
+  ally has picked, your menu shows it ("ALICE: EMBER").
+* Prize money, EXP, catches, disconnects and RUN (all three must choose it)
+  work like in Double Battles.
 
 
 TEAM GYM REMATCHES
