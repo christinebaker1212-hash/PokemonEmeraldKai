@@ -388,6 +388,11 @@ static const u8 sText_MpCoopWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appe
 static const u8 sText_MpCoopTwoWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!");
 static const u8 sText_MpCoopGotcha[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}{PLAY_BGM MUS_CAUGHT}\p");
 static const u8 sText_MpCoopUsedItem[] = _("{B_LINK_SCR_TRAINER_NAME} used\n{B_LAST_ITEM}!");
+static const u8 sText_MpCoopItemHp[] = _("{B_BUFF1}'s HP\nwas restored.");
+static const u8 sText_MpCoopItemCured[] = _("{B_BUFF1} was cured\nof its status problem.");
+static const u8 sText_MpCoopItemRevived[] = _("{B_BUFF1} was revived!");
+static const u8 sText_MpCoopItemHpCured[] = _("{B_BUFF1} was healed\nand cured!");
+const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
 static const u8 sText_Trainer1WantsToBattle[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME}\nwould like to battle!\p");
@@ -2268,6 +2273,18 @@ void BufferStringBattle(u16 stringID)
         {
             stringPtr = sText_PlayerUsedItem;
         }
+        break;
+    case STRINGID_MPCOOP_ITEM_HP:
+        stringPtr = sText_MpCoopItemHp;
+        break;
+    case STRINGID_MPCOOP_ITEM_CURED:
+        stringPtr = sText_MpCoopItemCured;
+        break;
+    case STRINGID_MPCOOP_ITEM_REVIVED:
+        stringPtr = sText_MpCoopItemRevived;
+        break;
+    case STRINGID_MPCOOP_ITEM_HP_CURED:
+        stringPtr = sText_MpCoopItemHpCured;
         break;
     case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
         // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,

@@ -107,6 +107,34 @@ BattleScript_MpCoopBallCaughtGoOn::
 	various BS_ATTACKER, VARIOUS_MP_COOP_REMOVE_CAUGHT
 	finishaction
 
+@ Moemon Co-op: a player used a healing item on one of the six Moemon (theirs or
+@ their partner's). The link master's game applies it and both games get the result.
+BattleScript_MpCoopUseItem::
+	printstring STRINGID_EMPTYSTRING3
+	playse SE_USE_ITEM
+	printstring STRINGID_PLAYERUSEDITEM
+	waitmessage B_WAIT_TIME_MED
+	various BS_ATTACKER, VARIOUS_MP_COOP_USE_ITEM
+	ptrvalue BattleScript_MpCoopItemActiveStatus
+	ptrvalue BattleScript_MpCoopItemBench
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+BattleScript_MpCoopItemActiveStatus::
+	various BS_TARGET, VARIOUS_MP_COOP_ITEM_STATUS
+	updatestatusicon BS_TARGET
+	printfromtable gMpCoopItemStringIds
+	waitmessage B_WAIT_TIME_MED
+	moveendcase MOVEEND_MIRROR_MOVE
+	finishaction
+
+BattleScript_MpCoopItemBench::
+	various BS_ATTACKER, VARIOUS_MP_COOP_ITEM_STATUS
+	printfromtable gMpCoopItemStringIds
+	waitmessage B_WAIT_TIME_MED
+	moveendcase MOVEEND_MIRROR_MOVE
+	finishaction
+
 BattleScript_WallyBallThrow::
 	printstring STRINGID_GOTCHAPKMNCAUGHTWALLY
 	setbyte gBattleOutcome, B_OUTCOME_CAUGHT

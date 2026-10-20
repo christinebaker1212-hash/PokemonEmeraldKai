@@ -453,6 +453,8 @@ bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
+extern u8 gMpCoopItemSlot;
+extern u8 gMpCoopItemTargetSlot;
 void MP_Emote_KeepBubbleFor(u8 playerId, const u8 *text);
 void MP_Emote_ClearBubbleFor(u8 playerId);
 struct ObjectEvent;

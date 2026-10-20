@@ -5,6 +5,7 @@
 #include "battle_anim.h"
 #include "battle_ai_script_commands.h"
 #include "battle_scripts.h"
+#include "constants/item_effects.h"
 #include "item.h"
 #include "util.h"
 #include "pokemon.h"
@@ -6356,6 +6357,90 @@ static void Cmd_useitemonopponent(void)
     gBattlescriptCurrInstr++;
 }
 
+// Moemon Co-op: a healing item one of the players used in a co-op battle
+// (HandleAction_UseItem set gMpCoopItemTargetSlot). Worked out on a copy, then
+// sent to both games: an active Moemon's HP goes through the health bar
+// (falls through to healthbarupdate), a benched one's straight into the party.
+static struct
+{
+    bool8 bench;
+    u8 slot;
+    u8 owner;
+    u32 status;
+} sMpItem;
+
+static void MpCoopUseItem(void)
+{
+    u8 slot = gMpCoopItemTargetSlot < PARTY_SIZE ? gMpCoopItemTargetSlot : 0;
+    struct Pokemon copy = gPlayerParty[slot];
+    u16 oldHp = GetMonData(&gPlayerParty[slot], MON_DATA_HP), newHp;
+    u32 oldStatus = GetMonData(&gPlayerParty[slot], MON_DATA_STATUS), newStatus;
+    bool8 inBattle = gMain.inBattle;
+    u8 i, active = MAX_BATTLERS_COUNT, owner = MAX_BATTLERS_COUNT;
+    const u8 *effect;
+
+    gMain.inBattle = FALSE;   // just the Moemon itself, no battle side effects
+    PokemonUseItemEffects(&copy, gLastUsedItem, slot, 0, FALSE);
+    gMain.inBattle = inBattle;
+    newHp = GetMonData(&copy, MON_DATA_HP);
+    newStatus = GetMonData(&copy, MON_DATA_STATUS);
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != B_SIDE_PLAYER)
+            continue;
+        if (gBattlerPartyIndexes[i] / MULTI_PARTY_SIZE == slot / MULTI_PARTY_SIZE)
+            owner = i;
+        if (gBattlerPartyIndexes[i] == slot && !(gAbsentBattlerFlags & gBitTable[i]) && gBattleMons[i].hp != 0)
+            active = i;
+    }
+    if (owner == MAX_BATTLERS_COUNT)
+        owner = GetBattlerAtPosition(slot < MULTI_PARTY_SIZE ? B_POSITION_PLAYER_LEFT : B_POSITION_PLAYER_RIGHT);
+
+    if (oldHp == 0 && newHp != 0)
+        gBattleCommunication[MULTISTRING_CHOOSER] = 2;
+    else if (newHp != oldHp && newStatus != oldStatus)
+        gBattleCommunication[MULTISTRING_CHOOSER] = 3;
+    else if (newHp != oldHp)
+        gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+    else
+        gBattleCommunication[MULTISTRING_CHOOSER] = 1;
+    PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, owner, slot);
+
+    sMpItem.slot = slot;
+    sMpItem.owner = owner;
+    sMpItem.status = newStatus;
+    if (active != MAX_BATTLERS_COUNT)
+    {
+        sMpItem.bench = FALSE;
+        gBattlerTarget = active;
+        gBattleMons[active].status1 = newStatus;
+        effect = gItemEffectTable[gLastUsedItem - ITEM_POTION];
+        if (gLastUsedItem >= ITEM_POTION && effect != NULL && (effect[3] & ITEM3_CONFUSION))
+            gBattleMons[active].status2 &= ~STATUS2_CONFUSION;
+        if (!(newStatus & STATUS1_SLEEP))
+            gBattleMons[active].status2 &= ~STATUS2_NIGHTMARE;
+        if (newHp != oldHp)
+        {
+            gBattleMoveDamage = (s32)oldHp - (s32)newHp;
+            gBattlescriptCurrInstr += 3 + 2 * sizeof(void *);   // health bar
+        }
+        else
+        {
+            gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
+        }
+    }
+    else
+    {
+        sMpItem.bench = TRUE;
+        gBattlerTarget = owner;
+        gActiveBattler = owner;
+        BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HP_BATTLE, 1 << slot, 2, &newHp);
+        MarkBattlerForControllerExec(gActiveBattler);
+        gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3 + sizeof(void *));
+    }
+}
+
 static void Cmd_various(void)
 {
     u8 side;
@@ -6559,6 +6644,23 @@ static void Cmd_various(void)
         MarkBattlerForControllerExec(gActiveBattler);
         break;
     }
+    case VARIOUS_MP_COOP_USE_ITEM:
+        MpCoopUseItem();
+        return;
+    case VARIOUS_MP_COOP_ITEM_STATUS:
+        // The new status into both games' copy of that Moemon
+        if (sMpItem.bench)
+        {
+            gActiveBattler = sMpItem.owner;
+            BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 1 << sMpItem.slot, 4, &sMpItem.status);
+        }
+        else
+        {
+            gActiveBattler = gBattlerTarget;
+            BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[gBattlerTarget].status1);
+        }
+        MarkBattlerForControllerExec(gActiveBattler);
+        break;
     }
 
     gBattlescriptCurrInstr += 3;

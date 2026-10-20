@@ -4308,7 +4308,7 @@ static void HandleTurnActionSelectionState(void)
                                             | BATTLE_TYPE_FRONTIER_NO_PYRAMID
                                             | BATTLE_TYPE_EREADER_TRAINER
                                             | BATTLE_TYPE_RECORDED_LINK)
-                        && !gMpCoopWild) // Moemon Co-op: POKé BALLS work in co-op wild battles
+                        && !gMpCoopBattle) // Moemon Co-op: POKé BALLS (co-op wild) and healing items work
                     {
                         RecordedBattle_ClearBattlerAction(gActiveBattler, 1);
                         gSelectionBattleScripts[gActiveBattler] = BattleScript_ActionSelectionItemsCantBeUsed;

@@ -1493,7 +1493,12 @@ static void CompleteWhenChoseItem(void)
 {
     if (gMain.callback2 == BattleMainCB2 && !gPaletteFade.active)
     {
-        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, gSpecialVar_ItemId);
+        u16 value = gSpecialVar_ItemId;
+        // Moemon Co-op: a healing item's target (any of the six) rides along in bits 12-14
+        if (gMpCoopBattle && value != ITEM_NONE && gMpCoopItemSlot < PARTY_SIZE)
+            value |= (gMpCoopItemSlot + 1) << 12;
+        gMpCoopItemSlot = 0xFF;
+        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, value);
         PlayerBufferExecCompleted();
     }
 }

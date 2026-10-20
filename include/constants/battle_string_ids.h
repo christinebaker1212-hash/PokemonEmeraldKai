@@ -381,6 +381,12 @@
 
 #define BATTLESTRINGS_COUNT                 381
 
+// Moemon Co-op: item results in co-op battles (handled in BufferStringBattle, not the table)
+#define STRINGID_MPCOOP_ITEM_HP             390
+#define STRINGID_MPCOOP_ITEM_CURED          391
+#define STRINGID_MPCOOP_ITEM_REVIVED        392
+#define STRINGID_MPCOOP_ITEM_HP_CURED       393
+
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
 // and are instead handled explicitly by BufferStringBattle.

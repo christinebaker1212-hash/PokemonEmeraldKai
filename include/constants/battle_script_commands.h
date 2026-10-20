@@ -360,6 +360,8 @@ enum BattleScriptOpcode
 #define VARIOUS_PLAY_TRAINER_DEFEATED_MUSIC     26
 #define VARIOUS_MP_COOP_CAUGHT_ONE              27   // Moemon Co-op: jumps if the other wild Pokemon is still out
 #define VARIOUS_MP_COOP_REMOVE_CAUGHT           28   // Moemon Co-op: the caught one leaves, the battle goes on
+#define VARIOUS_MP_COOP_USE_ITEM                29   // Moemon Co-op: a healing item on any of the six (2 jump pointers)
+#define VARIOUS_MP_COOP_ITEM_STATUS             30   // Moemon Co-op: sends that Moemon's new status to both games
 
 // Cmd_manipulatedmg
 #define DMG_CHANGE_SIGN            0

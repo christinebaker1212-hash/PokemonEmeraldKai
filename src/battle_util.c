@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_arena.h"
@@ -317,7 +318,14 @@ void HandleAction_UseItem(void)
     ClearFuryCutterDestinyBondGrudge(gBattlerAttacker);
     gLastUsedItem = gBattleBufferB[gBattlerAttacker][1] | (gBattleBufferB[gBattlerAttacker][2] << 8);
 
-    if (gLastUsedItem <= LAST_BALL) // is ball
+    // Moemon Co-op: a healing item carries its target's party slot in bits 12-14
+    if (gMpCoopBattle && (gLastUsedItem >> 12) != 0)
+    {
+        gMpCoopItemTargetSlot = (gLastUsedItem >> 12) - 1;
+        gLastUsedItem &= 0xFFF;
+        gBattlescriptCurrInstr = BattleScript_MpCoopUseItem;
+    }
+    else if (gLastUsedItem <= LAST_BALL) // is ball
     {
         gBattlescriptCurrInstr = gBattlescriptsForBallThrow[gLastUsedItem];
     }

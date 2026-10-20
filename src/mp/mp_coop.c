@@ -75,6 +75,8 @@ extern const u8 EventScript_MpCoopLearnMove[];
 
 bool8 gMpCoopBattle;
 bool8 gMpCoopWild;
+u8 gMpCoopItemSlot = 0xFF;         // party slot a healing item was used on (picked in the party menu)
+u8 gMpCoopItemTargetSlot = 0xFF;   // the master's battle: the slot it's being applied to
 
 enum {
     MPR_COOP_REQUEST = MPR_COOP_FIRST,  // asker -> challenged: may I join?

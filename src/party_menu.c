@@ -4439,12 +4439,45 @@ static bool8 ExecuteTableBasedItemEffect_(u8 partyMonIndex, u16 item, u8 monMove
         return ExecuteTableBasedItemEffect(&gPlayerParty[partyMonIndex], item, partyMonIndex, monMoveIndex);
 }
 
+// Moemon Co-op: in a co-op battle the item only picks its target here (yours
+// or your partner's); the link master's battle applies it for both games
+static void MpCoopItemUseCB_Medicine(u8 taskId, TaskFunc task)
+{
+    struct Pokemon copy = gPlayerParty[gPartyMenu.slotId];
+    u16 item = gSpecialVar_ItemId;
+    bool8 inBattle = gMain.inBattle, cannotUse;
+
+    gMain.inBattle = FALSE;
+    cannotUse = !NotUsingHPEVItemOnShedinja(&copy, item) || PokemonUseItemEffects(&copy, item, gPartyMenu.slotId, 0, FALSE);
+    gMain.inBattle = inBattle;
+    if (cannotUse)
+    {
+        gPartyMenuUseExitCallback = FALSE;
+        PlaySE(SE_SELECT);
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = task;
+        return;
+    }
+    gPartyMenuUseExitCallback = TRUE;
+    PlaySE(SE_SELECT);
+    RemoveBagItem(item, 1);
+    gMpCoopItemSlot = GetPartyIdFromBattleSlot(gPartyMenu.slotId);
+    gTasks[taskId].func = Task_ClosePartyMenu;
+}
+
 void ItemUseCB_Medicine(u8 taskId, TaskFunc task)
 {
     u16 hp = 0;
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
     u16 item = gSpecialVar_ItemId;
     bool8 canHeal, cannotUse;
+
+    if (gMpCoopBattle && gMain.inBattle)
+    {
+        MpCoopItemUseCB_Medicine(taskId, task);
+        return;
+    }
 
     if (NotUsingHPEVItemOnShedinja(mon, item) == FALSE)
     {

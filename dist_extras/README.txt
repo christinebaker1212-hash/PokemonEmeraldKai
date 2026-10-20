@@ -114,6 +114,9 @@ TEAMING UP FOR A DOUBLE BATTLE
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   bring more Moemon (half again as many; bosses a full six), they use their
   items and they choose their moves smarter.
+* In co-op battles you can use healing items (Potions, status heals,
+  Revives...) from the BAG on your own Moemon or your partner's, including
+  ones waiting on the bench (your partner's are the gold boxes).
 * Each player brings their first three healthy Moemon and picks their own
   moves. Both players get the full prize money and EXP for their Moemon.
   Evolutions happen on each player's game after the battle.
