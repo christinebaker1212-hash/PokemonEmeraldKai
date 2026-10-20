@@ -260,6 +260,11 @@ PRANK A FRIEND    Costs a MOEGATCHA pull: Magikarp follower (1 min),
                   backwards controls (15 sec), confetti cannon, whoopee
                   cushion. The victim gets a free REVENGE prank for 2 minutes.
                   Nobody can be pranked twice in a row, or during a battle.
+LEND FIELD MOVES  No CUT in your party? If a friend standing within 4 steps
+                  has a Moemon that knows CUT, SURF, STRENGTH, ROCK SMASH,
+                  WATERFALL or DIVE, the tree, rock, boulder or water works
+                  with theirs ("ALICE's PELIPPER used SURF!") and they get a
+                  note. You still need the badge for the move.
 TEAM PHOTO        With friends on the same map: everyone's trainer picture
                   lines up on a stage with your names, the place and the date,
                   framed like an instant photo. It's saved as a PNG in the

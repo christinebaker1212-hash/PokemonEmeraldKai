@@ -1577,6 +1577,12 @@ bool8 ScrCmd_bufferpartymonnick(struct ScriptContext *ctx)
     u8 stringVarIndex = ScriptReadByte(ctx);
     u16 partyIndex = VarGet(ScriptReadHalfword(ctx));
 
+    // Moemon Co-op: a friend's Moemon (field moves they lend)
+    if (partyIndex == MP_LEND_SLOT)
+    {
+        MP_Lend_Name(sScriptStringVars[stringVarIndex]);
+        return FALSE;
+    }
     GetMonData(&gPlayerParty[partyIndex], MON_DATA_NICKNAME, sScriptStringVars[stringVarIndex]);
     StringGet_Nickname(sScriptStringVars[stringVarIndex]);
     return FALSE;
@@ -1731,6 +1737,16 @@ bool8 ScrCmd_checkpartymove(struct ScriptContext *ctx)
             gSpecialVar_Result = i;
             gSpecialVar_0x8004 = species;
             break;
+        }
+    }
+    // Moemon Co-op: nobody in the party knows it, but a friend close by does
+    if (gSpecialVar_Result == PARTY_SIZE)
+    {
+        s32 lent = MP_Lend_Borrow(move);
+        if (lent >= 0)
+        {
+            gSpecialVar_Result = MP_LEND_SLOT;
+            gSpecialVar_0x8004 = lent;
         }
     }
     return FALSE;

@@ -396,6 +396,15 @@ const char *MP_Photo_Check(void);
 void MP_Photo_Start(void);
 void MP_Photo_OnRelay(u8 from, const u8 *data, u16 len);
 bool8 MP_Photo_Done(void);
+#define MP_LEND_SLOT (PARTY_SIZE + 1)   // checkpartymove's "slot" for a friend's Moemon (mp_lend.c)
+void MP_Lend_Update(void);
+void MP_Lend_OnRelay(u8 from, const u8 *data, u16 len);
+bool8 MP_Lend_Available(u16 move);
+s32 MP_Lend_Borrow(u16 move);
+void MP_Lend_Name(u8 *dst);
+void MP_Lend_ShowMonArgs(u32 *species, u32 *otId, u32 *personality);
+void MP_Lend_NotifyUsed(void);
+void MP_Lend_Debug(void);
 // mp_emote.c / mp_compass.c helpers for it
 void MP_Emote_PingBubble(u8 slot, const u8 *text, s16 tileX, s16 tileY);   // text NULL = hide
 void MP_Compass_PointAt(u8 slot, u8 colorPlayer, s32 dx, s32 dy, bool8 show);
@@ -636,6 +645,7 @@ enum {
     MPR_WELCOME = 90,          // the room creator's welcome note for a friend who joined (mp_main.c)
     MPR_PING = 91,             // "look here!": u8 mapGroup, mapNum, s16 x, y (mp_ping.c)
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
+    MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

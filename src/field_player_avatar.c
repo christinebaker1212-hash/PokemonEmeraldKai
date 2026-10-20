@@ -1313,6 +1313,9 @@ bool8 PartyHasMonWithSurf(void)
             if (MonKnowsMove(&gPlayerParty[i], MOVE_SURF))
                 return TRUE;
         }
+        // Moemon Co-op: a friend close by can lend SURF
+        if (MP_Lend_Available(MOVE_SURF))
+            return TRUE;
     }
     return FALSE;
 }

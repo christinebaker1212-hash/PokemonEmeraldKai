@@ -20,6 +20,7 @@
 #include "main.h"
 #include "battle_setup.h"
 #include "pokemon.h"
+#include "constants/moves.h"
 #include "event_data.h"
 #include "overworld.h"
 #include "money.h"
@@ -383,6 +384,37 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int b;
         for (b = 0; b < 4; b++)
             printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
+    }
+    else if (strcmp(cmd, "near") == 0)
+    {
+        int i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gObjectEvents[i].active)
+                printf("[test] obj %d gfx %d at %d,%d facing %d local %d\n", i, gObjectEvents[i].graphicsId,
+                       gObjectEvents[i].currentCoords.x, gObjectEvents[i].currentCoords.y,
+                       gObjectEvents[i].facingDirection, gObjectEvents[i].localId);
+    }
+    else if (strcmp(cmd, "lend") == 0)
+        MP_Lend_Debug();
+    else if (strcmp(cmd, "teach") == 0)
+    {
+        // mp teach SLOT MOVE: replaces the first move
+        int slot = atoi(arg), move = 0;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            move = atoi(sp + 1);
+        if (slot >= 0 && slot < PARTY_SIZE && move > 0 && move < MOVES_COUNT)
+        {
+            u16 m = move;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1, &m);
+            printf("[test] teach: slot %d move %d\n", slot, move);
+        }
+    }
+    else if (strcmp(cmd, "givebadges") == 0)
+    {
+        int b;
+        for (b = 0; b < 8; b++)
+            FlagSet(FLAG_BADGE01_GET + b);
     }
     else if (strcmp(cmd, "photo") == 0)
     {

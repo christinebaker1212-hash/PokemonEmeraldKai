@@ -977,6 +977,7 @@ void MP_Emote_Update(void)
     ShowSpeedNotice();
     UpdateBubble(&sBubbles[TOAST_SLOT], gPlayerAvatar.objectEventId);
     MP_Ping_Update();
+    MP_Lend_Update();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         UpdateDoorLabel(i);

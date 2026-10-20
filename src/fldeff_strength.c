@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "event_data.h"
 #include "event_scripts.h"
 #include "field_effect.h"
@@ -37,7 +38,14 @@ bool8 FldEff_UseStrength(void)
 {
     u8 taskId = CreateFieldMoveTask();
     gTasks[taskId].ptr.funcPtr = StartStrengthFieldEffect;
-    GetMonNickname(&gPlayerParty[gFieldEffectArguments[0]], gStringVar1);
+    // Moemon Co-op: a friend's Moemon lends STRENGTH
+    if (gFieldEffectArguments[0] == MP_LEND_SLOT)
+    {
+        MP_Lend_Name(gStringVar1);
+        MP_Lend_NotifyUsed();
+    }
+    else
+        GetMonNickname(&gPlayerParty[gFieldEffectArguments[0]], gStringVar1);
     return FALSE;
 }
 

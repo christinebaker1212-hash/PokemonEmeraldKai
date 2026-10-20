@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "decompress.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
@@ -2607,6 +2608,18 @@ bool8 FldEff_FieldMoveShowMonInit(void)
 {
     struct Pokemon *pokemon;
     bool32 noDucking = gFieldEffectArguments[0] & SHOW_MON_CRY_NO_DUCKING;
+    // Moemon Co-op: a friend's Moemon lends the move
+    if ((u8)gFieldEffectArguments[0] == MP_LEND_SLOT)
+    {
+        u32 species, otId, personality;
+        MP_Lend_ShowMonArgs(&species, &otId, &personality);
+        gFieldEffectArguments[0] = species | noDucking;
+        gFieldEffectArguments[1] = otId;
+        gFieldEffectArguments[2] = personality;
+        FieldEffectStart(FLDEFF_FIELD_MOVE_SHOW_MON);
+        FieldEffectActiveListRemove(FLDEFF_FIELD_MOVE_SHOW_MON_INIT);
+        return FALSE;
+    }
     pokemon = &gPlayerParty[(u8)gFieldEffectArguments[0]];
     gFieldEffectArguments[0] = GetMonData(pokemon, MON_DATA_SPECIES);
     gFieldEffectArguments[1] = GetMonData(pokemon, MON_DATA_OT_ID);

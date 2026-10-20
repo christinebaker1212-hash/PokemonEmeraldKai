@@ -951,6 +951,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Ping_OnRelay(from, data, len);
     else if (data[0] == MPR_PHOTO)
         MP_Photo_OnRelay(from, data, len);
+    else if (data[0] == MPR_LEND)
+        MP_Lend_OnRelay(from, data, len);
     else if (data[0] >= MPR_DEX_FIRST && data[0] < MPR_DEX_FIRST + 4)
         MP_Dex_OnRelay(from, data, len);
     else if (data[0] >= MPR_TRADE_FIRST && data[0] < MPR_GIFT_FIRST)
