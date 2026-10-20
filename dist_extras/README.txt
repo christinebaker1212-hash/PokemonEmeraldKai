@@ -394,7 +394,9 @@ clothes and bags from official FireRed/LeafGreen sprites (skirts, shorts, long
 coat, overalls, swimwear, Red's and Leaf's bags, the Hiker's pack), small head
 accessories (crown, glasses, cat ears...) from the picture's own parts, and
 skin in exact Gen 3 colors. FIELD picks its hairstyle: AUTO matches HAIR, or
-pick any of the 30 Gen 3 hairstyles (L/R jumps 5).
+pick any of 144 hairstyles (L/R jumps 5): the 30 from the Gen 3 kit, then 114
+named after the characters they come from (VALERIE, MARNIE, HUGH...). They all
+take your HAIR color; ribbons and clips take your top's colors.
 
 Characters without a battle back sprite: in battle your trainer isn't shown
 (your Moemon still are), unless you pick a BK PIC. You can also draw one in
@@ -406,7 +408,9 @@ Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
 by MufasaKong. CREATE uses a fan-made trainer customization parts kit for the
 pictures and a Gen 3 trainer kit (made for Top Down Sprite Maker) for the
-field sprites.
+field sprites. The extra field hairstyles are cut from aveontrainer's
+FRLG-style overworld sprites (deviantart.com/aveontrainer, gallery OVERWORLD),
+used with credit for this non-commercial project as the artist allows.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.

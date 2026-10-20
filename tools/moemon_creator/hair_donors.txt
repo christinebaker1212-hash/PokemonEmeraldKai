@@ -1,0 +1,120 @@
+# Extra field-sprite hairstyles (donor_hair.py). Art by aveontrainer:
+# https://www.deviantart.com/aveontrainer/gallery/67900303/overworld
+# FILE (gallery number) NAME [options]
+# options: long=ROW or long=S:ROW,N:ROW (where long hair stops; default: follow it down),
+#          eyes=S:ROW:X1:X2,W:ROW:X (when the hair hides them), dx=/dy= nudges,
+#          hair=/nothair=/skin=/acc= colors (hex), noacc, acc_fixed
+005 punk
+006 bob
+009 painter
+013 alexa
+014 bonnie
+020 olivia
+021 bun
+025 swept
+026 beach
+030 curly
+032 kalos-lass
+041 waiter long=0
+044 veteran
+048 valerie
+049 olympia
+050 viola
+053 ace-trainer
+054 hugh
+058 scientist noacc
+062 hop
+068 emma
+073 palmer
+076 sabrina
+078 nessa
+079 bede
+084 jasmine
+085 whitney
+088 volkner long=0
+089 aaron
+104 lenora
+107 elesa long=0
+111 grace
+112 thorton long=0
+113 trevor
+117 clair
+118 bea long=0
+119 marnie long=16
+123 benga long=0
+124 aveon
+126 updo
+129 lusamine
+132 shauna
+135 guitarist
+137 side-swept
+138 cool-trainer
+139 lass
+141 green-bob
+144 spiky
+145 ace long=0
+148 school-girl
+149 bird-keeper
+150 battle-girl
+153 swimmer
+154 twin
+162 galactic
+164 beauty
+165 bowl
+167 tousled noacc
+168 poke-fan
+170 looker
+175 ace-girl
+181 cissy
+183 glacia
+185 sidney
+187 liza
+189 rich-boy
+190 cool-girl
+192 parted
+193 hiker
+194 savannah
+195 kelly
+198 scruffy
+202 iris
+203 morrison
+204 drew
+205 solidad
+207 couple
+208 couple-girl
+213 hau
+214 lana
+221 long-blonde
+231 ruin-maniac
+236 hun
+244 concordia
+245 emerald long=0
+247 damian
+252 alain
+262 cyrus
+264 saturn
+265 jupiter
+266 mars
+267 eusine
+269 steven long=0
+272 flint
+277 bugsy
+279 silver
+280 barry
+281 cheren
+282 wally
+284 ariana
+285 archer
+286 petrel
+289 hex-maniac
+303 mallow
+304 roxanne
+307 juan
+308 ivy
+309 bertha long=0
+310 cheryl
+311 norman
+312 brawly
+316 juniper
+322 dragon-tamer
+326 ace-boy

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Moemon Co-op trainer creator: the Gen 3 field sprites (walk, run, Mach Bike).
 
-Usage: build_ow.py KIT3_DIR FRLG_DIR [--preview OUT.png]
+Usage: build_ow.py KIT3_DIR FRLG_DIR [HAIR_DIR] [--preview OUT.png]
   KIT3_DIR  the Gen 3 trainer kit (Top Down Sprite Maker "pokemon-gen-3": bases/, manifest.tds)
   FRLG_DIR  a pokefirered checkout (official overworld sprites to borrow clothes and bags from)
+  HAIR_DIR  aveontrainer's overworld sheets (extra hairstyles, see donor_hair.py / hair_donors.txt)
 Reads the CREATE parts made by build.py (graphics/moemon/creator/parts.bin, src/mp/mp_creator_data.h)
 for the colors of every part and the head accessories the Gen 3 kit doesn't have.
 Writes graphics/moemon/creator/ow3.bin and src/mp/mp_creator_ow.h.
 
 Where each piece of the field sprite comes from:
   body, head, eyes, hair (30 styles), T-shirt, pants, shoes, 5 hats   the Gen 3 kit
+  more hairstyles (hair_donors.txt)                                  aveontrainer's FRLG-style sprites
   skirts, shorts, long coat, overalls, swimwear, backpacks            official FRLG sprites
   other head accessories (crown, glasses, cat ears, fedora...)       the CREATE parts (front/back art)
 Skin tones are exact Gen 3 colors (overworld ramp and trainer pictures).
@@ -279,8 +281,12 @@ def shift(a, dx, dy):
 # ---------------------------------------------------------------------------
 
 class Builder:
-    def __init__(self, kit_dir, frlg_dir):
+    def __init__(self, kit_dir, frlg_dir, hair_dir=None):
         self.kit = Kit3(kit_dir)
+        if hair_dir:
+            import donor_hair
+            for name, nacc, sheet in donor_hair.load(hair_dir):
+                self.kit.add_hair(name, nacc, sheet)
         self.frlg = os.path.join(frlg_dir, 'graphics/object_events/pics/people')
         self.old = OldParts()
         self.st = Store()
@@ -739,4 +745,4 @@ if __name__ == '__main__':
         i = args.index('--preview')
         prev = args[i + 1]
         del args[i:i + 2]
-    Builder(args[0], args[1]).run(prev)
+    Builder(args[0], args[1], args[2] if len(args) > 2 else None).run(prev)

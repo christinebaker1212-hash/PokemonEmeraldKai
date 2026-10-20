@@ -71,6 +71,11 @@ class Kit3:
         self.root = root
         self.hairs = self.csv('hair')
         self.hats = self.csv('hat')
+        self.extra = {}   # (layer, name) -> sheet: hairstyles from elsewhere (donor_hair.py)
+
+    def add_hair(self, name, nacc, sheet):
+        self.hairs.append((name, nacc))
+        self.extra[('hair', name)] = sheet
 
     def csv(self, layer):
         out = []
@@ -80,6 +85,8 @@ class Kit3:
         return out
 
     def img(self, layer, name):
+        if (layer, name) in self.extra:
+            return self.extra[(layer, name)]
         p = os.path.join(self.root, 'bases', layer, name + '.png')
         if not os.path.exists(p):
             return None
