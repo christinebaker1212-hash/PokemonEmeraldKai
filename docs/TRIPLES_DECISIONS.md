@@ -41,6 +41,10 @@ answers agreed with the project owner (October 2026). They override the plan whe
   (always shown), the status badge when there is one, then the HP bar. Foes stacked top-left from (2,2),
   the team stacked right from (166,49), 21 px apart; a colored strip on the left of a player card shows its
   owner. Exact HP lives in the R team glance and the target screen.
+- See-through cards: the cream fill and border are blended (text, level, HP bar, status badge and owner
+  strip stay solid). Team cards ramp from the top: 38% / 15% / 0% see-through (the top one sits over the
+  right foe); foe cards 38%. A GBA can't blend a sprite over another sprite, so the port's renderer
+  draws the cards in an extra pass that blends over the finished frame.
 
 ## Process
 - Work through the phases independently; commit and send a Windows build at each major milestone
