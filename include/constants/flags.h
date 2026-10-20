@@ -45,6 +45,7 @@
 
 #define FLAG_UNUSED_0x020    0x20 // Unused Flag
 #define FLAG_UNUSED_0x021    0x21 // Unused Flag
+#define FLAG_MP_SKIP_TRUCK   FLAG_UNUSED_0x021 // Moemon Co-op: SKIP THE INTRO, the truck still drops you off
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
 #define FLAG_UNUSED_0x023    0x23 // Unused Flag
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag

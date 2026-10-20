@@ -7,7 +7,19 @@ InsideOfTruck_OnLoad:
 	setmetatile 4, 1, METATILE_InsideOfTruck_ExitLight_Top, FALSE
 	setmetatile 4, 2, METATILE_InsideOfTruck_ExitLight_Mid, FALSE
 	setmetatile 4, 3, METATILE_InsideOfTruck_ExitLight_Bottom, FALSE
+	call_if_set FLAG_MP_SKIP_TRUCK, InsideOfTruck_EventScript_MpSkipIntroExit
 	end
+
+@ Moemon Co-op: SKIP THE INTRO starts here too; the door leads out by your house
+InsideOfTruck_EventScript_MpSkipIntroExit::
+	checkplayergender
+	goto_if_eq VAR_RESULT, FEMALE, InsideOfTruck_EventScript_MpSkipIntroExitFemale
+	setdynamicwarp MAP_LITTLEROOT_TOWN, 3, 10
+	return
+
+InsideOfTruck_EventScript_MpSkipIntroExitFemale::
+	setdynamicwarp MAP_LITTLEROOT_TOWN, 12, 10
+	return
 
 InsideOfTruck_OnResume:
 	setstepcallback STEP_CB_TRUCK

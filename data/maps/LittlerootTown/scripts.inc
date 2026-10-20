@@ -36,6 +36,7 @@ LittlerootTown_MapScripts::
 
 LittlerootTown_OnTransition:
 	setflag FLAG_VISITED_LITTLEROOT_TOWN
+	call_if_set FLAG_MP_SKIP_TRUCK, LittlerootTown_EventScript_MpArriveByTruck
 	call Common_EventScript_SetupRivalGfxId
 	call_if_eq VAR_LITTLEROOT_INTRO_STATE, 2, LittlerootTown_EventScript_MoveMomToMaysDoor
 	call_if_unset FLAG_RESCUED_BIRCH, LittlerootTown_EventScript_SetTwinPos
@@ -102,10 +103,29 @@ LittlerootTown_EventScript_SetMomInFrontOfDoorFemale::
 	return
 
 LittlerootTown_OnFrame:
+	map_script_2 VAR_TEMP_F, 1, LittlerootTown_EventScript_MpStepOffTruck
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 1, LittlerootTown_EventScript_StepOffTruckMale
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 2, LittlerootTown_EventScript_StepOffTruckFemale
 	map_script_2 VAR_DEX_UPGRADE_JOHTO_STARTER_STATE, 1, LittlerootTown_EventScript_BeginDexUpgradeScene
 	.short 0
+
+@ Moemon Co-op: SKIP THE INTRO, hop off the truck in front of your house
+LittlerootTown_EventScript_MpArriveByTruck::
+	setvar VAR_TEMP_F, 1
+	return
+
+LittlerootTown_EventScript_MpStepOffTruck::
+	lockall
+	setvar VAR_TEMP_F, 0
+	clearflag FLAG_MP_SKIP_TRUCK
+	delay 15
+	playse SE_LEDGE
+	applymovement LOCALID_PLAYER, LittlerootTown_Movement_PlayerStepOffTruck
+	waitmovement 0
+	setflag FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_TRUCK
+	setflag FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_TRUCK
+	releaseall
+	end
 
 LittlerootTown_EventScript_StepOffTruckMale::
 	lockall

@@ -2,7 +2,9 @@
 // main_menu.c). The player picks and names a starter there; NewGameInitData
 // then sets the story up as it is right after the Route 103 rival battle, the
 // POKéDEX from BIRCH, the POKé BALLS from the rival and the RUNNING SHOES from
-// MOM, and starts the game outside BIRCH's lab in LITTLEROOT.
+// MOM. The game still starts in the moving truck, which drops the player off
+// in front of their house (FLAG_MP_SKIP_TRUCK: InsideOfTruck / LittlerootTown
+// scripts). The starter reads as met at Lv. 5 on ROUTE 101, as in the intro.
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -17,6 +19,7 @@
 #include "constants/heal_locations.h"
 #include "constants/items.h"
 #include "constants/maps.h"
+#include "constants/region_map_sections.h"
 #include "constants/species.h"
 #include "constants/vars.h"
 #include "constants/opponents.h"
@@ -63,6 +66,11 @@ static void GiveStarter(u16 rivalSpecies)
     // Made at the level it would have reached, so it knows the moves it would have learned
     CreateMon(&mon, sSpecies, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     SetMonData(&mon, MON_DATA_EXP, &exp);
+    {
+        u8 metLocation = MAPSEC_ROUTE_101, metLevel = 5;   // where PROF. BIRCH's bag is
+        SetMonData(&mon, MON_DATA_MET_LOCATION, &metLocation);
+        SetMonData(&mon, MON_DATA_MET_LEVEL, &metLevel);
+    }
     if (sHasNickname)
         SetMonData(&mon, MON_DATA_NICKNAME, sNickname);
     CalculateMonStats(&mon);
@@ -94,9 +102,9 @@ void MP_QuickStart_Apply(void)
     GetSetPokedexFlag(SpeciesToNationalPokedexNum(SPECIES_ZIGZAGOON), FLAG_SET_SEEN);
     GetSetPokedexFlag(SpeciesToNationalPokedexNum(sRivalSpecies[starter]), FLAG_SET_SEEN);
 
-    // The moving truck, the house, the clock and the TV
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_TRUCK);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_TRUCK);
+    // The moving truck (it still brings you: hidden after you step off), the house, the clock and the TV
+    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_TRUCK : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_TRUCK);
+    FlagSet(FLAG_MP_SKIP_TRUCK);
     FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_MOM : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_MOM);
     FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_MOM : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_MOM);
     FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_SIBLING : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_SIBLING);
@@ -155,9 +163,7 @@ void MP_QuickStart_Apply(void)
     FlagSet(FLAG_SYS_B_DASH);
     VarSet(VAR_LITTLEROOT_TOWN_STATE, 4);
 
-    // Home is the place to wake up; start just outside PROF. BIRCH's lab
+    // Home is the place to wake up; the game starts in the truck (NewGameInitData already warped there)
     SetLastHealLocationWarp(male ? HEAL_LOCATION_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F : HEAL_LOCATION_LITTLEROOT_TOWN_MAYS_HOUSE_2F);
-    SetWarpDestination(MAP_GROUP(MAP_LITTLEROOT_TOWN), MAP_NUM(MAP_LITTLEROOT_TOWN), WARP_ID_NONE, 7, 17);
-    WarpIntoMap();
     sSpecies = SPECIES_NONE;
 }
