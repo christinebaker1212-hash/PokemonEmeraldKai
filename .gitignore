@@ -53,3 +53,6 @@ moemon_server.exe
 .claude/worktrees/
 coop_store_*.dat
 __pycache__/
+
+# Moemon Co-op: per-player settings the game writes next to the exe
+moemon_controls.ini
