@@ -384,6 +384,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   use the item. (L and R need BUTTON MODE NORMAL in OPTION.)
 * Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
+* If the game crashes it saves crash_log.txt next to the game and says so.
+  Please send that file (and what you were doing) to the developer.
 * AUTOSAVE: the game saves itself quietly every 5 minutes on the map (and a
   minute after a battle), the moment you're standing free. Not where the START
   menu has no SAVE (SAFARI ZONE, BATTLE PIKE / PYRAMID, link rooms), and a new

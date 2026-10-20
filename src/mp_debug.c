@@ -400,6 +400,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] palfill %04x -> %d\n", 0x7700 + i, LoadSpritePalette(&pal));
         }
     }
+        else if (strcmp(cmd, "crash") == 0)
+    {
+        // crash - test crash_log.txt
+        volatile int *p = NULL;
+        *p = 1;
+    }
         else if (strcmp(cmd, "pals") == 0)
     {
         // pals - which tag holds each sprite palette slot

@@ -93,8 +93,12 @@ static void UpdateInternalClock(void);
 
 bool8 MP_ConfigAllowsTweaks(void);
 
+void Platform_InstallCrashLog(void);
+
 int main(int argc, char **argv)
 {
+    Platform_InstallCrashLog();   // Moemon Co-op: crash_log.txt (crash_log.c)
+
     // Moemon Co-op: the exe is a windowed app; the log console only opens with
     // AllowSmallTweaks = 1 in moemon_coop.ini
 #ifdef _WIN32
