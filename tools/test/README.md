@@ -47,6 +47,10 @@ watching before the key press that causes it (then a bare `waitlog N`). Fixed `w
 Species ids are the game's internal ones (Torchic 280, Mudkip 283; 252-276 are unused "?" slots). A log with
 `TIMEOUT` (a `waitfor`/`pressuntil` that never got there) or a crash fails the scenario too.
 
+The Windows build under Wine (`apt install wine64`), from the unzipped package:
+
+    tools/test/wine_smoke.sh PKG_DIR     # solo boot + battle, then Windows server + Windows host + Linux joiner at 250 ms
+
 Lower level, for trying things out (results and logs land in DIR):
 
     tools/test/run1.sh DIR [VAR=value...]       # DIR/a.txt, one client

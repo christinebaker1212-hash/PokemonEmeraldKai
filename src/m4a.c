@@ -1837,7 +1837,12 @@ void SetPokemonCryProgress(u32 val)
 
 bool32 IsPokemonCryPlaying(struct MusicPlayerInfo *mplayInfo)
 {
-    struct MusicPlayerTrack *track = mplayInfo->tracks;
+    struct MusicPlayerTrack *track;
+
+    // Moemon Co-op: no cry has played yet (seen on a co-op battle's partner screen under Windows)
+    if (mplayInfo == NULL)
+        return FALSE;
+    track = mplayInfo->tracks;
 
 #if defined PORTABLE && !defined SOUND_DISABLED
     if (!mplayInfo->hasBeenRanOnce)

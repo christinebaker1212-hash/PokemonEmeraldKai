@@ -242,6 +242,7 @@ pinned to the front view's top on screen (kit3.head_offset places the head cell 
 have MARGIN spare rows above and below (kit3.head_frames handles taller sheets). Audit: all 114 tops level, none clipped.
 
 ## Not yet done or verified
-- The Windows exe has never been run on real Windows (it was cross-compiled)
+- The Windows exe has never been run on real Windows (it was cross-compiled); it runs under Wine
+  (tools/test/wine_smoke.sh: solo, and a co-op battle with a Linux player through the Windows server)
 - Co-op battles: only POKé BALLS (wild) and healing items (ItemUseInBattle_Medicine); no items in PvP
 - Remote players aren't shown across warps (only the same map or connected maps)
