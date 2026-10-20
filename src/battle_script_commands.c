@@ -3260,16 +3260,16 @@ static void Cmd_jumpiftype(void)
 }
 
 // Moemon Co-op: per-owner EXP shares (see Cmd_getexp)
-static u16 sMpCoopExp[2], sMpCoopShareExp[2];
+static u16 sMpCoopExp[3], sMpCoopShareExp[3];
 
 static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
 {
-    u8 owner, i;
+    u8 owner, i, size = MP_Coop_SeatSize();   // 3 per player, 2 in a triple
 
-    for (owner = 0; owner < 2; owner++)
+    for (owner = 0; owner < PARTY_SIZE / size; owner++)
     {
         s32 viaSentIn = 0, viaExpShare = 0;
-        for (i = owner * MULTI_PARTY_SIZE; i < (owner + 1) * MULTI_PARTY_SIZE; i++)
+        for (i = owner * size; i < (owner + 1) * size; i++)
         {
             u16 item;
             u8 holdEffect;
@@ -3305,7 +3305,7 @@ static void Cmd_getexp(void)
     u16 *exp = &gBattleStruct->expValue;
 
     gBattlerFainted = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);
-    sentIn = gSentPokesToOpponent[(gBattlerFainted & 2) >> 1];
+    sentIn = gSentPokesToOpponent[gBattlerFainted >> 1];
 
     switch (gBattleScripting.getexpState)
     {
@@ -3385,7 +3385,7 @@ static void Cmd_getexp(void)
         {
             if (gMpCoopBattle)
             {
-                u8 owner = gBattleStruct->expGetterMonId / MULTI_PARTY_SIZE;
+                u8 owner = gBattleStruct->expGetterMonId / MP_Coop_SeatSize();
                 *exp = sMpCoopExp[owner];
                 gExpShareExp = sMpCoopShareExp[owner];
             }
@@ -4296,6 +4296,27 @@ static void Cmd_playstatchangeanimation(void)
     }
 }
 
+// Moemon Co-op: Triple Battle spread moves hit up to three foes. gMpSpreadDone holds
+// the targets already hit by this use of the move (reset at its first target).
+u8 gMpSpreadDone;
+static u8 MpNextSpreadTarget(void)
+{
+    u8 b, side = GetBattlerSide(gBattlerTarget);
+    if (!(gHitMarker & HITMARKER_NO_ATTACKSTRING))
+        gMpSpreadDone = 0;
+    gMpSpreadDone |= gBitTable[gBattlerTarget];
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        if (GetBattlerSide(b) != side || (gMpSpreadDone & gBitTable[b]) || (gAbsentBattlerFlags & gBitTable[b])
+         || gBattleMons[b].hp == 0)
+            continue;
+        gMpSpreadDone |= gBitTable[b];
+        return b;
+    }
+    gMpSpreadDone = 0;
+    return MAX_BATTLERS_COUNT;
+}
+
 static void Cmd_moveend(void)
 {
     s32 i;
@@ -4549,12 +4570,13 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_NEXT_TARGET: // For moves hitting two opposing Pokémon.
+            // (Moemon Co-op: a Triple Battle goes on to every foe not hit yet, MpNextSpreadTarget)
             if (!(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE) && gBattleTypeFlags & BATTLE_TYPE_DOUBLE
                 && !gProtectStructs[gBattlerAttacker].chargingTurn && gBattleMoves[gCurrentMove].target == MOVE_TARGET_BOTH
-                && !(gHitMarker & HITMARKER_NO_ATTACKSTRING))
+                && (!(gHitMarker & HITMARKER_NO_ATTACKSTRING) || (IS_TRIPLE_BATTLE() && gMpSpreadDone != 0)))
             {
-                u8 battler = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerTarget)));
-                if (gBattleMons[battler].hp != 0)
+                u8 battler = IS_TRIPLE_BATTLE() ? MpNextSpreadTarget() : GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerTarget)));
+                if (battler < gBattlersCount && gBattleMons[battler].hp != 0)
                 {
                     gBattlerTarget = battler;
                     gHitMarker |= HITMARKER_NO_ATTACKSTRING;
@@ -4825,6 +4847,14 @@ static void Cmd_jumpifcantswitch(void)
         else
             gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
     }
+    else if (IS_TRIPLE_BATTLE())
+    {
+        // Moemon Co-op: Baton Pass / Roar in a triple (the player's own two, the NPC's shared pool)
+        if (HasNoMonsToSwitch(gActiveBattler, PARTY_SIZE, PARTY_SIZE))
+            gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+        else
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+    }
     else if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
     {
         if (gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI)
@@ -4964,7 +4994,8 @@ static void Cmd_openpartyscreen(void)
 
     if (gBattlescriptCurrInstr[DSIZE8BIT] == BS_FAINTED_LINK_MULTIPLE_1)
     {
-        if ((gBattleTypeFlags & BATTLE_TYPE_MULTI) || !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+        // Moemon Co-op: a triple's fainted battlers all choose at once, like a multi battle's
+        if ((gBattleTypeFlags & BATTLE_TYPE_MULTI) || !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || IS_TRIPLE_BATTLE())
         {
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
@@ -5119,7 +5150,7 @@ static void Cmd_openpartyscreen(void)
     }
     else if (gBattlescriptCurrInstr[DSIZE8BIT] == BS_FAINTED_LINK_MULTIPLE_2)
     {
-        if (!(gBattleTypeFlags & BATTLE_TYPE_MULTI))
+        if (!(gBattleTypeFlags & BATTLE_TYPE_MULTI) && !IS_TRIPLE_BATTLE())
         {
             if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
             {
@@ -5229,7 +5260,7 @@ static void Cmd_openpartyscreen(void)
             {
                 gActiveBattler = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battler)));
                 if (gAbsentBattlerFlags & gBitTable[gActiveBattler])
-                    gActiveBattler ^= BIT_FLANK;
+                    gActiveBattler = BATTLE_PARTNER(gActiveBattler);   // Moemon Co-op: 5 -> 1, not 7
 
                 BtlController_EmitLinkStandbyMsg(B_COMM_TO_CONTROLLER, LINK_STANDBY_MSG_ONLY, FALSE);
                 MarkBattlerForControllerExec(gActiveBattler);
@@ -6445,7 +6476,7 @@ static void MpCoopUseItem(void)
     {
         if (GetBattlerSide(i) != B_SIDE_PLAYER)
             continue;
-        if (gBattlerPartyIndexes[i] / MULTI_PARTY_SIZE == slot / MULTI_PARTY_SIZE)
+        if (gBattlerPartyIndexes[i] / MP_Coop_SeatSize() == slot / MP_Coop_SeatSize())
             owner = i;
         if (gBattlerPartyIndexes[i] == slot && !(gAbsentBattlerFlags & gBitTable[i]) && gBattleMons[i].hp != 0)
             active = i;
@@ -6934,7 +6965,7 @@ static void Cmd_setreflect(void)
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].reflectTimer = 5;
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].reflectBattlerId = gBattlerAttacker;
 
-        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) == 2)
+        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) >= 2)   // (Moemon Co-op: >= for triples)
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_REFLECT_DOUBLE;
         else
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_REFLECT_SINGLE;
@@ -7706,7 +7737,7 @@ static void Cmd_setlightscreen(void)
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].lightscreenTimer = 5;
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].lightscreenBattlerId = gBattlerAttacker;
 
-        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) == 2)
+        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) >= 2)   // (Moemon Co-op: >= for triples)
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_LIGHTSCREEN_DOUBLE;
         else
             gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SET_LIGHTSCREEN_SINGLE;
@@ -7925,6 +7956,17 @@ static void Cmd_tryinfatuating(void)
     }
 }
 
+// Moemon Co-op: in a Triple Battle, the ally that is neither battler nor its
+// BATTLE_PARTNER (battler 0 <-> 2 leaves 4, 4 <-> 0 leaves 2...)
+static u8 MpThirdAlly(u8 battler)
+{
+    u8 b, partner = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(battler)));
+    for (b = 0; b < gBattlersCount; b++)
+        if (b != battler && b != partner && GetBattlerSide(b) == GetBattlerSide(battler))
+            return b;
+    return MAX_BATTLERS_COUNT;
+}
+
 static void Cmd_updatestatusicon(void)
 {
     if (gBattleControllerExecFlags)
@@ -7949,6 +7991,16 @@ static void Cmd_updatestatusicon(void)
         {
             gActiveBattler = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerAttacker)));
             if (!(gAbsentBattlerFlags & gBitTable[gActiveBattler]))
+            {
+                BtlController_EmitStatusIconUpdate(B_COMM_TO_CONTROLLER, gBattleMons[gActiveBattler].status1, gBattleMons[gActiveBattler].status2);
+                MarkBattlerForControllerExec(gActiveBattler);
+            }
+        }
+        // Moemon Co-op: a triple's third ally
+        if (IS_TRIPLE_BATTLE())
+        {
+            gActiveBattler = MpThirdAlly(gBattlerAttacker);
+            if (gActiveBattler < gBattlersCount && !(gAbsentBattlerFlags & gBitTable[gActiveBattler]))
             {
                 BtlController_EmitStatusIconUpdate(B_COMM_TO_CONTROLLER, gBattleMons[gActiveBattler].status1, gBattleMons[gActiveBattler].status2);
                 MarkBattlerForControllerExec(gActiveBattler);
@@ -8643,6 +8695,24 @@ static void Cmd_healpartystatus(void)
 
         // Because the above MULTISTRING_CHOOSER are ORd, if both are set then it will be B_MSG_BELL_BOTH_SOUNDPROOF
 
+        // Moemon Co-op: a triple's third ally (its message is the partner's)
+        if (IS_TRIPLE_BATTLE())
+        {
+            u8 third = MpThirdAlly(gBattlerAttacker);
+            if (third < gBattlersCount && !(gAbsentBattlerFlags & gBitTable[third]))
+            {
+                if (gBattleMons[third].ability != ABILITY_SOUNDPROOF)
+                {
+                    gBattleMons[third].status1 = 0;
+                    gBattleMons[third].status2 &= ~STATUS2_NIGHTMARE;
+                }
+                else
+                {
+                    RecordAbilityBattle(third, gBattleMons[third].ability);
+                }
+            }
+        }
+
         for (i = 0; i < PARTY_SIZE; i++)
         {
             u16 species = GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG);
@@ -8680,6 +8750,15 @@ static void Cmd_healpartystatus(void)
         {
             gBattleMons[gActiveBattler].status1 = 0;
             gBattleMons[gActiveBattler].status2 &= ~STATUS2_NIGHTMARE;
+        }
+        if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the third ally
+        {
+            u8 third = MpThirdAlly(gBattlerAttacker);
+            if (third < gBattlersCount && !(gAbsentBattlerFlags & gBitTable[third]))
+            {
+                gBattleMons[third].status1 = 0;
+                gBattleMons[third].status2 &= ~STATUS2_NIGHTMARE;
+            }
         }
 
     }
@@ -9399,6 +9478,28 @@ static void Cmd_settaunt(void)
 static void Cmd_trysethelpinghand(void)
 {
     gBattlerTarget = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerAttacker)));
+    // Moemon Co-op: in a Triple Battle the ally the player picked (or the first one up)
+    if (IS_TRIPLE_BATTLE())
+    {
+        u8 b, chosen = *(gBattleStruct->moveTarget + gBattlerAttacker);
+        if (chosen < gBattlersCount && chosen != gBattlerAttacker && GetBattlerSide(chosen) == GetBattlerSide(gBattlerAttacker)
+         && !(gAbsentBattlerFlags & gBitTable[chosen]) && gBattleMons[chosen].hp != 0)
+        {
+            gBattlerTarget = chosen;
+        }
+        else
+        {
+            for (b = 0; b < gBattlersCount; b++)
+            {
+                if (b != gBattlerAttacker && GetBattlerSide(b) == GetBattlerSide(gBattlerAttacker)
+                 && !(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0 && !gProtectStructs[b].helpingHand)
+                {
+                    gBattlerTarget = b;
+                    break;
+                }
+            }
+        }
+    }
 
     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE
         && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
@@ -10156,7 +10257,19 @@ static void Cmd_handleballthrow(void)
     }
     // (no target given) aim at whichever wild Pokémon is still there
     else if (gMpCoopWild && (gAbsentBattlerFlags & gBitTable[gBattlerTarget] || gBattleMons[gBattlerTarget].hp == 0))
-        gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
+    {
+        if (IS_TRIPLE_BATTLE())
+        {
+            u8 b;
+            for (b = 1; b < gBattlersCount; b += 2)
+                if (!(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0)
+                    break;
+            if (b < gBattlersCount)
+                gBattlerTarget = b;
+        }
+        else
+            gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
+    }
 
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
     {

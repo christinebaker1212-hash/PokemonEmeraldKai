@@ -35,3 +35,26 @@ Each step ends with a commit; the newest state is at the bottom.
   Choosing order: battle_main.c PrevChooser/HasNextChooser (left, center, right). gBattleCommunication's shared
   entries moved to 8-11 (ACTIONS_CONFIRMED_COUNT etc.): 0-5 are the battlers' selection states.
   Local triple: intro sends out all three, turn runs, KOs, back to field. Full regression passes.
+- Step 3 (rules): any target (player_controller.c HandleInputChooseTargetTriple: left to right over the six,
+  skipping absent ones; foes first), Helping Hand picks either ally (MpIsAllyPickMove; Cmd_trysethelpinghand
+  uses the chosen ally), spread moves 3/4 with 2+ targets (pokemon.c SpreadDamage, snapshot in
+  gMpSpreadTargetCount), every spread target in turn (battle_script_commands.c MpNextSpreadTarget),
+  HandleAction_UseMove's target (battle_util.c MpTripleChooseTarget: Follow Me, Lightning Rod, random foe for a
+  gone target), replacements (HasNoMonsToSwitch / MP_IsPartyIdOnSide / MP_TripleSwitchRange: each linked player
+  owns two slots, the NPC side shares six; every fainted battler chooses at once like a multi battle; a local
+  debug triple sends replacements in by itself), AI targets any of three, the third ally for Heal Bell /
+  Aromatherapy / status icons, Future Sight, foe EXP slots (gSentPokesToOpponent[battler >> 1]),
+  AI_itemType/Flags per trainer slot, "Wild X, Y and Z appeared!". Partner math `^ BIT_FLANK` that can meet
+  battlers 4-5 now uses BATTLE_PARTNER (battle_anim.c Cmd_monbg made battler 7 and hid sprite 0), and the center
+  foe gets its own shadow sprite (LoadAndCreateEnemyShadowSprites).
+- Step 4 (three games): mp_battle.c NetLink roster (MP_Battle_OpenLinkGroup; per-link queues, sync sequences,
+  ready mask, every other game's LinkPlayer), battle start 2+2+2 (battle_main.c CB2_HandleStartMultiPartnerBattle:
+  AllLinkBlocksReceived, link player i's two in slots 2i-2i+1, gLinkPlayers ids 0/2/4, the NPC is link player 3),
+  controllers (battle_controllers.c: battler 2i = link player i, master runs 1/3/5), intro send-outs for the
+  center battlers, trainer back pictures left/center/right (MpTripleTrainerX), "BOB sent out X!" lines.
+- Step 5 (matchmaking, mp_coop.c seats): wild = the two closest friends in the grass are asked at once (two
+  yeses: triple with up to three wild, one: double, none: alone); trainers with 3+ authored Pokémon (single
+  battles only) keep waiting for a third after the first friend joins ("{B} start now" = double). ACCEPT and
+  WILD_GO carry the seat list. Results, bonuses, catches, refunds and level-ups per seat; pair counters for every
+  pair (MP_Events_OnCoopWinGroup). Protocol 22. tools/test/runN.sh runs 2-4 clients.
+  Verified: three clients on Route 101, wild triple to the win, EXP per owner, all three back in the field.

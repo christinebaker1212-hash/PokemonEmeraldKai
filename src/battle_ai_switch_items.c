@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "battle_util.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
 #include "battle_main.h"
@@ -668,7 +669,11 @@ u8 GetMostSuitableMonToSwitchInto(void)
         battlerIn2 = gActiveBattler;
     }
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+    if (IS_TRIPLE_BATTLE())
+    {
+        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: shared pool
+    }
+    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
     {
         if ((gActiveBattler & BIT_FLANK) == B_FLANK_LEFT)
             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -686,6 +691,11 @@ u8 GetMostSuitableMonToSwitchInto(void)
         party = gEnemyParty;
 
     invalidMons = 0;
+    // Moemon Co-op: in a triple the third battler's Pokemon is out too
+    if (IS_TRIPLE_BATTLE())
+        for (i = firstId; i < lastId; i++)
+            if (MP_IsPartyIdOnSide(gActiveBattler, i))
+                invalidMons |= gBitTable[i];
 
     while (invalidMons != (1 << PARTY_SIZE) - 1) // All mons are invalid.
     {
@@ -763,6 +773,8 @@ u8 GetMostSuitableMonToSwitchInto(void)
         if (gBattlerPartyIndexes[battlerIn1] == i)
             continue;
         if (gBattlerPartyIndexes[battlerIn2] == i)
+            continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
             continue;
         if (i == *(gBattleStruct->monToSwitchIntoId + battlerIn1))
             continue;

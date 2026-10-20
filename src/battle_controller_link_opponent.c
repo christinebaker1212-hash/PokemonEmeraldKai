@@ -1308,7 +1308,7 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
-    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT || gMpCoopWild))
+    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;

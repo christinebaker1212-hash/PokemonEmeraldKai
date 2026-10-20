@@ -71,6 +71,7 @@ void ChooseMonForWirelessMinigame(void);
 void OpenPartyMenuInBattle(u8 partyAction);
 void ChooseMonForInBattleItem(void);
 void BufferBattlePartyCurrentOrder(void);
+void MP_TripleFixPartyOrder(void);   // Moemon Co-op: a linked triple's party screen order
 void BufferBattlePartyCurrentOrderBySide(u8 battler, u8 flankId);
 void SwitchPartyOrderLinkMulti(u8 battler, u8 slot, u8 slot2);
 void SwitchPartyMonSlots(u8 slot, u8 slot2);

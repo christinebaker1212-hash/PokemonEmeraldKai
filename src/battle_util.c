@@ -75,6 +75,7 @@ static const u8 sPkblToEscapeFactor[][3] = {
 };
 static const u8 sGoNearCounterToCatchFactor[] = {4, 3, 2, 1};
 static const u8 sGoNearCounterToEscapeFactor[] = {4, 4, 4, 4};
+static void MpTripleChooseTarget(u8 foeSide);   // Moemon Co-op
 
 void HandleAction_UseMove(void)
 {
@@ -148,7 +149,11 @@ void HandleAction_UseMove(void)
 
     // choose target
     side = BATTLE_OPPOSITE(GetBattlerSide(gBattlerAttacker));
-    if (gSideTimers[side].followmeTimer != 0
+    if (IS_TRIPLE_BATTLE())
+    {
+        MpTripleChooseTarget(side);
+    }
+    else if (gSideTimers[side].followmeTimer != 0
         && gBattleMoves[gCurrentMove].target == MOVE_TARGET_SELECTED
         && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gSideTimers[side].followmeTarget)
         && gBattleMons[gSideTimers[side].followmeTarget].hp != 0)
@@ -1024,14 +1029,13 @@ void ResetSentPokesToOpponentValue(void)
     s32 i;
     u32 bits = 0;
 
-    gSentPokesToOpponent[0] = 0;
-    gSentPokesToOpponent[1] = 0;
+    memset(gSentPokesToOpponent, 0, sizeof(gSentPokesToOpponent));
 
     for (i = 0; i < gBattlersCount; i += 2)
         bits |= gBitTable[gBattlerPartyIndexes[i]];
 
     for (i = 1; i < gBattlersCount; i += 2)
-        gSentPokesToOpponent[(i & BIT_FLANK) >> 1] = bits;
+        gSentPokesToOpponent[i >> 1] = bits;
 }
 
 void OpponentSwitchInResetSentPokesToOpponentValue(u8 battler)
@@ -1041,7 +1045,7 @@ void OpponentSwitchInResetSentPokesToOpponentValue(u8 battler)
 
     if (GetBattlerSide(battler) == B_SIDE_OPPONENT)
     {
-        u8 flank = ((battler & BIT_FLANK) >> 1);
+        u8 flank = battler >> 1;   // Moemon Co-op: 0-2 (a triple's center foe is 2)
         gSentPokesToOpponent[flank] = 0;
 
         for (i = 0; i < gBattlersCount; i += 2)
@@ -1063,7 +1067,7 @@ void UpdateSentPokesToOpponentValue(u8 battler)
     {
         s32 i;
         for (i = 1; i < gBattlersCount; i++)
-            gSentPokesToOpponent[(i & BIT_FLANK) >> 1] |= gBitTable[gBattlerPartyIndexes[battler]];
+            gSentPokesToOpponent[i >> 1] |= gBitTable[gBattlerPartyIndexes[battler]];
     }
 }
 
@@ -1890,6 +1894,16 @@ u8 DoBattlerEndTurnEffects(void)
     gHitMarker &= ~(HITMARKER_GRUDGE | HITMARKER_IGNORE_BIDE);
     return 0;
 }
+// Moemon Co-op: another battler on this side still has Future Sight / Doom Desire coming
+static bool8 MpSideHasFutureAttack(u8 battler)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (GetBattlerSide(b) == GetBattlerSide(battler) && gWishFutureKnock.futureSightCounter[b] != 0)
+            return TRUE;
+    return FALSE;
+}
+
 
 bool8 HandleWishPerishSongOnTurnEnd(void)
 {
@@ -1926,7 +1940,8 @@ bool8 HandleWishPerishSongOnTurnEnd(void)
                 BattleScriptExecute(BattleScript_MonTookFutureAttack);
 
                 if (gWishFutureKnock.futureSightCounter[gActiveBattler] == 0
-                 && gWishFutureKnock.futureSightCounter[BATTLE_PARTNER(gActiveBattler)] == 0)
+                 && gWishFutureKnock.futureSightCounter[BATTLE_PARTNER(gActiveBattler)] == 0
+                 && !(IS_TRIPLE_BATTLE() && MpSideHasFutureAttack(gActiveBattler)))
                 {
                     gSideStatuses[GET_BATTLER_SIDE(gBattlerTarget)] &= ~SIDE_STATUS_FUTUREATTACK;
                 }
@@ -2385,6 +2400,82 @@ u8 AtkCanceler_UnableToUseMove(void)
     return effect;
 }
 
+// Moemon Co-op: HandleAction_UseMove's target in a Triple Battle: Follow Me,
+// then Lightning Rod (the first in turn order among the other foes), then the
+// chosen target; a target that's gone becomes a random foe still standing
+static void MpTripleChooseTarget(u8 foeSide)
+{
+    u8 b, chosen = *(gBattleStruct->moveTarget + gBattlerAttacker), rod = MAX_BATTLERS_COUNT, rodOrder = 0xFF;
+
+    if (gSideTimers[foeSide].followmeTimer != 0
+        && gBattleMoves[gCurrentMove].target == MOVE_TARGET_SELECTED
+        && GetBattlerSide(gBattlerAttacker) != GetBattlerSide(gSideTimers[foeSide].followmeTarget)
+        && gBattleMons[gSideTimers[foeSide].followmeTarget].hp != 0)
+    {
+        gBattlerTarget = gSideTimers[foeSide].followmeTarget;
+        return;
+    }
+    if (gSideTimers[foeSide].followmeTimer == 0
+        && (gBattleMoves[gCurrentMove].power != 0 || gBattleMoves[gCurrentMove].target != MOVE_TARGET_USER)
+        && gBattleMons[chosen].ability != ABILITY_LIGHTNING_ROD
+        && gBattleMoves[gCurrentMove].type == TYPE_ELECTRIC)
+    {
+        for (b = 0; b < gBattlersCount; b++)
+        {
+            if (GetBattlerSide(b) != GetBattlerSide(gBattlerAttacker) && b != chosen
+             && gBattleMons[b].ability == ABILITY_LIGHTNING_ROD && gBattleMons[b].hp != 0
+             && !(gAbsentBattlerFlags & gBitTable[b]) && GetBattlerTurnOrderNum(b) < rodOrder)
+            {
+                rod = b;
+                rodOrder = GetBattlerTurnOrderNum(b);
+            }
+        }
+        if (rod != MAX_BATTLERS_COUNT)
+        {
+            gActiveBattler = rod;
+            RecordAbilityBattle(rod, gBattleMons[rod].ability);
+            gSpecialStatuses[rod].lightningRodRedirected = 1;
+            gBattlerTarget = rod;
+            return;
+        }
+    }
+    if (gBattleMoves[gChosenMove].target & MOVE_TARGET_RANDOM)
+        gBattlerTarget = GetRandomFoe(gBattlerAttacker);
+    else
+        gBattlerTarget = chosen;
+    if (gBattlerTarget >= gBattlersCount || (gAbsentBattlerFlags & gBitTable[gBattlerTarget]))
+        gBattlerTarget = GetRandomFoe(gBattlerAttacker);
+}
+
+// Moemon Co-op: party slot partyId is out (or coming out) for any battler on
+// this battler's side; a triple's three, not only the XOR partner
+bool8 MP_IsPartyIdOnSide(u8 battler, u8 partyId)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        if (GetBattlerSide(b) != GetBattlerSide(battler))
+            continue;
+        if (gBattlerPartyIndexes[b] == partyId || *(gBattleStruct->monToSwitchIntoId + b) == partyId)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// Moemon Co-op: the party slots a triple's battler can bring in. Linked: each
+// player owns two (battler 0 -> 0-1, 2 -> 2-3, 4 -> 4-5); the NPC side and a
+// local debug triple share all six.
+void MP_TripleSwitchRange(u8 battler, s32 *first, s32 *last)
+{
+    *first = 0;
+    *last = PARTY_SIZE;
+    if (GetBattlerSide(battler) == B_SIDE_PLAYER && (gBattleTypeFlags & BATTLE_TYPE_MULTI))
+    {
+        *first = battler & ~1;
+        *last = *first + 2;
+    }
+}
+
 bool8 HasNoMonsToSwitch(u8 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2)
 {
     u8 playerId, flankId;
@@ -2393,6 +2484,23 @@ bool8 HasNoMonsToSwitch(u8 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2)
 
     if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
         return FALSE;
+
+    if (IS_TRIPLE_BATTLE())
+    {
+        s32 first, last;
+        party = GetBattlerSide(battler) == B_SIDE_PLAYER ? gPlayerParty : gEnemyParty;
+        MP_TripleSwitchRange(battler, &first, &last);
+        for (i = first; i < last; i++)
+        {
+            if (GetMonData(&party[i], MON_DATA_HP) != 0
+             && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
+             && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
+             && i != partyIdBattlerOn1 && i != partyIdBattlerOn2
+             && !MP_IsPartyIdOnSide(battler, i))
+                return FALSE;
+        }
+        return TRUE;
+    }
 
     if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
     {
@@ -3935,6 +4043,30 @@ void HandleAction_RunBattleScript(void) // identical to RunBattleScriptCommands
         gBattleScriptingCommandsTable[*gBattlescriptCurrInstr]();
 }
 
+// Moemon Co-op: Triple Battle helpers
+// A random foe of battler that's still in the battle (any foe if none is)
+u8 GetRandomFoe(u8 battler)
+{
+    u8 b, list[MAX_BATTLERS_COUNT], n = 0;
+    for (b = 0; b < gBattlersCount; b++)
+        if (GetBattlerSide(b) != GetBattlerSide(battler) && !(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0)
+            list[n++] = b;
+    if (n == 0)
+        return GetBattlerAtPosition(BATTLE_OPPOSITE(GET_BATTLER_SIDE(battler)));
+    return list[Random() % n];
+}
+
+// The first battler on side with ability (fallback: fallback)
+u8 FindAbilityOnSide(u8 side, u8 ability, u8 fallback)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (GetBattlerSide(b) == side && gBattleMons[b].ability == ability && gBattleMons[b].hp != 0
+         && !(gAbsentBattlerFlags & gBitTable[b]))
+            return b;
+    return fallback;
+}
+
 u8 GetMoveTarget(u16 move, u8 setTarget)
 {
     u8 targetBattler = 0;
@@ -3965,7 +4097,9 @@ u8 GetMoveTarget(u16 move, u8 setTarget)
                 && AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE, gBattlerAttacker, ABILITY_LIGHTNING_ROD, 0, 0)
                 && gBattleMons[targetBattler].ability != ABILITY_LIGHTNING_ROD)
             {
-                targetBattler ^= BIT_FLANK;
+                // (Moemon Co-op: the foe that has it; in doubles that's the partner)
+                targetBattler = IS_TRIPLE_BATTLE() ? FindAbilityOnSide(GetBattlerSide(targetBattler), ABILITY_LIGHTNING_ROD, targetBattler)
+                                                   : (targetBattler ^ BIT_FLANK);
                 RecordAbilityBattle(targetBattler, gBattleMons[targetBattler].ability);
                 gSpecialStatuses[targetBattler].lightningRodRedirected = 1;
             }
@@ -3977,13 +4111,17 @@ u8 GetMoveTarget(u16 move, u8 setTarget)
     case MOVE_TARGET_OPPONENTS_FIELD:
         targetBattler = GetBattlerAtPosition(BATTLE_OPPOSITE(GET_BATTLER_SIDE(gBattlerAttacker)));
         if (gAbsentBattlerFlags & gBitTable[targetBattler])
-            targetBattler ^= BIT_FLANK;
+            targetBattler = IS_TRIPLE_BATTLE() ? GetRandomFoe(gBattlerAttacker) : (targetBattler ^ BIT_FLANK);
         break;
     case MOVE_TARGET_RANDOM:
         side = BATTLE_OPPOSITE(GetBattlerSide(gBattlerAttacker));
         if (gSideTimers[side].followmeTimer && gBattleMons[gSideTimers[side].followmeTarget].hp)
         {
             targetBattler = gSideTimers[side].followmeTarget;
+        }
+        else if (IS_TRIPLE_BATTLE())
+        {
+            targetBattler = GetRandomFoe(gBattlerAttacker);   // Moemon Co-op: any of the three
         }
         else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && moveTarget & MOVE_TARGET_RANDOM)
         {

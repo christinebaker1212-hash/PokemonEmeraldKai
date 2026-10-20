@@ -369,6 +369,7 @@ bool8 MP_Battle_IsActive(void);
 u16 MP_Battle_OpponentFrontPic(void);   // 0xFFFF = default
 void MP_Battle_FrameUpdate(void);
 void MP_Battle_OpenLink(u8 peer, bool8 isMaster);  // co-op battles: link layer only
+void MP_Battle_OpenLinkGroup(const u8 *peers, u8 count, u8 linkId);  // co-op triples: three games
 void MP_Battle_CloseLink(void);
 void NetLink_Open(void);
 void NetLink_Close(void);
@@ -410,6 +411,11 @@ u8 MP_BattleChat_BattlerOf(u8 playerId);
 void MP_Emote_BattleSay(const u8 *text, u8 icon);
 void MP_Emote_BattleUpdate(void);
 s8 MP_Coop_PartnerId(void);
+s8 MP_Coop_BattlerPlayer(u8 battler);     // network id controlling a player-side battler
+bool8 MP_Coop_IsTriple(void);
+s8 MP_Coop_SlotOwnerPlayer(u8 slot);     // battle party slot -> its owner (-1 = us)
+u8 MP_Coop_OwnBase(void);                // our first battle party slot
+u8 MP_Coop_SeatSize(void);               // Pokemon per player (3, or 2 in a triple)
 s8 MP_Battle_PeerId(void);
 
 // sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
@@ -667,6 +673,7 @@ void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Events_Update(void);
 void MP_Events_OnTrainerWin(void);
 void MP_Events_OnCoopWin(u8 partner);
+void MP_Events_OnCoopWinGroup(const u8 *players, u8 count);   // a triple: every pair + one battle
 void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon);
 void MP_Events_QueueToast(const char *ascii);   // shown on the field, one after another
 void MP_Events_OnTrade(void);
@@ -724,6 +731,7 @@ extern bool8 gMpCoopWild;            // TRUE while a co-op wild double runs (on 
 bool8 MP_Coop_TryWildTeamUp(void);   // a land wild encounter: team up with the closest friend in the grass
 void MP_Coop_SetWildEnemyParty(void);
 bool8 MP_Coop_WildHasTwo(void);
+bool8 MP_Coop_WildSlotEmpty(u8 battler);   // a foe slot with no wild Pokemon (starts absent)
 bool8 MP_Coop_OtherWildOut(u8 caughtBattler);
 void MP_Coop_OnWildCaught(u8 throwerPartyIndex, struct Pokemon *mon);
 void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c

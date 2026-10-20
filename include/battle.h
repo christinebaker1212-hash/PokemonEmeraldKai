@@ -420,8 +420,8 @@ struct BattleStruct
     void (*savedCallback)(void);
     u16 usedHeldItems[MAX_BATTLERS_COUNT];
     u8 chosenItem[MAX_BATTLERS_COUNT]; // why is this an u8?
-    u8 AI_itemType[2];
-    u8 AI_itemFlags[2];
+    u8 AI_itemType[MAX_BATTLERS_COUNT / 2];   // Moemon Co-op: one per trainer slot (a triple has 3)
+    u8 AI_itemFlags[MAX_BATTLERS_COUNT / 2];
     u16 choicedMove[MAX_BATTLERS_COUNT];
     u16 changedItems[MAX_BATTLERS_COUNT];
     u8 intimidateBattler;
@@ -699,6 +699,9 @@ extern u8 gBattlerFaintMarks;                           // Moemon Co-op: was gHi
 // Moemon Co-op: a Triple Battle (3 vs 3, gBattlersCount 6; BATTLE_TYPE_DOUBLE is set too)
 extern bool8 gIsTripleBattle;
 extern bool8 gMpDebugTriple;
+// Moemon Co-op: a triple's trainer back pictures (left / center / right)
+#define MpTripleTrainerX(battler) (GetBattlerPosition(battler) == B_POSITION_PLAYER_CENTER ? 74 \
+                                  : (GetBattlerPosition(battler) & BIT_FLANK) ? 122 : 26)
 #define IS_TRIPLE_BATTLE() (gIsTripleBattle)
 extern struct DisableStruct gDisableStructs[MAX_BATTLERS_COUNT];
 extern u16 gPauseCounterBattle;
@@ -711,7 +714,7 @@ extern struct SpecialStatus gSpecialStatuses[MAX_BATTLERS_COUNT];
 extern u16 gBattleWeather;
 extern struct WishFutureKnock gWishFutureKnock;
 extern u16 gIntroSlideFlags;
-extern u8 gSentPokesToOpponent[2];
+extern u8 gSentPokesToOpponent[MAX_BATTLERS_COUNT / 2];
 extern u16 gDynamicBasePower;
 extern u16 gExpShareExp;
 extern struct BattleEnigmaBerry gEnigmaBerries[MAX_BATTLERS_COUNT];

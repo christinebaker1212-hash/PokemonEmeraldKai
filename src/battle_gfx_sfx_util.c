@@ -1129,6 +1129,16 @@ static void PlayLowHpBeep(void)
     gTasks[taskId].data[0] = 0;
     PlaySE(SE_LOW_HEALTH);
 }
+// Moemon Co-op: another player Pokemon in a triple still has the low HP beep going
+static bool8 MpAnyAllyLowHpSong(u8 battler)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (b != battler && GetBattlerSide(b) == B_SIDE_PLAYER && gBattleSpritesDataPtr->battlerData[b].lowHpSong)
+            return TRUE;
+    return FALSE;
+}
+
 
 void HandleLowHpMusicChange(struct Pokemon *mon, u8 battler)
 {
@@ -1151,7 +1161,8 @@ void HandleLowHpMusicChange(struct Pokemon *mon, u8 battler)
             m4aSongNumStop(SE_LOW_HEALTH);
             return;
         }
-        if (IsDoubleBattle() && !gBattleSpritesDataPtr->battlerData[BATTLE_PARTNER(battler)].lowHpSong)
+        if (IsDoubleBattle() && !gBattleSpritesDataPtr->battlerData[BATTLE_PARTNER(battler)].lowHpSong
+         && !(IS_TRIPLE_BATTLE() && MpAnyAllyLowHpSong(battler)))
         {
             m4aSongNumStop(SE_LOW_HEALTH);
             return;
@@ -1166,6 +1177,8 @@ void BattleStopLowHpSound(void)
     gBattleSpritesDataPtr->battlerData[playerBattler].lowHpSong = 0;
     if (IsDoubleBattle())
         gBattleSpritesDataPtr->battlerData[BATTLE_PARTNER(playerBattler)].lowHpSong = 0;
+    if (IS_TRIPLE_BATTLE())
+        gBattleSpritesDataPtr->battlerData[B_BATTLER_4].lowHpSong = 0;   // Moemon Co-op
 
     m4aSongNumStop(SE_LOW_HEALTH);
 }
@@ -1234,6 +1247,17 @@ void LoadAndCreateEnemyShadowSprites(void)
     if (IsDoubleBattle())
     {
         battler = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
+        gBattleSpritesDataPtr->healthBoxesData[battler].shadowSpriteId = CreateSprite(&gSpriteTemplate_EnemyShadow,
+                                                                                        GetBattlerSpriteCoord(battler, BATTLER_COORD_X),
+                                                                                        GetBattlerSpriteCoord(battler, BATTLER_COORD_Y) + 29,
+                                                                                        0xC8);
+        gSprites[gBattleSpritesDataPtr->healthBoxesData[battler].shadowSpriteId].data[0] = battler;
+    }
+    // Moemon Co-op: the center foe of a triple (without its own shadow, its
+    // shadowSpriteId 0 pointed the shadow callback at another sprite)
+    if (IS_TRIPLE_BATTLE())
+    {
+        battler = GetBattlerAtPosition(B_POSITION_OPPONENT_CENTER);
         gBattleSpritesDataPtr->healthBoxesData[battler].shadowSpriteId = CreateSprite(&gSpriteTemplate_EnemyShadow,
                                                                                         GetBattlerSpriteCoord(battler, BATTLER_COORD_X),
                                                                                         GetBattlerSpriteCoord(battler, BATTLER_COORD_Y) + 29,

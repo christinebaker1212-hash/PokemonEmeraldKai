@@ -623,7 +623,7 @@ static void Cmd_monbg(void)
     }
 
     // Move battler's partner to background
-    battler ^= BIT_FLANK;
+    battler = BATTLE_PARTNER(battler);   // Moemon Co-op: a triple's battlers 4-5 have partners 0-1
     if (IsBattlerSpriteVisible(battler))
     {
         u8 position = GetBattlerPosition(battler);
@@ -942,7 +942,7 @@ static void Cmd_monbg_static(void)
         MoveBattlerSpriteToBG(battler, toBG_2, FALSE);
     }
 
-    battler ^= BIT_FLANK;
+    battler = BATTLE_PARTNER(battler);   // Moemon Co-op: a triple's battlers 4-5 have partners 0-1
     if (animBattlerId > 1 && IsBattlerSpriteVisible(battler))
     {
         u8 position = GetBattlerPosition(battler);

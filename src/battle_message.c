@@ -397,6 +397,9 @@ static const u8 sText_MpCoopWantsToRun[] = _("{B_ATK_NAME_WITH_PREFIX} wants to 
 const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
+// Moemon Co-op: Triple Battles, named left to right as on screen (the center one is in B_BUFF1)
+static const u8 sText_MpThreeWildAppeared[] = _("Wild {B_OPPONENT_MON2_NAME}, {B_BUFF1}\nand {B_OPPONENT_MON1_NAME} appeared!");
+static const u8 sText_MpThreeWildAppearedPause[] = _("Wild {B_OPPONENT_MON2_NAME}, {B_BUFF1}\nand {B_OPPONENT_MON1_NAME} appeared!\p");
 static const u8 sText_Trainer1WantsToBattle[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME}\nwould like to battle!\p");
 static const u8 sText_LinkTrainerWantsToBattle[] = _("{B_LINK_OPPONENT1_NAME}\nwants to battle!");
 static const u8 sText_TwoLinkTrainersWantToBattle[] = _("{B_LINK_OPPONENT1_NAME} and {B_LINK_OPPONENT2_NAME}\nwant to battle!");
@@ -1971,6 +1974,50 @@ static const struct BattleWindowText *const sBattleTextOnWindowsInfo[] =
 
 static const u8 sRecordedBattleTextSpeeds[] = {8, 4, 1, 0};
 
+static const u8 sText_MpSentOut[] = _(" sent out ");
+static const u8 sText_MpGo[] = _("Go! ");
+
+// "BOB sent out X!\nCARL sent out Y!\pGo! Z!" (allies left to right, then ours)
+static const u8 *MpTripleSendOutText(void)
+{
+    static EWRAM_DATA u8 sBuf[96];
+    static const u8 sOrder[] = {B_POSITION_PLAYER_LEFT, B_POSITION_PLAYER_CENTER, B_POSITION_PLAYER_RIGHT};
+    u8 *p = sBuf, i, mine = GetMultiplayerId() * 2, lines = 0;
+    u8 name[POKEMON_NAME_LENGTH + 2];
+
+    for (i = 0; i < ARRAY_COUNT(sOrder); i++)
+    {
+        u8 b = GetBattlerAtPosition(sOrder[i]);
+        if (b == mine || b >= gBattlersCount || b / 2 >= MAX_LINK_PLAYERS)
+            continue;
+        if (lines++)
+            *p++ = CHAR_NEWLINE;
+        p = StringCopy(p, gLinkPlayers[b / 2].name);
+        p = StringCopy(p, sText_MpSentOut);
+        GetMonData(&gPlayerParty[gBattlerPartyIndexes[b]], MON_DATA_NICKNAME, name);
+        StringGet_Nickname(name);
+        p = StringCopy(p, name);
+        *p++ = CHAR_EXCL_MARK;
+    }
+    *p++ = CHAR_PROMPT_CLEAR;
+    p = StringCopy(p, sText_MpGo);
+    GetMonData(&gPlayerParty[gBattlerPartyIndexes[mine]], MON_DATA_NICKNAME, name);
+    StringGet_Nickname(name);
+    p = StringCopy(p, name);
+    *p++ = CHAR_EXCL_MARK;
+    *p = EOS;
+    return sBuf;
+}
+
+// Moemon Co-op: a triple's center foe (battler 5) is out; its name goes in gBattleTextBuff1
+static bool8 MpTripleCenterFoeOut(void)
+{
+    if (!IS_TRIPLE_BATTLE() || (gAbsentBattlerFlags & (1u << B_BATTLER_5)))
+        return FALSE;
+    PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, B_BATTLER_5, gBattlerPartyIndexes[B_BATTLER_5]);
+    return TRUE;
+}
+
 void BufferStringBattle(u16 stringID)
 {
     s32 i;
@@ -2003,7 +2050,11 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gMpCoopWild)
+                if (gMpCoopWild && MpTripleCenterFoeOut())
+                {
+                    stringPtr = sText_MpThreeWildAppeared;   // Moemon Co-op: three wild Pokemon
+                }
+                else if (gMpCoopWild)
                 {
                     // Moemon Co-op: one or two wild Pokemon, two friends
                     stringPtr = MP_Coop_WildHasTwo() ? sText_MpCoopTwoWildAppeared : sText_MpCoopWildAppeared;
@@ -2047,6 +2098,8 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
                 stringPtr = sText_LegendaryPkmnAppeared;
+            else if (MpTripleCenterFoeOut())
+                stringPtr = sText_MpThreeWildAppearedPause;   // Moemon Co-op: a local debug triple
             else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE) // interesting, looks like they had something planned for wild double battles
                 stringPtr = sText_TwoWildPkmnAppeared;
             else if (gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
@@ -2058,7 +2111,11 @@ void BufferStringBattle(u16 stringID)
     case STRINGID_INTROSENDOUT: // poke first send-out
         if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
         {
-            if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+            if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+            {
+                stringPtr = MpTripleSendOutText();   // Moemon Co-op: two friends and us
+            }
+            else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
             {
                 if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
                     stringPtr = sText_InGamePartnerSentOutZGoN;

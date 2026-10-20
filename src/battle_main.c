@@ -219,7 +219,7 @@ EWRAM_DATA struct SpecialStatus gSpecialStatuses[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u16 gBattleWeather = 0;
 EWRAM_DATA struct WishFutureKnock gWishFutureKnock = {0};
 EWRAM_DATA u16 gIntroSlideFlags = 0;
-EWRAM_DATA u8 gSentPokesToOpponent[2] = {0};
+EWRAM_DATA u8 gSentPokesToOpponent[MAX_BATTLERS_COUNT / 2] = {0};   // Moemon Co-op: per foe slot (battler >> 1)
 EWRAM_DATA u16 gDynamicBasePower = 0;
 EWRAM_DATA u16 gExpShareExp = 0;
 EWRAM_DATA struct BattleEnigmaBerry gEnigmaBerries[MAX_BATTLERS_COUNT] = {0};
@@ -1185,6 +1185,13 @@ static void CB2_HandleStartBattle(void)
     }
 }
 
+// Moemon Co-op: a block from every game in the link (two, or three in a triple)
+static bool8 AllLinkBlocksReceived(void)
+{
+    u8 all = (1 << GetLinkPlayerCount()) - 1;
+    return (GetBlockReceivedStatus() & all) == all;
+}
+
 static void CB2_HandleStartMultiPartnerBattle(void)
 {
     u8 playerMultiplayerId;
@@ -1224,7 +1231,16 @@ static void CB2_HandleStartMultiPartnerBattle(void)
                 gLinkPlayers[1].id = 2;
                 gLinkPlayers[2].id = 1;
                 gLinkPlayers[3].id = 3;
-                if (gMpCoopBattle)
+                if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+                {
+                    // Moemon Co-op: three players (battlers 0, 2, 4), the NPC side is link player 3
+                    gLinkPlayers[2].id = 4;
+                    StringCopyN(gLinkPlayers[3].name, gTrainers[gTrainerBattleOpponent_A].trainerName, PLAYER_NAME_LENGTH);
+                    gLinkPlayers[3].name[PLAYER_NAME_LENGTH] = EOS;
+                    gLinkPlayers[3].language = GAME_LANGUAGE;
+                    gLinkPlayers[3].gender = MALE;
+                }
+                else if (gMpCoopBattle)
                 {
                     // Moemon Co-op: both opponent slots are the one NPC trainer
                     StringCopyN(gLinkPlayers[2].name, gTrainers[gTrainerBattleOpponent_A].trainerName, PLAYER_NAME_LENGTH);
@@ -1267,12 +1283,12 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 2:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             u8 taskId;
 
             ResetBlockReceivedFlags();
-            FindLinkBattleMaster(2, playerMultiplayerId);
+            FindLinkBattleMaster(GetLinkPlayerCount(), playerMultiplayerId);
             SetAllPlayersBerryData();
             if (!gMpCoopBattle) // Moemon Co-op: straight into the battle, like a single one
             {
@@ -1296,10 +1312,19 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 4:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             // Recv partner's Pokémon 1-2, and copy partner's and own Pokémon into party positions
             ResetBlockReceivedFlags();
+            if (IS_TRIPLE_BATTLE())
+            {
+                // Moemon Co-op: a triple's party is 2 + 2 + 2, link player i in slots 2i-2i+1
+                u8 i;
+                for (i = 0; i < GetLinkPlayerCount() && i < 3; i++)
+                    memcpy(&gPlayerParty[i * 2], gBlockRecvBuffer[i], sizeof(struct Pokemon) * 2);
+                gBattleCommunication[MULTIUSE_STATE] = 7;
+                break;
+            }
             if (gLinkPlayers[playerMultiplayerId].id != 0)
             {
                 memcpy(gPlayerParty, gBlockRecvBuffer[partnerMultiplayerId], sizeof(struct Pokemon) * 2);
@@ -1322,7 +1347,7 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 6:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             // Recv partner's Pokémon 3, and copy partner's and own Pokémon into party positions
             ResetBlockReceivedFlags();
@@ -1348,7 +1373,7 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 8:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             // Recv enemy Pokémon 1-2 (if not master)
             ResetBlockReceivedFlags();
@@ -1366,7 +1391,7 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 10:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             // Recv enemy Pokémon 3-4 (if not master)
             ResetBlockReceivedFlags();
@@ -1384,7 +1409,7 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         }
         break;
     case 12:
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             // Recv enemy Pokémon 5-6 (if not master)
             ResetBlockReceivedFlags();
@@ -1426,11 +1451,11 @@ static void CB2_HandleStartMultiPartnerBattle(void)
         break;
     case 15:
         // Receive rng seed for recorded battle (only read it if partner is the link master)
-        if ((GetBlockReceivedStatus() & 3) == 3)
+        if (AllLinkBlocksReceived())
         {
             ResetBlockReceivedFlags();
             if (!(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
-                memcpy(&gRecordedBattleRngSeed, gBlockRecvBuffer[partnerMultiplayerId], sizeof(gRecordedBattleRngSeed));
+                memcpy(&gRecordedBattleRngSeed, gBlockRecvBuffer[0], sizeof(gRecordedBattleRngSeed));   // the master's
             gBattleCommunication[MULTIUSE_STATE]++;
         }
         break;
@@ -3519,7 +3544,7 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
             MarkBattlerForControllerExec(gActiveBattler);
         }
 
-        if (gMpCoopWild && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT && !MP_Coop_WildHasTwo())
+        if (gMpCoopWild && MP_Coop_WildSlotEmpty(gActiveBattler))
         {
             // Moemon Co-op: one wild Pokémon against two friends. The other
             // opponent slot stays empty, as if it had fainted.
@@ -3563,7 +3588,9 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
         if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
         {
             if (GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
-             || (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT && !gMpCoopWild))
+             || GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_CENTER   // Moemon Co-op: a triple's third player
+             || ((GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT
+                  || GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_CENTER) && !gMpCoopWild))
             {
                 BtlController_EmitDrawTrainerPic(B_COMM_TO_CONTROLLER);
                 MarkBattlerForControllerExec(gActiveBattler);
@@ -3739,9 +3766,11 @@ static void BattleIntroOpponent2SendsOutMonAnimation(void)
 
     for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
     {
-        if (GetBattlerPosition(gActiveBattler) == position)
+        // Moemon Co-op: a triple's center one comes out with the right one
+        if (GetBattlerPosition(gActiveBattler) == position
+         || (IS_TRIPLE_BATTLE() && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_CENTER))
         {
-            if (gMpCoopWild && !MP_Coop_WildHasTwo())
+            if (gMpCoopWild && MP_Coop_WildSlotEmpty(gActiveBattler))
             {
                 // Moemon Co-op: one wild Pokémon against two friends. The other
                 // opponent slot stays empty, as if it had fainted.
@@ -3876,7 +3905,8 @@ static void BattleIntroPlayer2SendsOutMonAnimation(void)
 
     for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
     {
-        if (GetBattlerPosition(gActiveBattler) == position)
+        if (GetBattlerPosition(gActiveBattler) == position
+         || (IS_TRIPLE_BATTLE() && GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_CENTER))   // Moemon Co-op
         {
             BtlController_EmitIntroTrainerBallThrow(B_COMM_TO_CONTROLLER);
             MarkBattlerForControllerExec(gActiveBattler);

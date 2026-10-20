@@ -56,24 +56,31 @@ struct QueuedBlock
     u8 data[BLOCK_BUFFER_SIZE];
 };
 
+// Link ids: 0 = master. Two games for PvP and co-op doubles, three for a
+// co-op Triple Battle (each other game has its own block queue, sync
+// sequence and "ready" flag).
+#define NET_MAX_LINK 3
+
 static struct
 {
     bool8 battleActive;      // from battle start until back in the overworld
     bool8 aborted;
-    u8 peer;                 // network player id of the opponent
+    u8 peer;                 // network player id of the opponent (the first other game)
     u8 linkId;               // our link multiplayer id (0 = master)
-    bool8 recvFlags[2];
-    struct QueuedBlock queue[BLOCK_QUEUE];
-    u8 qHead, qCount;
+    u8 linkCount;            // games in the link (2, or 3 in a triple)
+    u8 peers[NET_MAX_LINK];  // network player id of each link id (ours unused)
+    bool8 recvFlags[MAX_LINK_PLAYERS];
+    struct QueuedBlock queue[NET_MAX_LINK][BLOCK_QUEUE];
+    u8 qHead[NET_MAX_LINK], qCount[NET_MAX_LINK];
     struct QueuedBlock selfQueue[BLOCK_QUEUE];   // our own blocks, when several go out in one frame
     u8 sHead, sCount;
     u16 mySyncSeq;
-    u16 peerSyncSeq;
+    u16 peerSyncSeq[NET_MAX_LINK];
     u8 pendingSync;          // 0 none, 1 standby, 2 close
-    bool8 peerReady;         // the other game is in the battle (sync kind 3)
-    bool8 haveRemotePlayer;
+    u8 readyMask;            // link ids whose game is in the battle (sync kind 3)
+    u8 remoteMask;           // link ids whose LinkPlayer we have
     bool8 opened;
-    struct LinkPlayer remotePlayer;
+    struct LinkPlayer remotePlayer[NET_MAX_LINK];
     u32 myMoney;
     u32 oppMoney;
     u8 oppName[MP_NAME_LEN + 1];
@@ -113,9 +120,27 @@ static bool8 DebugOn(void)
     return sOn;
 }
 
-static u8 PeerLinkId(void)
+// Every other game's link id as a bit mask
+static u8 OthersMask(void)
 {
-    return sNet.linkId ^ 1;
+    return ((1 << sNet.linkCount) - 1) & ~(1 << sNet.linkId);
+}
+
+static s8 LinkIdOf(u8 netId)
+{
+    u8 i;
+    for (i = 0; i < sNet.linkCount && i < NET_MAX_LINK; i++)
+        if (i != sNet.linkId && sNet.peers[i] == netId)
+            return i;
+    return -1;
+}
+
+static void SendAll(const u8 *buf, u16 len)
+{
+    u8 i;
+    for (i = 0; i < sNet.linkCount && i < NET_MAX_LINK; i++)
+        if (i != sNet.linkId)
+            MP_SendRelay(sNet.peers[i], buf, len);
 }
 
 u8 NetLink_GetMultiplayerId(void)
@@ -131,7 +156,9 @@ u8 NetLink_GetPlayerCount(void)
 {
     if (MP_Group_Active())
         return MP_Group_GetPlayerCount();
-    return sMixCount ? sMixCount : 2;
+    if (sMixCount)
+        return sMixCount;
+    return sNet.linkCount ? sNet.linkCount : 2;
 }
 
 // Run the vanilla record mixing code against a fake link of `count` players
@@ -170,15 +197,23 @@ bool8 NetLink_IsMaster(void)
     return sNet.linkId == 0;
 }
 
+// Once every other game's LinkPlayer is here
 static void ApplyRemotePlayer(void)
 {
-    u8 peer = PeerLinkId();
+    u8 i;
+    if ((sNet.remoteMask & OthersMask()) != OthersMask())
+        return;
     gLinkPlayers[sNet.linkId] = gLocalLinkPlayer;
-    gLinkPlayers[peer] = sNet.remotePlayer;
-    gLinkPlayers[peer].id = peer;
     gLinkPlayers[sNet.linkId].id = sNet.linkId;
-    ConvertLinkPlayerName(&gLinkPlayers[peer]);
-    SaveLinkPlayers(2);
+    for (i = 0; i < sNet.linkCount; i++)
+    {
+        if (i == sNet.linkId)
+            continue;
+        gLinkPlayers[i] = sNet.remotePlayer[i];
+        gLinkPlayers[i].id = i;
+        ConvertLinkPlayerName(&gLinkPlayers[i]);
+    }
+    SaveLinkPlayers(sNet.linkCount);
     gReceivedRemoteLinkPlayers = TRUE;
 }
 
@@ -191,15 +226,14 @@ void NetLink_Open(void)
     gLinkPlayers[sNet.linkId] = gLocalLinkPlayer;
     gLocalLinkPlayer.id = sNet.linkId;
     gLocalLinkPlayer.linkType = LINKTYPE_BATTLE;
-    sNet.recvFlags[0] = sNet.recvFlags[1] = FALSE;
+    memset(sNet.recvFlags, 0, sizeof(sNet.recvFlags));
     sNet.pendingSync = 0;
     gReceivedRemoteLinkPlayers = FALSE;
     sNet.opened = TRUE;
     buf[0] = MPR_LINK_PLAYER;
     memcpy(buf + 1, &gLocalLinkPlayer, sizeof(struct LinkPlayer));
-    MP_SendRelay(sNet.peer, buf, sizeof(buf));
-    if (sNet.haveRemotePlayer)
-        ApplyRemotePlayer();
+    SendAll(buf, sizeof(buf));
+    ApplyRemotePlayer();
 }
 
 void NetLink_Close(void)
@@ -243,7 +277,7 @@ bool8 NetLink_SendBlock(const void *src, u16 size)
     sRelayBuf[1] = size & 0xFF;
     sRelayBuf[2] = size >> 8;
     memcpy(sRelayBuf + 3, src, size);
-    MP_SendRelay(sNet.peer, sRelayBuf, size + 3);
+    SendAll(sRelayBuf, size + 3);
     return TRUE;
 }
 
@@ -252,17 +286,27 @@ bool8 NetLink_SendBlock(const void *src, u16 size)
 void NetLink_SendReady(void)
 {
     u8 buf[4] = {MPR_LINK_SYNC, 3, 0, 0};
-    MP_SendRelay(sNet.peer, buf, sizeof(buf));
+    SendAll(buf, sizeof(buf));
 }
 
 bool8 NetLink_PeerReady(void)
 {
-    return sNet.peerReady;
+    return (sNet.readyMask & OthersMask()) == OthersMask();
+}
+
+// Every other game reached our barrier
+static bool8 SyncReached(void)
+{
+    u8 i;
+    for (i = 0; i < sNet.linkCount; i++)
+        if (i != sNet.linkId && (s16)(sNet.peerSyncSeq[i] - sNet.mySyncSeq) < 0)
+            return FALSE;
+    return TRUE;
 }
 
 static void UpdateSync(void)
 {
-    if (sNet.pendingSync && (s16)(sNet.peerSyncSeq - sNet.mySyncSeq) >= 0)
+    if (sNet.pendingSync && SyncReached())
     {
         if (sNet.pendingSync == 2)
             gReceivedRemoteLinkPlayers = FALSE;
@@ -285,7 +329,13 @@ u8 NetLink_GetBlockReceivedStatus(void)
     // The next waiting block is there as soon as the last one was taken (no frame lost)
     if (sNet.battleActive && gNetLinkActive)
         PumpBlocks();
-    return (sNet.recvFlags[0] ? 1 : 0) | (sNet.recvFlags[1] ? 2 : 0);
+    {
+        u8 i, bits = 0;
+        for (i = 0; i < MAX_LINK_PLAYERS; i++)
+            if (sNet.recvFlags[i])
+                bits |= 1 << i;
+        return bits;
+    }
 }
 
 void NetLink_ResetBlockReceivedFlag(u8 who)
@@ -295,7 +345,7 @@ void NetLink_ResetBlockReceivedFlag(u8 who)
         MP_Group_ResetBlockReceivedFlag(who);
         return;
     }
-    if (who < 2)
+    if (who < MAX_LINK_PLAYERS)
         sNet.recvFlags[who] = FALSE;
     // Not refilled here: the game reads gBlockRecvBuffer right after clearing
     // the flag, so the next block waits until it asks again (below)
@@ -310,7 +360,7 @@ static void SendSync(u8 kind)
     buf[1] = kind;
     buf[2] = sNet.mySyncSeq & 0xFF;
     buf[3] = sNet.mySyncSeq >> 8;
-    MP_SendRelay(sNet.peer, buf, 4);
+    SendAll(buf, 4);
     UpdateSync();
 }
 
@@ -339,7 +389,7 @@ void NetLink_SetCloseCallback(void)
 // Moves the next queued block into gBlockRecvBuffer once the game consumed the previous one
 static void PumpBlocks(void)
 {
-    u8 peer = PeerLinkId();
+    u8 peer;
     if (sNet.sCount > 0 && !sNet.recvFlags[sNet.linkId])
     {
         struct QueuedBlock *b = &sNet.selfQueue[sNet.sHead];
@@ -348,13 +398,16 @@ static void PumpBlocks(void)
         sNet.sHead = (sNet.sHead + 1) % BLOCK_QUEUE;
         sNet.sCount--;
     }
-    if (sNet.qCount > 0 && !sNet.recvFlags[peer])
+    for (peer = 0; peer < sNet.linkCount && peer < NET_MAX_LINK; peer++)
     {
-        struct QueuedBlock *b = &sNet.queue[sNet.qHead];
-        memcpy(gBlockRecvBuffer[peer], b->data, b->size);
-        sNet.recvFlags[peer] = TRUE;
-        sNet.qHead = (sNet.qHead + 1) % BLOCK_QUEUE;
-        sNet.qCount--;
+        if (peer != sNet.linkId && sNet.qCount[peer] > 0 && !sNet.recvFlags[peer])
+        {
+            struct QueuedBlock *b = &sNet.queue[peer][sNet.qHead[peer]];
+            memcpy(gBlockRecvBuffer[peer], b->data, b->size);
+            sNet.recvFlags[peer] = TRUE;
+            sNet.qHead[peer] = (sNet.qHead[peer] + 1) % BLOCK_QUEUE;
+            sNet.qCount[peer]--;
+        }
     }
     UpdateSync();
 }
@@ -436,7 +489,7 @@ static void FinishBattle(void)
     sNet.battleActive = FALSE;
     gNetLinkActive = FALSE;
     gReceivedRemoteLinkPlayers = FALSE;
-    sNet.qCount = 0;
+    memset(sNet.qCount, 0, sizeof(sNet.qCount));
     sNet.sCount = 0;
 }
 
@@ -571,6 +624,8 @@ void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney)
     memset(&sNet, 0, sizeof(sNet));
     sNet.peer = opponentId;
     sNet.linkId = isMaster ? 0 : 1;
+    sNet.linkCount = 2;
+    sNet.peers[sNet.linkId ^ 1] = opponentId;
     sNet.battleActive = TRUE;
     sNet.myMoney = GetMoney(&gSaveBlock1Ptr->money);
     sNet.oppMoney = opponentMoney;
@@ -584,12 +639,35 @@ void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney)
     sNet.startTask = CreateTask(Task_StartMpBattle, 1);
 }
 
-// Co-op double battles start their own battle; they only need the link layer
+// Co-op battles start their own battle; they only need the link layer.
+// peers[] = the network player id of each link id (ours is skipped); count 2
+// for a co-op double, 3 for a triple.
+void MP_Battle_OpenLinkGroup(const u8 *peers, u8 count, u8 linkId)
+{
+    u8 i;
+    memset(&sNet, 0, sizeof(sNet));
+    sNet.linkId = linkId;
+    sNet.linkCount = count;
+    for (i = 0; i < count && i < NET_MAX_LINK; i++)
+        sNet.peers[i] = peers[i];
+    sNet.peer = peers[linkId == 0 ? 1 : 0];
+    sNet.battleActive = TRUE;
+    sNet.startTask = TASK_NONE;
+    StringCopyN(sNet.oppName, gMpPlayers[sNet.peer].name, MP_NAME_LEN);
+    sNet.oppName[MP_NAME_LEN] = EOS;
+    gNetLinkActive = TRUE;
+    gWirelessCommType = 0;
+    gReceivedRemoteLinkPlayers = FALSE;
+    MPNet_Log("co-op battle link: %d games, we are link %d", count, linkId);
+}
+
 void MP_Battle_OpenLink(u8 peer, bool8 isMaster)
 {
     memset(&sNet, 0, sizeof(sNet));
     sNet.peer = peer;
     sNet.linkId = isMaster ? 0 : 1;
+    sNet.linkCount = 2;
+    sNet.peers[sNet.linkId ^ 1] = peer;
     sNet.battleActive = TRUE;
     sNet.startTask = TASK_NONE;
     StringCopyN(sNet.oppName, gMpPlayers[peer].name, MP_NAME_LEN);
@@ -610,15 +688,16 @@ void MP_Battle_CloseLink(void)
 
 void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
 {
-    if (!sNet.battleActive || from != sNet.peer)
+    s8 lid;
+    if (!sNet.battleActive || (lid = LinkIdOf(from)) < 0)
         return;
     switch (data[0])
     {
     case MPR_LINK_PLAYER:
         if (len < 1 + sizeof(struct LinkPlayer))
             return;
-        memcpy(&sNet.remotePlayer, data + 1, sizeof(struct LinkPlayer));
-        sNet.haveRemotePlayer = TRUE;
+        memcpy(&sNet.remotePlayer[lid], data + 1, sizeof(struct LinkPlayer));
+        sNet.remoteMask |= 1 << lid;
         // Only apply once the game opened its side of the link
         if (sNet.opened)
             ApplyRemotePlayer();
@@ -632,17 +711,17 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
         size = data[1] | (data[2] << 8);
         if (size > BLOCK_BUFFER_SIZE || len < 3 + size)
             return;
-        if (sNet.qCount == BLOCK_QUEUE)
+        if (sNet.qCount[lid] == BLOCK_QUEUE)
         {
-            MPNet_Log("link block queue overflow");
+            MPNet_Log("link block queue overflow (link %d)", lid);
             return;
         }
         if (DebugOn())
-            MPNet_Log("blk recv %d: %02x %02x .. cmd %02x (q %d)", size, data[3], data[4], size > 8 ? data[11] : 0, sNet.qCount);
-        b = &sNet.queue[(sNet.qHead + sNet.qCount) % BLOCK_QUEUE];
+            MPNet_Log("blk recv %d from %d: %02x %02x .. cmd %02x (q %d)", size, lid, data[3], data[4], size > 8 ? data[11] : 0, sNet.qCount[lid]);
+        b = &sNet.queue[lid][(sNet.qHead[lid] + sNet.qCount[lid]) % BLOCK_QUEUE];
         b->size = size;
         memcpy(b->data, data + 3, size);
-        sNet.qCount++;
+        sNet.qCount[lid]++;
         PumpBlocks();
         break;
     }
@@ -651,10 +730,10 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
             return;
         if (data[1] == 3)
         {
-            sNet.peerReady = TRUE;
+            sNet.readyMask |= 1 << lid;
             break;
         }
-        sNet.peerSyncSeq = data[2] | (data[3] << 8);
+        sNet.peerSyncSeq[lid] = data[2] | (data[3] << 8);
         UpdateSync();
         break;
     }
@@ -691,8 +770,11 @@ static void AbortBattleToField(void)
 
 void MP_Battle_OnPlayerLeft(u8 id)
 {
-    if (!sNet.battleActive || id != sNet.peer)
+    if (!sNet.battleActive || LinkIdOf(id) < 0)
         return;
+    // the one who left (a triple has two other games)
+    StringCopyN(sNet.oppName, gMpPlayers[id].name, MP_NAME_LEN);
+    sNet.oppName[MP_NAME_LEN] = EOS;
     sNet.aborted = TRUE;
     if (sNet.startTask != TASK_NONE && FuncIsActiveTask(Task_StartMpBattle))
         return; // the start task cleans up
@@ -715,8 +797,8 @@ static void DebugDump(void)
               (void *)(uintptr_t)((uintptr_t)gMain.callback2 - (uintptr_t)CB2_Overworld),
               (void *)(uintptr_t)((uintptr_t)gBattleMainFunc - (uintptr_t)CB2_Overworld),
               gBattleCommunication[0], gBattleControllerExecFlags, sNet.recvFlags[0], sNet.recvFlags[1],
-              sNet.qCount, sNet.sCount, sNet.pendingSync, sNet.mySyncSeq, sNet.peerSyncSeq,
-              gReceivedRemoteLinkPlayers, sNet.haveRemotePlayer, sNet.opened);
+              sNet.qCount[0] + sNet.qCount[1] + sNet.qCount[2], sNet.sCount, sNet.pendingSync, sNet.mySyncSeq, sNet.peerSyncSeq[sNet.linkId ? 0 : 1],
+              gReceivedRemoteLinkPlayers, sNet.remoteMask, sNet.opened);
 }
 
 void MP_Battle_FrameUpdate(void)

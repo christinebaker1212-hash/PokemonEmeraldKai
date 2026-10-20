@@ -1218,9 +1218,39 @@ static u8 GetPartyBoxPaletteFlags(u8 slot, u8 animNum)
     return palFlags;
 }
 
+// Moemon Co-op: a linked triple's party screen in battle order: 0 = our active
+// Pokemon, 1 = the first ally's, 2 = our reserve, 3 = the second ally's
+// active one, 4-5 = the allies' reserves. Allies' boxes use the partner color.
+static bool8 MpIsAllySlot(u8 slot)
+{
+    if (IS_TRIPLE_BATTLE() && gMpCoopBattle && gMain.inBattle)
+        return slot == 1 || slot == 3 || slot == 4 || slot == 5;
+    return slot == 1 || slot == 4 || slot == 5;
+}
+
+// gBattlePartyCurrentOrder for a linked triple, from who is out right now
+void MP_TripleFixPartyOrder(void)
+{
+    u8 ids[PARTY_SIZE], seat, i, n = 0;
+    if (!IS_TRIPLE_BATTLE() || !gMpCoopBattle)
+        return;
+    seat = GetMultiplayerId();
+    for (i = 0; i < 3; i++)
+    {
+        u8 s = (seat + i) % 3, active = gBattlerPartyIndexes[s * 2];
+        if (active / 2 != s)
+            active = s * 2;
+        ids[i == 0 ? 0 : (i == 1 ? 1 : 3)] = active;
+        ids[i == 0 ? 2 : (i == 1 ? 4 : 5)] = active ^ 1;
+    }
+    for (i = 0; i < PARTY_SIZE / 2; i++)
+        gBattlePartyCurrentOrder[i] = (ids[i * 2] << 4) | ids[i * 2 + 1];
+    (void)n;
+}
+
 static bool8 PartyBoxPal_ParnterOrDisqualifiedInArena(u8 slot)
 {
-    if (gPartyMenu.layout == PARTY_LAYOUT_MULTI && (slot == 1 || slot == 4 || slot == 5))
+    if (gPartyMenu.layout == PARTY_LAYOUT_MULTI && MpIsAllySlot(slot))
         return TRUE;
 
     if (slot < MULTI_PARTY_SIZE && (gBattleTypeFlags & BATTLE_TYPE_ARENA) && gMain.inBattle && (gBattleStruct->arenaLostPlayerMons >> GetPartyIdFromBattleSlot(slot) & 1))
@@ -5975,8 +6005,8 @@ static bool8 TrySwitchInPokemon(void)
     u8 newSlot;
     u8 i;
 
-    // In a multi battle, slots 1, 4, and 5 are the partner's Pokémon
-    if (IsMultiBattle() == TRUE && (slot == 1 || slot == 4 || slot == 5))
+    // In a multi battle, slots 1, 4, and 5 are the partner's Pokémon (a triple: 3 too)
+    if (IsMultiBattle() == TRUE && MpIsAllySlot(slot))
     {
         StringCopy(gStringVar1, GetTrainerPartnerName());
         StringExpandPlaceholders(gStringVar4, gText_CantSwitchWithAlly);

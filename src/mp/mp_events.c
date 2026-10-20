@@ -792,6 +792,32 @@ void MP_Events_OnCoopWin(u8 partner)
         ContributeGoals(G_COOPTRAINER);
 }
 
+// A co-op Triple Battle won (the master's game): every pair of the three
+// counts once, the co-op battle itself once
+void MP_Events_OnCoopWinGroup(const u8 *players, u8 count)
+{
+    char key[40], names[3][16];
+    u8 i, j;
+    if (!Online() || count < 2 || count > 3)
+        return;
+    MyName(names[0]);
+    for (i = 1; i < count; i++)
+    {
+        if (players[i] >= MP_MAX_PLAYERS)
+            return;
+        MP_GameToAscii(names[i], gMpPlayers[players[i]].name, PLAYER_NAME_LENGTH);
+    }
+    for (i = 0; i < count; i++)
+        for (j = i + 1; j < count; j++)
+        {
+            PairKey(key, TodayUTC(), names[i], names[j]);
+            MP_Counter_Add(key, 1);
+        }
+    MP_Counter_Add("a:coop", 1);
+    if (!gMpCoopWild)
+        ContributeGoals(G_COOPTRAINER);
+}
+
 static bool8 CatchCounts(struct Pokemon *mon, u8 effType)
 {
     u16 species = mon ? GetMonData(mon, MON_DATA_SPECIES) : SPECIES_NONE;

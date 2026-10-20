@@ -14,6 +14,7 @@
 // so they fade with the rest of the screen.
 #include <string.h>
 #include "global.h"
+void MPNet_Log(const char *fmt, ...);
 #include "battle.h"
 #include "battle_interface.h"
 #include "battle_main.h"
@@ -359,6 +360,21 @@ void MP_TriCards_Composite(u16 *frame)
         if (!c->used || gHealthboxSpriteIds[b] >= MAX_SPRITES)
             continue;
         box = &gSprites[gHealthboxSpriteIds[b]];
+        if (gMpDebugTriple)
+        {
+            static u8 sLastState[MAX_BATTLERS_COUNT];
+            u8 st = (!box->inUse ? 1 : 0) | (box->invisible ? 2 : 0);
+            if (st != sLastState[b])
+            {
+                MPNet_Log("tricards: b%d box %d state %d -> %d (cmds %d %d %d %d %d %d, main %p)", b, gHealthboxSpriteIds[b], sLastState[b], st,
+                          gBattleBufferA[0][0], gBattleBufferA[1][0], gBattleBufferA[2][0], gBattleBufferA[3][0], gBattleBufferA[4][0], gBattleBufferA[5][0],
+                          (void *)gBattleMainFunc);
+                MPNet_Log("tricards: sprites %d %d %d %d %d %d, boxes %d %d %d %d %d %d, atk %d tgt %d", gBattlerSpriteIds[0], gBattlerSpriteIds[1],
+                          gBattlerSpriteIds[2], gBattlerSpriteIds[3], gBattlerSpriteIds[4], gBattlerSpriteIds[5], gHealthboxSpriteIds[0], gHealthboxSpriteIds[1],
+                          gHealthboxSpriteIds[2], gHealthboxSpriteIds[3], gHealthboxSpriteIds[4], gHealthboxSpriteIds[5], gBattleAnimAttacker, gBattleAnimTarget);
+                sLastState[b] = st;
+            }
+        }
         if (!box->inUse || box->invisible)
             continue;
         if (!CardPlace(b, &x0, &y0, &opacity))

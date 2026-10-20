@@ -213,12 +213,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "triple") == 0)
     {
-        // triple S:L S:L S:L - a local wild Triple Battle (you command party slots 0-2)
+        // triple S:L S:L S:L [S:L...] - a local wild Triple Battle (you command party
+        // slots 0-2); up to six foes, the 4th-6th come in when one faints
         void BattleSetup_StartLocalTripleWildBattle(void);
-        int sp[3] = {288, 263, 265}, lv[3] = {5, 5, 5}, i;
-        sscanf(arg, "%d:%d %d:%d %d:%d", &sp[0], &lv[0], &sp[1], &lv[1], &sp[2], &lv[2]);
+        int sp[PARTY_SIZE] = {288, 286, 290}, lv[PARTY_SIZE] = {5, 5, 5}, i, n = 0, used;
+        const char *p = arg;
+        while (n < PARTY_SIZE && sscanf(p, "%d:%d%n", &sp[n], &lv[n], &used) == 2)
+            p += used, n++;
+        if (n < 3)
+            n = 3;
         ZeroEnemyPartyMons();
-        for (i = 0; i < 3; i++)
+        for (i = 0; i < n; i++)
             CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();

@@ -3166,6 +3166,26 @@ void DeleteFirstMoveAndGiveMoveToBoxMon(struct BoxPokemon *boxMon, u16 move)
     (var) /= (gStatStageRatios)[(mon)->statStages[(statIndex)]][1];                 \
 }
 
+// Moemon Co-op: a screen weakens less when the side has more than one Pokemon:
+// exactly two in doubles (vanilla), two or more in a Triple Battle
+static bool8 MultiTargetSide(u8 alive)
+{
+    return IS_TRIPLE_BATTLE() ? alive >= 2 : alive == 2;
+}
+
+// Moemon Co-op: spread moves (MOVE_TARGET_BOTH). Doubles: half when both foes are
+// up (vanilla). Triples: 3/4 when two or more foes were up as the move started
+// (counted at its first target, so a KO halfway doesn't change it).
+u8 gMpSpreadTargetCount;
+static s32 SpreadDamage(s32 damage)
+{
+    if (!IS_TRIPLE_BATTLE())
+        return CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2 ? damage / 2 : damage;
+    if (!(gHitMarker & HITMARKER_NO_ATTACKSTRING))
+        gMpSpreadTargetCount = CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE);
+    return gMpSpreadTargetCount >= 2 ? damage * 3 / 4 : damage;
+}
+
 s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *defender, u32 move, u16 sideStatus, u16 powerOverride, u8 typeOverride, u8 battlerIdAtk, u8 battlerIdDef)
 {
     u32 i;
@@ -3329,15 +3349,15 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         // Apply Reflect
         if ((sideStatus & SIDE_STATUS_REFLECT) && gCritMultiplier == 1)
         {
-            if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2)
+            if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && MultiTargetSide(CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE)))
                 damage = 2 * (damage / 3);
             else
                 damage /= 2;
         }
 
         // Moves hitting both targets do half damage in double battles
-        if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == MOVE_TARGET_BOTH && CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2)
-            damage /= 2;
+        if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == MOVE_TARGET_BOTH)
+            damage = SpreadDamage(damage);
 
         // Moves always do at least 1 damage.
         if (damage == 0)
@@ -3380,15 +3400,15 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         // Apply Lightscreen
         if ((sideStatus & SIDE_STATUS_LIGHTSCREEN) && gCritMultiplier == 1)
         {
-            if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2)
+            if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && MultiTargetSide(CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE)))
                 damage = 2 * (damage / 3);
             else
                 damage /= 2;
         }
 
         // Moves hitting both targets do half damage in double battles
-        if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == MOVE_TARGET_BOTH && CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2)
-            damage /= 2;
+        if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == MOVE_TARGET_BOTH)
+            damage = SpreadDamage(damage);
 
         // Are effects of weather negated with cloud nine or air lock
         if (WEATHER_HAS_EFFECT2)

@@ -476,6 +476,37 @@ static void InitLinkBtlControllers(void)
             gBattlersCount = DOUBLE_BATTLERS_COUNT;
         }
     }
+    else if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+    {
+        // Moemon Co-op: three players. Link player i controls battler 2i (0 left,
+        // 2 right, 4 center) with party slots 2i-2i+1; the master's game runs the
+        // NPC side (1, 3, 5), the others show it. Same positions on every screen.
+        u8 me = GetMultiplayerId();
+        static const u8 sPos[TRIPLE_BATTLERS_COUNT] = {
+            B_POSITION_PLAYER_LEFT, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_RIGHT,
+            B_POSITION_OPPONENT_RIGHT, B_POSITION_PLAYER_CENTER, B_POSITION_OPPONENT_CENTER,
+        };
+
+        if (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER)
+            gBattleMainFunc = BeginBattleIntro;
+        for (i = 0; i < TRIPLE_BATTLERS_COUNT; i++)
+        {
+            gBattlerPositions[i] = sPos[i];
+            if (i & BIT_SIDE)
+            {
+                gBattlerControllerFuncs[i] = (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER) ? SetControllerToOpponent : SetControllerToLinkOpponent;
+                gBattlerPartyIndexes[i] = i / 2;   // the NPC side's first three
+            }
+            else
+            {
+                gBattlerControllerFuncs[i] = (i / 2 == me) ? SetControllerToPlayer : SetControllerToLinkPartner;
+                gBattlerPartyIndexes[i] = i;       // each player's first Pokemon
+            }
+        }
+        gBattlersCount = TRIPLE_BATTLERS_COUNT;
+        for (i = 0; i < TRIPLE_BATTLERS_COUNT; i++)
+            BufferBattlePartyCurrentOrderBySide(i, 0);
+    }
     else if (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER || gMpCoopBattle) // Moemon Co-op: same layout
     {
         if (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER)
@@ -958,7 +989,9 @@ static void Task_HandleSendLinkBuffersData(u8 taskId)
         }
         else
         {
-            if (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER || gMpCoopBattle)
+            if (gMpCoopBattle)
+                numPlayers = GetLinkPlayerCount();   // Moemon Co-op: 2, or 3 in a triple
+            else if (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER)
                 numPlayers = 2;
             else
                 numPlayers = (gBattleTypeFlags & BATTLE_TYPE_MULTI) ? 4 : 2;

@@ -31,6 +31,7 @@
 #include "util.h"
 #include "window.h"
 #include "constants/battle_anim.h"
+#include "constants/battle_move_effects.h"
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/party_menu.h"
@@ -116,6 +117,42 @@ static void MpShowPartnerTeam(void)
     *p++ = EXT_CTRL_CODE_BEGIN;
     *p++ = EXT_CTRL_CODE_FONT;
     *p++ = FONT_SMALL_NARROW;   // three short lines fit the prompt box
+    if (IS_TRIPLE_BATTLE() && gMpCoopBattle)
+    {
+        // Moemon Co-op: a triple: one line per ally, their two Pokemon ("TORCHIC 30/33  MUDKIP FNT")
+        u8 own = MP_Coop_OwnBase(), seat;
+        for (seat = 0; seat < 3; seat++)
+        {
+            u8 base = seat * 2, k, n = 0;
+            if (base == own)
+                continue;
+            if (lines++)
+                *p++ = CHAR_NEWLINE;
+            for (k = 0; k < 2; k++)
+            {
+                struct Pokemon *mon = &gPlayerParty[base + k];
+                u8 name[POKEMON_NAME_LENGTH + 2];
+                char buf[16];
+                u16 hp = GetMonData(mon, MON_DATA_HP);
+                if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+                    continue;
+                if (n++)
+                    *p++ = CHAR_SPACE, *p++ = CHAR_SPACE;
+                GetMonData(mon, MON_DATA_NICKNAME, name);
+                StringGet_Nickname(name);
+                p = StringCopy(p, name);
+                if (hp == 0)
+                    snprintf(buf, sizeof(buf), " FNT");
+                else
+                    snprintf(buf, sizeof(buf), " %d/%d", hp, GetMonData(mon, MON_DATA_MAX_HP));
+                MP_AsciiToGame(p, buf, 14);
+                p += StringLength(p);
+            }
+        }
+        *p = EOS;
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+        return;
+    }
     for (i = 0; i < MULTI_PARTY_SIZE; i++)
     {
         struct Pokemon *mon = &gPlayerParty[half + i];
@@ -478,9 +515,114 @@ static void UNUSED UnusedEndBounceEffect(void)
     gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseTarget;
 }
 
+// Moemon Co-op: Triple Battle targets, left to right on the screen
+static const u8 sTripleTargetOrder[TRIPLE_BATTLERS_COUNT] = {
+    B_POSITION_PLAYER_LEFT, B_POSITION_PLAYER_CENTER, B_POSITION_PLAYER_RIGHT,
+    B_POSITION_OPPONENT_RIGHT, B_POSITION_OPPONENT_CENTER, B_POSITION_OPPONENT_LEFT,
+};
+
+static u16 MpChosenMove(void)
+{
+    return GetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_MOVE1 + gMoveSelectionCursor[gActiveBattler]);
+}
+
+// Helping Hand in a triple: pick which ally (the move table says USER)
+static bool8 MpIsAllyPickMove(u16 move)
+{
+    return IS_TRIPLE_BATTLE() && gBattleMoves[move].effect == EFFECT_HELPING_HAND;
+}
+
+static bool8 MpTripleTargetValid(u8 battler)
+{
+    u16 move = MpChosenMove();
+    if (battler >= gBattlersCount || (gAbsentBattlerFlags & gBitTable[battler]))
+        return FALSE;
+    if (MpIsAllyPickMove(move))
+        return GetBattlerSide(battler) == B_SIDE_PLAYER && battler != gActiveBattler;
+    if (battler == gActiveBattler)
+        return (gBattleMoves[move].target & MOVE_TARGET_USER_OR_SELECTED) != 0;
+    return TRUE;
+}
+
+// The first valid ally (Helping Hand) or foe for the cursor to start on
+static u8 MpTripleFirstTarget(void)
+{
+    s32 i;
+    bool8 ally = MpIsAllyPickMove(MpChosenMove());
+    u8 pref = ally ? B_POSITION_PLAYER_CENTER : B_POSITION_OPPONENT_LEFT;
+    if (MpTripleTargetValid(GetBattlerAtPosition(pref)))
+        return GetBattlerAtPosition(pref);
+    // foes first (right to left as the order runs backwards), then allies
+    for (i = TRIPLE_BATTLERS_COUNT - 1; i >= 0; i--)
+    {
+        u8 b = GetBattlerAtPosition(sTripleTargetOrder[i]);
+        if ((ally ? GetBattlerSide(b) == B_SIDE_PLAYER : GetBattlerSide(b) != B_SIDE_PLAYER) && MpTripleTargetValid(b))
+            return b;
+    }
+    for (i = 0; i < TRIPLE_BATTLERS_COUNT; i++)
+        if (MpTripleTargetValid(GetBattlerAtPosition(sTripleTargetOrder[i])))
+            return GetBattlerAtPosition(sTripleTargetOrder[i]);
+    return gActiveBattler;
+}
+
+static void HandleInputChooseTargetTriple(void)
+{
+    s32 i, k;
+
+    DoBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX, 15, 1);
+    for (i = 0; i < gBattlersCount; i++)
+        if (i != gMultiUsePlayerCursor)
+            EndBounceEffect(i, BOUNCE_HEALTHBOX);
+
+    if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+        MP_Coop_SetIntent(MP_INTENT_MOVE, MpChosenMove(), gMultiUsePlayerCursor);
+        EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
+        PlayerBufferExecCompleted();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+        gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseMove;
+        DoBounceEffect(gActiveBattler, BOUNCE_HEALTHBOX, 7, 1);
+        DoBounceEffect(gActiveBattler, BOUNCE_MON, 7, 1);
+        EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
+    }
+    else if (JOY_NEW(DPAD_ANY))
+    {
+        s8 dir = JOY_NEW(DPAD_LEFT | DPAD_UP) ? -1 : 1;
+        u8 cur = 0;
+        for (i = 0; i < TRIPLE_BATTLERS_COUNT; i++)
+            if (GetBattlerAtPosition(sTripleTargetOrder[i]) == gMultiUsePlayerCursor)
+                cur = i;
+        for (k = 1; k < TRIPLE_BATTLERS_COUNT; k++)
+        {
+            u8 b = GetBattlerAtPosition(sTripleTargetOrder[(cur + dir * k + TRIPLE_BATTLERS_COUNT * 2) % TRIPLE_BATTLERS_COUNT]);
+            if (MpTripleTargetValid(b))
+            {
+                PlaySE(SE_SELECT);
+                gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+                gMultiUsePlayerCursor = b;
+                gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
+                break;
+            }
+        }
+    }
+}
+
 static void HandleInputChooseTarget(void)
 {
     s32 i;
+
+    if (IS_TRIPLE_BATTLE())
+    {
+        HandleInputChooseTargetTriple();
+        return;
+    }
     u8 identities[DOUBLE_BATTLERS_COUNT];
     memcpy(identities, sTargetIdentities, ARRAY_COUNT(sTargetIdentities));
 
@@ -653,6 +795,9 @@ static void HandleInputChooseMove(void)
         else
             gMultiUsePlayerCursor = GetBattlerAtPosition(BATTLE_OPPOSITE(GET_BATTLER_SIDE(gActiveBattler)));
 
+        if (MpIsAllyPickMove(moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]))
+            moveTarget = MOVE_TARGET_SELECTED;   // Moemon Co-op: Helping Hand picks an ally
+
         if (!gBattleBufferA[gActiveBattler][1]) // not a double battle
         {
             if (moveTarget & MOVE_TARGET_USER_OR_SELECTED && !gBattleBufferA[gActiveBattler][2])
@@ -674,6 +819,9 @@ static void HandleInputChooseMove(void)
             }
         }
 
+        if (gMpDebugTriple)
+            MPNet_Log("triple: b%d move %d target %d select %d dbl %d", gActiveBattler, moveInfo->moves[gMoveSelectionCursor[gActiveBattler]],
+                      moveTarget, canSelectTarget, gBattleBufferA[gActiveBattler][1]);
         if (!canSelectTarget)
         {
             BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
@@ -686,6 +834,8 @@ static void HandleInputChooseMove(void)
 
             if (moveTarget & (MOVE_TARGET_USER | MOVE_TARGET_USER_OR_SELECTED))
                 gMultiUsePlayerCursor = gActiveBattler;
+            else if (IS_TRIPLE_BATTLE())
+                gMultiUsePlayerCursor = MpTripleFirstTarget();
             else if (gAbsentBattlerFlags & gBitTable[GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)])
                 gMultiUsePlayerCursor = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
             else
@@ -1444,7 +1594,14 @@ static void Task_LaunchLvlUpAnim(u8 taskId)
     u8 monIndex = gTasks[taskId].tExpTask_monId;
 
     if (IsDoubleBattle() == TRUE && monIndex == gBattlerPartyIndexes[BATTLE_PARTNER(battler)])
-        battler ^= BIT_FLANK;
+        battler = BATTLE_PARTNER(battler);
+    if (IS_TRIPLE_BATTLE())   // Moemon Co-op: whichever ally has it out
+    {
+        u8 b;
+        for (b = 0; b < gBattlersCount; b++)
+            if (GetBattlerSide(b) == B_SIDE_PLAYER && gBattlerPartyIndexes[b] == monIndex)
+                battler = b;
+    }
 
     InitAndLaunchSpecialAnimation(battler, battler, battler, B_ANIM_LVL_UP);
     gTasks[taskId].func = Task_UpdateLvlInHealthbox;
@@ -2623,6 +2780,8 @@ static void PlayerHandleDrawTrainerPic(void)
             xPos = 90;
         else // First mon, on the left.
             xPos = 32;
+        if (IS_TRIPLE_BATTLE())   // Moemon Co-op: three trainers, left / center / right
+            xPos = MpTripleTrainerX(gActiveBattler);
 
         if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gPartnerTrainerId != TRAINER_STEVEN_PARTNER)
         {
@@ -3001,6 +3160,7 @@ static void PlayerHandleChooseItem(void)
         sMpQuickBall = ITEM_NONE;
         for (i = 0; i < (int)ARRAY_COUNT(gBattlePartyCurrentOrder); i++)
             gBattlePartyCurrentOrder[i] = gBattleBufferA[gActiveBattler][1 + i];
+        MP_TripleFixPartyOrder();
         if (CheckBagHasItem(ball, 1))
         {
             RemoveBagItem(ball, 1);
@@ -3019,6 +3179,7 @@ static void PlayerHandleChooseItem(void)
 
     for (i = 0; i < (int)ARRAY_COUNT(gBattlePartyCurrentOrder); i++)
         gBattlePartyCurrentOrder[i] = gBattleBufferA[gActiveBattler][1 + i];
+    MP_TripleFixPartyOrder();
 }
 
 static void PlayerHandleChoosePokemon(void)
@@ -3029,10 +3190,26 @@ static void PlayerHandleChoosePokemon(void)
 
     for (i = 0; i < (int)ARRAY_COUNT(gBattlePartyCurrentOrder); i++)
         gBattlePartyCurrentOrder[i] = gBattleBufferA[gActiveBattler][4 + i];
+    MP_TripleFixPartyOrder();
 
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA && (gBattleBufferA[gActiveBattler][1] & 0xF) != PARTY_ACTION_CANT_SWITCH)
     {
         BtlController_EmitChosenMonReturnValue(B_COMM_TO_ENGINE, gBattlerPartyIndexes[gActiveBattler] + 1, gBattlePartyCurrentOrder);
+        PlayerBufferExecCompleted();
+    }
+    else if (IS_TRIPLE_BATTLE() && !(gBattleTypeFlags & BATTLE_TYPE_LINK)
+          && (gBattleBufferA[gActiveBattler][1] & 0xF) == PARTY_ACTION_SEND_OUT)
+    {
+        // Moemon Co-op: a local debug triple sends replacements in by itself (one
+        // player can't fill in three party screens at once)
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            if (GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0 && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+             && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !MP_IsPartyIdOnSide(gActiveBattler, i))
+                break;
+        }
+        *(gBattleStruct->monToSwitchIntoId + gActiveBattler) = i;
+        BtlController_EmitChosenMonReturnValue(B_COMM_TO_ENGINE, i, gBattlePartyCurrentOrder);
         PlayerBufferExecCompleted();
     }
     else

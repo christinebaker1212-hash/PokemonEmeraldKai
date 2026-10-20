@@ -1,6 +1,7 @@
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
+#include "battle_util.h"
 #include "battle_anim.h"
 #include "battle_ai_script_commands.h"
 #include "battle_factory.h"
@@ -353,6 +354,8 @@ void BattleAI_SetupAIData(u8 defaultScoreMoves)
         gBattlerTarget = (Random() & BIT_FLANK) + BATTLE_OPPOSITE(GetBattlerSide(gActiveBattler));
         if (gAbsentBattlerFlags & gBitTable[gBattlerTarget])
             gBattlerTarget ^= BIT_FLANK;
+        if (IS_TRIPLE_BATTLE())
+            gBattlerTarget = GetRandomFoe(gActiveBattler);   // Moemon Co-op: any of three
     }
     // There's only one choice in single battles.
     else
@@ -481,7 +484,8 @@ static u8 ChooseMoveOrAction_Doubles(void)
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
-        if (i == sBattler_AI || gBattleMons[i].hp == 0)
+        // Moemon Co-op: battlers 4-5 only exist in a triple
+        if (i == sBattler_AI || i >= gBattlersCount || gBattleMons[i].hp == 0)
         {
             actionOrMoveIndex[i] = 0xFF;
             bestMovePointsForTarget[i] = -1;
@@ -548,7 +552,8 @@ static u8 ChooseMoveOrAction_Doubles(void)
                 bestMovePointsForTarget[i] = mostViableMovesScores[0];
 
                 // Don't use a move against ally if it has less than 100 points.
-                if (i == BATTLE_PARTNER(sBattler_AI) && bestMovePointsForTarget[i] < 100)
+                // Moemon Co-op: any ally (a triple has two)
+                if (GetBattlerSide(i) == GetBattlerSide(sBattler_AI) && bestMovePointsForTarget[i] < 100)
                 {
                     bestMovePointsForTarget[i] = -1;
                     mostViableMovesScores[0] = mostViableMovesScores[0]; // Needed to match.

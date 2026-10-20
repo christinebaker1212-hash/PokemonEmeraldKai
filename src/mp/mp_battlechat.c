@@ -68,6 +68,8 @@ static void SpriteCB_Pick(struct Sprite *sprite)
 u8 MP_BattleChat_LocalBattler(void)
 {
     u8 b;
+    if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+        return GetMultiplayerId() * 2;   // a triple: link player i is battler 2i
     if ((gBattleTypeFlags & BATTLE_TYPE_MULTI) && (gBattleTypeFlags & BATTLE_TYPE_LINK))
     {
         u8 half = GetMultiplayerId() == 0 ? 0 : 1;
@@ -84,6 +86,13 @@ u8 MP_BattleChat_BattlerOf(u8 playerId)
     u8 local, b;
     if (!gMain.inBattle)
         return MAX_BATTLERS_COUNT;
+    if (gMpCoopBattle && IS_TRIPLE_BATTLE())
+    {
+        for (b = 0; b < gBattlersCount; b += 2)
+            if (MP_Coop_BattlerPlayer(b) == playerId && b != MP_BattleChat_LocalBattler())
+                return b;
+        return MAX_BATTLERS_COUNT;
+    }
     if (gMpCoopBattle && MP_Coop_PartnerId() == playerId)
     {
         local = MP_BattleChat_LocalBattler();

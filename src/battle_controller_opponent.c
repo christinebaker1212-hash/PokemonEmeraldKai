@@ -1,6 +1,7 @@
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
+#include "battle_util.h"
 #include "battle_ai_script_commands.h"
 #include "battle_anim.h"
 #include "battle_arena.h"
@@ -1324,7 +1325,7 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
     // Moemon Co-op: the trainer is drawn for both opponent slots; show it once
-    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT || gMpCoopWild))
+    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
@@ -1593,6 +1594,8 @@ static void OpponentHandleChooseMove(void)
                     gBattlerTarget = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
                     if (gAbsentBattlerFlags & gBitTable[gBattlerTarget])
                         gBattlerTarget = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT);
+                    if (IS_TRIPLE_BATTLE() && (gAbsentBattlerFlags & gBitTable[gBattlerTarget]))
+                        gBattlerTarget = GetRandomFoe(gActiveBattler);   // Moemon Co-op: the center one
                 }
                 BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (gBattlerTarget << 8));
                 break;
@@ -1610,6 +1613,8 @@ static void OpponentHandleChooseMove(void)
 
             if (gBattleMoves[move].target & (MOVE_TARGET_USER_OR_SELECTED | MOVE_TARGET_USER))
                 BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (gActiveBattler << 8));
+            else if (IS_TRIPLE_BATTLE())   // Moemon Co-op: any of the three
+                BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (GetRandomFoe(gActiveBattler) << 8));
             else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
                 BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (GetBattlerAtPosition(Random() & 2) << 8));
             else
@@ -1648,7 +1653,11 @@ static void OpponentHandleChoosePokemon(void)
                 battler2 = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
             }
 
-            if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+            if (IS_TRIPLE_BATTLE())
+            {
+                firstId = 0, lastId = PARTY_SIZE;   // Moemon Co-op: a triple's shared pool
+            }
+            else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
             {
                 if (gActiveBattler == 1)
                     firstId = 0, lastId = PARTY_SIZE / 2;
@@ -1664,7 +1673,8 @@ static void OpponentHandleChoosePokemon(void)
             {
                 if (GetMonData(&gEnemyParty[chosenMonId], MON_DATA_HP) != 0
                     && chosenMonId != gBattlerPartyIndexes[battler1]
-                    && chosenMonId != gBattlerPartyIndexes[battler2])
+                    && chosenMonId != gBattlerPartyIndexes[battler2]
+                    && !(IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, chosenMonId)))
                 {
                     break;
                 }

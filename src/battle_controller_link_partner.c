@@ -1118,6 +1118,8 @@ static void LinkPartnerHandleDrawTrainerPic(void)
             xPos = 90;
         else // first mon
             xPos = 32;
+        if (IS_TRIPLE_BATTLE())   // Moemon Co-op: three trainers, left / center / right
+            xPos = MpTripleTrainerX(gActiveBattler);
     }
     else
     {
