@@ -199,6 +199,8 @@ EWRAM_DATA u16 gChosenMoveByBattler[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gMoveResultFlags = 0;
 EWRAM_DATA u32 gHitMarker = 0;
 EWRAM_DATA u8 gBattlerFaintMarks = 0;            // Moemon Co-op
+bool8 gIsTripleBattle;
+bool8 gMpDebugTriple;                           // Moemon Co-op: set before the battle starts, cleared in FreeBattleResources
 EWRAM_DATA u8 gBattlerInfatuatedWith[MAX_BATTLERS_COUNT] = {0};   // Moemon Co-op
 EWRAM_DATA static u8 sUnusedBattlersArray[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gBideTarget[MAX_BATTLERS_COUNT] = {0};
@@ -4242,6 +4244,43 @@ enum
     STATE_SELECTION_SCRIPT_MAY_RUN
 };
 
+// Moemon Co-op: who chooses before this position on the same game (doubles: the left
+// one before the right one; a local triple: left, center, right), skipping absent
+// battlers. MAX_BATTLERS_COUNT = nobody.
+static u8 ChooserOrder(u8 position)
+{
+    if (IS_TRIPLE_BATTLE())
+        return position >= B_POSITION_PLAYER_CENTER ? 1 : ((position & BIT_FLANK) ? 2 : 0);
+    return (position & BIT_FLANK) ? 1 : 0;
+}
+
+static u8 PrevChooser(u8 position)
+{
+    u8 b, best = MAX_BATTLERS_COUNT, bestOrder = 0;
+    u8 order = ChooserOrder(position);
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        u8 pos = GetBattlerPosition(b), o = ChooserOrder(pos);
+        if ((pos & BIT_SIDE) != (position & BIT_SIDE) || o >= order || (gBattleStruct->absentBattlerFlags & gBitTable[b]))
+            continue;
+        if (best == MAX_BATTLERS_COUNT || o > bestOrder)
+            best = b, bestOrder = o;
+    }
+    return best;
+}
+
+static bool8 HasNextChooser(u8 position)
+{
+    u8 b, order = ChooserOrder(position);
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        u8 pos = GetBattlerPosition(b);
+        if ((pos & BIT_SIDE) == (position & BIT_SIDE) && ChooserOrder(pos) > order && !(gBattleStruct->absentBattlerFlags & gBitTable[b]))
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static void HandleTurnActionSelectionState(void)
 {
     s32 i;
@@ -4258,10 +4297,21 @@ static void HandleTurnActionSelectionState(void)
             break;
         case STATE_BEFORE_ACTION_CHOSEN: // Choose an action.
             *(gBattleStruct->monToSwitchIntoId + gActiveBattler) = PARTY_SIZE;
+            if (IS_TRIPLE_BATTLE() && gMpDebugTriple)
+            {
+                static u32 sLast;
+                if (sLast != gMain.vblankCounter1 / 60)
+                {
+                    sLast = gMain.vblankCounter1 / 60;
+                    MPNet_Log("triple: b%d before-action, prev %d comm %d %d %d %d %d %d exec %x", gActiveBattler, PrevChooser(position),
+                              gBattleCommunication[0], gBattleCommunication[1], gBattleCommunication[2], gBattleCommunication[3],
+                              gBattleCommunication[4], gBattleCommunication[5], gBattleControllerExecFlags);
+                }
+            }
+            // Moemon Co-op: one chooser after the other (a triple's three in turn)
             if (gBattleTypeFlags & BATTLE_TYPE_MULTI
-                || (position & BIT_FLANK) == B_FLANK_LEFT
-                || gBattleStruct->absentBattlerFlags & gBitTable[GetBattlerAtPosition(BATTLE_PARTNER(position))]
-                || gBattleCommunication[GetBattlerAtPosition(BATTLE_PARTNER(position))] == STATE_WAIT_ACTION_CONFIRMED)
+                || PrevChooser(position) == MAX_BATTLERS_COUNT
+                || gBattleCommunication[PrevChooser(position)] == STATE_WAIT_ACTION_CONFIRMED)
             {
                 if (gBattleStruct->absentBattlerFlags & gBitTable[gActiveBattler])
                 {
@@ -4398,38 +4448,38 @@ static void HandleTurnActionSelectionState(void)
                     break;
                 case B_ACTION_CANCEL_PARTNER:
                     gBattleCommunication[gActiveBattler] = STATE_WAIT_SET_BEFORE_ACTION;
-                    gBattleCommunication[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))] = STATE_BEFORE_ACTION_CHOSEN;
+                    gBattleCommunication[PrevChooser(GetBattlerPosition(gActiveBattler))] = STATE_BEFORE_ACTION_CHOSEN;
                     RecordedBattle_ClearBattlerAction(gActiveBattler, 1);
-                    if (gBattleMons[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))].status2 & STATUS2_MULTIPLETURNS
-                        || gBattleMons[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))].status2 & STATUS2_RECHARGE)
+                    if (gBattleMons[PrevChooser(GetBattlerPosition(gActiveBattler))].status2 & STATUS2_MULTIPLETURNS
+                        || gBattleMons[PrevChooser(GetBattlerPosition(gActiveBattler))].status2 & STATUS2_RECHARGE)
                     {
                         BtlController_EmitEndBounceEffect(B_COMM_TO_CONTROLLER);
                         MarkBattlerForControllerExec(gActiveBattler);
                         return;
                     }
-                    else if (gChosenActionByBattler[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))] == B_ACTION_SWITCH)
+                    else if (gChosenActionByBattler[PrevChooser(GetBattlerPosition(gActiveBattler))] == B_ACTION_SWITCH)
                     {
-                        RecordedBattle_ClearBattlerAction(GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler))), 2);
+                        RecordedBattle_ClearBattlerAction(PrevChooser(GetBattlerPosition(gActiveBattler)), 2);
                     }
-                    else if (gChosenActionByBattler[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))] == B_ACTION_RUN)
+                    else if (gChosenActionByBattler[PrevChooser(GetBattlerPosition(gActiveBattler))] == B_ACTION_RUN)
                     {
-                        RecordedBattle_ClearBattlerAction(GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler))), 1);
+                        RecordedBattle_ClearBattlerAction(PrevChooser(GetBattlerPosition(gActiveBattler)), 1);
                     }
-                    else if (gChosenActionByBattler[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))] == B_ACTION_USE_MOVE
-                             && (gProtectStructs[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))].noValidMoves
-                                || gDisableStructs[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))].encoredMove))
+                    else if (gChosenActionByBattler[PrevChooser(GetBattlerPosition(gActiveBattler))] == B_ACTION_USE_MOVE
+                             && (gProtectStructs[PrevChooser(GetBattlerPosition(gActiveBattler))].noValidMoves
+                                || gDisableStructs[PrevChooser(GetBattlerPosition(gActiveBattler))].encoredMove))
                     {
-                        RecordedBattle_ClearBattlerAction(GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler))), 1);
+                        RecordedBattle_ClearBattlerAction(PrevChooser(GetBattlerPosition(gActiveBattler)), 1);
                     }
                     else if (gBattleTypeFlags & BATTLE_TYPE_PALACE
-                             && gChosenActionByBattler[GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)))] == B_ACTION_USE_MOVE)
+                             && gChosenActionByBattler[PrevChooser(GetBattlerPosition(gActiveBattler))] == B_ACTION_USE_MOVE)
                     {
                         gRngValue = gBattlePalaceMoveSelectionRngValue;
-                        RecordedBattle_ClearBattlerAction(GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler))), 1);
+                        RecordedBattle_ClearBattlerAction(PrevChooser(GetBattlerPosition(gActiveBattler)), 1);
                     }
                     else
                     {
-                        RecordedBattle_ClearBattlerAction(GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler))), 3);
+                        RecordedBattle_ClearBattlerAction(PrevChooser(GetBattlerPosition(gActiveBattler)), 3);
                     }
                     BtlController_EmitEndBounceEffect(B_COMM_TO_CONTROLLER);
                     MarkBattlerForControllerExec(gActiveBattler);
@@ -4591,8 +4641,7 @@ static void HandleTurnActionSelectionState(void)
                     i = FALSE;
 
                 if (((gBattleTypeFlags & BATTLE_TYPE_MULTI) || !(gBattleTypeFlags &  BATTLE_TYPE_DOUBLE))
-                    || (position & BIT_FLANK) != B_FLANK_LEFT
-                    || (*(&gBattleStruct->absentBattlerFlags) & gBitTable[GetBattlerAtPosition(BATTLE_PARTNER(position))]))
+                    || !HasNextChooser(position))
                 {
                     BtlController_EmitLinkStandbyMsg(B_COMM_TO_CONTROLLER, LINK_STANDBY_MSG_STOP_BOUNCE, i);
                 }
@@ -5082,7 +5131,7 @@ static void CheckFocusPunch_ClearVarsBeforeTurnStarts(void)
     gBattleStruct->dynamicMoveType = 0;
     gBattleMainFunc = RunTurnActionsFunctions;
     gBattleCommunication[3] = 0;
-    gBattleCommunication[4] = 0;
+    gBattleCommunication[ACTIONS_CONFIRMED_COUNT] = 0;
     gBattleScripting.multihitMoveEffect = 0;
     gBattleResources->battleScriptsStack->size = 0;
 }

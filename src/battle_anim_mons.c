@@ -49,7 +49,17 @@ static const struct UCoords8 sBattlerCoords[][MAX_BATTLERS_COUNT] =
         { 90, 88 },
         { 152, 32 },
     },
+    { // Moemon Co-op: Triple battle (player left / center / right at 30 / 76 / 120,
+      // foes 132 / 178 / 218; the mock-up in docs/triples)
+        [B_POSITION_PLAYER_LEFT]     = { 30, 82 },
+        [B_POSITION_OPPONENT_LEFT]   = { 218, 42 },
+        [B_POSITION_PLAYER_RIGHT]    = { 120, 84 },
+        [B_POSITION_OPPONENT_RIGHT]  = { 132, 38 },
+        [B_POSITION_PLAYER_CENTER]   = { 76, 88 },
+        [B_POSITION_OPPONENT_CENTER] = { 178, 30 },
+    },
 };
+#define BATTLER_COORDS_ROW() (IS_TRIPLE_BATTLE() ? 2 : IS_DOUBLE_BATTLE() ? 1 : 0)
 
 // One entry for each of the four Castform forms.
 const struct MonCoords gCastformFrontSpriteCoords[NUM_CASTFORM_FORMS] =
@@ -125,10 +135,10 @@ u8 GetBattlerSpriteCoord(u8 battler, u8 coordType)
     {
     case BATTLER_COORD_X:
     case BATTLER_COORD_X_2:
-        retVal = sBattlerCoords[IS_DOUBLE_BATTLE()][GetBattlerPosition(battler)].x;
+        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].x;
         break;
     case BATTLER_COORD_Y:
-        retVal = sBattlerCoords[IS_DOUBLE_BATTLE()][GetBattlerPosition(battler)].y;
+        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y;
         break;
     case BATTLER_COORD_Y_PIC_OFFSET:
     case BATTLER_COORD_Y_PIC_OFFSET_DEFAULT:
@@ -280,7 +290,7 @@ u8 GetBattlerSpriteFinal_Y(u8 battler, u16 species, bool8 a3)
         offset = GetBattlerYDelta(battler, species);
         offset -= GetBattlerElevation(battler, species);
     }
-    y = offset + sBattlerCoords[IS_DOUBLE_BATTLE()][GetBattlerPosition(battler)].y;
+    y = offset + sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y;
     if (a3)
     {
         if (GetBattlerSide(battler) == B_SIDE_PLAYER)

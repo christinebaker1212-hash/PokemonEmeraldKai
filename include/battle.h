@@ -695,7 +695,11 @@ extern u8 gBattlerFaintMarks;                           // Moemon Co-op: was gHi
 // lastTakenMoveFrom is [target][attacker][2 bytes]
 #define LAST_TAKEN_MOVE_FROM_STRIDE (MAX_BATTLERS_COUNT * 2)
 // OBJ palettes reserved for the battlers' sprites (one each); six in a Triple Battle
-#define BATTLER_SPRITE_PALETTES() (gBattlersCount > DOUBLE_BATTLERS_COUNT ? TRIPLE_BATTLERS_COUNT : DOUBLE_BATTLERS_COUNT)
+#define BATTLER_SPRITE_PALETTES() (gIsTripleBattle ? TRIPLE_BATTLERS_COUNT : DOUBLE_BATTLERS_COUNT)
+// Moemon Co-op: a Triple Battle (3 vs 3, gBattlersCount 6; BATTLE_TYPE_DOUBLE is set too)
+extern bool8 gIsTripleBattle;
+extern bool8 gMpDebugTriple;
+#define IS_TRIPLE_BATTLE() (gIsTripleBattle)
 extern struct DisableStruct gDisableStructs[MAX_BATTLERS_COUNT];
 extern u16 gPauseCounterBattle;
 extern u16 gPaydayMoney;

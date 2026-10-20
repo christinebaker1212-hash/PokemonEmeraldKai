@@ -2001,6 +2001,25 @@ const struct SpriteTemplate gBattlerSpriteTemplates[MAX_BATTLERS_COUNT] =
         .affineAnims = gAffineAnims_BattleSpriteOpponentSide,
         .callback = SpriteCB_WildMon
     },
+    // Moemon Co-op: Triple Battles (the pictures come from gMonSpritesGfxPtr in battle)
+    [B_POSITION_PLAYER_CENTER] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gBattlerPicTable_PlayerLeft,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [B_POSITION_OPPONENT_CENTER] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpriteOpponentSide,
+        .anims = NULL,
+        .images = gBattlerPicTable_OpponentLeft,
+        .affineAnims = gAffineAnims_BattleSpriteOpponentSide,
+        .callback = SpriteCB_WildMon
+    },
 };
 
 static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =

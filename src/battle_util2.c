@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
@@ -49,6 +50,8 @@ void AllocateBattleResources(void)
 
 void FreeBattleResources(void)
 {
+    MP_TriCards_End();         // Moemon Co-op
+    gIsTripleBattle = FALSE;
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
         FreeTrainerHillBattleStruct();
 

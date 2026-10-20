@@ -856,4 +856,14 @@ u8 MP_Team_Count(void);
 u8 MP_Team_Toggle(u8 slot);
 u8 MP_Team_BattleSlots(u8 *out, u8 max, bool8 (*usable)(struct Pokemon *));
 
+// mp_tricards.c: the Triple Battle cards (drawn over the frame)
+void MP_TriCards_Begin(void);
+void MP_TriCards_End(void);
+void MP_TriCards_Reload(void);
+bool8 MP_TriCards_Active(void);
+void MP_TriCards_SetOwner(u8 battler, u8 seat);
+void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo);
+void MP_TriCards_SetBarHp(u8 battler, s32 hp, s32 maxHp);
+void MP_TriCards_Composite(u16 *frame);
+
 #endif // GUARD_MP_H

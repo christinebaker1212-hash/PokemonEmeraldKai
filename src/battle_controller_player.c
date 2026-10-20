@@ -440,9 +440,16 @@ static void HandleInputChooseAction(void)
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
     {
+        // (Moemon Co-op: a local triple's center and right battlers go back too)
+        bool8 earlier = IS_TRIPLE_BATTLE()
+            ? ((GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_CENTER || GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT)
+               && (!(gAbsentBattlerFlags & gBitTable[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)])
+                   || (GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
+                       && !(gAbsentBattlerFlags & gBitTable[GetBattlerAtPosition(B_POSITION_PLAYER_CENTER)]))))
+            : (GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
+               && !(gAbsentBattlerFlags & gBitTable[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)]));
         if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
-         && GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
-         && !(gAbsentBattlerFlags & gBitTable[GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)])
+         && earlier
          && !(gBattleTypeFlags & BATTLE_TYPE_MULTI))
         {
             if (gBattleBufferA[gActiveBattler][1] == B_ACTION_USE_ITEM)
@@ -1127,6 +1134,11 @@ static void Intro_TryShinyAnimShowHealthbox(void)
 {
     bool32 bgmRestored = FALSE;
     bool32 battlerAnimsDone = FALSE;
+    // Moemon Co-op: a local Triple Battle's center battler comes out with these two
+    u8 third = (IS_TRIPLE_BATTLE() && !(gBattleTypeFlags & BATTLE_TYPE_MULTI)) ? B_BATTLER_4 : MAX_BATTLERS_COUNT;
+
+    if (third != MAX_BATTLERS_COUNT && gBattleSpritesDataPtr->healthBoxesData[third].ballAnimActive)
+        return;
 
     // Start shiny animation if applicable for 1st Pokémon
     if (!gBattleSpritesDataPtr->healthBoxesData[gActiveBattler].triedShinyMonAnim
@@ -1149,6 +1161,12 @@ static void Intro_TryShinyAnimShowHealthbox(void)
                 UpdateHealthboxAttribute(gHealthboxSpriteIds[BATTLE_PARTNER(gActiveBattler)], &gPlayerParty[gBattlerPartyIndexes[BATTLE_PARTNER(gActiveBattler)]], HEALTHBOX_ALL);
                 StartHealthboxSlideIn(BATTLE_PARTNER(gActiveBattler));
                 SetHealthboxSpriteVisible(gHealthboxSpriteIds[BATTLE_PARTNER(gActiveBattler)]);
+            }
+            if (third != MAX_BATTLERS_COUNT)
+            {
+                UpdateHealthboxAttribute(gHealthboxSpriteIds[third], &gPlayerParty[gBattlerPartyIndexes[third]], HEALTHBOX_ALL);
+                StartHealthboxSlideIn(third);
+                SetHealthboxSpriteVisible(gHealthboxSpriteIds[third]);
             }
             UpdateHealthboxAttribute(gHealthboxSpriteIds[gActiveBattler], &gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], HEALTHBOX_ALL);
             StartHealthboxSlideIn(gActiveBattler);
@@ -1188,7 +1206,10 @@ static void Intro_TryShinyAnimShowHealthbox(void)
         if (gSprites[gBattleControllerData[gActiveBattler]].callback == SpriteCallbackDummy
             && gSprites[gBattlerSpriteIds[gActiveBattler]].callback == SpriteCallbackDummy
             && gSprites[gBattleControllerData[BATTLE_PARTNER(gActiveBattler)]].callback == SpriteCallbackDummy
-            && gSprites[gBattlerSpriteIds[BATTLE_PARTNER(gActiveBattler)]].callback == SpriteCallbackDummy)
+            && gSprites[gBattlerSpriteIds[BATTLE_PARTNER(gActiveBattler)]].callback == SpriteCallbackDummy
+            && (third == MAX_BATTLERS_COUNT
+                || (gSprites[gBattleControllerData[third]].callback == SpriteCallbackDummy
+                    && gSprites[gBattlerSpriteIds[third]].callback == SpriteCallbackDummy)))
         {
             battlerAnimsDone = TRUE;
         }
@@ -1199,6 +1220,8 @@ static void Intro_TryShinyAnimShowHealthbox(void)
     {
         if (IsDoubleBattle() && !(gBattleTypeFlags & BATTLE_TYPE_MULTI))
             DestroySprite(&gSprites[gBattleControllerData[BATTLE_PARTNER(gActiveBattler)]]);
+        if (third != MAX_BATTLERS_COUNT)
+            DestroySprite(&gSprites[gBattleControllerData[third]]);
         DestroySprite(&gSprites[gBattleControllerData[gActiveBattler]]);
 
         gBattleSpritesDataPtr->animationData->introAnimActive = FALSE;
@@ -3344,6 +3367,16 @@ static void Task_StartSendOutAnim(u8 taskId)
             BattleLoadPlayerMonSpriteGfx(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], gActiveBattler);
             StartSendOutAnim(gActiveBattler, FALSE);
             gActiveBattler ^= BIT_FLANK;
+            // Moemon Co-op: a local Triple Battle sends out the center one too
+            if (IS_TRIPLE_BATTLE())
+            {
+                u8 saved = gActiveBattler;
+                gActiveBattler = B_BATTLER_4;
+                gBattleBufferA[gActiveBattler][1] = gBattlerPartyIndexes[gActiveBattler];
+                BattleLoadPlayerMonSpriteGfx(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], gActiveBattler);
+                StartSendOutAnim(gActiveBattler, FALSE);
+                gActiveBattler = saved;
+            }
         }
         gBattlerControllerFuncs[gActiveBattler] = Intro_TryShinyAnimShowHealthbox;
         gActiveBattler = savedActiveBattler;

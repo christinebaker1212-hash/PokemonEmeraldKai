@@ -290,11 +290,13 @@ enum BattleScriptOpcode
 #define SPRITES_INIT_STATE1     1 // shares the Id as well
 #define SPRITES_INIT_STATE2     2
 #define MOVE_EFFECT_BYTE        3
-#define ACTIONS_CONFIRMED_COUNT 4
-#define MULTISTRING_CHOOSER     5
-#define MISS_TYPE               6
-#define MSG_DISPLAY             7
-#define BATTLE_COMMUNICATION_ENTRIES_COUNT  8
+// Moemon Co-op: entries 0-5 are also each battler's action-selection state; with six
+// battlers the shared entries below moved past them (vanilla: 4, 5, 6, 7)
+#define ACTIONS_CONFIRMED_COUNT 8
+#define MULTISTRING_CHOOSER     9
+#define MISS_TYPE               10
+#define MSG_DISPLAY             11
+#define BATTLE_COMMUNICATION_ENTRIES_COUNT  12
 
 #define cEFFECT_CHOOSER      (gBattleCommunication + MOVE_EFFECT_BYTE)
 #define cMULTISTRING_CHOOSER (gBattleCommunication + MULTISTRING_CHOOSER)

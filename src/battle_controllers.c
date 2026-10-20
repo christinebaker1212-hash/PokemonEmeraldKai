@@ -243,6 +243,16 @@ static void InitSinglePlayerBtlControllers(void)
 
         gBattlersCount = DOUBLE_BATTLERS_COUNT;
 
+        // Moemon Co-op: a local Triple Battle (debug: the player commands all three)
+        if (IS_TRIPLE_BATTLE())
+        {
+            gBattlerControllerFuncs[B_BATTLER_4] = SetControllerToPlayer;
+            gBattlerPositions[B_BATTLER_4] = B_POSITION_PLAYER_CENTER;
+            gBattlerControllerFuncs[B_BATTLER_5] = SetControllerToOpponent;
+            gBattlerPositions[B_BATTLER_5] = B_POSITION_OPPONENT_CENTER;
+            gBattlersCount = TRIPLE_BATTLERS_COUNT;
+        }
+
         if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
         {
             if (gBattleTypeFlags & BATTLE_TYPE_MULTI && gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER)
@@ -594,6 +604,17 @@ static void InitLinkBtlControllers(void)
     }
 }
 
+// Moemon Co-op: an earlier battler on this one's side already uses party slot j
+// (vanilla only looked at battler i - 2; a triple's battler 4 also has battler 0)
+static bool8 IsPartyIdTakenBySide(u8 battler, u8 j)
+{
+    u8 k;
+    for (k = 0; k < battler; k++)
+        if (GET_BATTLER_SIDE2(k) == GET_BATTLER_SIDE2(battler) && gBattlerPartyIndexes[k] == j)
+            return TRUE;
+    return FALSE;
+}
+
 static void SetBattlePartyIds(void)
 {
     s32 i, j;
@@ -637,7 +658,7 @@ static void SetBattlePartyIds(void)
                          && GetMonData(&gPlayerParty[j], MON_DATA_SPECIES) != SPECIES_NONE  // Probably a typo by Game Freak. The rest use SPECIES2.
                          && GetMonData(&gPlayerParty[j], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
                          && !GetMonData(&gPlayerParty[j], MON_DATA_IS_EGG)
-                         && gBattlerPartyIndexes[i - 2] != j)
+                         && !IsPartyIdTakenBySide(i, j))
                         {
                             gBattlerPartyIndexes[i] = j;
                             break;
@@ -649,7 +670,7 @@ static void SetBattlePartyIds(void)
                          && GetMonData(&gEnemyParty[j], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
                          && GetMonData(&gEnemyParty[j], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
                          && !GetMonData(&gEnemyParty[j], MON_DATA_IS_EGG)
-                         && gBattlerPartyIndexes[i - 2] != j)
+                         && !IsPartyIdTakenBySide(i, j))
                         {
                             gBattlerPartyIndexes[i] = j;
                             break;

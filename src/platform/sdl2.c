@@ -13,6 +13,7 @@
 #include <SDL2/SDL.h>
 
 #include "global.h"
+#include "mp.h"
 #include "platform.h"
 #include "rtc.h"
 #include "gba/defines.h"
@@ -671,6 +672,7 @@ void VDraw(void)
 
     memset(image, 0, sizeof(sFrameImage));
     DrawFrame(image);
+    MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     if (!sTestMode)
         Display_UploadFrame(image);
     REG_VCOUNT = 161; // prep for being in VBlank period

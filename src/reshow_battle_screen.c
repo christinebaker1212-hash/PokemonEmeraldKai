@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "reshow_battle_screen.h"
 #include "battle.h"
 #include "palette.h"
@@ -73,6 +74,8 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
         break;
     case 4:
         FreeAllSpritePalettes();
+        if (IS_TRIPLE_BATTLE())
+            MP_TriCards_Reload();   // Moemon Co-op: the cards' palette
         gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
         break;
     case 5:

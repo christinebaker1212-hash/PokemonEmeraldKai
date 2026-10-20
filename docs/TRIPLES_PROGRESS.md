@@ -25,3 +25,13 @@ Each step ends with a commit; the newest state is at the bottom.
   STATUS2_INFATUATION bit 16 + gBattlerInfatuatedWith[], Leech Seed source in STATUS3 bits 21-23
   (STATUS3_LEECHSEED_FROM/SOURCE), palaceFlags u16, LAST_TAKEN_MOVE_FROM_STRIDE, BATTLER_SPRITE_PALETTES().
   Doubles still set gBattlersCount = DOUBLE_BATTLERS_COUNT. Full regression passes.
+- Step 2 (local bring-up) working: `mp triple S:L S:L S:L` (mp_debug.c) starts a local wild triple
+  (battle_setup.c BattleSetup_StartLocalTripleWildBattle, gIsTripleBattle, BATTLE_TYPE_DOUBLE). Positions
+  B_POSITION_PLAYER_CENTER (battler 4) / OPPONENT_CENTER (5); coords row 2 in battle_anim_mons.c sBattlerCoords;
+  gBattlerSpriteTemplates[4/5]; SetBattlePartyIds checks every earlier battler on the side (IsPartyIdTakenBySide).
+  Cards: src/mp/mp_tricards.c drawn over the frame from VDraw (sdl2.c), healthbox objects parked at x=280
+  (InitBattlerHealthboxCoords), data from UpdateHealthboxAttribute / MoveBattleBar, palette TAG 0x53C8 (reloaded
+  in reshow_battle_screen.c). Frame pixels are ABGR1555 (bit 15 = opaque). BATTLE_PARTNER(4/5) = 0/1.
+  Choosing order: battle_main.c PrevChooser/HasNextChooser (left, center, right). gBattleCommunication's shared
+  entries moved to 8-11 (ACTIONS_CONFIRMED_COUNT etc.): 0-5 are the battlers' selection states.
+  Local triple: intro sends out all three, turn runs, KOs, back to field. Full regression passes.

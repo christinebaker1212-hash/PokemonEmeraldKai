@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "pokemon.h"
 #include "battle_controllers.h"
@@ -903,8 +904,8 @@ u8 CreateBattlerHealthboxSprites(u8 battler)
     {
         if (GetBattlerSide(battler) == B_SIDE_PLAYER)
         {
-            healthboxLeftSpriteId = CreateSprite(&sHealthboxPlayerSpriteTemplates[GetBattlerPosition(battler) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
-            healthboxRightSpriteId = CreateSpriteAtEnd(&sHealthboxPlayerSpriteTemplates[GetBattlerPosition(battler) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
+            healthboxLeftSpriteId = CreateSprite(&sHealthboxPlayerSpriteTemplates[(GetBattlerPosition(battler) & BIT_FLANK) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
+            healthboxRightSpriteId = CreateSpriteAtEnd(&sHealthboxPlayerSpriteTemplates[(GetBattlerPosition(battler) & BIT_FLANK) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
 
             gSprites[healthboxLeftSpriteId].oam.affineParam = healthboxRightSpriteId;
 
@@ -916,8 +917,8 @@ u8 CreateBattlerHealthboxSprites(u8 battler)
         }
         else
         {
-            healthboxLeftSpriteId = CreateSprite(&sHealthboxOpponentSpriteTemplates[GetBattlerPosition(battler) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
-            healthboxRightSpriteId = CreateSpriteAtEnd(&sHealthboxOpponentSpriteTemplates[GetBattlerPosition(battler) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
+            healthboxLeftSpriteId = CreateSprite(&sHealthboxOpponentSpriteTemplates[(GetBattlerPosition(battler) & BIT_FLANK) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
+            healthboxRightSpriteId = CreateSpriteAtEnd(&sHealthboxOpponentSpriteTemplates[(GetBattlerPosition(battler) & BIT_FLANK) / 2], DISPLAY_WIDTH, DISPLAY_HEIGHT, 1);
 
             gSprites[healthboxLeftSpriteId].oam.affineParam = healthboxRightSpriteId;
 
@@ -929,7 +930,7 @@ u8 CreateBattlerHealthboxSprites(u8 battler)
         }
     }
 
-    healthbarSpriteId = CreateSpriteAtEnd(&sHealthbarSpriteTemplates[gBattlerPositions[battler]], 140, 60, 0);
+    healthbarSpriteId = CreateSpriteAtEnd(&sHealthbarSpriteTemplates[gBattlerPositions[battler] & (BIT_SIDE | BIT_FLANK)], 140, 60, 0);   // Moemon Co-op: 4/5 share 0/1's (off-screen in a triple)
     healthBarSpritePtr = &gSprites[healthbarSpriteId];
     SetSubspriteTables(healthBarSpritePtr, &sHealthBar_SubspriteTables[GetBattlerSide(battler)]);
     healthBarSpritePtr->subspriteMode = SUBSPRITES_IGNORE_PRIORITY;
@@ -1073,7 +1074,13 @@ void InitBattlerHealthboxCoords(u8 battler)
 {
     s16 x = 0, y = 0;
 
-    if (!IsDoubleBattle())
+    if (IS_TRIPLE_BATTLE())
+    {
+        // Moemon Co-op: the healthbox objects stay (all the battle code uses them)
+        // but off-screen; the cards are drawn over the frame (mp_tricards.c)
+        x = 280, y = 40;
+    }
+    else if (!IsDoubleBattle())
     {
         if (GetBattlerSide(battler) != B_SIDE_PLAYER)
             x = 44, y = 30;
@@ -2169,6 +2176,8 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
     // its max HP of 0 would divide by zero
     if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
         return;
+    if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the card
+        MP_TriCards_Update(battler, mon, elementId == HEALTHBOX_ALL);
 
     if (elementId == HEALTHBOX_ALL && !IsDoubleBattle())
         GetBattlerSide(battler); // Pointless function call.
@@ -2270,6 +2279,16 @@ s32 MoveBattleBar(u8 battler, u8 healthboxSpriteId, u8 whichBar, u8 unused)
 
     if (whichBar == EXP_BAR || (whichBar == HEALTH_BAR && !gBattleSpritesDataPtr->battlerData[battler].hpNumbersNoBars))
         MoveBattleBarGraphically(battler, whichBar);
+
+    // Moemon Co-op: a Triple Battle's card shows the bar's HP as it moves
+    if (whichBar == HEALTH_BAR && IS_TRIPLE_BATTLE())
+    {
+        struct BattleBarInfo *bar = &gBattleSpritesDataPtr->battleBars[battler];
+        s32 shown = (currentBarValue == -1 || bar->currValue < 0) ? bar->oldValue - bar->receivedValue : bar->currValue;
+        if (shown > bar->maxValue)
+            shown = bar->maxValue;
+        MP_TriCards_SetBarHp(battler, shown, bar->maxValue);
+    }
 
     if (currentBarValue == -1)
         gBattleSpritesDataPtr->battleBars[battler].currValue = 0;

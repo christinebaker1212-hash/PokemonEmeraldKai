@@ -211,6 +211,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
     }
+    else if (strcmp(cmd, "triple") == 0)
+    {
+        // triple S:L S:L S:L - a local wild Triple Battle (you command party slots 0-2)
+        void BattleSetup_StartLocalTripleWildBattle(void);
+        int sp[3] = {288, 263, 265}, lv[3] = {5, 5, 5}, i;
+        sscanf(arg, "%d:%d %d:%d %d:%d", &sp[0], &lv[0], &sp[1], &lv[1], &sp[2], &lv[2]);
+        ZeroEnemyPartyMons();
+        for (i = 0; i < 3; i++)
+            CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
+        BattleSetup_StartLocalTripleWildBattle();
+    }
     else if (strcmp(cmd, "dumpcolors") == 0)
     {
         // dumpcolors DIR - sprites and pictures for tools/moemon_frlg/colormaps.py

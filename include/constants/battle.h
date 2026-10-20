@@ -29,6 +29,8 @@ enum BattlerPosition
     B_POSITION_OPPONENT_LEFT,
     B_POSITION_PLAYER_RIGHT,
     B_POSITION_OPPONENT_RIGHT,
+    B_POSITION_PLAYER_CENTER,     // Moemon Co-op: Triple Battles (battler 4)
+    B_POSITION_OPPONENT_CENTER,   // (battler 5)
     MAX_POSITION_COUNT,
 };
 
@@ -56,7 +58,10 @@ enum BattlerId
 
 // These macros can be used with either battler ID or positions to get the partner or the opposite mon
 #define BATTLE_OPPOSITE(id) ((id) ^ BIT_SIDE)
-#define BATTLE_PARTNER(id) ((id) ^ BIT_FLANK)
+// Moemon Co-op: in a Triple Battle a battler has two allies; BATTLE_PARTNER of the
+// center battlers (4, 5) gives the left one so it never leaves the battler range.
+// Triples-aware code uses the ally helpers in battle_util.c instead.
+#define BATTLE_PARTNER(id) ((id) >= 4 ? (id) - 4 : ((id) ^ BIT_FLANK))
 
 #define B_SIDE_PLAYER     0
 #define B_SIDE_OPPONENT   1

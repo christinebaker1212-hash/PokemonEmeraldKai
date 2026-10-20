@@ -431,6 +431,21 @@ static void DoStandardWildBattle(void)
     TryUpdateGymLeaderRematchFromWild();
 }
 
+// Moemon Co-op: a local wild Triple Battle (debug / bring-up: the player commands
+// party slots 0-2 against gEnemyParty 0-2)
+void BattleSetup_StartLocalTripleWildBattle(void)
+{
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    StopPlayerAvatar();
+    gMain.savedCallback = CB2_EndWildBattle;
+    gBattleTypeFlags = BATTLE_TYPE_DOUBLE;
+    gIsTripleBattle = TRUE;
+    CreateBattleStartTask(GetWildBattleTransition(), 0);
+    IncrementGameStat(GAME_STAT_TOTAL_BATTLES);
+    IncrementGameStat(GAME_STAT_WILD_BATTLES);
+}
+
 void BattleSetup_StartRoamerBattle(void)
 {
     LockPlayerFieldControls();

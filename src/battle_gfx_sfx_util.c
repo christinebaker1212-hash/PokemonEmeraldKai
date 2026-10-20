@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_controllers.h"
 #include "battle_ai_script_commands.h"
@@ -853,6 +854,8 @@ bool8 BattleInitAllSprites(u8 *state1, u8 *battler)
     {
     case 0:
         ClearSpritesBattlerHealthboxAnimData();
+        if (IS_TRIPLE_BATTLE())
+            MP_TriCards_Begin();   // Moemon Co-op: the triple's cards (palette)
         (*state1)++;
         break;
     case 1:
