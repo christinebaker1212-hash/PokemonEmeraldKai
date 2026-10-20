@@ -581,8 +581,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             if (strcmp(what, "trainer") == 0) MP_Events_OnTrainerWin();
             else if (strcmp(what, "coop") == 0) MP_Events_OnCoopWin((u8)level);
-            else if (strcmp(what, "wild") == 0) MP_Events_OnWildEnd(B_OUTCOME_WON, level);
-            else if (strcmp(what, "catch") == 0) MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, level);
+            else if (strcmp(what, "wild") == 0) MP_Events_OnWildEnd(B_OUTCOME_WON, &gEnemyParty[0]);
+            else if (strcmp(what, "catch") == 0) MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, &gPlayerParty[0]);
             else if (strcmp(what, "trade") == 0) MP_Events_OnTrade();
             else if (strcmp(what, "gift") == 0) MP_Events_OnGiftSent();
         }

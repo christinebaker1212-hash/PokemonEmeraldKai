@@ -126,6 +126,8 @@ void MP_Dex_OnLocalFlag(u16 nationalNum, bool8 caught)
 {
     if (gMpDexApplying || nationalNum < 1 || nationalNum > NATIONAL_DEX_COUNT)
         return;
+    if (caught)
+        MP_Events_Did(MP_DID_NEWDEX);   // a new entry for today's goal
     SendOne(nationalNum, caught);
 }
 

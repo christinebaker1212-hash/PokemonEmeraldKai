@@ -10,7 +10,8 @@
 
 extern char gPlatformSavePath[512];
 
-#define MAX_ENTRIES 256
+#define MAX_ENTRIES 2048
+#define KEEP_DAYS 14   // dated keys ("goal:20261020:0") older than this are dropped
 #define KEY_MAX 47
 
 struct Entry
@@ -23,6 +24,27 @@ static struct Entry sEntries[MAX_ENTRIES];
 static int sCount;
 static char sLoadedFor[512];
 static bool8 sLoaded;
+
+s32 MP_DayNumber(s32 yyyymmdd);
+s32 MP_Today(void);
+
+// The date in a key like "goal:20261020:1" or "played:20261020" (0 = not a dated key)
+static s32 KeyDate(const char *key)
+{
+    const char *p;
+    for (p = key; *p; p++)
+    {
+        if ((p == key || p[-1] == ':') && p[0] == '2' && p[1] == '0')
+        {
+            int n = 0;
+            while (p[n] >= '0' && p[n] <= '9')
+                n++;
+            if (n == 8 && (p[n] == ':' || p[n] == 0))
+                return (s32)strtol(p, NULL, 10);
+        }
+    }
+    return 0;
+}
 
 static void Path(char *out, size_t size)
 {
@@ -54,6 +76,9 @@ static void Load(void)
         while (end >= k && (*end == ' ' || *end == '\t'))
             *end-- = 0;
         if (!*k || strlen(k) > KEY_MAX)
+            continue;
+        // Old dated keys (yesterday's goals, last month's gifts...) are dropped
+        if (KeyDate(k) && MP_DayNumber(KeyDate(k)) < MP_DayNumber(MP_Today()) - KEEP_DAYS)
             continue;
         snprintf(sEntries[sCount].key, sizeof(sEntries[sCount].key), "%s", k);
         sEntries[sCount].value = (s32)strtol(eq + 1, NULL, 10);
@@ -98,9 +123,17 @@ void MP_SaveData_Set(const char *key, s32 value)
     {
         if (sCount >= MAX_ENTRIES)
         {
-            // Full: drop the oldest entry (the file is in the order keys were added)
-            memmove(&sEntries[0], &sEntries[1], sizeof(sEntries[0]) * (MAX_ENTRIES - 1));
-            i = sCount = MAX_ENTRIES - 1;
+            // Full: drop the oldest dated entry. Never an undated one (pulls,
+            // pity, streak, achievements): losing those used to wipe pulls and
+            // hand out achievement rewards again.
+            int j, oldest = -1;
+            for (j = 0; j < sCount; j++)
+                if (KeyDate(sEntries[j].key) && (oldest < 0 || KeyDate(sEntries[j].key) < KeyDate(sEntries[oldest].key)))
+                    oldest = j;
+            if (oldest < 0)
+                return;   // only permanent keys left: keep them
+            memmove(&sEntries[oldest], &sEntries[oldest + 1], sizeof(sEntries[0]) * (sCount - oldest - 1));
+            i = sCount = sCount - 1;
         }
         snprintf(sEntries[i].key, sizeof(sEntries[i].key), "%s", key);
         sCount++;

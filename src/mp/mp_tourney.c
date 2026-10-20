@@ -65,6 +65,7 @@ static EWRAM_DATA struct
     u16 cursor;
     bool8 dirty;
     char note[72];
+    bool8 sawForfeit;     // a match of ours ended in a forfeit: prizes without pulls
     bool8 finalShown;
     u8 finalIds[MAX_P], finalWins[MAX_P];
 } sT = {0};
@@ -476,25 +477,39 @@ void MP_Tourney_OnBattleResult(u8 outcome)
 static void GivePrizes(void)
 {
     u8 i, rank = 0xFF;
+    bool8 pulls;
     for (i = 0; i < sT.n; i++)
         if (sT.finalIds[i] == gMpLocalId)
             rank = i;
     if (rank == 0xFF)
         return;
+    // MOEGATCHA pulls only for the day's first real tournament: three or more
+    // players and none of our matches forfeited
+    {
+        char key[24];
+        snprintf(key, sizeof(key), "tour:%d", (int)MP_Today());
+        pulls = sT.n >= 3 && !sT.sawForfeit && !MP_SaveData_Get(key);
+        if (pulls && rank <= 1)
+            MP_SaveData_Set(key, 1);
+    }
     if (rank == 0)
     {
         u8 text[80];
-        AddBagItem(ITEM_RARE_CANDY, 3);
-        MP_Gatcha_AddPulls(2);
-        MP_AsciiToGame(text, "Tournament champion!\nRARE CANDY x3, +2 MOEGATCHA", 76);
+        AddMoney(&gSaveBlock1Ptr->money, 3000);
+        if (pulls)
+            MP_Gatcha_AddPulls(2);
+        MP_AsciiToGame(text, pulls ? "Tournament champion!\n$3000, +2 MOEGATCHA pulls" : "Tournament champion!\n$3000", 76);
         MP_Toast(text);
         PlaySE(SE_SUCCESS);
+        MP_Achieve_Count("tourwin", 1);
     }
     else if (rank == 1)
     {
         u8 text[80];
-        MP_Gatcha_AddPulls(1);
-        MP_AsciiToGame(text, "2nd place in the tournament!\n+1 MOEGATCHA pull", 76);
+        AddMoney(&gSaveBlock1Ptr->money, 1500);
+        if (pulls)
+            MP_Gatcha_AddPulls(1);
+        MP_AsciiToGame(text, pulls ? "2nd place in the tournament!\n$1500, +1 MOEGATCHA pull" : "2nd place in the tournament!\n$1500", 76);
         MP_Toast(text);
     }
     else
@@ -588,6 +603,7 @@ static void Task_Tourney(u8 taskId)
                 u8 buf[3] = {MPR_T_FORFEIT, sT.tid, sT.round};
                 PlaySE(SE_SELECT);
                 SendTo(sT.myOpponent, buf, 3);
+                sT.sawForfeit = TRUE;
                 Report(0);
                 sT.dirty = TRUE;
             }
@@ -728,6 +744,7 @@ void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len)
          && (sT.me == ME_PROMPT || sT.me == ME_WAITING))
         {
             u8 text[64];
+            sT.sawForfeit = TRUE;
             Report(1);
             MP_AsciiToGame(text, "Your opponent forfeited.\nYou win this match!", 60);
             MP_Toast(text);

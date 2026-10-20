@@ -375,6 +375,7 @@ static void OnCard(u8 from, const u8 *data, u16 len)
     memcpy(&sCard, data + 1, sizeof(sCard));
     sCardLanguage = data[1 + sizeof(sCard)];
     sAsk.cardReady = TRUE;
+    MP_Events_Did(MP_DID_CARD);
     sAsk.cardFrom = from;
     sAsk.waitKind = 0;
 }
@@ -704,8 +705,19 @@ static void OnHofStart(u8 from)
     buf[3 + HOF_TEAM_BYTES + PLAYER_NAME_LENGTH] = EOS;
     MP_SendRelay(from, buf, sizeof(buf));
     Name(from, name);
-    snprintf(msg, sizeof(msg), "%s entered the HALL OF FAME, with your team cheering them on!\nYou got a MOEGATCHA pull.", name);
-    MP_Gatcha_AddPulls(1);
+    {
+        // A pull the first time each friend makes it (Elite Four reruns don't count)
+        char key[32];
+        snprintf(key, sizeof(key), "hof:%s", name);
+        if (!MP_SaveData_Get(key))
+        {
+            MP_SaveData_Set(key, 1);
+            MP_Gatcha_AddPulls(1);
+            snprintf(msg, sizeof(msg), "%s entered the HALL OF FAME, with your team cheering them on!\nYou got a MOEGATCHA pull.", name);
+        }
+        else
+            snprintf(msg, sizeof(msg), "%s entered the HALL OF FAME again, with your team cheering them on!", name);
+    }
     MP_ShowNotice(msg);
     MP_Social_Log(name, "entered the HALL OF FAME!");
 }
@@ -955,6 +967,7 @@ static void UpdateWait(u8 taskId)
         sAsk.baseReady = FALSE;
         if (sAsk.baseSlot != 0xFF && MP_SecretBase_PrepareVisit(sAsk.baseSlot))
         {
+            MP_Events_Did(MP_DID_BASE);
             CloseUi(taskId);
             ScriptContext_SetupScript(EventScript_MpVisitSecretBase);
             return;

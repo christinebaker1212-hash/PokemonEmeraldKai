@@ -612,7 +612,7 @@ static void CB2_EndWildBattle(void)
 {
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
-    MP_Events_OnWildEnd(gBattleOutcome, GetMonData(&gEnemyParty[0], MON_DATA_LEVEL)); // Moemon Co-op: team goals
+    MP_Events_OnWildEnd(gBattleOutcome, &gEnemyParty[0]); // Moemon Co-op: team goals
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {

@@ -878,7 +878,7 @@ static void FinishWild(void)
         if (sCoop.catchOwner[i] != CAUGHT_MINE)
             continue;
         GiveCaughtMon(&sCoop.catches[i]);
-        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, GetMonData(&sCoop.catches[i], MON_DATA_LEVEL));
+        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, &sCoop.catches[i]);
     }
     // CB2_EndWildBattle counts the leader's battle: the catches are counted above
     if (sCoop.isMaster && sCoop.outcome == B_OUTCOME_CAUGHT)
@@ -902,6 +902,13 @@ static void CB2_MpCoopFinish(void)
     gBattleOutcome = sCoop.outcome;
     if (sCoop.outcome == B_OUTCOME_WON)
     {
+        // Both players' achievements
+        if (!gMpCoopWild)
+        {
+            MP_Events_Did(MP_DID_COOPWIN);
+            if (GymBadgeFlag(sCoop.trainerId) || gTrainers[sCoop.trainerId].trainerClass == TRAINER_CLASS_LEADER)
+                MP_Events_Did(MP_DID_COOPGYM);
+        }
         if (sCoop.isMaster)
             MP_Events_OnCoopWin(sCoop.partner); // counted once, by the battle leader
         else if (!gMpCoopWild)

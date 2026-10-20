@@ -535,6 +535,22 @@ s32 MP_WeekNumber(void);
 // Shared PC and room counters (mp_sharedpc.c)
 void MP_SharedPc_Open(void);
 bool8 MP_InDungeon(void);
+struct Pokemon;
+// Achievements (mp_achieve.c) and things done with friends (mp_events.c MP_Events_Did)
+void MP_Achieve_Count(const char *name, s32 n);
+void MP_Achieve_Unlock(const char *id);
+void MP_Achieve_Update(void);
+void MP_Achieve_OnTrainerWin(u16 trainerId);
+void MP_Achieve_OnCatch(struct Pokemon *mon, bool8 outbreak);
+u16 MP_Achieve_Total(void);
+u16 MP_Achieve_DoneCount(void);
+void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, int statusLen, char *reward, int rewardLen);
+enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT, MP_DID_TRADE, MP_DID_PHOTO, MP_DID_PVP,
+       MP_DID_PVPWIN, MP_DID_BET, MP_DID_BETWIN, MP_DID_BLEND, MP_DID_BASE, MP_DID_CARD, MP_DID_RESCUE, MP_DID_SELFREVIVE,
+       MP_DID_COUNT };
+void MP_Events_Did(u8 what);
+void MP_Events_UpdateToasts(void);
+u8 MP_RareCandyCap(void);   // party_menu.c: no RARE CANDY past the next gym ace
 extern u8 gMpEnemyLevelBonus;                     // battle_main.c CreateNPCTrainerParty adds it (co-op team-ups)
 void MP_Coop_PrepareTrainerParty(u16 trainerId);
 void MP_Coop_FinishTrainerParty(u16 trainerId);
@@ -559,7 +575,7 @@ void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Events_Update(void);
 void MP_Events_OnTrainerWin(void);
 void MP_Events_OnCoopWin(u8 partner);
-void MP_Events_OnWildEnd(u8 outcome, u8 level);
+void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon);
 void MP_Events_QueueToast(const char *ascii);   // shown on the field, one after another
 void MP_Events_OnTrade(void);
 void MP_Events_OnGiftSent(void);

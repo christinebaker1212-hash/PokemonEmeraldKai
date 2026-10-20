@@ -91,12 +91,26 @@ void MP_Rematch_IsEndgame(void)
 }
 
 // Special (and for the partner after a co-op win): the team rematch reward
+// The day's first team rematch win gives a MOEGATCHA pull and a RARE CANDY;
+// after that, prize money
 void MP_Rematch_Reward(void)
 {
     u8 text[96];
-    if (!AddBagItem(ITEM_RARE_CANDY, 2))
-        AddMoney(&gSaveBlock1Ptr->money, 4000);
-    MP_Gatcha_AddPulls(1);
-    MP_AsciiToGame(text, "Team rematch won!\nRARE CANDY x2, +1 MOEGATCHA pull", 90);
+    char key[24];
+    snprintf(key, sizeof(key), "rematch:%d", (int)MP_Today());
+    if (!MP_SaveData_Get(key))
+    {
+        MP_SaveData_Set(key, 1);
+        if (!AddBagItem(ITEM_RARE_CANDY, 1))
+            AddMoney(&gSaveBlock1Ptr->money, 2000);
+        MP_Gatcha_AddPulls(1);
+        MP_AsciiToGame(text, "Team rematch won!\nRARE CANDY x1, +1 MOEGATCHA pull", 90);
+    }
+    else
+    {
+        AddMoney(&gSaveBlock1Ptr->money, 2000);
+        MP_AsciiToGame(text, "Team rematch won!\n$2000 (today's pull is already yours)", 90);
+    }
     MP_Toast(text);
+    MP_Achieve_Count("rematch", 1);
 }

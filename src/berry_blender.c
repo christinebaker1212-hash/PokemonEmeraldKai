@@ -3689,6 +3689,8 @@ static bool8 PrintBlendingResults(void)
 
         RemoveBagItem(gSpecialVar_ItemId, 1);
         AddPokeblock(&pokeblock);
+        if (MP_Blender_Active() && MP_Blender_NumPlayers() >= 2)
+            MP_Events_Did(MP_DID_BLEND);   // Moemon Co-op: blended with friends
 
         sBerryBlender->textState = 0;
         sBerryBlender->mainState++;

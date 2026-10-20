@@ -328,6 +328,9 @@ static void Task_Photo(u8 taskId)
         break;
     case PH_SHOOT:
         sPhoto.saved = SaveShot();
+        MP_Events_Did(MP_DID_PHOTO);
+        if (sPhoto.count >= 3)
+            MP_Achieve_Unlock("photo3");
         PlaySE(MUS_RG_PHOTO);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITE);
         TellFriends();

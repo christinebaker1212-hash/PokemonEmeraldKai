@@ -44,6 +44,10 @@
 #include "constants/songs.h"
 #include "constants/species.h"
 #include "constants/battle.h"
+#include "constants/pokemon.h"
+#include "battle_main.h"
+#include "battle.h"
+#include "battle_setup.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -75,6 +79,14 @@ static void QueueToast(const char *ascii)
 void MP_Events_QueueToast(const char *ascii)
 {
     QueueToast(ascii);
+}
+
+static void UpdateToasts(void);
+
+// Every frame, online or not (MP_FrameUpdate)
+void MP_Events_UpdateToasts(void)
+{
+    UpdateToasts();
 }
 
 static void UpdateToasts(void)
@@ -153,33 +165,65 @@ static void ItemAscii(u16 item, char *out)
 // ---------------------------------------------------------------------------
 // Team goals
 
-enum { G_TRAINERS, G_CATCH, G_WILD, G_COOP, G_GIFTS, G_TYPES };
+// Three goals a day: one everyone helps with (slot 0), one for co-op battles
+// (slot 1) and one about doing something together (slot 2). Alone, slots 1
+// and 2 become other "everyone" goals.
+enum {
+    // everyone helps
+    G_TRAINERS, G_CATCH, G_NEWDEX, G_OUTBREAK, G_TYPE, G_FLAWLESS, G_STRONG,
+    // co-op battles
+    G_COOP, G_COOPCATCH, G_COOPTRAINER, G_LEND,
+    // together
+    G_GIFTS, G_TRADE, G_PHOTO, G_PVP, G_SPECTATE, G_BLEND, G_BASE, G_CARD,
+    G_TYPES
+};
+#define G_SOLO_FIRST     G_TRAINERS
+#define G_SOLO_COUNT     (G_COOP - G_TRAINERS)
+#define G_TEAM_FIRST     G_COOP
+#define G_TEAM_COUNT     (G_GIFTS - G_COOP)
+#define G_TOGETHER_FIRST G_GIFTS
+#define G_TOGETHER_COUNT (G_TYPES - G_GIFTS)
 
 struct GoalDef
 {
-    u8 perPlayer;
+    u8 perPlayer;   // target = perPlayer x players today
+    u8 fixed;       // or a fixed target (0 = per player)
     const char *text;   // %d = target
 };
 
 static const struct GoalDef sGoalDefs[G_TYPES] = {
-    [G_TRAINERS] = {3, "Beat %d trainers as a team"},
-    [G_CATCH]    = {2, "Catch %d POK~MON as a team"},
-    [G_WILD]     = {5, "Defeat %d wild POK~MON"},
-    [G_COOP]     = {1, "Win co-op battles with each friend"},  // see CoopText
-    [G_GIFTS]    = {1, "Send %d daily gifts"},
+    [G_TRAINERS]    = {3, 0, "Beat %d trainers"},
+    [G_CATCH]       = {2, 0, "Catch %d POK~MON"},
+    [G_NEWDEX]      = {1, 0, "Register %d new POK~DEX entries"},
+    [G_OUTBREAK]    = {1, 0, "Catch %d of today's outbreak POK~MON"},
+    [G_TYPE]        = {2, 0, "Catch %d %s-type POK~MON"},     // see GoalText
+    [G_FLAWLESS]    = {1, 0, "Beat %d trainers without a faint"},
+    [G_STRONG]      = {1, 0, "Catch %d POK~MON at your badges' level"},
+    [G_COOP]        = {1, 0, "Win co-op battles with each friend"},   // see CoopText
+    [G_COOPCATCH]   = {1, 0, "Catch %d POK~MON in co-op wild battles"},
+    [G_COOPTRAINER] = {1, 0, "Win %d co-op trainer battles"},
+    [G_LEND]        = {1, 0, "Use a friend's field move %d times"},
+    [G_GIFTS]       = {1, 0, "Send %d daily gifts"},
+    [G_TRADE]       = {1, 0, "Trade POK~MON with friends (%d)"},
+    [G_PHOTO]       = {0, 1, "Take a TEAM PHOTO"},
+    [G_PVP]         = {1, 0, "Battle friends (%d)"},
+    [G_SPECTATE]    = {0, 1, "Watch a friend battle and bet on it"},
+    [G_BLEND]       = {0, 1, "Blend BERRIES with friends"},
+    [G_BASE]        = {0, 1, "Visit a friend's SECRET BASE"},
+    [G_CARD]        = {0, 1, "Swap TRAINER CARDS with a friend"},
 };
 
-struct GoalReward
-{
-    u16 item;
-    u8 qty;
-};
+// Today's type for G_TYPE (common ones, so it's always possible)
+static const u8 sGoalTypes[] = {TYPE_WATER, TYPE_GRASS, TYPE_BUG, TYPE_FLYING, TYPE_NORMAL, TYPE_POISON};
 
-static const struct GoalReward sGoalRewards[3] = {
-    {ITEM_GREAT_BALL, 3},
-    {ITEM_SUPER_POTION, 3},
-    {ITEM_RARE_CANDY, 1},
-};
+// G_STRONG: a catch at or above this level, by your badge count
+static const u8 sStrongLevel[9] = {5, 8, 13, 18, 22, 26, 30, 34, 38};
+
+#define DAILY_PULLS_PER_WEEK 5   // "all 3 goals" pulls; after that, money
+
+static u8 TodaysGoalType(s32 date);
+static u8 BadgeCount(void);
+static bool8 IsTodaysOutbreak(u16 species);
 
 // Players online today (at least the ones online right now)
 static u8 PeakPlayers(s32 date)
@@ -193,60 +237,69 @@ static u8 PeakPlayers(s32 date)
     return peak < 1 ? 1 : (peak > MP_MAX_PLAYERS ? MP_MAX_PLAYERS : peak);
 }
 
-// The day's three goal kinds, the same on every game
-static void PickGoals(s32 date, u8 *types)
+static bool8 OutbreakIsEarly(void);
+
+// Shuffles one category with the day's hash; the first entry is the pick
+static void ShufflePool(u8 *pool, u8 count, u32 *h)
 {
-    u32 h = Hash(MP_Lobby_RoomName(), (u32)date * 2654435761u);
-    u8 pool[G_TYPES] = {G_TRAINERS, G_CATCH, G_WILD, G_COOP, G_GIFTS};
     u8 i;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i + 1 < count; i++)
     {
-        u8 j = i + (h % (G_TYPES - i));
-        u8 t = pool[i];
+        u8 j = i + (*h % (count - i)), t = pool[i];
         pool[i] = pool[j];
         pool[j] = t;
-        types[i] = pool[i];
-        h = h * 1103515245u + 12345u;
+        *h = *h * 1103515245u + 12345u;
     }
 }
 
-// What the day's goals mean with this many players. Goals that need a friend
-// (co-op battles, gifts) are swapped for others when playing alone. The
-// three stay different from each other.
-static void EffectiveTypes(const u8 *types, u8 players, u8 *out)
+// The day's goals, the same on every game: types[0..2] = everyone / co-op /
+// together, solo[] = the "everyone" pool in the day's order (for playing alone)
+static void PickGoalsFull(s32 date, u8 *types, u8 *solo)
 {
-    static const u8 fallbacks[] = {G_WILD, G_TRAINERS, G_CATCH};
-    u8 s, k, i;
-    for (s = 0; s < 3; s++)
-        out[s] = types[s];
-    for (s = 0; s < 3; s++)
-    {
-        if (!((types[s] == G_COOP || types[s] == G_GIFTS) && players < 2))
-            continue;
-        for (k = 0; k < ARRAY_COUNT(fallbacks); k++)
-        {
-            bool8 used = FALSE;
-            for (i = 0; i < 3; i++)
-                if (out[i] == fallbacks[k])
-                    used = TRUE;
-            if (!used)
-            {
-                out[s] = fallbacks[k];
-                break;
-            }
-        }
-    }
+    u32 h = Hash(MP_Lobby_RoomName(), (u32)date * 2654435761u);
+    u8 team[G_TEAM_COUNT], together[G_TOGETHER_COUNT], i, n = 0;
+    u8 pool[G_SOLO_COUNT];
+    for (i = 0; i < G_SOLO_COUNT; i++)
+        pool[i] = G_SOLO_FIRST + i;
+    for (i = 0; i < G_TEAM_COUNT; i++)
+        team[i] = G_TEAM_FIRST + i;
+    for (i = 0; i < G_TOGETHER_COUNT; i++)
+        together[i] = G_TOGETHER_FIRST + i;
+    ShufflePool(pool, G_SOLO_COUNT, &h);
+    ShufflePool(team, G_TEAM_COUNT, &h);
+    ShufflePool(together, G_TOGETHER_COUNT, &h);
+    // The outbreak goal only when today's outbreak is somewhere everyone can reach early
+    for (i = 0; i < G_SOLO_COUNT; i++)
+        if (pool[i] != G_OUTBREAK || OutbreakIsEarly())
+            solo[n++] = pool[i];
+    while (n < G_SOLO_COUNT)
+        solo[n++] = G_CATCH;
+    types[0] = solo[0];
+    types[1] = team[0];
+    types[2] = together[0];
 }
 
-static u8 EffectiveType(u8 slot, u8 players, const u8 *types)
+static void PickGoals(s32 date, u8 *types)
 {
-    u8 eff[3];
-    EffectiveTypes(types, players, eff);
-    return eff[slot];
+    u8 solo[G_SOLO_COUNT];
+    PickGoalsFull(date, types, solo);
+}
+
+// What the day's goals mean with this many players: alone, the co-op and
+// together goals become the next "everyone" goals of the day
+static u8 EffectiveType(s32 date, u8 slot, u8 players)
+{
+    u8 t[3], solo[G_SOLO_COUNT];
+    PickGoalsFull(date, t, solo);
+    if (players >= 2 || slot == 0)
+        return t[slot];
+    return solo[slot];
 }
 
 static u16 GoalTarget(u8 effType, u8 players)
 {
+    if (sGoalDefs[effType].fixed)
+        return sGoalDefs[effType].fixed;
     return sGoalDefs[effType].perPlayer * players;
 }
 
@@ -256,6 +309,7 @@ static u16 GoalTarget(u8 effType, u8 players)
 // a third wheel. With just two players it's two wins together.
 
 #define MAX_ROSTER 8
+#define ROSTER_MINUTES 5   // minutes online today before a friend counts for pair goals
 
 struct Roster
 {
@@ -278,7 +332,7 @@ static void AddToRoster(struct Roster *r, const char *name)
 static void RosterFromCounter(const char *key, s32 value, void *arg)
 {
     const char *name = strstr(key, ":h:");
-    if (name && value > 0)
+    if (name && value >= ROSTER_MINUTES)
         AddToRoster((struct Roster *)arg, name + 3);
 }
 
@@ -292,16 +346,13 @@ static void TodaysRoster(s32 date, struct Roster *r)
     memset(r, 0, sizeof(*r));
     DayKey(prefix, date, "h:");
     MP_Counter_ForEach(prefix, RosterFromCounter, r);
+    (void)i;
     if (date == TodayUTC())
     {
+        // Me; friends join once they've been online a few minutes today (someone
+        // who popped in for a moment used to make the goal impossible)
         MyName(name);
         AddToRoster(r, name);
-        for (i = 0; i < MP_MAX_PLAYERS; i++)
-            if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasInfo)
-            {
-                MP_GameToAscii(name, gMpPlayers[i].name, PLAYER_NAME_LENGTH);
-                AddToRoster(r, name);
-            }
     }
 }
 
@@ -399,7 +450,7 @@ static void GoalNumbers(s32 date, u8 slot, s32 *progress, s32 *target)
     char key[40], what[4] = {'g', '0' + slot, 0};
     u8 types[3], players = PeakPlayers(date), t;
     PickGoals(date, types);
-    t = EffectiveType(slot, players, types);
+    t = EffectiveType(date, slot, players);
     if (t == G_COOP)
     {
         CoopNumbers(date, progress, target);
@@ -414,11 +465,33 @@ static void GoalText(s32 date, u8 slot, char *out, int len)
 {
     u8 types[3], players = PeakPlayers(date), t;
     PickGoals(date, types);
-    t = EffectiveType(slot, players, types);
+    t = EffectiveType(date, slot, players);
     if (t == G_COOP)
         CoopText(date, out, len);
+    else if (t == G_TYPE)
+    {
+        char type[12];
+        MP_GameToAscii(type, gTypeNames[TodaysGoalType(date)], 10);
+        snprintf(out, len, sGoalDefs[t].text, GoalTarget(t, players), type);
+    }
+    else if (t == G_STRONG)
+        snprintf(out, len, "Catch %d POK~MON at Lv %d+", GoalTarget(t, players), sStrongLevel[BadgeCount()]);
     else
         snprintf(out, len, sGoalDefs[t].text, GoalTarget(t, players));
+    if (GoalTarget(t, players) == 1)
+    {
+        // "Beat 1 trainers" -> "Beat 1 trainer"
+        static const char *const sPlural[][2] = {{"trainers", "trainer"}, {"entries", "entry"}, {"times", "time"},
+                                                 {"battles", "battle"}, {"gifts", "gift"}};
+        u8 k;
+        for (k = 0; k < ARRAY_COUNT(sPlural); k++)
+        {
+            char *p = strstr(out, sPlural[k][0]);
+            if (p)
+                memmove(p + strlen(sPlural[k][1]), p + strlen(sPlural[k][0]), strlen(p + strlen(sPlural[k][0])) + 1),
+                memcpy(p, sPlural[k][1], strlen(sPlural[k][1]));
+        }
+    }
 }
 
 static bool8 GoalDone(s32 date, u8 slot)
@@ -428,14 +501,26 @@ static bool8 GoalDone(s32 date, u8 slot)
     return p >= t;
 }
 
+static u8 TodaysGoalType(s32 date)
+{
+    return sGoalTypes[Hash(MP_Lobby_RoomName(), (u32)date * 31u + 3) % ARRAY_COUNT(sGoalTypes)];
+}
+
 static void ContributeGoals(u8 eventType)
 {
     s32 date = TodayUTC();
+    {
+        // Helped today: the day's consolation prize needs it
+        char key[32];
+        snprintf(key, sizeof(key), "contrib:%d", (int)date);
+        if (!MP_SaveData_Get(key))
+            MP_SaveData_Set(key, 1);
+    }
     u8 types[3], players = PeakPlayers(date), s;
     PickGoals(date, types);
     for (s = 0; s < 3; s++)
     {
-        if (EffectiveType(s, players, types) == eventType)
+        if (EffectiveType(date, s, players) == eventType)
         {
             char key[40], what[4] = {'g', '0' + s, 0};
             DayKey(key, date, what);
@@ -478,23 +563,8 @@ static void RaceAdd(u8 type, s32 value)
 }
 
 // ---------------------------------------------------------------------------
-// Achievements
-
-struct AchievementDef
-{
-    const char *key;
-    const char *name;
-    u16 steps[6];   // 0 = no more
-};
-
-static const struct AchievementDef sAchievements[] = {
-    {"a:caught",   "POK~MON caught together", {10, 25, 50, 100, 200, 386}},
-    {"a:trainers", "Trainers beaten together", {10, 25, 50, 100, 250, 500}},
-    {"a:coop",     "Co-op battles won",        {1, 5, 10, 25, 50, 100}},
-    {"a:badges",   "Badges earned together",   {1, 4, 8, 16, 24, 32}},
-    {"a:trades",   "Trades made",              {1, 5, 10, 25, 0}},
-    {"a:gifts",    "Daily gifts sent",         {5, 20, 50, 100, 0}},
-};
+// Achievements are personal now: mp_achieve.c. The team totals ("a:caught",
+// "a:trainers"...) stay as counters for the "while you were away" note.
 
 // ---------------------------------------------------------------------------
 // Outbreak
@@ -518,6 +588,25 @@ static void TodaysOutbreak(u16 *species, u16 *map)
     u32 h = Hash(MP_Lobby_RoomName(), (u32)TodayUTC() * 40503u + 7);
     *species = sOutbreakSpecies[h % ARRAY_COUNT(sOutbreakSpecies)];
     *map = sOutbreakMaps[(h / 97) % ARRAY_COUNT(sOutbreakMaps)];
+}
+
+static bool8 IsTodaysOutbreak(u16 species)
+{
+    u16 sp, map;
+    TodaysOutbreak(&sp, &map);
+    return species == sp;
+}
+
+// The outbreak goal only when the outbreak is on a route everyone reaches early
+static bool8 OutbreakIsEarly(void)
+{
+    static const u16 sEarly[] = {MAP_ROUTE101, MAP_ROUTE102, MAP_ROUTE103, MAP_ROUTE104, MAP_ROUTE110, MAP_ROUTE116, MAP_PETALBURG_WOODS};
+    u16 sp, map, i;
+    TodaysOutbreak(&sp, &map);
+    for (i = 0; i < ARRAY_COUNT(sEarly); i++)
+        if (map == sEarly[i])
+            return TRUE;
+    return FALSE;
 }
 
 // From wild_encounter.c: maybe swap a land encounter for the outbreak species
@@ -598,39 +687,36 @@ static void GiveConsolation(const char *why)
         else if (gMpPlayers[i].present && gMpPlayers[i].hasState)
             sum += gMpPlayers[i].state.topLevel, n++;
     }
-    if (myTop + 3 < (n ? sum / n : myTop) || myTop < badges * 6 + 12)
-    {
-        give = ITEM_RARE_CANDY, qty = 2;
-        reason = "for your POK~MON";
-    }
-    else if (CountItems(sHealing, ARRAY_COUNT(sHealing)) < 5)
+    (void)myTop;
+    (void)sum;
+    if (CountItems(sHealing, ARRAY_COUNT(sHealing)) < 5)
     {
         if (badges >= 4)
-            give = ITEM_HYPER_POTION, qty = 3;
+            give = ITEM_HYPER_POTION, qty = 1;
         else
-            give = ITEM_SUPER_POTION, qty = 5;
+            give = ITEM_SUPER_POTION, qty = 2;
         reason = "to stock up on healing";
     }
     else if (CountItems(sBalls, ARRAY_COUNT(sBalls)) < 5)
     {
         if (badges >= 5)
-            give = ITEM_ULTRA_BALL, qty = 5;
+            give = ITEM_ULTRA_BALL, qty = 2;
         else
-            give = ITEM_GREAT_BALL, qty = 5;
+            give = ITEM_GREAT_BALL, qty = 3;
         reason = "for catching";
     }
     else
         reason = "as pocket money";
 
-    if (give && GiveItemOrMoney(give, qty, 2000))
+    if (give && GiveItemOrMoney(give, qty, 800))
     {
         ItemAscii(give, item);
         snprintf(msg, sizeof(msg), "%s\n%s x%d", why, item, qty);
     }
     else
     {
-        AddMoney(&gSaveBlock1Ptr->money, 2000);
-        snprintf(msg, sizeof(msg), "%s\n$2000", why);
+        AddMoney(&gSaveBlock1Ptr->money, 800);
+        snprintf(msg, sizeof(msg), "%s\n$800", why);
     }
     QueueToast(msg);
 }
@@ -644,11 +730,27 @@ void MP_Events_Consolation(const char *why)
 // ---------------------------------------------------------------------------
 // Events from the game
 
+static u8 FaintedInParty(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG) && GetMonData(mon, MON_DATA_HP) == 0)
+            n++;
+    }
+    return n;
+}
+
 void MP_Events_OnTrainerWin(void)
 {
+    if (!gMpCoopBattle && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
+        MP_Achieve_OnTrainerWin(gTrainerBattleOpponent_A);
     if (!Online())
         return;
     ContributeGoals(G_TRAINERS);
+    if (!gMpCoopBattle && !(gBattleTypeFlags & BATTLE_TYPE_LINK) && FaintedInParty() == 0)
+        ContributeGoals(G_FLAWLESS);
     MP_Counter_Add("a:trainers", 1);
     RaceAdd(RACE_TRAINERS, 1);
 }
@@ -665,20 +767,52 @@ void MP_Events_OnCoopWin(u8 partner)
     PairKey(key, TodayUTC(), me, them);
     MP_Counter_Add(key, 1);
     MP_Counter_Add("a:coop", 1);
+    if (!gMpCoopWild)
+        ContributeGoals(G_COOPTRAINER);
 }
 
-void MP_Events_OnWildEnd(u8 outcome, u8 level)
+static bool8 CatchCounts(struct Pokemon *mon, u8 effType)
 {
+    u16 species = mon ? GetMonData(mon, MON_DATA_SPECIES) : SPECIES_NONE;
+    switch (effType)
+    {
+    case G_OUTBREAK: return species != SPECIES_NONE && IsTodaysOutbreak(species);
+    case G_TYPE:
+    {
+        u8 t = TodaysGoalType(TodayUTC());
+        return species != SPECIES_NONE && (gSpeciesInfo[species].types[0] == t || gSpeciesInfo[species].types[1] == t);
+    }
+    case G_STRONG:   return mon && GetMonData(mon, MON_DATA_LEVEL) >= sStrongLevel[BadgeCount()];
+    }
+    return FALSE;
+}
+
+// The end of a wild battle: mon = the wild POKéMON (caught or beaten)
+void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon)
+{
+    u8 level = mon ? GetMonData(mon, MON_DATA_LEVEL) : 0;
+    if (outcome == B_OUTCOME_CAUGHT && mon)
+        MP_Achieve_OnCatch(mon, IsTodaysOutbreak(GetMonData(mon, MON_DATA_SPECIES)));
     if (!Online())
         return;
     if (outcome == B_OUTCOME_WON)
-    {
-        ContributeGoals(G_WILD);
         RaceAdd(RACE_WILD, 1);
-    }
     else if (outcome == B_OUTCOME_CAUGHT)
     {
+        s32 date = TodayUTC();
+        u8 players = PeakPlayers(date), s;
         ContributeGoals(G_CATCH);
+        for (s = 0; s < 3; s++)
+        {
+            u8 t = EffectiveType(date, s, players);
+            if ((t == G_OUTBREAK || t == G_TYPE || t == G_STRONG) && CatchCounts(mon, t))
+                ContributeGoals(t);
+        }
+        if (gMpCoopWild)
+        {
+            ContributeGoals(G_COOPCATCH);
+            MP_Achieve_Count("coopcatch", 1);
+        }
         MP_Counter_Add("a:caught", 1);
         RaceAdd(RACE_CATCHES, 1);
         RaceAdd(RACE_BIGGEST, level);
@@ -693,10 +827,41 @@ void MP_Events_OnTrade(void)
 
 void MP_Events_OnGiftSent(void)
 {
+    MP_Achieve_Count("gift", 1);
     if (!Online())
         return;
     ContributeGoals(G_GIFTS);
     MP_Counter_Add("a:gifts", 1);
+}
+
+// Things done with friends (hooks around the co-op code): today's goals and
+// the achievements that count them
+void MP_Events_Did(u8 what)
+{
+    static const struct { u8 goal; const char *ach; } sDid[MP_DID_COUNT] = {
+        [MP_DID_NEWDEX]     = {G_NEWDEX, NULL},
+        [MP_DID_COOPWIN]    = {0xFF, "coop"},         // a co-op trainer battle won (both players)
+        [MP_DID_COOPGYM]    = {0xFF, "coopgym"},
+        [MP_DID_BORROW]     = {G_LEND, NULL},          // used a friend's field move
+        [MP_DID_LENT]       = {0xFF, "lend"},          // a friend used ours
+        [MP_DID_TRADE]      = {G_TRADE, "trade"},      // a trade with a POKéMON in it
+        [MP_DID_PHOTO]      = {G_PHOTO, NULL},
+        [MP_DID_PVP]        = {G_PVP, NULL},
+        [MP_DID_PVPWIN]     = {0xFF, "pvpwin"},
+        [MP_DID_BET]        = {G_SPECTATE, NULL},
+        [MP_DID_BETWIN]     = {0xFF, "bet"},
+        [MP_DID_BLEND]      = {G_BLEND, "blend"},
+        [MP_DID_BASE]       = {G_BASE, "base"},
+        [MP_DID_CARD]       = {G_CARD, "card"},
+        [MP_DID_RESCUE]     = {0xFF, "rescue"},
+        [MP_DID_SELFREVIVE] = {0xFF, "selfrevive"},
+    };
+    if (what >= MP_DID_COUNT)
+        return;
+    if (sDid[what].ach)
+        MP_Achieve_Count(sDid[what].ach, 1);
+    if (sDid[what].goal != 0xFF && Online())
+        ContributeGoals(sDid[what].goal);
 }
 
 // ---------------------------------------------------------------------------
@@ -716,6 +881,7 @@ static EWRAM_DATA struct
     bool8 catchupPending;    // waiting for the team counters after connecting
     u32 catchupVersion;
     u32 snapshotVersion;
+    u16 minuteFrames;
 } sEv = {0};
 
 // ---------------------------------------------------------------------------
@@ -811,23 +977,40 @@ static void CheckGoals(void)
         snprintf(key, sizeof(key), "goal:%d:%d", (int)date, s);
         if (!MP_SaveData_Get(key))
         {
-            char msg[96], goal[48], item[24];
+            // Everyone: balls. Co-op: healing. Together: a REVIVE.
+            char msg[96], item[24];
             u32 money = 300 * players;
+            u8 b = BadgeCount();
+            u16 give = s == 0 ? (b >= 5 ? ITEM_ULTRA_BALL : ITEM_GREAT_BALL)
+                     : s == 1 ? (b >= 4 ? ITEM_HYPER_POTION : ITEM_SUPER_POTION) : ITEM_REVIVE;
+            u8 qty = s == 2 ? 1 : (s == 1 && b >= 4 ? 2 : 3);
             MP_SaveData_Set(key, 1);
-            GoalText(date, s, goal, sizeof(goal));
-            ItemAscii(sGoalRewards[s].item, item);
-            GiveItemOrMoney(sGoalRewards[s].item, sGoalRewards[s].qty, 1000);
+            ItemAscii(give, item);
+            GiveItemOrMoney(give, qty, 1000);
             AddMoney(&gSaveBlock1Ptr->money, money);
-            snprintf(msg, sizeof(msg), "Team goal done!\n%s x%d, $%u", item, sGoalRewards[s].qty, (unsigned)money);
+            snprintf(msg, sizeof(msg), "Team goal done!\n%s x%d, $%u", item, qty, (unsigned)money);
             QueueToast(msg);
         }
     }
     snprintf(key, sizeof(key), "goalall:%d", (int)date);
     if (done == 3 && !MP_SaveData_Get(key))
     {
+        char week[24];
         MP_SaveData_Set(key, 1);
-        MP_Gatcha_AddPulls(1);
-        QueueToast("All 3 goals done!\n+1 MOEGATCHA pull");
+        MP_Achieve_Count("goals", 1);
+        // A MOEGATCHA pull for the first five such days of the week
+        snprintf(week, sizeof(week), "dailypulls:w%d", (int)MP_WeekNumber());
+        if (MP_SaveData_Get(week) < DAILY_PULLS_PER_WEEK)
+        {
+            MP_SaveData_Add(week, 1);
+            MP_Gatcha_AddPulls(1);
+            QueueToast("All 3 goals done!\n+1 MOEGATCHA pull");
+        }
+        else
+        {
+            AddMoney(&gSaveBlock1Ptr->money, 2000);
+            QueueToast("All 3 goals done!\n$2000 (this week's pulls are all yours)");
+        }
     }
 }
 
@@ -836,7 +1019,7 @@ static void CheckYesterday(void)
     s32 y = YesterdayUTC();
     char key[48], played[48];
     u8 s, done = 0;
-    snprintf(played, sizeof(played), "played:%d", (int)y);
+    snprintf(played, sizeof(played), "contrib:%d", (int)y);   // only for those who helped
     snprintf(key, sizeof(key), "cons:%d", (int)y);
     if (!MP_SaveData_Get(played) || MP_SaveData_Get(key))
         return;
@@ -848,41 +1031,20 @@ static void CheckYesterday(void)
         GiveConsolation("Consolation prize!");
 }
 
-static void CheckAchievements(void)
-{
-    u8 i, k;
-    for (i = 0; i < ARRAY_COUNT(sAchievements); i++)
-    {
-        s32 v = MP_Counter_Get(sAchievements[i].key);
-        for (k = 0; k < ARRAY_COUNT(sAchievements[i].steps) && sAchievements[i].steps[k]; k++)
-        {
-            char key[48];
-            if (v < sAchievements[i].steps[k])
-                break;
-            snprintf(key, sizeof(key), "ach:%s:%d", sAchievements[i].key + 2, sAchievements[i].steps[k]);
-            if (!MP_SaveData_Get(key))
-            {
-                char msg[96];
-                MP_SaveData_Set(key, 1);
-                MP_Gatcha_AddPulls(1);
-                snprintf(msg, sizeof(msg), "Achievement unlocked!\n+1 MOEGATCHA pull");
-                QueueToast(msg);
-            }
-        }
-    }
-}
-
 struct RaceScan
 {
     s32 week;
     s32 best;
     s32 mine;
+    u8 racers;   // players who scored
     char myKey[40];
 };
 
 static void ScanRace(const char *key, s32 value, void *arg)
 {
     struct RaceScan *rs = (struct RaceScan *)arg;
+    if (value > 0)
+        rs->racers++;
     if (value > rs->best)
         rs->best = value;
     if (strcmp(key, rs->myKey) == 0)
@@ -905,17 +1067,22 @@ static void CheckLastWeek(void)
     if (rs.mine <= 0)
         return;   // didn't take part (or the results haven't arrived yet)
     MP_SaveData_Set(key, 1);
-    if (rs.mine >= rs.best)
+    if (rs.mine >= rs.best && rs.racers >= 2)
     {
-        u32 money = 3000 * MP_ConnectedCount();
-        GiveItemOrMoney(ITEM_RARE_CANDY, 3, 3000);
+        // A real race: a PP UP, money for every racer and a MOEGATCHA pull
+        u32 money = 1000 * rs.racers;
+        char msg[96];
+        GiveItemOrMoney(ITEM_PP_UP, 1, 3000);
         AddMoney(&gSaveBlock1Ptr->money, money);
         MP_Gatcha_AddPulls(1);
-        {
-            char msg[96];
-            snprintf(msg, sizeof(msg), "You won the weekly race!\nRARE CANDY x3, $%u", (unsigned)money);
-            QueueToast(msg);
-        }
+        MP_Achieve_Count("racewin", 1);
+        snprintf(msg, sizeof(msg), "You won the weekly race!\nPP UP, $%u, +1 MOEGATCHA pull", (unsigned)money);
+        QueueToast(msg);
+    }
+    else if (rs.mine >= rs.best)
+    {
+        AddMoney(&gSaveBlock1Ptr->money, 1000);
+        QueueToast("Top of the weekly race (racing alone)!\n$1000");
     }
     else
         GiveConsolation("Race consolation prize!");
@@ -929,8 +1096,11 @@ static void UpdateStreak(void)
     char key[48];
     bool8 together = FALSE;
     u8 i;
+    // Together = a friend on the same map (not just online somewhere)
     for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasInfo)
+        if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasState
+         && gMpPlayers[i].state.mapGroup == gSaveBlock1Ptr->location.mapGroup
+         && gMpPlayers[i].state.mapNum == gSaveBlock1Ptr->location.mapNum)
             together = TRUE;
     if (sEv.lastTick == 0 || now < sEv.lastTick || now - sEv.lastTick > 5)
     {
@@ -961,9 +1131,9 @@ static void UpdateStreak(void)
         count = (last == day - 1) ? count + 1 : 1;
         MP_SaveData_Set("streak:day", day);
         MP_SaveData_Set("streak:count", count);
-        if (count >= 14)      item = ITEM_PP_UP, qty = 2;
-        else if (count >= 7)  item = ITEM_RARE_CANDY, qty = 2;
-        else if (count >= 5)  item = ITEM_RARE_CANDY, qty = 1;
+        if (count >= 14)      item = ITEM_PP_UP, qty = 1;
+        else if (count >= 7)  item = ITEM_REVIVE, qty = 1;
+        else if (count >= 5)  item = ITEM_ULTRA_BALL, qty = 2;
         else if (count >= 3)  item = ITEM_GREAT_BALL, qty = 5;
         else if (count >= 2)  item = ITEM_SUPER_POTION, qty = 3;
         GiveItemOrMoney(item, qty, 1000);
@@ -993,7 +1163,6 @@ s32 MP_Events_StreakDays(void)
 void MP_Events_Update(void)
 {
     bool8 inRoom = Online() && MP_IsInOverworld();
-    UpdateToasts();
     if (!Online())
     {
         sEv.inRoom = FALSE;
@@ -1012,13 +1181,7 @@ void MP_Events_Update(void)
         RequestAll();
         snprintf(played, sizeof(played), "played:%d", (int)TodayUTC());
         MP_SaveData_Set(played, 1);
-        {
-            char name[16], who[24], key[40];
-            MyName(name);
-            snprintf(who, sizeof(who), "h:%s", name);
-            DayKey(key, TodayUTC(), who);
-            MP_Counter_Max(key, 1);
-        }
+        sEv.minuteFrames = 60 * 60 - 1;   // report our minutes right away
         if (first)
         {
             sEv.catchupPending = TRUE;
@@ -1034,6 +1197,21 @@ void MP_Events_Update(void)
         }
     }
     UpdateCatchup();
+    // Minutes online today (up to ROSTER_MINUTES): friends count for pair goals after a few
+    if (++sEv.minuteFrames >= 60 * 60)
+    {
+        char name[16], who[24], key[40], mine[32];
+        s32 mins;
+        sEv.minuteFrames = 0;
+        snprintf(mine, sizeof(mine), "mins:%d", (int)TodayUTC());
+        mins = MP_SaveData_Get(mine);
+        if (mins < ROSTER_MINUTES)
+            MP_SaveData_Set(mine, ++mins);
+        MyName(name);
+        snprintf(who, sizeof(who), "h:%s", name);
+        DayKey(key, TodayUTC(), who);
+        MP_Counter_Max(key, mins);
+    }
     if (sEv.lastConnected != MP_ConnectedCount())
     {
         char key[40];
@@ -1056,7 +1234,6 @@ void MP_Events_Update(void)
     {
         sEv.checkTimer = 0;
         CheckGoals();
-        CheckAchievements();
         CheckYesterday();
         CheckLastWeek();
     }
@@ -1170,20 +1347,24 @@ static void DrawHub(void)
     MpUi_End();
     if (sDaily.cursor >= ROW_GOAL1 && sDaily.cursor <= ROW_GOAL3)
     {
-        u8 eff = EffectiveType(sDaily.cursor - ROW_GOAL1, players, types);
+        u8 eff = EffectiveType(date, sDaily.cursor - ROW_GOAL1, players);
         if (eff == G_COOP)
         {
             char status[96];
             CoopStatus(date, status, sizeof(status));
             MpUi_HelpAscii(status);
         }
+        else if (sDaily.cursor == ROW_GOAL1 || players < 2)
+            MpUi_HelpAscii("Everyone on the server helps. Reward: POKE BALLS + money.");
+        else if (sDaily.cursor == ROW_GOAL2)
+            MpUi_HelpAscii("Team up with friends for this one. Reward: healing + money.");
         else
-            MpUi_HelpAscii("Everyone on the server helps. Rewards for all!");
+            MpUi_HelpAscii("Do this together with friends. Reward: a REVIVE + money.");
     }
     else if (sDaily.cursor == ROW_OUTBREAK)
         MpUi_HelpAscii("It appears more often with more players online.");
     else if (sDaily.cursor == ROW_STREAK)
-        MpUi_HelpAscii("Play 10 minutes with a friend each day.");
+        MpUi_HelpAscii("Play 10 minutes on the same map as a friend each day.");
     else
         MpUi_HelpAscii("{A} SELECT  {B} CLOSE");
 }
@@ -1222,30 +1403,34 @@ static void DrawRace(void)
         MpUi_TextAscii(MPUI_ROWS - 1, line);
     }
     MpUi_End();
-    MpUi_HelpAscii("Winner: RARE CANDY x3 + a MOEGATCHA pull.  {B} BACK");
+    MpUi_HelpAscii("Winner (2+ racing): PP UP, money and a MOEGATCHA pull.  {B} BACK");
 }
 
 static void DrawAchievements(void)
 {
-    u16 i, first, count = ARRAY_COUNT(sAchievements);
-    MpUi_Begin("SHARED ACHIEVEMENTS");
+    u16 i, first, count = MP_Achieve_Total();
+    char title[32];
+    u8 right[32];
+    MpUi_Begin("ACHIEVEMENTS");
+    snprintf(title, sizeof(title), "%d/%d", MP_Achieve_DoneCount(), count);
+    MP_AsciiToGame(right, title, 30);
+    MpUi_TitleRight(right);
     first = MpUi_ScrollFor(sDaily.cursor, count, &sDaily.scroll);
     for (i = first; i < count && i < first + MPUI_ROWS; i++)
     {
-        const struct AchievementDef *a = &sAchievements[i];
-        s32 v = MP_Counter_Get(a->key);
-        u8 k;
-        char r[24];
-        for (k = 0; k < ARRAY_COUNT(a->steps) && a->steps[k] && v >= a->steps[k]; k++)
-            ;
-        if (k < ARRAY_COUNT(a->steps) && a->steps[k])
-            snprintf(r, sizeof(r), "%d/%d", (int)v, a->steps[k]);
-        else
-            snprintf(r, sizeof(r), "%d  ALL DONE", (int)v);
-        MpUi_RowAscii(i - first, i == sDaily.cursor, a->name, r);
+        const char *name, *desc;
+        char status[16], reward[32];
+        MP_Achieve_Info(i, &name, &desc, status, sizeof(status), reward, sizeof(reward));
+        MpUi_RowAscii(i - first, i == sDaily.cursor, name, status);
     }
     MpUi_End();
-    MpUi_HelpAscii("Each milestone: +1 MOEGATCHA pull for everyone.  {B} BACK");
+    {
+        const char *name, *desc;
+        char status[16], reward[32], help[160];
+        MP_Achieve_Info(sDaily.cursor, &name, &desc, status, sizeof(status), reward, sizeof(reward));
+        snprintf(help, sizeof(help), "%s  Reward: %s", desc, reward);
+        MpUi_HelpAscii(help);
+    }
 }
 
 static void Draw(void)
@@ -1306,9 +1491,15 @@ static void Task_Daily(u8 taskId)
     }
     else
     {
-        if (sDaily.screen == DS_ACHIEVEMENTS && MpUi_MoveCursor(&sDaily.cursor, ARRAY_COUNT(sAchievements)))
+        if (sDaily.screen == DS_ACHIEVEMENTS && MpUi_MoveCursor(&sDaily.cursor, MP_Achieve_Total()))
         {
             Draw();
+            return;
+        }
+        if (JOY_NEW(A_BUTTON | B_BUTTON) && !Online())
+        {
+            PlaySE(SE_SELECT);
+            CloseDaily();
             return;
         }
         if (JOY_NEW(A_BUTTON | B_BUTTON))
@@ -1327,13 +1518,11 @@ static void Task_Daily(u8 taskId)
 
 void MP_Daily_OpenMenu(void)
 {
-    if (!Online())
-    {
-        MP_ShowNotice("Daily goals, the race and achievements are shared with your server. Go online (CO-OP menu: {COOP}) first.");
-        return;
-    }
     memset(&sDaily, 0, sizeof(sDaily));
-    RequestAll();
+    if (!Online())
+        sDaily.screen = DS_ACHIEVEMENTS;   // offline: just your achievements (goals and the race need the server)
+    else
+        RequestAll();
     MpUi_Open();
     sDaily.taskId = CreateTask(Task_Daily, 80);
     Draw();
@@ -1353,12 +1542,12 @@ void MP_Events_DebugGoals(void)
             printf("[test] %d players=%d:", (int)date, p);
             for (s = 0; s < 3; s++)
             {
-                u8 t = EffectiveType(s, p, types);
+                u8 t = EffectiveType(date, s, p);
                 printf(" [");
                 if (t == G_COOP)
                     printf("co-op with each pair (%d each)", (int)WinsPerPair(p));
                 else
-                    printf(sGoalDefs[t].text, GoalTarget(t, p));
+                    printf(sGoalDefs[t].text, GoalTarget(t, p), "TYPE");
                 printf("]");
             }
             printf("\n");

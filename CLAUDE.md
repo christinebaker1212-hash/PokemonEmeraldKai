@@ -80,6 +80,13 @@ labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving bot
 (test: MOEMON_DEBUG_WARP=11,3,5,3 / 11,3,5,4, MOEMON_DEBUG_PARTY=283:46, `mp badges`).
 Phase 2: shared PC (put/take Pokémon and items, `MOEMON_STORE_DIR`), trade with money/items and a
 trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name tag and follower.
+Dailies (mp_events.c): 3 goals a day from 3 pools (everyone G_TRAINERS..G_STRONG / co-op G_COOP..G_LEND / together
+G_GIFTS..G_CARD; PickGoalsFull, solo fallbacks), hooks call MP_Events_Did(MP_DID_*) (goal + achievement counter). Pair goals
+only count friends with 5+ minutes today ("h:NAME" minute counter). Pull caps: 5 daily pulls/week ("dailypulls:wN"),
+weekly free +5 pulls online only, rematch pull once a day, tournament pulls once a day (3+ players, no forfeit), race needs
+2+ racers, HoF pull once per friend. Achievements (mp_achieve.c, 70, personal, offline too: "av:ID", counters "acnt:NAME"),
+DAILY > ACHIEVEMENTS (opens directly when offline). RARE CANDY cap MP_RareCandyCap (party_menu.c). Save data (mp_savedata.c)
+drops dated keys after 14 days and never evicts undated ones. Debug `mp goals` lists a week of goals.
 Phase 3 (mp_events.c, mp_gatcha.c): goals/toasts/MoeGatcha/streak with `mp event ...`, `mp savedata`, `mp gatcharig N` (0 N .. 6 EX; 5 = legendary event),
 `mp goals`, `mp pickup N` (0-18), harness `letters WORD`, MOEMON_DEBUG_DATE; `AllowSmallTweaks = 1` in the ini enables
 the MoeGatcha typed codes (mp_gatcha.c CheckTypedCodes, off by default, only from the file) and typing "speed" anywhere

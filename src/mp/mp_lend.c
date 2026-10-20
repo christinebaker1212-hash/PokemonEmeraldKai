@@ -164,6 +164,7 @@ void MP_Lend_OnRelay(u8 from, const u8 *data, u16 len)
     {
         // A friend just used one of ours
         u8 text[80], name[PLAYER_NAME_LENGTH + 1], tmp[24];
+        MP_Events_Did(MP_DID_LENT);
         static const u8 sUsedYour[] = _(" used your ");
         static const u8 sS[] = _("'s ");
         StringCopyN(name, gMpPlayers[from].name, PLAYER_NAME_LENGTH);
@@ -261,6 +262,7 @@ void MP_Lend_ShowMonArgs(u32 *species, u32 *otId, u32 *personality)
     *otId = m->otId;
     *personality = m->personality;
     MP_SendRelay(sActiveFriend, buf, sizeof(buf));
+    MP_Events_Did(MP_DID_BORROW);
 }
 
 // STRENGTH doesn't show the Moemon: just tell the friend
@@ -268,7 +270,10 @@ void MP_Lend_NotifyUsed(void)
 {
     u8 buf[3] = {MPR_LEND, MPR_LEND_USED_SUB, sActiveMove};
     if (Active())
+    {
         MP_SendRelay(sActiveFriend, buf, sizeof(buf));
+        MP_Events_Did(MP_DID_BORROW);
+    }
 }
 
 // Debug "mp lend": what each friend can lend

@@ -5,8 +5,8 @@
 // slowly click down onto the prize. Seven rarities (STANDARD banner):
 //   N 52%  U 28%  R 13.5%  SR 5%  SSR 1.2%  UR 0.25%  EX 0.05%
 // Legendary and mythical Moemon only come as UR, their shiny forms as EX.
-// Pity: an SR or better at least every 40 pulls, an SSR or better every 120,
-// a UR or better every 300 (EX is pure luck). A 10-pull always has an R+.
+// Pity: an SR or better at least every 40 pulls, an SSR or better every 100,
+// a UR or better every 200 (EX is pure luck). A 10-pull always has an R+.
 // A UR/EX is an event: the box climbs through every rarity, the screen goes
 // dark, the Moemon's silhouette rises to legendary battle music, then the
 // reveal (its cry, rainbow, stars) and friends online hear about it.
@@ -76,8 +76,8 @@ void MPNet_Log(const char *fmt, ...);
 #define FREE_WEEK_KEY "gatcha:freewk"   // week number + 1 of the last free 10-pull
 
 #define SR_PITY  40
-#define SSR_PITY 120
-#define UR_PITY  300
+#define SSR_PITY 100
+#define UR_PITY  200
 
 // Small helpers (no libm)
 static s32 FloorF(float v)
@@ -141,10 +141,10 @@ static const struct EventMon sEventMons[] = {
     [EV_SKITTY]    = {"BOX SKITTY", SPECIES_SKITTY, 5, {MOVE_GROWL, MOVE_TACKLE, MOVE_TAIL_WHIP, MOVE_PAY_DAY}, NULL, 0, FALSE},
     [EV_SWABLU]    = {"BOX SWABLU", SPECIES_SWABLU, 5, {MOVE_PECK, MOVE_GROWL, MOVE_FALSE_SWIPE, MOVE_NONE}, NULL, 0, FALSE},
     // EON TICKET and MYSTIC TICKET encounters
-    [EV_LATIAS]    = {"SOUTHERN LATIAS", SPECIES_LATIAS, 50, {MOVE_MIST_BALL, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_CHARM}, NULL, 0, FALSE},
-    [EV_LATIOS]    = {"SOUTHERN LATIOS", SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, NULL, 0, FALSE},
-    [EV_LUGIA]     = {"NAVEL ROCK LUGIA", SPECIES_LUGIA, 70, {MOVE_RECOVER, MOVE_HYDRO_PUMP, MOVE_RAIN_DANCE, MOVE_SWIFT}, NULL, 0, TRUE},
-    [EV_HOOH]      = {"NAVEL ROCK HO-OH", SPECIES_HO_OH, 70, {MOVE_RECOVER, MOVE_FIRE_BLAST, MOVE_SUNNY_DAY, MOVE_SWIFT}, NULL, 0, TRUE},
+    [EV_LATIAS]    = {"SOUTHERN LATIAS", SPECIES_LATIAS, 50, {MOVE_MIST_BALL, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_CHARM}, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_LATIOS]    = {"SOUTHERN LATIOS", SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_LUGIA]     = {"NAVEL ROCK LUGIA", SPECIES_LUGIA, 70, {MOVE_RECOVER, MOVE_HYDRO_PUMP, MOVE_RAIN_DANCE, MOVE_SWIFT}, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_HOOH]      = {"NAVEL ROCK HO-OH", SPECIES_HO_OH, 70, {MOVE_RECOVER, MOVE_FIRE_BLAST, MOVE_SUNNY_DAY, MOVE_SWIFT}, "GACHA", GACHA_OT_ID, TRUE},
     // PICKUP. Where a real Generation 3 event existed, its level and moves
     // (and the fateful encounter): AURA Mew, AGETO Celebi, WISHMKR Jirachi,
     // SPACE C Deoxys, the 10th Anniversary Lv70 legends (their Lv70 moves)
@@ -246,29 +246,29 @@ static const char *const sSetNames[] = {[SET_VITAMINS] = "VITAMIN SET", [SET_BAL
 static const struct PrizeDef sCommon[] = {
     ITEM(ITEM_POKE_BALL, 10, 10), ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_SUPER_POTION, 5, 10),
     ITEM(ITEM_HYPER_POTION, 3, 8), ITEM(ITEM_REVIVE, 2, 8), ITEM(ITEM_ETHER, 2, 6), ITEM(ITEM_FULL_HEAL, 3, 6),
-    ITEM(ITEM_MAX_REPEL, 3, 6), MONEY(2000, 10), MONEY(3000, 8),
+    ITEM(ITEM_MAX_REPEL, 3, 6), MONEY(500, 10), MONEY(1000, 8),
 };
 static const struct PrizeDef sUncommon[] = {
     ITEM(ITEM_ULTRA_BALL, 5, 10), ITEM(ITEM_RARE_CANDY, 1, 12), ITEM(ITEM_FULL_RESTORE, 2, 8),
     ITEM(ITEM_MAX_REVIVE, 1, 8), ITEM(ITEM_NUGGET, 1, 8), ITEM(ITEM_ELIXIR, 2, 6), ITEM(ITEM_TIMER_BALL, 5, 6),
     ITEM(ITEM_PROTEIN, 1, 4), ITEM(ITEM_IRON, 1, 4), ITEM(ITEM_CALCIUM, 1, 4), ITEM(ITEM_ZINC, 1, 4),
-    ITEM(ITEM_CARBOS, 1, 4), ITEM(ITEM_HP_UP, 1, 4), MONEY(6000, 10),
+    ITEM(ITEM_CARBOS, 1, 4), ITEM(ITEM_HP_UP, 1, 4), MONEY(2000, 10),
 };
 static const struct PrizeDef sRare[] = {
-    ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_PP_UP, 2, 8), ITEM(ITEM_MAX_ELIXIR, 2, 6),
+    ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_PP_UP, 2, 8), ITEM(ITEM_MAX_ELIXIR, 2, 6),
     ITEM(ITEM_FIRE_STONE, 1, 3), ITEM(ITEM_WATER_STONE, 1, 3), ITEM(ITEM_THUNDER_STONE, 1, 3),
     ITEM(ITEM_LEAF_STONE, 1, 3), ITEM(ITEM_MOON_STONE, 1, 3), ITEM(ITEM_LEFTOVERS, 1, 4),
     ITEM(ITEM_LUCKY_EGG, 1, 4), ITEM(ITEM_KINGS_ROCK, 1, 3), ITEM(ITEM_CHOICE_BAND, 1, 3),
     ITEM(ITEM_SCOPE_LENS, 1, 3), ITEM(ITEM_SHELL_BELL, 1, 3), ITEM(ITEM_PROTEIN, 3, 2), ITEM(ITEM_CARBOS, 3, 2),
-    MON(EV_ZIGZAGOON, 4), MON(EV_PICHU, 4), MON(EV_SKITTY, 4), MON(EV_SWABLU, 4), MONEY(15000, 8),
+    MON(EV_ZIGZAGOON, 4), MON(EV_PICHU, 4), MON(EV_SKITTY, 4), MON(EV_SWABLU, 4), MONEY(5000, 8),
 };
 static const struct PrizeDef sSuper[] = {
-    ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 10, 12), MONEY(50000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
+    ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 4, 12), MONEY(10000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
     ITEM(ITEM_LUCKY_EGG, 1, 6), SHINY(EV_ZIGZAGOON, 3), SHINY(EV_PICHU, 3), SHINY(EV_SKITTY, 3), SHINY(EV_SWABLU, 3),
 };
 static const struct PrizeDef sSSuper[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 14), ITEM(ITEM_RARE_CANDY, 25, 10), MONEY(100000, 10), ITEM(ITEM_PP_MAX, 5, 8),
-    SET(SET_VITAMINS, 3, 8),
+    ITEM(ITEM_MASTER_BALL, 1, 5), ITEM(ITEM_RARE_CANDY, 8, 10), MONEY(20000, 10), ITEM(ITEM_PP_MAX, 5, 8),
+    SET(SET_VITAMINS, 2, 8),
 };
 // Legendary and mythical Moemon: UR only, shiny ones EX only
 static const struct PrizeDef sUltra[] = {
@@ -286,25 +286,25 @@ static const struct PrizeDef sTrainCommon[] = {
     ITEM(ITEM_CALCIUM, 1, 6), ITEM(ITEM_ZINC, 1, 6), ITEM(ITEM_CARBOS, 1, 6),
 };
 static const struct PrizeDef sTrainUncommon[] = {
-    ITEM(ITEM_RARE_CANDY, 2, 14), ITEM(ITEM_HP_UP, 2, 5), ITEM(ITEM_PROTEIN, 2, 5), ITEM(ITEM_IRON, 2, 5),
+    ITEM(ITEM_RARE_CANDY, 1, 14), ITEM(ITEM_HP_UP, 2, 5), ITEM(ITEM_PROTEIN, 2, 5), ITEM(ITEM_IRON, 2, 5),
     ITEM(ITEM_CALCIUM, 2, 5), ITEM(ITEM_ZINC, 2, 5), ITEM(ITEM_CARBOS, 2, 5), ITEM(ITEM_PP_UP, 1, 8),
 };
 static const struct PrizeDef sTrainRare[] = {
-    ITEM(ITEM_RARE_CANDY, 5, 14), ITEM(ITEM_HP_UP, 5, 3), ITEM(ITEM_PROTEIN, 5, 3), ITEM(ITEM_IRON, 5, 3),
+    ITEM(ITEM_RARE_CANDY, 2, 14), ITEM(ITEM_HP_UP, 5, 3), ITEM(ITEM_PROTEIN, 5, 3), ITEM(ITEM_IRON, 5, 3),
     ITEM(ITEM_CALCIUM, 5, 3), ITEM(ITEM_ZINC, 5, 3), ITEM(ITEM_CARBOS, 5, 3), ITEM(ITEM_PP_UP, 3, 8),
     ITEM(ITEM_LUCKY_EGG, 1, 5), ITEM(ITEM_MACHO_BRACE, 1, 5), ITEM(ITEM_EXP_SHARE, 1, 5),
 };
 static const struct PrizeDef sTrainSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 15, 14), ITEM(ITEM_PP_MAX, 3, 10), SET(SET_VITAMINS, 3, 12),
+    ITEM(ITEM_RARE_CANDY, 4, 14), ITEM(ITEM_PP_MAX, 3, 10), SET(SET_VITAMINS, 1, 12),
 };
 static const struct PrizeDef sTrainSSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 30, 12), SET(SET_VITAMINS, 5, 10), ITEM(ITEM_PP_MAX, 5, 8),
+    ITEM(ITEM_RARE_CANDY, 6, 12), SET(SET_VITAMINS, 2, 10), ITEM(ITEM_PP_MAX, 5, 8),
 };
 static const struct PrizeDef sTrainUltra[] = {
-    ITEM(ITEM_RARE_CANDY, 50, 10), SET(SET_VITAMINS, 10, 10), ITEM(ITEM_PP_MAX, 10, 6),
+    ITEM(ITEM_RARE_CANDY, 10, 10), SET(SET_VITAMINS, 2, 10), ITEM(ITEM_PP_MAX, 10, 6),
 };
 static const struct PrizeDef sTrainEx[] = {
-    ITEM(ITEM_RARE_CANDY, 99, 10), SET(SET_VITAMINS, 25, 10), ITEM(ITEM_PP_MAX, 25, 6),
+    ITEM(ITEM_RARE_CANDY, 15, 10), SET(SET_VITAMINS, 3, 10), ITEM(ITEM_PP_MAX, 25, 6),
 };
 
 // BALL banner: special and hard-to-find POKé BALLS
@@ -321,16 +321,16 @@ static const struct PrizeDef sBallRare[] = {
     ITEM(ITEM_NEST_BALL, 10, 5), ITEM(ITEM_REPEAT_BALL, 10, 5), ITEM(ITEM_TIMER_BALL, 10, 5), SET(SET_BALLS, 3, 8),
 };
 static const struct PrizeDef sBallSuper[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 14), SET(SET_BALLS, 10, 8), ITEM(ITEM_LUXURY_BALL, 30, 6),
+    SET(SET_BALLS, 5, 10), ITEM(ITEM_ULTRA_BALL, 30, 8), ITEM(ITEM_LUXURY_BALL, 20, 6),
 };
 static const struct PrizeDef sBallSSuper[] = {
-    ITEM(ITEM_MASTER_BALL, 2, 12), SET(SET_BALLS, 20, 8), ITEM(ITEM_LUXURY_BALL, 60, 4),
+    SET(SET_BALLS, 10, 10), ITEM(ITEM_ULTRA_BALL, 60, 6), ITEM(ITEM_LUXURY_BALL, 40, 4),
 };
 static const struct PrizeDef sBallUltra[] = {
-    ITEM(ITEM_MASTER_BALL, 3, 10), ITEM(ITEM_MASTER_BALL, 5, 4), SET(SET_BALLS, 30, 6),
+    ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6),
 };
 static const struct PrizeDef sBallEx[] = {
-    ITEM(ITEM_MASTER_BALL, 10, 10), SET(SET_BALLS, 99, 6),
+    ITEM(ITEM_MASTER_BALL, 2, 10), SET(SET_BALLS, 40, 6),
 };
 
 // PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
@@ -362,7 +362,7 @@ static struct PrizeDef sPickupEx[3];
 static u8 sPickupCount;
 static const struct PrizeDef sPickupRare[] = {
     MON(EV_ZIGZAGOON, 6), MON(EV_PICHU, 6), MON(EV_SKITTY, 6), MON(EV_SWABLU, 6),
-    ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_PP_UP, 2, 8), MONEY(15000, 8),
+    ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_PP_UP, 2, 8), MONEY(5000, 8),
 };
 
 enum { BANNER_STANDARD, BANNER_PICKUP, BANNER_TRAINING, BANNER_BALLS, BANNER_COUNT };
@@ -1806,7 +1806,7 @@ static void DrawNameLine(const struct PrizeDef *def, u8 rarity, u32 amount, bool
 static void BuildMenu(void)
 {
     sG->menuCount = 0;
-    if (FreeTenAvailable())
+    if (FreeTenAvailable() && MP_IsConnected())
         sG->menuRows[sG->menuCount++] = MENU_FREE;
     sG->menuRows[sG->menuCount++] = MENU_ONE;
     sG->menuRows[sG->menuCount++] = MENU_TEN;
@@ -1931,13 +1931,13 @@ static void SwitchBanner(s8 dir)
 static void DrawMenu(void)
 {
     static const char *const sLabels[] = {
-        [MENU_FREE] = "FREE x10!",
+        [MENU_FREE] = "WEEKLY +5 PULLS",
         [MENU_ONE]  = "PULL x1",
         [MENU_TEN]  = "PULL x10",
         [MENU_BACK] = "BACK",
     };
     static const char *const sInfo[] = {
-        [MENU_FREE] = "Free this week! One RARE+ for sure.",
+        [MENU_FREE] = "Free every week while online: 5 pulls.",
         [MENU_ONE]  = "Uses 1 pull.",
         [MENU_TEN]  = "Uses 10 pulls. One RARE+ guaranteed!",
         [MENU_BACK] = "Back to the CO-OP menu.",
@@ -2830,8 +2830,11 @@ static void Task_Gatcha(u8 taskId)
             if (row == MENU_FREE)
             {
                 MP_SaveData_Set(FREE_WEEK_KEY, MP_WeekNumber() + 1);
+                MP_Gatcha_AddPulls(5);
                 PlaySE(SE_SHOP);
-                StartSpin(10);
+                BuildMenu();
+                DrawMenu();
+                DrawHelp("+5 pulls! See you next week.");
             }
             else if (row == MENU_ONE && MP_Gatcha_Pulls() >= 1)
             {
@@ -2848,7 +2851,7 @@ static void Task_Gatcha(u8 taskId)
             else
             {
                 PlaySE(SE_FAILURE);
-                DrawHelp(row == MENU_TEN ? "Not enough pulls for x10. Team achievements give more!" : "No pulls left. Team achievements give more!");
+                DrawHelp(row == MENU_TEN ? "Not enough pulls for x10. Daily goals and achievements give more!" : "No pulls left. Daily goals and achievements give more!");
             }
         }
         break;

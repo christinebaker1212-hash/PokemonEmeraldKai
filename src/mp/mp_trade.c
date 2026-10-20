@@ -525,6 +525,8 @@ static void ApplyTrade(void)
     }
     PlaySE(SE_SUCCESS);
     MP_Events_OnTrade();
+    if (sTrade.theirHasMon || sTrade.mine.monSlot != 0xFF)
+        MP_Events_Did(MP_DID_TRADE);   // only trades with a POKeMON in them count
     MP_GameToAscii(them, sTrade.partnerName, PLAYER_NAME_LENGTH);
     snprintf(msg, sizeof(msg), "Trade with %s complete!", them);
     MPNet_Log("trade with player %d complete", sTrade.partner + 1);

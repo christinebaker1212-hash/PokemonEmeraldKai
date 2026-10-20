@@ -5006,6 +5006,19 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc task)
     u16 *itemPtr = &gSpecialVar_ItemId;
     bool8 cannotUseEffect;
 
+    // Moemon Co-op: RARE CANDIES stop at the next gym leader's ace level
+    if (*itemPtr == ITEM_RARE_CANDY && GetMonData(mon, MON_DATA_LEVEL) >= MP_RareCandyCap())
+    {
+        static const u8 sText_Cap[] = _("RARE CANDIES won't raise it past\nLv. {STR_VAR_1} until your next BADGE.{PAUSE_UNTIL_PRESS}");
+        PlaySE(SE_SELECT);
+        gPartyMenuUseExitCallback = FALSE;
+        ConvertIntToDecimalStringN(gStringVar1, MP_RareCandyCap(), STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringExpandPlaceholders(gStringVar4, sText_Cap);
+        DisplayPartyMenuMessage(gStringVar4, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = task;
+        return;
+    }
     if (GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL)
     {
         BufferMonStatsToTaskData(mon, arrayPtr);

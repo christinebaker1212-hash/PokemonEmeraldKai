@@ -261,6 +261,7 @@ static void Task_Down(u8 taskId)
                 buf[2] = sRescue.selfFull;
                 MP_SendRelay(sRescue.friendId, buf, sizeof(buf));
                 sRescue.answer = RS_SELF;
+                MP_Events_Did(MP_DID_SELFREVIVE);
             }
             else if (sRescue.timer % 60 == 0)
                 DrawWaiting();
@@ -414,6 +415,7 @@ static void Task_Help(u8 taskId)
         MpUi_Close();
         if (pick != RS_NO)
         {
+            MP_Events_Did(MP_DID_RESCUE);
             char who[16], note[80];
             PlayerName(sRescue.helperId, who);
             snprintf(note, sizeof(note), "You helped %s back up!", who);

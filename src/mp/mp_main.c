@@ -1408,10 +1408,13 @@ void MP_Init(void)
 
 void MP_FrameUpdate(void)
 {
-    MpUi_RefreshIcons();   // help lines follow keyboard / pad switches
     u8 type;
     u16 len;
     int guard;
+
+    MP_Achieve_Update();        // achievements are personal: offline too
+    MP_Events_UpdateToasts();   // ... and so are their notes
+    MpUi_RefreshIcons();        // help lines follow keyboard / pad switches
 
     if (!sInitDone)
         MP_Init();

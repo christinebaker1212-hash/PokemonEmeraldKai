@@ -398,11 +398,17 @@ static void CB2_MpReturnFromBattle(void)
         StringAppend(sResultText, sNet.oppName);
         AppendRaw(sResultText, CHAR_EXCL_MARK);
         MP_Tourney_OnBattleResult(outcome == B_OUTCOME_WON || outcome == B_OUTCOME_DREW ? outcome : B_OUTCOME_LOST);
+        MP_Events_Did(MP_DID_PVP);
+        if (outcome == B_OUTCOME_WON)
+            MP_Events_Did(MP_DID_PVPWIN);
         gFieldCallback = FieldCB_MpResult;
         SetMainCallback2(CB2_ReturnToField);
         return;
     }
 
+    MP_Events_Did(MP_DID_PVP);
+    if (outcome == B_OUTCOME_WON)
+        MP_Events_Did(MP_DID_PVPWIN);
     if (outcome == B_OUTCOME_WON)
     {
         u32 prize = sNet.oppMoney / 10;

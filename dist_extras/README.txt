@@ -153,8 +153,10 @@ TOURNAMENT (CO-OP menu > TOURNAMENT)
 A quick battle tournament between everyone online. Everyone battles everyone
 once, a few matches at a time; with an odd number of players someone sits out
 each round, but everyone plays the same number of matches. These are friendly
-battles: no money changes hands and nobody blacks out. The champion gets the
-best prize, second place a MOEGATCHA pull, everyone else a consolation prize.
+battles: no money changes hands and nobody blacks out. The champion and
+second place get prize money; in the day's first tournament with three or
+more players and no forfeits they also get MOEGATCHA pulls (2 and 1).
+Everyone else gets a consolation prize.
 
 
 WATCHING BATTLES
@@ -197,21 +199,43 @@ EXP, but very high levels may not obey you until you have more badges).
 
 PLAYING TOGETHER EVERY DAY (CO-OP menu > DAILY)
 --------------------------------------------------
-TEAM GOALS     Three new goals every day for everyone on your server, like
-               "Beat 9 trainers as a team". Targets grow with the number of
-               players online today. The co-op battle goal is partner by
-               partner ("Win a co-op battle with BOB and CARL"), so with three
-               players everyone teams up with everyone. Every finished goal
-               rewards everyone; all three give a MOEGATCHA pull.
+TEAM GOALS     Three new goals every day for everyone on your server:
+                 one everybody helps with (beat trainers, catch POKEMON of
+                   today's type, register new POKEDEX entries, catch the
+                   outbreak, win without a faint...)
+                 one for co-op battles (win co-op battles, catch in co-op
+                   wild battles, use a friend's field move...)
+                 one to do together (trade, take a TEAM PHOTO, battle each
+                   other, bet on a friend's battle, blend BERRIES, visit a
+                   SECRET BASE, swap TRAINER CARDS, send gifts)
+               Playing alone, the last two become more "everybody" goals.
+               Targets grow with the number of players online today; friends
+               count after 5 minutes online. Each finished goal gives
+               everyone money plus POKE BALLS / healing / a REVIVE. All three
+               give a MOEGATCHA pull, up to 5 days a week (money after that).
+               If the day ends with goals left, everyone who helped gets a
+               small consolation prize.
 OUTBREAK       One Moemon appears a lot on one route today (more often with
                more players online). It's announced when you connect.
-STREAK         Play 10 minutes with a friend online every day to build your
-               co-op streak. Rewards grow each day; it's on your TRAINER CARD.
-WEEKLY RACE    A different challenge every week with a leaderboard. The
-               winner gets RARE CANDY x3, money and a MOEGATCHA pull.
-ACHIEVEMENTS   Team milestones (Moemon caught together, trainers beaten,
-               co-op wins, badges, trades, gifts). Each gives every player a
+STREAK         Play 10 minutes on the same map as a friend every day to build
+               your co-op streak. Rewards grow each day, every 7th day gives a
+               MOEGATCHA pull; it's on your TRAINER CARD.
+WEEKLY RACE    A different challenge every week with a leaderboard. When two
+               or more players raced, the winner gets a PP UP, money and a
                MOEGATCHA pull.
+ACHIEVEMENTS   70 personal accomplishments, also viewable offline: every
+               badge and the HALL OF FAME, the legendary trio and the REGIs,
+               gym battles won without a faint, with an underdog team or
+               with a single Moemon, shiny and legendary catches, the
+               POKEDEX, evolutions, eggs, contests, the GAME CORNER... and
+               together: co-op wins, a gym beaten as a team, rescues, lent
+               field moves, trades, gifts, team photos, battles and bets
+               between friends, tournaments, gym rematches, streaks. The
+               harder ones give MOEGATCHA pulls, the rest money.
+GYM REMATCHES  The day's first team rematch win gives a MOEGATCHA pull and a
+               RARE CANDY; later wins give money.
+RARE CANDIES   Can't raise a Moemon past the next gym leader's ace level
+               (15, 20, 27, 33, 36, 41, 47, 51; no limit after 8 badges).
 MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                it races past prizes and slowly clicks down onto yours.
                L/R switches banners:
@@ -238,10 +262,10 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                the real events (WISHMKR Jirachi, AURA Mew, AGETO Celebi,
                SPACE C Deoxys, the ticket legends, the Pokemon Box eggs).
                Pity, kept per banner: an SR or better at least every 40
-               pulls, an SSR or better every 120, a UR or better every 300.
+               pulls, an SSR or better every 100, a UR or better every 200.
                EX has no pity: pure luck. A 10-pull always has an R or
-               better, and everyone gets one FREE 10-pull every week (use it
-               on any banner).
+               better, and everyone online gets 5 free pulls every week.
+               Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,
                its silhouette rises to battle music, then it's revealed with
@@ -329,7 +353,7 @@ WEATHER         Routes 119 and 123's weather, and the abnormal weather after
                 the game, are the same for everyone.
 HALL OF FAME    Entering the HALL OF FAME shows the teams of the friends online
                 after yours, and they stand with you at the end. They get a
-                MOEGATCHA pull for cheering.
+                MOEGATCHA pull for cheering (the first time each friend makes it).
 BERRY BLENDER   CO-OP menu > BERRY GAMES > BERRY BLENDER asks every friend online. Everyone
                 who joins picks a BERRY from their own BAG and you blend
                 together, wherever you are (friends take the other seats).

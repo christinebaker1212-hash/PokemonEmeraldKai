@@ -321,6 +321,8 @@ static void ResolveBet(u8 outcome)
     if (sBetStake == 0)
         return;
     MP_GameToAscii(name, sWatch.name, MP_NAME_LEN);
+    if (outcome != 0)
+        MP_Events_Did(MP_DID_BET);
     if (outcome == 0)
     {
         AddMoney(&gSaveBlock1Ptr->money, sBetStake);
@@ -328,6 +330,7 @@ static void ResolveBet(u8 outcome)
     }
     else if ((outcome == B_OUTCOME_WON) == sBetOnWin)
     {
+        MP_Events_Did(MP_DID_BETWIN);
         AddMoney(&gSaveBlock1Ptr->money, sBetStake * 2);
         snprintf(msg, sizeof(msg), "You won your bet on %s!\n+$%d", name, (int)sBetStake);
     }
