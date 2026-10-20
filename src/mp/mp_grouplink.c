@@ -27,7 +27,6 @@
 #include "constants/songs.h"
 #include "constants/vars.h"
 
-void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void NetLink_FillLocalLinkPlayer(struct LinkPlayer *out);

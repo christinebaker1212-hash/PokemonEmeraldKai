@@ -51,7 +51,6 @@ enum {
 #define FRAMEF_KEY  1   // this update starts a full frame
 
 const u16 *Platform_GetFrame(void);
-void MPNet_Log(const char *fmt, ...);
 
 // ---- Streaming (the player in the battle) ----
 static struct

@@ -38,7 +38,6 @@
 #include "text.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
-void MPNet_Log(const char *fmt, ...);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Linkx_OpenUnion(void);
 extern const u8 EventScript_MpBerryBlender[];

@@ -33,7 +33,6 @@
 #include "constants/items.h"
 #include "constants/songs.h"
 
-void MPNet_Log(const char *fmt, ...);
 
 static const u8 sText_FlagOffline[] = _("You're not connected to the co-op\nserver, so nobody can see your flag.");
 static const u8 sText_FlagNobody[] = _("Nobody else is online right now.\nTry again when a friend joins!");

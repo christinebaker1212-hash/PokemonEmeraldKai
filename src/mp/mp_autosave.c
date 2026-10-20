@@ -21,7 +21,6 @@
 #include "union_room.h"
 #include "constants/battle_pyramid.h"
 
-void MPNet_Log(const char *fmt, ...);
 extern bool8 gDifferentSaveFile;
 
 #define FRAMES_PER_MINUTE  (60 * 60)

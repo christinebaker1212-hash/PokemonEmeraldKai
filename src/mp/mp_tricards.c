@@ -14,7 +14,6 @@
 // so they fade with the rest of the screen.
 #include <string.h>
 #include "global.h"
-void MPNet_Log(const char *fmt, ...);
 #include "battle.h"
 #include "battle_interface.h"
 #include "battle_main.h"

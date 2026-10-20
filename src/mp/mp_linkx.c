@@ -53,7 +53,6 @@
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Gatcha_AddPulls(s32 n);
-void MPNet_Log(const char *fmt, ...);
 bool8 NetLink_BeginRecordMix(u8 linkId, u8 count);
 void NetLink_EndRecordMix(void);
 void NetLink_FillLocalLinkPlayer(struct LinkPlayer *out);

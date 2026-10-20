@@ -197,6 +197,8 @@ TRIPLE BATTLES (THREE PLAYERS)
   same player on everyone's screen.
 * R on the action menu shows both allies' Moemon with their HP, and once an
   ally has picked, your menu shows it ("ALICE: EMBER").
+* While you pick a target, the box on the right names it, with its level (a
+  foe) or its exact HP (an ally). The D-Pad moves along all six.
 * Prize money, EXP, catches, disconnects and RUN (all three must choose it)
   work like in Double Battles.
 

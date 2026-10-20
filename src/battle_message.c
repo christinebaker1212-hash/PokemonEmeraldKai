@@ -405,6 +405,8 @@ static const u8 sText_LinkTrainerWantsToBattle[] = _("{B_LINK_OPPONENT1_NAME}\nw
 static const u8 sText_TwoLinkTrainersWantToBattle[] = _("{B_LINK_OPPONENT1_NAME} and {B_LINK_OPPONENT2_NAME}\nwant to battle!");
 static const u8 sText_Trainer1SentOutPkmn[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME} sent\nout {B_OPPONENT_MON1_NAME}!");
 static const u8 sText_Trainer1SentOutTwoPkmn[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME} sent\nout {B_OPPONENT_MON1_NAME} and {B_OPPONENT_MON2_NAME}!");
+// Moemon Co-op: a trainer's Triple Battle (screen order, the center one in B_BUFF1)
+static const u8 sText_MpTrainerSentOutThree[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME} sent out\n{B_OPPONENT_MON2_NAME}, {B_BUFF1} and {B_OPPONENT_MON1_NAME}!");
 static const u8 sText_Trainer1SentOutPkmn2[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME} sent\nout {B_BUFF1}!");
 static const u8 sText_LinkTrainerSentOutPkmn[] = _("{B_LINK_OPPONENT1_NAME} sent out\n{B_OPPONENT_MON1_NAME}!");
 static const u8 sText_LinkTrainerSentOutTwoPkmn[] = _("{B_LINK_OPPONENT1_NAME} sent out\n{B_OPPONENT_MON1_NAME} and {B_OPPONENT_MON2_NAME}!");
@@ -2137,6 +2139,8 @@ void BufferStringBattle(u16 stringID)
             {
                 if (gMpCoopWild)
                     stringPtr = sText_MpCoopWildGo;
+                else if (gMpCoopBattle && MpTripleCenterFoeOut())
+                    stringPtr = sText_MpTrainerSentOutThree;
                 else if (gMpCoopBattle)
                     stringPtr = sText_Trainer1SentOutTwoPkmn;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)

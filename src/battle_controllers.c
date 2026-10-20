@@ -1160,7 +1160,6 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
                 sDbg = getenv("MOEMON_LINKDEBUG") != NULL;
             if (sDbg)
             {
-                void MPNet_Log(const char *fmt, ...);
                 MPNet_Log("msg %d b%d %d %d exec=%08x", BYTE_TO_RECEIVE(0), battler, BYTE_TO_RECEIVE(LINK_BUFF_DATA),
                           BYTE_TO_RECEIVE(LINK_BUFF_DATA + 1), gBattleControllerExecFlags);
             }

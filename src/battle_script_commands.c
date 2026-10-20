@@ -6495,7 +6495,6 @@ static void MpCoopUseItem(void)
     PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, owner, slot);
 
     {
-        void MPNet_Log(const char *fmt, ...);
         MPNet_Log("co-op item %d on party slot %d: hp %d -> %d", gLastUsedItem, slot, oldHp, newHp);
     }
     sMpItem.slot = slot;

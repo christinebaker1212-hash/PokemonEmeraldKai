@@ -679,6 +679,7 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
             text[i] = (c >= 0xF7 && c != CHAR_NEWLINE) ? CHAR_SPACE : c;
         }
         text[i] = EOS;
+        MPNet_Log("battle emote from player %d over battler %d", from + 1, battler);
         if (battler < MAX_BATTLERS_COUNT)
             ShowBattleBubble(1 + from, battler, text, icon);
         return;

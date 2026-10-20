@@ -25,7 +25,6 @@
 #include "constants/songs.h"
 #include "constants/characters.h"
 
-void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 u8 MP_GiveMonKeepOT(struct Pokemon *mon);
 

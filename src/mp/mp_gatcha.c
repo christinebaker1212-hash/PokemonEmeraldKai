@@ -67,7 +67,6 @@ void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 u8 MP_GiveMonKeepOT(struct Pokemon *mon);
 void MP_FieldClearVBlankHBlankCallbacks(void);
 void MP_OpenMenuAtGatcha(void);
-void MPNet_Log(const char *fmt, ...);
 
 #define PULLS_KEY     "gatcha:pulls"
 #define PITY_SR_KEY   "gatcha:pity"     // pulls since the last SR+

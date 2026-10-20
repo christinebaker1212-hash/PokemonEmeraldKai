@@ -73,7 +73,6 @@
 #include "constants/trainers.h"
 #include "constants/flags.h"
 
-void MPNet_Log(const char *fmt, ...);
 extern const u8 EventScript_MpCoopLearnMove[];
 
 bool8 gMpCoopBattle;

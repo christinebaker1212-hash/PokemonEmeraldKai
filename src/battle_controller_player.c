@@ -565,9 +565,53 @@ static u8 MpTripleFirstTarget(void)
     return gActiveBattler;
 }
 
+// Moemon Co-op: while picking a target in a triple, the PP/type box names it
+// ("ZIGZAGOON", Lv for a foe, exact HP for an ally)
+static u8 sMpTargetShown = 0xFF;
+static void MpPutAscii(const char *s, u8 window);
+static void MoveSelectionDisplayPPNumber(void);
+static void MoveSelectionDisplayMoveType(void);
+
+static void MpShowTargetInfo(u8 battler)
+{
+    struct Pokemon *mon = GetBattlerSide(battler) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[battler]]
+                                                                  : &gEnemyParty[gBattlerPartyIndexes[battler]];
+    u8 name[POKEMON_NAME_LENGTH + 2];
+    char buf[16];
+
+    sMpTargetShown = battler;
+    if (GetBattlerSide(battler) == B_SIDE_PLAYER)
+    {
+        MpPutAscii("HP", B_WIN_PP);
+        snprintf(buf, sizeof(buf), "%3d", gBattleMons[battler].hp);
+    }
+    else
+    {
+        MpPutAscii("Lv", B_WIN_PP);
+        snprintf(buf, sizeof(buf), "%3d", gBattleMons[battler].level);
+    }
+    MpPutAscii(buf, B_WIN_PP_REMAINING);
+    GetMonData(mon, MON_DATA_NICKNAME, name);
+    StringGet_Nickname(name);
+    StringCopy(gDisplayedStringBattle, name);
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+}
+
+static void MpEndTargetInfo(void)
+{
+    if (sMpTargetShown == 0xFF)
+        return;
+    sMpTargetShown = 0xFF;
+    MoveSelectionDisplayPPNumber();
+    MoveSelectionDisplayMoveType();
+}
+
 static void HandleInputChooseTargetTriple(void)
 {
     s32 i, k;
+
+    if (sMpTargetShown != gMultiUsePlayerCursor)
+        MpShowTargetInfo(gMultiUsePlayerCursor);
 
     DoBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX, 15, 1);
     for (i = 0; i < gBattlersCount; i++)
@@ -581,11 +625,13 @@ static void HandleInputChooseTargetTriple(void)
         BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
         MP_Coop_SetIntent(MP_INTENT_MOVE, MpChosenMove(), gMultiUsePlayerCursor);
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
+        sMpTargetShown = 0xFF;
         PlayerBufferExecCompleted();
     }
     else if (JOY_NEW(B_BUTTON))
     {
         PlaySE(SE_SELECT);
+        MpEndTargetInfo();
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseMove;
         DoBounceEffect(gActiveBattler, BOUNCE_HEALTHBOX, 7, 1);

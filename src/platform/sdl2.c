@@ -432,7 +432,14 @@ void Platform_StoreSaveFile(void)
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 {
-    DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
+    // (one line per sector on every save load: only with MOEMON_FLASHDEBUG=1)
+    {
+        static int sFlashDbg = -1;
+        if (sFlashDbg < 0)
+            sFlashDbg = getenv("MOEMON_FLASHDEBUG") != NULL;
+        if (sFlashDbg)
+            DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
+    }
     FILE * savefile = fopen(gPlatformSavePath, "r+b");
     if (savefile == NULL)
     {

@@ -23,7 +23,6 @@
 u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);
 void MP_RemoveObjectEvent(struct ObjectEvent *objectEvent);
 u8 MP_FindSpritePaletteTag(u16 tag, u8 minSlot);
-void MPNet_Log(const char *fmt, ...);
 
 #define QUEUE_SIZE 24
 #define NAMETAG_W 64

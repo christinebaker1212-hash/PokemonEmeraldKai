@@ -36,7 +36,6 @@
 #include "constants/trainers.h"
 #include "constants/characters.h"
 
-void MPNet_Log(const char *fmt, ...);
 void FreeBattleResources(void);
 void FreeBattleSpritesData(void);
 void FreeMonSpritesGfx(void);

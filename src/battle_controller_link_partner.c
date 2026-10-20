@@ -1,5 +1,4 @@
 #include "global.h"
-void MPNet_Log(const char *fmt, ...);
 #include "mp.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
