@@ -26,12 +26,16 @@ from collections import Counter
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from kit3 import head_offset  # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DONORS = os.path.join(HERE, 'hair_donors.txt')
 
 # Kit head cell: eyes at rows 13-14, x 8 and 11 (S); x 7 (W); x 12 (E)
 KIT_EYE_ROW = 13
 KIT_EYE_X = {'S': 9.5, 'W': 7, 'E': 12}
+MARGIN = 4   # spare rows above and below the 20x20 head cells in our sheets (kit3.head_frames)
 HAIR_MARK = [(0xb0, 0xb0, 0xf8), (0x80, 0x80, 0xf0), (0x48, 0x48, 0xc8), (0x30, 0x30, 0x70)]   # light .. dark
 ACC_MARK = [[(0xf8, 0xb0, 0xb0), (0xf0, 0x80, 0x80), (0xc8, 0x48, 0x48), (0x70, 0x30, 0x30)],
             [(0xf8, 0xd4, 0xb0), (0xf0, 0xb8, 0x80), (0xc8, 0x88, 0x48), (0x70, 0x50, 0x30)]]
@@ -241,6 +245,8 @@ class Donor:
 
     def cut(self, d):
         """The hair of one direction: RGBA in the donor's frame (original colors)."""
+        if d in self.opts.get('copy', {}):
+            return self.cut(self.opts['copy'][d])
         f = self.fr[d]
         h, w = f.shape[:2]
         head = self.ey + 3
@@ -328,18 +334,25 @@ class Donor:
         return res
 
     def offset(self, d):
-        """dx, dy that put the donor frame on the kit head cell."""
+        """dx, dy that put the donor frame on the kit head cell.
+
+        Every direction moves by the same amount (from the front view's eyes), so the
+        hair keeps the donor sprite's own layout when turning; side-view eyes are too
+        easy to mistake for a nose or an outline to line up on. The kit draws its head
+        cell lower in some views (kit3.head_offset), which is taken back out here so the
+        hair doesn't sink when the player turns sideways or away. The side and back
+        views' tops are pinned to the front view's top, so the tip never moves."""
         ey, ex = self.eyes['S']
-        dy = KIT_EYE_ROW - ey
-        if d in ('S', 'N'):
-            dx = KIT_EYE_X['S'] - (ex[0] + ex[-1]) / 2
-        elif self.eyes.get(d):
-            dx = KIT_EYE_X[d] - self.eyes[d][1][0]
-            dy = KIT_EYE_ROW - self.eyes[d][0]
-        else:
-            dx = KIT_EYE_X['S'] - (ex[0] + ex[-1]) / 2
+        dx = KIT_EYE_X['S'] - (ex[0] + ex[-1]) / 2
+        dy = KIT_EYE_ROW - ey - (head_offset('walk', d, 1)[1] - head_offset('walk', 'S', 1)[1])
         dx += self.opts.get('dx', {}).get(d, 0)
         dy += self.opts.get('dy', {}).get(d, 0)
+        if d != 'S':
+            yd = np.nonzero(self.cut(d)[..., 3])[0]
+            ys = np.nonzero(self.cut('S')[..., 3])[0]
+            if len(yd) and len(ys):
+                place = head_offset('walk', d, 1)[1] - head_offset('walk', 'S', 1)[1]
+                dy = int(ys.min()) + self.offset('S')[1] - place - int(yd.min()) + self.opts.get('dy', {}).get(d, 0)
         return int(round(dx)), int(dy)
 
     def marker_map(self):
@@ -397,15 +410,16 @@ class Donor:
         return m
 
     def sheet(self, recolor=True):
-        """100x20 head sheet (S, W, E, N, S again for the run's tilted head)."""
+        """100x20 head sheet (S, W, E, N, S again for the run's tilted head), with MARGIN
+        spare rows above and below."""
         m = self.marker_map() if recolor else {}
-        out = np.zeros((20, 100, 4), np.uint8)
+        out = np.zeros((20 + 2 * MARGIN, 100, 4), np.uint8)
         for i, d in enumerate('SWENS'):
             cut = self.cut(d)
             dx, dy = self.offset(d)
             for y, x in zip(*np.nonzero(cut[..., 3])):
-                Y, X = y + dy, x + dx
-                if 0 <= Y < 20 and 0 <= X < 20:
+                Y, X = y + dy + MARGIN, x + dx
+                if 0 <= Y < 20 + 2 * MARGIN and 0 <= X < 20:
                     c = tuple(int(v) for v in cut[y, x, :3])
                     if lum(c) < 0.06:
                         c = (0, 0, 0)
@@ -445,6 +459,9 @@ def read_donors():
                 for item in v.split(','):
                     t = item.split(':')
                     opts[k][t[0]] = (int(t[1]), [int(x) for x in t[2:]])
+            elif k == 'copy':
+                # copy=N:S  (a view with no usable hair borrows another view's cut)
+                opts[k] = dict(item.split(':') for item in v.split(','))
             elif k in ('noacc', 'acc_fixed'):
                 opts[k] = True
         out.append((file, name, opts))
@@ -513,7 +530,7 @@ def review(img_dir, kit_dir, out, names):
                 comp(cell, hc, 10 - 3, 10 + hy)
                 if i < 4:
                     comp(cell, eyes[:, i * 20:(i + 1) * 20], 10 - 3, 10 + hy)
-                comp(cell, sh[:, i * 20:(i + 1) * 20], 10 - 3, 10 + hy)
+                comp(cell, sh[:, i * 20:(i + 1) * 20], 10 - 3, 10 + hy - MARGIN)
                 comp(row, cell, 192 + i * 34, 0)
         rows.append(row)
     a = np.concatenate(rows, 0)

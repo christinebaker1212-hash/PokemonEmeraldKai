@@ -106,7 +106,9 @@ class Kit3:
         return out
 
     def head_frames(self, layer, name, eyes=False):
-        """A 100x20 head sheet (5 cells: S, W, E, N, S tilted) placed on the head in each frame."""
+        """A 100x20 head sheet (5 cells: S, W, E, N, S tilted) placed on the head in each frame.
+        A taller sheet has the same number of spare rows above and below the 20x20 cells
+        (donor_hair.py), for hair that reaches past the head cell."""
         a = self.img(layer, name)
         if a is None:
             return None
@@ -116,11 +118,12 @@ class Kit3:
             b[:, 80:] = a[:, :20]
             a = b
         out = []
+        margin = (a.shape[0] - 20) // 2
         for view, anim, d, f in FRAMES:
             cell = a[:, head_col(anim, d) * 20:(head_col(anim, d) + 1) * 20]
             hx_, hy = head_offset(anim, d, f)
             dst = np.zeros((32, 32, 4), np.uint8)
-            paste(dst, cell, 10 + hx_ - WIN_X, 10 + hy - WIN_Y)
+            paste(dst, cell, 10 + hx_ - WIN_X, 10 + hy - WIN_Y - margin)
             out.append(dst)
         return out
 

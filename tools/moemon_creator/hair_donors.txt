@@ -3,6 +3,7 @@
 # FILE (gallery number) NAME [options]
 # options: long=ROW or long=S:ROW,N:ROW (where long hair stops; default: follow it down),
 #          eyes=S:ROW:X1:X2,W:ROW:X (when the hair hides them), dx=/dy= nudges,
+#          copy=N:S (a view borrows another view's cut),
 #          hair=/nothair=/skin=/acc= colors (hex), noacc, acc_fixed
 005 punk
 006 bob
@@ -67,7 +68,7 @@
 175 ace-girl
 181 cissy
 183 glacia
-185 sidney
+185 sidney copy=N:S
 187 liza
 189 rich-boy
 190 cool-girl

@@ -121,7 +121,10 @@ Test: ini `sprite = custom_1` + `custom1 = 0101020304000307010a0102060000`, `mp 
 Extra field hairstyles (fieldHair 31-144): tools/moemon_creator/donor_hair.py cuts them from aveontrainer's FRLG-style
 overworld sheets (2x art, `donor_hair.py --fetch DIR`; not in the repo) listed in hair_donors.txt; build_ow.py takes the
 folder as a 3rd argument (Kit3.add_hair). `donor_hair.py IMG_DIR KIT3_DIR out.png [names]` renders review sheets.
-Only clean cuts are listed; options per donor: long= (stop following long hair), noacc, eyes=, dx/dy.
+Only clean cuts are listed; options per donor: long= (stop following long hair), noacc, eyes=, dx/dy, copy=N:S.
+Placement (Donor.offset): every view moves by the front view's eye offset horizontally; side and back views' tops are
+pinned to the front view's top on screen (kit3.head_offset places the head cell lower in side/back views); the sheets
+have MARGIN spare rows above and below (kit3.head_frames handles taller sheets). Audit: all 114 tops level, none clipped.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled)
