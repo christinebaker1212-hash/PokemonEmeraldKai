@@ -238,6 +238,27 @@ static const char *ConfigPath(void)
     return getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : CONFIG_FILE;
 }
 
+// Before anything is loaded (sdl2.c main: the Windows log console): AllowSmallTweaks = 1?
+bool8 MP_ConfigAllowsTweaks(void)
+{
+    char line[256];
+    bool8 on = FALSE;
+    FILE *f = fopen(ConfigPath(), "r");
+    if (!f)
+        return FALSE;
+    while (fgets(line, sizeof(line), f))
+    {
+        char *p = line, *eq;
+        while (*p == ' ' || *p == '\t')
+            p++;
+        if (strncasecmp(p, "AllowSmallTweaks", 16) != 0 || !(eq = strchr(p, '=')))
+            continue;
+        on = atoi(eq + 1) == 1;
+    }
+    fclose(f);
+    return on;
+}
+
 static void LoadConfig(void)
 {
     FILE *f;

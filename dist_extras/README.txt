@@ -19,7 +19,13 @@ needed. On top of Kai it adds online co-op for up to 4 players:
 QUICK START
 -----------
 1. Unzip the folder anywhere. Every player needs their own copy.
+   Tip: before unzipping, right-click the zip > Properties > tick
+   "Unblock" > OK. Windows then doesn't treat the game as a download.
 2. Start MoemonEmeraldKaiCoop.exe and press START on the title screen.
+   If Windows shows "Windows protected your PC" (SmartScreen), click
+   "More info" and then "Run anyway". Windows shows this for any new
+   program that isn't signed with a paid certificate; the game asks for
+   no special rights and doesn't change your system.
 3. Choose:
      HOST A GAME  - type a server name (and a password if you want one),
                     then START HOSTING. The game opens your router by
@@ -537,7 +543,9 @@ FILES
   MoemonEmeraldKaiCoop.exe   the game
   SDL2.dll                   needed by the game
   lobby.txt                  optional lobby server address (advanced)
-  moemon_coop.ini            your co-op settings (written by the game)
+  moemon_coop.ini            your co-op settings (written by the game;
+                             AllowSmallTweaks = 1 also opens a log window
+                             next to the game, handy when reporting bugs)
   moemon_display.ini         display settings (written by the game)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor

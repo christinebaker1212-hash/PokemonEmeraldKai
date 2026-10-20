@@ -136,6 +136,8 @@ ifeq ($(PORTABLE),1)
     ifneq ($(NO_STD_LIB),1)
       PLATFORM_LFLAGS += -lmingw32
     endif
+    # Moemon Co-op: a windowed app (no console window; sdl2.c opens one with AllowSmallTweaks = 1)
+    PLATFORM_LFLAGS += -mwindows
   endif
 
   ifeq ($(TARGET_PLATFORM), PLATFORM_SDL2)
@@ -520,7 +522,7 @@ $(OBJ_DIR)/sym_common.ld: sym_common.txt $(C_OBJS) $(wildcard common_syms/*.txt)
 $(OBJ_DIR)/sym_ewram.ld: sym_ewram.txt
 	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
 
-$(OBJ_DIR)/res.o: $(C_SUBDIR)/platform/win32res/res.rc $(C_SUBDIR)/platform/win32res/icon.ico
+$(OBJ_DIR)/res.o: $(C_SUBDIR)/platform/win32res/res.rc $(C_SUBDIR)/platform/win32res/icon.ico $(C_SUBDIR)/platform/win32res/app.manifest
 	$(WINDRES) $< -o $@
 
 # Linker script

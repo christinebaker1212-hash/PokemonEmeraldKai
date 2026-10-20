@@ -91,13 +91,19 @@ static void CloseSaveFile(void);
 
 static void UpdateInternalClock(void);
 
+bool8 MP_ConfigAllowsTweaks(void);
+
 int main(int argc, char **argv)
 {
-    // Open an output console on Windows
+    // Moemon Co-op: the exe is a windowed app; the log console only opens with
+    // AllowSmallTweaks = 1 in moemon_coop.ini
 #ifdef _WIN32
-    AllocConsole() ;
-    AttachConsole( GetCurrentProcessId() ) ;
-    freopen( "CON", "w", stdout ) ;
+    if (MP_ConfigAllowsTweaks())
+    {
+        AllocConsole();
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
 #endif
 
     for (int i = 1; i < argc; i++)

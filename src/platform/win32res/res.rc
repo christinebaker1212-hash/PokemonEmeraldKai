@@ -1,1 +1,37 @@
-AppIcon	ICON "icon.ico"
+// Moemon Co-op: the exe's icon (tools/app_icon/build.py), version info and manifest.
+// The version info and a manifest that asks for no special rights make the exe look like
+// the ordinary program it is; SmartScreen itself only trusts a signed exe with reputation.
+#include <winver.h>
+
+AppIcon ICON "icon.ico"
+
+1 24 "app.manifest"
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   0x3fL
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "Moemon Emerald Kai Co-op project"
+            VALUE "FileDescription",  "Moemon Emerald Kai Co-op"
+            VALUE "FileVersion",      "1.0.0.0"
+            VALUE "InternalName",     "MoemonEmeraldKaiCoop"
+            VALUE "LegalCopyright",   "Fan project, not affiliated with Nintendo, Game Freak or The Pokemon Company"
+            VALUE "OriginalFilename", "MoemonEmeraldKaiCoop.exe"
+            VALUE "ProductName",      "Moemon Emerald Kai Co-op"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

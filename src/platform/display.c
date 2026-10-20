@@ -34,6 +34,7 @@
 #include <SDL2/SDL.h>
 
 #include "platform/display_sdl.h"
+#include "platform/app_icon.h"   // Moemon Co-op: the Poke Ball window icon
 
 #define GBA_W 240
 #define GBA_H 160
@@ -677,6 +678,15 @@ int Display_Init(const char *title)
         return -1;
     }
     SDL_SetWindowMinimumSize(sWindow, GBA_W, GBA_H);
+    {
+        SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormatFrom((void *)sAppIcon, APP_ICON_SIZE, APP_ICON_SIZE, 32,
+                                                               APP_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
+        if (icon)
+        {
+            SDL_SetWindowIcon(sWindow, icon);
+            SDL_FreeSurface(icon);
+        }
+    }
     if (CreateRenderer() != 0)
         return -1;
 
