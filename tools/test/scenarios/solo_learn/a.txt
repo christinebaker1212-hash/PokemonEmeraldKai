@@ -1,0 +1,8 @@
+pressuntil A field 5000
+mp wild 290:3
+pressuntil A action 3000
+mash A 220 20
+waitfor field 3000
+mp heap
+mp party
+quit

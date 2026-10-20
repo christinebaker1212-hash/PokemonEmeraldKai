@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "malloc.h"
 
@@ -45,6 +46,8 @@ void PutFirstMemBlockHeader(void *block, u32 size)
 {
     PutMemBlockHeader(block, (struct MemBlock *)block, (struct MemBlock *)block, size - sizeof(struct MemBlock));
 }
+
+void MP_HeapStats(u32 *used, u32 *freeTotal, u32 *largestFree);
 
 void *AllocInternal(void *heapStart, u32 size)
 {
@@ -98,7 +101,14 @@ void *AllocInternal(void *heapStart, u32 size)
         }
 
         if (pos->next == head)
+        {
+            // Moemon Co-op: say so (the caller usually writes through the NULL next)
+            u32 used, freeTotal, largest;
+            MP_HeapStats(&used, &freeTotal, &largest);
+            fprintf(stderr, "[heap] out of memory: asked %u, used %u, free %u, largest free %u\n",
+                    (unsigned)size, (unsigned)used, (unsigned)freeTotal, (unsigned)largest);
             return NULL;
+        }
 
         pos = pos->next;
     }
@@ -190,6 +200,27 @@ void InitHeap(void *heapStart, u32 heapSize)
     sHeapStart = heapStart;
     sHeapSize = heapSize;
     PutFirstMemBlockHeader(heapStart, heapSize);
+}
+
+// Moemon Co-op: how full the game's heap is (debug `mp heap`, and logged when it runs out)
+void MP_HeapStats(u32 *used, u32 *freeTotal, u32 *largestFree)
+{
+    struct MemBlock *block = sHeapStart;
+    *used = *freeTotal = *largestFree = 0;
+    if (block == NULL)
+        return;
+    do
+    {
+        if (block->flag)
+            *used += block->size + sizeof(struct MemBlock);
+        else
+        {
+            *freeTotal += block->size;
+            if (block->size > *largestFree)
+                *largestFree = block->size;
+        }
+        block = block->next;
+    } while (block != sHeapStart);
 }
 
 void *Alloc(u32 size)

@@ -51,6 +51,8 @@ Gotchas worth knowing before touching battles:
 - Triple Battles: battlers 4/5 exist. Anything doing `battler ^ BIT_FLANK` or assuming positions 0-3 (screen rebuild,
   shadows, Cmd_monbg) breaks for them, often by touching sprite 0 = battler 0's healthbox. Use BATTLE_PARTNER.
 - Bump MP_PROTOCOL_VERSION (src/mp/mp_net.h) on any protocol change; tools/test rebuilds the server from it.
+- Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
+  checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled); it runs under Wine

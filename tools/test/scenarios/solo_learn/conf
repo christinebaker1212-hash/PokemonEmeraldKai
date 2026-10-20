@@ -1,0 +1,5 @@
+# one client: a single wild battle where the lead (four moves) levels up and forgets a move for a new one
+# (the summary screen in battle), then evolves; the GBA-sized heap ran out here and crashed
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("party: 281(")

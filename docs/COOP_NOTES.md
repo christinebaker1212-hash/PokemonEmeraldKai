@@ -293,3 +293,10 @@ checksum) from the party and PC and pays 10 MoeGatcha pulls each, once per perso
 co-op data, in case the game isn't saved after). A party left empty takes the first healthy PC Pokémon. Debug:
 `mp badegg SLOT`, `mp compensate`. Also: a caught wild Pokémon's HP is zeroed in every game's copy (the "caught"
 SpriteInvisibility handlers), so the battle screen rebuilt after the BAG doesn't show it again.
+
+## Heap size
+
+The PC build's heap (include/malloc.h HEAP_SIZE) is 0x80000, not the GBA's 0x1C000: 64-bit MemBlock headers and
+pointers plus six battlers' sprite buffers filled it in battle, and the summary screen opened to forget a move then
+wrote through a NULL Alloc (crash on learning a fifth move, even in a single battle). Running out is now logged
+("[heap] out of memory: ..."); `mp heap` prints the use. Test: solo_learn.

@@ -703,6 +703,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         GiveMonToPlayer(&mon);
         printf("[test] giveforeign: given, bad egg %d\n", (int)MP_IsBoxMonBadEgg(&gPlayerParty[CalculatePlayerPartyCount() - 1].box));
     }
+    else if (strcmp(cmd, "heap") == 0)
+    {
+        void MP_HeapStats(u32 *used, u32 *freeTotal, u32 *largestFree);
+        u32 used, freeTotal, largest;
+        MP_HeapStats(&used, &freeTotal, &largest);
+        printf("[test] heap: used %u, free %u, largest free %u\n", (unsigned)used, (unsigned)freeTotal, (unsigned)largest);
+    }
     else if (strcmp(cmd, "compensate") == 0)
     {
         MP_CompensateBadEggs();
