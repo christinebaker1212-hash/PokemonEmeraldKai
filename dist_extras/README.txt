@@ -104,6 +104,10 @@ TEAMING UP FOR A DOUBLE BATTLE
   This message can't be skipped or sped up, so nobody says yes by accident.
 * Trainers with only one Moemon refuse: "Hey, I only have one MOEMON!
   Let's go one on one!" and the battle goes ahead normally.
+* Two against one is meant to be a fight: the trainer's Moemon are 2 levels
+  higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
+  bring more Moemon (half again as many; bosses a full six), they use their
+  items and they choose their moves smarter.
 * Each player brings their first three healthy Moemon and picks their own
   moves. Both players get the full prize money and EXP for their Moemon.
   Evolutions happen on each player's game after the battle.
@@ -132,6 +136,8 @@ WILD BATTLES TOGETHER
   doesn't end the battle: the other one is still there to catch or beat.
 * Friends further away (or not in the grass) don't join: you battle alone,
   like normal.
+* Wild Moemon you fight together are 2 levels higher, and 60% of the time
+  two of them show up.
 
 
 TEAM GYM REMATCHES

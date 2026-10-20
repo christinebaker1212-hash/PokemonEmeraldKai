@@ -112,7 +112,8 @@ enum {
 #define RESULT_WAIT_FRAMES (60 * 15)
 #define LOSE_TEXT_MAX 240
 #define MODE_WILD 0xFE   // sCoop.mode of a co-op wild double
-u8 gMpWildDoublePercent = 30;   // co-op wild battles that are 2 on 2 (debug: mp wilddouble N)
+u8 gMpWildDoublePercent = 60;   // co-op wild battles that are 2 on 2 (debug: mp wilddouble N)
+u8 gMpEnemyLevelBonus;          // added to trainer Pokemon levels while a co-op party is built
 bool8 MP_RollExtraLandMon(struct Pokemon *out);   // wild_encounter.c
 
 struct LearnLater
@@ -532,6 +533,64 @@ void MP_Coop_OnStartTrainerBattle(void)
 // The trainer's party is interleaved: the master's game puts the first,
 // third and fifth Pokémon on the left opponent and the others on the right,
 // so the trainer leads with their first two and sends the rest in order.
+// ---------------------------------------------------------------------------
+// Two players against one trainer is easy on vanilla numbers, so the master
+// builds a tougher party: +2 levels (+3 for gym leaders, admins, bosses and
+// rematches), more Pokémon (route trainers half again as many, bosses a full
+// six) placed before the ace, the trainer's items in play and smarter AI.
+
+bool8 MP_Coop_IsBossTrainer(u16 trainerId)
+{
+    switch (gTrainers[trainerId].trainerClass)
+    {
+    case TRAINER_CLASS_LEADER:
+    case TRAINER_CLASS_AQUA_ADMIN:
+    case TRAINER_CLASS_AQUA_LEADER:
+    case TRAINER_CLASS_MAGMA_ADMIN:
+    case TRAINER_CLASS_MAGMA_LEADER:
+    case TRAINER_CLASS_ELITE_FOUR:
+    case TRAINER_CLASS_CHAMPION:
+        return TRUE;
+    }
+    return GymBadgeFlag(trainerId) != 0 || MP_Rematch_IsRematchTrainer(trainerId);
+}
+
+bool8 MP_Coop_TrainerBattleBoost(void)
+{
+    return gMpCoopBattle && !gMpCoopWild && (gBattleTypeFlags & BATTLE_TYPE_TRAINER);
+}
+
+void MP_Coop_PrepareTrainerParty(u16 trainerId)
+{
+    gMpEnemyLevelBonus = MP_Coop_IsBossTrainer(trainerId) ? 3 : 2;
+}
+
+void MP_Coop_FinishTrainerParty(u16 trainerId)
+{
+    u8 n = 0, target, i, ace;
+    gMpEnemyLevelBonus = 0;
+    while (n < PARTY_SIZE && GetMonData(&gEnemyParty[n], MON_DATA_SPECIES) != SPECIES_NONE)
+        n++;
+    if (n < 2)
+        return;
+    target = MP_Coop_IsBossTrainer(trainerId) ? PARTY_SIZE : min(PARTY_SIZE, n + (n + 1) / 2);
+    if (target <= n)
+        return;
+    // The ace (the last one) moves to the end; fresh copies of the others fill in before it
+    ace = target - 1;
+    gEnemyParty[ace] = gEnemyParty[n - 1];
+    for (i = n - 1; i < ace; i++)
+    {
+        struct Pokemon *src = &gEnemyParty[(i - (n - 1)) % (n - 1)];
+        u16 species = GetMonData(src, MON_DATA_SPECIES);
+        u8 level = GetMonData(src, MON_DATA_LEVEL);
+        u16 item = GetMonData(src, MON_DATA_HELD_ITEM);
+        CreateMon(&gEnemyParty[i], species, level, GetMonData(src, MON_DATA_ATK_IV), TRUE, Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+        SetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM, &item);
+    }
+    MPNet_Log("coop: trainer %d party %d -> %d", trainerId, n, target);
+}
+
 void MP_Coop_ArrangeEnemyParty(void)
 {
     static const u8 sSlot[PARTY_SIZE] = {0, 3, 1, 4, 2, 5};
@@ -1238,12 +1297,30 @@ static void UpdateWildAsking(void)
 }
 
 // The master's game, building the battle: one wild Pokémon for both players
+// A wild Pokémon two levels up for a team of two (default moves for the new level)
+static void BoostWild(struct Pokemon *mon)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    u8 level = GetMonData(mon, MON_DATA_LEVEL);
+    u32 exp;
+    if (species == SPECIES_NONE || level + 2 > MAX_LEVEL)
+        return;
+    exp = gExperienceTables[gSpeciesInfo[species].growthRate][level + 2];
+    SetMonData(mon, MON_DATA_EXP, &exp);
+    CalculateMonStats(mon);
+    GiveMonInitialMoveset(mon);
+}
+
 void MP_Coop_SetWildEnemyParty(void)
 {
     ZeroEnemyPartyMons();
     gEnemyParty[0] = sCoop.wildMon;
+    BoostWild(&gEnemyParty[0]);
     if (sCoop.wildDouble)
+    {
         gEnemyParty[1] = sCoop.wildMon2;   // MP_Coop_ArrangeEnemyParty puts it on the right
+        BoostWild(&gEnemyParty[1]);
+    }
 }
 
 // Both games: a co-op wild battle against two wild Pokémon (the right one is enemy party slot 3)
