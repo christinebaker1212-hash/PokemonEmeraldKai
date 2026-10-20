@@ -1,7 +1,7 @@
 pressuntil A field 5000
 waitfor online 6000
 wait 300
-mp wilddouble 0
+mp wilddouble 100
 mp teach 0 45
 mp wild 288:3
 waitfor battle 2000

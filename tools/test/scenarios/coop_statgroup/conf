@@ -1,4 +1,4 @@
-# two clients on Route 101: GROWL in a co-op wild battle (BOB's lead or the wild ones) lowers both
+# two clients on Route 101, two wild Pokemon: BOB's lead uses GROWL (and the wild ones may too), lowering both
 # targets' ATTACK with one animation over both and one line, on both screens (mpstatgroup)
 MODE=2
 WARP=0,16,12,11
