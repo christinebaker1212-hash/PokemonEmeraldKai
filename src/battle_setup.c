@@ -85,6 +85,10 @@ static void CB2_EndWildBattle(void);
 static void CB2_EndScriptedWildBattle(void);
 static u8 GetWildBattleTransition(void);
 static u8 GetTrainerBattleTransition(void);
+
+// Moemon Co-op: co-op battles use the same transitions as single ones
+u8 MP_GetWildBattleTransition(void) { return GetWildBattleTransition(); }
+u8 MP_GetTrainerBattleTransition(void) { return GetTrainerBattleTransition(); }
 static void TryUpdateGymLeaderRematchFromWild(void);
 static void TryUpdateGymLeaderRematchFromTrainer(void);
 static void CB2_GiveStarter(void);

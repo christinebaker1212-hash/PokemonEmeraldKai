@@ -1,6 +1,9 @@
 #ifndef GUARD_BATTLE_H
 #define GUARD_BATTLE_H
 
+// Moemon Co-op: the battle intro slide (and what slides in with it) at this many times the speed
+#define INTRO_SLIDE_SPEED 2
+
 // should they be included here or included individually by every file?
 #include "constants/battle.h"
 #include "battle_main.h"

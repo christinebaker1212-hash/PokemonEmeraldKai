@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_main.h"
@@ -99,6 +100,8 @@ int GetAnimBgAttribute(u8 bgId, u8 attributeId)
     return 0;
 }
 
+// Moemon Co-op: battles start faster: the intro slide (and the trainers and
+// wild Pokémon sliding in with it, see INTRO_SLIDE_SPEED users) runs at double speed
 #define tState data[0]
 #define tEnvironment data[1]
 
@@ -110,7 +113,7 @@ void HandleIntroSlide(u8 environment)
     {
         taskId = CreateTask(BattleIntroSlidePartner, 0);
     }
-    else if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+    else if ((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopBattle) // Moemon Co-op: the normal slide
     {
         taskId = CreateTask(BattleIntroSlideLink, 0);
     }
@@ -161,7 +164,7 @@ static void BattleIntroSlide1(u8 taskId)
     case 0:
         if (gBattleTypeFlags & BATTLE_TYPE_LINK)
         {
-            gTasks[taskId].data[2] = 16;
+            gTasks[taskId].data[2] = gMpCoopBattle ? 1 : 16; // Moemon Co-op: no cable to wait for
             gTasks[taskId].tState++;
         }
         else
@@ -183,7 +186,7 @@ static void BattleIntroSlide1(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32;
+            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
             gIntroSlideFlags &= ~1;
         }
         break;
@@ -197,12 +200,12 @@ static void BattleIntroSlide1(u8 taskId)
             if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_LONG_GRASS)
             {
                 if (gBattle_BG1_Y != (u16)(-80))
-                    gBattle_BG1_Y -= 2;
+                    gBattle_BG1_Y -= 2 * INTRO_SLIDE_SPEED;
             }
             else
             {
                 if (gBattle_BG1_Y != (u16)(-56))
-                    gBattle_BG1_Y -= 1;
+                    gBattle_BG1_Y -= 1 * INTRO_SLIDE_SPEED;
             }
         }
 
@@ -210,7 +213,7 @@ static void BattleIntroSlide1(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -269,7 +272,7 @@ static void BattleIntroSlide2(u8 taskId)
         gTasks[taskId].data[4] = 16;
         if (gBattleTypeFlags & BATTLE_TYPE_LINK)
         {
-            gTasks[taskId].data[2] = 16;
+            gTasks[taskId].data[2] = gMpCoopBattle ? 1 : 16; // Moemon Co-op: no cable to wait for
             gTasks[taskId].tState++;
         }
         else
@@ -291,7 +294,7 @@ static void BattleIntroSlide2(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32;
+            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
             gTasks[taskId].data[5] = 1;
             gIntroSlideFlags &= ~1;
         }
@@ -311,7 +314,7 @@ static void BattleIntroSlide2(u8 taskId)
             if ((gTasks[taskId].data[4] & 0x1F) && --gTasks[taskId].data[5] == 0)
             {
                 gTasks[taskId].data[4] += 0xFF;
-                gTasks[taskId].data[5] = 4;
+                gTasks[taskId].data[5] = 4 / INTRO_SLIDE_SPEED;
             }
         }
 
@@ -319,7 +322,7 @@ static void BattleIntroSlide2(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -362,7 +365,7 @@ static void BattleIntroSlide3(u8 taskId)
         gTasks[taskId].data[4] = BLDALPHA_BLEND(8, 8);
         if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
         {
-            gTasks[taskId].data[2] = 16;
+            gTasks[taskId].data[2] = gMpCoopBattle ? 1 : 16; // Moemon Co-op: no cable to wait for
             gTasks[taskId].tState++;
         }
         else
@@ -384,7 +387,7 @@ static void BattleIntroSlide3(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32;
+            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
             gTasks[taskId].data[5] = 1;
             gIntroSlideFlags &= ~1;
         }
@@ -399,7 +402,7 @@ static void BattleIntroSlide3(u8 taskId)
             if ((gTasks[taskId].data[4] & 0xF) && --gTasks[taskId].data[5] == 0)
             {
                 gTasks[taskId].data[4] += 0xFF;
-                gTasks[taskId].data[5] = 6;
+                gTasks[taskId].data[5] = 6 / INTRO_SLIDE_SPEED;
             }
         }
 
@@ -407,7 +410,7 @@ static void BattleIntroSlide3(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -480,7 +483,7 @@ static void BattleIntroSlideLink(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32;
+            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
             gIntroSlideFlags &= ~1;
         }
         break;
@@ -489,7 +492,7 @@ static void BattleIntroSlideLink(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -553,7 +556,7 @@ static void BattleIntroSlidePartner(u8 taskId)
             gBattle_WIN0V += 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
 
         gBattle_BG1_X = gTasks[taskId].data[2];
         gBattle_BG2_X = -gTasks[taskId].data[2];

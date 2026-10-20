@@ -63,6 +63,8 @@ static struct
     bool8 recvFlags[2];
     struct QueuedBlock queue[BLOCK_QUEUE];
     u8 qHead, qCount;
+    struct QueuedBlock selfQueue[BLOCK_QUEUE];   // our own blocks, when several go out in one frame
+    u8 sHead, sCount;
     u16 mySyncSeq;
     u16 peerSyncSeq;
     u8 pendingSync;          // 0 none, 1 standby, 2 close
@@ -92,6 +94,8 @@ u16 MP_Battle_OpponentFrontPic(void)
 
 // ---------------------------------------------------------------------------
 // Link layer
+
+static void PumpBlocks(void);
 
 static u8 PeerLinkId(void)
 {
@@ -198,9 +202,25 @@ bool8 NetLink_SendBlock(const void *src, u16 size)
         return MP_Group_SendBlock(src, size);
     if (size > BLOCK_BUFFER_SIZE)
         size = BLOCK_BUFFER_SIZE;
-    // The GBA link also hands every sender its own block
-    memcpy(gBlockRecvBuffer[sNet.linkId], src, size);
-    sNet.recvFlags[sNet.linkId] = TRUE;
+    // The GBA link also hands every sender its own block. Several can go out
+    // in one frame now (battle_controllers.c), so queue it if the last one
+    // hasn't been taken yet instead of overwriting it.
+    if (!sNet.recvFlags[sNet.linkId] && sNet.sCount == 0)
+    {
+        memcpy(gBlockRecvBuffer[sNet.linkId], src, size);
+        sNet.recvFlags[sNet.linkId] = TRUE;
+    }
+    else if (sNet.sCount < BLOCK_QUEUE)
+    {
+        struct QueuedBlock *b = &sNet.selfQueue[(sNet.sHead + sNet.sCount) % BLOCK_QUEUE];
+        b->size = size;
+        memcpy(b->data, src, size);
+        sNet.sCount++;
+    }
+    else
+    {
+        MPNet_Log("own link block queue overflow");
+    }
     sRelayBuf[0] = MPR_LINK_BLOCK;
     sRelayBuf[1] = size & 0xFF;
     sRelayBuf[2] = size >> 8;
@@ -243,6 +263,8 @@ void NetLink_ResetBlockReceivedFlag(u8 who)
     }
     if (who < 2)
         sNet.recvFlags[who] = FALSE;
+    if (sNet.battleActive && gNetLinkActive)
+        PumpBlocks();   // the next waiting block is there right away (no frame lost)
 }
 
 static void SendSync(u8 kind)
@@ -284,6 +306,14 @@ void NetLink_SetCloseCallback(void)
 static void PumpBlocks(void)
 {
     u8 peer = PeerLinkId();
+    if (sNet.sCount > 0 && !sNet.recvFlags[sNet.linkId])
+    {
+        struct QueuedBlock *b = &sNet.selfQueue[sNet.sHead];
+        memcpy(gBlockRecvBuffer[sNet.linkId], b->data, b->size);
+        sNet.recvFlags[sNet.linkId] = TRUE;
+        sNet.sHead = (sNet.sHead + 1) % BLOCK_QUEUE;
+        sNet.sCount--;
+    }
     if (sNet.qCount > 0 && !sNet.recvFlags[peer])
     {
         struct QueuedBlock *b = &sNet.queue[sNet.qHead];
@@ -373,6 +403,7 @@ static void FinishBattle(void)
     gNetLinkActive = FALSE;
     gReceivedRemoteLinkPlayers = FALSE;
     sNet.qCount = 0;
+    sNet.sCount = 0;
 }
 
 static void CB2_MpReturnFromBattle(void)

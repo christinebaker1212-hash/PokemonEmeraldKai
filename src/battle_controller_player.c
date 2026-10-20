@@ -2737,6 +2737,7 @@ static void HandleChooseActionAfterDma3(void)
 
 static void PlayerHandleChooseAction(void)
 {
+    { extern unsigned long Platform_FrameCount(void); printf("[test] action menu at frame %lu\n", Platform_FrameCount()); }
     s32 i;
 
     gBattlerControllerFuncs[gActiveBattler] = HandleChooseActionAfterDma3;

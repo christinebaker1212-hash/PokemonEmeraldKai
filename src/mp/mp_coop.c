@@ -1070,7 +1070,12 @@ static void Task_StartJoinerBattle(u8 taskId)
         if (!IsFieldMessageBoxHidden())
             HideFieldMessageBox();
         PlayMapChosenOrBattleBGM(0);
-        BattleTransition_StartOnField(B_TRANSITION_POKEBALLS_TRAIL);
+        {
+            // The same transition a single battle of this kind would use
+            u8 MP_GetWildBattleTransition(void);
+            u8 MP_GetTrainerBattleTransition(void);
+            BattleTransition_StartOnField(gMpCoopWild ? MP_GetWildBattleTransition() : MP_GetTrainerBattleTransition());
+        }
         tState++;
         break;
     case 1:

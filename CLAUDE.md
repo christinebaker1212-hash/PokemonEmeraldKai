@@ -84,6 +84,13 @@ WARP=0,16,10,3 WARP_B=0,16,11,3, B faces A (LEFT), A + mash A, A runs B+UP into 
 Crash report (src/platform/crash_log.c, installed first thing in main): Windows SEH filter / Linux signals append to
 crash_log.txt: exception, exe+offset of the faulting address, callbacks, map, and exe+offsets found on the stack (resolve with
 x86_64-w64-mingw32-nm on the same exe; keep a copy of each shipped exe). Debug `mp crash` forces one.
+Battle starts: the intro slide (battle_intro.c) and the sprites sliding with it run at INTRO_SLIDE_SPEED (2, battle.h).
+Co-op battles (link multi under the hood) look like single ones: normal transition (MP_GetWild/TrainerBattleTransition),
+no VS screen, normal background and slide, no party bars for wild, wild mons drawn and slid in (no ball), one combined intro
+line held 24 frames. Network link (gNetLinkActive): no 100-frame start delay, all queued blocks sent/received/processed per
+frame (battle_controllers.c), own echo blocks queued (mp_battle.c selfQueue; overwriting them hung battles), GetMonData asked
+of all battlers at once, MP_FrameEnd flushes sends after each frame. Measured from encounter to action menu: solo wild 557 ->
+497 frames, co-op wild double 947 -> 562. Harness prints "[test] action menu at frame N"; the `action` condition misses co-op.
 Autosave (mp_autosave.c, MP_Autosave_Update from MP_FrameUpdate): every gMpConfig.autosaveMinutes (ini autosave, default 5)
 of map time, 1 minute after a battle, once MP_IsLocalFree + standing still for 30 frames; skipped where the START menu has
 no SAVE, during FLAG_MP_SKIP_TRUCK, and for a new game over an existing save (gDifferentSaveFile). Manual and MoeGatcha

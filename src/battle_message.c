@@ -383,6 +383,9 @@ static const u8 sText_WildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appear
 static const u8 sText_LegendaryPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!\p");
 static const u8 sText_WildPkmnAppearedPause[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!{PAUSE 127}");
 static const u8 sText_MpCoopWildGo[] = _("Team up and take it on!");
+// (no \p: battle_main.c holds them on screen a moment instead of the long link auto-scroll wait)
+static const u8 sText_MpCoopWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appeared!\nTeam up and take it on!");
+static const u8 sText_MpCoopTwoWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!");
 static const u8 sText_MpCoopGotcha[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}{PLAY_BGM MUS_CAUGHT}\p");
 static const u8 sText_MpCoopUsedItem[] = _("{B_LINK_SCR_TRAINER_NAME} used\n{B_LAST_ITEM}!");
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
@@ -1996,7 +1999,7 @@ void BufferStringBattle(u16 stringID)
                 if (gMpCoopWild)
                 {
                     // Moemon Co-op: one or two wild Pokemon, two friends
-                    stringPtr = MP_Coop_WildHasTwo() ? sText_TwoWildPkmnAppeared : sText_WildPkmnAppeared;
+                    stringPtr = MP_Coop_WildHasTwo() ? sText_MpCoopTwoWildAppeared : sText_MpCoopWildAppeared;
                 }
                 else if (gMpCoopBattle)
                 {

@@ -69,6 +69,7 @@ static u16 sUntilKeys = 0;
 extern int MP_TestCondition(const char *name);
 static u16 sMashKeys = 0;
 static unsigned long sFrameCounter = 0;
+unsigned long Platform_FrameCount(void) { return sFrameCounter; }
 static char sShotDir[400] = ".";
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
@@ -92,6 +93,7 @@ static void CloseSaveFile(void);
 static void UpdateInternalClock(void);
 
 bool8 MP_ConfigAllowsTweaks(void);
+void MP_FrameEnd(void);
 
 void Platform_InstallCrashLog(void);
 
@@ -224,6 +226,7 @@ int main(int argc, char **argv)
             }
             ENTER_VBLANK();
             MainLoop();
+            MP_FrameEnd();   // Moemon Co-op: send this frame's messages now
             VDraw();
             RunDMAsAndVBlank();
             AudioUpdate();
@@ -305,6 +308,7 @@ int main(int argc, char **argv)
                     continue;
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
+                MP_FrameEnd();   // Moemon Co-op: send this frame's messages now
                 if (i == steps - 1)   // only the frame that will be shown is drawn
                     VDraw();
                 RunDMAsAndVBlank();

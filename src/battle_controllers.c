@@ -783,7 +783,8 @@ static void Task_HandleSendLinkBuffersData(u8 taskId)
     switch (gTasks[taskId].tState)
     {
     case SENDTASK_STATE_INITIALIZE:
-        gTasks[taskId].tInitialDelayTimer = 100;
+        // Moemon Co-op: the network link needs no time to settle like the cable did
+        gTasks[taskId].tInitialDelayTimer = gNetLinkActive ? 1 : 100;
         gTasks[taskId].tState++;
         break;
     case SENDTASK_STATE_INITIAL_DELAY:
@@ -843,9 +844,20 @@ static void Task_HandleSendLinkBuffersData(u8 taskId)
         if (IsLinkTaskFinished())
         {
             blockSize = BYTE_TO_SEND(LINK_BUFF_SIZE_LO) | (BYTE_TO_SEND(LINK_BUFF_SIZE_HI) << 8);
-            gTasks[taskId].tBlockSendDelayTimer = 1;
+            gTasks[taskId].tBlockSendDelayTimer = gNetLinkActive ? 0 : 1;   // Moemon Co-op: no gap between blocks
             gTasks[taskId].tCurrentBlock_Start  = gTasks[taskId].tCurrentBlock_Start + blockSize + LINK_BUFF_DATA;
             gTasks[taskId].tState = SENDTASK_STATE_BEGIN_SEND_BLOCK;
+            // Moemon Co-op: the network link takes the next block right away
+            {
+                static u8 sDepth;
+                if (gNetLinkActive && sDepth < 32)
+                {
+                    sDepth++;
+                    Task_HandleSendLinkBuffersData(taskId);
+                    sDepth--;
+                    return;
+                }
+            }
         }
         break;
     case SENDTASK_STATE_UNUSED_STATE:
@@ -879,7 +891,9 @@ void TryReceiveLinkBattleData(void)
         DestroyTask_RfuIdle();
         for (i = 0; i < GetLinkPlayerCount(); i++)
         {
-            if (GetBlockReceivedStatus() & gBitTable[i])
+            // Moemon Co-op: on the network link take every block that's waiting, not one a frame
+            int drain;
+            for (drain = 0; drain < (gNetLinkActive ? 32 : 1) && (GetBlockReceivedStatus() & gBitTable[i]); drain++)
             {
                 ResetBlockReceivedFlag(i);
                 recvBuffer = (u8 *)gBlockRecvBuffer[i];
@@ -906,7 +920,19 @@ void TryReceiveLinkBattleData(void)
     }
 }
 
+static bool8 CopyReceivedLinkBuffersData(u8 taskId);
+
+// Moemon Co-op: on the network link, handle every message that's ready this frame
 static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId)
+{
+    int n;
+    for (n = 0; n < (gNetLinkActive ? 32 : 1); n++)
+        if (!CopyReceivedLinkBuffersData(taskId))
+            break;
+}
+
+// FALSE when there was nothing to do (or the battler is still busy)
+static bool8 CopyReceivedLinkBuffersData(u8 taskId)
 {
     u16 blockSize;
     u8 battler;
@@ -930,7 +956,7 @@ static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId)
         {
         case B_COMM_TO_CONTROLLER:
             if (IS_BATTLE_CONTROLLER_ACTIVE_ON_LOCAL(battler))
-                return;
+                return FALSE;
 
             memcpy(gBattleBufferA[battler], &BYTE_TO_RECEIVE(LINK_BUFF_DATA), blockSize);
             MarkBattlerReceivedLinkData(battler);
@@ -953,7 +979,9 @@ static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId)
         }
 
         gTasks[taskId].tCurrentBlock_Start = gTasks[taskId].tCurrentBlock_Start + blockSize + LINK_BUFF_DATA;
+        return TRUE;
     }
+    return FALSE;
 
     #undef BYTE_TO_RECEIVE
 }

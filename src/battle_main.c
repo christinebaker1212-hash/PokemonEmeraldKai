@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
@@ -1269,12 +1270,15 @@ static void CB2_HandleStartMultiPartnerBattle(void)
             ResetBlockReceivedFlags();
             FindLinkBattleMaster(2, playerMultiplayerId);
             SetAllPlayersBerryData();
+            if (!gMpCoopBattle) // Moemon Co-op: straight into the battle, like a single one
+            {
             taskId = CreateTask(InitLinkBattleVsScreen, 0);
             gTasks[taskId].data[1] = 0x10E;
             gTasks[taskId].data[2] = 0x5A;
             gTasks[taskId].data[5] = 0;
             gTasks[taskId].data[3] = 0x145;
             gTasks[taskId].data[4] = 0x145;
+            }
             gBattleCommunication[MULTIUSE_STATE]++;
         }
         break;
@@ -2710,7 +2714,9 @@ static void SpriteCB_MoveWildMonToRight(struct Sprite *sprite)
 {
     if ((gIntroSlideFlags & 1) == 0)
     {
-        sprite->x2 += 2;
+        sprite->x2 += 2 * INTRO_SLIDE_SPEED;   // Moemon Co-op: faster battle starts
+        if (sprite->x2 > 0)
+            sprite->x2 = 0;
         if (sprite->x2 == 0)
         {
             sprite->callback = SpriteCB_WildMonShowHealthbox;
@@ -2892,7 +2898,9 @@ static void SpriteCB_BattleSpriteSlideLeft(struct Sprite *sprite)
 {
     if (!(gIntroSlideFlags & 1))
     {
-        sprite->x2 -= 2;
+        sprite->x2 -= 2 * INTRO_SLIDE_SPEED;
+        if (sprite->x2 < 0)
+            sprite->x2 = 0;
         if (sprite->x2 == 0)
         {
             sprite->callback = SpriteCB_Idle;
@@ -3394,6 +3402,19 @@ static void BattleIntroGetMonsData(void)
     switch (gBattleCommunication[MULTIUSE_STATE])
     {
     case 0:
+        if (gNetLinkActive)
+        {
+            // Moemon Co-op: ask every battler at once; one at a time is a
+            // network round trip each
+            for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
+            {
+                BtlController_EmitGetMonData(B_COMM_TO_CONTROLLER, REQUEST_ALL_BATTLE, 0);
+                MarkBattlerForControllerExec(gActiveBattler);
+            }
+            gBattleCommunication[1] = gBattlersCount - 1;
+            gBattleCommunication[MULTIUSE_STATE]++;
+            break;
+        }
         gActiveBattler = gBattleCommunication[1];
         BtlController_EmitGetMonData(B_COMM_TO_CONTROLLER, REQUEST_ALL_BATTLE, 0);
         MarkBattlerForControllerExec(gActiveBattler);
@@ -3466,7 +3487,13 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
             MarkBattlerForControllerExec(gActiveBattler);
         }
 
-        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+        if (gMpCoopWild && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT && !MP_Coop_WildHasTwo())
+        {
+            // Moemon Co-op: one wild Pokémon against two friends. The other
+            // opponent slot stays empty, as if it had fainted.
+            gAbsentBattlerFlags |= gBitTable[gActiveBattler];
+        }
+        else if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
         {
             if (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_LEFT)
             {
@@ -3504,7 +3531,7 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
         if (gBattleTypeFlags & BATTLE_TYPE_MULTI)
         {
             if (GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
-             || GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
+             || (GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT && !gMpCoopWild))
             {
                 BtlController_EmitDrawTrainerPic(B_COMM_TO_CONTROLLER);
                 MarkBattlerForControllerExec(gActiveBattler);
@@ -3531,7 +3558,12 @@ static void BattleIntroDrawPartySummaryScreens(void)
     if (gBattleControllerExecFlags)
         return;
 
-    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+    if (gMpCoopWild)
+    {
+        // Moemon Co-op: wild Pokémon have no party to show; straight to "Wild X appeared!"
+        gBattleMainFunc = BattleIntroPrintTrainerWantsToBattle;
+    }
+    else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
     {
         for (i = 0; i < PARTY_SIZE; i++)
         {
@@ -3638,6 +3670,17 @@ static void BattleIntroPrintOpponentSendsOut(void)
         position = B_POSITION_OPPONENT_LEFT;
     }
 
+    if (gMpCoopWild)
+    {
+        // Moemon Co-op: the wild ones are already out (they slid in like in a
+        // single battle). Hold "Wild X appeared!" a moment so it can be read.
+        static u8 sHold;
+        if (++sHold < 24)
+            return;
+        sHold = 0;
+        gBattleMainFunc = BattleIntroRecordMonsToDex;
+        return;
+    }
     PrepareStringBattle(STRINGID_INTROSENDOUT, GetBattlerAtPosition(position));
     gBattleMainFunc = BattleIntroOpponent1SendsOutMonAnimation;
 }

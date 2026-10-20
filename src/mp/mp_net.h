@@ -117,6 +117,7 @@ int MPNet_IsValidRoomName(const char *name);
 // ---- Lobby + relay server (runs standalone, or inside a game hosting on the LAN) ----
 int MPServer_Start(int port, int lanDiscovery);
 void MPServer_Poll(void);
+void MPNet_ClientFlush(void);
 void MPServer_Stop(void);
 int MPServer_Port(void);
 int MPServer_IsRunning(void);

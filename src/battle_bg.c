@@ -790,7 +790,7 @@ void DrawMainBattleBackground(void)
     }
     else
     {
-        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+        if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
         {
             u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
             if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1130,7 +1130,8 @@ void InitLinkBattleVsScreen(u8 taskId)
 
 void DrawBattleEntryBackground(void)
 {
-    if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+    // Moemon Co-op: co-op battles (link under the hood) look like normal ones: no VS frame
+    if ((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopBattle)
     {
         LZDecompressVram(gBattleVSFrame_Gfx, (void *)(BG_CHAR_ADDR(1)));
         LZDecompressVram(gVsLettersGfx, (void *)OBJ_VRAM0);
@@ -1147,7 +1148,7 @@ void DrawBattleEntryBackground(void)
         gBattle_BG2_Y = 0xFF5C;
         LoadCompressedSpriteSheetUsingHeap(&sVsLettersSpriteSheet);
     }
-    else if (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
+    else if ((gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER)) && !gMpCoopBattle)
     {
         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) || gPartnerTrainerId == TRAINER_STEVEN_PARTNER)
         {

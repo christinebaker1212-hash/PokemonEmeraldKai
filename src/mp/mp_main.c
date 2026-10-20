@@ -1417,6 +1417,16 @@ void MP_Init(void)
     snprintf(sStatus, sizeof(sStatus), "OFFLINE");
 }
 
+// After the game's frame: send what it queued right away and let a server
+// hosted in this game pass it on, so replies don't wait for the next frame
+void MP_FrameEnd(void)
+{
+    if (sLobby.state == MP_LOBBY_OFF)
+        return;
+    MPNet_ClientFlush();
+    MPServer_Poll();
+}
+
 void MP_FrameUpdate(void)
 {
     u8 type;

@@ -221,6 +221,15 @@ void MPNet_ClientSend(uint8_t type, const void *data, uint16_t len)
     MPConn_Queue(&sClient, type, data, len);
 }
 
+static void Client_Fail(const char *why);
+
+// Sends what's queued now instead of at the next poll (end of a frame)
+void MPNet_ClientFlush(void)
+{
+    if (sClientStatus == MPNET_CONNECTED && MPConn_Flush(&sClient) < 0)
+        Client_Fail("send failed");
+}
+
 void MPNet_ClientClose(void)
 {
     MPConn_Reset(&sClient);
