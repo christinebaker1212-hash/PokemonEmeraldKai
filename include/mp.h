@@ -728,6 +728,7 @@ const u8 *MP_Coop_LoseText(void);    // NULL = use the game's
 void MP_Coop_RecordLearnLater(u8 partyIndex, u16 move);
 void MP_Coop_RecordMoney(u32 amount);
 bool8 MP_Coop_IsTradedMon(u8 partyIndex);
+u16 MP_Coop_ExpBonusFor(u8 partySlot);   // EXP bonus for a slot of the master's co-op party (owner's own)
 u16 MP_Coop_VictorySong(void);
 void MP_Coop_MirrorExp(u8 battler, u8 monId, s16 gainedExp);
 void CB2_MpCoopEndBattle(void);
@@ -837,5 +838,13 @@ void MP_Daycare_TryCoopEgg(struct DayCare *daycare);
 void MP_Linkx_HofBegin(void);
 u8 MP_Linkx_HofFriendCount(void);
 bool8 MP_Linkx_HofFriend(u8 i, u8 *team, u8 *name, u16 *pic);
+
+// mp_team.c: the co-op team (TEAM in the party menu, numbered 1-3)
+#define MP_TEAM_SIZE 3
+#define MP_TEAM_FULL 0xFF
+u8 MP_Team_Number(u8 slot);
+u8 MP_Team_Count(void);
+u8 MP_Team_Toggle(u8 slot);
+u8 MP_Team_BattleSlots(u8 *out, u8 max, bool8 (*usable)(struct Pokemon *));
 
 #endif // GUARD_MP_H

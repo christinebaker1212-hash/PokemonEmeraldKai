@@ -92,6 +92,7 @@ enum {
     MPR_COOP_WILD_CANCEL,               // too slow: battling alone after all
     MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer
     MPR_COOP_BSTATUS,                   // in a co-op battle -> partner: u8 MP_BST_* (what we're choosing)
+    MPR_COOP_BONUS,                     // battle start -> partner: u16 own EXP bonus percent (MP_ExpBonusPercent)
 };
 
 #define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
@@ -175,6 +176,8 @@ static struct
     // Battle
     bool8 isMaster;
     u8 partner;
+    s8 bonusFrom;          // the friend whose EXP bonus we last heard (MPR_COOP_BONUS), -1 = nobody
+    u16 bonusPercent;
     u8 localCount;
     u8 origIndex[MULTI_PARTY_SIZE];
     void (*afterBattle)(void);
@@ -204,7 +207,7 @@ static struct
     u8 catchOwner[2];         // CAUGHT_MINE / CAUGHT_PARTNER (the partner's game: all CAUGHT_MINE)
     u8 catchCount;
     u8 caught;             // CAUGHT_*
-} sCoop = { .requester = -1, .declinedBy = -1, .wildFrom = -1 };
+} sCoop = { .requester = -1, .declinedBy = -1, .wildFrom = -1, .bonusFrom = -1 };
 
 enum { WAIT_NONE, WAIT_ASKING, WAIT_WAITING };
 
@@ -600,6 +603,19 @@ static void Task_JoinCheck(u8 taskId)
     }
 }
 
+// The EXP bonus percent for a Pokémon in the master's battle party: party slots
+// 0-2 are the master's own, 3-5 the partner's (their own bonus, MPR_COOP_BONUS).
+u16 MP_Coop_ExpBonusFor(u8 partySlot)
+{
+    if (gMpCoopBattle && sCoop.isMaster && partySlot >= MULTI_PARTY_SIZE)
+    {
+        if (sCoop.bonusFrom == sCoop.partner)
+            return sCoop.bonusPercent;
+        MPNet_Log("co-op: no EXP bonus heard from player %d, using ours", sCoop.partner);
+    }
+    return MP_ExpBonusPercent();
+}
+
 // Special, after the trainer's intro speech (data/scripts/trainer_battle.inc).
 // The script waits (waitstate) until the task is done.
 void MP_Coop_JoinCheck(void)
@@ -614,19 +630,18 @@ static void ArrangeLocalParty(void)
 {
     struct Pokemon *tmp = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);
     u8 i, n = 0;
+    u8 slots[MULTI_PARTY_SIZE];
 
     SavePlayerParty(); // LoadPlayerParty brings the real party back afterwards
     memcpy(tmp, gPlayerParty, sizeof(struct Pokemon) * PARTY_SIZE);
     for (i = 0; i < MULTI_PARTY_SIZE; i++)
         sCoop.origIndex[i] = 0xFF;
-    for (i = 0; i < PARTY_SIZE && n < MULTI_PARTY_SIZE; i++)
+    // the co-op team (TEAM in the party menu) first, then the first usable others
+    n = MP_Team_BattleSlots(slots, MULTI_PARTY_SIZE, IsUsableMon);
+    for (i = 0; i < n; i++)
     {
-        if (IsUsableMon(&tmp[i]))
-        {
-            gPlayerParty[n] = tmp[i];
-            sCoop.origIndex[n] = i;
-            n++;
-        }
+        gPlayerParty[i] = tmp[slots[i]];
+        sCoop.origIndex[i] = slots[i];
     }
     for (i = n; i < PARTY_SIZE; i++)
         ZeroMonData(&gPlayerParty[i]);
@@ -647,6 +662,12 @@ static void BeginCoopBattle(bool8 isMaster, u8 partner)
     sCoop.resultWait = 0;
     sCoop.evoQueue = 0;
     ArrangeLocalParty();
+    // our own EXP bonus for the master's EXP script (each player gets their own)
+    {
+        u16 pct = MP_ExpBonusPercent();
+        u8 buf[3] = {MPR_COOP_BONUS, pct & 0xFF, pct >> 8};
+        Send(partner, buf, 3);
+    }
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK
                      | BATTLE_TYPE_MULTI | BATTLE_TYPE_TOWER_LINK_MULTI;
     gMpCoopBattle = TRUE;
@@ -1802,6 +1823,14 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             }
         }
         break;
+    case MPR_COOP_BONUS:
+        // sent before the link handshake, so it's here long before any EXP
+        if (len >= 3)
+        {
+            sCoop.bonusFrom = from;
+            sCoop.bonusPercent = data[1] | (data[2] << 8);
+        }
+        break;
     case MPR_COOP_BSTATUS:
         if (gMpCoopBattle && from == sCoop.partner && len >= 2 && data[1] != sPartnerBattleStatus)
         {
@@ -1892,6 +1921,8 @@ void MP_Coop_OnPlayerLeft(u8 id)
         sHeld[id].ttl = 0;
         MP_Emote_ClearBubbleFor(id);
     }
+    if (sCoop.bonusFrom == id)
+        sCoop.bonusFrom = -1;
     if (sCoop.wildFrom == id)
         StopWaitingForWild();
     if (sCoop.requester == id)

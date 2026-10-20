@@ -4155,7 +4155,8 @@ u8 IsRunningFromBattleImpossible(void)
 
     if (holdEffect == HOLD_EFFECT_CAN_ALWAYS_RUN)
         return BATTLE_RUN_SUCCESS;
-    if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+    // Moemon Co-op: a co-op wild battle is a normal escape (traps work)
+    if (gBattleTypeFlags & BATTLE_TYPE_LINK && !gMpCoopWild)
         return BATTLE_RUN_SUCCESS;
     if (gBattleMons[gActiveBattler].ability == ABILITY_RUN_AWAY)
         return BATTLE_RUN_SUCCESS;
@@ -4448,6 +4449,15 @@ static void HandleTurnActionSelectionState(void)
                 {
                     gSelectionBattleScripts[gActiveBattler] = BattleScript_AskIfWantsToForfeitMatch;
                     gBattleCommunication[gActiveBattler] = STATE_SELECTION_SCRIPT_MAY_RUN;
+                    *(gBattleStruct->selectionScriptFinished + gActiveBattler) = FALSE;
+                    *(gBattleStruct->stateIdAfterSelScript + gActiveBattler) = STATE_BEFORE_ACTION_CHOSEN;
+                    return;
+                }
+                else if (gMpCoopBattle && !gMpCoopWild && gBattleBufferB[gActiveBattler][1] == B_ACTION_RUN)
+                {
+                    // Moemon Co-op: no running from a trainer (it used to forfeit for both)
+                    gSelectionBattleScripts[gActiveBattler] = BattleScript_MpCoopCantRunFromTrainer;
+                    gBattleCommunication[gActiveBattler] = STATE_SELECTION_SCRIPT;
                     *(gBattleStruct->selectionScriptFinished + gActiveBattler) = FALSE;
                     *(gBattleStruct->stateIdAfterSelScript + gActiveBattler) = STATE_BEFORE_ACTION_CHOSEN;
                     return;
@@ -4876,6 +4886,17 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
     return strikesFirst;
 }
 
+// Moemon Co-op: whether every player chose RUN this turn (co-op wild, set in
+// SetActionsAndBattlersTurnOrder, read by HandleAction_Run)
+bool8 gMpCoopRunAgreed;
+
+// Items and switches go before moves; in a co-op wild battle RUN does too
+static bool8 IsEarlyAction(u8 action)
+{
+    return action == B_ACTION_USE_ITEM || action == B_ACTION_SWITCH
+        || (gMpCoopWild && action == B_ACTION_RUN);
+}
+
 static void SetActionsAndBattlersTurnOrder(void)
 {
     s32 turnOrderId = 0;
@@ -4892,7 +4913,25 @@ static void SetActionsAndBattlersTurnOrder(void)
     }
     else
     {
-        if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+        if (gMpCoopWild)
+        {
+            // Moemon Co-op: RUN is a team decision. Everyone chose it: one escape
+            // try (the first runner's action; the others do nothing). Otherwise a
+            // RUN only says so. Either way it goes first, like an item.
+            bool8 all = MpCoop_EveryoneRuns();
+            bool8 first = TRUE;
+            gMpCoopRunAgreed = all;
+            for (i = 0; i < gBattlersCount; i++)
+            {
+                if (gChosenActionByBattler[i] == B_ACTION_RUN && GetBattlerSide(i) == B_SIDE_PLAYER)
+                {
+                    if (all && !first)
+                        gChosenActionByBattler[i] = B_ACTION_NOTHING_FAINTED;
+                    first = FALSE;
+                }
+            }
+        }
+        else if (gBattleTypeFlags & BATTLE_TYPE_LINK)
         {
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
@@ -4939,7 +4978,7 @@ static void SetActionsAndBattlersTurnOrder(void)
         {
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
-                if (gChosenActionByBattler[gActiveBattler] == B_ACTION_USE_ITEM || gChosenActionByBattler[gActiveBattler] == B_ACTION_SWITCH)
+                if (IsEarlyAction(gChosenActionByBattler[gActiveBattler]))
                 {
                     gActionsByTurnOrder[turnOrderId] = gChosenActionByBattler[gActiveBattler];
                     gBattlerByTurnOrder[turnOrderId] = gActiveBattler;
@@ -4948,7 +4987,7 @@ static void SetActionsAndBattlersTurnOrder(void)
             }
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
-                if (gChosenActionByBattler[gActiveBattler] != B_ACTION_USE_ITEM && gChosenActionByBattler[gActiveBattler] != B_ACTION_SWITCH)
+                if (!IsEarlyAction(gChosenActionByBattler[gActiveBattler]))
                 {
                     gActionsByTurnOrder[turnOrderId] = gChosenActionByBattler[gActiveBattler];
                     gBattlerByTurnOrder[turnOrderId] = gActiveBattler;
@@ -4961,10 +5000,7 @@ static void SetActionsAndBattlersTurnOrder(void)
                 {
                     u8 battler1 = gBattlerByTurnOrder[i];
                     u8 battler2 = gBattlerByTurnOrder[j];
-                    if (gActionsByTurnOrder[i] != B_ACTION_USE_ITEM
-                        && gActionsByTurnOrder[j] != B_ACTION_USE_ITEM
-                        && gActionsByTurnOrder[i] != B_ACTION_SWITCH
-                        && gActionsByTurnOrder[j] != B_ACTION_SWITCH)
+                    if (!IsEarlyAction(gActionsByTurnOrder[i]) && !IsEarlyAction(gActionsByTurnOrder[j]))
                     {
                         if (GetWhoStrikesFirst(battler1, battler2, FALSE))
                             SwapTurnOrder(i, j);
@@ -5202,6 +5238,22 @@ static void HandleEndTurn_RanFromBattle(void)
     {
         gBattlescriptCurrInstr = BattleScript_PrintPlayerForfeited;
         gBattleOutcome = B_OUTCOME_FORFEITED;
+    }
+    else if (gMpCoopBattle)
+    {
+        // Moemon Co-op: the team got away; end the link for everyone
+        switch (gProtectStructs[gBattlerAttacker].fleeType)
+        {
+        default:
+            gBattlescriptCurrInstr = BattleScript_MpCoopGotAway;
+            break;
+        case FLEE_ITEM:
+            gBattlescriptCurrInstr = BattleScript_MpCoopSmokeBallEscape;
+            break;
+        case FLEE_ABILITY:
+            gBattlescriptCurrInstr = BattleScript_MpCoopRanUsingAbility;
+            break;
+        }
     }
     else
     {

@@ -55,6 +55,7 @@ void HandleAction_UseMove(void);
 void HandleAction_Switch(void);
 void HandleAction_UseItem(void);
 void HandleAction_Run(void);
+bool8 MpCoop_EveryoneRuns(void);   // Moemon Co-op: all player Pokémon chose RUN
 void HandleAction_WatchesCarefully(void);
 void HandleAction_SafariZoneBallThrow(void);
 void HandleAction_ThrowPokeblock(void);

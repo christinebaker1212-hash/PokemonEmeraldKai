@@ -3259,6 +3259,42 @@ static void Cmd_jumpiftype(void)
         gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }
 
+// Moemon Co-op: per-owner EXP shares (see Cmd_getexp)
+static u16 sMpCoopExp[2], sMpCoopShareExp[2];
+
+static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
+{
+    u8 owner, i;
+
+    for (owner = 0; owner < 2; owner++)
+    {
+        s32 viaSentIn = 0, viaExpShare = 0;
+        for (i = owner * MULTI_PARTY_SIZE; i < (owner + 1) * MULTI_PARTY_SIZE; i++)
+        {
+            u16 item;
+            u8 holdEffect;
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+                continue;
+            if (gBitTable[i] & sentIn)
+                viaSentIn++;
+            item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
+            holdEffect = (item == ITEM_ENIGMA_BERRY) ? gSaveBlock1Ptr->enigmaBerry.holdEffect : GetItemHoldEffect(item);
+            if (holdEffect == HOLD_EFFECT_EXP_SHARE)
+                viaExpShare++;
+        }
+        if (viaExpShare)
+        {
+            sMpCoopExp[owner] = max(1, SAFE_DIV(calculatedExp / 2, viaSentIn));
+            sMpCoopShareExp[owner] = max(1, calculatedExp / 2 / viaExpShare);
+        }
+        else
+        {
+            sMpCoopExp[owner] = max(1, SAFE_DIV(calculatedExp, viaSentIn));
+            sMpCoopShareExp[owner] = 0;
+        }
+    }
+}
+
 static void Cmd_getexp(void)
 {
     u16 item;
@@ -3316,6 +3352,11 @@ static void Cmd_getexp(void)
 
             calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
 
+            // Moemon Co-op: each player gets a full share, split only among their own
+            // Pokémon (party slots 0-2 = the master's, 3-5 = the partner's)
+            if (gMpCoopBattle)
+                MpCoopSplitExp(calculatedExp, sentIn);
+
             if (viaExpShare) // at least one mon is getting exp via exp share
             {
                 *exp = SAFE_DIV(calculatedExp / 2, viaSentIn);
@@ -3342,6 +3383,12 @@ static void Cmd_getexp(void)
     case 2: // set exp value to the poke in expgetter_id and print message
         if (gBattleControllerExecFlags == 0)
         {
+            if (gMpCoopBattle)
+            {
+                u8 owner = gBattleStruct->expGetterMonId / MULTI_PARTY_SIZE;
+                *exp = sMpCoopExp[owner];
+                gExpShareExp = sMpCoopShareExp[owner];
+            }
             item = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HELD_ITEM);
 
             if (item == ITEM_ENIGMA_BERRY)
@@ -3406,10 +3453,11 @@ static void Cmd_getexp(void)
                     }
 
                     // Moemon Co-op: buddy bonus for playing together ("gained a boosted")
-                    if (MP_ExpBonusPercent() && gBattleMoveDamage)
+                    // (co-op: the owner's own bonus, MP_Coop_ExpBonusFor)
+                    if (MP_Coop_ExpBonusFor(gBattleStruct->expGetterMonId) && gBattleMoveDamage)
                     {
                         // buddy bonus + TOGETHER (capped) + badge catch-up
-                        gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_ExpBonusPercent())) / 100;
+                        gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_Coop_ExpBonusFor(gBattleStruct->expGetterMonId))) / 100;
                         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3))
                             i = STRINGID_ABOOSTED;
                     }
@@ -3434,6 +3482,9 @@ static void Cmd_getexp(void)
                     PREPARE_STRING_BUFFER(gBattleTextBuff2, i);
                     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
 
+                    if (gMpCoopBattle)
+                        MPNet_Log("co-op exp: slot %d +%d (bonus %d%%)", gBattleStruct->expGetterMonId,
+                                  (int)gBattleMoveDamage, MP_Coop_ExpBonusFor(gBattleStruct->expGetterMonId));
                     PrepareStringBattle(STRINGID_PKMNGAINEDEXP, gBattleStruct->expGetterBattlerId);
                     MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBattlerFainted].species);
                 }

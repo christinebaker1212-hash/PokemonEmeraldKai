@@ -229,5 +229,10 @@ extern const u8 BattleScript_MpCoopWildBattleWon[];
 extern const u8 BattleScript_MpCoopBallCaught[];
 extern const u8 BattleScript_MpCoopUseItem[];
 extern const u8 BattleScript_MpCoopLearnMoveLater[];
+extern const u8 BattleScript_MpCoopWantsToRun[];
+extern const u8 BattleScript_MpCoopGotAway[];
+extern const u8 BattleScript_MpCoopSmokeBallEscape[];
+extern const u8 BattleScript_MpCoopRanUsingAbility[];
+extern const u8 BattleScript_MpCoopCantRunFromTrainer[];
 
 #endif // GUARD_BATTLE_SCRIPTS_H

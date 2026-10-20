@@ -496,9 +496,100 @@ bool8 TryRunFromBattle(u8 battler)
     return effect;
 }
 
+// Moemon Co-op: every player Pokémon still in the battle chose RUN
+bool8 MpCoop_EveryoneRuns(void)
+{
+    u8 i, players = 0;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != B_SIDE_PLAYER || (gAbsentBattlerFlags & gBitTable[i]) || gBattleMons[i].hp == 0)
+            continue;
+        players++;
+        if (gChosenActionByBattler[i] != B_ACTION_RUN)
+            return FALSE;
+    }
+    return players != 0;
+}
+
+// Moemon Co-op: the team's escape try in a co-op wild battle. A Smoke Ball or
+// Run Away on any player Pokémon gets everyone out; otherwise the fastest
+// player Pokémon against the fastest wild one, like a single battle.
+static bool8 MpCoopTryRun(void)
+{
+    u8 i, holdEffect, fast = 0xFF, foe = 0xFF;
+    bool8 effect = FALSE;
+
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if ((gAbsentBattlerFlags & gBitTable[i]) || gBattleMons[i].hp == 0)
+            continue;
+        if (GetBattlerSide(i) == B_SIDE_PLAYER)
+        {
+            holdEffect = (gBattleMons[i].item == ITEM_ENIGMA_BERRY) ? gEnigmaBerries[i].holdEffect : GetItemHoldEffect(gBattleMons[i].item);
+            if (holdEffect == HOLD_EFFECT_CAN_ALWAYS_RUN && !effect)
+            {
+                gBattlerAttacker = i;
+                gPotentialItemEffectBattler = i;
+                gLastUsedItem = gBattleMons[i].item;
+                gProtectStructs[i].fleeType = FLEE_ITEM;
+                effect = TRUE;
+            }
+            else if (gBattleMons[i].ability == ABILITY_RUN_AWAY && !effect)
+            {
+                gBattlerAttacker = i;
+                gLastUsedAbility = ABILITY_RUN_AWAY;
+                gProtectStructs[i].fleeType = FLEE_ABILITY;
+                effect = TRUE;
+            }
+            if (fast == 0xFF || gBattleMons[i].speed > gBattleMons[fast].speed)
+                fast = i;
+        }
+        else if (foe == 0xFF || gBattleMons[i].speed > gBattleMons[foe].speed)
+        {
+            foe = i;
+        }
+    }
+    if (!effect && fast != 0xFF)
+    {
+        if (foe == 0xFF || gBattleMons[fast].speed >= gBattleMons[foe].speed)
+            effect = TRUE;
+        else if ((gBattleMons[fast].speed * 128) / gBattleMons[foe].speed + (gBattleStruct->runTries * 30) > (Random() & 0xFF))
+            effect = TRUE;
+        gBattleStruct->runTries++;
+    }
+    MPNet_Log("co-op: team run %s", effect ? "got away" : "failed");
+    if (effect)
+    {
+        gCurrentTurnActionNumber = gBattlersCount;
+        gBattleOutcome = B_OUTCOME_RAN;
+    }
+    return effect;
+}
+
 void HandleAction_Run(void)
 {
     gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
+
+    // Moemon Co-op: the team runs only when everyone chose RUN (HandleAction_Run
+    // runs once: the other runners' actions were cleared)
+    if (gMpCoopWild)
+    {
+        if (!gMpCoopRunAgreed)
+        {
+            MPNet_Log("co-op: battler %d wants to run, not everyone does", gBattlerAttacker);
+            gBattlescriptCurrInstr = BattleScript_MpCoopWantsToRun;
+            gCurrentActionFuncId = B_ACTION_EXEC_SCRIPT;
+        }
+        else if (!MpCoopTryRun())
+        {
+            ClearFuryCutterDestinyBondGrudge(gBattlerAttacker);
+            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_CANT_ESCAPE_2;
+            gBattlescriptCurrInstr = BattleScript_PrintFailedToRunString;
+            gCurrentActionFuncId = B_ACTION_EXEC_SCRIPT;
+        }
+        return;
+    }
 
     if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
     {

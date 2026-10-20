@@ -1,0 +1,9 @@
+# Co-op wild: ALICE alone picks RUN (it only says so), next turn both pick RUN and they get away (no whiteout)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("wants to run, not everyone does" "co-op: team run got away" "co-op: battle over, outcome 4")
+EXPECT_B=("co-op: battle over, outcome 4")

@@ -107,6 +107,37 @@ BattleScript_MpCoopBallCaughtGoOn::
 	various BS_ATTACKER, VARIOUS_MP_COOP_REMOVE_CAUGHT
 	finishaction
 
+@ Moemon Co-op: a player chose RUN in a co-op wild battle, but not everyone did
+BattleScript_MpCoopWantsToRun::
+	printstring STRINGID_MPCOOP_WANTS_RUN
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ Moemon Co-op: everyone chose RUN and the team got away: end the link for everyone
+BattleScript_MpCoopGotAway::
+	printstring STRINGID_GOTAWAYSAFELY
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_MpCoopRanEnd::
+	endlinkbattle
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+BattleScript_MpCoopSmokeBallEscape::
+	playanimation BS_ATTACKER, B_ANIM_SMOKEBALL_ESCAPE
+	printstring STRINGID_PKMNFLEDUSINGITS
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MpCoopRanEnd
+
+BattleScript_MpCoopRanUsingAbility::
+	printstring STRINGID_PKMNFLEDUSING
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MpCoopRanEnd
+
+@ Moemon Co-op: RUN in a co-op trainer battle (shown to the player who chose it)
+BattleScript_MpCoopCantRunFromTrainer::
+	printselectionstring STRINGID_NORUNNINGFROMTRAINERS
+	endselectionscript
+
 @ Moemon Co-op: a player used a healing item on one of the six Moemon (theirs or
 @ their partner's). The link master's game applies it and both games get the result.
 BattleScript_MpCoopUseItem::

@@ -94,6 +94,7 @@ enum {
     MENU_TRADE1,
     MENU_TRADE2,
     MENU_TOSS,
+    MENU_MP_TEAM, // Moemon Co-op: mark for the co-op team
     MENU_FIELD_MOVES
 };
 
@@ -194,7 +195,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[8];
+    u8 actions[9]; // Moemon Co-op: 8 + TEAM (summary, 4 field moves, switch, item, team, cancel)
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -262,6 +263,10 @@ static void DisplayPartyPokemonDataForWirelessMinigame(u8);
 static void DisplayPartyPokemonDataForBattlePyramidHeldItem(u8);
 static bool8 DisplayPartyPokemonDataForMoveTutorOrEvolutionItem(u8);
 static void DisplayPartyPokemonData(u8);
+static void MpDrawTeamBadge(u8);
+#define MP_TEAM_BADGE_DX 12
+#define MP_TEAM_BADGE_DY 3
+#define MP_TEAM_BADGE_TEXT_UP 2
 static void DisplayPartyPokemonNickname(struct Pokemon *, struct PartyMenuBox *, u8);
 static void DisplayPartyPokemonLevelCheck(struct Pokemon *, struct PartyMenuBox *, u8);
 static void DisplayPartyPokemonGenderNidoranCheck(struct Pokemon *, struct PartyMenuBox *, u8);
@@ -459,6 +464,8 @@ static void ShiftMoveSlot(struct Pokemon *, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, bool8);
 static void BlitBitmapToPartyWindow_RightColumn(u8, u8, u8, u8, u8, bool8);
 static void CursorCb_Summary(u8);
+static void CursorCb_MpTeam(u8);
+static const u8 sText_MpTeamAction[] = _("CO-OP TEAM");
 static void CursorCb_Switch(u8);
 static void CursorCb_Cancel1(u8);
 static void CursorCb_Item(u8);
@@ -876,6 +883,24 @@ static void RenderPartyMenuBox(u8 slot)
     }
 }
 
+// Moemon Co-op: a small dark badge with the co-op team number (1-3) after the
+// gender symbol, field party menu only
+static void MpDrawTeamBadge(u8 slot)
+{
+    static const u8 sBadgeColors[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_DARK_GRAY};
+    const u8 *dims = sPartyMenuBoxes[slot].infoRects->dimensions;
+    u8 num = (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD) ? MP_Team_Number(slot) : 0;
+    u8 str[2];
+    u8 x = dims[8] + MP_TEAM_BADGE_DX, y = dims[9] + MP_TEAM_BADGE_DY;
+
+    if (num == 0)
+        return;
+    FillWindowPixelRect(sPartyMenuBoxes[slot].windowId, PIXEL_FILL(TEXT_COLOR_DARK_GRAY), x, y, 7, 9);
+    str[0] = CHAR_0 + num;
+    str[1] = EOS;
+    AddTextPrinterParameterized3(sPartyMenuBoxes[slot].windowId, FONT_SMALL, x + 1, y - MP_TEAM_BADGE_TEXT_UP, sBadgeColors, 0, str);
+}
+
 static void DisplayPartyPokemonData(u8 slot)
 {
     if (GetMonData(&gPlayerParty[slot], MON_DATA_IS_EGG))
@@ -892,6 +917,7 @@ static void DisplayPartyPokemonData(u8 slot)
         DisplayPartyPokemonHPCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot], 0);
         DisplayPartyPokemonMaxHPCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot], 0);
         DisplayPartyPokemonHPBarCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot]);
+        MpDrawTeamBadge(slot);
     }
 }
 
@@ -2684,6 +2710,9 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MAIL);
         else
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_ITEM);
+        // Moemon Co-op: mark / unmark for the co-op team
+        if (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD)
+            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MP_TEAM);
     }
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL1);
 }
@@ -3121,6 +3150,51 @@ static void CursorCb_Cancel1(u8 taskId)
     else
         DisplayPartyMenuStdMessage(PARTY_MSG_CHOOSE_MON);
     gTasks[taskId].func = Task_HandleChooseMonInput;
+}
+
+// Moemon Co-op: CO-OP TEAM marks this Pokémon 1-3 for co-op battles (or takes it off)
+static const u8 sText_MpTeamJoined[] = _("{STR_VAR_1} is no. {STR_VAR_2} on your\nco-op team.{PAUSE_UNTIL_PRESS}");
+static const u8 sText_MpTeamLeft[] = _("{STR_VAR_1} left your co-op team.{PAUSE_UNTIL_PRESS}");
+static const u8 sText_MpTeamFull[] = _("Your co-op team already has 3.\nTake one off first.{PAUSE_UNTIL_PRESS}");
+
+static void CursorCb_MpTeam(u8 taskId)
+{
+    u8 i, result;
+    const u8 *text;
+
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    GetMonNickname(&gPlayerParty[gPartyMenu.slotId], gStringVar1);
+    result = MP_Team_Toggle(gPartyMenu.slotId);
+    if (result == MP_TEAM_FULL)
+    {
+        PlaySE(SE_FAILURE);
+        text = sText_MpTeamFull;
+    }
+    else if (result == 0)
+    {
+        PlaySE(SE_BALL);
+        text = sText_MpTeamLeft;
+    }
+    else
+    {
+        PlaySE(SE_SELECT);
+        ConvertIntToDecimalStringN(gStringVar2, result, STR_CONV_MODE_LEFT_ALIGN, 1);
+        text = sText_MpTeamJoined;
+    }
+    // the message first: redrawing the boxes reuses gStringVar1/2
+    StringExpandPlaceholders(gStringVar4, text);
+    // numbers can shift, so redraw every box
+    for (i = 0; i < gPlayerPartyCount; i++)
+    {
+        DisplayPartyPokemonData(i);
+        PutWindowTilemap(sPartyMenuBoxes[i].windowId);
+        CopyWindowToVram(sPartyMenuBoxes[i].windowId, COPYWIN_GFX);
+    }
+    ScheduleBgCopyTilemapToVram(0);
+    DisplayPartyMenuMessage(gStringVar4, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
 }
 
 static void CursorCb_Item(u8 taskId)

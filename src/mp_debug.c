@@ -582,6 +582,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] style: slot %d = %04x\n", slot, v);
         }
     }
+    else if (strcmp(cmd, "team") == 0)
+    {
+        // team SLOT: toggle a party slot on the co-op team (like CO-OP TEAM in the party menu)
+        int slot = arg ? atoi(arg) : 0;
+        u8 r = MP_Team_Toggle(slot);
+        printf("[test] team: slot %d -> %d (count %d)\n", slot, r, MP_Team_Count());
+    }
     else if (strcmp(cmd, "hidesprites") == 0)
     {
         // hidesprites: every sprite invisible (a clean background for screenshots / mock-ups)
