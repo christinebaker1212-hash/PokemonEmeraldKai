@@ -31,7 +31,6 @@
 #define MAX_PADS 4
 #define STICK_DEAD   0.45f   // walking
 #define STICK_RUN    0.88f   // pushed all the way: run
-#define RSTICK_EMOTE 0.75f
 #define TRIGGER_ON   0.5f
 #define TURBO_PERIOD 6       // frames per A press while LT is held
 
@@ -43,7 +42,6 @@ static int sRumble = 1;
 static int sAutoRun;
 static int sInited;
 static u32 sPrevButtons;     // bit per SDL button, all pads merged
-static int sPrevEmote = -1;
 static int sTurbo;
 static int sTrigger[2];      // LT, RT held (last poll)
 static int sQuickTrigger = -1; // the trigger that opened a quick pick, until it's let go
@@ -567,8 +565,6 @@ u16 Gamepad_Poll(int *fastForward)
             }
             if (pressed & north)
                 Platform_ContextAction(INPUT_ACTION_COOP_MENU);
-            if (pressed & BTN(SDL_CONTROLLER_BUTTON_RIGHTSTICK))
-                Platform_ContextAction(INPUT_ACTION_EMOTE_MENU);
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_LEFTSTICK))
                 Platform_ContextAction(INPUT_ACTION_PING);
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
@@ -577,20 +573,7 @@ u16 Gamepad_Poll(int *fastForward)
                 run = 1;
             if (run)
                 keys |= B_BUTTON;
-            // Right stick flick = emote
-            {
-                int emote = -1;
-                if (rx * rx + ry * ry > RSTICK_EMOTE * RSTICK_EMOTE)
-                {
-                    if (rx * rx > ry * ry)
-                        emote = rx > 0 ? INPUT_ACTION_EMOTE_RIGHT : INPUT_ACTION_EMOTE_LEFT;
-                    else
-                        emote = ry > 0 ? INPUT_ACTION_EMOTE_DOWN : INPUT_ACTION_EMOTE_UP;
-                }
-                if (emote >= 0 && emote != sPrevEmote)
-                    Platform_ContextAction(emote);
-                sPrevEmote = emote;
-            }
+            // Emotes only come from the LT / RT hold menu (no right stick click or flick)
             break;
         case INPUT_CONTEXT_NAMING:
             if (buttons & west)  keys |= B_BUTTON;       // backspace
@@ -618,8 +601,6 @@ u16 Gamepad_Poll(int *fastForward)
             }
             break;
         }
-        if (context != INPUT_CONTEXT_OVERWORLD)
-            sPrevEmote = -1;
     }
     return keys;
 }

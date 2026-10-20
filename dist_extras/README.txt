@@ -502,9 +502,7 @@ others) and it just works, even mid-game. The buttons are set up for you:
 
 The other buttons change with what's on screen:
   Walking around    stick pushed all the way = run, X/Square = auto-run
-                    on/off, Y/Triangle = CO-OP menu, right stick = emotes
-                    (click it to open the emote / phrase pick and leave
-                    it open: A sends, B closes), left stick click =
+                    on/off, Y/Triangle = CO-OP menu, left stick click =
                     "look here!" ping on the tile in front of you
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,

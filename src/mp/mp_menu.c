@@ -1186,7 +1186,7 @@ void MP_OpenMenu(void)
 // pages; an empty slot on the first offers a ready-made phrase) and the
 // ready-made phrases in groups of 4. MINE 2-4 show once the page before has one.
 //   Held (LT/RT, or Q/E on the keyboard): let go to send the picked one.
-//   Open (right stick click, CO-OP > SOCIAL): A sends, B closes.
+//   Open (CO-OP > SOCIAL): A sends, B closes.
 // MINE: west button (SELECT) swaps an empty slot's ready-made phrase, north
 // (START) edits the phrase. Other phrase pages: west pins the phrase to MINE.
 
@@ -1205,7 +1205,7 @@ enum { QUICK_UP, QUICK_RIGHT, QUICK_DOWN, QUICK_LEFT, QUICK_BAR, QUICK_WINDOWS }
 
 static u8 sQuickPhrasePage = MP_QUICK_PAGE_MINE;   // the last phrase page, remembered
 static const u8 sQuickArrows[4] = {CHAR_UP_ARROW, CHAR_RIGHT_ARROW, CHAR_DOWN_ARROW, CHAR_LEFT_ARROW};
-// Emotes by direction (the same as a right stick flick): ! heart ? music
+// Emotes by direction: ! heart ? music
 static const u8 sQuickEmoteKey[4] = {0, 2, 1, 3};
 static const char *const sQuickEmoteNames[4] = {"!  SURPRISED", "HEART", "?  CONFUSED", "MUSIC"};
 static const char *const sQuickStockNames[4] = {"GREET", "MOVE", "BATTLE", "MORE"};
