@@ -4,6 +4,7 @@
 #   1) solo: the Windows exe boots, reaches the field and a wild battle's action menu
 #   2) mixed: the Windows relay server + a Windows host + a Linux joiner (pokeemerald64) in a
 #      co-op wild battle through lagproxy (default 250 ms + 80 ms jitter)
+#   3) reverse: Linux server + Linux host, Windows joiner
 #   Needs wine (apt install wine64). Results in $OUT/wine_smoke. Exit code = failures.
 . "$(dirname "$0")/common.sh"
 PKG="$(cd "${1:?usage: wine_smoke.sh PKG_DIR [DELAY_MS JIT_MS]}" && pwd)"; DELAY=${2:-250}; JIT=${3:-80}
@@ -37,6 +38,27 @@ if grep -q "co-op: battle over, outcome 1" "$M/a.log" && grep -q "co-op: battle 
     echo "ok   wine mixed (Windows server + host, Linux joiner, $DELAY ms)"
 else
     echo "FAIL wine mixed (see $M/*.log)"; fail=$((fail+1))
+fi
+# 3) the other way round: Linux relay server + Linux host, Windows joiner (the battle partner's screen)
+build_server || exit 99
+R="$D/reverse"; mkdir -p "$R"; cp "$TOOLS/scenarios/coop_wild/a.txt" "$TOOLS/scenarios/coop_wild/b.txt" "$R/"
+PORT=$(free_port); LP=$(free_port)
+"$SERVER" --port "$PORT" --no-router > "$R/server.log" 2>&1 & SP=$!
+python3 "$REPO/tools/mp_server/lagproxy.py" "$LP" "$PORT" "$DELAY" "$JIT" > "$R/proxy.log" 2>&1 & PP=$!
+sleep 1
+(cd "$REPO" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$R/a.txt" MOEMON_SHOTDIR="$R" MOEMON_DEBUG_QUICKSTART=1 \
+    MOEMON_TEST_FPS=60 MOEMON_LOBBY=127.0.0.1:$LP MOEMON_DEBUG_WARP=0,16,12,11 MOEMON_COOP_CONFIG="$R/a.ini" MOEMON_SAVE="$R/a.sav" \
+    MOEMON_DEBUG_NAME=ALICE MOEMON_DEBUG_GENDER=F MOEMON_COOP_AUTO="host:Test Room" timeout 400 "$BIN" > "$R/a.log" 2>&1) & AP=$!
+sleep 2
+(cd "$GAME" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="Z:$R/b.txt" MOEMON_SHOTDIR="Z:$R" MOEMON_DEBUG_QUICKSTART=1 \
+    MOEMON_TEST_FPS=60 MOEMON_LOBBY=127.0.0.1:$LP MOEMON_DEBUG_WARP=0,16,14,11 MOEMON_COOP_CONFIG="Z:$R/b.ini" MOEMON_SAVE="Z:$R/b.sav" \
+    MOEMON_DEBUG_NAME=BOB MOEMON_COOP_AUTO="join:Test Room" timeout 400 wine MoemonEmeraldKaiCoop.exe > "$R/b.log" 2>&1) & BP=$!
+wait $AP $BP
+kill $PP $SP 2>/dev/null; wineserver -k 2>/dev/null; wait 2>/dev/null
+if grep -q "co-op: battle over, outcome 1" "$R/a.log" && grep -q "co-op: battle over, outcome 1" "$R/b.log"; then
+    echo "ok   wine reverse (Linux server + host, Windows joiner, $DELAY ms)"
+else
+    echo "FAIL wine reverse (see $R/*.log)"; fail=$((fail+1))
 fi
 [ -f "$GAME/crash_log.txt" ] && { echo "crash_log.txt:"; tail -8 "$GAME/crash_log.txt"; }
 exit $fail
