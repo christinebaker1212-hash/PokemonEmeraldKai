@@ -627,7 +627,7 @@ void MP_Tourney_OpenMenu(void)
     InitIfNeeded();
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (CO-OP menu: C key or Y button) to hold a battle tournament.");
+        MP_ShowNotice("Go online (CO-OP menu: {COOP}) to hold a battle tournament.");
         return;
     }
     if (sT.state == TS_RUNNING || sT.state == TS_DONE)

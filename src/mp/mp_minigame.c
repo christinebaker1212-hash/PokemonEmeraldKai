@@ -766,7 +766,7 @@ static void Draw(void)
         if (sMg.note[0])
             MpUi_HelpAscii(sMg.note);
         else if (JoinedCount() == 0)
-            MpUi_HelpAscii("Asking your friends... START when someone joins.");
+            MpUi_HelpAscii("Asking your friends... {START} when someone joins.");
         else
             MpUi_HelpAscii(sMg.game == GAME_CRUSH ? "Everyone picks a BERRY, then crush it together!" : "Everyone picks a BERRY, then blend together!");
         break;

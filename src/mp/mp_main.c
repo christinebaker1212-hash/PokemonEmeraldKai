@@ -17,6 +17,7 @@
 #include "event_object_movement.h"
 #include "constants/characters.h"
 #include "string_util.h"
+#include "platform/gamepad.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -128,6 +129,24 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen)
     int i, n = 0;
     for (i = 0; src[i] && n < maxLen; i++)
     {
+        // {COOP}: what opens the CO-OP menu (the C key, or the pad's north button)
+        if (strncmp(src + i, "{COOP}", 6) == 0)
+        {
+            if (Gamepad_IconFamily() == GAMEPAD_ICONS_KEYBOARD)
+            {
+                static const char sKey[] = "the C key";
+                int k;
+                for (k = 0; sKey[k] && n < maxLen; k++)
+                    dst[n++] = AsciiCharToGame(sKey[k]);
+            }
+            else if (n + 2 <= maxLen)
+            {
+                dst[n++] = CHAR_KEYPAD_ICON;
+                dst[n++] = CHAR_MP_NORTH;
+            }
+            i += 5;
+            continue;
+        }
         if (src[i] == '{' && n + 2 <= maxLen)
         {
             const char *end = strchr(src + i, '}');
@@ -1345,6 +1364,7 @@ void MP_Init(void)
 
 void MP_FrameUpdate(void)
 {
+    MpUi_RefreshIcons();   // help lines follow keyboard / pad switches
     u8 type;
     u16 len;
     int guard;

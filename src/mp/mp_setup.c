@@ -373,7 +373,7 @@ static const char *MainItemHelp(u8 item)
     case MAIN_REJOIN:   return "Join the server you played on last time.";
     case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
     case MAIN_JOIN:     return "Find a friend's server and hop in.";
-    default:            return sSetup.fromField ? "Return to the game." : "Play alone. Go online later with the C key / Y button.";
+    default:            return sSetup.fromField ? "Return to the game." : "Play alone. Go online later with {COOP}.";
     }
 }
 

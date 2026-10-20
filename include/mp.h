@@ -508,6 +508,7 @@ void MpUi_TextAscii(u8 row, const char *text);
 void MpUi_End(void);
 void MpUi_Help(const u8 *text);
 void MpUi_HelpAscii(const char *ascii);
+void MpUi_RefreshIcons(void);
 void MpUi_HelpItem(u16 item);   // the item's description on the help line
 void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int maxLines, u8 fg, u8 bg);
 void MP_ShowFieldMessageFitted(const u8 *text);   // ShowFieldMessage, wrapped to the box with pages

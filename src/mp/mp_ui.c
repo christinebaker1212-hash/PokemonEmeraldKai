@@ -5,6 +5,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "platform/gamepad.h"
 #include "main.h"
 #include "event_object_lock.h"
 #include "map_name_popup.h"
@@ -41,6 +42,7 @@ static const struct WindowTemplate sHelpTemplate = {
 };
 
 static u8 sMain = WINDOW_NONE, sHelp = WINDOW_NONE;
+static u8 sHelpText[200];   // redrawn when the player switches keyboard / pad
 static s16 sScrollTop = -1, sScrollCount, sSelY = -1;
 static s16 sTitleEnd;   // x where the title text ends
 
@@ -220,6 +222,7 @@ void MpUi_Close(void)
     RemoveWindow(sMain);
     RemoveWindow(sHelp);
     sMain = sHelp = WINDOW_NONE;
+    sHelpText[0] = EOS;
     MpTheme_Pop();
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
@@ -320,14 +323,16 @@ void MpUi_End(void)
 }
 
 // Splits text into lines no wider than maxW (breaking at spaces); returns how many
-// lines it needs. Only the first maxLines are written.
+// lines it needs. Only the first maxLines are written. A button icon stays on the
+// same line as the word after it ("{A} SELECT"), and a gap of two or more spaces
+// (between two prompts) is the preferred place to break.
 static int WrapText(const u8 *text, u8 font, int maxW, u8 out[][128], int maxLines)
 {
     int lines = 0, i = 0;
     while (text[i] != EOS)
     {
         u8 line[128];
-        int n = 0, lastSpace = -1, lastSpaceSrc = -1, j = i;
+        int n = 0, lastSpace = -1, lastSpaceSrc = -1, lastGap = -1, lastGapSrc = -1, j = i;
         while (text[j] == CHAR_SPACE)
             j++;
         i = j;
@@ -343,17 +348,27 @@ static int WrapText(const u8 *text, u8 font, int maxW, u8 out[][128], int maxLin
             line[n + len] = EOS;
             if (GetStringWidth(font, line, 0) > maxW)
             {
-                if (lastSpace > 0)
+                if (lastGap > 0 && lastGap * 2 >= n)
+                {
+                    n = lastGap;
+                    j = lastGapSrc;
+                }
+                else if (lastSpace > 0)
                 {
                     n = lastSpace;
                     j = lastSpaceSrc;
                 }
                 break;
             }
-            if (c == CHAR_SPACE)
+            if (c == CHAR_SPACE && !(n >= 2 && line[n - 2] == CHAR_KEYPAD_ICON))
             {
                 lastSpace = n;
                 lastSpaceSrc = j;
+                if (n >= 1 && line[n - 1] == CHAR_SPACE)
+                {
+                    lastGap = n;
+                    lastGapSrc = j;
+                }
             }
             n += len;
             j += len;
@@ -419,6 +434,11 @@ void MpUi_Help(const u8 *text)
 {
     if (sHelp == WINDOW_NONE)
         return;
+    if (text != sHelpText)
+    {
+        StringCopyN(sHelpText, text, sizeof(sHelpText) - 1);
+        sHelpText[sizeof(sHelpText) - 1] = EOS;
+    }
     MpTheme_Panel(sHelp, 0);
     MpUi_PrintWrapped(sHelp, text, 4, 0, MAIN_W * 8 - 8, 2, MPT_GREY, MPT_BG);
     CopyWindowToVram(sHelp, COPYWIN_FULL);
@@ -733,5 +753,25 @@ void MP_FrameJoin_Clear(u8 bg, u8 left, u8 top, u8 width, u8 height, const u16 *
             if (rb + 1 < 32 && (j = JoinPiece(map[(rb + 1) * 32 + x])) >= JOIN_EXT_UP && j < JOIN_MERGED)
                 map[(rb + 1) * 32 + x] = Entry(STD_WINDOW_BASE_TILE_NUM + j - JOIN_EXT_UP);
         }
+    }
+}
+
+// Every frame: a help line with button icons follows the device in use
+void MpUi_RefreshIcons(void)
+{
+    static int sFamily = -1;
+    int f = Gamepad_IconFamily();
+    if (f == sFamily)
+        return;
+    sFamily = f;
+    if (sHelp != WINDOW_NONE && sHelpText[0] != EOS)
+    {
+        const u8 *c;
+        for (c = sHelpText; *c != EOS; c++)
+            if (*c == CHAR_KEYPAD_ICON)
+            {
+                MpUi_Help(sHelpText);
+                break;
+            }
     }
 }

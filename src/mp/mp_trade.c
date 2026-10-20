@@ -829,7 +829,7 @@ void MP_Trade_OpenMenu(void)
     InitIfNeeded();
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (CO-OP menu: C key or Y button) to trade with friends.");
+        MP_ShowNotice("Go online (CO-OP menu: {COOP}) to trade with friends.");
         return;
     }
     if (sTrade.state != ST_IDLE || sTrade.taskId != TASK_NONE)

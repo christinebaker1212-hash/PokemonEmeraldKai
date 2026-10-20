@@ -842,7 +842,7 @@ static void Draw(void)
         static const char *const sRows[BG_COUNT] = {"BERRY BLENDER", "BERRY CRUSH", "BACK"};
         static const char *const sHelp[BG_COUNT] = {
             "Blend BERRIES into POKEBLOCKS with friends, wherever you are.",
-            "Mash A with friends to crush BERRIES into BERRY POWDER.",
+            "Mash {A} with friends to crush BERRIES into BERRY POWDER.",
             "Back to the CO-OP menu.",
         };
         u16 i;
@@ -1020,7 +1020,7 @@ static void Task_LinkxUi(u8 taskId)
         if (!MP_IsConnected() || MP_ConnectedCount() < 2)
         {
             PlaySE(SE_FAILURE);
-            snprintf(sUi.note, sizeof(sUi.note), MP_IsConnected() ? "Nobody else is online right now." : "Go online first (CO-OP menu: C key or Y button).");
+            snprintf(sUi.note, sizeof(sUi.note), MP_IsConnected() ? "Nobody else is online right now." : "Go online first (CO-OP menu: {COOP}).");
         }
         else if (gMain.callback2 != CB2_Overworld)
         {

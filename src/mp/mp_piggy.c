@@ -291,7 +291,7 @@ bool8 MP_Piggy_TryInteract(void)
         if (!MP_GetRemoteMapPos(i, &rx, &ry) || rx != x || ry != y)
             continue;
         Name(i, name);
-        snprintf(text, sizeof(text), "Hop on %s's back for a ride?\n(B: hop off)", name);
+        snprintf(text, sizeof(text), "Hop on %s's back for a ride?\n({B} hops off)", name);
         MP_AsciiToGame(sPrompt, text, sizeof(sPrompt) - 1);
         LockPlayerFieldControls();
         taskId = CreateTask(Task_RidePrompt, 80);

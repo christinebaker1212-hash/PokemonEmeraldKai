@@ -1775,7 +1775,11 @@ static void DrawHelp(const char *s)
     if (GetStringWidth(font, buf, 0) > maxW)
         font = FONT_SMALL_NARROW;
     for (len = StringLength(buf); len > 1 && GetStringWidth(font, buf, 0) > maxW; len--)
+    {
         buf[len - 1] = EOS;
+        if (len >= 2 && buf[len - 2] == CHAR_KEYPAD_ICON)   // not half a button icon
+            buf[--len - 1] = EOS;
+    }
     Print(WIN_HELP, font, 4, 2, TC_PANEL, TC_GREY, buf);
     CopyWindowToVram(WIN_HELP, COPYWIN_FULL);
 }
@@ -1818,11 +1822,12 @@ static void DrawBannerLine(void)
     int width = sBanner == BANNER_PICKUP ? 156 : 24 * 8;   // the featured Moemon stands on the right
     u8 buf[48];
     FillWindowPixelBuffer(WIN_NAME, PIXEL_FILL(TC_PANEL));
-    PrintAscii(WIN_NAME, FONT_SMALL, 4, 2, TC_PANEL, TC_GREY, "< L");
+    PrintAscii(WIN_NAME, FONT_SMALL, 4, 2, TC_PANEL, TC_GREY, "< {L}");
+    MP_AsciiToGame(buf, "{R} >", 20);
     if (sBanner != BANNER_PICKUP)
-        PrintAscii(WIN_NAME, FONT_SMALL, 24 * 8 - 4 - 14, 2, TC_PANEL, TC_GREY, "R >");
+        Print(WIN_NAME, FONT_SMALL, 24 * 8 - 4 - GetStringWidth(FONT_SMALL, buf, 0), 2, TC_PANEL, TC_GREY, buf);
     else
-        PrintAscii(WIN_NAME, FONT_SMALL, width - 14, 2, TC_PANEL, TC_GREY, "R >");
+        Print(WIN_NAME, FONT_SMALL, width - GetStringWidth(FONT_SMALL, buf, 0), 2, TC_PANEL, TC_GREY, buf);
     MP_AsciiToGame(buf, sBanners[sBanner].name, 40);
     Print(WIN_NAME, FONT_SMALL, (width - GetStringWidth(FONT_SMALL, buf, 0)) / 2, 2, TC_PANEL, TC_BANNER, buf);
     if (sBanner == BANNER_PICKUP)

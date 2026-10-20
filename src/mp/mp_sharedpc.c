@@ -607,7 +607,7 @@ void MP_SharedPc_Open(void)
 {
     if (!CanUseStore())
     {
-        MP_ShowNotice("The shared PC belongs to the server. Go online (CO-OP menu: C key or Y button) to use it.");
+        MP_ShowNotice("The shared PC belongs to the server. Go online (CO-OP menu: {COOP}) to use it.");
         return;
     }
     memset(&sPc, 0, sizeof(sPc));

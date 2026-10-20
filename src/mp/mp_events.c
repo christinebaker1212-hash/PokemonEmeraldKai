@@ -1329,7 +1329,7 @@ void MP_Daily_OpenMenu(void)
 {
     if (!Online())
     {
-        MP_ShowNotice("Daily goals, the race and achievements are shared with your server. Go online (CO-OP menu: C key or Y button) first.");
+        MP_ShowNotice("Daily goals, the race and achievements are shared with your server. Go online (CO-OP menu: {COOP}) first.");
         return;
     }
     memset(&sDaily, 0, sizeof(sDaily));

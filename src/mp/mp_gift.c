@@ -186,7 +186,7 @@ void MP_Gift_OpenMenu(void)
 {
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (CO-OP menu: C key or Y button) to send gifts to friends.");
+        MP_ShowNotice("Go online (CO-OP menu: {COOP}) to send gifts to friends.");
         return;
     }
     memset(&sGiftUi, 0, sizeof(sGiftUi));

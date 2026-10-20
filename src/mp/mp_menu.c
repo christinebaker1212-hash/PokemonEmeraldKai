@@ -439,7 +439,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         else if (cursor == ROW_CREATE)
             snprintf(ascii, sizeof(ascii), "Make your own trainer (CUSTOM 1-3).");
         else if (cursor == ROW_EDIT && sIntroDone)
-            snprintf(ascii, sizeof(ascii), "The Sprite Editor opens later from START > CO-OP > LOOK.");
+            snprintf(ascii, sizeof(ascii), "The Sprite Editor opens later from {START} > CO-OP > LOOK.");
         else if (cursor == ROW_EDIT)
             snprintf(ascii, sizeof(ascii), "Draw your own look in the Sprite Editor.");
         else if (cursor == ROW_SAVE && sIntroDone)
@@ -477,7 +477,7 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
             snprintf(ascii, sizeof(ascii), "Save as CUSTOM %d and wear it.", sCreateSlot + 1);
             break;
         case CR_CANCEL:
-            snprintf(ascii, sizeof(ascii), "Back to LOOK without saving. (B does too.)");
+            snprintf(ascii, sizeof(ascii), "Back to LOOK without saving. ({B} does too.)");
             break;
         default:
             if (CREATE_IS_COLOR(cursor))
@@ -1363,15 +1363,15 @@ static void QuickDrawBar(s16 *data)
         MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
     }
     if (qHold >= 0)
-        snprintf(send, sizeof(send), "pick, let go to send");
+        snprintf(send, sizeof(send), "{DPAD} pick, let go to send");
     else
-        snprintf(send, sizeof(send), "pick, {A} send  {B} close");
+        snprintf(send, sizeof(send), "{DPAD} pick  {A} send  {B} close");
     if (qPage == MP_QUICK_PAGE_MINE)
-        snprintf(hint, sizeof(hint), "%s    %s swap  %s edit", send, west, north);
+        snprintf(hint, sizeof(hint), "%s  %s swap  %s edit", send, west, north);
     else if (IsMinePage(qPage))
-        snprintf(hint, sizeof(hint), "%s    %s edit", send, north);
+        snprintf(hint, sizeof(hint), "%s  %s edit", send, north);
     else if (qPage != MP_QUICK_PAGE_EMOTES)
-        snprintf(hint, sizeof(hint), "%s    %s pin to MINE", send, west);
+        snprintf(hint, sizeof(hint), "%s  %s pin to MINE", send, west);
     else
         snprintf(hint, sizeof(hint), "%s", send);
     MP_AsciiToGame(buf, hint, 90);

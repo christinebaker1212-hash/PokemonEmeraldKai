@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "naming_screen.h"
 #include "malloc.h"
 #include "palette.h"
@@ -1410,7 +1411,13 @@ static void NamingScreen_CreatePlayerIcon(void)
     u8 spriteId;
 
     rivalGfxId = GetRivalAvatarGraphicsIdByStateIdAndGender(PLAYER_AVATAR_STATE_NORMAL, sNamingScreen->monSpecies);
-    spriteId = CreateObjectGraphicsSprite(rivalGfxId, SpriteCallbackDummy, 56, 37, 0);
+    // Moemon Co-op: the player's LOOK (catalog, sprite pack or CREATE trainer)
+    {
+        const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_MP_LOCAL);
+        spriteId = CreateObjectGraphicsSprite(OBJ_EVENT_GFX_MP_LOCAL, SpriteCallbackDummy, 56, 37 + 16 - info->height / 2, 0);
+        if (spriteId == MAX_SPRITES)
+            spriteId = CreateObjectGraphicsSprite(rivalGfxId, SpriteCallbackDummy, 56, 37, 0);
+    }
     gSprites[spriteId].oam.priority = 3;
     StartSpriteAnim(&gSprites[spriteId], ANIM_STD_GO_SOUTH);
 }
@@ -1960,6 +1967,74 @@ static void SaveInputText(void)
     }
 }
 
+// Moemon Co-op: with a controller, the labels under BACK, OK and the page swap
+// button ("B BUTTON", "START >", "SELECT >") show its buttons instead.
+static u8 sMpBtnTiles[3][0x280];
+
+static void MpBtnPut(u8 *tiles, int wTiles, int x, int y, u8 v)
+{
+    u8 *b = &tiles[((y / 8) * wTiles + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+    *b = (x & 1) ? ((*b & 0x0F) | (v << 4)) : ((*b & 0xF0) | v);
+}
+
+// Clears the label (x0..x1, y0..y1) and draws the button there, right edge at
+// xRight (or centered when xRight < 0), squashed by a row when it doesn't fit
+static bool8 MpBtnLabel(u8 *tiles, u8 id, int x0, int x1, int y0, int y1, int xRight)
+{
+    u8 icon[16][16];
+    int w, h = 0, x, y, rows = y1 - y0 + 1, skip = -1, dy;
+    memset(icon, 0, sizeof(icon));
+    w = MP_ButtonIcon_ToPixels(id, &icon[0][0], 16, 0, 0, gNamingScreenMenu_Pal[4], 2, 1);
+    if (w == 0)
+        return FALSE;
+    for (y = 0; y < 16; y++)
+        for (x = 0; x < 16; x++)
+            if (icon[y][x])
+            {
+                h = y + 1;
+                if (icon[y][x] != 2)
+                    icon[y][x] = 1;   // white on dark, like the original labels
+            }
+    if (h > rows)
+        skip = h / 2;   // drop the middle row
+    for (y = y0; y <= y1; y++)
+        for (x = x0; x <= x1; x++)
+            MpBtnPut(tiles, 5, x, y, 4);
+    x = xRight < 0 ? (x0 + x1 + 1 - w) / 2 : xRight + 1 - w;
+    dy = y0 + (rows - (skip >= 0 ? h - 1 : h)) / 2;
+    for (y = 0; y < h; y++)
+    {
+        int i;
+        if (y == skip)
+            continue;
+        for (i = 0; i < w; i++)
+            if (icon[y][i])
+                MpBtnPut(tiles, 5, x + i, dy, icon[y][i]);
+        dy++;
+    }
+    return TRUE;
+}
+
+static void MpLoadButtonLabels(void)
+{
+    static const u32 *const sGfx[3] = {gNamingScreenBackButton_Gfx, gNamingScreenOKButton_Gfx, gNamingScreenPageSwapFrame_Gfx};
+    static const u16 sSize[3] = {0x1E0, 0x1E0, 0x280};
+    static const u16 sTag[3] = {GFXTAG_BACK_BUTTON, GFXTAG_OK_BUTTON, GFXTAG_PAGE_SWAP_FRAME};
+    int i;
+    for (i = 0; i < 3; i++)
+        memcpy(sMpBtnTiles[i], sGfx[i], sSize[i]);
+    if (!MpBtnLabel(sMpBtnTiles[0], CHAR_B_BUTTON, 3, 37, 15, 23, -1))
+        return;
+    MpBtnLabel(sMpBtnTiles[1], CHAR_START_BUTTON, 3, 27, 13, 22, 26);
+    MpBtnLabel(sMpBtnTiles[2], CHAR_SELECT_BUTTON, 4, 28, 18, 26, 27);
+    for (i = 0; i < 3; i++)
+    {
+        struct SpriteSheet sheet = {sMpBtnTiles[i], sSize[i], sTag[i]};
+        FreeSpriteTilesByTag(sTag[i]);
+        LoadSpriteSheet(&sheet);
+    }
+}
+
 static void LoadGfx(void)
 {
     LZ77UnCompWram(gNamingScreenMenu_Gfx, sNamingScreen->tileBuffer);
@@ -1967,6 +2042,7 @@ static void LoadGfx(void)
     LoadBgTiles(2, sNamingScreen->tileBuffer, sizeof(sNamingScreen->tileBuffer), 0);
     LoadBgTiles(3, sNamingScreen->tileBuffer, sizeof(sNamingScreen->tileBuffer), 0);
     LoadSpriteSheets(sSpriteSheets);
+    MpLoadButtonLabels();   // Moemon Co-op
     LoadSpritePalettes(sSpritePalettes);
 }
 
