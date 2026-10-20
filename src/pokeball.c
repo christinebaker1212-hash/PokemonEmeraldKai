@@ -350,6 +350,40 @@ u8 DoPokeballSendOutAnimation(s16 pan, u8 kindOfThrow)
 
 #define sBattler         data[6]
 
+// Moemon Co-op: the balls a Moemon is being sent out of (battle_main.c runs
+// sending out 30% faster; a thrown ball for a catch isn't one of these)
+static u8 sMpSendOutBalls[MAX_BATTLERS_COUNT] = {MAX_SPRITES, MAX_SPRITES, MAX_SPRITES, MAX_SPRITES};
+
+static void MpMarkSendOutBall(u8 spriteId)
+{
+    u8 i;
+    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    {
+        if (sMpSendOutBalls[i] >= MAX_SPRITES || !gSprites[sMpSendOutBalls[i]].inUse)
+        {
+            sMpSendOutBalls[i] = spriteId;
+            return;
+        }
+    }
+}
+
+// A Moemon is coming out of its ball right now
+bool8 MP_SendOutRunning(void)
+{
+    u8 i;
+    bool8 any = FALSE;
+    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    {
+        u8 s = sMpSendOutBalls[i];
+        if (s < MAX_SPRITES && gSprites[s].inUse && gSprites[s].template != NULL
+         && gSprites[s].template->tileTag >= GFX_TAG_POKE_BALL && gSprites[s].template->tileTag < GFX_TAG_POKE_BALL + POKEBALL_COUNT)
+            any = TRUE;
+        else
+            sMpSendOutBalls[i] = MAX_SPRITES;
+    }
+    return any;
+}
+
 static void Task_DoPokeballSendOutAnim(u8 taskId)
 {
     u16 throwCaseId;
@@ -385,12 +419,14 @@ static void Task_DoPokeballSendOutAnim(u8 taskId)
     switch (throwCaseId)
     {
     case POKEBALL_PLAYER_SENDOUT:
+        MpMarkSendOutBall(ballSpriteId);
         gBattlerTarget = battler;
         gSprites[ballSpriteId].x = 24;
         gSprites[ballSpriteId].y = 68;
         gSprites[ballSpriteId].callback = SpriteCB_PlayerMonSendOut_1;
         break;
     case POKEBALL_OPPONENT_SENDOUT:
+        MpMarkSendOutBall(ballSpriteId);
         gSprites[ballSpriteId].x = GetBattlerSpriteCoord(battler, BATTLER_COORD_X);
         gSprites[ballSpriteId].y = GetBattlerSpriteCoord(battler, BATTLER_COORD_Y) + 24;
         gBattlerTarget = battler;

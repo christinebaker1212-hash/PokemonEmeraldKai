@@ -1899,9 +1899,40 @@ static void CB2_HandleStartMultiBattle(void)
     }
 }
 
+// Moemon Co-op: sending Moemon out (the ball and the Moemon coming out of it;
+// not a ball thrown to catch one) and the fade at the end of the battle run
+// exactly 30% faster (the intro slide has its own double speed): on 3 of
+// every 10 frames they get one more step (sprites, animation tasks, palette
+// fade). Only this game's visuals change; the link tasks and the battle
+// itself run once a frame as always, so link battles see no difference.
+bool8 IsBattleLinkTaskFunc(TaskFunc func);
+bool8 MP_SendOutRunning(void);   // pokeball.c
+
+static bool8 MpBattleTurboPhase(void)
+{
+    if (gBattleOutcome != 0 && gPaletteFade.active)
+        return TRUE;
+    return MP_SendOutRunning();
+}
+
+static void MpBattleTurbo(void)
+{
+    static u8 sAcc;
+    if (!MpBattleTurboPhase())
+        return;
+    sAcc += 3;
+    if (sAcc < 10)
+        return;
+    sAcc -= 10;
+    AnimateSprites();
+    UpdatePaletteFade();
+    RunTasksExcept(IsBattleLinkTaskFunc);
+}
+
 void BattleMainCB2(void)
 {
     AnimateSprites();
+    MpBattleTurbo();
     BuildOamBuffer();
     RunTextPrinters();
     UpdatePaletteFade();

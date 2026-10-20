@@ -114,6 +114,11 @@ GetMonData asked of all battlers at once, MP_FrameEnd flushes sends after each f
 test with tools/mp_server/lagproxy.py (TCP proxy adding delay + jitter: `lagproxy.py LISTEN TARGET 150 50`, clients use
 MOEMON_LOBBY=127.0.0.1:LISTEN, FPS=60) and MOEMON_LINKDEBUG=1 (logs every block + link state each second). Verified at 150 ms.
 The battle screen's opening window and grass overlay also move at INTRO_SLIDE_STEP.
+Send-outs and the end fade run exactly 1.3x (battle_main.c MpBattleTurbo): on 3 of 10 frames BattleMainCB2 runs one more
+AnimateSprites + UpdatePaletteFade + RunTasksExcept(IsBattleLinkTaskFunc) while pokeball.c MP_SendOutRunning (balls marked
+in Task_DoPokeballSendOutAnim's SENDOUT cases, not catch throws) or gBattleOutcome && gPaletteFade.active. The link send /
+receive tasks never run twice a frame (that would break the controller-command ordering); the battle engine and controllers
+run once a frame as always. Wild intro -> action menu 916 -> 903 frames; co-op checked at 120-150 ms.
 Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vanilla 64/48/32; data/*.s need a touch to
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +

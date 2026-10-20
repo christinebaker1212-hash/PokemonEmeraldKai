@@ -35,6 +35,7 @@ void ResetTasks(void);
 u8 CreateTask(TaskFunc func, u8 priority);
 void DestroyTask(u8 taskId);
 void RunTasks(void);
+void RunTasksExcept(bool8 (*skip)(TaskFunc func));
 void TaskDummy(u8 taskId);
 void SetTaskFuncWithFollowupFunc(u8 taskId, TaskFunc func, TaskFunc followupFunc);
 void SwitchTaskToFollowupFunc(u8 taskId);

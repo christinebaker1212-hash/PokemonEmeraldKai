@@ -121,6 +121,26 @@ void RunTasks(void)
     }
 }
 
+// Moemon Co-op: one more round of tasks, leaving out those `skip` says no to
+// (battle_main.c's faster animations leave the link tasks alone)
+void RunTasksExcept(bool8 (*skip)(TaskFunc func))
+{
+    u8 taskId = FindFirstActiveTask();
+
+    if (taskId != NUM_TASKS)
+    {
+        do
+        {
+            u8 next;
+            TaskFunc func = gTasks[taskId].func;
+            if (!skip(func))
+                func(taskId);
+            next = gTasks[taskId].next;
+            taskId = next;
+        } while (taskId != TAIL_SENTINEL);
+    }
+}
+
 static u8 FindFirstActiveTask(void)
 {
     u8 taskId;

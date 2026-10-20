@@ -27,6 +27,13 @@ static void SetBattlePartyIds(void);
 static void Task_HandleSendLinkBuffersData(u8 taskId);
 static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId);
 
+// Moemon Co-op: the link's send / receive tasks (battle_main.c's faster
+// animations never run them twice in a frame)
+bool8 IsBattleLinkTaskFunc(TaskFunc func)
+{
+    return func == Task_HandleSendLinkBuffersData || func == Task_HandleCopyReceivedLinkBuffersData;
+}
+
 void HandleLinkBattleSetup(void)
 {
     if (gBattleTypeFlags & BATTLE_TYPE_LINK)
