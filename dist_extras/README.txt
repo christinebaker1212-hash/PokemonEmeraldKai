@@ -96,6 +96,12 @@ Advanced: lobby.txt can point the game at a lobby server instead (see the
 
 TEAMING UP FOR A DOUBLE BATTLE
 ------------------------------
+* When an NPC trainer challenges you and a friend is on the same map or
+  route, after the trainer's speech you're asked "Wait for another trainer
+  to join you?" Say YES and a "Join me!" bubble appears over your head.
+  Your friend walks up next to you, faces you, and they're in. Press B at
+  any time to stop waiting and battle alone. While you wait, nobody else can
+  talk to that trainer or be spotted by them.
 * When an NPC trainer challenges a friend (they get the "!" or talk to the
   trainer), walk up next to your friend and face them. You'll see
   "Asking <friend> to team up..." (press B to change your mind).

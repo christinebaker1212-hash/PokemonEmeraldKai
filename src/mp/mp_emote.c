@@ -671,6 +671,26 @@ void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text)
         ShowBubble(1 + playerId, text, FALSE);
 }
 
+// Keeps a bubble up over a player while something lasts (re-shown before it
+// runs out); MP_Emote_ClearBubbleFor takes it down
+void MP_Emote_KeepBubbleFor(u8 playerId, const u8 *text)
+{
+    u8 slot = playerId == gMpLocalId ? 0 : 1 + playerId;
+    InitIfNeeded();
+    if (playerId >= MP_MAX_PLAYERS)
+        return;
+    if (sBubbles[slot].timer < 60 || StringCompare(sBubbles[slot].text, text) != 0)
+        ShowBubble(slot, text, FALSE);
+}
+
+void MP_Emote_ClearBubbleFor(u8 playerId)
+{
+    u8 slot = playerId == gMpLocalId ? 0 : 1 + playerId;
+    InitIfNeeded();
+    if (playerId < MP_MAX_PLAYERS)
+        sBubbles[slot].timer = 0;
+}
+
 static bool8 CanEmote(void)
 {
     return MP_IsInOverworld() && !gMain.inBattle;

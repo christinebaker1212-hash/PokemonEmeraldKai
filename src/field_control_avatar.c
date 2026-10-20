@@ -321,6 +321,13 @@ const u8 *GetInteractedLinkPlayerScript(struct MapPosition *position, u8 metatil
             return NULL;
     }
 
+    // Moemon Co-op: a trainer another player is holding while they wait for a partner
+    if (MP_Coop_IsNpcHeld(&gObjectEvents[objectEventId]))
+    {
+        MP_Coop_OnHeldNpcTalk();
+        return NULL;
+    }
+
     gSelectedObjectEvent = objectEventId;
     gSpecialVar_LastTalked = gObjectEvents[objectEventId].localId;
     gSpecialVar_Facing = direction;

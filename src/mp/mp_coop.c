@@ -5,6 +5,10 @@
 // asks to join. Once the challenged player has read the trainer's speech,
 // they get an unskippable "X wants to join for a Double Battle! Is this OK?"
 // question. Trainers with a single Pokémon refuse ("Let's go one on one!").
+// If nobody has asked by then and a friend is on the same map, the challenged
+// player is asked "Wait for another trainer to join you?": while they wait a
+// "Join me!" bubble shows over them, other games leave that trainer alone,
+// and the first friend who walks up joins. B battles alone.
 //
 // The battle itself is the game's own "two link players vs. computer trainer"
 // mode (BATTLE_TYPE_TOWER_LINK_MULTI) carried over the network link in
@@ -83,7 +87,11 @@ enum {
     MPR_COOP_WILD_NO,                   // can't right now
     MPR_COOP_WILD_GO,                   // the battle starts
     MPR_COOP_WILD_CANCEL,               // too slow: battling alone after all
+    MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer
 };
+
+#define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
+#define WAIT_HOLD_FRAMES   180   // others forget a wait they stop hearing about
 
 #define WILD_RANGE_X     8     // about one screen
 #define WILD_RANGE_Y     6
@@ -151,6 +159,9 @@ static struct
     s8 requester;          // player asking to join, -1 = nobody
     bool8 prompting;
     bool8 accepted;
+    u8 waitStage;          // WAIT_*: asked whether to wait / waiting for a partner
+    u16 waitTimer;
+    u8 waitLocalId, waitMapNum, waitMapGroup;   // the trainer held while we wait
     // Asking player
     u8 role;
     u8 target;
@@ -191,6 +202,16 @@ static struct
     u8 caught;             // CAUGHT_*
 } sCoop = { .requester = -1, .declinedBy = -1, .wildFrom = -1 };
 
+enum { WAIT_NONE, WAIT_ASKING, WAIT_WAITING };
+
+// Trainers other players are holding while they wait for a partner: they
+// can't be talked to and don't spot anyone here
+static struct
+{
+    u16 ttl;
+    u8 localId, mapNum, mapGroup;
+} sHeld[MP_MAX_PLAYERS];
+
 static EWRAM_DATA u8 sText[160];
 
 static const u8 sText_JoinPrompt[] = _("{STR_VAR_1} wants to join for a\nDouble Battle! Is this OK?");
@@ -201,6 +222,10 @@ static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nMO
 static const u8 sText_TooLate[] = _("Too late! {STR_VAR_1}'s battle has\nalready started.");
 static const u8 sText_Busy[] = _("{STR_VAR_1} can't team up right now.");
 static const u8 sText_Left[] = _("{STR_VAR_1} left the game.");
+static const u8 sText_WaitAsk[] = _("Wait for another trainer to join\nyou for a Double Battle?");
+static const u8 sText_Waiting[] = _("Waiting for a partner to join…\n({B_BUTTON} battle alone)");
+static const u8 sText_JoinMe[] = _("Join me!");
+static const u8 sText_HeldNpc[] = _("They're waiting on {STR_VAR_1}'s battle.");
 static const u8 sText_LearnLater[] = _("During the battle, {STR_VAR_1} wanted to\nlearn {STR_VAR_2}, but it already knows\pfour moves. Teach it a new move now?");
 
 // ---------------------------------------------------------------------------
@@ -256,7 +281,7 @@ bool8 MP_Coop_IsChallenged(void)
 
 bool8 MP_Coop_IsBusy(void)
 {
-    return sCoop.role != ROLE_NONE || sCoop.prompting || gMpCoopBattle || sCoop.wildAsking || sCoop.wildFrom >= 0;
+    return sCoop.role != ROLE_NONE || sCoop.prompting || sCoop.waitStage != WAIT_NONE || gMpCoopBattle || sCoop.wildAsking || sCoop.wildFrom >= 0;
 }
 
 bool8 MP_Coop_IsMaster(void)
@@ -363,10 +388,72 @@ enum {
     JOIN_PRINT,
     JOIN_ASK,
     JOIN_ONE_MON,
+    JOIN_WAIT_PRINT,
+    JOIN_WAIT_ASK,
+    JOIN_WAITING,
 };
+
+static void SendWait(bool8 on)
+{
+    u8 buf[5] = {MPR_COOP_WAIT, on, sCoop.waitLocalId, sCoop.waitMapNum, sCoop.waitMapGroup};
+    MP_SendRelay(0xFF, buf, sizeof(buf));
+}
+
+static void StopWaiting(void)
+{
+    if (sCoop.waitStage == WAIT_WAITING)
+    {
+        SendWait(FALSE);
+        if (gMpLocalId >= 0)
+            MP_Emote_ClearBubbleFor(gMpLocalId);
+    }
+    sCoop.waitStage = WAIT_NONE;
+}
+
+// Another player is on this map (someone who could come and join)
+static bool8 FriendOnMap(void)
+{
+    u8 i;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        if (PlayerValid(i)
+         && gMpPlayers[i].state.mapGroup == gSaveBlock1Ptr->location.mapGroup
+         && gMpPlayers[i].state.mapNum == gSaveBlock1Ptr->location.mapNum)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// The requester joins: tell them the trainer and how it ends
+static void AcceptRequester(void)
+{
+    u8 buf[4 + LOSE_TEXT_MAX + 1];
+    const u8 *lose = GetTrainerALoseText();
+    u16 len = 0;
+    buf[0] = MPR_COOP_ACCEPT;
+    buf[1] = sCoop.trainerId & 0xFF;
+    buf[2] = sCoop.trainerId >> 8;
+    buf[3] = sCoop.mode;
+    if (lose != NULL)
+    {
+        while (len < LOSE_TEXT_MAX && lose[len] != EOS)
+        {
+            buf[4 + len] = lose[len];
+            len++;
+        }
+    }
+    buf[4 + len] = EOS;
+    Send(sCoop.requester, buf, 5 + len);
+    sCoop.accepted = TRUE;
+    sCoop.partner = sCoop.requester;
+    MPNet_Log("co-op: player %d joins the battle against trainer %d", sCoop.partner + 1, sCoop.trainerId);
+}
 
 static void FinishJoinCheck(u8 taskId)
 {
+    StopWaiting();
+    if (!IsFieldMessageBoxHidden())
+        HideFieldMessageBox();
     sCoop.prompting = FALSE;
     gTextFlags.canABSpeedUpPrint = FALSE;
     ScriptContext_Enable();
@@ -380,9 +467,26 @@ static void Task_JoinCheck(u8 taskId)
     switch (tState)
     {
     case JOIN_START:
-        if (!sCoop.challenged || !PlayerValid(sCoop.requester) || gNoOfApproachingTrainers == 2)
+        if (!sCoop.challenged || gNoOfApproachingTrainers == 2)
         {
             FinishJoinCheck(taskId);
+            break;
+        }
+        if (!PlayerValid(sCoop.requester))
+        {
+            // Nobody asked yet: offer to wait for a friend on this map
+            if (gTrainers[sCoop.trainerId].partySize <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+            {
+                FinishJoinCheck(taskId);
+                break;
+            }
+            sCoop.waitLocalId = gObjectEvents[gSelectedObjectEvent].localId;
+            sCoop.waitMapNum = gObjectEvents[gSelectedObjectEvent].mapNum;
+            sCoop.waitMapGroup = gObjectEvents[gSelectedObjectEvent].mapGroup;
+            sCoop.waitStage = WAIT_ASKING;
+            HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
+            MP_ShowFieldMessageFitted(sText_WaitAsk);
+            tState = JOIN_WAIT_PRINT;
             break;
         }
         if (gTrainers[sCoop.trainerId].partySize <= 1)
@@ -420,28 +524,7 @@ static void Task_JoinCheck(u8 taskId)
         if (PlayerValid(sCoop.requester))
         {
             if (answer == 0)
-            {
-                u8 buf[4 + LOSE_TEXT_MAX + 1];
-                const u8 *lose = GetTrainerALoseText();
-                u16 len = 0;
-                buf[0] = MPR_COOP_ACCEPT;
-                buf[1] = sCoop.trainerId & 0xFF;
-                buf[2] = sCoop.trainerId >> 8;
-                buf[3] = sCoop.mode;
-                if (lose != NULL)
-                {
-                    while (len < LOSE_TEXT_MAX && lose[len] != EOS)
-                    {
-                        buf[4 + len] = lose[len];
-                        len++;
-                    }
-                }
-                buf[4 + len] = EOS;
-                Send(sCoop.requester, buf, 5 + len);
-                sCoop.accepted = TRUE;
-                sCoop.partner = sCoop.requester;
-                MPNet_Log("co-op: player %d joins the battle against trainer %d", sCoop.partner + 1, sCoop.trainerId);
-            }
+                AcceptRequester();
             else
             {
                 SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_NO);
@@ -454,6 +537,56 @@ static void Task_JoinCheck(u8 taskId)
     case JOIN_ONE_MON:
         if (!IsTextPrinterActive(0) && JOY_NEW(A_BUTTON | B_BUTTON))
             FinishJoinCheck(taskId);
+        break;
+    case JOIN_WAIT_PRINT:
+        if (!IsTextPrinterActive(0))
+        {
+            DisplayYesNoMenuDefaultYes();
+            tState = JOIN_WAIT_ASK;
+        }
+        break;
+    case JOIN_WAIT_ASK:
+    {
+        s8 answer = Menu_ProcessInputNoWrapClearOnChoose();
+        if (answer == MENU_NOTHING_CHOSEN)
+            break;
+        if (answer != 0)
+        {
+            // Battle alone (a friend who asked meanwhile is told no)
+            if (PlayerValid(sCoop.requester))
+                SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_NO);
+            sCoop.requester = -1;
+            FinishJoinCheck(taskId);
+            break;
+        }
+        sCoop.waitStage = WAIT_WAITING;
+        sCoop.waitTimer = 0;
+        SendWait(TRUE);
+        MP_ShowFieldMessageFitted(sText_Waiting);
+        tState = JOIN_WAITING;
+        // fall through
+    }
+    case JOIN_WAITING:
+        if (PlayerValid(sCoop.requester))
+        {
+            // A friend walked up: they're in
+            PlaySE(SE_SUCCESS);
+            AcceptRequester();
+            FinishJoinCheck(taskId);
+            break;
+        }
+        if (++sCoop.waitTimer >= WAIT_RESEND_FRAMES)
+        {
+            sCoop.waitTimer = 0;
+            SendWait(TRUE);
+        }
+        if (gMpLocalId >= 0)
+            MP_Emote_KeepBubbleFor(gMpLocalId, sText_JoinMe);
+        if (!IsTextPrinterActive(0) && JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            FinishJoinCheck(taskId);   // a single battle after all
+        }
         break;
     }
 }
@@ -1435,9 +1568,55 @@ static void UpdateWildWaiting(void)
 
 static void TryRunPendingScript(void);
 
+static u8 sHeldBy;
+
+// A trainer some other player is holding while they wait for a partner
+bool8 MP_Coop_IsNpcHeld(struct ObjectEvent *obj)
+{
+    u8 i;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        if (sHeld[i].ttl && PlayerValid(i) && obj->localId == sHeld[i].localId
+         && obj->mapNum == sHeld[i].mapNum && obj->mapGroup == sHeld[i].mapGroup)
+        {
+            sHeldBy = i;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// Talking to a held trainer (right after MP_Coop_IsNpcHeld said so)
+void MP_Coop_OnHeldNpcTalk(void)
+{
+    SetNameVar(sHeldBy);
+    StringExpandPlaceholders(sText, sText_HeldNpc);
+    MP_Toast(sText);
+}
+
+static void UpdateHeld(void)
+{
+    u8 i;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        if (!sHeld[i].ttl)
+            continue;
+        if (--sHeld[i].ttl == 0 || !PlayerValid(i))
+        {
+            sHeld[i].ttl = 0;
+            MP_Emote_ClearBubbleFor(i);
+        }
+        else
+        {
+            MP_Emote_KeepBubbleFor(i, sText_JoinMe);
+        }
+    }
+}
+
 void MP_Coop_Update(void)
 {
     TryRunPendingScript();
+    UpdateHeld();
 
     if (sCoop.wildAsking)
         UpdateWildAsking();
@@ -1468,6 +1647,23 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
 {
     switch (data[0])
     {
+    case MPR_COOP_WAIT:
+        if (from < MP_MAX_PLAYERS && len >= 5)
+        {
+            if (data[1])
+            {
+                sHeld[from].ttl = WAIT_HOLD_FRAMES;
+                sHeld[from].localId = data[2];
+                sHeld[from].mapNum = data[3];
+                sHeld[from].mapGroup = data[4];
+            }
+            else if (sHeld[from].ttl)
+            {
+                sHeld[from].ttl = 0;
+                MP_Emote_ClearBubbleFor(from);
+            }
+        }
+        break;
     case MPR_COOP_REQUEST:
         if (!sCoop.challenged || sCoop.accepted || sCoop.prompting
          || (sCoop.requester >= 0 && sCoop.requester != from && PlayerValid(sCoop.requester)))
@@ -1546,6 +1742,11 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
 
 void MP_Coop_OnPlayerLeft(u8 id)
 {
+    if (id < MP_MAX_PLAYERS && sHeld[id].ttl)
+    {
+        sHeld[id].ttl = 0;
+        MP_Emote_ClearBubbleFor(id);
+    }
     if (sCoop.wildFrom == id)
         StopWaitingForWild();
     if (sCoop.requester == id)

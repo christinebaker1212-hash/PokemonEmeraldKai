@@ -205,6 +205,8 @@ bool8 CheckForTrainersWantingBattle(void)
             continue;
         if (gObjectEvents[i].trainerType != TRAINER_TYPE_NORMAL && gObjectEvents[i].trainerType != TRAINER_TYPE_BURIED)
             continue;
+        if (MP_Coop_IsNpcHeld(&gObjectEvents[i]))   // Moemon Co-op: waiting with another player
+            continue;
 
         numTrainers = CheckTrainer(i);
         if (numTrainers == 2)

@@ -451,6 +451,11 @@ bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
+void MP_Emote_KeepBubbleFor(u8 playerId, const u8 *text);
+void MP_Emote_ClearBubbleFor(u8 playerId);
+struct ObjectEvent;
+bool8 MP_Coop_IsNpcHeld(struct ObjectEvent *obj);
+void MP_Coop_OnHeldNpcTalk(void);
 void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text);
 // mp_social.c
 void MP_Social_Open(void);
