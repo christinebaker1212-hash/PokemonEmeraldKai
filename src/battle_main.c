@@ -4456,6 +4456,7 @@ static void HandleTurnActionSelectionState(void)
                 else if (gMpCoopBattle && !gMpCoopWild && gBattleBufferB[gActiveBattler][1] == B_ACTION_RUN)
                 {
                     // Moemon Co-op: no running from a trainer (it used to forfeit for both)
+                    MPNet_Log("co-op: battler %d tried to run from a trainer", gActiveBattler);
                     gSelectionBattleScripts[gActiveBattler] = BattleScript_MpCoopCantRunFromTrainer;
                     gBattleCommunication[gActiveBattler] = STATE_SELECTION_SCRIPT;
                     *(gBattleStruct->selectionScriptFinished + gActiveBattler) = FALSE;

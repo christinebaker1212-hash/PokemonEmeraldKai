@@ -26,6 +26,7 @@
 #include "global.h"
 #include "random.h"
 #include "mp.h"
+#include "item.h"
 #include "map_name_popup.h"
 #include "platform/gamepad.h"
 #include "battle.h"
@@ -77,7 +78,8 @@ extern const u8 EventScript_MpCoopLearnMove[];
 bool8 gMpCoopBattle;
 bool8 gMpCoopWild;
 u8 gMpCoopItemSlot = 0xFF;         // party slot a healing item was used on (picked in the party menu)
-u8 gMpCoopItemTargetSlot = 0xFF;   // the master's battle: the slot it's being applied to
+u8 gMpCoopItemTargetSlot = 0xFF;
+u8 gMpCoopBallTarget = 0xFF;   // the master's battle: the slot it's being applied to
 
 enum {
     MPR_COOP_REQUEST = MPR_COOP_FIRST,  // asker -> challenged: may I join?
@@ -93,6 +95,7 @@ enum {
     MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer
     MPR_COOP_BSTATUS,                   // in a co-op battle -> partner: u8 MP_BST_* (what we're choosing)
     MPR_COOP_BONUS,                     // battle start -> partner: u16 own EXP bonus percent (MP_ExpBonusPercent)
+    MPR_COOP_REFUND,                    // master -> partner: u16 ball that went back to your bag (its target was gone)
 };
 
 #define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
@@ -843,6 +846,39 @@ void MP_Coop_RecordMoney(u32 amount)
 }
 
 // Pokémon 0-2 belong to the master, 3-5 to the partner
+// Master: a ball's target was gone, so it goes back to the thrower's bag
+// (ours, or the partner's on their game)
+void MP_Coop_RefundBall(u8 thrower, u16 item)
+{
+    if (!gMpCoopBattle || !sCoop.isMaster)
+        return;
+    if (gBattlerPartyIndexes[thrower] < MULTI_PARTY_SIZE)
+    {
+        AddBagItem(item, 1);
+        MPNet_Log("co-op: ball %d went back to the bag", item);
+    }
+    else if (PlayerValid(sCoop.partner))
+    {
+        u8 buf[3] = {MPR_COOP_REFUND, item & 0xFF, item >> 8};
+        Send(sCoop.partner, buf, 3);
+    }
+}
+
+// The partner's game: a ball we threw caught a wild Pokémon (our screen played
+// the 3-shake catch). The master's result replaces these; they're only used
+// when the battle is called off before the result comes.
+void MP_Coop_NoteOwnCatch(u8 target)
+{
+    struct Pokemon *mon;
+    if (!gMpCoopWild || sCoop.isMaster || target >= MAX_BATTLERS_COUNT || sCoop.catchCount >= ARRAY_COUNT(sCoop.catches))
+        return;
+    mon = &sCoop.catches[sCoop.catchCount];
+    *mon = gEnemyParty[gBattlerPartyIndexes[target]];
+    MP_Ball_SetCaught(mon, gLastUsedItem);
+    sCoop.catchOwner[sCoop.catchCount] = CAUGHT_MINE;
+    sCoop.catchCount++;
+}
+
 bool8 MP_Coop_IsTradedMon(u8 partyIndex)
 {
     u8 owner = partyIndex < MULTI_PARTY_SIZE ? 0 : 1;
@@ -1186,6 +1222,19 @@ static void TryRunPendingScript(void)
 
 void MP_Coop_OnBattleAborted(void)
 {
+    u8 i;
+
+    // Called off (a player left): catches made so far stay with whoever threw
+    // the ball; the party itself is back to how it was before the battle
+    for (i = 0; i < sCoop.catchCount; i++)
+    {
+        if (sCoop.catchOwner[i] != CAUGHT_MINE)
+            continue;
+        MPNet_Log("co-op: battle called off, keeping a catch");
+        GiveCaughtMon(&sCoop.catches[i]);
+        MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, &sCoop.catches[i]);
+    }
+    sCoop.catchCount = 0;
     gMpCoopBattle = FALSE;
     gMpCoopWild = FALSE;
     sCoop.caught = CAUGHT_NONE;
@@ -1660,6 +1709,7 @@ static u8 sHeldBy;
 // what their partner is still doing (each game sends its menu state).
 
 static u8 sMyBattleStatus, sPartnerBattleStatus;
+static struct { u8 kind, target; u16 value; } sPartnerIntent;
 static bool8 sStandbyShown, sStandbyDirty, sStandbyPrinting;
 static EWRAM_DATA u8 sStandbyText[80];
 
@@ -1668,6 +1718,114 @@ static const u8 sText_PartnerMove[] = _("{STR_VAR_1} is selecting\na move to use
 static const u8 sText_PartnerBag[] = _("{STR_VAR_1} is choosing\nan item to use…");
 static const u8 sText_PartnerParty[] = _("{STR_VAR_1} is choosing a\nMOéMON to switch in…");
 static const u8 sText_PartnerDone[] = _("Waiting for {STR_VAR_1}…");
+
+// We chose (a move and target, an item, a switch, RUN): tell the partner
+void MP_Coop_SetIntent(u8 kind, u16 value, u8 target)
+{
+    u8 buf[6] = {MPR_COOP_BSTATUS, MP_BST_DONE, kind, value & 0xFF, value >> 8, target};
+    if (!gMpCoopBattle)
+        return;
+    sMyBattleStatus = MP_BST_DONE;
+    MPNet_Log("co-op: intent %d value %d target %d", kind, value, target);
+    if (PlayerValid(sCoop.partner))
+        Send(sCoop.partner, buf, sizeof(buf));
+}
+
+static u8 *AppendBattlerName(u8 *p, u8 battler)
+{
+    u8 name[POKEMON_NAME_LENGTH + 2];
+    struct Pokemon *party = GetBattlerSide(battler) == B_SIDE_PLAYER ? gPlayerParty : gEnemyParty;
+    GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_NICKNAME, name);
+    StringGet_Nickname(name);
+    return StringCopy(p, name);
+}
+
+static const u8 sText_IntentWantsRun[] = _(" wants to RUN!");
+static const u8 sText_IntentFoes[] = _("the foes");
+static const u8 sText_IntentEveryone[] = _("everyone");
+static const u8 sText_IntentSwitch[] = _("switch to ");
+
+// "BOB: EMBER" / "→ ZIGZAGOON" (game text, two lines) once the partner has chosen this turn
+bool8 MP_Coop_PartnerIntentText(u8 *dst)
+{
+    u8 *p = dst;
+    u8 kind = sPartnerIntent.kind, target = sPartnerIntent.target;
+    u16 value = sPartnerIntent.value;
+
+    if (!gMpCoopBattle || sPartnerBattleStatus != MP_BST_DONE || kind == MP_INTENT_NONE || !PlayerValid(sCoop.partner))
+        return FALSE;
+    SetNameVar(sCoop.partner);
+    p = StringCopy(p, gStringVar1);
+    if (kind == MP_INTENT_RUN)
+    {
+        StringCopy(p, sText_IntentWantsRun);
+        return TRUE;
+    }
+    *p++ = CHAR_COLON;
+    *p++ = CHAR_SPACE;
+    switch (kind)
+    {
+    case MP_INTENT_MOVE:
+    {
+        u8 flags;
+        if (value == MOVE_NONE || value >= MOVES_COUNT)
+            return FALSE;
+        p = StringCopy(p, gMoveNames[value]);
+        flags = gBattleMoves[value].target;
+        if (flags & (MOVE_TARGET_USER | MOVE_TARGET_OPPONENTS_FIELD | MOVE_TARGET_DEPENDS))
+            break;
+        *p++ = CHAR_NEWLINE;
+        *p++ = CHAR_RIGHT_ARROW;
+        *p++ = CHAR_SPACE;
+        if (flags & MOVE_TARGET_BOTH)
+            p = StringCopy(p, sText_IntentFoes);
+        else if (flags & MOVE_TARGET_FOES_AND_ALLY)
+            p = StringCopy(p, sText_IntentEveryone);
+        else if (target < MAX_BATTLERS_COUNT)
+            p = AppendBattlerName(p, target);
+        else
+            p -= 3;
+        break;
+    }
+    case MP_INTENT_BALL:
+        CopyItemName(value, p);
+        p += StringLength(p);
+        if (target < MAX_BATTLERS_COUNT)
+        {
+            *p++ = CHAR_NEWLINE;
+            *p++ = CHAR_RIGHT_ARROW;
+            *p++ = CHAR_SPACE;
+            p = AppendBattlerName(p, target);
+        }
+        break;
+    case MP_INTENT_ITEM:
+        CopyItemName(value, p);
+        p += StringLength(p);
+        if (target < PARTY_SIZE)
+        {
+            u8 name[POKEMON_NAME_LENGTH + 2];
+            *p++ = CHAR_NEWLINE;
+            *p++ = CHAR_RIGHT_ARROW;
+            *p++ = CHAR_SPACE;
+            GetMonData(&gPlayerParty[target], MON_DATA_NICKNAME, name);
+            StringGet_Nickname(name);
+            p = StringCopy(p, name);
+        }
+        break;
+    case MP_INTENT_SWITCH:
+        p = StringCopy(p, sText_IntentSwitch);
+        if (value < PARTY_SIZE)
+        {
+            u8 name[POKEMON_NAME_LENGTH + 2];
+            GetMonData(&gPlayerParty[value], MON_DATA_NICKNAME, name);
+            StringGet_Nickname(name);
+            p = StringCopy(p, name);
+        }
+        break;
+    }
+    *p = EOS;
+    return TRUE;
+}
 
 void MP_Coop_SetBattleStatus(u8 status)
 {
@@ -1718,6 +1876,7 @@ static void UpdateBattleStatus(void)
     if (!gMpCoopBattle)
     {
         sMyBattleStatus = sPartnerBattleStatus = MP_BST_NONE;
+        sPartnerIntent.kind = MP_INTENT_NONE;
         sStandbyShown = FALSE;
         return;
     }
@@ -1823,6 +1982,17 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             }
         }
         break;
+    case MPR_COOP_REFUND:
+        if (gMpCoopBattle && from == sCoop.partner && len >= 3)
+        {
+            u16 item = data[1] | (data[2] << 8);
+            if (MP_IsBallItem(item))
+            {
+                AddBagItem(item, 1);
+                MPNet_Log("co-op: ball %d went back to the bag", item);
+            }
+        }
+        break;
     case MPR_COOP_BONUS:
         // sent before the link handshake, so it's here long before any EXP
         if (len >= 3)
@@ -1832,10 +2002,18 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
         }
         break;
     case MPR_COOP_BSTATUS:
-        if (gMpCoopBattle && from == sCoop.partner && len >= 2 && data[1] != sPartnerBattleStatus)
+        if (gMpCoopBattle && from == sCoop.partner && len >= 2)
         {
+            // + u8 kind, u16 value, u8 target once they've chosen (MP_Coop_SetIntent)
+            u8 kind = len >= 6 ? data[2] : MP_INTENT_NONE;
+            if (data[1] == sPartnerBattleStatus && kind == sPartnerIntent.kind)
+                break;
             sPartnerBattleStatus = data[1];
+            sPartnerIntent.kind = kind;
+            sPartnerIntent.value = len >= 6 ? (data[3] | (data[4] << 8)) : 0;
+            sPartnerIntent.target = len >= 6 ? data[5] : 0xFF;
             sStandbyDirty = TRUE;
+            MP_BattleRefreshActionPrompt();
         }
         break;
     case MPR_COOP_REQUEST:
@@ -1896,6 +2074,7 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
                 memcpy(sCoop.resultMons, data + pos, sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
                 sCoop.gotResult = TRUE;
                 pos += sizeof(struct Pokemon) * MULTI_PARTY_SIZE;
+                sCoop.catchCount = 0;   // the master's list replaces what our screen noted
                 // We caught wild Pokémon
                 if (gMpCoopWild && pos < len)
                 {

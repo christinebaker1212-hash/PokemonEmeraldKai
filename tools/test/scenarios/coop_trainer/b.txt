@@ -5,6 +5,19 @@ wait 30
 press UP 12
 wait 20
 press UP 12
+waitfor action 8000
+wait 10
+press RIGHT 1
+wait 5
+press DOWN 1
+wait 5
+press A 1
+wait 150
+waitfor action 3000
+press UP 1
+wait 5
+press LEFT 1
+wait 5
 pressuntillog A 15000 co-op: battle over
 wait 300
 quit

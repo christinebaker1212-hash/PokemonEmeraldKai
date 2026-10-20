@@ -1,0 +1,10 @@
+# Co-op 2-on-2: both throw a MASTER BALL (L) at the same wild Pokemon, BOB moving his target cursor onto
+# ALICE's. ALICE's catches it; BOB's throw is called off and his ball goes back to his bag.
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("co-op: ball 1 at battler 1" "co-op wild: caught species" "co-op: battle over")
+EXPECT_B=("co-op: ball 1 at battler 1" "co-op: ball 1 went back to the bag" "co-op: battle over")

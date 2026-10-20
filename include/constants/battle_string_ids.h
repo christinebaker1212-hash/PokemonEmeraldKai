@@ -387,6 +387,7 @@
 #define STRINGID_MPCOOP_ITEM_REVIVED        392
 #define STRINGID_MPCOOP_ITEM_HP_CURED       393
 #define STRINGID_MPCOOP_WANTS_RUN           394   // co-op wild: RUN needs everyone
+#define STRINGID_MPCOOP_BALL_NO_TARGET      395   // co-op wild: the ball's target is gone
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

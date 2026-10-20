@@ -318,6 +318,12 @@ void HandleAction_UseItem(void)
     ClearFuryCutterDestinyBondGrudge(gBattlerAttacker);
     gLastUsedItem = gBattleBufferB[gBattlerAttacker][1] | (gBattleBufferB[gBattlerAttacker][2] << 8);
 
+    // Moemon Co-op: a ball carries its chosen wild target (bit 15 + battler in bits 12-14)
+    if (gMpCoopBattle && (gLastUsedItem & MP_BALL_TARGET_FLAG))
+    {
+        gMpCoopBallTarget = (gLastUsedItem >> 12) & 7;
+        gLastUsedItem &= 0xFFF;
+    }
     // Moemon Co-op: a healing item carries its target's party slot in bits 12-14
     if (gMpCoopBattle && (gLastUsedItem >> 12) != 0)
     {

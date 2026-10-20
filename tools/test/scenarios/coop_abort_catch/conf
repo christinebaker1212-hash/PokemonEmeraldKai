@@ -1,0 +1,9 @@
+# Co-op 2-on-2 wild: ALICE (the battle's master) catches one with a MASTER BALL, then BOB disconnects:
+# the battle is called off and ALICE keeps the catch (HP/EXP back to before the battle)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("co-op: battle called off, keeping a catch" "co-op wild: caught species" "disconnected")

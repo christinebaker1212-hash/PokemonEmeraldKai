@@ -10138,8 +10138,22 @@ static void Cmd_handleballthrow(void)
 
     gActiveBattler = gBattlerAttacker;
     gBattlerTarget = BATTLE_OPPOSITE(gBattlerAttacker);
-    // Moemon Co-op: in a co-op wild double, aim at whichever wild Pokémon is still there
-    if (gMpCoopWild && (gAbsentBattlerFlags & gBitTable[gBattlerTarget] || gBattleMons[gBattlerTarget].hp == 0))
+    // Moemon Co-op: the wild Pokémon the thrower picked. If it was caught or
+    // fainted earlier this turn, the throw is called off and the ball goes back.
+    if (gMpCoopWild && gMpCoopBallTarget < MAX_BATTLERS_COUNT)
+    {
+        gBattlerTarget = gMpCoopBallTarget;
+        gMpCoopBallTarget = 0xFF;
+        if (GetBattlerSide(gBattlerTarget) != B_SIDE_OPPONENT
+         || (gAbsentBattlerFlags & gBitTable[gBattlerTarget]) || gBattleMons[gBattlerTarget].hp == 0)
+        {
+            MP_Coop_RefundBall(gBattlerAttacker, gLastUsedItem);
+            gBattlescriptCurrInstr = BattleScript_MpCoopBallNoTarget;
+            return;
+        }
+    }
+    // (no target given) aim at whichever wild Pokémon is still there
+    else if (gMpCoopWild && (gAbsentBattlerFlags & gBitTable[gBattlerTarget] || gBattleMons[gBattlerTarget].hp == 0))
         gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
 
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)

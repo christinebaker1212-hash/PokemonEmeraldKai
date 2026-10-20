@@ -107,6 +107,12 @@ BattleScript_MpCoopBallCaughtGoOn::
 	various BS_ATTACKER, VARIOUS_MP_COOP_REMOVE_CAUGHT
 	finishaction
 
+@ Moemon Co-op: the ball's target was caught or fainted earlier this turn: the ball went back
+BattleScript_MpCoopBallNoTarget::
+	printstring STRINGID_MPCOOP_BALL_NO_TARGET
+	waitmessage B_WAIT_TIME_LONG
+	finishaction
+
 @ Moemon Co-op: a player chose RUN in a co-op wild battle, but not everyone did
 BattleScript_MpCoopWantsToRun::
 	printstring STRINGID_MPCOOP_WANTS_RUN

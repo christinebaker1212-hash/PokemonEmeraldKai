@@ -122,20 +122,28 @@ TEAMING UP FOR A DOUBLE BATTLE
   Your bubble pops up over your Moemon on your partner's (or opponent's)
   screen. Phrases are edited outside battle.
 * When you've picked your move first, the battle tells you what your partner
-  is doing ("ALICE is choosing an item to use...").
-* Each player brings their first three healthy Moemon and picks their own
-  moves. Both players get the full prize money and EXP for their Moemon.
-  Evolutions happen on each player's game after the battle.
+  is doing ("ALICE is choosing an item to use..."). Once your partner has
+  picked, your menu shows their choice ("ALICE: EMBER -> ZIGZAGOON").
+* Each player brings their CO-OP TEAM: pick POKeMON in the START menu, choose
+  a Moemon and CO-OP TEAM to mark it 1, 2 or 3 (again to take it off). Marked
+  Moemon go first; if fewer than three are marked (or one has fainted), your
+  first healthy others fill the gaps. Nothing marked = your first three
+  healthy Moemon.
+* Both players get the full prize money, and each player gets the full EXP
+  for their own Moemon (shared only among your own Moemon that battled), with
+  your own EXP bonuses. Evolutions happen on each player's game after the
+  battle.
 * A Moemon that already knows four moves can't stop the battle to learn a
   new one. After the battle you're asked if you want to teach it a move,
   and the Move Reminder screen opens.
 * If you lose, both of you black out. If someone disconnects, the battle is
-  called off.
+  called off: your party goes back to how it was before the battle (no EXP,
+  no prize money), but Moemon you already caught and items you already used
+  stay that way.
+* There's no running from a trainer, same as on your own.
 * Ordinary trainers count as beaten for both players. Story battles (gym
   leaders, rivals, villains) only count for the challenged player, so the
   partner can still get their badge by battling them on their own later.
-* Items can't be used during a co-op trainer battle (same as Cable Club
-  battles).
 
 
 WILD BATTLES TOGETHER
@@ -146,9 +154,17 @@ WILD BATTLES TOGETHER
   happens, as long as they're free (not in a menu, a battle or a trade).
 * It's two of you against one wild Moemon, and now and then two of them
   jump out at once (2 on 2). Both of you get EXP.
-* You can throw POKe BALLS (only Balls: other items can't be used). Whoever
-  throws the Ball that catches it gets the Moemon. Against two, catching one
-  doesn't end the battle: the other one is still there to catch or beat.
+* You can throw POKe BALLS and use healing items. Whoever throws the Ball
+  that catches it gets the Moemon. Against two, you pick which one to throw
+  at (the D-Pad moves between them, A throws, B puts the Ball back), and
+  catching one doesn't end the battle: the other one is still there.
+* If your target was already caught or beaten earlier in the turn (say your
+  partner's Ball got it first), your throw is called off and the Ball goes
+  back to your BAG.
+* Balls can't be thrown when your party and the PC are both full.
+* RUN is a team decision: you get away only if both of you choose RUN in the
+  same turn (one try, with your fastest Moemon). Choosing it alone just lets
+  your partner know you want to leave.
 * Friends further away (or not in the grass) don't join: you battle alone,
   like normal.
 * Wild Moemon you fight together are 2 levels higher, and 60% of the time

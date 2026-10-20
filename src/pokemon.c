@@ -4654,6 +4654,16 @@ bool8 IsPlayerPartyAndPokemonStorageFull(void)
 {
     s32 i;
 
+    // Moemon Co-op: in a co-op battle gPlayerParty is the shared battle party;
+    // a catch goes to the real (saved) party or the PC afterwards
+    if (gMpCoopBattle)
+    {
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetBoxMonData(&gSaveBlock1Ptr->playerParty[i].box, MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+                return FALSE;
+        return IsPokemonStorageFull();
+    }
+
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
             return FALSE;

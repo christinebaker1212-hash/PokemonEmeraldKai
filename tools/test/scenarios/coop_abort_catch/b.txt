@@ -1,0 +1,15 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+waitfor action 4000
+wait 10
+press B 1
+wait 10
+press RIGHT 1
+wait 5
+press DOWN 1
+wait 5
+press A 1
+waitfor action 6000
+wait 30
+quit

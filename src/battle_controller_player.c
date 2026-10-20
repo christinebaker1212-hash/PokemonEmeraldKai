@@ -97,6 +97,7 @@ static void PlayerCmdEnd(void);
 
 static void PlayerBufferRunCommand(void);
 static void HandleInputChooseTarget(void);
+static void HandleInputChooseAction(void);
 static void HandleInputChooseMove(void);
 static bool8 sMpMoveInfo;   // Moemon Co-op QoL: move info view (R)
 static u16 sMpQuickBall;    // Moemon Co-op QoL: ball thrown with L
@@ -150,6 +151,46 @@ static void MpShowPartnerTeam(void)
     if (lines == 0)
         MP_AsciiToGame(p, "Partner: no POK~MON left.", 40);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+}
+
+// "What will TORCHIC do?", or in a co-op battle once the partner has chosen,
+// their choice ("BOB: EMBER" / "→ ZIGZAGOON", small font)
+static void MpPrintActionPrompt(void)
+{
+    static EWRAM_DATA u8 sIntent[64];
+    u8 *p;
+
+    if (!gMpCoopBattle || !MP_Coop_PartnerIntentText(sIntent))
+    {
+        BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+        return;
+    }
+    // the box holds two lines: the partner's plan replaces the question
+    p = gDisplayedStringBattle;
+    *p++ = EXT_CTRL_CODE_BEGIN;
+    *p++ = EXT_CTRL_CODE_FONT;
+    *p++ = FONT_SMALL_NARROW;
+    StringCopy(p, sIntent);
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+}
+
+// Moemon Co-op: the partner's choice arrived; redraw the prompt if our action menu is up
+void MP_BattleRefreshActionPrompt(void)
+{
+    u8 b, saved = gActiveBattler;
+    if (!gMpCoopBattle || !gMain.inBattle || sMpPartnerGlance)
+        return;
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        if (gBattlerControllerFuncs[b] == HandleInputChooseAction)
+        {
+            gActiveBattler = b;
+            MpPrintActionPrompt();
+            gActiveBattler = saved;
+            return;
+        }
+    }
 }
 
 // A wild battle where the last kind of ball thrown is still in the bag
@@ -321,10 +362,7 @@ static void HandleInputChooseAction(void)
         if (sMpPartnerGlance)
             MpShowPartnerTeam();
         else
-        {
-            BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
-            BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
-        }
+            MpPrintActionPrompt();
         return;
     }
 
@@ -355,6 +393,7 @@ static void HandleInputChooseAction(void)
             break;
         case 3: // Bottom right
             BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_RUN, 0);
+            MP_Coop_SetIntent(MP_INTENT_RUN, 0, 0xFF);
             break;
         }
         PlayerBufferExecCompleted();
@@ -462,6 +501,7 @@ static void HandleInputChooseTarget(void)
         PlaySE(SE_SELECT);
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+        MP_Coop_SetIntent(MP_INTENT_MOVE, GetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_MOVE1 + gMoveSelectionCursor[gActiveBattler]), gMultiUsePlayerCursor);
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
         PlayerBufferExecCompleted();
     }
@@ -630,6 +670,7 @@ static void HandleInputChooseMove(void)
         if (!canSelectTarget)
         {
             BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+            MP_Coop_SetIntent(MP_INTENT_MOVE, moveInfo->moves[gMoveSelectionCursor[gActiveBattler]], gMultiUsePlayerCursor);
             PlayerBufferExecCompleted();
         }
         else
@@ -1467,7 +1508,11 @@ static void WaitForMonSelection(void)
     if (gMain.callback2 == BattleMainCB2 && !gPaletteFade.active)
     {
         if (gPartyMenuUseExitCallback == TRUE)
+        {
             BtlController_EmitChosenMonReturnValue(B_COMM_TO_ENGINE, gSelectedMonPartyId, gBattlePartyCurrentOrder);
+            if ((gBattleBufferA[gActiveBattler][1] & 0xF) == PARTY_ACTION_CHOOSE_MON)
+                MP_Coop_SetIntent(MP_INTENT_SWITCH, gSelectedMonPartyId, 0xFF);
+        }
         else
             BtlController_EmitChosenMonReturnValue(B_COMM_TO_ENGINE, PARTY_SIZE, NULL);
 
@@ -1489,11 +1534,104 @@ static void OpenBagAndChooseItem(void)
     }
 }
 
+// Moemon Co-op: picking which wild Pokémon a ball goes to (co-op wild, two of them)
+static u16 sMpBallItem;
+static const u8 sText_MpBallWhich[] = _("Throw it at\nwhich one?");
+
+static bool8 MpIsBallTarget(u8 battler)
+{
+    return battler < gBattlersCount && GetBattlerSide(battler) == B_SIDE_OPPONENT
+        && !(gAbsentBattlerFlags & gBitTable[battler])
+        && GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_HP) != 0;
+}
+
+static u8 MpCountBallTargets(u8 *first)
+{
+    u8 i, n = 0;
+    *first = BATTLE_OPPOSITE(gActiveBattler);
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (MpIsBallTarget(i) && n++ == 0)
+            *first = i;
+    }
+    return n;
+}
+
+static void MpEndBallTarget(void)
+{
+    gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
+    EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
+}
+
+static void HandleInputChooseBallTarget(void)
+{
+    DoBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX, 15, 1);
+    if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        MpEndBallTarget();
+        MPNet_Log("co-op: ball %d at battler %d", sMpBallItem, gMultiUsePlayerCursor);
+        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, sMpBallItem | MP_BALL_TARGET_FLAG | (gMultiUsePlayerCursor << 12));
+        MP_Coop_SetIntent(MP_INTENT_BALL, sMpBallItem, gMultiUsePlayerCursor);
+        PlayerBufferExecCompleted();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        // changed our mind: the ball goes back, choose again
+        PlaySE(SE_SELECT);
+        MpEndBallTarget();
+        AddBagItem(sMpBallItem, 1);
+        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, ITEM_NONE);
+        PlayerBufferExecCompleted();
+    }
+    else if (JOY_NEW(DPAD_ANY))
+    {
+        u8 i, next = gMultiUsePlayerCursor;
+        for (i = 1; i <= gBattlersCount; i++)
+        {
+            u8 b = (gMultiUsePlayerCursor + i) % gBattlersCount;
+            if (MpIsBallTarget(b))
+            {
+                next = b;
+                break;
+            }
+        }
+        if (next != gMultiUsePlayerCursor)
+        {
+            PlaySE(SE_SELECT);
+            MpEndBallTarget();
+            gMultiUsePlayerCursor = next;
+            gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
+        }
+    }
+}
+
 static void CompleteWhenChoseItem(void)
 {
     if (gMain.callback2 == BattleMainCB2 && !gPaletteFade.active)
     {
         u16 value = gSpecialVar_ItemId;
+        // Moemon Co-op: a ball in a co-op wild battle names its target; with two
+        // wild Pokémon out the player picks one first
+        if (gMpCoopWild && value != ITEM_NONE && MP_IsBallItem(value))
+        {
+            u8 first;
+            if (MpCountBallTargets(&first) >= 2)
+            {
+                sMpBallItem = value;
+                gMultiUsePlayerCursor = MpIsBallTarget(BATTLE_OPPOSITE(gActiveBattler)) ? BATTLE_OPPOSITE(gActiveBattler) : first;
+                gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
+                BattlePutTextOnWindow(sText_MpBallWhich, B_WIN_ACTION_PROMPT);
+                gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseBallTarget;
+                return;
+            }
+            value |= MP_BALL_TARGET_FLAG | (first << 12);
+            MP_Coop_SetIntent(MP_INTENT_BALL, gSpecialVar_ItemId, first);
+        }
+        else if (gMpCoopBattle && value != ITEM_NONE && gMpCoopItemSlot < PARTY_SIZE)
+        {
+            MP_Coop_SetIntent(MP_INTENT_ITEM, value, gMpCoopItemSlot);
+        }
         // Moemon Co-op: a healing item's target (any of the six) rides along in bits 12-14
         if (gMpCoopBattle && value != ITEM_NONE && gMpCoopItemSlot < PARTY_SIZE)
             value |= (gMpCoopItemSlot + 1) << 12;
@@ -2620,6 +2758,8 @@ static void PlayerHandleBallThrowAnim(void)
 {
     u8 ballThrowCaseId = gBattleBufferA[gActiveBattler][1];
 
+    if (ballThrowCaseId == BALL_3_SHAKES_SUCCESS && gMpCoopWild)
+        MP_Coop_NoteOwnCatch(gBattlerTarget);   // Moemon Co-op: kept if the battle is called off
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
     gDoingBattleAnim = TRUE;
     InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gMpCoopWild ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op
@@ -2756,8 +2896,7 @@ static void PlayerHandleChooseAction(void)
         ActionSelectionDestroyCursorAt(i);
 
     ActionSelectionCreateCursorAt(gActionSelectionCursor[gActiveBattler], 0);
-    BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_ACTION_PROMPT);
+    MpPrintActionPrompt();   // Moemon Co-op: + the partner's choice
     sMpPartnerGlance = FALSE;
     MP_Coop_SetBattleStatus(MP_BST_ACTION);   // Moemon Co-op: the partner sees what we're doing
 }
@@ -2845,8 +2984,8 @@ static void PlayerHandleChooseItem(void)
         }
         else
             gSpecialVar_ItemId = ITEM_NONE;
-        BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, gSpecialVar_ItemId);
-        PlayerBufferExecCompleted();
+        // (a co-op ball still picks its target there)
+        gBattlerControllerFuncs[gActiveBattler] = CompleteWhenChoseItem;
         return;
     }
 

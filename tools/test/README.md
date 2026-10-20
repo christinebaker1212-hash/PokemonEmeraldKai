@@ -20,7 +20,10 @@ Every two-client scenario also runs at the worst connection we plan for with `WO
 | `coop_catch` | co-op 2-on-2, a MASTER BALL (L = last ball) catches one, they finish the other |
 | `coop_levelup` | co-op win one EXP short of Lv16 on both: level up + Torchic -> Combusken on both |
 | `coop_heal` | ALICE uses a POTION on BOB's Moemon from her bag (partner's gold slot) |
-| `coop_trainer` | Roxanne: ALICE waits for a partner, BOB walks up and joins, they win |
+| `coop_trainer` | Roxanne: ALICE waits for a partner, BOB walks up and joins, BOB's RUN is refused, they win |
+| `coop_run` | co-op wild: ALICE alone picks RUN (it only says so), then both pick RUN until they get away |
+| `coop_ball_target` | co-op 2-on-2: both throw at the same wild Pokemon (BOB moves his target cursor); ALICE catches it, BOB's ball comes back |
+| `coop_abort_catch` / `coop_abort_catch2` | a catch, then the other player disconnects: the catcher keeps it (master / non-master) |
 | `pvp_battle` | BATTLE FLAG: BOB spots ALICE, link battle to the end, money changes hands |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped |

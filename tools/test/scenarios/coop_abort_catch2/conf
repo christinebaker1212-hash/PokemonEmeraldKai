@@ -1,0 +1,8 @@
+# The other way round: BOB (not the master) catches one, then ALICE (the master) disconnects: BOB keeps it
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_B=("co-op: battle called off, keeping a catch" "co-op wild: caught species" "disconnected")

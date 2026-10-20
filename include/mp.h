@@ -477,11 +477,19 @@ bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
 enum { MP_BST_NONE, MP_BST_ACTION, MP_BST_MOVE, MP_BST_BAG, MP_BST_PARTY, MP_BST_DONE };
+// What a co-op player chose this turn, shown to their partner ("BOB: EMBER -> ZIGZAGOON")
+enum { MP_INTENT_NONE, MP_INTENT_MOVE, MP_INTENT_ITEM, MP_INTENT_BALL, MP_INTENT_SWITCH, MP_INTENT_RUN };
+void MP_Coop_SetIntent(u8 kind, u16 value, u8 target);
+bool8 MP_Coop_PartnerIntentText(u8 *dst);   // FALSE when the partner hasn't chosen yet
+void MP_BattleRefreshActionPrompt(void);    // battle_controller_player.c
 void MP_Coop_SetBattleStatus(u8 status);
 bool8 MP_Coop_ShowStandby(void);
 void MP_Coop_OnBattleMessage(void);
 extern u8 gMpCoopItemSlot;
 extern u8 gMpCoopItemTargetSlot;
+extern u8 gMpCoopBallTarget;   // co-op wild: the battler a ball was aimed at (0xFF = none)
+#define MP_BALL_TARGET_FLAG 0x8000   // item | flag | (battler << 12): a ball with its chosen target
+void MP_Coop_RefundBall(u8 thrower, u16 item);
 void MP_Emote_KeepBubbleFor(u8 playerId, const u8 *text);
 void MP_Emote_ClearBubbleFor(u8 playerId);
 struct ObjectEvent;
@@ -728,6 +736,7 @@ const u8 *MP_Coop_LoseText(void);    // NULL = use the game's
 void MP_Coop_RecordLearnLater(u8 partyIndex, u16 move);
 void MP_Coop_RecordMoney(u32 amount);
 bool8 MP_Coop_IsTradedMon(u8 partyIndex);
+void MP_Coop_NoteOwnCatch(u8 target);   // partner: our ball caught it (kept if the battle is called off)
 u16 MP_Coop_ExpBonusFor(u8 partySlot);   // EXP bonus for a slot of the master's co-op party (owner's own)
 u16 MP_Coop_VictorySong(void);
 void MP_Coop_MirrorExp(u8 battler, u8 monId, s16 gainedExp);
