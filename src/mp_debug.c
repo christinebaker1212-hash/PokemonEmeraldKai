@@ -582,6 +582,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] style: slot %d = %04x\n", slot, v);
         }
     }
+    else if (strcmp(cmd, "hidesprites") == 0)
+    {
+        // hidesprites: every sprite invisible (a clean background for screenshots / mock-ups)
+        int i;
+        for (i = 0; i < MAX_SPRITES; i++)
+            if (gSprites[i].inUse)
+                gSprites[i].invisible = TRUE;
+    }
     else if (strcmp(cmd, "where") == 0)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

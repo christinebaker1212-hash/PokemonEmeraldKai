@@ -35,7 +35,12 @@ answers agreed with the project owner (October 2026). They override the plan whe
   picked; no editable intents or ready barrier in the first release.
 
 ## Presentation
-- Six-sprite layout and the compact healthboxes: mock-ups on the real art for approval before building.
+- Six sprites at full size, overlapping like Black/White triples (mock-up "A"): no scaling.
+  Foes at about (132,38) (178,30) (218,42), players at (30,82) (76,88) (120,84); the center one is drawn first.
+- Compact 72x18 cards in the healthbox colors. Row 1: the full name (10 letters fit). Row 2: the level
+  (always shown), the status badge when there is one, then the HP bar. Foes stacked top-left from (2,2),
+  the team stacked right from (166,55), 19 px apart; a colored strip on the left of a player card shows its
+  owner. Exact HP lives in the R team glance and the target screen.
 
 ## Process
 - Work through the phases independently; commit and send a Windows build at each major milestone
