@@ -393,7 +393,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Battles are quicker: messages print twice as fast as your text speed
   setting, stay up a shorter time, and A or B moves on to the next one.
   The low HP alarm beeps three times and then stops. Sending Moemon out and
-  the fade at the end of a battle are 30% quicker.
+  the fade at the end of a battle are 30% quicker, and held items like
+  LEFTOVERS (and Ingrain, Wish, Leech Seed) show a short, quick animation.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon you caught.
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind

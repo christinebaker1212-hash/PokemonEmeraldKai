@@ -478,6 +478,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
     }
+    else if (strcmp(cmd, "hold") == 0)
+    {
+        // mp hold SLOT ITEM - the party Moemon in SLOT holds ITEM
+        int slot = atoi(arg), v = 0;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            v = atoi(sp + 1);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u16 item = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM, &item);
+            printf("[test] hold: slot %d = item %d\n", slot, v);
+        }
+    }
     else if (strcmp(cmd, "hp") == 0)
     {
         // mp hp SLOT VALUE

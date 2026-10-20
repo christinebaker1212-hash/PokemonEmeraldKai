@@ -458,6 +458,16 @@ void InitAndLaunchChosenStatusAnimation(bool8 isStatus2, u32 status)
 
 #define tBattlerId data[0]
 
+static bool8 sMpFastGeneralAnim;
+
+// Moemon Co-op: a held item / Ingrain / Wish... animation is playing (battle_main.c doubles its speed)
+bool8 MP_FastGeneralAnimRunning(void)
+{
+    if (sMpFastGeneralAnim && (!gAnimScriptActive || !FuncIsActiveTask(Task_ClearBitWhenBattleTableAnimDone)))
+        sMpFastGeneralAnim = FALSE;
+    return sMpFastGeneralAnim;
+}
+
 bool8 TryHandleLaunchBattleTableAnimation(u8 activeBattler, u8 atkBattler, u8 defBattler, u8 tableId, u16 argument)
 {
     u8 taskId;
@@ -485,6 +495,10 @@ bool8 TryHandleLaunchBattleTableAnimation(u8 activeBattler, u8 atkBattler, u8 de
     gBattleAnimAttacker = atkBattler;
     gBattleAnimTarget = defBattler;
     gBattleSpritesDataPtr->animationData->animArg = argument;
+    // Moemon Co-op: passive effects that pop up between turns play at double speed
+    sMpFastGeneralAnim = (tableId == B_ANIM_HELD_ITEM_EFFECT || tableId == B_ANIM_FOCUS_BAND
+                       || tableId == B_ANIM_INGRAIN_HEAL || tableId == B_ANIM_WISH_HEAL
+                       || tableId == B_ANIM_LEECH_SEED_DRAIN);
     LaunchBattleAnimation(gBattleAnims_General, tableId, FALSE);
     taskId = CreateTask(Task_ClearBitWhenBattleTableAnimDone, 10);
     gTasks[taskId].tBattlerId = activeBattler;

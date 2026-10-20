@@ -1906,21 +1906,27 @@ static void CB2_HandleStartMultiBattle(void)
 // fade). Only this game's visuals change; the link tasks and the battle
 // itself run once a frame as always, so link battles see no difference.
 bool8 IsBattleLinkTaskFunc(TaskFunc func);
-bool8 MP_SendOutRunning(void);   // pokeball.c
+bool8 MP_SendOutRunning(void);          // pokeball.c
+bool8 MP_FastGeneralAnimRunning(void);  // battle_gfx_sfx_util.c
 
-static bool8 MpBattleTurboPhase(void)
+// Extra steps per 10 frames: 10 (double speed) for held item / Ingrain / Wish
+// effects, 3 (1.3x) for send-outs and the end fade, 0 otherwise
+static u8 MpBattleTurboRate(void)
 {
+    if (MP_FastGeneralAnimRunning())
+        return 10;
     if (gBattleOutcome != 0 && gPaletteFade.active)
-        return TRUE;
-    return MP_SendOutRunning();
+        return 3;
+    return MP_SendOutRunning() ? 3 : 0;
 }
 
 static void MpBattleTurbo(void)
 {
     static u8 sAcc;
-    if (!MpBattleTurboPhase())
+    u8 rate = MpBattleTurboRate();
+    if (rate == 0)
         return;
-    sAcc += 3;
+    sAcc += rate;
     if (sAcc < 10)
         return;
     sAcc -= 10;

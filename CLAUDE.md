@@ -119,6 +119,10 @@ AnimateSprites + UpdatePaletteFade + RunTasksExcept(IsBattleLinkTaskFunc) while 
 in Task_DoPokeballSendOutAnim's SENDOUT cases, not catch throws) or gBattleOutcome && gPaletteFade.active. The link send /
 receive tasks never run twice a frame (that would break the controller-command ordering); the battle engine and controllers
 run once a frame as always. Wild intro -> action menu 916 -> 903 frames; co-op checked at 120-150 ms.
+Passive effects between turns (B_ANIM_HELD_ITEM_EFFECT: Leftovers, berries, Shell Bell...; FOCUS_BAND, INGRAIN_HEAL,
+WISH_HEAL, LEECH_SEED_DRAIN) run at 2x through the same extra step (battle_gfx_sfx_util.c MP_FastGeneralAnimRunning, rate
+10 in MpBattleTurboRate), and General_HeldItemEffect wiggles once instead of three times: a Leftovers turn 852 -> 732 frames.
+Debug `mp hold SLOT ITEM`.
 Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vanilla 64/48/32; data/*.s need a touch to
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
