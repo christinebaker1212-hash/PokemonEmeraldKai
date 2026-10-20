@@ -240,6 +240,8 @@ TEAM GOALS     Three new goals every day for everyone on your server:
                    other, bet on a friend's battle, blend BERRIES, visit a
                    SECRET BASE, swap TRAINER CARDS, send gifts)
                Playing alone, the last two become more "everybody" goals.
+               Offline too: DAILY shows the day's three goals, counted on
+               your own save, with the same rewards.
                Targets grow with the number of players online today; friends
                count after 5 minutes online. Each finished goal gives
                everyone money plus POKE BALLS / healing / a REVIVE. All three
@@ -247,7 +249,8 @@ TEAM GOALS     Three new goals every day for everyone on your server:
                If the day ends with goals left, everyone who helped gets a
                small consolation prize.
 OUTBREAK       One Moemon appears a lot on one route today (more often with
-               more players online). It's announced when you connect.
+               more players online, offline too). It's announced when you
+               connect.
 STREAK         Play 10 minutes on the same map as a friend every day to build
                your co-op streak. Rewards grow each day, every 7th day gives a
                MOEGATCHA pull; it's on your TRAINER CARD.
@@ -261,8 +264,10 @@ ACHIEVEMENTS   70 personal accomplishments, also viewable offline: every
                POKEDEX, evolutions, eggs, contests, the GAME CORNER... and
                together: co-op wins, a gym beaten as a team, rescues, lent
                field moves, trades, gifts, team photos, battles and bets
-               between friends, tournaments, gym rematches, streaks. The
-               harder ones give MOEGATCHA pulls, the rest money.
+               between friends, tournaments, gym rematches, streaks. Every
+               one gives MOEGATCHA pulls: 3, a 10-pull for the harder ones,
+               20 for the hardest (the HALL OF FAME, LEVEL 100, a shiny...).
+               Ones you unlocked before this version get the difference.
 GYM REMATCHES  The day's first team rematch win gives a MOEGATCHA pull and a
                RARE CANDY; later wins give money.
 RARE CANDIES   Can't raise a Moemon past the next gym leader's ace level
@@ -295,7 +300,7 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                Pity, kept per banner: an SR or better at least every 40
                pulls, an SSR or better every 100, a UR or better every 200.
                EX has no pity: pure luck. A 10-pull always has an R or
-               better, and everyone online gets 5 free pulls every week.
+               better, and everyone gets 5 free pulls every week (offline too).
                Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,

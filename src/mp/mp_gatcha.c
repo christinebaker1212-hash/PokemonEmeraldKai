@@ -1817,7 +1817,7 @@ static void DrawNameLine(const struct PrizeDef *def, u8 rarity, u32 amount, bool
 static void BuildMenu(void)
 {
     sG->menuCount = 0;
-    if (FreeTenAvailable() && MP_IsConnected())
+    if (FreeTenAvailable())   // online or not
         sG->menuRows[sG->menuCount++] = MENU_FREE;
     sG->menuRows[sG->menuCount++] = MENU_ONE;
     sG->menuRows[sG->menuCount++] = MENU_TEN;
@@ -1864,8 +1864,15 @@ static void DrawBannerLine(void)
         snprintf(line, sizeof(line), "%s", sBanners[sBanner].tagline);
     MP_AsciiToGame(buf, line, 44);
     {
-        u8 font = GetStringWidth(FONT_NORMAL, buf, 0) > width - 8 ? FONT_SMALL : FONT_NORMAL;
-        Print(WIN_NAME, font, (width - GetStringWidth(font, buf, 0)) / 2, font == FONT_NORMAL ? 14 : 16, TC_PANEL, TC_WHITE, buf);
+        // the widest font that fits (three featured names need the narrow one)
+        u8 font = FONT_NORMAL;
+        s32 w;
+        if (GetStringWidth(font, buf, 0) > width - 8)
+            font = FONT_SMALL;
+        if (GetStringWidth(font, buf, 0) > width - 4)
+            font = FONT_SMALL_NARROW;
+        w = GetStringWidth(font, buf, 0);
+        Print(WIN_NAME, font, w < width ? (width - w) / 2 : 0, font == FONT_NORMAL ? 14 : 16, TC_PANEL, TC_WHITE, buf);
     }
     CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
 }
@@ -1948,7 +1955,7 @@ static void DrawMenu(void)
         [MENU_BACK] = "BACK",
     };
     static const char *const sInfo[] = {
-        [MENU_FREE] = "Free every week while online: 5 pulls.",
+        [MENU_FREE] = "Free every week: 5 pulls.",
         [MENU_ONE]  = "Uses 1 pull.",
         [MENU_TEN]  = "Uses 10 pulls. One RARE+ guaranteed!",
         [MENU_BACK] = "Back to the CO-OP menu.",

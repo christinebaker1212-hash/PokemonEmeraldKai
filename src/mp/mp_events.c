@@ -444,6 +444,8 @@ static void CoopStatus(s32 date, char *out, int len)
         snprintf(out, len, "Team up with a friend for a co-op battle.");
 }
 
+static void SoloKey(char *out, s32 date, u8 slot);
+
 // A goal's numbers and text for everyone
 static void GoalNumbers(s32 date, u8 slot, s32 *progress, s32 *target)
 {
@@ -456,8 +458,16 @@ static void GoalNumbers(s32 date, u8 slot, s32 *progress, s32 *target)
         CoopNumbers(date, progress, target);
         return;
     }
-    DayKey(key, date, what);
-    *progress = MP_Counter_Get(key);
+    if (Online())
+    {
+        DayKey(key, date, what);
+        *progress = MP_Counter_Get(key);
+    }
+    else
+    {
+        SoloKey(key, date, slot);
+        *progress = MP_SaveData_Get(key);
+    }
     *target = GoalTarget(t, players);
 }
 
@@ -506,6 +516,12 @@ static u8 TodaysGoalType(s32 date)
     return sGoalTypes[Hash(MP_Lobby_RoomName(), (u32)date * 31u + 3) % ARRAY_COUNT(sGoalTypes)];
 }
 
+// Offline goal progress ("solo:DATE:S", next to the save)
+static void SoloKey(char *out, s32 date, u8 slot)
+{
+    snprintf(out, 40, "solo:%d:%d", (int)date, slot);
+}
+
 static void ContributeGoals(u8 eventType)
 {
     s32 date = TodayUTC();
@@ -523,6 +539,13 @@ static void ContributeGoals(u8 eventType)
         if (EffectiveType(date, s, players) == eventType)
         {
             char key[40], what[4] = {'g', '0' + s, 0};
+            if (!Online())
+            {
+                // Playing alone: the day's goals are counted on this save
+                SoloKey(key, date, s);
+                MP_SaveData_Add(key, 1);
+                continue;
+            }
             DayKey(key, date, what);
             MP_Counter_Add(key, 1);
         }
@@ -614,8 +637,6 @@ u16 MP_Events_MaybeOutbreak(u16 species)
 {
     u16 osp, omap;
     u8 rate;
-    if (!Online())
-        return species;
     TodaysOutbreak(&osp, &omap);
     if (gSaveBlock1Ptr->location.mapGroup != (omap >> 8) || gSaveBlock1Ptr->location.mapNum != (omap & 0xFF))
         return species;
@@ -746,11 +767,11 @@ void MP_Events_OnTrainerWin(void)
 {
     if (!gMpCoopBattle && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
         MP_Achieve_OnTrainerWin(gTrainerBattleOpponent_A);
-    if (!Online())
-        return;
     ContributeGoals(G_TRAINERS);
     if (!gMpCoopBattle && !(gBattleTypeFlags & BATTLE_TYPE_LINK) && FaintedInParty() == 0)
         ContributeGoals(G_FLAWLESS);
+    if (!Online())
+        return;
     MP_Counter_Add("a:trainers", 1);
     RaceAdd(RACE_TRAINERS, 1);
 }
@@ -793,12 +814,9 @@ void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon)
     u8 level = mon ? GetMonData(mon, MON_DATA_LEVEL) : 0;
     if (outcome == B_OUTCOME_CAUGHT && mon)
         MP_Achieve_OnCatch(mon, IsTodaysOutbreak(GetMonData(mon, MON_DATA_SPECIES)));
-    if (!Online())
-        return;
-    if (outcome == B_OUTCOME_WON)
-        RaceAdd(RACE_WILD, 1);
-    else if (outcome == B_OUTCOME_CAUGHT)
+    if (outcome == B_OUTCOME_CAUGHT)
     {
+        // today's goals count offline too (on the save)
         s32 date = TodayUTC();
         u8 players = PeakPlayers(date), s;
         ContributeGoals(G_CATCH);
@@ -808,6 +826,13 @@ void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon)
             if ((t == G_OUTBREAK || t == G_TYPE || t == G_STRONG) && CatchCounts(mon, t))
                 ContributeGoals(t);
         }
+    }
+    if (!Online())
+        return;
+    if (outcome == B_OUTCOME_WON)
+        RaceAdd(RACE_WILD, 1);
+    else if (outcome == B_OUTCOME_CAUGHT)
+    {
         if (gMpCoopWild)
         {
             ContributeGoals(G_COOPCATCH);
@@ -860,8 +885,8 @@ void MP_Events_Did(u8 what)
         return;
     if (sDid[what].ach)
         MP_Achieve_Count(sDid[what].ach, 1);
-    if (sDid[what].goal != 0xFF && Online())
-        ContributeGoals(sDid[what].goal);
+    if (sDid[what].goal != 0xFF)
+        ContributeGoals(sDid[what].goal);   // offline: only "everyone" goals are on the list
 }
 
 // ---------------------------------------------------------------------------
@@ -974,7 +999,7 @@ static void CheckGoals(void)
         if (!GoalDone(date, s))
             continue;
         done++;
-        snprintf(key, sizeof(key), "goal:%d:%d", (int)date, s);
+        snprintf(key, sizeof(key), Online() ? "goal:%d:%d" : "sgoal:%d:%d", (int)date, s);
         if (!MP_SaveData_Get(key))
         {
             // Everyone: balls. Co-op: healing. Together: a REVIVE.
@@ -988,11 +1013,12 @@ static void CheckGoals(void)
             ItemAscii(give, item);
             GiveItemOrMoney(give, qty, 1000);
             AddMoney(&gSaveBlock1Ptr->money, money);
-            snprintf(msg, sizeof(msg), "Team goal done!\n%s x%d, $%u", item, qty, (unsigned)money);
+            snprintf(msg, sizeof(msg), "%s goal done!\n%s x%d, $%u", Online() ? "Team" : "Daily", item, qty, (unsigned)money);
             QueueToast(msg);
+            MPNet_Log("daily: goal %d done (%s)", s, Online() ? "team" : "solo");
         }
     }
-    snprintf(key, sizeof(key), "goalall:%d", (int)date);
+    snprintf(key, sizeof(key), Online() ? "goalall:%d" : "sgoalall:%d", (int)date);
     if (done == 3 && !MP_SaveData_Get(key))
     {
         char week[24];
@@ -1165,7 +1191,13 @@ void MP_Events_Update(void)
     bool8 inRoom = Online() && MP_IsInOverworld();
     if (!Online())
     {
+        // Playing alone: the day's goals still count (on the save)
         sEv.inRoom = FALSE;
+        if (MP_IsInOverworld() && ++sEv.checkTimer >= CHECK_FRAMES && MP_IsLocalFree())
+        {
+            sEv.checkTimer = 0;
+            CheckGoals();
+        }
         return;
     }
     if (!inRoom && !sEv.inRoom)
@@ -1245,6 +1277,19 @@ void MP_Events_Update(void)
 enum { DS_HUB, DS_RACE, DS_ACHIEVEMENTS };
 enum { ROW_GIFTS, ROW_GOAL1, ROW_GOAL2, ROW_GOAL3, ROW_OUTBREAK, ROW_STREAK, ROW_RACE, ROW_ACH, ROW_CLOSE, ROW_COUNT };
 
+// Offline: just the day's goals, the outbreak and achievements
+static const u8 sSoloRows[] = {ROW_GOAL1, ROW_GOAL2, ROW_GOAL3, ROW_OUTBREAK, ROW_ACH, ROW_CLOSE};
+
+static u8 HubRowCount(void)
+{
+    return Online() ? ROW_COUNT : ARRAY_COUNT(sSoloRows);
+}
+
+static u8 HubRow(u8 i)
+{
+    return Online() ? i : sSoloRows[i < ARRAY_COUNT(sSoloRows) ? i : ARRAY_COUNT(sSoloRows) - 1];
+}
+
 static EWRAM_DATA struct
 {
     u8 taskId;
@@ -1281,18 +1326,21 @@ static void DrawHub(void)
     char left[80], right[32];
     PickGoals(date, types);
     MpUi_Begin("DAILY");
-    snprintf(right, sizeof(right), "%d player%s today", players, players == 1 ? "" : "s");
+    if (Online())
+        snprintf(right, sizeof(right), "%d player%s today", players, players == 1 ? "" : "s");
+    else
+        snprintf(right, sizeof(right), "playing alone");
     {
         u8 r[32];
         MP_AsciiToGame(r, right, 30);
         MpUi_TitleRight(r);
     }
-    first = MpUi_ScrollFor(sDaily.cursor, ROW_COUNT, &sDaily.scroll);
-    for (i = first; i < ROW_COUNT && i < first + MPUI_ROWS; i++)
+    first = MpUi_ScrollFor(sDaily.cursor, HubRowCount(), &sDaily.scroll);
+    for (i = first; i < HubRowCount() && i < first + MPUI_ROWS; i++)
     {
         bool8 sel = i == sDaily.cursor;
         right[0] = 0;
-        switch (i)
+        switch (HubRow(i))
         {
         case ROW_GIFTS:
             snprintf(left, sizeof(left), "DAILY GIFTS...");
@@ -1301,7 +1349,7 @@ static void DrawHub(void)
         case ROW_GOAL2:
         case ROW_GOAL3:
         {
-            u8 s = i - ROW_GOAL1;
+            u8 s = HubRow(i) - ROW_GOAL1;
             s32 p, target;
             GoalNumbers(date, s, &p, &target);
             GoalText(date, s, left, sizeof(left));
@@ -1455,12 +1503,12 @@ static void Task_Daily(u8 taskId)
 {
     if (sDaily.screen == DS_HUB)
     {
-        if (MpUi_MoveCursor(&sDaily.cursor, ROW_COUNT))
+        if (MpUi_MoveCursor(&sDaily.cursor, HubRowCount()))
         {
             Draw();
             return;
         }
-        if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && sDaily.cursor == ROW_CLOSE))
+        if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && HubRow(sDaily.cursor) == ROW_CLOSE))
         {
             PlaySE(SE_SELECT);
             CloseDaily();
@@ -1468,7 +1516,7 @@ static void Task_Daily(u8 taskId)
         }
         if (JOY_NEW(A_BUTTON))
         {
-            switch (sDaily.cursor)
+            switch (HubRow(sDaily.cursor))
             {
             case ROW_GIFTS:
                 PlaySE(SE_SELECT);
@@ -1496,16 +1544,16 @@ static void Task_Daily(u8 taskId)
             Draw();
             return;
         }
-        if (JOY_NEW(A_BUTTON | B_BUTTON) && !Online())
-        {
-            PlaySE(SE_SELECT);
-            CloseDaily();
-            return;
-        }
         if (JOY_NEW(A_BUTTON | B_BUTTON))
         {
             PlaySE(SE_SELECT);
-            sDaily.cursor = sDaily.screen == DS_RACE ? ROW_RACE : ROW_ACH;
+            {
+                u8 want = sDaily.screen == DS_RACE ? ROW_RACE : ROW_ACH, k;
+                sDaily.cursor = 0;
+                for (k = 0; k < HubRowCount(); k++)
+                    if (HubRow(k) == want)
+                        sDaily.cursor = k;
+            }
             sDaily.scroll = 0;
             sDaily.screen = DS_HUB;
             Draw();
@@ -1519,10 +1567,8 @@ static void Task_Daily(u8 taskId)
 void MP_Daily_OpenMenu(void)
 {
     memset(&sDaily, 0, sizeof(sDaily));
-    if (!Online())
-        sDaily.screen = DS_ACHIEVEMENTS;   // offline: just your achievements (goals and the race need the server)
-    else
-        RequestAll();
+    if (Online())
+        RequestAll();   // offline: the goals are on the save
     MpUi_Open();
     sDaily.taskId = CreateTask(Task_Daily, 80);
     Draw();

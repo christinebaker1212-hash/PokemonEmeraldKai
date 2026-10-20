@@ -1468,6 +1468,8 @@ void MP_FrameUpdate(void)
     MP_AutoSession_Update();
     if (gMain.inBattle)
         MP_Emote_BattleUpdate();   // battle emote bubbles (solo battles too)
+    if (!(MPNet_ClientStatus() == MPNET_CONNECTED && gMpLocalId >= 0))
+        MP_Events_Update();        // daily goals alone (online: below)
 
     if (sLobby.state == MP_LOBBY_OFF)
         return;

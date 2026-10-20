@@ -170,9 +170,12 @@ trade evolution (Kadabra), daily gift + thank-you bonus. Battle Flag hides name 
 Dailies (mp_events.c): 3 goals a day from 3 pools (everyone G_TRAINERS..G_STRONG / co-op G_COOP..G_LEND / together
 G_GIFTS..G_CARD; PickGoalsFull, solo fallbacks), hooks call MP_Events_Did(MP_DID_*) (goal + achievement counter). Pair goals
 only count friends with 5+ minutes today ("h:NAME" minute counter). Pull caps: 5 daily pulls/week ("dailypulls:wN"),
-weekly free +5 pulls online only, rematch pull once a day, tournament pulls once a day (3+ players, no forfeit), race needs
+weekly free +5 pulls (offline too), rematch pull once a day, tournament pulls once a day (3+ players, no forfeit), race needs
 2+ racers, HoF pull once per friend. Achievements (mp_achieve.c, 70, personal, offline too: "av:ID", counters "acnt:NAME"),
-DAILY > ACHIEVEMENTS (opens directly when offline). RARE CANDY cap MP_RareCandyCap (party_menu.c). Save data (mp_savedata.c)
+DAILY > ACHIEVEMENTS. Achievement rewards: tier 0/1/2 = 3/10/20 pulls (mp_achieve.c AchPulls; saves from before get the
+difference once, "ach:rewards2"). Offline, DAILY shows the day's 3 "everyone" goals (sSoloRows; PeakPlayers = 1), counted
+on the save ("solo:DATE:S" via ContributeGoals/GoalNumbers), rewarded by CheckGoals ("sgoal:"/"sgoalall:" keys,
+the same weekly pull cap); MP_Events_Update runs offline from MP_FrameUpdate. The outbreak runs offline too. RARE CANDY cap MP_RareCandyCap (party_menu.c). Save data (mp_savedata.c)
 drops dated keys after 14 days and never evicts undated ones. Debug `mp goals` lists a week of goals.
 Phase 3 (mp_events.c, mp_gatcha.c): goals/toasts/MoeGatcha/streak with `mp event ...`, `mp savedata`, `mp gatcharig N` (0 N .. 6 EX; 5 = legendary event),
 `mp goals`, `mp pickup N` (0-18), harness `letters WORD`, MOEMON_DEBUG_DATE; `AllowSmallTweaks = 1` in the ini enables

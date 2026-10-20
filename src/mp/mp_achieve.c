@@ -3,7 +3,7 @@
 // game (badges, game stats like eggs hatched or contests won, the POKéDEX); the
 // rest are counted here by hooks around the co-op code (MP_Achieve_Count) or
 // unlocked by a single feat (MP_Achieve_Unlock: a flawless gym battle, a shiny...).
-// The harder ones give MOEGATCHA pulls; the rest money.
+// Every one gives MOEGATCHA pulls: 3, a 10-pull for the harder ones, 20 for the hardest.
 //
 // Unlocked achievements are kept next to the save ("av:<id>", mp_savedata.c),
 // counters as "acnt:<name>".
@@ -37,10 +37,14 @@ struct Achievement
     u8 kind;
     u16 arg;             // flag / game stat
     u16 target;
-    u8 pulls;            // MOEGATCHA pulls when unlocked (0 = money)
+    u8 tier;             // reward tier: 0 = 3 pulls, 1 = 10 pulls, 2 = 20 pulls (AchPulls)
 };
 
-#define MONEY_REWARD 1500
+static u8 AchPulls(u8 tier)
+{
+    static const u8 sPulls[] = {3, 10, 20};
+    return sPulls[tier < ARRAY_COUNT(sPulls) ? tier : 0];
+}
 
 static const struct Achievement sAch[] = {
     // ---- The journey
@@ -196,16 +200,8 @@ static void Grant(u16 i)
     if (MP_SaveData_Get(key))
         return;
     MP_SaveData_Set(key, 1);
-    if (a->pulls)
-    {
-        MP_Gatcha_AddPulls(a->pulls);
-        snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pull%s", a->name, a->pulls, a->pulls == 1 ? "" : "s");
-    }
-    else
-    {
-        AddMoney(&gSaveBlock1Ptr->money, MONEY_REWARD);
-        snprintf(msg, sizeof(msg), "Achievement: %s!\n$%d", a->name, MONEY_REWARD);
-    }
+    MP_Gatcha_AddPulls(AchPulls(a->tier));
+    snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pulls", a->name, AchPulls(a->tier));
     MP_Events_QueueToast(msg);
 }
 
@@ -226,6 +222,8 @@ void MP_Achieve_Unlock(const char *id)
             Grant(i);
 }
 
+static void TopUpOldRewards(void);
+
 // Every frame on the field: a few achievements checked each frame
 void MP_Achieve_Update(void)
 {
@@ -233,6 +231,7 @@ void MP_Achieve_Update(void)
     u8 k;
     if (!MP_IsInOverworld())
         return;
+    TopUpOldRewards();
     if (FlagGet(FLAG_DEFEATED_REGIROCK) && FlagGet(FLAG_DEFEATED_REGICE) && FlagGet(FLAG_DEFEATED_REGISTEEL))
         MP_Achieve_Unlock("regis");
     if (MP_ConnectedCount() >= 4)
@@ -318,7 +317,7 @@ u16 MP_Achieve_DoneCount(void)
     return n;
 }
 
-// name, description, "12/25" or "DONE", reward ("+1 pull" / "$1500")
+// name, description, "12/25" or "DONE", reward ("+10 MOEGATCHA pulls")
 void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, int statusLen, char *reward, int rewardLen)
 {
     const struct Achievement *a = &sAch[i];
@@ -333,10 +332,28 @@ void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, 
     }
     else
         snprintf(status, statusLen, "-");
-    if (a->pulls)
-        snprintf(reward, rewardLen, "+%d MOEGATCHA pull%s", a->pulls, a->pulls == 1 ? "" : "s");
-    else
-        snprintf(reward, rewardLen, "$%d", MONEY_REWARD);
+    snprintf(reward, rewardLen, "+%d MOEGATCHA pulls", AchPulls(a->tier));
+}
+
+// Achievements unlocked before the pull rewards went up (they gave $1500, 1 or 2
+// pulls) get the difference once, with one toast
+static void TopUpOldRewards(void)
+{
+    static const u8 sOldPulls[] = {0, 1, 2};
+    u16 i;
+    s32 extra = 0;
+    char msg[96];
+    if (MP_SaveData_Get("ach:rewards2"))
+        return;
+    MP_SaveData_Set("ach:rewards2", 1);
+    for (i = 0; i < NUM_ACH; i++)
+        if (MP_Achieve_IsDone(i))
+            extra += AchPulls(sAch[i].tier) - sOldPulls[sAch[i].tier];
+    if (extra <= 0)
+        return;
+    MP_Gatcha_AddPulls(extra);
+    snprintf(msg, sizeof(msg), "Achievement rewards went up!\n+%d MOEGATCHA pulls", (int)extra);
+    MP_Events_QueueToast(msg);
 }
 
 // RARE CANDIES can't raise a POKéMON past the next gym leader's ace (party_menu.c)
