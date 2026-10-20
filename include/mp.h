@@ -557,6 +557,22 @@ s32 MP_SaveData_Get(const char *key);
 #define MP_REG_SLOTS  3   // item_menu.c: extra registered key items: L (0), R (1), pad west / F key (2)
 #define MP_REG_SELECT 3   // (the game's own SELECT item, in the chooser)
 u16 MP_RegisteredItem(u8 slot);
+// Special balls (MoeGatcha only): kept in bits 12-15 of a Moemon's ball style
+enum { MP_SPECIAL_NONE, MP_SPECIAL_LOVE, MP_SPECIAL_FRIEND, MP_SPECIAL_FAST, MP_SPECIAL_LEVEL, MP_SPECIAL_LURE,
+       MP_SPECIAL_HEAVY, MP_SPECIAL_MOON, MP_SPECIAL_DREAM, MP_SPECIAL_HEAL, MP_SPECIAL_DUSK, MP_SPECIAL_QUICK };
+#define MP_SPECIAL_COUNT MP_SPECIAL_QUICK
+struct Pokemon;
+u8 MP_BallStyle_Special(u16 style);
+u8 MP_SpecialBall_FromItem(u16 item);
+u16 MP_SpecialBall_Item(u8 special);
+bool8 MP_IsBallItem(u16 item);
+u16 MP_BallStyle_DisplayItem(struct Pokemon *mon);
+u16 MP_BallStyle_ForItem(u16 item);
+bool8 MP_BallStyle_ItemCanColor(u16 item);
+bool8 MP_BallStyle_ItemCanDecorate(u16 item);
+void MP_Ball_SetCaught(struct Pokemon *mon, u16 item);
+u8 MP_SpecialBall_Multiplier(u16 item, u8 attacker, u8 target, u8 *catchRate);
+extern bool8 gMpFishingEncounter;   // wild_encounter.c: this wild battle came from a ROD (LURE BALL)
 // mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
 enum {
     MP_BALL_RED, MP_BALL_BLUE, MP_BALL_GREEN, MP_BALL_YELLOW, MP_BALL_PINK, MP_BALL_PURPLE,

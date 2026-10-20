@@ -17,6 +17,63 @@ static const u8 sGreatBallDesc[] = _(
     "higher catch rate\n"
     "than a POKé BALL.");
 
+
+// Moemon Co-op: special POKé BALLS
+static const u8 sLoveBallDesc[] = _(
+    "Sweet as a crush.\n"
+    "Great on the same\n"
+    "kind, other gender.");
+
+static const u8 sFriendBallDesc[] = _(
+    "Its catch becomes\n"
+    "friendly with you\n"
+    "right away.");
+
+static const u8 sFastBallDesc[] = _(
+    "Built for speed.\n"
+    "Great on very fast\n"
+    "MOéMON.");
+
+static const u8 sLevelBallDesc[] = _(
+    "Stronger the higher\n"
+    "your MOéMON's level\n"
+    "is than the foe's.");
+
+static const u8 sLureBallDesc[] = _(
+    "A BALL for anglers.\n"
+    "Great on MOéMON\n"
+    "hooked on a ROD.");
+
+static const u8 sHeavyBallDesc[] = _(
+    "Heavy and solid.\n"
+    "Best on big, heavy\n"
+    "MOéMON.");
+
+static const u8 sMoonBallDesc[] = _(
+    "Shines like a moon.\n"
+    "Good on MOéMON that\n"
+    "use a MOON STONE.");
+
+static const u8 sDreamBallDesc[] = _(
+    "A drowsy, dreamy\n"
+    "BALL. Great on\n"
+    "sleeping MOéMON.");
+
+static const u8 sHealBallDesc[] = _(
+    "A gentle BALL that\n"
+    "fully heals the\n"
+    "MOéMON it catches.");
+
+static const u8 sDuskBallDesc[] = _(
+    "Made for the dark.\n"
+    "Great at night and\n"
+    "in caves.");
+
+static const u8 sQuickBallDesc[] = _(
+    "Strikes first! Best\n"
+    "when thrown on the\n"
+    "first turn.");
+
 static const u8 sPokeBallDesc[] = _(
     "A tool used for\n"
     "catching wild\n"

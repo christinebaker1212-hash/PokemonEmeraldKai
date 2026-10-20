@@ -399,6 +399,20 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
   blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).
   The color shows when it's sent out in battle.
+* Special POKé BALLS (only from the MoeGatcha POKE BALLS banner):
+    LOVE BALL   x8 on your Moemon's species, opposite gender
+    FRIEND BALL the Moemon caught is friendly right away
+    FAST BALL   x4 on Moemon with base Speed 100+
+    LEVEL BALL  x2 / x4 / x8 when your Moemon is over 1x / 2x / 4x its level
+    LURE BALL   x4 on Moemon hooked with a ROD
+    HEAVY BALL  better on heavy Moemon (+20 / +30), worse under 100 kg
+    MOON BALL   x4 on Moemon that evolve with a MOON STONE
+    DREAM BALL  x4 on sleeping Moemon
+    HEAL BALL   heals the Moemon caught
+    DUSK BALL   x3 in caves or at night (8 PM - 6 AM)
+    QUICK BALL  x5 on the first turn
+  They can't be recolored or decorated. Other games see a Moemon caught in
+  one as being in a POKE BALL; this game shows the special ball.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a

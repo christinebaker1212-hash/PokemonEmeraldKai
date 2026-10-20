@@ -156,7 +156,7 @@ static void MpShowPartnerTeam(void)
 static bool8 MpQuickBallReady(void)
 {
     s32 ball = MP_SaveData_Get("ball:last");
-    if (ball < FIRST_BALL || ball > LAST_BALL || ball == ITEM_SAFARI_BALL || !CheckBagHasItem(ball, 1))
+    if (!MP_IsBallItem(ball) || ball == ITEM_SAFARI_BALL || !CheckBagHasItem(ball, 1))
         return FALSE;
     if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
         return FALSE;
@@ -409,7 +409,7 @@ static void HandleInputChooseAction(void)
             if (gBattleBufferA[gActiveBattler][1] == B_ACTION_USE_ITEM)
             {
                 // Add item to bag if it is a ball
-                if (itemId <= LAST_BALL)
+                if (MP_IsBallItem(itemId))
                     AddBagItem(itemId, 1);
                 else
                     return;

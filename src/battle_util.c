@@ -329,6 +329,10 @@ void HandleAction_UseItem(void)
     {
         gBattlescriptCurrInstr = gBattlescriptsForBallThrow[gLastUsedItem];
     }
+    else if (MP_SpecialBall_FromItem(gLastUsedItem)) // Moemon Co-op: the special balls throw like a POKé BALL
+    {
+        gBattlescriptCurrInstr = gBattlescriptsForBallThrow[ITEM_POKE_BALL];
+    }
     else if (gLastUsedItem == ITEM_POKE_DOLL || gLastUsedItem == ITEM_FLUFFY_TAIL)
     {
         gBattlescriptCurrInstr = gBattlescriptsForRunningByItem[0]; // BattleScript_RunByUsingItem

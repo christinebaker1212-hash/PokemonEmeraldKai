@@ -236,12 +236,14 @@ static u16 RandomSpecies(bool8 legend)
 }
 
 
-enum { SET_VITAMINS, SET_BALLS };
+enum { SET_VITAMINS, SET_BALLS, SET_APRICORN };
 static const u16 sSets[][6] = {
     [SET_VITAMINS] = {ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CALCIUM, ITEM_ZINC, ITEM_CARBOS},
     [SET_BALLS]    = {ITEM_NET_BALL, ITEM_DIVE_BALL, ITEM_NEST_BALL, ITEM_REPEAT_BALL, ITEM_TIMER_BALL, ITEM_LUXURY_BALL},
+    // The special balls (only from the BALL banner): the six with catch bonuses from the old days
+    [SET_APRICORN] = {ITEM_LOVE_BALL, ITEM_LEVEL_BALL, ITEM_LURE_BALL, ITEM_MOON_BALL, ITEM_HEAVY_BALL, ITEM_FAST_BALL},
 };
-static const char *const sSetNames[] = {[SET_VITAMINS] = "VITAMIN SET", [SET_BALLS] = "BALL SET"};
+static const char *const sSetNames[] = {[SET_VITAMINS] = "VITAMIN SET", [SET_BALLS] = "BALL SET", [SET_APRICORN] = "APRICORN SET"};
 
 static const struct PrizeDef sCommon[] = {
     ITEM(ITEM_POKE_BALL, 10, 10), ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_SUPER_POTION, 5, 10),
@@ -311,26 +313,35 @@ static const struct PrizeDef sTrainEx[] = {
 static const struct PrizeDef sBallCommon[] = {
     ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_NET_BALL, 3, 8), ITEM(ITEM_DIVE_BALL, 3, 8), ITEM(ITEM_NEST_BALL, 3, 8),
     ITEM(ITEM_REPEAT_BALL, 3, 8), ITEM(ITEM_TIMER_BALL, 3, 8), ITEM(ITEM_PREMIER_BALL, 3, 8), ITEM(ITEM_LUXURY_BALL, 1, 6),
+    // Special balls with no catch bonus sit with the PREMIER / LUXURY BALLS
+    ITEM(ITEM_HEAL_BALL, 2, 6), ITEM(ITEM_FRIEND_BALL, 1, 6),
 };
 static const struct PrizeDef sBallUncommon[] = {
     ITEM(ITEM_ULTRA_BALL, 5, 10), ITEM(ITEM_NET_BALL, 5, 6), ITEM(ITEM_DIVE_BALL, 5, 6), ITEM(ITEM_NEST_BALL, 5, 6),
     ITEM(ITEM_REPEAT_BALL, 5, 6), ITEM(ITEM_TIMER_BALL, 5, 6), ITEM(ITEM_LUXURY_BALL, 3, 8), ITEM(ITEM_PREMIER_BALL, 10, 6),
+    // The ones with a bonus in one situation, like NET / DIVE BALLS
+    ITEM(ITEM_LOVE_BALL, 2, 4), ITEM(ITEM_LEVEL_BALL, 2, 4), ITEM(ITEM_LURE_BALL, 2, 4), ITEM(ITEM_MOON_BALL, 2, 4),
+    ITEM(ITEM_HEAVY_BALL, 2, 4), ITEM(ITEM_FAST_BALL, 2, 4), ITEM(ITEM_HEAL_BALL, 4, 4), ITEM(ITEM_FRIEND_BALL, 3, 4),
 };
 static const struct PrizeDef sBallRare[] = {
     ITEM(ITEM_ULTRA_BALL, 15, 10), ITEM(ITEM_LUXURY_BALL, 8, 8), ITEM(ITEM_NET_BALL, 10, 5), ITEM(ITEM_DIVE_BALL, 10, 5),
     ITEM(ITEM_NEST_BALL, 10, 5), ITEM(ITEM_REPEAT_BALL, 10, 5), ITEM(ITEM_TIMER_BALL, 10, 5), SET(SET_BALLS, 3, 8),
+    // The strong all-rounders, like the TIMER BALL
+    ITEM(ITEM_QUICK_BALL, 3, 5), ITEM(ITEM_DUSK_BALL, 3, 5), ITEM(ITEM_DREAM_BALL, 3, 5), SET(SET_APRICORN, 1, 6),
 };
 static const struct PrizeDef sBallSuper[] = {
     SET(SET_BALLS, 5, 10), ITEM(ITEM_ULTRA_BALL, 30, 8), ITEM(ITEM_LUXURY_BALL, 20, 6),
+    SET(SET_APRICORN, 3, 8), ITEM(ITEM_QUICK_BALL, 10, 6), ITEM(ITEM_DUSK_BALL, 10, 6), ITEM(ITEM_DREAM_BALL, 10, 6),
 };
 static const struct PrizeDef sBallSSuper[] = {
     SET(SET_BALLS, 10, 10), ITEM(ITEM_ULTRA_BALL, 60, 6), ITEM(ITEM_LUXURY_BALL, 40, 4),
+    SET(SET_APRICORN, 6, 8), ITEM(ITEM_QUICK_BALL, 25, 5), ITEM(ITEM_DUSK_BALL, 25, 5),
 };
 static const struct PrizeDef sBallUltra[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6),
+    ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
 };
 static const struct PrizeDef sBallEx[] = {
-    ITEM(ITEM_MASTER_BALL, 2, 10), SET(SET_BALLS, 40, 6),
+    ITEM(ITEM_MASTER_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
 };
 
 // PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
@@ -398,7 +409,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(31, 17, 2),
     },
     [BANNER_BALLS] = {
-        "POKE BALLS", "Rare and special POK~ BALLS!",
+        "POKE BALLS", "Rare POK~ BALLS + 11 found only here!",
         {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
          {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallSSuper, ARRAY_COUNT(sBallSSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}, {sBallEx, ARRAY_COUNT(sBallEx)}},
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(6, 18, 31),

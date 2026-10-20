@@ -788,9 +788,13 @@ bool8 DoesCurrentMapHaveFishingMons(void)
         return FALSE;
 }
 
+bool8 gMpFishingEncounter;   // Moemon Co-op: the LURE BALL checks it (cleared after every wild battle)
+
 void FishingWildEncounter(u8 rod)
 {
     u16 species;
+
+    gMpFishingEncounter = TRUE;
 
     if (CheckFeebas() == TRUE)
     {

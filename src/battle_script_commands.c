@@ -10152,6 +10152,10 @@ static void Cmd_handleballthrow(void)
             case ITEM_PREMIER_BALL:
                 ballMultiplier = 10;
                 break;
+            default:
+                // Moemon Co-op: the special balls (LOVE, LEVEL, QUICK...)
+                ballMultiplier = MP_SpecialBall_Multiplier(gLastUsedItem, gBattlerAttacker, gBattlerTarget, &catchRate);
+                break;
             }
         }
         else
@@ -10176,7 +10180,7 @@ static void Cmd_handleballthrow(void)
             }
             else
             {
-                if (gBattleResults.catchAttempts[gLastUsedItem - ITEM_ULTRA_BALL] < 255)
+                if (gLastUsedItem <= LAST_BALL && gBattleResults.catchAttempts[gLastUsedItem - ITEM_ULTRA_BALL] < 255)
                     gBattleResults.catchAttempts[gLastUsedItem - ITEM_ULTRA_BALL]++;
             }
         }
@@ -10186,7 +10190,7 @@ static void Cmd_handleballthrow(void)
             BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
             MarkBattlerForControllerExec(gActiveBattler);
             gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
-            SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_POKEBALL, &gLastUsedItem);
+            MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);   // Moemon Co-op: special balls
 
             if (CalculatePlayerPartyCount() == PARTY_SIZE)
                 gBattleCommunication[MULTISTRING_CHOOSER] = 0;
@@ -10213,7 +10217,7 @@ static void Cmd_handleballthrow(void)
             if (shakes == BALL_3_SHAKES_SUCCESS) // mon caught, copy of the code above
             {
                 gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
-                SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_POKEBALL, &gLastUsedItem);
+                MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);   // Moemon Co-op: special balls
 
                 if (CalculatePlayerPartyCount() == PARTY_SIZE)
                     gBattleCommunication[MULTISTRING_CHOOSER] = 0;

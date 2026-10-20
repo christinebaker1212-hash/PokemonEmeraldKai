@@ -2881,7 +2881,7 @@ static EWRAM_DATA struct
     u8 row;
     u8 typeIndex;
     u8 typeCount;
-    u16 types[POKEBALL_COUNT];   // ball items to pick from
+    u16 types[POKEBALL_COUNT + MP_SPECIAL_COUNT];   // ball items to pick from
     u8 color;
     u8 decoration;
     const char *note;            // a line shown once after a change
@@ -2894,9 +2894,10 @@ static const struct WindowTemplate sMpBallBodyTemplate = {
     .bg = 0, .tilemapLeft = 11, .tilemapTop = 4, .width = 18, .height = 16, .paletteNum = 6, .baseBlock = 450,
 };
 
+// The ball shown for the Moemon: a special ball (kept in its style) or its real one
 static u16 MpBall_CurrentItem(void)
 {
-    return GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_POKEBALL);
+    return MP_BallStyle_DisplayItem(&sMonSummaryScreen->currentMon);
 }
 
 static bool8 MpBall_CanEdit(void)
@@ -2946,8 +2947,11 @@ static void MpBall_BuildTypes(void)
     u16 item, cur = MpBall_CurrentItem();
     sMpBall.typeCount = 0;
     sMpBall.typeIndex = 0;
-    for (item = ITEM_MASTER_BALL; item <= ITEM_PREMIER_BALL && sMpBall.typeCount < POKEBALL_COUNT; item++)
+    u8 i;
+    for (i = 0; i < POKEBALL_COUNT + MP_SPECIAL_COUNT && sMpBall.typeCount < ARRAY_COUNT(sMpBall.types); i++)
     {
+        // The Hoenn balls, then the special ones
+        item = i < POKEBALL_COUNT ? ITEM_MASTER_BALL + i : MP_SpecialBall_Item(i - POKEBALL_COUNT + 1);
         if (item != cur && !CheckBagHasItem(item, 1))
             continue;
         if (item == cur)
@@ -2965,11 +2969,12 @@ static u16 MpBall_SelectedItem(void)
 
 static u16 MpBall_SelectedStyle(void)
 {
-    u8 ball = ItemIdToBallId(MpBall_SelectedItem());
+    u16 item = MpBall_SelectedItem();
     if (!sMpBall.editing)
         return MP_BallStyle_OfMon(&sMonSummaryScreen->currentMon);
-    return MP_BallStyle_Make(MP_BallStyle_CanColor(ball) ? sMpBall.color : 0,
-                             MP_BallStyle_CanDecorate(ball) ? sMpBall.decoration : 0);
+    // Special balls can't be customized
+    return MP_BallStyle_Make(MP_BallStyle_ItemCanColor(item) ? sMpBall.color : 0,
+                             MP_BallStyle_ItemCanDecorate(item) ? sMpBall.decoration : 0) | MP_BallStyle_ForItem(item);
 }
 
 static void MpBall_Print(const char *ascii, u8 x, u8 y, u8 colorId)
@@ -3029,7 +3034,7 @@ static void MpBall_Draw(void)
 
     // COLOR (box rows 9-12)
     MpBall_Print("COLOR", 4, 41, 0);
-    if (MP_BallStyle_CanColor(ball))
+    if (MP_BallStyle_ItemCanColor(item))
     {
         char color[16];
         MP_GameToAscii(color, MP_BallStyle_ColorName(MP_BallStyle_Color(style)), sizeof(color) - 1);
@@ -3043,14 +3048,14 @@ static void MpBall_Draw(void)
 
     // DECORATION (box rows 14-19)
     MpBall_Print("DECOR", 4, 81, 0);
-    if (MP_BallStyle_CanDecorate(ball))
+    if (MP_BallStyle_ItemCanDecorate(item))
     {
         char deco[24];
         MP_GameToAscii(deco, MP_BallStyle_DecorationName(MP_BallStyle_Decoration(style)), sizeof(deco) - 1);
         snprintf(line, sizeof(line), MPBALL_ON(MPBALL_ROW_DECO) ? "< %s >" : "%s", deco);
         MpBall_Print(line, 52, 81, 0);
     }
-    else if (ball == BALL_POKE || ball == BALL_PREMIER)
+    else if (item == ITEM_POKE_BALL || item == ITEM_PREMIER_BALL)
     {
         MpBall_Print("None yet", 52, 81, 0);
     }
@@ -3138,7 +3143,7 @@ static void MpBall_RefreshCaughtBall(void)
 static void MpBall_Apply(u16 item, u16 style)
 {
     u16 st = style;
-    u32 it = item;
+    u32 it = MP_SpecialBall_FromItem(item) ? ITEM_POKE_BALL : item;   // special balls: a POKé BALL underneath
     if (sMonSummaryScreen->isBoxMon)
     {
         struct BoxPokemon *box = &sMonSummaryScreen->monList.boxMons[sMonSummaryScreen->curMonIndex];
@@ -3158,7 +3163,7 @@ static void MpBall_Apply(u16 item, u16 style)
 
 static void MpBall_ChangeValue(s8 delta)
 {
-    u8 ball = ItemIdToBallId(sMpBall.types[sMpBall.typeIndex]);
+    u16 item = sMpBall.types[sMpBall.typeIndex];
     switch (sMpBall.row)
     {
     case MPBALL_ROW_TYPE:
@@ -3167,12 +3172,12 @@ static void MpBall_ChangeValue(s8 delta)
         sMpBall.typeIndex = (sMpBall.typeIndex + sMpBall.typeCount + delta) % sMpBall.typeCount;
         break;
     case MPBALL_ROW_COLOR:
-        if (!MP_BallStyle_CanColor(ball))
+        if (!MP_BallStyle_ItemCanColor(item))
             return;
         sMpBall.color = (sMpBall.color + MP_BALL_COLORS + delta) % MP_BALL_COLORS;
         break;
     case MPBALL_ROW_DECO:
-        if (!MP_BallStyle_CanDecorate(ball))
+        if (!MP_BallStyle_ItemCanDecorate(item))
             return;
         sMpBall.decoration = (sMpBall.decoration + MP_BallStyle_DecorationCount() + delta) % MP_BallStyle_DecorationCount();
         break;
@@ -3184,11 +3189,11 @@ static void MpBall_ChangeValue(s8 delta)
 // Rows the selected ball can use (TYPE always)
 static bool8 MpBall_RowUsable(u8 row)
 {
-    u8 ball = ItemIdToBallId(sMpBall.types[sMpBall.typeIndex]);
+    u16 item = sMpBall.types[sMpBall.typeIndex];
     if (row == MPBALL_ROW_COLOR)
-        return MP_BallStyle_CanColor(ball);
+        return MP_BallStyle_ItemCanColor(item);
     if (row == MPBALL_ROW_DECO)
-        return MP_BallStyle_CanDecorate(ball);
+        return MP_BallStyle_ItemCanDecorate(item);
     return TRUE;
 }
 

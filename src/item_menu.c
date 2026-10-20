@@ -2095,7 +2095,7 @@ static void ItemMenu_UseInBattle(u8 taskId)
 {
     // Moemon Co-op: both games must agree on everything, so only POKé BALLS
     // (in co-op wild battles) can be used
-    if (gMpCoopBattle && !(gMpCoopWild && gSpecialVar_ItemId >= FIRST_BALL && gSpecialVar_ItemId <= LAST_BALL)
+    if (gMpCoopBattle && !(gMpCoopWild && MP_IsBallItem(gSpecialVar_ItemId))
      && GetItemBattleFunc(gSpecialVar_ItemId) != ItemUseInBattle_Medicine)   // healing items work too
     {
         RemoveContextWindow();

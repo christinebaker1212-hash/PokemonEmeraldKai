@@ -85,6 +85,20 @@
 #define ITEM_ZINC 70
 #define ITEM_PP_MAX 71
 #define ITEM_048 72
+
+// Moemon Co-op: special POKé BALLS (MoeGatcha only; mp_ballstyle.c). A Moemon caught in
+// one keeps POKé BALL as its ball and the special one in its ball style.
+#define ITEM_LOVE_BALL ITEM_035
+#define ITEM_FRIEND_BALL ITEM_036
+#define ITEM_FAST_BALL ITEM_037
+#define ITEM_LEVEL_BALL ITEM_038
+#define ITEM_LURE_BALL ITEM_039
+#define ITEM_HEAVY_BALL ITEM_03A
+#define ITEM_MOON_BALL ITEM_03B
+#define ITEM_DREAM_BALL ITEM_03C
+#define ITEM_HEAL_BALL ITEM_03D
+#define ITEM_DUSK_BALL ITEM_03E
+#define ITEM_QUICK_BALL ITEM_048
 #define ITEM_GUARD_SPEC 73
 #define ITEM_DIRE_HIT 74
 #define ITEM_X_ATTACK 75

@@ -15,6 +15,30 @@ const u32 gItemIconPalette_UltraBall[] = INCGFX_U32("graphics/items/icon_palette
 const u32 gItemIcon_GreatBall[] = INCGFX_U32("graphics/items/icons/great_ball.png", ".4bpp.lz");
 const u32 gItemIconPalette_GreatBall[] = INCGFX_U32("graphics/items/icon_palettes/great_ball.pal", ".gbapal.lz");
 
+// Moemon Co-op: special POKé BALLS
+const u32 gItemIcon_LoveBall[] = INCGFX_U32("graphics/items/icons/moemon_love_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_LoveBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_love_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_FriendBall[] = INCGFX_U32("graphics/items/icons/moemon_friend_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_FriendBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_friend_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_FastBall[] = INCGFX_U32("graphics/items/icons/moemon_fast_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_FastBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_fast_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_LevelBall[] = INCGFX_U32("graphics/items/icons/moemon_level_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_LevelBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_level_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_LureBall[] = INCGFX_U32("graphics/items/icons/moemon_lure_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_LureBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_lure_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_HeavyBall[] = INCGFX_U32("graphics/items/icons/moemon_heavy_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_HeavyBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_heavy_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_MoonBall[] = INCGFX_U32("graphics/items/icons/moemon_moon_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_MoonBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_moon_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_DreamBall[] = INCGFX_U32("graphics/items/icons/moemon_dream_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_DreamBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_dream_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_HealBall[] = INCGFX_U32("graphics/items/icons/moemon_heal_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_HealBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_heal_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_DuskBall[] = INCGFX_U32("graphics/items/icons/moemon_dusk_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_DuskBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_dusk_ball.pal", ".gbapal.lz");
+const u32 gItemIcon_QuickBall[] = INCGFX_U32("graphics/items/icons/moemon_quick_ball.png", ".4bpp.lz");
+const u32 gItemIconPalette_QuickBall[] = INCGFX_U32("graphics/items/icon_palettes/moemon_quick_ball.pal", ".gbapal.lz");
+
 const u32 gItemIcon_PokeBall[] = INCGFX_U32("graphics/items/icons/poke_ball.png", ".4bpp.lz");
 const u32 gItemIconPalette_PokeBall[] = INCGFX_U32("graphics/items/icon_palettes/poke_ball.pal", ".gbapal.lz");
 

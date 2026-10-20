@@ -603,8 +603,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] party:");
         for (i = 0; i < PARTY_SIZE; i++)
             if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
-                printf(" %d(%d/%d)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
-                       (int)GetMonData(&gPlayerParty[i], MON_DATA_HP), (int)GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP));
+                printf(" %d(%d/%d ball %d style %04x friend %d)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_HP), (int)GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP),
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_POKEBALL), (int)GetMonData(&gPlayerParty[i], MON_DATA_ENCRYPT_SEPARATOR),
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP));
             else
                 printf(" 0");
         printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));

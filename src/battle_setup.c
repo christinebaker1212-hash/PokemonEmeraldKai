@@ -614,6 +614,7 @@ void StartRegiBattle(void)
 
 static void CB2_EndWildBattle(void)
 {
+    gMpFishingEncounter = FALSE;   // Moemon Co-op: LURE BALL
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, 128);
     MP_Events_OnWildEnd(gBattleOutcome, &gEnemyParty[0]); // Moemon Co-op: team goals
