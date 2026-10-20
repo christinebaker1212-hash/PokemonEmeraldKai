@@ -670,6 +670,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Overworld_DebugDump(void);
         MP_Overworld_DebugDump();
+        {
+            void MP_Follower_DebugDump(void);
+            MP_Follower_DebugDump();
+        }
     }
     else if (strcmp(cmd, "drop") == 0)
     {

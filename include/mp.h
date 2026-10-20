@@ -458,6 +458,7 @@ bool8 MP_Compass_AnyShown(void);
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
 bool8 MP_Piggy_IsRiding(void);
+u8 MP_Piggy_CarrierSpeed(void);
 void MP_Piggy_FieldInput(u16 newKeys);
 void MP_Piggy_Update(void);
 void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len);

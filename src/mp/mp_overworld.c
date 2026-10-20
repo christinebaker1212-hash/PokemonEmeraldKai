@@ -733,6 +733,13 @@ void MP_Overworld_DebugDump(void)
 {
     u8 i;
     InitIfNeeded();
+    if (gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT)
+    {
+        struct Sprite *ms = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
+        printf("[test] me map %d.%d xy %d,%d sprite %d,%d off %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+               gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x, gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y,
+               ms->x, ms->y, ms->x2, ms->y2);
+    }
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         struct RemoteObj *r = &sRemote[i];
@@ -749,7 +756,7 @@ void MP_Overworld_DebugDump(void)
         if (o->spriteId < MAX_SPRITES)
         {
             struct Sprite *s = &gSprites[o->spriteId];
-            printf(" inUse %d sinv %d xy %d,%d pal %d prio %d", s->inUse, s->invisible, s->x, s->y, s->oam.paletteNum, s->oam.priority);
+            printf(" inUse %d sinv %d xy %d,%d off %d,%d pal %d prio %d", s->inUse, s->invisible, s->x, s->y, s->x2, s->y2, s->oam.paletteNum, s->oam.priority);
         }
         printf("\n");
     }

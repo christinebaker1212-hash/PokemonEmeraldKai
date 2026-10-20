@@ -357,6 +357,14 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
     fs->invisible = hidden || os->invisible
         || (s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
+    // Someone else stepped onto its tile (a friend hopping off a piggyback
+    // ride, or walking up behind): tuck it away instead of covering them
+    if (!fs->invisible && s->moved >= 16)
+    {
+        u8 other = GetObjectEventIdByXY(s->cur.x, s->cur.y);
+        if (other != OBJECT_EVENTS_COUNT && other != ownerObj)
+            fs->invisible = TRUE;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -537,4 +545,18 @@ bool8 MP_Follower_TryInteract(void)
     LockPlayerFieldControls();
     CreateTask(Task_FollowerTalk, 80);
     return TRUE;
+}
+
+void MP_Follower_DebugDump(void)
+{
+    u8 i;
+    for (i = 0; i < NUM_SLOTS; i++)
+    {
+        struct FollowerSlot *s = &sSlots[i];
+        if (!s->gfx)
+            continue;
+        printf("[test] follower %d cur %d,%d prev %d,%d moved %d sprite %d inv %d other %d owner %d\n", i, s->cur.x, s->cur.y,
+               s->prev.x, s->prev.y, s->moved, s->spriteId, SpriteIsOurs(s) ? gSprites[s->spriteId].invisible : -1,
+               GetObjectEventIdByXY(s->cur.x, s->cur.y), s->ownerObj);
+    }
 }

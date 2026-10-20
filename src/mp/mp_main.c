@@ -665,7 +665,7 @@ void MP_GetLocalState(struct MpState *s)
 static void CollectLocalState(struct MpState *s)
 {
     *s = sLastLocalState;
-    s->flags &= ~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED | MPF_CHALLENGED);
+    s->flags &= ~(MPF_FREE | MPF_IN_OVERWORLD | MPF_IN_BATTLE | MPF_TRAINER_MODE | MPF_ENGAGED | MPF_CHALLENGED | MPF_RIDING);
 
     if (MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
      && gObjectEvents[gPlayerAvatar.objectEventId].active)
@@ -714,7 +714,10 @@ static void CollectLocalState(struct MpState *s)
     if (MP_Coop_IsChallenged())
         s->flags |= MPF_CHALLENGED;
     if (MP_Piggy_IsRiding())
+    {
         s->flags |= MPF_RIDING;
+        s->speed = MP_Piggy_CarrierSpeed();
+    }
     if (MP_Trainer_IsActive())
         s->flags |= MPF_TRAINER_MODE;
     if (MP_Trainer_IsEngaged() || MP_Battle_IsActive())

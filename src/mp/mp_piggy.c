@@ -37,6 +37,7 @@ static s8 sCarrier = -1;          // who we ride, -1 = nobody
 static u16 sAwayFrames;
 static bool8 sWarping;
 static bool8 sRemoteRiding[MP_MAX_PLAYERS];
+static bool8 sRidingMe[MP_MAX_PLAYERS];   // friends on my back (from their PIG_ON)
 
 bool8 MP_Piggy_IsRiding(void)
 {
@@ -109,51 +110,83 @@ void MP_Piggy_FieldInput(u16 newKeys)
         TryHopOff();
 }
 
-// Follow the carrier one step at a time (or warp to them on another map)
+// Warp onto the carrier's tile on their map (they went through a door, flew,
+// or got too far ahead). Uses their own map's coordinates: converting them to
+// ours only works for this map and its neighbors.
+static void WarpToCarrier(void)
+{
+    struct MpState *st = &gMpPlayers[sCarrier].state;
+    sWarping = TRUE;
+    SetWarpDestination(st->mapGroup, st->mapNum, WARP_ID_NONE, st->x - MAP_OFFSET, st->y - MAP_OFFSET);
+    LockPlayerFieldControls();
+    DoWarp();
+}
+
+static void StepToward(struct ObjectEvent *me, s16 x, s16 y, bool8 hurry)
+{
+    s16 dx = x - me->currentCoords.x, dy = y - me->currentCoords.y;
+    u8 dir = dx > 0 ? DIR_EAST : dx < 0 ? DIR_WEST : dy > 0 ? DIR_SOUTH : DIR_NORTH;
+    ObjectEventSetHeldMovement(me, hurry ? GetWalkFasterMovementAction(dir) : GetWalkFastMovementAction(dir));
+}
+
+// Ride along: copy each step the carrier's figure takes on our screen (same
+// action, so the same speed: walking, running, biking, ledge jumps), which
+// also carries us over map connections. Catch up when a step was missed.
 static void Follow(void)
 {
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     struct MpState *st = &gMpPlayers[sCarrier].state;
-    s16 tx, ty, dx, dy;
+    u8 obj = MP_GetRemoteObjectEventId(sCarrier);
+    struct ObjectEvent *co;
+    s16 dx, dy, dist;
 
-    if (!MP_GetRemoteMapPos(sCarrier, &tx, &ty))
+    if (obj >= OBJECT_EVENTS_COUNT || !gObjectEvents[obj].active)
     {
-        // They went through a door, flew, or fell into a hole: follow once they're settled
+        // Not on this map or a connected one: follow once they've settled
         if ((st->flags & MPF_IN_OVERWORLD) && ++sAwayFrames >= WARP_SETTLE && !sWarping && MP_IsLocalFree())
-        {
-            sWarping = TRUE;
-            SetWarpDestination(st->mapGroup, st->mapNum, WARP_ID_NONE, st->x - MAP_OFFSET, st->y - MAP_OFFSET);
-            LockPlayerFieldControls();
-            DoWarp();
-        }
+            WarpToCarrier();
         return;
     }
     sAwayFrames = 0;
     sWarping = FALSE;
-    dx = tx - me->currentCoords.x;
-    dy = ty - me->currentCoords.y;
-    if (dx == 0 && dy == 0)
-    {
-        if (!ObjectEventIsMovementOverridden(me) && me->facingDirection != st->facing && st->facing >= DIR_SOUTH && st->facing <= DIR_EAST)
-            SetObjectEventDirection(me, st->facing);
-        return;
-    }
+    co = &gObjectEvents[obj];
     if (ObjectEventIsMovementOverridden(me) && !ObjectEventClearHeldMovementIfFinished(me))
         return;
-    if (abs(dx) + abs(dy) == 1)
+    dx = co->currentCoords.x - me->currentCoords.x;
+    dy = co->currentCoords.y - me->currentCoords.y;
+    dist = abs(dx) + abs(dy);
+    if (dist == 0)
     {
-        u8 dir = dx > 0 ? DIR_EAST : dx < 0 ? DIR_WEST : dy > 0 ? DIR_SOUTH : DIR_NORTH;
-        ObjectEventSetHeldMovement(me, st->speed >= MP_SPEED_FAST ? GetWalkFastMovementAction(dir) : GetWalkNormalMovementAction(dir));
+        if (me->facingDirection != co->facingDirection && co->facingDirection >= DIR_SOUTH && co->facingDirection <= DIR_EAST)
+            SetObjectEventDirection(me, co->facingDirection);
+        return;
     }
-    else if (MP_IsLocalFree())
+    if (me->currentCoords.x == co->previousCoords.x && me->currentCoords.y == co->previousCoords.y
+     && co->heldMovementActive && !co->heldMovementFinished)
     {
-        // Fell behind: catch up with a quick warp on the same map
-        sWarping = TRUE;
-        SetWarpDestination(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE,
-                           tx - MAP_OFFSET, ty - MAP_OFFSET);
-        LockPlayerFieldControls();
-        DoWarp();
+        ObjectEventSetHeldMovement(me, co->movementActionId); // the same step, right behind
+        return;
     }
+    if (abs(co->previousCoords.x - me->currentCoords.x) + abs(co->previousCoords.y - me->currentCoords.y) == 1
+     && dist == 2)
+    {
+        StepToward(me, co->previousCoords.x, co->previousCoords.y, TRUE); // missed a step: take their path
+        return;
+    }
+    if (dist <= 2)
+    {
+        StepToward(me, co->currentCoords.x, co->currentCoords.y, dist == 2);
+        return;
+    }
+    if (MP_IsLocalFree() && !sWarping)
+        WarpToCarrier(); // far behind (they were moved, or we lagged)
+}
+
+// The carrier's walking speed, sent as our own while we ride so friends'
+// screens move us at the same pace
+u8 MP_Piggy_CarrierSpeed(void)
+{
+    return CarrierValid() ? gMpPlayers[sCarrier].state.speed : MP_SPEED_WALK;
 }
 
 // Every overworld frame, after the camera moved
@@ -173,13 +206,31 @@ void MP_Piggy_Update(void)
             struct Sprite *s = &gSprites[gObjectEvents[obj].spriteId];
             if (riding)
             {
+                s->x2 = 0;
                 s->y2 = RIDE_Y_OFFSET;
                 s->subpriority = 0;
+                // On my back: their figure trails mine by the network delay, so
+                // draw it where I am (a few pixels at most when we're in step)
+                if (sRidingMe[i] && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT)
+                {
+                    struct Sprite *mine = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
+                    s16 ox = mine->x + mine->x2 - s->x, oy = mine->y + mine->y2 - s->y;
+                    if (abs(ox) <= 32 && abs(oy) <= 32)
+                    {
+                        s->x2 = ox;
+                        s->y2 = oy + RIDE_Y_OFFSET;
+                    }
+                }
             }
             else if (sRemoteRiding[i])
+            {
+                s->x2 = 0;
                 s->y2 = 0;
+            }
         }
         sRemoteRiding[i] = riding;
+        if (!riding)
+            sRidingMe[i] = FALSE;
     }
     if (sCarrier < 0)
         return;
@@ -202,6 +253,8 @@ void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len)
     if (from >= MP_MAX_PLAYERS)
         return;
     Name(from, name);
+    if (data[0] == MPR_PIG_ON || data[0] == MPR_PIG_OFF)
+        sRidingMe[from] = data[0] == MPR_PIG_ON;
     if (data[0] == MPR_PIG_ON)
         snprintf(msg, sizeof(msg), "%s hopped on your back!", name);
     else if (data[0] == MPR_PIG_OFF)
@@ -215,6 +268,7 @@ void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len)
 void MP_Piggy_OnPlayerLeft(u8 id)
 {
     sRemoteRiding[id] = FALSE;
+    sRidingMe[id] = FALSE;
 }
 
 // ---------------------------------------------------------------------------
