@@ -36,6 +36,7 @@ enum {
     INPUT_ACTION_QUICK_EMOTES = INPUT_ACTION_EMOTE_KEY1 + 8,   // LT held: quick emote pick
     INPUT_ACTION_QUICK_PHRASES,                                // RT held: quick phrase pick
     INPUT_ACTION_PING,                                         // left stick click / V: "look here!" on the tile ahead
+    INPUT_ACTION_ITEM_X,                                       // west button / F: the extra registered key item
 };
 #define INPUT_ACTION_EMOTE_KEY_COUNT 8
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "platform/gamepad.h"
 #include "item_menu.h"
 #include "battle.h"
 #include "battle_controllers.h"
@@ -90,6 +91,11 @@ enum {
     ACTION_GIVE_FAVOR_LADY,
     ACTION_CONFIRM_QUIZ_LADY,
     ACTION_DUMMY,
+    // Moemon Co-op QoL: REGISTER asks which button (SELECT, L, R or the extra one)
+    ACTION_MP_REG_SELECT,
+    ACTION_MP_REG_L,
+    ACTION_MP_REG_R,
+    ACTION_MP_REG_X,
 };
 
 enum {
@@ -193,6 +199,11 @@ static void BagMenu_MoveCursorCallback(s32, bool8, struct ListMenu *);
 static void BagMenu_ItemPrintCallback(u8, u32, u8);
 u16 MP_RegisteredItem(u8 slot);
 static void MP_ToggleRegisteredItem(u8 slot, u16 item);
+static void ItemMenu_MpRegisterSelect(u8 taskId);
+static void ItemMenu_MpRegisterL(u8 taskId);
+static void ItemMenu_MpRegisterR(u8 taskId);
+static void ItemMenu_MpRegisterX(u8 taskId);
+static u8 sMpRegText[4][24];   // the button choices' labels (button icons + OFF)
 static void ItemMenu_UseOutOfBattle(u8);
 static void ItemMenu_Toss(u8);
 static void ItemMenu_Register(u8);
@@ -281,7 +292,11 @@ static const struct MenuAction sItemMenuActions[] = {
     [ACTION_SHOW]              = {gMenuText_Show,     {ItemMenu_Show}},
     [ACTION_GIVE_FAVOR_LADY]   = {gMenuText_Give2,    {ItemMenu_GiveFavorLady}},
     [ACTION_CONFIRM_QUIZ_LADY] = {gMenuText_Confirm,  {ItemMenu_ConfirmQuizLady}},
-    [ACTION_DUMMY]             = {gText_EmptyString2, {NULL}}
+    [ACTION_DUMMY]             = {gText_EmptyString2, {NULL}},
+    [ACTION_MP_REG_SELECT]     = {sMpRegText[0],      {ItemMenu_MpRegisterSelect}},
+    [ACTION_MP_REG_L]          = {sMpRegText[1],      {ItemMenu_MpRegisterL}},
+    [ACTION_MP_REG_R]          = {sMpRegText[2],      {ItemMenu_MpRegisterR}},
+    [ACTION_MP_REG_X]          = {sMpRegText[3],      {ItemMenu_MpRegisterX}},
 };
 
 // these are all 2D arrays with a width of 2 but are represented as 1D arrays
@@ -995,13 +1010,25 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
                 if (!MP_ButtonIcon_DrawInBox(windowId, CHAR_SELECT_BUTTON, 96, y - 1, 24, 16))
                     BlitBitmapToWindow(windowId, sRegisteredSelect_Gfx, 96, y - 1, 24, 16);
             }
-            // Moemon Co-op QoL: registered to L / R
-            else if (itemId != ITEM_NONE && (MP_RegisteredItem(0) == itemId || MP_RegisteredItem(1) == itemId))
+            // Moemon Co-op QoL: registered to L, R or the extra button (pad west / F key)
+            else if (itemId != ITEM_NONE)
             {
-                void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
-                u8 tag[8];
-                MP_AsciiToGame(tag, MP_RegisteredItem(0) == itemId ? "(L)" : "(R)", 6);
-                BagMenu_Print(windowId, FONT_NARROW, tag, 100, y, 0, 0, TEXT_SKIP_DRAW, COLORID_NORMAL);
+                static const u8 sIds[MP_REG_SLOTS] = {CHAR_L_BUTTON, CHAR_R_BUTTON, CHAR_MP_WEST};
+                static const char *const sKeys[MP_REG_SLOTS] = {"{L}", "{R}", "F"};
+                u8 slot;
+                for (slot = 0; slot < MP_REG_SLOTS; slot++)
+                {
+                    if (MP_RegisteredItem(slot) != itemId)
+                        continue;
+                    if (!MP_ButtonIcon_DrawInBox(windowId, sIds[slot], 96, y - 1, 24, 16))
+                    {
+                        void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+                        u8 tag[8];
+                        MP_AsciiToGame(tag, sKeys[slot], 6);
+                        BagMenu_Print(windowId, FONT_NARROW, tag, 102, y, 0, 0, TEXT_SKIP_DRAW, COLORID_NORMAL);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -1933,22 +1960,69 @@ static void Task_RemoveItemFromBag(u8 taskId)
     }
 }
 
+// Moemon Co-op QoL: REGISTER / DESELECT asks which button: SELECT, L, R or
+// the extra one (the pad's west button, F on the keyboard). Picking the button
+// the item is already on takes it off.
 static void ItemMenu_Register(u8 taskId)
+{
+    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+    static u8 sMenu[6];
+    static const char *const sLabels[4] = {"{SELECT}", "{L}", "{R}", "{WEST}"};
+    char text[80];
+    u8 i;
+
+    RemoveContextWindow();
+    for (i = 0; i < 4; i++)
+    {
+        const char *label = (i == 3 && Gamepad_IconFamily() == GAMEPAD_ICONS_KEYBOARD) ? "F KEY" : sLabels[i];
+        u16 on = (i == 0) ? gSaveBlock1Ptr->registeredItem : MP_RegisteredItem(i - 1);
+        snprintf(text, sizeof(text), "%s%s", label, on == gSpecialVar_ItemId ? " OFF" : "");
+        MP_AsciiToGame(sMpRegText[i], text, sizeof(sMpRegText[i]) - 1);
+    }
+    sMenu[0] = ACTION_MP_REG_SELECT;
+    sMenu[1] = ACTION_MP_REG_L;
+    sMenu[2] = ACTION_MP_REG_R;
+    sMenu[3] = ACTION_MP_REG_X;
+    sMenu[4] = ACTION_DUMMY;
+    sMenu[5] = ACTION_CANCEL;
+    // L and R only work as item buttons with the normal button mode (OPTIONS)
+    if (gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_NORMAL)
+        sMenu[1] = sMenu[2] = ACTION_DUMMY;
+    gBagMenu->contextMenuItemsPtr = sMenu;
+    gBagMenu->contextMenuNumItems = ARRAY_COUNT(sMenu);
+    CopyItemName(gSpecialVar_ItemId, gStringVar1);
+    {
+        u8 msg[64];
+        char name[24];
+        void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
+        MP_GameToAscii(name, gStringVar1, sizeof(name) - 1);
+        snprintf(text, sizeof(text), "Which button for\n%s?", name);
+        MP_AsciiToGame(msg, text, sizeof(msg) - 1);
+        FillWindowPixelBuffer(WIN_DESCRIPTION, PIXEL_FILL(0));
+        BagMenu_Print(WIN_DESCRIPTION, FONT_NORMAL, msg, 3, 1, 0, 0, 0, COLORID_NORMAL);
+    }
+    PrintContextMenuItemGrid(BagMenu_AddWindow(ITEMWIN_2x3), 2, 3);
+    gTasks[taskId].func = Task_ItemContext_MultipleRows;
+}
+
+static void MpRegisterTo(u8 taskId, u8 slot)
 {
     s16 *data = gTasks[taskId].data;
     u16 *scrollPos = &gBagPosition.scrollPosition[gBagPosition.pocket];
     u16 *cursorPos = &gBagPosition.cursorPosition[gBagPosition.pocket];
 
-    if (gSaveBlock1Ptr->registeredItem == gSpecialVar_ItemId)
-        gSaveBlock1Ptr->registeredItem = ITEM_NONE;
-    else
-        gSaveBlock1Ptr->registeredItem = gSpecialVar_ItemId;
+    MP_ToggleRegisteredItem(slot, gSpecialVar_ItemId);
     DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);
     LoadBagItemListBuffers(gBagPosition.pocket);
     tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, *scrollPos, *cursorPos);
     ScheduleBgCopyTilemapToVram(0);
     ItemMenu_Cancel(taskId);
 }
+
+static void ItemMenu_MpRegisterSelect(u8 taskId) { MpRegisterTo(taskId, MP_REG_SELECT); }
+static void ItemMenu_MpRegisterL(u8 taskId)      { MpRegisterTo(taskId, 0); }
+static void ItemMenu_MpRegisterR(u8 taskId)      { MpRegisterTo(taskId, 1); }
+static void ItemMenu_MpRegisterX(u8 taskId)      { MpRegisterTo(taskId, 2); }
 
 static void ItemMenu_Give(u8 taskId)
 {
@@ -2104,27 +2178,44 @@ bool8 UseRegisteredKeyItemOnField(void)
     return TRUE;
 }
 
-// Moemon Co-op QoL: key items registered to L and R (kept in the save's
-// sidecar file). Same as SELECT, but nothing happens when the slot is empty.
-static const char *const sRegKeys[2] = {"reg:L", "reg:R"};
+// Moemon Co-op QoL: key items registered to L, R and the extra button (pad
+// west / F key), kept in the save's sidecar file. Same as SELECT, but nothing
+// happens when the slot is empty. One button per item.
+static const char *const sRegKeys[MP_REG_SLOTS] = {"reg:L", "reg:R", "reg:X"};
 
 u16 MP_RegisteredItem(u8 slot)
 {
-    s32 item = MP_SaveData_Get(sRegKeys[slot & 1]);
+    s32 item;
+    if (slot >= MP_REG_SLOTS)
+        return ITEM_NONE;
+    item = MP_SaveData_Get(sRegKeys[slot]);
     return (item > 0 && item < ITEMS_COUNT) ? item : ITEM_NONE;
+}
+
+static u16 GetRegSlot(u8 slot)
+{
+    return slot == MP_REG_SELECT ? gSaveBlock1Ptr->registeredItem : MP_RegisteredItem(slot);
+}
+
+static void SetRegSlot(u8 slot, u16 item)
+{
+    if (slot == MP_REG_SELECT)
+        gSaveBlock1Ptr->registeredItem = item;
+    else if (slot < MP_REG_SLOTS)
+        MP_SaveData_Set(sRegKeys[slot], item);
 }
 
 static void MP_ToggleRegisteredItem(u8 slot, u16 item)
 {
-    MP_SaveData_Set(sRegKeys[slot & 1], MP_RegisteredItem(slot) == item ? 0 : item);
-    // One button per item
-    if (MP_RegisteredItem(slot) == item)
-    {
-        if (MP_RegisteredItem(slot ^ 1) == item)
-            MP_SaveData_Set(sRegKeys[(slot ^ 1) & 1], 0);
-        if (gSaveBlock1Ptr->registeredItem == item)
-            gSaveBlock1Ptr->registeredItem = ITEM_NONE;
-    }
+    bool8 on = GetRegSlot(slot) != item;
+    u8 s;
+    for (s = 0; s < MP_REG_SLOTS; s++)
+        if (GetRegSlot(s) == item)
+            SetRegSlot(s, ITEM_NONE);
+    if (GetRegSlot(MP_REG_SELECT) == item)
+        SetRegSlot(MP_REG_SELECT, ITEM_NONE);
+    if (on)
+        SetRegSlot(slot, item);
 }
 
 bool8 MP_UseRegisteredItemSlot(u8 slot)
@@ -2132,12 +2223,16 @@ bool8 MP_UseRegisteredItemSlot(u8 slot)
     u16 item = MP_RegisteredItem(slot);
     u8 taskId;
     if (item == ITEM_NONE)
+    {
+        if (slot == 2)
+            MP_Events_QueueToast("Register a key item to this button in the BAG (REGISTER).");
         return FALSE;
+    }
     if (InUnionRoom() == TRUE || CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InBattlePike() || InMultiPartnerRoom() == TRUE)
         return FALSE;
     if (!CheckBagHasItem(item, 1))
     {
-        MP_SaveData_Set(sRegKeys[slot & 1], 0);
+        MP_SaveData_Set(sRegKeys[slot], 0);
         return FALSE;
     }
     HideMapNamePopUpWindow();

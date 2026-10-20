@@ -3,7 +3,8 @@
 // the ordinary program it is; SmartScreen itself only trusts a signed exe with reputation.
 #include <winver.h>
 
-AppIcon ICON "icon.ico"
+// ID 1: the first icon group, the one Explorer shows for the exe
+1 ICON "icon.ico"
 
 1 24 "app.manifest"
 

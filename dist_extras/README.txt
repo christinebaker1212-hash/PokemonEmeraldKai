@@ -377,8 +377,11 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   time (wild battles). In a co-op battle, R shows your partner's team.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon you caught.
-* Bag: in KEY ITEMS, press L or R on an item to put it on that button (like
-  SELECT's REGISTER). On the map, L / R use them.
+* Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
+  R, or the extra item button (X/Square on a controller, F on the keyboard).
+  Pick the button it's already on (OFF) to take it off. Pressing L or R on a
+  key item in the list also puts it on that button. On the map those buttons
+  use the item. (L and R need BUTTON MODE NORMAL in OPTION.)
 * Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
 * When a REPEL wears off you're asked if you want to use another one.
@@ -506,7 +509,8 @@ SETTINGS (START > SETTINGS)
                 from then on (it's remembered). Left/Right goes back to
                 ALL CONTROLLERS.
   PAD BUTTONS   AUTO, NINTENDO (A = right button) or XBOX (A = bottom)
-  STICK RUN     push the stick all the way to run (on/off)
+  STICK RUN     push the stick all the way to run (on/off; off in a new
+                game)
   RUMBLE        on/off
 The window can also be resized freely. Settings are kept in
 moemon_display.ini and moemon_controls.ini.
@@ -517,7 +521,8 @@ CONTROLS (keyboard)
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R
   C = CO-OP menu          1-8 = emotes and your phrases
-  V = "look here!" ping   Q (hold) = quick emotes   E (hold) = quick phrases
+  V = "look here!" ping   F = the extra registered key item (BAG > REGISTER)
+  Q (hold) = quick emotes   E (hold) = quick phrases
             (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
 
@@ -535,8 +540,9 @@ others) and it just works, even mid-game. The buttons are set up for you:
       PlayStation pads use the bottom button for A and the right one for B.
 
 The other buttons change with what's on screen:
-  Walking around    stick pushed all the way = run, X/Square = auto-run
-                    on/off, Y/Triangle = CO-OP menu, left stick click =
+  Walking around    X/Square = the extra registered key item (BAG >
+                    REGISTER), stick pushed all the way = run (with
+                    STICK RUN on), Y/Triangle = CO-OP menu, left stick click =
                     "look here!" ping on the tile in front of you
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,

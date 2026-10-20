@@ -11,8 +11,10 @@
 //   LB / RB              L / R
 //
 // The other buttons depend on what's on screen (Platform_InputContext):
-//   Overworld   left stick pushed all the way = run (with Running Shoes),
-//               west button (X / Square / Y) = toggle auto-run,
+//   Overworld   left stick pushed all the way = run (with Running Shoes,
+//               STICK RUN in the settings, off by default),
+//               west button (X / Square / Y) = the extra registered key item
+//               (BAG > REGISTER; LB / RB can hold key items too),
 //               north button (Y / Triangle / X) = CO-OP menu,
 //               right stick = emotes and quick phrases,
 //               LT / RT held = quick emote / phrase pick (direction, then let go;
@@ -37,9 +39,8 @@
 static SDL_GameController *sPads[MAX_PADS];
 static int sLastInputPad;   // the controller (not the keyboard) was used last
 static int sLayout = GAMEPAD_LAYOUT_AUTO;
-static int sAnalogRun = 1;
+static int sAnalogRun = 0;   // STICK RUN: off by default (and on every new game)
 static int sRumble = 1;
-static int sAutoRun;
 static int sInited;
 static u32 sPrevButtons;     // bit per SDL button, all pads merged
 static int sTurbo;
@@ -559,17 +560,12 @@ u16 Gamepad_Poll(int *fastForward)
         {
         case INPUT_CONTEXT_OVERWORLD:
             if (pressed & west)
-            {
-                sAutoRun = !sAutoRun;
-                Gamepad_Rumble(15, 60);
-            }
+                Platform_ContextAction(INPUT_ACTION_ITEM_X);
             if (pressed & north)
                 Platform_ContextAction(INPUT_ACTION_COOP_MENU);
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_LEFTSTICK))
                 Platform_ContextAction(INPUT_ACTION_PING);
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
-                run = 1;
-            if (sAutoRun && (keys & DPAD_ANY))
                 run = 1;
             if (run)
                 keys |= B_BUTTON;

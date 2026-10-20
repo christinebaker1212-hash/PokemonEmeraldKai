@@ -85,10 +85,13 @@ void FieldClearPlayerInput(struct FieldInput *input)
     input->input_field_1_2 = FALSE;
     input->input_field_1_3 = FALSE;
     input->dpadDirection = 0;
+    if (gMpItemXPressed)
+        gMpItemXPressed--;   // a press mid-step still counts at the next tile
 }
 
 #define MP_SELECT_HOLD_FRAMES 20
 static u8 sMpSelectHeld;
+u8 gMpItemXPressed;   // Moemon Co-op QoL: pad west / F key (input_context.c), kept a few frames
 
 void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
 {
@@ -114,6 +117,12 @@ void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
                 if (sMpSelectHeld > 0 && sMpSelectHeld < MP_SELECT_HOLD_FRAMES)
                     input->pressedSelectButton = TRUE;
                 sMpSelectHeld = 0;
+            }
+            // Moemon Co-op QoL: the extra item button (pad west / F key)
+            if (gMpItemXPressed)
+            {
+                input->input_field_1_3 = TRUE;
+                gMpItemXPressed = 0;
             }
             // Moemon Co-op QoL: key items registered to L / R
             if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL)
@@ -215,6 +224,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->input_field_1_0 && MP_UseRegisteredItemSlot(0) == TRUE)
         return TRUE;
     if (input->input_field_1_1 && MP_UseRegisteredItemSlot(1) == TRUE)
+        return TRUE;
+    if (input->input_field_1_3 && MP_UseRegisteredItemSlot(2) == TRUE)
         return TRUE;
 
     return FALSE;

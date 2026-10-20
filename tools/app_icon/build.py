@@ -3,7 +3,9 @@
 src/platform/win32res/icon.ico (exe icon, all the sizes Windows asks for) and
 include/platform/app_icon.h (64x64 RGBA for the SDL window icon).
   build.py [SOURCE_IMAGE]   a new source image is squared, trimmed and saved as app_icon.png first"""
+import io
 import os
+import struct
 import sys
 from PIL import Image
 
@@ -21,7 +23,52 @@ if len(sys.argv) > 1:
     sq.resize((256, 256), Image.LANCZOS).save(PNG)
 
 src = Image.open(PNG).convert('RGBA')
-src.save(ICO, sizes=[(s, s) for s in (16, 20, 24, 32, 40, 48, 64, 128, 256)])
+
+
+def bmp_entry(im):
+    """A classic 32-bit DIB icon image (what Explorer reads best for small sizes)"""
+    w, h = im.size
+    px = im.tobytes()
+    rows = []
+    mask_rows = []
+    stride = ((w + 31) // 32) * 4
+    for y in range(h - 1, -1, -1):   # bottom-up
+        row = bytearray()
+        bits = bytearray(stride)
+        for x in range(w):
+            r, g, b, a = px[(y * w + x) * 4:(y * w + x) * 4 + 4]
+            row += bytes((b, g, r, a))
+            if a == 0:
+                bits[x // 8] |= 0x80 >> (x % 8)
+        rows.append(bytes(row))
+        mask_rows.append(bytes(bits))
+    xor = b''.join(rows)
+    andm = b''.join(mask_rows)
+    header = struct.pack('<IiiHHIIiiII', 40, w, h * 2, 1, 32, 0, len(xor) + len(andm), 0, 0, 0, 0)
+    return header + xor + andm
+
+
+def write_ico(path, src, sizes):
+    images = []
+    for size in sizes:
+        im = src.resize((size, size), Image.LANCZOS)
+        if size >= 128:
+            buf = io.BytesIO()
+            im.save(buf, 'PNG')   # big sizes as PNG (Vista and later)
+            images.append((size, buf.getvalue()))
+        else:
+            images.append((size, bmp_entry(im)))
+    out = struct.pack('<HHH', 0, 1, len(images))
+    offset = 6 + 16 * len(images)
+    for size, data in images:
+        out += struct.pack('<BBBBHHII', size % 256, size % 256, 0, 0, 1, 32, len(data), offset)
+        offset += len(data)
+    out += b''.join(data for size, data in images)
+    with open(path, 'wb') as f:
+        f.write(out)
+
+
+write_ico(ICO, src, (16, 20, 24, 32, 40, 48, 64, 128, 256))
 small = src.resize((64, 64), Image.LANCZOS)
 px = small.tobytes()
 with open(HDR, 'w') as f:

@@ -522,7 +522,10 @@ void MpUi_Qty(u8 *dst, u32 qty);
 
 // Data kept next to the save file (mp_savedata.c)
 s32 MP_SaveData_Get(const char *key);
-u16 MP_RegisteredItem(u8 slot);            // item_menu.c: key items on L (0) / R (1)
+#define MP_REG_SLOTS  3   // item_menu.c: extra registered key items: L (0), R (1), pad west / F key (2)
+#define MP_REG_SELECT 3   // (the game's own SELECT item, in the chooser)
+u16 MP_RegisteredItem(u8 slot);
+extern u8 gMpItemXPressed;   // field_control_avatar.c: the extra item button was pressed (frames left)
 bool8 MP_UseRegisteredItemSlot(u8 slot);
 bool8 MP_Qol_OpenFollowerPicker(void);     // mp_qol.c
 void MP_Qol_OnScriptStart(const u8 *script);

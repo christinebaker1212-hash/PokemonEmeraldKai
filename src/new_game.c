@@ -1,4 +1,6 @@
 #include "global.h"
+#include "mp.h"
+#include "platform/gamepad.h"
 #include "new_game.h"
 #include "random.h"
 #include "pokemon.h"
@@ -211,6 +213,12 @@ void NewGameInitData(void)
     if (MP_DebugQuickStartEnabled())
         MP_DebugQuickStartNewGame();
     MP_QuickStart_Apply();   // Moemon Co-op: SKIP THE INTRO (mp_quickstart.c)
+    // Moemon Co-op QoL: a new game starts with STICK RUN off and no extra item buttons
+    Gamepad_SetAnalogRun(0);
+    Gamepad_SaveSettings();
+    MP_SaveData_Set("reg:L", 0);
+    MP_SaveData_Set("reg:R", 0);
+    MP_SaveData_Set("reg:X", 0);
     ResetMiniGamesRecords();
     InitUnionRoomChatRegisteredTexts();
     InitLilycoveLady();

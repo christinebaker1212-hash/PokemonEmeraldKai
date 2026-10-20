@@ -52,6 +52,9 @@ void Platform_ContextAction(int action)
     case INPUT_ACTION_PING:
         MP_Ping_Place();
         break;
+    case INPUT_ACTION_ITEM_X:
+        gMpItemXPressed = 20;   // used by the field input (field_control_avatar.c)
+        break;
     default:
         if (action >= INPUT_ACTION_EMOTE_KEY1 && action < INPUT_ACTION_EMOTE_KEY1 + INPUT_ACTION_EMOTE_KEY_COUNT)
             MP_Emote_Hotkey(action - INPUT_ACTION_EMOTE_KEY1);
