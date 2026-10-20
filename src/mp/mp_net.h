@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-#define MP_PROTOCOL_VERSION 16
+#define MP_PROTOCOL_VERSION 17
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
 #define MP_MAX_PLAYERS      4

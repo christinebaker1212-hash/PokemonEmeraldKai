@@ -550,7 +550,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int i;
         printf("[test] party:");
         for (i = 0; i < PARTY_SIZE; i++)
-            printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
+                printf(" %d(%d/%d)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_HP), (int)GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP));
+            else
+                printf(" 0");
         printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));
     }
     else if (strcmp(cmd, "badges") == 0)
