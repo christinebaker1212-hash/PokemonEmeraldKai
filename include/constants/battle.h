@@ -321,9 +321,12 @@ enum BattlerId
 #define BATTLE_ENVIRONMENT_BUILDING     8
 #define BATTLE_ENVIRONMENT_PLAIN        9
 
-#define B_WAIT_TIME_LONG  64
-#define B_WAIT_TIME_MED   48
-#define B_WAIT_TIME_SHORT 32
+// Moemon Co-op: how long a battle message stays up once it's fully printed
+// (vanilla 64 / 48 / 32). Outside link battles A or B moves on sooner.
+#define B_WAIT_TIME_LONG  40
+#define B_WAIT_TIME_MED   30
+#define B_WAIT_TIME_SHORT 20
+#define B_WAIT_TIME_MIN_BEFORE_SKIP 8
 
 #define CASTFORM_NORMAL     0
 #define CASTFORM_FIRE       1

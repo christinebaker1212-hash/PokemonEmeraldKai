@@ -103,7 +103,11 @@ ResetBlockReceivedFlag (the game reads the buffer right after clearing the flag)
 GetMonData asked of all battlers at once, MP_FrameEnd flushes sends after each frame. These only broke over the internet:
 test with tools/mp_server/lagproxy.py (TCP proxy adding delay + jitter: `lagproxy.py LISTEN TARGET 150 50`, clients use
 MOEMON_LOBBY=127.0.0.1:LISTEN, FPS=60) and MOEMON_LINKDEBUG=1 (logs every block + link state each second). Verified at 150 ms.
-The battle screen's opening window and grass overlay also move at INTRO_SLIDE_STEP. Measured from encounter to action menu: solo wild 557 ->
+The battle screen's opening window and grass overlay also move at INTRO_SLIDE_STEP.
+Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vanilla 64/48/32; data/*.s need a touch to
+reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
+single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
+enemy attack, MID text, no presses) 684 -> 476 frames. Measured from encounter to action menu: solo wild 557 ->
 497 frames, co-op wild double 947 -> 562. Harness prints "[test] action menu at frame N"; the `action` condition misses co-op.
 Autosave (mp_autosave.c, MP_Autosave_Update from MP_FrameUpdate): every gMpConfig.autosaveMinutes (ini autosave, default 5)
 of map time, 1 minute after a battle, once MP_IsLocalFree + standing still for 30 frames; skipped where the START menu has

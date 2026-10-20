@@ -384,6 +384,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Battle: on the move list, R shows each move's power, accuracy and kind
   (PHYS./SPEC./STATUS). At FIGHT/BAG, L throws the same kind of Ball as last
   time (wild battles). In a co-op battle, R shows your partner's team.
+* Battles are quicker: messages print twice as fast as your text speed
+  setting, stay up a shorter time, and A or B moves on to the next one.
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon you caught.
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind

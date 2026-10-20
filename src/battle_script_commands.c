@@ -2169,6 +2169,11 @@ static void Cmd_waitmessage(void)
         else
         {
             u16 toWait = T2_READ_16(gBattlescriptCurrInstr + 1);
+            // Moemon Co-op: A/B moves on once the message has been up a moment
+            // (not in link battles, where the other game has to see it too)
+            if (!(gBattleTypeFlags & BATTLE_TYPE_LINK) && gPauseCounterBattle >= B_WAIT_TIME_MIN_BEFORE_SKIP
+             && JOY_NEW(A_BUTTON | B_BUTTON))
+                gPauseCounterBattle = toWait;
             if (++gPauseCounterBattle >= toWait)
             {
                 gPauseCounterBattle = 0;
