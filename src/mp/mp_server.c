@@ -137,9 +137,11 @@ static void SendTo(int c, uint8_t type, const void *data, uint16_t len)
         MPConn_Queue(&sConns[c]->conn, type, data, len);
 }
 
+// u8 reason + u16 server version, so a client on another version can say who needs to update
 static void SendRoomError(int c, uint8_t reason)
 {
-    SendTo(c, MPMSG_S_ROOM_ERROR, &reason, 1);
+    uint8_t msg[3] = {reason, MP_PROTOCOL_VERSION & 0xFF, MP_PROTOCOL_VERSION >> 8};
+    SendTo(c, MPMSG_S_ROOM_ERROR, msg, sizeof(msg));
 }
 
 // Sends "u8 fromSlot + data" to everyone in the room who said hello, except `except`
@@ -496,8 +498,8 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
             uint8_t welcome[2];
             if (ver != MP_PROTOCOL_VERSION)
             {
-                uint8_t reason = MP_REJECT_VERSION;
-                SendTo(c, MPMSG_S_REJECT, &reason, 1);
+                uint8_t msg[3] = {MP_REJECT_VERSION, MP_PROTOCOL_VERSION & 0xFF, MP_PROTOCOL_VERSION >> 8};
+                SendTo(c, MPMSG_S_REJECT, msg, sizeof(msg));
                 return;
             }
             welcome[0] = (uint8_t)sc->slot;

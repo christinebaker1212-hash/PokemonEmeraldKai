@@ -463,6 +463,20 @@ static void DrawMessage(void)
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
 }
 
+// Which side is out of date, when the other side told us its version
+static const char *VersionText(void)
+{
+    static char text[160];
+    u16 other = MP_Lobby_OtherVersion();
+    if (other > MP_PROTOCOL_VERSION)
+        snprintf(text, sizeof(text), "Your game is out of date (co-op v%d, they have v%d). Update the game to join.", MP_PROTOCOL_VERSION, other);
+    else if (other != 0)
+        snprintf(text, sizeof(text), "That game is out of date (co-op v%d, you have v%d). The host needs to update.", other, MP_PROTOCOL_VERSION);
+    else
+        snprintf(text, sizeof(text), "That server is running a different version of the game (you have co-op v%d). Everyone needs the same version.", MP_PROTOCOL_VERSION);
+    return text;
+}
+
 static const char *LobbyErrorText(u8 err)
 {
     switch (err)
@@ -471,7 +485,7 @@ static const char *LobbyErrorText(u8 err)
     case MP_LOBBY_ERR_NOT_FOUND:    return "That server isn't open anymore. Check the name, or ask your friend to host again.";
     case MP_LOBBY_ERR_BAD_PASSWORD: return "Wrong password. Ask the host for it and try again.";
     case MP_LOBBY_ERR_FULL:         return "That server is full (4 players).";
-    case MP_LOBBY_ERR_VERSION:      return "That server is running a different version of the game. Everyone needs the same version.";
+    case MP_LOBBY_ERR_VERSION:      return VersionText();
     case MP_LOBBY_ERR_BAD_NAME:     return "Server names can use letters, numbers, spaces and - . ! ? ' &";
     case MP_LOBBY_ERR_SLOW_DOWN:    return "Too many wrong passwords. Wait a few seconds and try again.";
     case MP_LOBBY_ERR_SERVER_FULL:  return "The online lobby is busy right now. Try again in a minute.";
@@ -691,7 +705,12 @@ static void DrawJoin(void)
         {
             const u8 *color = (e->room.version != MP_PROTOCOL_VERSION || e->room.players >= e->room.maxPlayers) ? sColorDisabled : sColorNormal;
             Print(WIN_MAIN, e->room.name, 14, y, color);
-            snprintf(line, sizeof(line), "%s%d/%d", e->isLan ? "HOME " : "", e->room.players, e->room.maxPlayers);
+            if (e->room.version > MP_PROTOCOL_VERSION)
+                snprintf(line, sizeof(line), "NEWER");
+            else if (e->room.version != MP_PROTOCOL_VERSION)
+                snprintf(line, sizeof(line), "OLD");
+            else
+                snprintf(line, sizeof(line), "%s%d/%d", e->isLan ? "HOME " : "", e->room.players, e->room.maxPlayers);
             PrintRight(WIN_MAIN, line, 196, y, color);
             if (e->room.flags & MP_ROOM_FLAG_LOCKED)
             {
@@ -1004,6 +1023,7 @@ static void HandleJoin(void)
         }
         if (e->room.version != MP_PROTOCOL_VERSION)
         {
+            MP_Lobby_SetOtherVersion(e->room.version);
             ShowMessage(LobbyErrorText(MP_LOBBY_ERR_VERSION), TRUE, AFTER_JOIN);
             return;
         }
@@ -1122,6 +1142,7 @@ static void HandleWorking(void)
         if (e->room.version != MP_PROTOCOL_VERSION)
         {
             MP_Lobby_Disconnect();
+            MP_Lobby_SetOtherVersion(e->room.version);
             ShowMessage(LobbyErrorText(MP_LOBBY_ERR_VERSION), TRUE, AFTER_JOIN);
             return;
         }

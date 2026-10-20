@@ -6,7 +6,9 @@
 
 #include <stdint.h>
 
+#ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
 #define MP_PROTOCOL_VERSION 20
+#endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
 #define MP_MAX_PLAYERS      4
@@ -44,7 +46,7 @@ enum {
 // Message types, server -> client
 enum {
     MPMSG_S_WELCOME = 20,     // u8 yourId, u8 maxPlayers
-    MPMSG_S_REJECT = 21,      // u8 reason
+    MPMSG_S_REJECT = 21,      // u8 reason, u16 server version
     MPMSG_S_PLAYER_INFO = 22, // u8 id, MpHello
     MPMSG_S_PLAYER_LEAVE = 23,// u8 id
     MPMSG_S_STATE = 24,       // u8 id, MpWireState
@@ -53,7 +55,7 @@ enum {
     MPMSG_S_PONG = 27,
     MPMSG_S_ROOM_LIST = 28,   // u8 count, then per room: str name, u8 players, u8 max, u8 flags, u16 version
     MPMSG_S_ROOM_OK = 29,     // str name, u8 players, u8 created
-    MPMSG_S_ROOM_ERROR = 30,  // u8 reason
+    MPMSG_S_ROOM_ERROR = 30,  // u8 reason, u16 server version (protocol 20+ servers)
     MPMSG_S_STORE = 31,       // u8 op, ... (room storage replies and updates)
 };
 

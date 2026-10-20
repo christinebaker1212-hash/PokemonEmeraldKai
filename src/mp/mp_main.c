@@ -75,6 +75,8 @@ static struct
     u8 listCount;
     bool8 listReady;
 } sLobby;
+static void SetError(u8 err);
+static u16 sOtherVersion;   // the version a server or room told us about when it didn't match ours
 
 // ---------------------------------------------------------------------------
 // Text helpers (ASCII <-> game charset)
@@ -942,6 +944,13 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         MPNet_Log("server rejected us (%d)", len ? data[0] : 0);
         if (len && data[0] == MP_REJECT_NO_ROOM)
             sHelloSent = FALSE; // we'll say hello again after rejoining
+        if (len && data[0] == MP_REJECT_VERSION)
+        {
+            MP_Lobby_SetOtherVersion(len >= 3 ? data[1] | (data[2] << 8) : 0);
+            SetError(MP_LOBBY_ERR_VERSION);
+            sLobby.wantRoom = FALSE;
+            sLobby.reconnecting = FALSE;
+        }
         break;
     case MPMSG_S_PLAYER_INFO:
     {
@@ -1091,8 +1100,13 @@ static void ShowWelcome(u8 from, const u8 *text, u16 len)
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
 bool8 MP_Lobby_InRoom(void) { return sLobby.state == MP_LOBBY_IN_ROOM; }
 
+void MP_Lobby_SetOtherVersion(u16 version) { sOtherVersion = version; }
+u16 MP_Lobby_OtherVersion(void) { return sOtherVersion; }
+
 static void SetError(u8 err)
 {
+    if (err == MP_LOBBY_ERR_VERSION)
+        MPNet_Log("version mismatch: ours %d, theirs %d", MP_PROTOCOL_VERSION, sOtherVersion);
     sLobby.error = err;
     sLobby.state = MP_LOBBY_ERROR;
     sLobby.request = REQ_NONE;
@@ -1317,7 +1331,10 @@ static void Lobby_OnMessage(u8 type, const u8 *data, u16 len)
         case MP_ROOM_ERR_NOT_FOUND:    SetError(MP_LOBBY_ERR_NOT_FOUND); break;
         case MP_ROOM_ERR_BAD_PASSWORD: SetError(MP_LOBBY_ERR_BAD_PASSWORD); break;
         case MP_ROOM_ERR_FULL:         SetError(MP_LOBBY_ERR_FULL); break;
-        case MP_ROOM_ERR_VERSION:      SetError(MP_LOBBY_ERR_VERSION); break;
+        case MP_ROOM_ERR_VERSION:
+            MP_Lobby_SetOtherVersion(len >= 3 ? data[1] | (data[2] << 8) : 0);
+            SetError(MP_LOBBY_ERR_VERSION);
+            break;
         case MP_ROOM_ERR_BAD_NAME:     SetError(MP_LOBBY_ERR_BAD_NAME); break;
         case MP_ROOM_ERR_SLOW_DOWN:    SetError(MP_LOBBY_ERR_SLOW_DOWN); break;
         default:                       SetError(MP_LOBBY_ERR_SERVER_FULL); break;

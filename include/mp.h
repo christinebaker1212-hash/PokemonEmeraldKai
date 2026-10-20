@@ -213,6 +213,9 @@ void MP_Lobby_JoinRoom(const char *room, const char *password);
 void MP_Lobby_JoinRoomWithKey(const char *room, const u8 *key);
 const u8 *MP_Lobby_RoomKey(void);
 const char *MP_Lobby_RoomName(void);
+// The co-op version a server or room reported when it didn't match ours (0 = it didn't say)
+u16 MP_Lobby_OtherVersion(void);
+void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_InRoom(void);
 const char *MP_OnlineLobbyAddress(void);

@@ -7,7 +7,7 @@
 if [ -z "$NOBUILD" ]; then
     (cd "$REPO" && make linux -j"$(nproc)" > "$OUT.build.log" 2>&1) || { echo "build failed, see $OUT.build.log"; exit 99; }
 fi
-names=("$@"); [ ${#names[@]} = 0 ] && names=($(ls "$TOOLS/scenarios"))
+names=("$@"); all=0; [ ${#names[@]} = 0 ] && { names=($(ls "$TOOLS/scenarios")); all=1; }
 fail=0
 for n in "${names[@]}"; do
     src="$TOOLS/scenarios/$n"; [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; fail=$((fail+1)); continue; }
@@ -31,5 +31,6 @@ for n in "${names[@]}"; do
         if [ -z "$bad" ]; then echo "ok   $n ($((SECONDS-start)) s)"; else echo -e "FAIL $n ($((SECONDS-start)) s)$bad"; exit 1; fi
     ) || fail=$((fail+1))
 done
+[ $all = 1 ] && { "$TOOLS/version_check.sh" || fail=$((fail+1)); }
 echo "$fail failed, results in $OUT"
 exit $fail

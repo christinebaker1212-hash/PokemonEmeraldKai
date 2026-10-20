@@ -12,6 +12,7 @@ screenshots into PNGs if it's installed.
 |-----------------|----------------|
 | `solo_wild`     | one client: wild battle reaches the action menu, then wins and returns to the field |
 | `coop_wild`     | two clients on Route 101 through a local relay: BOB's encounter pulls ALICE in, they win together |
+| `version_check` | (`version_check.sh`, part of the full run) a relay server one co-op version ahead: the game reports the mismatch |
 | `coop_wild_lag` | the same through `tools/mp_server/lagproxy.py` at 250 ms each way + 80 ms jitter (NA <-> JP, the worst case we plan for) |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:
