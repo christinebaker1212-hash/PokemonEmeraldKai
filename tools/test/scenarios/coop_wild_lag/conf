@@ -1,0 +1,10 @@
+# like coop_wild through lagproxy at 250 ms each way + 80 ms jitter: worst case (NA <-> JP, relay far from both)
+MODE=2
+DELAY=250
+JIT=80
+FPS=60
+TMO=240
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+EXPECT_A=("action menu at frame" "co-op: battle over, outcome 1")
+EXPECT_B=("action menu at frame" "co-op: battle over, outcome 1")

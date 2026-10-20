@@ -1,0 +1,7 @@
+pressuntil A field 5000
+mp wild 288:3
+pressuntil A action 3000
+mash A 60 20
+waitfor field 3000
+log solo battle done
+quit

@@ -1,0 +1,3 @@
+# one client: a wild battle from encounter to the action menu, then fight until it's over
+MODE=1
+EXPECT_A=("action menu at frame" "solo battle done")

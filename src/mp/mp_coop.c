@@ -95,12 +95,12 @@ enum {
 };
 
 #define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
-#define WAIT_HOLD_FRAMES   180   // others forget a wait they stop hearing about
+#define WAIT_HOLD_FRAMES   240   // others forget a wait they stop hearing about
 
 #define WILD_RANGE_X     8     // about one screen
 #define WILD_RANGE_Y     6
-#define WILD_ASK_FRAMES  45    // wait this long for an answer, then battle alone
-#define WILD_GO_FRAMES   180   // a friend who said yes waits this long for the battle
+#define WILD_ASK_FRAMES  150   // wait this long for an answer, then battle alone (4 relay trips on an NA-JP link)
+#define WILD_GO_FRAMES   300   // a friend who said yes waits this long for the battle
 
 enum {
     CAUGHT_NONE,
