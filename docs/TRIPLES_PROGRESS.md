@@ -58,3 +58,11 @@ Each step ends with a commit; the newest state is at the bottom.
   WILD_GO carry the seat list. Results, bonuses, catches, refunds and level-ups per seat; pair counters for every
   pair (MP_Events_OnCoopWinGroup). Protocol 22. tools/test/runN.sh runs 2-4 clients.
   Verified: three clients on Route 101, wild triple to the win, EXP per owner, all three back in the field.
+- Step 6/7 (items, catches, settlement, presentation): verified with three clients: ALICE and BOB each catch a
+  different wild Pokémon and get only their own (tri_catch), ALICE heals CARL's Moemon (tri_heal), a disconnect calls
+  it off and the catch stays (tri_abort), all three level up and evolve on their own games (tri_levelup), CARL's lead
+  faints and he sends his reserve from the party screen (tri_faint), the trainer battle gives every player the prize
+  (tri_trainer); tri_wild/tri_catch also pass at 250 ms + 80 ms jitter. Screen rebuild after menus covers battlers 4-5
+  (reshow_battle_screen.c) and reloads the card palette after the battler slots are reserved; center trainer back
+  pictures (SetMultiuseSpriteTemplateToTrainerBack); R glance shows both allies (name + HP); intents "ALICE: PECK" one
+  line per ally; owner strips; EXP bonus per player id (it can arrive before the master sets up seats).

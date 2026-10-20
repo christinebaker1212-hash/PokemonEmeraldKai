@@ -1,0 +1,13 @@
+# Co-op wild triple: CARL's lead uses MEMENTO and faints, CARL picks his reserve in the party screen (his second Moemon,
+# the blue box at the top right), the battle goes on to the win
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:30,283:30"
+ENV_B="MOEMON_DEBUG_PARTY=280:30,283:30"
+ENV_C="MOEMON_DEBUG_PARTY=280:30,283:30"
+EXPECT_A=("co-op: battle over, outcome 1")
+EXPECT_B=("co-op: battle over, outcome 1")
+EXPECT_C=("co-op: battle over, outcome 1" "party: 280(0/")

@@ -119,7 +119,7 @@ static void MpShowPartnerTeam(void)
     *p++ = FONT_SMALL_NARROW;   // three short lines fit the prompt box
     if (IS_TRIPLE_BATTLE() && gMpCoopBattle)
     {
-        // Moemon Co-op: a triple: one line per ally, their two Pokemon ("TORCHIC 30/33  MUDKIP FNT")
+        // Moemon Co-op: a triple: one line per ally, their two Pokemon ("TORCHIC 30  MUDKIP FNT")
         u8 own = MP_Coop_OwnBase(), seat;
         for (seat = 0; seat < 3; seat++)
         {
@@ -144,7 +144,7 @@ static void MpShowPartnerTeam(void)
                 if (hp == 0)
                     snprintf(buf, sizeof(buf), " FNT");
                 else
-                    snprintf(buf, sizeof(buf), " %d/%d", hp, GetMonData(mon, MON_DATA_MAX_HP));
+                    snprintf(buf, sizeof(buf), " %d", hp);   // two to a line: no room for the max
                 MP_AsciiToGame(p, buf, 14);
                 p += StringLength(p);
             }

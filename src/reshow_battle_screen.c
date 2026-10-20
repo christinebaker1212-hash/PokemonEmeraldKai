@@ -74,9 +74,9 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
         break;
     case 4:
         FreeAllSpritePalettes();
-        if (IS_TRIPLE_BATTLE())
-            MP_TriCards_Reload();   // Moemon Co-op: the cards' palette
         gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
+        if (IS_TRIPLE_BATTLE())
+            MP_TriCards_Reload();   // Moemon Co-op: the cards' palette (after the battlers' slots)
         break;
     case 5:
         ClearSpritesHealthboxAnimData();
@@ -107,6 +107,8 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
     case 10:
         if (!LoadBattlerSpriteGfx(3))
             gBattleScripting.reshowMainState--;
+        LoadBattlerSpriteGfx(4);   // Moemon Co-op: a triple's center pair (nothing otherwise)
+        LoadBattlerSpriteGfx(5);
         break;
     case 11:
         CreateBattlerSprite(0);
@@ -119,6 +121,8 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
         break;
     case 14:
         CreateBattlerSprite(3);
+        CreateBattlerSprite(4);   // Moemon Co-op
+        CreateBattlerSprite(5);
         break;
     case 15:
         CreateHealthboxSprite(0);
@@ -131,6 +135,8 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
         break;
     case 18:
         CreateHealthboxSprite(3);
+        CreateHealthboxSprite(4);   // Moemon Co-op
+        CreateHealthboxSprite(5);
         break;
     case 19:
         {
@@ -146,6 +152,12 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
             if (IsDoubleBattle())
             {
                 opponentBattler = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
+                species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[opponentBattler]], MON_DATA_SPECIES);
+                SetBattlerShadowSpriteCallback(opponentBattler, species);
+            }
+            if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the center foe
+            {
+                opponentBattler = GetBattlerAtPosition(B_POSITION_OPPONENT_CENTER);
                 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[opponentBattler]], MON_DATA_SPECIES);
                 SetBattlerShadowSpriteCallback(opponentBattler, species);
             }
