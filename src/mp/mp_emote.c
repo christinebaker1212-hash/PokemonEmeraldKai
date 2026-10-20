@@ -80,6 +80,8 @@ static const u16 sBubblePal[16] = {
     RGB(4, 4, 12), RGB(31, 31, 31), RGB(1, 1, 5), RGB(31, 25, 6), RGB(11, 4, 19),
     // Compass arrows: red, blue, green, yellow players, outline
     RGB(31, 8, 8), RGB(8, 16, 31), RGB(6, 26, 6), RGB(31, 27, 4), RGB(2, 2, 4),
+    // The emote icons' pink heart (trainer_see.c MpIconLook: white 1, black 14, pink 15)
+    RGB(31, 20, 22),
 };
 
 static const struct OamData sOam_Bubble = {
@@ -583,6 +585,20 @@ static void ShowBubble(u8 slot, const u8 *text, bool8 note)
     b->dirty = TRUE;
 }
 
+void MP_StartNoteIcon(void);
+bool8 MP_EmoteIconShown(void);
+
+// The music note icon over an object (trainer_see.c)
+static void StartNoteIcon(struct ObjectEvent *obj)
+{
+    if (obj == NULL || !obj->active)
+        return;
+    gFieldEffectArguments[0] = obj->localId;
+    gFieldEffectArguments[1] = obj->mapNum;
+    gFieldEffectArguments[2] = obj->mapGroup;
+    MP_StartNoteIcon();
+}
+
 // The !, ? and heart icons over an object
 static void StartIcon(struct ObjectEvent *obj, u8 kind)
 {
@@ -644,11 +660,19 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
         text[i] = (c >= 0xF7 && c != CHAR_NEWLINE) ? CHAR_SPACE : c;
     }
     text[i] = EOS;
-    ShowBubble(1 + from, text, data[1] == SAY_NOTE);
     if (data[1] == SAY_NOTE)
+    {
+        u8 obj = MP_GetRemoteObjectEventId(from);
+        sBubbles[1 + from].timer = 0;   // the icon replaces their bubble
+        if (obj < OBJECT_EVENTS_COUNT)
+            StartNoteIcon(&gObjectEvents[obj]);
         MP_Social_OnEmote(from, MP_EMOTE_NOTE);
+    }
     else
+    {
+        ShowBubble(1 + from, text, FALSE);
         MP_Social_LogSay(from, text);
+    }
 }
 
 // A bubble over a player (combos, pranks)
@@ -681,7 +705,9 @@ void MP_Emote_Note(void)
 {
     if (!CanEmote())
         return;
-    ShowBubble(0, NULL, TRUE);
+    InitIfNeeded();
+    sBubbles[0].timer = 0;
+    StartNoteIcon(&gObjectEvents[gPlayerAvatar.objectEventId]);
     SendSay(SAY_NOTE, NULL);
     if (gMpLocalId >= 0)
         MP_Social_OnEmote(gMpLocalId, MP_EMOTE_NOTE);
@@ -990,15 +1016,23 @@ void MP_Emote_Update(void)
         u8 obj = (i != gMpLocalId && gMpPlayers[i].present) ? MP_GetRemoteObjectEventId(i) : OBJECT_EVENTS_COUNT;
         UpdateBubble(&sBubbles[1 + i], obj);
     }
-    if (!AnyBubbleShown() && !MP_Compass_AnyShown() && IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
+    if (!AnyBubbleShown() && !MP_Compass_AnyShown() && !MP_EmoteIconShown() && IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
         FreeSpritePaletteByTag(TAG_BUBBLE_PAL);
 }
 
 // Hide the name tag while that player's bubble is up
 bool8 MP_Emote_RemoteBubbleShown(u8 id)
 {
+    bool8 MP_EmoteIconOver(u8 localId, u8 mapNum, u8 mapGroup);
+    u8 obj;
     InitIfNeeded();
-    return id < MP_MAX_PLAYERS && sBubbles[1 + id].timer > 0;
+    if (id >= MP_MAX_PLAYERS)
+        return FALSE;
+    if (sBubbles[1 + id].timer > 0)
+        return TRUE;
+    obj = MP_GetRemoteObjectEventId(id);
+    return obj < OBJECT_EVENTS_COUNT
+        && MP_EmoteIconOver(gObjectEvents[obj].localId, gObjectEvents[obj].mapNum, gObjectEvents[obj].mapGroup);
 }
 
 void MP_Emote_OnPlayerLeft(u8 id)

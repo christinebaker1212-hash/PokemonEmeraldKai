@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle_setup.h"
 #include "event_data.h"
 #include "event_object_movement.h"
@@ -62,6 +63,7 @@ EWRAM_DATA u8 gApproachingTrainerId = 0;
 static const u8 sEmotion_ExclamationMarkGfx[] = INCGFX_U8("graphics/field_effects/pics/emotion_exclamation.png", ".4bpp");
 static const u8 sEmotion_QuestionMarkGfx[] = INCGFX_U8("graphics/field_effects/pics/emotion_question.png", ".4bpp");
 static const u8 sEmotion_HeartGfx[] = INCGFX_U8("graphics/field_effects/pics/emotion_heart.png", ".4bpp");
+static const u8 sEmotion_NoteGfx[] = INCGFX_U8("graphics/field_effects/pics/emotion_note.png", ".4bpp");   // Moemon Co-op
 
 static u8 (*const sDirectionalApproachDistanceFuncs[])(struct ObjectEvent *trainerObj, s16 range, s16 x, s16 y) =
 {
@@ -693,12 +695,80 @@ void TryPrepareSecondApproachingTrainer(void)
 #define sYOffset    data[4]
 #define sFldEffId   data[7]
 
+// Moemon Co-op: the icons used whatever sat in the player's and the first NPC's
+// palette slots, which co-op looks recolor (a red "!"). They're redrawn on the
+// co-op overlay palette instead (white 1, black 14, pink 15; see mp_emote.c), and
+// a music note joins them so every emote pops the same way.
+enum { MP_ICON_EXCLAMATION, MP_ICON_QUESTION, MP_ICON_HEART, MP_ICON_NOTE, MP_ICON_COUNT };
+static EWRAM_DATA u8 sMpIconGfx[MP_ICON_COUNT][0x80] = {0};
+static EWRAM_DATA bool8 sMpIconGfxBuilt = FALSE;
+static const struct SpriteFrameImage sMpIconImages[MP_ICON_COUNT] =
+{
+    {sMpIconGfx[0], 0x80}, {sMpIconGfx[1], 0x80}, {sMpIconGfx[2], 0x80}, {sMpIconGfx[3], 0x80},
+};
+static const union AnimCmd sMpIconAnim0[] = {ANIMCMD_FRAME(0, 60), ANIMCMD_END};
+static const union AnimCmd sMpIconAnim1[] = {ANIMCMD_FRAME(1, 60), ANIMCMD_END};
+static const union AnimCmd sMpIconAnim2[] = {ANIMCMD_FRAME(2, 60), ANIMCMD_END};
+static const union AnimCmd sMpIconAnim3[] = {ANIMCMD_FRAME(3, 60), ANIMCMD_END};
+static const union AnimCmd *const sMpIconAnims[MP_ICON_COUNT] = {sMpIconAnim0, sMpIconAnim1, sMpIconAnim2, sMpIconAnim3};
+
+static void SpriteCB_TrainerIcons(struct Sprite *sprite);
+
+static bool8 MpIconLook(struct Sprite *sprite, u8 icon)
+{
+    u8 slot;
+    if (!MP_Emote_LoadUiPalette() || (slot = IndexOfSpritePaletteTag(MP_TAG_UI_PAL)) == 0xFF)
+        return FALSE;
+    if (!sMpIconGfxBuilt)
+    {
+        static const u8 *const sSrc[MP_ICON_COUNT] = {sEmotion_ExclamationMarkGfx, sEmotion_QuestionMarkGfx, sEmotion_HeartGfx, sEmotion_NoteGfx};
+        u8 map[16] = {0};
+        int i, j;
+        map[14] = 1;    // white
+        map[15] = 14;   // black outline
+        map[5] = 15;    // the heart's pink
+        for (i = 0; i < MP_ICON_COUNT; i++)
+            for (j = 0; j < 0x80; j++)
+                sMpIconGfx[i][j] = map[sSrc[i][j] & 0xF] | (map[sSrc[i][j] >> 4] << 4);
+        sMpIconGfxBuilt = TRUE;
+    }
+    sprite->images = sMpIconImages;
+    sprite->anims = sMpIconAnims;
+    sprite->oam.paletteNum = slot;
+    StartSpriteAnim(sprite, icon);
+    return TRUE;
+}
+
+// Is an emote icon up? (the overlay palette stays loaded while one is)
+bool8 MP_EmoteIconShown(void)
+{
+    int i;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].callback == SpriteCB_TrainerIcons)
+            return TRUE;
+    return FALSE;
+}
+
+// Is an emote icon up over this object? (a friend's name tag steps aside for it)
+bool8 MP_EmoteIconOver(u8 localId, u8 mapNum, u8 mapGroup)
+{
+    int i;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].callback == SpriteCB_TrainerIcons
+         && gSprites[i].data[0] == localId && gSprites[i].data[1] == mapNum && gSprites[i].data[2] == mapGroup)
+            return TRUE;
+    return FALSE;
+}
+
 u8 FldEff_ExclamationMarkIcon(void)
 {
     u8 spriteId = CreateSpriteAtEnd(&sSpriteTemplate_ExclamationQuestionMark, 0, 0, 0x53);
 
     if (spriteId != MAX_SPRITES)
+    {
         SetIconSpriteData(&gSprites[spriteId], FLDEFF_EXCLAMATION_MARK_ICON, 0);
+        MpIconLook(&gSprites[spriteId], MP_ICON_EXCLAMATION);   // Moemon Co-op
+    }
 
     return 0;
 }
@@ -708,7 +778,10 @@ u8 FldEff_QuestionMarkIcon(void)
     u8 spriteId = CreateSpriteAtEnd(&sSpriteTemplate_ExclamationQuestionMark, 0, 0, 0x52);
 
     if (spriteId != MAX_SPRITES)
+    {
         SetIconSpriteData(&gSprites[spriteId], FLDEFF_QUESTION_MARK_ICON, 1);
+        MpIconLook(&gSprites[spriteId], MP_ICON_QUESTION);   // Moemon Co-op
+    }
 
     return 0;
 }
@@ -723,9 +796,23 @@ u8 FldEff_HeartIcon(void)
 
         SetIconSpriteData(sprite, FLDEFF_HEART_ICON, 0);
         sprite->oam.paletteNum = 2;
+        MpIconLook(sprite, MP_ICON_HEART);   // Moemon Co-op
     }
 
     return 0;
+}
+
+// Moemon Co-op: the music note emote, popping like the others (gFieldEffectArguments
+// 0-2 = local id, map num, map group, as for the icons above)
+void MP_StartNoteIcon(void)
+{
+    u8 spriteId = CreateSpriteAtEnd(&sSpriteTemplate_ExclamationQuestionMark, 0, 0, 0x52);
+
+    if (spriteId == MAX_SPRITES)
+        return;
+    SetIconSpriteData(&gSprites[spriteId], FLDEFF_HEART_ICON, 0);
+    if (!MpIconLook(&gSprites[spriteId], MP_ICON_NOTE))
+        DestroySprite(&gSprites[spriteId]);
 }
 
 static void SetIconSpriteData(struct Sprite *sprite, u16 fldEffId, u8 spriteAnimNum)
