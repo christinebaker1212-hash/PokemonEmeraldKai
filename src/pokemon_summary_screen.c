@@ -2794,11 +2794,47 @@ static void LimitEggSummaryPageDisplay(void) // If the Pokémon is an egg, limit
         ChangeBgX(3, 0, BG_COORD_SET);
 }
 
+// Moemon Co-op: the info page's button prompt ("{SELECT} RENAME") in the
+// dark strip under the portrait, so renaming is easy to find
+static EWRAM_DATA u8 sMpPromptWindow = 0;
+static const struct WindowTemplate sMpPromptWindowTemplate = {
+    .bg = 0,
+    .tilemapLeft = 0,
+    .tilemapTop = 18,
+    .width = 10,
+    .height = 2,
+    .paletteNum = 6,
+    .baseBlock = 700,
+};
+
+static void MpDrawInfoPrompts(void)
+{
+    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+    static const u8 sColors[3] = {0, 3, 4};   // white with a grey shadow, like the page titles
+    u8 text[48];
+    if (sMpPromptWindow == WINDOW_NONE)
+        return;
+    FillWindowPixelBuffer(sMpPromptWindow, PIXEL_FILL(0));
+    if (MpCanRename())
+    {
+        MP_AsciiToGame(text, "{SELECT} RENAME", sizeof(text) - 1);
+        AddTextPrinterParameterized4(sMpPromptWindow, FONT_NORMAL, (10 * 8 - GetStringWidth(FONT_NORMAL, text, 0)) / 2, 1,
+                                     0, 0, sColors, TEXT_SKIP_DRAW, text);
+        PutWindowTilemap(sMpPromptWindow);
+    }
+    else
+    {
+        ClearWindowTilemap(sMpPromptWindow);
+    }
+    CopyWindowToVram(sMpPromptWindow, COPYWIN_FULL);
+}
+
 static void ResetWindows(void)
 {
     u8 i;
 
     InitWindows(sSummaryTemplate);
+    sMpPromptWindow = AddWindow(&sMpPromptWindowTemplate);
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
@@ -2976,6 +3012,7 @@ static void PutPageWindowTilemaps(u8 page)
     case PSS_PAGE_INFO:
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
         PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+        MpDrawInfoPrompts();
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE);
@@ -3026,6 +3063,8 @@ static void ClearPageWindowTilemaps(u8 page)
     {
     case PSS_PAGE_INFO:
         ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+        if (sMpPromptWindow != WINDOW_NONE)
+            ClearWindowTilemap(sMpPromptWindow);
         if (InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE)
             ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL);
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE);

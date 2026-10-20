@@ -398,7 +398,7 @@ void SpriteCB_TrainerSlideIn(struct Sprite *sprite)
     if (!(gIntroSlideFlags & 1))
     {
         s16 before = sprite->x2;
-        sprite->x2 += sprite->sSpeedX * INTRO_SLIDE_SPEED;   // Moemon Co-op: faster battle starts
+        sprite->x2 += sprite->sSpeedX * INTRO_SLIDE_STEP / 2;   // Moemon Co-op: faster battle starts
         if ((before < 0 && sprite->x2 > 0) || (before > 0 && sprite->x2 < 0))
             sprite->x2 = 0;
         if (sprite->x2 == 0)

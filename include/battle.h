@@ -1,8 +1,11 @@
 #ifndef GUARD_BATTLE_H
 #define GUARD_BATTLE_H
 
-// Moemon Co-op: the battle intro slide (and what slides in with it) at this many times the speed
-#define INTRO_SLIDE_SPEED 2
+// Moemon Co-op: faster battle starts. The intro slide (and the trainers and wild
+// Pokémon sliding in with it) moves this many pixels a frame (vanilla 2: 120 frames;
+// 4: 60 frames, double speed). Keep it a divisor of 240 so everything lands exactly.
+#define INTRO_SLIDE_STEP 4
+#define INTRO_SLIDE_HOLD 16   // frames before the grass/sand overlay starts moving (vanilla 32)
 
 // should they be included here or included individually by every file?
 #include "constants/battle.h"

@@ -84,7 +84,9 @@ WARP=0,16,10,3 WARP_B=0,16,11,3, B faces A (LEFT), A + mash A, A runs B+UP into 
 Crash report (src/platform/crash_log.c, installed first thing in main): Windows SEH filter / Linux signals append to
 crash_log.txt: exception, exe+offset of the faulting address, callbacks, map, and exe+offsets found on the stack (resolve with
 x86_64-w64-mingw32-nm on the same exe; keep a copy of each shipped exe). Debug `mp crash` forces one.
-Battle starts: the intro slide (battle_intro.c) and the sprites sliding with it run at INTRO_SLIDE_SPEED (2, battle.h).
+Summary info page: "{SELECT} RENAME" prompt in the dark strip under the portrait (pokemon_summary_screen.c
+MpDrawInfoPrompts, window baseBlock 700) when MpCanRename(). The font has no {PKMN} glyph pair: strings.c uses "MON".
+Battle starts: the intro slide (battle_intro.c) and the sprites sliding with it move INTRO_SLIDE_STEP px a frame (4 = double speed, battle.h; vanilla 2).
 Co-op battles (link multi under the hood) look like single ones: normal transition (MP_GetWild/TrainerBattleTransition),
 no VS screen, normal background and slide, no party bars for wild, wild mons drawn and slid in (no ball), one combined intro
 line held 24 frames. Network link (gNetLinkActive): no 100-frame start delay, all queued blocks sent/received/processed per

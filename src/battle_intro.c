@@ -101,7 +101,7 @@ int GetAnimBgAttribute(u8 bgId, u8 attributeId)
 }
 
 // Moemon Co-op: battles start faster: the intro slide (and the trainers and
-// wild Pokémon sliding in with it, see INTRO_SLIDE_SPEED users) runs at double speed
+// wild Pokémon sliding in with it) moves INTRO_SLIDE_STEP pixels a frame (vanilla 2)
 #define tState data[0]
 #define tEnvironment data[1]
 
@@ -186,7 +186,7 @@ static void BattleIntroSlide1(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[3] = INTRO_SLIDE_HOLD;
             gIntroSlideFlags &= ~1;
         }
         break;
@@ -200,12 +200,12 @@ static void BattleIntroSlide1(u8 taskId)
             if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_LONG_GRASS)
             {
                 if (gBattle_BG1_Y != (u16)(-80))
-                    gBattle_BG1_Y -= 2 * INTRO_SLIDE_SPEED;
+                    gBattle_BG1_Y -= 4;
             }
             else
             {
                 if (gBattle_BG1_Y != (u16)(-56))
-                    gBattle_BG1_Y -= 1 * INTRO_SLIDE_SPEED;
+                    gBattle_BG1_Y -= 2;
             }
         }
 
@@ -213,7 +213,7 @@ static void BattleIntroSlide1(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[2] -= INTRO_SLIDE_STEP;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -294,7 +294,7 @@ static void BattleIntroSlide2(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[3] = INTRO_SLIDE_HOLD;
             gTasks[taskId].data[5] = 1;
             gIntroSlideFlags &= ~1;
         }
@@ -314,7 +314,7 @@ static void BattleIntroSlide2(u8 taskId)
             if ((gTasks[taskId].data[4] & 0x1F) && --gTasks[taskId].data[5] == 0)
             {
                 gTasks[taskId].data[4] += 0xFF;
-                gTasks[taskId].data[5] = 4 / INTRO_SLIDE_SPEED;
+                gTasks[taskId].data[5] = 2;
             }
         }
 
@@ -322,7 +322,7 @@ static void BattleIntroSlide2(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[2] -= INTRO_SLIDE_STEP;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -387,7 +387,7 @@ static void BattleIntroSlide3(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[3] = INTRO_SLIDE_HOLD;
             gTasks[taskId].data[5] = 1;
             gIntroSlideFlags &= ~1;
         }
@@ -402,7 +402,7 @@ static void BattleIntroSlide3(u8 taskId)
             if ((gTasks[taskId].data[4] & 0xF) && --gTasks[taskId].data[5] == 0)
             {
                 gTasks[taskId].data[4] += 0xFF;
-                gTasks[taskId].data[5] = 6 / INTRO_SLIDE_SPEED;
+                gTasks[taskId].data[5] = 3;
             }
         }
 
@@ -410,7 +410,7 @@ static void BattleIntroSlide3(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[2] -= INTRO_SLIDE_STEP;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -483,7 +483,7 @@ static void BattleIntroSlideLink(u8 taskId)
         {
             gTasks[taskId].tState++;
             gTasks[taskId].data[2] = DISPLAY_WIDTH;
-            gTasks[taskId].data[3] = 32 / INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[3] = INTRO_SLIDE_HOLD;
             gIntroSlideFlags &= ~1;
         }
         break;
@@ -492,7 +492,7 @@ static void BattleIntroSlideLink(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[2] -= INTRO_SLIDE_STEP;
 
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < DISPLAY_HEIGHT / 2; i++)
@@ -556,7 +556,7 @@ static void BattleIntroSlidePartner(u8 taskId)
             gBattle_WIN0V += 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2 * INTRO_SLIDE_SPEED;
+            gTasks[taskId].data[2] -= INTRO_SLIDE_STEP;
 
         gBattle_BG1_X = gTasks[taskId].data[2];
         gBattle_BG2_X = -gTasks[taskId].data[2];

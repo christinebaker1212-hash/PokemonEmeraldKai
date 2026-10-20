@@ -2714,7 +2714,7 @@ static void SpriteCB_MoveWildMonToRight(struct Sprite *sprite)
 {
     if ((gIntroSlideFlags & 1) == 0)
     {
-        sprite->x2 += 2 * INTRO_SLIDE_SPEED;   // Moemon Co-op: faster battle starts
+        sprite->x2 += INTRO_SLIDE_STEP;   // Moemon Co-op: faster battle starts
         if (sprite->x2 > 0)
             sprite->x2 = 0;
         if (sprite->x2 == 0)
@@ -2898,7 +2898,7 @@ static void SpriteCB_BattleSpriteSlideLeft(struct Sprite *sprite)
 {
     if (!(gIntroSlideFlags & 1))
     {
-        sprite->x2 -= 2 * INTRO_SLIDE_SPEED;
+        sprite->x2 -= INTRO_SLIDE_STEP;
         if (sprite->x2 < 0)
             sprite->x2 = 0;
         if (sprite->x2 == 0)
