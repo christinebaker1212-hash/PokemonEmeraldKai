@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "naming_screen.h"
 #include "main.h"
 #include "battle.h"
@@ -2901,7 +2902,9 @@ static void PrintAOrBButtonIcon(u8 windowId, bool8 bButton, u32 x)
     else
         button = sButtons_Gfx[1];
 
-    BlitBitmapToWindow(windowId, button, x, 0, 16, 16);
+    // Moemon Co-op: the controller's button when one is in use
+    if (!MP_ButtonIcon_DrawInBox(windowId, bButton ? CHAR_B_BUTTON : CHAR_A_BUTTON, x, 0, 16, 16))
+        BlitBitmapToWindow(windowId, button, x, 0, 16, 16);
 }
 
 static void PrintPageNamesAndStats(void)

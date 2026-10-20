@@ -132,21 +132,37 @@ static int Dist(u16 a, u16 b)
     return dr * dr * 3 + dg * dg * 4 + db * db * 2;
 }
 
-// Palette index for each color class in this window's palette
+static int Luma(u16 c)
+{
+    return (c & 31) * 3 + ((c >> 5) & 31) * 6 + ((c >> 10) & 31);
+}
+
+// Palette index for each color class in this window's palette. The body takes the
+// window's darkest color; a button color with nothing close
+// in the palette (a green A on a purple screen) becomes its lightest color instead.
 static void MapColors(u8 windowId, u8 *map)
 {
     const u16 *pal = &gPlttBufferUnfaded[BG_PLTT_ID(GetWindowAttribute(windowId, WINDOW_PALETTE_NUM))];
-    int c, i;
+    int c, i, darkest = 2, lightest = 1;
     memset(map, 0, 10);
+    for (i = 1; i < 16; i++)
+    {
+        if (Luma(pal[i]) < Luma(pal[darkest]))
+            darkest = i;
+        if (Luma(pal[i]) > Luma(pal[lightest]))
+            lightest = i;
+    }
     for (c = 1; c < 10; c++)
     {
         int best = 2, bestD = 0x7FFFFFFF;
-        if (c == 1 && Dist(pal[2], 0) < Dist(pal[2], 0x7FFF))
+        if (c == 1)
         {
-            map[c] = 2;   // the body: the dark text color, like the letters next to it
+            // the body: the darkest color (index 2 is the dark text color in most windows,
+            // but not all: the summary screen keeps red there)
+            map[c] = (Dist(pal[2], 0) < Dist(pal[2], 0x7FFF) && Luma(pal[2]) <= Luma(pal[darkest]) + 40) ? 2 : darkest;
             continue;
         }
-        for (i = 2; i < 16; i++)
+        for (i = 1; i < 16; i++)
         {
             int d = Dist(pal[i], sBtnClassColor[c]);
             if (d < bestD)
@@ -155,11 +171,68 @@ static void MapColors(u8 windowId, u8 *map)
                 best = i;
             }
         }
+        if (c >= 3 && bestD > 1500)
+            best = lightest;
         map[c] = best;
     }
 }
 
 static void DrawIcon(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay);
+static void DrawIconAt(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay);
+
+// Vanilla scenes that blit a button picture (summary screen A/B, the bag's SELECT tag):
+// the controller's icon centered in that box. FALSE = keyboard, draw the game's own picture.
+bool8 MP_ButtonIcon_DrawInBox(u8 windowId, u8 id, u16 x, u16 y, u16 w, u16 h)
+{
+    int icon = FirstIcon(id), second = SecondIcon(id);
+    int iw, ih;
+    if (Gamepad_IconFamily() == GAMEPAD_ICONS_KEYBOARD || icon < 0)
+        return FALSE;
+    iw = sBtnIcons[icon].w + (second >= 0 ? sBtnIcons[second].w : 0);
+    ih = sBtnIcons[icon].h;
+    x += (w > iw) ? (w - iw) / 2 : 0;
+    y += (h > ih) ? (h - ih + 1) / 2 : 0;
+    DrawIconAt(windowId, icon, x, y, id == CHAR_DPAD_NONE, Overlay(id));
+    if (second >= 0)
+        DrawIconAt(windowId, second, x + sBtnIcons[icon].w, y, FALSE, -1);
+    return TRUE;
+}
+
+// Into an 8bpp index buffer, for button pictures on sprites (easy chat's START / SELECT
+// tags): body in bodyIdx, button colors from pal when close, else contrastIdx. Returns the width (0 = keyboard).
+u8 MP_ButtonIcon_ToPixels(u8 id, u8 *buf, int stride, int x, int y, const u16 *pal, u8 bodyIdx, u8 contrastIdx)
+{
+    int icon = FirstIcon(id), w, h, i, j, c;
+    u8 map[10];
+    if (Gamepad_IconFamily() == GAMEPAD_ICONS_KEYBOARD || icon < 0)
+        return 0;
+    w = sBtnIcons[icon].w;
+    h = sBtnIcons[icon].h;
+    map[0] = 0;
+    map[1] = bodyIdx;
+    for (c = 2; c < 10; c++)
+    {
+        int best = contrastIdx, bestD = 1500;
+        for (i = 1; i < 16; i++)
+        {
+            int d = Dist(pal[i], sBtnClassColor[c]);
+            if (d < bestD)
+            {
+                bestD = d;
+                best = i;
+            }
+        }
+        map[c] = (c == 2 && best == contrastIdx) ? contrastIdx : best;
+    }
+    for (j = 0; j < h; j++)
+        for (i = 0; i < w; i++)
+        {
+            u8 v = sBtnPixels[sBtnIcons[icon].offset + j * w + i];
+            if (v)
+                buf[(y + j) * stride + x + i] = map[v];
+        }
+    return w;
+}
 
 u8 MP_ButtonIcon_Draw(u8 windowId, u8 id, u16 x, u16 y)
 {
@@ -172,8 +245,14 @@ u8 MP_ButtonIcon_Draw(u8 windowId, u8 id, u16 x, u16 y)
     return MP_ButtonIcon_Width(id);
 }
 
-// overlay: a same-sized icon whose lit pixels are added (a D-Pad with two arms lit)
+// On a text line: centered on the capitals
 static void DrawIcon(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay)
+{
+    DrawIconAt(windowId, icon, x, y + IconTop(sBtnIcons[icon].h), plain, overlay);
+}
+
+// overlay: a same-sized icon whose lit pixels are added (a D-Pad with two arms lit)
+static void DrawIconAt(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay)
 {
     static u8 sBuf[2 * 2 * TILE_SIZE_4BPP];   // 16x16, tile order
     u8 map[10];
@@ -199,5 +278,5 @@ static void DrawIcon(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overl
             *b |= (i & 1) ? v << 4 : v;
         }
     }
-    BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y + IconTop(h), w, h);
+    BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y, w, h);
 }

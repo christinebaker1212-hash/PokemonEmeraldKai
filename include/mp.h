@@ -405,6 +405,8 @@ void MP_Lend_Name(u8 *dst);
 void MP_Lend_ShowMonArgs(u32 *species, u32 *otId, u32 *personality);
 void MP_Lend_NotifyUsed(void);
 void MP_Lend_Debug(void);
+u8 MP_ButtonIcon_ToPixels(u8 charId, u8 *buf, int stride, int x, int y, const u16 *pal, u8 bodyIdx, u8 contrastIdx);
+bool8 MP_ButtonIcon_DrawInBox(u8 windowId, u8 charId, u16 x, u16 y, u16 w, u16 h);   // mp_buttons.c
 bool8 MP_Rescue_TryStart(void);
 void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len);
 bool8 MP_Rescue_Down(void);

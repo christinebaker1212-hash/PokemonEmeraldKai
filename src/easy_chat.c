@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "malloc.h"
 #include "bard_music.h"
 #include "bg.h"
@@ -4641,14 +4642,133 @@ static void SetWindowDimensions(u8 left, u8 top, u8 width, u8 height)
     SetGpuReg(REG_OFFSET_WIN0V, verticalDimensions);
 }
 
+// Moemon Co-op: with a controller, the START / SELECT tags show its buttons. They get
+// taller (32x16) to fit the icons; each tag has its own sheet so no animation is needed.
+#define GFXTAG_MP_SELECT_BUTTON 0x7361
+static EWRAM_DATA bool8 sMpBigStartSelect = FALSE;
+static u8 sMpStartSelectTiles[2][8 * TILE_SIZE_4BPP];
+
+static void MpBuildStartSelectTags(void)
+{
+    static const u8 sChar[2] = {CHAR_START_BUTTON, CHAR_SELECT_BUTTON};
+    const u8 *src = (const u8 *)sStartSelectButtons_Gfx;
+    u8 px[16][32];
+    int f, x, y;
+    sMpBigStartSelect = FALSE;
+    for (f = 0; f < 2; f++)
+    {
+        memset(px, 0, sizeof(px));
+        // The tag: dark fill (9), light edge (12), a shadow row under it
+        for (y = 2; y <= 13; y++)
+            for (x = 0; x < 32; x++)
+            {
+                bool8 corner = (y == 2 || y == 12) && (x == 0 || x == 31);
+                if (y == 13)
+                    px[y][x] = (x >= 2 && x <= 30) ? 12 : 0;
+                else if (corner)
+                    px[y][x] = (y == 12 && x == 31) ? 12 : 0;
+                else if (x == 0 || x == 31 || y == 2)
+                    px[y][x] = (y == 2 && (x == 0 || x == 31)) ? 0 : (y == 2 ? 9 : 12);
+                else
+                    px[y][x] = 9;
+            }
+        for (x = 1; x < 31; x++)
+            px[2][x] = (x == 1 || x == 30) ? 12 : 9;
+        // The arrow from the original tag (its white pixels right of the label)
+        for (y = 0; y < 8; y++)
+            for (x = 21; x < 31; x++)
+            {
+                int t = f * 4 + x / 8;
+                u8 b = src[t * TILE_SIZE_4BPP + y * 4 + (x % 8) / 2];
+                u8 v = (x & 1) ? b >> 4 : b & 0xF;
+                if (v == 15)
+                    px[y + 4][x] = 15;
+            }
+        // The button, light on the dark tag
+        if (!MP_ButtonIcon_ToPixels(sChar[f], &px[0][0], 32, 4, 3, gEasyChatButtonWindow_Pal, 15, 9))
+            return;
+        // 32x16 as 4x2 tiles
+        memset(sMpStartSelectTiles[f], 0, sizeof(sMpStartSelectTiles[f]));
+        for (y = 0; y < 16; y++)
+            for (x = 0; x < 32; x++)
+            {
+                int t = (y / 8) * 4 + x / 8;
+                u8 *b = &sMpStartSelectTiles[f][t * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+                *b |= (x & 1) ? px[y][x] << 4 : px[y][x];
+            }
+    }
+    {
+        struct SpriteSheet start = {sMpStartSelectTiles[0], sizeof(sMpStartSelectTiles[0]), GFXTAG_START_SELECT_BUTTONS};
+        struct SpriteSheet select = {sMpStartSelectTiles[1], sizeof(sMpStartSelectTiles[1]), GFXTAG_MP_SELECT_BUTTON};
+        FreeSpriteTilesByTag(GFXTAG_START_SELECT_BUTTONS);
+        LoadSpriteSheet(&start);
+        LoadSpriteSheet(&select);
+    }
+    sMpBigStartSelect = TRUE;
+}
+
+// Moemon Co-op: the side window's red SELECT and B BUTTON labels become the
+// controller's buttons: "(Y) MODE" on one line, the B icon over CANCEL.
+static u8 sMpButtonWindowTiles[0x800];
+
+static u8 MpBtnWinGet(int x, int y)
+{
+    u8 b = sMpButtonWindowTiles[((y / 8) * 8 + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+    return (x & 1) ? b >> 4 : b & 0xF;
+}
+
+static void MpBtnWinPut(int x, int y, u8 v)
+{
+    u8 *b = &sMpButtonWindowTiles[((y / 8) * 8 + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+    *b = (x & 1) ? ((*b & 0x0F) | (v << 4)) : ((*b & 0xF0) | v);
+}
+
+static bool8 MpLoadButtonWindow(void)
+{
+    u8 px[64][64], probe[16 * 16];
+    int x, y, w;
+    struct SpriteSheet sheet = {sMpButtonWindowTiles, sizeof(sMpButtonWindowTiles), GFXTAG_BUTTON_WINDOW};
+    if (!MP_ButtonIcon_ToPixels(CHAR_SELECT_BUTTON, probe, 16, 0, 0, gEasyChatButtonWindow_Pal, 12, 15))
+        return FALSE;
+    LZDecompressWram(gEasyChatButtonWindow_Gfx, sMpButtonWindowTiles);
+    for (y = 0; y < 64; y++)
+        for (x = 0; x < 64; x++)
+            px[y][x] = MpBtnWinGet(x, y);
+    // Clear the SELECT tag (and its shadow left of MODE) and the B BUTTON line
+    for (y = 8; y <= 15; y++)
+        for (x = 23; x <= 46; x++)
+            if (y < 15 || x < 34)
+                px[y][x] = 5;
+    for (y = 40; y <= 46; y++)
+        for (x = 23; x <= 56; x++)
+            px[y][x] = 5;
+    for (x = 25; x <= 52; x++)   // B tag's shadow row above CANCEL's outline
+        if (px[47][x] == 12 && px[48][x] != 15 && px[48][x] != 12)
+            px[47][x] = 5;
+    // Icons: dark body like the outlines, white letters
+    w = MP_ButtonIcon_ToPixels(CHAR_SELECT_BUTTON, probe, 16, 0, 0, gEasyChatButtonWindow_Pal, 12, 15);
+    MP_ButtonIcon_ToPixels(CHAR_SELECT_BUTTON, &px[0][0], 64, 33 - w, 13, gEasyChatButtonWindow_Pal, 12, 15);
+    MP_ButtonIcon_ToPixels(CHAR_B_BUTTON, &px[0][0], 64, 25, 37, gEasyChatButtonWindow_Pal, 12, 15);
+    for (y = 0; y < 64; y++)
+        for (x = 0; x < 64; x++)
+            MpBtnWinPut(x, y, px[y][x]);
+    LoadSpriteSheet(&sheet);
+    return TRUE;
+}
+
 static void LoadEasyChatGfx(void)
 {
     u32 i;
 
     LoadSpriteSheets(sSpriteSheets);
+    MpBuildStartSelectTags();   // Moemon Co-op
     LoadSpritePalettes(sSpritePalettes);
     for (i = 0; i < ARRAY_COUNT(sCompressedSpriteSheets); i++)
+    {
+        if (sCompressedSpriteSheets[i].tag == GFXTAG_BUTTON_WINDOW && MpLoadButtonWindow())   // Moemon Co-op
+            continue;
         LoadCompressedSpriteSheet(&sCompressedSpriteSheets[i]);
+    }
 }
 
 #define sDelayTimer    data[0]
@@ -4997,7 +5117,27 @@ static void SetScrollIndicatorXPos(bool32 inWordSelect)
 // The Start/Select buttons are used as page scroll indicators
 static void CreateStartSelectButtonSprites(void)
 {
-    u8 spriteId = CreateSprite(&sSpriteTemplate_StartSelectButton, 220, 84, 1);
+    u8 spriteId;
+    // Moemon Co-op: the controller's buttons on taller tags
+    if (sMpBigStartSelect)
+    {
+        static const struct OamData sOamBig = {
+            .shape = SPRITE_SHAPE(32x16), .size = SPRITE_SIZE(32x16), .priority = 1,
+        };
+        struct SpriteTemplate t = sSpriteTemplate_StartSelectButton;
+        t.oam = &sOamBig;
+        t.anims = gDummySpriteAnimTable;
+        spriteId = CreateSprite(&t, 220, 84 - 4, 1);
+        if (spriteId != MAX_SPRITES)
+            sScreenControl->startButtonSprite = &gSprites[spriteId];
+        t.tileTag = GFXTAG_MP_SELECT_BUTTON;
+        spriteId = CreateSprite(&t, 220, 156 - 4, 1);
+        if (spriteId != MAX_SPRITES)
+            sScreenControl->selectButtonSprite = &gSprites[spriteId];
+        HideStartSelectButtons();
+        return;
+    }
+    spriteId = CreateSprite(&sSpriteTemplate_StartSelectButton, 220, 84, 1);
     if (spriteId != MAX_SPRITES)
         sScreenControl->startButtonSprite = &gSprites[spriteId];
 

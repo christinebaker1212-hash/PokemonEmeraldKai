@@ -389,6 +389,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (b = 0; b < 4; b++)
             printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
     }
+    else if (strcmp(cmd, "register") == 0)
+    {
+        // mp register ITEM: adds it and registers it to SELECT
+        u16 item = atoi(arg);
+        AddBagItem(item, 1);
+        gSaveBlock1Ptr->registeredItem = item;
+    }
+    else if (strcmp(cmd, "fam") == 0)
+    {
+        int Gamepad_IconFamily(void);
+        printf("[test] icon family %d\n", Gamepad_IconFamily());
+    }
     else if (strcmp(cmd, "near") == 0)
     {
         int i;

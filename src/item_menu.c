@@ -990,7 +990,11 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
         {
             // Print registered icon
             if (gSaveBlock1Ptr->registeredItem != ITEM_NONE && gSaveBlock1Ptr->registeredItem == itemId)
-                BlitBitmapToWindow(windowId, sRegisteredSelect_Gfx, 96, y - 1, 24, 16);
+            {
+                // Moemon Co-op: the controller's SELECT button when one is in use
+                if (!MP_ButtonIcon_DrawInBox(windowId, CHAR_SELECT_BUTTON, 96, y - 1, 24, 16))
+                    BlitBitmapToWindow(windowId, sRegisteredSelect_Gfx, 96, y - 1, 24, 16);
+            }
             // Moemon Co-op QoL: registered to L / R
             else if (itemId != ITEM_NONE && (MP_RegisteredItem(0) == itemId || MP_RegisteredItem(1) == itemId))
             {
