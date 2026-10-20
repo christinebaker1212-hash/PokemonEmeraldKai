@@ -46,6 +46,26 @@ answers agreed with the project owner (October 2026). They override the plan whe
   right foe); foe cards 38%. A GBA can't blend a sprite over another sprite, so the port's renderer
   draws the cards in an extra pass that blends over the finished frame.
 
+## Doubles first (retrofit before triples, own build)
+Co-op doubles take these triples rules now; solo and PvP stay as they are unless noted.
+- **EXP:** each owner gets a full share (a foe's EXP is split only among that owner's own participating
+  Pokémon) and each player's own buddy/TOGETHER/catch-up bonus applies to their own Pokémon (today the
+  host's bonus is used for both).
+- **RUN:** the team runs only if both players choose RUN that turn: one normal escape roll with the fastest
+  player Pokémon; no loss/whiteout (today either player's RUN is a loss for both).
+- **Disconnect:** catches and used items stay; HP/PP as before the battle; no EXP, prize money or badges
+  (today catches are discarded too).
+- **Ball target:** a target picker for balls in 2-on-2 wild battles (bag and L quick ball); skipped when
+  only one wild Pokémon remains.
+- **Same target:** if a throw's target was already caught or fainted, the throw is called off and the
+  ball goes back to the bag; the turn is used. Never retargeted.
+- **Full party and PC:** the throw is refused before the ball is used ("No room..."), in every battle type.
+- **Co-op team:** one ordered pick of up to 3 Pokémon in the party menu (1-2-3), default the first 3
+  usable; doubles bring all three, triples the first two. No prompt before battle.
+- **Ally intent:** the partner line shows the partner's chosen move and target once picked
+  ("BOB: EMBER → POOCHYENA"); PvP keeps "Link standby…".
+- **Unchanged:** doubles keep Emerald's healthboxes and 1/2 spread damage.
+
 ## Process
 - Work through the phases independently; commit and send a Windows build at each major milestone
   (engine, three-client battles, UI, settlement); ask only when a real choice comes up.
