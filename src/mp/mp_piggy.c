@@ -254,7 +254,10 @@ void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len)
         return;
     Name(from, name);
     if (data[0] == MPR_PIG_ON || data[0] == MPR_PIG_OFF)
+    {
         sRidingMe[from] = data[0] == MPR_PIG_ON;
+        MPNet_Log("piggy: player %d hopped %s", from + 1, data[0] == MPR_PIG_ON ? "on" : "off");
+    }
     if (data[0] == MPR_PIG_ON)
         snprintf(msg, sizeof(msg), "%s hopped on your back!", name);
     else if (data[0] == MPR_PIG_OFF)

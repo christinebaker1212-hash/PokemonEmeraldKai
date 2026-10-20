@@ -1,0 +1,5 @@
+# SOCIAL > TEAM PHOTO with both on the same map: ALICE's game saves photos/team-*.png, BOB's gets told
+MODE=2
+TMO=120
+EXPECT_A=("[photo] saved")
+EXPECT_B=("team photo by player")

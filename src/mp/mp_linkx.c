@@ -375,6 +375,7 @@ static void OnCard(u8 from, const u8 *data, u16 len)
     memcpy(&sCard, data + 1, sizeof(sCard));
     sCardLanguage = data[1 + sizeof(sCard)];
     sAsk.cardReady = TRUE;
+    MPNet_Log("linkx: got player %d's TRAINER CARD", from + 1);
     MP_Events_Did(MP_DID_CARD);
     sAsk.cardFrom = from;
     sAsk.waitKind = 0;
@@ -398,6 +399,7 @@ static void OnBase(u8 from, const u8 *data, u16 len)
         return;
     memcpy(&base, data + 3, sizeof(base));
     Name(from, name);
+    MPNet_Log("linkx: got player %d's SECRET BASE (id %d)", from + 1, base.secretBaseId);
     sAsk.waitKind = 0;
     sAsk.baseReady = TRUE;
     sAsk.baseSlot = 0xFF;

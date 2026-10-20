@@ -1,0 +1,5 @@
+# DAILY > GIFT: ALICE sends BOB today's gift, BOB's game adds it and thanks her (thank-you bonus)
+MODE=2
+TMO=120
+EXPECT_A=("gift: player 2 says thanks")
+EXPECT_B=("gift: got item")

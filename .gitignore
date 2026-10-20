@@ -56,3 +56,4 @@ __pycache__/
 
 # Moemon Co-op: per-player settings the game writes next to the exe
 moemon_controls.ini
+photos/

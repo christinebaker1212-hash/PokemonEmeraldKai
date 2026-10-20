@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 24 1
+waitfor helpask 9000
+wait 60
+press A 2
+wait 300
+quit

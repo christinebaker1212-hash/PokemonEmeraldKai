@@ -229,6 +229,8 @@ void CB2_InitCoopSetupFromField(void);
 void MP_AutoSession_Update(void);
 
 // mp_main.c
+// "[mp] ..." line on stdout (log.txt); harness waitlog/watchlog match these
+void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_SendBlob(u8 kind, const void *data, u32 len);

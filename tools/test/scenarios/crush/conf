@@ -1,0 +1,5 @@
+# CO-OP > BERRY GAMES > BERRY CRUSH: ALICE invites, BOB accepts, both crush a berry, then NO to "play again"
+MODE=2
+TMO=200
+EXPECT_A=("player 2 answered 2" "BERRY CRUSH with 2 players" "crush: finished")
+EXPECT_B=("invites us to BERRY CRUSH" "BERRY CRUSH with 2 players" "crush: finished")

@@ -74,6 +74,7 @@ static struct
     u16 endTimer;
     u16 song;
     u16 prevKeys;
+    u16 updates;                   // frame updates received (log)
     u8 name[MP_NAME_LEN + 1];
     u16 frame[FRAME_W * FRAME_H];
     u16 shown[FRAME_W * FRAME_H];  // frame plus the banner
@@ -350,6 +351,8 @@ static void StopWatching(void)
     }
     if (sWatch.target != 0xFF && gMpPlayers[sWatch.target].present)
         SendSimple(sWatch.target, MPR_SPEC_LEAVE);
+    if (sWatch.target != 0xFF)
+        MPNet_Log("spectate: stopped watching, %d updates", sWatch.updates);
     sWatch.target = 0xFF;
     // Back to the overworld exactly where we were
     if (MP_IsInOverworld())
@@ -366,6 +369,7 @@ static void StartWatching(u8 id)
 {
     memset(&sWatch, 0, sizeof(sWatch));
     sWatch.target = id;
+    sWatch.updates = 0;
     StringCopyN(sWatch.name, gMpPlayers[id].name, MP_NAME_LEN);
     sWatch.name[MP_NAME_LEN] = EOS;
     sWatch.prevKeys = 0xFFFF; // ignore the A press that started this
@@ -427,6 +431,7 @@ const u16 *MP_Spectate_WatchFrame(u16 keys)
 
 static void ApplyFrame(const u8 *data, u16 len)
 {
+    sWatch.updates++;
     u16 song;
     int pos = 7, count, i;
     if (len < 7)

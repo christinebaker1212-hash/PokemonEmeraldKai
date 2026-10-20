@@ -6,5 +6,5 @@ FPS=60
 TMO=240
 WARP=0,16,12,11
 WARP_B=0,16,14,11
-EXPECT_A=("action menu at frame" "co-op: battle over, outcome 1")
-EXPECT_B=("action menu at frame" "co-op: battle over, outcome 1")
+EXPECT_A=("action menu at frame" "co-op: battle over, outcome 1" "mix: applied")
+EXPECT_B=("action menu at frame" "co-op: battle over, outcome 1" "mix: applied")

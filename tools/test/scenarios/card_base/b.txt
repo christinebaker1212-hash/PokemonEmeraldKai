@@ -1,0 +1,5 @@
+pressuntil A field 5000
+waitfor online 6000
+mp mkbase 181
+wait 3000
+quit

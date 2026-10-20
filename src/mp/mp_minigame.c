@@ -38,6 +38,7 @@
 #include "text.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+void MPNet_Log(const char *fmt, ...);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Linkx_OpenUnion(void);
 extern const u8 EventScript_MpBerryBlender[];
@@ -368,6 +369,7 @@ bool8 MP_Blender_TakeEnd(u16 *rpm, u32 *time, u16 *scores)
     if (!sMg.endNew)
         return FALSE;
     sMg.endNew = FALSE;
+    MPNet_Log("blender: results, top speed %d", sMg.endRpm);
     *rpm = sMg.endRpm;
     *time = sMg.endTime;
     memcpy(scores, sMg.endScores, sizeof(sMg.endScores));
@@ -378,7 +380,10 @@ bool8 MP_Blender_TakeEnd(u16 *rpm, u32 *time, u16 *scores)
 void MP_Blender_Finish(void)
 {
     if (sMg.role == ROLE_PLAYING && sMg.game == GAME_BLENDER)
+    {
+        MPNet_Log("blender: closed");
         ResetSession();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -574,6 +579,7 @@ void MP_Crush_Finish(void)
     if (!MP_Crush_Active())
         return;
     gTextFlags.autoScroll = sCrush.savedAutoScroll;
+    MPNet_Log("crush: finished%s", sCrush.broken ? " (a friend left)" : "");
     if (sCrush.broken)
         ToastAscii("A friend left, so BERRY CRUSH ended.");
     ResetSession();
@@ -687,6 +693,7 @@ void MP_Minigame_HostCrush(void)
 static void Launch(void)
 {
     CloseUi();
+    MPNet_Log("minigame: %s with %d players", sMg.game == GAME_CRUSH ? "BERRY CRUSH" : "BERRY BLENDER", sMg.n);
     sMg.role = ROLE_PLAYING;
     sMg.berryMask = 0;
     sMg.go = FALSE;
@@ -909,6 +916,7 @@ void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len)
             sMg.inviteSession = data[1];
             sMg.inviteGame = len >= 3 && data[2] == GAME_CRUSH ? GAME_CRUSH : GAME_BLENDER;
             sMg.askedAt = sMg.frame;
+            MPNet_Log("minigame: player %d invites us to %s", from + 1, sMg.inviteGame == GAME_CRUSH ? "BERRY CRUSH" : "the BERRY BLENDER");
         }
         else
         {
@@ -921,6 +929,7 @@ void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len)
         {
             sMg.answer[from] = data[2];
             sMg.note[0] = 0;
+            MPNet_Log("minigame: player %d answered %d", from + 1, data[2]);
             if (sMg.taskId != TASK_NONE)
                 Draw();
         }

@@ -2,6 +2,6 @@
 MODE=2
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:12"
-ENV_B="MOEMON_DEBUG_PARTY=258:12"
-EXPECT_A=("trade: both ready" "trade with player 2 complete" "species 258")
-EXPECT_B=("trade: both ready" "trade with player 1 complete" "species 280")
+ENV_B="MOEMON_DEBUG_PARTY=283:12"
+EXPECT_A=("trade: both ready" "trade with player 2 complete" "party: 283(")
+EXPECT_B=("trade: both ready" "trade with player 1 complete" "party: 280(")

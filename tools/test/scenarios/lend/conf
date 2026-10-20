@@ -1,0 +1,6 @@
+# Route 116 cut tree: ALICE's lead knows CUT, BOB (no CUT, all badges) walks up to the tree and borrows it
+MODE=2
+WARP=0,31,23,7
+WARP_B=0,31,21,7
+TMO=120
+EXPECT_B=("lend: borrowing move 15 from a friend")

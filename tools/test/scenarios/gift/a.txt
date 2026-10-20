@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp giftmenu
+wait 40
+watchlog says thanks
+press A 2
+waitlog 1200
+wait 60
+press B 2
+wait 60
+press B 2
+wait 100
+quit

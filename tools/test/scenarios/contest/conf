@@ -1,0 +1,7 @@
+# Link CONTEST at the Lilycove CONTEST HALL counter: both walk up, enter the same contest, mash A through it to the end
+MODE=2
+WARP=13,4,15,4
+TMO=900
+FPS=300   # long; at 0 ms it can run fast
+EXPECT_A=("group link: 2 players" "group link closed")
+EXPECT_B=("group link: 2 players" "group link closed")

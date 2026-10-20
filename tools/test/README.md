@@ -8,16 +8,43 @@ screenshots into PNGs if it's installed.
     tools/test/regress.sh coop_wild    # just one
     NOBUILD=1 OUT=/tmp/t tools/test/regress.sh
 
-| scenario        | what it checks |
-|-----------------|----------------|
-| `solo_wild`     | one client: wild battle reaches the action menu, then wins and returns to the field |
-| `coop_wild`     | two clients on Route 101 through a local relay: BOB's encounter pulls ALICE in, they win together |
-| `version_check` | (`version_check.sh`, part of the full run) a relay server one co-op version ahead: the game reports the mismatch |
-| `coop_wild_lag` | the same through `tools/mp_server/lagproxy.py` at 250 ms each way + 80 ms jitter (NA <-> JP, the worst case we plan for) |
+Every two-client scenario also runs at the worst connection we plan for with `WORST=1`
+(250 ms each way + 80 ms jitter through lagproxy, like NA <-> JP with the relay far from both).
+`JOBS=3` runs three at once.
+
+| scenario | what it checks |
+|---|---|
+| `solo_wild` | one client: wild battle to the action menu, win, back to the field |
+| `coop_wild` | Route 101: BOB's encounter pulls ALICE in, they win together; record mixing on join |
+| `coop_wild_lag` | the same, always at worst-case lag |
+| `coop_catch` | co-op 2-on-2, a MASTER BALL (L = last ball) catches one, they finish the other |
+| `coop_levelup` | co-op win one EXP short of Lv16 on both: level up + Torchic -> Combusken on both |
+| `coop_heal` | ALICE uses a POTION on BOB's Moemon from her bag (partner's gold slot) |
+| `coop_trainer` | Roxanne: ALICE waits for a partner, BOB walks up and joins, they win |
+| `pvp_battle` | BATTLE FLAG: BOB spots ALICE, link battle to the end, money changes hands |
+| `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
+| `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped |
+| `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
+| `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
+| `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |
+| `spectate` | A on a friend in a battle: watch it, B to stop |
+| `rescue` | BOB loses, ALICE gets HELP? and revives his lead |
+| `lend` | BOB cuts a tree with ALICE's Moemon's CUT |
+| `piggyback` | BOB rides on ALICE's back into Oldale |
+| `photo` | SOCIAL > TEAM PHOTO saved |
+| `gift` | DAILY > GIFT sent, received, thanked |
+| `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:
 `MODE=1|2`, optional `DELAY`/`JIT` (ms, through lagproxy), `FPS`, `TMO` (seconds), `WARP`/`WARP_B`,
-and `EXPECT_A=(...)` / `EXPECT_B=(...)`: text that must show up in that client's log. A log with
+`ENV_A`/`ENV_B` (extra environment, e.g. `MOEMON_DEBUG_PARTY=280:12`),
+and `EXPECT_A=(...)` / `EXPECT_B=(...)`: text that must show up in that client's log.
+
+Scripts wait on game state (`waitfor`/`pressuntil` with a condition such as `field`, `action`, `battle`,
+`partymenu`, `down`, `helpask`) or on a log line: `waitlog N TEXT` waits up to N frames for an `[mp]`
+line containing TEXT, `pressuntillog KEYS N TEXT` taps KEYS meanwhile, and `watchlog TEXT` starts
+watching before the key press that causes it (then a bare `waitlog N`). Fixed `wait`s break at high ping.
+Species ids are the game's internal ones (Torchic 280, Mudkip 283; 252-276 are unused "?" slots). A log with
 `TIMEOUT` (a `waitfor`/`pressuntil` that never got there) or a crash fails the scenario too.
 
 Lower level, for trying things out (results and logs land in DIR):

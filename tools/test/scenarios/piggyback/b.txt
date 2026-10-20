@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+press LEFT 2
+wait 30
+press A 2
+wait 40
+mash A 6 30
+wait 450
+mp where
+wait 100
+quit

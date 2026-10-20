@@ -3,7 +3,7 @@ MODE=2
 WARP=0,16,12,11
 WARP_B=0,16,14,11
 TMO=240
-ENV_A="MOEMON_DEBUG_PARTY=280:3,258:30"
+ENV_A="MOEMON_DEBUG_PARTY=280:3,283:30"
 ENV_B="MOEMON_DEBUG_PARTY=280:12"
 EXPECT_A=("starting PvP battle against player 2" "won the battle")
 EXPECT_B=("lost the battle")

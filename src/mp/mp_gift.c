@@ -229,6 +229,7 @@ void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len)
             PlaySE(SE_SUCCESS);
             reply[1] = ok;
             MP_SendRelay(from, reply, 2);
+            MPNet_Log("gift: got item %d x%d from player %d", item, qty, from + 1);
         }
         break;
     case MPR_GIFT_THANKS:
@@ -236,6 +237,7 @@ void MP_Gift_OnRelay(u8 from, const u8 *data, u16 len)
         // The thank-you bonus: more players online, bigger bonus
         u32 bonus = THANKS_MONEY_PER_PLAYER * MP_ConnectedCount();
         AddMoney(&gSaveBlock1Ptr->money, bonus);
+        MPNet_Log("gift: player %d says thanks (+$%u)", from + 1, (unsigned)bonus);
         snprintf(msg, sizeof(msg), "%s got your gift!\nThank-you bonus: $%u", name, (unsigned)bonus);
         MP_AsciiToGame(text, msg, 90);
         MP_Toast(text);

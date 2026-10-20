@@ -1,0 +1,10 @@
+watchlog hopped on
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000
+wait 60
+press B+UP 60
+wait 120
+mp where
+wait 200
+quit

@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 372 1
+mp item 135 2
+waitlog 3000 invites us to BERRY CRUSH
+wait 60
+press A 2
+waitlog 3000 BERRY CRUSH with 2 players
+pressuntil A crushask 9000
+wait 10
+press DOWN 2
+wait 10
+press A 2
+waitlog 3000 crush: finished
+wait 200
+quit

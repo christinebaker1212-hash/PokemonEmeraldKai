@@ -1,0 +1,19 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 273 1
+mp item 133 3
+wait 300
+watchlog answered 2
+mp blender
+waitlog 3000
+wait 30
+watchlog BERRY BLENDER with 2 players
+press A 2
+waitlog 600
+watchlog blender: closed
+mash A 20 30
+mash A 1500 4
+waitlog 3000
+wait 200
+mp pokeblocks
+quit

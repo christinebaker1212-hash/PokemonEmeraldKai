@@ -1,0 +1,5 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 2000 gift: got item
+wait 300
+quit

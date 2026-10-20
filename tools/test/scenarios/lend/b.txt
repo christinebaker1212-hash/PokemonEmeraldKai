@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 600
+mp givebadges
+press UP 8
+wait 30
+watchlog lend: borrowing move 15
+press A 4
+mash A 8 40
+waitlog 600
+wait 200
+quit

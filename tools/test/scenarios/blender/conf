@@ -1,0 +1,5 @@
+# CO-OP > BERRY GAMES > BERRY BLENDER: ALICE invites, BOB accepts, both put in a berry, play, results, a POKéBLOCK each
+MODE=2
+TMO=200
+EXPECT_A=("player 2 answered 2" "BERRY BLENDER with 2 players" "blender: closed" "pokeblocks: [")
+EXPECT_B=("invites us to the BERRY BLENDER" "BERRY BLENDER with 2 players" "blender: results" "blender: closed" "pokeblocks: [")

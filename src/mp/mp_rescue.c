@@ -436,6 +436,7 @@ void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len)
             Send(from, RS_BUSY);
             return;
         }
+        MPNet_Log("rescue: player %d asks for help", from + 1);
         sRescue.helperId = from;
         sRescue.cursor = 0;
         sRescue.optionCount = 0;
@@ -475,7 +476,10 @@ void MP_Rescue_OnRelay(u8 from, const u8 *data, u16 len)
     }
     // An answer to our call
     if (from == sRescue.friendId && sRescue.answer == 0xFF && data[1] >= RS_YES_REVIVE && data[1] <= RS_BUSY)
+    {
+        MPNet_Log("rescue: player %d answered %d", from + 1, data[1]);
         sRescue.answer = data[1];
+    }
 }
 
 // Harness conditions "down" (waiting for help or showing the answer) and "helpask"

@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 100
+press LEFT 2
+wait 600
+watchlog watching player 1
+press A 2
+wait 150
+press A 2
+wait 60
+press A 2
+waitlog 1200
+wait 600
+press B 2
+wait 200
+quit

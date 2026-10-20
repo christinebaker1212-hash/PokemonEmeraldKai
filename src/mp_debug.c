@@ -570,6 +570,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Daily_OpenMenu(void);
         MP_Daily_OpenMenu();
     }
+    else if (strcmp(cmd, "where") == 0)
+    {
+        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+        printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+               me->currentCoords.x - 7, me->currentCoords.y - 7);
+    }
+    else if (strcmp(cmd, "friend") == 0)
+    {
+        // friend N: CO-OP > FRIENDS > player N (1-4)
+        void MP_Linkx_OpenFriend(u8 id);
+        if (atoi(arg) >= 1 && atoi(arg) <= MP_MAX_PLAYERS)
+            MP_Linkx_OpenFriend(atoi(arg) - 1);
+    }
     else if (strcmp(cmd, "trade") == 0)
     {
         void MP_Trade_OpenMenu(void);

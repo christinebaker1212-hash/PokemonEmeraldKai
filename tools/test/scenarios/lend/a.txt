@@ -1,0 +1,5 @@
+pressuntil A field 5000
+waitfor online 6000
+mp teach 0 15
+wait 2400
+quit

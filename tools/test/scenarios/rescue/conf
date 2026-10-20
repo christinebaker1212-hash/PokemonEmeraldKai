@@ -1,0 +1,7 @@
+# BOB loses a wild battle; ALICE (close by, with a REVIVE) gets HELP? and revives his lead instead of a whiteout
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=200
+EXPECT_A=("rescue: player 2 asks for help")
+EXPECT_B=("rescue: asking player" "rescue: player 1 answered 1")

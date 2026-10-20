@@ -1,0 +1,25 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 400
+mp friend 2
+wait 40
+press DOWN 2
+wait 10
+watchlog TRAINER CARD
+press A 2
+waitlog 1500
+wait 120
+mash B 6 30
+wait 120
+mp friend 2
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+watchlog SECRET BASE
+press A 2
+waitlog 1500
+mash A 10 30
+wait 300
+quit

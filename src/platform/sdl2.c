@@ -943,6 +943,15 @@ static void TestHarnessStep(void)
             sUntilFrames = maxFrames;
             return;
         }
+        else if (strcmp(cmd, "watchlog") == 0)
+        {
+            // watchlog TEXT: start watching for an [mp] log line now; a later "waitlog N" waits for it
+            extern char gMpLogWatch[96];
+            extern int gMpLogSeen;
+            snprintf(gMpLogWatch, sizeof(gMpLogWatch), "%s", line + 9);
+            gMpLogWatch[strcspn(gMpLogWatch, "\r\n")] = 0;
+            gMpLogSeen = 0;
+        }
         else if (strcmp(cmd, "waitlog") == 0 || strcmp(cmd, "pressuntillog") == 0)
         {
             // waitlog MAXFRAMES TEXT...   /   pressuntillog KEYS MAXFRAMES TEXT...
@@ -960,9 +969,13 @@ static void TestHarnessStep(void)
                 sscanf(line, "%*s %*s %d %n", &maxFrames, &n);
                 sUntilKeys = ParseTestKeys(arg);
             }
-            snprintf(gMpLogWatch, sizeof(gMpLogWatch), "%s", n ? line + n : "");
-            gMpLogWatch[strcspn(gMpLogWatch, "\r\n")] = 0;
-            gMpLogSeen = 0;
+            // no TEXT: wait for the one a "watchlog TEXT" started (it may have shown up already)
+            if (n && line[n] && line[n] != '\r' && line[n] != '\n')
+            {
+                snprintf(gMpLogWatch, sizeof(gMpLogWatch), "%s", line + n);
+                gMpLogWatch[strcspn(gMpLogWatch, "\r\n")] = 0;
+                gMpLogSeen = 0;
+            }
             snprintf(sUntilName, sizeof(sUntilName), "log");
             sUntilFrames = maxFrames;
             return;

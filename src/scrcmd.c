@@ -1745,6 +1745,7 @@ bool8 ScrCmd_checkpartymove(struct ScriptContext *ctx)
         s32 lent = MP_Lend_Borrow(move);
         if (lent >= 0)
         {
+            MPNet_Log("lend: borrowing move %d from a friend's Moemon (species %d)", move, lent);
             gSpecialVar_Result = MP_LEND_SLOT;
             gSpecialVar_0x8004 = lent;
         }

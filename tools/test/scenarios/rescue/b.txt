@@ -1,0 +1,13 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp hp 1 0
+mp hp 2 0
+mp wild 288:60
+pressuntil A down 6000
+watchlog answered
+waitlog 2000
+mash A 10 30
+wait 200
+mp party
+quit

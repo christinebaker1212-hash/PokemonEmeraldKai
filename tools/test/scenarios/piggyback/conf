@@ -1,0 +1,7 @@
+# Route 101: BOB faces ALICE, A = hop on her back; she runs north into Oldale and he comes along (same map)
+MODE=2
+WARP=0,16,10,3
+WARP_B=0,16,11,3
+TMO=120
+EXPECT_A=("piggy: player 2 hopped on" "where map 0.10")
+EXPECT_B=("where map 0.10")

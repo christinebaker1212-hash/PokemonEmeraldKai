@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp wilddouble 0
+mp wild 288:3
+waitfor battle 2000
+wait 3000
+pressuntil A field 9000
+wait 600
+quit

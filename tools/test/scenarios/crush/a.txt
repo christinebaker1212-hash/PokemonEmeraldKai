@@ -1,0 +1,21 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 372 1
+mp item 133 3
+wait 300
+watchlog answered 2
+mp crush
+waitlog 3000
+wait 30
+watchlog BERRY CRUSH with 2 players
+press A 2
+waitlog 600
+pressuntil A crushask 9000
+wait 10
+press DOWN 2
+wait 10
+press A 2
+waitlog 3000 crush: finished
+wait 200
+mp pokeblocks
+quit

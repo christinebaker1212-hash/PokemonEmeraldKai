@@ -1,0 +1,4 @@
+# CO-OP > FRIENDS > BOB: ALICE looks at his TRAINER CARD, then visits his SECRET BASE (made with mp mkbase)
+MODE=2
+TMO=150
+EXPECT_A=("got player 2's TRAINER CARD" "got player 2's SECRET BASE (id")
