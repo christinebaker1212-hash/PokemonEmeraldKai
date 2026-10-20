@@ -854,7 +854,9 @@ static void TestHarnessStep(void)
         {
             if (--sUntilFrames <= 0)
             {
-                printf("[test] frame %lu: TIMEOUT waiting for %s\n", sFrameCounter, sUntilName);
+                extern char gMpLogWatch[96];
+                printf("[test] frame %lu: TIMEOUT waiting for %s%s%s\n", sFrameCounter, sUntilName,
+                       strcmp(sUntilName, "log") == 0 ? " " : "", strcmp(sUntilName, "log") == 0 ? gMpLogWatch : "");
                 fflush(stdout);
                 sUntilName[0] = 0;
             }
@@ -938,6 +940,30 @@ static void TestHarnessStep(void)
                 sUntilKeys = ParseTestKeys(arg);
             }
             snprintf(sUntilName, sizeof(sUntilName), "%s", name);
+            sUntilFrames = maxFrames;
+            return;
+        }
+        else if (strcmp(cmd, "waitlog") == 0 || strcmp(cmd, "pressuntillog") == 0)
+        {
+            // waitlog MAXFRAMES TEXT...   /   pressuntillog KEYS MAXFRAMES TEXT...
+            // waits until an [mp] log line containing TEXT is printed (from now on)
+            extern char gMpLogWatch[96];
+            extern int gMpLogSeen;
+            int maxFrames = 3000, n = 0;
+            if (strcmp(cmd, "waitlog") == 0)
+            {
+                sscanf(line, "%*s %d %n", &maxFrames, &n);
+                sUntilKeys = 0;
+            }
+            else
+            {
+                sscanf(line, "%*s %*s %d %n", &maxFrames, &n);
+                sUntilKeys = ParseTestKeys(arg);
+            }
+            snprintf(gMpLogWatch, sizeof(gMpLogWatch), "%s", n ? line + n : "");
+            gMpLogWatch[strcspn(gMpLogWatch, "\r\n")] = 0;
+            gMpLogSeen = 0;
+            snprintf(sUntilName, sizeof(sUntilName), "log");
             sUntilFrames = maxFrames;
             return;
         }

@@ -1,0 +1,9 @@
+# Co-op 2-on-2 wild battle: ALICE throws a MASTER BALL at the first action menu (L = last ball), they finish the other one
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("co-op wild: caught species" "co-op: battle over" "ball 1 ")
+EXPECT_B=("co-op: battle over")

@@ -1,0 +1,9 @@
+# Co-op wild battle where both leads are one EXP point short of Lv16: EXP, level up, evolution afterwards (Torchic -> Combusken)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("co-op: battle over, outcome 1" "lead Lv16")
+EXPECT_B=("co-op: battle over, outcome 1" "lead Lv16")

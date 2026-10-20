@@ -11,15 +11,21 @@
 
 static char sLastError[160];
 
+// Test harness "waitlog": set gMpLogWatch, and gMpLogSeen turns 1 once a log line contains it
+char gMpLogWatch[96];
+int gMpLogSeen;
+
 void MPNet_Log(const char *fmt, ...)
 {
+    char line[512];
     va_list ap;
     va_start(ap, fmt);
-    printf("[mp] ");
-    vprintf(fmt, ap);
-    printf("\n");
-    fflush(stdout);
+    vsnprintf(line, sizeof(line), fmt, ap);
     va_end(ap);
+    printf("[mp] %s\n", line);
+    fflush(stdout);
+    if (gMpLogWatch[0] && strstr(line, gMpLogWatch))
+        gMpLogSeen = 1;
 }
 
 const char *MPNet_LastError(void)

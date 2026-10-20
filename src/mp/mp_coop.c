@@ -1788,6 +1788,8 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
         {
             if (data[1])
             {
+                if (!sHeld[from].ttl)
+                    MPNet_Log("co-op: player %d is waiting for a partner at NPC %d", from + 1, data[2]);
                 sHeld[from].ttl = WAIT_HOLD_FRAMES;
                 sHeld[from].localId = data[2];
                 sHeld[from].mapNum = data[3];

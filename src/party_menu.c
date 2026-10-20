@@ -542,6 +542,12 @@ static void CB2_UpdatePartyMenu(void)
     UpdatePaletteFade();
 }
 
+// Moemon Co-op: test harness condition "partymenu"
+bool8 MP_PartyMenu_IsOpen(void)
+{
+    return gMain.callback2 == CB2_UpdatePartyMenu;
+}
+
 static void VBlankCB_PartyMenu(void)
 {
     LoadOam();

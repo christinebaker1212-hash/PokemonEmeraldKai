@@ -264,6 +264,7 @@ static void StartTradeScreen(void)
     memset(&sTrade.theirs, 0, sizeof(sTrade.theirs));
     sTrade.haveTheirs = FALSE;
     OfferChanged();
+    MPNet_Log("trade: trading with player %d", sTrade.partner + 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -705,6 +706,7 @@ static void CheckBothReady(void)
      && sTrade.theirs.seenSeq == sTrade.mine.seq && sTrade.mine.seenSeq == sTrade.theirs.seq)
     {
         sTrade.state = ST_CONFIRM;
+        MPNet_Log("trade: both ready");
         PlaySE(SE_PIN);
         sTrade.dirty = TRUE;
     }
@@ -863,6 +865,7 @@ void MP_Trade_OnRelay(u8 from, const u8 *data, u16 len)
         }
         sTrade.askedBy = from;
         sTrade.askedTimer = 0;
+        MPNet_Log("trade: player %d asks to trade", from + 1);
         break;
     case MPR_TRADE_ANSWER:
         if (sTrade.state == ST_ASKING && from == sTrade.partner && len >= 2)

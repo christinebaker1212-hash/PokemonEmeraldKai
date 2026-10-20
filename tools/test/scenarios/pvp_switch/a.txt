@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 4000 starting PvP battle
+pressuntil A partymenu 6000
+wait 30
+press RIGHT 2
+wait 20
+press A 2
+wait 40
+press A 2
+pressuntillog A 9000 the battle: 
+wait 300
+mp party
+quit

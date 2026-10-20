@@ -1,0 +1,9 @@
+# BOB raises the BATTLE FLAG, spots ALICE two tiles away, walks up: link battle to the end (money changes hands)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+EXPECT_A=("starting PvP battle against player 2" "the battle: ")
+EXPECT_B=("spotted player 1" "starting PvP battle against player 1" "the battle: ")
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"

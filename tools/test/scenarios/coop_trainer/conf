@@ -1,0 +1,9 @@
+# Roxanne's gym: ALICE talks to Roxanne and waits for a partner (YES), BOB walks up behind and joins: co-op double to the end
+MODE=2
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("joins the battle against trainer" "co-op: battle over, outcome 1")
+EXPECT_B=("is waiting for a partner" "co-op: battle over, outcome 1")

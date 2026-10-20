@@ -9,6 +9,7 @@
 #include "link.h"
 #include "link_rfu.h"
 #include "party_menu.h"
+#include "pokemon.h"
 #include "recorded_battle.h"
 #include "task.h"
 #include "util.h"
@@ -34,8 +35,11 @@ bool8 IsBattleLinkTaskFunc(TaskFunc func)
     return func == Task_HandleSendLinkBuffersData || func == Task_HandleCopyReceivedLinkBuffersData;
 }
 
+static EWRAM_DATA u8 sLocalFastBusy;
+
 void HandleLinkBattleSetup(void)
 {
+    sLocalFastBusy = 0;
     if (gBattleTypeFlags & BATTLE_TYPE_LINK)
     {
         if (gWirelessCommType)
@@ -738,6 +742,102 @@ enum
 
 // We want to send a message. Place it into the "send" buffer.
 // First argument is a BATTLELINKCOMMTYPE_...
+// Moemon Co-op: link battles over the internet. Vanilla makes the battle engine
+// (link master) wait for every game to finish every controller command before it
+// sends the next one: one network round trip per message, HP bar, animation...
+// (~20 a turn, 30 s a turn at 250 ms ping). For the purely visual commands below
+// the master only waits for its own screen; the other games play them strictly in
+// order, a little behind. Commands that answer the engine (choices, mon data, EXP)
+// and everything else still wait for everyone. IS_DONE carries the command it ends
+// (data[1]) so the master can drop the late answers of fast commands.
+// MOEMON_LINK_STRICT=1 turns this off (vanilla sync).
+// sLocalFastBusy (top of the file): non-master, battlers running a fast command here
+
+static bool8 IsFastLinkCommand(u8 cmd)
+{
+    switch (cmd)
+    {
+    case CONTROLLER_SETMONDATA:
+    case CONTROLLER_MOVEANIMATION:
+    case CONTROLLER_PRINTSTRING:
+    case CONTROLLER_PRINTSTRINGPLAYERONLY:
+    case CONTROLLER_HEALTHBARUPDATE:
+    case CONTROLLER_STATUSICONUPDATE:
+    case CONTROLLER_STATUSANIMATION:
+    case CONTROLLER_STATUSXOR:
+    case CONTROLLER_HITANIMATION:
+    case CONTROLLER_PLAYSE:
+    case CONTROLLER_FAINTINGCRY:
+    case CONTROLLER_FAINTANIMATION:
+    case CONTROLLER_BATTLEANIMATION:
+    case CONTROLLER_LINKSTANDBYMSG:
+    case CONTROLLER_RESETACTIONMOVESELECTION:
+    case CONTROLLER_CLEARUNKVAR:
+    case CONTROLLER_SETUNKVAR:
+    case CONTROLLER_CLEARUNKFLAG:
+    case CONTROLLER_TOGGLEUNKFLAG:
+        return TRUE;
+    }
+    return FALSE;
+}
+
+char *getenv(const char *name);
+
+// How long the master waits on a command: everyone (vanilla), the battler's owner
+// (and itself), or only itself (fast). Mirrors answer GETMONDATA too, and the intro,
+// ball throws and the ending stay in step.
+enum { LINK_SYNC_ALL, LINK_SYNC_OWNER, LINK_SYNC_FAST };
+
+static u8 LinkSyncKind(u8 cmd)
+{
+    if (IsFastLinkCommand(cmd))
+        return LINK_SYNC_FAST;
+    switch (cmd)
+    {
+    case CONTROLLER_GETMONDATA:
+    case CONTROLLER_GETRAWMONDATA:
+    case CONTROLLER_SETRAWMONDATA:
+    case CONTROLLER_DATATRANSFER:
+    case CONTROLLER_DMA3TRANSFER:
+    case CONTROLLER_PLAYBGM:
+    case CONTROLLER_ENDLINKBATTLE:
+    case CONTROLLER_BALLTHROWANIM:
+    case CONTROLLER_SUCCESSBALLTHROWANIM:
+    case CONTROLLER_INTROSLIDE:
+    case CONTROLLER_INTROTRAINERBALLTHROW:
+    case CONTROLLER_DRAWTRAINERPIC:
+    case CONTROLLER_TRAINERSLIDE:
+    case CONTROLLER_TRAINERSLIDEBACK:
+    case CONTROLLER_PLAYFANFAREORBGM:
+    case CONTROLLER_PALETTEFADE:
+    case CONTROLLER_ENDBOUNCE:
+        return LINK_SYNC_ALL;
+    }
+    return LINK_SYNC_OWNER;
+}
+
+// The link player whose game controls this battler (the master for the AI's)
+static u8 LinkOwnerOf(u8 battler)
+{
+    s32 id = GetBattlerMultiplayerId(battler);
+    return (id < GetLinkPlayerCount()) ? id : 0;
+}
+
+// Behind the master: may the master have gone on without waiting for us?
+static bool8 MasterMayRunAhead(u8 cmd, u8 battler)
+{
+    u8 kind = LinkSyncKind(cmd);
+    return kind == LINK_SYNC_FAST || (kind == LINK_SYNC_OWNER && LinkOwnerOf(battler) != GetMultiplayerId());
+}
+
+static bool8 UseFastLinkSync(void)
+{
+    static s8 sStrict = -1;
+    if (sStrict < 0)
+        sStrict = getenv("MOEMON_LINK_STRICT") != NULL;
+    return gNetLinkActive && !sStrict;
+}
+
 void PrepareBufferDataTransferLink(u8 bufferId, u16 size, u8 *data)
 {
     s32 alignedSize;
@@ -764,6 +864,19 @@ void PrepareBufferDataTransferLink(u8 bufferId, u16 size, u8 *data)
 
     for (i = 0; i < size; i++)
         BYTE_TO_SEND(LINK_BUFF_DATA + i) = data[i];
+    // Moemon Co-op: which command this ends (see IsFastLinkCommand)
+    if (bufferId == B_COMM_CONTROLLER_IS_DONE && size >= 2)
+    {
+        BYTE_TO_SEND(LINK_BUFF_DATA + 1) = gBattleBufferA[gActiveBattler][0];
+        // Behind the master, our own screen being done frees the battler right away:
+        // our echo of this would queue up behind the master's next command for it
+        if (UseFastLinkSync() && !(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+        {
+            MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(gActiveBattler, 0);
+            MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(gActiveBattler, GetMultiplayerId());
+            sLocalFastBusy &= ~gBitTable[gActiveBattler];
+        }
+    }
 
     #undef BYTE_TO_SEND
 
@@ -949,6 +1062,7 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId);
 
 static bool8 sTookControllerCommand;
 
+
 // Moemon Co-op: on the network link, handle the messages that are ready this
 // frame, but stop after a command for a controller: that controller has to run
 // it (next frame) before anything else is read. A later "done" for the same
@@ -986,15 +1100,47 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
         }
         battler = BYTE_TO_RECEIVE(LINK_BUFF_ACTIVE_BATTLER);
         blockSize = BYTE_TO_RECEIVE(LINK_BUFF_SIZE_LO) | (BYTE_TO_RECEIVE(LINK_BUFF_SIZE_HI) << 8);
+        {
+            static s8 sDbg = -1;
+            if (sDbg < 0)
+                sDbg = getenv("MOEMON_LINKDEBUG") != NULL;
+            if (sDbg)
+            {
+                void MPNet_Log(const char *fmt, ...);
+                MPNet_Log("msg %d b%d %d %d exec=%08x", BYTE_TO_RECEIVE(0), battler, BYTE_TO_RECEIVE(LINK_BUFF_DATA),
+                          BYTE_TO_RECEIVE(LINK_BUFF_DATA + 1), gBattleControllerExecFlags);
+            }
+        }
 
         switch (BYTE_TO_RECEIVE(0))
         {
         case B_COMM_TO_CONTROLLER:
             if (IS_BATTLE_CONTROLLER_ACTIVE_ON_LOCAL(battler))
                 return FALSE;
+            if (UseFastLinkSync() && !(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+            {
+                // Behind the master: one command at a time while fast ones are involved,
+                // so the screen shows them in the master's order
+                bool8 fast = MasterMayRunAhead(BYTE_TO_RECEIVE(LINK_BUFF_DATA), battler);
+                if ((fast || sLocalFastBusy) && (gBattleControllerExecFlags & 0xF))
+                    return FALSE;
+                if (fast)
+                    sLocalFastBusy |= gBitTable[battler];
+            }
 
             memcpy(gBattleBufferA[battler], &BYTE_TO_RECEIVE(LINK_BUFF_DATA), blockSize);
-            MarkBattlerReceivedLinkData(battler);
+            if (UseFastLinkSync() && (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER)
+             && LinkSyncKind(gBattleBufferA[battler][0]) != LINK_SYNC_ALL)
+            {
+                // Our own screen (and the battler's owner) has to finish it before the engine goes on
+                u8 owner = LinkOwnerOf(battler);
+                MARK_BATTLE_CONTROLLER_ACTIVE_FOR_PLAYER(battler, GetMultiplayerId());
+                if (LinkSyncKind(gBattleBufferA[battler][0]) == LINK_SYNC_OWNER && owner != GetMultiplayerId())
+                    MARK_BATTLE_CONTROLLER_ACTIVE_FOR_PLAYER(battler, owner);
+                MARK_BATTLE_CONTROLLER_MESSAGE_SYNCHRONIZED_OVER_LINK(battler);
+            }
+            else
+                MarkBattlerReceivedLinkData(battler);
             sTookControllerCommand = TRUE;
 
             if (!(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
@@ -1010,6 +1156,26 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
             break;
         case B_COMM_CONTROLLER_IS_DONE:
             playerId = BYTE_TO_RECEIVE(LINK_BUFF_DATA);
+            if (UseFastLinkSync())
+            {
+                u8 me = GetMultiplayerId();
+                if (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER)
+                {
+                    // An answer we didn't wait for (the flag may belong to a newer command by now)
+                    if (playerId != me)
+                    {
+                        u8 kind = LinkSyncKind(BYTE_TO_RECEIVE(LINK_BUFF_DATA + 1));
+                        if (kind == LINK_SYNC_FAST || (kind == LINK_SYNC_OWNER && playerId != LinkOwnerOf(battler)))
+                            break;
+                    }
+                    MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(battler, playerId);
+                }
+                else if (playerId == me)
+                    ;   // already done when we sent it (PrepareBufferDataTransferLink)
+                else if (playerId != 0)
+                    MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(battler, playerId);
+                break;
+            }
             MARK_BATTLE_CONTROLLER_IDLE_FOR_PLAYER(battler, playerId);
             break;
         }

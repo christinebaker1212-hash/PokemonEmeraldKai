@@ -710,6 +710,7 @@ static void DebugDump(void)
         sOn = getenv("MOEMON_LINKDEBUG") != NULL;
     if (!sOn || ++sTick % 60)
         return;
+    MPNet_Log("linkdbg cmds %d %d %d %d", gBattleBufferA[0][0], gBattleBufferA[1][0], gBattleBufferA[2][0], gBattleBufferA[3][0]);
     MPNet_Log("linkdbg cb2=%p main=%p ms=%d exec=%08x recv=%d%d q=%d s=%d sync=%d my=%d peer=%d rlp=%d have=%d open=%d",
               (void *)(uintptr_t)((uintptr_t)gMain.callback2 - (uintptr_t)CB2_Overworld),
               (void *)(uintptr_t)((uintptr_t)gBattleMainFunc - (uintptr_t)CB2_Overworld),

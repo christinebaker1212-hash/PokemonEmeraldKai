@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp battleflag
+waitlog 4000 starting PvP battle
+pressuntillog A 9000 the battle: 
+wait 300
+quit

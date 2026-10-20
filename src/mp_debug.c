@@ -132,6 +132,11 @@ bool8 MP_Setup_IsReady(void);
 bool8 MP_Setup_ScreenIs(int screen);
 int MP_TestCondition(const char *name)
 {
+    if (strcmp(name, "log") == 0)   // harness waitlog
+    {
+        extern int gMpLogSeen;
+        return gMpLogSeen;
+    }
     if (strcmp(name, "setup") == 0)
         return MP_Setup_IsReady();
     if (strcmp(name, "field") == 0)
@@ -167,6 +172,11 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(4);
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
+    if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
+    {
+        bool8 MP_PartyMenu_IsOpen(void);
+        return MP_PartyMenu_IsOpen() && !gPaletteFade.active;
+    }
     if (strcmp(name, "crushask") == 0)
     {
         bool8 MP_Crush_DebugAsking(void);
@@ -559,6 +569,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Daily_OpenMenu(void);
         MP_Daily_OpenMenu();
+    }
+    else if (strcmp(cmd, "trade") == 0)
+    {
+        void MP_Trade_OpenMenu(void);
+        MP_Trade_OpenMenu();
     }
     else if (strcmp(cmd, "giftmenu") == 0)
     {

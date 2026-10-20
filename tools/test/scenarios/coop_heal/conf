@@ -1,0 +1,9 @@
+# Co-op wild battle: BOB's lead is at 3 HP, ALICE uses a POTION on it from her bag (the partner's gold slot below hers; BOB's game runs the battle, so it logs the item)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op item 13 on party slot 0: hp 3 -> 23" "co-op: battle over")
