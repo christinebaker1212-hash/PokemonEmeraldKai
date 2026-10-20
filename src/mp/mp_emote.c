@@ -426,7 +426,6 @@ static bool8 AnyBubbleShown(void)
 bool8 MP_Emote_LoadUiPalette(void)
 {
     static u16 sPal[16];
-    struct SpritePalette pal = {sPal, TAG_BUBBLE_PAL};
     if (IndexOfSpritePaletteTag(TAG_BUBBLE_PAL) != 0xFF)
         return TRUE;
     {
@@ -440,19 +439,7 @@ bool8 MP_Emote_LoadUiPalette(void)
         sPal[8] = theme[MPT_BORDER];   // the frame's color
         sPal[9] = theme[MPT_BAND];
     }
-    if (LoadSpritePalette(&pal) != 0xFF)
-        return TRUE;
-    {
-        // No free slot (weather, field effects and friends' colors use them up):
-        // borrow an NPC reflection slot like the friends' palettes do
-        void MP_ClaimSpritePaletteSlot(u16 tag, u8 slot);
-        u8 slot = MP_Overworld_FreeBorrowSlot();
-        if (slot == 0xFF)
-            return FALSE;
-        MP_ClaimSpritePaletteSlot(TAG_BUBBLE_PAL, slot);
-        LoadPalette(sPal, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
-        return TRUE;
-    }
+    return MP_AllocCoopPalette(TAG_BUBBLE_PAL, sPal) != 0xFF;
 }
 
 static bool8 CreateBubbleSprites(struct Bubble *b)

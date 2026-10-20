@@ -159,7 +159,7 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     }
     pal.data = (const u16 *)(sFollowerData + s->gfx->offset + 8 * frameBytes);
     pal.tag = tag;
-    if (IndexOfSpritePaletteTag(tag) == 0xFF && LoadSpritePalette(&pal) == 0xFF)
+    if (MP_AllocCoopPalette(tag, pal.data) == 0xFF)
         return FALSE; // no palette slot free right now; try again later
     s->tmpl.tileTag = TAG_NONE;
     s->tmpl.paletteTag = tag;
@@ -266,6 +266,18 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         s->placed = FALSE;
     }
     fs = &gSprites[s->spriteId];
+    {
+        // The game can take the palette slot back (sprite.c MP_MakeRoomForPalette):
+        // wait for a new one rather than show someone else's colors
+        u8 palSlot = IndexOfSpritePaletteTag(TAG_FOLLOWER + (s - sSlots));
+        if (palSlot == 0xFF)
+        {
+            DestroySprite(fs);
+            s->spriteId = SPRITE_NONE;
+            return;
+        }
+        fs->oam.paletteNum = palSlot;
+    }
     if (!s->placed || s->ownerObj != ownerObj)
     {
         s->ownerObj = ownerObj;

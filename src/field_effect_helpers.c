@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
 #include "field_effect.h"
@@ -67,6 +68,12 @@ void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, boo
         reflectionSprite->oam.affineMode = ST_OAM_AFFINE_NORMAL;
 }
 
+// Moemon Co-op: reflections share their owner's palette slot (sprite.c palette moves skip them)
+bool8 MP_IsReflectionSprite(struct Sprite *sprite)
+{
+    return sprite->callback == UpdateObjectReflectionSprite;
+}
+
 static s16 GetReflectionVerticalOffset(struct ObjectEvent *objectEvent)
 {
     return GetObjectEventGraphicsInfo(objectEvent->graphicsId)->height - 2;
@@ -81,6 +88,10 @@ static void LoadObjectReflectionPalette(struct ObjectEvent *objectEvent, struct 
         [BRIDGE_TYPE_POND_HIGH - 1] = 44
     };
     reflectionSprite->sReflectionVerticalOffset = 0;
+    // Moemon Co-op: a friend's reflection shares the friend's own colors (its
+    // slot isn't an NPC slot, so loading an NPC reflection palette there broke them)
+    if (MP_IsMpObjectEvent(objectEvent))
+        return;
     if (!GetObjectEventGraphicsInfo(objectEvent->graphicsId)->disableReflectionPaletteLoad
      && ((bridgeType = MetatileBehavior_GetBridgeType(objectEvent->previousMetatileBehavior))
       || (bridgeType = MetatileBehavior_GetBridgeType(objectEvent->currentMetatileBehavior))))

@@ -191,7 +191,9 @@ const u8 gReflectionEffectPaletteMap[16] = {
         [PALSLOT_NPC_3_REFLECTION]       = PALSLOT_NPC_3_REFLECTION,
         [PALSLOT_NPC_4_REFLECTION]       = PALSLOT_NPC_4_REFLECTION,
         [PALSLOT_NPC_SPECIAL]            = PALSLOT_NPC_SPECIAL_REFLECTION,
-        [PALSLOT_NPC_SPECIAL_REFLECTION] = PALSLOT_NPC_SPECIAL_REFLECTION
+        [PALSLOT_NPC_SPECIAL_REFLECTION] = PALSLOT_NPC_SPECIAL_REFLECTION,
+        // Moemon Co-op: friends' palettes can sit in the dynamic slots; their reflections share them
+        [12] = 12, [13] = 13, [14] = 14, [15] = 15,
 };
 
 static const struct SpriteTemplate sCameraSpriteTemplate = {
@@ -2063,11 +2065,13 @@ static u8 LoadSpritePaletteIfTagExists(const struct SpritePalette *spritePalette
     return LoadSpritePalette(spritePalette);
 }
 
+void MP_VacatePaletteSlot(u8 slot);
 void PatchObjectPalette(u16 paletteTag, u8 paletteSlot)
 {
     // paletteTag is assumed to exist in sObjectEventSpritePalettes
     u8 paletteIndex = FindObjectEventPaletteIndexByTag(paletteTag);
 
+    MP_VacatePaletteSlot(paletteSlot); // Moemon Co-op: a co-op palette borrowed it
     LoadPalette(sObjectEventSpritePalettes[paletteIndex].data, OBJ_PLTT_ID(paletteSlot), PLTT_SIZE_4BPP);
 }
 

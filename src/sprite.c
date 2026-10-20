@@ -92,6 +92,8 @@ static void ApplyAffineAnimFrame(u8 matrixNum, struct AffineAnimFrameCmd *frameC
 static u8 IndexOfSpriteTileTag(u16 tag);
 static void AllocSpriteTileRange(u16 tag, u16 start, u16 count);
 static void DoLoadSpritePalette(const u16 *src, u16 paletteOffset);
+static u8 MP_MakeRoomForPalette(void);
+bool8 MP_IsCoopPaletteTag(u16 tag);
 static void UpdateSpriteMatrixAnchorPos(struct Sprite *, s32, s32);
 
 typedef void (*AnimFunc)(struct Sprite *);
@@ -1590,6 +1592,8 @@ u8 LoadSpritePalette(const struct SpritePalette *palette)
         return index;
 
     index = IndexOfSpritePaletteTag(TAG_NONE);
+    if (index == 0xFF)
+        index = MP_MakeRoomForPalette(); // Moemon Co-op: the game's own effects come first
 
     if (index == 0xFF)
     {
@@ -1620,6 +1624,8 @@ u8 AllocSpritePalette(u16 tag)
 {
     u8 index = IndexOfSpritePaletteTag(TAG_NONE);
     if (index == 0xFF)
+        index = MP_MakeRoomForPalette();
+    if (index == 0xFF)
     {
         return 0xFF;
     }
@@ -1636,8 +1642,8 @@ u8 IndexOfSpritePaletteTag(u16 tag)
     for (i = gReservedSpritePaletteCount; i < 16; i++)
         if (sSpritePaletteTags[i] == tag)
             return i;
-    // Moemon Co-op: the co-op overlay palette may sit in a borrowed reserved slot
-    if (tag == 0x53C0)
+    // Moemon Co-op: co-op palettes may sit in borrowed reserved slots
+    if (MP_IsCoopPaletteTag(tag))
         for (i = 0; i < gReservedSpritePaletteCount && i < 16; i++)
             if (sSpritePaletteTags[i] == tag)
                 return i;
@@ -1780,11 +1786,127 @@ u8 MP_AllocSpritePalette(u16 tag, u8 minSlot)
     return i;
 }
 
-// Moemon Co-op: tag a fixed slot (a borrowed NPC reflection slot)
-void MP_ClaimSpritePaletteSlot(u16 tag, u8 slot)
+// Moemon Co-op: palettes for co-op sprites (friends, followers, bubbles...).
+// The overworld leaves only slots 12-15 to tagged palettes and the game needs
+// them for weather (two) and field effects (tall grass, ripples, the Pokémon
+// Center's healing balls...). Co-op palettes borrow the NPC reflection slots
+// first (unused unless an NPC stands by water), then free dynamic slots. When
+// the game needs a slot co-op holds, the co-op palette moves elsewhere (its
+// sprites follow), or, with nowhere to go, gives the slot up and its sprites
+// hide until their owner gets a new slot.
+static const u8 sMpBorrowSlots[] = {11, 9, 8, 7, 6};
+
+bool8 MP_IsCoopPaletteTag(u16 tag)
 {
-    if (slot < 16)
-        sSpritePaletteTags[slot] = tag;
+    return (tag >= 0x1150 && tag < 0x1158)   // followers (mp_follower.c)
+        || (tag >= 0x5390 && tag < 0x5398)   // friends (mp_overworld.c)
+        || tag == 0x53C0;                    // bubbles, toasts, compass (MP_TAG_UI_PAL)
+}
+
+static bool8 MpSlotHasSprites(u8 slot)
+{
+    u32 i;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].oam.paletteNum == slot)
+            return TRUE;
+    return FALSE;
+}
+
+// A slot a co-op palette can use (0xFF = none)
+static u8 MpFreeSlot(u8 except, bool8 dynamicToo)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sMpBorrowSlots); i++)
+    {
+        u8 s = sMpBorrowSlots[i];
+        if (s != except && s < gReservedSpritePaletteCount && sSpritePaletteTags[s] == TAG_NONE && !MpSlotHasSprites(s))
+            return s;
+    }
+    if (dynamicToo)
+        for (i = gReservedSpritePaletteCount; i < 16; i++)
+            if (i != except && sSpritePaletteTags[i] == TAG_NONE)
+                return i;
+    return 0xFF;
+}
+
+// The slot holding a co-op palette, loading `colors` into a new one (0xFF = no room)
+u8 MP_AllocCoopPalette(u16 tag, const u16 *colors)
+{
+    u8 s = MP_FindSpritePaletteTag(tag, 0);
+    if (s != 0xFF)
+        return s;
+    s = MpFreeSlot(0xFF, TRUE);
+    if (s == 0xFF)
+        return 0xFF;
+    sSpritePaletteTags[s] = tag;
+    if (colors)
+        DoLoadSpritePalette(colors, PLTT_ID(s));
+    return s;
+}
+
+// Moves the co-op palette out of `slot` (to a borrowed slot, or a dynamic one
+// when dynamicToo), repointing its sprites; with nowhere to go they hide
+static void MpMoveCoopPalette(u8 slot, bool8 dynamicToo)
+{
+    bool8 MP_IsReflectionSprite(struct Sprite *sprite);
+    u16 tag = sSpritePaletteTags[slot];
+    u8 dest;
+    u32 i;
+    sSpritePaletteTags[slot] = TAG_NONE;
+    dest = MpFreeSlot(slot, dynamicToo);
+    if (dest != 0xFF)
+    {
+        sSpritePaletteTags[dest] = tag;
+        CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_ID(slot)], &gPlttBufferUnfaded[OBJ_PLTT_ID(dest)], PLTT_SIZE_4BPP);
+        CpuCopy16(&gPlttBufferFaded[OBJ_PLTT_ID(slot)], &gPlttBufferFaded[OBJ_PLTT_ID(dest)], PLTT_SIZE_4BPP);
+    }
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        struct Sprite *sp = &gSprites[i];
+        if (!sp->inUse || sp->oam.paletteNum != slot || MP_IsReflectionSprite(sp))
+            continue;
+        if (dest != 0xFF)
+            sp->oam.paletteNum = dest;
+        else
+            sp->invisible = TRUE;
+    }
+}
+
+// The game is about to write an object palette into `slot` (NPC reflections)
+void MP_VacatePaletteSlot(u8 slot)
+{
+    if (slot < 16 && MP_IsCoopPaletteTag(sSpritePaletteTags[slot]))
+        MpMoveCoopPalette(slot, TRUE);
+}
+
+// No free dynamic slot for the game's own palette: free one co-op holds
+// (remote followers first, friends last). 0xFF = none.
+static u8 MP_MakeRoomForPalette(void)
+{
+    u8 i, best = 0xFF, bestRank = 0xFF;
+    for (i = gReservedSpritePaletteCount; i < 16; i++)
+    {
+        u16 tag = sSpritePaletteTags[i];
+        u8 rank;
+        if (!MP_IsCoopPaletteTag(tag))
+            continue;
+        if (tag > 0x1150 && tag < 0x1158)
+            rank = 0;
+        else if (tag == 0x1150)
+            rank = 1;
+        else if (tag == 0x53C0)
+            rank = 2;
+        else
+            rank = 3;
+        if (rank < bestRank)
+        {
+            best = i;
+            bestRank = rank;
+        }
+    }
+    if (best != 0xFF)
+        MpMoveCoopPalette(best, FALSE);
+    return best;
 }
 
 // Moemon Co-op: a sprite's frame images were just swapped (live avatar change

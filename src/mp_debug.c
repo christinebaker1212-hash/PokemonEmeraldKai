@@ -365,7 +365,53 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] %s\n", line);
         }
     }
-    else if (strcmp(cmd, "follow") == 0)
+    else if (strcmp(cmd, "palvacate") == 0)
+    {
+        // palvacate SLOT - the game writes an NPC reflection palette there
+        void MP_VacatePaletteSlot(u8 slot);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        MP_VacatePaletteSlot(n);
+    }
+    else if (strcmp(cmd, "palcoop") == 0)
+    {
+        unsigned t = 0;
+        sscanf(arg, "%x", &t);
+        printf("[test] palcoop %04x -> %d\n", t, MP_AllocCoopPalette(t, NULL));
+    }
+        else if (strcmp(cmd, "palfree") == 0)
+    {
+        unsigned t = 0;
+        sscanf(arg, "%x", &t);
+        FreeSpritePaletteByTag(t);
+    }
+        else if (strcmp(cmd, "palfill") == 0)
+    {
+        // palfill N - the game grabs N more sprite palettes (0 = give them back)
+        static const u16 sJunk[16] = {0};
+        int n = 0, i;
+        sscanf(arg, "%d", &n);
+        if (n == 0)
+            for (i = 0; i < 8; i++)
+                FreeSpritePaletteByTag(0x7700 + i);
+        for (i = 0; i < n; i++)
+        {
+            struct SpritePalette pal = {sJunk, 0x7700 + i};
+            printf("[test] palfill %04x -> %d\n", 0x7700 + i, LoadSpritePalette(&pal));
+        }
+    }
+        else if (strcmp(cmd, "pals") == 0)
+    {
+        // pals - which tag holds each sprite palette slot
+        extern u8 gReservedSpritePaletteCount;
+        u16 GetSpritePaletteTagByPaletteNum(u8 paletteNum);
+        int i;
+        printf("[test] pals reserved=%d:", gReservedSpritePaletteCount);
+        for (i = 0; i < 16; i++)
+            printf(" %d=%04x", i, GetSpritePaletteTagByPaletteNum(i));
+        printf("\n");
+    }
+        else if (strcmp(cmd, "follow") == 0)
     {
         // follow N - party Pokémon N walks with you (like SELECT in the party menu)
         int n = 0;

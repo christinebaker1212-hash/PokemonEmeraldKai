@@ -23,7 +23,6 @@
 u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);
 void MP_RemoveObjectEvent(struct ObjectEvent *objectEvent);
 u8 MP_FindSpritePaletteTag(u16 tag, u8 minSlot);
-u8 MP_AllocSpritePalette(u16 tag, u8 minSlot);
 void MPNet_Log(const char *fmt, ...);
 
 #define QUEUE_SIZE 24
@@ -407,11 +406,7 @@ static void Despawn(u8 id)
     }
     DestroyBlob(id);
     DestroyNametag(id);
-    {
-        u8 s = MP_FindSpritePaletteTag(TAG_REMOTE_PAL_BASE + id, OBJ_PALSLOT_COUNT);
-        if (s != 0xFF)
-            FreeSpritePaletteByTag(TAG_REMOTE_PAL_BASE + id);
-    }
+    FreeSpritePaletteByTag(TAG_REMOTE_PAL_BASE + id);
     r->spawned = FALSE;
     r->objId = OBJECT_EVENTS_COUNT;
     r->palSlot = 0xFF;
@@ -427,58 +422,15 @@ static bool8 IsSpawnValid(u8 id)
     return obj->active && obj->localId == MP_LOCALID_BASE + id && obj->graphicsId == OBJ_EVENT_GFX_MP_REMOTE(id);
 }
 
-// Makes sure the remote player's palette is loaded into a sprite palette slot.
-// Uses the free dynamic sprite palette slots first. When those run out (weather
-// and field effects can use some), it borrows the NPC reflection slots, which
-// are only needed for NPC reflections on water.
-static const u8 sBorrowableSlots[] = {
-    PALSLOT_NPC_4_REFLECTION, PALSLOT_NPC_3_REFLECTION, PALSLOT_NPC_2_REFLECTION, PALSLOT_NPC_1_REFLECTION,
-};
-
-static bool8 IsSlotUsedByOtherRemote(u8 id, u8 slot)
-{
-    u8 i;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (i != id && sRemote[i].spawned && sRemote[i].palSlot == slot)
-            return TRUE;
-    // The co-op overlay palette (bubbles, toasts, compass) may have borrowed one too
-    return MP_FindSpritePaletteTag(MP_TAG_UI_PAL, 0) == slot;
-}
-
-// A reflection slot no remote player uses, for the overlay palette (0xFF = none)
-u8 MP_Overworld_FreeBorrowSlot(void)
-{
-    s8 i;
-    for (i = ARRAY_COUNT(sBorrowableSlots) - 1; i >= 0; i--)
-        if (!IsSlotUsedByOtherRemote(0xFF, sBorrowableSlots[i]))
-            return sBorrowableSlots[i];
-    return 0xFF;
-}
-
+// Makes sure the remote player's palette is loaded into a sprite palette slot
+// (sprite.c MP_AllocCoopPalette: a borrowed NPC reflection slot or a free one)
 static void EnsurePalette(u8 id, u16 *palOut)
 {
     struct RemoteObj *r = &sRemote[id];
-    
-    u8 slot = MP_FindSpritePaletteTag(TAG_REMOTE_PAL_BASE + id, OBJ_PALSLOT_COUNT);
+    u8 slot;
 
     MP_Avatar_GetRemotePalette(id, AvatarModeOf(id), palOut);
-
-    if (slot == 0xFF && r->palSlot < OBJ_PALSLOT_COUNT && r->palSlot != 0 && !IsSlotUsedByOtherRemote(id, r->palSlot))
-        slot = r->palSlot; // keep the borrowed slot
-    if (slot == 0xFF)
-        slot = MP_AllocSpritePalette(TAG_REMOTE_PAL_BASE + id, OBJ_PALSLOT_COUNT);
-    if (slot == 0xFF)
-    {
-        u8 i;
-        for (i = 0; i < ARRAY_COUNT(sBorrowableSlots); i++)
-        {
-            if (!IsSlotUsedByOtherRemote(id, sBorrowableSlots[i]))
-            {
-                slot = sBorrowableSlots[i];
-                break;
-            }
-        }
-    }
+    slot = MP_AllocCoopPalette(TAG_REMOTE_PAL_BASE + id, NULL);
     if (slot == 0xFF)
     {
         r->palSlot = 0; // last resort: the local player's palette

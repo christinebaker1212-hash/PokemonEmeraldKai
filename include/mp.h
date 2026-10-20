@@ -386,9 +386,12 @@ void MP_OpenQuickPick(u8 page, s8 hold);
 void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);
 
-// mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
+// sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
+u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);
+bool8 MP_IsCoopPaletteTag(u16 tag);
 #define MP_TAG_UI_PAL 0x53C0   // the co-op overlay sprite palette (mp_emote.c)
-u8 MP_Overworld_FreeBorrowSlot(void);
+
+// mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
 void MP_Ping_Place(void);
 void MP_Ping_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Ping_Update(void);
