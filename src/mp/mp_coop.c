@@ -702,6 +702,59 @@ void MP_Coop_PrepareTrainerParty(u16 trainerId)
     gMpEnemyLevelBonus = MP_Coop_IsBossTrainer(trainerId) ? 3 : 2;
 }
 
+static u16 BaseStatTotal(u16 species)
+{
+    const struct SpeciesInfo *b = &gSpeciesInfo[species];
+    return b->baseHP + b->baseAttack + b->baseDefense + b->baseSpeed + b->baseSpAttack + b->baseSpDefense;
+}
+
+static bool8 ShareType(u16 a, u16 b)
+{
+    const u8 *ta = gSpeciesInfo[a].types, *tb = gSpeciesInfo[b].types;
+    return ta[0] == tb[0] || ta[0] == tb[1] || ta[1] == tb[0] || ta[1] == tb[1];
+}
+
+// A Moemon to pad a co-op trainer's party with, in place of a copy of `src`:
+// it shares a type with it, is about as strong (base stats within 15%), isn't
+// legendary or a baby (no-eggs group), and isn't in the party yet. Always the
+// same for the same trainer and slot. Falls back to src's own species.
+static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
+{
+    static u16 sCandidates[NUM_SPECIES];
+    u16 srcSpecies = GetMonData(src, MON_DATA_SPECIES), species, count = 0;
+    u16 bst = BaseStatTotal(srcSpecies);
+    u8 tries;
+    u32 seed = trainerId * 2654435761u + slot * 40503u;
+
+    for (tries = 0; tries < 2 && count == 0; tries++)
+    {
+        u16 lo = bst * (tries ? 75 : 85) / 100, hi = bst * (tries ? 125 : 115) / 100;
+        for (species = 1; species < NUM_SPECIES; species++)
+        {
+            u8 k;
+            bool8 used = FALSE;
+            if (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z)
+                continue;
+            if (species == SPECIES_SHEDINJA || species == SPECIES_UNOWN || species == SPECIES_DITTO
+             || gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_NO_EGGS_DISCOVERED)
+                continue;
+            if (!ShareType(species, srcSpecies) || BaseStatTotal(species) < lo || BaseStatTotal(species) > hi)
+                continue;
+            for (k = 0; k < PARTY_SIZE; k++)
+                if (GetMonData(&gEnemyParty[k], MON_DATA_SPECIES) == species)
+                    used = TRUE;
+            if (!used)
+                sCandidates[count++] = species;
+        }
+    }
+    if (count == 0)
+        return srcSpecies;
+    seed ^= seed >> 13;
+    seed *= 0x5bd1e995u;
+    seed ^= seed >> 15;
+    return sCandidates[seed % count];
+}
+
 void MP_Coop_FinishTrainerParty(u16 trainerId)
 {
     u8 n = 0, target, i, ace;
@@ -713,19 +766,21 @@ void MP_Coop_FinishTrainerParty(u16 trainerId)
     target = MP_Coop_IsBossTrainer(trainerId) ? PARTY_SIZE : min(PARTY_SIZE, n + (n + 1) / 2);
     if (target <= n)
         return;
-    // The ace (the last one) moves to the end; fresh copies of the others fill in before it
+    // The ace (the last one) moves to the end; new Moemon fill in before it,
+    // each one like one of the trainer's others (see PickFillerSpecies)
     ace = target - 1;
     gEnemyParty[ace] = gEnemyParty[n - 1];
     for (i = n - 1; i < ace; i++)
     {
         struct Pokemon *src = &gEnemyParty[(i - (n - 1)) % (n - 1)];
-        u16 species = GetMonData(src, MON_DATA_SPECIES);
+        u16 species = PickFillerSpecies(src, i, trainerId);
         u8 level = GetMonData(src, MON_DATA_LEVEL);
-        u16 item = GetMonData(src, MON_DATA_HELD_ITEM);
         CreateMon(&gEnemyParty[i], species, level, GetMonData(src, MON_DATA_ATK_IV), TRUE, Random32(), OT_ID_RANDOM_NO_SHINY, 0);
-        SetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM, &item);
     }
-    MPNet_Log("coop: trainer %d party %d -> %d", trainerId, n, target);
+    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, target,
+              GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));
 }
 
 void MP_Coop_ArrangeEnemyParty(void)

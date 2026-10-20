@@ -154,7 +154,8 @@ Difficulty: trainer/wild levels were vanilla Emerald; route/gym trainers got +2.
 E4 53-59, Wallace 62, land wild levels +3/+4 on under-leveled routes and dungeons, route trainers from badge 3 AI TRY_TO_FAINT
 (scripted from the audit; see git history). Co-op team-ups (master only): MP_Coop_PrepareTrainerParty sets gMpEnemyLevelBonus
 (+2, +3 for MP_Coop_IsBossTrainer) used by battle_main.c CreateNPCTrainerParty; MP_Coop_FinishTrainerParty pads the party
-(route n + (n+1)/2, bosses 6) before the ace; MP_Coop_TrainerBattleBoost re-enables trainer items and smarter AI flags
+(route n + (n+1)/2, bosses 6) before the ace with PickFillerSpecies (shares a type with a party mon, base stats within
+15% (25% fallback), no legendaries/babies/Shedinja/Ditto, not already in the party, seeded by trainer+slot); MP_Coop_TrainerBattleBoost re-enables trainer items and smarter AI flags
 (battle_ai_script_commands.c); co-op wild mons +2 levels (BoostWild), gMpWildDoublePercent 60.
 
 Wait for a partner (mp_coop.c Task_JoinCheck JOIN_WAIT_*): after a trainer's speech with nobody asking yet, a friend on
