@@ -420,6 +420,24 @@ static void RedrawSprite(u16 *frame, const struct Sprite *s)
 }
 
 // After the GBA frame is drawn (platform VDraw): the cards over it
+// For the type icons (mp_typeicons.c): where battler's card is drawn this frame (its left and right
+// edges and its top), FALSE when it isn't
+bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top)
+{
+    struct Sprite *box;
+    s16 x0, y0;
+    u16 opacity;
+    if (!sActive || battler >= MAX_BATTLERS_COUNT || !sCards[battler].used || gHealthboxSpriteIds[battler] >= MAX_SPRITES)
+        return FALSE;
+    box = &gSprites[gHealthboxSpriteIds[battler]];
+    if (!box->inUse || box->invisible || !CardPlace(battler, &x0, &y0, &opacity))
+        return FALSE;
+    *left = x0 + box->x2;
+    *right = x0 + box->x2 + CARD_W - 1;
+    *top = y0 + box->y2;
+    return TRUE;
+}
+
 void MP_TriCards_Composite(u16 *frame)
 {
     const u16 *pal;

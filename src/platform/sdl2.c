@@ -680,6 +680,7 @@ void VDraw(void)
     memset(image, 0, sizeof(sFrameImage));
     DrawFrame(image);
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
+    MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
     if (!sTestMode)

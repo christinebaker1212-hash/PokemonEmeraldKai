@@ -938,6 +938,10 @@ extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
 void MP_TriCards_Composite(u16 *frame);
+bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top);
+// mp_typeicons.c: type icons by the healthboxes (OPTIONS > TYPE ICONS)
+bool8 MP_TypeIcons_On(void);
+void MP_TypeIcons_Composite(u16 *frame);
 void MP_BattleOverlay_Composite(u16 *frame);   // emote pick and bubbles over everything in battle
 
 

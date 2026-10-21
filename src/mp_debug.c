@@ -598,6 +598,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             MP_Photo_Start();
     }
+    else if (strcmp(cmd, "options") == 0)
+    {
+        // options - the OPTIONS screen (back to the field)
+        void CB2_InitOptionMenu(void);
+        void CB2_ReturnToField(void);
+        gMain.savedCallback = CB2_ReturnToField;
+        SetMainCallback2(CB2_InitOptionMenu);
+    }
+    else if (strcmp(cmd, "typeicons") == 0)
+    {
+        // typeicons [0|1] - OPTIONS > TYPE ICONS
+        gSaveBlock2Ptr->optionsTypeIcons = arg[0] ? atoi(arg) != 0 : 1;
+    }
     else if (strcmp(cmd, "wilddouble") == 0)
     {
         extern u8 gMpWildDoublePercent;

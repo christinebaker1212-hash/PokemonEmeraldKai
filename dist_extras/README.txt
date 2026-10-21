@@ -634,6 +634,9 @@ Characters without a battle back sprite: in battle your trainer isn't shown
 the Sprite Editor.
 
 OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
+OPTIONS > TYPE ICONS ON shows each Moemon's types as small colored icons
+next to its name in every battle (Single, Double and Triple). OFF (the
+default) leaves the battle screen as it always was.
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped

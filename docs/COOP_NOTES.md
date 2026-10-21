@@ -444,3 +444,14 @@ slot) for one sprite's palette when it may be 16+ (the capture "ball darkens", b
 untinted). Reflections of sprites in 16+ keep their palette (field_effect_helpers.c ReflectionPaletteFor).
 Running out of sprites, palettes or tiles prints "[gfx] out of ..." (tests: UNEXPECT "[gfx] out of"); `mp pals`
 lists every used slot. Test: gfx_pals_triple.
+
+## Type icons (OPTIONS > TYPE ICONS)
+
+gSaveBlock2Ptr->optionsTypeIcons (one of the 4 spare bits after regionMapZoom; old saves read OFF). option_menu.c has
+eight rows 14 pixels apart (OPTION_ROW_H, 16 in the original). mp_typeicons.c draws 11x11 icons
+(tools/moemon_typeicons/gen.py -> mp_typeicon_gfx.h, BGR555 with bit 15 = drawn) over the frame from sdl2.c VDraw after
+the triple cards: on the name's line, right of a foe's healthbox (box sprite x + 60), left of yours (x - 23), top
+y - 12 (measured, same in singles and doubles); in triples beside the cards (MP_TriCards_Place). They follow the box's
+x2/y2 and invisible, fade with gPaletteFade and use gBattleMons types when its species matches the party Mon (link
+battles: the games that don't run the engine have no gBattleMons types, so species types there). No Fairy in Kai.
+Debug: `mp typeicons 1`, `mp options`; MOEMON_TYPEICON_DEBUG=1 logs box positions.
