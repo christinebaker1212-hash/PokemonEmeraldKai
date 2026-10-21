@@ -116,6 +116,8 @@ static u8 AsciiCharToGame(char c)
 }
 
 static void SendWelcome(u8 id);
+static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+static bool8 OwnPadding(void);
 static void ShowWelcome(u8 from, const u8 *text, u16 len);
 
 // Button icons in co-op text: "{A}", "{START}", "{LT}"... (mp_buttons.c draws the controller's)
@@ -272,6 +274,7 @@ static void LoadConfig(void)
     gMpConfig.enabled = TRUE;
     gMpConfig.trainerRange = 4;
     gMpConfig.autosaveMinutes = 5;
+    gMpConfig.trainerPadding = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -331,6 +334,7 @@ static void LoadConfig(void)
             int m = atoi(val);
             gMpConfig.autosaveMinutes = m < 0 ? 0 : (m > 60 ? 60 : m);
         }
+        else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
         else if (strcmp(key, "quick_stock") == 0)
@@ -396,12 +400,15 @@ void MP_SaveConfig(void)
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
         "; shown to friends who join a server you host (HOST A GAME > WELCOME NOTE); | starts line 2\n"
         "welcome = %s\n"
+        "; servers you host: co-op trainers get one extra Moemon, so Double / Triple Battles work\n"
+        "; against smaller teams (HOST A GAME > TEAM PADDING; 0 = off)\n"
+        "trainer_padding = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 16 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.lobby);
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -1044,6 +1051,15 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Emote_OnRelay(from, data, len);
     else if (data[0] == MPR_WELCOME)
         ShowWelcome(from, data + 1, len - 1);
+    else if (data[0] == MPR_RULES)
+    {
+        if (len >= 2 && !sLobby.creator)
+        {
+            sRoomPadding = data[1] != 0;
+            sRoomRulesHeard = TRUE;
+            MPNet_Log("room rules from player %d: team padding %s", from + 1, sRoomPadding ? "on" : "off");
+        }
+    }
     else if (data[0] == MPR_PING)
         MP_Ping_OnRelay(from, data, len);
     else if (data[0] == MPR_PHOTO)
@@ -1087,6 +1103,12 @@ static void SendWelcome(u8 id)
 {
     u8 buf[2 + sizeof(gMpConfig.welcome)];
     u16 len = strlen(gMpConfig.welcome);
+    if (sLobby.creator)
+    {
+        // the room's settings first (the host decides them for everyone)
+        u8 rules[2] = {MPR_RULES, OwnPadding()};
+        MP_SendRelay(id, rules, 2);
+    }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
         return;
     buf[0] = MPR_WELCOME;
@@ -1112,6 +1134,22 @@ static void ShowWelcome(u8 from, const u8 *text, u16 len)
 }
 
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
+
+// TEAM PADDING: the host's choice, heard when we joined (our own when we made the room,
+// before we hear it, or with nobody around)
+static bool8 OwnPadding(void)
+{
+    if (getenv("MOEMON_TRAINER_PADDING"))   // tests
+        return atoi(getenv("MOEMON_TRAINER_PADDING")) != 0;
+    return gMpConfig.trainerPadding;
+}
+
+bool8 MP_TrainerPadding(void)
+{
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomPadding;
+    return OwnPadding();
+}
 bool8 MP_Lobby_InRoom(void) { return sLobby.state == MP_LOBBY_IN_ROOM; }
 
 void MP_Lobby_SetOtherVersion(u16 version) { sOtherVersion = version; }
@@ -1227,6 +1265,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.hidden = hidden;
     sLobby.request = req;
     sLobby.creator = (req == REQ_CREATE);
+    sRoomRulesHeard = FALSE;
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
     {

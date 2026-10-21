@@ -517,15 +517,25 @@ static void EndChallenge(u8 reason)
     sCoop.accepted = FALSE;
 }
 
-// A Triple Battle needs a trainer who has 3+ Pokémon of their own (before the
-// co-op padding) and an ordinary one-trainer battle (not Twins and the like;
-// rematches and battles without intro text are fine)
+// How many Moemon the trainer brings to a co-op battle: their own, plus the one
+// TEAM PADDING adds (a host setting, MP_TrainerPadding). Never more than one extra.
+static u8 CoopTrainerTeamSize(u16 trainerId)
+{
+    u8 n = gTrainers[trainerId].partySize;
+    if (MP_TrainerPadding() && n < PARTY_SIZE)
+        n++;
+    return n;
+}
+
+// A Triple Battle needs a trainer with 3+ Moemon (TEAM PADDING counted) and an
+// ordinary one-trainer battle (not Twins and the like; rematches and battles
+// without intro text are fine). A Double Battle needs 2+.
 static void OnResolve(const u8 *data, u32 len);
 static void OnResolveDone(s8 from, const u8 *data, u32 len);
 
 static bool8 TripleEligible(void)
 {
-    return gTrainers[sCoop.trainerId].partySize >= 3
+    return CoopTrainerTeamSize(sCoop.trainerId) >= 3
         && (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
             || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
             || sCoop.mode == TRAINER_BATTLE_REMATCH);
@@ -673,8 +683,8 @@ static u8 TryWaitForThird(void)
         sCoop.requester2 = -1;
     if (!TripleEligible() || (!PlayerValid(sCoop.requester2) && !FriendAvailableExcept(sCoop.requester)))
     {
-        MPNet_Log("co-op: no triple (trainer %d, %d Pokemon, mode %d)", sCoop.trainerId,
-                  gTrainers[sCoop.trainerId].partySize, sCoop.mode);
+        MPNet_Log("co-op: no triple (trainer %d, %d Pokemon, padding %d, mode %d)", sCoop.trainerId,
+                  gTrainers[sCoop.trainerId].partySize, MP_TrainerPadding(), sCoop.mode);
         return THIRD_NONE;
     }
     sCoop.waitingThird = TRUE;   // a third who asks from now on is kept
@@ -710,7 +720,7 @@ static bool8 ShowNoTripleNote(void)
     if (TripleEligible() || !FriendAvailableExcept(sCoop.requester))
         return FALSE;
     HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-    MP_ReplaceFieldMessage(gTrainers[sCoop.trainerId].partySize < 3 ? sText_NoTripleFew : sText_NoTripleKind);
+    MP_ReplaceFieldMessage(CoopTrainerTeamSize(sCoop.trainerId) < 3 ? sText_NoTripleFew : sText_NoTripleKind);
     MPNet_Log("co-op: no triple with this trainer, told the player");
     return TRUE;
 }
@@ -748,7 +758,7 @@ static void Task_JoinCheck(u8 taskId)
         if (!PlayerValid(sCoop.requester))
         {
             // Nobody asked yet: offer to wait for a friend on this map
-            if (gTrainers[sCoop.trainerId].partySize <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+            if (CoopTrainerTeamSize(sCoop.trainerId) <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
             {
                 FinishJoinCheck(taskId);
                 break;
@@ -762,9 +772,9 @@ static void Task_JoinCheck(u8 taskId)
             tState = JOIN_WAIT_PRINT;
             break;
         }
-        if (gTrainers[sCoop.trainerId].partySize <= 1)
+        if (CoopTrainerTeamSize(sCoop.trainerId) <= 1)
         {
-            // "Hey, I only have one MOéMON!"
+            // "Hey, I only have one MOéMON!" (TEAM PADDING off)
             SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_ONE_MON);
             sCoop.requester = -1;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
@@ -1249,31 +1259,30 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
     return sCandidates[seed % count];
 }
 
+// TEAM PADDING (a host setting): the trainer gets exactly one extra Moemon in a
+// co-op battle, Double or Triple, never more. Off: the trainer's own team only.
 void MP_Coop_FinishTrainerParty(u16 trainerId)
 {
-    u8 n = 0, target, i, ace;
+    u8 n = 0, ace;
+    struct Pokemon *src;
+    u16 species;
     gMpEnemyLevelBonus = 0;
-    if (sCoop.count == 3)
-        return;   // a Triple Battle: the trainer's own team, never padded (3+ of their own, TripleEligible)
     while (n < PARTY_SIZE && GetMonData(&gEnemyParty[n], MON_DATA_SPECIES) != SPECIES_NONE)
         n++;
-    if (n < 2)
-        return;
-    target = MP_Coop_IsBossTrainer(trainerId) ? PARTY_SIZE : min(PARTY_SIZE, n + (n + 1) / 2);
-    if (target <= n)
-        return;
-    // The ace (the last one) moves to the end; new Moemon fill in before it,
-    // each one like one of the trainer's others (see PickFillerSpecies)
-    ace = target - 1;
-    gEnemyParty[ace] = gEnemyParty[n - 1];
-    for (i = n - 1; i < ace; i++)
+    if (!MP_TrainerPadding() || n == 0 || n >= PARTY_SIZE)
     {
-        struct Pokemon *src = &gEnemyParty[(i - (n - 1)) % (n - 1)];
-        u16 species = PickFillerSpecies(src, i, trainerId);
-        u8 level = GetMonData(src, MON_DATA_LEVEL);
-        CreateMon(&gEnemyParty[i], species, level, GetMonData(src, MON_DATA_ATK_IV), TRUE, Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+        MPNet_Log("coop: trainer %d party %d, no padding", trainerId, n);
+        return;
     }
-    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, target,
+    // The ace (the last one) moves to the end; the new Moemon goes in before it,
+    // like the one before the ace (or the ace itself when it's alone; see PickFillerSpecies)
+    ace = n;
+    gEnemyParty[ace] = gEnemyParty[n - 1];
+    src = n >= 2 ? &gEnemyParty[n - 2] : &gEnemyParty[ace];
+    species = PickFillerSpecies(src, n - 1, trainerId);
+    CreateMon(&gEnemyParty[n - 1], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
+              Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, n + 1,
               GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));

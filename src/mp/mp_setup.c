@@ -33,7 +33,7 @@
 #define FRAME_PAL    14
 #define TEXT_PAL     15
 #define LINE_H       16
-#define HOST_LINE_H  13   // the host form has one more row
+#define HOST_LINE_H  11   // the host form has more rows
 #define LIST_ROWS    5
 #define REFRESH_FRAMES (60 * 3)
 #define LOCAL_PORT_TRIES 5
@@ -64,6 +64,11 @@ static const u8 sColorDim[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLO
 static const u8 sColorDisabled[] = {TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_WHITE};
 static const u8 sColorAccent[] = {TEXT_COLOR_WHITE, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_GRAY};
 static const u8 sColorError[] = {TEXT_COLOR_WHITE, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_GRAY};
+// The host form's rows sit closer than a glyph cell: no background fill, so a row never covers the one above
+static const u8 sHostNormal[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sHostAccent[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sHostDisabled[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_WHITE};
+static const u8 sHostArrow[] = {CHAR_RIGHT_ARROW, EOS};
 static const u8 sColorTitle[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY};
 
 // Screens
@@ -91,6 +96,7 @@ enum {
     HOST_PASSWORD,
     HOST_NOTE,
     HOST_LISTED,
+    HOST_PADDING,
     HOST_START,
     HOST_BACK,
     HOST_ROWS
@@ -499,12 +505,13 @@ static const char *LobbyErrorText(u8 err)
 static void DrawHost(void)
 {
     u8 i;
-    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "START HOSTING", "BACK"};
+    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "TEAM PADDING", "START HOSTING", "BACK"};
     static const char *const help[] = {
         "The name your friends will look for.",
         "Optional. Friends need it to join.",
         "Optional. Two short lines your friends see when they join.",
         "NO hides it: friends must type the exact name.",
+        "ON: trainers get one extra Moemon when friends team up.",
         "Open the server and start playing!",
         "Go back.",
     };
@@ -513,20 +520,20 @@ static void DrawHost(void)
     for (i = 0; i < HOST_ROWS; i++)
     {
         u8 y = 1 + HOST_LINE_H * i;
-        Print(WIN_MAIN, labels[i], 14, y, sColorNormal);
+        Print(WIN_MAIN, labels[i], 14, y, sHostNormal);
         if (i == HOST_NAME)
-            PrintGame(WIN_MAIN, sSetup.roomName, 104, y, sColorAccent);
+            PrintGame(WIN_MAIN, sSetup.roomName, 104, y, sHostAccent);
         else if (i == HOST_PASSWORD)
         {
             if (sSetup.password[0] == EOS)
-                Print(WIN_MAIN, "(none)", 104, y, sColorDisabled);
+                Print(WIN_MAIN, "(none)", 104, y, sHostDisabled);
             else
-                PrintGame(WIN_MAIN, sSetup.password, 104, y, sColorAccent);
+                PrintGame(WIN_MAIN, sSetup.password, 104, y, sHostAccent);
         }
         else if (i == HOST_NOTE)
         {
             if (sSetup.note[0][0] == EOS && sSetup.note[1][0] == EOS)
-                Print(WIN_MAIN, "(none)", 104, y, sColorDisabled);
+                Print(WIN_MAIN, "(none)", 104, y, sHostDisabled);
             else
             {
                 u8 shown[WALDA_PHRASE_LENGTH + 4];
@@ -534,18 +541,21 @@ static void DrawHost(void)
                 StringCopy(shown, sSetup.note[0][0] != EOS ? sSetup.note[0] : sSetup.note[1]);
                 if (sSetup.note[0][0] != EOS && sSetup.note[1][0] != EOS)
                     StringAppend(shown, sDots);
-                PrintGame(WIN_MAIN, shown, 104, y, sColorAccent);
+                PrintGame(WIN_MAIN, shown, 104, y, sHostAccent);
             }
         }
-        else if (i == HOST_LISTED)
+        else if (i == HOST_LISTED || i == HOST_PADDING)
         {
             u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
-            PrintGame(WIN_MAIN, lt, 104, y, sColorDim);
-            Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sColorAccent);
-            PrintGame(WIN_MAIN, rt, 140, y, sColorDim);
+            PrintGame(WIN_MAIN, lt, 104, y, sHostNormal);
+            if (i == HOST_LISTED)
+                Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sHostAccent);
+            else
+                Print(WIN_MAIN, gMpConfig.trainerPadding ? "ON" : "OFF", 114, y, sHostAccent);
+            PrintGame(WIN_MAIN, rt, 140, y, sHostNormal);
         }
         if (i == sSetup.hostCursor)
-            DrawCursor(WIN_MAIN, y);
+            AddTextPrinterParameterized3(WIN_MAIN, FONT_NORMAL, 2, y, sHostNormal, TEXT_SKIP_DRAW, sHostArrow);
     }
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
@@ -922,6 +932,13 @@ static void HandleHost(void)
     else if (sSetup.hostCursor == HOST_LISTED && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
     {
         sSetup.listed = !sSetup.listed;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (sSetup.hostCursor == HOST_PADDING && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
+    {
+        gMpConfig.trainerPadding = !gMpConfig.trainerPadding;
+        MP_SaveConfig();   // remembered for the next server
         PlaySE(SE_SELECT);
         DrawScreen();
     }

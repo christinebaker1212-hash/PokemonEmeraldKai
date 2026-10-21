@@ -2,7 +2,8 @@
 //
 // A battle scene with the Moemon standing on its platform and a panel on the
 // right: PRESET, MATERIALIZATION, ENERGY COLOR, ENTRANCE PARTICLES, RECALL
-// EFFECT and SOUND ACCENT. The preview loops: the ball drops in and opens, the
+// EFFECT and SOUND ACCENT, then SAVE AS (MY PRESET 1-3, which PRESET then offers)
+// and APPLY TO PARTY. The preview loops: the ball drops in and opens, the
 // entrance plays, a short pause, then the recall. SELECT shows it from the
 // other side (as other players see it), START saves, B leaves.
 #include <stdio.h>
@@ -38,7 +39,10 @@ u8 AnimateBallOpenParticles(u8 x, u8 y, u8 priority, u8 subpriority, u8 ballId);
 u8 ItemIdToBallId(u16 ballItem);
 extern const u16 gBallOpenFadeColors[];
 
-enum { ROW_PRESET, ROW_FORM, ROW_COLOR, ROW_PART, ROW_RECALL, ROW_SOUND, ROW_COUNT };
+enum { ROW_PRESET, ROW_FORM, ROW_COLOR, ROW_PART, ROW_RECALL, ROW_SOUND, ROW_SAVEAS, ROW_PARTY, ROW_COUNT };
+#define ROW_SETTINGS ROW_SAVEAS   // rows before this have a value line under the label
+
+enum { ASK_NONE, ASK_SAVE, ASK_REPLACE, ASK_PARTY };
 
 #define WIN_PANEL 0
 #define WIN_INFO  1
@@ -72,7 +76,9 @@ struct Editor
     MainCallback exitCb;
     u8 row;
     bool8 front;      // as other players see it
-    bool8 asking;     // "save changes?"
+    u8 asking;        // ASK_*: a YES / NO question in the info box
+    u8 slot;          // SAVE AS: MY PRESET slot 0-2
+    char note[64];    // a line for the info box ("Saved as MY PRESET 1.")
     bool8 leaving;
     u16 species;
     u32 personality, otId;
@@ -193,18 +199,62 @@ static const char *const sSoundInfo[MPFX_SOUND_COUNT] = {
     "Something spooky.",
 };
 
+static u8 PartyMonCount(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            n++;
+    return n;
+}
+
 static void DrawInfo(void)
 {
     const char *text;
+    char buf[112];
     s8 preset;
+    struct MpBallFx saved;
     FillWindowPixelBuffer(WIN_INFO, PIXEL_FILL(TC_PANEL));
     FillWindowPixelRect(WIN_INFO, PIXEL_FILL(TC_EDGE), 0, 0, 112, 1);
+    if (sEd->asking != ASK_NONE)
+    {
+        if (sEd->asking == ASK_SAVE)
+            text = "Save the changes?";
+        else if (sEd->asking == ASK_REPLACE)
+            snprintf(buf, sizeof(buf), "Replace MY PRESET %d with this mix?", sEd->slot + 1), text = buf;
+        else
+            snprintf(buf, sizeof(buf), "Give this mix to all %d Moemon in your party?", PartyMonCount()), text = buf;
+        PrintWrapped(WIN_INFO, text, 4, 3, 104);
+        PrintOn(WIN_INFO, "{A} YES   {B} NO", 4, 33, TC_GOLD, FONT_SMALL);
+        PutWindowTilemap(WIN_INFO);
+        CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
+        return;
+    }
+    if (sEd->note[0])
+    {
+        PrintWrapped(WIN_INFO, sEd->note, 4, 3, 104);
+        PutWindowTilemap(WIN_INFO);
+        CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
+        return;
+    }
     switch (sEd->row)
     {
     case ROW_PRESET:
         preset = MP_BallFx_WhichPreset(&sEd->fx);
-        text = preset < 0 ? "Your own mix. Pick a preset with {LEFTRIGHT}, or change any part below." :
-               preset == 0 ? "Everything the way the game does it." : "A ready-made mix. Change any part below to make it your own.";
+        if (preset < 0 && MP_BallFx_WhichUserPreset(&sEd->fx) >= 0)
+            text = "One of your own presets. SAVE AS keeps up to three.";
+        else
+            text = preset < 0 ? "Your own mix. Pick a preset with {LEFTRIGHT}, or change any part below." :
+                   preset == 0 ? "Everything the way the game does it." : "A ready-made mix. Change any part below to make it your own.";
+        break;
+    case ROW_SAVEAS:
+        snprintf(buf, sizeof(buf), MP_BallFx_GetUserPreset(sEd->slot, &saved)
+                 ? "{A} keeps this mix as MY PRESET %d, replacing the one there."
+                 : "{A} keeps this mix as MY PRESET %d (empty) for any Moemon.", sEd->slot + 1);
+        text = buf;
+        break;
+    case ROW_PARTY:
+        text = "{A}: give this mix to every Moemon in your party.";
         break;
     case ROW_FORM:   text = sFormInfo[sEd->fx.form]; break;
     case ROW_COLOR:  text = "The color of its energy: beams, glows, motes, pixels and ink."; break;
@@ -221,6 +271,7 @@ static const char *RowLabel(u8 row)
 {
     static const char *const sLabels[ROW_COUNT] = {
         "PRESET", "MATERIALIZATION", "ENERGY COLOR", "ENTRANCE PARTICLES", "RECALL EFFECT", "SOUND ACCENT",
+        "SAVE AS", "APPLY TO PARTY",
     };
     return sLabels[row];
 }
@@ -231,8 +282,18 @@ static void RowValue(u8 row, char *out, u32 size)
     switch (row)
     {
     case ROW_PRESET:
-        preset = MP_BallFx_WhichPreset(&sEd->fx);
-        snprintf(out, size, "%s", preset >= 0 ? MP_BallFx_PresetName(preset) : "CUSTOM");
+        (void)preset;
+        MP_BallFx_EffectName(&sEd->fx, out, size);
+        break;
+    case ROW_SAVEAS:
+    {
+        struct MpBallFx saved;
+        (void)saved;
+        snprintf(out, size, "MY PRESET %d", sEd->slot + 1);
+        break;
+    }
+    case ROW_PARTY:
+        out[0] = 0;
         break;
     case ROW_FORM:   snprintf(out, size, "%s", MP_BallFx_FormName(sEd->fx.form)); break;
     case ROW_COLOR:
@@ -258,26 +319,34 @@ static void DrawPanel(void)
     Print("BALL EFFECTS", 6, 1, TC_GOLD, FONT_NORMAL);
     for (row = 0; row < ROW_COUNT; row++)
     {
-        u8 y = 18 + row * 18;
         bool8 on = (row == sEd->row) && !sEd->asking;
-        if (on)
-            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y - 1, 124, 18);
-        Print(RowLabel(row), 6, y - 2, on ? TC_GREY : TC_DIM, FONT_SMALL);
         RowValue(row, value, sizeof(value));
-        snprintf(line, sizeof(line), on ? "< %s >" : "%s", value);
-        Print(line, on ? 6 : 12, y + 6, TC_WHITE, FONT_SMALL);
+        if (row < ROW_SETTINGS)
+        {
+            // label, and the value under it
+            u8 y = 17 + row * 17;
+            if (on)
+                FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y - 1, 124, 17);
+            Print(RowLabel(row), 6, y - 2, on ? TC_GREY : TC_DIM, FONT_SMALL);
+            snprintf(line, sizeof(line), on ? "< %s >" : "%s", value);
+            Print(line, on ? 6 : 12, y + 6, TC_WHITE, FONT_SMALL);
+        }
+        else
+        {
+            // one line: SAVE AS < MY PRESET 1 >, APPLY TO PARTY
+            u8 y = 17 + ROW_SETTINGS * 17 + 2 + (row - ROW_SETTINGS) * 13;
+            if (on)
+                FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y - 1, 124, 13);
+            Print(RowLabel(row), 6, y - 2, on ? TC_GOLD : TC_DIM, FONT_SMALL);
+            if (value[0])
+            {
+                snprintf(line, sizeof(line), on ? "< %s >" : "%s", value);
+                Print(line, 44, y - 2, TC_WHITE, FONT_SMALL);
+            }
+        }
     }
-    if (sEd->asking)
-    {
-        Print("Save the changes?", 6, 128, TC_WHITE, FONT_SMALL);
-        Print("{A} YES   {B} NO", 6, 142, TC_WHITE, FONT_SMALL);
-    }
-    else
-    {
-        Print("{UPDOWN}{LEFTRIGHT} PICK  {A} REPLAY", 6, 128, TC_GREY, FONT_SMALL);
-        snprintf(line, sizeof(line), "{SELECT} %s {START} SAVE", sEd->front ? "BACK" : "FRONT");
-        Print(line, 6, 142, TC_GREY, FONT_SMALL);
-    }
+    snprintf(line, sizeof(line), "{SELECT} %s  {START} SAVE", sEd->front ? "BACK" : "FRONT");
+    Print(line, 6, 146, TC_GREY, FONT_SMALL);
     PutWindowTilemap(WIN_PANEL);
     CopyWindowToVram(WIN_PANEL, COPYWIN_FULL);
     DrawInfo();
@@ -463,16 +532,41 @@ static void PreviewFrame(void)
 static void ChangeValue(s8 d)
 {
     struct MpBallFx *fx = &sEd->fx;
-    s8 preset;
     switch (sEd->row)
     {
     case ROW_PRESET:
-        preset = MP_BallFx_WhichPreset(fx);
-        if (preset < 0)
-            preset = d > 0 ? -1 : 0;
-        preset = (preset + MP_BallFx_PresetCount() + d) % MP_BallFx_PresetCount();
-        MP_BallFx_Preset(preset, fx);
+    {
+        // the ready-made presets, then MY PRESET 1-3 (the saved ones)
+        u8 builtIn = MP_BallFx_PresetCount(), total = builtIn + MPFX_USER_PRESETS, tries;
+        struct MpBallFx user;
+        s16 at = MP_BallFx_WhichPreset(fx);
+        if (at < 0 && (at = MP_BallFx_WhichUserPreset(fx)) >= 0)
+            at += builtIn;
+        if (at < 0)
+            at = d > 0 ? -1 : 0;
+        for (tries = 0; tries < total; tries++)
+        {
+            at = (at + total + d) % total;
+            if (at < builtIn)
+            {
+                MP_BallFx_Preset(at, fx);
+                break;
+            }
+            if (MP_BallFx_GetUserPreset(at - builtIn, &user))
+            {
+                *fx = user;
+                break;
+            }
+        }
         break;
+    }
+    case ROW_SAVEAS:
+        sEd->slot = (sEd->slot + MPFX_USER_PRESETS + d) % MPFX_USER_PRESETS;
+        PlaySE(SE_SELECT);
+        DrawPanel();
+        return;   // the preview keeps playing
+    case ROW_PARTY:
+        return;
     case ROW_FORM:   fx->form = (fx->form + MPFX_FORM_COUNT + d) % MPFX_FORM_COUNT; break;
     case ROW_COLOR:  fx->color = (fx->color + MP_BALL_COLORS + d) % MP_BALL_COLORS; break;
     case ROW_PART:   fx->part = (fx->part + MPFX_PART_COUNT + d) % MPFX_PART_COUNT; break;
@@ -482,6 +576,32 @@ static void ChangeValue(s8 d)
     PlaySE(SE_SELECT);
     DrawPanel();
     StartPreview();
+}
+
+static void SavePreset(void)
+{
+    MP_BallFx_SaveUserPreset(sEd->slot, &sEd->fx);
+    snprintf(sEd->note, sizeof(sEd->note), "Saved as MY PRESET %d. Pick it in PRESET for any Moemon.", sEd->slot + 1);
+    MPNet_Log("ball fx: saved MY PRESET %d (%04x)", sEd->slot + 1, MP_BallFx_Pack(&sEd->fx));
+    PlaySE(SE_SAVE);
+}
+
+// Every Moemon in the party gets this mix (the one being edited too, when it's in the party)
+static void ApplyToParty(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            continue;
+        MP_BallFx_SetBoxMon(&gPlayerParty[i].box, &sEd->fx);
+        if (&gPlayerParty[i].box == sEd->target)
+            sEd->orig = sEd->fx;   // already saved: no "save the changes?" on the way out
+        n++;
+    }
+    snprintf(sEd->note, sizeof(sEd->note), "Done! %d Moemon in your party have this mix now.", n);
+    MPNet_Log("ball fx: applied to %d party Moemon", n);
+    PlaySE(SE_EXP_MAX);
 }
 
 static void Leave(bool8 save)
@@ -521,13 +641,37 @@ static void Task_Editor(u8 taskId)
     PreviewFrame();
     if (gPaletteFade.active)
         return;
-    if (sEd->asking)
+    if (sEd->asking == ASK_SAVE)
     {
         if (JOY_NEW(A_BUTTON))
             Leave(TRUE);
         else if (JOY_NEW(B_BUTTON))
             Leave(FALSE);
         return;
+    }
+    if (sEd->asking != ASK_NONE)
+    {
+        if (JOY_NEW(A_BUTTON))
+        {
+            if (sEd->asking == ASK_REPLACE)
+                SavePreset();
+            else
+                ApplyToParty();
+            sEd->asking = ASK_NONE;
+            DrawPanel();
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sEd->asking = ASK_NONE;
+            DrawPanel();
+        }
+        return;
+    }
+    if (sEd->note[0] && (gMain.newKeys & (A_BUTTON | B_BUTTON | DPAD_ANY | START_BUTTON | SELECT_BUTTON)))
+    {
+        sEd->note[0] = 0;   // any key clears the "saved" line (and still does its own thing)
+        DrawInfo();
     }
     if (JOY_NEW(DPAD_UP))
     {
@@ -545,6 +689,27 @@ static void Task_Editor(u8 taskId)
         ChangeValue(-1);
     else if (JOY_REPEAT(DPAD_RIGHT))
         ChangeValue(1);
+    else if (JOY_NEW(A_BUTTON) && sEd->row == ROW_SAVEAS)
+    {
+        struct MpBallFx saved;
+        if (MP_BallFx_GetUserPreset(sEd->slot, &saved) && memcmp(&saved, &sEd->fx, sizeof(saved)) != 0)
+        {
+            sEd->asking = ASK_REPLACE;
+            PlaySE(SE_SELECT);
+            DrawPanel();
+        }
+        else
+        {
+            SavePreset();
+            DrawPanel();
+        }
+    }
+    else if (JOY_NEW(A_BUTTON) && sEd->row == ROW_PARTY)
+    {
+        sEd->asking = ASK_PARTY;
+        PlaySE(SE_SELECT);
+        DrawPanel();
+    }
     else if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
@@ -563,7 +728,7 @@ static void Task_Editor(u8 taskId)
     {
         if (memcmp(&sEd->fx, &sEd->orig, sizeof(sEd->fx)) != 0)
         {
-            sEd->asking = TRUE;
+            sEd->asking = ASK_SAVE;
             PlaySE(SE_SELECT);
             DrawPanel();
         }

@@ -164,8 +164,8 @@ visuals for both screens must go through controller emits (sprite invisibility v
 Difficulty: trainer/wild levels were vanilla Emerald; route/gym trainers got +2..+6 per story segment, gym aces 15/20/27/33/36/41/47/51,
 E4 53-59, Wallace 62, land wild levels +3/+4 on under-leveled routes and dungeons, route trainers from badge 3 AI TRY_TO_FAINT
 (scripted from the audit; see git history). Co-op team-ups (master only): MP_Coop_PrepareTrainerParty sets gMpEnemyLevelBonus
-(+2, +3 for MP_Coop_IsBossTrainer) used by battle_main.c CreateNPCTrainerParty; MP_Coop_FinishTrainerParty pads the party
-(route n + (n+1)/2, bosses 6) before the ace with PickFillerSpecies (shares a type with a party mon, base stats within
+(+2, +3 for MP_Coop_IsBossTrainer) used by battle_main.c CreateNPCTrainerParty; MP_Coop_FinishTrainerParty adds exactly one
+Moemon when TEAM PADDING is on (doubles and triples, bosses too; MP_TrainerPadding) before the ace with PickFillerSpecies (shares a type with a party mon, base stats within
 15% (25% fallback), no legendaries/babies/Shedinja/Ditto, not already in the party, seeded by trainer+slot); MP_Coop_TrainerBattleBoost re-enables trainer items and smarter AI flags
 (battle_ai_script_commands.c); co-op wild mons +2 levels (BoostWild), gMpWildDoublePercent 60.
 
@@ -248,7 +248,8 @@ BATTLE_TYPE_DOUBLE set, BATTLER_SLOTS for "every battler" loops; recorded battle
 battler 2i (0 left, 2 right, 4 center) with party slots 2i-2i+1 (mp_coop.c SeatSize/SeatBase; doubles keep 3+3), the
 master runs 1/3/5 (enemy slots 0-2 out, 3-5 a shared pool). mp_battle.c MP_Battle_OpenLinkGroup = 3 games (per-link
 queues/sync/ready). Matchmaking: wild asks the two closest friends in grass (2 yes = triple, MP_RollExtraLandMon twice);
-trainers with partySize >= 3 (single modes) wait for a third after the first joins (TripleEligible, B = double now).
+trainers with 3+ Moemon (CoopTrainerTeamSize: partySize + 1 with TEAM PADDING; single modes) wait for a third after the
+first joins (TripleEligible, B = double now).
 Rules: target picker over six (battle_controller_player.c HandleInputChooseTargetTriple), Helping Hand on either ally,
 spread 3/4 (pokemon.c SpreadDamage), MpNextSpreadTarget, battle_util.c MpTripleChooseTarget, replacements
 (MP_TripleSwitchRange / MP_IsPartyIdOnSide). Cards: src/mp/mp_tricards.c over the frame (owner strip = seat color),
@@ -303,9 +304,9 @@ wrote through a NULL Alloc (crash on learning a fifth move, even in a single bat
 
 ## Triple Battle joining rules
 
-TripleEligible: the trainer's own partySize >= 3 and a one-trainer mode (SINGLE, CONTINUE_SCRIPT(_NO_MUSIC),
-SINGLE_NO_INTRO_TEXT, REMATCH). A triple's enemy party is never padded (MP_Coop_FinishTrainerParty returns for
-count 3; doubles still pad by half). Requests are sent automatically by TryAsk when a free player faces a challenged
+TripleEligible: CoopTrainerTeamSize >= 3 (the trainer's partySize, +1 with TEAM PADDING) and a one-trainer mode
+(SINGLE, CONTINUE_SCRIPT(_NO_MUSIC), SINGLE_NO_INTRO_TEXT, REMATCH). Doubles need CoopTrainerTeamSize >= 2 (else
+DECLINE_ONE_MON). Requests are sent automatically by TryAsk when a free player faces a challenged
 one, so two friends next to the host ask at once: a second request while the host is still answering the first
 (or before JOIN_WAIT_THIRD) is kept as requester2 (MPR_COOP_REQUEST handler) instead of DECLINE_BUSY, and only
 DECLINE_NO / DECLINE_ONE_MON set the asker's declinedBy (busy / too late can retry). TryWaitForThird waits when a
@@ -357,6 +358,10 @@ Pokémon's data, so trades, the shared PC and link battles carry them. src/mp/mp
 src/mp/mp_ballfx_editor.c (editor), art from tools/moemon_ballfx/gen.py -> src/mp/mp_ballfx_gfx.h (indexed pixels;
 16/17/18 = the energy color and its light / dark shade). Debug: `mp ballfx SLOT F P C R S` / `mp ballfx SLOT preset N`,
 `mp fxedit SLOT`, `mp party` prints fx. Logs: "ballfx: entrance form F part P", "ballfx: recall R".
+MY PRESET 1-3 live in the save's .coop file ("fxpreset1" = bit 30 used | sound << 16 | MP_BallFx_Pack;
+MP_BallFx_GetUserPreset / SaveUserPreset / WhichUserPreset, MP_BallFx_EffectName names a mix for the editor and the
+summary). Editor rows SAVE AS (ASK_REPLACE when the slot holds another mix) and APPLY TO PARTY (ASK_PARTY; party
+Moemon that aren't eggs); the questions and "saved" notes use the info box. Test: fx_presets.
 
 Two halves:
 - Bodies (the Moemon's own sprite, Task_FxBody): palette blends (silhouettes, glows), the OAM matrix (DOUBLE mode;
@@ -389,3 +394,13 @@ Followers: MpState.followerFx + followerFlags bits 1-3 sound, 4-5 sent-out count
 tile and it comes out with its effect (DEFAULT = MPFX_FORM_VANILLA). Called back: sLeavingState keeps it out until its
 recall has played. Tests: fx_coop, fx_triple, fx_switch, fx_follow.
 
+
+## TEAM PADDING (host setting)
+
+HOST A GAME > TEAM PADDING (mp_setup.c HOST_PADDING, gMpConfig.trainerPadding, ini trainer_padding, default on). The
+room creator sends MPR_RULES {u8 padding} to each friend who joins, right before the welcome note (mp_main.c
+SendWelcome); MP_TrainerPadding() is the host's value when heard, else ours (MOEMON_TRAINER_PADDING=0/1 overrides
+ours, for tests). The battle master decides everything with it: CoopTrainerTeamSize (Double needs 2, Triple 3) and
+MP_Coop_FinishTrainerParty (exactly +1 when on, never more; logs "coop: trainer N party a -> b" or "party a, no
+padding"). Protocol 26. Tests: tri_padded (Tommy 2 -> 3, Triple), coop_one_mon (Josh 1 -> 2, Double), tri_no_triple
+(padding off: Tommy's own two, Double, "room rules ... off" heard by BOB).

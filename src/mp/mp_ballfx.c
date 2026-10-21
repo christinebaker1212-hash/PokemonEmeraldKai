@@ -101,6 +101,54 @@ s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx)
     return -1;
 }
 
+// MY PRESET 1-3: the player's own mixes, kept with the save (<save>.coop, "fxpreset1" =
+// used bit 30 | sound << 16 | packed effect)
+#define USER_PRESET_USED (1 << 30)
+
+bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
+{
+    char key[16];
+    s32 v;
+    if (slot >= MPFX_USER_PRESETS)
+        return FALSE;
+    snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
+    v = MP_SaveData_Get(key);
+    if (!(v & USER_PRESET_USED))
+        return FALSE;
+    MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
+    return TRUE;
+}
+
+void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx)
+{
+    char key[16];
+    if (slot >= MPFX_USER_PRESETS)
+        return;
+    snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
+    MP_SaveData_Set(key, USER_PRESET_USED | ((fx->sound & 0x7) << 16) | MP_BallFx_Pack(fx));
+}
+
+s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx)
+{
+    struct MpBallFx p;
+    u8 i;
+    for (i = 0; i < MPFX_USER_PRESETS; i++)
+        if (MP_BallFx_GetUserPreset(i, &p) && memcmp(&p, fx, sizeof(p)) == 0)
+            return i;
+    return -1;
+}
+
+void MP_BallFx_EffectName(const struct MpBallFx *fx, char *out, u32 size)
+{
+    s8 i = MP_BallFx_WhichPreset(fx);
+    if (i >= 0)
+        snprintf(out, size, "%s", sPresets[i].name);
+    else if ((i = MP_BallFx_WhichUserPreset(fx)) >= 0)
+        snprintf(out, size, "MY PRESET %d", i + 1);
+    else
+        snprintf(out, size, "CUSTOM");
+}
+
 // filler: form 0-3, particles 4-7, energy color 8-11, recall 12-14; sound in the spare flag bits
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out)
 {

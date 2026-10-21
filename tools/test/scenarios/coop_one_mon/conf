@@ -1,0 +1,10 @@
+# TEAM PADDING on: Josh has one Moemon, so he gets one more and BOB can join ALICE for a Double Battle (1 -> 2)
+MODE=2
+WARP=11,3,4,13
+WARP_B=11,3,4,14
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("joins the battle against trainer" "party 1 -> 2" "co-op: battle over, outcome 1")
+EXPECT_B=("room rules from player 1: team padding on" "co-op: battle over, outcome 1")
+UNEXPECT_A=("only have one")

@@ -33,7 +33,9 @@ QUICK START
                     itself and shows an INVITE CODE like K7QM-3XPA.
                     It's copied, so just paste it to your friends.
                     WELCOME NOTE (optional) is two short lines your
-                    friends see when they join.
+                    friends see when they join. TEAM PADDING (ON at
+                    first) gives trainers one extra Moemon when friends
+                    team up against them (see TEAMING UP below).
      JOIN A GAME  - choose ENTER INVITE CODE... and type the code your
                     friend sent, then the password if they set one.
                     Friends on the same Wi-Fi also show up in the list.
@@ -110,12 +112,17 @@ TEAMING UP FOR A DOUBLE BATTLE
 * When your friend finishes reading the trainer's speech, they get:
   "<you> wants to join for a Double Battle! Is this OK?"  YES / NO
   This message can't be skipped or sped up, so nobody says yes by accident.
-* Trainers with only one Moemon refuse: "Hey, I only have one MOEMON!
-  Let's go one on one!" and the battle goes ahead normally.
+* TEAM PADDING (a host setting: HOST A GAME > TEAM PADDING, ON at first):
+  when friends team up against a trainer, the trainer gets one extra
+  Moemon, never more. That's why a trainer with just one Moemon can still
+  take on two of you, and one with two can take on three. With TEAM
+  PADDING OFF, trainers only ever use their own team: one with a single
+  Moemon refuses ("Hey, I only have one MOEMON! Let's go one on one!") and
+  it takes three of their own for a Triple Battle. Everyone in the server
+  plays by the host's setting.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
-  bring more Moemon (half again as many; bosses a full six), they use their
-  items and they choose their moves smarter.
+  use their items and they choose their moves smarter.
 * In co-op battles you can use healing items (Potions, status heals,
   Revives...) from the BAG on your own Moemon or your partner's, including
   ones waiting on the bench (your partner's are the gold boxes).
@@ -198,9 +205,10 @@ TRIPLE BATTLES (THREE PLAYERS)
   question keeps waiting, so mashing through text can't start it by
   accident). You keep waiting as long as anyone else is online, even if
   they're busy in a battle or a menu right now. Two friends
-  who ask at the same time both get in. Only trainers who have three or more
-  Moemon of their own do Triple Battles (their team is never padded out for
-  one, and two-trainer battles like the Twins stay Double Battles). When a
+  who ask at the same time both get in. Trainers with three or more Moemon
+  do Triple Battles, counting the extra one from TEAM PADDING (so with it
+  ON, two of their own are enough). Two-trainer battles like the Twins stay
+  Double Battles. When a
   friend joins and another is online but the trainer can't do a Triple
   Battle, you're told so and it's a Double Battle.
 * Each player brings two Moemon: the first two of your CO-OP TEAM (or your
@@ -495,6 +503,9 @@ HANDY EXTRAS (they save time, they don't make the game easier)
     RECALL EFFECT       classic beam, dissolve, reverse confetti, smoke
                         retreat, digital shutdown, curtain call
     SOUND ACCENT        auto, none, chime, pop, boom, fanfare, thunder, spooky
+    SAVE AS             keeps your mix as MY PRESET 1, 2 or 3 ({LEFTRIGHT} picks,
+                        A saves). PRESET then offers it for any Moemon.
+    APPLY TO PARTY      gives the mix to every Moemon in your party (A)
   The preview shows it on a battle field: the entrance, a short pause, then
   the recall. SELECT shows it from the other side, START saves, B goes back.
   Everything is free. The effect stays with the Moemon (trades too) and

@@ -1,0 +1,44 @@
+pressuntil A field 5000
+mp fxedit 0
+wait 60
+press RIGHT 2
+wait 10
+press DOWN 2
+wait 10
+press RIGHT 2
+wait 10
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 10
+shot saveas
+press A 2
+wait 20
+shot saved
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press LEFT 2
+wait 10
+press RIGHT 2
+wait 20
+shot mypreset
+press UP 2
+wait 10
+press A 2
+wait 10
+shot ask
+press A 2
+wait 20
+shot applied
+press START 2
+wait 120
+mp party
+quit

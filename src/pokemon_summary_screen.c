@@ -3132,11 +3132,11 @@ static void MpBall_Draw(void)
     else if (MpBall_CanEdit())
     {
         struct MpBallFx fx;
-        s8 preset;
+        char name[24];
         MP_BallFx_OfMon(&sMonSummaryScreen->currentMon, &fx);
-        preset = MP_BallFx_WhichPreset(&fx);
+        MP_BallFx_EffectName(&fx, name, sizeof(name));
         MpBall_Print("{A} CHANGE BALL", 4, 97, 0);
-        snprintf(line, sizeof(line), "{SELECT} EFFECT: %s", preset >= 0 ? MP_BallFx_PresetName(preset) : "CUSTOM");
+        snprintf(line, sizeof(line), "{SELECT} EFFECT: %s", name);
         MpBall_Print(line, 4, 113, 0);
     }
     else

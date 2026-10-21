@@ -1,0 +1,14 @@
+# TEAM PADDING on (the default): Tommy has 2 Moemon, so with the one extra he can take on three. BOB asks during his
+# speech, ALICE says YES, "BOB has joined! Wait for another?" comes up and CARL walks up meanwhile, which starts
+# the Triple Battle right away: Tommy 2 -> 3
+MODE=3
+WARP=11,3,3,10
+WARP_B=11,3,3,11
+WARP_C=11,3,1,10
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("asking whether to wait for a third player" "(and another: triple)" "party 2 -> 3" "co-op: battle over, outcome 1")
+EXPECT_B=("room rules from player 1: team padding on" "co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")

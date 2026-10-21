@@ -1,0 +1,5 @@
+# The ball effect editor: a custom mix saved as MY PRESET 1, picked again from PRESET (it shows as MY PRESET 1), then
+# APPLY TO PARTY gives it to all three party Moemon
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15,258:10"
+EXPECT_A=("ball fx: saved MY PRESET 1" "ball fx: applied to 3 party Moemon" "[test] party:")

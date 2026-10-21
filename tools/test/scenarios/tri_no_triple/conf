@@ -1,12 +1,13 @@
-# Tommy (2 Moemon) can't do a Triple Battle: ALICE challenges him with BOB behind her and CARL elsewhere in
-# the gym, so she's told so and BOB joins a Double Battle (the trainer's team is never padded to make a triple)
+# TEAM PADDING off (the host's setting, heard by the others): Tommy (2 Moemon) can't do a Triple Battle. ALICE
+# challenges him with BOB behind her and CARL elsewhere in the gym, so she's told so and BOB joins a Double Battle
+# against Tommy's own two
 MODE=3
 WARP=11,3,3,10
 WARP_B=11,3,3,11
 WARP_C=11,3,5,17
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40 MOEMON_TRAINER_PADDING=0"
 ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
 ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
-EXPECT_A=("no triple with this trainer, told the player" "co-op: battle over, outcome 1")
-EXPECT_B=("co-op: battle over, outcome 1")
+EXPECT_A=("no triple with this trainer, told the player" "party 2, no padding" "co-op: battle over, outcome 1")
+EXPECT_B=("room rules from player 1: team padding off" "co-op: battle over, outcome 1")
