@@ -298,7 +298,7 @@ EWRAM_DATA bool8 gAffineAnimsDisabled = FALSE;
 
 void ResetSpriteData(void)
 {
-    ResetOamRange(0, 128);
+    ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
     ResetAllSprites();
     ClearSpriteCopyRequests();
     ResetAffineAnimData();
@@ -646,9 +646,9 @@ void DestroySprite(struct Sprite *sprite)
     }
 }
 
-void ResetOamRange(u8 start, u8 end)
+void ResetOamRange(u16 start, u16 end)
 {
-    u8 i;
+    u16 i;
     for (i = start; i < end; i++)
         gMain.oamBuffer[i] = *(struct OamData *)&gDummyOamData;
 }

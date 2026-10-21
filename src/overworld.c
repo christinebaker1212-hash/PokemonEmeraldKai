@@ -2146,7 +2146,7 @@ static void ResetScreenForMapLoad(void)
 
     DmaClear16(3, PLTT + 2, PLTT_SIZE - 2);
     DmaClearLarge16(3, (void *)VRAM, VRAM_SIZE, 0x1000);
-    ResetOamRange(0, 128);
+    ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
     LoadOam();
 }
 
