@@ -678,6 +678,7 @@ static void UpdateFriendshipStepCounter(void)
             AdjustFriendship(mon, FRIENDSHIP_EVENT_WALKING);
             mon++;
         }
+        MP_Follower_OnWalkSteps();   // Moemon Co-op: the one walking with you gains more
     }
 }
 

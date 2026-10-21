@@ -396,6 +396,9 @@ Followers: MpState.followerFx + followerFlags bits 1-3 sound, 4-5 sent-out count
 22, protocol 25). A count change while the follower is around: a mini ball (particle) is tossed from its owner to its
 tile and it comes out with its effect (DEFAULT = MPFX_FORM_VANILLA). Called back: sLeavingState keeps it out until its
 recall has played. Tests: fx_coop, fx_triple, fx_switch, fx_follow.
+Follower friendship (mp_follower.c): +5 when chosen (JoyOfBeingChosen, once a day per personality, save key
+followjoy:DATE:PID) and +1 every 128 steps (MP_Follower_OnWalkSteps from field_control_avatar.c, on top of the party's
+50% walking roll). Test: follow_joy.
 
 
 ## TEAM PADDING (host setting)

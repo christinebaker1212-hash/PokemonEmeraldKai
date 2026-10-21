@@ -458,6 +458,48 @@ bool8 MP_Follower_IsFollowing(struct Pokemon *mon)
     return sLocalPersonality != 0 && GetMonData(mon, MON_DATA_PERSONALITY) == sLocalPersonality;
 }
 
+// Walking with you makes a Moemon happier: +FOLLOW_JOY friendship when it's chosen
+// (once a day per Moemon, so toggling it back and forth gains nothing) and +1 every
+// 128 steps on top of the party's own walking friendship (MP_Follower_OnWalkSteps)
+#define FOLLOW_JOY 5
+
+static void AddFriendship(struct Pokemon *mon, u8 amount)
+{
+    s32 f = GetMonData(mon, MON_DATA_FRIENDSHIP);
+    u8 v;
+    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+        return;
+    f += amount;
+    v = f > MAX_FRIENDSHIP ? MAX_FRIENDSHIP : f;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &v);
+}
+
+static void JoyOfBeingChosen(struct Pokemon *mon)
+{
+    char key[40];
+    snprintf(key, sizeof(key), "followjoy:%d:%08x", (int)MP_Today(), (unsigned)GetMonData(mon, MON_DATA_PERSONALITY));
+    if (MP_SaveData_Get(key))
+        return;
+    MP_SaveData_Set(key, 1);
+    AddFriendship(mon, FOLLOW_JOY);
+    MPNet_Log("follower: friendship +%d -> %d", FOLLOW_JOY, (int)GetMonData(mon, MON_DATA_FRIENDSHIP));
+}
+
+// Every 128 steps (field_control_avatar.c UpdateFriendshipStepCounter)
+void MP_Follower_OnWalkSteps(void)
+{
+    u8 i;
+    LoadLocalChoice();
+    if (sLocalPersonality == 0)
+        return;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY) == sLocalPersonality)
+        {
+            AddFriendship(&gPlayerParty[i], 1);
+            return;
+        }
+}
+
 // SELECT in the party menu. Returns TRUE when the Pokémon now follows.
 bool8 MP_Follower_Toggle(struct Pokemon *mon)
 {
@@ -475,6 +517,7 @@ bool8 MP_Follower_Toggle(struct Pokemon *mon)
         sLeavingPersonality = 0;
         sLocalPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
         sLocalToggleSeq = (sLocalToggleSeq + 1) & 3;   // counts sending out only
+        JoyOfBeingChosen(mon);
     }
     gMpConfig.followerPersonality = sLocalPersonality;
     MP_SaveConfig();

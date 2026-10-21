@@ -1,0 +1,5 @@
+# Choosing a Moemon to walk with you: +5 friendship, once a day per Moemon (calling it back and choosing it again gains
+# nothing more)
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("follower: friendship +5 -> 75" "[test] follow 0 -> 1")

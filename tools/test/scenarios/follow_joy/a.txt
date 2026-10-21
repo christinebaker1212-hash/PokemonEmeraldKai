@@ -1,0 +1,9 @@
+pressuntil A field 5000
+mp party
+mp follow 0
+wait 30
+mp follow 0
+wait 30
+mp follow 0
+wait 30
+quit
