@@ -109,8 +109,25 @@ enum {
 #define MP_EMOTE_QUESTION     2
 #define MP_EMOTE_HEART        3
 #define MP_EMOTE_NOTE         4   // the music note bubble (combos, chat log)
+// EMOTES 2-4 in the quick pick (art: tools/moemon_emotes/gen.py -> src/mp/mp_emote_gfx.h);
+// sent as MPR_SAY SAY_ICON, not in the player state (the nibble above only holds 1-3)
+#define MP_EMOTE_ANGRY        5
+#define MP_EMOTE_SWEAT        6
+#define MP_EMOTE_SLEEPY       7
+#define MP_EMOTE_LAUGH        8
+#define MP_EMOTE_IDEA         9
+#define MP_EMOTE_SPARKLE      10
+#define MP_EMOTE_SAD          11
+#define MP_EMOTE_DOTS         12
+#define MP_EMOTE_FIRE         13
+#define MP_EMOTE_CROWN        14
+#define MP_EMOTE_BALL         15
+#define MP_EMOTE_SKULL        16
+#define MP_EMOTE_FIRST_EXTRA  MP_EMOTE_ANGRY
+#define MP_EMOTE_COUNT        17
+#define MP_EMOTE_PAGES        4    // EMOTES, MOODS, REACT, HYPE
 
-#define MP_NUM_PHRASES   16   // custom phrases per player (4 pages of 4 in the quick pick)
+#define MP_NUM_PHRASES   32   // custom phrases per player (8 pages of 4 in the quick pick: MINE, MINE 2-8)
 #define MP_QUICK_STOCK_SLOTS 4   // the first MINE page offers ready-made phrases in empty slots
 #define MP_PHRASE_WORDS  4    // easy chat words per phrase
 
@@ -395,13 +412,18 @@ void MP_OpenMenu(void);
 enum { MP_MENU_PAGE_MAIN, MP_MENU_PAGE_LOOK, MP_MENU_PAGE_EMOTES, MP_MENU_PAGE_FRIENDS, MP_MENU_PAGE_CREATE };
 void MP_OpenMenuPage(u8 page);
 // Quick pick (emotes and phrases around the player): hold 0 LT/Q, 1 RT/E (let go to send), -1 stays open
-enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_MINE_LAST = MP_QUICK_PAGE_MINE + MP_NUM_PHRASES / 4 - 1, MP_QUICK_PAGE_PHRASES = 0xFF };
+enum { MP_QUICK_PAGE_EMOTES, MP_QUICK_PAGE_EMOTES_LAST = MP_EMOTE_PAGES - 1, MP_QUICK_PAGE_MINE, MP_QUICK_PAGE_MINE_LAST = MP_QUICK_PAGE_MINE + MP_NUM_PHRASES / 4 - 1, MP_QUICK_PAGE_PHRASES = 0xFF };
 void MP_OpenQuickPick(u8 page, s8 hold);
 void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel);
 bool8 MP_QuickPickOpen(void);
 // Battle emotes / phrases (mp_battlechat.c, mp_menu.c, mp_emote.c)
 enum { MP_QUICK_NONE, MP_QUICK_EMOTE, MP_QUICK_TEXT };
 enum { MP_BUBBLE_ICON_NONE, MP_BUBBLE_ICON_NOTE, MP_BUBBLE_ICON_HEART };
+#define MP_BUBBLE_ICON_EXTRA 16   // + (kind - MP_EMOTE_FIRST_EXTRA): the extra emotes' symbols
+void MP_Emote_Send(u8 kind);           // any MP_EMOTE_* over the player (and to everyone around)
+const char *MP_Emote_Name(u8 kind);    // "!  SURPRISED", "ANGRY"...
+const u8 *MP_Emote_ExtraGfx(u8 extra, u8 frame);   // 16x16 4bpp field icon frames (trainer_see.c)
+u8 MP_Emote_ExtraFrames(u8 extra);
 u8 MP_Quick_PageCount(void);
 bool8 MP_Quick_PageShown(u8 page);
 void MP_Quick_SetPhrasePage(u8 page);

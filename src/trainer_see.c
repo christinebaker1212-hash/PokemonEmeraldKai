@@ -817,6 +817,40 @@ void MP_StartNoteIcon(void)
         DestroySprite(&gSprites[spriteId]);
 }
 
+// Moemon Co-op: the extra emotes (MP_EMOTE_ANGRY...), popping like the others; a
+// second frame alternates every 8 frames (gFieldEffectArguments 0-2 as above)
+static EWRAM_DATA struct SpriteFrameImage sMpExtraImages[MP_EMOTE_COUNT - MP_EMOTE_FIRST_EXTRA][2] = {0};
+static const union AnimCmd sMpExtraAnimStill[] = {ANIMCMD_FRAME(0, 60), ANIMCMD_END};
+static const union AnimCmd sMpExtraAnimFlip[] = {
+    ANIMCMD_FRAME(0, 8), ANIMCMD_FRAME(1, 8), ANIMCMD_FRAME(0, 8), ANIMCMD_FRAME(1, 8),
+    ANIMCMD_FRAME(0, 8), ANIMCMD_FRAME(1, 8), ANIMCMD_FRAME(0, 8), ANIMCMD_FRAME(1, 4), ANIMCMD_END,
+};
+static const union AnimCmd *const sMpExtraAnimsStill[] = {sMpExtraAnimStill};
+static const union AnimCmd *const sMpExtraAnimsFlip[] = {sMpExtraAnimFlip};
+
+void MP_StartExtraEmoteIcon(u8 kind)
+{
+    u8 spriteId, slot, extra = kind - MP_EMOTE_FIRST_EXTRA;
+    struct Sprite *sprite;
+    if (kind < MP_EMOTE_FIRST_EXTRA || kind >= MP_EMOTE_COUNT)
+        return;
+    if (!MP_Emote_LoadUiPalette() || (slot = IndexOfSpritePaletteTag(MP_TAG_UI_PAL)) == 0xFF)
+        return;
+    spriteId = CreateSpriteAtEnd(&sSpriteTemplate_ExclamationQuestionMark, 0, 0, 0x52);
+    if (spriteId == MAX_SPRITES)
+        return;
+    sprite = &gSprites[spriteId];
+    SetIconSpriteData(sprite, FLDEFF_HEART_ICON, 0);
+    sMpExtraImages[extra][0].data = MP_Emote_ExtraGfx(extra, 0);
+    sMpExtraImages[extra][0].size = 0x80;
+    sMpExtraImages[extra][1].data = MP_Emote_ExtraGfx(extra, 1);
+    sMpExtraImages[extra][1].size = 0x80;
+    sprite->images = sMpExtraImages[extra];
+    sprite->anims = MP_Emote_ExtraFrames(extra) > 1 ? sMpExtraAnimsFlip : sMpExtraAnimsStill;
+    sprite->oam.paletteNum = slot;
+    StartSpriteAnim(sprite, 0);
+}
+
 static void SetIconSpriteData(struct Sprite *sprite, u16 fldEffId, u8 spriteAnimNum)
 {
     sprite->oam.priority = 1;

@@ -705,8 +705,11 @@ The other buttons change with what's on screen:
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).
-                    R2 pages (LB/RB): MINE (up to 16 of your own phrases,
-                    4 per page; MINE 2, 3 and 4 show up as you fill the
+                    L2 pages (LB/RB): EMOTES (! heart ? music), MOODS
+                    (angry, sweat, sleepy, laugh), REACT (idea, sparkle,
+                    sad, ...) and HYPE (fire, crown, POKe BALL, skull).
+                    R2 pages (LB/RB): MINE (up to 32 of your own phrases,
+                    4 per page; MINE 2 to 8 show up as you fill the
                     page before) and ready-made ones (GREET, MOVE, BATTLE,
                     MORE). An empty slot on the first MINE page offers a
                     ready-made phrase: X/Square swaps it, or pick one on

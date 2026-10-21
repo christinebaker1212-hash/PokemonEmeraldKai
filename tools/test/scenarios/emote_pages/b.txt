@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 128
+shot fire_b
+wait 72
+shot skull_b
+wait 120
+mp emotekind 8
+wait 20
+shot laugh_b
+wait 200
+quit

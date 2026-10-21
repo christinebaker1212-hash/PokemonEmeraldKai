@@ -138,6 +138,18 @@ static void Combo(u8 other, u8 kind)
         [MP_EMOTE_QUESTION]    = "HUH?! HUH?!",
         [MP_EMOTE_HEART]       = "TRUE FRIENDS!",
         [MP_EMOTE_NOTE]        = "DUET!",
+        [MP_EMOTE_ANGRY]       = "DOUBLE RAGE!!",
+        [MP_EMOTE_SWEAT]       = "NERVOUS WRECKS...",
+        [MP_EMOTE_SLEEPY]      = "NAP TIME...",
+        [MP_EMOTE_LAUGH]       = "LOL!! LOL!!",
+        [MP_EMOTE_IDEA]        = "GREAT MINDS!",
+        [MP_EMOTE_SPARKLE]     = "DAZZLING DUO!",
+        [MP_EMOTE_SAD]         = "GROUP HUG...",
+        [MP_EMOTE_DOTS]        = "AWKWARD...",
+        [MP_EMOTE_FIRE]        = "ON FIRE!!",
+        [MP_EMOTE_CROWN]       = "ROYAL COURT!",
+        [MP_EMOTE_BALL]        = "GOTTA CATCH 'EM!",
+        [MP_EMOTE_SKULL]       = "WE'RE DONE FOR!",
     };
     u8 text[32];
     char who[16], line[64];
@@ -167,6 +179,12 @@ void MP_Social_OnEmote(u8 id, u8 kind)
     PlayerName(id, who);
     if (kind < ARRAY_COUNT(sNames))
         MP_Social_Log(who, sNames[kind]);
+    else if (kind < MP_EMOTE_COUNT)
+    {
+        char name[24];
+        snprintf(name, sizeof(name), "(%s)", MP_Emote_Name(kind));
+        MP_Social_Log(who, name);
+    }
     sLastEmoteFrame[id] = sFrame;
     sLastEmoteKind[id] = kind;
     if (gMpLocalId < 0)

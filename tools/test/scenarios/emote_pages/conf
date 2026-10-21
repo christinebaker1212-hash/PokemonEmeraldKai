@@ -1,0 +1,8 @@
+# The extra emotes (EMOTES pages MOODS, REACT, HYPE): ALICE shows FIRE and SKULL, BOB sees both over her; the HYPE page
+# of the quick pick
+MODE=2
+WARP=0,31,23,7
+WARP_B=0,31,21,7
+TMO=120
+EXPECT_A=("[test] emote 13 FIRE" "[test] emote 16 SKULL" "emote 8 (LAUGH) from player 2")
+EXPECT_B=("emote 13 (FIRE) from player 1" "emote 16 (SKULL) from player 1")

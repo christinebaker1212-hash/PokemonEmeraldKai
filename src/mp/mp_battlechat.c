@@ -313,20 +313,23 @@ static void Close(bool8 send)
     kind = MP_Quick_Choice(sPick.page, sPick.sel, &emote, text, sizeof(text), FALSE);
     if (kind == MP_QUICK_EMOTE)
     {
-        static const char *const sEmoteText[] = {"!", "?"};
-        // ! and ? as text, the heart and the music note as pictures
+        // ! and ? as text, the heart, the music note and the extra emotes as pictures
         switch (emote)
         {
-        case 0:
-        case 1:
-            MP_AsciiToGame(text, sEmoteText[emote], 4);
+        case MP_EMOTE_EXCLAMATION:
+        case MP_EMOTE_QUESTION:
+            MP_AsciiToGame(text, emote == MP_EMOTE_EXCLAMATION ? "!" : "?", 4);
             MP_Emote_BattleSay(text, MP_BUBBLE_ICON_NONE);
             break;
-        case 2:
+        case MP_EMOTE_HEART:
             MP_Emote_BattleSay(NULL, MP_BUBBLE_ICON_HEART);
             break;
-        default:
+        case MP_EMOTE_NOTE:
             MP_Emote_BattleSay(NULL, MP_BUBBLE_ICON_NOTE);
+            break;
+        default:
+            if (emote >= MP_EMOTE_FIRST_EXTRA && emote < MP_EMOTE_COUNT)
+                MP_Emote_BattleSay(NULL, MP_BUBBLE_ICON_EXTRA + emote - MP_EMOTE_FIRST_EXTRA);
             break;
         }
     }

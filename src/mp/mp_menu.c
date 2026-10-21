@@ -1182,9 +1182,9 @@ void MP_OpenMenu(void)
 
 // ---------------------------------------------------------------------------
 // Quick pick: emotes and phrases around the player, one per direction (D-Pad or
-// left stick). Pages (LB/RB, L/R keys): EMOTES, MINE (your 16 phrases on up to 4
+// left stick). Pages (LB/RB, L/R keys): EMOTES, MINE (your 32 phrases on up to 8
 // pages; an empty slot on the first offers a ready-made phrase) and the
-// ready-made phrases in groups of 4. MINE 2-4 show once the page before has one.
+// ready-made phrases in groups of 4. MINE 2-8 show once the page before has one.
 //   Held (LT/RT, or Q/E on the keyboard): let go to send the picked one.
 //   Open (CO-OP > SOCIAL): A sends, B closes.
 // MINE: west button (SELECT) swaps an empty slot's ready-made phrase, north
@@ -1201,14 +1201,30 @@ void MP_OpenMenu(void)
 enum { QUICK_UP, QUICK_RIGHT, QUICK_DOWN, QUICK_LEFT, QUICK_BAR, QUICK_WINDOWS };
 #define QUICK_MINE_PAGES (MP_NUM_PHRASES / 4)
 #define QUICK_STOCK_FIRST (MP_QUICK_PAGE_MINE_LAST + 1)
-#define QUICK_PAGES (QUICK_STOCK_FIRST + 4)   // EMOTES, MINE 1-4, 4 groups of ready-made phrases
+#define QUICK_PAGES (QUICK_STOCK_FIRST + 4)   // EMOTES 1-4, MINE 1-8, 4 groups of ready-made phrases
 
-static u8 sQuickPhrasePage = MP_QUICK_PAGE_MINE;   // the last phrase page, remembered
+static u8 sQuickPhrasePage = MP_QUICK_PAGE_MINE;     // the last phrase page, remembered
+static u8 sQuickEmotePage = MP_QUICK_PAGE_EMOTES;    // ... and emote page
 static const u8 sQuickArrows[4] = {CHAR_UP_ARROW, CHAR_RIGHT_ARROW, CHAR_DOWN_ARROW, CHAR_LEFT_ARROW};
-// Emotes by direction: ! heart ? music
-static const u8 sQuickEmoteKey[4] = {0, 2, 1, 3};
-static const char *const sQuickEmoteNames[4] = {"!  SURPRISED", "HEART", "?  CONFUSED", "MUSIC"};
+// Emotes by page and direction (up, right, down, left)
+static const u8 sQuickEmotes[MP_EMOTE_PAGES][4] = {
+    {MP_EMOTE_EXCLAMATION, MP_EMOTE_HEART, MP_EMOTE_QUESTION, MP_EMOTE_NOTE},
+    {MP_EMOTE_ANGRY, MP_EMOTE_SWEAT, MP_EMOTE_SLEEPY, MP_EMOTE_LAUGH},
+    {MP_EMOTE_IDEA, MP_EMOTE_SPARKLE, MP_EMOTE_SAD, MP_EMOTE_DOTS},
+    {MP_EMOTE_FIRE, MP_EMOTE_CROWN, MP_EMOTE_BALL, MP_EMOTE_SKULL},
+};
+static const char *const sQuickEmotePageNames[MP_EMOTE_PAGES] = {"EMOTES", "MOODS", "REACT", "HYPE"};
 static const char *const sQuickStockNames[4] = {"GREET", "MOVE", "BATTLE", "MORE"};
+
+static bool8 IsEmotePage(u8 page)
+{
+    return page <= MP_QUICK_PAGE_EMOTES_LAST;
+}
+
+static u8 QuickEmote(u8 page, u8 dir)
+{
+    return sQuickEmotes[page % MP_EMOTE_PAGES][dir & 3];
+}
 
 static bool8 IsMinePage(u8 page)
 {
@@ -1229,7 +1245,7 @@ static bool8 MinePageUsed(u8 page)
     return FALSE;
 }
 
-// MINE 2-4 show up once the page before them has a phrase (or they have one)
+// MINE 2-8 show up once the page before them has a phrase (or they have one)
 static bool8 QuickPageShown(u8 page)
 {
     if (!IsMinePage(page) || page == MP_QUICK_PAGE_MINE)
@@ -1240,18 +1256,34 @@ static bool8 QuickPageShown(u8 page)
 // ---- For the battle pick (mp_battlechat.c): the same pages, sending only ----
 u8 MP_Quick_PageCount(void) { return QUICK_PAGES; }
 bool8 MP_Quick_PageShown(u8 page) { return QuickPageShown(page); }
-void MP_Quick_SetPhrasePage(u8 page) { if (page != MP_QUICK_PAGE_EMOTES) sQuickPhrasePage = page; }
+void MP_Quick_SetPhrasePage(u8 page)
+{
+    if (IsEmotePage(page))
+        sQuickEmotePage = page;
+    else
+        sQuickPhrasePage = page;
+}
+
+// The page to open: the last phrase page for MP_QUICK_PAGE_PHRASES, the last emote page for EMOTES
+static u8 QuickOpenPage(u8 page)
+{
+    if (page == MP_QUICK_PAGE_PHRASES)
+        return sQuickPhrasePage;
+    if (page == MP_QUICK_PAGE_EMOTES)
+        return sQuickEmotePage;
+    return page % QUICK_PAGES;
+}
 
 u8 MP_Quick_StartPage(u8 page)
 {
-    u8 p = (page == MP_QUICK_PAGE_PHRASES) ? sQuickPhrasePage : page % QUICK_PAGES;
+    u8 p = QuickOpenPage(page);
     return QuickPageShown(p) ? p : MP_QUICK_PAGE_MINE;
 }
 
 void MP_Quick_PageName(u8 page, char *out, int size)
 {
-    if (page == MP_QUICK_PAGE_EMOTES)
-        snprintf(out, size, "EMOTES");
+    if (IsEmotePage(page))
+        snprintf(out, size, "%s", sQuickEmotePageNames[page]);
     else if (IsMinePage(page))
         snprintf(out, size, page == MP_QUICK_PAGE_MINE ? "MINE" : "MINE %d", page - MP_QUICK_PAGE_MINE + 1);
     else
@@ -1261,16 +1293,16 @@ void MP_Quick_PageName(u8 page, char *out, int size)
 static int QuickStockIndex(u8 page, u8 dir);
 static bool8 QuickEmptySlot(u8 page, u8 dir);
 
-// What a direction holds: MP_QUICK_EMOTE (*emoteKey: 0 ! 1 ? 2 heart 3 music; display: its
-// name in out), MP_QUICK_TEXT (the game text in out) or MP_QUICK_NONE (an empty phrase slot)
+// What a direction holds: MP_QUICK_EMOTE (*emoteKey: MP_EMOTE_*; display: its name in out),
+// MP_QUICK_TEXT (the game text in out) or MP_QUICK_NONE (an empty phrase slot)
 u8 MP_Quick_Choice(u8 page, u8 dir, u8 *emoteKey, u8 *out, int outSize, bool8 display)
 {
     int stock;
-    if (page == MP_QUICK_PAGE_EMOTES)
+    if (IsEmotePage(page))
     {
-        *emoteKey = sQuickEmoteKey[dir];
+        *emoteKey = QuickEmote(page, dir);
         if (display && outSize > 0)
-            MP_AsciiToGame(out, sQuickEmoteNames[dir], outSize - 1);
+            MP_AsciiToGame(out, MP_Emote_Name(*emoteKey), outSize - 1);
         return MP_QUICK_EMOTE;
     }
     if (QuickEmptySlot(page, dir))
@@ -1310,7 +1342,7 @@ static int QuickStockIndex(u8 page, u8 dir)
     return ((page - QUICK_STOCK_FIRST) * 4 + dir) % MP_Emote_QuickPhraseCount();
 }
 
-// An empty phrase slot on MINE 2-4 (nothing to send yet)
+// An empty phrase slot on MINE 2-8 (nothing to send yet)
 static bool8 QuickEmptySlot(u8 page, u8 dir)
 {
     return IsMinePage(page) && page != MP_QUICK_PAGE_MINE && MP_Emote_PhraseIsEmpty(MineSlot(page, dir));
@@ -1323,9 +1355,9 @@ static void QuickChoiceText(u8 page, u8 dir, u8 *line1, u8 *line2, bool8 twoLine
     u8 text[160];
     u8 *lines[2] = {line1, line2};
     line1[0] = line2[0] = EOS;
-    if (page == MP_QUICK_PAGE_EMOTES)
+    if (IsEmotePage(page))
     {
-        MP_AsciiToGame(line1, sQuickEmoteNames[dir], 20);
+        MP_AsciiToGame(line1, MP_Emote_Name(QuickEmote(page, dir)), 20);
         return;
     }
     stock = QuickStockIndex(page, dir);
@@ -1394,10 +1426,10 @@ static void QuickDrawBar(s16 *data)
         for (i = 0; i < 2 + 4; i++)   // EMOTES, MINE (n), then the ready-made groups
         {
             char name[12];
-            bool8 on = i == 0 ? qPage == MP_QUICK_PAGE_EMOTES
+            bool8 on = i == 0 ? IsEmotePage(qPage)
                      : i == 1 ? IsMinePage(qPage) : qPage == QUICK_STOCK_FIRST + i - 2;
             if (i == 0)
-                snprintf(name, sizeof(name), "EMOTES");
+                snprintf(name, sizeof(name), "%s", sQuickEmotePageNames[IsEmotePage(qPage) ? qPage : sQuickEmotePage]);
             else if (i == 1 && IsMinePage(qPage) && qPage != MP_QUICK_PAGE_MINE)
                 snprintf(name, sizeof(name), "MINE %d", qPage - MP_QUICK_PAGE_MINE + 1);
             else if (i == 1)
@@ -1422,7 +1454,7 @@ static void QuickDrawBar(s16 *data)
         snprintf(hint, sizeof(hint), "%s  %s swap  %s edit", send, west, north);
     else if (IsMinePage(qPage))
         snprintf(hint, sizeof(hint), "%s  %s edit", send, north);
-    else if (qPage != MP_QUICK_PAGE_EMOTES)
+    else if (!IsEmotePage(qPage))
         snprintf(hint, sizeof(hint), "%s  %s pin to MINE", send, west);
     else
         snprintf(hint, sizeof(hint), "%s", send);
@@ -1463,8 +1495,8 @@ static void QuickPickClose(u8 taskId, bool8 send)
     if (!send || sel < 0)
         return;
     // After closing, so you see your own bubble
-    if (page == MP_QUICK_PAGE_EMOTES)
-        MP_Emote_Hotkey(sQuickEmoteKey[sel]);
+    if (IsEmotePage(page))
+        MP_Emote_Send(QuickEmote(page, sel));
     else if ((stock = QuickStockIndex(page, sel)) >= 0)
         MP_Emote_SayQuick(stock);
     else
@@ -1522,12 +1554,11 @@ static void Task_QuickPick(u8 taskId)
         do
             qPage = (qPage + (JOY_NEW(R_BUTTON) ? 1 : QUICK_PAGES - 1)) % QUICK_PAGES;
         while (!QuickPageShown(qPage));
-        if (qPage != MP_QUICK_PAGE_EMOTES)
-            sQuickPhrasePage = qPage;
+        MP_Quick_SetPhrasePage(qPage);
         PlaySE(SE_SELECT);
         QuickDrawAll(data);
     }
-    else if (qPage != MP_QUICK_PAGE_EMOTES && JOY_NEW(SELECT_BUTTON))
+    else if (!IsEmotePage(qPage) && JOY_NEW(SELECT_BUTTON))
     {
         // MINE: the next ready-made phrase for an empty slot; other pages: put this one on MINE
         if (qSel < 0 || (qPage == MP_QUICK_PAGE_MINE && !MP_Emote_PhraseIsEmpty(qSel))
@@ -1573,7 +1604,7 @@ void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel)
     MpTheme_Push();
     taskId = CreateTask(Task_QuickPick, 80);
     data = gTasks[taskId].data;
-    qPage = (page == MP_QUICK_PAGE_PHRASES) ? sQuickPhrasePage : page % QUICK_PAGES;
+    qPage = QuickOpenPage(page);
     if (!QuickPageShown(qPage))
         qPage = MP_QUICK_PAGE_MINE;
     qSel = sel;

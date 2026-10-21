@@ -459,6 +459,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         MP_Emote_Hotkey(n);
     }
+    else if (strcmp(cmd, "emotekind") == 0)
+    {
+        // emotekind K - any MP_EMOTE_* (5-16: the extra emotes)
+        int k = 0;
+        sscanf(arg, "%d", &k);
+        printf("[test] emote %d %s\n", k, MP_Emote_Name(k));
+        MP_Emote_Send(k);
+    }
+    else if (strcmp(cmd, "battleicon") == 0)
+    {
+        // battleicon K - a battle bubble with emote K (5-16) over our Moemon
+        int k = 0;
+        sscanf(arg, "%d", &k);
+        if (k >= MP_EMOTE_FIRST_EXTRA && k < MP_EMOTE_COUNT)
+            MP_Emote_BattleSay(NULL, MP_BUBBLE_ICON_EXTRA + k - MP_EMOTE_FIRST_EXTRA);
+    }
+    else if (strcmp(cmd, "quick") == 0)
+    {
+        // quick PAGE - the emote / phrase quick pick, open (EMOTES 0-3, MINE 4-11, stock 12-15)
+        int page = 0;
+        sscanf(arg, "%d", &page);
+        MP_OpenQuickPickAt(page, -1, -1);
+    }
     else if (strcmp(cmd, "social") == 0)
     {
         MP_Social_Open();

@@ -3,7 +3,7 @@
 //   !  ?  heart   the game's own field-effect icons, sent in the player state
 //   note ...      and phrases: a speech bubble, sent as a relay message
 //
-// Each player has 16 custom phrases made in the game's word editor (the one
+// Each player has 32 custom phrases made in the game's word editor (the one
 // used for the TRAINER profile), plus a list of quick phrases. Use them from
 // CO-OP menu > EMOTES, the number keys 1-8 or a controller's LT / RT hold menu.
 #include <stdio.h>
@@ -94,6 +94,28 @@ static const struct OamData sOam_Bubble = {
     .size = SPRITE_SIZE(64x32),
     .priority = 1,
 };
+
+#include "mp_emote_gfx.h"   // the extra emotes (tools/moemon_emotes/gen.py)
+
+const u8 *MP_Emote_ExtraGfx(u8 extra, u8 frame)
+{
+    return sExtraEmoteGfx[extra % MP_EXTRA_EMOTE_COUNT][frame & 1];
+}
+
+u8 MP_Emote_ExtraFrames(u8 extra)
+{
+    return sExtraEmoteFrameCount[extra % MP_EXTRA_EMOTE_COUNT];
+}
+
+const char *MP_Emote_Name(u8 kind)
+{
+    static const char *const sNames[MP_EMOTE_FIRST_EXTRA] = {"", "!  SURPRISED", "?  CONFUSED", "HEART", "MUSIC"};
+    if (kind < MP_EMOTE_FIRST_EXTRA)
+        return sNames[kind];
+    if (kind < MP_EMOTE_COUNT)
+        return sExtraEmoteNames[kind - MP_EMOTE_FIRST_EXTRA];
+    return "";
+}
 
 // 9x11 music note (1 = ink)
 static const char *const sNoteBitmap[] = {
@@ -304,7 +326,7 @@ static void BuildBubble(struct Bubble *b)
     if (b->note)
     {
         nLines = 1;
-        w = 9;
+        w = b->note >= MP_BUBBLE_ICON_EXTRA ? 10 : 9;
         lens[0] = 0;
     }
     else
@@ -367,7 +389,16 @@ static void BuildBubble(struct Bubble *b)
         Put(BUBBLE_W / 2, bottom + 3, COL_EDGE);
     }
 
-    if (b->note)
+    if (b->note >= MP_BUBBLE_ICON_EXTRA && b->note < MP_BUBBLE_ICON_EXTRA + MP_EXTRA_EMOTE_COUNT)
+    {
+        // an extra emote's symbol (white is the bubble's own fill)
+        const u8 (*sym)[10] = sExtraEmoteBubble[b->note - MP_BUBBLE_ICON_EXTRA];
+        for (y = 0; y < 10; y++)
+            for (x = 0; x < 10; x++)
+                if (sym[y][x] > 1)
+                    Put(left + 3 + x, top + 1 + y, sym[y][x]);
+    }
+    else if (b->note)
     {
         const char *const *bitmap = b->note == MP_BUBBLE_ICON_HEART ? sHeartBitmap : sNoteBitmap;
         int rows = b->note == MP_BUBBLE_ICON_HEART ? (int)ARRAY_COUNT(sHeartBitmap) : (int)ARRAY_COUNT(sNoteBitmap);
@@ -655,7 +686,8 @@ void MP_Emote_OnRemoteIcon(u8 id, struct ObjectEvent *obj, u8 kind)
     MP_Social_OnEmote(id, kind);
 }
 
-enum { SAY_TEXT, SAY_NOTE, SAY_BATTLE };
+enum { SAY_TEXT, SAY_NOTE, SAY_BATTLE, SAY_ICON };   // SAY_ICON: u8 kind (an extra emote)
+void MP_StartExtraEmoteIcon(u8 kind);
 static void ShowBattleBubble(u8 slot, u8 battler, const u8 *text, u8 icon);   // SAY_BATTLE: u8 icon, then the text
 
 static void SendSay(u8 kind, const u8 *text)
@@ -704,6 +736,23 @@ void MP_Emote_OnRelay(u8 from, const u8 *data, u16 len)
         MPNet_Log("battle emote from player %d over battler %d", from + 1, battler);
         if (battler < MAX_BATTLERS_COUNT)
             ShowBattleBubble(1 + from, battler, text, icon);
+        return;
+    }
+    if (data[1] == SAY_ICON)
+    {
+        u8 obj = MP_GetRemoteObjectEventId(from), kind = data[2];
+        if (kind < MP_EMOTE_FIRST_EXTRA || kind >= MP_EMOTE_COUNT)
+            return;
+        sBubbles[1 + from].timer = 0;   // the icon replaces their bubble
+        if (obj < OBJECT_EVENTS_COUNT && gObjectEvents[obj].active)
+        {
+            gFieldEffectArguments[0] = gObjectEvents[obj].localId;
+            gFieldEffectArguments[1] = gObjectEvents[obj].mapNum;
+            gFieldEffectArguments[2] = gObjectEvents[obj].mapGroup;
+            MP_StartExtraEmoteIcon(kind);
+        }
+        MPNet_Log("emote %d (%s) from player %d", kind, MP_Emote_Name(kind), from + 1);
+        MP_Social_OnEmote(from, kind);
         return;
     }
     if (data[1] == SAY_NOTE)
@@ -878,6 +927,40 @@ void MP_Emote_Icon(u8 kind)
         MP_Social_OnEmote(gMpLocalId, kind);
 }
 
+// Any emote kind: the game's icons go through the player state, the music note and
+// the extra ones as a relay message
+void MP_Emote_Send(u8 kind)
+{
+    if (kind == MP_EMOTE_NOTE)
+    {
+        MP_Emote_Note();
+        return;
+    }
+    if (kind < MP_EMOTE_FIRST_EXTRA)
+    {
+        MP_Emote_Icon(kind);
+        return;
+    }
+    if (kind >= MP_EMOTE_COUNT || !CanEmote())
+        return;
+    InitIfNeeded();
+    sBubbles[0].timer = 0;
+    {
+        struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+        gFieldEffectArguments[0] = obj->localId;
+        gFieldEffectArguments[1] = obj->mapNum;
+        gFieldEffectArguments[2] = obj->mapGroup;
+        MP_StartExtraEmoteIcon(kind);
+    }
+    if (MP_IsConnected())
+    {
+        u8 msg[4] = {MPR_SAY, SAY_ICON, kind, EOS};
+        MP_SendRelay(0xFF, msg, 4);
+    }
+    if (gMpLocalId >= 0)
+        MP_Social_OnEmote(gMpLocalId, kind);
+}
+
 void MP_Emote_Note(void)
 {
     if (!CanEmote())
@@ -918,7 +1001,7 @@ void MP_Emote_SayQuick(u8 i)
 }
 
 // ---------------------------------------------------------------------------
-// Custom phrases (16 of them, 4 words each, made in the word editor)
+// Custom phrases (32 of them, 4 words each, made in the word editor)
 
 bool8 MP_Emote_PhraseIsEmpty(u8 slot)
 {
