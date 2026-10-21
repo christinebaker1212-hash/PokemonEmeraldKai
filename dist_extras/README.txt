@@ -365,7 +365,17 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                Pity, kept per banner: an SR or better at least every 40
                pulls, an SSR or better every 100, a UR or better every 200.
                EX has no pity: pure luck. A 10-pull always has an R or
-               better, and everyone gets 5 free pulls every week (offline too).
+               better.
+               FREE PULLS (offline too, and they pile up if you don't use
+               them): a free 10-pull on STANDARD every week, and a free
+               pull on every banner each day you play (FREE x10 / FREE x1
+               in the menu).
+               MOEGATCHA TICKETS: one pull on any banner (TICKET in the
+               menu; they pile up too). People who give you an important
+               item in the story (key items, HMs, the gym leaders' TMs, the
+               EXP. SHARE) hand you a ticket with it, once per item. The
+               Mauville GAME CORNER's prize counter (the doll clerk) sells
+               them for 2,500 COINS.
                Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,

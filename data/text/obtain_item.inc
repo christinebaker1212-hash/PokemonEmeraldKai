@@ -1,6 +1,10 @@
 gText_ObtainedTheItem::
 	.string "Obtained the {STR_VAR_2}!$"
 
+gText_MpGotGatchaTicket::
+	.string "A MOEGATCHA TICKET came with it!\n"
+	.string "(One pull on any MOEGATCHA banner.)$"
+
 gText_TheBagIsFull::
 	.string "The BAG is full…$"
 

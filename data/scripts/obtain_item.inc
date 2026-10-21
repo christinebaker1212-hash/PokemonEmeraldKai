@@ -5,6 +5,25 @@ Std_ObtainItem::
 	additem ITEMID, AMOUNT
 	copyvar VAR_0x8007, VAR_RESULT
 	call EventScript_ObtainItemMessage
+	call_if_eq VAR_0x8007, TRUE, EventScript_MpGatchaTicket   @ Moemon Co-op
+	return
+
+@ Moemon Co-op (tests: mp giveitemscript ID): someone gives you item VAR_0x8004
+EventScript_MpDebugGiveItem::
+	lock
+	giveitem VAR_0x8004
+	release
+	end
+
+@ Moemon Co-op: an important item from someone (key items, HMs, gym leaders' TMs, EXP. SHARE)
+@ comes with a MOEGATCHA TICKET, once per item (MP_GatchaTicketForItem decides)
+EventScript_MpGatchaTicket::
+	special MP_GatchaTicketForItem
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MpGatchaTicketDone
+	playse SE_RG_BAG_POCKET
+	msgbox gText_MpGotGatchaTicket, MSGBOX_DEFAULT
+EventScript_MpGatchaTicketDone::
+	setvar VAR_RESULT, TRUE
 	return
 
 EventScript_ObtainItemMessage::

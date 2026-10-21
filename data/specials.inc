@@ -541,6 +541,8 @@ gSpecials::
 	def_special CloseDeptStoreElevatorWindow
 	def_special TrySetBattleTowerLinkType
 	def_special MP_Coop_JoinCheck
+	def_special MP_GatchaTicketForItem
+	def_special MP_GatchaBuyTicket
 	def_special MP_Rematch_Reward
 	def_special MP_Rematch_IsEndgame
 	def_special MP_Coop_PrepareLearnMove

@@ -1,0 +1,7 @@
+# MoeGatcha free pulls and tickets: a new save gets this week's free 10-pull (STANDARD) and today's free pull on every
+# banner; a MACH BIKE from someone comes with a MOEGATCHA TICKET (once: the same item again doesn't, a POTION doesn't);
+# the Game Corner's doll clerk sells one for 2,500 COINS; the menu shows FREE x10 / FREE x1 / TICKET and a free pull spins
+MODE=1
+WARP=10,3,14,3
+EXPECT_A=("gatcha: free 10-pull for the week" "gatcha: daily free pull on every banner" "gatcha: ticket for item 259 (1 tickets)" "[test] gatcha tickets 1 free 14" "gatcha: ticket bought (2 tickets)" "[test] gatcha tickets 2 free 14" "free 13")
+UNEXPECT_A=("ticket for item 13" "(3 tickets)")

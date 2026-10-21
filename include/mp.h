@@ -739,7 +739,11 @@ struct Pokemon;
 void MP_Follower_Update(void);
 bool8 MP_Follower_TryInteract(void);
 bool8 MP_Follower_Toggle(struct Pokemon *mon);
-void MP_Follower_OnWalkSteps(void);   // every 128 steps: the follower's extra friendship
+void MP_Follower_OnWalkSteps(void);
+void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
+s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
+void MP_Gatcha_AddTickets(s32 n);
+s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);
 u16 MP_Follower_LocalDex(bool8 *female);

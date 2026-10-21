@@ -22,6 +22,7 @@
 #include "mp.h"
 #include "bg.h"
 #include "decompress.h"
+#include "event_data.h"
 #include "event_object_lock.h"
 #include "field_screen_effect.h"
 #include "field_weather.h"
@@ -72,7 +73,11 @@ void MP_OpenMenuAtGatcha(void);
 #define PITY_SR_KEY   "gatcha:pity"     // pulls since the last SR+
 #define PITY_SSR_KEY  "gatcha:pityssr"  // ... SSR+
 #define PITY_UR_KEY   "gatcha:pity7ur"  // ... UR+ (new key: the old 5-rarity count doesn't carry over)
-#define FREE_WEEK_KEY "gatcha:freewk"   // week number + 1 of the last free 10-pull
+#define FREE_WEEK_KEY "gatcha:freewk"   // week number + 1 of the last free 10-pull given
+#define FREE10_KEY    "gatcha:free10"   // free 10-pulls in stock (STANDARD only, one a week)
+#define FREE1_KEY     "gatcha:free1b%d" // free single pulls in stock, per banner (one a day each)
+#define FREE1_DAY_KEY "gatcha:free1day" // the day (YYYYMMDD) the last daily free pulls were given
+#define TICKETS_KEY   "gatcha:tickets"  // MOEGATCHA TICKETS: one pull on any banner
 
 #define SR_PITY  40
 #define SSR_PITY 100
@@ -479,9 +484,104 @@ void MP_Gatcha_AddPulls(s32 n)
     MP_SaveData_Add(PULLS_KEY, n);
 }
 
-static bool8 FreeTenAvailable(void)
+// Free pulls pile up: a free 10-pull on STANDARD each week and a free pull on every
+// banner each day you play (MP_Gatcha_GrantFree, from MP_Events_Update and on opening)
+static s32 Free10Stock(void)
 {
-    return MP_SaveData_Get(FREE_WEEK_KEY) != MP_WeekNumber() + 1;
+    return MP_SaveData_Get(FREE10_KEY);
+}
+
+static s32 Free1Stock(u8 banner)
+{
+    char key[24];
+    snprintf(key, sizeof(key), FREE1_KEY, banner);
+    return MP_SaveData_Get(key);
+}
+
+static void AddFree1(u8 banner, s32 n)
+{
+    char key[24];
+    snprintf(key, sizeof(key), FREE1_KEY, banner);
+    MP_SaveData_Add(key, n);
+}
+
+s32 MP_Gatcha_Tickets(void)
+{
+    return MP_SaveData_Get(TICKETS_KEY);
+}
+
+void MP_Gatcha_AddTickets(s32 n)
+{
+    MP_SaveData_Add(TICKETS_KEY, n);
+}
+
+// Free pulls everyone has waiting (the CO-OP menu shows them)
+s32 MP_Gatcha_FreeWaiting(void)
+{
+    s32 n = Free10Stock() * 10;
+    u8 b;
+    for (b = 0; b < BANNER_COUNT; b++)
+        n += Free1Stock(b);
+    return n;
+}
+
+// Special (data/scripts/obtain_item.inc, after giveitem): does this item, given by
+// someone, come with a MOEGATCHA TICKET? Key items, HMs, the gym leaders' TMs and the
+// EXP. SHARE do, once each per save. The item: the last additem; VAR_RESULT = TRUE
+// when a ticket was given.
+void MP_GatchaTicketForItem(void)
+{
+    static const u16 sStoryItems[] = {
+        ITEM_TM39, ITEM_TM08, ITEM_TM34, ITEM_TM50, ITEM_TM42, ITEM_TM40, ITEM_TM04, ITEM_TM03,   // the 8 gym leaders
+        ITEM_EXP_SHARE,                                                                          // Devon's president
+    };
+    extern u16 gMpLastScriptItem;
+    u16 item = gMpLastScriptItem;   // the giveitem's additem
+    char key[24];
+    bool8 important = GetItemPocket(item) == POCKET_KEY_ITEMS || (item >= ITEM_HM01 && item <= ITEM_HM08);
+    u8 i;
+    gSpecialVar_Result = FALSE;
+    for (i = 0; i < ARRAY_COUNT(sStoryItems) && !important; i++)
+        important = item == sStoryItems[i];
+    if (!important)
+        return;
+    snprintf(key, sizeof(key), "ticketitem:%d", item);
+    if (MP_SaveData_Get(key))
+        return;
+    MP_SaveData_Set(key, 1);
+    MP_Gatcha_AddTickets(1);
+    MPNet_Log("gatcha: ticket for item %d (%d tickets)", item, (int)MP_Gatcha_Tickets());
+    gSpecialVar_Result = TRUE;
+}
+
+// Special: the Game Corner prize clerk sold a ticket (the coins are already taken)
+void MP_GatchaBuyTicket(void)
+{
+    MP_Gatcha_AddTickets(1);
+    MPNet_Log("gatcha: ticket bought (%d tickets)", (int)MP_Gatcha_Tickets());
+}
+
+void MP_Gatcha_GrantFree(void)
+{
+    static s32 sCheckedDay;
+    s32 today = MP_Today();
+    if (today == sCheckedDay)
+        return;
+    sCheckedDay = today;
+    if (MP_SaveData_Get(FREE_WEEK_KEY) != MP_WeekNumber() + 1)
+    {
+        MP_SaveData_Set(FREE_WEEK_KEY, MP_WeekNumber() + 1);
+        MP_SaveData_Add(FREE10_KEY, 1);
+        MPNet_Log("gatcha: free 10-pull for the week (%d in stock)", (int)Free10Stock());
+    }
+    if (MP_SaveData_Get(FREE1_DAY_KEY) != today)
+    {
+        u8 b;
+        MP_SaveData_Set(FREE1_DAY_KEY, today);
+        for (b = 0; b < BANNER_COUNT; b++)
+            AddFree1(b, 1);
+        MPNet_Log("gatcha: daily free pull on every banner (STANDARD %d in stock)", (int)Free1Stock(BANNER_STANDARD));
+    }
 }
 
 static const struct PrizeDef *PickFromPool(u8 rarity)
@@ -801,7 +901,7 @@ struct GatchaState
 {
     u8 state;
     u8 cursor;
-    u8 menuRows[4];
+    u8 menuRows[6];   // MENU_ROWS
     u8 menuCount;
     u16 timer;
     float pos, spinFrom, spinTo;
@@ -850,7 +950,7 @@ static u16 sBg1Hofs;
 static EWRAM_DATA u16 *sBg1Map = NULL;
 static EWRAM_DATA u16 *sBg3Map = NULL;
 
-enum { MENU_FREE, MENU_ONE, MENU_TEN, MENU_BACK };
+enum { MENU_FREE10, MENU_FREE1, MENU_TICKET, MENU_ONE, MENU_TEN, MENU_BACK, MENU_ROWS };
 
 // ---------------------------------------------------------------------------
 // Generated graphics
@@ -1751,10 +1851,13 @@ static void DrawHeader(void)
 
     FillWindowPixelBuffer(WIN_TITLE, PIXEL_FILL(0));
     PrintAscii(WIN_TITLE, FONT_NORMAL, 2, 1, 0, TC_GOLD, "MOEGATCHA");
-    snprintf(line, sizeof(line), "PULLS: %d", (int)MP_Gatcha_Pulls());
+    if (MP_Gatcha_Tickets() > 0)
+        snprintf(line, sizeof(line), "PULLS %d  TICKETS %d", (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Tickets());
+    else
+        snprintf(line, sizeof(line), "PULLS: %d", (int)MP_Gatcha_Pulls());
     {
-        u8 buf[32];
-        MP_AsciiToGame(buf, line, 30);
+        u8 buf[40];
+        MP_AsciiToGame(buf, line, 38);
         Print(WIN_TITLE, FONT_NORMAL, 28 * 8 - 4 - GetStringWidth(FONT_NORMAL, buf, 0), 1, 0, TC_WHITE, buf);
     }
     CopyWindowToVram(WIN_TITLE, COPYWIN_FULL);
@@ -1816,8 +1919,12 @@ static void DrawNameLine(const struct PrizeDef *def, u8 rarity, u32 amount, bool
 static void BuildMenu(void)
 {
     sG->menuCount = 0;
-    if (FreeTenAvailable())   // online or not
-        sG->menuRows[sG->menuCount++] = MENU_FREE;
+    if (sBanner == BANNER_STANDARD && Free10Stock() > 0)
+        sG->menuRows[sG->menuCount++] = MENU_FREE10;
+    if (Free1Stock(sBanner) > 0)
+        sG->menuRows[sG->menuCount++] = MENU_FREE1;
+    if (MP_Gatcha_Tickets() > 0)
+        sG->menuRows[sG->menuCount++] = MENU_TICKET;
     sG->menuRows[sG->menuCount++] = MENU_ONE;
     sG->menuRows[sG->menuCount++] = MENU_TEN;
     sG->menuRows[sG->menuCount++] = MENU_BACK;
@@ -1942,38 +2049,45 @@ static void SwitchBanner(s8 dir)
     ShowPickupPic();
     BeginNormalPaletteFade(PALETTES_BG, 0, 8, 0, sBanners[sBanner].accent ? sBanners[sBanner].accent : RGB(31, 31, 31));
     DrawHeader();
+    BuildMenu();   // free pulls differ per banner
     DrawMenu();
 }
 
 static void DrawMenu(void)
 {
     static const char *const sLabels[] = {
-        [MENU_FREE] = "WEEKLY +5 PULLS",
-        [MENU_ONE]  = "PULL x1",
-        [MENU_TEN]  = "PULL x10",
-        [MENU_BACK] = "BACK",
+        [MENU_FREE10] = "FREE x10",
+        [MENU_FREE1]  = "FREE x1",
+        [MENU_TICKET] = "TICKET",
+        [MENU_ONE]    = "PULL x1",
+        [MENU_TEN]    = "PULL x10",
+        [MENU_BACK]   = "BACK",
     };
-    static const char *const sInfo[] = {
-        [MENU_FREE] = "Free every week: 5 pulls.",
-        [MENU_ONE]  = "Uses 1 pull.",
-        [MENU_TEN]  = "Uses 10 pulls. One RARE+ guaranteed!",
-        [MENU_BACK] = "Back to the CO-OP menu.",
-    };
-    u8 i;
+    char info[80];
+    u8 i, row = sG->menuRows[sG->cursor];
     FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
-    // Two columns of two
+    // Three columns of two
     for (i = 0; i < sG->menuCount; i++)
     {
         bool8 sel = i == sG->cursor;
-        u8 row = sG->menuRows[i];
-        int x = (i % 2) * 96 + 8, y = (i / 2) * 12 + 2;
-        u8 fg = sel ? TC_GOLD : (row == MENU_FREE ? TC_RARITY + R_SR : TC_WHITE);
-        if ((row == MENU_ONE && MP_Gatcha_Pulls() < 1) || (row == MENU_TEN && MP_Gatcha_Pulls() < 10))
+        u8 r = sG->menuRows[i];
+        int x = (i % 3) * 64 + 2, y = (i / 3) * 12 + 2;
+        u8 fg = sel ? TC_GOLD : (r <= MENU_TICKET ? TC_RARITY + R_SR : TC_WHITE);
+        if ((r == MENU_ONE && MP_Gatcha_Pulls() < 1) || (r == MENU_TEN && MP_Gatcha_Pulls() < 10))
             fg = sel ? TC_GOLD : TC_DIM;
         PrintAscii(WIN_MENU, FONT_NORMAL, x, y - 1, TC_PANEL, fg, sel ? ">" : "");
-        PrintAscii(WIN_MENU, FONT_NORMAL, x + 10, y - 1, TC_PANEL, fg, sLabels[row]);
+        PrintAscii(WIN_MENU, FONT_NORMAL, x + 9, y - 1, TC_PANEL, fg, sLabels[r]);
     }
-    PrintAscii(WIN_MENU, FONT_SMALL, 8, 28, TC_PANEL, TC_GREY, sInfo[sG->menuRows[sG->cursor]]);
+    switch (row)
+    {
+    case MENU_FREE10: snprintf(info, sizeof(info), "Free 10-pull, one a week. Waiting: %d", (int)Free10Stock()); break;
+    case MENU_FREE1:  snprintf(info, sizeof(info), "Free pull, one a day per banner. Waiting: %d", (int)Free1Stock(sBanner)); break;
+    case MENU_TICKET: snprintf(info, sizeof(info), "TICKET: 1 pull on any banner. You have %d.", (int)MP_Gatcha_Tickets()); break;
+    case MENU_ONE:    snprintf(info, sizeof(info), "Uses 1 pull."); break;
+    case MENU_TEN:    snprintf(info, sizeof(info), "Uses 10 pulls. One RARE+ guaranteed!"); break;
+    default:          snprintf(info, sizeof(info), "Back to the CO-OP menu."); break;
+    }
+    PrintAscii(WIN_MENU, FONT_SMALL, 8, 28, TC_PANEL, TC_GREY, info);
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
     {
         // ODDS%  N 52  U 28  R 13.5  SR 5  SSR 1.2  UR .25  EX .05
@@ -2821,11 +2935,15 @@ static void Task_Gatcha(u8 taskId)
             SwitchBanner(JOY_NEW(R_BUTTON) ? 1 : -1);
         else if (JOY_NEW(DPAD_ANY))
         {
-            u8 c = sG->cursor;
-            if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
-                c ^= 1;
+            // three columns of two
+            u8 c = sG->cursor, col = c % 3, line = c / 3;
+            if (JOY_NEW(DPAD_LEFT))
+                col = (col + 2) % 3;
+            else if (JOY_NEW(DPAD_RIGHT))
+                col = (col + 1) % 3;
             else
-                c ^= 2;
+                line ^= 1;
+            c = line * 3 + col;
             if (c >= sG->menuCount)
                 c = sG->menuCount - 1;
             if (c != sG->cursor)
@@ -2845,14 +2963,23 @@ static void Task_Gatcha(u8 taskId)
         else if (JOY_NEW(A_BUTTON))
         {
             u8 row = sG->menuRows[sG->cursor];
-            if (row == MENU_FREE)
+            if (row == MENU_FREE10 && sBanner == BANNER_STANDARD && Free10Stock() > 0)
             {
-                MP_SaveData_Set(FREE_WEEK_KEY, MP_WeekNumber() + 1);
-                MP_Gatcha_AddPulls(5);
+                MP_SaveData_Add(FREE10_KEY, -1);
                 PlaySE(SE_SHOP);
-                BuildMenu();
-                DrawMenu();
-                DrawHelp("+5 pulls! See you next week.");
+                StartSpin(10);
+            }
+            else if (row == MENU_FREE1 && Free1Stock(sBanner) > 0)
+            {
+                AddFree1(sBanner, -1);
+                PlaySE(SE_SHOP);
+                StartSpin(1);
+            }
+            else if (row == MENU_TICKET && MP_Gatcha_Tickets() > 0)
+            {
+                MP_Gatcha_AddTickets(-1);
+                PlaySE(SE_SHOP);
+                StartSpin(1);
             }
             else if (row == MENU_ONE && MP_Gatcha_Pulls() >= 1)
             {
@@ -3178,6 +3305,7 @@ static void CB2_InitGatcha(void)
     sG->arrowBottom = CreateSprite(&arrowT, REEL_CX, REEL_TOP + 38, 0);
     gSprites[sG->arrowBottom].invisible = TRUE;   // the name panel sits right under the reel
 
+    MP_Gatcha_GrantFree();
     BuildMenu();
     DrawHeader();
     DrawMenu();

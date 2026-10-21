@@ -22,6 +22,7 @@
 #include "pokemon.h"
 #include "constants/moves.h"
 #include "event_data.h"
+#include "coins.h"
 #include "overworld.h"
 #include "money.h"
 #include "item.h"
@@ -348,6 +349,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int n = -1;
         sscanf(arg, "%d", &n);
         MP_Gatcha_SetPickup(n);
+    }
+    else if (strcmp(cmd, "giveitemscript") == 0)
+    {
+        // giveitemscript ID - an NPC-style giveitem (the obtain message, a MOEGATCHA TICKET for important items)
+        extern const u8 EventScript_MpDebugGiveItem[];
+        int id = 0;
+        sscanf(arg, "%d", &id);
+        VarSet(VAR_0x8004, id);
+        ScriptContext_SetupScript(EventScript_MpDebugGiveItem);
+    }
+    else if (strcmp(cmd, "additem") == 0)
+    {
+        // additem ID N - straight into the bag
+        int id = 0, n = 1;
+        sscanf(arg, "%d %d", &id, &n);
+        AddBagItem(id, n);
+    }
+    else if (strcmp(cmd, "coins") == 0)
+    {
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        SetCoins(n);
+    }
+    else if (strcmp(cmd, "gatchastock") == 0)
+    {
+        printf("[test] gatcha tickets %d free %d\n", (int)MP_Gatcha_Tickets(), (int)MP_Gatcha_FreeWaiting());
     }
     else if (strcmp(cmd, "gatcharig") == 0)
     {

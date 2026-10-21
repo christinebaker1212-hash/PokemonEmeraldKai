@@ -490,12 +490,15 @@ bool8 ScrCmd_random(struct ScriptContext *ctx)
     return FALSE;
 }
 
+u16 gMpLastScriptItem;   // Moemon Co-op
+
 bool8 ScrCmd_additem(struct ScriptContext *ctx)
 {
     u16 itemId = VarGet(ScriptReadHalfword(ctx));
     u32 quantity = VarGet(ScriptReadHalfword(ctx));
 
     gSpecialVar_Result = AddBagItem(itemId, (u8)quantity);
+    gMpLastScriptItem = itemId;   // Moemon Co-op: MP_GatchaTicketForItem (VAR_0x8000 changes during the message)
     return FALSE;
 }
 

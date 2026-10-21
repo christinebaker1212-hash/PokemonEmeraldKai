@@ -1214,7 +1214,14 @@ s32 MP_Events_StreakDays(void)
 // Every frame (from MP_FrameUpdate) while in a room
 void MP_Events_Update(void)
 {
+    static u16 sFreeTimer;
     bool8 inRoom = Online() && MP_IsInOverworld();
+    // the MoeGatcha's free pulls for today / this week (they pile up)
+    if (++sFreeTimer >= 600 && MP_IsInOverworld())
+    {
+        sFreeTimer = 0;
+        MP_Gatcha_GrantFree();
+    }
     if (!Online())
     {
         // Playing alone: the day's goals still count (on the save)

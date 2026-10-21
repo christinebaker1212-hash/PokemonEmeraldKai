@@ -8,6 +8,7 @@ MauvilleCity_GameCorner_MapScripts::
 	.set TM_THUNDERBOLT_COINS, 4000
 	.set TM_ICE_BEAM_COINS, 4000
 	.set DOLL_COINS, 1000
+	.set GATCHA_TICKET_COINS, 2500   @ Moemon Co-op
 
 	.set COINS_PRICE_50,  1000
 	.set COINS_PRICE_500, 10000
@@ -126,8 +127,23 @@ MauvilleCity_GameCorner_EventScript_ChooseDollPrize::
 	case 0, MauvilleCity_GameCorner_EventScript_TreeckoDoll
 	case 1, MauvilleCity_GameCorner_EventScript_TorchicDoll
 	case 2, MauvilleCity_GameCorner_EventScript_MudkipDoll
-	case 3, MauvilleCity_GameCorner_EventScript_CancelDollSelect
+	case 3, MauvilleCity_GameCorner_EventScript_GatchaTicket
+	case 4, MauvilleCity_GameCorner_EventScript_CancelDollSelect
 	goto MauvilleCity_GameCorner_EventScript_CancelDollSelect
+	end
+
+@ Moemon Co-op: a MOEGATCHA TICKET (one pull on any banner) for coins
+MauvilleCity_GameCorner_EventScript_GatchaTicket::
+	msgbox MauvilleCity_GameCorner_Text_MpTicketConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, MauvilleCity_GameCorner_EventScript_CancelDollSelect
+	checkcoins VAR_TEMP_2
+	goto_if_lt VAR_TEMP_2, GATCHA_TICKET_COINS, MauvilleCity_GameCorner_EventScript_NotEnoughCoinsForDoll
+	removecoins GATCHA_TICKET_COINS
+	special MP_GatchaBuyTicket
+	updatecoinsbox 1, 1
+	playse SE_SHOP
+	msgbox MauvilleCity_GameCorner_Text_MpTicketBought, MSGBOX_DEFAULT
+	goto MauvilleCity_GameCorner_EventScript_ReturnToChooseDollPrize
 	end
 
 MauvilleCity_GameCorner_EventScript_TreeckoDoll::
@@ -776,3 +792,11 @@ MauvilleCity_GameCorner_Text_CantPlayWithNoCoinCase:
 	.string "You can't play if you don't have\n"
 	.string "a COIN CASE.$"
 
+
+MauvilleCity_GameCorner_Text_MpTicketConfirm:
+	.string "A MOEGATCHA TICKET for 2,500 COINS?\n"
+	.string "It's good for one pull on any banner.$"
+
+MauvilleCity_GameCorner_Text_MpTicketBought:
+	.string "Here's your MOEGATCHA TICKET!\n"
+	.string "Use it in the MOEGATCHA (CO-OP menu).$"

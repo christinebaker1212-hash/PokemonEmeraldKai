@@ -1,0 +1,55 @@
+pressuntil A field 5000
+wait 650
+mp giveitemscript 259
+pressuntillog A 3000 gatcha: ticket for item 259
+mash A 40 10
+wait 60
+mp gatchastock
+mp giveitemscript 259
+mash A 50 10
+wait 60
+mp giveitemscript 13
+mash A 50 10
+wait 60
+mp additem 260 1
+mp coins 3000
+press UP 2
+wait 10
+press A 2
+wait 400
+press A 2
+wait 400
+press A 2
+wait 300
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+shot clerk
+watchlog gatcha: ticket bought
+press A 2
+wait 400
+press A 2
+pressuntillog A 1500
+wait 100
+mp gatchastock
+press DOWN 2
+wait 8
+press A 2
+wait 60
+mash B 10 20
+wait 60
+mp gatcha
+wait 120
+shot gatcha_menu
+press RIGHT 2
+wait 10
+shot free1
+press A 2
+wait 30
+mash A 40 15
+wait 60
+mp gatchastock
+quit

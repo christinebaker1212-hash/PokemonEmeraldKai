@@ -666,6 +666,7 @@ const u8 gText_BlackFlute2[] = _("BLACK FLUTE");
 const u8 gText_GlassChair[] = _("GLASS CHAIR");
 const u8 gText_GlassDesk[] = _("GLASS DESK");
 const u8 gText_TreeckoDollAndPrice[] = _("TREECKO DOLL 1,000 COINS");
+const u8 gText_MpGatchaTicketAndPrice[] = _("GATCHA TICKET 2,500 COINS");   // Moemon Co-op
 const u8 gText_TorchicDollAndPrice[] = _("TORCHIC DOLL 1,000 COINS");
 const u8 gText_MudkipDollAndPrice[] = _("MUDKIP DOLL   1,000 COINS");
 const u8 gText_50CoinsAndPrice[] = _("  50 COINS    ¥1,000");
