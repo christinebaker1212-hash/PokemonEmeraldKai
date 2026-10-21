@@ -640,9 +640,17 @@ void MP_Gatcha_BackfillTickets(void)
     if (n > 0)
     {
         char msg[96];
+        u8 text[100];
         MP_Gatcha_AddTickets(n);
-        snprintf(msg, sizeof(msg), "You got %d MOEGATCHA TICKET%s for the story items you already have!", (int)n, n == 1 ? "" : "S");
-        MP_ShowNotice(msg);
+        // a note at the top of the screen, not a message box: it never gets in the way of anything
+        snprintf(msg, sizeof(msg), "+%d MOEGATCHA TICKET%s", (int)n, n == 1 ? "" : "S");
+        MP_AsciiToGame(text, msg, 40);
+        {
+            u8 nl[] = {CHAR_NEWLINE, EOS};
+            StringAppend(text, nl);
+        }
+        MP_AsciiToGame(text + StringLength(text), "for your story items!", 40);
+        MP_Toast(text);
     }
     MPNet_Log("gatcha: ticket backfill: %d for this save's story items (%d tickets)", (int)n, (int)MP_Gatcha_Tickets());
 }

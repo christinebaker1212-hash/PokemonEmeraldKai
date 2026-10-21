@@ -471,6 +471,13 @@ bool8 MP_BattleAnimInTask(void)
         || MP_StatusAnimTaskActive();
 }
 
+// Moemon Co-op: a special animation (ball throws for catches, switch-outs, substitute) is playing: ANIM SPEED leaves
+// these alone (a co-op catch is kept in step with the other games; sped up, it hung)
+bool8 MP_SpecialAnimRunning(void)
+{
+    return FuncIsActiveTask(Task_ClearBitWhenSpecialAnimDone);
+}
+
 bool8 MP_FastGeneralAnimRunning(void)
 {
     if (sMpFastGeneralAnim && (!gAnimScriptActive || !FuncIsActiveTask(Task_ClearBitWhenBattleTableAnimDone)))

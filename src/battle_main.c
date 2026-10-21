@@ -1937,6 +1937,7 @@ static void CB2_HandleStartMultiBattle(void)
 bool8 IsBattleLinkTaskFunc(TaskFunc func);
 bool8 MP_SendOutRunning(void);          // pokeball.c
 bool8 MP_FastGeneralAnimRunning(void);  // battle_gfx_sfx_util.c
+bool8 MP_SpecialAnimRunning(void);
 
 // Extra steps per 10 frames: 10 (double speed) for held item / Ingrain / Wish
 // effects, 3 (1.3x) for send-outs and the end fade, 0 otherwise
@@ -1952,7 +1953,7 @@ static u8 MpBattleTurboRate(void)
         rate = 6;
     // Moemon Co-op: the host's ANIM SPEED for move (and every other) battle animation
     anim = MP_BattleAnimSpeed();
-    if (gAnimScriptActive && anim / 5 > rate)
+    if (gAnimScriptActive && anim / 5 > rate && !MP_SpecialAnimRunning())
         rate = anim / 5;   // 25% -> 5, 30% -> 6
     return rate;
 }
@@ -1974,7 +1975,7 @@ static void MpBattleTurbo(void)
     bool8 moveAnim;
     // an animation ends once its sound effects have played: they play at the same faster tempo
     // (note timing only, not pitch; a new sound starts at normal tempo again)
-    if (gAnimScriptActive && MP_BattleAnimSpeed() != 0)
+    if (gAnimScriptActive && MP_BattleAnimSpeed() != 0 && !MP_SpecialAnimRunning())
     {
         u16 tempo = 256 * (100 + MP_BattleAnimSpeed()) / 100;
         MpSetSoundTempo(&gMPlayInfo_SE1, tempo);
