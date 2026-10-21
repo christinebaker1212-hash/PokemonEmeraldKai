@@ -820,6 +820,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] ballfx: slot %d form %d part %d color %d recall %d sound %d\n", slot, fx.form, fx.part, fx.color, fx.recall, fx.sound);
         }
     }
+    else if (strcmp(cmd, "ballstyle") == 0)
+    {
+        // ballstyle SLOT HEX - a party Moemon's POKé BALL style (c000 GENESIS BALL, d000 EPOCH BALL)
+        int slot = 0;
+        unsigned style = 0;
+        if (sscanf(arg, "%d %x", &slot, &style) == 2 && slot >= 0 && slot < PARTY_SIZE)
+        {
+            u32 v = style;
+            SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
+            printf("[test] ballstyle: slot %d style %04x\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR));
+        }
+    }
     else if (strcmp(cmd, "fxedit") == 0)
     {
         // fxedit SLOT - the ball effect editor for a party Moemon (back to the field after)

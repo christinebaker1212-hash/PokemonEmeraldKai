@@ -628,6 +628,19 @@ u8 MP_LegacyBall_Kind(u16 item);   // MP_SPECIAL_GENESIS / MP_SPECIAL_EPOCH, or 
 bool8 MP_LegacyBall_ResolveThrow(u16 item, u8 target, u8 *caseId);
 const u8 *MP_LegacyBall_String(u16 stringId);
 void MP_LegacyBall_RigRandom(const u8 *bytes, u8 count);
+void MP_LegacyBall_PlayCaughtJingle(void);
+// mp_legacy_anim.c / mp_legacy_sound.c: their throws (Red's / Crystal's own animation, art and sounds)
+void MP_LegacyAnim_Composite(u16 *frame);
+void MP_LegacyAnim_ClearKept(u8 battler);
+bool8 MP_LegacyAnim_Active(void);
+bool8 MP_LegacyAnim_NativeSendOut(u8 battler);   // its Moemon came in one of them, with no effect of its own
+bool8 MP_LegacyAnim_StartSendOut(u8 battler);
+bool8 MP_LegacyAnim_StartRecall(u8 battler);
+bool8 MP_LegacyAnim_NativeRecall(u8 battler);
+bool8 MP_LegacyAnim_MoveRunning(u8 battler);
+void MP_LegacySfx_Play(u8 id, u8 pan);
+bool8 MP_LegacySfx_Playing(void);
+void MP_LegacySfx_StopAll(void);
 extern bool8 gMpFishingEncounter;   // wild_encounter.c: this wild battle came from a ROD (LURE BALL)
 // mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
 enum {

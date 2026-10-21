@@ -47,6 +47,8 @@ stat moves (one animation and message for Growl / Tail Whip on several Pokémon)
 128 sprites, 256 OAM entries, 128 KB of sprite tiles), co-op EXP (everyone levels
 up and picks moves to forget at the same time), and ball entrance / recall effects (mp_ballfx.c: an effects layer
 drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-3, APPLY TO PARTY).
+Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
+mp_legacy_*.c, tools/moemon_legacy).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

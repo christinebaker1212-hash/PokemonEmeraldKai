@@ -544,6 +544,23 @@ HANDY EXTRAS (they save time, they don't make the game easier)
     QUICK BALL  x5 on the first turn
   They can't be recolored or decorated. Other games see a Moemon caught in
   one as being in a POKE BALL; this game shows the special ball.
+* GENESIS BALL and EPOCH BALL (MoeGatcha POKE BALLS banner): the POKE BALLS
+  of Pokemon Red and Pokemon Crystal, catch rules and all.
+    GENESIS BALL  Red's catch: sleep or freeze can catch at once, poison,
+                  burn or paralysis help too; at about a third of its HP or
+                  less a Moemon that passes the first check is caught. The
+                  ball can miss (a failed throw shown Red's way). Red's own
+                  messages, throw, shakes and sounds.
+    EPOCH BALL    Crystal's catch, with its two known bugs fixed (poison,
+                  burn and paralysis now help; Moemon with lots of HP no
+                  longer break the math). Success is decided first; a
+                  failed ball wobbles 0-3 times. Crystal's own messages,
+                  throw, wobbles and sounds.
+  A Moemon caught in one comes out and goes back the way it did in that game
+  (smoke, then it grows in; it shrinks away), unless you give it a ball
+  effect of your own. Battle speed settings never change the odds. In co-op
+  the game running the battle decides the throw once and everyone sees the
+  same.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a

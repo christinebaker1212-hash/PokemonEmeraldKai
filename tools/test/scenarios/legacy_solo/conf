@@ -1,0 +1,6 @@
+# GENESIS / EPOCH BALLS solo: the lead (made a GENESIS BALL Moemon) comes out Red's way; a rigged GENESIS
+# BALL fails with shakes, a rigged EPOCH BALL catches; the catch keeps the EPOCH BALL style
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("legacy anim: GENESIS send-out for b0" "legacy ball: GENESIS at b1" "-> shakes" "legacy anim: GENESIS timeline" "legacy ball: EPOCH at b1" "-> caught" "legacy anim: EPOCH timeline" "style d000")

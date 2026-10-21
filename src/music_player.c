@@ -766,6 +766,11 @@ void m4aSoundVSync(void)
 
         for(u32 i = 0; i < samplesPerFrame; i++)
             audioBuffer[i] = m4aBuffer[i] + cgbBuffer[i];
+        {
+            // Moemon Co-op: the GENESIS / EPOCH BALLS' Game Boy sounds (mp_legacy_sound.c)
+            void MP_LegacySfx_Mix(float *buffer, s32 count);
+            MP_LegacySfx_Mix(audioBuffer, samplesPerFrame);
+        }
 
         Platform_QueueAudio(audioBuffer, samplesPerFrame * 4);
         if((s8)(--mixer->dmaCounter) <= 0)

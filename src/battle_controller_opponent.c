@@ -1999,6 +1999,7 @@ static void OpponentHandleSpriteInvisibility(void)
 {
     if (gMpCoopWild && gBattleBufferA[gActiveBattler][1] == 2)
     {
+        MP_LegacyAnim_ClearKept(gActiveBattler);   // a GENESIS / EPOCH BALL's kept ball goes with it
         // Moemon Co-op: a caught wild Pokemon leaves (its sprite went into the ball)
         // and stays gone when the battle screen is rebuilt after the BAG or party screen
         // (only the master's game zeroed its HP)

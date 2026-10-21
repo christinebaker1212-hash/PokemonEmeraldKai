@@ -10718,6 +10718,9 @@ Special_SwitchOutOpponentMon:
 	end
 
 Special_BallThrow:
+	@ Moemon Co-op: GENESIS / EPOCH BALLS throw like Pokémon Red / Crystal (mp_legacy_anim.c)
+	createvisualtask AnimTask_MpIsLegacyBall, 2
+	jumpreteq 1, Special_MpLegacyBallThrow
 	createvisualtask AnimTask_LoadBallGfx, 2
 	delay 0
 	playsewithpan SE_BALL_THROW, 0
@@ -10740,6 +10743,11 @@ BallThrowTrainerBlock:
 	clearmonbg ANIM_DEF_PARTNER
 	blendoff
 	goto BallThrowEnd
+
+Special_MpLegacyBallThrow:
+	createvisualtask AnimTask_MpLegacyBallThrow, 2
+	waitforvisualfinish
+	end
 
 Special_BallThrowWithTrainer:
 	createvisualtask AnimTask_LoadBallGfx, 2

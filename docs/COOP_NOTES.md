@@ -459,3 +459,35 @@ y - 12 (measured, same in singles and doubles); in triples beside the cards (MP_
 x2/y2 and invisible, fade with gPaletteFade and use gBattleMons types when its species matches the party Mon (link
 battles: the games that don't run the engine have no gBattleMons types, so species types there). No Fairy in Kai.
 Debug: `mp typeicons 1`, `mp options`; MOEMON_TYPEICON_DEBUG=1 logs box positions.
+
+## GENESIS / EPOCH BALLS (Pokémon Red's and Crystal's POKé BALLS)
+
+Items ITEM_GENESIS_BALL (ITEM_052) / ITEM_EPOCH_BALL (ITEM_057), special balls 12 / 13 (style `c000` / `d000`, kept
+as POKé BALL + style like the other special balls); MoeGatcha BALL banner only.
+- Catch (mp_legacy_catch.inc.c, plain C, shared with tools/test/legacy_catch_test.c which checks it against
+  register-level transliterations of pokered af51989 ItemUseBall and pokecrystal 97187cd PokeBallEffect: run
+  `tools/test/legacy_catch_test.sh`). Red: Rand1 - status (25 sleep/freeze, 12 others; underflow catches), `<=`
+  catch rate, W = MaxHP*255/12 / max(HP/4,1) (> 255 catches), Rand2 <= X; failures show 0 (a miss: BALL_MP_MISS,
+  caseId 6) to 3 shakes from Z. Crystal: A = rate*(3M-2H)/(3M), min 1, +10 / +5 (the +5 fixed), saturates at 255,
+  caught when rand <= A; failures roll wobbles from the table. The 341+ max HP overflow is fixed by quartering
+  then halving until 3*MaxHP fits. Catch rate comes from the encounter's species (gEnemyParty), so Transform
+  doesn't change it.
+- Resolved once in Cmd_handleballthrow by the game running the battle (mp_legacy_balls.c MP_LegacyBall_ResolveThrow),
+  the result goes out in the usual BALLTHROWANIM caseId; messages per game via MP_LegacyBall_String (gLastUsedItem).
+  Tests: `mp legacyrand B,B,...` rigs the next random bytes (Red draws 1-2, Crystal 1 + wobbles).
+- Animation (mp_legacy_anim.c): tools/moemon_legacy/anim_bake.py runs both games' battle-animation engines offline
+  from the pret checkouts (`python3 tools/moemon_legacy/anim_bake.py REFS` with pokered/ and pokecrystal/ in REFS)
+  and writes mp_legacy_anim_data.h: per-frame OAM, events (sounds with Crystal's pan, Red's hide/show, Crystal's
+  shrink steps) and tiles. Special_BallThrow jumps to Special_MpLegacyBallThrow for these balls. Drawn over the
+  frame (VDraw, like mp_ballfx.c) below y 112 (the text box stays in front); touching tiles move as one object
+  (each object's centre is mapped from the GB positions (38,96) / (124,56) onto the thrower / target, its tiles
+  keep their 8 px spacing: mapping each tile on its own opened gaps through the ball).
+- Send-out / recall: a Moemon in one of these balls with no ball effect of its own (MpBallFx defaults) comes out
+  the original way (pokeball.c hides the Emerald ball; Red: poof, then 1 tile / 3x3 / 5x5 / whole; Crystal: poof +
+  3x3 / 5x5 / whole every 4 frames) and goes back shrinking (battle_anim_throw.c AnimTask_SwitchOutBallEffect).
+  Kai pics are 8x8 tiles: the 5x5 / 3x3 steps use tiles {0,1,4,6,7} / {0,4,7}.
+- Art: tools/moemon_balls/legacy.py makes the 24x24 item icons and mp_legacy_ball_art.h (the supplied 12x12 ball),
+  which mp_ballstyle.c draws into every frame of the ball sprite (summary, battle).
+- Sounds (mp_legacy_sound.c): tools/moemon_legacy/sfx_render.py renders the GB sound effects from the disassemblies
+  into mp_legacy_sfx.h; mixed into m4aSoundVSync's output (music_player.c), panned when the sound option is STEREO.
+- Debug: `mp ballstyle SLOT HEX` sets a party Moemon's ball style. Tests: legacy_solo, legacy_coop.

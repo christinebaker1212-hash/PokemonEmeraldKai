@@ -654,7 +654,7 @@ void AnimTask_SwitchOutShrinkMon(u8 taskId)
     u8 spriteId;
     struct MpBallFx mpFx;
 
-    if (gTasks[taskId].data[0] == 0 && MpRecallFx(gBattleAnimAttacker, &mpFx))
+    if (gTasks[taskId].data[0] == 0 && (MpRecallFx(gBattleAnimAttacker, &mpFx) || MP_LegacyAnim_NativeRecall(gBattleAnimAttacker)))
     {
         DestroyAnimVisualTask(taskId);   // Moemon Co-op: its own recall effect hid it already
         return;
@@ -689,9 +689,22 @@ static void Task_MpWaitRecallFx(u8 taskId)
         DestroyAnimVisualTask(taskId);
 }
 
+static void Task_MpWaitLegacyRecall(u8 taskId)
+{
+    if (!MP_LegacyAnim_MoveRunning(gTasks[taskId].data[1]))
+        DestroyAnimVisualTask(taskId);
+}
+
 void AnimTask_SwitchOutBallEffect(u8 taskId)
 {
     struct MpBallFx mpFx;
+    // Moemon Co-op: GENESIS / EPOCH BALL: Red's / Crystal's own recall (mp_legacy_anim.c)
+    if (gTasks[taskId].data[0] == 0 && MP_LegacyAnim_StartRecall(gBattleAnimAttacker))
+    {
+        gTasks[taskId].data[1] = gBattleAnimAttacker;
+        gTasks[taskId].func = Task_MpWaitLegacyRecall;
+        return;
+    }
     if (gTasks[taskId].data[0] == 0 && MpRecallFx(gBattleAnimAttacker, &mpFx))
     {
         u8 mon = gBattlerSpriteIds[gBattleAnimAttacker];

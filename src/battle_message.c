@@ -2528,10 +2528,15 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
         // Moemon Co-op: a GENESIS / EPOCH BALL catch says it like Red / Crystal
-        if (MP_LegacyBall_String(stringID) && !(gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)))
+        if (MP_LegacyBall_String(stringID))
         {
-            stringPtr = MP_LegacyBall_String(stringID);
-            break;
+            // its own game's catch jingle, with the message (sound_caught_mon)
+            MP_LegacyBall_PlayCaughtJingle();
+            if (!(gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)))
+            {
+                stringPtr = MP_LegacyBall_String(stringID);
+                break;
+            }
         }
         // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,
         // and with the other still out the battle goes on (no caught music)

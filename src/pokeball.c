@@ -412,6 +412,9 @@ static void Task_DoPokeballSendOutAnim(u8 taskId)
     // Moemon Co-op: the Moemon's own ball color
     MP_BallStyle_ApplyToBallSprite(ballSpriteId, ballId, MP_BallStyle_OfMon(GetBattlerSide(battler) != B_SIDE_PLAYER
                                    ? &gEnemyParty[gBattlerPartyIndexes[battler]] : &gPlayerParty[gBattlerPartyIndexes[battler]]));
+    // Moemon Co-op: a GENESIS / EPOCH BALL Moemon comes out like in Red / Crystal: no ball on the screen
+    if (MP_LegacyAnim_NativeSendOut(battler))
+        gSprites[ballSpriteId].invisible = TRUE;
     gSprites[ballSpriteId].data[0] = 0x80;
     gSprites[ballSpriteId].data[1] = 0;
     gSprites[ballSpriteId].data[7] = throwCaseId;
@@ -801,7 +804,7 @@ static void HandleBallAnimEnd_MpFx(struct Sprite *sprite)
 
     if (sprite->animEnded)
         sprite->invisible = TRUE;
-    if (MP_BallFx_BodyRunning(gBattlerSpriteIds[battler]))
+    if (MP_BallFx_BodyRunning(gBattlerSpriteIds[battler]) || MP_LegacyAnim_MoveRunning(battler))
         return;
     if (sprite->data[2] == 0)
     {
@@ -845,7 +848,16 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
     // Moemon Co-op: the Moemon's own entrance effect (the parts that aren't DEFAULT)
     MpBattlerBallFx(battler, &fx);
     customForm = fx.form != MPFX_FORM_DEFAULT && gMain.inBattle;
-    if (fx.part == MPFX_PART_DEFAULT || !gMain.inBattle)
+    if (MP_LegacyAnim_NativeSendOut(battler))
+    {
+        // Moemon Co-op: GENESIS / EPOCH BALL: Red's / Crystal's own send-out (mp_legacy_anim.c)
+        sprite->invisible = TRUE;
+        sprite->data[2] = 0;
+        sprite->callback = HandleBallAnimEnd_MpFx;
+        MP_LegacyAnim_StartSendOut(battler);
+        customForm = TRUE;
+    }
+    else if (fx.part == MPFX_PART_DEFAULT || !gMain.inBattle)
         AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1, 28, ballId);
     else
         PlaySE(SE_BALL_OPEN);
@@ -859,7 +871,7 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
         sprite->data[2] = 0;
         sprite->callback = HandleBallAnimEnd_MpFx;
     }
-    if (gMain.inBattle && !MP_BallFx_IsDefaultEntrance(&fx))
+    if (gMain.inBattle && !MP_BallFx_IsDefaultEntrance(&fx) && !MP_LegacyAnim_MoveRunning(battler))
     {
         struct MpBallFx partsOnly = fx;
         if (!customForm)

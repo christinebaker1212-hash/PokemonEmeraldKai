@@ -1,0 +1,10 @@
+# Co-op 2-on-2 wild battle: ALICE throws a rigged GENESIS BALL (Red's catch, resolved once by the game running
+# the battle); both games play Red's throw; ALICE keeps it as a GENESIS BALL Moemon
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("legacy anim: GENESIS timeline" "co-op wild: caught species" "co-op: battle over" "style c000")
+EXPECT_B=("legacy anim: GENESIS timeline" "co-op: battle over")
