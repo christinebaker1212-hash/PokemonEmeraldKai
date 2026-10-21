@@ -8,7 +8,9 @@ TMO=300
 ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:5"
 ENV_B="MOEMON_DEBUG_PARTY=280:15+,283:5"
 ENV_C="MOEMON_DEBUG_PARTY=280:15+,283:5"
-EXPECT_A=("co-op: battle over, outcome 1")
-EXPECT_B=("co-op levels: stop teaching 64?" "co-op: battle over, outcome 1")
-EXPECT_C=("co-op levels: player 2 is done" "co-op levels: slot 0 forgot move slot 0 for 64"
-          "co-op levels: slot 4 forgot move slot 0 for 64" "co-op: battle over, outcome 1")
+# (seats depend on who joins first, so each player's own choice is checked)
+EXPECT_A=("co-op levels: forgets move slot 0 for 64" "co-op: battle over, outcome 1")
+UNEXPECT_A=("co-op levels: did not learn")
+EXPECT_B=("co-op levels: stop teaching 64?" "co-op levels: did not learn 64" "co-op: battle over, outcome 1")
+UNEXPECT_B=("co-op levels: forgets move slot")
+EXPECT_C=("co-op levels: slot 0 forgot move slot 0 for 64" "kept its moves (no 64)" "co-op: battle over, outcome 1")

@@ -11123,7 +11123,10 @@ static void Cmd_mpcoopresolve(void)
         u16 move;
         u8 pos = MP_Coop_ResolveLearn(i, &slot, &move);
         if (pos >= MAX_MON_MOVES || slot >= PARTY_SIZE)
+        {
+            MPNet_Log("co-op levels: slot %d kept its moves (no %d)", slot, move);
             continue;
+        }
         RemoveMonPPBonus(&gPlayerParty[slot], pos);
         SetMonMoveSlot(&gPlayerParty[slot], move, pos);
         for (b = 0; b < gBattlersCount; b++)
@@ -11383,6 +11386,7 @@ static void Task_MpCoopResolve(u8 taskId)
             {
                 u16 oldMove = GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + pos);
                 sMpRes.answer[tIndex] = pos;
+                MPNet_Log("co-op levels: forgets move slot %d for %d", pos, move);
                 if (!MP_Coop_IsMaster())
                 {
                     // our copy too (the master's party, sent after the battle, says the same)
@@ -11397,6 +11401,7 @@ static void Task_MpCoopResolve(u8 taskId)
         switch (MpResYesNo(data))
         {
         case 1:
+            MPNet_Log("co-op levels: did not learn %d", move);
             MpResMessage(data, sText_MpLearnNot, slot, move, 0, MPR_NEXT);
             break;
         case 2:
