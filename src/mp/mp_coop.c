@@ -322,6 +322,7 @@ static const u8 sText_WaitAsk[] = _("Wait for another trainer to join\nyou for a
 static const u8 sText_Waiting[] = _("Waiting for a partner to join…\n({B_BUTTON} battle alone)");
 static const u8 sText_JoinMe[] = _("Join me!");
 static const u8 sText_WaitThird[] = _("{STR_VAR_1} is in! Waiting for one more\nfor a Triple Battle… ({B_BUTTON} start now)");
+static const u8 sText_StartDouble[] = _("Start a Double Battle with {STR_VAR_1}\nwithout waiting for a third?");
 static const u8 sText_HeldNpc[] = _("They're waiting on {STR_VAR_1}'s battle.");
 static const u8 sText_LearnLater[] = _("During the battle, {STR_VAR_1} wanted to\nlearn {STR_VAR_2}, but it already knows\pfour moves. Teach it a new move now?");
 
@@ -527,14 +528,14 @@ static bool8 TripleEligible(void)
             || sCoop.mode == TRAINER_BATTLE_REMATCH);
 }
 
-// Someone besides `except` who could still come and join (online, not battling).
-// Anywhere: they may be on the next route or indoors, and B starts the Double
-// Battle right away if they don't come
+// Someone besides `except` who could still come and join: anyone online, anywhere,
+// whatever they're doing right now (they may be finishing a battle or a menu, or be
+// on the next route). The host can always start the Double Battle without them.
 static bool8 FriendAvailableExcept(s8 except)
 {
     u8 i;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (PlayerValid(i) && i != except && gMpPlayers[i].hasState && !(gMpPlayers[i].state.flags & MPF_IN_BATTLE))
+        if (PlayerValid(i) && i != except && gMpPlayers[i].hasState)
             return TRUE;
     return FALSE;
 }
@@ -551,6 +552,8 @@ enum {
     JOIN_WAITING,
     JOIN_WAIT_THIRD,
     JOIN_NO_TRIPLE,
+    JOIN_START_DOUBLE_PRINT,   // B while waiting for a third: start the Double Battle now?
+    JOIN_START_DOUBLE_ASK,
 };
 
 static void SendWait(bool8 on)
@@ -903,9 +906,53 @@ static void Task_JoinCheck(u8 taskId)
             MP_Emote_KeepBubbleFor(gMpLocalId, sText_JoinMe);
         if (!IsTextPrinterActive(0) && JOY_NEW(B_BUTTON))
         {
+            // start a Double Battle now? (asked, so a B pressed through the text doesn't)
             PlaySE(SE_SELECT);
-            AcceptRequester();   // start a Double Battle now
-            FinishJoinCheck(taskId);
+            SetNameVar(sCoop.requester);
+            StringExpandPlaceholders(sText, sText_StartDouble);
+            MP_ShowFieldMessageFitted(sText);
+            tState = JOIN_START_DOUBLE_PRINT;
+        }
+        break;
+    case JOIN_START_DOUBLE_PRINT:
+    case JOIN_START_DOUBLE_ASK:
+        // the third may still turn up meanwhile, and the second may leave
+        if (!PlayerValid(sCoop.requester) || PlayerValid(sCoop.requester2))
+        {
+            if (tState == JOIN_START_DOUBLE_ASK)
+                EraseYesNoWindow();
+            tState = JOIN_WAIT_THIRD;
+            break;
+        }
+        if (tState == JOIN_START_DOUBLE_PRINT)
+        {
+            if (!IsTextPrinterActive(0))
+            {
+                DisplayYesNoMenuWithDefault(1);   // NO first
+                tState = JOIN_START_DOUBLE_ASK;
+            }
+        }
+        else
+        {
+            s8 answer = Menu_ProcessInputNoWrapClearOnChoose();
+            if (answer == MENU_NOTHING_CHOSEN)
+                break;
+            if (answer == 0)
+            {
+                AcceptRequester();   // a Double Battle now
+                FinishJoinCheck(taskId);
+                break;
+            }
+            // keep waiting
+            SetNameVar(sCoop.requester);
+            StringExpandPlaceholders(sText, sText_WaitThird);
+            MP_ShowFieldMessageFitted(sText);
+            tState = JOIN_WAIT_THIRD;
+        }
+        if (++sCoop.waitTimer >= WAIT_RESEND_FRAMES)
+        {
+            sCoop.waitTimer = 0;
+            SendWait(TRUE);
         }
         break;
     }
@@ -2585,9 +2632,17 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             SendByte(from, MPR_COOP_DECLINE, DECLINE_NO_TRIPLE);
             break;
         }
-        if (!sCoop.challenged || sCoop.accepted || sCoop.prompting
-         || (sCoop.requester >= 0 && sCoop.requester != from && PlayerValid(sCoop.requester)))
-            SendByte(from, MPR_COOP_DECLINE, sCoop.challenged ? DECLINE_BUSY : DECLINE_TOO_LATE);
+        if (!sCoop.challenged || sCoop.accepted)
+        {
+            SendByte(from, MPR_COOP_DECLINE, DECLINE_TOO_LATE);   // the battle is on its way
+            MPNet_Log("co-op: player %d asked too late", from + 1);
+        }
+        else if (sCoop.prompting || (sCoop.requester >= 0 && sCoop.requester != from && PlayerValid(sCoop.requester)))
+        {
+            SendByte(from, MPR_COOP_DECLINE, DECLINE_BUSY);
+            MPNet_Log("co-op: player %d asked while busy (requester %d, requester2 %d, waiting third %d)",
+                      from + 1, sCoop.requester + 1, sCoop.requester2 + 1, sCoop.waitingThird);
+        }
         else
             sCoop.requester = from;
         break;

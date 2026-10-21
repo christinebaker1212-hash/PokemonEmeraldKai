@@ -1,0 +1,13 @@
+# Like tri_trainer, but ALICE keeps pressing B once BOB is in (mashing through text): that only asks "start a Double
+# Battle without waiting?" (NO first, B = NO), so CARL still gets in and it's a Triple Battle
+MODE=3
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+WARP_C=11,3,3,3
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("co-op: waiting for a third player" "(and another: triple)" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
