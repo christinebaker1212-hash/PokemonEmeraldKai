@@ -45,6 +45,12 @@ static u32 ShowDisguiseFieldEffect(u8, u8, u8);
 #define sReflectionVerticalOffset   data[2]
 #define sIsStillReflection          data[7]
 
+// Moemon PC: sprites in palette slots 16+ (co-op ones) reflect in their own colors
+static u8 ReflectionPaletteFor(u8 paletteNum)
+{
+    return paletteNum < 16 ? gReflectionEffectPaletteMap[paletteNum] : paletteNum;
+}
+
 void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, bool8 stillReflection)
 {
     struct Sprite *reflectionSprite;
@@ -52,7 +58,7 @@ void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, boo
     reflectionSprite = &gSprites[CreateCopySpriteAt(sprite, sprite->x, sprite->y, 152)];
     reflectionSprite->callback = UpdateObjectReflectionSprite;
     reflectionSprite->oam.priority = 3;
-    reflectionSprite->oam.paletteNum = gReflectionEffectPaletteMap[reflectionSprite->oam.paletteNum];
+    reflectionSprite->oam.paletteNum = ReflectionPaletteFor(reflectionSprite->oam.paletteNum);
     reflectionSprite->usingSheet = TRUE;
     reflectionSprite->anims = gDummySpriteAnimTable;
     StartSpriteAnim(reflectionSprite, 0);
@@ -142,7 +148,7 @@ static void UpdateObjectReflectionSprite(struct Sprite *reflectionSprite)
     }
     else
     {
-        reflectionSprite->oam.paletteNum = gReflectionEffectPaletteMap[mainSprite->oam.paletteNum];
+        reflectionSprite->oam.paletteNum = ReflectionPaletteFor(mainSprite->oam.paletteNum);
         reflectionSprite->oam.shape = mainSprite->oam.shape;
         reflectionSprite->oam.size = mainSprite->oam.size;
         reflectionSprite->oam.matrixNum = mainSprite->oam.matrixNum | ST_OAM_VFLIP;

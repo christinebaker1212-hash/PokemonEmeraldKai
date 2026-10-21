@@ -273,7 +273,7 @@ static const struct OamDimensions sOamDimensions[3][4] =
 static u16 sSpriteTileRangeTags[MAX_SPRITES];
 static u16 sSpriteTileRanges[MAX_SPRITES][2];
 static struct AffineAnimState sAffineAnimStates[OAM_MATRIX_COUNT];
-static u16 sSpritePaletteTags[16];
+static u16 sSpritePaletteTags[OBJ_PAL_SLOTS];   // Moemon PC: 64 (16-63 only exist on PC)
 
 // iwram common
 COMMON_DATA u32 gOamMatrixAllocBitmap = 0;
@@ -285,9 +285,12 @@ EWRAM_DATA static u8 sSpriteOrder[MAX_SPRITES] = {0};
 EWRAM_DATA static bool8 sShouldProcessSpriteCopyRequests = 0;
 EWRAM_DATA static u8 sSpriteCopyRequestCount = 0;
 EWRAM_DATA static struct SpriteCopyRequest sSpriteCopyRequests[MAX_SPRITES] = {0};
-EWRAM_DATA u8 gOamLimit = 0;
+EWRAM_DATA u16 gOamLimit = 0;
+#ifdef PORTABLE
+_Static_assert(sizeof(struct OamData) * OAM_ENTRY_COUNT == OAM_SIZE, "OAM_SIZE must match struct OamData");
+#endif
 EWRAM_DATA u16 gReservedSpriteTileCount = 0;
-EWRAM_DATA static u8 sSpriteTileAllocBitmap[128] = {0};
+EWRAM_DATA static u8 sSpriteTileAllocBitmap[TOTAL_OBJ_TILE_COUNT / 8] = {0};
 EWRAM_DATA s16 gSpriteCoordOffsetX = 0;
 EWRAM_DATA s16 gSpriteCoordOffsetY = 0;
 EWRAM_DATA struct OamMatrix gOamMatrices[OAM_MATRIX_COUNT] = {0};
@@ -300,7 +303,7 @@ void ResetSpriteData(void)
     ClearSpriteCopyRequests();
     ResetAffineAnimData();
     FreeSpriteTileRanges();
-    gOamLimit = 64;
+    gOamLimit = OAM_MANUAL_BASE;   // Moemon PC: 192 (the GBA's 64); the last 64 are filled by hand
     gReservedSpriteTileCount = 0;
     AllocSpriteTiles(0);
     gSpriteCoordOffsetX = 0;
@@ -501,6 +504,15 @@ void AddSpritesToOamBuffer(void)
     }
 }
 
+// Moemon PC: a line in the log when graphics memory runs out (tests look for "[gfx] out of")
+#include <stdio.h>
+static void GfxOverflow(const char *what, u32 value)
+{
+    static u32 sCount;
+    if (sCount++ < 20)
+        printf("[gfx] out of %s (%u)\n", what, (unsigned)value);
+}
+
 u8 CreateSprite(const struct SpriteTemplate *template, s16 x, s16 y, u8 subpriority)
 {
     u8 i;
@@ -509,6 +521,7 @@ u8 CreateSprite(const struct SpriteTemplate *template, s16 x, s16 y, u8 subprior
         if (!gSprites[i].inUse)
             return CreateSpriteAt(i, template, x, y, subpriority);
 
+    GfxOverflow("sprites", template->tileTag);
     return MAX_SPRITES;
 }
 
@@ -520,6 +533,7 @@ u8 CreateSpriteAtEnd(const struct SpriteTemplate *template, s16 x, s16 y, u8 sub
         if (!gSprites[i].inUse)
             return CreateSpriteAt(i, template, x, y, subpriority);
 
+    GfxOverflow("sprites", template->tileTag);
     return MAX_SPRITES;
 }
 
@@ -725,7 +739,10 @@ s16 AllocSpriteTiles(u16 tileCount)
             i++;
 
             if (i == TOTAL_OBJ_TILE_COUNT)
+            {
+                GfxOverflow("sprite tiles", tileCount);
                 return -1;
+            }
         }
 
         start = i;
@@ -736,7 +753,10 @@ s16 AllocSpriteTiles(u16 tileCount)
             i++;
 
             if (i == TOTAL_OBJ_TILE_COUNT)
+            {
+                GfxOverflow("sprite tiles", tileCount);
                 return -1;
+            }
 
             if (!SPRITE_TILE_IS_ALLOCATED(i))
                 numTilesFound++;
@@ -1580,8 +1600,34 @@ void FreeAllSpritePalettes(void)
 {
     u8 i;
     gReservedSpritePaletteCount = 0;
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < OBJ_PAL_SLOTS; i++)
         sSpritePaletteTags[i] = TAG_NONE;
+}
+
+// Moemon PC: palettes that go to the extra slots (16+) first, keeping the GBA's 16 for
+// what battle animations fade one by one (a palette's mask bit 1 << (16 + n) only
+// exists for slots 0-15): co-op sprites, POKé BALLS and their sparkles
+static bool8 MpPrefersExtraSlot(u16 tag)
+{
+    return MP_IsCoopPaletteTag(tag)
+        || (tag >= 55000 && tag < 55040)     // POKé BALLS (pokeball.c) and their particles (battle_anim_throw.c)
+        || (tag >= 0x56A0 && tag < 0x56E0)   // recolored / special balls (mp_ballstyle.c)
+        || (tag >= 0x5710 && tag < 0x5760);  // decorated balls
+}
+
+// A free slot for `tag` (0xFF = none): the GBA's 16 first, the extra ones after them;
+// the other way around for MpPrefersExtraSlot
+static u8 MpFreePaletteSlot(u16 tag)
+{
+    u8 i;
+    if (MpPrefersExtraSlot(tag))
+        for (i = 16; i < OBJ_PAL_SLOTS; i++)
+            if (sSpritePaletteTags[i] == TAG_NONE)
+                return i;
+    for (i = gReservedSpritePaletteCount; i < OBJ_PAL_SLOTS; i++)
+        if (sSpritePaletteTags[i] == TAG_NONE)
+            return i;
+    return 0xFF;
 }
 
 u8 LoadSpritePalette(const struct SpritePalette *palette)
@@ -1591,12 +1637,13 @@ u8 LoadSpritePalette(const struct SpritePalette *palette)
     if (index != 0xFF)
         return index;
 
-    index = IndexOfSpritePaletteTag(TAG_NONE);
+    index = MpFreePaletteSlot(palette->tag);
     if (index == 0xFF)
         index = MP_MakeRoomForPalette(); // Moemon Co-op: the game's own effects come first
 
     if (index == 0xFF)
     {
+        GfxOverflow("sprite palettes", palette->tag);
         return 0xFF;
     }
     else
@@ -1622,11 +1669,12 @@ void DoLoadSpritePalette(const u16 *src, u16 paletteOffset)
 
 u8 AllocSpritePalette(u16 tag)
 {
-    u8 index = IndexOfSpritePaletteTag(TAG_NONE);
+    u8 index = MpFreePaletteSlot(tag);
     if (index == 0xFF)
         index = MP_MakeRoomForPalette();
     if (index == 0xFF)
     {
+        GfxOverflow("sprite palettes", tag);
         return 0xFF;
     }
     else
@@ -1639,7 +1687,7 @@ u8 AllocSpritePalette(u16 tag)
 u8 IndexOfSpritePaletteTag(u16 tag)
 {
     u8 i;
-    for (i = gReservedSpritePaletteCount; i < 16; i++)
+    for (i = gReservedSpritePaletteCount; i < OBJ_PAL_SLOTS; i++)
         if (sSpritePaletteTags[i] == tag)
             return i;
     // Moemon Co-op: co-op palettes may sit in borrowed reserved slots
@@ -1653,6 +1701,8 @@ u8 IndexOfSpritePaletteTag(u16 tag)
 
 u16 GetSpritePaletteTagByPaletteNum(u8 paletteNum)
 {
+    if (paletteNum >= OBJ_PAL_SLOTS)
+        return TAG_NONE;
     return sSpritePaletteTags[paletteNum];
 }
 
@@ -1769,7 +1819,7 @@ bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u
 u8 MP_FindSpritePaletteTag(u16 tag, u8 minSlot)
 {
     u8 i;
-    for (i = minSlot; i < 16; i++)
+    for (i = minSlot; i < OBJ_PAL_SLOTS; i++)
         if (sSpritePaletteTags[i] == tag)
             return i;
     return 0xFF;
@@ -1816,6 +1866,10 @@ static bool8 MpSlotHasSprites(u8 slot)
 static u8 MpFreeSlot(u8 except, bool8 dynamicToo)
 {
     u8 i;
+    // Moemon PC: the extra slots first, so co-op never shares or borrows the game's
+    for (i = 16; i < OBJ_PAL_SLOTS; i++)
+        if (i != except && sSpritePaletteTags[i] == TAG_NONE)
+            return i;
     for (i = 0; i < ARRAY_COUNT(sMpBorrowSlots); i++)
     {
         u8 s = sMpBorrowSlots[i];
@@ -1884,7 +1938,7 @@ void MP_VacatePaletteSlot(u8 slot)
 static u8 MP_MakeRoomForPalette(void)
 {
     u8 i, best = 0xFF, bestRank = 0xFF;
-    for (i = gReservedSpritePaletteCount; i < 16; i++)
+    for (i = gReservedSpritePaletteCount; i < 16; i++)   // only the GBA's slots are worth freeing
     {
         u16 tag = sSpritePaletteTags[i];
         u8 rank;
@@ -1954,7 +2008,7 @@ void MP_SpriteBudget(u8 *freeSprites, u8 *freePalettes, u16 *freeTiles, u8 *free
     for (i = 0; i < MAX_SPRITES; i++)
         if (!gSprites[i].inUse)
             (*freeSprites)++;
-    for (i = gReservedSpritePaletteCount; i < 16; i++)
+    for (i = gReservedSpritePaletteCount; i < OBJ_PAL_SLOTS; i++)
         if (sSpritePaletteTags[i] == TAG_NONE)
             (*freePalettes)++;
     for (i = gReservedSpriteTileCount; i < TOTAL_OBJ_TILE_COUNT; i++)

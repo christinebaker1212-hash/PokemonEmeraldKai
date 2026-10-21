@@ -391,7 +391,7 @@ void DigitObjUtil_HideOrShow(u32 id, bool32 hide)
 static u8 GetFirstOamId(u8 oamCount)
 {
     u32 i;
-    u16 firstOamId = 64;
+    u16 firstOamId = OAM_MANUAL_BASE;
 
     for (i = 0; i < sOamWork->count; i++)
     {
@@ -406,7 +406,7 @@ static u8 GetFirstOamId(u8 oamCount)
         }
     }
 
-    if (firstOamId + oamCount + 1 > 128)
+    if (firstOamId + oamCount + 1 > OAM_ENTRY_COUNT - 1)
         return 0xFF;
     else
         return firstOamId;

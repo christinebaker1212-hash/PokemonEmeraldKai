@@ -1,0 +1,16 @@
+pressuntil A field 5000
+mp ballfx 0 preset 1
+mp follow 0
+wait 30
+mp pals
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+waitfor action 9000
+mp pals
+mp budget
+shot battle
+pressuntillog A 15000 co-op: battle over
+wait 600
+mp pals
+shot after
+quit

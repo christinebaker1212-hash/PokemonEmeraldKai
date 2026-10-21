@@ -756,6 +756,4 @@ KNOWN LIMITATIONS
 * You see other players on your map and directly connected maps (e.g.
   Oldale <-> Route 101), not through a building door.
 * Other players walk through you and NPCs, so nobody gets stuck.
-* Busy areas can run out of sprite colors; a player may borrow another
-  palette for a moment.
 * Trading isn't networked.

@@ -153,6 +153,24 @@ static void ReadPlttIntoBuffers(void)
     }
 }
 
+// Moemon PC: sprite palettes 16-63 (OBJ_PAL_SLOTS) have no bit in a palette mask. They
+// join a fade or blend whose mask takes in most of the sprite palettes (screen fades,
+// "everything but the attacker"), and stay out of one aimed at a sprite or two.
+bool8 MP_MaskTakesExtraPalettes(u32 selectedPalettes)
+{
+    u32 obj = selectedPalettes >> 16;
+    u8 n = 0;
+    while (obj)
+    {
+        n += obj & 1;
+        obj >>= 1;
+    }
+    return OBJ_PAL_SLOTS > 16 && n >= 8;
+}
+
+#define FOR_EACH_EXTRA_PALETTE(offset) \
+    for (offset = OBJ_PLTT_OFFSET + 16 * 16; offset < OBJ_PLTT_OFFSET + OBJ_PAL_SLOTS * 16; offset += 16)
+
 bool8 BeginNormalPaletteFade(u32 selectedPalettes, s8 delay, u8 startY, u8 targetY, u16 blendColor)
 {
     u8 temp;
@@ -437,6 +455,12 @@ static u8 UpdateNormalPaletteFade(void)
         {
             selectedPalettes = gPaletteFade_selectedPalettes >> 16;
             paletteOffset = OBJ_PLTT_OFFSET;
+            if (MP_MaskTakesExtraPalettes(gPaletteFade_selectedPalettes))
+            {
+                u16 off;
+                FOR_EACH_EXTRA_PALETTE(off)
+                    BlendPalette(off, 16, gPaletteFade.y, gPaletteFade.blendColor);
+            }
         }
 
         while (selectedPalettes)
@@ -493,6 +517,18 @@ void InvertPlttBuffer(u32 selectedPalettes)
 {
     u16 paletteOffset = 0;
 
+    if (MP_MaskTakesExtraPalettes(selectedPalettes))
+    {
+        u16 off;
+        FOR_EACH_EXTRA_PALETTE(off)
+        {
+            u8 i;
+            u16 paletteOffset = off;
+            for (i = 0; i < 16; i++)
+                gPlttBufferFaded[paletteOffset + i] = ~gPlttBufferFaded[paletteOffset + i];
+        }
+    }
+
     while (selectedPalettes)
     {
         if (selectedPalettes & 1)
@@ -509,6 +545,22 @@ void InvertPlttBuffer(u32 selectedPalettes)
 void TintPlttBuffer(u32 selectedPalettes, s8 r, s8 g, s8 b)
 {
     u16 paletteOffset = 0;
+
+    if (MP_MaskTakesExtraPalettes(selectedPalettes))
+    {
+        u16 off;
+        FOR_EACH_EXTRA_PALETTE(off)
+        {
+            u8 i;
+            for (i = 0; i < 16; i++)
+            {
+                struct PlttData *data = (struct PlttData *)&gPlttBufferFaded[off + i];
+                data->r += r;
+                data->g += g;
+                data->b += b;
+            }
+        }
+    }
 
     while (selectedPalettes)
     {
@@ -531,6 +583,18 @@ void TintPlttBuffer(u32 selectedPalettes, s8 r, s8 g, s8 b)
 void UnfadePlttBuffer(u32 selectedPalettes)
 {
     u16 paletteOffset = 0;
+
+    if (MP_MaskTakesExtraPalettes(selectedPalettes))
+    {
+        u16 off;
+        FOR_EACH_EXTRA_PALETTE(off)
+        {
+            u8 i;
+            u16 paletteOffset = off;
+            for (i = 0; i < 16; i++)
+                gPlttBufferFaded[paletteOffset + i] = gPlttBufferUnfaded[paletteOffset + i];
+        }
+    }
 
     while (selectedPalettes)
     {
@@ -831,6 +895,10 @@ void BlendPalettes(u32 selectedPalettes, u8 coeff, u16 color)
 {
     u16 paletteOffset;
 
+    if (MP_MaskTakesExtraPalettes(selectedPalettes))
+        FOR_EACH_EXTRA_PALETTE(paletteOffset)
+            BlendPalette(paletteOffset, 16, coeff, color);
+
     for (paletteOffset = 0; selectedPalettes; paletteOffset += 16)
     {
         if (selectedPalettes & 1)
@@ -1036,3 +1104,58 @@ static void Task_BlendPalettesGradually(u8 taskId)
         }
     }
 }
+
+// Moemon PC: blend / fade one sprite palette by slot, any slot (palettes 16+ have no mask bit)
+void MP_BlendSpritePalette(u8 slot, u8 coeff, u16 color)
+{
+    if (slot < 16)
+        BlendPalettes(0x10000 << slot, coeff, color);
+    else if (slot < OBJ_PAL_SLOTS)
+        BlendPalette(OBJ_PLTT_ID(slot), 16, coeff, color);
+}
+
+#define tSlot   data[0]
+#define tDelay  data[1]
+#define tY      data[2]
+#define tTarget data[3]
+#define tColor  data[4]
+#define tWait   data[5]
+static void Task_MpSpritePaletteFade(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    if (tWait++ < tDelay)
+        return;
+    tWait = 0;
+    if (tY < tTarget)
+        tY = min(tY + 2, tTarget);
+    else
+        tY = max(tY - 2, tTarget);
+    BlendPalette(OBJ_PLTT_ID(tSlot), 16, tY, tColor);
+    if (tY == tTarget)
+        DestroyTask(taskId);
+}
+
+void MP_BeginSpritePaletteFade(u8 slot, s8 delay, u8 startY, u8 targetY, u16 color)
+{
+    u8 taskId;
+    if (slot < 16)
+    {
+        BeginNormalPaletteFade(0x10000 << slot, delay, startY, targetY, color);
+        return;
+    }
+    if (slot >= OBJ_PAL_SLOTS)
+        return;
+    taskId = CreateTask(Task_MpSpritePaletteFade, 2);
+    gTasks[taskId].tSlot = slot;
+    gTasks[taskId].tDelay = delay < 0 ? 0 : delay;
+    gTasks[taskId].tY = startY;
+    gTasks[taskId].tTarget = targetY;
+    gTasks[taskId].tColor = color;
+    BlendPalette(OBJ_PLTT_ID(slot), 16, startY, color);
+}
+#undef tSlot
+#undef tDelay
+#undef tY
+#undef tTarget
+#undef tColor
+#undef tWait

@@ -780,8 +780,8 @@ void DestroyWirelessStatusIndicatorSprite(void)
     {
         gSprites[gWirelessStatusIndicatorSpriteId].sValidator = 0;
         DestroySprite(&gSprites[gWirelessStatusIndicatorSpriteId]);
-        gMain.oamBuffer[125] = gDummyOamData;
-        CpuCopy16(&gDummyOamData, (struct OamData *)OAM + 125, sizeof(struct OamData));
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3] = gDummyOamData;
+        CpuCopy16(&gDummyOamData, (struct OamData *)OAM + OAM_ENTRY_COUNT - 3, sizeof(struct OamData));
     }
 }
 
@@ -866,12 +866,12 @@ void UpdateWirelessStatusIndicatorSprite(void)
         {
             sprite->sFrameDelay++;
         }
-        gMain.oamBuffer[125] = sWirelessStatusIndicatorOamData;
-        gMain.oamBuffer[125].x = sprite->x + sprite->centerToCornerVecX;
-        gMain.oamBuffer[125].y = sprite->y + sprite->centerToCornerVecY;
-        gMain.oamBuffer[125].paletteNum = sprite->oam.paletteNum;
-        gMain.oamBuffer[125].tileNum = sprite->sTileStart + sprite->anims[sprite->sCurrAnimNum][sprite->sFrameIdx].frame.imageValue;
-        CpuCopy16(&gMain.oamBuffer[125], (struct OamData *)OAM + 125, sizeof(struct OamData));
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3] = sWirelessStatusIndicatorOamData;
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3].x = sprite->x + sprite->centerToCornerVecX;
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3].y = sprite->y + sprite->centerToCornerVecY;
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3].paletteNum = sprite->oam.paletteNum;
+        gMain.oamBuffer[OAM_ENTRY_COUNT - 3].tileNum = sprite->sTileStart + sprite->anims[sprite->sCurrAnimNum][sprite->sFrameIdx].frame.imageValue;
+        CpuCopy16(&gMain.oamBuffer[OAM_ENTRY_COUNT - 3], (struct OamData *)OAM + OAM_ENTRY_COUNT - 3, sizeof(struct OamData));
         if (RfuGetStatus() == RFU_STATUS_FATAL_ERROR)
             DestroyWirelessStatusIndicatorSprite();
     }

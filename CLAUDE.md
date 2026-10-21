@@ -43,7 +43,8 @@ phases 1-4 (dex, buddy bonus, shared PC, trades, dailies/achievements/MoeGatcha,
 TEAM PADDING (host setting: trainers get one extra Moemon in team-ups),
 "wait for a partner", co-op healing items, the co-op doubles retrofit, batch 3 link features (record mixing, secret
 bases, trainer cards, day care eggs, minigames, contests), LOOK / CREATE sprites, co-op Triple Battles, and grouped
-stat moves (one animation and message for Growl / Tail Whip on several Pokémon), co-op EXP (everyone levels
+stat moves (one animation and message for Growl / Tail Whip on several Pokémon), graphics past the GBA limits (64 sprite palettes,
+128 sprites, 256 OAM entries, 128 KB of sprite tiles), co-op EXP (everyone levels
 up and picks moves to forget at the same time), and ball entrance / recall effects (mp_ballfx.c: an effects layer
 drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-3, APPLY TO PARTY).
 
@@ -54,6 +55,8 @@ Gotchas worth knowing before touching battles:
 - Triple Battles: battlers 4/5 exist. Anything doing `battler ^ BIT_FLANK` or assuming positions 0-3 (screen rebuild,
   shadows, Cmd_monbg) breaks for them, often by touching sprite 0 = battler 0's healthbox. Use BATTLE_PARTNER.
 - Bump MP_PROTOCOL_VERSION (src/mp/mp_net.h) on any protocol change; tools/test rebuilds the server from it.
+- Sprite palettes 16-63 have no bit in a palette mask (`1 << (16 + n)`): fade one sprite's palette by slot with
+  MP_BlendSpritePalette / MP_BeginSpritePaletteFade. Ball and co-op palettes live there (see COOP_NOTES, graphics).
 - Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 

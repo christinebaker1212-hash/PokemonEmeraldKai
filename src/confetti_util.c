@@ -47,7 +47,7 @@ bool32 ConfettiUtil_Free(void)
         return FALSE;
 
     for (i = 0; i < sWork->count; i++)
-        memcpy(&gMain.oamBuffer[i + 64], &gDummyOamData, sizeof(struct OamData));
+        memcpy(&gMain.oamBuffer[i + OAM_MANUAL_BASE], &gDummyOamData, sizeof(struct OamData));
 
     memset(sWork->array, 0, sWork->count * sizeof(struct ConfettiUtil));
     FREE_AND_SET_NULL(sWork->array);
@@ -73,7 +73,7 @@ bool32 ConfettiUtil_Update(void)
 
             if (sWork->array[i].dummied)
             {
-                memcpy(&gMain.oamBuffer[i + 64], &gDummyOamData, sizeof(struct OamData));
+                memcpy(&gMain.oamBuffer[i + OAM_MANUAL_BASE], &gDummyOamData, sizeof(struct OamData));
             }
             else
             {
@@ -81,7 +81,7 @@ bool32 ConfettiUtil_Update(void)
                 sWork->array[i].oam.x = sWork->array[i].x + sWork->array[i].xDelta;
                 sWork->array[i].oam.priority = sWork->array[i].priority;
                 sWork->array[i].oam.tileNum = sWork->array[i].tileNum;
-                memcpy(&gMain.oamBuffer[i + 64], &sWork->array[i], sizeof(struct OamData));
+                memcpy(&gMain.oamBuffer[i + OAM_MANUAL_BASE], &sWork->array[i], sizeof(struct OamData));
             }
         }
     }
@@ -176,6 +176,6 @@ u8 ConfettiUtil_Remove(u8 id)
     sWork->array[id].oam.y = DISPLAY_HEIGHT;
     sWork->array[id].oam.x = DISPLAY_WIDTH;
     sWork->array[id].dummied = TRUE;
-    memcpy(&gMain.oamBuffer[id + 64], &gDummyOamData, sizeof(struct OamData));
+    memcpy(&gMain.oamBuffer[id + OAM_MANUAL_BASE], &gDummyOamData, sizeof(struct OamData));
     return id;
 }

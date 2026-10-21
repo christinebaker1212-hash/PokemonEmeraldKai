@@ -440,8 +440,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u16 GetSpritePaletteTagByPaletteNum(u8 paletteNum);
         int i;
         printf("[test] pals reserved=%d:", gReservedSpritePaletteCount);
-        for (i = 0; i < 16; i++)
-            printf(" %d=%04x", i, GetSpritePaletteTagByPaletteNum(i));
+        for (i = 0; i < OBJ_PAL_SLOTS; i++)
+            if (i < 16 || GetSpritePaletteTagByPaletteNum(i) != 0xFFFF)
+                printf(" %d=%04x", i, GetSpritePaletteTagByPaletteNum(i));
         printf("\n");
     }
         else if (strcmp(cmd, "follow") == 0)

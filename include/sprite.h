@@ -2,7 +2,11 @@
 #define GUARD_SPRITE_H
 
 #define OAM_MATRIX_COUNT 32
+#ifdef PORTABLE
+#define MAX_SPRITES 128   // Moemon PC: twice the GBA's
+#else
 #define MAX_SPRITES 64
+#endif
 #define SPRITE_NONE 0xFF
 #define TAG_NONE 0xFFFF
 
@@ -261,7 +265,7 @@ extern const struct SpriteTemplate gDummySpriteTemplate;
 
 extern u8 gReservedSpritePaletteCount;
 extern struct Sprite gSprites[MAX_SPRITES + 1];
-extern u8 gOamLimit;
+extern u16 gOamLimit;
 extern u16 gReservedSpriteTileCount;
 extern s16 gSpriteCoordOffsetX;
 extern s16 gSpriteCoordOffsetY;

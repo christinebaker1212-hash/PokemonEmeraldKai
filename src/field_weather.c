@@ -152,10 +152,14 @@ static const u8 ALIGNED(2) sBasePaletteColorMapTypes[32] =
 // Moemon Co-op: the co-op overlay palette (bubbles, toasts, compass) keeps its
 // colors in any weather, even when it borrowed an NPC reflection slot
 u8 MP_FindSpritePaletteTag(u16 tag, u8 minSlot);
+// Moemon PC: sprite palettes 16+ (OBJ_PAL_SLOTS) are tinted like the game's dynamic ones
+#define WEATHER_PAL_COUNT (16 + OBJ_PAL_SLOTS)
 static u8 ColorMapType(u8 palIndex)
 {
     if (palIndex >= 16 && MP_FindSpritePaletteTag(0x53C0, 0) == palIndex - 16)
         return COLOR_MAP_NONE;
+    if (palIndex >= 32)
+        return palIndex < WEATHER_PAL_COUNT ? COLOR_MAP_DARK_CONTRAST : COLOR_MAP_NONE;
     return sPaletteColorMapTypes[palIndex];
 }
 
@@ -369,7 +373,7 @@ static void UpdateWeatherColorMap(void)
                 else
                     gWeatherPtr->colorMapIndex--;
 
-                ApplyColorMap(0, 32, gWeatherPtr->colorMapIndex);
+                ApplyColorMap(0, WEATHER_PAL_COUNT, gWeatherPtr->colorMapIndex);
             }
         }
     }
@@ -428,12 +432,12 @@ static bool8 FadeInScreen_RainShowShade(void)
 
     if (++gWeatherPtr->fadeScreenCounter >= 16)
     {
-        ApplyColorMap(0, 32, 3);
+        ApplyColorMap(0, WEATHER_PAL_COUNT, 3);
         gWeatherPtr->fadeScreenCounter = 16;
         return FALSE;
     }
 
-    ApplyColorMapWithBlend(0, 32, 3, 16 - gWeatherPtr->fadeScreenCounter, gWeatherPtr->fadeDestColor);
+    ApplyColorMapWithBlend(0, WEATHER_PAL_COUNT, 3, 16 - gWeatherPtr->fadeScreenCounter, gWeatherPtr->fadeDestColor);
     return TRUE;
 }
 
@@ -444,7 +448,7 @@ static bool8 FadeInScreen_Drought(void)
 
     if (++gWeatherPtr->fadeScreenCounter >= 16)
     {
-        ApplyColorMap(0, 32, -6);
+        ApplyColorMap(0, WEATHER_PAL_COUNT, -6);
         gWeatherPtr->fadeScreenCounter = 16;
         return FALSE;
     }
@@ -614,7 +618,7 @@ static void ApplyDroughtColorMapWithBlend(s8 colorMapIndex, u8 blendCoeff, u16 b
     gBlend = color.g;
     bBlend = color.b;
     palOffset = 0;
-    for (curPalIndex = 0; curPalIndex < 32; curPalIndex++)
+    for (curPalIndex = 0; curPalIndex < WEATHER_PAL_COUNT; curPalIndex++)
     {
         if (ColorMapType(curPalIndex) == COLOR_MAP_NONE)
         {
@@ -667,7 +671,7 @@ static void ApplyFogBlend(u8 blendCoeff, u16 blendColor)
     gBlend = color.g;
     bBlend = color.b;
 
-    for (curPalIndex = 16; curPalIndex < 32; curPalIndex++)
+    for (curPalIndex = 16; curPalIndex < WEATHER_PAL_COUNT; curPalIndex++)
     {
         if (LightenSpritePaletteInFog(curPalIndex))
         {
@@ -726,7 +730,7 @@ void ApplyWeatherColorMapIfIdle(s8 colorMapIndex)
 {
     if (gWeatherPtr->palProcessingState == WEATHER_PAL_STATE_IDLE)
     {
-        ApplyColorMap(0, 32, colorMapIndex);
+        ApplyColorMap(0, WEATHER_PAL_COUNT, colorMapIndex);
         gWeatherPtr->colorMapIndex = colorMapIndex;
     }
 }

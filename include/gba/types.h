@@ -72,10 +72,18 @@ struct OamData
              u32 matrixNum:5;   // bits 3/4 are h-flip/v-flip if not in affine mode
              u32 size:2;        // 0x4000, 0x8000 -> 0xC000
 
+#ifdef PORTABLE
+    // Moemon PC: 4096 sprite tiles and 64 sprite palettes (see OBJ_PAL_SLOTS)
+    /*0x04*/ u32 tileNum:12;
+             u32 priority:2;
+             u32 paletteNum:6;
+    /*0x08*/ u16 affineParam;
+#else
     /*0x04*/ u16 tileNum:10;    // 0x3FF
              u16 priority:2;    // 0x400, 0x800 -> 0xC00
              u16 paletteNum:4;
     /*0x06*/ u16 affineParam;
+#endif
 };
 
 #define ST_OAM_HFLIP     0x08

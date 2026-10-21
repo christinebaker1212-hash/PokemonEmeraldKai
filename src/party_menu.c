@@ -191,8 +191,8 @@ struct PartyMenuInternal
     MainCallback exitCallback;
     u32 chooseHalf:1;
     u32 lastSelectedSlot:3;  // Used to return to same slot when going left/right bewtween columns
-    u32 spriteIdConfirmPokeball:7;
-    u32 spriteIdCancelPokeball:7;
+    u32 spriteIdConfirmPokeball:8;   // Moemon PC: up to MAX_SPRITES 128
+    u32 spriteIdCancelPokeball:8;
     u32 messageId:14;
     u8 windowId[3];
     u8 actions[9]; // Moemon Co-op: 8 + TEAM (summary, 4 field moves, switch, item, team, cancel)

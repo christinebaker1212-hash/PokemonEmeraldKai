@@ -27,8 +27,23 @@
 
 #define BG_PLTT_SIZE  0x200
 #define OBJ_PLTT      (PLTT + BG_PLTT_SIZE)
-#define OBJ_PLTT_SIZE 0x200
-#define PLTT_SIZE     (BG_PLTT_SIZE + OBJ_PLTT_SIZE)
+#define OBJ_PLTT_SIZE 0x200   // the GBA's 16 sprite palettes
+
+// Moemon PC: graphics memory past the GBA's limits. Sprite palettes 16-63 follow
+// the GBA's 16 in PLTT and the palette buffers (so OBJ_PLTT_ID(n) just works),
+// sprite tiles go up to 4096 (128 KB), OAM has 256 entries, 128 sprites.
+#ifdef PORTABLE
+#define OBJ_PAL_SLOTS       64
+#define OBJ_TILE_COUNT_EXT  4096
+#define OAM_ENTRY_COUNT     256
+#else
+#define OBJ_PAL_SLOTS       16
+#define OBJ_TILE_COUNT_EXT  1024
+#define OAM_ENTRY_COUNT     128
+#endif
+#define OBJ_PLTT_EXT_SIZE   ((OBJ_PAL_SLOTS - 16) * 0x20)   // palettes 16+ (PC only)
+#define OAM_MANUAL_BASE     (OAM_ENTRY_COUNT - 64)          // OAM entries code fills by hand (digits, confetti...)
+#define PLTT_SIZE     (BG_PLTT_SIZE + OBJ_PLTT_SIZE + OBJ_PLTT_EXT_SIZE)
 
 #ifndef PORTABLE
 #define SOUND_INFO_PTR (*(struct SoundInfo **)0x3007FF0)
@@ -51,7 +66,7 @@ extern unsigned char PLTT[PLTT_SIZE] __attribute__ ((aligned (4)));
 
 #define BG_PLTT       PLTT
 
-#define VRAM_SIZE 0x18000
+#define VRAM_SIZE (0x10000 + OBJ_TILE_COUNT_EXT * 0x20)
 #ifndef PORTABLE
 #define VRAM      0x6000000
 #else
@@ -73,13 +88,17 @@ extern unsigned char VRAM_[VRAM_SIZE] __attribute__ ((aligned (4)));
 
 // text-mode BG
 #define OBJ_VRAM0      (VRAM + 0x10000)
-#define OBJ_VRAM0_SIZE 0x8000
+#define OBJ_VRAM0_SIZE (OBJ_TILE_COUNT_EXT * 0x20)
 
 // bitmap-mode BG
 #define OBJ_VRAM1      (VRAM + 0x14000)
 #define OBJ_VRAM1_SIZE 0x4000
 
+#ifdef PORTABLE
+#define OAM_SIZE (OAM_ENTRY_COUNT * 12)   // struct OamData is 12 bytes on PC (wider tile / palette numbers)
+#else
 #define OAM_SIZE 0x400
+#endif
 #ifndef PORTABLE
 #define OAM      0x7000000
 #else
@@ -109,7 +128,7 @@ extern unsigned char OAM[OAM_SIZE] __attribute__ ((aligned (4)));
 #define TILE_OFFSET_4BPP(n) ((n) * TILE_SIZE_4BPP)
 #define TILE_OFFSET_8BPP(n) ((n) * TILE_SIZE_8BPP)
 
-#define TOTAL_OBJ_TILE_COUNT 1024
+#define TOTAL_OBJ_TILE_COUNT OBJ_TILE_COUNT_EXT
 
 #define PLTT_SIZEOF(n) ((n) * sizeof(u16))
 #define PLTT_SIZE_4BPP PLTT_SIZEOF(16)

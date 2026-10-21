@@ -1,0 +1,17 @@
+# Graphics past the GBA's limits: a co-op wild triple with three different ball effects, followers out. Ball and co-op
+# palettes sit in the extra slots (16+), every palette has a slot of its own and nothing runs out of sprites, palettes
+# or tiles
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_C="MOEMON_DEBUG_PARTY=280:15+,283:5"
+EXPECT_A=("ballfx: entrance form 5" "ballfx: entrance form 11" "[test] pals" "co-op: battle over, outcome 1")
+EXPECT_B=("ballfx: entrance form 5" "co-op: battle over, outcome 1")
+EXPECT_C=("ballfx: entrance form 5" "co-op: battle over, outcome 1")
+UNEXPECT_A=("[gfx] out of")
+UNEXPECT_B=("[gfx] out of")
+UNEXPECT_C=("[gfx] out of")

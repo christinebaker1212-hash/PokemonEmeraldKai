@@ -1359,12 +1359,12 @@ static void SpriteCB_Ball_Capture_Step(struct Sprite *sprite)
     if (sprite->sTimer == 40)
     {
         PlaySE(SE_RG_BALL_CLICK);
-        BlendPalettes(0x10000 << sprite->oam.paletteNum, 6, RGB_BLACK);
+        MP_BlendSpritePalette(sprite->oam.paletteNum, 6, RGB_BLACK);   // Moemon PC: the ball may be in slot 16+
         MakeCaptureStars(sprite);
     }
     else if (sprite->sTimer == 60)
     {
-        BeginNormalPaletteFade(0x10000 << sprite->oam.paletteNum, 2, 6, 0, RGB_BLACK);
+        MP_BeginSpritePaletteFade(sprite->oam.paletteNum, 2, 6, 0, RGB_BLACK);
     }
     else if (sprite->sTimer == 95)
     {

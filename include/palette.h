@@ -57,6 +57,9 @@ extern u32 gPlttBufferTransferPending;
 extern u8 ALIGNED(4) gPaletteDecompressionBuffer[];
 extern u16 ALIGNED(4) gPlttBufferUnfaded[PLTT_BUFFER_SIZE];
 extern u16 ALIGNED(4) gPlttBufferFaded[PLTT_BUFFER_SIZE];
+bool8 MP_MaskTakesExtraPalettes(u32 selectedPalettes);   // Moemon PC: sprite palettes 16+ follow broad fades
+void MP_BlendSpritePalette(u8 slot, u8 coeff, u16 color);   // BlendPalettes for one sprite palette, any slot
+void MP_BeginSpritePaletteFade(u8 slot, s8 delay, u8 startY, u8 targetY, u16 color);
 
 void LoadCompressedPalette(const u32 *src, u16 offset, u16 size);
 void LoadPalette(const void *src, u16 offset, u16 size);
