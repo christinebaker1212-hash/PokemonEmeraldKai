@@ -680,6 +680,7 @@ void VDraw(void)
     memset(image, 0, sizeof(sFrameImage));
     DrawFrame(image);
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
+    MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
     if (!sTestMode)
         Display_UploadFrame(image);
     REG_VCOUNT = 161; // prep for being in VBlank period

@@ -328,6 +328,7 @@ static void Cmd_finishaction(void);
 static void Cmd_finishturn(void);
 static void Cmd_trainerslideout(void);
 static void Cmd_mpstatgroup(void);
+static void Cmd_mpcoopresolve(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -581,6 +582,7 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_FINISHTURN]                      = Cmd_finishturn,                              //0xF7
     [B_SCR_OP_TRAINERSLIDEOUT]                 = Cmd_trainerslideout,                         //0xF8
     [B_SCR_OP_MPSTATGROUP]                     = Cmd_mpstatgroup,                             //0xF9
+    [B_SCR_OP_MPCOOPRESOLVE]                   = Cmd_mpcoopresolve,                           //0xFA
 };
 
 struct StatFractions
@@ -3297,6 +3299,233 @@ static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
     }
 }
 
+// Moemon Co-op: every player's EXP at the same time, so a co-op battle goes at a
+// single battle's pace. One "gained EXP" line (each screen names its own
+// Pokémon), every player's EXP given in the same frame (each to their own
+// battler; the other games mirror it), then per round of level-ups one "grew to
+// LV." line, every player's stat boxes and "forget a move?" choices at the same
+// time on their own game (the host waits for all of them: mpcoopresolve), and
+// one line for the moves learned. States 10 to 15 of Cmd_getexp.
+static EWRAM_DATA u16 sMpGain[PARTY_SIZE] = {0};
+static EWRAM_DATA u8 sMpGainBoosted = 0, sMpEmitted = 0, sMpLeveled = 0, sMpLearnMask = 0;
+static EWRAM_DATA u16 sMpLearnMoves[PARTY_SIZE] = {0};
+static EWRAM_DATA u8 sMpEmitBattler[PARTY_SIZE] = {0};
+static EWRAM_DATA u16 sMpBefore[PARTY_SIZE][NUM_STATS] = {0};
+
+static u8 MpCoopSeats(void)
+{
+    return MP_Coop_SeatSize() == 2 ? 3 : 2;
+}
+
+static void MpCoopExpBegin(s32 sentIn, u8 fainted)
+{
+    u8 slot, size = MP_Coop_SeatSize();
+    sMpGainBoosted = sMpEmitted = sMpLeveled = 0;
+    for (slot = 0; slot < PARTY_SIZE; slot++)
+    {
+        struct Pokemon *mon = &gPlayerParty[slot];
+        u16 item = GetMonData(mon, MON_DATA_HELD_ITEM);
+        u8 holdEffect = item == ITEM_ENIGMA_BERRY ? gSaveBlock1Ptr->enigmaBerry.holdEffect : GetItemHoldEffect(item);
+        u8 owner = slot / size;
+        u32 gain;
+        bool8 boosted = FALSE;
+
+        sMpGain[slot] = 0;
+        if (owner >= MpCoopSeats() || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE
+         || GetMonData(mon, MON_DATA_HP) == 0 || GetMonData(mon, MON_DATA_LEVEL) >= MAX_LEVEL)
+            continue;
+        if (!(sentIn & gBitTable[slot]) && holdEffect != HOLD_EFFECT_EXP_SHARE)
+            continue;
+        gain = (sentIn & gBitTable[slot]) ? sMpCoopExp[owner] : 0;
+        if (holdEffect == HOLD_EFFECT_EXP_SHARE)
+            gain += sMpCoopShareExp[owner];
+        if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
+            gain = gain * 150 / 100;
+        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
+            gain = gain * 150 / 100;
+        if (MP_Coop_IsTradedMon(slot))
+        {
+            gain = gain * 150 / 100;
+            boosted = TRUE;
+        }
+        if (MP_Coop_ExpBonusFor(slot) && gain)
+        {
+            gain = gain * (100 + MP_Coop_ExpBonusFor(slot)) / 100;
+            boosted = TRUE;
+        }
+        if (gain == 0)
+            continue;
+        sMpGain[slot] = gain > 0xFFFF ? 0xFFFF : gain;
+        if (boosted)
+            sMpGainBoosted |= gBitTable[slot];
+        MonGainEVs(mon, gBattleMons[fainted].species);
+        MPNet_Log("co-op exp: slot %d +%d (bonus %d%%)", slot, (int)sMpGain[slot], MP_Coop_ExpBonusFor(slot));
+    }
+}
+
+static void MpCoopUpdateBattleMon(u8 slot)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        struct Pokemon *mon = &gPlayerParty[slot];
+        if (GetBattlerSide(b) != B_SIDE_PLAYER || gBattlerPartyIndexes[b] != slot || gBattleMons[b].hp == 0)
+            continue;
+        gBattleMons[b].level = GetMonData(mon, MON_DATA_LEVEL);
+        gBattleMons[b].hp = GetMonData(mon, MON_DATA_HP);
+        gBattleMons[b].maxHP = GetMonData(mon, MON_DATA_MAX_HP);
+        gBattleMons[b].attack = GetMonData(mon, MON_DATA_ATK);
+        gBattleMons[b].defense = GetMonData(mon, MON_DATA_DEF);
+        gBattleMons[b].speed = GetMonData(mon, MON_DATA_SPEED);
+        gBattleMons[b].spAttack = GetMonData(mon, MON_DATA_SPATK);
+        gBattleMons[b].spDefense = GetMonData(mon, MON_DATA_SPDEF);
+    }
+}
+
+static void MpCoopGiveMoveToBattleMons(u8 slot, u16 move)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (GetBattlerSide(b) == B_SIDE_PLAYER && gBattlerPartyIndexes[b] == slot
+         && !(gBattleMons[b].status2 & STATUS2_TRANSFORMED))
+            GiveMoveToBattleMon(&gBattleMons[b], move);
+}
+
+static void MpCoopExpStep(void)
+{
+    u8 slot, seat, size = MP_Coop_SeatSize();
+
+    if (gBattleControllerExecFlags)
+        return;
+    switch (gBattleScripting.getexpState)
+    {
+    case 10: // the one "gained EXP" line
+        for (slot = 0; slot < PARTY_SIZE && !sMpGain[slot]; slot++)
+            ;
+        if (slot == PARTY_SIZE)
+        {
+            gBattleScripting.getexpState = 6;
+            break;
+        }
+        if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gBattleStruct->wildVictorySong)
+        {
+            BattleStopLowHpSound();
+            PlayBGM(MUS_VICTORY_WILD);
+            gBattleStruct->wildVictorySong++;
+        }
+        // gains in buffer 1 (u16 per slot), boosted mask in buffer 2: each screen words it (BufferStringBattle)
+        for (slot = 0; slot < PARTY_SIZE; slot++)
+        {
+            gBattleTextBuff1[slot * 2] = sMpGain[slot];
+            gBattleTextBuff1[slot * 2 + 1] = sMpGain[slot] >> 8;
+        }
+        gBattleTextBuff2[0] = sMpGainBoosted;
+        PrepareStringBattle(STRINGID_MP_EXP_ALL, GetBattlerAtPosition(B_POSITION_PLAYER_LEFT));
+        gBattleScripting.getexpState = 11;
+        break;
+    case 11: // give: one Pokémon per player at a time, all players at once
+        sMpEmitted = 0;
+        for (seat = 0; seat < MpCoopSeats(); seat++)
+        {
+            for (slot = seat * size; slot < (seat + 1) * size; slot++)
+            {
+                struct Pokemon *mon = &gPlayerParty[slot];
+                if (!sMpGain[slot])
+                    continue;
+                if (GetMonData(mon, MON_DATA_LEVEL) >= MAX_LEVEL)
+                {
+                    sMpGain[slot] = 0;
+                    continue;
+                }
+                sMpBefore[slot][STAT_HP]    = GetMonData(mon, MON_DATA_MAX_HP);
+                sMpBefore[slot][STAT_ATK]   = GetMonData(mon, MON_DATA_ATK);
+                sMpBefore[slot][STAT_DEF]   = GetMonData(mon, MON_DATA_DEF);
+                sMpBefore[slot][STAT_SPEED] = GetMonData(mon, MON_DATA_SPEED);
+                sMpBefore[slot][STAT_SPATK] = GetMonData(mon, MON_DATA_SPATK);
+                sMpBefore[slot][STAT_SPDEF] = GetMonData(mon, MON_DATA_SPDEF);
+                gActiveBattler = seat * 2;   // the player's own battler (link player i = battler 2i)
+                gBattleBufferB[gActiveBattler][0] = 0;
+                sMpEmitBattler[slot] = gActiveBattler;
+                BtlController_EmitExpUpdate(B_COMM_TO_CONTROLLER, slot, sMpGain[slot]);
+                MarkBattlerForControllerExec(gActiveBattler);
+                sMpEmitted |= gBitTable[slot];
+                break;
+            }
+        }
+        gBattleScripting.getexpState = sMpEmitted ? 12 : 6;
+        break;
+    case 12: // results: level-ups this round
+        sMpLeveled = 0;
+        for (slot = 0; slot < PARTY_SIZE; slot++)
+        {
+            u8 b = sMpEmitBattler[slot];
+            if (!(sMpEmitted & gBitTable[slot]))
+                continue;
+            if (gBattleBufferB[b][0] == CONTROLLER_TWORETURNVALUES && gBattleBufferB[b][1] == RET_VALUE_LEVELED_UP)
+            {
+                sMpGain[slot] = gBattleBufferB[b][2] | (gBattleBufferB[b][3] << 8);
+                sMpLeveled |= gBitTable[slot];
+                gLeveledUpInBattle |= gBitTable[slot];
+                AdjustFriendship(&gPlayerParty[slot], FRIENDSHIP_EVENT_GROW_LEVEL);
+                MpCoopUpdateBattleMon(slot);
+            }
+            else
+            {
+                sMpGain[slot] = 0;
+            }
+        }
+        sMpEmitted = 0;
+        if (!sMpLeveled)
+        {
+            gBattleScripting.getexpState = 11;
+            break;
+        }
+        // levels in buffer 1 (0 = didn't level this round)
+        for (slot = 0; slot < PARTY_SIZE; slot++)
+            gBattleTextBuff1[slot] = (sMpLeveled & gBitTable[slot]) ? GetMonData(&gPlayerParty[slot], MON_DATA_LEVEL) : 0;
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_MpCoopGrew;
+        gBattleScripting.getexpState = 14;
+        break;
+    case 14: // the moves they learn at the new level without forgetting one; the rest go to state 15
+    {
+        sMpLearnMask = 0;
+        memset(sMpLearnMoves, 0, sizeof(sMpLearnMoves));
+        MP_Coop_ResolveReset();
+        for (slot = 0; slot < PARTY_SIZE; slot++)
+        {
+            struct Pokemon *mon = &gPlayerParty[slot];
+            u16 move;
+            if (!(sMpLeveled & gBitTable[slot]))
+                continue;
+            MP_Coop_ResolveAddBox(slot, sMpBefore[slot]);
+            for (move = MonTryLearningNewMove(mon, TRUE); move != MOVE_NONE; move = MonTryLearningNewMove(mon, FALSE))
+            {
+                if (move == MON_ALREADY_KNOWS_MOVE)
+                    continue;
+                if (move == MON_HAS_MAX_MOVES)
+                {
+                    MP_Coop_ResolveAddLearn(slot, gMoveToLearn);   // its owner picks one to forget
+                    continue;
+                }
+                MpCoopGiveMoveToBattleMons(slot, move);
+                sMpLearnMoves[slot] = move;
+                sMpLearnMask |= gBitTable[slot];
+            }
+        }
+        sMpLeveled = 0;
+        gBattleScripting.getexpState = 15;
+        break;
+    }
+    case 15: // everyone at once, each on their own game: stat boxes, moves to forget; then one "learned" line
+        gBattleScripting.getexpState = 11;   // what's left of their EXP, and the next ones
+        gBattleScripting.learnMoveState = 0;
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_MpCoopResolve;
+        break;
+    }
+}
+
 static void Cmd_getexp(void)
 {
     u16 item;
@@ -3380,6 +3609,13 @@ static void Cmd_getexp(void)
             gBattleScripting.getexpState++;
             gBattleStruct->expGetterMonId = 0;
             gBattleStruct->sentInPokes = sentIn;
+            // Moemon Co-op: everyone's EXP at once (MpCoopExpStep)
+            if (gMpCoopBattle)
+            {
+                MpCoopExpBegin(sentIn, gBattlerFainted);
+                gBattleScripting.getexpState = 10;
+                break;
+            }
         }
         // fall through
     case 2: // set exp value to the poke in expgetter_id and print message
@@ -3586,6 +3822,13 @@ static void Cmd_getexp(void)
             else
                 gBattleScripting.getexpState = 6; // we're done
         }
+        break;
+    case 10:
+    case 11:
+    case 12:
+    case 14:
+    case 15:
+        MpCoopExpStep();
         break;
     case 6: // increment instruction
         if (gBattleControllerExecFlags == 0)
@@ -5517,6 +5760,15 @@ static void Cmd_handlelearnnewmove(void)
         {
             gActiveBattler = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT);
             if (gBattlerPartyIndexes[gActiveBattler] == gBattleStruct->expGetterMonId
+                && !(gBattleMons[gActiveBattler].status2 & STATUS2_TRANSFORMED))
+            {
+                GiveMoveToBattleMon(&gBattleMons[gActiveBattler], learnMove);
+            }
+        }
+        if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the center one
+        {
+            gActiveBattler = GetBattlerAtPosition(B_POSITION_PLAYER_CENTER);
+            if (gActiveBattler < gBattlersCount && gBattlerPartyIndexes[gActiveBattler] == gBattleStruct->expGetterMonId
                 && !(gBattleMons[gActiveBattler].status2 & STATUS2_TRANSFORMED))
             {
                 GiveMoveToBattleMon(&gBattleMons[gActiveBattler], learnMove);
@@ -10843,3 +11095,371 @@ static void Cmd_mpstatgroup(void)
     gMpStatGroupMask = 0;
     gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }
+
+// Moemon Co-op (master): wait while every player goes through their stat boxes and
+// moves to forget (MP_Coop_StartResolveTask on each game), then give the chosen
+// moves and show one line for all the moves learned this round.
+static void Cmd_mpcoopresolve(void)
+{
+    u8 i, b;
+
+    if (gBattleScripting.learnMoveState == 0)
+    {
+        if (!MP_Coop_ResolveAny())
+        {
+            gBattlescriptCurrInstr++;
+            return;
+        }
+        MP_Coop_ResolveStart();
+        gBattleScripting.learnMoveState = 1;
+        return;
+    }
+    if (MP_Coop_ResolveWaiting())
+        return;
+    gBattleScripting.learnMoveState = 0;
+    for (i = 0; i < MP_Coop_ResolveLearnCount(); i++)
+    {
+        u8 slot;
+        u16 move;
+        u8 pos = MP_Coop_ResolveLearn(i, &slot, &move);
+        if (pos >= MAX_MON_MOVES || slot >= PARTY_SIZE)
+            continue;
+        RemoveMonPPBonus(&gPlayerParty[slot], pos);
+        SetMonMoveSlot(&gPlayerParty[slot], move, pos);
+        for (b = 0; b < gBattlersCount; b++)
+        {
+            if (GetBattlerSide(b) == B_SIDE_PLAYER && gBattlerPartyIndexes[b] == slot && MOVE_IS_PERMANENT(b, pos))
+            {
+                RemoveBattleMonPPBonus(&gBattleMons[b], pos);
+                SetBattleMonMoveSlot(&gBattleMons[b], move, pos);
+            }
+        }
+        MPNet_Log("co-op levels: slot %d forgot move slot %d for %d", slot, pos, move);
+        sMpLearnMoves[slot] = move;
+        sMpLearnMask |= gBitTable[slot];
+    }
+    if (sMpLearnMask == 0)
+    {
+        gBattlescriptCurrInstr++;
+        return;
+    }
+    // moves in buffer 1 (u16 per slot), who learned in buffer 2: each screen words it
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        gBattleTextBuff1[i * 2] = sMpLearnMoves[i];
+        gBattleTextBuff1[i * 2 + 1] = sMpLearnMoves[i] >> 8;
+    }
+    gBattleTextBuff2[0] = sMpLearnMask;
+    sMpLearnMask = 0;
+    gBattlescriptCurrInstr = BattleScript_MpCoopLearnedAll;   // returns where state 15 left off
+}
+
+// Moemon Co-op (every game): this player's own level-up stat boxes, then for each
+// move that needs one forgotten "can't learn more than four moves", delete one?,
+// the summary screen, "stop trying to teach it?" - as in a single battle - while
+// the other players do theirs. The answers go to the master (Cmd_mpcoopresolve).
+static const u8 sText_MpLearnTrying[] = _("{STR_VAR_1} is trying to\nlearn {STR_VAR_2}.");
+static const u8 sText_MpLearnFull[] = _("But {STR_VAR_1} can't learn\nmore than four moves.");
+static const u8 sText_MpLearnDelete[] = _("Delete a move to make\nroom for {STR_VAR_2}?");
+static const u8 sText_MpLearnStop[] = _("Stop trying to teach\n{STR_VAR_2}?");
+static const u8 sText_MpLearnHm[] = _("HM moves can't be\nforgotten now.");
+static const u8 sText_MpLearnForgot[] = _("{STR_VAR_1} forgot {STR_VAR_3}\nand learned {STR_VAR_2}!");
+static const u8 sText_MpLearnNot[] = _("{STR_VAR_1} did not learn\n{STR_VAR_2}.");
+static const u8 sText_MpLearnWaiting[] = _("Waiting for the others…");
+
+#define MP_RESOLVE_MAX 12
+static EWRAM_DATA struct
+{
+    u8 nBox, nLearn;
+    u8 boxSlot[PARTY_SIZE];
+    u16 before[PARTY_SIZE][NUM_STATS];
+    u8 learnSlot[MP_RESOLVE_MAX];
+    u16 learnMove[MP_RESOLVE_MAX];
+    u8 answer[MP_RESOLVE_MAX];
+    u8 hidden;   // our side's healthboxes hidden meanwhile (in triples they'd cover the boxes)
+} sMpRes = {0};
+
+// The level-up box and the YES/NO box sit where our side's healthboxes are
+static void MpResHideHealthboxes(void)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+    {
+        if (GetBattlerSide(b) != B_SIDE_PLAYER || gSprites[gHealthboxSpriteIds[b]].invisible)
+            continue;
+        sMpRes.hidden |= gBitTable[b];
+        SetHealthboxSpriteInvisible(gHealthboxSpriteIds[b]);
+    }
+}
+
+static void MpResShowHealthboxes(void)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (sMpRes.hidden & gBitTable[b])
+            SetHealthboxSpriteVisible(gHealthboxSpriteIds[b]);
+    sMpRes.hidden = 0;
+}
+
+#define tState  data[0]
+#define tTimer  data[1]
+#define tCursor data[2]
+#define tIndex  data[3]
+
+enum
+{
+    MPR_WAIT, MPR_BOX, MPR_BOX_RUN, MPR_LEARN, MPR_FULL, MPR_DELETE, MPR_YESNO, MPR_FADE, MPR_SUMMARY,
+    MPR_MSG, MPR_STOP_YESNO, MPR_NEXT, MPR_DONE,
+};
+
+static void MpResPrint(const u8 *text, u8 slot, u16 move, u16 oldMove)
+{
+    GetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+    StringCopy(gStringVar2, gMoveNames[move < MOVES_COUNT ? move : 0]);
+    StringCopy(gStringVar3, gMoveNames[oldMove < MOVES_COUNT ? oldMove : 0]);
+    StringExpandPlaceholders(gDisplayedStringBattle, text);
+    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MSG);
+}
+
+// 0 nothing yet, 1 yes, 2 no
+static u8 MpResYesNo(s16 *data)
+{
+    if (tTimer == 0)
+    {
+        if (IsTextPrinterActive(B_WIN_MSG))
+            return 0;
+        HandleBattleWindow(YESNOBOX_X_Y, 0);
+        BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
+        tCursor = 0;
+        BattleCreateYesNoCursorAt(0);
+        tTimer = 1;
+        return 0;
+    }
+    if (JOY_NEW(DPAD_UP) && tCursor != 0)
+    {
+        PlaySE(SE_SELECT);
+        BattleDestroyYesNoCursorAt(tCursor);
+        tCursor = 0;
+        BattleCreateYesNoCursorAt(0);
+    }
+    if (JOY_NEW(DPAD_DOWN) && tCursor == 0)
+    {
+        PlaySE(SE_SELECT);
+        BattleDestroyYesNoCursorAt(tCursor);
+        tCursor = 1;
+        BattleCreateYesNoCursorAt(1);
+    }
+    if (JOY_NEW(A_BUTTON) || JOY_NEW(B_BUTTON))
+    {
+        u8 answer = (JOY_NEW(A_BUTTON) && tCursor == 0) ? 1 : 2;
+        PlaySE(SE_SELECT);
+        HandleBattleWindow(YESNOBOX_X_Y, WINDOW_CLEAR);
+        tTimer = 0;
+        return answer;
+    }
+    return 0;
+}
+
+// a message, then the next state after a button (or a moment)
+static void MpResMessage(s16 *data, const u8 *text, u8 slot, u16 move, u16 oldMove, u8 next)
+{
+    MpResPrint(text, slot, move, oldMove);
+    tTimer = 0;
+    data[4] = next;
+    tState = MPR_MSG;
+}
+
+static void Task_MpCoopResolve(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u8 slot = sMpRes.learnSlot[tIndex];
+    u16 move = sMpRes.learnMove[tIndex];
+
+    if (!gMpCoopBattle || !gMain.inBattle)
+    {
+        DestroyTask(taskId);
+        return;
+    }
+    // hidden from the first box to the end (the summary screen's return shows them again)
+    if (tState != MPR_WAIT && tState != MPR_DONE && gMain.callback2 == BattleMainCB2)
+        MpResHideHealthboxes();
+    switch (tState)
+    {
+    case MPR_WAIT:   // the "grew to LV." line is still showing here
+        if (gMain.callback2 != BattleMainCB2 || IsTextPrinterActive(B_WIN_MSG))
+            tTimer = 0;
+        else if (++tTimer >= 16)
+        {
+            tIndex = 0;
+            tState = MPR_BOX;
+        }
+        break;
+    case MPR_BOX:
+        if (tIndex >= sMpRes.nBox)
+        {
+            tIndex = 0;
+            tState = MPR_LEARN;
+            break;
+        }
+        gBattleStruct->expGetterMonId = sMpRes.boxSlot[tIndex];
+        memcpy(gBattleResources->beforeLvlUp->stats, sMpRes.before[tIndex], sizeof(sMpRes.before[0]));
+        gBattleScripting.drawlvlupboxState = 0;
+        tState = MPR_BOX_RUN;
+        // fall through
+    case MPR_BOX_RUN:
+    {
+        // the battle script's own stat box, run here (the host's script is waiting meanwhile)
+        static const u8 sDone[2] = {0};
+        const u8 *saved = gBattlescriptCurrInstr;
+        bool8 done;
+        gBattlescriptCurrInstr = sDone;
+        Cmd_drawlvlupbox();
+        done = (gBattlescriptCurrInstr != sDone);
+        gBattlescriptCurrInstr = saved;
+        if (done)
+        {
+            tIndex++;
+            tState = MPR_BOX;
+        }
+        break;
+    }
+    case MPR_LEARN:
+        if (tIndex >= sMpRes.nLearn)
+        {
+            tState = MPR_DONE;
+            break;
+        }
+        sMpRes.answer[tIndex] = 0xFF;
+        MpResMessage(data, sText_MpLearnTrying, slot, move, 0, MPR_FULL);
+        break;
+    case MPR_FULL:
+        MpResMessage(data, sText_MpLearnFull, slot, move, 0, MPR_DELETE);
+        break;
+    case MPR_DELETE:
+        MPNet_Log("co-op levels: delete a move for %d?", move);
+        MpResPrint(sText_MpLearnDelete, slot, move, 0);
+        tTimer = 0;
+        tState = MPR_YESNO;
+        break;
+    case MPR_YESNO:
+        switch (MpResYesNo(data))
+        {
+        case 1:
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            tState = MPR_FADE;
+            break;
+        case 2:
+            MPNet_Log("co-op levels: stop teaching %d?", move);
+            MpResPrint(sText_MpLearnStop, slot, move, 0);
+            tState = MPR_STOP_YESNO;
+            break;
+        }
+        break;
+    case MPR_FADE:
+        if (!gPaletteFade.active)
+        {
+            FreeAllWindowBuffers();
+            ShowSelectMovePokemonSummaryScreen(gPlayerParty, slot, gPlayerPartyCount - 1, ReshowBattleScreenAfterMenu, move);
+            tState = MPR_SUMMARY;
+        }
+        break;
+    case MPR_SUMMARY:
+        if (!gPaletteFade.active && gMain.callback2 == BattleMainCB2)
+        {
+            u8 pos = GetMoveSlotToReplace();
+            if (pos >= MAX_MON_MOVES)
+            {
+                MPNet_Log("co-op levels: stop teaching %d?", move);
+                MpResPrint(sText_MpLearnStop, slot, move, 0);
+                tTimer = 0;
+                tState = MPR_STOP_YESNO;
+            }
+            else if (IsHMMove2(GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + pos)))
+            {
+                MpResMessage(data, sText_MpLearnHm, slot, move, 0, MPR_DELETE);
+            }
+            else
+            {
+                u16 oldMove = GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + pos);
+                sMpRes.answer[tIndex] = pos;
+                if (!MP_Coop_IsMaster())
+                {
+                    // our copy too (the master's party, sent after the battle, says the same)
+                    RemoveMonPPBonus(&gPlayerParty[slot], pos);
+                    SetMonMoveSlot(&gPlayerParty[slot], move, pos);
+                }
+                MpResMessage(data, sText_MpLearnForgot, slot, move, oldMove, MPR_NEXT);
+            }
+        }
+        break;
+    case MPR_STOP_YESNO:
+        switch (MpResYesNo(data))
+        {
+        case 1:
+            MpResMessage(data, sText_MpLearnNot, slot, move, 0, MPR_NEXT);
+            break;
+        case 2:
+            tState = MPR_DELETE;
+            break;
+        }
+        break;
+    case MPR_MSG:
+        if (!IsTextPrinterActive(B_WIN_MSG) && (JOY_NEW(A_BUTTON | B_BUTTON) || ++tTimer >= 50))
+            tState = data[4];
+        break;
+    case MPR_NEXT:
+        tIndex++;
+        tState = MPR_LEARN;
+        break;
+    case MPR_DONE:
+        MpResShowHealthboxes();
+        if (!MP_Coop_IsMaster())
+            BattlePutTextOnWindow(sText_MpLearnWaiting, B_WIN_MSG);   // the host's next line replaces it
+        MP_Coop_ResolveFinished(sMpRes.answer, sMpRes.nLearn);
+        DestroyTask(taskId);
+        break;
+    }
+}
+
+void MP_Coop_StartResolveTask(u8 nBox, const u8 *boxSlot, const u16 (*before)[6], u8 nLearn, const u8 *learnSlot, const u16 *learnMove)
+{
+    u8 taskId, i;
+    if (FuncIsActiveTask(Task_MpCoopResolve))
+        DestroyTask(FindTaskIdByFunc(Task_MpCoopResolve));
+    MpResShowHealthboxes();
+    if (nBox > PARTY_SIZE)
+        nBox = PARTY_SIZE;
+    if (nLearn > MP_RESOLVE_MAX)
+        nLearn = MP_RESOLVE_MAX;
+    sMpRes.nBox = 0;
+    for (i = 0; i < nBox; i++)
+    {
+        if (boxSlot[i] >= PARTY_SIZE)
+            continue;
+        sMpRes.boxSlot[sMpRes.nBox] = boxSlot[i];
+        memcpy(sMpRes.before[sMpRes.nBox], before[i], sizeof(sMpRes.before[0]));
+        sMpRes.nBox++;
+    }
+    sMpRes.nLearn = nLearn;
+    for (i = 0; i < nLearn; i++)
+    {
+        sMpRes.learnSlot[i] = learnSlot[i] < PARTY_SIZE ? learnSlot[i] : 0;
+        sMpRes.learnMove[i] = learnMove[i];
+        sMpRes.answer[i] = 0xFF;
+    }
+    taskId = CreateTask(Task_MpCoopResolve, 1);
+    gTasks[taskId].tState = MPR_WAIT;
+    gTasks[taskId].tTimer = 0;
+    gTasks[taskId].tIndex = 0;
+}
+
+bool8 MP_Coop_ResolveTaskActive(void)
+{
+    return FuncIsActiveTask(Task_MpCoopResolve);
+}
+
+#undef tState
+#undef tTimer
+#undef tCursor
+#undef tIndex

@@ -393,6 +393,9 @@
 #define STRINGID_MP_GROUP_STAT_UP           398
 #define STRINGID_MP_GROUP_STAT_UP2          399
 #define STRINGID_MP_GROUP_STAT_NOLOWER      400   // "... won't go any lower!"
+#define STRINGID_MP_EXP_ALL                 401   // co-op: everyone's EXP, each screen names its own
+#define STRINGID_MP_GREW_ALL                402   // co-op: everyone's level-ups this round
+#define STRINGID_MP_LEARN_ALL               403   // co-op: the moves they learned (or can learn after the battle)
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

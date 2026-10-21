@@ -96,6 +96,10 @@ enum {
     MPR_COOP_BSTATUS,                   // in a co-op battle -> partner: u8 MP_BST_* (what we're choosing)
     MPR_COOP_BONUS,                     // battle start -> partner: u16 own EXP bonus percent (MP_ExpBonusPercent)
     MPR_COOP_REFUND,                    // master -> partner: u16 ball that went back to your bag (its target was gone)
+    MPR_COOP_RESOLVE,                   // master -> owner: their level-up boxes and full-move-set learns this round
+                                        // (u8 nBox, u8 nLearn, nBox * {slot, 6 u16 stats before},
+                                        // nLearn * {slot, u16 move, 4 u16 moves, 4 u8 PP}), all players at once
+    MPR_COOP_RESOLVE_DONE,              // owner -> master: u8 n, n * u8 move slot forgotten (0xFF = didn't learn)
 };
 
 #define WAIT_RESEND_FRAMES 60    // the waiting player repeats MPR_COOP_WAIT this often
@@ -512,6 +516,9 @@ static void EndChallenge(u8 reason)
 // A Triple Battle needs a trainer who has 3+ Pokémon of their own (before the
 // co-op padding) and an ordinary one-trainer battle (not Twins and the like;
 // rematches and battles without intro text are fine)
+static void OnResolve(const u8 *data, u32 len);
+static void OnResolveDone(s8 from, const u8 *data, u32 len);
+
 static bool8 TripleEligible(void)
 {
     return gTrainers[sCoop.trainerId].partySize >= 3
@@ -2613,6 +2620,14 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
     case MPR_COOP_WILD_CANCEL:
         OnWildRelay(from, data, len);
         break;
+    case MPR_COOP_RESOLVE:
+        if (gMpCoopBattle && !sCoop.isMaster && from == sCoop.seatPlayer[0])
+            OnResolve(data, len);
+        break;
+    case MPR_COOP_RESOLVE_DONE:
+        if (gMpCoopBattle && sCoop.isMaster)
+            OnResolveDone(from, data, len);
+        break;
     case MPR_COOP_RESULT:
         if (gMpCoopBattle && !sCoop.isMaster && from == sCoop.seatPlayer[0] && len >= 9)
         {
@@ -2681,4 +2696,256 @@ void MP_Coop_OnPlayerLeft(u8 id)
     if (sCoop.declinedBy == id)
         sCoop.declinedBy = -1;
     // An asker waiting on this player is told by UpdateAsking
+}
+
+// ---------------------------------------------------------------------------
+// Level-ups in a co-op battle, everyone at once: each round the master hands
+// every player their own level-up stat boxes and the moves that need one
+// forgotten; all players (the master too) go through theirs on their own game
+// at the same time (battle_script_commands.c, MP_Coop_StartResolveTask) and the
+// master waits until everyone is done (mpcoopresolve).
+
+#define MAX_RESOLVE_LEARN 12
+static EWRAM_DATA struct
+{
+    u8 nBox, nLearn;
+    u8 boxSlot[PARTY_SIZE];
+    u16 before[PARTY_SIZE][NUM_STATS];
+    u8 learnSlot[MAX_RESOLVE_LEARN];
+    u16 learnMove[MAX_RESOLVE_LEARN];
+    u8 answer[MAX_RESOLVE_LEARN];
+    bool8 pending[MP_MAX_PLAYERS];
+    bool8 selfPending;
+} sResolve = {0};
+
+void MP_Coop_ResolveReset(void)
+{
+    memset(&sResolve, 0, sizeof(sResolve));
+}
+
+void MP_Coop_ResolveAddBox(u8 slot, const u16 *before)
+{
+    if (sResolve.nBox >= PARTY_SIZE)
+        return;
+    sResolve.boxSlot[sResolve.nBox] = slot;
+    memcpy(sResolve.before[sResolve.nBox], before, sizeof(sResolve.before[0]));
+    sResolve.nBox++;
+}
+
+void MP_Coop_ResolveAddLearn(u8 slot, u16 move)
+{
+    if (sResolve.nLearn >= MAX_RESOLVE_LEARN)
+        return;
+    sResolve.learnSlot[sResolve.nLearn] = slot;
+    sResolve.learnMove[sResolve.nLearn] = move;
+    sResolve.answer[sResolve.nLearn] = 0xFF;
+    sResolve.nLearn++;
+}
+
+bool8 MP_Coop_ResolveAny(void)
+{
+    return sResolve.nBox || sResolve.nLearn;
+}
+
+static bool8 ResolveMine(u8 slot, s8 player)
+{
+    return MP_Coop_SlotOwnerPlayer(slot) == player;
+}
+
+// Sends each player their part and starts ours
+void MP_Coop_ResolveStart(void)
+{
+    u8 buf[4 + PARTY_SIZE * 13 + MAX_RESOLVE_LEARN * 15];
+    u8 boxSlot[PARTY_SIZE], learnSlot[MAX_RESOLVE_LEARN], nb, nl, i, k;
+    u16 before[PARTY_SIZE][NUM_STATS], learnMove[MAX_RESOLVE_LEARN];
+    s8 p;
+
+    for (p = 0; p < MP_MAX_PLAYERS; p++)
+    {
+        u32 len = 3;
+        sResolve.pending[p] = FALSE;
+        if (!PlayerValid(p))
+            continue;
+        nb = nl = 0;
+        buf[0] = MPR_COOP_RESOLVE;
+        for (i = 0; i < sResolve.nBox; i++)
+        {
+            if (!ResolveMine(sResolve.boxSlot[i], p))
+                continue;
+            buf[len++] = sResolve.boxSlot[i];
+            for (k = 0; k < NUM_STATS; k++)
+            {
+                buf[len++] = sResolve.before[i][k] & 0xFF;
+                buf[len++] = sResolve.before[i][k] >> 8;
+            }
+            nb++;
+        }
+        for (i = 0; i < sResolve.nLearn; i++)
+        {
+            struct Pokemon *mon = &gPlayerParty[sResolve.learnSlot[i]];
+            if (!ResolveMine(sResolve.learnSlot[i], p))
+                continue;
+            buf[len++] = sResolve.learnSlot[i];
+            buf[len++] = sResolve.learnMove[i] & 0xFF;
+            buf[len++] = sResolve.learnMove[i] >> 8;
+            // its moves as we have them (their copy may miss one learned earlier in the battle)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = GetMonData(mon, MON_DATA_MOVE1 + k);
+                buf[len++] = m & 0xFF;
+                buf[len++] = m >> 8;
+            }
+            for (k = 0; k < MAX_MON_MOVES; k++)
+                buf[len++] = GetMonData(mon, MON_DATA_PP1 + k);
+            nl++;
+        }
+        if (nb == 0 && nl == 0)
+            continue;
+        buf[1] = nb;
+        buf[2] = nl;
+        sResolve.pending[p] = TRUE;
+        MPNet_Log("co-op levels: player %d has %d box(es), %d move(s) to choose", p + 1, nb, nl);
+        Send(p, buf, len);
+    }
+
+    nb = nl = 0;
+    for (i = 0; i < sResolve.nBox; i++)
+    {
+        if (!ResolveMine(sResolve.boxSlot[i], -1))
+            continue;
+        boxSlot[nb] = sResolve.boxSlot[i];
+        memcpy(before[nb], sResolve.before[i], sizeof(before[0]));
+        nb++;
+    }
+    for (i = 0; i < sResolve.nLearn; i++)
+    {
+        if (!ResolveMine(sResolve.learnSlot[i], -1))
+            continue;
+        learnSlot[nl] = sResolve.learnSlot[i];
+        learnMove[nl] = sResolve.learnMove[i];
+        nl++;
+    }
+    sResolve.selfPending = (nb || nl);
+    if (sResolve.selfPending)
+        MP_Coop_StartResolveTask(nb, boxSlot, before, nl, learnSlot, learnMove);
+}
+
+// The answers for one player's learns, in the order they were sent
+static void ResolveAnswers(s8 player, const u8 *answers, u8 n)
+{
+    u8 i, k = 0;
+    for (i = 0; i < sResolve.nLearn; i++)
+    {
+        if (!ResolveMine(sResolve.learnSlot[i], player))
+            continue;
+        sResolve.answer[i] = (k < n && answers[k] < MAX_MON_MOVES) ? answers[k] : 0xFF;
+        k++;
+    }
+}
+
+static void OnResolveDone(s8 from, const u8 *data, u32 len)
+{
+    if (from < 0 || from >= MP_MAX_PLAYERS || !sResolve.pending[from] || len < 2 || len < 2u + data[1])
+        return;
+    ResolveAnswers(from, data + 2, data[1]);
+    sResolve.pending[from] = FALSE;
+    MPNet_Log("co-op levels: player %d is done", from + 1);
+}
+
+// TRUE while someone is still looking at a stat box or choosing a move
+bool8 MP_Coop_ResolveWaiting(void)
+{
+    s8 p;
+    if (sResolve.selfPending && !MP_Coop_ResolveTaskActive())
+        sResolve.selfPending = FALSE;
+    if (sResolve.selfPending)
+        return TRUE;
+    for (p = 0; p < MP_MAX_PLAYERS; p++)
+    {
+        if (!sResolve.pending[p])
+            continue;
+        if (!PlayerValid(p) || !gMpCoopBattle)
+            sResolve.pending[p] = FALSE;   // gone: their moves stay as they were
+        else
+            return TRUE;
+    }
+    return FALSE;
+}
+
+u8 MP_Coop_ResolveLearnCount(void)
+{
+    return sResolve.nLearn;
+}
+
+// The learn and the move slot forgotten for it (0xFF = didn't learn it)
+u8 MP_Coop_ResolveLearn(u8 i, u8 *slot, u16 *move)
+{
+    *slot = sResolve.learnSlot[i];
+    *move = sResolve.learnMove[i];
+    return sResolve.answer[i];
+}
+
+// Our task is done (any game): the master keeps the answers, the others send them
+void MP_Coop_ResolveFinished(const u8 *answers, u8 n)
+{
+    u8 buf[2 + MAX_RESOLVE_LEARN], i;
+    if (sCoop.isMaster)
+    {
+        ResolveAnswers(-1, answers, n);
+        sResolve.selfPending = FALSE;
+        return;
+    }
+    if (n > MAX_RESOLVE_LEARN)
+        n = MAX_RESOLVE_LEARN;
+    buf[0] = MPR_COOP_RESOLVE_DONE;
+    buf[1] = n;
+    for (i = 0; i < n; i++)
+        buf[2 + i] = answers[i];
+    MPNet_Log("co-op levels: done (%d move(s) chosen)", n);
+    Send(sCoop.seatPlayer[0], buf, 2 + n);
+}
+
+static void OnResolve(const u8 *data, u32 len)
+{
+    u8 boxSlot[PARTY_SIZE], learnSlot[MAX_RESOLVE_LEARN], nb, nl, i, k;
+    u16 before[PARTY_SIZE][NUM_STATS], learnMove[MAX_RESOLVE_LEARN];
+    u32 pos = 3;
+
+    if (len < 3)
+        return;
+    nb = data[1];
+    nl = data[2];
+    if (nb > PARTY_SIZE || nl > MAX_RESOLVE_LEARN || len < 3u + nb * 13 + nl * 15)
+        return;
+    for (i = 0; i < nb; i++)
+    {
+        boxSlot[i] = data[pos++];
+        for (k = 0; k < NUM_STATS; k++, pos += 2)
+            before[i][k] = data[pos] | (data[pos + 1] << 8);
+    }
+    for (i = 0; i < nl; i++)
+    {
+        struct Pokemon *mon;
+        u8 slot = data[pos++];
+        learnSlot[i] = slot;
+        learnMove[i] = data[pos] | (data[pos + 1] << 8);
+        pos += 2;
+        mon = slot < PARTY_SIZE ? &gPlayerParty[slot] : NULL;
+        // the first time we see this Pokémon, its moves as the master has them
+        for (k = 0; k < i && learnSlot[k] != slot; k++)
+            ;
+        if (mon != NULL && k == i)
+        {
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = data[pos + k * 2] | (data[pos + k * 2 + 1] << 8);
+                u8 pp = data[pos + MAX_MON_MOVES * 2 + k];
+                SetMonData(mon, MON_DATA_MOVE1 + k, &m);
+                SetMonData(mon, MON_DATA_PP1 + k, &pp);
+            }
+        }
+        pos += MAX_MON_MOVES * 3;
+    }
+    MPNet_Log("co-op levels: %d box(es), %d move(s) to choose", nb, nl);
+    MP_Coop_StartResolveTask(nb, boxSlot, before, nl, learnSlot, learnMove);
 }

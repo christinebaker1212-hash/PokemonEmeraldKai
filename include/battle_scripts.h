@@ -225,6 +225,10 @@ extern const u8 BattleScript_ActionThrowPokeblock[];
 
 extern const u8 BattleScript_MpCoopTrainerBattleWon[];
 extern const u8 BattleScript_MpStatGroupShow[];
+extern const u8 BattleScript_MpCoopGrew[];
+extern const u8 BattleScript_MpCoopLearnedAll[];
+extern const u8 BattleScript_MpCoopLearnAll[];
+extern const u8 BattleScript_MpCoopResolve[];
 extern const u8 BattleScript_MpCoopBattleLost[];
 extern const u8 BattleScript_MpCoopWildBattleWon[];
 extern const u8 BattleScript_MpCoopBallCaught[];

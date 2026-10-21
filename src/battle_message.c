@@ -415,6 +415,138 @@ static const u8 *const sMpGroupStatTexts[2][4] = {
     {sText_MpGroupPartyDown, sText_MpGroupPartyDown2, sText_MpGroupPartyUp, sText_MpGroupPartyUp2},
     {sText_MpGroupFoesDown, sText_MpGroupFoesDown2, sText_MpGroupFoesUp, sText_MpGroupFoesUp2},
 };
+// Moemon Co-op: the one EXP line and the one level-up line of a co-op battle (Cmd_getexp
+// states 10-14). Each screen names its own Pokémon (the others' if it has none this time).
+static const u8 sText_MpExpGained[] = _(" gained");
+static const u8 sText_MpExpBoosted[] = _(" a boosted");
+static const u8 sText_MpExpPoints[] = _(" EXP. Points!\p");
+static const u8 sText_MpExpPlus[] = _(": +");
+static const u8 sText_MpExpShort[] = _(" EXP.");
+static const u8 sText_MpGrewTo[] = _(" grew to\nLV. ");
+static const u8 sText_MpGrewToShort[] = _(" grew to LV. ");
+static const u8 sText_MpGrewEnd[] = _("!{WAIT_SE}\p");
+static const u8 sText_MpExpEnd[] = _("\p");
+static const u8 sText_MpNewline[] = _("\n");
+static const u8 sText_MpBang[] = _("!");
+
+static u16 MpExpValue(u8 slot, bool8 grew)
+{
+    return grew ? gBattleTextBuff1[slot] : (gBattleTextBuff1[slot * 2] | (gBattleTextBuff1[slot * 2 + 1] << 8));
+}
+
+static void MpAppendNick(u8 *dst, u8 slot)
+{
+    u8 nick[POKEMON_NAME_LENGTH + 2];
+    GetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, nick);
+    StringGet_Nickname(nick);
+    StringAppend(dst, nick);
+}
+
+static void MpAppendNum(u8 *dst, u16 n)
+{
+    u8 num[8];
+    ConvertIntToDecimalStringN(num, n, STR_CONV_MODE_LEFT_ALIGN, 5);
+    StringAppend(dst, num);
+}
+
+static const u8 sText_MpLearned[] = _(" learned\n");
+static const u8 sText_MpLearnedShort[] = _(" learned ");
+static const u8 sText_MpCanLearn[] = _(" can learn\n");
+static const u8 sText_MpCanLearnShort[] = _(": ");
+static const u8 sText_MpAfterBattle[] = _(" after the battle!\p");
+static const u8 sText_MpLaterShort[] = _(" (later)");
+static const u8 sText_MpLearnEnd[] = _("!{WAIT_SE}\p");
+
+// One line about the moves they learned at the new level (a full move set: after the battle)
+static const u8 *MpBuildLearnText(void)
+{
+    static u8 sText[128];
+    u8 list[2], n = 0, slot, base = MP_Coop_OwnBase(), size = MP_Coop_SeatSize();
+
+    // only the ones that learned a move (gBattleTextBuff2[0]): moves that need one
+    // forgotten are chosen during the battle, by each player on their own game
+    for (slot = base; slot < base + size && slot < PARTY_SIZE && n < 2; slot++)
+        if (MpExpValue(slot, FALSE) && ((gBattleTextBuff2[0] >> slot) & 1))
+            list[n++] = slot;
+    if (n == 0)
+        for (slot = 0; slot < PARTY_SIZE && n < 2; slot++)
+            if (MpExpValue(slot, FALSE) && ((gBattleTextBuff2[0] >> slot) & 1))
+                list[n++] = slot;
+    sText[0] = EOS;
+    for (slot = 0; slot < n; slot++)
+    {
+        u16 move = MpExpValue(list[slot], FALSE);
+        bool8 learned = TRUE;
+        if (slot)
+            StringAppend(sText, sText_MpNewline);
+        MpAppendNick(sText, list[slot]);
+        if (n == 1)
+        {
+            StringAppend(sText, learned ? sText_MpLearned : sText_MpCanLearn);
+            StringAppend(sText, gMoveNames[move < MOVES_COUNT ? move : 0]);
+            StringAppend(sText, learned ? sText_MpLearnEnd : sText_MpAfterBattle);
+        }
+        else
+        {
+            StringAppend(sText, learned ? sText_MpLearnedShort : sText_MpCanLearnShort);
+            StringAppend(sText, gMoveNames[move < MOVES_COUNT ? move : 0]);
+            StringAppend(sText, learned ? sText_MpBang : sText_MpLaterShort);
+        }
+    }
+    if (n == 2)
+        StringAppend(sText, sText_MpExpEnd);
+    return sText;
+}
+
+static const u8 *MpBuildExpText(bool8 grew)
+{
+    static u8 sText[128];
+    u8 list[2], n = 0, slot, base = MP_Coop_OwnBase(), size = MP_Coop_SeatSize();
+
+    for (slot = base; slot < base + size && slot < PARTY_SIZE && n < 2; slot++)
+        if (MpExpValue(slot, grew))
+            list[n++] = slot;
+    if (n == 0)   // none of ours: the others'
+        for (slot = 0; slot < PARTY_SIZE && n < 2; slot++)
+            if (MpExpValue(slot, grew))
+                list[n++] = slot;
+
+    sText[0] = EOS;
+    if (n == 0)
+        return sText;
+    if (n == 1)
+    {
+        MpAppendNick(sText, list[0]);
+        if (grew)
+        {
+            StringAppend(sText, sText_MpGrewTo);
+            MpAppendNum(sText, MpExpValue(list[0], TRUE));
+            StringAppend(sText, sText_MpGrewEnd);
+        }
+        else
+        {
+            StringAppend(sText, sText_MpExpGained);
+            if (gBattleTextBuff2[0] & (1 << list[0]))
+                StringAppend(sText, sText_MpExpBoosted);
+            StringAppend(sText, sText_MpNewline);
+            MpAppendNum(sText, MpExpValue(list[0], FALSE));
+            StringAppend(sText, sText_MpExpPoints);
+        }
+        return sText;
+    }
+    for (slot = 0; slot < 2; slot++)
+    {
+        if (slot)
+            StringAppend(sText, sText_MpNewline);
+        MpAppendNick(sText, list[slot]);
+        StringAppend(sText, grew ? sText_MpGrewToShort : sText_MpExpPlus);
+        MpAppendNum(sText, MpExpValue(list[slot], grew));
+        StringAppend(sText, grew ? sText_MpBang : sText_MpExpShort);
+    }
+    StringAppend(sText, grew ? sText_MpGrewEnd + 1 : sText_MpExpEnd);
+    return sText;
+}
+
 const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
@@ -2381,6 +2513,15 @@ void BufferStringBattle(u16 stringID)
     case STRINGID_MP_GROUP_STAT_UP:
     case STRINGID_MP_GROUP_STAT_UP2:
         stringPtr = sMpGroupStatTexts[GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? 0 : 1][stringID - STRINGID_MP_GROUP_STAT_DOWN];
+        break;
+    case STRINGID_MP_EXP_ALL:
+        stringPtr = MpBuildExpText(FALSE);
+        break;
+    case STRINGID_MP_GREW_ALL:
+        stringPtr = MpBuildExpText(TRUE);
+        break;
+    case STRINGID_MP_LEARN_ALL:
+        stringPtr = MpBuildLearnText();
         break;
     case STRINGID_MP_GROUP_STAT_NOLOWER:
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;

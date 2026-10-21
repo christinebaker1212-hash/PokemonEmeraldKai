@@ -1,0 +1,14 @@
+# Co-op wild triple, all three Torchic reach Lv16 and want Peck: BOB says NO to deleting a move and YES to "stop
+# trying to teach Peck?" while the others pick a move to forget. The host gives Peck to the other two only.
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_C="MOEMON_DEBUG_PARTY=280:15+,283:5"
+EXPECT_A=("co-op: battle over, outcome 1")
+EXPECT_B=("co-op levels: stop teaching 64?" "co-op: battle over, outcome 1")
+EXPECT_C=("co-op levels: player 2 is done" "co-op levels: slot 0 forgot move slot 0 for 64"
+          "co-op levels: slot 4 forgot move slot 0 for 64" "co-op: battle over, outcome 1")

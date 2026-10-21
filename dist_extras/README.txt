@@ -134,9 +134,14 @@ TEAMING UP FOR A DOUBLE BATTLE
   for their own Moemon (shared only among your own Moemon that battled), with
   your own EXP bonuses. Evolutions happen on each player's game after the
   battle.
-* A Moemon that already knows four moves can't stop the battle to learn a
-  new one. After the battle you're asked if you want to teach it a move,
-  and the Move Reminder screen opens.
+* Everyone's EXP comes at once, at a single battle's pace: one "gained EXP"
+  line (your screen names your own Moemon) and everyone levels up together
+  with one "grew to LV." line.
+* Then every player goes through their own level-up stats and "delete a move
+  to make room?" choices on their own screen, at the same time. Whoever is
+  done first sees "Waiting for the others..." until everyone is finished,
+  then one line shows the moves everyone learned. It all happens during the
+  battle, the same as in a single battle.
 * If you lose, both of you black out. If someone disconnects, the battle is
   called off: your party goes back to how it was before the battle (no EXP,
   no prize money), but Moemon you already caught and items you already used

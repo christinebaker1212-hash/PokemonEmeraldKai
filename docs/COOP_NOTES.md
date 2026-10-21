@@ -312,3 +312,28 @@ DECLINE_NO / DECLINE_ONE_MON set the asker's declinedBy (busy / too late can ret
 third is queued or any other player is online and not battling (FriendAvailableExcept, any map). Not eligible but
 someone else around: JOIN_NO_TRIPLE shows sText_NoTripleFew / sText_NoTripleKind to the host, a third who asks gets
 DECLINE_NO_TRIPLE. Tests: tri_trainer_rush (failed on the old code), tri_no_triple (Tommy, 2 Moemon).
+
+## Co-op EXP at a single battle's pace
+
+Cmd_getexp in a co-op battle (gMpCoopBattle) leaves the per-slot loop after the calculation for states 10-15
+(battle_script_commands.c MpCoopExpBegin / MpCoopExpStep): every slot's gain at once (same rules: own share,
+EXP Share, Lucky Egg, trainer x1.5, traded, buddy bonus); one STRINGID_MP_EXP_ALL line (gains in gBattleTextBuff1,
+boosted mask in buff 2, each screen names its own slots via MP_Coop_OwnBase, others' if none); then rounds: one
+CONTROLLER_EXPUPDATE per player at once, to that player's battler (seat * 2; the owner's controller applies it,
+the others mirror it, MP_Coop_MirrorExp); level-ups of the round get one STRINGID_MP_GREW_ALL line
+(BattleScript_MpCoopGrew). State 14 gives the moves that fit (MonTryLearningNewMove) and queues the rest
+(MP_Coop_ResolveAddLearn) plus every stat box (MP_Coop_ResolveAddBox, stats from before the EXP); state 15 runs
+BattleScript_MpCoopResolve.
+
+Resolve (mpcoopresolve + mp_coop.c MP_Coop_Resolve*): the master sends each player MPR_COOP_RESOLVE with their own
+boxes and learns (with the Pokémon's moves as the master has them: the owner's copy can miss a move learned earlier
+in the battle) and starts its own part locally. Every game runs Task_MpCoopResolve at once: Cmd_drawlvlupbox driven
+from the task (gBattlescriptCurrInstr swapped in and back the same frame; the master's script is parked in
+mpcoopresolve), then per learn the single battle prompts (trying to learn, can't learn more, delete?, summary
+screen, HM, stop teaching?) printed locally, never with printstring (that would reach every screen). Our side's
+healthboxes are hidden meanwhile (in triples they cover the stat box and YES/NO). Joiners apply the choice to their
+own copy and answer MPR_COOP_RESOLVE_DONE (move slots, 0xFF = didn't learn); a player who leaves counts as done.
+When everyone is done the master applies the answers to its party and battle mons (MOVE_IS_PERMANENT) and prints one
+STRINGID_MP_LEARN_ALL line (fanfare) for every move learned this round. MP_Coop_RecordLearnLater (after the battle)
+is only a fallback now. Logs: "co-op levels: ...". Tests: tri_levelup, coop_levelup (Torchic Lv16 forgets for Peck).
+Battle emotes: MP_BattleOverlay_Composite repaints the pick and bubbles over the finished frame in every battle.

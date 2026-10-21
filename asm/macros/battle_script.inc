@@ -1255,6 +1255,12 @@
 
 	@ Moemon Co-op: mode 0 records a spread stat move's target and jumps to ptr
 	@ (when the move groups), mode 1 sets up the shared animation and message
+	@ Moemon Co-op: every player goes through their own level-up boxes and moves to
+	@ forget at the same time; waits for all of them
+	.macro mpcoopresolve
+	.byte B_SCR_OP_MPCOOPRESOLVE
+	.endm
+
 	.macro mpstatgroup mode:req, ptr=NULL
 	.byte B_SCR_OP_MPSTATGROUP
 	.byte \mode

@@ -884,11 +884,25 @@ bool8 MP_IsScriptMenuOpen(void);      // script_menu.c
 bool8 MP_IsShopMenuOpen(void);        // shop.c
 bool8 MP_IsFieldLoadCallback(void);   // overworld.c
 bool8 MP_Menu_IsCoopMenuOpen(void);   // mp_menu.c
+// Level-ups in a co-op battle, all players at once (stat boxes, moves to forget)
+void MP_Coop_ResolveReset(void);                   // master: a new round
+void MP_Coop_ResolveAddBox(u8 slot, const u16 *before);
+void MP_Coop_ResolveAddLearn(u8 slot, u16 move);
+bool8 MP_Coop_ResolveAny(void);
+void MP_Coop_ResolveStart(void);                   // master: every player gets theirs
+bool8 MP_Coop_ResolveWaiting(void);                // master: someone's still choosing
+u8 MP_Coop_ResolveLearnCount(void);
+u8 MP_Coop_ResolveLearn(u8 i, u8 *slot, u16 *move); // the move slot forgotten (0xFF none)
+void MP_Coop_ResolveFinished(const u8 *answers, u8 n); // a game's task is done
+// battle_script_commands.c: the boxes and prompts on this game
+void MP_Coop_StartResolveTask(u8 nBox, const u8 *boxSlot, const u16 (*before)[6], u8 nLearn, const u8 *learnSlot, const u16 *learnMove);
+bool8 MP_Coop_ResolveTaskActive(void);
 u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max);
 u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
 extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
 void MP_TriCards_Composite(u16 *frame);
+void MP_BattleOverlay_Composite(u16 *frame);   // emote pick and bubbles over everything in battle
 
 #endif // GUARD_MP_H

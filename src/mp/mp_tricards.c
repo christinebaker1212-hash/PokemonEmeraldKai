@@ -493,12 +493,18 @@ void MP_TriCards_Composite(u16 *frame)
             }
         }
     }
-    // the emote pick and battle bubbles stay in front of the cards
-    {
-        u8 ids[16], n, i;
-        n = MP_Emote_BattleOverlaySprites(ids, 12);
-        n += MP_BattleChat_OverlaySprites(ids + n, 16 - n);
-        for (i = 0; i < n; i++)
-            RedrawSprite(frame, &gSprites[ids[i]]);
-    }
+}
+
+// Any battle (Singles and Doubles too): the emote pick and battle bubbles painted
+// again over the finished frame, so cards, HP boxes, text boxes and animation
+// backgrounds never cover them (platform VDraw, after MP_TriCards_Composite)
+void MP_BattleOverlay_Composite(u16 *frame)
+{
+    u8 ids[16], n, i;
+    if (!gMain.inBattle || gMain.callback2 != BattleMainCB2)
+        return;
+    n = MP_Emote_BattleOverlaySprites(ids, 12);
+    n += MP_BattleChat_OverlaySprites(ids + n, 16 - n);
+    for (i = 0; i < n; i++)
+        RedrawSprite(frame, &gSprites[ids[i]]);
 }

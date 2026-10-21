@@ -3244,6 +3244,25 @@ BattleScript_LearnedNewMove::
 BattleScript_LearnMoveReturn::
 	return
 
+@ Moemon Co-op: everyone's EXP at once (Cmd_getexp states 10-14)
+BattleScript_MpCoopGrew::
+	fanfare MUS_LEVEL_UP
+	printstring STRINGID_MP_GREW_ALL
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+@ Moemon Co-op: everyone's stat boxes and moves to forget, at once (each on their own game)
+BattleScript_MpCoopResolve::
+	mpcoopresolve
+	return
+
+BattleScript_MpCoopLearnedAll::
+	fanfare MUS_LEVEL_UP
+BattleScript_MpCoopLearnAll::
+	printstring STRINGID_MP_LEARN_ALL
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_RainContinuesOrEnds::
 	printfromtable gRainContinuesStringIds
 	waitmessage B_WAIT_TIME_LONG

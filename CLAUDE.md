@@ -42,7 +42,8 @@ message holds, low HP beep), co-op partner status and intents, battle emotes, au
 phases 1-4 (dex, buddy bonus, shared PC, trades, dailies/achievements/MoeGatcha, co-op wild battles), difficulty,
 "wait for a partner", co-op healing items, the co-op doubles retrofit, batch 3 link features (record mixing, secret
 bases, trainer cards, day care eggs, minigames, contests), LOOK / CREATE sprites, co-op Triple Battles, and grouped
-stat moves (one animation and message for Growl / Tail Whip on several Pokémon).
+stat moves (one animation and message for Growl / Tail Whip on several Pokémon), and co-op EXP (everyone levels
+up and picks moves to forget at the same time).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
