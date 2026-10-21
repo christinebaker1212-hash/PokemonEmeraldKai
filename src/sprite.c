@@ -1944,3 +1944,23 @@ void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes)
     else
         RequestSpriteFrameImageCopy(0, sprite->oam.tileNum, sprite->images);
 }
+
+// Moemon Co-op (debug / ball effects): what's left for new sprites
+void MP_SpriteBudget(u8 *freeSprites, u8 *freePalettes, u16 *freeTiles, u8 *freeMatrices)
+{
+    u16 i;
+    *freeSprites = *freePalettes = *freeMatrices = 0;
+    *freeTiles = 0;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (!gSprites[i].inUse)
+            (*freeSprites)++;
+    for (i = gReservedSpritePaletteCount; i < 16; i++)
+        if (sSpritePaletteTags[i] == TAG_NONE)
+            (*freePalettes)++;
+    for (i = gReservedSpriteTileCount; i < TOTAL_OBJ_TILE_COUNT; i++)
+        if (!SPRITE_TILE_IS_ALLOCATED(i))
+            (*freeTiles)++;
+    for (i = 0; i < OAM_MATRIX_COUNT; i++)
+        if (!(gOamMatrixAllocBitmap & (1u << i)))
+            (*freeMatrices)++;
+}

@@ -3937,6 +3937,12 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
     case MON_DATA_FRIENDSHIP:
         retVal = substruct0->friendship;
         break;
+    case MON_DATA_MP_BALLFX:
+        retVal = substruct0->filler;
+        break;
+    case MON_DATA_MP_BALLFX_SOUND:
+        retVal = boxMon->unused;
+        break;
     case MON_DATA_MOVE1:
     case MON_DATA_MOVE2:
     case MON_DATA_MOVE3:
@@ -4333,6 +4339,15 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
     case MON_DATA_FRIENDSHIP:
         SET8(substruct0->friendship);
         break;
+    case MON_DATA_MP_BALLFX:
+        SET16(substruct0->filler);
+        break;
+    case MON_DATA_MP_BALLFX_SOUND:
+    {
+        u8 v = *data & 0xF;
+        boxMon->unused = v;
+        break;
+    }
     case MON_DATA_MOVE1:
     case MON_DATA_MOVE2:
     case MON_DATA_MOVE3:

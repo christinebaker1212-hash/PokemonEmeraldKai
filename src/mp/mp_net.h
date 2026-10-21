@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 24
+#define MP_PROTOCOL_VERSION 25
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
@@ -91,7 +91,7 @@ enum {
 // Wire structs are serialized by hand (little endian), these are just sizes.
 #define MP_NAME_LEN        8   // game charset, EOS (0xFF) padded
 #define MP_HELLO_SIZE      (2 + MP_NAME_LEN + 4 + 32)
-#define MP_WIRESTATE_SIZE  20
+#define MP_WIRESTATE_SIZE  22
 
 // ---- Client ----
 enum {

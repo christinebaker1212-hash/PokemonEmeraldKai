@@ -130,7 +130,8 @@ struct MpState
     u8 emote;
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
-    u8 followerFlags;  // bit 0: female
+    u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
+    u16 followerFx;    // its ball effect (MP_BallFx_Pack)
     u8 badges;         // how many gym badges (catch-up bonus)
 };
 
@@ -904,5 +905,50 @@ extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
 void MP_TriCards_Composite(u16 *frame);
 void MP_BattleOverlay_Composite(u16 *frame);   // emote pick and bubbles over everything in battle
+
+
+// ---------------------------------------------------------------------------
+// Ball entrance / recall effects (mp_ballfx.c, editor in mp_ballfx_editor.c)
+enum { MPFX_FORM_DEFAULT, MPFX_FORM_ANIME_BEAM, MPFX_FORM_SMOKE, MPFX_FORM_BUBBLE, MPFX_FORM_LIGHTNING, MPFX_FORM_HAUNTED,
+       MPFX_FORM_DIGITAL, MPFX_FORM_INK, MPFX_FORM_CRYSTAL, MPFX_FORM_METEOR, MPFX_FORM_POPIN, MPFX_FORM_RISE, MPFX_FORM_COUNT,
+       MPFX_FORM_VANILLA = MPFX_FORM_COUNT };   // VANILLA: the game's own, as a body effect (followers)
+enum { MPFX_PART_DEFAULT, MPFX_PART_NONE, MPFX_PART_CONFETTI, MPFX_PART_EXPLOSION, MPFX_PART_SMOKE, MPFX_PART_FIREWORKS,
+       MPFX_PART_FLOWER, MPFX_PART_BUBBLES, MPFX_PART_LIGHTNING, MPFX_PART_WISPS, MPFX_PART_PIXELS, MPFX_PART_INK,
+       MPFX_PART_CRYSTAL, MPFX_PART_SPOTLIGHT, MPFX_PART_DUST, MPFX_PART_ROYAL, MPFX_PART_COUNT };
+enum { MPFX_RECALL_DEFAULT, MPFX_RECALL_BEAM, MPFX_RECALL_DISSOLVE, MPFX_RECALL_CONFETTI, MPFX_RECALL_SMOKE,
+       MPFX_RECALL_DIGITAL, MPFX_RECALL_CURTAIN, MPFX_RECALL_COUNT, MPFX_RECALL_VANILLA = MPFX_RECALL_COUNT };
+enum { MPFX_SOUND_AUTO, MPFX_SOUND_NONE, MPFX_SOUND_CHIME, MPFX_SOUND_POP, MPFX_SOUND_BOOM, MPFX_SOUND_FANFARE,
+       MPFX_SOUND_THUNDER, MPFX_SOUND_SPOOKY, MPFX_SOUND_COUNT };
+struct MpBallFx { u8 form, part, color, recall, sound; };   // color: MP_BALL_* (energy color)
+#define MPFX_FRONT 0x01   // a front sprite (the opponent side / as others see it)
+#define MPFX_FIELD 0x02   // a follower on the overworld: smaller and fewer
+struct BoxPokemon;
+struct Pokemon;
+void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out);
+void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out);
+void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx);
+u16 MP_BallFx_Pack(const struct MpBallFx *fx);
+void MP_BallFx_Unpack(u16 v, u8 sound, struct MpBallFx *out);
+bool8 MP_BallFx_IsDefaultEntrance(const struct MpBallFx *fx);
+u16 MP_BallFx_EnergyRgb(u8 color);
+const char *MP_BallFx_FormName(u8 i);
+const char *MP_BallFx_PartName(u8 i);
+const char *MP_BallFx_RecallName(u8 i);
+const char *MP_BallFx_SoundName(u8 i);
+u8 MP_BallFx_PresetCount(void);
+const char *MP_BallFx_PresetName(u8 i);
+void MP_BallFx_Preset(u8 i, struct MpBallFx *out);
+s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx);
+bool8 MP_BallFx_StartEntrance(u8 monSpriteId, s16 bx, s16 by, u8 flags, const struct MpBallFx *fx);
+bool8 MP_BallFx_StartRecall(u8 monSpriteId, s16 bx, s16 by, u8 flags, const struct MpBallFx *fx);
+bool8 MP_BallFx_BodyRunning(u8 monSpriteId);
+bool8 MP_BallFx_Active(void);
+void MP_BallFx_StopAll(void);
+void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
+void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
+u16 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
+u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
+void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
+void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));
 
 #endif // GUARD_MP_H

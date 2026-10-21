@@ -1,0 +1,10 @@
+# ALICE sends out a follower with the FIRECRACKER ball effect, then calls it back: BOB, standing next to her,
+# sees both (the effect and a sent-out count travel in her player state)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,12
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+ENV_B="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("ballfx: entrance form 1 part 5" "ballfx: recall 3")
+EXPECT_B=("ballfx: entrance form 1 part 5" "ballfx: recall 3")

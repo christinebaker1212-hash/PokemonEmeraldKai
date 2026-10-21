@@ -33,6 +33,7 @@
 #include "text.h"
 #include "constants/event_objects.h"
 #include "constants/species.h"
+#include "constants/songs.h"
 
 struct MpFollowerGfx
 {
@@ -69,6 +70,16 @@ struct FollowerSlot
     u16 animTimer;
     bool8 placed;
     u8 ownerObj;
+    // Ball effects (mp_ballfx.c): it pops out of its ball / goes back with its owner's effect
+    bool8 seqKnown;
+    u8 lastSeq;
+    bool8 pendingIn;      // pop out when it shows up
+    u8 popTimer;          // the ball's flight, then the entrance
+    u8 pendingTimeout;
+    bool8 fxHide;         // hidden by the effect (the ball still flying, or called back)
+    bool8 recalling;
+    u16 fx;
+    u8 fxSound;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
 };
@@ -77,6 +88,9 @@ static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
 static bool8 sInit;
 static u32 sLocalPersonality;   // the party Pokémon that follows (0 = none)
 static bool8 sLocalLoaded;
+static u8 sLocalToggleSeq;      // counts sending it out (the others play the entrance on a change)
+static u32 sLeavingPersonality; // called back: shown until its recall has played (0 = none)
+static u8 sLeavingState;        // 0 none, 1 waiting to be on the field, 2 its recall is playing
 
 static const union AnimCmd sAnim0[] = {ANIMCMD_FRAME(0, 1), ANIMCMD_END};
 static const union AnimCmd sAnim1[] = {ANIMCMD_FRAME(1, 1), ANIMCMD_END};
@@ -189,6 +203,9 @@ static void SetSlotPokemon(struct FollowerSlot *s, u16 dex, bool8 female)
     s->female = female;
     s->gfx = gfx;
     s->placed = FALSE;
+    s->fxHide = FALSE;
+    s->recalling = FALSE;
+    s->popTimer = 0;
 }
 
 // Is the tile behind the owner somewhere the follower can stand?
@@ -355,8 +372,10 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     // Same layer as the owner; behind them when level with them
     fs->oam.priority = os->oam.priority;
     SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
-    fs->invisible = hidden || os->invisible
+    fs->invisible = hidden || os->invisible || s->fxHide
         || (s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
+    if (s->recalling && !MP_BallFx_BodyRunning(s->spriteId))
+        fs->invisible = TRUE;   // gone back into its ball: stays hidden until it's really gone
     // Someone else stepped onto its tile (a friend hopping off a piggyback
     // ride, or walking up behind): tuck it away instead of covering them
     if (!fs->invisible && s->moved >= 16)
@@ -370,19 +389,44 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
 // ---------------------------------------------------------------------------
 // The local player's follower
 
-static struct Pokemon *FindLocalFollower(void)
+static struct Pokemon *FindPartyMon(u32 personality)
 {
     u8 i;
-    if (sLocalPersonality == 0)
+    if (personality == 0)
         return NULL;
     for (i = 0; i < PARTY_SIZE; i++)
     {
         struct Pokemon *mon = &gPlayerParty[i];
         if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG)
-         && GetMonData(mon, MON_DATA_PERSONALITY) == sLocalPersonality)
+         && GetMonData(mon, MON_DATA_PERSONALITY) == personality)
             return mon;
     }
     return NULL;
+}
+
+// The Pokémon shown behind you: the follower, or the one going back into its ball
+static struct Pokemon *FindLocalFollower(void)
+{
+    if (sLeavingState && sLeavingPersonality)
+        return FindPartyMon(sLeavingPersonality);
+    return FindPartyMon(sLocalPersonality);
+}
+
+u16 MP_Follower_LocalFx(u8 *sound)
+{
+    struct Pokemon *mon = FindLocalFollower();
+    struct MpBallFx fx;
+    *sound = 0;
+    if (!mon)
+        return 0;
+    MP_BallFx_OfMon(mon, &fx);
+    *sound = fx.sound | (sLeavingState == 2 ? 0x8 : 0);   // bit 3: its recall is playing
+    return MP_BallFx_Pack(&fx);
+}
+
+u8 MP_Follower_LocalToggleSeq(void)
+{
+    return sLocalToggleSeq;
 }
 
 static void LoadLocalChoice(void)
@@ -419,9 +463,19 @@ bool8 MP_Follower_Toggle(struct Pokemon *mon)
 {
     LoadLocalChoice();
     if (MP_Follower_IsFollowing(mon))
+    {
+        // called back: it stays out until its recall has played on the field
+        sLeavingPersonality = sLocalPersonality;
+        sLeavingState = 1;
         sLocalPersonality = 0;
+    }
     else
+    {
+        sLeavingState = 0;
+        sLeavingPersonality = 0;
         sLocalPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
+        sLocalToggleSeq = (sLocalToggleSeq + 1) & 3;   // counts sending out only
+    }
     gMpConfig.followerPersonality = sLocalPersonality;
     MP_SaveConfig();
     return sLocalPersonality != 0;
@@ -458,6 +512,116 @@ static bool8 RemoteHidden(u8 id)
     return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & (MPF_TRAINER_MODE | MPF_RIDING));
 }
 
+static s16 ScreenX(const struct Sprite *sp) { return sp->x + sp->x2 + (sp->coordOffsetEnabled ? gSpriteCoordOffsetX : 0); }
+static s16 ScreenY(const struct Sprite *sp) { return sp->y + sp->y2 + (sp->coordOffsetEnabled ? gSpriteCoordOffsetY : 0); }
+
+// Ball effects for one follower (mp_ballfx.c). seq: how many times its owner sent one
+// out (a change while it's around = it was just sent out); leaving: its recall is playing.
+static void SlotEffects(struct FollowerSlot *s, u8 seq, bool8 leaving, u16 fxPacked, u8 sound, u8 ownerObj)
+{
+    struct MpBallFx fx;
+    struct Sprite *fs, *os;
+
+    s->fx = fxPacked;
+    s->fxSound = sound;
+    if (!s->seqKnown)
+    {
+        s->seqKnown = TRUE;
+        s->lastSeq = seq;
+    }
+    else if (seq != s->lastSeq)
+    {
+        s->lastSeq = seq;
+        if (!leaving)
+        {
+            s->pendingIn = TRUE;
+            s->pendingTimeout = 120;
+        }
+    }
+    if (!SpriteIsOurs(s) || ownerObj >= OBJECT_EVENTS_COUNT || !s->placed)
+    {
+        if (s->pendingIn && s->pendingTimeout && --s->pendingTimeout == 0)
+            s->pendingIn = FALSE;
+        return;
+    }
+    fs = &gSprites[s->spriteId];
+    os = &gSprites[gObjectEvents[ownerObj].spriteId];
+    MP_BallFx_Unpack(fxPacked, sound, &fx);
+
+    // sent out: its ball is tossed to its spot and it comes out with its effect
+    if (s->pendingIn && !s->recalling)
+    {
+        if (s->popTimer == 0)
+        {
+            if (fs->invisible && !s->fxHide)
+            {
+                if (s->pendingTimeout && --s->pendingTimeout == 0)
+                    s->pendingIn = FALSE;
+                return;   // waits until it can be seen
+            }
+            s->fxHide = TRUE;
+            fs->invisible = TRUE;
+            MP_BallFx_MiniBall(ScreenX(os), ScreenY(os) - 6, ScreenX(fs), ScreenY(fs) + 6, fx.color, 12);
+            s->popTimer = 1;
+        }
+        else if (++s->popTimer >= 13)
+        {
+            if (fx.form == MPFX_FORM_DEFAULT)
+                fx.form = MPFX_FORM_VANILLA;
+            if (fx.part == MPFX_PART_DEFAULT)
+                fx.part = MPFX_PART_NONE;
+            s->fxHide = FALSE;
+            fs->invisible = FALSE;
+            PlaySE(SE_BALL_OPEN);
+            MP_BallFx_StartEntrance(s->spriteId, ScreenX(fs), ScreenY(fs) + 6, MPFX_FIELD, &fx);
+            s->pendingIn = FALSE;
+            s->popTimer = 0;
+        }
+        return;
+    }
+    // called back: its recall, toward its owner
+    if (leaving && !s->recalling && !fs->invisible)
+    {
+        if (fx.recall == MPFX_RECALL_DEFAULT)
+            fx.recall = MPFX_RECALL_VANILLA;
+        PlaySE(SE_BALL_OPEN);
+        if (MP_BallFx_StartRecall(s->spriteId, ScreenX(os), ScreenY(os), MPFX_FIELD, &fx))
+            s->recalling = TRUE;
+    }
+}
+
+// The local follower being called back: shown until its recall has played
+static void UpdateLeaving(void)
+{
+    static u8 sWait;
+    struct FollowerSlot *s = &sSlots[0];
+    if (sLeavingState == 0)
+        return;
+    if (sLeavingState == 1)
+    {
+        // waits to be seen on the field (not after a while: hidden, surfing...)
+        if (SpriteIsOurs(s) && s->placed && !gSprites[s->spriteId].invisible)
+        {
+            sLeavingState = 2;
+            sWait = 0;
+        }
+        else if (++sWait > 90 || FindPartyMon(sLeavingPersonality) == NULL)
+        {
+            sLeavingState = 0;
+            sLeavingPersonality = 0;
+            sWait = 0;
+        }
+        return;
+    }
+    // its recall is over (or never started)
+    if ((s->recalling && !MP_BallFx_BodyRunning(s->spriteId)) || !SpriteIsOurs(s) || ++sWait > 60)
+    {
+        sLeavingState = 0;
+        sLeavingPersonality = 0;
+        sWait = 0;
+    }
+}
+
 // Every overworld frame (src/overworld.c, before sprites are drawn)
 void MP_Follower_Update(void)
 {
@@ -472,6 +636,12 @@ void MP_Follower_Update(void)
     dex = MP_Follower_LocalDex(&female);
     SetSlotPokemon(&sSlots[0], dex, female);
     UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden());
+    {
+        u8 sound;
+        u16 fx = MP_Follower_LocalFx(&sound);
+        SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2, fx, sound & 7, gPlayerAvatar.objectEventId);
+        UpdateLeaving();
+    }
 
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
@@ -485,8 +655,14 @@ void MP_Follower_Update(void)
         else
         {
             SetSlotPokemon(s, 0, FALSE);
+            s->seqKnown = FALSE;
         }
         UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) : TRUE);
+        if (obj != OBJECT_EVENTS_COUNT)
+        {
+            u8 fl = gMpPlayers[i].state.followerFlags;
+            SlotEffects(s, (fl >> 4) & 3, (fl & 0x40) != 0, gMpPlayers[i].state.followerFx, (fl >> 1) & 7, obj);
+        }
     }
 }
 

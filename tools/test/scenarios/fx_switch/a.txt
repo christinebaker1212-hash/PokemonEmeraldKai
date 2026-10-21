@@ -1,0 +1,20 @@
+pressuntil A field 5000
+mp ballfx 0 preset 5
+mp ballfx 1 preset 7
+mp wild 288:3
+pressuntil A action 3000
+wait 20
+press DOWN 2
+wait 10
+press A 2
+waitfor partymenu 600
+wait 30
+press RIGHT 2
+wait 20
+press A 2
+wait 30
+press A 2
+waitlog 600 ballfx: recall
+pressuntil A field 9000
+log solo battle done
+quit

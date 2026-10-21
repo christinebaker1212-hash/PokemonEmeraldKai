@@ -1,0 +1,10 @@
+# Co-op wild double where ALICE's lead has the FIRECRACKER ball effect (anime beam, fireworks) and BOB's the
+# HAUNTED one: both games play both entrances (the effect travels with the Pokemon's data)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("ballfx: entrance form 1 part 5" "ballfx: entrance form 5 part 9" "co-op: battle over, outcome 1")
+EXPECT_B=("ballfx: entrance form 1 part 5" "ballfx: entrance form 5 part 9" "co-op: battle over, outcome 1")

@@ -1,0 +1,13 @@
+# Co-op wild triple, three different ball effects (HAUNTED, ROYALTY, FIRECRACKER) sent out together: every game
+# plays all three, and the battle carries on as usual
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_C="MOEMON_DEBUG_PARTY=280:15+,283:5"
+EXPECT_A=("ballfx: entrance form 5" "ballfx: entrance form 11" "ballfx: entrance form 1" "co-op: battle over, outcome 1")
+EXPECT_B=("ballfx: entrance form 5" "ballfx: entrance form 11" "ballfx: entrance form 1" "co-op: battle over, outcome 1")
+EXPECT_C=("ballfx: entrance form 5" "ballfx: entrance form 11" "ballfx: entrance form 1" "co-op: battle over, outcome 1")

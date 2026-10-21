@@ -207,6 +207,7 @@ static void SetDefaultTilemaps(void);
 static void CloseSummaryScreen(u8);
 static bool8 MpCanRename(void);
 static void Task_MpStartRename(u8 taskId);
+static bool8 sMpStartOnBallPage;   // Moemon Co-op: reopen on the POKé BALL page
 static bool8 MpBall_HandleInput(u8 taskId);
 static void MpBall_ShowPage(void);
 static void MpBall_HidePage(void);
@@ -1148,6 +1149,10 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
     }
 
     sMonSummaryScreen->currPageIndex = sMonSummaryScreen->minPageIndex;
+    // Moemon Co-op: back from the ball effect editor, on the POKé BALL page
+    if (sMpStartOnBallPage && sMonSummaryScreen->maxPageIndex >= PSS_PAGE_BALL)
+        sMonSummaryScreen->currPageIndex = PSS_PAGE_BALL;
+    sMpStartOnBallPage = FALSE;
     SummaryScreen_SetAnimDelayTaskId(TASK_NONE);
 
     if (gMonSpritesGfxPtr == NULL)
@@ -1324,6 +1329,18 @@ static void InitBGs(void)
     SetBgTilemapBuffer(2, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_SKILLS][0]);
     SetBgTilemapBuffer(3, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0]);
     ResetAllBgsCoordinates();
+    if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BALL)
+    {
+        // Moemon Co-op: opened on the POKé BALL page (back from the ball effect editor):
+        // the layers as if it had been scrolled to (the ball page over the contest page)
+        SetBgTilemapBuffer(2, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL][0]);
+        SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_CONTEST_MOVES][0]);
+        ChangeBgX(1, 0x10000, BG_COORD_SET);
+        ChangeBgX(2, 0x10000, BG_COORD_SET);
+        SetBgAttribute(2, BG_ATTR_PRIORITY, 1);
+        SetBgAttribute(1, BG_ATTR_PRIORITY, 2);
+        sMonSummaryScreen->bgDisplayOrder = 0;
+    }
     ScheduleBgCopyTilemapToVram(1);
     ScheduleBgCopyTilemapToVram(2);
     ScheduleBgCopyTilemapToVram(3);
@@ -1602,6 +1619,40 @@ static void Task_MpStartRename(u8 taskId)
         DestroyTask(taskId);
         DoNamingScreen(NAMING_SCREEN_NICKNAME, sMpRename.name, species, gender, personality, CB2_MpAfterRename);
     }
+}
+
+// Moemon Co-op: the ball effect editor (mp_ballfx_editor.c), then back to this page
+static void CB2_MpAfterFxEditor(void)
+{
+    sMpStartOnBallPage = TRUE;
+    ShowPokemonSummaryScreen(sMpRename.mode, sMpRename.mons, sMpRename.monIndex, sMpRename.maxMonIndex, sMpRename.callback);
+}
+
+static void Task_MpStartFxEditor(u8 taskId)
+{
+    struct BoxPokemon *target;
+    if (gPaletteFade.active)
+        return;
+    sMpRename.mode = sMonSummaryScreen->mode;
+    sMpRename.mons = sMonSummaryScreen->monList.mons;
+    sMpRename.monIndex = sMonSummaryScreen->curMonIndex;
+    sMpRename.maxMonIndex = sMonSummaryScreen->maxMonIndex;
+    sMpRename.callback = sMonSummaryScreen->callback;
+    if (sMpRename.mode == SUMMARY_MODE_BOX)
+        target = &((struct BoxPokemon *)sMpRename.mons)[sMpRename.monIndex];
+    else
+        target = &((struct Pokemon *)sMpRename.mons)[sMpRename.monIndex].box;
+    SummaryScreen_DestroyAnimDelayTask();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    StopCryAndClearCrySongs();
+    m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 0x100);
+    if (gMonSpritesGfxPtr == NULL)
+        DestroyMonSpritesGfxManager(MON_SPR_GFX_MANAGER_A);
+    FreeSummaryScreen();
+    sMonSummaryScreen = NULL;
+    DestroyTask(taskId);
+    MP_BallFxEditor_Open(target, CB2_MpAfterFxEditor);
 }
 
 static void BeginCloseSummaryScreen(u8 taskId)
@@ -3080,7 +3131,13 @@ static void MpBall_Draw(void)
     }
     else if (MpBall_CanEdit())
     {
-        MpBall_Print("{A} CHANGE BALL", 4, 105, 0);
+        struct MpBallFx fx;
+        s8 preset;
+        MP_BallFx_OfMon(&sMonSummaryScreen->currentMon, &fx);
+        preset = MP_BallFx_WhichPreset(&fx);
+        MpBall_Print("{A} CHANGE BALL", 4, 97, 0);
+        snprintf(line, sizeof(line), "{SELECT} EFFECT: %s", preset >= 0 ? MP_BallFx_PresetName(preset) : "CUSTOM");
+        MpBall_Print(line, 4, 113, 0);
     }
     else
     {
@@ -3232,6 +3289,18 @@ static bool8 MpBall_HandleInput(u8 taskId)
     }
     if (!sMpBall.editing)
     {
+        if (JOY_NEW(SELECT_BUTTON))
+        {
+            if (!MpBall_CanEdit())
+            {
+                PlaySE(SE_FAILURE);
+                return TRUE;
+            }
+            PlaySE(SE_SELECT);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_MpStartFxEditor;
+            return TRUE;
+        }
         if (!JOY_NEW(A_BUTTON))
             return FALSE;
         if (!MpBall_CanEdit())

@@ -473,6 +473,28 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
   blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).
   The color shows when it's sent out in battle.
+* BALL EFFECTS (SELECT on the POKé BALL page): how each Moemon comes out of
+  its ball and goes back. Pick a ready-made mix (HAUNTED, SUPERSTAR,
+  FIRECRACKER, TEAM ROCKET'S BUDGET, GLITCH, BLOOM, CLASSIC ANIME, ROYALTY,
+  STORM, DEEP SEA, SHOOTING STAR) or set each part yourself:
+    MATERIALIZATION     how its body forms: anime beam, smoke, bubble,
+                        lightning, haunted fade, digital, ink, crystal,
+                        meteor drop, pop-in, rise up (or the game's own)
+    ENERGY COLOR        the color of beams, glows, motes, pixels and ink
+    ENTRANCE PARTICLES  confetti, explosion, smoke puff, fireworks, flower
+                        bloom, bubbles, lightning bolt, wisps + eyes, pixel
+                        bits, ink splash, crystal shards, spotlight, dust
+                        ring, royal sparkles (or none, or the game's own)
+    RECALL EFFECT       classic beam, dissolve, reverse confetti, smoke
+                        retreat, digital shutdown, curtain call
+    SOUND ACCENT        auto, none, chime, pop, boom, fanfare, thunder, spooky
+  The preview shows it on a battle field: the entrance, a short pause, then
+  the recall. SELECT shows it from the other side, START saves, B goes back.
+  Everything is free. The effect stays with the Moemon (trades too) and
+  every player sees it in link battles, co-op battles and PvP. It never
+  makes sending out or calling back take longer than the game's own. Your
+  follower pops out of its ball with it too (and goes back with its recall),
+  for everyone around.
 * Special POKé BALLS (only from the MoeGatcha POKE BALLS banner):
     LOVE BALL   x8 on your Moemon's species, opposite gender
     FRIEND BALL the Moemon caught is friendly right away

@@ -640,9 +640,25 @@ static void AnimTask_FlashHealthboxOnLevelUp_Step(u8 taskId)
     }
 }
 
+// Moemon Co-op: a recall with the Moemon's own effect (mp_ballfx.c) instead of the
+// game's; the anim script's shrink task then does nothing
+static bool8 MpRecallFx(u8 battler, struct MpBallFx *fx)
+{
+    MP_BallFx_OfMon(GetBattlerSide(battler) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[battler]]
+                                                             : &gEnemyParty[gBattlerPartyIndexes[battler]], fx);
+    return fx->recall != MPFX_RECALL_DEFAULT;
+}
+
 void AnimTask_SwitchOutShrinkMon(u8 taskId)
 {
     u8 spriteId;
+    struct MpBallFx mpFx;
+
+    if (gTasks[taskId].data[0] == 0 && MpRecallFx(gBattleAnimAttacker, &mpFx))
+    {
+        DestroyAnimVisualTask(taskId);   // Moemon Co-op: its own recall effect hid it already
+        return;
+    }
 
     spriteId = gBattlerSpriteIds[gBattleAnimAttacker];
     switch (gTasks[taskId].data[0])
@@ -667,8 +683,31 @@ void AnimTask_SwitchOutShrinkMon(u8 taskId)
     }
 }
 
+static void Task_MpWaitRecallFx(u8 taskId)
+{
+    if (!MP_BallFx_BodyRunning(gTasks[taskId].data[1]))
+        DestroyAnimVisualTask(taskId);
+}
+
 void AnimTask_SwitchOutBallEffect(u8 taskId)
 {
+    struct MpBallFx mpFx;
+    if (gTasks[taskId].data[0] == 0 && MpRecallFx(gBattleAnimAttacker, &mpFx))
+    {
+        u8 mon = gBattlerSpriteIds[gBattleAnimAttacker];
+        bool8 player = GetBattlerSide(gBattleAnimAttacker) == B_SIDE_PLAYER;
+        s16 x = GetBattlerSpriteCoord(gBattleAnimAttacker, BATTLER_COORD_X);
+        s16 y = GetBattlerSpriteCoord(gBattleAnimAttacker, BATTLER_COORD_Y);
+        // toward its trainer: bottom left for ours, top right for theirs
+        PlaySE(SE_BALL_OPEN);
+        if (MP_BallFx_StartRecall(mon, player ? x - 56 : x + 56, player ? y + 24 : y - 24, player ? 0 : MPFX_FRONT, &mpFx))
+        {
+            gTasks[taskId].data[1] = mon;
+            gTasks[taskId].func = Task_MpWaitRecallFx;
+            return;
+        }
+    }
+
     u8 spriteId;
     u16 ball;
     u8 ballId;

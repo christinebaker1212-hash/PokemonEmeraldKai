@@ -1,0 +1,6 @@
+# One client: the lead (GLITCH: digital, pixel bits, digital shutdown) is switched out for the second Moemon
+# (CLASSIC ANIME): its own recall plays, the second comes out with its own entrance, the battle goes on to the end
+MODE=1
+WARP=0,16,12,11
+ENV_A="MOEMON_DEBUG_PARTY=283:15,280:15"
+EXPECT_A=("ballfx: entrance form 6 part 10" "ballfx: recall 5" "ballfx: entrance form 1 part 1" "solo battle done")

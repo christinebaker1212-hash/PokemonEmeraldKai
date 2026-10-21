@@ -337,3 +337,44 @@ When everyone is done the master applies the answers to its party and battle mon
 STRINGID_MP_LEARN_ALL line (fanfare) for every move learned this round. MP_Coop_RecordLearnLater (after the battle)
 is only a fallback now. Logs: "co-op levels: ...". Tests: tri_levelup, coop_levelup (Torchic Lv16 forgets for Peck).
 Battle emotes: MP_BattleOverlay_Composite repaints the pick and bubbles over the finished frame in every battle.
+
+## Ball entrance and recall effects
+
+Per Moemon, next to the ball style: MON_DATA_MP_BALLFX (PokemonSubstruct0's spare `filler` u16: form 0-3, particles
+4-7, energy color 8-11, recall 12-14) and MON_DATA_MP_BALLFX_SOUND (BoxPokemon's 4 spare flag bits). Both are in the
+Pokémon's data, so trades, the shared PC and link battles carry them. src/mp/mp_ballfx.c (engine, names, presets),
+src/mp/mp_ballfx_editor.c (editor), art from tools/moemon_ballfx/gen.py -> src/mp/mp_ballfx_gfx.h (indexed pixels;
+16/17/18 = the energy color and its light / dark shade). Debug: `mp ballfx SLOT F P C R S` / `mp ballfx SLOT preset N`,
+`mp fxedit SLOT`, `mp party` prints fx. Logs: "ballfx: entrance form F part P", "ballfx: recall R".
+
+Two halves:
+- Bodies (the Moemon's own sprite, Task_FxBody): palette blends (silhouettes, glows), the OAM matrix (DOUBLE mode;
+  BodyScale keeps the feet on the ground), mosaic, blending (BLDALPHA for the haunted fade / dissolve), flicker.
+  Entrances last FORM_LEN = 16 frames (the game's send-out: emerge + palette fade), recalls RECALL_LEN = 22. BodyEnd
+  puts the sprite back exactly. MPFX_FORM_VANILLA / MPFX_RECALL_VANILLA are the game's own as bodies (followers).
+- Particles: not sprites. sParts (1024) are moved by Task_FxManager and drawn by MP_BallFx_Composite over the finished
+  frame (platform VDraw, before the battle emotes): nearest-neighbor scale / rotation / stretch, 16-level alpha,
+  BLEND_ADD (light) and BLEND_GLOW (adds on dark pixels, paints on bright ones), trails, fades, the game's palette
+  fade applied too. PF_UNDER skips pixels the Moemon sprite covers (MonPixel reads its tiles from VRAM, through its
+  matrix), so ground effects and the far side of orbits are behind it; MonSquares turns the sprite into 4x4 squares
+  in its own colors (digital form / shutdown, dissolve). Spotlight (dim everything but a dithered lit cone) and flash
+  are screen passes in the compositor. In battle nothing draws over the text box (y >= 112) unless PF_NOCLIP; the
+  editor clips to its field (MP_BallFx_SetClip). Particles only draw on the screen that spawned them (sPartScreen).
+  Several entrances at once (doubles / triples) scale the counts down (Budget).
+
+Battle hooks: pokeball.c SpriteCB_ReleaseMonFromBall (DEFAULT parts stay the game's own; a custom form skips the
+emerge affine anim and the ball fade task, HandleBallAnimEnd_MpFx waits for the body, then the NORMAL affine anim ends
+so the cry and idle anim start as usual); battle_anim_throw.c AnimTask_SwitchOutBallEffect runs the custom recall
+(Task_MpWaitRecallFx keeps the anim script waiting) and AnimTask_SwitchOutShrinkMon does nothing then. The send-out
+turbo (MP_SendOutRunning) speeds the effect up with the rest. NPC trainers' and wild Moemon are always DEFAULT.
+
+Editor: SELECT on the summary's POKé BALL page (Task_MpStartFxEditor, like the rename round trip; back on the ball page:
+sMpStartOnBallPage + InitBGs sets the layers as if scrolled there). Battle background (TallGrass), the Moemon on the
+player's platform (CreateMonPicSprite_Affine; SELECT front/back), the panel and a description box (wrapped by width).
+The preview loops: ball drops in, opens, entrance, 56-frame pause, recall.
+
+Followers: MpState.followerFx + followerFlags bits 1-3 sound, 4-5 sent-out count, 6 recall playing (MP_WIRESTATE_SIZE
+22, protocol 25). A count change while the follower is around: a mini ball (particle) is tossed from its owner to its
+tile and it comes out with its effect (DEFAULT = MPFX_FORM_VANILLA). Called back: sLeavingState keeps it out until its
+recall has played. Tests: fx_coop, fx_triple, fx_switch, fx_follow.
+

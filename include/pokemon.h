@@ -94,6 +94,8 @@ enum {
     MON_DATA_SPEED2,
     MON_DATA_SPATK2,
     MON_DATA_SPDEF2,
+    MON_DATA_MP_BALLFX,        // Moemon Co-op: ball entrance / recall effect (substruct 0's spare u16, mp_ballfx.c)
+    MON_DATA_MP_BALLFX_SOUND,  // Moemon Co-op: its sound accent (the 4 spare flag bits)
 };
 
 struct PokemonSubstruct0

@@ -785,16 +785,89 @@ static void Task_PlayCryWhenReleasedFromBall(u8 taskId)
     }
 }
 
+// Moemon Co-op: the ball effect of the Moemon this battler sends out (mp_ballfx.c)
+static void MpBattlerBallFx(u8 battler, struct MpBallFx *fx)
+{
+    MP_BallFx_OfMon(GetBattlerSide(battler) != B_SIDE_PLAYER ? &gEnemyParty[gBattlerPartyIndexes[battler]]
+                                                             : &gPlayerParty[gBattlerPartyIndexes[battler]], fx);
+}
+
+// Moemon Co-op: like HandleBallAnimEnd, for a Moemon whose body forms with its own
+// effect (no rising up, the "normal size" affine anim only once it's formed)
+static void HandleBallAnimEnd_MpFx(struct Sprite *sprite)
+{
+    u8 battler = sprite->sBattler;
+    struct Sprite *mon = &gSprites[gBattlerSpriteIds[battler]];
+
+    if (sprite->animEnded)
+        sprite->invisible = TRUE;
+    if (MP_BallFx_BodyRunning(gBattlerSpriteIds[battler]))
+        return;
+    if (sprite->data[2] == 0)
+    {
+        // formed: the game's own "normal size" anim (the cry and the idle anim wait for it to end)
+        sprite->data[2] = 1;
+        mon->invisible = FALSE;
+        StartSpriteAffineAnim(mon, BATTLER_AFFINE_NORMAL);
+        return;
+    }
+    if (sprite->animEnded && mon->affineAnimEnded)
+    {
+        s32 i, doneBattlers;
+
+        mon->y2 = 0;
+        gDoingBattleAnim = FALSE;
+        gBattleSpritesDataPtr->healthBoxesData[battler].ballAnimActive = FALSE;
+        FreeSpriteOamMatrix(sprite);
+        DestroySprite(sprite);
+        for (doneBattlers = 0, i = 0; i < MAX_BATTLERS_COUNT; i++)
+        {
+            if (gBattleSpritesDataPtr->healthBoxesData[i].ballAnimActive == FALSE)
+                doneBattlers++;
+        }
+        if (doneBattlers == MAX_BATTLERS_COUNT)
+        {
+            for (i = 0; i < POKEBALL_COUNT; i++)
+                FreeBallGfx(i);
+        }
+    }
+}
+
 static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
 {
     u8 battler = sprite->sBattler;
     u32 ballId;
+    struct MpBallFx fx;
+    bool8 customForm;
 
     StartSpriteAnim(sprite, 1);
     ballId = ItemIdToBallId(GetBattlerPokeballItemId(battler));
-    AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1, 28, ballId);
-    sprite->data[0] = LaunchBallFadeMonTask(TRUE, sprite->sBattler, 14, ballId);
-    sprite->callback = HandleBallAnimEnd;
+    // Moemon Co-op: the Moemon's own entrance effect (the parts that aren't DEFAULT)
+    MpBattlerBallFx(battler, &fx);
+    customForm = fx.form != MPFX_FORM_DEFAULT && gMain.inBattle;
+    if (fx.part == MPFX_PART_DEFAULT || !gMain.inBattle)
+        AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1, 28, ballId);
+    else
+        PlaySE(SE_BALL_OPEN);
+    if (!customForm)
+    {
+        sprite->data[0] = LaunchBallFadeMonTask(TRUE, sprite->sBattler, 14, ballId);
+        sprite->callback = HandleBallAnimEnd;
+    }
+    else
+    {
+        sprite->data[2] = 0;
+        sprite->callback = HandleBallAnimEnd_MpFx;
+    }
+    if (gMain.inBattle && !MP_BallFx_IsDefaultEntrance(&fx))
+    {
+        struct MpBallFx partsOnly = fx;
+        if (!customForm)
+            partsOnly.form = MPFX_FORM_DEFAULT;
+        // the Moemon is already in place (invisible): the body effect takes it from here
+        MP_BallFx_StartEntrance(gBattlerSpriteIds[battler], sprite->x, sprite->y - 5,
+                                GetBattlerSide(battler) != B_SIDE_PLAYER ? MPFX_FRONT : 0, &partsOnly);
+    }
 
     if (gMain.inBattle)
     {
@@ -849,7 +922,10 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
         gTasks[taskId].tCryTaskState = 0;
     }
 
-    StartSpriteAffineAnim(&gSprites[gBattlerSpriteIds[sprite->sBattler]], BATTLER_AFFINE_EMERGE);
+    if (!customForm)
+        StartSpriteAffineAnim(&gSprites[gBattlerSpriteIds[sprite->sBattler]], BATTLER_AFFINE_EMERGE);
+    else
+        gSprites[gBattlerSpriteIds[sprite->sBattler]].affineAnimEnded = FALSE;   // the cry waits for the form
 
     if (GetBattlerSide(sprite->sBattler) == B_SIDE_OPPONENT)
         gSprites[gBattlerSpriteIds[sprite->sBattler]].callback = SpriteCB_OpponentMonFromBall;
@@ -857,7 +933,7 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
         gSprites[gBattlerSpriteIds[sprite->sBattler]].callback = SpriteCB_PlayerMonFromBall;
 
     AnimateSprite(&gSprites[gBattlerSpriteIds[sprite->sBattler]]);
-    gSprites[gBattlerSpriteIds[sprite->sBattler]].data[1] = 0x1000;
+    gSprites[gBattlerSpriteIds[sprite->sBattler]].data[1] = customForm ? 0 : 0x1000;
 }
 
 #undef tCryTaskSpecies

@@ -710,6 +710,40 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_HeapStats(&used, &freeTotal, &largest);
         printf("[test] heap: used %u, free %u, largest free %u\n", (unsigned)used, (unsigned)freeTotal, (unsigned)largest);
     }
+    else if (strcmp(cmd, "ballfx") == 0)
+    {
+        // mp ballfx SLOT FORM PART COLOR RECALL SOUND  |  mp ballfx SLOT preset N
+        int slot = 0, f = 0, pa = 0, c = 0, r = 0, so = 0;
+        struct MpBallFx fx;
+        if (sscanf(arg, "%d preset %d", &slot, &f) == 2)
+            MP_BallFx_Preset(f, &fx);
+        else
+        {
+            sscanf(arg, "%d %d %d %d %d %d", &slot, &f, &pa, &c, &r, &so);
+            fx.form = f; fx.part = pa; fx.color = c; fx.recall = r; fx.sound = so;
+        }
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            MP_BallFx_SetBoxMon(&gPlayerParty[slot].box, &fx);
+            MP_BallFx_OfMon(&gPlayerParty[slot], &fx);
+            printf("[test] ballfx: slot %d form %d part %d color %d recall %d sound %d\n", slot, fx.form, fx.part, fx.color, fx.recall, fx.sound);
+        }
+    }
+    else if (strcmp(cmd, "fxedit") == 0)
+    {
+        // fxedit SLOT - the ball effect editor for a party Moemon (back to the field after)
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            MP_BallFxEditor_Open(&gPlayerParty[slot].box, CB2_ReturnToField);
+    }
+    else if (strcmp(cmd, "budget") == 0)
+    {
+        void MP_SpriteBudget(u8 *freeSprites, u8 *freePalettes, u16 *freeTiles, u8 *freeMatrices);
+        u8 sp, pal, mat;
+        u16 tiles;
+        MP_SpriteBudget(&sp, &pal, &tiles, &mat);
+        printf("[test] sprites: free %d sprites, %d palettes, %d tiles, %d matrices\n", sp, pal, tiles, mat);
+    }
     else if (strcmp(cmd, "compensate") == 0)
     {
         MP_CompensateBadEggs();
@@ -720,9 +754,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] party:");
         for (i = 0; i < PARTY_SIZE; i++)
             if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
-                printf(" %d(%d/%d ball %d style %04x friend %d%s)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                printf(" %d(%d/%d ball %d style %04x fx %04x/%d friend %d%s)", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
                        (int)GetMonData(&gPlayerParty[i], MON_DATA_HP), (int)GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP),
                        (int)GetMonData(&gPlayerParty[i], MON_DATA_POKEBALL), (int)GetMonData(&gPlayerParty[i], MON_DATA_ENCRYPT_SEPARATOR),
+                       (int)GetMonData(&gPlayerParty[i], MON_DATA_MP_BALLFX), (int)GetMonData(&gPlayerParty[i], MON_DATA_MP_BALLFX_SOUND),
                        (int)GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP),
                        GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG) ? " BAD EGG" : "");
             else
