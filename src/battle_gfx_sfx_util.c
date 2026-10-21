@@ -462,6 +462,15 @@ void InitAndLaunchChosenStatusAnimation(bool8 isStatus2, u32 status)
 static bool8 sMpFastGeneralAnim;
 
 // Moemon Co-op: a held item / Ingrain / Wish... animation is playing (battle_main.c doubles its speed)
+// Moemon Co-op: the running battle animation's script steps in a task (general, special and
+// status animations), not in a battler's controller (move animations)
+bool8 MP_BattleAnimInTask(void)
+{
+    bool8 MP_StatusAnimTaskActive(void);
+    return FuncIsActiveTask(Task_ClearBitWhenBattleTableAnimDone) || FuncIsActiveTask(Task_ClearBitWhenSpecialAnimDone)
+        || MP_StatusAnimTaskActive();
+}
+
 bool8 MP_FastGeneralAnimRunning(void)
 {
     if (sMpFastGeneralAnim && (!gAnimScriptActive || !FuncIsActiveTask(Task_ClearBitWhenBattleTableAnimDone)))

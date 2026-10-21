@@ -108,6 +108,13 @@ Passive effects between turns (B_ANIM_HELD_ITEM_EFFECT: Leftovers, berries, Shel
 WISH_HEAL, LEECH_SEED_DRAIN) run at 2x through the same extra step (battle_gfx_sfx_util.c MP_FastGeneralAnimRunning, rate
 10 in MpBattleTurboRate), and General_HeldItemEffect wiggles once instead of three times: a Leftovers turn 852 -> 732 frames.
 Debug `mp hold SLOT ITEM`.
+ANIM SPEED (host setting, HOST A GAME > ANIM SPEED: NORMAL / +25% / +30%, gMpConfig.animSpeed, ini battle_anim_speed,
+default 30, MOEMON_ANIM_SPEED overrides ours for tests): MPR_RULES is {u8 padding, u8 animSpeed} (protocol 27) and
+MP_BattleAnimSpeed() is the room's value. While gAnimScriptActive, MpBattleTurboRate is animSpeed/5 extra steps per 20
+frames; a move animation's script steps in its battler's controller, so the extra step also calls gAnimScriptCallback
+(not for general / special / status animations, whose script steps in a task: MP_BattleAnimInTask). Cmd_end waits for
+the sound effects to finish, so the SE players (SE1-3) play at the same tempo while an animation runs (MpSetSoundTempo;
+m4aMPlayTempoControl is a stub on PC). Scratch / Tackle: 41 -> 33 frames at +25%, 32-33 at +30%.
 Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vanilla 64/48/32; data/*.s need a touch to
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
@@ -409,7 +416,7 @@ followjoy:DATE:PID) and +1 every 128 steps (MP_Follower_OnWalkSteps from field_c
 ## TEAM PADDING (host setting)
 
 HOST A GAME > TEAM PADDING (mp_setup.c HOST_PADDING, gMpConfig.trainerPadding, ini trainer_padding, default on). The
-room creator sends MPR_RULES {u8 padding} to each friend who joins, right before the welcome note (mp_main.c
+room creator sends MPR_RULES {u8 padding, u8 animSpeed} to each friend who joins, right before the welcome note (mp_main.c
 SendWelcome); MP_TrainerPadding() is the host's value when heard, else ours (MOEMON_TRAINER_PADDING=0/1 overrides
 ours, for tests). The battle master decides everything with it: CoopTrainerTeamSize (Double needs 2, Triple 3) and
 MP_Coop_FinishTrainerParty (exactly +1 when on, never more; logs "coop: trainer N party a -> b" or "party a, no

@@ -1940,28 +1940,61 @@ bool8 MP_FastGeneralAnimRunning(void);  // battle_gfx_sfx_util.c
 
 // Extra steps per 10 frames: 10 (double speed) for held item / Ingrain / Wish
 // effects, 3 (1.3x) for send-outs and the end fade, 0 otherwise
+// Extra animation steps per 20 frames (6 = 1.3x)
 static u8 MpBattleTurboRate(void)
 {
+    u8 rate = 0, anim;
     if (MP_FastGeneralAnimRunning())
-        return 10;
+        return 20;
     if (gBattleOutcome != 0 && gPaletteFade.active)
-        return 3;
-    return MP_SendOutRunning() ? 3 : 0;
+        rate = 6;
+    else if (MP_SendOutRunning())
+        rate = 6;
+    // Moemon Co-op: the host's ANIM SPEED for move (and every other) battle animation
+    anim = MP_BattleAnimSpeed();
+    if (gAnimScriptActive && anim / 5 > rate)
+        rate = anim / 5;   // 25% -> 5, 30% -> 6
+    return rate;
+}
+
+// m4aMPlayTempoControl is a stub in the PC port (stub.c): the same thing on the player's fields
+// (music_player.c reads tempoU/tempoI as tempoScale/tempoInterval)
+static void MpSetSoundTempo(struct MusicPlayerInfo *mplay, u16 tempo)
+{
+    if (mplay->tempoU == tempo)
+        return;
+    mplay->tempoU = tempo;
+    mplay->tempoI = (mplay->tempoD * tempo) >> 8;
 }
 
 static void MpBattleTurbo(void)
 {
     static u8 sAcc;
     u8 rate = MpBattleTurboRate();
+    bool8 moveAnim;
+    // an animation ends once its sound effects have played: they play at the same faster tempo
+    // (note timing only, not pitch; a new sound starts at normal tempo again)
+    if (gAnimScriptActive && MP_BattleAnimSpeed() != 0)
+    {
+        u16 tempo = 256 * (100 + MP_BattleAnimSpeed()) / 100;
+        MpSetSoundTempo(&gMPlayInfo_SE1, tempo);
+        MpSetSoundTempo(&gMPlayInfo_SE2, tempo);
+        MpSetSoundTempo(&gMPlayInfo_SE3, tempo);
+    }
     if (rate == 0)
         return;
     sAcc += rate;
-    if (sAcc < 10)
+    if (sAcc < 20)
         return;
-    sAcc -= 10;
+    sAcc -= 20;
+    // a move animation's script steps in its battler's controller, once a frame: one more step here
+    // (general / special animations step in a task: RunTasksExcept below does it)
+    moveAnim = gAnimScriptActive && !MP_BattleAnimInTask();
     AnimateSprites();
     UpdatePaletteFade();
     RunTasksExcept(IsBattleLinkTaskFunc);
+    if (moveAnim && gAnimScriptActive)
+        gAnimScriptCallback();
 }
 
 void BattleMainCB2(void)

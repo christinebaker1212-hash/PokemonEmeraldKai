@@ -312,6 +312,8 @@ static void ClearSpriteIndex(u16 index)
 
 static void WaitAnimFrameCount(void)
 {
+    if (!gAnimScriptActive)
+        return;   // Moemon Co-op: an extra step after the end (battle_main.c MpBattleTurbo) does nothing
     if (sAnimFramesToWait <= 0)
     {
         gAnimScriptCallback = RunAnimScriptCommand;
@@ -325,6 +327,8 @@ static void WaitAnimFrameCount(void)
 
 static void RunAnimScriptCommand(void)
 {
+    if (!gAnimScriptActive)
+        return;   // Moemon Co-op: see WaitAnimFrameCount
     do
     {
         sScriptCmdTable[sBattleAnimScriptPtr[0]]();

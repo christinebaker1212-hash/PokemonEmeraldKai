@@ -36,6 +36,9 @@ QUICK START
                     friends see when they join. TEAM PADDING (ON at
                     first) gives trainers one extra Moemon when friends
                     team up against them (see TEAMING UP below).
+                    ANIM SPEED (+30% at first) makes battle animations
+                    (moves and everything else) play 25% or 30% faster
+                    for everyone in the server, or NORMAL.
      JOIN A GAME  - choose ENTER INVITE CODE... and type the code your
                     friend sent, then the password if they set one.
                     Friends on the same Wi-Fi also show up in the list.
@@ -491,6 +494,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   The low HP alarm beeps three times and then stops. Sending Moemon out and
   the fade at the end of a battle are 30% quicker, and held items like
   LEFTOVERS (and Ingrain, Wish, Leech Seed) show a short, quick animation.
+  Move animations play 30% faster too (the host's ANIM SPEED: NORMAL,
+  +25% or +30%; playing solo, the one in your own HOST A GAME screen).
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon
   (traded ones too; the NAME RATER in SLATEPORT renames them as well).

@@ -33,7 +33,8 @@
 #define FRAME_PAL    14
 #define TEXT_PAL     15
 #define LINE_H       16
-#define HOST_LINE_H  11   // the host form has more rows
+#define HOST_BACK_X  150  // BACK, on the START HOSTING line
+#define HOST_LINE_H  11   // the host form has more rows (START HOSTING and BACK share the last one)
 #define LIST_ROWS    5
 #define REFRESH_FRAMES (60 * 3)
 #define LOCAL_PORT_TRIES 5
@@ -97,6 +98,7 @@ enum {
     HOST_NOTE,
     HOST_LISTED,
     HOST_PADDING,
+    HOST_ANIM,
     HOST_START,
     HOST_BACK,
     HOST_ROWS
@@ -505,22 +507,24 @@ static const char *LobbyErrorText(u8 err)
 static void DrawHost(void)
 {
     u8 i;
-    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "TEAM PADDING", "START HOSTING", "BACK"};
+    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "TEAM PADDING", "ANIM SPEED", "START HOSTING", "BACK"};
     static const char *const help[] = {
         "The name your friends will look for.",
         "Optional. Friends need it to join.",
         "Optional. Two short lines your friends see when they join.",
         "NO hides it: friends must type the exact name.",
         "ON: trainers get one extra Moemon when friends team up.",
+        "How much faster battle animations play, for everyone.",
         "Open the server and start playing!",
-        "Go back.",
+        "Go back to HOST / JOIN.",
     };
 
     FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
     for (i = 0; i < HOST_ROWS; i++)
     {
-        u8 y = 1 + HOST_LINE_H * i;
-        Print(WIN_MAIN, labels[i], 14, y, sHostNormal);
+        u8 y = 1 + HOST_LINE_H * (i > HOST_START ? HOST_START : i);
+        u8 x = (i == HOST_BACK) ? HOST_BACK_X : 14;
+        Print(WIN_MAIN, labels[i], x, y, sHostNormal);
         if (i == HOST_NAME)
             PrintGame(WIN_MAIN, sSetup.roomName, 104, y, sHostAccent);
         else if (i == HOST_PASSWORD)
@@ -544,18 +548,20 @@ static void DrawHost(void)
                 PrintGame(WIN_MAIN, shown, 104, y, sHostAccent);
             }
         }
-        else if (i == HOST_LISTED || i == HOST_PADDING)
+        else if (i == HOST_LISTED || i == HOST_PADDING || i == HOST_ANIM)
         {
             u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
             PrintGame(WIN_MAIN, lt, 104, y, sHostNormal);
             if (i == HOST_LISTED)
                 Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sHostAccent);
-            else
+            else if (i == HOST_PADDING)
                 Print(WIN_MAIN, gMpConfig.trainerPadding ? "ON" : "OFF", 114, y, sHostAccent);
-            PrintGame(WIN_MAIN, rt, 140, y, sHostNormal);
+            else
+                Print(WIN_MAIN, gMpConfig.animSpeed == 30 ? "+30%" : gMpConfig.animSpeed == 25 ? "+25%" : "NORMAL", 114, y, sHostAccent);
+            PrintGame(WIN_MAIN, rt, i == HOST_ANIM ? 156 : 140, y, sHostNormal);
         }
         if (i == sSetup.hostCursor)
-            AddTextPrinterParameterized3(WIN_MAIN, FONT_NORMAL, 2, y, sHostNormal, TEXT_SKIP_DRAW, sHostArrow);
+            AddTextPrinterParameterized3(WIN_MAIN, FONT_NORMAL, x - 12, y, sHostNormal, TEXT_SKIP_DRAW, sHostArrow);
     }
     CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
     FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
@@ -917,21 +923,41 @@ static void HandleMain(void)
 
 static void HandleHost(void)
 {
+    // START HOSTING and BACK share the last line: UP / DOWN treat it as one row, LEFT / RIGHT pick
     if (JOY_NEW(DPAD_UP))
     {
-        sSetup.hostCursor = (sSetup.hostCursor == 0) ? HOST_ROWS - 1 : sSetup.hostCursor - 1;
+        if (sSetup.hostCursor >= HOST_START)
+            sSetup.hostCursor = HOST_START - 1;
+        else
+            sSetup.hostCursor = (sSetup.hostCursor == 0) ? HOST_START : sSetup.hostCursor - 1;
         PlaySE(SE_SELECT);
         DrawScreen();
     }
     else if (JOY_NEW(DPAD_DOWN))
     {
-        sSetup.hostCursor = (sSetup.hostCursor + 1) % HOST_ROWS;
+        sSetup.hostCursor = (sSetup.hostCursor >= HOST_START) ? 0 : sSetup.hostCursor + 1;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (sSetup.hostCursor >= HOST_START && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        sSetup.hostCursor = (sSetup.hostCursor == HOST_START) ? HOST_BACK : HOST_START;
         PlaySE(SE_SELECT);
         DrawScreen();
     }
     else if (sSetup.hostCursor == HOST_LISTED && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
     {
         sSetup.listed = !sSetup.listed;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (sSetup.hostCursor == HOST_ANIM && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
+    {
+        static const u8 sSpeeds[] = {0, 25, 30};
+        u8 i = gMpConfig.animSpeed == 30 ? 2 : gMpConfig.animSpeed == 25 ? 1 : 0;
+        i = (i + (JOY_NEW(DPAD_LEFT) ? 2 : 1)) % 3;
+        gMpConfig.animSpeed = sSpeeds[i];
+        MP_SaveConfig();
         PlaySE(SE_SELECT);
         DrawScreen();
     }

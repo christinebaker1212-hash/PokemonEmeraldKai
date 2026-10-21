@@ -563,6 +563,12 @@ void LaunchStatusAnimation(u8 battler, u8 statusAnimId)
     gTasks[taskId].data[0] = battler;
 }
 
+// Moemon Co-op: is a status animation's script stepping in its task? (battle_main.c MpBattleTurbo)
+bool8 MP_StatusAnimTaskActive(void)
+{
+    return FuncIsActiveTask(Task_DoStatusAnimation);
+}
+
 static void Task_DoStatusAnimation(u8 taskId)
 {
     gAnimScriptCallback();

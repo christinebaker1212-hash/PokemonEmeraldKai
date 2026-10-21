@@ -117,7 +117,9 @@ static u8 AsciiCharToGame(char c)
 
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+static u8 sRoomAnimSpeed;
 static bool8 OwnPadding(void);
+static u8 OwnAnimSpeed(void);
 static void ShowWelcome(u8 from, const u8 *text, u16 len);
 
 // Button icons in co-op text: "{A}", "{START}", "{LT}"... (mp_buttons.c draws the controller's)
@@ -275,6 +277,7 @@ static void LoadConfig(void)
     gMpConfig.trainerRange = 4;
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
+    gMpConfig.animSpeed = 30;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -335,6 +338,11 @@ static void LoadConfig(void)
             gMpConfig.autosaveMinutes = m < 0 ? 0 : (m > 60 ? 60 : m);
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
+        else if (strcmp(key, "battle_anim_speed") == 0)
+        {
+            int v = atoi(val);
+            gMpConfig.animSpeed = v >= 30 ? 30 : (v >= 25 ? 25 : 0);
+        }
         else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
         else if (strcmp(key, "quick_stock") == 0)
@@ -403,12 +411,14 @@ void MP_SaveConfig(void)
         "; servers you host: co-op trainers get one extra Moemon, so Double / Triple Battles work\n"
         "; against smaller teams (HOST A GAME > TEAM PADDING; 0 = off)\n"
         "trainer_padding = %d\n"
+        "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
+        "battle_anim_speed = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
-        "; your 16 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
+        "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.lobby);
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -1056,8 +1066,9 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         if (len >= 2 && !sLobby.creator)
         {
             sRoomPadding = data[1] != 0;
+            sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomRulesHeard = TRUE;
-            MPNet_Log("room rules from player %d: team padding %s", from + 1, sRoomPadding ? "on" : "off");
+            MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%", from + 1, sRoomPadding ? "on" : "off", sRoomAnimSpeed);
         }
     }
     else if (data[0] == MPR_PING)
@@ -1106,8 +1117,8 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[2] = {MPR_RULES, OwnPadding()};
-        MP_SendRelay(id, rules, 2);
+        u8 rules[3] = {MPR_RULES, OwnPadding(), OwnAnimSpeed()};
+        MP_SendRelay(id, rules, 3);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
         return;
@@ -1142,6 +1153,20 @@ static bool8 OwnPadding(void)
     if (getenv("MOEMON_TRAINER_PADDING"))   // tests
         return atoi(getenv("MOEMON_TRAINER_PADDING")) != 0;
     return gMpConfig.trainerPadding;
+}
+
+static u8 OwnAnimSpeed(void)
+{
+    if (getenv("MOEMON_ANIM_SPEED"))   // tests
+        return atoi(getenv("MOEMON_ANIM_SPEED"));
+    return gMpConfig.animSpeed;
+}
+
+u8 MP_BattleAnimSpeed(void)
+{
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomAnimSpeed;
+    return OwnAnimSpeed();
 }
 
 bool8 MP_TrainerPadding(void)

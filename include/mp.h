@@ -188,6 +188,7 @@ struct MpConfig
     u8 smallTweaks;           // AllowSmallTweaks (only from the file): MOEGATCHA typed codes
     u8 autosaveMinutes;       // mp_autosave.c: quiet save on the map every N minutes (0 = off)
     u8 trainerPadding;        // host setting: co-op trainers get one extra Moemon (HOST A GAME > TEAM PADDING)
+    u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
 
@@ -239,6 +240,8 @@ void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
+u8 MP_BattleAnimSpeed(void);     // the room host's ANIM SPEED: 0, 25 or 30 (percent faster)
+bool8 MP_BattleAnimInTask(void); // battle_gfx_sfx_util.c: the anim script steps in a task (not a move anim)
 const char *MP_OnlineLobbyAddress(void);
 const char *MP_InviteCode(void);   // for a game hosted on this PC, "" if none
 const char *MP_VpnName(void);      // "Radmin VPN" / "Hamachi" when the code uses one
@@ -811,7 +814,7 @@ enum {
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
-    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding (mp_main.c)
+    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed (mp_main.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)
