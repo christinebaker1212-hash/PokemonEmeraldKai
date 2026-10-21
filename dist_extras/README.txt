@@ -105,7 +105,8 @@ TEAMING UP FOR A DOUBLE BATTLE
   talk to that trainer or be spotted by them.
 * When an NPC trainer challenges a friend (they get the "!" or talk to the
   trainer), walk up next to your friend and face them. You'll see
-  "Asking <friend> to team up..." (press B to change your mind).
+  "Asking <friend> to team up..." (press B to change your mind; turn away
+  and face them again to ask again).
 * When your friend finishes reading the trainer's speech, they get:
   "<you> wants to join for a Double Battle! Is this OK?"  YES / NO
   This message can't be skipped or sped up, so nobody says yes by accident.
@@ -187,12 +188,15 @@ TRIPLE BATTLES (THREE PLAYERS)
 * Wild: when a wild Moemon jumps out, the two closest friends standing in
   grass nearby both jump in (usually three wild Moemon come out). With only
   one friend around it's the usual Double Battle.
-* Trainers: once one friend has joined your battle you see "<friend> is in!
-  Waiting for one more for a Triple Battle..." and the "Join me!" bubble stays
-  up. A second friend who walks up and faces you joins, and the Triple Battle
-  starts. To start a Double Battle without waiting, press B and answer YES
-  (B on that question keeps waiting, so mashing through text can't start it
-  by accident). You keep waiting as long as anyone else is online, even if
+* Trainers: once one friend has joined your battle you're asked "<friend>
+  has joined! Wait for another?" NO starts the Double Battle right away. YES
+  shows "<friend> is in! Waiting for one more for a Triple Battle..." and the
+  "Join me!" bubble stays up. A second friend who walks up and faces you
+  joins, and the Triple Battle starts as soon as all three of you are there
+  (also if they turn up while the question is still on screen). To start a
+  Double Battle without waiting after all, press B and answer YES (B on that
+  question keeps waiting, so mashing through text can't start it by
+  accident). You keep waiting as long as anyone else is online, even if
   they're busy in a battle or a menu right now. Two friends
   who ask at the same time both get in. Only trainers who have three or more
   Moemon of their own do Triple Battles (their team is never padded out for

@@ -576,6 +576,15 @@ void MP_ShowFieldMessageFitted(const u8 *text)
     ShowFieldMessage(sFitted);
 }
 
+// ShowFieldMessage does nothing while another message is still printing: a friend
+// who joins mid-sentence would leave the old text up under a new YES / NO
+void MP_ReplaceFieldMessage(const u8 *text)
+{
+    if (!IsFieldMessageBoxHidden())
+        StopFieldMessage();
+    MP_ShowFieldMessageFitted(text);
+}
+
 // ---------------------------------------------------------------------------
 // Joined frames: where two co-op windows meet (one's bottom edge on the row
 // above the other's top edge, or both edges on the same row), the frame art's

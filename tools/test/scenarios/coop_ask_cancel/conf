@@ -1,0 +1,10 @@
+# BOB walks up to ALICE during Roxanne's speech ("Asking ALICE to team up..."), changes his mind (B), turns away and
+# back: that asks again (B used to count as a "no" until the challenge ended), and he's in for the Double Battle
+MODE=2
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("joins the battle against trainer" "co-op: battle over, outcome 1")
+EXPECT_B=("stopped asking player 1" "turned away from player 1, can ask again" "co-op: battle over, outcome 1")

@@ -310,11 +310,19 @@ one, so two friends next to the host ask at once: a second request while the hos
 (or before JOIN_WAIT_THIRD) is kept as requester2 (MPR_COOP_REQUEST handler) instead of DECLINE_BUSY, and only
 DECLINE_NO / DECLINE_ONE_MON set the asker's declinedBy (busy / too late can retry). TryWaitForThird waits when a
 third is queued or any other player is online (FriendAvailableExcept: any map, whatever they're doing - they may be
-finishing a battle). While waiting for a third, B only asks "Start a Double Battle ... without waiting?" (JOIN_START_DOUBLE_*,
+finishing a battle). It first asks "<friend> has joined! Wait for another?" (JOIN_MORE_*, YES first; TryWaitForThird
+returns THIRD_ASK, already sends MPR_COOP_WAIT and keeps a third who asks meanwhile, which starts the triple at once;
+NO = AcceptRequester, the double; THIRD_QUEUED = a third already asked, no question). YES = StartWaitingThird.
+While waiting for a third, B only asks "Start a Double Battle ... without waiting?" (JOIN_START_DOUBLE_*,
 NO first): a single B pressed through text used to start the Double at once and the third was told "can't team up"
 (tri_wait_mash). A third asking once the battle is accepted gets DECLINE_TOO_LATE. Not eligible but
 someone else around: JOIN_NO_TRIPLE shows sText_NoTripleFew / sText_NoTripleKind to the host, a third who asks gets
-DECLINE_NO_TRIPLE. Tests: tri_trainer_rush (failed on the old code), tri_no_triple (Tommy, 2 Moemon).
+DECLINE_NO_TRIPLE. Tests: tri_trainer_rush (failed on the old code), tri_no_triple (Tommy, 2 Moemon), tri_more_no
+(NO to "Wait for another?"), coop_ask_cancel. B while asking (UpdateAsking) is not a "no": it sets cancelledAsk, and
+TryAsk skips that friend only while still facing them (turning away clears it; facing them again asks again). While the
+host's "wants to join" question is up for that friend (promptedFor), their new request just takes the seat back.
+Field messages in Task_JoinCheck go through MP_ReplaceFieldMessage: ShowFieldMessage ignores a new message while
+the last one is still printing, which left "Waiting for a partner" over the "Wait for another?" YES / NO.
 
 ## Co-op EXP at a single battle's pace
 

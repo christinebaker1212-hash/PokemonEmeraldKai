@@ -570,6 +570,7 @@ void MpUi_RefreshIcons(void);
 void MpUi_HelpItem(u16 item);   // the item's description on the help line
 void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int maxLines, u8 fg, u8 bg);
 void MP_ShowFieldMessageFitted(const u8 *text);   // ShowFieldMessage, wrapped to the box with pages
+void MP_ReplaceFieldMessage(const u8 *text);      // the same, cutting off a message still being printed
 bool8 MpUi_MoveCursor(u16 *cursor, u16 count);
 u16 MpUi_ScrollFor(u16 cursor, u16 count, u16 *scroll);
 void MpUi_Qty(u8 *dst, u32 qty);
@@ -939,6 +940,11 @@ u8 MP_BallFx_PresetCount(void);
 const char *MP_BallFx_PresetName(u8 i);
 void MP_BallFx_Preset(u8 i, struct MpBallFx *out);
 s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx);
+#define MPFX_USER_PRESETS 3
+bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out);       // MY PRESET 1-3 (slot 0-2), FALSE = empty
+void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx);
+s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx);             // -1 = none
+void MP_BallFx_EffectName(const struct MpBallFx *fx, char *out, u32 size);   // "HAUNTED", "MY PRESET 2", "CUSTOM"
 bool8 MP_BallFx_StartEntrance(u8 monSpriteId, s16 bx, s16 by, u8 flags, const struct MpBallFx *fx);
 bool8 MP_BallFx_StartRecall(u8 monSpriteId, s16 bx, s16 by, u8 flags, const struct MpBallFx *fx);
 bool8 MP_BallFx_BodyRunning(u8 monSpriteId);

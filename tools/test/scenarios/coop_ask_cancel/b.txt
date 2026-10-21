@@ -1,0 +1,17 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 320
+press UP 12
+wait 20
+press UP 12
+waitlog 600 asking player 1 to team up
+pressuntillog B 600 stopped asking player 1
+wait 30
+press LEFT 1
+wait 30
+press UP 1
+waitlog 300 asking player 1 to team up
+waitfor action 9000
+pressuntillog A 20000 co-op: battle over
+wait 300
+quit

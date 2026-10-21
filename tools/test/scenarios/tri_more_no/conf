@@ -1,0 +1,13 @@
+# ALICE waits at Roxanne, BOB walks up: "BOB has joined! Wait for another?" NO starts the Double Battle right away,
+# though CARL is online
+MODE=3
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+WARP_C=11,3,3,3
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+ENV_C="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("asking whether to wait for a third player" "joins the battle against trainer" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op: battle over, outcome 1")
+UNEXPECT_A=("(and another: triple)" "co-op: waiting for a third player")

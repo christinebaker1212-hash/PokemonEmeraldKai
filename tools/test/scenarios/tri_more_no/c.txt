@@ -1,0 +1,4 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 3000
+quit

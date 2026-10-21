@@ -185,6 +185,8 @@ static struct
     u8 targetName[MP_NAME_LEN + 1];
     u16 timer;
     s8 declinedBy;         // don't ask this player again until their challenge ends
+    s8 cancelledAsk;       // we pressed B while asking them: ask again once we've turned away and back
+    s8 promptedFor;        // whose "wants to join" question is up (they may stop asking and ask again)
     // Battle. Seats: 0 = the master (who met the trainer / wild Pokémon), 1-2
     // the friends who joined, in link order. A co-op double has two seats of
     // three Pokémon (party slots 0-2, 3-5), a triple three seats of two (0-1, 2-3, 4-5).
@@ -232,7 +234,7 @@ static struct
     u8 catchSeat[3];          // the seat that threw the ball
     u8 catchCount;
     u8 caught;             // CAUGHT_*
-} sCoop = { .requester = -1, .requester2 = -1, .declinedBy = -1, .wildFrom = -1, .bonusFrom = -1, .wildTarget2 = -1 };
+} sCoop = { .requester = -1, .requester2 = -1, .declinedBy = -1, .cancelledAsk = -1, .promptedFor = -1, .wildFrom = -1, .bonusFrom = -1, .wildTarget2 = -1 };
 
 // Pokémon each seat brings: 3 in a co-op double, 2 in a triple
 static u8 SeatSize(void)
@@ -318,7 +320,8 @@ static const u8 sText_NoTripleAsker[] = _("{STR_VAR_1}'s opponent can't do a Tri
 static const u8 sText_NoTripleFew[] = _("This trainer has fewer than 3 MOéMON:\nno Triple Battle. It's a Double!");
 static const u8 sText_NoTripleKind[] = _("This battle can't be a Triple Battle.\nIt's a Double!");
 static const u8 sText_Left[] = _("{STR_VAR_1} left the game.");
-static const u8 sText_WaitAsk[] = _("Wait for another trainer to join\nyou for a Double Battle?");
+static const u8 sText_WaitAsk[] = _("Wait for another trainer to join you?");
+static const u8 sText_WaitMore[] = _("{STR_VAR_1} has joined!\nWait for another?");
 static const u8 sText_Waiting[] = _("Waiting for a partner to join…\n({B_BUTTON} battle alone)");
 static const u8 sText_JoinMe[] = _("Join me!");
 static const u8 sText_WaitThird[] = _("{STR_VAR_1} is in! Waiting for one more\nfor a Triple Battle… ({B_BUTTON} start now)");
@@ -554,7 +557,11 @@ enum {
     JOIN_NO_TRIPLE,
     JOIN_START_DOUBLE_PRINT,   // B while waiting for a third: start the Double Battle now?
     JOIN_START_DOUBLE_ASK,
+    JOIN_MORE_PRINT,           // "<friend> has joined! Wait for another?"
+    JOIN_MORE_ASK,
 };
+
+enum { THIRD_NONE, THIRD_ASK, THIRD_QUEUED };
 
 static void SendWait(bool8 on)
 {
@@ -640,20 +647,9 @@ static void AcceptRequester(void)
               sCoop.joinCount == 3 ? " (and another: triple)" : "");
 }
 
-// One friend is in: wait for a third (TRUE) when the trainer allows it and
-// someone else is around
-static bool8 TryWaitForThird(void)
+// The NPC the others hold while we wait (and the "waiting" message they get)
+static void BeginWaitStage(void)
 {
-    // (a third who asked while we were answering the second one is already queued)
-    if (!TripleEligible() || (!PlayerValid(sCoop.requester2) && !FriendAvailableExcept(sCoop.requester)))
-    {
-        MPNet_Log("co-op: no triple (trainer %d, %d Pokemon, mode %d)", sCoop.trainerId,
-                  gTrainers[sCoop.trainerId].partySize, sCoop.mode);
-        return FALSE;
-    }
-    sCoop.waitingThird = TRUE;
-    if (sCoop.requester2 == sCoop.requester)
-        sCoop.requester2 = -1;
     if (sCoop.waitStage != WAIT_WAITING)
     {
         if (gSelectedObjectEvent < OBJECT_EVENTS_COUNT)
@@ -666,12 +662,45 @@ static bool8 TryWaitForThird(void)
     }
     sCoop.waitTimer = 0;
     SendWait(TRUE);
+}
+
+// One friend is in. When the trainer allows a Triple Battle and someone else is
+// online: THIRD_ASK ("<friend> has joined! Wait for another?" is up), or
+// THIRD_QUEUED (a third already asked: all three are here). THIRD_NONE otherwise.
+static u8 TryWaitForThird(void)
+{
+    if (sCoop.requester2 == sCoop.requester)
+        sCoop.requester2 = -1;
+    if (!TripleEligible() || (!PlayerValid(sCoop.requester2) && !FriendAvailableExcept(sCoop.requester)))
+    {
+        MPNet_Log("co-op: no triple (trainer %d, %d Pokemon, mode %d)", sCoop.trainerId,
+                  gTrainers[sCoop.trainerId].partySize, sCoop.mode);
+        return THIRD_NONE;
+    }
+    sCoop.waitingThird = TRUE;   // a third who asks from now on is kept
+    BeginWaitStage();
+    if (PlayerValid(sCoop.requester2))
+        return THIRD_QUEUED;
+    SetNameVar(sCoop.requester);
+    StringExpandPlaceholders(sText, sText_WaitMore);
+    HideMapNamePopUpWindow();
+    MP_ReplaceFieldMessage(sText);
+    MPNet_Log("co-op: asking whether to wait for a third player");
+    return THIRD_ASK;
+}
+
+// Yes, wait for a third
+static void StartWaitingThird(void)
+{
+    sCoop.waitingThird = TRUE;
+    if (sCoop.requester2 == sCoop.requester)
+        sCoop.requester2 = -1;
+    BeginWaitStage();
     SetNameVar(sCoop.requester);
     StringExpandPlaceholders(sText, sText_WaitThird);
     HideMapNamePopUpWindow();
-    MP_ShowFieldMessageFitted(sText);
+    MP_ReplaceFieldMessage(sText);
     MPNet_Log("co-op: waiting for a third player");
-    return TRUE;
 }
 
 // A friend is in, another is around, but this trainer can't do a Triple Battle:
@@ -681,7 +710,7 @@ static bool8 ShowNoTripleNote(void)
     if (TripleEligible() || !FriendAvailableExcept(sCoop.requester))
         return FALSE;
     HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-    MP_ShowFieldMessageFitted(gTrainers[sCoop.trainerId].partySize < 3 ? sText_NoTripleFew : sText_NoTripleKind);
+    MP_ReplaceFieldMessage(gTrainers[sCoop.trainerId].partySize < 3 ? sText_NoTripleFew : sText_NoTripleKind);
     MPNet_Log("co-op: no triple with this trainer, told the player");
     return TRUE;
 }
@@ -729,7 +758,7 @@ static void Task_JoinCheck(u8 taskId)
             sCoop.waitMapGroup = gObjectEvents[gSelectedObjectEvent].mapGroup;
             sCoop.waitStage = WAIT_ASKING;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-            MP_ShowFieldMessageFitted(sText_WaitAsk);
+            MP_ReplaceFieldMessage(sText_WaitAsk);
             tState = JOIN_WAIT_PRINT;
             break;
         }
@@ -739,7 +768,7 @@ static void Task_JoinCheck(u8 taskId)
             SendByte(sCoop.requester, MPR_COOP_DECLINE, DECLINE_ONE_MON);
             sCoop.requester = -1;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-            MP_ShowFieldMessageFitted(sText_OneMon);
+            MP_ReplaceFieldMessage(sText_OneMon);
             tState = JOIN_ONE_MON;
             break;
         }
@@ -747,8 +776,9 @@ static void Task_JoinCheck(u8 taskId)
         Gamepad_Rumble(40, 200);
         StringExpandPlaceholders(sText, sText_JoinPrompt);
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
-        MP_ShowFieldMessageFitted(sText);
+        MP_ReplaceFieldMessage(sText);
         sCoop.prompting = TRUE;
+        sCoop.promptedFor = sCoop.requester;
         tState = JOIN_PRINT;
         // fall through
     case JOIN_PRINT:
@@ -769,9 +799,15 @@ static void Task_JoinCheck(u8 taskId)
         {
             if (answer == 0)
             {
-                if (TryWaitForThird())
+                u8 third = TryWaitForThird();
+                if (third == THIRD_ASK)
                 {
-                    tState = JOIN_WAIT_THIRD;
+                    tState = JOIN_MORE_PRINT;
+                    break;
+                }
+                if (third == THIRD_QUEUED)
+                {
+                    tState = JOIN_WAIT_THIRD;   // all three are here: it begins
                     break;
                 }
                 if (ShowNoTripleNote())
@@ -825,7 +861,7 @@ static void Task_JoinCheck(u8 taskId)
         sCoop.waitStage = WAIT_WAITING;
         sCoop.waitTimer = 0;
         SendWait(TRUE);
-        MP_ShowFieldMessageFitted(sText_Waiting);
+        MP_ReplaceFieldMessage(sText_Waiting);
         tState = JOIN_WAITING;
         // fall through
     }
@@ -833,8 +869,15 @@ static void Task_JoinCheck(u8 taskId)
         if (PlayerValid(sCoop.requester))
         {
             // A friend walked up: they're in
+            u8 third;
             PlaySE(SE_SUCCESS);
-            if (TryWaitForThird())
+            third = TryWaitForThird();
+            if (third == THIRD_ASK)
+            {
+                tState = JOIN_MORE_PRINT;
+                break;
+            }
+            if (third == THIRD_QUEUED)
             {
                 tState = JOIN_WAIT_THIRD;
                 break;
@@ -910,8 +953,50 @@ static void Task_JoinCheck(u8 taskId)
             PlaySE(SE_SELECT);
             SetNameVar(sCoop.requester);
             StringExpandPlaceholders(sText, sText_StartDouble);
-            MP_ShowFieldMessageFitted(sText);
+            MP_ReplaceFieldMessage(sText);
             tState = JOIN_START_DOUBLE_PRINT;
+        }
+        break;
+    case JOIN_MORE_PRINT:
+    case JOIN_MORE_ASK:
+        // "<friend> has joined! Wait for another?" A third who turns up meanwhile: all
+        // three are here, it begins. The friend leaving: battle alone.
+        if (!PlayerValid(sCoop.requester) || PlayerValid(sCoop.requester2))
+        {
+            if (tState == JOIN_MORE_ASK)
+                EraseYesNoWindow();
+            tState = JOIN_WAIT_THIRD;
+            break;
+        }
+        if (++sCoop.waitTimer >= WAIT_RESEND_FRAMES)
+        {
+            sCoop.waitTimer = 0;
+            SendWait(TRUE);
+        }
+        if (tState == JOIN_MORE_PRINT)
+        {
+            if (!IsTextPrinterActive(0))
+            {
+                DisplayYesNoMenuDefaultYes();
+                MPNet_Log("co-op: wait for another? YES / NO");
+                tState = JOIN_MORE_ASK;
+            }
+            break;
+        }
+        {
+            s8 answer = Menu_ProcessInputNoWrapClearOnChoose();
+            if (answer == MENU_NOTHING_CHOSEN)
+                break;
+            if (answer == 0)
+            {
+                StartWaitingThird();   // yes: wait for a third
+                tState = JOIN_WAIT_THIRD;
+            }
+            else
+            {
+                AcceptRequester();     // no: a Double Battle now
+                FinishJoinCheck(taskId);
+            }
         }
         break;
     case JOIN_START_DOUBLE_PRINT:
@@ -946,7 +1031,7 @@ static void Task_JoinCheck(u8 taskId)
             // keep waiting
             SetNameVar(sCoop.requester);
             StringExpandPlaceholders(sText, sText_WaitThird);
-            MP_ShowFieldMessageFitted(sText);
+            MP_ReplaceFieldMessage(sText);
             tState = JOIN_WAIT_THIRD;
         }
         if (++sCoop.waitTimer >= WAIT_RESEND_FRAMES)
@@ -1806,6 +1891,7 @@ static bool8 TryAsk(void)
     struct ObjectEvent *me;
     s16 x, y;
     u8 i;
+    bool8 facingCancelled = FALSE;
 
     if (!MP_IsLocalFree() || !MP_IsConnected() || MP_Trainer_IsEngaged() || MP_Trainer_IsActive())
         return FALSE;
@@ -1825,6 +1911,11 @@ static bool8 TryAsk(void)
             continue;
         if (!MP_GetRemoteMapPos(i, &rx, &ry) || rx != x || ry != y)
             continue;
+        if (i == sCoop.cancelledAsk)
+        {
+            facingCancelled = TRUE;   // still facing the friend we just stopped asking
+            continue;
+        }
         if (!HasUsableMon())
             return FALSE;
         sCoop.role = ROLE_ASKING;
@@ -1840,6 +1931,11 @@ static bool8 TryAsk(void)
         MP_ShowFieldMessageFitted(sText);
         MPNet_Log("co-op: asking player %d to team up", i + 1);
         return TRUE;
+    }
+    if (!facingCancelled && sCoop.cancelledAsk >= 0)
+    {
+        MPNet_Log("co-op: turned away from player %d, can ask again", sCoop.cancelledAsk + 1);
+        sCoop.cancelledAsk = -1;   // turned away (or they moved): facing them again asks again
     }
     return FALSE;
 }
@@ -1859,7 +1955,8 @@ static void UpdateAsking(void)
     {
         SendByte(target, MPR_COOP_CANCEL, 0);
         StopAsking();
-        sCoop.declinedBy = target;
+        sCoop.cancelledAsk = target;   // not a "no": turn away and face them again to ask again
+        MPNet_Log("co-op: stopped asking player %d", target + 1);
         HideFieldMessageBox();
         UnlockPlayerFieldControls();
         return;
@@ -2637,6 +2734,11 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             SendByte(from, MPR_COOP_DECLINE, DECLINE_TOO_LATE);   // the battle is on its way
             MPNet_Log("co-op: player %d asked too late", from + 1);
         }
+        else if (sCoop.prompting && from == sCoop.promptedFor && !PlayerValid(sCoop.requester))
+        {
+            sCoop.requester = from;   // stopped asking, then asked again while their question is up
+            MPNet_Log("co-op: player %d asked again", from + 1);
+        }
         else if (sCoop.prompting || (sCoop.requester >= 0 && sCoop.requester != from && PlayerValid(sCoop.requester)))
         {
             SendByte(from, MPR_COOP_DECLINE, DECLINE_BUSY);
@@ -2750,6 +2852,8 @@ void MP_Coop_OnPlayerLeft(u8 id)
         sCoop.accepted = FALSE;
     if (sCoop.declinedBy == id)
         sCoop.declinedBy = -1;
+    if (sCoop.cancelledAsk == id)
+        sCoop.cancelledAsk = -1;
     // An asker waiting on this player is told by UpdateAsking
 }
 
