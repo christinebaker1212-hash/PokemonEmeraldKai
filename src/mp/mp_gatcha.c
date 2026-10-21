@@ -50,6 +50,7 @@
 #include "text.h"
 #include "window.h"
 #include "constants/items.h"
+#include "constants/flags.h"
 #include "constants/moves.h"
 #include "constants/rgb.h"
 #include "battle_pyramid.h"
@@ -554,6 +555,98 @@ void MP_GatchaTicketForItem(void)
     gSpecialVar_Result = TRUE;
 }
 
+// MOEGATCHA TICKETS a save would have had if tickets had existed when it got its story
+// items (saves from before them): once per save (BACKFILL_KEY), one per important item it
+// shows it got and wasn't rewarded for yet ("ticketitem:ID", shared with the live hook).
+// Proof: the event flag set when the item is handed over (items taken back later, like the
+// DEVON GOODS, or used up, like the gym leaders' TMs) or the item in the bag or PC.
+#define BACKFILL_KEY "gatcha:ticketbackfill"
+static bool8 GrantItemTicket(u16 item)
+{
+    char key[24];
+    snprintf(key, sizeof(key), "ticketitem:%d", item);
+    if (MP_SaveData_Get(key))
+        return FALSE;
+    MP_SaveData_Set(key, 1);
+    return TRUE;
+}
+
+static bool8 HasItemAnywhere(u16 item)
+{
+    return CheckBagHasItem(item, 1) || CheckPCHasItem(item, 1);
+}
+
+void MP_Gatcha_BackfillTickets(void)
+{
+    static const struct { u16 item; u16 flag; } sByFlag[] = {
+        {ITEM_HM01, FLAG_RECEIVED_HM_CUT},      {ITEM_HM02, FLAG_RECEIVED_HM_FLY},
+        {ITEM_HM03, FLAG_RECEIVED_HM_SURF},     {ITEM_HM04, FLAG_RECEIVED_HM_STRENGTH},
+        {ITEM_HM05, FLAG_RECEIVED_HM_FLASH},    {ITEM_HM06, FLAG_RECEIVED_HM_ROCK_SMASH},
+        {ITEM_HM07, FLAG_RECEIVED_HM_WATERFALL}, {ITEM_HM08, FLAG_RECEIVED_HM_DIVE},
+        {ITEM_TM39, FLAG_RECEIVED_TM_ROCK_TOMB}, {ITEM_TM08, FLAG_RECEIVED_TM_BULK_UP},
+        {ITEM_TM34, FLAG_RECEIVED_TM_SHOCK_WAVE}, {ITEM_TM50, FLAG_RECEIVED_TM_OVERHEAT},
+        {ITEM_TM42, FLAG_RECEIVED_TM_FACADE},   {ITEM_TM40, FLAG_RECEIVED_TM_AERIAL_ACE},
+        {ITEM_TM04, FLAG_RECEIVED_TM_CALM_MIND}, {ITEM_TM03, FLAG_RECEIVED_TM_WATER_PULSE},
+        {ITEM_EXP_SHARE, FLAG_RECEIVED_EXP_SHARE},
+        {ITEM_DEVON_GOODS, FLAG_RECOVERED_DEVON_GOODS}, {ITEM_LETTER, FLAG_RECEIVED_POKENAV},
+        {ITEM_METEORITE, FLAG_RECEIVED_METEORITE}, {ITEM_SCANNER, FLAG_EXCHANGED_SCANNER},
+        {ITEM_ROOT_FOSSIL, FLAG_CHOSE_ROOT_FOSSIL}, {ITEM_CLAW_FOSSIL, FLAG_CHOSE_CLAW_FOSSIL},
+        {ITEM_COIN_CASE, FLAG_RECEIVED_COIN_CASE}, {ITEM_CONTEST_PASS, FLAG_RECEIVED_CONTEST_PASS},
+        {ITEM_DEVON_SCOPE, FLAG_RECEIVED_DEVON_SCOPE}, {ITEM_GO_GOGGLES, FLAG_RECEIVED_GO_GOGGLES},
+        {ITEM_OLD_ROD, FLAG_RECEIVED_OLD_ROD},  {ITEM_GOOD_ROD, FLAG_RECEIVED_GOOD_ROD},
+        {ITEM_SUPER_ROD, FLAG_RECEIVED_SUPER_ROD}, {ITEM_POKEBLOCK_CASE, FLAG_RECEIVED_POKEBLOCK_CASE},
+        {ITEM_SS_TICKET, FLAG_RECEIVED_SS_TICKET}, {ITEM_WAILMER_PAIL, FLAG_RECEIVED_WAILMER_PAIL},
+        {ITEM_POWDER_JAR, FLAG_RECEIVED_POWDER_JAR},
+        {ITEM_MYSTIC_TICKET, FLAG_RECEIVED_MYSTIC_TICKET}, {ITEM_AURORA_TICKET, FLAG_RECEIVED_AURORA_TICKET},
+        {ITEM_OLD_SEA_MAP, FLAG_RECEIVED_OLD_SEA_MAP},
+    };
+    // key items found lying around (item balls) or not from the story never came with a ticket
+    static const u16 sNotGiven[] = {
+        ITEM_ROOM_1_KEY, ITEM_ROOM_2_KEY, ITEM_ROOM_4_KEY, ITEM_ROOM_6_KEY, ITEM_STORAGE_KEY, ITEM_BATTLE_FLAG,
+    };
+    s32 n = 0;
+    u16 item;
+    u8 i;
+
+    if (MP_SaveData_Get(BACKFILL_KEY))
+        return;
+    MP_SaveData_Set(BACKFILL_KEY, 1);
+    for (i = 0; i < ARRAY_COUNT(sByFlag); i++)
+    {
+        if ((FlagGet(sByFlag[i].flag) || HasItemAnywhere(sByFlag[i].item)) && GrantItemTicket(sByFlag[i].item))
+            n++;
+    }
+    // a bike: one ticket for the one the player has (or got, by the flag), unless either was rewarded already
+    if (FlagGet(FLAG_RECEIVED_BIKE) || HasItemAnywhere(ITEM_MACH_BIKE) || HasItemAnywhere(ITEM_ACRO_BIKE))
+    {
+        char machKey[24], acroKey[24];
+        snprintf(machKey, sizeof(machKey), "ticketitem:%d", ITEM_MACH_BIKE);
+        snprintf(acroKey, sizeof(acroKey), "ticketitem:%d", ITEM_ACRO_BIKE);
+        if (!MP_SaveData_Get(machKey) && !MP_SaveData_Get(acroKey)
+         && GrantItemTicket(HasItemAnywhere(ITEM_ACRO_BIKE) ? ITEM_ACRO_BIKE : ITEM_MACH_BIKE))
+            n++;
+    }
+    // any other key item the player is carrying (SOOT SACK, BASEMENT KEY, MAGMA EMBLEM, ORBS...)
+    for (item = ITEM_NONE + 1; item < ITEMS_COUNT; item++)
+    {
+        bool8 skip = FALSE;
+        if (GetItemPocket(item) != POCKET_KEY_ITEMS || item == ITEM_MACH_BIKE || item == ITEM_ACRO_BIKE)
+            continue;
+        for (i = 0; i < ARRAY_COUNT(sNotGiven) && !skip; i++)
+            skip = item == sNotGiven[i];
+        if (!skip && HasItemAnywhere(item) && GrantItemTicket(item))
+            n++;
+    }
+    if (n > 0)
+    {
+        char msg[96];
+        MP_Gatcha_AddTickets(n);
+        snprintf(msg, sizeof(msg), "You got %d MOEGATCHA TICKET%s for the story items you already have!", (int)n, n == 1 ? "" : "S");
+        MP_ShowNotice(msg);
+    }
+    MPNet_Log("gatcha: ticket backfill: %d for this save's story items (%d tickets)", (int)n, (int)MP_Gatcha_Tickets());
+}
+
 // Special: the Game Corner prize clerk sold a ticket (the coins are already taken)
 void MP_GatchaBuyTicket(void)
 {
@@ -565,6 +658,7 @@ void MP_Gatcha_GrantFree(void)
 {
     static s32 sCheckedDay;
     s32 today = MP_Today();
+    MP_Gatcha_BackfillTickets();
     if (today == sCheckedDay)
         return;
     sCheckedDay = today;

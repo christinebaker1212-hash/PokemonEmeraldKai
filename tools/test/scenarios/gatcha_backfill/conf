@@ -1,0 +1,7 @@
+# one client: a save from before MOEGATCHA TICKETS gets them once for the story items it already has. A new game gets
+# none (nothing yet); then, playing "an old save" (the backfill reset): a MACH BIKE in the bag, ROXANNE's TM used up
+# (its flag only) and the DEVON GOODS handed over (its flag only) = 3 tickets. Running it again or getting the bike
+# from an NPC again gives no more.
+MODE=1
+EXPECT_A=("ticket backfill: 0 for" "ticket backfill: 3 for this save's story items (3 tickets)" "gatcha tickets 3 free")
+UNEXPECT_A=("ticket for item 259" "ticket backfill: 3 for this save's story items (6")

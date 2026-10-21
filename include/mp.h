@@ -746,6 +746,7 @@ void MP_Follower_OnWalkSteps(void);
 void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
 void MP_Gatcha_AddTickets(s32 n);
+void MP_Gatcha_BackfillTickets(void);
 s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);

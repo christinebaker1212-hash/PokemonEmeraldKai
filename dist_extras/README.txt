@@ -378,7 +378,9 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                item in the story (key items, HMs, the gym leaders' TMs, the
                EXP. SHARE) hand you a ticket with it, once per item. The
                Mauville GAME CORNER's prize counter (the doll clerk) sells
-               them for 2,500 COINS.
+               them for 2,500 COINS. A save from before tickets existed gets
+               the ones it would have had, once, for the story items it
+               already got.
                Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,

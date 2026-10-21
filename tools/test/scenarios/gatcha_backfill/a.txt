@@ -1,0 +1,14 @@
+pressuntil A field 5000
+watchlog ticket backfill
+waitlog 1500 ticket backfill
+mp additem 259 1
+mp setflag 165
+mp setflag 143
+mp ticketbackfill reset
+wait 30
+mp ticketbackfill
+mp giveitemscript 259
+mash A 50 10
+wait 120
+mp gatchastock
+quit

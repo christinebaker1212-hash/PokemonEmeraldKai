@@ -372,6 +372,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         SetCoins(n);
     }
+    else if (strcmp(cmd, "setflag") == 0)
+    {
+        // setflag N - an event flag (include/constants/flags.h)
+        FlagSet(atoi(arg));
+    }
+    else if (strcmp(cmd, "ticketbackfill") == 0)
+    {
+        // ticketbackfill [reset] - the once-per-save MOEGATCHA TICKETS for story items already got (reset: as if never run)
+        if (strcmp(arg, "reset") == 0)
+            MP_SaveData_Set("gatcha:ticketbackfill", 0);
+        MP_Gatcha_BackfillTickets();
+    }
     else if (strcmp(cmd, "gatchastock") == 0)
     {
         printf("[test] gatcha tickets %d free %d\n", (int)MP_Gatcha_Tickets(), (int)MP_Gatcha_FreeWaiting());
