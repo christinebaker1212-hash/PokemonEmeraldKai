@@ -2527,12 +2527,27 @@ void BufferStringBattle(u16 stringID)
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;
         break;
     case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
+        // Moemon Co-op: a GENESIS / EPOCH BALL catch says it like Red / Crystal
+        if (MP_LegacyBall_String(stringID) && !(gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)))
+        {
+            stringPtr = MP_LegacyBall_String(stringID);
+            break;
+        }
         // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,
         // and with the other still out the battle goes on (no caught music)
         if (gMpCoopWild)
             stringPtr = MP_Coop_OtherWildOut(gBattlerTarget) ? sText_MpCoopGotchaGoOn : sText_MpCoopGotcha;
         else
             stringPtr = sText_GotchaPkmnCaughtPlayer;
+        break;
+    case STRINGID_PKMNBROKEFREE:
+    case STRINGID_ITAPPEAREDCAUGHT:
+    case STRINGID_AARGHALMOSTHADIT:
+    case STRINGID_SHOOTSOCLOSE:
+        // Moemon Co-op: GENESIS / EPOCH BALLS: Red's / Crystal's words
+        stringPtr = MP_LegacyBall_String(stringID);
+        if (stringPtr == NULL)
+            stringPtr = gBattleStringsTable[stringID - BATTLESTRINGS_TABLE_START];
         break;
     default: // load a string from the table
         if (stringID >= BATTLESTRINGS_COUNT)

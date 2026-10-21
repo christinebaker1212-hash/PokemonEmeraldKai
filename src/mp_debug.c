@@ -618,6 +618,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gMain.savedCallback = CB2_ReturnToField;
         SetMainCallback2(CB2_InitOptionMenu);
     }
+    else if (strcmp(cmd, "legacyrand") == 0)
+    {
+        // legacyrand B,B,... - the random bytes the next GENESIS / EPOCH BALL throws use
+        u8 bytes[16];
+        int n = 0, v, used;
+        const char *p = arg;
+        while (n < 16 && sscanf(p, "%d%n", &v, &used) == 1)
+        {
+            bytes[n++] = (u8)v;
+            p += used;
+            if (*p == ',')
+                p++;
+        }
+        MP_LegacyBall_RigRandom(bytes, n);
+    }
     else if (strcmp(cmd, "typeicons") == 0)
     {
         // typeicons [0|1] - OPTIONS > TYPE ICONS

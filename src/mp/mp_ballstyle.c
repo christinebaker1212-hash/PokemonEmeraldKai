@@ -47,6 +47,7 @@ static const u16 sSpecialItems[MP_SPECIAL_COUNT] = {
     [MP_SPECIAL_MOON - 1] = ITEM_MOON_BALL,   [MP_SPECIAL_DREAM - 1] = ITEM_DREAM_BALL,
     [MP_SPECIAL_HEAL - 1] = ITEM_HEAL_BALL,   [MP_SPECIAL_DUSK - 1] = ITEM_DUSK_BALL,
     [MP_SPECIAL_QUICK - 1] = ITEM_QUICK_BALL,
+    [MP_SPECIAL_GENESIS - 1] = ITEM_GENESIS_BALL, [MP_SPECIAL_EPOCH - 1] = ITEM_EPOCH_BALL,
 };
 
 static const u16 sSpecialRamps[MP_SPECIAL_COUNT][5] = {
@@ -61,6 +62,9 @@ static const u16 sSpecialRamps[MP_SPECIAL_COUNT][5] = {
     [MP_SPECIAL_HEAL - 1] = {RGB(14, 1, 10), RGB(21, 1, 16), RGB(30, 1, 22), RGB(30, 11, 25), RGB(31, 20, 28)},
     [MP_SPECIAL_DUSK - 1] = {RGB(4, 11, 4), RGB(6, 16, 6), RGB(9, 22, 9), RGB(16, 25, 16), RGB(23, 28, 23)},
     [MP_SPECIAL_QUICK - 1] = {RGB(14, 13, 1), RGB(21, 19, 1), RGB(29, 27, 2), RGB(30, 28, 11), RGB(30, 29, 21)},
+    // (their own art takes over wherever it can: mp_legacy_balls.c)
+    [MP_SPECIAL_GENESIS - 1] = {RGB(4, 4, 4), RGB(20, 10, 10), RGB(31, 16, 16), RGB(31, 24, 24), RGB(31, 31, 31)},
+    [MP_SPECIAL_EPOCH - 1] = {RGB(4, 4, 4), RGB(22, 7, 4), RGB(30, 10, 6), RGB(30, 16, 15), RGB(31, 19, 24)},
 };
 
 // Five shades per color, dark to light (the classic red uses the game's own)

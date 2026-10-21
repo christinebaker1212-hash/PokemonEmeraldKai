@@ -99,6 +99,9 @@
 #define ITEM_HEAL_BALL ITEM_03D
 #define ITEM_DUSK_BALL ITEM_03E
 #define ITEM_QUICK_BALL ITEM_048
+// The GENESIS / EPOCH BALLS: Pokémon Red's and Crystal's own POKé BALLS (mp_legacy_balls.c)
+#define ITEM_GENESIS_BALL ITEM_052
+#define ITEM_EPOCH_BALL ITEM_057
 #define ITEM_GUARD_SPEC 73
 #define ITEM_DIRE_HIT 74
 #define ITEM_X_ATTACK 75

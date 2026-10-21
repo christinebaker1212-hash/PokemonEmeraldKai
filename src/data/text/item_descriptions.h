@@ -19,6 +19,16 @@ static const u8 sGreatBallDesc[] = _(
 
 
 // Moemon Co-op: special POKé BALLS
+static const u8 sGenesisBallDesc[] = _(
+    "RED's POKé BALL.\n"
+    "Sleep or freeze is\n"
+    "a huge help.");
+
+static const u8 sEpochBallDesc[] = _(
+    "CRYSTAL's POKé\n"
+    "BALL. Weak foes and\n"
+    "any status help.");
+
 static const u8 sLoveBallDesc[] = _(
     "Sweet as a crush.\n"
     "Great on the same\n"

@@ -10543,6 +10543,31 @@ static void Cmd_handleballthrow(void)
         MarkBattlerForControllerExec(gActiveBattler);
         gBattlescriptCurrInstr = BattleScript_WallyBallThrow;
     }
+    else if (MP_LegacyBall_Kind(gLastUsedItem))
+    {
+        // Moemon Co-op: GENESIS / EPOCH BALL: Pokémon Red's / Crystal's own catch routine
+        // (mp_legacy_balls.c), resolved once here; every game shows the caseId it sends
+        u8 caseId;
+        if (MP_LegacyBall_ResolveThrow(gLastUsedItem, gBattlerTarget, &caseId))
+        {
+            BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
+            MarkBattlerForControllerExec(gActiveBattler);
+            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
+            MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);
+            if (CalculatePlayerPartyCount() == PARTY_SIZE)
+                gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+            else
+                gBattleCommunication[MULTISTRING_CHOOSER] = 1;
+        }
+        else
+        {
+            BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, caseId);
+            MarkBattlerForControllerExec(gActiveBattler);
+            // the message by the shakes shown (a miss is the first one: MP_LegacyBall_String)
+            gBattleCommunication[MULTISTRING_CHOOSER] = caseId == BALL_MP_MISS ? 0 : caseId;
+            gBattlescriptCurrInstr = BattleScript_ShakeBallThrow;
+        }
+    }
     else
     {
         u32 odds;

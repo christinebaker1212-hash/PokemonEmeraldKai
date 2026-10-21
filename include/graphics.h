@@ -3371,6 +3371,10 @@ extern const u32 gItemIcon_GreatBall[];
 extern const u32 gItemIconPalette_GreatBall[];
 // Moemon Co-op: special POKé BALLS
 extern const u32 gItemIcon_LoveBall[];
+extern const u32 gItemIcon_GenesisBall[];
+extern const u32 gItemIconPalette_GenesisBall[];
+extern const u32 gItemIcon_EpochBall[];
+extern const u32 gItemIconPalette_EpochBall[];
 extern const u32 gItemIconPalette_LoveBall[];
 extern const u32 gItemIcon_FriendBall[];
 extern const u32 gItemIconPalette_FriendBall[];

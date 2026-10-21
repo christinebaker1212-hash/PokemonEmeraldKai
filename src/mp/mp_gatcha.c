@@ -320,6 +320,8 @@ static const struct PrizeDef sBallCommon[] = {
     ITEM(ITEM_REPEAT_BALL, 3, 8), ITEM(ITEM_TIMER_BALL, 3, 8), ITEM(ITEM_PREMIER_BALL, 3, 8), ITEM(ITEM_LUXURY_BALL, 1, 6),
     // Special balls with no catch bonus sit with the PREMIER / LUXURY BALLS
     ITEM(ITEM_HEAL_BALL, 2, 6), ITEM(ITEM_FRIEND_BALL, 1, 6),
+    // Red's and Crystal's own POKé BALLS: the old rules, the old look
+    ITEM(ITEM_GENESIS_BALL, 3, 6), ITEM(ITEM_EPOCH_BALL, 3, 6),
 };
 static const struct PrizeDef sBallUncommon[] = {
     ITEM(ITEM_ULTRA_BALL, 5, 10), ITEM(ITEM_NET_BALL, 5, 6), ITEM(ITEM_DIVE_BALL, 5, 6), ITEM(ITEM_NEST_BALL, 5, 6),
@@ -327,6 +329,7 @@ static const struct PrizeDef sBallUncommon[] = {
     // The ones with a bonus in one situation, like NET / DIVE BALLS
     ITEM(ITEM_LOVE_BALL, 2, 4), ITEM(ITEM_LEVEL_BALL, 2, 4), ITEM(ITEM_LURE_BALL, 2, 4), ITEM(ITEM_MOON_BALL, 2, 4),
     ITEM(ITEM_HEAVY_BALL, 2, 4), ITEM(ITEM_FAST_BALL, 2, 4), ITEM(ITEM_HEAL_BALL, 4, 4), ITEM(ITEM_FRIEND_BALL, 3, 4),
+    ITEM(ITEM_GENESIS_BALL, 5, 4), ITEM(ITEM_EPOCH_BALL, 5, 4),
 };
 static const struct PrizeDef sBallRare[] = {
     ITEM(ITEM_ULTRA_BALL, 15, 10), ITEM(ITEM_LUXURY_BALL, 8, 8), ITEM(ITEM_NET_BALL, 10, 5), ITEM(ITEM_DIVE_BALL, 10, 5),

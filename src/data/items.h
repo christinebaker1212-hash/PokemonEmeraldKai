@@ -1055,15 +1055,17 @@ const struct Item gItems[] =
         .battleUseFunc = ItemUseInBattle_Escape,
     },
 
-    [ITEM_052] =
+    [ITEM_GENESIS_BALL] =
     {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
+        .name = _("GENESIS BALL"),
+        .itemId = ITEM_GENESIS_BALL,
         .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .description = sGenesisBallDesc,
+        .pocket = POCKET_POKE_BALLS,
+        .type = ITEM_POKE_BALL - FIRST_BALL,
+        .battleUsage = ITEM_B_USE_OTHER,
+        .battleUseFunc = ItemUseInBattle_PokeBall,
+        .secondaryId = ITEM_POKE_BALL - FIRST_BALL,
     },
 
 // Field items
@@ -1115,15 +1117,17 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_Repel,
     },
 
-    [ITEM_057] =
+    [ITEM_EPOCH_BALL] =
     {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
+        .name = _("EPOCH BALL"),
+        .itemId = ITEM_EPOCH_BALL,
         .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .description = sEpochBallDesc,
+        .pocket = POCKET_POKE_BALLS,
+        .type = ITEM_POKE_BALL - FIRST_BALL,
+        .battleUsage = ITEM_B_USE_OTHER,
+        .battleUseFunc = ItemUseInBattle_PokeBall,
+        .secondaryId = ITEM_POKE_BALL - FIRST_BALL,
     },
 
     [ITEM_058] =

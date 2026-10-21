@@ -90,14 +90,14 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_POKE_DOLL] = {gItemIcon_PokeDoll, gItemIconPalette_PokeDoll},
     [ITEM_FLUFFY_TAIL] = {gItemIcon_FluffyTail, gItemIconPalette_FluffyTail},
     // ????????
-    [ITEM_052] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
+    [ITEM_GENESIS_BALL] = {gItemIcon_GenesisBall, gItemIconPalette_GenesisBall},
     // Field items
     [ITEM_SUPER_REPEL] = {gItemIcon_Repel, gItemIconPalette_SuperRepel},
     [ITEM_MAX_REPEL] = {gItemIcon_Repel, gItemIconPalette_MaxRepel},
     [ITEM_ESCAPE_ROPE] = {gItemIcon_EscapeRope, gItemIconPalette_EscapeRope},
     [ITEM_REPEL] = {gItemIcon_Repel, gItemIconPalette_Repel},
     // ????????
-    [ITEM_057] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
+    [ITEM_EPOCH_BALL] = {gItemIcon_EpochBall, gItemIconPalette_EpochBall},
     [ITEM_058] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_059] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_05A] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},

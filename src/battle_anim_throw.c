@@ -1121,7 +1121,8 @@ static void SpriteCB_Ball_Bounce_Step(struct Sprite *sprite)
         sprite->sState = 0;
         sprite->y += Cos(64, 40);
         sprite->y2 = 0;
-        if (gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_NO_SHAKES)
+        if (gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_NO_SHAKES
+         || gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_MP_MISS)   // Moemon Co-op
         {
             sprite->sTimer = 0;
             sprite->callback = SpriteCB_Ball_Release;

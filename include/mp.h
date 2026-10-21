@@ -609,8 +609,9 @@ s32 MP_SaveData_Get(const char *key);
 u16 MP_RegisteredItem(u8 slot);
 // Special balls (MoeGatcha only): kept in bits 12-15 of a Moemon's ball style
 enum { MP_SPECIAL_NONE, MP_SPECIAL_LOVE, MP_SPECIAL_FRIEND, MP_SPECIAL_FAST, MP_SPECIAL_LEVEL, MP_SPECIAL_LURE,
-       MP_SPECIAL_HEAVY, MP_SPECIAL_MOON, MP_SPECIAL_DREAM, MP_SPECIAL_HEAL, MP_SPECIAL_DUSK, MP_SPECIAL_QUICK };
-#define MP_SPECIAL_COUNT MP_SPECIAL_QUICK
+       MP_SPECIAL_HEAVY, MP_SPECIAL_MOON, MP_SPECIAL_DREAM, MP_SPECIAL_HEAL, MP_SPECIAL_DUSK, MP_SPECIAL_QUICK,
+       MP_SPECIAL_GENESIS, MP_SPECIAL_EPOCH };   // 12 / 13: Pokémon Red's and Crystal's POKé BALLS (mp_legacy_balls.c)
+#define MP_SPECIAL_COUNT MP_SPECIAL_EPOCH
 struct Pokemon;
 u8 MP_BallStyle_Special(u16 style);
 u8 MP_SpecialBall_FromItem(u16 item);
@@ -622,6 +623,11 @@ bool8 MP_BallStyle_ItemCanColor(u16 item);
 bool8 MP_BallStyle_ItemCanDecorate(u16 item);
 void MP_Ball_SetCaught(struct Pokemon *mon, u16 item);
 u8 MP_SpecialBall_Multiplier(u16 item, u8 attacker, u8 target, u8 *catchRate);
+// mp_legacy_balls.c: the GENESIS / EPOCH BALLS (Pokémon Red's / Crystal's POKé BALLS)
+u8 MP_LegacyBall_Kind(u16 item);   // MP_SPECIAL_GENESIS / MP_SPECIAL_EPOCH, or 0
+bool8 MP_LegacyBall_ResolveThrow(u16 item, u8 target, u8 *caseId);
+const u8 *MP_LegacyBall_String(u16 stringId);
+void MP_LegacyBall_RigRandom(const u8 *bytes, u8 count);
 extern bool8 gMpFishingEncounter;   // wild_encounter.c: this wild battle came from a ROD (LURE BALL)
 // mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
 enum {
