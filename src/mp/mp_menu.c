@@ -1495,6 +1495,7 @@ static void QuickPickClose(u8 taskId, bool8 send)
     if (!send || sel < 0)
         return;
     // After closing, so you see your own bubble
+    MP_Achieve_Count("emote", 1);
     if (IsEmotePage(page))
         MP_Emote_Send(QuickEmote(page, sel));
     else if ((stock = QuickStockIndex(page, sel)) >= 0)

@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 120
+mp ach
+mp setflag 137
+mp setflag 110
+mp setflag 122
+mp setflag 106
+mp setflag 109
+mp setflag 107
+mp setflag 312
+mp setflag 123
+mp gamestat 7 120
+mp gamestat 11 12
+mp money 150000
+mp savedata ach:retro3 0
+wait 120
+mp ach
+mp achmenu 0
+wait 30
+shot journey
+press R 2
+wait 20
+shot battle
+press R 2
+wait 20
+press R 2
+wait 20
+press R 2
+wait 20
+press R 2
+wait 20
+shot extras
+press R 2
+wait 20
+shot journey_again
+press B 2
+wait 20
+press B 2
+wait 30
+quit

@@ -941,6 +941,41 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         gSaveBlock2Ptr->optionsWindowFrameType = n % WINDOW_FRAMES_COUNT;
     }
+    else if (strcmp(cmd, "achmenu") == 0)
+    {
+        // achmenu TAB - CO-OP > DAILY > ACHIEVEMENTS on a tab (0 JOURNEY ... 5 EXTRAS)
+        void MP_Daily_OpenAchievements(u8 tab);
+        MP_Daily_OpenAchievements(atoi(arg));
+    }
+    else if (strcmp(cmd, "ach") == 0)
+    {
+        // ach - achievements done, in all and per tab
+        s32 MP_Gatcha_Pulls(void);
+        u8 c;
+        printf("[test] achievements %d/%d:", MP_Achieve_DoneCount(), MP_Achieve_Total());
+        for (c = 0; c < MP_Achieve_CatCount(); c++)
+        {
+            u16 done, n = MP_Achieve_CountIn(c, &done);
+            printf(" %s %d/%d", MP_Achieve_CatName(c), done, n);
+        }
+        printf(" pulls %d\n", (int)MP_Gatcha_Pulls());
+    }
+    else if (strcmp(cmd, "lookskin") == 0)
+    {
+        // lookskin N - LOOK's skin color (0 = the sprite's own)
+        gMpConfig.app.skin = atoi(arg);
+    }
+    else if (strcmp(cmd, "gamestat") == 0)
+    {
+        // gamestat N VALUE - a game stat (include/constants/game_stat.h)
+        int n = 0, v = 0;
+        sscanf(arg, "%d %d", &n, &v);
+        SetGameStat(n, v);
+    }
+    else if (strcmp(cmd, "money") == 0)
+    {
+        SetMoney(&gSaveBlock1Ptr->money, atoi(arg));
+    }
     else if (strcmp(cmd, "daily") == 0)
     {
         void MP_Daily_OpenMenu(void);

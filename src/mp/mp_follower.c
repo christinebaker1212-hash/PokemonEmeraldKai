@@ -518,6 +518,7 @@ bool8 MP_Follower_Toggle(struct Pokemon *mon)
         sLocalPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
         sLocalToggleSeq = (sLocalToggleSeq + 1) & 3;   // counts sending out only
         JoyOfBeingChosen(mon);
+        MP_Achieve_Unlock("follower");
     }
     gMpConfig.followerPersonality = sLocalPersonality;
     MP_SaveConfig();

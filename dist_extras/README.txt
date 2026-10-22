@@ -339,17 +339,19 @@ STREAK         Play 10 minutes on the same map as a friend every day to build
 WEEKLY RACE    A different challenge every week with a leaderboard. When two
                or more players raced, the winner gets a PP UP, money and a
                MOEGATCHA pull.
-ACHIEVEMENTS   70 personal accomplishments, also viewable offline: every
-               badge and the HALL OF FAME, the legendary trio and the REGIs,
-               gym battles won without a faint, with an underdog team or
-               with a single Moemon, shiny and legendary catches, the
-               POKEDEX, evolutions, eggs, contests, the GAME CORNER... and
-               together: co-op wins, a gym beaten as a team, rescues, lent
-               field moves, trades, gifts, team photos, battles and bets
-               between friends, tournaments, gym rematches, streaks. Every
-               one gives MOEGATCHA pulls: 3, a 10-pull for the harder ones,
-               20 for the hardest (the HALL OF FAME, LEVEL 100, a shiny...).
-               Ones you unlocked before this version get the difference.
+ACHIEVEMENTS   184 personal accomplishments, also viewable offline, in six
+               tabs (L/R): JOURNEY (the story in order, HMs, landmarks,
+               BATTLE FRONTIER symbols), BATTLE (levels, a full team,
+               flawless gym wins, the BATTLE TOWER), CATCHING (the
+               POKEDEX, every type, legendaries, the HOENN POKEDEX, eggs),
+               HOENN (shops, contests, TV, money, the GAME CORNER...),
+               TOGETHER (co-op wins, Triple Battles, rescues, trades,
+               gifts, races, streaks) and EXTRAS (MOEGATCHA pulls and
+               rare prizes, followers, your look, POKE BALL styles).
+               Short goals give 3 MOEGATCHA pulls, longer ones 10, the
+               longest 20. Anything your save has already done counts:
+               new achievements you've already earned are given all at
+               once, with one message.
 GYM REMATCHES  The day's first team rematch win gives a MOEGATCHA pull and a
                RARE CANDY; later wins give money.
 RARE CANDIES   Can't raise a Moemon past the next gym leader's ace level

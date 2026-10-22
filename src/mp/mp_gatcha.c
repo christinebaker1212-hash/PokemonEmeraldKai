@@ -1069,6 +1069,7 @@ static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN);
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_CAUGHT);
         snprintf(res->note, sizeof(res->note), result == MON_GIVEN_TO_PARTY ? "It joined your party!" : "It was sent to your PC.");
+        MP_Achieve_Unlock("eventmon");
     }
     Free(mon);
 }
@@ -2738,6 +2739,14 @@ static void StartSpin(u8 count)
     }
     sG->best = best;
     MPNet_Log("gatcha: %d pull(s), best rarity %d", count, sG->results[best].rarity);
+    // achievements: pulls made, and the rarest prize
+    MP_Achieve_Count("pull", count);
+    if (sG->results[best].rarity >= R_SR)
+        MP_Achieve_Unlock("sr");
+    if (sG->results[best].rarity >= R_SSR)
+        MP_Achieve_Unlock("ssr");
+    if (sG->results[best].rarity >= R_UR)
+        MP_Achieve_Unlock("ur");
     SaveAfterPull();
 
     // The prize where the reel stops, and the cells next to it

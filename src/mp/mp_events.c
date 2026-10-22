@@ -1329,6 +1329,7 @@ static EWRAM_DATA struct
 {
     u8 taskId;
     u8 screen;
+    u8 achTab;          // ACHIEVEMENTS: the category shown (L/R)
     u16 cursor, scroll;
     u32 seenVersion;
 } sDaily = {0};
@@ -1489,28 +1490,31 @@ static void DrawRace(void)
     MpUi_HelpAscii("Winner (2+ racing): PP UP, money and a MOEGATCHA pull.  {B} BACK");
 }
 
+// ACHIEVEMENTS: one category at a time (L/R), its count and the total in the title
 static void DrawAchievements(void)
 {
-    u16 i, first, count = MP_Achieve_Total();
-    char title[32];
-    u8 right[32];
-    MpUi_Begin("ACHIEVEMENTS");
-    snprintf(title, sizeof(title), "%d/%d", MP_Achieve_DoneCount(), count);
-    MP_AsciiToGame(right, title, 30);
+    u16 i, first, done, count = MP_Achieve_CountIn(sDaily.achTab, &done);
+    char title[48];
+    u8 right[48];
+    snprintf(title, sizeof(title), "{L} %s {R}", MP_Achieve_CatName(sDaily.achTab));
+    MpUi_Begin(title);
+    snprintf(title, sizeof(title), "%d/%d  ALL %d/%d", done, count, MP_Achieve_DoneCount(), MP_Achieve_Total());
+    MP_AsciiToGame(right, title, 40);
     MpUi_TitleRight(right);
     first = MpUi_ScrollFor(sDaily.cursor, count, &sDaily.scroll);
     for (i = first; i < count && i < first + MPUI_ROWS; i++)
     {
         const char *name, *desc;
         char status[16], reward[32];
-        MP_Achieve_Info(i, &name, &desc, status, sizeof(status), reward, sizeof(reward));
+        MP_Achieve_Info(MP_Achieve_IndexIn(sDaily.achTab, i), &name, &desc, status, sizeof(status), reward, sizeof(reward));
         MpUi_RowAscii(i - first, i == sDaily.cursor, name, status);
     }
     MpUi_End();
+    if (count)
     {
         const char *name, *desc;
-        char status[16], reward[32], help[160];
-        MP_Achieve_Info(sDaily.cursor, &name, &desc, status, sizeof(status), reward, sizeof(reward));
+        char status[16], reward[32], help[200];
+        MP_Achieve_Info(MP_Achieve_IndexIn(sDaily.achTab, sDaily.cursor), &name, &desc, status, sizeof(status), reward, sizeof(reward));
         snprintf(help, sizeof(help), "%s  Reward: %s", desc, reward);
         MpUi_HelpAscii(help);
     }
@@ -1574,8 +1578,17 @@ static void Task_Daily(u8 taskId)
     }
     else
     {
-        if (sDaily.screen == DS_ACHIEVEMENTS && MpUi_MoveCursor(&sDaily.cursor, MP_Achieve_Total()))
+        if (sDaily.screen == DS_ACHIEVEMENTS && MpUi_MoveCursor(&sDaily.cursor, MP_Achieve_CountIn(sDaily.achTab, NULL)))
         {
+            Draw();
+            return;
+        }
+        if (sDaily.screen == DS_ACHIEVEMENTS && JOY_NEW(L_BUTTON | R_BUTTON))
+        {
+            u8 n = MP_Achieve_CatCount();
+            PlaySE(SE_SELECT);
+            sDaily.achTab = (sDaily.achTab + (JOY_NEW(R_BUTTON) ? 1 : n - 1)) % n;
+            sDaily.cursor = sDaily.scroll = 0;
             Draw();
             return;
         }
@@ -1606,6 +1619,16 @@ void MP_Daily_OpenMenu(void)
         RequestAll();   // offline: the goals are on the save
     MpUi_Open();
     sDaily.taskId = CreateTask(Task_Daily, 80);
+    Draw();
+}
+
+// Test harness: "mp achmenu TAB" opens ACHIEVEMENTS on a tab
+void MP_Daily_OpenAchievements(u8 tab)
+{
+    MP_Daily_OpenMenu();
+    sDaily.screen = DS_ACHIEVEMENTS;
+    sDaily.achTab = tab % MP_Achieve_CatCount();
+    sDaily.cursor = sDaily.scroll = 0;
     Draw();
 }
 

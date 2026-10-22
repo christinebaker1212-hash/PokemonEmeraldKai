@@ -3213,6 +3213,8 @@ static void MpBall_Apply(u16 item, u16 style)
     SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_POKEBALL, &it);
     SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ENCRYPT_SEPARATOR, &st);
     MpBall_RefreshCaughtBall();
+    if (st != 0)
+        MP_Achieve_Unlock("ballstyle");   // Moemon Co-op
 }
 
 static void MpBall_ChangeValue(s8 delta)

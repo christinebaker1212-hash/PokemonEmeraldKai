@@ -1652,6 +1652,8 @@ static void CB2_MpCoopFinish(void)
     if (sCoop.outcome == B_OUTCOME_WON)
     {
         // Both players' achievements
+        if (sCoop.count == 3)
+            MP_Achieve_Count("triple", 1);   // a Triple Battle won with two friends (wild or trainer)
         if (!gMpCoopWild)
         {
             MP_Events_Did(MP_DID_COOPWIN);

@@ -730,6 +730,10 @@ void MP_Achieve_OnCatch(struct Pokemon *mon, bool8 outbreak);
 u16 MP_Achieve_Total(void);
 u16 MP_Achieve_DoneCount(void);
 void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, int statusLen, char *reward, int rewardLen);
+u8 MP_Achieve_CatCount(void);                  // the menu's tabs (JOURNEY, BATTLE...)
+const char *MP_Achieve_CatName(u8 cat);
+u16 MP_Achieve_CountIn(u8 cat, u16 *done);
+u16 MP_Achieve_IndexIn(u8 cat, u16 row);
 enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT, MP_DID_TRADE, MP_DID_PHOTO, MP_DID_PVP,
        MP_DID_PVPWIN, MP_DID_BET, MP_DID_BETWIN, MP_DID_BLEND, MP_DID_BASE, MP_DID_CARD, MP_DID_RESCUE, MP_DID_SELFREVIVE,
        MP_DID_COUNT };
