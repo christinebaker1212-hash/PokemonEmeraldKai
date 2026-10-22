@@ -1426,7 +1426,8 @@ u32 GetBattlePalettesMask(bool8 battleBackground, bool8 attacker, bool8 target, 
     if (battleBackground)
     {
         if (!IsContest())
-            selectedPalettes = 0xe; // Palettes 1, 2, and 3
+            selectedPalettes = 0xc; // Palettes 2 and 3 (Moemon Co-op: not 1, the window frame
+                                    // from OPTIONS: a co-op window on screen during a move's flash went white)
         else
             selectedPalettes = 1 << GetBattleBgPaletteNum();
     }

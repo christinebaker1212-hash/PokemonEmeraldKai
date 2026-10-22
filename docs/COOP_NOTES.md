@@ -475,6 +475,10 @@ y - 12 (measured, same in singles and doubles); in triples beside the cards (MP_
 x2/y2 and invisible, fade with gPaletteFade and use gBattleMons types when its species matches the party Mon (link
 battles: the games that don't run the engine have no gBattleMons types, so species types there). No Fairy in Kai.
 Debug: `mp typeicons 1`, `mp options`; MOEMON_TYPEICON_DEBUG=1 logs box positions.
+Battle animations' "battle background" palettes (GetBattlePalettesMask, AnimTask_BlendColorCycleExclude) are 2-3 on
+PC, not 1-3: BG palette 1 in battle is the OPTIONS window frame (LoadBattleMenuWindowGfx), and co-op windows that
+stay up during other battlers' moves (doubles/triples) flashed white with every backdrop flash (Double-Edge,
+Take Down...). The backdrop itself is 2-4.
 
 ## GENESIS / EPOCH BALLS (Pokémon Red's and Crystal's POKé BALLS)
 
