@@ -1159,3 +1159,57 @@ void MP_BeginSpritePaletteFade(u8 slot, s8 delay, u8 startY, u8 targetY, u16 col
 #undef tTarget
 #undef tColor
 #undef tWait
+
+// Moemon PC: the layers drawn over the finished frame (type icons, the GENESIS / EPOCH
+// BALL throws...) fade exactly like a palette that is on screen: the palette's displayed
+// colors are fitted against its own colors as faded = s * own + b (one s, a b per
+// channel: any fade, blend or tint toward one color), and the same applies to the layer's
+// pixels. A fade aimed at other palettes (the background flash of a send-out) leaves them
+// alone, where the old "follow gPaletteFade.y" turned them white.
+void MP_FadeFit_FromPalette(struct MpFadeFit *fit, u16 plttIndex)
+{
+    const u16 *own = &gPlttBufferUnfaded[plttIndex], *shown = &((const u16 *)PLTT)[plttIndex];
+    s32 mu[3] = {0}, mf[3] = {0}, num = 0, den = 0, i, c;
+    bool8 same = TRUE;
+    for (i = 0; i < 16; i++)
+        if (own[i] != shown[i])
+            same = FALSE;
+    fit->on = !same;
+    if (same)
+        return;
+    for (c = 0; c < 3; c++)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            mu[c] += (own[i] >> (5 * c)) & 31;
+            mf[c] += (shown[i] >> (5 * c)) & 31;
+        }
+        for (i = 0; i < 16; i++)
+        {
+            s32 du = 16 * ((own[i] >> (5 * c)) & 31) - mu[c], df = 16 * ((shown[i] >> (5 * c)) & 31) - mf[c];
+            num += du * df;
+            den += du * du;
+        }
+    }
+    fit->s256 = den ? num * 256 / den : 256;
+    if (fit->s256 < 0)
+        fit->s256 = 0;
+    if (fit->s256 > 256)
+        fit->s256 = 256;
+    for (c = 0; c < 3; c++)
+        fit->b256[c] = (mf[c] * 256 - fit->s256 * mu[c]) / 16;
+}
+
+u16 MP_FadeFit_Apply(const struct MpFadeFit *fit, u16 color)
+{
+    u16 out = 0;
+    u8 c;
+    if (!fit->on)
+        return color;
+    for (c = 0; c < 3; c++)
+    {
+        s32 v = (fit->s256 * ((color >> (5 * c)) & 31) + fit->b256[c] + 128) >> 8;
+        out |= (v < 0 ? 0 : v > 31 ? 31 : v) << (5 * c);
+    }
+    return out | (color & 0x8000);
+}

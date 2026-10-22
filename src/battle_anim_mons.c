@@ -1000,6 +1000,17 @@ void ClearBattleAnimBg(u32 bgId)
     LoadBgTiles(bgAnimData.bgId, bgAnimData.bgTiles, 0x2000, bgAnimData.tilesOffset);
     FillBgTilemapBufferRect(bgAnimData.bgId, 0, 0, 0, 32, 64, 17);
     CopyBgTilemapBufferToVram(bgAnimData.bgId);
+#ifdef PORTABLE
+    // Moemon PC: clear the tilemap on screen right away too. The animations switch the
+    // layer back to the text tiles (char base 0) a frame later, and with the copy above
+    // still queued the old effect's tilemap showed text tiles all over the battle for a
+    // few frames (after every stat change).
+    {
+        u16 cnt = GetGpuReg(REG_OFFSET_BG0CNT + bgAnimData.bgId * 2);
+        static const u16 sMapSizes[4] = {0x800, 0x1000, 0x1000, 0x2000};
+        memset((void *)BG_SCREEN_ADDR((cnt >> 8) & 0x1F), 0, sMapSizes[cnt >> 14]);
+    }
+#endif
 }
 
 void AnimLoadCompressedBgGfx(u32 bgId, const u32 *src, u32 tilesOffset)

@@ -472,6 +472,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         volatile int *p = NULL;
         *p = 1;
     }
+        else if (strcmp(cmd, "dumppltt") == 0)
+    {
+        // dumppltt FILE - palette RAM, both palette buffers and the display registers (binary)
+        FILE *f = fopen(arg, "wb");
+        if (f)
+        {
+            fwrite((void *)PLTT, 1, PLTT_SIZE, f);
+            fwrite(gPlttBufferUnfaded, 1, PLTT_SIZE, f);
+            fwrite(gPlttBufferFaded, 1, PLTT_SIZE, f);
+            fwrite((void *)REG_BASE, 1, 0x60, f);
+            fclose(f);
+        }
+        printf("[test] pltt dumped: fade active %d y %d blend %04x sel %08x\n", gPaletteFade.active, gPaletteFade.y,
+               gPaletteFade.blendColor, gPaletteFade.multipurpose1);
+    }
         else if (strcmp(cmd, "pals") == 0)
     {
         // pals - which tag holds each sprite palette slot

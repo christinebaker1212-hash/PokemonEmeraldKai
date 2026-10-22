@@ -32,24 +32,12 @@ bool8 MP_TypeIcons_On(void)
     return gSaveBlock2Ptr->optionsTypeIcons;
 }
 
-static inline u16 Mix555(u16 a, u16 b, u8 k)   // k/16 of b over a
-{
-    u16 r = ((a & 31) * (16 - k) + (b & 31) * k) >> 4;
-    u16 g = (((a >> 5) & 31) * (16 - k) + ((b >> 5) & 31) * k) >> 4;
-    u16 bl = (((a >> 10) & 31) * (16 - k) + ((b >> 10) & 31) * k) >> 4;
-    return r | (g << 5) | (bl << 10) | 0x8000;
-}
+// The icons fade exactly as the healthbox (or card) they belong to: palette.c MP_FadeFit
+static struct MpFadeFit sFit;
 
-// The game's own whole-screen fade, applied to the icons too
 static u16 Faded(u16 c)
 {
-    if (gPaletteFade.active || gPaletteFade.y)
-    {
-        u8 y = gPaletteFade.y > 16 ? 16 : gPaletteFade.y;
-        if (y)
-            return Mix555(c, gPaletteFade.blendColor, y);
-    }
-    return c | 0x8000;
+    return MP_FadeFit_Apply(&sFit, c) | 0x8000;
 }
 
 static void DrawIcon(u16 *frame, u8 type, s16 x0, s16 y0)
@@ -148,6 +136,17 @@ void MP_TypeIcons_Composite(u16 *frame)
         }
         else if (!HealthboxPlace(b, &left, &right, &top))
             continue;
+        if (IS_TRIPLE_BATTLE())
+        {
+            u8 slot = IndexOfSpritePaletteTag(MP_TRICARD_PAL_TAG);
+            sFit.on = FALSE;
+            if (slot != 0xFF)
+                MP_FadeFit_FromPalette(&sFit, OBJ_PLTT_ID(slot));
+        }
+        else
+        {
+            MP_FadeFit_FromPalette(&sFit, OBJ_PLTT_ID(gSprites[gHealthboxSpriteIds[b]].oam.paletteNum));
+        }
         BattlerTypes(b, &t1, &t2);
         n = (t2 != t1 && t2 < NUMBER_OF_MON_TYPES) ? 2 : 1;
         if (foe)

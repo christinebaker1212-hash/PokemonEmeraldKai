@@ -191,7 +191,7 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
         sAnim.offX = sAnim.offY = 0;
         MapPoint(sAnim.game == MP_SPECIAL_GENESIS ? 120 : 128, 48, &rx, &ry);
         sAnim.offX = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_X) - rx - (sAnim.game == MP_SPECIAL_GENESIS ? 2 : 1);
-        sAnim.offY = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_Y) + 24 - ry - 2;
+        sAnim.offY = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_Y) + 24 - ry - 2 - 2;   // and 2 px higher (owner's call)
     }
     gBattleSpritesDataPtr->animationData->wildMonInvisible = gSprites[gBattlerSpriteIds[gBattleAnimTarget]].invisible;
     MPNet_Log("legacy anim: %s timeline %d (case %d), b%d -> b%d", sAnim.game == MP_SPECIAL_GENESIS ? "GENESIS" : "EPOCH",
@@ -226,7 +226,8 @@ static inline u16 Mix555(u16 a, u16 b, u8 k)   // k/16 of b over a
 
 static u16 Faded(u16 c)
 {
-    if (gPaletteFade.active || gPaletteFade.y)
+    // only a fade over most of the sprites (a screen fade), not a flash aimed at the background
+    if ((gPaletteFade.active || gPaletteFade.y) && MP_MaskTakesExtraPalettes(gPaletteFade.multipurpose1))
     {
         u8 y = gPaletteFade.y > 16 ? 16 : gPaletteFade.y;
         if (y)

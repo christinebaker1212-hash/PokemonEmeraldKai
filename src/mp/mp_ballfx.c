@@ -2192,7 +2192,8 @@ static const u8 sBayer4[4][4] = {{0, 8, 2, 10}, {12, 4, 14, 6}, {3, 11, 1, 9}, {
 // The game's own whole-screen fade, applied to our layer too
 static u16 Faded(u16 c)
 {
-    if (gPaletteFade.active || gPaletteFade.y)
+    // only a fade over most of the sprites (a screen fade), not a flash aimed at the background
+    if ((gPaletteFade.active || gPaletteFade.y) && MP_MaskTakesExtraPalettes(gPaletteFade.multipurpose1))
     {
         u8 y = gPaletteFade.y > 16 ? 16 : gPaletteFade.y;
         if (y)

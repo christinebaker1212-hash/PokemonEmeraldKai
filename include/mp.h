@@ -957,6 +957,7 @@ u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
 extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
+#define MP_TRICARD_PAL_TAG 0x53C8   // the triple cards' palette (mp_tricards.c)
 void MP_TriCards_Composite(u16 *frame);
 // The layers drawn over the frame in place of sprites show only while the GBA would show sprites
 // (the Pokédex page after a catch, the naming screen... turn OBJ off or blank the screen)
