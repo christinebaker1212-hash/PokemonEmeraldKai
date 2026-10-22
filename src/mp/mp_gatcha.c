@@ -417,7 +417,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(31, 17, 2),
     },
     [BANNER_BALLS] = {
-        "POKE BALLS", "Rare POK~ BALLS + 11 found only here!",
+        "POKE BALLS", "Rare POK~ BALLS + 13 found only here!",
         {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
          {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallSSuper, ARRAY_COUNT(sBallSSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}, {sBallEx, ARRAY_COUNT(sBallEx)}},
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(6, 18, 31),

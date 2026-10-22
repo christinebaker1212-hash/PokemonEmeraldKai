@@ -358,7 +358,10 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                              shadow.
                  TRAINING    Rare Candies, vitamins, PP Ups, Lucky Egg...
                  POKE BALLS  Net, Dive, Nest, Repeat, Timer, Luxury,
-                             Premier and Master Balls
+                             Premier and Master Balls, and the 13 found
+                             only here: LOVE, FRIEND, FAST, LEVEL, LURE,
+                             HEAVY, MOON, DREAM, HEAL, DUSK, QUICK,
+                             GENESIS and EPOCH
                Seven rarities (STANDARD): N 52%, U 28%, R 13.5%, SR 5%,
                SSR 1.2%, UR 0.25%, EX 0.05% (each banner's odds are on its
                bottom line). Legendary and mythical Moemon only come as UR,
