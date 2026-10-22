@@ -25,6 +25,6 @@ press B 2
 wait 30
 press B 2
 wait 30
-pressuntillog A 20000 co-op: battle over
+pressuntillog A 40000 co-op: battle over
 wait 300
 quit
