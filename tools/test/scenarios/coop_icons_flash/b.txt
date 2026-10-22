@@ -1,0 +1,13 @@
+pressuntil A field 5000
+mp typeicons 1
+mp teach 0 94
+waitfor online 6000
+wait 300
+mp wilddouble 100
+mp wild 288:3
+waitfor battle 2000
+pressuntil A action 4000
+wait 10
+mash A 8 25
+wait 1000
+quit
