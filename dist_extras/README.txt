@@ -293,8 +293,8 @@ DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.
 Moemon you get from a friend keep their original trainer's name and ID, but
-act as if you were their trainer: they always obey and gain EXP like your own
-(no traded bonus). The same goes for in-game trades.
+always obey you as if you were their trainer (they still gain the traded
+EXP bonus). The same goes for in-game trades.
 
 
 PLAYING TOGETHER EVERY DAY (CO-OP menu > DAILY)
@@ -588,6 +588,15 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   in <save>.bag, written with every save (the .bak files keep theirs as
   .bak1.bag and so on, so a .bak renamed back still has the whole BAG; a
   save played in another program since keeps only the normal BAG).
+* A shared world: a tree a friend CUT or a rock they smashed is gone for
+  everyone on that map, a STRENGTH boulder moves for everyone, CUT grass
+  is cut for everyone, and ashy grass a friend walked through on Route 113
+  is clear for you too (the soot is theirs). As in the game, it all comes
+  back once everyone has left the map; a friend who walks in while one of
+  you is still there sees it as you do.
+* Dark caves: every friend carries their own light, and a friend who used
+  FLASH lights up the cave around them on your screen too. Co-op notes and
+  speech bubbles stay readable in the dark.
 * Gender ratios are the original games' again (Moemon Kai had made most
   Moemon female): Torchic is mostly male, Zigzagoon half and half...
 * Weather in battle: SANDSTORM and HAIL hit everyone at the same time with

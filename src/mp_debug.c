@@ -19,6 +19,9 @@
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
+#include "field_effect.h"
+#include "fieldmap.h"
+#include "constants/field_effects.h"
 #include "save.h"
 #include "palette.h"
 #include "constants/characters.h"
@@ -386,6 +389,62 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int n = 0;
         sscanf(arg, "%d", &n);
         SetCoins(n);
+    }
+    else if (strcmp(cmd, "cuttree") == 0 || strcmp(cmd, "smashrock") == 0)
+    {
+        // cuttree LOCALID / smashrock LOCALID - as if we used CUT / ROCK SMASH on it (mp_world.c tells friends)
+        extern const u8 EventScript_CutTreeDown[];
+        gSpecialVar_LastTalked = atoi(arg);
+        if (cmd[0] == 'c')
+        {
+            ScriptContext_SetupScript(EventScript_CutTreeDown);
+        }
+        else
+        {
+            RemoveObjectEventByLocalIdAndMap(gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            MP_World_RockGone();
+        }
+    }
+    else if (strcmp(cmd, "cutgrass") == 0)
+    {
+        // cutgrass - CUT on the grass around where we face (SetUpFieldMove_Cut picks the tiles, as the menu does)
+        bool8 SetUpFieldMove_Cut(void);
+        if (SetUpFieldMove_Cut())
+        {
+            gFieldCallback2 = NULL;
+            gPostMenuFieldCallback = NULL;
+            FieldEffectStart(FLDEFF_CUT_GRASS);
+        }
+        else
+        {
+            printf("[test] cutgrass: nothing to cut here\n");
+        }
+    }
+    else if (strcmp(cmd, "worldobj") == 0)
+    {
+        // worldobj LOCALID - is that object on this map there, and where
+        u8 objId;
+        int localId = atoi(arg);
+        if (!TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &objId))
+            printf("[test] worldobj %d at %d,%d\n", localId, gObjectEvents[objId].currentCoords.x - MAP_OFFSET, gObjectEvents[objId].currentCoords.y - MAP_OFFSET);
+        else
+            printf("[test] worldobj %d gone\n", localId);
+    }
+    else if (strcmp(cmd, "ashcount") == 0)
+    {
+        printf("[test] ash %d\n", VarGet(VAR_ASH_GATHER_COUNT));
+    }
+    else if (strcmp(cmd, "tileat") == 0)
+    {
+        // tileat X,Y - the metatile there (map coords without the offset)
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        printf("[test] tile %d,%d = %d\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
+    else if (strcmp(cmd, "lights") == 0)
+    {
+        // lights - friends' lights in a dark cave, as last drawn (mp_world.c)
+        MP_World_DebugLights();
     }
     else if (strcmp(cmd, "gendersample") == 0)
     {

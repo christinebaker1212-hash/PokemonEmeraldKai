@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp additem 270 1
+waitfor online 6000
+wait 300
+mp cutgrass
+wait 200
+mp tileat 13,11
+wait 400
+wait 100
+mp warp 0,28,43,2
+wait 700
+press RIGHT 52
+wait 200
+mp tileat 45,2
+mp ashcount
+wait 600
+quit

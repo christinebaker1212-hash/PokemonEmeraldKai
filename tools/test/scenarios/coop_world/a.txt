@@ -1,0 +1,22 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp cuttree 30
+wait 200
+mp worldobj 30
+waitlog 3000 sent 1 change(s) to player 2
+wait 300
+mp warp 24,9,7,14
+wait 600
+mp smashrock 3
+wait 200
+mp worldobj 3
+wait 300
+mp warp 24,14,9,15
+wait 600
+mp setflag 2185
+press RIGHT 24
+wait 200
+mp worldobj 2
+wait 600
+quit

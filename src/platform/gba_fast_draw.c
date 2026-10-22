@@ -1,5 +1,6 @@
 #ifdef RENDERER_FAST_DRAW
 #include "global.h"
+#include "mp.h"
 #include <stdbool.h>
 #include "platform/dma.h"
 
@@ -2528,7 +2529,9 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         for (xpos = 0; xpos < DISPLAY_WIDTH; xpos++)
         {
             //win0 checks
-            if (WIN0enable && winCheckHorizontalBounds(WIN0left, WIN0right, xpos))
+            // (Moemon Co-op: plus friends' lights in a dark cave, mp_world.c)
+            if ((WIN0enable && winCheckHorizontalBounds(WIN0left, WIN0right, xpos))
+             || (gMpLightActive && MP_Light_IsLit(xpos, vcount)))
                 scanline.winMask[xpos] = REG_WININ & 0x3F;
             //win1 checks
             else if (WIN1enable && winCheckHorizontalBounds(WIN1left, WIN1right, xpos))

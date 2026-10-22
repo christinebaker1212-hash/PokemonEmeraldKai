@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "bike.h"
 #include "clock.h"
 #include "event_data.h"
@@ -762,9 +763,15 @@ static void AshGrassPerStepCallback(u8 taskId)
     {
         // Remove ash from grass
         if (MapGridGetMetatileIdAt(x, y) == METATILE_Fallarbor_AshGrass)
+        {
             StartAshFieldEffect(x, y, METATILE_Fallarbor_NormalGrass, 4);
+            MP_World_AshGathered(x, y, METATILE_Fallarbor_NormalGrass);   // Moemon Co-op: for friends too
+        }
         else
+        {
             StartAshFieldEffect(x, y, METATILE_Lavaridge_NormalGrass, 4);
+            MP_World_AshGathered(x, y, METATILE_Lavaridge_NormalGrass);
+        }
 
         // Try to gather ash
         if (CheckBagHasItem(ITEM_SOOT_SACK, 1))

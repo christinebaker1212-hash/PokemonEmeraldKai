@@ -28,6 +28,7 @@ EventScript_CutTreeDown::
 	applymovement VAR_LAST_TALKED, Movement_CutTreeDown
 	waitmovement 0
 	removeobject VAR_LAST_TALKED
+	special MP_World_CutTreeGone   @ Moemon Co-op: gone for friends on the map too
 	releaseall
 	end
 
@@ -87,6 +88,7 @@ EventScript_SmashRock::
 	applymovement VAR_LAST_TALKED, Movement_SmashRock
 	waitmovement 0
 	removeobject VAR_LAST_TALKED
+	special MP_World_RockGone   @ Moemon Co-op: gone for friends on the map too
 	specialvar VAR_RESULT, TryUpdateRusturfTunnelState
 	goto_if_eq VAR_RESULT, TRUE, EventScript_EndSmash
 	special RockSmashWildEncounter

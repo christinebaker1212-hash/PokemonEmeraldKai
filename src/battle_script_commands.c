@@ -3347,7 +3347,7 @@ static void MpCoopExpBegin(s32 sentIn, u8 fainted)
             gain = gain * 150 / 100;
         if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
             gain = gain * 150 / 100;
-        if (!MP_OtActsAsOwn(GetMonData(mon, MON_DATA_OT_ID)) && MP_Coop_IsTradedMon(slot))
+        if (MP_Coop_IsTradedMon(slot))
         {
             gain = gain * 150 / 100;
             boosted = TRUE;
@@ -3674,11 +3674,10 @@ static void Cmd_getexp(void)
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
-                    // Moemon Co-op: the partner's Pokémon are theirs, not traded; and traded Moemon
-                    // act as if the player were their OT (no traded boost; MoeGatcha prizes keep it)
-                    if (!MP_OtActsAsOwn(GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_OT_ID))
-                     && (gMpCoopBattle ? MP_Coop_IsTradedMon(gBattleStruct->expGetterMonId)
-                                       : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId])))
+                    // Moemon Co-op: the partner's Pokémon are theirs, not traded (traded Moemon keep
+                    // their boost, though they obey like the player's own: battle_util.c)
+                    if (gMpCoopBattle ? MP_Coop_IsTradedMon(gBattleStruct->expGetterMonId)
+                                      : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId]))
                     {
                         // check if the Pokémon doesn't belong to the player
                         if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3)

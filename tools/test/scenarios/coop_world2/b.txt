@@ -1,0 +1,15 @@
+pressuntil A field 5000
+mp additem 270 1
+waitfor online 6000
+waitlog 4000 (live)
+wait 200
+mp tileat 13,11
+shot b1
+mp warp 0,28,46,6
+waitlog 3000 player 1 (live)
+wait 900
+mp tileat 45,2
+mp ashcount
+shot b2
+wait 300
+quit

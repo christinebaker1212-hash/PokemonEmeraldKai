@@ -532,6 +532,7 @@ static void PackState(const struct MpState *s, u8 *p)
     PutU16(p + 14, s->seq);
     PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
     PutU16(p + 20, s->followerFx);
+    p[22] = s->light;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -543,6 +544,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
     s->followerFx = GetU16(p + 20);
+    s->light = p[22];
 }
 
 #define APPEARANCE_SIZE 32
@@ -734,6 +736,7 @@ static void CollectLocalState(struct MpState *s)
             s->speed = (flags & PLAYER_AVATAR_FLAG_DASH) ? MP_SPEED_RUN : MP_SPEED_WALK;
         }
         s->flags |= MPF_IN_OVERWORLD;
+        s->light = GetFlashLevel();   // friends draw our light in a dark cave (mp_world.c)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
@@ -1097,6 +1100,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Minigame_OnRelay(from, data, len);
     else if (data[0] >= MPR_MINIGAME_FIRST + 14 && data[0] < MPR_MINIGAME_FIRST + 20)
         MP_Group_OnRelay(from, data, len);
+    else if (data[0] >= MPR_WORLD_FIRST && data[0] < MPR_WORLD_FIRST + 2)
+        MP_World_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1539,6 +1544,7 @@ void MP_FrameUpdate(void)
     MP_Social_Update();
     MP_Together_Update();
     MP_Linkx_Update();
+    MP_World_Update();
     MP_Minigame_Update();
     MP_Group_Update();
 

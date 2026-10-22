@@ -699,6 +699,7 @@ void VDraw(void)
     uint16_t *image = sFrameImage;
 
     memset(image, 0, sizeof(sFrameImage));
+    MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     DrawFrame(image);
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)

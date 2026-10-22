@@ -658,7 +658,7 @@ void MP_Gatcha_BackfillTickets(void)
     MPNet_Log("gatcha: ticket backfill: %d for this save's story items (%d tickets)", (int)n, (int)MP_Gatcha_Tickets());
 }
 
-// Any OT but MoeGatcha's acts as the player's own (traded Moemon obey, no traded boost)
+// Any OT but MoeGatcha's acts as the player's own: traded Moemon obey (they keep the EXP boost)
 bool8 MP_OtActsAsOwn(u32 otId)
 {
     return otId != GACHA_OT_ID;

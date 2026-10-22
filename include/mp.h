@@ -150,6 +150,7 @@ struct MpState
     u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
     u16 followerFx;    // its ball effect (MP_BallFx_Pack)
     u8 badges;         // how many gym badges (catch-up bonus)
+    u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
 };
 
 
@@ -791,9 +792,9 @@ s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any bann
 void MP_Gatcha_AddTickets(s32 n);
 void MP_Gatcha_BackfillTickets(void);
 void MP_BattleTentWon(void);
-// Traded Moemon act as if the player were their OT: they obey at any badge count and get
-// no traded EXP boost (battle_util.c IsMonDisobedient, battle_script_commands.c EXP).
-// MoeGatcha prizes (their own OT) still obey by badges and get the boost.
+// Traded Moemon act as if the player were their OT: they obey at any badge count
+// (battle_util.c IsMonDisobedient); they keep the traded EXP boost. MoeGatcha prizes
+// (their own OT) still obey by badges.
 bool8 MP_OtActsAsOwn(u32 otId);          // a Battle Tent prize (three wins in a row): 3 tickets
 s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
@@ -872,7 +873,23 @@ enum {
     MPR_SOCIAL_FIRST = 160,    // pranks, piggyback... (mp_social.c, mp_piggy.c)
     MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
     MPR_MINIGAME_FIRST = 200,  // berry blender / berry crush with friends (mp_minigame.c)
+    MPR_WORLD_FIRST = 220,     // cut trees, smashed rocks, boulders, cut grass, soot (mp_world.c)
 };
+
+// mp_world.c: map changes and lights shared by friends on the same map
+void MP_World_CutTreeGone(void);
+void MP_World_RockGone(void);
+void MP_World_BoulderPushed(u8 objectEventId, u8 direction, s16 x, s16 y);
+void MP_World_CutGrassBegin(s16 x, s16 y);
+void MP_World_CutGrassEnd(void);
+void MP_World_AshGathered(s16 x, s16 y, u16 tile);
+void MP_World_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_World_Update(void);
+void MP_World_PrepareLights(void);   // sdl2.c VDraw, before the frame is drawn
+void MP_World_DebugLights(void);
+extern bool8 gMpLightActive;
+extern u8 gMpDarkUiPal;   // in a dark cave, sprites with this palette slot show through the darkness
+bool8 MP_Light_IsLit(int x, int y);   // the renderers' window 0 test
 
 
 // mp_minigame.c: BERRY BLENDER / BERRY CRUSH with friends (CO-OP > BERRY GAMES)

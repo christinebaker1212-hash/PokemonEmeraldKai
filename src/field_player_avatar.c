@@ -765,6 +765,7 @@ static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
              && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)) == FALSE)
             {
                 StartStrengthAnim(objectEventId, direction);
+                MP_World_BoulderPushed(objectEventId, direction, x, y);   // Moemon Co-op: for friends on the map
                 return TRUE;
             }
         }

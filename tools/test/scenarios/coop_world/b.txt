@@ -1,0 +1,22 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 700
+mp warp 0,19,36,22
+waitlog 3000 (list)
+wait 120
+mp worldobj 30
+shot b1
+wait 200
+mp warp 24,9,10,14
+waitlog 3000 (live)
+wait 200
+mp worldobj 3
+shot b2
+wait 200
+mp warp 24,14,13,13
+waitlog 3000 (live)
+wait 200
+mp worldobj 2
+shot b3
+wait 400
+quit

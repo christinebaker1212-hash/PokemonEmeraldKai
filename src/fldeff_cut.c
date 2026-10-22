@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
 #include "event_scripts.h"
@@ -318,6 +319,7 @@ bool8 FldEff_CutGrass(void)
 
     PlaySE(SE_M_CUT);
     PlayerGetDestCoords(&gPlayerFacingPosition.x, &gPlayerFacingPosition.y);
+    MP_World_CutGrassBegin(gPlayerFacingPosition.x, gPlayerFacingPosition.y);   // Moemon Co-op
     for (i = 0; i < CUT_HYPER_AREA; i++)
     {
         if (sHyperCutTiles[i] == TRUE)
@@ -334,6 +336,7 @@ bool8 FldEff_CutGrass(void)
     }
 
     SetCutGrassMetatiles(gPlayerFacingPosition.x - sTileCountFromPlayer_X, gPlayerFacingPosition.y - (1 + sTileCountFromPlayer_Y));
+    MP_World_CutGrassEnd();   // Moemon Co-op: the cut grass is cut for friends on the map too
     DrawWholeMapView();
     sCutGrassSpriteArrayPtr = AllocZeroed(CUT_SPRITE_ARRAY_COUNT);
 

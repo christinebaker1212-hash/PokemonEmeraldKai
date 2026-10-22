@@ -555,8 +555,8 @@ standing frames (mp_avatar.c StandInInfo). Debug: `mp easychat TYPE PERSON` (10 
 
 ## Small adjustments (traded OT, tents, genders, target level)
 - Traded Moemon act as if the player were their OT (MP_OtActsAsOwn, mp_gatcha.c): battle_util.c IsMonDisobedient
-  treats them as obedient and battle_script_commands.c gives no traded EXP boost (solo and co-op paths). MoeGatcha
-  prizes (GACHA_OT_ID) keep obeying by badges and keep the boost. Debug: `mp giveforeign SPECIES:LEVEL:lead`.
+  treats them as obedient. They keep the traded 1.5x EXP (the owner's call). MoeGatcha prizes (GACHA_OT_ID) keep
+  obeying by badges. Debug: `mp giveforeign SPECIES:LEVEL:lead`.
 - Battle Tents: battle_tent.c Give*TentPrize calls MP_BattleTentWon (3 MOEGATCHA TICKETS) when the prize is handed
   over; the three lobby scripts `call EventScript_MpTentGatchaTickets` (obtain_item.inc) for the message. A full BAG
   keeps both for later. Debug: `mp challenge 3` then walk into a tent lobby.
@@ -577,3 +577,19 @@ like the vanilla loop. One hit (or none): the vanilla named loop. `mpweathermsg 
 after its first time (the box is cleared instead), mode 2 the same for the "Everyone" line, mode 1 (weather ended)
 forgets; MP_Battle_ResetWeatherLines at battle start. Logs: "battle: weather hits N at once / (named)", "... line
 already shown". Only the master runs battle scripts, so co-op and PvP see the same thing. Test: coop_weather.
+
+## Shared world and lights (mp_world.c)
+Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
+walked onto the map: MP_World_Update watches friends' state maps). Each game keeps the change list of the map it is
+on (a new map starts a new list, so when everyone has left the map is as new, like the game's temp flags). Changes:
+WC_OBJ_GONE (specials MP_World_CutTreeGone / RockGone after removeobject in field_move_scripts.inc; receivers set the
+template's flag and play cut_tree / rock_smash_break when live), WC_TILE (fldeff_cut.c FldEff_CutGrass snapshots
+11x11 metatiles before/after and sends the differences; field_tasks.c AshGrassPerStepCallback sends the ash tile,
+receivers show the puff, the soot stays the walker's), WC_BOULDER (field_player_avatar.c TryPushBoulder: final x, y
+and direction; receivers walk it if it's one step away, else move it). Applied while the player is free.
+Lights: MpState.light = GetFlashLevel() (wire state byte 22). MP_World_PrepareLights (sdl2.c VDraw, before
+DrawFrame) turns each friend's light on the same dark map (radius from their flash level, grown/shrunk 2 px a frame)
+into per-scanline spans; gba_easy_draw.c / gba_fast_draw.c count a pixel in a span as inside window 0. In a dark
+cave, gMpDarkUiPal (the MP_TAG_UI_PAL slot) lets toasts / bubbles / "!" through the darkness (easy draw: their
+pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`, `mp cutgrass`, `mp worldobj ID`,
+`mp tileat X,Y`, `mp ashcount`. Tests: coop_flash, coop_world, coop_world2.

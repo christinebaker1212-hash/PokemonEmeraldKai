@@ -1,0 +1,7 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp lights
+shot a1
+wait 60
+quit
