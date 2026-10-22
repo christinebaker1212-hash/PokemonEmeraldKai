@@ -4,6 +4,6 @@ wait 300
 waitfor battle 2000
 wait 400
 wait 700
-pressuntil A field 8000
+pressuntil A field 16000
 wait 600
 quit
