@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 30   // 30: vanilla gender ratios (battles simulate genders on every game), light level in the state
+#define MP_PROTOCOL_VERSION 31   // 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
@@ -91,7 +91,7 @@ enum {
 // Wire structs are serialized by hand (little endian), these are just sizes.
 #define MP_NAME_LEN        8   // game charset, EOS (0xFF) padded
 #define MP_HELLO_SIZE      (2 + MP_NAME_LEN + 4 + 32)
-#define MP_WIRESTATE_SIZE  23
+#define MP_WIRESTATE_SIZE  24
 
 // ---- Client ----
 enum {

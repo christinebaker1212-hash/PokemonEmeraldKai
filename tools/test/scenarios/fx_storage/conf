@@ -1,0 +1,13 @@
+# Ball effects and POKé BALL colors past the first 11 / 12 / 16 / 7: stored in the Moemon's spare bits (markings top,
+# unused ribbons, a spare decoration bit, special-ball value 15) without disturbing markings, decorations or special balls;
+# old values read as before
+MODE=1
+TMO=60
+EXPECT_A=("fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 0 style 0000 (color 0 deco 0 special 0)"
+          "fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 15 style 0000 (color 0 deco 0 special 0)"
+          "fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 9 style f0f8 (color 40 deco 15 special 0)"
+          "fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 9 style 0844 (color 20 deco 4 special 0)"
+          "fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 9 style 0035 (color 5 deco 3 special 0)"
+          "fxget: slot 0 form 3 part 5 color 40 recall 6 sound 2 markings 9 style c000 (color 0 deco 0 special 12)"
+          "fxget: slot 0 form 0 part 0 color 10 recall 0 sound 0 markings 9 style c000 (color 0 deco 0 special 12)"
+          "ball unlocks c: 15 of 30 still to earn")

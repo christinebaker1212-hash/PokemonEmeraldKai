@@ -536,8 +536,9 @@ static void PackState(const struct MpState *s, u8 *p)
     p[10] = s->flags; p[11] = s->topLevel; p[12] = s->partyCount; p[13] = s->emote;
     PutU16(p + 14, s->seq);
     PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
-    PutU16(p + 20, s->followerFx);
+    PutU16(p + 20, s->followerFx & 0xFFFF);
     p[22] = s->light;
+    p[23] = s->followerFx >> 16;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -548,7 +549,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->flags = p[10]; s->topLevel = p[11]; s->partyCount = p[12]; s->emote = p[13];
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
-    s->followerFx = GetU16(p + 20);
+    s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
     s->light = p[22];
 }
 

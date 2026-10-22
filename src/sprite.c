@@ -1611,8 +1611,9 @@ static bool8 MpPrefersExtraSlot(u16 tag)
 {
     return MP_IsCoopPaletteTag(tag)
         || (tag >= 55000 && tag < 55040)     // POKé BALLS (pokeball.c) and their particles (battle_anim_throw.c)
-        || (tag >= 0x56A0 && tag < 0x56E0)   // recolored / special balls (mp_ballstyle.c)
-        || (tag >= 0x5710 && tag < 0x5760);  // decorated balls
+        || (tag >= 0x56A0 && tag < 0x56E0)   // special balls, ball icons (mp_ballstyle.c, summary)
+        || (tag >= 0x5710 && tag < 0x5760)   // decorated balls
+        || (tag >= 0x5770 && tag < 0x57A0);  // recolored POKé BALLS (41 colors)
 }
 
 // A free slot for `tag` (0xFF = none): the GBA's 16 first, the extra ones after them;

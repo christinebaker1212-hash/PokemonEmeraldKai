@@ -148,7 +148,7 @@ struct MpState
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
     u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
-    u16 followerFx;    // its ball effect (MP_BallFx_Pack)
+    u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
     u8 badges;         // how many gym badges (catch-up bonus)
     u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
 };
@@ -680,9 +680,18 @@ bool8 MP_LegacySfx_Playing(void);
 void MP_LegacySfx_StopAll(void);
 extern bool8 gMpFishingEncounter;   // wild_encounter.c: this wild battle came from a ROD (LURE BALL)
 // mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
+// The colors are also the ball effects' energy colors. The first 11 are everyone's; the 30 after them are
+// earned (achievements, MOEGATCHA: MP_BallUnlock_*).
 enum {
     MP_BALL_RED, MP_BALL_BLUE, MP_BALL_GREEN, MP_BALL_YELLOW, MP_BALL_PINK, MP_BALL_PURPLE,
-    MP_BALL_ORANGE, MP_BALL_CYAN, MP_BALL_BLACK, MP_BALL_SILVER, MP_BALL_GOLD, MP_BALL_COLORS
+    MP_BALL_ORANGE, MP_BALL_CYAN, MP_BALL_BLACK, MP_BALL_SILVER, MP_BALL_GOLD,
+    MP_BALL_CRIMSON, MP_BALL_SCARLET, MP_BALL_CORAL, MP_BALL_SALMON, MP_BALL_PEACH, MP_BALL_AMBER,
+    MP_BALL_LEMON, MP_BALL_OLIVE, MP_BALL_LIME, MP_BALL_MINT, MP_BALL_JADE, MP_BALL_FOREST,
+    MP_BALL_TEAL, MP_BALL_AQUA, MP_BALL_SKY, MP_BALL_AZURE, MP_BALL_NAVY, MP_BALL_INDIGO,
+    MP_BALL_VIOLET, MP_BALL_LILAC, MP_BALL_MAGENTA, MP_BALL_ROSE, MP_BALL_SAKURA, MP_BALL_BROWN,
+    MP_BALL_COCOA, MP_BALL_SAND, MP_BALL_CREAM, MP_BALL_WHITE, MP_BALL_GRAY, MP_BALL_BRONZE,
+    MP_BALL_COLORS,
+    MP_BALL_FIRST_EARNED = MP_BALL_CRIMSON,
 };
 struct BoxPokemon;
 u8 MP_BallStyle_Color(u16 style);
@@ -734,6 +743,9 @@ u8 MP_Achieve_CatCount(void);                  // the menu's tabs (JOURNEY, BATT
 const char *MP_Achieve_CatName(u8 cat);
 u16 MP_Achieve_CountIn(u8 cat, u16 *done);
 u16 MP_Achieve_IndexIn(u8 cat, u16 row);
+bool8 MP_Achieve_IsDone(u16 i);
+bool8 MP_Achieve_IsDoneById(const char *id);
+const char *MP_Achieve_NameById(const char *id);
 enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT, MP_DID_TRADE, MP_DID_PHOTO, MP_DID_PVP,
        MP_DID_PVPWIN, MP_DID_BET, MP_DID_BETWIN, MP_DID_BLEND, MP_DID_BASE, MP_DID_CARD, MP_DID_RESCUE, MP_DID_SELFREVIVE,
        MP_DID_COUNT };
@@ -1057,8 +1069,8 @@ struct Pokemon;
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out);
 void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out);
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx);
-u16 MP_BallFx_Pack(const struct MpBallFx *fx);
-void MP_BallFx_Unpack(u16 v, u8 sound, struct MpBallFx *out);
+u32 MP_BallFx_Pack(const struct MpBallFx *fx);                 // 24 bits: MON_DATA_MP_BALLFX | MON_DATA_MP_BALLFX_EXT << 16
+void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out);
 bool8 MP_BallFx_IsDefaultEntrance(const struct MpBallFx *fx);
 u16 MP_BallFx_EnergyRgb(u8 color);
 const char *MP_BallFx_FormName(u8 i);
@@ -1070,6 +1082,23 @@ const char *MP_BallFx_PresetName(u8 i);
 void MP_BallFx_Preset(u8 i, struct MpBallFx *out);
 s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx);
 #define MPFX_USER_PRESETS 3
+// mp_ballunlock.c: the colors and effect pieces this save can pick (the first ones are everyone's)
+#define MPFX_FORM_FIRST_EARNED   12
+#define MPFX_PART_FIRST_EARNED   16
+#define MPFX_RECALL_FIRST_EARNED 7
+enum { MPFX_PIECE_COLOR, MPFX_PIECE_FORM, MPFX_PIECE_PART, MPFX_PIECE_RECALL, MPFX_PIECE_KINDS };
+bool8 MP_BallUnlock_Has(u8 kind, u8 index);
+bool8 MP_BallUnlock_Give(u8 kind, u8 index);          // a MOEGATCHA prize; FALSE: had it already
+u8 MP_BallUnlock_Count(u8 kind);
+u8 MP_BallUnlock_First(u8 kind);
+u8 MP_BallUnlock_Step(u8 kind, u8 cur, s8 dir);       // the next one this save has, wrapping
+u8 MP_BallUnlock_Missing(u8 kind);
+void MP_BallUnlock_HowTo(u8 kind, u8 index, char *out, u32 size);
+u8 MP_BallUnlock_PrizeCount(void);
+bool8 MP_BallUnlock_Prize(u8 n, u8 *kind, u8 *index);
+u8 MP_BallUnlock_ForAchievement(const char *ach, u8 *kinds, u8 *indexes, u8 max);
+void MP_BallUnlock_Debug(const char *arg);
+void MP_BallUnlock_PieceName(u8 kind, u8 index, char *out, u32 size);   // "BALL COLOR: MINT"
 bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out);       // MY PRESET 1-3 (slot 0-2), FALSE = empty
 void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx);
 s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx);             // -1 = none
@@ -1081,7 +1110,7 @@ bool8 MP_BallFx_Active(void);
 void MP_BallFx_StopAll(void);
 void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
-u16 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
+u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
 u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));

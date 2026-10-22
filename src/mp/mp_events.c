@@ -1505,7 +1505,7 @@ static void DrawAchievements(void)
     for (i = first; i < count && i < first + MPUI_ROWS; i++)
     {
         const char *name, *desc;
-        char status[16], reward[32];
+        char status[16], reward[96];
         MP_Achieve_Info(MP_Achieve_IndexIn(sDaily.achTab, i), &name, &desc, status, sizeof(status), reward, sizeof(reward));
         MpUi_RowAscii(i - first, i == sDaily.cursor, name, status);
     }
@@ -1513,7 +1513,7 @@ static void DrawAchievements(void)
     if (count)
     {
         const char *name, *desc;
-        char status[16], reward[32], help[200];
+        char status[16], reward[96], help[256];
         MP_Achieve_Info(MP_Achieve_IndexIn(sDaily.achTab, sDaily.cursor), &name, &desc, status, sizeof(status), reward, sizeof(reward));
         snprintf(help, sizeof(help), "%s  Reward: %s", desc, reward);
         MpUi_HelpAscii(help);

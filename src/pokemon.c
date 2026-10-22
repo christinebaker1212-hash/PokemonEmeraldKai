@@ -3918,7 +3918,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         break;
     }
     case MON_DATA_MARKINGS:
-        retVal = boxMon->markings;
+        retVal = boxMon->markings & 0xF;   // Moemon Co-op: the top 4 bits are MON_DATA_MP_BALLFX_EXT's
         break;
     case MON_DATA_CHECKSUM:
         retVal = boxMon->checksum;
@@ -3946,6 +3946,9 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         break;
     case MON_DATA_MP_BALLFX_SOUND:
         retVal = boxMon->unused;
+        break;
+    case MON_DATA_MP_BALLFX_EXT:
+        retVal = (boxMon->markings >> 4) | (substruct3->unusedRibbons << 4);
         break;
     case MON_DATA_MOVE1:
     case MON_DATA_MOVE2:
@@ -4314,7 +4317,7 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
         break;
     }
     case MON_DATA_MARKINGS:
-        SET8(boxMon->markings);
+        boxMon->markings = (boxMon->markings & 0xF0) | (*data & 0xF);   // Moemon Co-op: keeps MON_DATA_MP_BALLFX_EXT's bits
         break;
     case MON_DATA_CHECKSUM:
         SET16(boxMon->checksum);
@@ -4350,6 +4353,13 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
     {
         u8 v = *data & 0xF;
         boxMon->unused = v;
+        break;
+    }
+    case MON_DATA_MP_BALLFX_EXT:
+    {
+        u8 v = *data;
+        boxMon->markings = (boxMon->markings & 0xF) | ((v & 0xF) << 4);
+        substruct3->unusedRibbons = v >> 4;
         break;
     }
     case MON_DATA_MOVE1:

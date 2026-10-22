@@ -4,6 +4,7 @@
 // decoration): how its body forms (materialization), the particles around the
 // entrance, the energy color, how it's recalled and a sound accent. They're
 // stored in the Pokémon itself (MON_DATA_MP_BALLFX: substruct 0's spare u16;
+// MON_DATA_MP_BALLFX_EXT: the markings byte's and the ribbons' spare bits;
 // MON_DATA_MP_BALLFX_SOUND: the 4 spare flag bits), so they travel with trades
 // and every game in a link battle shows them.
 //
@@ -101,9 +102,11 @@ s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx)
     return -1;
 }
 
-// MY PRESET 1-3: the player's own mixes, kept with the save (<save>.coop, "fxpreset1" =
-// used bit 30 | sound << 16 | packed effect)
+// MY PRESET 1-6: the player's own mixes, kept with the save (<save>.coop, "fxpreset1" =
+// used bit 30 | layout-2 bit 29 | sound << 24 | packed effect (24 bits); saved before layout 2:
+// used bit 30 | sound << 16 | the 16-bit packed effect)
 #define USER_PRESET_USED (1 << 30)
+#define USER_PRESET_V2   (1 << 29)
 
 bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
 {
@@ -115,7 +118,10 @@ bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
     v = MP_SaveData_Get(key);
     if (!(v & USER_PRESET_USED))
         return FALSE;
-    MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
+    if (v & USER_PRESET_V2)
+        MP_BallFx_Unpack(v & 0xFFFFFF, (v >> 24) & 0x7, out);
+    else
+        MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
     return TRUE;
 }
 
@@ -125,7 +131,7 @@ void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx)
     if (slot >= MPFX_USER_PRESETS)
         return;
     snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
-    MP_SaveData_Set(key, USER_PRESET_USED | ((fx->sound & 0x7) << 16) | MP_BallFx_Pack(fx));
+    MP_SaveData_Set(key, USER_PRESET_USED | USER_PRESET_V2 | ((fx->sound & 0x7) << 24) | MP_BallFx_Pack(fx));
 }
 
 s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx)
@@ -149,21 +155,14 @@ void MP_BallFx_EffectName(const struct MpBallFx *fx, char *out, u32 size)
         snprintf(out, size, "CUSTOM");
 }
 
-// filler: form 0-3, particles 4-7, energy color 8-11, recall 12-14; sound in the spare flag bits
+// MON_DATA_MP_BALLFX (substruct 0's spare u16): form 0-3, particles 4-7, energy color 8-11, recall 12-14;
+// MON_DATA_MP_BALLFX_EXT (8 bits): form bit 4, particles bit 4, color bits 4-5, recall bits 3-5 (all 0 in
+// Moemon from before there were more); the sound in the spare flag bits
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out)
 {
-    u16 v = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX, NULL);
-    out->form = v & 0xF;
-    out->part = (v >> 4) & 0xF;
-    out->color = (v >> 8) & 0xF;
-    out->recall = (v >> 12) & 0x7;
-    out->sound = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_SOUND, NULL) & 0x7;
-    if (out->form >= MPFX_FORM_COUNT)
-        out->form = 0;
-    if (out->color >= MP_BALL_COLORS)
-        out->color = 0;
-    if (out->recall >= MPFX_RECALL_COUNT)
-        out->recall = 0;
+    u32 v = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX, NULL)
+          | (GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_EXT, NULL) << 16);
+    MP_BallFx_Unpack(v, GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_SOUND, NULL), out);
 }
 
 void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out)
@@ -171,25 +170,35 @@ void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out)
     MP_BallFx_OfBoxMon(&mon->box, out);
 }
 
-u16 MP_BallFx_Pack(const struct MpBallFx *fx)
+u32 MP_BallFx_Pack(const struct MpBallFx *fx)
 {
-    return (fx->form & 0xF) | ((fx->part & 0xF) << 4) | ((fx->color & 0xF) << 8) | ((fx->recall & 0x7) << 12);
+    u32 base = (fx->form & 0xF) | ((fx->part & 0xF) << 4) | ((fx->color & 0xF) << 8) | ((fx->recall & 0x7) << 12);
+    u32 ext = ((fx->form >> 4) & 1) | (((fx->part >> 4) & 1) << 1) | (((fx->color >> 4) & 3) << 2) | (((fx->recall >> 3) & 7) << 4);
+    return base | (ext << 16);
 }
 
-void MP_BallFx_Unpack(u16 v, u8 sound, struct MpBallFx *out)
+void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out)
 {
-    out->form = (v & 0xF) < MPFX_FORM_COUNT ? (v & 0xF) : 0;
-    out->part = (v >> 4) & 0xF;
-    out->color = ((v >> 8) & 0xF) < MP_BALL_COLORS ? ((v >> 8) & 0xF) : 0;
-    out->recall = ((v >> 12) & 0x7) < MPFX_RECALL_COUNT ? ((v >> 12) & 0x7) : 0;
+    u32 ext = (v >> 16) & 0xFF;
+    u8 form = (v & 0xF) | ((ext & 1) << 4);
+    u8 part = ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4);
+    u8 color = ((v >> 8) & 0xF) | (((ext >> 2) & 3) << 4);
+    u8 recall = ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3);
+    out->form = form < MPFX_FORM_COUNT ? form : 0;
+    out->part = part < MPFX_PART_COUNT ? part : 0;
+    out->color = color < MP_BALL_COLORS ? color : 0;
+    out->recall = recall < MPFX_RECALL_COUNT ? recall : 0;
     out->sound = sound & 0x7;
 }
 
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx)
 {
-    u16 v = MP_BallFx_Pack(fx);
+    u32 packed = MP_BallFx_Pack(fx);
+    u16 v = packed & 0xFFFF;
+    u8 ext = packed >> 16;
     u8 s = fx->sound & 0x7;
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX, &v);
+    SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_EXT, &ext);
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_SOUND, &s);
 }
 
@@ -214,12 +223,36 @@ static const u16 sEnergyRgb[MP_BALL_COLORS] = {
     [MP_BALL_BLACK]  = RGB(6, 6, 8),
     [MP_BALL_SILVER] = RGB(25, 26, 28),
     [MP_BALL_GOLD]   = RGB(31, 24, 6),
-};
-// the particle palette's entry closest to each energy color
-static const u8 sEnergyIndex[MP_BALL_COLORS] = {
-    [MP_BALL_RED] = 8, [MP_BALL_BLUE] = 11, [MP_BALL_GREEN] = 13, [MP_BALL_YELLOW] = 6, [MP_BALL_PINK] = 9,
-    [MP_BALL_PURPLE] = 10, [MP_BALL_ORANGE] = 7, [MP_BALL_CYAN] = 12, [MP_BALL_BLACK] = 4, [MP_BALL_SILVER] = 2,
-    [MP_BALL_GOLD] = 15,
+    [MP_BALL_CRIMSON]  = RGB(24, 2, 8),
+    [MP_BALL_SCARLET]  = RGB(31, 4, 2),
+    [MP_BALL_CORAL]    = RGB(31, 13, 10),
+    [MP_BALL_SALMON]   = RGB(31, 17, 14),
+    [MP_BALL_PEACH]    = RGB(31, 22, 16),
+    [MP_BALL_AMBER]    = RGB(31, 20, 0),
+    [MP_BALL_LEMON]    = RGB(31, 31, 10),
+    [MP_BALL_OLIVE]    = RGB(21, 24, 5),
+    [MP_BALL_LIME]     = RGB(18, 31, 4),
+    [MP_BALL_MINT]     = RGB(14, 31, 20),
+    [MP_BALL_JADE]     = RGB(2, 22, 14),
+    [MP_BALL_FOREST]   = RGB(5, 19, 7),
+    [MP_BALL_TEAL]     = RGB(2, 18, 18),
+    [MP_BALL_AQUA]     = RGB(8, 31, 28),
+    [MP_BALL_SKY]      = RGB(14, 24, 31),
+    [MP_BALL_AZURE]    = RGB(4, 18, 31),
+    [MP_BALL_NAVY]     = RGB(6, 9, 24),
+    [MP_BALL_INDIGO]   = RGB(13, 9, 29),
+    [MP_BALL_VIOLET]   = RGB(19, 6, 31),
+    [MP_BALL_LILAC]    = RGB(24, 18, 31),
+    [MP_BALL_MAGENTA]  = RGB(31, 4, 26),
+    [MP_BALL_ROSE]     = RGB(31, 8, 16),
+    [MP_BALL_SAKURA]   = RGB(31, 22, 26),
+    [MP_BALL_BROWN]    = RGB(20, 11, 5),
+    [MP_BALL_COCOA]    = RGB(16, 9, 5),
+    [MP_BALL_SAND]     = RGB(27, 23, 15),
+    [MP_BALL_CREAM]    = RGB(31, 29, 22),
+    [MP_BALL_WHITE]    = RGB(31, 31, 31),
+    [MP_BALL_GRAY]     = RGB(20, 20, 22),
+    [MP_BALL_BRONZE]   = RGB(22, 13, 6),
 };
 static const u8 sConfettiColors[] = {8, 11, 13, 6, 9, 12};
 

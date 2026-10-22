@@ -567,10 +567,11 @@ static void ChangeValue(s8 d)
         return;   // the preview keeps playing
     case ROW_PARTY:
         return;
-    case ROW_FORM:   fx->form = (fx->form + MPFX_FORM_COUNT + d) % MPFX_FORM_COUNT; break;
-    case ROW_COLOR:  fx->color = (fx->color + MP_BALL_COLORS + d) % MP_BALL_COLORS; break;
-    case ROW_PART:   fx->part = (fx->part + MPFX_PART_COUNT + d) % MPFX_PART_COUNT; break;
-    case ROW_RECALL: fx->recall = (fx->recall + MPFX_RECALL_COUNT + d) % MPFX_RECALL_COUNT; break;
+    // only the pieces this save has (mp_ballunlock.c)
+    case ROW_FORM:   fx->form = MP_BallUnlock_Step(MPFX_PIECE_FORM, fx->form, d); break;
+    case ROW_COLOR:  fx->color = MP_BallUnlock_Step(MPFX_PIECE_COLOR, fx->color, d); break;
+    case ROW_PART:   fx->part = MP_BallUnlock_Step(MPFX_PIECE_PART, fx->part, d); break;
+    case ROW_RECALL: fx->recall = MP_BallUnlock_Step(MPFX_PIECE_RECALL, fx->recall, d); break;
     case ROW_SOUND:  fx->sound = (fx->sound + MPFX_SOUND_COUNT + d) % MPFX_SOUND_COUNT; break;
     }
     PlaySE(SE_SELECT);
@@ -582,7 +583,7 @@ static void SavePreset(void)
 {
     MP_BallFx_SaveUserPreset(sEd->slot, &sEd->fx);
     snprintf(sEd->note, sizeof(sEd->note), "Saved as MY PRESET %d. Pick it in PRESET for any Moemon.", sEd->slot + 1);
-    MPNet_Log("ball fx: saved MY PRESET %d (%04x)", sEd->slot + 1, MP_BallFx_Pack(&sEd->fx));
+    MPNet_Log("ball fx: saved MY PRESET %d (%06x)", sEd->slot + 1, (unsigned)MP_BallFx_Pack(&sEd->fx));
     PlaySE(SE_SAVE);
 }
 

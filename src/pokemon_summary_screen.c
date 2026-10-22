@@ -3230,7 +3230,7 @@ static void MpBall_ChangeValue(s8 delta)
     case MPBALL_ROW_COLOR:
         if (!MP_BallStyle_ItemCanColor(item))
             return;
-        sMpBall.color = (sMpBall.color + MP_BALL_COLORS + delta) % MP_BALL_COLORS;
+        sMpBall.color = MP_BallUnlock_Step(MPFX_PIECE_COLOR, sMpBall.color, delta);   // only the colors this save has
         break;
     case MPBALL_ROW_DECO:
         if (!MP_BallStyle_ItemCanDecorate(item))

@@ -2,9 +2,10 @@
 // in the 16 bits of struct BoxPokemon that Emerald never uses ("unknown",
 // MON_DATA_ENCRYPT_SEPARATOR): it's saved, and copied with the Moemon by
 // trades, the PC and the co-op link.
-//   bits 0-3   color (basic POKé BALLS only): 0 = classic red
-//   bits 4-11  decoration (POKé and PREMIER BALLS only): 0 = none
-//   bits 12-15 special ball (MP_SPECIAL_*, the MoeGatcha balls): 0 = none.
+//   bits 0-3   color (basic POKé BALLS only): 0 = classic red; bits 4-5 of the color: bit 11 and
+//              bits 12-15 = 15 (MP_BallStyle_Color; older versions only knew 11 colors)
+//   bits 4-10  decoration (POKé and PREMIER BALLS only): 0 = none
+//   bits 12-15 special ball (MP_SPECIAL_*, the MoeGatcha balls): 0 = none, 15 = none and color bit 5.
 //              Its MON_DATA_POKEBALL stays POKé BALL, so other games (and
 //              anything that only knows the 12 Hoenn balls) see a POKé BALL;
 //              this game shows the special one (MP_BallStyle_DisplayItem).
@@ -35,7 +36,7 @@
 #include "constants/battle.h"
 #include "constants/map_types.h"
 
-#define TAG_MP_BALL_COLOR 0x56A0   // + color: recolored POKé BALL battle palettes
+#define TAG_MP_BALL_COLOR 0x5770   // + color (41): recolored POKé BALL battle palettes (0x5770-0x5798)
 #define TAG_MP_BALL_SPECIAL 0x56C0 // + special: the special balls' battle palettes
 
 // The special balls: their items, and the color their thrown / summary ball
@@ -80,6 +81,36 @@ static const u16 sRamps[MP_BALL_COLORS][5] = {
     [MP_BALL_BLACK]  = {RGB(2, 2, 3),    RGB(4, 4, 5),    RGB(7, 7, 8),    RGB(12, 12, 13), RGB(19, 19, 20)},
     [MP_BALL_SILVER] = {RGB(12, 13, 14), RGB(17, 18, 19), RGB(22, 23, 24), RGB(26, 27, 28), RGB(30, 30, 31)},
     [MP_BALL_GOLD]   = {RGB(16, 11, 1),  RGB(22, 16, 2),  RGB(27, 21, 5),  RGB(31, 26, 11), RGB(31, 30, 21)},
+    [MP_BALL_CRIMSON]  = {RGB(12, 1, 4), RGB(17, 1, 6), RGB(24, 2, 8), RGB(27, 13, 17), RGB(29, 23, 25)},
+    [MP_BALL_SCARLET]  = {RGB(16, 2, 1), RGB(22, 3, 1), RGB(31, 4, 2), RGB(31, 14, 13), RGB(31, 23, 23)},
+    [MP_BALL_CORAL]    = {RGB(16, 6, 5), RGB(22, 9, 7), RGB(31, 13, 10), RGB(31, 20, 18), RGB(31, 26, 25)},
+    [MP_BALL_SALMON]   = {RGB(16, 8, 7), RGB(22, 12, 10), RGB(31, 17, 14), RGB(31, 22, 20), RGB(31, 27, 26)},
+    [MP_BALL_PEACH]    = {RGB(16, 11, 8), RGB(22, 16, 12), RGB(31, 22, 16), RGB(31, 25, 22), RGB(31, 28, 27)},
+    [MP_BALL_AMBER]    = {RGB(16, 10, 0), RGB(22, 14, 0), RGB(31, 20, 0), RGB(31, 24, 12), RGB(31, 28, 22)},
+    [MP_BALL_LEMON]    = {RGB(16, 16, 5), RGB(22, 22, 7), RGB(31, 31, 10), RGB(31, 31, 18), RGB(31, 31, 25)},
+    [MP_BALL_OLIVE]    = {RGB(8, 10, 2), RGB(12, 14, 3), RGB(17, 19, 4), RGB(22, 24, 14), RGB(27, 28, 23)},
+    [MP_BALL_LIME]     = {RGB(9, 16, 2), RGB(13, 22, 3), RGB(18, 31, 4), RGB(23, 31, 14), RGB(27, 31, 23)},
+    [MP_BALL_MINT]     = {RGB(7, 16, 10), RGB(10, 22, 14), RGB(14, 31, 20), RGB(20, 31, 24), RGB(26, 31, 28)},
+    [MP_BALL_JADE]     = {RGB(1, 11, 7), RGB(1, 16, 10), RGB(2, 22, 14), RGB(13, 25, 20), RGB(23, 28, 26)},
+    [MP_BALL_FOREST]   = {RGB(1, 6, 2), RGB(2, 10, 3), RGB(3, 15, 5), RGB(10, 21, 11), RGB(19, 27, 19)},
+    [MP_BALL_TEAL]     = {RGB(1, 9, 9), RGB(1, 13, 13), RGB(2, 18, 18), RGB(13, 23, 23), RGB(23, 27, 27)},
+    [MP_BALL_AQUA]     = {RGB(4, 16, 14), RGB(6, 22, 20), RGB(8, 31, 28), RGB(17, 31, 29), RGB(25, 31, 30)},
+    [MP_BALL_SKY]      = {RGB(7, 12, 16), RGB(10, 17, 22), RGB(14, 24, 31), RGB(20, 27, 31), RGB(26, 29, 31)},
+    [MP_BALL_AZURE]    = {RGB(2, 9, 16), RGB(3, 13, 22), RGB(4, 18, 31), RGB(14, 23, 31), RGB(23, 27, 31)},
+    [MP_BALL_NAVY]     = {RGB(1, 2, 8), RGB(2, 3, 12), RGB(3, 5, 17), RGB(9, 11, 23), RGB(18, 20, 28)},
+    [MP_BALL_INDIGO]   = {RGB(5, 3, 12), RGB(7, 4, 17), RGB(10, 6, 24), RGB(18, 16, 27), RGB(25, 24, 29)},
+    [MP_BALL_VIOLET]   = {RGB(10, 3, 16), RGB(14, 4, 22), RGB(19, 6, 31), RGB(24, 16, 31), RGB(28, 24, 31)},
+    [MP_BALL_LILAC]    = {RGB(12, 9, 16), RGB(17, 13, 22), RGB(24, 18, 31), RGB(27, 23, 31), RGB(29, 27, 31)},
+    [MP_BALL_MAGENTA]  = {RGB(16, 2, 13), RGB(22, 3, 19), RGB(31, 4, 26), RGB(31, 14, 28), RGB(31, 23, 30)},
+    [MP_BALL_ROSE]     = {RGB(16, 4, 8), RGB(22, 6, 12), RGB(31, 8, 16), RGB(31, 17, 22), RGB(31, 25, 27)},
+    [MP_BALL_SAKURA]   = {RGB(16, 11, 13), RGB(22, 16, 19), RGB(31, 22, 26), RGB(31, 25, 28), RGB(31, 28, 30)},
+    [MP_BALL_BROWN]    = {RGB(8, 4, 2), RGB(12, 6, 3), RGB(16, 9, 4), RGB(22, 17, 14), RGB(27, 25, 23)},
+    [MP_BALL_COCOA]    = {RGB(5, 2, 1), RGB(8, 4, 2), RGB(12, 7, 4), RGB(18, 13, 9), RGB(25, 21, 17)},
+    [MP_BALL_SAND]     = {RGB(14, 12, 8), RGB(19, 17, 11), RGB(27, 23, 15), RGB(29, 26, 21), RGB(30, 29, 27)},
+    [MP_BALL_CREAM]    = {RGB(21, 19, 12), RGB(26, 24, 16), RGB(30, 28, 20), RGB(31, 30, 25), RGB(31, 31, 29)},
+    [MP_BALL_WHITE]    = {RGB(18, 18, 20), RGB(23, 23, 25), RGB(27, 27, 28), RGB(30, 30, 30), RGB(31, 31, 31)},
+    [MP_BALL_GRAY]     = {RGB(8, 8, 9), RGB(12, 12, 13), RGB(17, 17, 18), RGB(22, 22, 23), RGB(27, 27, 28)},
+    [MP_BALL_BRONZE]   = {RGB(11, 6, 3), RGB(16, 9, 4), RGB(22, 13, 6), RGB(25, 20, 16), RGB(28, 26, 24)},
 };
 
 static const u8 sColorNames[MP_BALL_COLORS][8] = {
@@ -94,6 +125,36 @@ static const u8 sColorNames[MP_BALL_COLORS][8] = {
     [MP_BALL_BLACK]  = _("BLACK"),
     [MP_BALL_SILVER] = _("SILVER"),
     [MP_BALL_GOLD]   = _("GOLD"),
+    [MP_BALL_CRIMSON]  = _("CRIMSON"),
+    [MP_BALL_SCARLET]  = _("SCARLET"),
+    [MP_BALL_CORAL]    = _("CORAL"),
+    [MP_BALL_SALMON]   = _("SALMON"),
+    [MP_BALL_PEACH]    = _("PEACH"),
+    [MP_BALL_AMBER]    = _("AMBER"),
+    [MP_BALL_LEMON]    = _("LEMON"),
+    [MP_BALL_OLIVE]    = _("OLIVE"),
+    [MP_BALL_LIME]     = _("LIME"),
+    [MP_BALL_MINT]     = _("MINT"),
+    [MP_BALL_JADE]     = _("JADE"),
+    [MP_BALL_FOREST]   = _("FOREST"),
+    [MP_BALL_TEAL]     = _("TEAL"),
+    [MP_BALL_AQUA]     = _("AQUA"),
+    [MP_BALL_SKY]      = _("SKY"),
+    [MP_BALL_AZURE]    = _("AZURE"),
+    [MP_BALL_NAVY]     = _("NAVY"),
+    [MP_BALL_INDIGO]   = _("INDIGO"),
+    [MP_BALL_VIOLET]   = _("VIOLET"),
+    [MP_BALL_LILAC]    = _("LILAC"),
+    [MP_BALL_MAGENTA]  = _("MAGENTA"),
+    [MP_BALL_ROSE]     = _("ROSE"),
+    [MP_BALL_SAKURA]   = _("SAKURA"),
+    [MP_BALL_BROWN]    = _("BROWN"),
+    [MP_BALL_COCOA]    = _("COCOA"),
+    [MP_BALL_SAND]     = _("SAND"),
+    [MP_BALL_CREAM]    = _("CREAM"),
+    [MP_BALL_WHITE]    = _("WHITE"),
+    [MP_BALL_GRAY]     = _("GRAY"),
+    [MP_BALL_BRONZE]   = _("BRONZE"),
 };
 
 // Decorations: 1..MP_DECO_COUNT (0 = none)
@@ -109,21 +170,24 @@ static const u8 sColorNames[MP_BALL_COLORS][8] = {
 
 static const u8 sText_None[] = _("NONE");
 
+#define STYLE_COLOR_HIGH 0xF   // bits 12-15 = 15: not a special ball, color bit 5 set
+
 u8 MP_BallStyle_Color(u16 style)
 {
-    u8 c = style & 0xF;
+    u8 c = (style & 0xF) | (((style >> 11) & 1) << 4) | (((style >> 12) == STYLE_COLOR_HIGH) << 5);
     return c < MP_BALL_COLORS ? c : MP_BALL_RED;
 }
 
 u8 MP_BallStyle_Decoration(u16 style)
 {
-    u8 d = (style >> 4) & 0xFF;
+    u8 d = (style >> 4) & 0x7F;
     return d <= MP_DECO_COUNT ? d : 0;
 }
 
 u16 MP_BallStyle_Make(u8 color, u8 decoration)
 {
-    return (color & 0xF) | ((u16)decoration << 4);
+    return (color & 0xF) | ((u16)(decoration & 0x7F) << 4) | ((u16)((color >> 4) & 1) << 11)
+         | ((color >> 5) & 1 ? (u16)STYLE_COLOR_HIGH << 12 : 0);
 }
 
 u16 MP_BallStyle_OfMon(struct Pokemon *mon)
@@ -142,7 +206,7 @@ u16 MP_BallStyle_OfBoxMon(struct BoxPokemon *mon)
 u8 MP_BallStyle_Special(u16 style)
 {
     u8 s = style >> 12;
-    return s <= MP_SPECIAL_COUNT ? s : MP_SPECIAL_NONE;
+    return s <= MP_SPECIAL_COUNT ? s : MP_SPECIAL_NONE;   // 15: a color bit (STYLE_COLOR_HIGH)
 }
 
 // MP_SPECIAL_* of a ball item (0: not a special ball)

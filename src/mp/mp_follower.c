@@ -78,7 +78,7 @@ struct FollowerSlot
     u8 pendingTimeout;
     bool8 fxHide;         // hidden by the effect (the ball still flying, or called back)
     bool8 recalling;
-    u16 fx;
+    u32 fx;               // MP_BallFx_Pack
     u8 fxSound;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
@@ -412,7 +412,7 @@ static struct Pokemon *FindLocalFollower(void)
     return FindPartyMon(sLocalPersonality);
 }
 
-u16 MP_Follower_LocalFx(u8 *sound)
+u32 MP_Follower_LocalFx(u8 *sound)
 {
     struct Pokemon *mon = FindLocalFollower();
     struct MpBallFx fx;
@@ -561,7 +561,7 @@ static s16 ScreenY(const struct Sprite *sp) { return sp->y + sp->y2 + (sp->coord
 
 // Ball effects for one follower (mp_ballfx.c). seq: how many times its owner sent one
 // out (a change while it's around = it was just sent out); leaving: its recall is playing.
-static void SlotEffects(struct FollowerSlot *s, u8 seq, bool8 leaving, u16 fxPacked, u8 sound, u8 ownerObj)
+static void SlotEffects(struct FollowerSlot *s, u8 seq, bool8 leaving, u32 fxPacked, u8 sound, u8 ownerObj)
 {
     struct MpBallFx fx;
     struct Sprite *fs, *os;
@@ -682,7 +682,7 @@ void MP_Follower_Update(void)
     UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden());
     {
         u8 sound;
-        u16 fx = MP_Follower_LocalFx(&sound);
+        u32 fx = MP_Follower_LocalFx(&sound);
         SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2, fx, sound & 7, gPlayerAvatar.objectEventId);
         UpdateLeaving();
     }

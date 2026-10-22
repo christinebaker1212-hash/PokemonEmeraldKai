@@ -458,6 +458,27 @@ static s32 Progress(const struct Achievement *a)
     return 0;
 }
 
+static s16 IndexOfId(const char *id)
+{
+    u16 i;
+    for (i = 0; i < NUM_ACH; i++)
+        if (strcmp(sAch[i].id, id) == 0)
+            return i;
+    return -1;
+}
+
+bool8 MP_Achieve_IsDoneById(const char *id)
+{
+    s16 i = IndexOfId(id);
+    return i >= 0 && MP_Achieve_IsDone(i);
+}
+
+const char *MP_Achieve_NameById(const char *id)
+{
+    s16 i = IndexOfId(id);
+    return i >= 0 ? sAch[i].name : id;
+}
+
 bool8 MP_Achieve_IsDone(u16 i)
 {
     char key[48];
@@ -481,12 +502,30 @@ static s32 GrantQuiet(u16 i)
     return AchPulls(a->tier);
 }
 
+// ", BALL COLOR: SAND" for the ball pieces it unlocks (mp_ballunlock.c), or ""
+static void UnlockText(const char *id, char *out, u32 size)
+{
+    u8 kinds[2], indexes[2], n, k;
+    u32 len;
+    out[0] = 0;
+    n = MP_BallUnlock_ForAchievement(id, kinds, indexes, 2);
+    for (k = 0; k < n; k++)
+    {
+        len = strlen(out);
+        if (len + 4 >= size)
+            break;
+        strcat(out, ", ");
+        MP_BallUnlock_PieceName(kinds[k], indexes[k], out + len + 2, size - len - 2);
+    }
+}
+
 static void Grant(u16 i)
 {
-    char msg[96];
+    char msg[128], unlock[64];
     if (GrantQuiet(i))
     {
-        snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pulls", sAch[i].name, AchPulls(sAch[i].tier));
+        UnlockText(sAch[i].id, unlock, sizeof(unlock));
+        snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pulls%s", sAch[i].name, AchPulls(sAch[i].tier), unlock);
         MP_Events_QueueToast(msg);
     }
 }
@@ -705,7 +744,11 @@ void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, 
     }
     else
         snprintf(status, statusLen, "-");
-    snprintf(reward, rewardLen, "+%d MOEGATCHA pulls", AchPulls(a->tier));
+    {
+        char unlock[64];
+        UnlockText(a->id, unlock, sizeof(unlock));
+        snprintf(reward, rewardLen, "+%d MOEGATCHA pulls%s", AchPulls(a->tier), unlock);
+    }
 }
 
 // Achievements unlocked before the pull rewards went up (they gave $1500, 1 or 2

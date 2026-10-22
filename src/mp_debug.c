@@ -960,6 +960,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         printf(" pulls %d\n", (int)MP_Gatcha_Pulls());
     }
+    else if (strcmp(cmd, "fxunlock") == 0)
+    {
+        // fxunlock all | fxunlock KIND INDEX - MOEGATCHA ball pieces (0 color, 1 form, 2 particles, 3 recall)
+        MP_BallUnlock_Debug(arg);
+    }
     else if (strcmp(cmd, "lookskin") == 0)
     {
         // lookskin N - LOOK's skin color (0 = the sprite's own)
@@ -1262,6 +1267,43 @@ void MP_TestCommand(const char *cmd, const char *arg)
             u32 v = style;
             SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
             printf("[test] ballstyle: slot %d style %04x\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR));
+        }
+    }
+    else if (strcmp(cmd, "fxget") == 0)
+    {
+        // fxget SLOT - a party Moemon's ball effect, markings and ball style as stored
+        int slot = atoi(arg);
+        struct MpBallFx fx;
+        u16 style;
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            MP_BallFx_OfMon(&gPlayerParty[slot], &fx);
+            style = MP_BallStyle_OfMon(&gPlayerParty[slot]);
+            printf("[test] fxget: slot %d form %d part %d color %d recall %d sound %d markings %d style %04x (color %d deco %d special %d)\n",
+                   slot, fx.form, fx.part, fx.color, fx.recall, fx.sound, (int)GetMonData(&gPlayerParty[slot], MON_DATA_MARKINGS),
+                   style, MP_BallStyle_Color(style), MP_BallStyle_Decoration(style), MP_BallStyle_Special(style));
+        }
+    }
+    else if (strcmp(cmd, "markings") == 0)
+    {
+        // markings SLOT VALUE
+        int slot = 0, v = 0;
+        sscanf(arg, "%d %d", &slot, &v);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u8 m = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MARKINGS, &m);
+        }
+    }
+    else if (strcmp(cmd, "stylemake") == 0)
+    {
+        // stylemake SLOT COLOR DECORATION - a POKé BALL style through MP_BallStyle_Make
+        int slot = 0, c = 0, d = 0;
+        sscanf(arg, "%d %d %d", &slot, &c, &d);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u16 v = MP_BallStyle_Make(c, d);
+            SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
         }
     }
     else if (strcmp(cmd, "fxedit") == 0)

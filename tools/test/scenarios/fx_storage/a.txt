@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp ballfx 0 3 5 40 6 2
+mp fxget 0
+mp markings 0 15
+mp fxget 0
+mp markings 0 9
+mp stylemake 0 40 15
+mp fxget 0
+mp stylemake 0 20 4
+mp fxget 0
+mp ballstyle 0 0035
+mp fxget 0
+mp ballstyle 0 c000
+mp fxget 0
+mp ballfx 0 0 0 10 0 0
+mp fxget 0
+mp fxunlock all
+quit
