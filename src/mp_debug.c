@@ -6,6 +6,7 @@
 #include "global.h"
 #include "platform.h"
 #include "siirtc.h"
+#include "rtc.h"
 #include "easy_chat.h"
 #include "field_screen_effect.h"
 #include "field_player_avatar.h"
@@ -368,8 +369,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void PlantBerryTree(u8 id, u8 berry, u8 stage, bool8 allowGrowth);
         int tree = 0, berry = 1, stage = 5;
         sscanf(arg, "%d %d %d", &tree, &berry, &stage);
-        PlantBerryTree(tree, berry, stage, FALSE);
+        PlantBerryTree(tree, berry, stage, TRUE);
         printf("[test] berrytree %d = berry %d stage %d\n", tree, berry, stage);
+    }
+    else if (strcmp(cmd, "berryinfo") == 0)
+    {
+        // berryinfo TREE - a tree's berry, stage and minutes to the next stage
+        struct BerryTree *GetBerryTreeInfo(u8 id);
+        int tree = 0;
+        struct BerryTree *t;
+        sscanf(arg, "%d", &tree);
+        t = GetBerryTreeInfo(tree);
+        printf("[test] berryinfo %d: berry %d stage %d next %d min yield %d regrow %d (time events %s, wall clock %s, last %d.%02d:%02d, days var %d)\n",
+               tree, t->berry, t->stage, t->minutesUntilNextStage, t->berryYield, t->regrowthCount,
+               FlagGet(FLAG_SYS_CLOCK_SET) ? "on" : "off", FlagGet(FLAG_SET_WALL_CLOCK) ? "set" : "not set",
+               gSaveBlock2Ptr->lastBerryTreeUpdate.days, gSaveBlock2Ptr->lastBerryTreeUpdate.hours,
+               gSaveBlock2Ptr->lastBerryTreeUpdate.minutes, VarGet(VAR_DAYS));
     }
     else if (strcmp(cmd, "gatchaday") == 0)
     {
@@ -926,6 +941,56 @@ void MP_TestCommand(const char *cmd, const char *arg)
             if (gSprites[i].inUse)
                 gSprites[i].invisible = TRUE;
     }
+    else if (strcmp(cmd, "stuckclock") == 0)
+    {
+        // stuckclock - make this save look like one from when the clock was stuck at day 0
+        memset(&gSaveBlock2Ptr->lastBerryTreeUpdate, 0, sizeof(gSaveBlock2Ptr->lastBerryTreeUpdate));
+        memset(&gSaveBlock2Ptr->localTimeOffset, 0, sizeof(gSaveBlock2Ptr->localTimeOffset));
+        gSaveBlock2Ptr->localTimeOffset.hours = -10;   // the bedroom clock set to 10:00 against day 0
+        FlagSet(FLAG_SYS_CLOCK_SET);
+        FlagSet(FLAG_SET_WALL_CLOCK);
+        VarSet(VAR_DAYS, 0);
+        printf("[test] stuck clock save\n");
+    }
+    else if (strcmp(cmd, "berrywait") == 0)
+    {
+        // berrywait MIN - as if MIN minutes had passed for the Berry trees (then the time-based events run)
+        void DoTimeBasedEvents(void);
+        int min = 0;
+        s32 total;
+        struct Time *t = &gSaveBlock2Ptr->lastBerryTreeUpdate;
+        sscanf(arg, "%d", &min);
+        total = t->days * 1440 + t->hours * 60 + t->minutes - min;
+        t->days = total / 1440;
+        t->hours = (total / 60) % 24;
+        t->minutes = total % 60;
+        DoTimeBasedEvents();
+        printf("[test] berrywait %d\n", min);
+    }
+    else if (strcmp(cmd, "gjoin") == 0)
+    {
+        // gjoin - join the test's room again (MOEMON_COOP_AUTO=join:ROOM) after goffline
+        char buf[96], *room = NULL;
+        const char *env = getenv("MOEMON_COOP_AUTO");
+        if (env)
+        {
+            snprintf(buf, sizeof(buf), "%s", env);
+            strtok(buf, ":");
+            room = strtok(NULL, ":");
+        }
+        if (room)
+        {
+            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            MP_Lobby_JoinRoom(room, "");
+            printf("[test] joining %s\n", room);
+        }
+    }
+    else if (strcmp(cmd, "goffline") == 0)
+    {
+        // goffline - leave the room and the server (back to playing alone)
+        MP_Lobby_Disconnect();
+        printf("[test] offline\n");
+    }
     else if (strcmp(cmd, "clock") == 0)
     {
         // clock - the game clock (online: the host's PC clock)
@@ -934,6 +999,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         Platform_GetDateTime(&r);
         printf("[test] clock 20%02x-%02x-%02x %02x:%02x (%s)\n", r.year, r.month, r.day, r.hour, r.minute,
                MP_HostClockOffset(&off) ? "the host's" : "ours");
+        {
+            RtcCalcLocalTime();
+            printf("[test] game time day %d %02d:%02d (rtc status %04x, offset %d.%02d:%02d)\n", gLocalTime.days, gLocalTime.hours,
+                   gLocalTime.minutes, RtcGetErrorStatus(), gSaveBlock2Ptr->localTimeOffset.days,
+                   gSaveBlock2Ptr->localTimeOffset.hours, gSaveBlock2Ptr->localTimeOffset.minutes);
+        }
     }
     else if (strcmp(cmd, "where") == 0)
     {

@@ -1173,6 +1173,15 @@ bool8 MP_HostClockOffset(s64 *offset)
     return TRUE;
 }
 
+// How many seconds the game clock is ahead of this PC's own (the host's clock minus ours; 0 offline)
+s64 MP_ClockShift(void)
+{
+    s64 offset;
+    if (!MP_HostClockOffset(&offset))
+        return 0;
+    return offset - (MP_LocalClockAsUtc() - (s64)time(NULL));
+}
+
 static void SendWelcome(u8 id)
 {
     u8 buf[2 + sizeof(gMpConfig.welcome)];

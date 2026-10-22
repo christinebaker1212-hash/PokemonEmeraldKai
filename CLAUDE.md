@@ -61,6 +61,8 @@ Gotchas worth knowing before touching battles:
 - Bump MP_PROTOCOL_VERSION (src/mp/mp_net.h) on any protocol change; tools/test rebuilds the server from it.
 - Sprite palettes 16-63 have no bit in a palette mask (`1 << (16 + n)`): fade one sprite's palette by slot with
   MP_BlendSpritePalette / MP_BeginSpritePaletteFade. Ball and co-op palettes live there (see COOP_NOTES, graphics).
+- The game clock (RTC) is the PC's, and online the room host's: Berry growth must count on the player's own clock
+  (clock.c, MP_ClockShift), never on the shared one, or joining a host in another time zone grows trees by hours.
 - Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 

@@ -1,0 +1,26 @@
+pressuntil A field 5000
+waitfor online 6000
+mp goffline
+wait 60
+mp setflag 81
+mp warp 0,17,10,10
+wait 60
+mp berrytree 2 7 1
+mp berryinfo 2
+mp clock
+mp gjoin
+waitlog 3000 clock: following the host's clock
+wait 60
+mp warp 0,17,10,11
+wait 150
+mp berryinfo 2
+mp clock
+mp goffline
+wait 30
+mp warp 0,17,10,10
+wait 150
+mp berryinfo 2
+mp clock
+mp berrywait 180
+mp berryinfo 2
+quit

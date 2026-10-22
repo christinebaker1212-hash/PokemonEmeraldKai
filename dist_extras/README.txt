@@ -123,10 +123,17 @@ TEAMING UP FOR A DOUBLE BATTLE
   Moemon refuses ("Hey, I only have one MOEMON! Let's go one on one!") and
   it takes three of their own for a Triple Battle. Everyone in the server
   plays by the host's setting.
-* The game's clock (what time of day it is, Berry growth, the tides, daily
-  events of the original game) is the host's PC clock while you're in their
-  game, even if you live in another time zone, so everyone plays at the same
-  time of day. Offline, or in a game you made, it's your own PC's clock.
+* The game's clock (what time of day it is, the tides, daily events of the
+  original game) is the host's PC clock while you're in their game, even if
+  you live in another time zone, so everyone plays at the same time of day.
+  Offline, or in a game you made, it's your own PC's clock. Berry trees grow
+  by the time that really passes on your own clock, so joining or leaving a
+  host in another time zone never makes them jump ahead (or stop).
+* The game's clock is the PC's clock: the bedroom clock starts at your PC's
+  time. Earlier versions had the clock stuck at midnight on day 1, so Berries
+  never grew and daily events never came round (SKIP THE INTRO also left
+  them off). Old saves are fixed when loaded: Berry trees carry on from where
+  they are (no years of growth at once) and daily events get one new day.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   use their items and they choose their moves smarter.

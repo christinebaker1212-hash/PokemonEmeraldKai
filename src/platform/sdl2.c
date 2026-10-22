@@ -174,14 +174,17 @@ int main(int argc, char **argv)
         SDL_PauseAudio(0);
     }
 
+    // The clock is in 24-hour mode before the game checks it (AgbMain > RtcInit). After
+    // the check, it found 12-hour mode and "reset" the clock, which left it locked and the
+    // game's time stuck at day 0, 00:00 (no Berry growth, no daily events).
+    memset(&internalClock, 0, sizeof(internalClock));
+    internalClock.status = SIIRTCINFO_24HOUR;
+    UpdateInternalClock();
+
     AgbMain();
     MP_Init();
 
     double accumulator = 0.0;
-
-    memset(&internalClock, 0, sizeof(internalClock));
-    internalClock.status = SIIRTCINFO_24HOUR;
-    UpdateInternalClock();
 
     while (isRunning)
     {

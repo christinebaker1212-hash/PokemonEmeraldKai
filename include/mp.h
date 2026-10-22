@@ -274,6 +274,7 @@ void MP_Bag_WriteSidecar(void);
 void MP_Bag_LoadFromSave(void);
 bool8 MP_HostClockOffset(s64 *offset);   // mp_main.c: online, the game clock is the host's (seconds to add to time())
 s64 MP_LocalClockAsUtc(void);            // this PC's local time, as seconds as if it were UTC
+s64 MP_ClockShift(void);                 // how far the game clock is ahead of this PC's (0 offline)
 // The BAG's sort orders and "new" marks (mp_bag.c)
 enum { MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAGSORT_NEWEST, MP_BAGSORT_MANUAL, MP_BAGSORT_COUNT };
 u8 MP_Bag_SortMode(u8 pocket);
