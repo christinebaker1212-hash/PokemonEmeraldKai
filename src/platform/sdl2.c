@@ -143,6 +143,12 @@ int main(int argc, char **argv)
     if (Display_Init("Moemon Emerald Kai Co-op") != 0)
         return 1;
     {
+        // Moemon Co-op: a newer release installs and starts in place of this one (updater.c)
+        int Updater_Run(int argc, char **argv);
+        if (Updater_Run(argc, argv))
+            return 0;
+    }
+    {
         void Gamepad_Init(void);
         if (!sTestMode)
             Gamepad_Init();
