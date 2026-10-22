@@ -1,0 +1,8 @@
+# A trade carries the ball effect, newer pieces included (their extra bits): ALICE's lead (BOUNCE IN, POWER AURA,
+# BRONZE, SPIRIT ORB) goes to BOB and BOB's (PRISM, GEMSTONES, GRAY, SAKURA SCATTER) to ALICE
+MODE=2
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=283:12"
+EXPECT_A=("trade with player 2 complete" "fxget: slot 0 form 25 part 29 color 39 recall 35")
+EXPECT_B=("trade with player 1 complete" "fxget: slot 0 form 26 part 30 color 40 recall 36")

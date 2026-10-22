@@ -1,0 +1,27 @@
+pressuntil A field 5000
+mp ballfx 0 25 29 39 35 0
+waitfor online 6000
+waitlog 3000 asks to trade
+pressuntillog A 3000 trade: trading with player
+wait 30
+press RIGHT 2
+wait 240
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+watchlog trade: both ready
+press A 2
+waitlog 3000
+wait 10
+watchlog complete
+press A 2
+waitlog 3000
+mash A 20 20
+wait 200
+mp fxget 0
+quit

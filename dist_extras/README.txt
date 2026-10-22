@@ -550,33 +550,59 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   (traded ones too; the NAME RATER in SLATEPORT renames them as well).
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
-  blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).
+  blue, green, yellow, pink, purple, orange, cyan, black, silver, gold, and
+  30 more colors to earn, from CRIMSON to BRONZE).
   The color shows when it's sent out in battle.
 * BALL EFFECTS (SELECT on the POKé BALL page): how each Moemon comes out of
   its ball and goes back. Pick a ready-made mix (HAUNTED, SUPERSTAR,
   FIRECRACKER, TEAM ROCKET'S BUDGET, GLITCH, BLOOM, CLASSIC ANIME, ROYALTY,
-  STORM, DEEP SEA, SHOOTING STAR) or set each part yourself:
+  STORM, DEEP SEA, SHOOTING STAR, and 15 more once you have their pieces:
+  SWEETHEART, POP STAR, WINTER, WILDFIRE, HIGH TIDE, FOREST SPIRIT, HANAMI,
+  JACKPOT, PARTY TIME, SHADOW REALM, CYBERSPACE, GALAXY, DESERT WIND,
+  DAYDREAM, ANGEL) or set each part yourself:
     MATERIALIZATION     how its body forms: anime beam, smoke, bubble,
                         lightning, haunted fade, digital, ink, crystal,
-                        meteor drop, pop-in, rise up (or the game's own)
+                        meteor drop, pop-in, rise up (or the game's own);
+                        to earn: teleport, somersault, vortex, dash in,
+                        jelly drop, card flip, hologram, stardust, sand
+                        sculpt, flame pillar, geyser, leaf whirl, shadow
+                        step, prism, bounce in
     ENERGY COLOR        the color of beams, glows, motes, pixels and ink
+                        (11 colors, and the same 30 to earn as the ball)
     ENTRANCE PARTICLES  confetti, explosion, smoke puff, fireworks, flower
                         bloom, bubbles, lightning bolt, wisps + eyes, pixel
                         bits, ink splash, crystal shards, spotlight, dust
-                        ring, royal sparkles (or none, or the game's own)
+                        ring, royal sparkles (or none, or the game's own);
+                        to earn: hearts, music notes, snowfall, feathers,
+                        leaf gust, star shower, rainbow, fire ring, splash,
+                        sakura storm, pay day, balloons, butterflies,
+                        gemstones, power aura
     RECALL EFFECT       classic beam, dissolve, reverse confetti, smoke
-                        retreat, digital shutdown, curtain call
+                        retreat, digital shutdown, curtain call; to earn:
+                        teleport out, backflip, vortex, dash off, melt away,
+                        card flip, switch off, stardust, sand crumble, flame
+                        out, geyser lift, leaf whirl, shadow sink, prism
+                        twinkle, bounce back, heart pop, bubble float,
+                        lightning strike, ice shatter, balloon ride, super
+                        jump, dive, feather scatter, black hole, ghost fade,
+                        pixel rain, firework, nap time, sakura scatter,
+                        spirit orb
     SOUND ACCENT        auto, none, chime, pop, boom, fanfare, thunder, spooky
-    SAVE AS             keeps your mix as MY PRESET 1, 2 or 3 ({LEFTRIGHT} picks,
+                        (AUTO also gives many of the newer recalls a sound)
+    SAVE AS             keeps your mix as MY PRESET 1 to 6 ({LEFTRIGHT} picks,
                         A saves). PRESET then offers it for any Moemon.
     APPLY TO PARTY      gives the mix to every Moemon in your party (A)
   The preview shows it on a battle field: the entrance, a short pause, then
   the recall. SELECT shows it from the other side, START saves, B goes back.
-  Everything is free. The effect stays with the Moemon (trades too) and
-  every player sees it in link battles, co-op battles and PvP. It never
-  makes sending out or calling back take longer than the game's own. Your
-  follower pops out of its ball with it too (and goes back with its recall),
-  for everyone around.
+  The pieces "to earn" and the 30 newer colors show up as you get them:
+  half come with achievements (CO-OP > DAILY > ACHIEVEMENTS lists what each
+  one gives, and an achievement you already have counts), half are
+  MOEGATCHA prizes (mostly on the POKE BALLS banner; one you have already
+  turns into a MOEGATCHA TICKET). The effect stays with the Moemon (trades
+  too) and every player sees it in link battles, co-op battles and PvP,
+  whatever they have earned. It never makes sending out or calling back
+  take longer than the game's own. Your follower pops out of its ball with
+  it too (and goes back with its recall), for everyone around.
 * Special POKé BALLS (only from the MoeGatcha POKE BALLS banner):
     LOVE BALL   x8 on your Moemon's species, opposite gender
     FRIEND BALL the Moemon caught is friendly right away

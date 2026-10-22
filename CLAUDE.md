@@ -50,7 +50,8 @@ checked pixel for pixel by the tri_cards test; type icons layered beside every b
 stat moves (one animation and message for Growl / Tail Whip on several Pokémon), graphics past the GBA limits (64 sprite palettes,
 128 sprites, 256 OAM entries, 128 KB of sprite tiles), co-op EXP (everyone levels
 up and picks moves to forget at the same time), and ball entrance / recall effects (mp_ballfx.c: an effects layer
-drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-3, APPLY TO PARTY).
+drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-6, APPLY TO PARTY; 41 colors, the newer
+pieces earned by achievements or MoeGatcha prizes (mp_ballunlock.c); art partly imported from the game's battle anims).
 Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
 mp_legacy_*.c, tools/moemon_legacy).
 Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / IsValidBerryType, never

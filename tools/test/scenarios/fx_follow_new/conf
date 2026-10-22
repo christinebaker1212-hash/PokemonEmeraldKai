@@ -1,0 +1,10 @@
+# A follower with the newer pieces (FLAME PILLAR, STAR SHOWER, AZURE, FIREWORK): BOB, next to ALICE, sees its
+# entrance and recall (the effect travels in her player state, 24 bits)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,12
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+ENV_B="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("ballfx: entrance form 21 part 21 color 26" "ballfx: recall 33")
+EXPECT_B=("ballfx: entrance form 21 part 21 color 26" "ballfx: recall 33")

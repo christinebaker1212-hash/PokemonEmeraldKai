@@ -447,15 +447,44 @@ Battle emotes: MP_BattleOverlay_Composite repaints the pick and bubbles over the
 ## Ball entrance and recall effects
 
 Per Moemon, next to the ball style: MON_DATA_MP_BALLFX (PokemonSubstruct0's spare `filler` u16: form 0-3, particles
-4-7, energy color 8-11, recall 12-14) and MON_DATA_MP_BALLFX_SOUND (BoxPokemon's 4 spare flag bits). Both are in the
-Pokémon's data, so trades, the shared PC and link battles carry them. src/mp/mp_ballfx.c (engine, names, presets),
-src/mp/mp_ballfx_editor.c (editor), art from tools/moemon_ballfx/gen.py -> src/mp/mp_ballfx_gfx.h (indexed pixels;
-16/17/18 = the energy color and its light / dark shade). Debug: `mp ballfx SLOT F P C R S` / `mp ballfx SLOT preset N`,
-`mp fxedit SLOT`, `mp party` prints fx. Logs: "ballfx: entrance form F part P", "ballfx: recall R".
-MY PRESET 1-3 live in the save's .coop file ("fxpreset1" = bit 30 used | sound << 16 | MP_BallFx_Pack;
-MP_BallFx_GetUserPreset / SaveUserPreset / WhichUserPreset, MP_BallFx_EffectName names a mix for the editor and the
-summary). Editor rows SAVE AS (ASK_REPLACE when the slot holds another mix) and APPLY TO PARTY (ASK_PARTY; party
-Moemon that aren't eggs); the questions and "saved" notes use the info box. Test: fx_presets.
+4-7, energy color 8-11, recall 12-14), MON_DATA_MP_BALLFX_EXT (8 bits: the markings byte's top 4 bits and the spare
+ribbon bits; bit 0 form bit 4, bit 1 particles bit 4, bits 2-3 color bits 4-5, bits 4-6 recall bits 3-5; 0 in Moemon
+from before, so they keep their effect; MON_DATA_MARKINGS only touches the low 4 bits) and MON_DATA_MP_BALLFX_SOUND
+(BoxPokemon's spare flag bits). MP_BallFx_Pack / Unpack: 24 bits (base | ext << 16); MP_BallFx_SetBoxMon writes all
+three. All in the Pokémon's data, so trades, the shared PC and link battles carry them. src/mp/mp_ballfx.c (engine,
+names, presets), src/mp/mp_ballfx_editor.c (editor), mp_ballunlock.c (which pieces a save may pick), art from
+tools/moemon_ballfx/gen.py -> src/mp/mp_ballfx_gfx.h. Debug: `mp ballfx SLOT F P C R S` / `mp ballfx SLOT preset N`,
+`mp fxedit SLOT`, `mp fxget SLOT`, `mp party` prints fx. Logs: "ballfx: entrance form F part P color C",
+"ballfx: recall R color C", "ball fx: preset NAME" (editor).
+
+Pieces: 27 forms (DEFAULT + 11 + 15 newer), 31 particle sets (DEFAULT, NONE, 14 + 15 newer), 37 recalls (DEFAULT + 6
++ 30 newer), 41 energy colors (the ball colors, mp_ballstyle.c). The ones from MPFX_FORM_FIRST_EARNED (12),
+MPFX_PART_FIRST_EARNED (16), MPFX_RECALL_FIRST_EARNED (7) and MP_BALL_FIRST_EARNED (11) on are earned
+(MP_BallUnlock_Has): half by an achievement (mp_ballunlock_ach.h: {kind, index, achievement id}; it counts as soon as
+the achievement is done, so old saves have theirs, and the achievement's reward text names the piece), the other half
+are MOEGATCHA prizes (MP_BallUnlock_Give, save key "fxu:<c|f|p|r>:<index>"). mp_gatcha.c prize kind K_FX (POKE BALLS
+banner R / SR / SSR, STANDARD SR): the piece is picked at the pull among MP_BallUnlock_PrizeCount (45), one already
+had is a MOEGATCHA TICKET ("gatcha: ball piece N already had: a ticket"). Pickers step only through pieces the save
+has (MP_BallUnlock_Step); the editor's PRESET list skips a ready-made preset with a piece the save hasn't earned
+(MP_BallFx_PresetUnlocked). Only choosing is limited: other players' and traded Moemon play whatever they carry.
+`MOEMON_FX_UNLOCK_ALL=1` unlocks everything; `mp fxunlock KIND INDEX` / `mp fxunlock all` (all prizes) print what's
+left; `mp gatchafx N` makes the next pull prize N. Tests: fx_storage, fx_preset_lock, fx_preset_all, gatcha_fx.
+
+MY PRESET 1-6 live in the save's .coop file ("fxpreset1" = bit 30 used | bit 29 layout 2 | sound << 24 | the 24-bit
+pack; saved before layout 2: bit 30 | sound << 16 | the 16-bit pack; MP_BallFx_GetUserPreset / SaveUserPreset /
+WhichUserPreset, MP_BallFx_EffectName names a mix for the editor and the summary). Editor rows SAVE AS (ASK_REPLACE
+when the slot holds another mix) and APPLY TO PARTY (ASK_PARTY; party Moemon that aren't eggs); the questions and
+"saved" notes use the info box. Tests: fx_presets, fx_mypreset6.
+
+Art: indexed pixels with one palette, sFxPalette[FX_PAL_COUNT]: 1-15 the base colors, 16/17/18 the energy color and
+its light / dark shade (filled in per particle), 19 on the colors of the game's own battle animation art, which gen.py
+imports from graphics/battle_anims/sprites (imp / frames_of: Attract's hearts, Sing's notes, Razor Leaf, Ember, Surf's
+splash and water column, Pay Day's coins, Petal Dance, Focus Energy recolored to the energy color, Snore's Z, Ice
+Beam's ice chunk, ...). The palette is faded once a frame (sPalNow). Particle animation: nFrames / frameTime from art,
+framePhase, PF_ONCE (keep the last frame), PF_PINGPONG; PF_FLIPX mirrors; MOVE_BOUNCE (bounces on the ground line ty,
+then rests), MOVE_SETTLE (eases to tx, ty by frame dRadius, then stays). Bodies can turn (BodyTurn: scale + rotation
+in the OAM matrix). FieldScale shrinks the big art for followers. With the AUTO sound some newer recalls play their
+own sound (RecallSong) after the game's ball sound.
 
 Two halves:
 - Bodies (the Moemon's own sprite, Task_FxBody): palette blends (silhouettes, glows), the OAM matrix (DOUBLE mode;
@@ -483,10 +512,12 @@ sMpStartOnBallPage + InitBGs sets the layers as if scrolled there). Battle backg
 player's platform (CreateMonPicSprite_Affine; SELECT front/back), the panel and a description box (wrapped by width).
 The preview loops: ball drops in, opens, entrance, 56-frame pause, recall.
 
-Followers: MpState.followerFx + followerFlags bits 1-3 sound, 4-5 sent-out count, 6 recall playing (MP_WIRESTATE_SIZE
-22, protocol 25). A count change while the follower is around: a mini ball (particle) is tossed from its owner to its
+Followers: MpState.followerFx (24 bits: the wire state's byte 23 carries bits 16-23) + followerFlags bits 1-3 sound,
+4-5 sent-out count, 6 recall playing (MP_WIRESTATE_SIZE 24, protocol 31).
+A count change while the follower is around: a mini ball (particle) is tossed from its owner to its
 tile and it comes out with its effect (DEFAULT = MPFX_FORM_VANILLA). Called back: sLeavingState keeps it out until its
-recall has played. Tests: fx_coop, fx_triple, fx_switch, fx_follow.
+recall has played. Tests: fx_coop, fx_triple, fx_switch, fx_follow, and with the newer pieces (their extra bits)
+fx_coop_new, fx_trade, fx_follow_new.
 Follower friendship (mp_follower.c): +5 when chosen (JoyOfBeingChosen, once a day per personality, save key
 followjoy:DATE:PID) and +1 every 128 steps (MP_Follower_OnWalkSteps from field_control_avatar.c, on top of the party's
 50% walking roll). Test: follow_joy.

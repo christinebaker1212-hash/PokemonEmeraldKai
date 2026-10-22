@@ -928,6 +928,12 @@ static s16 Dist(s16 v)
     return sFieldMode ? v / 2 : v;
 }
 
+// Art drawn at battle size, smaller on the overworld (followers are small)
+static u16 FieldScale(u16 scale)
+{
+    return sFieldMode ? scale * 5 / 8 : scale;
+}
+
 // Fewer particles when several Moemon come out together (so it stays readable)
 static u8 Budget(u8 n)
 {
@@ -1521,8 +1527,8 @@ static void PartHearts(s16 mx, s16 my, s16 head)
     // a big heart swells over it...
     if ((p = Spawn(FXA_HEARTS_HEART4, 0, mx, head)))
     {
-        p->scale = 100;
-        p->dScale = 18;
+        p->scale = FieldScale(100);
+        p->dScale = FieldScale(18);
         p->life = 12;
         p->fadeOut = 8;
         p->alpha = 13;
@@ -1540,7 +1546,7 @@ static void PartHearts(s16 mx, s16 my, s16 head)
         p->vy = -(0x90 + RndU(0x40));
         p->sway = 2;
         p->angle = RndU(256);
-        p->scale = 130 + RndU(50);
+        p->scale = FieldScale(130 + RndU(50));
         p->life = 26 + RndU(8);
         p->delay = 2 + i * 2;
         p->fadeOut = 10;
@@ -1554,7 +1560,7 @@ static void PartHearts(s16 mx, s16 my, s16 head)
         p->vx = Cos(ang, Dist(0x260));
         p->vy = Sin(ang, Dist(0x200)) - 0x40;
         p->drag = 14;
-        p->scale = 110 + RndU(40);
+        p->scale = FieldScale(110 + RndU(40));
         p->life = 18 + RndU(6);
         p->fadeOut = 8;
     }
@@ -1575,7 +1581,7 @@ static void PartNotes(s16 mx, s16 my)
         p->vy = -(0x60 + RndU(0x30));
         p->sway = 3;
         p->angle = i * 40;
-        p->scale = 230;
+        p->scale = FieldScale(230);
         p->life = 34 + RndU(10);
         p->delay = i * 3;
         p->fadeIn = 3;
@@ -1648,7 +1654,7 @@ static void PartFeathers(s16 mx, s16 my)
         p->nFrames = 2;
         p->frameTime = 8;
         p->framePhase = RndU(2);
-        p->scale = 100 + RndU(40);
+        p->scale = FieldScale(100 + RndU(40));
         p->move = MOVE_FLUTTER;
         p->vx = Cos(ang, Dist(0x1C0));
         p->vy = Sin(ang, 0x1C0) - 0x80;
@@ -1681,7 +1687,7 @@ static void PartLeafGust(s16 mx, s16 feet, s16 head)
         p->vy = Rnd(0x40);
         p->sway = 3;
         p->angle = RndU(256);
-        p->scale = 200;
+        p->scale = FieldScale(200);
         p->life = 30 + RndU(8);
         p->delay = RndU(12);
         p->fadeIn = 3;
@@ -1717,7 +1723,7 @@ static void PartStars(s16 mx, s16 my, s16 head)
         p->life = 14;
         p->delay = i * 4;
         p->dRot = 12;
-        p->scale = 200;
+        p->scale = FieldScale(200);
         p->fadeOut = 4;
         p->trailEvery = 1;
         p->trailArt = FXA_STARS_SMALL0;
@@ -1729,7 +1735,7 @@ static void PartStars(s16 mx, s16 my, s16 head)
     if ((p = Spawn(FXA_STARS_BIG, 0, mx, head)))
     {
         p->scale = 40;
-        p->dScale = 30;   // stops growing at full size (ShapeParts)
+        p->dScale = FieldScale(30);   // stops growing at full size (ShapeParts)
         p->dRot = 6;
         p->life = 26;
         p->delay = 10;
@@ -1797,8 +1803,8 @@ static void PartFireRing(s16 mx, s16 feet)
         p->nFrames = 8;
         p->frameTime = 2;
         p->framePhase = RndU(8);
-        p->scale = 60;
-        p->dScale = 20;   // stops at 150 (ShapeParts)
+        p->scale = FieldScale(150);
+        p->fadeIn = 4;
         p->life = 28;
         p->fadeOut = 10;
         p->flags = PF_FAR_DIM;
@@ -1815,7 +1821,7 @@ static void PartFireRing(s16 mx, s16 feet)
         p->vy = -(0x90 + RndU(0x60));
         p->sway = 1;
         p->angle = RndU(256);
-        p->scale = 160;
+        p->scale = FieldScale(160);
         p->life = 15;
         p->fadeOut = 5;
         p->delay = 4 + RndU(20);
@@ -1898,7 +1904,7 @@ static void PartSakura(s16 mx, s16 my, s16 head)
         p->vy = 0x20 + RndU(0x30);
         p->sway = 3;
         p->angle = RndU(256);
-        p->scale = big ? 160 : 256;
+        p->scale = FieldScale(big ? 160 : 256);
         p->life = 44 + RndU(14);
         p->delay = RndU(20);
         p->fadeIn = 4;
@@ -1920,7 +1926,7 @@ static void PartCoins(s16 mx, s16 my, s16 feet)
         p->nFrames = 4;
         p->frameTime = 2;
         p->framePhase = RndU(4);
-        p->scale = 200;
+        p->scale = FieldScale(200);
         p->move = MOVE_BOUNCE;
         p->ty = feet - 4 + Rnd(3);
         p->vx = Rnd(Dist(0x240));
@@ -1971,6 +1977,7 @@ static void PartButterflies(s16 mx, s16 my)
         p->frameTime = 2;
         p->framePhase = RndU(3);
         p->flags = PF_PINGPONG;
+        p->scale = FieldScale(256);
         p->vx = Cos(ang, Dist(0x1C0));
         p->vy = Sin(ang, Dist(0x80)) - Dist(0xC0);
         p->sway = 4;
@@ -2048,7 +2055,7 @@ static void PartAura(s16 mx, s16 my, s16 feet, u8 color)
         p->vy = -Dist(0xE0) - RndU(0x60);
         p->life = 12;
         p->delay = i + RndU(8);
-        p->scale = 220;
+        p->scale = FieldScale(220);
     }
 }
 
@@ -2104,10 +2111,8 @@ static void ShapeParts(void)
             p->scale = 256, p->dScale = 0;
         else if (p->art == FXA_EXPLOSION_BLAST0 && p->scale > 340)
             p->dScale = 0;
-        else if (p->art == FXA_STARS_BIG && p->scale > 256)
-            p->scale = 256, p->dScale = 0;
-        else if (p->art == FXA_FIRE_FLAME0 && p->dScale > 0 && p->scale >= 150)
-            p->scale = 150, p->dScale = 0;
+        else if (p->art == FXA_STARS_BIG && p->scale > FieldScale(256))
+            p->scale = FieldScale(256), p->dScale = 0;
     }
 }
 
@@ -2952,7 +2957,7 @@ static void EntranceFrame(struct FxBody *b)
             p->angle = RndU(256);
             p->life = 15;
             p->fadeOut = 5;
-            p->scale = 160;
+            p->scale = FieldScale(160);
         }
         s->invisible = t < 3;
         BodyScale(b, 256, 150 + 106 * Ramp(t, 3, 10) / 256, TRUE);
@@ -3060,6 +3065,7 @@ static void EntranceFrame(struct FxBody *b)
                 p->nFrames = 9;
                 p->frameTime = 2;
                 p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
                 p->life = 11;
                 p->fadeIn = 2;
                 p->flags = PF_FAR_DIM;
@@ -3081,6 +3087,7 @@ static void EntranceFrame(struct FxBody *b)
                 p->nFrames = 9;
                 p->frameTime = 2;
                 p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
                 p->life = 24;
                 p->fadeOut = 10;
             }
@@ -3134,7 +3141,7 @@ static void EntranceFrame(struct FxBody *b)
             p->alpha = 10;
             p->life = 12;
             p->fadeOut = 6;
-            p->scale = 180;
+            p->scale = FieldScale(180);
         }
         break;
     }
@@ -3764,7 +3771,7 @@ static void RecallFrame(struct FxBody *b)
             p->angle = RndU(256);
             p->life = 15;
             p->fadeOut = 5;
-            p->scale = 160;
+            p->scale = FieldScale(160);
         }
         BodyTint(b, 16 * Ramp(t, 0, 5) / 256, RGB(31, 19, 6));
         BodyScale(b, 256, 256 - 100 * Ramp(t, 3, 8) / 256, TRUE);
@@ -3843,6 +3850,7 @@ static void RecallFrame(struct FxBody *b)
                 p->nFrames = 9;
                 p->frameTime = 2;
                 p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
                 p->life = 13;
                 p->fadeIn = 2;
                 p->flags = PF_FAR_DIM;
@@ -3863,6 +3871,7 @@ static void RecallFrame(struct FxBody *b)
                 p->nFrames = 9;
                 p->frameTime = 2;
                 p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
                 p->life = 7 + i / 2;
             }
         }
@@ -3899,7 +3908,7 @@ static void RecallFrame(struct FxBody *b)
             p->alpha = 10;
             p->life = 12;
             p->fadeOut = 6;
-            p->scale = 180;
+            p->scale = FieldScale(180);
         }
         break;
     }
@@ -3986,8 +3995,8 @@ static void RecallFrame(struct FxBody *b)
         {
             if ((p = Spawn(FXA_HEARTS_HEART4, 0, mx, my)))
             {
-                p->scale = 200;
-                p->dScale = 14;
+                p->scale = FieldScale(200);
+                p->dScale = FieldScale(14);
                 p->life = 10;
                 p->fadeOut = 8;
                 p->alpha = 13;
@@ -3999,7 +4008,7 @@ static void RecallFrame(struct FxBody *b)
                 p->move = MOVE_HOME;
                 p->tx = b->bx;
                 p->ty = b->by;
-                p->scale = 120;
+                p->scale = FieldScale(120);
                 p->life = 8 + i;
                 p->delay = 2;
             }
@@ -4340,7 +4349,7 @@ static void RecallFrame(struct FxBody *b)
             p->vy = -0x60;
             p->sway = 2;
             p->angle = t * 20;
-            p->scale = 180 + t * 6;
+            p->scale = FieldScale(180 + t * 6);
             p->life = 30;
             p->fadeIn = 3;
             p->fadeOut = 10;
