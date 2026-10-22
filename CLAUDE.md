@@ -11,8 +11,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `include/mp.h`: shared co-op API. `src/mp/mp_net.h` holds the protocol (bump `MP_PROTOCOL_VERSION` on changes)
 - `tools/mp_server/`: standalone relay server
 - `src/platform/updater.c` + `tools/release/`: the auto-updater and releases. Publishing a version = bump
-  `MOEMON_VERSION` (include/mp_version.h), add `tools/release/notes/v<ver>.md`, push the tag `v<ver>`
-  (.github/workflows/release.yml builds and publishes; BUILDING_COOP.md)
+  `MOEMON_VERSION` (include/mp_version.h), add `tools/release/notes/v<ver>.md`, push to the default branch
+  (.github/workflows/release.yml builds, tags and publishes; BUILDING_COOP.md). Sessions can't push tags.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)

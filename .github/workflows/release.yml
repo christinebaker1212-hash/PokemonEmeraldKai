@@ -1,59 +1,77 @@
-# Moemon Co-op: pushing a version tag (v1.2.3) builds the Windows and Linux games, tests the updater and
-# publishes the GitHub release the game's updater reads (src/platform/updater.c): both zips and update.txt.
-# The tag must match MOEMON_VERSION in include/mp_version.h. Notes come from tools/release/notes/<tag>.md.
+# Moemon Co-op: a new MOEMON_VERSION (include/mp_version.h) pushed to the default branch builds the Windows
+# and Linux games, tests the updater and publishes release v<version> (tag included), which the game's updater
+# reads (src/platform/updater.c): both zips and update.txt. Notes come from tools/release/notes/v<version>.md.
+# Also runs by hand (Actions > Release > Run workflow). A version that already has a release is skipped.
 name: Release
 
 on:
   push:
-    tags: ['v*']
+    paths: ['include/mp_version.h']
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   release:
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Version
+        id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
+          [ -n "$VER" ]
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VER" > /dev/null 2>&1; then
+            echo "v$VER is already released: nothing to do"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Tools
+        if: steps.ver.outputs.skip != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
 
-      - name: The tag matches mp_version.h
-        run: |
-          VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
-          echo "mp_version.h: $VER, tag: $GITHUB_REF_NAME"
-          [ "v$VER" = "$GITHUB_REF_NAME" ]
-
       - name: SDL2 for Windows (2.30.9, checked)
+        if: steps.ver.outputs.skip != 'true'
         run: |
           curl -sSL -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
           echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
           tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
 
       - name: Linux build
+        if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
 
       - name: Windows build
+        if: steps.ver.outputs.skip != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
 
       - name: Packages and update.txt
+        if: steps.ver.outputs.skip != 'true'
         run: |
           tools/release/package.sh linux dist
           SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist
           tools/release/manifest.sh dist
 
       - name: Updater test (Linux)
+        if: steps.ver.outputs.skip != 'true'
         run: NOBUILD=1 OUT="$RUNNER_TEMP/update_test" tools/test/update_test.sh
 
       - name: Publish
+        if: steps.ver.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="tools/release/notes/$GITHUB_REF_NAME.md"
-          [ -f "$NOTES" ] || { echo "Moemon Emerald Kai Co-op $GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"; NOTES="$RUNNER_TEMP/notes.md"; }
-          gh release create "$GITHUB_REF_NAME" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt \
-            --title "Moemon Emerald Kai Co-op $GITHUB_REF_NAME" --notes-file "$NOTES" --latest
+          TAG=${{ steps.ver.outputs.tag }}
+          NOTES="tools/release/notes/$TAG.md"
+          [ -f "$NOTES" ] || { echo "Moemon Emerald Kai Co-op $TAG" > "$RUNNER_TEMP/notes.md"; NOTES="$RUNNER_TEMP/notes.md"; }
+          gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt \
+            --target "$GITHUB_SHA" --title "Moemon Emerald Kai Co-op $TAG" --notes-file "$NOTES" --latest

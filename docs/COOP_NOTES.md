@@ -673,5 +673,6 @@ Off: AutoUpdate = 0 in the ini, --no-update, MOEMON_NO_UPDATE=1, no moemon_relea
 MOEMON_UPDATE_URL. Test: tools/test/update_test.sh (WIN=1 under Wine): offline, up to date, damaged, ESC, rollback
 (MOEMON_UPDATE_TEST_FAIL_SWAP), update, cleanup, not a release folder. MOEMON_UPDATE_FETCH=url fetches one URL and
 prints its SHA-256 (checked against curl on a 7.6 MB GitHub release asset, with redirects).
-Releases: .github/workflows/release.yml on a `v*` tag (must equal MOEMON_VERSION) builds both platforms, packages,
-runs the updater test and publishes with `gh release create`; notes from tools/release/notes/<tag>.md.
+Releases: .github/workflows/release.yml runs on a push to the default branch that changes include/mp_version.h (or
+by hand), skips a version that already has a release, builds both platforms, packages, runs the updater test and
+publishes with `gh release create --target <commit>` (which makes the tag); notes from tools/release/notes/v<ver>.md.
