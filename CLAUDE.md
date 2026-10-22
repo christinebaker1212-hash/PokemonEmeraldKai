@@ -42,7 +42,8 @@ message holds, low HP beep), co-op partner status and intents, battle emotes, au
 phases 1-4 (dex, buddy bonus, shared PC, trades, dailies/achievements/MoeGatcha, co-op wild battles), difficulty,
 TEAM PADDING (host setting: trainers get one extra Moemon in team-ups),
 "wait for a partner", co-op healing items, the co-op doubles retrofit, batch 3 link features (record mixing, secret
-bases, trainer cards, day care eggs, minigames, contests), LOOK / CREATE sprites, co-op Triple Battles, and grouped
+bases, trainer cards, day care eggs, minigames, contests), LOOK / CREATE sprites, co-op Triple Battles (cards drawn from the user's pixel art: tools/moemon_tricards,
+checked pixel for pixel by the tri_cards test; type icons layered beside every battle's boxes), and grouped
 stat moves (one animation and message for Growl / Tail Whip on several Pokémon), graphics past the GBA limits (64 sprite palettes,
 128 sprites, 256 OAM entries, 128 KB of sprite tiles), co-op EXP (everyone levels
 up and picks moves to forget at the same time), and ball entrance / recall effects (mp_ballfx.c: an effects layer

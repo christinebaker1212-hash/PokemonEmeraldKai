@@ -2,9 +2,12 @@
 //
 // One or two small icons in the style of the modern type chart (a colored
 // square with a white symbol; tools/moemon_typeicons/gen.py) next to every
-// battler's healthbox, on the name's line: to the right of a foe's box, to the
-// left of yours (the boxes sit at the screen's edges). Triple Battles use the
-// cards from mp_tricards.c instead of healthboxes; the icons go beside those.
+// battler's healthbox: to the right of a foe's box, to the left of yours (the
+// boxes sit at the screen's edges). Placed as in the user's Triple Battle
+// mock-up: the secondary type behind, 1 pixel from the box's outer ring and 2
+// below its top; the primary type in front of it, 4 pixels further out and
+// down. One type: only the front icon. Triple Battles use the cards from
+// mp_tricards.c instead of healthboxes; the icons go beside those the same way.
 // They're drawn over the frame like the cards (sdl2.c VDraw), so they take no
 // sprites, tiles or palettes, follow the boxes as they slide in and bounce,
 // fade with the screen, and show the battler's current types (gBattleMons:
@@ -25,7 +28,11 @@
 
 #include "mp_typeicon_gfx.h"
 
-#define ICON_GAP 1
+// from the box's outer ring (its side and top): the back icon, then the front one
+#define BACK_OUT 2
+#define BACK_DOWN 2
+#define FRONT_OUT 6
+#define FRONT_DOWN 6
 
 bool8 MP_TypeIcons_On(void)
 {
@@ -63,7 +70,7 @@ static void DrawIcon(u16 *frame, u8 type, s16 x0, s16 y0)
     }
 }
 
-// The healthbox's (singles / doubles) visible left and right edges and the top of the name's line
+// The healthbox's (singles / doubles) outer ring: its left and right columns and its top row
 static bool8 HealthboxPlace(u8 battler, s16 *left, s16 *right, s16 *top)
 {
     struct Sprite *box;
@@ -88,11 +95,11 @@ static bool8 HealthboxPlace(u8 battler, s16 *left, s16 *right, s16 *top)
             sLast[battler] = key;
         }
     }
-    // measured on screenshots, the same in singles and doubles: a foe's box art ends 60 pixels right of
-    // its first sprite's center, yours starts 23 left of it; the name's line starts 12 above
+    // measured on screenshots, the same in singles and doubles: a foe's box's outer ring is 60 pixels
+    // right of its first sprite's center, yours 23 left of it; the top of the ring 14 above
     *left = x - 23;
     *right = x + 60;
-    *top = y - 12;
+    *top = y - 14;
     return TRUE;
 }
 
@@ -123,8 +130,8 @@ void MP_TypeIcons_Composite(u16 *frame)
         return;
     for (b = 0; b < gBattlersCount && b < MAX_BATTLERS_COUNT; b++)
     {
-        s16 left, right, top, x;
-        u8 t1, t2, n;
+        s16 left, right, top;
+        u8 t1, t2;
         bool8 foe = GetBattlerSide(b) == B_SIDE_OPPONENT;
 
         if (gBattleTypeFlags & BATTLE_TYPE_SAFARI && !foe)
@@ -148,13 +155,9 @@ void MP_TypeIcons_Composite(u16 *frame)
             MP_FadeFit_FromPalette(&sFit, OBJ_PLTT_ID(gSprites[gHealthboxSpriteIds[b]].oam.paletteNum));
         }
         BattlerTypes(b, &t1, &t2);
-        n = (t2 != t1 && t2 < NUMBER_OF_MON_TYPES) ? 2 : 1;
-        if (foe)
-            x = right + 2;
-        else
-            x = left - 2 - n * MP_TYPEICON_SIZE - (n - 1) * ICON_GAP;
-        DrawIcon(frame, t1, x, top);
-        if (n == 2)
-            DrawIcon(frame, t2, x + MP_TYPEICON_SIZE + ICON_GAP, top);
+        // the secondary type behind, the primary in front
+        if (t2 != t1 && t2 < NUMBER_OF_MON_TYPES)
+            DrawIcon(frame, t2, foe ? right + BACK_OUT : left - BACK_OUT - (MP_TYPEICON_SIZE - 1), top + BACK_DOWN);
+        DrawIcon(frame, t1, foe ? right + FRONT_OUT : left - FRONT_OUT - (MP_TYPEICON_SIZE - 1), top + FRONT_DOWN);
     }
 }

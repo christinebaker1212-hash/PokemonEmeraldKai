@@ -336,6 +336,15 @@ Second custom back pic slot TRAINER_BACK_PIC_MP_PARTNER2. Debug: `mp triple S:L 
 commands all three), MOEMON_TRIPLEDEBUG=1 (logs; card visibility). Tests: tri_wild, tri_trainer, tri_catch, tri_heal,
 tri_abort, tri_levelup, tri_faint (MODE=3, tools/test/runN.sh). Gotcha: anything that does `battler ^ BIT_FLANK` or
 assumes positions 0-3 (reshow_battle_screen.c, shadows, Cmd_monbg) breaks for 4/5 (sprite 0 = battler 0's healthbox).
+Card art: the user's pixel mock-up (tools/moemon_tricards/cards_mockup.png; gen.py -> src/mp/mp_tricard_gfx.h), a
+74x22 body with a tail toward the type icons (foe: right, team: left; the team card's top-left corner is one pixel
+rounder, as drawn). Frames are stored as color roles (TC_*) and colored per frame through MP_FadeFit against the
+TAG_TRICARD_PAL palette, so there's no 16-color limit. Name at (4,3) from the body, gender 1 pixel after it (the
+original healthbox's colors), level at (4,11), or the original game's 20x8 status tag over it (status.png colors);
+the HP bar (hpbar.png with a smaller HP label, the original green/yellow/red/empty rows and thresholds on a 48-pixel
+scale) runs from 1 pixel after the level or tag to the ring, so it is 2 pixels shorter with a tag. Fill blends at the
+card's opacity, the frame at +40, the rest is solid. Placement: foe bodies at x 1, y 1/22/43; team bodies at x 165,
+y 48/69/90. Debug: `mp bstatus B STATUS1 [HP]`, `mp double S:L S:L` (local wild double).
 Cards: the HP bar follows MoveBattleBar's return value (battleBars[].currValue is fixed-point when max HP < 48);
 same-named Pokémon on a side get A/B/C left to right (MP_TriCards_Letter, also in the target box). The cards are drawn
 over the finished frame, so MP_TriCards_Composite paints the battle emote pick and bubbles again on top of them
@@ -519,8 +528,10 @@ the shop colors friends' avatars with MP_Overworld_MenuSpritePalette.
 gSaveBlock2Ptr->optionsTypeIcons (one of the 4 spare bits after regionMapZoom; old saves read OFF). option_menu.c has
 eight rows 14 pixels apart (OPTION_ROW_H, 16 in the original). mp_typeicons.c draws 11x11 icons
 (tools/moemon_typeicons/gen.py -> mp_typeicon_gfx.h, BGR555 with bit 15 = drawn) over the frame from sdl2.c VDraw after
-the triple cards: on the name's line, right of a foe's healthbox (box sprite x + 60), left of yours (x - 23), top
-y - 12 (measured, same in singles and doubles); in triples beside the cards (MP_TriCards_Place). They follow the box's
+the triple cards, layered as in the user's triple mock-up: the secondary type behind (2 pixels out from the box's
+outer ring, 2 below its top), the primary in front (6 out, 6 down); one type = the front icon only. Outer ring of a
+healthbox: right of a foe's at box sprite x + 60, left of yours at x - 23, top y - 14 (measured, same in singles and
+doubles); in triples the card body (MP_TriCards_Place). They follow the box's
 x2/y2 and invisible, fade with gPaletteFade and use gBattleMons types when its species matches the party Mon (link
 battles: the games that don't run the engine have no gBattleMons types, so species types there). No Fairy in Kai.
 Debug: `mp typeicons 1`, `mp options`; MOEMON_TYPEICON_DEBUG=1 logs box positions.

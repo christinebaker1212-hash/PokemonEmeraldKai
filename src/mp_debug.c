@@ -22,6 +22,7 @@
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
+#include "battle_interface.h"
 #include "field_effect.h"
 #include "fieldmap.h"
 #include "constants/field_effects.h"
@@ -249,6 +250,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();
+    }
+    else if (strcmp(cmd, "double") == 0)
+    {
+        // double S:L S:L - a local wild Double Battle (you command party slots 0-1)
+        void BattleSetup_StartLocalDoubleWildBattle(void);
+        int sp[2] = {288, 286}, lv[2] = {5, 5};
+        sscanf(arg, "%d:%d %d:%d", &sp[0], &lv[0], &sp[1], &lv[1]);
+        ZeroEnemyPartyMons();
+        CreateMon(&gEnemyParty[0], sp[0], lv[0], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        CreateMon(&gEnemyParty[1], sp[1], lv[1], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        BattleSetup_StartLocalDoubleWildBattle();
     }
     else if (strcmp(cmd, "dumpcolors") == 0)
     {
@@ -691,6 +703,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] battler %d hp %d/%d species %d level %d (party %d)\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP,
                    gBattleMons[b].species, gBattleMons[b].level,
                    GetMonData(GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]] : &gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_LEVEL));
+    }
+    else if (strcmp(cmd, "bstatus") == 0)
+    {
+        // bstatus BATTLER STATUS1 [HP] - sets a battler's status (and HP) and redraws its healthbox / card
+        int b = 0, st = 0, hp = -1;
+        sscanf(arg, "%d %d %d", &b, &st, &hp);
+        if (b >= 0 && b < gBattlersCount)
+        {
+            struct Pokemon *mon = GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]] : &gEnemyParty[gBattlerPartyIndexes[b]];
+            u32 status = st;
+            SetMonData(mon, MON_DATA_STATUS, &status);
+            gBattleMons[b].status1 = status;
+            if (hp >= 0)
+            {
+                u16 h = hp;
+                SetMonData(mon, MON_DATA_HP, &h);
+                gBattleMons[b].hp = h;
+            }
+            UpdateHealthboxAttribute(gHealthboxSpriteIds[b], mon, HEALTHBOX_ALL);
+        }
     }
     else if (strcmp(cmd, "register") == 0)
     {

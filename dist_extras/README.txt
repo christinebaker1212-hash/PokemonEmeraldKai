@@ -235,6 +235,9 @@ TRIPLE BATTLES (THREE PLAYERS)
 * Your allies are the gold boxes in the party screen; you can heal any of
   the six. Each card has a colored strip on the left: the same color is the
   same player on everyone's screen.
+* The cards show the name and gender, the level and the HP bar. A status
+  (PSN, PAR, SLP, FRZ, BRN) covers the level, as on the usual boxes. The
+  cards are see-through, so Moemon behind them stay visible.
 * R on the action menu shows both allies' Moemon with their HP, and once an
   ally has picked, your menu shows it ("ALICE: EMBER").
 * While you pick a target, the box on the right names it, with its level (a
@@ -740,8 +743,9 @@ the Sprite Editor.
 
 OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
 OPTIONS > TYPE ICONS ON shows each Moemon's types as small colored icons
-next to its name in every battle (Single, Double and Triple). OFF (the
-default) leaves the battle screen as it always was.
+next to its box in every battle (Single, Double and Triple): the second type
+behind, the first type in front of it. OFF (the default) leaves the battle
+screen as it always was.
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
