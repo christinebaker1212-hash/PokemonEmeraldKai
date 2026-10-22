@@ -767,6 +767,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
     }
+    else if (strcmp(cmd, "moves") == 0)
+    {
+        // mp moves SLOT M1 [M2 M3 M4] - the party Moemon in SLOT knows these moves (full PP); missing ones are emptied
+        int slot = 0, m[MAX_MON_MOVES] = {0}, n, i;
+        n = sscanf(arg, "%d %d %d %d %d", &slot, &m[0], &m[1], &m[2], &m[3]);
+        if (n >= 2 && slot >= 0 && slot < PARTY_SIZE)
+        {
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
+            printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
+        }
+    }
     else if (strcmp(cmd, "hold") == 0)
     {
         // mp hold SLOT ITEM - the party Moemon in SLOT holds ITEM

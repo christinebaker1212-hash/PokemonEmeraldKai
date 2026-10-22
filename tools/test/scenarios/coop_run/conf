@@ -1,4 +1,5 @@
-# Co-op wild: ALICE alone picks RUN (it only says so), next turn both pick RUN and they get away (no whiteout)
+# Co-op wild: ALICE alone picks RUN (it only says so), next turn both pick RUN and they get away (no whiteout).
+# ALICE's lead holds a SMOKE BALL, so the team's escape is certain (slower than the foe, it's a dice roll)
 MODE=2
 WARP=0,16,12,11
 WARP_B=0,16,14,11

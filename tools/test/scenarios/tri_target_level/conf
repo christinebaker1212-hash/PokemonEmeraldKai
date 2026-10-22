@@ -1,4 +1,6 @@
-# Roxanne co-op Triple at NA-JP lag: each player opens the target window (Lv must match the cards; a mismatch is logged)
+# Roxanne co-op Triple at NA-JP lag: each player opens the target window (Lv must match the cards; a mismatch is logged).
+# BOB and CAROL fight with TACKLE (35 PP): with PROTECT (10 PP) a long battle ran it dry and their A mashing
+# kept picking the empty move
 MODE=3
 WARP=11,3,5,3
 WARP_B=11,3,5,6

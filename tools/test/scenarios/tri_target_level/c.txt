@@ -1,4 +1,5 @@
 pressuntil A field 5000
+mp moves 0 33
 waitfor online 6000
 waitlog 4000 is waiting for a partner
 wait 400
