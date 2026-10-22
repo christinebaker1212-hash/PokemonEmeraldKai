@@ -653,3 +653,25 @@ into per-scanline spans; gba_easy_draw.c / gba_fast_draw.c count a pixel in a sp
 cave, gMpDarkUiPal (the MP_TAG_UI_PAL slot) lets toasts / bubbles / "!" through the darkness (easy draw: their
 pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`, `mp cutgrass`, `mp worldobj ID`,
 `mp tileat X,Y`, `mp ashcount`. Tests: coop_flash, coop_world, coop_world2.
+
+## Auto-updater and releases (src/platform/updater.c, tools/release)
+Runs in main() (sdl2.c) right after the window opens, before the save is used. update.txt comes from
+`https://github.com/<MOEMON_UPDATE_REPO>/releases/latest/download/update.txt` (no API, no rate limit): `version`,
+`tag`, and per platform `<windows|linux> <zip> <bytes> <sha256> <exe>`. The zip is fetched from the tagged release
+(`releases/download/<tag>/<zip>`) so a release published meanwhile can't mix in. Download in an SDL thread into
+`update_download.zip` next to the exe (size capped at the manifest's), SHA-256 checked while streaming and again
+after reading it back; entries checked against the zip's CRC-32 as they're unpacked (stb_image's deflate,
+`stbi_zlib_decode_noheader_malloc`). The top folder of the zip is dropped; names with `..`, `:`, `\` or a leading
+`/` are refused. Existing `*.ini` and `*.sav*` are kept. Install: every file to `<name>.upd_new`, then each existing
+file renamed to `<name>.upd_old` (works on a running exe and loaded SDL2.dll on Windows) and the new one renamed in;
+a failure renames everything back. `update_cleanup.txt` lists the `.upd_old` files; the next start (the restarted
+game) deletes them, or keeps the ones still locked for the start after. The new exe starts with
+MOEMON_JUST_UPDATED=1 (CreateProcessW on Windows, execv on Linux), which skips the check once. HTTPS: WinHTTP
+(automatic proxy, then the system's) on Windows, libcurl via dlopen on Linux (honors https_proxy; CURL_CA_BUNDLE /
+SSL_CERT_FILE set CAINFO). Screen: a 240x160 frame with a 5x7 font of its own (the game's text engine isn't up yet).
+Off: AutoUpdate = 0 in the ini, --no-update, MOEMON_NO_UPDATE=1, no moemon_release.txt, or a headless test without
+MOEMON_UPDATE_URL. Test: tools/test/update_test.sh (WIN=1 under Wine): offline, up to date, damaged, ESC, rollback
+(MOEMON_UPDATE_TEST_FAIL_SWAP), update, cleanup, not a release folder. MOEMON_UPDATE_FETCH=url fetches one URL and
+prints its SHA-256 (checked against curl on a 7.6 MB GitHub release asset, with redirects).
+Releases: .github/workflows/release.yml on a `v*` tag (must equal MOEMON_VERSION) builds both platforms, packages,
+runs the updater test and publishes with `gh release create`; notes from tools/release/notes/<tag>.md.

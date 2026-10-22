@@ -854,6 +854,27 @@ Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
 
+UPDATES
+-------
+When the game starts it checks for a newer version (online, at the
+game's GitHub page). If there is one, it shows "UPDATING TO VERSION ...",
+downloads it, checks that the download is complete and undamaged,
+installs it into this folder and starts the new version by itself.
+
+* Your save (pokeemerald.sav and its backups), your .ini settings and
+  your sprites are never touched. Only the game's own files are replaced.
+* ESC while it downloads: play this version now; it asks again next time.
+* No internet, or anything goes wrong: the game simply starts as it is
+  (and says why if the update itself failed). Nothing is left half-done:
+  a failed install puts every file back.
+* Turn it off with "AutoUpdate = 0" in moemon_coop.ini.
+* Play online with friends on the same version: if one of you updated,
+  the others get the update the next time they start the game.
+* It's an ordinary download, like a browser's: nothing about the firewall
+  or Windows settings is changed.
+* On Linux it needs libcurl (installed on nearly every system).
+
+
 USING YOUR EXISTING SAVE
 ------------------------
 The game saves to "pokeemerald.sav" next to the .exe. It's the normal
@@ -878,6 +899,7 @@ FILES
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md
+  moemon_release.txt         this version's number (the updater needs it)
 
 Everyone should run the same version. A different version is refused
 with a message saying so.
