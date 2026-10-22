@@ -435,7 +435,26 @@
 #define ITEM_MAGMA_EMBLEM 375
 #define ITEM_OLD_SEA_MAP 376
 
-#define ITEMS_COUNT 377
+// Moemon Kai: the e-Reader Berries (Japanese Ruby/Sapphire cards), each its own item
+// (berry numbers BERRY_PUMKIN.. follow ITEM_UNUSED_BERRY_3's; see ITEM_TO_BERRY)
+#define ITEM_PUMKIN_BERRY 377
+#define ITEM_DRASH_BERRY 378
+#define ITEM_EGGANT_BERRY 379
+#define ITEM_STRIB_BERRY 380
+#define ITEM_CHILAN_BERRY 381
+#define ITEM_NUTPEA_BERRY 382
+#define ITEM_GINEMA_BERRY 383
+#define ITEM_KUO_BERRY 384
+#define ITEM_YAGO_BERRY 385
+#define ITEM_TOUGA_BERRY 386
+#define ITEM_NINIKU_BERRY 387
+#define ITEM_TOPO_BERRY 388
+
+#define FIRST_EREADER_BERRY ITEM_PUMKIN_BERRY
+#define LAST_EREADER_BERRY  ITEM_TOPO_BERRY
+#define NUM_EREADER_BERRIES (LAST_EREADER_BERRY - FIRST_EREADER_BERRY + 1)
+
+#define ITEMS_COUNT 389
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow
@@ -459,7 +478,21 @@
 #define NUM_ROUTE_114_MAN_BERRIES         (LAST_ROUTE_114_MAN_BERRY - FIRST_ROUTE_114_MAN_BERRY + 1)
 #define NUM_ROUTE_114_MAN_BERRIES_SKIPPED (FIRST_ROUTE_114_MAN_BERRY - FIRST_BERRY_INDEX)
 
+// Berry numbers: 1.. for CHERI..ENIGMA (and the three unused slots), then the e-Reader Berries
+#define IS_EREADER_BERRY(itemId) ((itemId) >= FIRST_EREADER_BERRY && (itemId) <= LAST_EREADER_BERRY)
+#define IS_BERRY_ITEM(itemId) (((itemId) >= FIRST_BERRY_INDEX && (itemId) <= LAST_BERRY_INDEX) || IS_EREADER_BERRY(itemId))
+#define FIRST_EREADER_BERRY_TYPE (MAX_BERRY_INDEX - FIRST_BERRY_INDEX + 2)
+#ifdef MODERN   // C (only defined for C files; the scripts' assembler has no ?: and only names CHERI..ENIGMA)
+#define ITEM_TO_BERRY(itemId) (IS_EREADER_BERRY(itemId) ? ((itemId) - FIRST_EREADER_BERRY + FIRST_EREADER_BERRY_TYPE) \
+                                                          : (((itemId) - FIRST_BERRY_INDEX) + 1))
+#else
 #define ITEM_TO_BERRY(itemId) (((itemId) - FIRST_BERRY_INDEX) + 1)
+#endif
+#define BERRY_TO_ITEM(berry) ((berry) >= FIRST_EREADER_BERRY_TYPE ? ((berry) - FIRST_EREADER_BERRY_TYPE + FIRST_EREADER_BERRY) \
+                                                                  : ((berry) + FIRST_BERRY_INDEX - 1))
+#define LAST_BERRY_TYPE ITEM_TO_BERRY(LAST_EREADER_BERRY)   // the highest berry number
+// A berry's slot in tables made for the berry numbers (0-based)
+#define BERRY_SLOT(itemId) (ITEM_TO_BERRY(itemId) - 1)
 #define ITEM_TO_MAIL(itemId) ((itemId) - FIRST_MAIL_INDEX)
 #define MAIL_NONE 0xFF
 
@@ -496,6 +529,6 @@
 #define ITEM_B_USE_OTHER    2
 
 // Check if the item is one that can be used on a Pokémon.
-#define ITEM_HAS_EFFECT(item) ((item) >= ITEM_POTION && (item) <= MAX_BERRY_INDEX)
+#define ITEM_HAS_EFFECT(item) (((item) >= ITEM_POTION && (item) <= MAX_BERRY_INDEX) || IS_EREADER_BERRY(item))
 
 #endif  // GUARD_CONSTANTS_ITEMS_H

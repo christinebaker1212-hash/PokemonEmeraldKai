@@ -1621,3 +1621,65 @@ static const u8 sOldSeaMapDesc[] = _(
     "A faded sea chart\n"
     "that shows the way\n"
     "to a certain island.");
+
+// Moemon Kai: the e-Reader Berries
+static const u8 sPumkinBerryDesc[] = _(
+    "A hold item that\n"
+    "defrosts MOéMON\n"
+    "in battle.");
+
+static const u8 sDrashBerryDesc[] = _(
+    "A hold item that\n"
+    "heals poisoning\n"
+    "in battle.");
+
+static const u8 sEggantBerryDesc[] = _(
+    "A hold item that\n"
+    "snaps MOéMON out\n"
+    "of infatuation.");
+
+static const u8 sStribBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow STRIB.");
+
+static const u8 sChilanBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow CHILAN.");
+
+static const u8 sNutpeaBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow NUTPEA.");
+
+static const u8 sGinemaBerryDesc[] = _(
+    "A hold item that\n"
+    "restores any\n"
+    "lowered stat.");
+
+static const u8 sKuoBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow KUO.");
+
+static const u8 sYagoBerryDesc[] = _(
+    "A hold item that\n"
+    "heals a burn in\n"
+    "battle.");
+
+static const u8 sTougaBerryDesc[] = _(
+    "A hold item that\n"
+    "heals confusion\n"
+    "in battle.");
+
+static const u8 sNinikuBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow NINIKU.");
+
+static const u8 sTopoBerryDesc[] = _(
+    "{POKEBLOCK} ingredient.\n"
+    "Plant in loamy soil\n"
+    "to grow TOPO.");
+

@@ -111,6 +111,31 @@ static const u8 sBerryDescriptionPart1_Starf[] = _("So strong, it was abandoned 
 static const u8 sBerryDescriptionPart2_Starf[] = _("world's edge. Considered a mirage.");
 static const u8 sBerryDescriptionPart1_Enigma[] = _("A completely enigmatic BERRY.");
 static const u8 sBerryDescriptionPart2_Enigma[] = _("Appears to have the power of stars.");
+// Moemon Kai: the e-Reader Berries (flavors, firmness and effects from the Japanese cards)
+static const u8 sBerryDescriptionPart1_Pumkin[] = _("A hefty BERRY with a hard, ridged rind.");
+static const u8 sBerryDescriptionPart2_Pumkin[] = _("Its sour flesh warms a frozen body.");
+static const u8 sBerryDescriptionPart1_Drash[] = _("A long, pale BERRY that grows deep in");
+static const u8 sBerryDescriptionPart2_Drash[] = _("the soil. Its sweetness fights poison.");
+static const u8 sBerryDescriptionPart1_Eggant[] = _("A glossy, egg-shaped BERRY. Its dry");
+static const u8 sBerryDescriptionPart2_Eggant[] = _("taste is said to calm a smitten heart.");
+static const u8 sBerryDescriptionPart1_Strib[] = _("Tiny seeds dot its skin. It is spicy");
+static const u8 sBerryDescriptionPart2_Strib[] = _("and bitter at once.");
+static const u8 sBerryDescriptionPart1_Chilan[] = _("A long, soft BERRY that grows in just");
+static const u8 sBerryDescriptionPart2_Chilan[] = _("a few hours. Both spicy and sweet.");
+static const u8 sBerryDescriptionPart1_Nutpea[] = _("Hard little BERRIES packed in a shell.");
+static const u8 sBerryDescriptionPart2_Nutpea[] = _("Every flavor shows up, just a little.");
+static const u8 sBerryDescriptionPart1_Ginema[] = _("A tiny BERRY with a smelly skin and a");
+static const u8 sBerryDescriptionPart2_Ginema[] = _("hard nut. Said to restore lost power.");
+static const u8 sBerryDescriptionPart1_Kuo[] = _("A ribbed green BERRY with a sticky");
+static const u8 sBerryDescriptionPart2_Kuo[] = _("inside. A little of every flavor.");
+static const u8 sBerryDescriptionPart1_Yago[] = _("A bumpy BERRY that is tremendously");
+static const u8 sBerryDescriptionPart2_Yago[] = _("bitter. Its juice soothes burns.");
+static const u8 sBerryDescriptionPart1_Touga[] = _("A slim red BERRY that is tremendously");
+static const u8 sBerryDescriptionPart2_Touga[] = _("spicy. It clears a confused mind.");
+static const u8 sBerryDescriptionPart1_Niniku[] = _("Its pungent smell fills a whole room.");
+static const u8 sBerryDescriptionPart2_Niniku[] = _("Dry and bitter: a POKéBLOCK favorite.");
+static const u8 sBerryDescriptionPart1_Topo[] = _("Grows under the soil like a root. Its");
+static const u8 sBerryDescriptionPart2_Topo[] = _("flesh is sweet and a little sour.");
 
 const struct Berry gBerries[] =
 {
@@ -887,6 +912,222 @@ const struct Berry gBerries[] =
         .sour = 40,
         .smoothness = 40,
     },
+
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] =
+    {
+        .name = _("PUMKIN"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .size = 160,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Pumkin,
+        .description2 = sBerryDescriptionPart2_Pumkin,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 40,
+        .smoothness = 65,
+    },
+
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] =
+    {
+        .name = _("DRASH"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .size = 135,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Drash,
+        .description2 = sBerryDescriptionPart2_Drash,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 40,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 65,
+    },
+
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] =
+    {
+        .name = _("EGGANT"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .size = 150,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Eggant,
+        .description2 = sBerryDescriptionPart2_Eggant,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 40,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 65,
+    },
+
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] =
+    {
+        .name = _("STRIB"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .size = 122,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Strib,
+        .description2 = sBerryDescriptionPart2_Strib,
+        .stageDuration = 18,
+        .spicy = 30,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 30,
+        .sour = 0,
+        .smoothness = 85,
+    },
+
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] =
+    {
+        .name = _("CHILAN"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .size = 272,
+        .maxYield = 2,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Chilan,
+        .description2 = sBerryDescriptionPart2_Chilan,
+        .stageDuration = 1,
+        .spicy = 30,
+        .dry = 0,
+        .sweet = 30,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 85,
+    },
+
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] =
+    {
+        .name = _("NUTPEA"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .size = 124,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Nutpea,
+        .description2 = sBerryDescriptionPart2_Nutpea,
+        .stageDuration = 18,
+        .spicy = 10,
+        .dry = 10,
+        .sweet = 10,
+        .bitter = 10,
+        .sour = 10,
+        .smoothness = 5,
+    },
+
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] =
+    {
+        .name = _("GINEMA"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .size = 35,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Ginema,
+        .description2 = sBerryDescriptionPart2_Ginema,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 30,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 30,
+        .smoothness = 70,
+    },
+
+    [BERRY_SLOT(ITEM_KUO_BERRY)] =
+    {
+        .name = _("KUO"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .size = 220,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Kuo,
+        .description2 = sBerryDescriptionPart2_Kuo,
+        .stageDuration = 18,
+        .spicy = 10,
+        .dry = 10,
+        .sweet = 10,
+        .bitter = 10,
+        .sour = 10,
+        .smoothness = 5,
+    },
+
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] =
+    {
+        .name = _("YAGO"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .size = 36,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Yago,
+        .description2 = sBerryDescriptionPart2_Yago,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 40,
+        .sour = 0,
+        .smoothness = 65,
+    },
+
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] =
+    {
+        .name = _("TOUGA"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .size = 50,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Touga,
+        .description2 = sBerryDescriptionPart2_Touga,
+        .stageDuration = 18,
+        .spicy = 40,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 65,
+    },
+
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] =
+    {
+        .name = _("NINIKU"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .size = 60,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Niniku,
+        .description2 = sBerryDescriptionPart2_Niniku,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 30,
+        .sweet = 0,
+        .bitter = 30,
+        .sour = 0,
+        .smoothness = 85,
+    },
+
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] =
+    {
+        .name = _("TOPO"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .size = 88,
+        .maxYield = 3,
+        .minYield = 1,
+        .description1 = sBerryDescriptionPart1_Topo,
+        .description2 = sBerryDescriptionPart2_Topo,
+        .stageDuration = 18,
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 30,
+        .bitter = 0,
+        .sour = 30,
+        .smoothness = 85,
+    },
 };
 
 const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
@@ -932,7 +1173,19 @@ const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
     [ITEM_APICOT_BERRY - FIRST_BERRY_INDEX] = {.difficulty = 180, .powder = 500},
     [ITEM_LANSAT_BERRY - FIRST_BERRY_INDEX] = {.difficulty = 200, .powder = 750},
     [ITEM_STARF_BERRY - FIRST_BERRY_INDEX]  = {.difficulty = 200, .powder = 750},
-    [ITEM_ENIGMA_BERRY - FIRST_BERRY_INDEX] = {.difficulty = 150, .powder = 200}
+    [ITEM_ENIGMA_BERRY - FIRST_BERRY_INDEX] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_KUO_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] = {.difficulty = 150, .powder = 200},
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] = {.difficulty = 150, .powder = 200},
 };
 
 const struct BerryTree gBlankBerryTree = {};
@@ -977,6 +1230,13 @@ bool32 IsEnigmaBerryValid(void)
     return TRUE;
 }
 
+// CHERI..ENIGMA and the e-Reader Berries (not the unused numbers between them)
+bool8 IsValidBerryType(u8 berry)
+{
+    return (berry >= ITEM_TO_BERRY(FIRST_BERRY_INDEX) && berry <= ITEM_TO_BERRY(LAST_BERRY_INDEX))
+        || (berry >= FIRST_EREADER_BERRY_TYPE && berry <= LAST_BERRY_TYPE);
+}
+
 const struct Berry *GetBerryInfo(u8 berry)
 {
     if (berry == ITEM_TO_BERRY(ITEM_ENIGMA_BERRY) && IsEnigmaBerryValid())
@@ -985,7 +1245,7 @@ const struct Berry *GetBerryInfo(u8 berry)
     }
     else
     {
-        if (berry == BERRY_NONE || berry > ITEM_TO_BERRY(LAST_BERRY_INDEX))
+        if (!IsValidBerryType(berry))
             berry = ITEM_TO_BERRY(FIRST_BERRY_INDEX);
         return &gBerries[berry - 1];
     }
@@ -1150,9 +1410,7 @@ u8 GetStageByBerryTreeId(u8 id)
 
 u8 ItemIdToBerryType(u16 item)
 {
-    u16 berry = item - FIRST_BERRY_INDEX;
-
-    if (berry > LAST_BERRY_INDEX - FIRST_BERRY_INDEX)
+    if (!IS_BERRY_ITEM(item))
         return ITEM_TO_BERRY(FIRST_BERRY_INDEX);
     else
         return ITEM_TO_BERRY(item);
@@ -1160,12 +1418,10 @@ u8 ItemIdToBerryType(u16 item)
 
 static u16 BerryTypeToItemId(u16 berry)
 {
-    u16 item = berry - 1;
-
-    if (item > LAST_BERRY_INDEX - FIRST_BERRY_INDEX)
+    if (berry > 0xFF || !IsValidBerryType(berry))
         return FIRST_BERRY_INDEX;
     else
-        return berry + FIRST_BERRY_INDEX - 1;
+        return BERRY_TO_ITEM(berry);
 }
 
 void GetBerryNameByBerryType(u8 berry, u8 *string)

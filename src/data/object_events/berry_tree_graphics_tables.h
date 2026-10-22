@@ -466,6 +466,19 @@ const struct SpriteFrameImage *const gBerryTreePicTablePointers[] = {
     [ITEM_LANSAT_BERRY - FIRST_BERRY_INDEX] = sPicTable_LansatBerryTree,
     [ITEM_STARF_BERRY - FIRST_BERRY_INDEX]  = sPicTable_CornnBerryTree,
     [ITEM_ENIGMA_BERRY - FIRST_BERRY_INDEX] = sPicTable_DurinBerryTree,
+    // Moemon Kai: the e-Reader Berries grow on the trees of Berries that look like them, as ENIGMA does
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] = sPicTable_WikiBerryTree,
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] = sPicTable_LeppaBerryTree,
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] = sPicTable_WepearBerryTree,
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] = sPicTable_IapapaBerryTree,
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] = sPicTable_LiechiBerryTree,
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] = sPicTable_AguavBerryTree,
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] = sPicTable_MagoBerryTree,
+    [BERRY_SLOT(ITEM_KUO_BERRY)] = sPicTable_RazzBerryTree,
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] = sPicTable_DurinBerryTree,
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] = sPicTable_PomegBerryTree,
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] = sPicTable_PechaBerryTree,
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] = sPicTable_SpelonBerryTree,
 };
 
 const u8 *const gBerryTreePaletteSlotTablePointers[] = {
@@ -512,6 +525,18 @@ const u8 *const gBerryTreePaletteSlotTablePointers[] = {
     [ITEM_LANSAT_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Lansat,
     [ITEM_STARF_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Cornn,
     [ITEM_ENIGMA_BERRY - FIRST_BERRY_INDEX] = gBerryTreePaletteSlotTable_Durin,
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] = gBerryTreePaletteSlotTable_Wiki,
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] = gBerryTreePaletteSlotTable_Leppa,
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] = gBerryTreePaletteSlotTable_Wepear,
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] = gBerryTreePaletteSlotTable_Iapapa,
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] = gBerryTreePaletteSlotTable_Liechi,
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] = gBerryTreePaletteSlotTable_Aguav,
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] = gBerryTreePaletteSlotTable_Mago,
+    [BERRY_SLOT(ITEM_KUO_BERRY)] = gBerryTreePaletteSlotTable_Razz,
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] = gBerryTreePaletteSlotTable_Durin,
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] = gBerryTreePaletteSlotTable_Pomeg,
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] = gBerryTreePaletteSlotTable_Pecha,
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] = gBerryTreePaletteSlotTable_Spelon,
 };
 
 const u8 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
@@ -562,4 +587,16 @@ const u8 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
     [ITEM_UNUSED_BERRY_1 - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
     [ITEM_UNUSED_BERRY_2 - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
     [ITEM_UNUSED_BERRY_3 - FIRST_BERRY_INDEX] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_KUO_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
 };

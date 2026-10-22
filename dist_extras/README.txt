@@ -360,6 +360,10 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                              ticket Latias & Latios, Lugia, XD Lugia,
                              Ho-Oh). The banner's line shows today's. A
                              shiny RED GYARADOS is always an SR.
+                             BERRIES too: everyday ones (N/U), SITRUS /
+                             LUM and the rare POKeBLOCK ones (R), the
+                             Mirage Island pinch Berries (SR), and
+                             LANSAT, STARF and the e-Reader Berries (SSR).
                  PICKUP      a new one every week: every UR is one of
                              its Moemon, every EX one of them shiny. Mew &
                              Mewtwo, Celebi, Jirachi, Dragonite, Tyranitar,
@@ -589,6 +593,15 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   effect of your own. Battle speed settings never change the odds. In co-op
   the game running the battle decides the throw once and everyone sees the
   same.
+* e-Reader BERRIES: the twelve Berries Japan got from e-Reader cards for
+  Ruby and Sapphire are here as their own items (BERRIES No.47-58), so you
+  can keep them all: PUMKIN (thaws a frozen Moemon), DRASH (cures poison),
+  EGGANT (cures infatuation), STRIB, CHILAN, NUTPEA, GINEMA (restores
+  lowered stats), KUO, YAGO (heals a burn), TOUGA (cures confusion), NINIKU
+  and TOPO. Their flavors, firmness and held effects are the cards'; the
+  ones with no effect are for POKeBLOCKS. Plant them, crush or blend them
+  like any Berry. They only come from the MoeGatcha (STANDARD, SSR), and an
+  unmodded game can't take them in a trade.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a

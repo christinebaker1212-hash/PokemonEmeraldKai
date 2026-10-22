@@ -360,6 +360,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &v);
         gSaveBlock1Ptr->weatherCycleStage = v;
     }
+    else if (strcmp(cmd, "berrytree") == 0)
+    {
+        // berrytree TREE BERRY STAGE - plant BERRY (berry number: 47+ are the e-Reader Berries) in tree TREE
+        void PlantBerryTree(u8 id, u8 berry, u8 stage, bool8 allowGrowth);
+        int tree = 0, berry = 1, stage = 5;
+        sscanf(arg, "%d %d %d", &tree, &berry, &stage);
+        PlantBerryTree(tree, berry, stage, FALSE);
+        printf("[test] berrytree %d = berry %d stage %d\n", tree, berry, stage);
+    }
     else if (strcmp(cmd, "gatchaday") == 0)
     {
         // gatchaday N - STANDARD shows day N's prizes (-1: today)

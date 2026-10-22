@@ -49,6 +49,8 @@ up and picks moves to forget at the same time), and ball entrance / recall effec
 drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-3, APPLY TO PARTY).
 Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
 mp_legacy_*.c, tools/moemon_legacy).
+Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / IsValidBerryType, never
+`item - FIRST_BERRY_INDEX`), the MoeGatcha daily STANDARD lineup and the PICKUP reroll vote.
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
