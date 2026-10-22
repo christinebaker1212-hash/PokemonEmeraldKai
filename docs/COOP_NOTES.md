@@ -567,3 +567,13 @@ standing frames (mp_avatar.c StandInInfo). Debug: `mp easychat TYPE PERSON` (10 
   difference is logged ("target level mismatch", checked by tests/tri_target_level). The vanilla level-up refresh
   only updated battlers 0 and 2; in a Triple battler 4 kept its old level in battle (now MpCoopUpdateBattleMon).
   `mp bhp` lists every battler's battle and party level.
+
+## Weather all at once, lines once
+battle_scripts_1.s BattleScript_DamagingWeatherContinues: `mpweathergroup 0` works out every battler's damage
+(MpWeatherDamageFor, the old weatherdamage); with two or more hit it prints gMpWeatherAllStringIds ("Everyone was
+buffeted by the sandstorm!" / "pelted by HAIL!"), then mode 1 sends every hit battler's hit flash and mode 2 every HP
+bar in one go (one waitstate each), then mode 3 walks the turn order for datahpupdate / tryfaintmon / checkteamslost
+like the vanilla loop. One hit (or none): the vanilla named loop. `mpweathermsg 0` skips a weather's "continues" line
+after its first time (the box is cleared instead), mode 2 the same for the "Everyone" line, mode 1 (weather ended)
+forgets; MP_Battle_ResetWeatherLines at battle start. Logs: "battle: weather hits N at once / (named)", "... line
+already shown". Only the master runs battle scripts, so co-op and PvP see the same thing. Test: coop_weather.

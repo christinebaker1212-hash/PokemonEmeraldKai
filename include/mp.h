@@ -983,6 +983,7 @@ void MP_Coop_StartResolveTask(u8 nBox, const u8 *boxSlot, const u16 (*before)[6]
 bool8 MP_Coop_ResolveTaskActive(void);
 u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max);
 u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
+void MP_Battle_ResetWeatherLines(void);   // battle_script_commands.c: a new battle shows weather lines again
 extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0

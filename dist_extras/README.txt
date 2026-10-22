@@ -590,6 +590,11 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   save played in another program since keeps only the normal BAG).
 * Gender ratios are the original games' again (Moemon Kai had made most
   Moemon female): Torchic is mostly male, Zigzagoon half and half...
+* Weather in battle: SANDSTORM and HAIL hit everyone at the same time with
+  one line ("Everyone was buffeted by the sandstorm!"); only one Pokemon
+  hit is named as before. "The sunlight is strong.", "Rain continues to
+  fall." and the like, and the "Everyone..." line, show the first time only
+  until that weather ends.
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).

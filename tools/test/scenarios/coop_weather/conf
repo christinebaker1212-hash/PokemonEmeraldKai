@@ -1,0 +1,13 @@
+# co-op 2-on-2 at NA-JP lag: ALICE's SANDSTORM hits all four at once ("Everyone was buffeted"), the next
+# turns quietly; the battle goes on to the win on both games
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("co-op: battle over, outcome 1")
+EXPECT_B=("co-op: battle over, outcome 1" "battle: weather hits 4 at once")

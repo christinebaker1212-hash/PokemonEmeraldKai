@@ -329,6 +329,8 @@ static void Cmd_finishturn(void);
 static void Cmd_trainerslideout(void);
 static void Cmd_mpstatgroup(void);
 static void Cmd_mpcoopresolve(void);
+static void Cmd_mpweathergroup(void);
+static void Cmd_mpweathermsg(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -583,6 +585,8 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_TRAINERSLIDEOUT]                 = Cmd_trainerslideout,                         //0xF8
     [B_SCR_OP_MPSTATGROUP]                     = Cmd_mpstatgroup,                             //0xF9
     [B_SCR_OP_MPCOOPRESOLVE]                   = Cmd_mpcoopresolve,                           //0xFA
+    [B_SCR_OP_MPWEATHERGROUP]                  = Cmd_mpweathergroup,                          //0xFB
+    [B_SCR_OP_MPWEATHERMSG]                    = Cmd_mpweathermsg,                            //0xFC
 };
 
 struct StatFractions
@@ -8123,55 +8127,63 @@ static void Cmd_setsandstorm(void)
     gBattlescriptCurrInstr++;
 }
 
-static void Cmd_weatherdamage(void)
+// Sandstorm / hail damage for one battler this turn (0: not hit)
+static s32 MpWeatherDamageFor(u8 battler)
 {
+    s32 damage = 0;
     if (WEATHER_HAS_EFFECT)
     {
         if (gBattleWeather & B_WEATHER_SANDSTORM)
         {
-            if (gBattleMons[gBattlerAttacker].types[0] != TYPE_ROCK
-                && gBattleMons[gBattlerAttacker].types[0] != TYPE_STEEL
-                && gBattleMons[gBattlerAttacker].types[0] != TYPE_GROUND
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_ROCK
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_STEEL
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_GROUND
-                && gBattleMons[gBattlerAttacker].ability != ABILITY_SAND_VEIL
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
+            if (gBattleMons[battler].types[0] != TYPE_ROCK
+                && gBattleMons[battler].types[0] != TYPE_STEEL
+                && gBattleMons[battler].types[0] != TYPE_GROUND
+                && gBattleMons[battler].types[1] != TYPE_ROCK
+                && gBattleMons[battler].types[1] != TYPE_STEEL
+                && gBattleMons[battler].types[1] != TYPE_GROUND
+                && gBattleMons[battler].ability != ABILITY_SAND_VEIL
+                && !(gStatuses3[battler] & STATUS3_UNDERGROUND)
+                && !(gStatuses3[battler] & STATUS3_UNDERWATER))
             {
-                gBattleMoveDamage = gBattleMons[gBattlerAttacker].maxHP / 16;
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = 1;
+                damage = gBattleMons[battler].maxHP / 16;
+                if (damage == 0)
+                    damage = 1;
             }
             else
             {
-                gBattleMoveDamage = 0;
+                damage = 0;
             }
         }
         if (gBattleWeather & B_WEATHER_HAIL)
         {
-            if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ICE)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
+            if (!IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
+                && !(gStatuses3[battler] & STATUS3_UNDERGROUND)
+                && !(gStatuses3[battler] & STATUS3_UNDERWATER))
             {
-                gBattleMoveDamage = gBattleMons[gBattlerAttacker].maxHP / 16;
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = 1;
+                damage = gBattleMons[battler].maxHP / 16;
+                if (damage == 0)
+                    damage = 1;
             }
             else
             {
-                gBattleMoveDamage = 0;
+                damage = 0;
             }
         }
     }
     else
     {
-        gBattleMoveDamage = 0;
+        damage = 0;
     }
 
-    if (gAbsentBattlerFlags & gBitTable[gBattlerAttacker])
-        gBattleMoveDamage = 0;
+    if (gAbsentBattlerFlags & gBitTable[battler])
+        damage = 0;
 
+    return damage;
+}
+
+static void Cmd_weatherdamage(void)
+{
+    gBattleMoveDamage = MpWeatherDamageFor(gBattlerAttacker);
     gBattlescriptCurrInstr++;
 }
 
@@ -11125,6 +11137,117 @@ static void Cmd_mpstatgroup(void)
         gBattleCommunication[MULTISTRING_CHOOSER] = down ? 4 : 5;
     }
     gMpStatGroupMask = 0;
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
+
+// Moemon Co-op: sandstorm / hail hit every Pokémon at once ("Everyone was buffeted by the
+// sandstorm!"), their hit flashes and HP bars together; with only one hit, the usual named line.
+static s32 sMpWeatherDamage[MAX_BATTLERS_COUNT];
+
+static void Cmd_mpweathergroup(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+    u8 i, battler, count = 0;
+
+    switch (mode)
+    {
+    case 0: // who is hit, and how hard
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            battler = gBattlerByTurnOrder[i];
+            sMpWeatherDamage[battler] = gBattleMons[battler].hp != 0 ? MpWeatherDamageFor(battler) : 0;
+            if (sMpWeatherDamage[battler] != 0)
+                count++;
+        }
+        MPNet_Log("battle: weather hits %d %s", count, count < 2 ? "(named)" : "at once");
+        if (count < 2)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        break;
+    case 1: // everyone hit flashes at once
+    case 2: // and their HP bars go down at once
+        if (gBattleControllerExecFlags)
+            return;
+        for (battler = 0; battler < gBattlersCount; battler++)
+        {
+            if (sMpWeatherDamage[battler] == 0)
+                continue;
+            gActiveBattler = battler;
+            if (mode == 1)
+            {
+                BtlController_EmitHitAnimation(B_COMM_TO_CONTROLLER);
+            }
+            else
+            {
+                BtlController_EmitHealthBarUpdate(B_COMM_TO_CONTROLLER, sMpWeatherDamage[battler] <= 10000 ? sMpWeatherDamage[battler] : 10000);
+                if (GetBattlerSide(battler) == B_SIDE_PLAYER)
+                    gBattleResults.playerMonWasDamaged = TRUE;
+            }
+            MarkBattlerForControllerExec(battler);
+        }
+        break;
+    case 3: // the gBattleCommunication'th battler in turn order: its HP data next (jump if not hit)
+        battler = gBattlerByTurnOrder[gBattleCommunication[0]];
+        if (sMpWeatherDamage[battler] == 0)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        gBattlerAttacker = battler;
+        gBattleMoveDamage = sMpWeatherDamage[battler];
+        break;
+    }
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
+
+// Moemon Co-op: a weather's "continues" line (The sunlight is strong. / The sandstorm rages. ...)
+// and "Everyone was buffeted..." are shown the first time only, until that weather ends or
+// another one starts
+static u8 sMpWeatherLineShown;   // MpWeatherKind() of the weather whose line was shown, 0: none
+static u8 sMpWeatherAllShown;    // ... whose "Everyone was ..." line was shown
+
+static u8 MpWeatherKind(void)
+{
+    if (gBattleWeather & B_WEATHER_RAIN)
+        return 1;
+    if (gBattleWeather & B_WEATHER_SANDSTORM)
+        return 2;
+    if (gBattleWeather & B_WEATHER_SUN)
+        return 3;
+    if (gBattleWeather & B_WEATHER_HAIL)
+        return 4;
+    return 0;
+}
+
+void MP_Battle_ResetWeatherLines(void)
+{
+    sMpWeatherLineShown = sMpWeatherAllShown = 0;
+}
+
+static void Cmd_mpweathermsg(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+
+    u8 *shown = (mode == 2) ? &sMpWeatherAllShown : &sMpWeatherLineShown;
+
+    if (mode == 1)
+    {
+        sMpWeatherLineShown = sMpWeatherAllShown = 0;
+    }
+    else if (MpWeatherKind() != 0 && *shown == MpWeatherKind())
+    {
+        MPNet_Log("battle: weather %d %s already shown", MpWeatherKind(), mode == 2 ? "everyone line" : "line");
+        gBattlescriptCurrInstr = jumpPtr;
+        return;
+    }
+    else
+    {
+        *shown = MpWeatherKind();
+    }
     gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }
 

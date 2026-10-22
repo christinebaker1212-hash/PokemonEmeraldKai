@@ -1267,6 +1267,24 @@
 	ptrvalue \ptr
 	.endm
 
+	@ Moemon Co-op: sandstorm / hail damage for everyone at once. Mode 0 works out who is hit
+	@ (fewer than two: jump to ptr, the one-by-one loop), 1 their hit flashes, 2 their HP bars,
+	@ 3 picks the gBattleCommunication'th battler in turn order for datahpupdate (jump if not hit)
+	.macro mpweathergroup mode:req, ptr=NULL
+	.byte B_SCR_OP_MPWEATHERGROUP
+	.byte \mode
+	ptrvalue \ptr
+	.endm
+
+	@ Moemon Co-op: mode 0 jumps to ptr when this weather's "continues" line was shown already
+	@ (and remembers it otherwise), mode 2 the same for its "Everyone was ..." line; mode 1
+	@ forgets both (the weather ended)
+	.macro mpweathermsg mode:req, ptr=NULL
+	.byte B_SCR_OP_MPWEATHERMSG
+	.byte \mode
+	ptrvalue \ptr
+	.endm
+
 /* various command changed to more readable macros*/
 	.macro cancelmultiturnmoves battler:req
 	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES
