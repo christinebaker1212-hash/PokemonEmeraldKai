@@ -1,6 +1,7 @@
 // Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
@@ -117,6 +118,10 @@ static u8 AsciiCharToGame(char c)
 
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+// The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
+static bool8 sHostClockHeard;
+static s64 sHostClockOffset;      // the host's local time minus our time(NULL), in seconds
+static u16 sClockResendTimer;
 static u8 sRoomAnimSpeed;
 static bool8 OwnPadding(void);
 static u8 OwnAnimSpeed(void);
@@ -1074,6 +1079,20 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%", from + 1, sRoomPadding ? "on" : "off", sRoomAnimSpeed);
         }
     }
+    else if (data[0] == MPR_CLOCK)
+    {
+        if (len >= 9 && !sLobby.creator)
+        {
+            s64 hostLocal = 0;
+            u8 k;
+            for (k = 0; k < 8; k++)
+                hostLocal |= (s64)data[1 + k] << (8 * k);
+            if (!sHostClockHeard || llabs((long long)(hostLocal - (s64)time(NULL) - sHostClockOffset)) > 2)
+                MPNet_Log("clock: following the host's clock (UTC%+lld min)", (long long)((hostLocal - (s64)time(NULL) + 30) / 60));
+            sHostClockOffset = hostLocal - (s64)time(NULL);
+            sHostClockHeard = TRUE;
+        }
+    }
     else if (data[0] == MPR_PING)
         MP_Ping_OnRelay(from, data, len);
     else if (data[0] == MPR_PHOTO)
@@ -1117,6 +1136,43 @@ const char *MP_Lobby_RoomName(void) { return sLobby.room; }
 // ---------------------------------------------------------------------------
 // Welcome note: the player who made the room sends it to each friend who joins
 
+// This PC's local wall clock, as seconds as if it were UTC (so gmtime() gives the local
+// date and time). Worked out field by field: Windows has no tm_gmtoff.
+s64 MP_LocalClockAsUtc(void)
+{
+    time_t now = time(NULL);
+    struct tm lt = *localtime(&now), gt = *gmtime(&now);
+    s64 days = lt.tm_yday - gt.tm_yday;
+    if (lt.tm_year != gt.tm_year)
+        days = lt.tm_year > gt.tm_year ? 1 : -1;   // across New Year
+    return (s64)now + days * 86400 + (lt.tm_hour - gt.tm_hour) * 3600 + (lt.tm_min - gt.tm_min) * 60 + (lt.tm_sec - gt.tm_sec);
+}
+
+// The room's host tells everyone its clock (when they join, and now and then)
+static void SendClock(u8 to)
+{
+    u8 msg[9], k;
+    s64 local = MP_LocalClockAsUtc();
+    msg[0] = MPR_CLOCK;
+    for (k = 0; k < 8; k++)
+        msg[1 + k] = (u8)(local >> (8 * k));
+    MP_SendRelay(to, msg, sizeof(msg));
+}
+
+// Online (in a room we didn't make), the game clock is the host's
+bool8 MP_HostClockOffset(s64 *offset)
+{
+    if (sLobby.creator || !sHostClockHeard)
+        return FALSE;
+    if (sLobby.state != MP_LOBBY_IN_ROOM && sLobby.state != MP_LOBBY_RECONNECT_WAIT)
+    {
+        sHostClockHeard = FALSE;   // offline: our own clock again
+        return FALSE;
+    }
+    *offset = sHostClockOffset;
+    return TRUE;
+}
+
 static void SendWelcome(u8 id)
 {
     u8 buf[2 + sizeof(gMpConfig.welcome)];
@@ -1126,6 +1182,7 @@ static void SendWelcome(u8 id)
         // the room's settings first (the host decides them for everyone)
         u8 rules[3] = {MPR_RULES, OwnPadding(), OwnAnimSpeed()};
         MP_SendRelay(id, rules, 3);
+        SendClock(id);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
         return;
@@ -1298,6 +1355,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.request = req;
     sLobby.creator = (req == REQ_CREATE);
     sRoomRulesHeard = FALSE;
+    sHostClockHeard = FALSE;
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
     {
@@ -1586,6 +1644,12 @@ void MP_FrameUpdate(void)
     }
 
     MP_Battle_FrameUpdate();
+    // The host's clock again every few minutes (a PC clock can be changed or change for summer time)
+    if (sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM && gMpLocalId >= 0 && ++sClockResendTimer >= 60 * 60 * 5)
+    {
+        sClockResendTimer = 0;
+        SendClock(0xFF);
+    }
     if (gMpLocalId >= 0)
     {
         MP_Coop_Update();

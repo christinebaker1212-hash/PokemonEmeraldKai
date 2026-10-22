@@ -1,0 +1,8 @@
+pressuntil A field 5000
+mp clock
+waitfor online 6000
+waitlog 3000 clock: following the host's clock
+wait 540
+mp clock
+wait 60
+quit

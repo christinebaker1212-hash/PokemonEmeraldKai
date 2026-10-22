@@ -1,0 +1,6 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 600
+mp clock
+wait 60
+quit

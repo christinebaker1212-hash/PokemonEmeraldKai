@@ -272,6 +272,8 @@ void MP_Bag_SetPointers(struct BagPocket *pockets);   // mp_bag.c: the bigger po
 void MP_Bag_SyncToSaveBlock(void);
 void MP_Bag_WriteSidecar(void);
 void MP_Bag_LoadFromSave(void);
+bool8 MP_HostClockOffset(s64 *offset);   // mp_main.c: online, the game clock is the host's (seconds to add to time())
+s64 MP_LocalClockAsUtc(void);            // this PC's local time, as seconds as if it were UTC
 // The BAG's sort orders and "new" marks (mp_bag.c)
 enum { MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAGSORT_NEWEST, MP_BAGSORT_MANUAL, MP_BAGSORT_COUNT };
 u8 MP_Bag_SortMode(u8 pocket);
@@ -876,6 +878,7 @@ enum {
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
     MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed (mp_main.c)
+    MPR_CLOCK = 96,            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

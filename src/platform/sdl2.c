@@ -748,7 +748,19 @@ void Platform_SetStatus(struct SiiRtcInfo *rtc)
 static void UpdateInternalClock(void)
 {
     time_t rawTime = time(NULL);
-    struct tm *time = localtime(&rawTime);
+    struct tm *time;
+    s64 hostOffset;
+
+    // Moemon Co-op: online, the game's clock is the room host's PC clock; offline our own
+    if (MP_HostClockOffset(&hostOffset))
+    {
+        time_t hostLocal = (time_t)((s64)rawTime + hostOffset);
+        time = gmtime(&hostLocal);
+    }
+    else
+    {
+        time = localtime(&rawTime);
+    }
 
     internalClock.year = BinToBcd(time->tm_year - 100);
     internalClock.month = BinToBcd(time->tm_mon + 1);

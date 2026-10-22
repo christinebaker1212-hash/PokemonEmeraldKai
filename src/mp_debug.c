@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "platform.h"
+#include "siirtc.h"
 #include "easy_chat.h"
 #include "field_screen_effect.h"
 #include "field_player_avatar.h"
@@ -923,6 +925,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < MAX_SPRITES; i++)
             if (gSprites[i].inUse)
                 gSprites[i].invisible = TRUE;
+    }
+    else if (strcmp(cmd, "clock") == 0)
+    {
+        // clock - the game clock (online: the host's PC clock)
+        struct SiiRtcInfo r;
+        s64 off = 0;
+        Platform_GetDateTime(&r);
+        printf("[test] clock 20%02x-%02x-%02x %02x:%02x (%s)\n", r.year, r.month, r.day, r.hour, r.minute,
+               MP_HostClockOffset(&off) ? "the host's" : "ours");
     }
     else if (strcmp(cmd, "where") == 0)
     {
