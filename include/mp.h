@@ -272,6 +272,15 @@ void MP_Bag_SetPointers(struct BagPocket *pockets);   // mp_bag.c: the bigger po
 void MP_Bag_SyncToSaveBlock(void);
 void MP_Bag_WriteSidecar(void);
 void MP_Bag_LoadFromSave(void);
+// The BAG's sort orders and "new" marks (mp_bag.c)
+enum { MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAGSORT_NEWEST, MP_BAGSORT_MANUAL, MP_BAGSORT_COUNT };
+u8 MP_Bag_SortMode(u8 pocket);
+void MP_Bag_SetSortMode(u8 pocket, u8 mode);
+void MP_Bag_Sort(u8 pocket);
+bool8 MP_Bag_IsNew(u16 item);
+void MP_Bag_ClearNew(u16 item);
+void MP_Bag_NoteAdded(u16 item);
+void MP_Bag_ResetMarks(void);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);

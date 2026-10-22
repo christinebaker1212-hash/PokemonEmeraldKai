@@ -105,6 +105,7 @@ enum {
     WIN_TMHM_INFO_ICONS,
     WIN_TMHM_INFO,
     WIN_MESSAGE, // Identical to ITEMWIN_MESSAGE. Unused?
+    WIN_SORT_HINT, // Moemon Co-op: "START SORT" and the pocket's sort order
 };
 
 // Item list ID for toSwapPos to indicate an item is not currently being swapped
@@ -145,6 +146,9 @@ static bool8 IsWallysBag(void);
 static void Task_WallyTutorialBagMenu(u8);
 static void Task_BagMenu_HandleInput(u8);
 static void GetItemNameFromPocket(u8 *, u16);
+static void GetItemNameFromPocketMarked(u8 *, u16);
+static void DrawSortHint(u8 pocketId);
+static void OpenSortMenu(u8 taskId);
 static void PrintItemDescription(int);
 static void BagMenu_PrintCursorAtPos(u8, u8);
 static void BagMenu_Print(u8, u8, const u8 *, u8, u8, u8, u8, u8, u8);
@@ -463,6 +467,15 @@ static const struct WindowTemplate sDefaultBagWindows[] =
         .height = 4,
         .paletteNum = 15,
         .baseBlock = 0x1B1,
+    },
+    [WIN_SORT_HINT] = {
+        .bg = 0,
+        .tilemapLeft = 0,
+        .tilemapTop = 4,
+        .width = 5,
+        .height = 4,
+        .paletteNum = 1,
+        .baseBlock = 0x280,   // past the context menus' windows (0x21D-0x270)
     },
     DUMMY_WIN_TEMPLATE,
 };
@@ -885,7 +898,7 @@ static void LoadBagItemListBuffers(u8 pocketId)
     {
         for (i = 0; i < gBagMenu->numItemStacks[pocketId] - 1; i++)
         {
-            GetItemNameFromPocket(sListBuffer2->name[i], pocket->itemSlots[i].itemId);
+            GetItemNameFromPocketMarked(sListBuffer2->name[i], pocket->itemSlots[i].itemId);
             subBuffer = sListBuffer1->subBuffers;
             subBuffer[i].name = sListBuffer2->name[i];
             subBuffer[i].id = i;
@@ -899,16 +912,67 @@ static void LoadBagItemListBuffers(u8 pocketId)
     {
         for (i = 0; i < gBagMenu->numItemStacks[pocketId]; i++)
         {
-            GetItemNameFromPocket(sListBuffer2->name[i], pocket->itemSlots[i].itemId);
+            GetItemNameFromPocketMarked(sListBuffer2->name[i], pocket->itemSlots[i].itemId);
             subBuffer = sListBuffer1->subBuffers;
             subBuffer[i].name = sListBuffer2->name[i];
             subBuffer[i].id = i;
         }
     }
+    DrawSortHint(pocketId);
     gMultiuseListMenuTemplate = sItemListMenu;
     gMultiuseListMenuTemplate.totalItems = gBagMenu->numItemStacks[pocketId];
     gMultiuseListMenuTemplate.items = sListBuffer1->subBuffers;
     gMultiuseListMenuTemplate.maxShowed = gBagMenu->numShownItems[pocketId];
+}
+
+// Moemon Co-op: the BAG's sort orders (START) and the "!" on new items (mp_bag.c)
+static bool8 sBagListNeedsRedraw;
+static const u8 sText_SortType[] = _("TYPE");
+static const u8 sText_SortId[] = _("ID");
+static const u8 sText_SortAbc[] = _("ABC");
+static const u8 sText_SortOldest[] = _("OLDEST");
+static const u8 sText_SortNewest[] = _("NEWEST");
+static const u8 sText_SortManual[] = _("MANUAL");
+static const struct MenuAction sSortMenuActions[MP_BAGSORT_COUNT] = {
+    [MP_BAGSORT_TYPE]   = {sText_SortType},
+    [MP_BAGSORT_ID]     = {sText_SortId},
+    [MP_BAGSORT_ABC]    = {sText_SortAbc},
+    [MP_BAGSORT_OLDEST] = {sText_SortOldest},
+    [MP_BAGSORT_NEWEST] = {sText_SortNewest},
+    [MP_BAGSORT_MANUAL] = {sText_SortManual},
+};
+static const u8 sSortMenuOrder[MP_BAGSORT_COUNT] = {
+    MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAGSORT_NEWEST, MP_BAGSORT_MANUAL,
+};
+static const u8 sText_SortPocketBy[] = _("Sort this pocket by...");
+static const u8 sText_StartSort[] = _("{START_BUTTON}");
+static const u8 sText_Sort[] = _("SORT:");
+
+static void DrawSortHint(u8 pocketId)
+{
+    if (gBagMenu == NULL || IsWallysBag())
+        return;
+    FillWindowPixelBuffer(WIN_SORT_HINT, PIXEL_FILL(0));
+    // {START} / SORT / the order, three short lines left of the bag
+    BagMenu_Print(WIN_SORT_HINT, FONT_SMALL, sText_StartSort, 1, 0, 0, 0, TEXT_SKIP_DRAW, COLORID_POCKET_NAME);
+    BagMenu_Print(WIN_SORT_HINT, FONT_SMALL, sText_Sort, 1, 10, 0, 0, TEXT_SKIP_DRAW, COLORID_POCKET_NAME);
+    BagMenu_Print(WIN_SORT_HINT, FONT_SMALL, sSortMenuActions[MP_Bag_SortMode(pocketId)].text, 1, 21, 0, 0, TEXT_SKIP_DRAW, COLORID_POCKET_NAME);
+    PutWindowTilemap(WIN_SORT_HINT);
+    CopyWindowToVram(WIN_SORT_HINT, COPYWIN_FULL);
+}
+
+// The item's name in the list, with a "!" when it's new
+static void GetItemNameFromPocketMarked(u8 *dest, u16 itemId)
+{
+    if (MP_Bag_IsNew(itemId))
+    {
+        dest[0] = CHAR_EXCL_MARK;
+        GetItemNameFromPocket(dest + 1, itemId);
+    }
+    else
+    {
+        GetItemNameFromPocket(dest, itemId);
+    }
 }
 
 static void GetItemNameFromPocket(u8 *dest, u16 itemId)
@@ -950,6 +1014,19 @@ static void BagMenu_MoveCursorCallback(s32 itemIndex, bool8 onInit, struct ListM
     }
     if (gBagMenu->toSwapPos == NOT_SWAPPING)
     {
+        // Moemon Co-op: a new item's "!" goes once the cursor is on it
+        if (itemIndex != LIST_CANCEL && itemIndex >= 0 && itemIndex < MAX_POCKET_ITEMS)
+        {
+            u16 item = BagGetItemIdByPocketPosition(gBagPosition.pocket + 1, itemIndex);
+            if (MP_Bag_IsNew(item))
+            {
+                u8 *name = sListBuffer2->name[itemIndex];
+                MP_Bag_ClearNew(item);
+                if (name[0] == CHAR_EXCL_MARK)
+                    memmove(name, name + 1, StringLength(name + 1) + 1);
+                sBagListNeedsRedraw = TRUE;
+            }
+        }
         RemoveBagItemIconSprite(gBagMenu->itemIconSlot ^ 1);
         if (itemIndex != LIST_CANCEL)
            AddBagItemIconSprite(BagGetItemIdByPocketPosition(gBagPosition.pocket + 1, itemIndex), gBagMenu->itemIconSlot);
@@ -1145,16 +1222,10 @@ void UpdatePocketItemList(u8 pocketId)
 {
     u16 i;
     struct BagPocket *pocket = &gBagPockets[pocketId];
-    switch (pocketId)
-    {
-    case TMHM_POCKET:
-    case BERRIES_POCKET:
-        SortBerriesOrTMHMs(pocket);
-        break;
-    default:
-        CompactItemsInBagPocket(pocket);
-        break;
-    }
+    // Moemon Co-op: then the pocket's sort order (START in the BAG; TMs and Berries
+    // are by number unless the player picks another)
+    CompactItemsInBagPocket(pocket);
+    MP_Bag_Sort(pocketId);
 
     gBagMenu->numItemStacks[pocketId] = 0;
 
@@ -1297,11 +1368,23 @@ static void Task_BagMenu_HandleInput(u8 taskId)
                 }
                 return;
             }
+            // Moemon Co-op: START picks the pocket's sort order
+            if (JOY_NEW(START_BUTTON) && !IsWallysBag())
+            {
+                PlaySE(SE_SELECT);
+                OpenSortMenu(taskId);
+                return;
+            }
             break;
         }
 
         listPosition = ListMenu_ProcessInput(tListTaskId);
         ListMenuGetScrollAndRow(tListTaskId, scrollPos, cursorPos);
+        if (sBagListNeedsRedraw)
+        {
+            sBagListNeedsRedraw = FALSE;
+            RedrawListMenu(tListTaskId);
+        }
         switch (listPosition)
         {
         case LIST_NOTHING_CHOSEN:
@@ -1479,8 +1562,9 @@ static bool8 CanSwapItems(void)
      || gBagPosition.location == ITEMMENULOCATION_BATTLE)
     {
         // TMHMs and berries are numbered, and so may not be swapped
-        if (gBagPosition.pocket != TMHM_POCKET
-         && gBagPosition.pocket != BERRIES_POCKET)
+        // (Moemon Co-op: unless the pocket's sort order is MANUAL)
+        if ((gBagPosition.pocket != TMHM_POCKET && gBagPosition.pocket != BERRIES_POCKET)
+         || MP_Bag_SortMode(gBagPosition.pocket) == MP_BAGSORT_MANUAL)
             return TRUE;
     }
     return FALSE;
@@ -1556,6 +1640,7 @@ static void DoItemSwap(u8 taskId)
     else
     {
         MoveItemSlotInList(gBagPockets[gBagPosition.pocket].itemSlots, tListPosition, realPos);
+        MP_Bag_SetSortMode(gBagPosition.pocket, MP_BAGSORT_MANUAL);   // Moemon Co-op: the order you made stays
         gBagMenu->toSwapPos = NOT_SWAPPING;
         DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);
         if (tListPosition < realPos)
@@ -2074,6 +2159,104 @@ static void ItemMenu_CheckTag(u8 taskId)
 {
     gBagMenu->newScreenCallback = DoBerryTagScreen;
     Task_FadeAndCloseBagMenu(taskId);
+}
+
+// Moemon Co-op: the sort order menu (START)
+static void Task_BagSortMenu(u8 taskId);
+
+static void OpenSortMenu(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u8 win;
+    BagDestroyPocketScrollArrowPair();
+    BagMenu_PrintCursor(tListTaskId, COLORID_GRAY_CURSOR);
+    FillWindowPixelBuffer(WIN_DESCRIPTION, PIXEL_FILL(0));
+    BagMenu_Print(WIN_DESCRIPTION, FONT_NORMAL, sText_SortPocketBy, 3, 1, 0, 0, 0, COLORID_NORMAL);
+    win = BagMenu_AddWindow(ITEMWIN_2x3);
+    PrintMenuActionGrid(win, FONT_NARROW, 8, 1, 56, 2, 3, sSortMenuActions, sSortMenuOrder);
+    InitMenuActionGrid(win, 56, 2, 3, MP_Bag_SortMode(gBagPosition.pocket));
+    ScheduleBgCopyTilemapToVram(0);
+    gTasks[taskId].func = Task_BagSortMenu;
+}
+
+static void CloseSortMenu(u8 taskId, bool8 sorted)
+{
+    s16 *data = gTasks[taskId].data;
+    u16 *scrollPos = &gBagPosition.scrollPosition[gBagPosition.pocket];
+    u16 *cursorPos = &gBagPosition.cursorPosition[gBagPosition.pocket];
+
+    BagMenu_RemoveWindow(ITEMWIN_2x3);
+    if (sorted)
+    {
+        // The pocket in its new order, from the top
+        DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);
+        *scrollPos = *cursorPos = 0;
+        UpdatePocketItemList(gBagPosition.pocket);
+        LoadBagItemListBuffers(gBagPosition.pocket);
+        tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, *scrollPos, *cursorPos);
+    }
+    else
+    {
+        BagMenu_PrintCursor(tListTaskId, COLORID_NORMAL);
+    }
+    PrintItemDescription(*scrollPos + *cursorPos == gBagMenu->numItemStacks[gBagPosition.pocket] - 1 && !gBagMenu->hideCloseBagText
+                         ? LIST_CANCEL : *scrollPos + *cursorPos);
+    ScheduleBgCopyTilemapToVram(0);
+    ScheduleBgCopyTilemapToVram(1);
+    CreatePocketScrollArrowPair();
+    gTasks[taskId].func = Task_BagMenu_HandleInput;
+}
+
+static void Task_BagSortMenu(u8 taskId)
+{
+    s8 cursorPos;
+    if (MenuHelpers_ShouldWaitForLinkRecv() == TRUE)
+        return;
+    cursorPos = Menu_GetCursorPos();
+    if (JOY_NEW(DPAD_UP))
+    {
+        if (cursorPos >= 2)
+        {
+            PlaySE(SE_SELECT);
+            ChangeMenuGridCursorPosition(MENU_CURSOR_DELTA_NONE, MENU_CURSOR_DELTA_UP);
+        }
+    }
+    else if (JOY_NEW(DPAD_DOWN))
+    {
+        if (cursorPos < MP_BAGSORT_COUNT - 2)
+        {
+            PlaySE(SE_SELECT);
+            ChangeMenuGridCursorPosition(MENU_CURSOR_DELTA_NONE, MENU_CURSOR_DELTA_DOWN);
+        }
+    }
+    else if (JOY_NEW(DPAD_LEFT))
+    {
+        if (cursorPos & 1)
+        {
+            PlaySE(SE_SELECT);
+            ChangeMenuGridCursorPosition(MENU_CURSOR_DELTA_LEFT, MENU_CURSOR_DELTA_NONE);
+        }
+    }
+    else if (JOY_NEW(DPAD_RIGHT))
+    {
+        if (!(cursorPos & 1))
+        {
+            PlaySE(SE_SELECT);
+            ChangeMenuGridCursorPosition(MENU_CURSOR_DELTA_RIGHT, MENU_CURSOR_DELTA_NONE);
+        }
+    }
+    else if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        MP_Bag_SetSortMode(gBagPosition.pocket, sSortMenuOrder[cursorPos]);
+        MPNet_Log("bag: pocket %d sorted by %d", gBagPosition.pocket, sSortMenuOrder[cursorPos]);
+        CloseSortMenu(taskId, TRUE);
+    }
+    else if (JOY_NEW(B_BUTTON | START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        CloseSortMenu(taskId, FALSE);
+    }
 }
 
 static void ItemMenu_Cancel(u8 taskId)

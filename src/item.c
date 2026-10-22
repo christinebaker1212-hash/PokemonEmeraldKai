@@ -245,6 +245,7 @@ bool8 AddBagItem(u16 itemId, u16 count)
         u16 slotCapacity;
         u16 ownedCount;
         u8 pocket = GetItemPocket(itemId) - 1;
+        bool8 hadIt = CheckBagHasItem(itemId, 1);   // Moemon Co-op: a new item gets its "!" (mp_bag.c)
 
         itemPocket = &gBagPockets[pocket];
         newItems = AllocZeroed(itemPocket->capacity * sizeof(struct ItemSlot));
@@ -329,6 +330,8 @@ bool8 AddBagItem(u16 itemId, u16 count)
         }
         memcpy(itemPocket->itemSlots, newItems, itemPocket->capacity * sizeof(struct ItemSlot));
         Free(newItems);
+        if (!hadIt)
+            MP_Bag_NoteAdded(itemId);
         return TRUE;
     }
 }
@@ -651,6 +654,8 @@ void MoveItemSlotInList(struct ItemSlot *itemSlots, u32 from, u32 to)
 void ClearBag(void)
 {
     u16 i;
+
+    MP_Bag_ResetMarks();   // Moemon Co-op
 
     for (i = 0; i < POCKETS_COUNT; i++)
     {

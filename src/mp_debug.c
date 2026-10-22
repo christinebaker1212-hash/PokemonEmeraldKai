@@ -817,6 +817,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern u8 gMpWildDoublePercent;
         gMpWildDoublePercent = arg[0] ? atoi(arg) : 100;
     }
+    else if (strcmp(cmd, "bagorder") == 0)
+    {
+        // bagorder POCKET - the item numbers in a pocket's order (a * after a new one)
+        int p = 0;
+        u16 i;
+        sscanf(arg, "%d", &p);
+        if (p >= 0 && p < POCKETS_COUNT)
+        {
+            printf("[test] bagorder %d:", p);
+            for (i = 0; i < gBagPockets[p].capacity && gBagPockets[p].itemSlots[i].itemId != ITEM_NONE; i++)
+                printf(" %d%s", gBagPockets[p].itemSlots[i].itemId, MP_Bag_IsNew(gBagPockets[p].itemSlots[i].itemId) ? "*" : "");
+            printf("\n");
+        }
+    }
     else if (strcmp(cmd, "bag") == 0)
     {
         // bag - how many kinds of item each pocket holds, and the biggest stack

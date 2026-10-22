@@ -602,6 +602,13 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   ones with no effect are for POKeBLOCKS. Plant them, crush or blend them
   like any Berry. They only come from the MoeGatcha (STANDARD, SSR), and an
   unmodded game can't take them in a trade.
+* Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
+  Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
+  OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items
+  with SELECT; moving one switches the pocket to MANUAL). Each pocket keeps
+  its order, shown under {START} at the left. TMs and Berries are by number
+  until you pick something else. Items you just got have a "!" before their
+  name until the cursor lands on them.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a
