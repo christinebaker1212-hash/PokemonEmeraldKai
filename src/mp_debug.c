@@ -18,6 +18,7 @@
 #include "pokedex.h"
 #include "mp.h"
 #include "battle.h"
+#include "battle_anim.h"
 #include "save.h"
 #include "palette.h"
 #include "constants/characters.h"
@@ -386,6 +387,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         SetCoins(n);
     }
+    else if (strcmp(cmd, "gendersample") == 0)
+    {
+        // gendersample SPECIES - make 1000 wild-style Pokemon of SPECIES and count the genders
+        static struct Pokemon mon;
+        int species = atoi(arg), i, f = 0, m = 0, n = 0;
+        for (i = 0; i < 1000; i++)
+        {
+            CreateMon(&mon, species, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+            switch (GetMonGender(&mon))
+            {
+            case MON_FEMALE: f++; break;
+            case MON_MALE: m++; break;
+            default: n++; break;
+            }
+        }
+        printf("[test] gendersample %d: female %d male %d none %d (ratio %d)\n", species, f, m, n, gSpeciesInfo[species].genderRatio);
+    }
+    else if (strcmp(cmd, "challenge") == 0)
+    {
+        // challenge N - the frontier / tent challenge status (3 = won), e.g. before walking into a tent lobby
+        gSaveBlock2Ptr->frontier.challengeStatus = atoi(arg);
+        printf("[test] challenge status %d\n", gSaveBlock2Ptr->frontier.challengeStatus);
+    }
     else if (strcmp(cmd, "setflag") == 0)
     {
         // setflag N - an event flag (include/constants/flags.h)
@@ -557,8 +581,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "bhp") == 0)
     {
         int b;
-        for (b = 0; b < 4; b++)
-            printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
+        for (b = 0; b < gBattlersCount; b++)
+            printf("[test] battler %d hp %d/%d species %d level %d (party %d)\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP,
+                   gBattleMons[b].species, gBattleMons[b].level,
+                   GetMonData(GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]] : &gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_LEVEL));
     }
     else if (strcmp(cmd, "register") == 0)
     {
@@ -876,12 +902,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "giveforeign") == 0)
     {
-        // giveforeign SPECIES - a Pokemon made in another player's game (another OT ID), given
-        // the way a co-op catch is (GiveMonToPlayer)
+        // giveforeign SPECIES[:LEVEL[:lead]] - a Pokemon made in another player's game (another OT
+        // ID), given the way a co-op catch is (GiveMonToPlayer); ":lead" swaps it into slot 0
         static struct Pokemon mon;
-        int species = atoi(arg);
-        CreateMon(&mon, species > 0 ? species : 288, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, 0x9ABC1234);
+        int species = 0, level = 5;
+        char lead[8] = "";
+        sscanf(arg, "%d:%d:%7s", &species, &level, lead);
+        CreateMon(&mon, species > 0 ? species : 288, level > 0 && level <= 100 ? level : 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, 0x9ABC1234);
         GiveMonToPlayer(&mon);
+        if (strcmp(lead, "lead") == 0 && CalculatePlayerPartyCount() > 1)
+        {
+            struct Pokemon tmp = gPlayerParty[0];
+            gPlayerParty[0] = gPlayerParty[CalculatePlayerPartyCount() - 1];
+            gPlayerParty[CalculatePlayerPartyCount() - 1] = tmp;
+        }
         printf("[test] giveforeign: given, bad egg %d\n", (int)MP_IsBoxMonBadEgg(&gPlayerParty[CalculatePlayerPartyCount() - 1].box));
     }
     else if (strcmp(cmd, "heap") == 0)

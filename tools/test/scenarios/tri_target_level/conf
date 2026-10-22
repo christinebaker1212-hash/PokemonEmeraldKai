@@ -1,0 +1,18 @@
+# Roxanne co-op Triple at NA-JP lag: each player opens the target window (Lv must match the cards; a mismatch is logged)
+MODE=3
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+WARP_C=11,3,3,3
+TMO=900
+DELAY=250
+JIT=80
+FPS=60
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+UNEXPECT_A=("target level mismatch")
+UNEXPECT_B=("target level mismatch")
+UNEXPECT_C=("target level mismatch")

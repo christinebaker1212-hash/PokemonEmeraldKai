@@ -587,8 +587,12 @@ static void MpShowTargetInfo(u8 battler)
     }
     else
     {
+        // the same level as its card / healthbox (both from the Pokémon itself), so the two never differ
         MpPutAscii("Lv", B_WIN_PP);
-        snprintf(buf, sizeof(buf), "%3d", gBattleMons[battler].level);
+        snprintf(buf, sizeof(buf), "%3d", GetMonData(mon, MON_DATA_LEVEL));
+        if (GetMonData(mon, MON_DATA_LEVEL) != gBattleMons[battler].level)
+            MPNet_Log("target level mismatch: battler %d party slot %d card %d battle %d", battler,
+                      gBattlerPartyIndexes[battler], GetMonData(mon, MON_DATA_LEVEL), gBattleMons[battler].level);
     }
     MpPutAscii(buf, B_WIN_PP_REMAINING);
     GetMonData(mon, MON_DATA_NICKNAME, name);

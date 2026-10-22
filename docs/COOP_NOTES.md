@@ -552,3 +552,18 @@ player-gfx label (it swaps every VAR_OBJ_GFX_ID_n holding the player's own Brend
 frames in the look (field moves, fishing, watering, decorating; CREATE builds walk / run / Mach Bike only) keep the
 standing frames (mp_avatar.c StandInInfo). Debug: `mp easychat TYPE PERSON` (10 0 = Gabby and Ty's screen),
 `mp avatarstate N` (0-7).
+
+## Small adjustments (traded OT, tents, genders, target level)
+- Traded Moemon act as if the player were their OT (MP_OtActsAsOwn, mp_gatcha.c): battle_util.c IsMonDisobedient
+  treats them as obedient and battle_script_commands.c gives no traded EXP boost (solo and co-op paths). MoeGatcha
+  prizes (GACHA_OT_ID) keep obeying by badges and keep the boost. Debug: `mp giveforeign SPECIES:LEVEL:lead`.
+- Battle Tents: battle_tent.c Give*TentPrize calls MP_BattleTentWon (3 MOEGATCHA TICKETS) when the prize is handed
+  over; the three lobby scripts `call EventScript_MpTentGatchaTickets` (obtain_item.inc) for the message. A full BAG
+  keeps both for later. Debug: `mp challenge 3` then walk into a tent lobby.
+- Gender ratios: src/data/pokemon/species_info.h has pret/pokeemerald's genderRatio again (313 species Kai had moved
+  to 75% / 87.5% female). Protocol 30 so old and new games never battle together (genders are simulated on every
+  game). Debug: `mp gendersample SPECIES` (1000 Pokemon, gender counts).
+- Triple target window: the foe's Lv comes from the same Pokemon data as its card (it read gBattleMons), and a
+  difference is logged ("target level mismatch", checked by tests/tri_target_level). The vanilla level-up refresh
+  only updated battlers 0 and 2; in a Triple battler 4 kept its old level in battle (now MpCoopUpdateBattleMon).
+  `mp bhp` lists every battler's battle and party level.

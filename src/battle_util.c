@@ -4188,7 +4188,9 @@ u8 IsMonDisobedient(void)
             return DISOBEDIENCE_OBEDIENT;
         if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
             return DISOBEDIENCE_OBEDIENT;
-        if (!IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
+        // Moemon Co-op: traded Moemon act as if the player were their OT, so they always obey
+        // (MoeGatcha prizes still go by badges)
+        if (MP_OtActsAsOwn(gBattleMons[gBattlerAttacker].otId) || !IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
             return DISOBEDIENCE_OBEDIENT;
         if (FlagGet(FLAG_BADGE08_GET))
             return DISOBEDIENCE_OBEDIENT;

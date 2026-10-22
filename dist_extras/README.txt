@@ -292,8 +292,9 @@ SHARED PC...  A PC that belongs to the server: anyone can put Moemon and
 DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.
-Moemon you get from a friend keep their original trainer (they gain more
-EXP, but very high levels may not obey you until you have more badges).
+Moemon you get from a friend keep their original trainer's name and ID, but
+act as if you were their trainer: they always obey and gain EXP like your own
+(no traded bonus). The same goes for in-game trades.
 
 
 PLAYING TOGETHER EVERY DAY (CO-OP menu > DAILY)
@@ -380,7 +381,8 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                Mauville GAME CORNER's prize counter (the doll clerk) sells
                them for 2,500 COINS. A save from before tickets existed gets
                the ones it would have had, once, for the story items it
-               already got.
+               already got. Winning a BATTLE TENT challenge (three wins in
+               a row) gives 3 with the prize.
                Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,
@@ -586,6 +588,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   in <save>.bag, written with every save (the .bak files keep theirs as
   .bak1.bag and so on, so a .bak renamed back still has the whole BAG; a
   save played in another program since keeps only the normal BAG).
+* Gender ratios are the original games' again (Moemon Kai had made most
+  Moemon female): Torchic is mostly male, Zigzagoon half and half...
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).

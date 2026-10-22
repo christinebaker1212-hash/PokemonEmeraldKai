@@ -790,6 +790,11 @@ void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stock
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
 void MP_Gatcha_AddTickets(s32 n);
 void MP_Gatcha_BackfillTickets(void);
+void MP_BattleTentWon(void);
+// Traded Moemon act as if the player were their OT: they obey at any badge count and get
+// no traded EXP boost (battle_util.c IsMonDisobedient, battle_script_commands.c EXP).
+// MoeGatcha prizes (their own OT) still obey by badges and get the boost.
+bool8 MP_OtActsAsOwn(u32 otId);          // a Battle Tent prize (three wins in a row): 3 tickets
 s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);

@@ -1,0 +1,31 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 4000 is waiting for a partner
+wait 400
+shot c0
+press RIGHT 12
+wait 20
+press RIGHT 2
+wait 60
+shot c00
+waitfor action 8000
+shot c1
+wait 30
+press A 2
+wait 40
+press A 2
+wait 40
+shot cl1
+press RIGHT 2
+wait 30
+shot cl2
+press RIGHT 2
+wait 30
+shot cl3
+press B 2
+wait 30
+press B 2
+wait 30
+pressuntillog A 20000 co-op: battle over
+wait 300
+quit

@@ -417,7 +417,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(31, 17, 2),
     },
     [BANNER_BALLS] = {
-        "POKE BALLS", "Rare POK~ BALLS + 11 found only here!",
+        "POKE BALLS", "Rare POK~ BALLS + 13 found only here!",
         {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
          {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallSSuper, ARRAY_COUNT(sBallSSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}, {sBallEx, ARRAY_COUNT(sBallEx)}},
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(6, 18, 31),
@@ -656,6 +656,19 @@ void MP_Gatcha_BackfillTickets(void)
         MP_Toast(text);
     }
     MPNet_Log("gatcha: ticket backfill: %d for this save's story items (%d tickets)", (int)n, (int)MP_Gatcha_Tickets());
+}
+
+// Any OT but MoeGatcha's acts as the player's own (traded Moemon obey, no traded boost)
+bool8 MP_OtActsAsOwn(u32 otId)
+{
+    return otId != GACHA_OT_ID;
+}
+
+// A Battle Tent's prize was handed over (three wins in a row): 3 MOEGATCHA TICKETS
+void MP_BattleTentWon(void)
+{
+    MP_Gatcha_AddTickets(3);
+    MPNet_Log("gatcha: battle tent won: 3 tickets (%d tickets)", (int)MP_Gatcha_Tickets());
 }
 
 // Special: the Game Corner prize clerk sold a ticket (the coins are already taken)

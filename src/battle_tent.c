@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle_tent.h"
+#include "mp.h"
 #include "overworld.h"
 #include "event_data.h"
 #include "region_map.h"
@@ -157,6 +158,7 @@ static void GiveVerdanturfTentPrize(void)
         CopyItemName(gSaveBlock2Ptr->frontier.verdanturfTentPrize, gStringVar1);
         gSaveBlock2Ptr->frontier.verdanturfTentPrize = ITEM_NONE;
         gSpecialVar_Result = TRUE;
+        MP_BattleTentWon();   // Moemon Co-op: 3 MOEGATCHA TICKETS (the lobby script says so)
     }
     else
     {
@@ -207,6 +209,7 @@ static void GiveFallarborTentPrize(void)
         CopyItemName(gSaveBlock2Ptr->frontier.fallarborTentPrize, gStringVar1);
         gSaveBlock2Ptr->frontier.fallarborTentPrize = ITEM_NONE;
         gSpecialVar_Result = TRUE;
+        MP_BattleTentWon();   // Moemon Co-op: 3 MOEGATCHA TICKETS (the lobby script says so)
     }
     else
     {
@@ -262,6 +265,7 @@ static void GiveSlateportTentPrize(void)
         CopyItemName(gSaveBlock2Ptr->frontier.slateportTentPrize, gStringVar1);
         gSaveBlock2Ptr->frontier.slateportTentPrize = ITEM_NONE;
         gSpecialVar_Result = TRUE;
+        MP_BattleTentWon();   // Moemon Co-op: 3 MOEGATCHA TICKETS (the lobby script says so)
     }
     else
     {
