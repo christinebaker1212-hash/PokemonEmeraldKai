@@ -630,6 +630,12 @@ def bits():
     return [('beam', beam), ('shadow', shadow), ('line', line), ('spiral', spiral)] + dust
 
 
+def recall():
+    # for the new recalls: Snore's Z, Ice Beam's ice chunk breaking, a spirit orb (Will-O-Wisp's)
+    return frames_of('z.png', 16, 16, 2, 'z') + frames_of('ice_chunk.png', 32, 32, 4, 'chunk') \
+        + frames_of('wisp_orb.png', 16, 16, 7, 'orb')
+
+
 SETS = [
     ('CONFETTI', confetti), ('EXPLOSION', explosion), ('SMOKE', smoke), ('FIREWORKS', fireworks),
     ('FLOWER', flower), ('BUBBLES', bubbles), ('LIGHTNING', lightning), ('WISPS', wisps),
@@ -638,7 +644,7 @@ SETS = [
     ('HEARTS', hearts), ('NOTES', notes), ('SNOW', snow), ('FEATHERS', feathers), ('LEAVES', leaves),
     ('STARS', stars), ('RAINBOW', rainbow), ('FIRE', fire), ('WATER', water), ('SAKURA', sakura),
     ('COINS', coins), ('BALLOONS', balloons), ('BUTTERFLIES', butterflies), ('GEMS', gems), ('AURA', aura),
-    ('BITS', bits),
+    ('BITS', bits), ('RECALL', recall),
 ]
 
 def main():

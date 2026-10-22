@@ -217,6 +217,36 @@ static const char *const sRecallInfo[MPFX_RECALL_COUNT] = {
     "A puff hides it; the smoke is sucked into the ball.",
     "It becomes a grid of squares that blink out.",
     "A quick bow, a sparkle, then back to the ball.",
+    "A beam of light falls on it, it narrows to a line and is taken up.",
+    "It crouches, then backflips into the ball.",
+    "A vortex opens and it spins into it, faster and faster.",
+    "It leans in and dashes off the screen with speed lines.",
+    "It wobbles and melts into a puddle that slides back to the ball.",
+    "It flips over to its card side and the card spins into the ball.",
+    "It switches off like an old TV: a line, a dot, gone.",
+    "It turns to starlight and streams into the ball as stars.",
+    "It turns to sand and crumbles into a heap.",
+    "It bursts into flame and is gone in a puff of smoke.",
+    "A geyser bursts up under it and carries it away.",
+    "Leaves whirl around it, then fly into the ball.",
+    "It darkens and sinks into its shadow; the shadow slides away.",
+    "Its colors run through the rainbow as it twists into a sparkle.",
+    "It hops back to the ball, three hops, each bigger.",
+    "Its heart beats twice, then it bursts into hearts.",
+    "A bubble forms around it and floats it away, then pops.",
+    "It crackles, a bolt strikes, and it's gone in the flash.",
+    "Ice closes around it, it shakes, and it shatters.",
+    "Three balloons lift it off the top of the screen.",
+    "It crouches and leaps clean off the top of the screen.",
+    "It hops, turns head-down and dives into the ground with a splash.",
+    "It turns white and scatters into feathers.",
+    "A black hole opens at the ball and pulls it in, stretching.",
+    "It fades away like a ghost, drifting up.",
+    "It pixelates, then its pixels rain down and fade.",
+    "It shoots up like a rocket and bursts into fireworks.",
+    "It dozes off, Zs floating up, and fades away asleep.",
+    "It blushes pink and blows away in cherry petals.",
+    "It pales and its spirit, a glowing orb, flies into the ball.",
 };
 static const char *const sSoundInfo[MPFX_SOUND_COUNT] = {
     "A sound that suits the effect.",
@@ -532,7 +562,8 @@ static void PreviewFrame(void)
             sEd->timer = 0;
             PlaySE(SE_BALL_OPEN);
             if (!sEd->defaultRecall)
-                MP_BallFx_StartRecall(sEd->monSprite, sEd->monX - 56, sEd->monY + 24, flags, &sEd->fx);
+                MP_BallFx_StartRecall(sEd->monSprite, sEd->front ? sEd->monX + 56 : sEd->monX - 56,
+                                      sEd->front ? sEd->monY - 24 : sEd->monY + 24, flags, &sEd->fx);   // as in battle
             else
                 DefaultRecallFrame(0);
         }
