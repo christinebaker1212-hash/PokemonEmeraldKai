@@ -5195,8 +5195,9 @@ static void TryAddInterviewObjectEvents(void)
     }
 
     // Add object for player (facing right)
+    // Moemon Co-op: the player's own look, if they have one
     spriteId = CreateObjectGraphicsSprite(
-        gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL : OBJ_EVENT_GFX_RIVAL_MAY_NORMAL,
+        MP_PlayerStandInGfxId(gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL : OBJ_EVENT_GFX_RIVAL_MAY_NORMAL),
         SpriteCallbackDummy,
         52,
         40,

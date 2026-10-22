@@ -622,6 +622,8 @@ DRESSING UP (CO-OP menu > LOOK)
            watering, field moves, decorating) show it standing, facing the
            same way; bikes, surfing and diving still use Brendan's/May's.
            CREATE trainers have walking, running and Mach Bike frames.
+           Scenes that show you as someone else (Battle Tent and Battle
+           Frontier walk-ins, the Contest Hall, interviews) use your look too.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
            default) uses the one that goes with your sprite; or pick any
            other: Emerald's, FireRed/LeafGreen's, or one of the extra

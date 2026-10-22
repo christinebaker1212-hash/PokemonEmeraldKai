@@ -537,3 +537,13 @@ SaveBlock1's pockets are untouched in size: save.c copies the first slots there 
 (MP_Bag_SyncToSaveBlock in WriteSaveSectorOrSlot / HandleReplaceSector), sdl2.c StoreSaveFile writes the rest to
 "<save>.bag" with gSaveCounter and a checksum of SaveBlock1's pockets, and LoadGameSave takes them back only when both
 match. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
+
+## Player stand-ins wear the player's look
+Scenes that show the player as another object take Brendan / May by gender: the Battle Tent and Frontier battle
+rooms' walk-ins, the multi battle rooms, the Contest Hall, Route 111's fall, Southern Island, and the interview word
+screen (easy_chat.c TryAddInterviewObjectEvents). With a look of their own (MP_LocalUsesCustomAvatar) they take
+OBJ_EVENT_GFX_MP_LOCAL: MP_PlayerStandInGfxId() in C, `special MP_SetPlayerStandInGfx` at the end of each script's
+player-gfx label (it swaps every VAR_OBJ_GFX_ID_n holding the player's own Brendan / May graphics). Actions with no
+frames in the look (field moves, fishing, watering, decorating; CREATE builds walk / run / Mach Bike only) keep the
+standing frames (mp_avatar.c StandInInfo). Debug: `mp easychat TYPE PERSON` (10 0 = Gabby and Ty's screen),
+`mp avatarstate N` (0-7).

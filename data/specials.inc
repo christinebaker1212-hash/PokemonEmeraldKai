@@ -550,3 +550,4 @@ gSpecials::
 	def_special MP_Repel_UseAnother
 	def_special MP_SecretBase_FixExit
 	def_special MP_StartBerryCrush, waitstate=1
+	def_special MP_SetPlayerStandInGfx

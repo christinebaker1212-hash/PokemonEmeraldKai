@@ -298,6 +298,8 @@ u8 MP_ConnectedCount(void);
 // mp_avatar.c
 void MP_Avatar_Init(void);
 bool8 MP_LocalUsesCustomAvatar(void);
+u16 MP_PlayerStandInGfxId(u16 vanillaGfx);
+void MP_SetPlayerStandInGfx(void);
 bool8 MP_IsMpGraphicsId(u8 graphicsId);
 const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId);
 void MP_Avatar_ApplyLocal(void);     // recolor + refresh the local player sprite

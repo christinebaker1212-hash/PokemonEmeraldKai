@@ -38,10 +38,12 @@ BattleFrontier_BattleFactoryBattleRoom_EventScript_EndHideObjects::
 
 BattleFrontier_BattleFactoryBattleRoom_EventScript_SetPlayerGfxMale::
 	setvar VAR_OBJ_GFX_ID_F, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 BattleFrontier_BattleFactoryBattleRoom_EventScript_SetPlayerGfxFemale::
 	setvar VAR_OBJ_GFX_ID_F, OBJ_EVENT_GFX_RIVAL_MAY_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 BattleFrontier_BattleFactoryBattleRoom_OnFrame:

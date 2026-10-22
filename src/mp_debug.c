@@ -916,6 +916,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    gSaveBlock1Ptr->dewfordTrends[i].rand);
         }
     }
+    else if (strcmp(cmd, "easychat") == 0)
+    {
+        // easychat TYPE PERSON - the word screen as an NPC would open it (5 interview, 0/1 reporter, 2 boy)
+        static u16 sWords[9] = {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
+        int type = 5, person = 0;
+        sscanf(arg, "%d %d", &type, &person);
+        DoEasyChatScreen(type, sWords, CB2_ReturnToField, person);
+    }
     else if (strcmp(cmd, "trend") == 0)
     {
         // trend - Dewford's current trendy phrase

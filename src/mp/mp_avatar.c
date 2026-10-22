@@ -20,6 +20,7 @@
 
 #include "global.h"
 #include "mp.h"
+#include "event_data.h"
 #include "mp_pack.h"
 #include "mp_gfx_externs.h"
 #include "data.h"
@@ -1049,6 +1050,28 @@ static struct MpAppearance GetLocalAppearance(void)
     if (app.base == MP_BASE_DEFAULT || app.base == MP_BASE_CUSTOM || (app.base == MP_BASE_CREATED && !app.recipe.made))
         app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     return app;
+}
+
+// Scenes that show the player as a separate object (a Battle Tent / Frontier room's walk-in,
+// the Contest Hall, an interview's word screen...) take Brendan / May by gender: with a look of
+// your own, that object wears it instead
+u16 MP_PlayerStandInGfxId(u16 vanillaGfx)
+{
+    return MP_LocalUsesCustomAvatar() ? OBJ_EVENT_GFX_MP_LOCAL : vanillaGfx;
+}
+
+// Special, after a script set its player stand-in: every VAR_OBJ_GFX_ID_n holding the player's own
+// Brendan / May graphics takes the player's look
+void MP_SetPlayerStandInGfx(void)
+{
+    u16 own = gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL : OBJ_EVENT_GFX_RIVAL_MAY_NORMAL;
+    u16 own2 = gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_BRENDAN_NORMAL : OBJ_EVENT_GFX_MAY_NORMAL;
+    u16 v;
+    if (!MP_LocalUsesCustomAvatar())
+        return;
+    for (v = VAR_OBJ_GFX_ID_0; v <= VAR_OBJ_GFX_ID_F; v++)
+        if (VarGet(v) == own || VarGet(v) == own2)
+            VarSet(v, OBJ_EVENT_GFX_MP_LOCAL);
 }
 
 bool8 MP_LocalUsesCustomAvatar(void)
