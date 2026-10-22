@@ -635,6 +635,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gMain.savedCallback = CB2_ReturnToField;
         SetMainCallback2(CB2_InitOptionMenu);
     }
+    else if (strcmp(cmd, "creatures") == 0 || strcmp(cmd, "namecase") == 0)
+    {
+        // creatures 0|1 (MOEMON / POKEMON pictures and word), namecase 0|1|2 (as typed / ALL CAPS / Mixed Case)
+        if (cmd[0] == 'c')
+            gSaveBlock2Ptr->optionsPokemonArt = atoi(arg) != 0;
+        else
+            gSaveBlock2Ptr->optionsNameCase = atoi(arg) % MP_NAMECASE_COUNT;
+        printf("[test] creatures %d namecase %d\n", gSaveBlock2Ptr->optionsPokemonArt, gSaveBlock2Ptr->optionsNameCase);
+    }
     else if (strcmp(cmd, "legacyrand") == 0)
     {
         // legacyrand B,B,... - the random bytes the next GENESIS / EPOCH BALL throws use

@@ -267,6 +267,7 @@ void MP_NameCase_CopyName(u8 *dst, const u8 *name, u16 maxLen);
 const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId);   // text.c AddTextPrinter
 extern bool8 gMpTextFilterOff;
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
+bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_SendBlob(u8 kind, const void *data, u32 len);
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len);

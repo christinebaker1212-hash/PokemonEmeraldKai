@@ -3285,8 +3285,12 @@ extern const u32 gBattleEnvironmentPalette_StadiumWallace[];
 // Pokédex
 extern const u32 gPokedexInterface_Gfx[];
 extern const u16 gPokedexBgHoenn_Pal[];
-extern const u32 gPokedexMenu_Gfx[];
-extern const u32 gPokedexList_Tilemap[];
+extern const u32 gPokedexMenu_Gfx_Moe[], gPokedexMenu_Gfx_Pokemon[];   // Moemon Co-op: OPTIONS > CREATURES
+bool8 MP_MonArtPokemon(void);
+#define gPokedexMenu_Gfx (MP_MonArtPokemon() ? gPokedexMenu_Gfx_Pokemon : gPokedexMenu_Gfx_Moe)
+extern const u32 gPokedexList_Tilemap_Moe[], gPokedexList_Tilemap_Pokemon[];   // Moemon Co-op: OPTIONS > CREATURES
+bool8 MP_MonArtPokemon(void);
+#define gPokedexList_Tilemap (MP_MonArtPokemon() ? gPokedexList_Tilemap_Pokemon : gPokedexList_Tilemap_Moe)
 extern const u32 gPokedexListUnderlay_Tilemap[];
 extern const u32 gPokedexStartMenuMain_Tilemap[];
 extern const u32 gPokedexStartMenuSearchResults_Tilemap[];
@@ -4043,8 +4047,12 @@ extern const u32 gPokenavOptions_Gfx[];
 extern const u16 gPokenavOptions_Pal[];
 extern const u16 gPokenavLeftHeader_Pal[];
 extern const u16 gPokenavHeader_Pal[];
-extern const u32 gPokenavHeader_Gfx[];
-extern const u32 gPokenavHeader_Tilemap[];
+extern const u32 gPokenavHeader_Gfx_Moe[], gPokenavHeader_Gfx_Pokemon[];   // Moemon Co-op: OPTIONS > CREATURES
+bool8 MP_MonArtPokemon(void);
+#define gPokenavHeader_Gfx (MP_MonArtPokemon() ? gPokenavHeader_Gfx_Pokemon : gPokenavHeader_Gfx_Moe)
+extern const u32 gPokenavHeader_Tilemap_Moe[], gPokenavHeader_Tilemap_Pokemon[];   // Moemon Co-op: OPTIONS > CREATURES
+bool8 MP_MonArtPokemon(void);
+#define gPokenavHeader_Tilemap (MP_MonArtPokemon() ? gPokenavHeader_Tilemap_Pokemon : gPokenavHeader_Tilemap_Moe)
 extern const u32 gPokenavLeftHeaderHoennMap_Gfx[];
 extern const u32 gPokenavLeftHeaderMainMenu_Gfx[];
 extern const u32 gPokenavLeftHeaderCondition_Gfx[];

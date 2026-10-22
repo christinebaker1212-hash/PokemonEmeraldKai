@@ -25,6 +25,7 @@
 #include "overworld.h"
 #include "palette.h"
 #include "pokemon.h"
+#include "pokemon_icon.h"
 #include "script.h"
 #include "sound.h"
 #include "sprite.h"
@@ -82,6 +83,7 @@ struct FollowerSlot
     u8 fxSound;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
+    bool8 iconArt;        // OPTIONS > CREATURES POKéMON: its party icon walks instead (no overworld art)
 };
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
@@ -165,19 +167,35 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
 
     if (!s->gfx)
         return FALSE;
-    frameBytes = (u32)s->gfx->size * s->gfx->size / 2;
-    for (i = 0; i < 8; i++)
+    s->iconArt = MP_MonArtPokemon();
+    if (s->iconArt)
     {
-        s->frames[i].data = sFollowerData + s->gfx->offset + i * frameBytes;
-        s->frames[i].size = frameBytes;
+        // The original game has no walking sprites: its two-frame party icon, every direction
+        u16 species = NationalPokedexNumToSpecies(s->dex);
+        const u8 *icon = GetMonIconPtr(species, 0, FALSE);
+        for (i = 0; i < 8; i++)
+        {
+            s->frames[i].data = icon + (i & 1) * 0x200;
+            s->frames[i].size = 0x200;
+        }
+        pal.data = gMonIconPaletteTable[GetValidMonIconPalIndex(species)].data;
     }
-    pal.data = (const u16 *)(sFollowerData + s->gfx->offset + 8 * frameBytes);
+    else
+    {
+        frameBytes = (u32)s->gfx->size * s->gfx->size / 2;
+        for (i = 0; i < 8; i++)
+        {
+            s->frames[i].data = sFollowerData + s->gfx->offset + i * frameBytes;
+            s->frames[i].size = frameBytes;
+        }
+        pal.data = (const u16 *)(sFollowerData + s->gfx->offset + 8 * frameBytes);
+    }
     pal.tag = tag;
     if (MP_AllocCoopPalette(tag, pal.data) == 0xFF)
         return FALSE; // no palette slot free right now; try again later
     s->tmpl.tileTag = TAG_NONE;
     s->tmpl.paletteTag = tag;
-    s->tmpl.oam = s->gfx->size == 64 ? &sOam64 : &sOam32;
+    s->tmpl.oam = (s->gfx->size == 64 && !s->iconArt) ? &sOam64 : &sOam32;
     s->tmpl.anims = sAnims;
     s->tmpl.images = s->frames;
     s->tmpl.affineAnims = gDummySpriteAffineAnimTable;
@@ -349,7 +367,7 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         dyPix = (s16)((fvy - ovy) * 16 / 256);
         fx = os->x + dxPix;
         fy = os->y + dyPix;
-        if (s->gfx->size == 64)
+        if (s->gfx->size == 64 && !s->iconArt)
             fy -= 16;
         fs->x = fx;
         fs->y = fy;

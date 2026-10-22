@@ -2,7 +2,7 @@
 // the sprite's non-transparent pixels actually are.
 // .size is the dimensions of this drawn pixel area.
 // .y_offset is the number of pixels between the drawn pixel area and the bottom edge.
-const struct MonCoords gMonFrontPicCoords[] =
+const struct MonCoords gMonFrontPicCoords_Moe[] =
 {
     [SPECIES_NONE] = { .size = 0x88, .y_offset = 0 },
     [SPECIES_BULBASAUR] = { .size = 0x45, .y_offset = 1 },

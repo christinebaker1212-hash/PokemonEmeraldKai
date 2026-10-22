@@ -5259,7 +5259,7 @@ static const union AnimCmd *const sAnims_MoemonStatic[] =
     sAnim_GeneralFrame0,
 };
 
-const union AnimCmd *const *const gMonFrontAnimsPtrTable[] =
+const union AnimCmd *const *const gMonFrontAnimsPtrTable_Moe[] =
 {
     // Moemon Kai: all species use a static front frame
     [SPECIES_NONE] = sAnims_MoemonStatic,

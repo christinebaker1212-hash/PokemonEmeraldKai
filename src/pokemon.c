@@ -1403,7 +1403,11 @@ const s8 gNatureStatTable[NUM_NATURES][NUM_NATURE_STATS] =
 
 // SPECIES_NONE are ignored in the following two tables, so decrement before accessing these arrays to get the right result
 
-static const u8 sMonFrontAnimIdsTable[NUM_SPECIES - 1] =
+// Moemon Co-op: Kai's; OPTIONS > CREATURES POKéMON uses the original ones (mp_monart_data.c)
+extern const u8 gMonFrontAnimIdsTable_Pokemon[NUM_SPECIES - 1];
+#define sMonFrontAnimIdsTable_Pokemon gMonFrontAnimIdsTable_Pokemon
+#define sMonFrontAnimIdsTable MP_MONART(sMonFrontAnimIdsTable)
+static const u8 sMonFrontAnimIdsTable_Moe[NUM_SPECIES - 1] =
 {
     [SPECIES_BULBASAUR - 1] = 0,
     [SPECIES_IVYSAUR - 1] = 0,

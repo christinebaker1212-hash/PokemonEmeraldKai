@@ -114,12 +114,7 @@ extern const union AffineAnimCmd *const gAffineAnims_BattleSpriteOpponentSide[];
 extern const union AffineAnimCmd *const gAffineAnims_BattleSpriteContest[];
 
 extern const union AnimCmd *const gAnims_MonPic[];
-extern const struct MonCoords gMonFrontPicCoords[];
 extern const struct CompressedSpriteSheet gMonStillFrontPicTable[];
-extern const struct MonCoords gMonBackPicCoords[];
-extern const struct CompressedSpriteSheet gMonBackPicTable[];
-extern const struct CompressedSpritePalette gMonPaletteTable[];
-extern const struct CompressedSpritePalette gMonShinyPaletteTable[];
 extern const union AnimCmd *const *const gTrainerFrontAnimsPtrTable[];
 extern const struct MonCoords gTrainerFrontPicCoords[];
 extern const struct CompressedSpriteSheet gTrainerFrontPicTable[];
@@ -145,10 +140,27 @@ extern u32 gMpPartner2BackPalLz[MP_PAL_LZ_WORDS];
 extern u8 gMpPartner2BackTiles[4 * TRAINER_PIC_SIZE];
 extern const struct SpriteFrameImage gMpPartner2BackFrames[4];
 
-extern const u8 gEnemyMonElevation[NUM_SPECIES];
-
-extern const union AnimCmd *const *const gMonFrontAnimsPtrTable[];
-extern const struct CompressedSpriteSheet gMonFrontPicTable[];
+// Moemon Co-op: OPTIONS > CREATURES picks Kai's battle pictures (_Moe) or the original
+// POKéMON ones (_Pokemon, src/mp/mp_monart_data.c from tools/moemon_monart), with their own
+// coordinates, elevations and animations. Code reading the old names gets the chosen set.
+extern const struct CompressedSpriteSheet gMonFrontPicTable_Moe[], gMonFrontPicTable_Pokemon[];
+extern const struct CompressedSpriteSheet gMonBackPicTable_Moe[], gMonBackPicTable_Pokemon[];
+extern const struct CompressedSpritePalette gMonPaletteTable_Moe[], gMonPaletteTable_Pokemon[];
+extern const struct CompressedSpritePalette gMonShinyPaletteTable_Moe[], gMonShinyPaletteTable_Pokemon[];
+extern const struct MonCoords gMonFrontPicCoords_Moe[], gMonFrontPicCoords_Pokemon[];
+extern const struct MonCoords gMonBackPicCoords_Moe[], gMonBackPicCoords_Pokemon[];
+extern const u8 gEnemyMonElevation_Moe[NUM_SPECIES], gEnemyMonElevation_Pokemon[NUM_SPECIES];
+extern const union AnimCmd *const *const gMonFrontAnimsPtrTable_Moe[], *const *const gMonFrontAnimsPtrTable_Pokemon[];
+bool8 MP_MonArtPokemon(void);   // mp_monart.c
+#define MP_MONART(table) (MP_MonArtPokemon() ? table##_Pokemon : table##_Moe)
+#define gMonFrontPicTable      MP_MONART(gMonFrontPicTable)
+#define gMonBackPicTable       MP_MONART(gMonBackPicTable)
+#define gMonPaletteTable       MP_MONART(gMonPaletteTable)
+#define gMonShinyPaletteTable  MP_MONART(gMonShinyPaletteTable)
+#define gMonFrontPicCoords     MP_MONART(gMonFrontPicCoords)
+#define gMonBackPicCoords      MP_MONART(gMonBackPicCoords)
+#define gEnemyMonElevation     MP_MONART(gEnemyMonElevation)
+#define gMonFrontAnimsPtrTable MP_MONART(gMonFrontAnimsPtrTable)
 
 extern const struct Trainer gTrainers[];
 extern const u8 gTrainerClassNames[][13];

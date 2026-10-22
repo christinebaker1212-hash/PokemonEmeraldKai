@@ -26,7 +26,7 @@
 #include "constants/songs.h"
 #include "gba/io_reg.h"
 
-extern const struct CompressedSpriteSheet gMonFrontPicTable[];
+// Moemon Co-op: (data.h:) const struct CompressedSpriteSheet gMonFrontPicTable[];
 
 EWRAM_DATA static u8 sMailboxWindowIds[MAILBOXWIN_COUNT] = {0};
 EWRAM_DATA static struct ListMenuItem *sMailboxList = NULL;

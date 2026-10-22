@@ -1,4 +1,4 @@
-const struct CompressedSpriteSheet gMonBackPicTable[] =
+const struct CompressedSpriteSheet gMonBackPicTable_Moe[] =
 {
     SPECIES_SPRITE(NONE, gMonBackPic_CircledQuestionMark),
     SPECIES_SPRITE(BULBASAUR, gMonBackPic_Bulbasaur),

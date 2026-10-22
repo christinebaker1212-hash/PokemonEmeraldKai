@@ -3556,7 +3556,7 @@ static void Task_LoadCryScreen(u8 taskId)
         }
         break;
     case 1:
-        DecompressAndLoadBgGfxUsingHeap(3, &gPokedexMenu_Gfx, 0x2000, 0, 0);
+        DecompressAndLoadBgGfxUsingHeap(3, gPokedexMenu_Gfx, 0x2000, 0, 0);
         CopyToBgTilemapBuffer(3, &gPokedexCryScreen_Tilemap, 0, 0);
         FillWindowPixelBuffer(WIN_INFO, PIXEL_FILL(0));
         PutWindowTilemap(WIN_INFO);

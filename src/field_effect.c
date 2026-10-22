@@ -1,4 +1,5 @@
 #include "global.h"
+#include "data.h"
 #include "mp.h"
 #include "decompress.h"
 #include "event_object_movement.h"
@@ -243,7 +244,7 @@ static void Task_MoveDeoxysRock(u8 taskId);
 static u8 sActiveList[32];
 
 // External declarations
-extern struct CompressedSpritePalette gMonPaletteTable[]; // GF made a mistake and did not extern it as const.
+// Moemon Co-op: (data.h:) struct CompressedSpritePalette gMonPaletteTable[]; // GF made a mistake and did not (data.h:) it as const.
 extern const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[];
 extern const struct CompressedSpriteSheet gTrainerFrontPicTable[];
 extern u8 *gFieldEffectScriptPointers[];
