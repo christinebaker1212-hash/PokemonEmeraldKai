@@ -1077,6 +1077,55 @@ const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId)
     return &sMpGfxInfo[slot];
 }
 
+// A look with no frames for an action (a field move, fishing, watering, decorating) keeps
+// its own standing frame for it instead of turning into Brendan / May. Every animation of
+// the action shows the standing frame of its direction (the tables' anims go S, N, W, E)
+// and ends, so code that waits for the action's animation goes on. The frames sit at
+// 0 / 4 / 6: AlignFishingAnimationFrames shifts the sprite for frames 1-3, 5, 10 and 11.
+#define STANDIN_S 0
+#define STANDIN_N 4
+#define STANDIN_W 6
+static const union AnimCmd sStandIn_S[] = {ANIMCMD_FRAME(STANDIN_S, 8), ANIMCMD_END};
+static const union AnimCmd sStandIn_N[] = {ANIMCMD_FRAME(STANDIN_N, 8), ANIMCMD_END};
+static const union AnimCmd sStandIn_W[] = {ANIMCMD_FRAME(STANDIN_W, 8), ANIMCMD_END};
+static const union AnimCmd sStandIn_E[] = {ANIMCMD_FRAME(STANDIN_W, 8, .hFlip = TRUE), ANIMCMD_END};
+static const union AnimCmd *const sStandInAnims[] = {
+    sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E, sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E,
+    sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E, sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E,
+    sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E, sStandIn_S, sStandIn_N, sStandIn_W, sStandIn_E,
+};
+static struct ObjectEventGraphicsInfo sStandInInfo;
+static struct SpriteFrameImage sStandInFrames[STANDIN_W + 1];
+
+static const struct ObjectEventGraphicsInfo *StandInInfo(void)
+{
+    const struct ObjectEventGraphicsInfo *foot = MP_GetGraphicsInfo(OBJ_EVENT_GFX_MP_LOCAL);
+    u8 i;
+    sStandInInfo = *foot;
+    for (i = 0; i < ARRAY_COUNT(sStandInFrames); i++)
+        sStandInFrames[i] = foot->images[0];
+    sStandInFrames[STANDIN_N] = foot->images[1];
+    sStandInFrames[STANDIN_W] = foot->images[2];
+    sStandInInfo.images = sStandInFrames;
+    sStandInInfo.anims = sStandInAnims;
+    sStandInInfo.inanimate = FALSE;
+    return &sStandInInfo;
+}
+
+// The action graphics ids (field move, fishing, watering, decorating) a look may lack
+static bool8 IsActionGfxId(u8 graphicsId, u8 *state)
+{
+    u8 st, g;
+    for (st = ST_FIELD_MOVE; st <= ST_DECORATING; st++)
+        for (g = 0; g < GENDER_COUNT; g++)
+            if (sStateGfxIds[st][g] == graphicsId)
+            {
+                *state = st;
+                return TRUE;
+            }
+    return FALSE;
+}
+
 // Sprite pack replacements for the player's bike/surf/... graphics ids
 const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
 {
@@ -1084,6 +1133,8 @@ const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
     const struct MpPack *pack = LocalPack();
     if (!sAvatarInit)
         return NULL;
+    if (IsActionGfxId(graphicsId, &st) && !PackHasState(pack, st) && MP_LocalUsesCustomAvatar())
+        return StandInInfo();
     if (!pack)
     {
         // A created look has its own Mach Bike frames

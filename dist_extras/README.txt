@@ -609,7 +609,10 @@ DRESSING UP (CO-OP menu > LOOK)
            the trainers you make in CREATE (one not made yet looks like
            DEFAULT). It's used
            everywhere: walking, running, biking, surfing, diving, fishing,
-           field moves. Animations a sprite doesn't have use Brendan's/May's.
+           field moves. Actions a sprite has no frames for (fishing,
+           watering, field moves, decorating) show it standing, facing the
+           same way; bikes, surfing and diving still use Brendan's/May's.
+           CREATE trainers have walking, running and Mach Bike frames.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
            default) uses the one that goes with your sprite; or pick any
            other: Emerald's, FireRed/LeafGreen's, or one of the extra

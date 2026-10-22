@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "field_player_avatar.h"
+#include "event_object_movement.h"
 #include "text_window.h"
 #include "daycare.h"
 #include "pokemon_summary_screen.h"
@@ -662,6 +664,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         u8 TrySavingData(u8 saveType);
         TrySavingData(SAVE_NORMAL);
+    }
+    else if (strcmp(cmd, "fish") == 0)
+    {
+        // fish ROD - cast a rod (0 old, 1 good, 2 super) where you stand
+        StartFishing(atoi(arg));
+    }
+    else if (strcmp(cmd, "avatarstate") == 0)
+    {
+        // avatarstate N - the player's sprite for PLAYER_AVATAR_STATE_* N (5 field move, 6 fishing, 7 watering...)
+        struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+        ObjectEventSetGraphicsId(player, GetPlayerAvatarGraphicsIdByStateId(atoi(arg)));
+        StartSpriteAnim(&gSprites[player->spriteId], 0);
+        printf("[test] avatar state %d\n", atoi(arg));
     }
     else if (strcmp(cmd, "bike") == 0)
     {
