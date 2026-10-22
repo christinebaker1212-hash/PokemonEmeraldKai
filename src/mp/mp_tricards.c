@@ -443,7 +443,7 @@ void MP_TriCards_Composite(u16 *frame)
     const u16 *pal;
     u8 slot, b;
 
-    if (!sActive || !IS_TRIPLE_BATTLE() || !gMain.inBattle || gMain.callback2 != BattleMainCB2)
+    if (!sActive || !IS_TRIPLE_BATTLE() || !gMain.inBattle || gMain.callback2 != BattleMainCB2 || !MP_OBJ_LAYER_SHOWN())
         return;
     slot = IndexOfSpritePaletteTag(TAG_TRICARD_PAL);
     if (slot == 0xFF)

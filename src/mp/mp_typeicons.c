@@ -131,7 +131,7 @@ static void BattlerTypes(u8 battler, u8 *t1, u8 *t2)
 void MP_TypeIcons_Composite(u16 *frame)
 {
     u8 b;
-    if (!gMain.inBattle || gMain.callback2 != BattleMainCB2 || !MP_TypeIcons_On())
+    if (!gMain.inBattle || gMain.callback2 != BattleMainCB2 || !MP_TypeIcons_On() || !MP_OBJ_LAYER_SHOWN())
         return;
     for (b = 0; b < gBattlersCount && b < MAX_BATTLERS_COUNT; b++)
     {

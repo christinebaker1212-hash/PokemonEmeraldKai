@@ -2360,7 +2360,7 @@ void MP_BallFx_Composite(u16 *frame)
     u16 i;
     bool8 battle;
 
-    if (!MP_BallFx_Active() || gMain.callback2 != sPartScreen)
+    if (!MP_BallFx_Active() || gMain.callback2 != sPartScreen || !MP_OBJ_LAYER_SHOWN())
         return;
     battle = gMain.inBattle;
     if (sClipSet)

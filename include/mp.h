@@ -958,6 +958,11 @@ extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
 void MP_TriCards_Composite(u16 *frame);
+// The layers drawn over the frame in place of sprites show only while the GBA would show sprites
+// (the Pokédex page after a catch, the naming screen... turn OBJ off or blank the screen)
+// and not over the Pokédex page a catch shows inside the battle (Cmd_displaydexinfo sets gMpBattleSceneHidden)
+extern bool8 gMpBattleSceneHidden;
+#define MP_OBJ_LAYER_SHOWN() ((REG_DISPCNT & (DISPCNT_OBJ_ON | DISPCNT_FORCED_BLANK)) == DISPCNT_OBJ_ON && !gMpBattleSceneHidden)
 bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top);
 // mp_typeicons.c: type icons by the healthboxes (OPTIONS > TYPE ICONS)
 bool8 MP_TypeIcons_On(void);

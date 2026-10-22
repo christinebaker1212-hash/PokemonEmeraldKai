@@ -10774,6 +10774,7 @@ static void Cmd_displaydexinfo(void)
         if (!gPaletteFade.active)
         {
             FreeAllWindowBuffers();
+            gMpBattleSceneHidden = TRUE;   // Moemon Co-op: the layers drawn over the battle wait (mp.h)
             gBattleCommunication[TASK_ID] = DisplayCaughtMonDexPage(SpeciesToNationalPokedexNum(species),
                                                                         gBattleMons[gBattlerTarget].otId,
                                                                         gBattleMons[gBattlerTarget].personality);
@@ -10790,6 +10791,7 @@ static void Cmd_displaydexinfo(void)
         }
         break;
     case 3:
+        gMpBattleSceneHidden = FALSE;
         InitBattleBgsVideo();
         LoadBattleTextboxAndBackground();
         gBattle_BG3_X = 256;

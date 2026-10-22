@@ -55,7 +55,10 @@ static struct {
     u8 targetSize;     // Crystal: 7 the Moemon as it is, 5 / 3 its shrunk picture, 0 gone
     u32 lastTick;
     s32 ax, ay, tx, ty;   // the thrower's / target's anchors on the Kai screen (picture bottom centre)
+    s32 offX, offY;       // the whole throw moved so the ball comes to rest where Emerald's does
 } sAnim;
+
+static void MapPoint(s32 gx, s32 gy, s32 *x, s32 *y);
 
 static const struct LegacyAnimTimeline *Timeline(void)
 {
@@ -179,6 +182,17 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
     sAnim.targetSize = 7;
     Anchor(sAnim.attacker, &sAnim.ax, &sAnim.ay);
     Anchor(sAnim.target, &sAnim.tx, &sAnim.ty);
+    // Emerald's ball rests at the target's sprite coords + (0, 24) (AnimTask_ThrowBall's target 16 up,
+    // then SpriteCB_Ball_Bounce drops it 40); the GB balls rest at (120, 48) / (128, 48), their 12x12 art
+    // 2 / 1 px right of and 2 px below the middle of their 16x16 compared with Emerald's (measured on
+    // screenshots). The throw keeps its own path and is moved as a whole so the ball lands on that spot.
+    {
+        s32 rx, ry;
+        sAnim.offX = sAnim.offY = 0;
+        MapPoint(sAnim.game == MP_SPECIAL_GENESIS ? 120 : 128, 48, &rx, &ry);
+        sAnim.offX = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_X) - rx - (sAnim.game == MP_SPECIAL_GENESIS ? 2 : 1);
+        sAnim.offY = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_Y) + 24 - ry - 2;
+    }
     gBattleSpritesDataPtr->animationData->wildMonInvisible = gSprites[gBattlerSpriteIds[gBattleAnimTarget]].invisible;
     MPNet_Log("legacy anim: %s timeline %d (case %d), b%d -> b%d", sAnim.game == MP_SPECIAL_GENESIS ? "GENESIS" : "EPOCH",
               sAnim.timeline, caseId, sAnim.attacker, sAnim.target);
@@ -225,8 +239,8 @@ static u16 Faded(u16 c)
 // enemy picture (124,56) onto the thrower's and the target's
 static void MapPoint(s32 gx, s32 gy, s32 *x, s32 *y)
 {
-    *x = sAnim.ax + (gx - 38) * (sAnim.tx - sAnim.ax) / (124 - 38);
-    *y = sAnim.ay + (gy - 96) * (sAnim.ty - sAnim.ay) / (56 - 96);
+    *x = sAnim.ax + (gx - 38) * (sAnim.tx - sAnim.ax) / (124 - 38) + sAnim.offX;
+    *y = sAnim.ay + (gy - 96) * (sAnim.ty - sAnim.ay) / (56 - 96) + sAnim.offY;
 }
 
 // The battle's text box (from y 112) stays in front, as the GB games' did
@@ -550,17 +564,20 @@ static void DrawMoves(u16 *frame)
     }
 }
 
+bool8 gMpBattleSceneHidden;
+
 void MP_LegacyAnim_Composite(u16 *frame)
 {
     if (!gMain.inBattle)
     {
+        gMpBattleSceneHidden = FALSE;
         u8 b;
         sAnim.active = sAnim.kept = FALSE;
         for (b = 0; b < MAX_BATTLERS_COUNT; b++)
             sMove[b].active = FALSE;
         return;
     }
-    if (gMain.callback2 != BattleMainCB2)
+    if (gMain.callback2 != BattleMainCB2 || !MP_OBJ_LAYER_SHOWN())
         return;
     DrawMoves(frame);
     if (!sAnim.active && !sAnim.kept)
