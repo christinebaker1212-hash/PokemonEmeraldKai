@@ -41,8 +41,14 @@ enum { EV_SOUND = 1, EV_HIDE_TARGET, EV_SHOW_TARGET, EV_TARGET_SIZE };
 enum { TL_RED_MISS, TL_RED_1, TL_RED_2, TL_RED_3, TL_RED_CAUGHT,
        TL_GSC_0, TL_GSC_1, TL_GSC_2, TL_GSC_3, TL_GSC_CAUGHT, TL_RED_POOF, TL_GSC_POOF };
 
-// Red's sprites: the GENESIS BALL's own colors for the Game Boy's four shades
-static const u16 sRedShades[4] = {RGB(31, 31, 31), RGB(31, 24, 24), RGB(31, 16, 16), RGB(4, 4, 4)};
+// Red on the Super Game Boy (pokered SetPal_Battle / BlkPacket_Battle) colors the screen by area,
+// sprites too: the HP bars' palettes (PAL_GREENBAR / YELLOWBAR / REDBAR) and each Pokémon's own
+// palette over its picture. So a ball flying into the foe's picture takes the foe's colors.
+static const u16 sRedBarPals[3][4] = {
+    {RGB(31, 29, 31), RGB(30, 26, 15), RGB(9, 20, 11), RGB(3, 2, 2)},
+    {RGB(31, 29, 31), RGB(30, 26, 15), RGB(26, 20, 0), RGB(3, 2, 2)},
+    {RGB(31, 29, 31), RGB(30, 26, 15), RGB(26, 10, 6), RGB(3, 2, 2)},
+};
 
 static struct {
     bool8 active;      // a throw is playing
@@ -56,6 +62,9 @@ static struct {
     u32 lastTick;
     s32 ax, ay, tx, ty;   // the thrower's / target's anchors on the Kai screen (picture bottom centre)
     s32 offX, offY;       // the whole throw moved so the ball comes to rest where Emerald's does
+    u16 targetPal[4];     // the target's and the thrower's Moemon as a Game Boy palette (MonGbPalette)
+    u16 attackerPal[4];
+    u16 barPal[2][4];     // Red: the thrower's / target's HP bar palettes
 } sAnim;
 
 static void MapPoint(s32 gx, s32 gy, s32 *x, s32 *y);
@@ -63,6 +72,142 @@ static void MapPoint(s32 gx, s32 gy, s32 *x, s32 *y);
 static const struct LegacyAnimTimeline *Timeline(void)
 {
     return &sLegacyTimelines[sAnim.timeline];
+}
+
+// ---------------------------------------------------------------------------
+// A Moemon as a Game Boy palette: white, its main color (light), the same color dark, black,
+// like the GB games' per-species palettes. The main color is the most used one in its
+// picture (outline-dark and near-white pixels aside); its partner is the most used one of a
+// similar hue that is clearly lighter or darker, or a shade of it.
+
+static void Split555(u16 c, s32 *r, s32 *g, s32 *b)
+{
+    *r = c & 31;
+    *g = (c >> 5) & 31;
+    *b = (c >> 10) & 31;
+}
+
+static s32 Luma(u16 c)
+{
+    s32 r, g, b;
+    Split555(c, &r, &g, &b);
+    return r * 299 + g * 587 + b * 114;   // 0 .. 31000
+}
+
+static s32 HueOf(u16 c)   // 0-359, -1 for a gray
+{
+    s32 r, g, b, mx, mn, h;
+    Split555(c, &r, &g, &b);
+    mx = max(r, max(g, b));
+    mn = min(r, min(g, b));
+    if (mx - mn < 3)
+        return -1;
+    if (mx == r)
+        h = 60 * (g - b) / (mx - mn);
+    else if (mx == g)
+        h = 120 + 60 * (b - r) / (mx - mn);
+    else
+        h = 240 + 60 * (r - g) / (mx - mn);
+    return (h + 360) % 360;
+}
+
+static bool8 SimilarHue(u16 a, u16 b)
+{
+    s32 ha = HueOf(a), hb = HueOf(b), d;
+    if (ha < 0 || hb < 0)
+        return ha < 0 && hb < 0;
+    d = ha > hb ? ha - hb : hb - ha;
+    return min(d, 360 - d) <= 40;
+}
+
+static u16 Shade555(u16 c, s32 num, s32 den)
+{
+    s32 r, g, b;
+    Split555(c, &r, &g, &b);
+    r = min(31, r * num / den);
+    g = min(31, g * num / den);
+    b = min(31, b * num / den);
+    return RGB(r, g, b);
+}
+
+static void MonGbPalette(u8 spriteId, u16 *out)
+{
+    u32 count[16] = {0};
+    const u16 *pal;
+    const u8 *tiles;
+    struct Sprite *s;
+    u16 main = RGB(20, 20, 20), other;
+    s32 i, best = -1, best2 = -1;
+
+    out[0] = RGB(31, 31, 31);
+    out[3] = RGB(3, 2, 2);
+    out[1] = RGB(25, 25, 25);
+    out[2] = RGB(13, 13, 13);
+    if (spriteId >= MAX_SPRITES || !gSprites[spriteId].inUse || gSprites[spriteId].oam.bpp != ST_OAM_4BPP)
+        return;
+    s = &gSprites[spriteId];
+    pal = &gPlttBufferUnfaded[OBJ_PLTT_ID(s->oam.paletteNum)];
+    tiles = (const u8 *)OBJ_VRAM0 + s->oam.tileNum * TILE_SIZE_4BPP;
+    for (i = 0; i < 64 * TILE_SIZE_4BPP; i++)
+    {
+        count[tiles[i] & 0xF]++;
+        count[tiles[i] >> 4]++;
+    }
+    for (i = 1; i < 16; i++)
+    {
+        s32 l = Luma(pal[i]);
+        if (count[i] == 0 || l < 31000 * 18 / 100 || l > 31000 * 90 / 100)
+            continue;
+        if (best < 0 || count[i] > count[best])
+            best = i;
+    }
+    if (best < 0)
+        return;
+    main = pal[best];
+    for (i = 1; i < 16; i++)
+    {
+        s32 l = Luma(pal[i]), dl = l - Luma(main);
+        if (i == best || count[i] == 0 || l < 31000 * 12 / 100 || l > 31000 * 94 / 100)
+            continue;
+        if ((dl > 31000 / 10 || dl < -31000 / 10) && SimilarHue(pal[i], main)
+         && (best2 < 0 || count[i] > count[best2]))
+            best2 = i;
+    }
+    other = best2 >= 0 ? pal[best2] : Shade555(main, 3, 5);
+    if (Luma(other) > Luma(main))
+    {
+        out[1] = other;
+        out[2] = main;
+    }
+    else
+    {
+        out[1] = main;
+        out[2] = other;
+    }
+}
+
+// Red's HP bar palette for a battler: green, yellow under half, red under a fifth (as Emerald's bar)
+static void BarPalette(u8 battler, u16 *out)
+{
+    u8 level = 0;
+    if (gBattleMons[battler].maxHP)
+    {
+        u32 hp = gBattleMons[battler].hp, maxHP = gBattleMons[battler].maxHP;
+        level = hp * 2 > maxHP ? 0 : hp * 5 > maxHP ? 1 : 2;
+    }
+    memcpy(out, sRedBarPals[level], sizeof(sRedBarPals[0]));
+}
+
+// BlkPacket_Battle: which palette a Game Boy screen position is colored with
+static const u16 *RedAreaPalette(s32 gx, s32 gy)
+{
+    if (gx >= 88 && gy < 56)
+        return sAnim.targetPal;                      // the foe's picture (pal 3)
+    if (gy >= 96 || (gx < 72 && gy >= 32))
+        return sAnim.attackerPal;                    // the message box and our Moemon (pal 2)
+    if (gx >= 8 && gx < 88 && gy < 32)
+        return sAnim.barPal[1];                      // the foe's HP bar (pal 1)
+    return sAnim.barPal[0];                          // everything else (pal 0: our HP bar)
 }
 
 // ---------------------------------------------------------------------------
@@ -182,6 +327,10 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
     sAnim.targetSize = 7;
     Anchor(sAnim.attacker, &sAnim.ax, &sAnim.ay);
     Anchor(sAnim.target, &sAnim.tx, &sAnim.ty);
+    MonGbPalette(gBattlerSpriteIds[sAnim.target], sAnim.targetPal);
+    MonGbPalette(gBattlerSpriteIds[sAnim.attacker], sAnim.attackerPal);
+    BarPalette(sAnim.attacker, sAnim.barPal[0]);
+    BarPalette(sAnim.target, sAnim.barPal[1]);
     // Emerald's ball rests at the target's sprite coords + (0, 24) (AnimTask_ThrowBall's target 16 up,
     // then SpriteCB_Ball_Bounce drops it 40); the GB balls rest at (120, 48) / (128, 48), their 12x12 art
     // 2 / 1 px right of and 2 px below the middle of their 16x16 compared with Emerald's (measured on
@@ -323,7 +472,12 @@ static void DrawSprites(u16 *frame, u16 index)
     {
         const struct LegacyAnimSprite *s = &tl->sprites[f->first + i];
         if (sAnim.game == MP_SPECIAL_GENESIS)
-            DrawTile(frame, sRedAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags, sRedShades);
+            DrawTile(frame, sRedAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags,
+                     RedAreaPalette(s->x + 4, s->y + 4));
+        else if (!sAnim.active && sAnim.kept)
+            // Crystal: the caught ball stays with anim_keepsprites, and BattleAnim_ClearOAM moves
+            // every kept sprite to PAL_BATTLE_OB_ENEMY, the caught Pokémon's own palette
+            DrawTile(frame, sGscAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags, sAnim.targetPal);
         else
             DrawTile(frame, sGscAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags, gscColors[(s->flags >> 4) & 1]);
     }
@@ -400,6 +554,7 @@ static struct {
     bool8 mirror;                  // a back picture (Red mirrors its smoke onto the player's side)
     u32 lastTick;
     const struct LegacyStep *steps;
+    u16 pal[4];                    // Red: the smoke is in the Moemon's own area, so in its colors
 } sMove[MAX_BATTLERS_COUNT];
 
 // The ball this battler's Moemon came in, if one of these and its own look applies
@@ -450,6 +605,7 @@ static bool8 StartMove(u8 battler, bool8 recall)
     else
         sMove[battler].steps = recall ? sGscBack : sGscOut;
     sMove[battler].size = recall ? 7 : 0;
+    MonGbPalette(sMove[battler].sprite, sMove[battler].pal);
     if (!recall)
         sMove[battler].poof = game == MP_SPECIAL_GENESIS ? TL_RED_POOF : TL_GSC_POOF;
     else if (game == MP_SPECIAL_EPOCH)
@@ -540,7 +696,7 @@ static void DrawMoves(u16 *frame)
             s32 i;
             u8 c;
             for (c = 0; c < 4; c++)
-                colors[c] = sMove[b].game == MP_SPECIAL_GENESIS ? sRedShades[c]
+                colors[c] = sMove[b].game == MP_SPECIAL_GENESIS ? sMove[b].pal[c]
                           : RGB(sGscAnimPalettes[0][c][0], sGscAnimPalettes[0][c][1], sGscAnimPalettes[0][c][2]);
             for (i = f->count - 1; i >= 0; i--)
             {
