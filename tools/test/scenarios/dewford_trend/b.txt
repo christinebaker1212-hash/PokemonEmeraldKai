@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+mp trend
+waitlog 4000 trend: from player
+wait 60
+mp trend
+wait 200
+quit

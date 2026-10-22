@@ -1,0 +1,7 @@
+# BOB's save has broken trendy phrases ("??? ???", words this game doesn't have) at the top. They're never mixed into
+# ALICE's game, and BOB's own get new phrases (the overworld check every ~10 s, or the mix itself)
+MODE=2
+TMO=150
+EXPECT_A=("mix: applied" "[test] trends[0]:")
+EXPECT_B=("mix: applied")
+UNEXPECT_A=("???")

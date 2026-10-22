@@ -487,7 +487,7 @@ void CopyMatricesToOamBuffer(void)
 void AddSpritesToOamBuffer(void)
 {
     u8 i = 0;
-    u8 oamIndex = 0;
+    u16 oamIndex = 0;   // Moemon PC: up to 256 entries (an 8-bit index never reached the slot machine's limit)
 
     while (i < MAX_SPRITES)
     {
@@ -1720,7 +1720,7 @@ void SetSubspriteTables(struct Sprite *sprite, const struct SubspriteTable *subs
     sprite->subspriteMode = SUBSPRITES_ON;
 }
 
-bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u8 *oamIndex)
+bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
 {
     if (*oamIndex >= gOamLimit)
         return TRUE;
@@ -1737,7 +1737,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u8 *oamIndex)
     }
 }
 
-bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u8 *oamIndex)
+bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u16 *oamIndex)
 {
     const struct SubspriteTable *subspriteTable;
     struct OamData *oam;

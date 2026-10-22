@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 mix: applied
+wait 30
+mp trends
+wait 900
+mp trends
+quit

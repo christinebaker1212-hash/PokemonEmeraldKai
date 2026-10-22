@@ -769,3 +769,9 @@ bool8 MP_IsScriptMenuOpen(void)
 {
     return FuncIsActiveTask(Task_HandleMultichoiceInput);
 }
+
+// Moemon Co-op: tests wait for a script's YES / NO box (mp_debug.c "yesno")
+bool8 MP_ScriptYesNoOpen(void)
+{
+    return FuncIsActiveTask(Task_HandleYesNoInput);
+}

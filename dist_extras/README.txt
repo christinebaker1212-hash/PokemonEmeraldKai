@@ -455,6 +455,10 @@ RECORD MIXING   Happens by itself while friends are online (when someone
                 the rest, just like mixing records at a MOEMON CENTER.
                 (SECRET BASES only arrive once you have SECRET POWER, like in
                 the original.)
+DEWFORD TREND   Online, a phrase anyone tells the boy outside Dewford Hall
+                is the new trend right away, in everyone's game (alone, the
+                original rules apply). Broken phrases from old saves (shown
+                as ??? ???) are replaced by new ones and never mixed in.
 SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
                 you straight into their base, decorations and all (you can
                 battle its owner). Leaving puts you outside it, on its route.

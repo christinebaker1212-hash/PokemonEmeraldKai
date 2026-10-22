@@ -456,6 +456,25 @@ static void EnsurePalette(u8 id, u16 *palOut)
     }
 }
 
+// A menu's copy of a remote player's object (the shop's map view) gets their palette
+void MP_Overworld_MenuSpritePalette(u8 spriteId, u16 graphicsId)
+{
+    u16 pal[16];
+    u8 id, slot;
+    struct SpritePalette sp;
+    if (spriteId >= MAX_SPRITES || graphicsId < OBJ_EVENT_GFX_MP_REMOTE(0) || graphicsId > OBJ_EVENT_GFX_MP_LAST)
+        return;
+    id = graphicsId - OBJ_EVENT_GFX_MP_REMOTE(0);
+    MP_Avatar_GetRemotePalette(id, AvatarModeOf(id), pal);
+    sp.data = pal;
+    sp.tag = TAG_REMOTE_PAL_BASE + id;
+    slot = IndexOfSpritePaletteTag(sp.tag);
+    if (slot == 0xFF)
+        slot = LoadSpritePalette(&sp);
+    if (slot != 0xFF)
+        gSprites[spriteId].oam.paletteNum = slot;
+}
+
 static void RefreshGraphics(u8 id, struct ObjectEvent *obj)
 {
     void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes);

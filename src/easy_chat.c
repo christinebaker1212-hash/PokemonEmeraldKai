@@ -5330,6 +5330,18 @@ static bool8 IsEasyChatWordInvalid(u16 easyChatWord)
         return FALSE;
 }
 
+// Moemon Co-op: tests wait for the word screen (mp_debug.c "easychat")
+bool8 MP_EasyChatOpen(void)
+{
+    return gMain.callback2 == CB2_EasyChatScreen;
+}
+
+// Moemon Co-op: for dewford_trend.c (a saved or mixed-in trend with words this game doesn't have)
+bool8 MP_IsEasyChatWordInvalid(u16 easyChatWord)
+{
+    return easyChatWord == EC_EMPTY_WORD || IsEasyChatWordInvalid(easyChatWord);
+}
+
 bool8 IsBardWordInvalid(u16 easyChatWord)
 {
     int numWordsInGroup;

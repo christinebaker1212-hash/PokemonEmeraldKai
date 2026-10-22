@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "easy_chat.h"
+#include "field_screen_effect.h"
 #include "field_player_avatar.h"
 #include "event_object_movement.h"
 #include "text_window.h"
@@ -173,6 +175,16 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(2);
     if (strcmp(name, "message") == 0)
         return MP_Setup_ScreenIs(4);
+    if (strcmp(name, "easychat") == 0)   // the easy chat word screen is up
+    {
+        bool8 MP_EasyChatOpen(void);
+        return MP_EasyChatOpen();
+    }
+    if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up
+    {
+        bool8 MP_ScriptYesNoOpen(void);
+        return MP_ScriptYesNoOpen();
+    }
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
     if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
@@ -875,6 +887,54 @@ void MP_TestCommand(const char *cmd, const char *arg)
             MP_BallFx_SetBoxMon(&gPlayerParty[slot].box, &fx);
             MP_BallFx_OfMon(&gPlayerParty[slot], &fx);
             printf("[test] ballfx: slot %d form %d part %d color %d recall %d sound %d\n", slot, fx.form, fx.part, fx.color, fx.recall, fx.sound);
+        }
+    }
+    else if (strcmp(cmd, "settrend") == 0)
+    {
+        // settrend SLOT W1 W2 TRENDINESS - put a phrase straight into a saved trend slot (hex words)
+        unsigned slot = 0, w1 = 0, w2 = 0, t = 50;
+        if (sscanf(arg, "%u %x %x %u", &slot, &w1, &w2, &t) >= 3 && slot < SAVED_TRENDS_COUNT)
+        {
+            gSaveBlock1Ptr->dewfordTrends[slot].words[0] = w1;
+            gSaveBlock1Ptr->dewfordTrends[slot].words[1] = w2;
+            gSaveBlock1Ptr->dewfordTrends[slot].trendiness = t;
+            gSaveBlock1Ptr->dewfordTrends[slot].maxTrendiness = t > 127 ? 127 : (t < 1 ? 1 : t);
+        }
+    }
+    else if (strcmp(cmd, "trends") == 0)
+    {
+        int i;
+        for (i = 0; i < SAVED_TRENDS_COUNT; i++)
+        {
+            char ascii[64];
+            u8 buf[64];
+            ConvertEasyChatWordsToString(buf, gSaveBlock1Ptr->dewfordTrends[i].words, 2, 1);
+            MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+            printf("[test] trends[%d]: %04x %04x \"%s\" t %d max %d gain %d rand %04x\n", i, gSaveBlock1Ptr->dewfordTrends[i].words[0],
+                   gSaveBlock1Ptr->dewfordTrends[i].words[1], ascii, gSaveBlock1Ptr->dewfordTrends[i].trendiness,
+                   gSaveBlock1Ptr->dewfordTrends[i].maxTrendiness, gSaveBlock1Ptr->dewfordTrends[i].gainingTrendiness,
+                   gSaveBlock1Ptr->dewfordTrends[i].rand);
+        }
+    }
+    else if (strcmp(cmd, "trend") == 0)
+    {
+        // trend - Dewford's current trendy phrase
+        char ascii[64];
+        u8 buf[64];
+        ConvertEasyChatWordsToString(buf, gSaveBlock1Ptr->dewfordTrends[0].words, 2, 1);
+        MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+        printf("[test] trend: %04x %04x \"%s\" (trendiness %d)\n", gSaveBlock1Ptr->dewfordTrends[0].words[0],
+               gSaveBlock1Ptr->dewfordTrends[0].words[1], ascii, gSaveBlock1Ptr->dewfordTrends[0].trendiness);
+    }
+    else if (strcmp(cmd, "warp") == 0)
+    {
+        // warp GROUP,NUM,X,Y - a walk-in warp to that map spot (on the field)
+        int g = 0, n = 0, x = 0, y = 0;
+        if (sscanf(arg, "%d,%d,%d,%d", &g, &n, &x, &y) == 4)
+        {
+            SetWarpDestination(g, n, WARP_ID_NONE, x, y);
+            DoWarp();
+            printf("[test] warp: %d,%d %d,%d\n", g, n, x, y);
         }
     }
     else if (strcmp(cmd, "ballstyle") == 0)

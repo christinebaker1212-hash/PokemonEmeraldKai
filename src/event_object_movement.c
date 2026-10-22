@@ -524,7 +524,9 @@ static struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_LOCAL}, // Moemon Co-op custom local avatar
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK},  // Moemon Co-op sprite pack
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK_DIVE},
-#ifdef BUGFIX
+#if defined(BUGFIX) || defined(PORTABLE)
+    // Moemon Co-op: the end marker the search looks for; without it a tag that isn't here
+    // (a co-op avatar's, e.g. in the shop's map view) made the search loop forever on PC
     {NULL,                                  OBJ_EVENT_PAL_TAG_NONE},
 #else
     {}, // BUG: FindObjectEventPaletteIndexByTag looks for OBJ_EVENT_PAL_TAG_NONE and not 0x0.
@@ -2041,7 +2043,7 @@ static void LoadObjectEventPalette(u16 paletteTag)
     u16 i = FindObjectEventPaletteIndexByTag(paletteTag);
 
 // FindObjectEventPaletteIndexByTag returns 0xFF on failure, not OBJ_EVENT_PAL_TAG_NONE.
-#ifdef BUGFIX
+#if defined(BUGFIX) || defined(PORTABLE)
     if (i != 0xFF)
 #else
     if (i != OBJ_EVENT_PAL_TAG_NONE)
@@ -2071,6 +2073,8 @@ void PatchObjectPalette(u16 paletteTag, u8 paletteSlot)
     // paletteTag is assumed to exist in sObjectEventSpritePalettes
     u8 paletteIndex = FindObjectEventPaletteIndexByTag(paletteTag);
 
+    if (paletteIndex == 0xFF)
+        return; // Moemon Co-op: not one of these (it would read past the table)
     MP_VacatePaletteSlot(paletteSlot); // Moemon Co-op: a co-op palette borrowed it
     LoadPalette(sObjectEventSpritePalettes[paletteIndex].data, OBJ_PLTT_ID(paletteSlot), PLTT_SIZE_4BPP);
 }

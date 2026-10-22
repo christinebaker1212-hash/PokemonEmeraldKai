@@ -282,6 +282,10 @@ bool8 MP_IsConnected(void);
 const char *MP_StatusText(void);
 void MP_SaveConfig(void);
 void MP_SendRelay(u8 target, const void *data, u16 len);
+void MP_Linkx_SendTrend(const u16 *words, u16 rand);
+void MP_Dewford_PutTrendOnTop(const u16 *phrase, u16 rand);
+bool8 MP_Dewford_Sanitize(void);
+bool8 MP_IsEasyChatWordInvalid(u16 easyChatWord);
 void MP_SendAppearance(void);
 bool8 MP_IsInOverworld(void);
 bool8 MP_IsLocalFree(void);
@@ -299,6 +303,7 @@ const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId);
 void MP_Avatar_ApplyLocal(void);     // recolor + refresh the local player sprite
 void MP_Avatar_BuildRemote(u8 id);   // rebuild a remote player's gfx info + palette
 void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst);
+void MP_Overworld_MenuSpritePalette(u8 spriteId, u16 graphicsId);
 const u16 *MP_Avatar_OriginalPalette(u16 tag);
 const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId); // sprite pack bike/surf/...
 u16 MP_Avatar_RemoteFrontPic(u8 id);

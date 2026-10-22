@@ -1221,6 +1221,8 @@ void MP_Events_Update(void)
     {
         sFreeTimer = 0;
         MP_Gatcha_GrantFree();
+        if (MP_Dewford_Sanitize())
+            MPNet_Log("trend: replaced broken saved phrases");
     }
     if (!Online())
     {

@@ -1,0 +1,39 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 30
+press LEFT 2
+wait 20
+pressuntil A yesno 3000
+wait 20
+press DOWN 2
+wait 10
+press A 2
+wait 60
+pressuntil A easychat 3000
+wait 90
+shot groups
+press A 2
+wait 60
+press A 2
+wait 60
+press A 2
+wait 60
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+press DOWN 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 60
+shot phrase
+press START 2
+wait 60
+shot ok
+wait 30
+pressuntil A field 3000
+mp trend
+wait 300
+quit

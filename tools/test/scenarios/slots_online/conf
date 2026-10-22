@@ -1,0 +1,10 @@
+# Mauville Game Corner online: ALICE plays a slot machine with BOB in the room, spins once and quits back to the map
+# (the slot machine uses all 256 OAM entries; an 8-bit OAM index never reached that and the game hung)
+MODE=2
+WARP=10,3,1,6
+WARP_B=10,3,1,8
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+EXPECT_A=("slots_open.bmp" "slots_spun.bmp" "slots online done")
