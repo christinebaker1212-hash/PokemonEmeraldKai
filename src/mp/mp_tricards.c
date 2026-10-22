@@ -69,7 +69,6 @@ struct Card
 {
     bool8 used;
     bool8 dirty;
-    u8 owner;           // 0-2: owner strip color, 0xFF: none (foes)
     u8 name[POKEMON_NAME_LENGTH + 1];
     u8 letter;          // 0, or A/B/C when a card on the same side has the same name
     u8 gender;          // GENDER_*
@@ -127,15 +126,6 @@ static u8 DrawText(struct Card *c, const u8 *str, u8 x, u8 y, u8 maxX, u8 color)
     }
     RemoveWindow(winId);
     return right;
-}
-
-static void FillRect(struct Card *c, int x0, int y0, int x1, int y1, u8 color)
-{
-    int x, y;
-    for (y = y0; y <= y1; y++)
-        for (x = x0; x <= x1; x++)
-            if (x >= 0 && x < CARD_W && y >= 0 && y < CARD_H)
-                c->pix[y][x] = color;
 }
 
 // The original game's 20x8 status tag at (x, y). Returns the x after it.
@@ -207,9 +197,6 @@ static void Render(struct Card *c)
     u8 lx = body + 4, right = body + INSIDE_RIGHT, nameMax = right + 1, x, lv[8];
 
     memcpy(c->pix, c->team ? sTriCardTeamFrame : sTriCardFoeFrame, sizeof(c->pix));
-    // a linked Triple: the owner's seat color down the left inside the ring
-    if (c->owner < 3)
-        FillRect(c, body + 2, 4, body + 3, 17, TC_OWN1 + c->owner);
     // row 1: the name and the gender, and the letter at the right when names repeat
     if (c->letter)
     {
@@ -245,16 +232,9 @@ static void Render(struct Card *c)
 
 void MP_TriCards_Begin(void)
 {
-    u8 i;
     memset(sCards, 0, sizeof(sCards));
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
-        sCards[i].owner = 0xFF;
     if (IndexOfSpritePaletteTag(TAG_TRICARD_PAL) == 0xFF)
         LoadSpritePalette(&sCardSpritePal);
-    // A linked triple: battler 2i belongs to link player i, the same color on every screen
-    if (gMpCoopBattle && IS_TRIPLE_BATTLE())
-        for (i = 0; i < 3; i++)
-            sCards[i * 2].owner = i;
     sActive = TRUE;
 }
 
@@ -275,15 +255,6 @@ void MP_TriCards_End(void)
 bool8 MP_TriCards_Active(void)
 {
     return sActive && IS_TRIPLE_BATTLE();
-}
-
-void MP_TriCards_SetOwner(u8 battler, u8 seat)
-{
-    if (battler < MAX_BATTLERS_COUNT)
-    {
-        sCards[battler].owner = seat;
-        sCards[battler].dirty = TRUE;
-    }
 }
 
 static u8 StatusOf(u32 status1)

@@ -330,7 +330,7 @@ trainers with 3+ Moemon (CoopTrainerTeamSize: partySize + 1 with TEAM PADDING; s
 first joins (TripleEligible, B = double now).
 Rules: target picker over six (battle_controller_player.c HandleInputChooseTargetTriple), Helping Hand on either ally,
 spread 3/4 (pokemon.c SpreadDamage), MpNextSpreadTarget, battle_util.c MpTripleChooseTarget, replacements
-(MP_TripleSwitchRange / MP_IsPartyIdOnSide). Cards: src/mp/mp_tricards.c over the frame (owner strip = seat color),
+(MP_TripleSwitchRange / MP_IsPartyIdOnSide). Cards: src/mp/mp_tricards.c over the frame (no owner strips since the new card art),
 healthboxes parked below the screen. Party screen order MP_TripleFixPartyOrder (allies' slots 1,3,4,5 gold).
 Second custom back pic slot TRAINER_BACK_PIC_MP_PARTNER2. Debug: `mp triple S:L S:L S:L [...]` (local, one player
 commands all three), MOEMON_TRIPLEDEBUG=1 (logs; card visibility). Tests: tri_wild, tri_trainer, tri_catch, tri_heal,

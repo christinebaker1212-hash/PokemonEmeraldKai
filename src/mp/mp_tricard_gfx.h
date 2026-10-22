@@ -34,9 +34,6 @@ enum {
     TC_ST_SLP,
     TC_ST_FRZ,
     TC_ST_BRN,
-    TC_OWN1,
-    TC_OWN2,
-    TC_OWN3,
     TC_COUNT
 };
 
@@ -75,9 +72,6 @@ static const u16 sTriCardColors[TC_COUNT] = {
     [TC_ST_SLP] = 0x4694,
     [TC_ST_FRZ] = 0x72D1,
     [TC_ST_BRN] = 0x29DC,
-    [TC_OWN1] = 0x215D,
-    [TC_OWN2] = 0x7628,
-    [TC_OWN3] = 0x26E9,
 };
 
 #define TRICARD_FRAME_W 80

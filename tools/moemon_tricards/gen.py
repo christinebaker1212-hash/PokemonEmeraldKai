@@ -59,12 +59,9 @@ ROLES = [
     ('ST_LETTER', (255, 255, 222)),
     ('ST_AA', (222, 214, 181)),
     ('ST_PSN', None), ('ST_PAR', None), ('ST_SLP', None), ('ST_FRZ', None), ('ST_BRN', None),
-    # owner strips in a linked Triple (seat colors, as before)
-    ('OWN1', None), ('OWN2', None), ('OWN3', None),
 ]
 GBA = {  # colors given as GBA RGB(r, g, b) 0-31
     'ST_PSN': (24, 12, 24), 'ST_PAR': (23, 23, 3), 'ST_SLP': (20, 20, 17), 'ST_FRZ': (17, 22, 28), 'ST_BRN': (28, 14, 10),
-    'OWN1': (29, 10, 8), 'OWN2': (8, 17, 29), 'OWN3': (9, 23, 9),
 }
 IDX = {name: i for i, (name, _) in enumerate(ROLES)}
 
