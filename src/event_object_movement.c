@@ -474,6 +474,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #define OBJ_EVENT_PAL_TAG_MP_LOCAL                0x1130
 #define OBJ_EVENT_PAL_TAG_MP_PACK                 0x1131
 #define OBJ_EVENT_PAL_TAG_MP_PACK_DIVE            0x1132
+#define OBJ_EVENT_PAL_TAG_MP_BODY                 0x1133
 
 #include "data/object_events/object_event_graphics_info_pointers.h"
 #include "data/field_effects/field_effect_object_template_pointers.h"
@@ -524,6 +525,7 @@ static struct SpritePalette sObjectEventSpritePalettes[] = {
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_LOCAL}, // Moemon Co-op custom local avatar
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK},  // Moemon Co-op sprite pack
     {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_PACK_DIVE},
+    {gObjectEventPal_Brendan,               OBJ_EVENT_PAL_TAG_MP_BODY},  // Brendan's / May's sprites for the other body
 #if defined(BUGFIX) || defined(PORTABLE)
     // Moemon Co-op: the end marker the search looks for; without it a tag that isn't here
     // (a co-op avatar's, e.g. in the shop's map view) made the search loop forever on PC
@@ -2127,6 +2129,26 @@ void LoadPlayerObjectReflectionPalette(u16 tag, u8 slot)
             PatchObjectPalette(sPlayerReflectionPaletteSets[i].data[sCurrentReflectionType], gReflectionEffectPaletteMap[slot]);
             return;
         }
+    }
+    // Moemon Co-op: a look of the player's own (NPC sprite, CREATE, sprite pack) reflects in its own
+    // colors, washed out like Brendan's / May's reflection palettes (they were left with Brendan's)
+    if (tag >= OBJ_EVENT_PAL_TAG_MP_LOCAL && tag <= OBJ_EVENT_PAL_TAG_MP_BODY)
+    {
+        const u16 *pal = MP_GetObjectEventPaletteData(tag);
+        u16 refl[16];
+        if (pal == NULL)
+            return;
+        for (i = 0; i < 16; i++)
+        {
+            u16 c = pal[i];
+            u16 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
+            r += (31 - r) * 42 / 100;
+            g += (31 - g) * 42 / 100;
+            b += (31 - b) * 42 / 100;
+            refl[i] = r | (g << 5) | (b << 10);
+        }
+        MP_VacatePaletteSlot(gReflectionEffectPaletteMap[slot]);
+        LoadPalette(refl, OBJ_PLTT_ID(gReflectionEffectPaletteMap[slot]), PLTT_SIZE_4BPP);
     }
 }
 

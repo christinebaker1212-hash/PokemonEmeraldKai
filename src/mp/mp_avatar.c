@@ -22,6 +22,7 @@
 #include "mp.h"
 #include "event_data.h"
 #include "mp_pack.h"
+#include "mp_hybrid.h"
 #include "mp_gfx_externs.h"
 #include "data.h"
 #include "event_object_movement.h"
@@ -43,6 +44,7 @@
 #define OBJ_EVENT_PAL_TAG_MP_LOCAL          0x1130
 #define OBJ_EVENT_PAL_TAG_MP_PACK           0x1131
 #define OBJ_EVENT_PAL_TAG_MP_PACK_DIVE      0x1132
+#define OBJ_EVENT_PAL_TAG_MP_BODY           0x1133
 
 #define PACK_DIR "sprites"
 #define MAX_PACK_FILES 32
@@ -798,6 +800,76 @@ static bool8 PackHasState(const struct MpPack *pack, u8 state)
     return pack && pack->slot[sStatePackSlot[state]] != NULL;
 }
 
+// Pokemon among the NPC sprites: no Brendan / May body for them
+static bool8 IsPokemonNpc(u16 gfxId)
+{
+    return gfxId == OBJ_EVENT_GFX_WINGULL || gfxId == OBJ_EVENT_GFX_KIRLIA || gfxId == OBJ_EVENT_GFX_DUSCLOPS
+        || gfxId == OBJ_EVENT_GFX_MEW;
+}
+
+// How a look shows an action (any state but walking). The look's base has been resolved
+// (DEFAULT is BRENDAN or MAY by the save's gender).
+enum {
+    ACT_DEFAULT,   // Brendan's / May's own sprites (ActionGender), recolored
+    ACT_PACK,      // the sprite pack's
+    ACT_KIT,       // CREATE's own (the Mach Bike)
+    ACT_HYBRID,    // Brendan's / May's body with the look's head (mp_hybrid.c)
+    ACT_OWN,       // a Pokemon's own standing / walking frames
+    ACT_STANDIN,   // the look's standing frame (StandInInfo)
+};
+
+// Whose body an action is drawn on: Brendan's or May's
+static u8 ActionGender(const struct MpAppearance *app)
+{
+    const struct MpSpriteEntry *e;
+    switch (app->base)
+    {
+    case MP_BASE_BRENDAN:
+    case MP_BASE_RS_BRENDAN:
+        return MALE;
+    case MP_BASE_MAY:
+    case MP_BASE_RS_MAY:
+        return FEMALE;
+    case MP_BASE_CREATED:
+        if (app->recipe.made)
+            return app->recipe.girl ? FEMALE : MALE;
+        break;
+    case MP_BASE_NPC:
+        if ((e = MP_Avatar_FindCatalog(app->gfxId)) != NULL)
+            return e->gender == FEMALE ? FEMALE : MALE;
+        break;
+    }
+    return app->gender == FEMALE ? FEMALE : MALE;
+}
+
+static u8 ActionKind(const struct MpAppearance *app, const struct MpPack *pack, u8 state)
+{
+    const struct ObjectEventGraphicsInfo *npc;
+    if (PackHasState(pack, state))
+        return ACT_PACK;
+    if (PackHasState(pack, ST_FOOT))
+        return state >= ST_FIELD_MOVE ? ACT_STANDIN : ACT_DEFAULT;   // a drawn look: as before
+    if (state == ST_UNDERWATER)
+        return ACT_DEFAULT;   // a dark shape, the same for everyone
+    switch (app->base)
+    {
+    case MP_BASE_CREATED:
+        if (!app->recipe.made)
+            break;
+        return state == ST_MACH_BIKE ? ACT_KIT : ACT_HYBRID;
+    case MP_BASE_RS_BRENDAN:
+    case MP_BASE_RS_MAY:
+        return ACT_HYBRID;
+    case MP_BASE_NPC:
+        if ((npc = NpcInfo(app->gfxId)) == NULL)
+            break;
+        if (npc->width == 16 && (npc->height == 32 || npc->height == 16) && !IsPokemonNpc(app->gfxId))
+            return ACT_HYBRID;
+        return state >= ST_FIELD_MOVE ? ACT_STANDIN : ACT_OWN;
+    }
+    return ACT_DEFAULT;
+}
+
 // Graphics info storage:
 //   [0]                  local player on foot (OBJ_EVENT_GFX_MP_LOCAL)
 //   [1 + id]             remote players
@@ -805,12 +877,141 @@ static bool8 PackHasState(const struct MpPack *pack, u8 state)
 #define LOCAL_STATE(st) (1 + MP_MAX_PLAYERS + (st) - 1)
 #define NUM_MP_GFX (1 + MP_MAX_PLAYERS + ST_COUNT - 1)
 #define MAX_FRAMES 27
+#define LOCAL_TILE_BYTES (32 * 32 / 2)   // the local player's sprite: its biggest frames
 
 static struct ObjectEventGraphicsInfo sMpGfxInfo[NUM_MP_GFX];
 static struct SpriteFrameImage sMpFrames[NUM_MP_GFX][MAX_FRAMES];
+static u8 sHyTiles[NUM_MP_GFX][MP_HY_MAX_FRAMES * 32 * 32 / 2];   // ACT_HYBRID frames
+// Entries in the player's picture tables for each state (several can show the same frame)
+static const u8 sStatePicCount[ST_COUNT] = {18, 9, 27, 12, 9, 5, 12, 9, 1};
 static u32 sLocalStateBuilt[ST_COUNT];
 static u16 sOrigPalBrendan[16], sOrigPalMay[16], sOrigPalRSBrendan[16], sOrigPalRSMay[16];
 static u16 sLocalPalBrendan[16], sLocalPalMay[16], sLocalPalCustom[16], sLocalPalPack[16], sLocalPalPackDive[16];
+static u16 sLocalPalBody[16];   // Brendan's / May's sprites for a look of the other gender's body
+
+static void StatePalette(const struct MpAppearance *app, const struct MpPack *pack, u8 cacheSlot, u8 state, u16 *dst);
+static struct MpAppearance RemoteAppearance(u8 id);
+
+// The look's head, standing frames and palette for mp_hybrid.c
+static bool8 HybridLook(const struct MpAppearance *app, u8 cacheSlot, struct MpHybridLook *look, u16 *pal)
+{
+    const struct ObjectEventGraphicsInfo *info = NULL;
+    u8 i;
+    memset(look, 0, sizeof(*look));
+    StatePalette(app, NULL, cacheSlot, ST_FOOT, pal);
+    look->pal = pal;
+    switch (app->base)
+    {
+    case MP_BASE_NPC:        info = NpcInfo(app->gfxId); break;
+    case MP_BASE_RS_BRENDAN: info = &gObjectEventGraphicsInfo_RubySapphireBrendan; break;
+    case MP_BASE_RS_MAY:     info = &gObjectEventGraphicsInfo_RubySapphireMay; break;
+    case MP_BASE_CREATED:
+    {
+        const struct MpCreatedGfx *g;
+        u16 skin[4];
+        if (!app->recipe.made)
+            return FALSE;
+        g = MP_Created_Gfx(cacheSlot, &app->recipe);
+        MP_Created_FieldHeadInfo(&app->recipe, look->neck, skin);
+        for (i = 0; i < 3; i++)
+            look->frame[i] = g->ow[i];
+        look->w = look->h = 32;
+        // The palette colors nearest to the skin's shades (lightest first)
+        for (i = 0; i < 4; i++)
+        {
+            u8 j, best = 1, k;
+            u32 bestD = 0xFFFFFFFF;
+            for (j = 1; j < 16; j++)
+            {
+                int dr = (pal[j] & 31) - (skin[i] & 31), dg = ((pal[j] >> 5) & 31) - ((skin[i] >> 5) & 31);
+                int db = ((pal[j] >> 10) & 31) - ((skin[i] >> 10) & 31);
+                u32 d = dr * dr + dg * dg + db * db;
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = j;
+                }
+            }
+            for (k = 0; k < look->nSkin && look->skin[k] != best; k++)
+                ;
+            if (k == look->nSkin)
+                look->skin[look->nSkin++] = best;
+        }
+        look->kaiArms = FALSE;
+        return TRUE;
+    }
+    default:
+        return FALSE;
+    }
+    if (info == NULL || info->width != 16 || (info->height != 32 && info->height != 16))
+        return FALSE;
+    for (i = 0; i < 3; i++)
+        look->frame[i] = info->images[i].data;
+    look->w = 16;
+    look->h = info->height;
+    look->neck[0] = look->neck[1] = look->neck[2] = (info->height == 32) ? 23 : 9;
+    for (i = 0; i < 4; i++)
+        look->skin[i] = 1 + i;   // every Kai sprite's skin shades
+    look->nSkin = 4;
+    look->kaiArms = (info->height == 32);
+    return TRUE;
+}
+
+// ACT_HYBRID frames for a state into an info. FALSE (info untouched) when they can't be made.
+static bool8 BuildHybridInfo(int gfxSlot, const struct MpAppearance *app, u8 state, u8 cacheSlot)
+{
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[gfxSlot];
+    u8 gender = ActionGender(app);
+    const struct ObjectEventGraphicsInfo *def = DefaultInfo(state, gender);
+    struct MpHybridLook look;
+    u16 pal[16];
+    u32 frameBytes;
+    u8 n, i;
+
+    if (!HybridLook(app, cacheSlot, &look, pal))
+        return FALSE;
+    n = MP_Hybrid_Compose(&look, gender == FEMALE, state, def->images[0].data,
+                          gender == FEMALE ? sOrigPalMay : sOrigPalBrendan,
+                          sHyTiles[gfxSlot], MP_HY_MAX_FRAMES, &frameBytes);
+    if (n == 0 || frameBytes != def->size || sStatePicCount[state] > MAX_FRAMES)
+        return FALSE;
+    for (i = 0; i < sStatePicCount[state]; i++)
+    {
+        // The picture table's entry -> the frame it shows
+        u32 off = (u32)((const u8 *)def->images[i].data - (const u8 *)def->images[0].data);
+        if (off % frameBytes != 0 || off / frameBytes >= n)
+            return FALSE;
+        sMpFrames[gfxSlot][i].data = sHyTiles[gfxSlot] + off;
+        sMpFrames[gfxSlot][i].size = frameBytes;
+    }
+    *info = *def;
+    info->images = sMpFrames[gfxSlot];
+    return TRUE;
+}
+
+// ACT_OWN: a Pokemon look's own frames for a bike or surfing (walking frames for the bikes' riding)
+static void BuildOwnInfo(int gfxSlot, const struct MpAppearance *app, u8 state)
+{
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[gfxSlot];
+    const struct ObjectEventGraphicsInfo *foot = NpcInfo(app->gfxId);
+    u8 gender = ActionGender(app), i;
+    const struct ObjectEventGraphicsInfo *def = DefaultInfo(state, gender);
+    for (i = 0; i < sStatePicCount[state] && i < MAX_FRAMES; i++)
+    {
+        u8 f;
+        u32 off = (u32)((const u8 *)def->images[i].data - (const u8 *)def->images[0].data);
+        u8 src = off / def->size, dir = MP_Hybrid_FrameDir(gender == FEMALE, state, src);
+        if ((state == ST_MACH_BIKE || state == ST_ACRO_BIKE) && src < 9)
+            f = src;                                 // the same order as walking
+        else
+            f = (dir == 1) ? 1 : (dir >= 2) ? 2 : 0;   // standing (E is W turned by the animation)
+        sMpFrames[gfxSlot][i] = foot->images[f];
+    }
+    *info = *foot;
+    info->images = sMpFrames[gfxSlot];
+    info->anims = def->anims;
+    info->inanimate = FALSE;
+}
 
 // Fills an info for one state. Palette fields are set by the callers.
 static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const struct MpPack *pack, u8 state)
@@ -873,7 +1074,19 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
 
     if (state != ST_FOOT)
     {
-        *info = *def;
+        u8 cacheSlot = (gfxSlot >= 1 && gfxSlot <= MP_MAX_PLAYERS) ? gfxSlot - 1 : MP_CR_CACHE_LOCAL;
+        switch (ActionKind(app, pack, state))
+        {
+        case ACT_HYBRID:
+            if (BuildHybridInfo(gfxSlot, app, state, cacheSlot))
+                return;
+            MPNet_Log("avatar: no action frames for state %d (base %d, sprite %d)", state, app->base, app->gfxId);
+            break;
+        case ACT_OWN:
+            BuildOwnInfo(gfxSlot, app, state);
+            return;
+        }
+        *info = *DefaultInfo(state, ActionGender(app));
         return;
     }
 
@@ -931,9 +1144,19 @@ static void PackPalette(const struct MpAppearance *app, const struct MpPack *pac
 }
 
 // Palette of a character in a state (no pack)
-static void StatePalette(const struct MpAppearance *app, u8 cacheSlot, u8 state, u16 *dst)
+static void StatePalette(const struct MpAppearance *app, const struct MpPack *pack, u8 cacheSlot, u8 state, u16 *dst)
 {
-    bool8 female = (app->gender == FEMALE);
+    bool8 female = (ActionGender(app) == FEMALE);
+    if (state != ST_FOOT)
+    {
+        // Actions drawn with the look's own colors use its walking palette
+        u8 kind = ActionKind(app, pack, state);
+        if (kind == ACT_HYBRID || kind == ACT_OWN || kind == ACT_STANDIN)
+        {
+            StatePalette(app, pack, cacheSlot, ST_FOOT, dst);
+            return;
+        }
+    }
     if (IsCreated(app) && (state == ST_FOOT || state == ST_MACH_BIKE))
     {
         memcpy(dst, MP_Created_Gfx(cacheSlot, &app->recipe)->owPal, 32);
@@ -991,13 +1214,13 @@ void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst)
 {
     struct MpPack buf;
     const struct MpPack *pack = RemotePack(id, &buf);
-    struct MpAppearance app = gMpPlayers[id].app;
+    struct MpAppearance app = RemoteAppearance(id);
     if (avatarMode >= ST_COUNT)
         avatarMode = ST_FOOT;
     if (PackHasState(pack, avatarMode))
         PackPalette(&app, pack, avatarMode, dst);
     else
-        StatePalette(&app, id, avatarMode, dst);
+        StatePalette(&app, pack, id, avatarMode, dst);
 }
 
 // ---------------------------------------------------------------------------
@@ -1021,6 +1244,8 @@ void MP_Avatar_Init(void)
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_PACK, sLocalPalPack);
     memcpy(sLocalPalPackDive, sOrigPalBrendan, 32);
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_PACK_DIVE, sLocalPalPackDive);
+    memcpy(sLocalPalBody, sOrigPalBrendan, 32);
+    MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_BODY, sLocalPalBody);
 
     if (gMpConfig.app.base == MP_BASE_CUSTOM)
         gMpConfig.app.base = MP_BASE_DEFAULT;   // old ini files
@@ -1135,66 +1360,63 @@ static const struct ObjectEventGraphicsInfo *StandInInfo(void)
     return &sStandInInfo;
 }
 
-// The action graphics ids (field move, fishing, watering, decorating) a look may lack
-static bool8 IsActionGfxId(u8 graphicsId, u8 *state)
+// The player's graphics id for an avatar state (the save's gender's), or FALSE
+static bool8 PlayerStateOfGfxId(u8 graphicsId, u8 *state)
 {
-    u8 st, g;
-    for (st = ST_FIELD_MOVE; st <= ST_DECORATING; st++)
-        for (g = 0; g < GENDER_COUNT; g++)
-            if (sStateGfxIds[st][g] == graphicsId)
-            {
-                *state = st;
-                return TRUE;
-            }
+    u8 st, g = gSaveBlock2Ptr->playerGender == FEMALE ? FEMALE : MALE;
+    for (st = ST_MACH_BIKE; st < ST_COUNT; st++)
+        if (sStateGfxIds[st][g] == graphicsId)
+        {
+            *state = st;
+            return TRUE;
+        }
     return FALSE;
 }
 
-// Sprite pack replacements for the player's bike/surf/... graphics ids
+// The local player's bike / surf / field move / fishing / watering / decorating graphics: the
+// sprite pack's, CREATE's Mach Bike, Brendan's / May's body with the look's head... NULL = the game's own.
 const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
 {
-    u8 st, g;
-    const struct MpPack *pack = LocalPack();
-    if (!sAvatarInit)
+    u8 st, kind;
+    const struct MpPack *pack;
+    struct MpAppearance app;
+    struct ObjectEventGraphicsInfo *info;
+    if (!sAvatarInit || !PlayerStateOfGfxId(graphicsId, &st))
         return NULL;
-    if (IsActionGfxId(graphicsId, &st) && !PackHasState(pack, st) && MP_LocalUsesCustomAvatar())
+    pack = LocalPack();
+    app = GetLocalAppearance();
+    kind = ActionKind(&app, pack, st);
+    if (kind == ACT_STANDIN)
         return StandInInfo();
-    if (!pack)
+    if (kind == ACT_DEFAULT && ActionGender(&app) == (gSaveBlock2Ptr->playerGender == FEMALE ? FEMALE : MALE))
+        return NULL;   // the save's own Brendan / May (their palette is recolored in RebuildLocal)
+    info = &sMpGfxInfo[LOCAL_STATE(st)];
+    if (sLocalStateBuilt[st] == sLocalVersion + 1)
+        return info;
+    if (kind == ACT_DEFAULT)
     {
-        // A created look has its own Mach Bike frames
-        struct MpAppearance app = GetLocalAppearance();
-        if (!IsCreated(&app) || (graphicsId != sStateGfxIds[ST_MACH_BIKE][MALE] && graphicsId != sStateGfxIds[ST_MACH_BIKE][FEMALE]))
-            return NULL;
-        if (sLocalStateBuilt[ST_MACH_BIKE] != sLocalVersion + 1)
-        {
-            struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[LOCAL_STATE(ST_MACH_BIKE)];
-            BuildStateInfo(LOCAL_STATE(ST_MACH_BIKE), &app, NULL, ST_MACH_BIKE);
-            info->paletteSlot = PALSLOT_PLAYER;
-            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;
-            sLocalStateBuilt[ST_MACH_BIKE] = sLocalVersion + 1;
-        }
-        return &sMpGfxInfo[LOCAL_STATE(ST_MACH_BIKE)];
+        // The other one's sprites (a BRENDAN look on a girl's save...), with a palette of their own
+        *info = *DefaultInfo(st, ActionGender(&app));
+        if (info->paletteTag == OBJ_EVENT_PAL_TAG_BRENDAN || info->paletteTag == OBJ_EVENT_PAL_TAG_MAY)
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_BODY;
     }
-    for (st = ST_MACH_BIKE; st < ST_COUNT; st++)
+    else
     {
-        for (g = 0; g < GENDER_COUNT; g++)
-        {
-            if (sStateGfxIds[st][g] != graphicsId)
-                continue;
-            if (!PackHasState(pack, st))
-                return NULL;
-            if (sLocalStateBuilt[st] != sLocalVersion + 1)
-            {
-                struct MpAppearance app = GetLocalAppearance();
-                struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[LOCAL_STATE(st)];
-                BuildStateInfo(LOCAL_STATE(st), &app, pack, st);
-                info->paletteSlot = PALSLOT_PLAYER;
-                info->paletteTag = (st == ST_UNDERWATER) ? OBJ_EVENT_PAL_TAG_MP_PACK_DIVE : OBJ_EVENT_PAL_TAG_MP_PACK;
-                sLocalStateBuilt[st] = sLocalVersion + 1;
-            }
-            return &sMpGfxInfo[LOCAL_STATE(st)];
-        }
+        BuildStateInfo(LOCAL_STATE(st), &app, pack, st);
+        info->paletteSlot = PALSLOT_PLAYER;
+        if (kind == ACT_PACK)
+            info->paletteTag = (st == ST_UNDERWATER) ? OBJ_EVENT_PAL_TAG_MP_PACK_DIVE : OBJ_EVENT_PAL_TAG_MP_PACK;
+        else if (kind == ACT_KIT)
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;   // RebuildLocal: CREATE's palette
+        else if (info->images == sMpFrames[LOCAL_STATE(st)])
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_LOCAL;  // HYBRID / OWN: the look's walking palette
+        else if (info->paletteTag == OBJ_EVENT_PAL_TAG_BRENDAN || info->paletteTag == OBJ_EVENT_PAL_TAG_MAY)
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_BODY;   // couldn't be built: Brendan / May
     }
-    return NULL;
+    if (info->size < LOCAL_TILE_BYTES)
+        info->size = LOCAL_TILE_BYTES;   // see RebuildLocal
+    sLocalStateBuilt[st] = sLocalVersion + 1;
+    return info;
 }
 
 // Rebuilds the local palettes and graphics
@@ -1217,10 +1439,14 @@ static void RebuildLocal(void)
         ApplyRecolor(&genderApp, sLocalPalMay);
     else
         ApplyRecolor(&genderApp, sLocalPalBrendan);
+    // ...and a look on the other body (a BRENDAN look on a girl's save) its own copy
+    genderApp.base = (ActionGender(&app) == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
+    memcpy(sLocalPalBody, ActionGender(&app) == FEMALE ? sOrigPalMay : sOrigPalBrendan, 32);
+    ApplyRecolor(&genderApp, sLocalPalBody);
 
-    StatePalette(&app, MP_CR_CACHE_LOCAL, ST_FOOT, sLocalPalCustom);
+    StatePalette(&app, pack, MP_CR_CACHE_LOCAL, ST_FOOT, sLocalPalCustom);
     if (IsCreated(&app))
-        StatePalette(&app, MP_CR_CACHE_LOCAL, ST_MACH_BIKE, sLocalPalPack);   // same palette
+        StatePalette(&app, pack, MP_CR_CACHE_LOCAL, ST_MACH_BIKE, sLocalPalPack);   // same palette
     if (pack)
     {
         PackPalette(&app, pack, ST_FOOT, sLocalPalPack);
@@ -1228,22 +1454,63 @@ static void RebuildLocal(void)
     }
 
     BuildStateInfo(0, &app, pack, ST_FOOT);
+    // The player's sprite keeps the tile block it was made with when it gets on a bike, goes
+    // surfing...: room for those 32x32 frames whatever the look (as Brendan's / May's own)
+    if (sMpGfxInfo[0].size < LOCAL_TILE_BYTES)
+        sMpGfxInfo[0].size = LOCAL_TILE_BYTES;
     sMpGfxInfo[0].paletteSlot = PALSLOT_PLAYER;
     sMpGfxInfo[0].paletteTag = PackHasState(pack, ST_FOOT) ? OBJ_EVENT_PAL_TAG_MP_PACK : OBJ_EVENT_PAL_TAG_MP_LOCAL;
     memset(sLocalStateBuilt, 0, sizeof(sLocalStateBuilt));
 }
 
+// Debug (mp actiondump): the local look's frames for every state, as the game shows them.
+// File: per state "state w h n tag", then n frames and the 16 colors; tools render it.
+void MP_Avatar_DumpActions(const char *path)
+{
+    FILE *f;
+    u8 st, g = gSaveBlock2Ptr->playerGender == FEMALE ? FEMALE : MALE;
+    f = fopen(path, "wb");
+    if (!f)
+        return;
+    RebuildLocal();
+    for (st = 0; st < ST_COUNT; st++)
+    {
+        const struct ObjectEventGraphicsInfo *info;
+        const u16 *pal;
+        u8 i, n = sStatePicCount[st];
+        if (st == ST_FOOT)
+            info = MP_LocalUsesCustomAvatar() ? MP_GetGraphicsInfo(OBJ_EVENT_GFX_MP_LOCAL) : DefaultInfo(ST_FOOT, g);
+        else
+        {
+            info = MP_Avatar_LocalStateInfo(sStateGfxIds[st][g]);
+            if (info == NULL)
+                info = DefaultInfo(st, g);
+        }
+        if (info == &sStandInInfo)
+            n = STANDIN_W + 1;
+        else if (st == ST_FOOT)
+            n = 9;
+        pal = MP_GetObjectEventPaletteData(info->paletteTag);
+        fprintf(f, "%d %d %d %d %d\n", st, info->width, info->height, n, info->paletteTag);
+        for (i = 0; i < n; i++)
+            fwrite(info->images[i].data, 1, info->width * info->height / 2, f);
+        fwrite(pal ? pal : sOrigPalBrendan, 1, 32, f);
+    }
+    fclose(f);
+    printf("[test] actiondump: wrote %s\n", path);
+}
+
 // Rebuilds the local avatar and refreshes the player sprite
 void MP_Avatar_ApplyLocal(void)
 {
-    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes);
+    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldBytes, u32 newBytes);
     bool8 onField = MP_IsInOverworld() && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT
                  && gObjectEvents[gPlayerAvatar.objectEventId].active;
     u32 oldBytes = 0;
 
-    // The sprite's tile block was sized for the old look
+    // The sprite's tile block was sized for the old look's graphics
     if (onField && gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].images)
-        oldBytes = gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].images->size;
+        oldBytes = GetObjectEventGraphicsInfo(gObjectEvents[gPlayerAvatar.objectEventId].graphicsId)->size;
     RebuildLocal();
     if (onField)
     {
@@ -1254,7 +1521,11 @@ void MP_Avatar_ApplyLocal(void)
             ObjectEventSetGraphicsId(player, gfx);
             StartSpriteAnim(&gSprites[player->spriteId], GetFaceDirectionAnimNum(player->facingDirection));
             // Show it now, even with the menu open (the player is frozen)
-            MP_SpriteRefreshImages(&gSprites[player->spriteId], oldBytes);
+            if (oldBytes)
+                MP_SpriteRefreshImages(&gSprites[player->spriteId], oldBytes, GetObjectEventGraphicsInfo(gfx)->size);
+            // and its reflection in water the new colors
+            LoadPlayerObjectReflectionPalette(GetObjectEventGraphicsInfo(gfx)->paletteTag, PALSLOT_PLAYER);
+            UpdateSpritePaletteWithWeather(gReflectionEffectPaletteMap[PALSLOT_PLAYER]);
         }
         UpdateSpritePaletteWithWeather(PALSLOT_PLAYER);
     }
@@ -1263,10 +1534,55 @@ void MP_Avatar_ApplyLocal(void)
 // ---------------------------------------------------------------------------
 // Remote players
 
+// A remote player's look with its base resolved (DEFAULT -> BRENDAN / MAY...)
+static struct MpAppearance RemoteAppearance(u8 id)
+{
+    struct MpAppearance app = gMpPlayers[id].app;
+    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT || app.base == MP_BASE_CUSTOM
+     || (app.base == MP_BASE_CREATED && !app.recipe.made))
+        app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
+    return app;
+}
+
+// The surf blob draws with colors 5, 6 and 15 of the surfer's palette: Brendan's / May's have
+// them, other looks' palettes don't, so their blob gets a palette of its own (Brendan's or May's)
+u8 MP_Avatar_SurfBlobPalette(u8 id)
+{
+    struct MpAppearance app;
+    struct MpPack buf;
+    const struct MpPack *pack;
+    bool8 female, loaded;
+    u16 tag;
+    u8 slot;
+    if (!sAvatarInit)
+        return 0xFF;
+    if (id == 0xFF)
+    {
+        app = GetLocalAppearance();
+        pack = LocalPack();
+    }
+    else if (id < MP_MAX_PLAYERS)
+    {
+        app = RemoteAppearance(id);
+        pack = RemotePack(id, &buf);
+    }
+    else
+        return 0xFF;
+    if (ActionKind(&app, pack, ST_SURF) == ACT_DEFAULT)
+        return 0xFF;
+    female = ActionGender(&app) == FEMALE;
+    tag = MP_TAG_BLOB_PAL + (female ? 1 : 0);
+    loaded = IndexOfSpritePaletteTag(tag) != 0xFF;
+    slot = MP_AllocCoopPalette(tag, female ? sOrigPalMay : sOrigPalBrendan);
+    if (slot != 0xFF && !loaded)
+        UpdateSpritePaletteWithWeather(slot);
+    return slot;
+}
+
 void MP_Avatar_BuildRemote(u8 id)
 {
     struct MpPlayer *p = &gMpPlayers[id];
-    struct MpAppearance app = p->app;
+    struct MpAppearance app = RemoteAppearance(id);
     struct MpPack buf;
     const struct MpPack *pack = RemotePack(id, &buf);
     u8 mode = p->hasState ? p->state.avatarMode : MP_AVATAR_FOOT;
@@ -1274,9 +1590,6 @@ void MP_Avatar_BuildRemote(u8 id)
 
     if (mode >= ST_COUNT)
         mode = ST_FOOT;
-    if (app.base == MP_BASE_DEFAULT || app.base >= MP_BASE_COUNT || app.base == MP_BASE_CUSTOM
-     || (app.base == MP_BASE_CREATED && !app.recipe.made))
-        app.base = (app.gender == FEMALE) ? MP_BASE_MAY : MP_BASE_BRENDAN;
     BuildStateInfo(1 + id, &app, pack, mode);
     // The overworld code assigns the real palette slot after spawning
     info->paletteSlot = PALSLOT_NPC_1;

@@ -1024,6 +1024,13 @@ u32 FldEff_SurfBlob(void)
         struct Sprite *sprite = &gSprites[spriteId];
         sprite->coordOffsetEnabled = TRUE;
         sprite->oam.paletteNum = 0;
+        // Moemon Co-op: a look whose palette isn't Brendan's / May's gets the blob's own colors
+        if (gFieldEffectArguments[2] == gPlayerAvatar.objectEventId)
+        {
+            u8 slot = MP_Avatar_SurfBlobPalette(0xFF);
+            if (slot != 0xFF)
+                sprite->oam.paletteNum = slot;
+        }
         sprite->sPlayerObjId = gFieldEffectArguments[2];
         sprite->sVelocity = -1;
         sprite->sPrevX = -1;

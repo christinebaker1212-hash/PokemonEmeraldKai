@@ -477,16 +477,16 @@ void MP_Overworld_MenuSpritePalette(u8 spriteId, u16 graphicsId)
 
 static void RefreshGraphics(u8 id, struct ObjectEvent *obj)
 {
-    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes);
+    void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldBytes, u32 newBytes);
     struct RemoteObj *r = &sRemote[id];
     struct Sprite *sprite = &gSprites[obj->spriteId];
     u8 mode = AvatarModeOf(id);
-    // The tile block was sized for the old frames (walking 16x32, Mach Bike 32x32...)
-    u32 oldBytes = sprite->images ? sprite->images->size : 0;
+    // The tile block was sized for the old graphics (walking 16x32, Mach Bike 32x32...)
+    u32 oldBytes = sprite->images ? GetObjectEventGraphicsInfo(obj->graphicsId)->size : 0;
     MP_Avatar_BuildRemote(id);
     ObjectEventSetGraphicsId(obj, OBJ_EVENT_GFX_MP_REMOTE(id));
     if (oldBytes)
-        MP_SpriteRefreshImages(sprite, oldBytes);
+        MP_SpriteRefreshImages(sprite, oldBytes, GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_MP_REMOTE(id))->size);
     r->builtVersion = gMpPlayers[id].appearanceVersion;
     r->builtMode = mode;
 }
@@ -635,7 +635,10 @@ static void UpdateBlob(u8 id, struct ObjectEvent *obj)
         DestroyBlob(id);
     }
     if (surfing && r->blobSpriteId < MAX_SPRITES)
-        gSprites[r->blobSpriteId].oam.paletteNum = r->palSlot;
+    {
+        u8 slot = MP_Avatar_SurfBlobPalette(id);
+        gSprites[r->blobSpriteId].oam.paletteNum = (slot != 0xFF) ? slot : r->palSlot;
+    }
 }
 
 static void UpdateRemote(u8 id)

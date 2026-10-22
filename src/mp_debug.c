@@ -195,6 +195,8 @@ int MP_TestCondition(const char *name)
     }
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
+    if (strcmp(name, "surfing") == 0)   // surfing and free to move
+        return (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) && MP_IsLocalFree();
     if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
     {
         bool8 MP_PartyMenu_IsOpen(void);
@@ -934,11 +936,34 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StartSpriteAnim(&gSprites[player->spriteId], 0);
         printf("[test] avatar state %d\n", atoi(arg));
     }
+    else if (strcmp(cmd, "sprite") == 0)
+    {
+        // sprite NAME - wear a look by its ini name (hiker, frlg_lass, custom_1, rs_may...)
+        if (MP_Avatar_ParseSpriteName(arg, &gMpConfig.app))
+        {
+            if (gMpConfig.app.base == MP_BASE_CREATED)
+                gMpConfig.app.recipe = gMpConfig.custom[gMpConfig.app.created - 1];
+            gMpConfig.app.hasCustom = FALSE;
+            gMpConfig.customSprite[0] = 0;
+            MP_Avatar_ApplyLocal();
+            MP_SendAppearance();
+            printf("[test] sprite %s\n", arg);
+        }
+        else
+            printf("[test] sprite %s: no such look\n", arg);
+    }
+    else if (strcmp(cmd, "actiondump") == 0)
+    {
+        // actiondump FILE - the player's look in every avatar state (bike, surf, fishing...)
+        void MP_Avatar_DumpActions(const char *path);
+        MP_Avatar_DumpActions(arg);
+    }
     else if (strcmp(cmd, "bike") == 0)
     {
-        // bike - get on the Mach Bike (or off: bike 0)
+        // bike - get on the Mach Bike (bike 2: the Acro Bike; bike 0: off)
         extern void SetPlayerAvatarTransitionFlags(u16 flags);
-        SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT : PLAYER_AVATAR_FLAG_MACH_BIKE);
+        SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
+                                     : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
     }
     else if (strcmp(cmd, "repel") == 0)
     {

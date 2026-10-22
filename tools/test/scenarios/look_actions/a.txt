@@ -1,0 +1,34 @@
+pressuntil A field 5000
+waitfor online 6000
+mp sprite hiker
+mp givebadges
+mp teach 0 57
+wait 240
+press LEFT 2
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 30
+press A 2
+pressuntil A surfing 900
+shot a0_surfing
+wait 200
+press DOWN 8
+wait 300
+press RIGHT 40
+wait 200
+mp bike
+wait 300
+press RIGHT 6
+wait 300
+mp bike 0
+wait 10
+mp bike 2
+wait 300
+press B 60
+wait 300
+mp bike 0
+wait 10
+mp warp 0,0,7,20
+wait 600
+quit

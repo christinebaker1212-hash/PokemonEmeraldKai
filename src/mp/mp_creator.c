@@ -788,3 +788,15 @@ const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *
     sGfxValid[cacheSlot] = TRUE;
     return &sGfx[cacheSlot];
 }
+
+// For the action sprites built on Brendan's / May's bodies (mp_hybrid.c): the first body row of the
+// standing field frames facing S, N and W, and the skin's four shades
+void MP_Created_FieldHeadInfo(const struct MpCreated *r, u8 *neck, u16 *skin)
+{
+    bool8 g = r->girl != 0;
+    u8 i;
+    for (i = 0; i < 3; i++)
+        neck[i] = sOw3Band[g][i][0];
+    for (i = 0; i < 4; i++)
+        skin[i] = sOw3Skin[r->skin & 3][i];
+}

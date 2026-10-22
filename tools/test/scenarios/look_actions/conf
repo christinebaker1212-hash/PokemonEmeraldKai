@@ -1,0 +1,10 @@
+# Petalburg: ALICE wears an NPC look (HIKER) and surfs, rides both bikes; BOB watches (shots b_*.png).
+# Remote players see the NPC's head on Brendan's body for the bikes and surfing, and a navy surf blob.
+MODE=2
+WARP=0,0,7,20
+WARP_B=0,0,9,21
+FPS=60
+TMO=240
+EXPECT_A=("[test] sprite hiker" "[test] warp: 0,0 7,20")
+EXPECT_B=("[test] frame")
+UNEXPECT_B=("avatar: no action frames")

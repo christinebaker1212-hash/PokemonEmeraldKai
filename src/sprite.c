@@ -1851,7 +1851,8 @@ bool8 MP_IsCoopPaletteTag(u16 tag)
 {
     return (tag >= 0x1150 && tag < 0x1158)   // followers (mp_follower.c)
         || (tag >= 0x5390 && tag < 0x5398)   // friends (mp_overworld.c)
-        || tag == 0x53C0;                    // bubbles, toasts, compass (MP_TAG_UI_PAL)
+        || tag == 0x53C0                     // bubbles, toasts, compass (MP_TAG_UI_PAL)
+        || tag == 0x53C1 || tag == 0x53C2;   // surf blobs (MP_TAG_BLOB_PAL)
 }
 
 static bool8 MpSlotHasSprites(u8 slot)
@@ -1965,17 +1966,17 @@ static u8 MP_MakeRoomForPalette(void)
 }
 
 // Moemon Co-op: a sprite's frame images were just swapped (live avatar change
-// in the CO-OP menu). Give it a bigger tile block if the new frames need one,
-// then upload the current frame right away, even while the sprite is frozen.
-void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes)
+// in the CO-OP menu). Its tile block was oldBytes (the object's graphics info's size, which
+// event_object_movement.c allocates and frees): make it newBytes, then upload the current
+// frame right away, even while the sprite is frozen.
+void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldBytes, u32 newBytes)
 {
     const union AnimCmd *cmd;
-    u16 oldTiles = oldFrameBytes / TILE_SIZE_4BPP;
-    u16 newTiles;
+    u16 oldTiles = oldBytes / TILE_SIZE_4BPP;
+    u16 newTiles = newBytes / TILE_SIZE_4BPP;
 
     if (!sprite->inUse || sprite->usingSheet || sprite->images == NULL)
         return;
-    newTiles = sprite->images->size / TILE_SIZE_4BPP;
     if (newTiles > oldTiles)
     {
         s16 tile = AllocSpriteTiles(newTiles);

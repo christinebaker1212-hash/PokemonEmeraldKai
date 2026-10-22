@@ -389,6 +389,7 @@ void MP_Created_Unpack(const u8 *p, struct MpCreated *r);
 void MP_Created_Default(struct MpCreated *r, bool8 girl);
 void MP_Created_Clamp(struct MpCreated *r);
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r);
+void MP_Created_FieldHeadInfo(const struct MpCreated *r, u8 *neck, u16 *skin);   // neck[3], skin[4]
 u8 MP_Created_StyleCount(bool8 girl, u8 cat);
 const char *MP_Created_StyleName(bool8 girl, u8 cat, u8 style);
 u8 MP_Created_ColorCount(bool8 girl, u8 cat, u8 style);
@@ -489,6 +490,8 @@ s8 MP_Battle_PeerId(void);
 u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);
 bool8 MP_IsCoopPaletteTag(u16 tag);
 #define MP_TAG_UI_PAL 0x53C0   // the co-op overlay sprite palette (mp_emote.c)
+#define MP_TAG_BLOB_PAL 0x53C1  // +gender: the surf blob's colors for a look whose palette lacks them
+u8 MP_Avatar_SurfBlobPalette(u8 id);   // id 0xFF = us; 0xFF = the surfer's own palette has them
 
 // mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
 void MP_Ping_Place(void);
