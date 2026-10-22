@@ -256,6 +256,17 @@ void MP_AutoSession_Update(void);
 // "[mp] ..." line on stdout (log.txt); harness waitlog/watchlog match these
 void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+
+// mp_textopts.c: OPTIONS > NAME CASE / CREATURES (this game's display only)
+enum { MP_NAMECASE_AS_TYPED, MP_NAMECASE_CAPS, MP_NAMECASE_MIXED, MP_NAMECASE_COUNT };
+u8 MP_NameCaseMode(void);
+bool8 MP_PokemonWording(void);   // CREATURES: POKéMON
+void MP_NameCase_Recase(u8 *s, u16 len, u8 mode);
+void MP_NameCase_ApplyName(u8 *name, u16 maxLen);
+void MP_NameCase_CopyName(u8 *dst, const u8 *name, u16 maxLen);
+const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId);   // text.c AddTextPrinter
+extern bool8 gMpTextFilterOff;
+void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_SendBlob(u8 kind, const void *data, u32 len);
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len);

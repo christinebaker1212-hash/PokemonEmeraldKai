@@ -268,6 +268,7 @@ static void BuildNametag(u8 id, const u16 *pal)
 
     for (i = 0; i < MP_NAME_LEN && p->name[i] != EOS; i++)
         text[n++] = p->name[i];
+    MP_NameCase_Recase(text, n, MP_NameCaseMode());   // OPTIONS > NAME CASE
     if (p->hasState && p->state.topLevel > 0)
     {
         u8 lvl = p->state.topLevel;

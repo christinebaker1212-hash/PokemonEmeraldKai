@@ -288,6 +288,8 @@ bool16 AddTextPrinter(struct TextPrinterTemplate *printerTemplate, u8 speed, Tex
         sTempTextPrinter.subStructFields[i] = 0;
 
     sTempTextPrinter.printerTemplate = *printerTemplate;
+    // Moemon Co-op: OPTIONS > NAME CASE / CREATURES (a filtered copy; the source stays as it is)
+    sTempTextPrinter.printerTemplate.currentChar = MP_TextOpts_Filter(printerTemplate->currentChar, printerTemplate->windowId);
     sTempTextPrinter.callback = callback;
     sTempTextPrinter.minLetterSpacing = 0;
     sTempTextPrinter.japanese = 0;

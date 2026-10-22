@@ -3,6 +3,8 @@
 #include "bg.h"
 #include "gpu_regs.h"
 #include "international_string_util.h"
+#include "list_menu.h"
+#include "mp.h"
 #include "main.h"
 #include "menu.h"
 #include "palette.h"
@@ -24,6 +26,9 @@
 #define tButtonMode data[5]
 #define tWindowFrameType data[6]
 #define tTypeIcons data[7]   // Moemon Co-op
+#define tNameCase data[8]    // Moemon Co-op
+#define tPokemonArt data[9]  // Moemon Co-op
+#define tArrowTask data[10]  // Moemon Co-op: the scroll arrows
 
 enum
 {
@@ -34,6 +39,8 @@ enum
     MENUITEM_BUTTONMODE,
     MENUITEM_FRAMETYPE,
     MENUITEM_TYPEICONS,   // Moemon Co-op: type icons by the names in battle
+    MENUITEM_NAMECASE,    // Moemon Co-op: names as typed / ALL CAPS / Mixed Case
+    MENUITEM_CREATURES,   // Moemon Co-op: MOéMON or POKéMON (pictures and the word)
     MENUITEM_CANCEL,
     MENUITEM_COUNT,
 };
@@ -44,15 +51,21 @@ enum
     WIN_OPTIONS
 };
 
-// Moemon Co-op: rows 14 pixels apart (16 in the original) so TYPE ICONS fits
+// Moemon Co-op: rows 14 pixels apart (16 in the original); eight show at a time and the
+// list scrolls (sTop) to the ones below
 #define OPTION_ROW_H 14
-#define YPOS_TEXTSPEED    (MENUITEM_TEXTSPEED * OPTION_ROW_H)
-#define YPOS_BATTLESCENE  (MENUITEM_BATTLESCENE * OPTION_ROW_H)
-#define YPOS_BATTLESTYLE  (MENUITEM_BATTLESTYLE * OPTION_ROW_H)
-#define YPOS_SOUND        (MENUITEM_SOUND * OPTION_ROW_H)
-#define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * OPTION_ROW_H)
-#define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * OPTION_ROW_H)
-#define YPOS_TYPEICONS    (MENUITEM_TYPEICONS * OPTION_ROW_H)
+#define OPTION_VISIBLE_ROWS 8
+static EWRAM_DATA u16 sTop = 0;
+#define ROW_Y(item) ((s16)((item) - (s16)sTop) * OPTION_ROW_H)
+#define YPOS_TEXTSPEED    ROW_Y(MENUITEM_TEXTSPEED)
+#define YPOS_BATTLESCENE  ROW_Y(MENUITEM_BATTLESCENE)
+#define YPOS_BATTLESTYLE  ROW_Y(MENUITEM_BATTLESTYLE)
+#define YPOS_SOUND        ROW_Y(MENUITEM_SOUND)
+#define YPOS_BUTTONMODE   ROW_Y(MENUITEM_BUTTONMODE)
+#define YPOS_FRAMETYPE    ROW_Y(MENUITEM_FRAMETYPE)
+#define YPOS_TYPEICONS    ROW_Y(MENUITEM_TYPEICONS)
+#define YPOS_NAMECASE     ROW_Y(MENUITEM_NAMECASE)
+#define YPOS_CREATURES    ROW_Y(MENUITEM_CREATURES)
 
 static void Task_OptionMenuFadeIn(u8 taskId);
 static void Task_OptionMenuProcessInput(u8 taskId);
@@ -70,6 +83,9 @@ static void Sound_DrawChoices(u8 selection);
 static u8 FrameType_ProcessInput(u8 selection);
 static void FrameType_DrawChoices(u8 selection);
 static void TypeIcons_DrawChoices(u8 selection);
+static void NameCase_DrawChoices(u8 selection);
+static void Creatures_DrawChoices(u8 selection);
+static void RedrawOptions(u8 taskId);
 static u8 ButtonMode_ProcessInput(u8 selection);
 static void ButtonMode_DrawChoices(u8 selection);
 static void DrawHeaderText(void);
@@ -83,6 +99,13 @@ static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/interface/option_m
 static const u8 sEqualSignGfx[] = INCGFX_U8("graphics/interface/option_menu_equals_sign.png", ".4bpp");
 
 static const u8 sText_TypeIcons[] = _("TYPE ICONS");
+static const u8 sText_NameCase[] = _("NAME CASE");
+static const u8 sText_Creatures[] = _("CREATURES");
+static const u8 sText_NameCaseAsTyped[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}UNCORRECTED");
+static const u8 sText_NameCaseCaps[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}ALL CAPS");
+static const u8 sText_NameCaseMixed[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Mixed Case");
+static const u8 sText_CreaturesMoemon[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}MOéMON");
+static const u8 sText_CreaturesPokemon[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}POKéMON");
 
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
@@ -93,6 +116,8 @@ static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
     [MENUITEM_BUTTONMODE]  = gText_ButtonMode,
     [MENUITEM_FRAMETYPE]   = gText_Frame,
     [MENUITEM_TYPEICONS]   = sText_TypeIcons,
+    [MENUITEM_NAMECASE]    = sText_NameCase,
+    [MENUITEM_CREATURES]   = sText_Creatures,
     [MENUITEM_CANCEL]      = gText_OptionMenuCancel,
 };
 
@@ -226,7 +251,6 @@ void CB2_InitOptionMenu(void)
         break;
     case 8:
         PutWindowTilemap(WIN_OPTIONS);
-        DrawOptionMenuTexts();
         gMain.state++;
     case 9:
         DrawBgWindowFrames();
@@ -244,17 +268,14 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tButtonMode = gSaveBlock2Ptr->optionsButtonMode;
         gTasks[taskId].tWindowFrameType = gSaveBlock2Ptr->optionsWindowFrameType;
         gTasks[taskId].tTypeIcons = gSaveBlock2Ptr->optionsTypeIcons;
+        gTasks[taskId].tNameCase = gSaveBlock2Ptr->optionsNameCase;
+        gTasks[taskId].tPokemonArt = gSaveBlock2Ptr->optionsPokemonArt;
+        sTop = 0;
+        gTasks[taskId].tArrowTask = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_UP, DISPLAY_WIDTH / 2, 36,
+            40 + OPTION_VISIBLE_ROWS * OPTION_ROW_H + 4, MENUITEM_COUNT - OPTION_VISIBLE_ROWS, 0x2710, 0x2710, &sTop);
 
-        TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed);
-        BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff);
-        BattleStyle_DrawChoices(gTasks[taskId].tBattleStyle);
-        Sound_DrawChoices(gTasks[taskId].tSound);
-        ButtonMode_DrawChoices(gTasks[taskId].tButtonMode);
-        FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
-        TypeIcons_DrawChoices(gTasks[taskId].tTypeIcons);
+        RedrawOptions(taskId);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
-
-        CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
         gMain.state++;
         break;
     }
@@ -283,20 +304,21 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     {
         gTasks[taskId].func = Task_OptionMenuSave;
     }
-    else if (JOY_NEW(DPAD_UP))
+    else if (JOY_NEW(DPAD_UP | DPAD_DOWN))
     {
-        if (gTasks[taskId].tMenuSelection > 0)
-            gTasks[taskId].tMenuSelection--;
+        u16 oldTop = sTop;
+        s16 sel = gTasks[taskId].tMenuSelection;
+        if (JOY_NEW(DPAD_UP))
+            sel = (sel > 0) ? sel - 1 : MENUITEM_CANCEL;
         else
-            gTasks[taskId].tMenuSelection = MENUITEM_CANCEL;
-        HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
-    }
-    else if (JOY_NEW(DPAD_DOWN))
-    {
-        if (gTasks[taskId].tMenuSelection < MENUITEM_CANCEL)
-            gTasks[taskId].tMenuSelection++;
-        else
-            gTasks[taskId].tMenuSelection = 0;
+            sel = (sel < MENUITEM_CANCEL) ? sel + 1 : 0;
+        gTasks[taskId].tMenuSelection = sel;
+        if (sel < (s16)sTop)
+            sTop = sel;
+        else if (sel >= (s16)sTop + OPTION_VISIBLE_ROWS)
+            sTop = sel - OPTION_VISIBLE_ROWS + 1;
+        if (sTop != oldTop)
+            RedrawOptions(taskId);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
     }
     else
@@ -354,6 +376,25 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             if (previousOption != gTasks[taskId].tTypeIcons)
                 TypeIcons_DrawChoices(gTasks[taskId].tTypeIcons);
             break;
+        case MENUITEM_NAMECASE:
+            previousOption = gTasks[taskId].tNameCase;
+            if (JOY_NEW(DPAD_RIGHT))
+                gTasks[taskId].tNameCase = (gTasks[taskId].tNameCase + 1) % MP_NAMECASE_COUNT;
+            if (JOY_NEW(DPAD_LEFT))
+                gTasks[taskId].tNameCase = (gTasks[taskId].tNameCase + MP_NAMECASE_COUNT - 1) % MP_NAMECASE_COUNT;
+            if (previousOption != gTasks[taskId].tNameCase)
+            {
+                sArrowPressed = TRUE;
+                NameCase_DrawChoices(gTasks[taskId].tNameCase);
+            }
+            break;
+        case MENUITEM_CREATURES:
+            previousOption = gTasks[taskId].tPokemonArt;
+            gTasks[taskId].tPokemonArt = BattleScene_ProcessInput(gTasks[taskId].tPokemonArt);   // same two-way toggle
+
+            if (previousOption != gTasks[taskId].tPokemonArt)
+                Creatures_DrawChoices(gTasks[taskId].tPokemonArt);
+            break;
         default:
             return;
         }
@@ -375,6 +416,13 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock2Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
     gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
     gSaveBlock2Ptr->optionsTypeIcons = gTasks[taskId].tTypeIcons;
+    gSaveBlock2Ptr->optionsNameCase = gTasks[taskId].tNameCase;
+    if (gSaveBlock2Ptr->optionsPokemonArt != gTasks[taskId].tPokemonArt)
+    {
+        gSaveBlock2Ptr->optionsPokemonArt = gTasks[taskId].tPokemonArt;
+        MP_MonArt_Changed();
+    }
+    RemoveScrollIndicatorArrowPair(gTasks[taskId].tArrowTask);
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[taskId].func = Task_OptionMenuFadeOut;
@@ -392,14 +440,34 @@ static void Task_OptionMenuFadeOut(u8 taskId)
 
 static void HighlightOptionMenuItem(u8 index)
 {
+    u8 row = index - sTop;
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(16, DISPLAY_WIDTH - 16));
-    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(index * OPTION_ROW_H + 40, index * OPTION_ROW_H + 40 + OPTION_ROW_H));
+    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(row * OPTION_ROW_H + 40, row * OPTION_ROW_H + 40 + OPTION_ROW_H));
 }
 
-static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
+// Moemon Co-op: everything again after the list scrolled
+static void RedrawOptions(u8 taskId)
 {
-    u8 dst[16];
+    DrawOptionMenuTexts();
+    TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed);
+    BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff);
+    BattleStyle_DrawChoices(gTasks[taskId].tBattleStyle);
+    Sound_DrawChoices(gTasks[taskId].tSound);
+    ButtonMode_DrawChoices(gTasks[taskId].tButtonMode);
+    FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
+    TypeIcons_DrawChoices(gTasks[taskId].tTypeIcons);
+    NameCase_DrawChoices(gTasks[taskId].tNameCase);
+    Creatures_DrawChoices(gTasks[taskId].tPokemonArt);
+    CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
+}
+
+static void DrawOptionMenuChoice(const u8 *text, u8 x, s16 y, u8 style)
+{
+    u8 dst[32];
     u16 i;
+
+    if (y < 0 || y >= OPTION_VISIBLE_ROWS * OPTION_ROW_H)
+        return;   // Moemon Co-op: a row scrolled out of view
 
     for (i = 0; *text != EOS && i < ARRAY_COUNT(dst) - 1; i++)
         dst[i] = *(text++);
@@ -537,6 +605,27 @@ static void TypeIcons_DrawChoices(u8 selection)
     DrawOptionMenuChoice(gText_BattleSceneOn, GetStringRightAlignXOffset(FONT_NORMAL, gText_BattleSceneOn, 198), YPOS_TYPEICONS, selection != 0);
 }
 
+// Moemon Co-op: the choice in red in the middle of the choices' space; the names are
+// shown as written (the filter would recase "Mixed Case" or swap MOéMON)
+static void NameCase_DrawChoices(u8 selection)
+{
+    static const u8 *const sChoices[MP_NAMECASE_COUNT] = {sText_NameCaseAsTyped, sText_NameCaseCaps, sText_NameCaseMixed};
+    const u8 *text = sChoices[selection % MP_NAMECASE_COUNT];
+    s16 y = YPOS_NAMECASE;
+    if (y < 0 || y >= OPTION_VISIBLE_ROWS * OPTION_ROW_H)
+        return;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 198 - 104, OPTION_ROW_H);
+    DrawOptionMenuChoice(text, 104 + (94 - GetStringWidth(FONT_NORMAL, text, 0)) / 2, y, 1);
+}
+
+static void Creatures_DrawChoices(u8 selection)
+{
+    gMpTextFilterOff = TRUE;
+    DrawOptionMenuChoice(sText_CreaturesMoemon, 104, YPOS_CREATURES, selection == 0);
+    DrawOptionMenuChoice(sText_CreaturesPokemon, GetStringRightAlignXOffset(FONT_NORMAL, sText_CreaturesPokemon, 198), YPOS_CREATURES, selection != 0);
+    gMpTextFilterOff = FALSE;
+}
+
 static u8 FrameType_ProcessInput(u8 selection)
 {
     if (JOY_NEW(DPAD_RIGHT))
@@ -653,8 +742,8 @@ static void DrawOptionMenuTexts(void)
     u8 i;
 
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
-    for (i = 0; i < MENUITEM_COUNT; i++)
-        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * OPTION_ROW_H) + 1, TEXT_SKIP_DRAW, NULL);
+    for (i = sTop; i < MENUITEM_COUNT && i < sTop + OPTION_VISIBLE_ROWS; i++)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, ((i - sTop) * OPTION_ROW_H) + 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
 
