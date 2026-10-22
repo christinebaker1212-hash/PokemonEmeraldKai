@@ -1,0 +1,6 @@
+# The editor's PRESET list skips a preset with a piece this save hasn't earned: 13 steps right from DEFAULT go
+# through the 12 everyone has and back to DEFAULT (fx_preset_all: with everything unlocked, the 13th is SWEETHEART)
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=283:15"
+EXPECT_A=("ball fx: preset SHOOTING STAR" "ball fx: preset DEFAULT")
+UNEXPECT_A=("ball fx: preset SWEETHEART" "ball fx: preset WINTER" "ball fx: preset ANGEL")

@@ -1,0 +1,4 @@
+# MY PRESET 4-6: SAVE AS wraps from MY PRESET 1 back to 6, the mix is saved there and PRESET offers it
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=283:15"
+EXPECT_A=("ball fx: saved MY PRESET 6" "ball fx: preset SHOOTING STAR" "ball fx: preset MY PRESET 6")

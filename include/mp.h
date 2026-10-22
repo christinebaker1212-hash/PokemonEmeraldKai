@@ -1094,7 +1094,8 @@ u8 MP_BallFx_PresetCount(void);
 const char *MP_BallFx_PresetName(u8 i);
 void MP_BallFx_Preset(u8 i, struct MpBallFx *out);
 s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx);
-#define MPFX_USER_PRESETS 3
+bool8 MP_BallFx_PresetUnlocked(u8 i);
+#define MPFX_USER_PRESETS 6   // MY PRESET 1-6
 // mp_ballunlock.c: the colors and effect pieces this save can pick (the first ones are everyone's)
 #define MPFX_FORM_FIRST_EARNED   12
 #define MPFX_PART_FIRST_EARNED   16

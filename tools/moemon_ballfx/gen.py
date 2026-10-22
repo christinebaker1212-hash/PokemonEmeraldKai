@@ -210,15 +210,21 @@ def explosion():
 
 
 def smoke():
+    # soft, light puffs: a pale body, a dithered shade underneath, a gray rim (no dark outline:
+    # on a light battle background a dark one made them look like rocks)
     frames = []
     for i, s in enumerate((1.0, 0.72, 0.45)):
         a = Img(16, 16)
         for (x, y, r) in ((5.5, 9.5, 4.3), (10.5, 9.5, 4.3), (8, 6, 4.6), (8, 11, 4)):
-            a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, G)
-        for (x, y, r) in ((6.5, 5.5, 2.4), (10, 6.5, 2.0), (5, 8.5, 1.6)):
             a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, LG)
-        a.disc(8 + (7 - 8) * s, 8 + (4.8 - 8) * s, max(0.8, 1.1 * s), W)
-        a.outline(DG)
+        src = [row[:] for row in a.p]
+        for y in range(16):
+            for x in range(16):
+                if src[y][x] == LG and y >= 8 + 2.5 * s and ((x + y) % 2 == 0 or y >= 8 + 4.5 * s):
+                    a.p[y][x] = G
+        for (x, y, r) in ((6.5, 5.5, 2.4), (10, 6.5, 2.0), (5, 8.5, 1.6)):
+            a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, W)
+        a.outline(G)
         frames.append(('smoke%d' % i, a))
     return frames
 

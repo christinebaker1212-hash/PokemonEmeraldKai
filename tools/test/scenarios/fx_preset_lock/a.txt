@@ -1,0 +1,32 @@
+pressuntil A field 5000
+mp ballfx 0 0 0 0 0 0
+mp fxedit 0
+wait 40
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+press RIGHT 2
+wait 8
+shot locked
+quit

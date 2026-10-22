@@ -87,6 +87,22 @@ static const struct FxPreset sPresets[] = {
     {"STORM",                {MPFX_FORM_LIGHTNING, MPFX_PART_LIGHTNING, MP_BALL_YELLOW, MPFX_RECALL_DISSOLVE, MPFX_SOUND_THUNDER}},
     {"DEEP SEA",             {MPFX_FORM_BUBBLE,    MPFX_PART_BUBBLES,   MP_BALL_CYAN,   MPFX_RECALL_DISSOLVE, MPFX_SOUND_AUTO}},
     {"SHOOTING STAR",        {MPFX_FORM_METEOR,    MPFX_PART_DUST,      MP_BALL_BLUE,   MPFX_RECALL_BEAM,     MPFX_SOUND_AUTO}},
+    // with the newer pieces (in the PRESET list once this save has all of a preset's pieces)
+    {"SWEETHEART",           {MPFX_FORM_JELLY,     MPFX_PART_HEARTS,    MP_BALL_ROSE,    MPFX_RECALL_HEARTS,    MPFX_SOUND_AUTO}},
+    {"POP STAR",             {MPFX_FORM_SOMERSAULT, MPFX_PART_NOTES,    MP_BALL_MAGENTA, MPFX_RECALL_JUMP,      MPFX_SOUND_AUTO}},
+    {"WINTER",               {MPFX_FORM_STARDUST,  MPFX_PART_SNOW,      MP_BALL_AZURE,   MPFX_RECALL_ICE,       MPFX_SOUND_AUTO}},
+    {"WILDFIRE",             {MPFX_FORM_FLAME,     MPFX_PART_FIRE,      MP_BALL_SCARLET, MPFX_RECALL_FLAME,     MPFX_SOUND_AUTO}},
+    {"HIGH TIDE",            {MPFX_FORM_GEYSER,    MPFX_PART_SPLASH,    MP_BALL_AQUA,    MPFX_RECALL_DIVE,      MPFX_SOUND_AUTO}},
+    {"FOREST SPIRIT",        {MPFX_FORM_LEAVES,    MPFX_PART_BUTTERFLIES, MP_BALL_FOREST, MPFX_RECALL_LEAVES,   MPFX_SOUND_AUTO}},
+    {"HANAMI",               {MPFX_FORM_TELEPORT,  MPFX_PART_SAKURA,    MP_BALL_SAKURA,  MPFX_RECALL_SAKURA,    MPFX_SOUND_AUTO}},
+    {"JACKPOT",              {MPFX_FORM_CARD,      MPFX_PART_COINS,     MP_BALL_GOLD,    MPFX_RECALL_CARD,      MPFX_SOUND_AUTO}},
+    {"PARTY TIME",           {MPFX_FORM_BOUNCE,    MPFX_PART_BALLOONS,  MP_BALL_LEMON,   MPFX_RECALL_BALLOONS,  MPFX_SOUND_AUTO}},
+    {"SHADOW REALM",         {MPFX_FORM_SHADOW,    MPFX_PART_AURA,      MP_BALL_VIOLET,  MPFX_RECALL_BLACKHOLE, MPFX_SOUND_AUTO}},
+    {"CYBERSPACE",           {MPFX_FORM_HOLOGRAM,  MPFX_PART_PIXELS,    MP_BALL_LIME,    MPFX_RECALL_SWITCHOFF, MPFX_SOUND_AUTO}},
+    {"GALAXY",               {MPFX_FORM_VORTEX,    MPFX_PART_STARS,     MP_BALL_INDIGO,  MPFX_RECALL_STARDUST,  MPFX_SOUND_AUTO}},
+    {"DESERT WIND",          {MPFX_FORM_SAND,      MPFX_PART_DUST,      MP_BALL_SAND,    MPFX_RECALL_SAND,      MPFX_SOUND_AUTO}},
+    {"DAYDREAM",             {MPFX_FORM_PRISM,     MPFX_PART_RAINBOW,   MP_BALL_LILAC,   MPFX_RECALL_NAP,       MPFX_SOUND_AUTO}},
+    {"ANGEL",                {MPFX_FORM_TELEPORT,  MPFX_PART_FEATHERS,  MP_BALL_WHITE,   MPFX_RECALL_FEATHERS,  MPFX_SOUND_AUTO}},
 };
 
 const char *MP_BallFx_FormName(u8 i)   { return sFormNames[i < MPFX_FORM_COUNT ? i : 0]; }
@@ -99,6 +115,14 @@ const char *MP_BallFx_PresetName(u8 i) { return sPresets[i < ARRAY_COUNT(sPreset
 void MP_BallFx_Preset(u8 i, struct MpBallFx *out)
 {
     *out = sPresets[i < ARRAY_COUNT(sPresets) ? i : 0].fx;
+}
+
+// TRUE if this save has every piece of a preset (mp_ballunlock.c)
+bool8 MP_BallFx_PresetUnlocked(u8 i)
+{
+    const struct MpBallFx *fx = &sPresets[i < ARRAY_COUNT(sPresets) ? i : 0].fx;
+    return MP_BallUnlock_Has(MPFX_PIECE_COLOR, fx->color) && MP_BallUnlock_Has(MPFX_PIECE_FORM, fx->form)
+        && MP_BallUnlock_Has(MPFX_PIECE_PART, fx->part) && MP_BallUnlock_Has(MPFX_PIECE_RECALL, fx->recall);
 }
 
 // The preset this effect is, or -1
@@ -999,7 +1023,7 @@ static void Confetti(s16 cx, s16 cy, s16 dir)
         p->angle = RndU(256);
         p->nFrames = 3;
         p->frameTime = 3 + RndU(4);
-        p->life = 60 + RndU(30);
+        p->life = 44 + RndU(20);
         p->fadeOut = 14;
         p->delay = RndU(3);
     }
@@ -1064,7 +1088,7 @@ static void PartExplosion(s16 mx, s16 my, struct FxBody *b)
         p->life = 20 + RndU(14);
         p->fadeOut = 10;
     }
-    for (i = 0; i < Budget(7); i++)
+    for (i = 0; i < Budget(5); i++)
     {
         u8 ang = RndU(256);
         if (!(p = Spawn(FXA_EXPLOSION_SOOT0, 0, mx + Rnd(Dist(14)), my + Rnd(Dist(10)))))
@@ -1072,9 +1096,9 @@ static void PartExplosion(s16 mx, s16 my, struct FxBody *b)
         p->vx = Cos(ang, Dist(0x240));
         p->vy = Sin(ang, Dist(0x120)) - 0x80;
         p->drag = 7;
-        p->life = 28 + RndU(10);
-        p->fadeOut = 16;
-        p->alpha = 13;
+        p->life = 22 + RndU(8);
+        p->fadeOut = 14;
+        p->alpha = 11;
         p->delay = 7;
         p->scale = 180 + RndU(80);
         p->dScale = 3;
@@ -1104,7 +1128,7 @@ static void PartSmoke(s16 mx, s16 my, u8 n, u8 life, s16 spread)
         p->dRot = Rnd(2);
         p->life = life + RndU(10);
         p->fadeOut = life / 2;
-        p->alpha = 14;
+        p->alpha = 12;
     }
 }
 
@@ -1116,7 +1140,7 @@ static void PartFireworks(s16 mx, s16 my, s16 feet)
         struct FxPart *p = Spawn(FXA_FIREWORKS_ROCKET, 0, mx + Dist((i - n / 2) * 14), feet);
         if (!p)
             return;
-        p->vy = -Dist(0x480) - RndU(0xA0);
+        p->vy = -Dist(0x3A0) - RndU(0x80);   // bursts below the healthboxes
         p->vx = Dist((i - n / 2) * 0x20) + Rnd(0x18);
         p->ay = 0x14;
         p->life = 15 + RndU(5);
@@ -2035,7 +2059,7 @@ static void StartParticles(u8 part, u8 color, s16 mx, s16 my, s16 feet, s16 head
     {
     case MPFX_PART_CONFETTI:  PartConfetti(mx, my, feet - 4); break;
     case MPFX_PART_EXPLOSION: PartExplosion(mx, my, b); break;
-    case MPFX_PART_SMOKE:     PartSmoke(mx, my, 12, 40, 12); break;
+    case MPFX_PART_SMOKE:     PartSmoke(mx, my, 12, 32, 12); break;
     case MPFX_PART_FIREWORKS: PartFireworks(mx, my, feet); break;
     case MPFX_PART_FLOWER:    PartFlower(mx, feet); break;
     case MPFX_PART_BUBBLES:   PartBubbles(mx, my, feet, 22); break;
@@ -2350,8 +2374,8 @@ static void EntranceFrame(struct FxBody *b)
         // its silhouette inside a billowing cloud that clears
         if (t == 0)
         {
-            PartSmoke(mx, my, 10, 46, 14);
-            PartSmoke(mx, my + Dist(14), 4, 36, 20);
+            PartSmoke(mx, my, 10, 36, 14);
+            PartSmoke(mx, my + Dist(14), 4, 30, 20);
         }
         BodyTint(b, t < 6 ? 16 : 16 - 16 * Ramp(t, 6, 15) / 256, RGB(4, 4, 5));
         break;

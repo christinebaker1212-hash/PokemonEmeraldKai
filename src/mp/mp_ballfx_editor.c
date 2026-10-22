@@ -2,7 +2,7 @@
 //
 // A battle scene with the Moemon standing on its platform and a panel on the
 // right: PRESET, MATERIALIZATION, ENERGY COLOR, ENTRANCE PARTICLES, RECALL
-// EFFECT and SOUND ACCENT, then SAVE AS (MY PRESET 1-3, which PRESET then offers)
+// EFFECT and SOUND ACCENT, then SAVE AS (MY PRESET 1-6, which PRESET then offers)
 // and APPLY TO PARTY. The preview loops: the ball drops in and opens, the
 // entrance plays, a short pause, then the recall. SELECT shows it from the
 // other side (as other players see it), START saves, B leaves.
@@ -77,7 +77,7 @@ struct Editor
     u8 row;
     bool8 front;      // as other players see it
     u8 asking;        // ASK_*: a YES / NO question in the info box
-    u8 slot;          // SAVE AS: MY PRESET slot 0-2
+    u8 slot;          // SAVE AS: MY PRESET slot 0-5
     char note[64];    // a line for the info box ("Saved as MY PRESET 1.")
     bool8 leaving;
     u16 species;
@@ -597,7 +597,7 @@ static void ChangeValue(s8 d)
     {
     case ROW_PRESET:
     {
-        // the ready-made presets, then MY PRESET 1-3 (the saved ones)
+        // the ready-made presets (those whose pieces this save has), then MY PRESET 1-6 (the saved ones)
         u8 builtIn = MP_BallFx_PresetCount(), total = builtIn + MPFX_USER_PRESETS, tries;
         struct MpBallFx user;
         s16 at = MP_BallFx_WhichPreset(fx);
@@ -610,6 +610,8 @@ static void ChangeValue(s8 d)
             at = (at + total + d) % total;
             if (at < builtIn)
             {
+                if (!MP_BallFx_PresetUnlocked(at))
+                    continue;
                 MP_BallFx_Preset(at, fx);
                 break;
             }
@@ -618,6 +620,11 @@ static void ChangeValue(s8 d)
                 *fx = user;
                 break;
             }
+        }
+        {
+            char name[32];
+            MP_BallFx_EffectName(fx, name, sizeof(name));
+            MPNet_Log("ball fx: preset %s", name);
         }
         break;
     }
