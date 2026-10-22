@@ -576,6 +576,11 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   game started over an older save waits until you save it by hand once.
   moemon_coop.ini: autosave = minutes (0 = off). Older saves are kept as
   <save>.bak1-3.
+* A bigger BAG: up to 200 kinds of items, 64 kinds of POKE BALLS, key items,
+  TMs/HMs and BERRIES, and up to 999 of each. The save file stays a normal
+  Emerald save (its own BAG is the first slots); the rest is kept next to it
+  in <save>.bag, written with every save. (A save restored from a .bak file,
+  or played in another program since, keeps only the normal BAG.)
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).

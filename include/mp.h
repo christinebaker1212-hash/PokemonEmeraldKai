@@ -266,6 +266,11 @@ void MP_NameCase_ApplyName(u8 *name, u16 maxLen);
 void MP_NameCase_CopyName(u8 *dst, const u8 *name, u16 maxLen);
 const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId);   // text.c AddTextPrinter
 extern bool8 gMpTextFilterOff;
+struct BagPocket;
+void MP_Bag_SetPointers(struct BagPocket *pockets);   // mp_bag.c: the bigger pockets
+void MP_Bag_SyncToSaveBlock(void);
+void MP_Bag_WriteSidecar(void);
+void MP_Bag_LoadFromSave(void);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);

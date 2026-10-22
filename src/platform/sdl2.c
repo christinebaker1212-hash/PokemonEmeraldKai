@@ -423,6 +423,7 @@ static void StoreSaveFile()
         fseek(sSaveFile, 0, SEEK_SET);
         fwrite(FLASH_BASE, 1, sizeof(FLASH_BASE), sSaveFile);
     }
+    MP_Bag_WriteSidecar();   // Moemon Co-op: the pockets' slots past the save block's (mp_bag.c)
 }
 
 void Platform_StoreSaveFile(void)

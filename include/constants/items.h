@@ -470,7 +470,8 @@
 #define MAX_PC_ITEM_CAPACITY   999
 #define MAX_BERRY_CAPACITY     999
 
-#define BAG_ITEM_CAPACITY_DIGITS 2
+#define BAG_ITEM_CAPACITY_DIGITS 3   // Moemon Co-op: stacks of up to MP_BAG_ITEM_CAPACITY (was 2)
+#define MP_BAG_ITEM_CAPACITY   999   // Moemon Co-op: a bag stack (MAX_BAG_ITEM_CAPACITY stays for the Pyramid bag's u8s)
 #define BERRY_CAPACITY_DIGITS 3
 #define MAX_ITEM_DIGITS BERRY_CAPACITY_DIGITS
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "item.h"
 #include "berry.h"
 #include "string_util.h"
@@ -60,20 +61,8 @@ void ApplyNewEncryptionKeyToBagItems_(u32 newKey) // really GF?
 
 void SetBagItemsPointers(void)
 {
-    gBagPockets[ITEMS_POCKET].itemSlots = gSaveBlock1Ptr->bagPocket_Items;
-    gBagPockets[ITEMS_POCKET].capacity = BAG_ITEMS_COUNT;
-
-    gBagPockets[KEYITEMS_POCKET].itemSlots = gSaveBlock1Ptr->bagPocket_KeyItems;
-    gBagPockets[KEYITEMS_POCKET].capacity = BAG_KEYITEMS_COUNT;
-
-    gBagPockets[BALLS_POCKET].itemSlots = gSaveBlock1Ptr->bagPocket_PokeBalls;
-    gBagPockets[BALLS_POCKET].capacity = BAG_POKEBALLS_COUNT;
-
-    gBagPockets[TMHM_POCKET].itemSlots = gSaveBlock1Ptr->bagPocket_TMHM;
-    gBagPockets[TMHM_POCKET].capacity = BAG_TMHM_COUNT;
-
-    gBagPockets[BERRIES_POCKET].itemSlots = gSaveBlock1Ptr->bagPocket_Berries;
-    gBagPockets[BERRIES_POCKET].capacity = BAG_BERRIES_COUNT;
+    // Moemon Co-op: bigger pockets (mp_bag.c); the save block's are copied in and out
+    MP_Bag_SetPointers(gBagPockets);
 }
 
 void CopyItemName(u16 itemId, u8 *dst)
@@ -188,7 +177,7 @@ bool8 CheckBagHasSpace(u16 itemId, u16 count)
 
     pocket = GetItemPocket(itemId) - 1;
     if (pocket != BERRIES_POCKET)
-        slotCapacity = MAX_BAG_ITEM_CAPACITY;
+        slotCapacity = MP_BAG_ITEM_CAPACITY;
     else
         slotCapacity = MAX_BERRY_CAPACITY;
 
@@ -260,7 +249,7 @@ bool8 AddBagItem(u16 itemId, u16 count)
         memcpy(newItems, itemPocket->itemSlots, itemPocket->capacity * sizeof(struct ItemSlot));
 
         if (pocket != BERRIES_POCKET)
-            slotCapacity = MAX_BAG_ITEM_CAPACITY;
+            slotCapacity = MP_BAG_ITEM_CAPACITY;
         else
             slotCapacity = MAX_BERRY_CAPACITY;
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "platform.h"
 #include "agb_flash.h"
 #include "gba/flash_internal.h"
@@ -140,6 +141,8 @@ static u8 WriteSaveSectorOrSlot(u16 sectorId, const struct SaveSectorLocation *l
 {
     u32 status;
     u16 i;
+
+    MP_Bag_SyncToSaveBlock();   // Moemon Co-op: the save block's pockets from the bigger ones
 
     gReadWriteSector = &gSaveDataBuffer;
 
@@ -309,6 +312,7 @@ static u8 HandleReplaceSectorAndVerify(u16 sectorId, const struct SaveSectorLoca
 // Similar to HandleWriteSector, but fully erases the sector first, and skips writing the first signature byte
 static u8 HandleReplaceSector(u16 sectorId, const struct SaveSectorLocation *locations)
 {
+    MP_Bag_SyncToSaveBlock();   // Moemon Co-op
     u16 i;
     u16 sector;
     u8 *data;
@@ -894,6 +898,8 @@ u8 LoadGameSave(u8 saveType)
     default:
         status = TryLoadSaveSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
         CopyPartyAndObjectsFromSave();
+        if (status == SAVE_STATUS_OK)
+            MP_Bag_LoadFromSave();   // Moemon Co-op: the bigger pockets (mp_bag.c)
         gSaveFileStatus = status;
         gGameContinueCallback = NULL;
         break;

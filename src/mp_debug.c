@@ -669,6 +669,24 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern u8 gMpWildDoublePercent;
         gMpWildDoublePercent = arg[0] ? atoi(arg) : 100;
     }
+    else if (strcmp(cmd, "bag") == 0)
+    {
+        // bag - how many kinds of item each pocket holds, and the biggest stack
+        u8 p;
+        for (p = 0; p < POCKETS_COUNT; p++)
+        {
+            u16 i, kinds = 0, biggest = 0;
+            for (i = 0; i < gBagPockets[p].capacity; i++)
+                if (gBagPockets[p].itemSlots[i].itemId != ITEM_NONE)
+                {
+                    u16 q = gBagPockets[p].itemSlots[i].quantity ^ (u16)gSaveBlock2Ptr->encryptionKey;
+                    kinds++;
+                    if (q > biggest)
+                        biggest = q;
+                }
+            printf("[test] bag pocket %d: %d kinds (of %d), biggest stack %d\n", p, kinds, gBagPockets[p].capacity, biggest);
+        }
+    }
     else if (strcmp(cmd, "save") == 0)
     {
         u8 TrySavingData(u8 saveType);
