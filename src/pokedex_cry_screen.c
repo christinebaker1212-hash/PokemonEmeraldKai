@@ -357,6 +357,34 @@ static void PlayCryScreenCry(u16 species)
     sDexCryScreen->cryState = 1;
 }
 
+#ifdef PORTABLE
+// PC: the sound comes out of music_player.c's float mixer, not the GBA's 8-bit DMA buffer this
+// screen read (pcmBuffer is never written on PC: a flat line and a still needle). Take 16 points
+// across the last frame that was played, in the GBA's units (a sample of 1.0 is 128), doubled
+// like the original, signed around the waveform's middle.
+extern float audioBuffer[];
+extern s32 gAudioBufferLen;
+
+static void BufferCryWaveformSegment(void)
+{
+    u8 i;
+    s32 pairs = gAudioBufferLen / 2;
+    for (i = 0; i < ARRAY_COUNT(sDexCryScreen->cryWaveformBuffer); i++)
+    {
+        float v = 0;
+        if (pairs > 0)
+        {
+            s32 at = (i * pairs / ARRAY_COUNT(sDexCryScreen->cryWaveformBuffer)) * 2;
+            v = (audioBuffer[at] + audioBuffer[at + 1]) * 0.5f * 128.0f * 2.0f;
+        }
+        if (v > 127)
+            v = 127;
+        if (v < -127)
+            v = -127;
+        sDexCryScreen->cryWaveformBuffer[i] = v;
+    }
+}
+#else
 static void BufferCryWaveformSegment(void)
 {
     u8 i;
@@ -372,6 +400,7 @@ static void BufferCryWaveformSegment(void)
     for (i = 0; i < ARRAY_COUNT(sDexCryScreen->cryWaveformBuffer); i++)
         sDexCryScreen->cryWaveformBuffer[i] = buffer[i * 2] * 2;
 }
+#endif
 
 static void DrawWaveformFlatline(void)
 {
@@ -524,14 +553,25 @@ static void SpriteCB_CryMeterNeedle(struct Sprite *sprite)
         peakAmplitude = 0;
         for (i = 0; i < ARRAY_COUNT(sDexCryScreen->cryWaveformBuffer); i++)
         {
+#ifdef PORTABLE
+            // the PC samples are signed: the loudness is how far they swing either way
+            s8 level = sDexCryScreen->cryWaveformBuffer[i] < 0 ? -sDexCryScreen->cryWaveformBuffer[i] : sDexCryScreen->cryWaveformBuffer[i];
+            if (peakAmplitude < level)
+                peakAmplitude = level;
+#else
             if (peakAmplitude < sDexCryScreen->cryWaveformBuffer[i])
                 peakAmplitude = sDexCryScreen->cryWaveformBuffer[i];
+#endif
         }
         SetCryMeterNeedleTarget(peakAmplitude * 208 / 256);
         break;
     case 6:
         // To introduce some randomness, needle jumps to set pos in waveform rather than peak
+#ifdef PORTABLE
+        amplitude = sDexCryScreen->cryWaveformBuffer[10] < 0 ? -sDexCryScreen->cryWaveformBuffer[10] : sDexCryScreen->cryWaveformBuffer[10];
+#else
         amplitude = sDexCryScreen->cryWaveformBuffer[10];
+#endif
         SetCryMeterNeedleTarget(amplitude * 208 / 256);
         break;
     }

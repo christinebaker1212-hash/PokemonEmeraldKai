@@ -17,6 +17,7 @@ extern const u8 gScaleTable[];
 extern const u32 gFreqTable[];
 extern const u8 gClockTable[];
 float audioBuffer [MIXED_AUDIO_BUFFER_SIZE];
+s32 gAudioBufferLen;   // floats in audioBuffer's last frame (stereo pairs * 2): the Pokédex cry screen reads it
 
 u32 umul3232H32(u32 a, u32 b) {
     u64 result = a;
@@ -772,6 +773,7 @@ void m4aSoundVSync(void)
             MP_LegacySfx_Mix(audioBuffer, samplesPerFrame);
         }
 
+        gAudioBufferLen = samplesPerFrame;
         Platform_QueueAudio(audioBuffer, samplesPerFrame * 4);
         if((s8)(--mixer->dmaCounter) <= 0)
             mixer->dmaCounter = mixer->framesPerDmaCycle;

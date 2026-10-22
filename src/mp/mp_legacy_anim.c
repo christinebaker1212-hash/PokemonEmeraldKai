@@ -41,9 +41,12 @@ enum { EV_SOUND = 1, EV_HIDE_TARGET, EV_SHOW_TARGET, EV_TARGET_SIZE };
 enum { TL_RED_MISS, TL_RED_1, TL_RED_2, TL_RED_3, TL_RED_CAUGHT,
        TL_GSC_0, TL_GSC_1, TL_GSC_2, TL_GSC_3, TL_GSC_CAUGHT, TL_RED_POOF, TL_GSC_POOF };
 
-// Red on the Super Game Boy (pokered SetPal_Battle / BlkPacket_Battle) colors the screen by area,
+// Red's sprites: the GENESIS BALL's own colors for the Game Boy's four shades (the throw, the
+// shakes, the send-out smoke)
+static const u16 sRedShades[4] = {RGB(31, 31, 31), RGB(31, 24, 24), RGB(31, 16, 16), RGB(4, 4, 4)};
+// Once the catch is done, Red on the Super Game Boy (pokered SetPal_Battle / BlkPacket_Battle) colors the screen by area,
 // sprites too: the HP bars' palettes (PAL_GREENBAR / YELLOWBAR / REDBAR) and each Pokémon's own
-// palette over its picture. So a ball flying into the foe's picture takes the foe's colors.
+// palette over its picture. So the caught ball, resting in the foe's picture, takes its colors.
 static const u16 sRedBarPals[3][4] = {
     {RGB(31, 29, 31), RGB(30, 26, 15), RGB(9, 20, 11), RGB(3, 2, 2)},
     {RGB(31, 29, 31), RGB(30, 26, 15), RGB(26, 20, 0), RGB(3, 2, 2)},
@@ -473,7 +476,7 @@ static void DrawSprites(u16 *frame, u16 index)
         const struct LegacyAnimSprite *s = &tl->sprites[f->first + i];
         if (sAnim.game == MP_SPECIAL_GENESIS)
             DrawTile(frame, sRedAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags,
-                     RedAreaPalette(s->x + 4, s->y + 4));
+                     (!sAnim.active && sAnim.kept) ? RedAreaPalette(s->x + 4, s->y + 4) : sRedShades);
         else if (!sAnim.active && sAnim.kept)
             // Crystal: the caught ball stays with anim_keepsprites, and BattleAnim_ClearOAM moves
             // every kept sprite to PAL_BATTLE_OB_ENEMY, the caught Pokémon's own palette
@@ -554,7 +557,6 @@ static struct {
     bool8 mirror;                  // a back picture (Red mirrors its smoke onto the player's side)
     u32 lastTick;
     const struct LegacyStep *steps;
-    u16 pal[4];                    // Red: the smoke is in the Moemon's own area, so in its colors
 } sMove[MAX_BATTLERS_COUNT];
 
 // The ball this battler's Moemon came in, if one of these and its own look applies
@@ -605,7 +607,6 @@ static bool8 StartMove(u8 battler, bool8 recall)
     else
         sMove[battler].steps = recall ? sGscBack : sGscOut;
     sMove[battler].size = recall ? 7 : 0;
-    MonGbPalette(sMove[battler].sprite, sMove[battler].pal);
     if (!recall)
         sMove[battler].poof = game == MP_SPECIAL_GENESIS ? TL_RED_POOF : TL_GSC_POOF;
     else if (game == MP_SPECIAL_EPOCH)
@@ -696,7 +697,7 @@ static void DrawMoves(u16 *frame)
             s32 i;
             u8 c;
             for (c = 0; c < 4; c++)
-                colors[c] = sMove[b].game == MP_SPECIAL_GENESIS ? sMove[b].pal[c]
+                colors[c] = sMove[b].game == MP_SPECIAL_GENESIS ? sRedShades[c]
                           : RGB(sGscAnimPalettes[0][c][0], sGscAnimPalettes[0][c][1], sGscAnimPalettes[0][c][2]);
             for (i = f->count - 1; i >= 0; i--)
             {
