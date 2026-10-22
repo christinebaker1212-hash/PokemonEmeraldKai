@@ -540,6 +540,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             MP_SaveData_Set("gatcha:ticketbackfill", 0);
         MP_Gatcha_BackfillTickets();
     }
+    else if (strcmp(cmd, "gatchafx") == 0)
+    {
+        // gatchafx N - the next MoeGatcha pull gives ball effect prize number N (-1: a random one)
+        void MP_Gatcha_RigFx(s16 n);
+        MP_Gatcha_RigFx(atoi(arg));
+    }
     else if (strcmp(cmd, "gatchastock") == 0)
     {
         printf("[test] gatcha tickets %d free %d\n", (int)MP_Gatcha_Tickets(), (int)MP_Gatcha_FreeWaiting());

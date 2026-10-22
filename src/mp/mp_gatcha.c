@@ -222,7 +222,7 @@ static const struct EventMon sEventMons[] = {
     [EV_RANDOM_LEGEND] = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
 };
 
-enum { K_ITEM, K_MONEY, K_MON, K_SET };   // K_SET: several items at once (sSets)
+enum { K_ITEM, K_MONEY, K_MON, K_SET, K_FX };   // K_SET: several items at once (sSets); K_FX: a ball effect piece
 
 struct PrizeDef
 {
@@ -238,6 +238,9 @@ struct PrizeDef
 #define MON(e, w)     {K_MON, e, 1, w, FALSE}
 #define SHINY(e, w)   {K_MON, e, 1, w, TRUE}
 #define SET(n, q, w)  {K_SET, n, q, w, FALSE}
+// A POKé BALL color or ball effect piece, one of the MOEGATCHA ones (mp_ballunlock.c), picked at
+// the pull (qty: its number + 1; 0 = not picked yet). One the player has already: a TICKET instead
+#define FX(w)         {K_FX, ITEM_STAR_PIECE, 0, w, FALSE}
 
 static bool8 IsRandomEv(u16 ev)
 {
@@ -322,6 +325,7 @@ static const struct PrizeDef sRareItems[] = {
 static const struct PrizeDef sSuperItems[] = {
     ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 4, 12), MONEY(10000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
     ITEM(ITEM_LUCKY_EGG, 1, 6), SHINY(EV_GYARADOS, 2),   // the RED GYARADOS is always there, and always shiny
+    FX(4),   // a ball effect piece (more of them on the POKe BALLS banner)
     // Berries: the pinch ones from Mirage Island
     ITEM(ITEM_LIECHI_BERRY, 1, 2), ITEM(ITEM_GANLON_BERRY, 1, 2), ITEM(ITEM_SALAC_BERRY, 1, 2),
     ITEM(ITEM_PETAYA_BERRY, 1, 2), ITEM(ITEM_APICOT_BERRY, 1, 2),
@@ -459,14 +463,17 @@ static const struct PrizeDef sBallRare[] = {
     ITEM(ITEM_NEST_BALL, 10, 5), ITEM(ITEM_REPEAT_BALL, 10, 5), ITEM(ITEM_TIMER_BALL, 10, 5), SET(SET_BALLS, 3, 8),
     // The strong all-rounders, like the TIMER BALL
     ITEM(ITEM_QUICK_BALL, 3, 5), ITEM(ITEM_DUSK_BALL, 3, 5), ITEM(ITEM_DREAM_BALL, 3, 5), SET(SET_APRICORN, 1, 6),
+    FX(12),   // POKe BALL colors and ball effect pieces
 };
 static const struct PrizeDef sBallSuper[] = {
     SET(SET_BALLS, 5, 10), ITEM(ITEM_ULTRA_BALL, 30, 8), ITEM(ITEM_LUXURY_BALL, 20, 6),
     SET(SET_APRICORN, 3, 8), ITEM(ITEM_QUICK_BALL, 10, 6), ITEM(ITEM_DUSK_BALL, 10, 6), ITEM(ITEM_DREAM_BALL, 10, 6),
+    FX(12),
 };
 static const struct PrizeDef sBallSSuper[] = {
     SET(SET_BALLS, 10, 10), ITEM(ITEM_ULTRA_BALL, 60, 6), ITEM(ITEM_LUXURY_BALL, 40, 4),
     SET(SET_APRICORN, 6, 8), ITEM(ITEM_QUICK_BALL, 25, 5), ITEM(ITEM_DUSK_BALL, 25, 5),
+    FX(10),
 };
 static const struct PrizeDef sBallUltra[] = {
     ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
@@ -540,7 +547,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(31, 17, 2),
     },
     [BANNER_BALLS] = {
-        "POKE BALLS", "Rare POK~ BALLS + 13 found only here!",
+        "POKE BALLS", "Rare BALLS + ball colors and effects!",
         {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
          {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallSSuper, ARRAY_COUNT(sBallSSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}, {sBallEx, ARRAY_COUNT(sBallEx)}},
         {5200, 2800, 1350, 500, 120, 25, 5}, RGB(6, 18, 31),
@@ -921,6 +928,14 @@ void MP_Gatcha_Rig(s8 rarity)
     sRig = rarity;
 }
 
+// Test harness: the next pull's prize is a ball effect piece (MOEGATCHA prize number n; -1: picked at random)
+void MP_Gatcha_RigFx(s16 n)
+{
+    static struct PrizeDef sFxRig = FX(1);
+    sFxRig.qty = n >= 0 ? n + 1 : 0;
+    sRigDef = &sFxRig;
+}
+
 static u8 RollRarity(bool8 rarePlus)
 {
     char srKey[24], ssrKey[24], urKey[24];
@@ -995,6 +1010,15 @@ static void PrizeName(const struct PrizeDef *def, u32 amount, u8 *dst)
     else if (def->kind == K_SET)
     {
         snprintf(buf, sizeof(buf), "%s x%u", sSetNames[def->id], (unsigned)def->qty);
+        MP_AsciiToGame(dst, buf, 30);
+    }
+    else if (def->kind == K_FX)
+    {
+        u8 kind, index;
+        if (def->qty && MP_BallUnlock_Prize(def->qty - 1, &kind, &index))
+            MP_BallUnlock_PieceName(kind, index, buf, sizeof(buf));
+        else
+            snprintf(buf, sizeof(buf), "BALL EFFECT?");
         MP_AsciiToGame(dst, buf, 30);
     }
     else
@@ -1094,6 +1118,19 @@ static void GivePrize(struct Result *res)
     case K_MON:
         GiveEventMon(def, res);
         break;
+    case K_FX:
+    {
+        u8 kind, index;
+        if (def->qty && MP_BallUnlock_Prize(def->qty - 1, &kind, &index) && MP_BallUnlock_Give(kind, index))
+            snprintf(res->note, sizeof(res->note), "New! On the summary's POK~ BALL page.");
+        else
+        {
+            MP_Gatcha_AddTickets(1);
+            snprintf(res->note, sizeof(res->note), "Had it: a MOEGATCHA TICKET instead!");
+            MPNet_Log("gatcha: ball piece %d already had: a ticket", (int)def->qty - 1);
+        }
+        break;
+    }
     case K_SET:
     {
         u8 i, missed = 0;
@@ -1949,6 +1986,8 @@ static u16 IconKey(const struct PrizeDef *def)
 {
     if (def->kind == K_MON)
         return 0x8000 | DefSpecies(def);
+    if (def->kind == K_FX)
+        return 0x7FFF;
     return def->kind == K_SET ? sSets[def->id][0] : def->id;   // MONEY: the AMULET COIN
 }
 
@@ -2729,6 +2768,13 @@ static void StartSpin(u8 count)
             // A random Moemon: which one is decided now
             sRandDefs[i] = *r->def;
             sRandDefs[i].qty = RandomSpecies(r->def->id == EV_RANDOM_LEGEND);
+            r->def = &sRandDefs[i];
+        }
+        else if (r->def->kind == K_FX && r->def->qty == 0)
+        {
+            // which ball effect piece: decided now (any of them: one already had becomes a TICKET)
+            sRandDefs[i] = *r->def;
+            sRandDefs[i].qty = MP_BallUnlock_PrizeCount() ? 1 + Random() % MP_BallUnlock_PrizeCount() : 0;
             r->def = &sRandDefs[i];
         }
         GivePrize(r);

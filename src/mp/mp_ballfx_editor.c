@@ -302,7 +302,7 @@ static void DrawInfo(void)
     case ROW_PRESET:
         preset = MP_BallFx_WhichPreset(&sEd->fx);
         if (preset < 0 && MP_BallFx_WhichUserPreset(&sEd->fx) >= 0)
-            text = "One of your own presets. SAVE AS keeps up to three.";
+            text = "One of your own presets. SAVE AS keeps up to six.";
         else
             text = preset < 0 ? "Your own mix. Pick a preset with {LEFTRIGHT}, or change any part below." :
                    preset == 0 ? "Everything the way the game does it." : "A ready-made mix. Change any part below to make it your own.";

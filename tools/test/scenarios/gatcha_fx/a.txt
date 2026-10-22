@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 120
+mp gatchastock
+mp gatcharig 2 20
+mp gatchafx 0
+mp gatcha
+wait 60
+pressuntillog A 2000 gatcha: 
+wait 520
+shot newpiece
+mash B 12 20
+pressuntil B field 3000
+wait 60
+mp fxunlock 0 0
+mp gatcharig 2
+mp gatchafx 0
+mp gatcha
+wait 60
+pressuntillog A 2000 gatcha: 
+wait 520
+shot ticket
+mash B 12 20
+pressuntil B field 3000
+wait 60
+mp gatchastock
+quit
