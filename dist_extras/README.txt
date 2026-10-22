@@ -342,9 +342,24 @@ GYM REMATCHES  The day's first team rematch win gives a MOEGATCHA pull and a
 RARE CANDIES   Can't raise a Moemon past the next gym leader's ace level
                (15, 20, 27, 33, 36, 41, 47, 51; no limit after 8 badges).
 MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
-               it races past prizes and slowly clicks down onto yours.
+               it races past prizes and slowly clicks down onto yours
+               (the prizes going by never show the same picture twice on
+               screen).
                L/R switches banners:
-                 STANDARD    event Moemon, items and money (always there)
+                 STANDARD    event Moemon, items and money (always there).
+                             Its event Moemon change every day: four at
+                             R (shiny at SR) from Generation 1-3 events
+                             and gifts (Surfing / Flying Pikachu, Amnesia
+                             Psyduck, the ODD EGG babies with DIZZY PUNCH,
+                             the Dragon's Den Dratini, Kirk's Shuckie,
+                             Elm's Togepi, Colosseum's Espeon / Umbreon,
+                             the Pokemon Box eggs) and six legends at UR
+                             (shiny at EX: AURA / classic / Faraway Mew,
+                             AGETO / GS BALL Celebi, WISHMKR / CHANNEL
+                             Jirachi, SPACE C / Birth Island Deoxys, the
+                             ticket Latias & Latios, Lugia, XD Lugia,
+                             Ho-Oh). The banner's line shows today's. A
+                             shiny RED GYARADOS is always an SR.
                  PICKUP      a new one every week: every UR is one of
                              its Moemon, every EX one of them shiny. Mew &
                              Mewtwo, Celebi, Jirachi, Dragonite, Tyranitar,
@@ -356,7 +371,14 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                              Moemon have OT GACHA (ID 23195); the event
                              ones carry the real events' levels and moves.
                              Moemon you haven't seen yet only show their
-                             shadow.
+                             shadow. REROLL VOTE: with friends online,
+                             SELECT on PICKUP asks everyone whether to
+                             reroll this week's PICKUP. Nobody picks the
+                             new one: if more than half say YES (you
+                             count), a random different PICKUP is drawn
+                             for everyone, for the rest of the week. Pity
+                             counts stay. One reroll a week; friends who
+                             come online later get it too.
                  TRAINING    Rare Candies, vitamins, PP Ups, Lucky Egg...
                  POKE BALLS  Net, Dive, Nest, Repeat, Timer, Luxury,
                              Premier and Master Balls

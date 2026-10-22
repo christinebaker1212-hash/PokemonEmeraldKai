@@ -1102,6 +1102,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Group_OnRelay(from, data, len);
     else if (data[0] >= MPR_WORLD_FIRST && data[0] < MPR_WORLD_FIRST + 2)
         MP_World_OnRelay(from, data, len);
+    else if (data[0] >= MPR_GATCHA_FIRST && data[0] < MPR_GATCHA_FIRST + 4)
+        MP_Gatcha_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1589,6 +1591,7 @@ void MP_FrameUpdate(void)
         MP_Coop_Update();
         MP_Dex_Update();
         MP_Trade_Update();
+        MP_Gatcha_VoteUpdate();
         MP_Events_Update();
         MP_Tourney_Update();
         SendLocalState(FALSE);

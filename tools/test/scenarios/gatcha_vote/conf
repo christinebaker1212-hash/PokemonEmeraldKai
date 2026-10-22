@@ -1,0 +1,16 @@
+# Weekly PICKUP reroll vote at NA-JP lag. ALICE asks on the gatcha screen (SELECT) to reroll this week's PICKUP; BOB,
+# also on the gatcha screen, says YES there; CARL, on the map, gets the question in the field and says NO. 2 of 3 is more than
+# half: it ends as soon as the majority is certain, the same surprise PICKUP lands on all three games, ALICE's open
+# screen switches to it, and a second vote that week is refused.
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+EXPECT_A=("gatcha: reroll vote started" "player 2 voted YES" "gatcha: vote passed, this week's pickup is" "no vote: This week's PICKUP was rerolled already." "[test] gatcha reel banner 1")
+EXPECT_B=("asks for a reroll vote" "answered player 1's vote: YES" "gatcha: vote passed, this week's pickup is")
+EXPECT_C=("asks for a reroll vote" "answered player 1's vote: NO" "gatcha: vote passed, this week's pickup is")
+UNEXPECT_A=("did not pass")

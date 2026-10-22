@@ -360,6 +360,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &v);
         gSaveBlock1Ptr->weatherCycleStage = v;
     }
+    else if (strcmp(cmd, "gatchaday") == 0)
+    {
+        // gatchaday N - STANDARD shows day N's prizes (-1: today)
+        void MP_Gatcha_SetDay(s32 day);
+        int n = -1;
+        sscanf(arg, "%d", &n);
+        MP_Gatcha_SetDay(n);
+    }
+    else if (strcmp(cmd, "gatchagive") == 0)
+    {
+        // gatchagive EV [SHINY] - an event Moemon from the MoeGatcha list (EV_* order in mp_gatcha.c)
+        void MP_Gatcha_DebugGive(u8 ev, bool8 shiny);
+        int ev = 0, sh = 0;
+        sscanf(arg, "%d %d", &ev, &sh);
+        MP_Gatcha_DebugGive(ev, sh);
+    }
+    else if (strcmp(cmd, "gatchareel") == 0)
+    {
+        void MP_Gatcha_DebugReel(void);
+        MP_Gatcha_DebugReel();
+    }
     else if (strcmp(cmd, "pickup") == 0)
     {
         // pickup N - show PICKUP number N (0-18) instead of this week's

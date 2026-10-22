@@ -127,7 +127,11 @@ enum {
     EV_G_DITTO, EV_G_EEVEE, EV_G_FEEBAS, EV_G_DEOXYS, EV_G_HITMONLEE, EV_G_HITMONCHAN, EV_G_MOLTRES, EV_G_ZAPDOS,
     EV_G_ARTICUNO, EV_G_BULBASAUR, EV_G_CHARMANDER, EV_G_SQUIRTLE, EV_G_CHIKORITA, EV_G_TOTODILE, EV_G_CYNDAQUIL,
     EV_G_ENTEI, EV_G_RAIKOU, EV_G_SUICUNE, EV_G_LUGIA, EV_G_HOOH, EV_G_LATIOS, EV_G_LATIAS,
-    EV_RANDOM,          // a random Moemon (not legendary), picked at the pull: def->qty is the species
+    // STANDARD, taking turns day by day: Generation 1, 2 and 3 events and gifts
+    EV_SURF_PIKACHU, EV_FLY_PIKACHU, EV_PSYDUCK, EV_ODD_PICHU, EV_ODD_CLEFFA, EV_ODD_IGGLYBUFF, EV_ODD_SMOOCHUM,
+    EV_ODD_MAGBY, EV_ODD_ELEKID, EV_ODD_TYROGUE, EV_DRATINI, EV_SHUCKIE, EV_TOGEPI, EV_ESPEON, EV_UMBREON,
+    EV_GYARADOS, EV_OLD_MEW, EV_GS_CELEBI, EV_CHANNEL_JIRACHI, EV_FARAWAY_MEW, EV_BIRTH_DEOXYS, EV_XD_LUGIA,
+    EV_RANDOM,         // a random Moemon (not legendary), picked at the pull: def->qty is the species
     EV_RANDOM_LEGEND,   // a random legendary, picked at the pull
 };
 
@@ -185,6 +189,35 @@ static const struct EventMon sEventMons[] = {
     [EV_G_HOOH]       = {NULL, SPECIES_HO_OH, 70, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
     [EV_G_LATIOS]     = {NULL, SPECIES_LATIOS, 50, {MOVE_LUSTER_PURGE, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_DRAGON_DANCE}, "GACHA", GACHA_OT_ID, FALSE},
     [EV_G_LATIAS]     = {NULL, SPECIES_LATIAS, 50, {MOVE_MIST_BALL, MOVE_PSYCHIC, MOVE_RECOVER, MOVE_CHARM}, "GACHA", GACHA_OT_ID, FALSE},
+    // STANDARD, a few each day. Real events keep their level and moves: the
+    // Stadium Surfing Pikachu, the Snap Station Amnesia Psyduck, Crystal's ODD
+    // EGG babies (all with DIZZY PUNCH), its Dragon's Den Dratini (EXTREMESPEED),
+    // the GS BALL Celebi and Lake of Rage's RED GYARADOS (always shiny), Kirk's Shuckie, the
+    // CHANNEL Jirachi. Gifts and catches from the games (Elm's Togepi,
+    // Colosseum's Espeon and Umbreon, Faraway Island's Mew, Birth Island's
+    // Deoxys, XD's Lugia) know their moves at that level.
+    [EV_SURF_PIKACHU]  = {"SURFING PIKACHU", SPECIES_PIKACHU, 5, {MOVE_THUNDER_SHOCK, MOVE_GROWL, MOVE_SURF, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_FLY_PIKACHU]   = {"FLYING PIKACHU", SPECIES_PIKACHU, 5, {MOVE_THUNDER_SHOCK, MOVE_GROWL, MOVE_FLY, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_PSYDUCK]       = {"AMNESIA PSYDUCK", SPECIES_PSYDUCK, 15, {MOVE_SCRATCH, MOVE_AMNESIA, MOVE_NONE, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_PICHU]     = {"ODD EGG PICHU", SPECIES_PICHU, 5, {MOVE_THUNDER_SHOCK, MOVE_CHARM, MOVE_DIZZY_PUNCH, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_CLEFFA]    = {"ODD EGG CLEFFA", SPECIES_CLEFFA, 5, {MOVE_POUND, MOVE_CHARM, MOVE_DIZZY_PUNCH, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_IGGLYBUFF] = {"ODD EGG IGGLYBUFF", SPECIES_IGGLYBUFF, 5, {MOVE_SING, MOVE_CHARM, MOVE_DIZZY_PUNCH, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_SMOOCHUM]  = {"ODD EGG SMOOCHUM", SPECIES_SMOOCHUM, 5, {MOVE_POUND, MOVE_LICK, MOVE_DIZZY_PUNCH, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_MAGBY]     = {"ODD EGG MAGBY", SPECIES_MAGBY, 5, {MOVE_EMBER, MOVE_DIZZY_PUNCH, MOVE_NONE, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_ELEKID]    = {"ODD EGG ELEKID", SPECIES_ELEKID, 5, {MOVE_QUICK_ATTACK, MOVE_LEER, MOVE_DIZZY_PUNCH, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_ODD_TYROGUE]   = {"ODD EGG TYROGUE", SPECIES_TYROGUE, 5, {MOVE_TACKLE, MOVE_DIZZY_PUNCH, MOVE_NONE, MOVE_NONE}, NULL, 0, FALSE},
+    [EV_DRATINI]       = {"DRAGON'S DEN DRATINI", SPECIES_DRATINI, 15, {MOVE_WRAP, MOVE_LEER, MOVE_THUNDER_WAVE, MOVE_EXTREME_SPEED}, NULL, 0, FALSE},
+    [EV_SHUCKIE]       = {"SHUCKIE", SPECIES_SHUCKLE, 15, NO_MOVES, "KIRK", 518, FALSE},
+    [EV_TOGEPI]        = {"ELM'S TOGEPI", SPECIES_TOGEPI, 5, NO_MOVES, NULL, 0, FALSE},
+    [EV_ESPEON]        = {"COLOSSEUM ESPEON", SPECIES_ESPEON, 25, NO_MOVES, NULL, 0, FALSE},
+    [EV_UMBREON]       = {"COLOSSEUM UMBREON", SPECIES_UMBREON, 26, NO_MOVES, NULL, 0, FALSE},
+    [EV_GYARADOS]      = {"RED GYARADOS", SPECIES_GYARADOS, 30, NO_MOVES, NULL, 0, FALSE},
+    [EV_OLD_MEW]       = {"CLASSIC MEW", SPECIES_MEW, 5, {MOVE_POUND, MOVE_NONE, MOVE_NONE, MOVE_NONE}, "GF", 22796, TRUE},
+    [EV_GS_CELEBI]     = {"GS BALL CELEBI", SPECIES_CELEBI, 30, NO_MOVES, NULL, 0, FALSE},
+    [EV_CHANNEL_JIRACHI] = {"CHANNEL JIRACHI", SPECIES_JIRACHI, 5, {MOVE_WISH, MOVE_CONFUSION, MOVE_REST, MOVE_NONE}, "CHANNEL", 40122, TRUE},
+    [EV_FARAWAY_MEW]   = {"FARAWAY MEW", SPECIES_MEW, 30, NO_MOVES, NULL, 0, TRUE},
+    [EV_BIRTH_DEOXYS]  = {"BIRTH ISLAND DEOXYS", SPECIES_DEOXYS, 30, NO_MOVES, NULL, 0, TRUE},
+    [EV_XD_LUGIA]      = {"XD LUGIA", SPECIES_LUGIA, 50, NO_MOVES, NULL, 0, FALSE},
     [EV_RANDOM]       = {NULL, SPECIES_NONE, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
     [EV_RANDOM_LEGEND] = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
 };
@@ -261,31 +294,101 @@ static const struct PrizeDef sUncommon[] = {
     ITEM(ITEM_PROTEIN, 1, 4), ITEM(ITEM_IRON, 1, 4), ITEM(ITEM_CALCIUM, 1, 4), ITEM(ITEM_ZINC, 1, 4),
     ITEM(ITEM_CARBOS, 1, 4), ITEM(ITEM_HP_UP, 1, 4), MONEY(2000, 10),
 };
-static const struct PrizeDef sRare[] = {
+// STANDARD's R, SR, UR and EX pools change every day (SetupStandard): four
+// event Moemon from sDailyMons among the R items (shiny at SR) and six
+// legends from sDailyLegends at UR (shiny at EX)
+#define DAILY_MONS    4
+#define DAILY_LEGENDS 6
+static const struct PrizeDef sRareItems[] = {
     ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_PP_UP, 2, 8), ITEM(ITEM_MAX_ELIXIR, 2, 6),
     ITEM(ITEM_FIRE_STONE, 1, 3), ITEM(ITEM_WATER_STONE, 1, 3), ITEM(ITEM_THUNDER_STONE, 1, 3),
     ITEM(ITEM_LEAF_STONE, 1, 3), ITEM(ITEM_MOON_STONE, 1, 3), ITEM(ITEM_LEFTOVERS, 1, 4),
     ITEM(ITEM_LUCKY_EGG, 1, 4), ITEM(ITEM_KINGS_ROCK, 1, 3), ITEM(ITEM_CHOICE_BAND, 1, 3),
     ITEM(ITEM_SCOPE_LENS, 1, 3), ITEM(ITEM_SHELL_BELL, 1, 3), ITEM(ITEM_PROTEIN, 3, 2), ITEM(ITEM_CARBOS, 3, 2),
-    MON(EV_ZIGZAGOON, 4), MON(EV_PICHU, 4), MON(EV_SKITTY, 4), MON(EV_SWABLU, 4), MONEY(5000, 8),
+    MONEY(5000, 8),
 };
-static const struct PrizeDef sSuper[] = {
+static const struct PrizeDef sSuperItems[] = {
     ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 4, 12), MONEY(10000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
-    ITEM(ITEM_LUCKY_EGG, 1, 6), SHINY(EV_ZIGZAGOON, 3), SHINY(EV_PICHU, 3), SHINY(EV_SKITTY, 3), SHINY(EV_SWABLU, 3),
+    ITEM(ITEM_LUCKY_EGG, 1, 6), SHINY(EV_GYARADOS, 2),   // the RED GYARADOS is always there, and always shiny
 };
+static struct PrizeDef sRare[ARRAY_COUNT(sRareItems) + DAILY_MONS];
+static struct PrizeDef sSuper[ARRAY_COUNT(sSuperItems) + DAILY_MONS];
 static const struct PrizeDef sSSuper[] = {
     ITEM(ITEM_MASTER_BALL, 1, 5), ITEM(ITEM_RARE_CANDY, 8, 10), MONEY(20000, 10), ITEM(ITEM_PP_MAX, 5, 8),
     SET(SET_VITAMINS, 2, 8),
 };
 // Legendary and mythical Moemon: UR only, shiny ones EX only
-static const struct PrizeDef sUltra[] = {
-    MON(EV_MEW, 10), MON(EV_CELEBI, 10), MON(EV_JIRACHI, 10), MON(EV_DEOXYS, 10),
-    MON(EV_LATIAS, 10), MON(EV_LATIOS, 10), MON(EV_LUGIA, 7), MON(EV_HOOH, 7),
+static struct PrizeDef sUltra[DAILY_LEGENDS];
+static struct PrizeDef sEx[DAILY_LEGENDS];
+
+// Four a day, in turn (the two PICHU and the two PIKACHU never on the same day)
+static const u8 sDailyMons[] = {
+    EV_ODD_PICHU, EV_ZIGZAGOON, EV_DRATINI, EV_ODD_CLEFFA, EV_SURF_PIKACHU, EV_SKITTY, EV_TOGEPI, EV_ODD_SMOOCHUM,
+    EV_ESPEON, EV_PICHU, EV_ODD_MAGBY, EV_PSYDUCK, EV_SHUCKIE, EV_ODD_IGGLYBUFF, EV_FLY_PIKACHU, EV_SWABLU,
+    EV_UMBREON, EV_ODD_ELEKID, EV_ODD_TYROGUE,
 };
-static const struct PrizeDef sEx[] = {
-    SHINY(EV_MEW, 10), SHINY(EV_CELEBI, 10), SHINY(EV_JIRACHI, 10), SHINY(EV_DEOXYS, 10),
-    SHINY(EV_LATIAS, 10), SHINY(EV_LATIOS, 10), SHINY(EV_LUGIA, 7), SHINY(EV_HOOH, 7),
+// Six legends a day, one week round (never the same species twice in a day)
+static const u8 sDailyLegends[7][DAILY_LEGENDS] = {
+    {EV_MEW, EV_CELEBI, EV_JIRACHI, EV_DEOXYS, EV_LATIAS, EV_LUGIA},
+    {EV_OLD_MEW, EV_GS_CELEBI, EV_CHANNEL_JIRACHI, EV_BIRTH_DEOXYS, EV_LATIOS, EV_HOOH},
+    {EV_FARAWAY_MEW, EV_CELEBI, EV_JIRACHI, EV_XD_LUGIA, EV_LATIAS, EV_HOOH},
+    {EV_MEW, EV_GS_CELEBI, EV_CHANNEL_JIRACHI, EV_DEOXYS, EV_LATIOS, EV_LUGIA},
+    {EV_OLD_MEW, EV_CELEBI, EV_BIRTH_DEOXYS, EV_XD_LUGIA, EV_LATIAS, EV_LATIOS},
+    {EV_FARAWAY_MEW, EV_GS_CELEBI, EV_JIRACHI, EV_DEOXYS, EV_HOOH, EV_LUGIA},
+    {EV_MEW, EV_CHANNEL_JIRACHI, EV_BIRTH_DEOXYS, EV_XD_LUGIA, EV_HOOH, EV_LATIAS},
 };
+static const u8 sLegendWeight[] = {[EV_LUGIA] = 7, [EV_HOOH] = 7, [EV_XD_LUGIA] = 7};   // the rest 10
+
+static s32 sStandardDay = -1;   // test builds: mp gatchaday N
+
+static s32 StandardDay(void)
+{
+    s32 d = sStandardDay >= 0 ? sStandardDay : MP_DayNumber(MP_Today());
+    return d < 0 ? 0 : d;
+}
+
+static const u8 *TodaysMons(u8 *out)
+{
+    s32 day = StandardDay();
+    u8 i;
+    for (i = 0; i < DAILY_MONS; i++)
+        out[i] = sDailyMons[(day * DAILY_MONS + i) % ARRAY_COUNT(sDailyMons)];
+    return out;
+}
+
+static const u8 *TodaysLegends(void)
+{
+    return sDailyLegends[StandardDay() % 7];
+}
+
+static u8 LegendWeight(u8 ev)
+{
+    return ev < ARRAY_COUNT(sLegendWeight) && sLegendWeight[ev] ? sLegendWeight[ev] : 10;
+}
+
+// Today's STANDARD prizes
+static void SetupStandard(void)
+{
+    u8 mons[DAILY_MONS], i, n;
+    const u8 *legends = TodaysLegends();
+    TodaysMons(mons);
+    memcpy(sRare, sRareItems, sizeof(sRareItems));
+    memcpy(sSuper, sSuperItems, sizeof(sSuperItems));
+    for (i = 0, n = ARRAY_COUNT(sRareItems); i < DAILY_MONS; i++)
+        sRare[n + i] = (struct PrizeDef)MON(mons[i], 4);
+    for (i = 0, n = ARRAY_COUNT(sSuperItems); i < DAILY_MONS; i++)
+        sSuper[n + i] = (struct PrizeDef)SHINY(mons[i], 3);
+    for (i = 0; i < DAILY_LEGENDS; i++)
+    {
+        sUltra[i] = (struct PrizeDef)MON(legends[i], LegendWeight(legends[i]));
+        sEx[i] = (struct PrizeDef)SHINY(legends[i], LegendWeight(legends[i]));
+    }
+}
+
+void MP_Gatcha_SetDay(s32 day)
+{
+    sStandardDay = day;
+}
 
 // TRAINING banner: build your Moemon up
 static const struct PrizeDef sTrainCommon[] = {
@@ -433,11 +536,63 @@ void MP_Gatcha_SetPickup(s8 n)
     sPickupOverride = n;
 }
 
+// A PICKUP vote that passed this week (friends online choose; see the vote below)
+#define VOTE_WEEK_KEY "gatcha:votewk"     // week number + 1 of the vote
+#define VOTE_PICK_KEY "gatcha:votepick"   // the PICKUP it chose
+
+static s8 VotedPickup(void)
+{
+    s32 pick = MP_SaveData_Get(VOTE_PICK_KEY);
+    if (MP_SaveData_Get(VOTE_WEEK_KEY) != MP_WeekNumber() + 1 || pick < 0 || pick >= (s32)ARRAY_COUNT(sPickups))
+        return -1;
+    return pick;
+}
+
+static u8 FriendsOnline(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (i != gMpLocalId && gMpPlayers[i].present)
+            n++;
+    return n;
+}
+
+
+static u8 ThisWeeksPickupIndex(void)
+{
+    s8 voted = VotedPickup();
+    if (sPickupOverride >= 0 && sPickupOverride < (s8)ARRAY_COUNT(sPickups))
+        return sPickupOverride;
+    if (voted >= 0)
+        return voted;
+    return MP_WeekNumber() % ARRAY_COUNT(sPickups);
+}
+
 static const struct Pickup *ThisWeeksPickup(void)
 {
-    if (sPickupOverride >= 0 && sPickupOverride < (s8)ARRAY_COUNT(sPickups))
-        return &sPickups[sPickupOverride];
-    return &sPickups[MP_WeekNumber() % ARRAY_COUNT(sPickups)];
+    return &sPickups[ThisWeeksPickupIndex()];
+}
+
+// "MEW/MEWTWO", or "a random SHINY Moemon"
+static void PickupLabel(u8 index, char *out, int size)
+{
+    const struct Pickup *pu = &sPickups[index];
+    int n = 0;
+    u8 i;
+    out[0] = 0;
+    if (pu->mons[0] == EV_RANDOM)
+    {
+        snprintf(out, size, "a random SHINY Moemon");
+        return;
+    }
+    for (i = 0; i < pu->count && n < size; i++)
+    {
+        u8 name[POKEMON_NAME_LENGTH + 1];
+        char a[16];
+        GetSpeciesName(name, sEventMons[pu->mons[i]].species);
+        MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
+        n += snprintf(out + n, size - n, "%s%s", i ? "/" : "", a);
+    }
 }
 
 static bool8 PickupIsRandom(void)
@@ -708,6 +863,8 @@ static const struct PrizeDef *PickFromPool(u8 rarity)
     u16 total = 0, i, pick;
     for (i = 0; i < pool->count; i++)
         total += pool->defs[i].weight;
+    if (total == 0)
+        return &pool->defs[0];
     pick = Random() % total;
     for (i = 0; i < pool->count; i++)
     {
@@ -868,6 +1025,19 @@ static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
         SetMonData(mon, MON_DATA_MODERN_FATEFUL_ENCOUNTER, &one);
         SetMonData(mon, MON_DATA_MET_LOCATION, &loc);
     }
+    {
+        char ot[PLAYER_NAME_LENGTH + 2];
+        u8 otName[PLAYER_NAME_LENGTH + 1];
+        GetMonData(mon, MON_DATA_OT_NAME, otName);
+        otName[PLAYER_NAME_LENGTH] = EOS;
+        MP_GameToAscii(ot, otName, PLAYER_NAME_LENGTH);
+        MPNet_Log("gatcha: event mon %d: species %d Lv%d moves %d %d %d %d OT %s %u fateful %d met %d shiny %d", def->id,
+                  (int)GetMonData(mon, MON_DATA_SPECIES), (int)GetMonData(mon, MON_DATA_LEVEL),
+                  (int)GetMonData(mon, MON_DATA_MOVE1), (int)GetMonData(mon, MON_DATA_MOVE2), (int)GetMonData(mon, MON_DATA_MOVE3),
+                  (int)GetMonData(mon, MON_DATA_MOVE4), ot, (unsigned)GetMonData(mon, MON_DATA_OT_ID),
+                  (int)GetMonData(mon, MON_DATA_MODERN_FATEFUL_ENCOUNTER), (int)GetMonData(mon, MON_DATA_MET_LOCATION),
+                  (int)IsMonShiny(mon));
+    }
     result = e->otName ? MP_GiveMonKeepOT(mon) : GiveMonToPlayer(mon);
     if (result == MON_CANT_GIVE)
     {
@@ -997,6 +1167,9 @@ static u16 sSpritePalThemed[16] = {
 };
 
 enum { GS_FADE_IN, GS_MENU, GS_SPIN, GS_NUDGE, GS_HYPE, GS_EVENT, GS_REVEAL, GS_GRID, GS_EXIT };
+// GS_EXIT + 1: GS_FORCE (small tweaks)
+#define GS_VOTE_PICK  (GS_EXIT + 2)   // "reroll this week's PICKUP?" before asking
+#define GS_VOTE_ASKED (GS_EXIT + 3)   // a friend asks while this screen is open
 
 #define NO_CELL (-0x7FFFFFFF)   // a live icon slot that shows nothing (cells can be negative)
 
@@ -1048,6 +1221,8 @@ struct GatchaState
     s16 shake;          // amplitude in 1/16 px
     u16 pickupPic;      // the featured Moemon on the PICKUP banner (0xFFFF: none)
     u8 pickupShown;     // which of this week's PICKUP Moemon stands there
+    u8 tagPage;         // STANDARD: the tagline, or today's featured Moemon
+    u16 tagTimer;
     u16 pickupTimer;
     u8 forceRow;        // the "open" panel: 0 rarity, 1 prize
     u8 forceRarity;
@@ -1740,22 +1915,94 @@ static struct ReelCell *Cell(s32 i)
     return &sG->cells[((i % REEL_CELLS) + REEL_CELLS) % REEL_CELLS];
 }
 
-// Teasers: lots of flashy prizes going by
-static void MakeTeaser(struct ReelCell *c)
+// Teasers: lots of flashy prizes going by, never the same picture twice in
+// view: a cell's icon differs from every other within TEASER_GAP cells (more
+// than the screen holds) whenever the banner has enough different prizes
+#define TEASER_GAP 8
+
+static s32 sFixedCells[3];   // cells already decided ahead of the ones being filled (the prize and its neighbours)
+static u8 sFixedCount;
+
+// What a cell's icon shows: an item, or a Moemon (a random one, still a "?")
+static u16 IconKey(const struct PrizeDef *def)
+{
+    if (def->kind == K_MON)
+        return 0x8000 | DefSpecies(def);
+    return def->kind == K_SET ? sSets[def->id][0] : def->id;   // MONEY: the AMULET COIN
+}
+
+// Cells up to hi are filled in already, and so are the fixed ones
+static bool8 CellFilled(s32 j, s32 hi)
+{
+    u8 k;
+    if (Cell(j)->def == NULL)
+        return FALSE;
+    if (j <= hi)
+        return TRUE;
+    for (k = 0; k < sFixedCount; k++)
+        if (sFixedCells[k] == j)
+            return TRUE;
+    return FALSE;
+}
+
+// How close the nearest cell with the same icon is (TEASER_GAP + 1: none that close)
+static s32 RepeatDistance(s32 n, s32 hi, u16 key)
+{
+    s32 d;
+    for (d = 1; d <= TEASER_GAP; d++)
+        if ((CellFilled(n - d, hi) && IconKey(Cell(n - d)->def) == key)
+         || (CellFilled(n + d, hi) && IconKey(Cell(n + d)->def) == key))
+            return d;
+    return TEASER_GAP + 1;
+}
+
+static u8 TeaserRarity(void)
 {
     u16 r = Random() % 1000;
     // Flashy, but a legendary going by is still something to see
-    c->rarity = r < 6 ? R_EX : r < 30 ? R_UR : r < 90 ? R_SSR : r < 240 ? R_SR : r < 480 ? R_R : r < 730 ? R_U : R_N;
-    c->def = PickFromPool(c->rarity);
-    c->shown = c->rarity;
+    return r < 6 ? R_EX : r < 30 ? R_UR : r < 90 ? R_SSR : r < 240 ? R_SR : r < 480 ? R_R : r < 730 ? R_U : R_N;
+}
+
+// A prize for cell n of this rarity (0xFF: a teaser's random one) whose icon
+// isn't close by; the best of a few tries when the pools are small
+static const struct PrizeDef *PickVaried(s32 n, s32 hi, u8 rarity, u8 *rarityOut)
+{
+    const struct PrizeDef *best = NULL;
+    s32 bestDist = -1;
+    u8 bestRarity = 0, try;
+    for (try = 0; try < 24; try++)
+    {
+        u8 r = rarity != 0xFF ? rarity : TeaserRarity();
+        const struct PrizeDef *def = PickFromPool(r);
+        s32 dist = RepeatDistance(n, hi, IconKey(def));
+        if (dist > bestDist)
+        {
+            best = def;
+            bestDist = dist;
+            bestRarity = r;
+            if (dist > TEASER_GAP)
+                break;
+        }
+    }
+    if (rarityOut)
+        *rarityOut = bestRarity;
+    return best;
+}
+
+static void MakeTeaserAt(s32 n, s32 hi)
+{
+    struct ReelCell *c = Cell(n);
+    u8 r;
+    c->def = PickVaried(n, hi, 0xFF, &r);
+    c->rarity = c->shown = r;
 }
 
 static void GenerateAhead(s32 upTo)
 {
     while (sG->genUpTo < upTo)
     {
+        MakeTeaserAt(sG->genUpTo + 1, sG->genUpTo);
         sG->genUpTo++;
-        MakeTeaser(Cell(sG->genUpTo));
     }
 }
 
@@ -1911,7 +2158,7 @@ static void UpdateReel(void)
         {
             DestroyLive(l, slot);
             if (Cell(i)->def == NULL)   // never filled in: give it a prize to show
-                MakeTeaser(Cell(i));
+                MakeTeaserAt(i, sG->genUpTo);
             l->spriteId = CreateIcon(Cell(i)->def, slot, x, REEL_TOP + 16, &l->isMon, mystery);
             l->cell = i;
             l->mystery = mystery;
@@ -2062,7 +2309,9 @@ static void DrawBannerLine(void)
     if (sBanner != BANNER_PICKUP)
         Print(WIN_NAME, FONT_SMALL, 24 * 8 - 4 - GetStringWidth(FONT_SMALL, buf, 0), 2, TC_PANEL, TC_GREY, buf);
     else
+    {
         Print(WIN_NAME, FONT_SMALL, width - GetStringWidth(FONT_SMALL, buf, 0), 2, TC_PANEL, TC_GREY, buf);
+    }
     MP_AsciiToGame(buf, sBanners[sBanner].name, 40);
     Print(WIN_NAME, FONT_SMALL, (width - GetStringWidth(FONT_SMALL, buf, 0)) / 2, 2, TC_PANEL, TC_BANNER, buf);
     if (sBanner == BANNER_PICKUP)
@@ -2082,6 +2331,35 @@ static void DrawBannerLine(void)
                 MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
                 n += snprintf(line + n, sizeof(line) - n, "%s%s", i ? "/" : " ", a);
             }
+        }
+    }
+    else if (sBanner == BANNER_STANDARD && sG->tagPage % 5 != 0)
+    {
+        // Taking turns with the tagline: today's legends, then today's event Moemon
+        u8 page = sG->tagPage % 5, mons[DAILY_MONS], i, from, count;
+        const u8 *evs;
+        int n;
+        if (page <= 2)
+        {
+            evs = TodaysLegends();
+            from = (page - 1) * 3;
+            count = 3;
+            n = snprintf(line, sizeof(line), "TODAY'S UR:");
+        }
+        else
+        {
+            evs = TodaysMons(mons);
+            from = (page - 3) * 2;
+            count = 2;
+            n = snprintf(line, sizeof(line), "TODAY'S R:");
+        }
+        for (i = from; i < from + count; i++)
+        {
+            u8 name[POKEMON_NAME_LENGTH + 1];
+            char a[16];
+            GetSpeciesName(name, sEventMons[evs[i]].species);
+            MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
+            n += snprintf(line + n, sizeof(line) - n, "%s%s", i == from ? " " : "/", a);
         }
     }
     else
@@ -2161,7 +2439,7 @@ static void SwitchBanner(s8 dir)
     PlaySE(SE_DEX_PAGE);
     LoadThemedPalettes();
     for (i = c - 8; i <= sG->genUpTo; i++)
-        MakeTeaser(Cell(i));
+        MakeTeaserAt(i, i - 1);
     DestroyAllLive();
     UpdateReel();
     ShowPickupPic();
@@ -2169,6 +2447,36 @@ static void SwitchBanner(s8 dir)
     DrawHeader();
     BuildMenu();   // free pulls differ per banner
     DrawMenu();
+}
+
+// The help line under the menu: the odds (on PICKUP with friends online,
+// taking turns with how to start a vote)
+static void DrawOddsLine(void)
+{
+    u8 i;
+    if (sBanner == BANNER_PICKUP && (sG->tagPage & 1) && gMpLocalId >= 0 && FriendsOnline() > 0 && VotedPickup() < 0)
+    {
+        DrawHelp("{SELECT} Vote to reroll this week's PICKUP");
+        return;
+    }
+    {
+        // ODDS%  N 52  U 28  R 13.5  SR 5  SSR 1.2  UR .25  EX .05
+        char odds[96];
+        int n = snprintf(odds, sizeof(odds), "ODDS%%");
+        for (i = 0; i < R_COUNT; i++)
+        {
+            u16 v = sBanners[sBanner].per10k[i];   // 1/100 of a percent
+            if (v >= 100 && v % 100 == 0)
+                n += snprintf(odds + n, sizeof(odds) - n, " %s %d", sRarityShort[i], v / 100);
+            else if (v >= 100 && v % 10 == 0)
+                n += snprintf(odds + n, sizeof(odds) - n, " %s %d.%d", sRarityShort[i], v / 100, (v / 10) % 10);
+            else if (v >= 100)
+                n += snprintf(odds + n, sizeof(odds) - n, " %s %d.%02d", sRarityShort[i], v / 100, v % 100);
+            else
+                n += snprintf(odds + n, sizeof(odds) - n, " %s .%02d", sRarityShort[i], v);
+        }
+        DrawHelp(odds);
+    }
 }
 
 static void DrawMenu(void)
@@ -2207,24 +2515,7 @@ static void DrawMenu(void)
     }
     PrintAscii(WIN_MENU, FONT_SMALL, 8, 28, TC_PANEL, TC_GREY, info);
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
-    {
-        // ODDS%  N 52  U 28  R 13.5  SR 5  SSR 1.2  UR .25  EX .05
-        char odds[96];
-        int n = snprintf(odds, sizeof(odds), "ODDS%%");
-        for (i = 0; i < R_COUNT; i++)
-        {
-            u16 v = sBanners[sBanner].per10k[i];   // 1/100 of a percent
-            if (v >= 100 && v % 100 == 0)
-                n += snprintf(odds + n, sizeof(odds) - n, " %s %d", sRarityShort[i], v / 100);
-            else if (v >= 100 && v % 10 == 0)
-                n += snprintf(odds + n, sizeof(odds) - n, " %s %d.%d", sRarityShort[i], v / 100, (v / 10) % 10);
-            else if (v >= 100)
-                n += snprintf(odds + n, sizeof(odds) - n, " %s %d.%02d", sRarityShort[i], v / 100, v % 100);
-            else
-                n += snprintf(odds + n, sizeof(odds) - n, " %s .%02d", sRarityShort[i], v);
-        }
-        DrawHelp(odds);
-    }
+    DrawOddsLine();
     DrawBannerLine();
     CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
 }
@@ -2429,19 +2720,21 @@ static void StartSpin(u8 count)
     MPNet_Log("gatcha: %d pull(s), best rarity %d", count, sG->results[best].rarity);
     SaveAfterPull();
 
-    // New cells past the visible part of the reel, and the prize where it stops
+    // The prize where the reel stops, and the cells next to it
     prizeCell = center + SPIN_CELLS;
-    for (i = 5; i <= SPIN_CELLS + 8; i++)   // up to genUpTo below: those count as filled in
-        MakeTeaser(Cell(center + i));
     Cell(prizeCell)->def = sG->results[best].def;
     Cell(prizeCell)->rarity = Cell(prizeCell)->shown = sG->results[best].rarity;
+    sFixedCount = 0;
+    sFixedCells[sFixedCount++] = prizeCell;
     // So close! A legendary sits right next to it
     if (sG->results[best].rarity < R_UR)
     {
+        Cell(prizeCell + 1)->def = PickVaried(prizeCell + 1, center, R_UR, NULL);
         Cell(prizeCell + 1)->rarity = Cell(prizeCell + 1)->shown = R_UR;
-        Cell(prizeCell + 1)->def = PickFromPool(R_UR);
+        sFixedCells[sFixedCount++] = prizeCell + 1;
+        Cell(prizeCell - 1)->def = PickVaried(prizeCell - 1, center, R_SSR, NULL);
         Cell(prizeCell - 1)->rarity = Cell(prizeCell - 1)->shown = R_SSR;
-        Cell(prizeCell - 1)->def = PickFromPool(R_SSR);
+        sFixedCells[sFixedCount++] = prizeCell - 1;
     }
     // SR and up: a "?" box that looks RARE... and doesn't stay that way
     sG->prizeCell = prizeCell;
@@ -2454,10 +2747,25 @@ static void StartSpin(u8 count)
         if (sG->nudge)
         {
             // It seems to stop on a dud first
+            Cell(prizeCell - 1)->def = PickVaried(prizeCell - 1, center, R_N, NULL);
             Cell(prizeCell - 1)->rarity = Cell(prizeCell - 1)->shown = R_N;
-            Cell(prizeCell - 1)->def = PickFromPool(R_N);
+            if (sFixedCount < ARRAY_COUNT(sFixedCells) && sFixedCells[sFixedCount - 1] != prizeCell - 1)
+                sFixedCells[sFixedCount++] = prizeCell - 1;
         }
     }
+    // New teasers past the visible part of the reel (cells up to center + 6
+    // may already have their icons, so they stay as they are)
+    for (i = 7; i <= SPIN_CELLS + 8; i++)
+    {
+        u8 k;
+        bool8 fixed = FALSE;
+        for (k = 0; k < sFixedCount; k++)
+            if (sFixedCells[k] == center + i)
+                fixed = TRUE;
+        if (!fixed)
+            MakeTeaserAt(center + i, center + i - 1);
+    }
+    sFixedCount = 0;
     if (sG->pickupPic != 0xFFFF)
         gSprites[sG->pickupPic].invisible = TRUE;
     sG->genUpTo = prizeCell + 8;
@@ -2962,6 +3270,523 @@ static void CB2_Gatcha(void)
     UpdatePaletteFade();
 }
 
+// ---------------------------------------------------------------------------
+// PICKUP reroll vote: on the PICKUP banner, SELECT asks everyone online
+// whether to reroll this week's PICKUP. Nobody picks the new one: if more
+// than half say YES (the asker counts), a random different PICKUP is drawn
+// and revealed to everyone, for the rest of the week; pity counts stay. Once a
+// vote has passed there are no more that week. Friends who come online later
+// get the result from whoever has it.
+
+
+#define VOTE_FRAMES      (60 * 45)    // the asker waits this long for answers
+#define VOTE_ASK_FRAMES  (60 * 40)    // a question not answered by then counts as a NO
+#define VOTE_RETRY       (60 * 120)   // after a vote that didn't pass, before asking again
+
+enum { GV_ASK = MPR_GATCHA_FIRST, GV_ANSWER, GV_RESULT, GV_STATE };
+enum { VA_NO, VA_YES, VA_BUSY };
+
+static struct
+{
+    // A vote we started
+    bool8 active;
+    u8 id;
+    u8 asked;      // bit per player asked
+    u8 answered;
+    u8 yes;        // counting ours
+    u8 total;      // everyone online when it started, us too
+    u16 timer;
+    s32 week;
+    u16 retry;     // frames before we may ask again
+    // A friend's question to us
+    bool8 pending;
+    bool8 shown;   // on screen (gatcha screen or the field prompt)
+    u8 from;
+    u8 askId;
+    s32 askWeek;
+    u16 askTimer;
+    u8 taskId;
+    u16 cursor;
+    // Friends we've told about this week's vote
+    bool8 told[MP_MAX_PLAYERS];
+    bool8 changed;   // the PICKUP changed: the open screen catches up
+} sVote = {.taskId = TASK_NONE};
+
+static void PutS32(u8 *p, s32 v)
+{
+    p[0] = v; p[1] = v >> 8; p[2] = v >> 16; p[3] = v >> 24;
+}
+
+static s32 GetS32(const u8 *p)
+{
+    return (s32)(p[0] | (p[1] << 8) | (p[2] << 16) | ((u32)p[3] << 24));
+}
+
+static void VoterName(u8 id, char *out)
+{
+    MP_GameToAscii(out, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
+}
+
+// The toast has two short lines: "HITMONLEE/HITMONCHAN" becomes "HITMONLEE & co."
+static void ShortPickupLabel(u8 pickup, char *out, int size)
+{
+    if (sPickups[pickup].mons[0] == EV_RANDOM)
+    {
+        snprintf(out, size, "random SHINY!");
+        return;
+    }
+    PickupLabel(pickup, out, size);
+    if (strlen(out) > 18)
+    {
+        char *slash = strchr(out, '/');
+        if (slash)
+            snprintf(slash, size - (slash - out), " & co.");
+    }
+}
+
+static void ShowVoteNote(const char *ascii)
+{
+    u8 text[96];
+    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
+    MP_Toast(text);
+}
+
+// A vote's result, here and on every friend's game
+static void ApplyVote(u8 pickup, bool8 passed, u8 yes, u8 total, s32 week)
+{
+    char label[48], line[96];
+    ShortPickupLabel(pickup, label, sizeof(label));
+    if (!passed)
+    {
+        snprintf(line, sizeof(line), "No PICKUP reroll\n(%d of %d said YES)", yes, total);
+        MPNet_Log("gatcha: vote for pickup %d did not pass (%d/%d)", pickup, yes, total);
+        ShowVoteNote(line);
+        return;
+    }
+    if (week != MP_WeekNumber() || VotedPickup() >= 0 || pickup >= ARRAY_COUNT(sPickups))
+    {
+        MPNet_Log("gatcha: vote for pickup %d passed but not used here (week %d/%d, voted %d)", pickup, (int)week,
+                  (int)MP_WeekNumber(), VotedPickup());
+        return;
+    }
+    MP_SaveData_Set(VOTE_WEEK_KEY, week + 1);
+    MP_SaveData_Set(VOTE_PICK_KEY, pickup);
+    memset(sVote.told, 0, sizeof(sVote.told));
+    sVote.changed = TRUE;
+    MPNet_Log("gatcha: vote passed, this week's pickup is %d (%d/%d)", pickup, yes, total);
+    snprintf(line, sizeof(line), "New PICKUP! (%d/%d YES)\nUR: %s", yes, total, label);
+    ShowVoteNote(line);
+}
+
+static void FinishVote(bool8 cancelled)
+{
+    u8 msg[1 + 5 + 4], pickup = 0;
+    bool8 passed = !cancelled && sVote.yes * 2 > sVote.total;
+    if (passed)
+    {
+        // The surprise: any PICKUP but this week's
+        u8 cur = ThisWeeksPickupIndex();
+        pickup = Random() % (ARRAY_COUNT(sPickups) - 1);
+        if (pickup >= cur)
+            pickup++;
+    }
+    msg[0] = GV_RESULT;
+    msg[1] = sVote.id;
+    msg[2] = pickup;
+    msg[3] = cancelled ? 2 : passed;
+    msg[4] = sVote.yes;
+    msg[5] = sVote.total;
+    PutS32(msg + 6, sVote.week);
+    MP_SendRelay(0xFF, msg, sizeof(msg));
+    sVote.active = FALSE;
+    if (cancelled)
+    {
+        MPNet_Log("gatcha: our vote was called off (a friend asked first)");
+        return;
+    }
+    if (!passed)
+        sVote.retry = VOTE_RETRY;
+    ApplyVote(pickup, passed, sVote.yes, sVote.total, sVote.week);
+}
+
+static void StartVote(void)
+{
+    u8 msg[1 + 2 + 4], i;
+    sVote.active = TRUE;
+    sVote.id++;
+    sVote.asked = sVote.answered = 0;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (i != gMpLocalId && gMpPlayers[i].present)
+            sVote.asked |= 1 << i;
+    sVote.yes = 1;
+    sVote.total = 1 + FriendsOnline();
+    sVote.timer = 0;
+    sVote.week = MP_WeekNumber();
+    msg[0] = GV_ASK;
+    msg[1] = sVote.id;
+    msg[2] = ThisWeeksPickupIndex();   // the one it would replace
+    PutS32(msg + 3, sVote.week);
+    MP_SendRelay(0xFF, msg, sizeof(msg));
+    MPNet_Log("gatcha: reroll vote started, pickup now %d (%d online)", msg[2], sVote.total);
+}
+
+static void SendAnswer(u8 answer)
+{
+    u8 msg[3] = {GV_ANSWER, sVote.askId, answer};
+    MP_SendRelay(sVote.from, msg, sizeof(msg));
+    MPNet_Log("gatcha: answered player %d's vote: %s", sVote.from + 1, answer == VA_YES ? "YES" : answer == VA_NO ? "NO" : "BUSY");
+    sVote.pending = FALSE;
+    sVote.shown = FALSE;
+}
+
+// The friend's question in the field
+static void CloseVotePrompt(void)
+{
+    if (sVote.taskId != TASK_NONE)
+    {
+        if (MpUi_IsOpen())
+            MpUi_Close();
+        DestroyTask(sVote.taskId);
+        sVote.taskId = TASK_NONE;
+    }
+}
+
+static void DrawVotePrompt(void)
+{
+    char line[64], name[16];
+    VoterName(sVote.from, name);
+    MpUi_Begin("PICKUP VOTE");
+    snprintf(line, sizeof(line), "%s wants to reroll this week's PICKUP!", name);
+    MpUi_TextAscii(0, line);
+    MpUi_TextAscii(1, "The new one is a surprise...");
+    MpUi_RowAscii(3, sVote.cursor == 0, "YES", NULL);
+    MpUi_RowAscii(4, sVote.cursor == 1, "NO", NULL);
+    MpUi_End();
+    MpUi_HelpAscii("More than half say YES: a new one for everyone.");
+}
+
+static void Task_VotePrompt(u8 taskId)
+{
+    if (!sVote.pending)
+    {
+        CloseVotePrompt();
+        return;
+    }
+    if (MpUi_MoveCursor(&sVote.cursor, 2))
+        DrawVotePrompt();
+    else if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        SendAnswer(JOY_NEW(A_BUTTON) && sVote.cursor == 0 ? VA_YES : VA_NO);
+        CloseVotePrompt();
+    }
+}
+
+void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len)
+{
+    if (from >= MP_MAX_PLAYERS || from == gMpLocalId)
+        return;
+    switch (data[0])
+    {
+    case GV_ASK:
+    {
+        u8 msg[3] = {GV_ANSWER, len >= 2 ? data[1] : 0, VA_BUSY};
+        if (len < 7)
+            return;
+        MPNet_Log("gatcha: player %d asks for a reroll vote", from + 1);
+        if (sVote.active)
+        {
+            // Two at once: the lower player number keeps theirs
+            if (gMpLocalId < from)
+            {
+                MP_SendRelay(from, msg, sizeof(msg));
+                return;
+            }
+            FinishVote(TRUE);
+        }
+        if (sVote.pending || GetS32(data + 3) != MP_WeekNumber() || VotedPickup() >= 0)
+        {
+            if (!sVote.pending && VotedPickup() >= 0)
+                msg[2] = VA_NO;   // this week's was chosen already
+            MP_SendRelay(from, msg, sizeof(msg));
+            return;
+        }
+        sVote.pending = TRUE;
+        sVote.shown = FALSE;
+        sVote.from = from;
+        sVote.askId = data[1];
+        sVote.askWeek = GetS32(data + 3);
+        sVote.askTimer = 0;
+        sVote.cursor = 0;
+        break;
+    }
+    case GV_ANSWER:
+        if (len < 3 || !sVote.active || data[1] != sVote.id || !(sVote.asked & (1 << from)) || (sVote.answered & (1 << from)))
+            return;
+        sVote.answered |= 1 << from;
+        if (data[2] == VA_YES)
+            sVote.yes++;
+        MPNet_Log("gatcha: player %d voted %s (%d yes of %d)", from + 1, data[2] == VA_YES ? "YES" : "NO", sVote.yes, sVote.total);
+        break;
+    case GV_RESULT:
+        if (len < 10)
+            return;
+        if (sVote.pending && sVote.from == from && sVote.askId == data[1])
+        {
+            sVote.pending = FALSE;
+            sVote.shown = FALSE;
+        }
+        if (data[3] == 2)
+        {
+            MPNet_Log("gatcha: player %d's vote was called off", from + 1);
+            return;
+        }
+        ApplyVote(data[2], data[3] == 1, data[4], data[5], GetS32(data + 6));
+        break;
+    case GV_STATE:
+        // A friend's group already picked this week's PICKUP
+        if (len >= 6 && VotedPickup() < 0 && GetS32(data + 2) == MP_WeekNumber() && data[1] < ARRAY_COUNT(sPickups))
+        {
+            char label[48], line[96];
+            MP_SaveData_Set(VOTE_WEEK_KEY, MP_WeekNumber() + 1);
+            MP_SaveData_Set(VOTE_PICK_KEY, data[1]);
+            sVote.changed = TRUE;
+            ShortPickupLabel(data[1], label, sizeof(label));
+            MPNet_Log("gatcha: player %d says this week's pickup is %d", from + 1, data[1]);
+            snprintf(line, sizeof(line), "Friends' new PICKUP!\nUR: %s", label);
+            ShowVoteNote(line);
+        }
+        break;
+    }
+}
+
+// Every frame while online
+void MP_Gatcha_VoteUpdate(void)
+{
+    u8 i;
+    if (sVote.retry)
+        sVote.retry--;
+    if (sVote.active)
+    {
+        u8 waiting = 0;
+        for (i = 0; i < MP_MAX_PLAYERS; i++)
+            if ((sVote.asked & (1 << i)) && !(sVote.answered & (1 << i)) && gMpPlayers[i].present)
+                waiting++;
+        // Done once the answer can't change: a YES majority, too many NOs, or time's up
+        if (sVote.yes * 2 > sVote.total || (sVote.yes + waiting) * 2 <= sVote.total || waiting == 0 || ++sVote.timer >= VOTE_FRAMES)
+            FinishVote(FALSE);
+    }
+    if (sVote.pending)
+    {
+        if (!gMpPlayers[sVote.from].present)
+        {
+            sVote.pending = FALSE;
+            CloseVotePrompt();
+        }
+        else if (++sVote.askTimer >= VOTE_ASK_FRAMES)
+        {
+            SendAnswer(VA_BUSY);
+            CloseVotePrompt();
+            if (sG && sG->state == GS_VOTE_ASKED)
+                sVote.changed = TRUE;   // the screen goes back to its menu
+        }
+        else if (!sVote.shown && sG == NULL && sVote.taskId == TASK_NONE && MP_IsLocalFree() && !MpUi_IsOpen())
+        {
+            sVote.shown = TRUE;
+            PlaySE(SE_PIN);
+            MpUi_Open();
+            sVote.taskId = CreateTask(Task_VotePrompt, 80);
+            DrawVotePrompt();
+        }
+    }
+    // Tell friends who come online about this week's vote
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        if (i == gMpLocalId || !gMpPlayers[i].present || !gMpPlayers[i].hasInfo)
+        {
+            sVote.told[i] = FALSE;
+            continue;
+        }
+        if (!sVote.told[i] && VotedPickup() >= 0)
+        {
+            u8 msg[6];
+            msg[0] = GV_STATE;
+            msg[1] = VotedPickup();
+            PutS32(msg + 2, MP_WeekNumber());
+            MP_SendRelay(i, msg, sizeof(msg));
+            sVote.told[i] = TRUE;
+        }
+    }
+}
+
+// Test builds (mp gatchagive EV SHINY): give one event Moemon, as a pull would
+void MP_Gatcha_DebugGive(u8 ev, bool8 shiny)
+{
+    struct PrizeDef def = {K_MON, ev, 1, 1, shiny};
+    struct Result res;
+    if (ev >= ARRAY_COUNT(sEventMons) || IsRandomEv(ev))
+        return;
+    memset(&res, 0, sizeof(res));
+    GiveEventMon(&def, &res);
+    printf("[test] gatchagive %d: %s\n", ev, res.note);
+}
+
+// Test builds (mp gatchareel): the icons in view and the closest repeat
+void MP_Gatcha_DebugReel(void)
+{
+    s32 c, i, j, closest = 99;
+    if (sG == NULL)
+    {
+        printf("[test] gatcha reel: not open\n");
+        return;
+    }
+    c = CenterCell();
+    printf("[test] gatcha reel banner %d day %d:", sBanner, (int)StandardDay());
+    for (i = c - 4; i <= c + 4; i++)
+    {
+        printf(" %X", Cell(i)->def ? IconKey(Cell(i)->def) : 0);
+        for (j = i + 1; j <= c + 4; j++)
+            if (Cell(i)->def && Cell(j)->def && IconKey(Cell(i)->def) == IconKey(Cell(j)->def) && j - i < closest)
+                closest = j - i;
+    }
+    printf(" closest repeat %d\n", (int)closest);
+}
+
+// The reel shows another banner's (or another week's) prizes
+static void RefillReel(void)
+{
+    s32 c = CenterCell(), i;
+    for (i = c - 8; i <= sG->genUpTo; i++)
+        MakeTeaserAt(i, i - 1);
+    DestroyAllLive();
+    UpdateReel();
+}
+
+// A line in the menu window, left of the PICKUP Moemon: the widest font that fits
+static void PrintFitted(int y, u8 fg, const char *ascii)
+{
+    u8 buf[64], font = FONT_NORMAL;
+    s32 w, room = 184;
+    MP_AsciiToGame(buf, ascii, 60);
+    if (GetStringWidth(font, buf, 0) > room)
+        font = FONT_SMALL;
+    if (GetStringWidth(font, buf, 0) > room)
+        font = FONT_SMALL_NARROW;
+    w = GetStringWidth(font, buf, 0);
+    Print(WIN_MENU, font, w < room ? (room - w) / 2 : 0, y, TC_PANEL, fg, buf);
+}
+
+static void DrawVotePick(void)
+{
+    FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
+    PrintFitted(1, TC_GOLD, "REROLL THIS WEEK'S PICKUP?");
+    PrintFitted(14, TC_WHITE, "Friends vote. The new one is a surprise!");
+    CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
+    DrawHelp("{A} ASK EVERYONE ONLINE  {B} BACK");
+}
+
+static void DrawVoteAsked(void)
+{
+    char line[64], name[16];
+    VoterName(sVote.from, name);
+    FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
+    snprintf(line, sizeof(line), "%s: reroll this week's PICKUP?", name);
+    PrintFitted(1, TC_GOLD, line);
+    PrintFitted(14, TC_WHITE, "The new one is a surprise...");
+    CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
+    DrawHelp("{A} YES  {B} NO   (more than half YES: it changes)");
+}
+
+// SELECT on the PICKUP banner
+static void TryStartVotePick(void)
+{
+    const char *why = NULL;
+    if (gMpLocalId < 0 || FriendsOnline() == 0)
+        why = "A PICKUP reroll vote needs friends online.";
+    else if (VotedPickup() >= 0)
+        why = "This week's PICKUP was rerolled already.";
+    else if (sVote.active || sVote.pending)
+        why = "A vote is going on right now.";
+    else if (sVote.retry)
+        why = "Give it a little while before asking again.";
+    if (why)
+    {
+        PlaySE(SE_FAILURE);
+        DrawHelp(why);
+        MPNet_Log("gatcha: no vote: %s", why);
+        return;
+    }
+    PlaySE(SE_SELECT);
+    sG->state = GS_VOTE_PICK;
+    DrawVotePick();
+}
+
+static void HandleVotePick(void)
+{
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sG->state = GS_MENU;
+        DrawMenu();
+    }
+    else if (JOY_NEW(A_BUTTON))
+    {
+        sG->state = GS_MENU;
+        DrawMenu();
+        if (FriendsOnline() == 0 || VotedPickup() >= 0 || sVote.active || sVote.pending)
+        {
+            PlaySE(SE_FAILURE);
+            DrawHelp("The vote can't start right now.");
+            return;
+        }
+        PlaySE(SE_PIN);
+        StartVote();
+        DrawHelp("Asked everyone online! The result shows in a moment.");
+    }
+}
+
+// Every frame on the menu: a friend's question, or a new PICKUP to show
+static void CheckVoteOnMenu(void)
+{
+    if (sVote.pending && !sVote.shown)
+    {
+        sVote.shown = TRUE;
+        PlaySE(SE_PIN);
+        sG->state = GS_VOTE_ASKED;
+        DrawVoteAsked();
+        return;
+    }
+    if (sVote.changed)
+    {
+        sVote.changed = FALSE;
+        SetupPickup();
+        if (sBanner == BANNER_PICKUP)
+        {
+            RefillReel();
+            sG->pickupShown = 0;
+            ShowPickupPic();
+        }
+        DrawMenu();
+    }
+}
+
+static void HandleVoteAsked(void)
+{
+    if (!sVote.pending)   // the vote ended (or the time ran out)
+    {
+        sG->state = GS_MENU;
+        DrawMenu();
+        return;
+    }
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        SendAnswer(JOY_NEW(A_BUTTON) ? VA_YES : VA_NO);
+        sG->state = GS_MENU;
+        DrawMenu();
+    }
+}
+
 static void FreeScene(void)
 {
     sBigRays = FALSE;
@@ -3049,8 +3874,22 @@ static void Task_Gatcha(u8 taskId)
             sG->pickupShown++;
             ShowPickupPic();
         }
+        CheckVoteOnMenu();
+        if (sG->state != GS_MENU)
+            break;
+        if ((sBanner == BANNER_STANDARD || sBanner == BANNER_PICKUP) && ++sG->tagTimer >= 150)
+        {
+            sG->tagTimer = 0;
+            sG->tagPage++;
+            if (sBanner == BANNER_STANDARD)
+                DrawBannerLine();
+            else
+                DrawOddsLine();
+        }
         if (JOY_NEW(L_BUTTON | R_BUTTON))
             SwitchBanner(JOY_NEW(R_BUTTON) ? 1 : -1);
+        else if (JOY_NEW(SELECT_BUTTON) && sBanner == BANNER_PICKUP)
+            TryStartVotePick();
         else if (JOY_NEW(DPAD_ANY))
         {
             // three columns of two
@@ -3177,6 +4016,22 @@ static void Task_Gatcha(u8 taskId)
                 StartHype();
             }
         }
+        break;
+    case GS_VOTE_PICK:
+        sG->pos += 0.5f;
+        UpdateReel();
+        if (sG->pickupPic != 0xFFFF && ThisWeeksPickup()->count > 1 && ++sG->pickupTimer >= 150)
+        {
+            sG->pickupTimer = 0;
+            sG->pickupShown++;
+            ShowPickupPic();
+        }
+        HandleVotePick();
+        break;
+    case GS_VOTE_ASKED:
+        sG->pos += 0.5f;
+        UpdateReel();
+        HandleVoteAsked();
         break;
     case GS_FORCE:
         sG->pos += 0.5f;
@@ -3356,6 +4211,7 @@ static void CB2_InitGatcha(void)
     sG->pickupPic = 0xFFFF;
     sG->legendPic = 0xFFFF;
     sShakeX = sShakeY = 0;
+    SetupStandard();
     SetupPickup();
     memset(sIconItem, 0, sizeof(sIconItem));
     sBg1Map = AllocZeroed(64 * 32 * 2);

@@ -789,6 +789,8 @@ bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);
 void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
+void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len);   // the weekly PICKUP vote
+void MP_Gatcha_VoteUpdate(void);
 void MP_Gatcha_AddTickets(s32 n);
 void MP_Gatcha_BackfillTickets(void);
 void MP_BattleTentWon(void);
@@ -874,6 +876,7 @@ enum {
     MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
     MPR_MINIGAME_FIRST = 200,  // berry blender / berry crush with friends (mp_minigame.c)
     MPR_WORLD_FIRST = 220,     // cut trees, smashed rocks, boulders, cut grass, soot (mp_world.c)
+    MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
 };
 
 // mp_world.c: map changes and lights shared by friends on the same map
