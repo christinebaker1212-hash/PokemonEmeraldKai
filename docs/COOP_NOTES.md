@@ -516,10 +516,14 @@ as POKé BALL + style like the other special balls); MoeGatcha BALL banner only.
 
 SaveBlock2 spare option bits: optionsNameCase (2 bits: MP_NAMECASE_AS_TYPED / CAPS / MIXED) and optionsPokemonArt
 (1 bit). OPTIONS shows eight rows and scrolls (option_menu.c sTop, ROW_Y). Debug: `mp namecase N`, `mp creatures N`.
+The OPTION header (the game's own name, "Moémon Emerald Kai") is printed with the filter off.
 - NAME CASE (mp_textopts.c): text.c AddTextPrinter hands every string to MP_TextOpts_Filter, which copies it into a
   per-window buffer (the source is never changed) and recases the names it recognizes: species and NPC trainer names
   (built once, bucketed by first letter, longest first), the player, co-op friends, the party, the foe's party and
-  link players in battle, the PC's current box (looked at per string). Words must stand alone (MatchAt). Mixed Case
+  link players in battle, the PC's current box (looked at per string). Words must stand alone and match exactly as
+  stored (MatchAt): the same letters in another case are ordinary words ("If I may", "I hope", "red" vs the trainers
+  MAY, HOPE, RED). Move, ability and item names of two or more words are kept whole first (KeepAt: WAILMER PAIL,
+  SERENE GRACE, LEAF STONE). Debug `mp namefilter TEXT` logs TEXT as shown (~ stands for é). Mixed Case
   starts a word after a space or hyphen ("Ho-Oh", "Mr. Mime", "Farfetch'd"). The naming screen is skipped. Name tags
   (mp_overworld.c BuildNametag) use MP_NameCase_Recase. gMpTextFilterOff shows a string as written.
 - CREATURES: include/data.h turns gMonFrontPicTable, gMonBackPicTable, gMonPaletteTable, gMonShinyPaletteTable,
@@ -536,7 +540,8 @@ MP_BAG_ITEM_CAPACITY 999, BAG_ITEM_CAPACITY_DIGITS 3; the Battle Pyramid's u8 ba
 SaveBlock1's pockets are untouched in size: save.c copies the first slots there before every write
 (MP_Bag_SyncToSaveBlock in WriteSaveSectorOrSlot / HandleReplaceSector), sdl2.c StoreSaveFile writes the rest to
 "<save>.bag" with gSaveCounter and a checksum of SaveBlock1's pockets, and LoadGameSave takes them back only when both
-match. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
+match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loading tries "<save>.bag" then each
+"<save>.bakN.bag", so a .bak renamed back to the save gets its own extra slots. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
 
 ## Player stand-ins wear the player's look
 Scenes that show the player as another object take Brendan / May by gender: the Battle Tent and Frontier battle

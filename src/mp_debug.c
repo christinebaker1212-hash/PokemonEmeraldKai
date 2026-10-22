@@ -656,6 +656,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
             gSaveBlock2Ptr->optionsNameCase = atoi(arg) % MP_NAMECASE_COUNT;
         printf("[test] creatures %d namecase %d\n", gSaveBlock2Ptr->optionsPokemonArt, gSaveBlock2Ptr->optionsNameCase);
     }
+    else if (strcmp(cmd, "namefilter") == 0)
+    {
+        // namefilter TEXT - log TEXT as OPTIONS > NAME CASE / CREATURES would show it (~ is é)
+        static u8 in[200];
+        const u8 *f;
+        int i;
+        MP_AsciiToGame(in, arg, sizeof(in) - 1);
+        for (i = 0; arg[i] && i < (int)sizeof(in) - 1; i++)
+            if (arg[i] == '~')
+                in[i] = CHAR_e_ACUTE;
+        f = MP_TextOpts_Filter(in, 0);
+        printf("[test] namefilter <");
+        for (i = 0; f[i] != EOS; i++)
+        {
+            u8 one[2] = {f[i], EOS};
+            char c[8];
+            MP_GameToAscii(c, one, sizeof(c) - 1);
+            printf("%s", f[i] == CHAR_e_ACUTE ? "~" : c);
+        }
+        printf(">\n");
+    }
     else if (strcmp(cmd, "legacyrand") == 0)
     {
         // legacyrand B,B,... - the random bytes the next GENESIS / EPOCH BALL throws use

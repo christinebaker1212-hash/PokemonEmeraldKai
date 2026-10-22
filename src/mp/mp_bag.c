@@ -7,8 +7,10 @@
 // so the save file stays a normal Emerald save), and the slots past them are written
 // next to it in "<save>.bag" along with the save's counter. Loading takes the save
 // block's slots and, when "<save>.bag" was written with that same save (counter and
-// the save block's slots match), the rest: a save restored from a backup, or played
-// somewhere else in between, just has the save block's pocket.
+// the save block's slots match), the rest. The save backups keep theirs as
+// "<save>.bakN.bag" (sdl2.c BackUpSaveFile), so a .bak file renamed back to the save
+// finds its own: every one of them is tried. A save played somewhere else in between
+// just has the save block's pocket.
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
@@ -118,24 +120,17 @@ void MP_Bag_WriteSidecar(void)
     fclose(f);
 }
 
-// After a save was loaded: the save block's slots, then the rest from "<save>.bag"
-void MP_Bag_LoadFromSave(void)
+// The extra slots from one sidecar file, if it was written with this very save
+static bool8 LoadSidecar(const char *path)
 {
-    char path[600];
     FILE *f;
     u32 header[3];
     u8 p;
     bool8 sidecar = FALSE;
 
-    for (p = 0; p < POCKETS_COUNT; p++)
-    {
-        memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));
-        memcpy(sPockets[p].big, SaveSlots(p), sPockets[p].saveCount * sizeof(struct ItemSlot));
-    }
-    SidecarPath(path, sizeof(path));
     f = fopen(path, "rb");
     if (!f)
-        return;
+        return FALSE;
     if (fread(header, sizeof(header), 1, f) == 1 && header[0] == BAG_MAGIC
      && header[1] == gSaveCounter && header[2] == SaveBlockPocketsSum())
     {
@@ -158,5 +153,29 @@ void MP_Bag_LoadFromSave(void)
         }
     }
     fclose(f);
+    return sidecar;
+}
+
+// After a save was loaded: the save block's slots, then the rest from "<save>.bag" (or the
+// backup's own, for a .bak file renamed back to the save)
+void MP_Bag_LoadFromSave(void)
+{
+    char path[600];
+    u8 p, i;
+    bool8 sidecar = FALSE;
+
+    for (p = 0; p < POCKETS_COUNT; p++)
+    {
+        memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));
+        memcpy(sPockets[p].big, SaveSlots(p), sPockets[p].saveCount * sizeof(struct ItemSlot));
+    }
+    for (i = 0; i <= 3 && !sidecar; i++)
+    {
+        if (i == 0)
+            SidecarPath(path, sizeof(path));
+        else
+            snprintf(path, sizeof(path), "%s.bak%d.bag", gPlatformSavePath, i);
+        sidecar = LoadSidecar(path);
+    }
     MPNet_Log("bag: loaded%s", sidecar ? " with the extra slots" : " (extra slots not from this save)");
 }

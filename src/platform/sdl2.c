@@ -403,6 +403,11 @@ static void BackUpSaveFile(void)
         snprintf(to, sizeof(to), "%s.bak%d", gPlatformSavePath, i);
         remove(to);
         rename(from, to);
+        // the bigger BAG's extra slots go with their save (mp_bag.c finds them by the save's counter)
+        snprintf(from, sizeof(from), "%s.bak%d.bag", gPlatformSavePath, i - 1);
+        snprintf(to, sizeof(to), "%s.bak%d.bag", gPlatformSavePath, i);
+        remove(to);
+        rename(from, to);
     }
     snprintf(to, sizeof(to), "%s.bak1", gPlatformSavePath);
     out = fopen(to, "wb");
@@ -413,6 +418,21 @@ static void BackUpSaveFile(void)
         fclose(out);
     }
     fclose(in);
+    snprintf(from, sizeof(from), "%s.bag", gPlatformSavePath);
+    snprintf(to, sizeof(to), "%s.bak1.bag", gPlatformSavePath);
+    remove(to);
+    in = fopen(from, "rb");
+    if (in != NULL)
+    {
+        out = fopen(to, "wb");
+        if (out != NULL)
+        {
+            while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
+                fwrite(buf, 1, n, out);
+            fclose(out);
+        }
+        fclose(in);
+    }
 }
 
 static void StoreSaveFile()

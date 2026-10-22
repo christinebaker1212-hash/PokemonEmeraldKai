@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include "global.h"
 #include "battle.h"
+#include "battle_main.h"
+#include "item.h"
 #include "data.h"
 #include "link.h"
 #include "main.h"
@@ -23,7 +25,10 @@
 #include "pokemon_storage_system.h"
 #include "string_util.h"
 #include "window.h"
+#include "constants/abilities.h"
 #include "constants/characters.h"
+#include "constants/items.h"
+#include "constants/moves.h"
 #include "constants/opponents.h"
 #include "mp.h"
 
@@ -79,7 +84,7 @@ static bool8 IsWordChar(u8 c)
     return IsLetter(c) || (c >= CHAR_0 && c <= CHAR_0 + 9);
 }
 
-// Case-blind comparison: "Kira" in a message is the same name as "KIRA" in the dictionary
+// Case-blind comparison (the CREATURES word swap: MOéMON, Moémon...)
 static bool8 SameLetter(u8 a, u8 b)
 {
     return ToUpper(a) == ToUpper(b);
@@ -143,6 +148,25 @@ static int CompareRefs(const void *a, const void *b)
     return y->len - x->len;   // the longest first: "NIDORAN♂" before "NIDORAN"
 }
 
+// Move, ability and item names of more than one word stay whole, even with a name in them
+// (WAILMER PAIL, SERENE GRACE, LEAF STONE, RED ORB)
+#define MAX_KEEP (MOVES_COUNT + ABILITIES_COUNT + ITEMS_COUNT)
+static struct NameRef sKeep[MAX_KEEP];
+static u16 sKeepCount;
+
+static void AddKeep(const u8 *name, u8 max)
+{
+    u8 len = NameLen(name, max), i;
+    for (i = 0; i < len; i++)
+        if (name[i] == CHAR_SPACE || name[i] == CHAR_HYPHEN)
+            break;
+    if (i < len && sKeepCount < MAX_KEEP)
+    {
+        sKeep[sKeepCount].name = name;
+        sKeep[sKeepCount++].len = len;
+    }
+}
+
 static void BuildStatic(void)
 {
     u16 n = 0, i;
@@ -173,6 +197,13 @@ static void BuildStatic(void)
         if (sBucketCount[b]++ == 0)
             sBucketStart[b] = i;
     }
+    sKeepCount = 0;
+    for (i = 1; i < MOVES_COUNT; i++)
+        AddKeep(gMoveNames[i], MOVE_NAME_LENGTH);
+    for (i = 1; i < ABILITIES_COUNT; i++)
+        AddKeep(gAbilityNames[i], ABILITY_NAME_LENGTH);
+    for (i = 1; i < ITEMS_COUNT; i++)
+        AddKeep(GetItemName(i), ITEM_NAME_LENGTH);
     sStaticBuilt = TRUE;
 }
 
@@ -236,14 +267,28 @@ static void BuildDynamic(void)
     }
 }
 
+// Names are matched exactly as they are written: the game's text always spells a name as it
+// is stored (STEVEN, PIKACHU, the player's name as typed), while the same letters in another
+// case are ordinary words ("If I may...", "I hope...", "red").
 static bool8 MatchAt(const u8 *s, const struct NameRef *ref)
 {
     u8 i;
     for (i = 0; i < ref->len; i++)
-        if (s[i] == EOS || !SameLetter(s[i], ref->name[i]))
+        if (s[i] == EOS || s[i] != ref->name[i])
             return FALSE;
     return !IsWordChar(s[ref->len]);
 }
+
+static u8 KeepAt(const u8 *s)
+{
+    u16 i;
+    u8 best = 0;
+    for (i = 0; i < sKeepCount; i++)
+        if (sKeep[i].len > best && sKeep[i].name[0] == s[0] && MatchAt(s, &sKeep[i]))
+            best = sKeep[i].len;
+    return best;
+}
+
 
 // The length of the longest name starting at s (0: none)
 static u8 NameAt(const u8 *s)
@@ -355,6 +400,14 @@ const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId)
         {
             o += n;
             i += used;
+            prevWord = TRUE;
+            continue;
+        }
+        if (mode != MP_NAMECASE_AS_TYPED && !prevWord && IsLetter(str[i]) && (n = KeepAt(&str[i])) != 0)
+        {
+            memcpy(&out[o], &str[i], n);   // a move / ability / item name: as it is
+            o += n;
+            i += n;
             prevWord = TRUE;
             continue;
         }
