@@ -369,7 +369,8 @@ WHIRLWIND) has its own triple branch: the target's MP_TripleSwitchRange, minus a
 switches (battle_ai_switch_items.c: ShouldSwitch, Wonder Guard / absorb / type helpers, AI_TrySwitchOrUseItem's fallback)
 use MP_TripleSwitchRange and skip MP_IsPartyIdOnSide too (they took the halves of three, which hold another battler's
 Pokemon), and the fallback never ends past the range. Tests:
-tri_wattson (one SURF knocks out all three, two left), tri_roar (WHIRLWIND only); MOEMON_PARTYTRACE=1 logs both parties,
+tri_wattson (one SURF knocks out all three, two left), tri_explode (the reported case: VOLTORB's SELF-DESTRUCT with
+MOEMON_DEBUG_FOE_HP=1 and MOEMON_DEBUG_FOE_MOVE=2), tri_roar (WHIRLWIND only); MOEMON_PARTYTRACE=1 logs both parties,
 gBattlerPartyIndexes, monToSwitchIntoId and absent battlers on every change, tools/test/check_partytrace.py checks them.
 Intro: CONTROLLER_LOADMONSPRITE is LINK_SYNC_ALL (battle_controllers.c LinkSyncKind); as an owner command a joiner
 replayed the wild Pokémon's slide-ins one after another.

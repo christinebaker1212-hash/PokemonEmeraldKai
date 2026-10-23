@@ -1294,6 +1294,15 @@ void MP_Coop_ArrangeEnemyParty(void)
     struct Pokemon *tmp;
     u8 i;
 
+    if (getenv("MOEMON_DEBUG_FOE_HP"))
+    {
+        // Tests: the trainer's (or wild) Moemon start with at most this much HP
+        u16 hp = atoi(getenv("MOEMON_DEBUG_FOE_HP"));
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE && GetMonData(&gEnemyParty[i], MON_DATA_HP) > hp)
+                SetMonData(&gEnemyParty[i], MON_DATA_HP, &hp);
+    }
+
     if (sCoop.count == 3)
         return;   // a triple: the first three come out (battlers 1, 3, 5), the rest wait
     tmp = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);

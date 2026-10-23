@@ -1,0 +1,18 @@
+# The reported case: WATTSON's VOLTORB uses SELF-DESTRUCT (EXPLOSION's code) and every one of his three Moemon out
+# faints at once (they start at 1 HP), two are left: only two come out, the third spot stays empty. It used to send out
+# a broken Moemon from past his party (a BAD EGG) or crash. The players only SPLASH.
+MODE=3
+WARP=10,0,5,3
+WARP_B=10,0,5,6
+WARP_C=10,0,3,3
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1 MOEMON_DEBUG_FOE_HP=1 MOEMON_DEBUG_FOE_MOVE=2"
+ENV_B="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+ENV_C="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+EXPECT_A=("(and another: triple)" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
+EXPECT_B=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
+EXPECT_C=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
+UNEXPECT_A=("BADEGG" "no Pokemon left")
+UNEXPECT_B=("BADEGG" "no Pokemon left")
+UNEXPECT_C=("BADEGG" "no Pokemon left")
+CHECK="tools/test/check_partytrace.py"

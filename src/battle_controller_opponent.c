@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
@@ -1574,6 +1575,13 @@ static void OpponentHandleChooseMove(void)
 
             BattleAI_SetupAIData(ALL_MOVES_MASK);
             chosenMoveId = BattleAI_ChooseMoveOrAction();
+            {
+                // Moemon Co-op tests: MOEMON_DEBUG_FOE_MOVE=SLOT makes the trainer use that move slot when it has one
+                const char *force = getenv("MOEMON_DEBUG_FOE_MOVE");
+                if (force && chosenMoveId < MAX_MON_MOVES && atoi(force) >= 0 && atoi(force) < MAX_MON_MOVES
+                 && moveInfo->moves[atoi(force)] != MOVE_NONE)
+                    chosenMoveId = atoi(force);
+            }
 
             switch (chosenMoveId)
             {
