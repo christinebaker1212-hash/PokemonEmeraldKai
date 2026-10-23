@@ -7,8 +7,7 @@ waitfor friendbattle 4000
 wait 120
 press UP 2
 wait 30
-press A 2
-waitfor watchmenu 3000
+pressuntil A watchmenu 3000
 press DOWN 2
 wait 5
 press DOWN 2

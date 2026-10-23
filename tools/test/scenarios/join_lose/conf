@@ -1,11 +1,11 @@
-# Losing a joined battle. ALICE (one weak Moemon that only knows GROWL) battles a strong wild ZIGZAGOON; BOB (the same)
-# joins. Both lose and black out like after any team battle; afterwards everyone still has the same Moemon, none
+# Losing a joined battle. ALICE (one Moemon that only knows GROWL; Lv22, so a critical hit can't end her battle on
+# turn 1 before BOB is let in) battles a strong wild ZIGZAGOON; BOB (a weak one) joins (A until the menu opens). Both lose and black out like after any team battle; afterwards everyone still has the same Moemon, none
 # lost or swapped.
 MODE=2
 WARP=0,10,10,10
 WARP_B=0,10,10,11
 TMO=420
-ENV_A="MOEMON_DEBUG_PARTY=283:10"
+ENV_A="MOEMON_DEBUG_PARTY=283:22"
 ENV_B="MOEMON_DEBUG_PARTY=280:10"
 EXPECT_A=("join: entrance done" "co-op: battle over, outcome 2")
 EXPECT_B=("join: we're in the battle" "co-op: battle over, outcome 2")
