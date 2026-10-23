@@ -1,0 +1,10 @@
+# coop_trainer with LOOK > CREATE trainers on both sides: their 96x64 back pictures (local slot and the partner's) through
+# the whole battle; shots a_throw_* while they throw (the hand must show). Recipes from COOP_NOTES (mp created).
+MODE=2
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("[test] created 0101" "joins the battle against trainer" "tried to run from a trainer" "co-op: battle over, outcome 1")
+EXPECT_B=("[test] created 0100" "is waiting for a partner" "co-op: battle over, outcome 1")

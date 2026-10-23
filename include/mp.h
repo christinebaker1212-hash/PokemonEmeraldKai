@@ -376,13 +376,21 @@ bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal
 
 // mp_creator.c: trainers made from the parts kit (LOOK > CREATE)
 enum { MP_CR_HAIR, MP_CR_TOP, MP_CR_BOTTOM, MP_CR_HAT, MP_CR_BAG, MP_CR_CAT_COUNT };
+// The players' battle back pictures (TRAINER_BACK_PIC_MP_*) are 96x64, wider than a GBA sprite: a 64x64 piece
+// and a 32x64 one side by side (tiles: the 64x64 piece's 64, then the 32x64 piece's 32; MP_Avatar_OnSpriteCreated).
+// A 64x64 picture (Emerald's, a sprite pack's) sits MP_BACK_PIC_LEFT pixels in, where it always was on screen.
+#define MP_BACK_PIC_WIDTH 96
+#define MP_BACK_PIC_HEIGHT 64
+#define MP_BACK_PIC_SIZE (MP_BACK_PIC_WIDTH * MP_BACK_PIC_HEIGHT / 2)
+#define MP_BACK_PIC_LEFT 8
+
 struct MpCreatedGfx
 {
     u8 ow[27][32 * 32 / 2];   // 32x32 frames: walk 0-8, run 9-17, Mach Bike 18-26 (Emerald's order)
     u16 owPal[16];
     u8 front[64 * 64 / 2];
     u16 frontPal[16];
-    u8 back[4][64 * 64 / 2];   // Emerald's 4 throw frames
+    u8 back[4][MP_BACK_PIC_SIZE];   // Emerald's 4 throw frames (96x64, see MP_BACK_PIC_WIDTH)
     u16 backPal[16];
 };
 #define MP_CR_CACHE_LOCAL MP_MAX_PLAYERS   // cache slots: player ids, then the local player

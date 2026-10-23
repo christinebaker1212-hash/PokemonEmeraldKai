@@ -3,6 +3,8 @@
 #include "main.h"
 #include "palette.h"
 
+void MP_Avatar_OnSpriteCreated(struct Sprite *sprite); // Moemon Co-op: mp_avatar.c
+
 #define MAX_SPRITE_COPY_REQUESTS 64
 
 #define sAnchorX data[6]
@@ -600,6 +602,8 @@ u8 CreateSpriteAt(u8 index, const struct SpriteTemplate *template, s16 x, s16 y,
 
     if (template->paletteTag != TAG_NONE)
         sprite->oam.paletteNum = IndexOfSpritePaletteTag(template->paletteTag);
+
+    MP_Avatar_OnSpriteCreated(sprite); // Moemon Co-op: the players' 96x64 battle back pictures
 
     return index;
 }

@@ -58,30 +58,79 @@ extern const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPoint
 u32 gMpTrainerFrontPicLz[2][MP_PIC_LZ_WORDS];
 u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
 u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
-u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
+u8 gMpTrainerBackTiles[4 * MP_BACK_PIC_SIZE];
 u32 gMpPartnerBackPalLz[MP_PAL_LZ_WORDS];
-u8 gMpPartnerBackTiles[4 * TRAINER_PIC_SIZE];
+u8 gMpPartnerBackTiles[4 * MP_BACK_PIC_SIZE];
 // a Triple Battle's second ally
 u32 gMpPartner2BackPalLz[MP_PAL_LZ_WORDS];
-u8 gMpPartner2BackTiles[4 * TRAINER_PIC_SIZE];
+u8 gMpPartner2BackTiles[4 * MP_BACK_PIC_SIZE];
 const struct SpriteFrameImage gMpPartner2BackFrames[4] = {
-    {gMpPartner2BackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartner2BackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartner2BackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartner2BackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartner2BackTiles + 0 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartner2BackTiles + 1 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartner2BackTiles + 2 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartner2BackTiles + 3 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
 };
 const struct SpriteFrameImage gMpPartnerBackFrames[4] = {
-    {gMpPartnerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartnerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartnerBackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpPartnerBackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpPartnerBackTiles + 0 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartnerBackTiles + 1 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartnerBackTiles + 2 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpPartnerBackTiles + 3 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
 };
 const struct SpriteFrameImage gMpTrainerBackFrames[4] = {
-    {gMpTrainerBackTiles + 0 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpTrainerBackTiles + 1 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpTrainerBackTiles + 2 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
-    {gMpTrainerBackTiles + 3 * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE},
+    {gMpTrainerBackTiles + 0 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpTrainerBackTiles + 1 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpTrainerBackTiles + 2 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
+    {gMpTrainerBackTiles + 3 * MP_BACK_PIC_SIZE, MP_BACK_PIC_SIZE},
 };
+
+// The 96x64 back pictures are drawn as two pieces: 64x64 (tiles 0-63) and 32x64 (tiles 64-95), placed so a
+// 64x64 picture MP_BACK_PIC_LEFT pixels in shows where the game's 64x64 sprite would
+static const struct Subsprite sWideBackSubsprites[] = {
+    {.x = -32 - MP_BACK_PIC_LEFT, .y = -32, .shape = SPRITE_SHAPE(64x64), .size = SPRITE_SIZE(64x64), .tileOffset = 0, .priority = 2},
+    {.x = 32 - MP_BACK_PIC_LEFT, .y = -32, .shape = SPRITE_SHAPE(32x64), .size = SPRITE_SIZE(32x64), .tileOffset = 64, .priority = 2},
+};
+static const struct SubspriteTable sWideBackSubspriteTables[] = {{ARRAY_COUNT(sWideBackSubsprites), sWideBackSubsprites}};
+
+// Called by CreateSpriteAt for every new sprite: one made from a player's back picture gets its two pieces.
+// Affine is turned off: the pieces' places would read the matrix number as flip bits (and a back picture
+// is never scaled).
+void MP_Avatar_OnSpriteCreated(struct Sprite *sprite)
+{
+    if (sprite->images != gMpTrainerBackFrames && sprite->images != gMpPartnerBackFrames
+     && sprite->images != gMpPartner2BackFrames)
+        return;
+    FreeSpriteOamMatrix(sprite);
+    sprite->oam.matrixNum = 0;
+    SetSubspriteTables(sprite, sWideBackSubspriteTables);
+    sprite->subspriteMode = SUBSPRITES_IGNORE_PRIORITY;
+}
+
+// 64x64 frames <-> the 96x64 layout (tile column c of a 64x64 frame is the wide picture's column c + 1)
+static u8 *WideTile(u8 *frame, int col, int row)
+{
+    return col < 8 ? frame + (row * 8 + col) * TILE_SIZE_4BPP : frame + (64 + row * 4 + col - 8) * TILE_SIZE_4BPP;
+}
+
+static void BackFramesToWide(const u8 *std, u8 *wide)
+{
+    int f, row, col;
+    memset(wide, 0, 4 * MP_BACK_PIC_SIZE);
+    for (f = 0; f < 4; f++)
+        for (row = 0; row < 8; row++)
+            for (col = 0; col < 8; col++)
+                memcpy(WideTile(wide + f * MP_BACK_PIC_SIZE, col + MP_BACK_PIC_LEFT / 8, row),
+                       std + f * TRAINER_PIC_SIZE + (row * 8 + col) * TILE_SIZE_4BPP, TILE_SIZE_4BPP);
+}
+
+static void BackFramesToStd(const u8 *wide, u8 *std)
+{
+    int f, row, col;
+    for (f = 0; f < 4; f++)
+        for (row = 0; row < 8; row++)
+            for (col = 0; col < 8; col++)
+                memcpy(std + f * TRAINER_PIC_SIZE + (row * 8 + col) * TILE_SIZE_4BPP,
+                       WideTile((u8 *)wide + f * MP_BACK_PIC_SIZE, col + MP_BACK_PIC_LEFT / 8, row), TILE_SIZE_4BPP);
+}
 
 // ---------------------------------------------------------------------------
 // Presets. Which palette colors each sprite recolors is mapped by hand
@@ -1826,31 +1875,43 @@ static bool8 BuildFront(const struct MpAppearance *appIn, u8 cacheSlot, const st
     return TRUE;
 }
 
-static bool8 BuildBack(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor)
+static u8 sPicBuf[4 * MP_BACK_PIC_SIZE];
+
+// The look's 4 back frames: 96x64 (MP_BACK_PIC_WIDTH) when wide, else 64x64 (a CREATE look's wider
+// picture cut to the 64x64 the game shows of a normal one)
+static bool8 BuildBack(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, u8 *tiles, u16 *pal, bool8 recolor, bool8 wide)
 {
+    static u8 sStdBuf[4 * TRAINER_PIC_SIZE];
     struct MpAppearance app = Resolved(appIn);
     int b = BackChoice(&app);
     if (!app.backSel && IsCreated(&app))
     {
         const struct MpCreatedGfx *g = MP_Created_Gfx(cacheSlot, &app.recipe);
-        memcpy(tiles, g->back, 4 * TRAINER_PIC_SIZE);
+        if (wide)
+            memcpy(tiles, g->back, 4 * MP_BACK_PIC_SIZE);
+        else
+            BackFramesToStd(g->back[0], tiles);
         memcpy(pal, g->backPal, 32);
         return TRUE;
     }
     if (!app.backSel && pack && pack->slot[PACK_BACK])
     {
-        memcpy(tiles, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
+        memcpy(sStdBuf, pack->slot[PACK_BACK], 4 * TRAINER_PIC_SIZE);
         memcpy(pal, pack->pal[PACK_PAL_BACK], 32);
-        return TRUE;
     }
-    if (!BackChoiceTiles(b, tiles, pal))
-        return FALSE;
-    if (recolor)
-        RecolorByMap(&app, pal, FindColorMap(CMAP_BACK, MP_Avatar_BackSelConfigName(b + 1)));
+    else
+    {
+        if (!BackChoiceTiles(b, sStdBuf, pal))
+            return FALSE;
+        if (recolor)
+            RecolorByMap(&app, pal, FindColorMap(CMAP_BACK, MP_Avatar_BackSelConfigName(b + 1)));
+    }
+    if (wide)
+        BackFramesToWide(sStdBuf, tiles);
+    else
+        memcpy(tiles, sStdBuf, 4 * TRAINER_PIC_SIZE);
     return TRUE;
 }
-
-static u8 sPicBuf[4 * TRAINER_PIC_SIZE];
 
 // Front pic id for a look: an Emerald pic as is, or the runtime slot 0 (local) / 1 (others)
 static u16 FrontPicId(const struct MpAppearance *appIn, u8 cacheSlot, const struct MpPack *pack, int which)
@@ -1876,7 +1937,7 @@ static u16 BackPicId(const struct MpAppearance *appIn, u8 cacheSlot, const struc
     u16 pal[16];
     if (!usePack && (b < 0 || (b < EMERALD_BACK_COUNT && !WantsRecolor(&app))))
         return b < 0 ? 0xFFFF : (u16)b;
-    if (!BuildBack(&app, cacheSlot, pack, tiles, pal, TRUE))
+    if (!BuildBack(&app, cacheSlot, pack, tiles, pal, TRUE, TRUE))
         return 0xFFFF;
     MP_Pack_WriteLz77Literal((u8 *)palLz, pal, 32);
     return slotPic;
@@ -1897,7 +1958,7 @@ bool8 MP_Avatar_GetFrontTiles(const struct MpAppearance *app, u8 *tiles, u16 *pa
 
 bool8 MP_Avatar_GetBackTiles(const struct MpAppearance *app, u8 *tiles, u16 *pal)
 {
-    return BuildBack(app, MP_CR_CACHE_LOCAL, NULL, tiles, pal, FALSE);
+    return BuildBack(app, MP_CR_CACHE_LOCAL, NULL, tiles, pal, FALSE, FALSE);
 }
 
 bool8 MP_Avatar_PreviewFront(u8 *tiles, u16 *pal)
@@ -1924,10 +1985,13 @@ bool8 MP_Avatar_PlayerFront(s8 id, u8 *tiles, u16 *pal)
     return TRUE;
 }
 
+// The first back frame as 64x64 (a CREATE look's: the wide picture's left 64 columns, where that frame is)
 bool8 MP_Avatar_PreviewBack(u8 *tiles, u16 *pal)
 {
     struct MpAppearance app = GetLocalAppearance();
-    if (!BuildBack(&app, MP_CR_CACHE_LOCAL, LocalPack(), sPicBuf, pal, TRUE))
+    struct MpAppearance r = Resolved(&app);
+    bool8 created = !r.backSel && IsCreated(&r);
+    if (!BuildBack(&app, MP_CR_CACHE_LOCAL, LocalPack(), sPicBuf, pal, TRUE, created))
         return FALSE;
     memcpy(tiles, sPicBuf, TRAINER_PIC_SIZE);
     return TRUE;

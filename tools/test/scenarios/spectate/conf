@@ -1,4 +1,4 @@
-# In Oldale (no grass, so no co-op team-up) BOB walks up next to ALICE while she battles: A on her = watch it (JUST WATCH, no bet), B = stop
+# In Oldale (no grass, so no co-op team-up) BOB walks up next to ALICE while she battles: A on her, SPECTATE = watch it, B = stop
 MODE=2
 WARP=0,10,10,10
 WARP_B=0,10,11,10

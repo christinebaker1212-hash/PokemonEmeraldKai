@@ -6,9 +6,8 @@ press LEFT 2
 wait 600
 watchlog watching player 1
 press A 2
-wait 150
-press A 2
-wait 60
+waitfor watchmenu 3000
+wait 5
 press A 2
 waitlog 1200
 wait 400

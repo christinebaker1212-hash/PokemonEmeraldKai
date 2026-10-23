@@ -6,7 +6,7 @@
 //                 FRLG sprites, other head accessories from the CREATE parts, exact
 //                 Gen 3 skin colors (graphics/moemon/creator/ow3.bin, build_ow.py)
 //   ID picture    64x64 (the CREATE parts' 80x80 front, fitted without cutting feet or head)
-//   back          64x64, Emerald's 4 throw frames
+//   back          96x64, Emerald's 4 throw frames at the kit's size (MP_BACK_PIC_WIDTH)
 // CREATE parts: graphics/moemon/creator/parts.bin (tools/moemon_creator/build.py).
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +43,6 @@ static const u8 sOw3Data[] = INCBIN_U8("graphics/moemon/creator/ow3.bin");
 #define OW_W (9 * 32)
 #define OW_H 32
 #define FRONT_X0 8     // 64x64 window in the 80x80 front
-#define BACK_X0 4      // and in an 87-wide back frame
 
 // ---------------------------------------------------------------------------
 // Recipes
@@ -448,7 +447,7 @@ static struct MpCreated sGfxFor[MP_MAX_PLAYERS + 1];
 static bool8 sGfxValid[MP_MAX_PLAYERS + 1];
 static u16 sOw[3][OW_W * OW_H];
 static u16 sBack[BACK_FW * 4 * BACK_H];
-static u16 sBackFit[4][64 * 64];
+static u16 sBackFit[4][MP_BACK_PIC_WIDTH * MP_BACK_PIC_HEIGHT];
 
 // ---------------------------------------------------------------------------
 // Gen 3 field sprite (the same steps as render() in tools/moemon_creator/build_ow.py).
@@ -743,33 +742,45 @@ static void BuildFront(const struct MpCreated *r, struct MpCreatedGfx *g)
     ToTiles(g->front, sFrontFit, 64, 0, 0, 64, 64, &set, map);
 }
 
+// The kit's frames at their own size, moved down so the head is where Brendan's is: the picture's column X is
+// the kit frame's column X - BACK_KIT_X and its row Y the kit's row Y + BACK_KIT_Y (the bald head's top, row 33 of
+// every kit frame, lands on row 17, under Brendan's hat; hats reach up to row 7). Every part fits across (kit
+// columns 2-79 -> 6-83), so the throwing hand is never cut; the rows below the picture are under the text box.
+#define BACK_KIT_X 4
+#define BACK_KIT_Y 16
+
 static void BuildBack(const struct MpCreated *r, struct MpCreatedGfx *g)
 {
     struct ColorSet set;
     u8 map[MAX_COLORS];
-    int f, y, x, top = BACK_H, y0;
+    int f, y, x;
     memset(&set, 0, sizeof(set));
     Compose(r, CR_VIEW_BACK, sBack, BACK_FW * 4, BACK_H);
-    // The window starts just above the hair or hat; the waist is cut, like the kit's art
-    for (y = 0; y < BACK_H && top == BACK_H; y++)
-        for (x = 0; x < BACK_FW * 4; x++)
-            if (sBack[y * BACK_FW * 4 + x] & 0x8000)
-            {
-                top = y;
-                break;
-            }
-    y0 = top > 0 ? top - 1 : 0;
-    if (y0 + 64 > BACK_H)
-        y0 = BACK_H - 64;
     for (f = 0; f < 4; f++)
     {
-        for (y = 0; y < 64; y++)
-            memcpy(&sBackFit[f][y * 64], &sBack[(y0 + y) * BACK_FW * 4 + f * BACK_FW + BACK_X0], 64 * 2);
-        CountColors(&set, sBackFit[f], 64 * 64);
+        u16 *dst = sBackFit[f];
+        memset(dst, 0, sizeof(sBackFit[f]));
+        for (y = 0; y < MP_BACK_PIC_HEIGHT; y++)
+        {
+            int ky = y + BACK_KIT_Y;
+            if (ky >= BACK_H)
+                break;
+            for (x = 0; x < MP_BACK_PIC_WIDTH; x++)
+            {
+                int kx = x - BACK_KIT_X;
+                if (kx >= 0 && kx < BACK_FW)
+                    dst[y * MP_BACK_PIC_WIDTH + x] = sBack[ky * BACK_FW * 4 + f * BACK_FW + kx];
+            }
+        }
+        CountColors(&set, dst, MP_BACK_PIC_WIDTH * MP_BACK_PIC_HEIGHT);
     }
     ReduceColors(&set, g->backPal, map);
     for (f = 0; f < 4; f++)
-        ToTiles(g->back[f], sBackFit[f], 64, 0, 0, 64, 64, &set, map);
+    {
+        // the 64x64 piece's tiles, then the 32x64 piece's
+        ToTiles(g->back[f], sBackFit[f], MP_BACK_PIC_WIDTH, 0, 0, 64, 64, &set, map);
+        ToTiles(g->back[f] + 64 * 64 / 2, sBackFit[f], MP_BACK_PIC_WIDTH, 64, 0, MP_BACK_PIC_WIDTH - 64, 64, &set, map);
+    }
 }
 
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r)

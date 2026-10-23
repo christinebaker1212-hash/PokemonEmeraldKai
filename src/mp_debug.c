@@ -999,6 +999,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StartSpriteAnim(&gSprites[player->spriteId], 0);
         printf("[test] avatar state %d\n", atoi(arg));
     }
+    else if (strcmp(cmd, "created") == 0)
+    {
+        // created HEX - CUSTOM 1 = that recipe (the ini's custom1 = HEX) and wear it
+        if (MP_Created_FromHex(arg, &gMpConfig.custom[0]) && MP_Avatar_ParseSpriteName("custom_1", &gMpConfig.app))
+        {
+            gMpConfig.app.recipe = gMpConfig.custom[0];
+            gMpConfig.app.hasCustom = FALSE;
+            gMpConfig.customSprite[0] = 0;
+            MP_Avatar_ApplyLocal();
+            MP_SendAppearance();
+            printf("[test] created %s\n", arg);
+        }
+        else
+            printf("[test] created %s: bad recipe\n", arg);
+    }
     else if (strcmp(cmd, "sprite") == 0)
     {
         // sprite NAME - wear a look by its ini name (hiker, frlg_lass, custom_1, rs_may...)

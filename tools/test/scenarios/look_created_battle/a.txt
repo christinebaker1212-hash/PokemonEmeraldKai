@@ -1,0 +1,612 @@
+pressuntil A field 5000
+waitfor online 6000
+mp created 0101020304000307010a0102060000
+wait 200
+press UP 2
+wait 30
+press A 2
+pressuntillog A 4000 joins the battle against trainer
+waitfor battle 6000
+press A 1
+wait 5
+rendershot a_throw_000
+press A 1
+wait 5
+rendershot a_throw_001
+press A 1
+wait 5
+rendershot a_throw_002
+press A 1
+wait 5
+rendershot a_throw_003
+press A 1
+wait 5
+rendershot a_throw_004
+press A 1
+wait 5
+rendershot a_throw_005
+press A 1
+wait 5
+rendershot a_throw_006
+press A 1
+wait 5
+rendershot a_throw_007
+press A 1
+wait 5
+rendershot a_throw_008
+press A 1
+wait 5
+rendershot a_throw_009
+press A 1
+wait 5
+rendershot a_throw_010
+press A 1
+wait 5
+rendershot a_throw_011
+press A 1
+wait 5
+rendershot a_throw_012
+press A 1
+wait 5
+rendershot a_throw_013
+press A 1
+wait 5
+rendershot a_throw_014
+press A 1
+wait 5
+rendershot a_throw_015
+press A 1
+wait 5
+rendershot a_throw_016
+press A 1
+wait 5
+rendershot a_throw_017
+press A 1
+wait 5
+rendershot a_throw_018
+press A 1
+wait 5
+rendershot a_throw_019
+press A 1
+wait 5
+rendershot a_throw_020
+press A 1
+wait 5
+rendershot a_throw_021
+press A 1
+wait 5
+rendershot a_throw_022
+press A 1
+wait 5
+rendershot a_throw_023
+press A 1
+wait 5
+rendershot a_throw_024
+press A 1
+wait 5
+rendershot a_throw_025
+press A 1
+wait 5
+rendershot a_throw_026
+press A 1
+wait 5
+rendershot a_throw_027
+press A 1
+wait 5
+rendershot a_throw_028
+press A 1
+wait 5
+rendershot a_throw_029
+press A 1
+wait 5
+rendershot a_throw_030
+press A 1
+wait 5
+rendershot a_throw_031
+press A 1
+wait 5
+rendershot a_throw_032
+press A 1
+wait 5
+rendershot a_throw_033
+press A 1
+wait 5
+rendershot a_throw_034
+press A 1
+wait 5
+rendershot a_throw_035
+press A 1
+wait 5
+rendershot a_throw_036
+press A 1
+wait 5
+rendershot a_throw_037
+press A 1
+wait 5
+rendershot a_throw_038
+press A 1
+wait 5
+rendershot a_throw_039
+press A 1
+wait 5
+rendershot a_throw_040
+press A 1
+wait 5
+rendershot a_throw_041
+press A 1
+wait 5
+rendershot a_throw_042
+press A 1
+wait 5
+rendershot a_throw_043
+press A 1
+wait 5
+rendershot a_throw_044
+press A 1
+wait 5
+rendershot a_throw_045
+press A 1
+wait 5
+rendershot a_throw_046
+press A 1
+wait 5
+rendershot a_throw_047
+press A 1
+wait 5
+rendershot a_throw_048
+press A 1
+wait 5
+rendershot a_throw_049
+press A 1
+wait 5
+rendershot a_throw_050
+press A 1
+wait 5
+rendershot a_throw_051
+press A 1
+wait 5
+rendershot a_throw_052
+press A 1
+wait 5
+rendershot a_throw_053
+press A 1
+wait 5
+rendershot a_throw_054
+press A 1
+wait 5
+rendershot a_throw_055
+press A 1
+wait 5
+rendershot a_throw_056
+press A 1
+wait 5
+rendershot a_throw_057
+press A 1
+wait 5
+rendershot a_throw_058
+press A 1
+wait 5
+rendershot a_throw_059
+press A 1
+wait 5
+rendershot a_throw_060
+press A 1
+wait 5
+rendershot a_throw_061
+press A 1
+wait 5
+rendershot a_throw_062
+press A 1
+wait 5
+rendershot a_throw_063
+press A 1
+wait 5
+rendershot a_throw_064
+press A 1
+wait 5
+rendershot a_throw_065
+press A 1
+wait 5
+rendershot a_throw_066
+press A 1
+wait 5
+rendershot a_throw_067
+press A 1
+wait 5
+rendershot a_throw_068
+press A 1
+wait 5
+rendershot a_throw_069
+press A 1
+wait 5
+rendershot a_throw_070
+press A 1
+wait 5
+rendershot a_throw_071
+press A 1
+wait 5
+rendershot a_throw_072
+press A 1
+wait 5
+rendershot a_throw_073
+press A 1
+wait 5
+rendershot a_throw_074
+press A 1
+wait 5
+rendershot a_throw_075
+press A 1
+wait 5
+rendershot a_throw_076
+press A 1
+wait 5
+rendershot a_throw_077
+press A 1
+wait 5
+rendershot a_throw_078
+press A 1
+wait 5
+rendershot a_throw_079
+press A 1
+wait 5
+rendershot a_throw_080
+press A 1
+wait 5
+rendershot a_throw_081
+press A 1
+wait 5
+rendershot a_throw_082
+press A 1
+wait 5
+rendershot a_throw_083
+press A 1
+wait 5
+rendershot a_throw_084
+press A 1
+wait 5
+rendershot a_throw_085
+press A 1
+wait 5
+rendershot a_throw_086
+press A 1
+wait 5
+rendershot a_throw_087
+press A 1
+wait 5
+rendershot a_throw_088
+press A 1
+wait 5
+rendershot a_throw_089
+press A 1
+wait 5
+rendershot a_throw_090
+press A 1
+wait 5
+rendershot a_throw_091
+press A 1
+wait 5
+rendershot a_throw_092
+press A 1
+wait 5
+rendershot a_throw_093
+press A 1
+wait 5
+rendershot a_throw_094
+press A 1
+wait 5
+rendershot a_throw_095
+press A 1
+wait 5
+rendershot a_throw_096
+press A 1
+wait 5
+rendershot a_throw_097
+press A 1
+wait 5
+rendershot a_throw_098
+press A 1
+wait 5
+rendershot a_throw_099
+press A 1
+wait 5
+rendershot a_throw_100
+press A 1
+wait 5
+rendershot a_throw_101
+press A 1
+wait 5
+rendershot a_throw_102
+press A 1
+wait 5
+rendershot a_throw_103
+press A 1
+wait 5
+rendershot a_throw_104
+press A 1
+wait 5
+rendershot a_throw_105
+press A 1
+wait 5
+rendershot a_throw_106
+press A 1
+wait 5
+rendershot a_throw_107
+press A 1
+wait 5
+rendershot a_throw_108
+press A 1
+wait 5
+rendershot a_throw_109
+press A 1
+wait 5
+rendershot a_throw_110
+press A 1
+wait 5
+rendershot a_throw_111
+press A 1
+wait 5
+rendershot a_throw_112
+press A 1
+wait 5
+rendershot a_throw_113
+press A 1
+wait 5
+rendershot a_throw_114
+press A 1
+wait 5
+rendershot a_throw_115
+press A 1
+wait 5
+rendershot a_throw_116
+press A 1
+wait 5
+rendershot a_throw_117
+press A 1
+wait 5
+rendershot a_throw_118
+press A 1
+wait 5
+rendershot a_throw_119
+press A 1
+wait 5
+rendershot a_throw_120
+press A 1
+wait 5
+rendershot a_throw_121
+press A 1
+wait 5
+rendershot a_throw_122
+press A 1
+wait 5
+rendershot a_throw_123
+press A 1
+wait 5
+rendershot a_throw_124
+press A 1
+wait 5
+rendershot a_throw_125
+press A 1
+wait 5
+rendershot a_throw_126
+press A 1
+wait 5
+rendershot a_throw_127
+press A 1
+wait 5
+rendershot a_throw_128
+press A 1
+wait 5
+rendershot a_throw_129
+press A 1
+wait 5
+rendershot a_throw_130
+press A 1
+wait 5
+rendershot a_throw_131
+press A 1
+wait 5
+rendershot a_throw_132
+press A 1
+wait 5
+rendershot a_throw_133
+press A 1
+wait 5
+rendershot a_throw_134
+press A 1
+wait 5
+rendershot a_throw_135
+press A 1
+wait 5
+rendershot a_throw_136
+press A 1
+wait 5
+rendershot a_throw_137
+press A 1
+wait 5
+rendershot a_throw_138
+press A 1
+wait 5
+rendershot a_throw_139
+press A 1
+wait 5
+rendershot a_throw_140
+press A 1
+wait 5
+rendershot a_throw_141
+press A 1
+wait 5
+rendershot a_throw_142
+press A 1
+wait 5
+rendershot a_throw_143
+press A 1
+wait 5
+rendershot a_throw_144
+press A 1
+wait 5
+rendershot a_throw_145
+press A 1
+wait 5
+rendershot a_throw_146
+press A 1
+wait 5
+rendershot a_throw_147
+press A 1
+wait 5
+rendershot a_throw_148
+press A 1
+wait 5
+rendershot a_throw_149
+press A 1
+wait 5
+rendershot a_throw_150
+press A 1
+wait 5
+rendershot a_throw_151
+press A 1
+wait 5
+rendershot a_throw_152
+press A 1
+wait 5
+rendershot a_throw_153
+press A 1
+wait 5
+rendershot a_throw_154
+press A 1
+wait 5
+rendershot a_throw_155
+press A 1
+wait 5
+rendershot a_throw_156
+press A 1
+wait 5
+rendershot a_throw_157
+press A 1
+wait 5
+rendershot a_throw_158
+press A 1
+wait 5
+rendershot a_throw_159
+press A 1
+wait 5
+rendershot a_throw_160
+press A 1
+wait 5
+rendershot a_throw_161
+press A 1
+wait 5
+rendershot a_throw_162
+press A 1
+wait 5
+rendershot a_throw_163
+press A 1
+wait 5
+rendershot a_throw_164
+press A 1
+wait 5
+rendershot a_throw_165
+press A 1
+wait 5
+rendershot a_throw_166
+press A 1
+wait 5
+rendershot a_throw_167
+press A 1
+wait 5
+rendershot a_throw_168
+press A 1
+wait 5
+rendershot a_throw_169
+press A 1
+wait 5
+rendershot a_throw_170
+press A 1
+wait 5
+rendershot a_throw_171
+press A 1
+wait 5
+rendershot a_throw_172
+press A 1
+wait 5
+rendershot a_throw_173
+press A 1
+wait 5
+rendershot a_throw_174
+press A 1
+wait 5
+rendershot a_throw_175
+press A 1
+wait 5
+rendershot a_throw_176
+press A 1
+wait 5
+rendershot a_throw_177
+press A 1
+wait 5
+rendershot a_throw_178
+press A 1
+wait 5
+rendershot a_throw_179
+press A 1
+wait 5
+rendershot a_throw_180
+press A 1
+wait 5
+rendershot a_throw_181
+press A 1
+wait 5
+rendershot a_throw_182
+press A 1
+wait 5
+rendershot a_throw_183
+press A 1
+wait 5
+rendershot a_throw_184
+press A 1
+wait 5
+rendershot a_throw_185
+press A 1
+wait 5
+rendershot a_throw_186
+press A 1
+wait 5
+rendershot a_throw_187
+press A 1
+wait 5
+rendershot a_throw_188
+press A 1
+wait 5
+rendershot a_throw_189
+press A 1
+wait 5
+rendershot a_throw_190
+press A 1
+wait 5
+rendershot a_throw_191
+press A 1
+wait 5
+rendershot a_throw_192
+press A 1
+wait 5
+rendershot a_throw_193
+press A 1
+wait 5
+rendershot a_throw_194
+press A 1
+wait 5
+rendershot a_throw_195
+press A 1
+wait 5
+rendershot a_throw_196
+press A 1
+wait 5
+rendershot a_throw_197
+press A 1
+wait 5
+rendershot a_throw_198
+press A 1
+wait 5
+rendershot a_throw_199
+pressuntillog A 15000 co-op: battle over
+wait 300
+quit

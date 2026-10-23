@@ -131,13 +131,13 @@ extern const struct CompressedSpritePalette gTrainerBackPicPaletteTable[];
 extern u32 gMpTrainerFrontPicLz[2][MP_PIC_LZ_WORDS];
 extern u32 gMpTrainerFrontPalLz[2][MP_PAL_LZ_WORDS];
 extern u32 gMpTrainerBackPalLz[MP_PAL_LZ_WORDS];
-extern u8 gMpTrainerBackTiles[4 * TRAINER_PIC_SIZE];
+extern u8 gMpTrainerBackTiles[];   // 4 frames of MP_BACK_PIC_SIZE (mp.h)
 extern const struct SpriteFrameImage gMpTrainerBackFrames[4];
 extern u32 gMpPartnerBackPalLz[MP_PAL_LZ_WORDS];
-extern u8 gMpPartnerBackTiles[4 * TRAINER_PIC_SIZE];
+extern u8 gMpPartnerBackTiles[];
 extern const struct SpriteFrameImage gMpPartnerBackFrames[4];
 extern u32 gMpPartner2BackPalLz[MP_PAL_LZ_WORDS];
-extern u8 gMpPartner2BackTiles[4 * TRAINER_PIC_SIZE];
+extern u8 gMpPartner2BackTiles[];
 extern const struct SpriteFrameImage gMpPartner2BackFrames[4];
 
 // Moemon Co-op: OPTIONS > CREATURES picks Kai's battle pictures (_Moe) or the original
