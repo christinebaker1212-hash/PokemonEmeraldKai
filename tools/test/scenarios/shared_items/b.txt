@@ -1,0 +1,66 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp sharedpc
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 400
+press R 2
+wait 60
+press L 2
+wait 200
+mp itemcounts 13
+press DOWN 2
+wait 60
+shot b_list
+press A 2
+wait 30
+shot b_action
+press A 2
+wait 20
+press A 2
+wait 200
+mp itemcounts 13
+press B 2
+wait 20
+press A 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+wait 20
+press A 2
+wait 200
+mp itemcounts 13
+press B 2
+wait 20
+press R 2
+wait 60
+shot b_mypc
+press DOWN 2
+wait 20
+mp pctag
+wait 20
+shot b_tagged
+press A 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 300
+mp itemcounts 13
+shot b_sent
+press B 2
+wait 20
+press L 2
+wait 200
+mp itemcounts 13
+press B 2
+wait 30
+press B 2
+wait 30
+quit

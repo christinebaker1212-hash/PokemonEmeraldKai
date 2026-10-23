@@ -1,0 +1,8 @@
+# BOB picks up a shared Moemon and his game goes away while he holds it: the server puts it back in the first free
+# slot (slot 0 here) and ALICE's box shows it again.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=200
+EXPECT_A=("[test] sharedbox 1: 1:4(ALICE) | hand 0" "[test] sharedbox 1: 0:1(ALICE) 1:4(ALICE) | hand 0")
+EXPECT_B=("shared PC: transaction 1 (14 bytes, 1 in hand)")

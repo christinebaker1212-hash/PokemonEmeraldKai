@@ -17,7 +17,7 @@ names=("$@"); all=0; [ ${#names[@]} = 0 ] && { names=($(ls "$TOOLS/scenarios"));
 run_one() {
     local n=$1 src="$TOOLS/scenarios/$1" d="$OUT/$1" bad="" e l start=$SECONDS
     [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; return 1; }
-    rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"
+    rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"; cp "$src"/*.dat "$d/" 2>/dev/null   # .dat: a server storage file to start from
     unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C WARP_D EXPECT_A EXPECT_B EXPECT_C EXPECT_D UNEXPECT_A UNEXPECT_B UNEXPECT_C \
           UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D
     . "$src/conf"

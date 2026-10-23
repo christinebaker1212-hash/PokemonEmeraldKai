@@ -769,6 +769,55 @@ s32 MP_WeekNumber(void);
 
 // Shared PC and room counters (mp_sharedpc.c)
 void MP_SharedPc_Open(void);
+bool8 MP_SharedPc_ItemsOpen(void);
+
+// The shared PC's Pokémon in the PC box screen (mp_sharedbox.c). gPokemonStoragePtr points at a mirror of the
+// shared boxes while the screen shows them; the player's own boxes are MP_PersonalStorage() (the save uses that).
+enum { MP_PCV_NONE, MP_PCV_BOX, MP_PCV_ITEMS };   // where a player's cursor is
+struct MpPcCursor
+{
+    u8 view;        // MP_PCV_*
+    u8 box;         // shared box shown (MP_PCV_BOX)
+    s16 x, y;       // cursor on the screen (MP_PCV_BOX)
+    u16 species;    // held (0: nothing), the first of count
+    u8 count;
+    u16 row;        // item row (MP_PCV_ITEMS)
+    u32 heard;
+};
+struct PokemonStorage;
+struct BoxPokemon;
+struct PokemonStorage *MP_PersonalStorage(void);
+bool8 MP_SharedBox_IsMirrorShown(void);
+void MP_SharedBox_ShowShared(bool8 shared);
+void MP_SharedBox_SaveBlocksMoved(struct PokemonStorage *own);
+void MP_SharedBox_Begin(void);
+bool8 MP_SharedBox_Loaded(void);
+bool8 MP_SharedBox_IsOpen(void);
+void MP_SharedBox_Update(void);
+void MP_SharedBox_End(void);
+bool8 MP_SharedBox_Busy(void);
+void MP_SharedBox_ConnectionLost(void);
+void MP_SharedBox_OnMessage(const u8 *data, u16 len);
+bool8 MP_SharedBox_TakeChanges(u32 *cells);
+u32 MP_SharedBox_TakeInfoChanges(void);
+const char *MP_SharedBox_TakeNote(void);
+const u8 *MP_SharedBox_PutInBy(u8 box, u8 pos);
+const u8 *MP_SharedBox_PutInByMon(const struct BoxPokemon *b);
+bool8 MP_SharedBox_IsShared(const struct BoxPokemon *b);
+void MP_SharedBox_NoteRelease(const struct BoxPokemon *b);
+struct PokemonStorage *MP_SharedBox_Mirror(void);
+void MP_SharedBox_ResetCursors(void);
+void MP_SharedBox_SendCursor(u8 view, u8 box, s16 x, s16 y, u16 species, u8 count);
+void MP_SharedBox_SendCursorRow(u8 view, u8 box, s16 x, s16 y, u16 species, u8 count, u16 row);
+void MP_SharedBox_OnCursor(const u8 *data, u16 len);
+bool8 MP_SharedBox_GetCursor(u8 player, struct MpPcCursor *out);
+// pokemon_storage_system.c, for the shared PC
+u8 MP_PcStorage_Held(const struct BoxPokemon **out, u8 max);
+void MP_PcStorage_DropHeld(u32 pers, u32 otid);
+void MP_PcStorage_RequestRebuild(void);
+void MP_PcStorage_ForceClose(void);
+bool8 MP_PcStorage_Steady(void);
+void MP_PcStorage_OpenShared(void (*onClose)(void));
 bool8 MP_InDungeon(void);
 struct Pokemon;
 // Achievements (mp_achieve.c) and things done with friends (mp_events.c MP_Events_Did)

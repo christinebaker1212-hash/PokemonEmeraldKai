@@ -239,6 +239,37 @@ int MP_TestCondition(const char *name)
         u8 MP_Join_PendingCount(void);
         return MP_Join_PendingCount() >= atoi(name + 11);
     }
+    if (strncmp(name, "slot:", 5) == 0)    // slot:BOX:POS:SPECIES - the shared PC's slot (as we see it) has it (0: empty)
+    {
+        struct PokemonStorage *MP_SharedBox_Mirror(void);
+        int box = 1, pos = 0, species = 0;
+        struct BoxPokemon *b;
+        sscanf(name + 5, "%d:%d:%d", &box, &pos, &species);
+        if (box < 1 || box > TOTAL_BOXES_COUNT || pos < 0 || pos >= IN_BOX_COUNT)
+            return FALSE;
+        b = &MP_SharedBox_Mirror()->boxes[box - 1][pos];
+        if (!GetBoxMonData(b, MON_DATA_SANITY_HAS_SPECIES))
+            return species == 0;
+        return (int)GetBoxMonData(b, MON_DATA_SPECIES) == species;
+    }
+    if (strncmp(name, "boxname:", 8) == 0) // boxname:BOX:NAME - the shared PC's box (as we see it) is called NAME
+    {
+        struct PokemonStorage *MP_SharedBox_Mirror(void);
+        void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
+        int box = atoi(name + 8);
+        const char *want = strchr(name + 8, ':');
+        char have[16];
+        if (box < 1 || box > TOTAL_BOXES_COUNT || want == NULL)
+            return FALSE;
+        MP_GameToAscii(have, MP_SharedBox_Mirror()->boxNames[box - 1], BOX_NAME_LENGTH);
+        return strcmp(have, want + 1) == 0;
+    }
+    if (strcmp(name, "sharedsteady") == 0) // the shared PC's box screen, nothing waiting on the server
+        return MP_SharedBox_Loaded() && !MP_SharedBox_Busy() && MP_PcStorage_Steady();
+    if (strcmp(name, "sharedclosed") == 0) // the shared PC's Pokémon all sent and done with
+        return !MP_SharedBox_IsOpen();
+    if (strcmp(name, "pcstorage") == 0)    // a PC box screen
+        return MP_PcStorage_IsOpen();
     if (strcmp(name, "jaridle") == 0)      // the CANDY JAR's menu, done pouring or converting
         return MP_Candy_JarOpen() && !MP_Candy_JarBusy();
     if (strcmp(name, "jar") == 0)          // the CANDY JAR's menu (it may still be pouring)
@@ -1458,6 +1489,71 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
             printf(" %d", gMpCandies[t]);
         printf(" | jar %d\n", CheckBagHasItem(ITEM_CANDY_JAR, 1));
+    }
+    else if (strcmp(cmd, "itemcounts") == 0)
+    {
+        // itemcounts ITEM - how many in the BAG, in our own PC, and in the shared PC (as last listed)
+        u16 MP_SharedPc_ListedQty(u16 item);
+        int item = atoi(arg), i, pc = 0;
+        for (i = 0; i < PC_ITEMS_COUNT; i++)
+            if (gSaveBlock1Ptr->pcItems[i].itemId == item)
+                pc += gSaveBlock1Ptr->pcItems[i].quantity;
+        printf("[test] itemcounts %d: bag %d pc %d shared %d\n", item, (int)CountTotalItemQuantityInBag(item), pc,
+               (int)MP_SharedPc_ListedQty(item));
+    }
+    else if (strcmp(cmd, "sharedpc") == 0)
+    {
+        // sharedpc - CO-OP menu > SHARED PC (MOEMON / ITEMS / CANCEL)
+        MP_SharedPc_Open();
+    }
+    else if (strcmp(cmd, "sharedin") == 0)
+    {
+        // sharedin BOX POS SPECIES LEVEL - a new Moemon straight into the shared PC (BOX from 1)
+        void MP_SharedBox_DebugIn(u8 box, u8 pos, const struct BoxPokemon *b);
+        int box = 1, pos = 0, species = 1, level = 5;
+        struct BoxPokemon boxMon;
+        sscanf(arg, "%d %d %d %d", &box, &pos, &species, &level);
+        CreateBoxMon(&boxMon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        MP_SharedBox_DebugIn(box - 1, pos, &boxMon);
+        printf("[test] sharedin %d %d: %d\n", box, pos, species);
+    }
+    else if (strcmp(cmd, "sharedbox") == 0)
+    {
+        // sharedbox BOX - the shared PC's box as this game sees it (BOX from 1)
+        void MP_SharedBox_DebugDump(u8 box);
+        MP_SharedBox_DebugDump(atoi(arg) - 1);
+    }
+    else if (strcmp(cmd, "sharedname") == 0)
+    {
+        // sharedname BOX NAME - rename a shared box (as the box screen's NAME does; BOX from 1, NAME up to 8 letters)
+        void MP_SharedBox_DebugName(u8 box, const char *name);
+        char *sp = strchr(arg, ' ');
+        if (sp != NULL)
+            MP_SharedBox_DebugName(atoi(arg) - 1, sp + 1);
+    }
+    else if (strcmp(cmd, "monids") == 0)
+    {
+        // monids - every Moemon of ours and of the shared PC by personality:OT ID
+        void MP_SharedBox_DebugIds(void);
+        MP_SharedBox_DebugIds();
+    }
+    else if (strcmp(cmd, "ownbox") == 0)
+    {
+        // ownbox BOX - our own box (even with the shared PC's on screen)
+        struct PokemonStorage *own = MP_PersonalStorage();
+        int box = atoi(arg) - 1, i;
+        if (box >= 0 && box < TOTAL_BOXES_COUNT)
+        {
+            printf("[test] ownbox %d:", box + 1);
+            for (i = 0; i < IN_BOX_COUNT; i++)
+                if (GetBoxMonData(&own->boxes[box][i], MON_DATA_SANITY_HAS_SPECIES))
+                    printf(" %d:%d", i, (int)GetBoxMonData(&own->boxes[box][i], MON_DATA_SPECIES));
+            printf(" | party:");
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+                    printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+            printf("\n");
+        }
     }
     else if (strcmp(cmd, "candyjar") == 0)
     {

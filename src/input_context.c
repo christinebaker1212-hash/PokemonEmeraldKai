@@ -19,7 +19,7 @@ int Platform_InputContext(void)
         return INPUT_CONTEXT_QUICKPICK;
     if (gMain.inBattle)
         return INPUT_CONTEXT_BATTLE;
-    if (MP_PcStorage_IsOpen())
+    if (MP_PcStorage_IsOpen() || MP_SharedPc_ItemsOpen())   // the shared PC's item list tags too
         return INPUT_CONTEXT_PC_STORAGE;
     if (MP_IsInOverworld())
         return MP_IsLocalFree() ? INPUT_CONTEXT_OVERWORLD : INPUT_CONTEXT_TEXT;

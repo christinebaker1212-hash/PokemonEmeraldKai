@@ -1,0 +1,10 @@
+# The shared PC's ITEMS at lag: ALICE puts 3 POTIONs in from her BAG; BOB withdraws one to his BAG and sends two to
+# his own PC, then on MY PC tags POTION (his own one and those two) and SENDS ALL TO SHARED. Friends' cursors show on
+# the rows. (Each player starts with 5 POTIONs in the BAG and 1 in the PC.)
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=220
+EXPECT_A=("[test] itemcounts 13: bag 2 pc 1 shared 3")
+EXPECT_B=("[test] itemcounts 13: bag 5 pc 1 shared 3" "[test] itemcounts 13: bag 6 pc 1 shared 2" "[test] itemcounts 13: bag 6 pc 3 shared 0"
+          "[test] itemcounts 13: bag 6 pc 0 shared 3")

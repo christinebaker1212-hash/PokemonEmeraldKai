@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "malloc.h"
 #include "berry_powder.h"
 #include "item.h"
@@ -76,6 +77,7 @@ void SetSaveBlocksPointers(u16 offset)
     gSaveBlock2Ptr = (void *)(&gSaveblock2) + offset;
     *sav1_LocalVar = (void *)(&gSaveblock1) + offset;
     gPokemonStoragePtr = (void *)(&gPokemonStorage) + offset;
+    MP_SharedBox_SaveBlocksMoved(gPokemonStoragePtr);   // Moemon Co-op: the shared PC's boxes stay on screen
 
     SetBagItemsPointers();
     SetDecorationInventoriesPointers();
@@ -104,7 +106,7 @@ void MoveSaveBlocks_ResetHeap(void)
 #ifdef PORTABLE
     CpuCopy32(gSaveBlock2Ptr, saveBlock2Copy, sizeof(*gSaveBlock2Ptr));
     CpuCopy32(gSaveBlock1Ptr, saveBlock1Copy, sizeof(*gSaveBlock1Ptr));
-    CpuCopy32(gPokemonStoragePtr, pokemonStorageCopy, sizeof(*gPokemonStoragePtr));
+    CpuCopy32(MP_PersonalStorage(), pokemonStorageCopy, sizeof(*gPokemonStoragePtr));   // Moemon Co-op: never the shared PC's
 #else
     *saveBlock2Copy = *gSaveBlock2Ptr;
     *saveBlock1Copy = *gSaveBlock1Ptr;
@@ -123,7 +125,7 @@ void MoveSaveBlocks_ResetHeap(void)
 #ifdef PORTABLE
     CpuCopy32(saveBlock2Copy, gSaveBlock2Ptr, sizeof(*saveBlock2Copy));
     CpuCopy32(saveBlock1Copy, gSaveBlock1Ptr, sizeof(*saveBlock1Copy));
-    CpuCopy32(pokemonStorageCopy, gPokemonStoragePtr, sizeof(*pokemonStorageCopy));
+    CpuCopy32(pokemonStorageCopy, MP_PersonalStorage(), sizeof(*pokemonStorageCopy));   // Moemon Co-op: our own boxes
 #else
     *gSaveBlock2Ptr = *saveBlock2Copy;
     *gSaveBlock1Ptr = *saveBlock1Copy;

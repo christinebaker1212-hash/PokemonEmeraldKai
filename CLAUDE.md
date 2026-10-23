@@ -58,7 +58,9 @@ Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch mat
 mp_legacy_*.c, tools/moemon_legacy).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
-CANDY; ITEM_CANDY_JAR 398). Also items from later games (389-397: QUICK POWDER, EVIOLITE, seven treats; item names stay 13 letters). Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / IsValidBerryType, never
+CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock
+screen edits, diffed into server transactions; the player's own boxes are MP_PersonalStorage(), never assume
+gPokemonStoragePtr is theirs while the PC is open) with MY PC, SEND TO, friends' cursors, and its ITEMS list. Also items from later games (389-397: QUICK POWDER, EVIOLITE, seven treats; item names stay 13 letters). Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / IsValidBerryType, never
 `item - FIRST_BERRY_INDEX`), the MoeGatcha daily STANDARD lineup and the PICKUP reroll vote.
 Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).

@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 35   // 35: items 389-398 (QUICK POWDER, EVIOLITE, treats, CANDY JAR); 34: joining a battle in progress (mp_join.c); 33: SPECTATE panel (screens any time, scroll shifts, palette tiles); 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
+#define MP_PROTOCOL_VERSION 36   // 36: shared PC as 14 boxes of 30 (BOX_GET / TXN / CURSOR); 35: items 389-398 (QUICK POWDER, EVIOLITE, treats, CANDY JAR); 34: joining a battle in progress (mp_join.c); 33: SPECTATE panel (screens any time, scroll shifts, palette tiles); 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
@@ -164,17 +164,26 @@ int MPNet_ParseInviteCode(const char *code, uint32_t *ip, int *port);
 // Radmin VPN (26.x) / Hamachi (25.x) adapter address, the last resort
 int MPNet_FindVpnAddress(char *out, int len, char *nameOut, int nameLen);
 
-// Room storage (mp_store.c): the shared PC and counters, saved by the server
-#define MP_STORE_MONS        60
-#define MP_STORE_MON_BYTES   112   // opaque to the server (the game stores a Pokemon + who put it in)
+// Room storage (mp_store.c): the shared PC and counters, saved by the server.
+// The shared PC is 14 boxes of 30 like a personal one. A stored Pokemon is MP_STORE_MON_BYTES opaque bytes to the
+// server, except its first 8: personality and OT ID (little-endian u32s), which tell one Pokemon from another. A
+// player picking one up moves it into their "hand" on the server (nobody else can take it); if they leave, whatever
+// is still in their hand goes back into the first free slots.
+#define MP_SHARED_BOXES      14
+#define MP_SHARED_BOX_SLOTS  30
+#define MP_STORE_MONS        (MP_SHARED_BOXES * MP_SHARED_BOX_SLOTS)
+#define MP_STORE_MON_BYTES   112   // the game stores a Pokemon + who put it in
+#define MP_STORE_HAND        36    // a box and a party
+#define MP_STORE_BOXNAME     9     // 8 game characters + EOS
 #define MP_STORE_ITEMS       64
 #define MP_STORE_COUNTERS    512
 #define MP_STORE_KEY_MAX     31
 enum {
-    MP_ST_PC_LIST = 1,     // -> u8 count, (u8 slot, data)*
-    MP_ST_PC_PUT,          // data -> u8 ok, u8 slot
-    MP_ST_PC_TAKE,         // u8 slot -> u8 ok, u8 slot, data
-    MP_ST_PC_CHANGED,      // (to the room) someone put in or took a Pokemon
+    MP_ST_BOX_GET = 1,     // u8 box (0xFF: all) -> BOX_DATA for each
+    MP_ST_BOX_DATA,        // u8 box, name[9], u8 wallpaper, u8 count, (u8 pos, data)*   (also to the room after a change)
+    MP_ST_TXN,             // u16 seq, then commands (MP_TXN_*) -> BOX_DATA (room) for changed boxes, then TXN_RESULT
+    MP_ST_TXN_RESULT,      // u16 seq, u8 refusedIn, (u32 pers, u32 otid)*, u8 lostHolds, (u32, u32)*, u8 hand, data*
+    MP_ST_CURSOR,          // payload -> (to the others) u8 player, payload
     MP_ST_ITEM_LIST,       // -> u8 count, (u16 item, u16 qty)*
     MP_ST_ITEM_PUT,        // u16 item, u16 qty -> u16 item, u16 stored
     MP_ST_ITEM_TAKE,       // u16 item, u16 qty -> u16 item, u16 taken
@@ -185,8 +194,23 @@ enum {
     MP_ST_CTR_VALUE,       // s32 value, str key
     MP_ST_CTR_END,         // str prefix
 };
+// MP_ST_TXN commands, applied in order (each one on its own: a failed one doesn't undo the others)
+enum {
+    MP_TXN_HOLD = 1,       // u8 box, u8 pos, u32 pers, u32 otid: slot -> hand (only if that very Pokemon is there)
+    MP_TXN_PLACE,          // u8 box, u8 pos, data: the hand's Pokemon with that personality / OT ID -> slot, with this
+                           //   data (taken: the next free slot)
+    MP_TXN_IN,             // u8 box, u8 pos, data: from the player's own game -> slot (taken: the next free; full:
+                           //   refused, the game gives it back)
+    MP_TXN_OUT,            // u32 pers, u32 otid: hand -> the player's own game
+    MP_TXN_RELEASE,        // u32 pers, u32 otid: hand -> gone
+    MP_TXN_SET,            // u8 box, u8 pos, u32 pers, u32 otid, data: new data for the same Pokemon (markings, name)
+    MP_TXN_BOXINFO,        // u8 box, name[9], u8 wallpaper
+};
 typedef void (*MPStoreSendFunc)(void *ctx, int toAll, const uint8_t *data, uint16_t len);
-void MPStore_Handle(const uint8_t *roomKey, const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx);
+// player: the sender's seat in the room (whose hand)
+void MPStore_Handle(const uint8_t *roomKey, int player, const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx);
+// A player left the room: their hand goes back into free slots (BOX_DATA to the room)
+void MPStore_PlayerLeft(const uint8_t *roomKey, int player, MPStoreSendFunc send, void *ctx);
 
 // Logging hook (printf style). Defaults to stdout.
 void MPNet_Log(const char *fmt, ...);

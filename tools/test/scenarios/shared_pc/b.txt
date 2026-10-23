@@ -1,0 +1,80 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+mp sharedbox 1
+waitfor slot:1:4:1 3000
+wait 120
+waitfor sharedsteady 600
+mp sharedbox 1
+shot b_seemove
+log bob: send slot 2 to PC
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 20
+shot b_sendmenu
+press A 2
+wait 60
+waitfor sharedsteady 600
+mp ownbox 1
+mp sharedbox 1
+log bob: release slot 1 (ALICE's CHARMANDER)
+press LEFT 2
+wait 15
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 20
+press A 2
+wait 40
+shot b_releaseask
+press UP 2
+wait 10
+press A 2
+wait 200
+press A 2
+wait 60
+press A 2
+wait 60
+waitfor sharedsteady 600
+mp sharedbox 1
+log bob: released
+waitfor slot:1:3:0 3000
+wait 120
+waitfor sharedsteady 600
+mp sharedbox 1
+shot b_end
+mp monids
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+wait 60
+press B 2
+mp monids
+wait 60
+quit

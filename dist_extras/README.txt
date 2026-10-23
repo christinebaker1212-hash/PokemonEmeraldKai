@@ -341,6 +341,21 @@ SHARED PC...  A PC that belongs to the server: anyone can put Moemon and
               PC, so it's still there the next time the same server name and
               password are hosted. It can't be reached from inside caves and
               dungeons: pack what you need before you go in.
+              MOEMON: 14 shared boxes of 30, in the PC's own box screen (move,
+              SUMMARY, MARK, RELEASE, TAG groups, box names and wallpapers,
+              which everyone shares). Friends in the same box show as hands in
+              their color with their name, carrying whatever they hold; a
+              Moemon somebody holds can't be taken by anyone else. Along the
+              top: PARTY, MY PC (your own boxes, and back; a Moemon you hold
+              comes along) and CLOSE. A Moemon's menu (and the TAG menu) has
+              SEND TO PC / SEND TO SHARED: straight into your own boxes or the
+              shared ones. Anyone can release a shared Moemon ("Release LUNA's
+              PIKACHU?"); the candy goes to whoever releases it.
+              ITEMS: the shared items, and your own PC's (L/R to switch).
+              DEPOSIT FROM BAG puts items in; on an item: WITHDRAW (to your
+              BAG), SEND TO PC / SEND TO SHARED, CANCEL. TAG (X/Square, F)
+              marks items to move them all at once. Friends' names show on the
+              row they're looking at. Key items and HMs stay with you.
 DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.

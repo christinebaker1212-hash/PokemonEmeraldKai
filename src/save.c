@@ -704,7 +704,7 @@ static void UpdateSaveAddresses(void)
 
     for (; i <= SECTOR_ID_PKMN_STORAGE_END; i++) //setting i to SECTOR_ID_PKMN_STORAGE_START does not match
     {
-        gRamSaveSectorLocations[i].data = (void *)(gPokemonStoragePtr) + sSaveSlotLayout[i].offset;
+        gRamSaveSectorLocations[i].data = (void *)(MP_PersonalStorage()) + sSaveSlotLayout[i].offset;   // Moemon Co-op: never the shared PC's
         gRamSaveSectorLocations[i].size = sSaveSlotLayout[i].size;
     }
 }

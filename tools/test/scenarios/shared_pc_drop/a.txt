@@ -1,0 +1,28 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp sharedin 1 0 1 5
+mp sharedin 1 1 4 5
+wait 60
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+waitfor slot:1:0:0 3000
+wait 30
+waitfor sharedsteady 600
+mp sharedbox 1
+shot a_held_by_bob
+waitfor slot:1:0:1 3000
+wait 30
+waitfor sharedsteady 600
+mp sharedbox 1
+shot a_back
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+wait 30
+quit

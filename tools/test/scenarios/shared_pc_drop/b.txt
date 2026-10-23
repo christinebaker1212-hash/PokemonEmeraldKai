@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+waitfor slot:1:0:1 600
+press A 2
+wait 30
+press A 2
+wait 60
+waitfor sharedsteady 600
+wait 60
+quit

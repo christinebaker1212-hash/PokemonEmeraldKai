@@ -228,7 +228,7 @@ static void StoreSend(void *ctx, int toAll, const uint8_t *data, uint16_t len)
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         int m = sRooms[sx->room].members[i];
-        if (m >= 0 && sConns[m] && sConns[m]->helloDone)
+        if (m >= 0 && sConns[m] && sConns[m]->helloDone && !(toAll == 2 && m == sx->c))
             SendTo(m, MPMSG_S_STORE, data, len);
     }
 }
@@ -249,6 +249,12 @@ static void LeaveRoom(int c)
     slot = (uint8_t)sc->slot;
     wasJoined = sc->helloDone;
     r->members[sc->slot] = -1;
+    if (wasJoined)
+    {
+        // a Pokemon still in their hand in the shared PC goes back into its boxes (told to whoever's left)
+        struct StoreCtx sx = {c, sc->room};
+        MPStore_PlayerLeft(r->key, slot, StoreSend, &sx);
+    }
     if (wasJoined)
     {
         int i;
@@ -577,7 +583,7 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
         if (r && sc->helloDone)
         {
             struct StoreCtx sx = {c, sc->room};
-            MPStore_Handle(r->key, data, len, StoreSend, &sx);
+            MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
         }
         break;
     }

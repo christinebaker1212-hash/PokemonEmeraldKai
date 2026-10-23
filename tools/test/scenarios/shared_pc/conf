@@ -1,0 +1,13 @@
+# The shared PC's Pokemon in the box screen, two players at lag: ALICE stocks it (box 1: BULBASAUR, CHARMANDER,
+# SQUIRTLE, PIKACHU) and moves BULBASAUR along (BOB sees it); BOB sends SQUIRTLE to his own PC and releases ALICE's
+# CHARMANDER ("Release ALICE's CHARMANDER?", a candy for BOB); ALICE carries PIKACHU over to MY PC. check.py: every
+# Pokemon is in exactly one place (the server's file, a player's own storage) and the counts add up.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=300
+EXPECT_A=("[test] sharedbox 1: 0:1(ALICE) 1:4(ALICE) 2:7(ALICE) 3:25(ALICE) | hand 0" "[test] sharedbox 1: 1:4(ALICE) 2:7(ALICE) 3:25(ALICE) 4:1(ALICE) | hand 0"
+          "[test] ownbox 1: 26:25" "shared PC: now showing MY PC")
+EXPECT_B=("[test] sharedbox 1: 1:4(ALICE) 2:7(ALICE) 3:25(ALICE) 4:1(ALICE) | hand 0" "[test] ownbox 1: 0:7"
+          "[test] sharedbox 1: 3:25(ALICE) 4:1(ALICE) | hand 0" "candy: released species 4")
+CHECK="python3 tools/test/scenarios/shared_pc/check.py"

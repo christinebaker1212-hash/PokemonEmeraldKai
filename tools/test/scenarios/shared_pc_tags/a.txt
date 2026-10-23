@@ -1,0 +1,114 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp sharedin 1 0 1 5
+mp sharedin 1 1 4 5
+mp sharedin 1 2 7 5
+mp sharedin 1 3 25 5
+wait 60
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+waitfor slot:1:3:25 600
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+shot a_tagged
+press A 2
+wait 40
+shot a_tagmenu
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 60
+waitfor sharedsteady 600
+mp ownbox 1
+mp sharedbox 1
+press RIGHT 2
+wait 20
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press A 2
+wait 120
+press DOWN 2
+wait 40
+shot a_group
+press A 2
+wait 120
+waitfor sharedsteady 600
+mp sharedbox 1
+mp pctags
+log alice: wallpaper CITY for SHARED1
+press UP 2
+wait 20
+press UP 2
+wait 30
+mp pctags
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press A 2
+wait 40
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press A 2
+wait 120
+log alice: mark SQUIRTLE
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+mp pctags
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 20
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 60
+waitfor sharedsteady 600
+mp sharedname 1 TEAM
+wait 30
+waitfor sharedsteady 600
+mp sharedbox 1
+shot a_end
+wait 200
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+mp monids
+wait 30
+quit

@@ -1,0 +1,32 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp itemcounts 13
+mp sharedpc
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 120
+shot a_items
+press A 2
+wait 40
+shot a_bag
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press RIGHT 2
+wait 20
+shot a_qty
+press A 2
+wait 200
+mp itemcounts 13
+shot a_after
+wait 1500
+shot a_seeb
+press B 2
+wait 30
+press B 2
+wait 30
+quit

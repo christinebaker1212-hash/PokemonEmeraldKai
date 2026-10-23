@@ -1,0 +1,22 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+waitfor slot:1:9:25 4000
+waitfor boxname:1:TEAM 4000
+wait 120
+waitfor sharedsteady 600
+mp sharedbox 1
+shot b_end
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+mp monids
+wait 30
+quit

@@ -1,0 +1,12 @@
+# PC TAG mode in the shared boxes, at lag: ALICE tags BULBASAUR and CHARMANDER and SENDS them TO PC (her own box 1),
+# then tags SQUIRTLE and PIKACHU and MOVEs them a row down as a group, gives SHARED1 the CITY wallpaper and marks
+# SQUIRTLE with a circle, renames the box TEAM; BOB sees each change (b_end: the CITY wallpaper and TEAM drawn).
+# Nothing doubled.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=240
+EXPECT_A=("[test] ownbox 1: 0:1 1:4" "[test] sharedbox 1: 8:7(ALICE) 9:25(ALICE) | hand 0"
+          "[test] sharedbox 1: 8:7(ALICE)m1 9:25(ALICE) | hand 0 wallpaper 1 name TEAM")
+EXPECT_B=("[test] sharedbox 1: 8:7(ALICE)m1 9:25(ALICE) | hand 0 wallpaper 1 name TEAM")
+CHECK="python3 tools/test/scenarios/shared_pc/check.py any"

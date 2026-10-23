@@ -10,7 +10,7 @@ D="$(cd "${1:?usage: run2.sh DIR [DELAY_MS [JITTER_MS]]}" && pwd)"; DELAY=${2:-0
 build_server || exit 1
 rm -f "$D"/*.bmp "$D"/*.png "$D/a.sav" "$D/b.sav" "$D/a.ini" "$D/b.ini"
 PORT=$(free_port)
-"$SERVER" --port "$PORT" --no-router > "$D/server.log" 2>&1 &
+MOEMON_STORE_DIR="$D" "$SERVER" --port "$PORT" --no-router > "$D/server.log" 2>&1 &
 SP=$!
 LOBBY=$PORT
 if [ "$DELAY" -gt 0 ]; then

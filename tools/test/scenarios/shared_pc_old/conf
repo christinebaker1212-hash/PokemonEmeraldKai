@@ -1,0 +1,8 @@
+# A server storage file from before the boxes (MOEST1: the old list of 60 shared Pokemon, here BULBASAUR
+# and CHARMANDER in list slots 3 and 7, and 7 POTIONs): the server moves the Pokemon into SHARED1 in order
+# and keeps the items.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=150
+EXPECT_A=("[test] sharedbox 1: 0:1(ALICE) 1:4(ALICE) | hand 0" "[test] itemcounts 13: bag 5 pc 1 shared 7")

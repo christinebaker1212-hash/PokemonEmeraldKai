@@ -1,0 +1,88 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp sharedin 1 0 1 5
+mp sharedin 1 1 4 5
+mp sharedin 1 2 7 5
+mp sharedin 1 3 25 5
+wait 60
+mp sharedpc
+wait 30
+shot a_choose
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+mp sharedbox 1
+wait 120
+log alice: move slot 0 to slot 4
+press A 2
+wait 30
+press A 2
+wait 60
+shot a_held
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 30
+press A 2
+wait 30
+press A 2
+wait 60
+waitfor sharedsteady 600
+mp sharedbox 1
+log alice: moved
+waitfor slot:1:1:0 3000
+wait 120
+waitfor sharedsteady 600
+mp sharedbox 1
+shot a_afterbob
+log alice: take slot 3 to MY PC
+press LEFT 2
+wait 15
+press A 2
+wait 30
+press A 2
+wait 60
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press DOWN 2
+wait 30
+shot a_buttons
+press A 2
+wait 120
+waitfor pcstorage 600
+wait 60
+shot a_mypc
+press UP 2
+wait 15
+press A 2
+wait 30
+press A 2
+wait 120
+waitfor sharedsteady 600
+mp ownbox 1
+mp sharedbox 1
+shot a_placed_mypc
+log alice: done
+wait 120
+mp monids
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+wait 60
+press B 2
+mp monids
+wait 60
+quit

@@ -404,9 +404,12 @@ static s32 Owned(void)
     u8 i;
     for (i = 0; i < PARTY_SIZE; i++)
         n += PartyMon(i);
+    // our own boxes (not the shared PC's, shown in the box screen)
+    struct PokemonStorage *own = MP_PersonalStorage();
     for (box = 0; box < TOTAL_BOXES_COUNT; box++)
         for (pos = 0; pos < IN_BOX_COUNT; pos++)
-            if (GetBoxMonDataAt(box, pos, MON_DATA_SPECIES) != SPECIES_NONE && !GetBoxMonDataAt(box, pos, MON_DATA_IS_EGG))
+            if (GetBoxMonData(&own->boxes[box][pos], MON_DATA_SPECIES) != SPECIES_NONE
+             && !GetBoxMonData(&own->boxes[box][pos], MON_DATA_IS_EGG))
                 n++;
     return n;
 }

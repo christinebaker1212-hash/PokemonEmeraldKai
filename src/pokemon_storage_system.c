@@ -150,6 +150,8 @@ enum {
     MENU_POKECENTER,
     MENU_MACHINE,
     MENU_SIMPLE,
+    MENU_MP_SEND_PC,       // Moemon Co-op: the shared PC
+    MENU_MP_SEND_SHARED,
 };
 #define MENU_WALLPAPER_SETS_START MENU_SCENERY_1
 #define MENU_WALLPAPERS_START MENU_FOREST
@@ -158,6 +160,7 @@ enum {
 enum {
     INPUT_NONE,
     INPUT_MOVE_CURSOR,
+    INPUT_MP_MYPC,          // Moemon Co-op: the shared PC's MY PC button
     INPUT_2, // Unused
     INPUT_3, // Unused
     INPUT_CLOSE_BOX,
@@ -758,6 +761,25 @@ static EWRAM_DATA struct
     u8 targets[IN_BOX_COUNT];   // assorted placement: box position for each boxMons entry
     u8 marks[TAG_MARKS];
 } sMpTag = {0};
+
+// Moemon Co-op: the shared PC (end of the file)
+static void MpPcFrame(void);
+static bool8 MpOnExit(void);
+static void MpResetSprites(void);
+static void MpBlankStockButtons(void);
+static u8 MpButtonCursorX(u8 pos);
+static u8 MpButtonStep(u8 pos, s8 dir);
+static void MpToggleView(void);
+static bool8 MpGroupHeld(void);
+static u8 MpSendOne(void);
+static u8 MpSendTagged(void);
+static void MpAddSendMenuText(void);
+static void MpAddTagSendMenuText(void);
+static bool8 MpSendResultMessage(u8 result);
+static bool8 MpReleaseQuestion(u8 *out);
+static bool8 MpReleasingShared(void);
+bool8 MP_PcStorage_IsShared(void);
+bool8 MP_PcStorage_IsSharedView(void);
 
 static u8 MultiMove_UpdateMove(void);
 static void MultiMove_DeselectRow(u8, u8, u8);
@@ -1743,6 +1765,8 @@ static void CreateMainMenu(u8 whichMenu, s16 *windowIdPtr)
 
 static void CB2_ExitPokeStorage(void)
 {
+    if (MpOnExit())   // Moemon Co-op: the shared PC's box screen goes back to its own menu
+        return;
     sPreviousBoxOption = GetCurrentBoxOption();
     gFieldCallback = FieldTask_ReturnToPcMenu;
     SetMainCallback2(CB2_ReturnToField);
@@ -2047,6 +2071,7 @@ static void CB2_PokeStorage(void)
     AnimateSprites();
     BuildOamBuffer();
     gMpPcTagPressed = FALSE; // Moemon Co-op: a TAG press only counts the frame it comes
+    MpPcFrame();             // Moemon Co-op: the shared PC
 }
 
 static void EnterPokeStorage(u8 boxOption)
@@ -2115,6 +2140,7 @@ static void ResetForPokeStorage(void)
     TilemapUtil_SetMap(TILEMAPID_PKMN_DATA, 1, sPkmnData_Tilemap, 8, 4);
     TilemapUtil_SetPos(TILEMAPID_PKMN_DATA, 1, 0);
     sStorage->closeBoxFlashing = FALSE;
+    MpResetSprites();   // Moemon Co-op: the shared PC's sprites are made again
 }
 
 static void InitStartingPosData(void)
@@ -2360,6 +2386,16 @@ static void Task_PokeStorageMain(u8 taskId)
             break;
         case INPUT_CLOSE_BOX:
             SetPokeStorageTask(Task_OnCloseBoxPressed);
+            break;
+        case INPUT_MP_MYPC:
+            // Moemon Co-op: the shared PC <-> our own boxes (a held group can't come along)
+            if (MpGroupHeld())
+                PlaySE(SE_FAILURE);
+            else
+            {
+                PlaySE(SE_PC_LOGIN);
+                MpToggleView();
+            }
             break;
         case INPUT_PRESSED_B:
             SetPokeStorageTask(Task_OnBPressed);
@@ -2805,6 +2841,17 @@ static void Task_OnSelectedMon(u8 taskId)
         case MENU_INFO:
             SetPokeStorageTask(Task_ShowItemInfo);
             break;
+        case MENU_MP_SEND_PC:
+        case MENU_MP_SEND_SHARED:
+            // Moemon Co-op: to the other storage
+            if (MpSendResultMessage(MpSendOne()))
+                sStorage->state = 6;
+            else
+            {
+                ClearBottomWindow();
+                SetPokeStorageTask(Task_PokeStorageMain);
+            }
+            break;
         }
         break;
     case 3:
@@ -3027,6 +3074,12 @@ static void Task_ReleaseMon(u8 taskId)
         case  0: // Yes
             ClearBottomWindow();
             InitCanReleaseMonVars();
+            if (MpReleasingShared())
+            {
+                // Moemon Co-op: a shared Moemon isn't one of ours that a field move might need
+                sStorage->releaseStatusResolved = TRUE;
+                sStorage->canReleaseMon = TRUE;
+            }
             InitReleaseMon();
             sStorage->state++;
             break;
@@ -3756,7 +3809,8 @@ static void Task_OnCloseBoxPressed(u8 taskId)
     case 4:
         if (!IsComputerScreenCloseEffectActive())
         {
-            UpdateBoxToSendMons();
+            if (!MP_PcStorage_IsShared())   // Moemon Co-op: not from the shared boxes
+                UpdateBoxToSendMons();
             gPlayerPartyCount = CalculatePlayerPartyCount();
             sStorage->screenChangeType = SCREEN_CHANGE_EXIT_BOX;
             SetPokeStorageTask(Task_ChangeScreen);
@@ -3817,7 +3871,8 @@ static void Task_OnBPressed(u8 taskId)
     case 4:
         if (!IsComputerScreenCloseEffectActive())
         {
-            UpdateBoxToSendMons();
+            if (!MP_PcStorage_IsShared())   // Moemon Co-op: not from the shared boxes
+                UpdateBoxToSendMons();
             gPlayerPartyCount = CalculatePlayerPartyCount();
             sStorage->screenChangeType = SCREEN_CHANGE_EXIT_BOX;
             SetPokeStorageTask(Task_ChangeScreen);
@@ -4148,6 +4203,7 @@ static void InitSupplementalTilemaps(void)
     LoadPalette(gStorageSystemPartyMenu_Pal, BG_PLTT_ID(1), PLTT_SIZE_4BPP);
     TilemapUtil_SetMap(TILEMAPID_PARTY_MENU, 1, sStorage->partyMenuTilemapBuffer, 12, 22);
     TilemapUtil_SetMap(TILEMAPID_CLOSE_BUTTON, 1, sCloseBoxButton_Tilemap, 9, 4);
+    MpBlankStockButtons();   // Moemon Co-op: the shared PC draws PARTY / MY PC / CLOSE itself
     TilemapUtil_SetPos(TILEMAPID_PARTY_MENU, 10, 0);
     TilemapUtil_SetPos(TILEMAPID_CLOSE_BUTTON, 21, 0);
     SetPartySlotTilemaps();
@@ -4379,6 +4435,7 @@ static void InitPokeStorageBg0(void)
 static void PrintMessage(u8 id)
 {
     u8 *txtPtr;
+    u8 font;
 
     DynamicPlaceholderTextUtil_Reset();
     switch (sMessages[id].format)
@@ -4410,8 +4467,17 @@ static void PrintMessage(u8 id)
     }
 
     DynamicPlaceholderTextUtil_ExpandPlaceholders(sStorage->messageText, sMessages[id].text);
+    font = FONT_NORMAL;
+    if (id == MSG_RELEASE_POKE && MpReleaseQuestion(sStorage->messageText))
+    {
+        // Moemon Co-op: "Release LUNA's PIKACHU?" in the shared PC, narrower if it has to be
+        if (GetStringWidth(FONT_NORMAL, sStorage->messageText, 0) > 18 * 8 - 2)
+            font = FONT_NARROW;
+        if (GetStringWidth(FONT_NARROW, sStorage->messageText, 0) > 18 * 8 - 2)
+            font = FONT_SMALL_NARROW;
+    }
     FillWindowPixelBuffer(WIN_MESSAGE, PIXEL_FILL(1));
-    AddTextPrinterParameterized(WIN_MESSAGE, FONT_NORMAL, sStorage->messageText, 0, 1, TEXT_SKIP_DRAW, NULL);
+    AddTextPrinterParameterized(WIN_MESSAGE, font, sStorage->messageText, 0, 1, TEXT_SKIP_DRAW, NULL);
     DrawTextBorderOuter(WIN_MESSAGE, 2, 14);
     PutWindowTilemap(WIN_MESSAGE);
     CopyWindowToVram(WIN_MESSAGE, COPYWIN_GFX);
@@ -5968,6 +6034,8 @@ static void GetCursorCoordsByPos(u8 cursorArea, u8 cursorPosition, u16 *x, u16 *
     case CURSOR_AREA_BUTTONS:
         *y = sIsMonBeingMoved ? 8 : 14;
         *x = cursorPosition * 88 + 120;
+        if (MP_PcStorage_IsShared())
+            *x = MpButtonCursorX(cursorPosition);   // PARTY / MY PC / CLOSE
         break;
     case 4:
         *x = 160;
@@ -6584,6 +6652,7 @@ static void ReleaseMon(void)
     MP_ReturnHeldHm(&sStorage->tempMon);
     if (!GetMonData(&sStorage->tempMon, MON_DATA_IS_EGG))
         MP_Candy_OnRelease(GetMonData(&sStorage->tempMon, MON_DATA_SPECIES));
+    MP_SharedBox_NoteRelease(&sStorage->tempMon.box);   // the shared PC may let it go
     DestroyReleaseMonIcon();
     if (sIsMonBeingMoved)
     {
@@ -7178,7 +7247,14 @@ static u8 InBoxInput_Normal(void)
             {
                 cursorArea = CURSOR_AREA_BUTTONS;
                 cursorPosition -= IN_BOX_COUNT;
-                cursorPosition /= 3;
+                if (MP_PcStorage_IsShared())
+                {
+                    // columns 0-1: PARTY, 2-3: MY PC, 4-5: CLOSE
+                    static const u8 sCol[IN_BOX_COLUMNS] = {0, 0, 2, 2, 1, 1};
+                    cursorPosition = sCol[cursorPosition];
+                }
+                else
+                    cursorPosition /= 3;
                 sStorage->cursorVerticalWrap = 1;
                 sStorage->cursorFlipTimer = 1;
             }
@@ -7703,6 +7779,8 @@ static u8 HandleInput_OnButtons(void)
             sStorage->cursorVerticalWrap = -1;
             if (sCursorPosition == 0)
                 cursorPosition = IN_BOX_COUNT - 1 - 5;
+            else if (sCursorPosition == 2)
+                cursorPosition = IN_BOX_COUNT - 1 - 3;   // Moemon Co-op: MY PC
             else
                 cursorPosition = IN_BOX_COUNT - 1;
             sStorage->cursorFlipTimer = 1;
@@ -7721,19 +7799,25 @@ static u8 HandleInput_OnButtons(void)
         if (JOY_REPEAT(DPAD_LEFT))
         {
             retVal = INPUT_MOVE_CURSOR;
-            if (--cursorPosition < 0)
+            if (MP_PcStorage_IsShared())
+                cursorPosition = MpButtonStep(cursorPosition, -1);
+            else if (--cursorPosition < 0)
                 cursorPosition = 1;
             break;
         }
         else if (JOY_REPEAT(DPAD_RIGHT))
         {
             retVal = INPUT_MOVE_CURSOR;
-            if (++cursorPosition > 1)
+            if (MP_PcStorage_IsShared())
+                cursorPosition = MpButtonStep(cursorPosition, 1);
+            else if (++cursorPosition > 1)
                 cursorPosition = 0;
             break;
         }
 
         // Button was pressed, determine which
+        if (JOY_NEW(A_BUTTON) && cursorPosition == 2)
+            return INPUT_MP_MYPC;   // Moemon Co-op: the shared PC's MY PC
         if (JOY_NEW(A_BUTTON))
             return (cursorPosition == 0) ? INPUT_SHOW_PARTY : INPUT_CLOSE_BOX;
 
@@ -7856,6 +7940,8 @@ static bool8 SetMenuTexts_Mon(void)
 
     SetMenuText(MENU_MARK);
     SetMenuText(MENU_RELEASE);
+    if (!sIsMonBeingMoved)
+        MpAddSendMenuText();   // Moemon Co-op: SEND TO PC / SEND TO SHARED
     SetMenuText(MENU_CANCEL);
     return TRUE;
 }
@@ -8118,6 +8204,13 @@ static void InitMenu(void)
     sStorage->menuWindow.baseBlock = 92;
 }
 
+// Moemon Co-op: the shared PC's menu entries and release question (the rest of it is at the end of the file)
+static const u8 sText_MpSendToPcMenu[] = _("SEND TO PC");
+static const u8 sText_MpSendToSharedMenu[] = _("SEND TO SHARED");
+static const u8 gText_MpRelease[] = _("Release ");
+static const u8 gText_MpApostropheS[] = _("'s ");
+static const u8 gText_MpQuestion[] = _("?");
+
 static const u8 *const sMenuTexts[] =
 {
     [MENU_CANCEL]     = gPCText_Cancel,
@@ -8159,6 +8252,8 @@ static const u8 *const sMenuTexts[] =
     [MENU_POKECENTER] = gPCText_Pokecenter,
     [MENU_MACHINE]    = gPCText_Machine,
     [MENU_SIMPLE]     = gPCText_Simple,
+    [MENU_MP_SEND_PC]     = sText_MpSendToPcMenu,
+    [MENU_MP_SEND_SHARED] = sText_MpSendToSharedMenu,
 };
 
 static void SetMenuText(u8 textId)
@@ -10458,12 +10553,13 @@ static u16 Tag_CountAllMons(void)
 {
     u16 n = 0;
     u8 i, j;
+    struct PokemonStorage *own = MP_PersonalStorage();   // our own boxes, even with the shared PC's shown
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
             n++;
     for (i = 0; i < TOTAL_BOXES_COUNT; i++)
         for (j = 0; j < IN_BOX_COUNT; j++)
-            if (CheckBoxMonSanityAt(i, j))
+            if (GetBoxMonData(&own->boxes[i][j], MON_DATA_SANITY_HAS_SPECIES))
                 n++;
     return n;
 }
@@ -10500,6 +10596,7 @@ static void Task_TagMenu(u8 taskId)
         InitMenu();
         SetMenuText(MENU_MOVE);
         SetMenuText(MENU_RELEASE);
+        MpAddTagSendMenuText();   // Moemon Co-op: the shared PC
         SetMenuText(MENU_CANCEL);
         AddMenu();
         sStorage->state++;
@@ -10537,7 +10634,8 @@ static void Task_TagMenu(u8 taskId)
                 sStorage->state = 4;
             else if (Tag_AnyMail())
                 sStorage->state = 3;
-            else if (Tag_CountAllMons() < Tag_Count() + 2)
+            else if (!(MP_PcStorage_IsSharedView() && sMpTag.area == TAG_AREA_BOX)   // shared ones aren't ours to count
+                  && Tag_CountAllMons() < Tag_Count() + 2)
                 sStorage->state = 5;
             else
             {
@@ -10546,6 +10644,16 @@ static void Task_TagMenu(u8 taskId)
             }
             break;
         }
+        case MENU_MP_SEND_PC:
+        case MENU_MP_SEND_SHARED:
+            if (MpSendResultMessage(MpSendTagged()))
+                sStorage->state = 6;
+            else
+            {
+                ClearBottomWindow();
+                SetPokeStorageTask(Task_PokeStorageMain);
+            }
+            break;
         }
         break;
     case 2:
@@ -10591,6 +10699,7 @@ static u8 Tag_ReleaseAll(void)
         {
             MP_ReturnHeldHm(&gPlayerParty[i]);
             MP_Candy_OnRelease(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+            MP_SharedBox_NoteRelease(&gPlayerParty[i].box);
             ZeroMonData(&gPlayerParty[i]);
         }
         else
@@ -10598,6 +10707,7 @@ static u8 Tag_ReleaseAll(void)
             BoxMonAtToMon(sMpTag.box, i, &mon);
             MP_ReturnHeldHm(&mon);
             MP_Candy_OnRelease(GetMonData(&mon, MON_DATA_SPECIES));
+            MP_SharedBox_NoteRelease(&mon.box);
             ZeroBoxMonAt(sMpTag.box, i);
             if (StorageGetCurrentBox() == sMpTag.box)
                 DestroyBoxMonIconAtPosition(i);
@@ -11004,7 +11114,10 @@ static u8 Tag_InputOnButtons(void)
     }
     if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
     {
-        SetCursorPosition(CURSOR_AREA_BUTTONS, sCursorPosition ^ 1);
+        if (MP_PcStorage_IsShared())
+            SetCursorPosition(CURSOR_AREA_BUTTONS, MpButtonStep(sCursorPosition, JOY_REPEAT(DPAD_LEFT) ? -1 : 1));
+        else
+            SetCursorPosition(CURSOR_AREA_BUTTONS, sCursorPosition ^ 1);
         return INPUT_MOVE_CURSOR;
     }
     if (JOY_NEW(R_BUTTON) || (JOY_NEW(A_BUTTON) && sCursorPosition == 0))
@@ -11040,4 +11153,852 @@ void MP_PcStorage_LogTags(void)
     printf("[test] pctags: area %d box %d mask %x holding %d count %d buttons %d cursor %d,%d box %d\n", sMpTag.area,
            sMpTag.box + 1, (unsigned)sMpTag.mask, sMpTag.holding, sMpTag.count, sMpTag.onButtons, sCursorArea,
            sCursorPosition, StorageGetCurrentBox() + 1);
+}
+
+//------------------------------------------------------------------------------
+//  Moemon Co-op: the SHARED PC in this box screen (mp_sharedbox.c keeps the boxes in sync with the server).
+//
+//  MP_PcStorage_OpenShared opens it in MOVE POKeMON mode showing the shared boxes (gPokemonStoragePtr is the
+//  mirror then). The buttons along the top are PARTY / MY PC / CLOSE (sprites over blanked stock buttons); MY PC
+//  switches between the shared boxes and the player's own (a held Moemon comes along), rebuilding the screen like the
+//  game does after naming a box. A Moemon's menu and the TAG menu get SEND TO PC / SEND TO SHARED. Friends in the
+//  same shared box show as named hand cursors carrying what they hold.
+//------------------------------------------------------------------------------
+
+static const u32 sMpBtnParty_Gfx[] = INCGFX_U32("graphics/moemon/sharedpc/btn_party.png", ".4bpp");
+static const u16 sMpBtnParty_Pal[] = INCGFX_U16("graphics/moemon/sharedpc/btn_party.png", ".gbapal");
+static const u32 sMpBtnMyPc_Gfx[] = INCGFX_U32("graphics/moemon/sharedpc/btn_mypc.png", ".4bpp");
+static const u16 sMpBtnMyPc_Pal[] = INCGFX_U16("graphics/moemon/sharedpc/btn_mypc.png", ".gbapal");
+static const u32 sMpBtnClose_Gfx[] = INCGFX_U32("graphics/moemon/sharedpc/btn_close.png", ".4bpp");
+static const u16 sMpBtnClose_Pal[] = INCGFX_U16("graphics/moemon/sharedpc/btn_close.png", ".gbapal");
+
+u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);
+
+#define MP_TAG_BTN        0xDB00   // + button (tiles), + button * 2 (+1 lit) palettes
+#define MP_TAG_RCURSOR    0xDB10   // + player: a friend's cursor palette
+#define MP_TAG_RLABEL     0xDB20   // + player: name label tiles / palette
+#define MP_BTN_X_PARTY    84
+#define MP_BTN_X_MYPC     134
+#define MP_BTN_X_CLOSE    186
+
+static EWRAM_DATA struct
+{
+    bool8 on;              // this box screen is the shared PC's
+    bool8 sharedView;      // showing the shared boxes (else MY PC)
+    bool8 rebuild;         // rebuild the screen when it's steady (our own Pokémon changed under it)
+    bool8 forceClose;      // the link is gone: close now
+    u8 look;               // the shown box's name (1) or wallpaper (2) changed: drawn again
+    bool8 buttonsMade;
+    u8 buttons[3];         // by button cursor position: PARTY, CLOSE, MY PC
+    u8 btnPal[3][2];       // palette slots: normal, lit
+    u8 flashTimer;
+    u8 rCursor[MP_MAX_PLAYERS], rLabel[MP_MAX_PLAYERS], rIcon[MP_MAX_PLAYERS];
+    u16 rIconSpecies[MP_MAX_PLAYERS];
+    u8 rLabelName[MP_MAX_PLAYERS][PLAYER_NAME_LENGTH + 1];
+    s16 rX[MP_MAX_PLAYERS], rY[MP_MAX_PLAYERS];
+    void (*onClose)(void);
+} sMpPc = {0};
+
+static void Task_MpRebuild(u8 taskId);
+
+bool8 MP_PcStorage_IsShared(void)
+{
+    return sMpPc.on;
+}
+
+bool8 MP_PcStorage_IsSharedView(void)
+{
+    return sMpPc.on && sMpPc.sharedView;
+}
+
+// Opens the box screen on the shared boxes (the screen has faded out; the field is still there)
+void MP_PcStorage_OpenShared(void (*onClose)(void))
+{
+    memset(&sMpPc, 0, sizeof(sMpPc));
+    MpResetSprites();
+    sMpPc.on = TRUE;
+    sMpPc.sharedView = TRUE;
+    sMpPc.onClose = onClose;
+    MP_SharedBox_ShowShared(TRUE);
+    CleanupOverworldWindowsAndTilemaps();
+    sIsMonBeingMoved = FALSE;
+    sInPartyMenu = FALSE;
+    EnterPokeStorage(OPTION_MOVE_MONS);
+}
+
+// What the player holds (for the shared PC's bookkeeping): the moving Moemon, a held group (sMultiMove keeps its
+// copies after they're put down: only while the group is held do they count)
+u8 MP_PcStorage_Held(const struct BoxPokemon **out, u8 max)
+{
+    u8 n = 0, k;
+    if (sStorage == NULL)
+        return 0;
+    if (sIsMonBeingMoved && n < max)
+        out[n++] = &sStorage->movingMon.box;
+    if (sMultiMove != NULL && MpGroupHeld())
+        for (k = 0; k < IN_BOX_COUNT && n < max; k++)
+            if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+                out[n++] = &sMultiMove->boxMons[k];
+    return n;
+}
+
+static bool8 MpSameMon(const struct BoxPokemon *b, u32 pers, u32 otid)
+{
+    return GetBoxMonData((struct BoxPokemon *)b, MON_DATA_SANITY_HAS_SPECIES)
+        && GetBoxMonData((struct BoxPokemon *)b, MON_DATA_PERSONALITY) == pers
+        && GetBoxMonData((struct BoxPokemon *)b, MON_DATA_OT_ID) == otid;
+}
+
+// Somebody else got this Moemon first: out of our hand
+void MP_PcStorage_DropHeld(u32 pers, u32 otid)
+{
+    u8 k;
+    if (sStorage == NULL)
+        return;
+    if (sIsMonBeingMoved && MpSameMon(&sStorage->movingMon.box, pers, otid))
+    {
+        sIsMonBeingMoved = FALSE;
+        ZeroMonData(&sStorage->movingMon);
+        DestroyMovingMonIcon();
+        StartSpriteAnim(sStorage->cursorSprite, CURSOR_ANIM_BOUNCE);
+        TryRefreshDisplayMon();
+    }
+    if (sMultiMove != NULL)
+        for (k = 0; k < IN_BOX_COUNT; k++)
+            if (MpSameMon(&sMultiMove->boxMons[k], pers, otid))
+                ZeroBoxMonData(&sMultiMove->boxMons[k]);   // gone from the group (its picture goes when it's put down)
+}
+
+void MP_PcStorage_RequestRebuild(void)
+{
+    if (sMpPc.on)
+        sMpPc.rebuild = TRUE;
+}
+
+void MP_PcStorage_ForceClose(void)
+{
+    if (sMpPc.on)
+        sMpPc.forceClose = TRUE;
+}
+
+// Between moves: the main task waiting for input (the boxes and what's held agree)
+bool8 MP_PcStorage_Steady(void)
+{
+    if (!sMpPc.on || sStorage == NULL || gMain.callback2 != CB2_PokeStorage)
+        return FALSE;
+    if (gTasks[sStorage->taskId].func != Task_PokeStorageMain)
+        return FALSE;
+    switch (sStorage->state)
+    {
+    case MSTATE_HANDLE_INPUT:
+    case MSTATE_MOVE_CURSOR:
+    case MSTATE_WAIT_MSG:
+    case MSTATE_WAIT_ERROR_MSG:
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// A group in hand (SELECT's group move or a TAG MOVE): only while it's carried
+static bool8 MpGroupHeld(void)
+{
+    return sMpTag.holding || (sStorage != NULL && sStorage->inBoxMovingMode == MOVE_MODE_MULTIPLE_MOVING);
+}
+
+// The other storage: our own boxes while the shared ones are shown, and the other way round
+static struct PokemonStorage *MpOtherStorage(void)
+{
+    return sMpPc.sharedView ? MP_PersonalStorage() : MP_SharedBox_Mirror();
+}
+
+static bool8 MpFirstFree(struct PokemonStorage *st, u8 *box, u8 *pos)
+{
+    u8 i, p;
+    for (i = 0; i < TOTAL_BOXES_COUNT; i++)
+    {
+        u8 b = (st->currentBox + i) % TOTAL_BOXES_COUNT;
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            if (!GetBoxMonData(&st->boxes[b][p], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                *box = b;
+                *pos = p;
+                return TRUE;
+            }
+    }
+    return FALSE;
+}
+
+// Party Moemon (our own) go to the shared boxes; box Moemon to the other storage
+static struct PokemonStorage *MpSendTarget(bool8 fromParty)
+{
+    return fromParty ? MP_SharedBox_Mirror() : MpOtherStorage();
+}
+
+static u8 MpBoxIconSlot(u8 pos);
+
+// SEND TO PC / SHARED for the Moemon under the cursor. 0: sent, 1: last battler, 2: mail, 3: no room
+static u8 MpSendOne(void)
+{
+    u8 box, pos;
+    bool8 party = (sCursorArea == CURSOR_AREA_IN_PARTY);
+    struct PokemonStorage *to = MpSendTarget(party);
+    if (party)
+    {
+        if (IsRemovingLastPartyMon())
+            return 1;
+        if (ItemIsMail(GetMonData(&gPlayerParty[sCursorPosition], MON_DATA_HELD_ITEM)))
+            return 2;
+    }
+    if (!MpFirstFree(to, &box, &pos))
+        return 3;
+    if (party)
+    {
+        MP_ReturnHeldHm(&gPlayerParty[sCursorPosition]);
+        to->boxes[box][pos] = gPlayerParty[sCursorPosition].box;
+        BoxMonRestorePP(&to->boxes[box][pos]);
+        ZeroMonData(&gPlayerParty[sCursorPosition]);
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        DestroyAllPartyMonIcons();
+        CreatePartyMonsSprites(sInPartyMenu);
+        UpdatePartySlotColors();
+    }
+    else
+    {
+        to->boxes[box][pos] = gPokemonStoragePtr->boxes[StorageGetCurrentBox()][sCursorPosition];
+        ZeroBoxMonAt(StorageGetCurrentBox(), sCursorPosition);
+        DestroyBoxMonIconAtPosition(sCursorPosition);
+    }
+    TryRefreshDisplayMon();
+    MPNet_Log("shared PC: sent a Moemon to %s (box %d slot %d)", to == MP_SharedBox_Mirror() ? "the shared PC" : "our PC",
+              box + 1, pos);
+    return 0;
+}
+
+// SEND for the tagged Moemon: all or none (0 sent, 1 last battler, 2 mail, 3 no room)
+static u8 MpSendTagged(void)
+{
+    u8 i, n = 0, free = 0, b, p;
+    bool8 party = (sMpTag.area == TAG_AREA_PARTY);
+    struct PokemonStorage *to = MpSendTarget(party);
+    if (party && Tag_PartyBattlersLeft(sMpTag.mask) == 0)
+        return 1;
+    if (party && Tag_AnyMail())
+        return 2;
+    for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            if (!GetBoxMonData(&to->boxes[b][p], MON_DATA_SANITY_HAS_SPECIES))
+                free++;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if ((sMpTag.mask & (1u << i)) && Tag_HasMon(i))
+            n++;
+    if (free < n)
+        return 3;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+    {
+        if (!(sMpTag.mask & (1u << i)) || !Tag_HasMon(i) || !MpFirstFree(to, &b, &p))
+            continue;
+        if (party)
+        {
+            MP_ReturnHeldHm(&gPlayerParty[i]);
+            to->boxes[b][p] = gPlayerParty[i].box;
+            BoxMonRestorePP(&to->boxes[b][p]);
+            ZeroMonData(&gPlayerParty[i]);
+        }
+        else
+        {
+            to->boxes[b][p] = gPokemonStoragePtr->boxes[sMpTag.box][i];
+            ZeroBoxMonAt(sMpTag.box, i);
+            if (StorageGetCurrentBox() == sMpTag.box)
+                DestroyBoxMonIconAtPosition(i);
+        }
+    }
+    if (party)
+    {
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        DestroyAllPartyMonIcons();
+        CreatePartyMonsSprites(sInPartyMenu);
+        UpdatePartySlotColors();
+    }
+    MPNet_Log("shared PC: sent %d tagged to %s", n, to == MP_SharedBox_Mirror() ? "the shared PC" : "our PC");
+    Tag_Clear();
+    TryRefreshDisplayMon();
+    return 0;
+}
+
+static void MpAddSendMenuText(void)
+{
+    if (!sMpPc.on)
+        return;
+    // party Moemon and the shared boxes' go one way, our own boxes' the other
+    if (sCursorArea == CURSOR_AREA_IN_PARTY || !sMpPc.sharedView)
+        SetMenuText(MENU_MP_SEND_SHARED);
+    else
+        SetMenuText(MENU_MP_SEND_PC);
+}
+
+static void MpAddTagSendMenuText(void)
+{
+    if (!sMpPc.on)
+        return;
+    if (sMpTag.area == TAG_AREA_PARTY || !sMpPc.sharedView)
+        SetMenuText(MENU_MP_SEND_SHARED);
+    else
+        SetMenuText(MENU_MP_SEND_PC);
+}
+
+// Prints the outcome of a SEND (FALSE: it went)
+static bool8 MpSendResultMessage(u8 result)
+{
+    switch (result)
+    {
+    case 1:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_LAST_POKE);
+        return TRUE;
+    case 2:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_PLEASE_REMOVE_MAIL);
+        return TRUE;
+    case 3:
+        PlaySE(SE_FAILURE);
+        Tag_PrintText(MpSendTarget(sCursorArea == CURSOR_AREA_IN_PARTY || sMpTag.area == TAG_AREA_PARTY) == MP_SharedBox_Mirror()
+                      ? "The shared PC is full." : "Your boxes are full.");
+        return TRUE;
+    }
+    PlaySE(SE_PC_LOGIN);
+    return FALSE;
+}
+
+// The release question names whose Moemon it is ("Release LUNA's PIKACHU?") when it isn't ours
+static bool8 MpReleaseQuestion(u8 *out)
+{
+    const u8 *by = NULL;
+    u8 name[POKEMON_NAME_LENGTH + 1], owner[PLAYER_NAME_LENGTH + 1];
+    if (!sMpPc.on || !sMpPc.sharedView)
+        return FALSE;
+    if (sIsMonBeingMoved)
+    {
+        if (MP_SharedBox_IsShared(&sStorage->movingMon.box))
+            by = MP_SharedBox_PutInByMon(&sStorage->movingMon.box);
+    }
+    else if (sCursorArea == CURSOR_AREA_IN_BOX)
+        by = MP_SharedBox_PutInBy(StorageGetCurrentBox(), sCursorPosition);
+    if (by == NULL || by[0] == EOS || StringCompareN(by, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH) == 0)
+        return FALSE;
+    memcpy(owner, by, PLAYER_NAME_LENGTH);
+    owner[PLAYER_NAME_LENGTH] = EOS;
+    StringCopy(name, sStorage->displayMonName);
+    {
+        u8 *p = name + StringLength(name);
+        while (p > name && p[-1] == CHAR_SPACE)
+            *--p = EOS;
+    }
+    {
+        u8 *p = out;
+        p = StringCopy(p, gText_MpRelease);
+        p = StringCopy(p, owner);
+        p = StringCopy(p, gText_MpApostropheS);
+        p = StringCopy(p, name);
+        StringCopy(p, gText_MpQuestion);
+    }
+    return TRUE;
+}
+
+// Releasing a shared Moemon: the field move check is about our own Moemon only
+static bool8 MpReleasingShared(void)
+{
+    if (!sMpPc.on || !sMpPc.sharedView)
+        return FALSE;
+    if (sIsMonBeingMoved)
+        return MP_SharedBox_IsShared(&sStorage->movingMon.box);
+    return sCursorArea == CURSOR_AREA_IN_BOX;
+}
+
+// ---- Buttons
+
+static void MpCreateButtons(void)
+{
+    static const struct OamData sOam = {.shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 1};
+    const u32 *gfx[3] = {sMpBtnParty_Gfx, sMpBtnClose_Gfx, sMpBtnMyPc_Gfx};
+    const u16 *pal[3] = {sMpBtnParty_Pal, sMpBtnClose_Pal, sMpBtnMyPc_Pal};
+    const s16 xs[3] = {MP_BTN_X_PARTY, MP_BTN_X_CLOSE, MP_BTN_X_MYPC};
+    u8 i;
+    for (i = 0; i < 3; i++)
+    {
+        struct SpriteSheet sheet = {gfx[i], 64 * 32 / 2, MP_TAG_BTN + i};
+        struct SpritePalette normal = {pal[i], MP_TAG_BTN + 8 + i * 2};
+        struct SpritePalette lit = {pal[i], MP_TAG_BTN + 8 + i * 2 + 1};
+        struct SpriteTemplate t = {
+            .tileTag = MP_TAG_BTN + i, .paletteTag = MP_TAG_BTN + 8 + i * 2, .oam = &sOam, .anims = gDummySpriteAnimTable,
+            .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+        };
+        u16 litColors[16];
+        u8 c;
+        LoadSpriteSheet(&sheet);
+        sMpPc.btnPal[i][0] = LoadSpritePalette(&normal);
+        // lit: halfway to white (the stock CLOSE BOX flash)
+        for (c = 0; c < 16; c++)
+        {
+            u16 col = pal[i][c];
+            u8 r = col & 31, g = (col >> 5) & 31, b = (col >> 10) & 31;
+            litColors[c] = RGB(r + (31 - r) / 2, g + (31 - g) / 2, b + (31 - b) / 2);
+        }
+        lit.data = litColors;
+        sMpPc.btnPal[i][1] = LoadSpritePalette(&lit);
+        sMpPc.buttons[i] = CreateSprite(&t, xs[i] + 32, 16, 3);
+    }
+    sMpPc.buttonsMade = TRUE;
+}
+
+static void MpUpdateButtons(void)
+{
+    u8 i;
+    bool8 partyOut = sInPartyMenu || gTasks[sStorage->taskId].func == Task_ShowPartyPokemon
+                  || gTasks[sStorage->taskId].func == Task_HidePartyPokemon;
+    if (!sMpPc.buttonsMade)
+        MpCreateButtons();
+    sMpPc.flashTimer++;
+    for (i = 0; i < 3; i++)
+    {
+        struct Sprite *sp;
+        bool8 lit;
+        if (sMpPc.buttons[i] >= MAX_SPRITES)
+            continue;
+        sp = &gSprites[sMpPc.buttons[i]];
+        sp->invisible = (i != 1 && partyOut);   // PARTY and MY PC sit where the party slides in
+        lit = (sCursorArea == CURSOR_AREA_BUTTONS && sCursorPosition == i && (sMpPc.flashTimer & 16));
+        sp->oam.paletteNum = sMpPc.btnPal[i][lit ? 1 : 0];
+    }
+}
+
+// The stock PARTY POKeMON / CLOSE BOX buttons: blank (the sprites stand there)
+static const u16 sMpBlankClose_Tilemap[9 * 4] = {0};
+
+static void MpBlankStockButtons(void)
+{
+    u8 x;
+    if (!sMpPc.on)
+        return;
+    for (x = 0; x < 12; x++)
+    {
+        sStorage->partyMenuTilemapBuffer[20 * 12 + x] = 0;
+        sStorage->partyMenuTilemapBuffer[21 * 12 + x] = 0;
+    }
+    TilemapUtil_SetMap(TILEMAPID_CLOSE_BUTTON, 1, sMpBlankClose_Tilemap, 9, 4);
+}
+
+static u8 MpButtonCursorX(u8 pos)
+{
+    switch (pos)
+    {
+    case 0: return MP_BTN_X_PARTY + 28;
+    case 2: return MP_BTN_X_MYPC + 28;
+    default: return MP_BTN_X_CLOSE + 28;
+    }
+}
+
+// LEFT / RIGHT along PARTY, MY PC, CLOSE
+static u8 MpButtonStep(u8 pos, s8 dir)
+{
+    static const u8 order[3] = {0, 2, 1};
+    u8 i;
+    for (i = 0; i < 3 && order[i] != pos; i++)
+        ;
+    if (i == 3)
+        i = 0;
+    return order[(i + 3 + dir) % 3];
+}
+
+// ---- MY PC
+
+static void MpToggleView(void)
+{
+    sMpPc.sharedView = !sMpPc.sharedView;
+    MP_SharedBox_ShowShared(sMpPc.sharedView);
+    MPNet_Log("shared PC: now showing %s", sMpPc.sharedView ? "the shared boxes" : "MY PC");
+    SetPokeStorageTask(Task_MpRebuild);
+}
+
+// The title drawn again in place (a friend renamed the box): new letters over the same sprite tiles
+static void MpRedrawBoxTitle(void)
+{
+    u8 box = StorageGetCurrentBox(), i;
+    u16 tag = sStorage->boxTitleCycleId == 0 ? GFXTAG_BOX_TITLE : GFXTAG_BOX_TITLE_ALT;
+    u16 tileStart = GetSpriteTileStartByTag(tag);
+    s16 x = GetBoxTitleBaseX(GetBoxNamePtr(box));
+
+    StringCopyPadded(sStorage->boxTitleText, GetBoxNamePtr(box), 0, BOX_NAME_LENGTH);
+    DrawTextWindowAndBufferTiles(sStorage->boxTitleText, sStorage->boxTitleTiles, 0, 0, 2);
+    if (tileStart != 0xFFFF)
+        CpuCopy16(sStorage->boxTitleTiles, (u8 *)OBJ_VRAM0 + TILE_SIZE_4BPP * tileStart, 0x200);
+    for (i = 0; i < 2; i++)
+        if (sStorage->curBoxTitleSprites[i] != NULL)
+            sStorage->curBoxTitleSprites[i]->x = x + i * 32;
+    CycleBoxTitleColor();
+}
+
+// A friend changed the shown box's name or wallpaper: the wallpaper fades over the way the WALLPAPER menu does it
+static void Task_MpBoxLook(u8 taskId)
+{
+    switch (sStorage->state)
+    {
+    case 0:
+        if (sMpPc.look & 1)
+            MpRedrawBoxTitle();
+        if (!(sMpPc.look & 2))
+        {
+            sMpPc.look = 0;
+            SetPokeStorageTask(Task_PokeStorageMain);
+            return;
+        }
+        sStorage->wallpaperChangeState = 0;
+        sStorage->state++;
+        break;
+    case 1:
+        if (!DoWallpaperGfxChange())
+        {
+            sMpPc.look = 0;
+            SetPokeStorageTask(Task_PokeStorageMain);
+        }
+        break;
+    }
+}
+
+// Rebuilds the screen from the boxes now shown (the way the game comes back from naming a box)
+static void Task_MpRebuild(u8 taskId)
+{
+    switch (sStorage->state)
+    {
+    case 0:
+        SaveMovingMon();
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        sStorage->state++;
+        break;
+    case 1:
+        if (!UpdatePaletteFade())
+        {
+            sMpPc.rebuild = FALSE;
+            sMpPc.buttonsMade = FALSE;
+            sWhichToReshow = SCREEN_CHANGE_NAME_BOX - 1;
+            FreePokeStorageData();
+            DestroyTask(taskId);
+            SetMainCallback2(CB2_ReturnToPokeStorage);
+        }
+        break;
+    }
+}
+
+// ---- Friends' cursors
+
+static void MpBuildLabel(u8 player, const u8 *name)
+{
+    static u8 sPixels[64 * 16];
+    static u8 sTiles[8 * 4 * 32];
+    static const s8 offs[8][2] = {{-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,-1},{-1,1},{1,1}};
+    u8 text[PLAYER_NAME_LENGTH + 1];
+    int i, n, width = 0, x, o, tx, ty;
+    struct SpriteSheet sheet;
+    memset(sPixels, 0, sizeof(sPixels));
+    for (n = 0; n < PLAYER_NAME_LENGTH && name[n] != EOS; n++)
+        text[n] = name[n];
+    for (i = 0; i < n; i++)
+        width += (text[i] == CHAR_SPACE) ? 3 : MP_RenderSmallGlyph(text[i], 1, 0, 2);
+    x = (64 - width) / 2;
+    for (o = 0; o <= 8; o++)
+    {
+        int cx = x;
+        u8 color = (o == 8) ? 1 : 2;   // white over a dark outline
+        for (i = 0; i < n; i++)
+        {
+            int w, gx, gy;
+            if (text[i] == CHAR_SPACE)
+            {
+                cx += 3;
+                continue;
+            }
+            w = MP_RenderSmallGlyph(text[i], color, 0, 0);
+            for (gy = 0; gy < 16; gy++)
+            {
+                const u32 *rows = (gy < 8) ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+                for (gx = 0; gx < w && gx < 16; gx++)
+                {
+                    u32 row = rows[(gx < 8 ? 0 : 8) + (gy % 8)];
+                    int px = cx + gx + (o < 8 ? offs[o][0] : 0), py = gy - 2 + (o < 8 ? offs[o][1] : 0);
+                    if (((row >> ((gx % 8) * 4)) & 0xF) && px >= 0 && px < 64 && py >= 0 && py < 16)
+                        sPixels[py * 64 + px] = color;
+                }
+            }
+            cx += w;
+        }
+    }
+    memset(sTiles, 0, sizeof(sTiles));
+    for (ty = 0; ty < 2; ty++)
+        for (tx = 0; tx < 8; tx++)
+        {
+            u8 *tile = sTiles + (ty * 8 + tx) * 32;
+            int px, py;
+            for (py = 0; py < 8; py++)
+                for (px = 0; px < 8; px++)
+                {
+                    int k = py * 8 + px;
+                    u8 c = sPixels[(ty * 8 + py) * 64 + tx * 8 + px];
+                    tile[k / 2] |= (k & 1) ? (c << 4) : c;
+                }
+        }
+    FreeSpriteTilesByTag(MP_TAG_RLABEL + player);
+    sheet.data = sTiles;
+    sheet.size = sizeof(sTiles);   // 64x32, the name in the top half
+    sheet.tag = MP_TAG_RLABEL + player;
+    LoadSpriteSheet(&sheet);
+}
+
+// A color for each seat (the cursor's tint and the label's outline)
+static const u16 sMpSeatColors[MP_MAX_PLAYERS] = {RGB(31, 8, 8), RGB(6, 14, 31), RGB(4, 24, 6), RGB(28, 22, 2)};
+
+static void MpEnsureRemote(u8 p, const u8 *name)
+{
+    if (sMpPc.rCursor[p] >= MAX_SPRITES || !gSprites[sMpPc.rCursor[p]].inUse)
+    {
+        static const struct OamData sOamCursor = {.shape = SPRITE_SHAPE(32x32), .size = SPRITE_SIZE(32x32), .priority = 1};
+        static const struct OamData sOamLabel = {.shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 1};
+        u16 tint[16], labelPal[16] = {0};
+        u8 c;
+        struct SpritePalette pal = {tint, MP_TAG_RCURSOR + p};
+        struct SpritePalette lpal = {labelPal, MP_TAG_RLABEL + p};
+        struct SpriteTemplate cursor = {
+            .tileTag = GFXTAG_CURSOR, .paletteTag = MP_TAG_RCURSOR + p, .oam = &sOamCursor, .anims = gDummySpriteAnimTable,
+            .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+        };
+        struct SpriteTemplate label = {
+            .tileTag = MP_TAG_RLABEL + p, .paletteTag = MP_TAG_RLABEL + p, .oam = &sOamLabel, .anims = gDummySpriteAnimTable,
+            .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+        };
+        // the hand in the seat's color (its white parts tinted)
+        for (c = 0; c < 16; c++)
+        {
+            u16 col = sHandCursor_Pal[c], s = sMpSeatColors[p];
+            u8 r = col & 31, g = (col >> 5) & 31, b = (col >> 10) & 31;
+            u8 sr = s & 31, sg = (s >> 5) & 31, sb = (s >> 10) & 31;
+            tint[c] = RGB((r * 2 + sr) / 3, (g * 2 + sg) / 3, (b * 2 + sb) / 3);
+        }
+        tint[0] = sHandCursor_Pal[0];
+        labelPal[1] = RGB(31, 31, 31);
+        labelPal[2] = RGB((sMpSeatColors[p] & 31) / 3, ((sMpSeatColors[p] >> 5) & 31) / 3, ((sMpSeatColors[p] >> 10) & 31) / 3);
+        LoadSpritePalette(&pal);
+        LoadSpritePalette(&lpal);
+        MpBuildLabel(p, name);
+        memcpy(sMpPc.rLabelName[p], name, PLAYER_NAME_LENGTH);
+        sMpPc.rCursor[p] = CreateSprite(&cursor, 0, 0, 2);
+        sMpPc.rLabel[p] = CreateSprite(&label, 0, 0, 1);
+        sMpPc.rIcon[p] = MAX_SPRITES;
+        sMpPc.rIconSpecies[p] = 0;
+    }
+    else if (memcmp(sMpPc.rLabelName[p], name, PLAYER_NAME_LENGTH) != 0)
+    {
+        MpBuildLabel(p, name);
+        memcpy(sMpPc.rLabelName[p], name, PLAYER_NAME_LENGTH);
+    }
+}
+
+static void MpHideRemote(u8 p)
+{
+    if (sMpPc.rCursor[p] < MAX_SPRITES && gSprites[sMpPc.rCursor[p]].inUse)
+        gSprites[sMpPc.rCursor[p]].invisible = TRUE;
+    if (sMpPc.rLabel[p] < MAX_SPRITES && gSprites[sMpPc.rLabel[p]].inUse)
+        gSprites[sMpPc.rLabel[p]].invisible = TRUE;
+    if (sMpPc.rIcon[p] < MAX_SPRITES && gSprites[sMpPc.rIcon[p]].inUse)
+        gSprites[sMpPc.rIcon[p]].invisible = TRUE;
+}
+
+static void MpUpdateRemoteCursors(void)
+{
+    u8 p;
+    for (p = 0; p < MP_MAX_PLAYERS; p++)
+    {
+        struct MpPcCursor c;
+        struct Sprite *hand, *lbl;
+        if (!MP_SharedBox_GetCursor(p, &c) || c.view != MP_PCV_BOX || !sMpPc.sharedView || c.box != StorageGetCurrentBox())
+        {
+            MpHideRemote(p);
+            continue;
+        }
+        MpEnsureRemote(p, gMpPlayers[p].name);
+        hand = &gSprites[sMpPc.rCursor[p]];
+        lbl = &gSprites[sMpPc.rLabel[p]];
+        if (hand->invisible)
+        {
+            sMpPc.rX[p] = c.x;
+            sMpPc.rY[p] = c.y;
+        }
+        sMpPc.rX[p] += (c.x - sMpPc.rX[p]) / 2;
+        sMpPc.rY[p] += (c.y - sMpPc.rY[p]) / 2;
+        hand->invisible = FALSE;
+        hand->x = sMpPc.rX[p];
+        hand->y = sMpPc.rY[p];
+        hand->oam.tileNum = GetSpriteTileStartByTag(GFXTAG_CURSOR) + (c.species ? 48 : 0);   // a fist while holding
+        lbl->invisible = FALSE;
+        lbl->x = sMpPc.rX[p];
+        lbl->y = sMpPc.rY[p] - 10;
+        // what they hold rides with them
+        if (c.species != sMpPc.rIconSpecies[p])
+        {
+            if (sMpPc.rIcon[p] < MAX_SPRITES && gSprites[sMpPc.rIcon[p]].inUse)
+                DestroyBoxMonIcon(&gSprites[sMpPc.rIcon[p]]);
+            sMpPc.rIcon[p] = MAX_SPRITES;
+            if (c.species != SPECIES_NONE)
+            {
+                struct Sprite *icon = CreateMonIconSprite(c.species, 0, sMpPc.rX[p], sMpPc.rY[p] + 4, 2, 7);
+                if (icon != NULL)
+                    sMpPc.rIcon[p] = icon - gSprites;
+            }
+            sMpPc.rIconSpecies[p] = c.species;
+        }
+        if (sMpPc.rIcon[p] < MAX_SPRITES)
+        {
+            gSprites[sMpPc.rIcon[p]].invisible = FALSE;
+            gSprites[sMpPc.rIcon[p]].x = sMpPc.rX[p];
+            gSprites[sMpPc.rIcon[p]].y = sMpPc.rY[p] + 4;
+        }
+    }
+}
+
+// Where our cursor is, for the others (only over the shared boxes)
+static void MpSendOwnCursor(void)
+{
+    u16 species = SPECIES_NONE;
+    u8 count = 0, k;
+    struct Sprite *c = sStorage->cursorSprite;
+    if (!sMpPc.sharedView || sCursorArea == CURSOR_AREA_IN_PARTY || sInPartyMenu)
+    {
+        MP_SharedBox_SendCursor(MP_PCV_NONE, 0, 0, 0, 0, 0);
+        return;
+    }
+    if (sIsMonBeingMoved)
+    {
+        species = GetMonData(&sStorage->movingMon, MON_DATA_SPECIES);
+        count = 1;
+    }
+    else if (sMultiMove != NULL)
+    {
+        for (k = 0; k < IN_BOX_COUNT; k++)
+            if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                if (count == 0)
+                    species = GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SPECIES);
+                count++;
+            }
+        if (!MpGroupHeld())
+            species = SPECIES_NONE, count = 0;
+    }
+    MP_SharedBox_SendCursor(MP_PCV_BOX, StorageGetCurrentBox(), c->x + c->x2, c->y + c->y2, species, count);
+}
+
+// Boxes that changed under us: their icons again (the shared box shown)
+static void MpRefreshChangedIcons(void)
+{
+    u32 cells[TOTAL_BOXES_COUNT];
+    u8 box = StorageGetCurrentBox(), pos;
+    u32 info = MP_SharedBox_TakeInfoChanges();
+    if (sMpPc.sharedView)
+        sMpPc.look |= ((info >> box) & 1) | (((info >> (16 + box)) & 1) << 1);   // a friend renamed it / changed its wallpaper
+    if (!MP_SharedBox_TakeChanges(cells) || !sMpPc.sharedView)
+        return;
+    for (pos = 0; pos < IN_BOX_COUNT; pos++)
+    {
+        if (!(cells[box] & (1u << pos)))
+            continue;
+        DestroyBoxMonIconAtPosition(pos);
+        if (GetBoxMonDataAt(box, pos, MON_DATA_SANITY_HAS_SPECIES))
+            CreateBoxMonIconAtPos(pos);
+    }
+    TryRefreshDisplayMon();
+}
+
+// The link is gone: whatever we hold of our own goes back, and the screen closes
+static void MpForceCloseNow(void)
+{
+    u8 k, box, pos;
+    struct PokemonStorage *own = MP_PersonalStorage();
+    if (sIsMonBeingMoved)
+    {
+        if (!MP_SharedBox_IsShared(&sStorage->movingMon.box) && MpFirstFree(own, &box, &pos))
+            own->boxes[box][pos] = sStorage->movingMon.box;
+        sIsMonBeingMoved = FALSE;
+    }
+    if (sMultiMove != NULL)
+        for (k = 0; k < IN_BOX_COUNT; k++)
+            if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES)
+             && !MP_SharedBox_IsShared(&sMultiMove->boxMons[k]) && MpFirstFree(own, &box, &pos))
+                own->boxes[box][pos] = sMultiMove->boxMons[k];
+    DestroyTask(sStorage->taskId);
+    FreePokeStorageData();
+    SetMainCallback2(CB2_ExitPokeStorage);
+}
+
+// Every frame of the box screen (CB2_PokeStorage)
+static void MpPcFrame(void)
+{
+    if (!sMpPc.on || sStorage == NULL)
+        return;
+    if (sMpPc.forceClose)
+    {
+        sMpPc.forceClose = FALSE;
+        MpForceCloseNow();
+        return;
+    }
+    if (gTasks[sStorage->taskId].func == Task_InitPokeStorage)
+        return;
+    MpUpdateButtons();
+    if (MP_PcStorage_Steady() && sStorage->state == MSTATE_HANDLE_INPUT)
+    {
+        const char *note;
+        MpRefreshChangedIcons();
+        if (sMpPc.rebuild && !MpGroupHeld())
+        {
+            sMpPc.look = 0;
+            SetPokeStorageTask(Task_MpRebuild);
+            return;
+        }
+        if (sMpPc.look)
+        {
+            SetPokeStorageTask(Task_MpBoxLook);
+            return;
+        }
+        note = MP_SharedBox_TakeNote();
+        if (note[0])
+        {
+            PlaySE(SE_FAILURE);
+            Tag_PrintText(note);
+            sStorage->state = MSTATE_WAIT_MSG;
+        }
+    }
+    MpUpdateRemoteCursors();
+    MpSendOwnCursor();
+}
+
+// The box screen closed
+static bool8 MpOnExit(void)
+{
+    void (*cb)(void) = sMpPc.onClose;
+    if (!sMpPc.on)
+        return FALSE;
+    sMpPc.on = FALSE;
+    MP_SharedBox_End();
+    gFieldCallback = cb;
+    SetMainCallback2(CB2_ReturnToField);
+    return TRUE;
+}
+
+static void MpResetSprites(void)
+{
+    u8 p;
+    sMpPc.buttonsMade = FALSE;
+    for (p = 0; p < MP_MAX_PLAYERS; p++)
+    {
+        sMpPc.rCursor[p] = sMpPc.rLabel[p] = sMpPc.rIcon[p] = MAX_SPRITES;
+        sMpPc.rIconSpecies[p] = SPECIES_NONE;
+        memset(sMpPc.rLabelName[p], 0, sizeof(sMpPc.rLabelName[p]));
+    }
 }

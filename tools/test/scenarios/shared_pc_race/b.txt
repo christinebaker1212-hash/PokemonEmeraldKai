@@ -1,0 +1,47 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+wait 1
+wait 60
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+waitfor slot:1:0:1 600
+mp sharedbox 1
+wait 200
+press A 2
+wait 30
+press A 2
+wait 300
+shot b_after_grab
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 30
+press A 2
+wait 40
+press A 2
+wait 300
+waitfor sharedsteady 600
+mp sharedbox 1
+shot b_end
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+mp monids
+wait 60
+press B 2
+wait 30
+quit

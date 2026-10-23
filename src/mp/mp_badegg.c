@@ -45,7 +45,7 @@ void MP_CompensateBadEggs(void)
     {
         for (pos = 0; pos < IN_BOX_COUNT; pos++)
         {
-            struct BoxPokemon *boxMon = GetBoxedMonPtr(box, pos);
+            struct BoxPokemon *boxMon = &MP_PersonalStorage()->boxes[box][pos];
             if (MP_IsBoxMonBadEgg(boxMon))
             {
                 paid += PayFor(boxMon);
@@ -66,7 +66,7 @@ void MP_CompensateBadEggs(void)
         {
             for (pos = 0; pos < IN_BOX_COUNT; pos++)
             {
-                struct BoxPokemon *boxMon = GetBoxedMonPtr(box, pos);
+                struct BoxPokemon *boxMon = &MP_PersonalStorage()->boxes[box][pos];
                 if (GetBoxMonData(boxMon, MON_DATA_SPECIES) != SPECIES_NONE && !GetBoxMonData(boxMon, MON_DATA_IS_EGG))
                 {
                     BoxMonToMon(boxMon, &gPlayerParty[0]);
