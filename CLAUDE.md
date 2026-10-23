@@ -76,6 +76,12 @@ Gotchas worth knowing before touching battles:
   (clock.c, MP_ClockShift), never on the shared one, or joining a host in another time zone grows trees by hours.
 - Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
+- Names that fill their whole length (7-letter players: SATOSHI, TAKESHI) have no EOS of their own, and
+  `StringCopyN` / `StringAppendN` copy exactly N bytes without adding one. Always end the copy:
+  `*StringAppendN(buf, name, PLAYER_NAME_LENGTH) = EOS;` or `name[PLAYER_NAME_LENGTH] = EOS;`. Otherwise the text runs
+  into the bytes after it: a garbled name, or (1.3.2, CO-OP menu with four players) a crash in GetStringWidth on a
+  stray 0xF7. Test with 7-letter names (`MOEMON_DEBUG_NAME=SATOSHI`); `tools/test/check_names.sh` lists unended copies
+  (still to fix: mp_menu.c player line, mp_sharedpc.c "from", pokedex.c "CAUGHT BY").
 
 ## Not yet done or verified
 - The Windows exe has never been run on real Windows (it was cross-compiled); it runs under Wine
