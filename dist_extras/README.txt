@@ -279,6 +279,19 @@ Press B (or START) to stop watching at any time. Watching ends by itself
 when the battle is over.
 
 
+FRIENDS' SCREENS (CO-OP > SPECTATE)
+-----------------------------------
+Turn FRIENDS' SCREENS ON to see up to 3 friends' screens live, all the time,
+in a panel under your own: walking around, in menus or in battle. Each card
+has the friend's name and where they are (a red IN BATTLE tag in a battle).
+SIZE sets the cards to 1X, 2X, 3X or 4X the game's size. Your own screen
+gets smaller to make room, so everything stays on screen; when a size doesn't
+fit your window or monitor the cards use the biggest one that does (the
+menu says "4X (2X FITS)"). The window grows to fit the panel and goes back
+to its own size when you turn it off or your friends leave.
+Your choice is saved. Each friend sends about 20 KB/s while you watch.
+
+
 PVP: THE BATTLE FLAG
 --------------------
 * You get the BATTLE FLAG (KEY ITEMS) the first time you connect. Register

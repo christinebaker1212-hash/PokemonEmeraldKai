@@ -742,7 +742,7 @@ int Display_GetPanelScale(void)
     return sPanelScale;
 }
 
-static void FillRect(int x, int y, int w, int h, int r, int g, int b, int a)
+static void PanelFillRect(int x, int y, int w, int h, int r, int g, int b, int a)
 {
     SDL_Rect rc;
     rc.x = x, rc.y = y, rc.w = w, rc.h = h;
@@ -767,12 +767,12 @@ static void DrawPanel(int outW, int y0, int panelH, int s)
     {
         int r, g, b;
         PanelBg(y, panelH, &r, &g, &b);
-        FillRect(0, y0 + y, outW, 1, r, g, b, 255);
+        PanelFillRect(0, y0 + y, outW, 1, r, g, b, 255);
     }
     // a hairline on top, lighter, then a dark one
-    FillRect(0, y0, outW, 1, 58, 64, 82, 255);
+    PanelFillRect(0, y0, outW, 1, 58, 64, 82, 255);
     if (panelH > 4)
-        FillRect(0, y0 + 1, outW, 1, 10, 11, 15, 255);
+        PanelFillRect(0, y0 + 1, outW, 1, 10, 11, 15, 255);
     x = (outW - pw) / 2 + PANEL_PAD * s;
     y = y0 + (panelH - cardH) / 2;
     for (i = 0; i < sPanelCount; i++, x += cardW + PANEL_GAP * s)
@@ -782,11 +782,11 @@ static void DrawPanel(int outW, int y0, int panelH, int s)
         SDL_Rect dst;
         // soft shadow
         SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_BLEND);
-        FillRect(x + s, y + 2 * s, cardW, cardH, 0, 0, 0, 120);
+        PanelFillRect(x + s, y + 2 * s, cardW, cardH, 0, 0, 0, 120);
         SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
         // outline in the player's color, its corners cut (rounded at this size)
-        FillRect(x + s, y, cardW - 2 * s, cardH, ar, ag, ab, 255);
-        FillRect(x, y + s, cardW, cardH - 2 * s, ar, ag, ab, 255);
+        PanelFillRect(x + s, y, cardW - 2 * s, cardH, ar, ag, ab, 255);
+        PanelFillRect(x, y + s, cardW, cardH - 2 * s, ar, ag, ab, 255);
         // the screen
         dst.x = x + s;
         dst.y = y + s;
@@ -795,11 +795,11 @@ static void DrawPanel(int outW, int y0, int panelH, int s)
         if (sPanelHasFrame[i] && sPanelFrameTex[i])
             SDL_RenderCopy(sRenderer, sPanelFrameTex[i], NULL, &dst);
         else
-            FillRect(dst.x, dst.y, dst.w, dst.h, 11, 13, 18, 255);
+            PanelFillRect(dst.x, dst.y, dst.w, dst.h, 11, 13, 18, 255);
         // the label strip: dark, the player's color faintly along its top
-        FillRect(x + s, y + s + GBA_H * s, GBA_W * s, DISPLAY_PANEL_LABEL_H * s, 24, 27, 36, 255);
+        PanelFillRect(x + s, y + s + GBA_H * s, GBA_W * s, DISPLAY_PANEL_LABEL_H * s, 24, 27, 36, 255);
         c = s / 2 > 0 ? s / 2 : 1;
-        FillRect(x + s, y + s + GBA_H * s, GBA_W * s, c, ar / 2 + 12, ag / 2 + 13, ab / 2 + 18, 255);
+        PanelFillRect(x + s, y + s + GBA_H * s, GBA_W * s, c, ar / 2 + 12, ag / 2 + 13, ab / 2 + 18, 255);
         if (sPanelLabelTex[i])
         {
             dst.y = y + s + GBA_H * s;

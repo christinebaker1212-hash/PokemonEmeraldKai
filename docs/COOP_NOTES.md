@@ -739,6 +739,29 @@ cave, gMpDarkUiPal (the MP_TAG_UI_PAL slot) lets toasts / bubbles / "!" through 
 pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`, `mp cutgrass`, `mp worldobj ID`,
 `mp tileat X,Y`, `mp ashcount`. Tests: coop_flash, coop_world, coop_world2.
 
+## SPECTATE panel (mp_spectate.c, display.c)
+
+CO-OP > SPECTATE (MP_Spectate_OpenSettings, MpUi rows FRIENDS' SCREENS / SIZE / DONE; ini spectate_panel /
+spectate_size, gMpConfig.spectatePanel / spectateScale). Panel_Update subscribes to up to 3 present friends with
+MPR_SPEC_PANEL_JOIN (LEAVE when off or they leave; asks again after 9 s of silence); the sender streams whenever anyone
+watches (sStream.viewers | panel), 15 updates a second (20 while a battle watcher is on), a full frame every 4 s.
+Frame message (protocol 33): u8 type, u16 seq, u8 flags (KEY 1, SHIFT 2, LAST 4), u16 song, u8 tile count, s8 shiftX,
+s8 shiftY, then tiles (mode 0 raw, 1 RLE, 2 indexed 1/2/4 bpp). FindShift detects the map scrolling (camera hint +
+pixel samples), ShiftFrame moves the picture on both ends and only the uncovered and changed tiles go. One message per
+update goes to 0xFF when every friend watches (the server copies it); a send backlog over 24 KB skips pictures
+(MPNet_ClientQueued; a picture is a diff, so nothing is lost). ApplyUpdate decodes for the battle watcher and the
+panel alike; Panel_DrawLabel draws the card label (dot, name, location / red IN BATTLE pill) with the small font.
+MP_Spectate_PanelSync (sdl2.c VDraw, and SpectateStep while watching a battle) hands the cards to Display_SetPanel.
+display.c: PanelSize = 2 pads + n cards (240s + 2s outline) + gaps, 160s + label 12s; RenderToBackbuffer reserves the
+bottom, PanelFitScale shrinks the cards until they fit with the game at 1x or more; FitWindowToPanel (window only) keeps
+the game's whole scale and shrinks it, then the cards, until the window fits the monitor's usable area, and restores the
+window when the panel goes (also after leaving fullscreen with it up). Display_GetPanelScale = the size that fits now
+(the menu's "(2X FITS)"). Around the game the window is the panel's slate. Bandwidth: ~1.2 KB per update.
+Tests: spec_panel (4 players, DANA on a 1920x1080 monitor: sizes, fullscreen, off/on), spec_menu (real keys, saved ini,
+a friend leaving), spec_watch (panel while watching a battle), wine_smoke part 4 (Linux host + Windows friend).
+MOEMON_SPECTRACE=1 logs every picture's FNV sum on both ends; tools/test/check_spectrace.py compares them.
+Debug: `mp panel ON SIZE`, `display info` (window, game rect, cards), MOEMON_TEST_MONITOR=WxH.
+
 ## Tasks that destroy the next one (task.c NextLiveTask)
 
 DestroyTask unlinks a task but leaves its own `next`; RunTasks followed it after the task's function returned. A task

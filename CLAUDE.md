@@ -20,6 +20,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 ## Building
 - Linux: `make linux -j$(nproc)` (needs libsdl2-dev and libpng-dev)
 - Windows: `make winwsl -j$(nproc)` with x86_64-w64-mingw32-gcc and the SDL2 mingw package in ./SDL2
+  (or `tools/release/build_windows.sh SDL2_DIR`, which keeps the Windows objects apart). Build it before a release:
+  files that include windows.h (display.c, updater.c...) can't name a static helper like a Win32 function (FillRect).
 
 ## Headless testing
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
@@ -58,6 +60,8 @@ Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / 
 `item - FIRST_BERRY_INDEX`), the MoeGatcha daily STANDARD lineup and the PICKUP reroll vote.
 Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
+Also the SPECTATE panel (friends' screens under yours, 1x-4x: mp_spectate.c streaming, display.c layout and window
+fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
