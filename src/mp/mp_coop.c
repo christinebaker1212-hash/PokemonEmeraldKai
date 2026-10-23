@@ -3574,9 +3574,14 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     }
     gLeveledUpInBattle = newLeveled;
     for (b = 0; b < MAX_BATTLERS_COUNT; b += 2)
-        if (b < gBattlersCount && !(soloDouble && b == 2)
-         && gBattlerPartyIndexes[b] < PARTY_SIZE && map[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
+    {
+        if (b >= gBattlersCount || (soloDouble && b == 2))
+            continue;
+        if (gBattlerPartyIndexes[b] < PARTY_SIZE && map[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
             gBattlerPartyIndexes[b] = map[gBattlerPartyIndexes[b]];
+        else
+            gBattlerPartyIndexes[b] = (b / 2) * newSize;   // out of Pokemon (absent): its own seat, never a friend's slot
+    }
     for (i = 0; i < ARRAY_COUNT(gSentPokesToOpponent); i++)
         gSentPokesToOpponent[i] = RemapBits(gSentPokesToOpponent[i], map);
     gWishFutureKnock.knockedOffMons[B_SIDE_PLAYER] = RemapBits(gWishFutureKnock.knockedOffMons[B_SIDE_PLAYER], map);
@@ -3608,12 +3613,21 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
                 rest[nRest++] = i;
         }
         // TEAM PADDING: one extra Moemon in a team-up, never more (a co-op battle got it at its start)
-        if (!wild && !wasCoop && MP_TrainerPadding() && nActive + nAlive < PARTY_SIZE && nRest > 0)
+        // It only goes into an empty slot: one of the trainer's fainted Moemon must stay as it is (its "already gave
+        // EXP" mark would pass on to the newcomer, and then beating it would give none)
+        for (k = nRest; k > 0 && GetMonData(&oldEnemy[rest[k - 1]], MON_DATA_SPECIES) != SPECIES_NONE; k--)
+            ;
+        if (!wild && !wasCoop && MP_TrainerPadding() && nActive + nAlive < PARTY_SIZE && k > 0)
         {
-            u8 slot = rest[--nRest];   // an empty or fainted slot takes it
+            u8 slot = rest[k - 1];
             u8 total = nActive + nAlive;
             struct Pokemon *src = nAlive > 0 ? &oldEnemy[alive[nAlive - 1]] : &oldEnemy[actives[0]];
             u16 species = PickFillerSpecies(src, total, sCoop.trainerId);
+            for (; k < nRest; k++)
+                rest[k - 1] = rest[k];
+            nRest--;
+            gBattleStruct->givenExpMons &= ~(1 << slot);
+            gWishFutureKnock.knockedOffMons[B_SIDE_OPPONENT] &= ~(1 << slot);
             CreateMon(&oldEnemy[slot], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
                       Random32(), OT_ID_RANDOM_NO_SHINY, 0);
             // before the ace (the last one), like a co-op team-up's padding
@@ -3698,10 +3712,20 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
             keepMask |= 1 << b;
     {
         u8 oldBattlers = gBattlersCount, newCountB = count * 2, absent = gAbsentBattlerFlags;
+        for (b = 0; b < MAX_BATTLERS_COUNT; b++)
+        {
+            // nobody is switching in yet (a new spot's newcomer comes in with the entrance)
+            gBattleStruct->monToSwitchIntoId[b] = PARTY_SIZE;
+            gBattleStruct->AI_monToSwitchIntoId[b] = PARTY_SIZE;
+        }
         for (b = 0; b < newCountB; b++)
         {
             if (b < oldBattlers && !(soloDouble && b == 2))
                 continue;
+            // a spot someone else takes over: none of the old one's sprite state (hidden by FLY / DIG, behind a
+            // SUBSTITUTE, transformed, a CASTFORM form)
+            memset(&gBattleSpritesDataPtr->battlerData[b], 0, sizeof(gBattleSpritesDataPtr->battlerData[b]));
+            gBattleMonForms[b] = 0;
             u8 *ptr = (u8 *)&gBattleMons[b];
             for (i = 0; i < sizeof(struct BattlePokemon); i++)
                 ptr[i] = 0;

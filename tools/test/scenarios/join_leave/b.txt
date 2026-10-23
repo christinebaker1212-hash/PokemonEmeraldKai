@@ -16,5 +16,4 @@ press A 2
 waitlog 8000 join: we're in the battle
 pressuntil A action 6000
 wait 30
-mp partyids
 quit

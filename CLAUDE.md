@@ -60,6 +60,8 @@ Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / 
 `item - FIRST_BERRY_INDEX`), the MoeGatcha daily STANDARD lineup and the PICKUP reroll vote.
 Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
+Also joining a battle in progress (mp_join.c: JOIN in front of a battling friend; mp_coop.c MP_Coop_JoinConvertMaster
+rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*).
 Also the SPECTATE panel (friends' screens under yours, 1x-4x: mp_spectate.c streaming, display.c layout and window
 fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py).
 

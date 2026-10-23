@@ -802,3 +802,39 @@ labels (the CO-OP menu's players line, MP_Menu_BuildPlayersLine; the shared PC's
 the POKéDEX's "CAUGHT BY NAME", MP_Dex_CaughtByText) now write the end mark after the copy. `mp namelines` builds
 each into a buffer of 0xF7s and prints it ("|" = where the text ends). Test names7 (4 players named SATOSHI,
 TAKESHI, MITSURU, KENJIRO; regress.sh NAME_A..NAME_D set the names); the old code crashes in its CO-OP menu.
+
+## Joining a battle in progress (mp_join.c, protocol 34)
+Walking up to a battling friend: SPECTATE / BET / JOIN / CANCEL (mp_spectate.c Task_WatchPrompt, a window beside the
+message, the yes/no box's tiles). JOIN (MP_Join_Ask) sends JOINM_ASK; a co-op partner who isn't the master answers
+REDIRECT and the friend asks the master. The master queues the friend (WAIT) and asks its player at the next turn's
+start: BattleTurnPassed / TryDoEventsBeforeFirstTurn call MP_Join_OnTurnStart, HandleTurnActionSelectionState starts
+with MP_Join_TurnHook (TRUE holds the turn; states MJS_*). NO: ANS_NO (and the friend is told no at once for the rest
+of the battle: sJoin.declined). YES: ANS_YES (Pokémon each, players, wild flag, trainer id) -> the friend sends
+JOINM_PARTY (their picks: CO-OP TEAM first, MP_Team_BattleSlots) and starts the battle transition; a friend asking
+while others are being let in waits for the next turn (JoiningCount).
+Conversion on the master (mp_coop.c MP_Coop_JoinConvertMaster): SavePlayerParty for a solo battle (its party is the
+real one), each old seat keeps its usable Pokémon in battle party-menu order (the one out first; 3 in a double, 2 in a
+triple), the left-out ones go back to the real party at once (a partner's through CONVERT, as the master had them),
+with their level-ups (sCoop.preEvo, evolve after a win) and moves to learn (learnOut); every party-slot state is
+remapped (gBattlerPartyIndexes, gSentPokesToOpponent, knockedOffMons, wishMonId, gLeveledUpInBattle, givenExpMons,
+learn-later slots); an absent battler points at its own seat. The trainer's party is laid out for co-op (double:
+halves interleaved, triple: 0-2 then a pool) with TEAM PADDING once (solo battles only, into an empty slot: never
+over a fainted foe, whose "gave EXP" bit would pass on). New battlers start absent and "entering" (the screen rebuild,
+reshow_battle_screen.c, skips their sprites, boxes and shadows). A solo Double Battle: battler 2 first goes back to
+its ball (BattleScript_MpJoinRecall) and becomes the friend's; battlers taking over a spot get clean sprite state.
+Link: MP_Battle_JoinLink (a solo battle opens its link here; the others add link ids; everyone counts as ready; sync
+barriers continue from the master's seq) and MP_StartBattleLinkTasks (past the cable's start-up wait).
+The master sends JOINM_STATE (struct MpJoinSnapshot: plan, battle mons, sprite info, forms, side statuses, weather,
+lose text, both parties) to joiners and JOINM_CONVERT (+ their old seat) to a partner; everyone fades and rebuilds
+(ReshowBattleScreenAfterMenu; MP_TriCards_Reload starts a triple's cards), a partner only once its screen caught up
+(exec flags 0, link drained). A joiner: CB2_JoinWaitState -> CB2_MpJoinBattle (battle_main.c: resources, registers as
+the intro's slide leaves them, controllers, link, then the rebuild) -> READY. With every seat READY the master runs
+BattleScript_MpJoinEntrance (Cmd_mpjoin: next friend -> trainer slides in, "X has come to help!", switch-in data,
+IntroTrainerBallThrow, switchineffects; then each new foe spot's next Pokémon), then the turn starts (communication
+state cleared). The end is the usual co-op one (CB2_MpCoopEndBattle; afterBattle = the solo battle's own callback).
+Joinable: solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON) or one trainer, single or
+double (CB2_EndTrainerBattle, modes SINGLE / CONTINUE_SCRIPT / REMATCH and the double ones; not bosses, RIVAL,
+TEAM AQUA / MAGMA), or a co-op double of that kind. Not: triples, two trainers, PvP, frontier, safari, legendaries.
+Tests (MODE 2/3, WORST): join_no, join_wild, join_trainer, join_double, join_triple (double -> triple + redirect),
+join_two (two at once), join_cancel, join_leave; `mp partyids` + join_wild/check.py check every party's identities.
+Harness conditions: watchmenu, joinprompt, joinpendingN, friendbattleN.

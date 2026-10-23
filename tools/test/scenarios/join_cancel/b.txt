@@ -10,9 +10,11 @@ press DOWN 2
 wait 5
 press DOWN 2
 wait 5
+watchlog join: asking player 1
 press A 2
-waitlog 4000 join: asking player 1
-wait 120
-press B 2
+waitlog 4000
+wait 60
+watchlog join: we stopped asking
+pressuntillog B 4000
 wait 600
 quit

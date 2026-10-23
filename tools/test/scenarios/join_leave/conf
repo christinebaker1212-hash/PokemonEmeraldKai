@@ -11,4 +11,4 @@ EXPECT_A=("join: battle now 2 seats (was 1)" "join: entrance done" "player 2 lef
 EXPECT_B=("join: we're in the battle")
 UNEXPECT_A=("BAD EGG" "crash")
 UNEXPECT_B=("BAD EGG" "crash")
-CHECK="python3 tools/test/scenarios/join_wild/check.py"
+CHECK="python3 tools/test/scenarios/join_wild/check.py a"

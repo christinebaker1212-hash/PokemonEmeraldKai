@@ -1,6 +1,7 @@
 pressuntil A field 5000
 waitfor online 6000
 wait 60
+mp moves 0 57
 mp partyids
 waitfor friendbattle 6000
 mp warp 0,18,63,13

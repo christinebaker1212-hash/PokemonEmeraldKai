@@ -161,6 +161,7 @@ static EWRAM_DATA struct
     struct LinkPlayer partyLink[JOIN_MAX_NEW];
     struct Pokemon partyMons[JOIN_MAX_NEW][MULTI_PARTY_SIZE];
     u8 needReady;                    // seats still to say READY
+    u8 declined;                     // friends our player said NO to in this battle (they aren't asked again)
     // --- every game: battlers coming in (skipped by the screen rebuild until the entrance shows them) ---
     u8 entering;
     // --- a partner already in the battle ---
@@ -311,6 +312,12 @@ static void OnAsk(u8 from)
     if (reason != 0xFF)
     {
         SendAnswer(from, ANS_CANT, reason, 0);
+        return;
+    }
+    if (sJoin.declined & (1 << from))
+    {
+        // our player already said no in this battle: not asked again
+        SendAnswer(from, ANS_NO, 0, 0);
         return;
     }
     for (i = 0; i < sJoin.pendingCount; i++)
@@ -560,7 +567,10 @@ bool8 MP_Join_TurnHook(void)
             if (!yes)
             {
                 for (i = 0; i < sJoin.askingCount; i++)
+                {
                     SendAnswer(sJoin.asking[i], ANS_NO, 0, 0);
+                    sJoin.declined |= 1 << sJoin.asking[i];
+                }
                 MPNet_Log("join: our player said no");
                 ClearMessage();
                 return ResumeTurn();
@@ -614,7 +624,7 @@ bool8 MP_Join_TurnHook(void)
         }
         sJoin.state = MJS_CONVERT;
         if (!gMpCoopBattle && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
-         && !(gAbsentBattlerFlags & gBitTable[2]) && gBattleMons[2].hp != 0)
+         && !(gAbsentBattlerFlags & (1 << 2)) && gBattleMons[2].hp != 0)
             sJoin.state = MJS_RECALL;
         return TRUE;
     }
@@ -1219,6 +1229,8 @@ void MP_Join_Update(void)
             sJoin.turnStart = FALSE;
         }
     }
+    if (!gMain.inBattle)
+        sJoin.declined = 0;
     if (!gMain.inBattle && sJoin.state != MJS_IDLE)
     {
         sJoin.state = MJS_IDLE;

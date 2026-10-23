@@ -270,13 +270,39 @@ more players and no forfeits they also get MOEGATCHA pulls (2 and 1).
 Everyone else gets a consolation prize.
 
 
-WATCHING BATTLES
-----------------
+WATCHING, BETTING ON OR JOINING A FRIEND'S BATTLE
+-------------------------------------------------
 Players in a battle have "IN BATTLE" above their name ("IN MENU" means
 they're in the START or CO-OP menu, their BAG, a shop, the PC...). Walk up to someone
-IN BATTLE and press A, then YES to watch live. Your own game pauses while you watch.
-Press B (or START) to stop watching at any time. Watching ends by itself
-when the battle is over.
+IN BATTLE and press A: "Would you like to spectate, bet, or join?"
+
+  SPECTATE  Watch live. Your own game pauses while you watch. Press B (or
+            START) to stop watching at any time. Watching ends by itself
+            when the battle is over.
+  BET       Bet $500 on how it ends, then watch (see BETTING).
+  JOIN      Ask to join in. At the start of their next turn your friend is
+            asked "<your name> wants to join your battle! Is this okay?" (B while
+            you wait: never mind). NO: you're told so (and they aren't asked
+            again in that battle). YES: your trainer slides into their battle
+            ("<your name> has come to help!") and sends out your first Moemon.
+
+Which battles: a wild Moemon met in grass, caves or water, or an ordinary
+trainer (not a GYM LEADER, rival, TEAM AQUA / MAGMA or other story battle),
+and Double Battles with a friend. Two friends can join at once.
+
+  - A battle alone becomes a Double Battle (or a Triple Battle when two
+    friends join together); a Double Battle with a friend becomes a Triple.
+  - Everyone takes their Moemon in party order, the one out now first:
+    three each in a Double Battle, two each in a Triple. The others wait in
+    your party as they are (any that leveled up still get to evolve, and
+    learn their moves, after a win).
+  - The trainer gets a spot for each new player and sends out its next
+    Moemon there if it has one (TEAM PADDING: at most one extra Moemon).
+  - A Double Battle you started alone: your second Moemon goes back to its
+    Ball and your friend takes that spot.
+  - If someone leaves the game during the battle, it's called off, as in
+    any team battle, and everyone's party is back to how it was when
+    they joined.
 
 
 FRIENDS' SCREENS (CO-OP > SPECTATE)

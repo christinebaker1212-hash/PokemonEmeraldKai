@@ -3,9 +3,9 @@
 # ones (species, personality, OT ID) in the same slots, none lost, swapped, doubled or a BAD EGG, and none lost
 # a level or EXP. (A test that lets one evolve says so with EVOLVE=slot:species in the environment.)
 import os, re, sys
-d = sys.argv[1]
+d = sys.argv[-1]   # (regress.sh appends the result folder; an optional first argument names the clients)
 bad = 0
-for c in "abcd":
+for c in (sys.argv[1] if len(sys.argv) > 2 else "abcd"):
     if not os.path.exists(f"{d}/{c}.log"):
         continue
     lines = [l for l in open(f"{d}/{c}.log", errors="replace") if l.startswith("[test] partyids:")]

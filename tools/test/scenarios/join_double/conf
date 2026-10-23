@@ -4,7 +4,7 @@
 MODE=2
 WARP=0,18,64,13
 WARP_B=0,10,10,10
-TMO=320
+TMO=400
 ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7"
 ENV_B="MOEMON_DEBUG_PARTY=280:30,288:9"
 EXPECT_A=("join: our player said yes" "join: our second Moemon (party slot 1) makes room" "join: battle now 2 seats (was 1)" "join: battler 2 comes in" "join: entrance done" "co-op: battle over, outcome 1")

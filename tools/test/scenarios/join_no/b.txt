@@ -17,5 +17,17 @@ waitlog 6000 join: player 1 said no
 wait 240
 rendershot b_declined
 press A 2
-wait 600
+wait 120
+press A 2
+waitfor watchmenu 3000
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+watchlog join: player 1 said no
+press A 2
+waitlog 4000
+wait 120
+press A 2
+wait 400
 quit

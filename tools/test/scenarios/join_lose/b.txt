@@ -1,0 +1,24 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp moves 0 45
+mp moves 1 45
+mp partyids
+waitfor friendbattle 4000
+wait 120
+press UP 2
+wait 30
+press A 2
+waitfor watchmenu 3000
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press A 2
+waitlog 10000 join: we're in the battle
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 8000
+wait 60
+mp partyids
+wait 200
+quit
