@@ -1,9 +1,9 @@
 # JOIN a trainer battle. ALICE talks to YOUNGSTER CALVIN on ROUTE 102 (an ordinary trainer: he signs up for MATCH
-# CALL afterwards); BOB walks up behind her and picks JOIN; ALICE says YES. CALVIN gets a second spot: he sends out
+# CALL afterwards); BOB (on another map at first, so she isn't asked to wait for a partner) comes up beside her (out of the trainer's sight) and picks JOIN; ALICE says YES. CALVIN gets a second spot: he sends out
 # his next Moemon (or TEAM PADDING's extra) next to the first. Both win; both parties come back whole.
 MODE=2
 WARP=0,17,33,15
-WARP_B=0,17,33,16
+WARP_B=0,10,10,10
 TMO=300
 ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12"
 ENV_B="MOEMON_DEBUG_PARTY=280:12,288:9,286:8"

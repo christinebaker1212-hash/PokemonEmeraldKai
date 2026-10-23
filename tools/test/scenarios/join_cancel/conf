@@ -1,0 +1,12 @@
+# A friend who stops asking. BOB picks JOIN in front of ALICE's battle, then presses B while waiting for her answer:
+# ALICE is never asked, her battle goes on alone, and she runs from it.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,10,11
+TMO=220
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("join: player 2 asks to join our battle" "join: player 2 stopped asking")
+EXPECT_B=("join: asking player 1 to let us join" "join: we stopped asking")
+UNEXPECT_A=("join: asking our player" "join link" "co-op")
+UNEXPECT_B=("join: sent our" "join link")

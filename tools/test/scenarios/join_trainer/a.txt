@@ -6,13 +6,8 @@ mp partyids
 press UP 2
 wait 20
 pressuntil A battle 3000
-pressuntil A action 6000
-waitfor joinpending1 6000
-wait 20
-press A 2
-wait 30
-press A 2
-waitfor joinprompt 5000
+pressuntil A joinprompt 15000
+wait 10
 wait 20
 rendershot a_prompt
 press A 2

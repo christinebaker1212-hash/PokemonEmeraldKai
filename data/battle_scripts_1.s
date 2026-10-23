@@ -3008,6 +3008,19 @@ BattleScript_MpJoinFoes:
 BattleScript_MpJoinDone:
 	end2
 
+@ Moemon Co-op: a friend joins a Double Battle the player started alone: the player's second Pokémon (battler 2,
+@ gBattlerAttacker) goes back to its ball to make room, like a switch
+BattleScript_MpJoinRecall::
+	atknameinbuff1
+	resetintimidatetracebits BS_ATTACKER
+	hpthresholds2 BS_ATTACKER
+	printstring STRINGID_RETURNMON
+	switchoutabilities BS_ATTACKER
+	waitstate
+	returnatktoball
+	waitstate
+	end2
+
 @ Moemon Co-op: both players are out of Pokémon
 BattleScript_MpCoopBattleLost::
 	printstring STRINGID_PLAYERWHITEOUT

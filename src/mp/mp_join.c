@@ -11,6 +11,8 @@
 //
 // Which battles: a solo battle against a wild Pokémon or an ordinary trainer (not a gym leader, admin, rival or
 // other story battle), or a co-op Double Battle of that kind (it becomes a Triple Battle). Up to two friends at once.
+// A Double Battle the player started alone: their second Pokémon goes back to its ball and the friend takes its spot
+// (a co-op double; a second friend later makes it a triple).
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
@@ -96,6 +98,8 @@ enum {
     MJS_PROMPT_PRINT,
     MJS_PROMPT_YESNO,
     MJS_WAIT_PARTY,
+    MJS_RECALL,      // a solo Double Battle: the player's second Pokémon goes back to make room
+    MJS_RECALLED,
     MJS_CONVERT,
     MJS_FADE,
     MJS_REBUILD,
@@ -240,13 +244,15 @@ static u8 JoinableReason(void)
     }
     if (gMpFriendlyBattle || gNetLinkActive)
         return JOIN_CANT_KIND;
-    if (flags == 0)
+    if (flags == 0 || flags == BATTLE_TYPE_DOUBLE)
     {
         // a wild Pokémon met in the grass, a cave or the water (not a scripted one like KECLEON: its event goes on
         // after the battle)
         return gMain.savedCallback == MP_EndWildBattleCallback() ? 0xFF : JOIN_CANT_STORY;
     }
-    if (flags != BATTLE_TYPE_TRAINER || gMain.savedCallback != MP_EndTrainerBattleCallback())
+    // one trainer, single or double (a Double Battle the player started alone: their second Pokémon makes room)
+    if ((flags != BATTLE_TYPE_TRAINER && flags != (BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE))
+     || gMain.savedCallback != MP_EndTrainerBattleCallback())
         return JOIN_CANT_KIND;   // doubles, two trainers, frontier, safari, legendaries...
     if (!MP_Coop_JoinTrainerOk())
         return JOIN_CANT_STORY;
@@ -271,6 +277,22 @@ static s8 AskingIndex(u8 id)
     return -1;
 }
 
+// Friends being let in this turn who aren't counted in the seats yet
+static u8 JoiningCount(void)
+{
+    switch (sJoin.state)
+    {
+    case MJS_PROMPT_PRINT:
+    case MJS_PROMPT_YESNO:
+    case MJS_WAIT_PARTY:
+    case MJS_RECALL:
+    case MJS_RECALLED:
+    case MJS_CONVERT:
+        return sJoin.askingCount;
+    }
+    return 0;   // (from the conversion on, they're seats)
+}
+
 static void OnAsk(u8 from)
 {
     u8 reason, i;
@@ -291,11 +313,6 @@ static void OnAsk(u8 from)
         SendAnswer(from, ANS_CANT, reason, 0);
         return;
     }
-    if (sJoin.state != MJS_IDLE)
-    {
-        SendAnswer(from, ANS_CANT, JOIN_CANT_BUSY, 0);
-        return;
-    }
     for (i = 0; i < sJoin.pendingCount; i++)
     {
         if (sJoin.pending[i] == from)
@@ -304,7 +321,13 @@ static void OnAsk(u8 from)
             return;
         }
     }
-    if (MP_Coop_SeatCount() + sJoin.pendingCount >= 3)
+    if (AskingIndex(from) >= 0 && sJoin.state != MJS_IDLE)
+    {
+        SendAnswer(from, ANS_CANT, JOIN_CANT_BUSY, 0);   // (already being let in)
+        return;
+    }
+    // while others are being let in, a friend who asks waits for the next turn (if there's room left)
+    if (MP_Coop_SeatCount() + sJoin.pendingCount + JoiningCount() >= 3)
     {
         SendAnswer(from, ANS_CANT, JOIN_CANT_FULL, 0);
         return;
@@ -590,8 +613,23 @@ bool8 MP_Join_TurnHook(void)
             return ResumeTurn();
         }
         sJoin.state = MJS_CONVERT;
+        if (!gMpCoopBattle && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+         && !(gAbsentBattlerFlags & gBitTable[2]) && gBattleMons[2].hp != 0)
+            sJoin.state = MJS_RECALL;
         return TRUE;
     }
+    case MJS_RECALL:
+        if (IsTextPrinterActive(B_WIN_MSG) || gBattleControllerExecFlags)
+            return TRUE;
+        // "MARILL, come back!": battler 2's spot is the friend's (BattleScript_MpJoinRecall ends back here)
+        MPNet_Log("join: our second Moemon (party slot %d) makes room", gBattlerPartyIndexes[2]);
+        gBattlerAttacker = 2;
+        sJoin.state = MJS_RECALLED;
+        BattleScriptExecute(BattleScript_MpJoinRecall);
+        return TRUE;
+    case MJS_RECALLED:
+        sJoin.state = MJS_CONVERT;
+        return TRUE;
     case MJS_CONVERT:
         if (IsTextPrinterActive(B_WIN_MSG))
             return TRUE;
@@ -1056,13 +1094,13 @@ void MP_Join_OnRelay(u8 from, const u8 *data, u16 len)
         OnAsk(from);
         break;
     case JOINM_CANCEL:
+        MPNet_Log("join: player %d stopped asking", from + 1);
         RemovePending(from);
         k = AskingIndex(from);
         if (k >= 0 && (sJoin.state == MJS_PROMPT_PRINT || sJoin.state == MJS_PROMPT_YESNO || sJoin.state == MJS_WAIT_PARTY))
         {
             // they gave up while we were asking: the prompt goes on for the other one, or closes
             u8 i;
-            MPNet_Log("join: player %d stopped asking", from + 1);
             for (i = k; i + 1 < sJoin.askingCount; i++)
             {
                 sJoin.asking[i] = sJoin.asking[i + 1];

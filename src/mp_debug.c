@@ -224,13 +224,13 @@ int MP_TestCondition(const char *name)
         bool8 MP_Join_PromptUp(void);
         return gMain.inBattle && MP_Join_PromptUp();
     }
-    if (strcmp(name, "friendbattle") == 0)   // another player is in a battle (their state says so)
+    if (strncmp(name, "friendbattle", 12) == 0)   // friendbattle[N]: another player (N others) in a battle
     {
-        int i;
+        int i, n = 0, want = name[12] ? atoi(name + 12) : 1;
         for (i = 0; i < MP_MAX_PLAYERS; i++)
             if (i != gMpLocalId && gMpPlayers[i].present && (gMpPlayers[i].state.flags & MPF_IN_BATTLE))
-                return 1;
-        return 0;
+                n++;
+        return n >= want;
     }
     if (strncmp(name, "joinpending", 11) == 0)   // joinpendingN: N friends asked to join our battle (next turn's prompt)
     {

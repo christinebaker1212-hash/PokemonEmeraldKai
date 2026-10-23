@@ -1,0 +1,23 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp moves 0 45
+watchlog join: player 2 stopped asking
+mp wild 288:5
+pressuntil A action 4000
+waitlog 8000
+wait 20
+press A 2
+wait 30
+press A 2
+pressuntil A action 4000
+wait 20
+rendershot a_after
+press DOWN 2
+wait 5
+press RIGHT 2
+wait 5
+press A 2
+pressuntil B field 3000
+wait 300
+quit

@@ -3,10 +3,14 @@ waitfor online 6000
 wait 60
 mp partyids
 waitfor friendbattle 4000
-wait 120
-press UP 2
+mp warp 0,17,34,15
+waitfor field 2000
+wait 200
+press LEFT 2
 wait 30
 press A 2
+wait 30
+rendershot pressed
 waitfor watchmenu 3000
 press DOWN 2
 wait 5

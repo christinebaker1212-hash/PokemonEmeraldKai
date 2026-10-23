@@ -1,0 +1,14 @@
+# A friend who leaves right after joining. BOB joins ALICE's wild battle and then quits the game: the battle is called
+# off (as when a co-op partner leaves). Neither party may be damaged: ALICE's comes back as it was when he joined
+# (same Moemon, same slots), BOB's real party was never touched.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,10,11
+TMO=260
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7,290:5"
+ENV_B="MOEMON_DEBUG_PARTY=280:12,288:9"
+EXPECT_A=("join: battle now 2 seats (was 1)" "join: entrance done" "player 2 left" "opponent disconnected, leaving the battle")
+EXPECT_B=("join: we're in the battle")
+UNEXPECT_A=("BAD EGG" "crash")
+UNEXPECT_B=("BAD EGG" "crash")
+CHECK="python3 tools/test/scenarios/join_wild/check.py"

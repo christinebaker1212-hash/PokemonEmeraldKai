@@ -238,10 +238,16 @@ void MP_TriCards_Begin(void)
     sActive = TRUE;
 }
 
-// The battle screen came back (bag, party...): FreeAllSpritePalettes dropped ours
+// The battle screen came back (bag, party...): FreeAllSpritePalettes dropped ours. A battle that became a Triple
+// Battle while it ran (friends joined, mp_join.c) starts its cards here: the healthboxes being made fill them in.
 void MP_TriCards_Reload(void)
 {
-    if (sActive && IndexOfSpritePaletteTag(TAG_TRICARD_PAL) == 0xFF)
+    if (!sActive)
+    {
+        MP_TriCards_Begin();
+        return;
+    }
+    if (IndexOfSpritePaletteTag(TAG_TRICARD_PAL) == 0xFF)
         LoadSpritePalette(&sCardSpritePal);
 }
 

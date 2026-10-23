@@ -15,12 +15,8 @@ press DOWN 2
 wait 5
 press A 2
 waitlog 6000 join: we're in the battle
-pressuntil A action 6000
-wait 20
-press A 2
-wait 30
-press A 2
-waitlog 12000 join: our screen is rebuilt for 3 players
+watchlog join: our screen is rebuilt for 3 players
+pressuntillog A 20000
 wait 20
 rendershot b_rebuilt3
 pressuntil A action 8000

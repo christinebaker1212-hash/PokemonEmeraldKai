@@ -1,0 +1,14 @@
+# JOIN a Double Battle ALICE started alone (TWINS AMY & LIV on ROUTE 103): she has two Moemon out. BOB (on another map
+# at first, then beside her out of the twins' sight) joins; ALICE says YES: her second Moemon goes back to its ball
+# ("... come back!") and BOB takes that spot: a co-op Double Battle. Both win; both parties come back whole.
+MODE=2
+WARP=0,18,64,13
+WARP_B=0,10,10,10
+TMO=320
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7"
+ENV_B="MOEMON_DEBUG_PARTY=280:30,288:9"
+EXPECT_A=("join: our player said yes" "join: our second Moemon (party slot 1) makes room" "join: battle now 2 seats (was 1)" "join: battler 2 comes in" "join: entrance done" "co-op: battle over, outcome 1")
+EXPECT_B=("join: got the battle (seat 1 of 2)" "join: we're in the battle" "co-op: battle over, outcome 1")
+UNEXPECT_A=("BAD EGG" "crash" "can't be joined")
+UNEXPECT_B=("BAD EGG" "crash" "Couldn't join" "can't be joined")
+CHECK="python3 tools/test/scenarios/join_wild/check.py"

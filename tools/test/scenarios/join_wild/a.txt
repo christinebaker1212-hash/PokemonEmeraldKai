@@ -4,13 +4,8 @@ wait 60
 mp moves 0 45
 mp partyids
 mp wild 288:5
-pressuntil A action 4000
-waitfor joinpending1 6000
-wait 20
-press A 2
-wait 30
-press A 2
-waitfor joinprompt 4000
+pressuntil A joinprompt 15000
+wait 10
 wait 20
 press A 2
 waitlog 3000 join: everyone is in

@@ -3387,7 +3387,17 @@ bool8 MP_Coop_JoinTrainerOk(void)
     case TRAINER_CLASS_TEAM_MAGMA:
         return FALSE;
     }
-    return mode == TRAINER_BATTLE_SINGLE || mode == TRAINER_BATTLE_CONTINUE_SCRIPT || mode == TRAINER_BATTLE_REMATCH;
+    switch (mode)
+    {
+    case TRAINER_BATTLE_SINGLE:
+    case TRAINER_BATTLE_CONTINUE_SCRIPT:
+    case TRAINER_BATTLE_REMATCH:
+    case TRAINER_BATTLE_DOUBLE:                   // a Double Battle the player started alone
+    case TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE:
+    case TRAINER_BATTLE_REMATCH_DOUBLE:
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // The trainer's "you won" line, for a friend's game
@@ -3411,6 +3421,9 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     u8 s, i, k, b, newLeveled = 0, keepMask = 0;
     u8 oldOrig[MULTI_PARTY_SIZE];
     bool8 wasCoop = gMpCoopBattle, wild;
+    // a Double Battle the player started alone: their second Pokemon went back to its ball (mp_join.c
+    // BattleScript_MpJoinRecall) and battler 2 becomes the first friend's
+    bool8 soloDouble = !wasCoop && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE);
     struct LinkPlayer lp[3];
 
     memset(plan, 0, sizeof(*plan));
@@ -3561,7 +3574,8 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     }
     gLeveledUpInBattle = newLeveled;
     for (b = 0; b < MAX_BATTLERS_COUNT; b += 2)
-        if (b < gBattlersCount && gBattlerPartyIndexes[b] < PARTY_SIZE && map[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
+        if (b < gBattlersCount && !(soloDouble && b == 2)
+         && gBattlerPartyIndexes[b] < PARTY_SIZE && map[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
             gBattlerPartyIndexes[b] = map[gBattlerPartyIndexes[b]];
     for (i = 0; i < ARRAY_COUNT(gSentPokesToOpponent); i++)
         gSentPokesToOpponent[i] = RemapBits(gSentPokesToOpponent[i], map);
@@ -3680,11 +3694,14 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
 
     // --- the battlers ---
     for (b = 0; b < gBattlersCount; b++)
-        keepMask |= 1 << b;
+        if (!(soloDouble && b == 2))
+            keepMask |= 1 << b;
     {
         u8 oldBattlers = gBattlersCount, newCountB = count * 2, absent = gAbsentBattlerFlags;
-        for (b = oldBattlers; b < newCountB; b++)
+        for (b = 0; b < newCountB; b++)
         {
+            if (b < oldBattlers && !(soloDouble && b == 2))
+                continue;
             u8 *ptr = (u8 *)&gBattleMons[b];
             for (i = 0; i < sizeof(struct BattlePokemon); i++)
                 ptr[i] = 0;

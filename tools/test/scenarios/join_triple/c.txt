@@ -2,11 +2,13 @@ pressuntil A field 5000
 waitfor online 6000
 wait 60
 mp partyids
-waitfor friendbattle 4000
-wait 900
+waitfor friendbattle2 12000
+wait 200
 press LEFT 2
 wait 30
 press A 2
+wait 30
+rendershot pressed
 waitfor watchmenu 3000
 press DOWN 2
 wait 5

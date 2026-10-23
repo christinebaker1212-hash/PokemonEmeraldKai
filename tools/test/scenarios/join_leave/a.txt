@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp moves 0 45
+mp partyids
+mp wild 288:5
+pressuntil A joinprompt 15000
+wait 10
+press A 2
+watchlog opponent disconnected
+waitlog 12000
+pressuntil A field 6000
+wait 120
+mp partyids
+wait 120
+quit

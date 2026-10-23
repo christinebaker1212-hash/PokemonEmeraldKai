@@ -232,6 +232,7 @@ extern const u8 BattleScript_MpCoopResolve[];
 extern const u8 BattleScript_MpCoopBattleLost[];
 extern const u8 BattleScript_MpCoopWildBattleWon[];
 extern const u8 BattleScript_MpJoinEntrance[];
+extern const u8 BattleScript_MpJoinRecall[];
 extern const u8 BattleScript_MpCoopBallCaught[];
 extern const u8 BattleScript_MpCoopUseItem[];
 extern const u8 BattleScript_MpCoopLearnMoveLater[];
