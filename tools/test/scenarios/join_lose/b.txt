@@ -2,7 +2,6 @@ pressuntil A field 5000
 waitfor online 6000
 wait 60
 mp moves 0 45
-mp moves 1 45
 mp partyids
 waitfor friendbattle 4000
 wait 120

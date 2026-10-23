@@ -1457,6 +1457,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         MP_CompensateBadEggs();
     }
+    else if (strcmp(cmd, "bflags") == 0)
+    {
+        // bflags - the battle's type flags and battler count (and a few co-op bits)
+        printf("[test] bflags %08x battlers %d coop %d wild %d triple %d inBattle %d\n", (unsigned)gBattleTypeFlags,
+               gBattlersCount, gMpCoopBattle, gMpCoopWild, gIsTripleBattle, gMain.inBattle);
+    }
     else if (strcmp(cmd, "partyids") == 0)
     {
         // partyids - each party Moemon's identity (species:personality:OT ID) and level / EXP, to check nothing was

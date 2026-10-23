@@ -1,0 +1,18 @@
+# Two friends join a Double Battle ALICE started alone (TWINS AMY & LIV): her second Moemon goes back to its ball,
+# BOB and CARL slide in (a Triple Battle, two Moemon each) and the twins get a third spot (TEAM PADDING's extra comes
+# out there). Everyone wins and keeps their party.
+MODE=3
+WARP=0,18,64,13
+WARP_B=0,10,10,10
+WARP_C=0,10,12,10
+TMO=420
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7"
+ENV_B="MOEMON_DEBUG_PARTY=280:30,288:9"
+ENV_C="MOEMON_DEBUG_PARTY=283:30,286:9"
+EXPECT_A=("join: asking our player about 2 friend(s)" "join: our second Moemon (party slot 1) makes room" "join: battle now 3 seats (was 1)" "join: battler 2 comes in" "join: battler 4 comes in" "join: entrance done" "co-op: battle over, outcome 1")
+EXPECT_B=("join: got the battle (seat 1 of 3)" "co-op: battle over, outcome 1")
+EXPECT_C=("join: got the battle (seat 2 of 3)" "co-op: battle over, outcome 1")
+UNEXPECT_A=("BAD EGG" "crash")
+UNEXPECT_B=("BAD EGG" "crash" "Couldn't join")
+UNEXPECT_C=("BAD EGG" "crash" "Couldn't join")
+CHECK="python3 tools/test/scenarios/join_wild/check.py"
