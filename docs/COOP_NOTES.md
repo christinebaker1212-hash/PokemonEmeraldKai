@@ -739,6 +739,15 @@ cave, gMpDarkUiPal (the MP_TAG_UI_PAL slot) lets toasts / bubbles / "!" through 
 pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`, `mp cutgrass`, `mp worldobj ID`,
 `mp tileat X,Y`, `mp ashcount`. Tests: coop_flash, coop_world, coop_world2.
 
+## Tasks that destroy the next one (task.c NextLiveTask)
+
+DestroyTask unlinks a task but leaves its own `next`; RunTasks followed it after the task's function returned. A task
+that destroys itself and then (directly or through cleanup) the task after it made RunTasks run the dead one: MoeGatcha's
+opener (Task_EnterGatcha) calls CleanupOverworldWindowsAndTilemaps -> ClearMirageTowerPulseBlendEffect, which destroys the
+MIRAGE TOWER shimmer (priority 0xFF, often right after it) and frees its data: a crash on ROUTE 111 (UpdatePulseBlend
+reading NULL+4). RunTasks / RunTasksExcept now skip dead tasks (NextLiveTask), the shimmer task destroys itself without
+its data, and Task_EnterGatcha cleans up before destroying itself. Test gatcha_mirage (flags 334 + 157 = tower shown).
+
 ## Auto-updater and releases (src/platform/updater.c, tools/release)
 Runs in main() (sdl2.c) right after the window opens, before the save is used. update.txt comes from
 `https://github.com/<MOEMON_UPDATE_REPO>/releases/latest/download/update.txt` (no API, no rate limit): `version`,

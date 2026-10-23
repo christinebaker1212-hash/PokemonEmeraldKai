@@ -107,6 +107,19 @@ void DestroyTask(u8 taskId)
     }
 }
 
+// Moemon Co-op: the task to run after this one. A task that destroys itself keeps its old `next`, and if it also
+// destroyed that one (MoeGatcha's opener cleaning up the field killed the MIRAGE TOWER shimmer right after it), the
+// dead task ran anyway with its data freed: a crash. Dead tasks are skipped.
+static u8 NextLiveTask(u8 taskId)
+{
+    u8 next = gTasks[taskId].next, guard = 0;
+    while (next != TAIL_SENTINEL && next < NUM_TASKS && !gTasks[next].isActive && guard++ < NUM_TASKS)
+        next = gTasks[next].next;
+    if (next != TAIL_SENTINEL && (next >= NUM_TASKS || !gTasks[next].isActive))
+        next = TAIL_SENTINEL;
+    return next;
+}
+
 void RunTasks(void)
 {
     u8 taskId = FindFirstActiveTask();
@@ -116,7 +129,7 @@ void RunTasks(void)
         do
         {
             gTasks[taskId].func(taskId);
-            taskId = gTasks[taskId].next;
+            taskId = NextLiveTask(taskId);
         } while (taskId != TAIL_SENTINEL);
     }
 }
@@ -135,7 +148,7 @@ void RunTasksExcept(bool8 (*skip)(TaskFunc func))
             TaskFunc func = gTasks[taskId].func;
             if (!skip(func))
                 func(taskId);
-            next = gTasks[taskId].next;
+            next = NextLiveTask(taskId);
             taskId = next;
         } while (taskId != TAIL_SENTINEL);
     }

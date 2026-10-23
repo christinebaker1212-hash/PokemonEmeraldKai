@@ -4380,9 +4380,9 @@ static void Task_EnterGatcha(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
-        DestroyTask(taskId);
-        CleanupOverworldWindowsAndTilemaps();
+        CleanupOverworldWindowsAndTilemaps();   // (before destroying ourselves: it may destroy the task after us)
         SetMainCallback2(CB2_InitGatcha);
+        DestroyTask(taskId);
     }
 }
 

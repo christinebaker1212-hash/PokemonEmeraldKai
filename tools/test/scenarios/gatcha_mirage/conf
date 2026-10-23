@@ -1,0 +1,6 @@
+# MoeGatcha opened from CO-OP > MOEGATCHA on ROUTE 111 while the MIRAGE TOWER shimmers (a field task): it crashed on
+# opening (the opener destroyed itself and the shimmer task after it; RunTasks ran the dead one). Twice, then walking.
+MODE=1
+WARP=0,26,10,87
+TMO=120
+EXPECT_A=("mirage: on the field" "mirage: all done")
