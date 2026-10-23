@@ -1441,11 +1441,22 @@ void CB2_InitCoopSetupFromField(void)
 void MP_AutoSession_Update(void)
 {
     static bool8 sDone;
+    static u8 sTries;
+    static u16 sWait;
     const char *env;
     char buf[96], *mode, *name, *password;
 
     if (sDone)
-        return;
+    {
+        // a joiner that started before the host's room was there (a slow, busy test machine): try again a few times
+        u8 err = MP_Lobby_Error();
+        if (sTries == 0 || sTries >= 5 || MP_Lobby_State() != MP_LOBBY_ERROR
+         || (err != MP_LOBBY_ERR_NOT_FOUND && err != MP_LOBBY_ERR_UNREACHABLE) || ++sWait < 120)
+            return;
+        sWait = 0;
+        MPNet_Log("auto session: join failed (error %d), trying again", err);
+        MP_Lobby_Disconnect();
+    }
     sDone = TRUE;
     env = getenv("MOEMON_COOP_AUTO");
     if (!env)
@@ -1474,7 +1485,10 @@ void MP_AutoSession_Update(void)
     if (strcmp(mode, "host") == 0)
         MP_Lobby_CreateRoom(name, password ? password : "", FALSE);
     else
+    {
+        sTries++;
         MP_Lobby_JoinRoom(name, password ? password : "");
+    }
 }
 
 // Test harness helpers

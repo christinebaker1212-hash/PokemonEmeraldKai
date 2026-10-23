@@ -9,7 +9,10 @@ async def pipe(reader, writer):
     async def rd():
         last = 0.0
         while True:
-            data = await reader.read(65536)
+            try:
+                data = await reader.read(65536)
+            except (ConnectionError, OSError):   # a reset (closed with unread data) is a close too
+                data = b''
             due = max(time.monotonic() + D + random.random() * J, last)
             last = due
             await q.put((due, data))
@@ -24,8 +27,11 @@ async def pipe(reader, writer):
             if not data:
                 writer.close()
                 return
-            writer.write(data)
-            await writer.drain()
+            try:
+                writer.write(data)
+                await writer.drain()
+            except (ConnectionError, OSError):
+                return
     await asyncio.gather(rd(), wr(), return_exceptions=True)
 
 async def handle(cr, cw):
