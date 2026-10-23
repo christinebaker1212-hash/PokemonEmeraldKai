@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 200
+mp moves 0 15 45 93 104
+mp monmoves 0
+mp item 298 1
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press A 2
+wait 20
+pressuntil A partymenu 900
+wait 20
+pressuntil A summary 900
+wait 30
+shot summary
+press A 2
+wait 60
+shot forgot
+mash A 30 30
+wait 120
+mp monmoves 0
+mp bagqty 298
+quit

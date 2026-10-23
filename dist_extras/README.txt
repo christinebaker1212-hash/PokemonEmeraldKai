@@ -460,7 +460,8 @@ LEND FIELD MOVES  No CUT in your party? If a friend standing within 4 steps
                   has a Moemon that knows CUT, SURF, STRENGTH, ROCK SMASH,
                   WATERFALL or DIVE, the tree, rock, boulder or water works
                   with theirs ("ALICE's PELIPPER used SURF!") and they get a
-                  note. You still need the badge for the move.
+                  note. You still need the badge for the move. A Moemon
+                  holding the HM counts too (see HMs).
 RESCUE            Lose a battle with a friend within 10 steps and you don't
                   black out right away: they're asked to help. A REVIVE from
                   their bag brings your first Moemon back at half HP, a MAX
@@ -713,6 +714,20 @@ Walking together makes it happier: choosing it gives a little friendship
 you walk.
 
 
+HMs
+---
+  No HM restrictions: an HM move can be forgotten like any other move
+  (a TM can take its place, a new move at a level up, the MOVE DELETER),
+  and you can release a Moemon that knows SURF or DIVE.
+  A Moemon can HOLD an HM (BAG > TMs & HMs > GIVE, or its ITEM > GIVE):
+  it can then use that HM's move outside battle as if it knew it (its
+  party menu lists it, and trees, rocks, water and boulders ask as usual;
+  you still need the badge). In battle a held HM does nothing. Take it
+  back any time with ITEM > TAKE. A held HM never leaves you: when you
+  release, trade or store in the shared PC a Moemon holding one, the HM
+  goes back to your BAG first.
+
+
 DRESSING UP (CO-OP menu > LOOK)
 ---------------------------------
   SPRITE   any trainer or NPC from Emerald or FireRed/LeafGreen that walks
@@ -720,10 +735,12 @@ DRESSING UP (CO-OP menu > LOOK)
            the trainers you make in CREATE (one not made yet looks like
            DEFAULT). It's used
            everywhere: walking, running, biking, surfing, diving, fishing,
-           field moves. Actions a sprite has no frames for (fishing,
-           watering, field moves, decorating) show it standing, facing the
-           same way; bikes, surfing and diving still use Brendan's/May's.
-           CREATE trainers have walking, running and Mach Bike frames.
+           field moves. For the actions a sprite has no frames of its own
+           (bikes, surfing, fishing, watering, field moves, decorating) it
+           wears Brendan's or May's body for that action, in its own
+           clothes' colors, with its own head on top. CREATE trainers have
+           their own Mach Bike too. Pokemon sprites (Mew, Wingull...) ride
+           and surf as themselves. Running uses the sprite's walking frames.
            Scenes that show you as someone else (Battle Tent and Battle
            Frontier walk-ins, the Contest Hall, interviews) use your look too.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the

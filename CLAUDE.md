@@ -56,6 +56,8 @@ Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch mat
 mp_legacy_*.c, tools/moemon_legacy).
 Also the e-Reader Berries (items 377-388, berry numbers 47-58: use BERRY_SLOT / IsValidBerryType, never
 `item - FIRST_BERRY_INDEX`), the MoeGatcha daily STANDARD lineup and the PICKUP reroll vote.
+Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
+tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

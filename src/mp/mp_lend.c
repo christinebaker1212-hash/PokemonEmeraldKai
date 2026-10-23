@@ -70,7 +70,7 @@ static void ReadMine(struct LendMon *out)
             struct Pokemon *mon = &gPlayerParty[i];
             if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
                 break;
-            if (GetMonData(mon, MON_DATA_IS_EGG) || !MonKnowsMove(mon, sLendMoves[k]))
+            if (GetMonData(mon, MON_DATA_IS_EGG) || (!MonKnowsMove(mon, sLendMoves[k]) && MP_HeldHmMove(mon) != sLendMoves[k]))
                 continue;
             out[k].species = GetMonData(mon, MON_DATA_SPECIES);
             out[k].personality = GetMonData(mon, MON_DATA_PERSONALITY);

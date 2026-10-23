@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 200
+mp giveforeign 290:5
+mp giveforeign 290:6
+mp hold 0 339
+mp bagqty 339
+mp pc
+wait 60
+shot pcmenu
+press DOWN 2
+wait 10
+press A 2
+wait 120
+shot deposit
+press A 2
+wait 30
+shot submenu
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+shot release_sel
+press A 2
+wait 40
+shot ask
+press UP 2
+wait 6
+press A 2
+wait 120
+shot released
+mash A 6 30
+wait 60
+mp bagqty 339
+mp monmoves 0
+quit

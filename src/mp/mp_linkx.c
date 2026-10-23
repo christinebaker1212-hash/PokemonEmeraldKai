@@ -285,6 +285,8 @@ static void ApplyMix(void)
                 strncat(names, " & ", sizeof(names) - strlen(names) - 1);
             strncat(names, one, sizeof(names) - strlen(names) - 1);
         }
+    if (!names[0])
+        strcpy(names, "your friends");   // they left after sending their records
     MPNet_Log("mix: applied (new bases %d)", newBases);
     snprintf(msg, sizeof(msg), "Mixed records with %s!", names);
     if (sMix.manual || newBases)
@@ -318,7 +320,7 @@ static void UpdateMix(void)
     }
     else
         sMix.nextMix = 0;
-    if (sMix.active && sFrame - sMix.startFrame > MIX_TIMEOUT)
+    if (sMix.active && !sMix.applyPending && sFrame - sMix.startFrame > MIX_TIMEOUT)
         AbortMix();
     if (sMix.applyPending && InFieldAndFree() && gMain.callback2 == CB2_Overworld)
     {
@@ -803,7 +805,8 @@ void MP_Linkx_OnPlayerLeft(u8 id)
         return;
     sFriendDc[id].has = FALSE;
     sWorld[id].valid = FALSE;
-    if (sMix.active && (sMix.mask & (1 << id)))
+    // (once every record is here the mix goes ahead: it waits only for us to be free)
+    if (sMix.active && !sMix.applyPending && (sMix.mask & (1 << id)))
         AbortMix();
     if (sAsk.waitKind && sAsk.waitFrom == id)
         sAsk.waitKind = 0;

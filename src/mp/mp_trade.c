@@ -479,7 +479,10 @@ static void SendCommit(void)
     PutU16(buf + 3, sTrade.theirs.seq);
     buf[5] = sTrade.mine.monSlot != 0xFF;
     if (buf[5])
+    {
         memcpy(buf + 6, &gPlayerParty[sTrade.mine.monSlot], sizeof(struct Pokemon));
+        MP_StripHeldHm((struct Pokemon *)(buf + 6));   // a held HM stays here (ApplyTrade)
+    }
     SendTo(sTrade.partner, buf, buf[5] ? sizeof(buf) : 6);
     sTrade.sentCommit = TRUE;
 }
@@ -493,9 +496,10 @@ static void ApplyTrade(void)
     char msg[160], them[16];
     struct Offer theirs = sTrade.theirs;
 
-    // Give away ours
+    // Give away ours (a held HM goes back to the BAG)
     if (sTrade.mine.monSlot != 0xFF)
     {
+        MP_ReturnHeldHm(&gPlayerParty[sTrade.mine.monSlot]);
         ZeroMonData(&gPlayerParty[sTrade.mine.monSlot]);
         CompactPartySlots();
         CalculatePlayerPartyCount();

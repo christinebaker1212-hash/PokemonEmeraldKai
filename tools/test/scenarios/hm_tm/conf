@@ -1,0 +1,4 @@
+# no HM restrictions: BAG > TM10 > USE on the lead, who knows CUT first: it forgets CUT for HIDDEN POWER
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] monmoves: slot 0 species 280 moves 15 45 93 104" "[test] monmoves: slot 0 species 280 moves 237 45 93 104")

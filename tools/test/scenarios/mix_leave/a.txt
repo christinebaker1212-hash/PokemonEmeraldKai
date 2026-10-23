@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 mix: round
+press START 2
+wait 20
+shot a_menu
+watchlog player 2 left
+waitlog 900
+wait 60
+watchlog mix: applied
+press B 2
+waitlog 600
+wait 60
+quit

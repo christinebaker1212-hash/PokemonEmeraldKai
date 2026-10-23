@@ -284,6 +284,9 @@ NetLink_BeginRecordMix fakes a 2-4 player link), friend Secret Base visits (secr
 EventScript_MpVisitSecretBase), link Trainer Cards, Day Care co-op eggs (daycare.c MP_Daycare_TryCoopEgg,
 `<save>.coopegg`), shared roamer/weather, Hall of Fame friend teams. Debug: `mp mkbase 181`, `mp daycare N`,
 `mp coopegg`, `mp takeegg`, `mp hof`, `mp roamer`, `mp world`. All verified with two clients.
+Mixing rounds (mp_linkx.c UpdateMix): once every record has arrived (applyPending) the round is never dropped: neither
+the 30 s timeout nor a friend leaving cancels it; it waits until we're free on the field (test mix_leave: menu open
+while the friend quits).
 No UNION ROOM page any more: CO-OP > FRIENDS > a friend (mp_linkx.c MP_Linkx_OpenFriend) has GO TO, TRAINER CARD,
 VISIT SECRET BASE; CO-OP > BERRY GAMES (MP_Linkx_OpenUnion) has the blender and crush. Mixing is automatic only.
 Dewford trend online (dewford_trend.c, mp_linkx.c LX_TREND): TrySetTrendyPhrase always takes the phrase while
@@ -647,9 +650,41 @@ rooms' walk-ins, the multi battle rooms, the Contest Hall, Route 111's fall, Sou
 screen (easy_chat.c TryAddInterviewObjectEvents). With a look of their own (MP_LocalUsesCustomAvatar) they take
 OBJ_EVENT_GFX_MP_LOCAL: MP_PlayerStandInGfxId() in C, `special MP_SetPlayerStandInGfx` at the end of each script's
 player-gfx label (it swaps every VAR_OBJ_GFX_ID_n holding the player's own Brendan / May graphics). Actions with no
-frames in the look (field moves, fishing, watering, decorating; CREATE builds walk / run / Mach Bike only) keep the
-standing frames (mp_avatar.c StandInInfo). Debug: `mp easychat TYPE PERSON` (10 0 = Gabby and Ty's screen),
-`mp avatarstate N` (0-7).
+frames in the look are drawn on Brendan's / May's body (see "Action sprites for every look" below). Debug:
+`mp easychat TYPE PERSON` (10 0 = Gabby and Ty's screen), `mp avatarstate N` (0-7).
+
+## Action sprites for every look (mp_hybrid.c)
+NPC looks, RS BRENDAN / RS MAY and CREATE trainers have no bike, surf, field move, fishing, watering or decorating
+frames. mp_avatar.c ActionKind picks how a look shows each state: ACT_HYBRID builds them at run time from Brendan's
+(May's for a girl: ActionGender, the catalog's gender / the recipe's) frames for that state with the look's head
+(the rows above its neck: 23 in Kai's 16x32 sprites, 9 in 16x16 ones, the kit's band for CREATE; Kai sprites hold
+their arms beside the head, so skin there is left out) and the body's clothes recolored into the look's palette
+(BodyLut: skin 1-4 to the look's skin, Brendan's color groups to the look's body colors by size, the rest to the
+nearest color). The result uses the look's own walking palette (tag MP_LOCAL), so no palette merging. Where
+Brendan's head sits in each action frame and which pixels are his head is tools/moemon_hybrid/build.py ->
+src/mp/mp_hybrid_data.h (template match of the walking head, plus a taller top row and the hat outline; fishing
+frames keep the rod). CREATE keeps its own Mach Bike (ACT_KIT), Pokemon NPC looks ride / surf in their own frames
+(ACT_OWN) and stand for the rest (ACT_STANDIN), drawn sprite packs are unchanged, underwater is the shared dark
+shape. A BRENDAN / MAY look on the other gender's save gets that body's sprites with their own palette tag
+(MP_BODY 0x1133). Remote players build the same for bikes / surf (BuildStateInfo). Debug: `mp sprite NAME` (ini
+name), `mp actiondump FILE` (every state's frames + palette), `mp bike 2` (Acro Bike). Test: look_actions.
+Fixed with it: the player's sprite keeps the tile block it was made with when it changes state, so every local
+graphics info is sized for 32x32 frames (LOCAL_TILE_BYTES; a 16-wide look's bike frames overwrote other sprites);
+MP_SpriteRefreshImages takes old and new block sizes (the object's info size, which event_object_movement.c
+allocates and frees). The surf blob draws with colors 5, 6, 15 of the surfer's palette: a look whose palette isn't
+Brendan's / May's gets a blob palette of its own (MP_Avatar_SurfBlobPalette, tags 0x53C1/2). The player's water
+reflection takes the look's colors, washed out (LoadPlayerObjectReflectionPalette for the MP tags).
+
+## HMs (Moemon Kai): no restrictions, held HMs (mp_heldhm.c)
+HM moves can be forgotten anywhere (summary CanReplaceMove, evolution / battle / co-op level-up learning), the MOVE
+DELETER's last-SURF check and the PC's restricted release moves are gone. A Pokemon can hold an HM
+(MP_ItemCanBeHeld in the bag's GIVE paths) and use its field move as if it knew it: ScrCmd_checkpartymove,
+PartyHasMonWithSurf, the party menu's field moves (MENU_MP_TEAM drops out when 4 field moves + a held one fill the
+9-entry list) and LEND. Badges are still needed. A held HM never leaves the player: MP_ReturnHeldHm on release
+(ReleaseMon), link / in-game trades (TradeMons, both sides), co-op trades (ApplyTrade; the copy sent is stripped)
+and the shared PC (PutInMon); MP_GiveMonKeepOT strips one that arrives. Thief / Covet / Trick never take a held HM.
+Protocol 32. Debug: `mp monmoves SLOT`, `mp bagqty ITEM`, `mp pc`. Tests: hm_forget, hm_tm, hm_held, hm_surf,
+hm_release, hm_trade.
 
 ## Small adjustments (traded OT, tents, genders, target level)
 - Traded Moemon act as if the player were their OT (MP_OtActsAsOwn, mp_gatcha.c): battle_util.c IsMonDisobedient

@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 31   // 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
+#define MP_PROTOCOL_VERSION 32   // 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network

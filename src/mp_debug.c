@@ -207,6 +207,11 @@ int MP_TestCondition(const char *name)
         bool8 MP_Crush_DebugAsking(void);
         return MP_Crush_DebugAsking();
     }
+    if (strcmp(name, "summary") == 0)   // the summary screen is up (e.g. picking a move to forget)
+    {
+        bool8 MP_SummaryScreen_IsOpen(void);
+        return MP_SummaryScreen_IsOpen();
+    }
     if (strcmp(name, "nofade") == 0)
         return !gPaletteFade.active;
     if (strcmp(name, "action") == 0)
@@ -1182,6 +1187,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int page = 0;
         sscanf(arg, "%d", &page);
         MP_OpenMenuPageAt(page, 0);
+    }
+    else if (strcmp(cmd, "monmoves") == 0)
+    {
+        // monmoves SLOT - a party Moemon's moves and held item
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            printf("[test] monmoves: slot %d species %d moves %d %d %d %d held %d\n", slot,
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM));
+    }
+    else if (strcmp(cmd, "bagqty") == 0)
+    {
+        // bagqty ITEM - how many the bag has
+        int id = atoi(arg), n;
+        for (n = 0; n < 999 && CheckBagHasItem(id, n + 1); n++)
+            ;
+        printf("[test] bagqty %d: %d\n", id, n);
+    }
+    else if (strcmp(cmd, "pc") == 0)
+    {
+        // pc - the POKeMON STORAGE SYSTEM, as from a PC
+        void ShowPokemonStorageSystemPC(void);
+        LockPlayerFieldControls();
+        ShowPokemonStorageSystemPC();
     }
     else if (strcmp(cmd, "item") == 0)
     {

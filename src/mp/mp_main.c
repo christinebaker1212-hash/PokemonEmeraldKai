@@ -870,6 +870,7 @@ static void HandlePlayerLeft(u8 id)
 {
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return;
+    MPNet_Log("player %d left", id + 1);
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);

@@ -2116,7 +2116,7 @@ static void ItemMenu_Give(u8 taskId)
     {
         DisplayItemMessage(taskId, FONT_NORMAL, gText_CantWriteMail, HandleErrorMessage);
     }
-    else if (!GetItemImportance(gSpecialVar_ItemId))
+    else if (MP_ItemCanBeHeld(gSpecialVar_ItemId))   // Moemon Kai: HMs can be held
     {
         if (CalculatePlayerPartyCount() == 0)
         {
@@ -2309,7 +2309,7 @@ static void Task_ItemContext_GiveToParty(u8 taskId)
         StringExpandPlaceholders(gStringVar4, gText_Var1CantBeHeldHere);
         DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, HandleErrorMessage);
     }
-    else if (gBagPosition.pocket != KEYITEMS_POCKET && !GetItemImportance(gSpecialVar_ItemId))
+    else if (gBagPosition.pocket != KEYITEMS_POCKET && MP_ItemCanBeHeld(gSpecialVar_ItemId))   // Moemon Kai: HMs too
     {
         Task_FadeAndCloseBagMenu(taskId);
     }
@@ -2324,7 +2324,7 @@ static void Task_ItemContext_GiveToPC(u8 taskId)
 {
     if (ItemIsMail(gSpecialVar_ItemId) == TRUE)
         DisplayItemMessage(taskId, FONT_NORMAL, gText_CantWriteMail, HandleErrorMessage);
-    else if (gBagPosition.pocket != KEYITEMS_POCKET && !GetItemImportance(gSpecialVar_ItemId))
+    else if (gBagPosition.pocket != KEYITEMS_POCKET && MP_ItemCanBeHeld(gSpecialVar_ItemId))   // Moemon Kai: HMs too
         gTasks[taskId].func = Task_FadeAndCloseBagMenu;
     else
         PrintItemCantBeHeld(taskId);

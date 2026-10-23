@@ -2407,7 +2407,7 @@ static bool8 CanReplaceMove(void)
 {
     if (sMonSummaryScreen->firstMoveIndex == MAX_MON_MOVES
         || sMonSummaryScreen->newMove == MOVE_NONE
-        || IsMoveHm(sMonSummaryScreen->summary.moves[sMonSummaryScreen->firstMoveIndex]) != TRUE)
+        || TRUE)   // Moemon Kai: HM moves can be replaced like any other (a TM, a new move...)
         return TRUE;
     else
         return FALSE;
@@ -4878,4 +4878,10 @@ static void KeepMoveSelectorVisible(u8 firstSpriteId)
         gSprites[spriteIds[i]].data[1] = 0;
         gSprites[spriteIds[i]].invisible = FALSE;
     }
+}
+
+// Moemon Co-op (test harness): the summary screen is up and settled
+bool8 MP_SummaryScreen_IsOpen(void)
+{
+    return gMain.callback2 == MainCB2 && sMonSummaryScreen != NULL && !gPaletteFade.active;
 }

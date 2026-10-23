@@ -7324,6 +7324,7 @@ u8 *MonSpritesGfxManager_GetSpritePtr(u8 managerId, u8 spriteNum)
 u8 MP_GiveMonKeepOT(struct Pokemon *mon)
 {
     s32 i;
+    MP_StripHeldHm(mon);   // Moemon Kai: HMs never travel between games
     for (i = 0; i < PARTY_SIZE; i++)
     {
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE)

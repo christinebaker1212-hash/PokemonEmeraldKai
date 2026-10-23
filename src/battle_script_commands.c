@@ -2791,6 +2791,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
                     else if (gBattleMons[gBattlerAttacker].item != ITEM_NONE
                         || gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY
                         || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item)
+                        || MP_IS_ITEM_HM(gBattleMons[gBattlerTarget].item)   // Moemon Kai: a held HM stays put
                         || gBattleMons[gBattlerTarget].item == ITEM_NONE)
                     {
                         gBattlescriptCurrInstr++;
@@ -5860,7 +5861,7 @@ static void Cmd_yesnoboxlearnmove(void)
             else
             {
                 u16 move = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_MOVE1 + movePosition);
-                if (IsHMMove2(move))
+                if (FALSE)   // Moemon Kai: HM moves can be forgotten
                 {
                     PrepareStringBattle(STRINGID_HMMOVESCANTBEFORGOTTEN, gActiveBattler);
                     gBattleScripting.learnMoveState = 6;
@@ -9827,7 +9828,9 @@ static void Cmd_tryswapitems(void)
                  || gBattleMons[gBattlerAttacker].item == ITEM_ENIGMA_BERRY
                  || gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY
                  || IS_ITEM_MAIL(gBattleMons[gBattlerAttacker].item)
-                 || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item))
+                 || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item)
+                 || MP_IS_ITEM_HM(gBattleMons[gBattlerAttacker].item)   // Moemon Kai: a held HM stays put
+                 || MP_IS_ITEM_HM(gBattleMons[gBattlerTarget].item))
         {
             gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
         }
@@ -11532,7 +11535,7 @@ static void Task_MpCoopResolve(u8 taskId)
                 tTimer = 0;
                 tState = MPR_STOP_YESNO;
             }
-            else if (IsHMMove2(GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + pos)))
+            else if (FALSE)   // Moemon Kai: HM moves can be forgotten
             {
                 MpResMessage(data, sText_MpLearnHm, slot, move, 0, MPR_DELETE);
             }

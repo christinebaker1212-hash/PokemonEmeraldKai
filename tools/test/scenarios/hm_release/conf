@@ -1,0 +1,4 @@
+# held HMs never get lost: PC > DEPOSIT > the lead (holding HM01) > RELEASE: HM01 goes back to the BAG
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("[test] bagqty 339: 0" "held HM 339 back to the bag" "[test] bagqty 339: 1" "[test] monmoves: slot 0 species 290")

@@ -183,6 +183,7 @@ static void Local(const struct WorldChange *n)
 void MP_World_CutTreeGone(void)
 {
     struct WorldChange c = {WC_OBJ_GONE, 1, gSpecialVar_LastTalked};
+    MPNet_Log("world: tree %d cut", gSpecialVar_LastTalked);
     Local(&c);
 }
 

@@ -489,6 +489,13 @@ s8 MP_Battle_PeerId(void);
 // sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
 u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);
 bool8 MP_IsCoopPaletteTag(u16 tag);
+// Held HMs (Moemon Kai): a Pokemon holding an HM can use its field move; HMs never leave the player
+#define MP_IS_ITEM_HM(item) ((item) >= ITEM_HM01 && (item) <= ITEM_HM08)
+u16 MP_HeldHmMove(struct Pokemon *mon);          // the field move a held HM gives, MOVE_NONE if none
+bool8 MP_ReturnHeldHm(struct Pokemon *mon);      // a held HM back to the BAG (the Pokemon leaves us)
+bool8 MP_StripHeldHm(struct Pokemon *mon);       // a held HM removed (a copy that leaves us / arrives)
+bool8 MP_ItemCanBeHeld(u16 item);                // not an important item, or an HM
+
 #define MP_TAG_UI_PAL 0x53C0   // the co-op overlay sprite palette (mp_emote.c)
 #define MP_TAG_BLOB_PAL 0x53C1  // +gender: the surf blob's colors for a look whose palette lacks them
 u8 MP_Avatar_SurfBlobPalette(u8 id);   // id 0xFF = us; 0xFF = the surfer's own palette has them
