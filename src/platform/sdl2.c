@@ -899,9 +899,24 @@ bool8 Platform_IsTestMode(void)
     return sTestMode;
 }
 
+// shotburst PREFIX FRAMES [STEP]: a screenshot every STEP frames (default 1) for the next FRAMES frames, while the
+// script goes on (PREFIX_0000.bmp ...): to catch a glitch that lasts a few frames
+static char sBurstName[64];
+static int sBurstLeft, sBurstStep, sBurstIndex;
+
 static void TestHarnessStep(void)
 {
     char line[256];
+
+    if (sBurstLeft > 0)
+    {
+        if ((sBurstLeft-- % sBurstStep) == 0)
+        {
+            char name[96];
+            snprintf(name, sizeof(name), "%s_%04d", sBurstName, sBurstIndex++);
+            Platform_SaveScreenshot(name);
+        }
+    }
 
     if (sUntilName[0])
     {
@@ -985,6 +1000,14 @@ static void TestHarnessStep(void)
         else if (strcmp(cmd, "shot") == 0)
         {
             Platform_SaveScreenshot(arg);
+        }
+        else if (strcmp(cmd, "shotburst") == 0)
+        {
+            int frames = 0, step = 1;
+            sscanf(line, "%*s %63s %d %d", sBurstName, &frames, &step);
+            sBurstStep = step > 0 ? step : 1;
+            sBurstLeft = frames;
+            sBurstIndex = 0;
         }
         else if (strcmp(cmd, "waitfor") == 0 || strcmp(cmd, "pressuntil") == 0)
         {

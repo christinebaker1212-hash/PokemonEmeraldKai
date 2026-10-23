@@ -25,7 +25,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 
 ## Headless testing
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
-(commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, quit).
+(commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, shotburst PREFIX FRAMES [STEP] = a shot every
+frame while the script goes on, for glitches that last a few frames, quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
 `MOEMON_TEST_FPS=120` keeps several clients roughly in sync.

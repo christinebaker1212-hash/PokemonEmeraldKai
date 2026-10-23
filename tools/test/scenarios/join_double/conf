@@ -7,7 +7,7 @@ WARP_B=0,10,10,10
 TMO=400
 ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7"
 ENV_B="MOEMON_DEBUG_PARTY=280:30,288:9"
-EXPECT_A=("join: our player said yes" "join: our second Moemon (party slot 1) makes room" "join: battle now 2 seats (was 1)" "join: battler 2 comes in" "join: entrance done" "co-op: battle over, outcome 1")
+EXPECT_A=("join: rebuilding the screen behind black (fade 16)" "join: our player said yes" "join: our second Moemon (party slot 1) makes room" "join: battle now 2 seats (was 1)" "join: battler 2 comes in" "join: entrance done" "co-op: battle over, outcome 1")
 EXPECT_B=("join: got the battle (seat 1 of 2)" "join: we're in the battle" "co-op: battle over, outcome 1")
 UNEXPECT_A=("BAD EGG" "crash" "can't be joined")
 UNEXPECT_B=("BAD EGG" "crash" "Couldn't join" "can't be joined")

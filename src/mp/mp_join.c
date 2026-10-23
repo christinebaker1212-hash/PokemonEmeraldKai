@@ -161,12 +161,15 @@ static EWRAM_DATA struct
     struct LinkPlayer partyLink[JOIN_MAX_NEW];
     struct Pokemon partyMons[JOIN_MAX_NEW][MULTI_PARTY_SIZE];
     u8 needReady;                    // seats still to say READY
+    bool8 fadeOn;                    // our fade to black has started (another fade may have been running)
+    u8 shownWaiting;                 // whose name "Waiting for X…" shows (0xFF = none)
     u8 declined;                     // friends our player said NO to in this battle (they aren't asked again)
     // --- every game: battlers coming in (skipped by the screen rebuild until the entrance shows them) ---
     u8 entering;
     // --- a partner already in the battle ---
     u8 pstate;
     u16 ptimer;
+    bool8 pfadeOn;
     // --- the friend ---
     u8 fstate;
     s8 target;                       // who we asked (then the master)
@@ -376,7 +379,11 @@ static void ShowWaiting(void)
     for (i = 0; i < sJoin.askingCount; i++)
         if (!sJoin.gotParty[i])
             break;
-    NameAscii(a, sJoin.asking[i < sJoin.askingCount ? i : 0]);
+    i = sJoin.asking[i < sJoin.askingCount ? i : 0];
+    if (i == sJoin.shownWaiting)
+        return;   // already up (printing it again starts it over)
+    sJoin.shownWaiting = i;
+    NameAscii(a, i);
     snprintf(text, sizeof(text), "Waiting for %s…", a);
     MP_AsciiToGame(gDisplayedStringBattle, text, sizeof(gDisplayedStringBattle) - 1);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MSG);
@@ -580,6 +587,7 @@ bool8 MP_Join_TurnHook(void)
             MPNet_Log("join: our player said yes (%d players)", count);
             sJoin.timer = 0;
             sJoin.state = MJS_WAIT_PARTY;
+            sJoin.shownWaiting = 0xFF;
             ShowWaiting();
         }
         return TRUE;
@@ -645,12 +653,21 @@ bool8 MP_Join_TurnHook(void)
             return TRUE;
         ClearMessage();
         ConvertBattle();
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        sJoin.fadeOn = FALSE;
         sJoin.state = MJS_FADE;
-        return TRUE;
+        // fall through
     case MJS_FADE:
+        // The screen is rebuilt behind black. A fade still running (a solo Double Battle's recall leaves one) would
+        // turn ours down: wait for it, or the rebuild happens in plain view.
+        if (!sJoin.fadeOn)
+        {
+            if (BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK))
+                sJoin.fadeOn = TRUE;
+            return TRUE;
+        }
         if (!gPaletteFade.active)
         {
+            MPNet_Log("join: rebuilding the screen behind black (fade %d)", gPaletteFade.y);
             ReshowBattleScreenAfterMenu();
             sJoin.state = MJS_REBUILD;
         }
@@ -762,12 +779,20 @@ static void PartnerUpdate(void)
             SaveLinkPlayers(snap->plan.count);
             gBattleScripting.multiplayerId = GetMultiplayerId();
         }
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        sJoin.pfadeOn = FALSE;
         sJoin.pstate = PJS_FADE;
-        break;
+        // fall through
     case PJS_FADE:
+        // behind black (see MJS_FADE)
+        if (!sJoin.pfadeOn)
+        {
+            if (BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK))
+                sJoin.pfadeOn = TRUE;
+            break;
+        }
         if (!gPaletteFade.active)
         {
+            MPNet_Log("join: rebuilding the screen behind black (fade %d)", gPaletteFade.y);
             ReshowBattleScreenAfterMenu();
             sJoin.pstate = PJS_REBUILD;
         }

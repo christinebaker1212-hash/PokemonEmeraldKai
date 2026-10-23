@@ -9,7 +9,7 @@ TMO=360
 ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12,288:7"
 ENV_B="MOEMON_DEBUG_PARTY=283:40,288:9,286:8"
 ENV_C="MOEMON_DEBUG_PARTY=280:30,286:10"
-EXPECT_A=("join: asking our player about 2 friend(s)" "join: battle now 3 seats (was 1)" "join: seat 1 is ready" "join: seat 2 is ready" "join: battler 2 comes in" "join: battler 4 comes in" "co-op: battle over, outcome 1")
+EXPECT_A=("join: rebuilding the screen behind black (fade 16)" "join: asking our player about 2 friend(s)" "join: battle now 3 seats (was 1)" "join: seat 1 is ready" "join: seat 2 is ready" "join: battler 2 comes in" "join: battler 4 comes in" "co-op: battle over, outcome 1")
 EXPECT_B=("join: got the battle (seat 1 of 3)" "join: we are seat 1 of 3, bringing 2" "co-op: battle over, outcome 1")
 EXPECT_C=("join: got the battle (seat 2 of 3)" "join: we are seat 2 of 3, bringing 2" "co-op: battle over, outcome 1")
 UNEXPECT_A=("BAD EGG" "crash")
