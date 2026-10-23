@@ -945,6 +945,27 @@ enum {
    SENDTASK_STATE_UNUSED_STATE      = 5,
 };
 
+// Moemon Co-op: a battle that becomes a link battle while it runs (friends joining, mp_join.c). The link's send /
+// receive tasks start past the cable's start-up wait: every game in the link is in the battle already.
+void MP_StartBattleLinkTasks(void)
+{
+    sLocalFastBusy = 0;
+    CreateTasksForSendRecvLinkBuffers();
+    gTasks[sLinkSendTaskId].tState = SENDTASK_STATE_COUNT_PLAYERS;
+}
+
+// Moemon Co-op: nothing waiting in the battle link's own buffers (sent or received, not handled yet)
+bool8 MP_BattleLinkBuffersEmpty(void)
+{
+    if (!(gBattleTypeFlags & BATTLE_TYPE_LINK))
+        return TRUE;
+    if (!FuncIsActiveTask(Task_HandleSendLinkBuffersData) || !FuncIsActiveTask(Task_HandleCopyReceivedLinkBuffersData))
+        return TRUE;
+    return gTasks[sLinkSendTaskId].tCurrentBlock_Start == gTasks[sLinkSendTaskId].tCurrentBlock_End
+        && gTasks[sLinkReceiveTaskId].tCurrentBlock_Start == gTasks[sLinkReceiveTaskId].tCurrentBlock_End
+        && sLocalFastBusy == 0;
+}
+
 static void Task_HandleSendLinkBuffersData(u8 taskId)
 {
     u16 numPlayers;

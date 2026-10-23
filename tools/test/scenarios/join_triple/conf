@@ -1,0 +1,18 @@
+# Double, then triple. ALICE battles a wild ZIGZAGOON; BOB joins (a co-op double: three Moemon each). Then CARL talks
+# to BOB (not the leader: he's sent on to ALICE) and joins too: the battle becomes a Triple Battle, two Moemon each.
+# BOB's third Moemon sits the rest out: it goes back to his party as it was. Everyone's party comes back whole.
+MODE=3
+WARP=0,10,10,10
+WARP_B=0,10,10,11
+WARP_C=0,10,11,11
+TMO=360
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12"
+ENV_B="MOEMON_DEBUG_PARTY=283:40,288:9,286:8"
+ENV_C="MOEMON_DEBUG_PARTY=280:30,286:10"
+EXPECT_A=("join: battle now 2 seats (was 1)" "join: battle now 3 seats (was 2)" "join: seat 1 is ready" "join: seat 2 is ready" "join: battler 4 comes in" "co-op: battle over, outcome 1")
+EXPECT_B=("join: got the battle (seat 1 of 2)" "join: the battle grows to 3 players" "join: our party slot 2 sits the rest out" "join: our screen is rebuilt for 3 players" "co-op: battle over, outcome 1")
+EXPECT_C=("join: asking the battle's leader, player 1" "join: got the battle (seat 2 of 3)" "join: we're in the battle" "co-op: battle over, outcome 1")
+UNEXPECT_A=("BAD EGG" "crash")
+UNEXPECT_B=("BAD EGG" "crash" "joining anyway")
+UNEXPECT_C=("BAD EGG" "crash" "Couldn't join")
+CHECK="python3 tools/test/scenarios/join_wild/check.py"

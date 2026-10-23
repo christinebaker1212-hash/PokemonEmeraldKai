@@ -1285,6 +1285,15 @@
 	ptrvalue \ptr
 	.endm
 
+	@ Moemon Co-op: friends joining a battle in progress (mp_join.c). MPJOIN_NEXT_PLAYER / MPJOIN_NEXT_FOE pick the
+	@ next battler coming in (gBattleScripting.battler; jump to ptr when there's none), MPJOIN_TRAINER_PIC slides the
+	@ friend's trainer in, MPJOIN_BALL_THROW has them throw their Pokemon's ball
+	.macro mpjoin mode:req, ptr=NULL
+	.byte B_SCR_OP_MPJOIN
+	.byte \mode
+	ptrvalue \ptr
+	.endm
+
 /* various command changed to more readable macros*/
 	.macro cancelmultiturnmoves battler:req
 	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES

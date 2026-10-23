@@ -27,6 +27,7 @@
 #include "global.h"
 #include "random.h"
 #include "mp.h"
+#include "mp_join.h"
 #include "item.h"
 #include "map_name_popup.h"
 #include "platform/gamepad.h"
@@ -212,6 +213,9 @@ static struct
     struct LearnLater learn[MAX_LEARN];
     u8 learnCount;
     u8 evoQueue;           // party slots (original order) to try evolving
+    u8 preEvo;             // real party slots that leveled up but left the battle when friends joined (mp_join.c)
+    struct LearnLater learnOut[MAX_LEARN];   // ... and moves they wanted to learn (real party slots)
+    u8 learnOutCount;
     bool8 learnPromptPending;
     bool8 haveLoseText;
     u8 loseText[LOSE_TEXT_MAX + 1];
@@ -1123,6 +1127,8 @@ static void BeginCoopBattleGroup(u8 seat, u8 count, const u8 *players)
     sCoop.gotResult = FALSE;
     sCoop.resultWait = 0;
     sCoop.evoQueue = 0;
+    sCoop.preEvo = 0;
+    sCoop.learnOutCount = 0;
     ArrangeLocalParty();
     // our own EXP bonus for the master's EXP script (each player gets their own)
     if (seat != 0)
@@ -1418,13 +1424,39 @@ void MP_Coop_MirrorExp(u8 battler, u8 monId, s16 gainedExp)
 static void CB2_MpCoopEvolve(void);
 static void CB2_MpCoopFinish(void);
 
+static void AddLearnEntry(u8 slot, u16 move)
+{
+    u8 i;
+    for (i = 0; i < sCoop.learnCount; i++)
+        if (sCoop.learn[i].slot == slot && sCoop.learn[i].move == move)
+            return;
+    if (sCoop.learnCount < MAX_LEARN)
+    {
+        sCoop.learn[sCoop.learnCount].slot = slot;
+        sCoop.learn[sCoop.learnCount].move = move;
+        sCoop.learnCount++;
+    }
+}
+
+static void AddLearnOut(u8 slot, u16 move)
+{
+    if (slot < PARTY_SIZE && sCoop.learnOutCount < MAX_LEARN)
+    {
+        sCoop.learnOut[sCoop.learnOutCount].slot = slot;
+        sCoop.learnOut[sCoop.learnOutCount].move = move;
+        sCoop.learnOutCount++;
+    }
+}
+
 // Puts our (up to three) Pokémon back into the real party
 static void RestoreParty(const struct Pokemon *finalMons, u8 leveledBits)
 {
     u8 i;
 
     LoadPlayerParty();
-    sCoop.evoQueue = 0;
+    // the ones that leveled up before friends joined and sat the rest out still evolve after a win
+    sCoop.evoQueue = sCoop.outcome == B_OUTCOME_WON ? sCoop.preEvo : 0;
+    sCoop.preEvo = 0;
     for (i = 0; i < sCoop.localCount; i++)
     {
         u8 slot = sCoop.origIndex[i];
@@ -1435,6 +1467,10 @@ static void RestoreParty(const struct Pokemon *finalMons, u8 leveledBits)
         if (leveledBits & (1 << i))
             sCoop.evoQueue |= 1 << slot;
     }
+    // moves the ones that left the battle (friends joined) wanted to learn
+    for (i = 0; i < sCoop.learnOutCount; i++)
+        AddLearnEntry(sCoop.learnOut[i].slot, sCoop.learnOut[i].move);
+    sCoop.learnOutCount = 0;
     CalculatePlayerPartyCount();
 }
 
@@ -1518,6 +1554,7 @@ static void SendResult(void)
 static void FinishLink(void)
 {
     sCoop.playerBonusHeard = 0;   // the next battle's come fresh
+    MP_Join_OnBattleEnd();
     gMpCoopBattle = FALSE;
     MP_Battle_CloseLink();
     gBattleTypeFlags = BATTLE_TYPE_TRAINER;
@@ -1743,6 +1780,9 @@ void MP_Coop_OnBattleAborted(void)
         MP_Events_OnWildEnd(B_OUTCOME_CAUGHT, &sCoop.catches[i]);
     }
     sCoop.catchCount = 0;
+    sCoop.preEvo = 0;
+    sCoop.learnOutCount = 0;
+    MP_Join_OnBattleEnd();
     gMpCoopBattle = FALSE;
     gMpCoopWild = FALSE;
     sCoop.caught = CAUGHT_NONE;
@@ -3176,4 +3216,692 @@ static void OnResolve(const u8 *data, u32 len)
     }
     MPNet_Log("co-op levels: %d box(es), %d move(s) to choose", nb, nl);
     MP_Coop_StartResolveTask(nb, boxSlot, before, nl, learnSlot, learnMove);
+}
+
+// ---------------------------------------------------------------------------
+// Joining a battle in progress (mp_join.c runs the protocol and the screens; the parties change here)
+//
+// A solo battle becomes a co-op double (or a triple when two friends join at once), a co-op double becomes a triple.
+// Each player keeps the Pokémon they see first in the battle's party menu (the one out now first): the first 3 that
+// can battle in a double, the first 2 in a triple. The rest stay in the player's real party exactly as they are now
+// (SavePlayerParty / the saved copy), and anything that leveled up among them still gets to evolve after the battle.
+
+
+static void SetBattleControllerFor(u8 battler, void (*setter)(void))
+{
+    u8 saved = gActiveBattler;
+    gActiveBattler = battler;
+    setter();
+    gActiveBattler = saved;
+}
+
+static u8 JoinPick(const u8 *order, u8 n, u8 size, struct Pokemon *party, u8 *pick)
+{
+    u8 i, got = 0;
+    for (i = 0; i < n && got < size; i++)
+        if (order[i] < PARTY_SIZE && IsUsableMon(&party[order[i]]))
+            pick[got++] = order[i];
+    return got;
+}
+
+// The battle's party menu order for battler 0 of a solo battle (the one out first)
+static void SoloMenuOrder(u8 *order)
+{
+    u8 i;
+    for (i = 0; i < PARTY_SIZE / 2; i++)
+    {
+        order[i * 2] = gBattleStruct->battlerPartyOrders[0][i] >> 4;
+        order[i * 2 + 1] = gBattleStruct->battlerPartyOrders[0][i] & 0xF;
+    }
+    // (it always starts with the active one; make sure even if it got out of step)
+    if (order[0] != gBattlerPartyIndexes[0])
+    {
+        u8 k, active = gBattlerPartyIndexes[0];
+        for (k = 0; k < PARTY_SIZE && order[k] != active; k++)
+            ;
+        if (k < PARTY_SIZE)
+        {
+            for (; k > 0; k--)
+                order[k] = order[k - 1];
+            order[0] = active;
+        }
+    }
+}
+
+static u8 RemapBits(u8 bits, const u8 *map)
+{
+    u8 i, out = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if ((bits & (1 << i)) && map[i] < PARTY_SIZE)
+            out |= 1 << map[i];
+    return out;
+}
+
+static u16 sJoinFillerSpecies(struct Pokemon *party, u8 n, u16 trainerId)
+{
+    struct Pokemon *src = n >= 2 ? &party[n - 2] : &party[0];
+    return PickFillerSpecies(src, n, trainerId);
+}
+
+static void JoinSetLinkPlayers(const u8 *seatPlayer, u8 count, const struct LinkPlayer *lp)
+{
+    static const u8 sIds[3] = {0, 2, 4};
+    u8 i;
+    for (i = 0; i < count; i++)
+    {
+        gLinkPlayers[i] = lp[i];
+        gLinkPlayers[i].id = sIds[i];
+    }
+    for (i = count; i < MAX_LINK_PLAYERS; i++)
+    {
+        memset(&gLinkPlayers[i], 0, sizeof(gLinkPlayers[i]));
+        // (like the battle's start: the trainer's name, a wild battle's TRAINER_NONE)
+        StringCopyN(gLinkPlayers[i].name, gTrainers[gTrainerBattleOpponent_A].trainerName, PLAYER_NAME_LENGTH);
+        gLinkPlayers[i].name[PLAYER_NAME_LENGTH] = EOS;
+        gLinkPlayers[i].language = GAME_LANGUAGE;
+        gLinkPlayers[i].gender = MALE;
+    }
+    if (count == 2)
+    {
+        gLinkPlayers[2].id = 1;
+        gLinkPlayers[3].id = 3;
+    }
+    else
+    {
+        gLinkPlayers[3].id = 3;
+    }
+}
+
+// Battlers, positions and controllers for `count` seats; `mySeat` = our seat (0 = master). Existing controllers are
+// left alone when `keep` says so (they're idle at a turn's start).
+static void JoinSetBattlers(u8 count, u8 mySeat, u8 keepMask)
+{
+    static const u8 sPos[TRIPLE_BATTLERS_COUNT] = {
+        B_POSITION_PLAYER_LEFT, B_POSITION_OPPONENT_LEFT, B_POSITION_PLAYER_RIGHT,
+        B_POSITION_OPPONENT_RIGHT, B_POSITION_PLAYER_CENTER, B_POSITION_OPPONENT_CENTER,
+    };
+    u8 b, n = count * 2;
+    gBattlersCount = n;
+    for (b = 0; b < n; b++)
+    {
+        gBattlerPositions[b] = sPos[b];
+        if (keepMask & (1 << b))
+            continue;
+        if (b & BIT_SIDE)
+            SetBattleControllerFor(b, mySeat == 0 ? SetControllerToOpponent : SetControllerToLinkOpponent);
+        else
+            SetBattleControllerFor(b, (b / 2 == mySeat) ? SetControllerToPlayer : SetControllerToLinkPartner);
+    }
+    if (count == 3)
+    {
+        for (b = 0; b < n; b++)
+            BufferBattlePartyCurrentOrderBySide(b, 0);
+    }
+    else
+    {
+        BufferBattlePartyCurrentOrderBySide(0, 0);
+        BufferBattlePartyCurrentOrderBySide(1, 0);
+        BufferBattlePartyCurrentOrderBySide(2, 1);
+        BufferBattlePartyCurrentOrderBySide(3, 1);
+    }
+}
+
+bool8 MP_Coop_JoinIsSolo(void)
+{
+    return !gMpCoopBattle;
+}
+
+u8 MP_Coop_SeatCount(void)
+{
+    return gMpCoopBattle ? sCoop.count : 1;
+}
+
+u8 MP_Coop_SeatPlayer(u8 seat)
+{
+    return seat < 3 ? sCoop.seatPlayer[seat] : 0xFF;
+}
+
+// The Pokémon a joiner brings (their CO-OP TEAM, else their first that can battle), as their seat will hold them
+u8 MP_Coop_JoinerPick(u8 seatSize, u8 *slots)
+{
+    return MP_Team_BattleSlots(slots, seatSize, IsUsableMon);
+}
+
+u8 MP_Coop_Seat(void)
+{
+    return gMpCoopBattle ? sCoop.seat : 0;
+}
+
+// An ordinary trainer friends may join: not a gym leader, admin, rival, Team Aqua / Magma or other story battle.
+// (Route trainers who sign up for MATCH CALL after the battle use the continue-script mode too: they're fine.)
+bool8 MP_Coop_JoinTrainerOk(void)
+{
+    u16 trainer = gMpCoopBattle ? sCoop.trainerId : gTrainerBattleOpponent_A;
+    u8 mode = gMpCoopBattle ? sCoop.mode : GetTrainerBattleMode();
+    if (trainer == 0 || trainer >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainer))
+        return FALSE;
+    switch (gTrainers[trainer].trainerClass)
+    {
+    case TRAINER_CLASS_RIVAL:       // MAY / BRENDAN, WALLY, STEVEN
+    case TRAINER_CLASS_TEAM_AQUA:
+    case TRAINER_CLASS_TEAM_MAGMA:
+        return FALSE;
+    }
+    return mode == TRAINER_BATTLE_SINGLE || mode == TRAINER_BATTLE_CONTINUE_SCRIPT || mode == TRAINER_BATTLE_REMATCH;
+}
+
+// The trainer's "you won" line, for a friend's game
+const u8 *MP_Coop_JoinLoseText(void)
+{
+    if (gMpCoopWild || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return NULL;
+    return GetTrainerALoseText();
+}
+
+// Master: the conversion. joinMons[j] / joinCount[j] / joinLink[j] / joinBonus[j] for the new seats in order.
+void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (*joinMons)[MULTI_PARTY_SIZE],
+                               const u8 *joinCount, const struct LinkPlayer *joinLink, const u16 *joinBonus,
+                               struct MpJoinPlan *plan)
+{
+    struct Pokemon *oldParty = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);
+    struct Pokemon *oldEnemy = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);
+    u8 map[PARTY_SIZE], emap[PARTY_SIZE];
+    u8 oldCount = MP_Coop_SeatCount(), count = oldCount + newPlayers;
+    u8 newSize = count == 3 ? 2 : 3, oldSize = oldCount == 2 ? 3 : PARTY_SIZE;
+    u8 s, i, k, b, newLeveled = 0, keepMask = 0;
+    u8 oldOrig[MULTI_PARTY_SIZE];
+    bool8 wasCoop = gMpCoopBattle, wild;
+    struct LinkPlayer lp[3];
+
+    memset(plan, 0, sizeof(*plan));
+    memset(map, JOIN_UNUSED, sizeof(map));
+    memset(emap, JOIN_UNUSED, sizeof(emap));
+    memcpy(oldParty, gPlayerParty, sizeof(struct Pokemon) * PARTY_SIZE);
+    memcpy(oldEnemy, gEnemyParty, sizeof(struct Pokemon) * PARTY_SIZE);
+    memcpy(oldOrig, sCoop.origIndex, sizeof(oldOrig));
+    plan->oldCount = oldCount;
+    plan->count = count;
+
+    if (!wasCoop)
+    {
+        // A solo battle: what the party is right now is the real party (nothing was set aside at its start)
+        SavePlayerParty();
+        sCoop.mode = (gBattleTypeFlags & BATTLE_TYPE_TRAINER) ? GetTrainerBattleMode() : MODE_WILD;
+        sCoop.trainerId = (gBattleTypeFlags & BATTLE_TYPE_TRAINER) ? gTrainerBattleOpponent_A : 0;
+        sCoop.seatPlayer[0] = gMpLocalId;
+        sCoop.money = 0;
+        sCoop.learnCount = 0;
+        sCoop.catchCount = 0;
+        sCoop.caught = CAUGHT_NONE;
+        sCoop.preEvo = 0;
+        sCoop.learnOutCount = 0;
+        memset(sCoop.seatLeveled, 0, sizeof(sCoop.seatLeveled));
+        sCoop.partnerLeveled = 0;
+        sCoop.gotResult = FALSE;
+        sCoop.resultWait = 0;
+        sCoop.evoQueue = 0;
+        sCoop.haveLoseText = FALSE;
+        sCoop.afterBattle = gMain.savedCallback;   // CB2_EndWildBattle / CB2_EndTrainerBattle (MP_Join JoinableReason)
+        gMain.savedCallback = CB2_MpCoopEndBattle;
+        sCoop.wildDouble = FALSE;
+        sCoop.wildExtra = 0;
+    }
+    wild = sCoop.mode == MODE_WILD;
+    for (s = 0; s < oldCount; s++)
+        plan->seatPlayer[s] = sCoop.seatPlayer[s];
+    for (s = 0; s < newPlayers; s++)
+        plan->seatPlayer[oldCount + s] = joiner[s];
+    plan->mode = sCoop.mode;
+    plan->trainerId = sCoop.trainerId;
+
+    // --- the players' side ---
+    ZeroPlayerPartyMons();
+    memset(plan->oldLocalToNew, JOIN_UNUSED, sizeof(plan->oldLocalToNew));
+    for (s = 0; s < oldCount; s++)
+    {
+        u8 order[PARTY_SIZE], pick[MULTI_PARTY_SIZE], n, base = s * newSize, oldBase = s * oldSize, got;
+        if (!wasCoop)
+        {
+            SoloMenuOrder(order);
+            n = PARTY_SIZE;
+        }
+        else
+        {
+            // a co-op seat: the one out now, then the seat's others in order
+            u8 active = gBattlerPartyIndexes[s * 2];
+            n = 0;
+            if (active >= oldBase && active < oldBase + oldSize)
+                order[n++] = active;
+            for (k = oldBase; k < oldBase + oldSize; k++)
+                if (k != active)
+                    order[n++] = k;
+        }
+        got = JoinPick(order, n, newSize, oldParty, pick);
+        for (k = 0; k < got; k++)
+        {
+            gPlayerParty[base + k] = oldParty[pick[k]];
+            map[pick[k]] = base + k;
+            if (wasCoop)
+                plan->oldLocalToNew[s][pick[k] - oldBase] = base + k;
+        }
+        // left out: their state now goes back to their owner's real party; level-ups still evolve later
+        for (k = oldBase; k < oldBase + oldSize; k++)
+        {
+            bool8 kept = map[k] != JOIN_UNUSED;
+            if (kept)
+            {
+                if (gLeveledUpInBattle & (1 << k))
+                    newLeveled |= 1 << map[k];
+                continue;
+            }
+            if (!wasCoop)
+            {
+                if (gLeveledUpInBattle & (1 << k))
+                    sCoop.preEvo |= 1 << k;
+            }
+            else if (s == 0)
+            {
+                if (oldOrig[k - oldBase] < PARTY_SIZE && GetMonData(&oldParty[k], MON_DATA_SPECIES) != SPECIES_NONE)
+                {
+                    gSaveBlock1Ptr->playerParty[oldOrig[k - oldBase]] = oldParty[k];
+                    if (gLeveledUpInBattle & (1 << k))
+                        sCoop.preEvo |= 1 << oldOrig[k - oldBase];
+                }
+            }
+            else if (gLeveledUpInBattle & (1 << k))
+            {
+                plan->droppedLeveled[s] |= 1 << (k - oldBase);
+            }
+        }
+        if (s == 0)
+        {
+            memset(sCoop.origIndex, 0xFF, sizeof(sCoop.origIndex));
+            for (k = 0; k < got; k++)
+                sCoop.origIndex[k] = wasCoop ? oldOrig[pick[k] - oldBase] : pick[k];
+            sCoop.localCount = got;
+        }
+    }
+    for (s = 0; s < newPlayers; s++)
+    {
+        u8 base = (oldCount + s) * newSize;
+        for (k = 0; k < joinCount[s] && k < newSize; k++)
+            gPlayerParty[base + k] = joinMons[s][k];
+        lp[oldCount + s] = joinLink[s];
+        sCoop.playerBonus[joiner[s]] = joinBonus[s];
+        sCoop.playerBonusHeard |= 1 << joiner[s];
+    }
+    // moves to learn after the battle (by battle party slot): a kept Pokémon's follow it to its new slot, a
+    // left-out one's go with it to its real party (ours now, a partner's through the plan)
+    {
+        u8 n = 0;
+        for (i = 0; i < sCoop.learnCount; i++)
+        {
+            u8 slot = sCoop.learn[i].slot;
+            u16 move = sCoop.learn[i].move;
+            if (slot < PARTY_SIZE && map[slot] != JOIN_UNUSED)
+            {
+                sCoop.learn[n].slot = map[slot];
+                sCoop.learn[n].move = move;
+                n++;
+            }
+            else if (wasCoop && slot < oldCount * oldSize)
+            {
+                u8 owner = slot / oldSize, local = slot - owner * oldSize;
+                if (owner == 0)
+                    AddLearnOut(oldOrig[local], move);
+                else if (plan->droppedLearnCount[owner] < JOIN_MAX_LEARN_OUT)
+                {
+                    plan->droppedLearnSlot[owner][plan->droppedLearnCount[owner]] = local;
+                    plan->droppedLearnMove[owner][plan->droppedLearnCount[owner]] = move;
+                    plan->droppedLearnCount[owner]++;
+                }
+            }
+        }
+        sCoop.learnCount = n;
+    }
+    gLeveledUpInBattle = newLeveled;
+    for (b = 0; b < MAX_BATTLERS_COUNT; b += 2)
+        if (b < gBattlersCount && gBattlerPartyIndexes[b] < PARTY_SIZE && map[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
+            gBattlerPartyIndexes[b] = map[gBattlerPartyIndexes[b]];
+    for (i = 0; i < ARRAY_COUNT(gSentPokesToOpponent); i++)
+        gSentPokesToOpponent[i] = RemapBits(gSentPokesToOpponent[i], map);
+    gWishFutureKnock.knockedOffMons[B_SIDE_PLAYER] = RemapBits(gWishFutureKnock.knockedOffMons[B_SIDE_PLAYER], map);
+    for (b = 0; b < MAX_BATTLERS_COUNT; b += 2)
+        if (gWishFutureKnock.wishMonId[b] < PARTY_SIZE && map[gWishFutureKnock.wishMonId[b]] != JOIN_UNUSED)
+            gWishFutureKnock.wishMonId[b] = map[gWishFutureKnock.wishMonId[b]];
+    gBattleStruct->expGetterMonId = 0;
+
+    // --- the trainer's (or wild) side ---
+    {
+        u8 order[PARTY_SIZE], n = 0, actives[3], nActive = 0, slotOf[PARTY_SIZE];
+        u8 alive[PARTY_SIZE], nAlive = 0, rest[PARTY_SIZE], nRest = 0;
+        // out now, in battler order
+        for (b = 1; b < gBattlersCount; b += 2)
+            if (!(gAbsentBattlerFlags & (1 << b)) && gBattlerPartyIndexes[b] < PARTY_SIZE
+             && GetMonData(&oldEnemy[gBattlerPartyIndexes[b]], MON_DATA_HP) != 0)
+                actives[nActive++] = gBattlerPartyIndexes[b];
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            bool8 isActive = FALSE;
+            for (k = 0; k < nActive; k++)
+                if (actives[k] == i)
+                    isActive = TRUE;
+            if (isActive)
+                continue;
+            if (!wild && GetMonData(&oldEnemy[i], MON_DATA_HP) != 0 && GetMonData(&oldEnemy[i], MON_DATA_SPECIES) != SPECIES_NONE)
+                alive[nAlive++] = i;
+            else
+                rest[nRest++] = i;
+        }
+        // TEAM PADDING: one extra Moemon in a team-up, never more (a co-op battle got it at its start)
+        if (!wild && !wasCoop && MP_TrainerPadding() && nActive + nAlive < PARTY_SIZE && nRest > 0)
+        {
+            u8 slot = rest[--nRest];   // an empty or fainted slot takes it
+            u8 total = nActive + nAlive;
+            struct Pokemon *src = nAlive > 0 ? &oldEnemy[alive[nAlive - 1]] : &oldEnemy[actives[0]];
+            u16 species = PickFillerSpecies(src, total, sCoop.trainerId);
+            CreateMon(&oldEnemy[slot], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
+                      Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+            // before the ace (the last one), like a co-op team-up's padding
+            if (nAlive > 0)
+            {
+                u8 ace = alive[nAlive - 1];
+                alive[nAlive - 1] = slot;
+                alive[nAlive++] = ace;
+            }
+            else
+            {
+                alive[nAlive++] = slot;
+            }
+            plan->padded = TRUE;
+            MPNet_Log("join: TEAM PADDING adds species %d", species);
+        }
+        for (k = 0; k < nActive; k++)
+            order[n++] = actives[k];
+        for (k = 0; k < nAlive; k++)
+            order[n++] = alive[k];
+        for (k = 0; k < nRest; k++)
+            order[n++] = rest[k];
+        // order[] = the trainer's Pokémon in sending-out order. Lay them out for the new battle:
+        if (count == 3)
+        {
+            // a triple: battlers 1 / 3 / 5 on slots 0 / 1 / 2, the rest a shared pool
+            for (k = 0; k < PARTY_SIZE; k++)
+                slotOf[k] = k;
+        }
+        else
+        {
+            // a double: battler 1 sends slots 0-2, battler 3 slots 3-5 (the next one for battler 3 goes first)
+            static const u8 sDouble[PARTY_SIZE] = {0, 3, 1, 4, 2, 5};
+            for (k = 0; k < PARTY_SIZE; k++)
+                slotOf[k] = sDouble[k];
+        }
+        if (wild)
+        {
+            // wild Pokémon keep their places: the ones out stay on their battlers, empty slots stay empty
+            for (k = 0; k < PARTY_SIZE; k++)
+                slotOf[k] = JOIN_UNUSED;
+        }
+        ZeroEnemyPartyMons();
+        if (!wild)
+        {
+            for (k = 0; k < PARTY_SIZE; k++)
+            {
+                gEnemyParty[slotOf[k]] = oldEnemy[order[k]];
+                emap[order[k]] = slotOf[k];
+            }
+        }
+        else
+        {
+            // one wild battler per seat side position: b1 keeps slot 0; a wild double's second (battler 3) goes to
+            // the slot the new layout gives battler 3 (1 in a triple, 3 in a double)
+            for (k = 0; k < PARTY_SIZE; k++)
+                if (GetMonData(&oldEnemy[k], MON_DATA_SPECIES) != SPECIES_NONE)
+                    emap[k] = JOIN_UNUSED;
+            for (b = 1; b < gBattlersCount; b += 2)
+            {
+                u8 idx = gBattlerPartyIndexes[b], to = (count == 3) ? b / 2 : (b == 1 ? 0 : 3);
+                if (idx < PARTY_SIZE && GetMonData(&oldEnemy[idx], MON_DATA_SPECIES) != SPECIES_NONE)
+                {
+                    gEnemyParty[to] = oldEnemy[idx];
+                    emap[idx] = to;
+                }
+            }
+        }
+        gBattleStruct->givenExpMons = RemapBits(gBattleStruct->givenExpMons, emap);
+        gWishFutureKnock.knockedOffMons[B_SIDE_OPPONENT] = RemapBits(gWishFutureKnock.knockedOffMons[B_SIDE_OPPONENT], emap);
+        for (b = 1; b < MAX_BATTLERS_COUNT; b += 2)
+            if (gWishFutureKnock.wishMonId[b] < PARTY_SIZE && emap[gWishFutureKnock.wishMonId[b]] != JOIN_UNUSED)
+                gWishFutureKnock.wishMonId[b] = emap[gWishFutureKnock.wishMonId[b]];
+        for (b = 1; b < gBattlersCount; b += 2)
+            if (gBattlerPartyIndexes[b] < PARTY_SIZE && emap[gBattlerPartyIndexes[b]] != JOIN_UNUSED)
+                gBattlerPartyIndexes[b] = emap[gBattlerPartyIndexes[b]];
+    }
+
+    // --- the battlers ---
+    for (b = 0; b < gBattlersCount; b++)
+        keepMask |= 1 << b;
+    {
+        u8 oldBattlers = gBattlersCount, newCountB = count * 2, absent = gAbsentBattlerFlags;
+        for (b = oldBattlers; b < newCountB; b++)
+        {
+            u8 *ptr = (u8 *)&gBattleMons[b];
+            for (i = 0; i < sizeof(struct BattlePokemon); i++)
+                ptr[i] = 0;
+            gBattleStruct->monToSwitchIntoId[b] = PARTY_SIZE;
+            gBattleStruct->AI_monToSwitchIntoId[b] = PARTY_SIZE;
+            gChosenActionByBattler[b] = B_ACTION_NONE;
+            gChosenMoveByBattler[b] = MOVE_NONE;
+            if (b & BIT_SIDE)
+            {
+                // the trainer's next Pokémon for this battler, if it has one
+                s32 first, last;
+                u8 idx = JOIN_UNUSED;
+                if (count == 3)
+                    first = 3, last = PARTY_SIZE, idx = b / 2;
+                else
+                    first = 3, last = PARTY_SIZE, idx = 3;
+                if (wild || idx >= PARTY_SIZE || !IsUsableMon(&gEnemyParty[idx]))
+                {
+                    // nothing to send: an empty spot (an empty slot, so nothing is drawn there)
+                    u8 empty = JOIN_UNUSED;
+                    for (i = 0; i < PARTY_SIZE; i++)
+                        if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) == SPECIES_NONE)
+                        {
+                            empty = i;
+                            break;
+                        }
+                    gBattlerPartyIndexes[b] = empty != JOIN_UNUSED ? empty : idx;
+                    absent |= 1 << b;
+                }
+                else
+                {
+                    gBattlerPartyIndexes[b] = idx;
+                    absent |= 1 << b;
+                    plan->entering |= 1 << b;
+                }
+                (void)first;
+                (void)last;
+            }
+            else
+            {
+                gBattlerPartyIndexes[b] = (b / 2) * newSize;
+                absent |= 1 << b;
+                plan->entering |= 1 << b;
+            }
+        }
+        gAbsentBattlerFlags = absent;
+        gBattleStruct->absentBattlerFlags = absent;
+    }
+
+    for (s = 0; s < oldCount; s++)
+    {
+        if (s == 0)
+            NetLink_FillLocalLinkPlayer(&lp[0]);
+        else
+            lp[s] = gLinkPlayers[s];
+    }
+    lp[0].id = 0;
+    gMpCoopBattle = TRUE;
+    gMpCoopWild = wild;
+    gIsTripleBattle = count == 3;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK | BATTLE_TYPE_MULTI
+                     | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_IS_MASTER | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE);
+    gLinkType = LINKTYPE_BATTLE;
+    sCoop.isMaster = TRUE;
+    sCoop.seat = 0;
+    sCoop.count = count;
+    for (s = 0; s < 3; s++)
+        sCoop.seatPlayer[s] = s < count ? plan->seatPlayer[s] : 0xFF;
+    sCoop.partner = sCoop.seatPlayer[1];
+    JoinSetLinkPlayers(sCoop.seatPlayer, count, lp);
+    JoinSetBattlers(count, 0, keepMask);
+
+    plan->environment = gBattleEnvironment;
+    plan->padded = plan->padded || wasCoop;
+    plan->battleTypeFlags = gBattleTypeFlags & ~(BATTLE_TYPE_IS_MASTER | BATTLE_TYPE_LINK_IN_BATTLE);
+    for (b = 0; b < MAX_BATTLERS_COUNT; b++)
+        plan->partyIdx[b] = gBattlerPartyIndexes[b];
+    plan->absent = gAbsentBattlerFlags;
+    plan->weather = gBattleWeather;
+    for (s = 0; s < count; s++)
+        plan->linkPlayers[s] = gLinkPlayers[s];
+    Free(oldParty);
+    Free(oldEnemy);
+    MPNet_Log("join: battle now %d seats (was %d), entering %02x, absent %02x, party %d %d %d %d %d %d, foes %d %d %d %d %d %d",
+              count, oldCount, plan->entering, plan->absent,
+              GetMonData(&gPlayerParty[0], MON_DATA_SPECIES), GetMonData(&gPlayerParty[1], MON_DATA_SPECIES),
+              GetMonData(&gPlayerParty[2], MON_DATA_SPECIES), GetMonData(&gPlayerParty[3], MON_DATA_SPECIES),
+              GetMonData(&gPlayerParty[4], MON_DATA_SPECIES), GetMonData(&gPlayerParty[5], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));
+}
+
+// A game other than the master: the battle's battlers, positions, controllers and party slots as the plan says
+// (keepMask: battlers already in this game's battle keep their controllers)
+static void JoinSetBattlersKeep(const struct MpJoinPlan *plan, u8 seat, u8 keepMask)
+{
+    u8 b;
+    gBattleTypeFlags = plan->battleTypeFlags | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE);
+    gIsTripleBattle = plan->count == 3;
+    gMpCoopBattle = TRUE;
+    gMpCoopWild = plan->mode == MODE_WILD;
+    for (b = 0; b < MAX_BATTLERS_COUNT; b++)
+        gBattlerPartyIndexes[b] = plan->partyIdx[b];
+    gAbsentBattlerFlags = plan->absent;
+    JoinSetBattlers(plan->count, seat, keepMask);
+    JoinSetLinkPlayers(plan->seatPlayer, plan->count, plan->linkPlayers);
+}
+
+void MP_Coop_JoinSetBattlers(const struct MpJoinPlan *plan, u8 seat)
+{
+    JoinSetBattlersKeep(plan, seat, 0);
+}
+
+static void JoinSetSeats(const struct MpJoinPlan *plan, u8 seat)
+{
+    u8 s;
+    sCoop.isMaster = FALSE;
+    sCoop.seat = seat;
+    sCoop.count = plan->count;
+    for (s = 0; s < 3; s++)
+        sCoop.seatPlayer[s] = s < plan->count ? plan->seatPlayer[s] : 0xFF;
+    sCoop.partner = sCoop.seatPlayer[0];
+    sCoop.mode = plan->mode;
+    sCoop.trainerId = plan->trainerId;
+}
+
+// The friend who joined: their real party is set aside (the battle's party is the master's snapshot) and their
+// picks are their seat's Pokémon
+void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText)
+{
+    u8 i;
+    SavePlayerParty();   // LoadPlayerParty brings the real party back afterwards
+    JoinSetSeats(plan, seat);
+    sCoop.caught = CAUGHT_NONE;
+    sCoop.catchCount = 0;
+    memset(sCoop.seatLeveled, 0, sizeof(sCoop.seatLeveled));
+    sCoop.money = 0;
+    sCoop.learnCount = 0;
+    sCoop.learnOutCount = 0;
+    sCoop.partnerLeveled = 0;
+    sCoop.gotResult = FALSE;
+    sCoop.resultWait = 0;
+    sCoop.evoQueue = 0;
+    sCoop.preEvo = 0;
+    memset(sCoop.origIndex, 0xFF, sizeof(sCoop.origIndex));
+    for (i = 0; i < nPicks && i < MULTI_PARTY_SIZE && i < (plan->count == 3 ? 2 : 3); i++)
+        sCoop.origIndex[i] = picks[i];
+    sCoop.localCount = i;
+    sCoop.haveLoseText = FALSE;
+    if (loseText != NULL)
+    {
+        for (i = 0; i < LOSE_TEXT_MAX && loseText[i] != EOS; i++)
+            sCoop.loseText[i] = loseText[i];
+        sCoop.loseText[i] = EOS;
+        sCoop.haveLoseText = i > 0;
+    }
+    sCoop.afterBattle = NULL;
+    sCoop.role = ROLE_NONE;
+    sCoop.challenged = FALSE;
+    sCoop.accepted = FALSE;
+    sCoop.wildDouble = FALSE;
+    gMpCoopBattle = TRUE;
+    gMpCoopWild = plan->mode == MODE_WILD;
+    gIsTripleBattle = plan->count == 3;
+    gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
+    gLinkType = LINKTYPE_BATTLE;
+    gMain.savedCallback = CB2_MpCoopEndBattle;
+    MPNet_Log("join: we are seat %d of %d, bringing %d (slots %d %d %d)", seat, plan->count, sCoop.localCount,
+              sCoop.origIndex[0], sCoop.origIndex[1], sCoop.origIndex[2]);
+}
+
+// A partner already in the battle (a co-op double becoming a triple): their seat shrinks to two. The ones left out
+// go back to their real party now, as the master's game had them (oldSeatMons), and still get to evolve / learn
+// their moves after a win.
+void MP_Coop_JoinApplyPartner(const struct MpJoinPlan *plan, u8 seat, const struct Pokemon *party,
+                              const struct Pokemon *enemy, const struct Pokemon *oldSeatMons)
+{
+    u8 newSize = plan->count == 3 ? 2 : 3, newOrig[MULTI_PARTY_SIZE], i, kept = 0, keepMask = 0, b;
+
+    memset(newOrig, 0xFF, sizeof(newOrig));
+    for (i = 0; i < sCoop.localCount && i < MULTI_PARTY_SIZE; i++)
+    {
+        u8 to = plan->oldLocalToNew[seat][i], real = sCoop.origIndex[i];
+        if (to != JOIN_UNUSED)
+        {
+            u8 local = to - seat * newSize;
+            if (local < MULTI_PARTY_SIZE)
+            {
+                newOrig[local] = real;
+                kept++;
+            }
+            continue;
+        }
+        if (real < PARTY_SIZE && GetMonData((struct Pokemon *)&oldSeatMons[i], MON_DATA_SPECIES) != SPECIES_NONE)
+        {
+            gSaveBlock1Ptr->playerParty[real] = oldSeatMons[i];
+            if (plan->droppedLeveled[seat] & (1 << i))
+                sCoop.preEvo |= 1 << real;
+            MPNet_Log("join: our party slot %d sits the rest out", real);
+        }
+    }
+    for (i = 0; i < plan->droppedLearnCount[seat] && i < JOIN_MAX_LEARN_OUT; i++)
+    {
+        u8 local = plan->droppedLearnSlot[seat][i];
+        if (local < MULTI_PARTY_SIZE)
+            AddLearnOut(sCoop.origIndex[local], plan->droppedLearnMove[seat][i]);
+    }
+    memcpy(sCoop.origIndex, newOrig, sizeof(sCoop.origIndex));
+    sCoop.localCount = kept;
+    memcpy(gPlayerParty, party, sizeof(struct Pokemon) * PARTY_SIZE);
+    memcpy(gEnemyParty, enemy, sizeof(struct Pokemon) * PARTY_SIZE);
+    JoinSetSeats(plan, seat);
+    for (b = 0; b < gBattlersCount; b++)
+        keepMask |= 1 << b;
+    for (b = gBattlersCount; b < plan->count * 2; b++)
+        memset(&gBattleMons[b], 0, sizeof(gBattleMons[b]));
+    JoinSetBattlersKeep(plan, seat, keepMask);
+    MPNet_Log("join: our seat %d now has %d (slots %d %d), %d players", seat, kept, sCoop.origIndex[0], sCoop.origIndex[1], plan->count);
 }

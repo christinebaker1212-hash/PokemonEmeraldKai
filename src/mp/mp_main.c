@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include "mp_net.h"
+#include "mp_join.h"
 #include "global.h"
 #include "mp.h"
 #include "main.h"
@@ -891,6 +892,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Battle_OnPlayerLeft(id);
     MP_Spectate_OnPlayerLeft(id);
     MP_Coop_OnPlayerLeft(id);
+    MP_Join_OnPlayerLeft(id);
     ClearPlayer(id);
 }
 
@@ -1135,6 +1137,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_World_OnRelay(from, data, len);
     else if (data[0] >= MPR_GATCHA_FIRST && data[0] < MPR_GATCHA_FIRST + 4)
         MP_Gatcha_OnRelay(from, data, len);
+    else if (data[0] >= MPR_JOIN_FIRST && data[0] < MPR_JOIN_FIRST + 8)
+        MP_Join_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1674,6 +1678,7 @@ void MP_FrameUpdate(void)
     if (gMpLocalId >= 0)
     {
         MP_Coop_Update();
+        MP_Join_Update();
         MP_Dex_Update();
         MP_Trade_Update();
         MP_Gatcha_VoteUpdate();

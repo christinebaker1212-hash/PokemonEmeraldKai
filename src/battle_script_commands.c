@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp/mp_join.h"
 #include "battle.h"
 #include "battle_message.h"
 #include "battle_anim.h"
@@ -331,6 +332,7 @@ static void Cmd_mpstatgroup(void);
 static void Cmd_mpcoopresolve(void);
 static void Cmd_mpweathergroup(void);
 static void Cmd_mpweathermsg(void);
+static void Cmd_mpjoin(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -587,6 +589,7 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_MPCOOPRESOLVE]                   = Cmd_mpcoopresolve,                           //0xFA
     [B_SCR_OP_MPWEATHERGROUP]                  = Cmd_mpweathergroup,                          //0xFB
     [B_SCR_OP_MPWEATHERMSG]                    = Cmd_mpweathermsg,                            //0xFC
+    [B_SCR_OP_MPJOIN]                          = Cmd_mpjoin,                                  //0xFD
 };
 
 struct StatFractions
@@ -11289,6 +11292,39 @@ static void Cmd_mpweathermsg(void)
     else
     {
         *shown = MpWeatherKind();
+    }
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
+
+// Moemon Co-op (master): friends joining a battle in progress come in (BattleScript_MpJoinEntrance, mp_join.c)
+static void Cmd_mpjoin(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+
+    if (gBattleControllerExecFlags)
+        return;
+    switch (mode)
+    {
+    case MPJOIN_NEXT_PLAYER:
+    case MPJOIN_NEXT_FOE:
+        if (!MP_Join_NextEntering(mode == MPJOIN_NEXT_FOE))
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        break;
+    case MPJOIN_TRAINER_PIC:
+        gActiveBattler = gBattleScripting.battler;
+        BtlController_EmitDrawTrainerPic(B_COMM_TO_CONTROLLER);
+        MarkBattlerForControllerExec(gActiveBattler);
+        break;
+    case MPJOIN_BALL_THROW:
+        gActiveBattler = gBattleScripting.battler;
+        gAbsentBattlerFlags &= ~gBitTable[gActiveBattler];   // (switchinanim does this for the others)
+        BtlController_EmitIntroTrainerBallThrow(B_COMM_TO_CONTROLLER);
+        MarkBattlerForControllerExec(gActiveBattler);
+        break;
     }
     gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }

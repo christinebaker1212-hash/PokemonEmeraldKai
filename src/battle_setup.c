@@ -2037,6 +2037,12 @@ MainCallback MP_EndWildBattleCallback(void)
     return CB2_EndWildBattle;
 }
 
+// Moemon Co-op: an ordinary trainer battle's end (friends may join only those, mp_join.c)
+MainCallback MP_EndTrainerBattleCallback(void)
+{
+    return CB2_EndTrainerBattle;
+}
+
 // ...or a normal wild battle when no friend could jump in
 void MP_StartNormalWildBattle(void)
 {

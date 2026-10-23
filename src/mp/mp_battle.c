@@ -682,6 +682,63 @@ void MP_Battle_CloseLink(void)
     FinishBattle();
 }
 
+// Friends joining a battle in progress (mp_join.c). The games already in the battle's link keep everything queued
+// and add the newcomers' link ids; a solo battle's game (fresh) opens its link here, and so does a joiner's. All of
+// them are in the battle already, so every game counts as ready (no start-up wait), and the sync barriers count
+// on from the battle's own (seq: the master's, which every game in the battle has reached).
+void MP_Battle_JoinLink(const u8 *players, u8 count, u8 linkId, u16 seq, bool8 fresh)
+{
+    u8 i, oldCount = fresh ? 0 : sNet.linkCount;
+    if (fresh)
+    {
+        memset(&sNet, 0, sizeof(sNet));
+        sNet.battleActive = TRUE;
+        sNet.startTask = TASK_NONE;
+        sNet.opened = TRUE;
+        sNet.mySyncSeq = seq;
+    }
+    sNet.linkId = linkId;
+    sNet.linkCount = count;
+    for (i = 0; i < count && i < NET_MAX_LINK; i++)
+    {
+        sNet.peers[i] = players[i];
+        if (i != linkId && i >= oldCount)
+        {
+            sNet.peerSyncSeq[i] = sNet.mySyncSeq;
+            sNet.qHead[i] = sNet.qCount[i] = 0;
+        }
+    }
+    sNet.peer = players[linkId == 0 ? 1 : 0];
+    StringCopyN(sNet.oppName, gMpPlayers[sNet.peer].name, MP_NAME_LEN);
+    sNet.oppName[MP_NAME_LEN] = EOS;
+    sNet.readyMask = OthersMask();
+    sNet.remoteMask = OthersMask();
+    gNetLinkActive = TRUE;
+    gWirelessCommType = 0;
+    gReceivedRemoteLinkPlayers = TRUE;
+    MPNet_Log("join link: %d games (was %d), we are link %d, sync %d", count, oldCount, linkId, sNet.mySyncSeq);
+}
+
+u16 MP_Battle_SyncSeq(void)
+{
+    return sNet.mySyncSeq;
+}
+
+// Nothing from the battle's link waiting to be shown (the game has caught up with the master)
+bool8 MP_Battle_LinkDrained(void)
+{
+    u8 i;
+    if (sNet.sCount != 0)
+        return FALSE;
+    for (i = 0; i < MAX_LINK_PLAYERS; i++)
+        if (sNet.recvFlags[i])
+            return FALSE;
+    for (i = 0; i < NET_MAX_LINK; i++)
+        if (sNet.qCount[i] != 0)
+            return FALSE;
+    return sNet.pendingSync == 0;
+}
+
 // ---------------------------------------------------------------------------
 // Network messages
 

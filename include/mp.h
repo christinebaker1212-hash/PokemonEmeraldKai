@@ -858,6 +858,7 @@ void MP_Coop_OnStartTrainerBattle(void);
 void MP_Coop_OnBattleAborted(void);
 bool8 MP_Coop_IsMaster(void);
 extern bool8 gMpCoopWild;            // TRUE while a co-op wild double runs (on both games)
+extern bool8 gMpJoinedBattle;   // mp_join.c: friends joined this battle while it ran
 bool8 MP_Coop_TryWildTeamUp(void);   // a land wild encounter: team up with the closest friend in the grass
 void MP_Coop_SetWildEnemyParty(void);
 bool8 MP_Coop_WildHasTwo(void);
@@ -923,6 +924,7 @@ enum {
     MPR_MINIGAME_FIRST = 200,  // berry blender / berry crush with friends (mp_minigame.c)
     MPR_WORLD_FIRST = 220,     // cut trees, smashed rocks, boulders, cut grass, soot (mp_world.c)
     MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
+    MPR_JOIN_FIRST = 240,      // joining a friend's battle in progress (mp_join.c)
 };
 
 // mp_world.c: map changes and lights shared by friends on the same map

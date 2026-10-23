@@ -62,6 +62,8 @@
 #include "constants/songs.h"
 #include "constants/trainers.h"
 #include "cable_club.h"
+#include "mp/mp_join.h"
+#include "reshow_battle_screen.h"
 
 extern const struct BgTemplate gBattleBgTemplates[];
 extern const struct WindowTemplate *const gBattleWindowTemplates[];
@@ -627,6 +629,78 @@ void CB2_InitBattle(void)
     {
         CB2_InitBattleInternal();
     }
+}
+
+// Moemon Co-op: a friend joining a battle in progress (mp_join.c). Their game goes straight into the battle as the
+// master's snapshot has it, like a link game that isn't the master once the intro is over, and the screen is built
+// the way it is after a menu (the friends coming in stay hidden until their entrance).
+void MP_StartBattleLinkTasks(void);   // battle_controllers.c
+void CB2_MpJoinBattle(void)
+{
+    MoveSaveBlocks_ResetHeap();
+    AllocateBattleResources();
+    AllocateBattleSpritesData();
+    AllocateMonSpritesGfx();
+    RecordedBattle_ClearFrontierPassFlag();
+
+    SetHBlankCallback(NULL);
+    SetVBlankCallback(NULL);
+    CpuFill32(0, (void *)(VRAM), VRAM_SIZE);
+    ScanlineEffect_Clear();
+    ResetPaletteFade();
+    ResetTasks();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    // InitBattleBgsVideo's registers (the screen rebuild below sets up the backgrounds and windows), and the
+    // windows as the intro's slide leaves them: everything shown
+    DisableInterrupts(INTR_FLAG_HBLANK);
+    EnableInterrupts(INTR_FLAG_VBLANK | INTR_FLAG_VCOUNT | INTR_FLAG_TIMER3 | INTR_FLAG_SERIAL);
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+    SetGpuReg(REG_OFFSET_BLDY, 0);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJWIN_ON | DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    SetGpuReg(REG_OFFSET_MOSAIC, 0);
+    SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ | WININ_WIN0_CLR | WININ_WIN1_BG_ALL | WININ_WIN1_OBJ | WININ_WIN1_CLR);
+    SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG_ALL | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR | WINOUT_WINOBJ_BG_ALL | WINOUT_WINOBJ_OBJ | WINOUT_WINOBJ_CLR);
+    gBattle_WIN0H = DISPLAY_WIDTH;
+    gBattle_WIN0V = WIN_RANGE(0, DISPLAY_HEIGHT);
+    gBattle_WIN1H = 0;
+    gBattle_WIN1V = 0;
+
+    // like SetUpBattleVarsAndBirchZigzagoon, without the cable's link setup (the master's snapshot has the rest)
+    {
+        s32 i;
+        gBattleMainFunc = BeginBattleIntroDummy;
+        for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+        {
+            gBattlerControllerFuncs[i] = BattleControllerDummy;
+            gBattlerPositions[i] = 0xFF;
+            gActionSelectionCursor[i] = 0;
+            gMoveSelectionCursor[i] = 0;
+        }
+        gBattleControllerExecFlags = 0;
+        ClearBattleAnimationVars();
+        ClearBattleMonForms();
+        gActiveBattler = 0;
+        gBattleOutcome = 0;
+        gHitMarker = 0;
+        gBattleResources->battleScriptsStack->size = 0;
+        gBattleResources->battleCallbackStack->size = 0;
+        for (i = 0; i < BATTLE_COMMUNICATION_ENTRIES_COUNT; i++)
+            gBattleCommunication[i] = 0;
+        gBattleScripting.battleStyle = gSaveBlock2Ptr->optionsBattleStyle;
+    }
+    MP_Join_ApplySnapshot();
+    gReservedSpritePaletteCount = BATTLER_SPRITE_PALETTES();
+
+    gMain.inBattle = TRUE;
+    gSaveBlock2Ptr->frontier.disableRecordBattle = TRUE;
+    gPreBattleCallback1 = gMain.callback1;
+    gMain.callback1 = BattleMainCB1;
+    MP_StartBattleLinkTasks();
+    gBattleTypeFlags |= BATTLE_TYPE_LINK_IN_BATTLE;
+    MP_Join_CreateReadyTask();
+    ReshowBattleScreenAfterMenu();
 }
 
 static void CB2_InitBattleInternal(void)
@@ -4085,6 +4159,7 @@ static void TryDoEventsBeforeFirstTurn(void)
     *(&gBattleStruct->absentBattlerFlags) = gAbsentBattlerFlags;
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
     gBattleMainFunc = HandleTurnActionSelectionState;
+    MP_Join_OnTurnStart();   // Moemon Co-op: friends asking to join are asked about first (mp_join.c)
     ResetSentPokesToOpponentValue();
 
     for (i = 0; i < BATTLE_COMMUNICATION_ENTRIES_COUNT; i++)
@@ -4192,6 +4267,7 @@ void BattleTurnPassed(void)
     *(&gBattleStruct->absentBattlerFlags) = gAbsentBattlerFlags;
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
     gBattleMainFunc = HandleTurnActionSelectionState;
+    MP_Join_OnTurnStart();   // Moemon Co-op: friends asking to join are asked about first (mp_join.c)
     gRandomTurnNumber = Random();
 
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
@@ -4350,6 +4426,8 @@ static void HandleTurnActionSelectionState(void)
 {
     s32 i;
 
+    if (MP_Join_TurnHook())   // Moemon Co-op: a friend asked to join (mp_join.c)
+        return;
     gBattleCommunication[ACTIONS_CONFIRMED_COUNT] = 0;
     for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
     {

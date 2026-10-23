@@ -219,6 +219,29 @@ int MP_TestCondition(const char *name)
         bool8 MP_Test_IsChoosingAction(void);
         return gMain.inBattle && MP_Test_IsChoosingAction();
     }
+    if (strcmp(name, "joinprompt") == 0)   // "X wants to join your battle! Is this okay?" with its YES / NO up
+    {
+        bool8 MP_Join_PromptUp(void);
+        return gMain.inBattle && MP_Join_PromptUp();
+    }
+    if (strcmp(name, "friendbattle") == 0)   // another player is in a battle (their state says so)
+    {
+        int i;
+        for (i = 0; i < MP_MAX_PLAYERS; i++)
+            if (i != gMpLocalId && gMpPlayers[i].present && (gMpPlayers[i].state.flags & MPF_IN_BATTLE))
+                return 1;
+        return 0;
+    }
+    if (strncmp(name, "joinpending", 11) == 0)   // joinpendingN: N friends asked to join our battle (next turn's prompt)
+    {
+        u8 MP_Join_PendingCount(void);
+        return MP_Join_PendingCount() >= atoi(name + 11);
+    }
+    if (strcmp(name, "watchmenu") == 0)    // SPECTATE / BET / JOIN / CANCEL in front of a battling friend
+    {
+        bool8 MP_Spectate_ChoiceUp(void);
+        return MP_Spectate_ChoiceUp();
+    }
     return 0;
 }
 
@@ -1433,6 +1456,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "compensate") == 0)
     {
         MP_CompensateBadEggs();
+    }
+    else if (strcmp(cmd, "partyids") == 0)
+    {
+        // partyids - each party Moemon's identity (species:personality:OT ID) and level / EXP, to check nothing was
+        // lost, swapped, doubled or turned into a BAD EGG
+        int i;
+        printf("[test] partyids:");
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            struct Pokemon *mon = &gPlayerParty[i];
+            if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
+                continue;
+            printf(" %d:%08x:%08x:L%d:E%u%s", (int)GetMonData(mon, MON_DATA_SPECIES), (unsigned)GetMonData(mon, MON_DATA_PERSONALITY),
+                   (unsigned)GetMonData(mon, MON_DATA_OT_ID), (int)GetMonData(mon, MON_DATA_LEVEL), (unsigned)GetMonData(mon, MON_DATA_EXP),
+                   GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG) ? ":BADEGG" : "");
+        }
+        printf("\n");
     }
     else if (strcmp(cmd, "party") == 0)
     {

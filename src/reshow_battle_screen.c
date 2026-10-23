@@ -16,6 +16,7 @@
 #include "battle_interface.h"
 #include "battle_anim.h"
 #include "data.h"
+#include "mp/mp_join.h"
 
 // this file's functions
 static void CB2_ReshowBattleScreenAfterMenu(void);
@@ -147,19 +148,19 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
 
             opponentBattler = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
             species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[opponentBattler]], MON_DATA_SPECIES);
-            SetBattlerShadowSpriteCallback(opponentBattler, species);
+            SetBattlerShadowSpriteCallback(opponentBattler, MP_Join_IsEntering(opponentBattler) ? SPECIES_NONE : species);
 
             if (IsDoubleBattle())
             {
                 opponentBattler = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);
                 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[opponentBattler]], MON_DATA_SPECIES);
-                SetBattlerShadowSpriteCallback(opponentBattler, species);
+                SetBattlerShadowSpriteCallback(opponentBattler, MP_Join_IsEntering(opponentBattler) ? SPECIES_NONE : species);
             }
             if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the center foe
             {
                 opponentBattler = GetBattlerAtPosition(B_POSITION_OPPONENT_CENTER);
                 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[opponentBattler]], MON_DATA_SPECIES);
-                SetBattlerShadowSpriteCallback(opponentBattler, species);
+                SetBattlerShadowSpriteCallback(opponentBattler, MP_Join_IsEntering(opponentBattler) ? SPECIES_NONE : species);
             }
 
             ActionSelectionCreateCursorAt(gActionSelectionCursor[gBattlerInMenuId], 0);
@@ -222,6 +223,12 @@ static bool8 LoadBattlerSpriteGfx(u8 battler)
 
 static void CreateBattlerSprite(u8 battler)
 {
+    // Moemon Co-op: a friend who joined (or the trainer's next Pokemon for a new spot) comes in afterwards
+    if (MP_Join_IsEntering(battler))
+    {
+        gBattlerSpriteIds[battler] = MAX_SPRITES;
+        return;
+    }
     if (battler < gBattlersCount)
     {
         u8 posY;
@@ -327,5 +334,7 @@ static void CreateHealthboxSprite(u8 battler)
             if (GetMonData(&gPlayerParty[gBattlerPartyIndexes[battler]], MON_DATA_HP) == 0)
                 SetHealthboxSpriteInvisible(healthboxSpriteId);
         }
+        if (MP_Join_IsEntering(battler))   // Moemon Co-op: its box shows when it comes in
+            SetHealthboxSpriteInvisible(healthboxSpriteId);
     }
 }

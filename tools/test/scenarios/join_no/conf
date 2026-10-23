@@ -1,0 +1,14 @@
+# (in OLDALE TOWN: no grass, so nobody is pulled into the wild battle by the co-op wild team-up)
+# JOIN, then NO. ALICE battles a wild ZIGZAGOON on her own; BOB walks up, gets "Would you like to spectate, bet, or
+# join?" and picks JOIN. At the start of ALICE's next turn she's asked "BOB wants to join your battle! Is this
+# okay?" and says NO: BOB hears "ALICE has declined your request to join them." and ALICE's battle goes on alone.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,10,11
+TMO=220
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("join: player 2 asks to join our battle" "join: asking our player about 1 friend" "join: our player said no" "[test] party: 283(")
+EXPECT_B=("join: asking player 1 to let us join" "join: player 1 said no")
+UNEXPECT_A=("join: our player said yes" "join link" "co-op")
+UNEXPECT_B=("join: sent our" "join link")

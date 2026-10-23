@@ -256,7 +256,14 @@ enum BattleScriptOpcode
     B_SCR_OP_MPCOOPRESOLVE, // Moemon Co-op: every player's stat boxes and moves to forget, at once
     B_SCR_OP_MPWEATHERGROUP, // Moemon Co-op: sandstorm / hail hit everyone at once, one line
     B_SCR_OP_MPWEATHERMSG,   // Moemon Co-op: a weather's "continues" line only the first time
+    B_SCR_OP_MPJOIN,         // Moemon Co-op: friends joining a battle in progress come in (mp_join.c)
 };
+
+// Moemon Co-op: mpjoin modes
+#define MPJOIN_NEXT_PLAYER  0   // the next friend coming in -> gBattleScripting.battler (jump to ptr when none)
+#define MPJOIN_NEXT_FOE     1   // the next trainer Pokemon for a new spot (jump to ptr when none)
+#define MPJOIN_TRAINER_PIC  2   // the friend's trainer slides in
+#define MPJOIN_BALL_THROW   3   // ... slides away throwing the ball (the Pokemon comes out, its box shows)
 
 // The following correspond to the struct members of BattleScripting by adding their offset
 #define sPAINSPLIT_HP                (gBattleScripting + 0x00) // painSplitHp

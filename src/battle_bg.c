@@ -28,7 +28,9 @@
 
 // Moemon Co-op: a co-op wild double is a link battle, but it should look like
 // a wild battle (the route's own background and intro)
-#define MP_BG_TYPE_FLAGS (gMpCoopWild ? (gBattleTypeFlags & ~BATTLE_TYPE_LINK) : gBattleTypeFlags)
+// Moemon Co-op: a co-op wild battle, and a battle friends joined while it ran (mp_join.c), keep their own place's
+// background (a co-op trainer battle is a link battle: the building)
+#define MP_BG_TYPE_FLAGS ((gMpCoopWild || gMpJoinedBattle) ? (gBattleTypeFlags & ~BATTLE_TYPE_LINK) : gBattleTypeFlags)
 
 struct BattleBackground
 {

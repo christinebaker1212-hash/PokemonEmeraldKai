@@ -33,6 +33,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "window.h"
 #include "gba/m4a_internal.h"
 #include "m4a.h"
 #include "constants/songs.h"
@@ -40,6 +41,7 @@
 #include "palette.h"
 #include "platform/display.h"
 #include "mp_net.h"
+#include "mp_join.h"
 
 #define FRAME_W 240
 #define FRAME_H 160
@@ -1034,6 +1036,31 @@ static EWRAM_DATA u8 sPrompt[96];
 
 static void OpenBetMenu(u8 target);
 
+// The choice window beside the message: SPECTATE / BET / JOIN / CANCEL (the yes / no box's tiles: it isn't up)
+static const struct WindowTemplate sWatchChoiceWindow =
+{
+    .bg = 0,
+    .tilemapLeft = 20,
+    .tilemapTop = 6,
+    .width = 9,
+    .height = 8,
+    .paletteNum = 15,
+    .baseBlock = 0x125,
+};
+static const u8 sText_ChoiceSpectate[] = _("SPECTATE");
+static const u8 sText_ChoiceBet[] = _("BET");
+static const u8 sText_ChoiceJoin[] = _("JOIN");
+static const u8 sText_ChoiceCancel[] = _("CANCEL");
+static const struct MenuAction sWatchChoices[] =
+{
+    {sText_ChoiceSpectate, {NULL}},
+    {sText_ChoiceBet, {NULL}},
+    {sText_ChoiceJoin, {NULL}},
+    {sText_ChoiceCancel, {NULL}},
+};
+enum { WATCH_SPECTATE, WATCH_BET, WATCH_JOIN, WATCH_CANCEL };
+static EWRAM_DATA u8 sWatchWindowId = 0;
+
 static void Task_WatchPrompt(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -1047,31 +1074,52 @@ static void Task_WatchPrompt(u8 taskId)
     case 1:
         if (!IsTextPrinterActive(0))
         {
-            DisplayYesNoMenuDefaultYes();
+            sWatchWindowId = AddWindow(&sWatchChoiceWindow);
+            DrawStdWindowFrame(sWatchWindowId, FALSE);
+            PrintMenuTable(sWatchWindowId, ARRAY_COUNT(sWatchChoices), sWatchChoices);
+            InitMenuInUpperLeftCornerNormal(sWatchWindowId, ARRAY_COUNT(sWatchChoices), 0);
+            CopyWindowToVram(sWatchWindowId, COPYWIN_FULL);
             tState++;
         }
         break;
     case 2:
     {
-        s8 answer = Menu_ProcessInputNoWrapClearOnChoose();
+        s8 answer = Menu_ProcessInputNoWrap();
+        u8 t = tTarget;
+        bool8 stillOn;
         if (answer == MENU_NOTHING_CHOSEN)
             break;
+        ClearStdWindowAndFrameToTransparent(sWatchWindowId, TRUE);
+        RemoveWindow(sWatchWindowId);
         HideFieldMessageBox();
-        if (answer == 0 && gMpPlayers[tTarget].present && (gMpPlayers[tTarget].state.flags & MPF_IN_BATTLE))
-        {
-            // Bet on it?
-            u8 t = tTarget;
-            UnlockPlayerFieldControls();
-            DestroyTask(taskId);
-            OpenBetMenu(t);
-            return;
-        }
-        else
-            UnlockPlayerFieldControls();
+        UnlockPlayerFieldControls();
         DestroyTask(taskId);
+        stillOn = gMpPlayers[t].present && (gMpPlayers[t].state.flags & MPF_IN_BATTLE);
+        if (answer == MENU_B_PRESSED || answer == WATCH_CANCEL)
+            break;
+        if (!stillOn)
+        {
+            MP_ShowNotice("That battle is already over.");
+            break;
+        }
+        if (answer == WATCH_SPECTATE)
+        {
+            sBetStake = 0;
+            StartWatching(t);
+        }
+        else if (answer == WATCH_BET)
+            OpenBetMenu(t);
+        else
+            MP_Join_Ask(t);
         break;
     }
     }
+}
+
+bool8 MP_Spectate_ChoiceUp(void)
+{
+    u8 t = FindTaskIdByFunc(Task_WatchPrompt);
+    return t != TASK_NONE && gTasks[t].tState == 2;
 }
 
 static EWRAM_DATA struct { u8 target; u16 cursor; } sBetUi = {0};
@@ -1141,7 +1189,7 @@ bool8 MP_Spectate_TryInteract(void)
     s16 x, y;
     u8 i;
 
-    if (!JOY_NEW(A_BUTTON) || !MP_IsLocalFree() || !MP_IsConnected() || FuncIsActiveTask(Task_WatchPrompt))
+    if (!JOY_NEW(A_BUTTON) || !MP_IsLocalFree() || !MP_IsConnected() || FuncIsActiveTask(Task_WatchPrompt) || MP_Join_IsAsking())
         return FALSE;
     me = &gObjectEvents[gPlayerAvatar.objectEventId];
     x = me->currentCoords.x;
@@ -1159,7 +1207,7 @@ bool8 MP_Spectate_TryInteract(void)
         MP_GameToAscii(name, gMpPlayers[i].name, MP_NAME_LEN);
         {
             char text[80];
-            snprintf(text, sizeof(text), "%s is in a battle.\nWatch it?", name);
+            snprintf(text, sizeof(text), "%s is in a battle! Would you like\nto spectate, bet, or join?", name);
             MP_AsciiToGame(sPrompt, text, sizeof(sPrompt) - 1);
         }
         LockPlayerFieldControls();

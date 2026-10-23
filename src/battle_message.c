@@ -388,6 +388,7 @@ static const u8 sText_MpCoopWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} appe
 static const u8 sText_MpCoopTwoWildAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!");
 static const u8 sText_MpCoopGotcha[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}{PLAY_BGM MUS_CAUGHT}\p");
 static const u8 sText_MpCoopUsedItem[] = _("{B_LINK_SCR_TRAINER_NAME} used\n{B_LAST_ITEM}!");
+static const u8 sText_MpJoinHelp[] = _("{B_LINK_SCR_TRAINER_NAME} has come\nto help!");   // Moemon Co-op (mp_join.c)
 static const u8 sText_MpCoopItemHp[] = _("{B_BUFF1}'s HP\nwas restored.");
 static const u8 sText_MpCoopItemCured[] = _("{B_BUFF1} was cured\nof its status problem.");
 static const u8 sText_MpCoopItemRevived[] = _("{B_BUFF1} was revived!");
@@ -2533,6 +2534,9 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MP_WEATHER_ALL_HAIL:
         stringPtr = sText_MpWeatherAllHail;
+        break;
+    case STRINGID_MP_JOIN_HELP:
+        stringPtr = sText_MpJoinHelp;
         break;
     case STRINGID_MP_GROUP_STAT_NOLOWER:
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;

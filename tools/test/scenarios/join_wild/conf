@@ -1,0 +1,14 @@
+# JOIN, then YES. ALICE battles a wild ZIGZAGOON on her own; BOB walks up and picks JOIN; at ALICE's next turn she
+# says YES. The battle becomes a co-op Double Battle: BOB's trainer slides in ("BOB has come to help!") and sends
+# out his first Moemon, then both finish it together. Both parties come back whole (party lines before / after).
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,10,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12,288:9,286:8"
+EXPECT_A=("join: our player said yes" "join: player 2 brings 3 Pokémon" "join: battle now 2 seats (was 1)" "join: everyone is in" "join: battler 2 comes in" "join: entrance done" "co-op: battle over, outcome 1")
+EXPECT_B=("join: player 1 said yes" "join: got the battle (seat 1 of 2)" "join: we are seat 1 of 2, bringing 3" "join: we're in the battle" "co-op: battle over, outcome 1")
+UNEXPECT_A=("BAD EGG" "crash" "join: no Pokémon from")
+UNEXPECT_B=("BAD EGG" "crash" "Couldn't join")
+CHECK="python3 tools/test/scenarios/join_wild/check.py"

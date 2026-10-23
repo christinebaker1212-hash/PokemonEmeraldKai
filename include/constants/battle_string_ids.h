@@ -398,6 +398,7 @@
 #define STRINGID_MP_LEARN_ALL               403   // co-op: the moves they learned (or can learn after the battle)
 #define STRINGID_MP_WEATHER_ALL_SAND        404   // "Everyone was buffeted by the sandstorm!"
 #define STRINGID_MP_WEATHER_ALL_HAIL        405   // "Everyone was pelted by HAIL!"
+#define STRINGID_MP_JOIN_HELP               406   // "X has come to help!" (a friend joined the battle, mp_join.c)
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

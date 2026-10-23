@@ -2979,6 +2979,35 @@ BattleScript_MpCoopWildBattleWon::
 	waitmessage B_WAIT_TIME_LONG
 	end2
 
+@ Moemon Co-op: friends joined the battle (mp_join.c): each friend's trainer slides in ("X has come to help!") and
+@ sends their Pokémon out, then the trainer sends out a Pokémon for each new spot it can fill
+BattleScript_MpJoinEntrance::
+	mpjoin MPJOIN_NEXT_PLAYER, BattleScript_MpJoinFoes
+	mpjoin MPJOIN_TRAINER_PIC
+	waitstate
+	printstring STRINGID_MP_JOIN_HELP
+	waitmessage B_WAIT_TIME_LONG
+	getswitchedmondata BS_SCRIPTING
+	switchindataupdate BS_SCRIPTING
+	hpthresholds BS_SCRIPTING
+	printstring STRINGID_SWITCHINMON
+	mpjoin MPJOIN_BALL_THROW
+	waitstate
+	switchineffects BS_SCRIPTING
+	goto BattleScript_MpJoinEntrance
+BattleScript_MpJoinFoes:
+	mpjoin MPJOIN_NEXT_FOE, BattleScript_MpJoinDone
+	getswitchedmondata BS_SCRIPTING
+	switchindataupdate BS_SCRIPTING
+	hpthresholds BS_SCRIPTING
+	printstring STRINGID_SWITCHINMON
+	switchinanim BS_SCRIPTING, FALSE
+	waitstate
+	switchineffects BS_SCRIPTING
+	goto BattleScript_MpJoinFoes
+BattleScript_MpJoinDone:
+	end2
+
 @ Moemon Co-op: both players are out of Pokémon
 BattleScript_MpCoopBattleLost::
 	printstring STRINGID_PLAYERWHITEOUT

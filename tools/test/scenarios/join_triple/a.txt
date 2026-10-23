@@ -1,0 +1,36 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp moves 0 45
+mp partyids
+mp wild 288:8
+pressuntil A action 4000
+waitfor joinpending1 6000
+wait 20
+press A 2
+wait 30
+press A 2
+waitfor joinprompt 4000
+press A 2
+waitlog 3000 join: entrance done
+pressuntil A action 6000
+waitfor joinpending1 8000
+wait 20
+press A 2
+wait 30
+press A 2
+waitfor joinprompt 6000
+rendershot a_prompt3
+press A 2
+waitlog 6000 join: everyone is in
+wait 80
+rendershot a_entrance3
+pressuntil A action 6000
+wait 20
+rendershot a_triple
+pressuntillog A 30000 co-op: battle over
+pressuntil A field 5000
+wait 60
+mp partyids
+wait 200
+quit
