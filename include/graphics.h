@@ -3935,6 +3935,27 @@ extern const u32 gBerryPic_Niniku[];
 extern const u32 gBerryPalette_Niniku[];
 extern const u32 gBerryPic_Topo[];
 extern const u32 gBerryPalette_Topo[];
+// Moemon Kai: newer games' items
+extern const u32 gItemIcon_QuickPowder[];
+extern const u32 gItemIconPalette_QuickPowder[];
+extern const u32 gItemIcon_Eviolite[];
+extern const u32 gItemIconPalette_Eviolite[];
+extern const u32 gItemIcon_OldGateau[];
+extern const u32 gItemIconPalette_OldGateau[];
+extern const u32 gItemIcon_Casteliacone[];
+extern const u32 gItemIconPalette_Casteliacone[];
+extern const u32 gItemIcon_LumioseGalette[];
+extern const u32 gItemIconPalette_LumioseGalette[];
+extern const u32 gItemIcon_ShalourSable[];
+extern const u32 gItemIconPalette_ShalourSable[];
+extern const u32 gItemIcon_BigMalasada[];
+extern const u32 gItemIconPalette_BigMalasada[];
+extern const u32 gItemIcon_PewterCrunchies[];
+extern const u32 gItemIconPalette_PewterCrunchies[];
+extern const u32 gItemIcon_RageCandyBar[];
+extern const u32 gItemIconPalette_RageCandyBar[];
+extern const u32 gItemIcon_CandyJar[];
+extern const u32 gItemIconPalette_CandyJar[];
 
 //menu graphics
 extern const u16 gMenuInfoElements1_Pal[16];

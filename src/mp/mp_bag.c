@@ -122,6 +122,7 @@ void MP_Bag_WriteSidecar(void)
         fwrite(sPockets[p].big + sPockets[p].saveCount, sizeof(struct ItemSlot), n, f);
     }
     WriteMarks(f);   // the items' "new" marks and when they came in
+    MP_Candy_Write(f);   // the CANDY JAR's candies (mp_candy.c)
     fclose(f);
 }
 
@@ -158,6 +159,8 @@ static bool8 LoadSidecar(const char *path)
         }
         if (p != POCKETS_COUNT || !ReadMarks(f))
             MarksFromCurrentOrder();   // a sidecar from before the marks
+        else
+            MP_Candy_Read(f);
     }
     fclose(f);
     return sidecar;
@@ -171,6 +174,7 @@ void MP_Bag_LoadFromSave(void)
     u8 p, i;
     bool8 sidecar = FALSE;
 
+    MP_Candy_Reset();   // unless the sidecar has them
     for (p = 0; p < POCKETS_COUNT; p++)
     {
         memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));

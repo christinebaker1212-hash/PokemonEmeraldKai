@@ -22,6 +22,7 @@ enum {
     INPUT_CONTEXT_BATTLE,
     INPUT_CONTEXT_NAMING,      // the keyboard / naming screen
     INPUT_CONTEXT_QUICKPICK,   // the emote / phrase pick around the player is open
+    INPUT_CONTEXT_PC_STORAGE,  // the PC's boxes (west button / F = TAG)
 };
 
 // Extra actions the platform asks the game to run (Platform_ContextAction)
@@ -37,6 +38,7 @@ enum {
     INPUT_ACTION_QUICK_PHRASES,                                // RT held: quick phrase pick
     INPUT_ACTION_PING,                                         // left stick click / V: "look here!" on the tile ahead
     INPUT_ACTION_ITEM_X,                                       // west button / F: the extra registered key item
+    INPUT_ACTION_PC_TAG,                                       // west button / F in the PC's boxes: TAG
 };
 #define INPUT_ACTION_EMOTE_KEY_COUNT 8
 

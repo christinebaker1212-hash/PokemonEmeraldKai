@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 100
+mp candy -1 0
+mp candy 0 9999
+mp candy 10 500
+mp candy 11 47
+mp candy 3 3
+mp candy 7 1
+mp candyjar
+waitfor jar 600
+wait 40
+rendershot a_pour
+waitfor jaridle 1500
+mp jarstate
+rendershot a_full
+press SELECT 2
+wait 8
+rendershot a_shake
+wait 200
+mp jarstate
+press A 2
+wait 30
+rendershot a_conv1
+wait 30
+rendershot a_conv2
+waitfor jaridle 2000
+mp jarstate
+rendershot a_after
+press B 2
+pressuntil A field 600
+quit

@@ -132,7 +132,9 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
                 line[x] = pal[16 * paletteNum + pixel] | 0x8000;
         }
         else {
-            line[x] = pal[pixel] | 0x8000;
+            // Moemon Co-op: 0 is see-through in 256 colors too (the PC boxes' group move drew black over everything)
+            if (pixel != 0)
+                line[x] = pal[pixel] | 0x8000;
         }
     }
 }

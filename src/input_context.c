@@ -19,6 +19,8 @@ int Platform_InputContext(void)
         return INPUT_CONTEXT_QUICKPICK;
     if (gMain.inBattle)
         return INPUT_CONTEXT_BATTLE;
+    if (MP_PcStorage_IsOpen())
+        return INPUT_CONTEXT_PC_STORAGE;
     if (MP_IsInOverworld())
         return MP_IsLocalFree() ? INPUT_CONTEXT_OVERWORLD : INPUT_CONTEXT_TEXT;
     return INPUT_CONTEXT_OTHER;
@@ -32,6 +34,11 @@ void Platform_ContextAction(int action)
         if (action == INPUT_ACTION_QUICK_EMOTES || action == INPUT_ACTION_QUICK_PHRASES)
             MP_BattleChat_Open(action == INPUT_ACTION_QUICK_EMOTES ? MP_QUICK_PAGE_EMOTES : MP_QUICK_PAGE_PHRASES,
                                action == INPUT_ACTION_QUICK_EMOTES ? 0 : 1);
+        return;
+    }
+    if (action == INPUT_ACTION_PC_TAG)
+    {
+        gMpPcTagPressed = TRUE;   // read by the PC (pokemon_storage_system.c HandleInput)
         return;
     }
     if (!MP_IsLocalFree())

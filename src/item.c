@@ -656,6 +656,7 @@ void ClearBag(void)
     u16 i;
 
     MP_Bag_ResetMarks();   // Moemon Co-op
+    MP_Candy_Reset();      // a new game: no candies either
 
     for (i = 0; i < POCKETS_COUNT; i++)
     {

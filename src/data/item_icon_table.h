@@ -415,5 +415,16 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_TOUGA_BERRY] = {gItemIcon_TougaBerry, gItemIconPalette_TougaBerry},
     [ITEM_NINIKU_BERRY] = {gItemIcon_NinikuBerry, gItemIconPalette_NinikuBerry},
     [ITEM_TOPO_BERRY] = {gItemIcon_TopoBerry, gItemIconPalette_TopoBerry},
+    // Moemon Kai: newer games' items
+    [ITEM_QUICK_POWDER] = {gItemIcon_QuickPowder, gItemIconPalette_QuickPowder},
+    [ITEM_EVIOLITE] = {gItemIcon_Eviolite, gItemIconPalette_Eviolite},
+    [ITEM_OLD_GATEAU] = {gItemIcon_OldGateau, gItemIconPalette_OldGateau},
+    [ITEM_CASTELIACONE] = {gItemIcon_Casteliacone, gItemIconPalette_Casteliacone},
+    [ITEM_LUMIOSE_GALETTE] = {gItemIcon_LumioseGalette, gItemIconPalette_LumioseGalette},
+    [ITEM_SHALOUR_SABLE] = {gItemIcon_ShalourSable, gItemIconPalette_ShalourSable},
+    [ITEM_BIG_MALASADA] = {gItemIcon_BigMalasada, gItemIconPalette_BigMalasada},
+    [ITEM_PEWTER_CRUNCHIES] = {gItemIcon_PewterCrunchies, gItemIconPalette_PewterCrunchies},
+    [ITEM_RAGE_CANDY_BAR] = {gItemIcon_RageCandyBar, gItemIconPalette_RageCandyBar},
+    [ITEM_CANDY_JAR] = {gItemIcon_CandyJar, gItemIconPalette_CandyJar},
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},
 };

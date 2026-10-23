@@ -1,0 +1,143 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 4 5
+mp boxput 1 1 7 5
+mp boxput 1 2 1 5
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press A 2
+wait 40
+press UP 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 40
+press A 2
+wait 60
+mp boxmons 1
+press RIGHT 2
+wait 20
+press A 2
+wait 40
+shot boxmenu
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+shot boxmenu_release
+press A 2
+wait 40
+press UP 2
+wait 10
+press A 2
+wait 120
+press A 2
+wait 60
+press A 2
+wait 60
+mp boxmons 1
+pressuntil B field 3000
+waitlog 600 Birch comes
+wait 30
+shot birch_walk
+wait 100
+shot birch_talk
+press A 2
+wait 90
+shot birch_p1
+press A 2
+wait 90
+shot birch_p2
+press A 2
+wait 90
+shot birch_p3
+press A 2
+wait 90
+shot birch_p4
+press A 2
+wait 90
+shot birch_p5
+press A 2
+wait 90
+shot birch_p6
+press A 2
+wait 90
+shot birch_p7
+press A 2
+wait 90
+shot birch_p8
+press A 2
+wait 90
+shot birch_p9
+pressuntillog A 3000 Birch's visit is over
+wait 30
+shot birch_gone
+mp save
+wait 60
+mp candyreload
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 30
+press DOWN 2
+wait 20
+shot bag_keyitems
+press A 2
+wait 20
+shot bag_use
+press A 2
+waitfor jaridle 900
+rendershot jar_from_bag
+press B 2
+wait 90
+shot bag_back
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press A 2
+wait 30
+shot bag_registered
+press A 2
+wait 30
+pressuntil B field 600
+wait 30
+press SELECT 2
+waitfor jaridle 900
+rendershot jar_registered
+press B 2
+pressuntil A field 600
+quit

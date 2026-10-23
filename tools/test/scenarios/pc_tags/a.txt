@@ -1,0 +1,213 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 1 5
+mp boxput 1 2 4 5
+mp boxput 1 8 7 5
+mp boxput 1 4 25 5
+mp boxput 1 10 133 5
+mp boxput 2 0 19 5
+mp boxput 2 1 19 5
+mp boxput 2 2 19 5
+mp boxput 2 3 19 5
+mp boxput 2 4 19 5
+mp boxput 2 5 19 5
+mp boxput 2 6 19 5
+mp boxput 2 7 19 5
+mp boxput 2 8 19 5
+mp boxput 2 9 19 5
+mp boxput 2 10 19 5
+mp boxput 2 11 19 5
+mp boxput 2 14 19 5
+mp boxput 2 15 19 5
+mp boxput 2 16 19 5
+mp boxput 2 17 19 5
+mp boxput 2 18 19 5
+mp boxput 2 19 19 5
+mp boxput 2 20 19 5
+mp boxput 2 21 19 5
+mp boxput 2 22 19 5
+mp boxput 2 23 19 5
+mp boxput 2 24 19 5
+mp boxput 2 25 19 5
+mp boxput 2 26 19 5
+mp boxput 2 27 19 5
+mp boxput 2 28 19 5
+mp boxput 2 29 19 5
+mp boxput 3 5 19 5
+mp boxmons 1
+mp boxmons 2
+mp boxmons 3
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+mp pctag
+wait 10
+press DOWN 2
+wait 20
+mp pctag
+wait 20
+shot tagged
+press A 2
+wait 40
+shot menu
+press A 2
+wait 120
+mp pctags
+shot holding
+press RIGHT 2
+wait 30
+press A 2
+wait 120
+mp boxmons 1
+mp pctags
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+mp pctag
+wait 10
+press DOWN 2
+wait 20
+mp pctag
+wait 20
+mp pctags
+press A 2
+wait 40
+press A 2
+wait 120
+mp pctags
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 90
+mp pctags
+press A 2
+wait 30
+shot noroom
+press RIGHT 2
+wait 90
+mp pctags
+press A 2
+wait 120
+mp boxmons 3
+shot assorted
+mp pctags
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press A 2
+wait 120
+press R 2
+wait 120
+mp boxmons 3
+shot party
+mp pctags
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+mp pctag
+wait 10
+press DOWN 2
+wait 20
+mp pctag
+wait 20
+mp pctags
+press A 2
+wait 40
+press A 2
+wait 180
+mp pctags
+press A 2
+wait 120
+mp boxmons 3
+mp pctags
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press A 2
+wait 40
+shot release_prompt
+press UP 2
+wait 10
+press A 2
+wait 60
+shot released
+press A 2
+wait 40
+press A 2
+wait 60
+mp boxmons 3
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+mp pctag
+wait 10
+mp pctags
+press B 2
+wait 20
+mp pctags
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 20
+mp pctag
+wait 10
+mp pctags
+press A 2
+wait 40
+press A 2
+wait 120
+mp pctags
+press DOWN 2
+wait 30
+press DOWN 2
+wait 30
+press DOWN 2
+wait 30
+press DOWN 2
+wait 30
+press DOWN 2
+wait 30
+mp pctags
+shot buttons
+press A 2
+wait 120
+mp boxmons 3
+shot party2
+mp pctags
+quit

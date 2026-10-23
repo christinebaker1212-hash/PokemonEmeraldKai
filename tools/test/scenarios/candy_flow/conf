@@ -1,0 +1,8 @@
+# Candies from releases: two Moemon released with PC tags and one the usual way each leave a candy of their first
+# type; PROF. BIRCH walks over with the CANDY JAR once the player is back on the map, and the candies come back from
+# the save's sidecar ("<save>.bag"). Then the jar from the BAG (back to the BAG) and registered on SELECT (back to the
+# map).
+MODE=1
+TMO=200
+EXPECT_A=("candy: released species 4" "candy: released species 7" "candy: released species 1" "candy: Birch's visit is over"
+          "[test] candies after reload: 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 | jar 1" "candy: jar opened (3 candies, 0 to convert)")

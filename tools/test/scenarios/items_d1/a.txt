@@ -1,0 +1,71 @@
+pressuntil A field 5000
+wait 100
+mp item 391 3
+mp item 392 2
+mp item 389 1
+mp item 390 1
+mp item 393 1
+mp item 394 1
+mp item 395 1
+mp item 396 1
+mp item 397 1
+mp pstatus 0 8
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+shot bag_items
+press DOWN 2
+wait 20
+press A 2
+wait 30
+press A 2
+waitfor partymenu 300
+wait 20
+press A 2
+wait 150
+mp pstatus 0 -1
+press A 2
+wait 60
+shot bag_desc
+press B 2
+wait 60
+press B 2
+wait 40
+press B 2
+waitfor field 600
+wait 30
+mp wild 288:3
+pressuntil A action 3000
+wait 10
+mp holdtest
+mp bstatus 0 64
+mp bstatus2 0 7
+press RIGHT 2
+wait 10
+press A 2
+wait 90
+press DOWN 2
+wait 20
+press A 2
+wait 30
+press A 2
+waitfor partymenu 300
+wait 20
+press A 2
+wait 200
+mp bstatus2 0 -1
+pressuntil A action 3000
+wait 10
+press LEFT 2
+wait 10
+mash A 120 20
+shot battle_end
+waitfor field 3000
+log solo battle done
+quit

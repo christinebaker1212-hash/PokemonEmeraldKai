@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "malloc.h"
 #include "mp.h"
@@ -182,6 +183,14 @@ enum {
     INPUT_MULTIMOVE_UNABLE,
     INPUT_MULTIMOVE_MOVE_MONS,
     INPUT_MULTIMOVE_PLACE_MONS,
+    // Moemon Co-op: TAG mode
+    INPUT_TAG_TOGGLE,
+    INPUT_TAG_FAIL,
+    INPUT_TAG_CLEAR,
+    INPUT_TAG_MENU,
+    INPUT_TAG_PLACE_ASSORTED,
+    INPUT_TAG_NO_ROOM,
+    INPUT_TAG_TO_PARTY,
 };
 
 enum {
@@ -323,6 +332,7 @@ enum {
     MULTIMOVE_GRAB_SELECTION,
     MULTIMOVE_MOVE_MONS,
     MULTIMOVE_PLACE_MONS,
+    MULTIMOVE_TAG_PLACE_ASSORTED, // Moemon Co-op: TAG mode
 };
 
 // IDs for TilemapUtil
@@ -707,6 +717,48 @@ static void MultiMove_GetMonsFromSelection(void);
 static void MultiMove_RemoveMonsFromBox(void);
 static void MultiMove_CreatePlacedMonIcons(void);
 static void MultiMove_SetPlacedMonData(void);
+
+// Moemon Co-op: TAG mode (the end of this file)
+static void Tag_Init(void);
+static void Tag_Clear(void);
+static bool8 Tag_Active(void);
+static bool8 Tag_Validate(void);
+static u8 Tag_Toggle(void);
+static u8 Tag_TryPlace(void);
+static bool8 Tag_PlaceAssorted(void);
+static bool8 Tag_GroupToParty(void);
+static u8 Tag_InputOnButtons(void);
+static u8 Tag_ToButtons(void);
+static void Task_TagMenu(u8 taskId);
+static void Task_TagShowParty(u8 taskId);
+static void Tag_PrintText(const char *ascii);
+static bool8 sTagPressNow;
+#define TAG_AREA_NONE  0
+#define TAG_AREA_BOX   1
+#define TAG_AREA_PARTY 2
+#define TAG_MARKS      (IN_BOX_COUNT + PARTY_SIZE)
+#define TAG_GFX_TAG    0xDA70
+#define TAG_PAL_TAG    0xDA70
+
+bool8 gMpPcTagPressed;   // set by the input code (input_context.c)
+
+static EWRAM_DATA struct
+{
+    u8 area;
+    u8 box;
+    u32 mask;          // tagged box positions / party slots
+    bool8 hideMarks;   // the box is scrolling
+    bool8 holding;     // MOVE: the group is on bg 0
+    bool8 onButtons;   // holding, the cursor on PARTY POKéMON / CLOSE BOX (the group hidden)
+    bool8 fromParty;
+    u8 savedCursor;
+    u8 count;
+    u8 releaseCount;
+    bool8 refreshDisplay;
+    u8 targets[IN_BOX_COUNT];   // assorted placement: box position for each boxMons entry
+    u8 marks[TAG_MARKS];
+} sMpTag = {0};
+
 static u8 MultiMove_UpdateMove(void);
 static void MultiMove_DeselectRow(u8, u8, u8);
 static void MultiMove_SelectRow(u8, u8, u8);
@@ -1994,6 +2046,7 @@ static void CB2_PokeStorage(void)
     UpdateCloseBoxButtonFlash();
     AnimateSprites();
     BuildOamBuffer();
+    gMpPcTagPressed = FALSE; // Moemon Co-op: a TAG press only counts the frame it comes
 }
 
 static void EnterPokeStorage(u8 boxOption)
@@ -2181,6 +2234,7 @@ static void Task_InitPokeStorage(u8 taskId)
         break;
     case 10:
         SetMonIconTransparency();
+        Tag_Init(); // Moemon Co-op: TAG mode
         if (!sStorage->isReopening)
         {
             BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
@@ -2442,6 +2496,42 @@ static void Task_PokeStorageMain(u8 taskId)
             // cursor may not wrap around the edges.
             PlaySE(SE_FAILURE);
             break;
+        // Moemon Co-op: TAG mode
+        case INPUT_TAG_TOGGLE:
+            PlaySE(SE_SELECT);
+            break;
+        case INPUT_TAG_FAIL:
+            PlaySE(SE_FAILURE);
+            break;
+        case INPUT_TAG_CLEAR:
+            PlaySE(SE_SELECT);
+            Tag_Clear();
+            break;
+        case INPUT_TAG_MENU:
+            SetPokeStorageTask(Task_TagMenu);
+            break;
+        case INPUT_TAG_PLACE_ASSORTED:
+            PlaySE(SE_SELECT);
+            MultiMove_SetFunction(MULTIMOVE_TAG_PLACE_ASSORTED);
+            sStorage->state = MSTATE_MULTIMOVE_RUN;
+            break;
+        case INPUT_TAG_NO_ROOM:
+            // (no message while the group is held: bg 0 is its 256-color layer, like the SELECT group move)
+            PlaySE(SE_FAILURE);
+            MPNet_Log("pc tag: box %d has no room for %d", StorageGetCurrentBox() + 1, sMpTag.count);
+            break;
+        case INPUT_TAG_TO_PARTY:
+            if (Tag_GroupToParty())
+            {
+                PlaySE(SE_SELECT);
+                SetPokeStorageTask(Task_TagShowParty);
+            }
+            else
+            {
+                PlaySE(SE_FAILURE);   // no room in the party (no message: see INPUT_TAG_NO_ROOM)
+                MPNet_Log("pc tag: no room in the party for %d", sMpTag.count);
+            }
+            break;
         }
         break;
     case MSTATE_MOVE_CURSOR:
@@ -2504,7 +2594,14 @@ static void Task_PokeStorageMain(u8 taskId)
         break;
     case MSTATE_MULTIMOVE_RUN:
         if (!MultiMove_RunFunction())
+        {
+            if (sMpTag.refreshDisplay) // Moemon Co-op: a TAG group was put down
+            {
+                sMpTag.refreshDisplay = FALSE;
+                RefreshDisplayMon();
+            }
             sStorage->state = MSTATE_HANDLE_INPUT;
+        }
         break;
     case MSTATE_MULTIMOVE_RUN_CANCEL:
         // Began a multiple Pokémon selection but
@@ -5276,6 +5373,7 @@ static void SetUpScrollToBox(u8 boxId)
     sStorage->scrollToBoxId = boxId;
     sStorage->scrollDirection = direction;
     sStorage->scrollState = 0;
+    sMpTag.hideMarks = TRUE; // Moemon Co-op: TAG marks wait for the new box
 }
 
 static bool8 ScrollToBox(void)
@@ -6482,8 +6580,10 @@ static void ReleaseMon(void)
 {
     u8 boxId;
 
-    // Moemon Kai: a held HM stays with the player
+    // Moemon Kai: a held HM stays with the player, and the Moemon leaves a candy (mp_candy.c)
     MP_ReturnHeldHm(&sStorage->tempMon);
+    if (!GetMonData(&sStorage->tempMon, MON_DATA_IS_EGG))
+        MP_Candy_OnRelease(GetMonData(&sStorage->tempMon, MON_DATA_SPECIES));
     DestroyReleaseMonIcon();
     if (sIsMonBeingMoved)
     {
@@ -7120,6 +7220,19 @@ static u8 InBoxInput_Normal(void)
             break;
         }
 
+        // Moemon Co-op: TAG mode (the west button / F tags; with tags, A = the group's menu, B drops them)
+        if (sTagPressNow)
+            return Tag_Toggle();
+        if (Tag_Active() && Tag_Validate())
+        {
+            if (JOY_NEW(A_BUTTON))
+                return INPUT_TAG_MENU;
+            if (JOY_NEW(B_BUTTON))
+                return INPUT_TAG_CLEAR;
+            if (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR)
+                return INPUT_TAG_FAIL;
+        }
+
         // Moemon Co-op QoL: R takes the Pokémon straight into the party
         if (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR
          && !sIsMonBeingMoved && sStorage->boxOption != OPTION_MOVE_ITEMS && sStorage->boxOption != OPTION_DEPOSIT
@@ -7284,6 +7397,10 @@ static u8 InBoxInput_MovingMultiple(void)
             SetCursorPosition(CURSOR_AREA_IN_BOX, sCursorPosition + IN_BOX_COLUMNS);
             return INPUT_MULTIMOVE_MOVE_MONS;
         }
+        else if (sMpTag.holding)
+        {
+            return Tag_ToButtons(); // Moemon Co-op: to PARTY POKéMON / CLOSE BOX, the group waits
+        }
         else
         {
             return INPUT_MULTIMOVE_UNABLE;
@@ -7312,6 +7429,14 @@ static u8 InBoxInput_MovingMultiple(void)
         {
             return INPUT_SCROLL_RIGHT;
         }
+    }
+    else if (JOY_NEW(A_BUTTON) && sMpTag.holding)
+    {
+        return Tag_TryPlace(); // Moemon Co-op: as arranged, assorted, or no room
+    }
+    else if (JOY_NEW(R_BUTTON) && sMpTag.holding && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR)
+    {
+        return INPUT_TAG_TO_PARTY;
     }
     else if (JOY_NEW(A_BUTTON))
     {
@@ -7398,6 +7523,19 @@ static u8 HandleInput_InParty(void)
                 cursorPosition = 0;
             }
             break;
+        }
+
+        // Moemon Co-op: TAG mode
+        if (sTagPressNow)
+            return Tag_Toggle();
+        if (Tag_Active() && Tag_Validate())
+        {
+            if (JOY_NEW(A_BUTTON) && sCursorPosition < PARTY_SIZE)
+                return INPUT_TAG_MENU;
+            if (JOY_NEW(B_BUTTON))
+                return INPUT_TAG_CLEAR;
+            if (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_LR)
+                return INPUT_TAG_FAIL;
         }
 
         // Moemon Co-op QoL: R stores the Pokémon (choose the box, the current one is picked)
@@ -7633,6 +7771,13 @@ static u8 HandleInput(void)
     };
 
     u16 i = 0;
+
+    // Moemon Co-op: TAG mode
+    sTagPressNow = gMpPcTagPressed;
+    gMpPcTagPressed = FALSE;
+    if (sMpTag.holding && sMpTag.onButtons)
+        return Tag_InputOnButtons();
+
     while (inputFuncs[i].func != NULL)
     {
         if (inputFuncs[i].area == sCursorArea)
@@ -8194,6 +8339,8 @@ static bool8 MultiMove_RunFunction(void)
         return MultiMove_MoveMons();
     case MULTIMOVE_PLACE_MONS:
         return MultiMove_PlaceMons();
+    case MULTIMOVE_TAG_PLACE_ASSORTED:
+        return Tag_PlaceAssorted();
     }
     return FALSE;
 }
@@ -9453,6 +9600,7 @@ static void SetCurrentBox(u8 boxId)
 {
     if (boxId < TOTAL_BOXES_COUNT)
         gPokemonStoragePtr->currentBox = boxId;
+    sMpTag.hideMarks = FALSE; // Moemon Co-op: TAG marks
 }
 
 u32 GetBoxMonDataAt(u8 boxId, u8 boxPosition, s32 request)
@@ -10099,4 +10247,797 @@ static void UnkUtil_DmaRun(struct UnkUtilData *data)
         Dma3FillLarge16_(0, data->dest, data->size);
         data->dest += 64;
     }
+}
+
+//------------------------------------------------------------------------------
+//  Moemon Co-op: TAG mode (MOVE POKéMON)
+//
+//  The west button / F (gMpPcTagPressed) tags Moemon in one box or in the party
+//  (tagging somewhere else drops the old tags; B drops them all). With tags,
+//  A opens MOVE / RELEASE / CANCEL:
+//  - MOVE picks the group up on bg 0 like the SELECT group move (sMultiMove,
+//    holes for the untagged slots; a party group is one row). A places it as it
+//    was arranged, or, when that doesn't fit but the box has room, in the empty
+//    slots from the cursor on (row by row, wrapping); a box without room says
+//    so. R, or DOWN to the PARTY POKéMON button and A, puts it in the party when
+//    there's room.
+//  - RELEASE asks once for all of them (no EGGS, no MAIL, keep a Moemon that can
+//    battle in the party and two in all).
+//------------------------------------------------------------------------------
+
+static const u8 sTagMark_Gfx[TILE_SIZE_4BPP] = {
+    // 8x8, 4bpp, two pixels a byte (low nibble left): a gold badge with a dark rim
+    0x00, 0x11, 0x11, 0x00,
+    0x10, 0x22, 0x22, 0x01,
+    0x21, 0x32, 0x23, 0x12,
+    0x21, 0x33, 0x33, 0x12,
+    0x21, 0x33, 0x33, 0x12,
+    0x21, 0x32, 0x23, 0x12,
+    0x10, 0x22, 0x22, 0x01,
+    0x00, 0x11, 0x11, 0x00,
+};
+static const u16 sTagMark_Pal[16] = {RGB(0, 0, 0), RGB(4, 5, 10), RGB(31, 22, 4), RGB(31, 30, 18)};
+
+static const struct OamData sOamData_TagMark =
+{
+    .shape = SPRITE_SHAPE(8x8),
+    .size = SPRITE_SIZE(8x8),
+    .priority = 1,
+};
+
+static void SpriteCB_TagMark(struct Sprite *sprite);
+
+static const struct SpriteTemplate sSpriteTemplate_TagMark =
+{
+    .tileTag = TAG_GFX_TAG,
+    .paletteTag = TAG_PAL_TAG,
+    .oam = &sOamData_TagMark,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCB_TagMark,
+};
+
+static u8 Tag_Count(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if (sMpTag.mask & (1u << i))
+            n++;
+    return n;
+}
+
+static void Tag_Clear(void)
+{
+    sMpTag.area = TAG_AREA_NONE;
+    sMpTag.mask = 0;
+}
+
+static bool8 Tag_HasMon(u8 i)
+{
+    if (sMpTag.area == TAG_AREA_PARTY)
+        return i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES);
+    return GetBoxMonDataAt(sMpTag.box, i, MON_DATA_SANITY_HAS_SPECIES);
+}
+
+// Drops tags on slots that are empty now; TRUE while something is still tagged
+static bool8 Tag_Validate(void)
+{
+    u8 i;
+    if (sMpTag.area == TAG_AREA_NONE)
+        return FALSE;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if ((sMpTag.mask & (1u << i)) && !Tag_HasMon(i))
+            sMpTag.mask &= ~(1u << i);
+    if (sMpTag.mask == 0)
+        sMpTag.area = TAG_AREA_NONE;
+    return sMpTag.area != TAG_AREA_NONE;
+}
+
+static bool8 Tag_Active(void)
+{
+    return sStorage->boxOption == OPTION_MOVE_MONS && sMpTag.area != TAG_AREA_NONE;
+}
+
+static void Tag_Init(void)
+{
+    struct SpriteSheet sheet = {sTagMark_Gfx, sizeof(sTagMark_Gfx), TAG_GFX_TAG};
+    struct SpritePalette pal = {sTagMark_Pal, TAG_PAL_TAG};
+    u8 i;
+    gMpPcTagPressed = FALSE;
+    if (!sStorage->isReopening)
+        memset(&sMpTag, 0, sizeof(sMpTag));
+    sMpTag.hideMarks = FALSE;
+    for (i = 0; i < TAG_MARKS; i++)
+        sMpTag.marks[i] = MAX_SPRITES;
+    if (sStorage->boxOption != OPTION_MOVE_MONS)
+        return;
+    LoadSpriteSheet(&sheet);
+    LoadSpritePalette(&pal);
+    for (i = 0; i < TAG_MARKS; i++)
+    {
+        sMpTag.marks[i] = CreateSprite(&sSpriteTemplate_TagMark, 0, 0, 0);
+        if (sMpTag.marks[i] != MAX_SPRITES)
+        {
+            gSprites[sMpTag.marks[i]].data[0] = i;
+            gSprites[sMpTag.marks[i]].invisible = TRUE;
+        }
+    }
+}
+
+static void SpriteCB_TagMark(struct Sprite *sprite)
+{
+    u8 i = sprite->data[0];
+    struct Sprite *icon;
+
+    sprite->invisible = TRUE;
+    if (sStorage == NULL || sMpTag.hideMarks || sMpTag.holding)
+        return;
+    if (i < IN_BOX_COUNT)
+    {
+        if (sMpTag.area != TAG_AREA_BOX || !(sMpTag.mask & (1u << i)) || StorageGetCurrentBox() != sMpTag.box)
+            return;
+        icon = sStorage->boxMonsSprites[i];
+    }
+    else
+    {
+        i -= IN_BOX_COUNT;
+        if (sMpTag.area != TAG_AREA_PARTY || !(sMpTag.mask & (1u << i)))
+            return;
+        icon = sStorage->partySprites[i];
+    }
+    if (icon == NULL || icon->invisible)
+        return;
+    sprite->x = icon->x + icon->x2 - 11;
+    sprite->y = icon->y + icon->y2 - 10;
+    sprite->invisible = FALSE;
+}
+
+// TAG on the cursor's Moemon. Returns the input to report.
+static u8 Tag_Toggle(void)
+{
+    u8 area = sCursorArea == CURSOR_AREA_IN_PARTY ? TAG_AREA_PARTY : TAG_AREA_BOX;
+    u8 pos = sCursorPosition;
+
+    if (sStorage->boxOption != OPTION_MOVE_MONS || sIsMonBeingMoved || sStorage->inBoxMovingMode != MOVE_MODE_NORMAL
+     || (area == TAG_AREA_PARTY && pos >= PARTY_SIZE))
+        return INPUT_TAG_FAIL;
+    if (area == TAG_AREA_PARTY ? !GetMonData(&gPlayerParty[pos], MON_DATA_SANITY_HAS_SPECIES)
+                               : !GetCurrentBoxMonData(pos, MON_DATA_SANITY_HAS_SPECIES))
+        return INPUT_TAG_FAIL;
+    Tag_Validate();
+    if (sMpTag.area != area || (area == TAG_AREA_BOX && sMpTag.box != StorageGetCurrentBox()))
+    {
+        sMpTag.area = area;
+        sMpTag.box = StorageGetCurrentBox();
+        sMpTag.mask = 0;
+    }
+    sMpTag.mask ^= 1u << pos;
+    if (sMpTag.mask == 0)
+        sMpTag.area = TAG_AREA_NONE;
+    MPNet_Log("pc tag: %s %d %s (%d tagged)", area == TAG_AREA_PARTY ? "party slot" : "box position", pos,
+              (sMpTag.mask & (1u << pos)) ? "on" : "off", Tag_Count());
+    return INPUT_TAG_TOGGLE;
+}
+
+// The Moemon still able to battle in the party besides the tagged ones (or those in mask)
+static u8 Tag_PartyBattlersLeft(u32 mask)
+{
+    u8 i, n = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (!(mask & (1u << i)) && GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES)
+         && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG) && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
+            n++;
+    return n;
+}
+
+static u16 Tag_ItemAt(u8 i)
+{
+    if (sMpTag.area == TAG_AREA_PARTY)
+        return GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM);
+    return GetBoxMonDataAt(sMpTag.box, i, MON_DATA_HELD_ITEM);
+}
+
+static bool8 Tag_IsEggAt(u8 i)
+{
+    if (sMpTag.area == TAG_AREA_PARTY)
+        return GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG);
+    return GetBoxMonDataAt(sMpTag.box, i, MON_DATA_IS_EGG);
+}
+
+static bool8 Tag_AnyMail(void)
+{
+    u8 i;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if ((sMpTag.mask & (1u << i)) && ItemIsMail(Tag_ItemAt(i)))
+            return TRUE;
+    return FALSE;
+}
+
+static u16 Tag_CountAllMons(void)
+{
+    u16 n = 0;
+    u8 i, j;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+            n++;
+    for (i = 0; i < TOTAL_BOXES_COUNT; i++)
+        for (j = 0; j < IN_BOX_COUNT; j++)
+            if (CheckBoxMonSanityAt(i, j))
+                n++;
+    return n;
+}
+
+static void Tag_PrintText(const char *ascii)
+{
+    static u8 sText[96];
+    u8 font = FONT_NORMAL;
+    MP_AsciiToGame(sText, ascii, sizeof(sText) - 1);
+    if (GetStringWidth(FONT_NORMAL, sText, 0) > 18 * 8 - 2)
+        font = FONT_NARROW;
+    FillWindowPixelBuffer(WIN_MESSAGE, PIXEL_FILL(1));
+    AddTextPrinterParameterized(WIN_MESSAGE, font, sText, 0, 1, TEXT_SKIP_DRAW, NULL);
+    DrawTextBorderOuter(WIN_MESSAGE, 2, 14);
+    PutWindowTilemap(WIN_MESSAGE);
+    CopyWindowToVram(WIN_MESSAGE, COPYWIN_GFX);
+    ScheduleBgCopyTilemapToVram(0);
+}
+
+static void Task_TagMenu(u8 taskId);
+static void Task_TagRelease(u8 taskId);
+static void Task_TagMove(u8 taskId);
+static bool8 Tag_TargetTaken(u8 pos, u8 before);
+
+static void Task_TagMenu(u8 taskId)
+{
+    char text[48];
+    switch (sStorage->state)
+    {
+    case 0:
+        PlaySE(SE_SELECT);
+        snprintf(text, sizeof(text), "%d tagged. What will you do?", Tag_Count());
+        Tag_PrintText(text);
+        InitMenu();
+        SetMenuText(MENU_MOVE);
+        SetMenuText(MENU_RELEASE);
+        SetMenuText(MENU_CANCEL);
+        AddMenu();
+        sStorage->state++;
+        break;
+    case 1:
+        switch (HandleMenuInput())
+        {
+        case MENU_B_PRESSED:
+        case MENU_CANCEL:
+            ClearBottomWindow();
+            SetPokeStorageTask(Task_PokeStorageMain);
+            break;
+        case MENU_MOVE:
+            if (sMpTag.area == TAG_AREA_PARTY && Tag_PartyBattlersLeft(sMpTag.mask) == 0)
+                sStorage->state = 2;
+            else if (sMpTag.area == TAG_AREA_PARTY && Tag_AnyMail())
+                sStorage->state = 3;
+            else
+            {
+                PlaySE(SE_SELECT);
+                ClearBottomWindow();
+                SetPokeStorageTask(Task_TagMove);
+            }
+            break;
+        case MENU_RELEASE:
+        {
+            u8 i;
+            bool8 egg = FALSE;
+            for (i = 0; i < IN_BOX_COUNT; i++)
+                if ((sMpTag.mask & (1u << i)) && Tag_IsEggAt(i))
+                    egg = TRUE;
+            if (sMpTag.area == TAG_AREA_PARTY && Tag_PartyBattlersLeft(sMpTag.mask) == 0)
+                sStorage->state = 2;
+            else if (egg)
+                sStorage->state = 4;
+            else if (Tag_AnyMail())
+                sStorage->state = 3;
+            else if (Tag_CountAllMons() < Tag_Count() + 2)
+                sStorage->state = 5;
+            else
+            {
+                PlaySE(SE_SELECT);
+                SetPokeStorageTask(Task_TagRelease);
+            }
+            break;
+        }
+        }
+        break;
+    case 2:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_LAST_POKE);
+        sStorage->state = 6;
+        break;
+    case 3:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_PLEASE_REMOVE_MAIL);
+        sStorage->state = 6;
+        break;
+    case 4:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_CANT_RELEASE_EGG);
+        sStorage->state = 6;
+        break;
+    case 5:
+        PlaySE(SE_FAILURE);
+        Tag_PrintText("You can't release that many!");
+        sStorage->state = 6;
+        break;
+    case 6:
+        if (JOY_NEW(A_BUTTON | B_BUTTON | DPAD_ANY))
+        {
+            ClearBottomWindow();
+            SetPokeStorageTask(Task_PokeStorageMain);
+        }
+        break;
+    }
+}
+
+// Releases the tagged Moemon (their held HMs go back to the BAG); returns how many
+static u8 Tag_ReleaseAll(void)
+{
+    u8 i, n = 0;
+    struct Pokemon mon;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+    {
+        if (!(sMpTag.mask & (1u << i)) || !Tag_HasMon(i))
+            continue;
+        if (sMpTag.area == TAG_AREA_PARTY)
+        {
+            MP_ReturnHeldHm(&gPlayerParty[i]);
+            MP_Candy_OnRelease(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+            ZeroMonData(&gPlayerParty[i]);
+        }
+        else
+        {
+            BoxMonAtToMon(sMpTag.box, i, &mon);
+            MP_ReturnHeldHm(&mon);
+            MP_Candy_OnRelease(GetMonData(&mon, MON_DATA_SPECIES));
+            ZeroBoxMonAt(sMpTag.box, i);
+            if (StorageGetCurrentBox() == sMpTag.box)
+                DestroyBoxMonIconAtPosition(i);
+        }
+        n++;
+    }
+    if (sMpTag.area == TAG_AREA_PARTY)
+    {
+        CompactPartySlots();
+        DestroyAllPartyMonIcons();
+        CreatePartyMonsSprites(sInPartyMenu);
+        UpdatePartySlotColors();
+    }
+    MPNet_Log("pc tag: released %d", n);
+    Tag_Clear();
+    return n;
+}
+
+static void Task_TagRelease(u8 taskId)
+{
+    char text[48];
+    switch (sStorage->state)
+    {
+    case 0:
+        Tag_PrintText("Release all selected MO~MON?");
+        ShowYesNoWindow(1);
+        sStorage->state++;
+        // fallthrough
+    case 1:
+        switch (Menu_ProcessInputNoWrapClearOnChoose())
+        {
+        case MENU_B_PRESSED:
+        case 1: // No
+            ClearBottomWindow();
+            SetPokeStorageTask(Task_PokeStorageMain);
+            break;
+        case 0: // Yes
+            ClearBottomWindow();
+            PlaySE(SE_PC_OFF);
+            sMpTag.releaseCount = Tag_ReleaseAll();
+            RefreshDisplayMonData();
+            sStorage->state++;
+            break;
+        }
+        break;
+    case 2:
+        snprintf(text, sizeof(text), sMpTag.releaseCount == 1 ? "%d MO~MON was released." : "%d MO~MON were released.",
+                 sMpTag.releaseCount);
+        Tag_PrintText(text);
+        sStorage->state++;
+        break;
+    case 3:
+        if (JOY_NEW(A_BUTTON | B_BUTTON | DPAD_ANY))
+        {
+            Tag_PrintText("Bye-bye!");
+            sStorage->state++;
+        }
+        break;
+    case 4:
+        if (JOY_NEW(A_BUTTON | B_BUTTON | DPAD_ANY))
+        {
+            ClearBottomWindow();
+            RefreshDisplayMon();
+            StartDisplayMonMosaicEffect();
+            SetPokeStorageTask(Task_PokeStorageMain);
+        }
+        break;
+    }
+}
+
+// Draws the group (sMultiMove->boxMons over its rectangle) on bg 0
+static void Tag_DrawGroup(void)
+{
+    u8 r, c, k = 0;
+    FillWindowPixelBuffer8Bit(sStorage->multiMoveWindowId, PIXEL_FILL(0));
+    for (r = 0; r < sMultiMove->rowsTotal; r++)
+        for (c = 0; c < sMultiMove->columnsTotal; c++, k++)
+        {
+            struct BoxPokemon *boxMon = &sMultiMove->boxMons[k];
+            u16 species = GetBoxMonData(boxMon, MON_DATA_SPECIES_OR_EGG);
+            if (species != SPECIES_NONE && GetBoxMonData(boxMon, MON_DATA_SANITY_HAS_SPECIES))
+            {
+                const u8 *iconGfx = GetMonIconPtr(species, GetBoxMonData(boxMon, MON_DATA_PERSONALITY), 1);
+                BlitBitmapRectToWindow4BitTo8Bit(sStorage->multiMoveWindowId, iconGfx, 0, 0, 32, 32,
+                                                 24 * (sMultiMove->minColumn + c), 24 * (sMultiMove->minRow + r), 32, 32,
+                                                 GetValidMonIconPalIndex(species) + 8);
+            }
+        }
+}
+
+// Takes the tagged Moemon out (box positions keep their arrangement, the party's go in one row)
+static void Tag_TakeGroup(void)
+{
+    u8 i, minR = IN_BOX_ROWS, minC = IN_BOX_COLUMNS, maxR = 0, maxC = 0, k;
+
+    memset(sMultiMove->boxMons, 0, sizeof(sMultiMove->boxMons));
+    sMpTag.count = 0;
+    sMpTag.fromParty = (sMpTag.area == TAG_AREA_PARTY);
+    if (sMpTag.fromParty)
+    {
+        for (i = 0; i < PARTY_SIZE; i++)
+            if ((sMpTag.mask & (1u << i)) && GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                sMultiMove->boxMons[sMpTag.count++] = gPlayerParty[i].box;
+                ZeroMonData(&gPlayerParty[i]);
+            }
+        CompactPartySlots();
+        DestroyAllPartyMonIcons();
+        CreatePartyMonsSprites(sInPartyMenu);
+        UpdatePartySlotColors();
+        sMultiMove->minColumn = 0;
+        sMultiMove->minRow = 0;
+        sMultiMove->columnsTotal = sMpTag.count;
+        sMultiMove->rowsTotal = 1;
+    }
+    else
+    {
+        for (i = 0; i < IN_BOX_COUNT; i++)
+            if (sMpTag.mask & (1u << i))
+            {
+                u8 r = i / IN_BOX_COLUMNS, c = i % IN_BOX_COLUMNS;
+                if (r < minR) minR = r;
+                if (r > maxR) maxR = r;
+                if (c < minC) minC = c;
+                if (c > maxC) maxC = c;
+            }
+        sMultiMove->minColumn = minC;
+        sMultiMove->minRow = minR;
+        sMultiMove->columnsTotal = maxC - minC + 1;
+        sMultiMove->rowsTotal = maxR - minR + 1;
+        for (i = 0; i < IN_BOX_COUNT; i++)
+        {
+            struct BoxPokemon *boxMon;
+            if (!(sMpTag.mask & (1u << i)) || !GetBoxMonDataAt(sMpTag.box, i, MON_DATA_SANITY_HAS_SPECIES))
+                continue;
+            boxMon = GetBoxedMonPtr(sMpTag.box, i);
+            k = (i / IN_BOX_COLUMNS - minR) * sMultiMove->columnsTotal + (i % IN_BOX_COLUMNS - minC);
+            sMultiMove->boxMons[k] = *boxMon;
+            ZeroBoxMonAt(sMpTag.box, i);
+            if (StorageGetCurrentBox() == sMpTag.box)
+                DestroyBoxMonIconAtPosition(i);
+            sMpTag.count++;
+        }
+    }
+    MPNet_Log("pc tag: holding %d from %s (%dx%d at %d,%d)", sMpTag.count, sMpTag.fromParty ? "the party" : "a box",
+              sMultiMove->columnsTotal, sMultiMove->rowsTotal, sMultiMove->minColumn, sMultiMove->minRow);
+    Tag_Clear();
+}
+
+// The group's anchor: the box position the cursor holds it by (its first Moemon)
+static u8 Tag_GroupAnchor(void)
+{
+    u8 k;
+    for (k = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+        if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+            return (sMultiMove->minRow + k / sMultiMove->columnsTotal) * IN_BOX_COLUMNS
+                 + sMultiMove->minColumn + k % sMultiMove->columnsTotal;
+    return 0;
+}
+
+static void Task_TagMove(u8 taskId)
+{
+    switch (sStorage->state)
+    {
+    case 0:
+        Tag_TakeGroup();
+        if (sMpTag.fromParty)
+        {
+            SetUpHidePartyMenu();
+            sStorage->state = 1;
+        }
+        else
+        {
+            sStorage->state = 3;
+        }
+        break;
+    case 1:
+        if (!HidePartyMenu())
+            sStorage->state++;
+        break;
+    case 2:
+        if (!UpdateCursorPos())
+            sStorage->state++;
+        break;
+    case 3:
+        // the cursor goes to the group (in the box on screen)
+        SetCursorPosition(CURSOR_AREA_IN_BOX, Tag_GroupAnchor());
+        sStorage->state++;
+        break;
+    case 4:
+        if (UpdateCursorPos())
+            break;
+        HideBg(0);
+        TryLoadAllMonIconPalettesAtOffset(BG_PLTT_ID(8));
+        ChangeBgX(0, -1024, BG_COORD_SET);
+        ChangeBgY(0, -1024, BG_COORD_SET);
+        FillBgTilemapBufferRect_Palette0(0, 0, 0, 0, 0x20, 0x20);
+        Tag_DrawGroup();
+        SetBgAttribute(0, BG_ATTR_PALETTEMODE, 1);
+        PutWindowTilemap(sStorage->multiMoveWindowId);
+        CopyWindowToVram8Bit(sStorage->multiMoveWindowId, COPYWIN_FULL);
+        BlendPalettes(0x3F00, 8, RGB_WHITE);
+        SetGpuRegBits(REG_OFFSET_BG0CNT, BGCNT_256COLOR);
+        StartCursorAnim(CURSOR_ANIM_OPEN);
+        sStorage->state++;
+        break;
+    case 5:
+        if (IsDma3ManagerBusyWithBgCopy())
+            break;
+        ShowBg(0);
+        InitMultiMonPlaceChange(FALSE);
+        sStorage->state++;
+        break;
+    case 6:
+        if (!DoMonPlaceChange())
+        {
+            StartCursorAnim(CURSOR_ANIM_FIST);
+            MultiMove_InitMove(0, Q_8_8(1), 8);
+            InitMultiMonPlaceChange(TRUE);
+            sStorage->state++;
+        }
+        break;
+    case 7:
+    {
+        bool8 movingBg = MultiMove_UpdateMove();
+        bool8 movingMon = DoMonPlaceChange();
+        if (!movingBg && !movingMon)
+        {
+            u8 k;
+            sMpTag.holding = TRUE;
+            sMpTag.onButtons = FALSE;
+            sIsMonBeingMoved = TRUE;
+            sStorage->inBoxMovingMode = MOVE_MODE_MULTIPLE_MOVING;
+            sMovingMonOrigBoxId = StorageGetCurrentBox();
+            // the panel shows the group's first Moemon while it's held
+            for (k = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+                if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+                {
+                    BoxMonToMon(&sMultiMove->boxMons[k], &sStorage->movingMon);
+                    break;
+                }
+            RefreshDisplayMon();
+            SetPokeStorageTask(Task_PokeStorageMain);
+        }
+        break;
+    }
+    }
+}
+
+static u8 Tag_EmptyInCurrentBox(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if (!GetCurrentBoxMonData(i, MON_DATA_SANITY_HAS_SPECIES))
+            n++;
+    return n;
+}
+
+// A while holding the group in a box: the input to report
+static u8 Tag_TryPlace(void)
+{
+    u8 k, n, pos;
+    if (MultiMove_CanPlaceSelection())
+    {
+        sIsMonBeingMoved = FALSE;
+        sStorage->inBoxMovingMode = MOVE_MODE_NORMAL;
+        sMpTag.holding = FALSE;
+        sMpTag.refreshDisplay = TRUE;
+        MPNet_Log("pc tag: placed %d in box %d as arranged", sMpTag.count, StorageGetCurrentBox() + 1);
+        return INPUT_MULTIMOVE_PLACE_MONS;
+    }
+    if (Tag_EmptyInCurrentBox() < sMpTag.count)
+        return INPUT_TAG_NO_ROOM;
+    // Assorted: the empty slots from the cursor on, in the group's order
+    pos = sCursorPosition;
+    for (k = 0, n = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+    {
+        sMpTag.targets[k] = 0xFF;
+        if (!GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+            continue;
+        while (GetCurrentBoxMonData(pos, MON_DATA_SANITY_HAS_SPECIES) || (n > 0 && Tag_TargetTaken(pos, k)))
+            pos = (pos + 1) % IN_BOX_COUNT;
+        sMpTag.targets[k] = pos;
+        n++;
+        pos = (pos + 1) % IN_BOX_COUNT;
+    }
+    sIsMonBeingMoved = FALSE;
+    sStorage->inBoxMovingMode = MOVE_MODE_NORMAL;
+    sMpTag.holding = FALSE;
+    sMpTag.refreshDisplay = TRUE;
+    MPNet_Log("pc tag: placed %d in box %d from position %d on", sMpTag.count, StorageGetCurrentBox() + 1, sCursorPosition);
+    return INPUT_TAG_PLACE_ASSORTED;
+}
+
+static bool8 Tag_TargetTaken(u8 pos, u8 before)
+{
+    u8 k;
+    for (k = 0; k < before; k++)
+        if (sMpTag.targets[k] == pos)
+            return TRUE;
+    return FALSE;
+}
+
+// The assorted placement (like MultiMove_PlaceMons, with sMpTag.targets)
+static bool8 Tag_PlaceAssorted(void)
+{
+    u8 k, box = StorageGetCurrentBox();
+    switch (sMultiMove->state)
+    {
+    case 0:
+        for (k = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+            if (sMpTag.targets[k] != 0xFF)
+                SetBoxMonAt(box, sMpTag.targets[k], &sMultiMove->boxMons[k]);
+        MultiMove_InitMove(0, Q_8_8(-1), 8);
+        InitMultiMonPlaceChange(FALSE);
+        sMultiMove->state++;
+        break;
+    case 1:
+        if (!DoMonPlaceChange() && !MultiMove_UpdateMove())
+        {
+            for (k = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+                if (sMpTag.targets[k] != 0xFF)
+                    CreateBoxMonIconAtPos(sMpTag.targets[k]);
+            StartCursorAnim(CURSOR_ANIM_OPEN);
+            InitMultiMonPlaceChange(TRUE);
+            HideBg(0);
+            sMultiMove->state++;
+        }
+        break;
+    case 2:
+        if (!DoMonPlaceChange())
+        {
+            StartCursorAnim(CURSOR_ANIM_BOUNCE);
+            MultiMove_ResetBg();
+            sMultiMove->state++;
+        }
+        break;
+    case 3:
+        if (!IsDma3ManagerBusyWithBgCopy())
+        {
+            LoadPalette(GetTextWindowPalette(3), BG_PLTT_ID(13), PLTT_SIZE_4BPP);
+            SetCursorPriorityTo1();
+            ShowBg(0);
+            return FALSE;
+        }
+        break;
+    }
+    return TRUE;
+}
+
+// R / the PARTY POKéMON button while holding: the group joins the party (FALSE: no room)
+static bool8 Tag_GroupToParty(void)
+{
+    u8 k, slot = CalculatePlayerPartyCount();
+    if (slot + sMpTag.count > PARTY_SIZE)
+        return FALSE;
+    for (k = 0; k < sMultiMove->rowsTotal * sMultiMove->columnsTotal; k++)
+        if (GetBoxMonData(&sMultiMove->boxMons[k], MON_DATA_SANITY_HAS_SPECIES))
+            BoxMonToMon(&sMultiMove->boxMons[k], &gPlayerParty[slot++]);
+    memset(sMultiMove->boxMons, 0, sizeof(sMultiMove->boxMons));
+    MPNet_Log("pc tag: %d joined the party (%d now)", sMpTag.count, slot);
+    sMpTag.holding = FALSE;
+    sMpTag.onButtons = FALSE;
+    sIsMonBeingMoved = FALSE;
+    sStorage->inBoxMovingMode = MOVE_MODE_NORMAL;
+    HideBg(0);
+    MultiMove_ResetBg();
+    LoadPalette(GetTextWindowPalette(3), BG_PLTT_ID(13), PLTT_SIZE_4BPP);
+    SetCursorPriorityTo1();
+    StartCursorAnim(CURSOR_ANIM_BOUNCE);
+    return TRUE;   // Task_TagShowParty shows them (the party's icons come with it)
+}
+
+// After the group joined the party: the party slides in (its icons are made from the party), then its slots redraw
+static void Task_TagShowParty(u8 taskId)
+{
+    switch (sStorage->state)
+    {
+    case 0:
+        ClearSavedCursorPos();
+        SetUpDoShowPartyMenu();
+        sStorage->state++;
+        break;
+    case 1:
+        if (!DoShowPartyMenu())
+        {
+            UpdatePartySlotColors();
+            RefreshDisplayMon();
+            SetPokeStorageTask(Task_PokeStorageMain);
+        }
+        break;
+    }
+}
+
+// Input on the buttons while holding the group there (the group hidden)
+static u8 Tag_InputOnButtons(void)
+{
+    if (JOY_REPEAT(DPAD_UP))
+    {
+        sMpTag.onButtons = FALSE;
+        ShowBg(0);
+        SetCursorPosition(CURSOR_AREA_IN_BOX, sMpTag.savedCursor);
+        return INPUT_MOVE_CURSOR;
+    }
+    if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    {
+        SetCursorPosition(CURSOR_AREA_BUTTONS, sCursorPosition ^ 1);
+        return INPUT_MOVE_CURSOR;
+    }
+    if (JOY_NEW(R_BUTTON) || (JOY_NEW(A_BUTTON) && sCursorPosition == 0))
+        return INPUT_TAG_TO_PARTY;
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+        return INPUT_MULTIMOVE_UNABLE;
+    return INPUT_NONE;
+}
+
+// DOWN past the group's bottom: to the buttons (the group waits, hidden)
+static u8 Tag_ToButtons(void)
+{
+    sMpTag.onButtons = TRUE;
+    sMpTag.savedCursor = sCursorPosition;
+    HideBg(0);
+    SetCursorPosition(CURSOR_AREA_BUTTONS, 0);
+    return INPUT_MOVE_CURSOR;
+}
+
+bool8 MP_PcStorage_IsOpen(void)
+{
+    return gMain.callback2 == CB2_PokeStorage && sStorage != NULL;
+}
+
+// For tests: the tags and what's held (mp pctags)
+void MP_PcStorage_LogTags(void)
+{
+    if (!MP_PcStorage_IsOpen())
+    {
+        printf("[test] pctags: the PC isn't open\n");
+        return;
+    }
+    printf("[test] pctags: area %d box %d mask %x holding %d count %d buttons %d cursor %d,%d box %d\n", sMpTag.area,
+           sMpTag.box + 1, (unsigned)sMpTag.mask, sMpTag.holding, sMpTag.count, sMpTag.onButtons, sCursorArea,
+           sCursorPosition, StorageGetCurrentBox() + 1);
 }

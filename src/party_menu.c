@@ -5472,6 +5472,8 @@ u8 GetItemEffectType(u16 item)
 
     if (!ITEM_HAS_EFFECT(item))
         return ITEM_EFFECT_NONE;
+    if (item != ITEM_ENIGMA_BERRY && gItemEffectTable[item - ITEM_POTION] == NULL) // Moemon Kai: an item in range without one
+        return ITEM_EFFECT_NONE;
 
     // Read the item's effect properties.
     if (item == ITEM_ENIGMA_BERRY)

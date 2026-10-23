@@ -24,6 +24,7 @@
 //               In battles and menus the west button is B and the north
 //               button is SELECT.
 //   Naming screen   west = backspace (B), north = switch letters (SELECT).
+//   PC boxes    west = TAG (several Moemon at once), north = SELECT.
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -575,6 +576,11 @@ u16 Gamepad_Poll(int *fastForward)
         case INPUT_CONTEXT_NAMING:
             if (buttons & west)  keys |= B_BUTTON;       // backspace
             if (buttons & north) keys |= SELECT_BUTTON;  // switch letters
+            break;
+        case INPUT_CONTEXT_PC_STORAGE:
+            // The PC's boxes: west = TAG (pokemon_storage_system.c), north = SELECT
+            if (pressed & west)  Platform_ContextAction(INPUT_ACTION_PC_TAG);
+            if (buttons & north) keys |= SELECT_BUTTON;
             break;
         case INPUT_CONTEXT_QUICKPICK:
             // The emote / phrase pick: west = swap / pin a ready-made phrase, north = edit (mp_menu.c)

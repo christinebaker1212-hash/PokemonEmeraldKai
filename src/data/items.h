@@ -4711,4 +4711,133 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+
+    // Moemon Kai: newer games' items (names fit ITEM_NAME_LENGTH, Gen 3 style)
+    [ITEM_QUICK_POWDER] =
+    {
+        .name = _("QUICK POWDER"),
+        .itemId = ITEM_QUICK_POWDER,
+        .price = 10,
+        .holdEffect = HOLD_EFFECT_QUICK_POWDER,
+        .description = sQuickPowderDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_EVIOLITE] =
+    {
+        .name = _("EVIOLITE"),
+        .itemId = ITEM_EVIOLITE,
+        .price = 200,
+        .holdEffect = HOLD_EFFECT_EVIOLITE,
+        .description = sEvioliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_OLD_GATEAU] =
+    {
+        .name = _("OLD GATEAU"),
+        .itemId = ITEM_OLD_GATEAU,
+        .price = 200,
+        .description = sOldGateauDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_CASTELIACONE] =
+    {
+        .name = _("CASTELIACONE"),
+        .itemId = ITEM_CASTELIACONE,
+        .price = 200,
+        .description = sCasteliaconeDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_LUMIOSE_GALETTE] =
+    {
+        .name = _("LUMIOSEGALETE"),
+        .itemId = ITEM_LUMIOSE_GALETTE,
+        .price = 200,
+        .description = sLumioseGaletteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_SHALOUR_SABLE] =
+    {
+        .name = _("SHALOUR SABLE"),
+        .itemId = ITEM_SHALOUR_SABLE,
+        .price = 200,
+        .description = sShalourSableDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_BIG_MALASADA] =
+    {
+        .name = _("BIG MALASADA"),
+        .itemId = ITEM_BIG_MALASADA,
+        .price = 200,
+        .description = sBigMalasadaDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_PEWTER_CRUNCHIES] =
+    {
+        .name = _("PEWTERCRUNCHY"),
+        .itemId = ITEM_PEWTER_CRUNCHIES,
+        .price = 200,
+        .description = sPewterCrunchiesDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_RAGE_CANDY_BAR] =
+    {
+        .name = _("RAGECANDYBAR"),
+        .itemId = ITEM_RAGE_CANDY_BAR,
+        .price = 200,
+        .description = sRageCandyBarDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_CANDY_JAR] =
+    {
+        .name = _("CANDY JAR"),
+        .itemId = ITEM_CANDY_JAR,
+        .price = 0,
+        .description = sCandyJarDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
+    },
 };

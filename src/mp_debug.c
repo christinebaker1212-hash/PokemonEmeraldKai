@@ -40,6 +40,8 @@
 #include "item.h"
 #include "string_util.h"
 #include "constants/species.h"
+#include "gpu_regs.h"
+#include "bg.h"
 #include "constants/items.h"
 #include "constants/flags.h"
 #include "constants/heal_locations.h"
@@ -237,6 +239,10 @@ int MP_TestCondition(const char *name)
         u8 MP_Join_PendingCount(void);
         return MP_Join_PendingCount() >= atoi(name + 11);
     }
+    if (strcmp(name, "jaridle") == 0)      // the CANDY JAR's menu, done pouring or converting
+        return MP_Candy_JarOpen() && !MP_Candy_JarBusy();
+    if (strcmp(name, "jar") == 0)          // the CANDY JAR's menu (it may still be pouring)
+        return MP_Candy_JarOpen();
     if (strcmp(name, "watchmenu") == 0)    // SPECTATE / BET / JOIN / CANCEL in front of a battling friend
     {
         bool8 MP_Spectate_ChoiceUp(void);
@@ -1286,6 +1292,211 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void ShowPokemonStorageSystemPC(void);
         LockPlayerFieldControls();
         ShowPokemonStorageSystemPC();
+    }
+    else if (strcmp(cmd, "holdtest") == 0)
+    {
+        // holdtest - QUICK POWDER and EVIOLITE through the battle's own math on made-up battlers:
+        // who moves first (GetWhoStrikesFirst) and the damage a Tackle / Water Gun does (CalculateBaseDamage).
+        // In a battle only (the math reads its data); everything it touches is put back.
+        u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves);
+        struct BattlePokemon saveMons[2], atk, def;
+        u8 savePos[2] = {gBattlerPositions[0], gBattlerPositions[1]}, saveCount = gBattlersCount;
+        u8 saveAtk = gBattlerAttacker, saveTarget = gBattlerTarget, saveCrit = gCritMultiplier;
+        u16 savePower = gBattleMovePower;
+        u32 saveFlags = gBattleTypeFlags;
+        if (!gMain.inBattle || gBattleStruct == NULL)
+        {
+            printf("[test] holdtest: only in a battle\n");
+            return;
+        }
+        static const struct { u16 species; u16 item; bool8 transformed; } sSpeed[] = {
+            {SPECIES_DITTO, ITEM_NONE, FALSE}, {SPECIES_DITTO, ITEM_QUICK_POWDER, FALSE},
+            {SPECIES_DITTO, ITEM_QUICK_POWDER, TRUE}, {SPECIES_PIKACHU, ITEM_QUICK_POWDER, FALSE},
+        };
+        static const u16 sDefenders[] = {SPECIES_BULBASAUR, SPECIES_VENUSAUR, SPECIES_DITTO};
+        u32 i, j;
+        memcpy(saveMons, gBattleMons, sizeof(saveMons));
+        gBattlerPositions[0] = B_POSITION_PLAYER_LEFT;
+        gBattlerPositions[1] = B_POSITION_OPPONENT_LEFT;
+        gBattlersCount = 0;   // no abilities on the field
+        gBattleTypeFlags = BATTLE_TYPE_LINK;   // no badge boost
+        for (i = 0; i < ARRAY_COUNT(sSpeed); i++)
+        {
+            memset(&gBattleMons[0], 0, sizeof(gBattleMons[0]));
+            memset(&gBattleMons[1], 0, sizeof(gBattleMons[1]));
+            gBattleMons[0].species = sSpeed[i].species;
+            gBattleMons[0].item = sSpeed[i].item;
+            gBattleMons[0].speed = 50;
+            gBattleMons[0].status2 = sSpeed[i].transformed ? STATUS2_TRANSFORMED : 0;
+            gBattleMons[1].species = SPECIES_RATTATA;
+            gBattleMons[1].speed = 80;
+            for (j = 0; j < NUM_BATTLE_STATS; j++)
+                gBattleMons[0].statStages[j] = gBattleMons[1].statStages[j] = DEFAULT_STAT_STAGE;
+            printf("[test] holdtest speed species %d item %d transformed %d: %s first\n", sSpeed[i].species, sSpeed[i].item,
+                   sSpeed[i].transformed, GetWhoStrikesFirst(0, 1, TRUE) == 0 ? "holder" : "foe");
+        }
+        for (i = 0; i < ARRAY_COUNT(sDefenders); i++)
+        {
+            u16 items[2] = {ITEM_NONE, ITEM_EVIOLITE}, moves[2] = {MOVE_TACKLE, MOVE_WATER_GUN};
+            s32 dmg[2][2];
+            u32 k, m;
+            for (k = 0; k < 2; k++)
+                for (m = 0; m < 2; m++)
+                {
+                    memset(&atk, 0, sizeof(atk));
+                    memset(&def, 0, sizeof(def));
+                    atk.species = SPECIES_RATTATA;
+                    atk.level = 50;
+                    atk.attack = atk.spAttack = 120;
+                    def.species = sDefenders[i];
+                    def.item = items[k];
+                    def.defense = def.spDefense = 100;
+                    for (j = 0; j < NUM_BATTLE_STATS; j++)
+                        atk.statStages[j] = def.statStages[j] = DEFAULT_STAT_STAGE;
+                    gCritMultiplier = 1;
+                    dmg[k][m] = CalculateBaseDamage(&atk, &def, moves[m], 0, 0, 0, 0, 1);
+                }
+            printf("[test] holdtest eviolite species %d canevolve %d: tackle %d -> %d, water gun %d -> %d\n", sDefenders[i],
+                   SpeciesCanEvolve(sDefenders[i]), dmg[0][0], dmg[1][0], dmg[0][1], dmg[1][1]);
+        }
+        memcpy(gBattleMons, saveMons, sizeof(saveMons));
+        gBattlerPositions[0] = savePos[0];
+        gBattlerPositions[1] = savePos[1];
+        gBattlersCount = saveCount;
+        gBattleTypeFlags = saveFlags;
+        gBattlerAttacker = saveAtk;
+        gBattlerTarget = saveTarget;
+        gCritMultiplier = saveCrit;
+        gBattleMovePower = savePower;
+    }
+    else if (strcmp(cmd, "bstatus2") == 0)
+    {
+        // bstatus2 BATTLER STATUS2 - sets a battler's status2 (7 = confused for 7 turns; -1 = leave it), prints both
+        int b = 0, st = -1;
+        sscanf(arg, "%d %d", &b, &st);
+        if (b >= 0 && b < gBattlersCount)
+        {
+            if (st >= 0)
+                gBattleMons[b].status2 = st;
+            printf("[test] bstatus2 %d: status1 %u status2 %u\n", b, (unsigned)gBattleMons[b].status1, (unsigned)gBattleMons[b].status2);
+        }
+    }
+    else if (strcmp(cmd, "pstatus") == 0)
+    {
+        // pstatus SLOT STATUS1 - a party Moemon's status (8 = poison, 64 = paralysis, 0 = none); prints it back
+        int slot = 0, st = 0;
+        u32 status;
+        sscanf(arg, "%d %d", &slot, &st);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            status = st;
+            if (st >= 0)
+                SetMonData(&gPlayerParty[slot], MON_DATA_STATUS, &status);
+            printf("[test] pstatus %d = %u\n", slot, (unsigned)GetMonData(&gPlayerParty[slot], MON_DATA_STATUS));
+        }
+    }
+    else if (strcmp(cmd, "bgshow") == 0)
+    {
+        // bgshow BG 0|1 - hides or shows a background layer (debugging)
+        int bg = 0, on = 1;
+        sscanf(arg, "%d %d", &bg, &on);
+        if (on)
+            ShowBg(bg);
+        else
+            HideBg(bg);
+    }
+    else if (strcmp(cmd, "bgpeek") == 0)
+    {
+        // bgpeek BG TX TY - a background's tilemap entry at tile (TX, TY) and its first tile row's bytes
+        int bg = 0, tx = 0, ty = 0, i;
+        u16 cnt, entry;
+        const u8 *tiles;
+        sscanf(arg, "%d %d %d", &bg, &tx, &ty);
+        cnt = GetGpuReg(REG_OFFSET_BG0CNT + bg * 2);
+        entry = ((u16 *)(VRAM + ((cnt >> 8) & 0x1F) * 0x800))[(ty & 31) * 32 + (tx & 31)];
+        tiles = (const u8 *)(VRAM + ((cnt >> 2) & 3) * 0x4000) + (entry & 0x3FF) * ((cnt & 0x80) ? 64 : 32);
+        printf("[test] bgpeek %d %d,%d: cnt %04x entry %04x row0", bg, tx, ty, cnt, entry);
+        for (i = 0; i < 8; i++)
+            printf(" %02x", tiles[i]);
+        printf("\n");
+    }
+    else if (strcmp(cmd, "gpuregs") == 0)
+    {
+        // gpuregs - the display registers (DISPCNT, BGnCNT, blending, windows)
+        printf("[test] gpuregs dispcnt %04x bg0 %04x bg1 %04x bg2 %04x bg3 %04x bldcnt %04x bldalpha %04x bldy %04x winin %04x winout %04x\n",
+               GetGpuReg(REG_OFFSET_DISPCNT), GetGpuReg(REG_OFFSET_BG0CNT), GetGpuReg(REG_OFFSET_BG1CNT), GetGpuReg(REG_OFFSET_BG2CNT),
+               GetGpuReg(REG_OFFSET_BG3CNT), GetGpuReg(REG_OFFSET_BLDCNT), GetGpuReg(REG_OFFSET_BLDALPHA), GetGpuReg(REG_OFFSET_BLDY),
+               GetGpuReg(REG_OFFSET_WININ), GetGpuReg(REG_OFFSET_WINOUT));
+    }
+    else if (strcmp(cmd, "pctag") == 0)
+    {
+        // pctag - the TAG button in the PC's boxes (the west button / F)
+        gMpPcTagPressed = TRUE;
+    }
+    else if (strcmp(cmd, "pctags") == 0)
+    {
+        // pctags - the PC's tags and the group being held
+        MP_PcStorage_LogTags();
+    }
+    else if (strcmp(cmd, "candy") == 0)
+    {
+        // candy TYPE N - N candies of a type (TYPE -1: every type)
+        int type = 0, n = 0, t;
+        sscanf(arg, "%d %d", &type, &n);
+        for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
+            if ((type == t || type < 0) && t != TYPE_MYSTERY)
+                gMpCandies[t] = n;
+        printf("[test] candies: %d\n", (int)MP_Candy_Total());
+    }
+    else if (strcmp(cmd, "candyreload") == 0)
+    {
+        // candyreload - forget the candies and the BAG, then load them back from the save and its sidecar
+        int t;
+        MP_Candy_Reset();
+        MP_Bag_LoadFromSave();
+        printf("[test] candies after reload:");
+        for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
+            printf(" %d", gMpCandies[t]);
+        printf(" | jar %d\n", CheckBagHasItem(ITEM_CANDY_JAR, 1));
+    }
+    else if (strcmp(cmd, "candyjar") == 0)
+    {
+        MP_Candy_OpenJar(CB2_ReturnToField);
+    }
+    else if (strcmp(cmd, "jarstate") == 0)
+    {
+        MP_Candy_LogJar();
+    }
+    else if (strcmp(cmd, "boxput") == 0)
+    {
+        // boxput BOX POS SPECIES LEVEL - a Moemon in a box slot (BOX from 1)
+        int box = 1, pos = 0, species = 1, level = 5;
+        struct BoxPokemon boxMon;
+        sscanf(arg, "%d %d %d %d", &box, &pos, &species, &level);
+        if (box >= 1 && box <= TOTAL_BOXES_COUNT && pos >= 0 && pos < IN_BOX_COUNT)
+        {
+            CreateBoxMon(&boxMon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+            SetBoxMonAt(box - 1, pos, &boxMon);
+            printf("[test] boxput %d %d: %d\n", box, pos, species);
+        }
+    }
+    else if (strcmp(cmd, "boxmons") == 0)
+    {
+        // boxmons BOX - the box's Moemon (position:species) and the party's species
+        int box = 1, i;
+        sscanf(arg, "%d", &box);
+        if (box >= 1 && box <= TOTAL_BOXES_COUNT)
+        {
+            printf("[test] boxmons %d:", box);
+            for (i = 0; i < IN_BOX_COUNT; i++)
+                if (GetBoxMonDataAt(box - 1, i, MON_DATA_SANITY_HAS_SPECIES))
+                    printf(" %d:%d", i, (int)GetBoxMonDataAt(box - 1, i, MON_DATA_SPECIES));
+            printf(" | party:");
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+                    printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
+            printf("\n");
+        }
     }
     else if (strcmp(cmd, "item") == 0)
     {

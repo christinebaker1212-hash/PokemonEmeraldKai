@@ -1,0 +1,5 @@
+# PC TAG mode: the whole party tagged can't be moved or released (that's your last MOeMON); the tags stay
+MODE=1
+TMO=120
+EXPECT_A=("pc tag: party slot 1 on (2 tagged)" "[test] pctags: area 2 box 1 mask 3 holding 0")
+UNEXPECT_A=("pc tag: holding" "pc tag: released")

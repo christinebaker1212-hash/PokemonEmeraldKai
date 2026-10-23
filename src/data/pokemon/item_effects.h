@@ -459,4 +459,14 @@ const u8 *const gItemEffectTable[] =
     [ITEM_DRASH_BERRY - ITEM_POTION] = gItemEffect_PechaBerry,
     [ITEM_YAGO_BERRY - ITEM_POTION] = gItemEffect_RawstBerry,
     [ITEM_TOUGA_BERRY - ITEM_POTION] = gItemEffect_PersimBerry,
+    // Moemon Kai: the local specialties work like the LAVA COOKIE
+    [ITEM_OLD_GATEAU - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_CASTELIACONE - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_LUMIOSE_GALETTE - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_SHALOUR_SABLE - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_BIG_MALASADA - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_PEWTER_CRUNCHIES - ITEM_POTION] = gItemEffect_LavaCookie,
+    [ITEM_RAGE_CANDY_BAR - ITEM_POTION] = gItemEffect_LavaCookie,
+    // Moemon Kai: the table covers every item (it is read by item - ITEM_POTION; NULL = no effect)
+    [ITEMS_COUNT - ITEM_POTION] = NULL,
 };

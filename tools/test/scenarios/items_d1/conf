@@ -1,0 +1,9 @@
+# New items 389-397: QUICK POWDER / EVIOLITE in the battle math (mp holdtest), an OLD GATEAU from the BAG on a poisoned
+# Moemon, then another in battle on a paralyzed, confused one (shots: bag_items, bag_desc)
+MODE=1
+TMO=150
+EXPECT_A=("holdtest speed species 132 item 0 transformed 0: foe first" "holdtest speed species 132 item 389 transformed 0: holder first"
+          "holdtest speed species 132 item 389 transformed 1: foe first" "holdtest speed species 25 item 389 transformed 0: foe first"
+          "holdtest eviolite species 1 canevolve 1:" "holdtest eviolite species 3 canevolve 0:" "pstatus 0 = 8" "pstatus 0 = 0"
+          "bstatus2 0: status1 64 status2 7" "bstatus2 0: status1 0 status2 0" "solo battle done")
+CHECK="tools/test/scenarios/items_d1/check.py"

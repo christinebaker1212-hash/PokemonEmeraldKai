@@ -792,3 +792,25 @@ const u32 gItemIcon_NinikuBerry[] = INCGFX_U32("graphics/items/icons/niniku_berr
 const u32 gItemIconPalette_NinikuBerry[] = INCGFX_U32("graphics/items/icon_palettes/niniku_berry.pal", ".gbapal.lz");
 const u32 gItemIcon_TopoBerry[] = INCGFX_U32("graphics/items/icons/topo_berry.png", ".4bpp.lz");
 const u32 gItemIconPalette_TopoBerry[] = INCGFX_U32("graphics/items/icon_palettes/topo_berry.pal", ".gbapal.lz");
+
+// Moemon Kai: newer games' items (tools/moemon_items/import_items.py)
+const u32 gItemIcon_QuickPowder[] = INCGFX_U32("graphics/items/icons/quick_powder.png", ".4bpp.lz");
+const u32 gItemIconPalette_QuickPowder[] = INCGFX_U32("graphics/items/icon_palettes/quick_powder.pal", ".gbapal.lz");
+const u32 gItemIcon_Eviolite[] = INCGFX_U32("graphics/items/icons/eviolite.png", ".4bpp.lz");
+const u32 gItemIconPalette_Eviolite[] = INCGFX_U32("graphics/items/icon_palettes/eviolite.pal", ".gbapal.lz");
+const u32 gItemIcon_OldGateau[] = INCGFX_U32("graphics/items/icons/old_gateau.png", ".4bpp.lz");
+const u32 gItemIconPalette_OldGateau[] = INCGFX_U32("graphics/items/icon_palettes/old_gateau.pal", ".gbapal.lz");
+const u32 gItemIcon_Casteliacone[] = INCGFX_U32("graphics/items/icons/casteliacone.png", ".4bpp.lz");
+const u32 gItemIconPalette_Casteliacone[] = INCGFX_U32("graphics/items/icon_palettes/casteliacone.pal", ".gbapal.lz");
+const u32 gItemIcon_LumioseGalette[] = INCGFX_U32("graphics/items/icons/lumiose_galette.png", ".4bpp.lz");
+const u32 gItemIconPalette_LumioseGalette[] = INCGFX_U32("graphics/items/icon_palettes/lumiose_galette.pal", ".gbapal.lz");
+const u32 gItemIcon_ShalourSable[] = INCGFX_U32("graphics/items/icons/shalour_sable.png", ".4bpp.lz");
+const u32 gItemIconPalette_ShalourSable[] = INCGFX_U32("graphics/items/icon_palettes/shalour_sable.pal", ".gbapal.lz");
+const u32 gItemIcon_BigMalasada[] = INCGFX_U32("graphics/items/icons/big_malasada.png", ".4bpp.lz");
+const u32 gItemIconPalette_BigMalasada[] = INCGFX_U32("graphics/items/icon_palettes/big_malasada.pal", ".gbapal.lz");
+const u32 gItemIcon_PewterCrunchies[] = INCGFX_U32("graphics/items/icons/pewter_crunchies.png", ".4bpp.lz");
+const u32 gItemIconPalette_PewterCrunchies[] = INCGFX_U32("graphics/items/icon_palettes/pewter_crunchies.pal", ".gbapal.lz");
+const u32 gItemIcon_RageCandyBar[] = INCGFX_U32("graphics/items/icons/rage_candy_bar.png", ".4bpp.lz");
+const u32 gItemIconPalette_RageCandyBar[] = INCGFX_U32("graphics/items/icon_palettes/rage_candy_bar.pal", ".gbapal.lz");
+const u32 gItemIcon_CandyJar[] = INCGFX_U32("graphics/items/icons/candy_jar.png", ".4bpp.lz");
+const u32 gItemIconPalette_CandyJar[] = INCGFX_U32("graphics/items/icon_palettes/candy_jar.pal", ".gbapal.lz");

@@ -1626,6 +1626,7 @@ void MP_FrameUpdate(void)
     if (!sInitDone)
         MP_Init();
     MP_Qol_Update();
+    MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_Social_Update();
     MP_Together_Update();
     MP_Linkx_Update();

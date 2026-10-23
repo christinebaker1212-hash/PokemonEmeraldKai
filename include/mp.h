@@ -259,6 +259,10 @@ void MP_AutoSession_Update(void);
 // "[mp] ..." line on stdout (log.txt); harness waitlog/watchlog match these
 void MPNet_Log(const char *fmt, ...);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+// pokemon_storage_system.c: TAG mode in the PC boxes (the west button / F while the PC is open)
+extern bool8 gMpPcTagPressed;
+bool8 MP_PcStorage_IsOpen(void);
+void MP_PcStorage_LogTags(void);
 
 // mp_textopts.c: OPTIONS > NAME CASE / CREATURES (this game's display only)
 enum { MP_NAMECASE_AS_TYPED, MP_NAMECASE_CAPS, MP_NAMECASE_MIXED, MP_NAMECASE_COUNT };
@@ -304,6 +308,23 @@ bool8 MP_IsEasyChatWordInvalid(u16 easyChatWord);
 void MP_SendAppearance(void);
 bool8 MP_IsInOverworld(void);
 bool8 MP_IsLocalFree(void);
+
+// The CANDY JAR (mp_candy.c): candies from released Moemon, ten of a kind make a RARE CANDY
+extern u16 gMpCandies[];
+void MP_Candy_OnRelease(u16 species);
+u32 MP_Candy_Total(void);
+void MP_Candy_Reset(void);
+u16 MP_Candy_ConvertCount(void);
+bool8 MP_Candy_Convert(u16 *made);
+#ifdef EOF
+void MP_Candy_Write(FILE *f);
+void MP_Candy_Read(FILE *f);
+#endif
+void MP_Candy_Update(void);
+void MP_Candy_OpenJar(void (*back)(void));
+bool8 MP_Candy_JarOpen(void);
+bool8 MP_Candy_JarBusy(void);
+void MP_Candy_LogJar(void);
 u8 MP_GetPartyTopLevel(void);
 void MP_GetLocalState(struct MpState *state);
 void MP_TriggerLocalEmote(u8 kind);

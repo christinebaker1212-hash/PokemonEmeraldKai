@@ -454,7 +454,25 @@
 #define LAST_EREADER_BERRY  ITEM_TOPO_BERRY
 #define NUM_EREADER_BERRIES (LAST_EREADER_BERRY - FIRST_EREADER_BERRY + 1)
 
-#define ITEMS_COUNT 389
+// Moemon Kai: newer games' items
+#define ITEM_QUICK_POWDER 389       // DITTO's Speed x2 (not while transformed)
+#define ITEM_EVIOLITE 390           // DEFENSE / SP. DEF x1.5 for a Moemon that can still evolve
+// Local specialties like the LAVA COOKIE: heal all status problems and confusion
+#define ITEM_OLD_GATEAU 391
+#define ITEM_CASTELIACONE 392
+#define ITEM_LUMIOSE_GALETTE 393
+#define ITEM_SHALOUR_SABLE 394
+#define ITEM_BIG_MALASADA 395
+#define ITEM_PEWTER_CRUNCHIES 396
+#define ITEM_RAGE_CANDY_BAR 397
+#define FIRST_TREAT_ITEM ITEM_OLD_GATEAU
+#define LAST_TREAT_ITEM  ITEM_RAGE_CANDY_BAR
+#define IS_TREAT_ITEM(item) ((item) >= FIRST_TREAT_ITEM && (item) <= LAST_TREAT_ITEM)
+
+// Moemon Kai: the CANDY JAR (key item: candies from released Moemon, CONVERT to RARE CANDY; mp_candy.c)
+#define ITEM_CANDY_JAR 398
+
+#define ITEMS_COUNT 399
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow
@@ -529,6 +547,6 @@
 #define ITEM_B_USE_OTHER    2
 
 // Check if the item is one that can be used on a Pokémon.
-#define ITEM_HAS_EFFECT(item) (((item) >= ITEM_POTION && (item) <= MAX_BERRY_INDEX) || IS_EREADER_BERRY(item))
+#define ITEM_HAS_EFFECT(item) (((item) >= ITEM_POTION && (item) <= MAX_BERRY_INDEX) || IS_EREADER_BERRY(item) || IS_TREAT_ITEM(item))
 
 #endif  // GUARD_CONSTANTS_ITEMS_H

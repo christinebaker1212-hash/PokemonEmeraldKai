@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 60
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+press UP 2
+wait 20
+press UP 2
+wait 20
+press A 2
+wait 90
+mp pctag
+wait 10
+press DOWN 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press A 2
+wait 40
+shot last_move
+press A 2
+wait 30
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press A 2
+wait 40
+shot last_release
+press A 2
+wait 30
+mp pctags
+quit

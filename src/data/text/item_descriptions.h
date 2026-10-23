@@ -1683,3 +1683,55 @@ static const u8 sTopoBerryDesc[] = _(
     "Plant in loamy soil\n"
     "to grow TOPO.");
 
+// Moemon Kai: newer games' items
+static const u8 sQuickPowderDesc[] = _(
+    "A hold item that\n"
+    "raises DITTO's\n"
+    "SPEED.");
+
+static const u8 sEvioliteDesc[] = _(
+    "Raises DEFENSE and\n"
+    "SP. DEF of a holder\n"
+    "that can evolve.");
+
+static const u8 sOldGateauDesc[] = _(
+    "The OLD CHATEAU's\n"
+    "hidden specialty.\n"
+    "Heals all status.");
+
+static const u8 sCasteliaconeDesc[] = _(
+    "CASTELIA CITY's\n"
+    "famous ice cream.\n"
+    "Heals all status.");
+
+static const u8 sLumioseGaletteDesc[] = _(
+    "A pastry popular\n"
+    "in LUMIOSE CITY.\n"
+    "Heals all status.");
+
+static const u8 sShalourSableDesc[] = _(
+    "SHALOUR CITY's\n"
+    "shortbread cookie.\n"
+    "Heals all status.");
+
+static const u8 sBigMalasadaDesc[] = _(
+    "A fried bread from\n"
+    "the ALOLA region.\n"
+    "Heals all status.");
+
+static const u8 sPewterCrunchiesDesc[] = _(
+    "PEWTER CITY's\n"
+    "crunchy snack.\n"
+    "Heals all status.");
+
+static const u8 sRageCandyBarDesc[] = _(
+    "MAHOGANY TOWN's\n"
+    "famous candy bar.\n"
+    "Heals all status.");
+
+static const u8 sCandyJarDesc[] = _(
+    "Keeps the candies\n"
+    "released MOéMON\n"
+    "leave behind.");
+
+

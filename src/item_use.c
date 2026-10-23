@@ -671,6 +671,37 @@ static void Task_OpenRegisteredPokeblockCase(u8 taskId)
     }
 }
 
+// Moemon Kai: the CANDY JAR (mp_candy.c), from the BAG or registered, like the POKEBLOCK CASE
+static void CB2_OpenCandyJarFromBag(void)
+{
+    MP_Candy_OpenJar(CB2_ReturnToBagMenuPocket);
+}
+
+static void Task_OpenRegisteredCandyJar(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        MP_Candy_OpenJar(CB2_ReturnToField);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_CandyJar(u8 taskId)
+{
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_OpenCandyJarFromBag;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        gFieldCallback = FieldCB_ReturnToFieldNoScript;
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredCandyJar;
+    }
+}
+
 void ItemUseOutOfBattle_CoinCase(u8 taskId)
 {
     ConvertIntToDecimalStringN(gStringVar1, GetCoins(), STR_CONV_MODE_LEFT_ALIGN, 4);

@@ -4965,6 +4965,10 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
 
     if (holdEffect == HOLD_EFFECT_MACHO_BRACE)
         speedBattler1 /= 2;
+    // Moemon Kai: QUICK POWDER doubles DITTO's Speed, not while transformed
+    if (holdEffect == HOLD_EFFECT_QUICK_POWDER && gBattleMons[battler1].species == SPECIES_DITTO
+     && !(gBattleMons[battler1].status2 & STATUS2_TRANSFORMED))
+        speedBattler1 *= 2;
 
     if (gBattleMons[battler1].status1 & STATUS1_PARALYSIS)
         speedBattler1 /= 4;
@@ -4999,6 +5003,10 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
 
     if (holdEffect == HOLD_EFFECT_MACHO_BRACE)
         speedBattler2 /= 2;
+    // Moemon Kai: QUICK POWDER doubles DITTO's Speed, not while transformed
+    if (holdEffect == HOLD_EFFECT_QUICK_POWDER && gBattleMons[battler2].species == SPECIES_DITTO
+     && !(gBattleMons[battler2].status2 & STATUS2_TRANSFORMED))
+        speedBattler2 *= 2;
 
     if (gBattleMons[battler2].status1 & STATUS1_PARALYSIS)
         speedBattler2 /= 4;

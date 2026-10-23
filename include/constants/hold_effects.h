@@ -68,5 +68,7 @@
 #define HOLD_EFFECT_METAL_POWDER   64
 #define HOLD_EFFECT_THICK_CLUB     65
 #define HOLD_EFFECT_STICK          66
+#define HOLD_EFFECT_QUICK_POWDER   67   // Moemon Kai
+#define HOLD_EFFECT_EVIOLITE       68   // Moemon Kai
 
 #endif // GUARD_HOLD_EFFECTS_H

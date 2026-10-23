@@ -3199,6 +3199,18 @@ static s32 SpreadDamage(s32 damage)
     return gMpSpreadTargetCount >= 2 ? damage * 3 / 4 : damage;
 }
 
+// Moemon Kai: TRUE when the species evolves into something (EVIOLITE)
+bool8 SpeciesCanEvolve(u16 species)
+{
+    u32 i;
+    if (species == SPECIES_NONE || species >= NUM_SPECIES)
+        return FALSE;
+    for (i = 0; i < EVOS_PER_MON; i++)
+        if (gEvolutionTable[species][i].method != 0 && gEvolutionTable[species][i].targetSpecies != SPECIES_NONE)
+            return TRUE;
+    return FALSE;
+}
+
 s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *defender, u32 move, u16 sideStatus, u16 powerOverride, u8 typeOverride, u8 battlerIdAtk, u8 battlerIdDef)
 {
     u32 i;
@@ -3292,6 +3304,12 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         spAttack *= 2;
     if (defenderHoldEffect == HOLD_EFFECT_METAL_POWDER && defender->species == SPECIES_DITTO)
         defense *= 2;
+    // Moemon Kai: EVIOLITE, for a Moemon that can still evolve
+    if (defenderHoldEffect == HOLD_EFFECT_EVIOLITE && SpeciesCanEvolve(defender->species))
+    {
+        defense = (150 * defense) / 100;
+        spDefense = (150 * spDefense) / 100;
+    }
     if (attackerHoldEffect == HOLD_EFFECT_THICK_CLUB && (attacker->species == SPECIES_CUBONE || attacker->species == SPECIES_MAROWAK))
         attack *= 2;
 

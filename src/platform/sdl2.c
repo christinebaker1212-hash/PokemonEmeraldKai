@@ -609,10 +609,14 @@ void ProcessEvents(void)
                     Platform_ContextAction(INPUT_ACTION_COOP_MENU);
                 break;
             case SDLK_f:
-                // Moemon Co-op: the extra registered key item (the west button on a controller)
+                // Moemon Co-op: the extra registered key item (the west button on a controller);
+                // in the PC's boxes, TAG
                 if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
                  && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
                     Platform_ContextAction(INPUT_ACTION_ITEM_X);
+                else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
+                 && Platform_InputContext() == INPUT_CONTEXT_PC_STORAGE)
+                    Platform_ContextAction(INPUT_ACTION_PC_TAG);
                 break;
             case SDLK_v:
                 // Moemon Co-op: ping the tile ahead (left stick click on a controller)

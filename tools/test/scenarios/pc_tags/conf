@@ -1,0 +1,13 @@
+# PC TAG mode (MOVE POKeMON; mp pctag = the west button / F). BOX 1: tag three, MOVE one column right as arranged, then
+# carry them past BOX 2 (no room: refused) to BOX 3 (its Moemon in the way: they fill the empty slots from the cursor on);
+# two of them to the party with R; two tagged in the party go back to a box in a row; RELEASE two at once; B drops tags;
+# DOWN to PARTY POKeMON + A puts a held group in the party. Shots: tagged, menu, holding, assorted, party.
+MODE=1
+TMO=200
+EXPECT_A=("pc tag: box position 8 on (3 tagged)" "pc tag: holding 3 from a box (3x2 at 0,0)" "pc tag: placed 3 in box 1 as arranged"
+          "[test] boxmons 1: 1:1 3:4 4:25 9:7 10:133" "pc tag: holding 3 from a box (3x2 at 1,0)"
+          "pc tag: box 2 has no room for 3" "[test] boxmons 3: 3:1 4:4 5:19 6:7" "pc tag: 2 joined the party (4 now)" "[test] boxmons 3: 5:19 6:7 | party: 280 283 1 4"
+          "pc tag: holding 2 from the party (2x1 at 0,0)" "[test] boxmons 3: 0:1 1:4 5:19 6:7 | party: 280 283"
+          "pc tag: released 2" "[test] boxmons 3: 5:19 6:7 | party: 280 283" "pctags: area 0 box 3 mask 0 holding 0"
+          "pc tag: 2 joined the party (4 now)" "[test] boxmons 3: | party: 280 283 19 7")
+UNEXPECT_A=("placed 3 in box 2")

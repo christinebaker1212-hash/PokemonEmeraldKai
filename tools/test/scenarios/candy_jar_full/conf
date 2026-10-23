@@ -1,0 +1,7 @@
+# A full CANDY JAR: 10550 candies show as 96 small ones (each type its share, every type at least one). CONVERT
+# makes 1053 RARE CANDY in one go; the rest (9+0+7+3+1) stay. No candy may end outside the glass or deep in another.
+MODE=1
+TMO=150
+EXPECT_A=("candy: jar opened (10550 candies, 1053 to convert)" "candy: jar phase 1, 96 in, 0 waiting, 0 leaving, radius 36/10, 0 outside the glass"
+          "candy: converted, 1053 RARE CANDY made, 20 candies left" "candy: jar phase 1, 20 in, 0 waiting, 0 leaving")
+CHECK="tools/test/scenarios/candy_jar/check.py"

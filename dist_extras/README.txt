@@ -418,6 +418,8 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                              LUM and the rare POKeBLOCK ones (R), the
                              Mirage Island pinch Berries (SR), and
                              LANSAT, STARF and the e-Reader Berries (SSR).
+                             Treats from other regions (N), EVIOLITE and
+                             QUICK POWDER (R).
                  PICKUP      a new one every week: every UR is one of
                              its Moemon, every EX one of them shiny. Mew &
                              Mewtwo, Celebi, Jirachi, Dragonite, Tyranitar,
@@ -683,6 +685,15 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   ones with no effect are for POKeBLOCKS. Plant them, crush or blend them
   like any Berry. They only come from the MoeGatcha (STANDARD, SSR), and an
   unmodded game can't take them in a trade.
+* Items from later games (from the MoeGatcha STANDARD banner):
+  QUICK POWDER    held by DITTO: doubles its Speed (not while it's
+                  transformed).
+  EVIOLITE        held by a Moemon that can still evolve: DEFENSE and
+                  SP. DEF x1.5.
+  Treats          OLD GATEAU, CASTELIACONE, LUMIOSEGALETE (Lumiose Galette),
+                  SHALOUR SABLE, BIG MALASADA, PEWTERCRUNCHY (Pewter
+                  Crunchies), RAGECANDYBAR: heal all status problems and
+                  confusion, from the BAG or in battle, like a LAVA COOKIE.
 * Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
   Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
   OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items
@@ -695,6 +706,27 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a
   key item in the list also puts it on that button. On the map those buttons
   use the item. (L and R need BUTTON MODE NORMAL in OPTION.)
+* PC boxes, MOVE POKeMON: TAG (X/Square on a controller, F on the keyboard)
+  marks the Moemon under the cursor; tag as many as you like in one box, or
+  in your party (tagging somewhere else drops the old tags, B drops them
+  all). Then A: MOVE, RELEASE or CANCEL.
+    MOVE      picks them all up, keeping how they were arranged (party
+              Moemon in a row). A puts them down: as arranged if they fit
+              there, otherwise in the empty slots from the cursor on; a box
+              without room for all of them says no (a buzz). R, or DOWN to
+              PARTY POKeMON and A, puts them in your party when it has room.
+    RELEASE   "Release all selected MOEMON?" Not for EGGS or Moemon holding
+              MAIL, and you keep a Moemon that can battle in your party and
+              at least two Moemon in all. Held HMs go back to the BAG.
+* CANDIES: every Moemon you release leaves a candy of its type (its first
+  type). After your first release, PROF. BIRCH walks over with the CANDY
+  JAR (a KEY ITEM) as soon as you're free on the map; from then on candies
+  go into it by themselves. Use the jar from the BAG or a registered
+  button: the lid pops off and your candies pour in, a candy for each one
+  (past 96 the jar is full and the candies get smaller, each standing for
+  several). SELECT shakes the jar. A: CONVERT turns every ten of one kind
+  into a RARE CANDY: they fly out of the jar and the RARE CANDY goes to
+  your BAG. B: back. The candies are saved with your game.
 * Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
 * If the game crashes it saves crash_log.txt next to the game and says so.
@@ -892,7 +924,8 @@ CONTROLS (keyboard)
   Arrow keys = D-Pad      Z = A      X = B      Enter = START
   Backslash (\) = SELECT  A = L      S = R
   C = CO-OP menu          1-8 = emotes and your phrases
-  V = "look here!" ping   F = the extra registered key item (BAG > REGISTER)
+  V = "look here!" ping   F = the extra registered key item (BAG > REGISTER);
+                          in the PC boxes, TAG
   Q (hold) = quick emotes   E (hold) = quick phrases
             (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
@@ -931,6 +964,7 @@ The other buttons change with what's on screen:
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
                     X/Square = B, Y/Triangle = SELECT
   Naming screen     X/Square = delete, Y/Triangle = switch letters
+  PC boxes          X/Square = TAG (F on the keyboard), Y/Triangle = SELECT
 Button hints on screen show your controller's own buttons (Xbox,
 PlayStation or Nintendo) when you last used it, and the GBA buttons when
 you last used the keyboard.
