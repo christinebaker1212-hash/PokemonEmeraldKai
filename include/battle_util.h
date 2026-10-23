@@ -103,6 +103,7 @@ u8 GetRandomFoe(u8 battler);                          // Moemon Co-op
 u8 FindAbilityOnSide(u8 side, u8 ability, u8 fallback);  // Moemon Co-op
 bool8 MP_IsPartyIdOnSide(u8 battler, u8 partyId);        // Moemon Co-op: triples
 void MP_TripleSwitchRange(u8 battler, s32 *first, s32 *last);
+u8 MP_TripleCountReplacements(u8 battler);                 // Moemon Co-op: triples
 u8 IsMonDisobedient(void);
 
 #endif // GUARD_BATTLE_UTIL_H

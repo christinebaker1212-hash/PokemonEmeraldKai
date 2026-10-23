@@ -2477,6 +2477,24 @@ void MP_TripleSwitchRange(u8 battler, s32 *first, s32 *last)
     }
 }
 
+// Moemon Co-op: how many Pokemon a triple's battler could bring in now (alive, not out or coming out on its side)
+u8 MP_TripleCountReplacements(u8 battler)
+{
+    struct Pokemon *party = GetBattlerSide(battler) == B_SIDE_PLAYER ? gPlayerParty : gEnemyParty;
+    s32 first, last, i;
+    u8 n = 0;
+    MP_TripleSwitchRange(battler, &first, &last);
+    for (i = first; i < last; i++)
+    {
+        if (GetMonData(&party[i], MON_DATA_HP) != 0
+         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_NONE
+         && GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) != SPECIES_EGG
+         && !MP_IsPartyIdOnSide(battler, i))
+            n++;
+    }
+    return n;
+}
+
 bool8 HasNoMonsToSwitch(u8 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2)
 {
     u8 playerId, flankId;

@@ -360,6 +360,17 @@ same-named Pokémon on a side get A/B/C left to right (MP_TriCards_Letter, also 
 over the finished frame, so MP_TriCards_Composite paints the battle emote pick and bubbles again on top of them
 (MP_Emote_BattleOverlaySprites / MP_BattleChat_OverlaySprites). Battle bubbles keep the tail on the speaker and slide
 the box back on screen (Bubble.boxShift) instead of moving the whole bubble.
+Shared pools (the trainer's side, a local debug triple's player side): Cmd_openpartyscreen (BS_FAINTED_LINK_MULTIPLE_1)
+asks battlers that fainted together one after another, so it counts the replacements already promised per pool and a
+battler only gets one while MP_TripleCountReplacements still has one left over (else it's marked absent). The AI picks
+later, in each opponent controller; asking one too many made it pick slot 6, past gEnemyParty: a BAD EGG out of
+WATTSON's party (OpponentHandleChoosePokemon now never returns past the party). Cmd_forcerandomswitch (ROAR /
+WHIRLWIND) has its own triple branch: the target's MP_TripleSwitchRange, minus anything out on its side. The AI's own
+switches (battle_ai_switch_items.c: ShouldSwitch, Wonder Guard / absorb / type helpers, AI_TrySwitchOrUseItem's fallback)
+use MP_TripleSwitchRange and skip MP_IsPartyIdOnSide too (they took the halves of three, which hold another battler's
+Pokemon), and the fallback never ends past the range. Tests:
+tri_wattson (one SURF knocks out all three, two left), tri_roar (WHIRLWIND only); MOEMON_PARTYTRACE=1 logs both parties,
+gBattlerPartyIndexes, monToSwitchIntoId and absent battlers on every change, tools/test/check_partytrace.py checks them.
 Intro: CONTROLLER_LOADMONSPRITE is LINK_SYNC_ALL (battle_controllers.c LinkSyncKind); as an owner command a joiner
 replayed the wild Pokémon's slide-ins one after another.
 

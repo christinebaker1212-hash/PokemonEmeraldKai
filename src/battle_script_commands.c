@@ -5258,11 +5258,24 @@ static void Cmd_openpartyscreen(void)
         // Moemon Co-op: a triple's fainted battlers all choose at once, like a multi battle's
         if ((gBattleTypeFlags & BATTLE_TYPE_MULTI) || !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || IS_TRIPLE_BATTLE())
         {
+            // Moemon Co-op: a triple's battlers on one side can share a pool (the trainer's side): the ones that
+            // fainted together choose one after another, so a battler only gets a replacement when the pool still
+            // has one left after those promised to the battlers before it (else it picked past the party's end:
+            // a BAD EGG came out of WATTSON's party)
+            u8 promised[PARTY_SIZE + 1] = {0};
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
                 if (gBattlerFaintMarks & gBitTable[gActiveBattler])
                 {
-                    if (HasNoMonsToSwitch(gActiveBattler, PARTY_SIZE, PARTY_SIZE))
+                    s32 poolFirst = 0, poolLast = PARTY_SIZE;
+                    u8 poolKey = 0;
+                    if (IS_TRIPLE_BATTLE())
+                    {
+                        MP_TripleSwitchRange(gActiveBattler, &poolFirst, &poolLast);
+                        poolKey = (GetBattlerSide(gActiveBattler) == B_SIDE_OPPONENT) ? PARTY_SIZE : poolFirst;
+                    }
+                    if (HasNoMonsToSwitch(gActiveBattler, PARTY_SIZE, PARTY_SIZE)
+                     || (IS_TRIPLE_BATTLE() && MP_TripleCountReplacements(gActiveBattler) <= promised[poolKey]))
                     {
                         gAbsentBattlerFlags |= gBitTable[gActiveBattler];
                         gBattlerFaintMarks &= ~gBitTable[gActiveBattler];
@@ -5273,6 +5286,11 @@ static void Cmd_openpartyscreen(void)
                     {
                         ChooseMonToSendOut(PARTY_SIZE);
                         gSpecialStatuses[gActiveBattler].faintedHasReplacement = TRUE;
+                        promised[poolKey]++;
+                    }
+                    else if (gBattleStruct->monToSwitchIntoId[gActiveBattler] == PARTY_SIZE)
+                    {
+                        promised[poolKey]++;   // asked before, still choosing: its replacement is spoken for
                     }
                 }
                 else
@@ -7729,6 +7747,28 @@ static void Cmd_forcerandomswitch(void)
             party = gPlayerParty;
         else
             party = gEnemyParty;
+
+        if (IS_TRIPLE_BATTLE())
+        {
+            // Moemon Co-op: a triple brings in one of the target's own (its player's two, or the trainer's pool)
+            // that isn't out on its side; the halves of three below would take another player's Pokemon or one
+            // that's already out
+            s32 candidates[PARTY_SIZE], count = 0;
+            MP_TripleSwitchRange(gBattlerTarget, &firstMonId, &lastMonId);
+            for (i = firstMonId; i < lastMonId; i++)
+            {
+                if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
+                 && !GetMonData(&party[i], MON_DATA_IS_EGG)
+                 && GetMonData(&party[i], MON_DATA_HP) != 0
+                 && !MP_IsPartyIdOnSide(gBattlerTarget, i))
+                    candidates[count++] = i;
+            }
+            if (count == 0)
+                gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
+            else if (TryDoForceSwitchOut())
+                *(gBattleStruct->monToSwitchIntoId + gBattlerTarget) = candidates[Random() % count];
+            return;
+        }
 
         if ((gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER && gBattleTypeFlags & BATTLE_TYPE_LINK)
             || (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER && gBattleTypeFlags & BATTLE_TYPE_RECORDED_LINK)

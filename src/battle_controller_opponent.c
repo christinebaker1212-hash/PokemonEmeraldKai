@@ -1679,6 +1679,13 @@ static void OpponentHandleChoosePokemon(void)
                     break;
                 }
             }
+            // Moemon Co-op: never a slot past the party (that sent out whatever memory follows it: a BAD EGG).
+            // Nothing left to pick shouldn't be asked at all (Cmd_openpartyscreen); if it is, the fainted one stays.
+            if (chosenMonId >= PARTY_SIZE)
+            {
+                MPNet_Log("battle: no Pokemon left for battler %d to send out", gActiveBattler);
+                chosenMonId = gBattlerPartyIndexes[gActiveBattler];
+            }
         }
     }
     else
