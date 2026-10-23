@@ -32,7 +32,7 @@ for i in $(seq 0 $((N - 1))); do
     if [ "$i" = 0 ]; then auto="host:Test Room"; w=${WARP:-}; else auto="join:Test Room"; w=${!warpv:-$WARP}; fi
     env ${!envv} MOEMON_DEBUG_WARP=$w MOEMON_TEST="$D/$c.txt" MOEMON_COOP_CONFIG="$D/$c.ini" MOEMON_SAVE="$D/$c.sav" \
         MOEMON_DEBUG_NAME=${NAMES[$i]} MOEMON_DEBUG_GENDER=$([ $i = 0 ] && echo F || echo M) MOEMON_COOP_AUTO="$auto" \
-        timeout "${TMO:-150}" ${!wrapv} "$BIN" > "$D/$c.log" 2>&1 &
+        timeout -k 10 "${TMO:-150}" ${!wrapv} "$BIN" > "$D/$c.log" 2>&1 &
     PIDS+=($!)
     sleep 1
 done

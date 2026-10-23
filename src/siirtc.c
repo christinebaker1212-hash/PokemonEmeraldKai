@@ -166,7 +166,7 @@ bool8 SiiRtcReset(void)
     sLocked = TRUE;
 
 #ifdef PORTABLE
-    // TODO
+    sLocked = FALSE;   // Moemon Co-op: nothing to reset on a PC, but unlock (it stayed locked: every clock read failed)
 #else
     GPIO_PORT_DATA = SCK_HI;
     GPIO_PORT_DATA = SCK_HI | CS_HI;

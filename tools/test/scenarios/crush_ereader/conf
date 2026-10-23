@@ -1,0 +1,9 @@
+# BERRY CRUSH at NA-JP lag with e-Reader Berries (their own items after the original ones): ALICE crushes a PUMKIN
+# BERRY, BOB a TOUGA BERRY; both games agree on them (berry numbers 47 and 56) and finish (harder to crush, like ENIGMA: it takes longer)
+MODE=2
+DELAY=250
+JIT=80
+FPS=60
+TMO=600
+EXPECT_A=("player 2 answered 2" "BERRY CRUSH with 2 players" "crush: berries 47 56 0 0" "crush: finished")
+EXPECT_B=("invites us to BERRY CRUSH" "BERRY CRUSH with 2 players" "crush: berries 47 56 0 0" "crush: finished")

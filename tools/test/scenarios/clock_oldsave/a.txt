@@ -1,0 +1,10 @@
+pressuntil A field 5000
+wait 60
+mp stuckclock
+mp berrytree 2 7 1
+mp berryinfo 2
+mp warp 0,17,10,10
+wait 150
+mp berryinfo 2
+mp clock
+quit

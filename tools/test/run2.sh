@@ -24,12 +24,12 @@ export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_SHOTDIR="$D" MOEMON_LO
        MOEMON_DEBUG_QUICKSTART=1 MOEMON_TEST_FPS=${FPS:-120}
 env $ENV_A MOEMON_DEBUG_WARP=${WARP:-} MOEMON_TEST="$D/a.txt" MOEMON_COOP_CONFIG="$D/a.ini" MOEMON_SAVE="$D/a.sav" \
     MOEMON_DEBUG_NAME=${NAME_A:-ALICE} MOEMON_DEBUG_GENDER=F MOEMON_COOP_AUTO="host:Test Room" \
-    timeout "${TMO:-150}" "$BIN" > "$D/a.log" 2>&1 &
+    timeout -k 10 "${TMO:-150}" "$BIN" > "$D/a.log" 2>&1 &
 AP=$!
 sleep 1
 env $ENV_B MOEMON_DEBUG_WARP=${WARP_B:-$WARP} MOEMON_TEST="$D/b.txt" MOEMON_COOP_CONFIG="$D/b.ini" MOEMON_SAVE="$D/b.sav" \
     MOEMON_DEBUG_NAME=${NAME_B:-BOB} MOEMON_COOP_AUTO="join:Test Room" \
-    timeout "${TMO:-150}" "$BIN" > "$D/b.log" 2>&1 &
+    timeout -k 10 "${TMO:-150}" "$BIN" > "$D/b.log" 2>&1 &
 BP=$!
 wait $AP $BP
 kill $SP ${PP:-} 2>/dev/null

@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle.h"
 #include "battle_util.h"
+#include "mp.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
 #include "battle_main.h"
@@ -65,7 +66,9 @@ static bool8 ShouldSwitchIfWonderGuard(void)
     }
 
     // Get party information.
-    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+    if (IS_TRIPLE_BATTLE())
+        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: a triple's own pool
+    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
     {
         if ((gActiveBattler & BIT_FLANK) == B_FLANK_LEFT)
             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -87,6 +90,8 @@ static bool8 ShouldSwitchIfWonderGuard(void)
     {
         if (GetMonData(&party[i], MON_DATA_HP) == 0)
             continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
+            continue;   // Moemon Co-op: out (or coming out) for another battler on our side
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE)
             continue;
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_EGG)
@@ -161,7 +166,9 @@ static bool8 FindMonThatAbsorbsOpponentsMove(void)
     if (gBattleMons[gActiveBattler].ability == absorbingTypeAbility)
         return FALSE;
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+    if (IS_TRIPLE_BATTLE())
+        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: a triple's own pool
+    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
     {
         if ((gActiveBattler & BIT_FLANK) == B_FLANK_LEFT)
             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -185,6 +192,8 @@ static bool8 FindMonThatAbsorbsOpponentsMove(void)
 
         if (GetMonData(&party[i], MON_DATA_HP) == 0)
             continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
+            continue;   // Moemon Co-op: out (or coming out) for another battler on our side
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE)
             continue;
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_EGG)
@@ -359,7 +368,9 @@ static bool8 FindMonWithFlagsAndSuperEffective(u8 flags, u8 moduloPercent)
         battlerIn2 = gActiveBattler;
     }
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+    if (IS_TRIPLE_BATTLE())
+        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: a triple's own pool
+    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
     {
         if ((gActiveBattler & BIT_FLANK) == 0)
             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -383,6 +394,8 @@ static bool8 FindMonWithFlagsAndSuperEffective(u8 flags, u8 moduloPercent)
 
         if (GetMonData(&party[i], MON_DATA_HP) == 0)
             continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
+            continue;   // Moemon Co-op: out (or coming out) for another battler on our side
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE)
             continue;
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_EGG)
@@ -468,7 +481,9 @@ static bool8 ShouldSwitch(void)
         battlerIn2 = *activeBattlerPtr;
     }
 
-    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+    if (IS_TRIPLE_BATTLE())
+        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: a triple's own pool
+    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
     {
         if ((gActiveBattler & BIT_FLANK) == B_FLANK_LEFT)
             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -489,6 +504,8 @@ static bool8 ShouldSwitch(void)
     {
         if (GetMonData(&party[i], MON_DATA_HP) == 0)
             continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
+            continue;   // Moemon Co-op: out (or coming out) for another battler on our side
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE)
             continue;
         if (GetMonData(&party[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_EGG)
@@ -559,7 +576,9 @@ void AI_TrySwitchOrUseItem(void)
                         battlerIn2 = GetBattlerAtPosition(BATTLE_PARTNER(battlerIdentity));
                     }
 
-                    if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
+                    if (IS_TRIPLE_BATTLE())
+                        MP_TripleSwitchRange(gActiveBattler, &firstId, &lastId);   // Moemon Co-op: a triple's own pool
+                    else if (gBattleTypeFlags & (BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TOWER_LINK_MULTI))
                     {
                         if ((gActiveBattler & BIT_FLANK) == B_FLANK_LEFT)
                             firstId = 0, lastId = PARTY_SIZE / 2;
@@ -575,6 +594,11 @@ void AI_TrySwitchOrUseItem(void)
                     {
                         if (GetMonData(&party[monToSwitchId], MON_DATA_HP) == 0)
                             continue;
+                        if (IS_TRIPLE_BATTLE()
+                         && (GetMonData(&party[monToSwitchId], MON_DATA_SPECIES_OR_EGG) == SPECIES_NONE
+                          || GetMonData(&party[monToSwitchId], MON_DATA_SPECIES_OR_EGG) == SPECIES_EGG
+                          || MP_IsPartyIdOnSide(gActiveBattler, monToSwitchId)))
+                            continue;   // Moemon Co-op
                         if (monToSwitchId == gBattlerPartyIndexes[battlerIn1])
                             continue;
                         if (monToSwitchId == gBattlerPartyIndexes[battlerIn2])
@@ -585,6 +609,12 @@ void AI_TrySwitchOrUseItem(void)
                             continue;
 
                         break;
+                    }
+                    // Moemon Co-op: never past the party (ShouldSwitch counted one, so this shouldn't happen)
+                    if (monToSwitchId >= lastId)
+                    {
+                        MPNet_Log("battle: AI switch for battler %d found no Pokemon", gActiveBattler);
+                        monToSwitchId = gBattlerPartyIndexes[gActiveBattler];
                     }
                 }
 
@@ -770,6 +800,8 @@ u8 GetMostSuitableMonToSwitchInto(void)
             continue;
         if (GetMonData(&party[i], MON_DATA_HP) == 0)
             continue;
+        if (IS_TRIPLE_BATTLE() && MP_IsPartyIdOnSide(gActiveBattler, i))
+            continue;   // Moemon Co-op: out (or coming out) for another battler on our side
         if (gBattlerPartyIndexes[battlerIn1] == i)
             continue;
         if (gBattlerPartyIndexes[battlerIn2] == i)

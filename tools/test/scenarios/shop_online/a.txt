@@ -1,0 +1,34 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 30
+press LEFT 2
+wait 20
+press A 2
+wait 120
+press A 2
+wait 60
+press A 2
+wait 90
+shot decor_list
+press A 2
+wait 60
+press A 2
+wait 60
+mash A 4 40
+mash B 8 30
+wait 90
+mp warp 0,1,5,48
+wait 150
+press UP 2
+wait 20
+press A 2
+wait 90
+press A 2
+wait 90
+press A 2
+wait 90
+shot energy_list
+mash B 8 30
+waitfor field 3000
+log shop online done
+quit

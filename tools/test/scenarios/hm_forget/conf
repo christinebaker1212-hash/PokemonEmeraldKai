@@ -1,0 +1,7 @@
+# no HM restrictions: the lead knows CUT (an HM move) first; it levels up in a wild battle and forgets CUT
+# for the new move (it used to say "HM moves can't be forgotten now"). It holds HM08 through the battle: nothing
+# happens to it
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("[test] monmoves: slot 0 species 280 moves 15 45 93 104 held 346" "party: 281(" "[test] monmoves: slot 0 species 281 moves 24 45 93 104 held 346")
+UNEXPECT_A=("[test] monmoves: slot 0 species 281 moves 15 ")

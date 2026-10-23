@@ -3216,6 +3216,7 @@ static void BattleStartClearSetData(void)
     gBattlerAttacker = 0;
     gBattlerTarget = 0;
     gBattleWeather = 0;
+    MP_Battle_ResetWeatherLines();   // Moemon Co-op: weather lines shown once (battle_script_commands.c)
 
     dataPtr = (u8 *)&gWishFutureKnock;
     for (i = 0; i < sizeof(struct WishFutureKnock); i++)

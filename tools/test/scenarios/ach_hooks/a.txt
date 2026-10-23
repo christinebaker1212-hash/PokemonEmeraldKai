@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 120
+mp gatcharig 3 20
+mp gatcha
+wait 60
+pressuntillog A 2000 gatcha: 
+wait 30
+mash B 12 20
+pressuntil B field 3000
+wait 60
+mp follow 0
+mp style 0 2
+mp lookskin 2
+wait 120
+mp ach
+quit

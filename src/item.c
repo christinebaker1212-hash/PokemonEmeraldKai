@@ -81,8 +81,8 @@ void CopyItemNameHandlePlural(u16 itemId, u8 *dst, u32 quantity)
     }
     else
     {
-        if (itemId >= FIRST_BERRY_INDEX && itemId <= LAST_BERRY_INDEX)
-            GetBerryCountString(dst, gBerries[itemId - FIRST_BERRY_INDEX].name, quantity);
+        if (IS_BERRY_ITEM(itemId))
+            GetBerryCountString(dst, gBerries[BERRY_SLOT(itemId)].name, quantity);
         else
             StringCopy(dst, GetItemName(itemId));
     }
@@ -148,8 +148,10 @@ bool8 HasAtLeastOneBerry(void)
 {
     u16 i;
 
-    for (i = FIRST_BERRY_INDEX; i < ITEM_BRIGHT_POWDER; i++)
+    for (i = FIRST_BERRY_INDEX; i <= LAST_EREADER_BERRY; i++)
     {
+        if (i == ITEM_BRIGHT_POWDER)
+            i = FIRST_EREADER_BERRY;   // Moemon Kai: and the e-Reader Berries
         if (CheckBagHasItem(i, 1) == TRUE)
         {
             gSpecialVar_Result = TRUE;
@@ -243,6 +245,7 @@ bool8 AddBagItem(u16 itemId, u16 count)
         u16 slotCapacity;
         u16 ownedCount;
         u8 pocket = GetItemPocket(itemId) - 1;
+        bool8 hadIt = CheckBagHasItem(itemId, 1);   // Moemon Co-op: a new item gets its "!" (mp_bag.c)
 
         itemPocket = &gBagPockets[pocket];
         newItems = AllocZeroed(itemPocket->capacity * sizeof(struct ItemSlot));
@@ -327,6 +330,8 @@ bool8 AddBagItem(u16 itemId, u16 count)
         }
         memcpy(itemPocket->itemSlots, newItems, itemPocket->capacity * sizeof(struct ItemSlot));
         Free(newItems);
+        if (!hadIt)
+            MP_Bag_NoteAdded(itemId);
         return TRUE;
     }
 }
@@ -649,6 +654,8 @@ void MoveItemSlotInList(struct ItemSlot *itemSlots, u32 from, u32 to)
 void ClearBag(void)
 {
     u16 i;
+
+    MP_Bag_ResetMarks();   // Moemon Co-op
 
     for (i = 0; i < POCKETS_COUNT; i++)
     {

@@ -143,6 +143,12 @@ int main(int argc, char **argv)
     if (Display_Init("Moemon Emerald Kai Co-op") != 0)
         return 1;
     {
+        // Moemon Co-op: a newer release installs and starts in place of this one (updater.c)
+        int Updater_Run(int argc, char **argv);
+        if (Updater_Run(argc, argv))
+            return 0;
+    }
+    {
         void Gamepad_Init(void);
         if (!sTestMode)
             Gamepad_Init();
@@ -174,14 +180,17 @@ int main(int argc, char **argv)
         SDL_PauseAudio(0);
     }
 
+    // The clock is in 24-hour mode before the game checks it (AgbMain > RtcInit). After
+    // the check, it found 12-hour mode and "reset" the clock, which left it locked and the
+    // game's time stuck at day 0, 00:00 (no Berry growth, no daily events).
+    memset(&internalClock, 0, sizeof(internalClock));
+    internalClock.status = SIIRTCINFO_24HOUR;
+    UpdateInternalClock();
+
     AgbMain();
     MP_Init();
 
     double accumulator = 0.0;
-
-    memset(&internalClock, 0, sizeof(internalClock));
-    internalClock.status = SIIRTCINFO_24HOUR;
-    UpdateInternalClock();
 
     while (isRunning)
     {
@@ -403,6 +412,11 @@ static void BackUpSaveFile(void)
         snprintf(to, sizeof(to), "%s.bak%d", gPlatformSavePath, i);
         remove(to);
         rename(from, to);
+        // the bigger BAG's extra slots go with their save (mp_bag.c finds them by the save's counter)
+        snprintf(from, sizeof(from), "%s.bak%d.bag", gPlatformSavePath, i - 1);
+        snprintf(to, sizeof(to), "%s.bak%d.bag", gPlatformSavePath, i);
+        remove(to);
+        rename(from, to);
     }
     snprintf(to, sizeof(to), "%s.bak1", gPlatformSavePath);
     out = fopen(to, "wb");
@@ -413,6 +427,21 @@ static void BackUpSaveFile(void)
         fclose(out);
     }
     fclose(in);
+    snprintf(from, sizeof(from), "%s.bag", gPlatformSavePath);
+    snprintf(to, sizeof(to), "%s.bak1.bag", gPlatformSavePath);
+    remove(to);
+    in = fopen(from, "rb");
+    if (in != NULL)
+    {
+        out = fopen(to, "wb");
+        if (out != NULL)
+        {
+            while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
+                fwrite(buf, 1, n, out);
+            fclose(out);
+        }
+        fclose(in);
+    }
 }
 
 static void StoreSaveFile()
@@ -679,12 +708,14 @@ void VDraw(void)
     uint16_t *image = sFrameImage;
 
     memset(image, 0, sizeof(sFrameImage));
+    MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     DrawFrame(image);
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)
         Display_UploadFrame(image);
     REG_VCOUNT = 161; // prep for being in VBlank period
@@ -727,7 +758,19 @@ void Platform_SetStatus(struct SiiRtcInfo *rtc)
 static void UpdateInternalClock(void)
 {
     time_t rawTime = time(NULL);
-    struct tm *time = localtime(&rawTime);
+    struct tm *time;
+    s64 hostOffset;
+
+    // Moemon Co-op: online, the game's clock is the room host's PC clock; offline our own
+    if (MP_HostClockOffset(&hostOffset))
+    {
+        time_t hostLocal = (time_t)((s64)rawTime + hostOffset);
+        time = gmtime(&hostLocal);
+    }
+    else
+    {
+        time = localtime(&rawTime);
+    }
 
     internalClock.year = BinToBcd(time->tm_year - 100);
     internalClock.month = BinToBcd(time->tm_mon + 1);
@@ -841,6 +884,7 @@ static bool SpectateStep(void)
     if (!feed)
         return false;   // stopped watching: run the game this frame
     memcpy(sFrameImage, feed, sizeof(sFrameImage));
+    MP_Spectate_PanelSync();   // the SPECTATE panel keeps going under the battle we watch
     if (!sTestMode)
         Display_UploadFrame(sFrameImage);
     return true;

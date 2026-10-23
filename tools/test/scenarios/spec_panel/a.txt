@@ -1,0 +1,24 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+wait 300
+press LEFT 40
+press UP 40
+press RIGHT 60
+press DOWN 50
+press LEFT 30
+wait 100
+press RIGHT 40
+press UP 40
+press LEFT 60
+press DOWN 30
+wait 600
+press LEFT 40
+press UP 40
+press RIGHT 60
+press DOWN 50
+wait 1500
+display info
+log ALICE quits
+quit

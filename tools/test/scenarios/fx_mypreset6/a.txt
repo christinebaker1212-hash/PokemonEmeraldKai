@@ -1,0 +1,41 @@
+pressuntil A field 5000
+mp ballfx 0 0 0 0 0 0
+mp fxedit 0
+wait 40
+press DOWN 2
+wait 8
+press RIGHT 2
+wait 8
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 8
+press LEFT 2
+wait 8
+shot slot6
+press A 2
+wait 20
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 8
+press LEFT 2
+wait 10
+press RIGHT 2
+wait 10
+shot mypreset6
+quit

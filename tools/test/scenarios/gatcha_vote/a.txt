@@ -1,0 +1,26 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 900
+mp gatcha
+wait 200
+press R 2
+wait 60
+shot pickup_before
+wait 120
+wait 60
+shot hint
+wait 150
+shot hint2
+press SELECT 2
+wait 30
+shot choosing
+press A 2
+waitlog 4000 gatcha: vote passed
+wait 120
+shot pickup_after
+mp gatchareel
+press SELECT 2
+wait 30
+shot refused
+wait 60
+quit

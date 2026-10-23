@@ -1,0 +1,7 @@
+# Triple Battle cards and type icons against the user's pixel mock-up (tools/moemon_tricards/check_shot.py):
+# the POOCHYENA card pixel for pixel, its Dark icon where the mock-up has it, a PSN tag over ZIGZAGOON's level
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:12,283:13,280:12"
+EXPECT_A=("action menu at frame")
+CHECK="python3 tools/moemon_tricards/check_shot.py"

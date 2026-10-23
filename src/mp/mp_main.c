@@ -1,6 +1,7 @@
 // Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
@@ -117,6 +118,10 @@ static u8 AsciiCharToGame(char c)
 
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+// The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
+static bool8 sHostClockHeard;
+static s64 sHostClockOffset;      // the host's local time minus our time(NULL), in seconds
+static u16 sClockResendTimer;
 static u8 sRoomAnimSpeed;
 static bool8 OwnPadding(void);
 static u8 OwnAnimSpeed(void);
@@ -278,6 +283,7 @@ static void LoadConfig(void)
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.animSpeed = 30;
+    gMpConfig.spectateScale = 1;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -338,6 +344,12 @@ static void LoadConfig(void)
             gMpConfig.autosaveMinutes = m < 0 ? 0 : (m > 60 ? 60 : m);
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
+        else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
+        else if (strcmp(key, "spectate_size") == 0)
+        {
+            int v = atoi(val);
+            gMpConfig.spectateScale = v < 1 ? 1 : (v > 4 ? 4 : v);
+        }
         else if (strcmp(key, "battle_anim_speed") == 0)
         {
             int v = atoi(val);
@@ -413,12 +425,15 @@ void MP_SaveConfig(void)
         "trainer_padding = %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
+        "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
+        "spectate_panel = %d\nspectate_size = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed, gMpConfig.lobby);
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed,
+        gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -531,7 +546,9 @@ static void PackState(const struct MpState *s, u8 *p)
     p[10] = s->flags; p[11] = s->topLevel; p[12] = s->partyCount; p[13] = s->emote;
     PutU16(p + 14, s->seq);
     PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
-    PutU16(p + 20, s->followerFx);
+    PutU16(p + 20, s->followerFx & 0xFFFF);
+    p[22] = s->light;
+    p[23] = s->followerFx >> 16;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -542,7 +559,8 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->flags = p[10]; s->topLevel = p[11]; s->partyCount = p[12]; s->emote = p[13];
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
-    s->followerFx = GetU16(p + 20);
+    s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
+    s->light = p[22];
 }
 
 #define APPEARANCE_SIZE 32
@@ -734,6 +752,7 @@ static void CollectLocalState(struct MpState *s)
             s->speed = (flags & PLAYER_AVATAR_FLAG_DASH) ? MP_SPEED_RUN : MP_SPEED_WALK;
         }
         s->flags |= MPF_IN_OVERWORLD;
+        s->light = GetFlashLevel();   // friends draw our light in a dark cave (mp_world.c)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
@@ -861,6 +880,7 @@ static void HandlePlayerLeft(u8 id)
 {
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
         return;
+    MPNet_Log("player %d left", id + 1);
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);
@@ -1071,6 +1091,20 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%", from + 1, sRoomPadding ? "on" : "off", sRoomAnimSpeed);
         }
     }
+    else if (data[0] == MPR_CLOCK)
+    {
+        if (len >= 9 && !sLobby.creator)
+        {
+            s64 hostLocal = 0;
+            u8 k;
+            for (k = 0; k < 8; k++)
+                hostLocal |= (s64)data[1 + k] << (8 * k);
+            if (!sHostClockHeard || llabs((long long)(hostLocal - (s64)time(NULL) - sHostClockOffset)) > 2)
+                MPNet_Log("clock: following the host's clock (UTC%+lld min)", (long long)((hostLocal - (s64)time(NULL) + 30) / 60));
+            sHostClockOffset = hostLocal - (s64)time(NULL);
+            sHostClockHeard = TRUE;
+        }
+    }
     else if (data[0] == MPR_PING)
         MP_Ping_OnRelay(from, data, len);
     else if (data[0] == MPR_PHOTO)
@@ -1097,6 +1131,10 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Minigame_OnRelay(from, data, len);
     else if (data[0] >= MPR_MINIGAME_FIRST + 14 && data[0] < MPR_MINIGAME_FIRST + 20)
         MP_Group_OnRelay(from, data, len);
+    else if (data[0] >= MPR_WORLD_FIRST && data[0] < MPR_WORLD_FIRST + 2)
+        MP_World_OnRelay(from, data, len);
+    else if (data[0] >= MPR_GATCHA_FIRST && data[0] < MPR_GATCHA_FIRST + 4)
+        MP_Gatcha_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1110,6 +1148,52 @@ const char *MP_Lobby_RoomName(void) { return sLobby.room; }
 // ---------------------------------------------------------------------------
 // Welcome note: the player who made the room sends it to each friend who joins
 
+// This PC's local wall clock, as seconds as if it were UTC (so gmtime() gives the local
+// date and time). Worked out field by field: Windows has no tm_gmtoff.
+s64 MP_LocalClockAsUtc(void)
+{
+    time_t now = time(NULL);
+    struct tm lt = *localtime(&now), gt = *gmtime(&now);
+    s64 days = lt.tm_yday - gt.tm_yday;
+    if (lt.tm_year != gt.tm_year)
+        days = lt.tm_year > gt.tm_year ? 1 : -1;   // across New Year
+    return (s64)now + days * 86400 + (lt.tm_hour - gt.tm_hour) * 3600 + (lt.tm_min - gt.tm_min) * 60 + (lt.tm_sec - gt.tm_sec);
+}
+
+// The room's host tells everyone its clock (when they join, and now and then)
+static void SendClock(u8 to)
+{
+    u8 msg[9], k;
+    s64 local = MP_LocalClockAsUtc();
+    msg[0] = MPR_CLOCK;
+    for (k = 0; k < 8; k++)
+        msg[1 + k] = (u8)(local >> (8 * k));
+    MP_SendRelay(to, msg, sizeof(msg));
+}
+
+// Online (in a room we didn't make), the game clock is the host's
+bool8 MP_HostClockOffset(s64 *offset)
+{
+    if (sLobby.creator || !sHostClockHeard)
+        return FALSE;
+    if (sLobby.state != MP_LOBBY_IN_ROOM && sLobby.state != MP_LOBBY_RECONNECT_WAIT)
+    {
+        sHostClockHeard = FALSE;   // offline: our own clock again
+        return FALSE;
+    }
+    *offset = sHostClockOffset;
+    return TRUE;
+}
+
+// How many seconds the game clock is ahead of this PC's own (the host's clock minus ours; 0 offline)
+s64 MP_ClockShift(void)
+{
+    s64 offset;
+    if (!MP_HostClockOffset(&offset))
+        return 0;
+    return offset - (MP_LocalClockAsUtc() - (s64)time(NULL));
+}
+
 static void SendWelcome(u8 id)
 {
     u8 buf[2 + sizeof(gMpConfig.welcome)];
@@ -1119,6 +1203,7 @@ static void SendWelcome(u8 id)
         // the room's settings first (the host decides them for everyone)
         u8 rules[3] = {MPR_RULES, OwnPadding(), OwnAnimSpeed()};
         MP_SendRelay(id, rules, 3);
+        SendClock(id);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
         return;
@@ -1291,6 +1376,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.request = req;
     sLobby.creator = (req == REQ_CREATE);
     sRoomRulesHeard = FALSE;
+    sHostClockHeard = FALSE;
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
     {
@@ -1539,6 +1625,7 @@ void MP_FrameUpdate(void)
     MP_Social_Update();
     MP_Together_Update();
     MP_Linkx_Update();
+    MP_World_Update();
     MP_Minigame_Update();
     MP_Group_Update();
 
@@ -1578,11 +1665,18 @@ void MP_FrameUpdate(void)
     }
 
     MP_Battle_FrameUpdate();
+    // The host's clock again every few minutes (a PC clock can be changed or change for summer time)
+    if (sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM && gMpLocalId >= 0 && ++sClockResendTimer >= 60 * 60 * 5)
+    {
+        sClockResendTimer = 0;
+        SendClock(0xFF);
+    }
     if (gMpLocalId >= 0)
     {
         MP_Coop_Update();
         MP_Dex_Update();
         MP_Trade_Update();
+        MP_Gatcha_VoteUpdate();
         MP_Events_Update();
         MP_Tourney_Update();
         SendLocalState(FALSE);

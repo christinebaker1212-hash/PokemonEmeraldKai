@@ -21,11 +21,13 @@ FallarborTown_BattleTentBattleRoom_EventScript_SetPlayerGfx::
 FallarborTown_BattleTentBattleRoom_EventScript_SetPlayerGfxMale::
 	setvar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL
 	setvar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 FallarborTown_BattleTentBattleRoom_EventScript_SetPlayerGfxFemale::
 	setvar VAR_OBJ_GFX_ID_1, OBJ_EVENT_GFX_RIVAL_MAY_NORMAL
 	setvar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_RIVAL_MAY_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 FallarborTown_BattleTentBattleRoom_OnFrame:

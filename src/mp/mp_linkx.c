@@ -81,6 +81,7 @@ enum {
     LX_DAYCARE,                      // -> all: u8 has, struct BoxPokemon
     LX_HOF_START,                    // -> all: I'm entering the Hall of Fame
     LX_HOF_TEAM,                     // -> champion: team, u16 pic, name
+    LX_TREND,                        // -> all: u16 words[2], u16 rand: Dewford's new trendy phrase
     LX_LAST,
 };
 
@@ -284,6 +285,8 @@ static void ApplyMix(void)
                 strncat(names, " & ", sizeof(names) - strlen(names) - 1);
             strncat(names, one, sizeof(names) - strlen(names) - 1);
         }
+    if (!names[0])
+        strcpy(names, "your friends");   // they left after sending their records
     MPNet_Log("mix: applied (new bases %d)", newBases);
     snprintf(msg, sizeof(msg), "Mixed records with %s!", names);
     if (sMix.manual || newBases)
@@ -317,7 +320,7 @@ static void UpdateMix(void)
     }
     else
         sMix.nextMix = 0;
-    if (sMix.active && sFrame - sMix.startFrame > MIX_TIMEOUT)
+    if (sMix.active && !sMix.applyPending && sFrame - sMix.startFrame > MIX_TIMEOUT)
         AbortMix();
     if (sMix.applyPending && InFieldAndFree() && gMain.callback2 == CB2_Overworld)
     {
@@ -736,6 +739,34 @@ static void OnHofTeam(u8 from, const u8 *data, u16 len)
 }
 
 // ---------------------------------------------------------------------------
+// Dewford's trendy phrase: whoever enters one, it's the trend in every game (dewford_trend.c)
+
+void MP_Linkx_SendTrend(const u16 *words, u16 rand)
+{
+    u8 buf[7];
+    buf[0] = LX_TREND;
+    buf[1] = words[0] & 0xFF;
+    buf[2] = words[0] >> 8;
+    buf[3] = words[1] & 0xFF;
+    buf[4] = words[1] >> 8;
+    buf[5] = rand & 0xFF;
+    buf[6] = rand >> 8;
+    MP_SendRelay(0xFF, buf, sizeof(buf));
+    MPNet_Log("trend: sent %04x %04x", words[0], words[1]);
+}
+
+static void OnTrend(u8 from, const u8 *data, u16 len)
+{
+    u16 words[2];
+    if (len < 7)
+        return;
+    words[0] = data[1] | (data[2] << 8);
+    words[1] = data[3] | (data[4] << 8);
+    MP_Dewford_PutTrendOnTop(words, data[5] | (data[6] << 8));
+    MPNet_Log("trend: from player %d: %04x %04x", from, words[0], words[1]);
+}
+
+// ---------------------------------------------------------------------------
 // Messages and the frame update
 
 void MP_Linkx_OnRelay(u8 from, const u8 *data, u16 len)
@@ -764,6 +795,7 @@ void MP_Linkx_OnRelay(u8 from, const u8 *data, u16 len)
         break;
     case LX_HOF_START: OnHofStart(from); break;
     case LX_HOF_TEAM:  OnHofTeam(from, data, len); break;
+    case LX_TREND:     OnTrend(from, data, len); break;
     }
 }
 
@@ -773,7 +805,8 @@ void MP_Linkx_OnPlayerLeft(u8 id)
         return;
     sFriendDc[id].has = FALSE;
     sWorld[id].valid = FALSE;
-    if (sMix.active && (sMix.mask & (1 << id)))
+    // (once every record is here the mix goes ahead: it waits only for us to be free)
+    if (sMix.active && !sMix.applyPending && (sMix.mask & (1 << id)))
         AbortMix();
     if (sAsk.waitKind && sAsk.waitFrom == id)
         sAsk.waitKind = 0;

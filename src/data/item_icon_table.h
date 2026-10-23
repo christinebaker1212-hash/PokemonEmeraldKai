@@ -402,5 +402,18 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_MAGMA_EMBLEM] = {gItemIcon_MagmaEmblem, gItemIconPalette_MagmaEmblem},
     [ITEM_OLD_SEA_MAP] = {gItemIcon_OldSeaMap, gItemIconPalette_OldSeaMap},
     // Return to field arrow
+    // Moemon Kai: the e-Reader Berries
+    [ITEM_PUMKIN_BERRY] = {gItemIcon_PumkinBerry, gItemIconPalette_PumkinBerry},
+    [ITEM_DRASH_BERRY] = {gItemIcon_DrashBerry, gItemIconPalette_DrashBerry},
+    [ITEM_EGGANT_BERRY] = {gItemIcon_EggantBerry, gItemIconPalette_EggantBerry},
+    [ITEM_STRIB_BERRY] = {gItemIcon_StribBerry, gItemIconPalette_StribBerry},
+    [ITEM_CHILAN_BERRY] = {gItemIcon_ChilanBerry, gItemIconPalette_ChilanBerry},
+    [ITEM_NUTPEA_BERRY] = {gItemIcon_NutpeaBerry, gItemIconPalette_NutpeaBerry},
+    [ITEM_GINEMA_BERRY] = {gItemIcon_GinemaBerry, gItemIconPalette_GinemaBerry},
+    [ITEM_KUO_BERRY] = {gItemIcon_KuoBerry, gItemIconPalette_KuoBerry},
+    [ITEM_YAGO_BERRY] = {gItemIcon_YagoBerry, gItemIconPalette_YagoBerry},
+    [ITEM_TOUGA_BERRY] = {gItemIcon_TougaBerry, gItemIconPalette_TougaBerry},
+    [ITEM_NINIKU_BERRY] = {gItemIcon_NinikuBerry, gItemIconPalette_NinikuBerry},
+    [ITEM_TOPO_BERRY] = {gItemIcon_TopoBerry, gItemIconPalette_TopoBerry},
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},
 };

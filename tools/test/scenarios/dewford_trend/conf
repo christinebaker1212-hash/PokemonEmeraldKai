@@ -1,0 +1,11 @@
+# Dewford online: ALICE tells the trendy phrase boy a new phrase (BAG ACCEPT) through the real screens; it's the
+# trend at once for her and for BOB (online, a phrase anyone enters always becomes the trend, for the whole room)
+MODE=2
+WARP=0,11,2,6
+WARP_B=0,11,4,8
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+EXPECT_A=("trend: sent 0215 0635" "\"BAG ACCEPT\"")
+EXPECT_B=("trend: from player 0: 0215 0635" "\"BAG ACCEPT\"")

@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp teach 0 150
+mp teach 1 150
+waitfor online 6000
+wait 200
+press UP 2
+wait 30
+press A 2
+pressuntillog A 6000 joins the battle against trainer
+wait 200
+shot a1
+pressuntillog A 8000 absent 20
+wait 400
+shot a_after
+mash A 60 30
+wait 300
+quit

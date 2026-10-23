@@ -1,0 +1,11 @@
+# Slateport market online: ALICE buys a decoration, then opens the ENERGY GURU's shop with BOB standing in its map
+# view (a co-op avatar's palette tag isn't in Emerald's object palette table: the lookup looped forever = black screen)
+MODE=2
+WARP=0,1,7,38
+WARP_B=0,1,6,48
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+ENV_A="MOEMON_DEBUG_FLAGS=0x60 MOEMON_DEBUG_MONEY=90000"
+EXPECT_A=("decor_list.bmp" "energy_list.bmp" "shop online done")

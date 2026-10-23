@@ -487,7 +487,7 @@ void CopyMatricesToOamBuffer(void)
 void AddSpritesToOamBuffer(void)
 {
     u8 i = 0;
-    u8 oamIndex = 0;
+    u16 oamIndex = 0;   // Moemon PC: up to 256 entries (an 8-bit index never reached the slot machine's limit)
 
     while (i < MAX_SPRITES)
     {
@@ -1611,8 +1611,9 @@ static bool8 MpPrefersExtraSlot(u16 tag)
 {
     return MP_IsCoopPaletteTag(tag)
         || (tag >= 55000 && tag < 55040)     // POKé BALLS (pokeball.c) and their particles (battle_anim_throw.c)
-        || (tag >= 0x56A0 && tag < 0x56E0)   // recolored / special balls (mp_ballstyle.c)
-        || (tag >= 0x5710 && tag < 0x5760);  // decorated balls
+        || (tag >= 0x56A0 && tag < 0x56E0)   // special balls, ball icons (mp_ballstyle.c, summary)
+        || (tag >= 0x5710 && tag < 0x5760)   // decorated balls
+        || (tag >= 0x5770 && tag < 0x57A0);  // recolored POKé BALLS (41 colors)
 }
 
 // A free slot for `tag` (0xFF = none): the GBA's 16 first, the extra ones after them;
@@ -1720,7 +1721,7 @@ void SetSubspriteTables(struct Sprite *sprite, const struct SubspriteTable *subs
     sprite->subspriteMode = SUBSPRITES_ON;
 }
 
-bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u8 *oamIndex)
+bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
 {
     if (*oamIndex >= gOamLimit)
         return TRUE;
@@ -1737,7 +1738,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u8 *oamIndex)
     }
 }
 
-bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u8 *oamIndex)
+bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u16 *oamIndex)
 {
     const struct SubspriteTable *subspriteTable;
     struct OamData *oam;
@@ -1850,7 +1851,8 @@ bool8 MP_IsCoopPaletteTag(u16 tag)
 {
     return (tag >= 0x1150 && tag < 0x1158)   // followers (mp_follower.c)
         || (tag >= 0x5390 && tag < 0x5398)   // friends (mp_overworld.c)
-        || tag == 0x53C0;                    // bubbles, toasts, compass (MP_TAG_UI_PAL)
+        || tag == 0x53C0                     // bubbles, toasts, compass (MP_TAG_UI_PAL)
+        || tag == 0x53C1 || tag == 0x53C2;   // surf blobs (MP_TAG_BLOB_PAL)
 }
 
 static bool8 MpSlotHasSprites(u8 slot)
@@ -1964,17 +1966,17 @@ static u8 MP_MakeRoomForPalette(void)
 }
 
 // Moemon Co-op: a sprite's frame images were just swapped (live avatar change
-// in the CO-OP menu). Give it a bigger tile block if the new frames need one,
-// then upload the current frame right away, even while the sprite is frozen.
-void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldFrameBytes)
+// in the CO-OP menu). Its tile block was oldBytes (the object's graphics info's size, which
+// event_object_movement.c allocates and frees): make it newBytes, then upload the current
+// frame right away, even while the sprite is frozen.
+void MP_SpriteRefreshImages(struct Sprite *sprite, u32 oldBytes, u32 newBytes)
 {
     const union AnimCmd *cmd;
-    u16 oldTiles = oldFrameBytes / TILE_SIZE_4BPP;
-    u16 newTiles;
+    u16 oldTiles = oldBytes / TILE_SIZE_4BPP;
+    u16 newTiles = newBytes / TILE_SIZE_4BPP;
 
     if (!sprite->inUse || sprite->usingSheet || sprite->images == NULL)
         return;
-    newTiles = sprite->images->size / TILE_SIZE_4BPP;
     if (newTiles > oldTiles)
     {
         s16 tile = AllocSpriteTiles(newTiles);

@@ -5,6 +5,7 @@
 #   2) mixed: the Windows relay server + a Windows host + a Linux joiner (pokeemerald64) in a
 #      co-op wild battle through lagproxy (default 250 ms + 80 ms jitter)
 #   3) reverse: Linux server + Linux host, Windows joiner
+#   4) panel: the SPECTATE panel between a Linux host and a Windows friend (pixel-for-pixel checksums)
 #   Needs wine (apt install wine64). Results in $OUT/wine_smoke. Exit code = failures.
 . "$(dirname "$0")/common.sh"
 PKG="$(cd "${1:?usage: wine_smoke.sh PKG_DIR [DELAY_MS JIT_MS]}" && pwd)"; DELAY=${2:-250}; JIT=${3:-80}
@@ -59,6 +60,29 @@ if grep -q "co-op: battle over, outcome 1" "$R/a.log" && grep -q "co-op: battle 
     echo "ok   wine reverse (Linux server + host, Windows joiner, $DELAY ms)"
 else
     echo "FAIL wine reverse (see $R/*.log)"; fail=$((fail+1))
+fi
+# 4) the SPECTATE panel across platforms: Linux host and Windows friend show each other's screen (walking, then a wild
+#    battle); every picture each made of the other's must be the one sent, pixel for pixel (check_spectrace.py)
+P="$D/panel"; mkdir -p "$P"
+printf 'pressuntil A field 5000\nwaitfor online 6000\nmp panel 1 1\nwait 300\npress LEFT 40\npress UP 30\npress RIGHT 40\npress DOWN 30\nwait 200\nmp wilddouble 0\nmp wild 288:3\nwaitfor battle 2000\nwait 900\nquit\n' > "$P/a.txt"
+printf 'pressuntil A field 5000\nwaitfor online 6000\nmp panel 1 2\nwait 300\npress RIGHT 40\npress DOWN 30\npress LEFT 40\npress UP 30\nwait 1500\nquit\n' > "$P/b.txt"
+PORT=$(free_port); LP=$(free_port)
+"$SERVER" --port "$PORT" --no-router > "$P/server.log" 2>&1 & SP=$!
+python3 "$REPO/tools/mp_server/lagproxy.py" "$LP" "$PORT" "$DELAY" "$JIT" > "$P/proxy.log" 2>&1 & PP=$!
+sleep 1
+(cd "$REPO" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$P/a.txt" MOEMON_SHOTDIR="$P" MOEMON_DEBUG_QUICKSTART=1 \
+    MOEMON_TEST_FPS=60 MOEMON_LOBBY=127.0.0.1:$LP MOEMON_DEBUG_WARP=0,10,10,10 MOEMON_COOP_CONFIG="$P/a.ini" MOEMON_SAVE="$P/a.sav" \
+    MOEMON_SPECTRACE=1 MOEMON_DEBUG_NAME=ALICE MOEMON_DEBUG_GENDER=F MOEMON_COOP_AUTO="host:Test Room" timeout 400 "$BIN" > "$P/a.log" 2>&1) & AP=$!
+sleep 2
+(cd "$GAME" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="Z:$P/b.txt" MOEMON_SHOTDIR="Z:$P" MOEMON_DEBUG_QUICKSTART=1 \
+    MOEMON_TEST_FPS=60 MOEMON_LOBBY=127.0.0.1:$LP MOEMON_DEBUG_WARP=0,10,12,10 MOEMON_COOP_CONFIG="Z:$P/b.ini" MOEMON_SAVE="Z:$P/b.sav" \
+    MOEMON_SPECTRACE=1 MOEMON_DEBUG_NAME=BOB MOEMON_COOP_AUTO="join:Test Room" timeout 400 wine MoemonEmeraldKaiCoop.exe > "$P/b.log" 2>&1) & BP=$!
+wait $AP $BP
+kill $PP $SP 2>/dev/null; wineserver -k 2>/dev/null; wait 2>/dev/null
+if python3 "$TOOLS/check_spectrace.py" 30 "$P" > "$P/check.txt" 2>&1; then
+    echo "ok   wine panel (Linux host, Windows friend, each other's screens, $DELAY ms)"
+else
+    echo "FAIL wine panel (see $P/check.txt)"; fail=$((fail+1))
 fi
 [ -f "$GAME/crash_log.txt" ] && { echo "crash_log.txt:"; tail -8 "$GAME/crash_log.txt"; }
 exit $fail

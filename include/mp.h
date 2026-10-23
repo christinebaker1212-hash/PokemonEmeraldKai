@@ -148,8 +148,9 @@ struct MpState
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
     u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
-    u16 followerFx;    // its ball effect (MP_BallFx_Pack)
+    u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
     u8 badges;         // how many gym badges (catch-up bonus)
+    u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
 };
 
 
@@ -189,6 +190,8 @@ struct MpConfig
     u8 autosaveMinutes;       // mp_autosave.c: quiet save on the map every N minutes (0 = off)
     u8 trainerPadding;        // host setting: co-op trainers get one extra Moemon (HOST A GAME > TEAM PADDING)
     u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
+    u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
+    u8 spectateScale;         // ... each 1-4 times 240x160
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
 
@@ -271,6 +274,18 @@ void MP_Bag_SetPointers(struct BagPocket *pockets);   // mp_bag.c: the bigger po
 void MP_Bag_SyncToSaveBlock(void);
 void MP_Bag_WriteSidecar(void);
 void MP_Bag_LoadFromSave(void);
+bool8 MP_HostClockOffset(s64 *offset);   // mp_main.c: online, the game clock is the host's (seconds to add to time())
+s64 MP_LocalClockAsUtc(void);            // this PC's local time, as seconds as if it were UTC
+s64 MP_ClockShift(void);                 // how far the game clock is ahead of this PC's (0 offline)
+// The BAG's sort orders and "new" marks (mp_bag.c)
+enum { MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAGSORT_NEWEST, MP_BAGSORT_MANUAL, MP_BAGSORT_COUNT };
+u8 MP_Bag_SortMode(u8 pocket);
+void MP_Bag_SetSortMode(u8 pocket, u8 mode);
+void MP_Bag_Sort(u8 pocket);
+bool8 MP_Bag_IsNew(u16 item);
+void MP_Bag_ClearNew(u16 item);
+void MP_Bag_NoteAdded(u16 item);
+void MP_Bag_ResetMarks(void);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -282,6 +297,10 @@ bool8 MP_IsConnected(void);
 const char *MP_StatusText(void);
 void MP_SaveConfig(void);
 void MP_SendRelay(u8 target, const void *data, u16 len);
+void MP_Linkx_SendTrend(const u16 *words, u16 rand);
+void MP_Dewford_PutTrendOnTop(const u16 *phrase, u16 rand);
+bool8 MP_Dewford_Sanitize(void);
+bool8 MP_IsEasyChatWordInvalid(u16 easyChatWord);
 void MP_SendAppearance(void);
 bool8 MP_IsInOverworld(void);
 bool8 MP_IsLocalFree(void);
@@ -294,11 +313,14 @@ u8 MP_ConnectedCount(void);
 // mp_avatar.c
 void MP_Avatar_Init(void);
 bool8 MP_LocalUsesCustomAvatar(void);
+u16 MP_PlayerStandInGfxId(u16 vanillaGfx);
+void MP_SetPlayerStandInGfx(void);
 bool8 MP_IsMpGraphicsId(u8 graphicsId);
 const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId);
 void MP_Avatar_ApplyLocal(void);     // recolor + refresh the local player sprite
 void MP_Avatar_BuildRemote(u8 id);   // rebuild a remote player's gfx info + palette
 void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst);
+void MP_Overworld_MenuSpritePalette(u8 spriteId, u16 graphicsId);
 const u16 *MP_Avatar_OriginalPalette(u16 tag);
 const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId); // sprite pack bike/surf/...
 u16 MP_Avatar_RemoteFrontPic(u8 id);
@@ -369,6 +391,7 @@ void MP_Created_Unpack(const u8 *p, struct MpCreated *r);
 void MP_Created_Default(struct MpCreated *r, bool8 girl);
 void MP_Created_Clamp(struct MpCreated *r);
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r);
+void MP_Created_FieldHeadInfo(const struct MpCreated *r, u8 *neck, u16 *skin);   // neck[3], skin[4]
 u8 MP_Created_StyleCount(bool8 girl, u8 cat);
 const char *MP_Created_StyleName(bool8 girl, u8 cat, u8 style);
 u8 MP_Created_ColorCount(bool8 girl, u8 cat, u8 style);
@@ -468,7 +491,16 @@ s8 MP_Battle_PeerId(void);
 // sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
 u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);
 bool8 MP_IsCoopPaletteTag(u16 tag);
+// Held HMs (Moemon Kai): a Pokemon holding an HM can use its field move; HMs never leave the player
+#define MP_IS_ITEM_HM(item) ((item) >= ITEM_HM01 && (item) <= ITEM_HM08)
+u16 MP_HeldHmMove(struct Pokemon *mon);          // the field move a held HM gives, MOVE_NONE if none
+bool8 MP_ReturnHeldHm(struct Pokemon *mon);      // a held HM back to the BAG (the Pokemon leaves us)
+bool8 MP_StripHeldHm(struct Pokemon *mon);       // a held HM removed (a copy that leaves us / arrives)
+bool8 MP_ItemCanBeHeld(u16 item);                // not an important item, or an HM
+
 #define MP_TAG_UI_PAL 0x53C0   // the co-op overlay sprite palette (mp_emote.c)
+#define MP_TAG_BLOB_PAL 0x53C1  // +gender: the surf blob's colors for a look whose palette lacks them
+u8 MP_Avatar_SurfBlobPalette(u8 id);   // id 0xFF = us; 0xFF = the surfer's own palette has them
 
 // mp_ping.c: "look here!" markers on a tile, seen by friends on the same map
 void MP_Ping_Place(void);
@@ -660,9 +692,18 @@ bool8 MP_LegacySfx_Playing(void);
 void MP_LegacySfx_StopAll(void);
 extern bool8 gMpFishingEncounter;   // wild_encounter.c: this wild battle came from a ROD (LURE BALL)
 // mp_ballstyle.c: a Moemon's POKé BALL color / decoration (MON_DATA_ENCRYPT_SEPARATOR bits)
+// The colors are also the ball effects' energy colors. The first 11 are everyone's; the 30 after them are
+// earned (achievements, MOEGATCHA: MP_BallUnlock_*).
 enum {
     MP_BALL_RED, MP_BALL_BLUE, MP_BALL_GREEN, MP_BALL_YELLOW, MP_BALL_PINK, MP_BALL_PURPLE,
-    MP_BALL_ORANGE, MP_BALL_CYAN, MP_BALL_BLACK, MP_BALL_SILVER, MP_BALL_GOLD, MP_BALL_COLORS
+    MP_BALL_ORANGE, MP_BALL_CYAN, MP_BALL_BLACK, MP_BALL_SILVER, MP_BALL_GOLD,
+    MP_BALL_CRIMSON, MP_BALL_SCARLET, MP_BALL_CORAL, MP_BALL_SALMON, MP_BALL_PEACH, MP_BALL_AMBER,
+    MP_BALL_LEMON, MP_BALL_OLIVE, MP_BALL_LIME, MP_BALL_MINT, MP_BALL_JADE, MP_BALL_FOREST,
+    MP_BALL_TEAL, MP_BALL_AQUA, MP_BALL_SKY, MP_BALL_AZURE, MP_BALL_NAVY, MP_BALL_INDIGO,
+    MP_BALL_VIOLET, MP_BALL_LILAC, MP_BALL_MAGENTA, MP_BALL_ROSE, MP_BALL_SAKURA, MP_BALL_BROWN,
+    MP_BALL_COCOA, MP_BALL_SAND, MP_BALL_CREAM, MP_BALL_WHITE, MP_BALL_GRAY, MP_BALL_BRONZE,
+    MP_BALL_COLORS,
+    MP_BALL_FIRST_EARNED = MP_BALL_CRIMSON,
 };
 struct BoxPokemon;
 u8 MP_BallStyle_Color(u16 style);
@@ -710,6 +751,13 @@ void MP_Achieve_OnCatch(struct Pokemon *mon, bool8 outbreak);
 u16 MP_Achieve_Total(void);
 u16 MP_Achieve_DoneCount(void);
 void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, int statusLen, char *reward, int rewardLen);
+u8 MP_Achieve_CatCount(void);                  // the menu's tabs (JOURNEY, BATTLE...)
+const char *MP_Achieve_CatName(u8 cat);
+u16 MP_Achieve_CountIn(u8 cat, u16 *done);
+u16 MP_Achieve_IndexIn(u8 cat, u16 row);
+bool8 MP_Achieve_IsDone(u16 i);
+bool8 MP_Achieve_IsDoneById(const char *id);
+const char *MP_Achieve_NameById(const char *id);
 enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT, MP_DID_TRADE, MP_DID_PHOTO, MP_DID_PVP,
        MP_DID_PVPWIN, MP_DID_BET, MP_DID_BETWIN, MP_DID_BLEND, MP_DID_BASE, MP_DID_CARD, MP_DID_RESCUE, MP_DID_SELFREVIVE,
        MP_DID_COUNT };
@@ -772,6 +820,8 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Spectate_OnPlayerLeft(u8 id);
 void MP_Spectate_FrameUpdate(void);
 bool8 MP_Spectate_TryInteract(void);
+void MP_Spectate_OpenSettings(void);   // CO-OP > SPECTATE: the panel of friends' screens on / off, its size
+void MP_Spectate_PanelSync(void);      // sdl2.c VDraw: the panel's cards to the display
 
 // Follower Pokémon (mp_follower.c)
 struct Pokemon;
@@ -781,8 +831,15 @@ bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);
 void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
+void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len);   // the weekly PICKUP vote
+void MP_Gatcha_VoteUpdate(void);
 void MP_Gatcha_AddTickets(s32 n);
 void MP_Gatcha_BackfillTickets(void);
+void MP_BattleTentWon(void);
+// Traded Moemon act as if the player were their OT: they obey at any badge count
+// (battle_util.c IsMonDisobedient); they keep the traded EXP boost. MoeGatcha prizes
+// (their own OT) still obey by badges.
+bool8 MP_OtActsAsOwn(u32 otId);          // a Battle Tent prize (three wins in a row): 3 tickets
 s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);
@@ -852,6 +909,7 @@ enum {
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
     MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed (mp_main.c)
+    MPR_CLOCK = 96,            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)
@@ -860,7 +918,24 @@ enum {
     MPR_SOCIAL_FIRST = 160,    // pranks, piggyback... (mp_social.c, mp_piggy.c)
     MPR_LINKX_FIRST = 180,     // record mixing, secret bases, union room... (mp_linkx.c)
     MPR_MINIGAME_FIRST = 200,  // berry blender / berry crush with friends (mp_minigame.c)
+    MPR_WORLD_FIRST = 220,     // cut trees, smashed rocks, boulders, cut grass, soot (mp_world.c)
+    MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
 };
+
+// mp_world.c: map changes and lights shared by friends on the same map
+void MP_World_CutTreeGone(void);
+void MP_World_RockGone(void);
+void MP_World_BoulderPushed(u8 objectEventId, u8 direction, s16 x, s16 y);
+void MP_World_CutGrassBegin(s16 x, s16 y);
+void MP_World_CutGrassEnd(void);
+void MP_World_AshGathered(s16 x, s16 y, u16 tile);
+void MP_World_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_World_Update(void);
+void MP_World_PrepareLights(void);   // sdl2.c VDraw, before the frame is drawn
+void MP_World_DebugLights(void);
+extern bool8 gMpLightActive;
+extern u8 gMpDarkUiPal;   // in a dark cave, sprites with this palette slot show through the darkness
+bool8 MP_Light_IsLit(int x, int y);   // the renderers' window 0 test
 
 
 // mp_minigame.c: BERRY BLENDER / BERRY CRUSH with friends (CO-OP > BERRY GAMES)
@@ -943,7 +1018,6 @@ void MP_TriCards_Begin(void);
 void MP_TriCards_End(void);
 void MP_TriCards_Reload(void);
 bool8 MP_TriCards_Active(void);
-void MP_TriCards_SetOwner(u8 battler, u8 seat);
 void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo);
 void MP_TriCards_SetBarHp(u8 battler, s32 hp, s32 maxHp);
 u8 MP_TriCards_Letter(u8 battler);
@@ -971,6 +1045,7 @@ void MP_Coop_StartResolveTask(u8 nBox, const u8 *boxSlot, const u16 (*before)[6]
 bool8 MP_Coop_ResolveTaskActive(void);
 u8 MP_Emote_BattleOverlaySprites(u8 *ids, u8 max);
 u8 MP_BattleChat_OverlaySprites(u8 *ids, u8 max);
+void MP_Battle_ResetWeatherLines(void);   // battle_script_commands.c: a new battle shows weather lines again
 extern u8 gMpStatGroupMask;      // battle_script_commands.c: a spread stat move's changed battlers
 extern u8 gMpStatGroupFailMask;  // ... and the ones whose stat can't go lower
 extern u8 gMpStatAnimMask;       // battle_anim_utility_funcs.c: extra battlers of a stat animation   // A/B/C char when names repeat on that side, else 0
@@ -991,13 +1066,26 @@ void MP_BattleOverlay_Composite(u16 *frame);   // emote pick and bubbles over ev
 // ---------------------------------------------------------------------------
 // Ball entrance / recall effects (mp_ballfx.c, editor in mp_ballfx_editor.c)
 enum { MPFX_FORM_DEFAULT, MPFX_FORM_ANIME_BEAM, MPFX_FORM_SMOKE, MPFX_FORM_BUBBLE, MPFX_FORM_LIGHTNING, MPFX_FORM_HAUNTED,
-       MPFX_FORM_DIGITAL, MPFX_FORM_INK, MPFX_FORM_CRYSTAL, MPFX_FORM_METEOR, MPFX_FORM_POPIN, MPFX_FORM_RISE, MPFX_FORM_COUNT,
+       MPFX_FORM_DIGITAL, MPFX_FORM_INK, MPFX_FORM_CRYSTAL, MPFX_FORM_METEOR, MPFX_FORM_POPIN, MPFX_FORM_RISE,
+       MPFX_FORM_TELEPORT, MPFX_FORM_SOMERSAULT, MPFX_FORM_VORTEX, MPFX_FORM_DASH, MPFX_FORM_JELLY, MPFX_FORM_CARD,
+       MPFX_FORM_HOLOGRAM, MPFX_FORM_STARDUST, MPFX_FORM_SAND, MPFX_FORM_FLAME, MPFX_FORM_GEYSER, MPFX_FORM_LEAVES,
+       MPFX_FORM_SHADOW, MPFX_FORM_PRISM, MPFX_FORM_BOUNCE, MPFX_FORM_COUNT,
        MPFX_FORM_VANILLA = MPFX_FORM_COUNT };   // VANILLA: the game's own, as a body effect (followers)
 enum { MPFX_PART_DEFAULT, MPFX_PART_NONE, MPFX_PART_CONFETTI, MPFX_PART_EXPLOSION, MPFX_PART_SMOKE, MPFX_PART_FIREWORKS,
        MPFX_PART_FLOWER, MPFX_PART_BUBBLES, MPFX_PART_LIGHTNING, MPFX_PART_WISPS, MPFX_PART_PIXELS, MPFX_PART_INK,
-       MPFX_PART_CRYSTAL, MPFX_PART_SPOTLIGHT, MPFX_PART_DUST, MPFX_PART_ROYAL, MPFX_PART_COUNT };
+       MPFX_PART_CRYSTAL, MPFX_PART_SPOTLIGHT, MPFX_PART_DUST, MPFX_PART_ROYAL,
+       MPFX_PART_HEARTS, MPFX_PART_NOTES, MPFX_PART_SNOW, MPFX_PART_FEATHERS, MPFX_PART_LEAVES, MPFX_PART_STARS,
+       MPFX_PART_RAINBOW, MPFX_PART_FIRE, MPFX_PART_SPLASH, MPFX_PART_SAKURA, MPFX_PART_COINS, MPFX_PART_BALLOONS,
+       MPFX_PART_BUTTERFLIES, MPFX_PART_GEMS, MPFX_PART_AURA, MPFX_PART_COUNT };
 enum { MPFX_RECALL_DEFAULT, MPFX_RECALL_BEAM, MPFX_RECALL_DISSOLVE, MPFX_RECALL_CONFETTI, MPFX_RECALL_SMOKE,
-       MPFX_RECALL_DIGITAL, MPFX_RECALL_CURTAIN, MPFX_RECALL_COUNT, MPFX_RECALL_VANILLA = MPFX_RECALL_COUNT };
+       MPFX_RECALL_DIGITAL, MPFX_RECALL_CURTAIN,
+       MPFX_RECALL_TELEPORT, MPFX_RECALL_BACKFLIP, MPFX_RECALL_VORTEX, MPFX_RECALL_DASH, MPFX_RECALL_MELT,
+       MPFX_RECALL_CARD, MPFX_RECALL_SWITCHOFF, MPFX_RECALL_STARDUST, MPFX_RECALL_SAND, MPFX_RECALL_FLAME,
+       MPFX_RECALL_GEYSER, MPFX_RECALL_LEAVES, MPFX_RECALL_SHADOW, MPFX_RECALL_PRISM, MPFX_RECALL_BOUNCE,
+       MPFX_RECALL_HEARTS, MPFX_RECALL_BUBBLE, MPFX_RECALL_LIGHTNING, MPFX_RECALL_ICE, MPFX_RECALL_BALLOONS,
+       MPFX_RECALL_JUMP, MPFX_RECALL_DIVE, MPFX_RECALL_FEATHERS, MPFX_RECALL_BLACKHOLE, MPFX_RECALL_GHOST,
+       MPFX_RECALL_PIXELRAIN, MPFX_RECALL_FIREWORK, MPFX_RECALL_NAP, MPFX_RECALL_SAKURA, MPFX_RECALL_SPIRIT,
+       MPFX_RECALL_COUNT, MPFX_RECALL_VANILLA = MPFX_RECALL_COUNT };
 enum { MPFX_SOUND_AUTO, MPFX_SOUND_NONE, MPFX_SOUND_CHIME, MPFX_SOUND_POP, MPFX_SOUND_BOOM, MPFX_SOUND_FANFARE,
        MPFX_SOUND_THUNDER, MPFX_SOUND_SPOOKY, MPFX_SOUND_COUNT };
 struct MpBallFx { u8 form, part, color, recall, sound; };   // color: MP_BALL_* (energy color)
@@ -1008,8 +1096,8 @@ struct Pokemon;
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out);
 void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out);
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx);
-u16 MP_BallFx_Pack(const struct MpBallFx *fx);
-void MP_BallFx_Unpack(u16 v, u8 sound, struct MpBallFx *out);
+u32 MP_BallFx_Pack(const struct MpBallFx *fx);                 // 24 bits: MON_DATA_MP_BALLFX | MON_DATA_MP_BALLFX_EXT << 16
+void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out);
 bool8 MP_BallFx_IsDefaultEntrance(const struct MpBallFx *fx);
 u16 MP_BallFx_EnergyRgb(u8 color);
 const char *MP_BallFx_FormName(u8 i);
@@ -1020,7 +1108,25 @@ u8 MP_BallFx_PresetCount(void);
 const char *MP_BallFx_PresetName(u8 i);
 void MP_BallFx_Preset(u8 i, struct MpBallFx *out);
 s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx);
-#define MPFX_USER_PRESETS 3
+bool8 MP_BallFx_PresetUnlocked(u8 i);
+#define MPFX_USER_PRESETS 6   // MY PRESET 1-6
+// mp_ballunlock.c: the colors and effect pieces this save can pick (the first ones are everyone's)
+#define MPFX_FORM_FIRST_EARNED   12
+#define MPFX_PART_FIRST_EARNED   16
+#define MPFX_RECALL_FIRST_EARNED 7
+enum { MPFX_PIECE_COLOR, MPFX_PIECE_FORM, MPFX_PIECE_PART, MPFX_PIECE_RECALL, MPFX_PIECE_KINDS };
+bool8 MP_BallUnlock_Has(u8 kind, u8 index);
+bool8 MP_BallUnlock_Give(u8 kind, u8 index);          // a MOEGATCHA prize; FALSE: had it already
+u8 MP_BallUnlock_Count(u8 kind);
+u8 MP_BallUnlock_First(u8 kind);
+u8 MP_BallUnlock_Step(u8 kind, u8 cur, s8 dir);       // the next one this save has, wrapping
+u8 MP_BallUnlock_Missing(u8 kind);
+void MP_BallUnlock_HowTo(u8 kind, u8 index, char *out, u32 size);
+u8 MP_BallUnlock_PrizeCount(void);
+bool8 MP_BallUnlock_Prize(u8 n, u8 *kind, u8 *index);
+u8 MP_BallUnlock_ForAchievement(const char *ach, u8 *kinds, u8 *indexes, u8 max);
+void MP_BallUnlock_Debug(const char *arg);
+void MP_BallUnlock_PieceName(u8 kind, u8 index, char *out, u32 size);   // "BALL COLOR: MINT"
 bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out);       // MY PRESET 1-3 (slot 0-2), FALSE = empty
 void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx);
 s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx);             // -1 = none
@@ -1032,7 +1138,7 @@ bool8 MP_BallFx_Active(void);
 void MP_BallFx_StopAll(void);
 void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
-u16 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
+u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
 u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));

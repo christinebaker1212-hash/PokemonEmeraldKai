@@ -1,0 +1,12 @@
+# co-op double (2 players vs 2 wild): type icons and window frame through Thunder (screen flashes)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("action menu at frame")
+EXPECT_B=("action menu at frame")

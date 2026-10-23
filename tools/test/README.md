@@ -20,6 +20,11 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_wild_lag` | the same, always at worst-case lag |
 | `coop_catch` | co-op 2-on-2, a MASTER BALL (L = last ball) catches one, they finish the other |
 | `coop_levelup` | co-op win one EXP short of Lv16 on both: level up + Torchic -> Combusken on both |
+| `coop_icons_flash` | co-op 2-on-2 at NA-JP lag with TYPE ICONS on: THUNDER's screen flashes leave the icons and the window frame alone (screenshots) |
+| `coop_weather` | co-op 2-on-2 at NA-JP lag: SANDSTORM hits all four at once (one line, then quiet turns), win on both |
+| `coop_flash` | Granite Cave B2F (dark) at NA-JP lag: each sees the other's light, BOB's FLASH lights up around him on ALICE's screen; co-op notes show in the dark |
+| `coop_world` | NA-JP lag: a CUT tree is gone for a friend who walks onto the map later (list), a smashed rock vanishes live, a STRENGTH boulder moves on both games |
+| `coop_world2` | NA-JP lag: CUT grass is cut on the friend's game; Route 113's ash ALICE walks through clears for BOB, the soot is only hers |
 | `coop_heal` | ALICE uses a POTION on BOB's Moemon from her bag (partner's gold slot) |
 | `coop_trainer` | Roxanne: ALICE waits for a partner, BOB walks up and joins, BOB's RUN is refused, they win |
 | `coop_run` | co-op wild: ALICE alone picks RUN (it only says so), then both pick RUN until they get away |
@@ -38,6 +43,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `photo` | SOCIAL > TEAM PHOTO saved |
 | `gift` | DAILY > GIFT sent, received, thanked |
 | `tri_wild` | three clients: CARL's encounter pulls ALICE and BOB in, a wild Triple Battle to the win |
+| `tri_target_level` | Roxanne co-op Triple at NA-JP lag: every player opens the target window; its Lv must match the cards (no "target level mismatch" in any log) |
 | `tri_trainer` | Roxanne: ALICE waits, BOB joins, ALICE keeps waiting, CARL joins: a trainer Triple Battle |
 | `tri_catch` | wild triple: ALICE and BOB each catch a different wild Pokemon (each gets their own) |
 | `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the gold slots are the allies') |

@@ -1,0 +1,17 @@
+# WHIRLWIND (ROAR's code; VOLTORB is SOUNDPROOF) in a co-op Triple Battle: all three only blow at WATTSON: whoever comes in is from his pool,
+# never one already out or a slot past his party; each player keeps their own Moemon (check_partytrace.py).
+MODE=3
+WARP=10,0,5,3
+WARP_B=10,0,5,6
+WARP_C=10,0,3,3
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+ENV_B="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+ENV_C="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+EXPECT_A=("(and another: triple)" "partytrace: enemy")
+EXPECT_B=("co-op battle link: 3 games" "partytrace: enemy")
+EXPECT_C=("co-op battle link: 3 games" "partytrace: enemy")
+UNEXPECT_A=("BADEGG" "no Pokemon left")
+UNEXPECT_B=("BADEGG" "no Pokemon left")
+UNEXPECT_C=("BADEGG" "no Pokemon left")
+CHECK="tools/test/check_partytrace.py"

@@ -384,6 +384,7 @@ static void PutInMon(u8 partySlot)
 {
     u8 buf[1 + MP_STORE_MON_BYTES];
     struct Pokemon *mon = &gPlayerParty[partySlot];
+    MP_ReturnHeldHm(mon);   // a held HM stays with us
     memset(buf, 0, sizeof(buf));
     buf[0] = MP_ST_PC_PUT;
     memcpy(buf + 1, mon, sizeof(struct Pokemon));

@@ -1,0 +1,9 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp ballfx 0 21 21 26 33 0
+mp follow 0
+wait 200
+mp follow 0
+wait 200
+quit

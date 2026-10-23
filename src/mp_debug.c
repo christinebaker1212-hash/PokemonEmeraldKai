@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "platform.h"
+#include "siirtc.h"
+#include "rtc.h"
+#include "easy_chat.h"
+#include "field_screen_effect.h"
 #include "field_player_avatar.h"
 #include "event_object_movement.h"
 #include "text_window.h"
@@ -16,6 +21,11 @@
 #include "pokedex.h"
 #include "mp.h"
 #include "battle.h"
+#include "battle_anim.h"
+#include "battle_interface.h"
+#include "field_effect.h"
+#include "fieldmap.h"
+#include "constants/field_effects.h"
 #include "save.h"
 #include "palette.h"
 #include "constants/characters.h"
@@ -173,8 +183,20 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(2);
     if (strcmp(name, "message") == 0)
         return MP_Setup_ScreenIs(4);
+    if (strcmp(name, "easychat") == 0)   // the easy chat word screen is up
+    {
+        bool8 MP_EasyChatOpen(void);
+        return MP_EasyChatOpen();
+    }
+    if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up
+    {
+        bool8 MP_ScriptYesNoOpen(void);
+        return MP_ScriptYesNoOpen();
+    }
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
+    if (strcmp(name, "surfing") == 0)   // surfing and free to move
+        return (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) && MP_IsLocalFree();
     if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
     {
         bool8 MP_PartyMenu_IsOpen(void);
@@ -184,6 +206,11 @@ int MP_TestCondition(const char *name)
     {
         bool8 MP_Crush_DebugAsking(void);
         return MP_Crush_DebugAsking();
+    }
+    if (strcmp(name, "summary") == 0)   // the summary screen is up (e.g. picking a move to forget)
+    {
+        bool8 MP_SummaryScreen_IsOpen(void);
+        return MP_SummaryScreen_IsOpen();
     }
     if (strcmp(name, "nofade") == 0)
         return !gPaletteFade.active;
@@ -230,6 +257,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();
+    }
+    else if (strcmp(cmd, "double") == 0)
+    {
+        // double S:L S:L - a local wild Double Battle (you command party slots 0-1)
+        void BattleSetup_StartLocalDoubleWildBattle(void);
+        int sp[2] = {288, 286}, lv[2] = {5, 5};
+        sscanf(arg, "%d:%d %d:%d", &sp[0], &lv[0], &sp[1], &lv[1]);
+        ZeroEnemyPartyMons();
+        CreateMon(&gEnemyParty[0], sp[0], lv[0], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        CreateMon(&gEnemyParty[1], sp[1], lv[1], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        BattleSetup_StartLocalDoubleWildBattle();
     }
     else if (strcmp(cmd, "dumpcolors") == 0)
     {
@@ -344,6 +382,59 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &v);
         gSaveBlock1Ptr->weatherCycleStage = v;
     }
+    else if (strcmp(cmd, "berrytree") == 0)
+    {
+        // berrytree TREE BERRY STAGE - plant BERRY (berry number: 47+ are the e-Reader Berries) in tree TREE
+        void PlantBerryTree(u8 id, u8 berry, u8 stage, bool8 allowGrowth);
+        int tree = 0, berry = 1, stage = 5;
+        sscanf(arg, "%d %d %d", &tree, &berry, &stage);
+        PlantBerryTree(tree, berry, stage, TRUE);
+        printf("[test] berrytree %d = berry %d stage %d\n", tree, berry, stage);
+    }
+    else if (strcmp(cmd, "berryinfo") == 0)
+    {
+        // berryinfo TREE - a tree's berry, stage and minutes to the next stage
+        struct BerryTree *GetBerryTreeInfo(u8 id);
+        int tree = 0;
+        struct BerryTree *t;
+        sscanf(arg, "%d", &tree);
+        t = GetBerryTreeInfo(tree);
+        printf("[test] berryinfo %d: berry %d stage %d next %d min yield %d regrow %d (time events %s, wall clock %s, last %d.%02d:%02d, days var %d)\n",
+               tree, t->berry, t->stage, t->minutesUntilNextStage, t->berryYield, t->regrowthCount,
+               FlagGet(FLAG_SYS_CLOCK_SET) ? "on" : "off", FlagGet(FLAG_SET_WALL_CLOCK) ? "set" : "not set",
+               gSaveBlock2Ptr->lastBerryTreeUpdate.days, gSaveBlock2Ptr->lastBerryTreeUpdate.hours,
+               gSaveBlock2Ptr->lastBerryTreeUpdate.minutes, VarGet(VAR_DAYS));
+    }
+    else if (strcmp(cmd, "panel") == 0)
+    {
+        // panel ON SIZE: the SPECTATE panel (friends' screens under ours), SIZE 1-4
+        int on = 1, size = 1;
+        sscanf(arg, "%d %d", &on, &size);
+        gMpConfig.spectatePanel = on != 0;
+        gMpConfig.spectateScale = size < 1 ? 1 : (size > 4 ? 4 : size);
+        printf("[test] spectate panel %s, size %dx\n", on ? "on" : "off", gMpConfig.spectateScale);
+    }
+    else if (strcmp(cmd, "gatchaday") == 0)
+    {
+        // gatchaday N - STANDARD shows day N's prizes (-1: today)
+        void MP_Gatcha_SetDay(s32 day);
+        int n = -1;
+        sscanf(arg, "%d", &n);
+        MP_Gatcha_SetDay(n);
+    }
+    else if (strcmp(cmd, "gatchagive") == 0)
+    {
+        // gatchagive EV [SHINY] - an event Moemon from the MoeGatcha list (EV_* order in mp_gatcha.c)
+        void MP_Gatcha_DebugGive(u8 ev, bool8 shiny);
+        int ev = 0, sh = 0;
+        sscanf(arg, "%d %d", &ev, &sh);
+        MP_Gatcha_DebugGive(ev, sh);
+    }
+    else if (strcmp(cmd, "gatchareel") == 0)
+    {
+        void MP_Gatcha_DebugReel(void);
+        MP_Gatcha_DebugReel();
+    }
     else if (strcmp(cmd, "pickup") == 0)
     {
         // pickup N - show PICKUP number N (0-18) instead of this week's
@@ -374,6 +465,85 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         SetCoins(n);
     }
+    else if (strcmp(cmd, "cuttree") == 0 || strcmp(cmd, "smashrock") == 0)
+    {
+        // cuttree LOCALID / smashrock LOCALID - as if we used CUT / ROCK SMASH on it (mp_world.c tells friends)
+        extern const u8 EventScript_CutTreeDown[];
+        gSpecialVar_LastTalked = atoi(arg);
+        if (cmd[0] == 'c')
+        {
+            ScriptContext_SetupScript(EventScript_CutTreeDown);
+        }
+        else
+        {
+            RemoveObjectEventByLocalIdAndMap(gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            MP_World_RockGone();
+        }
+    }
+    else if (strcmp(cmd, "cutgrass") == 0)
+    {
+        // cutgrass - CUT on the grass around where we face (SetUpFieldMove_Cut picks the tiles, as the menu does)
+        bool8 SetUpFieldMove_Cut(void);
+        if (SetUpFieldMove_Cut())
+        {
+            gFieldCallback2 = NULL;
+            gPostMenuFieldCallback = NULL;
+            FieldEffectStart(FLDEFF_CUT_GRASS);
+        }
+        else
+        {
+            printf("[test] cutgrass: nothing to cut here\n");
+        }
+    }
+    else if (strcmp(cmd, "worldobj") == 0)
+    {
+        // worldobj LOCALID - is that object on this map there, and where
+        u8 objId;
+        int localId = atoi(arg);
+        if (!TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &objId))
+            printf("[test] worldobj %d at %d,%d\n", localId, gObjectEvents[objId].currentCoords.x - MAP_OFFSET, gObjectEvents[objId].currentCoords.y - MAP_OFFSET);
+        else
+            printf("[test] worldobj %d gone\n", localId);
+    }
+    else if (strcmp(cmd, "ashcount") == 0)
+    {
+        printf("[test] ash %d\n", VarGet(VAR_ASH_GATHER_COUNT));
+    }
+    else if (strcmp(cmd, "tileat") == 0)
+    {
+        // tileat X,Y - the metatile there (map coords without the offset)
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        printf("[test] tile %d,%d = %d\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
+    else if (strcmp(cmd, "lights") == 0)
+    {
+        // lights - friends' lights in a dark cave, as last drawn (mp_world.c)
+        MP_World_DebugLights();
+    }
+    else if (strcmp(cmd, "gendersample") == 0)
+    {
+        // gendersample SPECIES - make 1000 wild-style Pokemon of SPECIES and count the genders
+        static struct Pokemon mon;
+        int species = atoi(arg), i, f = 0, m = 0, n = 0;
+        for (i = 0; i < 1000; i++)
+        {
+            CreateMon(&mon, species, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+            switch (GetMonGender(&mon))
+            {
+            case MON_FEMALE: f++; break;
+            case MON_MALE: m++; break;
+            default: n++; break;
+            }
+        }
+        printf("[test] gendersample %d: female %d male %d none %d (ratio %d)\n", species, f, m, n, gSpeciesInfo[species].genderRatio);
+    }
+    else if (strcmp(cmd, "challenge") == 0)
+    {
+        // challenge N - the frontier / tent challenge status (3 = won), e.g. before walking into a tent lobby
+        gSaveBlock2Ptr->frontier.challengeStatus = atoi(arg);
+        printf("[test] challenge status %d\n", gSaveBlock2Ptr->frontier.challengeStatus);
+    }
     else if (strcmp(cmd, "setflag") == 0)
     {
         // setflag N - an event flag (include/constants/flags.h)
@@ -385,6 +555,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (strcmp(arg, "reset") == 0)
             MP_SaveData_Set("gatcha:ticketbackfill", 0);
         MP_Gatcha_BackfillTickets();
+    }
+    else if (strcmp(cmd, "gatchafx") == 0)
+    {
+        // gatchafx N - the next MoeGatcha pull gives ball effect prize number N (-1: a random one)
+        void MP_Gatcha_RigFx(s16 n);
+        MP_Gatcha_RigFx(atoi(arg));
     }
     else if (strcmp(cmd, "gatchastock") == 0)
     {
@@ -545,8 +721,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "bhp") == 0)
     {
         int b;
-        for (b = 0; b < 4; b++)
-            printf("[test] battler %d hp %d/%d species %d\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP, gBattleMons[b].species);
+        for (b = 0; b < gBattlersCount; b++)
+            printf("[test] battler %d hp %d/%d species %d level %d (party %d)\n", b, gBattleMons[b].hp, gBattleMons[b].maxHP,
+                   gBattleMons[b].species, gBattleMons[b].level,
+                   GetMonData(GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]] : &gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_LEVEL));
+    }
+    else if (strcmp(cmd, "bstatus") == 0)
+    {
+        // bstatus BATTLER STATUS1 [HP] - sets a battler's status (and HP) and redraws its healthbox / card
+        int b = 0, st = 0, hp = -1;
+        sscanf(arg, "%d %d %d", &b, &st, &hp);
+        if (b >= 0 && b < gBattlersCount)
+        {
+            struct Pokemon *mon = GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]] : &gEnemyParty[gBattlerPartyIndexes[b]];
+            u32 status = st;
+            SetMonData(mon, MON_DATA_STATUS, &status);
+            gBattleMons[b].status1 = status;
+            if (hp >= 0)
+            {
+                u16 h = hp;
+                SetMonData(mon, MON_DATA_HP, &h);
+                gBattleMons[b].hp = h;
+            }
+            UpdateHealthboxAttribute(gHealthboxSpriteIds[b], mon, HEALTHBOX_ALL);
+        }
     }
     else if (strcmp(cmd, "register") == 0)
     {
@@ -583,6 +781,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
             u16 m = move;
             SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1, &m);
             printf("[test] teach: slot %d move %d\n", slot, move);
+        }
+    }
+    else if (strcmp(cmd, "moves") == 0)
+    {
+        // mp moves SLOT M1 [M2 M3 M4] - the party Moemon in SLOT knows these moves (full PP); missing ones are emptied
+        int slot = 0, m[MAX_MON_MOVES] = {0}, n, i;
+        n = sscanf(arg, "%d %d %d %d %d", &slot, &m[0], &m[1], &m[2], &m[3]);
+        if (n >= 2 && slot >= 0 && slot < PARTY_SIZE)
+        {
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
+            printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
         }
     }
     else if (strcmp(cmd, "hold") == 0)
@@ -644,6 +854,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
             gSaveBlock2Ptr->optionsNameCase = atoi(arg) % MP_NAMECASE_COUNT;
         printf("[test] creatures %d namecase %d\n", gSaveBlock2Ptr->optionsPokemonArt, gSaveBlock2Ptr->optionsNameCase);
     }
+    else if (strcmp(cmd, "namefilter") == 0)
+    {
+        // namefilter TEXT - log TEXT as OPTIONS > NAME CASE / CREATURES would show it (~ is é)
+        static u8 in[200];
+        const u8 *f;
+        int i;
+        MP_AsciiToGame(in, arg, sizeof(in) - 1);
+        for (i = 0; arg[i] && i < (int)sizeof(in) - 1; i++)
+            if (arg[i] == '~')
+                in[i] = CHAR_e_ACUTE;
+        f = MP_TextOpts_Filter(in, 0);
+        printf("[test] namefilter <");
+        for (i = 0; f[i] != EOS; i++)
+        {
+            u8 one[2] = {f[i], EOS};
+            char c[8];
+            MP_GameToAscii(c, one, sizeof(c) - 1);
+            printf("%s", f[i] == CHAR_e_ACUTE ? "~" : c);
+        }
+        printf(">\n");
+    }
     else if (strcmp(cmd, "legacyrand") == 0)
     {
         // legacyrand B,B,... - the random bytes the next GENESIS / EPOCH BALL throws use
@@ -668,6 +899,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         extern u8 gMpWildDoublePercent;
         gMpWildDoublePercent = arg[0] ? atoi(arg) : 100;
+    }
+    else if (strcmp(cmd, "bagorder") == 0)
+    {
+        // bagorder POCKET - the item numbers in a pocket's order (a * after a new one)
+        int p = 0;
+        u16 i;
+        sscanf(arg, "%d", &p);
+        if (p >= 0 && p < POCKETS_COUNT)
+        {
+            printf("[test] bagorder %d:", p);
+            for (i = 0; i < gBagPockets[p].capacity && gBagPockets[p].itemSlots[i].itemId != ITEM_NONE; i++)
+                printf(" %d%s", gBagPockets[p].itemSlots[i].itemId, MP_Bag_IsNew(gBagPockets[p].itemSlots[i].itemId) ? "*" : "");
+            printf("\n");
+        }
     }
     else if (strcmp(cmd, "bag") == 0)
     {
@@ -705,11 +950,34 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StartSpriteAnim(&gSprites[player->spriteId], 0);
         printf("[test] avatar state %d\n", atoi(arg));
     }
+    else if (strcmp(cmd, "sprite") == 0)
+    {
+        // sprite NAME - wear a look by its ini name (hiker, frlg_lass, custom_1, rs_may...)
+        if (MP_Avatar_ParseSpriteName(arg, &gMpConfig.app))
+        {
+            if (gMpConfig.app.base == MP_BASE_CREATED)
+                gMpConfig.app.recipe = gMpConfig.custom[gMpConfig.app.created - 1];
+            gMpConfig.app.hasCustom = FALSE;
+            gMpConfig.customSprite[0] = 0;
+            MP_Avatar_ApplyLocal();
+            MP_SendAppearance();
+            printf("[test] sprite %s\n", arg);
+        }
+        else
+            printf("[test] sprite %s: no such look\n", arg);
+    }
+    else if (strcmp(cmd, "actiondump") == 0)
+    {
+        // actiondump FILE - the player's look in every avatar state (bike, surf, fishing...)
+        void MP_Avatar_DumpActions(const char *path);
+        MP_Avatar_DumpActions(arg);
+    }
     else if (strcmp(cmd, "bike") == 0)
     {
-        // bike - get on the Mach Bike (or off: bike 0)
+        // bike - get on the Mach Bike (bike 2: the Acro Bike; bike 0: off)
         extern void SetPlayerAvatarTransitionFlags(u16 flags);
-        SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT : PLAYER_AVATAR_FLAG_MACH_BIKE);
+        SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
+                                     : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
     }
     else if (strcmp(cmd, "repel") == 0)
     {
@@ -729,6 +997,46 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int n = 0;
         sscanf(arg, "%d", &n);
         gSaveBlock2Ptr->optionsWindowFrameType = n % WINDOW_FRAMES_COUNT;
+    }
+    else if (strcmp(cmd, "achmenu") == 0)
+    {
+        // achmenu TAB - CO-OP > DAILY > ACHIEVEMENTS on a tab (0 JOURNEY ... 5 EXTRAS)
+        void MP_Daily_OpenAchievements(u8 tab);
+        MP_Daily_OpenAchievements(atoi(arg));
+    }
+    else if (strcmp(cmd, "ach") == 0)
+    {
+        // ach - achievements done, in all and per tab
+        s32 MP_Gatcha_Pulls(void);
+        u8 c;
+        printf("[test] achievements %d/%d:", MP_Achieve_DoneCount(), MP_Achieve_Total());
+        for (c = 0; c < MP_Achieve_CatCount(); c++)
+        {
+            u16 done, n = MP_Achieve_CountIn(c, &done);
+            printf(" %s %d/%d", MP_Achieve_CatName(c), done, n);
+        }
+        printf(" pulls %d\n", (int)MP_Gatcha_Pulls());
+    }
+    else if (strcmp(cmd, "fxunlock") == 0)
+    {
+        // fxunlock all | fxunlock KIND INDEX - MOEGATCHA ball pieces (0 color, 1 form, 2 particles, 3 recall)
+        MP_BallUnlock_Debug(arg);
+    }
+    else if (strcmp(cmd, "lookskin") == 0)
+    {
+        // lookskin N - LOOK's skin color (0 = the sprite's own)
+        gMpConfig.app.skin = atoi(arg);
+    }
+    else if (strcmp(cmd, "gamestat") == 0)
+    {
+        // gamestat N VALUE - a game stat (include/constants/game_stat.h)
+        int n = 0, v = 0;
+        sscanf(arg, "%d %d", &n, &v);
+        SetGameStat(n, v);
+    }
+    else if (strcmp(cmd, "money") == 0)
+    {
+        SetMoney(&gSaveBlock1Ptr->money, atoi(arg));
     }
     else if (strcmp(cmd, "daily") == 0)
     {
@@ -761,6 +1069,71 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < MAX_SPRITES; i++)
             if (gSprites[i].inUse)
                 gSprites[i].invisible = TRUE;
+    }
+    else if (strcmp(cmd, "stuckclock") == 0)
+    {
+        // stuckclock - make this save look like one from when the clock was stuck at day 0
+        memset(&gSaveBlock2Ptr->lastBerryTreeUpdate, 0, sizeof(gSaveBlock2Ptr->lastBerryTreeUpdate));
+        memset(&gSaveBlock2Ptr->localTimeOffset, 0, sizeof(gSaveBlock2Ptr->localTimeOffset));
+        gSaveBlock2Ptr->localTimeOffset.hours = -10;   // the bedroom clock set to 10:00 against day 0
+        FlagSet(FLAG_SYS_CLOCK_SET);
+        FlagSet(FLAG_SET_WALL_CLOCK);
+        VarSet(VAR_DAYS, 0);
+        printf("[test] stuck clock save\n");
+    }
+    else if (strcmp(cmd, "berrywait") == 0)
+    {
+        // berrywait MIN - as if MIN minutes had passed for the Berry trees (then the time-based events run)
+        void DoTimeBasedEvents(void);
+        int min = 0;
+        s32 total;
+        struct Time *t = &gSaveBlock2Ptr->lastBerryTreeUpdate;
+        sscanf(arg, "%d", &min);
+        total = t->days * 1440 + t->hours * 60 + t->minutes - min;
+        t->days = total / 1440;
+        t->hours = (total / 60) % 24;
+        t->minutes = total % 60;
+        DoTimeBasedEvents();
+        printf("[test] berrywait %d\n", min);
+    }
+    else if (strcmp(cmd, "gjoin") == 0)
+    {
+        // gjoin - join the test's room again (MOEMON_COOP_AUTO=join:ROOM) after goffline
+        char buf[96], *room = NULL;
+        const char *env = getenv("MOEMON_COOP_AUTO");
+        if (env)
+        {
+            snprintf(buf, sizeof(buf), "%s", env);
+            strtok(buf, ":");
+            room = strtok(NULL, ":");
+        }
+        if (room)
+        {
+            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            MP_Lobby_JoinRoom(room, "");
+            printf("[test] joining %s\n", room);
+        }
+    }
+    else if (strcmp(cmd, "goffline") == 0)
+    {
+        // goffline - leave the room and the server (back to playing alone)
+        MP_Lobby_Disconnect();
+        printf("[test] offline\n");
+    }
+    else if (strcmp(cmd, "clock") == 0)
+    {
+        // clock - the game clock (online: the host's PC clock)
+        struct SiiRtcInfo r;
+        s64 off = 0;
+        Platform_GetDateTime(&r);
+        printf("[test] clock 20%02x-%02x-%02x %02x:%02x (%s)\n", r.year, r.month, r.day, r.hour, r.minute,
+               MP_HostClockOffset(&off) ? "the host's" : "ours");
+        {
+            RtcCalcLocalTime();
+            printf("[test] game time day %d %02d:%02d (rtc status %04x, offset %d.%02d:%02d)\n", gLocalTime.days, gLocalTime.hours,
+                   gLocalTime.minutes, RtcGetErrorStatus(), gSaveBlock2Ptr->localTimeOffset.days,
+                   gSaveBlock2Ptr->localTimeOffset.hours, gSaveBlock2Ptr->localTimeOffset.minutes);
+        }
     }
     else if (strcmp(cmd, "where") == 0)
     {
@@ -824,6 +1197,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &page);
         MP_OpenMenuPageAt(page, 0);
     }
+    else if (strcmp(cmd, "monmoves") == 0)
+    {
+        // monmoves SLOT - a party Moemon's moves and held item
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            printf("[test] monmoves: slot %d species %d moves %d %d %d %d held %d\n", slot,
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM));
+    }
+    else if (strcmp(cmd, "bagqty") == 0)
+    {
+        // bagqty ITEM - how many the bag has
+        int id = atoi(arg), n;
+        for (n = 0; n < 999 && CheckBagHasItem(id, n + 1); n++)
+            ;
+        printf("[test] bagqty %d: %d\n", id, n);
+    }
+    else if (strcmp(cmd, "pc") == 0)
+    {
+        // pc - the POKeMON STORAGE SYSTEM, as from a PC
+        void ShowPokemonStorageSystemPC(void);
+        LockPlayerFieldControls();
+        ShowPokemonStorageSystemPC();
+    }
     else if (strcmp(cmd, "item") == 0)
     {
         // item ID QTY - put items in the bag
@@ -843,12 +1242,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "giveforeign") == 0)
     {
-        // giveforeign SPECIES - a Pokemon made in another player's game (another OT ID), given
-        // the way a co-op catch is (GiveMonToPlayer)
+        // giveforeign SPECIES[:LEVEL[:lead]] - a Pokemon made in another player's game (another OT
+        // ID), given the way a co-op catch is (GiveMonToPlayer); ":lead" swaps it into slot 0
         static struct Pokemon mon;
-        int species = atoi(arg);
-        CreateMon(&mon, species > 0 ? species : 288, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, 0x9ABC1234);
+        int species = 0, level = 5;
+        char lead[8] = "";
+        sscanf(arg, "%d:%d:%7s", &species, &level, lead);
+        CreateMon(&mon, species > 0 ? species : 288, level > 0 && level <= 100 ? level : 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, 0x9ABC1234);
         GiveMonToPlayer(&mon);
+        if (strcmp(lead, "lead") == 0 && CalculatePlayerPartyCount() > 1)
+        {
+            struct Pokemon tmp = gPlayerParty[0];
+            gPlayerParty[0] = gPlayerParty[CalculatePlayerPartyCount() - 1];
+            gPlayerParty[CalculatePlayerPartyCount() - 1] = tmp;
+        }
         printf("[test] giveforeign: given, bad egg %d\n", (int)MP_IsBoxMonBadEgg(&gPlayerParty[CalculatePlayerPartyCount() - 1].box));
     }
     else if (strcmp(cmd, "heap") == 0)
@@ -877,6 +1284,62 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] ballfx: slot %d form %d part %d color %d recall %d sound %d\n", slot, fx.form, fx.part, fx.color, fx.recall, fx.sound);
         }
     }
+    else if (strcmp(cmd, "settrend") == 0)
+    {
+        // settrend SLOT W1 W2 TRENDINESS - put a phrase straight into a saved trend slot (hex words)
+        unsigned slot = 0, w1 = 0, w2 = 0, t = 50;
+        if (sscanf(arg, "%u %x %x %u", &slot, &w1, &w2, &t) >= 3 && slot < SAVED_TRENDS_COUNT)
+        {
+            gSaveBlock1Ptr->dewfordTrends[slot].words[0] = w1;
+            gSaveBlock1Ptr->dewfordTrends[slot].words[1] = w2;
+            gSaveBlock1Ptr->dewfordTrends[slot].trendiness = t;
+            gSaveBlock1Ptr->dewfordTrends[slot].maxTrendiness = t > 127 ? 127 : (t < 1 ? 1 : t);
+        }
+    }
+    else if (strcmp(cmd, "trends") == 0)
+    {
+        int i;
+        for (i = 0; i < SAVED_TRENDS_COUNT; i++)
+        {
+            char ascii[64];
+            u8 buf[64];
+            ConvertEasyChatWordsToString(buf, gSaveBlock1Ptr->dewfordTrends[i].words, 2, 1);
+            MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+            printf("[test] trends[%d]: %04x %04x \"%s\" t %d max %d gain %d rand %04x\n", i, gSaveBlock1Ptr->dewfordTrends[i].words[0],
+                   gSaveBlock1Ptr->dewfordTrends[i].words[1], ascii, gSaveBlock1Ptr->dewfordTrends[i].trendiness,
+                   gSaveBlock1Ptr->dewfordTrends[i].maxTrendiness, gSaveBlock1Ptr->dewfordTrends[i].gainingTrendiness,
+                   gSaveBlock1Ptr->dewfordTrends[i].rand);
+        }
+    }
+    else if (strcmp(cmd, "easychat") == 0)
+    {
+        // easychat TYPE PERSON - the word screen as an NPC would open it (5 interview, 0/1 reporter, 2 boy)
+        static u16 sWords[9] = {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
+        int type = 5, person = 0;
+        sscanf(arg, "%d %d", &type, &person);
+        DoEasyChatScreen(type, sWords, CB2_ReturnToField, person);
+    }
+    else if (strcmp(cmd, "trend") == 0)
+    {
+        // trend - Dewford's current trendy phrase
+        char ascii[64];
+        u8 buf[64];
+        ConvertEasyChatWordsToString(buf, gSaveBlock1Ptr->dewfordTrends[0].words, 2, 1);
+        MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+        printf("[test] trend: %04x %04x \"%s\" (trendiness %d)\n", gSaveBlock1Ptr->dewfordTrends[0].words[0],
+               gSaveBlock1Ptr->dewfordTrends[0].words[1], ascii, gSaveBlock1Ptr->dewfordTrends[0].trendiness);
+    }
+    else if (strcmp(cmd, "warp") == 0)
+    {
+        // warp GROUP,NUM,X,Y - a walk-in warp to that map spot (on the field)
+        int g = 0, n = 0, x = 0, y = 0;
+        if (sscanf(arg, "%d,%d,%d,%d", &g, &n, &x, &y) == 4)
+        {
+            SetWarpDestination(g, n, WARP_ID_NONE, x, y);
+            DoWarp();
+            printf("[test] warp: %d,%d %d,%d\n", g, n, x, y);
+        }
+    }
     else if (strcmp(cmd, "ballstyle") == 0)
     {
         // ballstyle SLOT HEX - a party Moemon's POKé BALL style (c000 GENESIS BALL, d000 EPOCH BALL)
@@ -887,6 +1350,43 @@ void MP_TestCommand(const char *cmd, const char *arg)
             u32 v = style;
             SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
             printf("[test] ballstyle: slot %d style %04x\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR));
+        }
+    }
+    else if (strcmp(cmd, "fxget") == 0)
+    {
+        // fxget SLOT - a party Moemon's ball effect, markings and ball style as stored
+        int slot = atoi(arg);
+        struct MpBallFx fx;
+        u16 style;
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            MP_BallFx_OfMon(&gPlayerParty[slot], &fx);
+            style = MP_BallStyle_OfMon(&gPlayerParty[slot]);
+            printf("[test] fxget: slot %d form %d part %d color %d recall %d sound %d markings %d style %04x (color %d deco %d special %d)\n",
+                   slot, fx.form, fx.part, fx.color, fx.recall, fx.sound, (int)GetMonData(&gPlayerParty[slot], MON_DATA_MARKINGS),
+                   style, MP_BallStyle_Color(style), MP_BallStyle_Decoration(style), MP_BallStyle_Special(style));
+        }
+    }
+    else if (strcmp(cmd, "markings") == 0)
+    {
+        // markings SLOT VALUE
+        int slot = 0, v = 0;
+        sscanf(arg, "%d %d", &slot, &v);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u8 m = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MARKINGS, &m);
+        }
+    }
+    else if (strcmp(cmd, "stylemake") == 0)
+    {
+        // stylemake SLOT COLOR DECORATION - a POKé BALL style through MP_BallStyle_Make
+        int slot = 0, c = 0, d = 0;
+        sscanf(arg, "%d %d %d", &slot, &c, &d);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u16 v = MP_BallStyle_Make(c, d);
+            SetMonData(&gPlayerParty[slot], MON_DATA_ENCRYPT_SEPARATOR, &v);
         }
     }
     else if (strcmp(cmd, "fxedit") == 0)

@@ -5195,8 +5195,9 @@ static void TryAddInterviewObjectEvents(void)
     }
 
     // Add object for player (facing right)
+    // Moemon Co-op: the player's own look, if they have one
     spriteId = CreateObjectGraphicsSprite(
-        gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL : OBJ_EVENT_GFX_RIVAL_MAY_NORMAL,
+        MP_PlayerStandInGfxId(gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL : OBJ_EVENT_GFX_RIVAL_MAY_NORMAL),
         SpriteCallbackDummy,
         52,
         40,
@@ -5328,6 +5329,18 @@ static bool8 IsEasyChatWordInvalid(u16 easyChatWord)
         return TRUE;
     else
         return FALSE;
+}
+
+// Moemon Co-op: tests wait for the word screen (mp_debug.c "easychat")
+bool8 MP_EasyChatOpen(void)
+{
+    return gMain.callback2 == CB2_EasyChatScreen;
+}
+
+// Moemon Co-op: for dewford_trend.c (a saved or mixed-in trend with words this game doesn't have)
+bool8 MP_IsEasyChatWordInvalid(u16 easyChatWord)
+{
+    return easyChatWord == EC_EMPTY_WORD || IsEasyChatWordInvalid(easyChatWord);
 }
 
 bool8 IsBardWordInvalid(u16 easyChatWord)

@@ -1,6 +1,7 @@
 # two clients on Route 101, two wild Pokemon: BOB's lead uses GROWL (and the wild ones may too), lowering both
 # targets' ATTACK with one animation over both and one line, on both screens (mpstatgroup)
 MODE=2
+TMO=240
 WARP=0,16,12,11
 WARP_B=0,16,14,11
 EXPECT_A=("stat change shown together on battlers" "co-op: battle over, outcome 1")

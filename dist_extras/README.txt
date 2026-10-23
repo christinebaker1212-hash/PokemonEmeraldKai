@@ -123,6 +123,17 @@ TEAMING UP FOR A DOUBLE BATTLE
   Moemon refuses ("Hey, I only have one MOEMON! Let's go one on one!") and
   it takes three of their own for a Triple Battle. Everyone in the server
   plays by the host's setting.
+* The game's clock (what time of day it is, the tides, daily events of the
+  original game) is the host's PC clock while you're in their game, even if
+  you live in another time zone, so everyone plays at the same time of day.
+  Offline, or in a game you made, it's your own PC's clock. Berry trees grow
+  by the time that really passes on your own clock, so joining or leaving a
+  host in another time zone never makes them jump ahead (or stop).
+* The game's clock is the PC's clock: the bedroom clock starts at your PC's
+  time. Earlier versions had the clock stuck at midnight on day 1, so Berries
+  never grew and daily events never came round (SKIP THE INTRO also left
+  them off). Old saves are fixed when loaded: Berry trees carry on from where
+  they are (no years of growth at once) and daily events get one new day.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   use their items and they choose their moves smarter.
@@ -222,8 +233,10 @@ TRIPLE BATTLES (THREE PLAYERS)
   for 3/4 damage; Earthquake and friends hit your allies too. Helping Hand
   lets you pick which ally to boost.
 * Your allies are the gold boxes in the party screen; you can heal any of
-  the six. Each card has a colored strip on the left: the same color is the
-  same player on everyone's screen.
+  the six.
+* The cards show the name and gender, the level and the HP bar. A status
+  (PSN, PAR, SLP, FRZ, BRN) covers the level, as on the usual boxes. The
+  cards are see-through, so Moemon behind them stay visible.
 * R on the action menu shows both allies' Moemon with their HP, and once an
   ally has picked, your menu shows it ("ALICE: EMBER").
 * While you pick a target, the box on the right names it, with its level (a
@@ -266,6 +279,19 @@ Press B (or START) to stop watching at any time. Watching ends by itself
 when the battle is over.
 
 
+FRIENDS' SCREENS (CO-OP > SPECTATE)
+-----------------------------------
+Turn FRIENDS' SCREENS ON to see up to 3 friends' screens live, all the time,
+in a panel under your own: walking around, in menus or in battle. Each card
+has the friend's name and where they are (a red IN BATTLE tag in a battle).
+SIZE sets the cards to 1X, 2X, 3X or 4X the game's size. Your own screen
+gets smaller to make room, so everything stays on screen; when a size doesn't
+fit your window or monitor the cards use the biggest one that does (the
+menu says "4X (2X FITS)"). The window grows to fit the panel and goes back
+to its own size when you turn it off or your friends leave.
+Your choice is saved. Each friend sends about 20 KB/s while you watch.
+
+
 PVP: THE BATTLE FLAG
 --------------------
 * You get the BATTLE FLAG (KEY ITEMS) the first time you connect. Register
@@ -292,8 +318,9 @@ SHARED PC...  A PC that belongs to the server: anyone can put Moemon and
 DAILY GIFT... Send each friend online today's gift once a day. They get the
               gift and you get a thank-you bonus (bigger with more players).
               The gift changes every day.
-Moemon you get from a friend keep their original trainer (they gain more
-EXP, but very high levels may not obey you until you have more badges).
+Moemon you get from a friend keep their original trainer's name and ID, but
+always obey you as if you were their trainer (they still gain the traded
+EXP bonus). The same goes for in-game trades.
 
 
 PLAYING TOGETHER EVERY DAY (CO-OP menu > DAILY)
@@ -325,25 +352,46 @@ STREAK         Play 10 minutes on the same map as a friend every day to build
 WEEKLY RACE    A different challenge every week with a leaderboard. When two
                or more players raced, the winner gets a PP UP, money and a
                MOEGATCHA pull.
-ACHIEVEMENTS   70 personal accomplishments, also viewable offline: every
-               badge and the HALL OF FAME, the legendary trio and the REGIs,
-               gym battles won without a faint, with an underdog team or
-               with a single Moemon, shiny and legendary catches, the
-               POKEDEX, evolutions, eggs, contests, the GAME CORNER... and
-               together: co-op wins, a gym beaten as a team, rescues, lent
-               field moves, trades, gifts, team photos, battles and bets
-               between friends, tournaments, gym rematches, streaks. Every
-               one gives MOEGATCHA pulls: 3, a 10-pull for the harder ones,
-               20 for the hardest (the HALL OF FAME, LEVEL 100, a shiny...).
-               Ones you unlocked before this version get the difference.
+ACHIEVEMENTS   184 personal accomplishments, also viewable offline, in six
+               tabs (L/R): JOURNEY (the story in order, HMs, landmarks,
+               BATTLE FRONTIER symbols), BATTLE (levels, a full team,
+               flawless gym wins, the BATTLE TOWER), CATCHING (the
+               POKEDEX, every type, legendaries, the HOENN POKEDEX, eggs),
+               HOENN (shops, contests, TV, money, the GAME CORNER...),
+               TOGETHER (co-op wins, Triple Battles, rescues, trades,
+               gifts, races, streaks) and EXTRAS (MOEGATCHA pulls and
+               rare prizes, followers, your look, POKE BALL styles).
+               Short goals give 3 MOEGATCHA pulls, longer ones 10, the
+               longest 20. Anything your save has already done counts:
+               new achievements you've already earned are given all at
+               once, with one message.
 GYM REMATCHES  The day's first team rematch win gives a MOEGATCHA pull and a
                RARE CANDY; later wins give money.
 RARE CANDIES   Can't raise a Moemon past the next gym leader's ace level
                (15, 20, 27, 33, 36, 41, 47, 51; no limit after 8 badges).
 MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
-               it races past prizes and slowly clicks down onto yours.
+               it races past prizes and slowly clicks down onto yours
+               (the prizes going by never show the same picture twice on
+               screen).
                L/R switches banners:
-                 STANDARD    event Moemon, items and money (always there)
+                 STANDARD    event Moemon, items and money (always there).
+                             Its event Moemon change every day: four at
+                             R (shiny at SR) from Generation 1-3 events
+                             and gifts (Surfing / Flying Pikachu, Amnesia
+                             Psyduck, the ODD EGG babies with DIZZY PUNCH,
+                             the Dragon's Den Dratini, Kirk's Shuckie,
+                             Elm's Togepi, Colosseum's Espeon / Umbreon,
+                             the Pokemon Box eggs) and six legends at UR
+                             (shiny at EX: AURA / classic / Faraway Mew,
+                             AGETO / GS BALL Celebi, WISHMKR / CHANNEL
+                             Jirachi, SPACE C / Birth Island Deoxys, the
+                             ticket Latias & Latios, Lugia, XD Lugia,
+                             Ho-Oh). The banner's line shows today's. A
+                             shiny RED GYARADOS is always an SR.
+                             BERRIES too: everyday ones (N/U), SITRUS /
+                             LUM and the rare POKeBLOCK ones (R), the
+                             Mirage Island pinch Berries (SR), and
+                             LANSAT, STARF and the e-Reader Berries (SSR).
                  PICKUP      a new one every week: every UR is one of
                              its Moemon, every EX one of them shiny. Mew &
                              Mewtwo, Celebi, Jirachi, Dragonite, Tyranitar,
@@ -355,13 +403,17 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                              Moemon have OT GACHA (ID 23195); the event
                              ones carry the real events' levels and moves.
                              Moemon you haven't seen yet only show their
-                             shadow.
+                             shadow. REROLL VOTE: with friends online,
+                             SELECT on PICKUP asks everyone whether to
+                             reroll this week's PICKUP. Nobody picks the
+                             new one: if more than half say YES (you
+                             count), a random different PICKUP is drawn
+                             for everyone, for the rest of the week. Pity
+                             counts stay. One reroll a week; friends who
+                             come online later get it too.
                  TRAINING    Rare Candies, vitamins, PP Ups, Lucky Egg...
                  POKE BALLS  Net, Dive, Nest, Repeat, Timer, Luxury,
-                             Premier and Master Balls, and the 13 found
-                             only here: LOVE, FRIEND, FAST, LEVEL, LURE,
-                             HEAVY, MOON, DREAM, HEAL, DUSK, QUICK,
-                             GENESIS and EPOCH
+                             Premier and Master Balls
                Seven rarities (STANDARD): N 52%, U 28%, R 13.5%, SR 5%,
                SSR 1.2%, UR 0.25%, EX 0.05% (each banner's odds are on its
                bottom line). Legendary and mythical Moemon only come as UR,
@@ -383,7 +435,8 @@ MOEGATCHA      (CO-OP menu > MOEGATCHA) Spend pulls on the prize reel:
                Mauville GAME CORNER's prize counter (the doll clerk) sells
                them for 2,500 COINS. A save from before tickets existed gets
                the ones it would have had, once, for the story items it
-               already got.
+               already got. Winning a BATTLE TENT challenge (three wins in
+               a row) gives 3 with the prize.
                Legendary prizes obey you like traded Moemon: by your badges.
                SR and up get a show that grows with the rarity: the "?" box
                climbs through the colors. A legendary turns the screen dark,
@@ -420,7 +473,8 @@ LEND FIELD MOVES  No CUT in your party? If a friend standing within 4 steps
                   has a Moemon that knows CUT, SURF, STRENGTH, ROCK SMASH,
                   WATERFALL or DIVE, the tree, rock, boulder or water works
                   with theirs ("ALICE's PELIPPER used SURF!") and they get a
-                  note. You still need the badge for the move.
+                  note. You still need the badge for the move. A Moemon
+                  holding the HM counts too (see HMs).
 RESCUE            Lose a battle with a friend within 10 steps and you don't
                   black out right away: they're asked to help. A REVIVE from
                   their bag brings your first Moemon back at half HP, a MAX
@@ -458,6 +512,10 @@ RECORD MIXING   Happens by itself while friends are online (when someone
                 the rest, just like mixing records at a MOEMON CENTER.
                 (SECRET BASES only arrive once you have SECRET POWER, like in
                 the original.)
+DEWFORD TREND   Online, a phrase anyone tells the boy outside Dewford Hall
+                is the new trend right away, in everyone's game (alone, the
+                original rules apply). Broken phrases from old saves (shown
+                as ??? ???) are replaced by new ones and never mixed in.
 SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
                 you straight into their base, decorations and all (you can
                 battle its owner). Leaving puts you outside it, on its route.
@@ -506,33 +564,59 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   (traded ones too; the NAME RATER in SLATEPORT renames them as well).
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
-  blue, green, yellow, pink, purple, orange, cyan, black, silver, gold).
+  blue, green, yellow, pink, purple, orange, cyan, black, silver, gold, and
+  30 more colors to earn, from CRIMSON to BRONZE).
   The color shows when it's sent out in battle.
 * BALL EFFECTS (SELECT on the POKé BALL page): how each Moemon comes out of
   its ball and goes back. Pick a ready-made mix (HAUNTED, SUPERSTAR,
   FIRECRACKER, TEAM ROCKET'S BUDGET, GLITCH, BLOOM, CLASSIC ANIME, ROYALTY,
-  STORM, DEEP SEA, SHOOTING STAR) or set each part yourself:
+  STORM, DEEP SEA, SHOOTING STAR, and 15 more once you have their pieces:
+  SWEETHEART, POP STAR, WINTER, WILDFIRE, HIGH TIDE, FOREST SPIRIT, HANAMI,
+  JACKPOT, PARTY TIME, SHADOW REALM, CYBERSPACE, GALAXY, DESERT WIND,
+  DAYDREAM, ANGEL) or set each part yourself:
     MATERIALIZATION     how its body forms: anime beam, smoke, bubble,
                         lightning, haunted fade, digital, ink, crystal,
-                        meteor drop, pop-in, rise up (or the game's own)
+                        meteor drop, pop-in, rise up (or the game's own);
+                        to earn: teleport, somersault, vortex, dash in,
+                        jelly drop, card flip, hologram, stardust, sand
+                        sculpt, flame pillar, geyser, leaf whirl, shadow
+                        step, prism, bounce in
     ENERGY COLOR        the color of beams, glows, motes, pixels and ink
+                        (11 colors, and the same 30 to earn as the ball)
     ENTRANCE PARTICLES  confetti, explosion, smoke puff, fireworks, flower
                         bloom, bubbles, lightning bolt, wisps + eyes, pixel
                         bits, ink splash, crystal shards, spotlight, dust
-                        ring, royal sparkles (or none, or the game's own)
+                        ring, royal sparkles (or none, or the game's own);
+                        to earn: hearts, music notes, snowfall, feathers,
+                        leaf gust, star shower, rainbow, fire ring, splash,
+                        sakura storm, pay day, balloons, butterflies,
+                        gemstones, power aura
     RECALL EFFECT       classic beam, dissolve, reverse confetti, smoke
-                        retreat, digital shutdown, curtain call
+                        retreat, digital shutdown, curtain call; to earn:
+                        teleport out, backflip, vortex, dash off, melt away,
+                        card flip, switch off, stardust, sand crumble, flame
+                        out, geyser lift, leaf whirl, shadow sink, prism
+                        twinkle, bounce back, heart pop, bubble float,
+                        lightning strike, ice shatter, balloon ride, super
+                        jump, dive, feather scatter, black hole, ghost fade,
+                        pixel rain, firework, nap time, sakura scatter,
+                        spirit orb
     SOUND ACCENT        auto, none, chime, pop, boom, fanfare, thunder, spooky
-    SAVE AS             keeps your mix as MY PRESET 1, 2 or 3 ({LEFTRIGHT} picks,
+                        (AUTO also gives many of the newer recalls a sound)
+    SAVE AS             keeps your mix as MY PRESET 1 to 6 ({LEFTRIGHT} picks,
                         A saves). PRESET then offers it for any Moemon.
     APPLY TO PARTY      gives the mix to every Moemon in your party (A)
   The preview shows it on a battle field: the entrance, a short pause, then
   the recall. SELECT shows it from the other side, START saves, B goes back.
-  Everything is free. The effect stays with the Moemon (trades too) and
-  every player sees it in link battles, co-op battles and PvP. It never
-  makes sending out or calling back take longer than the game's own. Your
-  follower pops out of its ball with it too (and goes back with its recall),
-  for everyone around.
+  The pieces "to earn" and the 30 newer colors show up as you get them:
+  half come with achievements (CO-OP > DAILY > ACHIEVEMENTS lists what each
+  one gives, and an achievement you already have counts), half are
+  MOEGATCHA prizes (mostly on the POKE BALLS banner; one you have already
+  turns into a MOEGATCHA TICKET). The effect stays with the Moemon (trades
+  too) and every player sees it in link battles, co-op battles and PvP,
+  whatever they have earned. It never makes sending out or calling back
+  take longer than the game's own. Your follower pops out of its ball with
+  it too (and goes back with its recall), for everyone around.
 * Special POKé BALLS (only from the MoeGatcha POKE BALLS banner):
     LOVE BALL   x8 on your Moemon's species, opposite gender
     FRIEND BALL the Moemon caught is friendly right away
@@ -564,6 +648,22 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   effect of your own. Battle speed settings never change the odds. In co-op
   the game running the battle decides the throw once and everyone sees the
   same.
+* e-Reader BERRIES: the twelve Berries Japan got from e-Reader cards for
+  Ruby and Sapphire are here as their own items (BERRIES No.47-58), so you
+  can keep them all: PUMKIN (thaws a frozen Moemon), DRASH (cures poison),
+  EGGANT (cures infatuation), STRIB, CHILAN, NUTPEA, GINEMA (restores
+  lowered stats), KUO, YAGO (heals a burn), TOUGA (cures confusion), NINIKU
+  and TOPO. Their flavors, firmness and held effects are the cards'; the
+  ones with no effect are for POKeBLOCKS. Plant them, crush or blend them
+  like any Berry. They only come from the MoeGatcha (STANDARD, SSR), and an
+  unmodded game can't take them in a trade.
+* Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
+  Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
+  OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items
+  with SELECT; moving one switches the pocket to MANUAL). Each pocket keeps
+  its order, shown under {START} at the left. TMs and Berries are by number
+  until you pick something else. Items you just got have a "!" before their
+  name until the cursor lands on them.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
   R, or the extra item button (X/Square on a controller, F on the keyboard).
   Pick the button it's already on (OFF) to take it off. Pressing L or R on a
@@ -582,8 +682,25 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * A bigger BAG: up to 200 kinds of items, 64 kinds of POKE BALLS, key items,
   TMs/HMs and BERRIES, and up to 999 of each. The save file stays a normal
   Emerald save (its own BAG is the first slots); the rest is kept next to it
-  in <save>.bag, written with every save. (A save restored from a .bak file,
-  or played in another program since, keeps only the normal BAG.)
+  in <save>.bag, written with every save (the .bak files keep theirs as
+  .bak1.bag and so on, so a .bak renamed back still has the whole BAG; a
+  save played in another program since keeps only the normal BAG).
+* A shared world: a tree a friend CUT or a rock they smashed is gone for
+  everyone on that map, a STRENGTH boulder moves for everyone, CUT grass
+  is cut for everyone, and ashy grass a friend walked through on Route 113
+  is clear for you too (the soot is theirs). As in the game, it all comes
+  back once everyone has left the map; a friend who walks in while one of
+  you is still there sees it as you do.
+* Dark caves: every friend carries their own light, and a friend who used
+  FLASH lights up the cave around them on your screen too. Co-op notes and
+  speech bubbles stay readable in the dark.
+* Gender ratios are the original games' again (Moemon Kai had made most
+  Moemon female): Torchic is mostly male, Zigzagoon half and half...
+* Weather in battle: SANDSTORM and HAIL hit everyone at the same time with
+  one line ("Everyone was buffeted by the sandstorm!"); only one Pokemon
+  hit is named as before. "The sunlight is strong.", "Rain continues to
+  fall." and the like, and the "Everyone..." line, show the first time only
+  until that weather ends.
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).
@@ -610,6 +727,20 @@ Walking together makes it happier: choosing it gives a little friendship
 you walk.
 
 
+HMs
+---
+  No HM restrictions: an HM move can be forgotten like any other move
+  (a TM can take its place, a new move at a level up, the MOVE DELETER),
+  and you can release a Moemon that knows SURF or DIVE.
+  A Moemon can HOLD an HM (BAG > TMs & HMs > GIVE, or its ITEM > GIVE):
+  it can then use that HM's move outside battle as if it knew it (its
+  party menu lists it, and trees, rocks, water and boulders ask as usual;
+  you still need the badge). In battle a held HM does nothing. Take it
+  back any time with ITEM > TAKE. A held HM never leaves you: when you
+  release, trade or store in the shared PC a Moemon holding one, the HM
+  goes back to your BAG first.
+
+
 DRESSING UP (CO-OP menu > LOOK)
 ---------------------------------
   SPRITE   any trainer or NPC from Emerald or FireRed/LeafGreen that walks
@@ -617,10 +748,14 @@ DRESSING UP (CO-OP menu > LOOK)
            the trainers you make in CREATE (one not made yet looks like
            DEFAULT). It's used
            everywhere: walking, running, biking, surfing, diving, fishing,
-           field moves. Actions a sprite has no frames for (fishing,
-           watering, field moves, decorating) show it standing, facing the
-           same way; bikes, surfing and diving still use Brendan's/May's.
-           CREATE trainers have walking, running and Mach Bike frames.
+           field moves. For the actions a sprite has no frames of its own
+           (bikes, surfing, fishing, watering, field moves, decorating) it
+           wears Brendan's or May's body for that action, in its own
+           clothes' colors, with its own head on top. CREATE trainers have
+           their own Mach Bike too. Pokemon sprites (Mew, Wingull...) ride
+           and surf as themselves. Running uses the sprite's walking frames.
+           Scenes that show you as someone else (Battle Tent and Battle
+           Frontier walk-ins, the Contest Hall, interviews) use your look too.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
            default) uses the one that goes with your sprite; or pick any
            other: Emerald's, FireRed/LeafGreen's, or one of the extra
@@ -665,8 +800,9 @@ the Sprite Editor.
 
 OPTIONS > FRAME also has the FireRed/LeafGreen window frames (21-29).
 OPTIONS > TYPE ICONS ON shows each Moemon's types as small colored icons
-next to its name in every battle (Single, Double and Triple). OFF (the
-default) leaves the battle screen as it always was.
+next to its box in every battle (Single, Double and Triple): the second type
+behind, the first type in front of it. OFF (the default) leaves the battle
+screen as it always was.
 
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
@@ -776,6 +912,27 @@ Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
 
+UPDATES
+-------
+When the game starts it checks for a newer version (online, at the
+game's GitHub page). If there is one, it shows "UPDATING TO VERSION ...",
+downloads it, checks that the download is complete and undamaged,
+installs it into this folder and starts the new version by itself.
+
+* Your save (pokeemerald.sav and its backups), your .ini settings and
+  your sprites are never touched. Only the game's own files are replaced.
+* ESC while it downloads: play this version now; it asks again next time.
+* No internet, or anything goes wrong: the game simply starts as it is
+  (and says why if the update itself failed). Nothing is left half-done:
+  a failed install puts every file back.
+* Turn it off with "AutoUpdate = 0" in moemon_coop.ini.
+* Play online with friends on the same version: if one of you updated,
+  the others get the update the next time they start the game.
+* It's an ordinary download, like a browser's: nothing about the firewall
+  or Windows settings is changed.
+* On Linux it needs libcurl (installed on nearly every system).
+
+
 USING YOUR EXISTING SAVE
 ------------------------
 The game saves to "pokeemerald.sav" next to the .exe. It's the normal
@@ -800,6 +957,7 @@ FILES
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md
+  moemon_release.txt         this version's number (the updater needs it)
 
 Everyone should run the same version. A different version is refused
 with a message saying so.

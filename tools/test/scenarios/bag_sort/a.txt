@@ -1,0 +1,52 @@
+pressuntil A field 5000
+wait 200
+mp item 68 2
+mp item 14 3
+mp item 75 1
+mp item 86 2
+mp item 110 1
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press DOWN 2
+wait 20
+press START 2
+wait 30
+press UP 2
+wait 10
+press LEFT 2
+wait 10
+press A 2
+wait 40
+mp bagorder 0
+shot abc
+press START 2
+wait 20
+press LEFT 2
+wait 10
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 40
+mp bagorder 0
+press START 2
+wait 20
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press LEFT 2
+wait 10
+press A 2
+wait 40
+mp bagorder 0
+shot newest
+quit

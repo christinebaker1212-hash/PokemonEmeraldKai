@@ -1,0 +1,12 @@
+# Shared map changes at NA-JP lag. 1) ALICE cuts Route 104's tree, then BOB walks onto the map: he's sent the list
+# and the tree is gone for him. 2) Granite Cave B2F: ALICE smashes a rock, gone for BOB right away. 3) Fiery Path:
+# ALICE pushes a STRENGTH boulder, it moves on BOB's game too.
+MODE=2
+WARP=0,19,34,22
+WARP_B=0,18,10,10
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+EXPECT_A=("worldobj 30 gone" "world: sent 1 change(s) to player 2" "worldobj 3 gone" "worldobj 2 at 11,15")
+EXPECT_B=("world: 1 change(s) from player 1 (list)" "worldobj 30 gone" "world: 1 change(s) from player 1 (live)" "worldobj 3 gone" "worldobj 2 at 11,15")

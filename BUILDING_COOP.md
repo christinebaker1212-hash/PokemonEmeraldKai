@@ -58,5 +58,21 @@ Server: `cd tools/mp_server && gcc -O2 -pthread -o moemon_server main.c ../../sr
 (Windows: `x86_64-w64-mingw32-gcc ... -lws2_32 -liphlpapi -static`). Deploying it:
 `tools/mp_server/DEPLOY.md`.
 
+## Releases and the auto-updater
+The game updates itself from this repository's GitHub releases (`src/platform/updater.c`, player side in
+`dist_extras/README.txt` UPDATES). To publish a version:
+1. Bump `MOEMON_VERSION` in `include/mp_version.h` (it must go up: the updater only installs a higher one).
+2. Write `tools/release/notes/v<version>.md` (the release's description).
+3. Commit and push to the default branch. A push that changes `include/mp_version.h` starts
+   `.github/workflows/release.yml` (it can also be started by hand: Actions > Release > Run workflow; a version
+   that already has a release is skipped). It creates the tag `v<version>` itself.
+
+The workflow builds both games and servers, packages
+`MoemonEmeraldKaiCoop-windows.zip` / `-linux.zip` (`tools/release/package.sh`), writes `update.txt`
+(`tools/release/manifest.sh`: version, tag, each zip's size and SHA-256), runs `tools/test/update_test.sh`
+and publishes the release. Locally the same steps are `tools/release/build_windows.sh SDL2_DIR`,
+`package.sh windows|linux OUT`, `manifest.sh OUT`. The updater only runs in a folder with
+`moemon_release.txt` (packaged releases), never in a source checkout.
+
 Bump `MP_PROTOCOL_VERSION` in `src/mp/mp_net.h` whenever the network
 protocol or anything that affects link battles changes.

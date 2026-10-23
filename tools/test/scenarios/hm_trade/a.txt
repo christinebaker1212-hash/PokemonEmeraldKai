@@ -1,0 +1,33 @@
+pressuntil A field 5000
+waitfor online 6000
+mp hold 0 339
+mp monmoves 0
+wait 200
+mp trade
+wait 60
+press A 2
+waitlog 3000 trade: trading with player
+wait 30
+press RIGHT 2
+wait 240
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+watchlog trade: both ready
+press A 2
+waitlog 3000
+wait 10
+watchlog complete
+press A 2
+waitlog 3000
+mash A 20 20
+wait 200
+mp party
+mp monmoves 0
+mp bagqty 339
+quit

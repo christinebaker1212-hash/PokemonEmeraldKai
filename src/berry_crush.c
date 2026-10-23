@@ -1051,12 +1051,12 @@ void StartBerryCrush(MainCallback exitCallback)
 
 static void GetBerryFromBag(void)
 {
-    if (gSpecialVar_ItemId < FIRST_BERRY_INDEX || gSpecialVar_ItemId > LAST_BERRY_INDEX + 1)
+    if (!IS_BERRY_ITEM(gSpecialVar_ItemId))   // Moemon Kai: and the e-Reader Berries
         gSpecialVar_ItemId = FIRST_BERRY_INDEX;
     else
         RemoveBagItem(gSpecialVar_ItemId, 1);
 
-    sGame->players[sGame->localId].berryId = gSpecialVar_ItemId - FIRST_BERRY_INDEX;
+    sGame->players[sGame->localId].berryId = BERRY_SLOT(gSpecialVar_ItemId);
     sGame->nextCmd = CMD_FADE;
     sGame->afterPalFadeCmd = CMD_WAIT_BERRIES;
     SetPaletteFadeArgs(sGame->commandArgs, FALSE, PALETTES_ALL, 0, 16, 0, RGB_BLACK);
@@ -1409,7 +1409,7 @@ static void CreateBerrySprites(struct BerryCrushGame *game, struct BerryCrushGam
             &sSpriteTemplate_PlayerBerry,
             sPlayerBerrySpriteTags[i],
             sPlayerBerrySpriteTags[i],
-            game->players[i].berryId + FIRST_BERRY_INDEX);
+            BERRY_TO_ITEM(game->players[i].berryId + 1));
         gfx->berrySprites[i] = &gSprites[spriteId];
         gfx->berrySprites[i]->oam.priority = 3;
         gfx->berrySprites[i]->affineAnimPaused = TRUE;
@@ -1669,7 +1669,7 @@ static void PrintResultsText(struct BerryCrushGame *game, u8 page, u8 sp14, u8 b
             playerId = i;
             ranking = i;
             j = game->players[i].berryId;
-            if (j >= LAST_BERRY_INDEX - FIRST_BERRY_INDEX + 2)
+            if (!IsValidBerryType(j + 1))
                 j = 0;
             StringCopy(gStringVar1, gBerries[j].name);
             StringExpandPlaceholders(gStringVar4, sResultsTexts[page]);
@@ -2415,11 +2415,14 @@ static u32 Cmd_WaitForOthersToPickBerries(struct BerryCrushGame *game, u8 *args)
         for (i = 0; i < game->playerCount; i++)
         {
             game->players[i].berryId = gBlockRecvBuffer[i][0];
-            if (game->players[i].berryId > LAST_BERRY_INDEX + 1)
+            if (game->players[i].berryId > 0xFE || !IsValidBerryType(game->players[i].berryId + 1))
                 game->players[i].berryId = 0;
             game->targetAPresses += gBerryCrush_BerryData[game->players[i].berryId].difficulty;
             game->powder += gBerryCrush_BerryData[game->players[i].berryId].powder;
         }
+        MPNet_Log("crush: berries %d %d %d %d (players %d)", game->players[0].berryId + 1, game->players[1].berryId + 1,
+                  game->playerCount > 2 ? game->players[2].berryId + 1 : 0, game->playerCount > 3 ? game->players[3].berryId + 1 : 0,
+                  game->playerCount);   // Moemon Co-op: berry numbers, for the tests
         game->cmdTimer = 0;
         ResetBlockReceivedFlags();
         game->targetDepth = MathUtil_Div32(Q_24_8(game->targetAPresses), Q_24_8(32));

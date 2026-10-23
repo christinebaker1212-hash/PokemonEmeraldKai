@@ -4565,4 +4565,150 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+    // Moemon Kai: the e-Reader Berries (Japanese Ruby/Sapphire cards)
+    [ITEM_PUMKIN_BERRY] =
+    {
+        .name = _("PUMKIN BERRY"),
+        .itemId = ITEM_PUMKIN_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_CURE_FRZ,
+        .description = sPumkinBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_DRASH_BERRY] =
+    {
+        .name = _("DRASH BERRY"),
+        .itemId = ITEM_DRASH_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_CURE_PSN,
+        .description = sDrashBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_EGGANT_BERRY] =
+    {
+        .name = _("EGGANT BERRY"),
+        .itemId = ITEM_EGGANT_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_CURE_ATTRACT,
+        .description = sEggantBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_STRIB_BERRY] =
+    {
+        .name = _("STRIB BERRY"),
+        .itemId = ITEM_STRIB_BERRY,
+        .price = 20,
+        .description = sStribBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_CHILAN_BERRY] =
+    {
+        .name = _("CHILAN BERRY"),
+        .itemId = ITEM_CHILAN_BERRY,
+        .price = 20,
+        .description = sChilanBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_NUTPEA_BERRY] =
+    {
+        .name = _("NUTPEA BERRY"),
+        .itemId = ITEM_NUTPEA_BERRY,
+        .price = 20,
+        .description = sNutpeaBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GINEMA_BERRY] =
+    {
+        .name = _("GINEMA BERRY"),
+        .itemId = ITEM_GINEMA_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_RESTORE_STATS,
+        .description = sGinemaBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_KUO_BERRY] =
+    {
+        .name = _("KUO BERRY"),
+        .itemId = ITEM_KUO_BERRY,
+        .price = 20,
+        .description = sKuoBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_YAGO_BERRY] =
+    {
+        .name = _("YAGO BERRY"),
+        .itemId = ITEM_YAGO_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_CURE_BRN,
+        .description = sYagoBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Medicine,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_TOUGA_BERRY] =
+    {
+        .name = _("TOUGA BERRY"),
+        .itemId = ITEM_TOUGA_BERRY,
+        .price = 20,
+        .holdEffect = HOLD_EFFECT_CURE_CONFUSION,
+        .description = sTougaBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .battleUsage = ITEM_B_USE_MEDICINE,
+        .battleUseFunc = ItemUseInBattle_Medicine,
+    },
+
+    [ITEM_NINIKU_BERRY] =
+    {
+        .name = _("NINIKU BERRY"),
+        .itemId = ITEM_NINIKU_BERRY,
+        .price = 20,
+        .description = sNinikuBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_TOPO_BERRY] =
+    {
+        .name = _("TOPO BERRY"),
+        .itemId = ITEM_TOPO_BERRY,
+        .price = 20,
+        .description = sTopoBerryDesc,
+        .pocket = POCKET_BERRIES,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

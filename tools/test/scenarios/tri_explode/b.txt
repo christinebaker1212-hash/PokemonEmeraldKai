@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp teach 0 150
+mp teach 1 150
+waitfor online 6000
+waitlog 4000 is waiting for a partner
+wait 30
+press UP 12
+wait 20
+press UP 12
+wait 120
+shot b0
+waitfor action 8000
+shot b1
+pressuntillog A 8000 absent 20
+wait 400
+shot b_after
+mash A 60 30
+wait 300
+quit

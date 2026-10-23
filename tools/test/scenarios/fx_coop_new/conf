@@ -1,0 +1,10 @@
+# Co-op wild double with the newer pieces (they use the extra storage bits): ALICE's lead has BOUNCE IN, POWER AURA,
+# BRONZE, SPIRIT ORB; BOB's the SWEETHEART preset (JELLY DROP, HEARTS, ROSE). Both games play both entrances
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("ballfx: entrance form 26 part 30 color 40" "ballfx: entrance form 16 part 16 color 32" "co-op: battle over, outcome 1")
+EXPECT_B=("ballfx: entrance form 26 part 30 color 40" "ballfx: entrance form 16 part 16 color 32" "co-op: battle over, outcome 1")

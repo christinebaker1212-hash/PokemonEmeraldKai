@@ -446,6 +446,18 @@ void BattleSetup_StartLocalTripleWildBattle(void)
     IncrementGameStat(GAME_STAT_WILD_BATTLES);
 }
 
+// Moemon Co-op: debug only (mp double): a local wild Double Battle against two foes
+void BattleSetup_StartLocalDoubleWildBattle(void)
+{
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    StopPlayerAvatar();
+    gMain.savedCallback = CB2_EndWildBattle;
+    gBattleTypeFlags = BATTLE_TYPE_DOUBLE;
+    gIsTripleBattle = FALSE;
+    CreateBattleStartTask(GetWildBattleTransition(), 0);
+}
+
 void BattleSetup_StartRoamerBattle(void)
 {
     LockPlayerFieldControls();

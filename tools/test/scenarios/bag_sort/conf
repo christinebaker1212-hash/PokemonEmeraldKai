@@ -1,0 +1,5 @@
+# BAG: START > SORT. New items get a "!" that goes once highlighted; ABC, TYPE and NEWEST put the ITEMS pocket in
+# order (bag item numbers printed by mp bagorder; * = still new); moving an item with SELECT makes the order MANUAL
+MODE=1
+TMO=120
+EXPECT_A=("bag: pocket 0 sorted by 2" "[test] bagorder 0: 14 110* 13 68 86* 75*" "bag: pocket 0 sorted by 0" "[test] bagorder 0: 13 14 68 75* 86* 110*" "bag: pocket 0 sorted by 4" "[test] bagorder 0: 110 86* 75* 14 68 13")

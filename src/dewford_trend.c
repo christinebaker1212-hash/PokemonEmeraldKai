@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "dewford_trend.h"
 #include "easy_chat.h"
 #include "event_data.h"
@@ -153,6 +154,17 @@ bool8 TrySetTrendyPhrase(u16 *phrase)
     struct DewfordTrend trend = {0};
     u16 i;
 
+    // Moemon Co-op: online, a phrase anyone enters is the new trend, for everyone in the room
+    // (record mixing set FLAG_SYS_MIX_RECORD, so the game's first-phrase rule was gone and a
+    // new phrase rarely beat the mixed-in ones; when it did, the next mix could bring an old one back)
+    if (MP_IsConnected())
+    {
+        u16 rand = Random();
+        MP_Dewford_PutTrendOnTop(phrase, rand);
+        MP_Linkx_SendTrend(phrase, rand);
+        return TRUE;
+    }
+
     if (!IsPhraseInSavedTrends(phrase))
     {
         if (!FlagGet(FLAG_SYS_CHANGED_DEWFORD_TREND))
@@ -206,6 +218,65 @@ bool8 TrySetTrendyPhrase(u16 *phrase)
 }
 
 
+// Moemon Co-op: saved trends with words this game doesn't have (shown as "??? ???") get
+// new ones, as a new game makes them. TRUE if any did.
+bool8 MP_Dewford_Sanitize(void)
+{
+    u16 i;
+    bool8 fixed = FALSE;
+    for (i = 0; i < SAVED_TRENDS_COUNT; i++)
+    {
+        struct DewfordTrend *trend = &gSaveBlock1Ptr->dewfordTrends[i];
+        if (!MP_IsEasyChatWordInvalid(trend->words[0]) && !MP_IsEasyChatWordInvalid(trend->words[1])
+         && trend->maxTrendiness != 0)
+            continue;
+        trend->words[0] = GetRandomEasyChatWordFromGroup(EC_GROUP_CONDITIONS);
+        trend->words[1] = GetRandomEasyChatWordFromGroup((Random() & 1) ? EC_GROUP_LIFESTYLE : EC_GROUP_HOBBIES);
+        trend->gainingTrendiness = Random() & 1;
+        SeedTrendRng(trend);
+        fixed = TRUE;
+    }
+    if (fixed)
+        SortTrends(gSaveBlock1Ptr->dewfordTrends, SAVED_TRENDS_COUNT, SORT_MODE_NORMAL);
+    return fixed;
+}
+
+// Moemon Co-op: `phrase` becomes the current trendy phrase (dewfordTrends[0]), trendier than
+// every saved one; `rand` comes with it so every game in the room keeps the same trend
+void MP_Dewford_PutTrendOnTop(const u16 *phrase, u16 rand)
+{
+    struct DewfordTrend trend = {0}, *saved = gSaveBlock1Ptr->dewfordTrends;
+    u16 i, j, top = 0;
+
+    // The phrase may already be saved: it moves up instead of being there twice
+    for (i = 0, j = 0; i < SAVED_TRENDS_COUNT; i++)
+        if (!(saved[i].words[0] == phrase[0] && saved[i].words[1] == phrase[1]))
+            saved[j++] = saved[i];
+    for (; j > 0 && j < SAVED_TRENDS_COUNT; j++)
+        saved[j] = saved[j - 1];   // (only when it was there: the list keeps 5, the last one twice)
+    for (i = 0; i < SAVED_TRENDS_COUNT; i++)
+        if (saved[i].trendiness > top)
+            top = saved[i].trendiness;
+    if (top >= 127)
+    {
+        // No room above the top one: the others step down below it
+        for (i = 0; i < SAVED_TRENDS_COUNT; i++)
+            if (saved[i].trendiness >= 127)
+                saved[i].trendiness = 126;
+        top = 126;
+    }
+    trend.words[0] = phrase[0];
+    trend.words[1] = phrase[1];
+    trend.trendiness = top + 1;
+    trend.maxTrendiness = 127;
+    trend.gainingTrendiness = TRUE;
+    trend.rand = rand;
+    for (i = SAVED_TRENDS_COUNT - 1; i > 0; i--)
+        saved[i] = saved[i - 1];
+    saved[0] = trend;
+    FlagSet(FLAG_SYS_CHANGED_DEWFORD_TREND);
+}
+
 static void SortTrends(struct DewfordTrend *trends, u16 numTrends, u8 mode)
 {
     u16 i;
@@ -257,7 +328,14 @@ void ReceiveDewfordTrendData(struct DewfordTrend *linkedTrends, size_t size, u8 
     {
         for (j = 0; j < SAVED_TRENDS_COUNT; j++)
         {
-            s16 idx = GetSavedTrendIndex(savedTrendsBuffer, src, numTrends);
+            s16 idx;
+            // Moemon Co-op: a friend's broken trend (words this game doesn't have: "??? ???") stays out
+            if (MP_IsEasyChatWordInvalid(src->words[0]) || MP_IsEasyChatWordInvalid(src->words[1]))
+            {
+                src++;
+                continue;
+            }
+            idx = GetSavedTrendIndex(savedTrendsBuffer, src, numTrends);
             if (idx < 0)
             {
                 // This phrase is not a currently saved trend, save it
@@ -276,12 +354,17 @@ void ReceiveDewfordTrendData(struct DewfordTrend *linkedTrends, size_t size, u8 
         }
     }
     SortTrends(savedTrendsBuffer, numTrends, SORT_MODE_FULL);
+    // Moemon Co-op: fewer than five good ones: our own saved ones fill the rest
+    for (i = 0; i < SAVED_TRENDS_COUNT && numTrends < SAVED_TRENDS_COUNT; i++)
+        if (GetSavedTrendIndex(savedTrendsBuffer, &gSaveBlock1Ptr->dewfordTrends[i], numTrends) < 0)
+            savedTrendsBuffer[numTrends++] = gSaveBlock1Ptr->dewfordTrends[i];
 
     // Overwrite current saved trends with new saved trends
     src = savedTrendsBuffer;
     dst = gSaveBlock1Ptr->dewfordTrends;
     for (i = 0; i < SAVED_TRENDS_COUNT; i++)
         *(dst++) = *(src++);
+    MP_Dewford_Sanitize();   // Moemon Co-op: (only if fewer than five good ones came in)
 
     Free(linkedTrendsBuffer);
     Free(savedTrendsBuffer);

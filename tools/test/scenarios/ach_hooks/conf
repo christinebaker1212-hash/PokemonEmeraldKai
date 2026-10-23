@@ -1,0 +1,7 @@
+# Achievements counted from now on: a MOEGATCHA pull rigged to SR unlocks SUPER RARE and counts the pull(s); a
+# follower out, a party POKé BALL with a style and a changed look unlock theirs (they show in the save, too)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20,283:20"
+EXPECT_A=("gatcha: " "achievement: sr (+3 pulls)" "achievement: follower (+3 pulls)" "achievement: ballstyle (+3 pulls)" "achievement: newlook (+3 pulls)" "[test] achievements")
+UNEXPECT_A=("achievement: ssr" "achievement: ur ")

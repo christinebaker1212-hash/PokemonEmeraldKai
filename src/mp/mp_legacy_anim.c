@@ -336,13 +336,14 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
     BarPalette(sAnim.target, sAnim.barPal[1]);
     // Emerald's ball rests at the target's sprite coords + (0, 24) (AnimTask_ThrowBall's target 16 up,
     // then SpriteCB_Ball_Bounce drops it 40); the GB balls rest at (120, 48) / (128, 48), their 12x12 art
-    // 2 / 1 px right of and 2 px below the middle of their 16x16 compared with Emerald's (measured on
-    // screenshots). The throw keeps its own path and is moved as a whole so the ball lands on that spot.
+    // 1 px right of and 2 px below the middle of their 16x16 compared with Emerald's (measured on
+    // screenshots: both now rest on the same columns as Emerald's ball). The throw keeps its own path
+    // and is moved as a whole so the ball lands on that spot.
     {
         s32 rx, ry;
         sAnim.offX = sAnim.offY = 0;
         MapPoint(sAnim.game == MP_SPECIAL_GENESIS ? 120 : 128, 48, &rx, &ry);
-        sAnim.offX = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_X) - rx - (sAnim.game == MP_SPECIAL_GENESIS ? 2 : 1);
+        sAnim.offX = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_X) - rx - 1;
         sAnim.offY = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_Y) + 24 - ry - 2 - 2;   // and 2 px higher (owner's call)
     }
     gBattleSpritesDataPtr->animationData->wildMonInvisible = gSprites[gBattlerSpriteIds[gBattleAnimTarget]].invisible;

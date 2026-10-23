@@ -1,4 +1,5 @@
 pressuntil A field 5000
+mp hold 0 194
 waitfor online 6000
 wait 300
 mp wilddouble 0

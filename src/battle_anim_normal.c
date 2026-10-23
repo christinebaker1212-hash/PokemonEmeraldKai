@@ -528,7 +528,7 @@ void AnimTask_BlendColorCycleExclude(u8 taskId)
     }
 
     if (cmd->unk0 == 1)
-        selectedPalettes |= 0xE;
+        selectedPalettes |= 0xC;   // Moemon Co-op: the backdrop, not palette 1 (the window frame)
 
     gTasks[taskId].tPalSelectorHi = selectedPalettes >> 16;
     gTasks[taskId].tPalSelectorLo = selectedPalettes & 0xFF;

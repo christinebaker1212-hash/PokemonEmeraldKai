@@ -329,6 +329,8 @@ static void Cmd_finishturn(void);
 static void Cmd_trainerslideout(void);
 static void Cmd_mpstatgroup(void);
 static void Cmd_mpcoopresolve(void);
+static void Cmd_mpweathergroup(void);
+static void Cmd_mpweathermsg(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -583,6 +585,8 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_TRAINERSLIDEOUT]                 = Cmd_trainerslideout,                         //0xF8
     [B_SCR_OP_MPSTATGROUP]                     = Cmd_mpstatgroup,                             //0xF9
     [B_SCR_OP_MPCOOPRESOLVE]                   = Cmd_mpcoopresolve,                           //0xFA
+    [B_SCR_OP_MPWEATHERGROUP]                  = Cmd_mpweathergroup,                          //0xFB
+    [B_SCR_OP_MPWEATHERMSG]                    = Cmd_mpweathermsg,                            //0xFC
 };
 
 struct StatFractions
@@ -2787,6 +2791,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
                     else if (gBattleMons[gBattlerAttacker].item != ITEM_NONE
                         || gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY
                         || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item)
+                        || MP_IS_ITEM_HM(gBattleMons[gBattlerTarget].item)   // Moemon Kai: a held HM stays put
                         || gBattleMons[gBattlerTarget].item == ITEM_NONE)
                     {
                         gBattlescriptCurrInstr++;
@@ -3670,7 +3675,8 @@ static void Cmd_getexp(void)
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
-                    // Moemon Co-op: the partner's Pokémon are theirs, not traded
+                    // Moemon Co-op: the partner's Pokémon are theirs, not traded (traded Moemon keep
+                    // their boost, though they obey like the player's own: battle_util.c)
                     if (gMpCoopBattle ? MP_Coop_IsTradedMon(gBattleStruct->expGetterMonId)
                                       : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId]))
                     {
@@ -3800,6 +3806,9 @@ static void Cmd_getexp(void)
 #endif
                     gBattleMons[2].spAttack = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPATK);
                 }
+                // Moemon Co-op: a Triple Battle's third player-side Pokémon (battler 4) levels up too
+                if (gIsTripleBattle)
+                    MpCoopUpdateBattleMon(gBattleStruct->expGetterMonId);
                 gBattleScripting.getexpState = 5;
             }
             else
@@ -5249,11 +5258,24 @@ static void Cmd_openpartyscreen(void)
         // Moemon Co-op: a triple's fainted battlers all choose at once, like a multi battle's
         if ((gBattleTypeFlags & BATTLE_TYPE_MULTI) || !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || IS_TRIPLE_BATTLE())
         {
+            // Moemon Co-op: a triple's battlers on one side can share a pool (the trainer's side): the ones that
+            // fainted together choose one after another, so a battler only gets a replacement when the pool still
+            // has one left after those promised to the battlers before it (else it picked past the party's end:
+            // a BAD EGG came out of WATTSON's party)
+            u8 promised[PARTY_SIZE + 1] = {0};
             for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
             {
                 if (gBattlerFaintMarks & gBitTable[gActiveBattler])
                 {
-                    if (HasNoMonsToSwitch(gActiveBattler, PARTY_SIZE, PARTY_SIZE))
+                    s32 poolFirst = 0, poolLast = PARTY_SIZE;
+                    u8 poolKey = 0;
+                    if (IS_TRIPLE_BATTLE())
+                    {
+                        MP_TripleSwitchRange(gActiveBattler, &poolFirst, &poolLast);
+                        poolKey = (GetBattlerSide(gActiveBattler) == B_SIDE_OPPONENT) ? PARTY_SIZE : poolFirst;
+                    }
+                    if (HasNoMonsToSwitch(gActiveBattler, PARTY_SIZE, PARTY_SIZE)
+                     || (IS_TRIPLE_BATTLE() && MP_TripleCountReplacements(gActiveBattler) <= promised[poolKey]))
                     {
                         gAbsentBattlerFlags |= gBitTable[gActiveBattler];
                         gBattlerFaintMarks &= ~gBitTable[gActiveBattler];
@@ -5264,6 +5286,11 @@ static void Cmd_openpartyscreen(void)
                     {
                         ChooseMonToSendOut(PARTY_SIZE);
                         gSpecialStatuses[gActiveBattler].faintedHasReplacement = TRUE;
+                        promised[poolKey]++;
+                    }
+                    else if (gBattleStruct->monToSwitchIntoId[gActiveBattler] == PARTY_SIZE)
+                    {
+                        promised[poolKey]++;   // asked before, still choosing: its replacement is spoken for
                     }
                 }
                 else
@@ -5852,7 +5879,7 @@ static void Cmd_yesnoboxlearnmove(void)
             else
             {
                 u16 move = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_MOVE1 + movePosition);
-                if (IsHMMove2(move))
+                if (FALSE)   // Moemon Kai: HM moves can be forgotten
                 {
                     PrepareStringBattle(STRINGID_HMMOVESCANTBEFORGOTTEN, gActiveBattler);
                     gBattleScripting.learnMoveState = 6;
@@ -7721,6 +7748,28 @@ static void Cmd_forcerandomswitch(void)
         else
             party = gEnemyParty;
 
+        if (IS_TRIPLE_BATTLE())
+        {
+            // Moemon Co-op: a triple brings in one of the target's own (its player's two, or the trainer's pool)
+            // that isn't out on its side; the halves of three below would take another player's Pokemon or one
+            // that's already out
+            s32 candidates[PARTY_SIZE], count = 0;
+            MP_TripleSwitchRange(gBattlerTarget, &firstMonId, &lastMonId);
+            for (i = firstMonId; i < lastMonId; i++)
+            {
+                if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
+                 && !GetMonData(&party[i], MON_DATA_IS_EGG)
+                 && GetMonData(&party[i], MON_DATA_HP) != 0
+                 && !MP_IsPartyIdOnSide(gBattlerTarget, i))
+                    candidates[count++] = i;
+            }
+            if (count == 0)
+                gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
+            else if (TryDoForceSwitchOut())
+                *(gBattleStruct->monToSwitchIntoId + gBattlerTarget) = candidates[Random() % count];
+            return;
+        }
+
         if ((gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER && gBattleTypeFlags & BATTLE_TYPE_LINK)
             || (gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER && gBattleTypeFlags & BATTLE_TYPE_RECORDED_LINK)
             || (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER))
@@ -8118,55 +8167,63 @@ static void Cmd_setsandstorm(void)
     gBattlescriptCurrInstr++;
 }
 
-static void Cmd_weatherdamage(void)
+// Sandstorm / hail damage for one battler this turn (0: not hit)
+static s32 MpWeatherDamageFor(u8 battler)
 {
+    s32 damage = 0;
     if (WEATHER_HAS_EFFECT)
     {
         if (gBattleWeather & B_WEATHER_SANDSTORM)
         {
-            if (gBattleMons[gBattlerAttacker].types[0] != TYPE_ROCK
-                && gBattleMons[gBattlerAttacker].types[0] != TYPE_STEEL
-                && gBattleMons[gBattlerAttacker].types[0] != TYPE_GROUND
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_ROCK
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_STEEL
-                && gBattleMons[gBattlerAttacker].types[1] != TYPE_GROUND
-                && gBattleMons[gBattlerAttacker].ability != ABILITY_SAND_VEIL
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
+            if (gBattleMons[battler].types[0] != TYPE_ROCK
+                && gBattleMons[battler].types[0] != TYPE_STEEL
+                && gBattleMons[battler].types[0] != TYPE_GROUND
+                && gBattleMons[battler].types[1] != TYPE_ROCK
+                && gBattleMons[battler].types[1] != TYPE_STEEL
+                && gBattleMons[battler].types[1] != TYPE_GROUND
+                && gBattleMons[battler].ability != ABILITY_SAND_VEIL
+                && !(gStatuses3[battler] & STATUS3_UNDERGROUND)
+                && !(gStatuses3[battler] & STATUS3_UNDERWATER))
             {
-                gBattleMoveDamage = gBattleMons[gBattlerAttacker].maxHP / 16;
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = 1;
+                damage = gBattleMons[battler].maxHP / 16;
+                if (damage == 0)
+                    damage = 1;
             }
             else
             {
-                gBattleMoveDamage = 0;
+                damage = 0;
             }
         }
         if (gBattleWeather & B_WEATHER_HAIL)
         {
-            if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ICE)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
-                && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
+            if (!IS_BATTLER_OF_TYPE(battler, TYPE_ICE)
+                && !(gStatuses3[battler] & STATUS3_UNDERGROUND)
+                && !(gStatuses3[battler] & STATUS3_UNDERWATER))
             {
-                gBattleMoveDamage = gBattleMons[gBattlerAttacker].maxHP / 16;
-                if (gBattleMoveDamage == 0)
-                    gBattleMoveDamage = 1;
+                damage = gBattleMons[battler].maxHP / 16;
+                if (damage == 0)
+                    damage = 1;
             }
             else
             {
-                gBattleMoveDamage = 0;
+                damage = 0;
             }
         }
     }
     else
     {
-        gBattleMoveDamage = 0;
+        damage = 0;
     }
 
-    if (gAbsentBattlerFlags & gBitTable[gBattlerAttacker])
-        gBattleMoveDamage = 0;
+    if (gAbsentBattlerFlags & gBitTable[battler])
+        damage = 0;
 
+    return damage;
+}
+
+static void Cmd_weatherdamage(void)
+{
+    gBattleMoveDamage = MpWeatherDamageFor(gBattlerAttacker);
     gBattlescriptCurrInstr++;
 }
 
@@ -9811,7 +9868,9 @@ static void Cmd_tryswapitems(void)
                  || gBattleMons[gBattlerAttacker].item == ITEM_ENIGMA_BERRY
                  || gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY
                  || IS_ITEM_MAIL(gBattleMons[gBattlerAttacker].item)
-                 || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item))
+                 || IS_ITEM_MAIL(gBattleMons[gBattlerTarget].item)
+                 || MP_IS_ITEM_HM(gBattleMons[gBattlerAttacker].item)   // Moemon Kai: a held HM stays put
+                 || MP_IS_ITEM_HM(gBattleMons[gBattlerTarget].item))
         {
             gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
         }
@@ -11123,6 +11182,117 @@ static void Cmd_mpstatgroup(void)
     gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
 }
 
+// Moemon Co-op: sandstorm / hail hit every Pokémon at once ("Everyone was buffeted by the
+// sandstorm!"), their hit flashes and HP bars together; with only one hit, the usual named line.
+static s32 sMpWeatherDamage[MAX_BATTLERS_COUNT];
+
+static void Cmd_mpweathergroup(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+    u8 i, battler, count = 0;
+
+    switch (mode)
+    {
+    case 0: // who is hit, and how hard
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            battler = gBattlerByTurnOrder[i];
+            sMpWeatherDamage[battler] = gBattleMons[battler].hp != 0 ? MpWeatherDamageFor(battler) : 0;
+            if (sMpWeatherDamage[battler] != 0)
+                count++;
+        }
+        MPNet_Log("battle: weather hits %d %s", count, count < 2 ? "(named)" : "at once");
+        if (count < 2)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        break;
+    case 1: // everyone hit flashes at once
+    case 2: // and their HP bars go down at once
+        if (gBattleControllerExecFlags)
+            return;
+        for (battler = 0; battler < gBattlersCount; battler++)
+        {
+            if (sMpWeatherDamage[battler] == 0)
+                continue;
+            gActiveBattler = battler;
+            if (mode == 1)
+            {
+                BtlController_EmitHitAnimation(B_COMM_TO_CONTROLLER);
+            }
+            else
+            {
+                BtlController_EmitHealthBarUpdate(B_COMM_TO_CONTROLLER, sMpWeatherDamage[battler] <= 10000 ? sMpWeatherDamage[battler] : 10000);
+                if (GetBattlerSide(battler) == B_SIDE_PLAYER)
+                    gBattleResults.playerMonWasDamaged = TRUE;
+            }
+            MarkBattlerForControllerExec(battler);
+        }
+        break;
+    case 3: // the gBattleCommunication'th battler in turn order: its HP data next (jump if not hit)
+        battler = gBattlerByTurnOrder[gBattleCommunication[0]];
+        if (sMpWeatherDamage[battler] == 0)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        gBattlerAttacker = battler;
+        gBattleMoveDamage = sMpWeatherDamage[battler];
+        break;
+    }
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
+
+// Moemon Co-op: a weather's "continues" line (The sunlight is strong. / The sandstorm rages. ...)
+// and "Everyone was buffeted..." are shown the first time only, until that weather ends or
+// another one starts
+static u8 sMpWeatherLineShown;   // MpWeatherKind() of the weather whose line was shown, 0: none
+static u8 sMpWeatherAllShown;    // ... whose "Everyone was ..." line was shown
+
+static u8 MpWeatherKind(void)
+{
+    if (gBattleWeather & B_WEATHER_RAIN)
+        return 1;
+    if (gBattleWeather & B_WEATHER_SANDSTORM)
+        return 2;
+    if (gBattleWeather & B_WEATHER_SUN)
+        return 3;
+    if (gBattleWeather & B_WEATHER_HAIL)
+        return 4;
+    return 0;
+}
+
+void MP_Battle_ResetWeatherLines(void)
+{
+    sMpWeatherLineShown = sMpWeatherAllShown = 0;
+}
+
+static void Cmd_mpweathermsg(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *jumpPtr = T2_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+
+    u8 *shown = (mode == 2) ? &sMpWeatherAllShown : &sMpWeatherLineShown;
+
+    if (mode == 1)
+    {
+        sMpWeatherLineShown = sMpWeatherAllShown = 0;
+    }
+    else if (MpWeatherKind() != 0 && *shown == MpWeatherKind())
+    {
+        MPNet_Log("battle: weather %d %s already shown", MpWeatherKind(), mode == 2 ? "everyone line" : "line");
+        gBattlescriptCurrInstr = jumpPtr;
+        return;
+    }
+    else
+    {
+        *shown = MpWeatherKind();
+    }
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
+
 // Moemon Co-op (master): wait while every player goes through their stat boxes and
 // moves to forget (MP_Coop_StartResolveTask on each game), then give the chosen
 // moves and show one line for all the moves learned this round.
@@ -11405,7 +11575,7 @@ static void Task_MpCoopResolve(u8 taskId)
                 tTimer = 0;
                 tState = MPR_STOP_YESNO;
             }
-            else if (IsHMMove2(GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + pos)))
+            else if (FALSE)   // Moemon Kai: HM moves can be forgotten
             {
                 MpResMessage(data, sText_MpLearnHm, slot, move, 0, MPR_DELETE);
             }

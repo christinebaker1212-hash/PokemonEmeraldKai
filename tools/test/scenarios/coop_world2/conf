@@ -1,0 +1,12 @@
+# At NA-JP lag. 1) Route 101: ALICE CUTs the tall grass around her; it's cut on BOB's game. 2) Route 113: ALICE
+# walks through ashy grass with a SOOT SACK (her spawn tile counts too); the grass is clear for BOB too, but only ALICE gets the soot.
+MODE=2
+WARP=0,16,13,10
+WARP_B=0,16,17,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+EXPECT_A=("tile 13,11 = 1" "ash 4")
+EXPECT_B=("tile 13,11 = 1" "tile 45,2 = 530" "ash 0")
+UNEXPECT_B=("ash 1" "ash 2" "ash 4")

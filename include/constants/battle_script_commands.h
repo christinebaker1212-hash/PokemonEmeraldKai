@@ -254,6 +254,8 @@ enum BattleScriptOpcode
     B_SCR_OP_TRAINERSLIDEOUT,
     B_SCR_OP_MPSTATGROUP,   // Moemon Co-op: spread stat moves shown together
     B_SCR_OP_MPCOOPRESOLVE, // Moemon Co-op: every player's stat boxes and moves to forget, at once
+    B_SCR_OP_MPWEATHERGROUP, // Moemon Co-op: sandstorm / hail hit everyone at once, one line
+    B_SCR_OP_MPWEATHERMSG,   // Moemon Co-op: a weather's "continues" line only the first time
 };
 
 // The following correspond to the struct members of BattleScripting by adding their offset

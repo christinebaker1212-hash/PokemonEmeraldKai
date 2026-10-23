@@ -1,0 +1,38 @@
+pressuntil A field 5000
+mp setflag 334
+mp setflag 157
+mp warp 0,26,10,86
+wait 200
+log mirage: on the field
+mp menu 0
+wait 30
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 400
+shot g1
+press B 2
+wait 60
+press B 2
+wait 60
+press B 2
+pressuntil B field 3000
+wait 60
+mp gatcha
+wait 400
+press B 2
+wait 60
+press B 2
+pressuntil B field 3000
+wait 60
+press DOWN 20
+wait 60
+shot g2
+log mirage: all done
+quit

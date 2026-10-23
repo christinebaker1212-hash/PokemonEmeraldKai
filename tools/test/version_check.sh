@@ -3,7 +3,7 @@
 # usage: version_check.sh   (results in $OUT/version_check)
 . "$(dirname "$0")/common.sh"
 d="$OUT/version_check"; rm -rf "$d"; mkdir -p "$d"
-ver=$(sed -n 's/^#define MP_PROTOCOL_VERSION \([0-9]*\)/\1/p' "$REPO/src/mp/mp_net.h")
+ver=$(sed -n 's/^#define MP_PROTOCOL_VERSION \([0-9]*\).*/\1/p' "$REPO/src/mp/mp_net.h")
 srv="$TOOLS/.bin/moemon_server_next"
 mkdir -p "$TOOLS/.bin"
 gcc -O2 -pthread -DMP_PROTOCOL_VERSION=$((ver + 1)) -o "$srv" "$REPO/tools/mp_server/main.c" "$REPO/src/mp/mp_net.c" \

@@ -1,0 +1,13 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 6000 asks for a reroll vote
+wait 90
+shot asked_field
+press DOWN 2
+wait 20
+press A 2
+waitlog 4000 gatcha: vote passed
+wait 120
+shot c_after
+wait 200
+quit

@@ -580,16 +580,23 @@ static void MpShowTargetInfo(u8 battler)
     char buf[16];
 
     sMpTargetShown = battler;
+    // both from the Pokémon itself, like its card / healthbox, so the two never differ. Not from gBattleMons:
+    // in a link battle only the host's game runs the battle engine and fills it in (elsewhere it reads 0)
     if (GetBattlerSide(battler) == B_SIDE_PLAYER)
     {
         MpPutAscii("HP", B_WIN_PP);
-        snprintf(buf, sizeof(buf), "%3d", gBattleMons[battler].hp);
+        snprintf(buf, sizeof(buf), "%3d", GetMonData(mon, MON_DATA_HP));
     }
     else
     {
         MpPutAscii("Lv", B_WIN_PP);
-        snprintf(buf, sizeof(buf), "%3d", gBattleMons[battler].level);
+        snprintf(buf, sizeof(buf), "%3d", GetMonData(mon, MON_DATA_LEVEL));
     }
+    if ((!(gBattleTypeFlags & BATTLE_TYPE_LINK) || (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+        && (GetMonData(mon, MON_DATA_LEVEL) != gBattleMons[battler].level || GetMonData(mon, MON_DATA_HP) != gBattleMons[battler].hp))
+        MPNet_Log("target level mismatch: battler %d party slot %d card Lv%d HP %d battle Lv%d HP %d", battler,
+                  gBattlerPartyIndexes[battler], GetMonData(mon, MON_DATA_LEVEL), GetMonData(mon, MON_DATA_HP),
+                  gBattleMons[battler].level, gBattleMons[battler].hp);
     MpPutAscii(buf, B_WIN_PP_REMAINING);
     GetMonData(mon, MON_DATA_NICKNAME, name);
     StringGet_Nickname(name);

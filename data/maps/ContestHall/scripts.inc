@@ -442,9 +442,11 @@ LilycoveCity_ContestLobby_EventScript_SetPlayerGfx::
 
 LilycoveCity_ContestLobby_EventScript_SetPlayerGfxBrendan::
 	setvar VAR_OBJ_GFX_ID_3, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 LilycoveCity_ContestLobby_EventScript_SetPlayerGfxMay::
 	setvar VAR_OBJ_GFX_ID_3, OBJ_EVENT_GFX_RIVAL_MAY_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 

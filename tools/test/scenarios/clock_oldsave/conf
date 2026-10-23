@@ -1,0 +1,7 @@
+# A save from when the game clock was stuck at day 0 (time events on, Berry timer at day 0, bedroom clock offset):
+# the first time-based update moves it to the PC's clock without years passing at once. The planted tree keeps its
+# minutes, the bedroom clock's offset is gone, and the day counter gives one new day (not thousands).
+MODE=1
+TMO=120
+EXPECT_A=("[test] stuck clock save" "clock: the game clock is the PC's now; Berry trees grow from here" "[test] berryinfo 2: berry 7 stage 1 next 180 min yield 0 regrow 0 (time events on, wall clock set, last 9" "offset 0.00:00")
+UNEXPECT_A=("berryinfo 2: berry 7 stage 2" "berryinfo 2: berry 7 stage 3" "berryinfo 2: berry 7 stage 4" "berryinfo 2: berry 7 stage 5" "berryinfo 2: berry 0")

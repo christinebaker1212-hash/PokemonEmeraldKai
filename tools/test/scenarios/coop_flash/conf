@@ -1,0 +1,12 @@
+# Granite Cave B2F (dark) at NA-JP lag: BOB used FLASH, ALICE didn't. ALICE's screen shows her own small light
+# and BOB's FLASH circle around him; BOB's shows his FLASH and ALICE's small light (screenshots)
+MODE=2
+WARP=24,9,27,13
+WARP_B=24,9,23,13
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+ENV_B="MOEMON_DEBUG_FLAGS=0x888"
+EXPECT_A=("lights: 1 friend light(s)" "radius 72")
+EXPECT_B=("lights: 1 friend light(s)" "radius 24")

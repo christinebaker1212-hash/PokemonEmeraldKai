@@ -1294,6 +1294,15 @@ void MP_Coop_ArrangeEnemyParty(void)
     struct Pokemon *tmp;
     u8 i;
 
+    if (getenv("MOEMON_DEBUG_FOE_HP"))
+    {
+        // Tests: the trainer's (or wild) Moemon start with at most this much HP
+        u16 hp = atoi(getenv("MOEMON_DEBUG_FOE_HP"));
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE && GetMonData(&gEnemyParty[i], MON_DATA_HP) > hp)
+                SetMonData(&gEnemyParty[i], MON_DATA_HP, &hp);
+    }
+
     if (sCoop.count == 3)
         return;   // a triple: the first three come out (battlers 1, 3, 5), the rest wait
     tmp = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);
@@ -1652,6 +1661,8 @@ static void CB2_MpCoopFinish(void)
     if (sCoop.outcome == B_OUTCOME_WON)
     {
         // Both players' achievements
+        if (sCoop.count == 3)
+            MP_Achieve_Count("triple", 1);   // a Triple Battle won with two friends (wild or trainer)
         if (!gMpCoopWild)
         {
             MP_Events_Did(MP_DID_COOPWIN);
@@ -2624,8 +2635,57 @@ static void UpdateHeld(void)
     }
 }
 
+// Tests (MOEMON_PARTYTRACE=1): every party change in a co-op battle, with BAD EGGS marked
+static void TraceParties(void)
+{
+    static s8 sOn = -1;
+    static u32 sLast;
+    u32 h = 2166136261u, k;
+    u8 i, side;
+    const u8 *p;
+    if (sOn < 0)
+        sOn = getenv("MOEMON_PARTYTRACE") != NULL;
+    if (!sOn || !gMpCoopBattle || !gMain.inBattle)
+        return;
+    p = (const u8 *)gEnemyParty;
+    for (k = 0; k < sizeof(gEnemyParty); k++)
+        h = (h ^ p[k]) * 16777619u;
+    p = (const u8 *)gPlayerParty;
+    for (k = 0; k < sizeof(gPlayerParty); k++)
+        h = (h ^ p[k]) * 16777619u;
+    if (gBattleStruct != NULL)
+        for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+            h = (h ^ (gBattlerPartyIndexes[i] | (gBattleStruct->monToSwitchIntoId[i] << 8))) * 16777619u;
+    h = (h ^ gAbsentBattlerFlags) * 16777619u;
+    if (h == sLast)
+        return;
+    sLast = h;
+    for (side = 0; side < 2; side++)
+    {
+        char line[160];
+        int n = 0;
+        struct Pokemon *party = side ? gEnemyParty : gPlayerParty;
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            struct BoxPokemon copy = party[i].box;   // checking a copy: GetMonData marks a broken one
+            bool8 bad = MP_IsBoxMonBadEgg(&copy);
+            n += snprintf(line + n, sizeof(line) - n, " %d%s/%d", GetBoxMonData(&copy, MON_DATA_SPECIES),
+                          bad ? "BADEGG" : "", party[i].hp);
+        }
+        MPNet_Log("partytrace: %s%s", side ? "enemy" : "player", line);
+    }
+    if (gBattleStruct != NULL)
+        MPNet_Log("partytrace: battlers %d %d %d %d %d %d, switching to %d %d %d %d %d %d, absent %02x",
+                  gBattlerPartyIndexes[0], gBattlerPartyIndexes[1], gBattlerPartyIndexes[2], gBattlerPartyIndexes[3],
+                  gBattlerPartyIndexes[4], gBattlerPartyIndexes[5], gBattleStruct->monToSwitchIntoId[0],
+                  gBattleStruct->monToSwitchIntoId[1], gBattleStruct->monToSwitchIntoId[2],
+                  gBattleStruct->monToSwitchIntoId[3], gBattleStruct->monToSwitchIntoId[4],
+                  gBattleStruct->monToSwitchIntoId[5], gAbsentBattlerFlags);
+}
+
 void MP_Coop_Update(void)
 {
+    TraceParties();
     UpdateBattleStatus();
     TryRunPendingScript();
     UpdateHeld();

@@ -56,10 +56,12 @@ Route111_EventScript_SetFallingPlayerGfx::
 
 Route111_EventScript_SetFallingPlayerGfxMale::
 	setvar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 Route111_EventScript_SetFallingPlayerGfxFemale::
 	setvar VAR_OBJ_GFX_ID_0, OBJ_EVENT_GFX_RIVAL_MAY_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 Route111_EventScript_CheckSetSandstorm::

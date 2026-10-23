@@ -1,0 +1,17 @@
+# WATTSON (4 Moemon + 1 with TEAM PADDING) in a co-op Triple Battle: one SURF knocks out all three in front, two
+# are left: only two come out (the third used to send out a BAD EGG from past the party). PARTYTRACE logs the parties.
+MODE=3
+WARP=10,0,5,3
+WARP_B=10,0,5,6
+WARP_C=10,0,3,3
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+ENV_B="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+ENV_C="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
+EXPECT_A=("(and another: triple)" "co-op: battle over, outcome 1" "partytrace: enemy")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize" "partytrace: enemy")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize" "partytrace: enemy")
+UNEXPECT_A=("BADEGG" "no Pokemon left")
+UNEXPECT_B=("BADEGG" "no Pokemon left")
+UNEXPECT_C=("BADEGG" "no Pokemon left")
+CHECK="tools/test/check_partytrace.py"

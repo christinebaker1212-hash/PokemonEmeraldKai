@@ -1,0 +1,31 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+display info
+mp menu 0
+wait 30
+press UP 2
+wait 20
+shot a_main
+press A 2
+wait 30
+shot a_settings_off
+press A 2
+wait 20
+press DOWN 2
+wait 10
+press RIGHT 2
+wait 30
+shot a_settings_2x
+press DOWN 2
+wait 10
+press A 2
+wait 300
+display info
+rendershot a_panel
+watchlog player 2 left
+waitlog 3000
+wait 60
+display info
+rendershot a_after
+quit

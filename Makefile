@@ -124,11 +124,11 @@ ifeq ($(PORTABLE),1)
 
   ifeq ($(TARGET_OS),WINDOWS)
     OS_CFLAGS :=
-    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi
+    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi -lwinhttp
     BUILD_FEXTENSION := .exe
   else
     OS_CFLAGS :=
-    OS_LFLAGS := -no-pie
+    OS_LFLAGS := -no-pie -ldl
   endif
 
   #Windows only

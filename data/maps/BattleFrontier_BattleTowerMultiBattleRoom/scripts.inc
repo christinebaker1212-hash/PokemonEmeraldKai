@@ -20,10 +20,12 @@ BattleFrontier_BattleTowerMultiBattleRoom_EventScript_SetObjGfx::
 	checkplayergender
 	goto_if_eq VAR_RESULT, FEMALE, BattleFrontier_BattleTowerMultiBattleRoom_EventScript_SetPlayerGfxFemale
 	setvar VAR_OBJ_GFX_ID_F, OBJ_EVENT_GFX_BRENDAN_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 BattleFrontier_BattleTowerMultiBattleRoom_EventScript_SetPlayerGfxFemale::
 	setvar VAR_OBJ_GFX_ID_F, OBJ_EVENT_GFX_MAY_NORMAL
+	special MP_SetPlayerStandInGfx   @ Moemon Co-op: the player's own look
 	return
 
 BattleFrontier_BattleTowerMultiBattleRoom_EventScript_SetLinkPlayerGfx::

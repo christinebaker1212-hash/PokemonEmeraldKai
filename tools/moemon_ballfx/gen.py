@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Moemon Co-op: pixel art for the ball entrance / recall effects (my own art, drawn here).
+"""Moemon Co-op: pixel art for the ball entrance / recall effects: drawn here, plus frames of
+the game's own battle animation art (graphics/battle_anims/sprites, imported with its colors).
 
-Writes src/mp/mp_ballfx_gfx.h: one 16-color palette shared by every effect, the
-sheets (4bpp, one per particle set, loaded only while that set is on screen) and
-the "energy" sheet, whose pixels use placeholders the game fills with the
-chosen energy color (E) and white (W).
+Writes src/mp/mp_ballfx_gfx.h: indexed pixels for every frame and one shared palette
+(the 15 base colors, then 3 placeholders the game fills with the chosen energy color
+and its light / dark shades (E, EL, ED), then the imported art's colors).
 
 usage: gen.py [--preview OUT.png]
 """
@@ -24,6 +24,60 @@ PAL = [
 ]
 W, LG, G, DG, K, Y, O, R, P, V, B, C, GR, BR, GD = range(1, 16)
 E, EL, ED = 16, 17, 18   # energy color, its light and dark shade (filled in by the game)
+FIRST_EXTRA = 19         # more colors from here: the game's own battle art keeps its colors (imp, rgb)
+EXTRA = []
+
+GAME = os.path.join(HERE, '..', '..', 'graphics', 'battle_anims', 'sprites')
+
+
+def rgb(r, g, b):
+    """The palette index of a 5-bit color (added to the extra colors if it's new)"""
+    c = (int(r), int(g), int(b))
+    for i, pc in enumerate(PAL):
+        if i and pc == c:
+            return i
+    if c not in EXTRA:
+        EXTRA.append(c)
+        assert FIRST_EXTRA + len(EXTRA) <= 256, 'too many effect colors'
+    return FIRST_EXTRA + EXTRA.index(c)
+
+
+def shade(col, k, to=(0, 0, 0)):
+    """col mixed k (0-1) of the way to `to` (default black)"""
+    c = PAL[col] if col < 16 else EXTRA[col - FIRST_EXTRA]
+    return rgb(*(round(a + (b - a) * k) for a, b in zip(c, to)))
+
+
+def imp(fname, x, y, w, h, mode='keep', flip=False):
+    """A frame of the game's own battle animation art (graphics/battle_anims/sprites): its colors
+    ('keep'), or as the energy color by brightness ('energy': white, light, energy, dark), or grays"""
+    from PIL import Image
+    im = Image.open(os.path.join(GAME, fname))
+    assert im.mode == 'P', fname
+    pal = im.getpalette()
+    out = Img(w, h)
+    for yy in range(h):
+        for xx in range(w):
+            v = im.getpixel((x + xx, y + yy))
+            if v % 16 == 0:
+                continue   # each 16-color palette's color 0: see-through
+            r, g, b = pal[v * 3:v * 3 + 3]
+            if mode == 'keep':
+                c = rgb(r >> 3, g >> 3, b >> 3)
+            else:
+                lum = (0.3 * r + 0.59 * g + 0.11 * b) / 255
+                if mode == 'energy':
+                    c = W if lum > 0.86 else EL if lum > 0.62 else E if lum > 0.38 else ED
+                elif mode == 'energy2':
+                    c = E if lum > 0.9 else ED
+                else:
+                    c = W if lum > 0.86 else LG if lum > 0.62 else G if lum > 0.38 else DG
+            out.p[yy][w - 1 - xx if flip else xx] = c
+    return out
+
+
+def frames_of(fname, w, h, count, prefix, mode='keep', start=0):
+    return [('%s%d' % (prefix, i), imp(fname, 0, (start + i) * h, w, h, mode)) for i in range(count)]
 
 
 class Img:
@@ -156,15 +210,21 @@ def explosion():
 
 
 def smoke():
+    # soft, light puffs: a pale body, a dithered shade underneath, a gray rim (no dark outline:
+    # on a light battle background a dark one made them look like rocks)
     frames = []
     for i, s in enumerate((1.0, 0.72, 0.45)):
         a = Img(16, 16)
         for (x, y, r) in ((5.5, 9.5, 4.3), (10.5, 9.5, 4.3), (8, 6, 4.6), (8, 11, 4)):
-            a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, G)
-        for (x, y, r) in ((6.5, 5.5, 2.4), (10, 6.5, 2.0), (5, 8.5, 1.6)):
             a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, LG)
-        a.disc(8 + (7 - 8) * s, 8 + (4.8 - 8) * s, max(0.8, 1.1 * s), W)
-        a.outline(DG)
+        src = [row[:] for row in a.p]
+        for y in range(16):
+            for x in range(16):
+                if src[y][x] == LG and y >= 8 + 2.5 * s and ((x + y) % 2 == 0 or y >= 8 + 4.5 * s):
+                    a.p[y][x] = G
+        for (x, y, r) in ((6.5, 5.5, 2.4), (10, 6.5, 2.0), (5, 8.5, 1.6)):
+            a.disc(8 + (x - 8) * s, 8 + (y - 8) * s, r * s, W)
+        a.outline(G)
         frames.append(('smoke%d' % i, a))
     return frames
 
@@ -400,11 +460,197 @@ def extras():
     return frames + [('ring', ring), ('wring', wring), ('ember', ember), ('soft', soft)]
 
 
+# ---------------------------------------------------------------------------
+# The sets added with the 15 new send-out forms and 15 new particle sets: mostly the game's
+# own battle animation art (Attract's hearts, Sing's notes, Razor Leaf, Ember, Pay Day, ...)
+
+def hearts():
+    return frames_of('pink_heart_2.png', 32, 32, 5, 'heart') + [('small', imp('magenta_heart.png', 0, 0, 16, 16))]
+
+
+def notes():
+    return frames_of('music_notes_2.png', 16, 16, 16, 'note')
+
+
+def snow():
+    small = Img(8, 8)
+    ice = rgb(19, 25, 31)
+    for y, row in enumerate(('...W...', '.W.b.W.', '..bbb..', 'WbbWbbW', '..bbb..', '.W.b.W.', '...W...')):
+        for x, ch in enumerate(row):
+            if ch != '.':
+                small.set(x, y, W if ch == 'W' else ice)
+    frames = [('flake0', small)]
+    for i, (size, arm) in enumerate(((16, 6.6),), 1):
+        f = Img(size, size)
+        c = size / 2 - 0.5
+        for k in range(6):
+            ang = k * math.pi / 3 + math.pi / 6
+            f.line(c, c, c + math.cos(ang) * arm, c + math.sin(ang) * arm, ice)
+            f.set(c + math.cos(ang) * arm, c + math.sin(ang) * arm, W)
+            bx, by = c + math.cos(ang) * arm * 0.6, c + math.sin(ang) * arm * 0.6
+            for side in (-0.9, 0.9):
+                f.line(bx, by, bx + math.cos(ang + side) * 2.2, by + math.sin(ang + side) * 2.2, W)
+        f.set(c, c, W)
+        frames.append(('flake%d' % i, f))
+    dot = Img(8, 8); dot.disc(3.5, 3.5, 1.3, W); dot.set(3, 3, W); dot.outline(ice)
+    return frames + [('dot', dot), ('ice0', imp('ice_crystals_1.png', 0, 0, 8, 16)),
+                     ('ice1', imp('ice_crystals_2.png', 0, 0, 8, 16)), ('ice2', imp('ice_crystals_4.png', 0, 0, 8, 16))]
+
+
+def feathers():
+    return frames_of('white_feather.png', 32, 32, 2, 'feather')
+
+
+def leaves():
+    return frames_of('leaf.png', 16, 16, 9, 'leaf') + frames_of('whirlwind_lines.png', 32, 16, 3, 'gust', 'gray')
+
+
+def stars():
+    return [('big', imp('yellow_star.png', 0, 0, 32, 32)), ('star', imp('gold_stars.png', 0, 0, 16, 16)),
+            ('small0', imp('gold_stars.png', 0, 16, 8, 8)), ('small1', imp('gold_stars.png', 8, 16, 8, 8))] \
+        + frames_of('eye_sparkle.png', 16, 16, 4, 'twinkle') + frames_of('sparkle_4.png', 32, 32, 5, 'shine')
+
+
+def rainbow():
+    arc = Img(64, 34)
+    bands = (R, O, Y, GR, B, V)
+    for k, col in enumerate(bands):
+        arc.ring(32, 33, 31.5 - k * 1.8, col, 1.8)
+    for y in range(34):   # the lower half of the rings is under the ground
+        for x in range(64):
+            if y >= 33:
+                arc.p[y][x] = 0
+    cloud = Img(24, 12)
+    for (x, y, r) in ((7, 7.5, 3.8), (12, 5.5, 4.6), (17, 7.5, 3.8), (11, 8.5, 3.4), (14.5, 8.5, 3.4)):
+        cloud.disc(x, y, r, W)
+    src = [row[:] for row in cloud.p]
+    for y in range(12):
+        for x in range(24):
+            if src[y][x] == W and y >= 8 and (y + x) % 2 == 0 or (src[y][x] == W and y >= 10):
+                cloud.p[y][x] = LG
+    cloud.outline(rgb(20, 24, 30))
+    return [('arc', arc), ('cloud', cloud)] + frames_of('rainbow_rings.png', 8, 16, 3, 'ring')
+
+
+def fire():
+    return frames_of('fire.png', 32, 32, 8, 'flame') + frames_of('small_ember.png', 32, 32, 5, 'ember') \
+        + frames_of('fire_plume.png', 32, 32, 5, 'plume')
+
+
+def water():
+    return frames_of('water_column.png', 16, 32, 4, 'column') + [('splash', imp('splash.png', 0, 0, 64, 64))] \
+        + frames_of('water_droplet.png', 32, 32, 8, 'drop') + frames_of('water_droplet_2.png', 32, 32, 5, 'spray')
+
+
+def sakura():
+    return frames_of('pink_petal.png', 8, 8, 4, 'petal') + frames_of('petal.png', 16, 16, 7, 'big')
+
+
+def coins():
+    return frames_of('coin.png', 16, 16, 4, 'coin')
+
+
+def balloons():
+    frames = []
+    for col in (R, B, Y, GR, P, C):
+        b = Img(16, 32)
+        b.ellipse(8, 9, 5.6, 7.2, col)
+        b.ellipse(9.6, 11.2, 3.4, 4.6, col)
+        # shade on the lower right, a shine on the upper left
+        src = [row[:] for row in b.p]
+        for y in range(32):
+            for x in range(16):
+                if src[y][x] == col and ((x - 4.5) ** 2 / 36 + (y - 5) ** 2 / 64) > 1.0:
+                    b.p[y][x] = shade(col, 0.32)
+        b.ellipse(5.6, 5.4, 1.3, 2.1, W)
+        b.set(7, 3, shade(col, 0.6, (31, 31, 31)))
+        b.poly([(6.5, 17.8), (9.5, 17.8), (8, 15.6)], shade(col, 0.4))
+        b.outline(shade(col, 0.6))
+        for y in range(18, 31):
+            b.set(8 + round(math.sin(y * 0.7) * 1.2), y, LG)
+        frames.append(('balloon%d' % col, b))
+    return frames
+
+
+def butterflies():
+    frames = []
+    for (up, down) in ((Y, O), (C, B), (P, W), (GR, Y)):
+        for i, open_ in enumerate((1.0, 0.55, 0.15)):
+            f = Img(16, 16)
+            for side in (-1, 1):
+                f.ellipse(8 + side * 3.6 * open_, 6, 3.4 * open_ + 0.6, 3.2, up)
+                f.ellipse(8 + side * 2.6 * open_, 10.5, 2.4 * open_ + 0.5, 2.3, down)
+                if open_ > 0.5:
+                    f.set(8 + side * 4.4 * open_, 5, W)
+            f.outline(shade(up, 0.55), inside_of=(up, down))
+            f.line(8, 4, 8, 12, K)
+            f.set(7, 3, K); f.set(9, 3, K); f.set(6, 2, K); f.set(10, 2, K)
+            frames.append(('fly%d_%d' % (up, i), f))
+    return frames
+
+
+def gems():
+    frames = []
+    for col in (R, B, GR, V, Y, C):
+        for i in range(2):
+            g = Img(8, 8)
+            g.poly([(1, 3), (2.5, 1), (5.5, 1), (7, 3), (4, 7.2)], col)
+            g.poly([(1, 3), (7, 3), (4, 7.2)], shade(col, 0.35))
+            g.poly([(2.5, 1), (5.5, 1), (5, 3), (3, 3)], shade(col, 0.5, (31, 31, 31)))
+            g.set(3, 2, W)
+            if i:
+                g.set(5, 4, W); g.set(4, 1, W)
+            frames.append(('gem%d_%d' % (col, i), g))
+    return frames
+
+
+def aura():
+    return frames_of('focus_energy.png', 16, 32, 4, 'flare', 'energy')
+
+
+def bits():
+    # pieces for the new forms: a teleport beam, a shadow, speed lines, a vortex, a card back
+    beam = Img(16, 64)
+    for y in range(64):
+        for x in range(16):
+            d = abs(x + 0.5 - 8)
+            bay = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]][y % 4][x % 4] / 16.0
+            v = d / 8 + (bay - 0.5) * 0.2
+            beam.p[y][x] = W if v < 0.16 else EL if v < 0.38 else E if v < 0.66 else ED if v < 0.9 else 0
+    shadow = Img(32, 16)
+    for y in range(16):
+        for x in range(32):
+            d = ((x + 0.5 - 16) / 15.5) ** 2 + ((y + 0.5 - 8) / 7.5) ** 2
+            bay = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]][y % 4][x % 4] / 16.0
+            if d < 0.55:
+                shadow.p[y][x] = K
+            elif d < 1.0 and bay > (d - 0.55) / 0.45 * 0.9:
+                shadow.p[y][x] = rgb(4, 2, 8)
+    line = Img(32, 4)
+    for x in range(32):
+        line.set(x, 1, W if x > 24 else EL if x > 12 else E)
+        if x > 18:
+            line.set(x, 2, E if x < 28 else EL)
+    spiral = imp('spiral.png', 0, 0, 64, 64, 'energy2')
+    dust = frames_of('speed_dust.png', 16, 16, 3, 'puff')
+    return [('beam', beam), ('shadow', shadow), ('line', line), ('spiral', spiral)] + dust
+
+
+def recall():
+    # for the new recalls: Snore's Z, Ice Beam's ice chunk breaking, a spirit orb (Will-O-Wisp's)
+    return frames_of('z.png', 16, 16, 2, 'z') + frames_of('ice_chunk.png', 32, 32, 4, 'chunk') \
+        + frames_of('wisp_orb.png', 16, 16, 7, 'orb')
+
+
 SETS = [
     ('CONFETTI', confetti), ('EXPLOSION', explosion), ('SMOKE', smoke), ('FIREWORKS', fireworks),
     ('FLOWER', flower), ('BUBBLES', bubbles), ('LIGHTNING', lightning), ('WISPS', wisps),
     ('CRYSTAL', crystal), ('SPOTLIGHT', spotlight), ('DUST', dust), ('ROYAL', royal), ('ENERGY', energy),
     ('EXTRA', extras),
+    ('HEARTS', hearts), ('NOTES', notes), ('SNOW', snow), ('FEATHERS', feathers), ('LEAVES', leaves),
+    ('STARS', stars), ('RAINBOW', rainbow), ('FIRE', fire), ('WATER', water), ('SAKURA', sakura),
+    ('COINS', coins), ('BALLOONS', balloons), ('BUTTERFLIES', butterflies), ('GEMS', gems), ('AURA', aura),
+    ('BITS', bits), ('RECALL', recall),
 ]
 
 def main():
@@ -414,11 +660,8 @@ def main():
     lines = ['// Generated by tools/moemon_ballfx/gen.py (Moemon Co-op ball effects). Do not edit.',
              '// Indexed pixels, drawn by the effects layer over the finished frame (mp_ballfx.c):',
              '// 0 transparent, 1 white, 2-5 grays, 6 yellow, 7 orange, 8 red, 9 pink, 10 purple, 11 blue,',
-             '// 12 cyan, 13 green, 14 brown, 15 gold; 16/17/18 = the energy color / its light / dark shade.', '']
-    lines.append('static const u16 sFxPalette[16] = {')
-    lines.append('    ' + ', '.join('RGB(%d, %d, %d)' % c for c in PAL) + ',')
-    lines.append('};')
-    lines.append('')
+             '// 12 cyan, 13 green, 14 brown, 15 gold; 16/17/18 = the energy color / its light / dark shade;',
+             '// 19 on: more colors (the game\'s own battle art, imported with its colors).', '']
     enums, table, pixels, all_frames = [], [], [], []
     for set_name, fn in SETS:
         for name, img in fn():
@@ -428,6 +671,13 @@ def main():
             for row in img.p:
                 pixels += row
             all_frames.append((set_name, name, img))
+    full = PAL + [(0, 0, 0)] * 3 + EXTRA
+    lines.append('#define FX_PAL_COUNT %d' % len(full))
+    lines.append('static const u16 sFxPalette[FX_PAL_COUNT] = {')
+    for k in range(0, len(full), 6):
+        lines.append('    ' + ' '.join('RGB(%d, %d, %d),' % c for c in full[k:k + 6]))
+    lines.append('};')
+    lines.append('')
     lines.append('enum {\n' + ''.join('    %s,\n' % e for e in enums) + '    FXA_COUNT,\n};\n')
     lines.append('static const u8 sFxPixels[] = {')
     for k in range(0, len(pixels), 32):
@@ -467,7 +717,7 @@ def main():
                     v = img.p[yy][xx]
                     if v == 0:
                         continue
-                    c = demo[v] if v in demo else PAL[v]
+                    c = demo[v] if v in demo else (PAL[v] if v < 16 else EXTRA[v - FIRST_EXTRA])
                     rgb = tuple(int(ch * 255 / 31) for ch in c)
                     for sy in range(scale):
                         for sx in range(scale):

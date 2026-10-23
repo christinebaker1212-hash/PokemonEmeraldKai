@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "bg.h"
 #include "data.h"
 #include "decompress.h"
@@ -915,6 +916,8 @@ static void BuyMenuDrawObjectEvents(void)
             gSprites[spriteId].subspriteMode = SUBSPRITES_ON;
         }
 
+        // Moemon Co-op: other players' avatars in their own colors
+        MP_Overworld_MenuSpritePalette(spriteId, gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]].graphicsId);
         StartSpriteAnim(&gSprites[spriteId], sShopData->viewportObjects[i][ANIM_NUM]);
     }
 }

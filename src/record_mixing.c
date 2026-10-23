@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "malloc.h"
 #include "random.h"
 #include "constants/items.h"
@@ -1427,6 +1428,7 @@ void MP_RecordMix_Prepare(void *dest)
     for (i = 0; i < NUM_NORMAL_TVSHOW_SLOTS; i++)
         active[i] = gSaveBlock1Ptr->tvShows[i].common.active;
     memset(dest, 0, sizeof(union PlayerRecord));
+    MP_Dewford_Sanitize();   // never send a broken trend
     sSentRecord = dest;
     PrepareExchangePacket();
     sSentRecord = saved;

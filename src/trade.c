@@ -1,5 +1,6 @@
 #include "global.h"
 #include "malloc.h"
+#include "mp.h"
 #include "battle_anim.h"
 #include "battle_interface.h"
 #include "bg.h"
@@ -3113,7 +3114,11 @@ static void TradeMons(u8 playerPartyIdx, u8 partnerPartyIdx)
     if (playerMail != MAIL_NONE)
         ClearMail(&gSaveBlock1Ptr->mail[playerMail]);
 
+    // Moemon Kai: a held HM stays with its owner (both games do this: the HM goes back to the
+    // sender's BAG and the receiver gets the Pokemon without it)
+    MP_ReturnHeldHm(playerMon);
     SWAP(*playerMon, *partnerMon, sTradeAnim->tempMon);
+    MP_StripHeldHm(playerMon);
 
     // By default, a Pokémon received from a trade will have 70 Friendship.
     // Eggs use Friendship to track egg cycles, so don't set this on Eggs.

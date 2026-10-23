@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp typeicons 1
+mp triple 286:8 288:9 290:7
+pressuntil A action 4000
+wait 30
+shot tri
+mp bstatus 3 8 10
+wait 60
+shot tri_st
+quit

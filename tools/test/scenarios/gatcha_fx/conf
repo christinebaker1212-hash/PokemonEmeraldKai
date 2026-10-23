@@ -1,0 +1,6 @@
+# A MOEGATCHA prize that is a ball effect piece: the first time it unlocks (BALL COLOR: SCARLET, the first of the
+# MOEGATCHA pieces: 29 of the 30 newer colors left to earn), the second time the same piece is a MOEGATCHA TICKET
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("ball unlock: c 12" "ball unlocks c: 29 of 30 still to earn" "gatcha: ball piece 0 already had: a ticket" "gatcha tickets 1")

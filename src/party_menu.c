@@ -2731,6 +2731,21 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
             }
         }
     }
+    // Moemon Kai: a held HM's field move, as if it knew it
+    {
+        u16 heldMove = MP_HeldHmMove(&mons[slotId]);
+        if (heldMove != MOVE_NONE && !MonKnowsMove(&mons[slotId], heldMove))
+        {
+            for (j = 0; sFieldMoves[j] != FIELD_MOVES_COUNT; j++)
+            {
+                if (sFieldMoves[j] == heldMove)
+                {
+                    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+                    break;
+                }
+            }
+        }
+    }
 
     if (!InBattlePike())
     {
@@ -2740,8 +2755,9 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MAIL);
         else
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_ITEM);
-        // Moemon Co-op: mark / unmark for the co-op team
-        if (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD)
+        // Moemon Co-op: mark / unmark for the co-op team (the list fits 9: not when 4 field moves and a
+        // held HM's fill it)
+        if (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD && sPartyMenuInternal->numActions + 2 <= ARRAY_COUNT(sPartyMenuInternal->actions))
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MP_TEAM);
     }
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL1);
@@ -6612,6 +6628,10 @@ void IsLastMonThatKnowsSurf(void)
     u32 i, j;
 
     gSpecialVar_Result = FALSE;
+    // Moemon Kai: no HM restrictions. HMs are never used up and can be held (MP_HeldHmMove),
+    // so forgetting SURF can't strand anyone.
+    if (TRUE)
+        return;
     move = GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_MOVE1 + gSpecialVar_0x8005);
     if (move == MOVE_SURF)
     {

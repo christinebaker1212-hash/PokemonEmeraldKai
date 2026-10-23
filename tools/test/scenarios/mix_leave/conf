@@ -1,0 +1,6 @@
+# Record mixing when a friend leaves right after sending their record: ALICE has the START menu open when BOB's record
+# arrives (so she can't mix yet) and BOB quits at once. She still mixes once the menu closes (it used to be dropped).
+MODE=2
+TMO=150
+EXPECT_A=("mix: applied")
+EXPECT_B=("mix: applied")

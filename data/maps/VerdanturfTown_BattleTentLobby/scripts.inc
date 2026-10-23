@@ -55,6 +55,7 @@ VerdanturfTown_BattleTentLobby_EventScript_GivePrize::
 	waitmessage
 	playfanfare MUS_OBTAIN_ITEM
 	waitfanfare
+	call EventScript_MpTentGatchaTickets   @ Moemon Co-op: 3 MOEGATCHA TICKETS for the three wins
 	msgbox VerdanturfTown_BattleTentLobby_Text_ReturnFortified, MSGBOX_DEFAULT
 	closemessage
 	setvar VAR_TEMP_CHALLENGE_STATUS, 255

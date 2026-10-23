@@ -1,0 +1,5 @@
+# held HMs: the lead holds HM03 and doesn't know SURF; facing Petalburg's pond it asks to SURF and surfs
+MODE=1
+WARP=0,0,7,20
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] monmoves: slot 0 species 280 moves 10 45 0 0 held 341" "where map 0.0 xy 6,20")

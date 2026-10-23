@@ -733,7 +733,9 @@ static void ButtonMode_DrawChoices(u8 selection)
 static void DrawHeaderText(void)
 {
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
+    gMpTextFilterOff = TRUE;   // Moemon Co-op: the game's own name stays as it is with CREATURES POKéMON
     AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, gText_Option, 8, 1, TEXT_SKIP_DRAW, NULL);
+    gMpTextFilterOff = FALSE;
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
 }
 

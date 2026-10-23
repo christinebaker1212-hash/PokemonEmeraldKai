@@ -1,13 +1,19 @@
-// Moemon Co-op: watching other players' battles.
+// Moemon Co-op: watching other players' screens.
 //
-// A player in a battle streams their screen to whoever is watching: changed
-// 8x8 tiles, run-length packed, about 20 times a second, plus the battle
-// music's song number. The watcher's own game pauses while the feed is shown
-// (src/platform/sdl2.c asks MP_Spectate_IsWatching every frame) and resumes
-// exactly where it was when they press B or the battle ends.
+// A player streams their screen to whoever is watching: changed 8x8 tiles
+// (run-length or palette packed), 15-20 times a second, plus the battle
+// music's song number. On the map the picture scrolls: the update says how far
+// and only the tiles that came into view and the ones that changed go along.
 //
-// Walk up to a player marked IN BATTLE and press A to watch.
+// Watching a battle: walk up to a player marked IN BATTLE and press A. The
+// watcher's own game pauses while the feed is shown (src/platform/sdl2.c asks
+// MP_Spectate_IsWatching every frame) and resumes exactly where it was when
+// they press B or the battle ends.
+//
+// The SPECTATE panel (CO-OP > SPECTATE): every friend's screen, all the time,
+// in a row under your own (src/platform/display.c draws it), 1-4 times.
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -30,6 +36,10 @@
 #include "gba/m4a_internal.h"
 #include "m4a.h"
 #include "constants/songs.h"
+#include "field_camera.h"
+#include "palette.h"
+#include "platform/display.h"
+#include "mp_net.h"
 
 #define FRAME_W 240
 #define FRAME_H 160
@@ -46,16 +56,26 @@ enum {
     MPR_SPEC_LEAVE,
     MPR_SPEC_FRAME,     // u16 seq, u8 flags, u16 song, u8 count, tiles...
     MPR_SPEC_END,       // the battle is over (or wasn't running)
+    MPR_SPEC_PANEL_JOIN,   // send me your screen for my SPECTATE panel (any time, not only battles)
+    MPR_SPEC_PANEL_LEAVE,
 };
 
-#define FRAMEF_KEY  1   // this update starts a full frame
+// MPR_SPEC_FRAME: u8 type, u16 seq, u8 flags, u16 song, u8 tile count, s8 shiftX, s8 shiftY, tiles...
+#define FRAME_HEADER 9
+#define FRAMEF_KEY   1   // this update starts a full frame
+#define FRAMEF_SHIFT 2   // first move the picture: new (x, y) = old (x + shiftX, y + shiftY)
+#define FRAMEF_LAST  4   // the update's last message (always sent: viewers know the sender is there)
+#define PANEL_SEND_EVERY 4   // 15 updates a second when only panels watch
+#define SEND_BACKLOG (24 * 1024)   // more than this still waiting to go out: skip a picture (the game's own messages first)
 
 const u16 *Platform_GetFrame(void);
+u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);
 
 // ---- Streaming (the player in the battle) ----
 static struct
 {
-    u8 viewers;                    // bitmask of player ids
+    u8 viewers;                    // bitmask of player ids watching our battle
+    u8 panel;                      // ... and of those with us in their SPECTATE panel
     bool8 needKey;
     u16 seq;
     u16 timer;
@@ -81,6 +101,25 @@ static struct
 
 static u8 sOut[MAX_PAYLOAD + 16];
 
+// Tests (MOEMON_SPECTRACE=1): each update's picture checksum, the sender's (what viewers should have) and each
+// viewer's (what it made of it), so a test can prove they're the same pixel for pixel
+static s8 sTrace = -1;
+static bool8 Tracing(void)
+{
+    if (sTrace < 0)
+        sTrace = getenv("MOEMON_SPECTRACE") != NULL;
+    return sTrace;
+}
+
+static u32 FrameSum(const u16 *buf)
+{
+    u32 h = 2166136261u;
+    int i;
+    for (i = 0; i < FRAME_W * FRAME_H; i++)
+        h = (h ^ buf[i]) * 16777619u;
+    return h;
+}
+
 bool8 MP_Spectate_IsWatching(void)
 {
     return sWatch.target != 0xFF;
@@ -88,7 +127,7 @@ bool8 MP_Spectate_IsWatching(void)
 
 bool8 MP_Spectate_IsStreaming(void)
 {
-    return sStream.viewers != 0;
+    return (sStream.viewers | sStream.panel) != 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -114,13 +153,20 @@ static bool8 TileChanged(const u16 *frame, int t)
     return FALSE;
 }
 
-// Appends one tile; returns bytes written. Mode 0 = raw, 1 = runs of a color
+// Bits per pixel of a palette-packed tile with n colors
+static int IndexBits(int n)
+{
+    return n <= 2 ? 1 : (n <= 4 ? 2 : 4);
+}
+
+// Appends one tile; returns bytes written. Mode 0 = raw, 1 = runs of a color, 2 = up to 16 colors and their
+// indices (1, 2 or 4 bits a pixel), whichever is smallest
 static int PackTile(const u16 *frame, int t, u8 *out)
 {
     int tx = (t % TILES_X) * 8, ty = (t / TILES_X) * 8, x, y, i;
-    u16 px[64];
-    u8 runs[64 * 3];
-    int nRuns = 0, len;
+    u16 px[64], cols[16];
+    u8 runs[64 * 3], idx[64];
+    int nRuns = 0, len, nCols = 0, runLen, palLen = 0x7FFF;
 
     for (y = 0; y < 8; y++)
         for (x = 0; x < 8; x++)
@@ -136,14 +182,49 @@ static int PackTile(const u16 *frame, int t, u8 *out)
         nRuns++;
         i += run;
     }
+    for (i = 0; i < 64 && nCols <= 16; i++)
+    {
+        int k;
+        for (k = 0; k < nCols && cols[k] != px[i]; k++)
+            ;
+        if (k == nCols)
+        {
+            if (nCols == 16)
+            {
+                nCols = 17;
+                break;
+            }
+            cols[nCols++] = px[i];
+        }
+        idx[i] = k;
+    }
+    if (nCols <= 16)
+        palLen = 4 + nCols * 2 + 64 * IndexBits(nCols) / 8;
+    runLen = 4 + nRuns * 3;
     out[0] = t & 0xFF;
     out[1] = t >> 8;
-    if (nRuns * 3 + 1 < 128)
+    if (palLen < runLen && palLen < 3 + 128)
+    {
+        int bits = IndexBits(nCols), perByte = 8 / bits;
+        u8 *p = out + 4 + nCols * 2;
+        out[2] = 2;
+        out[3] = nCols;
+        for (i = 0; i < nCols; i++)
+        {
+            out[4 + i * 2] = cols[i] & 0xFF;
+            out[4 + i * 2 + 1] = cols[i] >> 8;
+        }
+        memset(p, 0, 64 / perByte);
+        for (i = 0; i < 64; i++)
+            p[i / perByte] |= idx[i] << ((i % perByte) * bits);
+        len = palLen;
+    }
+    else if (runLen < 3 + 128)
     {
         out[2] = 1;
         out[3] = nRuns;
         memcpy(out + 4, runs, nRuns * 3);
-        len = 4 + nRuns * 3;
+        len = runLen;
     }
     else
     {
@@ -162,9 +243,17 @@ static int PackTile(const u16 *frame, int t, u8 *out)
 
 static void SendToViewers(const u8 *data, u16 len)
 {
-    u8 i;
+    u8 i, to = sStream.viewers | sStream.panel, others = 0;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (sStream.viewers & (1 << i))
+        if (i != gMpLocalId && gMpPlayers[i].present)
+            others |= 1 << i;
+    if (to != 0 && (to & others) == others)
+    {
+        MP_SendRelay(0xFF, data, len);   // everyone watches: the server copies it, we send it once
+        return;
+    }
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (to & (1 << i))
             MP_SendRelay(i, data, len);
 }
 
@@ -173,20 +262,147 @@ static void SendSimple(u8 target, u8 type)
     MP_SendRelay(target, &type, 1);
 }
 
+// Moves a picture: new (x, y) = old (x + ox, y + oy); what came into view is black until its tiles arrive
+static void ShiftFrame(u16 *buf, int ox, int oy)
+{
+    static u16 sTmp[FRAME_W * FRAME_H];
+    int y;
+    memcpy(sTmp, buf, sizeof(sTmp));
+    for (y = 0; y < FRAME_H; y++)
+    {
+        int sy = y + oy, x0, x1;
+        u16 *row = buf + y * FRAME_W;
+        if (sy < 0 || sy >= FRAME_H)
+        {
+            memset(row, 0, FRAME_W * 2);
+            continue;
+        }
+        x0 = ox < 0 ? -ox : 0;            // first x with a source
+        x1 = ox > 0 ? FRAME_W - ox : FRAME_W;
+        if (x0 >= FRAME_W || x1 <= 0)
+        {
+            memset(row, 0, FRAME_W * 2);
+            continue;
+        }
+        memset(row, 0, FRAME_W * 2);
+        memcpy(row + x0, sTmp + sy * FRAME_W + x0 + ox, (x1 - x0) * 2);
+    }
+}
+
+// Pixels sampled to find the scroll: a fixed spread over the picture
+#define SHIFT_SAMPLES 512
+static u16 sSampleX[SHIFT_SAMPLES], sSampleY[SHIFT_SAMPLES];
+
+static int ShiftMatch(const u16 *frame, int ox, int oy, int *inside)
+{
+    int i, match = 0;
+    *inside = 0;
+    for (i = 0; i < SHIFT_SAMPLES; i++)
+    {
+        int x = sSampleX[i], y = sSampleY[i], sx = x + ox, sy = y + oy;
+        if (sx < 0 || sx >= FRAME_W || sy < 0 || sy >= FRAME_H)
+            continue;
+        (*inside)++;
+        if (frame[y * FRAME_W + x] == sStream.ref[sy * FRAME_W + sx])
+            match++;
+    }
+    return match;
+}
+
+// On the map the picture scrolls with the camera: how far since the viewers' picture (FALSE = not a scroll).
+// The camera's move says roughly how far; the pixels say exactly and which way.
+static bool8 FindShift(const u16 *frame, int *outX, int *outY)
+{
+    static bool8 sCamValid, sSamplesMade;
+    static u16 sCamX, sCamY;
+    int dx = 0, dy = 0, sign, ex, ey, baseIn, base, best = -1, bestIn = 1, bx = 0, by = 0;
+    bool8 moved = FALSE;
+    if (!sSamplesMade)
+    {
+        u32 r = 12345;
+        int i;
+        for (i = 0; i < SHIFT_SAMPLES; i++)
+        {
+            r = r * 1103515245 + 12345;
+            sSampleX[i] = (r >> 8) % FRAME_W;
+            r = r * 1103515245 + 12345;
+            sSampleY[i] = (r >> 8) % FRAME_H;
+        }
+        sSamplesMade = TRUE;
+    }
+    if (MP_IsInOverworld() && !gPaletteFade.active)
+    {
+        u16 cx = gTotalCameraPixelOffsetX, cy = gTotalCameraPixelOffsetY;
+        if (sCamValid)
+        {
+            dx = (s16)(cx - sCamX);
+            dy = (s16)(cy - sCamY);
+            moved = (dx != 0 || dy != 0) && dx >= -48 && dx <= 48 && dy >= -48 && dy <= 48;
+        }
+        sCamX = cx;
+        sCamY = cy;
+        sCamValid = TRUE;
+    }
+    else
+        sCamValid = FALSE;
+    if (!moved)
+        return FALSE;
+    base = ShiftMatch(frame, 0, 0, &baseIn);
+    for (sign = -1; sign <= 1; sign += 2)
+        for (ey = -3; ey <= 3; ey++)
+            for (ex = -3; ex <= 3; ex++)
+            {
+                int ox = sign * dx + ex, oy = sign * dy + ey, in, m;
+                if (ox == 0 && oy == 0)
+                    continue;
+                m = ShiftMatch(frame, ox, oy, &in);
+                if (in >= SHIFT_SAMPLES / 2 && (best < 0 || m * bestIn > best * in))
+                {
+                    best = m;
+                    bestIn = in;
+                    bx = ox;
+                    by = oy;
+                }
+            }
+    // a clear winner: most samples match, clearly more than not moving
+    if (best < 0 || best * 4 < bestIn * 3 || (baseIn > 0 && best * baseIn <= base * bestIn + bestIn * baseIn / 10))
+        return FALSE;
+    *outX = bx;
+    *outY = by;
+    return TRUE;
+}
+
 static void StreamFrame(void)
 {
     const u16 *frame = Platform_GetFrame();
     bool8 key = sStream.needKey || sStream.keyTimer == 0;
-    int t = 0, pos, count;
+    int t = 0, pos, count, ox = 0, oy = 0, bytes = 0;
     u8 flags = key ? FRAMEF_KEY : 0;
+    static u8 sForced[NUM_TILES];
 
     if (!frame)
         return;
     sStream.needKey = FALSE;
     if (key)
         sStream.keyTimer = KEYFRAME_EVERY;
+    memset(sForced, 0, sizeof(sForced));
+    if (!key && FindShift(frame, &ox, &oy))
+    {
+        // Viewers move their picture the same way; the tiles that came into view go along
+        int tx, ty;
+        flags |= FRAMEF_SHIFT;
+        ShiftFrame(sStream.ref, ox, oy);
+        for (ty = 0; ty < TILES_Y; ty++)
+            for (tx = 0; tx < TILES_X; tx++)
+            {
+                int x0 = tx * 8, y0 = ty * 8;
+                if ((ox > 0 && x0 + 8 > FRAME_W - ox) || (ox < 0 && x0 < -ox)
+                 || (oy > 0 && y0 + 8 > FRAME_H - oy) || (oy < 0 && y0 < -oy))
+                    sForced[ty * TILES_X + tx] = TRUE;
+            }
+    }
     sStream.lastSong = CurrentSong();
-    // One or more messages; the first carries the key flag
+    // One or more messages; the first carries the flags (and the shift)
     do
     {
         sOut[0] = MPR_SPEC_FRAME;
@@ -195,20 +411,29 @@ static void StreamFrame(void)
         sOut[3] = flags;
         sOut[4] = sStream.lastSong & 0xFF;
         sOut[5] = sStream.lastSong >> 8;
-        pos = 7;
+        sOut[7] = (flags & FRAMEF_SHIFT) ? (u8)(s8)ox : 0;
+        sOut[8] = (flags & FRAMEF_SHIFT) ? (u8)(s8)oy : 0;
+        pos = FRAME_HEADER;
         count = 0;
         for (; t < NUM_TILES && pos + 140 < MAX_PAYLOAD && count < 255; t++)
         {
-            if (!key && !TileChanged(frame, t))
+            if (!key && !sForced[t] && !TileChanged(frame, t))
                 continue;
             pos += PackTile(frame, t, sOut + pos);
             count++;
         }
         sOut[6] = count;
-        if (count > 0 || flags)
+        if (t >= NUM_TILES)
+            sOut[3] |= FRAMEF_LAST;
+        if (count > 0 || sOut[3])
+        {
             SendToViewers(sOut, pos);
+            bytes += pos;
+        }
         flags = 0;
     } while (t < NUM_TILES);
+    if (Tracing())
+        MPNet_Log("spectrace: send seq %d sum %08x bytes %d%s", sStream.seq, FrameSum(sStream.ref), bytes, (ox || oy) ? " shift" : "");
     sStream.seq++;
 }
 
@@ -219,9 +444,9 @@ static bool8 LocalInBattle(void)
 
 static void Stream_Update(void)
 {
-    if (!sStream.viewers)
+    if (!(sStream.viewers | sStream.panel))
         return;
-    if (!LocalInBattle())
+    if (sStream.viewers && !LocalInBattle())
     {
         u8 i;
         // The result goes along, for anyone who bet on it
@@ -230,12 +455,15 @@ static void Stream_Update(void)
             if (sStream.viewers & (1 << i))
                 MP_SendRelay(i, end, 2);
         sStream.viewers = 0;
-        return;
+        if (!sStream.panel)
+            return;
     }
     if (sStream.keyTimer)
         sStream.keyTimer--;
-    if (++sStream.timer >= SEND_EVERY)
+    if (++sStream.timer >= (sStream.viewers ? SEND_EVERY : PANEL_SEND_EVERY)
+     && (MPNet_ClientQueued() < SEND_BACKLOG || sStream.timer >= 60))
     {
+        // (a picture only sends what changed since the last one, so skipping some loses nothing)
         sStream.timer = 0;
         StreamFrame();
     }
@@ -428,23 +656,19 @@ const u16 *MP_Spectate_WatchFrame(u16 keys)
     return sWatch.shown;
 }
 
-static void ApplyFrame(const u8 *data, u16 len)
+// Applies one frame message to a picture. *gotKey: it has had a full frame (updates before that are skipped).
+// FALSE when the message is broken.
+static bool8 ApplyUpdate(u16 *buf, bool8 *gotKey, const u8 *data, u16 len)
 {
-    sWatch.updates++;
-    u16 song;
-    int pos = 7, count, i;
-    if (len < 7)
-        return;
+    int pos = FRAME_HEADER, count, i;
+    if (len < FRAME_HEADER)
+        return FALSE;
     if (data[3] & FRAMEF_KEY)
-        sWatch.gotFrame = TRUE;
-    if (!sWatch.gotFrame)
-        return; // wait for a full frame first
-    song = data[4] | (data[5] << 8);
-    if (song && song != sWatch.song && song < LAST_SONG)
-    {
-        sWatch.song = song;
-        m4aSongNumStart(song);
-    }
+        *gotKey = TRUE;
+    if (!*gotKey)
+        return TRUE; // wait for a full frame first
+    if (data[3] & FRAMEF_SHIFT)
+        ShiftFrame(buf, (s8)data[7], (s8)data[8]);
     count = data[6];
     for (i = 0; i < count && pos + 3 <= len; i++)
     {
@@ -452,16 +676,16 @@ static void ApplyFrame(const u8 *data, u16 len)
         int tx, ty;
         u16 px[64];
         if (t >= NUM_TILES)
-            return;
+            return FALSE;
         if (mode == 1)
         {
             int nRuns, n = 0;
             if (pos + 4 > len)
-                return;
+                return FALSE;
             nRuns = data[pos + 3];
             pos += 4;
             if (pos + nRuns * 3 > len)
-                return;
+                return FALSE;
             for (k = 0; k < nRuns; k++)
             {
                 int run = data[pos + k * 3];
@@ -473,11 +697,35 @@ static void ApplyFrame(const u8 *data, u16 len)
                 px[n++] = 0;
             pos += nRuns * 3;
         }
+        else if (mode == 2)
+        {
+            int nCols, bits, perByte;
+            u16 cols[16];
+            if (pos + 4 > len)
+                return FALSE;
+            nCols = data[pos + 3];
+            if (nCols < 1 || nCols > 16)
+                return FALSE;
+            bits = IndexBits(nCols);
+            perByte = 8 / bits;
+            pos += 4;
+            if (pos + nCols * 2 + 64 / perByte > len)
+                return FALSE;
+            for (k = 0; k < nCols; k++)
+                cols[k] = data[pos + k * 2] | (data[pos + k * 2 + 1] << 8);
+            pos += nCols * 2;
+            for (k = 0; k < 64; k++)
+            {
+                int c = (data[pos + k / perByte] >> ((k % perByte) * bits)) & ((1 << bits) - 1);
+                px[k] = c < nCols ? cols[c] : 0;
+            }
+            pos += 64 / perByte;
+        }
         else
         {
             pos += 3;
             if (pos + 128 > len)
-                return;
+                return FALSE;
             for (k = 0; k < 64; k++)
                 px[k] = data[pos + k * 2] | (data[pos + k * 2 + 1] << 8);
             pos += 128;
@@ -485,8 +733,239 @@ static void ApplyFrame(const u8 *data, u16 len)
         tx = (t % TILES_X) * 8;
         ty = (t / TILES_X) * 8;
         for (k = 0; k < 8; k++)
-            memcpy(sWatch.frame + (ty + k) * FRAME_W + tx, px + k * 8, 16);
+            memcpy(buf + (ty + k) * FRAME_W + tx, px + k * 8, 16);
     }
+    return TRUE;
+}
+
+static void ApplyFrame(const u8 *data, u16 len)
+{
+    u16 song;
+    sWatch.updates++;
+    if (len < FRAME_HEADER)
+        return;
+    if (!ApplyUpdate(sWatch.frame, &sWatch.gotFrame, data, len) || !sWatch.gotFrame)
+        return;
+    song = data[4] | (data[5] << 8);
+    if (song && song != sWatch.song && song < LAST_SONG)
+    {
+        sWatch.song = song;
+        m4aSongNumStart(song);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The SPECTATE panel: friends' screens under ours (src/platform/display.c draws it)
+
+#define PANEL_ASK_AGAIN (60 * 9)   // nothing heard this long (they send a full frame every 4 s): ask again
+
+static const u32 sPanelAccents[MP_MAX_PLAYERS] = {0xFF5A6E, 0x3E9BFF, 0x2BD487, 0xFFB52E};
+
+static struct
+{
+    u8 subscribed;                          // players we asked for their screen
+    u8 shown[DISPLAY_PANEL_MAX];            // player ids on the cards, in order
+    u8 count;
+    bool8 gotKey[MP_MAX_PLAYERS];
+    bool8 changed[MP_MAX_PLAYERS];
+    bool8 labelChanged[MP_MAX_PLAYERS];
+    u16 heard[MP_MAX_PLAYERS];              // frames since their last update
+    u16 updates[MP_MAX_PLAYERS];
+    u32 labelKey[MP_MAX_PLAYERS];           // what the label shows (redrawn when it changes)
+    u16 frame[MP_MAX_PLAYERS][FRAME_W * FRAME_H];
+    u32 label[MP_MAX_PLAYERS][DISPLAY_PANEL_LABEL_W * DISPLAY_PANEL_LABEL_H];
+} sPanel;
+static u16 sPanelWaiting[FRAME_W * FRAME_H];   // "CONNECTING..." until a full frame arrives
+static bool8 sPanelWaitingMade;
+
+static void Panel_Forget(u8 id)
+{
+    sPanel.subscribed &= ~(1 << id);
+    sPanel.gotKey[id] = FALSE;
+    sPanel.heard[id] = 0;
+    sPanel.labelKey[id] = 0;
+}
+
+static void Panel_OnFrame(u8 from, const u8 *data, u16 len)
+{
+    if (from >= MP_MAX_PLAYERS || !(sPanel.subscribed & (1 << from)))
+        return;
+    sPanel.heard[from] = 0;
+    if (ApplyUpdate(sPanel.frame[from], &sPanel.gotKey[from], data, len))
+    {
+        // the update's last message: the picture is complete (they're split at 255 tiles / MAX_PAYLOAD)
+        if (Tracing() && sPanel.gotKey[from] && (data[3] & FRAMEF_LAST))
+            MPNet_Log("spectrace: player %d seq %d sum %08x", from + 1, data[1] | (data[2] << 8), FrameSum(sPanel.frame[from]));
+        if (sPanel.gotKey[from])
+        {
+            sPanel.changed[from] = TRUE;
+            if (sPanel.updates[from]++ == 0 || (data[3] & FRAMEF_KEY))
+                MPNet_Log("spectate panel: player %d frame%s, %d tiles", from + 1, (data[3] & FRAMEF_KEY) ? " (full)" : "", data[6]);
+        }
+    }
+    else
+    {
+        // A broken update: ask for a full frame
+        sPanel.gotKey[from] = FALSE;
+        SendSimple(from, MPR_SPEC_PANEL_JOIN);
+    }
+}
+
+// Asks the friends we show for their screen, and stops asking the rest
+static void Panel_Update(void)
+{
+    u8 want = 0, n = 0, i;
+    if (gMpConfig.spectatePanel && MP_IsConnected() && gMpLocalId >= 0)
+        for (i = 0; i < MP_MAX_PLAYERS && n < DISPLAY_PANEL_MAX; i++)
+            if (i != gMpLocalId && gMpPlayers[i].present)
+            {
+                want |= 1 << i;
+                sPanel.shown[n++] = i;
+            }
+    sPanel.count = n;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        u8 bit = 1 << i;
+        if ((want & bit) && !(sPanel.subscribed & bit))
+        {
+            Panel_Forget(i);
+            sPanel.subscribed |= bit;
+            sPanel.labelChanged[i] = TRUE;
+            sPanel.updates[i] = 0;
+            SendSimple(i, MPR_SPEC_PANEL_JOIN);
+            MPNet_Log("spectate panel: asking player %d for their screen", i + 1);
+        }
+        else if (!(want & bit) && (sPanel.subscribed & bit))
+        {
+            if (gMpPlayers[i].present && MP_IsConnected())
+                SendSimple(i, MPR_SPEC_PANEL_LEAVE);
+            Panel_Forget(i);
+        }
+        else if ((sPanel.subscribed & bit) && ++sPanel.heard[i] >= PANEL_ASK_AGAIN)
+        {
+            sPanel.heard[i] = 0;
+            sPanel.gotKey[i] = FALSE;
+            SendSimple(i, MPR_SPEC_PANEL_JOIN);
+            MPNet_Log("spectate panel: nothing from player %d, asking again", i + 1);
+        }
+    }
+}
+
+// The label under a card: a dot in the player's color, their name, and where they are (or IN BATTLE)
+static void LabelPixel(u32 *buf, int x, int y, u32 argb)
+{
+    if (x >= 0 && x < DISPLAY_PANEL_LABEL_W && y >= 0 && y < DISPLAY_PANEL_LABEL_H)
+        buf[y * DISPLAY_PANEL_LABEL_W + x] = argb;
+}
+
+static int LabelText(u32 *buf, int x, int y, const u8 *str, u32 fg, u32 shadow, bool8 measureOnly)
+{
+    int start = x;
+    for (; *str != EOS; str++)
+    {
+        int w = MP_RenderSmallGlyph(*str, 1, 0, 2), gx, gy;
+        if (!measureOnly)
+            for (gy = 0; gy < 16; gy++)
+            {
+                const u32 *rows = (gy < 8) ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+                for (gx = 0; gx < w && gx < 16; gx++)
+                {
+                    u32 row = rows[(gx < 8 ? 0 : 8) + (gy % 8)];
+                    u8 c = (row >> ((gx % 8) * 4)) & 0xF;
+                    if (c == 1)
+                        LabelPixel(buf, x + gx, y + gy, fg);
+                    else if (c == 2)
+                        LabelPixel(buf, x + gx, y + gy, shadow);
+                }
+            }
+        x += w;
+    }
+    return x - start;
+}
+
+static void Panel_DrawLabel(u8 id)
+{
+    u32 *buf = sPanel.label[id];
+    u8 name[PLAYER_NAME_LENGTH + 1], where[40];
+    u32 accent = 0xFF000000 | sPanelAccents[id], key = 5381;
+    bool8 battle = gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_BATTLE);
+    int i, x, w, y;
+
+    StringCopyN(name, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
+    name[PLAYER_NAME_LENGTH] = EOS;
+    MP_Friends_LocationName(id, where);
+    for (i = 0; name[i] != EOS; i++)
+        key = key * 33 + name[i];
+    for (i = 0; where[i] != EOS; i++)
+        key = key * 33 + where[i];
+    key = key * 33 + battle + 1;
+    if (key == sPanel.labelKey[id])
+        return;
+    sPanel.labelKey[id] = key;
+    sPanel.labelChanged[id] = TRUE;
+    memset(buf, 0, sizeof(sPanel.label[id]));
+    // a round dot in the player's color
+    for (y = 0; y < 5; y++)
+        for (x = 0; x < 5; x++)
+            if (!((x == 0 || x == 4) && (y == 0 || y == 4)))
+                LabelPixel(buf, 5 + x, 4 + y, accent);
+    LabelText(buf, 13, -2, name, 0xFFFFFFFF, 0xFF3A3F4E, FALSE);
+    // where they are, on the right: IN BATTLE in a red pill
+    w = LabelText(buf, 0, 0, where, 0, 0, TRUE);
+    x = DISPLAY_PANEL_LABEL_W - 6 - w;
+    if (battle)
+    {
+        for (y = 2; y < DISPLAY_PANEL_LABEL_H - 1; y++)
+            for (i = x - 4; i < x + w + 3; i++)
+                if (!((i == x - 4 || i == x + w + 2) && (y == 2 || y == DISPLAY_PANEL_LABEL_H - 2)))
+                    LabelPixel(buf, i, y, 0xFFD8394C);
+        LabelText(buf, x, -2, where, 0xFFFFFFFF, 0xFF7A1C2A, FALSE);
+    }
+    else
+        LabelText(buf, x, -2, where, 0xFFB4BCCC, 0xFF2A2F3B, FALSE);
+}
+
+static void Panel_MakeWaiting(void)
+{
+    int i;
+    const char *text = "CONNECTING...";
+    if (sPanelWaitingMade)
+        return;
+    for (i = 0; i < FRAME_W * FRAME_H; i++)
+        sPanelWaiting[i] = 0x8000 | (3 << 10) | (2 << 5) | 2;
+    DrawText(sPanelWaiting, (FRAME_W - (int)strlen(text) * 8) / 2, 75, text, 0xFFFF, 2);
+    sPanelWaitingMade = TRUE;
+}
+
+// sdl2.c, every drawn frame: the panel's cards to the display
+void MP_Spectate_PanelSync(void)
+{
+    struct DisplayPanelCard cards[DISPLAY_PANEL_MAX];
+    u8 i;
+    if (!MP_IsConnected() || gMpLocalId < 0)
+    {
+        sPanel.count = 0;   // left the server: nobody to show (Panel_Update only runs in a room)
+        sPanel.subscribed = 0;
+    }
+    if (sPanel.count == 0)
+    {
+        Display_SetPanel(0, gMpConfig.spectateScale, NULL);
+        return;
+    }
+    Panel_MakeWaiting();
+    for (i = 0; i < sPanel.count; i++)
+    {
+        u8 id = sPanel.shown[i];
+        Panel_DrawLabel(id);
+        cards[i].frame = sPanel.gotKey[id] ? (const void *)sPanel.frame[id] : (const void *)sPanelWaiting;
+        cards[i].frameChanged = sPanel.changed[id] || !sPanel.gotKey[id];
+        cards[i].label = sPanel.label[id];
+        cards[i].labelChanged = sPanel.labelChanged[id];
+        cards[i].accent = sPanelAccents[id];
+        sPanel.changed[id] = FALSE;
+        sPanel.labelChanged[id] = FALSE;
+    }
+    Display_SetPanel(sPanel.count, gMpConfig.spectateScale, cards);
 }
 
 void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len)
@@ -505,9 +984,21 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len)
     case MPR_SPEC_LEAVE:
         sStream.viewers &= ~(1 << from);
         break;
+    case MPR_SPEC_PANEL_JOIN:
+        if (!(sStream.panel & (1 << from)))
+            MPNet_Log("spectate panel: player %d shows our screen", from + 1);
+        sStream.panel |= 1 << from;
+        sStream.needKey = TRUE;
+        break;
+    case MPR_SPEC_PANEL_LEAVE:
+        if (sStream.panel & (1 << from))
+            MPNet_Log("spectate panel: player %d stopped showing our screen", from + 1);
+        sStream.panel &= ~(1 << from);
+        break;
     case MPR_SPEC_FRAME:
         if (from == sWatch.target && !sWatch.ending)
             ApplyFrame(data, len);
+        Panel_OnFrame(from, data, len);
         break;
     case MPR_SPEC_END:
         if (from == sWatch.target)
@@ -522,12 +1013,15 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len)
 void MP_Spectate_OnPlayerLeft(u8 id)
 {
     sStream.viewers &= ~(1 << id);
+    sStream.panel &= ~(1 << id);
+    Panel_Forget(id);
     // the watch loop notices the missing player and stops
 }
 
 void MP_Spectate_FrameUpdate(void)
 {
     Stream_Update();
+    Panel_Update();
 }
 
 // ---------------------------------------------------------------------------
@@ -674,4 +1168,79 @@ bool8 MP_Spectate_TryInteract(void)
         return TRUE;
     }
     return FALSE;
+}
+
+// ---------------------------------------------------------------------------
+// CO-OP > SPECTATE: the panel on / off and its size
+
+static EWRAM_DATA u16 sSetCursor = 0;
+static EWRAM_DATA u8 sSetShownFit = 0;   // the size the panel really has (smaller when the bigger one doesn't fit)
+
+static void DrawSettings(void)
+{
+    char size[20];
+    int fit = Display_GetPanelScale();
+    sSetShownFit = fit;
+    if (gMpConfig.spectatePanel && fit > 0 && fit != gMpConfig.spectateScale)
+        snprintf(size, sizeof(size), "%dX (%dX FITS)", gMpConfig.spectateScale, fit);
+    else
+        snprintf(size, sizeof(size), "%dX", gMpConfig.spectateScale);
+    MpUi_Begin("SPECTATE");
+    MpUi_RowAscii(0, sSetCursor == 0, "FRIENDS' SCREENS", gMpConfig.spectatePanel ? "ON" : "OFF");
+    MpUi_RowAscii(1, sSetCursor == 1, "SIZE", size);
+    MpUi_RowAscii(2, sSetCursor == 2, "DONE", NULL);
+    MpUi_End();
+    if (sSetCursor == 1)
+        MpUi_HelpAscii("Left/Right: 1X to 4X; yours fits above.");
+    else
+        MpUi_HelpAscii("Up to 3 friends' screens live, under yours.");
+}
+
+static void Task_SpectateSettings(u8 taskId)
+{
+    bool8 redraw = FALSE;
+    if (MpUi_MoveCursor(&sSetCursor, 3) || Display_GetPanelScale() != sSetShownFit)
+    {
+        DrawSettings();
+        return;
+    }
+    if (sSetCursor == 0 && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT))
+    {
+        gMpConfig.spectatePanel = !gMpConfig.spectatePanel;
+        MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
+        redraw = TRUE;
+    }
+    else if (sSetCursor == 1 && JOY_NEW(A_BUTTON | DPAD_RIGHT))
+    {
+        gMpConfig.spectateScale = gMpConfig.spectateScale >= 4 ? 1 : gMpConfig.spectateScale + 1;
+        redraw = TRUE;
+    }
+    else if (sSetCursor == 1 && JOY_NEW(DPAD_LEFT))
+    {
+        gMpConfig.spectateScale = gMpConfig.spectateScale <= 1 ? 4 : gMpConfig.spectateScale - 1;
+        redraw = TRUE;
+    }
+    else if (JOY_NEW(B_BUTTON) || (sSetCursor == 2 && JOY_NEW(A_BUTTON)))
+    {
+        PlaySE(SE_SELECT);
+        MP_SaveConfig();
+        MpUi_Close();
+        DestroyTask(taskId);
+        return;
+    }
+    if (redraw)
+    {
+        PlaySE(SE_SELECT);
+        DrawSettings();
+    }
+}
+
+void MP_Spectate_OpenSettings(void)
+{
+    if (gMpConfig.spectateScale < 1 || gMpConfig.spectateScale > 4)
+        gMpConfig.spectateScale = 1;
+    sSetCursor = 0;
+    MpUi_Open();
+    CreateTask(Task_SpectateSettings, 80);
+    DrawSettings();
 }

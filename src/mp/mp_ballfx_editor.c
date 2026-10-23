@@ -2,7 +2,7 @@
 //
 // A battle scene with the Moemon standing on its platform and a panel on the
 // right: PRESET, MATERIALIZATION, ENERGY COLOR, ENTRANCE PARTICLES, RECALL
-// EFFECT and SOUND ACCENT, then SAVE AS (MY PRESET 1-3, which PRESET then offers)
+// EFFECT and SOUND ACCENT, then SAVE AS (MY PRESET 1-6, which PRESET then offers)
 // and APPLY TO PARTY. The preview loops: the ball drops in and opens, the
 // entrance plays, a short pause, then the recall. SELECT shows it from the
 // other side (as other players see it), START saves, B leaves.
@@ -77,7 +77,7 @@ struct Editor
     u8 row;
     bool8 front;      // as other players see it
     u8 asking;        // ASK_*: a YES / NO question in the info box
-    u8 slot;          // SAVE AS: MY PRESET slot 0-2
+    u8 slot;          // SAVE AS: MY PRESET slot 0-5
     char note[64];    // a line for the info box ("Saved as MY PRESET 1.")
     bool8 leaving;
     u16 species;
@@ -160,6 +160,21 @@ static const char *const sFormInfo[MPFX_FORM_COUNT] = {
     "It falls in a blazing streak and lands with a squash and a shockwave.",
     "It's oversized for a moment, then settles with a bounce.",
     "It rises from the ground.",
+    "A beam of light strikes its spot and it materializes inside.",
+    "It springs out of the ball, flips once and lands.",
+    "A vortex opens and it spins out of it, slowing down.",
+    "It zooms in from the side with speed lines and skids to a stop.",
+    "It drops in as see-through jelly and wobbles into shape.",
+    "A card in its energy color flips over three times and shows it.",
+    "It's projected as a flickering, glitching hologram that firms up.",
+    "Stars swirl in and gather into its shape, then it shines.",
+    "Sand pours down and piles into its shape, then falls away.",
+    "A pillar of fire erupts and it steps out of the flames.",
+    "A geyser shoots it up, then it drops into place in a splash.",
+    "A whirl of leaves wraps it, then blows away.",
+    "Its shadow slides over from the ball and it rises out of it.",
+    "It grows in as its colors run through the rainbow.",
+    "It bounces out of the ball to its spot, three hops, each smaller.",
 };
 static const char *const sPartInfo[MPFX_PART_COUNT] = {
     "The game's own: the ball's sparkles.",
@@ -178,6 +193,21 @@ static const char *const sPartInfo[MPFX_PART_COUNT] = {
     "The field dims and a spotlight shines on it.",
     "A dust ring and a small impact flash at its feet.",
     "Golden sparkles, glitter and a little crown.",
+    "Hearts pop up around it and float away.",
+    "Music notes rise on both sides, as if it were singing.",
+    "Snow drifts down over it, ice glinting here and there.",
+    "A flurry of white feathers, drifting down.",
+    "A gust blows tumbling leaves past it.",
+    "Shooting stars streak by, it twinkles, a big star spins in.",
+    "A rainbow arcs over it from two little clouds.",
+    "Flames spring up in a ring around its feet.",
+    "A burst of water, a splash crown and flying drops.",
+    "A storm of cherry petals blows across the field.",
+    "Coins fly out, spinning, and bounce on the ground.",
+    "A bunch of balloons floats up from behind it.",
+    "Butterflies flutter out and away.",
+    "Glittering gems burst out and bounce on the ground.",
+    "A flaring aura rises around it in its energy color.",
 };
 static const char *const sRecallInfo[MPFX_RECALL_COUNT] = {
     "The game's own: it shrinks into the ball.",
@@ -187,6 +217,36 @@ static const char *const sRecallInfo[MPFX_RECALL_COUNT] = {
     "A puff hides it; the smoke is sucked into the ball.",
     "It becomes a grid of squares that blink out.",
     "A quick bow, a sparkle, then back to the ball.",
+    "A beam of light falls on it, it narrows to a line and is taken up.",
+    "It crouches, then backflips into the ball.",
+    "A vortex opens and it spins into it, faster and faster.",
+    "It leans in and dashes off the screen with speed lines.",
+    "It wobbles and melts into a puddle that slides back to the ball.",
+    "It flips over to its card side and the card spins into the ball.",
+    "It switches off like an old TV: a line, a dot, gone.",
+    "It turns to starlight and streams into the ball as stars.",
+    "It turns to sand and crumbles into a heap.",
+    "It bursts into flame and is gone in a puff of smoke.",
+    "A geyser bursts up under it and carries it away.",
+    "Leaves whirl around it, then fly into the ball.",
+    "It darkens and sinks into its shadow; the shadow slides away.",
+    "Its colors run through the rainbow as it twists into a sparkle.",
+    "It hops back to the ball, three hops, each bigger.",
+    "Its heart beats twice, then it bursts into hearts.",
+    "A bubble forms around it and floats it away, then pops.",
+    "It crackles, a bolt strikes, and it's gone in the flash.",
+    "Ice closes around it, it shakes, and it shatters.",
+    "Three balloons lift it off the top of the screen.",
+    "It crouches and leaps clean off the top of the screen.",
+    "It hops, turns head-down and dives into the ground with a splash.",
+    "It turns white and scatters into feathers.",
+    "A black hole opens at the ball and pulls it in, stretching.",
+    "It fades away like a ghost, drifting up.",
+    "It pixelates, then its pixels rain down and fade.",
+    "It shoots up like a rocket and bursts into fireworks.",
+    "It dozes off, Zs floating up, and fades away asleep.",
+    "It blushes pink and blows away in cherry petals.",
+    "It pales and its spirit, a glowing orb, flies into the ball.",
 };
 static const char *const sSoundInfo[MPFX_SOUND_COUNT] = {
     "A sound that suits the effect.",
@@ -242,7 +302,7 @@ static void DrawInfo(void)
     case ROW_PRESET:
         preset = MP_BallFx_WhichPreset(&sEd->fx);
         if (preset < 0 && MP_BallFx_WhichUserPreset(&sEd->fx) >= 0)
-            text = "One of your own presets. SAVE AS keeps up to three.";
+            text = "One of your own presets. SAVE AS keeps up to six.";
         else
             text = preset < 0 ? "Your own mix. Pick a preset with {LEFTRIGHT}, or change any part below." :
                    preset == 0 ? "Everything the way the game does it." : "A ready-made mix. Change any part below to make it your own.";
@@ -502,7 +562,8 @@ static void PreviewFrame(void)
             sEd->timer = 0;
             PlaySE(SE_BALL_OPEN);
             if (!sEd->defaultRecall)
-                MP_BallFx_StartRecall(sEd->monSprite, sEd->monX - 56, sEd->monY + 24, flags, &sEd->fx);
+                MP_BallFx_StartRecall(sEd->monSprite, sEd->front ? sEd->monX + 56 : sEd->monX - 56,
+                                      sEd->front ? sEd->monY - 24 : sEd->monY + 24, flags, &sEd->fx);   // as in battle
             else
                 DefaultRecallFrame(0);
         }
@@ -536,7 +597,7 @@ static void ChangeValue(s8 d)
     {
     case ROW_PRESET:
     {
-        // the ready-made presets, then MY PRESET 1-3 (the saved ones)
+        // the ready-made presets (those whose pieces this save has), then MY PRESET 1-6 (the saved ones)
         u8 builtIn = MP_BallFx_PresetCount(), total = builtIn + MPFX_USER_PRESETS, tries;
         struct MpBallFx user;
         s16 at = MP_BallFx_WhichPreset(fx);
@@ -549,6 +610,8 @@ static void ChangeValue(s8 d)
             at = (at + total + d) % total;
             if (at < builtIn)
             {
+                if (!MP_BallFx_PresetUnlocked(at))
+                    continue;
                 MP_BallFx_Preset(at, fx);
                 break;
             }
@@ -557,6 +620,11 @@ static void ChangeValue(s8 d)
                 *fx = user;
                 break;
             }
+        }
+        {
+            char name[32];
+            MP_BallFx_EffectName(fx, name, sizeof(name));
+            MPNet_Log("ball fx: preset %s", name);
         }
         break;
     }
@@ -567,10 +635,11 @@ static void ChangeValue(s8 d)
         return;   // the preview keeps playing
     case ROW_PARTY:
         return;
-    case ROW_FORM:   fx->form = (fx->form + MPFX_FORM_COUNT + d) % MPFX_FORM_COUNT; break;
-    case ROW_COLOR:  fx->color = (fx->color + MP_BALL_COLORS + d) % MP_BALL_COLORS; break;
-    case ROW_PART:   fx->part = (fx->part + MPFX_PART_COUNT + d) % MPFX_PART_COUNT; break;
-    case ROW_RECALL: fx->recall = (fx->recall + MPFX_RECALL_COUNT + d) % MPFX_RECALL_COUNT; break;
+    // only the pieces this save has (mp_ballunlock.c)
+    case ROW_FORM:   fx->form = MP_BallUnlock_Step(MPFX_PIECE_FORM, fx->form, d); break;
+    case ROW_COLOR:  fx->color = MP_BallUnlock_Step(MPFX_PIECE_COLOR, fx->color, d); break;
+    case ROW_PART:   fx->part = MP_BallUnlock_Step(MPFX_PIECE_PART, fx->part, d); break;
+    case ROW_RECALL: fx->recall = MP_BallUnlock_Step(MPFX_PIECE_RECALL, fx->recall, d); break;
     case ROW_SOUND:  fx->sound = (fx->sound + MPFX_SOUND_COUNT + d) % MPFX_SOUND_COUNT; break;
     }
     PlaySE(SE_SELECT);
@@ -582,7 +651,7 @@ static void SavePreset(void)
 {
     MP_BallFx_SaveUserPreset(sEd->slot, &sEd->fx);
     snprintf(sEd->note, sizeof(sEd->note), "Saved as MY PRESET %d. Pick it in PRESET for any Moemon.", sEd->slot + 1);
-    MPNet_Log("ball fx: saved MY PRESET %d (%04x)", sEd->slot + 1, MP_BallFx_Pack(&sEd->fx));
+    MPNet_Log("ball fx: saved MY PRESET %d (%06x)", sEd->slot + 1, (unsigned)MP_BallFx_Pack(&sEd->fx));
     PlaySE(SE_SAVE);
 }
 

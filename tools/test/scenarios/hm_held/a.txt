@@ -1,0 +1,57 @@
+pressuntil A field 5000
+wait 200
+mp givebadges
+mp moves 0 10 45
+mp item 339 1
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press A 2
+wait 20
+press RIGHT 2
+wait 6
+shot give
+press A 2
+pressuntil A partymenu 900
+wait 10
+press A 2
+wait 90
+shot given
+pressuntil B field 1500
+wait 30
+mp monmoves 0
+mp bagqty 339
+press START 2
+wait 30
+press UP 2
+wait 10
+shot startmenu
+press A 2
+waitfor partymenu 900
+wait 10
+press A 2
+wait 30
+shot actions
+pressuntil B field 1500
+wait 30
+shot before
+press UP 2
+wait 20
+press A 2
+pressuntil A yesno 900
+wait 10
+shot ask
+press A 2
+pressuntil A field 1500
+wait 60
+shot cut
+quit

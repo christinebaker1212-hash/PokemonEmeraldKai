@@ -369,6 +369,19 @@ static const struct CompressedTilesPal sBerryPicTable[] =
     [ITEM_TO_BERRY(ITEM_LANSAT_BERRY) - 1] = {gBerryPic_Lansat, gBerryPalette_Lansat},
     [ITEM_TO_BERRY(ITEM_STARF_BERRY)  - 1] = {gBerryPic_Starf,  gBerryPalette_Starf},
     [ITEM_TO_BERRY(ITEM_ENIGMA_BERRY) - 1] = {gBerryPic_Enigma, gBerryPalette_Enigma},
+    // Moemon Kai: the e-Reader Berries
+    [BERRY_SLOT(ITEM_PUMKIN_BERRY)] = {gBerryPic_Pumkin, gBerryPalette_Pumkin},
+    [BERRY_SLOT(ITEM_DRASH_BERRY)] = {gBerryPic_Drash, gBerryPalette_Drash},
+    [BERRY_SLOT(ITEM_EGGANT_BERRY)] = {gBerryPic_Eggant, gBerryPalette_Eggant},
+    [BERRY_SLOT(ITEM_STRIB_BERRY)] = {gBerryPic_Strib, gBerryPalette_Strib},
+    [BERRY_SLOT(ITEM_CHILAN_BERRY)] = {gBerryPic_Chilan, gBerryPalette_Chilan},
+    [BERRY_SLOT(ITEM_NUTPEA_BERRY)] = {gBerryPic_Nutpea, gBerryPalette_Nutpea},
+    [BERRY_SLOT(ITEM_GINEMA_BERRY)] = {gBerryPic_Ginema, gBerryPalette_Ginema},
+    [BERRY_SLOT(ITEM_KUO_BERRY)] = {gBerryPic_Kuo, gBerryPalette_Kuo},
+    [BERRY_SLOT(ITEM_YAGO_BERRY)] = {gBerryPic_Yago, gBerryPalette_Yago},
+    [BERRY_SLOT(ITEM_TOUGA_BERRY)] = {gBerryPic_Touga, gBerryPalette_Touga},
+    [BERRY_SLOT(ITEM_NINIKU_BERRY)] = {gBerryPic_Niniku, gBerryPalette_Niniku},
+    [BERRY_SLOT(ITEM_TOPO_BERRY)] = {gBerryPic_Topo, gBerryPalette_Topo},
 };
 
 const struct CompressedSpriteSheet gBerryCheckCircleSpriteSheet =
@@ -624,6 +637,8 @@ static void LoadBerryGfx(u8 berryId)
         // unknown empty if statement
     }
 
+    if (berryId >= ARRAY_COUNT(sBerryPicTable) || sBerryPicTable[berryId].tiles == NULL)
+        berryId = 0;   // Moemon Kai: no picture for the unused berry numbers
     pal.data = sBerryPicTable[berryId].pal;
     pal.tag = TAG_BERRY_PIC_PAL;
     LoadCompressedSpritePalette(&pal);

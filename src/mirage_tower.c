@@ -268,6 +268,12 @@ bool8 IsMirageTowerVisible(void)
 
 static void UpdateMirageTowerPulseBlend(u8 taskId)
 {
+    // Moemon Co-op: never with the shimmer's data gone (it crashed opening MoeGatcha on ROUTE 111)
+    if (sMirageTowerPulseBlend == NULL || sMirageTowerPulseBlend->taskId != taskId)
+    {
+        DestroyTask(taskId);
+        return;
+    }
     UpdatePulseBlend(&sMirageTowerPulseBlend->pulseBlend);
 }
 

@@ -1,0 +1,15 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 400
+press DOWN 30
+press RIGHT 40
+press UP 30
+press LEFT 40
+wait 200
+press RIGHT 40
+press DOWN 30
+press LEFT 40
+press UP 30
+wait 2400
+log CARL quits
+quit

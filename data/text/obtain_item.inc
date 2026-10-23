@@ -5,6 +5,10 @@ gText_MpGotGatchaTicket::
 	.string "A MOEGATCHA TICKET came with it!\n"
 	.string "(One pull on any MOEGATCHA banner.)$"
 
+gText_MpTentGatchaTickets::
+	.string "Three wins in a row also earned you\n"
+	.string "3 MOEGATCHA TICKETS!$"
+
 gText_TheBagIsFull::
 	.string "The BAG is full…$"
 

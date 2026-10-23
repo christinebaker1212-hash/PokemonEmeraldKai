@@ -1,0 +1,7 @@
+# Achievements earned before they existed are granted together, once, with one message: a save that has all
+# eight HMs, 120 battles, 12 catches and $150,000 gets HM COLLECTOR, BATTLE-READY, BALL TOSSER, WELL OFF (plus
+# whatever the quick start already had). Then the tabbed menu (L/R).
+MODE=1
+TMO=120
+EXPECT_A=("achievements: " "achievement: hms (+10 pulls)" "achievement: battles100 (+3 pulls)" "achievement: captures10 (+3 pulls)" "achievement: money100k (+10 pulls)" "achievement: start (+3 pulls)")
+UNEXPECT_A=("achievement: money999k" "achievement: captures100")

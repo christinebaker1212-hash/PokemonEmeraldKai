@@ -3264,17 +3264,58 @@ BattleScript_MpCoopLearnAll::
 	return
 
 BattleScript_RainContinuesOrEnds::
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_RAIN_STOPPED, BattleScript_RainStops
+	@ Moemon Co-op: "Rain continues to fall." the first time only
+	mpweathermsg 0, BattleScript_RainContinuesNoLine
 	printfromtable gRainContinuesStringIds
 	waitmessage B_WAIT_TIME_LONG
-	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_RAIN_STOPPED, BattleScript_RainContinuesOrEndsEnd
+	goto BattleScript_RainContinuesAnim
+BattleScript_RainContinuesNoLine::
+	printstring STRINGID_EMPTYSTRING3
+BattleScript_RainContinuesAnim::
 	playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES
+	end2
+BattleScript_RainStops::
+	mpweathermsg 1
+	printfromtable gRainContinuesStringIds
+	waitmessage B_WAIT_TIME_LONG
 BattleScript_RainContinuesOrEndsEnd::
 	end2
 
 BattleScript_DamagingWeatherContinues::
+	@ Moemon Co-op: "The sandstorm rages." the first time only, then everyone hit at once
+	mpweathermsg 0, BattleScript_DamagingWeatherNoLine
 	printfromtable gSandStormHailContinuesStringIds
 	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_DamagingWeatherAnim
+BattleScript_DamagingWeatherNoLine::
+	printstring STRINGID_EMPTYSTRING3
+BattleScript_DamagingWeatherAnim::
 	playanimation_var BS_ATTACKER, sB_ANIM_ARG1
+	mpweathergroup 0, BattleScript_DamagingWeatherOneByOne
+	mpweathermsg 2, BattleScript_MpWeatherHit
+	printfromtable gMpWeatherAllStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_MpWeatherHit::
+	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE
+	effectivenesssound
+	mpweathergroup 1
+	waitstate
+	mpweathergroup 2
+	waitstate
+	setbyte gBattleCommunication, 0
+BattleScript_MpWeatherApply::
+	mpweathergroup 3, BattleScript_MpWeatherApplyNext
+	orword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE
+	datahpupdate BS_ATTACKER
+	tryfaintmon BS_ATTACKER
+	checkteamslost BattleScript_MpWeatherApplyNext
+BattleScript_MpWeatherApplyNext::
+	jumpifbyte CMP_NOT_EQUAL, gBattleOutcome, 0, BattleScript_DamagingWeatherContinuesEnd
+	addbyte gBattleCommunication, 1
+	jumpifbytenotequal gBattleCommunication, gBattlersCount, BattleScript_MpWeatherApply
+	goto BattleScript_DamagingWeatherContinuesEnd
+BattleScript_DamagingWeatherOneByOne::
 	setbyte gBattleCommunication, 0
 BattleScript_DamagingWeatherLoop::
 	copyarraywithindex gBattlerAttacker, gBattlerByTurnOrder, gBattleCommunication, 1
@@ -3298,17 +3339,25 @@ BattleScript_DamagingWeatherContinuesEnd::
 	end2
 
 BattleScript_SandStormHailEnds::
+	mpweathermsg 1
 	printfromtable gSandStormHailEndStringIds
 	waitmessage B_WAIT_TIME_LONG
 	end2
 
 BattleScript_SunlightContinues::
+	@ Moemon Co-op: "The sunlight is strong." the first time only
+	mpweathermsg 0, BattleScript_SunlightContinuesNoLine
 	printstring STRINGID_SUNLIGHTSTRONG
 	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_SunlightContinuesAnim
+BattleScript_SunlightContinuesNoLine::
+	printstring STRINGID_EMPTYSTRING3
+BattleScript_SunlightContinuesAnim::
 	playanimation BS_ATTACKER, B_ANIM_SUN_CONTINUES
 	end2
 
 BattleScript_SunlightFaded::
+	mpweathermsg 1
 	printstring STRINGID_SUNLIGHTFADED
 	waitmessage B_WAIT_TIME_LONG
 	end2

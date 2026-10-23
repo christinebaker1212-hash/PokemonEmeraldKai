@@ -4,6 +4,7 @@
 // decoration): how its body forms (materialization), the particles around the
 // entrance, the energy color, how it's recalled and a sound accent. They're
 // stored in the Pokémon itself (MON_DATA_MP_BALLFX: substruct 0's spare u16;
+// MON_DATA_MP_BALLFX_EXT: the markings byte's and the ribbons' spare bits;
 // MON_DATA_MP_BALLFX_SOUND: the 4 spare flag bits), so they travel with trades
 // and every game in a link battle shows them.
 //
@@ -13,9 +14,9 @@
 // anything up. Several entrances at once (doubles, triples) share a budget so
 // the screen stays readable, and the spotlight dims the background only once.
 //
-// Graphics: tools/moemon_ballfx/gen.py -> mp_ballfx_gfx.h. All particles use
-// one 16-color palette (the overworld has a single free one), each set is only
-// in VRAM while it's on screen, and the "energy" art is recolored when loaded.
+// Graphics: tools/moemon_ballfx/gen.py -> mp_ballfx_gfx.h: indexed pixels with one
+// shared palette (the game's own battle animation art keeps its colors), drawn by
+// the effects layer; the "energy" pixels take the chosen energy color.
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -50,14 +51,23 @@
 static const char *const sFormNames[MPFX_FORM_COUNT] = {
     "DEFAULT", "ANIME BEAM", "SMOKE FORM", "BUBBLE FORM", "LIGHTNING", "HAUNTED FADE",
     "DIGITAL", "INK", "CRYSTAL", "METEOR DROP", "POP-IN", "RISE UP",
+    "TELEPORT", "SOMERSAULT", "VORTEX", "DASH IN", "JELLY DROP", "CARD FLIP", "HOLOGRAM", "STARDUST",
+    "SAND SCULPT", "FLAME PILLAR", "GEYSER", "LEAF WHIRL", "SHADOW STEP", "PRISM", "BOUNCE IN",
 };
 static const char *const sPartNames[MPFX_PART_COUNT] = {
     "DEFAULT", "NONE", "CONFETTI", "EXPLOSION", "SMOKE PUFF", "FIREWORKS", "FLOWER BLOOM", "BUBBLES",
     "LIGHTNING BOLT", "WISPS + EYES", "PIXEL BITS", "INK SPLASH", "CRYSTAL SHARDS", "SPOTLIGHT", "DUST RING",
     "ROYAL SPARKLES",
+    "HEARTS", "MUSIC NOTES", "SNOWFALL", "FEATHERS", "LEAF GUST", "STAR SHOWER", "RAINBOW", "FIRE RING",
+    "SPLASH", "SAKURA STORM", "PAY DAY", "BALLOONS", "BUTTERFLIES", "GEMSTONES", "POWER AURA",
 };
 static const char *const sRecallNames[MPFX_RECALL_COUNT] = {
     "DEFAULT", "CLASSIC BEAM", "DISSOLVE", "REVERSE CONFETTI", "SMOKE RETREAT", "DIGITAL SHUTDOWN", "CURTAIN CALL",
+    "TELEPORT OUT", "BACKFLIP", "VORTEX", "DASH OFF", "MELT AWAY", "CARD FLIP", "SWITCH OFF", "STARDUST",
+    "SAND CRUMBLE", "FLAME OUT", "GEYSER LIFT", "LEAF WHIRL", "SHADOW SINK", "PRISM TWINKLE", "BOUNCE BACK",
+    "HEART POP", "BUBBLE FLOAT", "LIGHTNING STRIKE", "ICE SHATTER", "BALLOON RIDE", "SUPER JUMP", "DIVE",
+    "FEATHER SCATTER", "BLACK HOLE", "GHOST FADE", "PIXEL RAIN", "FIREWORK", "NAP TIME", "SAKURA SCATTER",
+    "SPIRIT ORB",
 };
 static const char *const sSoundNames[MPFX_SOUND_COUNT] = {
     "AUTO", "NONE", "SOFT CHIME", "POP", "BOOM", "FANFARE", "THUNDER", "SPOOKY",
@@ -77,6 +87,22 @@ static const struct FxPreset sPresets[] = {
     {"STORM",                {MPFX_FORM_LIGHTNING, MPFX_PART_LIGHTNING, MP_BALL_YELLOW, MPFX_RECALL_DISSOLVE, MPFX_SOUND_THUNDER}},
     {"DEEP SEA",             {MPFX_FORM_BUBBLE,    MPFX_PART_BUBBLES,   MP_BALL_CYAN,   MPFX_RECALL_DISSOLVE, MPFX_SOUND_AUTO}},
     {"SHOOTING STAR",        {MPFX_FORM_METEOR,    MPFX_PART_DUST,      MP_BALL_BLUE,   MPFX_RECALL_BEAM,     MPFX_SOUND_AUTO}},
+    // with the newer pieces (in the PRESET list once this save has all of a preset's pieces)
+    {"SWEETHEART",           {MPFX_FORM_JELLY,     MPFX_PART_HEARTS,    MP_BALL_ROSE,    MPFX_RECALL_HEARTS,    MPFX_SOUND_AUTO}},
+    {"POP STAR",             {MPFX_FORM_SOMERSAULT, MPFX_PART_NOTES,    MP_BALL_MAGENTA, MPFX_RECALL_JUMP,      MPFX_SOUND_AUTO}},
+    {"WINTER",               {MPFX_FORM_STARDUST,  MPFX_PART_SNOW,      MP_BALL_AZURE,   MPFX_RECALL_ICE,       MPFX_SOUND_AUTO}},
+    {"WILDFIRE",             {MPFX_FORM_FLAME,     MPFX_PART_FIRE,      MP_BALL_SCARLET, MPFX_RECALL_FLAME,     MPFX_SOUND_AUTO}},
+    {"HIGH TIDE",            {MPFX_FORM_GEYSER,    MPFX_PART_SPLASH,    MP_BALL_AQUA,    MPFX_RECALL_DIVE,      MPFX_SOUND_AUTO}},
+    {"FOREST SPIRIT",        {MPFX_FORM_LEAVES,    MPFX_PART_BUTTERFLIES, MP_BALL_FOREST, MPFX_RECALL_LEAVES,   MPFX_SOUND_AUTO}},
+    {"HANAMI",               {MPFX_FORM_TELEPORT,  MPFX_PART_SAKURA,    MP_BALL_SAKURA,  MPFX_RECALL_SAKURA,    MPFX_SOUND_AUTO}},
+    {"JACKPOT",              {MPFX_FORM_CARD,      MPFX_PART_COINS,     MP_BALL_GOLD,    MPFX_RECALL_CARD,      MPFX_SOUND_AUTO}},
+    {"PARTY TIME",           {MPFX_FORM_BOUNCE,    MPFX_PART_BALLOONS,  MP_BALL_LEMON,   MPFX_RECALL_BALLOONS,  MPFX_SOUND_AUTO}},
+    {"SHADOW REALM",         {MPFX_FORM_SHADOW,    MPFX_PART_AURA,      MP_BALL_VIOLET,  MPFX_RECALL_BLACKHOLE, MPFX_SOUND_AUTO}},
+    {"CYBERSPACE",           {MPFX_FORM_HOLOGRAM,  MPFX_PART_PIXELS,    MP_BALL_LIME,    MPFX_RECALL_SWITCHOFF, MPFX_SOUND_AUTO}},
+    {"GALAXY",               {MPFX_FORM_VORTEX,    MPFX_PART_STARS,     MP_BALL_INDIGO,  MPFX_RECALL_STARDUST,  MPFX_SOUND_AUTO}},
+    {"DESERT WIND",          {MPFX_FORM_SAND,      MPFX_PART_DUST,      MP_BALL_SAND,    MPFX_RECALL_SAND,      MPFX_SOUND_AUTO}},
+    {"DAYDREAM",             {MPFX_FORM_PRISM,     MPFX_PART_RAINBOW,   MP_BALL_LILAC,   MPFX_RECALL_NAP,       MPFX_SOUND_AUTO}},
+    {"ANGEL",                {MPFX_FORM_TELEPORT,  MPFX_PART_FEATHERS,  MP_BALL_WHITE,   MPFX_RECALL_FEATHERS,  MPFX_SOUND_AUTO}},
 };
 
 const char *MP_BallFx_FormName(u8 i)   { return sFormNames[i < MPFX_FORM_COUNT ? i : 0]; }
@@ -91,6 +117,14 @@ void MP_BallFx_Preset(u8 i, struct MpBallFx *out)
     *out = sPresets[i < ARRAY_COUNT(sPresets) ? i : 0].fx;
 }
 
+// TRUE if this save has every piece of a preset (mp_ballunlock.c)
+bool8 MP_BallFx_PresetUnlocked(u8 i)
+{
+    const struct MpBallFx *fx = &sPresets[i < ARRAY_COUNT(sPresets) ? i : 0].fx;
+    return MP_BallUnlock_Has(MPFX_PIECE_COLOR, fx->color) && MP_BallUnlock_Has(MPFX_PIECE_FORM, fx->form)
+        && MP_BallUnlock_Has(MPFX_PIECE_PART, fx->part) && MP_BallUnlock_Has(MPFX_PIECE_RECALL, fx->recall);
+}
+
 // The preset this effect is, or -1
 s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx)
 {
@@ -101,9 +135,11 @@ s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx)
     return -1;
 }
 
-// MY PRESET 1-3: the player's own mixes, kept with the save (<save>.coop, "fxpreset1" =
-// used bit 30 | sound << 16 | packed effect)
+// MY PRESET 1-6: the player's own mixes, kept with the save (<save>.coop, "fxpreset1" =
+// used bit 30 | layout-2 bit 29 | sound << 24 | packed effect (24 bits); saved before layout 2:
+// used bit 30 | sound << 16 | the 16-bit packed effect)
 #define USER_PRESET_USED (1 << 30)
+#define USER_PRESET_V2   (1 << 29)
 
 bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
 {
@@ -115,7 +151,10 @@ bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
     v = MP_SaveData_Get(key);
     if (!(v & USER_PRESET_USED))
         return FALSE;
-    MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
+    if (v & USER_PRESET_V2)
+        MP_BallFx_Unpack(v & 0xFFFFFF, (v >> 24) & 0x7, out);
+    else
+        MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
     return TRUE;
 }
 
@@ -125,7 +164,7 @@ void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx)
     if (slot >= MPFX_USER_PRESETS)
         return;
     snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
-    MP_SaveData_Set(key, USER_PRESET_USED | ((fx->sound & 0x7) << 16) | MP_BallFx_Pack(fx));
+    MP_SaveData_Set(key, USER_PRESET_USED | USER_PRESET_V2 | ((fx->sound & 0x7) << 24) | MP_BallFx_Pack(fx));
 }
 
 s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx)
@@ -149,21 +188,14 @@ void MP_BallFx_EffectName(const struct MpBallFx *fx, char *out, u32 size)
         snprintf(out, size, "CUSTOM");
 }
 
-// filler: form 0-3, particles 4-7, energy color 8-11, recall 12-14; sound in the spare flag bits
+// MON_DATA_MP_BALLFX (substruct 0's spare u16): form 0-3, particles 4-7, energy color 8-11, recall 12-14;
+// MON_DATA_MP_BALLFX_EXT (8 bits): form bit 4, particles bit 4, color bits 4-5, recall bits 3-5 (all 0 in
+// Moemon from before there were more); the sound in the spare flag bits
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out)
 {
-    u16 v = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX, NULL);
-    out->form = v & 0xF;
-    out->part = (v >> 4) & 0xF;
-    out->color = (v >> 8) & 0xF;
-    out->recall = (v >> 12) & 0x7;
-    out->sound = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_SOUND, NULL) & 0x7;
-    if (out->form >= MPFX_FORM_COUNT)
-        out->form = 0;
-    if (out->color >= MP_BALL_COLORS)
-        out->color = 0;
-    if (out->recall >= MPFX_RECALL_COUNT)
-        out->recall = 0;
+    u32 v = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX, NULL)
+          | (GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_EXT, NULL) << 16);
+    MP_BallFx_Unpack(v, GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_SOUND, NULL), out);
 }
 
 void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out)
@@ -171,25 +203,35 @@ void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out)
     MP_BallFx_OfBoxMon(&mon->box, out);
 }
 
-u16 MP_BallFx_Pack(const struct MpBallFx *fx)
+u32 MP_BallFx_Pack(const struct MpBallFx *fx)
 {
-    return (fx->form & 0xF) | ((fx->part & 0xF) << 4) | ((fx->color & 0xF) << 8) | ((fx->recall & 0x7) << 12);
+    u32 base = (fx->form & 0xF) | ((fx->part & 0xF) << 4) | ((fx->color & 0xF) << 8) | ((fx->recall & 0x7) << 12);
+    u32 ext = ((fx->form >> 4) & 1) | (((fx->part >> 4) & 1) << 1) | (((fx->color >> 4) & 3) << 2) | (((fx->recall >> 3) & 7) << 4);
+    return base | (ext << 16);
 }
 
-void MP_BallFx_Unpack(u16 v, u8 sound, struct MpBallFx *out)
+void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out)
 {
-    out->form = (v & 0xF) < MPFX_FORM_COUNT ? (v & 0xF) : 0;
-    out->part = (v >> 4) & 0xF;
-    out->color = ((v >> 8) & 0xF) < MP_BALL_COLORS ? ((v >> 8) & 0xF) : 0;
-    out->recall = ((v >> 12) & 0x7) < MPFX_RECALL_COUNT ? ((v >> 12) & 0x7) : 0;
+    u32 ext = (v >> 16) & 0xFF;
+    u8 form = (v & 0xF) | ((ext & 1) << 4);
+    u8 part = ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4);
+    u8 color = ((v >> 8) & 0xF) | (((ext >> 2) & 3) << 4);
+    u8 recall = ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3);
+    out->form = form < MPFX_FORM_COUNT ? form : 0;
+    out->part = part < MPFX_PART_COUNT ? part : 0;
+    out->color = color < MP_BALL_COLORS ? color : 0;
+    out->recall = recall < MPFX_RECALL_COUNT ? recall : 0;
     out->sound = sound & 0x7;
 }
 
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx)
 {
-    u16 v = MP_BallFx_Pack(fx);
+    u32 packed = MP_BallFx_Pack(fx);
+    u16 v = packed & 0xFFFF;
+    u8 ext = packed >> 16;
     u8 s = fx->sound & 0x7;
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX, &v);
+    SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_EXT, &ext);
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_SOUND, &s);
 }
 
@@ -214,12 +256,36 @@ static const u16 sEnergyRgb[MP_BALL_COLORS] = {
     [MP_BALL_BLACK]  = RGB(6, 6, 8),
     [MP_BALL_SILVER] = RGB(25, 26, 28),
     [MP_BALL_GOLD]   = RGB(31, 24, 6),
-};
-// the particle palette's entry closest to each energy color
-static const u8 sEnergyIndex[MP_BALL_COLORS] = {
-    [MP_BALL_RED] = 8, [MP_BALL_BLUE] = 11, [MP_BALL_GREEN] = 13, [MP_BALL_YELLOW] = 6, [MP_BALL_PINK] = 9,
-    [MP_BALL_PURPLE] = 10, [MP_BALL_ORANGE] = 7, [MP_BALL_CYAN] = 12, [MP_BALL_BLACK] = 4, [MP_BALL_SILVER] = 2,
-    [MP_BALL_GOLD] = 15,
+    [MP_BALL_CRIMSON]  = RGB(24, 2, 8),
+    [MP_BALL_SCARLET]  = RGB(31, 4, 2),
+    [MP_BALL_CORAL]    = RGB(31, 13, 10),
+    [MP_BALL_SALMON]   = RGB(31, 17, 14),
+    [MP_BALL_PEACH]    = RGB(31, 22, 16),
+    [MP_BALL_AMBER]    = RGB(31, 20, 0),
+    [MP_BALL_LEMON]    = RGB(31, 31, 10),
+    [MP_BALL_OLIVE]    = RGB(21, 24, 5),
+    [MP_BALL_LIME]     = RGB(18, 31, 4),
+    [MP_BALL_MINT]     = RGB(14, 31, 20),
+    [MP_BALL_JADE]     = RGB(2, 22, 14),
+    [MP_BALL_FOREST]   = RGB(5, 19, 7),
+    [MP_BALL_TEAL]     = RGB(2, 18, 18),
+    [MP_BALL_AQUA]     = RGB(8, 31, 28),
+    [MP_BALL_SKY]      = RGB(14, 24, 31),
+    [MP_BALL_AZURE]    = RGB(4, 18, 31),
+    [MP_BALL_NAVY]     = RGB(6, 9, 24),
+    [MP_BALL_INDIGO]   = RGB(13, 9, 29),
+    [MP_BALL_VIOLET]   = RGB(19, 6, 31),
+    [MP_BALL_LILAC]    = RGB(24, 18, 31),
+    [MP_BALL_MAGENTA]  = RGB(31, 4, 26),
+    [MP_BALL_ROSE]     = RGB(31, 8, 16),
+    [MP_BALL_SAKURA]   = RGB(31, 22, 26),
+    [MP_BALL_BROWN]    = RGB(20, 11, 5),
+    [MP_BALL_COCOA]    = RGB(16, 9, 5),
+    [MP_BALL_SAND]     = RGB(27, 23, 15),
+    [MP_BALL_CREAM]    = RGB(31, 29, 22),
+    [MP_BALL_WHITE]    = RGB(31, 31, 31),
+    [MP_BALL_GRAY]     = RGB(20, 20, 22),
+    [MP_BALL_BRONZE]   = RGB(22, 13, 6),
 };
 static const u8 sConfettiColors[] = {8, 11, 13, 6, 9, 12};
 
@@ -264,6 +330,21 @@ static u16 AutoSong(const struct MpBallFx *fx)
     case MPFX_PART_SPOTLIGHT: return SE_M_DETECT;
     case MPFX_PART_DUST:      return SE_M_ROCK_THROW;
     case MPFX_PART_ROYAL:     return SE_SUCCESS;
+    case MPFX_PART_HEARTS:    return SE_M_CHARM;
+    case MPFX_PART_NOTES:     return SE_M_SING;
+    case MPFX_PART_SNOW:      return SE_M_ICY_WIND;
+    case MPFX_PART_FEATHERS:  return SE_TAILLOW_WING_FLAP;
+    case MPFX_PART_LEAVES:    return SE_M_GUST;
+    case MPFX_PART_STARS:     return SE_M_COSMIC_POWER;
+    case MPFX_PART_RAINBOW:   return SE_M_MORNING_SUN;
+    case MPFX_PART_FIRE:      return SE_M_FLAMETHROWER;
+    case MPFX_PART_SPLASH:    return SE_M_DIVE;
+    case MPFX_PART_SAKURA:    return SE_M_PETAL_DANCE;
+    case MPFX_PART_COINS:     return SE_M_PAY_DAY;
+    case MPFX_PART_BALLOONS:  return SE_BALLOON_BLUE;
+    case MPFX_PART_BUTTERFLIES: return SE_M_SWEET_SCENT;
+    case MPFX_PART_GEMS:      return SE_SHINY;
+    case MPFX_PART_AURA:      return SE_M_CHARGE;
     }
     switch (fx->form)
     {
@@ -274,6 +355,45 @@ static u16 AutoSong(const struct MpBallFx *fx)
     case MPFX_FORM_DIGITAL:   return SE_M_LOCK_ON;
     case MPFX_FORM_POPIN:     return SE_BALLOON_RED;
     case MPFX_FORM_METEOR:    return SE_M_ROCK_THROW;
+    case MPFX_FORM_TELEPORT:  return SE_M_TELEPORT;
+    case MPFX_FORM_SOMERSAULT: return SE_BIKE_HOP;
+    case MPFX_FORM_VORTEX:    return SE_M_WHIRLPOOL;
+    case MPFX_FORM_DASH:      return SE_M_DOUBLE_TEAM;
+    case MPFX_FORM_JELLY:     return SE_M_ACID_ARMOR;
+    case MPFX_FORM_CARD:      return SE_RG_CARD_FLIP;
+    case MPFX_FORM_HOLOGRAM:  return SE_PC_ON;
+    case MPFX_FORM_STARDUST:  return SE_M_SWIFT;
+    case MPFX_FORM_SAND:      return SE_M_SAND_ATTACK;
+    case MPFX_FORM_FLAME:     return SE_M_FLAME_WHEEL;
+    case MPFX_FORM_GEYSER:    return SE_M_WATERFALL;
+    case MPFX_FORM_LEAVES:    return SE_M_RAZOR_WIND;
+    case MPFX_FORM_SHADOW:    return SE_M_FAINT_ATTACK;
+    case MPFX_FORM_PRISM:     return SE_M_REFLECT;
+    case MPFX_FORM_BOUNCE:    return SE_BALL_BOUNCE_1;
+    }
+    return 0;
+}
+
+// The new recalls' own sound (with AUTO): the game plays its ball sound too
+static u16 RecallSong(u8 recall)
+{
+    switch (recall)
+    {
+    case MPFX_RECALL_TELEPORT:  return SE_M_TELEPORT;
+    case MPFX_RECALL_BACKFLIP:  return SE_BIKE_HOP;
+    case MPFX_RECALL_DASH:      return SE_M_DOUBLE_TEAM;
+    case MPFX_RECALL_CARD:      return SE_RG_CARD_FLIP;
+    case MPFX_RECALL_SWITCHOFF: return SE_PC_OFF;
+    case MPFX_RECALL_FLAME:     return SE_M_EMBER;
+    case MPFX_RECALL_HEARTS:    return SE_M_CHARM;
+    case MPFX_RECALL_BUBBLE:    return SE_M_BUBBLE;
+    case MPFX_RECALL_LIGHTNING: return SE_M_THUNDER_WAVE;
+    case MPFX_RECALL_ICE:       return SE_ICE_CRACK;
+    case MPFX_RECALL_JUMP:      return SE_M_JUMP_KICK;
+    case MPFX_RECALL_DIVE:      return SE_M_DIVE;
+    case MPFX_RECALL_FIREWORK:  return SE_M_COMET_PUNCH;
+    case MPFX_RECALL_NAP:       return SE_M_YAWN;
+    case MPFX_RECALL_BLACKHOLE: return SE_M_HAZE;
     }
     return 0;
 }
@@ -300,6 +420,8 @@ enum
     MOVE_SPIRAL,   // circles inward to (tx, ty)
     MOVE_ORBIT,    // circles (tx, ty) on a flat ellipse
     MOVE_RISE,     // floats up swaying, pops at the end
+    MOVE_BOUNCE,   // like FREE, but bounces on the ground line ty (smaller each time), then rests
+    MOVE_SETTLE,   // eases into (tx, ty) by its frame dRadius, then stays there
 };
 
 enum { BLEND_NORMAL, BLEND_ADD, BLEND_GLOW };   // GLOW: adds light on dark pixels, paints on bright ones
@@ -310,23 +432,31 @@ enum { BLEND_NORMAL, BLEND_ADD, BLEND_GLOW };   // GLOW: adds light on dark pixe
 #define PF_NOCLIP     0x08   // may cover the battle text box
 #define PF_STICK      0x10   // follows a body's sprite (tx/ty = offset)
 #define PF_UNDER      0x20   // behind the Moemon (underSprite): skips the pixels it covers
+#define PF_ONCE       0x40   // its frames play once, then it keeps the last
+#define PF_FLIPX      0x80   // mirrored
+#define PF_PINGPONG   0x100  // its frames play forward, then back (wings)
 
 #define MAX_PARTS 1024
-#define ART_NONE  0xFF
+#define ART_NONE  0xFFFF
 
 struct FxPart
 {
     bool8 used;
-    u8 art, nFrames, frameTime;
+    u16 art;
+    u8 nFrames, frameTime;
     u8 color;        // energy color
     u8 blend;
     u8 alpha;        // 16 = solid
     u8 fadeIn, fadeOut;
     u8 delay;        // hidden and still until then
-    u8 move, sway, popArt, flags;
+    u8 move, sway;
+    u16 popArt;
+    u16 flags;
+    u8 framePhase;   // the frame its animation starts on
     u8 rot;
     s8 dRot;
-    u8 trailEvery, trailArt;
+    u8 trailEvery;
+    u16 trailArt;
     u16 solid;       // nonzero: every pixel this color (a piece of the Moemon itself)
     u8 underSprite;
     u8 stickSprite;
@@ -351,7 +481,7 @@ static s16 sClipX0, sClipY0, sClipX1 = DISPLAY_WIDTH, sClipY1 = DISPLAY_HEIGHT;
 static bool8 sClipSet;
 static u8 sCurMon = MAX_SPRITES;   // the Moemon the effect being started belongs to
 
-static struct FxPart *Spawn(u8 art, u8 color, s16 x, s16 y)
+static struct FxPart *Spawn(u16 art, u8 color, s16 x, s16 y)
 {
     u16 i;
     struct FxPart *p;
@@ -461,6 +591,27 @@ static void UpdatePart(struct FxPart *p)
             break;
         p->y += p->vy;
         p->x += Sin((p->age * 8 + p->angle) & 0xFF, p->sway * 20);
+        break;
+    case MOVE_BOUNCE:
+        p->vy += p->ay;
+        p->x += p->vx;
+        p->y += p->vy;
+        if (p->y >= (p->ty << 8) && p->vy > 0)
+        {
+            p->y = p->ty << 8;
+            p->vy = -p->vy * 9 / 20;
+            p->vx = p->vx * 3 / 4;
+            if (p->vy > -0x60)
+                p->vx = p->vy = p->ay = 0;   // at rest
+        }
+        break;
+    case MOVE_SETTLE:
+        if (p->age <= p->dRadius)
+        {
+            s32 left = p->dRadius - p->age + 1;
+            p->x += ((p->tx << 8) - p->x) / left;
+            p->y += ((p->ty << 8) - p->y) / left;
+        }
         break;
     case MOVE_HOME:
         dx = (p->tx << 8) - p->x;
@@ -626,6 +777,7 @@ struct FxBody
     u8 origAffineMode, origMatrixNum, origObjMode;
     bool8 origMosaic, origPaused, ownMatrix;
     u16 helper[3];   // our own particles (bubble, crystal, trail, scanline)
+    u8 state;        // a form's own (CARD FLIP: which side shows)
     u8 alpha;        // see-through level wanted for the sprite (16 = solid)
 };
 
@@ -669,6 +821,39 @@ static void BodyTint(struct FxBody *b, s32 coeff, u16 color)
     if (coeff < 0)
         coeff = 0;
     BlendPalette(off, 16, coeff > 16 ? 16 : coeff, color);
+}
+
+// Scales (256 = 1) and turns (256 = a whole turn, clockwise) the Moemon sprite about its middle
+static void BodyTurn(struct FxBody *b, s32 sx, s32 sy, u8 rot)
+{
+    struct Sprite *s = &gSprites[b->mon];
+    u8 n = s->oam.matrixNum;
+    s32 c = gSineTable[(rot + 64) & 0xFF], sn = gSineTable[rot];
+    if (!(s->oam.affineMode & ST_OAM_AFFINE_ON_MASK))
+        return;
+    if (sx < 6)
+        sx = 6;
+    if (sy < 6)
+        sy = 6;
+    gOamMatrices[n].a = c * 256 / sx;
+    gOamMatrices[n].b = sn * 256 / sx;
+    gOamMatrices[n].c = -sn * 256 / sy;
+    gOamMatrices[n].d = c * 256 / sy;
+}
+
+// A color around the color wheel (0-255)
+static u16 Hue(u8 h)
+{
+    u8 f = (h % 43) * 31 / 42;
+    switch (h / 43)
+    {
+    case 0:  return RGB(31, f, 0);
+    case 1:  return RGB(31 - f, 31, 0);
+    case 2:  return RGB(0, 31, f);
+    case 3:  return RGB(0, 31 - f, 31);
+    case 4:  return RGB(f, 0, 31);
+    default: return RGB(31, 0, 31 - f);
+    }
 }
 
 static void BodyBegin(struct FxBody *b)
@@ -741,6 +926,12 @@ static s16 MonY(struct FxBody *b) { return gSprites[b->mon].y + b->baseY2 + OffY
 static s16 Dist(s16 v)
 {
     return sFieldMode ? v / 2 : v;
+}
+
+// Art drawn at battle size, smaller on the overworld (followers are small)
+static u16 FieldScale(u16 scale)
+{
+    return sFieldMode ? scale * 5 / 8 : scale;
 }
 
 // Fewer particles when several Moemon come out together (so it stays readable)
@@ -838,7 +1029,7 @@ static void Confetti(s16 cx, s16 cy, s16 dir)
         p->angle = RndU(256);
         p->nFrames = 3;
         p->frameTime = 3 + RndU(4);
-        p->life = 60 + RndU(30);
+        p->life = 44 + RndU(20);
         p->fadeOut = 14;
         p->delay = RndU(3);
     }
@@ -882,6 +1073,7 @@ static void PartExplosion(s16 mx, s16 my, struct FxBody *b)
     {
         p->nFrames = 3;
         p->frameTime = 4;
+        p->flags = PF_ONCE;
         p->life = 14;
         p->fadeOut = 4;
         p->delay = 1;
@@ -902,7 +1094,7 @@ static void PartExplosion(s16 mx, s16 my, struct FxBody *b)
         p->life = 20 + RndU(14);
         p->fadeOut = 10;
     }
-    for (i = 0; i < Budget(7); i++)
+    for (i = 0; i < Budget(5); i++)
     {
         u8 ang = RndU(256);
         if (!(p = Spawn(FXA_EXPLOSION_SOOT0, 0, mx + Rnd(Dist(14)), my + Rnd(Dist(10)))))
@@ -910,14 +1102,15 @@ static void PartExplosion(s16 mx, s16 my, struct FxBody *b)
         p->vx = Cos(ang, Dist(0x240));
         p->vy = Sin(ang, Dist(0x120)) - 0x80;
         p->drag = 7;
-        p->life = 28 + RndU(10);
-        p->fadeOut = 16;
-        p->alpha = 13;
+        p->life = 22 + RndU(8);
+        p->fadeOut = 14;
+        p->alpha = 11;
         p->delay = 7;
         p->scale = 180 + RndU(80);
         p->dScale = 3;
         p->nFrames = 2;
         p->frameTime = 30;
+        p->flags = PF_ONCE;
     }
     if (b != NULL)
         b->hopT = 6;
@@ -941,7 +1134,7 @@ static void PartSmoke(s16 mx, s16 my, u8 n, u8 life, s16 spread)
         p->dRot = Rnd(2);
         p->life = life + RndU(10);
         p->fadeOut = life / 2;
-        p->alpha = 14;
+        p->alpha = 12;
     }
 }
 
@@ -953,7 +1146,7 @@ static void PartFireworks(s16 mx, s16 my, s16 feet)
         struct FxPart *p = Spawn(FXA_FIREWORKS_ROCKET, 0, mx + Dist((i - n / 2) * 14), feet);
         if (!p)
             return;
-        p->vy = -Dist(0x480) - RndU(0xA0);
+        p->vy = -Dist(0x3A0) - RndU(0x80);   // bursts below the healthboxes
         p->vx = Dist((i - n / 2) * 0x20) + Rnd(0x18);
         p->ay = 0x14;
         p->life = 15 + RndU(5);
@@ -983,6 +1176,7 @@ static void FireworkBurst(s16 x, s16 y)
         p->ay = 0x07;
         p->nFrames = 2;
         p->frameTime = 12;
+        p->flags = PF_ONCE;
         p->life = 30 + RndU(10);
         p->fadeOut = 14;
     }
@@ -1000,7 +1194,7 @@ static void PartFlower(s16 mx, s16 feet)
         p->fadeOut = 12;
         p->scale = 200;
         p->dScale = 4;
-        p->flags = PF_UNDER;
+        p->flags = PF_UNDER | PF_ONCE;
     }
     if ((p = Glow(MP_BALL_PINK, mx, feet, TRUE, 16, 160, 12)))
         p->flags = PF_UNDER;
@@ -1254,6 +1448,7 @@ static void PartDust(s16 mx, s16 feet, u8 n)
         p->drag = 14;
         p->nFrames = 2;
         p->frameTime = 14;
+        p->flags = PF_ONCE;
         p->scale = 200 + RndU(100);
         p->dScale = 3;
         p->life = 30 + RndU(8);
@@ -1273,6 +1468,7 @@ static void PartRoyal(s16 mx, s16 my, s16 head)
         p->blend = BLEND_GLOW;
         p->nFrames = 3;
         p->frameTime = 4;
+        p->flags = PF_ONCE;
         p->life = 12;
         p->delay = i * 2;
         p->vy = -0x18;
@@ -1307,6 +1503,562 @@ static void PartRoyal(s16 mx, s16 my, s16 head)
         p->delay = 6;
 }
 
+// A twinkle (the game's own, from its eye sparkle) lighting up at (x, y)
+static struct FxPart *Twinkle(s16 x, s16 y, u8 delay)
+{
+    struct FxPart *p = Spawn(FXA_STARS_TWINKLE0, 0, x, y);
+    if (p)
+    {
+        p->blend = BLEND_ADD;
+        p->nFrames = 4;
+        p->frameTime = 3;
+        p->flags = PF_ONCE;
+        p->life = 12;
+        p->fadeOut = 4;
+        p->delay = delay;
+    }
+    return p;
+}
+
+static void PartHearts(s16 mx, s16 my, s16 head)
+{
+    u8 i, n = Budget(8);
+    struct FxPart *p;
+    // a big heart swells over it...
+    if ((p = Spawn(FXA_HEARTS_HEART4, 0, mx, head)))
+    {
+        p->scale = FieldScale(100);
+        p->dScale = FieldScale(18);
+        p->life = 12;
+        p->fadeOut = 8;
+        p->alpha = 13;
+    }
+    // ...hearts pop up around it (the game's Attract hearts, growing in) and float away
+    for (i = 0; i < n; i++)
+    {
+        s8 side = (i & 1) ? 1 : -1;
+        if (!(p = Spawn(FXA_HEARTS_HEART0, 0, mx + side * (Dist(16) + RndU(Dist(18))), my - Dist(4) + Rnd(Dist(14)))))
+            return;
+        p->nFrames = 5;
+        p->frameTime = 2;
+        p->flags = PF_ONCE;
+        p->move = MOVE_RISE;
+        p->vy = -(0x90 + RndU(0x40));
+        p->sway = 2;
+        p->angle = RndU(256);
+        p->scale = FieldScale(130 + RndU(50));
+        p->life = 26 + RndU(8);
+        p->delay = 2 + i * 2;
+        p->fadeOut = 10;
+    }
+    // and little ones burst out
+    for (i = 0; i < Budget(8); i++)
+    {
+        u8 ang = i * 32 + RndU(12);
+        if (!(p = Spawn(FXA_HEARTS_SMALL, 0, mx, my)))
+            return;
+        p->vx = Cos(ang, Dist(0x260));
+        p->vy = Sin(ang, Dist(0x200)) - 0x40;
+        p->drag = 14;
+        p->scale = FieldScale(110 + RndU(40));
+        p->life = 18 + RndU(6);
+        p->fadeOut = 8;
+    }
+}
+
+static void PartNotes(s16 mx, s16 my)
+{
+    u8 i, n = Budget(12);
+    struct FxPart *p;
+    // notes (Sing's) rise on both sides, swaying, as if it were singing
+    for (i = 0; i < n; i++)
+    {
+        s8 side = (i & 1) ? 1 : -1;
+        u16 art = FXA_NOTES_NOTE0 + (RndU(2) ? 8 : 0) + RndU(4);
+        if (!(p = Spawn(art, 0, mx + side * Dist(22 + RndU(10)), my + Dist(4) + Rnd(Dist(10)))))
+            return;
+        p->move = MOVE_RISE;
+        p->vy = -(0x60 + RndU(0x30));
+        p->sway = 3;
+        p->angle = i * 40;
+        p->scale = FieldScale(230);
+        p->life = 34 + RndU(10);
+        p->delay = i * 3;
+        p->fadeIn = 3;
+        p->fadeOut = 10;
+    }
+}
+
+static void PartSnow(s16 mx, s16 my, s16 feet, s16 head)
+{
+    u8 i;
+    struct FxPart *p;
+    if ((p = Glow(MP_BALL_CYAN, mx, feet - 2, TRUE, 44, 260, 0)))
+    {
+        p->alpha = 6;
+        p->fadeIn = 8;
+        p->stretchY = 90;
+        p->flags = PF_UNDER;
+    }
+    // snow drifts down over it
+    for (i = 0; i < Budget(28); i++)
+    {
+        u8 r = RndU(10);
+        u16 art = r < 6 ? FXA_SNOW_FLAKE0 : (r < 9 ? FXA_SNOW_DOT : FXA_SNOW_FLAKE1);
+        if (!(p = Spawn(art, 0, mx + Rnd(Dist(50)), head - Dist(24) + RndU(feet - head))))
+            return;
+        p->move = MOVE_FLUTTER;
+        p->vy = 0x50 + RndU(0x20);
+        p->sway = 2;
+        p->angle = RndU(256);
+        if (art == FXA_SNOW_FLAKE1)
+            p->dRot = Rnd(3);
+        p->life = 44 + RndU(16);
+        p->delay = RndU(18);
+        p->fadeIn = 6;
+        p->fadeOut = 12;
+    }
+    // and ice (Powder Snow's crystals) glints here and there
+    for (i = 0; i < Budget(5); i++)
+    {
+        if (!(p = Spawn(FXA_SNOW_ICE0 + RndU(3), 0, mx + Rnd(Dist(30)), my + Rnd(Dist(26)))))
+            return;
+        p->blend = BLEND_ADD;
+        p->alpha = 10;
+        p->scale = 128;
+        p->life = 8;
+        p->delay = 4 + RndU(20);
+        p->fadeIn = 2;
+        p->fadeOut = 4;
+    }
+}
+
+static void PartFeathers(s16 mx, s16 my)
+{
+    u8 i;
+    struct FxPart *p;
+    if ((p = Spawn(FXA_EXTRA_SOFT, 0, mx, my)))
+    {
+        p->alpha = 8;
+        p->life = 10;
+        p->fadeOut = 8;
+        p->scale = 200;
+        p->dScale = 20;
+    }
+    // a flurry of white feathers, tossed up, then drifting down
+    for (i = 0; i < Budget(10); i++)
+    {
+        u8 ang = 128 + 16 + RndU(96);
+        if (!(p = Spawn(FXA_FEATHERS_FEATHER0, 0, mx + Rnd(Dist(10)), my + Rnd(Dist(10)))))
+            return;
+        p->nFrames = 2;
+        p->frameTime = 8;
+        p->framePhase = RndU(2);
+        p->scale = FieldScale(100 + RndU(40));
+        p->move = MOVE_FLUTTER;
+        p->vx = Cos(ang, Dist(0x1C0));
+        p->vy = Sin(ang, 0x1C0) - 0x80;
+        p->ay = 0x18;
+        p->sway = 4;
+        p->angle = RndU(256);
+        p->rot = (u8)Rnd(24);
+        if (RndU(2))
+            p->flags = PF_FLIPX;
+        p->life = 60 + RndU(20);
+        p->fadeOut = 14;
+        p->delay = RndU(4);
+    }
+}
+
+static void PartLeafGust(s16 mx, s16 feet, s16 head)
+{
+    u8 i;
+    struct FxPart *p;
+    s16 h = feet - head;
+    // a gust blows leaves past it (Razor Leaf's, tumbling)
+    for (i = 0; i < Budget(16); i++)
+    {
+        if (!(p = Spawn(FXA_LEAVES_LEAF0, 0, mx - Dist(70) - RndU(Dist(20)), head + RndU(h))))
+            return;
+        p->nFrames = 9;
+        p->frameTime = 2;
+        p->framePhase = RndU(9);
+        p->vx = Dist(0x380) + RndU(0x100);
+        p->vy = Rnd(0x40);
+        p->sway = 3;
+        p->angle = RndU(256);
+        p->scale = FieldScale(200);
+        p->life = 30 + RndU(8);
+        p->delay = RndU(12);
+        p->fadeIn = 3;
+        p->fadeOut = 8;
+    }
+    for (i = 0; i < 4; i++)
+    {
+        if (!(p = Spawn(FXA_LEAVES_GUST0, 0, mx - Dist(50), head + i * h / 4)))
+            return;
+        p->nFrames = 3;
+        p->frameTime = 3;
+        p->vx = Dist(0x500);
+        p->life = 14;
+        p->delay = i * 3;
+        p->alpha = 10;
+        p->fadeIn = 3;
+        p->fadeOut = 6;
+        p->stretchX = 300;
+    }
+}
+
+static void PartStars(s16 mx, s16 my, s16 head)
+{
+    u8 i, n = Budget(5);
+    struct FxPart *p;
+    // shooting stars streak across above it...
+    for (i = 0; i < n; i++)
+    {
+        if (!(p = Spawn(FXA_STARS_STAR, 0, mx - Dist(80) + i * Dist(16), head - Dist(30) - RndU(Dist(8)))))
+            return;
+        p->vx = Dist(0x300);
+        p->vy = Dist(0x100);
+        p->life = 14;
+        p->delay = i * 4;
+        p->dRot = 12;
+        p->scale = FieldScale(200);
+        p->fadeOut = 4;
+        p->trailEvery = 1;
+        p->trailArt = FXA_STARS_SMALL0;
+    }
+    // ...it twinkles...
+    for (i = 0; i < Budget(10); i++)
+        Twinkle(mx + Rnd(Dist(36)), my + Rnd(Dist(30)), 6 + i * 3);
+    // ...and a big star spins in over it
+    if ((p = Spawn(FXA_STARS_BIG, 0, mx, head)))
+    {
+        p->scale = 40;
+        p->dScale = FieldScale(30);   // stops growing at full size (ShapeParts)
+        p->dRot = 6;
+        p->life = 26;
+        p->delay = 10;
+        p->fadeOut = 10;
+    }
+}
+
+static void PartRainbow(s16 mx, s16 feet)
+{
+    u8 i, k;
+    struct FxPart *p;
+    u16 scale = Dist(92) * 256 / 64;
+    s16 radius = Dist(92) * 29 / 64;
+    // a rainbow arcs over it, from a little cloud on each side
+    if ((p = Spawn(FXA_RAINBOW_ARC, 0, mx, feet - (34 * scale / 256) / 2 + 1)))
+    {
+        p->scale = scale;
+        p->alpha = 11;
+        p->life = 56;
+        p->fadeIn = 10;
+        p->fadeOut = 16;
+        p->flags = PF_UNDER;
+    }
+    for (k = 0; k < 2; k++)
+    {
+        if ((p = Spawn(FXA_RAINBOW_CLOUD, 0, mx + (k ? radius : -radius), feet - 4)))
+        {
+            p->scale = sFieldMode ? 128 : 256;
+            if (k)
+                p->flags = PF_FLIPX;
+            p->life = 56;
+            p->fadeIn = 8;
+            p->fadeOut = 16;
+            p->delay = 4;
+        }
+    }
+    for (i = 0; i < Budget(8); i++)
+    {
+        u8 ang = 128 + 12 + RndU(104);
+        Twinkle(mx + Cos(ang, radius), feet + Sin(ang, radius), 8 + i * 4);
+    }
+}
+
+static void PartFireRing(s16 mx, s16 feet)
+{
+    u8 i, n = Budget(8);
+    struct FxPart *p;
+    ScreenFlash(2, 4);
+    if ((p = Glow(MP_BALL_ORANGE, mx, feet - 4, TRUE, 30, 260, 0)))
+    {
+        p->stretchY = 90;
+        p->flags = PF_UNDER;
+    }
+    // flames (Ember's) spring up in a ring around its feet, the far side behind it
+    for (i = 0; i < n; i++)
+    {
+        if (!(p = Spawn(FXA_FIRE_FLAME0, 0, mx, feet)))
+            return;
+        p->move = MOVE_ORBIT;
+        p->tx = mx;
+        p->ty = feet - Dist(10);
+        p->angle = (i * 256 / n) << 8;
+        p->dAngle = 0x180;
+        p->radius = Dist(34) << 8;
+        p->nFrames = 8;
+        p->frameTime = 2;
+        p->framePhase = RndU(8);
+        p->scale = FieldScale(150);
+        p->fadeIn = 4;
+        p->life = 28;
+        p->fadeOut = 10;
+        p->flags = PF_FAR_DIM;
+        p->delay = i;
+    }
+    for (i = 0; i < Budget(10); i++)
+    {
+        if (!(p = Spawn(FXA_FIRE_EMBER0, 0, mx + Rnd(Dist(34)), feet - RndU(Dist(10)))))
+            return;
+        p->nFrames = 5;
+        p->frameTime = 3;
+        p->flags = PF_ONCE;
+        p->move = MOVE_RISE;
+        p->vy = -(0x90 + RndU(0x60));
+        p->sway = 1;
+        p->angle = RndU(256);
+        p->scale = FieldScale(160);
+        p->life = 15;
+        p->fadeOut = 5;
+        p->delay = 4 + RndU(20);
+    }
+}
+
+static void PartSplash(s16 mx, s16 feet)
+{
+    u8 i, k;
+    struct FxPart *p;
+    // a burst of water (Surf's splash) behind it, a crown at its feet, spray and drops
+    if ((p = Spawn(FXA_WATER_SPLASH, 0, mx, feet - Dist(26))))
+    {
+        p->scale = sFieldMode ? 128 : 230;
+        p->dScale = 4;
+        p->life = 14;
+        p->fadeOut = 8;
+        p->flags = PF_UNDER;
+    }
+    if ((p = Spawn(FXA_WATER_DROP4, 0, mx, feet - 6)))
+    {
+        p->nFrames = 4;
+        p->frameTime = 3;
+        p->flags = PF_ONCE;
+        p->scale = sFieldMode ? 160 : 300;
+        p->life = 12;
+        p->fadeOut = 4;
+    }
+    for (k = 0; k < 2; k++)
+    {
+        if ((p = Spawn(FXA_WATER_SPRAY0, 0, mx + (k ? Dist(18) : -Dist(18)), feet - Dist(14))))
+        {
+            p->nFrames = 5;
+            p->frameTime = 3;
+            p->flags = PF_ONCE | (k ? 0 : PF_FLIPX);
+            p->life = 15;
+            p->fadeOut = 4;
+            p->delay = 2;
+        }
+    }
+    if ((p = Ring(MP_BALL_SKY, TRUE, mx, feet - 2, 16, 100, 26, 70)))
+        p->flags = PF_UNDER;
+    for (i = 0; i < Budget(14); i++)
+    {
+        if (!(p = Spawn(FXA_ENERGY_DROP, MP_BALL_SKY, mx + Rnd(Dist(14)), feet - Dist(8))))
+            return;
+        p->vx = Rnd(Dist(0x200));
+        p->vy = -Dist(0x280) - RndU(0x140);
+        p->ay = 0x30;
+        p->life = 22;
+        p->fadeOut = 5;
+        p->scale = 200;
+    }
+}
+
+static void PartSakura(s16 mx, s16 my, s16 head)
+{
+    u8 i;
+    struct FxPart *p;
+    if ((p = Spawn(FXA_EXTRA_SOFT, MP_BALL_SAKURA, mx, my)))
+    {
+        p->alpha = 5;
+        p->life = 30;
+        p->fadeIn = 6;
+        p->fadeOut = 12;
+        p->scale = 500;
+        p->flags = PF_UNDER;
+    }
+    // a storm of cherry petals (Petal Dance's) blows across the field
+    for (i = 0; i < Budget(30); i++)
+    {
+        bool8 big = RndU(4) == 0;
+        if (!(p = Spawn(big ? FXA_SAKURA_BIG0 : FXA_SAKURA_PETAL0, 0, mx - Dist(80) + Rnd(Dist(20)),
+                        head - Dist(16) + RndU(Dist(70)))))
+            return;
+        p->nFrames = big ? 7 : 4;
+        p->frameTime = 3;
+        p->framePhase = RndU(p->nFrames);
+        p->vx = Dist(0x240) + RndU(0x100);
+        p->vy = 0x20 + RndU(0x30);
+        p->sway = 3;
+        p->angle = RndU(256);
+        p->scale = FieldScale(big ? 160 : 256);
+        p->life = 44 + RndU(14);
+        p->delay = RndU(20);
+        p->fadeIn = 4;
+        p->fadeOut = 10;
+    }
+}
+
+static void PartCoins(s16 mx, s16 my, s16 feet)
+{
+    u8 i;
+    struct FxPart *p;
+    if ((p = Glow(MP_BALL_GOLD, mx, my, FALSE, 10, 180, 20)))
+        p->alpha = 9;
+    // Pay Day: coins fly out, spinning, and bounce on the ground
+    for (i = 0; i < Budget(12); i++)
+    {
+        if (!(p = Spawn(FXA_COINS_COIN0, 0, mx + Rnd(Dist(6)), my)))
+            return;
+        p->nFrames = 4;
+        p->frameTime = 2;
+        p->framePhase = RndU(4);
+        p->scale = FieldScale(200);
+        p->move = MOVE_BOUNCE;
+        p->ty = feet - 4 + Rnd(3);
+        p->vx = Rnd(Dist(0x240));
+        p->vy = -Dist(0x200) - RndU(0xC0);
+        p->ay = 0x30;
+        p->life = 40 + RndU(10);
+        p->fadeOut = 8;
+        p->delay = RndU(8);
+    }
+    for (i = 0; i < Budget(5); i++)
+        Twinkle(mx + Rnd(Dist(30)), feet - RndU(Dist(10)), 14 + RndU(14));
+}
+
+static void PartBalloons(s16 mx, s16 feet)
+{
+    u8 i;
+    struct FxPart *p;
+    // a bunch of balloons floats up from behind it
+    for (i = 0; i < Budget(7); i++)
+    {
+        if (!(p = Spawn(FXA_BALLOONS_BALLOON8 + RndU(6), 0, mx + Rnd(Dist(30)), feet - Dist(10) - RndU(Dist(16)))))
+            return;
+        p->move = MOVE_RISE;
+        p->vy = -Dist(0x140) - RndU(0x80);
+        p->sway = 2;
+        p->angle = RndU(256);
+        p->rot = (u8)Rnd(10);
+        p->scale = sFieldMode ? 140 : 180 + RndU(60);
+        p->life = 60;
+        p->delay = i * 4;
+        p->fadeIn = 4;
+        p->fadeOut = 10;
+        p->flags = PF_UNDER;
+    }
+}
+
+static void PartButterflies(s16 mx, s16 my)
+{
+    u8 i;
+    struct FxPart *p;
+    // butterflies flutter out and away
+    for (i = 0; i < Budget(8); i++)
+    {
+        u8 ang = RndU(256);
+        if (!(p = Spawn(FXA_BUTTERFLIES_FLY6_0 + RndU(4) * 3, 0, mx + Rnd(Dist(20)), my + Rnd(Dist(20)))))
+            return;
+        p->nFrames = 3;
+        p->frameTime = 2;
+        p->framePhase = RndU(3);
+        p->flags = PF_PINGPONG;
+        p->scale = FieldScale(256);
+        p->vx = Cos(ang, Dist(0x1C0));
+        p->vy = Sin(ang, Dist(0x80)) - Dist(0xC0);
+        p->sway = 4;
+        p->angle = RndU(256);
+        p->life = 50 + RndU(10);
+        p->fadeIn = 4;
+        p->fadeOut = 12;
+        p->delay = RndU(6);
+    }
+}
+
+static void PartGems(s16 mx, s16 my, s16 feet)
+{
+    u8 i;
+    struct FxPart *p;
+    Glow(MP_BALL_WHITE, mx, my, TRUE, 10, 200, 16);
+    // glittering gems burst out and rain down, bouncing
+    for (i = 0; i < Budget(16); i++)
+    {
+        if (!(p = Spawn(FXA_GEMS_GEM8_0 + RndU(6) * 2, 0, mx + Rnd(Dist(6)), my + Rnd(Dist(6)))))
+            return;
+        p->nFrames = 2;
+        p->frameTime = 5;
+        p->framePhase = RndU(2);
+        p->move = MOVE_BOUNCE;
+        p->ty = feet - 2 + Rnd(3);
+        p->vx = Rnd(Dist(0x220));
+        p->vy = -Dist(0x240) - RndU(0x180);
+        p->ay = 0x2C;
+        p->life = 40 + RndU(12);
+        p->fadeOut = 10;
+    }
+    for (i = 0; i < Budget(4); i++)
+    {
+        if (!(p = Spawn(FXA_STARS_SHINE0, 0, mx + Rnd(Dist(30)), feet - RndU(Dist(14)))))
+            return;
+        p->blend = BLEND_ADD;
+        p->nFrames = 5;
+        p->frameTime = 2;
+        p->flags = PF_ONCE;
+        p->scale = 128;
+        p->life = 10;
+        p->delay = 16 + RndU(20);
+    }
+}
+
+static void PartAura(s16 mx, s16 my, s16 feet, u8 color)
+{
+    u8 i;
+    struct FxPart *p;
+    // a flaring aura (Focus Energy's flames) in its energy color
+    if ((p = Glow(color, mx, my, TRUE, 40, 300, 0)))
+    {
+        p->alpha = 6;
+        p->fadeIn = 6;
+        p->flags = PF_UNDER;
+    }
+    if ((p = Ring(color, FALSE, mx, feet - 2, 14, 100, 30, 80)))
+        p->flags = PF_UNDER;
+    if ((p = Ring(color, FALSE, mx, feet - 2, 14, 100, 30, 80)))
+    {
+        p->flags = PF_UNDER;
+        p->delay = 12;
+    }
+    for (i = 0; i < Budget(24); i++)
+    {
+        if (!(p = Spawn(FXA_AURA_FLARE0, color, mx + Rnd(Dist(24)), feet - RndU(Dist(14)))))
+            return;
+        p->nFrames = 4;
+        p->frameTime = 3;
+        p->flags = PF_ONCE | ((i & 1) ? PF_UNDER : 0);
+        p->blend = BLEND_GLOW;
+        p->alpha = 13;
+        p->move = MOVE_RISE;
+        p->vy = -Dist(0xE0) - RndU(0x60);
+        p->life = 12;
+        p->delay = i + RndU(8);
+        p->scale = FieldScale(220);
+    }
+}
+
 // Starts the particle effect for an entrance. feet/head: the Moemon's ground line and top.
 static void StartParticles(u8 part, u8 color, s16 mx, s16 my, s16 feet, s16 head, struct FxBody *b)
 {
@@ -1314,7 +2066,7 @@ static void StartParticles(u8 part, u8 color, s16 mx, s16 my, s16 feet, s16 head
     {
     case MPFX_PART_CONFETTI:  PartConfetti(mx, my, feet - 4); break;
     case MPFX_PART_EXPLOSION: PartExplosion(mx, my, b); break;
-    case MPFX_PART_SMOKE:     PartSmoke(mx, my, 12, 40, 12); break;
+    case MPFX_PART_SMOKE:     PartSmoke(mx, my, 12, 32, 12); break;
     case MPFX_PART_FIREWORKS: PartFireworks(mx, my, feet); break;
     case MPFX_PART_FLOWER:    PartFlower(mx, feet); break;
     case MPFX_PART_BUBBLES:   PartBubbles(mx, my, feet, 22); break;
@@ -1326,6 +2078,21 @@ static void StartParticles(u8 part, u8 color, s16 mx, s16 my, s16 feet, s16 head
     case MPFX_PART_SPOTLIGHT: PartSpotlight(mx, my, feet); break;
     case MPFX_PART_DUST:      PartDust(mx, feet, 14); break;
     case MPFX_PART_ROYAL:     PartRoyal(mx, my, head); break;
+    case MPFX_PART_HEARTS:    PartHearts(mx, my, head); break;
+    case MPFX_PART_NOTES:     PartNotes(mx, my); break;
+    case MPFX_PART_SNOW:      PartSnow(mx, my, feet, head); break;
+    case MPFX_PART_FEATHERS:  PartFeathers(mx, my); break;
+    case MPFX_PART_LEAVES:    PartLeafGust(mx, feet, head); break;
+    case MPFX_PART_STARS:     PartStars(mx, my, head); break;
+    case MPFX_PART_RAINBOW:   PartRainbow(mx, feet); break;
+    case MPFX_PART_FIRE:      PartFireRing(mx, feet); break;
+    case MPFX_PART_SPLASH:    PartSplash(mx, feet); break;
+    case MPFX_PART_SAKURA:    PartSakura(mx, my, head); break;
+    case MPFX_PART_COINS:     PartCoins(mx, my, feet); break;
+    case MPFX_PART_BALLOONS:  PartBalloons(mx, feet); break;
+    case MPFX_PART_BUTTERFLIES: PartButterflies(mx, my); break;
+    case MPFX_PART_GEMS:      PartGems(mx, my, feet); break;
+    case MPFX_PART_AURA:      PartAura(mx, my, feet, color); break;
     }
 }
 
@@ -1344,6 +2111,8 @@ static void ShapeParts(void)
             p->scale = 256, p->dScale = 0;
         else if (p->art == FXA_EXPLOSION_BLAST0 && p->scale > 340)
             p->dScale = 0;
+        else if (p->art == FXA_STARS_BIG && p->scale > FieldScale(256))
+            p->scale = FieldScale(256), p->dScale = 0;
     }
 }
 
@@ -1457,7 +2226,7 @@ static s16 Head(struct FxBody *b)
     return MonY(b) - ((b->flags & FLAG_FRONT) ? h / 4 : h / 8);
 }
 
-static struct FxPart *Helper(struct FxBody *b, u8 slot, u8 art, u8 color, s16 x, s16 y)
+static struct FxPart *Helper(struct FxBody *b, u8 slot, u16 art, u8 color, s16 x, s16 y)
 {
     struct FxPart *p;
     Kill(&b->helper[slot]);
@@ -1530,6 +2299,43 @@ static void MoteFromBody(struct FxBody *b, s16 x, s16 y, u16 c)
     p->fadeIn = 3;
 }
 
+static void StarIn(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // a little star from somewhere around it flies to its spot on the body
+    struct FxPart *p;
+    u8 ang = RndU(256);
+    if (RndU(3) == 0)
+        return;
+    if (!(p = Spawn(FXA_STARS_SMALL0 + RndU(2), 0, x + Cos(ang, Dist(50 + RndU(30))), y + Sin(ang, Dist(40 + RndU(20))))))
+        return;
+    p->move = MOVE_HOME;
+    p->blend = BLEND_GLOW;
+    p->tx = x;
+    p->ty = y;
+    p->life = 6 + RndU(4);
+    p->delay = RndU(3);
+    p->fadeIn = 2;
+}
+
+static void SandIn(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // a grain in a sand shade as light as its pixel, poured from above: the bottom rows first,
+    // all resting until the Moemon itself shows (frame 11; they go a frame later)
+    s32 lum = ((c & 0x1F) + ((c >> 5) & 0x1F) + ((c >> 10) & 0x1F)) / 3;
+    s32 d = (Feet(b) - y) * 7 / BodyHeight(b);
+    struct FxPart *p = Spawn(FXA_ENERGY_SQ4, b->color, x + Rnd(Dist(6)), y - Dist(40) - RndU(Dist(20)));
+    if (!p)
+        return;
+    d = d < 0 ? 0 : (d > 7 ? 7 : d);
+    p->solid = MixRgb(RGB(14, 10, 5), RGB(31, 28, 19), lum / 2) | 0x8000;
+    p->move = MOVE_SETTLE;
+    p->tx = x;
+    p->ty = y;
+    p->dRadius = 3;
+    p->delay = d;
+    p->life = 12 - d;
+}
+
 static void EntranceFrame(struct FxBody *b)
 {
     struct Sprite *s = &gSprites[b->mon];
@@ -1573,8 +2379,8 @@ static void EntranceFrame(struct FxBody *b)
         // its silhouette inside a billowing cloud that clears
         if (t == 0)
         {
-            PartSmoke(mx, my, 10, 46, 14);
-            PartSmoke(mx, my + Dist(14), 4, 36, 20);
+            PartSmoke(mx, my, 10, 36, 14);
+            PartSmoke(mx, my + Dist(14), 4, 30, 20);
         }
         BodyTint(b, t < 6 ? 16 : 16 - 16 * Ramp(t, 6, 15) / 256, RGB(4, 4, 5));
         break;
@@ -1591,8 +2397,8 @@ static void EntranceFrame(struct FxBody *b)
         {
             // wobbly: squash and stretch as it floats
             p->scale = 128 + 128 * Ramp(t, 0, 6) / 256;
-            p->stretchX = 256 + Sin(t * 22, 18);
-            p->stretchY = 256 - Sin(t * 22, 18);
+            p->stretchX = 256 + Sin((t * 22) & 0xFF, 18);
+            p->stretchY = 256 - Sin((t * 22) & 0xFF, 18);
             p->ty = -b->baseY2 + Sin(t * 16, 2);
         }
         r = 80 + 176 * Ramp(t, 0, 11) / 256;
@@ -1785,6 +2591,626 @@ static void EntranceFrame(struct FxBody *b)
             r = 256 + (t < 14 ? 10 : 0);
         BodyScale(b, 216 + 40 * Ramp(t, 0, 11) / 256, r, TRUE);
         break;
+    case MPFX_FORM_TELEPORT:
+        // a beam of light strikes its spot and it materializes inside, from a thin line to whole
+        if (t == 0)
+        {
+            s16 feet = Feet(b);
+            if ((p = Helper(b, 0, FXA_BITS_BEAM, b->color, mx, feet / 2)))
+            {
+                p->blend = BLEND_ADD;
+                p->alpha = 13;
+                p->stretchX = 40;
+                p->stretchY = feet * 256 / 64 + 8;   // from the top of the screen down to its feet
+            }
+            if ((p = Glow(b->color, mx, feet - 2, TRUE, 16, 220, 0)))
+            {
+                p->stretchY = 90;
+                p->flags = PF_UNDER;
+            }
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            p->stretchX = t < 3 ? 40 + 200 * Ramp(t, 0, 3) / 256 : 240 - 236 * Ramp(t, 8, 14) / 256;
+            if (t >= 14)
+                Kill(&b->helper[0]);
+        }
+        r = t < 3 ? 6 : 6 + 250 * Ramp(t, 3, 10) / 256;
+        BodyScale(b, r, 256 + 64 * (256 - Ramp(t, 3, 10)) / 256, TRUE);
+        BodyTint(b, t < 9 ? 16 : 16 - 16 * Ramp(t, 9, 15) / 256, light);
+        if (t >= 4 && t <= 10 && (t & 1) == 0)
+            Twinkle(mx + Rnd(Dist(20)), my + Rnd(Dist(24)), 0);
+        if (t == 10 && (p = Ring(b->color, TRUE, mx, Feet(b) - 2, 10, 120, 30, 80)))
+            p->flags = PF_UNDER;
+        break;
+    case MPFX_FORM_SOMERSAULT:
+        // springs out of the ball in an arc, flips once and lands
+        if (t < 11)
+        {
+            s32 k = Ramp(t, 0, 11);
+            s8 dir = b->bx <= mx ? 1 : -1;   // turning the way it goes
+            r = 140 + 116 * Ramp(t, 0, 7) / 256;
+            BodyTurn(b, r, r, (u8)(dir * k));
+            s->x2 = b->baseX2 + (b->bx - mx) * (256 - k) / 256;
+            s->y2 = b->baseY2 + (b->by - my) * (256 - k) / 256 - Sin(k / 2, Dist(34));
+            BodyTint(b, 12 - 12 * Ramp(t, 2, 11) / 256, light);
+            if ((p = Spawn(FXA_ENERGY_MOTE, b->color, mx + s->x2 - b->baseX2, my + s->y2 - b->baseY2)))
+            {
+                p->blend = BLEND_GLOW;
+                p->life = 8;
+                p->fadeOut = 8;
+                p->dScale = -20;
+                p->flags = PF_UNDER;   // a trail behind it, not over it
+            }
+        }
+        else
+        {
+            static const u8 sSquash[] = {70, 40, 14, 0, 0};
+            s->x2 = b->baseX2;
+            r = sSquash[t - 11];
+            BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+            BodyTint(b, 0, 0);
+            if (t == 11)
+            {
+                for (i = 0; i < 2; i++)
+                {
+                    if ((p = Spawn(FXA_BITS_PUFF0, 0, mx + (i ? Dist(14) : -Dist(14)), Feet(b) - 4)))
+                    {
+                        p->nFrames = 3;
+                        p->frameTime = 3;
+                        p->flags = PF_ONCE;
+                        p->vx = i ? 0xC0 : -0xC0;
+                        p->drag = 20;
+                        p->life = 12;
+                        p->fadeOut = 6;
+                    }
+                }
+            }
+        }
+        break;
+    case MPFX_FORM_VORTEX:
+        // a vortex opens behind it and it spins out of it, slowing down
+        if (t == 0)
+        {
+            if ((p = Helper(b, 0, FXA_BITS_SPIRAL, b->color, mx, my)))
+            {
+                p->alpha = 13;
+                p->scale = 40;
+                p->dRot = -10;
+                p->flags = PF_UNDER;
+            }
+            for (i = 0; i < Budget(10); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_MOTE, b->color, mx, my)))
+                    break;
+                p->move = MOVE_SPIRAL;
+                p->blend = BLEND_GLOW;
+                p->tx = mx;
+                p->ty = my;
+                p->angle = (i * 256 / 10) << 8;
+                p->dAngle = 0x1000;
+                p->radius = Dist(46) << 8;
+                p->dRadius = -p->radius / 12;
+                p->life = 12;
+            }
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            p->scale = t < 5 ? 40 + 260 * Ramp(t, 0, 5) / 256 : 300 - 296 * Ramp(t, 10, 15) / 256;
+            if (sFieldMode)
+                p->scale /= 2;
+            p->alpha = t < 10 ? 13 : 13 - 12 * Ramp(t, 10, 15) / 256;
+        }
+        {
+            s32 k = Ramp(t, 3, 13), left = 256 - k;
+            s->invisible = t < 3;
+            r = 6 + 250 * k / 256;
+            BodyTurn(b, r, r, (u8)(left * left / 256 * 2));   // two turns, slowing
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2;
+        }
+        BodyTint(b, t < 9 ? 14 : 14 - 14 * Ramp(t, 9, 15) / 256, MixRgb(energy, RGB_BLACK, 8));
+        if (t == 13)
+            Ring(b->color, FALSE, mx, my, 9, 180, 30, 256);
+        break;
+    case MPFX_FORM_DASH:
+    {
+        // zooms in from its side of the screen with speed lines, skids to a stop
+        s8 dir = (b->flags & FLAG_FRONT) ? 1 : -1;
+        if (t < 7)
+        {
+            s32 left = 256 - Ramp(t, 0, 7), off = Dist(130) * left / 256 * left / 256;
+            BodyScale(b, 256 + 120 * left / 256, 256 - 30 * left / 256, TRUE);
+            s->x2 = b->baseX2 + dir * off;
+            BodyTint(b, 10, light);
+            for (i = 0; i < Budget(2); i++)
+            {
+                if (!(p = Spawn(FXA_BITS_LINE, 0, mx + dir * (off + Dist(24 + RndU(16))), my + Rnd(Dist(20)))))
+                    break;
+                p->life = 5;
+                p->fadeOut = 5;
+                p->alpha = 12;
+                p->vx = -dir * 0x200;
+                p->stretchX = 200 + RndU(120);
+                if (dir > 0)
+                    p->flags = PF_FLIPX;   // the bright end where it's going
+            }
+        }
+        else
+        {
+            r = Ramp(t, 7, 9) - Ramp(t, 9, 13);   // 0 -> 256 -> 0: leans back as it skids
+            BodyTurn(b, 256 + 30 * r / 256, 256 - 20 * r / 256, (u8)(dir * 10 * r / 256));
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2;
+            BodyTint(b, 10 - 10 * Ramp(t, 7, 13) / 256, light);
+            if (t == 7)
+            {
+                for (i = 0; i < Budget(3); i++)
+                {
+                    if (!(p = Spawn(FXA_BITS_PUFF0, 0, mx + dir * Dist(4 + i * 8), Feet(b) - 3)))
+                        break;
+                    p->nFrames = 3;
+                    p->frameTime = 3;
+                    p->flags = PF_ONCE;
+                    p->vx = -dir * (0x100 + i * 0x40);
+                    p->drag = 20;
+                    p->life = 12;
+                    p->fadeOut = 6;
+                    p->delay = i;
+                }
+            }
+        }
+        break;
+    }
+    case MPFX_FORM_JELLY:
+        // drops in as see-through jelly in its energy color and wobbles into shape
+        s->oam.objMode = ST_OAM_OBJ_BLEND;
+        b->alpha = t < 9 ? 11 : 11 + 5 * Ramp(t, 9, 14) / 256;
+        if (t < 4)
+        {
+            s32 k = Ramp(t, 0, 4);
+            BodyScale(b, 180 + 40 * k / 256, 300 - 40 * k / 256, TRUE);
+            s->y2 -= Dist(36) * (65536 - k * k) / 65536;
+        }
+        else
+        {
+            s32 w = Cos(((t - 4) * 40) & 0xFF, 70) * (256 - Ramp(t, 4, 15)) / 256;
+            BodyScale(b, 256 + w, 256 - w, TRUE);
+            if (t == 4)
+            {
+                if ((p = Spawn(FXA_ENERGY_SPLAT, b->color, mx, Feet(b) - 2)))
+                {
+                    p->life = 24;
+                    p->fadeOut = 12;
+                    p->stretchX = 300;
+                    p->stretchY = 90;
+                    p->flags = PF_UNDER;
+                }
+                for (i = 0; i < Budget(8); i++)
+                {
+                    u8 ang = 128 + 16 + RndU(96);
+                    if (!(p = Spawn(FXA_ENERGY_DROP, b->color, mx + Rnd(Dist(14)), Feet(b) - 4)))
+                        break;
+                    p->vx = Cos(ang, Dist(0x1C0));
+                    p->vy = Sin(ang, Dist(0x200));
+                    p->ay = 0x22;
+                    p->life = 18;
+                    p->fadeOut = 6;
+                }
+            }
+        }
+        BodyTint(b, t < 6 ? 12 : 12 - 12 * Ramp(t, 6, 15) / 256, MixRgb(energy, RGB_WHITE, 4));
+        if (t == FORM_LEN - 1)
+            b->alpha = 16;
+        break;
+    case MPFX_FORM_CARD:
+    {
+        // a card in its energy color flips over (three times, slowing) and shows it
+        s32 k = Ramp(t, 0, 13), left = 256 - k;
+        s32 ang = 64 + 448 * (65536 - left * left) / 65536;   // edge-on .. face up
+        s32 c = Cos(ang & 0xFF, 256);
+        bool8 back = c < 0;
+        BodyScale(b, back ? -c : c, 256, FALSE);
+        s->y2 = b->baseY2 - Sin(k / 2, Dist(6));
+        if (back)
+            BodyTint(b, 16, energy);
+        else
+            BodyTint(b, t < 13 ? 6 : 6 - 6 * Ramp(t, 13, 15) / 256, RGB_WHITE);
+        if (t > 0 && back != b->state && (p = Spawn(FXA_ROYAL_SPARKLE1, 0, mx, my)))
+        {
+            // a glint as it turns edge-on
+            p->blend = BLEND_ADD;
+            p->life = 6;
+            p->fadeOut = 3;
+        }
+        b->state = back;
+        break;
+    }
+    case MPFX_FORM_HOLOGRAM:
+        // projected as a flickering, glitching hologram that firms up
+        s->oam.objMode = ST_OAM_OBJ_BLEND;
+        b->alpha = t >= 13 ? 16 : ((t % 4) == 1 ? 4 : 8 + 6 * Ramp(t, 0, 12) / 256);
+        s->x2 = b->baseX2 + ((t == 3 || t == 8) ? Dist(3) : (t == 4 ? -Dist(2) : 0));
+        s->invisible = t == 6;
+        BodyTint(b, t < 10 ? 11 : 11 - 11 * Ramp(t, 10, 15) / 256, MixRgb(energy, RGB_WHITE, 8));
+        if (t == 0 && (p = Glow(b->color, mx, Feet(b) - 2, TRUE, 18, 300, 0)))
+        {
+            // the projector
+            p->stretchY = 70;
+            p->alpha = 10;
+            p->flags = PF_UNDER;
+        }
+        if ((t == 0 || t == 7) && (p = Helper(b, 0, FXA_ENERGY_SCAN, b->color, mx, Feet(b))))
+        {
+            // a scanline sweeps up it (twice)
+            p->blend = BLEND_ADD;
+            p->stretchX = 512;
+            p->vy = -(Feet(b) - Head(b) + 6) * 256 / 6;
+        }
+        if (t == 13)
+            Kill(&b->helper[0]);
+        if ((t % 3) == 2 && t < 12)
+        {
+            for (i = 0; i < Budget(3); i++)
+            {
+                if (!(p = Spawn(RndU(2) ? FXA_ENERGY_SQ2 : FXA_ENERGY_SQ4, b->color, mx + Rnd(Dist(20)), my + Rnd(Dist(22)))))
+                    break;
+                p->blend = BLEND_ADD;
+                p->life = 3;
+            }
+        }
+        if (t == FORM_LEN - 1)
+            b->alpha = 16;
+        break;
+    case MPFX_FORM_STARDUST:
+        // stars swirl in and gather into its shape, then it shines
+        if (t == 0)
+            MonSquares(b, 6, StarIn);
+        s->invisible = t < 8;
+        if (t == 8)
+        {
+            if ((p = Glow(MP_BALL_GOLD, mx, my, TRUE, 10, 150, 10)))
+                p->alpha = 6;
+            for (i = 0; i < Budget(5); i++)
+                Twinkle(mx + Rnd(Dist(22)), my + Rnd(Dist(24)), i * 2);
+        }
+        if (t == 12 && (p = Spawn(FXA_STARS_SHINE0, 0, mx + Dist(14), Head(b) + Dist(6))))
+        {
+            p->blend = BLEND_ADD;
+            p->nFrames = 5;
+            p->frameTime = 2;
+            p->flags = PF_ONCE;
+            p->life = 10;
+        }
+        BodyTint(b, t < 10 ? 16 : 16 - 16 * Ramp(t, 10, 15) / 256, MixRgb(light, RGB(31, 30, 20), 8));
+        break;
+    case MPFX_FORM_SAND:
+        // sand pours down and piles up into its shape (bottom first), then the loose sand falls away
+        if (t == 0)
+            MonSquares(b, 4, SandIn);
+        if (t < 9)
+        {
+            for (i = 0; i < Budget(3); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_SQ2, MP_BALL_SAND, mx + Rnd(Dist(20)), Head(b) - Dist(40))))
+                    break;
+                p->vy = 0x300;
+                p->life = 8;
+                p->fadeOut = 3;
+            }
+        }
+        s->invisible = t < 11;
+        if (t == 11)
+        {
+            PartDust(mx, Feet(b), 6);
+            for (i = 0; i < Budget(14); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_SQ2, MP_BALL_SAND, mx + Rnd(Dist(20)), my + Rnd(Dist(22)))))
+                    break;
+                p->vx = Rnd(0x60);
+                p->ay = 0x30;
+                p->life = 14;
+                p->fadeOut = 6;
+            }
+        }
+        BodyTint(b, 14 - 14 * Ramp(t, 11, 15) / 256, RGB(27, 23, 15));
+        break;
+    case MPFX_FORM_FLAME:
+        // a pillar of fire erupts and it steps out of the flames
+        if (t == 0)
+        {
+            s16 feet = Feet(b);
+            ScreenFlash(2, 5);
+            if ((p = Spawn(FXA_FIRE_FLAME0, 0, mx, feet - Dist(34))))
+            {
+                p->nFrames = 8;
+                p->frameTime = 2;
+                p->scale = sFieldMode ? 150 : 300;
+                p->stretchY = 560;   // a pillar: about 2 1/2 times its height
+                p->life = 14;
+                p->fadeIn = 2;
+                p->fadeOut = 5;
+            }
+            if ((p = Spawn(FXA_FIRE_PLUME0, 0, mx, feet - Dist(12))))
+            {
+                p->nFrames = 5;
+                p->frameTime = 3;
+                p->flags = PF_ONCE;
+                p->scale = sFieldMode ? 150 : 300;
+                p->life = 15;
+                p->fadeOut = 4;
+            }
+            if ((p = Glow(MP_BALL_ORANGE, mx, feet - 6, TRUE, 18, 240, 0)))
+            {
+                p->stretchY = 120;
+                p->flags = PF_UNDER;
+            }
+        }
+        if (t < 12 && (t & 1) == 0 && (p = Spawn(FXA_FIRE_EMBER0, 0, mx + Rnd(Dist(18)), Feet(b) - RndU(Dist(40)))))
+        {
+            p->nFrames = 5;
+            p->frameTime = 3;
+            p->flags = PF_ONCE;
+            p->move = MOVE_RISE;
+            p->vy = -0xA0;
+            p->sway = 1;
+            p->angle = RndU(256);
+            p->life = 15;
+            p->fadeOut = 5;
+            p->scale = FieldScale(160);
+        }
+        s->invisible = t < 3;
+        BodyScale(b, 256, 150 + 106 * Ramp(t, 3, 10) / 256, TRUE);
+        BodyTint(b, t < 8 ? 16 : 16 - 16 * Ramp(t, 8, 13) / 256, t < 6 ? RGB(31, 27, 14) : RGB(31, 19, 6));
+        break;
+    case MPFX_FORM_GEYSER:
+    {
+        // a geyser shoots up under it; it rides the water up and drops into place as it falls away
+        s16 feet = Feet(b), top = Head(b) - Dist(26);
+        if (t == 0)
+        {
+            u8 n = (feet - top) / Dist(28) + 1;
+            if (n > 5)
+                n = 5;
+            for (i = 0; i < n; i++)
+            {
+                if (!(p = Spawn(FXA_WATER_COLUMN0, 0, mx, feet - Dist(14) - i * Dist(28))))
+                    break;
+                p->nFrames = 4;
+                p->frameTime = 2;
+                p->framePhase = i;
+                p->stretchX = sFieldMode ? 200 : 400;
+                p->stretchY = sFieldMode ? 115 : 230;
+                p->delay = i;
+                p->life = 11 - i;
+                p->fadeOut = 3;
+                p->alpha = 14;
+            }
+            if ((p = Spawn(FXA_WATER_SPLASH, 0, mx, feet - Dist(20))))
+            {
+                p->scale = sFieldMode ? 100 : 200;
+                p->life = 10;
+                p->fadeOut = 6;
+                p->flags = PF_UNDER;
+            }
+            if ((p = Ring(MP_BALL_SKY, TRUE, mx, feet - 2, 12, 100, 30, 70)))
+                p->flags = PF_UNDER;
+        }
+        if (t >= 3 && t < 10)
+        {
+            for (i = 0; i < Budget(2); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_DROP, MP_BALL_SKY, mx + Rnd(Dist(8)), top)))
+                    break;
+                p->vx = Rnd(Dist(0x180));
+                p->vy = -0x100 - RndU(0x100);
+                p->ay = 0x30;
+                p->life = 20;
+                p->fadeOut = 4;
+            }
+        }
+        s->invisible = t < 3;
+        r = t == 11 ? 46 : (t == 12 ? 22 : 0);
+        BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+        if (t < 8)
+            s->y2 -= Dist(30) * Ramp(t, 0, 4) / 256;
+        else if (t < 11)
+        {
+            s32 k = Ramp(t, 8, 11);
+            s->y2 -= Dist(30) * (65536 - k * k) / 65536;
+        }
+        BodyTint(b, t < 9 ? 10 : 10 - 10 * Ramp(t, 9, 15) / 256, RGB(14, 24, 31));
+        if (t == 11)
+        {
+            for (i = 0; i < 2; i++)
+            {
+                if ((p = Spawn(FXA_WATER_SPRAY0, 0, mx + (i ? Dist(14) : -Dist(14)), feet - Dist(8))))
+                {
+                    p->nFrames = 5;
+                    p->frameTime = 3;
+                    p->flags = PF_ONCE | (i ? 0 : PF_FLIPX);
+                    p->life = 15;
+                    p->fadeOut = 4;
+                }
+            }
+            if ((p = Spawn(FXA_WATER_DROP4, 0, mx, feet - 6)))
+            {
+                p->nFrames = 4;
+                p->frameTime = 3;
+                p->flags = PF_ONCE;
+                p->scale = sFieldMode ? 160 : 300;
+                p->life = 12;
+                p->fadeOut = 4;
+            }
+        }
+        break;
+    }
+    case MPFX_FORM_LEAVES:
+        // a whirl of leaves wraps it, then blows away
+        if (t == 0)
+        {
+            s16 head = Head(b), h = Feet(b) - head;
+            u8 n = Budget(18);
+            for (i = 0; i < n; i++)
+            {
+                if (!(p = Spawn(FXA_LEAVES_LEAF0, 0, mx, my)))
+                    break;
+                p->move = MOVE_ORBIT;
+                p->tx = mx;
+                p->ty = head + Dist(6) + h * i / n;
+                p->angle = (i * 256 * 3 / n) << 8;
+                p->dAngle = 0x1400;
+                p->radius = Dist(34) << 8;
+                p->dRadius = -(Dist(14) << 8) / 10;
+                p->nFrames = 9;
+                p->frameTime = 2;
+                p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
+                p->life = 11;
+                p->fadeIn = 2;
+                p->flags = PF_FAR_DIM;
+            }
+        }
+        if (t == 10)
+        {
+            for (i = 0; i < Budget(16); i++)
+            {
+                u8 ang = i * 16 + RndU(10);
+                if (!(p = Spawn(FXA_LEAVES_LEAF0, 0, mx + Cos(ang, Dist(20)), my + Rnd(Dist(20)))))
+                    break;
+                p->vx = Cos(ang, Dist(0x300));
+                p->vy = Sin(ang, Dist(0x180)) - 0x100;
+                p->ay = 0x10;
+                p->drag = 6;
+                p->sway = 2;
+                p->angle = RndU(256);
+                p->nFrames = 9;
+                p->frameTime = 2;
+                p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
+                p->life = 24;
+                p->fadeOut = 10;
+            }
+            for (i = 0; i < 3; i++)
+            {
+                if (!(p = Spawn(FXA_LEAVES_GUST0, 0, mx + (i - 1) * Dist(20), my + (i - 1) * Dist(12))))
+                    break;
+                p->nFrames = 3;
+                p->frameTime = 3;
+                p->vx = (i & 1) ? -0x280 : 0x280;
+                if (i & 1)
+                    p->flags = PF_FLIPX;
+                p->life = 10;
+                p->alpha = 10;
+                p->fadeOut = 6;
+            }
+        }
+        s->invisible = t < 2;
+        BodyScale(b, 120 + 136 * Ramp(t, 4, 12) / 256, 256, TRUE);
+        BodyTint(b, t < 10 ? 13 : 13 - 13 * Ramp(t, 10, 15) / 256, RGB(12, 26, 10));
+        break;
+    case MPFX_FORM_SHADOW:
+    {
+        // its shadow slides over from the ball, then it rises out of it
+        s16 feet = Feet(b);
+        if (t == 0 && (p = Helper(b, 0, FXA_BITS_SHADOW, 0, b->bx, feet - 2)))
+        {
+            p->alpha = 13;
+            p->stretchY = 180;
+            p->flags = PF_UNDER;
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            s32 k = Ramp(t, 0, 5);
+            p->x = (b->bx + (mx - b->bx) * k / 256) << 8;
+            p->y = (feet - 2) << 8;
+            p->stretchX = Dist(200 + 220 * Ramp(t, 3, 7) / 256);
+            p->alpha = t < 12 ? 13 : 13 - 12 * Ramp(t, 12, 15) / 256;
+        }
+        s->invisible = t < 5;
+        BodyScale(b, 236 + 20 * Ramp(t, 5, 12) / 256, 10 + 246 * Ramp(t, 5, 12) / 256, TRUE);
+        BodyTint(b, t < 10 ? 16 : 16 - 16 * Ramp(t, 10, 15) / 256, RGB(3, 1, 6));
+        if (t >= 5 && t < 11 && (t & 1) && (p = Spawn(FXA_WISPS_WISP0, 0, mx + Rnd(Dist(20)), feet - 4)))
+        {
+            p->move = MOVE_RISE;
+            p->vy = -0xC0;
+            p->sway = 1;
+            p->angle = RndU(256);
+            p->nFrames = 3;
+            p->frameTime = 3;
+            p->alpha = 10;
+            p->life = 12;
+            p->fadeOut = 6;
+            p->scale = FieldScale(180);
+        }
+        break;
+    }
+    case MPFX_FORM_PRISM:
+        // grows in as its colors run through the rainbow, with rings of light
+        r = t < 8 ? 80 + 196 * Ramp(t, 0, 8) / 256 : 276 - 20 * Ramp(t, 8, 11) / 256;
+        BodyScale(b, r, r, TRUE);
+        BodyTint(b, t < 9 ? 13 : 13 - 13 * Ramp(t, 9, 15) / 256, MixRgb(Hue((t * 28) & 0xFF), RGB_WHITE, 4));
+        if (t == 0 || t == 4 || t == 8)
+        {
+            static const u8 sRingColors[] = {MP_BALL_RED, MP_BALL_LIME, MP_BALL_AZURE};
+            Ring(sRingColors[t / 4], FALSE, mx, my, 10, 120, 34, 256);
+        }
+        if (t == 2)
+        {
+            for (i = 0; i < Budget(6); i++)
+            {
+                if (!(p = Spawn(FXA_RAINBOW_RING0, 0, mx + Rnd(Dist(26)), my + Rnd(Dist(20)))))
+                    break;
+                p->nFrames = 3;
+                p->frameTime = 3;
+                p->framePhase = RndU(3);
+                p->move = MOVE_RISE;
+                p->vy = -0x80;
+                p->sway = 1;
+                p->angle = RndU(256);
+                p->life = 20;
+                p->delay = i * 2;
+                p->fadeOut = 8;
+            }
+        }
+        if (t == 10 && (p = Spawn(FXA_STARS_SHINE0, 0, mx - Dist(14), Head(b) + Dist(8))))
+        {
+            p->blend = BLEND_ADD;
+            p->nFrames = 5;
+            p->frameTime = 2;
+            p->flags = PF_ONCE;
+            p->life = 10;
+        }
+        break;
+    case MPFX_FORM_BOUNCE:
+    {
+        // hops out of the ball to its spot: three bounces, each smaller, squashing as it lands
+        s32 k = Ramp(t, 0, 13), hop = 0, sq;
+        s16 feet = Feet(b);
+        if (t < 6)
+            hop = Sin(Ramp(t, 0, 6) / 2, Dist(34));
+        else if (t < 10)
+            hop = Sin(Ramp(t, 6, 10) / 2, Dist(14));
+        else if (t < 13)
+            hop = Sin(Ramp(t, 10, 13) / 2, Dist(5));
+        sq = t == 6 ? 70 : (t == 10 ? 44 : (t == 13 ? 20 : 0));
+        r = 110 + 146 * Ramp(t, 0, 6) / 256;
+        BodyScale(b, r * (256 + sq / 2) / 256, r * (256 - sq) / 256, TRUE);
+        s->x2 = b->baseX2 + (b->bx - mx) * (256 - k) / 256;
+        s->y2 += (b->by - feet) * (256 - k) / 256 - hop;
+        BodyTint(b, 12 - 12 * Ramp(t, 0, 11) / 256, RGB_WHITE);
+        if (sq && (p = Spawn(FXA_BITS_PUFF0, 0, mx + s->x2 - b->baseX2, feet - 3)))
+        {
+            p->nFrames = 3;
+            p->frameTime = 2;
+            p->flags = PF_ONCE;
+            p->alpha = 12;
+            p->scale = 120 + sq * 2;
+            p->life = 8;
+            p->fadeOut = 4;
+        }
+        break;
+    }
     default:
         break;
     }
@@ -1792,6 +3218,101 @@ static void EntranceFrame(struct FxBody *b)
     // explosion: a little bounce while it forms
     if (b->hopT && t >= b->hopT && t < b->hopT + 8)
         s->y2 -= Sin((t - b->hopT) * 16, Dist(6));
+}
+
+static void StarOut(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // a little star leaves its spot on the body for the ball
+    struct FxPart *p;
+    if (RndU(3) == 0)
+        return;
+    if (!(p = Spawn(FXA_STARS_SMALL0 + RndU(2), 0, x, y)))
+        return;
+    p->move = MOVE_HOME;
+    p->blend = BLEND_GLOW;
+    p->tx = b->bx;
+    p->ty = b->by;
+    p->life = 8 + RndU(6);
+    p->delay = RndU(4);
+    p->fadeIn = 2;
+}
+
+static void SandOut(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // a grain in a sand shade as light as its pixel, falling into a heap
+    s32 lum = ((c & 0x1F) + ((c >> 5) & 0x1F) + ((c >> 10) & 0x1F)) / 3;
+    struct FxPart *p = Spawn(FXA_ENERGY_SQ4, b->color, x, y);
+    if (!p)
+        return;
+    p->solid = MixRgb(RGB(14, 10, 5), RGB(31, 28, 19), lum / 2) | 0x8000;
+    p->move = MOVE_BOUNCE;
+    p->ty = Feet(b) - 2 - RndU(4);
+    p->vx = Rnd(0x30);
+    p->ay = 0x48 + RndU(0x18);
+    p->delay = RndU(5);
+    p->life = 16 + RndU(8);
+    p->fadeOut = 8;
+}
+
+static void PixelFall(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // one of its own pixels (a 4x4 square) rains down and fades; now and then a glowing one
+    struct FxPart *p = Spawn(FXA_ENERGY_SQ4, b->color, x, y);
+    if (!p)
+        return;
+    if (RndU(6))
+        p->solid = c;
+    else
+        p->blend = BLEND_GLOW;
+    p->ay = 0x40 + RndU(0x10);
+    p->delay = RndU(8);
+    p->life = 20;
+    p->fadeOut = 8;
+}
+
+static void FeatherOut(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    struct FxPart *p;
+    if (RndU(2))
+        return;
+    if (!(p = Spawn(FXA_FEATHERS_FEATHER0, 0, x, y)))
+        return;
+    p->nFrames = 2;
+    p->frameTime = 8;
+    p->framePhase = RndU(2);
+    p->scale = 90 + RndU(30);
+    p->move = MOVE_FLUTTER;
+    p->vx = Rnd(Dist(0x180));
+    p->vy = -0x100 - RndU(0x100);
+    p->ay = 0x18;
+    p->sway = 3;
+    p->angle = RndU(256);
+    p->rot = (u8)Rnd(24);
+    if (RndU(2))
+        p->flags = PF_FLIPX;
+    p->life = 40;
+    p->fadeOut = 14;
+}
+
+static void PetalOut(struct FxBody *b, s16 x, s16 y, u16 c)
+{
+    // a cherry petal blown away by the wind (from the left: that side goes first)
+    struct FxPart *p;
+    s32 d = (x - (MonX(b) - BodyHeight(b) / 2)) * 8 / BodyHeight(b);
+    if (RndU(3) == 0)
+        return;
+    if (!(p = Spawn(FXA_SAKURA_PETAL0, 0, x, y)))
+        return;
+    p->nFrames = 4;
+    p->frameTime = 3;
+    p->framePhase = RndU(4);
+    p->vx = Dist(0x200) + RndU(0x100);
+    p->vy = -0x40 + Rnd(0x40);
+    p->sway = 3;
+    p->angle = RndU(256);
+    p->life = 30 + RndU(14);
+    p->delay = d < 0 ? 0 : (d > 8 ? 8 : d);
+    p->fadeOut = 10;
 }
 
 static void RecallFrame(struct FxBody *b)
@@ -1974,6 +3495,906 @@ static void RecallFrame(struct FxBody *b)
             BodyTint(b, 16 * Ramp(t, 9, 13) / 256, RGB_WHITE);
         }
         break;
+    case MPFX_RECALL_TELEPORT:
+        // a beam of light falls on it; it narrows to a line inside and the beam takes it up
+        if (t == 0)
+        {
+            s16 feet = Feet(b);
+            if ((p = Helper(b, 0, FXA_BITS_BEAM, b->color, mx, feet / 2)))
+            {
+                p->blend = BLEND_ADD;
+                p->alpha = 13;
+                p->stretchX = 40;
+                p->stretchY = feet * 256 / 64 + 8;
+            }
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            p->stretchX = t < 4 ? 40 + 200 * Ramp(t, 0, 4) / 256 : 240 - 236 * Ramp(t, 13, 20) / 256;
+            if (t >= 20)
+                Kill(&b->helper[0]);
+        }
+        BodyTint(b, 16 * Ramp(t, 0, 4) / 256, light);
+        BodyScale(b, 256 - 250 * Ramp(t, 4, 11) / 256, 256 + 64 * Ramp(t, 4, 11) / 256, TRUE);
+        s->invisible = t >= 12;
+        if (t >= 4 && t <= 12 && (t & 1) == 0)
+            Twinkle(mx + Rnd(Dist(20)), my + Rnd(Dist(24)), 0);
+        if (t == 12)
+        {
+            for (i = 0; i < Budget(6); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_MOTE, b->color, mx, my + Rnd(Dist(24)))))
+                    break;
+                p->blend = BLEND_GLOW;
+                p->vy = -0x400;
+                p->life = 10;
+                p->delay = i;
+                p->fadeOut = 6;
+            }
+        }
+        break;
+    case MPFX_RECALL_BACKFLIP:
+        // crouches, then backflips into the ball in an arc
+        if (t < 4)
+        {
+            r = 40 * Ramp(t, 0, 2) / 256;
+            BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+        }
+        else
+        {
+            s32 k = Ramp(t, 4, 17);
+            s8 dir = b->bx <= mx ? 1 : -1;   // turning backward against the way it goes
+            r = 256 - 196 * k / 256;
+            BodyTurn(b, r, r, (u8)(dir * k));
+            s->x2 = b->baseX2 + (b->bx - mx) * k / 256;
+            s->y2 = b->baseY2 + (b->by - my) * k / 256 - Sin(k / 2, Dist(30));
+            BodyTint(b, 14 * Ramp(t, 8, 16) / 256, light);
+            if ((p = Spawn(FXA_ENERGY_MOTE, b->color, mx + s->x2 - b->baseX2, my + s->y2 - b->baseY2)))
+            {
+                p->blend = BLEND_GLOW;
+                p->life = 8;
+                p->fadeOut = 8;
+                p->dScale = -20;
+                p->flags = PF_UNDER;
+            }
+            s->invisible = t >= 17;
+            if (t == 17)
+                Glow(b->color, b->bx, b->by, FALSE, 8, 160, 20);
+        }
+        break;
+    case MPFX_RECALL_VORTEX:
+        // a vortex opens behind it and it spins into it, faster and faster
+        if (t == 0)
+        {
+            if ((p = Helper(b, 0, FXA_BITS_SPIRAL, b->color, mx, my)))
+            {
+                p->alpha = 13;
+                p->scale = 40;
+                p->dRot = 10;
+                p->flags = PF_UNDER;
+            }
+            for (i = 0; i < Budget(10); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_MOTE, b->color, mx, my)))
+                    break;
+                p->move = MOVE_SPIRAL;
+                p->blend = BLEND_GLOW;
+                p->tx = mx;
+                p->ty = my;
+                p->angle = (i * 256 / 10) << 8;
+                p->dAngle = 0x1000;
+                p->radius = Dist(46) << 8;
+                p->dRadius = -p->radius / 14;
+                p->life = 14;
+            }
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            p->scale = t < 6 ? 40 + 260 * Ramp(t, 0, 6) / 256 : 300 - 296 * Ramp(t, 15, 21) / 256;
+            if (sFieldMode)
+                p->scale /= 2;
+            p->alpha = t < 15 ? 13 : 13 - 12 * Ramp(t, 15, 21) / 256;
+        }
+        {
+            s32 k = Ramp(t, 4, 16);
+            r = 256 - 250 * k / 256;
+            BodyTurn(b, r, r, (u8)(k * k / 256 * 2));   // two turns, speeding up
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2;
+        }
+        BodyTint(b, 14 * Ramp(t, 0, 8) / 256, MixRgb(energy, RGB_BLACK, 8));
+        s->invisible = t >= 16;
+        break;
+    case MPFX_RECALL_DASH:
+    {
+        // leans in, then dashes off its side of the screen with speed lines
+        s8 dir = (b->flags & FLAG_FRONT) ? 1 : -1;
+        if (t < 4)
+        {
+            r = Ramp(t, 0, 3);
+            BodyTurn(b, 256 + 20 * r / 256, 256 - 20 * r / 256, (u8)(dir * 12 * r / 256));
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2;
+        }
+        else
+        {
+            s32 k = Ramp(t, 4, 14), off = Dist(160) * k / 256 * k / 256;
+            BodyScale(b, 256 + 120 * k / 256, 256 - 30 * k / 256, TRUE);
+            s->x2 = b->baseX2 + dir * off;
+            BodyTint(b, 10 * k / 256, light);
+            if (t == 4)
+            {
+                for (i = 0; i < Budget(3); i++)
+                {
+                    if (!(p = Spawn(FXA_BITS_PUFF0, 0, mx - dir * Dist(4 + i * 8), Feet(b) - 3)))
+                        break;
+                    p->nFrames = 3;
+                    p->frameTime = 3;
+                    p->flags = PF_ONCE;
+                    p->vx = -dir * (0x100 + i * 0x40);
+                    p->drag = 20;
+                    p->life = 12;
+                    p->fadeOut = 6;
+                    p->delay = i;
+                }
+            }
+            for (i = 0; i < Budget(2); i++)
+            {
+                if (!(p = Spawn(FXA_BITS_LINE, b->color, mx + dir * off - dir * Dist(24 + RndU(16)), my + Rnd(Dist(20)))))
+                    break;
+                p->life = 5;
+                p->fadeOut = 5;
+                p->alpha = 12;
+                p->vx = dir * 0x200;
+                p->stretchX = 200 + RndU(120);
+                if (dir < 0)
+                    p->flags = PF_FLIPX;   // the bright end where it's going
+            }
+            s->invisible = t >= 14;
+        }
+        break;
+    }
+    case MPFX_RECALL_MELT:
+        // wobbles, melts into a puddle of its energy color, the puddle slides back to the ball
+        s->oam.objMode = ST_OAM_OBJ_BLEND;
+        b->alpha = 16 - 5 * Ramp(t, 0, 6) / 256;
+        BodyTint(b, 12 * Ramp(t, 0, 6) / 256, MixRgb(energy, RGB_WHITE, 4));
+        if (t < 13)
+        {
+            s32 k = Ramp(t, 2, 13), w = Cos((t * 40) & 0xFF, 30) * (256 - k) / 256;
+            BodyScale(b, 256 + 120 * k / 256 + w, 256 - 246 * k / 256 - w, TRUE);
+        }
+        s->invisible = t >= 13;
+        if (t == 12 && (p = Helper(b, 0, FXA_ENERGY_SPLAT, b->color, mx, Feet(b) - 2)))
+        {
+            p->scale = 200;
+            p->stretchX = 340;
+            p->stretchY = 90;
+        }
+        if (t >= 13 && (p = PartAt(b->helper[0])))
+        {
+            s32 k = Ramp(t, 13, 21);
+            p->x = (mx + (b->bx - mx) * k / 256) << 8;
+            p->y = (Feet(b) - 2 + (b->by - Feet(b) + 2) * k / 256) << 8;
+            p->scale = 200 - 160 * k / 256;
+        }
+        break;
+    case MPFX_RECALL_CARD:
+        // flips over to its card side, then the card spins into the ball
+        if (t < 10)
+        {
+            s32 c = Cos((384 * Ramp(t, 0, 9) / 256) & 0xFF, 256);
+            bool8 back = c < 0;
+            BodyScale(b, back ? -c : c, 256, FALSE);
+            BodyTint(b, back ? 16 : 0, energy);
+            if (t > 0 && back != b->state && (p = Spawn(FXA_ROYAL_SPARKLE1, 0, mx, my)))
+            {
+                p->blend = BLEND_ADD;
+                p->life = 6;
+                p->fadeOut = 3;
+            }
+            b->state = back;
+        }
+        else
+        {
+            s32 k = Ramp(t, 10, 20);
+            r = 256 - 240 * k / 256;
+            BodyTurn(b, r, r, (u8)(k * 2));
+            BodyTint(b, 16, energy);
+            s->x2 = b->baseX2 + (b->bx - mx) * k / 256;
+            s->y2 = b->baseY2 + (b->by - my) * k / 256;
+            s->invisible = t >= 20;
+        }
+        break;
+    case MPFX_RECALL_SWITCHOFF:
+        // switches off like an old TV: a glitch, it squeezes to a line, the line to a dot, the dot fades
+        s->x2 = b->baseX2 + ((t == 1 || t == 3) ? Dist(3) : (t == 2 ? -Dist(2) : 0));
+        BodyTint(b, 16 * Ramp(t, 3, 9) / 256, RGB_WHITE);
+        if (t < 9)
+            BodyScale(b, 256 + 40 * Ramp(t, 4, 9) / 256, 256 - 250 * Ramp(t, 4, 9) / 256, FALSE);
+        else
+            BodyScale(b, 296 - 290 * Ramp(t, 9, 13) / 256, 6, FALSE);
+        s->invisible = t >= 13;
+        if (t == 13 && (p = Glow(MP_BALL_WHITE, mx, my, FALSE, 8, 90, -8)))
+            p->alpha = 14;
+        break;
+    case MPFX_RECALL_STARDUST:
+        // it turns to starlight and scatters into stars that stream into the ball
+        BodyTint(b, 16 * Ramp(t, 0, 6) / 256, MixRgb(light, RGB(31, 30, 20), 8));
+        if (t == 6)
+            MonSquares(b, 6, StarOut);
+        if (t >= 6)
+        {
+            s->oam.objMode = ST_OAM_OBJ_BLEND;
+            b->alpha = 16 - 15 * Ramp(t, 6, 12) / 256;
+        }
+        s->invisible = t >= 12;
+        break;
+    case MPFX_RECALL_SAND:
+        // it turns to sand and crumbles into a heap
+        BodyTint(b, 16 * Ramp(t, 0, 6) / 256, RGB(27, 23, 15));
+        if (t == 6)
+            MonSquares(b, 4, SandOut);
+        s->invisible = t >= 6;
+        if (t == 9)
+            PartDust(mx, Feet(b), 6);
+        break;
+    case MPFX_RECALL_FLAME:
+        // bursts into flame and is gone in a puff of smoke
+        if (t == 0)
+        {
+            s16 feet = Feet(b);
+            if ((p = Spawn(FXA_FIRE_FLAME0, 0, mx, feet - Dist(34))))
+            {
+                p->nFrames = 8;
+                p->frameTime = 2;
+                p->scale = sFieldMode ? 150 : 300;
+                p->stretchY = 560;
+                p->life = 18;
+                p->fadeIn = 3;
+                p->fadeOut = 6;
+            }
+            if ((p = Glow(MP_BALL_ORANGE, mx, feet - 6, TRUE, 20, 240, 0)))
+            {
+                p->stretchY = 120;
+                p->flags = PF_UNDER;
+            }
+        }
+        if (t < 14 && (t & 1) == 0 && (p = Spawn(FXA_FIRE_EMBER0, 0, mx + Rnd(Dist(18)), Feet(b) - RndU(Dist(40)))))
+        {
+            p->nFrames = 5;
+            p->frameTime = 3;
+            p->flags = PF_ONCE;
+            p->move = MOVE_RISE;
+            p->vy = -0xA0;
+            p->sway = 1;
+            p->angle = RndU(256);
+            p->life = 15;
+            p->fadeOut = 5;
+            p->scale = FieldScale(160);
+        }
+        BodyTint(b, 16 * Ramp(t, 0, 5) / 256, RGB(31, 19, 6));
+        BodyScale(b, 256, 256 - 100 * Ramp(t, 3, 8) / 256, TRUE);
+        s->invisible = t >= 8;
+        if (t == 14)
+            PartSmoke(mx, my, 6, 26, 10);
+        break;
+    case MPFX_RECALL_GEYSER:
+    {
+        // a geyser bursts up under it and carries it off the top of the screen
+        s16 feet = Feet(b), top = Head(b) - Dist(26);
+        s32 k = Ramp(t, 3, 15);
+        if (t == 0)
+        {
+            u8 n = (feet - top) / Dist(28) + 1;
+            if (n > 5)
+                n = 5;
+            for (i = 0; i < n; i++)
+            {
+                if (!(p = Spawn(FXA_WATER_COLUMN0, 0, mx, feet - Dist(14) - i * Dist(28))))
+                    break;
+                p->nFrames = 4;
+                p->frameTime = 2;
+                p->framePhase = i;
+                p->stretchX = sFieldMode ? 200 : 400;
+                p->stretchY = sFieldMode ? 115 : 230;
+                p->delay = i;
+                p->life = 16 - i;
+                p->fadeOut = 4;
+                p->alpha = 14;
+            }
+            if ((p = Spawn(FXA_WATER_SPLASH, 0, mx, feet - Dist(20))))
+            {
+                p->scale = sFieldMode ? 100 : 200;
+                p->life = 12;
+                p->fadeOut = 6;
+                p->flags = PF_UNDER;
+            }
+            if ((p = Ring(MP_BALL_SKY, TRUE, mx, feet - 2, 12, 100, 30, 70)))
+                p->flags = PF_UNDER;
+        }
+        if (t >= 3 && t < 15)
+        {
+            if ((p = Spawn(FXA_ENERGY_DROP, MP_BALL_SKY, mx + Rnd(Dist(10)), top)))
+            {
+                p->vx = Rnd(Dist(0x180));
+                p->vy = -0x100 - RndU(0x100);
+                p->ay = 0x30;
+                p->life = 20;
+                p->fadeOut = 4;
+            }
+        }
+        BodyScale(b, 256 - 40 * k / 256, 256 + 40 * k / 256, TRUE);
+        s->y2 -= Dist(130) * k / 256 * k / 256;
+        BodyTint(b, 10 * Ramp(t, 0, 4) / 256, RGB(14, 24, 31));
+        s->invisible = t >= 15;
+        break;
+    }
+    case MPFX_RECALL_LEAVES:
+        // a whirl of leaves wraps it, then the leaves fly into the ball
+        if (t == 0)
+        {
+            s16 head = Head(b), h = Feet(b) - head;
+            u8 n = Budget(18);
+            for (i = 0; i < n; i++)
+            {
+                if (!(p = Spawn(FXA_LEAVES_LEAF0, 0, mx, my)))
+                    break;
+                p->move = MOVE_ORBIT;
+                p->tx = mx;
+                p->ty = head + Dist(6) + h * i / n;
+                p->angle = (i * 256 * 3 / n) << 8;
+                p->dAngle = 0x1400;
+                p->radius = Dist(20) << 8;
+                p->dRadius = (Dist(14) << 8) / 12;
+                p->nFrames = 9;
+                p->frameTime = 2;
+                p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
+                p->life = 13;
+                p->fadeIn = 2;
+                p->flags = PF_FAR_DIM;
+            }
+        }
+        BodyScale(b, 256 - 250 * Ramp(t, 4, 12) / 256, 256, TRUE);
+        BodyTint(b, 13 * Ramp(t, 0, 5) / 256, RGB(12, 26, 10));
+        s->invisible = t >= 12;
+        if (t == 12)
+        {
+            for (i = 0; i < Budget(12); i++)
+            {
+                if (!(p = Spawn(FXA_LEAVES_LEAF0, 0, mx + Rnd(Dist(20)), my + Rnd(Dist(22)))))
+                    break;
+                p->move = MOVE_HOME;
+                p->tx = b->bx;
+                p->ty = b->by;
+                p->nFrames = 9;
+                p->frameTime = 2;
+                p->framePhase = RndU(9);
+                p->scale = FieldScale(256);
+                p->life = 7 + i / 2;
+            }
+        }
+        break;
+    case MPFX_RECALL_SHADOW:
+    {
+        // it darkens and sinks into its shadow, and the shadow slides back to the ball
+        s16 feet = Feet(b);
+        if (t == 0 && (p = Helper(b, 0, FXA_BITS_SHADOW, 0, mx, feet - 2)))
+        {
+            p->alpha = 13;
+            p->stretchY = 180;
+            p->flags = PF_UNDER;
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            s32 k = Ramp(t, 13, 20);
+            p->x = (mx + (b->bx - mx) * k / 256) << 8;
+            p->y = (feet - 2 + (b->by - feet + 2) * k / 256) << 8;
+            p->stretchX = Dist(100 + 320 * Ramp(t, 0, 4) / 256 - 200 * k / 256);
+            p->alpha = t < 17 ? 13 : 13 - 12 * Ramp(t, 17, 21) / 256;
+        }
+        BodyTint(b, 16 * Ramp(t, 0, 5) / 256, RGB(3, 1, 6));
+        BodyScale(b, 256 - 20 * Ramp(t, 5, 12) / 256, 256 - 246 * Ramp(t, 5, 12) / 256, TRUE);
+        s->invisible = t >= 12;
+        if (t >= 5 && t < 12 && (t & 1) && (p = Spawn(FXA_WISPS_WISP0, 0, mx + Rnd(Dist(20)), feet - 4)))
+        {
+            p->move = MOVE_RISE;
+            p->vy = -0xC0;
+            p->sway = 1;
+            p->angle = RndU(256);
+            p->nFrames = 3;
+            p->frameTime = 3;
+            p->alpha = 10;
+            p->life = 12;
+            p->fadeOut = 6;
+            p->scale = FieldScale(180);
+        }
+        break;
+    }
+    case MPFX_RECALL_PRISM:
+        // its colors run through the rainbow as it twists down into a sparkle
+        BodyTint(b, 13 * Ramp(t, 0, 3) / 256, MixRgb(Hue((t * 28) & 0xFF), RGB_WHITE, 4));
+        {
+            s32 k = Ramp(t, 6, 14);
+            r = 256 - 250 * k / 256;
+            BodyTurn(b, r, r, (u8)(k / 4));
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2;
+        }
+        if (t == 0 || t == 4 || t == 8)
+        {
+            static const u8 sRingColors[] = {MP_BALL_RED, MP_BALL_LIME, MP_BALL_AZURE};
+            Ring(sRingColors[t / 4], FALSE, mx, my, 10, 200, -14, 256);
+        }
+        s->invisible = t >= 14;
+        if (t == 14)
+        {
+            if ((p = Spawn(FXA_STARS_SHINE0, 0, mx, my)))
+            {
+                p->blend = BLEND_ADD;
+                p->nFrames = 5;
+                p->frameTime = 2;
+                p->flags = PF_ONCE;
+                p->life = 10;
+            }
+            for (i = 0; i < Budget(4); i++)
+            {
+                if (!(p = Spawn(FXA_RAINBOW_RING0, 0, mx + Rnd(Dist(10)), my + Rnd(Dist(10)))))
+                    break;
+                p->nFrames = 3;
+                p->frameTime = 3;
+                p->framePhase = RndU(3);
+                p->move = MOVE_HOME;
+                p->tx = b->bx;
+                p->ty = b->by;
+                p->life = 8 + i * 2;
+            }
+        }
+        break;
+    case MPFX_RECALL_BOUNCE:
+    {
+        // hops back to the ball: three hops, each bigger, getting smaller itself
+        s32 k = Ramp(t, 0, 19), hop = 0, sq;
+        s16 feet = Feet(b);
+        if (t < 7)
+            hop = Sin(Ramp(t, 0, 7) / 2, Dist(10));
+        else if (t < 13)
+            hop = Sin(Ramp(t, 7, 13) / 2, Dist(18));
+        else if (t < 19)
+            hop = Sin(Ramp(t, 13, 19) / 2, Dist(26));
+        sq = t == 7 ? 40 : (t == 13 ? 30 : 0);
+        r = 256 - 176 * k / 256;
+        BodyScale(b, r * (256 + sq / 2) / 256, r * (256 - sq) / 256, TRUE);
+        s->x2 = b->baseX2 + (b->bx - mx) * k / 256;
+        s->y2 += (b->by - feet) * k / 256 - hop;
+        BodyTint(b, 12 * Ramp(t, 12, 19) / 256, RGB_WHITE);
+        s->invisible = t >= 19;
+        if (sq && (p = Spawn(FXA_BITS_PUFF0, 0, mx + s->x2 - b->baseX2, feet - 3 + (b->by - feet) * k / 256)))
+        {
+            p->nFrames = 3;
+            p->frameTime = 2;
+            p->flags = PF_ONCE;
+            p->alpha = 12;
+            p->scale = 120 + sq * 2;
+            p->life = 8;
+            p->fadeOut = 4;
+        }
+        break;
+    }
+    case MPFX_RECALL_HEARTS:
+        // its heart beats twice, then it bursts into hearts that float into the ball
+        BodyTint(b, 14 * Ramp(t, 0, 8) / 256, RGB(31, 16, 24));
+        if (t < 9)
+        {
+            r = (t == 3 || t == 7) ? 24 : ((t == 4 || t == 8) ? 12 : 0);
+            BodyScale(b, 256 + r, 256 + r, TRUE);
+        }
+        s->invisible = t >= 9;
+        if (t == 9)
+        {
+            if ((p = Spawn(FXA_HEARTS_HEART4, 0, mx, my)))
+            {
+                p->scale = FieldScale(200);
+                p->dScale = FieldScale(14);
+                p->life = 10;
+                p->fadeOut = 8;
+                p->alpha = 13;
+            }
+            for (i = 0; i < Budget(10); i++)
+            {
+                if (!(p = Spawn(FXA_HEARTS_SMALL, 0, mx + Rnd(Dist(20)), my + Rnd(Dist(22)))))
+                    break;
+                p->move = MOVE_HOME;
+                p->tx = b->bx;
+                p->ty = b->by;
+                p->scale = FieldScale(120);
+                p->life = 8 + i;
+                p->delay = 2;
+            }
+        }
+        break;
+    case MPFX_RECALL_BUBBLE:
+        // a bubble forms around it and floats it away up, then pops
+        if (t == 0 && (p = Helper(b, 0, FXA_BUBBLES_BUBBLE64, 0, mx, my)))
+        {
+            p->alpha = 13;
+            p->scale = 60;
+            p->flags = PF_STICK;
+            p->stickSprite = b->mon;
+        }
+        if ((p = PartAt(b->helper[0])))
+        {
+            p->scale = 60 + 196 * Ramp(t, 0, 5) / 256;
+            p->stretchX = 256 + Sin((t * 22) & 0xFF, 14);
+            p->stretchY = 256 - Sin((t * 22) & 0xFF, 14);
+        }
+        {
+            s32 k = Ramp(t, 5, 19);
+            BodyScale(b, 256 - 86 * Ramp(t, 0, 5) / 256, 256 - 86 * Ramp(t, 0, 5) / 256, FALSE);
+            s->y2 = b->baseY2 - Dist(70) * k / 256 * k / 256;
+            s->x2 = b->baseX2 + Sin((t * 16) & 0xFF, Dist(6));
+        }
+        BodyTint(b, 6 * Ramp(t, 0, 5) / 256, RGB(16, 28, 31));
+        if (t == 19)
+        {
+            s16 x = mx + s->x2 - b->baseX2, y = my + s->y2 - b->baseY2;
+            Kill(&b->helper[0]);
+            Ring(MP_BALL_CYAN, TRUE, x, y, 8, 200, 30, 256);
+            for (i = 0; i < Budget(8); i++)
+            {
+                if ((p = Spawn(FXA_BUBBLES_POP, 0, x + Cos(i * 32, Dist(26)), y + Sin(i * 32, Dist(26)))))
+                {
+                    p->life = 7;
+                    p->fadeOut = 4;
+                    p->vx = Cos(i * 32, 0x100);
+                    p->vy = Sin(i * 32, 0x100);
+                }
+            }
+        }
+        s->invisible = t >= 19;
+        break;
+    case MPFX_RECALL_LIGHTNING:
+        // it crackles, a bolt strikes and it's gone in the flash
+        BodyTint(b, t < 4 ? 8 * (t & 1) : 16, RGB_WHITE);
+        s->invisible = t >= 9 || (t >= 5 && (t & 1));
+        if (t == 4)
+            PartLightning(mx, my);
+        if (t == 9)
+        {
+            for (i = 0; i < Budget(6); i++)
+            {
+                if (!(p = Spawn(FXA_LIGHTNING_ZAP0, 0, mx + Rnd(Dist(16)), my + Rnd(Dist(20)))))
+                    break;
+                p->blend = BLEND_ADD;
+                p->nFrames = 2;
+                p->frameTime = 2;
+                p->vy = -0x300;
+                p->life = 10;
+                p->fadeOut = 5;
+            }
+        }
+        break;
+    case MPFX_RECALL_ICE:
+        // ice closes around it, it shakes, and it shatters
+        if (t == 0 && (p = Helper(b, 0, FXA_CRYSTAL_CASE, 0, mx, my)))
+        {
+            p->alpha = 9;
+            p->fadeIn = 5;
+            p->flags = PF_STICK;
+            p->stickSprite = b->mon;
+        }
+        BodyTint(b, 12 * Ramp(t, 0, 6) / 256, RGB(22, 30, 31));
+        r = (t >= 8 && t < 12) ? ((t & 1) ? 1 : -1) : 0;
+        s->x2 = b->baseX2 + r;
+        if (t == 12)
+        {
+            Kill(&b->helper[0]);
+            ScreenFlash(2, 6);
+            if ((p = Spawn(FXA_RECALL_CHUNK0, 0, mx, my)))
+            {
+                p->nFrames = 4;
+                p->frameTime = 3;
+                p->flags = PF_ONCE;
+                p->scale = sFieldMode ? 180 : 360;
+                p->life = 12;
+                p->fadeOut = 4;
+            }
+            PartCrystal(mx, my, 16);
+        }
+        s->invisible = t >= 12;
+        break;
+    case MPFX_RECALL_BALLOONS:
+        // three balloons lift it off the top of the screen
+        if (t == 0)
+        {
+            for (i = 0; i < 3; i++)
+            {
+                if (!(p = Helper(b, i, FXA_BALLOONS_BALLOON8 + RndU(6), 0, mx, my)))
+                    continue;
+                p->flags = PF_STICK | PF_UNDER;
+                p->stickSprite = b->mon;
+                p->tx = (i - 1) * Dist(10);
+                p->ty = Head(b) - my - Dist(12) - (i == 1 ? Dist(4) : 0);
+                p->rot = (u8)((i - 1) * 8);
+                p->scale = sFieldMode ? 120 : 180;
+                p->fadeIn = 4;
+            }
+        }
+        {
+            s32 k = Ramp(t, 2, 21);
+            s->y2 = b->baseY2 - Dist(140) * k / 256 * k / 256;
+            s->x2 = b->baseX2 + Sin((t * 12) & 0xFF, Dist(4));
+        }
+        break;
+    case MPFX_RECALL_JUMP:
+        // crouches and leaps off the top of the screen
+        if (t < 6)
+        {
+            r = 66 * Ramp(t, 0, 5) / 256;
+            BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+        }
+        else
+        {
+            BodyScale(b, 210, 310, TRUE);
+            s->y2 -= Dist(170) * Ramp(t, 6, 15) / 256;
+            if (t < 15 && (p = Spawn(FXA_BITS_LINE, b->color, mx + Rnd(Dist(14)), MonY(b) + s->y2 - b->baseY2 + Dist(30))))
+            {
+                p->rot = 192;   // up: the bright end where it's going
+                p->life = 4;
+                p->fadeOut = 4;
+                p->alpha = 11;
+            }
+        }
+        if (t == 6)
+        {
+            for (i = 0; i < 2; i++)
+            {
+                if ((p = Spawn(FXA_BITS_PUFF0, 0, mx + (i ? Dist(14) : -Dist(14)), Feet(b) - 4)))
+                {
+                    p->nFrames = 3;
+                    p->frameTime = 3;
+                    p->flags = PF_ONCE;
+                    p->vx = i ? 0xC0 : -0xC0;
+                    p->drag = 20;
+                    p->life = 12;
+                    p->fadeOut = 6;
+                }
+            }
+            if ((p = Ring(MP_BALL_WHITE, TRUE, mx, Feet(b) - 2, 10, 100, 30, 70)))
+                p->flags = PF_UNDER;
+        }
+        s->invisible = t >= 15;
+        if (t == 17)
+            Twinkle(mx, sFieldMode ? MonY(b) - 40 : 8, 0);   // a glint where it went
+        break;
+    case MPFX_RECALL_DIVE:
+    {
+        // hops up, turns head-down and dives into the ground with a splash
+        s16 feet = Feet(b);
+        s8 dir = (b->flags & FLAG_FRONT) ? -1 : 1;
+        if (t < 9)
+        {
+            BodyTurn(b, 256, 256, (u8)(dir * 128 * Ramp(t, 2, 9) / 256));
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2 - Sin(Ramp(t, 0, 12) / 2, Dist(24));
+        }
+        else
+        {
+            s32 k = Ramp(t, 9, 15);
+            BodyTurn(b, 256, 256 - 250 * k / 256, 128);
+            s->x2 = b->baseX2;
+            s->y2 = b->baseY2 - Sin(Ramp(t, 0, 12) / 2, Dist(24)) + (feet - my) * k / 256;
+        }
+        if (t == 11)
+            PartSplash(mx, feet);
+        s->invisible = t >= 15;
+        break;
+    }
+    case MPFX_RECALL_FEATHERS:
+        // it turns white and scatters into feathers
+        BodyTint(b, 14 * Ramp(t, 0, 6) / 256, RGB_WHITE);
+        if (t == 6)
+        {
+            MonSquares(b, 10, FeatherOut);
+            for (i = 0; i < Budget(5); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_MOTE, b->color, mx + Rnd(Dist(14)), my + Rnd(Dist(14)))))
+                    break;
+                p->move = MOVE_HOME;
+                p->blend = BLEND_GLOW;
+                p->tx = b->bx;
+                p->ty = b->by;
+                p->life = 8 + i * 2;
+            }
+        }
+        s->invisible = t >= 6;
+        break;
+    case MPFX_RECALL_BLACKHOLE:
+    {
+        // a black hole opens at the ball and pulls it in, stretching
+        s32 k = Ramp(t, 3, 17);
+        if (t == 0)
+        {
+            if ((p = Helper(b, 0, FXA_BITS_SHADOW, 0, b->bx, b->by)))
+            {
+                p->alpha = 15;
+                p->scale = 20;
+                p->stretchY = 512;   // round
+                p->flags = PF_UNDER;
+            }
+            for (i = 0; i < Budget(10); i++)
+            {
+                if (!(p = Spawn(FXA_ENERGY_MOTE, b->color, b->bx, b->by)))
+                    break;
+                p->move = MOVE_SPIRAL;
+                p->blend = BLEND_GLOW;
+                p->tx = b->bx;
+                p->ty = b->by;
+                p->angle = (i * 256 / 10) << 8;
+                p->dAngle = 0x1200;
+                p->radius = Dist(40) << 8;
+                p->dRadius = -p->radius / 16;
+                p->life = 16;
+            }
+        }
+        if ((p = PartAt(b->helper[0])))
+            p->scale = t < 5 ? 20 + Dist(110) * Ramp(t, 0, 5) / 256 : (20 + Dist(110)) * (256 - Ramp(t, 17, 21)) / 256 + 4;
+        if (t == 2 || t == 8)
+            Ring(b->color, FALSE, b->bx, b->by, 16, 300, -16, 256);
+        BodyScale(b, (256 + 300 * k / 256) * (256 - k) / 256, 256 - k, FALSE);
+        s->x2 = b->baseX2 + (b->bx - mx) * (k * k / 256) / 256;
+        s->y2 = b->baseY2 + (b->by - my) * (k * k / 256) / 256;
+        BodyTint(b, 16 * Ramp(t, 0, 8) / 256, MixRgb(energy, RGB_BLACK, 8));
+        s->invisible = t >= 17;
+        if (t == 21)
+            Ring(b->color, TRUE, b->bx, b->by, 8, 60, 30, 256);
+        break;
+    }
+    case MPFX_RECALL_GHOST:
+        // it fades away like a ghost, drifting up
+        s->oam.objMode = ST_OAM_OBJ_BLEND;
+        b->alpha = 16 - 15 * Ramp(t, 0, 19) / 256;
+        s->y2 = b->baseY2 - Dist(16) * Ramp(t, 0, 20) / 256;
+        s->x2 = b->baseX2 + Sin((t * 20) & 0xFF, 2);
+        BodyTint(b, 8 * Ramp(t, 0, 10) / 256, RGB(18, 10, 28));
+        if (t == 0 && (p = Spawn(FXA_EXTRA_SOFT, MP_BALL_PURPLE, mx, my)))
+        {
+            p->alpha = 4;
+            p->life = 22;
+            p->fadeIn = 4;
+            p->fadeOut = 12;
+            p->scale = 600;
+        }
+        if (t == 4)
+        {
+            for (i = 0; i < Budget(3); i++)
+            {
+                if (!(p = Spawn(FXA_WISPS_WISP0, 0, mx + (i - 1) * Dist(18), my + Rnd(Dist(10)))))
+                    break;
+                p->move = MOVE_RISE;
+                p->vy = -0x80;
+                p->sway = 2;
+                p->angle = i * 80;
+                p->nFrames = 3;
+                p->frameTime = 4;
+                p->alpha = 11;
+                p->life = 22;
+                p->delay = i * 3;
+                p->fadeIn = 3;
+                p->fadeOut = 10;
+            }
+        }
+        s->invisible = t >= 20;
+        break;
+    case MPFX_RECALL_PIXELRAIN:
+        // it pixelates, then its pixels rain down and fade
+        s->oam.mosaic = t < 5;
+        sScreen.mosaicWant = t < 5 ? 1 + t * 3 : 0;
+        BodyTint(b, 6 * Ramp(t, 0, 4) / 256, light);
+        if (t == 5)
+        {
+            s->oam.mosaic = FALSE;
+            BodyTint(b, 0, 0);
+            MonSquares(b, 4, PixelFall);
+        }
+        s->invisible = t >= 5;
+        break;
+    case MPFX_RECALL_FIREWORK:
+    {
+        // it crouches, shoots up as a rocket and bursts into fireworks
+        s16 top = my - Dist(70);
+        if (top < 14)
+            top = 14;
+        BodyTint(b, 16 * Ramp(t, 0, 4) / 256, light);
+        if (t < 5)
+        {
+            r = 50 * Ramp(t, 0, 4) / 256;
+            BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+        }
+        else
+        {
+            s32 k = Ramp(t, 5, 13);
+            BodyScale(b, 256 - 230 * k / 256, 256 - 150 * k / 256, FALSE);
+            s->y2 = b->baseY2 - (my - top) * k / 256 * k / 256;
+            if (t < 13 && (p = Spawn(FXA_EXTRA_EMBER, 0, mx + Rnd(2), my + s->y2 - b->baseY2 + Dist(10))))
+            {
+                p->blend = BLEND_GLOW;
+                p->vy = 0x40;
+                p->life = 10;
+                p->fadeOut = 8;
+            }
+        }
+        if (t == 13)
+        {
+            FireworkBurst(mx, top);
+            ScreenFlash(2, 4);
+        }
+        s->invisible = t >= 13;
+        break;
+    }
+    case MPFX_RECALL_NAP:
+        // it dozes off, breathing slowly, Zs floating up, and fades away asleep
+        r = Sin((t * 12) & 0xFF, 14);
+        BodyScale(b, 256 + r / 2, 256 - r, TRUE);
+        BodyTint(b, 6 * Ramp(t, 0, 10) / 256, RGB(8, 10, 24));
+        if (t >= 6)
+        {
+            s->oam.objMode = ST_OAM_OBJ_BLEND;
+            b->alpha = 16 - 15 * Ramp(t, 6, 20) / 256;
+        }
+        if ((t == 0 || t == 6 || t == 12) && (p = Spawn(t ? FXA_RECALL_Z1 : FXA_RECALL_Z0, 0, mx + Dist(12), Head(b) + Dist(6))))
+        {
+            p->vx = 0x30;
+            p->vy = -0x60;
+            p->sway = 2;
+            p->angle = t * 20;
+            p->scale = FieldScale(180 + t * 6);
+            p->life = 30;
+            p->fadeIn = 3;
+            p->fadeOut = 10;
+        }
+        s->invisible = t >= 20;
+        break;
+    case MPFX_RECALL_SAKURA:
+        // it blushes pink and blows away in cherry petals
+        BodyTint(b, 12 * Ramp(t, 0, 6) / 256, RGB(31, 22, 26));
+        if (t == 6)
+            MonSquares(b, 6, PetalOut);
+        s->invisible = t >= 6;
+        break;
+    case MPFX_RECALL_SPIRIT:
+        // it pales and its spirit (a glowing orb) rises out and flies into the ball
+        BodyTint(b, 14 * Ramp(t, 0, 6) / 256, RGB(28, 30, 31));
+        if (t >= 4)
+        {
+            s->oam.objMode = ST_OAM_OBJ_BLEND;
+            b->alpha = 16 - 15 * Ramp(t, 4, 12) / 256;
+        }
+        s->invisible = t >= 12;
+        if (t == 5 && (p = Spawn(FXA_RECALL_ORB0, 0, mx, my)))
+        {
+            p->move = MOVE_SETTLE;
+            p->tx = mx;
+            p->ty = my - Dist(14);
+            p->dRadius = 6;
+            p->life = 7;
+            p->fadeIn = 3;
+        }
+        if (t == 12 && (p = Spawn(FXA_RECALL_ORB0, 0, mx, my - Dist(14))))
+        {
+            p->move = MOVE_HOME;
+            p->tx = b->bx;
+            p->ty = b->by;
+            p->nFrames = 7;
+            p->frameTime = 2;
+            p->flags = PF_ONCE;
+            p->life = 10;
+            p->trailEvery = 2;
+            p->trailArt = FXA_ENERGY_MOTE;
+            p->color = b->color;
+        }
+        break;
     }
 }
 
@@ -2073,6 +4494,8 @@ bool8 MP_BallFx_StartRecall(u8 monSpriteId, s16 bx, s16 by, u8 flags, const stru
         return FALSE;
     MPNet_Log("ballfx: recall %d color %d", fx->recall, fx->color);
     EnsureManager();
+    if (fx->sound == MPFX_SOUND_AUTO && RecallSong(fx->recall))
+        PlaySE12WithPanning(RecallSong(fx->recall), (flags & MPFX_FRONT) ? 63 : -64);
     b->recall = TRUE;
     b->id = fx->recall;
     b->color = fx->color < MP_BALL_COLORS ? fx->color : 0;
@@ -2242,15 +4665,39 @@ static bool8 MonPixel(u8 spriteId, s16 sx, s16 sy, u16 *color)
     return TRUE;
 }
 
+// The effects palette with the game's screen fade applied (once a frame, in MP_BallFx_Composite)
+static u16 sPalNow[FX_PAL_COUNT];
+
 static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 cx1, s16 cy1)
 {
-    const struct FxArt *art = &sFxArt[p->art];
-    const u8 *px = sFxPixels + art->offset;
-    u16 colors[19];
-    u8 alpha = p->alpha, i;
+    const struct FxArt *art;
+    const u8 *px;
+    u16 energyNow[3];
+    u8 alpha = p->alpha;
     s32 sx, sy, cosv, sinv, halfW, halfH, x0, y0, x1, y1, x, y;
     s16 px0 = p->x >> 8, py0 = p->y >> 8;
     u16 energy = sEnergyRgb[p->color];
+    u16 fr = 0;
+
+    // its animation frame
+    if (p->nFrames > 1 && p->frameTime)
+    {
+        u16 f = p->age / p->frameTime + p->framePhase;
+        if (p->flags & PF_ONCE)
+            fr = f >= p->nFrames ? p->nFrames - 1 : f;
+        else if (p->flags & PF_PINGPONG)
+        {
+            fr = f % (2 * p->nFrames - 2);
+            if (fr >= p->nFrames)
+                fr = 2 * p->nFrames - 2 - fr;
+        }
+        else
+            fr = f % p->nFrames;
+    }
+    if (p->art + fr >= FXA_COUNT)
+        return;
+    art = &sFxArt[p->art + fr];
+    px = sFxPixels + art->offset;
 
     // fades
     if (p->fadeIn && p->age < p->fadeIn)
@@ -2261,11 +4708,9 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
         alpha = alpha * 12 / 16;   // the far side of the orbit (and behind the Moemon: PF_UNDER)
     if (alpha == 0)
         return;
-    for (i = 1; i < 16; i++)
-        colors[i] = Faded(sFxPalette[i]);
-    colors[16] = Faded(energy);
-    colors[17] = Faded(MixRgb(energy, RGB_WHITE, 8));
-    colors[18] = Faded(MixRgb(energy, RGB_BLACK, 8));
+    energyNow[0] = Faded(energy);
+    energyNow[1] = Faded(MixRgb(energy, RGB_WHITE, 8));
+    energyNow[2] = Faded(MixRgb(energy, RGB_BLACK, 8));
 
     sx = p->scale * p->stretchX / 256;
     sy = p->scale * p->stretchY / 256;
@@ -2310,12 +4755,19 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
                 uy--;
             if (ux < 0 || uy < 0 || ux >= art->w || uy >= art->h)
                 continue;
+            if (p->flags & PF_FLIPX)
+                ux = art->w - 1 - ux;
             v = px[uy * art->w + ux];
-            if (v == 0 || v > 18)
+            if (v == 0 || v >= FX_PAL_COUNT)
                 continue;
             if ((p->flags & PF_UNDER) && MonPixel(p->underSprite, x, y, NULL))
                 continue;   // the Moemon stands in front of it
-            c = p->solid ? Faded(p->solid & 0x7FFF) : colors[v];
+            if (p->solid)
+                c = Faded(p->solid & 0x7FFF);
+            else if (v >= 16 && v <= 18)
+                c = energyNow[v - 16];
+            else
+                c = sPalNow[v];
             dst = &frame[y * DISPLAY_WIDTH + x];
             if (p->blend == BLEND_ADD)
                 *dst = Add555(*dst, c, alpha) | 0x8000;
@@ -2418,6 +4870,8 @@ void MP_BallFx_Composite(u16 *frame)
                 frame[y * DISPLAY_WIDTH + x] = Mix555(frame[y * DISPLAY_WIDTH + x], RGB_WHITE, sScreen.flashLevel * sScreen.flashTimer / 4 > 14 ? 14 : sScreen.flashLevel * sScreen.flashTimer / 4) | 0x8000;
     }
 
+    for (i = 0; i < FX_PAL_COUNT; i++)
+        sPalNow[i] = Faded(sFxPalette[i]);
     for (i = 0; i < sPartHigh; i++)
     {
         const struct FxPart *p = &sParts[i];

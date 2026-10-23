@@ -2407,7 +2407,7 @@ static bool8 CanReplaceMove(void)
 {
     if (sMonSummaryScreen->firstMoveIndex == MAX_MON_MOVES
         || sMonSummaryScreen->newMove == MOVE_NONE
-        || IsMoveHm(sMonSummaryScreen->summary.moves[sMonSummaryScreen->firstMoveIndex]) != TRUE)
+        || TRUE)   // Moemon Kai: HM moves can be replaced like any other (a TM, a new move...)
         return TRUE;
     else
         return FALSE;
@@ -3213,6 +3213,8 @@ static void MpBall_Apply(u16 item, u16 style)
     SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_POKEBALL, &it);
     SetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ENCRYPT_SEPARATOR, &st);
     MpBall_RefreshCaughtBall();
+    if (st != 0)
+        MP_Achieve_Unlock("ballstyle");   // Moemon Co-op
 }
 
 static void MpBall_ChangeValue(s8 delta)
@@ -3228,7 +3230,7 @@ static void MpBall_ChangeValue(s8 delta)
     case MPBALL_ROW_COLOR:
         if (!MP_BallStyle_ItemCanColor(item))
             return;
-        sMpBall.color = (sMpBall.color + MP_BALL_COLORS + delta) % MP_BALL_COLORS;
+        sMpBall.color = MP_BallUnlock_Step(MPFX_PIECE_COLOR, sMpBall.color, delta);   // only the colors this save has
         break;
     case MPBALL_ROW_DECO:
         if (!MP_BallStyle_ItemCanDecorate(item))
@@ -4876,4 +4878,10 @@ static void KeepMoveSelectorVisible(u8 firstSpriteId)
         gSprites[spriteIds[i]].data[1] = 0;
         gSprites[spriteIds[i]].invisible = FALSE;
     }
+}
+
+// Moemon Co-op (test harness): the summary screen is up and settled
+bool8 MP_SummaryScreen_IsOpen(void)
+{
+    return gMain.callback2 == MainCB2 && sMonSummaryScreen != NULL && !gPaletteFade.active;
 }

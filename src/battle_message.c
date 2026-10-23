@@ -401,6 +401,11 @@ const u16 gMpStatGroupStringIds[] = {
     STRINGID_DEFENDERSSTATFELL, STRINGID_DEFENDERSSTATROSE,
     STRINGID_MP_GROUP_STAT_NOLOWER, STRINGID_STATSWONTDECREASE,
 };
+// Moemon Co-op: sandstorm / hail hitting several Pokémon at once (mpweathergroup), by the
+// same chooser as gSandStormHailDmgStringIds (0 sandstorm, 1 hail)
+const u16 gMpWeatherAllStringIds[] = {STRINGID_MP_WEATHER_ALL_SAND, STRINGID_MP_WEATHER_ALL_HAIL};
+static const u8 sText_MpWeatherAllSand[] = _("Everyone was buffeted\nby the sandstorm!");
+static const u8 sText_MpWeatherAllHail[] = _("Everyone was pelted\nby HAIL!");
 static const u8 sText_MpGroupPartyNoLower[] = _("The party's {B_BUFF1}\nwon't go any lower!");
 static const u8 sText_MpGroupFoesNoLower[] = _("The foes' {B_BUFF1}\nwon't go any lower!");
 static const u8 sText_MpGroupPartyDown[] = _("The party's {B_BUFF1}\nwas lowered!");
@@ -2522,6 +2527,12 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MP_LEARN_ALL:
         stringPtr = MpBuildLearnText();
+        break;
+    case STRINGID_MP_WEATHER_ALL_SAND:
+        stringPtr = sText_MpWeatherAllSand;
+        break;
+    case STRINGID_MP_WEATHER_ALL_HAIL:
+        stringPtr = sText_MpWeatherAllHail;
         break;
     case STRINGID_MP_GROUP_STAT_NOLOWER:
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;

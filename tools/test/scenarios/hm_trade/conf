@@ -1,0 +1,8 @@
+# held HMs never travel: ALICE trades her lead holding HM01 to BOB. HM01 goes back to ALICE's BAG and BOB's
+# new Moemon holds nothing (BOB's lead held a POTION, which does travel)
+MODE=2
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=283:12"
+EXPECT_A=("trade with player 2 complete" "[test] monmoves: slot 0 species 283 moves" "held 13" "[test] bagqty 339: 1")
+EXPECT_B=("trade with player 1 complete" "[test] monmoves: slot 0 species 280 moves" "held 0" "[test] bagqty 339: 0")

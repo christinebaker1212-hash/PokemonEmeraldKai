@@ -1,0 +1,14 @@
+# Berry trees grow by the time that really passes, not by the host's clock: BOB (Los Angeles) plants an ORAN BERRY,
+# joins ALICE's game (Tokyo, 16 hours ahead), then goes offline again; the tree's minutes to its next stage stay the
+# same each time (it would have grown 16 hours on joining); 180 minutes later (mp berrywait) it grows one stage.
+# Also: the game clock reads the PC's (it was stuck at day 0), and a save from SKIP THE INTRO (bedroom clock marked
+# set, time-based events off: mp setflag 81) gets time-based events on.
+MODE=2
+DELAY=250
+JIT=80
+FPS=60
+TMO=240
+ENV_A="TZ=Asia/Tokyo"
+ENV_B="TZ=America/Los_Angeles"
+EXPECT_B=("clock: time-based events were off (skipped intro): on from now" "[test] berryinfo 2: berry 7 stage 1 next 180 min yield 0 regrow 0 (time events on" "clock: following the host's clock" "(the host's)" "[test] offline" "(ours)" "game time day 9" "rtc status 0000" "[test] berrywait 180" "[test] berryinfo 2: berry 7 stage 2")
+UNEXPECT_B=("berryinfo 2: berry 7 stage 3" "berryinfo 2: berry 7 stage 4" "berryinfo 2: berry 7 stage 5")

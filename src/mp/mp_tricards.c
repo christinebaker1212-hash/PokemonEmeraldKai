@@ -6,12 +6,15 @@
 // them), parked off-screen (InitBattlerHealthboxCoords), and these cards are
 // drawn by the port over the finished frame (MP_TriCards_Composite, from VDraw).
 //
-// A card is 72x20: row 1 the full name, row 2 the level, a status tag and the HP
-// bar. Foes are stacked top-left, the team right above the text box; the team's
-// cards ramp from 38% to 0% see-through (the top one sits over the right foe).
-// Only the cream fill and the border are blended: text, bar, status tag and the
-// owner strip stay solid. Colors come from a sprite palette loaded for the battle,
-// so they fade with the rest of the screen.
+// The cards are the user's pixel art (tools/moemon_tricards: mp_tricard_gfx.h): a
+// 74x22 card with a tail toward the type icons, name and gender on row 1, the
+// level and the original game's HP bar (with a small HP label) on row 2. A status
+// tag covers the level, as in the original healthbox, and the bar gets shorter to
+// fit it. Foes are stacked top-left, the team right above the text box; the
+// team's cards ramp from 38% to 0% see-through (the top one sits over the right
+// foe). Only the fill and the frame are blended: text, gender, bar and status tag
+// stay solid. The colors fade with the screen like the battle's own sprites (a
+// palette loaded for the battle is the reference: MP_FadeFit).
 #include <string.h>
 #include "global.h"
 #include "battle.h"
@@ -29,55 +32,51 @@
 #include "window.h"
 #include "constants/battle.h"
 #include "constants/characters.h"
+#include "constants/species.h"
+#include "data.h"
 #include "mp.h"
 
-#define CARD_W 72
-#define CARD_H 20
+#include "mp_tricard_gfx.h"
+
+#define CARD_W TRICARD_FRAME_W
+#define CARD_H TRICARD_FRAME_H
 #define CARD_STEP 21
-#define FOE_X 2
-#define FOE_Y 2
-#define TEAM_X 166
-#define TEAM_Y 49
+// where the frames go: the foes' card body at x 1, the team's at x 165 (the mock-up)
+#define FOE_X (1 - TRICARD_FOE_BODY)
+#define FOE_Y 1
+#define TEAM_X (165 - TRICARD_TEAM_BODY)
+#define TEAM_Y 48
+
+// card rows (from the card's top)
+#define ROW_NAME 3
+#define ROW_LEVEL 11
+#define ROW_BAR 12
+#define INSIDE_RIGHT 70   // the last column inside the ring, from the body's left
 
 #define TAG_TRICARD_PAL MP_TRICARD_PAL_TAG
 
-enum {
-    C_NONE, C_FILL, C_EDGE, C_TEXT, C_SHADOW, C_BAR_EDGE, C_BAR_EMPTY, C_GREEN, C_YELLOW, C_RED,
-    C_OWN1, C_OWN2, C_OWN3, C_WHITE, C_PSN, C_BRN,
-};
-
+// The fade reference: a sprite palette of the card's own colors, loaded for the battle
 static const u16 sCardPal[16] = {
-    [C_NONE]     = RGB(0, 0, 0),
-    [C_FILL]     = RGB(31, 31, 28),
-    [C_EDGE]     = RGB(8, 10, 9),
-    [C_TEXT]     = RGB(9, 9, 10),
-    [C_SHADOW]   = RGB(27, 26, 22),
-    [C_BAR_EDGE] = RGB(10, 13, 11),
-    [C_BAR_EMPTY]= RGB(9, 9, 9),
-    [C_GREEN]    = RGB(14, 31, 21),
-    [C_YELLOW]   = RGB(31, 28, 0),
-    [C_RED]      = RGB(31, 11, 7),
-    [C_OWN1]     = RGB(29, 10, 8),
-    [C_OWN2]     = RGB(8, 17, 29),
-    [C_OWN3]     = RGB(9, 23, 9),
-    [C_WHITE]    = RGB(31, 31, 31),
-    [C_PSN]      = RGB(24, 12, 25),
-    [C_BRN]      = RGB(29, 13, 8),
+    RGB(0, 0, 0), RGB(31, 31, 28), RGB(10, 13, 12), RGB(15, 18, 16), RGB(7, 10, 8), RGB(4, 7, 0), RGB(27, 26, 22), RGB(24, 23, 14),
+    RGB(9, 9, 10), RGB(31, 19, 18), RGB(8, 25, 31), RGB(10, 13, 11), RGB(26, 25, 23), RGB(31, 31, 31), RGB(11, 26, 16), RGB(14, 31, 21),
 };
 
 static const struct SpritePalette sCardSpritePal = {sCardPal, TAG_TRICARD_PAL};
+
+enum { GENDER_NONE, GENDER_MALE, GENDER_FEMALE };
 
 struct Card
 {
     bool8 used;
     bool8 dirty;
-    u8 owner;           // 0-2: owner strip color, 0xFF: none (foes)
     u8 name[POKEMON_NAME_LENGTH + 1];
     u8 letter;          // 0, or A/B/C when a card on the same side has the same name
+    u8 gender;          // GENDER_*
     u8 level;
     u8 status;          // 0 none, 1 PSN, 2 PAR, 3 SLP, 4 FRZ, 5 BRN
+    bool8 team;         // the team's card (tail on the left)
     s32 hp, maxHp;
-    u8 pix[CARD_H][CARD_W];
+    u8 pix[CARD_H][CARD_W];   // TC_* roles
 };
 
 static EWRAM_DATA struct Card sCards[MAX_BATTLERS_COUNT];
@@ -96,8 +95,9 @@ static const struct WindowTemplate sTextWindow = {
     .bg = 0, .tilemapLeft = 0, .tilemapTop = 0, .width = TEXT_WIN_W, .height = TEXT_WIN_H, .paletteNum = 0, .baseBlock = 0
 };
 
-// Draws str at (x, y) of the card: font pixel 1 = text, 3 = shadow. Returns the x after it.
-static u8 DrawText(struct Card *c, const u8 *str, u8 x, u8 y, u8 maxX)
+// Draws str at (x, y) of the card: font pixel 1 = color, 3 = shadow (up to maxX, not
+// included). Returns the x after it.
+static u8 DrawText(struct Card *c, const u8 *str, u8 x, u8 y, u8 maxX, u8 color)
 {
     static const u8 sColors[3] = {0, 1, 3};
     u8 winId = AddWindow(&sTextWindow);
@@ -118,7 +118,7 @@ static u8 DrawText(struct Card *c, const u8 *str, u8 x, u8 y, u8 maxX)
             u8 v = (px & 1) ? (*t >> 4) : (*t & 0xF);
             if (v == 1 || v == 3)
             {
-                c->pix[y + py][x + px] = (v == 1) ? C_TEXT : C_SHADOW;
+                c->pix[y + py][x + px] = (v == 1) ? color : TC_SHADOW;
                 if (x + px + 1 > right)
                     right = x + px + 1;
             }
@@ -128,91 +128,103 @@ static u8 DrawText(struct Card *c, const u8 *str, u8 x, u8 y, u8 maxX)
     return right;
 }
 
-static void FillRect(struct Card *c, int x0, int y0, int x1, int y1, u8 color)
-{
-    int x, y;
-    for (y = y0; y <= y1; y++)
-        for (x = x0; x <= x1; x++)
-            if (x >= 0 && x < CARD_W && y >= 0 && y < CARD_H)
-                c->pix[y][x] = color;
-}
-
-// A 20x8 status tag: rounded colored box with the 3 letters in white
+// The original game's 20x8 status tag at (x, y). Returns the x after it.
 static u8 DrawStatusTag(struct Card *c, u8 x, u8 y, u8 status)
 {
-    static const u8 sBg[] = {0, C_PSN, C_YELLOW, C_BAR_EMPTY, C_OWN2, C_BRN};
-    static const u8 sText[][4] = {
-        {EOS}, {CHAR_P, CHAR_S, CHAR_N, EOS}, {CHAR_P, CHAR_A, CHAR_R, EOS}, {CHAR_S, CHAR_L, CHAR_P, EOS},
-        {CHAR_F, CHAR_R, CHAR_Z, EOS}, {CHAR_B, CHAR_R, CHAR_N, EOS},
-    };
     int px, py;
-    struct Card tmp;
-    u8 end;
-
-    FillRect(c, x + 1, y, x + 18, y + 7, sBg[status]);
-    FillRect(c, x, y + 1, x + 19, y + 6, sBg[status]);
-    memset(tmp.pix, 0, sizeof(tmp.pix));
-    end = DrawText(&tmp, sText[status], 0, 0, CARD_W);
-    // text only (no shadow), centered, in white
-    for (py = 0; py < GLYPH_ROWS - 1; py++)
-        for (px = 0; px < end && px < 18; px++)
-            if (tmp.pix[py][px] == C_TEXT)
-                c->pix[y + py][x + 1 + (18 - end) / 2 + px] = C_WHITE;
+    for (py = 0; py < 8; py++)
+        for (px = 0; px < 20; px++)
+            c->pix[y + py][x + px] = sTriCardStatus[status - 1][py][px];
     return x + 20;
+}
+
+// HP the way the original bar counts it: 48 pixels, at least 1 while any is left
+static u8 HpPixels48(s32 hp, s32 maxHp)
+{
+    s32 px;
+    if (maxHp <= 0 || hp <= 0)
+        return 0;
+    px = hp * 48 / maxHp;
+    return px == 0 ? 1 : px;
+}
+
+// The HP bar from x to the inside of the ring (right): the left end with its HP label,
+// the fill, the right end. Green, yellow and red at the original game's thresholds.
+static void DrawBar(struct Card *c, int x, int right)
+{
+    int width = right - 1 - (x + 12);   // fill columns x+12 .. right-2
+    int filled = 0, i, py;
+    u8 top = TC_GREEN_TOP, bottom = TC_GREEN_BOTTOM, px48;
+
+    if (width < 1)
+        return;
+    px48 = HpPixels48(c->hp, c->maxHp);
+    if (px48)
+    {
+        filled = c->hp * width / c->maxHp;
+        if (filled < 1)
+            filled = 1;
+        if (filled > width)
+            filled = width;
+        if (px48 <= 9)
+            top = TC_RED_TOP, bottom = TC_RED_BOTTOM;
+        else if (px48 <= 24)
+            top = TC_YELLOW_TOP, bottom = TC_YELLOW_BOTTOM;
+    }
+    for (py = 0; py < 6; py++)
+    {
+        for (i = 0; i < 12; i++)
+            c->pix[ROW_BAR + py][x + i] = sTriCardBarLeft[py][i];
+        for (i = 0; i < 2; i++)
+            c->pix[ROW_BAR + py][right - 1 + i] = sTriCardBarRight[py][i];
+    }
+    for (i = 0; i < width; i++)
+    {
+        u8 *col = &c->pix[ROW_BAR][x + 12 + i];
+        bool8 full = i < filled;
+        col[0 * CARD_W] = TC_BAR_EDGE;
+        col[1 * CARD_W] = TC_BAR_WHITE;
+        col[2 * CARD_W] = full ? top : TC_EMPTY_TOP;
+        col[3 * CARD_W] = full ? bottom : TC_EMPTY_BOTTOM;
+        col[4 * CARD_W] = TC_BAR_WHITE;
+        col[5 * CARD_W] = TC_BAR_EDGE;
+    }
 }
 
 static void Render(struct Card *c)
 {
-    u8 lx, x, lv[8];
-    int bx, bw, filled;
-    u8 barColor;
+    u8 body = c->team ? TRICARD_TEAM_BODY : TRICARD_FOE_BODY;
+    u8 lx = body + 4, right = body + INSIDE_RIGHT, nameMax = right + 1, x, lv[8];
 
-    memset(c->pix, C_NONE, sizeof(c->pix));
-    // body with cut corners, border
-    FillRect(c, 1, 0, CARD_W - 2, CARD_H - 1, C_FILL);
-    FillRect(c, 0, 1, CARD_W - 1, CARD_H - 2, C_FILL);
-    FillRect(c, 1, 0, CARD_W - 2, 0, C_EDGE);
-    FillRect(c, 1, CARD_H - 1, CARD_W - 2, CARD_H - 1, C_EDGE);
-    FillRect(c, 0, 1, 0, CARD_H - 2, C_EDGE);
-    FillRect(c, CARD_W - 1, 1, CARD_W - 1, CARD_H - 2, C_EDGE);
-    lx = 3;
-    if (c->owner < 3)
-    {
-        FillRect(c, 1, 1, 2, CARD_H - 2, C_OWN1 + c->owner);
-        lx = 5;
-    }
-    // row 1: the name, and its letter at the right edge when names repeat
+    memcpy(c->pix, c->team ? sTriCardTeamFrame : sTriCardFoeFrame, sizeof(c->pix));
+    // row 1: the name and the gender, and the letter at the right when names repeat
     if (c->letter)
     {
         u8 tag[2] = {c->letter, EOS};
-        DrawText(c, c->name, lx, 2, CARD_W - 10);
-        DrawText(c, tag, CARD_W - 9, 2, CARD_W - 2);
+        DrawText(c, tag, right - 6, ROW_NAME, right + 1, TC_TEXT);
+        nameMax = right - 7;
+    }
+    x = DrawText(c, c->name, lx, ROW_NAME, nameMax, TC_TEXT);
+    if (c->gender != GENDER_NONE)
+    {
+        static const u8 sMale[] = {CHAR_MALE, EOS}, sFemale[] = {CHAR_FEMALE, EOS};
+        x = lx + GetStringWidth(FONT_SMALL, c->name, 0) + 1;   // one pixel apart (the mock-up)
+        DrawText(c, c->gender == GENDER_MALE ? sMale : sFemale, x, ROW_NAME, nameMax,
+                 c->gender == GENDER_MALE ? TC_MALE : TC_FEMALE);
+    }
+    // row 2: the level, or the status tag over it; then the HP bar to the right end
+    if (c->status)
+    {
+        x = DrawStatusTag(c, lx, ROW_LEVEL, c->status);
     }
     else
     {
-        DrawText(c, c->name, lx, 2, CARD_W - 2);
+        lv[0] = CHAR_EXTRA_SYMBOL;
+        lv[1] = CHAR_LV_2;
+        ConvertIntToDecimalStringN(lv + 2, c->level, STR_CONV_MODE_LEFT_ALIGN, 3);
+        x = DrawText(c, lv, lx, ROW_LEVEL, right + 1, TC_TEXT);
     }
-    // row 2: level, status, HP bar
-    lv[0] = CHAR_EXTRA_SYMBOL;
-    lv[1] = CHAR_LV_2;
-    ConvertIntToDecimalStringN(lv + 2, c->level, STR_CONV_MODE_LEFT_ALIGN, 3);
-    x = DrawText(c, lv, lx, 10, CARD_W - 2);
-    if (c->status)
-        x = DrawStatusTag(c, x + 1, 10, c->status);
-    bx = x + 2;
-    bw = CARD_W - bx - 3;
-    if (bw < 8)
-        bw = 8;
-    FillRect(c, bx - 1, 12, bx + bw, 15, C_BAR_EDGE);
-    FillRect(c, bx, 13, bx + bw - 1, 14, C_BAR_EMPTY);
-    if (c->maxHp > 0 && c->hp > 0)
-    {
-        filled = (c->hp * bw) / c->maxHp;
-        if (filled < 1)
-            filled = 1;
-        barColor = (c->hp * 2 > c->maxHp) ? C_GREEN : (c->hp * 5 > c->maxHp) ? C_YELLOW : C_RED;
-        FillRect(c, bx, 13, bx + filled - 1, 14, barColor);
-    }
+    DrawBar(c, x + 1, right);
     c->dirty = FALSE;
 }
 
@@ -220,16 +232,9 @@ static void Render(struct Card *c)
 
 void MP_TriCards_Begin(void)
 {
-    u8 i;
     memset(sCards, 0, sizeof(sCards));
-    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
-        sCards[i].owner = 0xFF;
     if (IndexOfSpritePaletteTag(TAG_TRICARD_PAL) == 0xFF)
         LoadSpritePalette(&sCardSpritePal);
-    // A linked triple: battler 2i belongs to link player i, the same color on every screen
-    if (gMpCoopBattle && IS_TRIPLE_BATTLE())
-        for (i = 0; i < 3; i++)
-            sCards[i * 2].owner = i;
     sActive = TRUE;
 }
 
@@ -250,15 +255,6 @@ void MP_TriCards_End(void)
 bool8 MP_TriCards_Active(void)
 {
     return sActive && IS_TRIPLE_BATTLE();
-}
-
-void MP_TriCards_SetOwner(u8 battler, u8 seat)
-{
-    if (battler < MAX_BATTLERS_COUNT)
-    {
-        sCards[battler].owner = seat;
-        sCards[battler].dirty = TRUE;
-    }
 }
 
 static u8 StatusOf(u32 status1)
@@ -289,6 +285,19 @@ void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo)
     StringGet_Nickname(c->name);
     c->level = GetMonData(mon, MON_DATA_LEVEL);
     c->status = StatusOf(GetMonData(mon, MON_DATA_STATUS));
+    c->team = GetBattlerSide(battler) == B_SIDE_PLAYER;
+    // the gender as on the original healthbox (a NIDORAN♀/♂ under its own name already shows it)
+    switch (GetMonGender(mon))
+    {
+    case MON_MALE:   c->gender = GENDER_MALE; break;
+    case MON_FEMALE: c->gender = GENDER_FEMALE; break;
+    default:         c->gender = GENDER_NONE; break;
+    }
+    {
+        u16 species = GetMonData(mon, MON_DATA_SPECIES);
+        if ((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M) && StringCompare(c->name, gSpeciesNames[species]) == 0)
+            c->gender = GENDER_NONE;
+    }
     if (hpToo)
     {
         c->hp = GetMonData(mon, MON_DATA_HP);
@@ -419,9 +428,8 @@ static void RedrawSprite(u16 *frame, const struct Sprite *s)
     }
 }
 
-// After the GBA frame is drawn (platform VDraw): the cards over it
-// For the type icons (mp_typeicons.c): where battler's card is drawn this frame (its left and right
-// edges and its top), FALSE when it isn't
+// For the type icons (mp_typeicons.c): where battler's card body is drawn this frame (its
+// outer ring's left and right columns and top row), FALSE when it isn't
 bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top)
 {
     struct Sprite *box;
@@ -432,23 +440,28 @@ bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top)
     box = &gSprites[gHealthboxSpriteIds[battler]];
     if (!box->inUse || box->invisible || !CardPlace(battler, &x0, &y0, &opacity))
         return FALSE;
-    *left = x0 + box->x2;
-    *right = x0 + box->x2 + CARD_W - 1;
+    *left = x0 + box->x2 + (GetBattlerSide(battler) == B_SIDE_PLAYER ? TRICARD_TEAM_BODY : TRICARD_FOE_BODY);
+    *right = *left + TRICARD_BODY_W - 1;
     *top = y0 + box->y2;
     return TRUE;
 }
 
+// After the GBA frame is drawn (platform VDraw): the cards over it
 void MP_TriCards_Composite(u16 *frame)
 {
-    const u16 *pal;
-    u8 slot, b;
+    struct MpFadeFit fit;
+    u16 colors[TC_COUNT];
+    u8 slot, b, i;
 
     if (!sActive || !IS_TRIPLE_BATTLE() || !gMain.inBattle || gMain.callback2 != BattleMainCB2 || !MP_OBJ_LAYER_SHOWN())
         return;
     slot = IndexOfSpritePaletteTag(TAG_TRICARD_PAL);
     if (slot == 0xFF)
         return;
-    pal = (const u16 *)(OBJ_PLTT) + slot * 16;
+    // the card's colors under the same fade as the battle's sprites
+    MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(slot));
+    for (i = 0; i < TC_COUNT; i++)
+        colors[i] = MP_FadeFit_Apply(&fit, sTriCardColors[i]);
     for (b = 0; b < gBattlersCount; b++)
     {
         struct Card *c = &sCards[b];
@@ -499,15 +512,26 @@ void MP_TriCards_Composite(u16 *frame)
                 int sx = x0 + px;
                 u8 v = c->pix[py][px];
                 u16 *dst;
-                if (v == C_NONE || sx < 0 || sx >= DISPLAY_WIDTH)
+                if (v == TC_NONE || sx < 0 || sx >= DISPLAY_WIDTH)
                     continue;
                 dst = &frame[sy * DISPLAY_WIDTH + sx];
-                if (v == C_FILL)
-                    *dst = Blend(pal[v], *dst, opacity);
-                else if (v == C_EDGE)
-                    *dst = Blend(pal[v], *dst, edgeOpacity);
-                else
-                    *dst = pal[v] | 0x8000;
+                switch (v)
+                {
+                case TC_FILL:
+                    *dst = Blend(colors[v], *dst, opacity);
+                    break;
+                case TC_OUTER:
+                case TC_OUTER_AA:
+                case TC_CORNER:
+                case TC_DARK:
+                case TC_RING:
+                case TC_RING_CORNER:
+                    *dst = Blend(colors[v], *dst, edgeOpacity);
+                    break;
+                default:
+                    *dst = colors[v] | 0x8000;
+                    break;
+                }
             }
         }
     }

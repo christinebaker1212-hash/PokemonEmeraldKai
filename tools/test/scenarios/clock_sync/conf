@@ -1,0 +1,12 @@
+# Game clock online: ALICE made the room on a PC in Tokyo, BOB plays in Los Angeles. BOB's game clock follows
+# ALICE's PC clock (the same date and time on both: compare their "[test] clock" lines); ALICE keeps her own.
+MODE=2
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+ENV_A="TZ=Asia/Tokyo"
+ENV_B="TZ=America/Los_Angeles"
+EXPECT_A=("(ours)")
+EXPECT_B=("clock: following the host's clock (UTC+540 min)" "(the host's)")
+UNEXPECT_A=("clock: following the host's clock")

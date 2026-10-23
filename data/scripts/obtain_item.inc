@@ -26,6 +26,13 @@ EventScript_MpGatchaTicketDone::
 	setvar VAR_RESULT, TRUE
 	return
 
+@ Moemon Co-op: a Battle Tent's prize (three wins in a row) comes with 3 MOEGATCHA TICKETS
+@ (battle_tent.c Give*TentPrize added them)
+EventScript_MpTentGatchaTickets::
+	playse SE_RG_BAG_POCKET
+	msgbox gText_MpTentGatchaTickets, MSGBOX_DEFAULT
+	return
+
 EventScript_ObtainItemMessage::
 	bufferitemnameplural STR_VAR_2, ITEMID, AMOUNT
 	checkitemtype ITEMID

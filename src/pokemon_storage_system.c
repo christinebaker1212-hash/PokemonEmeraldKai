@@ -1,5 +1,6 @@
 #include "global.h"
 #include "malloc.h"
+#include "mp.h"
 #include "bg.h"
 #include "data.h"
 #include "decompress.h"
@@ -6481,6 +6482,8 @@ static void ReleaseMon(void)
 {
     u8 boxId;
 
+    // Moemon Kai: a held HM stays with the player
+    MP_ReturnHeldHm(&sStorage->tempMon);
     DestroyReleaseMonIcon();
     if (sIsMonBeingMoved)
     {
@@ -6526,6 +6529,14 @@ struct
 static void GetRestrictedReleaseMoves(u16 *moves)
 {
     s32 i;
+
+    // Moemon Kai: no HM restrictions (HMs are never used up and can be held, so nobody gets
+    // stranded); a released Pokemon's held HM goes back to the BAG (ReleaseMon)
+    if (TRUE)
+    {
+        *moves = MOVES_COUNT;
+        return;
+    }
 
     for (i = 0; i < ARRAY_COUNT(sRestrictedReleaseMoves); i++)
     {

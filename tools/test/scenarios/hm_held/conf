@@ -1,0 +1,6 @@
+# held HMs: BAG > HM01 > GIVE to the lead (it doesn't know CUT); its party menu offers CUT; the tree by the
+# Route 104 Flower Shop asks to CUT and comes down
+MODE=1
+WARP=0,19,35,23
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] monmoves: slot 0 species 280 moves 10 45 0 0 held 339" "[test] bagqty 339: 0" "world: tree")

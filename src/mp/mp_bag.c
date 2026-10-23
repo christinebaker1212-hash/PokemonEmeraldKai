@@ -7,8 +7,10 @@
 // so the save file stays a normal Emerald save), and the slots past them are written
 // next to it in "<save>.bag" along with the save's counter. Loading takes the save
 // block's slots and, when "<save>.bag" was written with that same save (counter and
-// the save block's slots match), the rest: a save restored from a backup, or played
-// somewhere else in between, just has the save block's pocket.
+// the save block's slots match), the rest. The save backups keep theirs as
+// "<save>.bakN.bag" (sdl2.c BackUpSaveFile), so a .bak file renamed back to the save
+// finds its own: every one of them is tried. A save played somewhere else in between
+// just has the save block's pocket.
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
@@ -67,6 +69,10 @@ void MP_Bag_SyncToSaveBlock(void)
         memcpy(SaveSlots(p), sPockets[p].big, sPockets[p].saveCount * sizeof(struct ItemSlot));
 }
 
+static void MarksFromCurrentOrder(void);
+static bool8 ReadMarks(FILE *f);
+static void WriteMarks(FILE *f);
+
 #define BAG_MAGIC 0x4D424147   // "MBAG"
 
 static void SidecarPath(char *out, size_t size)
@@ -115,27 +121,21 @@ void MP_Bag_WriteSidecar(void)
         fwrite(&n, 1, 1, f);
         fwrite(sPockets[p].big + sPockets[p].saveCount, sizeof(struct ItemSlot), n, f);
     }
+    WriteMarks(f);   // the items' "new" marks and when they came in
     fclose(f);
 }
 
-// After a save was loaded: the save block's slots, then the rest from "<save>.bag"
-void MP_Bag_LoadFromSave(void)
+// The extra slots from one sidecar file, if it was written with this very save
+static bool8 LoadSidecar(const char *path)
 {
-    char path[600];
     FILE *f;
     u32 header[3];
     u8 p;
     bool8 sidecar = FALSE;
 
-    for (p = 0; p < POCKETS_COUNT; p++)
-    {
-        memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));
-        memcpy(sPockets[p].big, SaveSlots(p), sPockets[p].saveCount * sizeof(struct ItemSlot));
-    }
-    SidecarPath(path, sizeof(path));
     f = fopen(path, "rb");
     if (!f)
-        return;
+        return FALSE;
     if (fread(header, sizeof(header), 1, f) == 1 && header[0] == BAG_MAGIC
      && header[1] == gSaveCounter && header[2] == SaveBlockPocketsSum())
     {
@@ -156,7 +156,233 @@ void MP_Bag_LoadFromSave(void)
                 fread(sPockets[p].big + sPockets[p].saveCount, sizeof(struct ItemSlot), n, f);
             }
         }
+        if (p != POCKETS_COUNT || !ReadMarks(f))
+            MarksFromCurrentOrder();   // a sidecar from before the marks
     }
     fclose(f);
+    return sidecar;
+}
+
+// After a save was loaded: the save block's slots, then the rest from "<save>.bag" (or the
+// backup's own, for a .bak file renamed back to the save)
+void MP_Bag_LoadFromSave(void)
+{
+    char path[600];
+    u8 p, i;
+    bool8 sidecar = FALSE;
+
+    for (p = 0; p < POCKETS_COUNT; p++)
+    {
+        memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));
+        memcpy(sPockets[p].big, SaveSlots(p), sPockets[p].saveCount * sizeof(struct ItemSlot));
+    }
+    for (i = 0; i <= 3 && !sidecar; i++)
+    {
+        if (i == 0)
+            SidecarPath(path, sizeof(path));
+        else
+            snprintf(path, sizeof(path), "%s.bak%d.bag", gPlatformSavePath, i);
+        sidecar = LoadSidecar(path);
+    }
+    if (!sidecar)
+        MarksFromCurrentOrder();
     MPNet_Log("bag: loaded%s", sidecar ? " with the extra slots" : " (extra slots not from this save)");
+}
+
+// ---------------------------------------------------------------------------
+// Sorting the pockets and the "!" on new items.
+//
+// Each pocket has a sort order (START in the BAG): TYPE, ID, ABC, OLDEST,
+// NEWEST or MANUAL (the player's own order, moved with SELECT). The pocket is
+// put in that order whenever the BAG shows it. Items keep the time they first
+// came into the BAG (a running number) and a "new" mark that goes once the
+// cursor is on them; both are written to "<save>.bag" with the extra slots.
+
+#include "item_use.h"
+#include "mail.h"
+#include "string_util.h"
+
+#define MARKS_MAGIC 0x4D4B5253   // "MKRS"
+
+static u16 sObtained[ITEMS_COUNT];   // 0 = had before the marks were kept
+static u8 sNewMark[(ITEMS_COUNT + 7) / 8];
+static u16 sNextObtained = 1;
+
+bool8 MP_Bag_IsNew(u16 item)
+{
+    return item < ITEMS_COUNT && (sNewMark[item / 8] & (1 << (item % 8)));
+}
+
+void MP_Bag_ClearNew(u16 item)
+{
+    if (item < ITEMS_COUNT)
+        sNewMark[item / 8] &= ~(1 << (item % 8));
+}
+
+// item.c AddBagItem: an item that wasn't in the BAG came in
+void MP_Bag_NoteAdded(u16 item)
+{
+    if (item == ITEM_NONE || item >= ITEMS_COUNT)
+        return;
+    if (sNextObtained < 0xFFFF)
+        sObtained[item] = sNextObtained++;
+    sNewMark[item / 8] |= 1 << (item % 8);
+}
+
+// A new game (item.c ClearBag)
+void MP_Bag_ResetMarks(void)
+{
+    memset(sObtained, 0, sizeof(sObtained));
+    memset(sNewMark, 0, sizeof(sNewMark));
+    sNextObtained = 1;
+}
+
+// A save from before the marks: what's there counts as obtained in the order it's in
+static void MarksFromCurrentOrder(void)
+{
+    u8 p, i;
+    MP_Bag_ResetMarks();
+    for (p = 0; p < POCKETS_COUNT; p++)
+        for (i = 0; i < sPockets[p].bigCount; i++)
+        {
+            u16 item = sPockets[p].big[i].itemId;
+            if (item != ITEM_NONE && item < ITEMS_COUNT && sObtained[item] == 0)
+                sObtained[item] = sNextObtained++;
+        }
+}
+
+static void WriteMarks(FILE *f)
+{
+    u32 magic = MARKS_MAGIC;
+    u16 count = ITEMS_COUNT;
+    fwrite(&magic, sizeof(magic), 1, f);
+    fwrite(&count, sizeof(count), 1, f);
+    fwrite(&sNextObtained, sizeof(sNextObtained), 1, f);
+    fwrite(sObtained, sizeof(sObtained[0]), ITEMS_COUNT, f);
+    fwrite(sNewMark, 1, sizeof(sNewMark), f);
+}
+
+static bool8 ReadMarks(FILE *f)
+{
+    u32 magic = 0;
+    u16 count = 0, i, v;
+    u8 b;
+    if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != MARKS_MAGIC || fread(&count, sizeof(count), 1, f) != 1
+     || fread(&sNextObtained, sizeof(sNextObtained), 1, f) != 1)
+        return FALSE;
+    // written by a build with another item count: keep the items both know
+    for (i = 0; i < count; i++)
+    {
+        if (fread(&v, sizeof(v), 1, f) != 1)
+            return FALSE;
+        if (i < ITEMS_COUNT)
+            sObtained[i] = v;
+    }
+    for (i = 0; i < (count + 7) / 8; i++)
+    {
+        if (fread(&b, 1, 1, f) != 1)
+            return FALSE;
+        if (i < sizeof(sNewMark))
+            sNewMark[i] = b;
+    }
+    return TRUE;
+}
+
+// Sort orders (stored per pocket; 0 = the pocket's usual one)
+#define SORT_KEY "bag:sort%d"
+
+static u8 DefaultSort(u8 pocket)
+{
+    // TMs and Berries are numbered: by number, as in the original game
+    return (pocket == TMHM_POCKET || pocket == BERRIES_POCKET) ? MP_BAGSORT_ID : MP_BAGSORT_MANUAL;
+}
+
+u8 MP_Bag_SortMode(u8 pocket)
+{
+    char key[16];
+    s32 v;
+    if (pocket >= POCKETS_COUNT)
+        return MP_BAGSORT_MANUAL;
+    snprintf(key, sizeof(key), SORT_KEY, pocket);
+    v = MP_SaveData_Get(key);
+    return (v >= 1 && v <= MP_BAGSORT_COUNT) ? v - 1 : DefaultSort(pocket);
+}
+
+void MP_Bag_SetSortMode(u8 pocket, u8 mode)
+{
+    char key[16];
+    if (pocket >= POCKETS_COUNT || mode >= MP_BAGSORT_COUNT)
+        return;
+    snprintf(key, sizeof(key), SORT_KEY, pocket);
+    MP_SaveData_Set(key, mode + 1);
+}
+
+// TYPE: medicine, things used on a Moemon (vitamins, stones...), battle items,
+// field items (REPEL...), hold items, mail, the rest
+static u8 ItemCategory(u16 item)
+{
+    if (GetItemBattleUsage(item) == ITEM_B_USE_MEDICINE)
+        return 0;
+    if (GetItemType(item) == ITEM_USE_PARTY_MENU && GetItemFieldFunc(item) != ItemUseOutOfBattle_CannotUse)
+        return 1;
+    if (GetItemBattleUsage(item) != 0)
+        return 2;
+    if (GetItemFieldFunc(item) != NULL && GetItemFieldFunc(item) != ItemUseOutOfBattle_CannotUse)
+        return 3;
+    if (GetItemHoldEffect(item) != 0)
+        return 4;
+    if (ItemIsMail(item))
+        return 5;
+    return 6;
+}
+
+// < 0: a goes first
+static int CompareItems(u16 a, u16 b, u8 mode)
+{
+    int d = 0;
+    switch (mode)
+    {
+    case MP_BAGSORT_TYPE:
+        d = ItemCategory(a) - ItemCategory(b);
+        break;
+    case MP_BAGSORT_ABC:
+    {
+        u8 na[ITEM_NAME_LENGTH + 12], nb[ITEM_NAME_LENGTH + 12];
+        CopyItemName(a, na);
+        CopyItemName(b, nb);
+        d = StringCompare(na, nb);
+        break;
+    }
+    case MP_BAGSORT_OLDEST:
+        d = (int)sObtained[a < ITEMS_COUNT ? a : 0] - (int)sObtained[b < ITEMS_COUNT ? b : 0];
+        break;
+    case MP_BAGSORT_NEWEST:
+        d = (int)sObtained[b < ITEMS_COUNT ? b : 0] - (int)sObtained[a < ITEMS_COUNT ? a : 0];
+        break;
+    }
+    return d ? d : (int)a - (int)b;   // then by number (ID: only that)
+}
+
+// Puts a pocket in its sort order (the empty slots stay at the end). Stable,
+// so two stacks of one item stay in their order.
+void MP_Bag_Sort(u8 pocket)
+{
+    struct ItemSlot *slots;
+    u8 mode = MP_Bag_SortMode(pocket), n = 0, i, j;
+    if (pocket >= POCKETS_COUNT || mode == MP_BAGSORT_MANUAL)
+        return;
+    slots = sPockets[pocket].big;
+    while (n < sPockets[pocket].bigCount && slots[n].itemId != ITEM_NONE)
+        n++;
+    for (i = 1; i < n; i++)
+    {
+        struct ItemSlot cur = slots[i];
+        j = i;
+        while (j > 0 && CompareItems(slots[j - 1].itemId, cur.itemId, mode) > 0)
+        {
+            slots[j] = slots[j - 1];
+            j--;
+        }
+        slots[j] = cur;
+    }
 }
