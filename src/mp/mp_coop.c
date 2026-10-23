@@ -85,7 +85,8 @@ u8 gMpCoopBallTarget = 0xFF;   // the master's battle: the slot it's being appli
 enum {
     MPR_COOP_REQUEST = MPR_COOP_FIRST,  // asker -> challenged: may I join?
     MPR_COOP_CANCEL,                    // asker -> challenged: never mind
-    MPR_COOP_ACCEPT,                    // challenged -> asker: u16 trainer, u8 mode, lose text
+    MPR_COOP_ACCEPT,                    // challenged -> asker: u16 trainer, u8 mode, u8 count, u8 seat, 3x u8 player,
+                                        // u16 second trainer (0 = none), lose text, EOS, second lose text, EOS
     MPR_COOP_DECLINE,                   // challenged -> asker: u8 reason
     MPR_COOP_RESULT,                    // master -> partner after the battle
     MPR_COOP_WILD_ASK,                  // wild encounter -> closest friend in the grass: can you join?
@@ -93,7 +94,8 @@ enum {
     MPR_COOP_WILD_NO,                   // can't right now
     MPR_COOP_WILD_GO,                   // the battle starts
     MPR_COOP_WILD_CANCEL,               // too slow: battling alone after all
-    MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer
+    MPR_COOP_WAIT,                      // challenged -> all: u8 on, u8 localId, mapNum, mapGroup of the trainer,
+                                        // u8 localId of a second one (two trainers; 0 = none)
     MPR_COOP_BSTATUS,                   // in a co-op battle -> partner: u8 MP_BST_* (what we're choosing)
     MPR_COOP_BONUS,                     // battle start -> partner: u16 own EXP bonus percent (MP_ExpBonusPercent)
     MPR_COOP_REFUND,                    // master -> partner: u16 ball that went back to your bag (its target was gone)
@@ -170,6 +172,8 @@ static struct
     bool8 challenged;
     u16 trainerId;
     u8 mode;
+    bool8 twoTrainers;     // two trainers spotted us at once: the battle is against both (Steven-style 2 vs 2)
+    u16 trainerIdB;        // the second one (0: none)
     s8 requester;          // player asking to join, -1 = nobody
     s8 requester2;         // a second one while we wait for a Triple Battle, -1 = nobody
     bool8 waitingThird;    // one friend is in; waiting for a third player
@@ -180,6 +184,7 @@ static struct
     u8 waitStage;          // WAIT_*: asked whether to wait / waiting for a partner
     u16 waitTimer;
     u8 waitLocalId, waitMapNum, waitMapGroup;   // the trainer held while we wait
+    u8 waitLocalId2;                            // two trainers: the second one (0 = none)
     // Asking player
     u8 role;
     u8 target;
@@ -219,6 +224,8 @@ static struct
     bool8 learnPromptPending;
     bool8 haveLoseText;
     u8 loseText[LOSE_TEXT_MAX + 1];
+    bool8 haveLoseTextB;   // two trainers: the second one's
+    u8 loseTextB[LOSE_TEXT_MAX + 1];
     // Co-op wild doubles
     bool8 wildAsking;      // we met a wild Pokémon and asked a friend
     u8 wildTarget;
@@ -309,6 +316,7 @@ static struct
 {
     u16 ttl;
     u8 localId, mapNum, mapGroup;
+    u8 localId2;   // two trainers waiting together (0 = none)
 } sHeld[MP_MAX_PLAYERS];
 
 static EWRAM_DATA u8 sText[160];
@@ -404,6 +412,20 @@ u16 MP_Coop_TrainerPic(void)
     return gTrainers[gTrainerBattleOpponent_A].trainerPic;
 }
 
+// A co-op battle against two trainers at once (they spotted the player together)
+bool8 MP_Coop_TwoTrainers(void)
+{
+    return gMpCoopBattle && !gMpCoopWild && (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0;
+}
+
+// The trainer picture of an opponent battler: two trainers, the right one is the second
+u16 MP_Coop_TrainerPicFor(u8 battler)
+{
+    if (MP_Coop_TwoTrainers() && GetBattlerPosition(battler) == B_POSITION_OPPONENT_RIGHT)
+        return gTrainers[gTrainerBattleOpponent_B].trainerPic;
+    return MP_Coop_TrainerPic();
+}
+
 // The player controlling a player-side battler (a triple: battler 2i = seat i)
 s8 MP_Coop_BattlerPlayer(u8 battler)
 {
@@ -448,6 +470,13 @@ const u8 *MP_Coop_LoseText(void)
     return NULL;
 }
 
+const u8 *MP_Coop_LoseTextB(void)
+{
+    if (gMpCoopBattle && !sCoop.isMaster && sCoop.haveLoseTextB)
+        return sCoop.loseTextB;
+    return NULL;
+}
+
 u16 MP_Coop_VictorySong(void)
 {
     if (gMpCoopWild)
@@ -481,9 +510,25 @@ void MP_Coop_OnTrainerConfigured(void)
 
     if (sCoop.role != ROLE_NONE || gMpCoopBattle)
         return;
+    if (gNoOfApproachingTrainers == 2 && gApproachingTrainerId == 1)
+    {
+        // The second of two trainers who spotted us at once: the battle is against both of them
+        if (sCoop.challenged && sCoop.twoTrainers)
+        {
+            mode = GetTrainerBattleMode();
+            if (mode == TRAINER_BATTLE_SINGLE || mode == TRAINER_BATTLE_CONTINUE_SCRIPT
+             || mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC)
+                sCoop.trainerIdB = gTrainerBattleOpponent_B;
+            else
+                sCoop.challenged = FALSE;   // a kind of trainer this can't handle: the game's own battle
+        }
+        return;
+    }
     sCoop.challenged = FALSE;
     sCoop.accepted = FALSE;
     sCoop.requester = -1;
+    sCoop.twoTrainers = FALSE;
+    sCoop.trainerIdB = 0;
     if (!MP_IsConnected() || gApproachingTrainerId != 0)
         return;
     mode = GetTrainerBattleMode();
@@ -506,6 +551,14 @@ void MP_Coop_OnTrainerConfigured(void)
     sCoop.challenged = TRUE;
     sCoop.trainerId = gTrainerBattleOpponent_A;
     sCoop.mode = mode;
+    if (gNoOfApproachingTrainers == 2)
+    {
+        if (mode == TRAINER_BATTLE_SINGLE || mode == TRAINER_BATTLE_CONTINUE_SCRIPT
+         || mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC)
+            sCoop.twoTrainers = TRUE;   // the second one is configured next
+        else
+            sCoop.challenged = FALSE;
+    }
 }
 
 static void EndChallenge(u8 reason)
@@ -526,6 +579,15 @@ static void EndChallenge(u8 reason)
 static u8 CoopTrainerTeamSize(u16 trainerId)
 {
     u8 n = gTrainers[trainerId].partySize;
+    if (sCoop.twoTrainers && sCoop.trainerIdB != 0 && trainerId == sCoop.trainerId)
+    {
+        // two trainers: up to three each, and TEAM PADDING's one extra
+        u8 b = gTrainers[sCoop.trainerIdB].partySize;
+        n = (n > 3 ? 3 : n) + (b > 3 ? 3 : b);
+        if (MP_TrainerPadding() && n < PARTY_SIZE)
+            n++;
+        return n;
+    }
     if (MP_TrainerPadding() && n < PARTY_SIZE)
         n++;
     return n;
@@ -539,7 +601,8 @@ static void OnResolveDone(s8 from, const u8 *data, u32 len);
 
 static bool8 TripleEligible(void)
 {
-    return CoopTrainerTeamSize(sCoop.trainerId) >= 3
+    return !sCoop.twoTrainers   // two trainers: 2 players vs both of them
+        && CoopTrainerTeamSize(sCoop.trainerId) >= 3
         && (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
             || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
             || sCoop.mode == TRAINER_BATTLE_REMATCH);
@@ -579,7 +642,7 @@ enum { THIRD_NONE, THIRD_ASK, THIRD_QUEUED };
 
 static void SendWait(bool8 on)
 {
-    u8 buf[5] = {MPR_COOP_WAIT, on, sCoop.waitLocalId, sCoop.waitMapNum, sCoop.waitMapGroup};
+    u8 buf[6] = {MPR_COOP_WAIT, on, sCoop.waitLocalId, sCoop.waitMapNum, sCoop.waitMapGroup, sCoop.waitLocalId2};
     MP_SendRelay(0xFF, buf, sizeof(buf));
 }
 
@@ -613,8 +676,8 @@ static bool8 FriendOnMap(void)
 // u16 trainer, u8 mode, u8 count, u8 seat, 3x u8 player, lose text
 static void AcceptRequester(void)
 {
-    u8 buf[9 + LOSE_TEXT_MAX + 1];
-    const u8 *lose = GetTrainerALoseText();
+    u8 buf[11 + (LOSE_TEXT_MAX + 1) * 2];
+    const u8 *lose;
     u16 len = 0;
     u8 i;
 
@@ -641,24 +704,52 @@ static void AcceptRequester(void)
     buf[6] = sCoop.joinPlayers[0];
     buf[7] = sCoop.joinPlayers[1];
     buf[8] = sCoop.joinPlayers[2];
-    if (lose != NULL)
+    buf[9] = sCoop.twoTrainers ? (sCoop.trainerIdB & 0xFF) : 0;
+    buf[10] = sCoop.twoTrainers ? (sCoop.trainerIdB >> 8) : 0;
+    // the lose texts as this game has them (the second trainer's after the first's)
+    lose = GetTrainerALoseText();
+    while (lose != NULL && len < LOSE_TEXT_MAX && lose[len] != EOS)
     {
-        while (len < LOSE_TEXT_MAX && lose[len] != EOS)
-        {
-            buf[9 + len] = lose[len];
-            len++;
-        }
+        buf[11 + len] = lose[len];
+        len++;
     }
-    buf[9 + len] = EOS;
+    buf[11 + len++] = EOS;
+    if (sCoop.twoTrainers)
+    {
+        u16 k = 0;
+        lose = GetTrainerBLoseText();
+        while (lose != NULL && k < LOSE_TEXT_MAX && lose[k] != EOS)
+            buf[11 + len++] = lose[k++];
+    }
+    buf[11 + len++] = EOS;
     for (i = 1; i < sCoop.joinCount; i++)
     {
         buf[5] = i;
-        Send(sCoop.joinPlayers[i], buf, 10 + len);
+        Send(sCoop.joinPlayers[i], buf, 11 + len);
     }
     sCoop.accepted = TRUE;
     sCoop.partner = sCoop.requester;
-    MPNet_Log("co-op: player %d joins the battle against trainer %d%s", sCoop.partner + 1, sCoop.trainerId,
-              sCoop.joinCount == 3 ? " (and another: triple)" : "");
+    MPNet_Log("co-op: player %d joins the battle against trainer %d%s%s", sCoop.partner + 1, sCoop.trainerId,
+              sCoop.twoTrainers ? " and the second trainer" : "", sCoop.joinCount == 3 ? " (and another: triple)" : "");
+}
+
+// The trainer (or the two) that spotted us: others leave them alone while we wait
+static void NoteHeldTrainers(void)
+{
+    u8 obj = gSelectedObjectEvent;
+    sCoop.waitLocalId2 = 0;
+    if (sCoop.twoTrainers)
+    {
+        obj = gApproachingTrainers[0].objectEventId;
+        if (gApproachingTrainers[1].objectEventId < OBJECT_EVENTS_COUNT)
+            sCoop.waitLocalId2 = gObjectEvents[gApproachingTrainers[1].objectEventId].localId;
+    }
+    if (obj < OBJECT_EVENTS_COUNT)
+    {
+        sCoop.waitLocalId = gObjectEvents[obj].localId;
+        sCoop.waitMapNum = gObjectEvents[obj].mapNum;
+        sCoop.waitMapGroup = gObjectEvents[obj].mapGroup;
+    }
 }
 
 // The NPC the others hold while we wait (and the "waiting" message they get)
@@ -666,12 +757,8 @@ static void BeginWaitStage(void)
 {
     if (sCoop.waitStage != WAIT_WAITING)
     {
-        if (gSelectedObjectEvent < OBJECT_EVENTS_COUNT)
-        {
-            sCoop.waitLocalId = gObjectEvents[gSelectedObjectEvent].localId;
-            sCoop.waitMapNum = gObjectEvents[gSelectedObjectEvent].mapNum;
-            sCoop.waitMapGroup = gObjectEvents[gSelectedObjectEvent].mapGroup;
-        }
+        if (sCoop.waitStage == WAIT_NONE)
+            NoteHeldTrainers();
         sCoop.waitStage = WAIT_WAITING;
     }
     sCoop.waitTimer = 0;
@@ -754,11 +841,21 @@ static void Task_JoinCheck(u8 taskId)
     switch (tState)
     {
     case JOIN_START:
-        if (!sCoop.challenged || gNoOfApproachingTrainers == 2)
+        if (sCoop.challenged && sCoop.twoTrainers && gApproachingTrainerId == 0)
+        {
+            // Two trainers: the co-op steps come after the second one has spoken. Nothing changes meanwhile
+            // (a friend who asks now is answered then).
+            ScriptContext_Enable();
+            DestroyTask(taskId);
+            break;
+        }
+        if (!sCoop.challenged || (gNoOfApproachingTrainers == 2 && !sCoop.twoTrainers))
         {
             FinishJoinCheck(taskId);
             break;
         }
+        if (sCoop.twoTrainers)
+            MPNet_Log("co-op: two trainers (%d and %d): the team-up steps", sCoop.trainerId, sCoop.trainerIdB);
         if (!PlayerValid(sCoop.requester))
         {
             // Nobody asked yet: offer to wait for a friend on this map
@@ -767,9 +864,7 @@ static void Task_JoinCheck(u8 taskId)
                 FinishJoinCheck(taskId);
                 break;
             }
-            sCoop.waitLocalId = gObjectEvents[gSelectedObjectEvent].localId;
-            sCoop.waitMapNum = gObjectEvents[gSelectedObjectEvent].mapNum;
-            sCoop.waitMapGroup = gObjectEvents[gSelectedObjectEvent].mapGroup;
+            NoteHeldTrainers();
             sCoop.waitStage = WAIT_ASKING;
             HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
             MP_ReplaceFieldMessage(sText_WaitAsk);
@@ -1139,6 +1234,8 @@ static void BeginCoopBattleGroup(u8 seat, u8 count, const u8 *players)
     }
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK
                      | BATTLE_TYPE_MULTI | BATTLE_TYPE_TOWER_LINK_MULTI;
+    if (!gMpCoopWild && sCoop.twoTrainers && gTrainerBattleOpponent_B != 0)
+        gBattleTypeFlags |= BATTLE_TYPE_TWO_OPPONENTS;   // each trainer has their own side of the field
     gMpCoopBattle = TRUE;
     gLinkType = LINKTYPE_BATTLE;
     if (count == 3)
@@ -1160,7 +1257,11 @@ static void BeginCoopBattle(bool8 isMaster, u8 partner)
 void MP_Coop_OnStartTrainerBattle(void)
 {
     bool8 go = sCoop.accepted && PlayerValid(sCoop.partner) && sCoop.trainerId == gTrainerBattleOpponent_A
-            && gBattleTypeFlags == BATTLE_TYPE_TRAINER && !gMpCoopBattle;
+            && !gMpCoopBattle
+            && (sCoop.twoTrainers
+                ? (gBattleTypeFlags == (BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_TRAINER)
+                   && sCoop.trainerIdB == gTrainerBattleOpponent_B)
+                : gBattleTypeFlags == BATTLE_TYPE_TRAINER);
 
     sCoop.challenged = FALSE;
     sCoop.accepted = FALSE;
@@ -1209,7 +1310,10 @@ bool8 MP_Coop_TrainerBattleBoost(void)
 
 void MP_Coop_PrepareTrainerParty(u16 trainerId)
 {
-    gMpEnemyLevelBonus = MP_Coop_IsBossTrainer(trainerId) ? 3 : 2;
+    bool8 boss = MP_Coop_IsBossTrainer(trainerId);
+    if ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0)
+        boss |= MP_Coop_IsBossTrainer(gTrainerBattleOpponent_B);
+    gMpEnemyLevelBonus = boss ? 3 : 2;
 }
 
 static u16 BaseStatTotal(u16 species)
@@ -1267,27 +1371,60 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
 
 // TEAM PADDING (a host setting): the trainer gets exactly one extra Moemon in a
 // co-op battle, Double or Triple, never more. Off: the trainer's own team only.
-void MP_Coop_FinishTrainerParty(u16 trainerId)
+// One trainer's Moemon in gEnemyParty[base .. base + size): how many
+static u8 CountEnemyMons(u8 base, u8 size)
 {
-    u8 n = 0, ace;
+    u8 n = 0;
+    while (n < size && GetMonData(&gEnemyParty[base + n], MON_DATA_SPECIES) != SPECIES_NONE)
+        n++;
+    return n;
+}
+
+// TEAM PADDING's extra Moemon for the trainer whose team is gEnemyParty[base .. base + n), room for one more
+static void PadTrainer(u16 trainerId, u8 base, u8 n)
+{
+    u8 ace = base + n;
     struct Pokemon *src;
     u16 species;
+    // The ace (the last one) moves to the end; the new Moemon goes in before it,
+    // like the one before the ace (or the ace itself when it's alone; see PickFillerSpecies)
+    gEnemyParty[ace] = gEnemyParty[ace - 1];
+    src = n >= 2 ? &gEnemyParty[ace - 2] : &gEnemyParty[ace];
+    species = PickFillerSpecies(src, n - 1, trainerId);
+    CreateMon(&gEnemyParty[ace - 1], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
+              Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+}
+
+// Two trainers (gEnemyParty 0-2 the first's, 3-5 the second's): TEAM PADDING gives the one with fewer Moemon (the
+// first on a tie) one more, if they have room. Still one extra in all.
+void MP_Coop_FinishTwoTrainerParty(u16 trainerA, u16 trainerB)
+{
+    u8 a = CountEnemyMons(0, 3), b = CountEnemyMons(3, 3);
     gMpEnemyLevelBonus = 0;
-    while (n < PARTY_SIZE && GetMonData(&gEnemyParty[n], MON_DATA_SPECIES) != SPECIES_NONE)
-        n++;
+    if (MP_TrainerPadding() && (a < 3 || b < 3) && a != 0 && b != 0)
+    {
+        if (b < a)
+            PadTrainer(trainerB, 3, b);
+        else
+            PadTrainer(trainerA, 0, a);
+    }
+    MPNet_Log("coop: trainers %d + %d party %d + %d -> %d %d %d / %d %d %d", trainerA, trainerB, a, b,
+              GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
+              GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));
+}
+
+void MP_Coop_FinishTrainerParty(u16 trainerId)
+{
+    u8 n;
+    gMpEnemyLevelBonus = 0;
+    n = CountEnemyMons(0, PARTY_SIZE);
     if (!MP_TrainerPadding() || n == 0 || n >= PARTY_SIZE)
     {
         MPNet_Log("coop: trainer %d party %d, no padding", trainerId, n);
         return;
     }
-    // The ace (the last one) moves to the end; the new Moemon goes in before it,
-    // like the one before the ace (or the ace itself when it's alone; see PickFillerSpecies)
-    ace = n;
-    gEnemyParty[ace] = gEnemyParty[n - 1];
-    src = n >= 2 ? &gEnemyParty[n - 2] : &gEnemyParty[ace];
-    species = PickFillerSpecies(src, n - 1, trainerId);
-    CreateMon(&gEnemyParty[n - 1], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
-              Random32(), OT_ID_RANDOM_NO_SHINY, 0);
+    PadTrainer(trainerId, 0, n);
     MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, n + 1,
               GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
@@ -1311,6 +1448,8 @@ void MP_Coop_ArrangeEnemyParty(void)
 
     if (sCoop.count == 3)
         return;   // a triple: the first three come out (battlers 1, 3, 5), the rest wait
+    if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
+        return;   // two trainers: each one's own half already (0-2 left, 3-5 right)
     tmp = Alloc(sizeof(struct Pokemon) * PARTY_SIZE);
 
     memcpy(tmp, gEnemyParty, sizeof(struct Pokemon) * PARTY_SIZE);
@@ -1738,7 +1877,11 @@ static void CB2_MpCoopFinish(void)
         // (gym leaders, rivals...) keep their own event scripts, so the partner
         // can still battle them on their own later.
         if (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_DOUBLE)
+        {
             FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+            if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
+                FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
+        }
         // A team rematch with a gym leader: the partner gets the reward too
         else if (MP_Rematch_IsRematchTrainer(sCoop.trainerId))
             MP_Rematch_Reward();
@@ -1911,9 +2054,10 @@ static void OnAccepted(u8 from, const u8 *data, u16 len)
     u16 i;
 
     u8 count, seat, players[3];
+    u16 trainerB, pos;
 
     StopAsking();
-    if (len < 9)
+    if (len < 11)
         return;
     sCoop.trainerId = data[1] | (data[2] << 8);
     sCoop.mode = data[3];
@@ -1922,25 +2066,31 @@ static void OnAccepted(u8 from, const u8 *data, u16 len)
     players[0] = data[6];
     players[1] = data[7];
     players[2] = data[8];
+    trainerB = data[9] | (data[10] << 8);
     if (count < 2 || count > 3 || seat == 0 || seat >= count)
         return;
-    sCoop.haveLoseText = FALSE;
-    if (len > 9)
-    {
-        for (i = 0; i < LOSE_TEXT_MAX && 9 + i < len && data[9 + i] != EOS; i++)
-            sCoop.loseText[i] = data[9 + i];
-        sCoop.loseText[i] = EOS;
-        sCoop.haveLoseText = i > 0;
-    }
-    if (sCoop.trainerId >= TRAINERS_COUNT)
+    // the lose texts: the first trainer's, then the second's (two trainers)
+    pos = 11;
+    for (i = 0; i < LOSE_TEXT_MAX && pos < len && data[pos] != EOS; i++)
+        sCoop.loseText[i] = data[pos++];
+    sCoop.loseText[i] = EOS;
+    sCoop.haveLoseText = i > 0;
+    pos++;
+    for (i = 0; i < LOSE_TEXT_MAX && pos < len && data[pos] != EOS; i++)
+        sCoop.loseTextB[i] = data[pos++];
+    sCoop.loseTextB[i] = EOS;
+    sCoop.haveLoseTextB = i > 0;
+    if (sCoop.trainerId >= TRAINERS_COUNT || trainerB >= TRAINERS_COUNT)
         return;
+    sCoop.twoTrainers = trainerB != 0;
+    sCoop.trainerIdB = trainerB;
     {
         u8 t = FindTaskIdByFunc(Task_AskerMessage);
         if (t != TASK_NONE)
             DestroyTask(t);
     }
     gTrainerBattleOpponent_A = sCoop.trainerId;
-    gTrainerBattleOpponent_B = 0;
+    gTrainerBattleOpponent_B = trainerB;
     BeginCoopBattleGroup(seat, count, players);
     sCoop.afterBattle = NULL;
     CreateTask(Task_StartJoinerBattle, 1);
@@ -2125,6 +2275,7 @@ static void StartWildCoop(const u8 *players, u8 count)
     u8 partner = players[1], i;
     gTrainerBattleOpponent_A = 0;
     gTrainerBattleOpponent_B = 0;
+    sCoop.twoTrainers = FALSE;
     gMpCoopWild = TRUE;
     if (count == 3)
     {
@@ -2335,6 +2486,7 @@ static void OnWildRelay(u8 from, const u8 *data, u16 len)
             sCoop.wildFrom = -1;
             gTrainerBattleOpponent_A = 0;
             gTrainerBattleOpponent_B = 0;
+            sCoop.twoTrainers = FALSE;
             gMpCoopWild = TRUE;
             BeginCoopBattleGroup(seat, count, players);
             sCoop.mode = MODE_WILD;
@@ -2638,7 +2790,7 @@ bool8 MP_Coop_IsNpcHeld(struct ObjectEvent *obj)
     u8 i;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
-        if (sHeld[i].ttl && PlayerValid(i) && obj->localId == sHeld[i].localId
+        if (sHeld[i].ttl && PlayerValid(i) && (obj->localId == sHeld[i].localId || (sHeld[i].localId2 != 0 && obj->localId == sHeld[i].localId2))
          && obj->mapNum == sHeld[i].mapNum && obj->mapGroup == sHeld[i].mapGroup)
         {
             sHeldBy = i;
@@ -2770,6 +2922,7 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
                 sHeld[from].localId = data[2];
                 sHeld[from].mapNum = data[3];
                 sHeld[from].mapGroup = data[4];
+                sHeld[from].localId2 = len >= 6 ? data[5] : 0;
             }
             else if (sHeld[from].ttl)
             {

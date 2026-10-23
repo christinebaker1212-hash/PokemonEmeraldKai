@@ -2220,6 +2220,10 @@ void BufferStringBattle(u16 stringID)
                     // Moemon Co-op: one or two wild Pokemon, two friends
                     stringPtr = MP_Coop_WildHasTwo() ? sText_MpCoopTwoWildAppeared : sText_MpCoopWildAppeared;
                 }
+                else if (gMpCoopBattle && MP_Coop_TwoTrainers())
+                {
+                    stringPtr = sText_TwoTrainersWantToBattle; // Moemon Co-op: two NPC trainers
+                }
                 else if (gMpCoopBattle)
                 {
                     stringPtr = sText_Trainer1WantsToBattle; // Moemon Co-op: one NPC trainer
@@ -2300,6 +2304,8 @@ void BufferStringBattle(u16 stringID)
                     stringPtr = sText_MpCoopWildGo;
                 else if (gMpCoopBattle && MpTripleCenterFoeOut())
                     stringPtr = sText_MpTrainerSentOutThree;
+                else if (gMpCoopBattle && MP_Coop_TwoTrainers())
+                    stringPtr = sText_TwoTrainersSentPkmn;
                 else if (gMpCoopBattle)
                     stringPtr = sText_Trainer1SentOutTwoPkmn;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
@@ -2367,7 +2373,11 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gMpCoopBattle)
+                if (gMpCoopBattle && MP_Coop_TwoTrainers() && GetBattlerPosition(gBattleScripting.battler) == B_POSITION_OPPONENT_RIGHT)
+                {
+                    stringPtr = sText_Trainer2SentOutPkmn;   // Moemon Co-op: the second trainer's side
+                }
+                else if (gMpCoopBattle)
                 {
                     stringPtr = sText_Trainer1SentOutPkmn2;
                 }

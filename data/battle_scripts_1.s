@@ -2961,10 +2961,24 @@ BattleScript_MpStatGroupDone:
 
 BattleScript_MpCoopTrainerBattleWon::
 	playtrainerdefeatbgm BS_ATTACKER
+	jumpifbattletype BATTLE_TYPE_TWO_OPPONENTS, BattleScript_MpCoopTwoTrainersWon
 	printstring STRINGID_PLAYERDEFEATEDTRAINER1
 	trainerslidein BS_ATTACKER
 	waitstate
 	printstring STRINGID_TRAINER1LOSETEXT
+	goto BattleScript_MpCoopTrainerBattleWonReward
+@ two trainers spotted the player at once: both are beaten, both speak (like a game's own two-trainer battle)
+BattleScript_MpCoopTwoTrainersWon:
+	printstring STRINGID_TWOENEMIESDEFEATED
+	trainerslidein BS_ATTACKER
+	waitstate
+	printstring STRINGID_TRAINER1LOSETEXT
+	trainerslideout B_POSITION_OPPONENT_LEFT
+	waitstate
+	trainerslidein BS_FAINTED
+	waitstate
+	printstring STRINGID_TRAINER2LOSETEXT
+BattleScript_MpCoopTrainerBattleWonReward:
 	getmoneyreward
 	printstring STRINGID_PLAYERGOTMONEY
 	waitmessage B_WAIT_TIME_LONG

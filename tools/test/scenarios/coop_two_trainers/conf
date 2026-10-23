@@ -1,0 +1,13 @@
+# Two trainers spot ALICE at once (ROUTE 116: JANICE on the left, JERRY below the tile she steps on). The co-op steps come
+# after the second one's speech: she waits for a partner (YES), BOB walks up and joins, and it's BOB + ALICE against
+# both trainers, each with their own Moemon. Both games count both trainers as beaten afterwards.
+MODE=2
+WARP=0,31,30,6
+WARP_B=0,31,30,7
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("co-op: two trainers (" "joins the battle against trainer" "and the second trainer" "coop: trainers " "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
+EXPECT_B=("is waiting for a partner" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG")

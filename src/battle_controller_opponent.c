@@ -1297,7 +1297,7 @@ static void OpponentHandleDrawTrainerPic(void)
         trainerPicId = gTrainers[gTrainerBattleOpponent_A].trainerPic;
     }
 
-    if (gMpCoopBattle)
+    if (gMpCoopBattle && !MP_Coop_TwoTrainers())
     {
         xPos = 176; // Moemon Co-op: one trainer in the middle
     }
@@ -1325,8 +1325,8 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
-    // Moemon Co-op: the trainer is drawn for both opponent slots; show it once
-    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
+    // Moemon Co-op: the trainer is drawn for both opponent slots; show it once (two trainers: both)
+    if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;

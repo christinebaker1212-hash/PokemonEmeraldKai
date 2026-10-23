@@ -1,0 +1,15 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+press LEFT 12
+wait 30
+press LEFT 12
+wait 60
+pressuntil A battle 6000
+wait 200
+shot a_alone
+pressuntil A field 20000
+wait 120
+mp trainerflag 273 605
+wait 100
+quit

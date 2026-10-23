@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+mp trainerflag 273 605
+waitlog 6000 is waiting for a partner
+wait 30
+press UP 12
+wait 20
+press LEFT 12
+wait 20
+waitfor battle 6000
+wait 300
+shot b_intro
+pressuntillog A 20000 co-op: battle over
+pressuntil A field 6000
+wait 120
+mp trainerflag 273 605
+wait 200
+quit

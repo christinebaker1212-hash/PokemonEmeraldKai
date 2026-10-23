@@ -789,7 +789,16 @@ static void CB2_InitBattleInternal(void)
             // Facing two players: stronger and more Pokemon (mp_coop.c)
             MP_Coop_PrepareTrainerParty(gTrainerBattleOpponent_A);
             CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
-            MP_Coop_FinishTrainerParty(gTrainerBattleOpponent_A);
+            if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
+            {
+                // two trainers spotted the player at once: each one's own team on their side
+                CreateNPCTrainerParty(&gEnemyParty[PARTY_SIZE / 2], gTrainerBattleOpponent_B, FALSE);
+                MP_Coop_FinishTwoTrainerParty(gTrainerBattleOpponent_A, gTrainerBattleOpponent_B);
+            }
+            else
+            {
+                MP_Coop_FinishTrainerParty(gTrainerBattleOpponent_A);
+            }
         }
         MP_Coop_ArrangeEnemyParty();
     }
@@ -3706,7 +3715,10 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
             }
         }
 
-        if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT)
+        // (Moemon Co-op: two trainers in a co-op battle are MULTI too: their picture was asked for just above, and a
+        // second request over the link never completes)
+        if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT
+         && !gMpCoopBattle)
         {
             BtlController_EmitDrawTrainerPic(B_COMM_TO_CONTROLLER);
             MarkBattlerForControllerExec(gActiveBattler);

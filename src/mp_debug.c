@@ -1861,6 +1861,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] bflags %08x battlers %d coop %d wild %d triple %d inBattle %d\n", (unsigned)gBattleTypeFlags,
                gBattlersCount, gMpCoopBattle, gMpCoopWild, gIsTripleBattle, gMain.inBattle);
     }
+    else if (strcmp(cmd, "trainerflag") == 0)
+    {
+        // trainerflag ID [ID...] - whether each trainer counts as beaten on this game
+        char *tok = strtok(arg, " ");
+        while (tok != NULL)
+        {
+            int id = atoi(tok);
+            if (id > 0 && id < TRAINERS_COUNT)
+                printf("[test] trainerflag %d = %d\n", id, FlagGet(TRAINER_FLAGS_START + id) ? 1 : 0);
+            tok = strtok(NULL, " ");
+        }
+        fflush(stdout);
+    }
     else if (strcmp(cmd, "partyids") == 0)
     {
         // partyids - each party Moemon's identity (species:personality:OT ID) and level / EXP, to check nothing was

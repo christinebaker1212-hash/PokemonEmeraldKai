@@ -1,0 +1,11 @@
+# Two trainers spot ALICE at once while her only friend (BOB) is on another map: no team-up question, the game's own
+# two-trainer Double Battle (both count as beaten, no co-op link).
+MODE=2
+WARP=0,31,30,6
+WARP_B=0,10,10,10
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("co-op: two trainers (" "trainerflag 273 = 1" "trainerflag 605 = 1")
+UNEXPECT_A=("crash" "co-op battle link" "Wait for another" "is waiting for a partner")
+UNEXPECT_B=("crash")

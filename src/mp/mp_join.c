@@ -238,8 +238,8 @@ static u8 JoinableReason(void)
         return JOIN_CANT_OVER;
     if (gMpCoopBattle)
     {
-        if (!MP_Coop_IsMaster())
-            return JOIN_CANT_KIND;
+        if (!MP_Coop_IsMaster() || MP_Coop_TwoTrainers())
+            return JOIN_CANT_KIND;   // (two trainers: no third seat, nor a third foe spot)
         if (MP_Coop_SeatCount() >= 3)
             return JOIN_CANT_FULL;
         if (!gMpCoopWild && !MP_Coop_JoinTrainerOk())

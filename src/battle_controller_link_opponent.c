@@ -1290,11 +1290,16 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     // Moemon Co-op: the opponent's chosen character
     if (gNetLinkActive && MP_Battle_OpponentFrontPic() != 0xFFFF)
         trainerPicId = MP_Battle_OpponentFrontPic();
-    // Moemon Co-op: teamed up against an NPC trainer
+    // Moemon Co-op: teamed up against an NPC trainer (or two, each on their side)
     if (gMpCoopBattle)
     {
-        trainerPicId = MP_Coop_TrainerPic();
-        xPos = 176;
+        trainerPicId = MP_Coop_TrainerPicFor(gActiveBattler);
+        if (!MP_Coop_TwoTrainers())
+            xPos = 176;
+        else if ((GetBattlerPosition(gActiveBattler) & BIT_FLANK) != 0)
+            xPos = 152;
+        else
+            xPos = 200;
     }
     DecompressTrainerFrontPic(trainerPicId, gActiveBattler);
     SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
@@ -1308,7 +1313,7 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
-    if (gMpCoopBattle && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
+    if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
@@ -1319,7 +1324,7 @@ static void LinkOpponentHandleTrainerSlide(void)
     u32 trainerPicId;
 
     if (gMpCoopBattle)
-        trainerPicId = MP_Coop_TrainerPic();
+        trainerPicId = MP_Coop_TrainerPicFor(gActiveBattler);
     else if (gActiveBattler == 1)
         trainerPicId = GetFrontierTrainerFrontSpriteId(gTrainerBattleOpponent_A);
     else

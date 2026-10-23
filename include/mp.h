@@ -863,6 +863,7 @@ u8 MP_RareCandyCap(void);   // party_menu.c: no RARE CANDY past the next gym ace
 extern u8 gMpEnemyLevelBonus;                     // battle_main.c CreateNPCTrainerParty adds it (co-op team-ups)
 void MP_Coop_PrepareTrainerParty(u16 trainerId);
 void MP_Coop_FinishTrainerParty(u16 trainerId);
+void MP_Coop_FinishTwoTrainerParty(u16 trainerA, u16 trainerB);
 bool8 MP_Coop_IsBossTrainer(u16 trainerId);
 bool8 MP_Coop_TrainerBattleBoost(void);           // a co-op trainer battle: items and smarter AI (battle_ai_script_commands.c)   // caves and dungeons (no shared PC, no paid rescue)
 void MP_Store_OnMessage(const u8 *data, u16 len);
@@ -965,9 +966,12 @@ void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c
 void MP_StartNormalWildBattle(void);                 // battle_setup.c
 void MP_Coop_ArrangeEnemyParty(void);
 u16 MP_Coop_TrainerPic(void);
+u16 MP_Coop_TrainerPicFor(u8 battler);   // two trainers: the right opponent is the second one
+bool8 MP_Coop_TwoTrainers(void);         // a co-op battle against two trainers at once
 u16 MP_Coop_PartnerBackPicOr(u16 defaultPic);
 bool8 MP_Coop_PartnerHidesBack(void);
 const u8 *MP_Coop_LoseText(void);    // NULL = use the game's
+const u8 *MP_Coop_LoseTextB(void);   // the second trainer's (two trainers); NULL = the game's
 void MP_Coop_RecordLearnLater(u8 partyIndex, u16 move);
 void MP_Coop_RecordMoney(u32 amount);
 bool8 MP_Coop_IsTradedMon(u8 partyIndex);

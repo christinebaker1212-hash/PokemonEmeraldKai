@@ -1620,7 +1620,11 @@ const u8 *GetTrainerALoseText(void)
 
 const u8 *GetTrainerBLoseText(void)
 {
-    StringExpandPlaceholders(gStringVar4, ReturnEmptyStringIfNull(sTrainerBDefeatSpeech));
+    const u8 *string = sTrainerBDefeatSpeech;
+
+    if (MP_Coop_LoseTextB() != NULL) // Moemon Co-op: sent by the challenged player
+        string = MP_Coop_LoseTextB();
+    StringExpandPlaceholders(gStringVar4, ReturnEmptyStringIfNull(string));
     return gStringVar4;
 }
 
