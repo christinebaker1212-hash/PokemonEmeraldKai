@@ -884,6 +884,9 @@ void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 
 // mp_notify.c
 void MP_ShowNotice(const char *ascii);
+void MP_Menu_BuildPlayersLine(u8 *buf);                  // mp_menu.c: the CO-OP menu's players line (128 bytes)
+void MP_SharedPc_FromLabel(u8 *from, const u8 *by);      // mp_sharedpc.c: "from NAME" (24 bytes)
+void MP_Dex_CaughtByText(u8 *text, const u8 *by);        // pokedex.c: "CAUGHT BY NAME" (40 bytes)
 void MP_Notice_Update(void);
 void MP_OnFileDropped(const char *path);
 

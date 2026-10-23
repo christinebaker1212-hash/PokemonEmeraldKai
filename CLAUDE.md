@@ -74,6 +74,8 @@ Gotchas worth knowing before touching battles:
   MP_BlendSpritePalette / MP_BeginSpritePaletteFade. Ball and co-op palettes live there (see COOP_NOTES, graphics).
 - The game clock (RTC) is the PC's, and online the room host's: Berry growth must count on the player's own clock
   (clock.c, MP_ClockShift), never on the shared one, or joining a host in another time zone grows trees by hours.
+- StringCopyN / StringAppendN copy exactly N bytes and never add EOS: a full 7-letter name (PLAYER_NAME_LENGTH) runs
+  on into the next bytes unless you write `*StringAppendN(buf, name, PLAYER_NAME_LENGTH) = EOS;` (test names7).
 - Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 

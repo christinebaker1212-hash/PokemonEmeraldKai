@@ -1,0 +1,19 @@
+# Four players with full 7-letter names (SATOSHI, TAKESHI, MITSURU, KENJIRO). StringAppendN copies exactly 7 bytes and
+# never ends the string, so the CO-OP menu's players line, the shared PC's "from NAME" and the POKEDEX's "CAUGHT BY
+# NAME" ran on into whatever followed (garbled text, or a crash in GetStringWidth on a 0xF7). `mp namelines` builds
+# each one into a buffer of 0xF7s ("|" = where the text ends); everyone then opens the CO-OP menu.
+MODE=4
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+WARP_C=0,10,10,12
+WARP_D=0,10,12,12
+TMO=150
+NAME_A=SATOSHI
+NAME_B=TAKESHI
+NAME_C=MITSURU
+NAME_D=KENJIRO
+CHECK="python3 tools/test/scenarios/names7/check.py"
+EXPECT_A=("namelines: pc from TAKESHI| (12)" "namelines: dex CAUGHT BY KENJIRO| (17)" "namelines: pc from SATOSHI| (12)" "names7 menu")
+EXPECT_B=("namelines: pc from SATOSHI| (12)" "namelines: dex CAUGHT BY MITSURU| (17)" "names7 menu")
+EXPECT_C=("namelines: pc from KENJIRO| (12)" "namelines: dex CAUGHT BY TAKESHI| (17)" "names7 menu")
+EXPECT_D=("namelines: pc from MITSURU| (12)" "namelines: dex CAUGHT BY SATOSHI| (17)" "names7 menu")

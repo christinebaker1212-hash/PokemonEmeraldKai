@@ -793,3 +793,12 @@ prints its SHA-256 (checked against curl on a 7.6 MB GitHub release asset, with 
 Releases: .github/workflows/release.yml runs on a push to the default branch that changes include/mp_version.h (or
 by hand), skips a version that already has a release, builds both platforms, packages, runs the updater test and
 publishes with `gh release create --target <commit>` (which makes the tag); notes from tools/release/notes/v<ver>.md.
+
+## Full 7-letter names (1.4.1)
+StringCopyN / StringAppendN copy exactly N bytes and never end the string. A name that fills all 7 letters has no end
+mark inside those 7 bytes, so a label built with `StringAppendN(buf, name, PLAYER_NAME_LENGTH)` ran on into whatever
+followed: junk on screen, or a crash in GetStringWidth on a 0xF7 (the "insert a stored string" code). The three such
+labels (the CO-OP menu's players line, MP_Menu_BuildPlayersLine; the shared PC's "from NAME", MP_SharedPc_FromLabel;
+the POKéDEX's "CAUGHT BY NAME", MP_Dex_CaughtByText) now write the end mark after the copy. `mp namelines` builds
+each into a buffer of 0xF7s and prints it ("|" = where the text ends). Test names7 (4 players named SATOSHI,
+TAKESHI, MITSURU, KENJIRO; regress.sh NAME_A..NAME_D set the names); the old code crashes in its CO-OP menu.

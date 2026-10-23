@@ -23,7 +23,7 @@ sleep 1
 cd "$REPO" || exit 1
 export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_SHOTDIR="$D" MOEMON_LOBBY=127.0.0.1:$LOBBY \
        MOEMON_DEBUG_QUICKSTART=1 MOEMON_TEST_FPS=${FPS:-120}
-NAMES=(ALICE BOB CARL DANA)
+NAMES=("${NAME_A:-ALICE}" "${NAME_B:-BOB}" "${NAME_C:-CARL}" "${NAME_D:-DANA}")   # NAME_A..NAME_D: other names
 PIDS=()
 for i in $(seq 0 $((N - 1))); do
     c=$(printf "\\x$(printf %x $((97 + i)))")

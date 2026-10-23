@@ -141,6 +141,14 @@ void MP_Counter_ForEach(const char *prefix, void (*fn)(const char *key, s32 valu
             fn(sCache[i].key, sCache[i].value, arg);
 }
 
+// "from NAME" (24 bytes). StringAppendN copies exactly 7 bytes and never ends the string, so a full 7-letter name
+// (SATOSHI) has no end marker of its own: end it here.
+void MP_SharedPc_FromLabel(u8 *from, const u8 *by)
+{
+    MP_AsciiToGame(from, "from ", 8);
+    *StringAppendN(from, by, PLAYER_NAME_LENGTH) = EOS;
+}
+
 // ---------------------------------------------------------------------------
 // Shared PC screen
 
@@ -327,8 +335,7 @@ static void Draw(void)
             MonLabel(&m->mon, left);
             if (m->by[0] != EOS && m->by[0] != 0)
             {
-                MP_AsciiToGame(from, "from ", 8);
-                StringAppendN(from, m->by, PLAYER_NAME_LENGTH);
+                MP_SharedPc_FromLabel(from, m->by);
                 MpUi_Row(row, sel, left, from);
             }
             else

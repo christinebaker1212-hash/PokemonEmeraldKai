@@ -4112,6 +4112,15 @@ static EWRAM_DATA u16 sMpInfoNatNum = 0;
 static EWRAM_DATA u8 sMpInfoCategory[32] = {0};
 static EWRAM_DATA u16 sMpInfoTimer = 0;
 
+// "CAUGHT BY NAME" (40 bytes). StringAppendN copies exactly 7 bytes and never ends the string, so a full 7-letter
+// name (SATOSHI) has no end marker of its own: end it here.
+void MP_Dex_CaughtByText(u8 *text, const u8 *by)
+{
+    static const u8 sText_CaughtBy[] = _("CAUGHT BY ");
+    StringCopy(text, sText_CaughtBy);
+    *StringAppendN(text, by, PLAYER_NAME_LENGTH) = EOS;
+}
+
 static void MpPrintCategoryLine(bool8 showCatcher)
 {
     u8 text[40];
@@ -4119,9 +4128,7 @@ static void MpPrintCategoryLine(bool8 showCatcher)
     FillWindowPixelRect(0, PIXEL_FILL(0), 0x60, 0x29, DISPLAY_WIDTH - 0x60 - 0x10, 16);
     if (showCatcher && by != NULL)
     {
-        static const u8 sText_CaughtBy[] = _("CAUGHT BY ");
-        StringCopy(text, sText_CaughtBy);
-        StringAppendN(text, by, PLAYER_NAME_LENGTH);
+        MP_Dex_CaughtByText(text, by);
         PrintInfoScreenText(text, 0x64, 0x29);
     }
     else

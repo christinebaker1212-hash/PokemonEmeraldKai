@@ -111,11 +111,10 @@ static u8 *RowValue(u8 row)
     }
 }
 
-static void DrawPlayersWindow(u8 windowId)
+// The players line (names and top levels), into buf (128 bytes)
+void MP_Menu_BuildPlayersLine(u8 *buf)
 {
-    u8 buf[128];
     u8 i, n = 0;
-    MpTheme_Panel(windowId, 0);
     buf[0] = EOS;
     if (!MP_IsConnected())
     {
@@ -145,7 +144,9 @@ static void DrawPlayersWindow(u8 windowId)
                 u8 sep[] = {CHAR_SPACE, CHAR_SPACE, EOS};
                 StringAppend(buf, sep);
             }
-            StringAppendN(buf, name, PLAYER_NAME_LENGTH);
+            // (StringAppendN copies exactly 7 bytes and never ends the string: a full 7-letter name like
+            // SATOSHI ran on into whatever followed, which could hold a placeholder code and crash)
+            *StringAppendN(buf, name, PLAYER_NAME_LENGTH) = EOS;
             {
                 u8 lv[] = {CHAR_SPACE, CHAR_LV, EOS};
                 StringAppend(buf, lv);
@@ -154,6 +155,13 @@ static void DrawPlayersWindow(u8 windowId)
             StringAppend(buf, lvl);
         }
     }
+}
+
+static void DrawPlayersWindow(u8 windowId)
+{
+    u8 buf[128];
+    MpTheme_Panel(windowId, 0);
+    MP_Menu_BuildPlayersLine(buf);
     {
         // Buddy bonus, and when hosting on this PC the code friends type to join (on the right)
         int rightW = 0;

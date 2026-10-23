@@ -414,6 +414,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gMpConfig.spectateScale = size < 1 ? 1 : (size > 4 ? 4 : size);
         printf("[test] spectate panel %s, size %dx\n", on ? "on" : "off", gMpConfig.spectateScale);
     }
+    else if (strcmp(cmd, "namelines") == 0)
+    {
+        // namelines: the CO-OP menu's players line, the shared PC's "from NAME" and the POKEDEX's "CAUGHT BY NAME"
+        // for every player, each built into a buffer full of junk (0xF7 = "insert a stored string", which crashed
+        // GetStringWidth): a name without its end marker shows the junk. "|" marks where the text ends.
+        u8 buf[128], i;
+        char ascii[160];
+        memset(buf, 0xF7, sizeof(buf));
+        MP_Menu_BuildPlayersLine(buf);
+        MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+        printf("[test] namelines: players %s| (%d)\n", ascii, StringLength(buf));
+        for (i = 0; i <= MP_MAX_PLAYERS; i++)
+        {
+            const u8 *name = i == MP_MAX_PLAYERS ? gSaveBlock2Ptr->playerName : gMpPlayers[i].name;
+            if (i < MP_MAX_PLAYERS && (i == gMpLocalId || !gMpPlayers[i].present))
+                continue;
+            memset(buf, 0xF7, sizeof(buf));
+            MP_SharedPc_FromLabel(buf, name);
+            MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+            printf("[test] namelines: pc %s| (%d)\n", ascii, StringLength(buf));
+            memset(buf, 0xF7, sizeof(buf));
+            MP_Dex_CaughtByText(buf, name);
+            MP_GameToAscii(ascii, buf, sizeof(ascii) - 1);
+            printf("[test] namelines: dex %s| (%d)\n", ascii, StringLength(buf));
+        }
+    }
     else if (strcmp(cmd, "gatchaday") == 0)
     {
         // gatchaday N - STANDARD shows day N's prizes (-1: today)

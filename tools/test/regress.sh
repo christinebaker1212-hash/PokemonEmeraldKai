@@ -2,7 +2,7 @@
 # Runs the scenarios in tools/test/scenarios and checks their logs. usage: regress.sh [NAME...]
 #   Each scenario folder has a.txt (+ b.txt, c.txt, d.txt for two to four clients) and conf (MODE=1|2|3|4,
 #   DELAY/JIT/FPS/TMO/WARP/WARP_B/WARP_C/WARP_D, EXPECT_A .. EXPECT_D = text that must show up in a.log .. d.log;
-#   UNEXPECT_A .. _D = text that must not; CHECK = a command run from the repo root with the result folder
+#   UNEXPECT_A .. _D = text that must not; NAME_A .. NAME_D = player names (MODE 3/4); CHECK = a command run from the repo root with the result folder
 #   as its last argument, which must exit 0). Results go to $OUT/NAME (default /tmp/moemon_tests).
 #   Builds the game first unless NOBUILD=1. WORST=1 runs every two-client scenario at 250 ms + 80 ms jitter
 #   each way (NA <-> JP). JOBS=N runs N scenarios at once (default 1). Exit code = number of failed scenarios.
@@ -19,12 +19,12 @@ run_one() {
     [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; return 1; }
     rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"
     unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C WARP_D EXPECT_A EXPECT_B EXPECT_C EXPECT_D UNEXPECT_A UNEXPECT_B UNEXPECT_C \
-          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK
+          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D
     . "$src/conf"
     if [ -n "$WORST" ] && [ "$MODE" -ge 2 ] && [ -z "$DELAY" ]; then   # NA <-> JP for every multi-client scenario
         DELAY=250; JIT=80; FPS=60; TMO=$(( ${TMO:-150} * 2 ))
     fi
-    export WARP WARP_B WARP_C WARP_D FPS TMO ENV_A ENV_B ENV_C ENV_D
+    export WARP WARP_B WARP_C WARP_D FPS TMO ENV_A ENV_B ENV_C ENV_D NAME_A NAME_B NAME_C NAME_D
     if [ "$MODE" -ge 3 ]; then
         "$TOOLS/runN.sh" "$MODE" "$d" "${DELAY:-0}" "${JIT:-0}" > "$d/run.txt" 2>&1
     elif [ "$MODE" = 2 ]; then

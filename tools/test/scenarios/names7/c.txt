@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 400
+mp namelines
+mp menu 0
+wait 60
+shot c_menu
+log names7 menu
+wait 30
+press B 2
+wait 30
+press B 2
+wait 300
+quit
