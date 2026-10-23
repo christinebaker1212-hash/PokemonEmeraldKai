@@ -149,6 +149,7 @@ struct MpState
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
     u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
     u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
+    s16 followerHue;   // its Stadium hue in degrees (mp_hue.c; 0 = its own colors)
     u8 badges;         // how many gym badges (catch-up bonus)
     u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
 };
@@ -291,6 +292,23 @@ void MP_Bag_ClearNew(u16 item);
 void MP_Bag_NoteAdded(u16 item);
 void MP_Bag_ResetMarks(void);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
+// mp_hue.c: Pokémon Stadium hues for nicknamed Pokémon
+#define MP_HUE_TAG_BASE 0x6F00   // 0x6F00-0x6F7F: sprite palette tags of turned palettes
+struct BoxPokemon;
+struct CompressedSpritePalette;
+u8 MP_Hue_Number(const u8 *otName, const u8 *nickname, u16 trainerId);
+s16 MP_Hue_Degrees(u16 species, u8 nv);
+void MP_Hue_Limits(u16 species, u8 *min, u8 *max);
+s16 MP_Hue_OfBoxMon(const struct BoxPokemon *b);
+s16 MP_Hue_Find(u32 otId, u32 personality);
+s16 MP_Hue_FindByPersonality(u32 personality);
+void MP_Hue_ShiftPalette(u16 *pal, u16 keepMask, s16 hue);
+const u32 *MP_Hue_Lz(const u32 *lz, u16 species, s16 hue);
+const struct CompressedSpritePalette *MP_Hue_LzStruct(const struct CompressedSpritePalette *pal, u16 species, s16 hue);
+u16 MP_Hue_Tag(u16 orig, s16 hue);
+u16 MP_Hue_IconPaletteTag(u16 baseTag, const u16 *colors, s16 hue);
+void MP_Hue_FreeUnusedIconPalettes(void);
+bool8 MP_Hue_IsHueTag(u16 tag);
 bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_SendBlob(u8 kind, const void *data, u32 len);
@@ -1222,6 +1240,7 @@ void MP_BallFx_StopAll(void);
 void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
 u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
+s16 MP_Follower_LocalHue(void);          // mp_follower.c: the follower's Stadium hue, for the network
 u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));

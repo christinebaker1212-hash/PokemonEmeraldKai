@@ -1,0 +1,1257 @@
+{
+"abra": {
+"dex": 63,
+"max": 30,
+"min": 20
+},
+"aerodactyl": {
+"dex": 142,
+"max": 60,
+"min": 60
+},
+"aipom": {
+"dex": 190,
+"max": 10,
+"min": 20
+},
+"alakazam": {
+"dex": 65,
+"max": 30,
+"min": 30
+},
+"ampharos": {
+"dex": 181,
+"max": 10,
+"min": 20
+},
+"arbok": {
+"dex": 24,
+"max": 30,
+"min": 70
+},
+"arcanine": {
+"dex": 59,
+"max": 20,
+"min": 30
+},
+"ariados": {
+"dex": 168,
+"max": 15,
+"min": 15
+},
+"articuno": {
+"dex": 144,
+"max": 30,
+"min": 20
+},
+"azumarill": {
+"dex": 184,
+"max": 10,
+"min": 15
+},
+"bayleef": {
+"dex": 153,
+"max": 10,
+"min": 20
+},
+"beedrill": {
+"dex": 15,
+"max": 50,
+"min": 20
+},
+"bellossom": {
+"dex": 182,
+"max": 25,
+"min": 20
+},
+"bellsprout": {
+"dex": 69,
+"max": 15,
+"min": 15
+},
+"blastoise": {
+"dex": 9,
+"max": 35,
+"min": 30
+},
+"blissey": {
+"dex": 242,
+"max": 15,
+"min": 25
+},
+"bulbasaur": {
+"dex": 1,
+"max": 70,
+"min": 45
+},
+"butterfree": {
+"dex": 12,
+"max": 50,
+"min": 40
+},
+"caterpie": {
+"dex": 10,
+"max": 80,
+"min": 30
+},
+"celebi": {
+"dex": 251,
+"max": 5,
+"min": 10
+},
+"chansey": {
+"dex": 113,
+"max": 60,
+"min": 50
+},
+"charizard": {
+"dex": 6,
+"max": 15,
+"min": 20
+},
+"charmander": {
+"dex": 4,
+"max": 20,
+"min": 25
+},
+"charmeleon": {
+"dex": 5,
+"max": 55,
+"min": 10
+},
+"chikorita": {
+"dex": 152,
+"max": 20,
+"min": 35
+},
+"chinchou": {
+"dex": 170,
+"max": 10,
+"min": 10
+},
+"clefable": {
+"dex": 36,
+"max": 50,
+"min": 40
+},
+"clefairy": {
+"dex": 35,
+"max": 50,
+"min": 40
+},
+"cleffa": {
+"dex": 173,
+"max": 10,
+"min": 30
+},
+"cloyster": {
+"dex": 91,
+"max": 60,
+"min": 70
+},
+"corsola": {
+"dex": 222,
+"max": 10,
+"min": 25
+},
+"crobat": {
+"dex": 169,
+"max": 10,
+"min": 10
+},
+"croconaw": {
+"dex": 159,
+"max": 10,
+"min": 20
+},
+"cubone": {
+"dex": 104,
+"max": 5,
+"min": 25
+},
+"cyndaquil": {
+"dex": 155,
+"max": 10,
+"min": 15
+},
+"delibird": {
+"dex": 225,
+"max": 15,
+"min": 15
+},
+"dewgong": {
+"dex": 87,
+"max": 10,
+"min": 10
+},
+"diglett": {
+"dex": 50,
+"max": 35,
+"min": 20
+},
+"ditto": {
+"dex": 132,
+"max": 20,
+"min": 60
+},
+"dodrio": {
+"dex": 85,
+"max": 40,
+"min": 10
+},
+"doduo": {
+"dex": 84,
+"max": 40,
+"min": 10
+},
+"donphan": {
+"dex": 232,
+"max": 10,
+"min": 20
+},
+"dragonair": {
+"dex": 148,
+"max": 10,
+"min": 30
+},
+"dragonite": {
+"dex": 149,
+"max": 25,
+"min": 20
+},
+"dratini": {
+"dex": 147,
+"max": 20,
+"min": 40
+},
+"drowzee": {
+"dex": 96,
+"max": 30,
+"min": 10
+},
+"dugtrio": {
+"dex": 51,
+"max": 35,
+"min": 20
+},
+"dunsparce": {
+"dex": 206,
+"max": 15,
+"min": 10
+},
+"eevee": {
+"dex": 133,
+"max": 30,
+"min": 30
+},
+"ekans": {
+"dex": 23,
+"max": 40,
+"min": 30
+},
+"electabuzz": {
+"dex": 125,
+"max": 30,
+"min": 20
+},
+"electrode": {
+"dex": 101,
+"max": 10,
+"min": 70
+},
+"elekid": {
+"dex": 239,
+"max": 10,
+"min": 5
+},
+"entei": {
+"dex": 244,
+"max": 10,
+"min": 20
+},
+"espeon": {
+"dex": 196,
+"max": 10,
+"min": 15
+},
+"exeggcute": {
+"dex": 102,
+"max": 40,
+"min": 50
+},
+"exeggutor": {
+"dex": 103,
+"max": 40,
+"min": 30
+},
+"farfetchd": {
+"dex": 83,
+"max": 30,
+"min": 30
+},
+"fearow": {
+"dex": 22,
+"max": 30,
+"min": 25
+},
+"feraligatr": {
+"dex": 160,
+"max": 10,
+"min": 25
+},
+"flaaffy": {
+"dex": 180,
+"max": 10,
+"min": 20
+},
+"flareon": {
+"dex": 136,
+"max": 30,
+"min": 20
+},
+"forretress": {
+"dex": 205,
+"max": 10,
+"min": 20
+},
+"furret": {
+"dex": 162,
+"max": 10,
+"min": 20
+},
+"gastly": {
+"dex": 92,
+"max": 50,
+"min": 80
+},
+"gengar": {
+"dex": 94,
+"max": 30,
+"min": 90
+},
+"geodude": {
+"dex": 74,
+"max": 180,
+"min": 180
+},
+"girafarig": {
+"dex": 203,
+"max": 10,
+"min": 10
+},
+"gligar": {
+"dex": 207,
+"max": 10,
+"min": 10
+},
+"gloom": {
+"dex": 44,
+"max": 65,
+"min": 40
+},
+"golbat": {
+"dex": 42,
+"max": 30,
+"min": 25
+},
+"goldeen": {
+"dex": 118,
+"max": 40,
+"min": 60
+},
+"golduck": {
+"dex": 55,
+"max": 50,
+"min": 60
+},
+"golem": {
+"dex": 76,
+"max": 20,
+"min": 50
+},
+"granbull": {
+"dex": 210,
+"max": 15,
+"min": 15
+},
+"graveler": {
+"dex": 75,
+"max": 180,
+"min": 180
+},
+"grimer": {
+"dex": 88,
+"max": 180,
+"min": 180
+},
+"growlithe": {
+"dex": 58,
+"max": 10,
+"min": 35
+},
+"gyarados": {
+"dex": 130,
+"max": 50,
+"min": 20
+},
+"haunter": {
+"dex": 93,
+"max": 30,
+"min": 70
+},
+"heracross": {
+"dex": 214,
+"max": 5,
+"min": 10
+},
+"hitmonchan": {
+"dex": 107,
+"max": 50,
+"min": 20
+},
+"hitmonlee": {
+"dex": 106,
+"max": 50,
+"min": 20
+},
+"hitmontop": {
+"dex": 237,
+"max": 10,
+"min": 15
+},
+"ho-oh": {
+"dex": 250,
+"max": 15,
+"min": 10
+},
+"hoothoot": {
+"dex": 163,
+"max": 10,
+"min": 15
+},
+"hoppip": {
+"dex": 187,
+"max": 10,
+"min": 20
+},
+"horsea": {
+"dex": 116,
+"max": 40,
+"min": 40
+},
+"houndoom": {
+"dex": 229,
+"max": 10,
+"min": 10
+},
+"houndour": {
+"dex": 228,
+"max": 10,
+"min": 10
+},
+"hypno": {
+"dex": 97,
+"max": 30,
+"min": 15
+},
+"igglybuff": {
+"dex": 174,
+"max": 20,
+"min": 25
+},
+"ivysaur": {
+"dex": 2,
+"max": 45,
+"min": 40
+},
+"jigglypuff": {
+"dex": 39,
+"max": 40,
+"min": 40
+},
+"jolteon": {
+"dex": 135,
+"max": 20,
+"min": 25
+},
+"jumpluff": {
+"dex": 189,
+"max": 5,
+"min": 10
+},
+"jynx": {
+"dex": 124,
+"max": 30,
+"min": 10
+},
+"kabuto": {
+"dex": 140,
+"max": 30,
+"min": 20
+},
+"kabutops": {
+"dex": 141,
+"max": 50,
+"min": 40
+},
+"kadabra": {
+"dex": 64,
+"max": 30,
+"min": 30
+},
+"kakuna": {
+"dex": 14,
+"max": 40,
+"min": 25
+},
+"kangaskhan": {
+"dex": 115,
+"max": 50,
+"min": 30
+},
+"kingdra": {
+"dex": 230,
+"max": 15,
+"min": 20
+},
+"kingler": {
+"dex": 99,
+"max": 25,
+"min": 20
+},
+"koffing": {
+"dex": 109,
+"max": 90,
+"min": 60
+},
+"krabby": {
+"dex": 98,
+"max": 30,
+"min": 20
+},
+"lanturn": {
+"dex": 171,
+"max": 10,
+"min": 20
+},
+"lapras": {
+"dex": 131,
+"max": 20,
+"min": 30
+},
+"larvitar": {
+"dex": 246,
+"max": 20,
+"min": 30
+},
+"ledian": {
+"dex": 166,
+"max": 15,
+"min": 15
+},
+"ledyba": {
+"dex": 165,
+"max": 10,
+"min": 25
+},
+"lickitung": {
+"dex": 108,
+"max": 30,
+"min": 50
+},
+"lugia": {
+"dex": 249,
+"max": 10,
+"min": 20
+},
+"machamp": {
+"dex": 68,
+"max": 80,
+"min": 70
+},
+"machoke": {
+"dex": 67,
+"max": 60,
+"min": 70
+},
+"machop": {
+"dex": 66,
+"max": 60,
+"min": 40
+},
+"magby": {
+"dex": 240,
+"max": 10,
+"min": 5
+},
+"magcargo": {
+"dex": 219,
+"max": 10,
+"min": 15
+},
+"magikarp": {
+"dex": 129,
+"max": 25,
+"min": 30
+},
+"magmar": {
+"dex": 126,
+"max": 30,
+"min": 15
+},
+"magnemite": {
+"dex": 81,
+"max": 180,
+"min": 180
+},
+"magneton": {
+"dex": 82,
+"max": 180,
+"min": 180
+},
+"mankey": {
+"dex": 56,
+"max": 30,
+"min": 35
+},
+"mantine": {
+"dex": 226,
+"max": 10,
+"min": 20
+},
+"mareep": {
+"dex": 179,
+"max": 10,
+"min": 10
+},
+"marill": {
+"dex": 183,
+"max": 10,
+"min": 10
+},
+"marowak": {
+"dex": 105,
+"max": 5,
+"min": 25
+},
+"meganium": {
+"dex": 154,
+"max": 10,
+"min": 20
+},
+"meowth": {
+"dex": 52,
+"max": 35,
+"min": 40
+},
+"metapod": {
+"dex": 11,
+"max": 60,
+"min": 20
+},
+"mew": {
+"dex": 151,
+"max": 60,
+"min": 40
+},
+"mewtwo": {
+"dex": 150,
+"max": 90,
+"min": 70
+},
+"miltank": {
+"dex": 241,
+"max": 10,
+"min": 20
+},
+"misdreavus": {
+"dex": 200,
+"max": 15,
+"min": 20
+},
+"moltres": {
+"dex": 146,
+"max": 20,
+"min": 20
+},
+"mr-mime": {
+"dex": 122,
+"max": 50,
+"min": 30
+},
+"muk": {
+"dex": 89,
+"max": 180,
+"min": 180
+},
+"murkrow": {
+"dex": 198,
+"max": 15,
+"min": 10
+},
+"natu": {
+"dex": 177,
+"max": 10,
+"min": 15
+},
+"nidoking": {
+"dex": 34,
+"max": 30,
+"min": 50
+},
+"nidoqueen": {
+"dex": 31,
+"max": 80,
+"min": 60
+},
+"nidoran-f": {
+"dex": 29,
+"max": 70,
+"min": 60
+},
+"nidoran-m": {
+"dex": 32,
+"max": 20,
+"min": 70
+},
+"nidorina": {
+"dex": 30,
+"max": 80,
+"min": 80
+},
+"nidorino": {
+"dex": 33,
+"max": 20,
+"min": 70
+},
+"ninetales": {
+"dex": 38,
+"max": 50,
+"min": 30
+},
+"noctowl": {
+"dex": 164,
+"max": 7,
+"min": 7
+},
+"octillery": {
+"dex": 224,
+"max": 10,
+"min": 10
+},
+"oddish": {
+"dex": 43,
+"max": 70,
+"min": 40
+},
+"omanyte": {
+"dex": 138,
+"max": 60,
+"min": 15
+},
+"omastar": {
+"dex": 139,
+"max": 60,
+"min": 15
+},
+"onix": {
+"dex": 95,
+"max": 180,
+"min": 180
+},
+"paras": {
+"dex": 46,
+"max": 30,
+"min": 20
+},
+"parasect": {
+"dex": 47,
+"max": 35,
+"min": 20
+},
+"persian": {
+"dex": 53,
+"max": 50,
+"min": 20
+},
+"phanpy": {
+"dex": 231,
+"max": 10,
+"min": 20
+},
+"pichu": {
+"dex": 172,
+"max": 5,
+"min": 10
+},
+"pidgeot": {
+"dex": 18,
+"max": 20,
+"min": 35
+},
+"pidgeotto": {
+"dex": 17,
+"max": 30,
+"min": 30
+},
+"pidgey": {
+"dex": 16,
+"max": 30,
+"min": 30
+},
+"pikachu": {
+"dex": 25,
+"max": 25,
+"min": 15
+},
+"piloswine": {
+"dex": 221,
+"max": 5,
+"min": 10
+},
+"pineco": {
+"dex": 204,
+"max": 15,
+"min": 10
+},
+"pinsir": {
+"dex": 127,
+"max": 130,
+"min": 60
+},
+"politoed": {
+"dex": 186,
+"max": 20,
+"min": 20
+},
+"poliwag": {
+"dex": 60,
+"max": 50,
+"min": 50
+},
+"poliwhirl": {
+"dex": 61,
+"max": 50,
+"min": 50
+},
+"poliwrath": {
+"dex": 62,
+"max": 50,
+"min": 50
+},
+"ponyta": {
+"dex": 77,
+"max": 20,
+"min": 25
+},
+"porygon": {
+"dex": 137,
+"max": 40,
+"min": 40
+},
+"porygon2": {
+"dex": 233,
+"max": 5,
+"min": 20
+},
+"primeape": {
+"dex": 57,
+"max": 40,
+"min": 35
+},
+"psyduck": {
+"dex": 54,
+"max": 30,
+"min": 20
+},
+"pupitar": {
+"dex": 247,
+"max": 20,
+"min": 20
+},
+"quagsire": {
+"dex": 195,
+"max": 15,
+"min": 30
+},
+"quilava": {
+"dex": 156,
+"max": 15,
+"min": 10
+},
+"qwilfish": {
+"dex": 211,
+"max": 5,
+"min": 15
+},
+"raichu": {
+"dex": 26,
+"max": 25,
+"min": 15
+},
+"raikou": {
+"dex": 243,
+"max": 5,
+"min": 20
+},
+"rapidash": {
+"dex": 78,
+"max": 20,
+"min": 25
+},
+"raticate": {
+"dex": 20,
+"max": 30,
+"min": 30
+},
+"rattata": {
+"dex": 19,
+"max": 60,
+"min": 40
+},
+"remoraid": {
+"dex": 223,
+"max": 20,
+"min": 20
+},
+"rhydon": {
+"dex": 112,
+"max": 180,
+"min": 180
+},
+"rhyhorn": {
+"dex": 111,
+"max": 180,
+"min": 180
+},
+"sandshrew": {
+"dex": 27,
+"max": 40,
+"min": 40
+},
+"sandslash": {
+"dex": 28,
+"max": 25,
+"min": 20
+},
+"scizor": {
+"dex": 212,
+"max": 15,
+"min": 20
+},
+"scyther": {
+"dex": 123,
+"max": 50,
+"min": 30
+},
+"seadra": {
+"dex": 117,
+"max": 35,
+"min": 30
+},
+"seaking": {
+"dex": 119,
+"max": 30,
+"min": 50
+},
+"seel": {
+"dex": 86,
+"max": 30,
+"min": 40
+},
+"sentret": {
+"dex": 161,
+"max": 15,
+"min": 14
+},
+"shellder": {
+"dex": 90,
+"max": 40,
+"min": 70
+},
+"shuckle": {
+"dex": 213,
+"max": 10,
+"min": 10
+},
+"skarmory": {
+"dex": 227,
+"max": 10,
+"min": 20
+},
+"skiploom": {
+"dex": 188,
+"max": 10,
+"min": 20
+},
+"slowbro": {
+"dex": 80,
+"max": 40,
+"min": 40
+},
+"slowking": {
+"dex": 199,
+"max": 15,
+"min": 20
+},
+"slowpoke": {
+"dex": 79,
+"max": 40,
+"min": 40
+},
+"slugma": {
+"dex": 218,
+"max": 5,
+"min": 10
+},
+"smeargle": {
+"dex": 235,
+"max": 25,
+"min": 25
+},
+"smoochum": {
+"dex": 238,
+"max": 10,
+"min": 20
+},
+"sneasel": {
+"dex": 215,
+"max": 10,
+"min": 20
+},
+"snorlax": {
+"dex": 143,
+"max": 60,
+"min": 10
+},
+"snubbull": {
+"dex": 209,
+"max": 10,
+"min": 25
+},
+"spearow": {
+"dex": 21,
+"max": 20,
+"min": 30
+},
+"spinarak": {
+"dex": 167,
+"max": 10,
+"min": 20
+},
+"squirtle": {
+"dex": 7,
+"max": 30,
+"min": 50
+},
+"stantler": {
+"dex": 234,
+"max": 5,
+"min": 15
+},
+"starmie": {
+"dex": 121,
+"max": 50,
+"min": 40
+},
+"staryu": {
+"dex": 120,
+"max": 30,
+"min": 10
+},
+"steelix": {
+"dex": 208,
+"max": 10,
+"min": 25
+},
+"sudowoodo": {
+"dex": 185,
+"max": 15,
+"min": 20
+},
+"suicune": {
+"dex": 245,
+"max": 10,
+"min": 15
+},
+"sunflora": {
+"dex": 192,
+"max": 10,
+"min": 15
+},
+"sunkern": {
+"dex": 191,
+"max": 10,
+"min": 10
+},
+"swinub": {
+"dex": 220,
+"max": 10,
+"min": 10
+},
+"tangela": {
+"dex": 114,
+"max": 20,
+"min": 40
+},
+"tauros": {
+"dex": 128,
+"max": 30,
+"min": 10
+},
+"teddiursa": {
+"dex": 216,
+"max": 10,
+"min": 10
+},
+"tentacool": {
+"dex": 72,
+"max": 40,
+"min": 40
+},
+"tentacruel": {
+"dex": 73,
+"max": 40,
+"min": 40
+},
+"togepi": {
+"dex": 175,
+"max": 10,
+"min": 25
+},
+"togetic": {
+"dex": 176,
+"max": 30,
+"min": 40
+},
+"totodile": {
+"dex": 158,
+"max": 10,
+"min": 10
+},
+"typhlosion": {
+"dex": 157,
+"max": 15,
+"min": 10
+},
+"tyranitar": {
+"dex": 248,
+"max": 10,
+"min": 10
+},
+"tyrogue": {
+"dex": 236,
+"max": 15,
+"min": 15
+},
+"umbreon": {
+"dex": 197,
+"max": 15,
+"min": 15
+},
+"unown": {
+"dex": 201,
+"max": 180,
+"min": 180
+},
+"ursaring": {
+"dex": 217,
+"max": 10,
+"min": 20
+},
+"vaporeon": {
+"dex": 134,
+"max": 50,
+"min": 20
+},
+"venomoth": {
+"dex": 49,
+"max": 100,
+"min": 60
+},
+"venonat": {
+"dex": 48,
+"max": 60,
+"min": 60
+},
+"venusaur": {
+"dex": 3,
+"max": 40,
+"min": 30
+},
+"victreebel": {
+"dex": 71,
+"max": 30,
+"min": 30
+},
+"vileplume": {
+"dex": 45,
+"max": 60,
+"min": 25
+},
+"voltorb": {
+"dex": 100,
+"max": 10,
+"min": 70
+},
+"vulpix": {
+"dex": 37,
+"max": 35,
+"min": 30
+},
+"wartortle": {
+"dex": 8,
+"max": 30,
+"min": 50
+},
+"weedle": {
+"dex": 13,
+"max": 50,
+"min": 0
+},
+"weepinbell": {
+"dex": 70,
+"max": 40,
+"min": 25
+},
+"weezing": {
+"dex": 110,
+"max": 90,
+"min": 60
+},
+"wigglytuff": {
+"dex": 40,
+"max": 40,
+"min": 40
+},
+"wobbuffet": {
+"dex": 202,
+"max": 15,
+"min": 20
+},
+"wooper": {
+"dex": 194,
+"max": 10,
+"min": 20
+},
+"xatu": {
+"dex": 178,
+"max": 10,
+"min": 15
+},
+"yanma": {
+"dex": 193,
+"max": 15,
+"min": 20
+},
+"zapdos": {
+"dex": 145,
+"max": 25,
+"min": 20
+},
+"zubat": {
+"dex": 41,
+"max": 30,
+"min": 30
+}
+}

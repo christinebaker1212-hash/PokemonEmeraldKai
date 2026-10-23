@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "data.h"
 #include "platform.h"
 #include "siirtc.h"
 #include "rtc.h"
@@ -1522,6 +1523,81 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // sharedbox BOX - the shared PC's box as this game sees it (BOX from 1)
         void MP_SharedBox_DebugDump(u8 box);
         MP_SharedBox_DebugDump(atoi(arg) - 1);
+    }
+    else if (strcmp(cmd, "huecheck") == 0)
+    {
+        // huecheck - the Stadium hue math on fixed inputs, for tools/moemon_hues/check_hues.py (compares with the page)
+        static const char *const names[][2] = {
+            {"ASH", "PIKA"}, {"Red", "Sparky"}, {"LUNA", "Bubbles"}, {"ALICE", "Mr. Fluff"}, {"BOB", "a"},
+            {"Ziggy", "ZZZZZZZZZZ"}, {"x", "(Hi):-?!"}, {"May", "Brendan"},
+        };
+        static const u16 ids[] = {0, 1, 255, 256, 12345, 54321, 65535};
+        static const s16 hues[] = {-180, -90, -45, -1, 1, 13, 45, 90, 179, 180};
+        u8 ot[16], nick[16];
+        u32 i, j, c;
+        for (i = 0; i < ARRAY_COUNT(names); i++)
+            for (j = 0; j < ARRAY_COUNT(ids); j++)
+            {
+                MP_AsciiToGame(ot, names[i][0], 7);
+                MP_AsciiToGame(nick, names[i][1], 10);
+                printf("[hue] nv %s|%s|%u = %u\n", names[i][0], names[i][1], ids[j], MP_Hue_Number(ot, nick, ids[j]));
+            }
+        for (i = 1; i < NUM_SPECIES; i++)
+            for (j = 0; j < 256; j += 15)
+            {
+                u8 mn, mx;
+                MP_Hue_Limits(i, &mn, &mx);
+                printf("[hue] deg %u %u %u %u = %d\n", (unsigned)i, (unsigned)j, mn, mx, MP_Hue_Degrees(i, j));
+            }
+        for (i = 0; i < ARRAY_COUNT(hues); i++)
+            for (c = 0; c < 0x8000; c += 97)
+            {
+                u16 pal[16] = {0};
+                pal[1] = c;
+                MP_Hue_ShiftPalette(pal, 0, hues[i]);
+                printf("[hue] col %d %u = %u\n", hues[i], (unsigned)c, pal[1]);
+            }
+        printf("[hue] done\n");
+    }
+    else if (strcmp(cmd, "nick") == 0)
+    {
+        // nick SLOT NAME - nickname a party Pokémon (SLOT from 1; NAME up to 10 letters, "-" = its species name)
+        char *sp = strchr(arg, ' ');
+        int slot = atoi(arg) - 1;
+        if (sp != NULL && slot >= 0 && slot < PARTY_SIZE)
+        {
+            u8 name[POKEMON_NAME_LENGTH + 2];
+            memset(name, EOS, sizeof(name));
+            if (strcmp(sp + 1, "-") == 0)
+                StringCopy(name, gSpeciesNames[GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES)]);
+            else
+                MP_AsciiToGame(name, sp + 1, POKEMON_NAME_LENGTH);
+            SetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, name);
+        }
+    }
+    else if (strcmp(cmd, "huemon") == 0)
+    {
+        // huemon SLOT - a party Pokémon's Stadium hue
+        int slot = atoi(arg) - 1;
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            struct Pokemon *mon = &gPlayerParty[slot];
+            u16 species = GetMonData(mon, MON_DATA_SPECIES);
+            u8 ot[PLAYER_NAME_LENGTH + 2], nick[POKEMON_NAME_LENGTH + 2], mn, mx;
+            char aot[32], anick[32];
+            void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
+            memset(ot, EOS, sizeof(ot));
+            memset(nick, EOS, sizeof(nick));
+            GetMonData(mon, MON_DATA_OT_NAME, ot);
+            GetMonData(mon, MON_DATA_NICKNAME, nick);
+            MP_GameToAscii(aot, ot, PLAYER_NAME_LENGTH);
+            MP_GameToAscii(anick, nick, POKEMON_NAME_LENGTH);
+            MP_Hue_Limits(species, &mn, &mx);
+            printf("[test] huemon %d species %d hue %d\n", slot + 1, species, MP_Hue_OfBoxMon(&mon->box));
+            if (StringCompare(nick, gSpeciesNames[species]) != 0)   // nicknamed: the page's answer to compare
+                printf("[hue] mon %s|%s|%u %u %u = %d\n", aot, anick, (unsigned)(GetMonData(mon, MON_DATA_OT_ID) & 0xFFFF), mn, mx,
+                       MP_Hue_OfBoxMon(&mon->box));
+        }
     }
     else if (strcmp(cmd, "sharedname") == 0)
     {

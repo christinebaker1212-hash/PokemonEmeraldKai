@@ -58,6 +58,7 @@ struct FollowerSlot
 {
     u16 dex;                  // 0 = none
     u8 female;
+    s16 hue;                  // its Stadium hue (mp_hue.c; 0 = its own colors)
     const struct MpFollowerGfx *gfx;
     u8 spriteId;              // SPRITE_NONE when not created
     struct Coords16 prev;     // tile the follower is leaving
@@ -161,6 +162,7 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     u16 tag = TAG_FOLLOWER + (s - sSlots);
     u32 frameBytes;
     struct SpritePalette pal;
+    u16 colors[16];
     u8 i, id;
 
     if (!s->gfx)
@@ -173,7 +175,9 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     }
     pal.data = (const u16 *)(sFollowerData + s->gfx->offset + 8 * frameBytes);
     pal.tag = tag;
-    if (MP_AllocCoopPalette(tag, pal.data) == 0xFF)
+    memcpy(colors, pal.data, sizeof(colors));
+    MP_Hue_ShiftPalette(colors, 0, s->hue);   // a nicknamed one in its Stadium hue (the whole picture: creature art)
+    if (MP_AllocCoopPalette(tag, colors) == 0xFF)
         return FALSE; // no palette slot free right now; try again later
     s->tmpl.tileTag = TAG_NONE;
     s->tmpl.paletteTag = tag;
@@ -193,12 +197,28 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     return TRUE;
 }
 
-static void SetSlotPokemon(struct FollowerSlot *s, u16 dex, bool8 female)
+static void SetSlotPokemon(struct FollowerSlot *s, u16 dex, bool8 female, s16 hue)
 {
     const struct MpFollowerGfx *gfx = dex ? FindGfx(dex, female) : NULL;
-    if (gfx == s->gfx && s->dex == dex)
+    if (gfx == s->gfx && s->dex == dex && s->hue == hue)
         return;
+    if (gfx)
+        MPNet_Log("follower: slot %d dex %d hue %d", (int)(s - sSlots), dex, hue);
+    if (gfx == s->gfx && s->dex == dex && SpriteIsOurs(s))
+    {
+        // only its colors changed (renamed): the same sprite with the new palette
+        u16 colors[16];
+        u32 frameBytes = (u32)s->gfx->size * s->gfx->size / 2;
+        u8 slot = IndexOfSpritePaletteTag(TAG_FOLLOWER + (s - sSlots));
+        s->hue = hue;
+        memcpy(colors, sFollowerData + s->gfx->offset + 8 * frameBytes, sizeof(colors));
+        MP_Hue_ShiftPalette(colors, 0, hue);
+        if (slot != 0xFF)
+            LoadPalette(colors, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
+        return;
+    }
     DestroySlotSprite(s);
+    s->hue = hue;
     s->dex = gfx ? dex : 0;
     s->female = female;
     s->gfx = gfx;
@@ -452,6 +472,17 @@ u16 MP_Follower_LocalDex(bool8 *female)
     return SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
 }
 
+// The follower's Stadium hue, for the network (mp_hue.c; 0 = its own colors)
+s16 MP_Follower_LocalHue(void)
+{
+    struct Pokemon *mon;
+    LoadLocalChoice();
+    mon = FindLocalFollower();
+    if (MP_Prank_MagikarpActive() || !mon)
+        return 0;
+    return MP_Hue_OfBoxMon(&mon->box);
+}
+
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon)
 {
     LoadLocalChoice();
@@ -678,7 +709,7 @@ void MP_Follower_Update(void)
         return;
 
     dex = MP_Follower_LocalDex(&female);
-    SetSlotPokemon(&sSlots[0], dex, female);
+    SetSlotPokemon(&sSlots[0], dex, female, dex ? MP_Follower_LocalHue() : 0);
     UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden());
     {
         u8 sound;
@@ -693,12 +724,13 @@ void MP_Follower_Update(void)
         u8 obj = OBJECT_EVENTS_COUNT;
         if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasState)
         {
-            SetSlotPokemon(s, gMpPlayers[i].state.followerDex, (gMpPlayers[i].state.followerFlags & 1) != 0);
+            SetSlotPokemon(s, gMpPlayers[i].state.followerDex, (gMpPlayers[i].state.followerFlags & 1) != 0,
+                           gMpPlayers[i].state.followerHue);
             obj = MP_GetRemoteObjectEventId(i);
         }
         else
         {
-            SetSlotPokemon(s, 0, FALSE);
+            SetSlotPokemon(s, 0, FALSE, 0);
             s->seqKnown = FALSE;
         }
         UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) : TRUE);

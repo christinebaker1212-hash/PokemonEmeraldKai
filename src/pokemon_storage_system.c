@@ -5329,6 +5329,15 @@ static struct Sprite *CreateMonIconSprite(u16 species, u32 personality, s16 x, s
 
     species = GetIconSpecies(species, personality);
     template.paletteTag = PALTAG_MON_ICON_0 + gMonIconPaletteIndices[species];
+    {
+        // Moemon Co-op: a nicknamed Pokémon's icon in its Stadium hue (mp_hue.c)
+        s16 hue = MP_Hue_FindByPersonality(personality);
+        if (hue != 0)
+        {
+            MP_Hue_FreeUnusedIconPalettes();
+            template.paletteTag = MP_Hue_IconPaletteTag(template.paletteTag, gMonIconPalettes[gMonIconPaletteIndices[species]], hue);
+        }
+    }
     tileNum = TryLoadMonIconTiles(species);
     if (tileNum == 0xFFFF)
         return NULL;

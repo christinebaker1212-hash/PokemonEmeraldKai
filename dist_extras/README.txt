@@ -605,6 +605,14 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon
   (traded ones too; the NAME RATER in SLATEPORT renames them as well).
+* POKeMON STADIUM COLORS: a Moemon with a nickname gets its own colors,
+  worked out the way POKeMON STADIUM does it: its nickname, its OT's name
+  and the Trainer ID pick a hue within what suits its species. The same
+  nickname always gives the same colors, and everyone else sees them too.
+  Faces, arms and legs keep their skin tones (with OPTIONS > CREATURES on
+  POKeMON the whole picture turns). Shows in battle, on the summary screen,
+  in the PC and party, on its icon and when it follows you. Without a
+  nickname (or with its species' name) it keeps its usual colors.
   The fifth page (POKé BALL) shows its ball: press A to move it to any kind
   of ball in your bag (uses one), or to recolor a basic POKé BALL (red,
   blue, green, yellow, pink, purple, orange, cyan, black, silver, gold, and

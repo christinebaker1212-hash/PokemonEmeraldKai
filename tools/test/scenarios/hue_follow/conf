@@ -1,0 +1,13 @@
+# Stadium hues online: ALICE's nicknamed CLEFAIRY follows her; BOB, next to her, sees it in the same colors (the
+# hue travels in her player state, protocol 37). check.py: BOB's follower slot has ALICE's hue.
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,12
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=35:15"
+ENV_B="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] huemon 1 species 35")
+EXPECT_B=("follower: slot 1 dex 35 hue")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")
+CHECK="python3 tools/test/scenarios/hue_follow/check.py"

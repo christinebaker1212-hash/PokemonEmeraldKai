@@ -550,6 +550,7 @@ static void PackState(const struct MpState *s, u8 *p)
     PutU16(p + 20, s->followerFx & 0xFFFF);
     p[22] = s->light;
     p[23] = s->followerFx >> 16;
+    PutU16(p + 24, (u16)s->followerHue);
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -562,6 +563,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
     s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
     s->light = p[22];
+    s->followerHue = (s16)GetU16(p + 24);
 }
 
 #define APPEARANCE_SIZE 32
@@ -789,6 +791,7 @@ static void CollectLocalState(struct MpState *s)
         u8 sound;
         s->followerDex = MP_Follower_LocalDex(&female);
         s->followerFx = MP_Follower_LocalFx(&sound);
+        s->followerHue = s->followerDex ? MP_Follower_LocalHue() : 0;
         s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0);
     }
     sLastLocalState = *s;
@@ -800,7 +803,7 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
         || a->facing != b->facing || a->elevation != b->elevation || a->avatarMode != b->avatarMode
         || a->speed != b->speed || a->flags != b->flags || a->topLevel != b->topLevel
         || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags
-        || a->followerFx != b->followerFx
+        || a->followerFx != b->followerFx || a->followerHue != b->followerHue
         || a->badges != b->badges;
 }
 

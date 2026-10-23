@@ -6688,15 +6688,7 @@ static void Task_PlayMapChosenOrBattleBGM(u8 taskId)
 
 #undef tSongId
 
-const u32 *GetMonFrontSpritePal(struct Pokemon *mon)
-{
-    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
-    u32 otId = GetMonData(mon, MON_DATA_OT_ID, 0);
-    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
-    return GetMonSpritePalFromSpeciesAndPersonality(species, otId, personality);
-}
-
-const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 personality)
+static const u32 *MonSpritePal(u16 species, u32 otId, u32 personality)
 {
     u32 shinyValue;
 
@@ -6710,15 +6702,7 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
         return gMonPaletteTable[species].data;
 }
 
-const struct CompressedSpritePalette *GetMonSpritePalStruct(struct Pokemon *mon)
-{
-    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
-    u32 otId = GetMonData(mon, MON_DATA_OT_ID, 0);
-    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
-    return GetMonSpritePalStructFromOtIdPersonality(species, otId, personality);
-}
-
-const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u16 species, u32 otId , u32 personality)
+static const struct CompressedSpritePalette *MonSpritePalStruct(u16 species, u32 otId, u32 personality)
 {
     u32 shinyValue;
 
@@ -6727,6 +6711,33 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
         return &gMonShinyPaletteTable[species];
     else
         return &gMonPaletteTable[species];
+}
+
+// Moemon Co-op: a nicknamed Pokémon's palette is turned to its Stadium hue (mp_hue.c)
+const u32 *GetMonFrontSpritePal(struct Pokemon *mon)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID, 0);
+    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
+    return MP_Hue_Lz(MonSpritePal(species, otId, personality), species, MP_Hue_OfBoxMon(&mon->box));
+}
+
+const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 personality)
+{
+    return MP_Hue_Lz(MonSpritePal(species, otId, personality), species, MP_Hue_Find(otId, personality));
+}
+
+const struct CompressedSpritePalette *GetMonSpritePalStruct(struct Pokemon *mon)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+    u32 otId = GetMonData(mon, MON_DATA_OT_ID, 0);
+    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, 0);
+    return MP_Hue_LzStruct(MonSpritePalStruct(species, otId, personality), species, MP_Hue_OfBoxMon(&mon->box));
+}
+
+const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u16 species, u32 otId , u32 personality)
+{
+    return MP_Hue_LzStruct(MonSpritePalStruct(species, otId, personality), species, MP_Hue_Find(otId, personality));
 }
 
 bool32 IsHMMove2(u16 move)

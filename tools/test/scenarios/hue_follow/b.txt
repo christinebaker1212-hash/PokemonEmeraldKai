@@ -1,0 +1,6 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 450
+rendershot b_follow
+wait 150
+quit

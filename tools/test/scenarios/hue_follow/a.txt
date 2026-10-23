@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 100
+mp nick 1 Mr. Fluff
+mp huemon 1
+mp follow 0
+wait 300
+rendershot a_follow
+wait 200
+quit

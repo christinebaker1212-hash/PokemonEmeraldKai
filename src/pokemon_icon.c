@@ -1,5 +1,6 @@
 #include "global.h"
 #include "graphics.h"
+#include "mp.h"
 #include "mail.h"
 #include "palette.h"
 #include "pokemon_icon.h"
@@ -1040,6 +1041,17 @@ u8 CreateMonIcon(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u
 
     if (species > NUM_SPECIES)
         iconTemplate.paletteTag = POKE_ICON_BASE_PAL_TAG;
+    else
+    {
+        // Moemon Co-op: a nicknamed Pokémon's icon in its Stadium hue (mp_hue.c)
+        s16 hue = MP_Hue_FindByPersonality(personality);
+        if (hue != 0)
+        {
+            MP_Hue_FreeUnusedIconPalettes();
+            iconTemplate.paletteTag = MP_Hue_IconPaletteTag(iconTemplate.paletteTag,
+                                                            gMonIconPaletteTable[gMonIconPaletteIndices[species]].data, hue);
+        }
+    }
 
     spriteId = CreateMonIconSprite(&iconTemplate, x, y, subpriority);
 

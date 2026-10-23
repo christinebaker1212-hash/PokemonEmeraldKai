@@ -1,0 +1,8 @@
+# Stadium hues on screen: CLEFAIRY and PIKACHU nicknamed (BULBASAUR not), seen as a follower, on the summary screen
+# (plain first, then nicknamed), in the PC (DEPOSIT: party icons), in battle, and with OPTIONS > CREATURES = POKeMON.
+# Screenshots for the eye; the log has each one's hue.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=35:10,25:10,1:10"
+EXPECT_A=("[test] huemon 3 species 1 hue 0")
+UNEXPECT_A=("[gfx] out of" "[crash]")
