@@ -1,6 +1,6 @@
 # Two players grab the same shared Moemon at the same moment (at lag, so neither sees the other's first): the server
 # gives it to whoever's HOLD came first; the other's game takes it out of their hand ("Someone else took that MOeMON
-# first."). Each then tries to put it down (ALICE at slot 5, BOB at 6): it ends up in exactly one place.
+# first."). Each then tries to put it down (ALICE at slot 5, BOB at 6: one row down, since RIGHT wraps within a row of 6): it ends up in exactly one place.
 MODE=2
 WARP=0,10,10,10
 WARP_B=0,10,12,10

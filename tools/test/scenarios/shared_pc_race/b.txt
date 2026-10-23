@@ -16,17 +16,7 @@ wait 30
 press A 2
 wait 300
 shot b_after_grab
-press RIGHT 2
-wait 15
-press RIGHT 2
-wait 15
-press RIGHT 2
-wait 15
-press RIGHT 2
-wait 15
-press RIGHT 2
-wait 15
-press RIGHT 2
+press DOWN 2
 wait 30
 press A 2
 wait 40
