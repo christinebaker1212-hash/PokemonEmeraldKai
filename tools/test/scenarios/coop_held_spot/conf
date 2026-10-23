@@ -1,0 +1,13 @@
+# ROUTE 116: JERRY spots ALICE at the far end of his sight; she waits for a partner (YES). BOB then steps into
+# JERRY's sight on his own game: JERRY (held there for ALICE) spots him, walks up as usual, and BOB goes straight into
+# ALICE's battle ("You team up with ALICE!", no question). JERRY counts as beaten on both games.
+MODE=2
+WARP=0,31,29,4
+WARP_B=0,31,26,7
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("co-op: waiting for a partner (trainer 273)" "joins the battle against trainer 273" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+EXPECT_B=("is waiting for a partner" "spotted by the trainer player 1 is waiting on" "joining player 1's battle" "in player 1's battle" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG" "battling alone" "Wait for another")

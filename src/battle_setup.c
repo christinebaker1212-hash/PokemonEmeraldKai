@@ -1410,6 +1410,19 @@ void BattleSetup_StartTrainerBattle(void)
     ScriptContext_Stop();
 }
 
+// Moemon Co-op: this game's trainer script went into a friend's battle against the same trainer(s) instead of its
+// own, and won: what BattleSetup_StartTrainerBattle and CB2_EndTrainerBattle would have done for its own battle (the
+// script then ends the way it would after its own battle: EventScript_MpCoopAfterTrainerBattle)
+void MP_EndJoinedTrainerBattle(void)
+{
+    sNoOfPossibleTrainerRetScripts = gNoOfApproachingTrainers;
+    gNoOfApproachingTrainers = 0;
+    sShouldCheckTrainerBScript = FALSE;
+    gWhichTrainerToFaceAfterBattle = 0;
+    RegisterTrainerInMatchCall();
+    SetBattledTrainersFlags();
+}
+
 static void CB2_EndTrainerBattle(void)
 {
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)

@@ -197,6 +197,28 @@ bool8 CheckForTrainersWantingBattle(void)
     gNoOfApproachingTrainers = 0;
     gApproachingTrainerId = 0;
 
+    // Moemon Co-op: a trainer a friend is waiting on (for a partner) may spot us: we join their battle against it
+    if (MP_Coop_CanJoinHeldTrainer())
+    {
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        {
+            if (!gObjectEvents[i].active)
+                continue;
+            if (gObjectEvents[i].trainerType != TRAINER_TYPE_NORMAL && gObjectEvents[i].trainerType != TRAINER_TYPE_BURIED)
+                continue;
+            if (!MP_Coop_IsNpcHeld(&gObjectEvents[i]))
+                continue;
+            if (CheckTrainer(i) == 0)
+                continue;
+            MP_Coop_NoteHeldSpotter();
+            gNoOfApproachingTrainers = 1;   // only this one comes over
+            ResetTrainerOpponentIds();
+            ConfigureAndSetUpOneTrainerBattle(gApproachingTrainers[0].objectEventId, gApproachingTrainers[0].trainerScriptPtr);
+            gTrainerApproachedPlayer = TRUE;
+            return TRUE;
+        }
+    }
+
     for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
     {
         u8 numTrainers;

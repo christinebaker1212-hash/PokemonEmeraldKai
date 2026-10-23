@@ -67,7 +67,8 @@ Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
 Also joining a battle in progress (mp_join.c: JOIN in front of a battling friend; mp_coop.c MP_Coop_JoinConvertMaster
 rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*).
-Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
+Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two trainers at once"; tests coop_two_*, coop_held_spot,
+coop_wait_merge). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
 tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens under yours, 1x-4x: mp_spectate.c streaming, display.c layout and window
 fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py).
 

@@ -553,3 +553,5 @@ gSpecials::
 	def_special MP_SetPlayerStandInGfx
 	def_special MP_World_CutTreeGone
 	def_special MP_World_RockGone
+	def_special MP_Coop_TryJoinHeldTrainer
+	def_special MP_Coop_TakeJoinedOther

@@ -107,7 +107,17 @@ TEAMING UP FOR A DOUBLE BATTLE
   to join you?" Say YES and a "Join me!" bubble appears over your head.
   Your friend walks up next to you, faces you, and they're in. Press B at
   any time to stop waiting and battle alone. While you wait, nobody else can
-  talk to that trainer or be spotted by them.
+  talk to that trainer.
+* If that trainer spots a friend while you wait (they step into its line of
+  sight), it walks up to them as usual and they go straight into your battle:
+  "You team up with <you>!", no question. If two of you are already waiting
+  on the same trainer, whoever started waiting first leads and the other
+  joins them on their own.
+* Two trainers spotting you at once (like a pair facing each other across a
+  path): you're asked about teaming up once, after the second one's speech.
+  With a friend it's the two of you against both trainers, each trainer with
+  their own Moemon on their side of the field; alone it's the usual battle
+  against both. (No Triple Battle against two trainers.)
 * When an NPC trainer challenges a friend (they get the "!" or talk to the
   trainer), walk up next to your friend and face them. You'll see
   "Asking <friend> to team up..." (press B to change your mind; turn away

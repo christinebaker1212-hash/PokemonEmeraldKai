@@ -981,6 +981,11 @@ u16 MP_Coop_VictorySong(void);
 void MP_Coop_MirrorExp(u8 battler, u8 monId, s16 gainedExp);
 void CB2_MpCoopEndBattle(void);
 void MP_Coop_JoinCheck(void);        // special, after the trainer's intro speech
+void MP_Coop_TryJoinHeldTrainer(void);   // special: a trainer a friend waits on walked up to us (VAR_RESULT)
+u8 MP_Coop_TakeJoinedOther(void);        // specialvar: we were in a friend's battle (1 won, 2 not, 0 no)
+bool8 MP_Coop_CanJoinHeldTrainer(void);  // trainer_see.c: a held trainer may spot us
+void MP_Coop_NoteHeldSpotter(void);      // trainer_see.c: it did (right after MP_Coop_IsNpcHeld)
+void MP_EndJoinedTrainerBattle(void);    // battle_setup.c: our trainer script's battle was a friend's, and won
 void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 
 // mp_notify.c

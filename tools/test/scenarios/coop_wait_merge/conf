@@ -1,0 +1,14 @@
+# ROUTE 116: JERRY spots ALICE and BOB at about the same time (each on their own game, before either waits), and both
+# say YES to waiting for a partner. They wait on the same trainer: whoever waited first leads and the other joins
+# them on their own (ALICE, the lower player number, decides). JERRY counts as beaten on both games.
+MODE=2
+WARP=0,31,29,4
+WARP_B=0,31,26,7
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("co-op: waiting for a partner (trainer 273)" "waits on our trainer too" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+EXPECT_B=("co-op: waiting for a partner (trainer 273)" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+UNEXPECT_A=("crash" "BAD EGG" "battling alone")
+UNEXPECT_B=("crash" "BAD EGG" "battling alone" "spotted by the trainer")
+CHECK="python3 tools/test/scenarios/coop_wait_merge/check.py"

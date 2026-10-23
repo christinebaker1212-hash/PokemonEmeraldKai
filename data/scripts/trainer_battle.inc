@@ -4,6 +4,13 @@ EventScript_StartTrainerApproach::
 EventScript_TrainerApproach::
 	special PlayTrainerEncounterMusic
 	special DoTrainerApproach
+	@ Moemon Co-op: a trainer a friend is waiting on (for a partner) spotted us: we join their battle
+	special MP_Coop_TryJoinHeldTrainer
+	goto_if_eq VAR_RESULT, FALSE, EventScript_ShowTrainerIntroMsg
+	waitstate
+	specialvar VAR_RESULT, MP_Coop_TakeJoinedOther
+	goto_if_eq VAR_RESULT, 1, EventScript_MpCoopAfterTrainerBattle
+	goto_if_eq VAR_RESULT, 2, EventScript_MpCoopJoinedFriend
 	goto EventScript_ShowTrainerIntroMsg
 
 EventScript_TryDoNormalTrainerBattle::
@@ -102,15 +109,26 @@ EventScript_ShowTrainerIntroMsg::
 	special ShowTrainerIntroSpeech
 	waitmessage
 	waitbuttonpress
-	@ Moemon Co-op: a player who walked up may ask to join for a Double Battle
+	@ Moemon Co-op: a player who walked up may ask to join for a Double Battle (or we join a friend waiting on the
+	@ same trainer: the battle was theirs, ours is over)
 	special MP_Coop_JoinCheck
 	waitstate
+	specialvar VAR_RESULT, MP_Coop_TakeJoinedOther
+	goto_if_eq VAR_RESULT, 1, EventScript_MpCoopAfterTrainerBattle
+	goto_if_eq VAR_RESULT, 2, EventScript_MpCoopJoinedFriend
 	special TryPrepareSecondApproachingTrainer
 	goto_if_eq VAR_RESULT, TRUE, EventScript_TrainerApproach
 	goto EventScript_DoTrainerBattle
 
+@ Moemon Co-op: we were in a friend's battle against this trainer and it didn't end in a win (called off)
+EventScript_MpCoopJoinedFriend::
+	releaseall
+	end
+
 EventScript_DoTrainerBattle::
 	dotrainerbattle
+@ Moemon Co-op: also after a friend's battle against this trainer, won (MP_EndJoinedTrainerBattle)
+EventScript_MpCoopAfterTrainerBattle::
 	/* Below battle mode check only needed in FRLG*/
 	specialvar VAR_RESULT, GetTrainerBattleMode
 	goto_if_eq VAR_RESULT, TRAINER_BATTLE_SINGLE, EventScript_EndTrainerBattle
