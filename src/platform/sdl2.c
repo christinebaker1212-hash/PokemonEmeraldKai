@@ -715,6 +715,7 @@ void VDraw(void)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)
         Display_UploadFrame(image);
     REG_VCOUNT = 161; // prep for being in VBlank period
@@ -883,6 +884,7 @@ static bool SpectateStep(void)
     if (!feed)
         return false;   // stopped watching: run the game this frame
     memcpy(sFrameImage, feed, sizeof(sFrameImage));
+    MP_Spectate_PanelSync();   // the SPECTATE panel keeps going under the battle we watch
     if (!sTestMode)
         Display_UploadFrame(sFrameImage);
     return true;

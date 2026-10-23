@@ -1,8 +1,8 @@
 #!/bin/bash
 # Runs the scenarios in tools/test/scenarios and checks their logs. usage: regress.sh [NAME...]
-#   Each scenario folder has a.txt (+ b.txt, c.txt for two / three clients) and conf (MODE=1|2|3,
-#   DELAY/JIT/FPS/TMO/WARP/WARP_B/WARP_C, EXPECT_A / EXPECT_B / EXPECT_C = text that must show up in a.log / b.log /
-#   c.log; UNEXPECT_A / _B / _C = text that must not; CHECK = a command run from the repo root with the result folder
+#   Each scenario folder has a.txt (+ b.txt, c.txt, d.txt for two to four clients) and conf (MODE=1|2|3|4,
+#   DELAY/JIT/FPS/TMO/WARP/WARP_B/WARP_C/WARP_D, EXPECT_A .. EXPECT_D = text that must show up in a.log .. d.log;
+#   UNEXPECT_A .. _D = text that must not; CHECK = a command run from the repo root with the result folder
 #   as its last argument, which must exit 0). Results go to $OUT/NAME (default /tmp/moemon_tests).
 #   Builds the game first unless NOBUILD=1. WORST=1 runs every two-client scenario at 250 ms + 80 ms jitter
 #   each way (NA <-> JP). JOBS=N runs N scenarios at once (default 1). Exit code = number of failed scenarios.
@@ -18,14 +18,15 @@ run_one() {
     local n=$1 src="$TOOLS/scenarios/$1" d="$OUT/$1" bad="" e l start=$SECONDS
     [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; return 1; }
     rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"
-    unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C EXPECT_A EXPECT_B EXPECT_C UNEXPECT_A UNEXPECT_B UNEXPECT_C ENV_A ENV_B ENV_C CHECK
+    unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C WARP_D EXPECT_A EXPECT_B EXPECT_C EXPECT_D UNEXPECT_A UNEXPECT_B UNEXPECT_C \
+          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK
     . "$src/conf"
     if [ -n "$WORST" ] && [ "$MODE" -ge 2 ] && [ -z "$DELAY" ]; then   # NA <-> JP for every multi-client scenario
         DELAY=250; JIT=80; FPS=60; TMO=$(( ${TMO:-150} * 2 ))
     fi
-    export WARP WARP_B WARP_C FPS TMO ENV_A ENV_B ENV_C
-    if [ "$MODE" = 3 ]; then
-        "$TOOLS/runN.sh" 3 "$d" "${DELAY:-0}" "${JIT:-0}" > "$d/run.txt" 2>&1
+    export WARP WARP_B WARP_C WARP_D FPS TMO ENV_A ENV_B ENV_C ENV_D
+    if [ "$MODE" -ge 3 ]; then
+        "$TOOLS/runN.sh" "$MODE" "$d" "${DELAY:-0}" "${JIT:-0}" > "$d/run.txt" 2>&1
     elif [ "$MODE" = 2 ]; then
         "$TOOLS/run2.sh" "$d" "${DELAY:-0}" "${JIT:-0}" > "$d/run.txt" 2>&1
     else
@@ -35,13 +36,15 @@ run_one() {
     for e in "${EXPECT_A[@]}"; do grep -qF -- "$e" "$d/a.log" || bad="$bad\n    a.log lacks: $e"; done
     for e in "${EXPECT_B[@]}"; do grep -qF -- "$e" "$d/b.log" || bad="$bad\n    b.log lacks: $e"; done
     for e in "${EXPECT_C[@]}"; do grep -qF -- "$e" "$d/c.log" || bad="$bad\n    c.log lacks: $e"; done
+    for e in "${EXPECT_D[@]}"; do grep -qF -- "$e" "$d/d.log" || bad="$bad\n    d.log lacks: $e"; done
     for e in "${UNEXPECT_A[@]}"; do grep -qF -- "$e" "$d/a.log" && bad="$bad\n    a.log has: $e"; done
     for e in "${UNEXPECT_B[@]}"; do grep -qF -- "$e" "$d/b.log" && bad="$bad\n    b.log has: $e"; done
     for e in "${UNEXPECT_C[@]}"; do grep -qF -- "$e" "$d/c.log" && bad="$bad\n    c.log has: $e"; done
+    for e in "${UNEXPECT_D[@]}"; do grep -qF -- "$e" "$d/d.log" && bad="$bad\n    d.log has: $e"; done
     if [ -n "$CHECK" ]; then
         (cd "$REPO" && $CHECK "$d") > "$d/check.txt" 2>&1 || bad="$bad\n    check failed: $(tail -1 "$d/check.txt")"
     fi
-    for l in "$d"/a.log "$d"/b.log "$d"/c.log; do
+    for l in "$d"/a.log "$d"/b.log "$d"/c.log "$d"/d.log; do
         [ -f "$l" ] && grep -q "TIMEOUT\|Segmentation\|Aborted\|CRASH" "$l" && bad="$bad\n    $(basename "$l"): $(grep -m1 "TIMEOUT\|Segmentation\|Aborted\|CRASH" "$l")"
     done
     if [ -z "$bad" ]; then echo "ok   $n ($((SECONDS-start)) s)"; else echo -e "FAIL $n ($((SECONDS-start)) s)$bad"; return 1; fi

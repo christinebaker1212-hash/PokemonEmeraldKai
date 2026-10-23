@@ -283,6 +283,7 @@ static void LoadConfig(void)
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.animSpeed = 30;
+    gMpConfig.spectateScale = 1;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -343,6 +344,12 @@ static void LoadConfig(void)
             gMpConfig.autosaveMinutes = m < 0 ? 0 : (m > 60 ? 60 : m);
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
+        else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
+        else if (strcmp(key, "spectate_size") == 0)
+        {
+            int v = atoi(val);
+            gMpConfig.spectateScale = v < 1 ? 1 : (v > 4 ? 4 : v);
+        }
         else if (strcmp(key, "battle_anim_speed") == 0)
         {
             int v = atoi(val);
@@ -418,12 +425,15 @@ void MP_SaveConfig(void)
         "trainer_padding = %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
+        "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
+        "spectate_panel = %d\nspectate_size = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed, gMpConfig.lobby);
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed,
+        gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)

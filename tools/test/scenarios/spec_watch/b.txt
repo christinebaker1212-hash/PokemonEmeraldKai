@@ -1,0 +1,20 @@
+pressuntil A field 5000
+waitfor online 6000
+mp panel 1 1
+wait 100
+press LEFT 2
+wait 600
+watchlog watching player 1
+press A 2
+wait 150
+press A 2
+wait 60
+press A 2
+waitlog 1200
+wait 400
+rendershot b_watch
+wait 600
+press B 2
+wait 300
+log BOB quits
+quit

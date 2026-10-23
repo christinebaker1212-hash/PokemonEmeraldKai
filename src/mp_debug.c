@@ -405,6 +405,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
                gSaveBlock2Ptr->lastBerryTreeUpdate.days, gSaveBlock2Ptr->lastBerryTreeUpdate.hours,
                gSaveBlock2Ptr->lastBerryTreeUpdate.minutes, VarGet(VAR_DAYS));
     }
+    else if (strcmp(cmd, "panel") == 0)
+    {
+        // panel ON SIZE: the SPECTATE panel (friends' screens under ours), SIZE 1-4
+        int on = 1, size = 1;
+        sscanf(arg, "%d %d", &on, &size);
+        gMpConfig.spectatePanel = on != 0;
+        gMpConfig.spectateScale = size < 1 ? 1 : (size > 4 ? 4 : size);
+        printf("[test] spectate panel %s, size %dx\n", on ? "on" : "off", gMpConfig.spectateScale);
+    }
     else if (strcmp(cmd, "gatchaday") == 0)
     {
         // gatchaday N - STANDARD shows day N's prizes (-1: today)

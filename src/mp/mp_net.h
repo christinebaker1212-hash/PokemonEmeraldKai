@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 32   // 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
+#define MP_PROTOCOL_VERSION 33   // 33: SPECTATE panel (screens any time, scroll shifts, palette tiles); 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
@@ -120,6 +120,7 @@ int MPNet_IsValidRoomName(const char *name);
 int MPServer_Start(int port, int lanDiscovery);
 void MPServer_Poll(void);
 void MPNet_ClientFlush(void);
+int MPNet_ClientQueued(void);   // bytes waiting to go out (the connection is slower than what we send)
 void MPServer_Stop(void);
 int MPServer_Port(void);
 int MPServer_IsRunning(void);

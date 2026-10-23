@@ -1,0 +1,42 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+display info
+mp panel 1 1
+waitlog 1500 spectate panel: player 3 frame
+wait 300
+display info
+rendershot d_s1
+mp panel 1 2
+wait 90
+display info
+rendershot d_s2
+mp panel 1 3
+wait 90
+display info
+rendershot d_s3
+mp panel 1 4
+wait 90
+display info
+rendershot d_s4
+display fullscreen 1
+wait 90
+display info
+rendershot d_fs4
+mp panel 1 2
+wait 90
+display info
+rendershot d_fs2
+display fullscreen 0
+wait 90
+display info
+mp panel 0 2
+wait 90
+display info
+mp panel 1 1
+wait 400
+display info
+rendershot d_back
+wait 900
+log DANA quits
+quit

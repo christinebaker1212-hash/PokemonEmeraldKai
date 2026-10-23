@@ -1,0 +1,22 @@
+# The SPECTATE panel with four players: everyone shows the other three. ALICE walks around (the picture scrolls), BOB
+# battles, CARL opens menus, DANA (a 1920x1080 monitor) goes through the sizes, fullscreen, off and on again.
+# check_spectrace.py proves every picture each viewer made is the one its sender sent, pixel for pixel.
+MODE=4
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+WARP_C=0,10,10,12
+WARP_D=0,10,12,12
+TMO=220
+ENV_A="MOEMON_SPECTRACE=1"
+ENV_B="MOEMON_SPECTRACE=1"
+ENV_C="MOEMON_SPECTRACE=1"
+ENV_D="MOEMON_SPECTRACE=1 MOEMON_TEST_MONITOR=1920x1080"
+CHECK="tools/test/check_spectrace.py 30"
+EXPECT_A=("spectate panel: player 2 frame (full)" "spectate panel: player 3 frame (full)" "spectate panel: player 4 frame (full)" "spectate panel: player 4 stopped showing our screen")
+EXPECT_B=("spectate panel: player 1 frame (full)" "spectate panel: player 3 frame (full)" "spectate panel: player 4 frame (full)")
+EXPECT_C=("spectate panel: player 1 frame (full)" "spectate panel: player 2 frame (full)" "spectate panel: player 4 frame (full)")
+EXPECT_D=("spectate panel: player 1 frame (full)" "spectate panel: player 2 frame (full)" "spectate panel: player 3 frame (full)" "rendershot" "panel 3 cards 2x")
+UNEXPECT_A=("asking again")
+UNEXPECT_B=("asking again")
+UNEXPECT_C=("asking again")
+UNEXPECT_D=("asking again" "FAILED")

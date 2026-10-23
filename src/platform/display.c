@@ -79,6 +79,16 @@ static int sFilterShown;
 static int sFsWasMaximized;
 static Uint32 sToggleTicks;
 
+// Moemon Co-op spectating panel (Display_SetPanel)
+#define PANEL_PAD 6       // around the cards, in game pixels (times the panel's scale)
+#define PANEL_GAP 6       // between cards
+static int sPanelCount, sPanelReqScale, sPanelScale = 1;
+static int sPanelOwnK;    // the game's whole-number scale the window keeps beside the panel
+static int sPanelSavedW, sPanelSavedH, sPanelHadWindow;   // the window before the panel resized it
+static SDL_Texture *sPanelFrameTex[DISPLAY_PANEL_MAX], *sPanelLabelTex[DISPLAY_PANEL_MAX];
+static int sPanelHasFrame[DISPLAY_PANEL_MAX];
+static unsigned sPanelAccent[DISPLAY_PANEL_MAX];
+
 static const char *const sScaleNames[DISPLAY_SCALE_COUNT] = {"pixel_perfect", "sharp_fit", "stretch"};
 static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid"};
 
@@ -222,6 +232,12 @@ static int WindowDisplayIndex(void)
 
 static void GetUsableBounds(int display, SDL_Rect *r)
 {
+    const char *test = getenv("MOEMON_TEST_MONITOR");   // tests: pretend the monitor is WxH
+    if (test && sscanf(test, "%dx%d", &r->w, &r->h) == 2)
+    {
+        r->x = r->y = 0;
+        return;
+    }
     if (SDL_GetDisplayUsableBounds(display, r) != 0 && SDL_GetDisplayBounds(display, r) != 0)
     {
         r->x = r->y = 0;
@@ -328,7 +344,9 @@ static void SnapshotWindowed(int force)
     sCfg.maximized = (f & SDL_WINDOW_MAXIMIZED) != 0;
     if (sCfg.maximized)
         return;
-    SDL_GetWindowSize(sWindow, &sCfg.winW, &sCfg.winH);
+    // With the spectating panel up the window is the panel's size: remember the game's own
+    if (sPanelCount == 0)
+        SDL_GetWindowSize(sWindow, &sCfg.winW, &sCfg.winH);
     SDL_GetWindowPosition(sWindow, &sCfg.winX, &sCfg.winY);
 }
 
@@ -351,6 +369,16 @@ static SDL_Texture *CreateTex(Uint32 format, int access, int w, int h, int linea
 
 static void DestroyTextures(void)
 {
+    int i;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+    {
+        if (sPanelFrameTex[i])
+            SDL_DestroyTexture(sPanelFrameTex[i]);
+        if (sPanelLabelTex[i])
+            SDL_DestroyTexture(sPanelLabelTex[i]);
+        sPanelFrameTex[i] = sPanelLabelTex[i] = NULL;
+        sPanelHasFrame[i] = 0;
+    }
     if (sGameTex)
         SDL_DestroyTexture(sGameTex);
     if (sScaleTex)
@@ -542,18 +570,275 @@ static void ComputeDstRect(int outW, int outH, SDL_Rect *dst)
     dst->y = (outH - dst->h) / 2;
 }
 
+// ---------------------------------------------------------------------------
+// Spectating panel
+// ---------------------------------------------------------------------------
+
+// The panel's size in screen pixels for n cards at scale s: each card is the screen and its label inside a
+// one-game-pixel outline
+static void PanelSize(int n, int s, int *w, int *h)
+{
+    *w = 2 * PANEL_PAD * s + n * (GBA_W * s + 2 * s) + (n - 1) * PANEL_GAP * s;
+    *h = 2 * PANEL_PAD * s + 2 * s + GBA_H * s + DISPLAY_PANEL_LABEL_H * s;
+}
+
+// The biggest scale up to the one asked whose panel fits an outW x outH output with room for the game at 1x
+static int PanelFitScale(int outW, int outH)
+{
+    int s, w, h;
+    for (s = sPanelReqScale; s > 1; s--)
+    {
+        PanelSize(sPanelCount, s, &w, &h);
+        if (w <= outW && outH - h >= GBA_H)
+            break;
+    }
+    return s < 1 ? 1 : s;
+}
+
+// The window's size for the panel at scale s with the game at whole scale k
+static void PanelWindowSize(int s, int k, int *w, int *h)
+{
+    int pw, ph;
+    PanelSize(sPanelCount, s, &pw, &ph);
+    *w = GBA_W * k > pw ? GBA_W * k : pw;
+    *h = GBA_H * k + ph;
+}
+
+// A window (not fullscreen or maximized) takes the size the panel needs: the game keeps its scale, or gets
+// smaller, then the panel does, until both fit the monitor
+static void FitWindowToPanel(void)
+{
+    int display, k, s, w = 0, h = 0, x, y, t, l, b, r, minW, minH;
+    SDL_Rect ub;
+    Uint32 f;
+    if (sWindow == NULL)
+        return;
+    sDirty = 1;
+    f = SDL_GetWindowFlags(sWindow);
+    if (sPanelCount > 0)
+    {
+        PanelWindowSize(1, 1, &minW, &minH);
+        SDL_SetWindowMinimumSize(sWindow, minW, minH);
+    }
+    else
+        SDL_SetWindowMinimumSize(sWindow, GBA_W, GBA_H);
+    if (f & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED))
+        return;
+    display = WindowDisplayIndex();
+    GetUsableBounds(display, &ub);
+    GetBorders(&t, &l, &b, &r);
+    if (sPanelCount == 0)
+    {
+        // Gone: the window as it was (unless it wasn't a plain window then)
+        if (!sPanelHadWindow)
+            return;
+        w = sPanelSavedW;
+        h = sPanelSavedH;
+    }
+    else
+    {
+        for (s = sPanelReqScale; s >= 1; s--)
+        {
+            for (k = sPanelOwnK; k >= 1; k--)
+            {
+                PanelWindowSize(s, k, &w, &h);
+                if (w <= ub.w - l - r && h <= ub.h - t - b)
+                    break;
+            }
+            if (k >= 1)
+                break;
+        }
+        if (s < 1)
+            PanelWindowSize(1, 1, &w, &h);
+    }
+    if (w < GBA_W || h < GBA_H)
+        return;
+    SDL_GetWindowPosition(sWindow, &x, &y);
+    {
+        int cw, ch;
+        SDL_GetWindowSize(sWindow, &cw, &ch);
+        x += (cw - w) / 2;   // grow / shrink around the top middle
+    }
+    ClampWindowPos(display, &x, &y, w, h);
+    SDL_SetWindowSize(sWindow, w, h);
+    SDL_SetWindowPosition(sWindow, x, y);
+}
+
+static SDL_Texture *PanelTex(SDL_Texture **tex, Uint32 format, int w, int h)
+{
+    if (*tex == NULL)
+    {
+        *tex = CreateTex(format, SDL_TEXTUREACCESS_STREAMING, w, h, 0);
+        if (*tex)
+            SDL_SetTextureBlendMode(*tex, format == SDL_PIXELFORMAT_ARGB8888 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+    }
+    return *tex;
+}
+
+void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards)
+{
+    int i, changed;
+    if (count < 0)
+        count = 0;
+    if (count > DISPLAY_PANEL_MAX)
+        count = DISPLAY_PANEL_MAX;
+    scale = Clamp(scale, 1, 4);
+    if (count > 0 && sPanelCount == 0 && sWindow)
+    {
+        // Coming up: remember the window as it was, and the game's whole scale in it
+        Uint32 f = SDL_GetWindowFlags(sWindow);
+        SDL_GetWindowSize(sWindow, &sPanelSavedW, &sPanelSavedH);
+        sPanelHadWindow = !(f & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED));
+        sPanelOwnK = Clamp(sPanelSavedW / GBA_W < sPanelSavedH / GBA_H ? sPanelSavedW / GBA_W : sPanelSavedH / GBA_H,
+                           1, DISPLAY_MAX_WINDOW_SCALE);
+    }
+    changed = (count != sPanelCount || (count > 0 && scale != sPanelReqScale));
+    sPanelReqScale = scale;
+    if (changed)
+    {
+        sPanelCount = count;
+        FitWindowToPanel();
+    }
+    if (sRenderer == NULL)
+        return;
+    for (i = 0; i < count; i++)
+    {
+        sPanelAccent[i] = cards[i].accent;
+        if (cards[i].frame && (cards[i].frameChanged || !sPanelHasFrame[i]))
+        {
+            if (PanelTex(&sPanelFrameTex[i], SDL_PIXELFORMAT_ABGR1555, GBA_W, GBA_H))
+            {
+                SDL_UpdateTexture(sPanelFrameTex[i], NULL, cards[i].frame, GBA_W * 2);
+                sPanelHasFrame[i] = 1;
+                sDirty = 1;
+            }
+        }
+        else if (!cards[i].frame && sPanelHasFrame[i])
+        {
+            sPanelHasFrame[i] = 0;
+            sDirty = 1;
+        }
+        if (cards[i].label && cards[i].labelChanged)
+        {
+            if (PanelTex(&sPanelLabelTex[i], SDL_PIXELFORMAT_ARGB8888, DISPLAY_PANEL_LABEL_W, DISPLAY_PANEL_LABEL_H))
+            {
+                SDL_UpdateTexture(sPanelLabelTex[i], NULL, cards[i].label, DISPLAY_PANEL_LABEL_W * 4);
+                sDirty = 1;
+            }
+        }
+    }
+    for (; i < DISPLAY_PANEL_MAX; i++)
+        sPanelHasFrame[i] = 0;
+}
+
+// The size the panel's cards really have (smaller than asked when that doesn't fit the window)
+int Display_GetPanelScale(void)
+{
+    int w = 0, h = 0;
+    if (sPanelCount == 0)
+        return 0;
+    if (sRenderer && SDL_GetRendererOutputSize(sRenderer, &w, &h) == 0 && w > 0 && h > 0)
+        return PanelFitScale(w, h);
+    return sPanelScale;
+}
+
+static void FillRect(int x, int y, int w, int h, int r, int g, int b, int a)
+{
+    SDL_Rect rc;
+    rc.x = x, rc.y = y, rc.w = w, rc.h = h;
+    SDL_SetRenderDrawColor(sRenderer, r, g, b, a);
+    SDL_RenderFillRect(sRenderer, &rc);
+}
+
+// The panel's background color at row y of h (a soft vertical gradient)
+static void PanelBg(int y, int h, int *r, int *g, int *b)
+{
+    *r = 25 - 11 * y / (h > 1 ? h : 1);
+    *g = 28 - 12 * y / (h > 1 ? h : 1);
+    *b = 37 - 15 * y / (h > 1 ? h : 1);
+}
+
+static void DrawPanel(int outW, int y0, int panelH, int s)
+{
+    int pw, ph, i, y, x, cardW = GBA_W * s + 2 * s, cardH = GBA_H * s + DISPLAY_PANEL_LABEL_H * s + 2 * s;
+    PanelSize(sPanelCount, s, &pw, &ph);
+    SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
+    for (y = 0; y < panelH; y++)
+    {
+        int r, g, b;
+        PanelBg(y, panelH, &r, &g, &b);
+        FillRect(0, y0 + y, outW, 1, r, g, b, 255);
+    }
+    // a hairline on top, lighter, then a dark one
+    FillRect(0, y0, outW, 1, 58, 64, 82, 255);
+    if (panelH > 4)
+        FillRect(0, y0 + 1, outW, 1, 10, 11, 15, 255);
+    x = (outW - pw) / 2 + PANEL_PAD * s;
+    y = y0 + (panelH - cardH) / 2;
+    for (i = 0; i < sPanelCount; i++, x += cardW + PANEL_GAP * s)
+    {
+        unsigned a = sPanelAccent[i];
+        int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF, c;
+        SDL_Rect dst;
+        // soft shadow
+        SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_BLEND);
+        FillRect(x + s, y + 2 * s, cardW, cardH, 0, 0, 0, 120);
+        SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
+        // outline in the player's color, its corners cut (rounded at this size)
+        FillRect(x + s, y, cardW - 2 * s, cardH, ar, ag, ab, 255);
+        FillRect(x, y + s, cardW, cardH - 2 * s, ar, ag, ab, 255);
+        // the screen
+        dst.x = x + s;
+        dst.y = y + s;
+        dst.w = GBA_W * s;
+        dst.h = GBA_H * s;
+        if (sPanelHasFrame[i] && sPanelFrameTex[i])
+            SDL_RenderCopy(sRenderer, sPanelFrameTex[i], NULL, &dst);
+        else
+            FillRect(dst.x, dst.y, dst.w, dst.h, 11, 13, 18, 255);
+        // the label strip: dark, the player's color faintly along its top
+        FillRect(x + s, y + s + GBA_H * s, GBA_W * s, DISPLAY_PANEL_LABEL_H * s, 24, 27, 36, 255);
+        c = s / 2 > 0 ? s / 2 : 1;
+        FillRect(x + s, y + s + GBA_H * s, GBA_W * s, c, ar / 2 + 12, ag / 2 + 13, ab / 2 + 18, 255);
+        if (sPanelLabelTex[i])
+        {
+            dst.y = y + s + GBA_H * s;
+            dst.h = DISPLAY_PANEL_LABEL_H * s;
+            SDL_RenderCopy(sRenderer, sPanelLabelTex[i], NULL, &dst);
+        }
+    }
+    SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
+}
+
+static SDL_Rect sLastGameRect;   // where the last frame drew the game (tests)
+static int sLastPanelH;
+
 static void RenderToBackbuffer(void)
 {
     int outW = 0, outH = 0, kx, ky, exact, filterOn;
     SDL_Rect dst;
+    int panelH = 0;
 
     sFilterShown = 0;
     SDL_SetRenderTarget(sRenderer, NULL);
-    SDL_SetRenderDrawColor(sRenderer, 0, 0, 0, 255);
+    if (sPanelCount > 0)
+        SDL_SetRenderDrawColor(sRenderer, 17, 19, 26, 255);   // beside the game: the panel's slate, darker
+    else
+        SDL_SetRenderDrawColor(sRenderer, 0, 0, 0, 255);
     SDL_RenderClear(sRenderer);
     if (sGameTex == NULL || SDL_GetRendererOutputSize(sRenderer, &outW, &outH) != 0 || outW <= 0 || outH <= 0)
         return;
 
+    // Moemon Co-op: the spectating panel takes the bottom; the game fits above it
+    if (sPanelCount > 0)
+    {
+        int pw;
+        sPanelScale = PanelFitScale(outW, outH);
+        PanelSize(sPanelCount, sPanelScale, &pw, &panelH);
+        if (panelH > outH - 1)
+            panelH = outH - 1;
+        outH -= panelH;
+    }
     ComputeDstRect(outW, outH, &dst);
     kx = CeilDiv(dst.w, GBA_W);
     ky = CeilDiv(dst.h, GBA_H);
@@ -599,6 +884,10 @@ static void RenderToBackbuffer(void)
         filterOn = 0;
     }
     sFilterShown = filterOn;
+    sLastGameRect = dst;
+    sLastPanelH = panelH;
+    if (panelH > 0)
+        DrawPanel(outW, outH, panelH, sPanelScale);   // last: drawing to a render target above may not keep it
 }
 
 static void ClearToBlack(void)
@@ -836,6 +1125,18 @@ void Display_TestCommand(const char *key, int value)
     else if (strcmp(key, "vsync") == 0)   Display_SetVSync(value);
     else if (strcmp(key, "save") == 0)    Display_SaveSettings();
     else if (strcmp(key, "toggle") == 0)  Display_ToggleFullscreen();
+    else if (strcmp(key, "info") == 0 && sWindow && sRenderer)
+    {
+        int ww, wh, ow = 0, oh = 0, pw = 0, ph = 0;
+        RenderToBackbuffer();   // the layout as it is now (headless runs only draw for screenshots)
+        SDL_GetWindowSize(sWindow, &ww, &wh);
+        SDL_GetRendererOutputSize(sRenderer, &ow, &oh);
+        if (sPanelCount > 0)
+            PanelSize(sPanelCount, sPanelScale, &pw, &ph);
+        printf("[display] info: window %dx%d output %dx%d game %d,%d %dx%d panel %d cards %dx (%dx%d, strip %d)\n",
+               ww, wh, ow, oh, sLastGameRect.x, sLastGameRect.y, sLastGameRect.w, sLastGameRect.h,
+               sPanelCount, sPanelCount ? sPanelScale : 0, pw, ph, sLastPanelH);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -882,6 +1183,17 @@ void Display_SetFullscreen(int on)
             SDL_SetWindowSize(sWindow, sCfg.winW, sCfg.winH);
             if (sCfg.winX != POS_UNSET && sCfg.winY != POS_UNSET)
                 SDL_SetWindowPosition(sWindow, sCfg.winX, sCfg.winY);
+            if (sPanelCount > 0)
+            {
+                // Moemon Co-op: the spectating panel is up: this window is the one to go back to when it goes, and it
+                // grows to fit the panel now
+                sPanelSavedW = sCfg.winW;
+                sPanelSavedH = sCfg.winH;
+                sPanelHadWindow = 1;
+                sPanelOwnK = Clamp(sCfg.winW / GBA_W < sCfg.winH / GBA_H ? sCfg.winW / GBA_W : sCfg.winH / GBA_H,
+                                   1, DISPLAY_MAX_WINDOW_SCALE);
+                FitWindowToPanel();
+            }
         }
     }
     sToggleTicks = SDL_GetTicks();
@@ -904,6 +1216,12 @@ int Display_GetWindowScale(void)
             // Reflect manual resizing: the biggest whole scale the window holds.
             int w, h, s;
             SDL_GetWindowSize(sWindow, &w, &h);
+            if (sPanelCount > 0)
+            {
+                int pw, ph;
+                PanelSize(sPanelCount, sPanelScale, &pw, &ph);
+                h -= ph;
+            }
             s = w / GBA_W;
             if (h / GBA_H < s)
                 s = h / GBA_H;
@@ -928,6 +1246,20 @@ void Display_SetWindowScale(int scale)
     sCfg.windowScale = scale;
     w = GBA_W * scale;
     h = GBA_H * scale;
+    if (sPanelCount > 0 && sWindow && !(SDL_GetWindowFlags(sWindow) & SDL_WINDOW_FULLSCREEN))
+    {
+        // The game at this scale with the panel under it (the window without it comes back when it goes)
+        sPanelOwnK = scale;
+        sPanelSavedW = w;
+        sPanelSavedH = h;
+        sPanelHadWindow = 1;
+        sCfg.winW = w;
+        sCfg.winH = h;
+        if (SDL_GetWindowFlags(sWindow) & SDL_WINDOW_MAXIMIZED)
+            SDL_RestoreWindow(sWindow);
+        FitWindowToPanel();
+        return;
+    }
     if (sWindow == NULL)
     {
         sCfg.winW = w;
@@ -1050,5 +1382,7 @@ int Display_IsFilterShown(void) { return sFilter != DISPLAY_FILTER_OFF; }
 int Display_GetVSync(void) { return sVSync; }
 void Display_SetVSync(int on) { sVSync = on ? 1 : 0; }
 void Display_SaveSettings(void) { }
+void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards) { (void)count; (void)scale; (void)cards; }
+int Display_GetPanelScale(void) { return 0; }
 
 #endif // PLATFORM_SDL2

@@ -190,6 +190,8 @@ struct MpConfig
     u8 autosaveMinutes;       // mp_autosave.c: quiet save on the map every N minutes (0 = off)
     u8 trainerPadding;        // host setting: co-op trainers get one extra Moemon (HOST A GAME > TEAM PADDING)
     u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
+    u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
+    u8 spectateScale;         // ... each 1-4 times 240x160
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
 };
 
@@ -818,6 +820,8 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Spectate_OnPlayerLeft(u8 id);
 void MP_Spectate_FrameUpdate(void);
 bool8 MP_Spectate_TryInteract(void);
+void MP_Spectate_OpenSettings(void);   // CO-OP > SPECTATE: the panel of friends' screens on / off, its size
+void MP_Spectate_PanelSync(void);      // sdl2.c VDraw: the panel's cards to the display
 
 // Follower Pokémon (mp_follower.c)
 struct Pokemon;

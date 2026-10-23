@@ -229,6 +229,11 @@ void MPNet_ClientSend(uint8_t type, const void *data, uint16_t len)
 
 static void Client_Fail(const char *why);
 
+int MPNet_ClientQueued(void)
+{
+    return sClient.sendLen;
+}
+
 // Sends what's queued now instead of at the next poll (end of a frame)
 void MPNet_ClientFlush(void)
 {

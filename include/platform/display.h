@@ -35,6 +35,22 @@ int Display_GetVSync(void);
 void Display_SetVSync(int on);
 void Display_SaveSettings(void);
 
+// Moemon Co-op spectating panel (src/mp/mp_spectate.c): up to DISPLAY_PANEL_MAX friends' screens in a row at
+// the bottom of the window, each `scale` (1-4) times 240x160 with a label under it. The game fits in the space
+// above; a window gets bigger (or the game smaller) so every screen stays in view.
+#define DISPLAY_PANEL_MAX 3
+#define DISPLAY_PANEL_LABEL_W 240
+#define DISPLAY_PANEL_LABEL_H 12
+struct DisplayPanelCard
+{
+    const void *frame;      // 240x160 ABGR1555, like the game's frame
+    const void *label;      // DISPLAY_PANEL_LABEL_W x DISPLAY_PANEL_LABEL_H ARGB8888
+    unsigned accent;        // 0xRRGGBB: the card's outline
+    int frameChanged, labelChanged;
+};
+void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards);   // count 0: no panel
+int Display_GetPanelScale(void);   // the scale it's shown at now (less than asked when the screen is too small)
+
 // In-game DISPLAY SETTINGS screen (src/display_menu.c).
 // Display_OpenSettingsMenu only creates the menu task; onClose (may be NULL)
 // runs after its windows are removed.

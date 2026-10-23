@@ -1,0 +1,13 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+wait 400
+mp wilddouble 0
+mp wild 288:3
+waitfor battle 2000
+wait 1200
+pressuntil A field 9000
+wait 1200
+log BOB quits
+quit
