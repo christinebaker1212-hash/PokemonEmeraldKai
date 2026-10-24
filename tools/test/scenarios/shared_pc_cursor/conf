@@ -1,0 +1,8 @@
+# The shared PC's hand cursor on the PARTY / MY PC / CLOSE buttons: drawn over them, never upside down there, and
+# still the right way up after MY PC switches to your own boxes and back, also holding a Moemon (shots c*.png;
+# mp pccursor logs vFlip).
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=200
+EXPECT_A=("vflip 0 priority 1 subpriority 6")

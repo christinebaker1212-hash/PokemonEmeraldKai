@@ -1479,6 +1479,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // pctag - the TAG button in the PC's boxes (the west button / F)
         gMpPcTagPressed = TRUE;
     }
+    else if (strcmp(cmd, "pccursor") == 0)
+    {
+        // pccursor - the box screen's hand cursor: area, position, upside down or not
+        void MP_PcStorage_LogCursor(void);
+        MP_PcStorage_LogCursor();
+    }
     else if (strcmp(cmd, "pctags") == 0)
     {
         // pctags - the PC's tags and the group being held

@@ -6044,7 +6044,11 @@ static void GetCursorCoordsByPos(u8 cursorArea, u8 cursorPosition, u16 *x, u16 *
         *y = sIsMonBeingMoved ? 8 : 14;
         *x = cursorPosition * 88 + 120;
         if (MP_PcStorage_IsShared())
-            *x = MpButtonCursorX(cursorPosition);   // PARTY / MY PC / CLOSE
+        {
+            // PARTY / MY PC / CLOSE: the hand points down onto the button, over it (never turned upside down)
+            *x = MpButtonCursorX(cursorPosition);
+            *y = sIsMonBeingMoved ? 2 : 6;
+        }
         break;
     case 4:
         *x = 160;
@@ -6115,7 +6119,7 @@ static bool8 UpdateCursorPos(void)
 
         // Cursor flips vertically when moving on/off the top buttons
         if (sStorage->cursorFlipTimer && --sStorage->cursorFlipTimer == 0)
-            sStorage->cursorSprite->vFlip = (sStorage->cursorSprite->vFlip == FALSE);
+            sStorage->cursorSprite->vFlip = (sStorage->cursorSprite->vFlip == FALSE) && !MP_PcStorage_IsShared();
     }
     else
     {
@@ -11164,6 +11168,18 @@ void MP_PcStorage_LogTags(void)
            sCursorPosition, StorageGetCurrentBox() + 1);
 }
 
+// Moemon Co-op (test harness): the hand cursor
+void MP_PcStorage_LogCursor(void)
+{
+    if (sStorage == NULL || sStorage->cursorSprite == NULL)
+    {
+        printf("[test] pccursor: no box screen\n");
+        return;
+    }
+    printf("[test] pccursor area %d pos %d vflip %d priority %d subpriority %d\n", sCursorArea, sCursorPosition,
+           sStorage->cursorSprite->vFlip, sStorage->cursorSprite->oam.priority, sStorage->cursorSprite->subpriority);
+}
+
 //------------------------------------------------------------------------------
 //  Moemon Co-op: the SHARED PC in this box screen (mp_sharedbox.c keeps the boxes in sync with the server).
 //
@@ -11556,7 +11572,7 @@ static void MpCreateButtons(void)
         }
         lit.data = litColors;
         sMpPc.btnPal[i][1] = LoadSpritePalette(&lit);
-        sMpPc.buttons[i] = CreateSprite(&t, xs[i] + 32, 16, 3);
+        sMpPc.buttons[i] = CreateSprite(&t, xs[i] + 32, 16, 20);   // behind the hand cursor (6)
     }
     sMpPc.buttonsMade = TRUE;
 }
@@ -11568,6 +11584,10 @@ static void MpUpdateButtons(void)
                   || gTasks[sStorage->taskId].func == Task_HidePartyPokemon;
     if (!sMpPc.buttonsMade)
         MpCreateButtons();
+    // The shared PC's hand is never upside down (the stock screen flips it for its buttons, and a flip under way
+    // when MY PC rebuilt the screen left it upside down)
+    if (sStorage->cursorSprite != NULL)
+        sStorage->cursorSprite->vFlip = FALSE;
     sMpPc.flashTimer++;
     for (i = 0; i < 3; i++)
     {

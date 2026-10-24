@@ -1,0 +1,73 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp sharedin 1 0 1 5
+wait 60
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 600
+wait 60
+shot c0_box
+press A 2
+wait 30
+press A 2
+wait 60
+press UP 2
+wait 30
+press UP 2
+wait 40
+shot c0_held
+mp pccursor
+press DOWN 2
+wait 30
+press DOWN 2
+wait 40
+press A 2
+wait 30
+press A 2
+wait 60
+waitfor sharedsteady 600
+wait 60
+shot c0_placed
+press UP 2
+wait 30
+press UP 2
+wait 40
+shot c1_party
+press RIGHT 2
+wait 40
+shot c2_mypc
+press A 2
+wait 30
+waitfor sharedsteady 600
+wait 60
+shot c3_after_mypc
+press DOWN 2
+wait 40
+shot c4_down
+press DOWN 2
+wait 40
+shot c5_box
+press UP 2
+wait 30
+press UP 2
+wait 30
+press RIGHT 2
+wait 30
+press A 2
+wait 30
+waitfor sharedsteady 600
+wait 60
+press DOWN 2
+wait 40
+press DOWN 2
+wait 40
+shot c6_shared_again
+mp pccursor
+press B 2
+wait 30
+press B 2
+wait 200
+quit
