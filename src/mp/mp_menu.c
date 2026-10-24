@@ -34,7 +34,9 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
 enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_SPECTATE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
-enum { ROW_SPRITE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
+// LOOK rows. BIKE only shows for a character who rides a Pokemon or a vehicle on a bike: the page's
+// cursor counts the rows shown (LookRowAt / LookCursorOf)
+enum { ROW_GROUP, ROW_SPRITE, ROW_BIKE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
 // LOOK > CREATE: a trainer from the parts kit (CUSTOM 1-3)
 // Every row works the same way (like LOOK): Left/Right changes it, L/R jumps; each part's color is its own row
 enum { CR_SLOT, CR_BODY, CR_SKIN, CR_HAIR, CR_HAIRC, CR_FHAIR, CR_TOP, CR_TOPC, CR_BOTTOM, CR_BOTC,
@@ -83,6 +85,37 @@ static void PrintAscii(u8 windowId, const char *ascii, u8 x, u8 y)
     u8 buf[64];
     MP_AsciiToGame(buf, ascii, 60);
     MText(windowId, FONT_SMALL, buf, x, y);
+}
+
+static bool8 LookRowShown(u8 row)
+{
+    return row != ROW_BIKE || MP_Avatar_HasRide(&gMpConfig.app);
+}
+
+static u8 LookRowCount(void)
+{
+    u8 row, n = 0;
+    for (row = 0; row < LOOK_COUNT; row++)
+        n += LookRowShown(row);
+    return n;
+}
+
+// The LOOK row at a cursor position, and the cursor position of a row (the next one shown)
+static u8 LookRowAt(u8 cursor)
+{
+    u8 row;
+    for (row = 0; row < LOOK_COUNT; row++)
+        if (LookRowShown(row) && cursor-- == 0)
+            return row;
+    return ROW_REVERT;
+}
+
+static u8 LookCursorOf(u8 row)
+{
+    u8 r, n = 0;
+    for (r = 0; r < row && r < LOOK_COUNT; r++)
+        n += LookRowShown(r);
+    return n;
 }
 
 static u16 NumChoices(u8 row)
@@ -190,7 +223,7 @@ static u8 RowCount(u8 page)
 {
     switch (page)
     {
-    case MP_MENU_PAGE_LOOK:   return LOOK_COUNT;
+    case MP_MENU_PAGE_LOOK:   return LookRowCount();
     case MP_MENU_PAGE_CREATE: return CREATE_COUNT;
     case MP_MENU_PAGE_FRIENDS:
     {
@@ -298,8 +331,8 @@ static bool8 LookIsCreated(void)
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", "", "SPECTATE"};
-    const char *const lookLabels[] = {"SPRITE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...", "EDIT SPRITES...",
-                                             sIntroDone ? "ALL DONE!" : "SAVE LOOK", "REVERT"};
+    const char *const lookLabels[] = {"GROUP", "SPRITE", "BIKE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...",
+                                      "EDIT SPRITES...", sIntroDone ? "ALL DONE!" : "SAVE LOOK", "REVERT"};
     char line[64];
     u8 row;
 
@@ -377,25 +410,31 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         {
             Create_PrintRow(windowId, row, y);
         }
-        else if (row == ROW_CREATE || row == ROW_EDIT || row == ROW_SAVE || row == ROW_REVERT)
+        else if (LookRowAt(row) == ROW_CREATE || LookRowAt(row) == ROW_EDIT || LookRowAt(row) == ROW_SAVE || LookRowAt(row) == ROW_REVERT)
         {
-            PrintAscii(windowId, lookLabels[row], 8, y);
+            PrintAscii(windowId, lookLabels[LookRowAt(row)], 8, y);
         }
         else
         {
-            switch (row)
+            u8 look = LookRowAt(row);
+            switch (look)
             {
+            case ROW_GROUP:  snprintf(line, sizeof(line), "%s", MP_Avatar_GroupName(MP_Avatar_ChoiceGroup(MP_Avatar_GetChoice(&gMpConfig.app)))); break;
             case ROW_SPRITE: snprintf(line, sizeof(line), "%s", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app))); break;
+            case ROW_BIKE:   snprintf(line, sizeof(line), "%s", gMpConfig.app.bike ? "BIKE" : "RIDE"); break;
             case ROW_FRONT:  snprintf(line, sizeof(line), "%s", MP_Avatar_FrontSelName(gMpConfig.app.frontSel)); break;
             case ROW_BACKPIC: snprintf(line, sizeof(line), "%s", MP_Avatar_BackSelName(gMpConfig.app.backSel)); break;
-            case ROW_SKIN:   snprintf(line, sizeof(line), "%s", MP_Avatar_SkinName(*RowValue(row))); break;
-            case ROW_HAIR:   snprintf(line, sizeof(line), "%s", MP_Avatar_HairName(*RowValue(row))); break;
-            default:         snprintf(line, sizeof(line), "%s", MP_Avatar_ColorName(*RowValue(row))); break;
+            case ROW_SKIN:   snprintf(line, sizeof(line), "%s", MP_Avatar_SkinName(*RowValue(look))); break;
+            case ROW_HAIR:   snprintf(line, sizeof(line), "%s", MP_Avatar_HairName(*RowValue(look))); break;
+            default:         snprintf(line, sizeof(line), "%s", MP_Avatar_ColorName(*RowValue(look))); break;
             }
             // A CUSTOM look's colors come from its parts
-            if (row >= ROW_SKIN && row <= ROW_ACCENT && LookIsCreated())
+            if (look >= ROW_SKIN && look <= ROW_ACCENT && LookIsCreated())
                 snprintf(line, sizeof(line), "CREATE");
-            PrintChoice(windowId, lookLabels[row], line, y, 38);
+            if (look == ROW_GROUP)
+                PrintChoice(windowId, "", line, y, 14);   // the group's name across the row: < NAMED NPC >
+            else
+                PrintChoice(windowId, lookLabels[look], line, y, 38);
         }
     }
     sTxtFg = MPT_TEXT;
@@ -428,7 +467,16 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
         char ascii[160];
         u8 buf[170];
         MpTheme_Panel(windowId, 0);
-        if (cursor == ROW_SPRITE && gMpConfig.app.base == MP_BASE_CREATED && !gMpConfig.app.recipe.made)
+        cursor = LookRowAt(cursor);
+        if (cursor == ROW_GROUP)
+            snprintf(ascii, sizeof(ascii), "%s: %s", MP_Avatar_GroupName(MP_Avatar_ChoiceGroup(MP_Avatar_GetChoice(&gMpConfig.app))),
+                MP_Avatar_ChoiceGroup(MP_Avatar_GetChoice(&gMpConfig.app)) == MP_LOOK_NAMED ? "people with a name   {LEFTRIGHT} group"
+                : MP_Avatar_ChoiceGroup(MP_Avatar_GetChoice(&gMpConfig.app)) == MP_LOOK_GENERIC ? "classes and townsfolk   {LEFTRIGHT} group"
+                : "CREATE and sprite sheets   {LEFTRIGHT} group");
+        else if (cursor == ROW_BIKE)
+            snprintf(ascii, sizeof(ascii), "%s   {LEFTRIGHT} change",
+                gMpConfig.app.bike ? "BIKE: on a bike, a bicycle" : "RIDE: on a bike, their ride as drawn");
+        else if (cursor == ROW_SPRITE && gMpConfig.app.base == MP_BASE_CREATED && !gMpConfig.app.recipe.made)
             snprintf(ascii, sizeof(ascii), "%s: not made yet (looks like DEFAULT)", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
         else if (cursor == ROW_SPRITE)
             snprintf(ascii, sizeof(ascii), "%s   {START} match pics   {SELECT} undo", MP_Avatar_ChoiceName(MP_Avatar_GetChoice(&gMpConfig.app)));
@@ -648,7 +696,7 @@ static void GoToPage(s16 *data, u8 page, u8 cursor)
     {
         if (from != MP_MENU_PAGE_CREATE)
             Look_Snapshot();
-        Preview_Show(cursor == ROW_BACKPIC);
+        Preview_Show(LookRowAt(cursor) == ROW_BACKPIC);
     }
     else if (page == MP_MENU_PAGE_CREATE)
         Preview_Show(sCreateShowBack);
@@ -673,8 +721,9 @@ static bool8 Look_Undo(u8 row)
 {
     struct MpAppearance *app = &gMpConfig.app, before = *app;
     bool8 all = (row == ROW_REVERT);
-    if (all || row == ROW_SPRITE)
+    if (all || row == ROW_SPRITE || row == ROW_GROUP)
         MP_Avatar_RestoreSprite(&sLookBefore, sLookBeforePack);
+    if (all || row == ROW_BIKE)    app->bike = sLookBefore.bike;
     if (all || row == ROW_FRONT)   app->frontSel = sLookBefore.frontSel;
     if (all || row == ROW_BACKPIC) app->backSel = sLookBefore.backSel;
     if (all || row == ROW_SKIN)    app->skin = sLookBefore.skin;
@@ -684,25 +733,28 @@ static bool8 Look_Undo(u8 row)
     return memcmp(&before, app, sizeof(before)) != 0;
 }
 
+static u16 sGroupLast[MP_LOOK_GROUP_COUNT];   // LOOK > GROUP: the sprite last worn in each group
+
 static void HandleLookInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
     bool8 changed = FALSE;
+    u8 row = LookRowAt(tCursor);
 
-    if ((tCursor == ROW_CREATE && JOY_NEW(A_BUTTON))
-     || (tCursor >= ROW_SKIN && tCursor <= ROW_ACCENT && LookIsCreated() && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT)))
+    if ((row == ROW_CREATE && JOY_NEW(A_BUTTON))
+     || (row >= ROW_SKIN && row <= ROW_ACCENT && LookIsCreated() && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT)))
     {
         PlaySE(SE_SELECT);
         Create_Open();
         GoToPage(data, MP_MENU_PAGE_CREATE, CR_SLOT);
         return;
     }
-    if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON) && sIntroDone)
+    if (row == ROW_EDIT && JOY_NEW(A_BUTTON) && sIntroDone)
     {
         PlaySE(SE_FAILURE);   // no editor during the new game's intro
         return;
     }
-    if (tCursor == ROW_EDIT && JOY_NEW(A_BUTTON))
+    if (row == ROW_EDIT && JOY_NEW(A_BUTTON))
     {
         // Save the current character as an editable sheet, then open the
         // editor and the sprites folder
@@ -722,20 +774,42 @@ static void HandleLookInput(u8 taskId)
         MP_ShowNotice(msg);
         return;
     }
-    else if (tCursor == ROW_SPRITE && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
+    else if (row == ROW_SPRITE && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
     {
-        // Many sprites: Left/Right steps (hold to scroll), L/R jumps by 10
-        u16 n = NumChoices(ROW_SPRITE);
+        // Many sprites: Left/Right steps through the group (hold to scroll), L/R jumps by 10
         u16 c = MP_Avatar_GetChoice(&gMpConfig.app);
+        u8 g = MP_Avatar_ChoiceGroup(c);
+        u16 first = MP_Avatar_GroupFirst(g), n = MP_Avatar_GroupSize(g);
         u16 step = JOY_REPEAT(L_BUTTON | R_BUTTON) ? 10 : 1;
-        if (JOY_REPEAT(DPAD_RIGHT | R_BUTTON))
-            c = (c + step) % n;
-        else
-            c = (c + n - (step % n)) % n;
-        MP_Avatar_SetChoice(&gMpConfig.app, c);
+        if (n > 0)
+        {
+            c -= first;
+            if (JOY_REPEAT(DPAD_RIGHT | R_BUTTON))
+                c = (c + step) % n;
+            else
+                c = (c + n - (step % n)) % n;
+            MP_Avatar_SetChoice(&gMpConfig.app, first + c);
+            sGroupLast[g] = first + c;
+            changed = TRUE;
+        }
+    }
+    else if (row == ROW_GROUP && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    {
+        // NAMED NPC / GENERICS / CUSTOM: the sprite last worn in that group (its first one at first)
+        u8 g = MP_Avatar_ChoiceGroup(MP_Avatar_GetChoice(&gMpConfig.app));
+        sGroupLast[g] = MP_Avatar_GetChoice(&gMpConfig.app);
+        g = JOY_REPEAT(DPAD_RIGHT) ? (g + 1) % MP_LOOK_GROUP_COUNT : (g + MP_LOOK_GROUP_COUNT - 1) % MP_LOOK_GROUP_COUNT;
+        if (MP_Avatar_ChoiceGroup(sGroupLast[g]) != g)
+            sGroupLast[g] = MP_Avatar_GroupFirst(g);
+        MP_Avatar_SetChoice(&gMpConfig.app, sGroupLast[g]);
         changed = TRUE;
     }
-    else if (tCursor == ROW_FRONT && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
+    else if (row == ROW_BIKE && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    {
+        gMpConfig.app.bike = !gMpConfig.app.bike;
+        changed = TRUE;
+    }
+    else if (row == ROW_FRONT && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | L_BUTTON | R_BUTTON))
     {
         // Hundreds of pictures: Left/Right steps, L/R jumps by 10
         u16 n = NumChoices(ROW_FRONT);
@@ -748,17 +822,17 @@ static void HandleLookInput(u8 taskId)
         gMpConfig.app.frontSel = c;
         changed = TRUE;
     }
-    else if ((tCursor == ROW_BACKPIC || (tCursor >= ROW_SKIN && tCursor <= ROW_ACCENT)) && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
+    else if ((row == ROW_BACKPIC || (row >= ROW_SKIN && row <= ROW_ACCENT)) && JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT))
     {
-        u8 *v = RowValue(tCursor);
-        u8 n = NumChoices(tCursor);
+        u8 *v = RowValue(row);
+        u8 n = NumChoices(row);
         *v = JOY_REPEAT(DPAD_RIGHT) ? (*v + 1) % n : (*v + n - 1) % n;
         changed = TRUE;
     }
-    else if ((JOY_NEW(SELECT_BUTTON) && tCursor <= ROW_ACCENT) || (JOY_NEW(A_BUTTON) && tCursor == ROW_REVERT))
+    else if ((JOY_NEW(SELECT_BUTTON) && row <= ROW_ACCENT) || (JOY_NEW(A_BUTTON) && row == ROW_REVERT))
     {
         // Undo this row (SELECT) or everything (REVERT)
-        if (Look_Undo(tCursor))
+        if (Look_Undo(row))
             changed = TRUE;
         else
             PlaySE(SE_FAILURE);
@@ -768,13 +842,13 @@ static void HandleLookInput(u8 taskId)
         // ID PIC / BK PIC back to the ones that go with the sprite (NONE if it has none).
         // On those rows just that one, anywhere else both.
         struct MpAppearance before = gMpConfig.app;
-        MP_Avatar_MatchPictures(&gMpConfig.app, tCursor != ROW_BACKPIC, tCursor != ROW_FRONT);
+        MP_Avatar_MatchPictures(&gMpConfig.app, row != ROW_BACKPIC, row != ROW_FRONT);
         if (memcmp(&before, &gMpConfig.app, sizeof(before)) != 0)
             changed = TRUE;
         else
             PlaySE(SE_FAILURE);
     }
-    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == ROW_SAVE))
+    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && row == ROW_SAVE))
     {
         PlaySE(SE_SAVE);
         MP_SaveConfig();
@@ -793,11 +867,14 @@ static void HandleLookInput(u8 taskId)
     if (changed)
     {
         PlaySE(SE_SELECT);
+        if (!LookRowShown(row))
+            row = ROW_SPRITE;   // BIKE went away (REVERT)
+        tCursor = LookCursorOf(row);
         MP_Avatar_ApplyLocal();
         MP_SendAppearance();
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
-        Preview_Draw(tCursor == ROW_BACKPIC);
+        Preview_Draw(row == ROW_BACKPIC);
     }
 }
 
@@ -901,7 +978,7 @@ static void HandleCreateInput(u8 taskId)
         gMpConfig.app = sCreateBefore;
         MP_Avatar_ApplyLocal();
         MP_SendAppearance();
-        GoToPage(data, MP_MENU_PAGE_LOOK, ROW_CREATE);
+        GoToPage(data, MP_MENU_PAGE_LOOK, LookCursorOf(ROW_CREATE));
         return;
     }
     if (JOY_NEW(A_BUTTON) && tCursor == CR_SAVE)
@@ -911,7 +988,7 @@ static void HandleCreateInput(u8 taskId)
         gMpConfig.custom[sCreateSlot] = sCreateWork;
         Create_Wear();
         MP_SaveConfig();
-        GoToPage(data, MP_MENU_PAGE_LOOK, ROW_SPRITE);
+        GoToPage(data, MP_MENU_PAGE_LOOK, LookCursorOf(ROW_SPRITE));
         return;
     }
     if (JOY_NEW(START_BUTTON))
@@ -1052,7 +1129,7 @@ static void HandleMainInput(u8 taskId)
         MP_Tourney_OpenMenu();
         break;
     case MAIN_LOOK:
-        GoToPage(data, MP_MENU_PAGE_LOOK, ROW_SPRITE);
+        GoToPage(data, MP_MENU_PAGE_LOOK, LookCursorOf(ROW_SPRITE));
         break;
     case MAIN_SPECTATE:
         CloseMenu(taskId);
@@ -1095,7 +1172,7 @@ static void Task_CoopMenu(u8 taskId)
         if (tPage == MP_MENU_PAGE_LOOK)
         {
             Look_Snapshot();
-            Preview_Show(tCursor == ROW_BACKPIC);
+            Preview_Show(LookRowAt(tCursor) == ROW_BACKPIC);
         }
         tState++;
         break;
@@ -1116,7 +1193,7 @@ static void Task_CoopMenu(u8 taskId)
             if (tPage == MP_MENU_PAGE_FRIENDS || tPage == MP_MENU_PAGE_LOOK || tPage == MP_MENU_PAGE_CREATE)
                 DrawBottom(tPlayers, tPage, tCursor);
             if (tPage == MP_MENU_PAGE_LOOK)
-                Preview_Draw(tCursor == ROW_BACKPIC);
+                Preview_Draw(LookRowAt(tCursor) == ROW_BACKPIC);
         }
         else if (tPage == MP_MENU_PAGE_CREATE)
             HandleCreateInput(taskId);
@@ -1173,6 +1250,8 @@ void MP_OpenMenuPage(u8 page)
     gTasks[taskId].tPage = page;
     if (page == MP_MENU_PAGE_MAIN)
         gTasks[taskId].tCursor = MP_Lobby_InRoom() ? MAIN_EMOTES : MAIN_ONLINE;
+    else if (page == MP_MENU_PAGE_LOOK)
+        gTasks[taskId].tCursor = LookCursorOf(ROW_SPRITE);
 }
 
 // Back from the BERRY GAMES page

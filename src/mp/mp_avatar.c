@@ -230,12 +230,87 @@ static const u16 sExtFrontPals[] = INCBIN_U16("graphics/moemon/ext/front_pals.bi
 static const u8 sExtBackTiles[] = INCBIN_U8("graphics/moemon/ext/back_tiles.bin");
 static const u16 sExtBackPals[] = INCBIN_U16("graphics/moemon/ext/back_pals.bin");
 
-#define EMERALD_FRONT_COUNT TRAINER_PIC_MP_LOCAL          // Emerald's own trainer pics come first
-#define FRONT_CHOICES (EMERALD_FRONT_COUNT + MP_EXT_FRONT_COUNT)
-#define EMERALD_BACK_COUNT TRAINER_BACK_PIC_MP_LOCAL
-#define BACK_CHOICES (EMERALD_BACK_COUNT + MP_EXT_BACK_COUNT)
+// ---------------------------------------------------------------------------
+// Player characters from Moemon's other branch (tools/moemon_chars/import.py): their own walking and
+// running frames, Mach / Acro Bike frames (a bicycle, or a ridden Pokemon or vehicle) and diving frames.
+// Surfing, field moves, fishing, watering and decorating are built (mp_hybrid.c).
 
-#define CATALOG_COUNT (ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT)
+#define MP_CHAR_FRONT_EMERALD(n) (n)
+#define MP_CHAR_FRONT_NEW(n) (0x1000 + (n))
+#define MP_CHAR_BACK_EMERALD(n) (n)
+#define MP_CHAR_BACK_NEW(n) (0x100 + (n))
+#define MP_CHARF_MACH_RIDE 1   // the Mach Bike sheet shows a ridden Pokemon or a vehicle (LOOK > BIKE)
+#define MP_CHARF_ACRO_RIDE 2
+#define MP_CHARF_GENERIC   4   // a class or a group's member: LOOK > GENERICS
+
+struct MpCharDef
+{
+    const char *name;
+    const char *cfg;      // ini name
+    u8 gender;
+    u16 front, back;      // MP_CHAR_FRONT_* / MP_CHAR_BACK_*
+    u8 flags;
+    u32 offset;           // in sCharOwTiles
+    u8 bikeSize;          // the bikes' frames: 32x32, or 64x64 (PROF. BIRCH and the ZIGZAGOON chasing him)
+};
+
+#include "mp_chars_gfx.h"
+
+static const u8 sCharOwTiles[] = INCBIN_U8("graphics/moemon/chars/ow_tiles.bin");
+static const u16 sCharOwPals[] = INCBIN_U16("graphics/moemon/chars/ow_pals.bin");   // field, dive
+static const u8 sCharFrontTiles[] = INCBIN_U8("graphics/moemon/chars/front_tiles.bin");
+static const u16 sCharFrontPals[] = INCBIN_U16("graphics/moemon/chars/front_pals.bin");
+static const u8 sCharBackTiles[] = INCBIN_U8("graphics/moemon/chars/back_tiles.bin");
+static const u16 sCharBackPals[] = INCBIN_U16("graphics/moemon/chars/back_pals.bin");
+
+#define EMERALD_FRONT_COUNT TRAINER_PIC_MP_LOCAL          // Emerald's own trainer pics come first
+#define CHAR_FRONT_FIRST (EMERALD_FRONT_COUNT + MP_EXT_FRONT_COUNT)
+#define FRONT_CHOICES (CHAR_FRONT_FIRST + MP_CHAR_FRONT_COUNT)
+#define EMERALD_BACK_COUNT TRAINER_BACK_PIC_MP_LOCAL
+#define CHAR_BACK_FIRST (EMERALD_BACK_COUNT + MP_EXT_BACK_COUNT)
+#define BACK_CHOICES (CHAR_BACK_FIRST + MP_CHAR_BACK_COUNT)
+
+// A character's frames: 9 walking + 9 running (16x32), 9 Mach Bike + 27 Acro Bike (bikeSize square), 9 diving (32x32)
+#define CHAR_WALK 0
+#define CHAR_RUN 9
+#define CHAR_MACH 18
+#define CHAR_ACRO 27
+#define CHAR_DIVE 54
+
+static const u8 *CharFrame(const struct MpCharDef *c, u8 n)
+{
+    u32 bike = c->bikeSize * c->bikeSize / 2, off = c->offset;
+    if (n < CHAR_MACH)
+        return sCharOwTiles + off + n * 256;
+    off += CHAR_MACH * 256;
+    if (n < CHAR_DIVE)
+        return sCharOwTiles + off + (n - CHAR_MACH) * bike;
+    return sCharOwTiles + off + (CHAR_DIVE - CHAR_MACH) * bike + (n - CHAR_DIVE) * 512;
+}
+
+static int CharIndex(u16 gfxId)
+{
+    return (gfxId >= MP_GFX_CHAR_FIRST && gfxId - MP_GFX_CHAR_FIRST < MP_CHAR_COUNT) ? gfxId - MP_GFX_CHAR_FIRST : -1;
+}
+
+// The character a look wears (MP_BASE_NPC with a character's sprite), or NULL
+static const struct MpCharDef *CharOf(const struct MpAppearance *app)
+{
+    int i = app->base == MP_BASE_NPC ? CharIndex(app->gfxId) : -1;
+    return i >= 0 ? &sMpChars[i] : NULL;
+}
+
+static u16 CharFrontChoice(u16 v)
+{
+    return v >= MP_CHAR_FRONT_NEW(0) ? CHAR_FRONT_FIRST + v - MP_CHAR_FRONT_NEW(0) : v;
+}
+
+static u16 CharBackChoice(u16 v)
+{
+    return v >= MP_CHAR_BACK_NEW(0) ? CHAR_BACK_FIRST + v - MP_CHAR_BACK_NEW(0) : v;
+}
+
+#define CATALOG_COUNT (ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT + MP_CHAR_COUNT)
 // Selections: 0 = MATCH, 1..CHOICES = a picture, then DEFAULT (Brendan/May by
 // the save's gender) for ID PIC and NONE (hidden in battles) for BK PIC
 #define FRONT_DEFAULT (FRONT_CHOICES + 1)
@@ -244,6 +319,9 @@ static const u16 sExtBackPals[] = INCBIN_U16("graphics/moemon/ext/back_pals.bin"
 static struct MpSpriteEntry sExtCatalog[MP_EXT_OW_COUNT];
 static struct ObjectEventGraphicsInfo sExtInfo[MP_EXT_OW_COUNT];
 static struct SpriteFrameImage sExtFrames[MP_EXT_OW_COUNT][9];
+static struct MpSpriteEntry sCharCatalog[MP_CHAR_COUNT];
+static struct ObjectEventGraphicsInfo sCharInfo[MP_CHAR_COUNT];   // walking (the catalog's NPC info)
+static struct SpriteFrameImage sCharFrames[MP_CHAR_COUNT][9];
 static bool8 sExtReady;
 
 static void InitExtCatalog(void)
@@ -282,6 +360,25 @@ static void InitExtCatalog(void)
         sExtInfo[i].tracks = TRACKS_FOOT;
         sExtInfo[i].anims = gObjectEventGraphicsInfo_Boy1.anims;
     }
+    for (i = 0; i < MP_CHAR_COUNT; i++)
+    {
+        const struct MpCharDef *c = &sMpChars[i];
+        sCharCatalog[i].gfxId = MP_GFX_CHAR_FIRST + i;
+        sCharCatalog[i].name = c->name;
+        sCharCatalog[i].frontPic = CharFrontChoice(c->front);
+        sCharCatalog[i].backPic = CharBackChoice(c->back);
+        sCharCatalog[i].gender = c->gender;
+        sCharInfo[i] = gObjectEventGraphicsInfo_Boy1;
+        for (f = 0; f < 9; f++)
+        {
+            sCharFrames[i][f].data = CharFrame(c, CHAR_WALK + f);
+            sCharFrames[i][f].size = 256;
+        }
+        sCharInfo[i].images = sCharFrames[i];
+        sCharInfo[i].size = 256;
+        sCharInfo[i].inanimate = FALSE;
+        sCharInfo[i].tracks = TRACKS_FOOT;
+    }
     sExtReady = TRUE;
 }
 
@@ -290,12 +387,19 @@ static const struct MpSpriteEntry *CatalogAt(u16 i)
     InitExtCatalog();
     if (i < ARRAY_COUNT(sSpriteCatalog))
         return &sSpriteCatalog[i];
-    return &sExtCatalog[i - ARRAY_COUNT(sSpriteCatalog)];
+    if (i < ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT)
+        return &sExtCatalog[i - ARRAY_COUNT(sSpriteCatalog)];
+    return &sCharCatalog[i - ARRAY_COUNT(sSpriteCatalog) - MP_EXT_OW_COUNT];
 }
 
 const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId)
 {
     u16 i;
+    if (gfxId >= MP_GFX_CHAR_FIRST)
+    {
+        InitExtCatalog();
+        return CharIndex(gfxId) >= 0 ? &sCharCatalog[CharIndex(gfxId)] : NULL;
+    }
     if (gfxId >= MP_GFX_EXT_FIRST)
         return gfxId - MP_GFX_EXT_FIRST < MP_EXT_OW_COUNT ? CatalogAt(ARRAY_COUNT(sSpriteCatalog) + gfxId - MP_GFX_EXT_FIRST) : NULL;
     for (i = 0; i < ARRAY_COUNT(sSpriteCatalog); i++)
@@ -308,6 +412,8 @@ const struct ObjectEventGraphicsInfo *MP_Avatar_NpcInfo(u16 gfxId)
 {
     if (MP_Avatar_FindCatalog(gfxId) == NULL)
         return NULL;
+    if (CharIndex(gfxId) >= 0)
+        return &sCharInfo[CharIndex(gfxId)];
     if (gfxId >= MP_GFX_EXT_FIRST)
         return &sExtInfo[gfxId - MP_GFX_EXT_FIRST];
     return gObjectEventGraphicsInfoPointers[gfxId];
@@ -318,6 +424,8 @@ const u16 *MP_Avatar_NpcPalette(u16 gfxId)
     const struct ObjectEventGraphicsInfo *info = MP_Avatar_NpcInfo(gfxId);
     if (!info)
         return NULL;
+    if (CharIndex(gfxId) >= 0)
+        return sCharOwPals + CharIndex(gfxId) * 32;   // the field palette
     if (gfxId >= MP_GFX_EXT_FIRST)
         return sExtOwPals + (gfxId - MP_GFX_EXT_FIRST) * 16;
     return MP_GetObjectEventPaletteData(info->paletteTag);
@@ -326,6 +434,18 @@ const u16 *MP_Avatar_NpcPalette(u16 gfxId)
 static const struct ObjectEventGraphicsInfo *NpcInfo(u16 gfxId)
 {
     return MP_Avatar_NpcInfo(gfxId);
+}
+
+// A character's frame for the sprite editor (frame numbers: CHAR_WALK...), its size (16 = 16x32) and its
+// palette as drawn (the diving one for diving frames). NULL when gfxId isn't a character.
+const u8 *MP_Avatar_CharFrame(u16 gfxId, u8 frame, u8 *size, const u16 **pal)
+{
+    int i = CharIndex(gfxId);
+    if (i < 0 || frame >= CHAR_DIVE + 9)
+        return NULL;
+    *size = frame < CHAR_MACH ? 16 : frame < CHAR_DIVE ? sMpChars[i].bikeSize : 32;
+    *pal = sCharOwPals + i * 32 + (frame >= CHAR_DIVE ? 16 : 0);
+    return CharFrame(&sMpChars[i], frame);
 }
 
 // ---------------------------------------------------------------------------
@@ -342,6 +462,7 @@ static u32 sLocalVersion;      // bumped when the local look changes
 static bool8 sAvatarInit;
 
 static void RebuildLocal(void);
+static bool8 sChoicesBuilt;   // the LOOK > SPRITE list (BuildChoices): rebuilt when the packs change
 
 static bool8 HasPngExtension(const char *name)
 {
@@ -394,6 +515,7 @@ void MP_Avatar_RefreshPackList(void)
             sPackFileCount++;
         }
     }
+    sChoicesBuilt = FALSE;
 }
 
 static void UnloadLocalPack(void)
@@ -462,13 +584,144 @@ static const struct MpPack *RemotePack(u8 id, struct MpPack *buf)
 }
 
 // ---------------------------------------------------------------------------
-// Sprite choices (CO-OP menu > SPRITE): bases, CUSTOM 1-3 (LOOK > CREATE),
-// catalog sprites, then packs
+// Sprite choices (CO-OP menu > LOOK > SPRITE), in three groups (LOOK > GROUP):
+//   NAMED NPC  DEFAULT, BRENDAN, MAY, the characters with a name (in the sprite pack's order), then the
+//              game's own named people (Norman, Anabel, Bill...) and the Ruby/Sapphire pair
+//   GENERICS   classes and townsfolk: the characters that are a class (grunts...), then the game's own
+//   CUSTOM     CUSTOM 1-3 (LOOK > CREATE), then the sprite packs in the sprites folder
+// Looks the characters replaced (the old STEVEN, RED, PROF. OAK...) aren't offered; saves that wear
+// them get the character (sMpCharAliases).
 
 #define NUM_BASE_CHOICES MP_BASE_CUSTOM   // DEFAULT, BRENDAN, MAY, RS BRENDAN, RS MAY
-#define FIRST_CUSTOM NUM_BASE_CHOICES
-#define FIRST_CATALOG (FIRST_CUSTOM + MP_CREATED_SLOTS)
-#define FIRST_PACK (FIRST_CATALOG + CATALOG_COUNT)
+
+enum { CH_BASE, CH_CREATED, CH_NPC, CH_PACK };
+
+struct MpChoice
+{
+    u8 kind;
+    u16 value;   // base, CUSTOM slot (1-3), graphics id or pack index
+};
+
+#define MAX_CHOICES (NUM_BASE_CHOICES + MP_CREATED_SLOTS + CATALOG_COUNT + MAX_PACK_FILES)
+static struct MpChoice sChoices[MAX_CHOICES];
+static u16 sGroupStart[MP_LOOK_GROUP_COUNT + 1];
+
+// The game's own sprites of people with a name (the rest are classes and townsfolk)
+static const char *const sNamedCatalog[] = {
+    "norman", "juan", "anabel", "tucker", "spenser", "greta", "noland", "brandon", "scott", "mom", "teala",
+    "frlg_celio", "frlg_bill", "frlg_daisy", "frlg_lorelei", "frlg_mr._fuji",
+};
+
+static void ToConfigName(char *dst, const char *src, int len);
+
+// The ini name of a catalog sprite (frlg_ for FireRed/LeafGreen ones, kai_ for the characters)
+static void CatalogConfigName(const struct MpSpriteEntry *e, char *out, int len)
+{
+    char buf[40];
+    int c = CharIndex(e->gfxId);
+    if (c >= 0)
+    {
+        snprintf(out, len, "%s", sMpChars[c].cfg);
+        return;
+    }
+    ToConfigName(buf, e->name, sizeof(buf));
+    snprintf(out, len, "%s%s", e->gfxId >= MP_GFX_EXT_FIRST ? "frlg_" : "", buf);
+}
+
+static bool8 IsReplacedCatalog(const char *cfg)
+{
+    u16 i;
+    for (i = 0; i < ARRAY_COUNT(sMpCharAliases); i++)
+        if (strcmp(sMpCharAliases[i][0], cfg) == 0)
+            return TRUE;
+    return FALSE;
+}
+
+static bool8 IsNamedCatalog(const char *cfg)
+{
+    u16 i;
+    for (i = 0; i < ARRAY_COUNT(sNamedCatalog); i++)
+        if (strcmp(sNamedCatalog[i], cfg) == 0)
+            return TRUE;
+    return FALSE;
+}
+
+static void AddChoice(u16 *n, u8 kind, u16 value)
+{
+    if (*n < MAX_CHOICES)
+    {
+        sChoices[*n].kind = kind;
+        sChoices[*n].value = value;
+        (*n)++;
+    }
+}
+
+static void BuildChoices(void)
+{
+    u16 n = 0, i;
+    char cfg[48];
+    // NAMED NPC
+    sGroupStart[MP_LOOK_NAMED] = n;
+    AddChoice(&n, CH_BASE, MP_BASE_DEFAULT);
+    AddChoice(&n, CH_BASE, MP_BASE_BRENDAN);
+    AddChoice(&n, CH_BASE, MP_BASE_MAY);
+    for (i = 0; i < MP_CHAR_COUNT; i++)
+        if (!(sMpChars[i].flags & MP_CHARF_GENERIC))
+            AddChoice(&n, CH_NPC, MP_GFX_CHAR_FIRST + i);
+    for (i = 0; i < ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT; i++)
+    {
+        CatalogConfigName(CatalogAt(i), cfg, sizeof(cfg));
+        if (IsNamedCatalog(cfg) && !IsReplacedCatalog(cfg))
+            AddChoice(&n, CH_NPC, CatalogAt(i)->gfxId);
+    }
+    AddChoice(&n, CH_BASE, MP_BASE_RS_BRENDAN);
+    AddChoice(&n, CH_BASE, MP_BASE_RS_MAY);
+    // GENERICS
+    sGroupStart[MP_LOOK_GENERIC] = n;
+    for (i = 0; i < MP_CHAR_COUNT; i++)
+        if (sMpChars[i].flags & MP_CHARF_GENERIC)
+            AddChoice(&n, CH_NPC, MP_GFX_CHAR_FIRST + i);
+    for (i = 0; i < ARRAY_COUNT(sSpriteCatalog) + MP_EXT_OW_COUNT; i++)
+    {
+        CatalogConfigName(CatalogAt(i), cfg, sizeof(cfg));
+        if (!IsNamedCatalog(cfg) && !IsReplacedCatalog(cfg))
+            AddChoice(&n, CH_NPC, CatalogAt(i)->gfxId);
+    }
+    // CUSTOM
+    sGroupStart[MP_LOOK_CUSTOM] = n;
+    for (i = 1; i <= MP_CREATED_SLOTS; i++)
+        AddChoice(&n, CH_CREATED, i);
+    for (i = 0; i < sPackFileCount; i++)
+        AddChoice(&n, CH_PACK, i);
+    sGroupStart[MP_LOOK_GROUP_COUNT] = n;
+    sChoicesBuilt = TRUE;
+}
+
+static void EnsureChoices(void)
+{
+    if (!sChoicesBuilt)
+        BuildChoices();
+}
+
+static u16 PackChoice(u16 pack)
+{
+    u16 i;
+    EnsureChoices();
+    for (i = sGroupStart[MP_LOOK_CUSTOM]; i < sGroupStart[MP_LOOK_GROUP_COUNT]; i++)
+        if (sChoices[i].kind == CH_PACK && sChoices[i].value == pack)
+            return i;
+    return 0;
+}
+
+static u16 FindChoice(u8 kind, u16 value)
+{
+    u16 i;
+    EnsureChoices();
+    for (i = 0; i < sGroupStart[MP_LOOK_GROUP_COUNT]; i++)
+        if (sChoices[i].kind == kind && sChoices[i].value == value)
+            return i;
+    return 0;
+}
 
 // A CUSTOM slot that was never made looks like DEFAULT
 static bool8 IsCreated(const struct MpAppearance *app)
@@ -478,7 +731,37 @@ static bool8 IsCreated(const struct MpAppearance *app)
 
 u16 MP_Avatar_ChoiceCount(void)
 {
-    return FIRST_PACK + sPackFileCount;
+    EnsureChoices();
+    return sGroupStart[MP_LOOK_GROUP_COUNT];
+}
+
+u8 MP_Avatar_ChoiceGroup(u16 choice)
+{
+    u8 g;
+    EnsureChoices();
+    for (g = MP_LOOK_GROUP_COUNT - 1; g > 0; g--)
+        if (choice >= sGroupStart[g])
+            break;
+    return g;
+}
+
+// First choice of a group and how many it has
+u16 MP_Avatar_GroupFirst(u8 group)
+{
+    EnsureChoices();
+    return group < MP_LOOK_GROUP_COUNT ? sGroupStart[group] : 0;
+}
+
+u16 MP_Avatar_GroupSize(u8 group)
+{
+    EnsureChoices();
+    return group < MP_LOOK_GROUP_COUNT ? sGroupStart[group + 1] - sGroupStart[group] : 0;
+}
+
+const char *MP_Avatar_GroupName(u8 group)
+{
+    static const char *const sNames[MP_LOOK_GROUP_COUNT] = {"NAMED NPC", "GENERICS", "CUSTOM"};
+    return group < MP_LOOK_GROUP_COUNT ? sNames[group] : "?";
 }
 
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
@@ -488,58 +771,60 @@ u16 MP_Avatar_GetChoice(const struct MpAppearance *app)
     {
         for (i = 0; i < sPackFileCount; i++)
             if (strcmp(sPackFiles[i], gMpConfig.customSprite) == 0)
-                return FIRST_PACK + i;
+                return PackChoice(i);
     }
     if (app->base == MP_BASE_CREATED)
-        return (app->created >= 1 && app->created <= MP_CREATED_SLOTS) ? FIRST_CUSTOM + app->created - 1 : 0;
+        return (app->created >= 1 && app->created <= MP_CREATED_SLOTS) ? FindChoice(CH_CREATED, app->created) : 0;
     if (app->base == MP_BASE_NPC)
-    {
-        for (i = 0; i < CATALOG_COUNT; i++)
-            if (CatalogAt(i)->gfxId == app->gfxId)
-                return FIRST_CATALOG + i;
-        return 0;
-    }
-    return app->base < NUM_BASE_CHOICES ? app->base : 0;
+        return FindChoice(CH_NPC, app->gfxId);
+    return app->base < NUM_BASE_CHOICES ? FindChoice(CH_BASE, app->base) : 0;
 }
 
 void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice)
 {
-    if (choice < NUM_BASE_CHOICES)
+    const struct MpChoice *c;
+    EnsureChoices();
+    if (choice >= sGroupStart[MP_LOOK_GROUP_COUNT])
+        choice = 0;
+    c = &sChoices[choice];
+    switch (c->kind)
     {
-        app->base = (u8)choice;
+    case CH_BASE:
+        app->base = (u8)c->value;
         app->gfxId = 0;
         app->hasCustom = FALSE;
-    }
-    else if (choice < FIRST_CATALOG)
-    {
+        break;
+    case CH_CREATED:
         // CUSTOM 1-3: the trainer made in LOOK > CREATE (DEFAULT until it's made)
         app->base = MP_BASE_CREATED;
-        app->created = choice - FIRST_CUSTOM + 1;
+        app->created = c->value;
         app->recipe = gMpConfig.custom[app->created - 1];
         app->gfxId = 0;
         app->hasCustom = FALSE;
-    }
-    else if (choice < FIRST_PACK)
-    {
+        break;
+    case CH_NPC:
         app->base = MP_BASE_NPC;
-        app->gfxId = CatalogAt(choice - FIRST_CATALOG)->gfxId;
+        app->gfxId = c->value;
         app->hasCustom = FALSE;
-    }
-    else if (choice - FIRST_PACK < sPackFileCount)
-    {
-        const char *path = sPackFiles[choice - FIRST_PACK];
-        char err[160];
-        if (LoadLocalPack(path, err, sizeof(err)))
+        break;
+    case CH_PACK:
+        if (c->value < sPackFileCount)
         {
-            snprintf(gMpConfig.customSprite, sizeof(gMpConfig.customSprite), "%s", path);
-            app->base = sLocalPack.base == MP_BASE_CUSTOM ? MP_BASE_DEFAULT : sLocalPack.base;
-            app->gfxId = sLocalPack.gfxId;
-            app->hasCustom = TRUE;
+            const char *path = sPackFiles[c->value];
+            char err[160];
+            if (LoadLocalPack(path, err, sizeof(err)))
+            {
+                snprintf(gMpConfig.customSprite, sizeof(gMpConfig.customSprite), "%s", path);
+                app->base = sLocalPack.base == MP_BASE_CUSTOM ? MP_BASE_DEFAULT : sLocalPack.base;
+                app->gfxId = sLocalPack.gfxId;
+                app->hasCustom = TRUE;
+            }
+            else
+            {
+                printf("[mp] sprite pack not loaded: %s\n", err);
+            }
         }
-        else
-        {
-            printf("[mp] sprite pack not loaded: %s\n", err);
-        }
+        break;
     }
     if (!app->hasCustom)
         gMpConfig.customSprite[0] = 0;
@@ -556,7 +841,7 @@ void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *saved
         for (i = 0; i < sPackFileCount; i++)
             if (strcmp(sPackFiles[i], savedPack) == 0)
             {
-                MP_Avatar_SetChoice(&gMpConfig.app, FIRST_PACK + i);
+                MP_Avatar_SetChoice(&gMpConfig.app, PackChoice(i));
                 return;
             }
     }
@@ -567,15 +852,19 @@ void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *saved
 const char *MP_Avatar_ChoiceName(u16 choice)
 {
     static const char *const sCustomNames[MP_CREATED_SLOTS] = {"CUSTOM 1", "CUSTOM 2", "CUSTOM 3"};
-    if (choice < NUM_BASE_CHOICES)
-        return sBaseNames[choice];
-    if (choice < FIRST_CATALOG)
-        return sCustomNames[choice - FIRST_CUSTOM];
-    if (choice < FIRST_PACK)
-        return CatalogAt(choice - FIRST_CATALOG)->name;
-    if (choice - FIRST_PACK < sPackFileCount)
-        return sPackNames[choice - FIRST_PACK];
-    return "?";
+    const struct MpChoice *c;
+    const struct MpSpriteEntry *e;
+    EnsureChoices();
+    if (choice >= sGroupStart[MP_LOOK_GROUP_COUNT])
+        return "?";
+    c = &sChoices[choice];
+    switch (c->kind)
+    {
+    case CH_BASE:    return sBaseNames[c->value];
+    case CH_CREATED: return sCustomNames[c->value - 1];
+    case CH_NPC:     return (e = MP_Avatar_FindCatalog(c->value)) != NULL ? e->name : "?";
+    default:         return c->value < sPackFileCount ? sPackNames[c->value] : "?";
+    }
 }
 
 static void ToConfigName(char *dst, const char *src, int len)
@@ -597,11 +886,7 @@ void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int l
         return;
     }
     if (app->base == MP_BASE_NPC && MP_Avatar_FindCatalog(app->gfxId))
-    {
-        char buf[40];
-        ToConfigName(buf, MP_Avatar_FindCatalog(app->gfxId)->name, sizeof(buf));
-        snprintf(out, len, "%s%s", app->gfxId >= MP_GFX_EXT_FIRST ? "frlg_" : "", buf);
-    }
+        CatalogConfigName(MP_Avatar_FindCatalog(app->gfxId), out, len);
     else
         ToConfigName(out, MP_Avatar_BaseName(app->base >= MP_BASE_CUSTOM ? MP_BASE_DEFAULT : app->base), len);
 }
@@ -628,16 +913,16 @@ int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app)
             return TRUE;
         }
     }
+    // Looks a character replaced: the character
+    for (i = 0; i < ARRAY_COUNT(sMpCharAliases); i++)
+        if (strcmp(sMpCharAliases[i][0], name) == 0)
+        {
+            name = sMpCharAliases[i][1];
+            break;
+        }
     for (i = 0; i < CATALOG_COUNT; i++)
     {
-        ToConfigName(buf, CatalogAt(i)->name, sizeof(buf));
-        if (i >= ARRAY_COUNT(sSpriteCatalog))
-        {
-            // FireRed/LeafGreen sprites are saved as frlg_<name>
-            char ext[48];
-            snprintf(ext, sizeof(ext), "frlg_%s", buf);
-            snprintf(buf, sizeof(buf), "%s", ext);
-        }
+        CatalogConfigName(CatalogAt(i), buf, sizeof(buf));
         if (strcmp(buf, name) == 0)
         {
             app->base = MP_BASE_NPC;
@@ -865,6 +1150,7 @@ enum {
     ACT_HYBRID,    // Brendan's / May's body with the look's head (mp_hybrid.c)
     ACT_OWN,       // a Pokemon's own standing / walking frames
     ACT_STANDIN,   // the look's standing frame (StandInInfo)
+    ACT_CHAR,      // a character's own bike / diving frames (mp_chars_gfx.h)
 };
 
 // Whose body an action is drawn on: Brendan's or May's
@@ -891,13 +1177,36 @@ static u8 ActionGender(const struct MpAppearance *app)
     return app->gender == FEMALE ? FEMALE : MALE;
 }
 
+// A character who rides a Pokemon or a vehicle shows a bicycle instead (LOOK > BIKE: BIKE)
+static bool8 CharBikeIsHybrid(const struct MpCharDef *c, const struct MpAppearance *app, u8 state)
+{
+    u8 flag = (state == ST_MACH_BIKE) ? MP_CHARF_MACH_RIDE : MP_CHARF_ACRO_RIDE;
+    return (c->flags & flag) && app->bike;
+}
+
+bool8 MP_Avatar_HasRide(const struct MpAppearance *app)
+{
+    const struct MpCharDef *c = CharOf(app);
+    return c && (c->flags & (MP_CHARF_MACH_RIDE | MP_CHARF_ACRO_RIDE));
+}
+
 static u8 ActionKind(const struct MpAppearance *app, const struct MpPack *pack, u8 state)
 {
     const struct ObjectEventGraphicsInfo *npc;
+    const struct MpCharDef *c;
     if (PackHasState(pack, state))
         return ACT_PACK;
     if (PackHasState(pack, ST_FOOT))
         return state >= ST_FIELD_MOVE ? ACT_STANDIN : ACT_DEFAULT;   // a drawn look: as before
+    if ((c = CharOf(app)) != NULL)
+    {
+        // Their own bikes and diving; the rest (surfing, field moves...) built on Brendan's / May's body
+        if (state == ST_UNDERWATER)
+            return ACT_CHAR;
+        if (state == ST_MACH_BIKE || state == ST_ACRO_BIKE)
+            return CharBikeIsHybrid(c, app, state) ? ACT_HYBRID : ACT_CHAR;
+        return ACT_HYBRID;
+    }
     if (state == ST_UNDERWATER)
         return ACT_DEFAULT;   // a dark shape, the same for everyone
     switch (app->base)
@@ -940,6 +1249,48 @@ static u16 sLocalPalBody[16];   // Brendan's / May's sprites for a look of the o
 
 static void StatePalette(const struct MpAppearance *app, const struct MpPack *pack, u8 cacheSlot, u8 state, u16 *dst);
 static struct MpAppearance RemoteAppearance(u8 id);
+
+// The local player's sprite keeps one tile block whatever it's doing (on foot, on a bike, surfing...):
+// big enough for every state's frames. 32x32, or 64x64 for PROF. BIRCH's bikes.
+static u32 LocalTileBytes(const struct MpAppearance *app, const struct MpPack *pack)
+{
+    const struct MpCharDef *c = CharOf(app);
+    if (c && c->bikeSize == 64 && !PackHasState(pack, ST_FOOT))
+        return 64 * 64 / 2;
+    return LOCAL_TILE_BYTES;
+}
+
+// A character's skin shades (its color map's S colors, lightest first; without a map the skin-like
+// colors of its standing frames)
+static void CharSkin(const struct MpCharDef *c, struct MpHybridLook *look)
+{
+    const u16 *pal = sCharOwPals + (c - sMpChars) * 32;
+    const char *map = FindColorMap(CMAP_OW, c->cfg);
+    u8 i, j, n = 0, idx[15];
+    for (i = 1; i < 16; i++)
+    {
+        int h, sat, v;
+        RgbToHsv(pal[i], &h, &sat, &v);
+        if (map ? map[i - 1] == 'S' : (pal[i] && h <= 45 && sat >= 40 && sat <= 170 && v >= 150))
+            idx[n++] = i;
+    }
+    for (i = 0; i < n; i++)
+        for (j = i + 1; j < n; j++)
+        {
+            int h1, s1, v1, h2, s2, v2;
+            RgbToHsv(pal[idx[i]], &h1, &s1, &v1);
+            RgbToHsv(pal[idx[j]], &h2, &s2, &v2);
+            if (v2 > v1)
+            {
+                u8 t = idx[i];
+                idx[i] = idx[j];
+                idx[j] = t;
+            }
+        }
+    look->nSkin = n > 4 ? 4 : n;
+    for (i = 0; i < look->nSkin; i++)
+        look->skin[i] = idx[i];
+}
 
 // The look's head, standing frames and palette for mp_hybrid.c
 static bool8 HybridLook(const struct MpAppearance *app, u8 cacheSlot, struct MpHybridLook *look, u16 *pal)
@@ -1003,6 +1354,8 @@ static bool8 HybridLook(const struct MpAppearance *app, u8 cacheSlot, struct MpH
         look->skin[i] = 1 + i;   // every Kai sprite's skin shades
     look->nSkin = 4;
     look->kaiArms = (info->height == 32);
+    if (CharOf(app))
+        CharSkin(CharOf(app), look);
     return TRUE;
 }
 
@@ -1059,6 +1412,31 @@ static void BuildOwnInfo(int gfxSlot, const struct MpAppearance *app, u8 state)
     *info = *foot;
     info->images = sMpFrames[gfxSlot];
     info->anims = def->anims;
+    info->inanimate = FALSE;
+}
+
+// ACT_CHAR: a character's own Mach / Acro Bike or diving frames (one per picture-table entry, as Brendan's)
+static void BuildCharInfo(int gfxSlot, const struct MpCharDef *c, u8 state, u8 gender)
+{
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[gfxSlot];
+    u8 first = (state == ST_MACH_BIKE) ? CHAR_MACH : (state == ST_ACRO_BIKE) ? CHAR_ACRO : CHAR_DIVE;
+    u8 n = (state == ST_ACRO_BIKE) ? 27 : 9, i;
+    u8 size = (state == ST_UNDERWATER) ? 32 : c->bikeSize;
+    *info = *DefaultInfo(state, gender);
+    for (i = 0; i < n && i < MAX_FRAMES; i++)
+    {
+        sMpFrames[gfxSlot][i].data = CharFrame(c, first + i);
+        sMpFrames[gfxSlot][i].size = size * size / 2;
+    }
+    info->images = sMpFrames[gfxSlot];
+    info->size = size * size / 2;
+    info->width = size;
+    info->height = size;
+    if (size == 64)
+    {
+        info->oam = gObjectEventGraphicsInfo_RayquazaStill.oam;
+        info->subspriteTables = gObjectEventGraphicsInfo_RayquazaStill.subspriteTables;
+    }
     info->inanimate = FALSE;
 }
 
@@ -1134,6 +1512,9 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
         case ACT_OWN:
             BuildOwnInfo(gfxSlot, app, state);
             return;
+        case ACT_CHAR:
+            BuildCharInfo(gfxSlot, CharOf(app), state, ActionGender(app));
+            return;
         }
         *info = *DefaultInfo(state, ActionGender(app));
         return;
@@ -1157,6 +1538,15 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
         *info = *base;
         for (i = 0; i < 18; i++)
             sMpFrames[gfxSlot][i] = base->images[hasRunFrames ? i : (i % 9)];
+        if (CharOf(app))
+        {
+            // The characters run in their own running frames (other NPC looks run in their walking ones)
+            for (i = 0; i < 9; i++)
+            {
+                sMpFrames[gfxSlot][9 + i].data = CharFrame(CharOf(app), CHAR_RUN + i);
+                sMpFrames[gfxSlot][9 + i].size = 256;
+            }
+        }
         info->images = sMpFrames[gfxSlot];
         info->anims = anims->anims;   // player animations (walk + run)
         info->inanimate = FALSE;
@@ -1198,9 +1588,18 @@ static void StatePalette(const struct MpAppearance *app, const struct MpPack *pa
     bool8 female = (ActionGender(app) == FEMALE);
     if (state != ST_FOOT)
     {
-        // Actions drawn with the look's own colors use its walking palette
+        // Actions drawn with the look's own colors use its walking palette (a character's diving: its own)
         u8 kind = ActionKind(app, pack, state);
-        if (kind == ACT_HYBRID || kind == ACT_OWN || kind == ACT_STANDIN)
+        if (kind == ACT_CHAR && state == ST_UNDERWATER)
+        {
+            const struct MpCharDef *c = CharOf(app);
+            char cfg[48];
+            memcpy(dst, sCharOwPals + (c - sMpChars) * 32 + 16, 32);
+            snprintf(cfg, sizeof(cfg), "%s_dive", c->cfg);
+            RecolorByMap(app, dst, FindColorMap(CMAP_OW, cfg));
+            return;
+        }
+        if (kind == ACT_HYBRID || kind == ACT_OWN || kind == ACT_STANDIN || kind == ACT_CHAR)
         {
             StatePalette(app, pack, cacheSlot, ST_FOOT, dst);
             return;
@@ -1457,13 +1856,15 @@ const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
             info->paletteTag = (st == ST_UNDERWATER) ? OBJ_EVENT_PAL_TAG_MP_PACK_DIVE : OBJ_EVENT_PAL_TAG_MP_PACK;
         else if (kind == ACT_KIT)
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;   // RebuildLocal: CREATE's palette
+        else if (kind == ACT_CHAR && st == ST_UNDERWATER)
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK_DIVE;   // RebuildLocal: the character's diving palette
         else if (info->images == sMpFrames[LOCAL_STATE(st)])
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_LOCAL;  // HYBRID / OWN: the look's walking palette
         else if (info->paletteTag == OBJ_EVENT_PAL_TAG_BRENDAN || info->paletteTag == OBJ_EVENT_PAL_TAG_MAY)
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_BODY;   // couldn't be built: Brendan / May
     }
-    if (info->size < LOCAL_TILE_BYTES)
-        info->size = LOCAL_TILE_BYTES;   // see RebuildLocal
+    if (info->size < LocalTileBytes(&app, pack))
+        info->size = LocalTileBytes(&app, pack);   // see RebuildLocal
     sLocalStateBuilt[st] = sLocalVersion + 1;
     return info;
 }
@@ -1501,12 +1902,14 @@ static void RebuildLocal(void)
         PackPalette(&app, pack, ST_FOOT, sLocalPalPack);
         PackPalette(&app, pack, ST_UNDERWATER, sLocalPalPackDive);
     }
+    else if (CharOf(&app))
+        StatePalette(&app, NULL, MP_CR_CACHE_LOCAL, ST_UNDERWATER, sLocalPalPackDive);
 
     BuildStateInfo(0, &app, pack, ST_FOOT);
     // The player's sprite keeps the tile block it was made with when it gets on a bike, goes
     // surfing...: room for those 32x32 frames whatever the look (as Brendan's / May's own)
-    if (sMpGfxInfo[0].size < LOCAL_TILE_BYTES)
-        sMpGfxInfo[0].size = LOCAL_TILE_BYTES;
+    if (sMpGfxInfo[0].size < LocalTileBytes(&app, pack))
+        sMpGfxInfo[0].size = LocalTileBytes(&app, pack);
     sMpGfxInfo[0].paletteSlot = PALSLOT_PLAYER;
     sMpGfxInfo[0].paletteTag = PackHasState(pack, ST_FOOT) ? OBJ_EVENT_PAL_TAG_MP_PACK : OBJ_EVENT_PAL_TAG_MP_LOCAL;
     memset(sLocalStateBuilt, 0, sizeof(sLocalStateBuilt));
@@ -1670,14 +2073,16 @@ const char *MP_Avatar_FrontSelName(u16 sel)
     sel--;
     if (sel < EMERALD_FRONT_COUNT)
         return sMpEmeraldFrontNames[sel][0];
-    if (sel < FRONT_CHOICES)
+    if (sel < CHAR_FRONT_FIRST)
         return sMpExtFronts[sel - EMERALD_FRONT_COUNT].name;
+    if (sel < FRONT_CHOICES)
+        return sMpCharFrontNames[sel - CHAR_FRONT_FIRST][0];
     return "?";
 }
 
 const char *MP_Avatar_FrontSelArtist(u16 sel)
 {
-    if (sel > EMERALD_FRONT_COUNT && sel <= FRONT_CHOICES)
+    if (sel > EMERALD_FRONT_COUNT && sel <= CHAR_FRONT_FIRST)
         return sMpExtFronts[sel - 1 - EMERALD_FRONT_COUNT].artist;
     return "";
 }
@@ -1698,7 +2103,9 @@ const char *MP_Avatar_FrontSelConfigName(u16 sel)
     sel--;
     if (sel < EMERALD_FRONT_COUNT)
         return sMpEmeraldFrontNames[sel][1];
-    return sMpExtFronts[sel - EMERALD_FRONT_COUNT].cfg;
+    if (sel < CHAR_FRONT_FIRST)
+        return sMpExtFronts[sel - EMERALD_FRONT_COUNT].cfg;
+    return sMpCharFrontNames[sel - CHAR_FRONT_FIRST][1];
 }
 
 u16 MP_Avatar_ParseFrontSel(const char *name)
@@ -1719,8 +2126,10 @@ const char *MP_Avatar_BackSelName(u8 sel)
     sel--;
     if (sel < EMERALD_BACK_COUNT)
         return sEmeraldBackNames[sel][0];
-    if (sel < BACK_CHOICES)
+    if (sel < CHAR_BACK_FIRST)
         return sMpExtBackNames[sel - EMERALD_BACK_COUNT][0];
+    if (sel < BACK_CHOICES)
+        return sMpCharBackNames[sel - CHAR_BACK_FIRST][0];
     return "?";
 }
 
@@ -1735,7 +2144,9 @@ const char *MP_Avatar_BackSelConfigName(u8 sel)
     if (sel < EMERALD_BACK_COUNT)
         return sEmeraldBackNames[sel][1];
     (void)buf;
-    return sMpExtBackNames[sel - EMERALD_BACK_COUNT][1];
+    if (sel < CHAR_BACK_FIRST)
+        return sMpExtBackNames[sel - EMERALD_BACK_COUNT][1];
+    return sMpCharBackNames[sel - CHAR_BACK_FIRST][1];
 }
 
 u8 MP_Avatar_ParseBackSel(const char *name)
@@ -1811,6 +2222,13 @@ static bool8 FrontChoiceTiles(int c, u8 *tiles, u16 *pal, bool8 *canRecolor)
         LZ77UnCompWram(gTrainerFrontPicPaletteTable[c].data, pal);
         return TRUE;
     }
+    if (c >= CHAR_FRONT_FIRST)
+    {
+        c -= CHAR_FRONT_FIRST;
+        memcpy(tiles, sCharFrontTiles + c * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE);
+        memcpy(pal, sCharFrontPals + c * 16, 32);
+        return TRUE;
+    }
     c -= EMERALD_FRONT_COUNT;
     memcpy(tiles, sExtFrontTiles + c * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE);
     memcpy(pal, sExtFrontPals + c * 16, 32);
@@ -1835,6 +2253,13 @@ static bool8 BackChoiceTiles(int b, u8 *tiles, u16 *pal)
             memcpy(tiles + i * TRAINER_PIC_SIZE, src + f * TRAINER_PIC_SIZE, TRAINER_PIC_SIZE);
         }
         LZ77UnCompWram(gTrainerBackPicPaletteTable[b].data, pal);
+        return TRUE;
+    }
+    if (b >= CHAR_BACK_FIRST)
+    {
+        b -= CHAR_BACK_FIRST;
+        memcpy(tiles, sCharBackTiles + b * 4 * TRAINER_PIC_SIZE, 4 * TRAINER_PIC_SIZE);
+        memcpy(pal, sCharBackPals + b * 16, 32);
         return TRUE;
     }
     b -= EMERALD_BACK_COUNT;
@@ -2253,7 +2678,7 @@ bool8 MP_Avatar_InstallPack(const char *src, char *err, int errLen)
         snprintf(err, errLen, "sprites folder is full");
         return FALSE;
     }
-    choice = FIRST_PACK + i;
+    choice = PackChoice(i);
     MP_Avatar_SetChoice(&gMpConfig.app, choice);
     if (!gMpConfig.app.hasCustom)
     {

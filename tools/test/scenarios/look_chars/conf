@@ -1,0 +1,14 @@
+# Petalburg at NA-JP lag: ALICE wears new characters; BOB watches (shots b*.png).
+# PROF. BIRCH's bikes are 64x64 (the ZIGZAGOON chasing him); SERENA rides a RHYHORN on the Mach Bike
+# (bikemode 1: a bicycle); a character's own diving sprite; the old ini name "steven" wears the new STEVEN.
+MODE=2
+WARP=0,0,7,20
+WARP_B=0,0,9,21
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+EXPECT_A=("[test] sprite kai_prof_birch" "[test] bikemode 1 (rides: 1)" "[test] sprite steven")
+EXPECT_B=("[test] frame")
+UNEXPECT_A=("avatar: no action frames")
+UNEXPECT_B=("avatar: no action frames")

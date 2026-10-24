@@ -692,6 +692,41 @@ allocates and frees). The surf blob draws with colors 5, 6, 15 of the surfer's p
 Brendan's / May's gets a blob palette of its own (MP_Avatar_SurfBlobPalette, tags 0x53C1/2). The player's water
 reflection takes the look's colors, washed out (LoadPlayerObjectReflectionPalette for the MP tags).
 
+## Characters from Moemon's other branch (F1, protocol 39: mp_chars_gfx.h, tools/moemon_chars)
+The user's sprite zip (113 characters, 284 trainer pictures, 115 back pictures) is imported by
+tools/moemon_chars/import.py into graphics/moemon/chars/*.bin + src/mp/mp_chars_gfx.h. 000 Brendan and 001 May are
+pixel for pixel the game's own, so they're skipped (the player's default is unchanged); front_000-092 are Emerald's
+pictures and 64 more are the FireRed/LeafGreen ones already in graphics/moemon/ext (skipped); 127 new fronts (20 of
+them nobody's: HeartGold/SoulSilver characters named in FRONT_NAMES) and 107 new backs (5-frame ones keep 0, 1, 3, 4
+like Red's). Per character (sMpChars): walking + running 16x32, Mach / Acro Bike frames (32x32; 64x64 for PROF.
+BIRCH, bikeSize), 9 diving 32x32 (one per picture-table entry, as the game's sheets), a field palette (walk, run,
+bikes: <= 15 colors each) and a diving palette; flags MACH_RIDE / ACRO_RIDE (the sheet is a ridden Pokemon or a
+vehicle: shape overlap with Brendan's bicycle < 0.78, minus the drawn bicycles in BICYCLE_MACH / _ACRO) and GENERIC.
+The pack left the Acro front-wheel frames (11-12, 15-16, 19-20) empty for 64 characters and put Brendan's there for
+6: the importer copies the back-wheel ones (9-10...) over them.
+Looks: graphics ids MP_GFX_CHAR_FIRST (0x9000) + n, ini names kai_<name>; NpcInfo is the walking sheet. mp_avatar.c
+ActionKind: ACT_CHAR (own frames, BuildCharInfo) for diving and the bikes, unless the bike sheet is a ride and the
+look's `bike` (LOOK > BIKE, appearance byte 26, ini `bike = ride|bike`) asks for a bicycle -> ACT_HYBRID; the rest
+ACT_HYBRID (Brendan's / May's body by the character's gender, skin shades from the color map's S colors: CharSkin).
+They run in their own running frames. Diving uses its own palette (local tag MP_PACK_DIVE, StatePalette ST_UNDERWATER;
+a map named kai_<name>_dive would recolor it). PROF. BIRCH's 64x64 bikes: every local state info is
+LocalTileBytes = 2048 for him (the player's tile block never changes size), OAM / subsprites from RayquazaStill;
+remote players resize per mode as before. The replaced looks (old STEVEN, RED, LEAF, WALLY, WALLACE, ARCHIE, MAXIE,
+LUCY, PROF. BIRCH, MAGMA GRUNT F, FRLG PROF. OAK, GIOVANNI, BLUE, ROCKET GRUNTS) stay in the catalog but aren't
+offered; sMpCharAliases turns their ini names into the characters' (MP_Avatar_ParseSpriteName).
+LOOK > GROUP: the SPRITE choices are a built list (BuildChoices) in three groups: NAMED NPC (DEFAULT, BRENDAN, MAY,
+the named characters in pack order, sNamedCatalog, RS BRENDAN / MAY), GENERICS (GENERIC characters, the rest of the
+catalog), CUSTOM (CUSTOM 1-3, sprite packs; rebuilt with the pack list). SPRITE steps inside the group; GROUP goes
+to the sprite last worn in the next group. BIKE only shows for riders: the LOOK cursor counts the rows shown
+(LookRowAt / LookCursorOf). ID PIC / BK PIC lists end with the new pictures (CHAR_FRONT_FIRST / CHAR_BACK_FIRST).
+Recolors: 345 maps in colormaps.txt (kai_*), first guesses by tools/moemon_chars/suggest_maps.py (skin from the face
+middle, hair from the top of the head, outfit / accent from torso / legs), every one checked in the three test looks
+(review_maps.py check), the wrong ones mapped by hand from per-color strips (review_maps.py strips); backs take their
+front's roles by color (most share the palette). The sprite editor export writes walk, run, 32x32 bikes and diving.
+Debug: `mp sprite kai_serena`, `mp bikemode 0|1`, `mp underwater`, `mp actiondump FILE`, `mp export` (writes into
+the working folder's sprites/). Test: look_chars (NA-JP lag: BIRCH's 64x64 bikes, SERENA's ride vs bicycle, diving,
+an old ini name).
+
 ## HMs (Moemon Kai): no restrictions, held HMs (mp_heldhm.c)
 HM moves can be forgotten anywhere (summary CanReplaceMove, evolution / battle / co-op level-up learning), the MOVE
 DELETER's last-SURF check and the PC's restricted release moves are gone. A Pokemon can hold an HM

@@ -48,6 +48,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `tri_catch` | wild triple: ALICE and BOB each catch a different wild Pokemon (each gets their own) |
 | `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the gold slots are the allies') |
 | `tri_abort` | wild triple: ALICE catches one, BOB disconnects: called off, ALICE keeps the catch |
+| `look_chars` | NA-JP lag: ALICE wears new characters: PROF. BIRCH's 64x64 bikes, SERENA's ridden RHYHORN then a bicycle (LOOK > BIKE), her diving sprite, an old ini name (`steven`); BOB sees each |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

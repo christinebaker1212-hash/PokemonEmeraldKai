@@ -834,29 +834,42 @@ HMs
 
 DRESSING UP (CO-OP menu > LOOK)
 ---------------------------------
-  SPRITE   any trainer or NPC from Emerald or FireRed/LeafGreen that walks
-           in all four directions (Left/Right, L/R jump 10), or CUSTOM 1-3,
+  GROUP    which sprites SPRITE goes through: NAMED NPC (people with a
+           name: DEFAULT, Brendan, May, then over a hundred characters from
+           every generation - Ethan, Red, Cynthia, Steven, Iono, Leon... -
+           then Emerald's and FireRed/LeafGreen's own named people), GENERICS
+           (classes and townsfolk, grunts included) or CUSTOM (CREATE 1-3 and
+           your own sprite sheets). Left/Right; each group remembers the
+           sprite you last wore in it.
+  SPRITE   a sprite of that group (Left/Right, L/R jump 10). CUSTOM 1-3 are
            the trainers you make in CREATE (one not made yet looks like
            DEFAULT). It's used
            everywhere: walking, running, biking, surfing, diving, fishing,
-           field moves. For the actions a sprite has no frames of its own
-           (bikes, surfing, fishing, watering, field moves, decorating) it
+           field moves. The named characters have their own running, Mach
+           Bike, Acro Bike and diving sprites. For the actions a sprite has
+           no frames of its own (surfing, fishing, watering, field moves,
+           decorating, and the bikes of the others) it
            wears Brendan's or May's body for that action, in its own
            clothes' colors, with its own head on top. CREATE trainers have
            their own Mach Bike too. Pokemon sprites (Mew, Wingull...) ride
-           and surf as themselves. Running uses the sprite's walking frames.
+           and surf as themselves. Other sprites run in their walking frames.
+  BIKE     only for a character who rides a Pokemon or a vehicle instead of
+           a bike (Blue, Serena on her Rhyhorn, Prof. Birch running from a
+           Zigzagoon...): RIDE shows it as drawn, BIKE a bicycle.
            Scenes that show you as someone else (Battle Tent and Battle
            Frontier walk-ins, the Contest Hall, interviews) use your look too.
   ID PIC   the picture on your TRAINER CARD and in battles. MATCH (the
            default) uses the one that goes with your sprite; or pick any
-           other: Emerald's, FireRed/LeafGreen's, or one of the extra
-           pictures from Pokemon Showdown (L/R jump 10).
+           other: Emerald's, FireRed/LeafGreen's, the extra pictures from
+           Pokemon Showdown, or the characters' pictures (and HeartGold/
+           SoulSilver's Archer, Bugsy, Karen...) at the end (L/R jump 10).
   BK PIC   your back in battles: MATCH, Brendan, May, Red, Leaf, Wally,
            Steven, the Old Man, the Poke Dude, the Platinum and Diamond/
            Pearl ones (Lucas, Dawn, Barry, Cheryl, Riley, Marley, Buck, Mira),
-           Gold, Kris and a Gold/Silver boy, or NONE (hidden).
+           Gold, Kris, a Gold/Silver boy, every named character's own back,
+           or NONE (hidden).
   SKIN / HAIR / OUTFIT / ACCENT   colors. They change your sprite and the
-           ID and back pictures together. (The extra Showdown pictures and
+           ID and back pictures together (the characters' too). (The extra Showdown pictures and
            your own drawn sprites keep their own colors.)
   CREATE...   make your own trainer from parts (see below).
   START       ID PIC and BK PIC go back to MATCH (on one of those rows, just

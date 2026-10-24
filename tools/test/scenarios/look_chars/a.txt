@@ -1,0 +1,36 @@
+pressuntil A field 5000
+waitfor online 6000
+mp sprite kai_prof_birch
+wait 240
+mp bike
+wait 120
+press RIGHT 30
+wait 240
+shot a0_birch_mach
+mp bike 0
+wait 10
+mp bike 2
+wait 120
+press LEFT 30
+wait 240
+shot a1_birch_acro
+mp bike 0
+wait 10
+mp sprite kai_serena
+wait 240
+mp bike
+wait 300
+shot a2_serena_ride
+mp bikemode 1
+wait 300
+shot a3_serena_bike
+mp bike 0
+wait 10
+mp underwater
+wait 300
+shot a4_serena_dive
+mp bike 0
+wait 10
+mp sprite steven
+wait 300
+quit

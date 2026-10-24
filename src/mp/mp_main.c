@@ -328,6 +328,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "hair") == 0) gMpConfig.app.hair = ParseChoice(val, MP_Avatar_HairName, MP_HAIR_COUNT);
         else if (strcmp(key, "trainer_pic") == 0) gMpConfig.app.frontSel = MP_Avatar_ParseFrontSel(val);
         else if (strcmp(key, "back_pic") == 0) gMpConfig.app.backSel = MP_Avatar_ParseBackSel(val);
+        else if (strcmp(key, "bike") == 0) gMpConfig.app.bike = (strcmp(val, "bike") == 0);
         else if (strncmp(key, "custom", 6) == 0 && key[6] >= '1' && key[6] < '1' + MP_CREATED_SLOTS && key[7] == 0)
         {
             struct MpCreated r;
@@ -411,6 +412,8 @@ void MP_SaveConfig(void)
         "hair = %s\n"
         "; trainer card / battle pictures: match (same as the sprite) or a name from CO-OP > LOOK\n"
         "trainer_pic = %s\nback_pic = %s\n"
+        "; a character who rides a Pokemon or a vehicle on a bike: ride (as drawn) or bike (a bicycle)\n"
+        "bike = %s\n"
         "; how many tiles a player holding the BATTLE FLAG can see\n"
         "trainer_range = %d\n"
         "; the party Moemon that follows you (SELECT in the party menu); 0 = none\n"
@@ -432,7 +435,8 @@ void MP_SaveConfig(void)
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
-        MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel), gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
+        MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
+        gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.lobby);
     {
@@ -579,6 +583,7 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     p[11] = a->hair;
     p[12] = a->created;
     MP_Created_Pack(&a->recipe, p + 13);   // 13 bytes
+    p[26] = a->bike;
 }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
@@ -596,6 +601,7 @@ static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
     a->hair = p[11] < MP_HAIR_COUNT ? p[11] : 0;
     a->created = p[12] <= MP_CREATED_SLOTS ? p[12] : 0;
     MP_Created_Unpack(p + 13, &a->recipe);
+    a->bike = p[26] ? 1 : 0;
     if (a->base == MP_BASE_CREATED && !a->recipe.made)
         a->base = MP_BASE_DEFAULT;
 }

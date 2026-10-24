@@ -635,6 +635,8 @@ bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const s
     bool8 ok;
     u8 slot;
     bool8 female = (gender == FEMALE);
+    u8 charSize;
+    const u16 *charPal;
 
     if (base == MP_BASE_DEFAULT || base == MP_BASE_CUSTOM)
         base = female ? MP_BASE_MAY : MP_BASE_BRENDAN;
@@ -659,6 +661,22 @@ bool8 MP_Pack_Export(const char *path, const struct MpAppearance *appIn, const s
     else if (base == MP_BASE_RS_BRENDAN || base == MP_BASE_RS_MAY)
     {
         PutInfoFrames(atlas, PACK_WALK, base == MP_BASE_RS_MAY ? &gObjectEventGraphicsInfo_RubySapphireMay : &gObjectEventGraphicsInfo_RubySapphireBrendan, 0);
+    }
+    else if (base == MP_BASE_NPC && MP_Avatar_CharFrame(gfxId, 0, &charSize, &charPal))
+    {
+        // A character from Moemon's other branch: walking, running, its bikes (32x32 ones) and diving.
+        // (Each frame is fetched before it's drawn: the call sets the palette it's drawn with.)
+        static const struct { u8 slot, first, count; } sParts[] = {
+            {PACK_WALK, 0, 9}, {PACK_RUN, 9, 9}, {PACK_MACH_BIKE, 18, 9}, {PACK_ACRO_BIKE, 27, 27}, {PACK_DIVE, 54, 9},
+        };
+        int part, f;
+        for (part = 0; part < (int)ARRAY_COUNT(sParts); part++)
+            for (f = 0; f < sParts[part].count; f++)
+            {
+                const u8 *frame = MP_Avatar_CharFrame(gfxId, sParts[part].first + f, &charSize, &charPal);
+                if (frame && charSize == gMpPackSlots[sParts[part].slot].w)   // (PROF. BIRCH's 64x64 bikes don't fit)
+                    PutFrame(atlas, sParts[part].slot, f, frame, charPal);
+            }
     }
     else if (base == MP_BASE_NPC && MP_Avatar_NpcInfo(gfxId))
     {

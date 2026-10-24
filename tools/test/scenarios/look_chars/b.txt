@@ -1,0 +1,39 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 330
+shot b0_birch_mach
+wait 360
+shot b1_birch_acro
+wait 80
+shot b2_00
+wait 80
+shot b2_01
+wait 80
+shot b2_02
+wait 80
+shot b2_03
+wait 80
+shot b2_04
+wait 80
+shot b2_05
+wait 80
+shot b2_06
+wait 80
+shot b2_07
+wait 80
+shot b2_08
+wait 80
+shot b2_09
+wait 80
+shot b2_10
+wait 80
+shot b2_11
+wait 80
+shot b2_12
+wait 80
+shot b2_13
+wait 80
+shot b2_14
+wait 80
+shot b2_15
+quit

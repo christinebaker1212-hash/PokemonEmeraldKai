@@ -32,7 +32,7 @@ enum {
 
 struct MpSpriteEntry
 {
-    u16 gfxId;      // OBJ_EVENT_GFX_*, or MP_GFX_EXT_FIRST + n for FireRed/LeafGreen sprites
+    u16 gfxId;      // OBJ_EVENT_GFX_*, MP_GFX_EXT_FIRST + n (FireRed/LeafGreen) or MP_GFX_CHAR_FIRST + n
     const char *name;
     u16 frontPic;   // trainer card / battle front pic choice (see MP_Avatar_FrontChoiceCount), MP_PIC_NONE = default
     u16 backPic;    // battle back pic choice, MP_PIC_NONE = default
@@ -40,6 +40,7 @@ struct MpSpriteEntry
 };
 
 #define MP_GFX_EXT_FIRST 0x8000   // overworld sprites that only exist in the CO-OP catalog
+#define MP_GFX_CHAR_FIRST 0x9000  // characters from Moemon's other branch (mp_chars_gfx.h): walk, run, bikes, dive
 
 #define MP_SKIN_COUNT   7
 #define MP_COLOR_COUNT  11
@@ -74,6 +75,7 @@ struct MpAppearance
     u8 backSel;     // battle back pic: 0 = matches the sprite, else 1 + back choice
     u8 hair;        // 0 = sprite default
     u8 created;     // MP_BASE_CREATED: which CUSTOM slot (1-3), for the name
+    u8 bike;        // a character who rides a Pokemon or a vehicle: 0 = RIDE it, 1 = a BIKE (LOOK > BIKE)
     struct MpCreated recipe;   // MP_BASE_CREATED: the parts (everyone builds the look from them)
 };
 
@@ -375,6 +377,15 @@ u16 MP_Avatar_ChoiceCount(void);
 u16 MP_Avatar_GetChoice(const struct MpAppearance *app);
 void MP_Avatar_SetChoice(struct MpAppearance *app, u16 choice);
 const char *MP_Avatar_ChoiceName(u16 choice);
+// LOOK > GROUP: NAMED NPC, GENERICS, CUSTOM (the SPRITE choices are grouped)
+enum { MP_LOOK_NAMED, MP_LOOK_GENERIC, MP_LOOK_CUSTOM, MP_LOOK_GROUP_COUNT };
+u8 MP_Avatar_ChoiceGroup(u16 choice);
+u16 MP_Avatar_GroupFirst(u8 group);
+u16 MP_Avatar_GroupSize(u8 group);
+const char *MP_Avatar_GroupName(u8 group);
+// LOOK > BIKE: the look's character rides a Pokemon or a vehicle on a bike (RIDE / BIKE)
+bool8 MP_Avatar_HasRide(const struct MpAppearance *app);
+const u8 *MP_Avatar_CharFrame(u16 gfxId, u8 frame, u8 *size, const u16 **pal);
 void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *savedPack);
 int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app); // TRUE when found
 void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len);

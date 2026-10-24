@@ -71,6 +71,9 @@ Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two tr
 coop_wait_merge). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
 tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens under yours, 1x-4x: mp_spectate.c streaming, display.c layout and window
 fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py).
+Also the characters from Moemon's other branch (111 looks with their own running, bike / ridden-Pokemon and diving
+sprites, 127 ID and 107 back pictures: tools/moemon_chars, mp_chars_gfx.h, graphics ids 0x9000+, ini kai_*; LOOK >
+GROUP NAMED NPC / GENERICS / CUSTOM and LOOK > BIKE RIDE / BIKE; PROF. BIRCH's bikes are 64x64; test look_chars).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

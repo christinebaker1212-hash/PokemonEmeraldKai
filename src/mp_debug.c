@@ -1081,6 +1081,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
         SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
                                      : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
     }
+    else if (strcmp(cmd, "bikemode") == 0)
+    {
+        // bikemode N - LOOK > BIKE for a character who rides a Pokemon or a vehicle: 0 RIDE, 1 BIKE
+        gMpConfig.app.bike = atoi(arg) ? 1 : 0;
+        MP_Avatar_ApplyLocal();
+        MP_SendAppearance();
+        printf("[test] bikemode %d (rides: %d)\n", gMpConfig.app.bike, MP_Avatar_HasRide(&gMpConfig.app));
+    }
+    else if (strcmp(cmd, "underwater") == 0)
+    {
+        // underwater - the diving sprite where you stand (looks only: nothing else about diving)
+        extern void SetPlayerAvatarTransitionFlags(u16 flags);
+        SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_UNDERWATER);
+    }
     else if (strcmp(cmd, "repel") == 0)
     {
         // repel - one step of REPEL left, and another REPEL in the bag
