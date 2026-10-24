@@ -279,6 +279,17 @@ struct MpLifeBond
 #define LIFE_BOND_FAMILY    (1 << 2)
 #define LIFE_BOND_MET       (1 << 3)
 
+// Things that happened that Pokémon tell each other about (word spreads, docs 8.1)
+#define LIFE_NEWS 16
+struct MpLifeNews
+{
+    u8 kind;        // MEM_BADGE, MEM_STORY, MEM_LEGEND...
+    u8 pad;
+    u16 param;
+    u32 when;       // play minute
+};
+const struct MpLifeNews *MP_Life_News(u8 *count);
+
 // Keys: a Pokémon is its personality and OT ID; a Trainer is their ID and name
 u32 MP_Life_MonKey(u32 personality, u32 otId);
 u32 MP_Life_BoxKey(struct BoxPokemon *box);
@@ -336,6 +347,9 @@ bool8 MP_Life_NameOf(u32 key, u8 *out);   // FALSE when unknown
 #define LIFE_JOURNAL_TEXT  96
 u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max);
 void MP_Life_Reveal(struct MpLifeRec *rec, u8 fact);
+u8 MP_Life_JournalKnownCount(void);   // known lines in the last journal built (no "???" line)
+
+bool8 MP_Life_WantsOut(struct BoxPokemon *box);   // asking to come out (party screen, follower picker)
 
 // Every frame on the map (mp_main.c MP_FrameUpdate) and the minute tick
 void MP_Life_FrameUpdate(void);

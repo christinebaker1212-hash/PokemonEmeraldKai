@@ -1,0 +1,41 @@
+pressuntil A field 5000
+wait 150
+mp life count
+mp life remember 0 19 150 1
+mp life remember 0 19 150 1
+mp life remember 0 8 180 0
+mp life trait 0 1 1 100
+mp life minutes 30
+mp life reveal 0
+mp life journal 0
+mp life save
+mp life load
+mp life count
+press START 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 30
+press A 2
+wait 90
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 40
+shot journal1
+press A 2
+wait 20
+shot journal2
+press DOWN 2
+wait 60
+shot journal_other
+quit

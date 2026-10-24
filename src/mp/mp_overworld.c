@@ -1,6 +1,7 @@
 // Moemon Co-op: remote players in the overworld (object events, movement replay, nametags)
 #include "global.h"
 #include "mp.h"
+#include "mp_life_field.h"
 #include "contest.h"
 #include "constants/contest.h"
 #include "main.h"
@@ -709,7 +710,7 @@ void MP_Overworld_Update(void)
         return;
     MP_Notice_Update();
     if (!MP_Spectate_TryInteract() && !MP_Piggy_TryInteract())
-        MP_Follower_TryInteract();
+        MP_LifeInteract_TryFollower();   // MOéMON GARDEN: tap A (the fitting thing) / hold A (the verb wheel)
     if (sAppliedGender != gSaveBlock2Ptr->playerGender)
     {
         sAppliedGender = gSaveBlock2Ptr->playerGender;

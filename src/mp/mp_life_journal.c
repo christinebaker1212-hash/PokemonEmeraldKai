@@ -16,6 +16,7 @@
 #include "constants/characters.h"
 #include "constants/region_map_sections.h"
 #include "constants/species.h"
+#include "constants/weather.h"
 
 // ---------------------------------------------------------------------------
 // Words
@@ -106,6 +107,9 @@ static const u8 sTxt_Badge[] = _("Won the {STR_VAR_3} together.");
 static const u8 sTxt_Legend[] = _("Saw {STR_VAR_3} with its own eyes.");
 static const u8 sTxt_NewPlace[] = _("First saw {STR_VAR_2} with {STR_VAR_1}.");
 static const u8 sTxt_WeatherSnow[] = _("Saw snow fall for the first time.");
+static const u8 sTxt_WeatherAsh[] = _("Saw ash fall like snow in {STR_VAR_2}.");
+static const u8 sTxt_WeatherSand[] = _("Braved a sandstorm in {STR_VAR_2}.");
+static const u8 sTxt_WeatherStorm[] = _("Saw a fierce storm in {STR_VAR_2}.");
 static const u8 sTxt_WeatherOther[] = _("Saw strange weather in {STR_VAR_2}.");
 static const u8 sTxt_Fright[] = _("Got scared by {STR_VAR_3} in {STR_VAR_2}.");
 static const u8 sTxt_Overcame[] = _("Isn't afraid of {STR_VAR_3} anymore.");
@@ -260,7 +264,11 @@ static void AddMemory(struct Builder *bd, u8 slot)
         tmpl = sTxt_Legend;
         break;
     case MEM_NEW_PLACE: tmpl = sTxt_NewPlace; break;
-    case MEM_WEATHER: tmpl = m->param == 7 /* WEATHER_SNOW */ ? sTxt_WeatherSnow : sTxt_WeatherOther; break;
+    case MEM_WEATHER:
+        tmpl = m->param == WEATHER_SNOW ? sTxt_WeatherSnow : m->param == WEATHER_VOLCANIC_ASH ? sTxt_WeatherAsh
+             : m->param == WEATHER_SANDSTORM ? sTxt_WeatherSand
+             : (m->param == WEATHER_RAIN_THUNDERSTORM || m->param == WEATHER_DOWNPOUR) ? sTxt_WeatherStorm : sTxt_WeatherOther;
+        break;
     case MEM_FRIGHT:
     case MEM_OVERCAME:
         StringCopy(extra, m->param < LIFE_TRIG_COUNT && m->param ? sTrigText[m->param] : (const u8[])_("something"));
@@ -289,6 +297,14 @@ static void AddMemory(struct Builder *bd, u8 slot)
         Add(bd, fact, tmpl, m->place, extra);
 }
 
+static u8 sKnownCount;
+
+// How many lines the last journal had that the Trainer knows (not counting the "???" line)
+u8 MP_Life_JournalKnownCount(void)
+{
+    return sKnownCount;
+}
+
 u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max)
 {
     struct Builder bd;
@@ -297,6 +313,7 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
     u32 me;
     u8 i, extra[32];
 
+    sKnownCount = 0;
     if (rec == NULL || max < 2)
         return 0;
     me = MP_Life_MonKey(rec->personality, rec->otId);
@@ -442,6 +459,7 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
         for (i = 0; i < n; i++)
             AddMemory(&bd, order[i]);
     }
+    sKnownCount = bd.count;
     if (bd.unknown && bd.count < max)
         StringCopy(lines[bd.count++], sTxt_Unknown);
     return bd.count;

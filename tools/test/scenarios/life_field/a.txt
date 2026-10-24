@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 60
+mp item 139 3
+mp follow 0
+wait 30
+mp life need 0 0 230
+press UP 2
+wait 10
+press A 2
+wait 150
+shot tap
+pressuntil B field 900
+wait 30
+press A 40
+shot wheel
+press A+DOWN 15
+wait 150
+shot fed
+pressuntil B field 900
+wait 30
+mp life temper 0 3 240
+mp life act 10
+pressuntillog NONE 2400 life field: hint
+wait 200
+shot hint
+mp life field
+mp life feel 0 1 90
+mp life act 5
+mp life need 0 1 250
+press RIGHT 2
+pressuntillog NONE 2400 life field: act 5
+wait 300
+shot nap
+press DOWN 16
+wait 30
+mp life field
+quit

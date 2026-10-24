@@ -385,6 +385,7 @@ static u16 GetFieldMoveMonSpecies(void);
 static void UpdatePartyMonHPBar(u8, struct Pokemon *);
 static void SpriteCB_UpdatePartyMonIcon(struct Sprite *);
 static void SpriteCB_BouncePartyMonIcon(struct Sprite *);
+static void SpriteCB_MpWantsOutIcon(struct Sprite *);
 static void ShowOrHideHeldItemSprite(u16, struct PartyMenuBox *);
 static void CreateHeldItemSpriteForTrade(u8, bool8);
 static void SpriteCB_HeldItem(struct Sprite *);
@@ -4109,6 +4110,13 @@ static void CreatePartyMonIconSprite(struct Pokemon *mon, struct PartyMenuBox *m
     species2 = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
     CreatePartyMonIconSpriteParameterized(species2, GetMonData(mon, MON_DATA_PERSONALITY), menuBox, 1, handleDeoxys);
     UpdatePartyMonHPBar(menuBox->monSpriteId, mon);
+    // Moemon Co-op: MOéMON GARDEN, a Pokémon asking to come out wiggles now and then
+    if (!gMain.inBattle && menuBox->monSpriteId < MAX_SPRITES && MP_Follower_HasGraphics(mon) && MP_Life_WantsOut(&mon->box))
+    {
+        gSprites[menuBox->monSpriteId].data[6] = 1;
+        gSprites[menuBox->monSpriteId].data[4] = gSprites[menuBox->monSpriteId].x2;
+        gSprites[menuBox->monSpriteId].callback = SpriteCB_MpWantsOutIcon;
+    }
 }
 
 static void CreatePartyMonIconSpriteParameterized(u16 species, u32 pid, struct PartyMenuBox *menuBox, u8 priority, bool32 handleDeoxys)
@@ -4162,7 +4170,8 @@ static void AnimateSelectedPartyIcon(u8 spriteId, u8 animNum)
             gSprites[spriteId].x2 = -4;
             gSprites[spriteId].y2 = 0;
         }
-        gSprites[spriteId].callback = SpriteCB_UpdatePartyMonIcon;
+        gSprites[spriteId].data[4] = gSprites[spriteId].x2;
+        gSprites[spriteId].callback = gSprites[spriteId].data[6] ? SpriteCB_MpWantsOutIcon : SpriteCB_UpdatePartyMonIcon;
     }
     else
     {
@@ -4188,6 +4197,15 @@ static void SpriteCB_BouncePartyMonIcon(struct Sprite *sprite)
 static void SpriteCB_UpdatePartyMonIcon(struct Sprite *sprite)
 {
     UpdateMonIconFrame(sprite);
+}
+
+// Moemon Co-op: MOéMON GARDEN, a quick wiggle every couple of seconds (it'd like to come out)
+static void SpriteCB_MpWantsOutIcon(struct Sprite *sprite)
+{
+    static const s8 sWiggle[12] = {1, 2, 1, 0, -1, -2, -1, 0, 1, 2, 1, 0};
+    u16 t = (u16)sprite->data[5]++ % 120;
+    UpdateMonIconFrame(sprite);
+    sprite->x2 = sprite->data[4] + (t < ARRAY_COUNT(sWiggle) ? sWiggle[t] : 0);   // data[4]: its usual offset
 }
 
 static void CreatePartyMonHeldItemSprite(struct Pokemon *mon, struct PartyMenuBox *menuBox)

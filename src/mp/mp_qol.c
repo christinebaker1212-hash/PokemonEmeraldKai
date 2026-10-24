@@ -38,8 +38,11 @@ static void DrawPicker(void)
             char buf[16];
             GetMonData(mon, MON_DATA_NICKNAME, name);
             StringGet_Nickname(name);
-            snprintf(buf, sizeof(buf), "%sLv%d", MP_Follower_IsFollowing(mon) ? "FOLLOWING  " : "",
-                     (int)GetMonData(mon, MON_DATA_LEVEL));
+            if (MP_Life_WantsOut(&mon->box))   // MOéMON GARDEN: it's asking to come out
+                snprintf(buf, sizeof(buf), "WANTS TO COME");
+            else
+                snprintf(buf, sizeof(buf), "%sLv%d", MP_Follower_IsFollowing(mon) ? "FOLLOWING  " : "",
+                         (int)GetMonData(mon, MON_DATA_LEVEL));
             MP_AsciiToGame(lv, buf, 14);
             MpUi_Row(i, i == sPick.cursor, name, lv);
         }

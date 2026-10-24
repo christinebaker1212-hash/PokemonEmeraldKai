@@ -34,6 +34,8 @@
 #include "constants/event_objects.h"
 #include "constants/species.h"
 #include "constants/songs.h"
+#include "mp_life_emote.h"
+#include "mp_life_field.h"
 
 struct MpFollowerGfx
 {
@@ -83,6 +85,17 @@ struct FollowerSlot
     u8 fxSound;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
+    // MOéMON GARDEN (mp_life_field.c): the follower going about its own business while its
+    // Trainer stands still. Its own tiles and step; it hurries back when the Trainer moves on.
+    bool8 autoOn;
+    bool8 autoStuck;
+    bool8 autoReturning;     // on its way back to its Trainer's side
+    struct Coords16 aPrev, aCur, aTarget;
+    u8 aMoved;               // pixels into its step (16 = standing on aCur)
+    u8 aSpeed;               // pixels a frame
+    u8 aDir;
+    u8 aPose;                // LIFE_POSE_*
+    u16 aTimer;
 };
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
@@ -247,6 +260,8 @@ static bool8 CanStandBehind(struct ObjectEvent *owner, struct Coords16 *out)
 static void PlaceAtOwner(struct FollowerSlot *s, struct ObjectEvent *owner)
 {
     struct Coords16 behind;
+    s->autoOn = FALSE;   // MOéMON GARDEN: whatever it was doing on its own ends (a warp, a new map)
+    s->aPose = LIFE_POSE_NONE;
     s->prev = s->cur = s->ownerLast = owner->currentCoords;
     if (CanStandBehind(owner, &behind))
         s->prev = s->cur = behind; // appear right away instead of after the first step
@@ -274,6 +289,129 @@ static u8 DirBetween(struct Coords16 from, struct Coords16 to, u8 fallback)
     if (abs(dx) >= abs(dy))
         return dx < 0 ? FDIR_LEFT : FDIR_RIGHT;
     return dy < 0 ? FDIR_UP : FDIR_DOWN;
+}
+
+// MOéMON GARDEN: can the follower stand on this tile on its own? (never where anyone needs to be)
+static bool8 AutoCanStand(struct ObjectEvent *owner, s16 x, s16 y)
+{
+    u8 behavior, elevation;
+    if (x == owner->currentCoords.x && y == owner->currentCoords.y)
+        return FALSE;
+    if (MapGridGetCollisionAt(x, y) != 0 || GetObjectEventIdByXY(x, y) != OBJECT_EVENTS_COUNT)
+        return FALSE;
+    behavior = MapGridGetMetatileBehaviorAt(x, y);
+    if (MetatileBehavior_IsDoor(behavior) || MetatileBehavior_IsWarpDoor(behavior) || MetatileBehavior_IsNonAnimDoor(behavior)
+     || MetatileBehavior_IsSurfableWaterOrUnderwater(behavior) || MetatileBehavior_IsWaterfall(behavior)
+     || MetatileBehavior_IsJumpEast(behavior) || MetatileBehavior_IsJumpWest(behavior)
+     || MetatileBehavior_IsJumpNorth(behavior) || MetatileBehavior_IsJumpSouth(behavior)
+     || MetatileBehavior_IsDeepSand(behavior) || MetatileBehavior_IsIce(behavior) || MetatileBehavior_IsEastArrowWarp(behavior) || MetatileBehavior_IsWestArrowWarp(behavior)
+     || MetatileBehavior_IsNorthArrowWarp(behavior) || MetatileBehavior_IsSouthArrowWarp(behavior)
+     || MetatileBehavior_IsDeepSouthWarp(behavior) || MetatileBehavior_IsEscalator(behavior))
+        return FALSE;
+    elevation = MapGridGetElevationAt(x, y);
+    if (elevation != 0 && elevation != 15 && owner->currentElevation != 0 && owner->currentElevation != 15
+     && elevation != owner->currentElevation)
+        return FALSE;
+    // near its Trainer and on screen
+    if (abs(x - owner->currentCoords.x) > 6 || abs(y - owner->currentCoords.y) > 4)
+        return FALSE;
+    return TRUE;
+}
+
+bool8 MP_Follower_CanStandAt(s16 x, s16 y)
+{
+    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT)
+        return FALSE;
+    return AutoCanStand(&gObjectEvents[gPlayerAvatar.objectEventId], x, y);
+}
+
+static u8 DirToward(struct Coords16 from, struct Coords16 to, u8 fallback);
+
+// One step of its own walk toward aTarget (greedy, around small obstacles)
+static void AutoStep(struct FollowerSlot *s, struct ObjectEvent *owner)
+{
+    s16 dx, dy, i;
+    struct Coords16 tries[4];
+    u8 n = 0;
+    if (s->aMoved < 16)
+    {
+        s->aMoved += s->aSpeed;
+        if (s->aMoved > 16)
+            s->aMoved = 16;
+        return;
+    }
+    s->aPrev = s->aCur;
+    dx = s->aTarget.x - s->aCur.x;
+    dy = s->aTarget.y - s->aCur.y;
+    if (dx == 0 && dy == 0)
+        return;
+    // the longer way first, then the shorter, then sideways around something in the way
+    if (abs(dx) >= abs(dy))
+    {
+        tries[n].x = s->aCur.x + (dx > 0 ? 1 : -1), tries[n++].y = s->aCur.y;
+        if (dy) tries[n].x = s->aCur.x, tries[n++].y = s->aCur.y + (dy > 0 ? 1 : -1);
+        else    tries[n].x = s->aCur.x, tries[n++].y = s->aCur.y + 1, tries[n].x = s->aCur.x, tries[n++].y = s->aCur.y - 1;
+    }
+    else
+    {
+        tries[n].x = s->aCur.x, tries[n++].y = s->aCur.y + (dy > 0 ? 1 : -1);
+        if (dx) tries[n].x = s->aCur.x + (dx > 0 ? 1 : -1), tries[n++].y = s->aCur.y;
+        else    tries[n].x = s->aCur.x + 1, tries[n++].y = s->aCur.y, tries[n].x = s->aCur.x - 1, tries[n++].y = s->aCur.y;
+    }
+    for (i = 0; i < n; i++)
+        if (AutoCanStand(owner, tries[i].x, tries[i].y))
+        {
+            s->aCur = tries[i];
+            s->aMoved = 0;
+            s->aDir = DirToward(s->aPrev, s->aCur, s->aDir);
+            s->autoStuck = FALSE;
+            return;
+        }
+    s->autoStuck = TRUE;
+}
+
+static u8 DirToward(struct Coords16 from, struct Coords16 to, u8 fallback)
+{
+    s16 dx = to.x - from.x, dy = to.y - from.y;
+    if (dx == 0 && dy == 0)
+        return fallback;
+    if (abs(dx) >= abs(dy))
+        return dx < 0 ? FDIR_LEFT : FDIR_RIGHT;
+    return dy < 0 ? FDIR_UP : FDIR_DOWN;
+}
+
+// The frame (and little offsets) for the follower on its own: walking, or its pose
+static u8 AutoFrame(struct FollowerSlot *s, struct Sprite *fs)
+{
+    u16 t = ++s->aTimer;
+    fs->x2 = 0;
+    if (s->aMoved < 16 && (s->aPrev.x != s->aCur.x || s->aPrev.y != s->aCur.y))
+        return s->aDir * 2 + ((s->animTimer / (s->aSpeed > 1 ? 4 : WALK_FRAME_TIME)) & 1);
+    switch (s->aPose)
+    {
+    case LIFE_POSE_SIT:
+        return s->aDir * 2;
+    case LIFE_POSE_NAP:
+        fs->y2 = 2;
+        return FDIR_DOWN * 2;
+    case LIFE_POSE_HOP:
+    {
+        static const s8 sHop[16] = {0, -2, -4, -5, -6, -6, -5, -4, -2, 0, 0, 0, 0, 0, 0, 0};
+        fs->y2 = sHop[(t / 2) % 16];
+        return s->aDir * 2 + ((t / 8) & 1);
+    }
+    case LIFE_POSE_SHAKE:
+        fs->x2 = ((t / 3) & 1) ? 1 : -1;
+        return s->aDir * 2 + ((t / 6) & 1);
+    case LIFE_POSE_SPIN:
+    {
+        static const u8 sSpin[4] = {FDIR_DOWN, FDIR_RIGHT, FDIR_UP, FDIR_LEFT};
+        return sSpin[(t / 8) & 3] * 2;
+    }
+    case LIFE_POSE_LOOKUP:
+        return FDIR_UP * 2;
+    }
+    return s->aDir * 2 + ((s->animTimer / IDLE_FRAME_TIME) & 1);
 }
 
 // Moves one follower with its owner for this frame. hidden: owner surfing etc.
@@ -325,7 +463,29 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     if (owner->currentCoords.x != s->ownerLast.x || owner->currentCoords.y != s->ownerLast.y)
     {
         s16 jump = abs(owner->currentCoords.x - s->ownerLast.x) + abs(owner->currentCoords.y - s->ownerLast.y);
-        if (jump > 3)
+        if (s->autoOn)
+        {
+            // MOéMON GARDEN: its Trainer moves on. Close by, it hurries after them (into the tile
+            // they left, at twice the pace); far away or out of sight, it simply reappears beside them
+            struct Coords16 at = s->aMoved >= 8 ? s->aCur : s->aPrev;
+            s16 d = abs(at.x - s->ownerLast.x) + abs(at.y - s->ownerLast.y);
+            s->autoOn = FALSE;
+            s->aPose = LIFE_POSE_NONE;
+            MP_LifeField_OnHurryBack(d);
+            if (jump > 3 || d > 2)
+            {
+                PlaceAtOwner(s, owner);
+            }
+            else
+            {
+                s->prev = at;
+                s->cur = s->ownerLast;
+                s->ownerLast = owner->currentCoords;
+                s->moved = 0;
+                s->dir = DirBetween(s->prev, s->cur, s->dir);
+            }
+        }
+        else if (jump > 3)
         {
             PlaceAtOwner(s, owner); // warped or teleported
         }
@@ -365,6 +525,13 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         fvx = s->prev.x * 256 + (s->cur.x - s->prev.x) * frac;
         fvy = s->prev.y * 256 + (s->cur.y - s->prev.y) * frac;
+        if (s->autoOn)
+        {
+            // its own walk (MOéMON GARDEN)
+            AutoStep(s, owner);
+            fvx = s->aPrev.x * 256 + (s->aCur.x - s->aPrev.x) * s->aMoved * 16;
+            fvy = s->aPrev.y * 256 + (s->aCur.y - s->aPrev.y) * s->aMoved * 16;
+        }
         dxPix = (s16)((fvx - ovx) * 16 / 256);
         dyPix = (s16)((fvy - ovy) * 16 / 256);
         fx = os->x + dxPix;
@@ -379,10 +546,18 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
 
         // Walking frames while moving, a slow idle bob while standing
         s->animTimer++;
-        if (s->moved < total && (s->prev.x != s->cur.x || s->prev.y != s->cur.y))
-            frame = s->dir * 2 + ((s->animTimer / WALK_FRAME_TIME) & 1);
+        if (s->autoOn)
+        {
+            frame = AutoFrame(s, fs);
+        }
         else
-            frame = s->dir * 2 + ((s->animTimer / IDLE_FRAME_TIME) & 1);
+        {
+            fs->x2 = 0;
+            if (s->moved < total && (s->prev.x != s->cur.x || s->prev.y != s->cur.y))
+                frame = s->dir * 2 + ((s->animTimer / WALK_FRAME_TIME) & 1);
+            else
+                frame = s->dir * 2 + ((s->animTimer / IDLE_FRAME_TIME) & 1);
+        }
     }
     if (frame != s->anim)
     {
@@ -393,12 +568,12 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     fs->oam.priority = os->oam.priority;
     SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
     fs->invisible = hidden || os->invisible || s->fxHide
-        || (s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
+        || (!s->autoOn && s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
     if (s->recalling && !MP_BallFx_BodyRunning(s->spriteId))
         fs->invisible = TRUE;   // gone back into its ball: stays hidden until it's really gone
     // Someone else stepped onto its tile (a friend hopping off a piggyback
     // ride, or walking up behind): tuck it away instead of covering them
-    if (!fs->invisible && s->moved >= 16)
+    if (!fs->invisible && s->moved >= 16 && !s->autoOn)
     {
         u8 other = GetObjectEventIdByXY(s->cur.x, s->cur.y);
         if (other != OBJECT_EVENTS_COUNT && other != ownerObj)
@@ -570,8 +745,8 @@ bool8 MP_Follower_LocalTile(s16 *x, s16 *y)
     struct FollowerSlot *s = &sSlots[0];
     if (!sInit || !s->gfx || !SpriteIsOurs(s) || gSprites[s->spriteId].invisible)
         return FALSE;
-    *x = s->cur.x;
-    *y = s->cur.y;
+    *x = s->autoOn ? s->aCur.x : s->cur.x;
+    *y = s->autoOn ? s->aCur.y : s->cur.y;
     return TRUE;
 }
 
@@ -740,6 +915,8 @@ void MP_Follower_Update(void)
             SlotEffects(s, (fl >> 4) & 3, (fl & 0x40) != 0, gMpPlayers[i].state.followerFx, (fl >> 1) & 7, obj);
         }
     }
+    MP_LifeInteract_Update();
+    MP_LifeField_Update();   // MOéMON GARDEN: the follower's own life (mp_life_field.c)
 }
 
 // Talking to your follower
@@ -797,6 +974,181 @@ bool8 MP_Follower_TryInteract(void)
     LockPlayerFieldControls();
     CreateTask(Task_FollowerTalk, 80);
     return TRUE;
+}
+
+// ---------------------------------------------------------------------------
+// MOéMON GARDEN (mp_life_field.c): the local follower on its own
+
+static struct ObjectEvent *LocalOwner(void)
+{
+    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || !gObjectEvents[gPlayerAvatar.objectEventId].active)
+        return NULL;
+    return &gObjectEvents[gPlayerAvatar.objectEventId];
+}
+
+// It may wander off only while standing (not mid-step) and seen
+bool8 MP_Follower_AutoStart(void)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    if (!sInit || !s->gfx || !SpriteIsOurs(s) || !s->placed || s->moved < 16 || s->autoOn
+     || gSprites[s->spriteId].invisible || LocalOwner() == NULL)
+        return FALSE;
+    s->autoOn = TRUE;
+    s->autoStuck = FALSE;
+    s->autoReturning = FALSE;
+    s->aPrev = s->aCur = s->aTarget = s->cur;
+    s->aMoved = 16;
+    s->aSpeed = 1;
+    s->aDir = s->dir;
+    s->aPose = LIFE_POSE_NONE;
+    s->aTimer = 0;
+    return TRUE;
+}
+
+bool8 MP_Follower_AutoActive(void)
+{
+    return sInit && sSlots[0].autoOn;
+}
+
+void MP_Follower_AutoTarget(s16 x, s16 y, u8 speed)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    if (!s->autoOn)
+        return;
+    s->aTarget.x = x;
+    s->aTarget.y = y;
+    s->aSpeed = speed ? speed : 1;
+    s->autoStuck = FALSE;
+    if (s->aPose != LIFE_POSE_NONE)
+        s->aPose = LIFE_POSE_NONE;
+}
+
+bool8 MP_Follower_AutoArrived(void)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    return s->autoOn && s->aMoved >= 16 && s->aCur.x == s->aTarget.x && s->aCur.y == s->aTarget.y;
+}
+
+bool8 MP_Follower_AutoStuck(void)
+{
+    return sSlots[0].autoOn && sSlots[0].autoStuck;
+}
+
+void MP_Follower_AutoPose(u8 pose)
+{
+    if (sSlots[0].autoOn)
+    {
+        sSlots[0].aPose = pose;
+        sSlots[0].aTimer = 0;
+    }
+}
+
+void MP_Follower_AutoFaceTile(s16 x, s16 y)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    struct Coords16 to;
+    if (!s->autoOn)
+        return;
+    to.x = x;
+    to.y = y;
+    s->aDir = DirToward(s->aCur, to, s->aDir);
+}
+
+void MP_Follower_AutoFace(u8 dir)
+{
+    if (sSlots[0].autoOn)
+        sSlots[0].aDir = dir;
+}
+
+// Back to following: it walks to its Trainer's side, then follows as usual
+void MP_Follower_AutoReturn(void)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    struct ObjectEvent *owner = LocalOwner();
+    struct Coords16 behind;
+    if (!s->autoOn || owner == NULL)
+        return;
+    if (CanStandBehind(owner, &behind))
+        s->aTarget = behind;
+    else
+        s->aTarget = s->aCur;
+    s->autoReturning = TRUE;
+    s->aSpeed = 2;
+    s->aPose = LIFE_POSE_NONE;
+}
+
+// Called every frame by mp_life_field.c while it's returning: once beside its Trainer, it follows again
+bool8 MP_Follower_AutoFinishReturn(void)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    struct ObjectEvent *owner = LocalOwner();
+    s16 d;
+    if (!s->autoOn || owner == NULL)
+        return TRUE;
+    d = abs(s->aCur.x - owner->currentCoords.x) + abs(s->aCur.y - owner->currentCoords.y);
+    if (s->aMoved >= 16 && (d <= 1 || s->autoStuck || MP_Follower_AutoArrived()))
+    {
+        if (d > 1)
+        {
+            PlaceAtOwner(s, owner);
+        }
+        else
+        {
+            s->prev = s->cur = s->aCur;
+            s->ownerLast = owner->currentCoords;
+            s->moved = 16;
+            s->dir = s->aDir;
+        }
+        s->autoOn = FALSE;
+        s->aPose = LIFE_POSE_NONE;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// Where the local follower stands (its own tile while on its own)
+bool8 MP_Follower_LocalPos(s16 *x, s16 *y, u8 *dir)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    if (!sInit || !s->gfx || !SpriteIsOurs(s) || !s->placed)
+        return FALSE;
+    if (s->autoOn)
+    {
+        *x = s->aCur.x;
+        *y = s->aCur.y;
+        *dir = s->aDir;
+    }
+    else
+    {
+        *x = s->cur.x;
+        *y = s->cur.y;
+        *dir = s->dir;
+    }
+    return TRUE;
+}
+
+// For the emote bubble over a follower: its sprite's screen position (FALSE = not shown)
+bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority)
+{
+    struct FollowerSlot *s;
+    struct Sprite *fs;
+    if (!sInit || slot >= NUM_SLOTS)
+        return FALSE;
+    s = &sSlots[slot];
+    if (!s->gfx || !SpriteIsOurs(s))
+        return FALSE;
+    fs = &gSprites[s->spriteId];
+    if (fs->invisible)
+        return FALSE;
+    *x = ScreenX(fs);
+    *top = ScreenY(fs) - s->gfx->size / 2 + (s->gfx->size == 64 ? 16 : 4);
+    *subpriority = fs->subpriority > 0 ? fs->subpriority - 1 : 0;
+    return TRUE;
+}
+
+u16 MP_Follower_SlotDex(u8 slot)
+{
+    return slot < NUM_SLOTS && sInit ? sSlots[slot].dex : 0;
 }
 
 void MP_Follower_DebugDump(void)

@@ -26,6 +26,7 @@
 #include "random.h"
 #include "string_util.h"
 #include "tv.h"
+#include "mp_life_emote.h"
 #include "constants/berry.h"
 #include "constants/characters.h"
 #include "constants/flags.h"
@@ -57,6 +58,10 @@ static struct MpLifeName sNames[LIFE_MAX_NAMES];
 static u16 sNameCount;
 static u8 sNameNext;
 static bool8 sLoaded;
+static u32 sStoryMask, sBadgeMask;
+static bool8 sStoryKnown;   // the masks were read (or set from the save's flags)
+static struct MpLifeNews sNews[LIFE_NEWS];
+static u8 sNewsCount;
 static u32 sFrame;          // frames on the map since the last emotion step
 static u32 sLastMinute;     // play minute of the last minute tick
 static u16 sLastPlace = 0xFFFF;
@@ -914,8 +919,19 @@ static void ArrivedAt(struct MpLifeRec *rec, u16 place, bool8 present)
 static void PlacesMinute(struct MpLifeRec *rec)
 {
     struct MpLifePlace *p = MP_Life_Place(rec, MP_Life_CurrentPlace(), TRUE);
+    u8 i;
     if (p && p->level < 255)
         p->level++;
+    // a place it knows deeply and feels good in becomes a favorite (one at a time)
+    if (p && p->level >= 200 && rec->mood > 20)
+    {
+        for (i = 0; i < LIFE_PLACES; i++)
+            if (rec->place[i].flags & LIFE_PLACE_FAVORITE)
+                return;
+        p->flags |= LIFE_PLACE_FAVORITE;
+        MP_Life_AddTrait(rec, TRAIT_LOVES_PLACE, p->map, 90);
+        MPNet_Log("life: favorite place %u for species %u", p->map, rec->species);
+    }
 }
 
 static void ReunionCheck(struct MpLifeRec *rec, bool8 inParty)
@@ -988,6 +1004,137 @@ static void MinuteTick(u32 now, u32 minutes)
     }
 }
 
+// ---------------------------------------------------------------------------
+// The story and badges (docs 8.1-8.2): beats the save's flags mark, lived by the party
+
+static const struct { u16 flag; u8 beat; u16 legend; u8 strength; } sStory[] = {
+    {FLAG_DEFEATED_RIVAL_ROUTE103, LIFE_STORY_RIVAL, 0, 150},
+    {FLAG_DEFEATED_RIVAL_ROUTE_104, LIFE_STORY_RIVAL, 0, 150},
+    {FLAG_DEFEATED_RIVAL_RUSTBORO, LIFE_STORY_RIVAL, 0, 160},
+    {FLAG_DEFEATED_WALLY_MAUVILLE, LIFE_STORY_WALLY, 0, 150},
+    {FLAG_DEFEATED_WALLY_VICTORY_ROAD, LIFE_STORY_WALLY, 0, 190},
+    {FLAG_BEAT_MAGMA_GRUNT_JAGGED_PASS, LIFE_STORY_MAGMA, 0, 150},
+    {FLAG_DEFEATED_EVIL_TEAM_MT_CHIMNEY, LIFE_STORY_MT_CHIMNEY, 0, 200},
+    {FLAG_RECEIVED_CASTFORM, LIFE_STORY_WEATHER_INST, 0, 170},
+    {FLAG_DEFEATED_MAGMA_SPACE_CENTER, LIFE_STORY_SPACE_CENTER, 0, 200},
+    {FLAG_TEAM_AQUA_ESCAPED_IN_SUBMARINE, LIFE_STORY_AQUA, 0, 170},
+    {FLAG_GROUDON_AWAKENED_MAGMA_HIDEOUT, LIFE_STORY_GROUDON, 0, 220},
+    {FLAG_KYOGRE_ESCAPED_SEAFLOOR_CAVERN, LIFE_STORY_KYOGRE, 0, 220},
+    {FLAG_SOOTOPOLIS_ARCHIE_MAXIE_LEAVE, LIFE_STORY_RAYQUAZA, 0, 230},
+    {FLAG_SOOTOPOLIS_ARCHIE_MAXIE_LEAVE, LIFE_STORY_SOOTOPOLIS, 0, 220},
+    {FLAG_DEFEATED_ELITE_4_DRAKE, LIFE_STORY_ELITE_FOUR, 0, 220},
+    {FLAG_SYS_GAME_CLEAR, LIFE_STORY_CHAMPION, 0, 250},
+    {FLAG_DEFEATED_GROUDON, 0, SPECIES_GROUDON, 220},
+    {FLAG_DEFEATED_KYOGRE, 0, SPECIES_KYOGRE, 220},
+    {FLAG_DEFEATED_RAYQUAZA, 0, SPECIES_RAYQUAZA, 230},
+};
+
+static u32 CurrentStoryMask(void)
+{
+    u32 m = 0;
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sStory); i++)
+        if (FlagGet(sStory[i].flag))
+            m |= 1u << i;
+    return m;
+}
+
+static u32 CurrentBadgeMask(void)
+{
+    u32 m = 0;
+    u8 i;
+    for (i = 0; i < 8; i++)
+        if (FlagGet(FLAG_BADGE01_GET + i))
+            m |= 1u << i;
+    return m;
+}
+
+// News for word spreading (mp_life_social.c): who in the party lived it tells the others later
+static void AddNews(u8 kind, u16 param)
+{
+    if (sNewsCount == LIFE_NEWS)
+    {
+        memmove(&sNews[0], &sNews[1], sizeof(sNews[0]) * (LIFE_NEWS - 1));
+        sNewsCount--;
+    }
+    sNews[sNewsCount].kind = kind;
+    sNews[sNewsCount].param = param;
+    sNews[sNewsCount].when = MP_Life_PlayMinutes();
+    sNewsCount++;
+}
+
+const struct MpLifeNews *MP_Life_News(u8 *count)
+{
+    *count = sNewsCount;
+    return sNews;
+}
+
+static void PartyLives(u8 kind, u16 param, u8 strength)
+{
+    u8 i;
+    u32 follower = gMpConfig.followerPersonality;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct BoxPokemon *box = &gPlayerParty[i].box;
+        struct MpLifeRec *rec = MP_Life_Get(box, TRUE);
+        bool8 inFront;
+        if (rec == NULL || GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+            continue;
+        // the follower and the lead were right there; the rest watched from their balls
+        inFront = rec->personality == follower || i == 0;
+        MP_Life_Remember(rec, kind, strength, inFront ? TIER_PART : TIER_WITNESS, 0, param);
+        if (kind == MEM_BADGE || kind == MEM_STORY)
+            MP_Life_Feel(rec, EMO_PRIDE, 30);
+    }
+}
+
+static void StoryTick(void)
+{
+    u32 story, badges, changed;
+    u8 i;
+    if (gSaveBlock1Ptr == NULL)
+        return;
+    story = CurrentStoryMask();
+    badges = CurrentBadgeMask();
+    if (!sStoryKnown)
+    {
+        // a save from before the Garden: what happened before isn't relived now
+        sStoryMask = story;
+        sBadgeMask = badges;
+        sStoryKnown = TRUE;
+        return;
+    }
+    changed = badges & ~sBadgeMask;
+    for (i = 0; i < 8; i++)
+        if (changed & (1u << i))
+        {
+            PartyLives(MEM_BADGE, i, 230);
+            AddNews(MEM_BADGE, i);
+            MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_SPARKLE);
+            MPNet_Log("life: badge %u", i + 1);
+        }
+    changed = story & ~sStoryMask;
+    for (i = 0; i < ARRAY_COUNT(sStory); i++)
+        if (changed & (1u << i))
+        {
+            if (sStory[i].legend)
+            {
+                PartyLives(MEM_LEGEND, sStory[i].legend, sStory[i].strength);
+                AddNews(MEM_LEGEND, sStory[i].legend);
+            }
+            else
+            {
+                PartyLives(MEM_STORY, sStory[i].beat, sStory[i].strength);
+                AddNews(MEM_STORY, sStory[i].beat);
+            }
+            MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, sStory[i].beat == LIFE_STORY_GROUDON || sStory[i].beat == LIFE_STORY_KYOGRE
+                              ? LIFE_EMOTE_EXCLAIM : LIFE_EMOTE_SPARKLE);
+            MPNet_Log("life: story %u (beat %u)", i, sStory[i].beat);
+        }
+    sStoryMask = story;
+    sBadgeMask = badges;
+}
+
 // Emotions settle on their own over a few minutes (every 2 seconds: -1)
 static void EmotionStep(void)
 {
@@ -1033,6 +1180,7 @@ void MP_Life_FrameUpdate(void)
         // everyone in the party has a record (a new catch, a Pokémon taken from the PC)
         for (i = 0; i < PARTY_SIZE; i++)
             MP_Life_Get(&gPlayerParty[i].box, TRUE);
+        StoryTick();
     }
 }
 
@@ -1047,6 +1195,10 @@ struct LifeHeader
     u32 recSize, recCount;
     u32 bondSize, bondCount;
     u32 nameCount;
+    u32 storyMask;          // story beats already lived (sStory bits)
+    u32 badgeMask;          // badges already celebrated
+    u32 newsCount;
+    struct MpLifeNews news[LIFE_NEWS];
 };
 
 static void SidecarPath(char *out, size_t size, int backup)
@@ -1059,6 +1211,9 @@ static void SidecarPath(char *out, size_t size, int backup)
 
 void MP_Life_Reset(void)
 {
+    sStoryKnown = FALSE;
+    sNewsCount = 0;
+    memset(sNews, 0, sizeof(sNews));
     sRecCount = 0;
     sBondCount = 0;
     sNameCount = 0;
@@ -1089,6 +1244,10 @@ void MP_Life_WriteSidecar(void)
     h.bondSize = sizeof(struct MpLifeBond);
     h.bondCount = sBondCount;
     h.nameCount = sNameCount;
+    h.storyMask = sStoryMask;
+    h.badgeMask = sBadgeMask;
+    h.newsCount = sNewsCount;
+    memcpy(h.news, sNews, sizeof(h.news));
     fwrite(&h, sizeof(h), 1, f);
     fwrite(sRecs, sizeof(struct MpLifeRec), sRecCount, f);
     fwrite(sBonds, sizeof(struct MpLifeBond), sBondCount, f);
@@ -1151,6 +1310,11 @@ static bool8 ReadSidecar(const char *path, bool8 needCounter)
             break;
         sNameCount++;
     }
+    sStoryMask = h.storyMask;
+    sBadgeMask = h.badgeMask;
+    sNewsCount = h.newsCount <= LIFE_NEWS ? h.newsCount : LIFE_NEWS;
+    memcpy(sNews, h.news, sizeof(sNews));
+    sStoryKnown = TRUE;
     fclose(f);
     return TRUE;
 }
@@ -1264,6 +1428,58 @@ void MP_Life_Debug(const char *args)
             MP_Life_AddTrait(rec, b, c, d);
         printf("[test] life trait %d %d %d %d\n", a, b, c, d);
     }
+    else if (strcmp(cmd, "need") == 0 && a >= 0 && a < PARTY_SIZE)
+    {
+        // need SLOT NEED VALUE
+        struct MpLifeRec *rec = MP_Life_Get(&gPlayerParty[a].box, TRUE);
+        if (rec && b >= 0 && b < LIFE_NEEDS)
+            rec->need[b] = c;
+        printf("[test] life need %d %d %d\n", a, b, c);
+    }
+    else if (strcmp(cmd, "feel") == 0 && a >= 0 && a < PARTY_SIZE)
+    {
+        // feel SLOT EMOTION AMOUNT
+        struct MpLifeRec *rec = MP_Life_Get(&gPlayerParty[a].box, TRUE);
+        if (rec && b >= 0 && b < LIFE_EMOTIONS)
+            rec->emo[b] = c;
+        printf("[test] life feel %d %d %d\n", a, b, c);
+    }
+    else if (strcmp(cmd, "temper") == 0 && a >= 0 && a < PARTY_SIZE)
+    {
+        // temper SLOT AXIS VALUE
+        struct MpLifeRec *rec = MP_Life_Get(&gPlayerParty[a].box, TRUE);
+        if (rec && b >= 0 && b < LIFE_AXES)
+            rec->cur[b] = rec->base[b] = c;
+        printf("[test] life temper %d %d %d\n", a, b, c);
+    }
+    else if (strcmp(cmd, "verb") == 0)
+    {
+        // verb V: as if V was picked on the wheel (LIFE_VERBS = SIT WITH)
+        void MP_LifeInteract_Debug(s8 verb);
+        MP_LifeInteract_Debug(a);
+        printf("[test] life verb %d\n", a);
+    }
+    else if (strcmp(cmd, "emote") == 0)
+    {
+        MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, a);
+        printf("[test] life emote %d\n", a);
+    }
+    else if (strcmp(cmd, "act") == 0)
+    {
+        // act N: the follower's next activity is LIFE_ACT_N (if this place allows it)
+        void MP_LifeField_DebugForce(u8 act);
+        MP_LifeField_DebugForce(a);
+        printf("[test] life act %d\n", a);
+    }
+    else if (strcmp(cmd, "field") == 0)
+    {
+        void MP_LifeField_Debug(void);
+        MP_LifeField_Debug();
+    }
+    else if (strcmp(cmd, "story") == 0)
+    {
+        printf("[test] life story mask %08x badges %02x news %u\n", (unsigned)sStoryMask, (unsigned)sBadgeMask, sNewsCount);
+    }
     else if (strcmp(cmd, "count") == 0)
     {
         printf("[test] life count records %u bonds %u names %u\n", sRecCount, sBondCount, sNameCount);
@@ -1340,4 +1556,30 @@ void MP_Life_Closest(u32 from, u32 *friendKey, u32 *rivalKey, u32 *familyKey, u3
          && b->v[BOND_RESPECT] + b->v[BOND_FRICTION] > bestRival)
             bestRival = b->v[BOND_RESPECT] + b->v[BOND_FRICTION], *rivalKey = b->to;
     }
+}
+
+// ---------------------------------------------------------------------------
+// Asking to come out (docs 7): sometimes a party Pokémon would like to walk with its Trainer: a curious
+// one near a place it likes, a social one who misses company, a lively one bursting to play. The cue
+// changes now and then (in ten-minute spells) and saying no leaves no mark.
+bool8 MP_Life_WantsOut(struct BoxPokemon *box)
+{
+    struct MpLifeRec *rec = MP_Life_Get(box, FALSE);
+    struct MpLifePlace *p;
+    bool8 liked, eager = FALSE;
+    u32 spell;
+    if (rec == NULL || rec->personality == gMpConfig.followerPersonality)
+        return FALSE;
+    p = MP_Life_Place(rec, MP_Life_CurrentPlace(), FALSE);
+    liked = p && ((p->flags & LIFE_PLACE_FAVORITE) || MP_Life_FindTrait(rec, TRAIT_LOVES_PLACE, p->map) || p->level >= 150);
+    if (rec->cur[LIFE_CURIOUS] >= 150 && (liked || rec->need[NEED_EXPLORE] >= 180))
+        eager = TRUE;
+    if (rec->cur[LIFE_SOCIAL] >= 170 && rec->need[NEED_COMPANY] >= 200)
+        eager = TRUE;
+    if (rec->cur[LIFE_LIVELY] >= 150 && rec->need[NEED_PLAY] >= 230)
+        eager = TRUE;
+    if (!eager)
+        return FALSE;
+    spell = MP_Life_PlayMinutes() / 10;
+    return ((rec->personality ^ (spell * 2654435761u)) >> 7) % 3 == 0;
 }

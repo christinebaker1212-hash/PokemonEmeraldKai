@@ -1,0 +1,9 @@
+# MOéMON GARDEN on the map (Route 104 beach, by a hidden POTION): the follower's own life. Tap A in front of it: the
+# fitting thing (it's hungry: its tummy rumbles); hold A: the verb wheel, FEED A BERRY (the ORAN BERRY it was actually
+# looking for food: a memory and a moment, Friendship +5); a very curious follower sniffs at the hidden item (the rare
+# hint); a nap (Zzz); walking off wakes it (it hurries back). Shots tap, wheel, fed, hint, nap.
+MODE=1
+TMO=150
+WARP="0,19,15,57"
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("life interact: verb 0" "life interact: wheel open" "life: moment (memory 17) friendship +5" "life interact: verb 2" "life field: hint at 14,55" "life field: act 5" "life emote: slot 0 icon 2")

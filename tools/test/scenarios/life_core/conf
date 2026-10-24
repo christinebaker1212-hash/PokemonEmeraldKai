@@ -1,0 +1,10 @@
+# MOéMON GARDEN core: a record per Pokémon (temperament, tastes, needs, memories, traits, bonds). A good memory involving
+# the owner (praised) raises Friendship once by an Emerald-sized step (+5 under 100); the same again at once only
+# strengthens it (no Friendship); a fright is a memory but never Friendship. 30 minutes of needs, the journal (all
+# facts revealed), the .life sidecar written and read back, and the summary's JOURNAL page (6th page: lined sheet,
+# A turns the page; a Pokémon with no record yet gets a note). Shots journal*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:12"
+EXPECT_A=("life: moment (memory 19) friendship +5 -> 75" "[test] life remember 0 kind 19 -> no memory friendship 75" "[test] life remember 0 kind 8 -> memory friendship 75" "[test] journal 0: TEST praised it. It glowed." "[test] journal 0: Uneasy around thunderstorms." "[test] life loaded 2" "journal: shown" "journal: page 2 of")
+UNEXPECT_A=("moment (memory 8)")

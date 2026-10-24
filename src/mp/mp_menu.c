@@ -1712,6 +1712,179 @@ bool8 MP_QuickPickOpen(void)
     return FindTaskIdByFunc(Task_QuickPick) != TASK_NONE;
 }
 
+// ---------------------------------------------------------------------------
+// MOéMON GARDEN: the verb wheel (hold A in front of your follower). The same boxes around you as the
+// quick pick; L / R switch pages. Held: let go of A to do the picked one (nothing picked: the wheel
+// stays open, A does it, B closes).
+
+enum { VERB_PAGE_TOGETHER, VERB_PAGE_HEART, VERB_PAGE_QUIET, VERB_PAGES };
+#define VERB_SIT_WITH LIFE_VERBS   // not a LIFE_VERB_* of its own (mp_life_interact.c)
+static const s8 sVerbs[VERB_PAGES][4] = {
+    [VERB_PAGE_TOGETHER] = {LIFE_VERB_PET, LIFE_VERB_PLAY, LIFE_VERB_FEED, LIFE_VERB_TALK},
+    [VERB_PAGE_HEART]    = {LIFE_VERB_PRAISE, LIFE_VERB_COMFORT, LIFE_VERB_GROOM, VERB_SIT_WITH},
+    [VERB_PAGE_QUIET]    = {LIFE_VERB_WATCH, LIFE_VERB_KEEPSAKE, -1, -1},
+};
+static const char *const sVerbNames[LIFE_VERBS + 1] = {
+    [LIFE_VERB_TALK] = "TALK", [LIFE_VERB_PET] = "PET", [LIFE_VERB_FEED] = "FEED A BERRY",
+    [LIFE_VERB_PLAY] = "PLAY", [LIFE_VERB_PRAISE] = "PRAISE", [LIFE_VERB_COMFORT] = "COMFORT",
+    [LIFE_VERB_WATCH] = "WATCH QUIETLY", [LIFE_VERB_GROOM] = "GROOM", [LIFE_VERB_KEEPSAKE] = "GIVE A KEEPSAKE",
+    [LIFE_VERB_PICKUP] = "", [VERB_SIT_WITH] = "SIT WITH",
+};
+static const char *const sVerbPageNames[VERB_PAGES] = {"TOGETHER", "HEART", "QUIET"};
+static void (*sVerbDone)(s8 verb);
+static u8 sVerbPage;   // remembered between openings
+
+static void VerbDrawChoice(s16 *data, u8 dir)
+{
+    u8 win = qWin(dir), l1[40], arrow[2] = {sQuickArrows[dir], EOS};
+    const struct WindowTemplate *t = &sQuickWins[dir];
+    bool8 sel = (qSel == dir), twoLines = t->height >= 3;
+    s8 verb = sVerbs[qPage][dir];
+    MpTheme_Panel(win, 0);
+    if (sel && verb >= 0)
+        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, 0, t->width * 8, t->height * 8);
+    sTxtBg = sel && verb >= 0 ? MPT_SEL : MPT_BG;
+    sTxtFg = sel && verb >= 0 ? MPT_GOLD : MPT_TEXT;
+    if (verb >= 0)
+    {
+        MText(win, FONT_SMALL, arrow, 2, twoLines ? 6 : 1);
+        MP_AsciiToGame(l1, sVerbNames[verb], 30);
+        MText(win, FONT_SMALL_NARROW, l1, 13, twoLines ? 6 : 1);
+    }
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+static void VerbDrawBar(s16 *data)
+{
+    u8 win = qWin(QUICK_BAR), buf[96];
+    int x = 3, i;
+    char hint[96];
+    MpTheme_Panel(win, 0);
+    for (i = 0; i < VERB_PAGES; i++)
+    {
+        sTxtFg = qPage == i ? MPT_GOLD : MPT_GREY;
+        MP_AsciiToGame(buf, sVerbPageNames[i], 20);
+        MText(win, FONT_SMALL_NARROW, buf, x, 1);
+        x += GetStringWidth(FONT_SMALL_NARROW, buf, 0) + 6;
+    }
+    sTxtFg = MPT_GREY;
+    MP_AsciiToGame(buf, "{L}{R}", 20);
+    MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
+    if (qHold >= 0)
+        snprintf(hint, sizeof(hint), "{DPAD} pick, let go of {A} to do it");
+    else
+        snprintf(hint, sizeof(hint), "{DPAD} pick  {A} do it  {B} close");
+    MP_AsciiToGame(buf, hint, 90);
+    sTxtFg = MPT_TEXT;
+    MText(win, FONT_SMALL_NARROW, buf, 3, 12);
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+static void VerbDrawAll(s16 *data)
+{
+    u8 i;
+    for (i = 0; i < 4; i++)
+        VerbDrawChoice(data, i);
+    VerbDrawBar(data);
+}
+
+static void VerbClose(u8 taskId, s8 verb)
+{
+    s16 *data = gTasks[taskId].data;
+    void (*done)(s8) = sVerbDone;
+    QuickRemoveWindows(data);
+    DestroyTask(taskId);
+    sVerbDone = NULL;
+    if (done)
+        done(verb);
+}
+
+static void Task_VerbWheel(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    s16 sel = qSel;
+    if (JOY_HELD(DPAD_UP))
+        sel = QUICK_UP;
+    else if (JOY_HELD(DPAD_RIGHT))
+        sel = QUICK_RIGHT;
+    else if (JOY_HELD(DPAD_DOWN))
+        sel = QUICK_DOWN;
+    else if (JOY_HELD(DPAD_LEFT))
+        sel = QUICK_LEFT;
+    if (sel != qSel)
+    {
+        s16 old = qSel;
+        qSel = sel;
+        PlaySE(SE_SELECT);
+        if (old >= 0)
+            VerbDrawChoice(data, old);
+        VerbDrawChoice(data, sel);
+    }
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        VerbClose(taskId, -1);
+    }
+    else if ((qHold >= 0 && !JOY_HELD(A_BUTTON)) || (qHold < 0 && JOY_NEW(A_BUTTON)))
+    {
+        s8 verb = qSel >= 0 ? sVerbs[qPage][qSel] : -1;
+        if (verb >= 0)
+        {
+            PlaySE(SE_SELECT);
+            VerbClose(taskId, verb);
+        }
+        else if (qHold >= 0)
+        {
+            qHold = -1;   // let go without picking: the wheel stays open
+            VerbDrawBar(data);
+        }
+        else
+        {
+            PlaySE(SE_FAILURE);
+        }
+    }
+    else if (JOY_NEW(L_BUTTON | R_BUTTON))
+    {
+        qPage = (qPage + (JOY_NEW(R_BUTTON) ? 1 : VERB_PAGES - 1)) % VERB_PAGES;
+        sVerbPage = qPage;
+        PlaySE(SE_SELECT);
+        VerbDrawAll(data);
+    }
+}
+
+void MP_OpenVerbWheel(void (*done)(s8 verb))
+{
+    u8 taskId, i;
+    s16 *data;
+    if (FindTaskIdByFunc(Task_VerbWheel) != TASK_NONE)
+        return;
+    HideMapNamePopUpWindow();
+    LoadMessageBoxAndBorderGfx();
+    MpTheme_Push();
+    taskId = CreateTask(Task_VerbWheel, 80);
+    data = gTasks[taskId].data;
+    qPage = sVerbPage % VERB_PAGES;
+    qSel = -1;
+    qFade = FALSE;
+    qHold = 0;   // opened by holding A
+    sVerbDone = done;
+    for (i = 0; i < QUICK_WINDOWS; i++)
+    {
+        qWin(i) = AddWindow(&sQuickWins[i]);
+        DrawStdWindowFrame(qWin(i), FALSE);
+    }
+    VerbDrawAll(data);
+    PlaySE(SE_WIN_OPEN);
+    MPNet_Log("life interact: wheel open");
+}
+
+bool8 MP_VerbWheelOpen(void)
+{
+    return FindTaskIdByFunc(Task_VerbWheel) != TASK_NONE;
+}
+
 void MP_OpenQuickPick(u8 page, s8 hold)
 {
     MP_OpenQuickPickAt(page, hold, -1);
