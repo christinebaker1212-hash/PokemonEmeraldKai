@@ -11,6 +11,7 @@ waitfor sharedsteady 600
 waitfor slot:1:0:1 600
 mp sharedbox 1
 wait 200
+barrier grab 2
 press A 2
 wait 30
 press A 2

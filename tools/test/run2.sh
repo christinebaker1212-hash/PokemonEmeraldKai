@@ -8,7 +8,7 @@
 . "$(dirname "$0")/common.sh"
 D="$(cd "${1:?usage: run2.sh DIR [DELAY_MS [JITTER_MS]]}" && pwd)"; DELAY=${2:-0}; JIT=${3:-0}
 build_server || exit 1
-rm -f "$D"/*.bmp "$D"/*.png "$D/a.sav" "$D/b.sav" "$D/a.ini" "$D/b.ini"
+rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D/a.sav" "$D/b.sav" "$D/a.ini" "$D/b.ini"
 PORT=$(free_port)
 MOEMON_STORE_DIR="$D" "$SERVER" --port "$PORT" --no-router > "$D/server.log" 2>&1 &
 SP=$!

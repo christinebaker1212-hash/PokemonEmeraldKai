@@ -59,7 +59,8 @@ and `EXPECT_A=(...)` / `EXPECT_B=(...)`: text that must show up in that client's
 Scripts wait on game state (`waitfor`/`pressuntil` with a condition such as `field`, `action`, `battle`,
 `partymenu`, `down`, `helpask`) or on a log line: `waitlog N TEXT` waits up to N frames for an `[mp]`
 line containing TEXT, `pressuntillog KEYS N TEXT` taps KEYS meanwhile, and `watchlog TEXT` starts
-watching before the key press that causes it (then a bare `waitlog N`). Fixed `wait`s break at high ping.
+watching before the key press that causes it (then a bare `waitlog N`). Fixed `wait`s break at high ping. `barrier NAME COUNT` holds a client until COUNT clients (they share the result folder) reach it: the
+next lines run on the same frame (shared_pc_race grabs the same Moemon at once).
 Species ids are the game's internal ones (Torchic 280, Mudkip 283; 252-276 are unused "?" slots). A log with
 `TIMEOUT` (a `waitfor`/`pressuntil` that never got there) or a crash fails the scenario too.
 

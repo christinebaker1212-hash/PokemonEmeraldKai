@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <dirent.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -72,6 +74,10 @@ static u16 sMashKeys = 0;
 static unsigned long sFrameCounter = 0;
 unsigned long Platform_FrameCount(void) { return sFrameCounter; }
 static char sShotDir[400] = ".";
+// barrier NAME COUNT: wait until COUNT clients (sharing the screenshot folder) got there, so their next lines run
+// on the same frame (a test that needs two players to do something at the very same moment)
+static char sBarrierName[64];
+static int sBarrierCount, sBarrierFrames;
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
 static bool SpectateStep(void);
@@ -918,6 +924,27 @@ static void TestHarnessStep(void)
         }
     }
 
+    if (sBarrierName[0])
+    {
+        int have = 0;
+        DIR *d = opendir(sShotDir);
+        struct dirent *e;
+        char prefix[80];
+        snprintf(prefix, sizeof(prefix), "barrier_%s_", sBarrierName);
+        if (d)
+        {
+            while ((e = readdir(d)) != NULL)
+                if (strncmp(e->d_name, prefix, strlen(prefix)) == 0)
+                    have++;
+            closedir(d);
+        }
+        if (have < sBarrierCount && ++sBarrierFrames < 60 * 120)
+            return;
+        printf("[test] frame %lu: barrier %s %s\n", sFrameCounter, sBarrierName, have < sBarrierCount ? "TIMEOUT" : "passed");
+        fflush(stdout);
+        sBarrierName[0] = 0;
+    }
+
     if (sUntilName[0])
     {
         if (MP_TestCondition(sUntilName))
@@ -1126,6 +1153,20 @@ static void TestHarnessStep(void)
             int v = 0;
             sscanf(line, "%*s %*s %d", &v);
             Gamepad_TestCommand(cmd, arg, v);
+        }
+        else if (strcmp(cmd, "barrier") == 0)
+        {
+            char path[600];
+            FILE *f;
+            snprintf(sBarrierName, sizeof(sBarrierName), "%s", arg);
+            sBarrierCount = n > 1 ? n : 2;
+            sBarrierFrames = 0;
+            snprintf(path, sizeof(path), "%s/barrier_%s_%llu", sShotDir, sBarrierName,
+                     (unsigned long long)SDL_GetPerformanceCounter());
+            f = fopen(path, "w");
+            if (f)
+                fclose(f);
+            return;
         }
         else if (strcmp(cmd, "log") == 0)
         {
