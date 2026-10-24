@@ -88,6 +88,8 @@ struct Actor
     u8 qLen;
     struct Coords16 q[6];
     struct Coords16 qLast;
+    s16 traceX, traceY;     // tests: the last tile and facing logged (MOEMON_MOVETRACE)
+    u8 traceDir;
 };
 
 static struct
@@ -101,6 +103,7 @@ static struct
     u16 pMoved;
     s32 ovx, ovy;
     u8 rareDone;            // LIFE_RARE_* bits that happened this visit (once is plenty)
+    bool8 moveTrace;        // MOEMON_MOVETRACE (tests)
 } sL;
 
 bool8 MP_Garden_StoneShown(void);
@@ -333,6 +336,7 @@ static struct Actor *NewActor(void)
             sL.a[i].decor = -1;
             sL.a[i].speed = 1;
             sL.a[i].anim = 0xFF;
+            sL.a[i].traceX = -1;   // (logged once it's out)
             return &sL.a[i];
         }
     return NULL;
@@ -1612,10 +1616,12 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
     }
-    else
+    else if (!(t.x == a->qLast.x && t.y == a->qLast.y))
     {
+        // a new step (the same report again changes nothing): the step before first, if it was sent together
+        // with this one
         if (!(f.x == t.x && f.y == t.y) && abs(f.x - a->qLast.x) + abs(f.y - a->qLast.y) == 1)
-            QueueStep(a, f);   // (the step before, if it was sent together with this one)
+            QueueStep(a, f);
         QueueStep(a, t);
     }
     a->speed = speed ? speed : 1;
@@ -1708,6 +1714,7 @@ void MP_GardenLife_OnMapLoad(void)
         sL.a[i].used = FALSE;
     sL.active = FALSE;
     sL.rareDone = 0;
+    sL.moveTrace = getenv("MOEMON_MOVETRACE") != NULL;
 }
 
 void MP_GardenLife_Update(void)
@@ -1761,6 +1768,24 @@ void MP_GardenLife_Update(void)
     }
     MP_GardenWatch_Update();
     MP_GardenNet_Update();
+    if (sL.moveTrace)
+    {
+        // tests (MOEMON_MOVETRACE, check_movetrace.py): each Garden Pokémon's tile and facing as they change,
+        // under its owner's id and its key, so two games' logs can be compared step by step
+        for (i = 0; i < MAX_ACTORS; i++)
+        {
+            struct Actor *a = &sL.a[i];
+            if (gMpLocalId < 0)
+                a->traceX = -1;   // (not in a room yet: logged once it is, under its owner's id)
+            if (!a->used || gMpLocalId < 0 || (a->cur.x == a->traceX && a->cur.y == a->traceY && a->dir == a->traceDir))
+                continue;
+            a->traceX = a->cur.x;
+            a->traceY = a->cur.y;
+            a->traceDir = a->dir;
+            printf("[test] mv G%d:%08x %d %d %d\n", a->owner < 0 ? gMpLocalId : a->owner, (unsigned)a->key,
+                   a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->dir);
+        }
+    }
 }
 
 void MP_GardenLife_Debug(const char *args)

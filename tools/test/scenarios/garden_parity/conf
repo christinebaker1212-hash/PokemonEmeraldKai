@@ -1,0 +1,15 @@
+# Garden parity at NA-JP lag: ALICE and BOB in the MOéMON GARDEN while their Pokémon live there (wandering,
+# playing, tag); every Garden Pokémon takes the same steps and faces the same ways on both screens
+# (MOEMON_MOVETRACE, check_movetrace.py).
+MODE=2
+WARP=0,57,26,10
+WARP_B=0,57,28,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15,277:15 MOEMON_MOVETRACE=1"
+ENV_B="MOEMON_DEBUG_PARTY=283:15,280:15 MOEMON_DEBUG_PID_SALT=7 MOEMON_MOVETRACE=1"
+EXPECT_A=("garden: player 2's")
+EXPECT_B=("garden: player 1's")
+CHECK="python3 tools/test/check_movetrace.py"

@@ -523,8 +523,8 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
 // ---------------------------------------------------------------------------
 // Watching (docs 2.2: the journal fills in as the Trainer notices things)
 
-#define WATCH_MARK_MINUTES 4    // watchMark counts in 4-minute steps (1..255, 0 = never)
-#define WATCH_WAIT_STEPS   8    // half an hour between things learned just by watching one Pokémon
+#define WATCH_MARK_MINUTES 1    // watchMark counts play minutes (1..255, wrapping; 0 = never)
+#define WATCH_WAIT_STEPS   30   // half an hour between things learned just by watching one Pokémon
 
 static u8 WatchMarkNow(void)
 {

@@ -1,0 +1,15 @@
+# Movement parity at NA-JP lag (Oldale): ALICE walks, turns on the spot, runs and walks back while her follower is
+# out; then her follower goes off on its own and runs back when she walks on; BOB walks and runs too. Every player
+# and follower takes the same steps and faces the same ways on both screens (MOEMON_MOVETRACE,
+# check_movetrace.py: the step lists the same, in order).
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_MOVETRACE=1"
+ENV_B="MOEMON_DEBUG_PARTY=283:15 MOEMON_DEBUG_PID_SALT=7 MOEMON_MOVETRACE=1"
+EXPECT_A=("life field: act 2 to")
+CHECK="python3 tools/test/check_movetrace.py"

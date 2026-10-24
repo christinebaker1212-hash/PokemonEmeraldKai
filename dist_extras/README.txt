@@ -1090,6 +1090,8 @@ away; a MOEMON doesn't suffer or sulk because you didn't play.
                 (comfort it, play, praise it, or just talk).
   Hold A        A wheel: PET, PLAY, FEED, TALK / PRAISE, COMFORT, GROOM,
                 SIT WITH / WATCH, KEEPSAKE. Let go of A on your choice.
+                (Watching it now and then teaches you something new
+                about it, at most every half hour of play.)
                 Each MOEMON likes some things more than others, and some
                 would rather not be petted; it'll just step aside.
   JOURNAL       A page in its summary (after the POKE BALL page): what

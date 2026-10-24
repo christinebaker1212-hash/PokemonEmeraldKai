@@ -418,10 +418,12 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         // watching quietly: now and then the Trainer notices something about it (mp_life_journal.c)
         if (MP_Life_Observe(&mon->box))
         {
+            MPNet_Log("life interact: watched, learned something");
             React(LIFE_EMOTE_QUESTION, LIFE_POSE_NONE, 0);
             OwnerBond(rec, 0, 0, FALSE);
             return sText_Watch_Learn;
         }
+        MPNet_Log("life interact: watched, nothing new");
         return sText_Watch_Nothing;
     }
     return sText_Talk_Default;

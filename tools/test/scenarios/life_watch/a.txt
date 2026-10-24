@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+wait 30
+mp life temper 0 0 200
+mp life temper 0 1 60
+mp life verb 6
+waitlog 300 life interact: watched
+pressuntil B field 900
+wait 30
+mp life verb 6
+waitlog 300 life interact: watched
+pressuntil B field 900
+wait 30
+mp life verb 6
+waitlog 300 life interact: watched
+pressuntil B field 900
+wait 30
+mp life playtime 31
+mp life verb 6
+waitlog 300 life interact: watched
+pressuntil B field 900
+wait 30
+quit

@@ -110,6 +110,7 @@ struct FollowerSlot
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
 static bool8 sTrace;   // MOEMON_FOLLOWTRACE: the local follower's position in pixels every frame (tests)
+static bool8 sMoveTrace;   // MOEMON_MOVETRACE: every player's and follower's tile and facing as they change (tests)
 static bool8 sInit;
 static u32 sLocalPersonality;   // the party Pokémon that follows (0 = none)
 static bool8 sLocalLoaded;
@@ -144,6 +145,7 @@ static void InitIfNeeded(void)
     for (i = 0; i < NUM_SLOTS; i++)
         sSlots[i].spriteId = SPRITE_NONE;
     sTrace = getenv("MOEMON_FOLLOWTRACE") != NULL;
+    sMoveTrace = getenv("MOEMON_MOVETRACE") != NULL;
     sInit = TRUE;
 }
 
@@ -1015,6 +1017,53 @@ static void UpdateLeaving(void)
 // Every overworld frame (src/overworld.c, before sprites are drawn)
 static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, u8 id, const struct MpState *st);
 
+// Tests (MOEMON_MOVETRACE, tools/test/check_movetrace.py): each player's and follower's tile and facing, logged as
+// they change, under the player's id, so two games' logs can be compared step by step
+static void MoveTrace(void)
+{
+    static s16 last[2 * MP_MAX_PLAYERS][3];
+    static bool8 lastValid[2 * MP_MAX_PLAYERS];
+    u8 i;
+    if (gMpLocalId < 0)
+        return;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        u8 obj = i == gMpLocalId ? gPlayerAvatar.objectEventId : MP_GetRemoteObjectEventId(i);
+        struct FollowerSlot *s = i == gMpLocalId ? &sSlots[0] : &sSlots[1 + i];
+        s16 v[2][3];
+        bool8 ok[2] = {FALSE, FALSE};
+        u8 k;
+        if (obj < OBJECT_EVENTS_COUNT && gObjectEvents[obj].active)
+        {
+            v[0][0] = gObjectEvents[obj].currentCoords.x;
+            v[0][1] = gObjectEvents[obj].currentCoords.y;
+            v[0][2] = gObjectEvents[obj].facingDirection;
+            ok[0] = TRUE;
+        }
+        if (s->gfx && s->placed && SpriteIsOurs(s) && !gSprites[s->spriteId].invisible)
+        {
+            v[1][0] = s->autoOn ? s->aCur.x : s->cur.x;
+            v[1][1] = s->autoOn ? s->aCur.y : s->cur.y;
+            v[1][2] = s->autoOn ? s->aDir : s->dir;
+            ok[1] = TRUE;
+        }
+        for (k = 0; k < 2; k++)
+        {
+            u8 n = i * 2 + k;
+            if (!ok[k])
+            {
+                lastValid[n] = FALSE;
+                continue;
+            }
+            if (lastValid[n] && last[n][0] == v[k][0] && last[n][1] == v[k][1] && last[n][2] == v[k][2])
+                continue;
+            memcpy(last[n], v[k], sizeof(last[n]));
+            lastValid[n] = TRUE;
+            printf("[test] mv %c%d %d %d %d\n", k ? 'F' : 'P', i, v[k][0] - MAP_OFFSET, v[k][1] - MAP_OFFSET, v[k][2]);
+        }
+    }
+}
+
 void MP_Follower_Update(void)
 {
     u8 i;
@@ -1061,6 +1110,8 @@ void MP_Follower_Update(void)
     }
     MP_LifeInteract_Update();
     MP_LifeField_Update();   // MOéMON GARDEN: the follower's own life (mp_life_field.c)
+    if (sMoveTrace)
+        MoveTrace();
 }
 
 // Talking to your follower
@@ -1420,10 +1471,12 @@ static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, u8 id, const struct 
             s->aPrev = s->aCur = s->aTarget = s->qLast = t;
             s->aMoved = 16;
         }
-        else
+        else if (!(t.x == s->qLast.x && t.y == s->qLast.y))
         {
+            // a new step (the same state again changes nothing): the step before first, if that state was
+            // merged into this one
             if (!(p.x == t.x && p.y == t.y) && abs(p.x - s->qLast.x) + abs(p.y - s->qLast.y) == 1)
-                QueueTile(s, p);   // (the step before, if that state was merged into this one)
+                QueueTile(s, p);
             QueueTile(s, t);
         }
         s->aSpeed = (st->lifeFace >> 2) & 7;

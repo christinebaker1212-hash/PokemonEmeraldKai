@@ -1341,3 +1341,28 @@ respect and friction), PROUD (warmth 250+ or family: pride, joy, affection), els
 (GA_REACT), the follower shows it on the map. A Pokémon that evolves in the Garden gets its new sprite there.
 Debug `mp life egg A B|hatchsoon|evolve SLOT SPECIES|evoreact W E|familiar A B V`, `mp life garden rare N KIND|
 pursuit N LEVEL`. Tests garden_longterm, life_family.
+
+1.15.1 (protocol 43):
+- The follower's way back (mp_follower.c StartReturn / PathStep / FinishReturn). When its Trainer walks on while it's
+  off on its own, it doesn't pop over: it heads for the tile they just left (trail, updated each step), on a shortest
+  path within AutoCanStand's area (breadth-first, 13x9 tiles around the Trainer), at twice their pace (2 / 4 / 6
+  pixels a frame for walking / running / cycling), and falls in behind them once it's on that tile, taking up their
+  step where it is (no jump). Beside a Trainer who stands still it follows from there; boxed in for 20 frames: within
+  3 tiles it follows from where it is, farther it's put back behind them (the last resort, logged). Only a warp
+  (a jump of 4+ tiles) puts it straight back. Tests life_return (MOEMON_FOLLOWTRACE: tools/test/check_followtrace.py,
+  no step over 12 px in a frame).
+- Arrival bubbles (mp_life_field.c Arrival) only when the map section changes (a town, a route: not every door), and
+  a new place only in its first minute; nothing on loading. Test life_arrival (check_arrival.py).
+- Watching (mp_life_journal.c MP_Life_Observe): WATCH QUIETLY and the Garden's WATCH teach only what can be seen
+  (temperament, the type need, the pursuit; never memories), one thing per Pokémon per 30 play minutes
+  (MpLifeRec.watchMark, the old pad byte). Test life_watch (`mp life playtime M`, check_watch.py).
+- Movement parity. Players were already replayed step by step (mp_overworld.c's queue of positions). A follower on
+  its own now sends the tile it's stepping onto and the one it stepped from (lifeDx / lifeDy and lifePx / lifePy, from
+  its Trainer's x / y in the same state) with its facing and pace (lifeFace); friends' games queue those tiles
+  (only when the tile is new: a resent state queues nothing) and replay them in order (FollowerSlot.remoteDriven),
+  then follow from where it stopped. Garden Pokémon the same (18-byte actors: cur, from, speed; every 4 frames when
+  changed; SetRemote's queue). Tests move_parity and garden_parity at NA-JP lag (MOEMON_MOVETRACE logs every
+  player's, follower's and Garden Pokémon's tile and facing; tools/test/check_movetrace.py compares the two games'
+  lists: the same, in order, the viewer allowed to trail by up to 3 steps when the games quit).
+- DEOXYS's icon (pokemon_icon.c GetMonIconTiles): Kai's icon has one form, so the PC box and party menu no longer
+  read Emerald's Speed Forme 0x400 bytes on (past the end: garbage).

@@ -70,6 +70,11 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_shortcut` | the shortcut there and the board's GO BACK; a Pokémon Center PC's MOéMON GARDEN row turns the PC off and goes |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
+| `life_return` | Route 104: the follower off on its own runs back after its Trainer and falls in behind them, never popping over (check_followtrace.py) |
+| `life_arrival` | arrival bubbles only in a new area: nothing at the start or in and out of a house, a curious look in PETALBURG (check_arrival.py) |
+| `life_watch` | WATCH QUIETLY: learned, nothing new, nothing new, then learned again half an hour later (check_watch.py) |
+| `move_parity` | NA-JP lag, Oldale: both players' and followers' steps and facings the same on both screens, a follower on its own and running back included (check_movetrace.py) |
+| `garden_parity` | NA-JP lag: both players' Garden Pokémon take the same steps and face the same ways on both screens (check_movetrace.py) |
 | `garden_together` | NA-JP lag: two in the Garden: the hedge opens, each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 

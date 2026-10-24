@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+mp follow 0
+wait 200
+barrier start 2
+wait 100
+press DOWN 32
+press LEFT 16
+wait 30
+press UP 3
+wait 30
+press B+RIGHT 48
+wait 30
+press UP 16
+barrier done 2
+wait 600
+barrier end 2
+quit

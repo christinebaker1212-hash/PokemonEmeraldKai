@@ -2062,6 +2062,14 @@ void MP_Life_Debug(const char *args)
         gSaveBlock1Ptr->daycare = saved;
         printf("[test] life egg: party %u\n", CalculatePlayerPartyCount());
     }
+    else if (strcmp(cmd, "playtime") == 0)
+    {
+        // playtime MINUTES: the clock moves on (tests: things that wait on play time)
+        u32 m = MP_Life_PlayMinutes() + a;
+        gSaveBlock2Ptr->playTimeHours = m / 60;
+        gSaveBlock2Ptr->playTimeMinutes = m % 60;
+        printf("[test] life playtime +%d -> %u\n", a, (unsigned)m);
+    }
     else if (strcmp(cmd, "familiar") == 0 && a >= 0 && a < PARTY_SIZE && b >= 0 && b < PARTY_SIZE)
     {
         // familiar A B V: how well A knows B

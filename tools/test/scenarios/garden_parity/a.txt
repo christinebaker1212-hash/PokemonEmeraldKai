@@ -1,0 +1,17 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+barrier in 2
+pressuntil B field 900
+wait 300
+mp life garden force 0 13
+wait 600
+mp life garden force 1 6
+wait 600
+mp life garden force 2 2
+wait 900
+barrier done 2
+wait 300
+mp life garden actors
+barrier end 2
+quit

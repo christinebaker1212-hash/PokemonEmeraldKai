@@ -1199,12 +1199,10 @@ void SpriteCB_MonIcon(struct Sprite *sprite)
 
 const u8 *GetMonIconTiles(u16 species, bool32 handleDeoxys)
 {
-    const u8 *iconSprite = gMonIconTable[species];
-    if (species == SPECIES_DEOXYS && handleDeoxys == TRUE)
-    {
-        iconSprite = (const u8 *)(0x400 + iconSprite); // use the specific Deoxys form icon (Speed in this case)
-    }
-    return iconSprite;
+    // Moemon Kai: DEOXYS has one icon, Kai's own (graphics/pokemon/deoxys/icon.png, two frames). Emerald's icon
+    // held its Speed Forme right after it and the PC box and party menu showed that one (handleDeoxys), but here
+    // that would read past the end of the icon into whatever comes next: garbage.
+    return gMonIconTable[species];
 }
 
 void TryLoadAllMonIconPalettesAtOffset(u16 offset)
