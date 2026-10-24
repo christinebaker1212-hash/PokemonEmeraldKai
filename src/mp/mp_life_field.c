@@ -15,6 +15,7 @@
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
 #include "mp_life_social.h"
+#include "mp_garden.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -878,8 +879,9 @@ void MP_LifeField_Update(void)
 
     PlaceEmotes();
     box = FollowerBox();
-    if (box == NULL || gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT)
+    if (box == NULL || gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || MP_Garden_HidesFollowers())
     {
+        // (in the MOéMON GARDEN it lives as a Garden Pokémon: mp_garden_life.c)
         sB.act = LIFE_ACT_NONE;
         sB.personality = 0;
         return;

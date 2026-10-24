@@ -22,6 +22,7 @@
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
 #include "mp_life_social.h"
+#include "mp_garden.h"
 #include "data.h"
 #include "event_object_movement.h"
 #include "field_message_box.h"
@@ -76,6 +77,8 @@ static struct
     s8 verb;
     u16 item;
     u8 answer;
+    u32 targetKey;          // which of their Pokémon (their follower, or one in the MOéMON GARDEN)
+    u16 targetDex;
 } sS = {.taskId = TASK_NONE};
 
 static bool8 SameMap(u8 id)
@@ -93,13 +96,18 @@ static u32 FriendKey(u8 id)
 }
 
 // "ALICE's SKITTY" for a friend's follower (we know its species, not its nickname)
-static void FriendMonName(u8 id, u8 *out)
+static void FriendMonNameOf(u8 id, u16 dex, u8 *out)
 {
-    u16 species = NationalPokedexNumToSpecies(gMpPlayers[id].state.followerDex);
+    u16 species = NationalPokedexNumToSpecies(dex);
     u8 *end = StringCopy(out, gMpPlayers[id].name);
     static const u8 sS_[] = _("'s ");
     end = StringCopy(end, sS_);
     StringCopy(end, gSpeciesNames[species]);
+}
+
+static void FriendMonName(u8 id, u8 *out)
+{
+    FriendMonNameOf(id, gMpPlayers[id].state.followerDex, out);
 }
 
 static void NoteFriendFollower(u8 id)
@@ -486,7 +494,7 @@ static u16 FirstBerry(void)
 
 static void ShowAnswer(u8 taskId, const u8 *text)
 {
-    FriendMonName(sS.friendId, gStringVar1);
+    FriendMonNameOf(sS.friendId, sS.targetDex, gStringVar1);
     if (sS.item)
         CopyItemName(sS.item, gStringVar2);
     StringExpandPlaceholders(gStringVar4, text);
@@ -502,7 +510,7 @@ static void Task_Friend(u8 taskId)
     case 0:   // tap: the fitting thing (as far as we can tell); hold: the wheel
         if (!JOY_HELD(A_BUTTON))
         {
-            u8 act = gMpPlayers[sS.friendId].state.lifeAct;
+            u8 act = sS.targetKey == gMpPlayers[sS.friendId].state.followerKey ? gMpPlayers[sS.friendId].state.lifeAct : LIFE_ACT_NONE;
             sS.verb = act == LIFE_ACT_PLAY ? LIFE_VERB_PLAY : LIFE_VERB_TALK;
             if (act == LIFE_ACT_NAP)
             {
@@ -521,7 +529,7 @@ static void Task_Friend(u8 taskId)
         break;
     case 2:   // ask its Trainer's game
     {
-        u8 buf[4];
+        u8 buf[8];
         if (sS.verb < 0)
         {
             UnlockPlayerFieldControls();
@@ -539,6 +547,10 @@ static void Task_Friend(u8 taskId)
         buf[1] = (u8)sS.verb;
         buf[2] = sS.item & 0xFF;
         buf[3] = sS.item >> 8;
+        buf[4] = sS.targetKey;
+        buf[5] = sS.targetKey >> 8;
+        buf[6] = sS.targetKey >> 16;
+        buf[7] = sS.targetKey >> 24;
         sS.answer = 0xFF;
         MP_SendRelay(sS.friendId, buf, sizeof(buf));
         MPNet_Log("life social: verb %d to player %d", sS.verb, sS.friendId + 1);
@@ -553,7 +565,7 @@ static void Task_Friend(u8 taskId)
             if (a == ANS_ATE && sS.item)
                 RemoveBagItem(sS.item, 1);   // food from a friend comes from their own bag (docs 6.4)
             if (a == ANS_HAPPY || a == ANS_PLAYED || a == ANS_LOVES || a == ANS_ATE)
-                PlayCry_NormalNoDucking(NationalPokedexNumToSpecies(gMpPlayers[sS.friendId].state.followerDex), 0, CRY_VOLUME_RS / 2, CRY_PRIORITY_NORMAL);
+                PlayCry_NormalNoDucking(NationalPokedexNumToSpecies(sS.targetDex), 0, CRY_VOLUME_RS / 2, CRY_PRIORITY_NORMAL);
             ShowAnswer(taskId, sAnswers[a]);
         }
         break;
@@ -596,6 +608,8 @@ bool8 MP_LifeSocial_TryFriendFollower(void)
         if (fx != x || fy != y)
             continue;
         sS.friendId = i;
+        sS.targetKey = gMpPlayers[i].state.followerKey;
+        sS.targetDex = gMpPlayers[i].state.followerDex;
         LockPlayerFieldControls();
         sS.taskId = CreateTask(Task_Friend, 80);
         return TRUE;
@@ -603,10 +617,25 @@ bool8 MP_LifeSocial_TryFriendFollower(void)
     return FALSE;
 }
 
+// A in front of a friend's Pokémon in the MOéMON GARDEN (mp_garden_life.c)
+bool8 MP_LifeSocial_TryFriendPokemon(s8 owner, u32 key, u16 dex)
+{
+    if (owner < 0 || owner >= MP_MAX_PLAYERS || (sS.taskId != TASK_NONE && gTasks[sS.taskId].isActive))
+        return FALSE;
+    sS.friendId = owner;
+    sS.targetKey = key;
+    sS.targetDex = dex;
+    LockPlayerFieldControls();
+    sS.taskId = CreateTask(Task_Friend, 80);
+    return TRUE;
+}
+
 // ---------------------------------------------------------------------------
 // ... and its Trainer's side: our follower answers through its bond with them (never Friendship)
 
-static u8 Answer(struct MpLifeRec *rec, u8 from, u8 verb, u16 item)
+void MP_GardenLife_ReactKey(u32 key, u8 emote, u8 pose, u16 frames);
+
+static u8 Answer(struct MpLifeRec *rec, u8 from, u8 verb, u16 item, bool8 asleep)
 {
     u32 me = MP_Life_MonKey(rec->personality, rec->otId), tk = FriendKey(from);
     struct MpLifeBond *b = MP_Life_Bond(me, tk, TRUE);
@@ -616,7 +645,7 @@ static u8 Answer(struct MpLifeRec *rec, u8 from, u8 verb, u16 item)
     u8 ans, aff0 = b ? b->v[BOND_AFFECTION] : 0;
     sS.lastVerbFrame[from] = sS.frame;
     MP_Life_Closest(me, &fr, &rv, &fa, &fv);
-    if (MP_LifeField_Activity() == LIFE_ACT_NAP)
+    if (asleep)
         return ANS_ASLEEP;
     if (verb < LIFE_VERBS && (rec->boundaries & (1 << verb)))
         return ANS_SIDESTEP;   // a boundary: no mark on the bond
@@ -687,15 +716,29 @@ void MP_LifeSocial_OnRelay(u8 from, const u8 *data, u16 len)
     case MPR_LIFE_VERB:
     {
         struct MpLifeRec *rec = MP_LifeField_FollowerRec();
-        u8 reply[5], ans;
+        u8 reply[5], ans, pose;
         u16 item;
+        u32 key = 0;
+        bool8 garden = FALSE;
         if (len < 4)
             return;
         item = data[2] | (data[3] << 8);
-        ans = rec ? Answer(rec, from, data[1], item) : ANS_NONE;
+        if (len >= 8)
+            key = data[4] | (data[5] << 8) | (data[6] << 16) | ((u32)data[7] << 24);
+        if (key && MP_Garden_IsHere() && MP_Life_PartyBox(key) != NULL)
+        {
+            rec = MP_Life_FindKey(key);   // one of ours in the Garden
+            garden = TRUE;
+        }
+        ans = rec ? Answer(rec, from, data[1], item, garden ? FALSE : MP_LifeField_Activity() == LIFE_ACT_NAP) : ANS_NONE;
+        pose = ans == ANS_PLAYED || ans == ANS_LOVES ? LIFE_POSE_HOP : ans == ANS_SHY ? LIFE_POSE_SIT : LIFE_POSE_NONE;
         if (rec && ans != ANS_ASLEEP)
-            MP_LifeField_Reaction(sAnswerEmote[ans], ans == ANS_PLAYED || ans == ANS_LOVES ? LIFE_POSE_HOP
-                                                     : ans == ANS_SHY ? LIFE_POSE_SIT : LIFE_POSE_NONE, 90);
+        {
+            if (garden)
+                MP_GardenLife_ReactKey(key, sAnswerEmote[ans], pose, 90);
+            else
+                MP_LifeField_Reaction(sAnswerEmote[ans], pose, 90);
+        }
         reply[0] = MPR_LIFE_REPLY;
         reply[1] = data[1];
         reply[2] = ans;
@@ -822,6 +865,8 @@ void MP_LifeSocial_Debug(const char *args)
         // verb PLAYER V: as if we picked V in front of that friend's follower
         sS.friendId = a - 1;
         sS.verb = b;
+        sS.targetKey = gMpPlayers[a - 1].state.followerKey;
+        sS.targetDex = gMpPlayers[a - 1].state.followerDex;
         LockPlayerFieldControls();
         sS.taskId = CreateTask(Task_Friend, 80);
         gTasks[sS.taskId].tState = 2;

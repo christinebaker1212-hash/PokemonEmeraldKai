@@ -53,6 +53,12 @@ u16 MP_Follower_SlotDex(u8 slot);
 bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y);
 bool8 MP_Follower_AutoTargetTile(s16 *x, s16 *y);
 u8 MP_Follower_SlotPose(u8 slot);
+struct SpriteFrameImage;
+struct SpriteTemplate;
+struct Sprite;
+u8 MP_Follower_CreateMonSprite(u16 dex, bool8 female, s16 hue, u16 palTag, struct SpriteFrameImage *frames,
+                               struct SpriteTemplate *tmpl, u8 *size, void (*callback)(struct Sprite *));
+bool8 MP_Follower_DexHasGraphics(u16 dex);
 
 // mp_life_field.c
 void MP_LifeField_Update(void);          // every overworld frame, after the followers moved
@@ -65,5 +71,6 @@ void MP_LifeField_Reaction(u8 emote, u8 pose, u16 frames);   // a short reaction
 // mp_life_interact.c: talking to and doing things with Pokémon
 bool8 MP_LifeInteract_TryFollower(void);   // A in front of the follower (the smart action) or held A (the wheel)
 void MP_LifeInteract_Update(void);
+bool8 MP_LifeInteract_StartFor(struct Pokemon *mon, s8 actor);   // a Garden Pokémon (mp_garden_life.c)
 
 #endif // GUARD_MP_LIFE_FIELD_H

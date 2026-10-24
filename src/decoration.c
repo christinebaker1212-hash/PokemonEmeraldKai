@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_life.h"
 #include "malloc.h"
 #include "decompress.h"
 #include "decoration.h"
@@ -109,6 +110,7 @@ EWRAM_DATA static u8 sDecorationActionsCursorPos = 0;
 EWRAM_DATA static u8 sNumOwnedDecorationsInCurCategory = 0;
 EWRAM_DATA static u8 sSecretBaseItemsIndicesBuffer[DECOR_MAX_SECRET_BASE] = {};
 EWRAM_DATA static u8 sPlayerRoomItemsIndicesBuffer[DECOR_MAX_PLAYERS_HOUSE] = {};
+EWRAM_DATA static u8 sMpGardenItemsIndicesBuffer[GARDEN_DECOR_MAX] = {};   // Moemon Co-op: placed in the MOéMON GARDEN
 EWRAM_DATA static u16 sDecorationsCursorPos = 0;
 EWRAM_DATA static u16 sDecorationsScrollOffset = 0;
 EWRAM_DATA u8 gCurDecorationIndex = 0;
@@ -154,6 +156,7 @@ static void PrintDecorationItemDescription(s32 itemIndex);
 static void RemoveDecorationItemsOtherWindows(void);
 static bool8 IsDecorationIndexInSecretBase(u8 idx);
 static bool8 IsDecorationIndexInPlayersRoom(u8 idx);
+static bool8 IsDecorationIndexInMpGarden(u8 idx);
 static void IdentifyOwnedDecorationsCurrentlyInUse(u8 taskId);
 static void InitDecorationItemsWindow(u8 taskId);
 static void ShowDecorationCategorySummaryWindow(u8 category);
@@ -930,6 +933,8 @@ static void DecorationItemsMenu_PrintDecorationInUse(u8 windowId, u32 itemIndex,
             BlitMenuInfoIcon(windowId, MENU_INFO_ICON_BALL_RED, 92, y + 2);
         else if (IsDecorationIndexInPlayersRoom(itemIndex + 1) == TRUE)
             BlitMenuInfoIcon(windowId, MENU_INFO_ICON_BALL_BLUE, 92, y + 2);
+        else if (IsDecorationIndexInMpGarden(itemIndex + 1) == TRUE)
+            BlitMenuInfoIcon(windowId, MENU_INFO_ICON_BALL_BLUE, 92, y + 2);   // Moemon Co-op: in the MOéMON GARDEN
     }
 }
 
@@ -1055,6 +1060,15 @@ static bool8 IsDecorationIndexInSecretBase(u8 idx)
     return FALSE;
 }
 
+static bool8 IsDecorationIndexInMpGarden(u8 idx)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sMpGardenItemsIndicesBuffer); i++)
+        if (sMpGardenItemsIndicesBuffer[i] == idx)
+            return TRUE;
+    return FALSE;
+}
+
 static bool8 IsDecorationIndexInPlayersRoom(u8 idx)
 {
     u8 i;
@@ -1118,6 +1132,29 @@ static void IdentifyOwnedDecorationsCurrentlyInUseInternal(u8 taskId)
             }
         }
     }
+
+    // Moemon Co-op: and the MOéMON GARDEN's (a decoration there isn't in the Secret Base at the same time)
+    memset(sMpGardenItemsIndicesBuffer, 0, sizeof(sMpGardenItemsIndicesBuffer));
+    count = 0;
+    for (i = 0; i < GARDEN_DECOR_MAX; i++)
+    {
+        u8 d = MP_Life_GardenSave()->decor[i].decor;
+        if (d == DECOR_NONE)
+            continue;
+        for (j = 0; j < gDecorationInventories[sCurDecorationCategory].size; j++)
+        {
+            if (gCurDecorationItems[j] == d && IsDecorationIndexInSecretBase(j + 1) != TRUE && IsDecorationIndexInPlayersRoom(j + 1) != TRUE)
+            {
+                for (k = 0; k < count && sMpGardenItemsIndicesBuffer[k] != j + 1; k++);
+                if (k == count)
+                {
+                    sMpGardenItemsIndicesBuffer[count] = j + 1;
+                    count++;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 static void IdentifyOwnedDecorationsCurrentlyInUse(u8 taskId)
@@ -1139,6 +1176,8 @@ bool8 IsSelectedDecorInThePC(void)
             return FALSE;
         }
     }
+    if (IsDecorationIndexInMpGarden(sDecorationsScrollOffset + sDecorationsCursorPos + 1))
+        return FALSE;   // Moemon Co-op: out in the MOéMON GARDEN
 
     return TRUE;
 }

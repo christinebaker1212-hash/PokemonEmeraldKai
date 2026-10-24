@@ -36,6 +36,7 @@
 #include "constants/songs.h"
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
+#include "mp_garden.h"
 
 struct MpFollowerGfx
 {
@@ -753,14 +754,16 @@ bool8 MP_Follower_LocalTile(s16 *x, s16 *y)
 
 static bool8 LocalHidden(void)
 {
-    return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER)) != 0 || MP_Piggy_IsRiding();
+    return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER)) != 0 || MP_Piggy_IsRiding()
+        || MP_Garden_HidesFollowers();   // MOéMON GARDEN: it lives freely there (mp_garden_life.c)
 }
 
 static bool8 RemoteHidden(u8 id)
 {
     u8 mode = gMpPlayers[id].state.avatarMode;
     // Holding the BATTLE FLAG: no follower either, so they blend in
-    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & (MPF_TRAINER_MODE | MPF_RIDING));
+    return mode == MP_AVATAR_SURF || mode == MP_AVATAR_UNDERWATER || (gMpPlayers[id].state.flags & (MPF_TRAINER_MODE | MPF_RIDING))
+        || MP_Garden_HidesFollowers();   // MOéMON GARDEN: friends' followers live there as Garden Pokémon too
 }
 
 static s16 ScreenX(const struct Sprite *sp) { return sp->x + sp->x2 + (sp->coordOffsetEnabled ? gSpriteCoordOffsetX : 0); }
@@ -1159,6 +1162,48 @@ bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority)
 u16 MP_Follower_SlotDex(u8 slot)
 {
     return slot < NUM_SLOTS && sInit ? sSlots[slot].dex : 0;
+}
+
+// MOéMON GARDEN (mp_garden_life.c): a Pokémon's walking sprite for the Garden. 8 frames (down, up, left, right;
+// two steps each), its own palette (Stadium hue). Returns the sprite id or MAX_SPRITES.
+u8 MP_Follower_CreateMonSprite(u16 dex, bool8 female, s16 hue, u16 palTag, struct SpriteFrameImage *frames,
+                               struct SpriteTemplate *tmpl, u8 *size, void (*callback)(struct Sprite *))
+{
+    const struct MpFollowerGfx *gfx = dex ? FindGfx(dex, female) : NULL;
+    u32 frameBytes;
+    u16 colors[16];
+    u8 i, id;
+    if (gfx == NULL)
+        return MAX_SPRITES;
+    frameBytes = (u32)gfx->size * gfx->size / 2;
+    for (i = 0; i < 8; i++)
+    {
+        frames[i].data = sFollowerData + gfx->offset + i * frameBytes;
+        frames[i].size = frameBytes;
+    }
+    memcpy(colors, sFollowerData + gfx->offset + 8 * frameBytes, sizeof(colors));
+    MP_Hue_ShiftPalette(colors, 0, hue);
+    if (IndexOfSpritePaletteTag(palTag) == 0xFF && MP_AllocCoopPalette(palTag, colors) == 0xFF)
+        return MAX_SPRITES;
+    tmpl->tileTag = TAG_NONE;
+    tmpl->paletteTag = palTag;
+    tmpl->oam = gfx->size == 64 ? &sOam64 : &sOam32;
+    tmpl->anims = sAnims;
+    tmpl->images = frames;
+    tmpl->affineAnims = gDummySpriteAffineAnimTable;
+    tmpl->callback = callback;
+    id = CreateSprite(tmpl, 0, 0, 0);
+    if (id == MAX_SPRITES)
+        return MAX_SPRITES;
+    gSprites[id].coordOffsetEnabled = TRUE;
+    gSprites[id].invisible = TRUE;
+    *size = gfx->size;
+    return id;
+}
+
+bool8 MP_Follower_DexHasGraphics(u16 dex)
+{
+    return dex && FindGfx(dex, FALSE) != NULL;
 }
 
 // MOéMON GARDEN: a friend's follower on its own, as their game says (its tile beside them, its pose).

@@ -24,6 +24,7 @@
 #include "platform/gamepad.h"
 #include "mp_life_battle.h"
 #include "mp_life_social.h"
+#include "mp_garden.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -1205,6 +1206,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Gatcha_OnRelay(from, data, len);
     else if (data[0] >= MPR_JOIN_FIRST && data[0] < MPR_JOIN_FIRST + 8)
         MP_Join_OnRelay(from, data, len);
+    else if (data[0] >= MPR_GARDEN_FIRST && data[0] < MPR_GARDEN_FIRST + 2)
+        MP_GardenNet_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1695,6 +1698,7 @@ void MP_FrameUpdate(void)
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)
     MP_LifeSocial_Update();     // ... and among friends (mp_life_social.c)
+    MP_Garden_FrameUpdate();    // the MOéMON GARDEN (mp_garden.c, mp_garden_life.c)
     MP_SharedBox_Update();      // the shared PC's boxes: what changed goes to the server
     MP_Social_Update();
     MP_Together_Update();

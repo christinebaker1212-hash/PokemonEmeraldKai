@@ -291,6 +291,24 @@ struct MpLifeNews
 };
 const struct MpLifeNews *MP_Life_News(u8 *count);
 void MP_Life_AddNews(u8 kind, u16 param, u32 teller);
+// The MOéMON GARDEN's own save data (mp_garden.c), kept in the .life sidecar
+#define GARDEN_DECOR_MAX 16
+#define MP_GARDEN_VISITED  (1 << 0)
+#define MP_GARDEN_SHORTCUT (1 << 1)   // came by the shortcut: the board offers the way back
+struct MpGardenDecor
+{
+    u8 decor;       // DECOR_* (0 = none)
+    u8 x, y;        // map tile (no MAP_OFFSET)
+    u8 pad;
+};
+struct MpGardenSave
+{
+    u32 flags;
+    u8 retGroup, retNum, retX, retY;   // where the shortcut came from
+    struct MpGardenDecor decor[GARDEN_DECOR_MAX];
+    u32 reserved[4];
+};
+struct MpGardenSave *MP_Life_GardenSave(void);
 u32 MP_Life_LastLineMin(void);           // the last rare battle line (play minutes, 0 = never)
 void MP_Life_SetLastLineMin(u32 minute);
 

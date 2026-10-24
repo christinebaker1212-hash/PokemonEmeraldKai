@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 60
+mp life garden shortcut
+waitlog 900 garden: shortcut there
+pressuntil B field 1200
+wait 120
+mp life garden state
+shot there
+mp life garden board
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+shot board
+watchlog garden: shortcut back
+press A 2
+waitlog 600
+wait 200
+mp where
+shot back
+quit

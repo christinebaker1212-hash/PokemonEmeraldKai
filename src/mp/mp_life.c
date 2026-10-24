@@ -29,6 +29,7 @@
 #include "mp_life_emote.h"
 #include "mp_life_battle.h"
 #include "mp_life_social.h"
+#include "mp_garden.h"
 #include "constants/berry.h"
 #include "constants/characters.h"
 #include "constants/flags.h"
@@ -64,6 +65,12 @@ static u32 sStoryMask, sBadgeMask;
 static bool8 sStoryKnown;   // the masks were read (or set from the save's flags)
 static struct MpLifeNews sNews[LIFE_NEWS];
 static u32 sLastLineMin;   // the last rare battle line (play minutes; mp_life_battle.c)
+static struct MpGardenSave sGarden;
+
+struct MpGardenSave *MP_Life_GardenSave(void)
+{
+    return &sGarden;
+}
 static u8 sNewsCount;
 static u32 sFrame;          // frames on the map since the last emotion step
 static u32 sLastMinute;     // play minute of the last minute tick
@@ -1431,7 +1438,7 @@ struct LifeHeader
     u32 bondSize, bondCount;
     u32 nameSize, nameCount;
     u32 lastLineMin;        // play minute of the last rare battle line (mp_life_battle.c), 0 = never
-    u32 reserved[8];
+    struct MpGardenSave garden;   // the MOéMON GARDEN (mp_garden.c)
     u32 storyMask;          // story beats already lived (sStory bits)
     u32 badgeMask;          // badges already celebrated
     u32 newsCount;
@@ -1450,6 +1457,7 @@ void MP_Life_Reset(void)
 {
     sStoryKnown = FALSE;
     sLastLineMin = 0;
+    memset(&sGarden, 0, sizeof(sGarden));
     sNewsCount = 0;
     memset(sNews, 0, sizeof(sNews));
     sRecCount = 0;
@@ -1484,7 +1492,7 @@ void MP_Life_WriteSidecar(void)
     h.nameSize = sizeof(struct MpLifeName);
     h.nameCount = sNameCount;
     h.lastLineMin = sLastLineMin;
-    memset(h.reserved, 0, sizeof(h.reserved));
+    h.garden = sGarden;
     h.storyMask = sStoryMask;
     h.badgeMask = sBadgeMask;
     h.newsCount = sNewsCount;
@@ -1562,6 +1570,7 @@ static bool8 ReadSidecar(const char *path, bool8 needCounter)
         }
     }
     sLastLineMin = h.lastLineMin;
+    sGarden = h.garden;
     sStoryMask = h.storyMask;
     sBadgeMask = h.badgeMask;
     sNewsCount = h.newsCount <= LIFE_NEWS ? h.newsCount : LIFE_NEWS;
@@ -1729,6 +1738,10 @@ void MP_Life_Debug(const char *args)
     {
         void MP_LifeField_Debug(void);
         MP_LifeField_Debug();
+    }
+    else if (strcmp(cmd, "garden") == 0)
+    {
+        MP_Garden_Debug(args + 7);
     }
     else if (strcmp(cmd, "social") == 0)
     {

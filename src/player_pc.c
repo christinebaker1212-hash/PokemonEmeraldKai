@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_garden.h"
 #include "constants/songs.h"
 #include "bg.h"
 #include "decoration.h"
@@ -35,7 +36,8 @@ enum {
     MENU_ITEMSTORAGE,
     MENU_MAILBOX,
     MENU_DECORATION,
-    MENU_TURNOFF
+    MENU_TURNOFF,
+    MENU_GARDEN,        // Moemon Co-op: the MOéMON GARDEN's shortcut (after the first visit)
 };
 
 // Item storage menu options
@@ -189,12 +191,20 @@ static const u8 *const sItemStorage_OptionDescriptions[] =
     [MENU_EXIT]     = gText_GoBackPrevMenu,
 };
 
+static const u8 sText_MpGarden[] = _("MOéMON GARDEN");
+static void PlayerPC_MpGarden(u8 taskId);
+static bool8 sMpBedroomPC;   // which PC this is (the option count no longer tells: the GARDEN row)
+
+static const u8 sBedroomPC_OptionOrderGarden[] = {MENU_ITEMSTORAGE, MENU_MAILBOX, MENU_DECORATION, MENU_GARDEN, MENU_TURNOFF};
+static const u8 sPlayerPC_OptionOrderGarden[] = {MENU_ITEMSTORAGE, MENU_MAILBOX, MENU_GARDEN, MENU_TURNOFF};
+
 static const struct MenuAction sPlayerPCMenuActions[] =
 {
     [MENU_ITEMSTORAGE] = { gText_ItemStorage, {PlayerPC_ItemStorage} },
     [MENU_MAILBOX]     = { gText_Mailbox,     {PlayerPC_Mailbox} },
     [MENU_DECORATION]  = { gText_Decoration,  {PlayerPC_Decoration} },
-    [MENU_TURNOFF]     = { gText_TurnOff,     {PlayerPC_TurnOff} }
+    [MENU_TURNOFF]     = { gText_TurnOff,     {PlayerPC_TurnOff} },
+    [MENU_GARDEN]      = { sText_MpGarden,    {PlayerPC_MpGarden} },
 };
 
 static const u8 sBedroomPC_OptionOrder[] =
@@ -372,15 +382,17 @@ void NewGameInitPCItems(void)
 
 void BedroomPC(void)
 {
-    sTopMenuOptionOrder = sBedroomPC_OptionOrder;
-    sTopMenuNumOptions = NUM_BEDROOM_PC_OPTIONS;
+    sMpBedroomPC = TRUE;
+    sTopMenuOptionOrder = MP_Garden_Visited() ? sBedroomPC_OptionOrderGarden : sBedroomPC_OptionOrder;
+    sTopMenuNumOptions = MP_Garden_Visited() ? ARRAY_COUNT(sBedroomPC_OptionOrderGarden) : NUM_BEDROOM_PC_OPTIONS;
     DisplayItemMessageOnField(CreateTask(TaskDummy, 0), gText_WhatWouldYouLike, InitPlayerPCMenu);
 }
 
 void PlayerPC(void)
 {
-    sTopMenuOptionOrder = sPlayerPC_OptionOrder;
-    sTopMenuNumOptions = NUM_PLAYER_PC_OPTIONS;
+    sMpBedroomPC = FALSE;
+    sTopMenuOptionOrder = MP_Garden_Visited() ? sPlayerPC_OptionOrderGarden : sPlayerPC_OptionOrder;
+    sTopMenuNumOptions = MP_Garden_Visited() ? ARRAY_COUNT(sPlayerPC_OptionOrderGarden) : NUM_PLAYER_PC_OPTIONS;
     DisplayItemMessageOnField(CreateTask(TaskDummy, 0), gText_WhatWouldYouLike, InitPlayerPCMenu);
 }
 
@@ -396,10 +408,8 @@ static void InitPlayerPCMenu(u8 taskId)
     struct WindowTemplate windowTemplate;
     data = gTasks[taskId].data;
 
-    if (sTopMenuNumOptions == NUM_PLAYER_PC_OPTIONS)
-        windowTemplate = sWindowTemplates_MainMenus[WIN_MAIN_MENU];
-    else // Bedroom PC
-        windowTemplate = sWindowTemplates_MainMenus[WIN_MAIN_MENU_BEDROOM];
+    windowTemplate = sWindowTemplates_MainMenus[WIN_MAIN_MENU];
+    windowTemplate.height = sTopMenuNumOptions * 2;   // Moemon Co-op: as tall as its rows (the GARDEN row)
 
     windowTemplate.width = GetMaxWidthInSubsetOfMenuTable(sPlayerPCMenuActions, sTopMenuOptionOrder, sTopMenuNumOptions);
     tWindowId = AddWindow(&windowTemplate);
@@ -448,6 +458,13 @@ void ReshowPlayerPC(u8 var)
     DisplayItemMessageOnField(var, gText_WhatWouldYouLike, InitPlayerPCMenu);
 }
 
+// Moemon Co-op: the PC turns off, then off to the MOéMON GARDEN (mp_garden.c)
+static void PlayerPC_MpGarden(u8 taskId)
+{
+    MP_Garden_ShortcutFromPC();
+    PlayerPC_TurnOff(taskId);
+}
+
 static void PlayerPC_ItemStorage(u8 taskId)
 {
     InitItemStorageMenu(taskId, MENU_WITHDRAW);
@@ -491,7 +508,7 @@ static void PlayerPC_Decoration(u8 taskId)
 
 static void PlayerPC_TurnOff(u8 taskId)
 {
-    if (sTopMenuNumOptions == NUM_BEDROOM_PC_OPTIONS) // Flimsy way to determine if Bedroom PC is in use
+    if (sMpBedroomPC) // Moemon Co-op: told, not guessed from the option count
     {
         if (gSaveBlock2Ptr->playerGender == MALE)
             ScriptContext_SetupScript(LittlerootTown_BrendansHouse_2F_EventScript_TurnOffPlayerPC);

@@ -1,0 +1,7 @@
+# The MOéMON GARDEN map: walk west out of LITTLEROOT into PROF. BIRCH's meadow (first visit: the welcome, a memory
+# for the party); with every badge, every growth mark appears. Shots entered, east, pond, hedge.
+MODE=1
+TMO=120
+WARP="0,9,3,10"
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15"
+EXPECT_A=("garden: first visit" "life: memory 27" "garden: growth 0" "garden: growth 3")

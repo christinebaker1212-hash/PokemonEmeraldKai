@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_garden.h"
 #include "mp.h"
 #include "main.h"
 #include "bike.h"
@@ -694,6 +695,8 @@ static u8 CheckForPlayerAvatarStaticCollision(u8 direction)
 u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction, u8 metatileBehavior)
 {
     u8 collision = GetCollisionAtCoords(objectEvent, x, y, direction);
+    if (collision == COLLISION_NONE && objectEvent->isPlayer && MP_Garden_ActorAt(x, y))
+        collision = COLLISION_OBJECT_EVENT;   // Moemon Co-op: a MOéMON GARDEN Pokémon stands there
     if (collision == COLLISION_ELEVATION_MISMATCH && CanStopSurfing(x, y, direction))
         return COLLISION_STOP_SURFING;
 

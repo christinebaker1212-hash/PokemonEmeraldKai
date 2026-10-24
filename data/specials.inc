@@ -555,3 +555,4 @@ gSpecials::
 	def_special MP_World_RockGone
 	def_special MP_Coop_TryJoinHeldTrainer
 	def_special MP_Coop_TakeJoinedOther
+	def_special MP_Garden_OpenBoard, waitstate=1

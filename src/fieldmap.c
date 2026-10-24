@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_garden.h"
 #include "battle_pyramid.h"
 #include "bg.h"
 #include "fieldmap.h"
@@ -64,6 +65,7 @@ void InitMap(void)
     InitMapLayoutData(&gMapHeader);
     SetOccupiedSecretBaseEntranceMetatiles(gMapHeader.events);
     RunOnLoadMapScript();
+    MP_Garden_OnMapLoad();   // Moemon Co-op: the MOéMON GARDEN's growth marks and hedge
 }
 
 void InitMapFromSavedGame(void)
@@ -72,6 +74,7 @@ void InitMapFromSavedGame(void)
     InitSecretBaseAppearance(FALSE);
     SetOccupiedSecretBaseEntranceMetatiles(gMapHeader.events);
     LoadSavedMapView();
+    MP_Garden_OnMapLoad();   // Moemon Co-op
     RunOnLoadMapScript();
     UpdateTVScreensOnMap(gBackupMapLayout.width, gBackupMapLayout.height);
 }

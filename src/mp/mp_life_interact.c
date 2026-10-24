@@ -13,6 +13,7 @@
 #include "mp_life.h"
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
+#include "mp_garden.h"
 #include "berry.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
@@ -84,7 +85,48 @@ struct InteractState
 };
 static struct InteractState sI;
 
+// Who this is with: the follower, or a Pokémon in the MOéMON GARDEN (mp_garden_life.c)
+static struct
+{
+    bool8 active;
+    struct Pokemon *mon;
+    s8 actor;           // the Garden's actor index (-1: the follower)
+} sTarget = {.actor = -1};
+
+static struct Pokemon *TheFollower(void);
+
 static struct Pokemon *FollowerMon(void)
+{
+    if (sTarget.active)
+        return sTarget.mon;
+    return TheFollower();
+}
+
+static void React(u8 emote, u8 pose, u16 frames)
+{
+    if (sTarget.active && sTarget.actor >= 0)
+        MP_Garden_ActorReaction(sTarget.actor, emote, pose, frames);
+    else
+        MP_LifeField_Reaction(emote, pose, frames);
+}
+
+static u8 TargetActivity(void)
+{
+    return sTarget.active && sTarget.actor >= 0 ? MP_Garden_ActorActivity(sTarget.actor) : MP_LifeField_Activity();
+}
+
+static bool8 TargetInviting(void)
+{
+    return sTarget.active && sTarget.actor >= 0 ? MP_Garden_ActorActivity(sTarget.actor) == LIFE_ACT_PLAY : MP_LifeField_Inviting();
+}
+
+static void EndTarget(void)
+{
+    sTarget.active = FALSE;
+    sTarget.actor = -1;
+}
+
+static struct Pokemon *TheFollower(void)
 {
     u8 i;
     u32 p = gMpConfig.followerPersonality;
@@ -149,10 +191,10 @@ static const u8 *CrossBoundary(struct MpLifeRec *rec, const u8 *sidestep, u8 ver
     if (recent >= 3)
     {
         MP_Life_Feel(rec, EMO_FRUSTRATION, 30);   // fades within minutes; the bond is never marked
-        MP_LifeField_Reaction(LIFE_EMOTE_ANGRY, LIFE_POSE_SIT, 90);
+        React(LIFE_EMOTE_ANGRY, LIFE_POSE_SIT, 90);
         return sText_Huff;
     }
-    MP_LifeField_Reaction(rec->cur[LIFE_WARM] > 110 ? LIFE_EMOTE_HEART : LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
+    React(rec->cur[LIFE_WARM] > 110 ? LIFE_EMOTE_HEART : LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
     return sidestep;
 }
 
@@ -201,7 +243,7 @@ static u8 NegativeFeeling(struct MpLifeRec *rec)
 static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
 {
     u32 owner = MP_Life_LocalTrainerKey();
-    u8 act = MP_LifeField_Activity();
+    u8 act = TargetActivity();
     bool8 repeat = IsRepeat(verb);
     struct MpLifeBond *bond = MP_Life_Bond(MP_Life_MonKey(rec->personality, rec->otId), owner, FALSE);
     u8 familiar = bond ? bond->v[BOND_FAMILIAR] : 0;
@@ -212,32 +254,32 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         OwnerBond(rec, 0, 0, FALSE);
         if (act == LIFE_ACT_NAP)
             return sText_Talk_Asleep;
-        if (MP_LifeField_Inviting())
+        if (TargetInviting())
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_BALL, LIFE_POSE_HOP, 60);
+            React(LIFE_EMOTE_BALL, LIFE_POSE_HOP, 60);
             return sText_Talk_Inviting;
         }
         if (rec->emo[EMO_FEAR] >= 40)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_SWEAT, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_SWEAT, LIFE_POSE_NONE, 0);
             return sText_Talk_Scared;
         }
         if (rec->need[NEED_HUNGER] >= 210)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_FOOD, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_FOOD, LIFE_POSE_NONE, 0);
             return sText_Talk_Hungry;
         }
         if (rec->cur[LIFE_BOLD] < 90 && familiar < 120)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
             return sText_Talk_Shy;
         }
         if (rec->cur[LIFE_WARM] < 80)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_NONE, LIFE_POSE_SIT, 40);
+            React(LIFE_EMOTE_NONE, LIFE_POSE_SIT, 40);
             return sText_Talk_Aloof;
         }
-        MP_LifeField_Reaction(rec->mood > 30 ? LIFE_EMOTE_NOTE : LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
+        React(rec->mood > 30 ? LIFE_EMOTE_NOTE : LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
         return rec->mood > 30 ? sText_Talk_Happy : sText_Talk_Default;
 
     case LIFE_VERB_PET:
@@ -246,17 +288,17 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         if (repeat)
         {
             OwnerBond(rec, 0, 0, FALSE);
-            MP_LifeField_Reaction(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
             return sText_Content;
         }
         MP_Life_Feel(rec, rec->cur[LIFE_WARM] >= 100 ? EMO_AFFECTION : EMO_CALM, 15);
         OwnerBond(rec, 1, rec->cur[LIFE_WARM] >= 100 ? 1 : 0, FALSE);
         if (rec->cur[LIFE_WARM] < 80)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_DOTS, LIFE_POSE_SIT, 40);
+            React(LIFE_EMOTE_DOTS, LIFE_POSE_SIT, 40);
             return sText_Pet_Aloof;
         }
-        MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_NONE, 0);
+        React(LIFE_EMOTE_HEART, LIFE_POSE_NONE, 0);
         return sText_Pet_Warm;
 
     case LIFE_VERB_FEED:
@@ -269,7 +311,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         // just ate: politely declines (the berry stays in the BAG)
         if (rec->need[NEED_HUNGER] < 60)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
             return sText_Feed_Full;
         }
         RemoveBagItem(berry, 1);
@@ -286,36 +328,36 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             if (taste > 0 && rec->emo[EMO_SADNESS] + rec->emo[EMO_FEAR] >= 40)
                 MP_Life_AddTrait(rec, TRAIT_COMFORT_FOOD, StrongestFlavor(berry), 50);   // it cheered up on this
             OwnerBond(rec, 2, 2, TRUE);
-            MP_LifeField_Reaction(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 50);
+            React(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 50);
             return taste > 0 ? sText_Feed_Favorite : taste < 0 ? sText_Feed_Disliked : sText_Feed_Hungry;
         }
         MP_Life_Satisfy(rec, NEED_HUNGER, 80);
         MP_Life_Feel(rec, EMO_JOY, taste < 0 ? 0 : 10);
         OwnerBond(rec, 0, 0, FALSE);
-        MP_LifeField_Reaction(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_FOOD, LIFE_POSE_NONE, 0);
+        React(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_FOOD, LIFE_POSE_NONE, 0);
         return taste < 0 ? sText_Feed_Disliked : sText_Feed_Snack;
     }
 
     case LIFE_VERB_PLAY:
         if (rec->need[NEED_REST] >= 210 || act == LIFE_ACT_NAP)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_ZZZ, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_ZZZ, LIFE_POSE_NONE, 0);
             return sText_Play_Sleepy;
         }
-        if (MP_LifeField_Inviting() || rec->need[NEED_PLAY] >= 150)
+        if (TargetInviting() || rec->need[NEED_PLAY] >= 150)
         {
             // it wanted to play: a game together it'll remember
             MP_Life_Remember(rec, MEM_PLAYED, 100 + rec->need[NEED_PLAY] / 4, TIER_PART, owner, 0);
             MP_Life_Satisfy(rec, NEED_PLAY, 220);
             MP_Life_Feel(rec, EMO_JOY, 35);
             OwnerBond(rec, 1, 2, TRUE);
-            MP_LifeField_Reaction(LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 90);
+            React(LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 90);
             return sText_Play_Great;
         }
         MP_Life_Satisfy(rec, NEED_PLAY, 60);
         MP_Life_Feel(rec, EMO_JOY, repeat ? 5 : 12);
         OwnerBond(rec, 0, 0, FALSE);
-        MP_LifeField_Reaction(LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 40);
+        React(LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 40);
         return repeat ? sText_Content : sText_Play_Default;
 
     case LIFE_VERB_PRAISE:
@@ -324,12 +366,12 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             MP_Life_Remember(rec, MEM_PRAISED, 90 + rec->emo[EMO_PRIDE], TIER_PART, owner, 0);
             MP_Life_Feel(rec, EMO_PRIDE, 20);
             OwnerBond(rec, 1, 2, TRUE);
-            MP_LifeField_Reaction(LIFE_EMOTE_SPARKLE, LIFE_POSE_HOP, 50);
+            React(LIFE_EMOTE_SPARKLE, LIFE_POSE_HOP, 50);
             return rec->cur[LIFE_PROUD] >= 180 ? sText_Praise_Proud : sText_Praise_Glow;
         }
         OwnerBond(rec, 0, 0, FALSE);
         MP_Life_Feel(rec, EMO_PRIDE, repeat ? 0 : 8);
-        MP_LifeField_Reaction(repeat ? LIFE_EMOTE_CALM : LIFE_EMOTE_SPARKLE, LIFE_POSE_NONE, 0);
+        React(repeat ? LIFE_EMOTE_CALM : LIFE_EMOTE_SPARKLE, LIFE_POSE_NONE, 0);
         return repeat ? sText_Content : (rec->cur[LIFE_PROUD] >= 180 ? sText_Praise_Proud : sText_Praise_Default);
 
     case LIFE_VERB_COMFORT:
@@ -347,12 +389,12 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             MP_Life_SoftenTrait(rec, TRAIT_AFRAID, LIFE_TRIG_THUNDER, 12);
             MP_Life_SoftenTrait(rec, TRAIT_AFRAID, LIFE_TRIG_DARK, 12);
             OwnerBond(rec, 3, 2, TRUE);
-            MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_SIT, 90);
+            React(LIFE_EMOTE_HEART, LIFE_POSE_SIT, 90);
             return sText_Comfort_Calms;
         }
         MP_Life_Feel(rec, EMO_AFFECTION, repeat ? 0 : 6);
         OwnerBond(rec, 0, 0, FALSE);
-        MP_LifeField_Reaction(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
+        React(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
         return repeat ? sText_Content : sText_Comfort_NotNeeded;
     }
 
@@ -361,7 +403,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             return CrossBoundary(rec, sText_Groom_Boundary, verb);
         if (repeat)
         {
-            MP_LifeField_Reaction(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
+            React(LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
             return sText_Content;
         }
         MP_Life_Feel(rec, EMO_CALM, 15);
@@ -369,7 +411,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         if (MP_Life_TypeNeed(rec, FALSE) == TNEED_COZY)
             MP_Life_Satisfy(rec, NEED_TYPE_A, 80);
         OwnerBond(rec, 1, 1, FALSE);
-        MP_LifeField_Reaction(LIFE_EMOTE_SPARKLE, LIFE_POSE_NONE, 0);
+        React(LIFE_EMOTE_SPARKLE, LIFE_POSE_NONE, 0);
         return sText_Groom_Neat;
 
     case LIFE_VERB_WATCH:
@@ -388,7 +430,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             MP_Life_Journal(&mon->box, lines, LIFE_JOURNAL_LINES);
             if (MP_Life_JournalKnownCount() > base)
             {
-                MP_LifeField_Reaction(LIFE_EMOTE_QUESTION, LIFE_POSE_NONE, 0);
+                React(LIFE_EMOTE_QUESTION, LIFE_POSE_NONE, 0);
                 OwnerBond(rec, 0, 0, FALSE);
                 return sText_Watch_Learn;
             }
@@ -408,7 +450,7 @@ static const u8 *DoSitWith(struct MpLifeRec *rec)
     MP_Life_Satisfy(rec, rec->cur[LIFE_SOCIAL] >= 128 ? NEED_COMPANY : NEED_QUIET, 120);
     OwnerBond(rec, shy ? 2 : 1, 1, shy);
     MP_Life_Reveal(rec, LIFE_FACT_TEMPER(LIFE_SOCIAL));
-    MP_LifeField_Reaction(LIFE_EMOTE_CALM, LIFE_POSE_SIT, 120);
+    React(LIFE_EMOTE_CALM, LIFE_POSE_SIT, 120);
     return shy ? sText_Sit_Shy : sText_Sit_Default;
 }
 
@@ -420,7 +462,7 @@ static const u8 *DoKeepsake(struct Pokemon *mon, struct MpLifeRec *rec)
     CopyItemName(item, gStringVar2);
     if (rec->keepsake == item)
     {
-        MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_NONE, 0);
+        React(LIFE_EMOTE_HEART, LIFE_POSE_NONE, 0);
         return sText_Keepsake_Still;
     }
     rec->keepsake = item;
@@ -428,18 +470,18 @@ static const u8 *DoKeepsake(struct Pokemon *mon, struct MpLifeRec *rec)
     MP_Life_Remember(rec, MEM_KEEPSAKE, 150, TIER_PART, MP_Life_LocalTrainerKey(), item);
     MP_Life_Feel(rec, EMO_AFFECTION, 30);
     OwnerBond(rec, 1, 3, TRUE);
-    MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_HOP, 60);
+    React(LIFE_EMOTE_HEART, LIFE_POSE_HOP, 60);
     return sText_Keepsake_Give;
 }
 
 // The fitting thing for A (docs 6.1)
 static s8 SmartVerb(struct MpLifeRec *rec)
 {
-    if (MP_LifeField_Activity() == LIFE_ACT_NAP)
+    if (TargetActivity() == LIFE_ACT_NAP)
         return LIFE_VERB_WATCH + 64;             // don't wake it: just look (a TALK that says it's asleep)
     if (NegativeFeeling(rec) >= 40)
         return LIFE_VERB_COMFORT;
-    if (MP_LifeField_Inviting())
+    if (TargetInviting())
         return LIFE_VERB_PLAY;
     if (rec->emo[EMO_PRIDE] >= 50)
         return LIFE_VERB_PRAISE;
@@ -464,12 +506,13 @@ static void ShowResult(u8 taskId, s8 verb)
     {
         UnlockPlayerFieldControls();
         DestroyTask(taskId);
+        EndTarget();
         return;
     }
     GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
     StringGet_Nickname(gStringVar1);
     if (verb == LIFE_VERB_WATCH + 64)
-        text = sText_Talk_Asleep, MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_ZZZ);
+        text = sText_Talk_Asleep, React(LIFE_EMOTE_ZZZ, LIFE_POSE_NONE, 0);
     else if (verb == LIFE_VERBS)          // SIT WITH
         text = DoSitWith(rec);
     else if (verb == LIFE_VERB_KEEPSAKE)
@@ -532,6 +575,7 @@ static void Task_Interact(u8 taskId)
         {
             UnlockPlayerFieldControls();
             DestroyTask(taskId);
+            EndTarget();
         }
         break;
     }
@@ -553,6 +597,19 @@ bool8 MP_LifeInteract_TryFollower(void)
     MoveCoords(me->facingDirection, &x, &y);
     if (x != fx || y != fy || GetObjectEventIdByXY(x, y) != OBJECT_EVENTS_COUNT)
         return FALSE;
+    LockPlayerFieldControls();
+    CreateTask(Task_Interact, 80);
+    return TRUE;
+}
+
+// A in front of a Garden Pokémon (mp_garden_life.c): the same tap / hold, with that Pokémon
+bool8 MP_LifeInteract_StartFor(struct Pokemon *mon, s8 actor)
+{
+    if (FuncIsActiveTask(Task_Interact) || mon == NULL)
+        return FALSE;
+    sTarget.active = TRUE;
+    sTarget.mon = mon;
+    sTarget.actor = actor;
     LockPlayerFieldControls();
     CreateTask(Task_Interact, 80);
     return TRUE;

@@ -1074,6 +1074,7 @@ enum {
     MPR_WORLD_FIRST = 220,     // cut trees, smashed rocks, boulders, cut grass, soot (mp_world.c)
     MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
     MPR_JOIN_FIRST = 240,      // joining a friend's battle in progress (mp_join.c)
+    MPR_GARDEN_FIRST = 250,    // the MOéMON GARDEN: 250 Pokémon there, 251 decorations (mp_garden_net.c)
 };
 
 // mp_world.c: map changes and lights shared by friends on the same map

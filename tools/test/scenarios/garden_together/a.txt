@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+barrier in 2
+pressuntil B field 900
+wait 200
+mp life garden decor give 77
+press DOWN 2
+wait 20
+mp life garden decor place 77
+wait 400
+shot alice
+mp life garden actors
+barrier talk 2
+waitlog 3000 life social: player 2 did verb
+wait 300
+barrier done 2
+quit

@@ -9,6 +9,7 @@ void MP_LifeSocial_CollectState(struct MpState *s);   // mp_main.c: the follower
 void MP_LifeSocial_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_LifeSocial_Update(void);                       // every frame (mp_main.c)
 bool8 MP_LifeSocial_TryFriendFollower(void);           // A in front of a friend's follower (mp_overworld.c)
+bool8 MP_LifeSocial_TryFriendPokemon(s8 owner, u32 key, u16 dex);   // ... or a friend's Pokémon in the Garden
 void MP_LifeSocial_AskRecord(u32 key);                 // a Pokémon from elsewhere: does a friend's game know it?
 void MP_LifeSocial_SendRecord(u8 target, u32 key, bool8 traded);
 // mp_life_field.c: meeting a friend's follower (or a friend) while the Trainers pause together

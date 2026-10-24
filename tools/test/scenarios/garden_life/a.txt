@@ -1,0 +1,45 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 300
+shot out
+mp life garden actors
+mp life garden force 0 4
+wait 400
+shot play
+mp life garden actors
+mp life garden talk 1
+wait 30
+press A 2
+wait 120
+shot talk
+pressuntil B field 900
+wait 30
+mp life garden decor give 77
+mp life garden decor give 101
+press DOWN 2
+wait 20
+mp life garden decor place 77
+wait 30
+shot doll
+mp life garden force 2 13
+wait 400
+shot dollplay
+mp life garden actors
+mp life garden board
+wait 40
+press DOWN 2
+wait 10
+press A 2
+waitlog 600 garden watch: start
+wait 300
+shot watch
+watchlog garden watch: told
+press A 2
+waitlog 300
+wait 120
+shot told
+pressuntillog B 1500 garden watch: end
+wait 30
+shot back
+quit
