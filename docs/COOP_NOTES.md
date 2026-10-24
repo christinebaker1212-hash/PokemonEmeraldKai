@@ -1106,3 +1106,24 @@ vanishes; then any new balls pour). SELECT: shake (BG1 jiggles, walls move with 
 candy_jar, candy_jar_full (check.py reads mp jarstate: nothing outside the glass, no deep overlaps, all still),
 candy_flow (release -> Birch -> BAG / registered jar -> save reload). mp candy TYPE N (-1 = all), candyjar,
 jarstate, candyreload; harness conditions jar, jaridle.
+
+## POKéDEX entries from four games (H9, pokedex.c; data from tools/moemon_dex)
+tools/moemon_dex/import_dex.py reads pret pokeruby `src/data/pokedex_entries_en.h` (`#ifdef SAPPHIRE` = Sapphire,
+`#else` = Ruby, the _1/_2 page halves joined) and pokefirered `src/data/pokemon/pokedex_text_fr.h` (REVISION 1 text),
+flows each into one line (a line ending in a word's hyphen joins without a space), turns POKéMON into MOéMON like
+Kai's own entries (POKé BALL stays) and writes src/data/pokemon/mp_dex_more.h: per species Ruby / Sapphire / FireRed
+strings and whether Emerald (gPokedexEntries[].description, Kai's text) is shown; a text that repeats an earlier one
+word for word is NULL (183 Sapphire = Ruby, 3 Emerald = Ruby), MP_DEX_MORE_MAX_LEN = the longest combined text.
+Species are matched by order and checked by name against Kai's pokedex_entries.h. Order: Ruby, Sapphire, Emerald,
+FireRed, joined with spaces, no headings (the user's call: "as if it were one, long, PokeDex entry").
+pokedex.c (after the pokedex_entries.h include): MpDexBuild (newlines -> spaces) and MpDexWrap (greedy, FONT_NORMAL,
+MP_DEX_TEXT_WIDTH 212 px, the block centered by its widest line), MpDexDraw: 4 lines from sMpDexTop at y 95 (the
+stock entry's box), DOWN_ARROW at the box's right while more follows, UP_ARROW while reading and not at the top.
+PrintMonInfo draws it for owned Pokémon on the info page; the page after a catch (newEntry) keeps the stock entry.
+The top bar gets a TEXT tab: TEXT_SCREEN is the first screen (the cursor starts there), sMpDexBarSlots gives the five
+buttons' columns and widths (6 6 5 6 7 tiles), LoadScreenSelectBarMain loads tools/moemon_dex/gen_bar.py's 60 tiles
+(mp_dex_bar.h, built from the stock bar's pixels; T and X drawn in its letter style) at tile 256 of BG1's char block
+(after the 0x2000 bytes of menu tiles) and HighlightScreenSelectBarItem colors by slot. A on TEXT: owned and longer
+than the box -> sMpDexReading (else SE_FAILURE); MpDexReadInput takes UP/DOWN (repeat) and B (back to the top);
+TryDoInfoScreenScroll does nothing while reading. Logs "dex text: reading #N, L lines", "top T of M", "closed".
+Debug: `mp dexcheck [N]` builds all 386 (most lines 19, #303). Test dex_text.

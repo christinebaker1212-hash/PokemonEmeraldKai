@@ -44,6 +44,7 @@ enum
 
 enum
 {
+    TEXT_SCREEN, // Moemon Co-op: the TEXT tab (every game's entry, scrolled)
     AREA_SCREEN,
     CRY_SCREEN,
     SIZE_SCREEN,
@@ -855,6 +856,224 @@ ALIGNED(4) static const u8 sExpandedPlaceholder_PokedexDescription[] = _("");
 #include "data/pokemon/pokedex_text.h"
 #include "data/pokemon/pokedex_entries.h"
 
+// Moemon Co-op: every game's Pokédex entry as one long text, in the order Ruby, Sapphire, Emerald (this
+// game's own entry) and FireRed; entries that repeat an earlier one word for word are left out
+// (tools/moemon_dex). The info page shows its first lines; the TEXT tab (A) scrolls it with UP/DOWN, B goes back.
+struct MpDexMore
+{
+    const u8 *ruby;
+    const u8 *sapphire;
+    bool8 emerald;
+    const u8 *fireRed;
+};
+#include "data/pokemon/mp_dex_more.h"
+#include "data/pokemon/mp_dex_bar.h"
+
+static void PrintInfoScreenText(const u8 *str, u8 left, u8 top);
+
+#define MP_DEX_TEXT_TOP      95   // where the stock entry is printed
+#define MP_DEX_TEXT_ROWS     4    // lines in the box
+#define MP_DEX_TEXT_WIDTH    212  // wrap width in pixels (the arrows go to its right)
+#define MP_DEX_TEXT_MAXLINES 48
+
+// The TEXT / AREA / CRY / SIZE / CANCEL buttons: first column and width in tiles (tools/moemon_dex/gen_bar.py)
+static const u8 sMpDexBarSlots[SCREEN_COUNT][2] = {{0, 6}, {6, 6}, {12, 5}, {17, 6}, {23, 7}};
+#define MP_DEX_BAR_TILE 256   // the bar's tiles go after the 256 menu tiles in the BG's char block
+
+static u8 sMpDexText[MP_DEX_MORE_MAX_LEN + 16];
+static u16 sMpDexLineStart[MP_DEX_TEXT_MAXLINES + 1];
+static u8 sMpDexLineCount;
+static u8 sMpDexTop;         // first line shown
+static u8 sMpDexLeft;        // x of the text block (centered by its widest line)
+static u16 sMpDexNum;        // the national number sMpDexText holds (0 = the stock placeholder)
+static bool8 sMpDexReading;  // TEXT is open: UP/DOWN scroll the text
+
+static u32 MpDexAppend(u32 len, const u8 *s)
+{
+    if (s == NULL)
+        return len;
+    if (len != 0 && len < sizeof(sMpDexText) - 1)
+        sMpDexText[len++] = CHAR_SPACE;
+    for (; *s != EOS && len < sizeof(sMpDexText) - 1; s++)
+    {
+        if (*s == CHAR_NEWLINE)
+        {
+            // the line breaks become spaces, except after a word's hyphen ("nutrient-" + "rich")
+            if (len >= 2 && sMpDexText[len - 1] == CHAR_HYPHEN && sMpDexText[len - 2] != CHAR_SPACE)
+                continue;
+            if (len != 0 && sMpDexText[len - 1] == CHAR_SPACE)
+                continue;
+            sMpDexText[len++] = CHAR_SPACE;
+        }
+        else
+        {
+            sMpDexText[len++] = *s;
+        }
+    }
+    sMpDexText[len] = EOS;
+    return len;
+}
+
+static u32 MpDexWidth(u32 start, u32 end)
+{
+    u8 buf[80];
+    u32 n = end - start;
+    if (n > sizeof(buf) - 1)
+        n = sizeof(buf) - 1;
+    memcpy(buf, &sMpDexText[start], n);
+    buf[n] = EOS;
+    return GetStringWidth(FONT_NORMAL, buf, 0);
+}
+
+// Break sMpDexText into lines at most MP_DEX_TEXT_WIDTH pixels wide.
+static void MpDexWrap(void)
+{
+    u32 len = StringLength(sMpDexText);
+    u32 start = 0, widest = 0;
+
+    sMpDexLineCount = 0;
+    while (start < len && sMpDexLineCount < MP_DEX_TEXT_MAXLINES)
+    {
+        u32 end = start, fit = start, w;
+        // grow the line a word at a time while it fits
+        while (end < len)
+        {
+            u32 next = end;
+            while (next < len && sMpDexText[next] == CHAR_SPACE)
+                next++;
+            while (next < len && sMpDexText[next] != CHAR_SPACE)
+                next++;
+            if (MpDexWidth(start, next) > MP_DEX_TEXT_WIDTH && fit != start)
+                break;
+            fit = end = next;
+        }
+        w = MpDexWidth(start, fit);
+        if (w > widest)
+            widest = w;
+        sMpDexLineStart[sMpDexLineCount++] = start;
+        start = fit;
+        while (start < len && sMpDexText[start] == CHAR_SPACE)
+            start++;
+    }
+    sMpDexLineStart[sMpDexLineCount] = len;
+    sMpDexLeft = (DISPLAY_WIDTH - widest) / 2;
+}
+
+static void MpDexBuild(u32 num)
+{
+    u32 len = 0;
+    const struct MpDexMore *more;
+
+    sMpDexNum = num;
+    sMpDexTop = 0;
+    if (num == 0 || num > NATIONAL_DEX_COUNT)
+    {
+        sMpDexText[0] = EOS;
+        sMpDexLineCount = 0;
+        return;
+    }
+    more = &sMpDexMore[num];
+    sMpDexText[0] = EOS;
+    len = MpDexAppend(len, more->ruby);
+    len = MpDexAppend(len, more->sapphire);
+    if (more->emerald)
+        len = MpDexAppend(len, gPokedexEntries[num].description);
+    len = MpDexAppend(len, more->fireRed);
+    MpDexWrap();
+}
+
+// Draw the lines from sMpDexTop in the entry's box, with an arrow while more text is above or below.
+static void MpDexDraw(void)
+{
+    u8 buf[80];
+    u32 i, arrowX = sMpDexLeft + MP_DEX_TEXT_WIDTH + 4;
+    static const u8 sUp[] = {CHAR_UP_ARROW, EOS};
+    static const u8 sDown[] = {CHAR_DOWN_ARROW, EOS};
+
+    if (arrowX > DISPLAY_WIDTH - 8)
+        arrowX = DISPLAY_WIDTH - 8;
+    FillWindowPixelRect(WIN_INFO, PIXEL_FILL(0), 0, MP_DEX_TEXT_TOP, DISPLAY_WIDTH, DISPLAY_HEIGHT - MP_DEX_TEXT_TOP);
+    for (i = 0; i < MP_DEX_TEXT_ROWS && sMpDexTop + i < sMpDexLineCount; i++)
+    {
+        u32 s = sMpDexLineStart[sMpDexTop + i], e = sMpDexLineStart[sMpDexTop + i + 1], n;
+        while (e > s && sMpDexText[e - 1] == CHAR_SPACE)
+            e--;
+        n = e - s;
+        if (n > sizeof(buf) - 1)
+            n = sizeof(buf) - 1;
+        memcpy(buf, &sMpDexText[s], n);
+        buf[n] = EOS;
+        PrintInfoScreenText(buf, sMpDexLeft, MP_DEX_TEXT_TOP + 16 * i);
+    }
+    if (sMpDexReading && sMpDexTop > 0)
+        PrintInfoScreenText(sUp, arrowX, MP_DEX_TEXT_TOP);
+    if (sMpDexTop + MP_DEX_TEXT_ROWS < sMpDexLineCount)
+        PrintInfoScreenText(sDown, arrowX, MP_DEX_TEXT_TOP + 16 * (MP_DEX_TEXT_ROWS - 1));
+}
+
+static u8 MpDexMaxTop(void)
+{
+    return sMpDexLineCount > MP_DEX_TEXT_ROWS ? sMpDexLineCount - MP_DEX_TEXT_ROWS : 0;
+}
+
+// The reading mode's input. TRUE = it took this frame's input.
+static bool8 MpDexReadInput(void)
+{
+    if (!sMpDexReading)
+        return FALSE;
+    if (JOY_NEW(B_BUTTON))
+    {
+        sMpDexReading = FALSE;
+        sMpDexTop = 0;
+        MpDexDraw();
+        CopyWindowToVram(WIN_INFO, COPYWIN_GFX);
+        PlaySE(SE_SELECT);
+        MPNet_Log("dex text: closed");
+    }
+    else if (JOY_REPEAT(DPAD_DOWN) || JOY_REPEAT(DPAD_UP))
+    {
+        u8 top = sMpDexTop;
+        if (JOY_REPEAT(DPAD_DOWN) && top < MpDexMaxTop())
+            top++;
+        else if (JOY_REPEAT(DPAD_UP) && top > 0)
+            top--;
+        if (top != sMpDexTop)
+        {
+            sMpDexTop = top;
+            MpDexDraw();
+            CopyWindowToVram(WIN_INFO, COPYWIN_GFX);
+            MPNet_Log("dex text: top %u of %u", sMpDexTop, MpDexMaxTop());
+        }
+    }
+    return TRUE;
+}
+
+// mp dexcheck: build every species' text and report the longest (lines, characters) and any that didn't fit
+void MP_Dex_DebugTexts(u16 show)
+{
+    u32 n, most = 0, mostNum = 0, longest = 0, bad = 0;
+
+    for (n = 1; n <= NATIONAL_DEX_COUNT; n++)
+    {
+        u32 len;
+        MpDexBuild(n);
+        len = StringLength(sMpDexText);
+        if (sMpDexLineCount > most)
+            most = sMpDexLineCount, mostNum = n;
+        if (len > longest)
+            longest = len;
+        if (sMpDexLineCount >= MP_DEX_TEXT_MAXLINES || len >= sizeof(sMpDexText) - 1 || sMpDexLineCount <= MP_DEX_TEXT_ROWS)
+            bad++, MPNet_Log("dex check: #%u has %u lines, %u characters", n, sMpDexLineCount, len);
+    }
+    MPNet_Log("dex check: %u species, most lines %u (#%u), longest %u characters, %u to look at", NATIONAL_DEX_COUNT, most, mostNum, longest, bad);
+    if (show >= 1 && show <= NATIONAL_DEX_COUNT)
+    {
+        MpDexBuild(show);
+        MPNet_Log("dex check: #%u has %u lines, left %u", show, sMpDexLineCount, sMpDexLeft);
+    }
+    sMpDexNum = 0;
+}
+
 static const u16 sSizeScreenSilhouette_Pal[] = INCGFX_U16("graphics/pokedex/size_silhouette.pal", ".gbapal");
 
 static const struct BgTemplate sInfoScreen_BgTemplate[] =
@@ -1579,7 +1798,7 @@ static void ResetPokedexView(struct PokedexView *pokedexView)
     pokedexView->currentPage = PAGE_MAIN;
     pokedexView->currentPageBackup = PAGE_MAIN;
     pokedexView->isSearchResults = FALSE;
-    pokedexView->selectedScreen = AREA_SCREEN;
+    pokedexView->selectedScreen = TEXT_SCREEN; // Moemon Co-op: the cursor starts on TEXT
     pokedexView->screenSwitchState = 0;
     pokedexView->menuIsOpen = 0;
     pokedexView->menuCursorPos = 0;
@@ -1623,7 +1842,7 @@ void CB2_OpenPokedex(void)
         sPokedexView->dexOrder = gSaveBlock2Ptr->pokedex.order;
         sPokedexView->selectedPokemon = sLastSelectedPokemon;
         sPokedexView->pokeBallRotation = sPokeBallRotation;
-        sPokedexView->selectedScreen = AREA_SCREEN;
+        sPokedexView->selectedScreen = TEXT_SCREEN; // Moemon Co-op: the cursor starts on TEXT
         if (!IsNationalPokedexEnabled())
         {
             sPokedexView->seenCount = GetHoennPokedexCount(FLAG_GET_SEEN);
@@ -2678,6 +2897,9 @@ static bool8 TryDoInfoScreenScroll(void)
     u16 nextPokemon;
     u16 selectedPokemon = sPokedexView->selectedPokemon;
 
+    if (sMpDexReading) // Moemon Co-op: UP/DOWN scroll the TEXT instead
+        return FALSE;
+
     if (JOY_NEW(DPAD_UP) && selectedPokemon)
     {
         nextPokemon = selectedPokemon;
@@ -3372,11 +3594,14 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     if (gTasks[taskId].tScrolling)
     {
         // Scroll up/down
+        sMpDexReading = FALSE;
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_LoadInfoScreenWaitForFade;
         PlaySE(SE_DEX_SCROLL);
         return;
     }
+    if (MpDexReadInput()) // Moemon Co-op: TEXT is open
+        return;
     if (JOY_NEW(B_BUTTON))
     {
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
@@ -3388,6 +3613,20 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     {
         switch (sPokedexView->selectedScreen)
         {
+        case TEXT_SCREEN: // Moemon Co-op: read every game's entry
+            if (!sPokedexListItem->owned || sMpDexNum != sPokedexListItem->dexNum || sMpDexLineCount <= MP_DEX_TEXT_ROWS)
+            {
+                PlaySE(SE_FAILURE);
+            }
+            else
+            {
+                sMpDexReading = TRUE;
+                MpDexDraw();
+                CopyWindowToVram(WIN_INFO, COPYWIN_GFX);
+                PlaySE(SE_SELECT);
+                MPNet_Log("dex text: reading #%u, %u lines", sMpDexNum, sMpDexLineCount);
+            }
+            break;
         case AREA_SCREEN:
             BeginNormalPaletteFade(PALETTES_ALL & ~(0x14), 0, 0, 16, RGB_BLACK);
             sPokedexView->screenSwitchState = 1;
@@ -3876,7 +4115,15 @@ static void Task_SwitchScreensFromSizeScreen(u8 taskId)
 
 static void LoadScreenSelectBarMain(u16 unused)
 {
+    u16 *ptr = GetBgTilemapBuffer(1);
+    u32 row, col;
+
     CopyToBgTilemapBuffer(1, gPokedexScreenSelectBarMain_Tilemap, 0, 0);
+    // Moemon Co-op: the bar with the TEXT tab (its own tiles after the menu's 256)
+    LoadBgTiles(1, sMpDexBarTiles, sizeof(sMpDexBarTiles), MP_DEX_BAR_TILE);
+    for (row = 0; row < 2; row++)
+        for (col = 0; col < 30; col++)
+            ptr[row * 32 + col] = (MP_DEX_BAR_TILE + row * 30 + col) | 0x4000;
 }
 
 static void LoadScreenSelectBarSubmenu(u16 unused)
@@ -3892,7 +4139,7 @@ static void HighlightScreenSelectBarItem(u8 selectedScreen, u16 unused)
 
     for (i = 0; i < SCREEN_COUNT; i++)
     {
-        u8 row = (i * 7) + 1;
+        u8 row = sMpDexBarSlots[i][0]; // Moemon Co-op: five buttons of their own widths
         u16 newPalette;
 
         do
@@ -3902,7 +4149,7 @@ static void HighlightScreenSelectBarItem(u8 selectedScreen, u16 unused)
                 newPalette = 0x2000;
         } while (0);
 
-        for (j = 0; j < 7; j++)
+        for (j = 0; j < sMpDexBarSlots[i][1]; j++)
         {
             ptr[row + j] = (ptr[row + j] % 0x1000) | newPalette;
             ptr[row + j + 0x20] = (ptr[row + j + 0x20] % 0x1000) | newPalette;
@@ -4194,6 +4441,16 @@ static void PrintMonInfo(u32 num, u32 value, u32 owned, u32 newEntry)
         PrintInfoScreenText(gText_UnkHeight, 0x81, 0x39);
         PrintInfoScreenText(gText_UnkWeight, 0x81, 0x49);
     }
+    // Moemon Co-op: the info page shows the start of every game's entry (the TEXT tab scrolls it); the page
+    // after a catch keeps this game's own entry, which fits its box
+    sMpDexReading = FALSE;
+    if (owned && !newEntry)
+    {
+        MpDexBuild(num);
+        MpDexDraw();
+        return;
+    }
+    sMpDexNum = 0;
     if (owned)
         description = gPokedexEntries[num].description;
     else

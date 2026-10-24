@@ -1,0 +1,51 @@
+pressuntil A field 5000
+wait 60
+mp dexcatch 252
+mp dexcatch 253
+mp dexsee 254
+mp dexcheck 252
+press START 2
+wait 30
+shot d_menu
+press A 2
+wait 150
+shot d_list
+press A 2
+wait 150
+shot d_info
+press A 2
+wait 20
+shot d_read0
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 20
+shot d_read3
+press UP 2
+wait 20
+shot d_read2
+press B 2
+wait 20
+shot d_back
+press DOWN 2
+wait 150
+shot d_next
+press DOWN 2
+wait 150
+shot d_seen
+press A 2
+wait 20
+shot d_seen_text
+press UP 2
+wait 150
+press RIGHT 2
+wait 10
+press A 2
+wait 150
+shot d_area
+press B 2
+wait 150
+shot d_info_again
+quit

@@ -1059,6 +1059,18 @@ Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
 
+POKEDEX ENTRIES
+---------------
+A MOEMON's page in the POKEDEX tells you everything RUBY, SAPPHIRE,
+EMERALD and FIRERED had to say about it, as one long entry (an entry
+that says exactly what an earlier game said is shown only once). The page
+shows the beginning; a small arrow means there's more.
+  TEXT (the first button at the top, where the cursor starts)  A = read
+  While reading   UP / DOWN = scroll, B = done
+After reading, UP / DOWN go to the next MOEMON again. AREA, CRY and SIZE
+work as before (move right to them). A MOEMON you've only seen has no
+entry yet. The page that appears after a catch keeps EMERALD's entry.
+
 UPDATES
 -------
 When the game starts it checks for a newer version (online, at the

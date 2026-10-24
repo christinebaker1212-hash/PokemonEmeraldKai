@@ -57,6 +57,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `spec_sides` | 4 players, NA-JP lag: ALICE (1920x1080) shows BOB LEFT 1X, CARL RIGHT 2X, DANA ABOVE 1X, then DANA in her own window, then closes it (DANA only goes off); check_spectrace.py |
 | `options_tabs` | START > OPTIONS with real keys: TEXT SPEED, L/R tabs, BUTTON ICONS PLAYSTATION (icons switch), AUTOSAVE 10, MOENAV CALLS BATTLES (random chat calls stop); check.sh: saved to the inis |
 | `music_options` | BIKE MUSIC / SURF MUSIC: the Mach Bike, surfing Petalburg's pond and diving, songs checked in order (check.py) |
+| `dex_text` | POKéDEX TEXT tab: the long entry's start with an arrow, A / DOWN / UP / B scrolling, DOWN to the next Pokémon after, seen-only does nothing, AREA still opens; `mp dexcheck` builds all 386 texts |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

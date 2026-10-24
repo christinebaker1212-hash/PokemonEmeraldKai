@@ -42,5 +42,6 @@ bool16 HasAllHoennMons(void);
 void ResetPokedexScrollPositions(void);
 bool16 HasAllMons(void);
 void CB2_OpenPokedex(void);
+void MP_Dex_DebugTexts(u16 show); // Moemon Co-op: mp dexcheck
 
 #endif // GUARD_POKEDEX_H

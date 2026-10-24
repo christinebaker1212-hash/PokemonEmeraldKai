@@ -82,6 +82,8 @@ BATTLE_GO, MPR_PHRASE_READY; the loser keeps their money; test flag_phrases).
 Also OPTIONS in tabs (option_menu.c: GAME / DISPLAY / CONTROLS / CO-OP rows, L/R tabs; replaces START > SETTINGS and
 CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON ICONS (gamepad.c) and MOENAV CALLS
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
+Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
+reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
