@@ -912,6 +912,11 @@ recall leaves a fade-in running; the refused fade let ReshowBattleScreenAfterMen
 run in plain view: white flash, bare background, empty boxes). Log "join: rebuilding the screen behind black (fade 16)",
 expected by the join_* tests. Found with the harness's `shotburst PREFIX FRAMES [STEP]` (every frame saved; the first
 fade-in frames only look bare when brightened: light colors all round to one value at that BLDY).
+The joiner (1.11.1): CB2_MpJoinBattle builds a screen that was never there, and some palettes reach palette RAM
+directly while ReshowBattleScreenAfterMenu runs (bufferTransferDisabled doesn't hold them), so ~30 frames of half-built
+battle (green stripes, bits of sprites, an empty box) showed between the transition and the fade-in. gMpReshowDark
+(reshow_battle_screen.c, set by CB2_MpJoinBattle) re-applies BLDCNT darken / BLDY 16 after every rebuild step (step 0
+resets the blend registers); the closing BeginHardwarePaletteFade(0xFF, 0, 16, 0) fades in from that same darkness.
 Joinable: solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON) or one trainer, single or
 double (CB2_EndTrainerBattle, modes SINGLE / CONTINUE_SCRIPT / REMATCH and the double ones; not bosses, RIVAL,
 TEAM AQUA / MAGMA), or a co-op double of that kind. Not: triples, two trainers, PvP, frontier, safari, legendaries.

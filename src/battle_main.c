@@ -655,9 +655,10 @@ void CB2_MpJoinBattle(void)
     // windows as the intro's slide leaves them: everything shown
     DisableInterrupts(INTR_FLAG_HBLANK);
     EnableInterrupts(INTR_FLAG_VBLANK | INTR_FLAG_VCOUNT | INTR_FLAG_TIMER3 | INTR_FLAG_SERIAL);
-    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    // dark until the rebuild's fade-in (reshow_battle_screen.c gMpReshowDark)
+    SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_ALL | BLDCNT_EFFECT_DARKEN);
     SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-    SetGpuReg(REG_OFFSET_BLDY, 0);
+    SetGpuReg(REG_OFFSET_BLDY, 16);
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJWIN_ON | DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     SetGpuReg(REG_OFFSET_MOSAIC, 0);
     SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN0_OBJ | WININ_WIN0_CLR | WININ_WIN1_BG_ALL | WININ_WIN1_OBJ | WININ_WIN1_CLR);
@@ -700,6 +701,10 @@ void CB2_MpJoinBattle(void)
     MP_StartBattleLinkTasks();
     gBattleTypeFlags |= BATTLE_TYPE_LINK_IN_BATTLE;
     MP_Join_CreateReadyTask();
+    {
+        extern bool8 gMpReshowDark;   // reshow_battle_screen.c
+        gMpReshowDark = TRUE;
+    }
     ReshowBattleScreenAfterMenu();
 }
 

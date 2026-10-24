@@ -25,6 +25,11 @@ static void CreateBattlerSprite(u8 battler);
 static void CreateHealthboxSprite(u8 battler);
 static void ClearBattleBgCntBaseBlocks(void);
 
+// Moemon Co-op: a friend joining a battle (battle_main.c CB2_MpJoinBattle) rebuilds a screen that was never there:
+// some palettes reach the screen directly while it's built, so it stays fully darkened (the blend registers) until
+// the hardware fade-in at the end takes over from the same darkness
+bool8 gMpReshowDark;
+
 void ReshowBattleScreenDummy(void)
 {
 
@@ -176,12 +181,18 @@ static void CB2_ReshowBattleScreenAfterMenu(void)
         SetVBlankCallback(VBlankCB_Battle);
         ClearBattleBgCntBaseBlocks();
         BeginHardwarePaletteFade(0xFF, 0, 0x10, 0, 1);
+        gMpReshowDark = FALSE;
         gPaletteFade.bufferTransferDisabled = 0;
         SetMainCallback2(BattleMainCB2);
         FillAroundBattleWindows();
         break;
     }
 
+    if (gMpReshowDark)
+    {
+        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_ALL | BLDCNT_EFFECT_DARKEN);
+        SetGpuReg(REG_OFFSET_BLDY, 16);
+    }
     gBattleScripting.reshowMainState++;
 }
 
