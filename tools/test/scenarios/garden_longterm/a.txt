@@ -1,0 +1,69 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 300
+mp life garden actors
+watchlog milestone
+mp life garden pursuit 2 58
+wait 240
+shot pursuit
+waitlog 1500
+wait 20
+shot milestone
+mp life show 2
+watchlog rare 2 done
+mp life garden rare 0 2
+wait 360
+shot paddle
+waitlog 1800
+wait 10
+shot paddled
+mp life show 1
+watchlog rare 1 done
+mp life garden rare 0 1
+wait 360
+shot stars
+waitlog 1800
+mp life familiar 0 1 80
+mp life familiar 2 1 40
+watchlog reacts
+mp life evolve 1 281
+wait 90
+shot evolved
+waitlog 1500
+wait 120
+shot react
+mp life garden actors
+mp life show 1
+wait 600
+mp life show 0
+mp life journal 0
+mp life journal 1
+mp life journal 2
+press START 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press DOWN 2
+wait 20
+press A 2
+wait 30
+press A 2
+wait 90
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 30
+press RIGHT 2
+wait 40
+shot journal
+press A 2
+wait 20
+shot journal2
+quit

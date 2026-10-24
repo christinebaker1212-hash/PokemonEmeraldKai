@@ -48,23 +48,6 @@
 
 enum { FDIR_DOWN, FDIR_UP, FDIR_LEFT, FDIR_RIGHT };
 
-// What a Garden Pokémon does (LIFE_ACT_* where they match, so friends' games can show them)
-enum
-{
-    GA_NONE = LIFE_ACT_NONE,
-    GA_WANDER = LIFE_ACT_WANDER,
-    GA_NAP = LIFE_ACT_NAP,
-    GA_FORAGE = LIFE_ACT_FORAGE,
-    GA_PLAY = LIFE_ACT_PLAY,
-    GA_COMPANY = LIFE_ACT_COMPANY,
-    GA_QUIET = LIFE_ACT_QUIET,
-    GA_TYPE = LIFE_ACT_TYPE,
-    GA_LOOK = LIFE_ACT_LOOK,
-    GA_CHASE = LIFE_ACT_COUNT,   // tag
-    GA_SQUABBLE,
-    GA_DECOR,
-};
-
 struct Actor
 {
     bool8 used;
@@ -93,6 +76,12 @@ struct Actor
     u8 tneed;
     s8 decor;               // the decoration it's using (-1 none)
     u8 arrivePose;          // the pose it takes once there
+    // long-term life (docs 12)
+    u8 rare;                // GA_RARE: LIFE_RARE_*
+    bool8 lead;             // GA_RARE / GA_SONG: it started it (and keeps the books for both)
+    bool8 learner;          // GA_PURSUIT: it's the one being taught
+    bool8 seen;             // GA_RARE: the Trainer saw it happen
+    u8 newBody;             // times it showed it's still getting used to a new body (this visit)
 };
 
 static struct
@@ -105,6 +94,7 @@ static struct
     s16 pSprX, pSprY;
     u16 pMoved;
     s32 ovx, ovy;
+    u8 rareDone;            // LIFE_RARE_* bits that happened this visit (once is plenty)
 } sL;
 
 bool8 MP_Garden_StoneShown(void);
@@ -115,6 +105,7 @@ void MP_GardenDecor_Used(s8 decor, struct MpLifeRec *rec);
 bool8 MP_GardenDecor_IsFavorite(s8 index, struct MpLifeRec *rec);
 void MP_GardenWatch_Update(void);
 bool8 MP_GardenWatch_Active(void);
+bool8 MP_GardenWatch_View(s16 *x, s16 *y);
 void MP_GardenNet_Update(void);
 
 bool8 MP_Garden_HidesFollowers(void)
@@ -232,6 +223,19 @@ static bool8 T_ByTree(s16 x, s16 y, s16 *fx, s16 *fy)
         return FALSE;
     if (MapGridGetCollisionAt(x, y - 1) == 0 && MapGridGetCollisionAt(x - 1, y) == 0 && MapGridGetCollisionAt(x + 1, y) == 0)
         return FALSE;
+    *fx = x;
+    *fy = y - 1;
+    return TRUE;
+}
+
+// Below one of the trees around the GARDEN (the grove's not grown yet): a trunk to climb
+static bool8 T_ByEdgeTree(s16 x, s16 y, s16 *fx, s16 *fy)
+{
+    if (MapGridGetCollisionAt(x, y - 1) == 0 || IsWater(x, y - 1) || MP_GardenDecor_At(x, y - 1)
+     || GetObjectEventIdByXY(x, y - 1) != OBJECT_EVENTS_COUNT)
+        return FALSE;
+    if ((x == GX(GARDEN_BOARD_X) && y - 1 == GY(GARDEN_BOARD_Y)) || (x >= GX(GARDEN_HEDGE_X) && x <= GX(GARDEN_HEDGE_X) + 1))
+        return FALSE;   // (the GARDEN BOARD, the hedge: not trees)
     *fx = x;
     *fy = y - 1;
     return TRUE;
@@ -357,9 +361,15 @@ static void SyncLocalActors(void)
         for (i = 0; i < MAX_ACTORS; i++)
             if (sL.a[i].used && sL.a[i].owner < 0 && sL.a[i].key == key)
             {
+                u16 dex = SpeciesToNationalPokedexNum(species);
                 have = TRUE;
                 sL.a[i].slot = p;
-                sL.a[i].dex = SpeciesToNationalPokedexNum(species);   // (an evolution here)
+                if (sL.a[i].dex != dex)
+                {
+                    // it evolved here (a stone, a RARE CANDY): its new body's sprite
+                    sL.a[i].dex = dex;
+                    DestroyActorSprite(&sL.a[i]);
+                }
             }
         if (have || (a = NewActor()) == NULL)
             continue;
@@ -572,10 +582,15 @@ static void Plan(struct Actor *a, u8 act, s16 x, s16 y, s16 fx, s16 fy, u16 dura
     a->pose = LIFE_POSE_NONE;
     a->emote = emote;
     a->speed = act == GA_CHASE ? 2 : 1;
-    if (act != GA_PLAY && act != GA_CHASE && act != GA_SQUABBLE)
+    if (act != GA_PLAY && act != GA_CHASE && act != GA_SQUABBLE && act != GA_RARE && act != GA_SONG
+     && act != GA_REACT && act != GA_PURSUIT)
         a->partner = -1;
     if (act != GA_DECOR)
         a->decor = -1;
+    a->rare = 0;
+    a->lead = FALSE;
+    a->learner = FALSE;
+    a->seen = FALSE;
 }
 
 static u8 LeadTypeNeed(struct MpLifeRec *rec, u8 *amount)
@@ -643,17 +658,437 @@ static bool8 BesideActor(struct Actor *a, struct Actor *b, s16 *x, s16 *y)
     return FindNear(b->cur.x, b->cur.y, T_Any, 1, x, y, &fx, &fy) && !(*x == b->cur.x && *y == b->cur.y);
 }
 
+// ---------------------------------------------------------------------------
+// Long-term life (docs 12): its own pursuit, rare moments, a family song, an evolution's new body
+
+static bool8 HasType(struct MpLifeRec *rec, u8 type)
+{
+    return gSpeciesInfo[rec->species].types[0] == type || gSpeciesInfo[rec->species].types[1] == type;
+}
+
+static bool8 ClearSky(void)
+{
+    u8 w = GetCurrentWeather();
+    return w == WEATHER_NONE || w == WEATHER_SUNNY_CLOUDS || w == WEATHER_SUNNY;
+}
+
+static bool8 Rainy(void)
+{
+    u8 w = GetCurrentWeather();
+    return w == WEATHER_RAIN || w == WEATHER_RAIN_THUNDERSTORM || w == WEATHER_DOWNPOUR;
+}
+
+static u8 Hour(void)
+{
+    RtcCalcLocalTime();
+    return gLocalTime.hours;
+}
+
+// The Trainer can see it: on screen around them (or around the view, while watching)
+static bool8 Seen(struct Actor *a)
+{
+    struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 vx = me->currentCoords.x, vy = me->currentCoords.y;
+    MP_GardenWatch_View(&vx, &vy);
+    return abs(a->cur.x - vx) <= 7 && abs(a->cur.y - vy) <= 5;
+}
+
+static u8 Level(struct Actor *a)
+{
+    return a->owner < 0 && a->slot < PARTY_SIZE ? GetMonData(&gPlayerParty[a->slot], MON_DATA_LEVEL) : 0;
+}
+
+// a free tile next to (x, y) for b (not (x, y) itself)
+static bool8 BesideTile(struct Actor *b, s16 x, s16 y, s16 *ox, s16 *oy)
+{
+    static const s8 d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    u8 i, start = Random() & 3;
+    for (i = 0; i < 4; i++)
+    {
+        s16 nx = x + d[(start + i) & 3][0], ny = y + d[(start + i) & 3][1];
+        if (CanStand(nx, ny, b))
+        {
+            *ox = nx;
+            *oy = ny;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// One of ours, free and close by, that passes a test
+static struct Actor *OursNear(struct Actor *a, u8 radius, bool8 (*ok)(struct Actor *a, struct Actor *b))
+{
+    u8 i;
+    struct Actor *best = NULL;
+    int bestD = 99;
+    for (i = 0; i < MAX_ACTORS; i++)
+    {
+        struct Actor *b = &sL.a[i];
+        int d;
+        if (b == a || b->owner >= 0 || !Available(b) || RecOf(b) == NULL)
+            continue;
+        d = abs(b->cur.x - a->cur.x) + abs(b->cur.y - a->cur.y);
+        if (d <= radius && d < bestD && ok(a, b))
+            bestD = d, best = b;
+    }
+    return best;
+}
+
+// --- Pursuits: no stats, no prizes; it visibly gets better, and the journal celebrates it
+
+static const u8 sPursuitStep[LIFE_PURSUIT_MILESTONES] = {60, 150, 250};
+
+// how it looks at it: [pursuit][0 a beginner, 1 getting there, 2 a natural] = pose, emote
+static const u8 sPursuitLook[LIFE_PURSUIT_COUNT][3][2] = {
+    [LIFE_PURSUIT_CLIMB]   = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_SWIM]    = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_SHAKE, LIFE_EMOTE_WATER}, {LIFE_POSE_HOP, LIFE_EMOTE_WATER}},
+    [LIFE_PURSUIT_SING]    = {{LIFE_POSE_SIT, LIFE_EMOTE_DOTS}, {LIFE_POSE_SIT, LIFE_EMOTE_NOTE}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}},
+    [LIFE_PURSUIT_COLLECT] = {{LIFE_POSE_SHAKE, LIFE_EMOTE_QUESTION}, {LIFE_POSE_SHAKE, LIFE_EMOTE_SPARKLE}, {LIFE_POSE_HOP, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_DIG]     = {{LIFE_POSE_SHAKE, LIFE_EMOTE_DOTS}, {LIFE_POSE_SHAKE, LIFE_EMOTE_EXCLAIM}, {LIFE_POSE_HOP, LIFE_EMOTE_EXCLAIM}},
+    [LIFE_PURSUIT_TEACH]   = {{LIFE_POSE_HOP, LIFE_EMOTE_DOTS}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_HOP, LIFE_EMOTE_SPARKLE}},
+};
+
+static bool8 IsYounger(struct Actor *a, struct Actor *b)
+{
+    return Level(b) + 5 <= Level(a);
+}
+
+static bool8 StartPursuit(struct Actor *a, struct MpLifeRec *rec, u8 p)
+{
+    s16 x, y, fx = 0x7FFF, fy = 0;
+    bool8 ok = FALSE;
+    u8 band, pose, emote;
+    struct Actor *student = NULL;
+    if (p == LIFE_PURSUIT_NONE || p >= LIFE_PURSUIT_COUNT)
+        return FALSE;
+    sSearcher = a;
+    switch (p)
+    {
+    case LIFE_PURSUIT_CLIMB:   ok = FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByEdgeTree, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_SWIM:    ok = FindNear(a->cur.x, a->cur.y, T_ByWater, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_SING:    ok = FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_COLLECT: ok = FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_DIG:     ok = FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_TEACH:
+        if ((student = OursNear(a, 8, IsYounger)) != NULL && BesideActor(a, student, &x, &y))
+        {
+            fx = student->cur.x;
+            fy = student->cur.y;
+            ok = TRUE;
+        }
+        break;
+    }
+    if (!ok)
+        return FALSE;
+    if (rec->pursuit != p)
+    {
+        // it takes it up (docs 12: one that fits its interests)
+        rec->pursuit = p;
+        rec->pursuitLevel = 0;
+        MPNet_Log("garden: %u takes up pursuit %u", a->dex, p);
+    }
+    band = rec->pursuitLevel < sPursuitStep[0] ? 0 : rec->pursuitLevel < sPursuitStep[1] ? 1 : 2;
+    pose = sPursuitLook[p][band][0];
+    emote = sPursuitLook[p][band][1];
+    Plan(a, GA_PURSUIT, x, y, fx, fy, 60 * (7 + band * 2), pose, emote);
+    a->partner = -1;
+    if (student)
+    {
+        a->partner = student - sL.a;
+        Plan(student, GA_PURSUIT, student->cur.x, student->cur.y, x, y, 60 * (7 + band * 2), LIFE_POSE_SIT, LIFE_EMOTE_QUESTION);
+        student->partner = a - sL.a;
+        student->learner = TRUE;
+    }
+    MPNet_Log("garden: %u pursuit %u (level %u)", a->dex, p, rec->pursuitLevel);
+    return TRUE;
+}
+
+// a session done: a little better at it; a milestone is a memory (TRUE: it celebrates)
+static bool8 PursuitDone(struct Actor *a, struct MpLifeRec *rec)
+{
+    u8 before = rec->pursuitLevel, gain, m;
+    bool8 milestone = FALSE;
+    if (a->learner)
+    {
+        // the one being taught: it looks up to its teacher
+        struct Actor *t = a->partner >= 0 ? &sL.a[a->partner] : NULL;
+        if (t && t->used)
+            MP_Life_BondShare(a->key, t->key, 2, 3, 1, 3, 0);
+        MP_Life_Feel(rec, EMO_JOY, 10);
+        return FALSE;
+    }
+    if (rec->pursuit == LIFE_PURSUIT_NONE)
+        return FALSE;
+    if (a->partner >= 0 && sL.a[a->partner].used)
+        MP_Life_BondShare(a->key, sL.a[a->partner].key, 2, 2, 2, 0, 0);
+    gain = 2 + Random() % 3 + (rec->cur[LIFE_LIVELY] >= 150 ? 1 : 0);
+    rec->pursuitLevel = before + gain > 255 ? 255 : before + gain;
+    MP_Life_Feel(rec, EMO_JOY, 6);
+    for (m = 0; m < LIFE_PURSUIT_MILESTONES; m++)
+        if (before < sPursuitStep[m] && rec->pursuitLevel >= sPursuitStep[m])
+        {
+            MP_Life_Remember(rec, MEM_PURSUIT, 140 + m * 40, TIER_PART, 0, (rec->pursuit << 8) | m);
+            MP_Life_Feel(rec, EMO_PRIDE, 30);
+            MP_Life_Reveal(rec, LIFE_FACT_PURSUIT);
+            MPNet_Log("garden: %u pursuit %u milestone %u", a->dex, rec->pursuit, m);
+            milestone = TRUE;
+        }
+    if (Seen(a))
+        MP_Life_Reveal(rec, LIFE_FACT_PURSUIT);
+    return milestone;
+}
+
+// --- Rare moments: only when temperament, bonds, place, weather and the time of day line up
+
+static bool8 RareFits(u8 kind, struct Actor *a, struct MpLifeRec *ra, struct Actor *b, struct MpLifeRec *rb, bool8 force)
+{
+    struct MpLifeBond *ab = BondWith(a, b), *ba = BondWith(b, a);
+    u8 h;
+    if (ab == NULL || ba == NULL)
+        return FALSE;
+    h = Hour();
+    switch (kind)
+    {
+    case LIFE_RARE_STARGAZE:
+        // two best friends on a clear night, one of them a dreamer
+        return (force || (IsNight() && ClearSky()))
+            && ab->v[BOND_AFFECTION] >= 180 && ba->v[BOND_AFFECTION] >= 180 && ab->v[BOND_TRUST] >= 140 && ba->v[BOND_TRUST] >= 140
+            && (ra->cur[LIFE_CURIOUS] >= 120 || ra->cur[LIFE_WARM] >= 160);
+    case LIFE_RARE_PADDLE:
+        // a warm Water type, and a nervous Fire type who trusts it, on a calm day
+        return (force || (!IsNight() && !Rainy()))
+            && HasType(ra, TYPE_WATER) && ra->cur[LIFE_WARM] >= 130 && HasType(rb, TYPE_FIRE)
+            && (rb->cur[LIFE_BOLD] < 120 || MP_Life_FindTrait(rb, TRAIT_AFRAID, LIFE_TRIG_WATER))
+            && ba->v[BOND_TRUST] >= 110 && ab->v[BOND_AFFECTION] >= 100;
+    case LIFE_RARE_RIVAL_NAP:
+        // old rivals, both worn out, on a lazy afternoon
+        return (force || (h >= 12 && h < 17 && ra->need[NEED_REST] >= 100 && rb->need[NEED_REST] >= 100))
+            && ((ab->flags | ba->flags) & LIFE_BOND_RIVAL) && ab->shared >= 8 && ab->v[BOND_RESPECT] >= 120;
+    case LIFE_RARE_FAMILY:
+        // family, a quiet evening, a warm one in a good mood
+        return (force || (h >= 17 && h < 21 && ra->mood > 20 && rb->mood > 0))
+            && (ab->flags & LIFE_BOND_FAMILY) && ra->cur[LIFE_WARM] >= 120;
+    }
+    return FALSE;
+}
+
+static bool8 StartRare(u8 kind, struct Actor *a, struct Actor *b)
+{
+    s16 x = a->cur.x, y = a->cur.y, fx = 0x7FFF, fy = 0, bx, by;
+    u16 dur = 60 * 20;
+    u8 ia = a - sL.a, ib = b - sL.a;
+    sSearcher = a;
+    switch (kind)
+    {
+    case LIFE_RARE_STARGAZE:
+        if (!FindNear(a->cur.x, a->cur.y, T_Open, 8, &x, &y, &fx, &fy) || !BesideTile(b, x, y, &bx, &by))
+            return FALSE;
+        Plan(a, GA_RARE, x, y, 0x7FFF, 0, dur, LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE);
+        Plan(b, GA_RARE, bx, by, 0x7FFF, 0, dur, LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE);
+        break;
+    case LIFE_RARE_PADDLE:
+        if (!FindNear(a->cur.x, a->cur.y, T_ByWater, 14, &x, &y, &fx, &fy) || !BesideTile(b, x, y, &bx, &by))
+            return FALSE;
+        Plan(a, GA_RARE, x, y, fx, fy, dur, LIFE_POSE_SHAKE, LIFE_EMOTE_WATER);
+        Plan(b, GA_RARE, bx, by, fx, fy, dur, LIFE_POSE_SIT, LIFE_EMOTE_SWEAT);
+        break;
+    case LIFE_RARE_RIVAL_NAP:
+        if (!(FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Any, 3, &x, &y, &fx, &fy))
+         || !BesideTile(b, x, y, &bx, &by))
+            return FALSE;
+        Plan(a, GA_RARE, x, y, 0x7FFF, 0, dur, LIFE_POSE_NAP, LIFE_EMOTE_ZZZ);
+        Plan(b, GA_RARE, bx, by, 0x7FFF, 0, dur, LIFE_POSE_NAP, LIFE_EMOTE_ZZZ);
+        break;
+    case LIFE_RARE_FAMILY:
+        if (!BesideActor(a, b, &x, &y))
+            return FALSE;
+        dur = 60 * 12;
+        Plan(a, GA_RARE, x, y, b->cur.x, b->cur.y, dur, LIFE_POSE_SHAKE, LIFE_EMOTE_HEART);
+        Plan(b, GA_RARE, b->cur.x, b->cur.y, x, y, dur, LIFE_POSE_SIT, LIFE_EMOTE_CALM);
+        break;
+    default:
+        return FALSE;
+    }
+    a->rare = b->rare = kind;
+    a->lead = TRUE;
+    a->partner = ib;
+    b->partner = ia;
+    sL.rareDone |= 1 << kind;
+    MPNet_Log("garden: rare %u: %u and %u", kind, a->dex, b->dex);
+    return TRUE;
+}
+
+static bool8 TryRare(struct Actor *a, struct MpLifeRec *ra, u8 forceKind)
+{
+    u8 i, k;
+    if (!forceKind && (Random() % 12) != 0)
+        return FALSE;   // even when it all lines up, not every time
+    for (i = 0; i < MAX_ACTORS; i++)
+    {
+        struct Actor *b = &sL.a[i];
+        struct MpLifeRec *rb;
+        if (b == a || b->owner >= 0 || !Available(b) || (rb = RecOf(b)) == NULL)
+            continue;
+        if (!forceKind && abs(b->cur.x - a->cur.x) + abs(b->cur.y - a->cur.y) > 10)
+            continue;
+        for (k = 1; k < LIFE_RARE_COUNT; k++)
+        {
+            if (forceKind ? k != forceKind : (sL.rareDone & (1 << k)) != 0)
+                continue;
+            if (RareFits(k, a, ra, b, rb, forceKind != 0) && StartRare(k, a, b))
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// it happened: both remember (the journal only keeps it if the Trainer saw it, docs 12)
+static void RememberRare(struct MpLifeRec *rec, u8 kind, u8 role, u32 who, bool8 seen)
+{
+    struct MpLifeMemory *m = MP_Life_Remember(rec, MEM_RARE, 200, TIER_PART, who, kind | (role << 8));
+    u8 fact;
+    if (m == NULL)
+        return;
+    fact = LIFE_FACT_MEMORY(m - rec->mem);
+    if (seen)
+    {
+        rec->rareSeen |= 1u << kind;
+        MP_Life_Reveal(rec, fact);
+    }
+    else
+    {
+        rec->known[fact / 32] &= ~(1u << (fact % 32));
+    }
+}
+
+static void RareDone(struct Actor *a, struct MpLifeRec *ra)
+{
+    struct Actor *b = a->partner >= 0 && sL.a[a->partner].used ? &sL.a[a->partner] : NULL;
+    struct MpLifeRec *rb = b ? RecOf(b) : NULL;
+    bool8 seen = a->seen || (b && b->seen);
+    u8 kind = a->rare;
+    if (b == NULL || rb == NULL)
+        return;
+    RememberRare(ra, kind, 0, b->key, seen);
+    RememberRare(rb, kind, 1, a->key, seen);
+    switch (kind)
+    {
+    case LIFE_RARE_STARGAZE:
+        MP_Life_BondShare(a->key, b->key, 3, 3, 4, 0, 0);
+        MP_Life_BondShare(b->key, a->key, 3, 3, 4, 0, 0);
+        break;
+    case LIFE_RARE_PADDLE:
+        // the nervous one found its courage
+        if (MP_Life_FindTrait(rb, TRAIT_AFRAID, LIFE_TRIG_WATER))
+            MP_Life_SoftenTrait(rb, TRAIT_AFRAID, LIFE_TRIG_WATER, 40);
+        MP_Life_Feel(rb, EMO_PRIDE, 25);
+        MP_Life_BondShare(b->key, a->key, 2, 5, 3, 2, 0);
+        MP_Life_BondShare(a->key, b->key, 2, 2, 3, 0, 0);
+        break;
+    case LIFE_RARE_RIVAL_NAP:
+        MP_Life_BondShare(a->key, b->key, 2, 3, 2, 1, -8);
+        MP_Life_BondShare(b->key, a->key, 2, 3, 2, 1, -8);
+        break;
+    case LIFE_RARE_FAMILY:
+        MP_Life_BondShare(a->key, b->key, 2, 3, 4, 0, 0);
+        MP_Life_BondShare(b->key, a->key, 2, 3, 4, 0, 0);
+        break;
+    }
+    MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), LIFE_EMOTE_HEART);
+    MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(b - sL.a), LIFE_EMOTE_HEART);
+    MPNet_Log("garden: rare %u done (seen %d)", kind, seen);
+}
+
+// --- Family: a song its family sings, together
+
+static bool8 IsFamilyOf(struct Actor *a, struct Actor *b)
+{
+    return MP_Life_IsFamily(a->key, b->key);
+}
+
+static void SongDone(struct Actor *a)
+{
+    struct Actor *b = a->partner >= 0 && sL.a[a->partner].used ? &sL.a[a->partner] : NULL;
+    if (b == NULL)
+        return;
+    MP_Life_BondShare(a->key, b->key, 2, 2, 3, 0, 0);
+    MP_Life_BondShare(b->key, a->key, 2, 2, 3, 0, 0);
+    MP_Life_Feel(RecOf(a), EMO_JOY, 12);
+    if (RecOf(b))
+        MP_Life_Feel(RecOf(b), EMO_JOY, 12);
+}
+
+// --- Evolution: friends come to see the new body; the evolved one isn't used to it yet
+
+static bool8 TryReact(struct Actor *a, struct MpLifeRec *rec)
+{
+    u8 i;
+    for (i = 0; i < MAX_ACTORS; i++)
+    {
+        struct Actor *b = &sL.a[i];
+        struct MpLifeRec *rb;
+        u8 kind, pose, emote;
+        s16 x, y;
+        if (b == a || !b->used || b->owner >= 0 || (rb = RecOf(b)) == NULL || !MP_Life_NewBody(rb))
+            continue;
+        if (abs(b->cur.x - a->cur.x) + abs(b->cur.y - a->cur.y) > 12)
+            continue;
+        kind = MP_Life_EvolutionReaction(rec, rb);
+        if (kind == LIFE_EVO_REACT_NONE)
+            continue;
+        pose = kind == LIFE_EVO_REACT_PROUD ? LIFE_POSE_HOP : LIFE_POSE_SIT;
+        emote = kind == LIFE_EVO_REACT_PROUD ? LIFE_EMOTE_SPARKLE : kind == LIFE_EVO_REACT_AWED ? LIFE_EMOTE_EXCLAIM : LIFE_EMOTE_ANGRY;
+        if (!BesideActor(a, b, &x, &y))
+            x = a->cur.x, y = a->cur.y;
+        Plan(a, GA_REACT, x, y, b->cur.x, b->cur.y, 60 * 3, pose, emote);
+        a->partner = i;
+        MPNet_Log("garden: %u reacts (%u) to %u's new body", a->dex, kind, b->dex);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 NewBody(struct Actor *a, struct MpLifeRec *rec)
+{
+    s16 x, y, fx, fy;
+    if (a->newBody >= 3 || !MP_Life_NewBody(rec) || (Random() % 3) != 0)
+        return FALSE;
+    sSearcher = a;
+    a->newBody++;
+    if (a->newBody == 1 && FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy))
+    {
+        // a surprised look at its reflection
+        Plan(a, GA_LOOK, x, y, fx, fy, 150, LIFE_POSE_SIT, LIFE_EMOTE_EXCLAIM);
+        MPNet_Log("garden: %u looks at its reflection", a->dex);
+    }
+    else if (FindNear(a->cur.x + (Random() % 5) - 2, a->cur.y + (Random() % 3) - 1, T_Any, 2, &x, &y, &fx, &fy))
+    {
+        // a stumble: the new legs (or wings, or tail) take some getting used to
+        Plan(a, GA_WANDER, x, y, 0x7FFF, 0, 50, LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT);
+        MPNet_Log("garden: %u stumbles", a->dex);
+    }
+    else
+    {
+        Plan(a, GA_LOOK, a->cur.x, a->cur.y, 0x7FFF, 0, 90, LIFE_POSE_SPIN, LIFE_EMOTE_QUESTION);
+    }
+    return TRUE;
+}
+
 static void Choose(struct Actor *a, struct MpLifeRec *rec)
 {
-    u16 score[GA_DECOR + 1];
+    u16 score[GA_COUNT];
     u16 total = 0, pick;
-    u8 i, tneed, tamount;
+    u8 i, tneed, tamount, pursuit;
     s16 x, y, fx, fy;
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
-    struct Actor *friendA = NULL, *rivalA = NULL;
+    struct Actor *friendA = NULL, *rivalA = NULL, *songMate = NULL;
     s16 dX = 0, dY = 0;
     s8 decor;
     memset(score, 0, sizeof(score));
+    // long-term life first (docs 12): a friend's new body, a rare moment, its own new body
+    if (TryReact(a, rec) || TryRare(a, rec, 0) || NewBody(a, rec))
+        return;
     sSearcher = a;
     tneed = LeadTypeNeed(rec, &tamount);
     score[GA_WANDER] = 15 + rec->cur[LIFE_LIVELY] / 6 + rec->need[NEED_EXPLORE] / 6;
@@ -678,12 +1113,19 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
         score[GA_QUIET] = rec->need[NEED_QUIET] / 3;
     if ((decor = MP_GardenDecor_Near(a->cur.x, a->cur.y, 8, 0, &dX, &dY)) >= 0)
         score[GA_DECOR] = 20 + rec->cur[LIFE_CURIOUS] / 8 + (MP_GardenDecor_IsFavorite(decor, rec) ? 40 : 0);
-    for (i = 0; i <= GA_DECOR; i++)
+    // its pursuit (or one it might take up)
+    pursuit = rec->pursuit ? rec->pursuit : MP_Life_PursuitFor(rec);
+    if (pursuit != LIFE_PURSUIT_NONE)
+        score[GA_PURSUIT] = rec->pursuit ? 18 + rec->cur[LIFE_LIVELY] / 12 + rec->need[NEED_PLAY] / 8 : 6 + rec->cur[LIFE_CURIOUS] / 20;
+    // a song its family sings, with family close by
+    if (MP_Life_FamilyTrait(rec, TRAIT_FAMILY_SONG) && (songMate = OursNear(a, 8, IsFamilyOf)) != NULL)
+        score[GA_SONG] = 20 + rec->cur[LIFE_WARM] / 10;
+    for (i = 0; i < GA_COUNT; i++)
         total += score[i];
     if (total == 0)
         return;
     pick = Random() % total;
-    for (i = 0; i <= GA_DECOR; i++)
+    for (i = 0; i < GA_COUNT; i++)
     {
         if (pick < score[i])
             break;
@@ -788,8 +1230,26 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
         break;
     case GA_COMPANY:
         if (FindNear(me->currentCoords.x, me->currentCoords.y, T_Any, 1, &x, &y, &fx, &fy) && !(x == me->currentCoords.x && y == me->currentCoords.y))
-            Plan(a, GA_COMPANY, x, y, me->currentCoords.x, me->currentCoords.y, 60 * 6, LIFE_POSE_SIT,
-                 rec->cur[LIFE_WARM] >= 130 ? LIFE_EMOTE_HEART : LIFE_EMOTE_CALM);
+        {
+            // a family greeting: a happy twirl first (docs 12)
+            bool8 greet = MP_Life_FamilyTrait(rec, TRAIT_FAMILY_GREETING) != NULL;
+            Plan(a, GA_COMPANY, x, y, me->currentCoords.x, me->currentCoords.y, 60 * 6, greet ? LIFE_POSE_SPIN : LIFE_POSE_SIT,
+                 greet || rec->cur[LIFE_WARM] >= 130 ? LIFE_EMOTE_HEART : LIFE_EMOTE_CALM);
+        }
+        break;
+    case GA_PURSUIT:
+        StartPursuit(a, rec, pursuit);
+        break;
+    case GA_SONG:
+        if (songMate && BesideActor(a, songMate, &x, &y))
+        {
+            Plan(a, GA_SONG, x, y, songMate->cur.x, songMate->cur.y, 60 * 8, LIFE_POSE_SIT, LIFE_EMOTE_NOTE);
+            Plan(songMate, GA_SONG, songMate->cur.x, songMate->cur.y, x, y, 60 * 8, LIFE_POSE_SIT, LIFE_EMOTE_NOTE);
+            a->lead = TRUE;
+            a->partner = songMate - sL.a;
+            songMate->partner = a - sL.a;
+            MPNet_Log("garden: %u and %u sing their family's song", a->dex, songMate->dex);
+        }
         break;
     case GA_QUIET:
     {
@@ -840,6 +1300,10 @@ static void Satisfy(struct Actor *a, struct MpLifeRec *rec)
     case GA_QUIET:    MP_Life_Satisfy(rec, NEED_QUIET, 14); MP_Life_Feel(rec, EMO_CALM, 2); break;
     case GA_TYPE:     MP_Life_Satisfy(rec, NeedOfType(rec, a->tneed), 16); MP_Life_Feel(rec, EMO_JOY, 1); break;
     case GA_SQUABBLE: MP_Life_Feel(rec, EMO_FRUSTRATION, 2); MP_Life_Feel(rec, EMO_PRIDE, 1); break;
+    case GA_PURSUIT:  MP_Life_Satisfy(rec, NEED_PLAY, 8); MP_Life_Feel(rec, EMO_JOY, 1); break;
+    case GA_RARE:
+    case GA_SONG:     MP_Life_Satisfy(rec, NEED_COMPANY, 10); MP_Life_Feel(rec, EMO_JOY, 2); MP_Life_Feel(rec, EMO_CALM, 2); break;
+    case GA_REACT:    MP_Life_Satisfy(rec, NEED_COMPANY, 4); break;
     default:          MP_Life_Satisfy(rec, NEED_EXPLORE, 5); break;
     }
 }
@@ -920,22 +1384,46 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         return;
     }
     if ((a->timer % 30) == 0)
+    {
         Satisfy(a, rec);
+        if (a->act == GA_RARE && Seen(a))
+            a->seen = TRUE;
+    }
+    // the nervous one finds its courage halfway (a paddle), a family greeting's twirl ends
+    if (a->act == GA_RARE && a->rare == LIFE_RARE_PADDLE && !a->lead && a->timer == a->duration / 2)
+    {
+        a->pose = LIFE_POSE_SHAKE;
+        a->emote = LIFE_EMOTE_WATER;
+        MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), LIFE_EMOTE_EXCLAIM);
+    }
+    if (a->act == GA_COMPANY && a->pose == LIFE_POSE_SPIN && a->timer == 45)
+        a->pose = LIFE_POSE_SIT;
     if (a->emote != LIFE_EMOTE_NONE && a->timer && (a->timer % 180) == 0)
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->emote);
     if ((a->act == GA_PLAY || a->act == GA_SQUABBLE) && a->partner >= 0 && sL.a[a->partner].used && (a->timer % 30) == 0)
         a->dir = DirToward(a->cur, sL.a[a->partner].cur.x, sL.a[a->partner].cur.y, a->dir);
     if (a->timer >= a->duration)
     {
+        bool8 celebrate = FALSE;
         if (a->act == GA_PLAY || a->act == GA_CHASE || a->act == GA_SQUABBLE)
             Shared(a, rec);
         if (a->act == GA_FORAGE)
             MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), LIFE_EMOTE_NOTE);
+        if (a->act == GA_PURSUIT)
+            celebrate = PursuitDone(a, rec);
+        if (a->act == GA_RARE && a->lead)
+            RareDone(a, rec);
+        if (a->act == GA_SONG && a->lead)
+            SongDone(a);
         a->act = GA_NONE;
         a->pose = LIFE_POSE_NONE;
         a->partner = -1;
         a->decor = -1;
+        a->rare = 0;
+        a->lead = a->learner = FALSE;
         a->cooldown = 40 + Random() % 120;
+        if (celebrate)
+            MP_Garden_ActorReaction(a - sL.a, LIFE_EMOTE_SPARKLE, LIFE_POSE_HOP, 90);   // a milestone!
     }
 }
 
@@ -1014,6 +1502,22 @@ bool8 MP_GardenLife_Info(u8 i, s16 *x, s16 *y, u8 *act, u8 *phase, s8 *partner, 
     *owner = a->owner;
     *key = a->key;
     return TRUE;
+}
+
+// What exactly it's doing, for WATCH mode: GA_RARE its LIFE_RARE_* (| 0x80 if the other one started it),
+// GA_PURSUIT its LIFE_PURSUIT_* (0x80 the one being taught); 0 when unknown (a friend's Pokémon)
+u8 MP_GardenLife_Detail(u8 i)
+{
+    struct Actor *a;
+    struct MpLifeRec *rec;
+    if (i >= MAX_ACTORS || !sL.a[i].used || sL.a[i].owner >= 0)
+        return 0;
+    a = &sL.a[i];
+    if (a->act == GA_RARE)
+        return a->rare | (a->lead ? 0 : 0x80);
+    if (a->act == GA_PURSUIT)
+        return a->learner ? 0x80 : (rec = RecOf(a)) != NULL ? rec->pursuit : 0;
+    return 0;
 }
 
 u8 MP_GardenLife_Pose(u8 i)
@@ -1148,6 +1652,7 @@ void MP_GardenLife_OnMapLoad(void)
     for (i = 0; i < MAX_ACTORS; i++)
         sL.a[i].used = FALSE;
     sL.active = FALSE;
+    sL.rareDone = 0;
 }
 
 void MP_GardenLife_Update(void)
@@ -1211,8 +1716,9 @@ void MP_GardenLife_Debug(const char *args)
         struct Actor *a = &sL.a[i];
         if (!a->used)
             continue;
-        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d\n", i, a->dex, a->owner,
-               a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner);
+        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d\n", i,
+               a->dex, a->owner, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner, a->rare,
+               a->lead, a->learner);
     }
 }
 
@@ -1250,6 +1756,67 @@ void MP_GardenLife_DebugForce(u8 actor, u8 act)
         }
     }
     Choose(&sL.a[actor], rec);
+}
+
+// Tests: line everything up for a rare moment (bonds, temperament; time and weather waived) and let it happen
+void MP_GardenLife_DebugRare(u8 actor, u8 kind)
+{
+    struct Actor *a;
+    struct MpLifeRec *ra;
+    u8 i;
+    if (actor >= MAX_ACTORS || !sL.a[actor].used || (ra = RecOf(&sL.a[actor])) == NULL || kind == 0 || kind >= LIFE_RARE_COUNT)
+        return;
+    a = &sL.a[actor];
+    for (i = 0; i < MAX_ACTORS; i++)
+    {
+        struct Actor *b = &sL.a[i];
+        struct MpLifeRec *rb;
+        struct MpLifeBond *ab, *ba;
+        if (b == a || !b->used || b->owner >= 0 || (rb = RecOf(b)) == NULL)
+            continue;
+        ab = MP_Life_Bond(a->key, b->key, TRUE);
+        ba = MP_Life_Bond(b->key, a->key, TRUE);
+        if (ab == NULL || ba == NULL)
+            continue;
+        ab->v[BOND_AFFECTION] = ba->v[BOND_AFFECTION] = 200;
+        ab->v[BOND_TRUST] = ba->v[BOND_TRUST] = 160;
+        ab->v[BOND_RESPECT] = ba->v[BOND_RESPECT] = 130;
+        ab->shared = ba->shared = 10;
+        if (kind == LIFE_RARE_RIVAL_NAP)
+            ab->flags |= LIFE_BOND_RIVAL, ba->flags |= LIFE_BOND_RIVAL;
+        if (kind == LIFE_RARE_FAMILY)
+            ab->flags |= LIFE_BOND_FAMILY, ba->flags |= LIFE_BOND_FAMILY;
+        if (kind == LIFE_RARE_PADDLE)
+            rb->cur[LIFE_BOLD] = 90;
+        b->act = GA_NONE;
+        b->reactTimer = 0;
+    }
+    ra->cur[LIFE_CURIOUS] = 160;
+    ra->cur[LIFE_WARM] = 170;
+    a->act = GA_NONE;
+    a->reactTimer = 0;
+    printf("[test] garden rare %u: %s\n", kind, TryRare(a, ra, kind) ? "started" : "no");
+}
+
+// Tests: its pursuit at this level, now
+void MP_GardenLife_DebugPursuit(u8 actor, u8 level)
+{
+    struct MpLifeRec *rec;
+    struct Actor *a;
+    u8 p;
+    if (actor >= MAX_ACTORS || !sL.a[actor].used || (rec = RecOf(&sL.a[actor])) == NULL)
+        return;
+    a = &sL.a[actor];
+    p = rec->pursuit ? rec->pursuit : MP_Life_PursuitFor(rec);
+    a->act = GA_NONE;
+    a->reactTimer = 0;
+    if (p != LIFE_PURSUIT_NONE)
+    {
+        rec->pursuit = p;
+        rec->pursuitLevel = level;
+        StartPursuit(a, rec, p);
+    }
+    printf("[test] garden pursuit %u level %u: %s\n", rec->pursuit, rec->pursuitLevel, a->act == GA_PURSUIT ? "started" : "no");
 }
 
 // Where a map tile is on screen, for sprites anchored like the actors (decorations: mp_garden_decor.c)

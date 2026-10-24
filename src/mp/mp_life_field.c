@@ -62,6 +62,8 @@ struct Brain
     u32 personality;    // the follower this is about
     u8 mingleId;        // the friend whose follower (or who) it went to meet
     bool8 mingleGreet;  // ... the friend themself
+    u16 longTimer;      // frames to the next look at long-term life (evolutions, family)
+    u8 newBody;         // times it showed it isn't used to its new body yet
 };
 static struct Brain sB;
 
@@ -816,6 +818,49 @@ static void Arrival(struct MpLifeRec *rec)
     }
 }
 
+// Long-term life (docs 12): a teammate's evolution (the first time it's out after it), its own new
+// body, a song its family sings
+static void LongTerm(struct MpLifeRec *rec)
+{
+    u8 i;
+    if (sB.longTimer)
+    {
+        sB.longTimer--;
+        return;
+    }
+    sB.longTimer = 90;
+    if (sB.reactTimer || MP_LifeEmote_Current(LIFE_EMOTE_SLOT_LOCAL) != LIFE_EMOTE_NONE)
+        return;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct MpLifeRec *o = MP_Life_Get(&gPlayerParty[i].box, FALSE);
+        u8 k;
+        if (o == NULL || o == rec)
+            continue;
+        k = MP_Life_EvolutionReaction(rec, o);
+        if (k != LIFE_EVO_REACT_NONE)
+        {
+            MP_LifeField_Reaction(k == LIFE_EVO_REACT_PROUD ? LIFE_EMOTE_SPARKLE : k == LIFE_EVO_REACT_AWED ? LIFE_EMOTE_EXCLAIM : LIFE_EMOTE_ANGRY,
+                                  k == LIFE_EVO_REACT_PROUD ? LIFE_POSE_HOP : LIFE_POSE_NONE, 60);
+            return;
+        }
+    }
+    if (MP_Life_NewBody(rec) && sB.newBody < 4 && (Random() % 8) == 0)
+    {
+        // a stumble while walking, a surprised look at itself while standing about
+        bool8 walking = sB.idle == 0;
+        sB.newBody++;
+        if (walking)
+            MP_LifeField_Reaction(LIFE_EMOTE_SWEAT, LIFE_POSE_SHAKE, 30);
+        else
+            MP_LifeField_Reaction(LIFE_EMOTE_EXCLAIM, LIFE_POSE_SPIN, 90);
+        MPNet_Log("life: new body (%s)", walking ? "stumble" : "look");
+        return;
+    }
+    if (MP_Life_FamilyTrait(rec, TRAIT_FAMILY_SONG) && rec->mood > 20 && (Random() % 40) == 0)
+        MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_NOTE);   // humming its family's song
+}
+
 // ---------------------------------------------------------------------------
 
 u8 MP_LifeField_Activity(void)
@@ -917,6 +962,7 @@ void MP_LifeField_Update(void)
     if (!MP_IsLocalFree())
         return;   // a script, a menu: it stays as it is
     Cues(rec);
+    LongTerm(rec);
 
     if (sB.reactTimer)
     {

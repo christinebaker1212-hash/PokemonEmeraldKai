@@ -152,6 +152,31 @@ enum
     LIFE_TRIG_COUNT
 };
 
+// Rare moments (MEM_RARE's param; docs 12: only when temperament, bonds, place, weather and time line up)
+enum
+{
+    LIFE_RARE_NONE,
+    LIFE_RARE_STARGAZE,     // two best friends stargazing on a clear night
+    LIFE_RARE_PADDLE,       // a Water type teaching a nervous Fire type to paddle (param on the learner: who taught)
+    LIFE_RARE_RIVAL_NAP,    // old rivals finally sharing a nap
+    LIFE_RARE_FAMILY,       // grooming its family
+    LIFE_RARE_COUNT
+};
+
+// Own pursuits (MpLifeRec.pursuit; docs 12: no stats, no prizes)
+enum
+{
+    LIFE_PURSUIT_NONE,
+    LIFE_PURSUIT_CLIMB,     // the grove's trees
+    LIFE_PURSUIT_SWIM,      // laps of the pond
+    LIFE_PURSUIT_SING,
+    LIFE_PURSUIT_COLLECT,   // pretty stones
+    LIFE_PURSUIT_DIG,       // tunnels in the sand
+    LIFE_PURSUIT_TEACH,     // showing the younger ones
+    LIFE_PURSUIT_COUNT
+};
+#define LIFE_PURSUIT_MILESTONES 3   // at pursuitLevel 60, 150, 250 (MEM_PURSUIT param: pursuit << 8 | milestone)
+
 // Learned traits
 enum
 {
@@ -163,6 +188,8 @@ enum
     TRAIT_CONFIDENT,    // battles went well
     TRAIT_COMFORT_FOOD, // param: flavor
     TRAIT_DISLIKES,     // param: verb it came to dislike (LIFE_VERB_*)
+    TRAIT_FAMILY_SONG,  // a song its family sings (eggs, docs 12; param: low 16 bits of the parent's key)
+    TRAIT_FAMILY_GREETING, // greets the way its family does (param: as above)
     TRAIT_COUNT
 };
 
@@ -252,6 +279,7 @@ struct MpLifeRec
 #define LIFE_REC_RAISED_BEFORE (1 << 0)   // owned before the Garden existed (Friendship gave its bond a head start)
 #define LIFE_REC_IN_PARTY      (1 << 1)   // was in the party at the last check (reunions)
 #define LIFE_REC_FAMILY_KNOWN  (1 << 2)
+#define LIFE_REC_EGG           (1 << 3)   // made for an egg (its parents known): hatching finishes it
 
 // How one Pokémon feels about a Trainer or another Pokémon (one-sided: each direction is its own bond)
 enum
@@ -375,7 +403,16 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
 void MP_Life_Reveal(struct MpLifeRec *rec, u8 fact);
 u8 MP_Life_JournalKnownCount(void);   // known lines in the last journal built (no "???" line)
 
-bool8 MP_Life_WantsOut(struct BoxPokemon *box);   // asking to come out (party screen, follower picker)
+bool8 MP_Life_WantsOut(struct BoxPokemon *box);
+void MP_Life_NoteEgg(struct BoxPokemon *egg, struct BoxPokemon *parentA, struct BoxPokemon *parentB);   // daycare.c
+u8 MP_Life_PursuitFor(struct MpLifeRec *rec);   // the pursuit that fits its instincts and temperament (LIFE_PURSUIT_*)
+bool8 MP_Life_NewBody(struct MpLifeRec *rec);   // evolved within the last quarter hour: still getting used to it
+// A teammate's evolution (docs 12: friends react): how this one takes it, once per evolution (the first
+// time it sees the new body: the follower, or in the Garden). Applies the feelings and bond changes.
+enum { LIFE_EVO_REACT_NONE, LIFE_EVO_REACT_PROUD, LIFE_EVO_REACT_AWED, LIFE_EVO_REACT_JEALOUS };
+u8 MP_Life_EvolutionReaction(struct MpLifeRec *watcher, struct MpLifeRec *evolved);
+struct MpLifeTrait *MP_Life_FamilyTrait(struct MpLifeRec *rec, u8 id);   // TRAIT_FAMILY_*, whatever the param
+bool8 MP_Life_IsFamily(u32 a, u32 b);   // asking to come out (party screen, follower picker)
 
 // Every frame on the map (mp_main.c MP_FrameUpdate) and the minute tick
 void MP_Life_FrameUpdate(void);

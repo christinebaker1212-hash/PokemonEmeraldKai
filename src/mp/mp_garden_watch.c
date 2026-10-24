@@ -31,11 +31,9 @@ void SpawnCameraObject(void);
 void RemoveCameraObject(void);
 u8 MP_GardenLife_Count(void);
 bool8 MP_GardenLife_Info(u8 i, s16 *x, s16 *y, u8 *act, u8 *phase, s8 *partner, u16 *dex, s8 *owner, u32 *key);
+u8 MP_GardenLife_Detail(u8 i);
 
 // (the Garden's activity ids, mp_garden_life.c)
-#define GA_CHASE    LIFE_ACT_COUNT
-#define GA_SQUABBLE (LIFE_ACT_COUNT + 1)
-#define GA_DECOR    (LIFE_ACT_COUNT + 2)
 
 static struct
 {
@@ -52,6 +50,16 @@ static struct
 bool8 MP_GardenWatch_Active(void)
 {
     return sW.active;
+}
+
+// Where the view is while watching (the camera): what's on screen around it is what the Trainer sees
+bool8 MP_GardenWatch_View(s16 *x, s16 *y)
+{
+    if (!sW.active || sW.camObj >= OBJECT_EVENTS_COUNT || !gObjectEvents[sW.camObj].active)
+        return FALSE;
+    *x = gObjectEvents[sW.camObj].currentCoords.x;
+    *y = gObjectEvents[sW.camObj].currentCoords.y;
+    return TRUE;
 }
 
 static int Interest(u8 i)
@@ -71,6 +79,14 @@ static int Interest(u8 i)
         return 50 + (phase == 1 ? 20 : 0);
     case GA_DECOR:
         return 40;
+    case GA_RARE:
+        return 95;   // something special: always worth watching
+    case GA_SONG:
+        return 55;
+    case GA_REACT:
+        return 45;
+    case GA_PURSUIT:
+        return 35;
     case LIFE_ACT_NAP:
         // a pile of nappers is worth a look
         for (j = 0; j < MP_GardenLife_Count(); j++)
@@ -138,6 +154,8 @@ static void PickFocus(void)
                 }
                 if ((rec->favDecor >> 8) >= 5)
                     MP_Life_Reveal(rec, LIFE_FACT_DECOR);
+                if (rec->pursuit && act == GA_PURSUIT)
+                    MP_Life_Reveal(rec, LIFE_FACT_PURSUIT);
             }
         }
         MPNet_Log("garden watch: focus %d (act %u)", pick, act);
@@ -285,6 +303,25 @@ static const u8 sTxt_Type[] = _("{STR_VAR_1} is doing what it loves best.");
 static const u8 sTxt_Company[] = _("{STR_VAR_1} is keeping you company.");
 static const u8 sTxt_Quiet[] = _("{STR_VAR_1} is enjoying some time alone.");
 static const u8 sTxt_Wander[] = _("{STR_VAR_1} is strolling around.");
+static const u8 sTxt_RareAny[] = _("{STR_VAR_1} and {STR_VAR_2} are sharing a special moment.");
+static const u8 sTxt_RareStars[] = _("{STR_VAR_1} and {STR_VAR_2} are gazing up at the stars together.");
+static const u8 sTxt_RarePaddle[] = _("{STR_VAR_1} is coaxing {STR_VAR_2} into the water!");
+static const u8 sTxt_RarePaddled[] = _("{STR_VAR_2} is coaxing {STR_VAR_1} into the water!");
+static const u8 sTxt_RareNap[] = _("Old rivals {STR_VAR_1} and {STR_VAR_2} are napping side by side.");
+static const u8 sTxt_RareFamily[] = _("{STR_VAR_1} and {STR_VAR_2} are grooming each other.");
+static const u8 sTxt_Song[] = _("{STR_VAR_1} and {STR_VAR_2} are singing their family's song.");
+static const u8 sTxt_React[] = _("{STR_VAR_1} is taking a good look at {STR_VAR_2}'s new form.");
+static const u8 sTxt_PursuitAny[] = _("{STR_VAR_1} is busy with something it loves.");
+static const u8 *const sTxt_Pursuit[LIFE_PURSUIT_COUNT] = {
+    [LIFE_PURSUIT_NONE]    = sTxt_PursuitAny,
+    [LIFE_PURSUIT_CLIMB]   = (const u8[])_("{STR_VAR_1} is practicing its climbing."),
+    [LIFE_PURSUIT_SWIM]    = (const u8[])_("{STR_VAR_1} is swimming laps."),
+    [LIFE_PURSUIT_SING]    = (const u8[])_("{STR_VAR_1} is singing its heart out."),
+    [LIFE_PURSUIT_COLLECT] = (const u8[])_("{STR_VAR_1} is looking for pretty stones."),
+    [LIFE_PURSUIT_DIG]     = (const u8[])_("{STR_VAR_1} is digging a tunnel."),
+    [LIFE_PURSUIT_TEACH]   = (const u8[])_("{STR_VAR_1} is showing {STR_VAR_2} how it's done."),
+};
+static const u8 sTxt_Taught[] = _("{STR_VAR_2} is showing {STR_VAR_1} how it's done.");
 
 static void NameOfActor(s8 i, u8 *out)
 {
@@ -323,6 +360,27 @@ static void Describe(void)
     case LIFE_ACT_TYPE: t = sTxt_Type; break;
     case LIFE_ACT_COMPANY: t = sTxt_Company; break;
     case LIFE_ACT_QUIET: t = sTxt_Quiet; break;
+    case GA_SONG: t = sTxt_Song; break;
+    case GA_REACT: t = sTxt_React; break;
+    case GA_RARE:
+    {
+        u8 d = MP_GardenLife_Detail(sW.focus);
+        switch (d & 0x7F)
+        {
+        case LIFE_RARE_STARGAZE:  t = sTxt_RareStars; break;
+        case LIFE_RARE_PADDLE:    t = (d & 0x80) ? sTxt_RarePaddled : sTxt_RarePaddle; break;
+        case LIFE_RARE_RIVAL_NAP: t = sTxt_RareNap; break;
+        case LIFE_RARE_FAMILY:    t = sTxt_RareFamily; break;
+        default:                  t = sTxt_RareAny; break;
+        }
+        break;
+    }
+    case GA_PURSUIT:
+    {
+        u8 d = MP_GardenLife_Detail(sW.focus);
+        t = d == 0x80 ? sTxt_Taught : d < LIFE_PURSUIT_COUNT ? sTxt_Pursuit[d] : sTxt_PursuitAny;
+        break;
+    }
     }
     StringExpandPlaceholders(gStringVar4, t);
     MP_ShowFieldMessageFitted(gStringVar4);

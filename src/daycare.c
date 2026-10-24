@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp_life.h"   // Moemon Co-op
 #include "pokemon.h"
 #include "battle.h"
 #include "daycare.h"
@@ -840,6 +841,11 @@ static void _GiveEggFromDaycare(struct DayCare *daycare)
     }
     else
         BuildDaycareEgg(daycare, &egg);
+    // Moemon Co-op: MOéMON GARDEN, the EGG's record knows its parents (the ones in this DAY CARE)
+    if (daycare == &gSaveBlock1Ptr->daycare)
+        MP_Life_NoteEgg(&egg.box,
+                        GetBoxMonData(&daycare->mons[0].mon, MON_DATA_SANITY_HAS_SPECIES) ? &daycare->mons[0].mon : NULL,
+                        GetBoxMonData(&daycare->mons[1].mon, MON_DATA_SANITY_HAS_SPECIES) ? &daycare->mons[1].mon : NULL);
     gPlayerParty[PARTY_SIZE - 1] = egg;
     CompactPartySlots();
     CalculatePlayerPartyCount();

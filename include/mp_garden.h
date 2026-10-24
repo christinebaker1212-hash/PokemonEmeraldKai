@@ -3,6 +3,29 @@
 
 // Moemon Co-op: the MOéMON GARDEN (src/mp/mp_garden.c, docs/POKEMON_GARDEN.md 11): PROF. BIRCH's research
 // meadow west of LITTLEROOT, where the party lives freely.
+#include "mp_life_field.h"
+
+// What a Garden Pokémon does: LIFE_ACT_* where they match, then the Garden's own (sent to friends too)
+enum
+{
+    GA_NONE = LIFE_ACT_NONE,
+    GA_WANDER = LIFE_ACT_WANDER,
+    GA_NAP = LIFE_ACT_NAP,
+    GA_FORAGE = LIFE_ACT_FORAGE,
+    GA_PLAY = LIFE_ACT_PLAY,
+    GA_COMPANY = LIFE_ACT_COMPANY,
+    GA_QUIET = LIFE_ACT_QUIET,
+    GA_TYPE = LIFE_ACT_TYPE,
+    GA_LOOK = LIFE_ACT_LOOK,
+    GA_CHASE = LIFE_ACT_COUNT,   // tag
+    GA_SQUABBLE,
+    GA_DECOR,
+    GA_PURSUIT,     // its own pursuit (docs 12)
+    GA_RARE,        // a rare moment with another (LIFE_RARE_*)
+    GA_REACT,       // going to see a friend's new body (an evolution)
+    GA_SONG,        // a family song
+    GA_COUNT
+};
 
 bool8 MP_Garden_IsHere(void);
 void MP_Garden_OnMapLoad(void);           // fieldmap.c InitMap / InitMapFromSavedGame: growth marks, the hedge

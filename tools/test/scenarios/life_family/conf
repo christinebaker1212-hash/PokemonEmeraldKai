@@ -1,0 +1,9 @@
+# MOéMON GARDEN family (docs 12): MUDKIP and TREECKO make an EGG through the DAY CARE's code (its record knows its
+# parents, its temperament leans toward theirs); it hatches on the next step (the real hatching scene); the hatchling
+# meets its parents in the party (family bonds, "Met its parent"); then TREECKO evolves into GROVYLE and the follower MUDKIP reacts
+# to its new body. Shots egg, hatched, family.
+MODE=1
+TMO=200
+WARP="0,19,15,57"
+ENV_A="MOEMON_DEBUG_PARTY=283:15,277:15"
+EXPECT_A=("life: egg record for species" "(parents known 2)" "life: hatched species" "life: family met (role 0) species 283 and 283" "life: family met (role 0) species 277 and 283" "life: evolution reaction" "journal 2: Hatched in" "journal 2: Met its parent," "journal 0: Met its little one,")

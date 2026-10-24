@@ -132,6 +132,37 @@ static const u8 sTxt_Rare[] = _("Saw something rare in {STR_VAR_2}.");
 static const u8 sTxt_Pursuit[] = _("Got better at what it loves.");
 static const u8 sTxt_FriendMem[] = _("Made friends with {STR_VAR_3}.");
 static const u8 sTxt_Family[] = _("Met its family.");
+static const u8 sTxt_FamilyChild[] = _("Met its little one, {STR_VAR_3}.");
+static const u8 sTxt_FamilyParent[] = _("Met its parent, {STR_VAR_3}.");
+static const u8 sTxt_FamilySibling[] = _("Met its sibling, {STR_VAR_3}.");
+
+// Rare moments (MEM_RARE, docs 12): [kind][0 = it led, 1 = the other one did]
+static const u8 sRareText[LIFE_RARE_COUNT][2][44] = {
+    [LIFE_RARE_STARGAZE]  = {_("Stargazed with {STR_VAR_3} on a clear night."), _("Stargazed with {STR_VAR_3} on a clear night.")},
+    [LIFE_RARE_PADDLE]    = {_("Taught {STR_VAR_3} to paddle in the pond."), _("{STR_VAR_3} taught it to paddle. Brave!")},
+    [LIFE_RARE_RIVAL_NAP] = {_("Shared a nap with its old rival {STR_VAR_3}."), _("Shared a nap with its old rival {STR_VAR_3}.")},
+    [LIFE_RARE_FAMILY]    = {_("Groomed {STR_VAR_3} one quiet evening."), _("{STR_VAR_3} groomed it one quiet evening.")},
+};
+
+// Pursuits (docs 12): what it took up, and its milestones
+static const u8 sPursuitText[LIFE_PURSUIT_COUNT][40] = {
+    [LIFE_PURSUIT_CLIMB]   = _("Loves climbing the GARDEN's trees."),
+    [LIFE_PURSUIT_SWIM]    = _("Swims laps in the GARDEN pond."),
+    [LIFE_PURSUIT_SING]    = _("Loves to sing."),
+    [LIFE_PURSUIT_COLLECT] = _("Collects pretty stones."),
+    [LIFE_PURSUIT_DIG]     = _("Digs tunnels in the sand."),
+    [LIFE_PURSUIT_TEACH]   = _("Likes showing the younger ones."),
+};
+static const u8 sPursuitMilestone[LIFE_PURSUIT_COUNT][LIFE_PURSUIT_MILESTONES][40] = {
+    [LIFE_PURSUIT_CLIMB]   = {_("Climbed its first tree!"), _("Reached the top branch!"), _("Climbs the tallest tree with ease.")},
+    [LIFE_PURSUIT_SWIM]    = {_("Splashed out into the pond!"), _("Swam a whole lap of the pond!"), _("Swims laps without a pause.")},
+    [LIFE_PURSUIT_SING]    = {_("Hummed its first real tune."), _("Sang a whole song without stopping!"), _("Its song fills the whole GARDEN.")},
+    [LIFE_PURSUIT_COLLECT] = {_("Found its first pretty stone!"), _("Has a little pile of pretty stones."), _("Found the prettiest stone of all!")},
+    [LIFE_PURSUIT_DIG]     = {_("Dug its first tunnel in the sand!"), _("Dug a tunnel big enough to hide in!"), _("Its tunnels run all under the sand.")},
+    [LIFE_PURSUIT_TEACH]   = {_("Showed a younger one how it's done."), _("The younger ones follow its lead."), _("A patient teacher to everyone.")},
+};
+static const u8 sTxt_FamilySong[] = _("Hums a song its family sings.");
+static const u8 sTxt_FamilyGreeting[] = _("Greets you the way its family does.");
 static const u8 sTxt_GardenMem[] = _("Saw the GARDEN for the first time.");
 static const u8 sTxt_FavDecor[] = _("Loves the {STR_VAR_3} in the GARDEN.");
 
@@ -290,10 +321,19 @@ static void AddMemory(struct Builder *bd, u8 slot)
     case MEM_REUNION: tmpl = sTxt_Reunion; break;
     case MEM_KEEPSAKE: CopyItemName(m->param, extra); tmpl = sTxt_KeepsakeMem; break;
     case MEM_HEARD: StringCopy(extra, who); tmpl = sTxt_Heard; break;
-    case MEM_RARE: tmpl = sTxt_Rare; break;
-    case MEM_PURSUIT: tmpl = sTxt_Pursuit; break;
+    case MEM_RARE:
+        StringCopy(extra, who);
+        tmpl = (m->param & 0xFF) && (m->param & 0xFF) < LIFE_RARE_COUNT ? sRareText[m->param & 0xFF][(m->param >> 8) ? 1 : 0] : sTxt_Rare;
+        break;
+    case MEM_PURSUIT:
+        tmpl = (m->param >> 8) && (m->param >> 8) < LIFE_PURSUIT_COUNT && (m->param & 0xFF) < LIFE_PURSUIT_MILESTONES
+             ? sPursuitMilestone[m->param >> 8][m->param & 0xFF] : sTxt_Pursuit;
+        break;
     case MEM_FRIEND: StringCopy(extra, who); tmpl = sTxt_FriendMem; break;
-    case MEM_FAMILY: tmpl = sTxt_Family; break;
+    case MEM_FAMILY:
+        StringCopy(extra, who);
+        tmpl = m->who == 0 ? sTxt_Family : m->param == 0 ? sTxt_FamilyChild : m->param == 1 ? sTxt_FamilyParent : sTxt_FamilySibling;
+        break;
     case MEM_GARDEN: tmpl = sTxt_GardenMem; break;
     }
     if (tmpl)
@@ -366,6 +406,9 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
         if (rec->taste[lo] <= -50)
             Add(&bd, LIFE_FACT_DISLIKES, sTxt_Dislikes, MAPSEC_NONE, sFlavors[lo]);
     }
+    // A pursuit it took up (the GARDEN, docs 12)
+    if (rec->pursuit && rec->pursuit < LIFE_PURSUIT_COUNT)
+        Add(&bd, LIFE_FACT_PURSUIT, sPursuitText[rec->pursuit], MAPSEC_NONE, NULL);
     // A boundary it showed
     for (i = 0; i < LIFE_VERBS; i++)
         if (rec->boundaries & (1 << i))
@@ -406,6 +449,8 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
             Add(&bd, LIFE_FACT_TRAIT(i), sTxt_ComfortFood, MAPSEC_NONE, extra);
             break;
         case TRAIT_DISLIKES: Add(&bd, LIFE_FACT_TRAIT(i), sTxt_DislikesLearned, MAPSEC_NONE, sVerbIng[t->param < LIFE_VERBS ? t->param : 0]); break;
+        case TRAIT_FAMILY_SONG: Add(&bd, LIFE_FACT_TRAIT(i), sTxt_FamilySong, MAPSEC_NONE, NULL); break;
+        case TRAIT_FAMILY_GREETING: Add(&bd, LIFE_FACT_TRAIT(i), sTxt_FamilyGreeting, MAPSEC_NONE, NULL); break;
         }
     }
     // Its closest friend, a rival, family, and a favorite Trainer besides its own

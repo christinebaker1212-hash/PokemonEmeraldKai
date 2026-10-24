@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+mp life minutes 1
+wait 30
+mp life egg 0 1
+wait 30
+mp life show 2
+shot egg
+mp life hatchsoon
+press UP 40
+wait 60
+mash B 60 15
+pressuntil B field 1200
+wait 30
+shot hatched
+mp life minutes 1
+wait 30
+mp life show 2
+mp life show 0
+mp life journal 2
+mp life journal 0
+wait 30
+shot family
+mp life familiar 0 1 60
+mp life evolve 1 278
+waitlog 1500 life: evolution reaction
+wait 120
+quit

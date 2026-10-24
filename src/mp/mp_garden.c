@@ -430,6 +430,22 @@ void MP_Garden_Debug(const char *args)
         MP_GardenLife_DebugForce(a, b);
         printf("[test] garden force %d %d\n", a, b);
     }
+    else if (strcmp(cmd, "rare") == 0)
+    {
+        // rare ACTOR KIND: a rare moment (LIFE_RARE_*) with everything lined up for it
+        void MP_GardenLife_DebugRare(u8 actor, u8 kind);
+        int b = 0;
+        sscanf(args, "%31s %d %d", cmd, &a, &b);
+        MP_GardenLife_DebugRare(a, b);
+    }
+    else if (strcmp(cmd, "pursuit") == 0)
+    {
+        // pursuit ACTOR LEVEL: its pursuit (one that fits it), at that level
+        void MP_GardenLife_DebugPursuit(u8 actor, u8 level);
+        int b = 0;
+        sscanf(args, "%31s %d %d", cmd, &a, &b);
+        MP_GardenLife_DebugPursuit(a, b);
+    }
     else if (strcmp(cmd, "talk") == 0)
     {
         void MP_GardenLife_DebugTalk(u8 actor);

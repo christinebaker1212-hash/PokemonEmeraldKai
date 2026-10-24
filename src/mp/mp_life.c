@@ -18,6 +18,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_life.h"
+#include "daycare.h"
 #include "event_data.h"
 #include "main.h"
 #include "overworld.h"
@@ -172,6 +173,30 @@ static u32 Instincts(u16 species)
     return dex <= NATIONAL_DEX_COUNT ? sMpLifeInstincts[dex] : 0;
 }
 
+// The pursuit that would suit it (docs 12: one that fits its interests), from its current species'
+// instincts and type and its own temperament; when several fit, its own pick (from its personality)
+u8 MP_Life_PursuitFor(struct MpLifeRec *rec)
+{
+    u32 inst = Instincts(rec->species);
+    u8 c[LIFE_PURSUIT_COUNT], n = 0;
+    u8 ta = MP_Life_TypeNeed(rec, FALSE), tb = MP_Life_TypeNeed(rec, TRUE);
+#define TN(t) (ta == (t) || tb == (t))
+    if ((inst & (INST_TREE | INST_SKY)) || TN(TNEED_HEIGHT) || TN(TNEED_SKY))
+        c[n++] = LIFE_PURSUIT_CLIMB;
+    if ((inst & INST_SEA) || TN(TNEED_SOAK))
+        c[n++] = LIFE_PURSUIT_SWIM;
+    if (inst & INST_SING)
+        c[n++] = LIFE_PURSUIT_SING;
+    if ((inst & INST_COLLECT) || TN(TNEED_SHINE) || TN(TNEED_STONE))
+        c[n++] = LIFE_PURSUIT_COLLECT;
+    if ((inst & INST_DIG) || TN(TNEED_DIG))
+        c[n++] = LIFE_PURSUIT_DIG;
+    if (((inst & INST_GENTLE) || rec->cur[LIFE_WARM] >= 170) && rec->cur[LIFE_SOCIAL] >= 110)
+        c[n++] = LIFE_PURSUIT_TEACH;
+#undef TN
+    return n ? c[(rec->personality >> 4) % n] : LIFE_PURSUIT_NONE;
+}
+
 static bool8 HasEggGroup(u16 species, u8 group)
 {
     return gSpeciesInfo[species].eggGroups[0] == group || gSpeciesInfo[species].eggGroups[1] == group;
@@ -309,6 +334,13 @@ static struct BoxPokemon *FindOwnedBox(u32 key)
     struct BoxPokemon *box = MP_Life_PartyBox(key);
     struct PokemonStorage *st = MP_PersonalStorage();
     u16 b, s;
+    if (box == NULL)
+    {
+        // an EGG in the party (its record waits for the hatch)
+        for (b = 0; b < PARTY_SIZE; b++)
+            if (GetBoxMonData(&gPlayerParty[b].box, MON_DATA_IS_EGG) && MP_Life_BoxKey(&gPlayerParty[b].box) == key)
+                return &gPlayerParty[b].box;
+    }
     if (box || st == NULL)
         return box;
     for (b = 0; b < TOTAL_BOXES_COUNT; b++)
@@ -340,6 +372,14 @@ static struct MpLifeRec *NewRecSlot(void)
 
 static void InitialOwnerBond(struct MpLifeRec *rec, struct BoxPokemon *box);
 static void RememberHowWeMet(struct MpLifeRec *rec, struct BoxPokemon *box);
+static void EvolutionCheck(struct MpLifeRec *rec, struct BoxPokemon *box);
+static void FinishEgg(struct MpLifeRec *rec, struct BoxPokemon *box);
+
+static bool8 InParty(struct BoxPokemon *box)
+{
+    return box >= &gPlayerParty[0].box && box <= &gPlayerParty[PARTY_SIZE - 1].box
+        && ((u8 *)box - (u8 *)&gPlayerParty[0]) % sizeof(struct Pokemon) == 0;
+}
 
 struct MpLifeRec *MP_Life_Get(struct BoxPokemon *box, bool8 create)
 {
@@ -352,6 +392,10 @@ struct MpLifeRec *MP_Life_Get(struct BoxPokemon *box, bool8 create)
     personality = GetBoxMonData(box, MON_DATA_PERSONALITY);
     otId = GetBoxMonData(box, MON_DATA_OT_ID);
     rec = FindRec(personality, otId);
+    if (rec && (rec->flags & LIFE_REC_EGG))
+        FinishEgg(rec, box);   // it hatched
+    if (rec && species != rec->species && InParty(box))
+        EvolutionCheck(rec, box);   // it just evolved (noticed right away, not at the next minute)
     if (rec || !create)
         return rec;
     rec = NewRecSlot();
@@ -1102,10 +1146,24 @@ static void ReunionCheck(struct MpLifeRec *rec, bool8 inParty)
     }
 }
 
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
+
+static bool8 EvolvesInto(u16 from, u16 to)
+{
+    u8 i;
+    if (from == SPECIES_NONE || from >= NUM_SPECIES)
+        return FALSE;
+    for (i = 0; i < EVOS_PER_MON; i++)
+        if (gEvolutionTable[from][i].targetSpecies == to)
+            return TRUE;
+    return FALSE;
+}
+
 static void EvolutionCheck(struct MpLifeRec *rec, struct BoxPokemon *box)
 {
     u16 species = GetBoxMonData(box, MON_DATA_SPECIES);
-    if (species != rec->species && species != SPECIES_NONE)
+    // (only a real evolution: SHEDINJA shares NINCADA's personality, and must not keep "evolving" it back)
+    if (species != rec->species && species != SPECIES_NONE && EvolvesInto(rec->species, species))
     {
         // same self, new body (docs 12): its species instincts change, everything else stays
         struct MpLifePlace *p;
@@ -1123,6 +1181,238 @@ static bool8 HasMemory(struct MpLifeRec *rec, u8 kind, s32 param, u32 when)
         if (rec->mem[i].kind == kind && (param < 0 || rec->mem[i].param == param) && rec->mem[i].when >= when)
             return TRUE;
     return FALSE;
+}
+
+bool8 MP_Life_NewBody(struct MpLifeRec *rec)
+{
+    u32 now = MP_Life_PlayMinutes();
+    return rec != NULL && HasMemory(rec, MEM_EVOLVED, -1, now >= 15 ? now - 15 : 0);
+}
+
+// ---------------------------------------------------------------------------
+// Friends react to an evolution (docs 12): proud, awed, a rival a little jealous. Once per pair and
+// evolution (the newest few pairs are kept; a record of which isn't needed past the quarter hour).
+
+static struct { u32 watcher, evolved, when; } sEvoSeen[16];
+static u8 sEvoSeenNext;
+
+u8 MP_Life_EvolutionReaction(struct MpLifeRec *watcher, struct MpLifeRec *evolved)
+{
+    u32 wk, ek, now = MP_Life_PlayMinutes();
+    struct MpLifeBond *b;
+    u8 i, kind;
+    if (watcher == NULL || evolved == NULL || watcher == evolved || !MP_Life_NewBody(evolved))
+        return LIFE_EVO_REACT_NONE;
+    wk = MP_Life_MonKey(watcher->personality, watcher->otId);
+    ek = MP_Life_MonKey(evolved->personality, evolved->otId);
+    for (i = 0; i < ARRAY_COUNT(sEvoSeen); i++)
+        if (sEvoSeen[i].watcher == wk && sEvoSeen[i].evolved == ek && now - sEvoSeen[i].when <= 20)
+            return LIFE_EVO_REACT_NONE;
+    b = MP_Life_Bond(wk, ek, FALSE);
+    if (b == NULL || b->v[BOND_FAMILIAR] < 20)
+        return LIFE_EVO_REACT_NONE;   // it hardly knows it
+    if ((b->flags & LIFE_BOND_RIVAL) || b->v[BOND_FRICTION] >= 90)
+    {
+        kind = LIFE_EVO_REACT_JEALOUS;
+        MP_Life_Feel(watcher, EMO_FRUSTRATION, 15);
+        MP_Life_BondShare(wk, ek, 1, 0, 0, 3, 2);
+    }
+    else if (MP_Life_BondWarmth(b) >= 250 || (b->flags & LIFE_BOND_FAMILY))
+    {
+        kind = LIFE_EVO_REACT_PROUD;
+        MP_Life_Feel(watcher, EMO_PRIDE, 20);
+        MP_Life_Feel(watcher, EMO_JOY, 10);
+        MP_Life_BondShare(wk, ek, 2, 1, 2, 2, 0);
+    }
+    else
+    {
+        kind = LIFE_EVO_REACT_AWED;
+        MP_Life_Feel(watcher, EMO_SURPRISE, 20);
+        MP_Life_BondShare(wk, ek, 1, 0, 0, 3, 0);
+    }
+    sEvoSeen[sEvoSeenNext].watcher = wk;
+    sEvoSeen[sEvoSeenNext].evolved = ek;
+    sEvoSeen[sEvoSeenNext].when = now;
+    sEvoSeenNext = (sEvoSeenNext + 1) % ARRAY_COUNT(sEvoSeen);
+    MPNet_Log("life: evolution reaction %u from species %u to species %u", kind, watcher->species, evolved->species);
+    return kind;
+}
+
+// ---------------------------------------------------------------------------
+// Eggs and family (docs 12): a hatchling's slight leanings from its parents, sometimes a family trait,
+// and family bonds with its parents (and siblings) once they're together.
+
+struct MpLifeTrait *MP_Life_FamilyTrait(struct MpLifeRec *rec, u8 id)
+{
+    u8 i;
+    if (rec == NULL)
+        return NULL;
+    for (i = 0; i < LIFE_TRAITS; i++)
+        if (rec->trait[i].id == id && rec->trait[i].strength)
+            return &rec->trait[i];
+    return NULL;
+}
+
+bool8 MP_Life_IsFamily(u32 a, u32 b)
+{
+    struct MpLifeBond *x = MP_Life_Bond(a, b, FALSE);
+    return x != NULL && (x->flags & LIFE_BOND_FAMILY);
+}
+
+static void FamilyBond(u32 a, u32 b)
+{
+    struct MpLifeBond *x = MP_Life_Bond(a, b, TRUE), *y = MP_Life_Bond(b, a, TRUE);
+    if (x)
+        x->flags |= LIFE_BOND_FAMILY;
+    if (y)
+        y->flags |= LIFE_BOND_FAMILY;
+}
+
+// the EGG left the DAY CARE (daycare.c): its record is made now, from its parents
+void MP_Life_NoteEgg(struct BoxPokemon *egg, struct BoxPokemon *parentA, struct BoxPokemon *parentB)
+{
+    struct BoxPokemon *parents[2] = {parentA, parentB};
+    struct MpLifeRec *rec, *pr[2] = {NULL, NULL};
+    u32 personality, otId;
+    s32 sum[LIFE_AXES];
+    u8 i, n = 0, p;
+    if (egg == NULL || GetBoxMonData(egg, MON_DATA_SPECIES) == SPECIES_NONE)
+        return;
+    personality = GetBoxMonData(egg, MON_DATA_PERSONALITY);
+    otId = GetBoxMonData(egg, MON_DATA_OT_ID);
+    if (FindRec(personality, otId) != NULL || (rec = NewRecSlot()) == NULL)
+        return;
+    memset(rec, 0, sizeof(*rec));
+    rec->personality = personality;
+    rec->otId = otId;
+    rec->species = GetBoxMonData(egg, MON_DATA_SPECIES);
+    rec->version = LIFE_VERSION;
+    rec->flags = LIFE_REC_EGG;
+    rec->createdMin = rec->lastTickMin = MP_Life_PlayMinutes();
+    rec->lastPartyMark = MP_Life_ProgressMark();
+    rec->emo[EMO_CALM] = 40;
+    RollTemperament(rec, egg);
+    memset(sum, 0, sizeof(sum));
+    for (p = 0; p < 2; p++)
+    {
+        if (parents[p] == NULL || GetBoxMonData(parents[p], MON_DATA_SPECIES) == SPECIES_NONE)
+            continue;
+        rec->parents[p] = MP_Life_BoxKey(parents[p]);
+        if ((pr[p] = MP_Life_Get(parents[p], FALSE)) == NULL)
+            continue;
+        for (i = 0; i < LIFE_AXES; i++)
+            sum[i] += pr[p]->base[i];
+        n++;
+    }
+    // slight leanings: a quarter of the way toward its parents' temperaments, never a copy
+    if (n)
+        for (i = 0; i < LIFE_AXES; i++)
+        {
+            s32 lean = (sum[i] / n - rec->base[i]) / 4;
+            rec->base[i] = rec->cur[i] = Clamp8(rec->base[i] + lean);
+        }
+    // sometimes a small family trait (a third of the time): a parent's comfort food, a song, a greeting
+    if (n && (personality >> 8) % 3 == 0)
+    {
+        struct MpLifeRec *from = pr[0] ? pr[0] : pr[1];
+        u8 which = (personality >> 16) % 3;
+        u32 fromKey = MP_Life_MonKey(from->personality, from->otId);
+        struct MpLifeTrait *food = NULL;
+        for (i = 0; i < LIFE_TRAITS; i++)
+            if (from->trait[i].id == TRAIT_COMFORT_FOOD && from->trait[i].strength)
+                food = &from->trait[i];
+        if (which == 0)
+        {
+            // the family's favorite food: its parent's comfort food, or the flavor its parent loves most
+            u8 flavor = 0;
+            if (food)
+                flavor = food->param;
+            else
+                for (i = 1; i < FLAVOR_COUNT; i++)
+                    if (from->taste[i] > from->taste[flavor])
+                        flavor = i;
+            if (flavor < FLAVOR_COUNT)
+            {
+                rec->taste[flavor] = rec->taste[flavor] < 60 ? 60 : rec->taste[flavor];
+                MP_Life_AddTrait(rec, TRAIT_COMFORT_FOOD, flavor, 90);
+            }
+        }
+        else
+        {
+            MP_Life_AddTrait(rec, which == 1 ? TRAIT_FAMILY_SONG : TRAIT_FAMILY_GREETING, fromKey & 0xFFFF, 90);
+        }
+    }
+    MPNet_Log("life: egg record for species %u (parents known %u)", rec->species, n);
+}
+
+// it hatched: everything a new Pokémon gets, plus knowing its parents
+static void FinishEgg(struct MpLifeRec *rec, struct BoxPokemon *box)
+{
+    u32 me = MP_Life_MonKey(rec->personality, rec->otId);
+    u8 p;
+    rec->flags &= ~LIFE_REC_EGG;
+    rec->species = GetBoxMonData(box, MON_DATA_SPECIES);
+    rec->createdMin = rec->lastTickMin = MP_Life_PlayMinutes();
+    InitialOwnerBond(rec, box);
+    RememberHowWeMet(rec, box);
+    {
+        u8 name[POKEMON_NAME_LENGTH + 1];
+        GetBoxMonData(box, MON_DATA_NICKNAME, name);
+        name[POKEMON_NAME_LENGTH] = EOS;
+        MP_Life_NoteName(me, name);
+    }
+    for (p = 0; p < 2; p++)
+        if (rec->parents[p] && MP_Life_FindKey(rec->parents[p]))
+            FamilyBond(me, rec->parents[p]);
+    rec->flags |= LIFE_REC_FAMILY_KNOWN;
+    MPNet_Log("life: hatched species %u", rec->species);
+}
+
+static bool8 MetFamily(u32 a, u32 b)
+{
+    struct MpLifeBond *x = MP_Life_Bond(a, b, FALSE);
+    return x != NULL && (x->flags & LIFE_BOND_MET);
+}
+
+// in the party together: parents and children (and siblings) meet (MEM_FAMILY param: 0 its little one,
+// 1 its parent, 2 its sibling)
+static void FamilyCheck(struct MpLifeRec *rec)
+{
+    u32 me = MP_Life_MonKey(rec->personality, rec->otId);
+    u8 i, p, q;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct MpLifeRec *o = MP_Life_Get(&gPlayerParty[i].box, FALSE);
+        u32 ok;
+        u8 role = 0xFF;
+        if (o == NULL || o == rec)
+            continue;
+        ok = MP_Life_MonKey(o->personality, o->otId);
+        if (rec->parents[0] == ok || rec->parents[1] == ok)
+            role = 1;
+        else if (o->parents[0] == me || o->parents[1] == me)
+            role = 0;
+        else
+            for (p = 0; p < 2; p++)
+                for (q = 0; q < 2; q++)
+                    if (rec->parents[p] && rec->parents[p] == o->parents[q])
+                        role = 2;
+        if (role == 0xFF || MetFamily(me, ok))
+            continue;
+        FamilyBond(me, ok);
+        {
+            struct MpLifeBond *x = MP_Life_Bond(me, ok, TRUE), *y = MP_Life_Bond(ok, me, TRUE);
+            if (x)
+                x->flags |= LIFE_BOND_MET;
+            if (y)
+                y->flags |= LIFE_BOND_MET;
+        }
+        MP_Life_BondShare(me, ok, 10, 8, 8, 0, 0);
+        MP_Life_BondShare(ok, me, 10, 8, 8, 0, 0);
+        MP_Life_Remember(rec, MEM_FAMILY, 180, TIER_PART, ok, role);
+        MP_Life_Remember(o, MEM_FAMILY, 180, TIER_PART, me, role == 2 ? 2 : role ^ 1);
+        MPNet_Log("life: family met (role %u) species %u and %u", role, rec->species, o->species);
+    }
 }
 
 static bool8 HasMemoryAt(struct MpLifeRec *rec, u32 when)
@@ -1214,6 +1504,7 @@ static void MinuteTick(u32 now, u32 minutes)
         if (rec == NULL)
             continue;
         EvolutionCheck(rec, box);
+        FamilyCheck(rec);
         if (place != sLastPlace)
             ArrivedAt(rec, place, TRUE);
         NeedsMinute(rec, minutes);
@@ -1652,6 +1943,20 @@ static void DebugRec(u8 slot)
     for (i = 0; i < LIFE_TRAITS; i++)
         if (rec->trait[i].strength)
             printf("[test] life %u: trait %u param %u strength %u\n", slot, rec->trait[i].id, rec->trait[i].param, rec->trait[i].strength);
+    printf("[test] life %u: pursuit %u level %u rare seen 0x%x flags 0x%x parents %08x %08x new body %d\n", slot, rec->pursuit,
+           rec->pursuitLevel, (unsigned)rec->rareSeen, rec->flags, (unsigned)rec->parents[0], (unsigned)rec->parents[1],
+           MP_Life_NewBody(rec));
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct MpLifeRec *o = MP_Life_Get(&gPlayerParty[i].box, FALSE);
+        struct MpLifeBond *ob;
+        if (o == NULL || o == rec)
+            continue;
+        ob = MP_Life_Bond(MP_Life_MonKey(rec->personality, rec->otId), MP_Life_MonKey(o->personality, o->otId), FALSE);
+        if (ob)
+            printf("[test] life %u: bond with %u fam %u trust %u aff %u resp %u fric %u flags 0x%x shared %u\n", slot, i,
+                   ob->v[0], ob->v[1], ob->v[2], ob->v[3], ob->v[4], ob->flags, ob->shared);
+    }
     b = MP_Life_Bond(MP_Life_MonKey(rec->personality, rec->otId), MP_Life_LocalTrainerKey(), FALSE);
     if (b)
         printf("[test] life %u: owner bond fam %u trust %u aff %u resp %u fric %u shared %u\n", slot, b->v[0], b->v[1], b->v[2],
@@ -1742,6 +2047,54 @@ void MP_Life_Debug(const char *args)
     else if (strcmp(cmd, "garden") == 0)
     {
         MP_Garden_Debug(args + 7);
+    }
+    else if (strcmp(cmd, "egg") == 0 && a >= 0 && a < PARTY_SIZE && b >= 0 && b < PARTY_SIZE && a != b)
+    {
+        // egg A B: party POKéMON A and B make an EGG through the DAY CARE's own code (copies of them stand in
+        // for its guests for a moment; the real DAY CARE is put back after), and the Trainer takes it
+        void GiveEggFromDaycare(void);
+        struct DayCare saved = gSaveBlock1Ptr->daycare;
+        memset(&gSaveBlock1Ptr->daycare, 0, sizeof(gSaveBlock1Ptr->daycare));
+        gSaveBlock1Ptr->daycare.mons[0].mon = gPlayerParty[a].box;
+        gSaveBlock1Ptr->daycare.mons[1].mon = gPlayerParty[b].box;
+        TriggerPendingDaycareEgg();
+        GiveEggFromDaycare();
+        gSaveBlock1Ptr->daycare = saved;
+        printf("[test] life egg: party %u\n", CalculatePlayerPartyCount());
+    }
+    else if (strcmp(cmd, "familiar") == 0 && a >= 0 && a < PARTY_SIZE && b >= 0 && b < PARTY_SIZE)
+    {
+        // familiar A B V: how well A knows B
+        struct MpLifeRec *ra = MP_Life_Get(&gPlayerParty[a].box, TRUE), *rb = MP_Life_Get(&gPlayerParty[b].box, TRUE);
+        struct MpLifeBond *bd = (ra && rb) ? MP_Life_Bond(MP_Life_MonKey(ra->personality, ra->otId), MP_Life_MonKey(rb->personality, rb->otId), TRUE) : NULL;
+        if (bd)
+            bd->v[BOND_FAMILIAR] = c;
+        printf("[test] life familiar %d -> %d %d\n", a, b, c);
+    }
+    else if (strcmp(cmd, "hatchsoon") == 0)
+    {
+        // hatchsoon: the party's EGGs are ready, and the next step hatches them
+        u8 i, zero = 0;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+                SetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP, &zero);
+        gSaveBlock1Ptr->daycare.stepCounter = 254;
+        printf("[test] life hatchsoon\n");
+    }
+    else if (strcmp(cmd, "evolve") == 0 && a >= 0 && a < PARTY_SIZE)
+    {
+        // evolve SLOT SPECIES: it becomes that species (the A-Life side of an evolution; no scene)
+        u16 sp = b;
+        SetMonData(&gPlayerParty[a], MON_DATA_SPECIES, &sp);
+        CalculateMonStats(&gPlayerParty[a]);
+        MP_Life_Get(&gPlayerParty[a].box, TRUE);
+        printf("[test] life evolve %d -> %d\n", a, b);
+    }
+    else if (strcmp(cmd, "evoreact") == 0 && a >= 0 && a < PARTY_SIZE && b >= 0 && b < PARTY_SIZE)
+    {
+        // evoreact WATCHER EVOLVED: how WATCHER takes EVOLVED's new body
+        u8 k = MP_Life_EvolutionReaction(MP_Life_Get(&gPlayerParty[a].box, TRUE), MP_Life_Get(&gPlayerParty[b].box, TRUE));
+        printf("[test] life evoreact %d %d: %u\n", a, b, k);
     }
     else if (strcmp(cmd, "social") == 0)
     {
