@@ -1757,13 +1757,19 @@ static void AddLearnOut(u8 slot, u16 move)
 }
 
 // Puts our (up to three) Pokémon back into the real party
+// Level-ups evolve after a win, or after a catch (catch EXP)
+static bool8 OutcomeEvolves(void)
+{
+    return sCoop.outcome == B_OUTCOME_WON || sCoop.outcome == B_OUTCOME_CAUGHT;
+}
+
 static void RestoreParty(const struct Pokemon *finalMons, u8 leveledBits)
 {
     u8 i;
 
     LoadPlayerParty();
     // the ones that leveled up before friends joined and sat the rest out still evolve after a win
-    sCoop.evoQueue = sCoop.outcome == B_OUTCOME_WON ? sCoop.preEvo : 0;
+    sCoop.evoQueue = OutcomeEvolves() ? sCoop.preEvo : 0;
     sCoop.preEvo = 0;
     for (i = 0; i < sCoop.localCount; i++)
     {
@@ -1908,7 +1914,7 @@ void CB2_MpCoopEndBattle(void)
         memset(mons, 0, sizeof(struct Pokemon) * MULTI_PARTY_SIZE);
         memcpy(mons, gPlayerParty, sizeof(struct Pokemon) * SeatSize());
         KeepOwnLearnEntries(0);
-        RestoreParty(mons, sCoop.outcome == B_OUTCOME_WON ? own : 0);
+        RestoreParty(mons, OutcomeEvolves() ? own : 0);
         Free(mons);
         FinishLink();
         SetMainCallback2(CB2_MpCoopEvolve);
@@ -3321,7 +3327,7 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             u8 i, size = data[7], count = data[8];
             sCoop.outcome = data[1];
             sCoop.money = data[2] | (data[3] << 8) | (data[4] << 16) | ((u32)data[5] << 24);
-            sCoop.partnerLeveled = sCoop.outcome == B_OUTCOME_WON ? data[6] : 0;
+            sCoop.partnerLeveled = OutcomeEvolves() ? data[6] : 0;
             sCoop.learnCount = 0;
             if (size > MULTI_PARTY_SIZE)
                 break;

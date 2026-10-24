@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 1 3
+mp savedata ball:last 1
+wait 300
+mp wilddouble 0
+mp wild 288:5
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 10
+mp bstatus 1 0 1
+mp bhp
+press L 2
+pressuntillog A 12000 co-op: battle over
+pressuntil A field 6000
+wait 300
+mp party
+quit

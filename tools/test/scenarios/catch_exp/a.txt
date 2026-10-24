@@ -1,0 +1,22 @@
+pressuntil A field 5000
+mp item 1 3
+mp savedata ball:last 1
+mp wild 288:5
+pressuntil A action 3000
+wait 10
+press L 2
+pressuntillog A 6000 catch exp
+wait 40
+shot e1
+wait 60
+shot e2
+press A 2
+wait 80
+shot e3
+press A 2
+wait 80
+shot e4
+pressuntil A field 9000
+wait 200
+mp party
+quit

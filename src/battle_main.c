@@ -5561,8 +5561,8 @@ static void FreeResetData_ReturnToOvOrDoEvolutions(void)
     }
 #endif
         ResetSpriteData();
-        // Moemon Co-op: evolutions run after the link closes (CB2_MpCoopEndBattle)
-        if (gLeveledUpInBattle == 0 || gBattleOutcome != B_OUTCOME_WON || gMpCoopBattle)
+        // Moemon Co-op: evolutions run after the link closes (CB2_MpCoopEndBattle); a catch's EXP can level up too
+        if (gLeveledUpInBattle == 0 || (gBattleOutcome != B_OUTCOME_WON && gBattleOutcome != B_OUTCOME_CAUGHT) || gMpCoopBattle)
         {
             gBattleMainFunc = ReturnFromBattleToOverworld;
             return;

@@ -200,6 +200,10 @@ WILD BATTLES TOGETHER
   partner's Ball got it first), your throw is called off and the Ball goes
   back to your BAG.
 * Balls can't be thrown when your party and the PC are both full.
+* CATCH EXP: catching a Moemon gives EXP too, to everyone in the battle (and
+  when you play alone). The more of its HP you knocked off first, the more:
+  almost a whole faint's worth at 1 HP, a tenth of it at full HP. Level-ups
+  from it evolve after the battle as usual.
 * Older versions turned a Moemon that a friend (not the host) caught into a
   BAD EGG. That's fixed. When you load a save, any BAD EGGS in your party or
   PC are removed and you get 10 MoeGatcha pulls for each one.

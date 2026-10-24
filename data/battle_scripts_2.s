@@ -66,6 +66,7 @@ BattleScript_SuccessBallThrow::
 	incrementgamestat GAME_STAT_POKEMON_CAPTURES
 BattleScript_PrintCaughtMonInfo::
 	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
+	call BattleScript_MpCatchExp
 	trysetcaughtmondexflags BattleScript_TryNicknameCaughtMon
 	printstring STRINGID_PKMNDATAADDEDTODEX
 	waitstate
@@ -94,6 +95,7 @@ BattleScript_MpCoopBallCaught::
 	ptrvalue BattleScript_MpCoopBallCaughtGoOn
 	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_MpCatchExp
 	givecaughtmon
 	setbyte gBattleOutcome, B_OUTCOME_CAUGHT
 	endlinkbattle
@@ -103,9 +105,18 @@ BattleScript_MpCoopBallCaught::
 BattleScript_MpCoopBallCaughtGoOn::
 	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
 	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_MpCatchExp
 	givecaughtmon
 	various BS_ATTACKER, VARIOUS_MP_COOP_REMOVE_CAUGHT
 	finishaction
+
+@ Moemon Co-op: catch EXP. The caught Pokemon gives EXP like a faint, scaled by the damage dealt (10-100%), to
+@ everyone (getexp skips the Safari Zone)
+BattleScript_MpCatchExp::
+	various BS_TARGET, VARIOUS_MP_CATCH_EXP
+	setbyte sGIVEEXP_STATE, 0
+	getexp BS_TARGET
+	return
 
 @ Moemon Co-op: the ball's target was caught or fainted earlier this turn: the ball went back
 BattleScript_MpCoopBallNoTarget::

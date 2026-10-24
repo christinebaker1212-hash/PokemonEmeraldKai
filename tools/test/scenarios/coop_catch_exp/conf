@@ -1,0 +1,14 @@
+# Catch EXP in a co-op wild battle at NA-JP lag: ALICE knocks the ZIGZAGOON down to 1 HP and catches it with a
+# MASTER BALL; both leads (one point short of Lv16) get their share, grow, learn and evolve after the battle
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("catch exp: hp 1/" "co-op exp: slot 0 +" "co-op exp: slot 3 +" "co-op: battle over, outcome 7" "lead Lv16"
+          "[test] party: 281(")
+EXPECT_B=("co-op: battle over, outcome 7" "lead Lv16" "[test] party: 281(")

@@ -3273,6 +3273,9 @@ static void Cmd_jumpiftype(void)
 
 // Moemon Co-op: per-owner EXP shares (see Cmd_getexp)
 static u16 sMpCoopExp[3], sMpCoopShareExp[3];
+// Moemon Co-op: catch EXP. Set by VARIOUS_MP_CATCH_EXP just before the getexp that follows "Gotcha!": the share of
+// a faint's EXP the caught Pokemon is worth (the damage dealt, 10-100%). 0 = an ordinary getexp.
+static u8 sMpCatchExpPercent;
 
 static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
 {
@@ -3415,7 +3418,7 @@ static void MpCoopExpStep(void)
             gBattleScripting.getexpState = 6;
             break;
         }
-        if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gBattleStruct->wildVictorySong)
+        if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gBattleStruct->wildVictorySong && !sMpCatchExpPercent)
         {
             BattleStopLowHpSound();
             PlayBGM(MUS_VICTORY_WILD);
@@ -3590,6 +3593,9 @@ static void Cmd_getexp(void)
             }
 
             calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
+            // Moemon Co-op: a caught Pokemon is worth the share of its HP that was knocked off
+            if (sMpCatchExpPercent)
+                calculatedExp = max(1, (u32)calculatedExp * sMpCatchExpPercent / 100);
 
             // Moemon Co-op: each player gets a full share, split only among their own
             // Pokémon (party slots 0-2 = the master's, 3-5 = the partner's)
@@ -3657,7 +3663,8 @@ static void Cmd_getexp(void)
             else
             {
                 // music change in wild battle after fainting a poke
-                if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && gBattleMons[0].hp != 0 && !gBattleStruct->wildVictorySong)
+                if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && gBattleMons[0].hp != 0 && !gBattleStruct->wildVictorySong
+                 && !sMpCatchExpPercent)
                 {
                     BattleStopLowHpSound();
                     PlayBGM(MUS_VICTORY_WILD);
@@ -3848,6 +3855,7 @@ static void Cmd_getexp(void)
             // not sure why gf clears the item and ability here
             gBattleMons[gBattlerFainted].item = ITEM_NONE;
             gBattleMons[gBattlerFainted].ability = ABILITY_NONE;
+            sMpCatchExpPercent = 0;
             gBattlescriptCurrInstr += 2;
         }
         break;
@@ -7028,6 +7036,15 @@ static void Cmd_various(void)
     case VARIOUS_MP_COOP_USE_ITEM:
         MpCoopUseItem();
         return;
+    case VARIOUS_MP_CATCH_EXP:
+    {
+        // Moemon Co-op: the caught Pokemon gives EXP like a faint, scaled by the damage dealt (at least 10%)
+        u32 maxHP = gBattleMons[gBattlerTarget].maxHP, hp = gBattleMons[gBattlerTarget].hp;
+        u32 percent = maxHP ? (maxHP - min(hp, maxHP)) * 100 / maxHP : 100;
+        sMpCatchExpPercent = max(10, min(100, percent));
+        MPNet_Log("catch exp: hp %u/%u, %u%% of a faint", (unsigned)hp, (unsigned)maxHP, (unsigned)sMpCatchExpPercent);
+        break;
+    }
     case VARIOUS_MP_COOP_ITEM_STATUS:
         // The new status into both games' copy of that Moemon
         if (sMpItem.bench)
