@@ -37,6 +37,8 @@
 #include "event_data.h"
 #include "coins.h"
 #include "overworld.h"
+#include "sound.h"
+#include "platform/gamepad.h"
 #include "money.h"
 #include "item.h"
 #include "string_util.h"
@@ -480,6 +482,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
                     gMpConfig.specFriends[i].size = gMpConfig.spectateScale;
         }
         printf("[test] spectate panel %s, size %dx\n", on ? "on" : "off", gMpConfig.spectateScale);
+    }
+    else if (strcmp(cmd, "optionstab") == 0)
+    {
+        // optionstab N: OPTIONS (open) shows tab N (0 GAME, 1 DISPLAY, 2 CONTROLS, 3 CO-OP)
+        void MP_Options_DebugTab(u8 tab);
+        MP_Options_DebugTab(atoi(arg));
     }
     else if (strcmp(cmd, "panelfriend") == 0)
     {
@@ -1124,6 +1132,39 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern void SetPlayerAvatarTransitionFlags(u16 flags);
         SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
                                      : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
+    }
+    else if (strcmp(cmd, "mountbike") == 0)
+    {
+        // mountbike N - on (1 Mach, 2 Acro) or off (0) a bike the game's own way (GetOnOffBike: the bike song too)
+        void GetOnOffBike(u8 transitionFlags);
+        int n = atoi(arg);
+        GetOnOffBike(n == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT : n == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
+    }
+    else if (strcmp(cmd, "iconfamily") == 0)
+    {
+        // iconfamily - the button icons drawn now (0 keyboard, 1 Nintendo, 2 PlayStation, 3 Xbox) and the setting
+        printf("[test] iconfamily %d set %d\n", Gamepad_IconFamily(), Gamepad_GetIconSet());
+    }
+    else if (strcmp(cmd, "matchcalltest") == 0)
+    {
+        void MP_MatchCall_DebugSelect(int n);
+        MP_MatchCall_DebugSelect(arg[0] ? atoi(arg) : 5);
+    }
+    else if (strcmp(cmd, "ridemusic") == 0)
+    {
+        // ridemusic BIKE SURF - OPTIONS > GAME > BIKE MUSIC / SURF MUSIC (1 on, 0 off)
+        int b = 1, sf = 1;
+        sscanf(arg, "%d %d", &b, &sf);
+        gMpConfig.bikeMusic = b != 0;
+        gMpConfig.surfMusic = sf != 0;
+        printf("[test] ridemusic bike %d surf %d\n", gMpConfig.bikeMusic, gMpConfig.surfMusic);
+    }
+    else if (strcmp(cmd, "music") == 0)
+    {
+        // music - the song playing now (and the saved bike song); music play: the map's song again, as on arrival
+        if (strcmp(arg, "play") == 0)
+            Overworld_PlaySpecialMapMusic();
+        printf("[test] music %u saved %u\n", (unsigned)GetCurrentMapMusic(), (unsigned)gSaveBlock1Ptr->savedMusic);
     }
     else if (strcmp(cmd, "bikemode") == 0)
     {

@@ -26,6 +26,7 @@
 #include "task.h"
 #include "wild_encounter.h"
 #include "window.h"
+#include "mp.h"
 #include "constants/abilities.h"
 #include "constants/battle_frontier.h"
 #include "constants/event_objects.h"
@@ -1111,6 +1112,16 @@ static bool32 SelectMatchCallTrainer(void)
     if (GetRematchTrainerLocation(matchCallId) == gMapHeader.regionMapSectionId && !TrainerIsEligibleForRematch(matchCallId))
         return FALSE;
 
+    // Moemon Co-op: OPTIONS > CO-OP > MOENAV CALLS = BATTLES: a trainer only calls to ask for a battle (the same tests
+    // SelectMatchCallMessage makes; the different-route one is the day's fixed draw). Story calls come from scripts.
+    if (gMpConfig.moenavCalls
+     && !(TrainerIsEligibleForRematch(matchCallId) && GetRematchTrainerLocation(matchCallId) == gMapHeader.regionMapSectionId)
+     && !ShouldTrainerRequestBattle(matchCallId))
+    {
+        MPNet_Log("moenav: a chat call from trainer %d skipped", sMatchCallState.trainerId);
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -2115,4 +2126,17 @@ void LoadMatchCallWindowGfx(u32 windowId, u32 destOffset, u32 paletteId)
 void DrawMatchCallTextBoxBorder(u32 windowId, u32 tileOffset, u32 paletteId)
 {
     DrawMatchCallTextBoxBorder_Internal(windowId, tileOffset, paletteId);
+}
+
+// Moemon Co-op test harness (mp matchcalltest N): would a random call come? SelectMatchCallTrainer N times, with the
+// MATCH CALL flag and the first rematch trainer registered
+void MP_MatchCall_DebugSelect(int n)
+{
+    int i, ok = 0;
+    FlagSet(FLAG_HAS_MATCH_CALL);
+    FlagSet(TRAINER_REGISTERED_FLAGS_START + 0);
+    for (i = 0; i < n; i++)
+        if (SelectMatchCallTrainer())
+            ok++;
+    MPNet_Log("moenav test: %d of %d calls would come", ok, n);
 }

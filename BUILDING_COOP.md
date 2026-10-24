@@ -40,8 +40,8 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (SDL2 native PC port)
   * `mp_debug.c` + harness in `src/platform/sdl2.c`: headless test mode
     (`MOEMON_TEST=script`, `MOEMON_DEBUG_QUICKSTART=1`, ...)
 
-* **Display** (`src/platform/display.c`, `src/display_menu.c`): borderless
-  fullscreen, pixel-perfect / sharp-fit / stretch scaling, filters, START > SETTINGS.
+* **Display** (`src/platform/display.c`): borderless fullscreen, pixel-perfect / sharp-fit / stretch scaling,
+  filters; set in START > OPTIONS (`src/option_menu.c`: tabs GAME / DISPLAY / CONTROLS / CO-OP).
 
 ## Build
 Linux: `sudo apt install build-essential libpng-dev libsdl2-dev` then `make linux -j$(nproc)`

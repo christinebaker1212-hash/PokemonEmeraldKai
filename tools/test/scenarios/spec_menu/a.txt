@@ -2,24 +2,30 @@ pressuntil A field 5000
 waitfor online 6000
 wait 120
 display info
-mp menu 0
+press START 2
 wait 30
 press UP 2
-wait 20
-shot a_main
+wait 10
+press UP 2
+wait 10
+shot a_start
 press A 2
+wait 120
+press R 2
+wait 10
+press R 2
+wait 10
+press R 2
 wait 30
-shot a_settings_off
-display info
+shot a_coop_off
 press A 2
-wait 60
-display info
+wait 20
 press DOWN 2
 wait 10
+shot a_coop_on
 press A 2
 wait 30
 shot a_bob_page
-display info
 press RIGHT 2
 wait 10
 press DOWN 2
@@ -30,14 +36,11 @@ shot a_bob_above_2x
 display info
 press B 2
 wait 20
-shot a_settings_on
-display info
-press DOWN 2
-wait 10
-press DOWN 2
-wait 10
-press A 2
+shot a_coop_back
+press B 2
+wait 120
 barrier menudone 2
+press B 2
 wait 300
 display info
 rendershot a_panel

@@ -68,6 +68,11 @@ int Gamepad_TriggerHeld(int right);        // LT/Q (0) or RT/E (1) held: a contr
 void Gamepad_SetKeyHold(int which, int held);
 // Which button icons to show: the last used controller's, or the keyboard's (the GBA buttons)
 enum { GAMEPAD_ICONS_KEYBOARD, GAMEPAD_ICONS_NINTENDO, GAMEPAD_ICONS_PLAYSTATION, GAMEPAD_ICONS_XBOX };
+// OPTIONS > CONTROLS > BUTTON ICONS: AUTO (the device used last) or always one set
+enum { GAMEPAD_ICONSET_AUTO, GAMEPAD_ICONSET_KEYBOARD, GAMEPAD_ICONSET_XBOX, GAMEPAD_ICONSET_PLAYSTATION, GAMEPAD_ICONSET_NINTENDO,
+       GAMEPAD_ICONSET_COUNT };
+int Gamepad_GetIconSet(void);
+void Gamepad_SetIconSet(int set);
 int Gamepad_IconFamily(void);
 void Gamepad_NoteKeyboard(void);
 

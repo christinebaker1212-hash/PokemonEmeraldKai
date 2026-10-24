@@ -285,6 +285,8 @@ static void LoadConfig(void)
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
+    gMpConfig.bikeMusic = TRUE;
+    gMpConfig.surfMusic = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -347,6 +349,9 @@ static void LoadConfig(void)
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
+        else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
+        else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
+        else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -455,6 +460,10 @@ void MP_SaveConfig(void)
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
         "spectate_panel = %d\nspectate_size = %d\n"
+        "; OPTIONS > GAME: the cycling song on a bike, the surfing / underwater songs (1) or the map's own (0)\n"
+        "bike_music = %d\nsurf_music = %d\n"
+        "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
+        "moenav_calls = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -462,7 +471,8 @@ void MP_SaveConfig(void)
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.animSpeed,
-        gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.lobby);
+        gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
+        gMpConfig.moenavCalls ? "battles" : "all", gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)

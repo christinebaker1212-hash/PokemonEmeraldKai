@@ -9,7 +9,7 @@
 N=${1:?usage: runN.sh N DIR [DELAY_MS [JITTER_MS]]}; shift
 D="$(cd "${1:?usage: runN.sh N DIR [DELAY_MS [JITTER_MS]]}" && pwd)"; DELAY=${2:-0}; JIT=${3:-0}
 build_server || exit 1
-rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D"/[abcd].sav "$D"/[abcd].ini
+rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D"/[abcd].sav "$D"/[abcd].ini "$D"/[abcd]_controls.ini
 PORT=$(free_port)
 MOEMON_STORE_DIR="$D" "$SERVER" --port "$PORT" --no-router > "$D/server.log" 2>&1 &
 SP=$!
@@ -30,7 +30,7 @@ for i in $(seq 0 $((N - 1))); do
     C=${c^^}
     envv="ENV_$C"; warpv="WARP_$C"; wrapv="WRAP_$C"
     if [ "$i" = 0 ]; then auto="host:Test Room"; w=${WARP:-}; else auto="join:Test Room"; w=${!warpv:-$WARP}; fi
-    env ${!envv} MOEMON_DEBUG_WARP=$w MOEMON_TEST="$D/$c.txt" MOEMON_COOP_CONFIG="$D/$c.ini" MOEMON_SAVE="$D/$c.sav" \
+    env ${!envv} MOEMON_DEBUG_WARP=$w MOEMON_TEST="$D/$c.txt" MOEMON_COOP_CONFIG="$D/$c.ini" MOEMON_CONTROLS_CONFIG="$D/${c}_controls.ini" MOEMON_SAVE="$D/$c.sav" \
         MOEMON_DEBUG_NAME=${NAMES[$i]} MOEMON_DEBUG_GENDER=$([ $i = 0 ] && echo F || echo M) MOEMON_COOP_AUTO="$auto" \
         timeout -k 10 "${TMO:-150}" ${!wrapv} "$BIN" > "$D/$c.log" 2>&1 &
     PIDS+=($!)

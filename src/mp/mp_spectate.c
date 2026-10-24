@@ -1277,16 +1277,8 @@ bool8 MP_Spectate_TryInteract(void)
 }
 
 // ---------------------------------------------------------------------------
-// CO-OP > SPECTATE: FRIENDS' SCREENS on / off, one row per friend online (A: their page: SHOW, PLACE = below / above
-// / left / right / own window, SIZE), NEW FRIENDS (the size for friends without settings), DONE
-
-static EWRAM_DATA u16 sSetCursor = 0;
-static EWRAM_DATA u16 sSetPage = 0;      // 0: main, 1 + player id: that friend's page
-static EWRAM_DATA u16 sSetMainCursor = 0;
-static EWRAM_DATA u8 sSetShownFit[DISPLAY_PANEL_MAX + 1] = {0};   // what the sizes really were when last drawn
-
-static const char *const sPlaceNames[] = {"BELOW", "ABOVE", "LEFT", "RIGHT", "OWN WINDOW"};
-#define PLACE_COUNT 5
+// The friends' screens' settings are in OPTIONS > CO-OP (option_menu.c): FRIENDS' SCREENS on / off, one row per friend
+// online (A: their page: SHOW, PLACE = below / above / left / right / own window, SIZE), NEW FRIENDS
 
 static u8 SetFriends(u8 *ids)
 {
@@ -1312,194 +1304,21 @@ static u8 ShownFit(u8 id)
     return 0;
 }
 
-static u8 Place(const struct MpSpecFriend *fr)
+// ---------------------------------------------------------------------------
+// OPTIONS > CO-OP (option_menu.c): the friends online and their screens' settings
+
+u8 MP_Spectate_ListFriends(u8 *ids)
 {
-    return fr->popout ? 4 : fr->side;
+    return SetFriends(ids);
 }
 
-static void SizeText(char *out, int size, int fit)
+struct MpSpecFriend *MP_Spectate_Friend(u8 id, bool8 create)
 {
-    if (fit > 0 && fit != size)
-        sprintf(out, "%dX (%dX FITS)", size, fit);
-    else
-        sprintf(out, "%dX", size);
+    return SpecFriend(id, create);
 }
 
-static void DrawSettings(void)
+// The size friend id's screen really shows at (0: not shown now)
+u8 MP_Spectate_ShownSize(u8 id)
 {
-    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids), i;
-    char value[24], name[MP_NAME_LEN + 1];
-    if (sSetPage == 0)
-    {
-        MpUi_Begin("SPECTATE");
-        MpUi_RowAscii(0, sSetCursor == 0, "FRIENDS' SCREENS", gMpConfig.spectatePanel ? "ON" : "OFF");
-        for (i = 0; i < n; i++)
-        {
-            const struct MpSpecFriend *fr = SpecFriend(ids[i], FALSE);
-            u8 fit = ShownFit(ids[i]);
-            sSetShownFit[i] = fit;
-            MP_GameToAscii(name, gMpPlayers[ids[i]].name, MP_NAME_LEN);
-            name[MP_NAME_LEN] = 0;
-            if (!fr->show)
-                sprintf(value, "OFF");
-            else
-                sprintf(value, "%s %dX", fr->popout ? "WINDOW" : sPlaceNames[fr->side], fit ? fit : fr->size);
-            MpUi_RowAscii(1 + i, sSetCursor == 1 + i, name, value);
-        }
-        sprintf(value, "%dX", gMpConfig.spectateScale);
-        MpUi_RowAscii(1 + n, sSetCursor == 1 + n, "NEW FRIENDS", value);
-        MpUi_RowAscii(2 + n, sSetCursor == 2 + n, "DONE", NULL);
-        MpUi_End();
-        if (sSetCursor == 0)
-            MpUi_HelpAscii(n ? "Friends' screens live beside yours." : "Friends online show up here.");
-        else if (sSetCursor <= n)
-            MpUi_HelpAscii("A: where it goes and how big.");
-        else if (sSetCursor == 1 + n)
-            MpUi_HelpAscii("Left/Right: size for friends not set yet.");
-        else
-            MpUi_HelpAscii("Saved for next time.");
-    }
-    else
-    {
-        u8 id = sSetPage - 1;
-        const struct MpSpecFriend *fr = SpecFriend(id, FALSE);
-        u8 fit = ShownFit(id);
-        sSetShownFit[DISPLAY_PANEL_MAX] = fit;
-        MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN);
-        name[MP_NAME_LEN] = 0;
-        MpUi_Begin(name);
-        MpUi_RowAscii(0, sSetCursor == 0, "SHOW", fr->show ? "ON" : "OFF");
-        MpUi_RowAscii(1, sSetCursor == 1, "PLACE", sPlaceNames[Place(fr)]);
-        SizeText(value, fr->size, fit);
-        MpUi_RowAscii(2, sSetCursor == 2, "SIZE", value);
-        MpUi_RowAscii(3, sSetCursor == 3, "DONE", NULL);
-        MpUi_End();
-        if (sSetCursor == 1)
-            MpUi_HelpAscii(fr->popout ? "Its own window: closing it hides it." : "Left/Right: which side of yours.");
-        else if (sSetCursor == 2)
-            MpUi_HelpAscii("Left/Right: 1X to 4X.");
-        else if (sSetCursor == 0)
-            MpUi_HelpAscii("Show this friend's screen?");
-        else
-            MpUi_HelpAscii("Back to SPECTATE.");
-    }
-}
-
-static bool8 FitsChanged(void)
-{
-    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids), i;
-    if (sSetPage == 0)
-    {
-        for (i = 0; i < n; i++)
-            if (ShownFit(ids[i]) != sSetShownFit[i])
-                return TRUE;
-        return FALSE;
-    }
-    return ShownFit(sSetPage - 1) != sSetShownFit[DISPLAY_PANEL_MAX];
-}
-
-static void Task_SpectateSettings(u8 taskId)
-{
-    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids);
-    bool8 redraw = FALSE;
-    s8 dir = JOY_NEW(DPAD_RIGHT) ? 1 : (JOY_NEW(DPAD_LEFT) ? -1 : 0);
-
-    if (sSetPage != 0 && !gMpPlayers[sSetPage - 1].present)
-    {
-        // that friend left: back to the main page
-        sSetPage = 0;
-        sSetCursor = 0;
-        DrawSettings();
-        return;
-    }
-    if (sSetPage == 0 && sSetCursor > 2 + n)
-        sSetCursor = 2 + n;
-    if (MpUi_MoveCursor(&sSetCursor, sSetPage == 0 ? 3 + n : 4) || FitsChanged())
-    {
-        DrawSettings();
-        return;
-    }
-    if (sSetPage == 0)
-    {
-        if (sSetCursor == 0 && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT))
-        {
-            gMpConfig.spectatePanel = !gMpConfig.spectatePanel;
-            MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
-            redraw = TRUE;
-        }
-        else if (sSetCursor >= 1 && sSetCursor <= n && JOY_NEW(A_BUTTON))
-        {
-            sSetMainCursor = sSetCursor;
-            sSetPage = 1 + ids[sSetCursor - 1];
-            sSetCursor = 1;
-            redraw = TRUE;
-        }
-        else if (sSetCursor == 1 + n && (dir || JOY_NEW(A_BUTTON)))
-        {
-            int v = gMpConfig.spectateScale + (dir ? dir : 1);
-            gMpConfig.spectateScale = v > 4 ? 1 : (v < 1 ? 4 : v);
-            redraw = TRUE;
-        }
-        else if (JOY_NEW(B_BUTTON) || (sSetCursor == 2 + n && JOY_NEW(A_BUTTON)))
-        {
-            PlaySE(SE_SELECT);
-            MP_SaveConfig();
-            MpUi_Close();
-            DestroyTask(taskId);
-            return;
-        }
-    }
-    else
-    {
-        u8 id = sSetPage - 1;
-        if (sSetCursor == 0 && (dir || JOY_NEW(A_BUTTON)))
-        {
-            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
-            fr->show = !fr->show;
-            MPNet_Log("spectate panel: player %d shown %d", id + 1, fr->show);
-            redraw = TRUE;
-        }
-        else if (sSetCursor == 1 && (dir || JOY_NEW(A_BUTTON)))
-        {
-            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
-            int p = Place(fr) + (dir ? dir : 1);
-            p = p >= PLACE_COUNT ? 0 : (p < 0 ? PLACE_COUNT - 1 : p);
-            fr->popout = p == 4;
-            if (p < 4)
-                fr->side = p;
-            fr->show = TRUE;
-            MPNet_Log("spectate panel: player %d %s", id + 1, sPlaceNames[p]);
-            redraw = TRUE;
-        }
-        else if (sSetCursor == 2 && (dir || JOY_NEW(A_BUTTON)))
-        {
-            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
-            int v = fr->size + (dir ? dir : 1);
-            fr->size = v > 4 ? 1 : (v < 1 ? 4 : v);
-            MPNet_Log("spectate panel: player %d size %dx", id + 1, fr->size);
-            redraw = TRUE;
-        }
-        else if (JOY_NEW(B_BUTTON) || (sSetCursor == 3 && JOY_NEW(A_BUTTON)))
-        {
-            sSetPage = 0;
-            sSetCursor = sSetMainCursor;
-            redraw = TRUE;
-        }
-    }
-    if (redraw)
-    {
-        PlaySE(SE_SELECT);
-        DrawSettings();
-    }
-}
-
-void MP_Spectate_OpenSettings(void)
-{
-    if (gMpConfig.spectateScale < 1 || gMpConfig.spectateScale > 4)
-        gMpConfig.spectateScale = 1;
-    sSetCursor = 0;
-    sSetPage = 0;
-    MpUi_Open();
-    CreateTask(Task_SpectateSettings, 80);
-    DrawSettings();
+    return ShownFit(id);
 }

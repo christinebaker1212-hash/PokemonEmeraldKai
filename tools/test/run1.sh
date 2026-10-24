@@ -5,10 +5,10 @@
 #   A DIR/a.sav.coop already there is kept (seed save data, e.g. "ball:last = 4").
 . "$(dirname "$0")/common.sh"
 D="$(cd "${1:?usage: run1.sh DIR [VAR=value...]}" && pwd)"; shift
-rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D/a.sav"; [ -n "$KEEPINI" ] || rm -f "$D/a.ini"
+rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D/a.sav"; [ -n "$KEEPINI" ] || rm -f "$D/a.ini" "$D/a_controls.ini"
 cd "$REPO" || exit 1
 env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$D/a.txt" MOEMON_SHOTDIR="$D" MOEMON_DEBUG_QUICKSTART=1 \
-    MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$D/a.ini" MOEMON_SAVE="$D/a.sav" "$@" \
+    MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$D/a.ini" MOEMON_CONTROLS_CONFIG="$D/a_controls.ini" MOEMON_SAVE="$D/a.sav" "$@" \
     timeout -k 10 "${TMO:-120}" "$BIN" > "$D/log.txt" 2>&1
 rc=$?
 convert_shots "$D"

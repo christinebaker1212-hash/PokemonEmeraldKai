@@ -319,8 +319,8 @@ and Double Battles with a friend. Two friends can join at once.
     they joined.
 
 
-FRIENDS' SCREENS (CO-OP > SPECTATE)
------------------------------------
+FRIENDS' SCREENS (OPTIONS > CO-OP)
+----------------------------------
 Turn FRIENDS' SCREENS ON to see up to 3 friends' screens live, all the time:
 walking around, in menus or in battle. Each card has the friend's name and
 where they are (a red IN BATTLE tag in a battle).
@@ -965,8 +965,17 @@ differently; nobody's version overwrites anyone else's.
 Older 144x32 / 288x32 walking sheets still work.
 
 
-SETTINGS (START > SETTINGS)
----------------------------
+OPTIONS (START > OPTIONS, or OPTIONS on the title screen)
+---------------------------------------------------------
+Every setting in one place, in four tabs: L / R switches tabs, Up / Down picks a
+row, Left / Right (or A) changes it, B or CLOSE leaves. The line at the bottom
+says what the row does.
+GAME      TEXT SPEED, BATTLE SCENE, BATTLE STYLE, SOUND, BUTTON MODE, FRAME,
+          TYPE ICONS, NAME CASE, CREATURES (as before), and
+  BIKE MUSIC    ON: the cycling song on a bike. OFF: the map's own song.
+  SURF MUSIC    ON: the surfing and underwater songs. OFF: surfing keeps the
+                map's song, and diving keeps the song of the sea above.
+DISPLAY
   FULLSCREEN    borderless fullscreen (also F11 or Alt+Enter)
   WINDOW SCALE  1x to 10x
   SCALING       PIXEL PERFECT (whole-number zoom, sharpest),
@@ -974,16 +983,27 @@ SETTINGS (START > SETTINGS)
                 STRETCH (fills the screen exactly)
   FILTER        OFF, SCANLINES, LCD GRID
   VSYNC         on/off
+CONTROLS
   CONTROLLER    which controller plays. Press A on this row, then press
                 any button on the controller you want; that one is used
                 from then on (it's remembered). Left/Right goes back to
                 ALL CONTROLLERS.
-  PAD BUTTONS   AUTO, NINTENDO (A = right button) or XBOX (A = bottom)
+  PAD BUTTONS   AUTO, A = RIGHT (Nintendo style) or A = BOTTOM (Xbox style)
   STICK RUN     push the stick all the way to run (on/off; off in a new
                 game)
   RUMBLE        on/off
+  BUTTON ICONS  the button pictures in help lines: AUTO (the keyboard or
+                controller you used last), or always KEYBOARD, XBOX,
+                PLAYSTATION or NINTENDO
+CO-OP
+  FRIENDS' SCREENS and a row for each friend online: see FRIENDS' SCREENS.
+  NEW FRIENDS   the screen size for friends you haven't set up yet
+  AUTOSAVE      a quiet save on the map every 5 to 60 minutes, or OFF
+  FLAG RANGE    how many tiles you see with the BATTLE FLAG planted (1-8)
+  MOENAV CALLS  ALL, or BATTLES: trainers only call when they want a battle
+                (no chatting). Story calls always come.
 The window can also be resized freely. Settings are kept in
-moemon_display.ini and moemon_controls.ini.
+moemon_display.ini, moemon_controls.ini and moemon_coop.ini.
 
 
 CONTROLS (keyboard)

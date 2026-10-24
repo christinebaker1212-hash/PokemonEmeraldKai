@@ -1149,6 +1149,27 @@ void Overworld_ResetMapMusic(void)
     ResetMapMusic();
 }
 
+// Moemon Co-op: OPTIONS > GAME > BIKE MUSIC / SURF MUSIC off. Biking and surfing keep the map's own song; diving
+// keeps the song of the sea above (whatever was playing), unless nothing was
+static EWRAM_DATA u16 sMpSeaSong = 0;   // the song playing when we dove with SURF MUSIC off
+
+static bool8 MpIsRideSong(u16 song)
+{
+    return song == MUS_NONE || song == MUS_DUMMY || song == MUS_SURF || song == MUS_UNDERWATER || song == MUS_CYCLING;
+}
+
+static u16 MpRideMusic(u16 music)
+{
+    u16 cur = GetCurrentMapMusic();
+    if (MpIsRideSong(cur) && sMpSeaSong)
+        cur = sMpSeaSong;
+    if ((music == MUS_CYCLING && !gMpConfig.bikeMusic) || (music == MUS_SURF && !gMpConfig.surfMusic))
+        return GetCurrLocationDefaultMusic();
+    if (music == MUS_UNDERWATER && !gMpConfig.surfMusic && !MpIsRideSong(cur))
+        return cur;
+    return music;
+}
+
 void Overworld_PlaySpecialMapMusic(void)
 {
     u16 music = GetCurrLocationDefaultMusic();
@@ -1161,6 +1182,7 @@ void Overworld_PlaySpecialMapMusic(void)
             music = MUS_UNDERWATER;
         else if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
             music = MUS_SURF;
+        music = MpRideMusic(music);
     }
 
     if (music != GetCurrentMapMusic())
@@ -1185,10 +1207,15 @@ static void TransitionMapMusic(void)
         u16 currentMusic = GetCurrentMapMusic();
         if (newMusic != MUS_ABNORMAL_WEATHER && newMusic != MUS_NONE)
         {
-            if (currentMusic == MUS_UNDERWATER || currentMusic == MUS_SURF)
-                return;
-            if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
-                newMusic = MUS_SURF;
+            if (gMpConfig.surfMusic)
+            {
+                if (currentMusic == MUS_UNDERWATER || currentMusic == MUS_SURF)
+                    return;
+                if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
+                    newMusic = MUS_SURF;
+            }
+            else if (newMusic == MUS_UNDERWATER && currentMusic != MUS_NONE && currentMusic != MUS_DUMMY)
+                newMusic = currentMusic;   // Moemon Co-op: SURF MUSIC off: diving keeps the sea's song
         }
         if (newMusic != currentMusic)
         {
@@ -1227,6 +1254,14 @@ void TryFadeOutOldMapMusic(void)
 {
     u16 currentMusic = GetCurrentMapMusic();
     u16 warpMusic = GetWarpDestinationMusic();
+    // Moemon Co-op: SURF MUSIC off: diving keeps the sea's song (no fade; MpRideMusic plays it on underwater)
+    if (!gMpConfig.surfMusic && warpMusic == MUS_UNDERWATER && !MpIsRideSong(currentMusic))
+    {
+        sMpSeaSong = currentMusic;
+        return;
+    }
+    if (warpMusic != MUS_UNDERWATER)
+        sMpSeaSong = 0;
     if (FlagGet(FLAG_DONT_TRANSITION_MUSIC) != TRUE && warpMusic != GetCurrentMapMusic())
     {
         if (currentMusic == MUS_SURF

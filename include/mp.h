@@ -209,6 +209,9 @@ struct MpConfig
     u8 spectateScale;         // ... each 1-4 times 240x160 (the size for friends without their own)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
     struct MpSpecFriend specFriends[MP_SPEC_FRIENDS];   // CO-OP > SPECTATE: each friend's screen, by name
+    u8 bikeMusic;             // OPTIONS > GAME > BIKE MUSIC: the cycling song on a bike (1) or the map's own (0)
+    u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
+    u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
 };
 
 extern struct MpConfig gMpConfig;
@@ -946,7 +949,9 @@ void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Spectate_OnPlayerLeft(u8 id);
 void MP_Spectate_FrameUpdate(void);
 bool8 MP_Spectate_TryInteract(void);
-void MP_Spectate_OpenSettings(void);   // CO-OP > SPECTATE: the panel of friends' screens on / off, its size
+u8 MP_Spectate_ListFriends(u8 *ids);                        // OPTIONS > CO-OP: friends online (up to 3)
+struct MpSpecFriend *MP_Spectate_Friend(u8 id, bool8 create);   // their screen's settings (by name)
+u8 MP_Spectate_ShownSize(u8 id);                            // the size their screen shows at now (0: none)   // CO-OP > SPECTATE: the panel of friends' screens on / off, its size
 void MP_Spectate_PanelSync(void);      // sdl2.c VDraw: the panel's cards to the display
 
 // Follower Pokémon (mp_follower.c)

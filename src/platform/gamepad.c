@@ -62,6 +62,20 @@ static const char *ConfigPath(void)
     return p ? p : "moemon_controls.ini";
 }
 
+// OPTIONS > CONTROLS > BUTTON ICONS
+static int sIconSet = GAMEPAD_ICONSET_AUTO;
+static const char *const sIconSetNames[GAMEPAD_ICONSET_COUNT] = {"auto", "keyboard", "xbox", "playstation", "nintendo"};
+
+int Gamepad_GetIconSet(void)
+{
+    return sIconSet;
+}
+
+void Gamepad_SetIconSet(int set)
+{
+    sIconSet = (set % GAMEPAD_ICONSET_COUNT + GAMEPAD_ICONSET_COUNT) % GAMEPAD_ICONSET_COUNT;
+}
+
 static void LoadSettings(void)
 {
     FILE *f = fopen(ConfigPath(), "r");
@@ -80,6 +94,13 @@ static void LoadSettings(void)
             sAnalogRun = atoi(val) != 0;
         else if (strcmp(key, "rumble") == 0)
             sRumble = atoi(val) != 0;
+        else if (strcmp(key, "button_icons") == 0)
+        {
+            int i;
+            for (i = 0; i < GAMEPAD_ICONSET_COUNT; i++)
+                if (strcmp(val, sIconSetNames[i]) == 0)
+                    sIconSet = i;
+        }
         else if (strcmp(key, "controller") == 0 && strcmp(val, "all") != 0)
             snprintf(sSelectedGuid, sizeof(sSelectedGuid), "%s", val);
     }
@@ -92,11 +113,14 @@ void Gamepad_SaveSettings(void)
     FILE *f = fopen(ConfigPath(), "w");
     if (!f)
         return;
-    fprintf(f, "; Moemon Emerald Kai controller settings (START > SETTINGS)\n"
+    fprintf(f, "; Moemon Emerald Kai controller settings (OPTIONS > CONTROLS)\n"
                "; layout = auto, standard (bottom button = A) or nintendo (right button = A)\n"
                "layout = %s\nanalog_run = %d\nrumble = %d\n"
-               "; controller = all, or the id of the one picked in START > SETTINGS\n"
-               "controller = %s\n", names[sLayout], sAnalogRun, sRumble, sSelectedGuid[0] ? sSelectedGuid : "all");
+               "; controller = all, or the id of the one picked in OPTIONS > CONTROLS\n"
+               "controller = %s\n"
+               "; button_icons = auto (the device used last), keyboard, xbox, playstation or nintendo\n"
+               "button_icons = %s\n", names[sLayout], sAnalogRun, sRumble, sSelectedGuid[0] ? sSelectedGuid : "all",
+               sIconSetNames[sIconSet]);
     fclose(f);
 }
 
@@ -247,6 +271,13 @@ int Gamepad_IconFamily(void)
 {
     SDL_GameController *pad = SelectedPad();
     int i;
+    switch (sIconSet)
+    {
+    case GAMEPAD_ICONSET_KEYBOARD:    return GAMEPAD_ICONS_KEYBOARD;
+    case GAMEPAD_ICONSET_XBOX:        return GAMEPAD_ICONS_XBOX;
+    case GAMEPAD_ICONSET_PLAYSTATION: return GAMEPAD_ICONS_PLAYSTATION;
+    case GAMEPAD_ICONSET_NINTENDO:    return GAMEPAD_ICONS_NINTENDO;
+    }
     for (i = 0; !pad && i < MAX_PADS; i++)
         pad = sPads[i];
     if (!pad || !sLastInputPad)

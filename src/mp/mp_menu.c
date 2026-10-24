@@ -33,7 +33,7 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_SPECTATE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 // LOOK rows. BIKE only shows for a character who rides a Pokemon or a vehicle on a bike: the page's
 // cursor counts the rows shown (LookRowAt / LookCursorOf)
 enum { ROW_GROUP, ROW_SPRITE, ROW_BIKE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
@@ -330,7 +330,7 @@ static bool8 LookIsCreated(void)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", "", "SPECTATE"};
+    static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
     const char *const lookLabels[] = {"GROUP", "SPRITE", "BIKE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...",
                                       "EDIT SPRITES...", sIntroDone ? "ALL DONE!" : "SAVE LOOK", "REVERT"};
     char line[64];
@@ -1130,10 +1130,6 @@ static void HandleMainInput(u8 taskId)
         break;
     case MAIN_LOOK:
         GoToPage(data, MP_MENU_PAGE_LOOK, LookCursorOf(ROW_SPRITE));
-        break;
-    case MAIN_SPECTATE:
-        CloseMenu(taskId);
-        MP_Spectate_OpenSettings();
         break;
     case MAIN_REMINDER:
         // The Move Tutor's service, anywhere (still costs a HEART SCALE)

@@ -55,6 +55,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_catch_exp` | NA-JP lag, co-op wild: ALICE catches a ZIGZAGOON at 1 HP (95%); both leads get EXP, grow and evolve after the battle |
 | `flag_phrases` | NA-JP lag: BOB uses the BATTLE FLAG (PHRASES: the phrase builder and back to the list, then PLANT), both screens show his CHALLENGE, the result quotes his phrase; check.py: the winner got a tenth, the loser kept their money |
 | `spec_sides` | 4 players, NA-JP lag: ALICE (1920x1080) shows BOB LEFT 1X, CARL RIGHT 2X, DANA ABOVE 1X, then DANA in her own window, then closes it (DANA only goes off); check_spectrace.py |
+| `options_tabs` | START > OPTIONS with real keys: TEXT SPEED, L/R tabs, BUTTON ICONS PLAYSTATION (icons switch), AUTOSAVE 10, MOENAV CALLS BATTLES (random chat calls stop); check.sh: saved to the inis |
+| `music_options` | BIKE MUSIC / SURF MUSIC: the Mach Bike, surfing Petalburg's pond and diving, songs checked in order (check.py) |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

@@ -1,6 +1,6 @@
 // Moemon Kai PC: display settings (fullscreen, scaling, filters, vsync).
 // The state lives in the platform layer (src/platform/display.c). Game code
-// (e.g. src/display_menu.c) uses these plain C functions; they apply live.
+// (src/option_menu.c, OPTIONS > DISPLAY) uses these plain C functions; they apply live.
 #ifndef GUARD_PLATFORM_DISPLAY_H
 #define GUARD_PLATFORM_DISPLAY_H
 
@@ -60,11 +60,6 @@ int Display_GetCardScale(int i);       // the size card i is shown at now (less 
 int Display_TakeClosedPopout(void);    // the id of a pop-out window the player closed, or -1
 void Display_SavePopoutBMPs(const char *prefix);   // test harness: PREFIX_<id>.bmp for each pop-out window
 
-// In-game DISPLAY SETTINGS screen (src/display_menu.c).
-// Display_OpenSettingsMenu only creates the menu task; onClose (may be NULL)
-// runs after its windows are removed.
-void Display_OpenSettingsMenu(void (*onClose)(void));
-// Overworld version: locks field controls and unlocks them on close.
-void Display_OpenFieldSettingsMenu(void);
+// The display and controller settings are in OPTIONS > DISPLAY / CONTROLS (src/option_menu.c).
 
 #endif // GUARD_PLATFORM_DISPLAY_H

@@ -1,6 +1,6 @@
-# CO-OP > SPECTATE with the real keys: ALICE turns FRIENDS' SCREENS on, opens BOB's row and sets PLACE to ABOVE and
-# SIZE to 2X (saved in her .ini by his name), sees his screen above hers, and the panel goes away (window back to its
-# own size) when BOB leaves.
+# OPTIONS > CO-OP with the real keys (START > OPTIONS, R to the CO-OP tab): ALICE turns FRIENDS' SCREENS on, opens
+# BOB's row and sets PLACE to ABOVE and SIZE to 2X (saved in her .ini by his name), sees his screen above hers, and the
+# panel goes away (window back to its own size) when BOB leaves.
 MODE=2
 WARP=0,10,10,10
 WARP_B=0,10,12,10

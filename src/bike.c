@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "bike.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -984,8 +985,11 @@ void GetOnOffBike(u8 transitionFlags)
     else
     {
         SetPlayerAvatarTransitionFlags(transitionFlags);
-        Overworld_SetSavedMusic(MUS_CYCLING);
-        Overworld_ChangeMusicTo(MUS_CYCLING);
+        if (gMpConfig.bikeMusic)   // Moemon Co-op: OPTIONS > GAME > BIKE MUSIC
+        {
+            Overworld_SetSavedMusic(MUS_CYCLING);
+            Overworld_ChangeMusicTo(MUS_CYCLING);
+        }
     }
 }
 

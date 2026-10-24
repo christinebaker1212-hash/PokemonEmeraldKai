@@ -8,7 +8,7 @@
 . "$(dirname "$0")/common.sh"
 D="$(cd "${1:?usage: run2.sh DIR [DELAY_MS [JITTER_MS]]}" && pwd)"; DELAY=${2:-0}; JIT=${3:-0}
 build_server || exit 1
-rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D/a.sav" "$D/b.sav" "$D/a.ini" "$D/b.ini"
+rm -f "$D"/*.bmp "$D"/*.png "$D"/barrier_* "$D/a.sav" "$D/b.sav" "$D/a.ini" "$D/b.ini" "$D"/[ab]_controls.ini
 PORT=$(free_port)
 MOEMON_STORE_DIR="$D" "$SERVER" --port "$PORT" --no-router > "$D/server.log" 2>&1 &
 SP=$!
@@ -22,12 +22,12 @@ sleep 1
 cd "$REPO" || exit 1
 export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_SHOTDIR="$D" MOEMON_LOBBY=127.0.0.1:$LOBBY \
        MOEMON_DEBUG_QUICKSTART=1 MOEMON_TEST_FPS=${FPS:-120}
-env $ENV_A MOEMON_DEBUG_WARP=${WARP:-} MOEMON_TEST="$D/a.txt" MOEMON_COOP_CONFIG="$D/a.ini" MOEMON_SAVE="$D/a.sav" \
+env $ENV_A MOEMON_DEBUG_WARP=${WARP:-} MOEMON_TEST="$D/a.txt" MOEMON_COOP_CONFIG="$D/a.ini" MOEMON_CONTROLS_CONFIG="$D/a_controls.ini" MOEMON_SAVE="$D/a.sav" \
     MOEMON_DEBUG_NAME=${NAME_A:-ALICE} MOEMON_DEBUG_GENDER=F MOEMON_COOP_AUTO="host:Test Room" \
     timeout -k 10 "${TMO:-150}" "$BIN" > "$D/a.log" 2>&1 &
 AP=$!
 sleep 1
-env $ENV_B MOEMON_DEBUG_WARP=${WARP_B:-$WARP} MOEMON_TEST="$D/b.txt" MOEMON_COOP_CONFIG="$D/b.ini" MOEMON_SAVE="$D/b.sav" \
+env $ENV_B MOEMON_DEBUG_WARP=${WARP_B:-$WARP} MOEMON_TEST="$D/b.txt" MOEMON_COOP_CONFIG="$D/b.ini" MOEMON_CONTROLS_CONFIG="$D/b_controls.ini" MOEMON_SAVE="$D/b.sav" \
     MOEMON_DEBUG_NAME=${NAME_B:-BOB} MOEMON_COOP_AUTO="join:Test Room" \
     timeout -k 10 "${TMO:-150}" "$BIN" > "$D/b.log" 2>&1 &
 BP=$!

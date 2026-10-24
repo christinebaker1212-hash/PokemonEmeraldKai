@@ -1,0 +1,9 @@
+# OPTIONS > GAME > BIKE MUSIC / SURF MUSIC in Petalburg (MUS_PETALBURG 362). Bike music on: the cycling song (403) on the
+# Mach Bike; off: Petalburg's song. Surf music off: surfing the pond (held HM03, as in hm_surf) keeps Petalburg's song;
+# the map's song again with it on is the surfing song (365), off Petalburg's. Diving with it off (a warp to
+# UNDERWATER ROUTE 124) keeps the song that was playing; on, the underwater song (411). check.py: the songs in order.
+MODE=1
+WARP=0,0,7,20
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] ridemusic bike 0 surf 0" "where map 0.0 xy 6,20")
+CHECK="python3 tools/test/scenarios/music_options/check.py"

@@ -499,6 +499,36 @@ Harness: mp useflag (field only), mp phraseclear N, mp phrasedefault, mp phrases
 easychat TYPE (the scripts' way in). Tests: flag_phrases (check.py: the prize and the loser's money), pvp_battle
 (no CHALLENGE: no box).
 
+## OPTIONS in tabs (H8, option_menu.c; START > OPTIONS and the title screen's OPTIONS)
+
+The game's own options screen (its frame, palette, fonts, red / green choices, the WIN0 highlight bar) rebuilt as a
+row table: BuildRows fills sRows (opt, arg) for the tab (TAB_GAME / DISPLAY / CONTROLS / COOP) or a friend's page
+(sFriendPage = 1 + player id); Choices / Current / Change / RowLabel per OPT_*. Rows with 2-3 short choices show
+them all (the one on in red, like the originals); longer lists show the one on, centered (FONT_SMALL_NARROW if long);
+a long label is drawn narrow and its choices start after it (sLabelEnd). Seven rows show (sTop scrolls, the scroll
+arrows are made again per tab) and a hint line under them says what the row does. L / R switch tabs (checked before A,
+so BUTTON MODE L=A doesn't also press A), B / START / CLOSE leave (BACK on a friend's page). Values apply live: the
+save's options straight into gSaveBlock2Ptr (FRAME reloads its tiles), display / pad through the platform API, co-op
+into gMpConfig; leaving saves moemon_display.ini, moemon_controls.ini and the co-op ini, calls MP_MonArt_Changed if
+CREATURES changed, and on the map plays the right song if BIKE / SURF MUSIC changed. ShownKey (every row's value, the
+pad state, a friend's shown size) redraws when anything changes outside (F11, a controller, a friend coming or
+going). START no longer has SETTINGS (display_menu.c is gone) and CO-OP no longer has SPECTATE (both moved here).
+Rows: GAME = the originals + TYPE ICONS / NAME CASE / CREATURES + BIKE MUSIC / SURF MUSIC; DISPLAY = FULLSCREEN, WINDOW
+SCALE, SCALING, FILTER, VSYNC; CONTROLS = CONTROLLER (A: press a button on it), PAD BUTTONS, STICK RUN, RUMBLE, BUTTON
+ICONS; CO-OP = FRIENDS' SCREENS, a row per friend, NEW FRIENDS, AUTOSAVE (0 / 5 / 10 / 15 / 20 / 30 / 45 / 60 min),
+FLAG RANGE (1-8), MOENAV CALLS.
+BIKE MUSIC / SURF MUSIC (gMpConfig.bikeMusic / surfMusic, ini bike_music / surf_music): bike.c GetOnOffBike and
+field_effect.c FldEff_UseSurf skip the song change; overworld.c MpRideMusic turns MUS_CYCLING / MUS_SURF into the map's
+own song in Overworld_PlaySpecialMapMusic and keeps the song playing for MUS_UNDERWATER; TryFadeOutOldMapMusic doesn't
+fade out when diving (sMpSeaSong remembers the sea's song); TransitionMapMusic keeps the current song for MUS_UNDERWATER.
+BUTTON ICONS (gamepad.c sIconSet, moemon_controls.ini button_icons): Gamepad_IconFamily returns the set picked, else
+the last device. MOENAV CALLS (gMpConfig.moenavCalls, ini moenav_calls = all / battles): match_call.c
+SelectMatchCallTrainer refuses a random call unless the trainer would ask for a battle (same route and eligible, or
+ShouldTrainerRequestBattle, the day's fixed draw); scripted calls (StartMatchCallFromScript) never go through it.
+Harness: `mp optionstab N`, `mp iconfamily`, `mp matchcalltest N`, `mp mountbike N` (the game's own GetOnOffBike),
+`mp ridemusic BIKE SURF`, `mp music [play]`. Test clients each get their own controls ini (run1/run2/runN.sh
+MOEMON_CONTROLS_CONFIG). Tests: options_tabs, music_options, spec_menu (the CO-OP tab with real keys).
+
 ## Ball entrance and recall effects
 
 Per Moemon, next to the ball style: MON_DATA_MP_BALLFX (PokemonSubstruct0's spare `filler` u16: form 0-3, particles
@@ -816,9 +846,10 @@ pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`,
 
 ## SPECTATE panel (mp_spectate.c, display.c)
 
-CO-OP > SPECTATE (MP_Spectate_OpenSettings, MpUi): FRIENDS' SCREENS, a row per friend online (A: their page SHOW /
-PLACE = BELOW / ABOVE / LEFT / RIGHT / OWN WINDOW / SIZE), NEW FRIENDS (gMpConfig.spectateScale, the size for friends
-without settings), DONE. Per friend: gMpConfig.specFriends[16] (struct MpSpecFriend: ASCII name, side, size, popout,
+OPTIONS > CO-OP (option_menu.c, since 1.13; CO-OP > SPECTATE before): FRIENDS' SCREENS, a row per friend online (A:
+their page SHOW / PLACE = BELOW / ABOVE / LEFT / RIGHT / OWN WINDOW / SIZE, through mp_spectate.c MP_Spectate_Friend /
+MP_Spectate_ListFriends / MP_Spectate_ShownSize), NEW FRIENDS (gMpConfig.spectateScale, the size for friends without
+settings). Per friend: gMpConfig.specFriends[16] (struct MpSpecFriend: ASCII name, side, size, popout,
 show; SpecFriend(id, create) finds them by name, the oldest dropped when full; ini `spectate_friend = SIDE SIZE POPOUT
 SHOW NAME`). Panel_Update only asks friends with show on; MP_Spectate_PanelSync skips any just hidden (a closed window).
 display.c (1.12): each card has side / scale / popout / id. PanelLayout(f) puts the window's cards in groups: rows

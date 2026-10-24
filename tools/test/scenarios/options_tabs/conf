@@ -1,0 +1,6 @@
+# OPTIONS with the real keys (START > OPTIONS): GAME > TEXT SPEED to FAST; L/R through the tabs; CONTROLS > BUTTON
+# ICONS to PLAYSTATION (the icons drawn change: mp iconfamily 2); CO-OP > AUTOSAVE to 10 MIN and MOENAV CALLS to
+# BATTLES (random chat calls stop: mp matchcalltest), saved to a.ini / a_controls.ini (check.sh). Shots o_*.png.
+MODE=1
+EXPECT_A=("[test] iconfamily 2 set 3" "moenav: a chat call from trainer" "moenav test: 0 of 5 calls would come" "moenav calls: battles")
+CHECK="bash tools/test/scenarios/options_tabs/check.sh"

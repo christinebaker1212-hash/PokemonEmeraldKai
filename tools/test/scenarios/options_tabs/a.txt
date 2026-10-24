@@ -1,0 +1,63 @@
+pressuntil A field 5000
+wait 60
+mp matchcalltest 5
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+press RIGHT 2
+wait 20
+shot o_game
+press R 2
+wait 20
+shot o_display
+press R 2
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press RIGHT 2
+wait 5
+press RIGHT 2
+wait 5
+press RIGHT 2
+wait 20
+shot o_controls
+press R 2
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press RIGHT 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press RIGHT 2
+wait 20
+shot o_coop
+press L 2
+wait 20
+press L 2
+wait 20
+press L 2
+wait 20
+shot o_back_to_game
+press B 2
+wait 120
+press B 2
+wait 60
+mp iconfamily
+mp matchcalltest 5
+quit
