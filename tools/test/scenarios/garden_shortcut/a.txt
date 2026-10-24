@@ -19,4 +19,28 @@ waitlog 600
 wait 200
 mp where
 shot back
+pressuntil B field 900
+mp life garden pc
+wait 120
+press A 2
+wait 150
+shot pcchoice
+press DOWN 2
+wait 20
+press A 2
+wait 150
+press A 2
+wait 150
+shot pcmenu
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+watchlog garden: shortcut there
+press A 2
+waitlog 900
+pressuntil B field 1200
+wait 60
+mp life garden state
+shot pcthere
 quit

@@ -5,6 +5,8 @@
 // everything not known yet is one "??? (not known yet)" line at the end.
 #include <string.h>
 #include "global.h"
+#include "decoration.h"
+#include "constants/decorations.h"
 #include "mp.h"
 #include "mp_life.h"
 #include "item.h"
@@ -131,6 +133,7 @@ static const u8 sTxt_Pursuit[] = _("Got better at what it loves.");
 static const u8 sTxt_FriendMem[] = _("Made friends with {STR_VAR_3}.");
 static const u8 sTxt_Family[] = _("Met its family.");
 static const u8 sTxt_GardenMem[] = _("Saw the GARDEN for the first time.");
+static const u8 sTxt_FavDecor[] = _("Loves the {STR_VAR_3} in the GARDEN.");
 
 static const u8 sTxt_Likes[] = _("Loves {STR_VAR_3} food.");
 static const u8 sTxt_Dislikes[] = _("Can't stand {STR_VAR_3} food.");
@@ -421,6 +424,12 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
     {
         CopyItemName(rec->keepsake, extra);
         Add(&bd, LIFE_FACT_KEEPSAKE, sTxt_Keepsake, MAPSEC_NONE, extra);
+    }
+    // a favorite decoration in the MOéMON GARDEN (mp_garden_decor.c)
+    if ((rec->favDecor >> 8) >= 5 && (rec->favDecor & 0xFF) < NUM_DECORATIONS)
+    {
+        StringCopy(extra, gDecorations[rec->favDecor & 0xFF].name);
+        Add(&bd, LIFE_FACT_DECOR, sTxt_FavDecor, MAPSEC_NONE, extra);
     }
     {
         u8 best = 0xFF, lvl = 100;

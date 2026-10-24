@@ -446,6 +446,13 @@ void MP_Garden_Debug(const char *args)
         void MP_GardenWatch_Debug(void);
         MP_GardenWatch_Debug();
     }
+    else if (strcmp(cmd, "pc") == 0)
+    {
+        // pc: as if A were pressed on a Pokémon Center's PC
+        extern const u8 EventScript_PC[];
+        ScriptContext_SetupScript(EventScript_PC);
+        printf("[test] garden pc\n");
+    }
     else if (strcmp(cmd, "board") == 0)
     {
         // board: as if A were pressed on the GARDEN BOARD (its script)

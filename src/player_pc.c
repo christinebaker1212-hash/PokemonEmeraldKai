@@ -461,8 +461,16 @@ void ReshowPlayerPC(u8 var)
 // Moemon Co-op: the PC turns off, then off to the MOéMON GARDEN (mp_garden.c)
 static void PlayerPC_MpGarden(u8 taskId)
 {
+    extern const u8 EventScript_TurnOffPC[];
     MP_Garden_ShortcutFromPC();
-    PlayerPC_TurnOff(taskId);
+    if (sMpBedroomPC)
+    {
+        PlayerPC_TurnOff(taskId);   // (its turn-off script ends the PC script)
+        return;
+    }
+    // the Pokémon Center's PC would go back to its own menu: turn it off and end there
+    ScriptContext_SetupScript(EventScript_TurnOffPC);
+    DestroyTask(taskId);
 }
 
 static void PlayerPC_ItemStorage(u8 taskId)

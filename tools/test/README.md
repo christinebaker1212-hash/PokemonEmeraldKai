@@ -65,6 +65,10 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `life_battle_save` | wild double: TORCHIC knocks out a foe while its best friend MUDKIP hangs on at 3 HP: sparkle / heart bubbles, the line after "fainted!", MEM_PARTNER for both |
 | `life_word` | word spreads: a proud TORCHIC tells MUDKIP (who wasn't there) about the first badge: MEM_HEARD from TORCHIC |
 | `life_social` | NA-JP lag, Oldale: ALICE's follower meets BOB's (a bond in her save), its bubbles show on BOB's screen, BOB pets it (her game answers: a sidestep, PET is beyond its boundary), BOB's new LOOK gets a double take |
+| `garden_map` | walk west out of LITTLEROOT into the MOéMON GARDEN (first visit: welcome, a memory); every growth mark with all badges |
+| `garden_life` | three Pokémon live in the Garden: play, talking to one, a PIKACHU DOLL placed and played with, WATCH mode (A tells, B back) |
+| `garden_shortcut` | the shortcut there and the board's GO BACK; a Pokémon Center PC's MOéMON GARDEN row turns the PC off and goes |
+| `garden_together` | NA-JP lag: two in the Garden: the hedge opens, each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

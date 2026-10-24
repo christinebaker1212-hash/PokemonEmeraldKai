@@ -1254,3 +1254,48 @@ same species: <= 1 memory and under 30 minutes old). MP_Life_PackRecord / Unpack
 known[] reset for the new Trainer, a bond with the new Trainer made). Tests: MOEMON_DEBUG_PID_SALT=N gives a
 client's debug party its own personalities (test clients otherwise get identical ones). Debug `mp life social
 bonds|mingle|verb PLAYER V|trainerbond PLAYER N`. Tests life_social, trade.
+G5 the Garden (mp_garden.c, mp_garden_life.c, mp_garden_decor.c, mp_garden_watch.c, mp_garden_net.c). The map:
+MAP_MOEMON_GARDEN (group 0 num 57, appended so no map id moved; LAYOUT_MOEMON_GARDEN appended), 34x20, General +
+Petalburg tilesets, made by tools/moemon_garden/gen_map.py from Littleroot's and Petalburg's own metatiles (their
+collision / elevation bits kept; Petalburg's pond twice, its stair pieces 250/251 made shore) and its facts in
+src/mp/mp_garden_map.h. It's connected west of LITTLEROOT (both map.jsons: left / right, offset 0; Littleroot's
+west edge rows 4-16 were already open grass), region map section LITTLEROOT, no name popup of its own; the
+GARDEN BOARD is a sign (bg event) running special MP_Garden_OpenBoard (waitstate). fieldmap.c InitMap /
+InitMapFromSavedGame call MP_Garden_OnMapLoad: growth marks stamped with MapGridSetMetatileIdAt from the group's
+badges (the most among Trainers on the map: 1 tall grass 00d, 2 the 3x3 puddle set c8-da, 4 sand 11c, 5 the storm
+stone (a PUSHABLE_BOULDER sprite), 6 two grove trees (tops 1ce/1cf, trunks 1d6/1d7 with collision)), and the hedge
+(cols 12-13, forest pattern) opened to grass when a friend is on the map (closed again once they've gone and nobody
+stands on it). First visit: MEM_GARDEN for the party, a welcome note, MP_GARDEN_VISITED -> the PC's MOéMON GARDEN
+row (player_pc.c: option orders with MENU_GARDEN, the window as tall as its rows, which PC told by sMpBedroomPC;
+a Pokémon Center PC ends with EventScript_TurnOffPC so it doesn't go back to its own menu) -> the warp once
+MP_IsLocalFree, MP_GARDEN_SHORTCUT (cleared on walking out of the Garden) -> the board's GO BACK to the saved spot.
+Save data: struct MpGardenSave in the .life header (flags, the return spot, 16 decorations).
+Garden Pokémon (actors, up to 24): in the Garden followers are hidden (LocalHidden / RemoteHidden ask
+MP_Garden_HidesFollowers; mp_life_field.c pauses) and the whole party lives there. Each actor has its own sprite
+(mp_follower.c MP_Follower_CreateMonSprite, palette TAG_GARDEN_PAL + index), positioned from the player's sprite
+like followers are (UpdateAnchor: the player's position in 1/256 tiles from its sprite's movement), a tile people
+can't walk through (field_player_avatar.c CheckForObjectEventCollision asks MP_Garden_ActorAt, which also covers
+decorations), greedy steps around obstacles (CanStand: the Garden's open area, no collision, water, objects,
+decorations or other actors). Their minds (ours only; friends' games run theirs): weighted choices from needs and
+temperament: WANDER, LOOK, NAP (a cushion first, else a cozy spot), FORAGE (tall grass, flowers), TYPE (the type
+need where the Garden has it: pond edge, flowers in the sun, sand, tall grass, the grove, the storm stone, puddles),
+PLAY / CHASE with the warmest friend nearby (it's invited and joins; tag: it runs and the other follows), SQUABBLE
+with a rival (friction 60+ or LIFE_BOND_RIVAL), COMPANY beside the Trainer, QUIET in the emptiest corner, DECOR
+(dolls and big dolls: play). Shared play: BondShare at the end (MEM_FRIEND when it becomes a friendship, MEM_PLAYED
+now and then; not about the Trainer, so no Friendship); squabbles: respect, friction for competitive ones. Emotes
+in LIFE_EMOTE_SLOT_GARDEN(i). A in front of one: mp_life_interact.c's tap / hold-A with a target (sTarget: React /
+TargetActivity route to the actor), a friend's: MP_LifeSocial_TryFriendPokemon (MPR_LIFE_VERB carries its key; their
+game answers through its bond with us and reacts on that actor). Decorations: DECORPERM_SPRITE ones (dolls, big
+dolls, cushions) drawn with CreateObjectGraphicsSprite(gDecorations[d].tiles[0]); DECORATE on the board: PLACE ONE
+HERE (the tile you face; copies free = owned - Secret Base - bedroom - Garden) / PUT ONE AWAY; decoration.c marks
+Garden ones in use (sMpGardenItemsIndicesBuffer: blue ball, can't be placed or tossed elsewhere). A favorite grows
+from repeated use (favDecor = type | count << 8; 5 = a favorite: +40 to choosing it, a journal line). WATCH (board):
+starts once the board's script ended; SpawnCameraObject, the camera walks (slow) toward the most interesting actor
+(play / tag / squabble 50+, decorations 40, nap piles, type needs...; changes after 8 s), A describes it in plain
+words, B walks the view back and RemoveCameraObject; each new focus reveals a temperament fact (and a favorite
+decoration). With friends (mp_garden_net.c, MPR_GARDEN_FIRST 250/251): every 10 frames when changed (heartbeat 2 s)
+each game sends its actors (key, dex, female, hue, target tile, dir | pose << 4, act, emote + seq: 15 bytes each)
+and every 3 s (at once when someone arrives) its decorations; receivers walk friends' actors to their tiles
+(MP_GardenLife_SetRemote, a jump of 5+ tiles snaps), show their bubbles and decorations, and drop them when that
+friend leaves. Debug `mp life garden state|shortcut|actors|force N ACT|talk N|decor give D|decor place D|decor list|
+watch|board|pc`. Tests garden_map, garden_life, garden_shortcut, garden_together.

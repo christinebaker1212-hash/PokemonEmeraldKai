@@ -1099,6 +1099,27 @@ scared) can raise its friendship a little, once. A MOEMON that wants to
 come out wiggles on the party screen, and the hold-SELECT follower
 picker says WANTS TO COME.
 
+In battle, a MOEMON remembers what stands out: hanging on at the last
+moment, the knockout that won it, a comeback, a friend who stepped in.
+Round pink bubbles on its sprite (with a soft sound) show how it feels;
+the square white ones are players'. Very rarely, after the biggest
+moments, a pink line in the message box tells you what it's feeling.
+With friends, MOEMON get to know each other and you: followers meet
+when you stand together, friends can pet or feed yours (from their own
+bag), and a MOEMON's life story travels with it in a trade.
+
+THE GARDEN: walk west out of LITTLEROOT into PROF. BIRCH's research
+meadow. Your whole party lives there freely: napping, playing tag,
+splashing at the pond, keeping you company. After your first visit,
+your PC (MOEMON GARDEN) takes you there, and the GARDEN BOARD by the
+pond takes you back. The Garden grows as your journey goes on.
+  GARDEN BOARD  DECORATE: put dolls and cushions from your SECRET BASE
+                collection out for them (and put them away again).
+                WATCH: sit down and watch; A tells you what's going on,
+                B stands up.
+With friends there, a hedge opens to a bigger meadow, and everyone's
+MOEMON and decorations are there together.
+
 UPDATES
 -------
 When the game starts it checks for a newer version (online, at the
