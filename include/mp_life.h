@@ -168,7 +168,7 @@ enum
 {
     LIFE_PURSUIT_NONE,
     LIFE_PURSUIT_CLIMB,     // the grove's trees
-    LIFE_PURSUIT_SWIM,      // laps of the pond
+    LIFE_PURSUIT_SWIM,      // splashing at the pond's edge
     LIFE_PURSUIT_SING,
     LIFE_PURSUIT_COLLECT,   // pretty stones
     LIFE_PURSUIT_DIG,       // tunnels in the sand

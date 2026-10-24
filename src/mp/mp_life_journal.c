@@ -147,7 +147,7 @@ static const u8 sRareText[LIFE_RARE_COUNT][2][44] = {
 // Pursuits (docs 12): what it took up, and its milestones
 static const u8 sPursuitText[LIFE_PURSUIT_COUNT][40] = {
     [LIFE_PURSUIT_CLIMB]   = _("Loves climbing the GARDEN's trees."),
-    [LIFE_PURSUIT_SWIM]    = _("Swims laps in the GARDEN pond."),
+    [LIFE_PURSUIT_SWIM]    = _("Loves splashing in the GARDEN pond."),
     [LIFE_PURSUIT_SING]    = _("Loves to sing."),
     [LIFE_PURSUIT_COLLECT] = _("Collects pretty stones."),
     [LIFE_PURSUIT_DIG]     = _("Digs tunnels in the sand."),
@@ -155,7 +155,7 @@ static const u8 sPursuitText[LIFE_PURSUIT_COUNT][40] = {
 };
 static const u8 sPursuitMilestone[LIFE_PURSUIT_COUNT][LIFE_PURSUIT_MILESTONES][40] = {
     [LIFE_PURSUIT_CLIMB]   = {_("Climbed its first tree!"), _("Reached the top branch!"), _("Climbs the tallest tree with ease.")},
-    [LIFE_PURSUIT_SWIM]    = {_("Splashed out into the pond!"), _("Swam a whole lap of the pond!"), _("Swims laps without a pause.")},
+    [LIFE_PURSUIT_SWIM]    = {_("Got its feet wet in the pond!"), _("Splashes about like a natural!"), _("Its splashes reach across the pond.")},
     [LIFE_PURSUIT_SING]    = {_("Hummed its first real tune."), _("Sang a whole song without stopping!"), _("Its song fills the whole GARDEN.")},
     [LIFE_PURSUIT_COLLECT] = {_("Found its first pretty stone!"), _("Has a little pile of pretty stones."), _("Found the prettiest stone of all!")},
     [LIFE_PURSUIT_DIG]     = {_("Dug its first tunnel in the sand!"), _("Dug a tunnel big enough to hide in!"), _("Its tunnels run all under the sand.")},

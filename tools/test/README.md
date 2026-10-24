@@ -68,6 +68,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_map` | walk west out of LITTLEROOT into the MOéMON GARDEN (first visit: welcome, a memory); every growth mark with all badges |
 | `garden_life` | three Pokémon live in the Garden: play, talking to one, a PIKACHU DOLL placed and played with, WATCH mode (A tells, B back) |
 | `garden_shortcut` | the shortcut there and the board's GO BACK; a Pokémon Center PC's MOéMON GARDEN row turns the PC off and goes |
+| `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
+| `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
 | `garden_together` | NA-JP lag: two in the Garden: the hedge opens, each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 

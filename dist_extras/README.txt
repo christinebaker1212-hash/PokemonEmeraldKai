@@ -1120,6 +1120,16 @@ pond takes you back. The Garden grows as your journey goes on.
 With friends there, a hedge opens to a bigger meadow, and everyone's
 MOEMON and decorations are there together.
 
+Over time, a MOEMON may take up something it loves in the Garden:
+climbing the trees, splashing in the pond, singing, collecting pretty
+stones, digging tunnels or showing the younger ones. It gets better at
+it, and the JOURNAL celebrates the big steps. Once in a long while, when the
+right MOEMON, the time of day and the weather line up, something rare
+happens; the JOURNAL keeps the ones you saw. A MOEMON hatched from an
+EGG knows its parents and may take after them a little. After it
+evolves, it takes a while to get used to its new body, and its friends
+come to see.
+
 UPDATES
 -------
 When the game starts it checks for a newer version (online, at the

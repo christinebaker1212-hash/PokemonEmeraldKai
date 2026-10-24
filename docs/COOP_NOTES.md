@@ -1299,3 +1299,45 @@ and every 3 s (at once when someone arrives) its decorations; receivers walk fri
 (MP_GardenLife_SetRemote, a jump of 5+ tiles snaps), show their bubbles and decorations, and drop them when that
 friend leaves. Debug `mp life garden state|shortcut|actors|force N ACT|talk N|decor give D|decor place D|decor list|
 watch|board|pc`. Tests garden_map, garden_life, garden_shortcut, garden_together.
+
+G6 long-term life (protocol 42: the Garden activities below go out in the actor relay; GA_* now lives in
+include/mp_garden.h for mp_garden_life.c and mp_garden_watch.c).
+Pursuits (MpLifeRec.pursuit / pursuitLevel; GA_PURSUIT): MP_Life_PursuitFor picks the one that fits the current
+species' instincts and type needs and its temperament (CLIMB: INST_TREE / SKY or TNEED_HEIGHT / SKY; SWIM (splashing at
+the pond's edge: actors never enter water): INST_SEA or TNEED_SOAK; SING: INST_SING; COLLECT: INST_COLLECT, TNEED_SHINE / STONE; DIG: INST_DIG, TNEED_DIG; TEACH: gentle or
+warm 170+ and social 110+), several fitting: one from its personality. It takes it up the first time it goes for it
+(a low weight until then). Where: the grove (or, before it grows, a tree at the Garden's edge: T_ByEdgeTree, never the
+board or the hedge), the pond edge, flowers / open ground, the storm stone or sand, sand, beside a younger (5+ levels
+lower) party Pokémon who sits and watches (learner: trust and respect for its teacher). Each session +2-5 (+1 lively);
+milestones at 60 / 150 / 250 are MEM_PURSUIT (param pursuit << 8 | 0-2, a moment for the party), LIFE_FACT_PURSUIT and
+a sparkle hop. The look changes with the level band (pose / bubble from sPursuitLook: a beginner's sweat or dots, then
+notes, then sparkles), sessions get longer (7 / 9 / 11 s). Journal: "Loves climbing the GARDEN's trees." and the
+milestone lines ("Reached the top branch!").
+Rare moments (GA_RARE, LIFE_RARE_*): tried first in Choose, 1 in 12 when it all lines up, each kind once a visit
+(sL.rareDone), only between our own Pokémon within 10 tiles. STARGAZE: both ways affection 180+ and trust 140+, a
+clear night, one curious 120+ or warm 160+ (open ground, side by side, looking up). PADDLE: a warm (130+) Water type
+and a Fire type that's timid (bold < 120) or afraid of water, trusting it 110+ (pond edge; the learner's sweat turns to
+splashing halfway; its water fear softens by 40). RIVAL_NAP: a rival bond, 8+ shared, respect 120+, both tired, 12-17 h.
+FAMILY: a family bond, 17-21 h, a warm one in a good mood grooms the other. The leader keeps the books at the end:
+MEM_RARE for both (param kind | role << 8: role 1 = the other one led), bonds, hearts. The journal keeps it only if the
+Trainer saw it (Seen: within 7x5 tiles of the player, or of the WATCH view, at any 30-frame check), otherwise its
+memory's known bit is cleared; rareSeen collects the kinds seen. WATCH: interest 95, its own sentence.
+Eggs and family: daycare.c _GiveEggFromDaycare calls MP_Life_NoteEgg with the save DAY CARE's guests: a record made now
+(LIFE_REC_EGG, parents[] = their keys, RollTemperament then a quarter of the way toward the known parents' born
+temperaments; a third of eggs, from the personality: a family food (a parent's comfort food or loved flavor, now a
+TRAIT_COMFORT_FOOD), TRAIT_FAMILY_SONG or TRAIT_FAMILY_GREETING). Party EGGs count as owned (FindOwnedBox) so the
+record isn't dropped. Hatching keeps personality and OT, so the next MP_Life_Get finds it: FinishEgg (owner bond, the
+MET memory "Hatched in ...", name, family bonds with parents we have records of). FamilyCheck (minute tick): parents,
+children and siblings (a shared parent) in the party meet once (LIFE_BOND_MET on the family bond): bonds, MEM_FAMILY
+(param 0 its little one, 1 its parent, 2 its sibling). The family song: GA_SONG with family nearby, and the follower
+hums now and then; the greeting: a twirl and a heart when it comes to keep the Trainer company.
+Evolution: MP_Life_Get notices it at once for a party Pokémon (EvolutionCheck, only when the new species is in the old
+one's gEvolutionTable: SHEDINJA shares NINCADA's personality). Instincts and type needs read rec->species, so they
+switch; temperament, memories and bonds stay. MP_Life_NewBody: MEM_EVOLVED in the last 15 minutes. In the Garden it
+looks at its reflection by the pond or stumbles (up to 3 times a visit); on the map the follower stumbles while walking
+(SWEAT + SHAKE) or looks itself over when standing (EXCLAIM + SPIN), up to 4 times. Friends react the first time they
+see it (MP_Life_EvolutionReaction, once per pair, needs familiarity 20+): JEALOUS (rival or friction 90+: frustration,
+respect and friction), PROUD (warmth 250+ or family: pride, joy, affection), else AWED; Garden actors walk over
+(GA_REACT), the follower shows it on the map. A Pokémon that evolves in the Garden gets its new sprite there.
+Debug `mp life egg A B|hatchsoon|evolve SLOT SPECIES|evoreact W E|familiar A B V`, `mp life garden rare N KIND|
+pursuit N LEVEL`. Tests garden_longterm, life_family.
