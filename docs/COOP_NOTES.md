@@ -1127,3 +1127,65 @@ buttons' columns and widths (6 6 5 6 7 tiles), LoadScreenSelectBarMain loads too
 than the box -> sMpDexReading (else SE_FAILURE); MpDexReadInput takes UP/DOWN (repeat) and B (back to the top);
 TryDoInfoScreenScroll does nothing while reading. Logs "dex text: reading #N, L lines", "top T of M", "closed".
 Debug: `mp dexcheck [N]` builds all 386 (most lines 19, #303). Test dex_text.
+
+## MOéMON GARDEN (A-Life; the spec is docs/POKEMON_GARDEN.md)
+Principles from the design: needs create behavior, experiences create emotions, relationships create attachment;
+ordinary absence is never neglect (background needs only become preferences, nothing ever suffers or decays while the
+player is away). Emerald's Friendship stays authoritative: only Emerald's own causes lower it; the Garden raises it
+only through a moment (below). No settings.
+
+G1 core (mp_life.c, include/mp_life.h). One MpLifeRec per Pokémon, keyed MP_Life_MonKey(personality, otId) (top bit
+clear; Trainers are hash(otId, name) | 0x80000000). Records hold temperament (6 axes: BOLD WARM LIVELY CURIOUS
+SOCIAL PROUD, base + current, current drifts +-1-2 within base +-40), needs (hunger rest play explore company quiet +
+two type needs, dual types weighted by temperament: typeLean), 8 emotions (joy fear frustration sadness surprise
+affection pride calm) over a slow mood, tastes (from the Nature's flavors), boundaries (proud -> PET, timid ->
+PICKUP, aloof -> GROOM), 12 traits, 32 memories (16 bytes: kind, feeling, strength, tier, place, param, who), 24
+places, known[] (journal facts revealed), parents, keepsake. RollTemperament seeds from personality ^ otId, nudged by
+Nature, the species' instincts (tools/moemon_life/gen_instincts.py -> flags such as NIGHT SING DIG SHY FIERCE PACK
+SEA SKY), egg groups and speed. Bonds (MpLifeBond: familiarity trust affection respect friction, flags
+TRAINER/RIVAL/FAMILY/MET) go from a record to a Trainer or another Pokémon; the owner bond starts from Friendship
+(familiarity 20 + f/3, trust/affection + f/5). Nothing erodes with absence.
+MP_Life_Remember(rec, kind, strength, tier, who, param): tiers PART / WITNESS (x2/3) / HEARD (x1/2); under 80 only
+stirs feelings; the same kind within 30 minutes strengthens the old memory; full -> replaces the weakest
+unprotected one. The moment rule: a positive moment kind, strength >= 96, not heard, with the owner (who = owner, or
+nobody while it's in the party) -> Friendship + 5 / 3 / 2 (Emerald's step sizes by Friendship band), once per memory
+("life: moment (memory K) friendship +N"). Time is play time (MP_Life_PlayMinutes); MinuteTick (party only): needs
+(capped at 120 minutes a step), places (level per minute there; level 200 + good mood -> TRAIT_LOVES_PLACE), mood,
+drift, evolution (MEM_EVOLVED), reunion (a badge or 3+ hours of story progress apart). EmotionStep every 120 frames.
+Sidecar "<save>.life" (header "LIFE" v1, saveCounter, counts, story/badge masks, news[16]; then records, bonds,
+names), written after StoreSaveFile with the save's backups (.bakN.life), loaded after the save (exact counter first,
+else the plain file); records of another size are copied field by field. Limits 640 records, 4096 bonds, 256 names.
+JOURNAL summary page (pokemon_summary_screen.c PSS_PAGE_JOURNAL after the POKé BALL page; mp_life_journal.c):
+sentences written as the Trainer's observations ({STR_VAR_1} Trainer, {STR_VAR_2} place, {STR_VAR_3} other), facts
+revealed with familiarity or by WATCH (unknown ones are one "??? (not known yet)" line), on a lined sheet (INFO rows
+4-7), FONT_NARROW, 7 rows a page, A turns pages.
+
+G2 field life. Emotes (mp_life_emote.c): 16 round pink bubbles drawn in code (NOTE HEART ZZZ EXCLAIM QUESTION SWEAT
+ANGRY TEAR SPARKLE FOOD DOTS CALM SUN WATER BALL LEAF), never the Trainers' square emotes; one co-op palette
+(TAG 0x5720); slots: local follower 0, friends' followers 1 + id, Garden 1 + MP_MAX_PLAYERS + i; 90 frames with a
+pop and bob. The follower on its own (mp_follower.c auto*): while its Trainer stands still (same tile, no held
+movement, MP_IsLocalFree) for 90 + (255 - lively) / 4 frames, mp_life_field.c picks a weighted activity: LOOK,
+WANDER, INVESTIGATE (by an object, grass, water), FORAGE (hungry), NAP (tired), PLAY (inviting: the BALL bubble),
+COMPANY (sits by its Trainer: social, timid or warm), QUIET (apart: unsocial), TYPE (its type need: soak, bask,
+dig...), HINT (rare: curious or PICKUP, 1 in 8, sniffs at a hidden item's tile: BG_EVENT_HIDDEN_ITEM not yet found).
+It walks greedily (AutoCanStand: no collision, objects, water, ledges, doors, warps, ice or deep sand, same
+elevation, within 6x4 tiles of its Trainer), goes, does (a pose: SIT NAP HOP SHAKE SPIN LOOKUP), and the need it
+served drops every 30 frames. When its Trainer walks: within 2 tiles it hurries into the old tile at double speed,
+farther it's placed back (PlaceAtOwner clears the autonomy; the brain drops a stale activity). Cues: needs show as
+bubbles shaped by temperament (a proud one hides tiredness, a dramatic one flops). Surroundings every 120 frames:
+weather and darkness (first snow / ash / sandstorm memories, thunder fear or love, a fright memory and TRAIT_AFRAID
+that new good experiences soften). Places: map sections; a new town or route is MEM_NEW_PLACE.
+Interaction (mp_life_interact.c): A in front of the follower = the smart verb (asleep: let it sleep; upset: comfort;
+inviting: play; proud: praise; else talk); A held 20 frames = the verb wheel (mp_menu.c, the quick-pick's window:
+pages TOGETHER PET PLAY FEED TALK / HEART PRAISE COMFORT GROOM SIT WITH / QUIET WATCH KEEPSAKE; let go of A to pick).
+Each verb's answer depends on fit and boundaries: a crossed boundary gets a sidestep, insisting a brief huff, and the
+bond is never marked; repeats within 60 s mean little. FEED picks a BERRY by taste (a full one declines: no berry
+used); a hungry or foraging one remembers it (MEM_FED, a moment). PLAY while inviting, PRAISE when proud, COMFORT when
+upset (softens fears) leave memories; WATCH reveals a journal fact; KEEPSAKE makes the held item its keepsake.
+Story (StoryTick, every 120 frames): sStory flags (rival battles, Wally, Magma / Aqua beats, the legends, the
+Elite Four, the CHAMPION) and badges -> PartyLives: the follower and the lead were part of it, the rest witnessed;
+news for word spreading (MP_Life_News); a save from before the Garden doesn't relive the past. Asking to come out
+(MP_Life_WantsOut: curious + an explore need or a loved place, social + company, lively + play; asks in about one
+10-minute spell of three): its party icon wiggles (party_menu.c SpriteCB_MpWantsOutIcon) and the hold-SELECT picker
+says WANTS TO COME. Debug: `mp life show|remember|minutes|trait|need|feel|temper|verb|emote|act|field|story|wants|
+count|save|load|reveal|journal`. Tests life_core, life_field, life_story.

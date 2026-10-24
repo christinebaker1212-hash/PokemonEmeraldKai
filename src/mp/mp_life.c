@@ -1359,6 +1359,8 @@ static const char *const sNeedNames[LIFE_NEEDS] = {"hunger", "rest", "play", "ex
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 
+static bool8 sWantsForce;   // tests: skip the 10-minute spells
+
 static void DebugRec(u8 slot)
 {
     struct MpLifeRec *rec = MP_Life_Get(&gPlayerParty[slot].box, FALSE);
@@ -1476,6 +1478,12 @@ void MP_Life_Debug(const char *args)
         void MP_LifeField_Debug(void);
         MP_LifeField_Debug();
     }
+    else if (strcmp(cmd, "wants") == 0)
+    {
+        // wants 1: it asks whenever it's eager (no 10-minute spells); wants 0: back to normal
+        sWantsForce = a;
+        printf("[test] life wants force %d\n", a);
+    }
     else if (strcmp(cmd, "story") == 0)
     {
         printf("[test] life story mask %08x badges %02x news %u\n", (unsigned)sStoryMask, (unsigned)sBadgeMask, sNewsCount);
@@ -1580,6 +1588,8 @@ bool8 MP_Life_WantsOut(struct BoxPokemon *box)
         eager = TRUE;
     if (!eager)
         return FALSE;
+    if (sWantsForce)
+        return TRUE;
     spell = MP_Life_PlayMinutes() / 10;
     return ((rec->personality ^ (spell * 2654435761u)) >> 7) % 3 == 0;
 }

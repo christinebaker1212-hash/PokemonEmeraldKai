@@ -84,6 +84,10 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
+Also MOéMON GARDEN (A-Life, spec docs/POKEMON_GARDEN.md, built in milestones G1-G6: mp_life*.c, include/mp_life*.h; per-Pokémon
+records in a "<save>.life" sidecar, Friendship only raised through moments and never lowered by the Garden; JOURNAL summary page;
+the follower's own activities, Pokémon emote bubbles (round, pink, never like Trainer emotes), smart A + hold-A verb wheel,
+story beats; tests life_*).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

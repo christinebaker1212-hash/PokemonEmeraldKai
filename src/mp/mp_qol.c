@@ -34,16 +34,19 @@ static void DrawPicker(void)
         if (i < sPick.count)
         {
             struct Pokemon *mon = &gPlayerParty[sPick.slots[i]];
-            u8 name[POKEMON_NAME_LENGTH + 2], lv[16];
-            char buf[16];
+            u8 name[POKEMON_NAME_LENGTH + 2], lv[24];
+            char buf[24];
             GetMonData(mon, MON_DATA_NICKNAME, name);
             StringGet_Nickname(name);
             if (MP_Life_WantsOut(&mon->box))   // MOéMON GARDEN: it's asking to come out
+            {
                 snprintf(buf, sizeof(buf), "WANTS TO COME");
+                MPNet_Log("life: picker wants out %u", (unsigned)sPick.slots[i]);
+            }
             else
                 snprintf(buf, sizeof(buf), "%sLv%d", MP_Follower_IsFollowing(mon) ? "FOLLOWING  " : "",
                          (int)GetMonData(mon, MON_DATA_LEVEL));
-            MP_AsciiToGame(lv, buf, 14);
+            MP_AsciiToGame(lv, buf, sizeof(lv) - 1);
             MpUi_Row(i, i == sPick.cursor, name, lv);
         }
         else if (i == sPick.count)

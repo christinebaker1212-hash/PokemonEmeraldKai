@@ -58,6 +58,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `options_tabs` | START > OPTIONS with real keys: TEXT SPEED, L/R tabs, BUTTON ICONS PLAYSTATION (icons switch), AUTOSAVE 10, MOENAV CALLS BATTLES (random chat calls stop); check.sh: saved to the inis |
 | `music_options` | BIKE MUSIC / SURF MUSIC: the Mach Bike, surfing Petalburg's pond and diving, songs checked in order (check.py) |
 | `dex_text` | POKéDEX TEXT tab: the long entry's start with an arrow, A / DOWN / UP / B scrolling, DOWN to the next Pokémon after, seen-only does nothing, AREA still opens; `mp dexcheck` builds all 386 texts |
+| `life_core` | MOéMON GARDEN records: temperament, memories, a moment raises Friendship once, the .life sidecar saved and loaded, the JOURNAL page and its pages |
+| `life_field` | Route 104: tap A (the fitting verb), hold A (the wheel, FEED A BERRY: a memory and a moment), the hidden-item hint, a nap, hurrying back |
+| `life_story` | a badge becomes a memory (part / witness) and news; a curious MUDKIP asks to come out: party icon wiggle, WANTS TO COME in the follower picker |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

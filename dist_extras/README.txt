@@ -14,6 +14,8 @@ needed. On top of Kai it adds online co-op for up to 4 players:
   * PvP with the BATTLE FLAG.
   * Dress up as any trainer or NPC in the game, recolor them, or draw your
     own sprites with the included Sprite Editor.
+  * MOEMON GARDEN: every MOEMON has its own temperament, feelings and
+    memories, does its own thing on the map and keeps a JOURNAL page.
   * Proper fullscreen, sharp scaling at any window size, and display filters.
 
 
@@ -1070,6 +1072,32 @@ shows the beginning; a small arrow means there's more.
 After reading, UP / DOWN go to the next MOEMON again. AREA, CRY and SIZE
 work as before (move right to them). A MOEMON you've only seen has no
 entry yet. The page that appears after a catch keeps EMERALD's entry.
+
+MOEMON GARDEN
+-------------
+Every MOEMON has a life of its own: a temperament (bold or timid, warm
+or aloof, lively, curious, social, proud), needs, feelings and memories
+of what it lived through with you. Nothing is ever lost while you're
+away; a MOEMON doesn't suffer or sulk because you didn't play.
+  On the map    Stand still and your follower does its own thing: looks
+                around, sniffs at things, naps when tired, splashes in
+                water, basks, sits by you, or invites you to play (a ball
+                bubble). Once in a while a curious one finds something
+                hidden. Walk on and it hurries back.
+  Bubbles       Round pink bubbles over a MOEMON are its own feelings
+                (the square ones are players' emotes).
+  A             In front of your follower: the fitting thing to do
+                (comfort it, play, praise it, or just talk).
+  Hold A        A wheel: PET, PLAY, FEED, TALK / PRAISE, COMFORT, GROOM,
+                SIT WITH / WATCH, KEEPSAKE. Let go of A on your choice.
+                Each MOEMON likes some things more than others, and some
+                would rather not be petted; it'll just step aside.
+  JOURNAL       A page in its summary (after the POKE BALL page): what
+                you've noticed about it so far. A = next page.
+Big moments together (a badge, a hungry MOEMON fed, comfort when it was
+scared) can raise its friendship a little, once. A MOEMON that wants to
+come out wiggles on the party screen, and the hold-SELECT follower
+picker says WANTS TO COME.
 
 UPDATES
 -------

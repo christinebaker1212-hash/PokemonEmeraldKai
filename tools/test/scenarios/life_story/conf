@@ -1,0 +1,9 @@
+# MOéMON GARDEN story beats: a badge (FLAG_BADGE01_GET) while the party is out becomes a memory for each of them
+# (the follower and the lead were right there, the other one watched), news to tell later, a sparkle; a curious MUDKIP
+# that wants to explore asks to come out: its party icon wiggles and the hold-SELECT picker says WANTS TO COME.
+# Shots party, picker.
+MODE=1
+TMO=120
+WARP="0,19,15,57"
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15"
+EXPECT_A=("life: badge 1" "life: party wants out 1" "life: picker wants out 1")

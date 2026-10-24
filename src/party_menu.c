@@ -4116,6 +4116,7 @@ static void CreatePartyMonIconSprite(struct Pokemon *mon, struct PartyMenuBox *m
         gSprites[menuBox->monSpriteId].data[6] = 1;
         gSprites[menuBox->monSpriteId].data[4] = gSprites[menuBox->monSpriteId].x2;
         gSprites[menuBox->monSpriteId].callback = SpriteCB_MpWantsOutIcon;
+        MPNet_Log("life: party wants out %u", (unsigned)(menuBox - sPartyMenuBoxes));
     }
 }
 

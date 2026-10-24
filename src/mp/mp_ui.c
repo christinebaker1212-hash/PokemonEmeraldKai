@@ -239,14 +239,23 @@ void MpUi_Begin(const char *title)
     sTitleEnd = 6 + GetStringWidth(FONT_SMALL, buf, 0);
 }
 
+// Copies at most size-1 characters of a string and ends it (StringCopyN alone copies a fixed count, reading past
+// short strings)
+static void CopyText(u8 *dst, const u8 *src, int size)
+{
+    int len = StringLength(src);
+    if (len > size - 1)
+        len = size - 1;
+    *StringCopyN(dst, src, len) = EOS;
+}
+
 // Text on the right end of the title line (e.g. "POKéMON  ITEMS" tabs)
 void MpUi_TitleRight(const u8 *text)
 {
     u8 cut[64];
     u8 font = FONT_SMALL;
     int len, room = MAIN_W * 8 - 6 - (sTitleEnd + 8);
-    StringCopyN(cut, text, sizeof(cut) - 1);
-    cut[sizeof(cut) - 1] = EOS;
+    CopyText(cut, text, sizeof(cut));
     if (GetStringWidth(font, cut, 0) > room)
         font = FONT_SMALL_NARROW;
     for (len = StringLength(cut); len > 1 && GetStringWidth(font, cut, 0) > room; len--)
@@ -266,8 +275,7 @@ void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
     if (right)
     {
         // Right text gets at most half the row
-        StringCopyN(rcut, right, sizeof(rcut) - 1);
-        rcut[sizeof(rcut) - 1] = EOS;
+        CopyText(rcut, right, sizeof(rcut));
         for (len2 = StringLength(rcut); len2 > 1 && GetStringWidth(FONT_SMALL_NARROW, rcut, 0) > MAIN_W * 4; len2--)
             rcut[len2 - 1] = EOS;
         right = rcut;
@@ -282,8 +290,7 @@ void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
         MpTheme_Print(sMain, FONT_SMALL, arrow, 6, y, MPT_TEXT, bg);
         sSelY = y;
     }
-    StringCopyN(cut, left, sizeof(cut) - 1);
-    cut[sizeof(cut) - 1] = EOS;
+    CopyText(cut, left, sizeof(cut));
     for (len = StringLength(cut); len > 1 && GetStringWidth(FONT_SMALL_NARROW, cut, 0) > maxW; len--)
         cut[len - 1] = EOS;
     MpTheme_Print(sMain, FONT_SMALL_NARROW, cut, 15, y, MPT_TEXT, bg);
@@ -436,8 +443,7 @@ void MpUi_Help(const u8 *text)
         return;
     if (text != sHelpText)
     {
-        StringCopyN(sHelpText, text, sizeof(sHelpText) - 1);
-        sHelpText[sizeof(sHelpText) - 1] = EOS;
+        CopyText(sHelpText, text, sizeof(sHelpText));
     }
     MpTheme_Panel(sHelp, 0);
     MpUi_PrintWrapped(sHelp, text, 4, 0, MAIN_W * 8 - 8, 2, MPT_GREY, MPT_BG);
