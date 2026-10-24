@@ -1,6 +1,7 @@
 pressuntil A field 5000
 waitfor online 6000
 waitlog 2000 spectate panel: player 1 shows our screen
+barrier menudone 2
 wait 200
 press LEFT 30
 press RIGHT 30

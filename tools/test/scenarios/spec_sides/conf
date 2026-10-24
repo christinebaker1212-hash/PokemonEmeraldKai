@@ -1,0 +1,22 @@
+# SPECTATE panel sides, sizes and pop-outs, four players at NA-JP lag. ALICE (a 1920x1080 monitor) puts BOB on her
+# LEFT at 1X, CARL on her RIGHT at 2X and DANA ABOVE at 1X; then DANA in her OWN WINDOW at 2X; then she closes DANA's
+# window, which stops showing DANA only. Shots a_*.png (and a_pop_3.png, DANA's window); check_spectrace.py proves
+# every picture ALICE made is the one its sender sent, pixel for pixel.
+MODE=4
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+WARP_C=0,10,10,12
+WARP_D=0,10,12,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_SPECTRACE=1 MOEMON_TEST_MONITOR=1920x1080"
+ENV_B="MOEMON_SPECTRACE=1"
+ENV_C="MOEMON_SPECTRACE=1"
+ENV_D="MOEMON_SPECTRACE=1"
+CHECK="tools/test/check_spectrace.py 10"
+EXPECT_A=("card 1 left 1x" "card 2 right 2x" "card 3 above 1x" "pop-out window for card 3 (2x)" "popout 3 window 484x348"
+          "popshot" "pop-out window for card 3 closed by the player" "player 4's window closed, not shown"
+          "panel 2 cards 2x (strip 0) | card 1 left 1x")
+UNEXPECT_A=("asking again" "FAILED")

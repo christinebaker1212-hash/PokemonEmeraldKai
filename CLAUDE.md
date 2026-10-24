@@ -70,8 +70,9 @@ Also joining a battle in progress (mp_join.c: JOIN in front of a battling friend
 rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*).
 Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two trainers at once"; tests coop_two_*, coop_held_spot,
 coop_wait_merge). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
-tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens under yours, 1x-4x: mp_spectate.c streaming, display.c layout and window
-fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py).
+tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens beside yours, each friend below / above / left / right /
+in its own pop-out window at 1x-4x, remembered by name: mp_spectate.c streaming and settings, display.c layout, pop-outs and window
+fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py; tests spec_*).
 Also the characters from Moemon's other branch (111 looks with their own running, bike / ridden-Pokemon and diving
 sprites, 127 ID and 107 back pictures: tools/moemon_chars, mp_chars_gfx.h, graphics ids 0x9000+, ini kai_*; LOOK >
 GROUP NAMED NPC / GENERICS / CUSTOM and LOOK > BIKE RIDE / BIKE; PROF. BIRCH's bikes are 64x64; test look_chars).

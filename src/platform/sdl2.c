@@ -1134,6 +1134,14 @@ static void TestHarnessStep(void)
                    Display_SaveOutputBMP(path) == 0 ? "ok" : "FAILED");
             fflush(stdout);
         }
+        else if (strcmp(cmd, "popshot") == 0)
+        {
+            // popshot NAME: each pop-out window (a friend's screen in its own window) to NAME_<player id>.bmp
+            char path[1024];
+            snprintf(path, sizeof(path), "%s/%s", sShotDir, arg);
+            Display_SavePopoutBMPs(path);
+            fflush(stdout);
+        }
         else if (strcmp(cmd, "winsize") == 0)
         {
             int w = atoi(arg), h = n;

@@ -80,14 +80,32 @@ static int sFsWasMaximized;
 static Uint32 sToggleTicks;
 
 // Moemon Co-op spectating panel (Display_SetPanel)
-#define PANEL_PAD 6       // around the cards, in game pixels (times the panel's scale)
+#define PANEL_PAD 6       // around the cards, in game pixels (times the group's biggest scale)
 #define PANEL_GAP 6       // between cards
-static int sPanelCount, sPanelReqScale, sPanelScale = 1;
+static int sPanelCount;   // cards in the main window (not the pop-outs)
+static int sPanelFit = 1; // the biggest scale a card in the window gets now (each gets min(its own, this))
 static int sPanelOwnK;    // the game's whole-number scale the window keeps beside the panel
 static int sPanelSavedW, sPanelSavedH, sPanelHadWindow;   // the window before the panel resized it
 static SDL_Texture *sPanelFrameTex[DISPLAY_PANEL_MAX], *sPanelLabelTex[DISPLAY_PANEL_MAX];
 static int sPanelHasFrame[DISPLAY_PANEL_MAX];
 static unsigned sPanelAccent[DISPLAY_PANEL_MAX];
+static int sPanelSide[DISPLAY_PANEL_MAX], sPanelReq[DISPLAY_PANEL_MAX], sPanelId[DISPLAY_PANEL_MAX];
+
+// Pop-outs: a friend's screen in a window of its own (its own renderer and textures)
+struct Popout
+{
+    int used, id, scale, shown, dirty, hasFrame;
+    unsigned accent;
+    Uint32 windowId;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *frame, *label;
+};
+static struct Popout sPopouts[DISPLAY_PANEL_MAX];
+static int sClosedPopouts[8], sClosedCount;
+static int sGivenCount, sGivenWhere[DISPLAY_PANEL_MAX], sGivenId[DISPLAY_PANEL_MAX];   // card i: window spot, or -1 = pop-out
+static void DestroyPopout(struct Popout *p);
+static void DestroyAllPopouts(void);
 
 static const char *const sScaleNames[DISPLAY_SCALE_COUNT] = {"pixel_perfect", "sharp_fit", "stretch"};
 static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid"};
@@ -574,47 +592,116 @@ static void ComputeDstRect(int outW, int outH, SDL_Rect *dst)
 // Spectating panel
 // ---------------------------------------------------------------------------
 
-// The panel's size in screen pixels for n cards at scale s: each card is the screen and its label inside a
-// one-game-pixel outline
-static void PanelSize(int n, int s, int *w, int *h)
+// Where the cards in the window go at fit f: rows above / below the game (the whole width), columns left / right of
+// it (between the rows). Each card is the screen and its label inside a one-game-pixel outline, at min(its scale, f).
+struct PanelLayout
 {
-    *w = 2 * PANEL_PAD * s + n * (GBA_W * s + 2 * s) + (n - 1) * PANEL_GAP * s;
-    *h = 2 * PANEL_PAD * s + 2 * s + GBA_H * s + DISPLAY_PANEL_LABEL_H * s;
+    int scale[DISPLAY_PANEL_MAX];
+    int w[DISPLAY_SIDE_COUNT], h[DISPLAY_SIDE_COUNT];   // each group's box (0 x 0: nobody there)
+    int maxScale[DISPLAY_SIDE_COUNT];
+};
+
+static int CardW(int s) { return GBA_W * s + 2 * s; }
+static int CardH(int s) { return GBA_H * s + DISPLAY_PANEL_LABEL_H * s + 2 * s; }
+
+static void PanelLayout(int f, struct PanelLayout *L)
+{
+    int i, side;
+    memset(L, 0, sizeof(*L));
+    for (i = 0; i < sPanelCount; i++)
+    {
+        L->scale[i] = sPanelReq[i] < f ? sPanelReq[i] : f;
+        if (L->scale[i] > L->maxScale[sPanelSide[i]])
+            L->maxScale[sPanelSide[i]] = L->scale[i];
+    }
+    for (side = 0; side < DISPLAY_SIDE_COUNT; side++)
+    {
+        int n = 0, along = 0, across = 0, m = L->maxScale[side];
+        int row = side == DISPLAY_SIDE_BELOW || side == DISPLAY_SIDE_ABOVE;
+        for (i = 0; i < sPanelCount; i++)
+        {
+            int cw, ch;
+            if (sPanelSide[i] != side)
+                continue;
+            cw = CardW(L->scale[i]);
+            ch = CardH(L->scale[i]);
+            along += row ? cw : ch;
+            if ((row ? ch : cw) > across)
+                across = row ? ch : cw;
+            n++;
+        }
+        if (n == 0)
+            continue;
+        along += 2 * PANEL_PAD * m + (n - 1) * PANEL_GAP * m;
+        across += 2 * PANEL_PAD * m;
+        L->w[side] = row ? along : across;
+        L->h[side] = row ? across : along;
+    }
 }
 
-// The biggest scale up to the one asked whose panel fits an outW x outH output with room for the game at 1x
+static int PanelMaxReq(void)
+{
+    int i, m = 1;
+    for (i = 0; i < sPanelCount; i++)
+        if (sPanelReq[i] > m)
+            m = sPanelReq[i];
+    return m;
+}
+
+// Does the layout fit an outW x outH output with room for the game at 1x?
+static int PanelFits(const struct PanelLayout *L, int outW, int outH)
+{
+    int midH = outH - L->h[DISPLAY_SIDE_ABOVE] - L->h[DISPLAY_SIDE_BELOW];
+    return L->w[DISPLAY_SIDE_ABOVE] <= outW && L->w[DISPLAY_SIDE_BELOW] <= outW
+        && outW - L->w[DISPLAY_SIDE_LEFT] - L->w[DISPLAY_SIDE_RIGHT] >= GBA_W
+        && midH >= GBA_H && midH >= L->h[DISPLAY_SIDE_LEFT] && midH >= L->h[DISPLAY_SIDE_RIGHT];
+}
+
+// The biggest fit whose layout fits the output (1 when nothing does)
 static int PanelFitScale(int outW, int outH)
 {
-    int s, w, h;
-    for (s = sPanelReqScale; s > 1; s--)
+    int f;
+    struct PanelLayout L;
+    for (f = PanelMaxReq(); f > 1; f--)
     {
-        PanelSize(sPanelCount, s, &w, &h);
-        if (w <= outW && outH - h >= GBA_H)
+        PanelLayout(f, &L);
+        if (PanelFits(&L, outW, outH))
             break;
     }
-    return s < 1 ? 1 : s;
+    return f;
 }
 
-// The window's size for the panel at scale s with the game at whole scale k
-static void PanelWindowSize(int s, int k, int *w, int *h)
+// The window's size for fit f with the game at whole scale k
+static void PanelWindowSize(int f, int k, int *w, int *h)
 {
-    int pw, ph;
-    PanelSize(sPanelCount, s, &pw, &ph);
-    *w = GBA_W * k > pw ? GBA_W * k : pw;
-    *h = GBA_H * k + ph;
+    struct PanelLayout L;
+    int midW, midH;
+    PanelLayout(f, &L);
+    midW = L.w[DISPLAY_SIDE_LEFT] + GBA_W * k + L.w[DISPLAY_SIDE_RIGHT];
+    midH = GBA_H * k;
+    if (L.h[DISPLAY_SIDE_LEFT] > midH)
+        midH = L.h[DISPLAY_SIDE_LEFT];
+    if (L.h[DISPLAY_SIDE_RIGHT] > midH)
+        midH = L.h[DISPLAY_SIDE_RIGHT];
+    *w = midW;
+    if (L.w[DISPLAY_SIDE_ABOVE] > *w)
+        *w = L.w[DISPLAY_SIDE_ABOVE];
+    if (L.w[DISPLAY_SIDE_BELOW] > *w)
+        *w = L.w[DISPLAY_SIDE_BELOW];
+    *h = L.h[DISPLAY_SIDE_ABOVE] + midH + L.h[DISPLAY_SIDE_BELOW];
 }
 
 // A window (not fullscreen or maximized) takes the size the panel needs: the game keeps its scale, or gets
-// smaller, then the panel does, until both fit the monitor
+// smaller, then the screens do, until everything fits the monitor
 static void FitWindowToPanel(void)
 {
-    int display, k, s, w = 0, h = 0, x, y, t, l, b, r, minW, minH;
+    int display, k, f, w = 0, h = 0, x, y, t, l, b, r, minW, minH;
     SDL_Rect ub;
-    Uint32 f;
+    Uint32 f2;
     if (sWindow == NULL)
         return;
     sDirty = 1;
-    f = SDL_GetWindowFlags(sWindow);
+    f2 = SDL_GetWindowFlags(sWindow);
     if (sPanelCount > 0)
     {
         PanelWindowSize(1, 1, &minW, &minH);
@@ -622,7 +709,7 @@ static void FitWindowToPanel(void)
     }
     else
         SDL_SetWindowMinimumSize(sWindow, GBA_W, GBA_H);
-    if (f & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED))
+    if (f2 & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED))
         return;
     display = WindowDisplayIndex();
     GetUsableBounds(display, &ub);
@@ -637,18 +724,18 @@ static void FitWindowToPanel(void)
     }
     else
     {
-        for (s = sPanelReqScale; s >= 1; s--)
+        for (f = PanelMaxReq(); f >= 1; f--)
         {
             for (k = sPanelOwnK; k >= 1; k--)
             {
-                PanelWindowSize(s, k, &w, &h);
+                PanelWindowSize(f, k, &w, &h);
                 if (w <= ub.w - l - r && h <= ub.h - t - b)
                     break;
             }
             if (k >= 1)
                 break;
         }
-        if (s < 1)
+        if (f < 1)
             PanelWindowSize(1, 1, &w, &h);
     }
     if (w < GBA_W || h < GBA_H)
@@ -664,26 +751,271 @@ static void FitWindowToPanel(void)
     SDL_SetWindowPosition(sWindow, x, y);
 }
 
-static SDL_Texture *PanelTex(SDL_Texture **tex, Uint32 format, int w, int h)
+static SDL_Texture *PanelTex(SDL_Renderer *ren, SDL_Texture **tex, Uint32 format, int w, int h)
 {
     if (*tex == NULL)
     {
-        *tex = CreateTex(format, SDL_TEXTUREACCESS_STREAMING, w, h, 0);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        *tex = SDL_CreateTexture(ren, format, SDL_TEXTUREACCESS_STREAMING, w, h);
         if (*tex)
             SDL_SetTextureBlendMode(*tex, format == SDL_PIXELFORMAT_ARGB8888 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
     }
     return *tex;
 }
 
-void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards)
+// A card's frame and label into a pair of textures; TRUE when anything changed
+static int UploadCard(SDL_Renderer *ren, SDL_Texture **frameTex, SDL_Texture **labelTex, int *hasFrame,
+                      const struct DisplayPanelCard *c)
 {
-    int i, changed;
+    int changed = 0;
+    if (c->frame && (c->frameChanged || !*hasFrame))
+    {
+        if (PanelTex(ren, frameTex, SDL_PIXELFORMAT_ABGR1555, GBA_W, GBA_H))
+        {
+            SDL_UpdateTexture(*frameTex, NULL, c->frame, GBA_W * 2);
+            *hasFrame = 1;
+            changed = 1;
+        }
+    }
+    else if (!c->frame && *hasFrame)
+    {
+        *hasFrame = 0;
+        changed = 1;
+    }
+    if (c->label && (c->labelChanged || *labelTex == NULL))
+    {
+        if (PanelTex(ren, labelTex, SDL_PIXELFORMAT_ARGB8888, DISPLAY_PANEL_LABEL_W, DISPLAY_PANEL_LABEL_H))
+        {
+            SDL_UpdateTexture(*labelTex, NULL, c->label, DISPLAY_PANEL_LABEL_W * 4);
+            changed = 1;
+        }
+    }
+    return changed;
+}
+
+// ---------------------------------------------------------------------------
+// Pop-out windows
+
+static void DestroyPopout(struct Popout *p)
+{
+    if (p->frame)
+        SDL_DestroyTexture(p->frame);
+    if (p->label)
+        SDL_DestroyTexture(p->label);
+    if (p->renderer)
+        SDL_DestroyRenderer(p->renderer);
+    if (p->window)
+        SDL_DestroyWindow(p->window);
+    memset(p, 0, sizeof(*p));
+}
+
+static void DestroyAllPopouts(void)
+{
+    int i;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+        if (sPopouts[i].used)
+            DestroyPopout(&sPopouts[i]);
+}
+
+static struct Popout *FindPopout(int id)
+{
+    int i;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+        if (sPopouts[i].used && sPopouts[i].id == id)
+            return &sPopouts[i];
+    return NULL;
+}
+
+static struct Popout *OpenPopout(const struct DisplayPanelCard *c, int nth)
+{
+    int i, x = SDL_WINDOWPOS_CENTERED, y = SDL_WINDOWPOS_CENTERED, s = Clamp(c->scale, 1, 4);
+    struct Popout *p = NULL;
+    for (i = 0; i < DISPLAY_PANEL_MAX && p == NULL; i++)
+        if (!sPopouts[i].used)
+            p = &sPopouts[i];
+    if (p == NULL)
+        return NULL;
+    if (sWindow)
+    {
+        // beside the game's window, on its right (one step down for each)
+        int wx, wy, ww, wh;
+        SDL_GetWindowPosition(sWindow, &wx, &wy);
+        SDL_GetWindowSize(sWindow, &ww, &wh);
+        x = wx + ww + 16 + nth * 24;
+        y = wy + nth * 24;
+        ClampWindowPos(WindowDisplayIndex(), &x, &y, CardW(s), CardH(s));
+    }
+    p->window = SDL_CreateWindow(c->title ? c->title : "Moemon Co-op", x, y, CardW(s), CardH(s),
+                                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    if (p->window == NULL)
+    {
+        printf("[display] pop-out window: %s\n", SDL_GetError());
+        return NULL;
+    }
+    SDL_SetWindowMinimumSize(p->window, CardW(1), CardH(1));
+    // no vsync here: the game's window keeps the pace
+    p->renderer = SDL_CreateRenderer(p->window, -1, SDL_RENDERER_ACCELERATED);
+    if (p->renderer == NULL)
+        p->renderer = SDL_CreateRenderer(p->window, -1, SDL_RENDERER_SOFTWARE);
+    if (p->renderer == NULL)
+    {
+        printf("[display] pop-out renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(p->window);
+        p->window = NULL;
+        return NULL;
+    }
+    p->used = 1;
+    p->id = c->id;
+    p->scale = s;
+    p->dirty = 1;
+    p->windowId = SDL_GetWindowID(p->window);
+    printf("[display] pop-out window for card %d (%dx)\n", c->id, s);
+    return p;
+}
+
+static void DrawCard(SDL_Renderer *ren, SDL_Texture *frame, int hasFrame, SDL_Texture *label, unsigned a, int x, int y, int s);
+
+static void DrawPopout(struct Popout *p)
+{
+    int ow = 0, oh = 0, s, cw, ch;
+    if (SDL_GetRendererOutputSize(p->renderer, &ow, &oh) != 0 || ow <= 0 || oh <= 0)
+        return;
+    SDL_SetRenderDrawColor(p->renderer, 17, 19, 26, 255);
+    SDL_RenderClear(p->renderer);
+    // the biggest whole size that fits the window (at least 1x)
+    for (s = 8; s > 1 && (CardW(s) > ow || CardH(s) > oh); s--)
+        ;
+    p->shown = s;
+    cw = CardW(s);
+    ch = CardH(s);
+    DrawCard(p->renderer, p->frame, p->hasFrame, p->label, p->accent, (ow - cw) / 2, (oh - ch) / 2, s);
+}
+
+static void PresentPopouts(void)
+{
+    int i;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+        if (sPopouts[i].used && sPopouts[i].dirty)
+        {
+            DrawPopout(&sPopouts[i]);
+            SDL_RenderPresent(sPopouts[i].renderer);
+            sPopouts[i].dirty = 0;
+        }
+}
+
+// The pop-out cards: windows open for the new ones, close for the ones gone or back in the panel
+static void SyncPopouts(int count, const struct DisplayPanelCard *cards)
+{
+    int i, j, nth = 0;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+    {
+        int keep = 0;
+        if (!sPopouts[i].used)
+            continue;
+        for (j = 0; j < count; j++)
+            if (cards[j].popout && cards[j].id == sPopouts[i].id)
+                keep = 1;
+        if (!keep)
+        {
+            printf("[display] pop-out window for card %d closed\n", sPopouts[i].id);
+            DestroyPopout(&sPopouts[i]);
+        }
+    }
+    for (j = 0; j < count; j++)
+    {
+        struct Popout *p;
+        if (!cards[j].popout)
+            continue;
+        p = FindPopout(cards[j].id);
+        if (p == NULL)
+            p = OpenPopout(&cards[j], nth);
+        nth++;
+        if (p == NULL)
+            continue;
+        if (p->scale != Clamp(cards[j].scale, 1, 4))
+        {
+            // a new size: the window takes it
+            p->scale = Clamp(cards[j].scale, 1, 4);
+            SDL_SetWindowSize(p->window, CardW(p->scale), CardH(p->scale));
+            p->dirty = 1;
+        }
+        if (p->accent != cards[j].accent)
+            p->dirty = 1;
+        p->accent = cards[j].accent;
+        if (cards[j].title)
+            SDL_SetWindowTitle(p->window, cards[j].title);
+        if (UploadCard(p->renderer, &p->frame, &p->label, &p->hasFrame, &cards[j]))
+            p->dirty = 1;
+    }
+}
+
+int Display_TakeClosedPopout(void)
+{
+    int id, i;
+    if (sClosedCount == 0)
+        return -1;
+    id = sClosedPopouts[0];
+    for (i = 1; i < sClosedCount; i++)
+        sClosedPopouts[i - 1] = sClosedPopouts[i];
+    sClosedCount--;
+    return id;
+}
+
+// A pop-out window's own events; TRUE when the event was one of theirs
+static int PopoutEvent(const SDL_Event *e)
+{
+    int i;
+    if (e->type != SDL_WINDOWEVENT)
+        return 0;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+    {
+        struct Popout *p = &sPopouts[i];
+        if (!p->used || e->window.windowID != p->windowId)
+            continue;
+        if (e->window.event == SDL_WINDOWEVENT_CLOSE)
+        {
+            // closing it stops showing that friend's screen (mp_spectate.c takes the id)
+            if (sClosedCount < (int)(sizeof(sClosedPopouts) / sizeof(sClosedPopouts[0])))
+                sClosedPopouts[sClosedCount++] = p->id;
+            printf("[display] pop-out window for card %d closed by the player\n", p->id);
+            DestroyPopout(p);
+        }
+        else
+            p->dirty = 1;
+        return 1;
+    }
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+
+void Display_SetPanel(int count, const struct DisplayPanelCard *cards)
+{
+    int i, n = 0, changed;
     if (count < 0)
         count = 0;
     if (count > DISPLAY_PANEL_MAX)
         count = DISPLAY_PANEL_MAX;
-    scale = Clamp(scale, 1, 4);
-    if (count > 0 && sPanelCount == 0 && sWindow)
+    SyncPopouts(count, cards);
+    // the cards that stay in the window
+    for (i = 0, changed = 0; i < count; i++)
+    {
+        int side = Clamp(cards[i].side, 0, DISPLAY_SIDE_COUNT - 1), req = Clamp(cards[i].scale, 1, 4);
+        if (cards[i].popout)
+            continue;
+        if (n >= sPanelCount || sPanelSide[n] != side || sPanelReq[n] != req)
+            changed = 1;
+        if (n < sPanelCount && sPanelId[n] != cards[i].id)
+        {
+            // someone else in this spot: their own picture, not the last one's
+            sPanelHasFrame[n] = 0;
+            changed = 1;
+        }
+        n++;
+    }
+    if (n != sPanelCount)
+        changed = 1;
+    if (n > 0 && sPanelCount == 0 && sWindow)
     {
         // Coming up: remember the window as it was, and the game's whole scale in it
         Uint32 f = SDL_GetWindowFlags(sWindow);
@@ -692,62 +1024,75 @@ void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards
         sPanelOwnK = Clamp(sPanelSavedW / GBA_W < sPanelSavedH / GBA_H ? sPanelSavedW / GBA_W : sPanelSavedH / GBA_H,
                            1, DISPLAY_MAX_WINDOW_SCALE);
     }
-    changed = (count != sPanelCount || (count > 0 && scale != sPanelReqScale));
-    sPanelReqScale = scale;
+    sGivenCount = count;
+    for (i = 0, n = 0; i < count; i++)
+    {
+        sGivenId[i] = cards[i].id;
+        sGivenWhere[i] = cards[i].popout ? -1 : n;
+        if (cards[i].popout)
+            continue;
+        sPanelSide[n] = Clamp(cards[i].side, 0, DISPLAY_SIDE_COUNT - 1);
+        sPanelReq[n] = Clamp(cards[i].scale, 1, 4);
+        sPanelId[n] = cards[i].id;
+        n++;
+    }
     if (changed)
     {
-        sPanelCount = count;
+        sPanelCount = n;
         FitWindowToPanel();
     }
     if (sRenderer == NULL)
         return;
-    for (i = 0; i < count; i++)
+    for (i = 0, n = 0; i < count; i++)
     {
-        sPanelAccent[i] = cards[i].accent;
-        if (cards[i].frame && (cards[i].frameChanged || !sPanelHasFrame[i]))
-        {
-            if (PanelTex(&sPanelFrameTex[i], SDL_PIXELFORMAT_ABGR1555, GBA_W, GBA_H))
-            {
-                SDL_UpdateTexture(sPanelFrameTex[i], NULL, cards[i].frame, GBA_W * 2);
-                sPanelHasFrame[i] = 1;
-                sDirty = 1;
-            }
-        }
-        else if (!cards[i].frame && sPanelHasFrame[i])
-        {
-            sPanelHasFrame[i] = 0;
+        if (cards[i].popout)
+            continue;
+        sPanelAccent[n] = cards[i].accent;
+        if (UploadCard(sRenderer, &sPanelFrameTex[n], &sPanelLabelTex[n], &sPanelHasFrame[n], &cards[i]))
             sDirty = 1;
-        }
-        if (cards[i].label && cards[i].labelChanged)
-        {
-            if (PanelTex(&sPanelLabelTex[i], SDL_PIXELFORMAT_ARGB8888, DISPLAY_PANEL_LABEL_W, DISPLAY_PANEL_LABEL_H))
-            {
-                SDL_UpdateTexture(sPanelLabelTex[i], NULL, cards[i].label, DISPLAY_PANEL_LABEL_W * 4);
-                sDirty = 1;
-            }
-        }
+        n++;
     }
-    for (; i < DISPLAY_PANEL_MAX; i++)
-        sPanelHasFrame[i] = 0;
+    for (; n < DISPLAY_PANEL_MAX; n++)
+        sPanelHasFrame[n] = 0;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+        if (sPopouts[i].used && sPopouts[i].dirty)
+            sDirty = 1;   // Display_Present draws them
 }
 
-// The size the panel's cards really have (smaller than asked when that doesn't fit the window)
-int Display_GetPanelScale(void)
+// The size card i (in the order given to Display_SetPanel) is shown at now: smaller than asked when it doesn't fit
+int Display_GetCardScale(int i)
 {
-    int w = 0, h = 0;
-    if (sPanelCount == 0)
+    int w = 0, h = 0, n;
+    struct PanelLayout L;
+    if (i < 0 || i >= sGivenCount)
+        return 0;
+    if (sGivenWhere[i] < 0)
+    {
+        // a pop-out: the size its window shows it at
+        struct Popout *p = FindPopout(sGivenId[i]);
+        return p ? (p->shown ? p->shown : p->scale) : 0;
+    }
+    n = sGivenWhere[i];
+    if (n >= sPanelCount)
         return 0;
     if (sRenderer && SDL_GetRendererOutputSize(sRenderer, &w, &h) == 0 && w > 0 && h > 0)
-        return PanelFitScale(w, h);
-    return sPanelScale;
+        PanelLayout(PanelFitScale(w, h), &L);
+    else
+        PanelLayout(sPanelFit, &L);
+    return L.scale[n];
+}
+
+static void PanelFillRectOn(SDL_Renderer *ren, int x, int y, int w, int h, int r, int g, int b, int a)
+{
+    SDL_Rect rc;
+    rc.x = x, rc.y = y, rc.w = w, rc.h = h;
+    SDL_SetRenderDrawColor(ren, r, g, b, a);
+    SDL_RenderFillRect(ren, &rc);
 }
 
 static void PanelFillRect(int x, int y, int w, int h, int r, int g, int b, int a)
 {
-    SDL_Rect rc;
-    rc.x = x, rc.y = y, rc.w = w, rc.h = h;
-    SDL_SetRenderDrawColor(sRenderer, r, g, b, a);
-    SDL_RenderFillRect(sRenderer, &rc);
+    PanelFillRectOn(sRenderer, x, y, w, h, r, g, b, a);
 }
 
 // The panel's background color at row y of h (a soft vertical gradient)
@@ -758,53 +1103,111 @@ static void PanelBg(int y, int h, int *r, int *g, int *b)
     *b = 37 - 15 * y / (h > 1 ? h : 1);
 }
 
-static void DrawPanel(int outW, int y0, int panelH, int s)
+// One card: a soft shadow, the outline in the player's color (corners cut), the screen, the label strip
+static void DrawCard(SDL_Renderer *ren, SDL_Texture *frame, int hasFrame, SDL_Texture *label, unsigned a, int x, int y, int s)
 {
-    int pw, ph, i, y, x, cardW = GBA_W * s + 2 * s, cardH = GBA_H * s + DISPLAY_PANEL_LABEL_H * s + 2 * s;
-    PanelSize(sPanelCount, s, &pw, &ph);
-    SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
-    for (y = 0; y < panelH; y++)
+    int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF, c, cardW = CardW(s), cardH = CardH(s);
+    SDL_Rect dst;
+    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+    PanelFillRectOn(ren, x + s, y + 2 * s, cardW, cardH, 0, 0, 0, 120);
+    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_NONE);
+    PanelFillRectOn(ren, x + s, y, cardW - 2 * s, cardH, ar, ag, ab, 255);
+    PanelFillRectOn(ren, x, y + s, cardW, cardH - 2 * s, ar, ag, ab, 255);
+    dst.x = x + s;
+    dst.y = y + s;
+    dst.w = GBA_W * s;
+    dst.h = GBA_H * s;
+    if (hasFrame && frame)
+        SDL_RenderCopy(ren, frame, NULL, &dst);
+    else
+        PanelFillRectOn(ren, dst.x, dst.y, dst.w, dst.h, 11, 13, 18, 255);
+    PanelFillRectOn(ren, x + s, y + s + GBA_H * s, GBA_W * s, DISPLAY_PANEL_LABEL_H * s, 24, 27, 36, 255);
+    c = s / 2 > 0 ? s / 2 : 1;
+    PanelFillRectOn(ren, x + s, y + s + GBA_H * s, GBA_W * s, c, ar / 2 + 12, ag / 2 + 13, ab / 2 + 18, 255);
+    if (label)
     {
-        int r, g, b;
-        PanelBg(y, panelH, &r, &g, &b);
-        PanelFillRect(0, y0 + y, outW, 1, r, g, b, 255);
+        dst.y = y + s + GBA_H * s;
+        dst.h = DISPLAY_PANEL_LABEL_H * s;
+        SDL_RenderCopy(ren, label, NULL, &dst);
     }
-    // a hairline on top, lighter, then a dark one
-    PanelFillRect(0, y0, outW, 1, 58, 64, 82, 255);
-    if (panelH > 4)
-        PanelFillRect(0, y0 + 1, outW, 1, 10, 11, 15, 255);
-    x = (outW - pw) / 2 + PANEL_PAD * s;
-    y = y0 + (panelH - cardH) / 2;
-    for (i = 0; i < sPanelCount; i++, x += cardW + PANEL_GAP * s)
+    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_NONE);
+}
+
+// Where each group's box sits in an outW x outH output: rows the whole width at the top / bottom, columns between them
+static void GroupRect(const struct PanelLayout *L, int side, int outW, int outH, SDL_Rect *r)
+{
+    int top = L->h[DISPLAY_SIDE_ABOVE], bottom = L->h[DISPLAY_SIDE_BELOW];
+    switch (side)
     {
-        unsigned a = sPanelAccent[i];
-        int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF, c;
-        SDL_Rect dst;
-        // soft shadow
-        SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_BLEND);
-        PanelFillRect(x + s, y + 2 * s, cardW, cardH, 0, 0, 0, 120);
-        SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
-        // outline in the player's color, its corners cut (rounded at this size)
-        PanelFillRect(x + s, y, cardW - 2 * s, cardH, ar, ag, ab, 255);
-        PanelFillRect(x, y + s, cardW, cardH - 2 * s, ar, ag, ab, 255);
-        // the screen
-        dst.x = x + s;
-        dst.y = y + s;
-        dst.w = GBA_W * s;
-        dst.h = GBA_H * s;
-        if (sPanelHasFrame[i] && sPanelFrameTex[i])
-            SDL_RenderCopy(sRenderer, sPanelFrameTex[i], NULL, &dst);
-        else
-            PanelFillRect(dst.x, dst.y, dst.w, dst.h, 11, 13, 18, 255);
-        // the label strip: dark, the player's color faintly along its top
-        PanelFillRect(x + s, y + s + GBA_H * s, GBA_W * s, DISPLAY_PANEL_LABEL_H * s, 24, 27, 36, 255);
-        c = s / 2 > 0 ? s / 2 : 1;
-        PanelFillRect(x + s, y + s + GBA_H * s, GBA_W * s, c, ar / 2 + 12, ag / 2 + 13, ab / 2 + 18, 255);
-        if (sPanelLabelTex[i])
+    case DISPLAY_SIDE_ABOVE: r->x = 0; r->y = 0; r->w = outW; r->h = top; break;
+    case DISPLAY_SIDE_BELOW: r->x = 0; r->y = outH - bottom; r->w = outW; r->h = bottom; break;
+    case DISPLAY_SIDE_LEFT:  r->x = 0; r->y = top; r->w = L->w[side]; r->h = outH - top - bottom; break;
+    default:                 r->x = outW - L->w[side]; r->y = top; r->w = L->w[side]; r->h = outH - top - bottom; break;
+    }
+}
+
+static SDL_Rect sLastCardRect[DISPLAY_PANEL_MAX];   // where the last frame drew each card (tests)
+
+static void DrawPanel(const struct PanelLayout *L, int outW, int outH)
+{
+    int side, i, y;
+    SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
+    for (side = 0; side < DISPLAY_SIDE_COUNT; side++)
+    {
+        SDL_Rect g;
+        int row = side == DISPLAY_SIDE_BELOW || side == DISPLAY_SIDE_ABOVE, m = L->maxScale[side], pos, total = 0, n = 0;
+        if (L->w[side] == 0)
+            continue;
+        GroupRect(L, side, outW, outH, &g);
+        for (y = 0; y < g.h; y++)
         {
-            dst.y = y + s + GBA_H * s;
-            dst.h = DISPLAY_PANEL_LABEL_H * s;
-            SDL_RenderCopy(sRenderer, sPanelLabelTex[i], NULL, &dst);
+            int r, gg, b;
+            PanelBg(y, g.h, &r, &gg, &b);
+            PanelFillRect(g.x, g.y + y, g.w, 1, r, gg, b, 255);
+        }
+        // a hairline on the side facing the game, lighter, then a dark one
+        switch (side)
+        {
+        case DISPLAY_SIDE_BELOW: PanelFillRect(g.x, g.y, g.w, 1, 58, 64, 82, 255);
+                                 PanelFillRect(g.x, g.y + 1, g.w, 1, 10, 11, 15, 255); break;
+        case DISPLAY_SIDE_ABOVE: PanelFillRect(g.x, g.y + g.h - 1, g.w, 1, 58, 64, 82, 255);
+                                 PanelFillRect(g.x, g.y + g.h - 2, g.w, 1, 10, 11, 15, 255); break;
+        case DISPLAY_SIDE_LEFT:  PanelFillRect(g.x + g.w - 1, g.y, 1, g.h, 58, 64, 82, 255);
+                                 PanelFillRect(g.x + g.w - 2, g.y, 1, g.h, 10, 11, 15, 255); break;
+        default:                 PanelFillRect(g.x, g.y, 1, g.h, 58, 64, 82, 255);
+                                 PanelFillRect(g.x + 1, g.y, 1, g.h, 10, 11, 15, 255); break;
+        }
+        // the cards, centered along the group
+        for (i = 0; i < sPanelCount; i++)
+            if (sPanelSide[i] == side)
+            {
+                total += row ? CardW(L->scale[i]) : CardH(L->scale[i]);
+                n++;
+            }
+        total += (n - 1) * PANEL_GAP * m;
+        pos = (row ? g.x + (g.w - total) / 2 : g.y + (g.h - total) / 2);
+        for (i = 0; i < sPanelCount; i++)
+        {
+            int s = L->scale[i], x, yy;
+            if (sPanelSide[i] != side)
+                continue;
+            if (row)
+            {
+                x = pos;
+                yy = g.y + (g.h - CardH(s)) / 2;
+                pos += CardW(s) + PANEL_GAP * m;
+            }
+            else
+            {
+                x = g.x + (g.w - CardW(s)) / 2;
+                yy = pos;
+                pos += CardH(s) + PANEL_GAP * m;
+            }
+            DrawCard(sRenderer, sPanelFrameTex[i], sPanelHasFrame[i], sPanelLabelTex[i], sPanelAccent[i], x, yy, s);
+            sLastCardRect[i].x = x;
+            sLastCardRect[i].y = yy;
+            sLastCardRect[i].w = CardW(s);
+            sLastCardRect[i].h = CardH(s);
         }
     }
     SDL_SetRenderDrawBlendMode(sRenderer, SDL_BLENDMODE_NONE);
@@ -815,9 +1218,10 @@ static int sLastPanelH;
 
 static void RenderToBackbuffer(void)
 {
-    int outW = 0, outH = 0, kx, ky, exact, filterOn;
+    int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0;
     SDL_Rect dst;
     int panelH = 0;
+    struct PanelLayout L;
 
     sFilterShown = 0;
     SDL_SetRenderTarget(sRenderer, NULL);
@@ -829,17 +1233,26 @@ static void RenderToBackbuffer(void)
     if (sGameTex == NULL || SDL_GetRendererOutputSize(sRenderer, &outW, &outH) != 0 || outW <= 0 || outH <= 0)
         return;
 
-    // Moemon Co-op: the spectating panel takes the bottom; the game fits above it
+    // Moemon Co-op: the spectating panel's groups take the sides they're on; the game fits in the middle
+    fullW = outW;
+    fullH = outH;
     if (sPanelCount > 0)
     {
-        int pw;
-        sPanelScale = PanelFitScale(outW, outH);
-        PanelSize(sPanelCount, sPanelScale, &pw, &panelH);
-        if (panelH > outH - 1)
-            panelH = outH - 1;
-        outH -= panelH;
+        sPanelFit = PanelFitScale(outW, outH);
+        PanelLayout(sPanelFit, &L);
+        gameX = L.w[DISPLAY_SIDE_LEFT];
+        gameY = L.h[DISPLAY_SIDE_ABOVE];
+        outW -= L.w[DISPLAY_SIDE_LEFT] + L.w[DISPLAY_SIDE_RIGHT];
+        outH -= L.h[DISPLAY_SIDE_ABOVE] + L.h[DISPLAY_SIDE_BELOW];
+        if (outW < 1)
+            outW = 1;
+        if (outH < 1)
+            outH = 1;
+        panelH = L.h[DISPLAY_SIDE_BELOW];
     }
     ComputeDstRect(outW, outH, &dst);
+    dst.x += gameX;
+    dst.y += gameY;
     kx = CeilDiv(dst.w, GBA_W);
     ky = CeilDiv(dst.h, GBA_H);
     exact = (dst.w == GBA_W * kx && dst.h == GBA_H * ky);
@@ -886,8 +1299,8 @@ static void RenderToBackbuffer(void)
     sFilterShown = filterOn;
     sLastGameRect = dst;
     sLastPanelH = panelH;
-    if (panelH > 0)
-        DrawPanel(outW, outH, panelH, sPanelScale);   // last: drawing to a render target above may not keep it
+    if (sPanelCount > 0)
+        DrawPanel(&L, fullW, fullH);   // last: drawing to a render target above may not keep it
 }
 
 static void ClearToBlack(void)
@@ -997,6 +1410,7 @@ int Display_Init(const char *title)
 
 void Display_Shutdown(void)
 {
+    DestroyAllPopouts();
     DestroyTextures();
     if (sRenderer)
         SDL_DestroyRenderer(sRenderer);
@@ -1028,7 +1442,23 @@ int Display_HandleEvent(const SDL_Event *e)
         break;
     }
     case SDL_WINDOWEVENT:
+        if (PopoutEvent(e))
+            return 1;
         sDirty = 1;
+        // With pop-outs open SDL only quits when every window is closed: closing the game's window quits
+        if (e->window.event == SDL_WINDOWEVENT_CLOSE && sWindow && e->window.windowID == SDL_GetWindowID(sWindow))
+        {
+            SDL_Event q;
+            int i, any = 0;
+            for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+                any |= sPopouts[i].used;
+            if (any)
+            {
+                memset(&q, 0, sizeof(q));
+                q.type = SDL_QUIT;
+                SDL_PushEvent(&q);
+            }
+        }
         switch (e->window.event)
         {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -1043,7 +1473,8 @@ int Display_HandleEvent(const SDL_Event *e)
         sDirty = 1;
         break;
     case SDL_RENDER_DEVICE_RESET:
-        // All textures are lost; make them again.
+        // All textures are lost; make them again (the pop-outs open again with the next cards).
+        DestroyAllPopouts();
         DestroyTextures();
         if (sRenderer)
             CreateGameTexture();
@@ -1085,7 +1516,35 @@ void Display_Present(void)
         return;
     RenderToBackbuffer();
     SDL_RenderPresent(sRenderer);
+    PresentPopouts();
     sDirty = 0;
+}
+
+// Test harness: each pop-out window's picture to PREFIX_<card id>.bmp
+void Display_SavePopoutBMPs(const char *prefix)
+{
+    int i;
+    for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+    {
+        struct Popout *p = &sPopouts[i];
+        int w = 0, h = 0;
+        SDL_Surface *surf;
+        char path[1100];
+        if (!p->used)
+            continue;
+        DrawPopout(p);
+        SDL_GetRendererOutputSize(p->renderer, &w, &h);
+        surf = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_ARGB8888);
+        snprintf(path, sizeof(path), "%s_%d.bmp", prefix, p->id);
+        if (surf)
+        {
+            int ok = SDL_RenderReadPixels(p->renderer, NULL, SDL_PIXELFORMAT_ARGB8888, surf->pixels, surf->pitch) == 0
+                  && SDL_SaveBMP(surf, path) == 0;
+            printf("[display] popshot %s %dx%d %s\n", path, w, h, ok ? "ok" : "FAILED");
+            SDL_FreeSurface(surf);
+        }
+        SDL_RenderPresent(p->renderer);
+    }
 }
 
 int Display_SaveOutputBMP(const char *path)
@@ -1125,17 +1584,47 @@ void Display_TestCommand(const char *key, int value)
     else if (strcmp(key, "vsync") == 0)   Display_SetVSync(value);
     else if (strcmp(key, "save") == 0)    Display_SaveSettings();
     else if (strcmp(key, "toggle") == 0)  Display_ToggleFullscreen();
+    else if (strcmp(key, "closepopout") == 0)
+    {
+        // closepopout ID: the player clicks the close button of card ID's pop-out window
+        struct Popout *p = FindPopout(value);
+        if (p)
+        {
+            SDL_Event e;
+            memset(&e, 0, sizeof(e));
+            e.type = SDL_WINDOWEVENT;
+            e.window.event = SDL_WINDOWEVENT_CLOSE;
+            e.window.windowID = p->windowId;
+            SDL_PushEvent(&e);
+        }
+    }
     else if (strcmp(key, "info") == 0 && sWindow && sRenderer)
     {
-        int ww, wh, ow = 0, oh = 0, pw = 0, ph = 0;
+        static const char *const sides[DISPLAY_SIDE_COUNT] = {"below", "above", "left", "right"};
+        int ww, wh, ow = 0, oh = 0, i, big = 0;
+        struct PanelLayout L;
         RenderToBackbuffer();   // the layout as it is now (headless runs only draw for screenshots)
         SDL_GetWindowSize(sWindow, &ww, &wh);
         SDL_GetRendererOutputSize(sRenderer, &ow, &oh);
-        if (sPanelCount > 0)
-            PanelSize(sPanelCount, sPanelScale, &pw, &ph);
-        printf("[display] info: window %dx%d output %dx%d game %d,%d %dx%d panel %d cards %dx (%dx%d, strip %d)\n",
+        PanelLayout(sPanelFit, &L);
+        for (i = 0; i < sPanelCount; i++)
+            if (L.scale[i] > big)
+                big = L.scale[i];
+        // "cards Nx": the biggest card in the window; then each card (side, size, where) and each pop-out
+        printf("[display] info: window %dx%d output %dx%d game %d,%d %dx%d panel %d cards %dx (strip %d)",
                ww, wh, ow, oh, sLastGameRect.x, sLastGameRect.y, sLastGameRect.w, sLastGameRect.h,
-               sPanelCount, sPanelCount ? sPanelScale : 0, pw, ph, sLastPanelH);
+               sPanelCount, big, sLastPanelH);
+        for (i = 0; i < sPanelCount; i++)
+            printf(" | card %d %s %dx at %d,%d %dx%d", sPanelId[i], sides[sPanelSide[i]], L.scale[i], sLastCardRect[i].x,
+                   sLastCardRect[i].y, sLastCardRect[i].w, sLastCardRect[i].h);
+        for (i = 0; i < DISPLAY_PANEL_MAX; i++)
+            if (sPopouts[i].used)
+            {
+                int pw = 0, ph = 0;
+                SDL_GetWindowSize(sPopouts[i].window, &pw, &ph);
+                printf(" | popout %d window %dx%d", sPopouts[i].id, pw, ph);
+            }
+        printf("\n");
     }
 }
 
@@ -1218,9 +1707,10 @@ int Display_GetWindowScale(void)
             SDL_GetWindowSize(sWindow, &w, &h);
             if (sPanelCount > 0)
             {
-                int pw, ph;
-                PanelSize(sPanelCount, sPanelScale, &pw, &ph);
-                h -= ph;
+                struct PanelLayout L;
+                PanelLayout(sPanelFit, &L);
+                w -= L.w[DISPLAY_SIDE_LEFT] + L.w[DISPLAY_SIDE_RIGHT];
+                h -= L.h[DISPLAY_SIDE_ABOVE] + L.h[DISPLAY_SIDE_BELOW];
             }
             s = w / GBA_W;
             if (h / GBA_H < s)

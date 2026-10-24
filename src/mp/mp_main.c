@@ -347,6 +347,30 @@ static void LoadConfig(void)
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
+        else if (strcmp(key, "spectate_friend") == 0)
+        {
+            // spectate_friend = SIDE SIZE POPOUT SHOW NAME
+            char side[16];
+            int size = 1, pop = 0, show = 1, used = 0, i, n;
+            if (sscanf(val, "%15s %d %d %d %n", side, &size, &pop, &show, &used) >= 4 && val[used])
+            {
+                for (n = 0; n < MP_SPEC_FRIENDS && gMpConfig.specFriends[n].name[0]; n++)
+                    ;
+                if (n < MP_SPEC_FRIENDS)
+                {
+                    struct MpSpecFriend *fr = &gMpConfig.specFriends[n];
+                    static const char *const sides[] = {"below", "above", "left", "right"};
+                    snprintf(fr->name, sizeof(fr->name), "%s", val + used);
+                    fr->side = MP_SPEC_BELOW;
+                    for (i = 0; i < 4; i++)
+                        if (strcmp(side, sides[i]) == 0)
+                            fr->side = i;
+                    fr->size = size < 1 ? 1 : (size > 4 ? 4 : size);
+                    fr->popout = pop != 0;
+                    fr->show = show != 0;
+                }
+            }
+        }
         else if (strcmp(key, "spectate_size") == 0)
         {
             int v = atoi(val);
@@ -457,6 +481,17 @@ void MP_SaveConfig(void)
             MP_Created_ToHex(&gMpConfig.custom[i], hex);
             fprintf(f, "custom%d = %s\n", i + 1, hex);
         }
+    }
+    {
+        static const char *const sides[] = {"below", "above", "left", "right"};
+        int i;
+        fprintf(f, "; CO-OP > SPECTATE, each friend's screen: side (below, above, left, right), size (1-4), own window (0 / 1),\n"
+                   "; shown (0 / 1), their name\n");
+        for (i = 0; i < MP_SPEC_FRIENDS; i++)
+            if (gMpConfig.specFriends[i].name[0])
+                fprintf(f, "spectate_friend = %s %d %d %d %s\n", sides[gMpConfig.specFriends[i].side & 3],
+                        gMpConfig.specFriends[i].size, gMpConfig.specFriends[i].popout, gMpConfig.specFriends[i].show,
+                        gMpConfig.specFriends[i].name);
     }
     fprintf(f, "AllowSmallTweaks = %d\n", gMpConfig.smallTweaks ? 1 : 0);
     fclose(f);

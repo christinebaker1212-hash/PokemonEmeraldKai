@@ -813,13 +813,43 @@ static void Panel_OnFrame(u8 from, const u8 *data, u16 len)
     }
 }
 
+// A friend's SPECTATE settings, by their name (CREATE: a slot for them, the oldest dropped when all 16 are used).
+// Not created: the defaults (below, the NEW FRIENDS size, shown) when they have none.
+static struct MpSpecFriend *SpecFriend(u8 id, bool8 create)
+{
+    static struct MpSpecFriend sDefault;
+    char name[MP_NAME_LEN + 1];
+    int i;
+    MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN);
+    name[MP_NAME_LEN] = 0;
+    for (i = 0; i < MP_SPEC_FRIENDS; i++)
+        if (gMpConfig.specFriends[i].name[0] && strcmp(gMpConfig.specFriends[i].name, name) == 0)
+            return &gMpConfig.specFriends[i];
+    memset(&sDefault, 0, sizeof(sDefault));
+    snprintf(sDefault.name, sizeof(sDefault.name), "%s", name);
+    sDefault.side = MP_SPEC_BELOW;
+    sDefault.size = gMpConfig.spectateScale < 1 ? 1 : gMpConfig.spectateScale;
+    sDefault.show = TRUE;
+    if (!create)
+        return &sDefault;
+    for (i = 0; i < MP_SPEC_FRIENDS && gMpConfig.specFriends[i].name[0]; i++)
+        ;
+    if (i == MP_SPEC_FRIENDS)
+    {
+        memmove(&gMpConfig.specFriends[0], &gMpConfig.specFriends[1], sizeof(gMpConfig.specFriends[0]) * (MP_SPEC_FRIENDS - 1));
+        i = MP_SPEC_FRIENDS - 1;
+    }
+    gMpConfig.specFriends[i] = sDefault;
+    return &gMpConfig.specFriends[i];
+}
+
 // Asks the friends we show for their screen, and stops asking the rest
 static void Panel_Update(void)
 {
     u8 want = 0, n = 0, i;
     if (gMpConfig.spectatePanel && MP_IsConnected() && gMpLocalId >= 0)
         for (i = 0; i < MP_MAX_PLAYERS && n < DISPLAY_PANEL_MAX; i++)
-            if (i != gMpLocalId && gMpPlayers[i].present)
+            if (i != gMpLocalId && gMpPlayers[i].present && SpecFriend(i, FALSE)->show)
             {
                 want |= 1 << i;
                 sPanel.shown[n++] = i;
@@ -943,7 +973,19 @@ static void Panel_MakeWaiting(void)
 void MP_Spectate_PanelSync(void)
 {
     struct DisplayPanelCard cards[DISPLAY_PANEL_MAX];
-    u8 i;
+    static char sTitles[DISPLAY_PANEL_MAX][40];
+    int closed;
+    u8 i, n;
+    // A pop-out window the player closed: that friend's screen is off (back on in CO-OP > SPECTATE)
+    while ((closed = Display_TakeClosedPopout()) >= 0)
+    {
+        if (closed < MP_MAX_PLAYERS && gMpPlayers[closed].present)
+        {
+            SpecFriend(closed, TRUE)->show = FALSE;
+            MP_SaveConfig();
+        }
+        MPNet_Log("spectate panel: player %d's window closed, not shown", closed + 1);
+    }
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
         sPanel.count = 0;   // left the server: nobody to show (Panel_Update only runs in a room)
@@ -951,23 +993,39 @@ void MP_Spectate_PanelSync(void)
     }
     if (sPanel.count == 0)
     {
-        Display_SetPanel(0, gMpConfig.spectateScale, NULL);
+        Display_SetPanel(0, NULL);
         return;
     }
     Panel_MakeWaiting();
-    for (i = 0; i < sPanel.count; i++)
+    for (i = 0, n = 0; i < sPanel.count; i++)
     {
         u8 id = sPanel.shown[i];
+        struct DisplayPanelCard *card = &cards[n];
+        if (!SpecFriend(id, FALSE)->show)
+            continue;   // just hidden (its window closed): Panel_Update drops it next
         Panel_DrawLabel(id);
-        cards[i].frame = sPanel.gotKey[id] ? (const void *)sPanel.frame[id] : (const void *)sPanelWaiting;
-        cards[i].frameChanged = sPanel.changed[id] || !sPanel.gotKey[id];
-        cards[i].label = sPanel.label[id];
-        cards[i].labelChanged = sPanel.labelChanged[id];
-        cards[i].accent = sPanelAccents[id];
+        card->frame = sPanel.gotKey[id] ? (const void *)sPanel.frame[id] : (const void *)sPanelWaiting;
+        card->frameChanged = sPanel.changed[id] || !sPanel.gotKey[id];
+        card->label = sPanel.label[id];
+        card->labelChanged = sPanel.labelChanged[id];
+        card->accent = sPanelAccents[id];
+        {
+            const struct MpSpecFriend *fr = SpecFriend(id, FALSE);
+            char name[MP_NAME_LEN + 1];
+            card->side = fr->side;
+            card->scale = fr->size;
+            card->popout = fr->popout;
+            card->id = id;
+            MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN);
+            name[MP_NAME_LEN] = 0;
+            snprintf(sTitles[n], sizeof(sTitles[n]), "%s - Moemon Co-op", name);
+            card->title = sTitles[n];
+        }
         sPanel.changed[id] = FALSE;
         sPanel.labelChanged[id] = FALSE;
+        n++;
     }
-    Display_SetPanel(sPanel.count, gMpConfig.spectateScale, cards);
+    Display_SetPanel(n, cards);
 }
 
 void MP_Spectate_OnRelay(u8 from, const u8 *data, u16 len)
@@ -1219,62 +1277,214 @@ bool8 MP_Spectate_TryInteract(void)
 }
 
 // ---------------------------------------------------------------------------
-// CO-OP > SPECTATE: the panel on / off and its size
+// CO-OP > SPECTATE: FRIENDS' SCREENS on / off, one row per friend online (A: their page: SHOW, PLACE = below / above
+// / left / right / own window, SIZE), NEW FRIENDS (the size for friends without settings), DONE
 
 static EWRAM_DATA u16 sSetCursor = 0;
-static EWRAM_DATA u8 sSetShownFit = 0;   // the size the panel really has (smaller when the bigger one doesn't fit)
+static EWRAM_DATA u16 sSetPage = 0;      // 0: main, 1 + player id: that friend's page
+static EWRAM_DATA u16 sSetMainCursor = 0;
+static EWRAM_DATA u8 sSetShownFit[DISPLAY_PANEL_MAX + 1] = {0};   // what the sizes really were when last drawn
+
+static const char *const sPlaceNames[] = {"BELOW", "ABOVE", "LEFT", "RIGHT", "OWN WINDOW"};
+#define PLACE_COUNT 5
+
+static u8 SetFriends(u8 *ids)
+{
+    u8 i, n = 0;
+    for (i = 0; i < MP_MAX_PLAYERS && n < DISPLAY_PANEL_MAX; i++)
+        if (i != gMpLocalId && gMpPlayers[i].present && MP_IsConnected())
+            ids[n++] = i;
+    return n;
+}
+
+// The size friend id's card shows at now (0: not shown)
+static u8 ShownFit(u8 id)
+{
+    u8 i, n = 0;
+    for (i = 0; i < sPanel.count; i++)
+    {
+        if (!SpecFriend(sPanel.shown[i], FALSE)->show)
+            continue;   // not given to the display (MP_Spectate_PanelSync's order)
+        if (sPanel.shown[i] == id)
+            return Display_GetCardScale(n);
+        n++;
+    }
+    return 0;
+}
+
+static u8 Place(const struct MpSpecFriend *fr)
+{
+    return fr->popout ? 4 : fr->side;
+}
+
+static void SizeText(char *out, int size, int fit)
+{
+    if (fit > 0 && fit != size)
+        sprintf(out, "%dX (%dX FITS)", size, fit);
+    else
+        sprintf(out, "%dX", size);
+}
 
 static void DrawSettings(void)
 {
-    char size[20];
-    int fit = Display_GetPanelScale();
-    sSetShownFit = fit;
-    if (gMpConfig.spectatePanel && fit > 0 && fit != gMpConfig.spectateScale)
-        snprintf(size, sizeof(size), "%dX (%dX FITS)", gMpConfig.spectateScale, fit);
+    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids), i;
+    char value[24], name[MP_NAME_LEN + 1];
+    if (sSetPage == 0)
+    {
+        MpUi_Begin("SPECTATE");
+        MpUi_RowAscii(0, sSetCursor == 0, "FRIENDS' SCREENS", gMpConfig.spectatePanel ? "ON" : "OFF");
+        for (i = 0; i < n; i++)
+        {
+            const struct MpSpecFriend *fr = SpecFriend(ids[i], FALSE);
+            u8 fit = ShownFit(ids[i]);
+            sSetShownFit[i] = fit;
+            MP_GameToAscii(name, gMpPlayers[ids[i]].name, MP_NAME_LEN);
+            name[MP_NAME_LEN] = 0;
+            if (!fr->show)
+                sprintf(value, "OFF");
+            else
+                sprintf(value, "%s %dX", fr->popout ? "WINDOW" : sPlaceNames[fr->side], fit ? fit : fr->size);
+            MpUi_RowAscii(1 + i, sSetCursor == 1 + i, name, value);
+        }
+        sprintf(value, "%dX", gMpConfig.spectateScale);
+        MpUi_RowAscii(1 + n, sSetCursor == 1 + n, "NEW FRIENDS", value);
+        MpUi_RowAscii(2 + n, sSetCursor == 2 + n, "DONE", NULL);
+        MpUi_End();
+        if (sSetCursor == 0)
+            MpUi_HelpAscii(n ? "Friends' screens live beside yours." : "Friends online show up here.");
+        else if (sSetCursor <= n)
+            MpUi_HelpAscii("A: where it goes and how big.");
+        else if (sSetCursor == 1 + n)
+            MpUi_HelpAscii("Left/Right: size for friends not set yet.");
+        else
+            MpUi_HelpAscii("Saved for next time.");
+    }
     else
-        snprintf(size, sizeof(size), "%dX", gMpConfig.spectateScale);
-    MpUi_Begin("SPECTATE");
-    MpUi_RowAscii(0, sSetCursor == 0, "FRIENDS' SCREENS", gMpConfig.spectatePanel ? "ON" : "OFF");
-    MpUi_RowAscii(1, sSetCursor == 1, "SIZE", size);
-    MpUi_RowAscii(2, sSetCursor == 2, "DONE", NULL);
-    MpUi_End();
-    if (sSetCursor == 1)
-        MpUi_HelpAscii("Left/Right: 1X to 4X; yours fits above.");
-    else
-        MpUi_HelpAscii("Up to 3 friends' screens live, under yours.");
+    {
+        u8 id = sSetPage - 1;
+        const struct MpSpecFriend *fr = SpecFriend(id, FALSE);
+        u8 fit = ShownFit(id);
+        sSetShownFit[DISPLAY_PANEL_MAX] = fit;
+        MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN);
+        name[MP_NAME_LEN] = 0;
+        MpUi_Begin(name);
+        MpUi_RowAscii(0, sSetCursor == 0, "SHOW", fr->show ? "ON" : "OFF");
+        MpUi_RowAscii(1, sSetCursor == 1, "PLACE", sPlaceNames[Place(fr)]);
+        SizeText(value, fr->size, fit);
+        MpUi_RowAscii(2, sSetCursor == 2, "SIZE", value);
+        MpUi_RowAscii(3, sSetCursor == 3, "DONE", NULL);
+        MpUi_End();
+        if (sSetCursor == 1)
+            MpUi_HelpAscii(fr->popout ? "Its own window: closing it hides it." : "Left/Right: which side of yours.");
+        else if (sSetCursor == 2)
+            MpUi_HelpAscii("Left/Right: 1X to 4X.");
+        else if (sSetCursor == 0)
+            MpUi_HelpAscii("Show this friend's screen?");
+        else
+            MpUi_HelpAscii("Back to SPECTATE.");
+    }
+}
+
+static bool8 FitsChanged(void)
+{
+    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids), i;
+    if (sSetPage == 0)
+    {
+        for (i = 0; i < n; i++)
+            if (ShownFit(ids[i]) != sSetShownFit[i])
+                return TRUE;
+        return FALSE;
+    }
+    return ShownFit(sSetPage - 1) != sSetShownFit[DISPLAY_PANEL_MAX];
 }
 
 static void Task_SpectateSettings(u8 taskId)
 {
+    u8 ids[DISPLAY_PANEL_MAX], n = SetFriends(ids);
     bool8 redraw = FALSE;
-    if (MpUi_MoveCursor(&sSetCursor, 3) || Display_GetPanelScale() != sSetShownFit)
+    s8 dir = JOY_NEW(DPAD_RIGHT) ? 1 : (JOY_NEW(DPAD_LEFT) ? -1 : 0);
+
+    if (sSetPage != 0 && !gMpPlayers[sSetPage - 1].present)
+    {
+        // that friend left: back to the main page
+        sSetPage = 0;
+        sSetCursor = 0;
+        DrawSettings();
+        return;
+    }
+    if (sSetPage == 0 && sSetCursor > 2 + n)
+        sSetCursor = 2 + n;
+    if (MpUi_MoveCursor(&sSetCursor, sSetPage == 0 ? 3 + n : 4) || FitsChanged())
     {
         DrawSettings();
         return;
     }
-    if (sSetCursor == 0 && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT))
+    if (sSetPage == 0)
     {
-        gMpConfig.spectatePanel = !gMpConfig.spectatePanel;
-        MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
-        redraw = TRUE;
+        if (sSetCursor == 0 && JOY_NEW(A_BUTTON | DPAD_LEFT | DPAD_RIGHT))
+        {
+            gMpConfig.spectatePanel = !gMpConfig.spectatePanel;
+            MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
+            redraw = TRUE;
+        }
+        else if (sSetCursor >= 1 && sSetCursor <= n && JOY_NEW(A_BUTTON))
+        {
+            sSetMainCursor = sSetCursor;
+            sSetPage = 1 + ids[sSetCursor - 1];
+            sSetCursor = 1;
+            redraw = TRUE;
+        }
+        else if (sSetCursor == 1 + n && (dir || JOY_NEW(A_BUTTON)))
+        {
+            int v = gMpConfig.spectateScale + (dir ? dir : 1);
+            gMpConfig.spectateScale = v > 4 ? 1 : (v < 1 ? 4 : v);
+            redraw = TRUE;
+        }
+        else if (JOY_NEW(B_BUTTON) || (sSetCursor == 2 + n && JOY_NEW(A_BUTTON)))
+        {
+            PlaySE(SE_SELECT);
+            MP_SaveConfig();
+            MpUi_Close();
+            DestroyTask(taskId);
+            return;
+        }
     }
-    else if (sSetCursor == 1 && JOY_NEW(A_BUTTON | DPAD_RIGHT))
+    else
     {
-        gMpConfig.spectateScale = gMpConfig.spectateScale >= 4 ? 1 : gMpConfig.spectateScale + 1;
-        redraw = TRUE;
-    }
-    else if (sSetCursor == 1 && JOY_NEW(DPAD_LEFT))
-    {
-        gMpConfig.spectateScale = gMpConfig.spectateScale <= 1 ? 4 : gMpConfig.spectateScale - 1;
-        redraw = TRUE;
-    }
-    else if (JOY_NEW(B_BUTTON) || (sSetCursor == 2 && JOY_NEW(A_BUTTON)))
-    {
-        PlaySE(SE_SELECT);
-        MP_SaveConfig();
-        MpUi_Close();
-        DestroyTask(taskId);
-        return;
+        u8 id = sSetPage - 1;
+        if (sSetCursor == 0 && (dir || JOY_NEW(A_BUTTON)))
+        {
+            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
+            fr->show = !fr->show;
+            MPNet_Log("spectate panel: player %d shown %d", id + 1, fr->show);
+            redraw = TRUE;
+        }
+        else if (sSetCursor == 1 && (dir || JOY_NEW(A_BUTTON)))
+        {
+            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
+            int p = Place(fr) + (dir ? dir : 1);
+            p = p >= PLACE_COUNT ? 0 : (p < 0 ? PLACE_COUNT - 1 : p);
+            fr->popout = p == 4;
+            if (p < 4)
+                fr->side = p;
+            fr->show = TRUE;
+            MPNet_Log("spectate panel: player %d %s", id + 1, sPlaceNames[p]);
+            redraw = TRUE;
+        }
+        else if (sSetCursor == 2 && (dir || JOY_NEW(A_BUTTON)))
+        {
+            struct MpSpecFriend *fr = SpecFriend(id, TRUE);
+            int v = fr->size + (dir ? dir : 1);
+            fr->size = v > 4 ? 1 : (v < 1 ? 4 : v);
+            MPNet_Log("spectate panel: player %d size %dx", id + 1, fr->size);
+            redraw = TRUE;
+        }
+        else if (JOY_NEW(B_BUTTON) || (sSetCursor == 3 && JOY_NEW(A_BUTTON)))
+        {
+            sSetPage = 0;
+            sSetCursor = sSetMainCursor;
+            redraw = TRUE;
+        }
     }
     if (redraw)
     {
@@ -1288,6 +1498,7 @@ void MP_Spectate_OpenSettings(void)
     if (gMpConfig.spectateScale < 1 || gMpConfig.spectateScale > 4)
         gMpConfig.spectateScale = 1;
     sSetCursor = 0;
+    sSetPage = 0;
     MpUi_Open();
     CreateTask(Task_SpectateSettings, 80);
     DrawSettings();

@@ -35,21 +35,30 @@ int Display_GetVSync(void);
 void Display_SetVSync(int on);
 void Display_SaveSettings(void);
 
-// Moemon Co-op spectating panel (src/mp/mp_spectate.c): up to DISPLAY_PANEL_MAX friends' screens in a row at
-// the bottom of the window, each `scale` (1-4) times 240x160 with a label under it. The game fits in the space
-// above; a window gets bigger (or the game smaller) so every screen stays in view.
+// Moemon Co-op spectating panel (src/mp/mp_spectate.c): up to DISPLAY_PANEL_MAX friends' screens, each on its own
+// side of the game (below / above in a row, left / right in a column) at its own size (1-4 times 240x160, a label
+// under it), or in a window of its own (a pop-out). The game fits in the space left; a window gets bigger (or the game
+// and then the screens smaller) so every screen stays in view.
 #define DISPLAY_PANEL_MAX 3
 #define DISPLAY_PANEL_LABEL_W 240
 #define DISPLAY_PANEL_LABEL_H 12
+enum { DISPLAY_SIDE_BELOW, DISPLAY_SIDE_ABOVE, DISPLAY_SIDE_LEFT, DISPLAY_SIDE_RIGHT, DISPLAY_SIDE_COUNT };
 struct DisplayPanelCard
 {
     const void *frame;      // 240x160 ABGR1555, like the game's frame
     const void *label;      // DISPLAY_PANEL_LABEL_W x DISPLAY_PANEL_LABEL_H ARGB8888
     unsigned accent;        // 0xRRGGBB: the card's outline
     int frameChanged, labelChanged;
+    int side;               // DISPLAY_SIDE_*
+    int scale;              // 1-4
+    int popout;             // in a window of its own
+    int id;                 // who it is (the same id while it's shown: the pop-out window goes with it)
+    const char *title;      // the pop-out window's title (ASCII)
 };
-void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards);   // count 0: no panel
-int Display_GetPanelScale(void);   // the scale it's shown at now (less than asked when the screen is too small)
+void Display_SetPanel(int count, const struct DisplayPanelCard *cards);   // count 0: no panel
+int Display_GetCardScale(int i);       // the size card i is shown at now (less than asked when it doesn't fit; 0: none)
+int Display_TakeClosedPopout(void);    // the id of a pop-out window the player closed, or -1
+void Display_SavePopoutBMPs(const char *prefix);   // test harness: PREFIX_<id>.bmp for each pop-out window
 
 // In-game DISPLAY SETTINGS screen (src/display_menu.c).
 // Display_OpenSettingsMenu only creates the menu task; onClose (may be NULL)

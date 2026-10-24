@@ -174,6 +174,18 @@ struct MpPlayer
     u32 blobHave[1];
 };
 
+// CO-OP > SPECTATE: how one friend's screen shows (mp_spectate.c), remembered by their name
+#define MP_SPEC_FRIENDS 16
+enum { MP_SPEC_BELOW, MP_SPEC_ABOVE, MP_SPEC_LEFT, MP_SPEC_RIGHT };   // = DISPLAY_SIDE_*
+struct MpSpecFriend
+{
+    char name[MP_NAME_LEN + 1];   // ASCII; "" = an empty slot
+    u8 side;                      // MP_SPEC_*
+    u8 size;                      // 1-4
+    u8 popout;                    // in a window of its own
+    u8 show;                      // 0: not shown (closing its pop-out window does this)
+};
+
 struct MpConfig
 {
     bool8 enabled;
@@ -194,8 +206,9 @@ struct MpConfig
     u8 trainerPadding;        // host setting: co-op trainers get one extra Moemon (HOST A GAME > TEAM PADDING)
     u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
     u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
-    u8 spectateScale;         // ... each 1-4 times 240x160
+    u8 spectateScale;         // ... each 1-4 times 240x160 (the size for friends without their own)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
+    struct MpSpecFriend specFriends[MP_SPEC_FRIENDS];   // CO-OP > SPECTATE: each friend's screen, by name
 };
 
 extern struct MpConfig gMpConfig;

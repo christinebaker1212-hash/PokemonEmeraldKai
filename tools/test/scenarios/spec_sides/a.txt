@@ -1,0 +1,22 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+mp panelfriend 2 2 1 0 1
+mp panelfriend 3 3 2 0 1
+mp panelfriend 4 1 1 0 1
+waitlog 3000 spectate panel: player 4 frame
+wait 400
+display info
+rendershot a_sides
+mp panelfriend 4 1 2 1 1
+wait 200
+display info
+rendershot a_popped
+popshot a_pop
+display closepopout 3
+wait 200
+display info
+rendershot a_closed
+barrier done 4
+quit

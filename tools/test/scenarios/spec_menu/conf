@@ -1,5 +1,6 @@
-# CO-OP > SPECTATE with the real keys: ALICE turns FRIENDS' SCREENS on and the SIZE to 2X (saved in her .ini), sees
-# BOB's screen, and the panel goes away (window back to its own size) when BOB leaves.
+# CO-OP > SPECTATE with the real keys: ALICE turns FRIENDS' SCREENS on, opens BOB's row and sets PLACE to ABOVE and
+# SIZE to 2X (saved in her .ini by his name), sees his screen above hers, and the panel goes away (window back to its
+# own size) when BOB leaves.
 MODE=2
 WARP=0,10,10,10
 WARP_B=0,10,12,10
@@ -7,6 +8,6 @@ TMO=150
 ENV_A="MOEMON_SPECTRACE=1"
 ENV_B="MOEMON_SPECTRACE=1"
 CHECK="bash tools/test/scenarios/spec_menu/check.sh"
-EXPECT_A=("spectate panel on" "spectate panel: asking player 2 for their screen" "spectate panel: player 2 frame (full)" "panel 1 cards 2x" "player 2 left" "panel 0 cards 0x")
+EXPECT_A=("spectate panel on" "spectate panel: player 2 ABOVE" "spectate panel: player 2 size 2x" "spectate panel: asking player 2 for their screen" "spectate panel: player 2 frame (full)" "panel 1 cards 2x" "card 1 above 2x" "player 2 left" "panel 0 cards 0x")
 EXPECT_B=("spectate panel: player 1 shows our screen")
 UNEXPECT_A=("asking again")

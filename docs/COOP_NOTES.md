@@ -816,8 +816,22 @@ pixels set WINMASK_OBJ). Debug: `mp lights`, `mp cuttree ID`, `mp smashrock ID`,
 
 ## SPECTATE panel (mp_spectate.c, display.c)
 
-CO-OP > SPECTATE (MP_Spectate_OpenSettings, MpUi rows FRIENDS' SCREENS / SIZE / DONE; ini spectate_panel /
-spectate_size, gMpConfig.spectatePanel / spectateScale). Panel_Update subscribes to up to 3 present friends with
+CO-OP > SPECTATE (MP_Spectate_OpenSettings, MpUi): FRIENDS' SCREENS, a row per friend online (A: their page SHOW /
+PLACE = BELOW / ABOVE / LEFT / RIGHT / OWN WINDOW / SIZE), NEW FRIENDS (gMpConfig.spectateScale, the size for friends
+without settings), DONE. Per friend: gMpConfig.specFriends[16] (struct MpSpecFriend: ASCII name, side, size, popout,
+show; SpecFriend(id, create) finds them by name, the oldest dropped when full; ini `spectate_friend = SIDE SIZE POPOUT
+SHOW NAME`). Panel_Update only asks friends with show on; MP_Spectate_PanelSync skips any just hidden (a closed window).
+display.c (1.12): each card has side / scale / popout / id. PanelLayout(f) puts the window's cards in groups: rows
+above and below the game (the whole width), columns left and right (between the rows), each card at min(scale, f);
+PanelFitScale = the biggest f whose layout leaves the game 1x; FitWindowToPanel tries f then the game's whole scale k
+(PanelWindowSize). A pop-out (struct Popout) is its own SDL window + renderer (no vsync) + textures, opened beside the
+game's window, drawn at the biggest whole size that fits it (PresentPopouts in Display_Present); its CLOSE event is
+queued for Display_TakeClosedPopout (mp_spectate.c turns that friend's SHOW off) and the window is destroyed at once.
+Closing the game's window while pop-outs are open pushes SDL_QUIT (SDL only quits when every window is closed).
+Display_GetCardScale(i) = the size card i (the order given) really has. `display info` adds `| card ID SIDE Nx at X,Y
+WxH` per card and `| popout ID window WxH`; harness `popshot NAME` saves each pop-out (NAME_ID.bmp), `display
+closepopout ID` clicks its close button, `mp panelfriend PLAYER SIDE SIZE POPOUT SHOW`. Test spec_sides.
+The rest as before: Panel_Update subscribes to up to 3 present friends with
 MPR_SPEC_PANEL_JOIN (LEAVE when off or they leave; asks again after 9 s of silence); the sender streams whenever anyone
 watches (sStream.viewers | panel), 15 updates a second (20 while a battle watcher is on), a full frame every 4 s.
 Frame message (protocol 33): u8 type, u16 seq, u8 flags (KEY 1, SHIFT 2, LAST 4), u16 song, u8 tile count, s8 shiftX,
@@ -832,8 +846,8 @@ bottom, PanelFitScale shrinks the cards until they fit with the game at 1x or mo
 the game's whole scale and shrinks it, then the cards, until the window fits the monitor's usable area, and restores the
 window when the panel goes (also after leaving fullscreen with it up). Display_GetPanelScale = the size that fits now
 (the menu's "(2X FITS)"). Around the game the window is the panel's slate. Bandwidth: ~1.2 KB per update.
-Tests: spec_panel (4 players, DANA on a 1920x1080 monitor: sizes, fullscreen, off/on), spec_menu (real keys, saved ini,
-a friend leaving), spec_watch (panel while watching a battle), wine_smoke part 4 (Linux host + Windows friend).
+Tests: spec_panel (4 players, DANA on a 1920x1080 monitor: sizes, fullscreen, off/on), spec_sides (left / right / above,
+mixed sizes, a pop-out and closing it), spec_menu (real keys: BOB's page, ABOVE 2X saved by name, a friend leaving), spec_watch (panel while watching a battle), wine_smoke part 4 (Linux host + Windows friend).
 MOEMON_SPECTRACE=1 logs every picture's FNV sum on both ends; tools/test/check_spectrace.py compares them.
 Debug: `mp panel ON SIZE`, `display info` (window, game rect, cards), MOEMON_TEST_MONITOR=WxH.
 

@@ -473,7 +473,38 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d", &on, &size);
         gMpConfig.spectatePanel = on != 0;
         gMpConfig.spectateScale = size < 1 ? 1 : (size > 4 ? 4 : size);
+        {
+            int i;   // friends with their own settings take the size too
+            for (i = 0; i < MP_SPEC_FRIENDS; i++)
+                if (gMpConfig.specFriends[i].name[0])
+                    gMpConfig.specFriends[i].size = gMpConfig.spectateScale;
+        }
         printf("[test] spectate panel %s, size %dx\n", on ? "on" : "off", gMpConfig.spectateScale);
+    }
+    else if (strcmp(cmd, "panelfriend") == 0)
+    {
+        // panelfriend PLAYER SIDE SIZE POPOUT SHOW: one friend's screen (PLAYER 1-4, SIDE 0 below 1 above 2 left 3 right)
+        int pl = 0, side = 0, size = 1, pop = 0, show = 1, i, n;
+        char name[MP_NAME_LEN + 1];
+        sscanf(arg, "%d %d %d %d %d", &pl, &side, &size, &pop, &show);
+        if (pl >= 1 && pl <= MP_MAX_PLAYERS && gMpPlayers[pl - 1].present)
+        {
+            MP_GameToAscii(name, gMpPlayers[pl - 1].name, MP_NAME_LEN);
+            name[MP_NAME_LEN] = 0;
+            for (i = 0; i < MP_SPEC_FRIENDS && gMpConfig.specFriends[i].name[0] && strcmp(gMpConfig.specFriends[i].name, name); i++)
+                ;
+            if (i == MP_SPEC_FRIENDS)
+                i = MP_SPEC_FRIENDS - 1;
+            n = i;
+            snprintf(gMpConfig.specFriends[n].name, sizeof(gMpConfig.specFriends[n].name), "%s", name);
+            gMpConfig.specFriends[n].side = side & 3;
+            gMpConfig.specFriends[n].size = size < 1 ? 1 : (size > 4 ? 4 : size);
+            gMpConfig.specFriends[n].popout = pop != 0;
+            gMpConfig.specFriends[n].show = show != 0;
+            printf("[test] panelfriend %s side %d size %d popout %d show %d\n", name, side & 3, size, pop, show);
+        }
+        else
+            printf("[test] panelfriend: no player %d\n", pl);
     }
     else if (strcmp(cmd, "namelines") == 0)
     {
