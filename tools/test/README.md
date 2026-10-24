@@ -49,6 +49,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the gold slots are the allies') |
 | `tri_abort` | wild triple: ALICE catches one, BOB disconnects: called off, ALICE keeps the catch |
 | `look_chars` | NA-JP lag: ALICE wears new characters: PROF. BIRCH's 64x64 bikes, SERENA's ridden RHYHORN then a bicycle (LOOK > BIKE), her diving sprite, an old ini name (`steven`); BOB sees each |
+| `look_created_remote` | NA-JP lag: BOB receives ALICE's whole CREATE recipe (FIELD HAIR 5) and later her LOOK > BIKE (`mp remoteapp`); shots of her sprite on both screens |
 | `shared_pc_cursor` | the shared PC's hand on PARTY / MY PC / CLOSE: over the buttons, never upside down (also holding a Moemon, and after MY PC and back) |
 | `catch_exp` | solo: a MASTER BALL at a full-HP ZIGZAGOON gives 10% of a faint's EXP; the lead TORCHIC grows and evolves after the catch |
 | `coop_catch_exp` | NA-JP lag, co-op wild: ALICE catches a ZIGZAGOON at 1 HP (95%); both leads get EXP, grow and evolve after the battle |

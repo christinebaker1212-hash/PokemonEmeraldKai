@@ -1,0 +1,12 @@
+# A CREATE look as friends see it, at NA-JP lag: ALICE wears a recipe with FIELD HAIR 5 (not AUTO); BOB must get the
+# whole recipe (FIELD HAIR used to be overwritten by LOOK > BIKE in the same byte). Then ALICE wears SERENA with
+# LOOK > BIKE = BIKE, and BOB must get that too. Shots: a_self / b_sees (ALICE's field sprite on both screens).
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+EXPECT_A=("[test] created 0101020304000307010a01020605" "[test] bikemode 1")
+EXPECT_B=("[test] remoteapp 1: base " "recipe 0101020304000307010a01020605 bike 0" "bike 1")

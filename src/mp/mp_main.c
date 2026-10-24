@@ -582,8 +582,8 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     p[10] = a->backSel;
     p[11] = a->hair;
     p[12] = a->created;
-    MP_Created_Pack(&a->recipe, p + 13);   // 13 bytes
-    p[26] = a->bike;
+    MP_Created_Pack(&a->recipe, p + 13);   // MP_CREATED_BYTES (14): bytes 13-26, FIELD HAIR last
+    p[27] = a->bike;
 }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
@@ -601,7 +601,7 @@ static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
     a->hair = p[11] < MP_HAIR_COUNT ? p[11] : 0;
     a->created = p[12] <= MP_CREATED_SLOTS ? p[12] : 0;
     MP_Created_Unpack(p + 13, &a->recipe);
-    a->bike = p[26] ? 1 : 0;
+    a->bike = p[27] ? 1 : 0;
     if (a->base == MP_BASE_CREATED && !a->recipe.made)
         a->base = MP_BASE_DEFAULT;
 }

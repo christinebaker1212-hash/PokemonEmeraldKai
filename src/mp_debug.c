@@ -1052,6 +1052,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] created %s: bad recipe\n", arg);
     }
+    else if (strcmp(cmd, "remoteapp") == 0)
+    {
+        // remoteapp - each friend's look as we received it (base, CREATE recipe, LOOK > BIKE)
+        int i;
+        for (i = 0; i < MP_MAX_PLAYERS; i++)
+            if (i != gMpLocalId && gMpPlayers[i].present)
+            {
+                char hex[MP_CREATED_BYTES * 2 + 1];
+                MP_Created_ToHex(&gMpPlayers[i].app.recipe, hex);
+                printf("[test] remoteapp %d: base %d recipe %s bike %d\n", i + 1, gMpPlayers[i].app.base, hex,
+                       gMpPlayers[i].app.bike);
+            }
+    }
     else if (strcmp(cmd, "sprite") == 0)
     {
         // sprite NAME - wear a look by its ini name (hiker, frlg_lass, custom_1, rs_may...)

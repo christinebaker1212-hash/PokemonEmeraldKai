@@ -741,7 +741,7 @@ The pack left the Acro front-wheel frames (11-12, 15-16, 19-20) empty for 64 cha
 6: the importer copies the back-wheel ones (9-10...) over them.
 Looks: graphics ids MP_GFX_CHAR_FIRST (0x9000) + n, ini names kai_<name>; NpcInfo is the walking sheet. mp_avatar.c
 ActionKind: ACT_CHAR (own frames, BuildCharInfo) for diving and the bikes, unless the bike sheet is a ride and the
-look's `bike` (LOOK > BIKE, appearance byte 26, ini `bike = ride|bike`) asks for a bicycle -> ACT_HYBRID; the rest
+look's `bike` (LOOK > BIKE, appearance byte 27: bytes 13-26 are the CREATE recipe, FIELD HAIR last; ini `bike = ride|bike`) asks for a bicycle -> ACT_HYBRID; the rest
 ACT_HYBRID (Brendan's / May's body by the character's gender, skin shades from the color map's S colors: CharSkin).
 They run in their own running frames. Diving uses its own palette (local tag MP_PACK_DIVE, StatePalette ST_UNDERWATER;
 a map named kai_<name>_dive would recolor it). PROF. BIRCH's 64x64 bikes: every local state info is

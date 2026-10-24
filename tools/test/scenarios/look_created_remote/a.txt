@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 100
+mp created 0101020304000307010a01020605
+barrier worn 2
+wait 300
+shot a_self
+barrier looked 2
+mp sprite kai_serena
+mp bikemode 1
+barrier bike 2
+wait 300
+barrier done 2
+quit
