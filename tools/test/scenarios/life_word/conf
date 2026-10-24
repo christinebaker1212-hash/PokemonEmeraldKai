@@ -1,0 +1,6 @@
+# MOéMON GARDEN word spreads: TORCHIC lived the first badge, MUDKIP wasn't there (its memory removed): TORCHIC, a
+# proud one, tells it (sounds bigger: stronger memory, pride by association): MUDKIP "heard all about it from TORCHIC".
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15"
+EXPECT_A=("life: badge 1" "life: word spread (news 3) from species 280 to species 283" "memory 1 kind 22")

@@ -283,12 +283,16 @@ struct MpLifeBond
 #define LIFE_NEWS 16
 struct MpLifeNews
 {
-    u8 kind;        // MEM_BADGE, MEM_STORY, MEM_LEGEND...
+    u8 kind;        // MEM_BADGE, MEM_STORY, MEM_LEGEND, MEM_CLUTCH...
     u8 pad;
     u16 param;
     u32 when;       // play minute
+    u32 teller;     // who it happened to (0 = everyone who was there)
 };
 const struct MpLifeNews *MP_Life_News(u8 *count);
+void MP_Life_AddNews(u8 kind, u16 param, u32 teller);
+u32 MP_Life_LastLineMin(void);           // the last rare battle line (play minutes, 0 = never)
+void MP_Life_SetLastLineMin(u32 minute);
 
 // Keys: a Pokémon is its personality and OT ID; a Trainer is their ID and name
 u32 MP_Life_MonKey(u32 personality, u32 otId);
@@ -316,6 +320,7 @@ u8 MP_Life_PressingNeed(struct MpLifeRec *rec, u8 *amount);  // its strongest ne
 struct MpLifeBond *MP_Life_Bond(u32 from, u32 to, bool8 create);
 void MP_Life_BondShare(u32 from, u32 to, s8 familiar, s8 trust, s8 affection, s8 respect, s8 friction);
 int MP_Life_BondWarmth(const struct MpLifeBond *b);  // a rough "how much it likes them" for choices
+void MP_Life_Closest(u32 from, u32 *friendKey, u32 *rivalKey, u32 *familyKey, u32 *favoriteKey);   // 0 = none
 
 // The places it knows (by map section: towns, routes, caves; region-independent)
 struct MpLifePlace *MP_Life_Place(struct MpLifeRec *rec, u16 mapsec, bool8 create);

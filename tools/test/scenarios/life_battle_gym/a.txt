@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 60
+mp life temper 0 1 200
+press UP 2
+wait 30
+pressuntillog A 15000 life battle: line shown
+wait 45
+shot line
+mp life battle state
+pressuntillog A 6000 life battle: end
+pressuntil A field 3000
+wait 60
+mp life show 0
+quit

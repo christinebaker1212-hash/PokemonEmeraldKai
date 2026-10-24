@@ -29,6 +29,7 @@ enum
 #define LIFE_EMOTE_SLOT_REMOTE(id) (1 + (id))
 #define LIFE_EMOTE_SLOT_GARDEN(i)  (1 + MP_MAX_PLAYERS + (i))
 #define LIFE_EMOTE_SLOTS           (1 + MP_MAX_PLAYERS + 24)
+#define LIFE_EMOTE_SLOT_BATTLER(b) LIFE_EMOTE_SLOT_GARDEN(b)   // in battle (no Garden then): battler b's Pokémon
 
 void MP_LifeEmote_Show(u8 slot, u8 icon);
 u8 MP_LifeEmote_Current(u8 slot);

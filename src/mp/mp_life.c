@@ -27,6 +27,7 @@
 #include "string_util.h"
 #include "tv.h"
 #include "mp_life_emote.h"
+#include "mp_life_battle.h"
 #include "constants/berry.h"
 #include "constants/characters.h"
 #include "constants/flags.h"
@@ -38,11 +39,11 @@ extern char gPlatformSavePath[512];
 extern u32 gSaveCounter;
 
 #define LIFE_MAGIC     0x4546494C   // "LIFE"
-#define LIFE_VERSION   1
+#define LIFE_VERSION   2            // 2: longer names, name size and the last battle line in the header
 #define LIFE_MAX_RECS  640          // party + every box + room to spare
 #define LIFE_MAX_BONDS 4096
 #define LIFE_MAX_NAMES 256
-#define LIFE_NAME_LEN  12
+#define LIFE_NAME_LEN  24           // "MAY's MARSHTOMP", "ALICE's SKITTY"
 
 struct MpLifeName
 {
@@ -61,6 +62,7 @@ static bool8 sLoaded;
 static u32 sStoryMask, sBadgeMask;
 static bool8 sStoryKnown;   // the masks were read (or set from the save's flags)
 static struct MpLifeNews sNews[LIFE_NEWS];
+static u32 sLastLineMin;   // the last rare battle line (play minutes; mp_life_battle.c)
 static u8 sNewsCount;
 static u32 sFrame;          // frames on the map since the last emotion step
 static u32 sLastMinute;     // play minute of the last minute tick
@@ -973,6 +975,93 @@ static void EvolutionCheck(struct MpLifeRec *rec, struct BoxPokemon *box)
     }
 }
 
+static bool8 HasMemory(struct MpLifeRec *rec, u8 kind, s32 param, u32 when)
+{
+    u8 i;
+    for (i = 0; i < LIFE_MEMORIES; i++)
+        if (rec->mem[i].kind == kind && (param < 0 || rec->mem[i].param == param) && rec->mem[i].when >= when)
+            return TRUE;
+    return FALSE;
+}
+
+static bool8 HasMemoryAt(struct MpLifeRec *rec, u32 when)
+{
+    u8 i;
+    for (i = 0; i < LIFE_MEMORIES; i++)
+        if (rec->mem[i].kind && rec->mem[i].when == when)
+            return TRUE;
+    return FALSE;
+}
+
+// Word spreads (docs 8.1): a teammate who lived it tells one who wasn't there, in its own way. Only between
+// Pokémon together in the party (the Garden too, mp_garden.c); one in the PC hears once it's back.
+static bool8 sSpreadForce;   // tests: the next telling happens for sure
+
+static void SpreadWord(u32 now)
+{
+    s8 n;
+    u8 count, i, j;
+    const struct MpLifeNews *news = MP_Life_News(&count);
+    if (count == 0 || (!sSpreadForce && (Random() % 3) != 0))
+        return;
+    sSpreadForce = FALSE;
+    for (n = count - 1; n >= 0; n--)
+    {
+        const struct MpLifeNews *nw = &news[n];
+        u16 heardParam = (nw->kind << 8) | (nw->param & 0xFF);
+        if (now < nw->when + 1)
+            continue;   // not right away: once things have settled
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            struct MpLifeRec *l = MP_Life_Get(&gPlayerParty[i].box, FALSE), *t = NULL;
+            u32 lk;
+            if (l == NULL || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+                continue;
+            lk = MP_Life_MonKey(l->personality, l->otId);
+            if (lk == nw->teller || HasMemory(l, MEM_HEARD, heardParam, nw->when) || HasMemory(l, MEM_HEARD, -1, now > 30 ? now - 30 : 0))
+                continue;
+            if (nw->teller ? HasMemoryAt(l, nw->when) : HasMemory(l, nw->kind, nw->param, 0))
+                continue;   // it was there
+            for (j = 0; j < PARTY_SIZE && t == NULL; j++)
+            {
+                struct MpLifeRec *c = MP_Life_Get(&gPlayerParty[j].box, FALSE);
+                u32 ck;
+                if (c == NULL || c == l)
+                    continue;
+                ck = MP_Life_MonKey(c->personality, c->otId);
+                if (nw->teller ? ck == nw->teller : HasMemory(c, nw->kind, nw->param, 0))
+                    t = c;
+            }
+            if (t == NULL)
+                continue;
+            {
+                u32 tk = MP_Life_MonKey(t->personality, t->otId);
+                struct MpLifeBond *bond = MP_Life_Bond(lk, tk, FALSE);
+                u8 strength = 170;
+                // telling is in character: a boastful one makes it sound bigger, a nervous one scarier
+                if (t->cur[LIFE_PROUD] >= 170)
+                    strength = 200, MP_Life_Feel(l, EMO_PRIDE, 15);
+                if (t->cur[LIFE_BOLD] < 80 && (nw->kind == MEM_LEGEND || (nw->kind == MEM_STORY && nw->param >= LIFE_STORY_GROUDON && nw->param <= LIFE_STORY_RAYQUAZA)))
+                    MP_Life_Feel(l, EMO_FEAR, 15);
+                MP_Life_Remember(l, MEM_HEARD, strength, TIER_HEARD, tk, heardParam);
+                // the listener's reaction depends on the teller: it believes a friend; a rival's boasting irritates it
+                if (bond && (bond->flags & LIFE_BOND_RIVAL) && t->cur[LIFE_PROUD] >= 150)
+                {
+                    MP_Life_Feel(l, EMO_FRUSTRATION, 12);
+                    MP_Life_BondShare(lk, tk, 2, 0, 0, 0, 2);
+                }
+                else
+                {
+                    MP_Life_Feel(l, EMO_PRIDE, 10);   // proud by association
+                    MP_Life_BondShare(lk, tk, 2, 1, 1, 0, 0);
+                }
+                MPNet_Log("life: word spread (news %u) from species %u to species %u", nw->kind, t->species, l->species);
+                return;   // one telling at a time
+            }
+        }
+    }
+}
+
 static void MinuteTick(u32 now, u32 minutes)
 {
     u8 i;
@@ -992,6 +1081,7 @@ static void MinuteTick(u32 now, u32 minutes)
         rec->lastTickMin = now;
     }
     sLastPlace = place;
+    SpreadWord(now);
     // reunions: who is in the party now, who isn't
     {
         u16 r;
@@ -1050,7 +1140,7 @@ static u32 CurrentBadgeMask(void)
 }
 
 // News for word spreading (mp_life_social.c): who in the party lived it tells the others later
-static void AddNews(u8 kind, u16 param)
+void MP_Life_AddNews(u8 kind, u16 param, u32 teller)
 {
     if (sNewsCount == LIFE_NEWS)
     {
@@ -1059,8 +1149,19 @@ static void AddNews(u8 kind, u16 param)
     }
     sNews[sNewsCount].kind = kind;
     sNews[sNewsCount].param = param;
+    sNews[sNewsCount].teller = teller;
     sNews[sNewsCount].when = MP_Life_PlayMinutes();
     sNewsCount++;
+}
+
+u32 MP_Life_LastLineMin(void)
+{
+    return sLastLineMin;
+}
+
+void MP_Life_SetLastLineMin(u32 minute)
+{
+    sLastLineMin = minute;
 }
 
 const struct MpLifeNews *MP_Life_News(u8 *count)
@@ -1109,7 +1210,7 @@ static void StoryTick(void)
         if (changed & (1u << i))
         {
             PartyLives(MEM_BADGE, i, 230);
-            AddNews(MEM_BADGE, i);
+            MP_Life_AddNews(MEM_BADGE, i, 0);
             MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_SPARKLE);
             MPNet_Log("life: badge %u", i + 1);
         }
@@ -1120,12 +1221,12 @@ static void StoryTick(void)
             if (sStory[i].legend)
             {
                 PartyLives(MEM_LEGEND, sStory[i].legend, sStory[i].strength);
-                AddNews(MEM_LEGEND, sStory[i].legend);
+                MP_Life_AddNews(MEM_LEGEND, sStory[i].legend, 0);
             }
             else
             {
                 PartyLives(MEM_STORY, sStory[i].beat, sStory[i].strength);
-                AddNews(MEM_STORY, sStory[i].beat);
+                MP_Life_AddNews(MEM_STORY, sStory[i].beat, 0);
             }
             MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, sStory[i].beat == LIFE_STORY_GROUDON || sStory[i].beat == LIFE_STORY_KYOGRE
                               ? LIFE_EMOTE_EXCLAIM : LIFE_EMOTE_SPARKLE);
@@ -1194,7 +1295,9 @@ struct LifeHeader
     u32 saveCounter;
     u32 recSize, recCount;
     u32 bondSize, bondCount;
-    u32 nameCount;
+    u32 nameSize, nameCount;
+    u32 lastLineMin;        // play minute of the last rare battle line (mp_life_battle.c), 0 = never
+    u32 reserved[8];
     u32 storyMask;          // story beats already lived (sStory bits)
     u32 badgeMask;          // badges already celebrated
     u32 newsCount;
@@ -1212,6 +1315,7 @@ static void SidecarPath(char *out, size_t size, int backup)
 void MP_Life_Reset(void)
 {
     sStoryKnown = FALSE;
+    sLastLineMin = 0;
     sNewsCount = 0;
     memset(sNews, 0, sizeof(sNews));
     sRecCount = 0;
@@ -1243,7 +1347,10 @@ void MP_Life_WriteSidecar(void)
     h.recCount = sRecCount;
     h.bondSize = sizeof(struct MpLifeBond);
     h.bondCount = sBondCount;
+    h.nameSize = sizeof(struct MpLifeName);
     h.nameCount = sNameCount;
+    h.lastLineMin = sLastLineMin;
+    memset(h.reserved, 0, sizeof(h.reserved));
     h.storyMask = sStoryMask;
     h.badgeMask = sBadgeMask;
     h.newsCount = sNewsCount;
@@ -1264,8 +1371,8 @@ static bool8 ReadSidecar(const char *path, bool8 needCounter)
     u32 i;
     if (f == NULL)
         return FALSE;
-    if (fread(&h, sizeof(h), 1, f) != 1 || h.magic != LIFE_MAGIC || (needCounter && h.saveCounter != gSaveCounter)
-     || h.recSize == 0 || h.bondSize == 0)
+    if (fread(&h, sizeof(h), 1, f) != 1 || h.magic != LIFE_MAGIC || h.version < 2 || (needCounter && h.saveCounter != gSaveCounter)
+     || h.recSize == 0 || h.bondSize == 0 || h.nameSize < sizeof(u32) + 2)
     {
         fclose(f);
         return FALSE;
@@ -1304,12 +1411,23 @@ static bool8 ReadSidecar(const char *path, bool8 needCounter)
         }
     }
     sNameCount = 0;
-    for (i = 0; i < h.nameCount && sNameCount < LIFE_MAX_NAMES; i++)
+    for (i = 0; i < h.nameCount; i++)
     {
-        if (fread(&sNames[sNameCount], sizeof(struct MpLifeName), 1, f) != 1)
+        u8 buf[sizeof(struct MpLifeName) * 2];
+        u32 n = h.nameSize < sizeof(buf) ? h.nameSize : sizeof(buf);
+        if (fread(buf, 1, n, f) != n)
             break;
-        sNameCount++;
+        if (h.nameSize > n)
+            fseek(f, h.nameSize - n, SEEK_CUR);
+        if (sNameCount < LIFE_MAX_NAMES)
+        {
+            struct MpLifeName *nm = &sNames[sNameCount++];
+            memset(nm, 0, sizeof(*nm));
+            memcpy(nm, buf, n < sizeof(*nm) ? n : sizeof(*nm));
+            nm->name[LIFE_NAME_LEN - 1] = EOS;   // a longer name from a newer build: cut, still ended
+        }
     }
+    sLastLineMin = h.lastLineMin;
     sStoryMask = h.storyMask;
     sBadgeMask = h.badgeMask;
     sNewsCount = h.newsCount <= LIFE_NEWS ? h.newsCount : LIFE_NEWS;
@@ -1477,6 +1595,40 @@ void MP_Life_Debug(const char *args)
     {
         void MP_LifeField_Debug(void);
         MP_LifeField_Debug();
+    }
+    else if (strcmp(cmd, "battle") == 0)
+    {
+        // battle lineforce 1 | battle state
+        MP_LifeBattle_Debug(args + 7);
+    }
+    else if (strcmp(cmd, "bond") == 0 && a >= 0 && a < PARTY_SIZE && b >= 0 && b < PARTY_SIZE)
+    {
+        // bond A B FAMILIAR TRUST AFFECTION...: set A's bond with B (c = affection, d = trust)
+        struct MpLifeRec *ra = MP_Life_Get(&gPlayerParty[a].box, TRUE), *rb = MP_Life_Get(&gPlayerParty[b].box, TRUE);
+        struct MpLifeBond *bd = (ra && rb) ? MP_Life_Bond(MP_Life_MonKey(ra->personality, ra->otId), MP_Life_MonKey(rb->personality, rb->otId), TRUE) : NULL;
+        if (bd)
+        {
+            bd->v[BOND_AFFECTION] = c;
+            bd->v[BOND_TRUST] = d;
+        }
+        printf("[test] life bond %d -> %d affection %d trust %d\n", a, b, c, d);
+    }
+    else if (strcmp(cmd, "forget") == 0 && a >= 0 && a < PARTY_SIZE)
+    {
+        // forget SLOT KIND: its memories of that kind are gone (as if it hadn't been there)
+        struct MpLifeRec *rec = MP_Life_Get(&gPlayerParty[a].box, TRUE);
+        u8 i;
+        for (i = 0; rec && i < LIFE_MEMORIES; i++)
+            if (rec->mem[i].kind == b)
+                memset(&rec->mem[i], 0, sizeof(rec->mem[i]));
+        printf("[test] life forget %d kind %d\n", a, b);
+    }
+    else if (strcmp(cmd, "spread") == 0)
+    {
+        // spread: one telling now (a couple of minutes later than the news)
+        sSpreadForce = TRUE;
+        SpreadWord(MP_Life_PlayMinutes() + 2);
+        printf("[test] life spread\n");
     }
     else if (strcmp(cmd, "wants") == 0)
     {

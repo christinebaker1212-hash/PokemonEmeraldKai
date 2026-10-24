@@ -61,6 +61,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `life_core` | MOéMON GARDEN records: temperament, memories, a moment raises Friendship once, the .life sidecar saved and loaded, the JOURNAL page and its pages |
 | `life_field` | Route 104: tap A (the fitting verb), hold A (the wheel, FEED A BERRY: a memory and a moment), the hidden-item hint, a nap, hurrying back |
 | `life_story` | a badge becomes a memory (part / witness) and news; a curious MUDKIP asks to come out: party icon wiggle, WANTS TO COME in the follower picker |
+| `life_battle_gym` | the first Gym (ROXANNE): the rare pink line after "... defeated LEADER ROXANNE!" with a chime, a boss's final knockout as a memory |
+| `life_battle_save` | wild double: TORCHIC knocks out a foe while its best friend MUDKIP hangs on at 3 HP: sparkle / heart bubbles, the line after "fainted!", MEM_PARTNER for both |
+| `life_word` | word spreads: a proud TORCHIC tells MUDKIP (who wasn't there) about the first badge: MEM_HEARD from TORCHIC |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

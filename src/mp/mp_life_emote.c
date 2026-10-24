@@ -9,6 +9,7 @@
 #include "mp.h"
 #include "mp_life.h"
 #include "mp_life_emote.h"
+#include "main.h"
 #include "palette.h"
 #include "sprite.h"
 #include "constants/rgb.h"
@@ -255,6 +256,7 @@ void MP_LifeEmote_Place(u8 slot, bool8 visible, s16 x, s16 top, u8 subpriority)
         }
         sp->oam.paletteNum = pal;
     }
+    sp->oam.priority = gMain.inBattle ? 0 : 1;   // in battle, over the health boxes (it's small and brief)
     sp->x = x;
     sp->y = top - 6;
     // a little pop when it appears, then it bobs gently

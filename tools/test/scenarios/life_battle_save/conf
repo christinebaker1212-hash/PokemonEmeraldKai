@@ -1,0 +1,7 @@
+# MOéMON GARDEN in battle: a wild Double Battle; MUDKIP (slot 1) hangs on at 3 HP and TORCHIC, its best friend,
+# knocks out a foe: both bubble (sparkle / heart), and the rare line shows after the foe's "fainted!"; after
+# the battle both remember it (MEM_PARTNER, each naming the other) and their bond grew. Shot line.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40,283:20"
+EXPECT_A=("life battle: begin kind 1" "saved slot 1 (close)" "life battle: line 1 queued" "life battle: line shown: " "life battle: end (won 1" "life: memory 14")

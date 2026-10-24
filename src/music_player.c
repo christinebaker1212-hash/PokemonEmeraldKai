@@ -770,7 +770,9 @@ void m4aSoundVSync(void)
         {
             // Moemon Co-op: the GENESIS / EPOCH BALLS' Game Boy sounds (mp_legacy_sound.c)
             void MP_LegacySfx_Mix(float *buffer, s32 count);
+            void MP_LifeSfx_Mix(float *buffer, s32 count);
             MP_LegacySfx_Mix(audioBuffer, samplesPerFrame);
+            MP_LifeSfx_Mix(audioBuffer, samplesPerFrame);   // MOéMON GARDEN's quiet sounds (mp_life_sound.c)
         }
 
         gAudioBufferLen = samplesPerFrame;

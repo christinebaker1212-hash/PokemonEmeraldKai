@@ -22,6 +22,7 @@
 #include "constants/map_types.h"
 #include "constants/region_map_sections.h"
 #include "platform/gamepad.h"
+#include "mp_life_battle.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -1694,6 +1695,7 @@ void MP_FrameUpdate(void)
     MP_AutoSession_Update();
     if (gMain.inBattle)
         MP_Emote_BattleUpdate();   // battle emote bubbles (solo battles too)
+    MP_LifeBattle_Update();        // MOéMON GARDEN in battle: moments, bonds, Pokémon emotes, rare lines
     if (!(MPNet_ClientStatus() == MPNET_CONNECTED && gMpLocalId >= 0))
         MP_Events_Update();        // daily goals alone (online: below)
 

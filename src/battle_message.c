@@ -29,6 +29,7 @@
 #include "constants/trainers.h"
 #include "constants/trainer_hill.h"
 #include "constants/weather.h"
+#include "mp_life_battle.h"
 
 struct BattleWindowText
 {
@@ -3335,6 +3336,12 @@ void BattlePutTextOnWindow(const u8 *text, u8 windowId)
     printerTemplate.fgColor = textInfo[windowId].fgColor;
     printerTemplate.bgColor = textInfo[windowId].bgColor;
     printerTemplate.shadowColor = textInfo[windowId].shadowColor;
+    if (gMpBattleTextPink && windowId == B_WIN_MSG)
+    {
+        // Moemon Co-op: a MOéMON GARDEN battle line (mp_life_battle.c): pink, the box's rose as its shadow
+        printerTemplate.fgColor = 8;
+        printerTemplate.shadowColor = 14;
+    }
 
     if (printerTemplate.x == 0xFF)
     {

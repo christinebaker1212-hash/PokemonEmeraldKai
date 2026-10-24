@@ -1,0 +1,8 @@
+# MOéMON GARDEN in battle: a warm MUDKIP wins the player's first Gym battle (ROXANNE, no badges yet): the rare
+# line shows after "... defeated LEADER ROXANNE!" in pink with a chime ("looks back at you, beaming!"); a boss's
+# final knockout is a memory (MEM_CLUTCH) and a moment; the winner's bubble. Shot line.
+MODE=1
+TMO=300
+WARP=11,3,5,3
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("life battle: begin kind 3" "life battle: won" "life battle: line 2 queued" "life battle: line shown: " "beaming" "life battle: end (won 1" "life: memory 12")

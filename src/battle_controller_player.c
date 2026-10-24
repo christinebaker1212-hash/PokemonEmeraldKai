@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_life_battle.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_arena.h"
@@ -1725,7 +1726,7 @@ static void FreeMonSpriteAfterSwitchOutAnim(void)
 
 static void CompleteOnInactiveTextPrinter2(void)
 {
-    if (!IsTextPrinterActive(B_WIN_MSG))
+    if (!IsTextPrinterActive(B_WIN_MSG) && !MP_LifeBattle_TextHold())   // Moemon Co-op: a MOéMON GARDEN line may follow
         PlayerBufferExecCompleted();
 }
 
