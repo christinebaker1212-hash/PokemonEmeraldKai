@@ -476,6 +476,29 @@ Safari Zone or link battles; EVs too). Level-ups from it evolve after the battle
 and mp_coop.c OutcomeEvolves accept B_OUTCOME_CAUGHT as well as WON. Tests: catch_exp (solo, full HP = 10%, Torchic
 evolves), coop_catch_exp (lag, 1 HP = 95%, both evolve).
 
+## BATTLE FLAG phrases and prize (H4, protocol 40: mp_trainer.c, mp_battle.c, item_use.c)
+
+Using the flag (ItemUseOnFieldCB_BattleFlag -> MP_Trainer_UseFlag) turns the item task into Task_FlagMenu: "Set phrases,
+or plant?" PHRASES / PLANT / CANCEL. PLANT calls item_use.c MP_BattleFlag_Plant (the old flag message, then trainer
+mode). PHRASES lists CHALLENGE / WIN / LOSE / DONE; a pick fades out and opens DoEasyChatScreen
+(EASY_CHAT_TYPE_BATTLE_START / WON / LOST) on gSaveBlock1Ptr->easyChatBattleStart / Won / Lost (the save's own phrases,
+also the Battle Tower's: defaults from InitEasyChatPhrases); its exit callback returns to the field with
+MP_Trainer_FieldCB_Phrases, which reopens the list (sPhraseCursor kept). DoEasyChatScreen calls ResetTasks, so the
+menu task dies and is created again on the way back.
+
+Handshake: MPR_ARRIVED / MPR_BATTLE_GO carry money + 3 x 6 u16 words (start, won, lost; ReadPhrases fills missing
+words with EC_EMPTY_WORD, bad ones print as ??? through CopyEasyChatWord). On ARRIVED the target answers GO and both
+games show the trainer's CHALLENGE ("NAME: words", MP_ShowFieldMessageFitted wraps it; states SP_PHRASE /
+TM_PHRASE). A box closes on A / B or 3 s after its text is out; then MPR_PHRASE_READY goes to the other side, and a
+side starts the battle (MP_Battle_Start + MP_Battle_SetOppPhrases) once its box is closed and the other's READY came.
+An empty CHALLENGE shows no box and sends READY at once. Cancels / leaving close the box (CloseChallengeBox); a side
+that never gets READY gives up after 20 s. The result message (CB2_MpReturnFromBattle) adds a page with the other's
+LOSE (we won) or WIN (we lost) phrase (AppendOppPhrase; no page for an empty one or a tournament match). The winner
+still gets oppMoney / 10 (the loser's money when the battle started) and a ball; the loser no longer pays it.
+Harness: mp useflag (field only), mp phraseclear N, mp phrasedefault, mp phrases, mp money (no number: print), mp
+easychat TYPE (the scripts' way in). Tests: flag_phrases (check.py: the prize and the loser's money), pvp_battle
+(no CHALLENGE: no box).
+
 ## Ball entrance and recall effects
 
 Per Moemon, next to the ball style: MON_DATA_MP_BALLFX (PokemonSubstruct0's spare `filler` u16: form 0-3, particles

@@ -87,7 +87,10 @@ static struct
 } sNet;
 
 static u8 sRelayBuf[BLOCK_BUFFER_SIZE + 16];
-static EWRAM_DATA u8 sResultText[256];
+static EWRAM_DATA u8 sResultText[320];
+// The opponent's WIN / LOSE phrases (BATTLE FLAG battles: mp_trainer.c), quoted in the result message
+static EWRAM_DATA u16 sOppPhrases[2][EASY_CHAT_BATTLE_WORDS_COUNT] = {0};
+static EWRAM_DATA bool8 sHaveOppPhrases = FALSE;
 
 s8 MP_Battle_PeerId(void)
 {
@@ -483,6 +486,30 @@ static void FieldCB_MpResult(void)
         CreateTask(Task_ShowResultMessage, 80);
 }
 
+void MP_Battle_SetOppPhrases(const u16 *won, const u16 *lost)
+{
+    memcpy(sOppPhrases[0], won, sizeof(sOppPhrases[0]));
+    memcpy(sOppPhrases[1], lost, sizeof(sOppPhrases[1]));
+    sHaveOppPhrases = TRUE;
+}
+
+// A page with the opponent's phrase (WIN when we lost, LOSE when we won), if they have one
+// (then a page break; without a phrase, a new line as before)
+static void AppendOppPhrase(bool8 weWon)
+{
+    u8 quote[120];
+    static const u8 sPage[] = {CHAR_PROMPT_CLEAR, EOS};
+    if (!sHaveOppPhrases || !MP_Trainer_QuotePhrase(quote, sNet.oppName, sOppPhrases[weWon ? 1 : 0]))
+    {
+        AppendRaw(sResultText, CHAR_NEWLINE);
+        return;
+    }
+    StringAppend(sResultText, sPage);
+    StringAppend(sResultText, quote);
+    StringAppend(sResultText, sPage);
+    MPNet_Log("result phrase: %s", weWon ? "their LOSE" : "their WIN");
+}
+
 static void FinishBattle(void)
 {
     sNet.battleActive = FALSE;
@@ -539,7 +566,7 @@ static void CB2_MpReturnFromBattle(void)
         Append(sResultText, " defeated ");
         StringAppend(sResultText, sNet.oppName);
         AppendRaw(sResultText, CHAR_EXCL_MARK);
-        AppendRaw(sResultText, CHAR_NEWLINE);
+        AppendOppPhrase(TRUE);
         Append(sResultText, "Got ");
         AppendMoney(sResultText, prize);
         Append(sResultText, " and a ");
@@ -552,19 +579,14 @@ static void CB2_MpReturnFromBattle(void)
     }
     else if (outcome == B_OUTCOME_LOST || outcome == B_OUTCOME_FORFEITED || (outcome & B_OUTCOME_LINK_BATTLE_RAN))
     {
-        u32 loss = sNet.myMoney / 10;
-        if (loss > GetMoney(&gSaveBlock1Ptr->money))
-            loss = GetMoney(&gSaveBlock1Ptr->money);
-        RemoveMoney(&gSaveBlock1Ptr->money, loss);
+        // The winner's prize (a tenth of our money) isn't taken from us
         StringCopy(sResultText, gSaveBlock2Ptr->playerName);
         Append(sResultText, " lost to ");
         StringAppend(sResultText, sNet.oppName);
-        Append(sResultText, " and paid ");
-        AppendMoney(sResultText, loss);
         AppendRaw(sResultText, CHAR_PERIOD);
-        AppendRaw(sResultText, CHAR_NEWLINE);
+        AppendOppPhrase(FALSE);
         Append(sResultText, "You hurried back to safety...");
-        MPNet_Log("lost the battle: -%u money", (unsigned)loss);
+        MPNet_Log("lost the battle: money kept");
         gMpWhiteOutFieldCallback = FieldCB_MpResult;
         gMain.state = 0;
         SetMainCallback2(CB2_MpWhiteOut);
@@ -621,6 +643,7 @@ static void Task_StartMpBattle(u8 taskId)
 void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney)
 {
     memset(&sNet, 0, sizeof(sNet));
+    sHaveOppPhrases = FALSE;   // MP_Battle_SetOppPhrases comes right after for a flag battle
     sNet.peer = opponentId;
     sNet.linkId = isMaster ? 0 : 1;
     sNet.linkCount = 2;

@@ -1152,7 +1152,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "money") == 0)
     {
-        SetMoney(&gSaveBlock1Ptr->money, atoi(arg));
+        // money [N] - sets the money, or without N prints it
+        if (arg[0])
+            SetMoney(&gSaveBlock1Ptr->money, atoi(arg));
+        else
+            printf("[test] money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
     }
     else if (strcmp(cmd, "daily") == 0)
     {
@@ -1989,6 +1993,52 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "battleflag") == 0)
     {
         MP_Trainer_Toggle();
+    }
+    else if (strcmp(cmd, "useflag") == 0)
+    {
+        // useflag - use the BATTLE FLAG from the field ("Set phrases, or plant?"); only on the field, like the item
+        if (MP_IsInOverworld())
+            MP_Trainer_UseFlag(CreateTask(TaskDummy, 80));
+        else
+            printf("[test] useflag: not on the field\n");
+    }
+    else if (strcmp(cmd, "easychat") == 0)
+    {
+        // easychat TYPE - the phrase builder the way the game's scripts open it (special ShowEasyChatScreen)
+        void ShowEasyChatScreen(void);
+        gSpecialVar_0x8004 = atoi(arg);
+        ShowEasyChatScreen();
+    }
+    else if (strcmp(cmd, "phrasedefault") == 0)
+    {
+        // phrasedefault - the new game's phrases (profile, battle phrases; mail words cleared)
+        void InitEasyChatPhrases(void);
+        InitEasyChatPhrases();
+    }
+    else if (strcmp(cmd, "phraseclear") == 0)
+    {
+        // phraseclear N - empties a battle phrase (0 CHALLENGE, 1 WIN, 2 LOSE)
+        int n = atoi(arg), i;
+        u16 *w = n == 0 ? gSaveBlock1Ptr->easyChatBattleStart : n == 1 ? gSaveBlock1Ptr->easyChatBattleWon
+                                                                        : gSaveBlock1Ptr->easyChatBattleLost;
+        for (i = 0; i < EASY_CHAT_BATTLE_WORDS_COUNT; i++)
+            w[i] = 0xFFFF;
+        printf("[test] phrase %d cleared\n", n);
+    }
+    else if (strcmp(cmd, "phrases") == 0)
+    {
+        // phrases - the three battle phrases' words
+        int i;
+        printf("[test] phrases:");
+        for (i = 0; i < EASY_CHAT_BATTLE_WORDS_COUNT; i++)
+            printf(" %04x", gSaveBlock1Ptr->easyChatBattleStart[i]);
+        printf(" |");
+        for (i = 0; i < EASY_CHAT_BATTLE_WORDS_COUNT; i++)
+            printf(" %04x", gSaveBlock1Ptr->easyChatBattleWon[i]);
+        printf(" |");
+        for (i = 0; i < EASY_CHAT_BATTLE_WORDS_COUNT; i++)
+            printf(" %04x", gSaveBlock1Ptr->easyChatBattleLost[i]);
+        printf("\n");
     }
     else if (strcmp(cmd, "objs") == 0)
     {

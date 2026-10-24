@@ -336,13 +336,23 @@ PVP: THE BATTLE FLAG
 --------------------
 * You get the BATTLE FLAG (KEY ITEMS) the first time you connect. Register
   it to SELECT for quick use.
-* Use it to stand guard like an NPC trainer. While the flag is planted your
-  name tag and follower are hidden, so you blend in. When another player walks
-  into your line of sight you get a "!", walk up to them and a link battle
-  starts. Press B to pack the flag up.
-* Winner gets 1/10 of the loser's money plus a random Poke Ball. The loser
-  pays that and wakes up at their last Moemon Center. HP/PP are restored
-  and no EXP is gained, like Cable Club battles.
+* Using it asks "Set phrases, or plant?".
+  PLANT    Stand guard like an NPC trainer. While the flag is planted your
+           name tag and follower are hidden, so you blend in. When another
+           player walks into your line of sight you get a "!", walk up to
+           them and a link battle starts. Press B to pack the flag up.
+  PHRASES  Make up what you say, from the game's word list: your CHALLENGE
+           (when you walk up to someone), what you say if you WIN and what
+           you say if you LOSE. Pick one to change it, DONE when you're done.
+           These are the same phrases the BATTLE TOWER uses.
+* Before the battle both of you see your CHALLENGE (A closes it, or it closes
+  by itself after a few seconds; the battle starts when both are closed).
+  Afterwards the winner sees the loser's LOSE phrase and the loser sees the
+  winner's WIN phrase.
+* The winner gets a tenth of the loser's money plus a random Poke Ball. It
+  isn't taken from the loser: they keep all their money and wake up at their
+  last Moemon Center. HP/PP are restored and no EXP is gained, like Cable
+  Club battles.
 
 
 TRADING, THE SHARED PC AND DAILY GIFTS (CO-OP menu)

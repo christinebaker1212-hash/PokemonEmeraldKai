@@ -1,0 +1,22 @@
+pressuntil A field 5000
+waitfor online 6000
+mp money 4000
+mp phraseclear 1
+mp phraseclear 2
+mp money
+waitlog 6000 challenge phrase shown
+wait 100
+shot a_challenge
+pressuntillog A 9000 the battle: 
+wait 150
+shot a_result1
+press A 2
+wait 150
+shot a_result2
+press A 2
+wait 150
+shot a_result3
+pressuntil A field 3000
+wait 200
+mp money
+quit

@@ -126,7 +126,13 @@ void ItemUseOutOfBattle_BattleFlag(u8 taskId)
     SetUpItemUseOnFieldCallback(taskId);
 }
 
+// "Set phrases, or plant?" (mp_trainer.c MP_Trainer_UseFlag); PLANT comes back to MP_BattleFlag_Plant
 static void ItemUseOnFieldCB_BattleFlag(u8 taskId)
+{
+    MP_Trainer_UseFlag(taskId);
+}
+
+void MP_BattleFlag_Plant(u8 taskId)
 {
     const u8 *msg = MP_Trainer_FlagUseMessage();
     LockPlayerFieldControls();

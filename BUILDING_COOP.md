@@ -28,7 +28,7 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (SDL2 native PC port)
     leased + cleaned up), CGNAT check, invite codes (public IPv4 + port in 8
     base-32 characters), Radmin VPN / Hamachi fallback
   * `mp_overworld.c`: remote player objects, movement replay, nametags, surf blobs
-  * `mp_trainer.c`: BATTLE FLAG trainer mode and the challenge handshake
+  * `mp_trainer.c`: BATTLE FLAG trainer mode, the challenge handshake, "Set phrases, or plant?" and the battle phrases
   * `mp_battle.c`: network implementation of the link block API (routed from
     `link.c` when `gNetLinkActive`), so the stock link battle code runs over
     the internet. Also PvP rewards and the whiteout.

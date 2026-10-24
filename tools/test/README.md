@@ -30,7 +30,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_run` | co-op wild: ALICE alone picks RUN (it only says so), then both pick RUN until they get away |
 | `coop_ball_target` | co-op 2-on-2: both throw at the same wild Pokemon (BOB moves his target cursor); ALICE catches it, BOB's ball comes back |
 | `coop_abort_catch` / `coop_abort_catch2` | a catch, then the other player disconnects: the catcher keeps it (master / non-master) |
-| `pvp_battle` | BATTLE FLAG: BOB spots ALICE, link battle to the end, money changes hands |
+| `pvp_battle` | BATTLE FLAG: BOB (no CHALLENGE phrase: no phrase box) spots ALICE, link battle to the end, the winner gets a tenth of the loser's money |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
@@ -52,6 +52,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `shared_pc_cursor` | the shared PC's hand on PARTY / MY PC / CLOSE: over the buttons, never upside down (also holding a Moemon, and after MY PC and back) |
 | `catch_exp` | solo: a MASTER BALL at a full-HP ZIGZAGOON gives 10% of a faint's EXP; the lead TORCHIC grows and evolves after the catch |
 | `coop_catch_exp` | NA-JP lag, co-op wild: ALICE catches a ZIGZAGOON at 1 HP (95%); both leads get EXP, grow and evolve after the battle |
+| `flag_phrases` | NA-JP lag: BOB uses the BATTLE FLAG (PHRASES: the phrase builder and back to the list, then PLANT), both screens show his CHALLENGE, the result quotes his phrase; check.py: the winner got a tenth, the loser kept their money |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

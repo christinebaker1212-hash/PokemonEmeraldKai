@@ -482,6 +482,11 @@ bool8 MP_Trainer_CanPlantFlag(void);
 const u8 *MP_Trainer_FlagUseMessage(void);
 void MP_Trainer_OnPlayerLeft(u8 id);
 void ItemUseOutOfBattle_BattleFlag(u8 taskId);
+void MP_BattleFlag_Plant(u8 taskId);                       // item_use.c: plant the flag (or say why not)
+void MP_Trainer_UseFlag(u8 taskId);                        // mp_trainer.c: "Set phrases, or plant?"
+void MP_Trainer_FieldCB_Phrases(void);                     // back from the phrase builder: the phrase list again
+bool8 MP_Trainer_QuotePhrase(u8 *dest, const u8 *name, const u16 *words);   // "NAME: phrase", FALSE if empty
+void MP_Battle_SetOppPhrases(const u16 *won, const u16 *lost);   // mp_battle.c: for the result message
 
 // mp_battle.c (network link layer + PvP flow)
 extern bool8 gNetLinkActive;
@@ -1015,6 +1020,7 @@ enum {
     MPR_ARRIVED,           // trainer -> target: walked up, start the battle (includes money)
     MPR_BATTLE_GO,         // target -> trainer: ready (includes money)
     MPR_CANCEL,            // either side aborts
+    MPR_PHRASE_READY,      // either side: the challenge phrase box is closed (both ready: the battle starts)
     MPR_LINK_PLAYER = 20,  // struct LinkPlayer
     MPR_LINK_BLOCK,        // block data
     MPR_LINK_SYNC,         // standby / close barrier

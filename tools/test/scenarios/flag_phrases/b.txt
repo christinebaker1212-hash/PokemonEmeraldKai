@@ -1,0 +1,68 @@
+pressuntil A field 5000
+waitfor online 6000
+mp money 7000
+mp money
+wait 200
+mp useflag
+wait 150
+shot b_ask
+press A 2
+wait 150
+shot b_which
+press A 2
+wait 150
+shot b_builder
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+shot b_delall0
+press A 2
+wait 90
+shot b_delall
+press A 2
+wait 60
+shot b_delall2
+press B 2
+wait 60
+shot b_quit
+press UP 2
+wait 15
+press A 2
+wait 200
+shot b_back
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press DOWN 2
+wait 15
+press A 2
+wait 60
+mp useflag
+wait 150
+press DOWN 2
+wait 15
+press A 2
+wait 150
+shot b_planted
+press A 2
+waitlog 4000 spotted player
+waitlog 6000 challenge phrase shown
+wait 100
+shot b_challenge
+pressuntillog A 9000 the battle: 
+wait 150
+shot b_result1
+press A 2
+wait 150
+shot b_result2
+press A 2
+wait 150
+shot b_result3
+pressuntil A field 3000
+wait 200
+mp money
+quit

@@ -75,6 +75,9 @@ fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectra
 Also the characters from Moemon's other branch (111 looks with their own running, bike / ridden-Pokemon and diving
 sprites, 127 ID and 107 back pictures: tools/moemon_chars, mp_chars_gfx.h, graphics ids 0x9000+, ini kai_*; LOOK >
 GROUP NAMED NPC / GENERICS / CUSTOM and LOOK > BIKE RIDE / BIKE; PROF. BIRCH's bikes are 64x64; test look_chars).
+Also catch EXP (a catch gives EXP scaled by the damage dealt: BattleScript_MpCatchExp; tests catch_exp, coop_catch_exp)
+and BATTLE FLAG phrases ("Set phrases, or plant?", the save's easy chat battle phrases sent with MPR_ARRIVED /
+BATTLE_GO, MPR_PHRASE_READY; the loser keeps their money; test flag_phrases).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

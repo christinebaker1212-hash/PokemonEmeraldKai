@@ -1,0 +1,18 @@
+# BATTLE FLAG phrases at NA-JP lag: BOB uses the flag ("Set phrases, or plant?"), opens the phrase builder for his
+# CHALLENGE and backs out to the phrase list, then PLANTs it; he spots ALICE, both screens show BOB's challenge
+# phrase, the battle starts once both boxes are closed. ALICE has no WIN / LOSE phrases: only her result quotes BOB's.
+# The winner gets a tenth of the loser's money and the loser keeps it all (check.py)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("challenge phrase shown" "starting PvP battle against player 2" "result phrase: their")
+UNEXPECT_B=("result phrase: their")
+EXPECT_B=("battle flag: phrases" "battle flag: set phrase 0" "battle flag: plant" "spotted player 1" "challenge phrase shown"
+          "starting PvP battle against player 1" "the battle: ")
+CHECK="python3 tools/test/scenarios/flag_phrases/check.py"
