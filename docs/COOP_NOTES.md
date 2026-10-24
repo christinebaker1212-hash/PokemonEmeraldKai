@@ -1189,3 +1189,40 @@ news for word spreading (MP_Life_News); a save from before the Garden doesn't re
 10-minute spell of three): its party icon wiggles (party_menu.c SpriteCB_MpWantsOutIcon) and the hold-SELECT picker
 says WANTS TO COME. Debug: `mp life show|remember|minutes|trait|need|feel|temper|verb|emote|act|field|story|wants|
 count|save|load|reveal|journal`. Tests life_core, life_field, life_story.
+G3 battles (mp_life_battle.c, called every frame from MP_FrameUpdate). Presentation only. It reads what every client
+keeps current in a link battle: party HP (the controllers' SETMONDATA), gBattlerPartyIndexes, gAbsentBattlerFlags
+and gBattlerAttacker (sent with each command), so host and guests see the same moments. Slots are party indexes
+(ally = gPlayerParty, foe = gEnemyParty); ours = player side and, in co-op, MP_Coop_BattlerPlayer(b) == gMpLocalId
+(STEVEN's half excluded). Kinds: wild, trainer (+25 strength), boss (+70: LEADER, ELITE_FOUR, CHAMPION, RIVAL,
+Magma / Aqua leaders and admins), legend (+70: legendary / roamer flags), PvP (+50); recorded, Wally's tutorial and
+Safari are skipped. "Won" = every gEnemyParty Pokémon at 0 HP (a guest's gBattleOutcome comes late). At the end:
+MEM_FAINTED (85 + importance; 85 wild), MEM_NEAR_FAINT (survived at <= 1/8 HP and won: 90 + importance, +25 at 1 HP),
+MEM_CLUTCH (the last knockout: boss / PvP always, trainers at <= 25% HP, wild at <= 12%), MEM_COMEBACK (won after our
+side was down to one able Pokémon against two or more: 150 + importance), MEM_PARTNER for a save (a knockout while a
+partner on the field is at <= 1/5 HP: the saved one 130 + importance/2, the saver 110 + TRAIT_PROTECTIVE). Side by
+side: trust and respect +1-2 a battle. Foes: only notable ones (PvP, boss classes, legends) or one that knocked it
+out get a bond (trainer Pokémon are keyed by trainer name + evolution family, so May's TORCHIC and COMBUSKEN are one
+rival; names "MAY's MARSHTOMP" in the name table, 23 letters): respect +2..8, friction only for competitive
+temperaments (proud >= 170, or bold >= 180 and warm < 110); first meeting across a battle +10 respect; notable foe
+met 3+ times with respect >= 40 -> LIFE_BOND_RIVAL + MEM_RIVAL. Routine wins: TRAIT_CONFIDENT +1 (wild) / +2, pride.
+Pokémon battle emotes: LIFE_EMOTE_SLOT_BATTLER(b) (= the Garden slots, unused in battle), at the sprite's top
+corner, OAM priority 0 in battle, with mp_life_sound.c's bloop (up: happy, down: worried); at most 6 a battle and one
+per Pokémon per 150 frames: low HP (sweat; proud: sparkle; fierce: angry), a clutch knockout (sparkle), saved
+(heart) / saver (sparkle), a warm partner fainting (tear), a rival met again (exclaim / angry), a feared legend
+(sweat), boss / PvP winners (note / sparkle). Rare lines: LN_SAVED / SAVED_BY (best friend per MP_Life_Closest
+saved at <= 1/8 HP), FIRST_GYM (a LEADER with no badges at the start), CHAMPION, COMEBACK (boss / PvP, <= 25% HP),
+RIVAL (a rival bond shared >= 5); each in four temperament flavors; at most one per 300 play minutes for the save
+(header lastLineMin; `mp life battle lineforce 1` for tests). Shown by MP_LifeBattle_TextHold, which every battle
+controller's print-done function calls (player, partner, opponent, link opponent, link partner, recorded opponent):
+when the moment's message (TARGETFAINTED / ATTACKERFAINTED, or PLAYERDEFEATEDTRAINER1 / TWOENEMIESDEFEATED /
+BATTLEEND) finished, it lets it be read 24 frames (A/B after 8 outside link battles), prints the line through
+BattlePutTextOnWindow with gMpBattleTextPink (fg = BG color 8, unused in the box art and every battle text, set to
+pink; shadow = the box's rose 14) at the battle's text speed, plays the chime (synthesized: three rising bells), and
+completes once printed; the script's own hold follows. Local only, so link battles stay in step (a guest falls a
+line behind and catches up). A line whose message never came is dropped and not spent. Word spreads (mp_life.c
+SpreadWord in the minute tick, 1 in 3): news (badges, story, legends, and boss / PvP clutch and comeback wins with
+their teller) is told by a party member who lived it to one who wasn't there: MEM_HEARD (who = teller, param =
+kind << 8 | param, tier HEARD halves it), a proud teller makes it bigger (+pride), a timid one makes legends scarier
+(+fear); a rival's boasting irritates (+friction), anyone else's makes it proud by association. One telling at a
+time, one hearing per 30 minutes per listener. Debug `mp life battle state`, `mp life bond A B AFF TRUST`, `mp life
+forget SLOT KIND`, `mp life spread`. Tests life_battle_gym, life_battle_save, life_word.
