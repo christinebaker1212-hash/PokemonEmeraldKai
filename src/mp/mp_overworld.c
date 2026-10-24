@@ -2,6 +2,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_life_field.h"
+#include "mp_life_social.h"
 #include "contest.h"
 #include "constants/contest.h"
 #include "main.h"
@@ -709,7 +710,7 @@ void MP_Overworld_Update(void)
     if (!MP_IsInOverworld())
         return;
     MP_Notice_Update();
-    if (!MP_Spectate_TryInteract() && !MP_Piggy_TryInteract())
+    if (!MP_Spectate_TryInteract() && !MP_Piggy_TryInteract() && !MP_LifeSocial_TryFriendFollower())
         MP_LifeInteract_TryFollower();   // MOéMON GARDEN: tap A (the fitting thing) / hold A (the verb wheel)
     if (sAppliedGender != gSaveBlock2Ptr->playerGender)
     {

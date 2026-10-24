@@ -32,7 +32,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_abort_catch` / `coop_abort_catch2` | a catch, then the other player disconnects: the catcher keeps it (master / non-master) |
 | `pvp_battle` | BATTLE FLAG: BOB (no CHALLENGE phrase: no phrase box) spots ALICE, link battle to the end, the winner gets a tenth of the loser's money |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
-| `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped |
+| `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
 | `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |
@@ -64,6 +64,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `life_battle_gym` | the first Gym (ROXANNE): the rare pink line after "... defeated LEADER ROXANNE!" with a chime, a boss's final knockout as a memory |
 | `life_battle_save` | wild double: TORCHIC knocks out a foe while its best friend MUDKIP hangs on at 3 HP: sparkle / heart bubbles, the line after "fainted!", MEM_PARTNER for both |
 | `life_word` | word spreads: a proud TORCHIC tells MUDKIP (who wasn't there) about the first badge: MEM_HEARD from TORCHIC |
+| `life_social` | NA-JP lag, Oldale: ALICE's follower meets BOB's (a bond in her save), its bubbles show on BOB's screen, BOB pets it (her game answers: a sidestep, PET is beyond its boundary), BOB's new LOOK gets a double take |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

@@ -1226,3 +1226,31 @@ kind << 8 | param, tier HEARD halves it), a proud teller makes it bigger (+pride
 (+fear); a rival's boasting irritates (+friction), anyone else's makes it proud by association. One telling at a
 time, one hearing per 30 minutes per listener. Debug `mp life battle state`, `mp life bond A B AFF TRUST`, `mp life
 forget SLOT KIND`, `mp life spread`. Tests life_battle_gym, life_battle_save, life_word.
+G4 among friends (mp_life_social.c; protocol 41). Wire state 36 bytes: followerKey (u32), lifeAct, lifePose, lifeDx /
+lifeDy (its own tile from its Trainer's while on its own, MP_LIFE_NO_AUTO = following), lifeEmote + lifeEmoteSeq (a
+change shows the bubble in slot LIFE_EMOTE_SLOT_REMOTE(id)). mp_follower.c DriveRemoteAuto walks a friend's follower
+to that tile itself (smooth at any lag), shows the pose on arrival, and walks it back (FinishReturn, shared with the
+local return) when their game says it follows again; only slot 0 tells mp_life_field.c about hurrying back. Being
+near a friend (8 tiles, every 600 frames): MP_Life_BondNudge (no shared-experience count) familiarity with their
+Trainer (follower up to 120, the party up to 60) and their follower (80); names noted ("ALICE", "ALICE's SKITTY").
+Meeting (mp_life_field.c LIFE_ACT_MINGLE, chosen like any activity: 40 + social/4 + company/4, +60 to greet a
+Trainer it's fond of (affection >= 120: it runs to them)): needs the friend standing still 90+ frames within 6
+tiles; it goes beside their follower; the bubble from the bond (first meeting: shy sweat / warm heart / curious ?;
+friction: a squabble; lively: tag) and MP_LifeSocial_Met: BondShare (+3 familiar, trust / affection by temperament,
+respect / friction for competitive ones), MEM_FRIEND once a friend (affection 150, trust 120); then 2 minutes
+before meeting that friend again. Friends' verbs (A / held A in front of a friend's follower:
+MP_LifeSocial_TryFriendFollower, before our own follower's): MPR_LIFE_VERB {verb, item} -> its Trainer's game
+answers (Answer: asleep, boundary = sidestep with no mark, shy with strangers, FEED only when hungry (the berry
+leaves the friend's BAG only when eaten), PLAY for lively ones, PRAISE / COMFORT when it fits; a favorite Trainer
+(MP_Life_Closest favoriteKey) is greeted "overjoyed"; the same friend again within a minute only adds familiarity;
+MEM_FRIEND when affection reaches 120) with a reaction (MP_LifeField_Reaction, synced) and MPR_LIFE_REPLY {verb,
+answer}; the friend sees "ALICE's TORCHIC steps aside. Not that, thanks." etc. Never Friendship. A new LOOK
+(appearanceVersion changed) of a friend our follower knows (familiarity 20+): EXCLAIM, a sniff (QUESTION + shake;
+shy ones wait longer), HEART; after 3 changes in a while just a QUESTION (the count fades one per 5 minutes).
+Records travel: MPR_LIFE_RECORD kind 2 (a trade: mp_trade.c ApplyTrade sends the outgoing record, its bonds and
+their names: the newest word, replaces ours; the bond with its first Trainer is marked TRAINER; MEM_MET traded),
+kind 0 (ask: a new record asks the room, each key once a session) / 1 (answer: fills in only a fresh record of the
+same species: <= 1 memory and under 30 minutes old). MP_Life_PackRecord / UnpackRecord (sizes in the message,
+known[] reset for the new Trainer, a bond with the new Trainer made). Tests: MOEMON_DEBUG_PID_SALT=N gives a
+client's debug party its own personalities (test clients otherwise get identical ones). Debug `mp life social
+bonds|mingle|verb PLAYER V|trainerbond PLAYER N`. Tests life_social, trade.

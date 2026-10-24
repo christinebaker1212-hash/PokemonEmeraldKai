@@ -471,7 +471,8 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
             s16 d = abs(at.x - s->ownerLast.x) + abs(at.y - s->ownerLast.y);
             s->autoOn = FALSE;
             s->aPose = LIFE_POSE_NONE;
-            MP_LifeField_OnHurryBack(d);
+            if (s == &sSlots[0])
+                MP_LifeField_OnHurryBack(d);
             if (jump > 3 || d > 2)
             {
                 PlaceAtOwner(s, owner);
@@ -873,6 +874,8 @@ static void UpdateLeaving(void)
 }
 
 // Every overworld frame (src/overworld.c, before sprites are drawn)
+static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState *st);
+
 void MP_Follower_Update(void)
 {
     u8 i;
@@ -908,6 +911,8 @@ void MP_Follower_Update(void)
             SetSlotPokemon(s, 0, FALSE, 0);
             s->seqKnown = FALSE;
         }
+        if (obj != OBJECT_EVENTS_COUNT)
+            DriveRemoteAuto(s, obj, &gMpPlayers[i].state);   // MOéMON GARDEN: on its own, as its Trainer's game says
         UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) : TRUE);
         if (obj != OBJECT_EVENTS_COUNT)
         {
@@ -1077,11 +1082,16 @@ void MP_Follower_AutoReturn(void)
     s->aPose = LIFE_POSE_NONE;
 }
 
+static bool8 FinishReturn(struct FollowerSlot *s, struct ObjectEvent *owner);
+
 // Called every frame by mp_life_field.c while it's returning: once beside its Trainer, it follows again
 bool8 MP_Follower_AutoFinishReturn(void)
 {
-    struct FollowerSlot *s = &sSlots[0];
-    struct ObjectEvent *owner = LocalOwner();
+    return FinishReturn(&sSlots[0], LocalOwner());
+}
+
+static bool8 FinishReturn(struct FollowerSlot *s, struct ObjectEvent *owner)
+{
     s16 d;
     if (!s->autoOn || owner == NULL)
         return TRUE;
@@ -1149,6 +1159,95 @@ bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority)
 u16 MP_Follower_SlotDex(u8 slot)
 {
     return slot < NUM_SLOTS && sInit ? sSlots[slot].dex : 0;
+}
+
+// MOéMON GARDEN: a friend's follower on its own, as their game says (its tile beside them, its pose).
+// It walks there itself here, so it moves smoothly whatever the lag.
+static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState *st)
+{
+    struct ObjectEvent *owner;
+    if (obj >= OBJECT_EVENTS_COUNT || !s->gfx || !s->placed || !SpriteIsOurs(s))
+        return;
+    owner = &gObjectEvents[obj];
+    if (st->lifeDx != MP_LIFE_NO_AUTO)
+    {
+        struct Coords16 t;
+        t.x = owner->currentCoords.x + st->lifeDx;
+        t.y = owner->currentCoords.y + st->lifeDy;
+        if (!s->autoOn)
+        {
+            if (s->moved < 16)
+                return;   // its step first
+            s->autoOn = TRUE;
+            s->autoStuck = FALSE;
+            s->aPrev = s->aCur = s->aTarget = s->cur;
+            s->aMoved = 16;
+            s->aDir = s->dir;
+            s->aTimer = 0;
+        }
+        s->autoReturning = FALSE;
+        if (s->aTarget.x != t.x || s->aTarget.y != t.y)
+        {
+            s->aTarget = t;
+            s->autoStuck = FALSE;
+        }
+        s->aSpeed = 1;
+        if (s->aMoved >= 16 && s->aCur.x == t.x && s->aCur.y == t.y)
+        {
+            if (s->aPose != st->lifePose)
+            {
+                s->aPose = st->lifePose;
+                s->aTimer = 0;
+            }
+        }
+        else
+        {
+            s->aPose = LIFE_POSE_NONE;
+        }
+    }
+    else if (s->autoOn)
+    {
+        // back with its Trainer: walk to their side, then follow
+        if (!s->autoReturning)
+        {
+            struct Coords16 behind;
+            s->aTarget = CanStandBehind(owner, &behind) ? behind : s->aCur;
+            s->autoReturning = TRUE;
+            s->aSpeed = 2;
+            s->aPose = LIFE_POSE_NONE;
+        }
+        FinishReturn(s, owner);
+    }
+}
+
+// Where a follower stands now (its own tile while on its own)
+bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y)
+{
+    struct FollowerSlot *s;
+    if (!sInit || slot >= NUM_SLOTS)
+        return FALSE;
+    s = &sSlots[slot];
+    if (!s->gfx || !SpriteIsOurs(s) || !s->placed || gSprites[s->spriteId].invisible)
+        return FALSE;
+    *x = s->autoOn ? s->aCur.x : s->cur.x;
+    *y = s->autoOn ? s->aCur.y : s->cur.y;
+    return TRUE;
+}
+
+// The local follower's destination while on its own (FALSE: following)
+bool8 MP_Follower_AutoTargetTile(s16 *x, s16 *y)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    if (!sInit || !s->autoOn || s->autoReturning)
+        return FALSE;
+    *x = s->aTarget.x;
+    *y = s->aTarget.y;
+    return TRUE;
+}
+
+u8 MP_Follower_SlotPose(u8 slot)
+{
+    return sInit && slot < NUM_SLOTS && sSlots[slot].autoOn ? sSlots[slot].aPose : LIFE_POSE_NONE;
 }
 
 void MP_Follower_DebugDump(void)

@@ -28,6 +28,7 @@
 #include "tv.h"
 #include "mp_life_emote.h"
 #include "mp_life_battle.h"
+#include "mp_life_social.h"
 #include "constants/berry.h"
 #include "constants/characters.h"
 #include "constants/flags.h"
@@ -367,7 +368,140 @@ struct MpLifeRec *MP_Life_Get(struct BoxPokemon *box, bool8 create)
         MP_Life_NoteName(MP_Life_MonKey(personality, otId), name);
     }
     MPNet_Log("life: new record for species %u (%u records)", species, sRecCount);
+    // it may have lived somewhere else first (a trade, the shared PC): a friend's game may know its story
+    MP_LifeSocial_AskRecord(MP_Life_MonKey(personality, otId));
     return rec;
+}
+
+// ---------------------------------------------------------------------------
+// Records travel with their Pokémon (trades, the shared PC: docs 10)
+
+#define PACK_BONDS 24
+
+// [u16 recSize][u16 bondSize][u8 bonds][u8 nameLen] record, bonds, then a name (LIFE_NAME_LEN) per bond
+u16 MP_Life_PackRecord(u32 key, u8 *out, u16 max)
+{
+    struct MpLifeRec *rec = MP_Life_FindKey(key);
+    u16 pos = 6, i;
+    u8 n = 0;
+    if (rec == NULL || max < 6 + sizeof(*rec))
+        return 0;
+    out[0] = sizeof(*rec) & 0xFF; out[1] = sizeof(*rec) >> 8;
+    out[2] = sizeof(struct MpLifeBond) & 0xFF; out[3] = sizeof(struct MpLifeBond) >> 8;
+    out[5] = LIFE_NAME_LEN;
+    memcpy(out + pos, rec, sizeof(*rec));
+    pos += sizeof(*rec);
+    for (i = 0; i < sBondCount && n < PACK_BONDS; i++)
+    {
+        u8 name[LIFE_NAME_LEN];
+        if (sBonds[i].from != key)
+            continue;
+        if (pos + sizeof(struct MpLifeBond) + LIFE_NAME_LEN > max)
+            break;
+        memcpy(out + pos, &sBonds[i], sizeof(struct MpLifeBond));
+        pos += sizeof(struct MpLifeBond);
+        memset(name, 0, sizeof(name));
+        if (!MP_Life_NameOf(sBonds[i].to, name))
+            name[0] = EOS;
+        name[LIFE_NAME_LEN - 1] = EOS;
+        memcpy(out + pos, name, LIFE_NAME_LEN);
+        pos += LIFE_NAME_LEN;
+        n++;
+    }
+    out[4] = n;
+    return pos;
+}
+
+static u8 MemoryCount(const struct MpLifeRec *rec)
+{
+    u8 i, n = 0;
+    for (i = 0; i < LIFE_MEMORIES; i++)
+        n += rec->mem[i].kind != MEM_NONE;
+    return n;
+}
+
+// A record from a friend's game. A trade's is the latest word on that Pokémon; an answer to our question
+// only fills in a record we just made up for it (a Pokémon from the shared PC).
+bool8 MP_Life_UnpackRecord(const u8 *in, u16 len, bool8 traded, const u8 *fromTrainerName, u32 fromTrainerKey)
+{
+    u16 recSize, bondSize, pos = 6, i;
+    u8 n, nameLen;
+    struct MpLifeRec incoming, *rec;
+    u32 key, me = MP_Life_LocalTrainerKey();
+    if (!sLoaded || len < 6)
+        return FALSE;
+    recSize = in[0] | (in[1] << 8);
+    bondSize = in[2] | (in[3] << 8);
+    n = in[4];
+    nameLen = in[5];
+    if (recSize == 0 || bondSize == 0 || len < pos + recSize)
+        return FALSE;
+    memset(&incoming, 0, sizeof(incoming));
+    memcpy(&incoming, in + pos, recSize < sizeof(incoming) ? recSize : sizeof(incoming));
+    pos += recSize;
+    key = MP_Life_MonKey(incoming.personality, incoming.otId);
+    rec = MP_Life_FindKey(key);
+    if (rec && !traded && (rec->species != incoming.species || !(MemoryCount(rec) <= 1 && rec->createdMin + 30 >= MP_Life_PlayMinutes())))
+        return FALSE;   // ours already lived with us (or isn't that Pokémon at all): keep it
+    if (rec == NULL && (rec = NewRecSlot()) == NULL)
+        return FALSE;
+    *rec = incoming;
+    rec->version = LIFE_VERSION;
+    rec->flags &= ~LIFE_REC_IN_PARTY;
+    rec->lastPartyMark = MP_Life_ProgressMark();
+    rec->createdMin = rec->lastTickMin = MP_Life_PlayMinutes();
+    rec->known[0] = rec->known[1] = 0;   // a new Trainer gets to know it from the start
+    // its bonds: with its old Trainer, its old friends; never one with us from the other side
+    for (i = 0; i < n && pos + bondSize + nameLen <= len; i++)
+    {
+        struct MpLifeBond b, *d;
+        memset(&b, 0, sizeof(b));
+        memcpy(&b, in + pos, bondSize < sizeof(b) ? bondSize : sizeof(b));
+        pos += bondSize;
+        if (nameLen && in[pos] != EOS)
+        {
+            u8 name[LIFE_NAME_LEN];
+            u8 k;
+            for (k = 0; k < LIFE_NAME_LEN - 1 && k < nameLen && in[pos + k] != EOS; k++)
+                name[k] = in[pos + k];
+            name[k] = EOS;
+            if (b.to != me)
+                MP_Life_NoteName(b.to, name);
+        }
+        pos += nameLen;
+        if (b.from != key || b.to == 0)
+            continue;
+        if (b.to == fromTrainerKey && fromTrainerKey)
+            b.flags |= LIFE_BOND_TRAINER | LIFE_BOND_MET;   // its first Trainer: greeted warmly ever after
+        d = MP_Life_Bond(b.from, b.to, TRUE);
+        if (d)
+            *d = b;
+    }
+    if (fromTrainerName && fromTrainerKey)
+        MP_Life_NoteName(fromTrainerKey, fromTrainerName);
+    // and us, its Trainer now
+    if (MP_Life_Bond(key, me, FALSE) == NULL)
+    {
+        struct MpLifeBond *b = MP_Life_Bond(key, me, TRUE);
+        if (b)
+        {
+            b->flags |= LIFE_BOND_TRAINER | LIFE_BOND_MET;
+            b->v[BOND_FAMILIAR] = 10;
+        }
+    }
+    if (traded)
+        MP_Life_Remember(rec, MEM_MET, 200, TIER_PART, me, 3);
+    MPNet_Log("life: record for species %u from a friend (%s)", rec->species, traded ? "trade" : "shared");
+    return TRUE;
+}
+
+// A small step in one part of a bond (being around each other), up to a cap; not a shared experience
+void MP_Life_BondNudge(u32 from, u32 to, u8 part, u8 amount, u8 cap)
+{
+    struct MpLifeBond *b = MP_Life_Bond(from, to, TRUE);
+    if (b == NULL || part >= BOND_PARTS || b->v[part] >= cap)
+        return;
+    b->v[part] = b->v[part] + amount > cap ? cap : b->v[part] + amount;
 }
 
 static void DropRecord(u16 index)
@@ -1595,6 +1729,10 @@ void MP_Life_Debug(const char *args)
     {
         void MP_LifeField_Debug(void);
         MP_LifeField_Debug();
+    }
+    else if (strcmp(cmd, "social") == 0)
+    {
+        MP_LifeSocial_Debug(args + 7);
     }
     else if (strcmp(cmd, "battle") == 0)
     {

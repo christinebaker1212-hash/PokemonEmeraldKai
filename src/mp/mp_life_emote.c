@@ -84,6 +84,7 @@ struct EmoteSlot
     u8 spriteId;
     u8 icon;
     u16 timer;
+    u8 seq;         // counts emotes (sent to friends: a change shows it there)
 };
 static struct EmoteSlot sSlots[LIFE_EMOTE_SLOTS];
 static bool8 sInit;
@@ -196,9 +197,16 @@ void MP_LifeEmote_Show(u8 slot, u8 icon)
         return;
     sSlots[slot].icon = icon;
     sSlots[slot].timer = EMOTE_TIME;
+    sSlots[slot].seq++;
     if (SpriteIsOurs(&sSlots[slot]))
         StartSpriteAnim(&gSprites[sSlots[slot].spriteId], icon);
     MPNet_Log("life emote: slot %u icon %u", slot, icon);
+}
+
+u8 MP_LifeEmote_Seq(u8 slot)
+{
+    InitIfNeeded();
+    return slot < LIFE_EMOTE_SLOTS ? sSlots[slot].seq : 0;
 }
 
 u8 MP_LifeEmote_Current(u8 slot)

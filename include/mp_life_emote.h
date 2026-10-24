@@ -33,6 +33,7 @@ enum
 
 void MP_LifeEmote_Show(u8 slot, u8 icon);
 u8 MP_LifeEmote_Current(u8 slot);
+u8 MP_LifeEmote_Seq(u8 slot);
 void MP_LifeEmote_Place(u8 slot, bool8 visible, s16 x, s16 top, u8 subpriority);
 void MP_LifeEmote_HideAll(void);
 

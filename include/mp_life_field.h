@@ -31,6 +31,7 @@ enum
     LIFE_ACT_TYPE,      // its type need (soak, bask, dig...)
     LIFE_ACT_HINT,      // sniffing at something hidden
     LIFE_ACT_RETURN,
+    LIFE_ACT_MINGLE,    // with a friend's follower (or a friend) while the Trainers pause together
     LIFE_ACT_COUNT
 };
 
@@ -49,6 +50,9 @@ bool8 MP_Follower_LocalPos(s16 *x, s16 *y, u8 *dir);
 bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority);
 bool8 MP_Follower_CanStandAt(s16 x, s16 y);
 u16 MP_Follower_SlotDex(u8 slot);
+bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y);
+bool8 MP_Follower_AutoTargetTile(s16 *x, s16 *y);
+u8 MP_Follower_SlotPose(u8 slot);
 
 // mp_life_field.c
 void MP_LifeField_Update(void);          // every overworld frame, after the followers moved

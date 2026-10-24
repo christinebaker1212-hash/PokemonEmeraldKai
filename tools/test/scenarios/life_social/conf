@@ -1,0 +1,15 @@
+# MOéMON GARDEN among friends, at NA-JP lag. Both stand still in Oldale: ALICE's follower goes to meet BOB's
+# (a bond with it, in ALICE's save); her follower's heart bubble shows on BOB's screen; BOB pets her follower
+# (her game answers through its bond with BOB, never Friendship; BOB sees the answer); BOB puts on a new LOOK:
+# her follower does a double take (surprise, a sniff, recognition). Shots met (A), heart, answer (B).
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+DELAY=250
+JIT=80
+FPS=60
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+ENV_B="MOEMON_DEBUG_PARTY=283:15 MOEMON_DEBUG_PID_SALT=7"
+EXPECT_A=("life social: met player 2's follower (first time)" "life social: player 2 did verb 1: answer" "life social: double take (player 2)" "life social: double take done")
+EXPECT_B=("life emote: slot 1 icon 1" "life social: verb 1 to player 1" "life social: answer")

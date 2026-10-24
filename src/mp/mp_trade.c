@@ -10,6 +10,8 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_life.h"
+#include "mp_life_social.h"
 #include "pokedex.h"
 #include "mp_net.h"
 #include "field_weather.h"
@@ -499,6 +501,8 @@ static void ApplyTrade(void)
     // Give away ours (a held HM goes back to the BAG)
     if (sTrade.mine.monSlot != 0xFF)
     {
+        // MOéMON GARDEN: its life story goes with it (mp_life_social.c)
+        MP_LifeSocial_SendRecord(sTrade.partner, MP_Life_BoxKey(&gPlayerParty[sTrade.mine.monSlot].box), TRUE);
         MP_ReturnHeldHm(&gPlayerParty[sTrade.mine.monSlot]);
         ZeroMonData(&gPlayerParty[sTrade.mine.monSlot]);
         CompactPartySlots();

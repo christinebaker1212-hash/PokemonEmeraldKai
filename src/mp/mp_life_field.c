@@ -14,6 +14,7 @@
 #include "mp_life.h"
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
+#include "mp_life_social.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -58,6 +59,8 @@ struct Brain
     u16 hintedItem;     // the hidden item flag it last sniffed at (so it doesn't keep doing it)
     u16 frightCooldown;
     u32 personality;    // the follower this is about
+    u8 mingleId;        // the friend whose follower (or who) it went to meet
+    bool8 mingleGreet;  // ... the friend themself
 };
 static struct Brain sB;
 
@@ -380,7 +383,8 @@ static bool8 PlanTypeNeed(struct MpLifeRec *rec, u8 tneed)
     return TRUE;
 }
 
-static u8 sForceAct = 0xFF;   // mp life act N (tests): this activity next, if it can
+static u8 sForceAct = 0xFF;
+static struct { s16 x, y, fx, fy; u8 emote, pose; bool8 valid; } sMingle;   // where a meeting would be (ChooseActivity)   // mp life act N (tests): this activity next, if it can
 
 static void ChooseActivity(struct MpLifeRec *rec)
 {
@@ -399,6 +403,20 @@ static void ChooseActivity(struct MpLifeRec *rec)
     haveCompany = FindTile(Test_ByOwner, 1, &x, &y, &fx, &fy);
     haveQuiet = FindTile(Test_Apart, 4, &x, &y, &fx, &fy);
     haveHint = FindHiddenItem(&x, &y, &flag);
+    {
+        // friends pausing nearby: their followers (docs 7: when followers meet)
+        u8 mFriend, mEmote, mPose;
+        bool8 mGreet;
+        s16 mx, my, mfx, mfy;
+        sMingle.valid = FALSE;
+        if (MP_LifeSocial_MingleTarget(rec, &mFriend, &mx, &my, &mfx, &mfy, &mEmote, &mPose, &mGreet))
+        {
+            score[LIFE_ACT_MINGLE] = 40 + rec->cur[LIFE_SOCIAL] / 4 + rec->need[NEED_COMPANY] / 4 + (mGreet ? 60 : 0);
+            sB.mingleId = mFriend;
+            sB.mingleGreet = mGreet;
+            sMingle.x = mx; sMingle.y = my; sMingle.fx = mfx; sMingle.fy = mfy; sMingle.emote = mEmote; sMingle.pose = mPose; sMingle.valid = TRUE;
+        }
+    }
 
     score[LIFE_ACT_LOOK] = 20 + rec->cur[LIFE_CURIOUS] / 8;
     score[LIFE_ACT_WANDER] = 10 + rec->cur[LIFE_LIVELY] / 6 + rec->need[NEED_EXPLORE] / 6;
@@ -487,6 +505,10 @@ static void ChooseActivity(struct MpLifeRec *rec)
     case LIFE_ACT_TYPE:
         PlanTypeNeed(rec, tneed);
         break;
+    case LIFE_ACT_MINGLE:
+        if (sMingle.valid)
+            Plan(LIFE_ACT_MINGLE, sMingle.x, sMingle.y, sMingle.fx, sMingle.fy, 60 * 5, sMingle.pose, sMingle.emote);
+        break;
     case LIFE_ACT_HINT:
     {
         s16 hx, hy;
@@ -519,6 +541,7 @@ static void Satisfy(struct MpLifeRec *rec)
     case LIFE_ACT_NAP:     MP_Life_Satisfy(rec, NEED_REST, 10); MP_Life_Feel(rec, EMO_CALM, 2); break;
     case LIFE_ACT_PLAY:    MP_Life_Satisfy(rec, NEED_PLAY, 4); MP_Life_Feel(rec, EMO_JOY, 1); break;
     case LIFE_ACT_COMPANY: MP_Life_Satisfy(rec, NEED_COMPANY, 14); MP_Life_Feel(rec, EMO_AFFECTION, 1); break;
+    case LIFE_ACT_MINGLE:  MP_Life_Satisfy(rec, NEED_COMPANY, 14); MP_Life_Feel(rec, EMO_JOY, 1); break;
     case LIFE_ACT_QUIET:   MP_Life_Satisfy(rec, NEED_QUIET, 14); MP_Life_Feel(rec, EMO_CALM, 2); break;
     case LIFE_ACT_TYPE:    MP_Life_Satisfy(rec, NeedOfType(rec, sB.tneed), 16); MP_Life_Feel(rec, EMO_JOY, 1); break;
     case LIFE_ACT_WANDER:
@@ -570,6 +593,8 @@ static void RunActivity(struct MpLifeRec *rec)
             MP_Follower_AutoPose(sB.pose);
             if (sB.emote != LIFE_EMOTE_NONE)
                 MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, sB.emote);
+            if (sB.act == LIFE_ACT_MINGLE)
+                MP_LifeSocial_Met(sB.mingleId, sB.mingleGreet);
             if (sB.act == LIFE_ACT_PLAY)
             {
                 sB.inviting = TRUE;

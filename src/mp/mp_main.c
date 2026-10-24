@@ -23,6 +23,7 @@
 #include "constants/region_map_sections.h"
 #include "platform/gamepad.h"
 #include "mp_life_battle.h"
+#include "mp_life_social.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -601,6 +602,9 @@ static void PackState(const struct MpState *s, u8 *p)
     p[22] = s->light;
     p[23] = s->followerFx >> 16;
     PutU16(p + 24, (u16)s->followerHue);
+    PutU32(p + 26, s->followerKey);
+    p[30] = s->lifeAct; p[31] = s->lifePose; p[32] = (u8)s->lifeDx; p[33] = (u8)s->lifeDy;
+    p[34] = s->lifeEmote; p[35] = s->lifeEmoteSeq;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -614,6 +618,9 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
     s->light = p[22];
     s->followerHue = (s16)GetU16(p + 24);
+    s->followerKey = GetU32(p + 26);
+    s->lifeAct = p[30]; s->lifePose = p[31]; s->lifeDx = (s8)p[32]; s->lifeDy = (s8)p[33];
+    s->lifeEmote = p[34]; s->lifeEmoteSeq = p[35];
 }
 
 #define APPEARANCE_SIZE 32
@@ -846,6 +853,7 @@ static void CollectLocalState(struct MpState *s)
         s->followerHue = s->followerDex ? MP_Follower_LocalHue() : 0;
         s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0);
     }
+    MP_LifeSocial_CollectState(s);   // MOéMON GARDEN: the follower's own life
     sLastLocalState = *s;
 }
 
@@ -856,7 +864,8 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
         || a->speed != b->speed || a->flags != b->flags || a->topLevel != b->topLevel
         || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags
         || a->followerFx != b->followerFx || a->followerHue != b->followerHue
-        || a->badges != b->badges;
+        || a->badges != b->badges || a->followerKey != b->followerKey || a->lifeAct != b->lifeAct
+        || a->lifePose != b->lifePose || a->lifeDx != b->lifeDx || a->lifeDy != b->lifeDy || a->lifeEmoteSeq != b->lifeEmoteSeq;
 }
 
 static void SendLocalState(bool8 force)
@@ -1162,6 +1171,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sHostClockHeard = TRUE;
         }
     }
+    else if (data[0] >= MPR_LIFE_FIRST && data[0] < MPR_LIFE_FIRST + 3)
+        MP_LifeSocial_OnRelay(from, data, len);
     else if (data[0] == MPR_PING)
         MP_Ping_OnRelay(from, data, len);
     else if (data[0] == MPR_PHOTO)
@@ -1683,6 +1694,7 @@ void MP_FrameUpdate(void)
     MP_Qol_Update();
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)
+    MP_LifeSocial_Update();     // ... and among friends (mp_life_social.c)
     MP_SharedBox_Update();      // the shared PC's boxes: what changed goes to the server
     MP_Social_Update();
     MP_Together_Update();

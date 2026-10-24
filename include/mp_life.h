@@ -320,6 +320,9 @@ u8 MP_Life_PressingNeed(struct MpLifeRec *rec, u8 *amount);  // its strongest ne
 struct MpLifeBond *MP_Life_Bond(u32 from, u32 to, bool8 create);
 void MP_Life_BondShare(u32 from, u32 to, s8 familiar, s8 trust, s8 affection, s8 respect, s8 friction);
 int MP_Life_BondWarmth(const struct MpLifeBond *b);  // a rough "how much it likes them" for choices
+void MP_Life_BondNudge(u32 from, u32 to, u8 part, u8 amount, u8 cap);
+u16 MP_Life_PackRecord(u32 key, u8 *out, u16 max);   // a record and its bonds for a friend's game (0 = none)
+bool8 MP_Life_UnpackRecord(const u8 *in, u16 len, bool8 traded, const u8 *fromTrainerName, u32 fromTrainerKey);
 void MP_Life_Closest(u32 from, u32 *friendKey, u32 *rivalKey, u32 *familyKey, u32 *favoriteKey);   // 0 = none
 
 // The places it knows (by map section: towns, routes, caves; region-independent)

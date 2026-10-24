@@ -127,7 +127,11 @@ void MP_DebugQuickStartNewGame(void)
         int species = 0, level = 5;
         if (sscanf(tok, "%d:%d", &species, &level) >= 1 && species > 0 && species < NUM_SPECIES)
         {
-            CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+            if (getenv("MOEMON_DEBUG_PID_SALT"))   // tests with two players: Pokémon of their own (MOéMON GARDEN keys)
+                CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, TRUE,
+                          (u32)strtoul(getenv("MOEMON_DEBUG_PID_SALT"), NULL, 0) * 2654435761u + slot, OT_ID_PLAYER_ID, 0);
+            else
+                CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
             if (strchr(tok, '+') && level < MAX_LEVEL) // "280:15+" = one exp point short of the next level
             {
                 u32 exp = gExperienceTables[gSpeciesInfo[species].growthRate][level + 1] - 1;

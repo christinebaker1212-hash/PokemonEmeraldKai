@@ -154,7 +154,15 @@ struct MpState
     s16 followerHue;   // its Stadium hue in degrees (mp_hue.c; 0 = its own colors)
     u8 badges;         // how many gym badges (catch-up bonus)
     u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
+    // MOéMON GARDEN (mp_life_social.c): who the follower is and what it's doing on its own
+    u32 followerKey;   // MP_Life_MonKey (0 = none)
+    u8 lifeAct;        // LIFE_ACT_*
+    u8 lifePose;       // LIFE_POSE_*
+    s8 lifeDx, lifeDy; // its own tile, from its Trainer's (MP_LIFE_NO_AUTO: following)
+    u8 lifeEmote;      // its Pokémon emote bubble (LIFE_EMOTE_*, 0xFF none)
+    u8 lifeEmoteSeq;   // counts emotes (a change shows it)
 };
+#define MP_LIFE_NO_AUTO 127
 
 
 struct MpPlayer
@@ -1053,7 +1061,8 @@ enum {
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
     MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed (mp_main.c)
-    MPR_CLOCK = 96,            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
+    MPR_CLOCK = 96,
+    MPR_LIFE_FIRST = 97,       // MOéMON GARDEN: 97 verb on a friend's follower, 98 its answer, 99 a record (mp_life_social.c)            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,
     MPR_TRADE_FIRST = 100,     // trading (mp_trade.c)
     MPR_GIFT_FIRST = 110,      // daily gifts (mp_gift.c)

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+waitfor online 6000
+mp follow 0
+wait 400
+barrier start 2
+mp life social trainerbond 1 60
+waitlog 4000 life emote: slot 1 icon 1
+wait 30
+shot heart
+barrier verb 2
+mp life social verb 1 1
+waitlog 4000 life social: answer
+wait 240
+shot answer
+pressuntil B field 900
+barrier look 2
+wait 30
+mp sprite kai_serena
+wait 600
+quit

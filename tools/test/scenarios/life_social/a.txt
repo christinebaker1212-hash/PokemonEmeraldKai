@@ -1,0 +1,25 @@
+pressuntil A field 5000
+waitfor online 6000
+mp follow 0
+wait 400
+barrier start 2
+mp life social trainerbond 2 60
+wait 200
+mp life temper 0 4 240
+mp life need 0 4 250
+wait 300
+mp life social mingle
+waitlog 5000 life social: met player 2
+wait 60
+shot met
+mp life emote 1
+wait 120
+mp life social bonds
+barrier verb 2
+waitlog 4000 life social: player 2 did verb
+wait 200
+barrier look 2
+waitlog 4000 life social: double take done
+wait 60
+mp life social bonds
+quit
