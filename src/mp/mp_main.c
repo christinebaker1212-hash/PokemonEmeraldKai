@@ -1681,6 +1681,7 @@ void MP_FrameUpdate(void)
         MP_Init();
     MP_Qol_Update();
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
+    MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)
     MP_SharedBox_Update();      // the shared PC's boxes: what changed goes to the server
     MP_Social_Update();
     MP_Together_Update();

@@ -57,6 +57,7 @@ enum {
     PSS_PAGE_BATTLE_MOVES,
     PSS_PAGE_CONTEST_MOVES,
     PSS_PAGE_BALL,          // Moemon Co-op: the Moemon's POKé BALL (type, color, decoration)
+    PSS_PAGE_JOURNAL,       // Moemon Co-op: MOéMON GARDEN, its journal (mp_life_journal.c)
     PSS_PAGE_COUNT,
 };
 
@@ -213,6 +214,12 @@ static void MpBall_ShowPage(void);
 static void MpBall_HidePage(void);
 static void MpBall_HideTitle(void);
 static void MpBall_BuildPageTilemap(void);
+static void MpJournal_InitWindows(void);
+static void MpJournal_ShowPage(void);
+static void MpJournal_HidePage(void);
+static void MpJournal_HideTitle(void);
+static bool8 MpJournal_HandleInput(u8 taskId);
+static void MpJournal_Free(void);
 static void PrintTextOnWindow(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId);
 static void Task_HandleInput(u8);
 static void ChangeSummaryPokemon(u8, s8);
@@ -743,6 +750,8 @@ static const u8 sButtons_Gfx[][4 * TILE_SIZE_4BPP] = {
 
 static void MpBall_PrintPage(void);
 static void Task_MpBall_PrintPage(u8 taskId);
+static void MpJournal_PrintPage(void);
+static void Task_MpJournal_PrintPage(u8 taskId);
 static void (*const sTextPrinterFunctions[])(void) =
 {
     [PSS_PAGE_INFO] = PrintInfoPageText,
@@ -750,6 +759,7 @@ static void (*const sTextPrinterFunctions[])(void) =
     [PSS_PAGE_BATTLE_MOVES] = PrintBattleMoves,
     [PSS_PAGE_CONTEST_MOVES] = PrintContestMoves,
     [PSS_PAGE_BALL] = MpBall_PrintPage,
+    [PSS_PAGE_JOURNAL] = MpJournal_PrintPage,
 };
 
 static const TaskFunc sTextPrinterTasks[] =
@@ -759,6 +769,7 @@ static const TaskFunc sTextPrinterTasks[] =
     [PSS_PAGE_BATTLE_MOVES] = Task_PrintBattleMoves,
     [PSS_PAGE_CONTEST_MOVES] = Task_PrintContestMoves,
     [PSS_PAGE_BALL] = Task_MpBall_PrintPage,
+    [PSS_PAGE_JOURNAL] = Task_MpJournal_PrintPage,
 };
 
 static const u8 sMemoNatureTextColor[] = _("{COLOR LIGHT_RED}{SHADOW GREEN}");
@@ -1354,19 +1365,36 @@ static void InitBGs(void)
 
 // Moemon Co-op: the POKé BALL page's background is the INFO page's right
 // panel with its three bar labels blanked (the page prints its own)
-static void MpBall_BuildPageTilemap(void)
+static void MpPanel_BuildPageTilemap(u8 page)
 {
-    u16 *dst = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL][1];
+    u16 *dst = sMonSummaryScreen->bgTilemapBuffers[page][1];
     const u16 *src = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0];
     static const u8 sBarRows[] = {3, 8, 13};
     u8 x, y, i;
-    memset(sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL], 0, sizeof(sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_BALL]));
+    memset(sMonSummaryScreen->bgTilemapBuffers[page], 0, sizeof(sMonSummaryScreen->bgTilemapBuffers[page]));
     for (y = 2; y < 20; y++)
         for (x = 10; x < 30; x++)
             dst[y * 32 + x] = src[y * 32 + x];
     for (i = 0; i < ARRAY_COUNT(sBarRows); i++)
         for (x = 12; x <= 20; x++)
             dst[sBarRows[i] * 32 + x] = src[sBarRows[i] * 32 + 21];
+}
+
+static void MpBall_BuildPageTilemap(void)
+{
+    u16 *dst = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_JOURNAL][1];
+    const u16 *src = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0];
+    u8 x, y;
+    MpPanel_BuildPageTilemap(PSS_PAGE_BALL);
+    // The journal: one lined sheet under the top bar, green and white rows of 16 pixels like the
+    // INFO page's (rows 4-7 of that page are one green row and one white row)
+    MpPanel_BuildPageTilemap(PSS_PAGE_JOURNAL);
+    for (y = 4; y < 20; y++)
+    {
+        u8 from = 4 + ((y - 4) & 3);   // 4, 5 green; 6, 7 white
+        for (x = 10; x < 30; x++)
+            dst[y * 32 + x] = src[from * 32 + (x == 27 ? 26 : x)];
+    }
 }
 
 static bool8 DecompressGraphics(void)
@@ -1555,6 +1583,7 @@ static void FreeSummaryScreen(void)
 {
     FreeAllWindowBuffers();
     Free(sMonSummaryScreen);
+    MpJournal_Free();   // Moemon Co-op
 }
 
 // ---------------------------------------------------------------------------
@@ -1683,6 +1712,8 @@ static void Task_HandleInput(u8 taskId)
 {
     if (MenuHelpers_ShouldWaitForLinkRecv() != TRUE && !gPaletteFade.active)
     {
+        if (sMonSummaryScreen->currPageIndex == PSS_PAGE_JOURNAL && MpJournal_HandleInput(taskId))
+            return;
         if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BALL && MpBall_HandleInput(taskId))
             return;
         if (JOY_NEW(DPAD_UP))
@@ -3186,6 +3217,234 @@ static void Task_MpBall_PrintPage(u8 taskId)
     DestroyTask(taskId);
 }
 
+// ---------------------------------------------------------------------------
+// Moemon Co-op: MOéMON GARDEN, the JOURNAL page (mp_life_journal.c): plain sentences the Trainer has
+// learned about the Moemon, a page at a time (A turns the page). Same windows' place as the POKé BALL
+// page (never on screen together).
+
+static const struct WindowTemplate sMpJournalTitleTemplate = {
+    .bg = 0, .tilemapLeft = 0, .tilemapTop = 0, .width = 11, .height = 2, .paletteNum = 6, .baseBlock = 740,
+};
+static const struct WindowTemplate sMpJournalBodyTemplate = {
+    .bg = 0, .tilemapLeft = 11, .tilemapTop = 4, .width = 18, .height = 16, .paletteNum = 6, .baseBlock = 450,
+};
+
+#define MPJ_ROWS     8       // rows on a page (the last one: the page count)
+#define MPJ_ROW_H    16      // one green or white row of the sheet
+#define MPJ_WIDTH    140     // pixels a row may take
+
+static EWRAM_DATA struct
+{
+    u8 titleWindow;
+    u8 bodyWindow;
+    u8 page;
+    u8 pages;
+    u8 rowCount;
+    u8 rows[48][LIFE_JOURNAL_TEXT];   // wrapped rows; a fact's first row starts with a bullet
+} *sMpJournal = NULL;
+
+static const u8 sMpJournalText_Title[] = _("JOURNAL");
+static const u8 sMpJournalText_NoRecord[] = _("Spend time together in your party to get to know it.");
+static const u8 sMpJournalText_More[] = _("{A_BUTTON} more");
+
+static void MpJournal_InitWindows(void)
+{
+    if (sMpJournal == NULL)
+        sMpJournal = AllocZeroed(sizeof(*sMpJournal));
+    if (sMpJournal == NULL)
+        return;
+    sMpJournal->titleWindow = AddWindow(&sMpJournalTitleTemplate);
+    sMpJournal->bodyWindow = AddWindow(&sMpJournalBodyTemplate);
+    sMpJournal->page = 0;
+    if (sMpJournal->titleWindow != WINDOW_NONE)
+    {
+        FillWindowPixelBuffer(sMpJournal->titleWindow, PIXEL_FILL(0));
+        PrintTextOnWindow(sMpJournal->titleWindow, sMpJournalText_Title, 2, 1, 0, 1);
+    }
+}
+
+static void MpJournal_HideTitle(void)
+{
+    if (sMpJournal && sMpJournal->titleWindow != WINDOW_NONE)
+        ClearWindowTilemap(sMpJournal->titleWindow);
+}
+
+// Wraps one sentence into rows of at most MPJ_WIDTH pixels (the first row gets a bullet)
+static void MpJournal_Wrap(const u8 *text)
+{
+    u8 row[LIFE_JOURNAL_TEXT];
+    u16 start = 0, len = StringLength(text);
+    bool8 first = TRUE;
+    while (start < len && sMpJournal->rowCount < ARRAY_COUNT(sMpJournal->rows))
+    {
+        u16 end = start, fit = start;
+        while (end < len)
+        {
+            u16 next = end;
+            while (next < len && text[next] == CHAR_SPACE)
+                next++;
+            while (next < len && text[next] != CHAR_SPACE)
+                next++;
+            {
+                u16 n = next - start;
+                u8 *r = row;
+                if (first)
+                    *r++ = CHAR_HYPHEN, *r++ = CHAR_SPACE;
+                else
+                    *r++ = CHAR_SPACE, *r++ = CHAR_SPACE;
+                memcpy(r, &text[start], n);
+                r[n] = EOS;
+                if (GetStringWidth(FONT_NARROW, row, 0) > MPJ_WIDTH && fit != start)
+                    break;
+            }
+            fit = end = next;
+        }
+        {
+            u8 *r = sMpJournal->rows[sMpJournal->rowCount++];
+            u16 n = fit - start;
+            if (first)
+                *r++ = CHAR_HYPHEN, *r++ = CHAR_SPACE;
+            else
+                *r++ = CHAR_SPACE, *r++ = CHAR_SPACE;
+            memcpy(r, &text[start], n);
+            r[n] = EOS;
+        }
+        start = fit;
+        while (start < len && text[start] == CHAR_SPACE)
+            start++;
+        first = FALSE;
+    }
+}
+
+static void MpJournal_Build(void)
+{
+    static u8 lines[LIFE_JOURNAL_LINES][LIFE_JOURNAL_TEXT];
+    struct BoxPokemon *box = &sMonSummaryScreen->currentMon.box;
+    u8 n, i;
+    sMpJournal->rowCount = 0;
+    n = MP_Life_Journal(box, lines, LIFE_JOURNAL_LINES);
+    if (n == 0)
+        MpJournal_Wrap(sMpJournalText_NoRecord);
+    for (i = 0; i < n; i++)
+    {
+        // keep a sentence on one page: if it wouldn't fit what's left, it starts the next page
+        u8 before = sMpJournal->rowCount;
+        MpJournal_Wrap(lines[i]);
+        if (before % (MPJ_ROWS - 1) != 0 && before / (MPJ_ROWS - 1) != (sMpJournal->rowCount - 1) / (MPJ_ROWS - 1)
+         && sMpJournal->rowCount - before < MPJ_ROWS - 1)
+        {
+            // move the sentence's rows to the start of the next page
+            u8 pad = (MPJ_ROWS - 1) - before % (MPJ_ROWS - 1), k;
+            u8 count = sMpJournal->rowCount - before;
+            if (sMpJournal->rowCount + pad <= ARRAY_COUNT(sMpJournal->rows))
+            {
+                for (k = count; k-- > 0;)
+                    memcpy(sMpJournal->rows[before + pad + k], sMpJournal->rows[before + k], LIFE_JOURNAL_TEXT);
+                for (k = 0; k < pad; k++)
+                    sMpJournal->rows[before + k][0] = EOS;
+                sMpJournal->rowCount += pad;
+            }
+        }
+    }
+    sMpJournal->pages = (sMpJournal->rowCount + MPJ_ROWS - 2) / (MPJ_ROWS - 1);
+    if (sMpJournal->pages == 0)
+        sMpJournal->pages = 1;
+    if (sMpJournal->page >= sMpJournal->pages)
+        sMpJournal->page = 0;
+}
+
+static void MpJournal_Draw(void)
+{
+    u8 i, w = sMpJournal->bodyWindow;
+    if (w == WINDOW_NONE)
+        return;
+    FillWindowPixelBuffer(w, PIXEL_FILL(0));
+    for (i = 0; i < MPJ_ROWS - 1; i++)
+    {
+        u16 r = sMpJournal->page * (MPJ_ROWS - 1) + i;
+        if (r >= sMpJournal->rowCount)
+            break;
+        if (sMpJournal->rows[r][0] != EOS)
+            AddTextPrinterParameterized4(w, FONT_NARROW, 2, 1 + i * MPJ_ROW_H, 0, 0, sTextColors[0], TEXT_SKIP_DRAW, sMpJournal->rows[r]);
+    }
+    if (sMpJournal->pages > 1)
+    {
+        u8 text[24];
+        u8 *end = StringCopy(text, sMpJournalText_More);
+        *end++ = CHAR_SPACE;
+        end = ConvertIntToDecimalStringN(end, sMpJournal->page + 1, STR_CONV_MODE_LEFT_ALIGN, 2);
+        *end++ = CHAR_SLASH;
+        ConvertIntToDecimalStringN(end, sMpJournal->pages, STR_CONV_MODE_LEFT_ALIGN, 2);
+        AddTextPrinterParameterized4(w, FONT_NARROW, 144 - 2 - GetStringWidth(FONT_NARROW, text, 0), 1 + (MPJ_ROWS - 1) * MPJ_ROW_H,
+                                     0, 0, sTextColors[1], TEXT_SKIP_DRAW, text);
+    }
+    PutWindowTilemap(w);
+    CopyWindowToVram(w, COPYWIN_FULL);
+}
+
+static void MpJournal_ShowPage(void)
+{
+    if (sMpJournal == NULL)
+        return;
+    if (sMpJournal->titleWindow != WINDOW_NONE)
+    {
+        PutWindowTilemap(sMpJournal->titleWindow);
+        CopyWindowToVram(sMpJournal->titleWindow, COPYWIN_FULL);
+    }
+    PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+    sMpJournal->page = 0;
+    MpJournal_Build();
+    MpJournal_Draw();
+    MPNet_Log("journal: shown, %u rows, %u pages", sMpJournal->rowCount, sMpJournal->pages);
+}
+
+static void MpJournal_HidePage(void)
+{
+    if (sMpJournal == NULL)
+        return;
+    if (sMpJournal->bodyWindow != WINDOW_NONE)
+        ClearWindowTilemap(sMpJournal->bodyWindow);
+    ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+    MpJournal_HideTitle();
+}
+
+static void MpJournal_PrintPage(void)
+{
+    // Drawn when the page is shown; a new Moemon (UP / DOWN) redraws it
+    if (sMpJournal && sMonSummaryScreen->currPageIndex == PSS_PAGE_JOURNAL)
+    {
+        sMpJournal->page = 0;
+        MpJournal_Build();
+        MpJournal_Draw();
+    }
+}
+
+static void Task_MpJournal_PrintPage(u8 taskId)
+{
+    DestroyTask(taskId);
+}
+
+static void MpJournal_Free(void)
+{
+    if (sMpJournal != NULL)
+    {
+        Free(sMpJournal);
+        sMpJournal = NULL;
+    }
+}
+
+// A turns the page (TRUE = the input was used)
+static bool8 MpJournal_HandleInput(u8 taskId)
+{
+    if (sMpJournal == NULL || !JOY_NEW(A_BUTTON) || sMpJournal->pages <= 1)
+        return FALSE;
+    sMpJournal->page = (sMpJournal->page + 1) % sMpJournal->pages;
+    PlaySE(SE_SELECT);
+    MpJournal_Draw();
+    MPNet_Log("journal: page %u of %u", sMpJournal->page + 1, sMpJournal->pages);
+    return TRUE;
+}
+
 static void MpBall_RefreshCaughtBall(void)
 {
     if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL] != SPRITE_NONE)
@@ -3388,6 +3647,7 @@ static void ResetWindows(void)
     InitWindows(sSummaryTemplate);
     sMpPromptWindow = AddWindow(&sMpPromptWindowTemplate);
     MpBall_InitWindows();
+    MpJournal_InitWindows();
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
@@ -3560,11 +3820,15 @@ static void PutPageWindowTilemaps(u8 page)
     ClearWindowTilemap(PSS_LABEL_WINDOW_BATTLE_MOVES_TITLE);
     ClearWindowTilemap(PSS_LABEL_WINDOW_CONTEST_MOVES_TITLE);
     MpBall_HideTitle();
+    MpJournal_HideTitle();
 
     switch (page)
     {
     case PSS_PAGE_BALL:
         MpBall_ShowPage();
+        break;
+    case PSS_PAGE_JOURNAL:
+        MpJournal_ShowPage();
         break;
     case PSS_PAGE_INFO:
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
@@ -3620,6 +3884,9 @@ static void ClearPageWindowTilemaps(u8 page)
     {
     case PSS_PAGE_BALL:
         MpBall_HidePage();
+        break;
+    case PSS_PAGE_JOURNAL:
+        MpJournal_HidePage();
         break;
     case PSS_PAGE_INFO:
         ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);

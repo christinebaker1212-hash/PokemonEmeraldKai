@@ -364,6 +364,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "life") == 0)
+    {
+        // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
+        MP_Life_Debug(arg);
+    }
     else if (strcmp(cmd, "dexcheck") == 0)
     {
         // dexcheck [NATIONAL_NUMBER]: every species' long Pokedex text built and checked (pokedex.c)

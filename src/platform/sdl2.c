@@ -393,10 +393,11 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
+    static const char *const sSidecars[] = {"bag", "life"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;
-    int i;
+    int i, k;
     FILE *in, *out;
     if (sDone && SDL_GetTicks() - sLastBackup < 10 * 60 * 1000)
         return;
@@ -418,11 +419,14 @@ static void BackUpSaveFile(void)
         snprintf(to, sizeof(to), "%s.bak%d", gPlatformSavePath, i);
         remove(to);
         rename(from, to);
-        // the bigger BAG's extra slots go with their save (mp_bag.c finds them by the save's counter)
-        snprintf(from, sizeof(from), "%s.bak%d.bag", gPlatformSavePath, i - 1);
-        snprintf(to, sizeof(to), "%s.bak%d.bag", gPlatformSavePath, i);
-        remove(to);
-        rename(from, to);
+        // the sidecars go with their save (mp_bag.c, mp_life.c find theirs by the save's counter)
+        for (k = 0; k < 2; k++)
+        {
+            snprintf(from, sizeof(from), "%s.bak%d.%s", gPlatformSavePath, i - 1, sSidecars[k]);
+            snprintf(to, sizeof(to), "%s.bak%d.%s", gPlatformSavePath, i, sSidecars[k]);
+            remove(to);
+            rename(from, to);
+        }
     }
     snprintf(to, sizeof(to), "%s.bak1", gPlatformSavePath);
     out = fopen(to, "wb");
@@ -433,20 +437,23 @@ static void BackUpSaveFile(void)
         fclose(out);
     }
     fclose(in);
-    snprintf(from, sizeof(from), "%s.bag", gPlatformSavePath);
-    snprintf(to, sizeof(to), "%s.bak1.bag", gPlatformSavePath);
-    remove(to);
-    in = fopen(from, "rb");
-    if (in != NULL)
+    for (k = 0; k < 2; k++)
     {
-        out = fopen(to, "wb");
-        if (out != NULL)
+        snprintf(from, sizeof(from), "%s.%s", gPlatformSavePath, sSidecars[k]);
+        snprintf(to, sizeof(to), "%s.bak1.%s", gPlatformSavePath, sSidecars[k]);
+        remove(to);
+        in = fopen(from, "rb");
+        if (in != NULL)
         {
-            while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
-                fwrite(buf, 1, n, out);
-            fclose(out);
+            out = fopen(to, "wb");
+            if (out != NULL)
+            {
+                while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
+                    fwrite(buf, 1, n, out);
+                fclose(out);
+            }
+            fclose(in);
         }
-        fclose(in);
     }
 }
 
@@ -459,6 +466,7 @@ static void StoreSaveFile()
         fwrite(FLASH_BASE, 1, sizeof(FLASH_BASE), sSaveFile);
     }
     MP_Bag_WriteSidecar();   // Moemon Co-op: the pockets' slots past the save block's (mp_bag.c)
+    MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
 }
 
 void Platform_StoreSaveFile(void)

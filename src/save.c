@@ -900,6 +900,7 @@ u8 LoadGameSave(u8 saveType)
         CopyPartyAndObjectsFromSave();
         if (status == SAVE_STATUS_OK)
             MP_Bag_LoadFromSave();   // Moemon Co-op: the bigger pockets (mp_bag.c)
+            MP_Life_LoadFromSave();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
         gSaveFileStatus = status;
         gGameContinueCallback = NULL;
         break;

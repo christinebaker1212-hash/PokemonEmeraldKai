@@ -200,6 +200,7 @@ void NewGameInitData(void)
     ClearRoamerLocationData();
     gSaveBlock1Ptr->registeredItem = ITEM_NONE;
     ClearBag();
+    MP_Life_Reset();   // Moemon Co-op: MOéMON GARDEN, a new game's Pokémon start new lives (mp_life.c)
     NewGameInitPCItems();
     ClearPokeblocks();
     ClearDecorationInventories();

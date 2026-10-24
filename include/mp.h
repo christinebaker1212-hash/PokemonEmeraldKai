@@ -1289,4 +1289,6 @@ u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));
 
+#include "mp_life.h"   // MOéMON GARDEN, the A-Life
+
 #endif // GUARD_MP_H
