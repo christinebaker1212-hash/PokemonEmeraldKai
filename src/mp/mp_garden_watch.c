@@ -138,21 +138,14 @@ static void PickFocus(void)
         sW.timer = 0;
         if (MP_GardenLife_Info(pick, &x, &y, &act, &phase, &partner, &dex, &owner, &key) && owner < 0)
         {
-            // what you see fills in journals
+            // what you see fills in journals (now and then: MP_Life_Observe); what it's doing right there, at once
             struct MpLifeRec *rec = MP_Life_FindKey(key);
             if (rec)
             {
-                u8 tries;
-                for (tries = 0; tries < 8; tries++)
-                {
-                    u8 fact = Random() % LIFE_AXES;
-                    if (!(rec->known[0] & (1u << LIFE_FACT_TEMPER(fact))))
-                    {
-                        MP_Life_Reveal(rec, LIFE_FACT_TEMPER(fact));
-                        break;
-                    }
-                }
-                if ((rec->favDecor >> 8) >= 5)
+                struct BoxPokemon *box = MP_Life_PartyBox(key);
+                if (box)
+                    MP_Life_Observe(box);
+                if ((rec->favDecor >> 8) >= 5 && (act == GA_DECOR || act == LIFE_ACT_NAP))
                     MP_Life_Reveal(rec, LIFE_FACT_DECOR);
                 if (rec->pursuit && act == GA_PURSUIT)
                     MP_Life_Reveal(rec, LIFE_FACT_PURSUIT);

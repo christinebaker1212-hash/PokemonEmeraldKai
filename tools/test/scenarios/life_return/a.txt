@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+wait 30
+mp life temper 0 2 220
+mp life temper 0 3 230
+mp life act 2
+waitlog 900 life field: act 2
+wait 120
+mp life field
+shot off
+press UP 48
+shot running
+wait 90
+mp life field
+shot behind
+mp life act 3
+waitlog 900 life field: act 3
+wait 200
+mp life field
+press DOWN 64
+wait 90
+mp life field
+mp life act 2
+waitlog 900 life field: act 2
+wait 120
+mp life field
+press RIGHT 80
+wait 90
+mp life field
+quit

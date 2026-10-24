@@ -261,7 +261,7 @@ struct MpLifeRec
     s8 taste[5];            // FLAVOR_*: -100 dislikes .. 100 loves
     u8 pursuit;             // LIFE_PURSUIT_* it took up (0 = none)
     u8 pursuitLevel;
-    u8 pad0;
+    u8 watchMark;           // when watching last taught something (MP_Life_Observe; 0 = never)
     u16 keepsake;           // item it was given and keeps
     u16 favDecor;           // its favorite Garden decoration (0 = none)
     u16 lastPartyMark;      // the adventure's progress when it was last with its Trainer
@@ -400,6 +400,10 @@ bool8 MP_Life_NameOf(u32 key, u8 *out);   // FALSE when unknown
 #define LIFE_JOURNAL_LINES 16
 #define LIFE_JOURNAL_TEXT  96
 u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max);
+// Watching it (WATCH QUIETLY, the GARDEN's WATCH): something about it the Trainer can see for themselves (its
+// temperament, what it loves doing, its pursuit; never its past), at most once per half hour of play for each
+// Pokémon. TRUE: a new journal line.
+bool8 MP_Life_Observe(struct BoxPokemon *box);
 void MP_Life_Reveal(struct MpLifeRec *rec, u8 fact);
 u8 MP_Life_JournalKnownCount(void);   // known lines in the last journal built (no "???" line)
 

@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MP_PROTOCOL_VERSION   // -D only to build an "other version" server for tests
-#define MP_PROTOCOL_VERSION 42   // 42: MOéMON GARDEN long-term life (Garden activities GA_PURSUIT / RARE / REACT / SONG in the actor relay); 41: MOéMON GARDEN (wire state 36 bytes: follower key, its activity, pose, own tile and emote; MPR_LIFE_VERB / REPLY / RECORD / ASK); 40: LOOK > BIKE moves to appearance byte 27 (26 is the CREATE recipe's FIELD HAIR), BATTLE FLAG phrases (MPR_ARRIVED / BATTLE_GO carry 3 x 6 easy chat words, MPR_PHRASE_READY), the loser keeps their money, catch EXP (co-op: a catch evolves like a win); 39: characters from Moemon's other branch (graphics ids 0x9000+, appearance byte 26 = LOOK > BIKE), 127 ID / 107 BACK pictures more; 38: co-op against two trainers (ACCEPT: second trainer + lose text; WAIT: a second NPC), held trainers spot friends, waiting players merge; 37: a follower's Stadium hue in the wire state (26 bytes); 36: shared PC as 14 boxes of 30 (BOX_GET / TXN / CURSOR); 35: items 389-398 (QUICK POWDER, EVIOLITE, treats, CANDY JAR); 34: joining a battle in progress (mp_join.c); 33: SPECTATE panel (screens any time, scroll shifts, palette tiles); 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
+#define MP_PROTOCOL_VERSION 43   // 43: followers on their own and Garden Pokémon replay their owner's exact steps and facing (wire state 39 bytes: lifePx / lifePy / lifeFace; Garden actors 18 bytes); 42: MOéMON GARDEN long-term life (Garden activities GA_PURSUIT / RARE / REACT / SONG in the actor relay); 41: MOéMON GARDEN (wire state 36 bytes: follower key, its activity, pose, own tile and emote; MPR_LIFE_VERB / REPLY / RECORD / ASK); 40: LOOK > BIKE moves to appearance byte 27 (26 is the CREATE recipe's FIELD HAIR), BATTLE FLAG phrases (MPR_ARRIVED / BATTLE_GO carry 3 x 6 easy chat words, MPR_PHRASE_READY), the loser keeps their money, catch EXP (co-op: a catch evolves like a win); 39: characters from Moemon's other branch (graphics ids 0x9000+, appearance byte 26 = LOOK > BIKE), 127 ID / 107 BACK pictures more; 38: co-op against two trainers (ACCEPT: second trainer + lose text; WAIT: a second NPC), held trainers spot friends, waiting players merge; 37: a follower's Stadium hue in the wire state (26 bytes); 36: shared PC as 14 boxes of 30 (BOX_GET / TXN / CURSOR); 35: items 389-398 (QUICK POWDER, EVIOLITE, treats, CANDY JAR); 34: joining a battle in progress (mp_join.c); 33: SPECTATE panel (screens any time, scroll shifts, palette tiles); 32: held HMs never travel (trades, shared PC); 31: a follower's ball effect in 24 bits (state byte 23); 30: vanilla gender ratios, light level
 #endif
 #define MP_DEFAULT_PORT     27015      // TCP: lobby server
 #define MP_DISCOVERY_PORT   27016      // UDP: finding games on the local network
@@ -91,7 +91,7 @@ enum {
 // Wire structs are serialized by hand (little endian), these are just sizes.
 #define MP_NAME_LEN        8   // game charset, EOS (0xFF) padded
 #define MP_HELLO_SIZE      (2 + MP_NAME_LEN + 4 + 32)
-#define MP_WIRESTATE_SIZE  36
+#define MP_WIRESTATE_SIZE  39
 
 // ---- Client ----
 enum {

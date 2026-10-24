@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+mp life temper 0 3 240
+mp life minutes 1
+wait 120
+mp warp 17,0,5,7
+pressuntil NONE field 600
+wait 150
+mp warp 0,19,15,57
+pressuntil NONE field 600
+wait 150
+mp warp 0,0,7,20
+pressuntil NONE field 600
+wait 150
+shot petalburg
+mp warp 0,19,15,57
+pressuntil NONE field 600
+wait 150
+mp warp 17,0,5,7
+pressuntil NONE field 600
+wait 150
+mp warp 0,19,15,57
+pressuntil NONE field 600
+wait 150
+quit

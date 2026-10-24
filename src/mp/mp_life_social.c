@@ -146,15 +146,24 @@ void MP_LifeSocial_CollectState(struct MpState *s)
     s->followerKey = rec ? MP_Life_MonKey(rec->personality, rec->otId) : 0;
     s->lifeAct = rec ? MP_LifeField_Activity() : 0;
     s->lifePose = rec ? MP_Follower_SlotPose(0) : 0;
-    s->lifeDx = s->lifeDy = MP_LIFE_NO_AUTO;
-    if (rec && MP_Follower_AutoTargetTile(&x, &y) && gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT)
+    s->lifeDx = s->lifeDy = s->lifePx = s->lifePy = MP_LIFE_NO_AUTO;
+    s->lifeFace = 0;
     {
-        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
-        s16 dx = x - me->currentCoords.x, dy = y - me->currentCoords.y;
-        if (dx > -20 && dx < 20 && dy > -20 && dy < 20)
+        // on its own (an errand or on its way back): the tile it's stepping onto and the one it left, from its
+        // Trainer's tile in this same state, so every game replays the same steps
+        s16 px, py;
+        u8 dir, speed;
+        if (rec && MP_Follower_AutoState(&x, &y, &px, &py, &dir, &speed))
         {
-            s->lifeDx = dx;
-            s->lifeDy = dy;
+            s16 dx = x - s->x, dy = y - s->y, ex = px - s->x, ey = py - s->y;
+            if (dx > -20 && dx < 20 && dy > -20 && dy < 20 && ex > -20 && ex < 20 && ey > -20 && ey < 20)
+            {
+                s->lifeDx = dx;
+                s->lifeDy = dy;
+                s->lifePx = ex;
+                s->lifePy = ey;
+                s->lifeFace = (dir & 3) | ((speed > 7 ? 7 : speed) << 2);
+            }
         }
     }
     s->lifeEmote = MP_LifeEmote_Current(LIFE_EMOTE_SLOT_LOCAL);

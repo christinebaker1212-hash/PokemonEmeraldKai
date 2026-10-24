@@ -57,6 +57,9 @@ struct Brain
     u16 reactTimer;     // a reaction (an answer to an interaction) holds the pose this long
     u16 lastMap;        // map it last saw (group << 8 | num)
     u16 arriveTimer;    // frames since arriving on this map
+    u16 curPlace;       // the map section it's in (MAPSEC_*)
+    bool8 placeKnown;   // (the first map it sees, at loading or when it comes out: nothing to react to)
+    bool8 newArea;      // this map is a different area from the last one
     u16 hintedItem;     // the hidden item flag it last sniffed at (so it doesn't keep doing it)
     u16 frightCooldown;
     u32 personality;    // the follower this is about
@@ -788,33 +791,44 @@ static void Surroundings(struct MpLifeRec *rec)
     }
 }
 
-// Arriving somewhere: a curious look around, or joy at a place it loves
+// Arriving somewhere: a curious look around a new place, or joy at a place it loves. Only when it really
+// comes into another area (a town, a route, a cave: its map section), not for every door: in and out of
+// the houses of a town is still the same town. A new place is new once (its first minute there).
 static void Arrival(struct MpLifeRec *rec)
 {
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     if (map != sB.lastMap)
     {
+        u16 place = MP_Life_CurrentPlace();
         sB.lastMap = map;
         sB.arriveTimer = 0;
+        sB.newArea = sB.placeKnown && place != sB.curPlace;
+        sB.curPlace = place;
+        sB.placeKnown = TRUE;
         return;
     }
     if (sB.arriveTimer < 0xFFFF)
         sB.arriveTimer++;
-    if (sB.arriveTimer == 40)
+    if (sB.arriveTimer == 40 && sB.newArea)
     {
-        struct MpLifePlace *p = MP_Life_Place(rec, MP_Life_CurrentPlace(), FALSE);
+        struct MpLifePlace *p = MP_Life_Place(rec, sB.curPlace, FALSE);
+        u8 emote = LIFE_EMOTE_NONE;
+        sB.newArea = FALSE;
         if (p && ((p->flags & LIFE_PLACE_FAVORITE) || MP_Life_FindTrait(rec, TRAIT_LOVES_PLACE, p->map)))
         {
-            MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_HEART);
+            emote = LIFE_EMOTE_HEART;
             MP_Life_Feel(rec, EMO_JOY, 20);
         }
-        else if (p == NULL || p->level < 10)
+        else if (p == NULL || p->level == 0)
         {
             if (rec->cur[LIFE_CURIOUS] >= 140)
-                MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_QUESTION);
+                emote = LIFE_EMOTE_QUESTION;
             else if (rec->cur[LIFE_BOLD] < 80)
-                MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_DOTS);
+                emote = LIFE_EMOTE_DOTS;
         }
+        if (emote != LIFE_EMOTE_NONE)
+            MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, emote);
+        MPNet_Log("life arrival: new area %u (emote %u)", sB.curPlace, emote);
     }
 }
 

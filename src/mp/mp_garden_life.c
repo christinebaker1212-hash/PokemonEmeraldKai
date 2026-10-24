@@ -82,6 +82,12 @@ struct Actor
     bool8 learner;          // GA_PURSUIT: it's the one being taught
     bool8 seen;             // GA_RARE: the Trainer saw it happen
     u8 newBody;             // times it showed it's still getting used to a new body (this visit)
+    // the network: the tile it last stepped from (ours: sent with cur); a friend's: the tiles their game says it
+    // stepped on, replayed in order (the same path and facings on every screen)
+    struct Coords16 from;
+    u8 qLen;
+    struct Coords16 q[6];
+    struct Coords16 qLast;
 };
 
 static struct
@@ -308,6 +314,7 @@ static bool8 SpawnNear(struct Actor *a, s16 x, s16 y)
         return FALSE;
     a->prev.x = a->cur.x = a->target.x = ox;
     a->prev.y = a->cur.y = a->target.y = oy;
+    a->from = a->cur;
     a->moved = 16;
     a->dir = FDIR_DOWN;
     return TRUE;
@@ -410,13 +417,36 @@ static void Step(struct Actor *a)
     struct Coords16 n;
     if (a->moved < 16)
     {
-        a->moved += a->speed;
+        a->moved += a->owner >= 0 && a->qLen >= 2 ? a->speed * 2 : a->speed;   // (a friend's, behind: catching up)
         if (a->moved >= 16)
         {
             a->moved = 16;
             a->prev = a->cur;
         }
         return;
+    }
+    if (a->owner >= 0)
+    {
+        // a friend's: their game's steps in order (no searching of its own)
+        while (a->qLen && a->q[0].x == a->cur.x && a->q[0].y == a->cur.y)
+        {
+            memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));
+            a->qLen--;
+        }
+        if (a->qLen == 0)
+            return;
+        if (abs(a->q[0].x - a->cur.x) + abs(a->q[0].y - a->cur.y) == 1)
+        {
+            n = a->q[0];
+            memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));
+            a->qLen--;
+            a->dir = DirToward(a->cur, n.x, n.y, a->dir);
+            a->from = a->prev = a->cur;
+            a->cur = n;
+            a->moved = 0;
+            return;
+        }
+        a->target = a->q[0];   // (a gap: steps lost to a lag spike) straight there, then on along its path
     }
     if (a->cur.x == a->target.x && a->cur.y == a->target.y)
         return;
@@ -447,7 +477,7 @@ static void Step(struct Actor *a)
     }
     a->stuck = 0;
     a->dir = DirToward(a->cur, n.x, n.y, a->dir);
-    a->prev = a->cur;
+    a->from = a->prev = a->cur;
     a->cur = n;
     a->moved = 0;
 }
@@ -1031,9 +1061,7 @@ static bool8 TryReact(struct Actor *a, struct MpLifeRec *rec)
         u8 kind, pose, emote;
         s16 x, y;
         if (b == a || !b->used || b->owner >= 0 || (rb = RecOf(b)) == NULL || !MP_Life_NewBody(rb))
-            continue;
-        if (abs(b->cur.x - a->cur.x) + abs(b->cur.y - a->cur.y) > 12)
-            continue;
+            continue;   // (anywhere in the GARDEN: it's small enough that everyone sees the new body)
         kind = MP_Life_EvolutionReaction(rec, rb);
         if (kind == LIFE_EVO_REACT_NONE)
             continue;
@@ -1531,10 +1559,27 @@ u8 MP_GardenLife_Dir(u8 i)
 }
 
 // A friend's Pokémon, as their game says (mp_garden_net.c): it walks to its tile here
-s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s16 hue, s16 x, s16 y, u8 dir, u8 pose, u8 act)
+static void QueueStep(struct Actor *a, struct Coords16 t)
+{
+    if (t.x == a->qLast.x && t.y == a->qLast.y)
+        return;
+    if (a->qLen == ARRAY_COUNT(a->q))
+    {
+        memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));   // far behind: the oldest step goes
+        a->qLen--;
+    }
+    a->q[a->qLen++] = t;
+    a->qLast = t;
+}
+
+// A friend's Garden Pokémon, as their game says: the tile it's on or stepping onto (x, y) and the one it stepped
+// from (fx, fy), queued and replayed in order; its pace; its facing and pose once it's there
+s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s16 hue, s16 x, s16 y, s16 fx, s16 fy,
+                           u8 speed, u8 dir, u8 pose, u8 act)
 {
     u8 i;
     struct Actor *a = NULL;
+    struct Coords16 t, f;
     for (i = 0; i < MAX_ACTORS; i++)
         if (sL.a[i].used && sL.a[i].owner == owner && sL.a[i].slot == index)
             a = &sL.a[i];
@@ -1543,6 +1588,8 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         FreeActor(a);
         a = NULL;
     }
+    t.x = x, t.y = y;
+    f.x = fx, f.y = fy;
     if (a == NULL)
     {
         if (dex == 0 || !MP_Follower_DexHasGraphics(dex) || (a = NewActor()) == NULL)
@@ -1553,21 +1600,26 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         a->dex = dex;
         a->female = female;
         a->hue = hue;
-        a->prev.x = a->cur.x = a->target.x = x;
-        a->prev.y = a->cur.y = a->target.y = y;
+        a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
+        a->dir = dir;
         MPNet_Log("garden: player %d's %u here", owner + 1, dex);
     }
-    if (abs(x - a->cur.x) + abs(y - a->cur.y) > 4)
+    if (abs(x - a->qLast.x) + abs(y - a->qLast.y) > 4)
     {
-        a->prev.x = a->cur.x = x;
-        a->prev.y = a->cur.y = y;
+        // far from where it was (a lag spike): it simply goes on from there
+        a->qLen = 0;
+        a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
     }
-    a->target.x = x;
-    a->target.y = y;
-    a->speed = abs(x - a->cur.x) + abs(y - a->cur.y) > 1 ? 2 : 1;
-    if (a->moved >= 16 && a->cur.x == x && a->cur.y == y)
+    else
+    {
+        if (!(f.x == t.x && f.y == t.y) && abs(f.x - a->qLast.x) + abs(f.y - a->qLast.y) == 1)
+            QueueStep(a, f);   // (the step before, if it was sent together with this one)
+        QueueStep(a, t);
+    }
+    a->speed = speed ? speed : 1;
+    if (a->qLen == 0 && a->moved >= 16 && a->cur.x == x && a->cur.y == y)
     {
         a->dir = dir;
         a->pose = pose;
@@ -1581,8 +1633,8 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
     return a - sL.a;
 }
 
-// Ours, for the network: party slot order (index), its look and where it is
-bool8 MP_GardenLife_Local(u8 n, u32 *key, u16 *dex, u8 *female, s16 *hue, s16 *x, s16 *y, u8 *dir, u8 *pose, u8 *act, u8 *actor)
+bool8 MP_GardenLife_Local(u8 n, u32 *key, u16 *dex, u8 *female, s16 *hue, s16 *x, s16 *y, s16 *fx, s16 *fy, u8 *speed, u8 *dir,
+                          u8 *pose, u8 *act, u8 *actor)
 {
     u8 i, k = 0;
     for (i = 0; i < MAX_ACTORS; i++)
@@ -1596,8 +1648,11 @@ bool8 MP_GardenLife_Local(u8 n, u32 *key, u16 *dex, u8 *female, s16 *hue, s16 *x
         *dex = a->dex;
         *female = a->female;
         *hue = a->hue;
-        *x = a->target.x;
-        *y = a->target.y;
+        *x = a->cur.x;     // the tile it's on or stepping onto, and the one it stepped from: friends' games
+        *y = a->cur.y;     // replay its steps
+        *fx = a->from.x;
+        *fy = a->from.y;
+        *speed = a->speed;
         *dir = a->dir;
         *pose = a->pose;
         *act = a->act;

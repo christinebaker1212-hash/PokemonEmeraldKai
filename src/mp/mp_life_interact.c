@@ -415,29 +415,14 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
         return sText_Groom_Neat;
 
     case LIFE_VERB_WATCH:
-    {
-        // watching quietly: the Trainer learns something not known yet (a fact that has a journal line)
-        static u8 lines[LIFE_JOURNAL_LINES][LIFE_JOURNAL_TEXT];
-        u8 base, start = Random() % 64, k;
-        MP_Life_Journal(&mon->box, lines, LIFE_JOURNAL_LINES);
-        base = MP_Life_JournalKnownCount();
-        for (k = 0; k < 64; k++)
+        // watching quietly: now and then the Trainer notices something about it (mp_life_journal.c)
+        if (MP_Life_Observe(&mon->box))
         {
-            u8 fact = (start + k) % 64;
-            if (rec->known[fact / 32] & (1u << (fact % 32)))
-                continue;
-            MP_Life_Reveal(rec, fact);
-            MP_Life_Journal(&mon->box, lines, LIFE_JOURNAL_LINES);
-            if (MP_Life_JournalKnownCount() > base)
-            {
-                React(LIFE_EMOTE_QUESTION, LIFE_POSE_NONE, 0);
-                OwnerBond(rec, 0, 0, FALSE);
-                return sText_Watch_Learn;
-            }
-            rec->known[fact / 32] &= ~(1u << (fact % 32));
+            React(LIFE_EMOTE_QUESTION, LIFE_POSE_NONE, 0);
+            OwnerBond(rec, 0, 0, FALSE);
+            return sText_Watch_Learn;
         }
         return sText_Watch_Nothing;
-    }
     }
     return sText_Talk_Default;
 }

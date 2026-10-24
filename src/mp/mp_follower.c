@@ -97,9 +97,19 @@ struct FollowerSlot
     u8 aDir;
     u8 aPose;                // LIFE_POSE_*
     u16 aTimer;
+    struct Coords16 trail;   // returning: the tile its Trainer just left (where it falls in behind them)
+    u8 ownerSpeed;           // pixels a frame its Trainer last moved at (it runs to keep up)
+    u8 aStuckFrames;         // returning with no way through
+    // a friend's follower on its own: the tiles their game says it stepped on, replayed in order (the same
+    // path and facing on every screen)
+    bool8 remoteDriven;
+    u8 qLen;
+    struct Coords16 q[8];
+    struct Coords16 qLast;   // the last tile queued (or where it started)
 };
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
+static bool8 sTrace;   // MOEMON_FOLLOWTRACE: the local follower's position in pixels every frame (tests)
 static bool8 sInit;
 static u32 sLocalPersonality;   // the party Pokémon that follows (0 = none)
 static bool8 sLocalLoaded;
@@ -133,6 +143,7 @@ static void InitIfNeeded(void)
     memset(sSlots, 0, sizeof(sSlots));
     for (i = 0; i < NUM_SLOTS; i++)
         sSlots[i].spriteId = SPRITE_NONE;
+    sTrace = getenv("MOEMON_FOLLOWTRACE") != NULL;
     sInit = TRUE;
 }
 
@@ -261,7 +272,12 @@ static bool8 CanStandBehind(struct ObjectEvent *owner, struct Coords16 *out)
 static void PlaceAtOwner(struct FollowerSlot *s, struct ObjectEvent *owner)
 {
     struct Coords16 behind;
+    if (s->autoOn && s == &sSlots[0])
+        MPNet_Log("follower: put back beside its Trainer");
     s->autoOn = FALSE;   // MOéMON GARDEN: whatever it was doing on its own ends (a warp, a new map)
+    s->autoReturning = FALSE;
+    s->remoteDriven = FALSE;
+    s->qLen = 0;
     s->aPose = LIFE_POSE_NONE;
     s->prev = s->cur = s->ownerLast = owner->currentCoords;
     if (CanStandBehind(owner, &behind))
@@ -328,7 +344,65 @@ bool8 MP_Follower_CanStandAt(s16 x, s16 y)
 
 static u8 DirToward(struct Coords16 from, struct Coords16 to, u8 fallback);
 
-// One step of its own walk toward aTarget (greedy, around small obstacles)
+// Returning: the next tile on a shortest way to aTarget, within the area around its Trainer where it may
+// stand (a breadth-first search back from the target), so a fence or a tree in between doesn't stop it.
+// FALSE: no way there.
+#define PATH_W 13   // AutoCanStand's area: 6 tiles either side of the Trainer, 4 above and below
+#define PATH_H 9
+static bool8 PathStep(struct FollowerSlot *s, struct ObjectEvent *owner, struct Coords16 *next)
+{
+    static const s8 d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    u8 dist[PATH_W * PATH_H];
+    u8 queue[PATH_W * PATH_H];
+    u16 head = 0, tail = 0;
+    s16 ox = owner->currentCoords.x - PATH_W / 2, oy = owner->currentCoords.y - PATH_H / 2;
+    s16 tx = s->aTarget.x - ox, ty = s->aTarget.y - oy;
+    u8 i, best = 0xFF;
+    if (tx < 0 || tx >= PATH_W || ty < 0 || ty >= PATH_H)
+        return FALSE;
+    memset(dist, 0xFF, sizeof(dist));
+    dist[ty * PATH_W + tx] = 0;
+    queue[tail++] = ty * PATH_W + tx;
+    while (head < tail)
+    {
+        u8 c = queue[head++];
+        s16 cx = c % PATH_W, cy = c / PATH_W;
+        for (i = 0; i < 4; i++)
+        {
+            s16 nx = cx + d[i][0], ny = cy + d[i][1];
+            u8 n;
+            if (nx < 0 || nx >= PATH_W || ny < 0 || ny >= PATH_H)
+                continue;
+            n = ny * PATH_W + nx;
+            if (dist[n] != 0xFF)
+                continue;
+            // (its own tile counts as open, whatever is there: it's where the way starts)
+            if (!(nx + ox == s->aCur.x && ny + oy == s->aCur.y) && !AutoCanStand(owner, nx + ox, ny + oy))
+                continue;
+            dist[n] = dist[c] + 1;
+            queue[tail++] = n;
+        }
+    }
+    for (i = 0; i < 4; i++)
+    {
+        s16 nx = s->aCur.x + d[i][0] - ox, ny = s->aCur.y + d[i][1] - oy;
+        u8 n;
+        if (nx < 0 || nx >= PATH_W || ny < 0 || ny >= PATH_H)
+            continue;
+        n = ny * PATH_W + nx;
+        if (dist[n] == 0xFF || !AutoCanStand(owner, nx + ox, ny + oy))
+            continue;
+        if (best == 0xFF || dist[n] < dist[best])
+        {
+            best = n;
+            next->x = nx + ox;
+            next->y = ny + oy;
+        }
+    }
+    return best != 0xFF;
+}
+
+// One step of its own walk toward aTarget (greedy, around small obstacles; returning: a real way there)
 static void AutoStep(struct FollowerSlot *s, struct ObjectEvent *owner)
 {
     s16 dx, dy, i;
@@ -336,16 +410,52 @@ static void AutoStep(struct FollowerSlot *s, struct ObjectEvent *owner)
     u8 n = 0;
     if (s->aMoved < 16)
     {
-        s->aMoved += s->aSpeed;
+        // (a friend's follower behind on its steps: a little quicker until it's caught up)
+        s->aMoved += s->remoteDriven && s->qLen >= 2 ? s->aSpeed * 2 : s->aSpeed;
         if (s->aMoved > 16)
             s->aMoved = 16;
         return;
     }
     s->aPrev = s->aCur;
+    if (s->remoteDriven)
+    {
+        // its game's steps, in order: the same tiles, so the same facings
+        while (s->qLen && s->q[0].x == s->aCur.x && s->q[0].y == s->aCur.y)
+        {
+            memmove(&s->q[0], &s->q[1], (s->qLen - 1) * sizeof(s->q[0]));
+            s->qLen--;
+        }
+        if (s->qLen == 0)
+            return;
+        if (abs(s->q[0].x - s->aCur.x) + abs(s->q[0].y - s->aCur.y) == 1)
+        {
+            s->aCur = s->q[0];
+            memmove(&s->q[0], &s->q[1], (s->qLen - 1) * sizeof(s->q[0]));
+            s->qLen--;
+            s->aMoved = 0;
+            s->aDir = DirToward(s->aPrev, s->aCur, s->aDir);
+            s->autoStuck = FALSE;
+            return;
+        }
+        s->aTarget = s->q[0];   // (a gap: steps lost to a lag spike) straight there, then on along its path
+    }
     dx = s->aTarget.x - s->aCur.x;
     dy = s->aTarget.y - s->aCur.y;
     if (dx == 0 && dy == 0)
         return;
+    if (s->autoReturning)
+    {
+        struct Coords16 next;
+        if (PathStep(s, owner, &next))
+        {
+            s->aCur = next;
+            s->aMoved = 0;
+            s->aDir = DirToward(s->aPrev, s->aCur, s->aDir);
+            s->autoStuck = FALSE;
+            return;
+        }
+        // (no way within the area: the greedy steps below, then the fallback in FinishReturn)
+    }
     // the longer way first, then the shorter, then sideways around something in the way
     if (abs(dx) >= abs(dy))
     {
@@ -415,6 +525,22 @@ static u8 AutoFrame(struct FollowerSlot *s, struct Sprite *fs)
     return s->aDir * 2 + ((s->animTimer / IDLE_FRAME_TIME) & 1);
 }
 
+static bool8 FinishReturn(struct FollowerSlot *s, struct ObjectEvent *owner);
+
+// MOéMON GARDEN: back to its Trainer. It heads for the tile behind them (then for each tile they leave, if
+// they walk on) and falls in behind them there (FinishReturn).
+static void StartReturn(struct FollowerSlot *s, struct ObjectEvent *owner)
+{
+    struct Coords16 behind;
+    if (s->autoReturning)
+        return;
+    s->trail = CanStandBehind(owner, &behind) ? behind : s->aCur;
+    s->autoReturning = TRUE;
+    s->autoStuck = FALSE;
+    s->aStuckFrames = 0;
+    s->aPose = LIFE_POSE_NONE;
+}
+
 // Moves one follower with its owner for this frame. hidden: owner surfing etc.
 static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
 {
@@ -464,28 +590,25 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     if (owner->currentCoords.x != s->ownerLast.x || owner->currentCoords.y != s->ownerLast.y)
     {
         s16 jump = abs(owner->currentCoords.x - s->ownerLast.x) + abs(owner->currentCoords.y - s->ownerLast.y);
-        if (s->autoOn)
+        if (s->autoOn && jump > 3)
         {
-            // MOéMON GARDEN: its Trainer moves on. Close by, it hurries after them (into the tile
-            // they left, at twice the pace); far away or out of sight, it simply reappears beside them
-            struct Coords16 at = s->aMoved >= 8 ? s->aCur : s->aPrev;
-            s16 d = abs(at.x - s->ownerLast.x) + abs(at.y - s->ownerLast.y);
-            s->autoOn = FALSE;
-            s->aPose = LIFE_POSE_NONE;
-            if (s == &sSlots[0])
-                MP_LifeField_OnHurryBack(d);
-            if (jump > 3 || d > 2)
+            PlaceAtOwner(s, owner);   // warped or teleported
+        }
+        else if (s->autoOn)
+        {
+            // MOéMON GARDEN: its Trainer moves on. It runs after them along the tiles they leave and falls in
+            // behind them (FinishReturn), never popping over to them. (A friend's follower runs as their game
+            // says: DriveRemoteAuto.)
+            if (!s->autoReturning && !s->remoteDriven)
             {
-                PlaceAtOwner(s, owner);
+                struct Coords16 at = s->aMoved >= 8 ? s->aCur : s->aPrev;
+                if (s == &sSlots[0])
+                    MP_LifeField_OnHurryBack(abs(at.x - s->ownerLast.x) + abs(at.y - s->ownerLast.y));
+                StartReturn(s, owner);
             }
-            else
-            {
-                s->prev = at;
-                s->cur = s->ownerLast;
-                s->ownerLast = owner->currentCoords;
-                s->moved = 0;
-                s->dir = DirBetween(s->prev, s->cur, s->dir);
-            }
+            s->trail = s->ownerLast;
+            s->ownerLast = owner->currentCoords;
+            s->moved = 0;   // (its Trainer's step, counted as when following: falling in mid-step is seamless)
         }
         else if (jump > 3)
         {
@@ -506,6 +629,8 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         s16 d = abs(ddx) + abs(ddy);
         if (d <= 8) // larger jumps are the camera re-centering, not movement
             s->moved += d;
+        if (d > 0 && d <= 8)
+            s->ownerSpeed = d;
         s->ownerLastX = os->x;
         s->ownerLastY = os->y;
     }
@@ -525,6 +650,15 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
             ovx = owner->currentCoords.x * 256;
             ovy = owner->currentCoords.y * 256;
         }
+        if (s->autoOn && s->autoReturning && !s->remoteDriven && !FinishReturn(s, owner))
+        {
+            // on its way back: to the tile its Trainer left, fast enough to catch up (twice their pace)
+            bool8 ownerStill = owner->currentCoords.x == s->ownerLast.x && owner->currentCoords.y == s->ownerLast.y
+                            && s->moved >= total;
+            u8 speed = ownerStill ? 2 : s->ownerSpeed * 2;
+            s->aTarget = s->trail;
+            s->aSpeed = speed < 2 ? 2 : speed > 6 ? 6 : speed;
+        }
         fvx = s->prev.x * 256 + (s->cur.x - s->prev.x) * frac;
         fvy = s->prev.y * 256 + (s->cur.y - s->prev.y) * frac;
         if (s->autoOn)
@@ -536,6 +670,8 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         dxPix = (s16)((fvx - ovx) * 16 / 256);
         dyPix = (s16)((fvy - ovy) * 16 / 256);
+        if (s == &sSlots[0] && sTrace)
+            printf("[test] followtrace %ld %ld auto %d ret %d\n", (long)(fvx * 16 / 256), (long)(fvy * 16 / 256), s->autoOn, s->autoReturning);
         fx = os->x + dxPix;
         fy = os->y + dyPix;
         if (s->gfx->size == 64)
@@ -877,7 +1013,7 @@ static void UpdateLeaving(void)
 }
 
 // Every overworld frame (src/overworld.c, before sprites are drawn)
-static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState *st);
+static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, u8 id, const struct MpState *st);
 
 void MP_Follower_Update(void)
 {
@@ -915,7 +1051,7 @@ void MP_Follower_Update(void)
             s->seqKnown = FALSE;
         }
         if (obj != OBJECT_EVENTS_COUNT)
-            DriveRemoteAuto(s, obj, &gMpPlayers[i].state);   // MOéMON GARDEN: on its own, as its Trainer's game says
+            DriveRemoteAuto(s, obj, i, &gMpPlayers[i].state);   // MOéMON GARDEN: on its own, as its Trainer's game says
         UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) : TRUE);
         if (obj != OBJECT_EVENTS_COUNT)
         {
@@ -1027,6 +1163,7 @@ void MP_Follower_AutoTarget(s16 x, s16 y, u8 speed)
     s->aTarget.y = y;
     s->aSpeed = speed ? speed : 1;
     s->autoStuck = FALSE;
+    s->autoReturning = FALSE;   // (a new errand: it isn't heading back any more)
     if (s->aPose != LIFE_POSE_NONE)
         s->aPose = LIFE_POSE_NONE;
 }
@@ -1073,19 +1210,10 @@ void MP_Follower_AutoReturn(void)
 {
     struct FollowerSlot *s = &sSlots[0];
     struct ObjectEvent *owner = LocalOwner();
-    struct Coords16 behind;
     if (!s->autoOn || owner == NULL)
         return;
-    if (CanStandBehind(owner, &behind))
-        s->aTarget = behind;
-    else
-        s->aTarget = s->aCur;
-    s->autoReturning = TRUE;
-    s->aSpeed = 2;
-    s->aPose = LIFE_POSE_NONE;
+    StartReturn(s, owner);
 }
-
-static bool8 FinishReturn(struct FollowerSlot *s, struct ObjectEvent *owner);
 
 // Called every frame by mp_life_field.c while it's returning: once beside its Trainer, it follows again
 bool8 MP_Follower_AutoFinishReturn(void)
@@ -1093,30 +1221,59 @@ bool8 MP_Follower_AutoFinishReturn(void)
     return FinishReturn(&sSlots[0], LocalOwner());
 }
 
+// Falls in behind its Trainer once it's caught up (TRUE: following again). On the tile they left, it takes up
+// following right where their step is (no jump); beside a Trainer who stands still, it just follows from there.
+// Boxed in for a moment with no way through: close by it follows from where it is (it slides over on their
+// next step); farther, it reappears behind them (the last resort).
 static bool8 FinishReturn(struct FollowerSlot *s, struct ObjectEvent *owner)
 {
     s16 d;
+    bool8 ownerStill;
     if (!s->autoOn || owner == NULL)
         return TRUE;
+    if (s->aMoved < 16)
+        return FALSE;
     d = abs(s->aCur.x - owner->currentCoords.x) + abs(s->aCur.y - owner->currentCoords.y);
-    if (s->aMoved >= 16 && (d <= 1 || s->autoStuck || MP_Follower_AutoArrived()))
+    ownerStill = owner->currentCoords.x == s->ownerLast.x && owner->currentCoords.y == s->ownerLast.y && s->moved >= 16;
+    if (s->autoStuck)
+        s->aStuckFrames++;
+    else
+        s->aStuckFrames = 0;
+    if (s->aCur.x == s->trail.x && s->aCur.y == s->trail.y && d <= 2)
     {
-        if (d > 1)
+        // on the tile they left (or behind them): following from here, their step carries on as it is
+        s->prev = s->cur = s->aCur;
+        if (ownerStill)
+            s->ownerLast = owner->currentCoords;
+    }
+    else if (d <= 1 && ownerStill)
+    {
+        s->prev = s->cur = s->aCur;
+        s->ownerLast = owner->currentCoords;
+        s->moved = 16;
+    }
+    else if (s->aStuckFrames >= 20)
+    {
+        if (d > 3)
         {
             PlaceAtOwner(s, owner);
+            s->autoReturning = FALSE;
+            return TRUE;
         }
-        else
-        {
-            s->prev = s->cur = s->aCur;
-            s->ownerLast = owner->currentCoords;
-            s->moved = 16;
-            s->dir = s->aDir;
-        }
-        s->autoOn = FALSE;
-        s->aPose = LIFE_POSE_NONE;
-        return TRUE;
+        s->prev = s->cur = s->aCur;
+        s->ownerLast = owner->currentCoords;
     }
-    return FALSE;
+    else
+    {
+        return FALSE;
+    }
+    s->dir = s->aDir;
+    s->autoOn = FALSE;
+    s->autoReturning = FALSE;
+    s->aPose = LIFE_POSE_NONE;
+    if (s == &sSlots[0])
+        MPNet_Log("follower trail: fell in behind (%d from its Trainer)", d);
+    return TRUE;
 }
 
 // Where the local follower stands (its own tile while on its own)
@@ -1206,19 +1363,36 @@ bool8 MP_Follower_DexHasGraphics(u16 dex)
     return dex && FindGfx(dex, FALSE) != NULL;
 }
 
-// MOéMON GARDEN: a friend's follower on its own, as their game says (its tile beside them, its pose).
-// It walks there itself here, so it moves smoothly whatever the lag.
-static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState *st)
+// MOéMON GARDEN: a friend's follower on its own, as their game says: the tiles it steps on (queued and replayed
+// in order, so its path and facings are the same as on their screen), its pace, its facing and pose once there.
+// When their game has it following again, it finishes those steps and falls in behind them here.
+static void QueueTile(struct FollowerSlot *s, struct Coords16 t)
+{
+    if (t.x == s->qLast.x && t.y == s->qLast.y)
+        return;
+    if (s->qLen == ARRAY_COUNT(s->q))
+    {
+        memmove(&s->q[0], &s->q[1], (s->qLen - 1) * sizeof(s->q[0]));   // far behind: the oldest step goes
+        s->qLen--;
+    }
+    s->q[s->qLen++] = t;
+    s->qLast = t;
+}
+
+static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, u8 id, const struct MpState *st)
 {
     struct ObjectEvent *owner;
+    s16 ox, oy;
     if (obj >= OBJECT_EVENTS_COUNT || !s->gfx || !s->placed || !SpriteIsOurs(s))
         return;
     owner = &gObjectEvents[obj];
-    if (st->lifeDx != MP_LIFE_NO_AUTO)
+    if (st->lifeDx != MP_LIFE_NO_AUTO && st->lifePx != MP_LIFE_NO_AUTO && MP_GetRemoteMapPos(id, &ox, &oy))
     {
-        struct Coords16 t;
-        t.x = owner->currentCoords.x + st->lifeDx;
-        t.y = owner->currentCoords.y + st->lifeDy;
+        struct Coords16 t, p;
+        t.x = ox + st->lifeDx;
+        t.y = oy + st->lifeDy;
+        p.x = ox + st->lifePx;
+        p.y = oy + st->lifePy;
         if (!s->autoOn)
         {
             if (s->moved < 16)
@@ -1229,16 +1403,35 @@ static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState
             s->aMoved = 16;
             s->aDir = s->dir;
             s->aTimer = 0;
+            s->qLen = 0;
+            s->qLast = s->cur;
+        }
+        if (!s->remoteDriven)
+        {
+            s->remoteDriven = TRUE;
+            s->qLen = 0;
+            s->qLast = s->aCur;
         }
         s->autoReturning = FALSE;
-        if (s->aTarget.x != t.x || s->aTarget.y != t.y)
+        if (abs(t.x - s->qLast.x) + abs(t.y - s->qLast.y) > 6)
         {
-            s->aTarget = t;
-            s->autoStuck = FALSE;
+            // far from where it was (it was put back with them, a lag spike): it simply goes on from there
+            s->qLen = 0;
+            s->aPrev = s->aCur = s->aTarget = s->qLast = t;
+            s->aMoved = 16;
         }
-        s->aSpeed = 1;
-        if (s->aMoved >= 16 && s->aCur.x == t.x && s->aCur.y == t.y)
+        else
         {
+            if (!(p.x == t.x && p.y == t.y) && abs(p.x - s->qLast.x) + abs(p.y - s->qLast.y) == 1)
+                QueueTile(s, p);   // (the step before, if that state was merged into this one)
+            QueueTile(s, t);
+        }
+        s->aSpeed = (st->lifeFace >> 2) & 7;
+        if (s->aSpeed == 0)
+            s->aSpeed = 1;
+        if (s->qLen == 0 && s->aMoved >= 16 && s->aCur.x == t.x && s->aCur.y == t.y)
+        {
+            s->aDir = st->lifeFace & 3;
             if (s->aPose != st->lifePose)
             {
                 s->aPose = st->lifePose;
@@ -1252,16 +1445,20 @@ static void DriveRemoteAuto(struct FollowerSlot *s, u8 obj, const struct MpState
     }
     else if (s->autoOn)
     {
-        // back with its Trainer: walk to their side, then follow
-        if (!s->autoReturning)
+        // following again in their game: the last steps first, then it follows from right there, as it does
+        // in their game (its Trainer's step so far is already counted: UpdateSlot)
+        if (s->remoteDriven && (s->qLen || s->aMoved < 16))
+            return;
+        if (s->remoteDriven)
         {
-            struct Coords16 behind;
-            s->aTarget = CanStandBehind(owner, &behind) ? behind : s->aCur;
-            s->autoReturning = TRUE;
-            s->aSpeed = 2;
+            s->remoteDriven = FALSE;
+            s->prev = s->cur = s->aCur;
+            s->dir = s->aDir;
+            s->autoOn = FALSE;
             s->aPose = LIFE_POSE_NONE;
+            return;
         }
-        FinishReturn(s, owner);
+        StartReturn(s, owner);
     }
 }
 
@@ -1276,6 +1473,22 @@ bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y)
         return FALSE;
     *x = s->autoOn ? s->aCur.x : s->cur.x;
     *y = s->autoOn ? s->aCur.y : s->cur.y;
+    return TRUE;
+}
+
+// The local follower on its own (an errand, or on its way back): the tile it's on or stepping onto, the one it
+// stepped from, its facing and pace (mp_life_social.c sends them; friends' games replay its steps)
+bool8 MP_Follower_AutoState(s16 *x, s16 *y, s16 *px, s16 *py, u8 *dir, u8 *speed)
+{
+    struct FollowerSlot *s = &sSlots[0];
+    if (!sInit || !s->autoOn)
+        return FALSE;
+    *x = s->aCur.x;
+    *y = s->aCur.y;
+    *px = s->aPrev.x;
+    *py = s->aPrev.y;
+    *dir = s->aDir;
+    *speed = s->aSpeed;
     return TRUE;
 }
 

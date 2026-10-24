@@ -1,0 +1,11 @@
+# The follower off on its own (Route 104 beach) when its Trainer walks on: it runs after them along the tiles they
+# leave and falls in behind them, never popping over (check_followtrace.py: no step over 12 px in a frame; no
+# "put back beside its Trainer"). A few rounds: wandering, investigating, then walking off in different
+# directions. Shots off, running, behind.
+MODE=1
+TMO=150
+WARP="0,19,15,57"
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_FOLLOWTRACE=1"
+EXPECT_A=("life field: act 2 to" "life field: act 3 to" "follower trail: fell in behind")
+UNEXPECT_A=("follower: put back beside its Trainer")
+CHECK="python3 tools/test/check_followtrace.py"

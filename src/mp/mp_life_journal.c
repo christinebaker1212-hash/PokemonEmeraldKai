@@ -11,6 +11,7 @@
 #include "mp_life.h"
 #include "item.h"
 #include "pokemon.h"
+#include "random.h"
 #include "region_map.h"
 #include "string_util.h"
 #include "data.h"
@@ -517,4 +518,49 @@ u8 MP_Life_Journal(struct BoxPokemon *box, u8 lines[][LIFE_JOURNAL_TEXT], u8 max
     if (bd.unknown && bd.count < max)
         StringCopy(lines[bd.count++], sTxt_Unknown);
     return bd.count;
+}
+
+// ---------------------------------------------------------------------------
+// Watching (docs 2.2: the journal fills in as the Trainer notices things)
+
+#define WATCH_MARK_MINUTES 4    // watchMark counts in 4-minute steps (1..255, 0 = never)
+#define WATCH_WAIT_STEPS   8    // half an hour between things learned just by watching one Pokémon
+
+static u8 WatchMarkNow(void)
+{
+    return (MP_Life_PlayMinutes() / WATCH_MARK_MINUTES) % 255 + 1;
+}
+
+bool8 MP_Life_Observe(struct BoxPokemon *box)
+{
+    static u8 lines[LIFE_JOURNAL_LINES][LIFE_JOURNAL_TEXT];
+    static const u8 sSeen[] = {
+        LIFE_FACT_TEMPER(0), LIFE_FACT_TEMPER(1), LIFE_FACT_TEMPER(2), LIFE_FACT_TEMPER(3), LIFE_FACT_TEMPER(4),
+        LIFE_FACT_TEMPER(5), LIFE_FACT_TYPE_NEED, LIFE_FACT_PURSUIT,
+    };
+    struct MpLifeRec *rec = MP_Life_Get(box, FALSE);
+    u8 base, start, k, now;
+    if (rec == NULL)
+        return FALSE;
+    now = WatchMarkNow();
+    if (rec->watchMark != 0 && (now + 255 - rec->watchMark) % 255 < WATCH_WAIT_STEPS)
+        return FALSE;   // watched it not long ago: nothing new yet
+    MP_Life_Journal(box, lines, LIFE_JOURNAL_LINES);
+    base = MP_Life_JournalKnownCount();
+    start = Random() % ARRAY_COUNT(sSeen);
+    for (k = 0; k < ARRAY_COUNT(sSeen); k++)
+    {
+        u8 fact = sSeen[(start + k) % ARRAY_COUNT(sSeen)];
+        if (rec->known[fact / 32] & (1u << (fact % 32)))
+            continue;
+        MP_Life_Reveal(rec, fact);
+        MP_Life_Journal(box, lines, LIFE_JOURNAL_LINES);
+        if (MP_Life_JournalKnownCount() > base)
+        {
+            rec->watchMark = now;
+            return TRUE;
+        }
+        rec->known[fact / 32] &= ~(1u << (fact % 32));   // (no line for it: nothing to learn there)
+    }
+    return FALSE;
 }

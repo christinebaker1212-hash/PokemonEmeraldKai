@@ -158,9 +158,13 @@ struct MpState
     u32 followerKey;   // MP_Life_MonKey (0 = none)
     u8 lifeAct;        // LIFE_ACT_*
     u8 lifePose;       // LIFE_POSE_*
-    s8 lifeDx, lifeDy; // its own tile, from its Trainer's (MP_LIFE_NO_AUTO: following)
+    s8 lifeDx, lifeDy; // the tile it's on (or stepping onto) on its own, from its Trainer's x / y above
+                       // (MP_LIFE_NO_AUTO: following)
     u8 lifeEmote;      // its Pokémon emote bubble (LIFE_EMOTE_*, 0xFF none)
     u8 lifeEmoteSeq;   // counts emotes (a change shows it)
+    s8 lifePx, lifePy; // ... the tile it stepped from (friends' games replay its exact path: a step merged
+                       // into the next state still shows)
+    u8 lifeFace;       // bits 0-1 its facing (0 down, 1 up, 2 left, 3 right), bits 2-4 its pace (pixels a frame)
 };
 #define MP_LIFE_NO_AUTO 127
 

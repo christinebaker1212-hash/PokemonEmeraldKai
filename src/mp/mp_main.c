@@ -606,6 +606,7 @@ static void PackState(const struct MpState *s, u8 *p)
     PutU32(p + 26, s->followerKey);
     p[30] = s->lifeAct; p[31] = s->lifePose; p[32] = (u8)s->lifeDx; p[33] = (u8)s->lifeDy;
     p[34] = s->lifeEmote; p[35] = s->lifeEmoteSeq;
+    p[36] = (u8)s->lifePx; p[37] = (u8)s->lifePy; p[38] = s->lifeFace;
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -622,6 +623,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->followerKey = GetU32(p + 26);
     s->lifeAct = p[30]; s->lifePose = p[31]; s->lifeDx = (s8)p[32]; s->lifeDy = (s8)p[33];
     s->lifeEmote = p[34]; s->lifeEmoteSeq = p[35];
+    s->lifePx = (s8)p[36]; s->lifePy = (s8)p[37]; s->lifeFace = p[38];
 }
 
 #define APPEARANCE_SIZE 32
@@ -866,7 +868,8 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
         || a->emote != b->emote || a->followerDex != b->followerDex || a->followerFlags != b->followerFlags
         || a->followerFx != b->followerFx || a->followerHue != b->followerHue
         || a->badges != b->badges || a->followerKey != b->followerKey || a->lifeAct != b->lifeAct
-        || a->lifePose != b->lifePose || a->lifeDx != b->lifeDx || a->lifeDy != b->lifeDy || a->lifeEmoteSeq != b->lifeEmoteSeq;
+        || a->lifePose != b->lifePose || a->lifeDx != b->lifeDx || a->lifeDy != b->lifeDy || a->lifeEmoteSeq != b->lifeEmoteSeq
+        || a->lifePx != b->lifePx || a->lifePy != b->lifePy || a->lifeFace != b->lifeFace;
 }
 
 static void SendLocalState(bool8 force)

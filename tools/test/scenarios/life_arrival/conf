@@ -1,0 +1,9 @@
+# The follower's arrival bubbles (Route 104): nothing when the game starts, nothing in and out of MR. BRINEY's
+# house (the same area: no "?" every door), a curious look in PETALBURG CITY (a new area), and nothing again in
+# and out of the house once Route 104 is known.
+MODE=1
+TMO=150
+WARP="0,19,15,57"
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("life arrival: new area 7 (emote 4)" "life emote: slot 0 icon 4")
+CHECK="python3 tools/test/check_arrival.py"

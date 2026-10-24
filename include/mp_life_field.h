@@ -52,6 +52,7 @@ bool8 MP_Follower_CanStandAt(s16 x, s16 y);
 u16 MP_Follower_SlotDex(u8 slot);
 bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y);
 bool8 MP_Follower_AutoTargetTile(s16 *x, s16 *y);
+bool8 MP_Follower_AutoState(s16 *x, s16 *y, s16 *px, s16 *py, u8 *dir, u8 *speed);   // the local follower on its own
 u8 MP_Follower_SlotPose(u8 slot);
 struct SpriteFrameImage;
 struct SpriteTemplate;
