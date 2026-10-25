@@ -27,15 +27,15 @@ printf '\t.include "asm/macros/m4a.inc"\n\t.include "asm/macros/music_voice.inc"
           && as --64 --defsym VER_64BIT=1 --defsym MODERN=1 --defsym PORTABLE=1 -I sound -I . -o "$T/vg.o" "$T/vg.s")
 "$B" --render "$T/gm.mmsproj" "$T/gm.wav" 5
 
-echo "== going over 10 tracks"
+echo "== GBA accurate on and off"
 python3 test/make_test_midi.py "$T/many.mid" 9          # 14 tracks
 "$B" --save "$T/many.mid" "$T/many.mmsproj" mus_route104
-"$B" --export "$T/many.mmsproj" "$T/many10.kaisong"
-python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 tracks"
-sed -i 's/^gba_accurate=1/gba_accurate=0/' "$T/many.mmsproj"
-"$B" --export "$T/many.mmsproj" "$T/many14.kaisong"
+"$B" --export "$T/many.mmsproj" "$T/many14.kaisong"            # GBA accurate is off by default: as is
 python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "^version 1, 14 tracks"
 python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "voices: 64"
+sed 's/^gba_accurate=0/gba_accurate=1/' "$T/many.mmsproj" > "$T/many_gba.mmsproj"
+"$B" --export "$T/many_gba.mmsproj" "$T/many10.kaisong"
+python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 tracks"
 "$B" --raw "$T/many.mmsproj" "$T/many.f32" 600
 test -s "$T/gm.wav"
 echo "all passed"

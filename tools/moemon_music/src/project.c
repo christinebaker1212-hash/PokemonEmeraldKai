@@ -36,7 +36,7 @@ void project_init(Project *p)
     p->exactGate = 1;
     p->gmFixes = 1;
     p->loopMode = LOOP_MARKERS;
-    p->gbaAccurate = 1;
+    p->gbaAccurate = 0;          // off unless turned on: songs play and export as they are
     project_apply_mode(p);
     p->balance = 1;
     p->drumsFirst = 1;

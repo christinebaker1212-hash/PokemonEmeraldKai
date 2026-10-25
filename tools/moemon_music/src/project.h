@@ -24,7 +24,7 @@ typedef struct {
     int exactGate;
     int gmFixes;
     int loopMode;
-    int gbaAccurate;          // play and export like the game: 10 tracks, 5 sample voices (else 64 / 64)
+    int gbaAccurate;          // off by default; on: play and export like the game (10 tracks, 5 sample voices), off: 64 / 64
     int moreTracks;           // derived from gbaAccurate (project_apply_mode)
     int voices;               // derived: sample voices mixed at once
     int drumsFirst;           // GM fixes: drum tracks win voices over melodic ones
