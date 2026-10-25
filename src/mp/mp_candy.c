@@ -54,6 +54,8 @@ static u8 CandyType(u16 species)
     if (species == SPECIES_NONE || species >= NUM_SPECIES)
         return TYPE_NORMAL;
     type = gSpeciesInfo[species].types[0];
+    if (type == TYPE_FAIRY)
+        type = TYPE_NORMAL;   // Moemon Kai (Gen 5-8 fork): the jar keeps its 17 kinds; fairies were NORMAL before Gen 6
     if (type >= NUMBER_OF_MON_TYPES || type == TYPE_MYSTERY)
         type = TYPE_NORMAL;
     return type;
@@ -403,6 +405,7 @@ static const struct { const u32 *gfx; const u32 *pal; const char *name; } sCandy
     [TYPE_ICE] = {sCandyGfx_Ice, sCandyPal_Ice, "ICE"},
     [TYPE_DRAGON] = {sCandyGfx_Dragon, sCandyPal_Dragon, "DRA"},
     [TYPE_DARK] = {sCandyGfx_Dark, sCandyPal_Dark, "DAR"},
+    [TYPE_FAIRY] = {NULL, NULL, NULL},   // FAIRY Moemon give NORMAL candies (MP_Candy_Add)
 };
 
 enum { WIN_LIST, WIN_HELP, WIN_JAR_COUNT };

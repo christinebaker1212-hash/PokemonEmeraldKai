@@ -1,0 +1,863 @@
+@ Gen 5-8 move animations (Move_<MOVE>). A move without its own borrows a Gen 3 one of its type
+@ (tools/moemon_gen58/gen_moves.py adds the stubs; tools/moemon_gen4/gen_anims.py ports expansion's).
+
+Move_HONE_CLAWS:
+	goto Move_TORMENT
+
+Move_WIDE_GUARD:
+	goto Move_ROCK_TOMB
+
+Move_GUARD_SPLIT:
+	goto Move_CALM_MIND
+
+Move_POWER_SPLIT:
+	goto Move_CALM_MIND
+
+Move_WONDER_ROOM:
+	goto Move_CALM_MIND
+
+Move_PSYSHOCK:
+	goto Move_PSYCHIC
+
+Move_VENOSHOCK:
+	goto Move_SLUDGE_BOMB
+
+Move_AUTOTOMIZE:
+	goto Move_IRON_DEFENSE
+
+Move_RAGE_POWDER:
+	goto Move_SPIDER_WEB
+
+Move_TELEKINESIS:
+	goto Move_CALM_MIND
+
+Move_MAGIC_ROOM:
+	goto Move_CALM_MIND
+
+Move_SMACK_DOWN:
+	goto Move_ROCK_SLIDE
+
+Move_STORM_THROW:
+	goto Move_KARATE_CHOP
+
+Move_FLAME_BURST:
+	goto Move_FLAMETHROWER
+
+Move_SLUDGE_WAVE:
+	goto Move_SLUDGE_BOMB
+
+Move_QUIVER_DANCE:
+	goto Move_SPIDER_WEB
+
+Move_HEAVY_SLAM:
+	goto Move_IRON_TAIL
+
+Move_SYNCHRONOISE:
+	goto Move_PSYCHIC
+
+Move_ELECTRO_BALL:
+	goto Move_THUNDERBOLT
+
+Move_SOAK:
+	goto Move_WATER_SPORT
+
+Move_FLAME_CHARGE:
+	goto Move_FLAMETHROWER
+
+Move_COIL:
+	goto Move_TOXIC
+
+Move_LOW_SWEEP:
+	goto Move_KARATE_CHOP
+
+Move_ACID_SPRAY:
+	goto Move_SLUDGE_BOMB
+
+Move_FOUL_PLAY:
+	goto Move_CRUNCH
+
+Move_SIMPLE_BEAM:
+	goto Move_GROWL
+
+Move_ENTRAINMENT:
+	goto Move_GROWL
+
+Move_AFTER_YOU:
+	goto Move_GROWL
+
+Move_ROUND:
+	goto Move_TAKE_DOWN
+
+Move_ECHOED_VOICE:
+	goto Move_TAKE_DOWN
+
+Move_CHIP_AWAY:
+	goto Move_TAKE_DOWN
+
+Move_CLEAR_SMOG:
+	goto Move_SLUDGE_BOMB
+
+Move_STORED_POWER:
+	goto Move_PSYCHIC
+
+Move_QUICK_GUARD:
+	goto Move_BULK_UP
+
+Move_ALLY_SWITCH:
+	goto Move_CALM_MIND
+
+Move_SCALD:
+	goto Move_SURF
+
+Move_SHELL_SMASH:
+	goto Move_GROWL
+
+Move_HEAL_PULSE:
+	goto Move_CALM_MIND
+
+Move_HEX:
+	goto Move_SHADOW_BALL
+
+Move_SKY_DROP:
+	goto Move_WING_ATTACK
+
+Move_SHIFT_GEAR:
+	goto Move_IRON_DEFENSE
+
+Move_CIRCLE_THROW:
+	goto Move_KARATE_CHOP
+
+Move_INCINERATE:
+	goto Move_FLAMETHROWER
+
+Move_QUASH:
+	goto Move_TORMENT
+
+Move_ACROBATICS:
+	goto Move_WING_ATTACK
+
+Move_REFLECT_TYPE:
+	goto Move_GROWL
+
+Move_RETALIATE:
+	goto Move_TAKE_DOWN
+
+Move_FINAL_GAMBIT:
+	goto Move_KARATE_CHOP
+
+Move_BESTOW:
+	goto Move_GROWL
+
+Move_INFERNO:
+	goto Move_FLAMETHROWER
+
+Move_WATER_PLEDGE:
+	goto Move_SURF
+
+Move_FIRE_PLEDGE:
+	goto Move_FLAMETHROWER
+
+Move_GRASS_PLEDGE:
+	goto Move_RAZOR_LEAF
+
+Move_VOLT_SWITCH:
+	goto Move_THUNDERBOLT
+
+Move_STRUGGLE_BUG:
+	goto Move_SIGNAL_BEAM
+
+Move_BULLDOZE:
+	goto Move_EARTHQUAKE
+
+Move_FROST_BREATH:
+	goto Move_ICE_BEAM
+
+Move_DRAGON_TAIL:
+	goto Move_DRAGON_CLAW
+
+Move_WORK_UP:
+	goto Move_GROWL
+
+Move_ELECTROWEB:
+	goto Move_THUNDERBOLT
+
+Move_WILD_CHARGE:
+	goto Move_THUNDERBOLT
+
+Move_DRILL_RUN:
+	goto Move_EARTHQUAKE
+
+Move_DUAL_CHOP:
+	goto Move_DRAGON_CLAW
+
+Move_HEART_STAMP:
+	goto Move_PSYCHIC
+
+Move_HORN_LEECH:
+	goto Move_RAZOR_LEAF
+
+Move_SACRED_SWORD:
+	goto Move_KARATE_CHOP
+
+Move_RAZOR_SHELL:
+	goto Move_SURF
+
+Move_HEAT_CRASH:
+	goto Move_FLAMETHROWER
+
+Move_LEAF_TORNADO:
+	goto Move_RAZOR_LEAF
+
+Move_STEAMROLLER:
+	goto Move_SIGNAL_BEAM
+
+Move_COTTON_GUARD:
+	goto Move_INGRAIN
+
+Move_NIGHT_DAZE:
+	goto Move_CRUNCH
+
+Move_PSYSTRIKE:
+	goto Move_PSYCHIC
+
+Move_TAIL_SLAP:
+	goto Move_TAKE_DOWN
+
+Move_HURRICANE:
+	goto Move_WING_ATTACK
+
+Move_HEAD_CHARGE:
+	goto Move_TAKE_DOWN
+
+Move_GEAR_GRIND:
+	goto Move_IRON_TAIL
+
+Move_SEARING_SHOT:
+	goto Move_FLAMETHROWER
+
+Move_TECHNO_BLAST:
+	goto Move_TAKE_DOWN
+
+Move_RELIC_SONG:
+	goto Move_TAKE_DOWN
+
+Move_SECRET_SWORD:
+	goto Move_KARATE_CHOP
+
+Move_GLACIATE:
+	goto Move_ICE_BEAM
+
+Move_BOLT_STRIKE:
+	goto Move_THUNDERBOLT
+
+Move_BLUE_FLARE:
+	goto Move_FLAMETHROWER
+
+Move_FIERY_DANCE:
+	goto Move_FLAMETHROWER
+
+Move_FREEZE_SHOCK:
+	goto Move_ICE_BEAM
+
+Move_ICE_BURN:
+	goto Move_ICE_BEAM
+
+Move_SNARL:
+	goto Move_CRUNCH
+
+Move_ICICLE_CRASH:
+	goto Move_ICE_BEAM
+
+Move_V_CREATE:
+	goto Move_FLAMETHROWER
+
+Move_FUSION_FLARE:
+	goto Move_FLAMETHROWER
+
+Move_FUSION_BOLT:
+	goto Move_THUNDERBOLT
+
+Move_FLYING_PRESS:
+	goto Move_KARATE_CHOP
+
+Move_MAT_BLOCK:
+	goto Move_BULK_UP
+
+Move_BELCH:
+	goto Move_SLUDGE_BOMB
+
+Move_ROTOTILLER:
+	goto Move_SAND_ATTACK
+
+Move_STICKY_WEB:
+	goto Move_SPIDER_WEB
+
+Move_FELL_STINGER:
+	goto Move_SIGNAL_BEAM
+
+Move_PHANTOM_FORCE:
+	goto Move_SHADOW_BALL
+
+Move_TRICK_OR_TREAT:
+	goto Move_CONFUSE_RAY
+
+Move_NOBLE_ROAR:
+	goto Move_GROWL
+
+Move_ION_DELUGE:
+	goto Move_CHARGE
+
+Move_PARABOLIC_CHARGE:
+	goto Move_THUNDERBOLT
+
+Move_FORESTS_CURSE:
+	goto Move_INGRAIN
+
+Move_PETAL_BLIZZARD:
+	goto Move_RAZOR_LEAF
+
+Move_FREEZE_DRY:
+	goto Move_ICE_BEAM
+
+Move_DISARMING_VOICE:
+	goto Move_SWEET_KISS
+
+Move_PARTING_SHOT:
+	goto Move_TORMENT
+
+Move_TOPSY_TURVY:
+	goto Move_TORMENT
+
+Move_DRAINING_KISS:
+	goto Move_SWEET_KISS
+
+Move_CRAFTY_SHIELD:
+	goto Move_MOONLIGHT
+
+Move_FLOWER_SHIELD:
+	goto Move_MOONLIGHT
+
+Move_GRASSY_TERRAIN:
+	goto Move_INGRAIN
+
+Move_MISTY_TERRAIN:
+	goto Move_MOONLIGHT
+
+Move_ELECTRIFY:
+	goto Move_CHARGE
+
+Move_PLAY_ROUGH:
+	goto Move_SWEET_KISS
+
+Move_FAIRY_WIND:
+	goto Move_SWEET_KISS
+
+Move_MOONBLAST:
+	goto Move_SWEET_KISS
+
+Move_BOOMBURST:
+	goto Move_TAKE_DOWN
+
+Move_FAIRY_LOCK:
+	goto Move_MOONLIGHT
+
+Move_KINGS_SHIELD:
+	goto Move_IRON_DEFENSE
+
+Move_PLAY_NICE:
+	goto Move_GROWL
+
+Move_CONFIDE:
+	goto Move_GROWL
+
+Move_DIAMOND_STORM:
+	goto Move_ROCK_SLIDE
+
+Move_STEAM_ERUPTION:
+	goto Move_SURF
+
+Move_HYPERSPACE_HOLE:
+	goto Move_PSYCHIC
+
+Move_WATER_SHURIKEN:
+	goto Move_SURF
+
+Move_MYSTICAL_FIRE:
+	goto Move_FLAMETHROWER
+
+Move_SPIKY_SHIELD:
+	goto Move_INGRAIN
+
+Move_AROMATIC_MIST:
+	goto Move_MOONLIGHT
+
+Move_EERIE_IMPULSE:
+	goto Move_CHARGE
+
+Move_VENOM_DRENCH:
+	goto Move_TOXIC
+
+Move_POWDER:
+	goto Move_SPIDER_WEB
+
+Move_GEOMANCY:
+	goto Move_MOONLIGHT
+
+Move_MAGNETIC_FLUX:
+	goto Move_CHARGE
+
+Move_HAPPY_HOUR:
+	goto Move_GROWL
+
+Move_ELECTRIC_TERRAIN:
+	goto Move_CHARGE
+
+Move_DAZZLING_GLEAM:
+	goto Move_SWEET_KISS
+
+Move_CELEBRATE:
+	goto Move_GROWL
+
+Move_HOLD_HANDS:
+	goto Move_GROWL
+
+Move_BABY_DOLL_EYES:
+	goto Move_MOONLIGHT
+
+Move_NUZZLE:
+	goto Move_THUNDERBOLT
+
+Move_HOLD_BACK:
+	goto Move_TAKE_DOWN
+
+Move_INFESTATION:
+	goto Move_SIGNAL_BEAM
+
+Move_POWER_UP_PUNCH:
+	goto Move_KARATE_CHOP
+
+Move_OBLIVION_WING:
+	goto Move_WING_ATTACK
+
+Move_THOUSAND_ARROWS:
+	goto Move_EARTHQUAKE
+
+Move_THOUSAND_WAVES:
+	goto Move_EARTHQUAKE
+
+Move_LANDS_WRATH:
+	goto Move_EARTHQUAKE
+
+Move_LIGHT_OF_RUIN:
+	goto Move_SWEET_KISS
+
+Move_ORIGIN_PULSE:
+	goto Move_SURF
+
+Move_PRECIPICE_BLADES:
+	goto Move_EARTHQUAKE
+
+Move_DRAGON_ASCENT:
+	goto Move_WING_ATTACK
+
+Move_HYPERSPACE_FURY:
+	goto Move_CRUNCH
+
+Move_SHORE_UP:
+	goto Move_SAND_ATTACK
+
+Move_FIRST_IMPRESSION:
+	goto Move_SIGNAL_BEAM
+
+Move_BANEFUL_BUNKER:
+	goto Move_TOXIC
+
+Move_SPIRIT_SHACKLE:
+	goto Move_SHADOW_BALL
+
+Move_DARKEST_LARIAT:
+	goto Move_CRUNCH
+
+Move_SPARKLING_ARIA:
+	goto Move_SURF
+
+Move_ICE_HAMMER:
+	goto Move_ICE_BEAM
+
+Move_FLORAL_HEALING:
+	goto Move_MOONLIGHT
+
+Move_HIGH_HORSEPOWER:
+	goto Move_EARTHQUAKE
+
+Move_STRENGTH_SAP:
+	goto Move_INGRAIN
+
+Move_SOLAR_BLADE:
+	goto Move_RAZOR_LEAF
+
+Move_LEAFAGE:
+	goto Move_RAZOR_LEAF
+
+Move_SPOTLIGHT:
+	goto Move_GROWL
+
+Move_TOXIC_THREAD:
+	goto Move_TOXIC
+
+Move_LASER_FOCUS:
+	goto Move_GROWL
+
+Move_GEAR_UP:
+	goto Move_IRON_DEFENSE
+
+Move_THROAT_CHOP:
+	goto Move_CRUNCH
+
+Move_POLLEN_PUFF:
+	goto Move_SIGNAL_BEAM
+
+Move_ANCHOR_SHOT:
+	goto Move_IRON_TAIL
+
+Move_PSYCHIC_TERRAIN:
+	goto Move_CALM_MIND
+
+Move_LUNGE:
+	goto Move_SIGNAL_BEAM
+
+Move_FIRE_LASH:
+	goto Move_FLAMETHROWER
+
+Move_POWER_TRIP:
+	goto Move_CRUNCH
+
+Move_BURN_UP:
+	goto Move_FLAMETHROWER
+
+Move_SPEED_SWAP:
+	goto Move_CALM_MIND
+
+Move_SMART_STRIKE:
+	goto Move_IRON_TAIL
+
+Move_PURIFY:
+	goto Move_TOXIC
+
+Move_REVELATION_DANCE:
+	goto Move_TAKE_DOWN
+
+Move_CORE_ENFORCER:
+	goto Move_DRAGON_CLAW
+
+Move_TROP_KICK:
+	goto Move_RAZOR_LEAF
+
+Move_INSTRUCT:
+	goto Move_CALM_MIND
+
+Move_BEAK_BLAST:
+	goto Move_WING_ATTACK
+
+Move_CLANGING_SCALES:
+	goto Move_DRAGON_CLAW
+
+Move_DRAGON_HAMMER:
+	goto Move_DRAGON_CLAW
+
+Move_BRUTAL_SWING:
+	goto Move_CRUNCH
+
+Move_AURORA_VEIL:
+	goto Move_HAIL
+
+Move_SHELL_TRAP:
+	goto Move_FLAMETHROWER
+
+Move_FLEUR_CANNON:
+	goto Move_SWEET_KISS
+
+Move_PSYCHIC_FANGS:
+	goto Move_PSYCHIC
+
+Move_STOMPING_TANTRUM:
+	goto Move_EARTHQUAKE
+
+Move_SHADOW_BONE:
+	goto Move_SHADOW_BALL
+
+Move_ACCELEROCK:
+	goto Move_ROCK_SLIDE
+
+Move_LIQUIDATION:
+	goto Move_SURF
+
+Move_PRISMATIC_LASER:
+	goto Move_PSYCHIC
+
+Move_SPECTRAL_THIEF:
+	goto Move_SHADOW_BALL
+
+Move_SUNSTEEL_STRIKE:
+	goto Move_IRON_TAIL
+
+Move_MOONGEIST_BEAM:
+	goto Move_SHADOW_BALL
+
+Move_TEARFUL_LOOK:
+	goto Move_GROWL
+
+Move_ZING_ZAP:
+	goto Move_THUNDERBOLT
+
+Move_NATURES_MADNESS:
+	goto Move_SWEET_KISS
+
+Move_MULTI_ATTACK:
+	goto Move_TAKE_DOWN
+
+Move_MIND_BLOWN:
+	goto Move_FLAMETHROWER
+
+Move_PLASMA_FISTS:
+	goto Move_THUNDERBOLT
+
+Move_PHOTON_GEYSER:
+	goto Move_PSYCHIC
+
+Move_ZIPPY_ZAP:
+	goto Move_THUNDERBOLT
+
+Move_SPLISHY_SPLASH:
+	goto Move_SURF
+
+Move_FLOATY_FALL:
+	goto Move_WING_ATTACK
+
+Move_PIKA_PAPOW:
+	goto Move_THUNDERBOLT
+
+Move_BOUNCY_BUBBLE:
+	goto Move_SURF
+
+Move_BUZZY_BUZZ:
+	goto Move_THUNDERBOLT
+
+Move_SIZZLY_SLIDE:
+	goto Move_FLAMETHROWER
+
+Move_GLITZY_GLOW:
+	goto Move_PSYCHIC
+
+Move_BADDY_BAD:
+	goto Move_CRUNCH
+
+Move_SAPPY_SEED:
+	goto Move_RAZOR_LEAF
+
+Move_FREEZY_FROST:
+	goto Move_ICE_BEAM
+
+Move_SPARKLY_SWIRL:
+	goto Move_SWEET_KISS
+
+Move_VEEVEE_VOLLEY:
+	goto Move_TAKE_DOWN
+
+Move_DOUBLE_IRON_BASH:
+	goto Move_IRON_TAIL
+
+Move_DYNAMAX_CANNON:
+	goto Move_DRAGON_CLAW
+
+Move_SNIPE_SHOT:
+	goto Move_SURF
+
+Move_JAW_LOCK:
+	goto Move_CRUNCH
+
+Move_STUFF_CHEEKS:
+	goto Move_GROWL
+
+Move_NO_RETREAT:
+	goto Move_BULK_UP
+
+Move_TAR_SHOT:
+	goto Move_ROCK_TOMB
+
+Move_MAGIC_POWDER:
+	goto Move_CALM_MIND
+
+Move_DRAGON_DARTS:
+	goto Move_DRAGON_CLAW
+
+Move_TEATIME:
+	goto Move_GROWL
+
+Move_OCTOLOCK:
+	goto Move_BULK_UP
+
+Move_BOLT_BEAK:
+	goto Move_THUNDERBOLT
+
+Move_FISHIOUS_REND:
+	goto Move_SURF
+
+Move_COURT_CHANGE:
+	goto Move_GROWL
+
+Move_CLANGOROUS_SOUL:
+	goto Move_DRAGON_DANCE
+
+Move_BODY_PRESS:
+	goto Move_KARATE_CHOP
+
+Move_DECORATE:
+	goto Move_MOONLIGHT
+
+Move_DRUM_BEATING:
+	goto Move_RAZOR_LEAF
+
+Move_SNAP_TRAP:
+	goto Move_RAZOR_LEAF
+
+Move_PYRO_BALL:
+	goto Move_FLAMETHROWER
+
+Move_BEHEMOTH_BLADE:
+	goto Move_IRON_TAIL
+
+Move_BEHEMOTH_BASH:
+	goto Move_IRON_TAIL
+
+Move_AURA_WHEEL:
+	goto Move_THUNDERBOLT
+
+Move_BREAKING_SWIPE:
+	goto Move_DRAGON_CLAW
+
+Move_BRANCH_POKE:
+	goto Move_RAZOR_LEAF
+
+Move_OVERDRIVE:
+	goto Move_THUNDERBOLT
+
+Move_APPLE_ACID:
+	goto Move_RAZOR_LEAF
+
+Move_GRAV_APPLE:
+	goto Move_RAZOR_LEAF
+
+Move_SPIRIT_BREAK:
+	goto Move_SWEET_KISS
+
+Move_STRANGE_STEAM:
+	goto Move_SWEET_KISS
+
+Move_LIFE_DEW:
+	goto Move_WATER_SPORT
+
+Move_OBSTRUCT:
+	goto Move_TORMENT
+
+Move_FALSE_SURRENDER:
+	goto Move_CRUNCH
+
+Move_METEOR_ASSAULT:
+	goto Move_KARATE_CHOP
+
+Move_ETERNABEAM:
+	goto Move_DRAGON_CLAW
+
+Move_STEEL_BEAM:
+	goto Move_IRON_TAIL
+
+Move_EXPANDING_FORCE:
+	goto Move_PSYCHIC
+
+Move_STEEL_ROLLER:
+	goto Move_IRON_TAIL
+
+Move_SCALE_SHOT:
+	goto Move_DRAGON_CLAW
+
+Move_METEOR_BEAM:
+	goto Move_ROCK_SLIDE
+
+Move_SHELL_SIDE_ARM:
+	goto Move_SLUDGE_BOMB
+
+Move_MISTY_EXPLOSION:
+	goto Move_SWEET_KISS
+
+Move_GRASSY_GLIDE:
+	goto Move_RAZOR_LEAF
+
+Move_RISING_VOLTAGE:
+	goto Move_THUNDERBOLT
+
+Move_TERRAIN_PULSE:
+	goto Move_TAKE_DOWN
+
+Move_SKITTER_SMACK:
+	goto Move_SIGNAL_BEAM
+
+Move_BURNING_JEALOUSY:
+	goto Move_FLAMETHROWER
+
+Move_LASH_OUT:
+	goto Move_CRUNCH
+
+Move_POLTERGEIST:
+	goto Move_SHADOW_BALL
+
+Move_CORROSIVE_GAS:
+	goto Move_TOXIC
+
+Move_COACHING:
+	goto Move_BULK_UP
+
+Move_FLIP_TURN:
+	goto Move_SURF
+
+Move_TRIPLE_AXEL:
+	goto Move_ICE_BEAM
+
+Move_DUAL_WINGBEAT:
+	goto Move_WING_ATTACK
+
+Move_SCORCHING_SANDS:
+	goto Move_EARTHQUAKE
+
+Move_JUNGLE_HEALING:
+	goto Move_INGRAIN
+
+Move_WICKED_BLOW:
+	goto Move_CRUNCH
+
+Move_SURGING_STRIKES:
+	goto Move_SURF
+
+Move_THUNDER_CAGE:
+	goto Move_THUNDERBOLT
+
+Move_DRAGON_ENERGY:
+	goto Move_DRAGON_CLAW
+
+Move_FREEZING_GLARE:
+	goto Move_PSYCHIC
+
+Move_FIERY_WRATH:
+	goto Move_CRUNCH
+
+Move_THUNDEROUS_KICK:
+	goto Move_KARATE_CHOP
+
+Move_GLACIAL_LANCE:
+	goto Move_ICE_BEAM
+
+Move_ASTRAL_BARRAGE:
+	goto Move_SHADOW_BALL
+
+Move_EERIE_SPELL:
+	goto Move_PSYCHIC

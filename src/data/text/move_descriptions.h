@@ -1418,6 +1418,7 @@ static const u8 sPsychoBoostDescription[] = _(
     "but sharply lowers SP. ATK.");
 
 #include "move_descriptions_gen4.h"   // Moemon Kai: Gen 4 moves
+#include "move_descriptions_gen58.h"   // Moemon Kai: Gen 5-8 moves
 
 // MOVE_NONE is ignored in this table. Make sure to always subtract 1 before getting the right pointer.
 const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
@@ -1777,4 +1778,5 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_DOOM_DESIRE - 1] = sDoomDesireDescription,
     [MOVE_PSYCHO_BOOST - 1] = sPsychoBoostDescription,
     MOVE_DESCRIPTIONS_GEN4
+    MOVE_DESCRIPTIONS_GEN58
 };

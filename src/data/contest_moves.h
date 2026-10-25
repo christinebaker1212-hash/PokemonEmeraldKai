@@ -2833,6 +2833,7 @@ const struct ContestMove gContestMoves[MOVES_COUNT] =
         .comboMoves = {COMBO_STARTER_CALM_MIND},
     },
 #include "contest_moves_gen4.h"   // Moemon Kai: Gen 4 moves
+#include "contest_moves_gen58.h"   // Moemon Kai: Gen 5-8 moves
 };
 
 const struct ContestEffect gContestEffects[] =
