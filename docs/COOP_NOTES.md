@@ -651,7 +651,8 @@ padding"). Protocol 26. Tests: tri_padded (Tommy 2 -> 3, Triple), coop_one_mon (
 ## PMD Collab followers (mp_pmd.c, mp_bigsprite.c; data from tools/moemon_pmd)
 Followers (yours and friends') and Garden Pokémon are PMD Collab overworld sprites (github PMDCollab/SpriteCollab,
 CC BY-NC 4.0; artists in dist_extras/PMD_CREDITS.txt, packaged). tools/moemon_pmd/import.py SPRITECOLLAB_DIR writes
-graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-386, variant 0 normal, 1 female, 2/3
+graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-493; 387-493 added later with
+`--append 387-493` from a newer collab checkout, the rest kept byte for byte, variant 0 normal, 1 female, 2/3
 shiny / female shiny when the shiny colors need pixels of their own), src/data/mp_pmd.h (the index) and the credits.
 A chunk ('PMD2'): bpp 4 (8 for the few shiny sheets with 16+ colors: all colors kept), palette and shiny palette (one
 set of pixels when the (normal, shiny) color pairs fit in 15), 29 animations (PMD_ANIM_*), each frames x 8 directions
@@ -1746,6 +1747,9 @@ COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_Batt
   damage", JABOCA / ROWAP hurt a physical / special attacker by 1/8, MICLE gives the next move x1.2 accuracy,
   CUSTAP moves first at 1/4 HP (MP_Gen4_OrderKey, eaten in MP_Gen4_BeforeMove). Trees: a vanilla tree of the berry's
   color. They have no place to be found yet (debug `mp additem`); the other regions will sell or grow them.
+- Followers: the default (HGSS-style) sprites of 387-493 come from Moemon Quetzal's overworld sprites
+  (tools/moemon_gen4/gen_followers.py QUETZAL_ROM: appended to followers.bin, "sheet": "quetzal" in index.json);
+  the PMD ones from the PMD Collab (tools/moemon_pmd/import.py --append 387-493).
 - Not yet: STEADFAST, LEAF GUARD, STORM DRAIN's redirect, STICKY BARB passing on contact, and real animations for
   the moves still borrowing Gen 3 ones (data/battle_anim_scripts_gen4.inc).
 Debug `mp g4side SIDE ROCK TSPIKES WISH` lays hazards (0 = the player's side), `mp setmove SLOT IDX MOVE`, `mp hold SLOT ITEM`,

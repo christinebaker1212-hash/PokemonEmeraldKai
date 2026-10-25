@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Moemon Co-op: PMD Collab overworld sprites for followers and Garden Pokémon (mp_pmd.c).
 
-usage: import.py SPRITECOLLAB_DIR [OUT_DIR]
+usage: import.py SPRITECOLLAB_DIR [OUT_DIR] [--append FIRST-LAST]
+  --append: only national dex FIRST-LAST, added to (or replacing in) the pmd.bin / mp_pmd.h / credits already there,
+  so the others stay byte for byte (the Gen 4 Pokemon 387-493 came in this way, from a newer collab checkout).
   SPRITECOLLAB_DIR: a checkout of https://github.com/PMDCollab/SpriteCollab (sprite/0001-0386, tracker.json,
   credit_names.txt). OUT_DIR defaults to this repo: graphics/moemon/pmd/pmd.bin, src/data/mp_pmd.h,
   dist_extras/PMD_CREDITS.txt.
@@ -32,7 +34,7 @@ from PIL import Image
 ANIMS = ['Walk', 'Idle', 'Sleep', 'Eat', 'Hop', 'Rotate', 'Attack', 'Shoot', 'Strike', 'LookUp', 'Charge', 'Shock',
          'Trip', 'Tumble', 'Hurt', 'Cringe', 'Nod', 'Pose', 'Sit', 'DeepBreath', 'Laying', 'Float', 'LeapForth', 'Pull',
          'Wake', 'EventSleep', 'Swing', 'Double', 'QuickStrike']
-MAX_DEX = 386
+MAX_DEX = 493
 
 
 def bgr555(rgb):
@@ -261,8 +263,13 @@ def credits_for(repo, dex_dirs, names):
 def main():
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
-    repo = sys.argv[1]
-    out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    first, last = 1, MAX_DEX
+    if '--append' in sys.argv:
+        first, last = (int(x) for x in sys.argv[sys.argv.index('--append') + 1].split('-'))
+        args.remove('%d-%d' % (first, last))
+    repo = args[0]
+    out = args[1] if len(args) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
     tracker = json.load(open(os.path.join(repo, 'tracker.json'), encoding='utf-8'))
     names = {}
     cn = os.path.join(repo, 'credit_names.txt')
@@ -275,7 +282,21 @@ def main():
     blob = bytearray()
     index = []
     credit_rows = []
-    for dex in range(1, MAX_DEX + 1):
+    kept_credits = []
+    if '--append' in sys.argv:
+        import re
+        old = open(os.path.join(out, 'src', 'data', 'mp_pmd.h')).read()
+        index = [tuple(int(x) for x in m) for m in re.findall(r'\{(\d+), (\d+), (\d+), (\d+), (\d+)\}', old)]
+        index = [e for e in index if not first <= e[0] <= last]
+        blob = bytearray(open(os.path.join(out, 'graphics', 'moemon', 'pmd', 'pmd.bin'), 'rb').read())
+        del blob[max(e[2] + e[3] for e in index):]
+        while len(blob) % 4:
+            blob.append(0)
+        for row in open(os.path.join(out, 'dist_extras', 'PMD_CREDITS.txt'), encoding='utf-8').read().split('\n'):
+            m = re.match(r'#(\d+) ', row)
+            if m and not first <= int(m.group(1)) <= last:
+                kept_credits.append(row)
+    for dex in range(first, last + 1):
         base = os.path.join(repo, 'sprite', '%04d' % dex)
         name = tracker.get('%04d' % dex, {}).get('name', '?')
         sheet = Sheet(base)
@@ -313,7 +334,12 @@ def main():
             f.write('    {%d, %d, %d, %d, %d},\n' % e)
         f.write('};\n')
     with open(os.path.join(out, 'dist_extras', 'PMD_CREDITS.txt'), 'w', encoding='utf-8') as f:
-        f.write(credits_for(repo, credit_rows, names))
+        text = credits_for(repo, credit_rows, names)
+        if kept_credits:   # --append: the others' rows as they were, in dex order
+            head, rows = text.split('\n\n', 1)
+            rows = sorted(kept_credits + [r for r in rows.split('\n') if r], key=lambda r: int(r[1:r.index(' ')]))
+            text = head + '\n\n' + '\n'.join(rows) + '\n'
+        f.write(text)
     print('%d chunks, %.1f MB deflated, %.1f MB inflated' % (len(index), len(blob) / 1e6, sum(e[4] for e in index) / 1e6))
     for w in warnings:
         print('warning:', w)

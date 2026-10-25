@@ -388,3 +388,110 @@ Sprite artists for each Pokemon:
 #384 Rayquaza: CHUNSOFT
 #385 Jirachi: CHUNSOFT, Grimlin
 #386 Deoxys: CHUNSOFT
+#387 Turtwig: CHUNSOFT
+#388 Grotle: CHUNSOFT, Caitemis
+#389 Torterra: CHUNSOFT
+#390 Chimchar: CHUNSOFT
+#391 Monferno: CHUNSOFT
+#392 Infernape: CHUNSOFT, Caitemis
+#393 Piplup: CHUNSOFT
+#394 Prinplup: CHUNSOFT
+#395 Empoleon: CHUNSOFT
+#396 Starly: CHUNSOFT, Emboarger, JFain, Emmuffin
+#397 Staravia: CHUNSOFT, Emmuffin
+#398 Staraptor: CHUNSOFT, Audino, Emmuffin
+#399 Bidoof: CHUNSOFT, Emmuffin
+#400 Bibarel: CHUNSOFT
+#401 Kricketot: CHUNSOFT
+#402 Kricketune: CHUNSOFT
+#403 Shinx: CHUNSOFT, Morei
+#404 Luxio: CHUNSOFT, Caitemis, Morei, XModxGodX
+#405 Luxray: CHUNSOFT, baronessfaron
+#406 Budew: CHUNSOFT, Uni
+#407 Roserade: CHUNSOFT, JFain, G〜, Emmuffin
+#408 Cranidos: CHUNSOFT
+#409 Rampardos: CHUNSOFT
+#410 Shieldon: CHUNSOFT
+#411 Bastiodon: CHUNSOFT
+#412 Burmy: CHUNSOFT, Caitemis
+#413 Wormadam: CHUNSOFT
+#414 Mothim: CHUNSOFT
+#415 Combee: CHUNSOFT
+#416 Vespiquen: CHUNSOFT
+#417 Pachirisu: CHUNSOFT, JFain, baronessfaron, Emmuffin
+#418 Buizel: CHUNSOFT, Reimu\_needs\_$$$
+#419 Floatzel: CHUNSOFT
+#420 Cherubi: CHUNSOFT
+#421 Cherrim: CHUNSOFT
+#422 Shellos: CHUNSOFT
+#423 Gastrodon: CHUNSOFT
+#424 Ambipom: CHUNSOFT
+#425 Drifloon: CHUNSOFT
+#426 Drifblim: CHUNSOFT
+#427 Buneary: CHUNSOFT, JFain
+#428 Lopunny: CHUNSOFT
+#429 Mismagius: CHUNSOFT
+#430 Honchkrow: CHUNSOFT, Caitemis
+#431 Glameow: CHUNSOFT, baronessfaron
+#432 Purugly: CHUNSOFT
+#433 Chingling: CHUNSOFT, anomalocaris
+#434 Stunky: CHUNSOFT, JFain
+#435 Skuntank: CHUNSOFT
+#436 Bronzor: CHUNSOFT
+#437 Bronzong: CHUNSOFT
+#438 Bonsly: CHUNSOFT
+#439 Mime_Jr_: CHUNSOFT, JFain
+#440 Happiny: CHUNSOFT, JFain
+#441 Chatot: CHUNSOFT, JFain
+#442 Spiritomb: CHUNSOFT
+#443 Gible: CHUNSOFT
+#444 Gabite: CHUNSOFT
+#445 Garchomp: CHUNSOFT
+#446 Munchlax: CHUNSOFT
+#447 Riolu: CHUNSOFT
+#448 Lucario: CHUNSOFT, Emmuffin
+#449 Hippopotas: CHUNSOFT
+#450 Hippowdon: CHUNSOFT
+#451 Skorupi: CHUNSOFT
+#452 Drapion: CHUNSOFT
+#453 Croagunk: CHUNSOFT, Caitemis, Emmuffin
+#454 Toxicroak: CHUNSOFT
+#455 Carnivine: CHUNSOFT
+#456 Finneon: CHUNSOFT, JFain
+#457 Lumineon: CHUNSOFT, Emmuffin
+#458 Mantyke: CHUNSOFT
+#459 Snover: CHUNSOFT
+#460 Abomasnow: CHUNSOFT
+#461 Weavile: CHUNSOFT
+#462 Magnezone: CHUNSOFT
+#463 Lickilicky: CHUNSOFT
+#464 Rhyperior: CHUNSOFT
+#465 Tangrowth: CHUNSOFT, Emmuffin
+#466 Electivire: CHUNSOFT
+#467 Magmortar: CHUNSOFT
+#468 Togekiss: CHUNSOFT
+#469 Yanmega: CHUNSOFT
+#470 Leafeon: CHUNSOFT, baronessfaron
+#471 Glaceon: CHUNSOFT, JFain, baronessfaron
+#472 Gliscor: CHUNSOFT
+#473 Mamoswine: CHUNSOFT
+#474 Porygon_Z: CHUNSOFT, Caitemis
+#475 Gallade: CHUNSOFT
+#476 Probopass: CHUNSOFT
+#477 Dusknoir: CHUNSOFT, Caitemis
+#478 Froslass: CHUNSOFT
+#479 Rotom: CHUNSOFT
+#480 Uxie: CHUNSOFT
+#481 Mesprit: CHUNSOFT, baronessfaron
+#482 Azelf: CHUNSOFT
+#483 Dialga: CHUNSOFT
+#484 Palkia: CHUNSOFT
+#485 Heatran: CHUNSOFT
+#486 Regigigas: CHUNSOFT
+#487 Giratina: CHUNSOFT
+#488 Cresselia: CHUNSOFT, baronessfaron
+#489 Phione: CHUNSOFT, Emmuffin
+#490 Manaphy: CHUNSOFT, JFain
+#491 Darkrai: CHUNSOFT, baronessfaron
+#492 Shaymin: CHUNSOFT, JFain
+#493 Arceus: JFain, baronessfaron, Emboarger
