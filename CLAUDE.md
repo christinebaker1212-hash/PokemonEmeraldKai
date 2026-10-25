@@ -32,6 +32,9 @@ sharing the result folder get there, so they act on the same frame, quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
 `MOEMON_TEST_FPS=120` keeps several clients roughly in sync.
+**Never test with moves that can miss** unless the test is about accuracy: a miss wastes the run, tokens and time.
+Give the Pokémon a 100%-accurate move first (`mp teach SLOT MOVE` replaces its first move, e.g. 61 BUBBLEBEAM),
+and pick foes and moves so the battle ends in a few turns.
 Verified this way: 4-player overworld sync, nametags, custom PNG sprite,
 BATTLE FLAG -> spot -> walk up -> link battle -> rewards and whiteout, save/continue.
 
@@ -51,7 +54,8 @@ phases 1-4 (dex, buddy bonus, shared PC, trades, dailies/achievements/MoeGatcha,
 TEAM PADDING (host setting: trainers get one extra Moemon in team-ups),
 "wait for a partner", co-op healing items, the co-op doubles retrofit, batch 3 link features (record mixing, secret
 bases, trainer cards, day care eggs, minigames, contests), LOOK / CREATE sprites, co-op Triple Battles (cards drawn from the user's pixel art: tools/moemon_tricards,
-checked pixel for pixel by the tri_cards test; type icons layered beside every battle's boxes), and grouped
+checked pixel for pixel by the tri_cards test; type icons layered beside every battle's boxes; the party screen PARTY_LAYOUT_TRIPLE,
+checked against the user's mock-up by tri_party), and grouped
 stat moves (one animation and message for Growl / Tail Whip on several Pokémon), graphics past the GBA limits (64 sprite palettes,
 128 sprites, 256 OAM entries, 128 KB of sprite tiles), co-op EXP (everyone levels
 up and picks moves to forget at the same time), and ball entrance / recall effects (mp_ballfx.c: an effects layer

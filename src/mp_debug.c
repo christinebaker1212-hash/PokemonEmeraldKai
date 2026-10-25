@@ -2044,7 +2044,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "partycursor") == 0)   // where the party screen's cursor is (7 = CANCEL) and its layout
     {
-        printf("[test] party menu cursor %d layout %d\n", gPartyMenu.slotId, gPartyMenu.layout);
+        printf("[test] party menu cursor %d layout %d type %d (triple %d co-op %d flags %x)\n", gPartyMenu.slotId, gPartyMenu.layout,
+               gPartyMenu.menuType, gIsTripleBattle, gMpCoopBattle, (unsigned)gBattleTypeFlags);
     }
     else if (strcmp(cmd, "party") == 0)
     {

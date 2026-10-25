@@ -248,8 +248,9 @@ TRIPLE BATTLES (THREE PLAYERS)
   Battles. Moves that hit both foes (Surf, Rock Slide...) hit all three foes
   for 3/4 damage; Earthquake and friends hit your allies too. Helping Hand
   lets you pick which ally to boost.
-* Your allies are the gold boxes in the party screen; you can heal any of
-  the six.
+* The party screen shows the three Moemon out in battle on the left (yours
+  first) and the ones waiting on the right, in the same order. Your allies'
+  boxes are gold; you can heal any of the six.
 * The cards show the name and gender, the level and the HP bar. A status
   (PSN, PAR, SLP, FRZ, BRN) covers the level, as on the usual boxes. The
   cards are see-through, so Moemon behind them stay visible.

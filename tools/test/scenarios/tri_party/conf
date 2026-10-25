@@ -6,8 +6,8 @@ WARP=0,16,13,12
 WARP_B=0,16,14,11
 WARP_C=0,16,12,11
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=280:20,258:20"
-ENV_B="MOEMON_DEBUG_PARTY=280:20,252:20"
+ENV_A="MOEMON_DEBUG_PARTY=280:20,283:20"
+ENV_B="MOEMON_DEBUG_PARTY=280:20,277:20"
 ENV_C="MOEMON_DEBUG_PARTY=280:20"
 EXPECT_A=("party menu cursor 3" "party menu cursor 4" "party menu cursor 7" "co-op: battle over")
 EXPECT_B=("co-op: battle over")

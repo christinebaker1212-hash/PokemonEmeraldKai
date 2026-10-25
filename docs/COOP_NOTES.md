@@ -346,10 +346,16 @@ first joins (TripleEligible, B = double now).
 Rules: target picker over six (battle_controller_player.c HandleInputChooseTargetTriple), Helping Hand on either ally,
 spread 3/4 (pokemon.c SpreadDamage), MpNextSpreadTarget, battle_util.c MpTripleChooseTarget, replacements
 (MP_TripleSwitchRange / MP_IsPartyIdOnSide). Cards: src/mp/mp_tricards.c over the frame (no owner strips since the new card art),
-healthboxes parked below the screen. Party screen order MP_TripleFixPartyOrder (allies' slots 1,3,4,5 gold).
+healthboxes parked below the screen. Party screen: PARTY_LAYOUT_TRIPLE (party_menu.c; gPartyMenu.layout is 3 bits now), drawn
+from the user's mock-up (docs/user_images/25.png, tools/moemon_tricards/party_mock.png): the three actives in 10x5 panels on the
+left (ours, then the allies'), their reserves in the wide boxes on the right in the same order. MpBlitTripleArt builds both
+from the stock box art pixel by pixel (panel = stock rows 2-5, 15-36, 38-51; wide = one pixel higher), and a caller's "tile
+row" to redraw stands for a text band (sTriplePanelBands / sTripleWideBands). Actives not selected get the orange inner edge
+(color 6). Order MP_TripleFixPartyOrder (actives 0-2, reserves 3-5; allies' slots 1,2,4,5 gold). Cursor:
+UpdatePartySelectionTripleLayout. Test tri_party checks the screen against the mock-up pixel for pixel (check_party.py).
 Second custom back pic slot TRAINER_BACK_PIC_MP_PARTNER2. Debug: `mp triple S:L S:L S:L [...]` (local, one player
 commands all three), MOEMON_TRIPLEDEBUG=1 (logs; card visibility). Tests: tri_wild, tri_trainer, tri_catch, tri_heal,
-tri_abort, tri_levelup, tri_faint (MODE=3, tools/test/runN.sh). Gotcha: anything that does `battler ^ BIT_FLANK` or
+tri_abort, tri_levelup, tri_faint, tri_party (MODE=3, tools/test/runN.sh). Gotcha: anything that does `battler ^ BIT_FLANK` or
 assumes positions 0-3 (reshow_battle_screen.c, shadows, Cmd_monbg) breaks for 4/5 (sprite 0 = battler 0's healthbox).
 Card art: the user's pixel mock-up (tools/moemon_tricards/cards_mockup.png; gen.py -> src/mp/mp_tricard_gfx.h), a
 74x22 body with a tail toward the type icons (foe: right, team: left; the team card's top-left corner is one pixel

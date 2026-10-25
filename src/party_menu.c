@@ -2444,7 +2444,13 @@ static void MpBlitTripleArt(u8 windowId, const u8 *tilemap, bool8 panel, u8 x, u
         if (src < 0)
             continue;
         for (px = x * 8; px < (x + width) * 8; px++)
-            MpBoxArtPut(pixels, wTiles, px, row, MpBoxArtPixel(tilemap, wTiles, px, src));
+        {
+            u8 c = MpBoxArtPixel(tilemap, wTiles, px, src);
+            // The mock-up starts a panel's light left edge (color 4) with a dither: the fill (5) on rows 20 and 22
+            if (panel && px == 2 && (row == 20 || row == 22) && c == 4)
+                c = 5;
+            MpBoxArtPut(pixels, wTiles, px, row, c);
+        }
     }
     FillWindowPixelRect(windowId, PIXEL_FILL(0), x * 8, r0, width * 8, r1 - r0);
     BlitBitmapRectToWindow(windowId, pixels, x * 8, r0, wTiles * 8, hTiles * 8, x * 8, r0, width * 8, r1 - r0);
@@ -2556,10 +2562,11 @@ static void LoadPartyBoxPalette(struct PartyMenuBox *menuBox, u8 palFlags)
         LOAD_PARTY_BOX_PAL(sPartyBoxEmptySlotPalIds2, sPartyBoxPalOffsets2);
     }
 
-    // Moemon Co-op: the Pokemon out in a co-op triple have an orange inner edge (the selection orange)
+    // Moemon Co-op: the Pokemon out in a co-op triple have an orange inner edge (color 6, in the selection orange)
+    // while not selected; the selected one keeps its orange frame and normal edge
     if (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE && menuBox->windowId < 3
-     && !(palFlags & (PARTY_PAL_NO_MON | PARTY_PAL_SWITCHING | PARTY_PAL_TO_SWITCH | PARTY_PAL_TO_SOFTBOIL)))
-        LoadPalette(GetPartyMenuPalBufferPtr(sPartyBoxCurrSelectionPalIds2[2]), sPartyBoxPalOffsets2[2] + palOffset, PLTT_SIZEOF(1));
+     && !(palFlags & (PARTY_PAL_NO_MON | PARTY_PAL_SELECTED | PARTY_PAL_SWITCHING | PARTY_PAL_TO_SWITCH | PARTY_PAL_TO_SOFTBOIL)))
+        LoadPalette(GetPartyMenuPalBufferPtr(sPartyBoxCurrSelectionPalIds2[2]), sPartyBoxPalOffsets1[2] + palOffset, PLTT_SIZEOF(1));
 }
 
 static void DisplayPartyPokemonBarDetail(u8 windowId, const u8 *str, u8 color, const u8 *align)
@@ -6177,10 +6184,10 @@ void ChooseMonForWirelessMinigame(void)
 
 static u8 GetPartyLayoutFromBattleType(void)
 {
+    if (IS_TRIPLE_BATTLE() && gMpCoopBattle)   // Moemon Co-op: before the double check (a triple isn't one)
+        return PARTY_LAYOUT_TRIPLE;
     if (IsDoubleBattle() == FALSE)
         return PARTY_LAYOUT_SINGLE;
-    if (IS_TRIPLE_BATTLE() && gMpCoopBattle)
-        return PARTY_LAYOUT_TRIPLE;
     if (IsMultiBattle() == TRUE)
         return PARTY_LAYOUT_MULTI;
     return PARTY_LAYOUT_DOUBLE;

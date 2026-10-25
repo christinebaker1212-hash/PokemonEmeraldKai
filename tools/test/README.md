@@ -46,7 +46,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `tri_target_level` | Roxanne co-op Triple at NA-JP lag: every player opens the target window; its Lv must match the cards (no "target level mismatch" in any log) |
 | `tri_trainer` | Roxanne: ALICE waits, BOB joins, ALICE keeps waiting, CARL joins: a trainer Triple Battle |
 | `tri_catch` | wild triple: ALICE and BOB each catch a different wild Pokemon (each gets their own) |
-| `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the gold slots are the allies') |
+| `tri_heal` | wild triple: ALICE uses a POTION on CARL's Moemon (the third panel on the left: the second ally's Moemon out) |
+| `tri_party` | wild triple: ALICE's party screen against the user's mock-up pixel for pixel (actives left, reserves right), cursor RIGHT / DOWN / CANCEL |
 | `tri_abort` | wild triple: ALICE catches one, BOB disconnects: called off, ALICE keeps the catch |
 | `look_chars` | NA-JP lag: ALICE wears new characters: PROF. BIRCH's 64x64 bikes, SERENA's ridden RHYHORN then a bicycle (LOOK > BIKE), her diving sprite, an old ini name (`steven`); BOB sees each |
 | `look_created_remote` | NA-JP lag: BOB receives ALICE's whole CREATE recipe (FIELD HAIR 5) and later her LOOK > BIKE (`mp remoteapp`); shots of her sprite on both screens |

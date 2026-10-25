@@ -16,7 +16,7 @@ wait 60
 press A 2
 waitfor partymenu 600
 wait 20
-press RIGHT 2
+press DOWN 2
 wait 10
 press DOWN 2
 wait 10

@@ -1,5 +1,5 @@
-# Co-op wild triple: CARL's lead is at 3 HP, ALICE uses a POTION on it from her bag (the gold slot at the
-# right column's second row; CARL's game runs the battle, so it logs the item)
+# Co-op wild triple: CARL's lead is at 3 HP, ALICE uses a POTION on it from her bag (the third panel on the
+# left, the second ally's Pokemon out; CARL's game runs the battle, so it logs the item)
 MODE=3
 WARP=0,16,12,11
 WARP_B=0,16,14,11
