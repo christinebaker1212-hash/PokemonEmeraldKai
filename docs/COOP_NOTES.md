@@ -1113,21 +1113,26 @@ candy_jar, candy_jar_full (check.py reads mp jarstate: nothing outside the glass
 candy_flow (release -> Birch -> BAG / registered jar -> save reload). mp candy TYPE N (-1 = all), candyjar,
 jarstate, candyreload; harness conditions jar, jaridle.
 1.18 rework, drawn from the user's mock-up (tools/moemon_candyjar: jar_mockup.png -> gen.py -> src/mp/mp_candyjar_gfx.h).
-The background (green diamonds, the framed jar panel, the list window, the message box) and the jar's glass are full-color
-pictures (one table of the mock-up's 125 colors) drawn UNDER the game's layers: MP_Candy_Composite (sdl2.c VDraw right
-after DrawFrame) fills every pixel nothing was drawn on (the renderer leaves bit 15 clear on the backdrop) with the
-background, or the glass shifted by sJar.shakeX. The backdrop is white, so its faded value gives the fade step (inverted
+The framed jar panel, the list window (shortened: its rows from 115 are the mock-up's 14 lower, so it ends above the
+game's message box) and the jar's glass are full-color pictures (one table of the mock-up's colors) drawn UNDER the
+game's layers: MP_Candy_Composite (sdl2.c VDraw right after DrawFrame) fills every pixel nothing was drawn on (the
+renderer leaves bit 15 clear on the backdrop) with them, the glass shifted by sJar.shownShakeX (the shake latched in
+VBlankCB_Jar when OAM loads: the frame is drawn before the new OAM, so the current shake put the glass a frame ahead of
+the lid and candies); elsewhere (sCJ_Bg 0) a 128x128 tile of 64-pixel diamonds (gen.py draws it: a checker turned 45
+degrees, its edges dithered) drifting down-right a pixel every other VBlank (sJar.scroll). The backdrop is white, so its faded value gives the fade step (inverted
 with palette.c BlendPalette's math) and the pictures fade with the palettes. gen.py paints the mock-up's three sample
 candies out of the glass (rows above the floor from clear glass higher up, the floor's rows from its middle), takes the
-lid off (rows 25-40: a 64x32 sprite, sCJ_LidTiles; it flies to LID_UP_Y above the screen), and fills the jar's place in
-the background with the panel's own speckle. The physics read sCJ_JarRole (1 outline, 2 glass; the edge = the first and
+lid off (rows 25-40: a 64x32 sprite, sCJ_LidTiles; it flies to LID_UP_Y above the screen), draws a glass lip on the
+mouth (rows 36-40, all under the lid: only seen with the lid off), and fills the jar's place in the background with the
+panel's own speckle. The physics read sCJ_JarRole (1 outline, 2 glass; the edge = the first and
 last pixel that isn't panel green, so a light outline pixel still closes the wall); box CJ_JAR_X/Y 16,24, 80x96, neck
 CJ_NECK_L/R, CJ_LID_ROWS 17; candies at most 6 px in radius (the mock-up's 12-pixel ones), sized from CJ_GLASS_AREA.
-BG0 only (text): WIN_LIST (see-through, 16x17 from 112,8) and WIN_HELP (row 18), palette 15 = the standard menu
-palette (YES / NO box, button glyphs) with the mock-up's inks in 10-15 (sJarInks). The list as the mock-up: names (dark)
-and counts (blue-gray; blue = can make a RARE CANDY) in FONT_SMALL at sListRowY, candies centered at LIST_ICON_X, the
-mock-up's 4x6 gray arrow drawn into the window (JarDrawCursor), ALL in the right column's empty last row. The message in
-FONT_NORMAL from x 12 with the buttons ending at x 206 (FONT_SMALL buttons when even narrow text wouldn't fit).
+BG0 only (text): WIN_LIST (see-through, 16x15 from 112,8) and WIN_HELP in the game's own message box (rows 16-19:
+LoadMessageBoxGfx / DrawDialogFrameWithCustomTileAndPalette; the user preferred it to the mock-up's, which ran off the
+screen), palette 15 = the standard menu palette (message, YES / NO box, button glyphs) with the mock-up's inks in 10-15
+(sJarInks). The list as the mock-up: names (dark) and counts (blue-gray; blue = can make a RARE CANDY) in FONT_SMALL at
+sListRowY (11 pixels apart), 10-pixel candies at LIST_ICON_X, the mock-up's 4x6 gray arrow drawn into the window
+(JarDrawCursor), ALL in the right column's empty last row. The message in FONT_NORMAL, the buttons small at its right.
 JarIdleHelp says what the kind under the cursor needs ("N more FIRE for a RARE CANDY.", "2 RARE CANDY from WATER." with
 {A}MAKE). A on a kind with 10+ (or ALL with anything) asks YES / NO (CreateYesNoMenu over the list's lower right; the
 list's candies under it hide: JarHideUnderYesNo); YES converts that kind (MP_Candy_ConvertType) or all

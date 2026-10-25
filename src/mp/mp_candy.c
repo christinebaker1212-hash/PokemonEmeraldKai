@@ -419,10 +419,12 @@ enum { WIN_LIST, WIN_HELP, WIN_JAR_COUNT };
 #define LIST_CURSOR_X 7
 #define FRAME_TILE 0x200     // the YES / NO box's frame (LoadUserWindowBorderGfx: 9 tiles)
 #define FRAME_PAL 14
+#define MSGBOX_TILE 0x214    // the message box's frame (LoadMessageBoxGfx)
+#define MSGBOX_PAL 13
 #define TAG_ALL_ICON 0x5C62
 
-// The rows' print positions (the mock-up's rows: 12 pixels apart, one 13); the capitals start 4 lower
-static const u8 sListRowY[LIST_ROWS] = {15, 27, 39, 51, 63, 76, 88, 100, 112};
+// The rows' print positions (11 pixels apart: the list ends above the message box); the capitals start 4 lower
+static const u8 sListRowY[LIST_ROWS] = {12, 23, 34, 45, 56, 67, 78, 89, 100};
 
 // Text colors: the standard menu palette (the YES / NO box, button icons) with the mock-up's in 10-15
 enum { INK_TEXT = 10, INK_TEXT_SHADOW, INK_COUNT, INK_COUNT_SHADOW, INK_CURSOR, INK_MSG_SHADOW };
@@ -434,9 +436,9 @@ static const struct BgTemplate sJarBgs[] = {
 };
 
 static const struct WindowTemplate sJarWindows[] = {
-    // see-through over the picture's list (from its frame to the screen's edge) and its message box
-    [WIN_LIST] = {.bg = 0, .tilemapLeft = LIST_X / 8, .tilemapTop = LIST_Y / 8, .width = 16, .height = 17, .paletteNum = 15, .baseBlock = 1},
-    [WIN_HELP] = {.bg = 0, .tilemapLeft = 0, .tilemapTop = 18, .width = 30, .height = 2, .paletteNum = 15, .baseBlock = 1 + 16 * 17},
+    // see-through over the picture's list (from its frame to the screen's edge); the game's message box (rows 16-19)
+    [WIN_LIST] = {.bg = 0, .tilemapLeft = LIST_X / 8, .tilemapTop = LIST_Y / 8, .width = 16, .height = 15, .paletteNum = 15, .baseBlock = 1},
+    [WIN_HELP] = {.bg = 0, .tilemapLeft = 2, .tilemapTop = 17, .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 1 + 16 * 15},
     DUMMY_WIN_TEMPLATE,
 };
 
@@ -455,6 +457,8 @@ static EWRAM_DATA struct
     u8 pourTimer;
     u8 shakeTimer;
     s8 shakeX;
+    s8 shownShakeX;         // the shake the sprites on the screen have (OAM loads at VBlank, after the frame is drawn)
+    u16 scroll;             // the diamonds' scroll (VBlank count)
 } sJar = {0};
 
 static const u8 sTextInk[] = {TEXT_COLOR_TRANSPARENT, INK_TEXT, INK_TEXT_SHADOW};
@@ -466,38 +470,28 @@ static void JarText(u8 win, u8 x, u8 y, const char *ascii)
     AddTextPrinterParameterized3(win, FONT_SMALL, x, y, sTextInk, TEXT_SKIP_DRAW, buf);
 }
 
-#define MSG_X 12        // the message box's text (as the mock-up: from x 12, capitals at y 150)
-#define MSG_Y 3
-#define MSG_RIGHT 206   // the buttons end there
-
-// The message box: what's going on (left, in the message font, narrower when it's long) and the buttons (right)
+// The message box (the game's): what's going on (left, in the message font, narrower when it's long) and the buttons
+// (right, small)
 static void JarMessage(const char *ascii, const char *buttons)
 {
-    static const u8 sMsgInk[] = {TEXT_COLOR_TRANSPARENT, INK_TEXT, INK_MSG_SHADOW};
+    static const u8 sMsgInk[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
     u8 text[96], keys[48];
     s32 keysW = 0, room;
-    u8 font = FONT_NORMAL, keysFont = FONT_NORMAL;
-    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(0));
-    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
+    u8 font = FONT_NORMAL;
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
     if (buttons != NULL)
     {
         MP_AsciiToGame(keys, buttons, sizeof(keys) - 1);
-        keysW = GetStringWidth(FONT_NORMAL, keys, 0);
-        // a long message that wouldn't fit even narrow: the buttons go small instead
-        if (GetStringWidth(FONT_SMALL_NARROW, text, 0) > MSG_RIGHT - keysW - 8 - MSG_X)
-        {
-            keysFont = FONT_SMALL;
-            keysW = GetStringWidth(FONT_SMALL, keys, 0);
-        }
-        AddTextPrinterParameterized3(WIN_HELP, keysFont, MSG_RIGHT - keysW, MSG_Y + (keysFont == FONT_SMALL ? 1 : 0),
-                                     sMsgInk, TEXT_SKIP_DRAW, keys);
+        keysW = GetStringWidth(FONT_SMALL, keys, 0);
+        AddTextPrinterParameterized3(WIN_HELP, FONT_SMALL, 26 * 8 - keysW - 2, 3, sMsgInk, TEXT_SKIP_DRAW, keys);
     }
-    room = (buttons != NULL ? MSG_RIGHT - keysW - 8 : 30 * 8 - 4) - MSG_X;
+    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
+    room = 26 * 8 - (buttons != NULL ? keysW + 8 : 2) - 2;
     if (GetStringWidth(FONT_NORMAL, text, 0) > room)
         font = FONT_NARROW;
     if (GetStringWidth(FONT_NARROW, text, 0) > room)
         font = FONT_SMALL_NARROW;
-    AddTextPrinterParameterized3(WIN_HELP, font, MSG_X, MSG_Y, sMsgInk, TEXT_SKIP_DRAW, text);
+    AddTextPrinterParameterized3(WIN_HELP, font, 2, 1, sMsgInk, TEXT_SKIP_DRAW, text);
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
 }
 
@@ -1405,6 +1399,8 @@ static void JarDrawList(void)
 static void VBlankCB_Jar(void)
 {
     LoadOam();
+    sJar.shownShakeX = sJar.shakeX;   // the glass (MP_Candy_Composite) moves with the candies and the lid
+    sJar.scroll++;
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 }
@@ -1469,8 +1465,8 @@ static void JarHopKind(u8 t)
 }
 
 // Over the list's lower right rows, just above the message box
-static const struct WindowTemplate sJarYesNo = {.bg = 0, .tilemapLeft = 24, .tilemapTop = 12, .width = 5, .height = 4,
-                                                .paletteNum = 15, .baseBlock = 1 + 16 * 17 + 30 * 2};
+static const struct WindowTemplate sJarYesNo = {.bg = 0, .tilemapLeft = 24, .tilemapTop = 11, .width = 5, .height = 4,
+                                                .paletteNum = 15, .baseBlock = 1 + 16 * 15 + 26 * 2};
 
 // The list's candies under the YES / NO box hide while it's up (sprites draw over windows)
 static void JarHideUnderYesNo(bool8 hide)
@@ -1659,7 +1655,7 @@ static void CB2_OpenJar(void)
     }
     for (i = 0; i <= ALL_MATRIX; i++)
         sMatrices[i] = AllocOamMatrix();
-    SetOamMatrixRotationScaling(sMatrices[LIST_MATRIX], 0xB0, 0xB0, 0);   // the list's candies: 11 pixels
+    SetOamMatrixRotationScaling(sMatrices[LIST_MATRIX], 0xA0, 0xA0, 0);   // the list's candies: 10 pixels
     SetOamMatrixRotationScaling(sMatrices[ALL_MATRIX], 0x90, 0x90, 0);    // ALL's RARE CANDY (32 pixels): 18
     sJar.allIcon = MAX_SPRITES;
     sJar.asking = 0xFF;
@@ -1670,11 +1666,13 @@ static void CB2_OpenJar(void)
     memset(&sFx, 0, sizeof(sFx));
     sFx.prize = MAX_SPRITES;
     sFx.lidWanted = TRUE;
-    sJar.shakeX = 0;
+    sJar.shakeX = sJar.shownShakeX = 0;
     sJar.shakeTimer = 0;
     sRand = Random() | (Random() << 16);
     JarReadGlass();
     LoadUserWindowBorderGfx(WIN_LIST, FRAME_TILE, BG_PLTT_ID(FRAME_PAL));   // for the YES / NO box
+    LoadMessageBoxGfx(WIN_HELP, MSGBOX_TILE, BG_PLTT_ID(MSGBOX_PAL));
+    DrawDialogFrameWithCustomTileAndPalette(WIN_HELP, FALSE, MSGBOX_TILE, MSGBOX_PAL);
     PutWindowTilemap(WIN_LIST);
     PutWindowTilemap(WIN_HELP);
     JarDrawList();
@@ -1717,7 +1715,7 @@ void MP_Candy_Composite(u16 *frame)
 {
     s8 fadeOf[32];
     u16 bd = 0x7FFF;
-    int i, x, y, coeff;
+    int i, x, y, coeff, scroll = (sJar.scroll / 2) % CJ_PATTERN;
     if (gMain.callback2 != CB2_Jar)
         return;
     for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
@@ -1738,12 +1736,16 @@ void MP_Candy_Composite(u16 *frame)
         for (x = 0; x < DISPLAY_WIDTH; x++)
         {
             u16 c;
-            s32 jx = x - JAR_X - sJar.shakeX, jy = y - JAR_Y;
+            s32 jx = x - JAR_X - sJar.shownShakeX, jy = y - JAR_Y;
             u8 k;
             if (row[x] & 0x8000)
                 continue;
             k = (jx >= 0 && jx < JAR_W && jy >= 0 && jy < JAR_H) ? sCJ_Jar[jy][jx] : 0;
-            c = sCJ_Colors[k ? k : sCJ_Bg[y][x]];
+            if (!k)
+                k = sCJ_Bg[y][x];
+            if (!k)   // the diamonds, drifting down and right a pixel every other frame
+                k = sCJ_Pattern[(u32)(y - scroll) % CJ_PATTERN][(u32)(x - scroll) % CJ_PATTERN];
+            c = sCJ_Colors[k];
             if (coeff)
             {
                 s32 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;

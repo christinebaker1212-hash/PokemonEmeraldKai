@@ -2,9 +2,11 @@
 """The CANDY JAR screen from the user's mock-up (jar_mockup.png, 240x160).
 
 Writes src/mp/mp_candyjar_gfx.h:
-- the background (BG3): the mock-up with the jar, its lid, the list's text and the message box's text taken out
-  (the jar's place gets the panel's own speckled fill, the list's and message box's insides their plain color);
-- the jar's glass (BG1, so it can shake on its own): the mock-up's jar below the lid, its three sample candies
+- the background: the jar's panel and the list window from the mock-up (the jar, its lid and the list's text taken
+  out: the jar's place gets the panel's own speckled fill, the list's inside its plain white; the list shortened to end
+  above the game's message box), and a 64x64 tile of diamonds that scrolls under them;
+- the jar's glass (it shakes on its own), with a glass lip drawn on its mouth for when the lid is off: the mock-up's
+  jar below the lid, its three sample candies
   painted out with the glass around them (the rows above the floor from the clear glass higher up, the floor's rows
   from its middle, between the candies);
 - the lid (a 64x32 sprite, so it can fly off): its rows 25-40;
@@ -29,8 +31,12 @@ GLASS_TOP = 41                             # the mouth's first row of glass
 NECK_L, NECK_R = 34, 76                    # the neck's inside (screen x)
 LID_SX, LID_SY = 24, 24                    # the lid sprite's top left (64x32)
 PANEL_FILL_X = range(17, 23)               # the left panel's inside, left of the jar: its speckled fill
-LIST_IN = (119, 8, 232, 134)               # the list's white inside (inclusive)
-MSG_IN = (4, 146, 235, 159)                # the message box's cream inside
+PANEL = (9, 13, 100, 127)                  # the jar's panel (inclusive)
+LIST = (112, 1, 239, 127)                  # the list window, shortened to end above the game's message box (row 16):
+LIST_CUT, LIST_SHIFT = 115, 14             # its rows from 115 down are the mock-up's 14 lower (bottom frame, corners)
+LIST_IN = (119, 8, 232, 120)               # its white inside, after the cut
+PATTERN = 128                              # the diamonds' tile (two 64-pixel diamonds each way) (they scroll under everything: MP_Candy_Composite)
+PATTERN_COLORS = {'light': (156, 225, 186), 'dark': (115, 177, 167)}
 
 
 def is_dark(p):
@@ -96,16 +102,56 @@ def main():
         for x in range(l, r + 1):
             lid[(x, y)] = px[y][x]
 
-    # --- the background: the jar's place filled, the list's and message's insides plain
-    bg = [row[:] for row in px]
+    # --- the jar's mouth with the lid off: a glass lip (an ellipse ring) on top of the neck, under where the lid sits
+    O, Wh, L, M, D = (3, 4, 3), (248, 248, 247), (206, 234, 246), (175, 212, 231), (142, 182, 204)
+    rim = {36: [(35, 75, O)],
+           37: [(33, 34, O), (35, 75, Wh), (76, 77, O)],
+           38: [(32, 32, O), (33, 33, Wh), (34, 76, D), (77, 77, L), (78, 78, O)],
+           39: [(32, 32, O), (33, 33, L), (34, 76, M), (77, 77, L), (78, 78, O)],
+           40: [(33, 33, O), (34, 47, Wh), (48, 70, L), (71, 76, M), (77, 77, O)]}
+    for y, runs in rim.items():
+        for x0, x1, c in runs:
+            for x in range(x0, x1 + 1):
+                jar[(x, y)] = c
+                role[(x, y)] = 1 if c == O else 2
+    assert all(q in lid or q[1] == LID_BOTTOM and q in jar for q in jar if q[1] < GLASS_TOP), 'the rim shows past the lid'
+
+    # --- the background: the two panels from the mock-up (the jar's place filled, the list's inside plain, the list
+    # shortened); everywhere else (None) the scrolling diamonds
+    near_pattern = [(115, 177, 167), (156, 225, 186), (121, 194, 173), (107, 164, 156), (165, 226, 187),
+                    (149, 209, 181), (138, 181, 174), (157, 225, 195)]
+
+    def patternish(p):       # a corner pixel showing the diamonds round a panel's rounded corner
+        return min(sum((p[k] - q[k]) ** 2 for k in range(3)) for q in near_pattern) < 300
+
+    bg = [[None] * W for _ in range(H)]
+    for (x0, y0, x1, y1), src_row in ((PANEL, lambda y: y), (LIST, lambda y: y if y < LIST_CUT else y + LIST_SHIFT)):
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                p = px[src_row(y)][x]
+                corner = min(x - x0, x1 - x) < 3 and min(y - y0, y1 - y) < 3
+                if not (corner and patternish(p)):
+                    bg[y][x] = p
     for y in range(LID_TOP, 119):
         for x in range(JX0, JX0 + JW):
             if (x, y) in jar or (x, y) in lid or (y >= LID_BOTTOM and walls[y][0] <= x <= walls[y][1]):
                 bg[y][x] = px[y][PANEL_FILL_X[(x * 5 + y * 3) % len(PANEL_FILL_X)]]
-    for (x0, y0, x1, y1), fill in ((LIST_IN, px[70][230]), (MSG_IN, px[152][230])):
-        for y in range(y0, y1 + 1):
-            for x in range(x0, x1 + 1):
-                bg[y][x] = fill
+    x0, y0, x1, y1 = LIST_IN
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            bg[y][x] = px[70][230]
+
+    # the diamonds: a checker turned 45 degrees (64 pixels across), softened along the edges by a 2-pixel dither
+    cell = PATTERN // 2
+    pattern = [[None] * PATTERN for _ in range(PATTERN)]
+    for y in range(PATTERN):
+        for x in range(PATTERN):
+            tone = ((x + y) // cell + (x - y) // cell) & 1
+            du, dv = (x + y) % cell, (x - y) % cell
+            d = min(du, cell - du, dv, cell - dv)
+            if d < 2 and (x & 1):
+                tone ^= 1
+            pattern[y][x] = PATTERN_COLORS['light' if tone else 'dark']
 
     def c15(p):
         return (p[0] >> 3, p[1] >> 3, p[2] >> 3)
@@ -124,7 +170,8 @@ def main():
             colors.append(c)
         return cindex[c]
 
-    bg_idx = [[ci(bg[y][x]) for x in range(W)] for y in range(H)]
+    bg_idx = [[ci(bg[y][x]) if bg[y][x] is not None else 0 for x in range(W)] for y in range(H)]
+    pat_idx = [[ci(pattern[y][x]) for x in range(PATTERN)] for y in range(PATTERN)]
     jar_idx = [[ci(jar[(x, y)]) if (x, y) in jar else 0 for x in range(JX0, JX0 + JW)] for y in range(JY0, JY0 + JH)]
     assert len(colors) <= 256, '%d colors' % len(colors)
 
@@ -174,11 +221,14 @@ def main():
            '#define CJ_GLASS_AREA %d' % glass_area,
            '#define CJ_LID_X %d   // the lid sprite\'s center' % (LID_SX + 32), '#define CJ_LID_Y %d' % (LID_SY + 16),
            '#define CJ_LID_BOTTOM %d' % LID_BOTTOM,
-           '#define CJ_COLOR_COUNT %d' % len(colors), '']
+           '#define CJ_COLOR_COUNT %d' % len(colors), '#define CJ_PATTERN %d   // sCJ_Bg 0: the diamonds show' % PATTERN,
+           '#define CJ_LIST_BOTTOM %d   // the list window\'s last row' % LIST[3], '']
     out.append('static const u16 sCJ_Colors[CJ_COLOR_COUNT] = {\n%s\n};' % block(
         ['0x0000'] + ['0x%04X' % rgb(c) for c in colors[1:]], 12))
     out.append('static const u8 sCJ_Bg[160][240] = {\n%s\n};' % '\n'.join(
         '    {' + ','.join(str(v) for v in row) + '},' for row in bg_idx))
+    out.append('static const u8 sCJ_Pattern[CJ_PATTERN][CJ_PATTERN] = {\n%s\n};' % '\n'.join(
+        '    {' + ','.join(str(v) for v in row) + '},' for row in pat_idx))
     out.append('static const u8 sCJ_Jar[CJ_JAR_H][CJ_JAR_W] = {\n%s\n};' % '\n'.join(
         '    {' + ','.join(str(v) for v in row) + '},' for row in jar_idx))
     out.append('static const u16 sCJ_LidPal[16] = {%s};' % ', '.join(
@@ -200,7 +250,8 @@ def main():
             for x in range(W):
                 j = (x - JX0, y - JY0)
                 k = jar_idx[j[1]][j[0]] if 0 <= j[0] < JW and 0 <= j[1] < JH else 0
-                c = colors[k] if k else colors[bg_idx[y][x]]
+                b = bg_idx[y][x] or pat_idx[y % PATTERN][x % PATTERN]
+                c = colors[k] if k else colors[b]
                 im.putpixel((x, y), tuple(v << 3 for v in c))
         nolid = im.copy()
         for (x, y), p in lid.items():
