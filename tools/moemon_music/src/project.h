@@ -7,6 +7,7 @@
 #include "midi.h"
 #include "convert.h"
 #include "sf.h"
+#include "inst.h"
 
 #define STUDIO_VERSION "1.0"
 
@@ -35,6 +36,20 @@ typedef struct {
     SfVoice voice[128];
     uint8_t voiceSet[128];    // slot has a choice (otherwise the GM match is used)
     int dirty;
+    // music ripped from another console (PSF, USF, GBS...): the MIDI above was made from it
+    int isRip;
+    int ripKind;
+    char ripPath[1024];       // the rip, for the original-instruments player (played again on open)
+    int ripTrack;             // GBS subsong
+    char ripInfo[256];        // game / artist / console, for display
+    SfVoice ripOrig[128];     // each slot as the original instrument
+    SfVoice ripGm[128];       // each slot as its closest General MIDI instrument (type 0xFF = none)
+    int ripUseGm;             // the instruments in use: 0 original, 1 General MIDI
+    struct Rip *rip;          // the recording (its sound plays as "original"); NULL when the file is gone
+    float ripGain;            // the loudness match (studio_match_rip)
+    // samples the project brings (rips' original instruments); voices refer to them as INST_CUSTOM + i
+    CustomSample *custom;
+    int ncustom;
 } Project;
 
 void project_init(Project *p);
@@ -45,6 +60,15 @@ void project_free(Project *p);
 // song's instruments and settings.
 int project_load_midi(Project *p, const char *path, char *err, int errlen);
 int project_load(Project *p, const char *path, char *err, int errlen);
+// Plays a rip through its console's emulator and makes a project from it. biosDir: PlayStation BIOS
+// folder. gbsTrack: -1 = the .m3u's or the first.
+int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsTrack, char *err, int errlen);
+// Rip projects: switch every slot between the original instruments and General MIDI ones.
+void project_rip_instruments(Project *p, int useGm);
+// Makes the MIDI again from the recording with a new loudness (instrument choices stay).
+int project_rip_regain(Project *p, float gain, char *err, int errlen);
+// Points the instrument layer at this project's custom samples (before converting or playing it).
+void project_bind(Project *p);
 int project_save(Project *p, const char *path, char *err, int errlen);
 // Fills every used slot that has no choice yet with its closest General MIDI match.
 void project_default_voices(Project *p, const Conv *c, int force);

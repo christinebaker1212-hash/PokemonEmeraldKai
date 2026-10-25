@@ -30,6 +30,28 @@ void voice_to_text(const SfVoice *v, char *buf, int n);
 int voice_from_text(const char *s, SfVoice *v);
 extern const SfVoice VOICE_PLACEHOLDER;        // what empty voicegroup slots hold in the game
 
+// Samples and Game Boy waves a project brings with it (music ripped from other games). A voice's
+// ref of INST_CUSTOM + i names custom sample / wave i.
+#define INST_CUSTOM 10000
+#define INST_MAX_CUSTOM 1024
+typedef struct {
+    char name[40];           // [a-z0-9_], unique in the project
+    int8_t *data;            // 8-bit signed PCM, like the game's samples
+    uint32_t size, loopStart, freq;   // freq: 22.10 fixed point, the rate at key 60 (WaveData.freq)
+    int loops;
+    int isWave;              // a Game Boy programmable wave: 16 bytes (32 4-bit steps), no rate
+} CustomSample;
+// The open project's custom samples (the project owns the list; this only points at it).
+void inst_custom_bind(CustomSample *list, int n);
+// Appends a copy of s (its data copied, with zero padding past the end) to a list. Returns its ref
+// (INST_CUSTOM + index), or -1.
+int custom_list_add(CustomSample **list, int *n, const CustomSample *s);
+void custom_list_free(CustomSample **list, int *n);
+int inst_custom_count(void);
+const CustomSample *inst_custom_get(int ref);     // NULL when ref isn't a custom one
+int inst_is_custom_ref(int ref);
+int custom_by_name(const char *name);             // its ref, or -1
+
 int sample_by_name(const char *name);
 int wave_by_name(const char *name);
 int group_by_name(const char *name);

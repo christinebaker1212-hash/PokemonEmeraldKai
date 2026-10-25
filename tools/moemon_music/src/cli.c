@@ -6,12 +6,15 @@
 //   moemon_music_studio --dump IN                         the song bytecode, one track a line
 //   moemon_music_studio --dump-exact IN VOLUME            the same, converted like mid2agb -E -V VOLUME
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
+//   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
+// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF); MMS_BIOS = the PlayStation BIOS folder.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "studio.h"
 #include "export.h"
 #include "inst.h"
+#include "rip.h"
 
 static int ends_with(const char *s, const char *e)
 {
@@ -29,9 +32,11 @@ int studio_open(Studio *s, const char *path)
 {
     char err[512];
     int ok = ends_with(path, ".mmsproj") ? project_load(&s->p, path, err, sizeof(err))
+           : rip_kind_of(path) >= 0      ? project_load_rip(&s->p, path, g_biosDir, -1, err, sizeof(err))
                                          : project_load_midi(&s->p, path, err, sizeof(err));
     if (!ok) { snprintf(s->msg, sizeof(s->msg), "%s", err); return 0; }
     if (!studio_rebuild(s)) return 0;
+    if (rip_kind_of(path) >= 0) studio_match_rip(s);
     if (err[0] && ends_with(path, ".mmsproj")) snprintf(s->msg, sizeof(s->msg), "%s", err);
     return 1;
 }
@@ -79,6 +84,19 @@ int cli_main(int argc, char **argv)
         if (!export_decomp(&s.p, &s.c, argv[3], err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         return 0;
     }
+    if (!strcmp(mode, "--original") && argc >= 4) {
+        const Rip *r = s.p.rip;
+        if (!r) { fprintf(stderr, "%s isn't a rip (or its file is gone)\n", argv[2]); return 1; }
+        FILE *f = fopen(argv[3], "wb");
+        if (!f) { fprintf(stderr, "can't write %s\n", argv[3]); return 1; }
+        uint32_t n = (uint32_t)r->pcmFrames;
+        fwrite("RIFF", 1, 4, f); w32(f, 36 + n * 4); fwrite("WAVEfmt ", 1, 8, f);
+        w32(f, 16); w16(f, 1); w16(f, 2); w32(f, (uint32_t)r->rate); w32(f, (uint32_t)r->rate * 4); w16(f, 4); w16(f, 16);
+        fwrite("data", 1, 4, f); w32(f, n * 4);
+        fwrite(r->pcm, 4, n, f);
+        fclose(f);
+        return 0;
+    }
     if ((!strcmp(mode, "--render") || !strcmp(mode, "--raw")) && argc >= 4) {
         int raw = !strcmp(mode, "--raw");
         int frames = argc >= 5 ? atoi(argv[4]) : 0;
@@ -93,6 +111,7 @@ int cli_main(int argc, char **argv)
         }
         eng_init(&e);
         eng_start(&e, &s.song);
+        if (getenv("MMS_SOLO")) e.muteMask = ~strtoull(getenv("MMS_SOLO"), NULL, 0);   // tests: only these tracks
         float buf[ENG_FRAME_SAMPLES * 2];
         for (int i = 0; i < frames; i++) {
             eng_frame(&e, buf);

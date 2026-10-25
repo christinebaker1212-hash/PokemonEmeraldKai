@@ -9,7 +9,69 @@ const SfVoice VOICE_PLACEHOLDER = {1, 60, 0, 0, 2, -1, -1, 0, 0, 15, 0};
 static EWave sWaves[SF_NUM_SAMPLES];
 static EInst sGroups[SF_NUM_GROUPS][128];
 
-const EWave *inst_wave(int s) { return s >= 0 && s < SF_NUM_SAMPLES ? &sWaves[s] : NULL; }
+// ------------------------------------------------------------------ custom samples
+static CustomSample *sCustom;
+static EWave sCustomWave[INST_MAX_CUSTOM];
+static int sNumCustom;
+
+int inst_is_custom_ref(int ref) { return ref >= INST_CUSTOM && ref < INST_CUSTOM + sNumCustom; }
+int inst_custom_count(void) { return sNumCustom; }
+const CustomSample *inst_custom_get(int ref) { return inst_is_custom_ref(ref) ? &sCustom[ref - INST_CUSTOM] : NULL; }
+
+void inst_custom_bind(CustomSample *list, int n)
+{
+    if (n > INST_MAX_CUSTOM) n = INST_MAX_CUSTOM;
+    sCustom = list;
+    sNumCustom = list ? n : 0;
+    for (int i = 0; i < sNumCustom; i++) {
+        EWave *w = &sCustomWave[i];
+        w->freq = list[i].freq;
+        w->loopStart = list[i].loopStart;
+        w->size = list[i].size;
+        w->loops = list[i].loops;
+        w->data = list[i].data;
+    }
+}
+
+int custom_by_name(const char *name)
+{
+    for (int i = 0; i < sNumCustom; i++) if (!strcmp(sCustom[i].name, name)) return INST_CUSTOM + i;
+    return -1;
+}
+
+int custom_list_add(CustomSample **list, int *n, const CustomSample *s)
+{
+    if (*n >= INST_MAX_CUSTOM) return -1;
+    CustomSample *nl = realloc(*list, sizeof(CustomSample) * (size_t)(*n + 1));
+    if (!nl) return -1;
+    *list = nl;
+    CustomSample *d = &nl[*n];
+    *d = *s;
+    uint32_t len = s->isWave ? 16 : s->size;
+    // zero bytes past the end, like the game's samples have (the mixer reads ahead)
+    d->data = calloc((size_t)len + 20, 1);
+    if (!d->data) return -1;
+    if (s->data) memcpy(d->data, s->data, len);
+    if (s->isWave) { d->size = 16; d->freq = 0; d->loops = 0; d->loopStart = 0; }
+    if (d->loopStart > d->size) d->loopStart = 0;
+    return INST_CUSTOM + (*n)++;
+}
+
+void custom_list_free(CustomSample **list, int *n)
+{
+    if (*list == sCustom) inst_custom_bind(NULL, 0);
+    for (int i = 0; i < *n; i++) free((*list)[i].data);
+    free(*list);
+    *list = NULL;
+    *n = 0;
+}
+
+const EWave *inst_wave(int s)
+{
+    if (s >= 0 && s < SF_NUM_SAMPLES) return &sWaves[s];
+    if (inst_is_custom_ref(s) && !sCustom[s - INST_CUSTOM].isWave) return &sCustomWave[s - INST_CUSTOM];
+    return NULL;
+}
 
 static void make(const SfVoice *v, EInst *o, int depth)
 {
@@ -29,6 +91,7 @@ static void make(const SfVoice *v, EInst *o, int depth)
         o->attack = o->decay = o->sustain = o->release = 0;
     } else if ((v->type & 7) == 3) {
         if (v->ref >= 0 && v->ref < SF_NUM_WAVES) o->wave16 = sf_pcm + sf_waves[v->ref].offset;
+        else if (inst_is_custom_ref(v->ref)) o->wave16 = (const uint8_t *)sCustom[v->ref - INST_CUSTOM].data;
     } else if (v->type & 7) {
         o->cgbParam = (uint32_t)(v->ref < 0 ? 0 : v->ref);
     } else {
@@ -94,6 +157,10 @@ void voice_name(const SfVoice *v, char *buf, int n)
     int p = inst_find_preset(v);
     if (p >= 0) { snprintf(buf, n, "%s", sf_presets[p].name); return; }
     if (voice_same(v, &VOICE_PLACEHOLDER)) { snprintf(buf, n, "(empty)"); return; }
+    if (!(v->type & 0xC0) && ((v->type & 7) == 0 || (v->type & 7) == 3) && inst_is_custom_ref(v->ref)) {
+        snprintf(buf, n, "Original: %s", sCustom[v->ref - INST_CUSTOM].name);
+        return;
+    }
     // an edited voice: name it after what it plays
     SfVoice base = *v;
     for (int i = 0; i < SF_NUM_PRESETS; i++) {
@@ -122,13 +189,19 @@ void voice_detail(const SfVoice *v, char *buf, int n)
                  v->attack, v->decay, v->sustain, v->release);
     } else if ((v->type & 7) == 3) {
         snprintf(buf, n, "%s %s  key %d  A%d D%d S%d R%d", voice_kind(v),
-                 v->ref >= 0 ? sf_waves[v->ref].name + strlen("ProgrammableWaveData_") : "?", v->key,
+                 inst_is_custom_ref(v->ref) ? sCustom[v->ref - INST_CUSTOM].name :
+                 v->ref >= 0 && v->ref < SF_NUM_WAVES ? sf_waves[v->ref].name + strlen("ProgrammableWaveData_") : "?", v->key,
                  v->attack, v->decay, v->sustain, v->release);
     } else if ((v->type & 7) == 4) {
         snprintf(buf, n, "%s %s  key %d  A%d D%d S%d R%d", voice_kind(v), v->ref ? "periodic" : "white", v->key,
                  v->attack, v->decay, v->sustain, v->release);
+    } else if (inst_is_custom_ref(v->ref)) {
+        const CustomSample *c = &sCustom[v->ref - INST_CUSTOM];
+        snprintf(buf, n, "%s %s (original, %u samples%s)  A%d D%d S%d R%d", voice_kind(v), c->name, c->size,
+                 c->loops ? ", loops" : "", v->attack, v->decay, v->sustain, v->release);
     } else {
-        snprintf(buf, n, "%s %s  key %d  A%d D%d S%d R%d", voice_kind(v), v->ref >= 0 ? sf_samples[v->ref].name : "?",
+        snprintf(buf, n, "%s %s  key %d  A%d D%d S%d R%d", voice_kind(v),
+                 v->ref >= 0 && v->ref < SF_NUM_SAMPLES ? sf_samples[v->ref].name : "?",
                  v->key, v->attack, v->decay, v->sustain, v->release);
     }
 }
@@ -139,9 +212,11 @@ void voice_to_text(const SfVoice *v, char *buf, int n)
     if (v->type & 0x80) snprintf(ref, sizeof(ref), "kit:%s", v->sub >= 0 ? sf_group_names[v->sub] : "");
     else if (v->type & 0x40) snprintf(ref, sizeof(ref), "split:%s:%s", v->sub >= 0 ? sf_group_names[v->sub] : "",
                                       v->ks >= 0 ? sf_keysplit_names[v->ks] : "");
-    else if ((v->type & 7) == 3) snprintf(ref, sizeof(ref), "wave:%s", v->ref >= 0 ? sf_waves[v->ref].name : "");
+    else if (((v->type & 7) == 3 || !(v->type & 7)) && inst_is_custom_ref(v->ref))
+        snprintf(ref, sizeof(ref), "custom:%s", sCustom[v->ref - INST_CUSTOM].name);
+    else if ((v->type & 7) == 3) snprintf(ref, sizeof(ref), "wave:%s", v->ref >= 0 && v->ref < SF_NUM_WAVES ? sf_waves[v->ref].name : "");
     else if (v->type & 7) snprintf(ref, sizeof(ref), "value:%d", v->ref);
-    else snprintf(ref, sizeof(ref), "sample:%s", v->ref >= 0 ? sf_samples[v->ref].name : "");
+    else snprintf(ref, sizeof(ref), "sample:%s", v->ref >= 0 && v->ref < SF_NUM_SAMPLES ? sf_samples[v->ref].name : "");
     snprintf(buf, n, "type=0x%02X key=%d length=%d pansweep=0x%02X ref=%s adsr=%d,%d,%d,%d",
              v->type, v->key, v->length, v->panSweep, ref, v->attack, v->decay, v->sustain, v->release);
 }
@@ -167,6 +242,7 @@ int voice_from_text(const char *s, SfVoice *v)
         v->ks = (int16_t)keysplit_by_name(c + 1);
         return v->sub >= 0 && v->ks >= 0;
     }
+    if (!strncmp(ref, "custom:", 7)) { v->ref = (int16_t)custom_by_name(ref + 7); return v->ref >= 0; }
     if (!strncmp(ref, "wave:", 5)) { v->ref = (int16_t)wave_by_name(ref + 5); return v->ref >= 0; }
     if (!strncmp(ref, "value:", 6)) { v->ref = (int16_t)atoi(ref + 6); return 1; }
     if (!strncmp(ref, "sample:", 7)) { v->ref = (int16_t)sample_by_name(ref + 7); return v->ref >= 0; }

@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include "project.h"
 #include "inst.h"
+#include "rip.h"
+#include "rip_song.h"
 
 int read_file(const char *path, uint8_t **data, size_t *len)
 {
@@ -30,6 +32,8 @@ const char *path_base(const char *path)
 void project_init(Project *p)
 {
     memset(p, 0, sizeof(*p));
+    for (int i = 0; i < 128; i++) p->ripGm[i].type = 0xFF;
+    p->ripGain = 1;
     p->masterVol = 100;
     p->reverb = 50;
     p->priority = 0;
@@ -53,6 +57,8 @@ void project_free(Project *p)
 {
     midi_free(&p->midi);
     free(p->midiData);
+    if (p->rip) { rip_free(p->rip); free(p->rip); }
+    custom_list_free(&p->custom, &p->ncustom);
     project_init(p);
 }
 
@@ -153,6 +159,94 @@ int project_load_midi(Project *p, const char *path, char *err, int errlen)
     return 1;
 }
 
+// ------------------------------------------------------------------ rips
+
+void project_rip_instruments(Project *p, int useGm)
+{
+    p->ripUseGm = useGm;
+    for (int s = 0; s < 128; s++) {
+        if (!p->voiceSet[s]) continue;
+        if (useGm && p->ripGm[s].type != 0xFF) p->voice[s] = p->ripGm[s];
+        else p->voice[s] = p->ripOrig[s];
+    }
+    p->dirty = 1;
+}
+
+void project_bind(Project *p) { inst_custom_bind(p->custom, p->ncustom); }
+
+int project_rip_regain(Project *p, float gain, char *err, int errlen)
+{
+    if (!p->rip) { snprintf(err, errlen, "the rip isn't loaded"); return 0; }
+    RipSong song;
+    if (!rip_song_build(p->rip, &song, gain, err, errlen)) return 0;
+    Midi m;
+    if (!midi_parse(&m, song.mid, song.midLen, err, errlen)) { rip_song_free(&song); return 0; }
+    midi_free(&p->midi);
+    free(p->midiData);
+    p->midi = m;
+    p->midiData = song.mid;
+    p->midiLen = song.midLen;
+    song.mid = NULL;
+    // the same instruments in the same order: swap the sample data in
+    custom_list_free(&p->custom, &p->ncustom);
+    p->custom = song.custom;
+    p->ncustom = song.ncustom;
+    song.custom = NULL;
+    song.ncustom = 0;
+    p->ripGain = gain;
+    project_bind(p);
+    rip_song_free(&song);
+    return 1;
+}
+
+int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsTrack, char *err, int errlen)
+{
+    Rip *r = calloc(1, sizeof(Rip));
+    if (!r) { snprintf(err, errlen, "out of memory"); return 0; }
+    err[0] = 0;
+    if (!rip_load(r, path, biosDir, gbsTrack, 0, err, errlen)) { free(r); return 0; }
+    RipSong song;
+    if (!rip_song_build(r, &song, 1.0f, err, errlen)) { rip_free(r); free(r); return 0; }
+    Project np;
+    project_init(&np);
+    np.midiData = song.mid;
+    np.midiLen = song.midLen;
+    song.mid = NULL;
+    snprintf(np.midiName, sizeof(np.midiName), "%s.mid", song.prefix);
+    if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); rip_free(r); free(r); return 0; }
+    snprintf(np.title, sizeof(np.title), "%.63s", r->title);
+    np.isRip = 1;
+    np.ripKind = r->kind;
+    np.ripTrack = r->track;
+    snprintf(np.ripPath, sizeof(np.ripPath), "%s", path);
+    snprintf(np.ripInfo, sizeof(np.ripInfo), "%s%s%s%s%s", r->game, r->game[0] && r->artist[0] ? " - " : "", r->artist,
+             (r->game[0] || r->artist[0]) ? " - " : "", r->console);
+    np.gmFixes = 1;            // expression, bend range, notes clipped at the loop end
+    np.exactGate = 1;
+    np.balance = 0;
+    np.drumsFirst = 0;
+    np.masterVol = 127;
+    np.reverb = song.reverb;
+    np.loopMode = song.hasLoop ? LOOP_CUSTOM : LOOP_NONE;
+    np.loopStart = song.loopStart;
+    np.loopEnd = song.loopEnd;
+    for (int s = 0; s < 128; s++) {
+        np.ripOrig[s] = song.orig[s];
+        if (song.slotSample[s] >= 0) { np.voice[s] = song.orig[s]; np.voiceSet[s] = 1; }
+    }
+    np.rip = r;
+    np.custom = song.custom;
+    np.ncustom = song.ncustom;
+    song.custom = NULL;
+    song.ncustom = 0;
+    rip_song_free(&song);
+    project_free(p);
+    *p = np;
+    project_bind(p);
+    p->dirty = 1;
+    return 1;
+}
+
 // ------------------------------------------------------------------ project file
 
 static const char B64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -209,11 +303,33 @@ int project_save(Project *p, const char *path, char *err, int errlen)
     int first = 1;
     for (int i = 0; i < 64; i++) if ((p->muted >> i) & 1) { fprintf(f, first ? "%d" : ",%d", i); first = 0; }
     fprintf(f, "\n");
+    if (p->isRip) {
+        fprintf(f, "rip_kind=%d\n", p->ripKind);
+        fprintf(f, "rip_path=%s\n", p->ripPath);
+        fprintf(f, "rip_track=%d\n", p->ripTrack);
+        fprintf(f, "rip_info=%s\n", p->ripInfo);
+        fprintf(f, "rip_gain=%.6f\n", p->ripGain);
+        fprintf(f, "rip_use_gm=%d\n", p->ripUseGm);
+    }
+    // custom samples before the voices that use them
+    for (int i = 0; i < p->ncustom; i++) {
+        const CustomSample *c = &p->custom[i];
+        fprintf(f, "custom=%s,%u,%u,%d,%d,%u\n", c->name, c->freq, c->loopStart, c->loops, c->isWave, c->size);
+        b64_write(f, (const uint8_t *)c->data, c->isWave ? 16 : c->size);
+        fprintf(f, "end\n");
+    }
     for (int s = 0; s < 128; s++) {
         if (!p->voiceSet[s]) continue;
         char t[300];
         voice_to_text(&p->voice[s], t, sizeof(t));
         fprintf(f, "voice%d=%s\n", s, t);
+    }
+    if (p->isRip) {
+        for (int s = 0; s < 128; s++) {
+            char t[300];
+            if (p->voiceSet[s]) { voice_to_text(&p->ripOrig[s], t, sizeof(t)); fprintf(f, "rip_orig%d=%s\n", s, t); }
+            if (p->voiceSet[s] && p->ripGm[s].type != 0xFF) { voice_to_text(&p->ripGm[s], t, sizeof(t)); fprintf(f, "rip_gm%d=%s\n", s, t); }
+        }
     }
     fprintf(f, "midi_name=%s\n", p->midiName);
     fprintf(f, "midi=\n");
@@ -236,9 +352,13 @@ int project_load(Project *p, const char *path, char *err, int errlen)
     if (strncmp(text, "MoemonMusicStudio ", 18)) { snprintf(err, errlen, "%s isn't a Moemon Music Studio project", path_base(path)); free(data); return 0; }
     Project np;
     project_init(&np);
-    int inMidi = 0, bad = 0;
+    int inMidi = 0, inCustom = 0, bad = 0, bound = 0;
     char *midiText = NULL;
     size_t midiTextLen = 0;
+    char *custText = NULL;
+    size_t custTextLen = 0;
+    CustomSample cur;
+    memset(&cur, 0, sizeof(cur));
     for (char *line = strtok(text, "\n"); line; line = strtok(NULL, "\n")) {
         size_t l = strlen(line);
         if (l && line[l - 1] == '\r') line[--l] = 0;
@@ -247,6 +367,27 @@ int project_load(Project *p, const char *path, char *err, int errlen)
             midiText = realloc(midiText, midiTextLen + l + 1);
             memcpy(midiText + midiTextLen, line, l + 1);
             midiTextLen += l;
+            continue;
+        }
+        if (inCustom) {
+            if (strcmp(line, "end")) {
+                custText = realloc(custText, custTextLen + l + 1);
+                memcpy(custText + custTextLen, line, l + 1);
+                custTextLen += l;
+                continue;
+            }
+            inCustom = 0;
+            uint32_t want = cur.isWave ? 16 : cur.size;
+            uint8_t *d = calloc((size_t)want + custTextLen + 4, 1);
+            size_t got = custText ? b64_read(custText, d) : 0;
+            if (got >= want) {
+                cur.data = (int8_t *)d;
+                if (custom_list_add(&np.custom, &np.ncustom, &cur) < 0) bad++;
+            } else bad++;
+            free(d);
+            free(custText);
+            custText = NULL;
+            custTextLen = 0;
             continue;
         }
         char *eq = strchr(line, '=');
@@ -275,26 +416,46 @@ int project_load(Project *p, const char *path, char *err, int errlen)
                 while (*q && *q != ',') q++;
                 if (*q) q++;
             }
-        } else if (!strncmp(k, "voice", 5)) {
-            int s = atoi(k + 5);
+        } else if (!strcmp(k, "custom")) {
+            memset(&cur, 0, sizeof(cur));
+            char nm[64] = {0};
+            unsigned fr = 0, ls = 0, sz = 0;
+            int lp = 0, wv = 0;
+            if (sscanf(v, "%63[^,],%u,%u,%d,%d,%u", nm, &fr, &ls, &lp, &wv, &sz) == 6) {
+                snprintf(cur.name, sizeof(cur.name), "%s", nm);
+                cur.freq = fr; cur.loopStart = ls; cur.loops = lp; cur.isWave = wv; cur.size = sz;
+                inCustom = 1;
+            } else bad++;
+        } else if (!strncmp(k, "voice", 5) || !strncmp(k, "rip_orig", 8) || !strncmp(k, "rip_gm", 6)) {
+            if (!bound) { inst_custom_bind(np.custom, np.ncustom); bound = 1; }
+            int isOrig = !strncmp(k, "rip_orig", 8), isGm = !strncmp(k, "rip_gm", 6);
+            int s = atoi(k + (isOrig ? 8 : isGm ? 6 : 5));
             if (s >= 0 && s < 128) {
-                if (voice_from_text(v, &np.voice[s])) np.voiceSet[s] = 1;
+                SfVoice *dst = isOrig ? &np.ripOrig[s] : isGm ? &np.ripGm[s] : &np.voice[s];
+                if (voice_from_text(v, dst)) { if (!isOrig && !isGm) np.voiceSet[s] = 1; }
                 else bad++;
             }
-        } else if (!strcmp(k, "midi_name")) snprintf(np.midiName, sizeof(np.midiName), "%s", v);
+        } else if (!strcmp(k, "rip_kind")) { np.isRip = 1; np.ripKind = atoi(v); }
+        else if (!strcmp(k, "rip_path")) snprintf(np.ripPath, sizeof(np.ripPath), "%s", v);
+        else if (!strcmp(k, "rip_track")) np.ripTrack = atoi(v);
+        else if (!strcmp(k, "rip_info")) snprintf(np.ripInfo, sizeof(np.ripInfo), "%s", v);
+        else if (!strcmp(k, "rip_gain")) np.ripGain = (float)atof(v);
+        else if (!strcmp(k, "rip_use_gm")) np.ripUseGm = atoi(v); else if (!strcmp(k, "midi_name")) snprintf(np.midiName, sizeof(np.midiName), "%s", v);
         else if (!strcmp(k, "midi")) inMidi = 1;
     }
     free(data);
-    if (!midiText) { snprintf(err, errlen, "the project has no MIDI in it"); return 0; }
+    free(custText);
+    if (!midiText) { snprintf(err, errlen, "the project has no MIDI in it"); custom_list_free(&np.custom, &np.ncustom); project_bind(p); return 0; }
     np.midiData = malloc(midiTextLen);
     np.midiLen = b64_read(midiText, np.midiData);
     free(midiText);
-    if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); return 0; }
+    if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); custom_list_free(&np.custom, &np.ncustom); project_bind(p); return 0; }
     project_apply_mode(&np);
     if (np.masterVol < 0) np.masterVol = 0;
     if (np.masterVol > 127) np.masterVol = 127;
     project_free(p);
     *p = np;
+    project_bind(p);
     snprintf(p->path, sizeof(p->path), "%s", path);
     p->dirty = 0;
     if (bad) snprintf(err, errlen, "%d instrument(s) in the project aren't in this version's sound set and were reset", bad);
