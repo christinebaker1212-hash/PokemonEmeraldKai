@@ -1464,6 +1464,15 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   before it, QueueTurn / PopStep, one turn a frame). Before, a facing that arrived while the copy was still
   finishing its last step was lost (a turn on arrival raced the step's end: garden_parity failed now and then);
   catching up counts steps only (QueuedSteps).
+- 1.17.1: Garden Pokémon and decorations off the screen are hidden (Draw / DrawOne: sp->invisible from the screen
+  position with gSpriteCoordOffset): OAM x wraps at 512 and y at 256, so in the 56x40 Garden far ones showed up
+  again in the middle and at the top of the view (the old 40x26 one rarely put them that far). StuckHere ignores the
+  ledge's tile (MB_JUMP_SOUTH) and only acts after 30 frames standing still (T_NOT_MOVING, no unfinished held
+  movement): a jump down the ledge passed over its tile and sent the player back to the landing. DECORATE > PLACE
+  ONE carries the decoration (sCarry: Task_CarryNote shows how, with field controls locked; then the decoration
+  blinks on the tile ahead, slowly where it can go, quickly where it can't; field_control_avatar.c hands A / B to
+  MP_GardenDecor_CarryInput: A puts it down there, B back): before, it was placed on the tile in front, which from
+  the GARDEN BOARD is the board. Test garden_decorate.
   Tests garden_places (each of the 17 types reaches a place of its own with 0 and 8 badges:
   check_garden_places.py), garden_together (a friend's badges grow your Garden live), the other garden_* at the new
   spots.

@@ -401,7 +401,8 @@ static bool8 StuckHere(void)
         // (a jump down the ledge passes over the ledge's tile: never stuck there, nor while on the move)
         stuck = MapGridGetCollisionAt(me->currentCoords.x, me->currentCoords.y) != 0
              && !MetatileBehavior_IsJumpSouth(MapGridGetMetatileBehaviorAt(me->currentCoords.x, me->currentCoords.y))
-             && gPlayerAvatar.tileTransitionState == T_NOT_MOVING && !ObjectEventIsMovementOverridden(me);
+             && gPlayerAvatar.tileTransitionState == T_NOT_MOVING
+             && !(me->heldMovementActive && !me->heldMovementFinished);   // (the engine leaves heldMovementActive set once a step is done)
     // standing there a moment first (half a second): a step or a jump in progress never counts
     if (!stuck)
         sStuckFrames = 0;

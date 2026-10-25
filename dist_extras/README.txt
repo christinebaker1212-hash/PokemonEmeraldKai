@@ -1133,6 +1133,8 @@ grove, 7 a second flower bed, 8 a stone circle. With friends, the Garden
 shows the most badges among you.
   GARDEN BOARD  DECORATE: put dolls and cushions from your SECRET BASE
                 collection out for them (and put them away again).
+                PLACE ONE: carry it to its spot (it blinks on the
+                tile in front of you), A puts it down, B puts it back.
                 WATCH: sit down and watch; A tells you what's going on,
                 B stands up.
 With friends there, everyone's MOEMON and decorations are there
