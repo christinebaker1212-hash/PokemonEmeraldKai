@@ -20,7 +20,16 @@ int studio_open(Studio *s, const char *path);
 
 static SDL_Window *sWin;
 static SDL_Renderer *sRen;
-static SDL_Texture *sFont;
+// fonts: [0] the pixel font, [1] Smooth, [2] Bold; Smooth and Bold come at 1x, 2x and 3x
+enum { FONT_PIXEL, FONT_SMOOTH, FONT_BOLD, NUM_FONTS };
+static const char *FONT_NAMES[NUM_FONTS] = {"Pixel", "Smooth", "Bold"};
+static SDL_Texture *sFonts[NUM_FONTS][3];
+static int sFontChoice = FONT_PIXEL;
+// window size: 0 = fit the screen, else a percentage of 1280x800
+static const int WIN_SIZES[] = {0, 100, 125, 150, 175, 200};
+#define NUM_WIN_SIZES 6
+static int sWinSize = 0;
+extern const unsigned char ui_fonts[];
 static SDL_AudioDeviceID sDev;
 
 static Studio S;
@@ -37,7 +46,7 @@ static char sStatus[512] = "Open a MIDI file (or drop one on the window) to star
 static int sSelSlot = -1;
 static int sTrackScroll, sSlotScroll;
 
-enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP };
+enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY };
 static int sModal;
 static int sInModal;              // drawing the modal (its widgets take input)
 static char sSearch[64];
@@ -211,18 +220,36 @@ static void frame_rect(int x, int y, int w, int h, Col c)
     SDL_RenderDrawRect(sRen, &r);
 }
 
-static int text(int x, int y, const char *s, Col c)
+// how many screen pixels one layout pixel is: picks the font size that stays sharp
+static int font_scale(void)
 {
-    SDL_SetTextureColorMod(sFont, c.r, c.g, c.b);
+    int ow = W, oh = H;
+    SDL_GetRendererOutputSize(sRen, &ow, &oh);
+    float k = (float)ow / W < (float)oh / H ? (float)ow / W : (float)oh / H;
+    return k <= 1.3f ? 1 : k <= 2.3f ? 2 : 3;
+}
+
+static int sFontNow = 1;   // the scale picked for this frame
+
+static int text_font(int x, int y, const char *s, Col c, int font)
+{
+    int sc = font == FONT_PIXEL ? 1 : sFontNow;
+    SDL_Texture *t = sFonts[font][sc - 1];
+    SDL_SetTextureColorMod(t, c.r, c.g, c.b);
     int x0 = x;
     for (; *s; s++) {
         unsigned ch = (unsigned char)*s;
         if (ch < 32 || ch > 126) ch = '?';
-        SDL_Rect src = {(int)(ch - 32) * 8, 0, 8, 16}, dst = {x, y, 8, 16};
-        SDL_RenderCopy(sRen, sFont, &src, &dst);
+        SDL_Rect src = {(int)(ch - 32) * 8 * sc, 0, 8 * sc, 16 * sc}, dst = {x, y, 8, 16};
+        SDL_RenderCopy(sRen, t, &src, &dst);
         x += 8;
     }
     return x - x0;
+}
+
+static int text(int x, int y, const char *s, Col c)
+{
+    return text_font(x, y, s, c, sFontChoice);
 }
 
 static int textw(const char *s) { return (int)strlen(s) * 8; }
@@ -502,11 +529,12 @@ static void draw_top(void)
     if (button(x, 8, 140, 28, "Export decomp", have_song())) run_action(ACT_EXPORT_DECOMP);
     x += 146;
     if (button(W - 44, 8, 32, 28, "?", 1)) sModal = MODAL_HELP;
+    if (button(W - 84, 8, 36, 28, "Aa", 1)) sModal = MODAL_DISPLAY;
     char name[400];
     if (have_song())
         snprintf(name, sizeof(name), "%s%s", S.p.path[0] ? path_base(S.p.path) : S.p.midiName, S.p.dirty ? " *" : "");
     else name[0] = 0;
-    textfit(x + 4, 14, W - 52 - x - 8, name, C_DIM);
+    textfit(x + 4, 14, W - 92 - x - 8, name, C_DIM);
 }
 
 static void draw_transport(void)
@@ -1091,6 +1119,7 @@ static void draw_help(void)
         "and convert exactly like the game build converts them.",
         "",
         "Space: play / pause.  Esc: close a window.  Mouse wheel: scroll lists and change numbers.",
+        "Aa (top right): the font (Pixel, Smooth, Bold) and the window size.",
     };
     for (int i = 0; i < (int)(sizeof(lines) / sizeof(lines[0])); i++) text(x + 20, y + 44 + i * 22, lines[i], C_TEXT);
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
@@ -1110,32 +1139,129 @@ static void handle_piano(SDL_Keycode k, int down)
     else audition_off();
 }
 
-static void make_font(void)
+static SDL_Texture *font_texture(int scale, int pixelFont, const unsigned char *alpha)
 {
-    SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, 95 * 8, 16, 32, SDL_PIXELFORMAT_RGBA32);
+    int gw = 8 * scale, gh = 16 * scale;
+    SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, 95 * gw, gh, 32, SDL_PIXELFORMAT_RGBA32);
     Uint32 *px = (Uint32 *)s->pixels;
     for (int c = 0; c < 95; c++)
-        for (int y = 0; y < 16; y++)
-            for (int x = 0; x < 8; x++)
-                px[y * (s->pitch / 4) + c * 8 + x] = (kFont[c][y] & (0x80 >> x)) ? 0xFFFFFFFFu : 0;
-    sFont = SDL_CreateTextureFromSurface(sRen, s);
-    SDL_SetTextureBlendMode(sFont, SDL_BLENDMODE_BLEND);
+        for (int y = 0; y < gh; y++)
+            for (int x = 0; x < gw; x++) {
+                unsigned a = pixelFont ? ((kFont[c][y] & (0x80 >> x)) ? 255 : 0) : alpha[(c * gh + y) * gw + x];
+                px[y * (s->pitch / 4) + c * gw + x] = SDL_MapRGBA(s->format, 255, 255, 255, (Uint8)a);
+            }
+    SDL_Texture *t = SDL_CreateTextureFromSurface(sRen, s);
+    SDL_SetTextureBlendMode(t, SDL_BLENDMODE_BLEND);
+    // the pixel font keeps its pixels square; the others are smoothed when scaled
+    SDL_SetTextureScaleMode(t, pixelFont ? SDL_ScaleModeNearest : SDL_ScaleModeLinear);
     SDL_FreeSurface(s);
+    return t;
+}
+
+static void make_fonts(void)
+{
+    sFonts[FONT_PIXEL][0] = sFonts[FONT_PIXEL][1] = sFonts[FONT_PIXEL][2] = font_texture(1, 1, NULL);
+    const unsigned char *p = ui_fonts;
+    for (int f = FONT_SMOOTH; f <= FONT_BOLD; f++)
+        for (int sc = 1; sc <= 3; sc++) {
+            sFonts[f][sc - 1] = font_texture(sc, 0, p);
+            p += 95 * (8 * sc) * (16 * sc);
+        }
+}
+
+// Display settings live in the user's settings folder (SDL_GetPrefPath), not with projects.
+static void settings_path(char *buf, int n)
+{
+    char *dir = SDL_GetPrefPath("Moemon", "MusicStudio");
+    snprintf(buf, n, "%ssettings.ini", dir ? dir : "");
+    SDL_free(dir);
+}
+
+static void settings_load(void)
+{
+    char path[1024], line[128];
+    settings_path(path, sizeof(path));
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    while (fgets(line, sizeof(line), f)) {
+        int v;
+        if (sscanf(line, "font=%d", &v) == 1 && v >= 0 && v < NUM_FONTS) sFontChoice = v;
+        if (sscanf(line, "window=%d", &v) == 1) {
+            for (int i = 0; i < NUM_WIN_SIZES; i++) if (WIN_SIZES[i] == v) sWinSize = i;
+        }
+    }
+    fclose(f);
+}
+
+static void settings_save(void)
+{
+    char path[1024];
+    settings_path(path, sizeof(path));
+    FILE *f = fopen(path, "w");
+    if (!f) return;
+    fprintf(f, "font=%d\nwindow=%d\n", sFontChoice, WIN_SIZES[sWinSize]);
+    fclose(f);
+}
+
+// Sizes the window: a share of 1280x800, or as big as fits, never bigger than the screen.
+static void apply_window_size(void)
+{
+    SDL_Rect r;
+    int d = SDL_GetWindowDisplayIndex(sWin);
+    if (SDL_GetDisplayUsableBounds(d < 0 ? 0 : d, &r) != 0) { r.w = W; r.h = H; r.x = r.y = 0; }
+    int maxw = r.w - 16, maxh = r.h - 48;   // room for the title bar
+    float k = WIN_SIZES[sWinSize] ? WIN_SIZES[sWinSize] / 100.0f : 10.0f;
+    if (W * k > maxw) k = (float)maxw / W;
+    if (H * k > maxh) k = (float)maxh / H;
+    if (!WIN_SIZES[sWinSize]) k *= 0.95f;
+    SDL_SetWindowSize(sWin, (int)(W * k), (int)(H * k));
+    SDL_SetWindowPosition(sWin, SDL_WINDOWPOS_CENTERED_DISPLAY(d < 0 ? 0 : d), SDL_WINDOWPOS_CENTERED_DISPLAY(d < 0 ? 0 : d));
+}
+
+static void draw_display(void)
+{
+    int x, y, w = 760, h = 330;
+    modal_box(&x, &y, w, h, "DISPLAY");
+    text(x + 20, y + 44, "Font", C_DIM);
+    for (int i = 0; i < NUM_FONTS; i++) {
+        int bx = x + 120 + i * 130;
+        if (sFontChoice == i) fill(bx - 2, y + 38, 124, 32, C_ACCENT);
+        if (button(bx, y + 40, 120, 28, FONT_NAMES[i], 1) && sFontChoice != i) { sFontChoice = i; settings_save(); }
+    }
+    fill(x + 20, y + 84, w - 40, 60, C_BG);
+    text(x + 32, y + 94, "Moemon Music Studio  Route 101 (key-split)  A255 D0 S255 R165", C_TEXT);
+    text(x + 32, y + 116, "0123456789  The quick brown Zigzagoon jumps over Wurmple.", C_DIM);
+    text(x + 20, y + 170, "Window", C_DIM);
+    for (int i = 0; i < NUM_WIN_SIZES; i++) {
+        int bx = x + 120 + i * 102;
+        char lab[16];
+        if (WIN_SIZES[i]) snprintf(lab, sizeof(lab), "%d%%", WIN_SIZES[i]);
+        else snprintf(lab, sizeof(lab), "Fit screen");
+        if (sWinSize == i) fill(bx - 2, y + 164, 98, 32, C_ACCENT);
+        if (button(bx, y + 166, 94, 28, lab, 1)) { sWinSize = i; apply_window_size(); settings_save(); }
+    }
+    text(x + 20, y + 214, "A bigger window makes everything bigger. Smooth and Bold stay sharp at any size;", C_DIM);
+    text(x + 20, y + 234, "the window can also be resized by dragging its edges.", C_DIM);
+    if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
 }
 
 int ui_main(int argc, char **argv)
 {
+    // Windows: draw at the screen's real pixels instead of letting display scaling stretch (and blur) the window
+    SDL_SetHint("SDL_WINDOWS_DPI_AWARENESS", "permonitorv2");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "SDL: %s\n", SDL_GetError());
         return 1;
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    settings_load();
     sWin = SDL_CreateWindow("Moemon Music Studio", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
                             SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     sRen = SDL_CreateRenderer(sWin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!sRen) sRen = SDL_CreateRenderer(sWin, -1, 0);
     SDL_RenderSetLogicalSize(sRen, W, H);
-    make_font();
+    make_fonts();
+    if (!getenv("MMS_SHOT")) apply_window_size();
 
     inst_init();
     studio_init(&S);
@@ -1154,6 +1280,12 @@ int ui_main(int argc, char **argv)
     SDL_StartTextInput();
 
     if (argc >= 2) open_path(argv[1]);
+    if (getenv("MMS_TEST_FONT")) sFontChoice = atoi(getenv("MMS_TEST_FONT")) % NUM_FONTS;   // tests: a font
+    if (getenv("MMS_TEST_WINDOW")) {                                                       // tests: "WxH"
+        int ww = W, wh = H;
+        sscanf(getenv("MMS_TEST_WINDOW"), "%dx%d", &ww, &wh);
+        SDL_SetWindowSize(sWin, ww, wh);
+    }
     if (getenv("MMS_TEST_SLOT")) sSelSlot = atoi(getenv("MMS_TEST_SLOT"));   // tests: select an instrument
     if (getenv("MMS_TEST_PLAY") && have_song()) play_from(0);                // tests: start playing
     if (getenv("MMS_TEST_MODAL")) {   // tests: open a window for a screenshot
@@ -1221,6 +1353,7 @@ int ui_main(int argc, char **argv)
             else play_from(sFrames >= S.totalFrames && S.loopStartFrame < 0 ? 0 : sFrames);
         }
 
+        sFontNow = font_scale();
         color(C_BG);
         SDL_RenderClear(sRen);
         sInModal = 0;
@@ -1238,12 +1371,15 @@ int ui_main(int argc, char **argv)
         case MODAL_PATH: draw_path_prompt(); break;
         case MODAL_CONFIRM: draw_confirm(); break;
         case MODAL_HELP: draw_help(); break;
+        case MODAL_DISPLAY: draw_display(); break;
         }
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit
             static int frames;
             if (++frames == atoi(getenv("MMS_SHOT_FRAME") ? getenv("MMS_SHOT_FRAME") : "10")) {
-                SDL_Surface *sh = SDL_CreateRGBSurfaceWithFormat(0, W, H, 32, SDL_PIXELFORMAT_ARGB8888);
+                int ow = W, oh = H;
+                SDL_GetRendererOutputSize(sRen, &ow, &oh);
+                SDL_Surface *sh = SDL_CreateRGBSurfaceWithFormat(0, ow, oh, 32, SDL_PIXELFORMAT_ARGB8888);
                 SDL_RenderReadPixels(sRen, NULL, SDL_PIXELFORMAT_ARGB8888, sh->pixels, sh->pitch);
                 SDL_SaveBMP(sh, getenv("MMS_SHOT"));
                 SDL_FreeSurface(sh);

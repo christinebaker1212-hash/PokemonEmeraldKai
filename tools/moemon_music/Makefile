@@ -32,9 +32,9 @@ build/linux/%.o: src/%.c $(HDRS) $(GEN)/sf_counts.h
 build/linux/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/linux
 	$(CC) $(CFLAGS) -O0 -c $< -o $@
-build/linux/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin
+build/linux/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin src/fonts.bin
 	@mkdir -p build/linux
-	$(CC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' $< -o $@
+	$(CC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' -DFONTS_BIN='"src/fonts.bin"' $< -o $@
 build/linux/moemon_music_studio: $(LOBJ)
 	$(CC) -o $@ $^ $(shell sdl2-config --libs 2>/dev/null || echo -lSDL2) -lm
 
@@ -48,9 +48,9 @@ build/windows/%.o: src/%.c $(HDRS) $(GEN)/sf_counts.h
 build/windows/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/windows
 	$(WCC) $(CFLAGS) -O0 -c $< -o $@
-build/windows/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin
+build/windows/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin src/fonts.bin
 	@mkdir -p build/windows
-	$(WCC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' $< -o $@
+	$(WCC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' -DFONTS_BIN='"src/fonts.bin"' $< -o $@
 build/windows/MoemonMusicStudio.exe: $(WOBJ)
 	$(WCC) -o $@ $^ -L$(WSDL)/lib -lmingw32 -lSDL2main -lSDL2 -lcomdlg32 -lole32 -lshell32 -mwindows -static-libgcc
 	cp $(WSDL)/bin/SDL2.dll build/windows/

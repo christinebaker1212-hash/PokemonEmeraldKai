@@ -37,7 +37,7 @@ make test                   # converter vs mid2agb on every game MIDI, exports, 
 The instruments come from the game's `sound` folder at build time: `gen_soundfont.py` reads every
 voicegroup, drum kit and key-split table, converts the samples with `tools/wav2agb` exactly as the
 game build does, and writes `build/gen/` (the program embeds it; nothing else ships with the exe).
-`src/font.h` is checked in (`gen_font.py` remakes it from DejaVu Sans Mono).
+`src/font.h` and `src/fonts.bin` are checked in (`gen_font.py` remakes them from DejaVu Sans Mono).
 
 ## Using it
 
@@ -47,6 +47,8 @@ the song, **S** plays it alone. INSTRUMENTS lists the voice slots the song uses:
 **Hold to hear** or keys Z-M, and its envelope. SONG sets the game song it replaces, volume,
 reverb, priority, the loop (MIDI markers, none, whole song, custom bars), and can take every
 instrument from a game song's voicegroup. Then **Save** and **Export .kaisong** / **Export decomp**.
+**Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
+and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
 
 Command line (also what the tests use):
 

@@ -8,3 +8,10 @@ sf_pcm:
 #if defined(__linux__) && defined(__ELF__)
     .section .note.GNU-stack,"",%progbits
 #endif
+
+/* Smooth and Bold fonts (gen_font.py -> src/fonts.bin) */
+    .section .rodata
+    .balign 16
+    .globl ui_fonts
+ui_fonts:
+    .incbin FONTS_BIN
