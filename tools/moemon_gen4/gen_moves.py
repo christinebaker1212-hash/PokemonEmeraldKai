@@ -221,7 +221,7 @@ def main():
     text, table = [GEN], []
     for m in moves:
         d = cache.get(m['const'], {}).get('description') or m['description']
-        lines = d.replace('Pokémon', 'POKéMON').split('\\n')
+        lines = d.replace('Pokémon', 'MOéMON').split('\\n')
         sym = 's%sDescription' % ''.join(w.capitalize() for w in m['const'][5:].split('_'))
         text.append('static const u8 %s[] = _(\n%s);\n\n' % (
             sym, '\n'.join('    "%s%s"' % (l, '\\n' if i < len(lines) - 1 else '') for i, l in enumerate(lines))))

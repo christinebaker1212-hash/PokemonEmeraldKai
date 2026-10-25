@@ -1,0 +1,190 @@
+{
+ "ABILITY_MOTOR_DRIVE": {
+  "name": "Motor Drive",
+  "description": "Ups Speed if hit by Electr."
+ },
+ "ABILITY_RIVALRY": {
+  "name": "Rivalry",
+  "description": "Strong vs. opposite gender."
+ },
+ "ABILITY_STEADFAST": {
+  "name": "Steadfast",
+  "description": "Flinching raises Speed."
+ },
+ "ABILITY_SNOW_CLOAK": {
+  "name": "Snow Cloak",
+  "description": "Ups evasion in hail or snow."
+ },
+ "ABILITY_GLUTTONY": {
+  "name": "Gluttony",
+  "description": "Eats Berries at half HP."
+ },
+ "ABILITY_ANGER_POINT": {
+  "name": "Anger Point",
+  "description": "Maxes Attack when crit."
+ },
+ "ABILITY_UNBURDEN": {
+  "name": "Unburden",
+  "description": "Item loss boosts Speed."
+ },
+ "ABILITY_HEATPROOF": {
+  "name": "Heatproof",
+  "description": "Halves Fire-type damage."
+ },
+ "ABILITY_SIMPLE": {
+  "name": "Simple",
+  "description": "Doubles stat changes."
+ },
+ "ABILITY_DRY_SKIN": {
+  "name": "Dry Skin",
+  "description": "Heat hurts, Water restores."
+ },
+ "ABILITY_DOWNLOAD": {
+  "name": "Download",
+  "description": "Ups offense based on foe."
+ },
+ "ABILITY_IRON_FIST": {
+  "name": "Iron Fist",
+  "description": "Powers up punching moves."
+ },
+ "ABILITY_POISON_HEAL": {
+  "name": "Poison Heal",
+  "description": "Restores HP if poisoned."
+ },
+ "ABILITY_ADAPTABILITY": {
+  "name": "Adaptability",
+  "description": "Powers up same-type moves."
+ },
+ "ABILITY_SKILL_LINK": {
+  "name": "Skill Link",
+  "description": "Maxes multistrike hits."
+ },
+ "ABILITY_HYDRATION": {
+  "name": "Hydration",
+  "description": "Cures status in rain."
+ },
+ "ABILITY_SOLAR_POWER": {
+  "name": "Solar Power",
+  "description": "Sunlight boosts, but hurts."
+ },
+ "ABILITY_QUICK_FEET": {
+  "name": "Quick Feet",
+  "description": "Boosts Speed if statused."
+ },
+ "ABILITY_NORMALIZE": {
+  "name": "Normalize",
+  "description": "Moves become Normal-type."
+ },
+ "ABILITY_SNIPER": {
+  "name": "Sniper",
+  "description": "Powers up critical hits."
+ },
+ "ABILITY_MAGIC_GUARD": {
+  "name": "Magic Guard",
+  "description": "Only damaged by attacks."
+ },
+ "ABILITY_NO_GUARD": {
+  "name": "No Guard",
+  "description": "Ensures all attacks land."
+ },
+ "ABILITY_STALL": {
+  "name": "Stall",
+  "description": "Always last to use moves."
+ },
+ "ABILITY_TECHNICIAN": {
+  "name": "Technician",
+  "description": "Powers up weak moves."
+ },
+ "ABILITY_LEAF_GUARD": {
+  "name": "Leaf Guard",
+  "description": "Blocks status in sunlight."
+ },
+ "ABILITY_KLUTZ": {
+  "name": "Klutz",
+  "description": "Can't use held items."
+ },
+ "ABILITY_MOLD_BREAKER": {
+  "name": "Mold Breaker",
+  "description": "Moves ignore Abilities."
+ },
+ "ABILITY_SUPER_LUCK": {
+  "name": "Super Luck",
+  "description": "Raises critical-hit ratio."
+ },
+ "ABILITY_AFTERMATH": {
+  "name": "Aftermath",
+  "description": "Fainting damages the foe."
+ },
+ "ABILITY_ANTICIPATION": {
+  "name": "Anticipation",
+  "description": "Senses dangerous moves."
+ },
+ "ABILITY_FOREWARN": {
+  "name": "Forewarn",
+  "description": "Determines a foe's move."
+ },
+ "ABILITY_UNAWARE": {
+  "name": "Unaware",
+  "description": "Ignores foes' stat changes."
+ },
+ "ABILITY_TINTED_LENS": {
+  "name": "Tinted Lens",
+  "description": "Ups “not very effective”."
+ },
+ "ABILITY_FILTER": {
+  "name": "Filter",
+  "description": "Weakens “supereffective”."
+ },
+ "ABILITY_SLOW_START": {
+  "name": "Slow Start",
+  "description": "Takes 5 turns to get going."
+ },
+ "ABILITY_SCRAPPY": {
+  "name": "Scrappy",
+  "description": "Normal & Fight. hit Ghosts."
+ },
+ "ABILITY_STORM_DRAIN": {
+  "name": "Storm Drain",
+  "description": "Draws Water-type moves."
+ },
+ "ABILITY_ICE_BODY": {
+  "name": "Ice Body",
+  "description": "HP recovery in hail or snow."
+ },
+ "ABILITY_SOLID_ROCK": {
+  "name": "Solid Rock",
+  "description": "Weakens “supereffective”."
+ },
+ "ABILITY_SNOW_WARNING": {
+  "name": "Snow Warning",
+  "description": "Summons hail in battle."
+ },
+ "ABILITY_HONEY_GATHER": {
+  "name": "Honey Gather",
+  "description": "May gather Honey."
+ },
+ "ABILITY_FRISK": {
+  "name": "Frisk",
+  "description": "Checks a foe's held item."
+ },
+ "ABILITY_RECKLESS": {
+  "name": "Reckless",
+  "description": "Powers up recoil moves."
+ },
+ "ABILITY_MULTITYPE": {
+  "name": "Multitype",
+  "description": "Matches Plate or Z-Crystal."
+ },
+ "ABILITY_FLOWER_GIFT": {
+  "name": "Flower Gift",
+  "description": "Sun ups allies' Atk & Sp.Def."
+ },
+ "ABILITY_BAD_DREAMS": {
+  "name": "Bad Dreams",
+  "description": "Damages sleeping foes."
+ },
+ "ABILITY_TANGLED_FEET": {
+  "name": "Tangled Feet",
+  "description": "Boosts evasion if confused."
+ }
+}
