@@ -1,5 +1,6 @@
 #include "global.h"
 #include "sprite.h"
+#include "mp_bigsprite.h"
 #include "main.h"
 #include "palette.h"
 
@@ -491,6 +492,7 @@ void AddSpritesToOamBuffer(void)
     u8 i = 0;
     u16 oamIndex = 0;   // Moemon PC: up to 256 entries (an 8-bit index never reached the slot machine's limit)
 
+    MP_BigSprite_BeginOam();
     while (i < MAX_SPRITES)
     {
         struct Sprite *sprite = &gSprites[sSpriteOrder[i]];
@@ -660,7 +662,10 @@ void ResetOamRange(u16 start, u16 end)
 void LoadOam(void)
 {
     if (!gMain.oamLoadDisabled)
+    {
         CpuCopy32(gMain.oamBuffer, (void *)OAM, sizeof(gMain.oamBuffer));
+        MP_BigSprite_CommitOam();   // Moemon PC: the big sprites' list goes with it
+    }
 }
 
 void ClearSpriteCopyRequests(void)
@@ -1729,6 +1734,9 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
 {
     if (*oamIndex >= gOamLimit)
         return TRUE;
+
+    if (sprite->mpBig)   // Moemon PC: a picture of any size, in this place in the order
+        return MP_BigSprite_AddOam(sprite, oamIndex);
 
     if (!sprite->subspriteTables || sprite->subspriteMode == SUBSPRITES_OFF)
     {

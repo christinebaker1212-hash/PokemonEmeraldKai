@@ -648,6 +648,48 @@ MP_Coop_FinishTrainerParty (exactly +1 when on, never more; logs "coop: trainer 
 padding"). Protocol 26. Tests: tri_padded (Tommy 2 -> 3, Triple), coop_one_mon (Josh 1 -> 2, Double), tri_no_triple
 (padding off: Tommy's own two, Double, "room rules ... off" heard by BOB).
 
+## PMD Collab followers (mp_pmd.c, mp_bigsprite.c; data from tools/moemon_pmd)
+Followers (yours and friends') and Garden Pokémon are PMD Collab overworld sprites (github PMDCollab/SpriteCollab,
+CC BY-NC 4.0; artists in dist_extras/PMD_CREDITS.txt, packaged). tools/moemon_pmd/import.py SPRITECOLLAB_DIR writes
+graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-386, variant 0 normal, 1 female, 2/3
+shiny / female shiny when the shiny colors need pixels of their own), src/data/mp_pmd.h (the index) and the credits.
+A chunk ('PMD2'): bpp 4 (8 for the few shiny sheets with 16+ colors: all colors kept), palette and shiny palette (one
+set of pixels when the (normal, shiny) color pairs fit in 15), 29 animations (PMD_ANIM_*), each frames x 8 directions
+(rows: down, down-right, right, up-right, up, up-left, left, down-left; 1 row when the sheet has one) with durations in
+60ths; a frame = the picture cropped to its pixels with its top-left from the ground point (the sheet frame's center,
+where PMD draws the shadow). pmd.bin goes in with __asm__ .incbin (mp_pmd_data.c; .rdata on Windows; json_data_rules.mk
+makes the object depend on it): INCBIN would spell 13 MB out as C text. mp_pmd.c inflates a sheet (stbi_zlib) when it's
+first shown, shares it, frees it 5 s after the last view lets go (CACHE_MAX 48).
+Big sprites (PC only): struct Sprite has mpBig. AddSpriteToOamBuffer writes such a sprite's entry in its sorted place with
+shape 3 (prohibited on the GBA) and tileNum = an index into a side list (mp_bigsprite.c: picture, exact position,
+flips, an affine pivot); the list is double-buffered and swapped in LoadOam, so it always matches the OAM shown.
+gba_easy_draw.c DrawBigSprite draws the whole picture on each line through the same PutObjPixel as other sprites
+(priority, blending, windows, battle weather), so depth with the player, NPCs and grass is the game's own. Colors 1-15
+are the sprite's palette slot (fades, weather, Stadium hue); 8-bit pictures' colors 16+ follow the slot's fade
+(MP_FadeFit_FromColors, MP_Pmd_Tick). Affine: a reflection copy turns around its own point (mirrors at the feet:
+followfx puts it at ground + 6, the bottom of the tile, as the player's); anything else around the picture's middle
+(ball effects: mp_ballfx.c BigFrame / BodyHeight / MonX / MonY / MonPixel read the big frame).
+Placement: the ground point is PMD_GROUND_DY (8) below the old 32x32 frames' center (the tile's middle). Facing: 8
+ways, MP_Pmd_Animate turns 45 degrees every 3 frames toward the wanted facing (a turn shows the diagonals); steps face
+the 4 ways. Fast (running, biking): the walk plays twice as fast. Standing with nothing to do: a DEEPBREATH every 12 s,
+SIT after 40 s. A sheet missing an animation plays the nearest it has (sFallbacks: SLEEP -> LAYING -> EVENTSLEEP -> SIT ->
+IDLE, EAT -> NOD -> IDLE, ...; WALK last, every sheet has it). No PMD sheet: the Moemon frames as before.
+Poses -> animations (LIFE_POSE_*, MP_Pmd_Animate; Moemon sprites show MP_LifePose_Base's nearest old pose):
+NONE IDLE (DEEPBREATH, SIT) | SIT SIT | NAP SLEEP (facing down) | HOP HOP | SHAKE EAT (rummaging, digging, sniffing) |
+SPIN IDLE turning round | LOOKUP LOOKUP | EAT EAT | SPAR ATTACK / SHOOT / STRIKE (dex % 3) | NOD NOD | JOY POSE |
+TWIRL ROTATE | TRIP TRIP / TUMBLE | HURT HURT / CRINGE | CHARGE CHARGE / SHOCK (dex odd: the second) | FLOAT FLOAT |
+LEAP LEAPFORTH | PULL PULL | BREATH DEEPBREATH | LAY LAYING.
+Where they come from: foraging and munching foliage EAT; basking LAY; storms CHARGE; sparring SPAR; the new-body stumble
+TRIP; a squabble HURT; greeting a friend it's fond of / the double take / greeting its Trainer in the Garden TWIRL;
+leveling up (back on the map: mp_life_field.c lastLevel) TWIRL; talking NOD; petting (warm) and praise, keepsakes,
+being loved, a proud evolution JOY; fed EAT (a flavor it dislikes HURT); after a nap BREATH; partway through a hint,
+with its Trainer within 3 tiles, PULL (facing them); Ghost / Psychic types investigating (field) or looking about
+(Garden) sometimes FLOAT by the water; Garden pursuits end in LEAP / JOY, teaching NODs, a milestone LEAPs.
+Network (protocol 47): poses 7-19 travel as before (wire state lifePose; Garden actors: byte 11 = dir (2 bits) | pose
+<< 2), shiny in followerFlags bit 7 and the Garden actor's byte 6 bit 1. Debug: `mp pmd [SLOT]`; MOEMON_DEBUG_PARTY
+"280:15*" = shiny. Tests pmd_follower, pmd_remote (and every follow_*, fx_follow*, garden_*, life_* test runs with them).
+A very tall follower trailing south of its Trainer covers them (the depth order is the game's: it's in front).
+
 ## Graphics past the GBA limits (PC only)
 
 include/gba/defines.h: OBJ_PAL_SLOTS 64 sprite palettes (the GBA's 16, then 16-63 right after them in PLTT and the

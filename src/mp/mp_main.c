@@ -10,6 +10,7 @@
 #include "mp_join.h"
 #include "global.h"
 #include "mp.h"
+#include "mp_pmd.h"
 #include "main.h"
 #include "overworld.h"
 #include "pokemon.h"
@@ -880,7 +881,8 @@ static void CollectLocalState(struct MpState *s)
         s->followerDex = MP_Follower_LocalDex(&female);
         s->followerFx = MP_Follower_LocalFx(&sound);
         s->followerHue = s->followerDex ? MP_Follower_LocalHue() : 0;
-        s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0);
+        s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0)
+                         | (s->followerDex && MP_Follower_LocalShiny() ? 0x80 : 0);
     }
     MP_LifeSocial_CollectState(s);   // MOéMON GARDEN: the follower's own life
     sLastLocalState = *s;
@@ -1772,6 +1774,7 @@ void MP_FrameUpdate(void)
         MP_Init();
     MP_Qol_Update();
     MP_ReflectionPalettes_Sweep();   // reflection palettes no sprite shows any more
+    MP_Pmd_FrameUpdate();            // PMD sheets nobody shows any more (mp_pmd.c)
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_TmRefund_Update();       // the LOTTERY CORNER clerk brings back TMs used up before they became reusable
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)

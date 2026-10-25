@@ -191,7 +191,7 @@ static const u8 *CrossBoundary(struct MpLifeRec *rec, const u8 *sidestep, u8 ver
     if (recent >= 3)
     {
         MP_Life_Feel(rec, EMO_FRUSTRATION, 30);   // fades within minutes; the bond is never marked
-        React(LIFE_EMOTE_ANGRY, LIFE_POSE_SIT, 90);
+        React(LIFE_EMOTE_ANGRY, LIFE_POSE_HURT, 90);
         return sText_Huff;
     }
     React(rec->cur[LIFE_WARM] > 110 ? LIFE_EMOTE_HEART : LIFE_EMOTE_DOTS, LIFE_POSE_NONE, 0);
@@ -279,7 +279,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             React(LIFE_EMOTE_NONE, LIFE_POSE_SIT, 40);
             return sText_Talk_Aloof;
         }
-        React(rec->mood > 30 ? LIFE_EMOTE_NOTE : LIFE_EMOTE_CALM, LIFE_POSE_NONE, 0);
+        React(rec->mood > 30 ? LIFE_EMOTE_NOTE : LIFE_EMOTE_CALM, LIFE_POSE_NOD, 60);   // nods along
         return rec->mood > 30 ? sText_Talk_Happy : sText_Talk_Default;
 
     case LIFE_VERB_PET:
@@ -298,7 +298,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             React(LIFE_EMOTE_DOTS, LIFE_POSE_SIT, 40);
             return sText_Pet_Aloof;
         }
-        React(LIFE_EMOTE_HEART, LIFE_POSE_NONE, 0);
+        React(LIFE_EMOTE_HEART, LIFE_POSE_JOY, 45);
         return sText_Pet_Warm;
 
     case LIFE_VERB_FEED:
@@ -328,7 +328,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             if (taste > 0 && rec->emo[EMO_SADNESS] + rec->emo[EMO_FEAR] >= 40)
                 MP_Life_AddTrait(rec, TRAIT_COMFORT_FOOD, StrongestFlavor(berry), 50);   // it cheered up on this
             OwnerBond(rec, 2, 2, TRUE);
-            React(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_NOTE, LIFE_POSE_HOP, 50);
+            React(taste < 0 ? LIFE_EMOTE_SWEAT : LIFE_EMOTE_NOTE, taste < 0 ? LIFE_POSE_HURT : LIFE_POSE_EAT, 50);
             return taste > 0 ? sText_Feed_Favorite : taste < 0 ? sText_Feed_Disliked : sText_Feed_Hungry;
         }
         MP_Life_Satisfy(rec, NEED_HUNGER, 80);
@@ -366,7 +366,7 @@ static const u8 *DoVerb(struct Pokemon *mon, struct MpLifeRec *rec, u8 verb)
             MP_Life_Remember(rec, MEM_PRAISED, 90 + rec->emo[EMO_PRIDE], TIER_PART, owner, 0);
             MP_Life_Feel(rec, EMO_PRIDE, 20);
             OwnerBond(rec, 1, 2, TRUE);
-            React(LIFE_EMOTE_SPARKLE, LIFE_POSE_HOP, 50);
+            React(LIFE_EMOTE_SPARKLE, LIFE_POSE_JOY, 50);
             return rec->cur[LIFE_PROUD] >= 180 ? sText_Praise_Proud : sText_Praise_Glow;
         }
         OwnerBond(rec, 0, 0, FALSE);
@@ -457,7 +457,7 @@ static const u8 *DoKeepsake(struct Pokemon *mon, struct MpLifeRec *rec)
     MP_Life_Remember(rec, MEM_KEEPSAKE, 150, TIER_PART, MP_Life_LocalTrainerKey(), item);
     MP_Life_Feel(rec, EMO_AFFECTION, 30);
     OwnerBond(rec, 1, 3, TRUE);
-    React(LIFE_EMOTE_HEART, LIFE_POSE_HOP, 60);
+    React(LIFE_EMOTE_HEART, LIFE_POSE_JOY, 60);
     return sText_Keepsake_Give;
 }
 

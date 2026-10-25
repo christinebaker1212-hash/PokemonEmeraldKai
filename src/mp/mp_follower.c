@@ -37,6 +37,7 @@
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
 #include "mp_garden.h"
+#include "mp_pmd.h"
 
 struct MpFollowerGfx
 {
@@ -61,6 +62,7 @@ struct FollowerSlot
 {
     u16 dex;                  // 0 = none
     u8 female;
+    bool8 shiny;
     s16 hue;                  // its Stadium hue (mp_hue.c; 0 = its own colors)
     const struct MpFollowerGfx *gfx;
     u8 spriteId;              // SPRITE_NONE when not created
@@ -106,6 +108,11 @@ struct FollowerSlot
     u8 qLen;
     struct Coords16 q[8];
     struct Coords16 qLast;   // the last tile queued (or where it started)
+    // PMD Collab sprite (mp_pmd.c): the whole picture as a big sprite, 8 directions, turning smoothly
+    bool8 pmdOn;
+    u8 pdir;                 // PMD_DIR_* shown
+    u8 pturn;                // frames until its next 45-degree step toward the facing it wants
+    struct MpPmdView pmd;
 };
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
@@ -178,9 +185,17 @@ bool8 MP_Follower_IsFollowerSprite(struct Sprite *sprite)
     return sprite->inUse && sprite->callback == SpriteCB_Follower;
 }
 
+static void DetachPmd(struct FollowerSlot *s)
+{
+    if (s->pmdOn)
+        MP_Pmd_Detach(&s->pmd, SpriteIsOurs(s) ? &gSprites[s->spriteId] : NULL);
+    s->pmdOn = FALSE;
+}
+
 static void DestroySlotSprite(struct FollowerSlot *s)
 {
     MP_FollowFx_Remove(s - sSlots);   // its grass, splashes and reflection go with it
+    DetachPmd(s);
     if (SpriteIsOurs(s))
     {
         u16 tag = TAG_FOLLOWER + (s - sSlots);
@@ -227,31 +242,53 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     gSprites[id].coordOffsetEnabled = TRUE;
     gSprites[id].invisible = TRUE;
     s->anim = 0xFF;
+    // The PMD Collab picture when there's one (the Moemon frames above stay as the fallback)
+    s->pmdOn = FALSE;
+    if (MP_Pmd_Attach(&s->pmd, &gSprites[id], s->dex, s->female, s->shiny, s->hue, colors))
+    {
+        u8 slot = IndexOfSpritePaletteTag(tag);
+        if (slot != 0xFF)
+            LoadPalette(colors, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
+        s->pmdOn = TRUE;
+        s->pdir = MP_Pmd_DirFrom4(s->dir);
+        s->pturn = 0;
+    }
     return TRUE;
 }
 
-static void SetSlotPokemon(struct FollowerSlot *s, u16 dex, bool8 female, s16 hue)
+static void SetSlotPokemon(struct FollowerSlot *s, u16 dex, bool8 female, bool8 shiny, s16 hue)
 {
     const struct MpFollowerGfx *gfx = dex ? FindGfx(dex, female) : NULL;
-    if (gfx == s->gfx && s->dex == dex && s->hue == hue)
+    if (gfx == s->gfx && s->dex == dex && s->hue == hue && s->shiny == shiny)
         return;
     if (gfx)
-        MPNet_Log("follower: slot %d dex %d hue %d", (int)(s - sSlots), dex, hue);
+        MPNet_Log("follower: slot %d dex %d hue %d%s%s", (int)(s - sSlots), dex, hue, shiny ? " shiny" : "",
+                  MP_Pmd_Has(dex) ? " (PMD)" : "");
     if (gfx == s->gfx && s->dex == dex && SpriteIsOurs(s))
     {
-        // only its colors changed (renamed): the same sprite with the new palette
+        // only its colors changed (renamed, or shiny now): the same sprite with the new palette
         u16 colors[16];
         u32 frameBytes = (u32)s->gfx->size * s->gfx->size / 2;
         u8 slot = IndexOfSpritePaletteTag(TAG_FOLLOWER + (s - sSlots));
         s->hue = hue;
+        s->shiny = shiny;
         memcpy(colors, sFollowerData + s->gfx->offset + 8 * frameBytes, sizeof(colors));
         MP_Hue_ShiftPalette(colors, 0, hue);
+        if (s->pmdOn)
+        {
+            u8 anim = s->pmd.anim, dir = s->pmd.dir;
+            bool8 loop = s->pmd.loop;
+            s->pmdOn = MP_Pmd_Attach(&s->pmd, &gSprites[s->spriteId], dex, s->female, shiny, hue, colors);
+            if (s->pmdOn)
+                MP_Pmd_SetAnim(&s->pmd, anim, dir, loop);
+        }
         if (slot != 0xFF)
             LoadPalette(colors, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
         return;
     }
     DestroySlotSprite(s);
     s->hue = hue;
+    s->shiny = shiny;
     s->dex = gfx ? dex : 0;
     s->female = female;
     s->gfx = gfx;
@@ -297,6 +334,8 @@ static void PlaceAtOwner(struct FollowerSlot *s, struct ObjectEvent *owner)
     case DIR_WEST:  s->dir = FDIR_LEFT; break;
     case DIR_EAST:  s->dir = FDIR_RIGHT; break;
     }
+    s->pdir = MP_Pmd_DirFrom4(s->dir);   // (PMD picture) facing that way right away
+    s->pturn = 0;
     s->moved = 16;
     s->placed = TRUE;
     if (owner->spriteId < MAX_SPRITES)
@@ -506,7 +545,7 @@ static u8 AutoFrame(struct FollowerSlot *s, struct Sprite *fs)
     fs->x2 = 0;
     if (s->aMoved < 16 && (s->aPrev.x != s->aCur.x || s->aPrev.y != s->aCur.y))
         return s->aDir * 2 + ((s->animTimer / (s->aSpeed > 1 ? 4 : WALK_FRAME_TIME)) & 1);
-    switch (s->aPose)
+    switch (MP_LifePose_Base(s->aPose))
     {
     case LIFE_POSE_SIT:
         return s->aDir * 2;
@@ -585,6 +624,7 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         if (palSlot == 0xFF)
         {
             MP_FollowFx_Remove(s - sSlots);
+            DetachPmd(s);
             DestroySprite(fs);
             s->spriteId = SPRITE_NONE;
             return;
@@ -693,7 +733,9 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
             printf("[test] followtrace %ld %ld auto %d ret %d\n", (long)(fvx * 16 / 256), (long)(fvy * 16 / 256), s->autoOn, s->autoReturning);
         fx = os->x + dxPix;
         fy = os->y + dyPix;
-        if (s->gfx->size == 64)
+        if (s->pmdOn)
+            fy += PMD_GROUND_DY;   // a PMD picture hangs from its ground point (its feet)
+        else if (s->gfx->size == 64)
             fy -= 16;
         fs->x = fx;
         fs->y = fy;
@@ -705,17 +747,31 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         s->animTimer++;
         if (s->autoOn)
         {
+            s16 hop = fs->y2;
             frame = AutoFrame(s, fs);
+            if (s->pmdOn)   // the PMD picture has its own motion: no bobbing offsets
+            {
+                fs->x2 = 0;
+                fs->y2 = hop;
+                MP_Pmd_Animate(&s->pmd, &s->pdir, &s->pturn,
+                               s->aMoved < 16 && (s->aPrev.x != s->aCur.x || s->aPrev.y != s->aCur.y), s->aDir, s->aPose,
+                               s->aSpeed > 1);
+            }
         }
         else
         {
+            bool8 walking = s->moved < total && (s->prev.x != s->cur.x || s->prev.y != s->cur.y);
             fs->x2 = 0;
-            if (s->moved < total && (s->prev.x != s->cur.x || s->prev.y != s->cur.y))
+            if (walking)
                 frame = s->dir * 2 + ((s->animTimer / WALK_FRAME_TIME) & 1);
             else
                 frame = s->dir * 2 + ((s->animTimer / IDLE_FRAME_TIME) & 1);
+            if (s->pmdOn)
+                MP_Pmd_Animate(&s->pmd, &s->pdir, &s->pturn, walking, s->dir, LIFE_POSE_NONE, s->ownerSpeed > 1);
         }
     }
+    if (s->pmdOn)
+        MP_Pmd_Tick(&s->pmd, fs);
     if (frame != s->anim)
     {
         StartSpriteAnim(fs, frame);
@@ -808,6 +864,14 @@ u16 MP_Follower_LocalDex(bool8 *female)
 }
 
 // The follower's Stadium hue, for the network (mp_hue.c; 0 = its own colors)
+bool8 MP_Follower_LocalShiny(void)
+{
+    struct Pokemon *mon;
+    LoadLocalChoice();
+    mon = FindLocalFollower();
+    return mon && !MP_Prank_MagikarpActive() && IsMonShiny(mon);
+}
+
 s16 MP_Follower_LocalHue(void)
 {
     struct Pokemon *mon;
@@ -1095,7 +1159,7 @@ void MP_Follower_Update(void)
         return;
 
     dex = MP_Follower_LocalDex(&female);
-    SetSlotPokemon(&sSlots[0], dex, female, dex ? MP_Follower_LocalHue() : 0);
+    SetSlotPokemon(&sSlots[0], dex, female, dex && MP_Follower_LocalShiny(), dex ? MP_Follower_LocalHue() : 0);
     UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden());
     {
         u8 sound;
@@ -1111,12 +1175,12 @@ void MP_Follower_Update(void)
         if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasState)
         {
             SetSlotPokemon(s, gMpPlayers[i].state.followerDex, (gMpPlayers[i].state.followerFlags & 1) != 0,
-                           gMpPlayers[i].state.followerHue);
+                           (gMpPlayers[i].state.followerFlags & 0x80) != 0, gMpPlayers[i].state.followerHue);
             obj = MP_GetRemoteObjectEventId(i);
         }
         else
         {
-            SetSlotPokemon(s, 0, FALSE, 0);
+            SetSlotPokemon(s, 0, FALSE, FALSE, 0);
             s->seqKnown = FALSE;
         }
         if (obj != OBJECT_EVENTS_COUNT)
@@ -1382,7 +1446,10 @@ bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority)
     if (fs->invisible)
         return FALSE;
     *x = ScreenX(fs);
-    *top = ScreenY(fs) - s->gfx->size / 2 + (s->gfx->size == 64 ? 16 : 4);
+    if (s->pmdOn)   // the PMD picture's top, above its feet
+        *top = ScreenY(fs) - MP_Pmd_Height(&s->pmd);
+    else
+        *top = ScreenY(fs) - s->gfx->size / 2 + (s->gfx->size == 64 ? 16 : 4);
     *subpriority = fs->subpriority > 0 ? fs->subpriority - 1 : 0;
     return TRUE;
 }
@@ -1593,4 +1660,15 @@ void MP_Follower_DebugDump(void)
                s->prev.x, s->prev.y, s->moved, s->spriteId, SpriteIsOurs(s) ? gSprites[s->spriteId].invisible : -1,
                GetObjectEventIdByXY(s->cur.x, s->cur.y), s->ownerObj);
     }
+}
+
+// Tests (mp pmd): a follower's PMD picture: its Pokémon, colors, animation and facing
+void MP_Follower_PmdDebug(u8 slot)
+{
+    struct FollowerSlot *s;
+    if (!sInit || slot >= NUM_SLOTS)
+        return;
+    s = &sSlots[slot];
+    printf("[test] pmd slot %d: dex %d on %d shiny %d anim %d shown %d dir %d frame %d height %d\n", slot, s->dex, s->pmdOn,
+           s->shiny, s->pmd.anim, s->pmd.shown, s->pmd.dir, s->pmd.frame, s->pmdOn ? MP_Pmd_Height(&s->pmd) : 0);
 }

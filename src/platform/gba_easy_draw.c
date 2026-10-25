@@ -1,6 +1,7 @@
 #ifdef RENDERER_EASY_DRAW
 #include "global.h"
 #include "mp.h"
+#include "mp_bigsprite.h"
 #include <stdbool.h>
 #include "platform/dma.h"
 
@@ -468,6 +469,140 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
         return (xpos >= left && xpos < right);
 }
 
+// One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,
+// then the sprite layer (ordinary sprites and Moemon PC's big sprites share it)
+static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct OamData *oam, uint16_t color, int global_x,
+                        uint16_t vcount, bool windowsEnabled, unsigned int blendMode, bool isSemiTransparent, bool isObjWin,
+                        bool is8BPP)
+{
+    bool winShouldBlendPixel;
+    // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
+    if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
+        color = gMpScenePixel(color, global_x, vcount, TRUE);
+    
+    // Moemon Co-op: co-op notes and bubbles show through a dark cave's darkness
+    if (gMpDarkUiPal != 0xFF && !is8BPP && oam->paletteNum == gMpDarkUiPal && global_x >= 0 && global_x < DISPLAY_WIDTH)
+        scanline->winMask[global_x] |= WINMASK_OBJ;
+    //if sprite mode is 2 then write to the window mask instead
+    if (isObjWin)
+    {
+        if (scanline->winMask[global_x] & WINMASK_WINOUT)
+        scanline->winMask[global_x] = (REG_WINOUT >> 8) & 0x3F;
+        return;
+    }
+    //this code runs if pixel is to be drawn
+    if (global_x < DISPLAY_WIDTH && global_x >= 0)
+    {
+        //check if its enabled in the window (if window is enabled)
+        winShouldBlendPixel = (windowsEnabled == false || scanline->winMask[global_x] & WINMASK_CLR);
+        
+        //has to be separated from the blend mode switch statement because of OBJ semi transparancy feature
+        if ((blendMode == 1 && REG_BLDCNT & BLDCNT_TGT1_OBJ && winShouldBlendPixel) || isSemiTransparent)
+        {
+            uint16_t targetA = color;
+            uint16_t targetB = 0;
+            if (alphaBlendSelectTargetB(scanline, &targetB, oam->priority, 0, global_x, false))
+            {
+                color = alphaBlendColor(targetA, targetB);
+            }
+        }
+        else if (REG_BLDCNT & BLDCNT_TGT1_OBJ && winShouldBlendPixel)
+        {
+            switch (blendMode)
+            {
+            case 2:
+                color = alphaBrightnessIncrease(color);
+                break;
+            case 3:
+                color = alphaBrightnessDecrease(color);
+                break;
+            }
+        }
+        
+        //write pixel to pixel framebuffer
+        pixels[global_x] = color | (1 << 15);
+    }
+}
+
+// Moemon PC: a big sprite (mp_bigsprite.h) on this line: its whole picture, in its OAM entry's place
+static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, uint16_t vcount, bool windowsEnabled,
+                          unsigned int blendMode)
+{
+    const struct MpBigOam *e = MP_BigSprite_Oam(oam->tileNum);
+    bool isAffine = oam->affineMode & 1;
+    bool isSemiTransparent = (oam->objMode == 1);
+    bool isObjWin = (oam->objMode == 2);
+    int16_t m[2][2] = {{0x100, 0}, {0, 0x100}};
+    uint16_t *pixels, *palette;
+    int ty0, x0, x1, gx, stride;
+
+    if (e == NULL)
+        return;
+    if (isAffine ? ((int)vcount < e->gy - e->reach || (int)vcount > e->gy + e->reach)
+                 : ((int)vcount < e->top || (int)vcount >= e->top + e->h))
+        return;
+    if (isAffine)
+    {
+        u8 matrixNum = oam->matrixNum * 4;
+        m[0][0] = ((struct OamData *)OAM)[matrixNum].affineParam;
+        m[0][1] = ((struct OamData *)OAM)[matrixNum + 1].affineParam;
+        m[1][0] = ((struct OamData *)OAM)[matrixNum + 2].affineParam;
+        m[1][1] = ((struct OamData *)OAM)[matrixNum + 3].affineParam;
+    }
+    pixels = scanline->spriteLayers[oam->priority];
+    palette = (uint16_t *)(PLTT + 0x200) + oam->paletteNum * 16;
+    stride = e->bpp == 4 ? (e->w + 1) / 2 : e->w;
+    ty0 = vcount - e->top;
+    if (isAffine)   // turned around its point (a reflection mirrors at the feet; effects turn it about its middle)
+    {
+        x0 = e->gx - e->reach;
+        x1 = e->gx + e->reach + 1;
+    }
+    else
+    {
+        x0 = e->left;
+        x1 = e->left + e->w;
+    }
+    if (x0 < 0)
+        x0 = 0;
+    if (x1 > DISPLAY_WIDTH)
+        x1 = DISPLAY_WIDTH;
+    for (gx = x0; gx < x1; gx++)
+    {
+        int tx = gx - e->left, ty = ty0;
+        uint8_t idx;
+        uint16_t color;
+        if (isAffine)
+        {
+            int lx = gx - e->gx, ly = (int)vcount - e->gy;
+            tx = ((m[0][0] * lx + m[0][1] * ly) >> 8) + e->px;
+            ty = ((m[1][0] * lx + m[1][1] * ly) >> 8) + e->py;
+            if (tx < 0 || ty < 0 || tx >= e->w || ty >= e->h)
+                continue;
+        }
+        else
+        {
+            if (e->hflip)
+                tx = e->w - 1 - tx;
+            if (e->vflip)
+                ty = e->h - 1 - ty;
+        }
+        if (e->bpp == 4)
+        {
+            idx = e->pixels[ty * stride + tx / 2];
+            idx = (tx & 1) ? idx >> 4 : idx & 0xF;
+        }
+        else
+        {
+            idx = e->pixels[ty * stride + tx];
+        }
+        if (idx == 0)
+            continue;
+        color = idx < 16 ? palette[idx] : e->big->extraShown[idx - 16];
+        PutObjPixel(scanline, pixels, oam, color, gx, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin, FALSE);
+    }
+}
+
 // Parts of this code heavily borrowed from NanoboyAdvance.
 static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool windowsEnabled)
 {
@@ -476,7 +611,6 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
     unsigned int y;
     void *objtiles = VRAM_ + 0x10000;
     unsigned int blendMode = (REG_BLDCNT >> 6) & 3;
-    bool winShouldBlendPixel = true;
 
     int16_t matrix[2][2] = {};
 
@@ -499,6 +633,12 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
 
         if (!(isAffine) && doubleSizeOrDisabled) // disable for non-affine
         {
+            continue;
+        }
+
+        if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
+        {
+            DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);
             continue;
         }
 
@@ -639,56 +779,8 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
                 }
 
                 if (pixel != 0)
-                {
-                    uint16_t color = palette[pixel];;
-
-                    // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
-                    if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
-                        color = gMpScenePixel(color, global_x, vcount, TRUE);
-                    
-                    // Moemon Co-op: co-op notes and bubbles show through a dark cave's darkness
-                    if (gMpDarkUiPal != 0xFF && !is8BPP && oam->paletteNum == gMpDarkUiPal && global_x >= 0 && global_x < DISPLAY_WIDTH)
-                        scanline->winMask[global_x] |= WINMASK_OBJ;
-                    //if sprite mode is 2 then write to the window mask instead
-                    if (isObjWin)
-                    {
-                        if (scanline->winMask[global_x] & WINMASK_WINOUT)
-                        scanline->winMask[global_x] = (REG_WINOUT >> 8) & 0x3F;
-                        continue;
-                    }
-                    //this code runs if pixel is to be drawn
-                    if (global_x < DISPLAY_WIDTH && global_x >= 0)
-                    {
-                        //check if its enabled in the window (if window is enabled)
-                        winShouldBlendPixel = (windowsEnabled == false || scanline->winMask[global_x] & WINMASK_CLR);
-                        
-                        //has to be separated from the blend mode switch statement because of OBJ semi transparancy feature
-                        if ((blendMode == 1 && REG_BLDCNT & BLDCNT_TGT1_OBJ && winShouldBlendPixel) || isSemiTransparent)
-                        {
-                            uint16_t targetA = color;
-                            uint16_t targetB = 0;
-                            if (alphaBlendSelectTargetB(scanline, &targetB, oam->priority, 0, global_x, false))
-                            {
-                                color = alphaBlendColor(targetA, targetB);
-                            }
-                        }
-                        else if (REG_BLDCNT & BLDCNT_TGT1_OBJ && winShouldBlendPixel)
-                        {
-                            switch (blendMode)
-                            {
-                            case 2:
-                                color = alphaBrightnessIncrease(color);
-                                break;
-                            case 3:
-                                color = alphaBrightnessDecrease(color);
-                                break;
-                            }
-                        }
-                        
-                        //write pixel to pixel framebuffer
-                        pixels[global_x] = color | (1 << 15);
-                    }
-                }
+                    PutObjPixel(scanline, pixels, oam, palette[pixel], global_x, vcount, windowsEnabled, blendMode,
+                                isSemiTransparent, isObjWin, is8BPP);
             }
         }
     }

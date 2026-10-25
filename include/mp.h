@@ -149,7 +149,7 @@ struct MpState
     u8 emote;
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
-    u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
+    u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing, bit 7: shiny
     u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
     s16 followerHue;   // its Stadium hue in degrees (mp_hue.c; 0 = its own colors)
     u8 badges;         // how many gym badges (catch-up bonus)
@@ -1346,6 +1346,7 @@ void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
 u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
 s16 MP_Follower_LocalHue(void);          // mp_follower.c: the follower's Stadium hue, for the network
+bool8 MP_Follower_LocalShiny(void);      // ... whether it's shiny (followerFlags bit 7: its PMD picture's colors)
 u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));

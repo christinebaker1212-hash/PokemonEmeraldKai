@@ -248,6 +248,9 @@ struct Sprite
              u8 subspriteMode:2;
 
     /*0x43*/ u8 subpriority;
+
+    // Moemon PC: a picture of any size drawn in this sprite's place (mp_bigsprite.h); NULL = an ordinary sprite
+    struct MpBigSprite *mpBig;
 };
 
 struct OamMatrix

@@ -185,7 +185,7 @@ static u8 MeetingEmote(struct MpLifeRec *rec, struct MpLifeBond *bond, u8 theirA
     }
     if (bond->v[BOND_FRICTION] >= 60 && bond->v[BOND_FRICTION] > bond->v[BOND_AFFECTION] / 2)
     {
-        *pose = LIFE_POSE_SHAKE;   // a squabble
+        *pose = LIFE_POSE_HURT;    // a squabble
         return bond->v[BOND_RESPECT] >= 80 ? LIFE_EMOTE_SPARKLE : LIFE_EMOTE_ANGRY;
     }
     if (rec->cur[LIFE_LIVELY] >= 150 || theirAct == LIFE_ACT_PLAY)
@@ -236,7 +236,7 @@ bool8 MP_LifeSocial_MingleTarget(struct MpLifeRec *rec, u8 *friendId, s16 *x, s1
                 *greetTrainer = greet;
                 if (greet)
                 {
-                    *pose = LIFE_POSE_HOP;
+                    *pose = LIFE_POSE_TWIRL;   // a twirl for a friend it's fond of
                     *emote = LIFE_EMOTE_HEART;
                 }
                 else
@@ -326,7 +326,7 @@ static void DoubleTake(void)
         sS.takeStage = 3;
         break;
     case 3:   // it's them!
-        MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_HOP, 50);
+        MP_LifeField_Reaction(LIFE_EMOTE_HEART, LIFE_POSE_TWIRL, 50);
         MPNet_Log("life social: double take done");
         sS.takeStage = 0;
         break;
@@ -740,7 +740,7 @@ void MP_LifeSocial_OnRelay(u8 from, const u8 *data, u16 len)
             garden = TRUE;
         }
         ans = rec ? Answer(rec, from, data[1], item, garden ? FALSE : MP_LifeField_Activity() == LIFE_ACT_NAP) : ANS_NONE;
-        pose = ans == ANS_PLAYED || ans == ANS_LOVES ? LIFE_POSE_HOP : ans == ANS_SHY ? LIFE_POSE_SIT : LIFE_POSE_NONE;
+        pose = ans == ANS_LOVES ? LIFE_POSE_JOY : ans == ANS_PLAYED ? LIFE_POSE_HOP : ans == ANS_SHY ? LIFE_POSE_SIT : LIFE_POSE_NONE;
         if (rec && ans != ANS_ASLEEP)
         {
             if (garden)

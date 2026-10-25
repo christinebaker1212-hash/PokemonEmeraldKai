@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 90
+press RIGHT 30
+mp pmd
+shot walking
+wait 60
+mp pmd
+shot standing
+quit

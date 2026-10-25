@@ -19,13 +19,13 @@
 #define GX(x) ((x) + MAP_OFFSET)
 #define GY(y) ((y) + MAP_OFFSET)
 
-#define MPR_GARDEN_ACTORS (MPR_GARDEN_FIRST + 0)   // u8 count, then 15 bytes each
+#define MPR_GARDEN_ACTORS (MPR_GARDEN_FIRST + 0)   // u8 count, then ACTOR_BYTES each
 #define MPR_GARDEN_DECOR  (MPR_GARDEN_FIRST + 1)   // u8 count, then decor, x, y each
 #define ACTOR_BYTES 18
 
 bool8 MP_GardenLife_Local(u8 n, u32 *key, u16 *dex, u8 *female, s16 *hue, s16 *x, s16 *y, s16 *fx, s16 *fy, u8 *speed, u8 *dir,
                           u8 *pose, u8 *act, u8 *actor);
-s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s16 hue, s16 x, s16 y, s16 fx, s16 fy,
+s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, u8 female, s16 hue, s16 x, s16 y, s16 fx, s16 fy,
                            u8 speed, u8 dir, u8 pose, u8 act);
 void MP_GardenLife_DropMissing(s8 owner, u8 present);
 void MP_GardenDecor_SetRemote(u8 owner, const u8 *list, u8 count);
@@ -83,11 +83,11 @@ void MP_GardenNet_Update(void)
             break;
         p[0] = key; p[1] = key >> 8; p[2] = key >> 16; p[3] = key >> 24;
         PutU16(p + 4, dex);
-        p[6] = female;
+        p[6] = female;   // bit 0 female, bit 1 shiny
         PutU16(p + 7, (u16)hue);
         p[9] = x - MAP_OFFSET;
         p[10] = y - MAP_OFFSET;
-        p[11] = dir | (pose << 4);
+        p[11] = (dir & 3) | (pose << 2);   // (protocol 47: 6 bits of pose for the PMD actions)
         p[12] = act;
         p[13] = MP_LifeEmote_Current(LIFE_EMOTE_SLOT_GARDEN(actor));
         p[14] = MP_LifeEmote_Seq(LIFE_EMOTE_SLOT_GARDEN(actor));
@@ -134,7 +134,7 @@ void MP_GardenNet_OnRelay(u8 from, const u8 *data, u16 len)
         const u8 *p = &data[2 + i * ACTOR_BYTES];
         u32 key = p[0] | (p[1] << 8) | (p[2] << 16) | ((u32)p[3] << 24);
         s8 actor = MP_GardenLife_SetRemote(from, i, key, GetU16(p + 4), p[6], (s16)GetU16(p + 7), GX(p[9]), GY(p[10]),
-                                           GX(p[15]), GY(p[16]), p[17], p[11] & 0xF, p[11] >> 4, p[12]);
+                                           GX(p[15]), GY(p[16]), p[17], p[11] & 3, p[11] >> 2, p[12]);
         present |= 1 << i;
         if (actor < 0)
             continue;

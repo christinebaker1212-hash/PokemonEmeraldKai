@@ -20,6 +20,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_bigsprite.h"
 #include "decompress.h"
 #include "gpu_regs.h"
 #include "main.h"
@@ -783,8 +784,25 @@ struct FxBody
 
 static EWRAM_DATA struct FxBody sBodies[MAX_BODIES] = {0};
 
+// Moemon PC: a big sprite's (a PMD Collab follower's) picture this frame: its size and top-left from the sprite's point
+static bool8 BigFrame(const struct Sprite *s, s16 *dx, s16 *dy, u16 *w, u16 *h)
+{
+    const u8 *f = s->mpBig ? s->mpBig->frame : NULL;
+    if (!f)
+        return FALSE;
+    *dx = (s16)(f[0] | (f[1] << 8));
+    *dy = (s16)(f[2] | (f[3] << 8));
+    *w = f[4] | (f[5] << 8);
+    *h = f[6] | (f[7] << 8);
+    return TRUE;
+}
+
 static u8 BodyHeight(struct FxBody *b)
 {
+    s16 dx, dy;
+    u16 w, h;
+    if (BigFrame(&gSprites[b->mon], &dx, &dy, &w, &h))
+        return h > 255 ? 255 : (h < 8 ? 8 : h);
     return gSprites[b->mon].oam.size == SPRITE_SIZE(32x32) ? 32 : 64;
 }
 
@@ -920,8 +938,23 @@ static void BodyEnd(struct FxBody *b)
 
 static s16 OffX(const struct Sprite *s) { return s->coordOffsetEnabled ? gSpriteCoordOffsetX : 0; }
 static s16 OffY(const struct Sprite *s) { return s->coordOffsetEnabled ? gSpriteCoordOffsetY : 0; }
-static s16 MonX(struct FxBody *b) { return gSprites[b->mon].x + b->baseX2 + OffX(&gSprites[b->mon]); }
-static s16 MonY(struct FxBody *b) { return gSprites[b->mon].y + b->baseY2 + OffY(&gSprites[b->mon]); }
+static bool8 BigFrame(const struct Sprite *s, s16 *dx, s16 *dy, u16 *w, u16 *h);
+// The body's middle on screen (a big sprite's point is its feet: its picture's middle is above them)
+static s16 MonX(struct FxBody *b)
+{
+    s16 dx, dy;
+    u16 w, h;
+    s16 x = gSprites[b->mon].x + b->baseX2 + OffX(&gSprites[b->mon]);
+    return BigFrame(&gSprites[b->mon], &dx, &dy, &w, &h) ? x + dx + w / 2 : x;
+}
+
+static s16 MonY(struct FxBody *b)
+{
+    s16 dx, dy;
+    u16 w, h;
+    s16 y = gSprites[b->mon].y + b->baseY2 + OffY(&gSprites[b->mon]);
+    return BigFrame(&gSprites[b->mon], &dx, &dy, &w, &h) ? y + dy + h / 2 : y;
+}
 
 static s16 Dist(s16 v)
 {
@@ -4637,6 +4670,47 @@ static bool8 MonPixel(u8 spriteId, s16 sx, s16 sy, u16 *color)
     s32 w, h, lx, ly, dx, dy;
     const u8 *tiles;
     u8 v;
+    if (spriteId < MAX_SPRITES && s->inUse && !s->invisible && s->mpBig && s->mpBig->frame)
+    {
+        // Moemon PC: a big sprite's picture (turned about its middle, as the renderer does)
+        s16 fdx, fdy;
+        u16 fw, fh;
+        const u8 *px;
+        BigFrame(s, &fdx, &fdy, &fw, &fh);
+        px = s->mpBig->frame + 8;
+        dx = sx - (s->x + s->x2 + (s->coordOffsetEnabled ? gSpriteCoordOffsetX : 0) + fdx + fw / 2);
+        dy = sy - (s->y + s->y2 + (s->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + fdy + fh / 2);
+        if (s->oam.affineMode & ST_OAM_AFFINE_ON_MASK)
+        {
+            const struct OamMatrix *m = &gOamMatrices[s->oam.matrixNum];
+            s32 rx = (m->a * dx + m->b * dy) >> 8;
+            s32 ry = (m->c * dx + m->d * dy) >> 8;
+            dx = rx;
+            dy = ry;
+        }
+        else if ((s->oam.matrixNum >> 3) & 1)
+        {
+            dx = -dx - 1;
+        }
+        lx = dx + fw / 2;
+        ly = dy + fh / 2;
+        if (lx < 0 || ly < 0 || lx >= fw || ly >= fh)
+            return FALSE;
+        if (s->mpBig->bpp == 4)
+        {
+            v = px[ly * ((fw + 1) / 2) + lx / 2];
+            v = (lx & 1) ? (v >> 4) : (v & 0xF);
+        }
+        else
+        {
+            v = px[ly * fw + lx];
+        }
+        if (v == 0)
+            return FALSE;
+        if (color)
+            *color = (v < 16 ? gPlttBufferUnfaded[OBJ_PLTT_ID(s->oam.paletteNum) + v] : s->mpBig->extraShown[v - 16]) | 0x8000;
+        return TRUE;
+    }
     if (spriteId >= MAX_SPRITES || !s->inUse || s->invisible || s->oam.shape > 2 || s->oam.bpp != ST_OAM_4BPP)
         return FALSE;
     w = sDims[s->oam.shape][s->oam.size][0];

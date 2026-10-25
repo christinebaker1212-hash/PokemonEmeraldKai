@@ -32,7 +32,7 @@ linux)
     ;;
 *) echo "platform: windows or linux"; exit 1 ;;
 esac
-cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt "$P/"
+cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt "$P/"
 cp tools/mp_server/DEPLOY.md "$P/server/"
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
