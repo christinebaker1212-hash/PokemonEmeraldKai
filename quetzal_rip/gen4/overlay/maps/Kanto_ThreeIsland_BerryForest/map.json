@@ -1,0 +1,404 @@
+{
+  "id": "MAP_KANTO_THREE_ISLAND_BERRY_FOREST",
+  "name": "Kanto_ThreeIsland_BerryForest",
+  "layout": "LAYOUT_KANTO_THREE_ISLAND_BERRY_FOREST",
+  "music": "MUS_RG_VIRIDIAN_FOREST",
+  "region_map_section": "MAPSEC_BERRY_FOREST",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16152",
+      "x": 4,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_8413A16",
+      "flag": "FLAG_QZ_0x2199"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 12,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_12"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 19,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_13"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 23,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_14"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 38,
+      "y": 23,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_15"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 44,
+      "y": 23,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_16"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 44,
+      "y": 29,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_17"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 16,
+      "y": 43,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_18"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 17,
+      "y": 39,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_19"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 14,
+      "y": 39,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_1A"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 11,
+      "y": 39,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_1B"
+    },
+    {
+      "local_id": "12",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 12,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_846C1EB",
+      "flag": "FLAG_QZ_0x2316"
+    },
+    {
+      "local_id": "13",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 27,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_846C1F8",
+      "flag": "FLAG_QZ_0x2314"
+    },
+    {
+      "local_id": "14",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 12,
+      "y": 43,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_846C205",
+      "flag": "FLAG_QZ_0x2315"
+    },
+    {
+      "local_id": "15",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1154",
+      "x": 40,
+      "y": 31,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "local_id": "16",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1306",
+      "x": 19,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 43,
+      "y": 41,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_BOND_BRIDGE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 42,
+      "y": 41,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_BOND_BRIDGE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 44,
+      "y": 41,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_BOND_BRIDGE",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 27,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_8413ACB"
+    },
+    {
+      "type": "sign",
+      "x": 39,
+      "y": 35,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_ThreeIsland_BerryForest_EventScript_8413AC2"
+    },
+    {
+      "type": "hidden_item",
+      "x": 31,
+      "y": 25,
+      "elevation": 3,
+      "item": "ITEM_RAZZ_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_90"
+    },
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 15,
+      "elevation": 3,
+      "item": "ITEM_BLUK_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_91"
+    },
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 24,
+      "elevation": 3,
+      "item": "ITEM_NANAB_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_92"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 24,
+      "elevation": 3,
+      "item": "ITEM_WEPEAR_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_93"
+    },
+    {
+      "type": "hidden_item",
+      "x": 37,
+      "y": 18,
+      "elevation": 3,
+      "item": "ITEM_ORAN_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_94"
+    },
+    {
+      "type": "hidden_item",
+      "x": 14,
+      "y": 23,
+      "elevation": 3,
+      "item": "ITEM_CHERI_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_95"
+    },
+    {
+      "type": "hidden_item",
+      "x": 47,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_CHESTO_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_96"
+    },
+    {
+      "type": "hidden_item",
+      "x": 7,
+      "y": 30,
+      "elevation": 3,
+      "item": "ITEM_PECHA_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_97"
+    },
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_RAWST_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_98"
+    },
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 6,
+      "elevation": 3,
+      "item": "ITEM_ASPEAR_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_99"
+    },
+    {
+      "type": "hidden_item",
+      "x": 46,
+      "y": 32,
+      "elevation": 3,
+      "item": "ITEM_PERSIM_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_100"
+    },
+    {
+      "type": "hidden_item",
+      "x": 43,
+      "y": 16,
+      "elevation": 3,
+      "item": "ITEM_PINAP_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_101"
+    },
+    {
+      "type": "hidden_item",
+      "x": 8,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_LUM_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_102"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 109,
+    "region": "kanto",
+    "header": "0x89379DC",
+    "layout_id": 891,
+    "mapsec_index": 176,
+    "mapsec_name": "BERRY FOREST",
+    "music_id": 499,
+    "weather_id": 11,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "ThreeIsland_BerryForest"
+    }
+  }
+}

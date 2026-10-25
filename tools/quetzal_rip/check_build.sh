@@ -2,21 +2,23 @@
 # Assemble everything in quetzal_rip/ with Kai's own tools (mapjson, preproc, cpp, as) and,
 # given the ROM, compare every labelled script / text / movement / mart block byte for byte.
 #   tools/quetzal_rip/check_build.sh [QUETZAL.gba]
+#   QZ_RIP=dir tools/quetzal_rip/check_build.sh       (assemble another rip tree; no byte check)
 # Writes into $TMPDIR (or /tmp); in the repo it only builds Kai's tools and `make generated` headers.
 set -e -o pipefail
 cd "$(dirname "$0")/../.."
 ROM="$1"
+R="${QZ_RIP:-quetzal_rip}"   # another rip tree: e.g. a copy of quetzal_rip with quetzal_rip/gen4/overlay over it
 T="${TMPDIR:-/tmp}/quetzal_check"
 rm -rf "$T"; mkdir -p "$T/kai" "$T/qz/maps" "$T/inc/constants"
 for t in preproc mapjson jsonproc; do make -s -C tools/$t >/dev/null; done
 make -s generated >/dev/null    # Kai's own generated headers (map_groups.h, heal_locations.h...; gitignored)
 M=tools/mapjson/mapjson
-$M layouts emerald quetzal_rip/layouts/layouts.json "$T/qz" "$T/qz"
-$M groups emerald quetzal_rip/maps/map_groups.json "$T/qz" "$T/qz"
+$M layouts emerald $R/layouts/layouts.json "$T/qz" "$T/qz"
+$M groups emerald $R/maps/map_groups.json "$T/qz" "$T/qz"
 n=0
-for d in quetzal_rip/maps/*/; do
+for d in $R/maps/*/; do
   b=$(basename "$d"); mkdir -p "$T/qz/maps/$b"
-  $M map emerald "$d/map.json" quetzal_rip/layouts/layouts.json "$T/qz/maps/$b" >/dev/null
+  $M map emerald "$d/map.json" $R/layouts/layouts.json "$T/qz/maps/$b" >/dev/null
   n=$((n+1))
 done
 echo "mapjson: $n map.json files converted"
@@ -29,12 +31,12 @@ python3 -c "import re,sys; s=open(sys.argv[1]).read(); s=re.sub(r'\((\d+) << 8\)
   echo '#include "qz_map_groups.h"'
   echo '#include "quetzal_constants.h"'
   [ -n "$ROM" ] && echo '#include "quetzal_ids.h"'   # Quetzal's numbers, for the byte check
-  echo '	.include "quetzal_rip/include/quetzal_macros.inc"'
-  for f in quetzal_rip/scripts/*.inc quetzal_rip/maps/*/scripts.inc; do echo "	.include \"$f\""; done
-  for d in quetzal_rip/maps/*/; do echo "	.include \"$T/qz/maps/$(basename "$d")/events.inc\""; done
+  echo "	.include \"$R/include/quetzal_macros.inc\""
+  for f in $R/scripts/*.inc $R/maps/*/scripts.inc; do echo "	.include \"$f\""; done
+  for d in $R/maps/*/; do echo "	.include \"$T/qz/maps/$(basename "$d")/events.inc\""; done
 } > "$T/test.s"
 tools/preproc/preproc "$T/test.s" charmap.txt \
-  | cpp -I "$T/inc" -I include -I quetzal_rip/include - \
+  | cpp -I "$T/inc" -I include -I $R/include - \
   | tools/preproc/preproc -ie "$T/test.s" charmap.txt > "$T/test.pp.s"
 as --32 --defsym VER_64BIT=0 --defsym MODERN=0 --defsym PORTABLE=1 --defsym UBFIX=1 -o "$T/test.o" "$T/test.pp.s"
 echo "assembled: $T/test.o"

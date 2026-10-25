@@ -1,0 +1,175 @@
+{
+  "id": "MAP_JOHTO_DRAGON_SHRINE",
+  "name": "Johto_DragonShrine",
+  "layout": "LAYOUT_JOHTO_DRAGON_SHRINE",
+  "music": "MUS_QZ_639",
+  "region_map_section": "MAPSEC_JOHTO_DRAGONS_DEN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16038",
+      "x": 6,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DragonShrine_EventScript_83CC33E",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16050",
+      "x": 3,
+      "y": 12,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DragonShrine_EventScript_83CCEEC",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16050",
+      "x": 9,
+      "y": 12,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DragonShrine_EventScript_83CCEF5",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16013",
+      "x": 5,
+      "y": 16,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x1059"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_899",
+      "x": 8,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_900",
+      "x": 4,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_DRAGONS_DEN_B1F",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 15,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5010",
+      "var_value": "2",
+      "script": "Johto_DragonShrine_EventScript_83CC372"
+    },
+    {
+      "type": "trigger",
+      "x": 7,
+      "y": 16,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5010",
+      "var_value": "2",
+      "script": "Johto_DragonShrine_EventScript_83CC386"
+    },
+    {
+      "type": "trigger",
+      "x": 5,
+      "y": 16,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5010",
+      "var_value": "2",
+      "script": "Johto_DragonShrine_EventScript_83CC35E"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 15,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 15,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    }
+  ],
+  "quetzal": {
+    "group": 34,
+    "num": 35,
+    "region": "johto",
+    "header": "0x8935688",
+    "layout_id": 477,
+    "mapsec_index": 59,
+    "mapsec_name": "DRAGON’S DEN",
+    "music_id": 639,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "DragonShrine",
+      "text_match": 0.99
+    }
+  }
+}

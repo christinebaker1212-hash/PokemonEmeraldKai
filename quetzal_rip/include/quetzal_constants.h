@@ -2987,4 +2987,8 @@
 #define FLAG_QZ_KANTO_HIDDEN_ITEM_190    (FLAG_HIDDEN_ITEMS_START + 0x400 + 190)
 #define TRAINER_BATTLE_QZ_13               13
 
+// gencap.py (quetzal_rip/gen4): objects of content past the generation cap get this flag. Keep it set.
+// 0x2FFF is unused by Quetzal.
+#define FLAG_QZ_GEN_CAPPED                 0x2FFF
+
 #endif

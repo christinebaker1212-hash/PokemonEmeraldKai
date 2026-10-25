@@ -1,0 +1,232 @@
+{
+  "id": "MAP_JOHTO_SPROUT_TOWER3F",
+  "name": "Johto_SproutTower3F",
+  "layout": "LAYOUT_JOHTO_SPROUT_TOWER3F",
+  "music": "MUS_QZ_630",
+  "region_map_section": "MAPSEC_JOHTO_SPROUT_TOWER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16050",
+      "x": 14,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 10,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "10",
+      "script": "Johto_SproutTower3F_EventScript_83FA794",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16050",
+      "x": 8,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 10,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "10",
+      "script": "Johto_SproutTower3F_EventScript_83FA77D",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16050",
+      "x": 11,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_LEFT_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_SproutTower3F_EventScript_83FA7AB",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16036",
+      "x": 11,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SproutTower3F_EventScript_83FA8B7",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16053",
+      "x": 11,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x1082"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 16,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SproutTower3F_EventScript_83FA7DA",
+      "flag": "FLAG_QZ_0x1163"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 7,
+      "y": 16,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SproutTower3F_EventScript_83FA7CD",
+      "flag": "FLAG_QZ_0x1162"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16066",
+      "x": 11,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x64",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "0"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1054",
+      "x": 6,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SPROUT_TOWER2F",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 7,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5011",
+      "var_value": "0",
+      "script": "Johto_SproutTower3F_EventScript_83FA84F"
+    },
+    {
+      "type": "trigger",
+      "x": 13,
+      "y": 7,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5011",
+      "var_value": "0",
+      "script": "Johto_SproutTower3F_EventScript_83FA7E7"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_SproutTower3F_EventScript_83FA7C2"
+    },
+    {
+      "type": "sign",
+      "x": 17,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83FA60F"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83FA60F"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83FA60F"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83FA60F"
+    }
+  ],
+  "quetzal": {
+    "group": 35,
+    "num": 81,
+    "region": "johto",
+    "header": "0x8936958",
+    "layout_id": 649,
+    "mapsec_index": 50,
+    "mapsec_name": "SPROUT TOWER",
+    "music_id": 630,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "SproutTower3F",
+      "text_match": 1.07
+    }
+  }
+}

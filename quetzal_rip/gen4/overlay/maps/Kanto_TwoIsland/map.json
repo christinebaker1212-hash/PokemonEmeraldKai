@@ -1,0 +1,307 @@
+{
+  "id": "MAP_KANTO_TWO_ISLAND",
+  "name": "Kanto_TwoIsland",
+  "layout": "LAYOUT_KANTO_TWO_ISLAND",
+  "music": "MUS_RG_SEVII_123",
+  "region_map_section": "MAPSEC_TWO_ISLAND",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_TWO_ISLAND_CAPE_BRINK",
+      "offset": 24,
+      "direction": "up"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16122",
+      "x": 28,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_8417319",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16215",
+      "x": 31,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_84173DF",
+      "flag": "FLAG_QZ_0x21D6"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16104",
+      "x": 30,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_84173E8",
+      "flag": "FLAG_QZ_0x21D2"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 26,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_84173D6",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16203",
+      "x": 27,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_8417401",
+      "flag": "FLAG_QZ_0x21D5"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 30,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_12"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 39,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_846BF95",
+      "flag": "FLAG_QZ_0x231D"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16151",
+      "x": 37,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_8417413",
+      "flag": "0"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16110",
+      "x": 24,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_TwoIsland_EventScript_841740A",
+      "flag": "0"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1335",
+      "x": 34,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1062",
+      "x": 39,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "local_id": "12",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 10,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "13",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 11,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "14",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 11,
+      "y": 2,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "15",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 12,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 39,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_TWO_ISLAND_JOYFUL_GAME_CORNER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 33,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_TWO_ISLAND_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_TWO_ISLAND_POKEMON_CENTER_1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_TWO_ISLAND_HARBOR",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 29,
+      "y": 8,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_TwoIsland_EventScript_841741C"
+    },
+    {
+      "type": "sign",
+      "x": 40,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_TwoIsland_EventScript_8417425"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 3,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_TwoIsland_EventScript_841742E"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 70,
+    "region": "kanto",
+    "header": "0x8938360",
+    "layout_id": 863,
+    "mapsec_index": 144,
+    "mapsec_name": "TWO ISLAND",
+    "music_id": 547,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "TwoIsland"
+    }
+  }
+}

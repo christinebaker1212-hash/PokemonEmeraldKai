@@ -1,0 +1,169 @@
+{
+  "id": "MAP_KANTO_ROUTE22",
+  "name": "Kanto_Route22",
+  "layout": "LAYOUT_KANTO_ROUTE22",
+  "music": "MUS_RG_ROUTE3",
+  "region_map_section": "MAPSEC_ROUTE_22",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_ROUTE23",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_KANTO_VIRIDIAN_CITY",
+      "offset": -10,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16109",
+      "x": 25,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x21B1"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_738",
+      "x": 24,
+      "y": 9,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2385"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_749",
+      "x": 37,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FDF6",
+      "flag": "FLAG_QZ_0x2E38"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROUTE22_NORTH_ENTRANCE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROUTE22_NORTH_ENTRANCE",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 4,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "1",
+      "script": "Kanto_Route22_EventScript_8417F9C"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 5,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "1",
+      "script": "Kanto_Route22_EventScript_8417FA8"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 6,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "1",
+      "script": "Kanto_Route22_EventScript_8417FBB"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 4,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "3",
+      "script": "Kanto_Route22_EventScript_84180E1"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 5,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "3",
+      "script": "Kanto_Route22_EventScript_84180ED"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 6,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5125",
+      "var_value": "3",
+      "script": "Kanto_Route22_EventScript_8418100"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 12,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_Route22_EventScript_84181BA"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 98,
+    "region": "kanto",
+    "header": "0x8938670",
+    "layout_id": 743,
+    "mapsec_index": 122,
+    "mapsec_name": "ROUTE 22",
+    "music_id": 505,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "Route22"
+    }
+  }
+}

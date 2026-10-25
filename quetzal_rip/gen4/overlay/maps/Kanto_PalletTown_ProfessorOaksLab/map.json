@@ -1,0 +1,301 @@
+{
+  "id": "MAP_KANTO_PALLET_TOWN_PROFESSOR_OAKS_LAB",
+  "name": "Kanto_PalletTown_ProfessorOaksLab",
+  "layout": "LAYOUT_KANTO_PALLET_TOWN_PROFESSOR_OAKS_LAB",
+  "music": "MUS_RG_OAK_LAB",
+  "region_map_section": "MAPSEC_PALLET_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 3,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DDC",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16218",
+      "x": 2,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_UP_AND_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E34",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 11,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E08",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16184",
+      "x": 6,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_84194B9",
+      "flag": "FLAG_QZ_0x21A2"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 8,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AD6",
+      "flag": "FLAG_QZ_0x226B"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 9,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D84",
+      "flag": "FLAG_QZ_0x230B"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 10,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DAB",
+      "flag": "FLAG_QZ_0x2276"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16109",
+      "x": 5,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419483",
+      "flag": "FLAG_QZ_0x22BE"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16181",
+      "x": 4,
+      "y": 1,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E4D",
+      "flag": "FLAG_QZ_0x22A5"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16181",
+      "x": 5,
+      "y": 1,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E4D",
+      "flag": "FLAG_QZ_0x22A5"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1064",
+      "x": 3,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PALLET_TOWN",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 7,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PALLET_TOWN",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 5,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PALLET_TOWN",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 5,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "2",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_84191E7"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "2",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_84191E7"
+    },
+    {
+      "type": "trigger",
+      "x": 7,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "2",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_84191E7"
+    },
+    {
+      "type": "trigger",
+      "x": 5,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "3",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_841920B"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "3",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419217"
+    },
+    {
+      "type": "trigger",
+      "x": 7,
+      "y": 8,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511A",
+      "var_value": "3",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419223"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E56"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E56"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E5F"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E68"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 122,
+    "region": "kanto",
+    "header": "0x8938910",
+    "layout_id": 688,
+    "mapsec_index": 88,
+    "mapsec_name": "PALLET TOWN",
+    "music_id": 513,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PalletTown_ProfessorOaksLab"
+    }
+  }
+}

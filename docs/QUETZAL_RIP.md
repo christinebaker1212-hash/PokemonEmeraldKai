@@ -30,6 +30,8 @@ The ROM itself is not in the repo.
 | `quetzal_rip/include/` | `quetzal_constants.h` (every FLAG_QZ/VAR_QZ/TRAINER_QZ/OBJ_EVENT_GFX_QZ/MUS_QZ value), `quetzal_macros.inc` (custom commands, Quetzal specials), `quetzal_ids.h` (Quetzal's species/item/move numbers, for checks only) | |
 | `quetzal_rip/sound/` | Quetzal's 107 new songs (ids 559-665): 56 Johto music tracks + 51 sound-effect copies, as `.mid` + `midi.cfg` lines for Kai's build, `.s` (exact ROM bytes), 2 new voicegroups, 192 new samples (`.wav`); `README.md` names each song from where it plays | Kai's sound formats; `tools/quetzal_rip/songs.py [--verify]` |
 | `quetzal_rip/region_map/` | Johto map + Kanto's 4 maps (Kanto, Sevii 1-3 / 4-5 / 6-7): `map.png` / `map.bin` / `map.pal` like Kai's `graphics/pokenav/region_map/`, `preview.png`; `layouts.json` (15x28 section grids like `region_map_layout.h`); `fly_heal.json` (35 heal locations, 34 fly spots with unlock flags) | `tools/quetzal_rip/region_map.py` |
+| `quetzal_rip/data/gifts.json`, `names.json` | gifts from ROM tables: 229 static encounters (Johto 106, Kanto 123), the 84 starter choices, 17 in-game trades with the maps that use them; every species / move / item id with its name (species also types and base stat total) | `tools/quetzal_rip/gifts.py` (run by `rip.py`) |
+| `quetzal_rip/gen4/` | **the rip capped to Gen 4** (see below): `data/` (trainers, wild, gifts), `overlay/` (changed scripts and map.json files), `changes.json`, `REPORT.md` | `tools/quetzal_rip/gencap.py` |
 | `quetzal_rip/previews/` | `johto_overview.png`, `kanto_overview.png`: all outdoor maps stitched by their connections | 1/4 scale |
 
 ### Verified
@@ -62,6 +64,34 @@ convert back to the ROM's bytes with Kai's `wav2agb`.
   share a name get `_2`, `_3`... (`SPECIES_PIKACHU_17`), see `data/id_map.json` for the Quetzal id of each.
 - Stock specials Kai has are written by Kai's name. Careful: Quetzal's special *numbers* are not stock (13 were
   inserted), the rip already resolved that.
+
+## Capped to Gen 4 (`quetzal_rip/gen4/`)
+
+Quetzal uses Pokémon, moves and items of every generation (Bruno has Koraidon, Route 29 fishes up Wishiwashi).
+Kai stops at Gen 4, and Gen 4 Pokémon only appear after the Elite Four, in the other regions; Johto and Kanto open
+after Hoenn's League, so everything up to Gen 4 may stay there. `python3 tools/quetzal_rip/gencap.py --max-gen 4`
+writes the capped version next to the untouched rip (Quetzal's modern data stays in `quetzal_rip/data` for later):
+
+- **Wild encounters**: a later Pokémon becomes its older form or family member (Alolan Rattata -> Rattata,
+  Sylveon -> Eevee), else one from the reference game's table for the same map and kind of encounter
+  (Crystal for Johto; FireRed, Red and Crystal's Kanto for Kanto), else one of the same type and similar stats.
+- **Trainers**: matched by name and class with Crystal's / FireRed's trainers (Bruno -> Crystal's Bruno:
+  Koraidon, Zamazenta, Marshadow, Urshifu become Machamp, Hitmontop, Hitmonlee, Hitmonchan). Replacements evolve
+  as far as the level allows; moves are checked against the Gen 4 learnset (pokeplatinum) and refilled from
+  level-up moves; held items past Gen 4 become older ones (Assault Vest -> Leftovers, gems -> type items).
+- **Gifts**: starter choices keep Gen 1-4 (36 of 84); 144 static encounters of later legendaries are scrapped and
+  their overworld objects hidden with `FLAG_QZ_GEN_CAPPED` (defined in `quetzal_constants.h`, keep it set); trades
+  follow Crystal's / FireRed's at the same house (Goldenrod: Abra for Machop, like Crystal's Mike).
+- **Scripts and maps**: later items leave the marts; given items become older ones; later quest items stay where
+  an event checks for them, listed in `REPORT.md` "Events built on later content" for the port to drop.
+- Items Kai already has stay (Kai's systems take precedence), and so do HGSS-era story items (GS Ball, Tidal Bell,
+  Red Scale, Apricorns, Sport Ball). Quetzal's own items (IV Up, IV Max, Gender Pill, Max Candy) are dropped.
+
+`overlay/` holds every changed rip file at its rip path; copied over `quetzal_rip/` it assembles with Kai's tools
+(`QZ_RIP=<that tree> tools/quetzal_rip/check_build.sh`). Every change and its reason is in `changes.json`.
+Reference data: `tools/quetzal_rip/gen_refs.json` (built by `gen_refs.py` from pret/pokered, pokecrystal,
+pokefirered) and `tools/moemon_gen4/gen4_data.json` (Gen 1-4 species, moves, items, abilities, learnsets, from
+pret/pokeplatinum by `tools/moemon_gen4/platinum_extract.py`). `--max-gen 6` makes the Kalos-era version.
 
 ## What Kai needs before the content can run
 

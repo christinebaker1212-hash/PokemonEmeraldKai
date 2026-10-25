@@ -1,0 +1,216 @@
+{
+  "id": "MAP_KANTO_ROCKET_HIDEOUT_B4F",
+  "name": "Kanto_RocketHideout_B4F",
+  "layout": "LAYOUT_KANTO_ROCKET_HIDEOUT_B4F",
+  "music": "MUS_RG_ROCKET_HIDEOUT",
+  "region_map_section": "MAPSEC_ROCKET_HIDEOUT",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16138",
+      "x": 19,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_8410FE9",
+      "flag": "FLAG_QZ_0x228E"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 20,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_8411035",
+      "flag": "FLAG_QZ_0x21CB"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 4,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_RocketHideout_B4F_EventScript_8411063",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 3,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_8411098",
+      "flag": "FLAG_QZ_0x218F"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 19,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_8411113",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 16,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_84110C9",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 1,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_846BBE4",
+      "flag": "FLAG_QZ_0x22CA"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 4,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_846BBF1",
+      "flag": "FLAG_QZ_0x22C9"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 6,
+      "y": 23,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_RocketHideout_B4F_EventScript_846BBFE",
+      "flag": "FLAG_QZ_0x22C8"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1333",
+      "x": 19,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 15,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROCKET_HIDEOUT_B3F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROCKET_HIDEOUT_ELEVATOR",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 21,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROCKET_HIDEOUT_ELEVATOR",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 22,
+      "y": 6,
+      "elevation": 3,
+      "item": "ITEM_NEST_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_13"
+    },
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 6,
+      "elevation": 3,
+      "item": "ITEM_NET_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_134"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 45,
+    "region": "kanto",
+    "header": "0x89372DC",
+    "layout_id": 764,
+    "mapsec_index": 133,
+    "mapsec_name": "ROCKET HIDEOUT",
+    "music_id": 486,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "RocketHideout_B4F"
+    }
+  }
+}

@@ -1,0 +1,4396 @@
+{
+ "_note": "see tools/quetzal_rip/gifts.py for the table layouts",
+ "starter_choices": [
+  "SPECIES_BULBASAUR",
+  "SPECIES_CHARMANDER",
+  "SPECIES_SQUIRTLE",
+  "SPECIES_PIKACHU",
+  "SPECIES_ZUBAT",
+  "SPECIES_GASTLY",
+  "SPECIES_DITTO",
+  "SPECIES_EEVEE",
+  "SPECIES_PORYGON",
+  "SPECIES_CHIKORITA",
+  "SPECIES_CYNDAQUIL",
+  "SPECIES_TOTODILE",
+  "SPECIES_TOGEPI",
+  "SPECIES_SNEASEL",
+  "SPECIES_SWINUB",
+  "SPECIES_TYROGUE",
+  "SPECIES_ELEKID",
+  "SPECIES_MAGBY",
+  "SPECIES_TREECKO",
+  "SPECIES_TORCHIC",
+  "SPECIES_MUDKIP",
+  "SPECIES_RALTS",
+  "SPECIES_AZURILL",
+  "SPECIES_ARON",
+  "SPECIES_ELECTRIKE",
+  "SPECIES_TRAPINCH",
+  "SPECIES_SPHEAL",
+  "SPECIES_TURTWIG",
+  "SPECIES_CHIMCHAR",
+  "SPECIES_PIPLUP",
+  "SPECIES_BUIZEL",
+  "SPECIES_HAPPINY",
+  "SPECIES_MUNCHLAX",
+  "SPECIES_RIOLU",
+  "SPECIES_SNOVER",
+  "SPECIES_ROTOM"
+ ],
+ "starter_choices_hoenn": [
+  "SPECIES_BULBASAUR",
+  "SPECIES_CHARMANDER",
+  "SPECIES_SQUIRTLE",
+  "SPECIES_PIKACHU",
+  "SPECIES_ZUBAT",
+  "SPECIES_GASTLY",
+  "SPECIES_DITTO",
+  "SPECIES_EEVEE",
+  "SPECIES_PORYGON",
+  "SPECIES_CHIKORITA",
+  "SPECIES_CYNDAQUIL",
+  "SPECIES_TOTODILE",
+  "SPECIES_TOGEPI",
+  "SPECIES_SNEASEL",
+  "SPECIES_SWINUB",
+  "SPECIES_TYROGUE",
+  "SPECIES_ELEKID",
+  "SPECIES_MAGBY",
+  "SPECIES_TREECKO",
+  "SPECIES_TORCHIC",
+  "SPECIES_MUDKIP",
+  "SPECIES_RALTS",
+  "SPECIES_ARON",
+  "SPECIES_ELECTRIKE",
+  "SPECIES_TRAPINCH",
+  "SPECIES_SPHEAL",
+  "SPECIES_TURTWIG",
+  "SPECIES_CHIMCHAR",
+  "SPECIES_PIPLUP",
+  "SPECIES_BUIZEL",
+  "SPECIES_HAPPINY",
+  "SPECIES_MUNCHLAX",
+  "SPECIES_RIOLU",
+  "SPECIES_SNOVER",
+  "SPECIES_ROTOM"
+ ],
+ "static_encounters": [
+  {
+   "region": "johto",
+   "index": 0,
+   "map": "Johto_IcePathB2FBlackthornSide",
+   "group": 34,
+   "num": 92,
+   "species": "SPECIES_ARTICUNO",
+   "level": 40,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11D2",
+    "0x11D3",
+    "0x11D4"
+   ],
+   "kind": 16,
+   "raw": "225c0200900028000000d211d311d41100000f00000000000000000000000010"
+  },
+  {
+   "region": "johto",
+   "index": 1,
+   "map": "Johto_SilverCaveSnowySlope",
+   "group": 34,
+   "num": 118,
+   "species": "SPECIES_ARTICUNO_2",
+   "level": 60,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11D5",
+    "0x11D6",
+    "0x11D7"
+   ],
+   "kind": 52,
+   "raw": "22760400cf033c000000d511d611d71100000e00000000000000000000000034",
+   "scrapped": "later form of Articuno, which has its own encounter"
+  },
+  {
+   "region": "johto",
+   "index": 2,
+   "map": "Johto_OlivineLighthouse",
+   "group": 35,
+   "num": 9,
+   "species": "SPECIES_ZAPDOS",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11D8",
+    "0x11D9",
+    "0x11DA"
+   ],
+   "kind": 16,
+   "raw": "2309130091001e000000d811d911da1100000d00000000000000000000000010"
+  },
+  {
+   "region": "johto",
+   "index": 3,
+   "map": "Johto_Route45",
+   "group": 35,
+   "num": 55,
+   "species": "SPECIES_ZAPDOS_2",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11DB",
+    "0x11DC",
+    "0x11DD"
+   ],
+   "kind": 52,
+   "raw": "23371000d00332000000db11dc11dd1100000100000000000000000000000034",
+   "scrapped": "later form of Zapdos, which has its own encounter"
+  },
+  {
+   "region": "johto",
+   "index": 4,
+   "map": "Johto_SilverCaveFireRoom",
+   "group": 34,
+   "num": 111,
+   "species": "SPECIES_MOLTRES",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11DE",
+    "0x11DF",
+    "0x11E0"
+   ],
+   "kind": 16,
+   "raw": "226f0100920046000000de11df11e01100000a00000000000000000000000010"
+  },
+  {
+   "region": "johto",
+   "index": 5,
+   "map": "Johto_BurnedTower1F",
+   "group": 34,
+   "num": 14,
+   "species": "SPECIES_MOLTRES_2",
+   "level": 60,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11E1",
+    "0x11E2",
+    "0x11E3"
+   ],
+   "kind": 52,
+   "raw": "220e0800d1033c000000e111e211e31100001100000000000000000000000034",
+   "scrapped": "later form of Moltres, which has its own encounter"
+  },
+  {
+   "region": "johto",
+   "index": 6,
+   "map": "Johto_TeamRocketBaseB3F",
+   "group": 35,
+   "num": 23,
+   "species": "SPECIES_MEWTWO",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11E4",
+    "0x11E5",
+    "0x11E6"
+   ],
+   "kind": 192,
+   "raw": "23171200960046000000e411e511e61100010e00000000001c130000000000c0"
+  },
+  {
+   "region": "johto",
+   "index": 7,
+   "map": "Johto_IlexForest",
+   "group": 34,
+   "num": 94,
+   "species": "SPECIES_MEW",
+   "level": 15,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11E7",
+    "0x11E8",
+    "0x11E9"
+   ],
+   "kind": 36,
+   "raw": "225e130097000f000000e711e811e9110000ff00000000000000000000000024"
+  },
+  {
+   "region": "johto",
+   "index": 8,
+   "map": "Johto_OlivineCity",
+   "group": 35,
+   "num": 3,
+   "species": "SPECIES_RAIKOU",
+   "level": 25,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11EA",
+    "0x11EB",
+    "0x11EC"
+   ],
+   "kind": 116,
+   "raw": "23031500f30019000000ea11eb11ec1100000d0000000000a910000000000074"
+  },
+  {
+   "region": "johto",
+   "index": 9,
+   "map": "Johto_EcruteakCity",
+   "group": 34,
+   "num": 36,
+   "species": "SPECIES_ENTEI",
+   "level": 25,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11ED",
+    "0x11EE",
+    "0x11EF"
+   ],
+   "kind": 116,
+   "raw": "22241c00f40019000000ed11ee11ef1100000a0000000000a910000000000074"
+  },
+  {
+   "region": "johto",
+   "index": 10,
+   "map": "Johto_LakeOfRage",
+   "group": 34,
+   "num": 97,
+   "species": "SPECIES_SUICUNE",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11F0",
+    "0x11F1",
+    "0x11F2"
+   ],
+   "kind": 116,
+   "raw": "22611000f5001e000000f011f111f21100000b0000000000a9102d5003000074"
+  },
+  {
+   "region": "johto",
+   "index": 11,
+   "map": "Johto_WhirlIslandLugiaChamber",
+   "group": 35,
+   "num": 115,
+   "species": "SPECIES_LUGIA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11F3",
+    "0x11F4",
+    "0x11F5"
+   ],
+   "kind": 1,
+   "raw": "23730000f90046000000f311f411f51108000e00000000000000000000000001"
+  },
+  {
+   "region": "johto",
+   "index": 12,
+   "map": "Johto_TinTowerRoof",
+   "group": 35,
+   "num": 91,
+   "species": "SPECIES_HO_OH",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11F6",
+    "0x11F7",
+    "0x11F8"
+   ],
+   "kind": 1,
+   "raw": "235b0000fa0046000000f611f711f8110800ff00000000000000000000000001"
+  },
+  {
+   "region": "johto",
+   "index": 13,
+   "map": "Johto_IlexForest",
+   "group": 34,
+   "num": 94,
+   "species": "SPECIES_CELEBI",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11F9",
+    "0x11FA",
+    "0x11FB"
+   ],
+   "kind": 1,
+   "raw": "225e0000fb0046000000f911fa11fb110800ff00000000000000000000000001"
+  },
+  {
+   "region": "johto",
+   "index": 14,
+   "map": "Johto_RuinsOfAlphChambers",
+   "group": 35,
+   "num": 62,
+   "species": "SPECIES_REGIROCK",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11FC",
+    "0x11FD",
+    "0x11FE"
+   ],
+   "kind": 8,
+   "raw": "233e1200790132000000fc11fd11fe1108000500000000007610000000000008"
+  },
+  {
+   "region": "johto",
+   "index": 15,
+   "map": "Johto_RuinsOfAlphChambers",
+   "group": 35,
+   "num": 62,
+   "species": "SPECIES_REGICE",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x11FF",
+    "0x1200",
+    "0x1201"
+   ],
+   "kind": 8,
+   "raw": "233e13007a0132000000ff110012011208000f00000000007810000000000008"
+  },
+  {
+   "region": "johto",
+   "index": 16,
+   "map": "Johto_RuinsOfAlphChambers",
+   "group": 35,
+   "num": 62,
+   "species": "SPECIES_REGISTEEL",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1202",
+    "0x1203",
+    "0x1204"
+   ],
+   "kind": 8,
+   "raw": "233e14007b013200000002120312041208000800000000007910000000000008"
+  },
+  {
+   "region": "johto",
+   "index": 17,
+   "map": "Johto_Route27",
+   "group": 35,
+   "num": 29,
+   "species": "SPECIES_LATIAS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1205",
+    "0x1206",
+    "0x1207"
+   ],
+   "kind": 84,
+   "raw": "231d0d007c012d0000000512061207120800ff00000000000000000000000054"
+  },
+  {
+   "region": "johto",
+   "index": 18,
+   "map": "Johto_Route26South",
+   "group": 35,
+   "num": 25,
+   "species": "SPECIES_LATIOS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1208",
+    "0x1209",
+    "0x120A"
+   ],
+   "kind": 84,
+   "raw": "231906007d012d000000081209120a120800ff00000000000000000000000054"
+  },
+  {
+   "region": "johto",
+   "index": 19,
+   "map": "Johto_EmbeddedTower",
+   "group": 34,
+   "num": 45,
+   "species": "SPECIES_KYOGRE",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x120B",
+    "0x120C",
+    "0x120D"
+   ],
+   "kind": 104,
+   "raw": "222d01007e01460000000b120c120d120801ff00000000001213000000000068"
+  },
+  {
+   "region": "johto",
+   "index": 20,
+   "map": "Johto_EmbeddedTower",
+   "group": 34,
+   "num": 45,
+   "species": "SPECIES_GROUDON",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x120E",
+    "0x120F",
+    "0x1210"
+   ],
+   "kind": 104,
+   "raw": "222d02007f01460000000e120f1210120801ff00000000001113000000000068"
+  },
+  {
+   "region": "johto",
+   "index": 21,
+   "map": "Johto_EmbeddedTower",
+   "group": 34,
+   "num": 45,
+   "species": "SPECIES_RAYQUAZA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1211",
+    "0x1212",
+    "0x1213"
+   ],
+   "kind": 104,
+   "raw": "222d03008001460000001112121213120801ff00000000000000000000000368"
+  },
+  {
+   "region": "johto",
+   "index": 22,
+   "map": "Johto_SilverCaveMountainside",
+   "group": 34,
+   "num": 115,
+   "species": "SPECIES_JIRACHI",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1214",
+    "0x1215",
+    "0x1216"
+   ],
+   "kind": 108,
+   "raw": "227301008101460000001412151216120001ff0000000000000000000000006c"
+  },
+  {
+   "region": "johto",
+   "index": 23,
+   "map": "Johto_SilverCaveRoom3",
+   "group": 34,
+   "num": 114,
+   "species": "SPECIES_DEOXYS",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1217",
+    "0x1218",
+    "0x1219"
+   ],
+   "kind": 0,
+   "raw": "227202008201460000001712181219120001ff00000000002414000000000000"
+  },
+  {
+   "region": "johto",
+   "index": 24,
+   "map": "Johto_RuinsOfAlphOutside",
+   "group": 35,
+   "num": 61,
+   "species": "SPECIES_UXIE",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x121A",
+    "0x121B",
+    "0x121C"
+   ],
+   "kind": 44,
+   "raw": "233d1400e001320000001a121b121c1208000e0000000000000000000000002c"
+  },
+  {
+   "region": "johto",
+   "index": 25,
+   "map": "Johto_LakeOfRage",
+   "group": 34,
+   "num": 97,
+   "species": "SPECIES_MESPRIT",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x121D",
+    "0x121E",
+    "0x121F"
+   ],
+   "kind": 44,
+   "raw": "22611200e101320000001d121e121f1208000e0000000000000000000000002c"
+  },
+  {
+   "region": "johto",
+   "index": 26,
+   "map": "Johto_DragonsDenB1F",
+   "group": 34,
+   "num": 33,
+   "species": "SPECIES_AZELF",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1220",
+    "0x1221",
+    "0x1222"
+   ],
+   "kind": 44,
+   "raw": "22211600e2013200000020122112221208000e0000000000000000000000002c"
+  },
+  {
+   "region": "johto",
+   "index": 27,
+   "map": "Johto_TohjoFalls",
+   "group": 35,
+   "num": 93,
+   "species": "SPECIES_DIALGA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1223",
+    "0x1224",
+    "0x1225"
+   ],
+   "kind": 48,
+   "raw": "235d0300e3014600000023122412251208010800000000000000000000000030"
+  },
+  {
+   "region": "johto",
+   "index": 28,
+   "map": "Johto_TohjoFalls",
+   "group": 35,
+   "num": 93,
+   "species": "SPECIES_PALKIA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1226",
+    "0x1227",
+    "0x1228"
+   ],
+   "kind": 48,
+   "raw": "235d0200e4014600000026122712281208010b00000000000000000000000030"
+  },
+  {
+   "region": "johto",
+   "index": 29,
+   "map": "Johto_SilverCaveFireRoom",
+   "group": 34,
+   "num": 111,
+   "species": "SPECIES_HEATRAN",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1229",
+    "0x122A",
+    "0x122B"
+   ],
+   "kind": 136,
+   "raw": "226f0200e5014600000029122a122b120000ff00000000000000000000000088"
+  },
+  {
+   "region": "johto",
+   "index": 30,
+   "map": "Johto_RuinsOfAlphInnerChamber",
+   "group": 35,
+   "num": 59,
+   "species": "SPECIES_REGIGIGAS",
+   "level": 55,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x122C",
+    "0x122D",
+    "0x122E"
+   ],
+   "kind": 12,
+   "raw": "233b0800e601370000002c122d122e120800ff0000000000000000000000010c"
+  },
+  {
+   "region": "johto",
+   "index": 31,
+   "map": "Johto_DarkCaveVioletEntrance",
+   "group": 34,
+   "num": 32,
+   "species": "SPECIES_GIRATINA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x122F",
+    "0x1230",
+    "0x1231"
+   ],
+   "kind": 132,
+   "raw": "22200900e701460000002f123012311200000700000000000000000000000084"
+  },
+  {
+   "region": "johto",
+   "index": 32,
+   "map": "Johto_SafariZone_Peak",
+   "group": 35,
+   "num": 73,
+   "species": "SPECIES_CRESSELIA",
+   "level": 35,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1232",
+    "0x1233",
+    "0x1234"
+   ],
+   "kind": 140,
+   "raw": "23490100e801230000003212331234120000ff0000000000000000000000008c"
+  },
+  {
+   "region": "johto",
+   "index": 33,
+   "map": "Johto_WhirlIslandTunnelEast",
+   "group": 35,
+   "num": 113,
+   "species": "SPECIES_MANAPHY",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1235",
+    "0x1236",
+    "0x1237"
+   ],
+   "kind": 112,
+   "raw": "23710100ea012d0000003512361237120000ff00000000000000000000000070"
+  },
+  {
+   "region": "johto",
+   "index": 34,
+   "map": "Johto_DarkCaveBlackthornEntrance",
+   "group": 34,
+   "num": 31,
+   "species": "SPECIES_DARKRAI",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1238",
+    "0x1239",
+    "0x123A"
+   ],
+   "kind": 144,
+   "raw": "221f0600eb0132000000381239123a120000ff00000000000000000000000090"
+  },
+  {
+   "region": "johto",
+   "index": 35,
+   "map": "Johto_NationalPark",
+   "group": 34,
+   "num": 122,
+   "species": "SPECIES_SHAYMIN",
+   "level": 20,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x123B",
+    "0x123C",
+    "0x123D"
+   ],
+   "kind": 148,
+   "raw": "227a2300ec01140000003b123c123d120000ff00000000000000000000000094"
+  },
+  {
+   "region": "johto",
+   "index": 36,
+   "map": "Johto_RuinsOfAlphArceusChamber",
+   "group": 35,
+   "num": 116,
+   "species": "SPECIES_ARCEUS",
+   "level": 100,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x123E",
+    "0x123F",
+    "0x1240"
+   ],
+   "kind": 2,
+   "raw": "23740100ed01640000003e123f1240120801ff00000000000000000000000002"
+  },
+  {
+   "region": "johto",
+   "index": 37,
+   "map": "Johto_OlivineLighthouse",
+   "group": 35,
+   "num": 9,
+   "species": "SPECIES_VICTINI",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1241",
+    "0x1242",
+    "0x1243"
+   ],
+   "kind": 188,
+   "raw": "23091400ee011e00000041124212431200000a000000000000000000000000bc",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 38,
+   "map": "Johto_MountMortar1FOutside",
+   "group": 34,
+   "num": 107,
+   "species": "SPECIES_COBALION",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1244",
+    "0x1245",
+    "0x1246"
+   ],
+   "kind": 120,
+   "raw": "226b03007e021e00000044124512461200000800000000000000000000000078",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 39,
+   "map": "Johto_VictoryRoad2F",
+   "group": 35,
+   "num": 100,
+   "species": "SPECIES_TERRAKION",
+   "level": 40,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1247",
+    "0x1248",
+    "0x1249"
+   ],
+   "kind": 120,
+   "raw": "236406007f022800000047124812491200000500000000000000000000000078",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 40,
+   "map": "Johto_Route44",
+   "group": 35,
+   "num": 54,
+   "species": "SPECIES_VIRIZION",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x124A",
+    "0x124B",
+    "0x124C"
+   ],
+   "kind": 120,
+   "raw": "23360c0080021e0000004a124b124c1200000c00000000000000000000000078",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 41,
+   "map": "Johto_Route47",
+   "group": 35,
+   "num": 57,
+   "species": "SPECIES_TORNADUS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x124D",
+    "0x124E",
+    "0x124F"
+   ],
+   "kind": 80,
+   "raw": "23390d0081022d0000004d124e124f1200000200000000000000000000000050",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 42,
+   "map": "Johto_Route41",
+   "group": 35,
+   "num": 51,
+   "species": "SPECIES_THUNDURUS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1250",
+    "0x1251",
+    "0x1252"
+   ],
+   "kind": 80,
+   "raw": "23332d0082022d00000050125112521200000d00000000000000000000000050",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 43,
+   "map": "Johto_DragonShrine",
+   "group": 34,
+   "num": 35,
+   "species": "SPECIES_RESHIRAM",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1253",
+    "0x1254",
+    "0x1255"
+   ],
+   "kind": 64,
+   "raw": "222305008302460000005312541255120001ff00000000000000000000000040",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 44,
+   "map": "Johto_DragonShrine",
+   "group": 34,
+   "num": 35,
+   "species": "SPECIES_ZEKROM",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1256",
+    "0x1257",
+    "0x1258"
+   ],
+   "kind": 64,
+   "raw": "222306008402460000005612571258120001ff00000000000000000000000040",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 45,
+   "map": "Johto_Route48",
+   "group": 35,
+   "num": 58,
+   "species": "SPECIES_LANDORUS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1259",
+    "0x125A",
+    "0x125B"
+   ],
+   "kind": 80,
+   "raw": "233a010085022d00000059125a125b1200000400000000000000000000000050",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 46,
+   "map": "Johto_IcePathB3F",
+   "group": 34,
+   "num": 93,
+   "species": "SPECIES_KYUREM",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x125C",
+    "0x125D",
+    "0x125E"
+   ],
+   "kind": 152,
+   "raw": "225d0c008602460000005c125d125e120000ff00000000000000000000000098",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 47,
+   "map": "Johto_MountMortarB1F",
+   "group": 34,
+   "num": 109,
+   "species": "SPECIES_KELDEO",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x125F",
+    "0x1260",
+    "0x1261"
+   ],
+   "kind": 124,
+   "raw": "226d09008702320000005f126012611200000b0000000000000000000000007c",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 48,
+   "map": "Johto_DanceTheater",
+   "group": 34,
+   "num": 44,
+   "species": "SPECIES_MELOETTA",
+   "level": 55,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1262",
+    "0x1263",
+    "0x1264"
+   ],
+   "kind": 184,
+   "raw": "222c0c008802370000006212631264120000ff000000000000001a50080000b8",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 49,
+   "map": "Johto_RuinsOfAlphResearchCenter",
+   "group": 35,
+   "num": 60,
+   "species": "SPECIES_GENESECT",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1265",
+    "0x1266",
+    "0x1267"
+   ],
+   "kind": 4,
+   "raw": "233c07008902320000006512661267120800ff00000000000000000000000004",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "johto",
+   "index": 50,
+   "map": "Johto_IlexForest",
+   "group": 34,
+   "num": 94,
+   "species": "SPECIES_XERNEAS",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1268",
+    "0x1269",
+    "0x126A"
+   ],
+   "kind": 156,
+   "raw": "225e1400cc0246000000681269126a120001ff0000000000000000000000009c",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 51,
+   "map": "Johto_BurnedTowerB1F",
+   "group": 34,
+   "num": 15,
+   "species": "SPECIES_YVELTAL",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x126B",
+    "0x126C",
+    "0x126D"
+   ],
+   "kind": 156,
+   "raw": "220f0900cd02460000006b126c126d120001ff0000000000000000000000009c",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 52,
+   "map": "Johto_UnionCaveB2F",
+   "group": 35,
+   "num": 98,
+   "species": "SPECIES_ZYGARDE_4",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x126E",
+    "0x126F",
+    "0x1270"
+   ],
+   "kind": 156,
+   "raw": "236207007304460000006e126f1270120000ff0000000000000000000000009c",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 53,
+   "map": "Johto_CliffCave",
+   "group": 34,
+   "num": 29,
+   "species": "SPECIES_DIANCIE",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1271",
+    "0x1272",
+    "0x1273"
+   ],
+   "kind": 196,
+   "raw": "221d0c00cf021e0000007112721273120000ff000000000000000000000000c4",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 54,
+   "map": "Johto_EmbeddedTower",
+   "group": 34,
+   "num": 45,
+   "species": "SPECIES_HOOPA_2",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1274",
+    "0x1275",
+    "0x1276"
+   ],
+   "kind": 200,
+   "raw": "222d04007504460000007412751276120000ff000000bb0200000000000000c8",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 55,
+   "map": "Johto_MountMortarB1F",
+   "group": 34,
+   "num": 109,
+   "species": "SPECIES_VOLCANION",
+   "level": 30,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1277",
+    "0x1278",
+    "0x1279"
+   ],
+   "kind": 204,
+   "raw": "226d0800d1021e0000007712781279120000ff000000000000000000000000cc",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "johto",
+   "index": 56,
+   "map": "Johto_TeamRocketBaseB3F",
+   "group": 35,
+   "num": 23,
+   "species": "SPECIES_TYPE_NULL",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x127A",
+    "0x127B",
+    "0x127C"
+   ],
+   "kind": 20,
+   "raw": "231713000403320000007a127b127c120800ff00000000000000000000000014",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 57,
+   "map": "Johto_GoldenrodCity",
+   "group": 34,
+   "num": 59,
+   "species": "SPECIES_TAPU_KOKO",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x127D",
+    "0x127E",
+    "0x127F"
+   ],
+   "kind": 40,
+   "raw": "223b1a001103320000007d127e127f1208000d00000000000000000000000028",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 58,
+   "map": "Johto_EcruteakCity",
+   "group": 34,
+   "num": 36,
+   "species": "SPECIES_TAPU_LELE",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1280",
+    "0x1281",
+    "0x1282"
+   ],
+   "kind": 40,
+   "raw": "22241b0012033200000080128112821208000e00000000000000000000000028",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 59,
+   "map": "Johto_AzaleaTown",
+   "group": 34,
+   "num": 0,
+   "species": "SPECIES_TAPU_BULU",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1283",
+    "0x1284",
+    "0x1285"
+   ],
+   "kind": 40,
+   "raw": "2200090013033200000083128412851208000c00000000000000000000000028",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 60,
+   "map": "Johto_CianwoodCity",
+   "group": 34,
+   "num": 22,
+   "species": "SPECIES_TAPU_FINI",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1286",
+    "0x1287",
+    "0x1288"
+   ],
+   "kind": 40,
+   "raw": "22160e0014033200000086128712881208000b00000000000000000000000028",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 61,
+   "map": "Johto_SilverCaveItemRoom",
+   "group": 34,
+   "num": 110,
+   "species": "SPECIES_COSMOG",
+   "level": 20,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1289",
+    "0x128A",
+    "0x128B"
+   ],
+   "kind": 88,
+   "raw": "226e020015031400000089128a128b1200010e00000000000000000000000058",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 62,
+   "map": "Johto_WhirlIslandTunnelEast",
+   "group": 35,
+   "num": 113,
+   "species": "SPECIES_NIHILEGO",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x128C",
+    "0x128D",
+    "0x128E"
+   ],
+   "kind": 96,
+   "raw": "237102001903460000008c128d128e120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 63,
+   "map": "Johto_SafariZone_Forest",
+   "group": 35,
+   "num": 74,
+   "species": "SPECIES_BUZZWOLE",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x128F",
+    "0x1290",
+    "0x1291"
+   ],
+   "kind": 96,
+   "raw": "234a01001a03460000008f12901291120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 64,
+   "map": "Johto_SafariZone_Desert",
+   "group": 35,
+   "num": 71,
+   "species": "SPECIES_PHEROMOSA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1292",
+    "0x1293",
+    "0x1294"
+   ],
+   "kind": 96,
+   "raw": "234701001b03460000009212931294120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 65,
+   "map": "Johto_TeamRocketBaseB2F",
+   "group": 35,
+   "num": 22,
+   "species": "SPECIES_XURKITREE",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1295",
+    "0x1296",
+    "0x1297"
+   ],
+   "kind": 96,
+   "raw": "231611001c03460000009512961297120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 66,
+   "map": "Johto_TinTower8F",
+   "group": 35,
+   "num": 90,
+   "species": "SPECIES_CELESTEELA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1298",
+    "0x1299",
+    "0x129A"
+   ],
+   "kind": 96,
+   "raw": "235a04001d0346000000981299129a120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 67,
+   "map": "Johto_SproutTower3F",
+   "group": 35,
+   "num": 81,
+   "species": "SPECIES_KARTANA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x129B",
+    "0x129C",
+    "0x129D"
+   ],
+   "kind": 96,
+   "raw": "235109001e03460000009b129c129d120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 68,
+   "map": "Johto_GoldenrodUndergroundWarehouse",
+   "group": 34,
+   "num": 86,
+   "species": "SPECIES_GUZZLORD",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x129E",
+    "0x129F",
+    "0x12A0"
+   ],
+   "kind": 96,
+   "raw": "225608001f03460000009e129f12a0120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 69,
+   "map": "Johto_SilverCaveItemRoom",
+   "group": 34,
+   "num": 110,
+   "species": "SPECIES_NECROZMA",
+   "level": 80,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12A1",
+    "0x12A2",
+    "0x12A3"
+   ],
+   "kind": 100,
+   "raw": "226e0300200350000000a112a212a3120000ff00000000000000000000000064",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 70,
+   "map": "Johto_GoldenrodUndergroundSwitchRoomEntrances",
+   "group": 34,
+   "num": 87,
+   "species": "SPECIES_MAGEARNA_2",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12A4",
+    "0x12A5",
+    "0x12A6"
+   ],
+   "kind": 216,
+   "raw": "22570b009f0446000000a412a512a612000108000000000000000000000000d8",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 71,
+   "map": "Johto_SproutTower1F",
+   "group": 35,
+   "num": 79,
+   "species": "SPECIES_MARSHADOW",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12A7",
+    "0x12A8",
+    "0x12A9"
+   ],
+   "kind": 212,
+   "raw": "234f0800220332000000a712a812a912080007000000000000000000000000d4",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 72,
+   "map": "Johto_ElmsLab",
+   "group": 35,
+   "num": 0,
+   "species": "SPECIES_POIPOLE",
+   "level": 5,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12AA",
+    "0x12AB",
+    "0x12AC"
+   ],
+   "kind": 92,
+   "raw": "23000900230305000000aa12ab12ac120000030000000000000000000000005c",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 73,
+   "map": "Johto_VictoryRoad1F",
+   "group": 35,
+   "num": 101,
+   "species": "SPECIES_STAKATAKA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12AD",
+    "0x12AE",
+    "0x12AF"
+   ],
+   "kind": 96,
+   "raw": "23650700250346000000ad12ae12af120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 74,
+   "map": "Johto_Route35",
+   "group": 35,
+   "num": 43,
+   "species": "SPECIES_BLACEPHALON",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12B0",
+    "0x12B1",
+    "0x12B2"
+   ],
+   "kind": 96,
+   "raw": "232b1000260346000000b012b112b2120000ff00000000000000000000000060",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 75,
+   "map": "Johto_Route33",
+   "group": 35,
+   "num": 40,
+   "species": "SPECIES_ZERAORA",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12B3",
+    "0x12B4",
+    "0x12B5"
+   ],
+   "kind": 220,
+   "raw": "23280400270332000000b312b412b51208000d000000000000000000000000dc",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 76,
+   "map": "Johto_GoldenrodBikeShop",
+   "group": 34,
+   "num": 60,
+   "species": "SPECIES_MELTAN",
+   "level": 20,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12B6",
+    "0x12B7",
+    "0x12B8"
+   ],
+   "kind": 208,
+   "raw": "223c0300280314000000b612b712b812000008000000000000000000000000d0",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "johto",
+   "index": 77,
+   "map": "Johto_IndigoPlateau",
+   "group": 34,
+   "num": 95,
+   "species": "SPECIES_ZACIAN",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12B9",
+    "0x12BA",
+    "0x12BB"
+   ],
+   "kind": 60,
+   "raw": "225f0100780346000000b912ba12bb120001120000000000000000000000003c",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 78,
+   "map": "Johto_IndigoPlateau",
+   "group": 34,
+   "num": 95,
+   "species": "SPECIES_ZAMAZENTA",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12BC",
+    "0x12BD",
+    "0x12BE"
+   ],
+   "kind": 60,
+   "raw": "225f0200790346000000bc12bd12be120001010000000000000000000000003c",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 79,
+   "map": "Johto_IndigoPlateau",
+   "group": 34,
+   "num": 95,
+   "species": "SPECIES_ETERNATUS",
+   "level": 80,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12BF",
+    "0x12C0",
+    "0x12C1"
+   ],
+   "kind": 160,
+   "raw": "225f03007a0350000000bf12c012c1120000ff000000000000000000000000a0",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 80,
+   "map": "Johto_MountMortarB1F",
+   "group": 34,
+   "num": 109,
+   "species": "SPECIES_KUBFU",
+   "level": 40,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12C2",
+    "0x12C3",
+    "0x12C4"
+   ],
+   "kind": 164,
+   "raw": "226d0a007b0328000000c212c312c4120000010000000000bb100000000000a4",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 81,
+   "map": "Johto_IlexForest",
+   "group": 34,
+   "num": 94,
+   "species": "SPECIES_ZARUDE_2",
+   "level": 60,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12C5",
+    "0x12C6",
+    "0x12C7"
+   ],
+   "kind": 32,
+   "raw": "225e1500b4043c000000c512c612c7120000ff00000000000000000000000020",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 82,
+   "map": "Johto_RuinsOfAlphChambers",
+   "group": 35,
+   "num": 62,
+   "species": "SPECIES_REGIELEKI",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12C8",
+    "0x12C9",
+    "0x12CA"
+   ],
+   "kind": 8,
+   "raw": "233e15007e0332000000c812c912ca1208000d00000000007710000000000008",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 83,
+   "map": "Johto_RuinsOfAlphChambers",
+   "group": 35,
+   "num": 62,
+   "species": "SPECIES_REGIDRAGO",
+   "level": 50,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12CB",
+    "0x12CC",
+    "0x12CD"
+   ],
+   "kind": 8,
+   "raw": "233e16007f0332000000cb12cc12cd1208001000000000007710000000000008",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 84,
+   "map": "Johto_IcePathB1F",
+   "group": 34,
+   "num": 90,
+   "species": "SPECIES_GLASTRIER",
+   "level": 40,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12CE",
+    "0x12CF",
+    "0x12D0"
+   ],
+   "kind": 168,
+   "raw": "225a0400800328000000ce12cf12d01200000f000000000000000000000000a8",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 85,
+   "map": "Johto_SproutTower2F",
+   "group": 35,
+   "num": 80,
+   "species": "SPECIES_SPECTRIER",
+   "level": 40,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12D1",
+    "0x12D2",
+    "0x12D3"
+   ],
+   "kind": 172,
+   "raw": "23500500810328000000d112d212d312070007000000000000000000000000ac",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 86,
+   "map": "Johto_SilverCaveSnowySlope",
+   "group": 34,
+   "num": 118,
+   "species": "SPECIES_CALYREX",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12D4",
+    "0x12D5",
+    "0x12D6"
+   ],
+   "kind": 176,
+   "raw": "22760300820346000000d412d512d6120000ff000000000000000000000000b0",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "johto",
+   "index": 87,
+   "map": "Johto_NationalPark",
+   "group": 34,
+   "num": 122,
+   "species": "SPECIES_ENAMORUS",
+   "level": 45,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12D7",
+    "0x12D8",
+    "0x12D9"
+   ],
+   "kind": 80,
+   "raw": "227a2400bd042d000000d712d812d91200001200000000000000000000000050",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 88,
+   "map": "Johto_EcruteakCityNorth",
+   "group": 34,
+   "num": 6,
+   "species": "SPECIES_WO_CHIEN",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12DA",
+    "0x12DB",
+    "0x12DC"
+   ],
+   "kind": 56,
+   "raw": "22061300320546000000da12db12dc1200010c00000000000000000000000038",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 89,
+   "map": "Johto_IcePathB1F",
+   "group": 34,
+   "num": 90,
+   "species": "SPECIES_CHIEN_PAO",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12DD",
+    "0x12DE",
+    "0x12DF"
+   ],
+   "kind": 56,
+   "raw": "225a0300330546000000dd12de12df1200010f00000000000000000000000038",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 90,
+   "map": "Johto_MountMortar1FInside",
+   "group": 34,
+   "num": 106,
+   "species": "SPECIES_TING_LU",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12E0",
+    "0x12E1",
+    "0x12E2"
+   ],
+   "kind": 56,
+   "raw": "226a0b00340546000000e012e112e21200010400000000000000000000000038",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 91,
+   "map": "Johto_BurnedTowerB1F",
+   "group": 34,
+   "num": 15,
+   "species": "SPECIES_CHI_YU",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12E3",
+    "0x12E4",
+    "0x12E5"
+   ],
+   "kind": 56,
+   "raw": "220f0800350546000000e312e412e51200010a00000000000000000000000038",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 92,
+   "map": "Johto_RuinsOfAlphOutside",
+   "group": 35,
+   "num": 61,
+   "species": "SPECIES_KORAIDON",
+   "level": 80,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12E6",
+    "0x12E7",
+    "0x12E8"
+   ],
+   "kind": 24,
+   "raw": "233d1300380550000000e612e712e8120001ff00000000001913000000000018",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 93,
+   "map": "Johto_GoldenrodMagnetTrainStation",
+   "group": 34,
+   "num": 84,
+   "species": "SPECIES_MIRAIDON",
+   "level": 80,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12E9",
+    "0x12EA",
+    "0x12EB"
+   ],
+   "kind": 28,
+   "raw": "22540a00390550000000e912ea12eb120001ff0000000000000077500600001c",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 94,
+   "map": "Johto_LakeOfRage",
+   "group": 34,
+   "num": 97,
+   "species": "SPECIES_WALKING_WAKE",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12EC",
+    "0x12ED",
+    "0x12EE"
+   ],
+   "kind": 116,
+   "raw": "226111003a0546000000ec12ed12ee1200000b00000000001913000000000074",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 95,
+   "map": "Johto_Route44",
+   "group": 35,
+   "num": 54,
+   "species": "SPECIES_IRON_LEAVES",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12EF",
+    "0x12F0",
+    "0x12F1"
+   ],
+   "kind": 128,
+   "raw": "23360d003b0546000000ef12f012f11200000c00000000000000775006000080",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 96,
+   "map": "Johto_Route45",
+   "group": 35,
+   "num": 55,
+   "species": "SPECIES_OKIDOGI",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12F2",
+    "0x12F3",
+    "0x12F4"
+   ],
+   "kind": 72,
+   "raw": "233711004d0546000000f212f312f41200000100000000000000000000000048",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 97,
+   "map": "Johto_Route35",
+   "group": 35,
+   "num": 43,
+   "species": "SPECIES_MUNKIDORI",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12F5",
+    "0x12F6",
+    "0x12F7"
+   ],
+   "kind": 72,
+   "raw": "232b0f004e0546000000f512f612f71200000e00000000000000000000000048",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 98,
+   "map": "Johto_Route47",
+   "group": 35,
+   "num": 57,
+   "species": "SPECIES_FEZANDIPITI",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12F8",
+    "0x12F9",
+    "0x12FA"
+   ],
+   "kind": 72,
+   "raw": "23390e004f0546000000f812f912fa1200001200000000000000000000000048",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 99,
+   "map": "Johto_Route29",
+   "group": 35,
+   "num": 33,
+   "species": "SPECIES_OGERPON",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12FB",
+    "0x12FC",
+    "0x12FD"
+   ],
+   "kind": 68,
+   "raw": "23210a00500546000000fb12fc12fd120001ff00000000000000000000000044",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 100,
+   "map": "Johto_EcruteakCity",
+   "group": 34,
+   "num": 36,
+   "species": "SPECIES_GOUGING_FIRE",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x12FE",
+    "0x12FF",
+    "0x1300"
+   ],
+   "kind": 116,
+   "raw": "22241d005d0546000000fe12ff12001300000a00000000001913000000000074",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 101,
+   "map": "Johto_OlivineCity",
+   "group": 35,
+   "num": 3,
+   "species": "SPECIES_RAGING_BOLT",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1301",
+    "0x1302",
+    "0x1303"
+   ],
+   "kind": 116,
+   "raw": "230316005e054600000001130213031300000d00000000001913000000000074",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 102,
+   "map": "Johto_VictoryRoad2F",
+   "group": 35,
+   "num": 100,
+   "species": "SPECIES_IRON_BOULDER",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1304",
+    "0x1305",
+    "0x1306"
+   ],
+   "kind": 128,
+   "raw": "236407005f054600000004130513061300000500000000000000775006000080",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 103,
+   "map": "Johto_MountMortar1FOutside",
+   "group": 34,
+   "num": 107,
+   "species": "SPECIES_IRON_CROWN",
+   "level": 70,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x1307",
+    "0x1308",
+    "0x1309"
+   ],
+   "kind": 128,
+   "raw": "226b040060054600000007130813091300000800000000000000775006000080",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 104,
+   "map": "Johto_UnionCaveB1F",
+   "group": 35,
+   "num": 97,
+   "species": "SPECIES_TERAPAGOS",
+   "level": 25,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x130A",
+    "0x130B",
+    "0x130C"
+   ],
+   "kind": 180,
+   "raw": "236109006105190000000a130b130c130000ff000000000000000000000000b4",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "johto",
+   "index": 105,
+   "map": "Johto_MahoganyMart1F",
+   "group": 34,
+   "num": 104,
+   "species": "SPECIES_PECHARUNT",
+   "level": 75,
+   "item": "ITEM_NONE",
+   "flags": [
+    "0x130D",
+    "0x130E",
+    "0x130F"
+   ],
+   "kind": 76,
+   "raw": "2268050062054b0000000d130e130f130000ff0000000000000000000000004c",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 0,
+   "map": "Kanto_SeafoamIslands_B4F",
+   "group": 36,
+   "num": 87,
+   "species": "SPECIES_ARTICUNO",
+   "flags": [
+    "0x2133",
+    "0x2330",
+    "0x2178",
+    "0x0"
+   ],
+   "byte_0xC": 0,
+   "raw": "90003321302378210000245700000000"
+  },
+  {
+   "region": "kanto",
+   "index": 1,
+   "map": "Kanto_PowerPlant",
+   "group": 36,
+   "num": 95,
+   "species": "SPECIES_ZAPDOS",
+   "flags": [
+    "0x213B",
+    "0x2331",
+    "0x21DA",
+    "0x0"
+   ],
+   "byte_0xC": 0,
+   "raw": "91003b213123da210000245f00000000"
+  },
+  {
+   "region": "kanto",
+   "index": 2,
+   "map": "Kanto_MtEmber_Summit",
+   "group": 36,
+   "num": 101,
+   "species": "SPECIES_MOLTRES",
+   "flags": [
+    "0x2138",
+    "0x2332",
+    "0x219F",
+    "0x0"
+   ],
+   "byte_0xC": 0,
+   "raw": "9200382132239f210000246500000000"
+  },
+  {
+   "region": "kanto",
+   "index": 3,
+   "map": "Kanto_CeruleanCave_B1F",
+   "group": 36,
+   "num": 74,
+   "species": "SPECIES_MEWTWO",
+   "flags": [
+    "0x2137",
+    "0x2333",
+    "0x219D",
+    "0x0"
+   ],
+   "byte_0xC": 0,
+   "raw": "9600372133239d210000244a00000000"
+  },
+  {
+   "region": "kanto",
+   "index": 4,
+   "map": "Kanto_NavelRock_Base",
+   "group": 37,
+   "num": 35,
+   "species": "SPECIES_LUGIA",
+   "flags": [
+    "0x2136",
+    "0x2334",
+    "0x219C",
+    "0x21DE"
+   ],
+   "byte_0xC": 0,
+   "raw": "f900362134239c21de21252300000000"
+  },
+  {
+   "region": "kanto",
+   "index": 5,
+   "map": "Kanto_NavelRock_Summit",
+   "group": 37,
+   "num": 34,
+   "species": "SPECIES_HO_OH",
+   "flags": [
+    "0x2135",
+    "0x2335",
+    "0x218D",
+    "0x21DB"
+   ],
+   "byte_0xC": 0,
+   "raw": "fa00352135238d21db21252200000000"
+  },
+  {
+   "region": "kanto",
+   "index": 6,
+   "map": "Kanto_BirthIsland_Exterior",
+   "group": 37,
+   "num": 53,
+   "species": "SPECIES_DEOXYS",
+   "flags": [
+    "0x2134",
+    "0x2336",
+    "0x2184",
+    "0x2126"
+   ],
+   "byte_0xC": 0,
+   "raw": "82013421362384212621253500000000"
+  },
+  {
+   "region": "kanto",
+   "index": 7,
+   "map": "Kanto_Route10",
+   "group": 37,
+   "num": 85,
+   "species": "SPECIES_RAIKOU",
+   "flags": [
+    "0x2338",
+    "0x2339",
+    "0x2337",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "f300382339233723000025550b280d00"
+  },
+  {
+   "region": "kanto",
+   "index": 8,
+   "map": "Kanto_MtEmber_Exterior",
+   "group": 36,
+   "num": 97,
+   "species": "SPECIES_ENTEI",
+   "flags": [
+    "0x233B",
+    "0x233C",
+    "0x233A",
+    "0x0"
+   ],
+   "byte_0xC": 21,
+   "raw": "f4003b233c233a230000246115320a00"
+  },
+  {
+   "region": "kanto",
+   "index": 9,
+   "map": "Kanto_Route25",
+   "group": 37,
+   "num": 101,
+   "species": "SPECIES_SUICUNE",
+   "flags": [
+    "0x233E",
+    "0x233F",
+    "0x233D",
+    "0x0"
+   ],
+   "byte_0xC": 14,
+   "raw": "f5003e233f233d23000025650e280b00"
+  },
+  {
+   "region": "kanto",
+   "index": 10,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGIROCK",
+   "flags": [
+    "0x2341",
+    "0x2342",
+    "0x2340",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "790141234223402300002518013c0500"
+  },
+  {
+   "region": "kanto",
+   "index": 11,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGICE",
+   "flags": [
+    "0x2344",
+    "0x2345",
+    "0x2343",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "7a0144234523432300002518023c0f00"
+  },
+  {
+   "region": "kanto",
+   "index": 12,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGISTEEL",
+   "flags": [
+    "0x2347",
+    "0x2348",
+    "0x2346",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "7b0147234823462300002518033c0800"
+  },
+  {
+   "region": "kanto",
+   "index": 13,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGIELEKI",
+   "flags": [
+    "0x234A",
+    "0x234B",
+    "0x2349",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "7e034a234b23492300002518043c0d00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 14,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGIDRAGO",
+   "flags": [
+    "0x234D",
+    "0x234E",
+    "0x234C",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "7f034d234e234c2300002518053c1000",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 15,
+   "map": "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "group": 37,
+   "num": 24,
+   "species": "SPECIES_REGIGIGAS",
+   "flags": [
+    "0x2350",
+    "0x2351",
+    "0x234F",
+    "0x0"
+   ],
+   "byte_0xC": 6,
+   "raw": "e601502351234f230000251806460000"
+  },
+  {
+   "region": "kanto",
+   "index": 16,
+   "map": "Kanto_SevenIsland_SevaultCanyon",
+   "group": 37,
+   "num": 117,
+   "species": "SPECIES_GOUGING_FIRE",
+   "flags": [
+    "0x2353",
+    "0x2354",
+    "0x2352",
+    "0x0"
+   ],
+   "byte_0xC": 21,
+   "raw": "5d0553235423522300002575153c0a00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 17,
+   "map": "Kanto_SixIsland_RuinValley",
+   "group": 37,
+   "num": 114,
+   "species": "SPECIES_RAGING_BOLT",
+   "flags": [
+    "0x2356",
+    "0x2357",
+    "0x2355",
+    "0x0"
+   ],
+   "byte_0xC": 18,
+   "raw": "5e0556235723552300002572123c0d00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 18,
+   "map": "Kanto_TwoIsland_CapeBrink",
+   "group": 37,
+   "num": 104,
+   "species": "SPECIES_WALKING_WAKE",
+   "flags": [
+    "0x2359",
+    "0x235A",
+    "0x2358",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "3a0559235a2358230000256801320b00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 19,
+   "map": "Kanto_Route17",
+   "group": 37,
+   "num": 92,
+   "species": "SPECIES_KORAIDON",
+   "flags": [
+    "0x235C",
+    "0x235D",
+    "0x235B",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "38055c235d235b230000255c0b500100",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 20,
+   "map": "Kanto_Route17",
+   "group": 37,
+   "num": 92,
+   "species": "SPECIES_MIRAIDON",
+   "flags": [
+    "0x235F",
+    "0x2360",
+    "0x235E",
+    "0x0"
+   ],
+   "byte_0xC": 12,
+   "raw": "39055f2360235e230000255c0c500d00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 21,
+   "map": "Kanto_FiveIsland_ResortGorgeous",
+   "group": 37,
+   "num": 107,
+   "species": "SPECIES_ARTICUNO_2",
+   "flags": [
+    "0x2362",
+    "0x2363",
+    "0x2361",
+    "0x0"
+   ],
+   "byte_0xC": 9,
+   "raw": "cf036223632361230000256b093c0e00",
+   "scrapped": "later form of Articuno, which has its own encounter"
+  },
+  {
+   "region": "kanto",
+   "index": 22,
+   "map": "Kanto_SevenIsland_SevaultCanyon_Entrance",
+   "group": 37,
+   "num": 116,
+   "species": "SPECIES_ZAPDOS_2",
+   "flags": [
+    "0x2365",
+    "0x2366",
+    "0x2364",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "d00365236623642300002574083c0100",
+   "scrapped": "later form of Zapdos, which has its own encounter"
+  },
+  {
+   "region": "kanto",
+   "index": 23,
+   "map": "Kanto_FiveIsland_MemorialPillar",
+   "group": 37,
+   "num": 110,
+   "species": "SPECIES_MOLTRES_2",
+   "flags": [
+    "0x2368",
+    "0x2369",
+    "0x2367",
+    "0x0"
+   ],
+   "byte_0xC": 6,
+   "raw": "d1036823692367230000256e063c1100",
+   "scrapped": "later form of Moltres, which has its own encounter"
+  },
+  {
+   "region": "kanto",
+   "index": 24,
+   "map": "Kanto_FiveIsland_Meadow",
+   "group": 37,
+   "num": 109,
+   "species": "SPECIES_COBALION",
+   "flags": [
+    "0x236B",
+    "0x236C",
+    "0x236A",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "7e026b236c236a230000256d083c0800",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 25,
+   "map": "Kanto_RockTunnel_B1F",
+   "group": 36,
+   "num": 82,
+   "species": "SPECIES_TERRAKION",
+   "flags": [
+    "0x236E",
+    "0x236F",
+    "0x236D",
+    "0x0"
+   ],
+   "byte_0xC": 27,
+   "raw": "7f026e236f236d23000024521b3c0500",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 26,
+   "map": "Kanto_Route8",
+   "group": 37,
+   "num": 83,
+   "species": "SPECIES_VIRIZION",
+   "flags": [
+    "0x2371",
+    "0x2372",
+    "0x2370",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "800271237223702300002553103c0c00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 27,
+   "map": "Kanto_FiveIsland_WaterLabyrinth",
+   "group": 37,
+   "num": 108,
+   "species": "SPECIES_KELDEO",
+   "flags": [
+    "0x2374",
+    "0x2375",
+    "0x2373",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "87027423752373230000256c033c0b00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 28,
+   "map": "Kanto_Route14",
+   "group": 37,
+   "num": 89,
+   "species": "SPECIES_IRON_LEAVES",
+   "flags": [
+    "0x2377",
+    "0x2378",
+    "0x2376",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "3b0577237823762300002559103c0c00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 29,
+   "map": "Kanto_Route23",
+   "group": 37,
+   "num": 99,
+   "species": "SPECIES_IRON_BOULDER",
+   "flags": [
+    "0x237A",
+    "0x237B",
+    "0x2379",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "5f057a237b23792300002563083c0500",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 30,
+   "map": "Kanto_RocketHideout_B4F",
+   "group": 36,
+   "num": 45,
+   "species": "SPECIES_IRON_CROWN",
+   "flags": [
+    "0x237D",
+    "0x237E",
+    "0x237C",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "60057d237e237c230000242d0a3c0800",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 31,
+   "map": "Kanto_TwoIsland_CapeBrink",
+   "group": 37,
+   "num": 104,
+   "species": "SPECIES_UXIE",
+   "flags": [
+    "0x2380",
+    "0x2381",
+    "0x237F",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "e001802381237f230000256802320e00"
+  },
+  {
+   "region": "kanto",
+   "index": 32,
+   "map": "Kanto_Route6",
+   "group": 37,
+   "num": 81,
+   "species": "SPECIES_MESPRIT",
+   "flags": [
+    "0x2383",
+    "0x2384",
+    "0x2382",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "e1018323842382230000255107280e00"
+  },
+  {
+   "region": "kanto",
+   "index": 33,
+   "map": "Kanto_Route22",
+   "group": 37,
+   "num": 98,
+   "species": "SPECIES_AZELF",
+   "flags": [
+    "0x2386",
+    "0x2387",
+    "0x2385",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "e2018623872385230000256202280e00"
+  },
+  {
+   "region": "kanto",
+   "index": 34,
+   "map": "Kanto_Route18",
+   "group": 37,
+   "num": 93,
+   "species": "SPECIES_TORNADUS",
+   "flags": [
+    "0x2389",
+    "0x238A",
+    "0x2388",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "810289238a2388230000255d04280200",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 35,
+   "map": "Kanto_Route20",
+   "group": 37,
+   "num": 95,
+   "species": "SPECIES_THUNDURUS",
+   "flags": [
+    "0x238C",
+    "0x238D",
+    "0x238B",
+    "0x0"
+   ],
+   "byte_0xC": 12,
+   "raw": "82028c238d238b230000255f0c280d00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 36,
+   "map": "Kanto_SixIsland_WaterPath",
+   "group": 37,
+   "num": 113,
+   "species": "SPECIES_LANDORUS",
+   "flags": [
+    "0x238F",
+    "0x2390",
+    "0x238E",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "85028f2390238e23000025710a3c0400",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 37,
+   "map": "Kanto_VermilionCity",
+   "group": 37,
+   "num": 62,
+   "species": "SPECIES_TAPU_KOKO",
+   "flags": [
+    "0x2392",
+    "0x2393",
+    "0x2391",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "11039223932391230000253e073c0d00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 38,
+   "map": "Kanto_SaffronCity",
+   "group": 37,
+   "num": 67,
+   "species": "SPECIES_TAPU_LELE",
+   "flags": [
+    "0x2395",
+    "0x2396",
+    "0x2394",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "120395239623942300002543103c0e00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 39,
+   "map": "Kanto_CeladonCity",
+   "group": 37,
+   "num": 63,
+   "species": "SPECIES_TAPU_BULU",
+   "flags": [
+    "0x2398",
+    "0x2399",
+    "0x2397",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "13039823992397230000253f103c0c00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 40,
+   "map": "Kanto_CeruleanCity",
+   "group": 37,
+   "num": 60,
+   "species": "SPECIES_TAPU_FINI",
+   "flags": [
+    "0x239B",
+    "0x239C",
+    "0x239A",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "14039b239c239a230000253c0d3c0b00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 41,
+   "map": "Kanto_FourIsland_IcefallCave_Entrance",
+   "group": 36,
+   "num": 110,
+   "species": "SPECIES_CHIEN_PAO",
+   "flags": [
+    "0x239E",
+    "0x239F",
+    "0x239D",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "33059e239f239d230000246e013c0f00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 42,
+   "map": "Kanto_FourIsland_IcefallCave_B1F",
+   "group": 36,
+   "num": 112,
+   "species": "SPECIES_GLASTRIER",
+   "flags": [
+    "0x23A1",
+    "0x23A2",
+    "0x23A0",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "8003a123a223a02300002470033c0f00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 43,
+   "map": "Kanto_SeafoamIslands_B2F",
+   "group": 36,
+   "num": 85,
+   "species": "SPECIES_KYUREM",
+   "flags": [
+    "0x23A4",
+    "0x23A5",
+    "0x23A3",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "8602a423a523a32300002455043c0f00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 44,
+   "map": "Kanto_MtEmber_SummitPath_3F",
+   "group": 36,
+   "num": 100,
+   "species": "SPECIES_HEATRAN",
+   "flags": [
+    "0x23A7",
+    "0x23A8",
+    "0x23A6",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "e501a723a823a6230000246401320a00"
+  },
+  {
+   "region": "kanto",
+   "index": 45,
+   "map": "Kanto_CinnabarIsland_PrimalChamber",
+   "group": 39,
+   "num": 35,
+   "species": "SPECIES_GROUDON",
+   "flags": [
+    "0x23AA",
+    "0x23AB",
+    "0x23A9",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "7f01aa23ab23a9230000272303460400"
+  },
+  {
+   "region": "kanto",
+   "index": 46,
+   "map": "Kanto_MtEmber_RubyPath_B3F",
+   "group": 36,
+   "num": 106,
+   "species": "SPECIES_CHI_YU",
+   "flags": [
+    "0x23AD",
+    "0x23AE",
+    "0x23AC",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "3505ad23ae23ac230000246a0b3c0a00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 47,
+   "map": "Kanto_SevenIsland_SevaultCanyon",
+   "group": 37,
+   "num": 117,
+   "species": "SPECIES_TING_LU",
+   "flags": [
+    "0x23B0",
+    "0x23B1",
+    "0x23AF",
+    "0x0"
+   ],
+   "byte_0xC": 22,
+   "raw": "3405b023b123af2300002575163c0400",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 48,
+   "map": "Kanto_SixIsland_RuinValley",
+   "group": 37,
+   "num": 114,
+   "species": "SPECIES_WO_CHIEN",
+   "flags": [
+    "0x23B3",
+    "0x23B4",
+    "0x23B2",
+    "0x0"
+   ],
+   "byte_0xC": 19,
+   "raw": "3205b323b423b22300002572133c0c00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 49,
+   "map": "Kanto_Route25",
+   "group": 37,
+   "num": 101,
+   "species": "SPECIES_ENAMORUS",
+   "flags": [
+    "0x23B6",
+    "0x23B7",
+    "0x23B5",
+    "0x0"
+   ],
+   "byte_0xC": 15,
+   "raw": "bd04b623b723b523000025650f3c1200",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 50,
+   "map": "Kanto_OneIsland_KindleRoad_EmberSpa",
+   "group": 37,
+   "num": 54,
+   "species": "SPECIES_VOLCANION",
+   "flags": [
+    "0x23B9",
+    "0x23BA",
+    "0x23B8",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "d102b923ba23b823000025360732ff00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 51,
+   "map": "Kanto_ThreeIsland",
+   "group": 37,
+   "num": 71,
+   "species": "SPECIES_OKIDOGI",
+   "flags": [
+    "0x23BC",
+    "0x23BD",
+    "0x23BB",
+    "0x0"
+   ],
+   "byte_0xC": 15,
+   "raw": "4d05bc23bd23bb23000025470f320100",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 52,
+   "map": "Kanto_ThreeIsland_BerryForest",
+   "group": 36,
+   "num": 109,
+   "species": "SPECIES_MUNKIDORI",
+   "flags": [
+    "0x23BF",
+    "0x23C0",
+    "0x23BE",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "4e05bf23c023be230000246d10320e00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 53,
+   "map": "Kanto_ThreeIsland_BondBridge",
+   "group": 37,
+   "num": 105,
+   "species": "SPECIES_FEZANDIPITI",
+   "flags": [
+    "0x23C2",
+    "0x23C3",
+    "0x23C1",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "4f05c223c323c123000025690a321200",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 54,
+   "map": "Kanto_TwoIsland",
+   "group": 37,
+   "num": 70,
+   "species": "SPECIES_PECHARUNT",
+   "flags": [
+    "0x23C5",
+    "0x23C6",
+    "0x23C4",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "6205c523c623c423000025460a32ff00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 55,
+   "map": "Kanto_ThreeIsland_Port",
+   "group": 37,
+   "num": 106,
+   "species": "SPECIES_OGERPON",
+   "flags": [
+    "0x23C8",
+    "0x23C9",
+    "0x23C7",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "5005c823c923c7230000256a043cff00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 56,
+   "map": "Kanto_MtEmber_RubyPath_B5F",
+   "group": 36,
+   "num": 102,
+   "species": "SPECIES_DIANCIE",
+   "flags": [
+    "0x23CB",
+    "0x23CC",
+    "0x23CA",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "cf02cb23cc23ca2300002466023cff00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 57,
+   "map": "Kanto_SixIsland_DottedHole_SapphireRoom",
+   "group": 36,
+   "num": 120,
+   "species": "SPECIES_TERAPAGOS",
+   "flags": [
+    "0x23CE",
+    "0x23CF",
+    "0x23CD",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "6105ce23cf23cd2300002478033cff00",
+   "scrapped": "Gen 9"
+  },
+  {
+   "region": "kanto",
+   "index": 58,
+   "map": "Kanto_FiveIsland_LostCave_Room1",
+   "group": 37,
+   "num": 10,
+   "species": "SPECIES_SPECTRIER",
+   "flags": [
+    "0x23D1",
+    "0x23D2",
+    "0x23D0",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "8103d123d223d0230000250a023c0700",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 59,
+   "map": "Kanto_ThreeIsland_BerryForest",
+   "group": 36,
+   "num": 109,
+   "species": "SPECIES_CALYREX",
+   "flags": [
+    "0x23D4",
+    "0x23D5",
+    "0x23D3",
+    "0x0"
+   ],
+   "byte_0xC": 15,
+   "raw": "8203d423d523d3230000246d0f46ff00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 60,
+   "map": "Kanto_SixIsland_PatternBush",
+   "group": 36,
+   "num": 121,
+   "species": "SPECIES_CELEBI",
+   "flags": [
+    "0x23D7",
+    "0x23D8",
+    "0x23D6",
+    "0x0"
+   ],
+   "byte_0xC": 14,
+   "raw": "fb00d723d823d623000024790e3c0e00"
+  },
+  {
+   "region": "kanto",
+   "index": 61,
+   "map": "Kanto_SixIsland_PatternBush",
+   "group": 36,
+   "num": 121,
+   "species": "SPECIES_ZARUDE_2",
+   "flags": [
+    "0x23DA",
+    "0x23DB",
+    "0x23D9",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "b404da23db23d923000024790d3c1100",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 62,
+   "map": "Kanto_RocketHideout_B1F",
+   "group": 36,
+   "num": 42,
+   "species": "SPECIES_COSMOG",
+   "flags": [
+    "0x23DD",
+    "0x23DE",
+    "0x23DC",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "1503dd23de23dc230000242a0814ff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 63,
+   "map": "Kanto_SeafoamIslands_1F",
+   "group": 36,
+   "num": 83,
+   "species": "SPECIES_NIHILEGO",
+   "flags": [
+    "0x23E0",
+    "0x23E1",
+    "0x23DF",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "1903e023e123df2300002453043cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 64,
+   "map": "Kanto_SafariZone_East",
+   "group": 36,
+   "num": 64,
+   "species": "SPECIES_BUZZWOLE",
+   "flags": [
+    "0x23E3",
+    "0x23E4",
+    "0x23E2",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "1a03e323e423e22300002440053cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 65,
+   "map": "Kanto_FiveIsland_ResortGorgeous",
+   "group": 37,
+   "num": 107,
+   "species": "SPECIES_PHEROMOSA",
+   "flags": [
+    "0x23E6",
+    "0x23E7",
+    "0x23E5",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "1b03e623e723e5230000256b0a3cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 66,
+   "map": "Kanto_PowerPlant",
+   "group": 36,
+   "num": 95,
+   "species": "SPECIES_XURKITREE",
+   "flags": [
+    "0x23E9",
+    "0x23EA",
+    "0x23E8",
+    "0x0"
+   ],
+   "byte_0xC": 9,
+   "raw": "1c03e923ea23e8230000245f093cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 67,
+   "map": "Kanto_VermilionCity",
+   "group": 37,
+   "num": 62,
+   "species": "SPECIES_CELESTEELA",
+   "flags": [
+    "0x23EC",
+    "0x23ED",
+    "0x23EB",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "1d03ec23ed23eb230000253e083cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 68,
+   "map": "Kanto_Route15",
+   "group": 37,
+   "num": 90,
+   "species": "SPECIES_KARTANA",
+   "flags": [
+    "0x23EF",
+    "0x23F0",
+    "0x23EE",
+    "0x0"
+   ],
+   "byte_0xC": 15,
+   "raw": "1e03ef23f023ee230000255a0f3cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 69,
+   "map": "Kanto_PokemonMansion_3F",
+   "group": 36,
+   "num": 61,
+   "species": "SPECIES_GUZZLORD",
+   "flags": [
+    "0x23F2",
+    "0x23F3",
+    "0x23F1",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "1f03f223f323f1230000243d053cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 70,
+   "map": "Kanto_SevenIsland_TanobyRuins",
+   "group": 37,
+   "num": 118,
+   "species": "SPECIES_STAKATAKA",
+   "flags": [
+    "0x23F5",
+    "0x23F6",
+    "0x23F4",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "2503f523f623f42300002576053cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 71,
+   "map": "Kanto_TwoIsland",
+   "group": 37,
+   "num": 70,
+   "species": "SPECIES_BLACEPHALON",
+   "flags": [
+    "0x23F8",
+    "0x23F9",
+    "0x23F7",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "2603f823f923f723000025460b3cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 72,
+   "map": "Kanto_MtMoon_B2F",
+   "group": 36,
+   "num": 3,
+   "species": "SPECIES_NECROZMA",
+   "flags": [
+    "0x23FB",
+    "0x23FC",
+    "0x23FA",
+    "0x0"
+   ],
+   "byte_0xC": 12,
+   "raw": "2003fb23fc23fa23000024030c46ff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 73,
+   "map": "Kanto_Route25_SeaCottage",
+   "group": 38,
+   "num": 111,
+   "species": "SPECIES_POIPOLE",
+   "flags": [
+    "0x23FE",
+    "0x23FF",
+    "0x23FD",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "2303fe23ff23fd230000266f0305ff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 74,
+   "map": "Kanto_SilphCo_3F",
+   "group": 36,
+   "num": 49,
+   "species": "SPECIES_MAGEARNA_2",
+   "flags": [
+    "0x2901",
+    "0x2902",
+    "0x2900",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "9f0401290229002900002431053cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 75,
+   "map": "Kanto_PokemonMansion_B1F",
+   "group": 36,
+   "num": 62,
+   "species": "SPECIES_TYPE_NULL",
+   "flags": [
+    "0x2904",
+    "0x2905",
+    "0x2903",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "04030429052903290000243e073cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 76,
+   "map": "Kanto_FiveIsland_RocketWarehouse",
+   "group": 36,
+   "num": 114,
+   "species": "SPECIES_GENESECT",
+   "flags": [
+    "0x2907",
+    "0x2908",
+    "0x2906",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "8902072908290629000024720b3cff00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 77,
+   "map": "Kanto_SaffronCity_Dojo",
+   "group": 38,
+   "num": 77,
+   "species": "SPECIES_KUBFU",
+   "flags": [
+    "0x290A",
+    "0x290B",
+    "0x2909",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "7b030a290b2909290000264d08140100",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 78,
+   "map": "Kanto_SafariZone_North",
+   "group": 36,
+   "num": 65,
+   "species": "SPECIES_XERNEAS",
+   "flags": [
+    "0x290D",
+    "0x290E",
+    "0x290C",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "cc020d290e290c2900002441043cff00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 79,
+   "map": "Kanto_Route10",
+   "group": 37,
+   "num": 85,
+   "species": "SPECIES_YVELTAL",
+   "flags": [
+    "0x2910",
+    "0x2911",
+    "0x290F",
+    "0x0"
+   ],
+   "byte_0xC": 12,
+   "raw": "cd02102911290f29000025550c3cff00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 80,
+   "map": "Kanto_DiglettsCave_B1F",
+   "group": 36,
+   "num": 37,
+   "species": "SPECIES_ZYGARDE_4",
+   "flags": [
+    "0x2913",
+    "0x2914",
+    "0x2912",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "730413291429122900002425013cff00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 81,
+   "map": "Kanto_MtMoon_1F",
+   "group": 36,
+   "num": 1,
+   "species": "SPECIES_DIALGA",
+   "flags": [
+    "0x2916",
+    "0x2917",
+    "0x2915",
+    "0x0"
+   ],
+   "byte_0xC": 15,
+   "raw": "e301162917291529000024010f3cff00"
+  },
+  {
+   "region": "kanto",
+   "index": 82,
+   "map": "Kanto_MtMoon_1F",
+   "group": 36,
+   "num": 1,
+   "species": "SPECIES_PALKIA",
+   "flags": [
+    "0x2919",
+    "0x291A",
+    "0x2918",
+    "0x0"
+   ],
+   "byte_0xC": 16,
+   "raw": "e40119291a29182900002401103cff00"
+  },
+  {
+   "region": "kanto",
+   "index": 83,
+   "map": "Kanto_PokemonTower_7F",
+   "group": 36,
+   "num": 94,
+   "species": "SPECIES_GIRATINA",
+   "flags": [
+    "0x291C",
+    "0x291D",
+    "0x291B",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "e7011c291d291b290000245e053cff00"
+  },
+  {
+   "region": "kanto",
+   "index": 84,
+   "map": "Kanto_PewterCity_Museum_1F",
+   "group": 38,
+   "num": 3,
+   "species": "SPECIES_HOOPA",
+   "flags": [
+    "0x291F",
+    "0x2920",
+    "0x291E",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "d0021f2920291e2900002603073c0e00",
+   "scrapped": "Gen 6"
+  },
+  {
+   "region": "kanto",
+   "index": 85,
+   "map": "Kanto_SevenIsland_SevaultCanyon_House",
+   "group": 39,
+   "num": 33,
+   "species": "SPECIES_MELOETTA",
+   "flags": [
+    "0x2922",
+    "0x2923",
+    "0x2921",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "880222292329212900002721043cff00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 86,
+   "map": "Kanto_Route4",
+   "group": 37,
+   "num": 79,
+   "species": "SPECIES_CRESSELIA",
+   "flags": [
+    "0x2926",
+    "0x2927",
+    "0x2925",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "e8012629272925290000254f083cff00"
+  },
+  {
+   "region": "kanto",
+   "index": 87,
+   "map": "Kanto_SSAnne_1F_Room6",
+   "group": 36,
+   "num": 29,
+   "species": "SPECIES_DARKRAI",
+   "flags": [
+    "0x2929",
+    "0x292A",
+    "0x2928",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "eb0129292a2928290000241d023c1100"
+  },
+  {
+   "region": "kanto",
+   "index": 88,
+   "map": "Kanto_SSAnne_Exterior",
+   "group": 36,
+   "num": 4,
+   "species": "SPECIES_MEW",
+   "flags": [
+    "0x292F",
+    "0x2930",
+    "0x292E",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "97002f2930292e2900002404023cff00"
+  },
+  {
+   "region": "kanto",
+   "index": 89,
+   "map": "Kanto_PalletTown_ProfessorOaksLab",
+   "group": 37,
+   "num": 122,
+   "species": "SPECIES_MELTAN",
+   "flags": [
+    "0x2933",
+    "0x2934",
+    "0x2932",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "28033329342932290000257a0b05ff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 90,
+   "map": "Kanto_PokemonTower_3F",
+   "group": 36,
+   "num": 90,
+   "species": "SPECIES_MARSHADOW",
+   "flags": [
+    "0x2936",
+    "0x2937",
+    "0x2935",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "22033629372935290000245a053cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 91,
+   "map": "Kanto_Route10",
+   "group": 37,
+   "num": 85,
+   "species": "SPECIES_ZERAORA",
+   "flags": [
+    "0x2939",
+    "0x293A",
+    "0x2938",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "270339293a293829000025550d3cff00",
+   "scrapped": "Gen 7"
+  },
+  {
+   "region": "kanto",
+   "index": 92,
+   "map": "Kanto_PewterCity_Museum_2F",
+   "group": 38,
+   "num": 4,
+   "species": "SPECIES_JIRACHI",
+   "flags": [
+    "0x2DF1",
+    "0x2DF2",
+    "0x2DF0",
+    "0x0"
+   ],
+   "byte_0xC": 6,
+   "raw": "8101f12df22df02d00002604063c0e00"
+  },
+  {
+   "region": "kanto",
+   "index": 93,
+   "map": "Kanto_OneIsland_TreasureBeach",
+   "group": 37,
+   "num": 103,
+   "species": "SPECIES_MANAPHY",
+   "flags": [
+    "0x2DF4",
+    "0x2DF5",
+    "0x2DF3",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "ea01f42df52df32d0000256703320b00"
+  },
+  {
+   "region": "kanto",
+   "index": 94,
+   "map": "Kanto_PewterCity",
+   "group": 37,
+   "num": 59,
+   "species": "SPECIES_SHAYMIN",
+   "flags": [
+    "0x2DF7",
+    "0x2DF8",
+    "0x2DF6",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "ec01f72df82df62d0000253b0b0fff00"
+  },
+  {
+   "region": "kanto",
+   "index": 95,
+   "map": "Kanto_ViridianForest",
+   "group": 36,
+   "num": 0,
+   "species": "SPECIES_ZACIAN",
+   "flags": [
+    "0x2DFA",
+    "0x2DFB",
+    "0x2DF9",
+    "0x0"
+   ],
+   "byte_0xC": 12,
+   "raw": "7803fa2dfb2df92d000024000c3cff00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 96,
+   "map": "Kanto_ViridianForest",
+   "group": 36,
+   "num": 0,
+   "species": "SPECIES_ZAMAZENTA",
+   "flags": [
+    "0x2DFD",
+    "0x2DFE",
+    "0x2DFC",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "7903fd2dfe2dfc2d000024000d3cff00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 97,
+   "map": "Kanto_VictoryRoad_3F",
+   "group": 36,
+   "num": 41,
+   "species": "SPECIES_RESHIRAM",
+   "flags": [
+    "0x2E00",
+    "0x2E01",
+    "0x2DFF",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "8302002e012eff2d000024290d3cff00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 98,
+   "map": "Kanto_VictoryRoad_3F",
+   "group": 36,
+   "num": 41,
+   "species": "SPECIES_ZEKROM",
+   "flags": [
+    "0x2E03",
+    "0x2E04",
+    "0x2E02",
+    "0x0"
+   ],
+   "byte_0xC": 14,
+   "raw": "8402032e042e022e000024290e3cff00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 99,
+   "map": "Kanto_VictoryRoad_2F",
+   "group": 36,
+   "num": 40,
+   "species": "SPECIES_VICTINI",
+   "flags": [
+    "0x2E06",
+    "0x2E07",
+    "0x2E05",
+    "0x0"
+   ],
+   "byte_0xC": 14,
+   "raw": "ee01062e072e052e000024280e3cff00",
+   "scrapped": "Gen 5"
+  },
+  {
+   "region": "kanto",
+   "index": 100,
+   "map": "Kanto_CeruleanCave_1F",
+   "group": 36,
+   "num": 72,
+   "species": "SPECIES_ETERNATUS",
+   "flags": [
+    "0x2E09",
+    "0x2E0A",
+    "0x2E08",
+    "0x0"
+   ],
+   "byte_0xC": 10,
+   "raw": "7a03092e0a2e082e000024480a3cff00",
+   "scrapped": "Gen 8"
+  },
+  {
+   "region": "kanto",
+   "index": 101,
+   "map": "Kanto_Route21_South",
+   "group": 37,
+   "num": 97,
+   "species": "SPECIES_LATIOS",
+   "flags": [
+    "0x2E0C",
+    "0x2E0D",
+    "0x2E0B",
+    "0x0"
+   ],
+   "byte_0xC": 6,
+   "raw": "7d010c2e0d2e0b2e000025610628ff00"
+  },
+  {
+   "region": "kanto",
+   "index": 102,
+   "map": "Kanto_Route21_North",
+   "group": 37,
+   "num": 96,
+   "species": "SPECIES_LATIAS",
+   "flags": [
+    "0x2E10",
+    "0x2E11",
+    "0x2E0F",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "7c01102e112e0f2e000025600728ff00"
+  },
+  {
+   "region": "kanto",
+   "index": 103,
+   "map": "Kanto_SixIsland_AlteringCave",
+   "group": 36,
+   "num": 122,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E16",
+    "0x2E17",
+    "0x2E15",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "ed01162e172e152e0000247a01640000"
+  },
+  {
+   "region": "kanto",
+   "index": 104,
+   "map": "Kanto_CinnabarIsland_PrimalChamber",
+   "group": 39,
+   "num": 35,
+   "species": "SPECIES_KYOGRE",
+   "flags": [
+    "0x2E3B",
+    "0x2E3C",
+    "0x2E3A",
+    "0x0"
+   ],
+   "byte_0xC": 4,
+   "raw": "7e013b2e3c2e3a2e0000272304460b00"
+  },
+  {
+   "region": "kanto",
+   "index": 105,
+   "map": "Kanto_CeruleanCave_RayquazaChamber",
+   "group": 39,
+   "num": 36,
+   "species": "SPECIES_RAYQUAZA",
+   "flags": [
+    "0x2EA9",
+    "0x2EAA",
+    "0x2EA8",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "8001a92eaa2ea82e000027240146ff00"
+  },
+  {
+   "region": "kanto",
+   "index": 106,
+   "map": "Kanto_Route23",
+   "group": 37,
+   "num": 99,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E19",
+    "0x0",
+    "0x2E18",
+    "0x0"
+   ],
+   "byte_0xC": 9,
+   "raw": "1804192e0000182e0000256309640100",
+   "form_of": "SPECIES_ARCEUS_2"
+  },
+  {
+   "region": "kanto",
+   "index": 107,
+   "map": "Kanto_Route18",
+   "group": 37,
+   "num": 93,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E1B",
+    "0x0",
+    "0x2E1A",
+    "0x0"
+   ],
+   "byte_0xC": 5,
+   "raw": "19041b2e00001a2e0000255d05640200",
+   "form_of": "SPECIES_ARCEUS_3"
+  },
+  {
+   "region": "kanto",
+   "index": 108,
+   "map": "Kanto_Route14",
+   "group": 37,
+   "num": 89,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E1D",
+    "0x0",
+    "0x2E1C",
+    "0x0"
+   ],
+   "byte_0xC": 17,
+   "raw": "1a041d2e00001c2e0000255911640300",
+   "form_of": "SPECIES_ARCEUS_4"
+  },
+  {
+   "region": "kanto",
+   "index": 109,
+   "map": "Kanto_SevenIsland_SevaultCanyon",
+   "group": 37,
+   "num": 117,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E1F",
+    "0x0",
+    "0x2E1E",
+    "0x0"
+   ],
+   "byte_0xC": 23,
+   "raw": "1b041f2e00001e2e0000257517640400",
+   "form_of": "SPECIES_ARCEUS_5"
+  },
+  {
+   "region": "kanto",
+   "index": 110,
+   "map": "Kanto_Route9",
+   "group": 37,
+   "num": 84,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E21",
+    "0x0",
+    "0x2E20",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "1c04212e0000202e000025540d640500",
+   "form_of": "SPECIES_ARCEUS_6"
+  },
+  {
+   "region": "kanto",
+   "index": 111,
+   "map": "Kanto_Route2",
+   "group": 37,
+   "num": 77,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E23",
+    "0x0",
+    "0x2E22",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "1d04232e0000222e0000254d08640600",
+   "form_of": "SPECIES_ARCEUS_7"
+  },
+  {
+   "region": "kanto",
+   "index": 112,
+   "map": "Kanto_FiveIsland_MemorialPillar",
+   "group": 37,
+   "num": 110,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E25",
+    "0x0",
+    "0x2E24",
+    "0x0"
+   ],
+   "byte_0xC": 7,
+   "raw": "1e04252e0000242e0000256e07640700",
+   "form_of": "SPECIES_ARCEUS_8"
+  },
+  {
+   "region": "kanto",
+   "index": 113,
+   "map": "Kanto_Route11",
+   "group": 37,
+   "num": 86,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E27",
+    "0x0",
+    "0x2E26",
+    "0x0"
+   ],
+   "byte_0xC": 14,
+   "raw": "1f04272e0000262e000025560e640800",
+   "form_of": "SPECIES_ARCEUS_9"
+  },
+  {
+   "region": "kanto",
+   "index": 114,
+   "map": "Kanto_OneIsland_KindleRoad",
+   "group": 37,
+   "num": 102,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E29",
+    "0x0",
+    "0x2E28",
+    "0x0"
+   ],
+   "byte_0xC": 30,
+   "raw": "2004292e0000282e000025661e640a00",
+   "form_of": "SPECIES_ARCEUS_10"
+  },
+  {
+   "region": "kanto",
+   "index": 115,
+   "map": "Kanto_Route20",
+   "group": 37,
+   "num": 95,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E2B",
+    "0x0",
+    "0x2E2A",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "21042b2e00002a2e0000255f0d640b00",
+   "form_of": "SPECIES_ARCEUS_11"
+  },
+  {
+   "region": "kanto",
+   "index": 116,
+   "map": "Kanto_Route7",
+   "group": 37,
+   "num": 82,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E2D",
+    "0x0",
+    "0x2E2C",
+    "0x0"
+   ],
+   "byte_0xC": 2,
+   "raw": "22042d2e00002c2e0000255202640c00",
+   "form_of": "SPECIES_ARCEUS_12"
+  },
+  {
+   "region": "kanto",
+   "index": 117,
+   "map": "Kanto_Route6",
+   "group": 37,
+   "num": 81,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E2F",
+    "0x0",
+    "0x2E2E",
+    "0x0"
+   ],
+   "byte_0xC": 8,
+   "raw": "23042f2e00002e2e0000255108640d00",
+   "form_of": "SPECIES_ARCEUS_13"
+  },
+  {
+   "region": "kanto",
+   "index": 118,
+   "map": "Kanto_Route5",
+   "group": 37,
+   "num": 80,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E31",
+    "0x0",
+    "0x2E30",
+    "0x0"
+   ],
+   "byte_0xC": 1,
+   "raw": "2404312e0000302e0000255001640e00",
+   "form_of": "SPECIES_ARCEUS_14"
+  },
+  {
+   "region": "kanto",
+   "index": 119,
+   "map": "Kanto_FourIsland",
+   "group": 37,
+   "num": 72,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E33",
+    "0x0",
+    "0x2E32",
+    "0x0"
+   ],
+   "byte_0xC": 13,
+   "raw": "2504332e0000322e000025480d640f00",
+   "form_of": "SPECIES_ARCEUS_15"
+  },
+  {
+   "region": "kanto",
+   "index": 120,
+   "map": "Kanto_SevenIsland_SevaultCanyon_Entrance",
+   "group": 37,
+   "num": 116,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E35",
+    "0x0",
+    "0x2E34",
+    "0x0"
+   ],
+   "byte_0xC": 9,
+   "raw": "2604352e0000342e0000257409641000",
+   "form_of": "SPECIES_ARCEUS_16"
+  },
+  {
+   "region": "kanto",
+   "index": 121,
+   "map": "Kanto_Route16",
+   "group": 37,
+   "num": 91,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E37",
+    "0x0",
+    "0x2E36",
+    "0x0"
+   ],
+   "byte_0xC": 11,
+   "raw": "2704372e0000362e0000255b0b641100",
+   "form_of": "SPECIES_ARCEUS_17"
+  },
+  {
+   "region": "kanto",
+   "index": 122,
+   "map": "Kanto_Route22",
+   "group": 37,
+   "num": 98,
+   "species": "SPECIES_ARCEUS",
+   "flags": [
+    "0x2E39",
+    "0x0",
+    "0x2E38",
+    "0x0"
+   ],
+   "byte_0xC": 3,
+   "raw": "2804392e0000382e0000256203641200",
+   "form_of": "SPECIES_ARCEUS_18"
+  }
+ ],
+ "in_game_trades": [
+  {
+   "index": 0,
+   "nickname": "Gastly",
+   "species": "SPECIES_GASTLY",
+   "requested_species": "SPECIES_RALTS",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    15,
+    15,
+    15,
+    15,
+    15,
+    15
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 132,
+   "ot_name": "Quetzal",
+   "used_by": [],
+   "raw": "c1d5e7e8e0edff000000000000005c000f0f0f0f0f0f0000000000000505051e05000000840000000000ffcbe9d9e8eed5e0ff000000000018010000"
+  },
+  {
+   "index": 1,
+   "nickname": "Kangaskhan",
+   "species": "SPECIES_KANGASKHAN",
+   "requested_species": "SPECIES_KECLEON",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "ability_num": 1,
+   "ot_id": 0,
+   "personality": 111,
+   "ot_name": "Quetzal",
+   "used_by": [],
+   "raw": "c5d5e2dbd5e7dfdcd5e2ff00000073000a0a0a0a0a0a0100000000000505051e050000006f0000000000ffcbe9d9e8eed5e0ff000000000060010000"
+  },
+  {
+   "index": 2,
+   "nickname": "Alakazam",
+   "species": "SPECIES_ALAKAZAM",
+   "requested_species": "SPECIES_GYARADOS",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 127,
+   "ot_name": "Quetzal",
+   "used_by": [],
+   "raw": "bbe0d5dfd5eed5e1ff000000000041000a0a0a0a0a0a0000000000000505051e050000007f0000000000ffcbe9d9e8eed5e0ff000000000082000000"
+  },
+  {
+   "index": 3,
+   "nickname": "PERSIAN",
+   "species": "SPECIES_PERSIAN",
+   "requested_species": "SPECIES_PERSIAN",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 139,
+   "ot_name": "Quetzal",
+   "used_by": [],
+   "raw": "cad9e6e7ddd5e2ff000000000000bf031f1f1f1f1f1f0000000000000505051e050000008b0000000000ffcbe9d9e8eed5e0ff000000000035000000"
+  },
+  {
+   "index": 4,
+   "nickname": "SPHEAL",
+   "species": "SPECIES_SPHEAL",
+   "requested_species": "SPECIES_BELLSPROUT",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    20,
+    20,
+    20,
+    31,
+    31
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 15,
+   "ot_name": "Quetzal",
+   "used_by": [
+    "maps/Johto_VioletKylesHouse/scripts.inc"
+   ],
+   "raw": "cdcac2bfbbc6ff000000000000006b011f1414141f1f00000000000005051e05050000000f0000000000ffcbe9d9e8eed5e0ff000000000a45000000"
+  },
+  {
+   "index": 5,
+   "nickname": "MACHOP",
+   "species": "SPECIES_MACHOP",
+   "requested_species": "SPECIES_ABRA",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    20,
+    31,
+    20,
+    20
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 3,
+   "ot_name": "Quetzal",
+   "used_by": [
+    "maps/Johto_GoldenrodDeptStore6F/scripts.inc"
+   ],
+   "raw": "cabbc8bdc2bbc7ff000000000000a2021f1f141f141400000000000005051e0505000000030000000000ffcbe9d9e8eed5e0ff000000000a50030000"
+  },
+  {
+   "index": 6,
+   "nickname": "VOLTORB",
+   "species": "SPECIES_VOLTORB",
+   "requested_species": "SPECIES_KRABBY",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    20,
+    20,
+    31,
+    31,
+    20
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 10,
+   "ot_name": "Quetzal",
+   "used_by": [
+    "maps/Johto_OlivineTimsHouse/scripts.inc"
+   ],
+   "raw": "c2bfc6c3c9cacec3c6bfff000000b6021f14141f1f1400000000000005051e05050000000a0000000000ffcbe9d9e8eed5e0ff000000000a62000000"
+  },
+  {
+   "index": 7,
+   "nickname": "DRAGONAIR",
+   "species": "SPECIES_DRAGONAIR",
+   "requested_species": "SPECIES_DODRIO",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 0,
+   "ot_id": 0,
+   "personality": 15,
+   "ot_name": "Quetzal",
+   "used_by": [
+    "maps/Johto_BlackthornEmysHouse/scripts.inc"
+   ],
+   "raw": "cdc6c3c1c1c9c9ff000000000000d4041f1f1f1f1f1f00000000000005051e05050000000f0000000000ffcbe9d9e8eed5e0ff000000010a55000000"
+  },
+  {
+   "index": 8,
+   "nickname": "ZYNX",
+   "species": "SPECIES_JYNX",
+   "requested_species": "SPECIES_PSYDUCK",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    20,
+    20,
+    31,
+    31,
+    20
+   ],
+   "ability_num": 2,
+   "ot_id": 36728,
+   "personality": 10,
+   "ot_name": "DONTAE",
+   "used_by": [
+    "maps/Kanto_CeruleanCity_House3/scripts.inc"
+   ],
+   "raw": "d4d3c8d2ff0000000000000000007c001f14141f1f140200788f0000051e0505050000000a0000000000ffbec9c8cebbbfff00000000000a36000000"
+  },
+  {
+   "index": 9,
+   "nickname": "PONYTA",
+   "species": "SPECIES_PONYTA",
+   "requested_species": "SPECIES_NIDORAN_F",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    20,
+    31,
+    20,
+    20
+   ],
+   "ability_num": 1,
+   "ot_id": 63184,
+   "personality": 13,
+   "ot_name": "SAIGE",
+   "used_by": [
+    "maps/Kanto_UndergroundPath_NorthEntrance/scripts.inc"
+   ],
+   "raw": "cac9c8d3cebbff00000000000000c8031f1f141f14140100d0f60000050505051e0000000d0000000000ffcdbbc3c1bfff0000000000010ab6020000"
+  },
+  {
+   "index": 10,
+   "nickname": "FARFETCH’D",
+   "species": "SPECIES_FARFETCHD",
+   "requested_species": "SPECIES_TAILLOW",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    20,
+    31,
+    20,
+    20
+   ],
+   "ability_num": 2,
+   "ot_id": 8810,
+   "personality": 3,
+   "ot_name": "ELYSSA",
+   "used_by": [
+    "maps/Kanto_VermilionCity_House2/scripts.inc"
+   ],
+   "raw": "c0bbccc0bfcebdc2b4beff000000cc031f1f141f141402006a2200001e05050505000000030000000000ffbfc6d3cdcdbbff00000000000a14010000"
+  },
+  {
+   "index": 11,
+   "nickname": "NIDORINA",
+   "species": "SPECIES_NIDORINA",
+   "requested_species": "SPECIES_NIDORINO",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    20,
+    31,
+    20,
+    20
+   ],
+   "ability_num": 0,
+   "ot_id": 13637,
+   "personality": 13,
+   "ot_name": "TURNER",
+   "used_by": [
+    "maps/Kanto_Route11_EastEntrance_2F/scripts.inc"
+   ],
+   "raw": "bebbcccfc7bbc5bbff0000000000d6031f1f141f141400004535000005051e05050000000d0000000000ffcecfccc8bfccff00000000000a0e050000"
+  },
+  {
+   "index": 12,
+   "nickname": "LICKILICKY",
+   "species": "SPECIES_LICKILICKY",
+   "requested_species": "SPECIES_GOLDUCK",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 2,
+   "ot_id": 1239,
+   "personality": 23,
+   "ot_name": "HADEN",
+   "used_by": [
+    "maps/Kanto_Route18_EastEntrance_2F/scripts.inc"
+   ],
+   "raw": "c6c3bdc5c3c6c3bdc5d3ff000000cf011f1f1f1f1f1f0200d7040000050505051e000000170000000000ffc2bbbebfc8ff0000000000000a37000000"
+  },
+  {
+   "index": 13,
+   "nickname": "PORYGON2",
+   "species": "SPECIES_PORYGON2",
+   "requested_species": "SPECIES_RAICHU",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 1,
+   "ot_id": 50298,
+   "personality": 15,
+   "ot_name": "CLIFTON",
+   "used_by": [
+    "maps/Kanto_CinnabarIsland_PokemonLab_Lounge/scripts.inc"
+   ],
+   "raw": "cac9ccd3c1c9c8a3ff0000000000e9001f1f1f1f1f1f01007ac400001e050505050000000f0000000000ffbdc6c3c0cec9c8ff000000000a1a000000"
+  },
+  {
+   "index": 14,
+   "nickname": "SCIZOR",
+   "species": "SPECIES_SCIZOR",
+   "requested_species": "SPECIES_HERACROSS",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 2,
+   "ot_id": 60042,
+   "personality": 3,
+   "ot_name": "NORMA",
+   "used_by": [
+    "maps/Kanto_CinnabarIsland_PokemonLab_Lounge/scripts.inc"
+   ],
+   "raw": "c5c6bfbbd0c9ccff000000000000b8041f1f1f1f1f1f02008aea000005051e0505000000030000000000ffc8c9ccc7bbff0000000000010ad6000000"
+  },
+  {
+   "index": 15,
+   "nickname": "KINGDRA",
+   "species": "SPECIES_KINGDRA",
+   "requested_species": "SPECIES_RAPIDASH",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    31,
+    31,
+    31,
+    31,
+    31
+   ],
+   "ability_num": 1,
+   "ot_id": 9853,
+   "personality": 15,
+   "ot_name": "GARETT",
+   "used_by": [
+    "maps/Kanto_CinnabarIsland_PokemonLab_ExperimentRoom/scripts.inc"
+   ],
+   "raw": "c5c3c8c1beccbbff000000000000e6001f1f1f1f1f1f01007d260000050505051e0000000f0000000000ffc1bbccbfceceff00000000000a4e000000"
+  },
+  {
+   "index": 16,
+   "nickname": "MR. MIME",
+   "species": "SPECIES_MR_MIME",
+   "requested_species": "SPECIES_DROWZEE",
+   "held_item": "ITEM_NONE",
+   "ivs": [
+    31,
+    20,
+    20,
+    31,
+    31,
+    20
+   ],
+   "ability_num": 1,
+   "ot_id": 10283,
+   "personality": 10,
+   "ot_name": "REYLEY",
+   "used_by": [
+    "maps/Kanto_Route2_House/scripts.inc"
+   ],
+   "raw": "c7ccad00c7c3c7bfff00000000007a001f14141f1f1401002b28000005051e05050000000a0000000000ffccbfd3c6bfd3ff00000000000a60000000"
+  }
+ ]
+}

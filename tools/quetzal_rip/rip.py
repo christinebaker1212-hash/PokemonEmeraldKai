@@ -193,6 +193,8 @@ class Ripper:
         overview(self.rom, self.maps, (37, 57), 0.25, os.path.join(self.out, 'previews', 'kanto_overview.png'))
         self.idmap_stats = consts.id_map(self)
         self.write_index()
+        import gifts
+        gifts.write(self.rom, self.names, self.out)    # needs maps/index.json and the scripts
 
     def entry_notes(self):
         notes = defaultdict(list)
