@@ -1410,3 +1410,8 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   Tests garden_map, garden_centers, garden_travel, garden_stuck (and the other garden_* at new spots).
 - 1.16.1: the Garden's lone trees (and the grove growth mark, sGardenTree) are Rustboro's standalone tree (crown
   1CE/1CF, middle 1D6/1D7, trunk on grass 1E6/1E7), not a forest column's 1DC/1DD bottom half that joins the next tree.
+- 1.16.2: the Garden's forest edge. Outside a map the game draws border.bin by map-coordinate parity (top halves
+  1D4/1D5 on even rows), so the map is 26 rows (even): the bottom row of crowns (odd) sits over the border's top
+  halves, and the corner columns (1DC/1DD on the top and bottom rows, no edge piece) run into it. The west column
+  ends above the escalator's landing with 1E4/1E7 (a last tree over open ground, odd row) and starts again below it
+  with a crown 1CE/1CF (odd row) and 1D4/1D7, as LITTLEROOT's edges do. The landing is 7 rows (one more wall).

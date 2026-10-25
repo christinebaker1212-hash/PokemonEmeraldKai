@@ -3,11 +3,11 @@
 #define GUARD_MP_GARDEN_MAP_H
 
 #define GARDEN_W 40
-#define GARDEN_H 25
+#define GARDEN_H 26
 #define GARDEN_X0 2
 #define GARDEN_X1 37
 #define GARDEN_Y0 2
-#define GARDEN_Y1 23
+#define GARDEN_Y1 24
 #define GARDEN_BOARD_X 6
 #define GARDEN_BOARD_Y 9
 #define GARDEN_WARP_X 1   // the escalator (warp 0): in and out
@@ -17,7 +17,7 @@
 #define GARDEN_PAD_X0 0   // the landing (no Garden Pokemon or decorations on it)
 #define GARDEN_PAD_Y0 10
 #define GARDEN_PAD_X1 4
-#define GARDEN_PAD_Y1 15
+#define GARDEN_PAD_Y1 16
 #define GARDEN_GRASS 0x3001
 #define GARDEN_FLOWER 0x3004
 

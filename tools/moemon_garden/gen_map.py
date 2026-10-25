@@ -11,7 +11,8 @@ written by mp_garden.c at load time from the GROWTH_* rectangles here.
 import os, random, struct
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
-W, H = 40, 25   # (odd: every forest column ends on a whole tree above the bottom row of tree tops)
+W, H = 40, 26   # (even: outside the map, the border repeats the forest by row parity, top halves on even rows; the
+                #  bottom row of tree tops (odd) then sits over the border trees' top halves, as LITTLEROOT's does)
 
 def load(name, w):
     d = open(os.path.join(ROOT, 'data/layouts/%s/map.bin' % name), 'rb').read()
@@ -46,18 +47,26 @@ def forest_cell(r, c):
 P_TL, P_T, P_TR = mt(0x118), mt(0x119), mt(0x11a)
 P_BL, P_B, P_BR = mt(0x128), mt(0x129), mt(0x12a)
 
-# borders: top forest with its base row, left and right forest, bottom tree tops
+# the forest's edge pieces, as LITTLEROOT uses them (with their bits)
+T_END_L = (lr[3][0], lr[3][1])     # 1e4 1e7: a west column's last tree, over open ground
+T_CROWN = (lr[17][0], lr[17][1])   # 1ce 1cf: the crown of a column's first tree, over open ground
+T_FIRST_L = (lr[18][0], lr[18][1]) # 1d4 1d7: that tree's top half
+assert [v & 0x3FF for v in T_END_L + T_CROWN + T_FIRST_L] == [0x1E4, 0x1E7, 0x1CE, 0x1CF, 0x1D4, 0x1D7]
+CORNERS = (0, 1, W - 2, W - 1)
+# borders: the top forest with its edge row over the meadow, the west and east columns (which run on into the
+# forest at the corners: no edge piece there), the bottom row of tree tops
 for c in range(W):
     g[0][c] = forest_cell(0, c)
-    g[1][c] = T_BASE_A if c % 2 == 0 else T_BASE_B
-    g[H - 1][c] = T_CAP_A if c % 2 == 0 else T_CAP_B
+    g[1][c] = forest_cell(1, c) if c in CORNERS else (T_BASE_A if c % 2 == 0 else T_BASE_B)
+    g[H - 1][c] = forest_cell(H - 1, c) if c in CORNERS else (T_CAP_A if c % 2 == 0 else T_CAP_B)
 for r in range(1, H - 1):
-    for c in (0, 1, W - 2, W - 1):
+    for c in CORNERS:
         g[r][c] = forest_cell(r, c)
 # the way in and out: the POKEMON CENTER's 2F escalator against the west edge, on a landing of the CENTER's floor
 # (laid out like the CENTER's 2F: wall, escalator top, the escalator's two moving rows, wall, the wall's corner).
-# The landing starts on an even row and ends on an odd one, so the forest above and below keeps whole trees.
-PAD = (10, 0, 6, 5)   # row, col, height, width
+# The west column above it ends in a whole tree over open ground (its last bottom half on an odd row), and starts
+# again below it with a crown on an odd row, so its trees keep the border's row parity.
+PAD = (10, 0, 7, 5)   # row, col, height, width
 pc2f = load('PokemonCenter_2F', 14)   # the CENTER's 2F: the pieces keep its collision and elevation bits
 FLOOR, WALL, WALL_END = 0x2B0, 0x2B1, 0x2B2   # gen_tileset.py's imports of 0x202, 0x220, 0x228
 def pc_mt(r, c, id_=None):
@@ -74,7 +83,13 @@ for k in range(3):      # tile you step off onto has elevation 0, between the es
         g[ESC[0] + k][c] = pc_mt(5 + k, c, FLOOR if v & 0x3FF == 0x202 else None)
 g[PAD[0]][0] = pc_mt(4, 0, WALL)
 g[PAD[0] + 4][0] = pc_mt(8, 0, WALL)
-g[PAD[0] + 5][0] = pc_mt(9, 0, WALL_END)
+g[PAD[0] + 5][0] = pc_mt(8, 0, WALL)
+g[PAD[0] + 6][0] = pc_mt(9, 0, WALL_END)
+END_ROW, CROWN_ROW = PAD[0] - 1, PAD[0] + PAD[2]
+assert END_ROW % 2 == 1 and CROWN_ROW % 2 == 1
+g[END_ROW][0], g[END_ROW][1] = T_END_L
+g[CROWN_ROW][0], g[CROWN_ROW][1] = T_CROWN
+g[CROWN_ROW + 1][0], g[CROWN_ROW + 1][1] = T_FIRST_L
 WARP = (ESC[0] + 1, 1)  # the escalator tile you step on (MB_DOWN_ESCALATOR), as on a CENTER's 2F
 def stamp(src, sr, sc, h, w, dr, dc):
     for r in range(h):
