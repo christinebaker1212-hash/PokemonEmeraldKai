@@ -98,6 +98,8 @@ reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_
 Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING, the host's online; the team's top-3 average,
 co-op seats average via MpState.top3; trainers, wild, scripted wild; badge caps, boss margins, evolutions; tests levelscale_*,
 coop_levelscale).
+Also the Garden's BERRY farm (mp_farm.c: the game's own BERRY trees, ids 100-119, framed soil stamped as plots open; online the room host's
+farm through MP_Farm_Tree in GetBerryTreeInfo, plant / pick asked of the host; GA_FARM Pokémon work by nature; COOP_NOTES "BERRY farm"; tests farm_*).
 Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin; big sprites:
 struct Sprite mpBig, mp_bigsprite.c + gba_easy_draw.c DrawBigSprite draw any size in the sprite order; 8 directions, poses 7-19 =
 PMD actions, MP_Pmd_Animate; credits dist_extras/PMD_CREDITS.txt; tests pmd_*). Also battle weather on screen the whole battle (mp_battleweather.c: particles over the frame, the renderer hook gMpScenePixel

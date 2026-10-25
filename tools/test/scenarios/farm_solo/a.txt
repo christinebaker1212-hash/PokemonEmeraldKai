@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 60
+mp farm state
+shot farm
+mp item 133 1
+press DOWN 2
+wait 20
+press A 2
+waitfor yesno 300
+wait 10
+press A 2
+wait 150
+press A 2
+wait 120
+mash A 6 30
+pressuntil B field 900
+wait 30
+mp farm state
+shot planted
+mp farm grow 720
+wait 90
+mp farm state
+shot ripe
+press A 2
+wait 30
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 60
+mash A 8 40
+pressuntil B field 900
+wait 30
+mp bagqty 133
+mp farm state
+shot picked
+mp farm plant 1 7 1
+mp farm plant 2 1 5
+mp farm ripe 2
+mp farm grow 1
+wait 30
+mp life garden force 0 20
+waitlog 3000 farm: 252 tends plot 1
+mp life garden force 1 20
+waitlog 3000 farm: 258 waters plot 1
+mp life garden force 1 4
+wait 2
+mp life garden force 1 20
+waitlog 3000 farm: 258 nibbles a berry of plot 2
+wait 30
+shot work
+mp farm state
+quit

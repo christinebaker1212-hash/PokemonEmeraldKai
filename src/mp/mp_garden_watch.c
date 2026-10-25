@@ -85,6 +85,8 @@ static int Interest(u8 i)
         return 55;
     case GA_REACT:
         return 45;
+    case GA_FARM:
+        return 42;
     case GA_PURSUIT:
         return 35;
     case LIFE_ACT_NAP:
@@ -314,6 +316,12 @@ static const u8 *const sTxt_Pursuit[LIFE_PURSUIT_COUNT] = {
     [LIFE_PURSUIT_DIG]     = (const u8[])_("{STR_VAR_1} is digging a tunnel."),
     [LIFE_PURSUIT_TEACH]   = (const u8[])_("{STR_VAR_1} is showing {STR_VAR_2} how it's done."),
 };
+static const u8 sTxt_FarmAny[] = _("{STR_VAR_1} is looking after the BERRY plants.");
+static const u8 *const sTxt_Farm[] = {
+    (const u8[])_("{STR_VAR_1} is watering the BERRY plants."),
+    (const u8[])_("{STR_VAR_1} is helping a BERRY plant grow."),
+    (const u8[])_("{STR_VAR_1} is sneaking a bite of a BERRY!"),
+};
 static const u8 sTxt_Taught[] = _("{STR_VAR_2} is showing {STR_VAR_1} how it's done.");
 
 static void NameOfActor(s8 i, u8 *out)
@@ -355,6 +363,12 @@ static void Describe(void)
     case LIFE_ACT_QUIET: t = sTxt_Quiet; break;
     case GA_SONG: t = sTxt_Song; break;
     case GA_REACT: t = sTxt_React; break;
+    case GA_FARM:
+    {
+        u8 d = MP_GardenLife_Detail(sW.focus);
+        t = (d & 0x80) && (d & 0x7F) < ARRAY_COUNT(sTxt_Farm) ? sTxt_Farm[d & 0x7F] : sTxt_FarmAny;
+        break;
+    }
     case GA_RARE:
     {
         u8 d = MP_GardenLife_Detail(sW.focus);

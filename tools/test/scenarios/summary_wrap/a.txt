@@ -10,19 +10,19 @@ press A 2
 wait 30
 press A 2
 wait 90
-mp summary
+mp sumstate
 press LEFT 2
 wait 40
-mp summary
+mp sumstate
 shot journal_one_page
 press A 2
 wait 30
-mp summary
+mp sumstate
 shot journal_after_a
 press RIGHT 2
 wait 40
-mp summary
+mp sumstate
 press RIGHT 2
 wait 40
-mp summary
+mp sumstate
 quit

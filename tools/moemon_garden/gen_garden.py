@@ -353,6 +353,17 @@ def rect_ring(x0, y0, x1, y1):
 PAD = (0, 18, 4, 24)       # the escalator's landing: x0, y0, x1, y1 (the CENTER's floor)
 BOARD = (6, 17)            # the GARDEN BOARD (a sign)
 STONE = (29, 13)           # the storm stone (a sprite: mp_garden_decor.c)
+# The BERRY farm (mp_farm.c): two rows of soft soil south of the main path, by the landing, with lanes above, between
+# and below them. A plot is soil once it's open (4, then 2 more per badge, in this order); grass until then. Each has
+# a BERRY tree object (berry tree ids from FARM_TREE_FIRST, hidden by FLAG_TEMP_1 + plot while closed).
+# A row is framed as the routes frame theirs (ROUTE 104, 110, 116, 119): its rounded ends 14B / 14D beside the soil 14C
+# and the lip 113 / 114 / 115 on the row below, round the open plots only.
+FARM_ROWS = [(7, 23, 10), (7, 25, 10)]   # (first soil x, y, plots)
+FARM = [(x0 + i, y) for x0, y, n in FARM_ROWS for i in range(n)]
+FARM_TREE_FIRST = 100
+SOIL = 0x354C              # General's pieces with the routes' bits: the soil (collision 1, elevation 3)
+SOIL_L, SOIL_R = 0x314B, 0x314D           # its ends (walkable, elevation 3)
+LIP_L, LIP, LIP_R = 0x3113, 0x3114, 0x3115   # the row below
 ZONES = []                 # (need, x0, y0, x1, y1, badges, face x, face y)
 
 def zone(need, x0, y0, x1, y1, badges=0, face=None):
@@ -450,18 +461,22 @@ def base():
     for tx, ty in ((1, 1), (1, 2), (17, 1), (2, 17), (2, 18), (3, 18), (7, 18)):
         p.tree(tx, ty)
     loose = {',': [(13, 9), (14, 9), (19, 9), (22, 11), (23, 10), (34, 9), (35, 10), (12, 18), (13, 19), (17, 17),
-                   (8, 25), (9, 26), (20, 27), (21, 26), (15, 23), (36, 28), (37, 29), (16, 33), (50, 11), (39, 18),
+                   (5, 23), (19, 22), (20, 27), (21, 26), (36, 28), (37, 29), (16, 33), (50, 11), (39, 18),
                    (40, 19), (34, 15), (35, 16)],
-             'g': [(2, 9), (3, 9), (2, 10), (3, 10), (2, 11), (14, 25), (15, 25), (14, 26), (15, 26), (16, 26),
+             'g': [(2, 9), (3, 9), (2, 10), (3, 10), (2, 11), (18, 25), (18, 26), (19, 26), (18, 27),
                    (52, 22), (53, 22), (52, 23), (53, 23), (53, 24), (5, 34), (5, 35), (6, 35), (52, 9), (53, 9)]}
     for k, pts in loose.items():
         for x, y in pts:
             assert p.ground[y][x] == '.', 'dressing over %r at %d,%d' % (p.ground[y][x], x, y)
             p.ground[y][x] = k
-    for (x, y), m in (((22, 9), 0x213), ((12, 24), 0x211), ((19, 24), 0x208), ((42, 30), 0x20A), ((13, 34), 0x208),
+    for (x, y), m in (((22, 9), 0x213), ((19, 24), 0x208), ((42, 30), 0x20A), ((13, 34), 0x208),
                       ((35, 12), 0x20C)):
         assert p.ground[y][x] == '.', (x, y, p.ground[y][x])
         p.cell(x, y, SEC('mauville', m, 0x3000))
+    # the farm's plots and the lanes round them: plain grass (the soil is stamped by mp_farm.c as plots open)
+    for x in range(min(f[0] for f in FARM) - 1, max(f[0] for f in FARM) + 2):
+        for y in range(min(f[1] for f in FARM) - 1, max(f[1] for f in FARM) + 2):   # (the lane above, the lips below)
+            assert p.ground[y][x] == '.' and (x, y) not in p.cells, 'the farm over %r at %d,%d' % (p.ground[y][x], x, y)
     return p
 
 def growth(p, badge):
@@ -605,6 +620,10 @@ def main():
     m = json.load(open(mj))
     m['warp_events'] = [{'x': warp[0], 'y': warp[1], 'elevation': 0, 'dest_map': 'MAP_OLDALE_TOWN_POKEMON_CENTER_1F', 'dest_warp_id': '2'}]
     m['bg_events'][0]['x'], m['bg_events'][0]['y'] = BOARD
+    m['object_events'] = [{'graphics_id': 'OBJ_EVENT_GFX_BERRY_TREE', 'x': x, 'y': y, 'elevation': SOIL >> 12,
+                           'movement_type': 'MOVEMENT_TYPE_BERRY_TREE_GROWTH', 'movement_range_x': 0, 'movement_range_y': 0,
+                           'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': str(FARM_TREE_FIRST + i),
+                           'script': 'BerryTreeScript', 'flag': 'FLAG_TEMP_%X' % (1 + i)} for i, (x, y) in enumerate(FARM)]
     open(mj, 'w').write(json.dumps(m, indent=2) + '\n')
     write_header(warp, grow, rawg[0])
     print('moemon_garden: %d metatiles, %d tiles, palettes %s; %d growth cells' % (stats['metatiles'], stats['tiles'], stats['slots'], len(grow)))
@@ -632,7 +651,18 @@ def write_header(warp, grow, g0):
              '#define GARDEN_PAD_Y0 %d' % y0, '#define GARDEN_PAD_X1 %d' % x1, '#define GARDEN_PAD_Y1 %d' % y1,
              '#define GARDEN_STONE_X %d   // the storm stone (ELECTRIC\'s place: a sprite)' % STONE[0],
              '#define GARDEN_STONE_Y %d' % STONE[1],
-             '#define GARDEN_FLOWER 0x%03X' % FLOWER, '',
+             '#define GARDEN_FLOWER 0x%03X' % FLOWER,
+             '#define GARDEN_FARM_PLOTS %d   // the BERRY farm (mp_farm.c): object event local ids 1.., hidden by FLAG_TEMP_1 + plot' % len(FARM),
+             '#define GARDEN_FARM_TREE_FIRST %d   // their BERRY tree ids' % FARM_TREE_FIRST,
+             '#define GARDEN_SOIL 0x%04X   // an open plot\'s soft soil (with its bits), framed as the routes frame theirs:' % SOIL,
+             '#define GARDEN_SOIL_L 0x%04X   // the row\'s rounded ends' % SOIL_L, '#define GARDEN_SOIL_R 0x%04X' % SOIL_R,
+             '#define GARDEN_LIP_L 0x%04X   // the row below' % LIP_L, '#define GARDEN_LIP 0x%04X' % LIP, '#define GARDEN_LIP_R 0x%04X' % LIP_R,
+             '#define GARDEN_GRASS 0x%04X   // the ground there before a plot opens' % g0[FARM[0][1]][FARM[0][0]], '',
+             '#ifdef GARDEN_WANT_FARM',
+             '// The rows: {first soil x, y, plots}; the plots open in this order, a row at a time',
+             'static const struct GardenFarmRow { u8 x, y, count; } sGardenFarmRows[] = {']
+    lines += ['    {%d, %d, %d},' % r for r in FARM_ROWS]
+    lines += ['};', '#endif', '',
              '#ifdef GARDEN_WANT_GROWTH',
              '// What each badge adds: {badges, x, y, metatile with its bits}, in order',
              'static const struct GardenGrowth { u8 badges, x, y; u16 tile; } sGardenGrowth[] = {']

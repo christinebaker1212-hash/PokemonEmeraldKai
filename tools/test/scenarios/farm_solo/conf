@@ -1,0 +1,15 @@
+# The MOéMON GARDEN's BERRY farm alone: with no badges 4 plots are open (soil framed as the routes frame theirs).
+# Talk to plot 0 with a CHERI BERRY in the BAG: plant it (the game's own BERRY tree script); 720 minutes later it's
+# ripe; pick it (the BAG gets the BERRIES, the soil is empty again). Then the Garden Pokémon's farm work by their
+# nature: TREECKO (Grass) helps plot 1 grow, MUDKIP (Water) waters it, and a hungry MUDKIP nibbles a BERRY of plot 2,
+# left ripe a long while. Shots farm, planted, ripe, picked, work.
+MODE=1
+TMO=240
+WARP="0,57,7,22"
+ENV_A="MOEMON_DEBUG_PARTY=277:15,283:15"
+EXPECT_A=("[test] farm plots 4 friends 0" "[test] farm plot 0: berry 1 stage 1"
+          "[test] farm plot 0: berry 1 stage 5" "[test] bagqty 133: 2" "[test] farm plot 0: berry 0 stage 0"
+          "farm: 252 tends plot 1" "farm: 258 waters plot 1" "farm: 258 nibbles a berry of plot 2"
+          "[test] farm plot 1: berry 7 stage 1 yield 0 min 16" "watered 1000 care 1"
+          "[test] farm plot 2: berry 1 stage 5 yield 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

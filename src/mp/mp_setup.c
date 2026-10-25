@@ -1112,6 +1112,13 @@ static void ShowPatchReader(bool8 on)
     CopyBgTilemapBufferToVram(0);   // (this screen runs no scheduled copies)
 }
 
+static void LogPatchCursor(void)
+{
+    char name[16];
+    PatchLineName(MP_PatchNotes_Get(sSetup.patchLine[sSetup.patchCursor].first)->version, name, sizeof(name));
+    MPNet_Log("patch notes: cursor on %s", name);   // (tests find a line by name)
+}
+
 static void HandlePatches(void)
 {
     if (JOY_REPEAT(DPAD_UP) && sSetup.patchCursor > 0)
@@ -1121,6 +1128,7 @@ static void HandlePatches(void)
             sSetup.patchScroll = sSetup.patchCursor;
         PlaySE(SE_SELECT);
         DrawScreen();
+        LogPatchCursor();
     }
     else if (JOY_REPEAT(DPAD_DOWN) && sSetup.patchCursor + 1 < sSetup.patchLineCount)
     {
@@ -1129,6 +1137,7 @@ static void HandlePatches(void)
             sSetup.patchScroll = sSetup.patchCursor - LIST_ROWS + 1;
         PlaySE(SE_SELECT);
         DrawScreen();
+        LogPatchCursor();
     }
     else if (JOY_NEW(A_BUTTON) && sSetup.patchLineCount > 0)
     {

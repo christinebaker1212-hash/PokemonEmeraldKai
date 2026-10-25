@@ -1,0 +1,8 @@
+# Weather on screen from the battle's first frame: a wild battle on rainy Route 120 shows the rain during the intro
+# slide already, before the battle's own weather is set ("It is raining." comes after the send-out, as always), and
+# the rain stays. Shots intro (the slide, rain falling), sentout.
+MODE=1
+WARP=0,35,7,30
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("[test] bweather shown rain battle none" "[test] bweather shown rain battle rain" "action menu at frame")

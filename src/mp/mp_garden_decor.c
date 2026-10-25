@@ -11,6 +11,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 #include "mp_life.h"
 #include "decoration.h"
 #include "decoration_inventory.h"
@@ -318,7 +319,8 @@ static bool8 GroundFree(s16 x, s16 y)
     s16 mx = x - MAP_OFFSET, my = y - MAP_OFFSET;
     return mx >= GARDEN_X0 && mx <= GARDEN_X1 && my >= GARDEN_Y0 && my <= GARDEN_Y1
         && !(mx <= GARDEN_PAD_X1 && my >= GARDEN_PAD_Y0 && my <= GARDEN_PAD_Y1)
-        && MapGridGetCollisionAt(x, y) == 0 && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(x, y));
+        && MapGridGetCollisionAt(x, y) == 0 && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(x, y))
+        && !MP_Farm_IsFarmGround(mx, my);   // (the BERRY farm and the ways to its plots, open or not yet)
 }
 
 // On load (and when the Garden grows): a decoration whose place isn't open ground any more (a save from an older
@@ -394,7 +396,8 @@ bool8 MP_GardenDecor_CanPlaceAt(u8 decor, s16 x, s16 y)
         {
             s16 tx = x + i, ty = y - j;
             if (MapGridGetCollisionAt(tx, ty) || MP_Garden_ActorAt(tx, ty) || GetObjectEventIdByXY(tx, ty) != OBJECT_EVENTS_COUNT
-             || MP_GardenDecor_At(tx, ty))   // (ours, friends', the storm stone)
+             || MP_GardenDecor_At(tx, ty)   // (ours, friends', the storm stone)
+             || MP_Farm_IsFarmGround(tx - MAP_OFFSET, ty - MAP_OFFSET))
                 return FALSE;
         }
     return TRUE;

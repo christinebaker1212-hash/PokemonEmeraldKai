@@ -21,6 +21,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "mp_farm.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_interface.h"
@@ -320,7 +321,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
     }
-    else if (strcmp(cmd, "summary") == 0)   // the summary screen's page and input mode
+    else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
     {
         void MP_Summary_Debug(void);
         MP_Summary_Debug();
@@ -403,6 +404,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (cmd[3] == 'c')
             GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "farm") == 0)
+    {
+        // farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT: the MOéMON GARDEN's BERRY farm (mp_farm.c)
+        MP_Farm_Debug(arg);
     }
     else if (strcmp(cmd, "life") == 0)
     {
@@ -2075,6 +2081,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG) ? ":BADEGG" : "");
         }
         printf("\n");
+    }
+    else if (strcmp(cmd, "bwshown") == 0)   // bwshown - the weather on screen and the battle's own (mp_battleweather.c)
+    {
+        void MP_BattleWeather_Debug(void);
+        MP_BattleWeather_Debug();
     }
     else if (strcmp(cmd, "bweather") == 0)   // bweather rain|downpour|sun|sand|hail|none - the battle's weather now
     {

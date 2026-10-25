@@ -1,0 +1,41 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+pressuntil B field 900
+mp givebadges
+wait 200
+barrier ripe 2
+wait 120
+mp farm state
+shot bob_farm
+press DOWN 2
+wait 20
+press A 2
+wait 30
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 120
+mash A 8 40
+pressuntil B field 900
+wait 30
+mp bagqty 133
+shot bob_picked
+press A 2
+waitfor yesno 300
+wait 10
+press A 2
+wait 150
+press A 2
+wait 180
+mash A 6 30
+pressuntil B field 900
+wait 30
+mp bagqty 133
+barrier helper 2
+mp life garden force 0 20
+waitlog 3000 farm: 258 waters plot
+wait 300
+mp farm state
+barrier done 2
+quit

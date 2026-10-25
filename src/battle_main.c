@@ -4203,6 +4203,7 @@ static void TryDoEventsBeforeFirstTurn(void)
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
     gBattleMainFunc = HandleTurnActionSelectionState;
     MP_Join_OnTurnStart();   // Moemon Co-op: friends asking to join are asked about first (mp_join.c)
+    MP_BattleWeather_TurnStart();   // Moemon Co-op: the battle's own weather from now on (mp_battleweather.c)
     ResetSentPokesToOpponentValue();
 
     for (i = 0; i < BATTLE_COMMUNICATION_ENTRIES_COUNT; i++)
@@ -4311,6 +4312,7 @@ void BattleTurnPassed(void)
     BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
     gBattleMainFunc = HandleTurnActionSelectionState;
     MP_Join_OnTurnStart();   // Moemon Co-op: friends asking to join are asked about first (mp_join.c)
+    MP_BattleWeather_TurnStart();   // Moemon Co-op: the battle's own weather from now on (mp_battleweather.c)
     gRandomTurnNumber = Random();
 
     if (gBattleTypeFlags & BATTLE_TYPE_PALACE)

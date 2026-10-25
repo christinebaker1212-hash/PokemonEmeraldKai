@@ -81,6 +81,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `levelscale_trainer` | ROXANNE's ace Lv15 -> 20 against a team averaging 42 (boss margin, no-badge cap) |
 | `levelscale_off` | LEVEL SCALING off: no scaling |
 | `coop_levelscale` | NA-JP lag: ROXANNE scaled for the average of both teams (Lv30 and Lv50) |
+| `farm_solo` | the Garden's BERRY farm: 4 plots open, plant a CHERI BERRY by talking to plot 0, grow, pick it; TREECKO tends, MUDKIP waters, a hungry MUDKIP nibbles |
+| `farm_together` | NA-JP lag: BOB sees ALICE's (the host's) farm, picks her ripe plot (her game hands the BERRIES over) and plants one back |
 | `pmd_follower` | a shiny TORCHIC follows as a PMD Collab picture (big sprite): walking right, then idle (mp pmd), shots |
 | `pmd_remote` | NA-JP lag: BOB sees ALICE's shiny ONIX follower as the same shiny PMD picture (followerFlags bit 7) |
 | `patch_notes` | PATCH NOTES on the CO-OP setup screen: the list of version lines, 1.18's five updates full screen (scroll, page), 0.1 at the end (shots) |

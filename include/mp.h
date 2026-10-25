@@ -274,6 +274,8 @@ const char *MP_Lobby_RoomName(void);
 u16 MP_Lobby_OtherVersion(void);
 void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
+bool8 MP_Lobby_IsCreator(void);  // we made the room we're in (its host)
+s8 MP_RoomHostId(void);          // online in a room someone else made: the host's player id while they're here; else -1
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
 bool8 MP_LevelScaling(void);     // ... and LEVEL SCALING
@@ -389,6 +391,7 @@ void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
 void MP_Candy_Composite(u16 *frame);
+void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
 // The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel
 extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
@@ -1126,6 +1129,7 @@ enum {
     MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
     MPR_JOIN_FIRST = 240,      // joining a friend's battle in progress (mp_join.c)
     MPR_GARDEN_FIRST = 250,    // the MOéMON GARDEN: 250 Pokémon there, 251 decorations (mp_garden_net.c)
+    MPR_FARM_FIRST = 252,      // the Garden's BERRY farm: 252 the host's farm, 253 a friend asks, 254 the answer (mp_farm.c)
 };
 
 // mp_world.c: map changes and lights shared by friends on the same map

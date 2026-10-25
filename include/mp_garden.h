@@ -24,6 +24,7 @@ enum
     GA_RARE,        // a rare moment with another (LIFE_RARE_*)
     GA_REACT,       // going to see a friend's new body (an evolution)
     GA_SONG,        // a family song
+    GA_FARM,        // work on the BERRY farm, by its nature (mp_farm.c FARM_WORK_*)
     GA_COUNT
 };
 

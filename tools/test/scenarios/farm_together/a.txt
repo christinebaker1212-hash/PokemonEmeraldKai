@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+pressuntil B field 900
+wait 200
+mp farm plant 0 1 5
+mp farm state
+barrier ripe 2
+waitlog 6000 farm: player 2 plants berry 1 in plot 0
+wait 120
+mp farm state
+shot alice_farm
+barrier helper 2
+waitlog 6000 farm: player 2 waters plot
+wait 120
+mp farm state
+barrier done 2
+quit

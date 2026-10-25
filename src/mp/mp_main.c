@@ -26,6 +26,7 @@
 #include "mp_life_battle.h"
 #include "mp_life_social.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -123,6 +124,7 @@ static u8 AsciiCharToGame(char c)
 
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+static s8 sRoomHostId = -1;          // ... and who sent them (the host's player id)
 static bool8 sRoomLevelScaling;
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
@@ -1197,6 +1199,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomLevelScaling = len >= 4 ? data[3] != 0 : TRUE;
             sRoomRulesHeard = TRUE;
+            sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
                       sRoomPadding ? "on" : "off", sRoomAnimSpeed, sRoomLevelScaling ? "on" : "off");
         }
@@ -1251,6 +1254,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Join_OnRelay(from, data, len);
     else if (data[0] >= MPR_GARDEN_FIRST && data[0] < MPR_GARDEN_FIRST + 2)
         MP_GardenNet_OnRelay(from, data, len);
+    else if (data[0] >= MPR_FARM_FIRST && data[0] < MPR_FARM_FIRST + 3)
+        MP_Farm_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1346,6 +1351,16 @@ static void ShowWelcome(u8 from, const u8 *text, u16 len)
 }
 
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
+bool8 MP_Lobby_IsCreator(void) { return sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM; }
+
+// The room's host (who made it), heard with its rules when we joined: while they're still here
+s8 MP_RoomHostId(void)
+{
+    if (sLobby.creator || !sRoomRulesHeard || sRoomHostId < 0 || sRoomHostId >= MP_MAX_PLAYERS || sRoomHostId == gMpLocalId
+     || (sLobby.state != MP_LOBBY_IN_ROOM && sLobby.state != MP_LOBBY_RECONNECT_WAIT) || !gMpPlayers[sRoomHostId].present)
+        return -1;
+    return sRoomHostId;
+}
 
 // TEAM PADDING: the host's choice, heard when we joined (our own when we made the room,
 // before we hear it, or with nobody around)
@@ -1527,6 +1542,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.request = req;
     sLobby.creator = (req == REQ_CREATE);
     sRoomRulesHeard = FALSE;
+    sRoomHostId = -1;
     sHostClockHeard = FALSE;
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)

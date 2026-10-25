@@ -21,6 +21,23 @@
 #define GARDEN_STONE_X 29   // the storm stone (ELECTRIC's place: a sprite)
 #define GARDEN_STONE_Y 13
 #define GARDEN_FLOWER 0x004
+#define GARDEN_FARM_PLOTS 20   // the BERRY farm (mp_farm.c): object event local ids 1.., hidden by FLAG_TEMP_1 + plot
+#define GARDEN_FARM_TREE_FIRST 100   // their BERRY tree ids
+#define GARDEN_SOIL 0x354C   // an open plot's soft soil (with its bits), framed as the routes frame theirs:
+#define GARDEN_SOIL_L 0x314B   // the row's rounded ends
+#define GARDEN_SOIL_R 0x314D
+#define GARDEN_LIP_L 0x3113   // the row below
+#define GARDEN_LIP 0x3114
+#define GARDEN_LIP_R 0x3115
+#define GARDEN_GRASS 0x3001   // the ground there before a plot opens
+
+#ifdef GARDEN_WANT_FARM
+// The rows: {first soil x, y, plots}; the plots open in this order, a row at a time
+static const struct GardenFarmRow { u8 x, y, count; } sGardenFarmRows[] = {
+    {7, 23, 10},
+    {7, 25, 10},
+};
+#endif
 
 #ifdef GARDEN_WANT_GROWTH
 // What each badge adds: {badges, x, y, metatile with its bits}, in order

@@ -1188,6 +1188,23 @@ shows the most badges among you.
 With friends there, everyone's MOEMON and decorations are there
 together (whichever CENTER each of you came up in).
 
+THE BERRY FARM: two rows of soft, loamy soil just below the landing.
+4 plots are open at first, and each badge opens 2 more (20 with all
+eight). They work like the BERRY patches on the routes: talk to one
+(or use a BERRY on it from the BAG) to plant a BERRY, water it with the
+WAILMER PAIL at each stage for more BERRIES, and pick them when they're
+ripe. They grow on your own PC's clock, even while you're away, and
+BERRIES left too long fall and grow again, as on the routes.
+Your MOEMON lend a hand, each in its own way: GRASS types help a plant
+grow a little faster, WATER types and the kindest MOEMON water dry
+soil, and a hungry or mischievous one may sneak a bite of BERRIES you
+leave ripe for too long.
+Online, the Garden's farm is the host's (whoever made the room): all of
+you plant, water and pick there together, and its plots are the host's
+(their badges). Whoever gets to a plot first plants it or picks its
+BERRIES. Your own farm waits for you, growing, until you play alone or
+host.
+
 Over time, a MOEMON may take up something it loves in the Garden:
 climbing the trees, splashing in the pond, singing, collecting pretty
 stones, digging tunnels or showing the younger ones. It gets better at

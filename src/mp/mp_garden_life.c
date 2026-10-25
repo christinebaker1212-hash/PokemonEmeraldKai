@@ -18,6 +18,7 @@
 #include "mp.h"
 #include "mp_pmd.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 #include "mp_life.h"
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
@@ -90,6 +91,8 @@ struct Actor
     bool8 learner;          // GA_PURSUIT: it's the one being taught
     bool8 seen;             // GA_RARE: the Trainer saw it happen
     u8 newBody;             // times it showed it's still getting used to a new body (this visit)
+    s8 farmPlot;            // GA_FARM: the plot it's seeing to, and what it does there (FARM_WORK_*)
+    u8 farmWork;
     // the network: the tile it last stepped from (ours: sent with cur); a friend's: the tiles their game says it
     // stepped on, replayed in order (the same path and facings on every screen)
     struct Coords16 from;
@@ -1288,6 +1291,18 @@ static void SongDone(struct Actor *a)
         MP_Life_Feel(RecOf(b), EMO_JOY, 12);
 }
 
+// The farm work done (beside its plot; the plot may not need it any more: someone got there first)
+static void FarmDone(struct Actor *a)
+{
+    s16 px, py;
+    if (a->farmPlot < 0)
+        return;
+    MP_Farm_PlotPos(a->farmPlot, &px, &py);
+    if (abs(a->cur.x - px) + abs(a->cur.y - py) == 1 && MP_Farm_DoWork(a->farmWork, a->farmPlot, a->dex))
+        MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->farmWork == FARM_WORK_NIBBLE ? LIFE_EMOTE_HEART : LIFE_EMOTE_NOTE);
+    a->farmPlot = -1;
+}
+
 // --- Evolution: friends come to see the new body; the evolved one isn't used to it yet
 
 static bool8 TryReact(struct Actor *a, struct MpLifeRec *rec)
@@ -1378,6 +1393,56 @@ static bool8 TypePlace(struct Actor *a, u8 tneed, bool8 anyTime)
     return TRUE;
 }
 
+// What it would do on the BERRY farm, by its nature (and how much it wants to: 0 nothing)
+static u16 FarmWork(struct Actor *a, struct MpLifeRec *rec, s8 *plot, u8 *work)
+{
+    u32 busy = 0;
+    u8 i;
+    s8 p;
+    if (a->owner >= 0 || MP_Farm_Plots() == 0)
+        return 0;
+    for (i = 0; i < MAX_ACTORS; i++)   // (one of ours to a plot)
+        if (sL.a[i].used && &sL.a[i] != a && sL.a[i].act == GA_FARM && sL.a[i].farmPlot >= 0)
+            busy |= 1u << sL.a[i].farmPlot;
+    if (HasType(rec, TYPE_GRASS) && (p = MP_Farm_FindWork(FARM_WORK_TEND, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_TEND;
+        return 26 + rec->cur[LIFE_WARM] / 16;
+    }
+    if ((HasType(rec, TYPE_WATER) || rec->cur[LIFE_WARM] >= 150)
+     && (p = MP_Farm_FindWork(FARM_WORK_WATER, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_WATER;
+        return 14 + rec->cur[LIFE_WARM] / 10 + (HasType(rec, TYPE_WATER) ? 12 : 0);
+    }
+    if ((rec->need[NEED_HUNGER] >= 110 || (rec->cur[LIFE_LIVELY] >= 160 && rec->cur[LIFE_WARM] < 110))
+     && (p = MP_Farm_FindWork(FARM_WORK_NIBBLE, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_NIBBLE;
+        return 10 + rec->need[NEED_HUNGER] / 10;
+    }
+    return 0;
+}
+
+// Off to a plot: beside it, facing it (watering: a nod; helping it grow: powering up; a nibble: eating)
+static bool8 PlanFarm(struct Actor *a, s8 plot, u8 work)
+{
+    static const u8 sPose[FARM_WORK_COUNT] = {LIFE_POSE_NOD, LIFE_POSE_CHARGE, LIFE_POSE_EAT};
+    static const u8 sEmote[FARM_WORK_COUNT] = {LIFE_EMOTE_WATER, LIFE_EMOTE_LEAF, LIFE_EMOTE_FOOD};
+    s16 px, py, x, y, fx, fy;
+    if (plot < 0 || work >= FARM_WORK_COUNT)
+        return FALSE;
+    MP_Farm_PlotPos(plot, &px, &py);
+    sSearcher = a;
+    if (!FindNear(px, py, T_Any, 1, &x, &y, &fx, &fy))
+        return FALSE;
+    Plan(a, GA_FARM, x, y, px, py, work == FARM_WORK_NIBBLE ? 60 * 3 : 60 * 4, sPose[work], sEmote[work]);
+    a->farmPlot = plot;
+    a->farmWork = work;
+    MPNet_Log("garden: %u goes to plot %d (work %u)", a->dex, plot, work);
+    return TRUE;
+}
+
 static void Choose(struct Actor *a, struct MpLifeRec *rec)
 {
     u16 score[GA_COUNT];
@@ -1387,7 +1452,9 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     struct Actor *friendA = NULL, *rivalA = NULL, *songMate = NULL;
     s16 dX = 0, dY = 0;
-    s8 decor;
+    s8 decor, farmPlot = -1;
+    u8 farmWork = 0;
+    u16 farmScore;
     memset(score, 0, sizeof(score));
     // long-term life first (docs 12): a friend's new body, a rare moment, its own new body
     if (TryReact(a, rec) || TryRare(a, rec, 0) || NewBody(a, rec))
@@ -1423,6 +1490,10 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
     // a song its family sings, with family close by
     if (MP_Life_FamilyTrait(rec, TRAIT_FAMILY_SONG) && (songMate = OursNear(a, 8, IsFamilyOf)) != NULL)
         score[GA_SONG] = 20 + rec->cur[LIFE_WARM] / 10;
+    // the BERRY farm, by its nature: Grass types help a plant grow, Water types and warm ones water dry soil, and a
+    // hungry or mischievous one may nibble BERRIES left too long
+    farmScore = FarmWork(a, rec, &farmPlot, &farmWork);
+    score[GA_FARM] = farmScore;
     for (i = 0; i < GA_COUNT; i++)
         total += score[i];
     if (total == 0)
@@ -1563,6 +1634,9 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
             a->decor = decor;
         }
         break;
+    case GA_FARM:
+        PlanFarm(a, farmPlot, farmWork);
+        break;
     }
 }
 
@@ -1583,6 +1657,12 @@ static void Satisfy(struct Actor *a, struct MpLifeRec *rec)
     case GA_RARE:
     case GA_SONG:     MP_Life_Satisfy(rec, NEED_COMPANY, 10); MP_Life_Feel(rec, EMO_JOY, 2); MP_Life_Feel(rec, EMO_CALM, 2); break;
     case GA_REACT:    MP_Life_Satisfy(rec, NEED_COMPANY, 4); break;
+    case GA_FARM:
+        if (a->farmWork == FARM_WORK_NIBBLE)
+            MP_Life_Satisfy(rec, NEED_HUNGER, 12);
+        else
+            MP_Life_Feel(rec, EMO_CALM, 1);
+        break;
     default:          MP_Life_Satisfy(rec, NEED_EXPLORE, 5); break;
     }
 }
@@ -1697,6 +1777,8 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
             RareDone(a, rec);
         if (a->act == GA_SONG && a->lead)
             SongDone(a);
+        if (a->act == GA_FARM)
+            FarmDone(a);
         a->act = GA_NONE;
         a->pose = LIFE_POSE_NONE;
         a->partner = -1;
@@ -1801,6 +1883,8 @@ u8 MP_GardenLife_Detail(u8 i)
         return a->rare | (a->lead ? 0 : 0x80);
     if (a->act == GA_PURSUIT)
         return a->learner ? 0x80 : (rec = RecOf(a)) != NULL ? rec->pursuit : 0;
+    if (a->act == GA_FARM)
+        return 0x80 | a->farmWork;
     return 0;
 }
 
@@ -2125,6 +2209,16 @@ void MP_GardenLife_DebugForce(u8 actor, u8 act)
         case GA_PLAY: case GA_CHASE: rec->need[NEED_PLAY] = 250; rec->cur[LIFE_LIVELY] = 200; break;
         case GA_COMPANY: rec->need[NEED_COMPANY] = 250; rec->cur[LIFE_SOCIAL] = 220; break;
         case GA_QUIET: rec->need[NEED_QUIET] = 250; rec->cur[LIFE_SOCIAL] = 40; break;
+        case GA_FARM:
+        {
+            // the farm work its nature picks (none: nothing)
+            s8 plot = -1;
+            u8 work = 0;
+            if (FarmWork(&sL.a[actor], rec, &plot, &work))
+                PlanFarm(&sL.a[actor], plot, work);
+            printf("[test] garden farm actor %u -> plot %d work %u\n", actor, sL.a[actor].act == GA_FARM ? plot : -1, work);
+            return;
+        }
         }
     }
     Choose(&sL.a[actor], rec);

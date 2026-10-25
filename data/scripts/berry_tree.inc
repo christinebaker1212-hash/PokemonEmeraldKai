@@ -40,6 +40,10 @@ BerryTree_EventScript_ChooseBerryToPlant::
 	closemessage
 	special Bag_ChooseBerry
 	goto_if_eq VAR_ITEM_ID, 0, BerryTree_EventScript_CancelPlanting
+	@ Moemon Co-op: a plot of a friend's farm (the MOéMON GARDEN online) asks the farm's host first
+	specialvar VAR_RESULT, MP_Farm_AskPlant
+	call_if_eq VAR_RESULT, MP_FARM_WAIT, BerryTree_EventScript_FarmWait
+	goto_if_ne VAR_RESULT, MP_FARM_GO, BerryTree_EventScript_FarmNotPlanted
 	removeitem VAR_ITEM_ID
 	call BerryTree_EventScript_PlantBerry
 
@@ -107,6 +111,10 @@ BerryTree_EventScript_CheckBerryFullyGrown::
 	goto_if_eq VAR_RESULT, NO, BerryTree_EventScript_CancelPickingBerry
 
 BerryTree_EventScript_PickBerry::
+	@ Moemon Co-op: a friend's farm: its host hands the BERRIES over (so only one Trainer picks them)
+	specialvar VAR_RESULT, MP_Farm_AskPick
+	call_if_eq VAR_RESULT, MP_FARM_WAIT, BerryTree_EventScript_FarmWait
+	goto_if_ne VAR_RESULT, MP_FARM_GO, BerryTree_EventScript_FarmNotPicked
 	special ObjectEventInteractionPickBerryTree
 	goto_if_eq VAR_0x8004, 0, BerryTree_EventScript_BerryPocketFull
 	special IncrementDailyPickedBerries
@@ -139,9 +147,54 @@ BerryTree_EventScript_CancelPickingBerry::
 BerryTree_EventScript_ItemUsePlantBerry::
 	lockall
 	special ObjectEventInteractionGetBerryTreeData
+	specialvar VAR_RESULT, MP_Farm_AskPlant
+	call_if_eq VAR_RESULT, MP_FARM_WAIT, BerryTree_EventScript_FarmWait
+	goto_if_ne VAR_RESULT, MP_FARM_GO, BerryTree_EventScript_FarmItemNotPlanted
 	call BerryTree_EventScript_PlantBerry
 	releaseall
 	end
+
+@ Moemon Co-op: the farm's host answers (mp_farm.c ends the wait)
+BerryTree_EventScript_FarmWait::
+	waitstate
+	return
+
+BerryTree_EventScript_FarmNotPlanted::
+	call BerryTree_EventScript_FarmPlantMessage
+	release
+	end
+
+BerryTree_EventScript_FarmItemNotPlanted::
+	additem VAR_ITEM_ID
+	call BerryTree_EventScript_FarmPlantMessage
+	releaseall
+	end
+
+BerryTree_EventScript_FarmPlantMessage::
+	goto_if_eq VAR_RESULT, MP_FARM_NO_ANSWER, BerryTree_EventScript_FarmNoAnswer
+	message BerryTree_Text_FarmPlantedFirst
+	waitmessage
+	waitbuttonpress
+	return
+
+BerryTree_EventScript_FarmNotPicked::
+	goto_if_eq VAR_RESULT, MP_FARM_NO_ANSWER, BerryTree_EventScript_FarmNoAnswerRelease
+	message BerryTree_Text_FarmPickedFirst
+	waitmessage
+	waitbuttonpress
+	release
+	end
+
+BerryTree_EventScript_FarmNoAnswerRelease::
+	call BerryTree_EventScript_FarmNoAnswer
+	release
+	end
+
+BerryTree_EventScript_FarmNoAnswer::
+	message BerryTree_Text_FarmNoAnswer
+	waitmessage
+	waitbuttonpress
+	return
 
 BerryTree_EventScript_WantToWater::
 	checkitem ITEM_WAILMER_PAIL
@@ -247,3 +300,15 @@ BerryTree_Text_PlantIsDelighted:
 
 BerryTree_Text_ExclamationPoint:
 	.string "!$"
+
+BerryTree_Text_FarmPlantedFirst:
+	.string "Someone else planted a BERRY here\n"
+	.string "just now.$"
+
+BerryTree_Text_FarmPickedFirst:
+	.string "Someone else picked these BERRIES\n"
+	.string "just now.$"
+
+BerryTree_Text_FarmNoAnswer:
+	.string "The farm's host didn't answer.\n"
+	.string "Try again in a moment.$"
