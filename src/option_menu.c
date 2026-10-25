@@ -75,8 +75,16 @@ enum
     OPT_FR_PLACE,
     OPT_FR_SIZE,
     OPT_FR_BACK,
+    OPT_SC_ON,        // the LEVEL SCALING page (MP_SCALE_*, in order)
+    OPT_SC_WILD,
+    OPT_SC_TRAINERS,
+    OPT_SC_BOSS,
+    OPT_SC_CAPS,
+    OPT_SC_PAST8,
+    OPT_SC_BACK,
     OPT_CLOSE,
 };
+#define SC_RULE(opt) ((opt) - OPT_SC_ON)
 
 #define MAX_ROWS 16
 static EWRAM_DATA struct { u8 opt, arg; } sRows[MAX_ROWS] = {0};
@@ -85,6 +93,7 @@ static EWRAM_DATA u8 sTab = 0;
 static EWRAM_DATA u8 sSel = 0;
 static EWRAM_DATA u16 sTop = 0;
 static EWRAM_DATA u8 sFriendPage = 0;      // 0: the CO-OP tab, 1 + player id: that friend's page
+static EWRAM_DATA bool8 sScalePage = 0;    // GAME > LEVEL SCALING's page
 static EWRAM_DATA u8 sCoopCursor = 0;      // where the CO-OP tab's cursor was before a friend's page
 static EWRAM_DATA u8 sArrowTask = 0;
 static EWRAM_DATA u8 sStartCreatures = 0;
@@ -138,6 +147,21 @@ static const u8 sText_FollowDefault[] = _("DEFAULT");
 static const u8 sText_FollowPmd[] = _("PMD");
 static const u8 sText_FollowOriginal[] = _("ORIGINAL");
 static const u8 sText_LevelScale[] = _("LEVEL SCALING");
+static const u8 sText_ScWild[] = _("WILD");
+static const u8 sText_ScTrainers[] = _("TRAINERS");
+static const u8 sText_ScBoss[] = _("BOSS MARGIN");
+static const u8 sText_ScCaps[] = _("BADGE CAPS");
+static const u8 sText_ScPast8[] = _("PAST 8 BADGES");
+static const u8 sText_ScLow[] = _("LOW");
+static const u8 sText_ScMedium[] = _("MEDIUM");
+static const u8 sText_ScHigh[] = _("HIGH");
+static const u8 sText_ScBelow[] = _("BELOW");
+static const u8 sText_ScEven[] = _("EVEN");
+static const u8 sText_ScAbove[] = _("ABOVE");
+static const u8 sText_ScToLeague[] = _("TO LEAGUE");
+static const u8 sText_ScFree[] = _("FREE");
+static const u8 sText_ScCapped[] = _("CAPPED");
+static const u8 sText_ScAuto[] = _("AUTO");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
@@ -260,6 +284,12 @@ static void BuildRows(void)
 {
     u8 ids[MP_MAX_PLAYERS], n, i;
     sRowCount = 0;
+    if (sScalePage)
+    {
+        for (i = OPT_SC_ON; i <= OPT_SC_BACK; i++)
+            AddRow(i, 0);
+        return;
+    }
     if (sFriendPage)
     {
         AddRow(OPT_FR_SHOW, sFriendPage - 1);
@@ -321,6 +351,12 @@ static int Wrap(int v, int n)
     return (v % n + n) % n;
 }
 
+// Online in a room someone else made, LEVEL SCALING is theirs: shown, not changed
+static bool8 ScaleLocked(void)
+{
+    return MP_Lobby_InRoom() && !MP_LevelScalingIsOurs();
+}
+
 static u8 AutosaveIndex(void)
 {
     u8 i;
@@ -357,7 +393,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_LEVELSCALE:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -389,6 +425,18 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_FOLLOWSPRITES:
         names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
         return 3;
+    case OPT_SC_ON: case OPT_SC_CAPS:
+        names[0] = sText_Off, names[1] = sText_On;
+        return 2;
+    case OPT_SC_WILD:
+        names[0] = sText_Off, names[1] = sText_ScLow, names[2] = sText_ScMedium, names[3] = sText_ScHigh;
+        return 4;
+    case OPT_SC_TRAINERS:
+        names[0] = sText_Off, names[1] = sText_ScBelow, names[2] = sText_ScEven, names[3] = sText_ScAbove;
+        return 4;
+    case OPT_SC_PAST8:
+        names[0] = sText_ScToLeague, names[1] = sText_ScFree, names[2] = sText_ScCapped;
+        return 3;
     }
     // one free-form value
     buf[0] = EOS;
@@ -405,6 +453,21 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         {
             u8 *p = ConvertIntToDecimalStringN(buf, Display_GetWindowScale(), STR_CONV_MODE_LEFT_ALIGN, 2);
             p[0] = CHAR_x, p[1] = EOS;
+        }
+        break;
+    case OPT_LEVELSCALE:
+        StringCopy(buf, MP_LevelScaleRule(MP_SCALE_ON) ? sText_On : sText_Off);
+        break;
+    case OPT_SC_BOSS:
+        {
+            u8 v = MP_LevelScaleRule(MP_SCALE_BOSS);
+            if (v == 0)
+                StringCopy(buf, sText_ScAuto);
+            else
+            {
+                buf[0] = CHAR_PLUS;
+                ConvertIntToDecimalStringN(buf + 1, v - 1, STR_CONV_MODE_LEFT_ALIGN, 1);
+            }
         }
         break;
     case OPT_PADSELECT:
@@ -493,7 +556,9 @@ static u8 Current(u8 row)
     case OPT_FR_PLACE:    return FriendPlace(MP_Spectate_Friend(arg, FALSE));
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
-    case OPT_LEVELSCALE:  return gMpConfig.levelScaling != 0;
+    case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+        return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
@@ -548,7 +613,15 @@ static void Change(u8 row, int dir)
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
-    case OPT_LEVELSCALE:  gMpConfig.levelScaling = !gMpConfig.levelScaling; MP_SendRoomRules(); break;
+    case OPT_LEVELSCALE:  break;   // A opens its page
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+        if (!ScaleLocked())
+        {
+            u8 rule = SC_RULE(sRows[row].opt);
+            MP_LevelScaleSetOwn(rule, Wrap(MP_LevelScaleOwnRule(rule) + dir, MP_LevelScaleRuleCount(rule)));
+            MPNet_Log("level scaling rule %d: %d", rule, MP_LevelScaleOwnRule(rule));
+        }
+        break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
@@ -614,6 +687,13 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FLAGRANGE:   return sText_FlagRange;
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_FOLLOWSPRITES: return sText_Followers;
+    case OPT_SC_ON:       return sText_LevelScale;
+    case OPT_SC_WILD:     return sText_ScWild;
+    case OPT_SC_TRAINERS: return sText_ScTrainers;
+    case OPT_SC_BOSS:     return sText_ScBoss;
+    case OPT_SC_CAPS:     return sText_ScCaps;
+    case OPT_SC_PAST8:    return sText_ScPast8;
+    case OPT_SC_BACK:     return sText_Back;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
@@ -729,8 +809,24 @@ static void DrawHint(void)
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
-        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s" : "WILD AND TRAINERS KEEP UP WITH YOU",
-                 MP_LevelScaling() ? "ON" : "OFF");
+        snprintf(ascii, sizeof(ascii), "%s", ScaleLocked() ? "ONLINE THE HOST DECIDES. A: SEE IT" : "A: HOW WILD AND TRAINERS KEEP UP");
+    else if (opt >= OPT_SC_ON && opt <= OPT_SC_PAST8 && ScaleLocked())
+        snprintf(ascii, sizeof(ascii), "THE HOST DECIDES THIS ONLINE");
+    else if (opt == OPT_SC_ON)
+        snprintf(ascii, sizeof(ascii), "WILD AND TRAINERS KEEP UP WITH YOU");
+    else if (opt == OPT_SC_WILD)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"WILD ONES AT THEIR OWN LEVELS", "A QUARTER OF THE WAY TO YOUR TEAM",
+                 "HALFWAY TO YOUR TEAM'S LEVEL", "A FEW LEVELS BELOW YOUR TEAM"}[MP_LevelScaleRule(MP_SCALE_WILD) & 3]);
+    else if (opt == OPT_SC_TRAINERS)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"TRAINERS AT THEIR OWN LEVELS", "THEIR BEST 4 BELOW YOUR TEAM",
+                 "THEIR BEST AT YOUR TEAM'S LEVEL", "THEIR BEST 3 ABOVE YOUR TEAM"}[MP_LevelScaleRule(MP_SCALE_TRAINERS) & 3]);
+    else if (opt == OPT_SC_BOSS)
+        snprintf(ascii, sizeof(ascii), "HOW FAR ABOVE YOUR TEAM BOSSES ARE");
+    else if (opt == OPT_SC_CAPS)
+        snprintf(ascii, sizeof(ascii), "A LEVEL CAP THAT RISES WITH BADGES");
+    else if (opt == OPT_SC_PAST8)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"CAPPED UNTIL THE LEAGUE, THEN FREE", "NO CAP ONCE YOU HAVE ALL 8",
+                 "ALWAYS A CAP (80 AFTER THE LEAGUE)"}[MP_LevelScaleRule(MP_SCALE_PAST8) % 3]);
     else if (opt == OPT_BUTTONICONS)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)
@@ -758,7 +854,17 @@ static void DrawHeader(void)
 {
     int i, x = 8;
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    if (sFriendPage)
+    if (sScalePage)
+    {
+        u8 buf[40];
+        u8 *p = StringCopy(buf, sTabNames[TAB_GAME]);
+        *p++ = CHAR_SPACE;
+        *p++ = CHAR_GREATER_THAN;
+        *p++ = CHAR_SPACE;
+        StringCopy(p, sText_LevelScale);
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
+    }
+    else if (sFriendPage)
     {
         u8 buf[32];
         u8 *p = StringCopy(buf, sText_TabCoop);
@@ -803,7 +909,7 @@ static void HighlightRow(void)
 // A number for everything the rows show, to redraw when something changes elsewhere (F11, a controller, a friend)
 static u32 ShownKey(void)
 {
-    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + Gamepad_IsSelecting();
+    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting();
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
@@ -951,6 +1057,7 @@ void CB2_InitOptionMenu(void)
         sArrowTask = TASK_NONE;
         if (gSaveBlock2Ptr->optionsWindowFrameType >= WINDOW_FRAMES_COUNT)
             gSaveBlock2Ptr->optionsWindowFrameType = 0;
+        sScalePage = FALSE;
         GoTo(TAB_GAME, 0, 0);
         gMain.state++;
         break;
@@ -993,10 +1100,29 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_COOP, 0, 0);   // that friend left
         return;
     }
-    else if (!sFriendPage && JOY_NEW(L_BUTTON | R_BUTTON))
+    else if (!sFriendPage && !sScalePage && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         GoTo(Wrap(sTab + (JOY_NEW(R_BUTTON) ? 1 : -1), TAB_COUNT), 0, 0);
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_LEVELSCALE)
+    {
+        PlaySE(SE_SELECT);
+        sScalePage = TRUE;
+        GoTo(TAB_GAME, 0, 0);
+        return;
+    }
+    else if (sScalePage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_SC_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sScalePage = FALSE;
+        GoTo(TAB_GAME, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_LEVELSCALE)
+                sSel = i;
+        RedrawAll();
         return;
     }
     else if (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && (opt == OPT_CLOSE || opt == OPT_FR_BACK)))

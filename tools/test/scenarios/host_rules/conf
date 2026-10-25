@@ -1,0 +1,8 @@
+# HOST A GAME > GAME RULES on the CO-OP setup screen: the host form's GAME RULES row opens the rules page (TEAM
+# PADDING, ANIM SPEED, LEVEL SCALING and its settings); TRAINERS from EVEN to ABOVE, PAST 8 BADGES from capped to
+# the League to FREE; B back to the host form and the main screen. Saved (a.ini). Shots hr_host, hr_rules, hr_changed.
+MODE=1
+TMO=90
+ENV_A="MOEMON_SKIP_COOP_SETUP=0"
+EXPECT_A=("setup: game rules" "setup: rule 4 now 3" "setup: rule 7 now 1")
+CHECK="bash tools/test/scenarios/host_rules/check.sh"

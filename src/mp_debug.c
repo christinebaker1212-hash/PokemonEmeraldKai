@@ -21,6 +21,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "map_name_popup.h"
 #include "mp_farm.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -1258,6 +1259,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "summary") == 0)
     {
         extern void CB2_ReturnToField(void);
+        HideMapNamePopUpWindow();   // (as the START menu does: its task would draw over the summary's BG0)
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, 0, gPlayerPartyCount - 1, CB2_ReturnToField);
     }
     else if (strcmp(cmd, "frame") == 0)

@@ -251,6 +251,8 @@ struct Sprite
 
     // Moemon PC: a picture of any size drawn in this sprite's place (mp_bigsprite.h); NULL = an ordinary sprite
     struct MpBigSprite *mpBig;
+    bool8 mpClipOn;         // Moemon PC: nothing of it drawn from screen line mpClipY down (in water, in the ground)
+    s16 mpClipY;
 };
 
 struct OamMatrix

@@ -156,12 +156,19 @@ TEAMING UP FOR A DOUBLE BATTLE
   is the average of your three highest-level Moemon (in a co-op battle, of
   everyone's teams). Trainers' strongest Moemon are at that level, Gym
   Leaders, team bosses, your rival, the Elite Four and the Champion 2 to 5
-  above it, wild Moemon 3 to 6 below. Nothing is ever weaker than it
-  normally is, and nothing goes above a cap that rises with your badges (18
-  with none, 65 with all eight; no cap after the League). A raised Moemon
-  evolves if it would have by that level and knows its moves for it. EXP
-  is the usual for its level. Online, the host's setting counts. The Battle
-  Frontier and mass outbreaks keep their own levels.
+  above it, wild Moemon halfway between their usual level and yours.
+  Nothing is ever weaker than it normally is, and nothing goes above a cap
+  that rises with your badges (18 with none, 65 with all eight; no cap
+  after the League). A raised trainer's Moemon evolves if it would have by
+  that level and knows its moves for it. A raised wild Moemon stays what
+  the area has, but now and then its evolved form turns up instead, a rare
+  find. EXP is the usual for its level. The Battle Frontier and mass
+  outbreaks keep their own levels.
+  Press A on LEVEL SCALING for its settings: WILD (OFF, LOW, MEDIUM, HIGH),
+  TRAINERS (OFF, BELOW, EVEN, ABOVE your team), BOSS MARGIN (AUTO or +0 to
+  +8), BADGE CAPS (ON / OFF) and PAST 8 BADGES (free after the League,
+  always free, or always capped). Online, the host's settings count: the
+  host picks them under HOST A GAME > GAME RULES.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   use their items and they choose their moves smarter.
@@ -1208,7 +1215,7 @@ BERRIES. Your own farm waits for you, growing, until you play alone or
 host.
 
 Over time, a MOEMON may take up something it loves in the Garden:
-climbing the trees, splashing in the pond, singing, collecting pretty
+climbing the trees, swimming in the pond, singing, collecting pretty
 stones, digging tunnels or showing the younger ones. It gets better at
 it, and the JOURNAL celebrates the big steps. Once in a long while, when the
 right MOEMON, the time of day and the weather line up, something rare
@@ -1216,6 +1223,11 @@ happens; the JOURNAL keeps the ones you saw. A MOEMON hatched from an
 EGG knows its parents and may take after them a little. After it
 evolves, it takes a while to get used to its new body, and its friends
 come to see.
+You can see what each one is up to: a WATER type swims out into the pond
+(only its head above the water, now and then diving right under), a
+climber goes up a tree's trunk, a digger sinks half into the soft sand
+with dirt flying, a helper's water splashes on the farm's soil, and they
+rustle through the tall grass like you do.
 
 UPDATES
 -------

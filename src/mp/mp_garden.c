@@ -586,11 +586,11 @@ void MP_Garden_Debug(const char *args)
     }
     else if (strcmp(cmd, "pursuit") == 0)
     {
-        // pursuit ACTOR LEVEL: its pursuit (one that fits it), at that level
-        void MP_GardenLife_DebugPursuit(u8 actor, u8 level);
-        int b = 0;
-        sscanf(args, "%31s %d %d", cmd, &a, &b);
-        MP_GardenLife_DebugPursuit(a, b);
+        // pursuit ACTOR LEVEL [P]: its pursuit (one that fits it, or LIFE_PURSUIT_* P), at that level
+        void MP_GardenLife_DebugPursuit(u8 actor, u8 level, u8 pursuit);
+        int b = 0, c = 0;
+        sscanf(args, "%31s %d %d %d", cmd, &a, &b, &c);
+        MP_GardenLife_DebugPursuit(a, b, c);
     }
     else if (strcmp(cmd, "talk") == 0)
     {

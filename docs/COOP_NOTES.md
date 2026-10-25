@@ -259,6 +259,21 @@ from its personality, no Random), then BoostWild +2. Not scaled: Battle Frontier
 (MP_LevelScale_ForgetPending), roamers, Battle Tower etc. Logs "level scale: trainer N ace A -> B (team T, cap C)",
 "level scale: wild S LvA -> LvB", "level scale: evolved"; debug `mp landwild` (an encounter from the map's grass table);
 env MOEMON_LEVEL_SCALING=0/1. Tests levelscale_wild, levelscale_trainer, levelscale_off, coop_levelscale.
+Settings (1.23.0, protocol 49): MP_SCALE_ON / WILD / TRAINERS / BOSS / CAPS / PAST8 (include/mp.h; gMpConfig.levelScaling
+and gMpConfig.scale[], ini `level_scaling_rules = W T B C P`, defaults 2 2 0 1 0). WILD: OFF, LOW (a quarter of the way
+from the area's level to the team's, minus 0-1), MEDIUM (halfway, minus 0-2: the default; the user found 3-6 below the
+team far too strong), HIGH (the old 3-6 below the team). TRAINERS: OFF, BELOW (the ace 4 under the team), EVEN, ABOVE
+(3 over). BOSS MARGIN: AUTO (the old +2..+5 by badges, the Elite Four +5) or +0..+8 for every boss. BADGE CAPS on / off.
+PAST 8 BADGES: capped until the League then free (the old rule), free, always capped (sCaps[8], 80 after the League).
+A wild Pokémon raised past its evolution level stays the area's own (the normal encounter); 1 in 10 (personality >> 8
+% 10 == 0, so every game in a co-op battle agrees) is the evolved form, a rare encounter (RareEvolvedForm; log
+"level scale: a rare evolved form"; env MOEMON_SCALE_RARE=1 always / 0 never, tests).
+Who sets them: playing alone, OPTIONS > GAME > LEVEL SCALING (A opens its page: GAME > LEVEL SCALING header, the six
+rows, BACK; L / R off on the page; log "level scaling rule N: V"); in a room, its host: HOST A GAME > GAME RULES
+(mp_setup.c SCR_RULES, replacing the TEAM PADDING / BATTLE SPEED rows: those two plus the six; logs "setup: game
+rules", "setup: rule N now V"). A friend's rows show the host's values, locked. MPR_RULES = [id, padding, anim,
+scaling, the five]; MP_LevelScaleRule reads the host's while in someone else's room (sRoomScale), ours otherwise.
+Env MOEMON_LEVEL_RULES="W T B C P" (tests). Tests levelscale_options, host_rules.
 
 Difficulty: trainer/wild levels were vanilla Emerald; route/gym trainers got +2..+6 per story segment, gym aces 15/20/27/33/36/41/47/51,
 E4 53-59, Wallace 62, land wild levels +3/+4 on under-leveled routes and dungeons, route trainers from badge 3 AI TRY_TO_FAINT
@@ -1329,7 +1344,17 @@ revealed with familiarity or by WATCH (unknown ones are one "??? (not known yet)
 4-7), FONT_NARROW, 7 rows a page, A turns pages. The "Ⓐ MORE" prompt (its own promptWindow at 22,0, baseBlock 762) shows
 only when there is more than one page; A on a one-page journal does nothing (MpJournal_HandleInput still takes it, so it
 never reaches the INFO page's move selection). LEFT on the first summary page goes to the last and RIGHT on the last to
-the first (ChangePage: a left wrap stages the target page's tilemap in the under BG first); test summary_wrap.
+the first; test summary_wrap. INFO is the bottom layer (BG3: its page in the tilemap's left half, the EGG layout in the
+right half), the other pages sit in the right half of BG1 / BG2 (bgDisplayOrder 1: BG1 on top), so the wraps at INFO
+can't use the stock scrolls (1.23.0): RIGHT round to INFO (PssWrapToInfo) slides the page on top away to the left with
+the layer under it at its blank half, then order 0 as when the screen opens; LEFT round from INFO (PssWrapToLast)
+slides the last page in over INFO from the left on BG1 (x 0 down to -256), then order 1 with BG2 holding the page before
+it at 0x10000, ready for the next LEFT (before, the last page's layer sat at its blank half and the POKé BALL page's
+background showed under the JOURNAL). A wrap from a page on a layer (picking a move) stages the last page under it, in
+view. JOURNAL stripes: MpJournal_PaintStripes repaints its sheet (rows 4-19 of [JOURNAL][1]) a sentence at a time
+(rowEntry; INFO rows 4-5 green, 6-7 white), so a wrapped sentence keeps one color. Test summary_wrap_shots.
+`mp summary` hides the map name popup first, as the START menu does: its task kept running and erased its corner of
+the summary's BG0 (the dex number's top row, the SKILLS title) when it timed out.
 
 G2 field life. Emotes (mp_life_emote.c): 16 round pink bubbles drawn in code (NOTE HEART ZZZ EXCLAIM QUESTION SWEAT
 ANGRY TEAR SPARKLE FOOD DOTS CALM SUN WATER BALL LEAF), never the Trainers' square emotes; one co-op palette
@@ -1705,3 +1730,28 @@ EAT + food) and does it at the end if the plot still needs it (MP_Farm_DoWork; a
 "is looking after the BERRY plants.").
 Debug `mp farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT`, `mp life garden force ACTOR 20` (GA_FARM: the
 work its nature picks). Tests farm_solo, farm_together (NA-JP lag).
+Watering shows the water on the soil (FLDEFF_RIPPLE on the plot every 32 frames, mp_garden_life.c DrawDoing); a
+watering or tending that took ends with FLDEFF_SPARKLE on the plant.
+
+## What Garden Pokémon do shows (mp_garden_life.c DrawDoing)
+Every activity has to be seen, not imagined (the user's rule). Poses LIFE_POSE_SWIM / CLIMB / DIG (mp_life_field.h;
+MP_LifePose_Base: NONE / NONE / SHAKE for the old sprites, mp_pmd.c: WALK paddling / WALK facing up / EAT):
+- SWIM (TypePlace SOAK, the SWIM pursuit, the rare PADDLE's leader, and its follower halfway): on arrival EnterWater
+  steps it onto the water beside it (the tile it faces first; nobody there), keeping the shore tile; at the end
+  LeaveWater steps back (the shore, or any ground beside; no room: 30 frames more in the water). An activity cut
+  short (act NONE while inWater) gets out first. In the water Actor.sink = a quarter of its height + 2, a dive right
+  under every 300 frames (visT 200-249: height + 4, going down 3 a frame), FLDEFF_RIPPLE every 48 frames and at the
+  dive's start and end. Friends' Pokémon: inWater = their tile is water (their game moved them there).
+- CLIMB (the CLIMB pursuit, bands 1-2): Actor.lift up to 20 (a pixel every 2 frames), half of it toward the tree it
+  faces, all of it up, drawn at OAM priority 1 (in front of the tree's top layer, which hid it).
+- DIG (TypePlace DIG, the DIG pursuit): sink 3/5 of its height, FLDEFF_DUST every 24 frames.
+The sink is drawn with sprite.h mpClipOn / mpClipY: nothing of the sprite's OAM entries from that screen line down
+(the feet line: a PMD picture's ground point, an old sprite's bottom). AddSpriteToOamBuffer notes the clip for the
+entries it wrote (mp_bigsprite.c MP_BigSprite_NoteClip; the side list is swapped in by MP_BigSprite_CommitOam with
+the big sprites'), gba_easy_draw.c DrawSprites skips the lines. Any sprite can use it.
+Garden Pokémon also get followers' ground effects (mp_followfx.c slots MP_FOLLOWFX_GARDEN + actor, 24 of them: grass,
+sand, puddles, reflections; none while sunk, lifted or in the water). WATCH says "is swimming in the pond." / "is up
+in a tree!" / "is digging in the dirt." (MP_GardenLife_Doing) except for pursuits and rare moments, which keep
+their own lines (the SWIM pursuit: "is swimming laps in the pond."). Logs "garden: N swims in the pond at", "out of
+the pond", "climbs a tree at", "digs at"; `mp life garden actors` prints sink / up / water; `mp life garden pursuit
+ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.

@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 60
+mp summary
+waitfor summary 300
+wait 60
+shot info0
+press LEFT 2
+wait 60
+shot journal
+press RIGHT 2
+shotburst wrap 16
+wait 60
+shot info1
+press RIGHT 2
+wait 60
+shot skills
+press LEFT 2
+wait 60
+shot info2
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 40
+wait 30
+shot journal2
+quit

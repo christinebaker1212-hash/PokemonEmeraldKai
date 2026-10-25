@@ -1,0 +1,11 @@
+# What MOéMON GARDEN Pokémon do shows: MUDKIP goes to the pond and swims in it (only its top above the water, the
+# rest cut off at the water line; now and then a dive right under), TREECKO climbs a tree (up its trunk), SANDSHREW
+# digs in the dig patch (half in the ground). Each one's state comes from `mp life garden actors` (water / sink / up)
+# and is checked by check.sh; WATCH mode says what each is doing. Shots swim, dive, climb, dig.
+MODE=1
+TMO=240
+WARP="0,57,33,7"
+ENV_A="MOEMON_DEBUG_PARTY=283:15,277:15,27:15"
+EXPECT_A=("garden: 258 swims in the pond" "garden: 252 climbs a tree" "garden: 27 digs at" "garden: 258 out of the pond")
+UNEXPECT_A=("stuck")
+CHECK="bash tools/test/scenarios/garden_doing/check.sh"

@@ -1730,7 +1730,7 @@ void SetSubspriteTables(struct Sprite *sprite, const struct SubspriteTable *subs
     sprite->subspriteMode = SUBSPRITES_ON;
 }
 
-bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
+static bool8 AddSpriteToOamBufferInner(struct Sprite *sprite, u16 *oamIndex)
 {
     if (*oamIndex >= gOamLimit)
         return TRUE;
@@ -1748,6 +1748,14 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
     {
         return AddSubspritesToOamBuffer(sprite, &gMain.oamBuffer[*oamIndex], oamIndex);
     }
+}
+
+bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
+{
+    u16 first = *oamIndex;
+    bool8 full = AddSpriteToOamBufferInner(sprite, oamIndex);
+    MP_BigSprite_NoteClip(sprite, first, *oamIndex);   // Moemon PC: its entries stop at its clip line
+    return full;
 }
 
 bool8 AddSubspritesToOamBuffer(struct Sprite *sprite, struct OamData *destOam, u16 *oamIndex)

@@ -636,6 +636,8 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
             continue;
         }
 
+        if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
+            continue;
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
             DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);

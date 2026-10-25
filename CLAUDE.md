@@ -95,9 +95,10 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
-Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING, the host's online; the team's top-3 average,
-co-op seats average via MpState.top3; trainers, wild, scripted wild; badge caps, boss margins, evolutions; tests levelscale_*,
-coop_levelscale).
+Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING and its page of settings MP_SCALE_*, the host's
+online, set on HOST A GAME > GAME RULES; the team's top-3 average, co-op seats average via MpState.top3; trainers, wild (halfway
+by default), scripted wild; badge caps, boss margins, trainer evolutions, a raised wild one's evolved form as a rare encounter;
+tests levelscale_*, coop_levelscale, host_rules).
 Also the Garden's BERRY farm (mp_farm.c: the game's own BERRY trees, ids 100-119, framed soil stamped as plots open; online the room host's
 farm through MP_Farm_Tree in GetBerryTreeInfo, plant / pick asked of the host; GA_FARM Pokémon work by nature; COOP_NOTES "BERRY farm"; tests farm_*).
 Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin; big sprites:
@@ -113,7 +114,8 @@ story beats; battle memories and rare pink lines; friends' Pokémon and records 
 every POKéMON CENTER's 2F, its escalator redirected in SetupWarp, START > GARDEN quick travel; tilesets via
 tools/moemon_garden/gen_garden.py: original pieces joined by the original maps' rules, a place per type (zones) and
 per badge (growth table), pathfinding to them; the escalator kept at its fldeff_escalator.c ids; test garden_places); G6 pursuits, rare
-moments, eggs and family, evolution; tests life_*, garden_*).
+moments, eggs and family, evolution; every activity visible: swimming in the pond, climbing trees, digging, cut off at the
+water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

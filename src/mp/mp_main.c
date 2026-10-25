@@ -125,6 +125,8 @@ static u8 AsciiCharToGame(char c)
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
 static s8 sRoomHostId = -1;          // ... and who sent them (the host's player id)
+static u8 sRoomScale[MP_SCALE_COUNT - 1];   // ... LEVEL SCALING's settings
+static void LevelRulesFromEnv(void);
 static bool8 sRoomLevelScaling;
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
@@ -309,6 +311,11 @@ static void LoadConfig(void)
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.levelScaling = TRUE;
+    gMpConfig.scale[MP_SCALE_WILD - 1] = 2;       // MEDIUM: halfway between the area's level and the team's
+    gMpConfig.scale[MP_SCALE_TRAINERS - 1] = 2;   // EVEN
+    gMpConfig.scale[MP_SCALE_BOSS - 1] = 0;       // AUTO
+    gMpConfig.scale[MP_SCALE_CAPS - 1] = 1;
+    gMpConfig.scale[MP_SCALE_PAST8 - 1] = 0;
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
@@ -375,6 +382,14 @@ static void LoadConfig(void)
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "level_scaling") == 0) gMpConfig.levelScaling = atoi(val) != 0;
+        else if (strcmp(key, "level_scaling_rules") == 0)
+        {
+            int v[MP_SCALE_COUNT - 1], k;
+            if (sscanf(val, "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == MP_SCALE_COUNT - 1)
+                for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+                    if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
+                        gMpConfig.scale[k] = v[k];
+        }
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
@@ -488,6 +503,9 @@ void MP_SaveConfig(void)
         "trainer_padding = %d\n"
         "; OPTIONS > GAME > LEVEL SCALING: wild Pokemon and trainers keep up with your team (online, the host's counts)\n"
         "level_scaling = %d\n"
+        "; its settings: wild (0 off, 1 low, 2 medium, 3 high), trainers (0 off, 1 below, 2 even, 3 above), boss margin\n"
+        "; (0 auto, 1-9 = +0 to +8), badge caps (0 / 1), past 8 badges (0 capped until the League, 1 free, 2 always capped)\n"
+        "level_scaling_rules = %d %d %d %d %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
@@ -504,7 +522,8 @@ void MP_SaveConfig(void)
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.animSpeed,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling,
+        gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
@@ -1205,6 +1224,11 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomPadding = data[1] != 0;
             sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomLevelScaling = len >= 4 ? data[3] != 0 : TRUE;
+            {
+                u8 k;
+                for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+                    sRoomScale[k] = len >= 5 + k && data[4 + k] < MP_LevelScaleRuleCount(k + 1) ? data[4 + k] : gMpConfig.scale[k];
+            }
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1329,8 +1353,10 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[4] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
-        MP_SendRelay(id, rules, 4);
+        u8 rules[4 + MP_SCALE_COUNT - 1] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        LevelRulesFromEnv();
+        memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
+        MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
@@ -1418,6 +1444,58 @@ bool8 MP_LevelScalingIsOurs(void)   // not a joiner who heard the host's rules
     return sLobby.creator || !sRoomRulesHeard;
 }
 
+u8 MP_LevelScaleRuleCount(u8 which)
+{
+    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3};
+    return which < MP_SCALE_COUNT ? sCounts[which] : 1;
+}
+
+// Tests: MOEMON_LEVEL_RULES="WILD TRAINERS BOSS CAPS PAST8" sets ours at the start
+static void LevelRulesFromEnv(void)
+{
+    static bool8 sDone;
+    int v[MP_SCALE_COUNT - 1], k;
+    if (sDone)
+        return;
+    sDone = TRUE;
+    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == 5)
+        for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+            if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
+                gMpConfig.scale[k] = v[k];
+}
+
+u8 MP_LevelScaleOwnRule(u8 which)
+{
+    LevelRulesFromEnv();
+    if (which == MP_SCALE_ON)
+        return OwnLevelScaling();
+    return which < MP_SCALE_COUNT ? gMpConfig.scale[which - 1] : 0;
+}
+
+u8 MP_LevelScaleRule(u8 which)
+{
+    LevelRulesFromEnv();
+    if (which == MP_SCALE_ON)
+        return MP_LevelScaling();
+    if (which >= MP_SCALE_COUNT)
+        return 0;
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomScale[which - 1];
+    return gMpConfig.scale[which - 1];
+}
+
+void MP_LevelScaleSetOwn(u8 which, u8 value)
+{
+    if (which >= MP_SCALE_COUNT || value >= MP_LevelScaleRuleCount(which))
+        return;
+    if (which == MP_SCALE_ON)
+        gMpConfig.levelScaling = value;
+    else
+        gMpConfig.scale[which - 1] = value;
+    MP_SaveConfig();
+    MP_SendRoomRules();
+}
+
 bool8 MP_LevelScaling(void)
 {
     if (!sLobby.creator && sRoomRulesHeard)
@@ -1428,7 +1506,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[4];
+    u8 rules[4 + MP_SCALE_COUNT - 1];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1436,9 +1514,11 @@ void MP_SendRoomRules(void)
     rules[1] = OwnPadding();
     rules[2] = OwnAnimSpeed();
     rules[3] = OwnLevelScaling();
+    LevelRulesFromEnv();
+    memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
-            MP_SendRelay(i, rules, 4);
+            MP_SendRelay(i, rules, sizeof(rules));
 }
 
 bool8 MP_TrainerPadding(void)

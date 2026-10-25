@@ -199,6 +199,17 @@ struct MpSpecFriend
     u8 show;                      // 0: not shown (closing its pop-out window does this)
 };
 
+// LEVEL SCALING's settings (mp_levelscale.c): the room host's online, ours alone (MP_LevelScaleRule)
+enum
+{
+    MP_SCALE_ON,        // on / off (gMpConfig.levelScaling)
+    MP_SCALE_WILD,      // 0 OFF, 1 LOW (a quarter of the way to the team), 2 MEDIUM (halfway), 3 HIGH (3-6 below the team)
+    MP_SCALE_TRAINERS,  // 0 OFF, 1 BELOW (the ace 4 under the team), 2 EVEN (the ace at the team's level), 3 ABOVE (3 over)
+    MP_SCALE_BOSS,      // 0 AUTO (+2 to +5 by badges; the ELITE FOUR +5), 1-9: +0 to +8
+    MP_SCALE_CAPS,      // badge level caps: 1 on, 0 off
+    MP_SCALE_PAST8,     // with all eight badges: 0 capped until the League then free, 1 free, 2 always capped (80 after it)
+    MP_SCALE_COUNT
+};
 struct MpConfig
 {
     bool8 enabled;
@@ -227,6 +238,7 @@ struct MpConfig
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
+    u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
 };
 enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
 // FOLLOWERS: the PMD Collab pictures for a follower on the map (garden FALSE) or a Garden Pokémon (TRUE)?
@@ -280,6 +292,10 @@ u16 MP_Lobby_OtherVersion(void);
 void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_IsCreator(void);  // we made the room we're in (its host)
+u8 MP_LevelScaleRule(u8 which);  // MP_SCALE_*: the room host's online (as a friend), ours otherwise
+u8 MP_LevelScaleOwnRule(u8 which);
+void MP_LevelScaleSetOwn(u8 which, u8 value);   // (saved, and the room hears it when we're its host)
+u8 MP_LevelScaleRuleCount(u8 which);            // how many values it has
 s8 MP_RoomHostId(void);          // online in a room someone else made: the host's player id while they're here; else -1
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
@@ -1027,6 +1043,10 @@ u16 MP_Follower_LocalDex(bool8 *female);
 bool8 MP_Follower_LocalTile(s16 *x, s16 *y);
 bool8 MP_Follower_IsFollowerSprite(struct Sprite *sprite);
 // mp_followfx.c: followers' ground effects (grass, sand, puddles, flowing water, hot springs, ripples, reflections)
+// slots: 0 ours, 1.. friends' followers, MP_FOLLOWFX_GARDEN.. the MOéMON GARDEN's Pokémon
+#define MP_FOLLOWFX_GARDEN (1 + MP_MAX_PLAYERS)
+#define MP_FOLLOWFX_SLOTS (MP_FOLLOWFX_GARDEN + 24)
+bool8 MP_GardenLife_IsActorSprite(struct Sprite *sprite);
 void MP_FollowFx_Update(u8 slot, u8 spriteId, s16 prevX, s16 prevY, s16 curX, s16 curY, u8 moved, u8 fdir, u8 size,
                         u8 elevation, bool8 hidden);
 void MP_FollowFx_Remove(u8 slot);
@@ -1119,7 +1139,7 @@ enum {
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
-    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed, u8 levelScaling (mp_main.c)
+    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed, u8 levelScaling, 5 x u8 MP_SCALE_WILD.. (mp_main.c)
     MPR_CLOCK = 96,
     MPR_LIFE_FIRST = 97,       // MOéMON GARDEN: 97 verb on a friend's follower, 98 its answer, 99 a record (mp_life_social.c)            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,

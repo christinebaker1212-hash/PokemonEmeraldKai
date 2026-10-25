@@ -27,3 +27,4 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 28 | "I liked the right message box for the Candy Jar much better" | CANDY JAR message box |
 | 29-30 | JOURNAL with one page: the page prompt is missing, INFO shows and the text garbles | summary JOURNAL fix (1.19.0, test summary_wrap) |
 | 31 | bag design (HGSS-style BAG: 8 pockets Items, Medicine, Poké Balls, TMs & HMs, Berries, Battle Items, Key Items, Favorites; item list with "x N" and CLOSE BAG; description box) | bag rework (to do) |
+| 32-33 | summary: the JOURNAL with an entry changing stripe color on its second line; INFO garbled after RIGHT from the last page | summary wrap / JOURNAL stripes (1.23.0, test summary_wrap_shots) |
