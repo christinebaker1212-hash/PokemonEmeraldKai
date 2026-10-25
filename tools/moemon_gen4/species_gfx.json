@@ -1,0 +1,5189 @@
+{
+ "expansion": {
+  "SPECIES_TURTWIG": {
+   "expansion_key": "SPECIES_TURTWIG",
+   "height": 4,
+   "weight": 102,
+   "pokemonScale": 491,
+   "pokemonOffset": 20,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 11,
+   "backPicYOffset": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    40,
+    48
+   ],
+   "backPicSize": [
+    48,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_TURTWIG",
+   "frontPic": "gMonFrontPic_Turtwig",
+   "backPic": "gMonBackPic_Turtwig",
+   "palette": "gMonPalette_Turtwig",
+   "shinyPalette": "gMonShinyPalette_Turtwig",
+   "iconSprite": "gMonIcon_Turtwig",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/turtwig",
+   "footprint_png": "graphics/pokemon/turtwig/footprint.png",
+   "icon_png": "graphics/pokemon/turtwig/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/turtwig.wav"
+  },
+  "SPECIES_GROTLE": {
+   "expansion_key": "SPECIES_GROTLE",
+   "height": 11,
+   "weight": 970,
+   "pokemonScale": 320,
+   "pokemonOffset": 9,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 10,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_GROTLE",
+   "frontPic": "gMonFrontPic_Grotle",
+   "backPic": "gMonBackPic_Grotle",
+   "palette": "gMonPalette_Grotle",
+   "shinyPalette": "gMonShinyPalette_Grotle",
+   "iconSprite": "gMonIcon_Grotle",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/grotle",
+   "footprint_png": "graphics/pokemon/grotle/footprint.png",
+   "icon_png": "graphics/pokemon/grotle/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/grotle.wav"
+  },
+  "SPECIES_TORTERRA": {
+   "expansion_key": "SPECIES_TORTERRA",
+   "height": 22,
+   "weight": 3100,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 348,
+   "trainerOffset": 6,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 4,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_SHAKE",
+   "backAnimId": "BACK_ANIM_SHAKE_GLOW_GREEN",
+   "cryId": "CRY_TORTERRA",
+   "frontPic": "gMonFrontPic_Torterra",
+   "backPic": "gMonBackPic_Torterra",
+   "palette": "gMonPalette_Torterra",
+   "shinyPalette": "gMonShinyPalette_Torterra",
+   "iconSprite": "gMonIcon_Torterra",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/torterra",
+   "footprint_png": "graphics/pokemon/torterra/footprint.png",
+   "icon_png": "graphics/pokemon/torterra/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/torterra.wav"
+  },
+  "SPECIES_CHIMCHAR": {
+   "expansion_key": "SPECIES_CHIMCHAR",
+   "height": 5,
+   "weight": 62,
+   "pokemonScale": 432,
+   "pokemonOffset": 15,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    32,
+    48
+   ],
+   "backPicSize": [
+    56,
+    56
+   ],
+   "frontAnimId": "ANIM_V_JUMPS_BIG",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_CHIMCHAR",
+   "frontPic": "gMonFrontPic_Chimchar",
+   "backPic": "gMonBackPic_Chimchar",
+   "palette": "gMonPalette_Chimchar",
+   "shinyPalette": "gMonShinyPalette_Chimchar",
+   "iconSprite": "gMonIcon_Chimchar",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/chimchar",
+   "footprint_png": "graphics/pokemon/chimchar/footprint.png",
+   "icon_png": "graphics/pokemon/chimchar/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/chimchar.wav"
+  },
+  "SPECIES_MONFERNO": {
+   "expansion_key": "SPECIES_MONFERNO",
+   "height": 9,
+   "weight": 220,
+   "pokemonScale": 338,
+   "pokemonOffset": 9,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_JUMPS_V_STRETCH",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_MONFERNO",
+   "frontPic": "gMonFrontPic_Monferno",
+   "backPic": "gMonBackPic_Monferno",
+   "palette": "gMonPalette_Monferno",
+   "shinyPalette": "gMonShinyPalette_Monferno",
+   "iconSprite": "gMonIcon_Monferno",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/monferno",
+   "footprint_png": "graphics/pokemon/monferno/footprint.png",
+   "icon_png": "graphics/pokemon/monferno/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/monferno.wav"
+  },
+  "SPECIES_INFERNAPE": {
+   "expansion_key": "SPECIES_INFERNAPE",
+   "height": 12,
+   "weight": 550,
+   "pokemonScale": 282,
+   "pokemonOffset": 3,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 1,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_SHAKE_GLOW_RED",
+   "cryId": "CRY_INFERNAPE",
+   "frontPic": "gMonFrontPic_Infernape",
+   "backPic": "gMonBackPic_Infernape",
+   "palette": "gMonPalette_Infernape",
+   "shinyPalette": "gMonShinyPalette_Infernape",
+   "iconSprite": "gMonIcon_Infernape",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/infernape",
+   "footprint_png": "graphics/pokemon/infernape/footprint.png",
+   "icon_png": "graphics/pokemon/infernape/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/infernape.wav"
+  },
+  "SPECIES_PIPLUP": {
+   "expansion_key": "SPECIES_PIPLUP",
+   "height": 4,
+   "weight": 52,
+   "pokemonScale": 491,
+   "pokemonOffset": 17,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 14,
+   "backPicYOffset": 10,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    24,
+    40
+   ],
+   "backPicSize": [
+    40,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_PIPLUP",
+   "frontPic": "gMonFrontPic_Piplup",
+   "backPic": "gMonBackPic_Piplup",
+   "palette": "gMonPalette_Piplup",
+   "shinyPalette": "gMonShinyPalette_Piplup",
+   "iconSprite": "gMonIcon_Piplup",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/piplup",
+   "footprint_png": "graphics/pokemon/piplup/footprint.png",
+   "icon_png": "graphics/pokemon/piplup/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/piplup.wav"
+  },
+  "SPECIES_PRINPLUP": {
+   "expansion_key": "SPECIES_PRINPLUP",
+   "height": 8,
+   "weight": 230,
+   "pokemonScale": 366,
+   "pokemonOffset": 10,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 7,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    48,
+    56
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_PRINPLUP",
+   "frontPic": "gMonFrontPic_Prinplup",
+   "backPic": "gMonBackPic_Prinplup",
+   "palette": "gMonPalette_Prinplup",
+   "shinyPalette": "gMonShinyPalette_Prinplup",
+   "iconSprite": "gMonIcon_Prinplup",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/prinplup",
+   "footprint_png": "graphics/pokemon/prinplup/footprint.png",
+   "icon_png": "graphics/pokemon/prinplup/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/prinplup.wav"
+  },
+  "SPECIES_EMPOLEON": {
+   "expansion_key": "SPECIES_EMPOLEON",
+   "height": 17,
+   "weight": 845,
+   "pokemonScale": 259,
+   "pokemonOffset": 0,
+   "trainerScale": 290,
+   "trainerOffset": 1,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_SHAKE_GLOW_BLUE",
+   "cryId": "CRY_EMPOLEON",
+   "frontPic": "gMonFrontPic_Empoleon",
+   "backPic": "gMonBackPic_Empoleon",
+   "palette": "gMonPalette_Empoleon",
+   "shinyPalette": "gMonShinyPalette_Empoleon",
+   "iconSprite": "gMonIcon_Empoleon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/empoleon",
+   "footprint_png": "graphics/pokemon/empoleon/footprint.png",
+   "icon_png": "graphics/pokemon/empoleon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/empoleon.wav"
+  },
+  "SPECIES_STARLY": {
+   "expansion_key": "SPECIES_STARLY",
+   "height": 3,
+   "weight": 20,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 11,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    40
+   ],
+   "backPicSize": [
+    56,
+    48
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_STARLY",
+   "frontPic": "gMonFrontPic_Starly",
+   "backPic": "gMonBackPic_Starly",
+   "palette": "gMonPalette_Starly",
+   "shinyPalette": "gMonShinyPalette_Starly",
+   "iconSprite": "gMonIcon_Starly",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/starly",
+   "footprint_png": "graphics/pokemon/starly/footprint.png",
+   "icon_png": "graphics/pokemon/starly/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/starly.wav"
+  },
+  "SPECIES_STARAVIA": {
+   "expansion_key": "SPECIES_STARAVIA",
+   "height": 6,
+   "weight": 155,
+   "pokemonScale": 422,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    48
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_TRIANGLE_DOWN",
+   "cryId": "CRY_STARAVIA",
+   "frontPic": "gMonFrontPic_Staravia",
+   "backPic": "gMonBackPic_Staravia",
+   "palette": "gMonPalette_Staravia",
+   "shinyPalette": "gMonShinyPalette_Staravia",
+   "iconSprite": "gMonIcon_Staravia",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/staravia",
+   "footprint_png": "graphics/pokemon/staravia/footprint.png",
+   "icon_png": "graphics/pokemon/staravia/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/staravia.wav"
+  },
+  "SPECIES_STARAPTOR": {
+   "expansion_key": "SPECIES_STARAPTOR",
+   "height": 12,
+   "weight": 249,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 3,
+   "backPicYOffset": 3,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SHAKE",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_STARAPTOR",
+   "frontPic": "gMonFrontPic_Staraptor",
+   "backPic": "gMonBackPic_Staraptor",
+   "palette": "gMonPalette_Staraptor",
+   "shinyPalette": "gMonShinyPalette_Staraptor",
+   "iconSprite": "gMonIcon_Staraptor",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/staraptor",
+   "footprint_png": "graphics/pokemon/staraptor/footprint.png",
+   "icon_png": "graphics/pokemon/staraptor/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/staraptor.wav"
+  },
+  "SPECIES_BIDOOF": {
+   "expansion_key": "SPECIES_BIDOOF",
+   "height": 5,
+   "weight": 200,
+   "pokemonScale": 432,
+   "pokemonOffset": 16,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 13,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    40,
+    40
+   ],
+   "backPicSize": [
+    64,
+    40
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_SLOW",
+   "backAnimId": "BACK_ANIM_V_SHAKE_H_SLIDE",
+   "cryId": "CRY_BIDOOF",
+   "frontPic": "gMonFrontPic_Bidoof",
+   "backPic": "gMonBackPic_Bidoof",
+   "palette": "gMonPalette_Bidoof",
+   "shinyPalette": "gMonShinyPalette_Bidoof",
+   "iconSprite": "gMonIcon_Bidoof",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bidoof",
+   "footprint_png": "graphics/pokemon/bidoof/footprint.png",
+   "icon_png": "graphics/pokemon/bidoof/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bidoof.wav"
+  },
+  "SPECIES_BIBAREL": {
+   "expansion_key": "SPECIES_BIBAREL",
+   "height": 10,
+   "weight": 315,
+   "pokemonScale": 305,
+   "pokemonOffset": 8,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_GROW_VIBRATE",
+   "backAnimId": "BACK_ANIM_DIP_RIGHT_SIDE",
+   "cryId": "CRY_BIBAREL",
+   "frontPic": "gMonFrontPic_Bibarel",
+   "backPic": "gMonBackPic_Bibarel",
+   "palette": "gMonPalette_Bibarel",
+   "shinyPalette": "gMonShinyPalette_Bibarel",
+   "iconSprite": "gMonIcon_Bibarel",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bibarel",
+   "footprint_png": "graphics/pokemon/bibarel/footprint.png",
+   "icon_png": "graphics/pokemon/bibarel/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bibarel.wav"
+  },
+  "SPECIES_KRICKETOT": {
+   "expansion_key": "SPECIES_KRICKETOT",
+   "height": 3,
+   "weight": 22,
+   "pokemonScale": 530,
+   "pokemonOffset": 17,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 11,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    48,
+    56
+   ],
+   "frontAnimId": "ANIM_H_JUMPS",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_KRICKETOT",
+   "frontPic": "gMonFrontPic_Kricketot",
+   "backPic": "gMonBackPic_Kricketot",
+   "palette": "gMonPalette_Kricketot",
+   "shinyPalette": "gMonShinyPalette_Kricketot",
+   "iconSprite": "gMonIcon_Kricketot",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/kricketot",
+   "footprint_png": "graphics/pokemon/kricketot/footprint.png",
+   "icon_png": "graphics/pokemon/kricketot/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/kricketot.wav"
+  },
+  "SPECIES_KRICKETUNE": {
+   "expansion_key": "SPECIES_KRICKETUNE",
+   "height": 10,
+   "weight": 255,
+   "pokemonScale": 305,
+   "pokemonOffset": 8,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 3,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_SLOW",
+   "backAnimId": "BACK_ANIM_H_VIBRATE",
+   "cryId": "CRY_KRICKETUNE",
+   "frontPic": "gMonFrontPic_Kricketune",
+   "backPic": "gMonBackPic_Kricketune",
+   "palette": "gMonPalette_Kricketune",
+   "shinyPalette": "gMonShinyPalette_Kricketune",
+   "iconSprite": "gMonIcon_Kricketune",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/kricketune",
+   "footprint_png": "graphics/pokemon/kricketune/footprint.png",
+   "icon_png": "graphics/pokemon/kricketune/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/kricketune.wav"
+  },
+  "SPECIES_SHINX": {
+   "expansion_key": "SPECIES_SHINX",
+   "height": 5,
+   "weight": 95,
+   "pokemonScale": 432,
+   "pokemonOffset": 17,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 13,
+   "backPicYOffset": 8,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    40
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_SHINX",
+   "frontPic": "gMonFrontPic_Shinx",
+   "backPic": "gMonBackPic_Shinx",
+   "palette": "gMonPalette_Shinx",
+   "shinyPalette": "gMonShinyPalette_Shinx",
+   "iconSprite": "gMonIcon_Shinx",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/shinx",
+   "footprint_png": "graphics/pokemon/shinx/footprint.png",
+   "icon_png": "graphics/pokemon/shinx/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/shinx.wav"
+  },
+  "SPECIES_LUXIO": {
+   "expansion_key": "SPECIES_LUXIO",
+   "height": 9,
+   "weight": 305,
+   "pokemonScale": 338,
+   "pokemonOffset": 10,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_STRETCH",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_LUXIO",
+   "frontPic": "gMonFrontPic_Luxio",
+   "backPic": "gMonBackPic_Luxio",
+   "palette": "gMonPalette_Luxio",
+   "shinyPalette": "gMonShinyPalette_Luxio",
+   "iconSprite": "gMonIcon_Luxio",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/luxio",
+   "footprint_png": "graphics/pokemon/luxio/footprint.png",
+   "icon_png": "graphics/pokemon/luxio/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/luxio.wav"
+  },
+  "SPECIES_LUXRAY": {
+   "expansion_key": "SPECIES_LUXRAY",
+   "height": 14,
+   "weight": 420,
+   "pokemonScale": 265,
+   "pokemonOffset": 2,
+   "trainerScale": 262,
+   "trainerOffset": 0,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_GLOW_YELLOW",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_LUXRAY",
+   "frontPic": "gMonFrontPic_Luxray",
+   "backPic": "gMonBackPic_Luxray",
+   "palette": "gMonPalette_Luxray",
+   "shinyPalette": "gMonShinyPalette_Luxray",
+   "iconSprite": "gMonIcon_Luxray",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/luxray",
+   "footprint_png": "graphics/pokemon/luxray/footprint.png",
+   "icon_png": "graphics/pokemon/luxray/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/luxray.wav"
+  },
+  "SPECIES_BUDEW": {
+   "expansion_key": "SPECIES_BUDEW",
+   "height": 2,
+   "weight": 12,
+   "pokemonScale": 682,
+   "pokemonOffset": 24,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 14,
+   "backPicYOffset": 11,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    32,
+    40
+   ],
+   "backPicSize": [
+    40,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_BUDEW",
+   "frontPic": "gMonFrontPic_Budew",
+   "backPic": "gMonBackPic_Budew",
+   "palette": "gMonPalette_Budew",
+   "shinyPalette": "gMonShinyPalette_Budew",
+   "iconSprite": "gMonIcon_Budew",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/budew",
+   "footprint_png": "graphics/pokemon/budew/footprint.png",
+   "icon_png": "graphics/pokemon/budew/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/budew.wav"
+  },
+  "SPECIES_ROSERADE": {
+   "expansion_key": "SPECIES_ROSERADE",
+   "height": 9,
+   "weight": 145,
+   "pokemonScale": 338,
+   "pokemonOffset": 10,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_VIBRATE",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_ROSERADE",
+   "frontPic": "gMonFrontPic_Roserade",
+   "backPic": "gMonBackPic_Roserade",
+   "palette": "gMonPalette_Roserade",
+   "shinyPalette": "gMonShinyPalette_Roserade",
+   "iconSprite": "gMonIcon_Roserade",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/roserade",
+   "footprint_png": "graphics/pokemon/roserade/footprint.png",
+   "icon_png": "graphics/pokemon/roserade/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/roserade.wav"
+  },
+  "SPECIES_CRANIDOS": {
+   "expansion_key": "SPECIES_CRANIDOS",
+   "height": 9,
+   "weight": 315,
+   "pokemonScale": 338,
+   "pokemonOffset": 10,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_CRANIDOS",
+   "frontPic": "gMonFrontPic_Cranidos",
+   "backPic": "gMonBackPic_Cranidos",
+   "palette": "gMonPalette_Cranidos",
+   "shinyPalette": "gMonShinyPalette_Cranidos",
+   "iconSprite": "gMonIcon_Cranidos",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/cranidos",
+   "footprint_png": "graphics/pokemon/cranidos/footprint.png",
+   "icon_png": "graphics/pokemon/cranidos/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/cranidos.wav"
+  },
+  "SPECIES_RAMPARDOS": {
+   "expansion_key": "SPECIES_RAMPARDOS",
+   "height": 16,
+   "weight": 1025,
+   "pokemonScale": 259,
+   "pokemonOffset": 1,
+   "trainerScale": 296,
+   "trainerOffset": 1,
+   "frontPicYOffset": 3,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SHAKE_TWICE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_RAMPARDOS",
+   "frontPic": "gMonFrontPic_Rampardos",
+   "backPic": "gMonBackPic_Rampardos",
+   "palette": "gMonPalette_Rampardos",
+   "shinyPalette": "gMonShinyPalette_Rampardos",
+   "iconSprite": "gMonIcon_Rampardos",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/rampardos",
+   "footprint_png": "graphics/pokemon/rampardos/footprint.png",
+   "icon_png": "graphics/pokemon/rampardos/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/rampardos.wav"
+  },
+  "SPECIES_SHIELDON": {
+   "expansion_key": "SPECIES_SHIELDON",
+   "height": 5,
+   "weight": 570,
+   "pokemonScale": 432,
+   "pokemonOffset": 16,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 15,
+   "backPicYOffset": 11,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    40,
+    40
+   ],
+   "backPicSize": [
+    56,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SHAKE",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_SHIELDON",
+   "frontPic": "gMonFrontPic_Shieldon",
+   "backPic": "gMonBackPic_Shieldon",
+   "palette": "gMonPalette_Shieldon",
+   "shinyPalette": "gMonShinyPalette_Shieldon",
+   "iconSprite": "gMonIcon_Shieldon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/shieldon",
+   "footprint_png": "graphics/pokemon/shieldon/footprint.png",
+   "icon_png": "graphics/pokemon/shieldon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/shieldon.wav"
+  },
+  "SPECIES_BASTIODON": {
+   "expansion_key": "SPECIES_BASTIODON",
+   "height": 13,
+   "weight": 1495,
+   "pokemonScale": 272,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 7,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_BACK_AND_LUNGE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_BASTIODON",
+   "frontPic": "gMonFrontPic_Bastiodon",
+   "backPic": "gMonBackPic_Bastiodon",
+   "palette": "gMonPalette_Bastiodon",
+   "shinyPalette": "gMonShinyPalette_Bastiodon",
+   "iconSprite": "gMonIcon_Bastiodon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bastiodon",
+   "footprint_png": "graphics/pokemon/bastiodon/footprint.png",
+   "icon_png": "graphics/pokemon/bastiodon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bastiodon.wav"
+  },
+  "SPECIES_BURMY": {
+   "expansion_key": "SPECIES_BURMY_PLANT",
+   "height": 2,
+   "weight": 34,
+   "pokemonScale": 682,
+   "pokemonOffset": 24,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 13,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 10,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    32,
+    56
+   ],
+   "backPicSize": [
+    40,
+    56
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_H_SHAKE",
+   "cryId": "CRY_BURMY",
+   "frontPic": "gMonFrontPic_BurmyPlant",
+   "backPic": "gMonBackPic_BurmyPlant",
+   "palette": "gMonPalette_BurmyPlant",
+   "shinyPalette": "gMonShinyPalette_BurmyPlant",
+   "iconSprite": "gMonIcon_BurmyPlant",
+   "frontAnimFrames": [
+    [
+     "0",
+     "30"
+    ]
+   ],
+   "dir": "graphics/pokemon/burmy",
+   "footprint_png": "graphics/pokemon/burmy/footprint.png",
+   "icon_png": "graphics/pokemon/burmy/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/burmy.wav"
+  },
+  "SPECIES_WORMADAM": {
+   "expansion_key": "SPECIES_WORMADAM_PLANT",
+   "height": 5,
+   "weight": 65,
+   "pokemonScale": 432,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 2,
+   "enemyMonElevation": 8,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_SWING_CONVEX_FAST_SHORT",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_WORMADAM",
+   "frontPic": "gMonFrontPic_WormadamPlant",
+   "backPic": "gMonBackPic_WormadamPlant",
+   "palette": "gMonPalette_WormadamPlant",
+   "shinyPalette": "gMonShinyPalette_WormadamPlant",
+   "iconSprite": "gMonIcon_WormadamPlant",
+   "frontAnimFrames": [
+    [
+     "0",
+     "30"
+    ]
+   ],
+   "dir": "graphics/pokemon/wormadam",
+   "footprint_png": "graphics/pokemon/wormadam/footprint.png",
+   "icon_png": "graphics/pokemon/wormadam/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/wormadam.wav"
+  },
+  "SPECIES_MOTHIM": {
+   "expansion_key": "SPECIES_MOTHIM_PLANT",
+   "height": 3,
+   "weight": 55,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 16,
+   "backPicYOffset": 22,
+   "enemyMonElevation": 15,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    40
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_TRIANGLE_DOWN",
+   "cryId": "CRY_COMBEE",
+   "frontPic": "gMonFrontPic_Combee",
+   "backPic": "gMonBackPic_Combee",
+   "palette": "gMonPalette_Combee",
+   "shinyPalette": "gMonShinyPalette_Combee",
+   "iconSprite": "gMonIcon_Combee",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/combee",
+   "footprint_png": "graphics/pokemon/combee/footprint.png",
+   "icon_png": "graphics/pokemon/combee/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/combee.wav"
+  },
+  "SPECIES_COMBEE": {
+   "expansion_key": "SPECIES_COMBEE",
+   "height": 3,
+   "weight": 55,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 16,
+   "backPicYOffset": 22,
+   "enemyMonElevation": 15,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    40
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_TRIANGLE_DOWN",
+   "cryId": "CRY_COMBEE",
+   "frontPic": "gMonFrontPic_Combee",
+   "backPic": "gMonBackPic_Combee",
+   "palette": "gMonPalette_Combee",
+   "shinyPalette": "gMonShinyPalette_Combee",
+   "iconSprite": "gMonIcon_Combee",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/combee",
+   "footprint_png": "graphics/pokemon/combee/footprint.png",
+   "icon_png": "graphics/pokemon/combee/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/combee.wav"
+  },
+  "SPECIES_VESPIQUEN": {
+   "expansion_key": "SPECIES_VESPIQUEN",
+   "height": 12,
+   "weight": 385,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 0,
+   "enemyMonElevation": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_LUNGE_GROW",
+   "backAnimId": "BACK_ANIM_CIRCLE_COUNTERCLOCKWISE",
+   "cryId": "CRY_VESPIQUEN",
+   "frontPic": "gMonFrontPic_Vespiquen",
+   "backPic": "gMonBackPic_Vespiquen",
+   "palette": "gMonPalette_Vespiquen",
+   "shinyPalette": "gMonShinyPalette_Vespiquen",
+   "iconSprite": "gMonIcon_Vespiquen",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/vespiquen",
+   "footprint_png": "graphics/pokemon/vespiquen/footprint.png",
+   "icon_png": "graphics/pokemon/vespiquen/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/vespiquen.wav"
+  },
+  "SPECIES_PACHIRISU": {
+   "expansion_key": "SPECIES_PACHIRISU",
+   "height": 4,
+   "weight": 39,
+   "pokemonScale": 491,
+   "pokemonOffset": 16,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 3,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_SHAKE_FLASH_YELLOW",
+   "cryId": "CRY_PACHIRISU",
+   "frontPic": "gMonFrontPic_Pachirisu",
+   "backPic": "gMonBackPic_Pachirisu",
+   "palette": "gMonPalette_Pachirisu",
+   "shinyPalette": "gMonShinyPalette_Pachirisu",
+   "iconSprite": "gMonIcon_Pachirisu",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/pachirisu",
+   "footprint_png": "graphics/pokemon/pachirisu/footprint.png",
+   "icon_png": "graphics/pokemon/pachirisu/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/pachirisu.wav"
+  },
+  "SPECIES_BUIZEL": {
+   "expansion_key": "SPECIES_BUIZEL",
+   "height": 7,
+   "weight": 295,
+   "pokemonScale": 365,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    48
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_GROW_VIBRATE",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_BUIZEL",
+   "frontPic": "gMonFrontPic_Buizel",
+   "backPic": "gMonBackPic_Buizel",
+   "palette": "gMonPalette_Buizel",
+   "shinyPalette": "gMonShinyPalette_Buizel",
+   "iconSprite": "gMonIcon_Buizel",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/buizel",
+   "footprint_png": "graphics/pokemon/buizel/footprint.png",
+   "icon_png": "graphics/pokemon/buizel/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/buizel.wav"
+  },
+  "SPECIES_FLOATZEL": {
+   "expansion_key": "SPECIES_FLOATZEL",
+   "height": 11,
+   "weight": 335,
+   "pokemonScale": 320,
+   "pokemonOffset": 7,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 3,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_JUMPS_V_STRETCH",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_FLOATZEL",
+   "frontPic": "gMonFrontPic_Floatzel",
+   "backPic": "gMonBackPic_Floatzel",
+   "palette": "gMonPalette_Floatzel",
+   "shinyPalette": "gMonShinyPalette_Floatzel",
+   "iconSprite": "gMonIcon_Floatzel",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/floatzel",
+   "footprint_png": "graphics/pokemon/floatzel/footprint.png",
+   "icon_png": "graphics/pokemon/floatzel/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/floatzel.wav"
+  },
+  "SPECIES_CHERUBI": {
+   "expansion_key": "SPECIES_CHERUBI",
+   "height": 4,
+   "weight": 33,
+   "pokemonScale": 491,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 16,
+   "backPicYOffset": 13,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    40,
+    32
+   ],
+   "backPicSize": [
+    48,
+    40
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_CHERUBI",
+   "frontPic": "gMonFrontPic_Cherubi",
+   "backPic": "gMonBackPic_Cherubi",
+   "palette": "gMonPalette_Cherubi",
+   "shinyPalette": "gMonShinyPalette_Cherubi",
+   "iconSprite": "gMonIcon_Cherubi",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/cherubi",
+   "footprint_png": "graphics/pokemon/cherubi/footprint.png",
+   "icon_png": "graphics/pokemon/cherubi/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/cherubi.wav"
+  },
+  "SPECIES_CHERRIM": {
+   "expansion_key": "SPECIES_CHERRIM_OVERCAST",
+   "height": 5,
+   "weight": 93,
+   "pokemonScale": 432,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    32,
+    48
+   ],
+   "backPicSize": [
+    40,
+    56
+   ],
+   "frontAnimId": "ANIM_DEEP_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_CHERRIM",
+   "frontPic": "gMonFrontPic_CherrimOvercast",
+   "backPic": "gMonBackPic_CherrimOvercast",
+   "palette": "gMonPalette_CherrimOvercast",
+   "shinyPalette": "gMonShinyPalette_CherrimOvercast",
+   "iconSprite": "gMonIcon_CherrimOvercast",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/cherrim",
+   "footprint_png": "graphics/pokemon/cherrim/footprint.png",
+   "icon_png": "graphics/pokemon/cherrim/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/cherrim.wav"
+  },
+  "SPECIES_SHELLOS": {
+   "expansion_key": "SPECIES_SHELLOS_WEST",
+   "height": 3,
+   "weight": 63,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 13,
+   "backPicYOffset": 8,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    40
+   ],
+   "backPicSize": [
+    40,
+    56
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_H_SPRING",
+   "cryId": "CRY_SHELLOS",
+   "frontPic": "gMonFrontPic_ShellosWestSea",
+   "backPic": "gMonBackPic_ShellosWestSea",
+   "palette": "gMonPalette_ShellosWestSea",
+   "shinyPalette": "gMonShinyPalette_ShellosWestSea",
+   "iconSprite": "gMonIcon_ShellosWestSea",
+   "frontAnimFrames": [
+    [
+     "0",
+     "30"
+    ]
+   ],
+   "dir": "graphics/pokemon/shellos",
+   "footprint_png": "graphics/pokemon/shellos/footprint.png",
+   "icon_png": "graphics/pokemon/shellos/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/shellos.wav"
+  },
+  "SPECIES_GASTRODON": {
+   "expansion_key": "SPECIES_GASTRODON_WEST",
+   "height": 9,
+   "weight": 299,
+   "pokemonScale": 338,
+   "pokemonOffset": 8,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 3,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_CIRCULAR_STRETCH_TWICE",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_GASTRODON",
+   "frontPic": "gMonFrontPic_GastrodonWestSea",
+   "backPic": "gMonBackPic_GastrodonWestSea",
+   "palette": "gMonPalette_GastrodonWestSea",
+   "shinyPalette": "gMonShinyPalette_GastrodonWestSea",
+   "iconSprite": "gMonIcon_GastrodonWestSea",
+   "frontAnimFrames": [
+    [
+     "0",
+     "30"
+    ]
+   ],
+   "dir": "graphics/pokemon/gastrodon",
+   "footprint_png": "graphics/pokemon/gastrodon/footprint.png",
+   "icon_png": "graphics/pokemon/gastrodon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/gastrodon.wav"
+  },
+  "SPECIES_AMBIPOM": {
+   "expansion_key": "SPECIES_AMBIPOM",
+   "height": 12,
+   "weight": 203,
+   "pokemonScale": 282,
+   "pokemonOffset": 3,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 1,
+   "backPicYOffset": 3,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_BACK_AND_LUNGE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_LARGE",
+   "cryId": "CRY_AMBIPOM",
+   "frontPic": "gMonFrontPic_Ambipom",
+   "backPic": "gMonBackPic_Ambipom",
+   "palette": "gMonPalette_Ambipom",
+   "shinyPalette": "gMonShinyPalette_Ambipom",
+   "iconSprite": "gMonIcon_Ambipom",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/ambipom",
+   "footprint_png": "graphics/pokemon/ambipom/footprint.png",
+   "icon_png": "graphics/pokemon/ambipom/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/ambipom.wav"
+  },
+  "SPECIES_DRIFLOON": {
+   "expansion_key": "SPECIES_DRIFLOON",
+   "height": 4,
+   "weight": 12,
+   "pokemonScale": 491,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 0,
+   "enemyMonElevation": 5,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    32,
+    56
+   ],
+   "backPicSize": [
+    40,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_DRIFLOON",
+   "frontPic": "gMonFrontPic_Drifloon",
+   "backPic": "gMonBackPic_Drifloon",
+   "palette": "gMonPalette_Drifloon",
+   "shinyPalette": "gMonShinyPalette_Drifloon",
+   "iconSprite": "gMonIcon_Drifloon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/drifloon",
+   "footprint_png": "graphics/pokemon/drifloon/footprint.png",
+   "icon_png": "graphics/pokemon/drifloon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/drifloon.wav"
+  },
+  "SPECIES_DRIFBLIM": {
+   "expansion_key": "SPECIES_DRIFBLIM",
+   "height": 12,
+   "weight": 150,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 7,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_DRIFBLIM",
+   "frontPic": "gMonFrontPic_Drifblim",
+   "backPic": "gMonBackPic_Drifblim",
+   "palette": "gMonPalette_Drifblim",
+   "shinyPalette": "gMonShinyPalette_Drifblim",
+   "iconSprite": "gMonIcon_Drifblim",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/drifblim",
+   "footprint_png": "graphics/pokemon/drifblim/footprint.png",
+   "icon_png": "graphics/pokemon/drifblim/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/drifblim.wav"
+  },
+  "SPECIES_BUNEARY": {
+   "expansion_key": "SPECIES_BUNEARY",
+   "height": 4,
+   "weight": 55,
+   "pokemonScale": 491,
+   "pokemonOffset": 16,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 4,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    32,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_JUMPS_V_STRETCH",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_BUNEARY",
+   "frontPic": "gMonFrontPic_Buneary",
+   "backPic": "gMonBackPic_Buneary",
+   "palette": "gMonPalette_Buneary",
+   "shinyPalette": "gMonShinyPalette_Buneary",
+   "iconSprite": "gMonIcon_Buneary",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/buneary",
+   "footprint_png": "graphics/pokemon/buneary/footprint.png",
+   "icon_png": "graphics/pokemon/buneary/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/buneary.wav"
+  },
+  "SPECIES_LOPUNNY": {
+   "expansion_key": "SPECIES_LOPUNNY",
+   "height": 12,
+   "weight": 333,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 5,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_SHRINK_GROW",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_LOPUNNY",
+   "frontPic": "gMonFrontPic_Lopunny",
+   "backPic": "gMonBackPic_Lopunny",
+   "palette": "gMonPalette_Lopunny",
+   "shinyPalette": "gMonShinyPalette_Lopunny",
+   "iconSprite": "gMonIcon_Lopunny",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/lopunny",
+   "footprint_png": "graphics/pokemon/lopunny/footprint.png",
+   "icon_png": "graphics/pokemon/lopunny/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/lopunny.wav"
+  },
+  "SPECIES_MISMAGIUS": {
+   "expansion_key": "SPECIES_MISMAGIUS",
+   "height": 9,
+   "weight": 44,
+   "pokemonScale": 338,
+   "pokemonOffset": 8,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 3,
+   "backPicYOffset": 3,
+   "enemyMonElevation": 3,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    64
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_MISMAGIUS",
+   "frontPic": "gMonFrontPic_Mismagius",
+   "backPic": "gMonBackPic_Mismagius",
+   "palette": "gMonPalette_Mismagius",
+   "shinyPalette": "gMonShinyPalette_Mismagius",
+   "iconSprite": "gMonIcon_Mismagius",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/mismagius",
+   "footprint_png": "graphics/pokemon/mismagius/footprint.png",
+   "icon_png": "graphics/pokemon/mismagius/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/mismagius.wav"
+  },
+  "SPECIES_HONCHKROW": {
+   "expansion_key": "SPECIES_HONCHKROW",
+   "height": 9,
+   "weight": 273,
+   "pokemonScale": 338,
+   "pokemonOffset": 8,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 8,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+   "backAnimId": "BACK_ANIM_H_STRETCH",
+   "cryId": "CRY_HONCHKROW",
+   "frontPic": "gMonFrontPic_Honchkrow",
+   "backPic": "gMonBackPic_Honchkrow",
+   "palette": "gMonPalette_Honchkrow",
+   "shinyPalette": "gMonShinyPalette_Honchkrow",
+   "iconSprite": "gMonIcon_Honchkrow",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/honchkrow",
+   "footprint_png": "graphics/pokemon/honchkrow/footprint.png",
+   "icon_png": "graphics/pokemon/honchkrow/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/honchkrow.wav"
+  },
+  "SPECIES_GLAMEOW": {
+   "expansion_key": "SPECIES_GLAMEOW",
+   "height": 5,
+   "weight": 39,
+   "pokemonScale": 432,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 7,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_GROW_VIBRATE",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW",
+   "cryId": "CRY_GLAMEOW",
+   "frontPic": "gMonFrontPic_Glameow",
+   "backPic": "gMonBackPic_Glameow",
+   "palette": "gMonPalette_Glameow",
+   "shinyPalette": "gMonShinyPalette_Glameow",
+   "iconSprite": "gMonIcon_Glameow",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/glameow",
+   "footprint_png": "graphics/pokemon/glameow/footprint.png",
+   "icon_png": "graphics/pokemon/glameow/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/glameow.wav"
+  },
+  "SPECIES_PURUGLY": {
+   "expansion_key": "SPECIES_PURUGLY",
+   "height": 10,
+   "weight": 438,
+   "pokemonScale": 305,
+   "pokemonOffset": 7,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 5,
+   "backPicYOffset": 8,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_GROW_STUTTER",
+   "cryId": "CRY_PURUGLY",
+   "frontPic": "gMonFrontPic_Purugly",
+   "backPic": "gMonBackPic_Purugly",
+   "palette": "gMonPalette_Purugly",
+   "shinyPalette": "gMonShinyPalette_Purugly",
+   "iconSprite": "gMonIcon_Purugly",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/purugly",
+   "footprint_png": "graphics/pokemon/purugly/footprint.png",
+   "icon_png": "graphics/pokemon/purugly/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/purugly.wav"
+  },
+  "SPECIES_CHINGLING": {
+   "expansion_key": "SPECIES_CHINGLING",
+   "height": 2,
+   "weight": 6,
+   "pokemonScale": 682,
+   "pokemonOffset": 24,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 15,
+   "backPicYOffset": 13,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    40,
+    40
+   ],
+   "backPicSize": [
+    48,
+    48
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_CHINGLING",
+   "frontPic": "gMonFrontPic_Chingling",
+   "backPic": "gMonBackPic_Chingling",
+   "palette": "gMonPalette_Chingling",
+   "shinyPalette": "gMonShinyPalette_Chingling",
+   "iconSprite": "gMonIcon_Chingling",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/chingling",
+   "footprint_png": "graphics/pokemon/chingling/footprint.png",
+   "icon_png": "graphics/pokemon/chingling/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/chingling.wav"
+  },
+  "SPECIES_STUNKY": {
+   "expansion_key": "SPECIES_STUNKY",
+   "height": 4,
+   "weight": 192,
+   "pokemonScale": 491,
+   "pokemonOffset": 17,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 13,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    56,
+    48
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_TIP_MOVE_FORWARD",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_STUNKY",
+   "frontPic": "gMonFrontPic_Stunky",
+   "backPic": "gMonBackPic_Stunky",
+   "palette": "gMonPalette_Stunky",
+   "shinyPalette": "gMonShinyPalette_Stunky",
+   "iconSprite": "gMonIcon_Stunky",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/stunky",
+   "footprint_png": "graphics/pokemon/stunky/footprint.png",
+   "icon_png": "graphics/pokemon/stunky/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/stunky.wav"
+  },
+  "SPECIES_SKUNTANK": {
+   "expansion_key": "SPECIES_SKUNTANK",
+   "height": 10,
+   "weight": 380,
+   "pokemonScale": 305,
+   "pokemonOffset": 9,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 4,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+   "backAnimId": "BACK_ANIM_H_STRETCH",
+   "cryId": "CRY_SKUNTANK",
+   "frontPic": "gMonFrontPic_Skuntank",
+   "backPic": "gMonBackPic_Skuntank",
+   "palette": "gMonPalette_Skuntank",
+   "shinyPalette": "gMonShinyPalette_Skuntank",
+   "iconSprite": "gMonIcon_Skuntank",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/skuntank",
+   "footprint_png": "graphics/pokemon/skuntank/footprint.png",
+   "icon_png": "graphics/pokemon/skuntank/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/skuntank.wav"
+  },
+  "SPECIES_BRONZOR": {
+   "expansion_key": "SPECIES_BRONZOR",
+   "height": 5,
+   "weight": 605,
+   "pokemonScale": 432,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 14,
+   "backPicYOffset": 9,
+   "enemyMonElevation": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    32,
+    40
+   ],
+   "backPicSize": [
+    40,
+    48
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_TRIANGLE_DOWN",
+   "cryId": "CRY_BRONZOR",
+   "frontPic": "gMonFrontPic_Bronzor",
+   "backPic": "gMonBackPic_Bronzor",
+   "palette": "gMonPalette_Bronzor",
+   "shinyPalette": "gMonShinyPalette_Bronzor",
+   "iconSprite": "gMonIcon_Bronzor",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bronzor",
+   "footprint_png": "graphics/pokemon/bronzor/footprint.png",
+   "icon_png": "graphics/pokemon/bronzor/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bronzor.wav"
+  },
+  "SPECIES_BRONZONG": {
+   "expansion_key": "SPECIES_BRONZONG",
+   "height": 13,
+   "weight": 1870,
+   "pokemonScale": 272,
+   "pokemonOffset": 3,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 7,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE_SMALL",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_BRONZONG",
+   "frontPic": "gMonFrontPic_Bronzong",
+   "backPic": "gMonBackPic_Bronzong",
+   "palette": "gMonPalette_Bronzong",
+   "shinyPalette": "gMonShinyPalette_Bronzong",
+   "iconSprite": "gMonIcon_Bronzong",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bronzong",
+   "footprint_png": "graphics/pokemon/bronzong/footprint.png",
+   "icon_png": "graphics/pokemon/bronzong/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bronzong.wav"
+  },
+  "SPECIES_BONSLY": {
+   "expansion_key": "SPECIES_BONSLY",
+   "height": 5,
+   "weight": 150,
+   "pokemonScale": 432,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    32,
+    48
+   ],
+   "backPicSize": [
+    40,
+    64
+   ],
+   "frontAnimId": "ANIM_BOUNCE_ROTATE_TO_SIDES",
+   "backAnimId": "BACK_ANIM_H_VIBRATE",
+   "cryId": "CRY_BONSLY",
+   "frontPic": "gMonFrontPic_Bonsly",
+   "backPic": "gMonBackPic_Bonsly",
+   "palette": "gMonPalette_Bonsly",
+   "shinyPalette": "gMonShinyPalette_Bonsly",
+   "iconSprite": "gMonIcon_Bonsly",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/bonsly",
+   "footprint_png": "graphics/pokemon/bonsly/footprint.png",
+   "icon_png": "graphics/pokemon/bonsly/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/bonsly.wav"
+  },
+  "SPECIES_MIME_JR": {
+   "expansion_key": "SPECIES_MIME_JR",
+   "height": 6,
+   "weight": 130,
+   "pokemonScale": 422,
+   "pokemonOffset": 14,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 1,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    32,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_SLOW",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_LARGE",
+   "cryId": "CRY_MIME_JR",
+   "frontPic": "gMonFrontPic_MimeJr",
+   "backPic": "gMonBackPic_MimeJr",
+   "palette": "gMonPalette_MimeJr",
+   "shinyPalette": "gMonShinyPalette_MimeJr",
+   "iconSprite": "gMonIcon_MimeJr",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/mime_jr",
+   "footprint_png": "graphics/pokemon/mime_jr/footprint.png",
+   "icon_png": "graphics/pokemon/mime_jr/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/mime_jr.wav"
+  },
+  "SPECIES_HAPPINY": {
+   "expansion_key": "SPECIES_HAPPINY",
+   "height": 6,
+   "weight": 244,
+   "pokemonScale": 422,
+   "pokemonOffset": 15,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    32,
+    48
+   ],
+   "backPicSize": [
+    48,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_HAPPINY",
+   "frontPic": "gMonFrontPic_Happiny",
+   "backPic": "gMonBackPic_Happiny",
+   "palette": "gMonPalette_Happiny",
+   "shinyPalette": "gMonShinyPalette_Happiny",
+   "iconSprite": "gMonIcon_Happiny",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/happiny",
+   "footprint_png": "graphics/pokemon/happiny/footprint.png",
+   "icon_png": "graphics/pokemon/happiny/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/happiny.wav"
+  },
+  "SPECIES_CHATOT": {
+   "expansion_key": "SPECIES_CHATOT",
+   "height": 5,
+   "weight": 19,
+   "pokemonScale": 432,
+   "pokemonOffset": 15,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 11,
+   "backPicYOffset": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    48
+   ],
+   "backPicSize": [
+    48,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SHAKE_TWICE",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_CHATOT",
+   "frontPic": "gMonFrontPic_Chatot",
+   "backPic": "gMonBackPic_Chatot",
+   "palette": "gMonPalette_Chatot",
+   "shinyPalette": "gMonShinyPalette_Chatot",
+   "iconSprite": "gMonIcon_Chatot",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/chatot",
+   "footprint_png": "graphics/pokemon/chatot/footprint.png",
+   "icon_png": "graphics/pokemon/chatot/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/chatot.wav"
+  },
+  "SPECIES_SPIRITOMB": {
+   "expansion_key": "SPECIES_SPIRITOMB",
+   "height": 10,
+   "weight": 1080,
+   "pokemonScale": 305,
+   "pokemonOffset": 7,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 5,
+   "iconPalIndex": 5,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_GROW_IN_STAGES",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_SPIRITOMB",
+   "frontPic": "gMonFrontPic_Spiritomb",
+   "backPic": "gMonBackPic_Spiritomb",
+   "palette": "gMonPalette_Spiritomb",
+   "shinyPalette": "gMonShinyPalette_Spiritomb",
+   "iconSprite": "gMonIcon_Spiritomb",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/spiritomb",
+   "footprint_png": "graphics/pokemon/spiritomb/footprint.png",
+   "icon_png": "graphics/pokemon/spiritomb/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/spiritomb.wav"
+  },
+  "SPECIES_GIBLE": {
+   "expansion_key": "SPECIES_GIBLE",
+   "height": 7,
+   "weight": 205,
+   "pokemonScale": 365,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 9,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    56,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_H_SHAKE",
+   "cryId": "CRY_GIBLE",
+   "frontPic": "gMonFrontPic_Gible",
+   "backPic": "gMonBackPic_Gible",
+   "palette": "gMonPalette_Gible",
+   "shinyPalette": "gMonShinyPalette_Gible",
+   "iconSprite": "gMonIcon_Gible",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/gible",
+   "footprint_png": "graphics/pokemon/gible/footprint.png",
+   "icon_png": "graphics/pokemon/gible/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/gible.wav"
+  },
+  "SPECIES_GABITE": {
+   "expansion_key": "SPECIES_GABITE",
+   "height": 14,
+   "weight": 560,
+   "pokemonScale": 265,
+   "pokemonOffset": 2,
+   "trainerScale": 262,
+   "trainerOffset": 0,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 3,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_GABITE",
+   "frontPic": "gMonFrontPic_Gabite",
+   "backPic": "gMonBackPic_Gabite",
+   "palette": "gMonPalette_Gabite",
+   "shinyPalette": "gMonShinyPalette_Gabite",
+   "iconSprite": "gMonIcon_Gabite",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/gabite",
+   "footprint_png": "graphics/pokemon/gabite/footprint.png",
+   "icon_png": "graphics/pokemon/gabite/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/gabite.wav"
+  },
+  "SPECIES_GARCHOMP": {
+   "expansion_key": "SPECIES_GARCHOMP",
+   "height": 19,
+   "weight": 950,
+   "pokemonScale": 256,
+   "pokemonOffset": 1,
+   "trainerScale": 326,
+   "trainerOffset": 4,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SHAKE_TWICE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_GARCHOMP",
+   "frontPic": "gMonFrontPic_Garchomp",
+   "backPic": "gMonBackPic_Garchomp",
+   "palette": "gMonPalette_Garchomp",
+   "shinyPalette": "gMonShinyPalette_Garchomp",
+   "iconSprite": "gMonIcon_Garchomp",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/garchomp",
+   "footprint_png": "graphics/pokemon/garchomp/footprint.png",
+   "icon_png": "graphics/pokemon/garchomp/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/garchomp.wav"
+  },
+  "SPECIES_MUNCHLAX": {
+   "expansion_key": "SPECIES_MUNCHLAX",
+   "height": 6,
+   "weight": 1050,
+   "pokemonScale": 422,
+   "pokemonOffset": 14,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 7,
+   "iconPalIndex": 3,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    48,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+   "backAnimId": "BACK_ANIM_GROW",
+   "cryId": "CRY_MUNCHLAX",
+   "frontPic": "gMonFrontPic_Munchlax",
+   "backPic": "gMonBackPic_Munchlax",
+   "palette": "gMonPalette_Munchlax",
+   "shinyPalette": "gMonShinyPalette_Munchlax",
+   "iconSprite": "gMonIcon_Munchlax",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/munchlax",
+   "footprint_png": "graphics/pokemon/munchlax/footprint.png",
+   "icon_png": "graphics/pokemon/munchlax/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/munchlax.wav"
+  },
+  "SPECIES_RIOLU": {
+   "expansion_key": "SPECIES_RIOLU",
+   "height": 7,
+   "weight": 202,
+   "pokemonScale": 365,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 8,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_RAPID_H_HOPS",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_LARGE",
+   "cryId": "CRY_RIOLU",
+   "frontPic": "gMonFrontPic_Riolu",
+   "backPic": "gMonBackPic_Riolu",
+   "palette": "gMonPalette_Riolu",
+   "shinyPalette": "gMonShinyPalette_Riolu",
+   "iconSprite": "gMonIcon_Riolu",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/riolu",
+   "footprint_png": "graphics/pokemon/riolu/footprint.png",
+   "icon_png": "graphics/pokemon/riolu/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/riolu.wav"
+  },
+  "SPECIES_LUCARIO": {
+   "expansion_key": "SPECIES_LUCARIO",
+   "height": 12,
+   "weight": 540,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 0,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_V_SHAKE_H_SLIDE",
+   "cryId": "CRY_LUCARIO",
+   "frontPic": "gMonFrontPic_Lucario",
+   "backPic": "gMonBackPic_Lucario",
+   "palette": "gMonPalette_Lucario",
+   "shinyPalette": "gMonShinyPalette_Lucario",
+   "iconSprite": "gMonIcon_Lucario",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/lucario",
+   "footprint_png": "graphics/pokemon/lucario/footprint.png",
+   "icon_png": "graphics/pokemon/lucario/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/lucario.wav"
+  },
+  "SPECIES_HIPPOPOTAS": {
+   "expansion_key": "SPECIES_HIPPOPOTAS",
+   "height": 8,
+   "weight": 495,
+   "pokemonScale": 366,
+   "pokemonOffset": 11,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 14,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    40
+   ],
+   "backPicSize": [
+    64,
+    40
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_HIPPOPOTAS",
+   "frontPic": "gMonFrontPic_Hippopotas",
+   "backPic": "gMonBackPic_Hippopotas",
+   "palette": "gMonPalette_Hippopotas",
+   "shinyPalette": "gMonShinyPalette_Hippopotas",
+   "iconSprite": "gMonIcon_Hippopotas",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/hippopotas",
+   "footprint_png": "graphics/pokemon/hippopotas/footprint.png",
+   "icon_png": "graphics/pokemon/hippopotas/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/hippopotas.wav"
+  },
+  "SPECIES_HIPPOWDON": {
+   "expansion_key": "SPECIES_HIPPOWDON",
+   "height": 20,
+   "weight": 3000,
+   "pokemonScale": 261,
+   "pokemonOffset": 2,
+   "trainerScale": 334,
+   "trainerOffset": 4,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SHAKE_TWICE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_HIPPOWDON",
+   "frontPic": "gMonFrontPic_Hippowdon",
+   "backPic": "gMonBackPic_Hippowdon",
+   "palette": "gMonPalette_Hippowdon",
+   "shinyPalette": "gMonShinyPalette_Hippowdon",
+   "iconSprite": "gMonIcon_Hippowdon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/hippowdon",
+   "footprint_png": "graphics/pokemon/hippowdon/footprint.png",
+   "icon_png": "graphics/pokemon/hippowdon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/hippowdon.wav"
+  },
+  "SPECIES_SKORUPI": {
+   "expansion_key": "SPECIES_SKORUPI",
+   "height": 8,
+   "weight": 120,
+   "pokemonScale": 366,
+   "pokemonOffset": 12,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 11,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_SLOW",
+   "backAnimId": "BACK_ANIM_H_SLIDE",
+   "cryId": "CRY_SKORUPI",
+   "frontPic": "gMonFrontPic_Skorupi",
+   "backPic": "gMonBackPic_Skorupi",
+   "palette": "gMonPalette_Skorupi",
+   "shinyPalette": "gMonShinyPalette_Skorupi",
+   "iconSprite": "gMonIcon_Skorupi",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/skorupi",
+   "footprint_png": "graphics/pokemon/skorupi/footprint.png",
+   "icon_png": "graphics/pokemon/skorupi/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/skorupi.wav"
+  },
+  "SPECIES_DRAPION": {
+   "expansion_key": "SPECIES_DRAPION",
+   "height": 13,
+   "weight": 615,
+   "pokemonScale": 272,
+   "pokemonOffset": 5,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_JUMPS_BIG",
+   "backAnimId": "BACK_ANIM_V_SHAKE_H_SLIDE",
+   "cryId": "CRY_DRAPION",
+   "frontPic": "gMonFrontPic_Drapion",
+   "backPic": "gMonBackPic_Drapion",
+   "palette": "gMonPalette_Drapion",
+   "shinyPalette": "gMonShinyPalette_Drapion",
+   "iconSprite": "gMonIcon_Drapion",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/drapion",
+   "footprint_png": "graphics/pokemon/drapion/footprint.png",
+   "icon_png": "graphics/pokemon/drapion/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/drapion.wav"
+  },
+  "SPECIES_CROAGUNK": {
+   "expansion_key": "SPECIES_CROAGUNK",
+   "height": 7,
+   "weight": 230,
+   "pokemonScale": 365,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    48
+   ],
+   "backPicSize": [
+    56,
+    56
+   ],
+   "frontAnimId": "ANIM_RAPID_H_HOPS",
+   "backAnimId": "BACK_ANIM_GROW",
+   "cryId": "CRY_CROAGUNK",
+   "frontPic": "gMonFrontPic_Croagunk",
+   "backPic": "gMonBackPic_Croagunk",
+   "palette": "gMonPalette_Croagunk",
+   "shinyPalette": "gMonShinyPalette_Croagunk",
+   "iconSprite": "gMonIcon_Croagunk",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/croagunk",
+   "footprint_png": "graphics/pokemon/croagunk/footprint.png",
+   "icon_png": "graphics/pokemon/croagunk/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/croagunk.wav"
+  },
+  "SPECIES_TOXICROAK": {
+   "expansion_key": "SPECIES_TOXICROAK",
+   "height": 13,
+   "weight": 444,
+   "pokemonScale": 272,
+   "pokemonOffset": 3,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 5,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    56,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_H_SLIDE",
+   "cryId": "CRY_TOXICROAK",
+   "frontPic": "gMonFrontPic_Toxicroak",
+   "backPic": "gMonBackPic_Toxicroak",
+   "palette": "gMonPalette_Toxicroak",
+   "shinyPalette": "gMonShinyPalette_Toxicroak",
+   "iconSprite": "gMonIcon_Toxicroak",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/toxicroak",
+   "footprint_png": "graphics/pokemon/toxicroak/footprint.png",
+   "icon_png": "graphics/pokemon/toxicroak/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/toxicroak.wav"
+  },
+  "SPECIES_CARNIVINE": {
+   "expansion_key": "SPECIES_CARNIVINE",
+   "height": 14,
+   "weight": 270,
+   "pokemonScale": 265,
+   "pokemonOffset": 2,
+   "trainerScale": 262,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 8,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_FIGURE_8",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_CARNIVINE",
+   "frontPic": "gMonFrontPic_Carnivine",
+   "backPic": "gMonBackPic_Carnivine",
+   "palette": "gMonPalette_Carnivine",
+   "shinyPalette": "gMonShinyPalette_Carnivine",
+   "iconSprite": "gMonIcon_Carnivine",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/carnivine",
+   "footprint_png": "graphics/pokemon/carnivine/footprint.png",
+   "icon_png": "graphics/pokemon/carnivine/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/carnivine.wav"
+  },
+  "SPECIES_FINNEON": {
+   "expansion_key": "SPECIES_FINNEON",
+   "height": 4,
+   "weight": 70,
+   "pokemonScale": 491,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 14,
+   "backPicYOffset": 12,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    32,
+    40
+   ],
+   "backPicSize": [
+    56,
+    40
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE_SMALL",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_FINNEON",
+   "frontPic": "gMonFrontPic_Finneon",
+   "backPic": "gMonBackPic_Finneon",
+   "palette": "gMonPalette_Finneon",
+   "shinyPalette": "gMonShinyPalette_Finneon",
+   "iconSprite": "gMonIcon_Finneon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/finneon",
+   "footprint_png": "graphics/pokemon/finneon/footprint.png",
+   "icon_png": "graphics/pokemon/finneon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/finneon.wav"
+  },
+  "SPECIES_LUMINEON": {
+   "expansion_key": "SPECIES_LUMINEON",
+   "height": 12,
+   "weight": 240,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_H_STRETCH",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_LUMINEON",
+   "frontPic": "gMonFrontPic_Lumineon",
+   "backPic": "gMonBackPic_Lumineon",
+   "palette": "gMonPalette_Lumineon",
+   "shinyPalette": "gMonShinyPalette_Lumineon",
+   "iconSprite": "gMonIcon_Lumineon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/lumineon",
+   "footprint_png": "graphics/pokemon/lumineon/footprint.png",
+   "icon_png": "graphics/pokemon/lumineon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/lumineon.wav"
+  },
+  "SPECIES_MANTYKE": {
+   "expansion_key": "SPECIES_MANTYKE",
+   "height": 10,
+   "weight": 650,
+   "pokemonScale": 305,
+   "pokemonOffset": 7,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_TWIST_TWICE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_MANTYKE",
+   "frontPic": "gMonFrontPic_Mantyke",
+   "backPic": "gMonBackPic_Mantyke",
+   "palette": "gMonPalette_Mantyke",
+   "shinyPalette": "gMonShinyPalette_Mantyke",
+   "iconSprite": "gMonIcon_Mantyke",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/mantyke",
+   "footprint_png": "graphics/pokemon/mantyke/footprint.png",
+   "icon_png": "graphics/pokemon/mantyke/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/mantyke.wav"
+  },
+  "SPECIES_SNOVER": {
+   "expansion_key": "SPECIES_SNOVER",
+   "height": 10,
+   "weight": 505,
+   "pokemonScale": 305,
+   "pokemonOffset": 7,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    48
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_SNOVER",
+   "frontPic": "gMonFrontPic_Snover",
+   "backPic": "gMonBackPic_Snover",
+   "palette": "gMonPalette_Snover",
+   "shinyPalette": "gMonShinyPalette_Snover",
+   "iconSprite": "gMonIcon_Snover",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/snover",
+   "footprint_png": "graphics/pokemon/snover/footprint.png",
+   "icon_png": "graphics/pokemon/snover/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/snover.wav"
+  },
+  "SPECIES_ABOMASNOW": {
+   "expansion_key": "SPECIES_ABOMASNOW",
+   "height": 22,
+   "weight": 1355,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 348,
+   "trainerOffset": 6,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 4,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_SHAKE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_ABOMASNOW",
+   "frontPic": "gMonFrontPic_Abomasnow",
+   "backPic": "gMonBackPic_Abomasnow",
+   "palette": "gMonPalette_Abomasnow",
+   "shinyPalette": "gMonShinyPalette_Abomasnow",
+   "iconSprite": "gMonIcon_Abomasnow",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/abomasnow",
+   "footprint_png": "graphics/pokemon/abomasnow/footprint.png",
+   "icon_png": "graphics/pokemon/abomasnow/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/abomasnow.wav"
+  },
+  "SPECIES_WEAVILE": {
+   "expansion_key": "SPECIES_WEAVILE",
+   "height": 11,
+   "weight": 340,
+   "pokemonScale": 320,
+   "pokemonOffset": 7,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_VIBRATE",
+   "backAnimId": "BACK_ANIM_JOLT_RIGHT",
+   "cryId": "CRY_WEAVILE",
+   "frontPic": "gMonFrontPic_Weavile",
+   "backPic": "gMonBackPic_Weavile",
+   "palette": "gMonPalette_Weavile",
+   "shinyPalette": "gMonShinyPalette_Weavile",
+   "iconSprite": "gMonIcon_Weavile",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/weavile",
+   "footprint_png": "graphics/pokemon/weavile/footprint.png",
+   "icon_png": "graphics/pokemon/weavile/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/weavile.wav"
+  },
+  "SPECIES_MAGNEZONE": {
+   "expansion_key": "SPECIES_MAGNEZONE",
+   "height": 12,
+   "weight": 1800,
+   "pokemonScale": 282,
+   "pokemonOffset": 4,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 12,
+   "enemyMonElevation": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    40
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_TRIANGLE_DOWN",
+   "cryId": "CRY_MAGNEZONE",
+   "frontPic": "gMonFrontPic_Magnezone",
+   "backPic": "gMonBackPic_Magnezone",
+   "palette": "gMonPalette_Magnezone",
+   "shinyPalette": "gMonShinyPalette_Magnezone",
+   "iconSprite": "gMonIcon_Magnezone",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/magnezone",
+   "footprint_png": "graphics/pokemon/magnezone/footprint.png",
+   "icon_png": "graphics/pokemon/magnezone/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/magnezone.wav"
+  },
+  "SPECIES_LICKILICKY": {
+   "expansion_key": "SPECIES_LICKILICKY",
+   "height": 17,
+   "weight": 1400,
+   "pokemonScale": 259,
+   "pokemonOffset": 0,
+   "trainerScale": 290,
+   "trainerOffset": 1,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 2,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_LICKILICKY",
+   "frontPic": "gMonFrontPic_Lickilicky",
+   "backPic": "gMonBackPic_Lickilicky",
+   "palette": "gMonPalette_Lickilicky",
+   "shinyPalette": "gMonShinyPalette_Lickilicky",
+   "iconSprite": "gMonIcon_Lickilicky",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/lickilicky",
+   "footprint_png": "graphics/pokemon/lickilicky/footprint.png",
+   "icon_png": "graphics/pokemon/lickilicky/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/lickilicky.wav"
+  },
+  "SPECIES_RHYPERIOR": {
+   "expansion_key": "SPECIES_RHYPERIOR",
+   "height": 24,
+   "weight": 2828,
+   "pokemonScale": 256,
+   "pokemonOffset": 3,
+   "trainerScale": 369,
+   "trainerOffset": 7,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 0,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SHAKE_TWICE",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_RHYPERIOR",
+   "frontPic": "gMonFrontPic_Rhyperior",
+   "backPic": "gMonBackPic_Rhyperior",
+   "palette": "gMonPalette_Rhyperior",
+   "shinyPalette": "gMonShinyPalette_Rhyperior",
+   "iconSprite": "gMonIcon_Rhyperior",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/rhyperior",
+   "footprint_png": "graphics/pokemon/rhyperior/footprint.png",
+   "icon_png": "graphics/pokemon/rhyperior/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/rhyperior.wav"
+  },
+  "SPECIES_TANGROWTH": {
+   "expansion_key": "SPECIES_TANGROWTH",
+   "height": 20,
+   "weight": 1286,
+   "pokemonScale": 261,
+   "pokemonOffset": 1,
+   "trainerScale": 334,
+   "trainerOffset": 4,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_STRETCH",
+   "backAnimId": "BACK_ANIM_GROW",
+   "cryId": "CRY_TANGROWTH",
+   "frontPic": "gMonFrontPic_Tangrowth",
+   "backPic": "gMonBackPic_Tangrowth",
+   "palette": "gMonPalette_Tangrowth",
+   "shinyPalette": "gMonShinyPalette_Tangrowth",
+   "iconSprite": "gMonIcon_Tangrowth",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/tangrowth",
+   "footprint_png": "graphics/pokemon/tangrowth/footprint.png",
+   "icon_png": "graphics/pokemon/tangrowth/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/tangrowth.wav"
+  },
+  "SPECIES_ELECTIVIRE": {
+   "expansion_key": "SPECIES_ELECTIVIRE",
+   "height": 18,
+   "weight": 1386,
+   "pokemonScale": 267,
+   "pokemonOffset": 2,
+   "trainerScale": 286,
+   "trainerOffset": 1,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 9,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_GLOW_YELLOW",
+   "backAnimId": "BACK_ANIM_SHAKE_FLASH_YELLOW",
+   "cryId": "CRY_ELECTIVIRE",
+   "frontPic": "gMonFrontPic_Electivire",
+   "backPic": "gMonBackPic_Electivire",
+   "palette": "gMonPalette_Electivire",
+   "shinyPalette": "gMonShinyPalette_Electivire",
+   "iconSprite": "gMonIcon_Electivire",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/electivire",
+   "footprint_png": "graphics/pokemon/electivire/footprint.png",
+   "icon_png": "graphics/pokemon/electivire/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/electivire.wav"
+  },
+  "SPECIES_MAGMORTAR": {
+   "expansion_key": "SPECIES_MAGMORTAR",
+   "height": 16,
+   "weight": 680,
+   "pokemonScale": 259,
+   "pokemonOffset": 1,
+   "trainerScale": 296,
+   "trainerOffset": 1,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_SHAKE_GLOW_RED",
+   "cryId": "CRY_MAGMORTAR",
+   "frontPic": "gMonFrontPic_Magmortar",
+   "backPic": "gMonBackPic_Magmortar",
+   "palette": "gMonPalette_Magmortar",
+   "shinyPalette": "gMonShinyPalette_Magmortar",
+   "iconSprite": "gMonIcon_Magmortar",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/magmortar",
+   "footprint_png": "graphics/pokemon/magmortar/footprint.png",
+   "icon_png": "graphics/pokemon/magmortar/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/magmortar.wav"
+  },
+  "SPECIES_TOGEKISS": {
+   "expansion_key": "SPECIES_TOGEKISS",
+   "height": 15,
+   "weight": 380,
+   "pokemonScale": 268,
+   "pokemonOffset": 2,
+   "trainerScale": 271,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 10,
+   "enemyMonElevation": 14,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_SWING_CONVEX",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_LARGE",
+   "cryId": "CRY_TOGEKISS",
+   "frontPic": "gMonFrontPic_Togekiss",
+   "backPic": "gMonBackPic_Togekiss",
+   "palette": "gMonPalette_Togekiss",
+   "shinyPalette": "gMonShinyPalette_Togekiss",
+   "iconSprite": "gMonIcon_Togekiss",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/togekiss",
+   "footprint_png": "graphics/pokemon/togekiss/footprint.png",
+   "icon_png": "graphics/pokemon/togekiss/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/togekiss.wav"
+  },
+  "SPECIES_YANMEGA": {
+   "expansion_key": "SPECIES_YANMEGA",
+   "height": 19,
+   "weight": 515,
+   "pokemonScale": 256,
+   "pokemonOffset": 1,
+   "trainerScale": 326,
+   "trainerOffset": 4,
+   "frontPicYOffset": 5,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_VIBRATE",
+   "backAnimId": "BACK_ANIM_H_VIBRATE",
+   "cryId": "CRY_YANMEGA",
+   "frontPic": "gMonFrontPic_Yanmega",
+   "backPic": "gMonBackPic_Yanmega",
+   "palette": "gMonPalette_Yanmega",
+   "shinyPalette": "gMonShinyPalette_Yanmega",
+   "iconSprite": "gMonIcon_Yanmega",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/yanmega",
+   "footprint_png": "graphics/pokemon/yanmega/footprint.png",
+   "icon_png": "graphics/pokemon/yanmega/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/yanmega.wav"
+  },
+  "SPECIES_LEAFEON": {
+   "expansion_key": "SPECIES_LEAFEON",
+   "height": 10,
+   "weight": 255,
+   "pokemonScale": 305,
+   "pokemonOffset": 8,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 9,
+   "backPicYOffset": 0,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    56,
+    48
+   ],
+   "backPicSize": [
+    48,
+    64
+   ],
+   "frontAnimId": "ANIM_SHRINK_GROW",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_LEAFEON",
+   "frontPic": "gMonFrontPic_Leafeon",
+   "backPic": "gMonBackPic_Leafeon",
+   "palette": "gMonPalette_Leafeon",
+   "shinyPalette": "gMonShinyPalette_Leafeon",
+   "iconSprite": "gMonIcon_Leafeon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/leafeon",
+   "footprint_png": "graphics/pokemon/leafeon/footprint.png",
+   "icon_png": "graphics/pokemon/leafeon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/leafeon.wav"
+  },
+  "SPECIES_GLACEON": {
+   "expansion_key": "SPECIES_GLACEON",
+   "height": 8,
+   "weight": 259,
+   "pokemonScale": 366,
+   "pokemonOffset": 10,
+   "trainerScale": 257,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_V_STRETCH",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_GLACEON",
+   "frontPic": "gMonFrontPic_Glaceon",
+   "backPic": "gMonBackPic_Glaceon",
+   "palette": "gMonPalette_Glaceon",
+   "shinyPalette": "gMonShinyPalette_Glaceon",
+   "iconSprite": "gMonIcon_Glaceon",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/glaceon",
+   "footprint_png": "graphics/pokemon/glaceon/footprint.png",
+   "icon_png": "graphics/pokemon/glaceon/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/glaceon.wav"
+  },
+  "SPECIES_GLISCOR": {
+   "expansion_key": "SPECIES_GLISCOR",
+   "height": 20,
+   "weight": 425,
+   "pokemonScale": 261,
+   "pokemonOffset": 1,
+   "trainerScale": 334,
+   "trainerOffset": 4,
+   "frontPicYOffset": 7,
+   "backPicYOffset": 11,
+   "enemyMonElevation": 9,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_SWING_CONVEX",
+   "backAnimId": "BACK_ANIM_V_STRETCH",
+   "cryId": "CRY_GLISCOR",
+   "frontPic": "gMonFrontPic_Gliscor",
+   "backPic": "gMonBackPic_Gliscor",
+   "palette": "gMonPalette_Gliscor",
+   "shinyPalette": "gMonShinyPalette_Gliscor",
+   "iconSprite": "gMonIcon_Gliscor",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/gliscor",
+   "footprint_png": "graphics/pokemon/gliscor/footprint.png",
+   "icon_png": "graphics/pokemon/gliscor/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/gliscor.wav"
+  },
+  "SPECIES_MAMOSWINE": {
+   "expansion_key": "SPECIES_MAMOSWINE",
+   "height": 25,
+   "weight": 2910,
+   "pokemonScale": 257,
+   "pokemonOffset": 6,
+   "trainerScale": 423,
+   "trainerOffset": 8,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_BACK_AND_LUNGE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_MAMOSWINE",
+   "frontPic": "gMonFrontPic_Mamoswine",
+   "backPic": "gMonBackPic_Mamoswine",
+   "palette": "gMonPalette_Mamoswine",
+   "shinyPalette": "gMonShinyPalette_Mamoswine",
+   "iconSprite": "gMonIcon_Mamoswine",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/mamoswine",
+   "footprint_png": "graphics/pokemon/mamoswine/footprint.png",
+   "icon_png": "graphics/pokemon/mamoswine/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/mamoswine.wav"
+  },
+  "SPECIES_PORYGON_Z": {
+   "expansion_key": "SPECIES_PORYGON_Z",
+   "height": 9,
+   "weight": 340,
+   "pokemonScale": 338,
+   "pokemonOffset": 8,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 12,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    40,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+   "backAnimId": "BACK_ANIM_H_VIBRATE",
+   "cryId": "CRY_PORYGON_Z",
+   "frontPic": "gMonFrontPic_PorygonZ",
+   "backPic": "gMonBackPic_PorygonZ",
+   "palette": "gMonPalette_PorygonZ",
+   "shinyPalette": "gMonShinyPalette_PorygonZ",
+   "iconSprite": "gMonIcon_PorygonZ",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/porygon_z",
+   "footprint_png": "graphics/pokemon/porygon_z/footprint.png",
+   "icon_png": "graphics/pokemon/porygon_z/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/porygon_z.wav"
+  },
+  "SPECIES_GALLADE": {
+   "expansion_key": "SPECIES_GALLADE",
+   "height": 16,
+   "weight": 520,
+   "pokemonScale": 259,
+   "pokemonOffset": 1,
+   "trainerScale": 296,
+   "trainerOffset": 1,
+   "frontPicYOffset": 1,
+   "backPicYOffset": 5,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    56,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_VIBRATE",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_GALLADE",
+   "frontPic": "gMonFrontPic_Gallade",
+   "backPic": "gMonBackPic_Gallade",
+   "palette": "gMonPalette_Gallade",
+   "shinyPalette": "gMonShinyPalette_Gallade",
+   "iconSprite": "gMonIcon_Gallade",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/gallade",
+   "footprint_png": "graphics/pokemon/gallade/footprint.png",
+   "icon_png": "graphics/pokemon/gallade/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/gallade.wav"
+  },
+  "SPECIES_PROBOPASS": {
+   "expansion_key": "SPECIES_PROBOPASS",
+   "height": 14,
+   "weight": 3400,
+   "pokemonScale": 265,
+   "pokemonOffset": 2,
+   "trainerScale": 262,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 4,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SLIDE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_H_SLIDE",
+   "cryId": "CRY_PROBOPASS",
+   "frontPic": "gMonFrontPic_Probopass",
+   "backPic": "gMonBackPic_Probopass",
+   "palette": "gMonPalette_Probopass",
+   "shinyPalette": "gMonShinyPalette_Probopass",
+   "iconSprite": "gMonIcon_Probopass",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/probopass",
+   "footprint_png": "graphics/pokemon/probopass/footprint.png",
+   "icon_png": "graphics/pokemon/probopass/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/probopass.wav"
+  },
+  "SPECIES_DUSKNOIR": {
+   "expansion_key": "SPECIES_DUSKNOIR",
+   "height": 22,
+   "weight": 1066,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 348,
+   "trainerOffset": 6,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_H_SLIDE",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_DUSKNOIR",
+   "frontPic": "gMonFrontPic_Dusknoir",
+   "backPic": "gMonBackPic_Dusknoir",
+   "palette": "gMonPalette_Dusknoir",
+   "shinyPalette": "gMonShinyPalette_Dusknoir",
+   "iconSprite": "gMonIcon_Dusknoir",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/dusknoir",
+   "footprint_png": "graphics/pokemon/dusknoir/footprint.png",
+   "icon_png": "graphics/pokemon/dusknoir/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/dusknoir.wav"
+  },
+  "SPECIES_FROSLASS": {
+   "expansion_key": "SPECIES_FROSLASS",
+   "height": 13,
+   "weight": 266,
+   "pokemonScale": 272,
+   "pokemonOffset": 3,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 8,
+   "backPicYOffset": 3,
+   "enemyMonElevation": 7,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    48
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_FROSLASS",
+   "frontPic": "gMonFrontPic_Froslass",
+   "backPic": "gMonBackPic_Froslass",
+   "palette": "gMonPalette_Froslass",
+   "shinyPalette": "gMonShinyPalette_Froslass",
+   "iconSprite": "gMonIcon_Froslass",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/froslass",
+   "footprint_png": "graphics/pokemon/froslass/footprint.png",
+   "icon_png": "graphics/pokemon/froslass/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/froslass.wav"
+  },
+  "SPECIES_ROTOM": {
+   "expansion_key": "SPECIES_ROTOM",
+   "height": 3,
+   "weight": 3,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 11,
+   "backPicYOffset": 5,
+   "enemyMonElevation": 10,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    48
+   ],
+   "backPicSize": [
+    56,
+    56
+   ],
+   "frontAnimId": "ANIM_GLOW_YELLOW",
+   "backAnimId": "BACK_ANIM_SHAKE_FLASH_YELLOW",
+   "cryId": "CRY_ROTOM",
+   "frontPic": "gMonFrontPic_Rotom",
+   "backPic": "gMonBackPic_Rotom",
+   "palette": "gMonPalette_Rotom",
+   "shinyPalette": "gMonShinyPalette_Rotom",
+   "iconSprite": "gMonIcon_Rotom",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/rotom",
+   "footprint_png": "graphics/pokemon/rotom/normal/footprint.png",
+   "icon_png": "graphics/pokemon/rotom/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/rotom.wav"
+  },
+  "SPECIES_UXIE": {
+   "expansion_key": "SPECIES_UXIE",
+   "height": 3,
+   "weight": 3,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 6,
+   "backPicYOffset": 8,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    56
+   ],
+   "backPicSize": [
+    56,
+    48
+   ],
+   "frontAnimId": "ANIM_SWING_CONCAVE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_UXIE",
+   "frontPic": "gMonFrontPic_Uxie",
+   "backPic": "gMonBackPic_Uxie",
+   "palette": "gMonPalette_Uxie",
+   "shinyPalette": "gMonShinyPalette_Uxie",
+   "iconSprite": "gMonIcon_Uxie",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/uxie",
+   "footprint_png": "graphics/pokemon/uxie/footprint.png",
+   "icon_png": "graphics/pokemon/uxie/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/uxie.wav"
+  },
+  "SPECIES_MESPRIT": {
+   "expansion_key": "SPECIES_MESPRIT",
+   "height": 3,
+   "weight": 3,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 8,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_MESPRIT",
+   "frontPic": "gMonFrontPic_Mesprit",
+   "backPic": "gMonBackPic_Mesprit",
+   "palette": "gMonPalette_Mesprit",
+   "shinyPalette": "gMonShinyPalette_Mesprit",
+   "iconSprite": "gMonIcon_Mesprit",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/mesprit",
+   "footprint_png": "graphics/pokemon/mesprit/footprint.png",
+   "icon_png": "graphics/pokemon/mesprit/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/mesprit.wav"
+  },
+  "SPECIES_AZELF": {
+   "expansion_key": "SPECIES_AZELF",
+   "height": 3,
+   "weight": 3,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 6,
+   "enemyMonElevation": 6,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    64
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_V_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_AZELF",
+   "frontPic": "gMonFrontPic_Azelf",
+   "backPic": "gMonBackPic_Azelf",
+   "palette": "gMonPalette_Azelf",
+   "shinyPalette": "gMonShinyPalette_Azelf",
+   "iconSprite": "gMonIcon_Azelf",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/azelf",
+   "footprint_png": "graphics/pokemon/azelf/footprint.png",
+   "icon_png": "graphics/pokemon/azelf/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/azelf.wav"
+  },
+  "SPECIES_DIALGA": {
+   "expansion_key": "SPECIES_DIALGA",
+   "height": 54,
+   "weight": 6830,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 721,
+   "trainerOffset": 19,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 0,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_H_SHAKE",
+   "backAnimId": "BACK_ANIM_V_SHAKE",
+   "cryId": "CRY_DIALGA",
+   "frontPic": "gMonFrontPic_Dialga",
+   "backPic": "gMonBackPic_Dialga",
+   "palette": "gMonPalette_Dialga",
+   "shinyPalette": "gMonShinyPalette_Dialga",
+   "iconSprite": "gMonIcon_Dialga",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/dialga",
+   "footprint_png": "graphics/pokemon/dialga/footprint.png",
+   "icon_png": "graphics/pokemon/dialga/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/dialga.wav"
+  },
+  "SPECIES_PALKIA": {
+   "expansion_key": "SPECIES_PALKIA",
+   "height": 42,
+   "weight": 3360,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 650,
+   "trainerOffset": 16,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 6,
+   "iconPalIndex": 2,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_V_SHAKE",
+   "backAnimId": "BACK_ANIM_H_SHAKE",
+   "cryId": "CRY_PALKIA",
+   "frontPic": "gMonFrontPic_Palkia",
+   "backPic": "gMonBackPic_Palkia",
+   "palette": "gMonPalette_Palkia",
+   "shinyPalette": "gMonShinyPalette_Palkia",
+   "iconSprite": "gMonIcon_Palkia",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/palkia",
+   "footprint_png": "graphics/pokemon/palkia/footprint.png",
+   "icon_png": "graphics/pokemon/palkia/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/palkia.wav"
+  },
+  "SPECIES_HEATRAN": {
+   "expansion_key": "SPECIES_HEATRAN",
+   "height": 17,
+   "weight": 4300,
+   "pokemonScale": 259,
+   "pokemonOffset": 1,
+   "trainerScale": 290,
+   "trainerOffset": 1,
+   "frontPicYOffset": 5,
+   "backPicYOffset": 13,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    56
+   ],
+   "backPicSize": [
+    64,
+    40
+   ],
+   "frontAnimId": "ANIM_GLOW_ORANGE",
+   "backAnimId": "BACK_ANIM_SHAKE_GLOW_RED",
+   "cryId": "CRY_HEATRAN",
+   "frontPic": "gMonFrontPic_Heatran",
+   "backPic": "gMonBackPic_Heatran",
+   "palette": "gMonPalette_Heatran",
+   "shinyPalette": "gMonShinyPalette_Heatran",
+   "iconSprite": "gMonIcon_Heatran",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/heatran",
+   "footprint_png": "graphics/pokemon/heatran/footprint.png",
+   "icon_png": "graphics/pokemon/heatran/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/heatran.wav"
+  },
+  "SPECIES_REGIGIGAS": {
+   "expansion_key": "SPECIES_REGIGIGAS",
+   "height": 37,
+   "weight": 4200,
+   "pokemonScale": 256,
+   "pokemonOffset": 2,
+   "trainerScale": 610,
+   "trainerOffset": 17,
+   "frontPicYOffset": 4,
+   "backPicYOffset": 13,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    40
+   ],
+   "frontAnimId": "ANIM_V_SHAKE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_REGIGIGAS",
+   "frontPic": "gMonFrontPic_Regigigas",
+   "backPic": "gMonBackPic_Regigigas",
+   "palette": "gMonPalette_Regigigas",
+   "shinyPalette": "gMonShinyPalette_Regigigas",
+   "iconSprite": "gMonIcon_Regigigas",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/regigigas",
+   "footprint_png": "graphics/pokemon/regigigas/footprint.png",
+   "icon_png": "graphics/pokemon/regigigas/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/regigigas.wav"
+  },
+  "SPECIES_GIRATINA": {
+   "expansion_key": "SPECIES_GIRATINA_ALTERED",
+   "height": 45,
+   "weight": 7500,
+   "pokemonScale": 256,
+   "pokemonOffset": 0,
+   "trainerScale": 614,
+   "trainerOffset": 13,
+   "frontPicYOffset": 0,
+   "backPicYOffset": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_GROW_VIBRATE",
+   "backAnimId": "BACK_ANIM_V_SHAKE_LOW",
+   "cryId": "CRY_GIRATINA",
+   "frontPic": "gMonFrontPic_GiratinaAltered",
+   "backPic": "gMonBackPic_GiratinaAltered",
+   "palette": "gMonPalette_GiratinaAltered",
+   "shinyPalette": "gMonShinyPalette_GiratinaAltered",
+   "iconSprite": "gMonIcon_GiratinaAltered",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/giratina",
+   "footprint_png": "graphics/pokemon/giratina/footprint.png",
+   "icon_png": "graphics/pokemon/giratina/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/giratina.wav"
+  },
+  "SPECIES_CRESSELIA": {
+   "expansion_key": "SPECIES_CRESSELIA",
+   "height": 15,
+   "weight": 856,
+   "pokemonScale": 268,
+   "pokemonOffset": 2,
+   "trainerScale": 271,
+   "trainerOffset": 0,
+   "frontPicYOffset": 2,
+   "backPicYOffset": 0,
+   "enemyMonElevation": 3,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    56,
+    64
+   ],
+   "frontAnimId": "ANIM_H_SLIDE_WOBBLE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_CRESSELIA",
+   "frontPic": "gMonFrontPic_Cresselia",
+   "backPic": "gMonBackPic_Cresselia",
+   "palette": "gMonPalette_Cresselia",
+   "shinyPalette": "gMonShinyPalette_Cresselia",
+   "iconSprite": "gMonIcon_Cresselia",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/cresselia",
+   "footprint_png": "graphics/pokemon/cresselia/footprint.png",
+   "icon_png": "graphics/pokemon/cresselia/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/cresselia.wav"
+  },
+  "SPECIES_PHIONE": {
+   "expansion_key": "SPECIES_PHIONE",
+   "height": 4,
+   "weight": 31,
+   "pokemonScale": 491,
+   "pokemonOffset": 12,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 12,
+   "backPicYOffset": 9,
+   "enemyMonElevation": 8,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    56,
+    40
+   ],
+   "backPicSize": [
+    64,
+    48
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_PHIONE",
+   "frontPic": "gMonFrontPic_Phione",
+   "backPic": "gMonBackPic_Phione",
+   "palette": "gMonPalette_Phione",
+   "shinyPalette": "gMonShinyPalette_Phione",
+   "iconSprite": "gMonIcon_Phione",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/phione",
+   "footprint_png": "graphics/pokemon/phione/footprint.png",
+   "icon_png": "graphics/pokemon/phione/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/phione.wav"
+  },
+  "SPECIES_MANAPHY": {
+   "expansion_key": "SPECIES_MANAPHY",
+   "height": 3,
+   "weight": 14,
+   "pokemonScale": 530,
+   "pokemonOffset": 13,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 13,
+   "backPicYOffset": 10,
+   "enemyMonElevation": 10,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    40
+   ],
+   "backPicSize": [
+    64,
+    56
+   ],
+   "frontAnimId": "ANIM_SWING_CONVEX",
+   "backAnimId": "BACK_ANIM_CONVEX_DOUBLE_ARC",
+   "cryId": "CRY_MANAPHY",
+   "frontPic": "gMonFrontPic_Manaphy",
+   "backPic": "gMonBackPic_Manaphy",
+   "palette": "gMonPalette_Manaphy",
+   "shinyPalette": "gMonShinyPalette_Manaphy",
+   "iconSprite": "gMonIcon_Manaphy",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/manaphy",
+   "footprint_png": "graphics/pokemon/manaphy/footprint.png",
+   "icon_png": "graphics/pokemon/manaphy/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/manaphy.wav"
+  },
+  "SPECIES_DARKRAI": {
+   "expansion_key": "SPECIES_DARKRAI",
+   "height": 15,
+   "weight": 505,
+   "pokemonScale": 268,
+   "pokemonOffset": 2,
+   "trainerScale": 271,
+   "trainerOffset": 0,
+   "frontPicYOffset": 3,
+   "backPicYOffset": 0,
+   "enemyMonElevation": 4,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    64,
+    64
+   ],
+   "backPicSize": [
+    64,
+    64
+   ],
+   "frontAnimId": "ANIM_GLOW_BLACK",
+   "backAnimId": "BACK_ANIM_SHRINK_GROW_VIBRATE",
+   "cryId": "CRY_DARKRAI",
+   "frontPic": "gMonFrontPic_Darkrai",
+   "backPic": "gMonBackPic_Darkrai",
+   "palette": "gMonPalette_Darkrai",
+   "shinyPalette": "gMonShinyPalette_Darkrai",
+   "iconSprite": "gMonIcon_Darkrai",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/darkrai",
+   "footprint_png": "graphics/pokemon/darkrai/footprint.png",
+   "icon_png": "graphics/pokemon/darkrai/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/darkrai.wav"
+  },
+  "SPECIES_SHAYMIN": {
+   "expansion_key": "SPECIES_SHAYMIN_LAND",
+   "height": 2,
+   "weight": 21,
+   "pokemonScale": 682,
+   "pokemonOffset": 24,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 16,
+   "backPicYOffset": 15,
+   "iconPalIndex": 1,
+   "frontPicSize": [
+    40,
+    32
+   ],
+   "backPicSize": [
+    56,
+    40
+   ],
+   "frontAnimId": "ANIM_V_SQUISH_AND_BOUNCE",
+   "backAnimId": "BACK_ANIM_CONCAVE_ARC_SMALL",
+   "cryId": "CRY_SHAYMIN_LAND",
+   "frontPic": "gMonFrontPic_ShayminLand",
+   "backPic": "gMonBackPic_ShayminLand",
+   "palette": "gMonPalette_ShayminLand",
+   "shinyPalette": "gMonShinyPalette_ShayminLand",
+   "iconSprite": "gMonIcon_ShayminLand",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/shaymin",
+   "footprint_png": "graphics/pokemon/shaymin/footprint.png",
+   "icon_png": "graphics/pokemon/shaymin/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/shaymin_land.wav"
+  },
+  "SPECIES_ARCEUS": {
+   "expansion_key": "SPECIES_ARCEUS_FIGHTING",
+   "height": 4,
+   "weight": 40,
+   "pokemonScale": 491,
+   "pokemonOffset": 16,
+   "trainerScale": 256,
+   "trainerOffset": 0,
+   "frontPicYOffset": 10,
+   "backPicYOffset": 7,
+   "iconPalIndex": 0,
+   "frontPicSize": [
+    48,
+    56
+   ],
+   "backPicSize": [
+    40,
+    64
+   ],
+   "frontAnimId": "ANIM_H_JUMPS",
+   "backAnimId": "BACK_ANIM_H_SHAKE",
+   "cryId": "CRY_VICTINI",
+   "frontPic": "gMonFrontPic_Victini",
+   "backPic": "gMonBackPic_Victini",
+   "palette": "gMonPalette_Victini",
+   "shinyPalette": "gMonShinyPalette_Victini",
+   "iconSprite": "gMonIcon_Victini",
+   "frontAnimFrames": [],
+   "dir": "graphics/pokemon/victini",
+   "footprint_png": "graphics/pokemon/victini/footprint.png",
+   "icon_png": "graphics/pokemon/victini/icon.png",
+   "cry_wav": "sound/direct_sound_samples/cries/victini.wav"
+  }
+ },
+ "moemon": {
+  "SPECIES_TURTWIG": {
+   "dir": "graphics/moemon/gen4/turtwig",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_GROTLE": {
+   "dir": "graphics/moemon/gen4/grotle",
+   "coords": {
+    "front": [
+     64,
+     56,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_TORTERRA": {
+   "dir": "graphics/moemon/gen4/torterra",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CHIMCHAR": {
+   "dir": "graphics/moemon/gen4/chimchar",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MONFERNO": {
+   "dir": "graphics/moemon/gen4/monferno",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_INFERNAPE": {
+   "dir": "graphics/moemon/gen4/infernape",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_PIPLUP": {
+   "dir": "graphics/moemon/gen4/piplup",
+   "coords": {
+    "front": [
+     40,
+     56,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_PRINPLUP": {
+   "dir": "graphics/moemon/gen4/prinplup",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_EMPOLEON": {
+   "dir": "graphics/moemon/gen4/empoleon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_STARLY": {
+   "dir": "graphics/moemon/gen4/starly",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_STARAVIA": {
+   "dir": "graphics/moemon/gen4/staravia",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_STARAPTOR": {
+   "dir": "graphics/moemon/gen4/staraptor",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_BIDOOF": {
+   "dir": "graphics/moemon/gen4/bidoof",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_BIBAREL": {
+   "dir": "graphics/moemon/gen4/bibarel",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_KRICKETOT": {
+   "dir": "graphics/moemon/gen4/kricketot",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_KRICKETUNE": {
+   "dir": "graphics/moemon/gen4/kricketune",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_SHINX": {
+   "dir": "graphics/moemon/gen4/shinx",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_LUXIO": {
+   "dir": "graphics/moemon/gen4/luxio",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_LUXRAY": {
+   "dir": "graphics/moemon/gen4/luxray",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_BUDEW": {
+   "dir": "graphics/moemon/gen4/budew",
+   "coords": {
+    "front": [
+     32,
+     56,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_ROSERADE": {
+   "dir": "graphics/moemon/gen4/roserade",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CRANIDOS": {
+   "dir": "graphics/moemon/gen4/cranidos",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_RAMPARDOS": {
+   "dir": "graphics/moemon/gen4/rampardos",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_SHIELDON": {
+   "dir": "graphics/moemon/gen4/shieldon",
+   "coords": {
+    "front": [
+     48,
+     56,
+     0
+    ],
+    "back": [
+     64,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_BASTIODON": {
+   "dir": "graphics/moemon/gen4/bastiodon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_BURMY": {
+   "dir": "graphics/moemon/gen4/burmy",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_WORMADAM": {
+   "dir": "graphics/moemon/gen4/wormadam",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MOTHIM": {
+   "dir": "graphics/moemon/gen4/combee",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_COMBEE": {
+   "dir": "graphics/moemon/gen4/combee",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_VESPIQUEN": {
+   "dir": "graphics/moemon/gen4/vespiquen",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_PACHIRISU": {
+   "dir": "graphics/moemon/gen4/pachirisu",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_BUIZEL": {
+   "dir": "graphics/moemon/gen4/buizel",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_FLOATZEL": {
+   "dir": "graphics/moemon/gen4/floatzel",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CHERUBI": {
+   "dir": "graphics/moemon/gen4/cherubi",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_CHERRIM": {
+   "dir": "graphics/moemon/gen4/cherrim",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_SHELLOS": {
+   "dir": "graphics/moemon/gen4/shellos",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_GASTRODON": {
+   "dir": "graphics/moemon/gen4/gastrodon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_AMBIPOM": {
+   "dir": "graphics/moemon/gen4/ambipom",
+   "coords": {
+    "front": [
+     64,
+     56,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_DRIFLOON": {
+   "dir": "graphics/moemon/gen4/drifloon",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_DRIFBLIM": {
+   "dir": "graphics/moemon/gen4/drifblim",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_BUNEARY": {
+   "dir": "graphics/moemon/gen4/buneary",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_LOPUNNY": {
+   "dir": "graphics/moemon/gen4/lopunny",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MISMAGIUS": {
+   "dir": "graphics/moemon/gen4/mismagius",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_HONCHKROW": {
+   "dir": "graphics/moemon/gen4/honchkrow",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GLAMEOW": {
+   "dir": "graphics/moemon/gen4/glameow",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_PURUGLY": {
+   "dir": "graphics/moemon/gen4/purugly",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CHINGLING": {
+   "dir": "graphics/moemon/gen4/chingling",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_STUNKY": {
+   "dir": "graphics/moemon/gen4/stunky",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_SKUNTANK": {
+   "dir": "graphics/moemon/gen4/skuntank",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_BRONZOR": {
+   "dir": "graphics/moemon/gen4/bronzor",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_BRONZONG": {
+   "dir": "graphics/moemon/gen4/bronzong",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_BONSLY": {
+   "dir": "graphics/moemon/gen4/bonsly",
+   "coords": {
+    "front": [
+     32,
+     48,
+     0
+    ],
+    "back": [
+     32,
+     40,
+     0
+    ]
+   }
+  },
+  "SPECIES_MIME_JR": {
+   "dir": "graphics/moemon/gen4/mime_jr",
+   "coords": {
+    "front": [
+     40,
+     56,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_HAPPINY": {
+   "dir": "graphics/moemon/gen4/happiny",
+   "coords": {
+    "front": [
+     40,
+     56,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_CHATOT": {
+   "dir": "graphics/moemon/gen4/chatot",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_SPIRITOMB": {
+   "dir": "graphics/moemon/gen4/spiritomb",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_GIBLE": {
+   "dir": "graphics/moemon/gen4/gible",
+   "coords": {
+    "front": [
+     40,
+     56,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_GABITE": {
+   "dir": "graphics/moemon/gen4/gabite",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GARCHOMP": {
+   "dir": "graphics/moemon/gen4/garchomp",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_MUNCHLAX": {
+   "dir": "graphics/moemon/gen4/munchlax",
+   "coords": {
+    "front": [
+     40,
+     56,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_RIOLU": {
+   "dir": "graphics/moemon/gen4/riolu",
+   "coords": {
+    "front": [
+     48,
+     56,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_LUCARIO": {
+   "dir": "graphics/moemon/gen4/lucario",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_HIPPOPOTAS": {
+   "dir": "graphics/moemon/gen4/hippopotas",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     40,
+     0
+    ]
+   }
+  },
+  "SPECIES_HIPPOWDON": {
+   "dir": "graphics/moemon/gen4/hippowdon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_SKORUPI": {
+   "dir": "graphics/moemon/gen4/skorupi",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_DRAPION": {
+   "dir": "graphics/moemon/gen4/drapion",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CROAGUNK": {
+   "dir": "graphics/moemon/gen4/croagunk",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_TOXICROAK": {
+   "dir": "graphics/moemon/gen4/toxicroak",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_CARNIVINE": {
+   "dir": "graphics/moemon/gen4/carnivine",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_FINNEON": {
+   "dir": "graphics/moemon/gen4/finneon",
+   "coords": {
+    "front": [
+     40,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_LUMINEON": {
+   "dir": "graphics/moemon/gen4/lumineon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_MANTYKE": {
+   "dir": "graphics/moemon/gen4/mantyke",
+   "coords": {
+    "front": [
+     48,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_SNOVER": {
+   "dir": "graphics/moemon/gen4/snover",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_ABOMASNOW": {
+   "dir": "graphics/moemon/gen4/abomasnow",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_WEAVILE": {
+   "dir": "graphics/moemon/gen4/weavile",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     48,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_MAGNEZONE": {
+   "dir": "graphics/moemon/gen4/magnezone",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_LICKILICKY": {
+   "dir": "graphics/moemon/gen4/lickilicky",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     40,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_RHYPERIOR": {
+   "dir": "graphics/moemon/gen4/rhyperior",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_TANGROWTH": {
+   "dir": "graphics/moemon/gen4/tangrowth",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_ELECTIVIRE": {
+   "dir": "graphics/moemon/gen4/electivire",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MAGMORTAR": {
+   "dir": "graphics/moemon/gen4/magmortar",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_TOGEKISS": {
+   "dir": "graphics/moemon/gen4/togekiss",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_YANMEGA": {
+   "dir": "graphics/moemon/gen4/yanmega",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_LEAFEON": {
+   "dir": "graphics/moemon/gen4/leafeon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GLACEON": {
+   "dir": "graphics/moemon/gen4/glaceon",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GLISCOR": {
+   "dir": "graphics/moemon/gen4/gliscor",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MAMOSWINE": {
+   "dir": "graphics/moemon/gen4/mamoswine",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_PORYGON_Z": {
+   "dir": "graphics/moemon/gen4/porygon_z",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GALLADE": {
+   "dir": "graphics/moemon/gen4/gallade",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_PROBOPASS": {
+   "dir": "graphics/moemon/gen4/probopass",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_DUSKNOIR": {
+   "dir": "graphics/moemon/gen4/dusknoir",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_FROSLASS": {
+   "dir": "graphics/moemon/gen4/froslass",
+   "coords": {
+    "front": [
+     56,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_ROTOM": {
+   "dir": "graphics/moemon/gen4/rotom",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_UXIE": {
+   "dir": "graphics/moemon/gen4/uxie",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_MESPRIT": {
+   "dir": "graphics/moemon/gen4/mesprit",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_AZELF": {
+   "dir": "graphics/moemon/gen4/azelf",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_DIALGA": {
+   "dir": "graphics/moemon/gen4/dialga",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     56,
+     0
+    ]
+   }
+  },
+  "SPECIES_PALKIA": {
+   "dir": "graphics/moemon/gen4/palkia",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_HEATRAN": {
+   "dir": "graphics/moemon/gen4/heatran",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     56,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_REGIGIGAS": {
+   "dir": "graphics/moemon/gen4/regigigas",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_GIRATINA": {
+   "dir": "graphics/moemon/gen4/giratina",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_CRESSELIA": {
+   "dir": "graphics/moemon/gen4/cresselia",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_PHIONE": {
+   "dir": "graphics/moemon/gen4/phione",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_MANAPHY": {
+   "dir": "graphics/moemon/gen4/manaphy",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_DARKRAI": {
+   "dir": "graphics/moemon/gen4/darkrai",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  },
+  "SPECIES_SHAYMIN": {
+   "dir": "graphics/moemon/gen4/shaymin",
+   "coords": {
+    "front": [
+     48,
+     56,
+     0
+    ],
+    "back": [
+     48,
+     48,
+     0
+    ]
+   }
+  },
+  "SPECIES_ARCEUS": {
+   "dir": "graphics/moemon/gen4/victini",
+   "coords": {
+    "front": [
+     64,
+     64,
+     0
+    ],
+    "back": [
+     64,
+     64,
+     0
+    ]
+   }
+  }
+ }
+}

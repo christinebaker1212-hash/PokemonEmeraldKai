@@ -1,3 +1,4 @@
+#include "gen4_tables.h"   // Moemon Kai: Gen 4
 const struct CompressedSpriteSheet gMonFrontPicTable_Moe[] =
 {
     SPECIES_SPRITE(NONE, gMonFrontPic_CircledQuestionMark),
@@ -440,4 +441,5 @@ const struct CompressedSpriteSheet gMonFrontPicTable_Moe[] =
     SPECIES_SPRITE(UNOWN_Z, gMonFrontPic_UnownZ),
     SPECIES_SPRITE(UNOWN_EMARK, gMonFrontPic_UnownExclamationMark),
     SPECIES_SPRITE(UNOWN_QMARK, gMonFrontPic_UnownQuestionMark),
+    GEN4_FRONT   // Moemon Kai: Gen 4
 };

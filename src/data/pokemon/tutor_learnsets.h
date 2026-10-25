@@ -5747,5 +5747,6 @@ static const u32 sTutorLearnsets[] =
                                 | TUTOR(MOVE_SLEEP_TALK)
                                 | TUTOR(MOVE_DEFENSE_CURL)),
 
+#include "tutor_learnsets_gen4.h"   // Moemon Kai: Gen 4
 };
 

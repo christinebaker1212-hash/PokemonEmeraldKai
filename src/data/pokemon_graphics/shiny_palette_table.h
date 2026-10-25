@@ -1,3 +1,4 @@
+#include "gen4_tables.h"   // Moemon Kai: Gen 4
 const struct CompressedSpritePalette gMonShinyPaletteTable_Moe[] =
 {
     SPECIES_SHINY_PAL(NONE, gMonShinyPalette_CircledQuestionMark),
@@ -440,4 +441,5 @@ const struct CompressedSpritePalette gMonShinyPaletteTable_Moe[] =
     SPECIES_SHINY_PAL(UNOWN_Z, gMonShinyPalette_Unown),
     SPECIES_SHINY_PAL(UNOWN_EMARK, gMonShinyPalette_Unown),
     SPECIES_SHINY_PAL(UNOWN_QMARK, gMonShinyPalette_Unown),
+    GEN4_SHINY   // Moemon Kai: Gen 4
 };

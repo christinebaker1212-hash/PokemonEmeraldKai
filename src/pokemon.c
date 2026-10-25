@@ -102,6 +102,7 @@ static const struct CombinedMove sCombinedMoves[2] =
 // NOTE: The order of the elements in the 3 arrays below is irrelevant.
 // To reorder the pokedex, see the values in include/constants/pokedex.h.
 
+#include "data/pokemon/dex_numbers_gen4.h"   // Moemon Kai: Gen 4
 #define SPECIES_TO_HOENN(name)      [SPECIES_##name - 1] = HOENN_DEX_##name
 #define SPECIES_TO_NATIONAL(name)   [SPECIES_##name - 1] = NATIONAL_DEX_##name
 #define HOENN_TO_NATIONAL(name)     [HOENN_DEX_##name - 1] = NATIONAL_DEX_##name
@@ -520,6 +521,7 @@ static const u16 sSpeciesToHoennPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_HOENN(JIRACHI),
     SPECIES_TO_HOENN(DEOXYS),
     SPECIES_TO_HOENN(CHIMECHO),
+    SPECIES_TO_HOENN_GEN4   // Moemon Kai: Gen 4
 };
 
 // Assigns all species to the National Dex Index (Summary No. for National Dex)
@@ -936,6 +938,7 @@ static const u16 sSpeciesToNationalPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_NATIONAL(JIRACHI),
     SPECIES_TO_NATIONAL(DEOXYS),
     SPECIES_TO_NATIONAL(CHIMECHO),
+    SPECIES_TO_NATIONAL_GEN4   // Moemon Kai: Gen 4
 };
 
 // Assigns all Hoenn Dex Indexes to a National Dex Index
@@ -1092,6 +1095,7 @@ static const u16 sHoennToNationalOrder[NUM_SPECIES - 1] =
     HOENN_TO_NATIONAL(DUSCLOPS),
     HOENN_TO_NATIONAL(TROPIUS),
     HOENN_TO_NATIONAL(CHIMECHO),
+    HOENN_TO_NATIONAL_GEN4   // Moemon Kai: Gen 4
     HOENN_TO_NATIONAL(ABSOL),
     HOENN_TO_NATIONAL(VULPIX),
     HOENN_TO_NATIONAL(NINETALES),

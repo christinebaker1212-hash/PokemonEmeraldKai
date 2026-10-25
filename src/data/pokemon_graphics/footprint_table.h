@@ -1,3 +1,4 @@
+#include "gen4_tables.h"   // Moemon Kai: Gen 4
 const u8 *const gMonFootprintTable[] =
 {
     [SPECIES_NONE] = gMonFootprint_Bulbasaur,
@@ -413,4 +414,5 @@ const u8 *const gMonFootprintTable[] =
     [SPECIES_DEOXYS] = gMonFootprint_Deoxys,
     [SPECIES_CHIMECHO] = gMonFootprint_Chimecho,
     [SPECIES_EGG] = gMonFootprint_Bulbasaur,
+    GEN4_FOOTPRINT   // Moemon Kai: Gen 4
 };

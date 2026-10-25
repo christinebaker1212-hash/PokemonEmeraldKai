@@ -2822,3 +2822,5 @@ const u8 gMonIcon_UnownExclamationMark[] = INCGFX_U8("graphics/pokemon/unown/exc
 const u32 gMonStillFrontPic_UnownQuestionMark[] = INCGFX_U32("graphics/pokemon/unown/question_mark/front.png", ".4bpp.lz");
 const u32 gMonBackPic_UnownQuestionMark[] = INCBIN_U32("graphics/moemon/gMonBackPic_UnownQuestionMark.bin");
 const u8 gMonIcon_UnownQuestionMark[] = INCGFX_U8("graphics/pokemon/unown/question_mark/icon.png", ".4bpp");
+
+#include "pokemon_gen4.h"   // Moemon Kai: Gen 4

@@ -391,6 +391,10 @@ bool8 MP_Candy_Convert(u16 *made);
 #ifdef EOF
 void MP_Candy_Write(FILE *f);
 void MP_Candy_Read(FILE *f);
+// pokedex.c: dex flags past the save block's arrays (Gen 4 on), in "<save>.bag" after the candies
+void MP_DexExt_Reset(void);
+void MP_DexExt_Write(FILE *f);
+void MP_DexExt_Read(FILE *f);
 #endif
 void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));

@@ -2319,3 +2319,5 @@ const u8 gDeoxysPokedexText[] = _(
     "extraterrestrial virus exposed to a laser\n"
     "beam. Its body is configured for superior\n"
     "agility and speed.");
+
+#include "pokedex_text_gen4.h"   // Moemon Kai: Gen 4

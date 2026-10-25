@@ -10180,4 +10180,5 @@ const union {
         .FLASH = TRUE,
     } },
 
+#include "tmhm_learnsets_gen4.h"   // Moemon Kai: Gen 4
 };

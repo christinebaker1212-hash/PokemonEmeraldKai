@@ -123,6 +123,7 @@ void MP_Bag_WriteSidecar(void)
     }
     WriteMarks(f);   // the items' "new" marks and when they came in
     MP_Candy_Write(f);   // the CANDY JAR's candies (mp_candy.c)
+    MP_DexExt_Write(f);  // Moemon Kai: dex flags past the save block's (pokedex.c)
     fclose(f);
 }
 
@@ -160,7 +161,10 @@ static bool8 LoadSidecar(const char *path)
         if (p != POCKETS_COUNT || !ReadMarks(f))
             MarksFromCurrentOrder();   // a sidecar from before the marks
         else
+        {
             MP_Candy_Read(f);
+            MP_DexExt_Read(f);   // Moemon Kai
+        }
     }
     fclose(f);
     return sidecar;
@@ -175,6 +179,7 @@ void MP_Bag_LoadFromSave(void)
     bool8 sidecar = FALSE;
 
     MP_Candy_Reset();   // unless the sidecar has them
+    MP_DexExt_Reset();
     for (p = 0; p < POCKETS_COUNT; p++)
     {
         memset(sPockets[p].big, 0, sPockets[p].bigCount * sizeof(struct ItemSlot));

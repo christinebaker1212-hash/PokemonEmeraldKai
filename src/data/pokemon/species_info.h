@@ -11664,5 +11664,6 @@ const struct SpeciesInfo gSpeciesInfo[] =
         .safariZoneFleeRate = 0,
         .bodyColor = BODY_COLOR_BLUE,
         .noFlip = FALSE,
-    }
+    },
+#include "species_info_gen4.h"   // Moemon Kai: Gen 4
 };

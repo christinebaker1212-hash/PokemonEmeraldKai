@@ -1306,5 +1306,6 @@ const u16 gEggMoves[] = {
               MOVE_HYPNOSIS,
               MOVE_DREAM_EATER),
 
+#include "egg_moves_gen4.h"   // Moemon Kai: Gen 4
     EGG_MOVES_TERMINATOR
 };

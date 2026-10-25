@@ -9,6 +9,7 @@
 #define SPECIES_SPRITE(species, sprite) [SPECIES_##species] = {sprite, MON_PIC_SIZE, SPECIES_##species}
 #define SPECIES_PAL(species, pal) [SPECIES_##species] = {pal, SPECIES_##species}
 #define SPECIES_SHINY_PAL(species, pal) [SPECIES_##species] = {pal, SPECIES_##species + SPECIES_SHINY_TAG}
+#include "mp_monart_gen4.h"   // Moemon Kai: Gen 4
 
 static const u32 sPkFrontPic_CircledQuestionMark[] = INCGFX_U32("graphics/pokemon/question_mark/circled/anim_front.png", ".4bpp.lz");
 static const u32 sPkFrontPic_Bulbasaur[] = INCGFX_U32("graphics/pokemon/bulbasaur/anim_front.png", ".4bpp.lz");
@@ -2062,6 +2063,7 @@ const struct CompressedSpriteSheet gMonFrontPicTable_Pokemon[] =
     SPECIES_SPRITE(UNOWN_Z, sPkFrontPic_UnownZ),
     SPECIES_SPRITE(UNOWN_EMARK, sPkFrontPic_UnownExclamationMark),
     SPECIES_SPRITE(UNOWN_QMARK, sPkFrontPic_UnownQuestionMark),
+    GEN4_PK_FRONT   // Moemon Kai: Gen 4
 };
 
 // back_pic_table.h
@@ -2507,6 +2509,7 @@ const struct CompressedSpriteSheet gMonBackPicTable_Pokemon[] =
     SPECIES_SPRITE(UNOWN_Z, sPkBackPic_UnownZ),
     SPECIES_SPRITE(UNOWN_EMARK, sPkBackPic_UnownExclamationMark),
     SPECIES_SPRITE(UNOWN_QMARK, sPkBackPic_UnownQuestionMark),
+    GEN4_PK_BACK   // Moemon Kai: Gen 4
 };
 
 // palette_table.h
@@ -2952,6 +2955,7 @@ const struct CompressedSpritePalette gMonPaletteTable_Pokemon[] =
     SPECIES_PAL(UNOWN_Z, sPkPalette_Unown),
     SPECIES_PAL(UNOWN_EMARK, sPkPalette_Unown),
     SPECIES_PAL(UNOWN_QMARK, sPkPalette_Unown),
+    GEN4_PK_PAL   // Moemon Kai: Gen 4
 };
 
 // shiny_palette_table.h
@@ -3397,6 +3401,7 @@ const struct CompressedSpritePalette gMonShinyPaletteTable_Pokemon[] =
     SPECIES_SHINY_PAL(UNOWN_Z, sPkShinyPalette_Unown),
     SPECIES_SHINY_PAL(UNOWN_EMARK, sPkShinyPalette_Unown),
     SPECIES_SHINY_PAL(UNOWN_QMARK, sPkShinyPalette_Unown),
+    GEN4_PK_SHINY   // Moemon Kai: Gen 4
 };
 
 // front_pic_coordinates.h
@@ -3846,6 +3851,7 @@ const struct MonCoords gMonFrontPicCoords_Pokemon[] =
     [SPECIES_UNOWN_Z]     = { .size = MON_COORDS_SIZE(24, 32), .y_offset = 16 },
     [SPECIES_UNOWN_EMARK] = { .size = MON_COORDS_SIZE(24, 40), .y_offset = 15 },
     [SPECIES_UNOWN_QMARK] = { .size = MON_COORDS_SIZE(24, 40), .y_offset = 13 },
+    GEN4_PK_FCOORD   // Moemon Kai: Gen 4
 };
 
 // back_pic_coordinates.h
@@ -4295,6 +4301,7 @@ const struct MonCoords gMonBackPicCoords_Pokemon[] =
     [SPECIES_UNOWN_Z]     = { .size = MON_COORDS_SIZE(32, 48), .y_offset = 10 },
     [SPECIES_UNOWN_EMARK] = { .size = MON_COORDS_SIZE(24, 56), .y_offset =  6 },
     [SPECIES_UNOWN_QMARK] = { .size = MON_COORDS_SIZE(32, 56), .y_offset =  6 },
+    GEN4_PK_BCOORD   // Moemon Kai: Gen 4
 };
 
 // enemy_mon_elevation.h
@@ -4363,6 +4370,7 @@ const u8 gEnemyMonElevation_Pokemon[NUM_SPECIES] =
     [SPECIES_JIRACHI] = 12,
     [SPECIES_DEOXYS] = 8,
     [SPECIES_CHIMECHO] = 12,
+    GEN4_PK_ELEV   // Moemon Kai: Gen 4
 };
 
 // front_pic_anims.h (data.c's sAnim_GeneralFrame0 first)
@@ -10068,6 +10076,7 @@ const union AnimCmd *const *const gMonFrontAnimsPtrTable_Pokemon[] =
     [SPECIES_UNOWN_EMARK] = sAnims_UnownEMark,
     [SPECIES_UNOWN_QMARK] = sAnims_UnownQMark,
 
+    GEN4_PK_ANIMS   // Moemon Kai: Gen 4
 };
 
 const u8 gMonFrontAnimIdsTable_Pokemon[NUM_SPECIES - 1] =
@@ -10458,4 +10467,5 @@ const u8 gMonFrontAnimIdsTable_Pokemon[NUM_SPECIES - 1] =
     [SPECIES_JIRACHI - 1]     = ANIM_SWING_CONVEX,
     [SPECIES_DEOXYS - 1]      = ANIM_H_PIVOT,
     [SPECIES_CHIMECHO - 1]    = ANIM_H_SLIDE_WOBBLE,
+    GEN4_PK_ANIMID   // Moemon Kai: Gen 4
 };

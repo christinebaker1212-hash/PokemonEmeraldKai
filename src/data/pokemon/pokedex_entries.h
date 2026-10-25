@@ -4643,4 +4643,5 @@ const struct PokedexEntry gPokedexEntries[] =
         .trainerScale = 290,
         .trainerOffset = 2,
     },
+#include "pokedex_entries_gen4.h"   // Moemon Kai: Gen 4
 };

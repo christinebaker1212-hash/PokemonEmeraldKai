@@ -185,7 +185,10 @@ int strcmp(const char *, const char*);
 
 // NUM_DEX_FLAG_BYTES allocates more flags than it needs to, as NUM_SPECIES includes the "old unown"
 // values that don't appear in the Pokédex. NATIONAL_DEX_COUNT does not include these values.
-#define NUM_DEX_FLAG_BYTES ROUND_BITS_TO_BYTES(NUM_SPECIES)
+// Moemon Kai: kept at Gen 3's size so saves keep their layout (416 dex numbers). Later numbers' flags live in
+// "<save>.bag" (pokedex.c MP_DexExt_*, written with the save like the bag's extra slots).
+#define NUM_DEX_FLAG_BYTES 52
+#define NUM_DEX_EXT_FLAG_BYTES (ROUND_BITS_TO_BYTES(NATIONAL_DEX_COUNT) > NUM_DEX_FLAG_BYTES ? ROUND_BITS_TO_BYTES(NATIONAL_DEX_COUNT) - NUM_DEX_FLAG_BYTES : 1)
 #define NUM_FLAG_BYTES ROUND_BITS_TO_BYTES(FLAGS_COUNT)
 #define NUM_TRENDY_SAYING_BYTES ROUND_BITS_TO_BYTES(NUM_TRENDY_SAYINGS)
 

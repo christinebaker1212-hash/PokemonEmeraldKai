@@ -1743,6 +1743,7 @@ void ResetPokedex(void)
         gSaveBlock1Ptr->seen1[i] = 0;
         gSaveBlock1Ptr->seen2[i] = 0;
     }
+    MP_DexExt_Reset();   // Moemon Kai
 }
 
 void ResetPokedexScrollPositions(void)
@@ -4567,9 +4568,66 @@ u16 GetPokedexHeightWeight(u16 dexNum, u8 data)
     }
 }
 
+// Moemon Kai: the flags of dex numbers past the save block's arrays (Gen 4 on), kept in "<save>.bag"
+static u8 sDexExtSeen[NUM_DEX_EXT_FLAG_BYTES], sDexExtOwned[NUM_DEX_EXT_FLAG_BYTES];
+#define DEX_EXT_MAGIC 0x58454444   // "DDEX"
+
+void MP_DexExt_Reset(void)
+{
+    memset(sDexExtSeen, 0, sizeof(sDexExtSeen));
+    memset(sDexExtOwned, 0, sizeof(sDexExtOwned));
+}
+
+void MP_DexExt_Write(FILE *f)
+{
+    u32 magic = DEX_EXT_MAGIC;
+    u16 count = NUM_DEX_EXT_FLAG_BYTES;
+    fwrite(&magic, sizeof(magic), 1, f);
+    fwrite(&count, sizeof(count), 1, f);
+    fwrite(sDexExtSeen, 1, count, f);
+    fwrite(sDexExtOwned, 1, count, f);
+}
+
+void MP_DexExt_Read(FILE *f)
+{
+    u32 magic = 0;
+    u16 count = 0, n;
+    MP_DexExt_Reset();
+    if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != DEX_EXT_MAGIC || fread(&count, sizeof(count), 1, f) != 1)
+        return;   // a sidecar from before Gen 4
+    n = count < NUM_DEX_EXT_FLAG_BYTES ? count : NUM_DEX_EXT_FLAG_BYTES;
+    if (fread(sDexExtSeen, 1, n, f) != n)
+        return;
+    fseek(f, count - n, SEEK_CUR);
+    if (fread(sDexExtOwned, 1, n, f) != n)
+        MP_DexExt_Reset();
+}
+
+static s8 GetSetPokedexFlagExt(u16 index, u8 mask, u8 caseID)
+{
+    index -= NUM_DEX_FLAG_BYTES;
+    if (index >= NUM_DEX_EXT_FLAG_BYTES)
+        return 0;
+    switch (caseID)
+    {
+    case FLAG_GET_SEEN:
+        return (sDexExtSeen[index] & mask) != 0;
+    case FLAG_GET_CAUGHT:
+        return (sDexExtOwned[index] & mask) != 0;
+    case FLAG_SET_SEEN:
+        sDexExtSeen[index] |= mask;
+        break;
+    case FLAG_SET_CAUGHT:
+        sDexExtOwned[index] |= mask;
+        sDexExtSeen[index] |= mask;
+        break;
+    }
+    return 0;
+}
+
 s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
 {
-    u8 index;
+    u16 index;
     u8 bit;
     u8 mask;
     s8 retVal;
@@ -4579,6 +4637,12 @@ s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
     bit = nationalDexNo % 8;
     mask = 1 << bit;
     retVal = 0;
+    if (index >= NUM_DEX_FLAG_BYTES)   // Moemon Kai: Gen 4 on
+    {
+        if ((caseID == FLAG_SET_SEEN || caseID == FLAG_SET_CAUGHT) && !GetSetPokedexFlagExt(index, mask, caseID == FLAG_SET_SEEN ? FLAG_GET_SEEN : FLAG_GET_CAUGHT))
+            MP_Dex_OnLocalFlag(nationalDexNo + 1, caseID == FLAG_SET_CAUGHT); // Moemon Co-op: shared Pokédex
+        return GetSetPokedexFlagExt(index, mask, caseID);
+    }
     switch (caseID)
     {
     case FLAG_GET_SEEN:

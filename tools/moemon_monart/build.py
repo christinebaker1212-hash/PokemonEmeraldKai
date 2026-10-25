@@ -64,6 +64,19 @@ m = re.search(r'static const u8 sMonFrontAnimIdsTable\[NUM_SPECIES - 1\] =\s*\{.
 out.append(m.group(0).replace('static const u8 sMonFrontAnimIdsTable', 'const u8 gMonFrontAnimIdsTable_Pokemon'))
 out.append('')
 
+# Moemon Kai: the Gen 4 pictures (tools/moemon_gen4/gen_species.py writes src/mp/mp_monart_gen4.h)
+text = '\n'.join(out)
+text = text.replace('SPECIES_SHINY_TAG}\n', 'SPECIES_SHINY_TAG}\n#include "mp_monart_gen4.h"   // Moemon Kai: Gen 4\n', 1)
+for name, mac in (('gMonFrontPicTable_Pokemon[] =', 'GEN4_PK_FRONT'), ('gMonBackPicTable_Pokemon[] =', 'GEN4_PK_BACK'),
+                  ('gMonPaletteTable_Pokemon[] =', 'GEN4_PK_PAL'), ('gMonShinyPaletteTable_Pokemon[] =', 'GEN4_PK_SHINY'),
+                  ('gMonFrontPicCoords_Pokemon[] =', 'GEN4_PK_FCOORD'), ('gMonBackPicCoords_Pokemon[] =', 'GEN4_PK_BCOORD'),
+                  ('gEnemyMonElevation_Pokemon[NUM_SPECIES] =', 'GEN4_PK_ELEV'),
+                  ('gMonFrontAnimsPtrTable_Pokemon[] =', 'GEN4_PK_ANIMS'),
+                  ('gMonFrontAnimIdsTable_Pokemon[NUM_SPECIES - 1] =', 'GEN4_PK_ANIMID')):
+    i = text.index(name)
+    j = text.index('\n};', i)
+    text = text[:j] + '\n    %s   // Moemon Kai: Gen 4' % mac + text[j:]
+out = [text]
 with open(os.path.join(repo, 'src/mp/mp_monart_data.c'), 'w') as f:
     f.write('\n'.join(out))
 print('%d pictures and palettes' % len(names))
