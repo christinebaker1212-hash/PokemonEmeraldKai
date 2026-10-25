@@ -24,6 +24,14 @@ rendershot a_shake2
 wait 120
 mp jarstate
 rendershot a_aftershake
+press RIGHT 2
+wait 10
+press DOWN 2
+wait 30
+rendershot a_cursor
+press A 2
+wait 20
+rendershot a_ask
 press A 2
 wait 40
 rendershot a_conv1
@@ -36,6 +44,17 @@ rendershot a_conv4
 waitfor jaridle 1200
 mp jarstate
 rendershot a_converted
+press UP 2
+wait 10
+press UP 2
+wait 30
+press A 2
+wait 20
+press A 2
+wait 40
+waitfor jaridle 1200
+mp jarstate
+rendershot a_converted_all
 press B 2
 pressuntil A field 600
 wait 10

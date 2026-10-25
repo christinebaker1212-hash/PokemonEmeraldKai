@@ -780,9 +780,13 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   go into it by themselves. Use the jar from the BAG or a registered
   button: the lid pops off and your candies pour in, a candy for each one
   (past 96 the jar is full and the candies get smaller, each standing for
-  several). SELECT shakes the jar. A: CONVERT turns every ten of one kind
+  several); they settle in layers, kind by kind. The list shows each kind:
+  blue ones have enough for a RARE CANDY, gray ones are empty. Move the
+  cursor to a kind (its candies hop in the jar) and the message box says
+  how many more it needs; A on a blue one asks, YES turns every ten of it
   into a RARE CANDY: they fly out of the jar and the RARE CANDY goes to
-  your BAG. B: back. The candies are saved with your game.
+  your BAG. ALL (bottom right) converts every kind at once. SELECT shakes
+  the jar. B: back. The candies are saved with your game.
 * Hold SELECT on the map to pick which Moemon follows you (a quick tap of
   SELECT still uses your registered item).
 * If the game crashes it saves crash_log.txt next to the game and says so.
