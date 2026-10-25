@@ -28,6 +28,7 @@ The ROM itself is not in the repo.
 | `quetzal_rip/trainer_pics/` | front pics of every Kanto/Johto trainer (`front/pic_<id>.png/.pal`) | 64x64 indexed |
 | `quetzal_rip/data/` | `trainers.json` (793 trainers, parties), `wild_encounters.json` (229 maps), `region_map_sections.json`, `flags_vars.json` (every flag/var: where set, checked, hides objects), `id_map.json` (every species/item/move used, with Kai's constant or null) | JSON |
 | `quetzal_rip/include/` | `quetzal_constants.h` (every FLAG_QZ/VAR_QZ/TRAINER_QZ/OBJ_EVENT_GFX_QZ/MUS_QZ value), `quetzal_macros.inc` (custom commands, Quetzal specials), `quetzal_ids.h` (Quetzal's species/item/move numbers, for checks only) | |
+| `quetzal_rip/sound/` | Quetzal's 107 new songs (ids 559-665): 56 Johto music tracks + 51 sound-effect copies, as `.mid` + `midi.cfg` lines for Kai's build, `.s` (exact ROM bytes), 2 new voicegroups, 192 new samples (`.wav`); `README.md` names each song from where it plays | Kai's sound formats; `tools/quetzal_rip/songs.py [--verify]` |
 | `quetzal_rip/previews/` | `johto_overview.png`, `kanto_overview.png`: all outdoor maps stitched by their connections | 1/4 scale |
 
 ### Verified
@@ -39,11 +40,12 @@ The ROM itself is not in the repo.
 - **all 12,344 labelled script, text, movement and mart blocks are byte-identical to the ROM** (pointers masked).
   So no command, argument or character was decoded wrongly.
 Map renders (`tools/quetzal_rip/render.py`, `overview.py`), sprite sheets and trainer pics were checked by eye.
+`python3 tools/quetzal_rip/songs.py ROM --verify`: all 107 songs assemble back to the ROM's bytes, all 107 `.mid`
+files rebuild through Kai's `mid2agb` into the same notes / controllers / tempo / loop, and all 192 `.wav` samples
+convert back to the ROM's bytes with Kai's `wav2agb`.
 
 ### Not ripped yet
 
-- **Music.** Johto's songs are Quetzal's own (song ids 559-665 in the table at 0x09397008, standard m4a); the rip
-  only names them `MUS_QZ_<id>`. Kanto uses FRLG songs Kai already has.
 - **Region map graphics and fly / heal locations** for Johto and Kanto (ENGINE.md has the region logic; the map
   section tables are ripped in `data/region_map_sections.json`).
 
@@ -102,7 +104,9 @@ In rough order of size. Each item says where the details are.
    groups them (Bug Contest, static legendaries, FRLG ports such as Seagallop / elevators / Lorelei's dolls, region
    travel, Celebi time travel, Darkrai/Cresselia dreams, fossils, shops). Special 737 (a Quest Log leftover) is called
    132 times and does nothing: delete those calls.
-9. **Music.** Johto's songs are new (`MUS_QZ_*`, not ripped yet); Kanto uses the FRLG songs Kai already has.
+9. **Music.** Johto's songs are new: `quetzal_rip/sound/` (drop the `.mid` files into `sound/songs/midi/`, append
+   the `midi.cfg`, voicegroup, sample and song-table snippets; map `MUS_QZ_<id>` to the new song constants).
+   Kanto uses the FRLG songs Kai already has. Johto battles use the stock battle music.
 10. **Hidden items.** Kanto's hidden-item ids restart at 0 (they are FRLG's hidden-item ids, 183/183); the rip writes
     them as `FLAG_QZ_KANTO_HIDDEN_ITEM_<n>`. Johto has no hidden items.
 
