@@ -197,10 +197,11 @@ int MP_TestCondition(const char *name)
         bool8 MP_EasyChatOpen(void);
         return MP_EasyChatOpen();
     }
-    if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up
+    if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up, or a menu's (menu_helpers.c)
     {
         bool8 MP_ScriptYesNoOpen(void);
-        return MP_ScriptYesNoOpen();
+        bool8 MP_MenuYesNoOpen(void);
+        return MP_ScriptYesNoOpen() || MP_MenuYesNoOpen();
     }
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;

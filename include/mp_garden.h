@@ -36,7 +36,15 @@ bool8 MP_Garden_Visited(void);            // quick travel appears after the firs
 bool8 MP_Garden_QuickTravelShown(void);   // start_menu.c: START > GARDEN
 void MP_Garden_QuickTravel(bool8 fromPc); // START > GARDEN, the PC's row: off to the Garden, or why not
 void MP_Garden_RedirectWarp(s8 destGroup, s8 destNum);   // field_control_avatar.c SetupWarp: the CENTERs' 2F
-bool8 MP_GardenDecor_CarryInput(bool8 a, bool8 b);   // field_control_avatar.c: A puts a carried decoration down, B back
+// decoration.c's MOéMON GARDEN mode (DECORATE on the GARDEN BOARD: the SECRET BASE's decorating), map coords with MAP_OFFSET
+void MP_Garden_ShowDecorationMenu(void);   // special (decoration.c)
+bool8 MP_GardenDecor_CanPlaceAt(u8 decor, s16 x, s16 y);   // its bottom left tile
+bool8 MP_GardenDecor_PlaceAt(u8 decor, s16 x, s16 y);
+s8 MP_GardenDecor_OursAt(s16 x, s16 y);    // our decoration covering this tile (-1 none)
+bool8 MP_GardenDecor_At(s16 x, s16 y);     // any decoration there (friends', the storm stone too)
+void MP_GardenDecor_PutAway(u8 index);
+void MP_GardenDecor_Prune(void);          // decorating: a decoration put away loses its sprite at once
+void MP_GardenLife_KeepOnReload(void);     // the next map load keeps the Garden Pokémon where they are
 void MP_GardenDecor_CheckPlaces(void);    // on load: decorations where nobody could reach them go back
 bool8 MP_Garden_TryInteract(void);        // A in front of a Garden Pokémon (mp_overworld.c)
 void MP_Garden_Debug(const char *args);

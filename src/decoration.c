@@ -1,5 +1,7 @@
 #include "global.h"
+#include "mp.h"
 #include "mp_life.h"
+#include "mp_garden.h"
 #include "malloc.h"
 #include "decompress.h"
 #include "decoration.h"
@@ -94,6 +96,7 @@ struct DecorationPCContext
     u8 *pos;
     u8 size;
     u8 isPlayerRoom;
+    u8 isMpGarden;   // Moemon Co-op: the MOéMON GARDEN (dolls and cushions, as the bedroom; its own list, not pos[])
 };
 
 enum Windows
@@ -111,6 +114,8 @@ EWRAM_DATA static u8 sNumOwnedDecorationsInCurCategory = 0;
 EWRAM_DATA static u8 sSecretBaseItemsIndicesBuffer[DECOR_MAX_SECRET_BASE] = {};
 EWRAM_DATA static u8 sPlayerRoomItemsIndicesBuffer[DECOR_MAX_PLAYERS_HOUSE] = {};
 EWRAM_DATA static u8 sMpGardenItemsIndicesBuffer[GARDEN_DECOR_MAX] = {};   // Moemon Co-op: placed in the MOéMON GARDEN
+extern const u8 MoemonGarden_EventScript_DecorateDone[];
+EWRAM_DATA static u8 sMpGardenItems[GARDEN_DECOR_MAX] = {};   // Moemon Co-op: the Garden's decorations (the context's items)
 EWRAM_DATA static u16 sDecorationsCursorPos = 0;
 EWRAM_DATA static u16 sDecorationsScrollOffset = 0;
 EWRAM_DATA u8 gCurDecorationIndex = 0;
@@ -515,10 +520,25 @@ static const struct YesNoFuncTable sTossDecorationYesNoFunctions =
     .noFunc = DontTossDecoration,
 };
 
+// Moemon Co-op: the MOéMON GARDEN's decorations as the context's items (its places are the Garden's own)
+static void MpGardenSyncItems(void)
+{
+    u8 i;
+    for (i = 0; i < GARDEN_DECOR_MAX; i++)
+        sMpGardenItems[i] = MP_Life_GardenSave()->decor[i].decor;
+}
+
 void InitDecorationContextItems(void)
 {
     if (sCurDecorationCategory < DECORCAT_COUNT)
         gCurDecorationItems = gDecorationInventories[sCurDecorationCategory].items;
+
+    if (sDecorationContext.isMpGarden)
+    {
+        MpGardenSyncItems();
+        sDecorationContext.items = sMpGardenItems;
+        return;
+    }
 
     if (sDecorationContext.isPlayerRoom == FALSE)
     {
@@ -588,6 +608,7 @@ void DoSecretBaseDecorationMenu(u8 taskId)
     sDecorationContext.pos = gSaveBlock1Ptr->secretBases[0].decorationPositions;
     sDecorationContext.size = DECOR_MAX_SECRET_BASE;
     sDecorationContext.isPlayerRoom = FALSE;
+    sDecorationContext.isMpGarden = FALSE;
     gTasks[taskId].func = HandleDecorationActionsMenuInput;
 }
 
@@ -598,7 +619,27 @@ void DoPlayerRoomDecorationMenu(u8 taskId)
     sDecorationContext.pos = gSaveBlock1Ptr->playerRoomDecorationPositions;
     sDecorationContext.size = DECOR_MAX_PLAYERS_HOUSE;
     sDecorationContext.isPlayerRoom = TRUE;
+    sDecorationContext.isMpGarden = FALSE;
     gTasks[taskId].func = HandleDecorationActionsMenuInput;
+}
+
+// Moemon Co-op: DECORATE on the MOéMON GARDEN's board (its script ends still locked; CANCEL runs DecorateDone)
+static void DoMpGardenDecorationMenu(u8 taskId)
+{
+    InitDecorationActionsWindow();
+    MpGardenSyncItems();
+    sDecorationContext.items = sMpGardenItems;
+    sDecorationContext.pos = NULL;
+    sDecorationContext.size = GARDEN_DECOR_MAX;
+    sDecorationContext.isPlayerRoom = FALSE;
+    sDecorationContext.isMpGarden = TRUE;
+    gTasks[taskId].func = HandleDecorationActionsMenuInput;
+}
+
+void MP_Garden_ShowDecorationMenu(void)
+{
+    MPNet_Log("garden: decorating");
+    CreateTask(DoMpGardenDecorationMenu, 0);
 }
 
 static void HandleDecorationActionsMenuInput(u8 taskId)
@@ -681,7 +722,13 @@ static void DecorationMenuAction_Toss(u8 taskId)
 static void DecorationMenuAction_Cancel(u8 taskId)
 {
     RemoveDecorationWindow(WINDOW_MAIN_MENU);
-    if (!sDecorationContext.isPlayerRoom)
+    if (sDecorationContext.isMpGarden)
+    {
+        ScriptContext_SetupScript(MoemonGarden_EventScript_DecorateDone);
+        sDecorationContext.isMpGarden = FALSE;
+        DestroyTask(taskId);
+    }
+    else if (!sDecorationContext.isPlayerRoom)
     {
         ScriptContext_SetupScript(SecretBase_EventScript_PCCancel);
         DestroyTask(taskId);
@@ -729,7 +776,7 @@ static void PrintDecorationCategoryMenuItems(u8 taskId)
     u8 windowId = sDecorMenuWindowIds[WINDOW_DECORATION_CATEGORIES];
     bool8 isPlayerRoom = sDecorationContext.isPlayerRoom;
     bool8 shouldDisable = FALSE;
-    if (isPlayerRoom == TRUE && tDecorationMenuCommand == DECOR_MENU_PLACE)
+    if ((isPlayerRoom == TRUE || sDecorationContext.isMpGarden) && tDecorationMenuCommand == DECOR_MENU_PLACE)
         shouldDisable = TRUE;
 
     for (i = 0; i < DECORCAT_COUNT; i++)
@@ -889,7 +936,7 @@ static void PrintDecorationItemMenuItems(u8 taskId)
     u16 i;
 
     data = gTasks[taskId].data;
-    if ((sCurDecorationCategory < DECORCAT_DOLL || sCurDecorationCategory > DECORCAT_CUSHION) && sDecorationContext.isPlayerRoom == TRUE && tDecorationMenuCommand == DECOR_MENU_PLACE)
+    if ((sCurDecorationCategory < DECORCAT_DOLL || sCurDecorationCategory > DECORCAT_CUSHION) && (sDecorationContext.isPlayerRoom == TRUE || sDecorationContext.isMpGarden) && tDecorationMenuCommand == DECOR_MENU_PLACE)
         ColorMenuItemString(gStringVar1, TRUE);
     else
         ColorMenuItemString(gStringVar1, FALSE);
@@ -1363,9 +1410,12 @@ static bool8 HasDecorationSpace(void)
 
 static void DecorationItemsMenuAction_AttemptPlace(u8 taskId)
 {
-    if (sDecorationContext.isPlayerRoom == TRUE && sCurDecorationCategory != DECORCAT_DOLL && sCurDecorationCategory != DECORCAT_CUSHION)
+    if ((sDecorationContext.isPlayerRoom == TRUE || sDecorationContext.isMpGarden) && sCurDecorationCategory != DECORCAT_DOLL && sCurDecorationCategory != DECORCAT_CUSHION)
     {
-        StringExpandPlaceholders(gStringVar4, gText_CantPlaceInRoom);
+        if (sDecorationContext.isMpGarden)
+            MP_AsciiToGame(gStringVar4, "Only dolls and cushions can go out\nin the MOEMON GARDEN.", 120);
+        else
+            StringExpandPlaceholders(gStringVar4, gText_CantPlaceInRoom);
         DisplayItemMessageOnField(taskId, gStringVar4, ReturnToDecorationItemsAfterInvalidSelection);
     }
     else if (IsSelectedDecorInThePC() == TRUE)
@@ -1577,6 +1627,9 @@ static bool8 CanPlaceDecoration(u8 taskId, const struct Decoration *decoration)
     mapY = gTasks[taskId].tDecorHeight;
     mapX = gTasks[taskId].tDecorWidth;
 
+    if (sDecorationContext.isMpGarden)   // Moemon Co-op: the Garden's open ground, nobody and nothing there
+        return MP_GardenDecor_CanPlaceAt(decoration->id, gTasks[taskId].tCursorX, gTasks[taskId].tCursorY);
+
     switch (decoration->permission)
     {
     case DECORPERM_SOLID_FLOOR:
@@ -1702,6 +1755,25 @@ static void PlaceDecorationPrompt(u8 taskId)
 static void PlaceDecoration(u8 taskId)
 {
     ClearDialogWindowAndFrame(0, FALSE);
+    if (sDecorationContext.isMpGarden)
+    {
+        // Moemon Co-op: into the Garden's list (the Garden draws it); back to where the player stood
+        u16 i;
+        if (MP_GardenDecor_PlaceAt(gCurDecorationItems[gCurDecorationIndex], gTasks[taskId].tCursorX, gTasks[taskId].tCursorY))
+        {
+            // this copy is in use now (the list's blue ball; it can't be placed twice)
+            for (i = 0; i < GARDEN_DECOR_MAX; i++)
+                if (sMpGardenItemsIndicesBuffer[i] == 0)
+                {
+                    sMpGardenItemsIndicesBuffer[i] = gCurDecorationIndex + 1;
+                    break;
+                }
+        }
+        MpGardenSyncItems();
+        gSprites[sDecor_CameraSpriteObjectIdx1].y += 2;
+        CancelDecorating_(taskId);
+        return;
+    }
     PlaceDecoration_(taskId);
     if (gDecorations[gCurDecorationItems[gCurDecorationIndex]].permission != DECORPERM_SPRITE)
     {
@@ -1786,6 +1858,8 @@ static void c1_overworld_prev_quest(u8 taskId)
         LockPlayerFieldControls();
         if (!gPaletteFade.active)
         {
+            if (sDecorationContext.isMpGarden)
+                MP_GardenLife_KeepOnReload();
             WarpToInitialPosition(taskId);
             gTasks[taskId].tState = 1;
         }
@@ -1806,11 +1880,13 @@ static void Task_InitDecorationItemsWindow(u8 taskId)
     switch (tState)
     {
     case 0:
-        HideSecretBaseDecorationSprites();
+        if (!sDecorationContext.isMpGarden)   // Moemon Co-op: the Garden draws its own
+            HideSecretBaseDecorationSprites();
         tState++;
         break;
     case 1:
-        ScriptContext_SetupScript(SecretBase_EventScript_InitDecorations);
+        if (!sDecorationContext.isMpGarden)
+            ScriptContext_SetupScript(SecretBase_EventScript_InitDecorations);
         tState++;
         break;
     case 2:
@@ -2301,14 +2377,22 @@ static void Task_PutAwayDecoration(u8 taskId)
     switch (gTasks[taskId].tState)
     {
     case 0:
-        ClearRearrangementNonSprites();
+        if (!sDecorationContext.isMpGarden)
+            ClearRearrangementNonSprites();
         gTasks[taskId].tState = 1;
         break;
     case 1:
         if (!gPaletteFade.active)
         {
             DrawWholeMapView();
-            ScriptContext_SetupScript(SecretBase_EventScript_PutAwayDecoration);
+            if (sDecorationContext.isMpGarden)
+            {
+                // Moemon Co-op: off the Garden's list (its sprite goes with it)
+                MP_GardenDecor_PutAway(sDecorRearrangementDataBuffer[0].idx);
+                MpGardenSyncItems();
+            }
+            else
+                ScriptContext_SetupScript(SecretBase_EventScript_PutAwayDecoration);
             ClearDialogWindowAndFrame(0, TRUE);
             gTasks[taskId].tState = 2;
         }
@@ -2615,6 +2699,21 @@ static void AttemptMarkDecorUnderCursorForRemoval(u8 taskId)
     u32 var2;
 
     sCurDecorSelectedInRearrangement = 0;
+    if (sDecorationContext.isMpGarden)
+    {
+        // Moemon Co-op: the Garden's decoration under the cursor (the cursor jumps to it, as for a Secret Base's)
+        s8 g = MP_GardenDecor_OursAt(gTasks[taskId].tCursorX, gTasks[taskId].tCursorY);
+        if (g >= 0)
+        {
+            struct MpGardenDecor *d = &MP_Life_GardenSave()->decor[g];
+            SetDecorRearrangementShape(d->decor, &sDecorRearrangementDataBuffer[0]);
+            sDecorRearrangementDataBuffer[0].idx = g;
+            SetCameraSpritePosition(sDecorRearrangementDataBuffer[0].width - (gTasks[taskId].tCursorX - MAP_OFFSET - d->x + 1),
+                                    d->y - (gTasks[taskId].tCursorY - MAP_OFFSET));
+            sCurDecorSelectedInRearrangement = 1;
+        }
+        return;
+    }
     if (AttemptMarkSpriteDecorUnderCursorForRemoval(taskId) != TRUE)
     {
         // Not a sprite.
@@ -2684,6 +2783,8 @@ static void Task_StopPuttingAwayDecorations(u8 taskId)
     case 0:
         if (!gPaletteFade.active)
         {
+            if (sDecorationContext.isMpGarden)
+                MP_GardenLife_KeepOnReload();
             WarpToInitialPosition(taskId);
             gTasks[taskId].tState = 1;
         }
@@ -2703,11 +2804,13 @@ static void Task_ReinitializeDecorationMenuHandler(u8 taskId)
     switch (tState)
     {
     case 0:
-        HideSecretBaseDecorationSprites();
+        if (!sDecorationContext.isMpGarden)   // Moemon Co-op: the Garden draws its own
+            HideSecretBaseDecorationSprites();
         tState++;
         break;
     case 1:
-        ScriptContext_SetupScript(SecretBase_EventScript_InitDecorations);
+        if (!sDecorationContext.isMpGarden)
+            ScriptContext_SetupScript(SecretBase_EventScript_InitDecorations);
         tState++;
         break;
     case 2:

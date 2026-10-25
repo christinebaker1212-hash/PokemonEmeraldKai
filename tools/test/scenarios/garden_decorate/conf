@@ -1,10 +1,12 @@
-# DECORATE from the GARDEN BOARD with the buttons a player uses: facing the board, DECORATE > PLACE ONE > the PIKACHU
-# DOLL; a note says how to carry it; walk off with it (it blinks on the tile ahead), A puts it down; then a second one
-# carried and put back with B. Jumping down the plateau's ledge lands below it (no trip back to the escalator).
-# Shots carry, placed.
+# DECORATE from the GARDEN BOARD with the buttons a player uses, the SECRET BASE's way (decoration.c's Garden mode):
+# DECORATE > DOLL > the PIKACHU DOLL, the decorating cursor 3 right and 1 down, "Place it here?" YES; back out of the
+# menus and walk (before 1.17.3 placing locked the player for good). Then PUT AWAY with the cursor on it, YES, and
+# walk again. The placed doll shows as in use in the list (choosing it again: "This is in use already.", never two). Jumping down the plateau's ledge lands below it (no trip back to the escalator).
+# Shots menu, dolls, items, placing, cursor, back, again, returned, cursor_again, putaway_done.
 MODE=1
-TMO=200
+TMO=240
 WARP="0,57,6,18"
 ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("garden: carrying decoration 77" "garden: placed decoration 77 at 9,19" "garden: carrying decoration 101" "garden: carrying decoration 101: put back" "[test] where map 0.57 xy 44,11")
-UNEXPECT_A=("stuck" "placed decoration 101")
+EXPECT_A=("garden: decorating" "garden: placed decoration 77 at 9,19" "[test] garden decor 0: 77 at 9,19" "[test] where map 0.57 xy 5,18"
+          "garden: put away decoration 77" "[test] ctx 1 free 1 overworld 1 locked 0 script 0" "[test] where map 0.57 xy 44,11")
+UNEXPECT_A=("stuck" "locked 1" "garden decor 1:")

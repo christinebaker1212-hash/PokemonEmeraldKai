@@ -68,7 +68,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_map` | OLDALE's CENTER escalator rides up into the MOéMON GARDEN (first visit: welcome, a memory; every growth mark with all badges) and its escalator back down to OLDALE |
 | `garden_centers` | all 17 CENTERs (LEAGUE and BATTLE FRONTIER too): up into the Garden and back down to the same CENTER |
 | `surf_remote` | a friend surfing Petalburg's pond: their blob under them, again after a map reload (OPTIONS and back), and hidden with them once BOB is 28 tiles away on ROUTE 102 (before 1.17.2 it wrapped round onto his screen) |
-| `garden_decorate` | DECORATE with the real buttons: facing the GARDEN BOARD, PLACE ONE carries a doll (blinking ahead), A puts it down, a second one put back with B; a jump down the plateau's ledge lands below it |
+| `garden_decorate` | DECORATE with the real buttons, the SECRET BASE's way: DOLL > the PIKACHU DOLL moved with the decorating cursor, "Place it here?" YES, back out and walk (1.17.2 locked the player); the copy shows in use; PUT AWAY with the cursor; walk again; a jump down the plateau's ledge lands below it |
 | `garden_places` | a place for every type: TORCHIC is sent to each of the 17 types' places with no badges, then with all eight, and walks all the way there round the trees, rocks and water (check_garden_places.py) |
 | `garden_stuck` | an older save standing inside a tree goes back to the landing; with no CENTER recorded the way down follows the heal location |
 | `garden_life` | three Pokémon live in the Garden: play, talking to one, a PIKACHU DOLL placed and played with, WATCH mode (A tells, B back) |

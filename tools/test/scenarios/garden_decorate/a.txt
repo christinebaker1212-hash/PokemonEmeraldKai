@@ -8,42 +8,110 @@ press UP 2
 wait 20
 press A 2
 wait 60
-press A 2
-wait 30
-press A 2
-wait 30
-watchlog garden: carrying decoration 77
+watchlog garden: decorating
 press A 2
 waitlog 300
-pressuntil A field 900
-wait 30
-press DOWN 20
-wait 30
-press RIGHT 20
-wait 30
-press RIGHT 2
-wait 20
-shot carry
+wait 40
+shot menu
 press A 2
+wait 40
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+shot dolls
+press A 2
+wait 40
+shot items
+press A 2
+wait 120
+shot placing
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press DOWN 2
+wait 12
+shot cursor
+watchlog garden: placed decoration 77 at 9,19
+press A 2
+waitfor yesno 900
+wait 10
+press A 2
+waitlog 300
+wait 200
+shot back
+press A 2
+wait 120
+shot again
+press A 2
+wait 40
+press B 2
+wait 30
+press B 2
+wait 30
+press B 2
 wait 60
-shot placed
-mp warp 0,57,6,18
-wait 300
+mp ctx
+press LEFT 20
+wait 40
+mp where
+mp life garden decor list
+press RIGHT 20
+wait 20
 press UP 2
 wait 20
 press A 2
 wait 60
 press A 2
-wait 30
+wait 60
+press DOWN 2
+wait 10
 press A 2
-wait 30
-watchlog garden: carrying decoration 101
+wait 120
+shot putaway
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press DOWN 2
+wait 12
+watchlog garden: put away decoration 77
+press A 2
+waitfor yesno 900
+wait 10
 press A 2
 waitlog 300
-pressuntil A field 900
-wait 30
+wait 240
+shot returned
+press A 2
+wait 60
+shot cursor_again
+press B 2
+waitfor yesno 900
+wait 10
+press A 2
+wait 200
+shot putaway_done
 press B 2
 wait 60
+mp ctx
+press LEFT 20
+wait 40
+mp where
+mp life garden decor list
 mp warp 0,57,44,8
 wait 300
 press DOWN 30

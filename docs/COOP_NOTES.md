@@ -1319,9 +1319,9 @@ now and then; not about the Trainer, so no Friendship); squabbles: respect, fric
 in LIFE_EMOTE_SLOT_GARDEN(i). A in front of one: mp_life_interact.c's tap / hold-A with a target (sTarget: React /
 TargetActivity route to the actor), a friend's: MP_LifeSocial_TryFriendPokemon (MPR_LIFE_VERB carries its key; their
 game answers through its bond with us and reacts on that actor). Decorations: DECORPERM_SPRITE ones (dolls, big
-dolls, cushions) drawn with CreateObjectGraphicsSprite(gDecorations[d].tiles[0]); DECORATE on the board: PLACE ONE
-HERE (the tile you face; copies free = owned - Secret Base - bedroom - Garden) / PUT ONE AWAY; decoration.c marks
-Garden ones in use (sMpGardenItemsIndicesBuffer: blue ball, can't be placed or tossed elsewhere). A favorite grows
+dolls, cushions) drawn with CreateObjectGraphicsSprite(gDecorations[d].tiles[0]); DECORATE on the board is the
+SECRET BASE's decorating (1.18.0, below); decoration.c marks Garden ones in use (sMpGardenItemsIndicesBuffer: blue
+ball, can't be placed twice, placed or tossed elsewhere). A favorite grows
 from repeated use (favDecor = type | count << 8; 5 = a favorite: +40 to choosing it, a journal line). WATCH (board):
 starts once the board's script ended; SpawnCameraObject, the camera walks (slow) toward the most interesting actor
 (play / tag / squabble 50+, decorations 40, nap piles, type needs...; changes after 8 s), A describes it in plain
@@ -1506,6 +1506,20 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   blinks on the tile ahead, slowly where it can go, quickly where it can't; field_control_avatar.c hands A / B to
   MP_GardenDecor_CarryInput: A puts it down there, B back): before, it was placed on the tile in front, which from
   the GARDEN BOARD is the board. Test garden_decorate.
+- 1.18.0: the carrying locked the player for good after putting one down (ProcessPlayerFieldInput returning TRUE
+  makes CB1_Overworld lock the field controls for a script that never came). Replaced by the SECRET BASE's
+  decorating, as the user asked: decoration.c's MOéMON GARDEN mode (sDecorationContext.isMpGarden). The board's
+  script: OpenBoard waits, VAR_RESULT 1 (DECORATE) goes on to `special MP_Garden_ShowDecorationMenu` and ends still
+  locked, like the Secret Base PC's; CANCEL runs MoemonGarden_EventScript_DecorateDone (releaseall). The bedroom's
+  rules (dolls and cushions only; the Garden's own message), the context's items = sMpGardenItems (the Garden save's
+  list: pos[] can't hold a 56x40 map), CanPlaceDecoration -> MP_GardenDecor_CanPlaceAt (open ground, a big doll's
+  other tiles clear, nobody, no decoration: ours, friends', the storm stone), PlaceDecoration -> MP_GardenDecor_PlaceAt
+  (marks the copy in use), PUT AWAY's cursor -> MP_GardenDecor_OursAt / MP_GardenDecor_PutAway; no Secret Base
+  sprites or scripts on the way back. Both end, as the Secret Base's do, with a reload of the map where the player
+  stood: MP_GardenLife_KeepOnReload keeps the Garden Pokémon (their sprites come back by themselves), and while the
+  player's sprite is the decorating cursor's they're hidden and still (a put-away one loses its sprite at once:
+  MP_GardenDecor_Prune). The harness's yesno condition also sees menus' YES / NO (menu_helpers.c MP_MenuYesNoOpen).
+  Test garden_decorate (placing, walking after it, the copy in use, PUT AWAY, walking again).
   Tests garden_places (each of the 17 types reaches a place of its own with 0 and 8 badges:
   check_garden_places.py), garden_together (a friend's badges grow your Garden live), the other garden_* at the new
   spots.

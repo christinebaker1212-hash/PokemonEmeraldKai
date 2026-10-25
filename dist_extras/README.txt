@@ -1136,9 +1136,10 @@ marsh, 3 a boulder field, 4 a dig field, 5 more shiny stones, 6 a perch
 grove, 7 a second flower bed, 8 a stone circle. With friends, the Garden
 shows the most badges among you.
   GARDEN BOARD  DECORATE: put dolls and cushions from your SECRET BASE
-                collection out for them (and put them away again).
-                PLACE ONE: carry it to its spot (it blinks on the
-                tile in front of you), A puts it down, B puts it back.
+                collection out for them, as you decorate a SECRET BASE:
+                DECORATE > DOLL or CUSHION > pick one, move it over
+                the Garden with the + Control Pad, A: "Place it here?".
+                PUT AWAY: move the cursor onto one, A. CANCEL ends.
                 WATCH: sit down and watch; A tells you what's going on,
                 B stands up.
 With friends there, everyone's MOEMON and decorations are there

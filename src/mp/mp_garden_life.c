@@ -1932,9 +1932,24 @@ bool8 MP_GardenLife_ActorScreenPos(u8 i, s16 *x, s16 *y)
 
 // ---------------------------------------------------------------------------
 
+static bool8 sKeepOnReload;
+
+// decoration.c: decorating ends with a reload of the Garden (back to where the player stood); the Pokémon stay as they are
+// (their sprites come back by themselves: Draw)
+void MP_GardenLife_KeepOnReload(void)
+{
+    sKeepOnReload = TRUE;
+}
+
 void MP_GardenLife_OnMapLoad(void)
 {
     u8 i;
+    if (sKeepOnReload)
+    {
+        sKeepOnReload = FALSE;
+        if (MP_Garden_IsHere())
+            return;
+    }
     // a fresh visit: everyone comes out again around the player (friends' arrive with their games' word)
     for (i = 0; i < MAX_ACTORS; i++)
         sL.a[i].used = FALSE;
@@ -1961,6 +1976,16 @@ void MP_GardenLife_Update(void)
     }
     if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || gObjectEvents[gPlayerAvatar.objectEventId].spriteId >= MAX_SPRITES)
         return;
+    if (!gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].inUse)
+    {
+        // decorating: the player's sprite is the decorating cursor's for now (decoration.c), and the Pokémon are
+        // placed from it: hidden (and still) until it's back
+        for (i = 0; i < MAX_ACTORS; i++)
+            if (sL.a[i].used && SpriteIsOurs(&sL.a[i]))
+                gSprites[sL.a[i].spriteId].invisible = TRUE;
+        MP_GardenDecor_Prune();
+        return;
+    }
     sL.frame++;
     if (!sL.active)
     {

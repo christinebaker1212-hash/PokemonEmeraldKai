@@ -493,7 +493,6 @@ static void DrawBoard(void)
 }
 
 void MP_Garden_StartWatch(void);
-void MP_Garden_OpenDecorate(void);
 
 static void Task_Board(u8 taskId)
 {
@@ -509,17 +508,10 @@ static void Task_Board(u8 taskId)
     PlaySE(SE_SELECT);
     MpUi_Close();
     DestroyTask(taskId);
-    switch (pick)
-    {
-    case BOARD_DECORATE:
-        MP_Garden_OpenDecorate();   // its own menu; it ends the script
-        return;
-    case BOARD_WATCH:
-        ScriptContext_Enable();
-        MP_Garden_StartWatch();
-        return;
-    }
+    gSpecialVar_Result = pick == BOARD_DECORATE;   // the board's script goes on to the decorating (VAR_RESULT 1)
     ScriptContext_Enable();
+    if (pick == BOARD_WATCH)
+        MP_Garden_StartWatch();
 }
 
 void MP_Garden_OpenBoard(void)

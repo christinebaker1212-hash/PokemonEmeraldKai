@@ -160,6 +160,12 @@ void CreateYesNoMenuWithCallbacks(u8 taskId, const struct WindowTemplate *templa
     gTasks[taskId].func = Task_CallYesOrNoCallback;
 }
 
+// Moemon Co-op (the test harness): a menus' YES / NO is up (the decorating's, the items'...)
+bool8 MP_MenuYesNoOpen(void)
+{
+    return FuncIsActiveTask(Task_CallYesOrNoCallback);
+}
+
 static void Task_CallYesOrNoCallback(u8 taskId)
 {
     switch (Menu_ProcessInputNoWrapClearOnChoose())
