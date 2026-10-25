@@ -16,6 +16,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
+- `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
 
 ## Building
 - Linux: `make linux -j$(nproc)` (needs libsdl2-dev and libpng-dev)
