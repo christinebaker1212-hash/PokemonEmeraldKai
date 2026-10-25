@@ -1,0 +1,52 @@
+{
+  "id": "MAP_JOHTO_ROUTE40_TRAINER_HILL_GATE",
+  "name": "Johto_Route40TrainerHillGate",
+  "layout": "LAYOUT_JOHTO_ROUTE40_TRAINER_HILL_GATE",
+  "music": "MUS_QZ_621",
+  "region_map_section": "MAPSEC_JOHTO_ROUTE40",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ROUTE40",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 7,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ROUTE40",
+      "dest_warp_id": "10"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 55,
+    "region": "johto",
+    "header": "0x89358B8",
+    "layout_id": 497,
+    "mapsec_index": 30,
+    "mapsec_name": "ROUTE 40",
+    "music_id": 621,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_Route40_House1"
+    }
+  }
+}

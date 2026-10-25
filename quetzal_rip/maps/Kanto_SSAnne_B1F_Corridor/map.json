@@ -1,0 +1,88 @@
+{
+  "id": "MAP_KANTO_SSANNE_B1F_CORRIDOR",
+  "name": "Kanto_SSAnne_B1F_Corridor",
+  "layout": "LAYOUT_KANTO_SSANNE_B1F_CORRIDOR",
+  "music": "MUS_RG_SS_ANNE",
+  "region_map_section": "MAPSEC_S_S_ANNE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 19,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SSANNE_1F_CORRIDOR",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_ROOM1",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_ROOM2",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_ROOM3",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_ROOM4",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_ROOM5",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 21,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_8"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 8,
+    "region": "kanto",
+    "header": "0x8936ED0",
+    "layout_id": 755,
+    "mapsec_index": 128,
+    "mapsec_name": "S.S. ANNE",
+    "music_id": 516,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SSAnne_B1F_Corridor"
+    }
+  }
+}

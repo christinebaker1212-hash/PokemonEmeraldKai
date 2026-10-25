@@ -1,0 +1,153 @@
+{
+  "id": "MAP_KANTO_ONE_ISLAND_KINDLE_ROAD_EMBER_SPA",
+  "name": "Kanto_OneIsland_KindleRoad_EmberSpa",
+  "layout": "LAYOUT_KANTO_ONE_ISLAND_KINDLE_ROAD_EMBER_SPA",
+  "music": "MUS_RG_FUCHSIA",
+  "region_map_section": "MAPSEC_EMBER_SPA",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 11,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151B6",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16102",
+      "x": 15,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151BF",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16107",
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151DA",
+      "flag": "FLAG_QZ_0x21AA"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16175",
+      "x": 20,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151D1",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 10,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151F3",
+      "flag": "0"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16102",
+      "x": 11,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151C8",
+      "flag": "0"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_977",
+      "x": 14,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x23B8"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 13,
+      "y": 36,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ONE_ISLAND_KINDLE_ROAD",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 13,
+      "y": 13,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_8415229"
+    }
+  ],
+  "bg_events": [],
+  "quetzal": {
+    "group": 37,
+    "num": 54,
+    "region": "kanto",
+    "header": "0x89381A0",
+    "layout_id": 988,
+    "mapsec_index": 195,
+    "mapsec_name": "EMBER SPA",
+    "music_id": 520,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "OneIsland_KindleRoad_EmberSpa"
+    }
+  }
+}

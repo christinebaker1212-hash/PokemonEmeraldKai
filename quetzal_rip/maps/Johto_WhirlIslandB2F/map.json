@@ -1,0 +1,223 @@
+{
+  "id": "MAP_JOHTO_WHIRL_ISLAND_B2F",
+  "name": "Johto_WhirlIslandB2F",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLAND_B2F",
+  "music": "MUS_QZ_631",
+  "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 59,
+      "y": 55,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400E9B",
+      "flag": "FLAG_QZ_0x110F"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 47,
+      "y": 29,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400E8E",
+      "flag": "FLAG_QZ_0x110E"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 27,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400E81",
+      "flag": "FLAG_QZ_0x110D"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_329",
+      "x": 35,
+      "y": 86,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83F4A9E",
+      "flag": "FLAG_QZ_0x1048"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 44,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "12"
+    },
+    {
+      "x": 57,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE5",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 35,
+      "y": 85,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_LUGIA_CHAMBER",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 41,
+      "y": 68,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Quetzal_EventScript_8400E2D"
+    },
+    {
+      "type": "trigger",
+      "x": 41,
+      "y": 69,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 35,
+      "y": 86,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 36,
+      "y": 86,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 34,
+      "y": 86,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 35,
+      "y": 87,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 57,
+      "y": 92,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 58,
+      "y": 93,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 56,
+      "y": 93,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 57,
+      "y": 94,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    },
+    {
+      "type": "trigger",
+      "x": 57,
+      "y": 93,
+      "elevation": 0,
+      "var": "0",
+      "var_value": "0",
+      "script": "Johto_WhirlIslandB2F_EventScript_8400EA8"
+    }
+  ],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 114,
+    "region": "johto",
+    "header": "0x8936CF4",
+    "layout_id": 682,
+    "mapsec_index": 43,
+    "mapsec_name": "WHIRL ISLANDS",
+    "music_id": 631,
+    "weather_id": 11,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_WhirlIslands_Cave6"
+    }
+  }
+}

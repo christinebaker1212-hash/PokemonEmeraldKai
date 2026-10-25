@@ -1,0 +1,60 @@
+{
+  "id": "MAP_JOHTO_CIANWOOD_PHARMACY",
+  "name": "Johto_CianwoodPharmacy",
+  "layout": "LAYOUT_JOHTO_CIANWOOD_PHARMACY",
+  "music": "MUS_QZ_617",
+  "region_map_section": "MAPSEC_JOHTO_CIANWOOD_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16003",
+      "x": 8,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_CianwoodPharmacy_EventScript_83CB959",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_CIANWOOD_CITY",
+      "dest_warp_id": "6"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 28,
+    "region": "johto",
+    "header": "0x89355C4",
+    "layout_id": 470,
+    "mapsec_index": 7,
+    "mapsec_name": "CIANWOOD CITY",
+    "music_id": 617,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "CianwoodPharmacy",
+      "text_match": 0.7
+    }
+  }
+}

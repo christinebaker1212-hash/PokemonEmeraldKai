@@ -1,0 +1,73 @@
+{
+  "id": "MAP_KANTO_SSANNE_B1F_ROOM4",
+  "name": "Kanto_SSAnne_B1F_Room4",
+  "layout": "LAYOUT_KANTO_SSANNE_2F_ROOM1",
+  "music": "MUS_RG_SS_ANNE",
+  "region_map_section": "MAPSEC_S_S_ANNE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 3,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_SSAnne_B1F_Room4_EventScript_8410937",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 2,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SSAnne_B1F_Room4_EventScript_8410920",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SSANNE_B1F_CORRIDOR",
+      "dest_warp_id": "4"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 36,
+    "num": 27,
+    "region": "kanto",
+    "header": "0x89370E4",
+    "layout_id": 810,
+    "mapsec_index": 128,
+    "mapsec_name": "S.S. ANNE",
+    "music_id": 516,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SSAnne_B1F_Room4"
+    }
+  }
+}

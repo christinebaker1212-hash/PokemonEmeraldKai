@@ -1,0 +1,52 @@
+{
+  "id": "MAP_JOHTO_RUINS_OF_ALPH_OMANYTE_WORD_ROOM",
+  "name": "Johto_RuinsOfAlphOmanyteWordRoom",
+  "layout": "LAYOUT_JOHTO_RUINS_OF_ALPH_OMANYTE_WORD_ROOM",
+  "music": "MUS_QZ_632",
+  "region_map_section": "MAPSEC_JOHTO_RUINS_OF_ALPH",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 10,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "24"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 65,
+    "region": "johto",
+    "header": "0x8936798",
+    "layout_id": 633,
+    "mapsec_index": 60,
+    "mapsec_name": "RUINS OF ALPH",
+    "music_id": 632,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_RuinsOfAlph_Cave3"
+    }
+  }
+}

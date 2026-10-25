@@ -1,0 +1,67 @@
+{
+  "id": "MAP_JOHTO_SILVER_CAVE_OUTSIDE",
+  "name": "Johto_SilverCaveOutside",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_OUTSIDE",
+  "music": "MUS_QZ_636",
+  "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_CITY",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_JOHTO_ROUTE28",
+      "offset": 6,
+      "direction": "right"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_ROOM1",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_POKECENTER1F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 15,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_SilverCaveOutside_EventScript_83E043C"
+    }
+  ],
+  "quetzal": {
+    "group": 34,
+    "num": 116,
+    "region": "johto",
+    "header": "0x8935F64",
+    "layout_id": 558,
+    "mapsec_index": 23,
+    "mapsec_name": "MT. SILVER",
+    "music_id": 636,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "SilverCaveOutside",
+      "text_match": 1.0
+    }
+  }
+}

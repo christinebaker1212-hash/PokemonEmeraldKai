@@ -1,0 +1,260 @@
+{
+  "id": "MAP_KANTO_MT_EMBER_RUBY_PATH_B4F",
+  "name": "Kanto_MtEmber_RubyPath_B4F",
+  "layout": "LAYOUT_KANTO_MT_EMBER_RUBY_PATH_B4F",
+  "music": "MUS_RG_SEVII_CAVE",
+  "region_map_section": "MAPSEC_MT_EMBER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 14,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_EMBER_RUBY_PATH_B5F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 4,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_EMBER_RUBY_PATH_B3F",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413636"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413636"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413636"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413640"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413640"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413640"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841364A"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841364A"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841364A"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413654"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413654"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413654"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841365E"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841365E"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841365E"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413668"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413668"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413668"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413672"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413686"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413690"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413672"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_8413672"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841367C"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841367C"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_MtEmber_RubyPath_B4F_EventScript_841367C"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 96,
+    "region": "kanto",
+    "header": "0x8937870",
+    "layout_id": 890,
+    "mapsec_index": 175,
+    "mapsec_name": "MT. EMBER",
+    "music_id": 543,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "MtEmber_RubyPath_B4F"
+    }
+  }
+}

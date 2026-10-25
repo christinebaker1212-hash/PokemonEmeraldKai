@@ -1,0 +1,108 @@
+{
+  "id": "MAP_KANTO_UNDERGROUND_PATH_EAST_WEST_TUNNEL",
+  "name": "Kanto_UndergroundPath_EastWestTunnel",
+  "layout": "LAYOUT_KANTO_UNDERGROUND_PATH_EAST_WEST_TUNNEL",
+  "music": "MUS_RG_ROUTE1",
+  "region_map_section": "MAPSEC_UNDERGROUND_PATH_2",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 76,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_UNDERGROUND_PATH_EAST_ENTRANCE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 3,
+      "y": 4,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_UNDERGROUND_PATH_WEST_ENTRANCE",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 7,
+      "y": 3,
+      "elevation": 3,
+      "item": "ITEM_POTION",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_77"
+    },
+    {
+      "type": "hidden_item",
+      "x": 17,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_PARALYZE_HEAL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_79"
+    },
+    {
+      "type": "hidden_item",
+      "x": 31,
+      "y": 4,
+      "elevation": 3,
+      "item": "ITEM_AWAKENING",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_80"
+    },
+    {
+      "type": "hidden_item",
+      "x": 45,
+      "y": 3,
+      "elevation": 3,
+      "item": "ITEM_BURN_HEAL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_81"
+    },
+    {
+      "type": "hidden_item",
+      "x": 70,
+      "y": 3,
+      "elevation": 3,
+      "item": "ITEM_ICE_HEAL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_82"
+    },
+    {
+      "type": "hidden_item",
+      "x": 55,
+      "y": 2,
+      "elevation": 3,
+      "item": "ITEM_ETHER",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_83"
+    },
+    {
+      "type": "hidden_item",
+      "x": 62,
+      "y": 5,
+      "elevation": 3,
+      "item": "ITEM_ANTIDOTE",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_78"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 34,
+    "region": "kanto",
+    "header": "0x89371A8",
+    "layout_id": 806,
+    "mapsec_index": 130,
+    "mapsec_name": "UNDERGROUND PATH",
+    "music_id": 503,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "UndergroundPath_EastWestTunnel"
+    }
+  }
+}

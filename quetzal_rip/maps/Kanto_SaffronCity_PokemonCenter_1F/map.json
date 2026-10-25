@@ -1,0 +1,122 @@
+{
+  "id": "MAP_KANTO_SAFFRON_CITY_POKEMON_CENTER_1F",
+  "name": "Kanto_SaffronCity_PokemonCenter_1F",
+  "layout": "LAYOUT_KANTO_VIRIDIAN_CITY_POKEMON_CENTER_1F",
+  "music": "MUS_RG_POKE_CENTER",
+  "region_map_section": "MAPSEC_SAFFRON_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16170",
+      "x": 7,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SaffronCity_PokemonCenter_1F_EventScript_841F0A7",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16137",
+      "x": 14,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SaffronCity_PokemonCenter_1F_EventScript_841F0B0",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16217",
+      "x": 4,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SaffronCity_PokemonCenter_1F_EventScript_841F0B9",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16220",
+      "x": 9,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_UP_AND_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SaffronCity_PokemonCenter_1F_EventScript_841F0C2",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "elevation": 4,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY_POKEMON_CENTER_2F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 38,
+    "num": 81,
+    "region": "kanto",
+    "header": "0x893925C",
+    "layout_id": 691,
+    "mapsec_index": 98,
+    "mapsec_name": "SAFFRON CITY",
+    "music_id": 515,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SaffronCity_PokemonCenter_1F"
+    }
+  }
+}

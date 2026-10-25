@@ -1,0 +1,66 @@
+{
+  "id": "MAP_JOHTO_DRAGONS_DEN1F",
+  "name": "Johto_DragonsDen1F",
+  "layout": "LAYOUT_JOHTO_DRAGONS_DEN1F",
+  "music": "MUS_QZ_639",
+  "region_map_section": "MAPSEC_JOHTO_DRAGONS_DEN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_BLACKTHORN_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_DRAGONS_DEN1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 4,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_DRAGONS_DEN1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_DRAGONS_DEN_B1F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 34,
+    "region": "johto",
+    "header": "0x893566C",
+    "layout_id": 476,
+    "mapsec_index": 59,
+    "mapsec_name": "DRAGON’S DEN",
+    "music_id": 639,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_DragonsDen_Cave1"
+    }
+  }
+}

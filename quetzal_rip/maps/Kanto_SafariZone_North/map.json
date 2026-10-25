@@ -1,0 +1,226 @@
+{
+  "id": "MAP_KANTO_SAFARI_ZONE_NORTH",
+  "name": "Kanto_SafariZone_North",
+  "layout": "LAYOUT_KANTO_SAFARI_ZONE_NORTH",
+  "music": "MUS_EVOLUTION",
+  "region_map_section": "MAPSEC_KANTO_SAFARI_ZONE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 33,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SafariZone_North_EventScript_846BCCE",
+      "flag": "FLAG_QZ_0x22E3"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 28,
+      "y": 9,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SafariZone_North_EventScript_846BCDB",
+      "flag": "FLAG_QZ_0x22E5"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 29,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SafariZone_North_EventScript_846C0C0",
+      "flag": "FLAG_QZ_0x22E4"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_972",
+      "x": 32,
+      "y": 19,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x290C"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 11,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 12,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 20,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 21,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 22,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_WEST",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 48,
+      "y": 31,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_EAST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 48,
+      "y": 32,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_EAST",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 48,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_EAST",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 30,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_CENTER",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 31,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_CENTER",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 32,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_CENTER",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 43,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SAFARI_ZONE_NORTH_REST_HOUSE",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 27,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SafariZone_North_EventScript_84120F8"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 31,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SafariZone_North_EventScript_8412101"
+    },
+    {
+      "type": "sign",
+      "x": 29,
+      "y": 32,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SafariZone_North_EventScript_841210A"
+    },
+    {
+      "type": "sign",
+      "x": 34,
+      "y": 28,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SafariZone_North_EventScript_8412113"
+    },
+    {
+      "type": "sign",
+      "x": 44,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SafariZone_North_EventScript_84120EF"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 65,
+    "region": "kanto",
+    "header": "0x893750C",
+    "layout_id": 782,
+    "mapsec_index": 136,
+    "mapsec_name": "SAFARI ZONE",
+    "music_id": 377,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SafariZone_North"
+    }
+  }
+}

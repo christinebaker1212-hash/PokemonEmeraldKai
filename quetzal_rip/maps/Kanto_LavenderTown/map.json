@@ -1,0 +1,227 @@
+{
+  "id": "MAP_KANTO_LAVENDER_TOWN",
+  "name": "Kanto_LavenderTown",
+  "layout": "LAYOUT_KANTO_LAVENDER_TOWN",
+  "music": "MUS_RG_LAVENDER",
+  "region_map_section": "MAPSEC_LAVENDER_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_ROUTE10",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_KANTO_ROUTE12",
+      "offset": 0,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_KANTO_ROUTE8",
+      "offset": 0,
+      "direction": "left"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16152",
+      "x": 19,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_LavenderTown_EventScript_84164CE",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16219",
+      "x": 12,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_LavenderTown_EventScript_84164F7",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16110",
+      "x": 10,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_LavenderTown_EventScript_8416500",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 15,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 16,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 16,
+      "y": 6,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 17,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 18,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_POKEMON_TOWER_1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 6,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_LAVENDER_TOWN_POKEMON_CENTER_1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 10,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_LAVENDER_TOWN_VOLUNTEER_POKEMON_HOUSE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_LAVENDER_TOWN_HOUSE1",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 10,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_LAVENDER_TOWN_HOUSE2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_LAVENDER_TOWN_MART",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_LavenderTown_EventScript_8416512"
+    },
+    {
+      "type": "sign",
+      "x": 15,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_LavenderTown_EventScript_8416509"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_LavenderTown_EventScript_8416524"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_LavenderTown_EventScript_841651B"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 61,
+    "region": "kanto",
+    "header": "0x8938264",
+    "layout_id": 715,
+    "mapsec_index": 92,
+    "mapsec_name": "LAVENDER TOWN",
+    "music_id": 492,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "LavenderTown"
+    }
+  }
+}

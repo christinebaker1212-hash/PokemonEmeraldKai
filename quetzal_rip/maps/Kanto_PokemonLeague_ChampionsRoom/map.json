@@ -1,0 +1,80 @@
+{
+  "id": "MAP_KANTO_POKEMON_LEAGUE_CHAMPIONS_ROOM",
+  "name": "Kanto_PokemonLeague_ChampionsRoom",
+  "layout": "LAYOUT_KANTO_POKEMON_LEAGUE_CHAMPIONS_ROOM",
+  "music": "MUS_RG_VICTORY_ROAD",
+  "region_map_section": "MAPSEC_POKEMON_LEAGUE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16109",
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16184",
+      "x": 6,
+      "y": 15,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x21A1"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 19,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_LEAGUE_LANCES_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_LEAGUE_HALL_OF_FAME",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 36,
+    "num": 79,
+    "region": "kanto",
+    "header": "0x8937694",
+    "layout_id": 849,
+    "mapsec_index": 137,
+    "mapsec_name": "POKéMON LEAGUE",
+    "music_id": 507,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PokemonLeague_ChampionsRoom"
+    }
+  }
+}

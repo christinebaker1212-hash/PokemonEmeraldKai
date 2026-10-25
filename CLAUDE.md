@@ -20,6 +20,9 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
+- `quetzal_rip/` + `tools/quetzal_rip/`: Kanto and Johto ripped from Moemon Quetzal (maps, scripts, tilesets, sprites,
+  trainers, wild, music) for a future port; not built. Start at `docs/QUETZAL_RIP.md` (notes in `docs/quetzal/`).
+  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
 
 ## Building

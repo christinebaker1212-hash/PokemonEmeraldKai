@@ -1,0 +1,112 @@
+Kanto_CeladonCity_DepartmentStore_Elevator_MapScripts::
+	.byte 0
+
+@ Kanto_CeladonCity_DepartmentStore_Elevator sign / bg event at 0,2
+@ Kanto_CeladonCity_DepartmentStore_Elevator sign / bg event at 4,1
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C412::
+	lockall
+	setvar VAR_0x8004, 3
+	call_if_unset FLAG_TEMP_2, Quetzal_EventScript_8457F7C
+	copyvar VAR_0x8005, VAR_QZ_0x5104
+	special ShowDeptStoreElevatorFloorSelect
+	message Quetzal_Text_84565ED
+	waitmessage
+	setvar VAR_0x8004, 3
+	specialvar VAR_RESULT, QzGetElevatorFloorCursor_738
+	copyvar VAR_0x8000, VAR_RESULT
+	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C476
+	goto_if_eq VAR_0x8000, 1, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C483
+	goto_if_eq VAR_0x8000, 2, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C490
+	goto_if_eq VAR_0x8000, 3, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C49D
+	goto_if_eq VAR_0x8000, 4, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4AA
+	end
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C476::
+	multichoicedefault 0, 0, 0x59, 1, 0
+	nop
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C483::
+	multichoicedefault 0, 0, 0x59, 1, 1
+	nop
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C490::
+	multichoicedefault 0, 0, 0x59, 1, 2
+	nop
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C49D::
+	multichoicedefault 0, 0, 0x59, 1, 3
+	nop
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4AA::
+	multichoicedefault 0, 0, 0x59, 1, 4
+	nop
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7::
+	copyvar VAR_0x8000, VAR_RESULT
+	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5AA
+	goto_if_eq VAR_0x8000, 1, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C582
+	goto_if_eq VAR_0x8000, 2, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C55A
+	goto_if_eq VAR_0x8000, 3, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C532
+	goto_if_eq VAR_0x8000, 4, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C50A
+	goto_if_eq VAR_0x8000, 5, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	goto_if_eq VAR_0x8000, 127, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	end
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C50A::
+	setvar VAR_0x8006, 4
+	setdynamicwarp MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_1F, 255, 6, 1
+	goto_if_eq VAR_QZ_0x5104, 4, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	call Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7
+	setvar VAR_QZ_0x5104, 4
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C532::
+	setvar VAR_0x8006, 5
+	setdynamicwarp MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_2F, 255, 6, 1
+	goto_if_eq VAR_QZ_0x5104, 5, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	call Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7
+	setvar VAR_QZ_0x5104, 5
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C55A::
+	setvar VAR_0x8006, 6
+	setdynamicwarp MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_3F, 255, 6, 1
+	goto_if_eq VAR_QZ_0x5104, 6, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	call Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7
+	setvar VAR_QZ_0x5104, 6
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C582::
+	setvar VAR_0x8006, 7
+	setdynamicwarp MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_4F, 255, 6, 1
+	goto_if_eq VAR_QZ_0x5104, 7, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	call Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7
+	setvar VAR_QZ_0x5104, 7
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5AA::
+	setvar VAR_0x8006, 8
+	setdynamicwarp MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_5F, 255, 6, 1
+	goto_if_eq VAR_QZ_0x5104, 8, Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+	call Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7
+	setvar VAR_QZ_0x5104, 8
+	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D2::
+	special QzCloseDeptStoreElevatorWindow_538
+	releaseall
+	end
+
+Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C5D7::
+	special QzCloseDeptStoreElevatorWindow_538
+	closemessage
+	waitse
+	special MoveElevator
+	waitstate
+	setflag FLAG_TEMP_2
+	return

@@ -1,0 +1,73 @@
+{
+  "id": "MAP_KANTO_SAFFRON_CITY_MR_PSYCHICS_HOUSE",
+  "name": "Kanto_SaffronCity_MrPsychicsHouse",
+  "layout": "LAYOUT_KANTO_LAVENDER_TOWN_HOUSE1",
+  "music": "MUS_RG_PEWTER",
+  "region_map_section": "MAPSEC_SAFFRON_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16102",
+      "x": 7,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SaffronCity_MrPsychicsHouse_EventScript_841F101",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 3,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 4,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SAFFRON_CITY",
+      "dest_warp_id": "7"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 38,
+    "num": 83,
+    "region": "kanto",
+    "header": "0x8939294",
+    "layout_id": 700,
+    "mapsec_index": 98,
+    "mapsec_name": "SAFFRON CITY",
+    "music_id": 526,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SaffronCity_MrPsychicsHouse"
+    }
+  }
+}

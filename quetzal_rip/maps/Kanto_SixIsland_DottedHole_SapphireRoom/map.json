@@ -1,0 +1,103 @@
+{
+  "id": "MAP_KANTO_SIX_ISLAND_DOTTED_HOLE_SAPPHIRE_ROOM",
+  "name": "Kanto_SixIsland_DottedHole_SapphireRoom",
+  "layout": "LAYOUT_KANTO_SIX_ISLAND_DOTTED_HOLE_SAPPHIRE_ROOM",
+  "music": "MUS_RG_SEVII_DUNGEON",
+  "region_map_section": "MAPSEC_DOTTED_HOLE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16194",
+      "x": 7,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SixIsland_DottedHole_SapphireRoom_EventScript_8413F9E",
+      "flag": "FLAG_QZ_0x22E9"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 5,
+      "y": 9,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x2186"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1334",
+      "x": 7,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x23CD"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SIX_ISLAND_DOTTED_HOLE_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 5,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SIX_ISLAND_DOTTED_HOLE_B4F",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_SixIsland_DottedHole_SapphireRoom_EventScript_8414208"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 120,
+    "region": "kanto",
+    "header": "0x8937B10",
+    "layout_id": 935,
+    "mapsec_index": 180,
+    "mapsec_name": "DOTTED HOLE",
+    "music_id": 546,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SixIsland_DottedHole_SapphireRoom"
+    }
+  }
+}

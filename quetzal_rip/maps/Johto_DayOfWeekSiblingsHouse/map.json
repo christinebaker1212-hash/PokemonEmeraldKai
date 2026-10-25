@@ -1,0 +1,62 @@
+{
+  "id": "MAP_JOHTO_DAY_OF_WEEK_SIBLINGS_HOUSE",
+  "name": "Johto_DayOfWeekSiblingsHouse",
+  "layout": "LAYOUT_JOHTO_DAY_OF_WEEK_SIBLINGS_HOUSE",
+  "music": "MUS_QZ_623",
+  "region_map_section": "MAPSEC_JOHTO_ROUTE26",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ROUTE26_SOUTH",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_DayOfWeekSiblingsHouse_EventScript_83EC1A4"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_DayOfWeekSiblingsHouse_EventScript_83EC1A4"
+    }
+  ],
+  "quetzal": {
+    "group": 35,
+    "num": 28,
+    "region": "johto",
+    "header": "0x893638C",
+    "layout_id": 596,
+    "mapsec_index": 98,
+    "mapsec_name": "ROUTE 26",
+    "music_id": 623,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "DayOfWeekSiblingsHouse",
+      "text_match": 1.25
+    }
+  }
+}

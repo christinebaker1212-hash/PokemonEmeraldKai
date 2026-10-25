@@ -1,0 +1,60 @@
+{
+  "id": "MAP_JOHTO_HALL_OF_FAME",
+  "name": "Johto_HallOfFame",
+  "layout": "LAYOUT_JOHTO_HALL_OF_FAME",
+  "music": "MUS_RG_HALL_OF_FAME",
+  "region_map_section": "MAPSEC_JOHTO_INDIGO_PLATEAU",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16032",
+      "x": 5,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 5,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_LANCES_ROOM",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 16,
+    "region": "johto",
+    "header": "0x893623C",
+    "layout_id": 584,
+    "mapsec_index": 97,
+    "mapsec_name": "INDIGO PLATEAU",
+    "music_id": 498,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "HallOfFame",
+      "text_match": 0.99
+    }
+  }
+}

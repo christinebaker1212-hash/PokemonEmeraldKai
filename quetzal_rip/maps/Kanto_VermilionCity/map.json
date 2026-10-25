@@ -1,0 +1,499 @@
+{
+  "id": "MAP_KANTO_VERMILION_CITY",
+  "name": "Kanto_VermilionCity",
+  "layout": "LAYOUT_KANTO_VERMILION_CITY",
+  "music": "MUS_RG_VERMILLION",
+  "region_map_section": "MAPSEC_VERMILION_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_ROUTE6",
+      "offset": 12,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_KANTO_ROUTE11",
+      "offset": 10,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16215",
+      "x": 22,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_84165A8",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 17,
+      "y": 9,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_84165B1",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 31,
+      "y": 30,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_84168B7",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 24,
+      "y": 33,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_84165D2",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 19,
+      "y": 24,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_12"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 25,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_84168C0",
+      "flag": "FLAG_QZ_0x21D7"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1041",
+      "x": 17,
+      "y": 26,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2391"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1053",
+      "x": 26,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x23EB"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_27",
+      "x": 32,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_841652D",
+      "flag": "0"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15",
+      "x": 36,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C1103",
+      "flag": "0"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_44",
+      "x": 37,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C1119",
+      "flag": "0"
+    },
+    {
+      "local_id": "12",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_45",
+      "x": 40,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C06B6",
+      "flag": "0"
+    },
+    {
+      "local_id": "13",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_46",
+      "x": 41,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C0666",
+      "flag": "0"
+    },
+    {
+      "local_id": "14",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_32",
+      "x": 32,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_8416544",
+      "flag": "0"
+    },
+    {
+      "local_id": "15",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_30",
+      "x": 36,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C0B00",
+      "flag": "0"
+    },
+    {
+      "local_id": "16",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_48",
+      "x": 37,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C112F",
+      "flag": "0"
+    },
+    {
+      "local_id": "17",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_7",
+      "x": 40,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_82C0B82",
+      "flag": "0"
+    },
+    {
+      "local_id": "18",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 40,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "19",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 41,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "20",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 41,
+      "y": 6,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "21",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 42,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 22,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SSANNE_EXTERIOR",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 23,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SSANNE_EXTERIOR",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SSANNE_EXTERIOR",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_HOUSE1",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 15,
+      "y": 6,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_POKEMON_CENTER_1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 12,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_POKEMON_FAN_CLUB",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 19,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_HOUSE2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 28,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_MART",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 28,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_HOUSE3",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 14,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_VERMILION_CITY_GYM",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 22,
+      "y": 33,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5145",
+      "var_value": "0",
+      "script": "Kanto_VermilionCity_EventScript_841685F"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 33,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5145",
+      "var_value": "0",
+      "script": "Kanto_VermilionCity_EventScript_8416866"
+    },
+    {
+      "type": "trigger",
+      "x": 22,
+      "y": 32,
+      "elevation": 0,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_VermilionCity_EventScript_841686D"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 32,
+      "elevation": 0,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_VermilionCity_EventScript_841686D"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 33,
+      "y": 6,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_VermilionCity_EventScript_84168F3"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 17,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_VermilionCity_EventScript_8416905"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 24,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_VermilionCity_EventScript_841690E"
+    },
+    {
+      "type": "sign",
+      "x": 34,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_VermilionCity_EventScript_8416926"
+    },
+    {
+      "type": "sign",
+      "x": 45,
+      "y": 17,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_VermilionCity_EventScript_84168FC"
+    },
+    {
+      "type": "hidden_item",
+      "x": 14,
+      "y": 11,
+      "elevation": 3,
+      "item": "ITEM_MAX_ETHER",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_48"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 62,
+    "region": "kanto",
+    "header": "0x8938280",
+    "layout_id": 716,
+    "mapsec_index": 93,
+    "mapsec_name": "VERMILION CITY",
+    "music_id": 525,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "VermilionCity"
+    }
+  }
+}

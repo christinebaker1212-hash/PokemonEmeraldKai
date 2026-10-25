@@ -1,0 +1,316 @@
+{
+  "id": "MAP_KANTO_VICTORY_ROAD_2F",
+  "name": "Kanto_VictoryRoad_2F",
+  "layout": "LAYOUT_KANTO_VICTORY_ROAD_2F",
+  "music": "MUS_RG_MT_MOON",
+  "region_map_section": "MAPSEC_KANTO_VICTORY_ROAD",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16203",
+      "x": 7,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410CD9",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16107",
+      "x": 20,
+      "y": 11,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410CF0",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
+      "x": 31,
+      "y": 16,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410D07",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16158",
+      "x": 26,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WALK_SEQUENCE_DOWN_RIGHT_LEFT_UP",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410D35",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
+      "x": 36,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410D1E",
+      "flag": "0"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 17,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VictoryRoad_2F_EventScript_846BED2",
+      "flag": "FLAG_QZ_0x2321"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 40,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VictoryRoad_2F_EventScript_846BEDF",
+      "flag": "FLAG_QZ_0x2322"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 25,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VictoryRoad_2F_EventScript_846BEEC",
+      "flag": "FLAG_QZ_0x2320"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 14,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VictoryRoad_2F_EventScript_846BEF9",
+      "flag": "FLAG_QZ_0x2323"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 8,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "0"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 6,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "0"
+    },
+    {
+      "local_id": "12",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 33,
+      "y": 19,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "FLAG_QZ_0x21D8"
+    },
+    {
+      "local_id": "13",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16125",
+      "x": 40,
+      "y": 9,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8471C54",
+      "flag": "0"
+    },
+    {
+      "local_id": "14",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_750",
+      "x": 45,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2E05"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_3F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 34,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_3F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 38,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_3F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 36,
+      "y": 17,
+      "elevation": 4,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_3F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 49,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROUTE23",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 48,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE23",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 47,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROUTE23",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 34,
+      "y": 19,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_VICTORY_ROAD_3F",
+      "dest_warp_id": "4"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 2,
+      "y": 19,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5137",
+      "var_value": "99",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410C77"
+    },
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 19,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5138",
+      "var_value": "99",
+      "script": "Kanto_VictoryRoad_2F_EventScript_8410CA8"
+    }
+  ],
+  "bg_events": [],
+  "quetzal": {
+    "group": 36,
+    "num": 40,
+    "region": "kanto",
+    "header": "0x8937250",
+    "layout_id": 759,
+    "mapsec_index": 132,
+    "mapsec_name": "VICTORY ROAD",
+    "music_id": 500,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "VictoryRoad_2F"
+    }
+  }
+}

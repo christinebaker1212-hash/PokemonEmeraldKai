@@ -1,0 +1,111 @@
+{
+  "id": "MAP_KANTO_ROUTE22_NORTH_ENTRANCE",
+  "name": "Kanto_Route22_NorthEntrance",
+  "layout": "LAYOUT_KANTO_ROUTE22_NORTH_ENTRANCE",
+  "music": "MUS_RG_VIRIDIAN_FOREST",
+  "region_map_section": "MAPSEC_ROUTE_22",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16182",
+      "x": 8,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_Route22_NorthEntrance_EventScript_8420627",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16182",
+      "x": 3,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_Route22_NorthEntrance_EventScript_842061E",
+      "flag": "FLAG_QZ_0x210A"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 1,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE23",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 6,
+      "y": 10,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE22",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 10,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE22",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 10,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE22",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "elevation": 3,
+      "dest_map": "MAP_JOHTO_VICTORY_ROAD_GATE",
+      "dest_warp_id": "4"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 7,
+      "y": 2,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5126",
+      "var_value": "0",
+      "script": "Kanto_Route22_NorthEntrance_EventScript_8420638"
+    }
+  ],
+  "bg_events": [],
+  "quetzal": {
+    "group": 38,
+    "num": 110,
+    "region": "kanto",
+    "header": "0x8939588",
+    "layout_id": 854,
+    "mapsec_index": 122,
+    "mapsec_name": "ROUTE 22",
+    "music_id": 499,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "Route22_NorthEntrance"
+    }
+  }
+}

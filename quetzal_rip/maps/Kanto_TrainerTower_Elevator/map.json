@@ -1,0 +1,53 @@
+{
+  "id": "MAP_KANTO_TRAINER_TOWER_ELEVATOR",
+  "name": "Kanto_TrainerTower_Elevator",
+  "layout": "LAYOUT_KANTO_TRAINER_TOWER_ELEVATOR",
+  "music": "MUS_RG_TRAINER_TOWER",
+  "region_map_section": "MAPSEC_TRAINER_TOWER_2",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 2,
+      "y": 5,
+      "elevation": 3,
+      "dest_map": "MAP_DYNAMIC",
+      "dest_warp_id": "127"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 0,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_TrainerTower_Elevator_EventScript_84148BD"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 8,
+    "region": "kanto",
+    "header": "0x8937C98",
+    "layout_id": 928,
+    "mapsec_index": 179,
+    "mapsec_name": "TRAINER TOWER",
+    "music_id": 556,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "TrainerTower_Elevator"
+    }
+  }
+}

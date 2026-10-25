@@ -1,0 +1,14995 @@
+{
+"formula": "gid = OverworldGfxId(species): species+256 for most; forms remapped by 0x082694C8 jump tables; +5000 if shiny (0x080A415C)",
+"gid_to_species": {
+"257": [
+1,
+"Bulbasaur",
+false
+],
+"5257": [
+1,
+"Bulbasaur",
+true
+],
+"258": [
+2,
+"Ivysaur",
+false
+],
+"5258": [
+2,
+"Ivysaur",
+true
+],
+"259": [
+3,
+"Venusaur",
+false
+],
+"5259": [
+3,
+"Venusaur",
+true
+],
+"260": [
+4,
+"Charmander",
+false
+],
+"5260": [
+4,
+"Charmander",
+true
+],
+"261": [
+5,
+"Charmeleon",
+false
+],
+"5261": [
+5,
+"Charmeleon",
+true
+],
+"262": [
+6,
+"Charizard",
+false
+],
+"5262": [
+6,
+"Charizard",
+true
+],
+"263": [
+7,
+"Squirtle",
+false
+],
+"5263": [
+7,
+"Squirtle",
+true
+],
+"264": [
+8,
+"Wartortle",
+false
+],
+"5264": [
+8,
+"Wartortle",
+true
+],
+"265": [
+9,
+"Blastoise",
+false
+],
+"5265": [
+9,
+"Blastoise",
+true
+],
+"266": [
+10,
+"Caterpie",
+false
+],
+"5266": [
+10,
+"Caterpie",
+true
+],
+"267": [
+11,
+"Metapod",
+false
+],
+"5267": [
+11,
+"Metapod",
+true
+],
+"268": [
+12,
+"Butterfree",
+false
+],
+"5268": [
+12,
+"Butterfree",
+true
+],
+"269": [
+13,
+"Weedle",
+false
+],
+"5269": [
+13,
+"Weedle",
+true
+],
+"270": [
+14,
+"Kakuna",
+false
+],
+"5270": [
+14,
+"Kakuna",
+true
+],
+"271": [
+15,
+"Beedrill",
+false
+],
+"5271": [
+15,
+"Beedrill",
+true
+],
+"272": [
+16,
+"Pidgey",
+false
+],
+"5272": [
+16,
+"Pidgey",
+true
+],
+"273": [
+17,
+"Pidgeotto",
+false
+],
+"5273": [
+17,
+"Pidgeotto",
+true
+],
+"274": [
+18,
+"Pidgeot",
+false
+],
+"5274": [
+18,
+"Pidgeot",
+true
+],
+"275": [
+19,
+"Rattata",
+false
+],
+"5275": [
+19,
+"Rattata",
+true
+],
+"276": [
+20,
+"Raticate",
+false
+],
+"5276": [
+20,
+"Raticate",
+true
+],
+"277": [
+21,
+"Spearow",
+false
+],
+"5277": [
+21,
+"Spearow",
+true
+],
+"278": [
+22,
+"Fearow",
+false
+],
+"5278": [
+22,
+"Fearow",
+true
+],
+"279": [
+23,
+"Ekans",
+false
+],
+"5279": [
+23,
+"Ekans",
+true
+],
+"280": [
+24,
+"Arbok",
+false
+],
+"5280": [
+24,
+"Arbok",
+true
+],
+"281": [
+25,
+"Pikachu",
+false
+],
+"5281": [
+25,
+"Pikachu",
+true
+],
+"282": [
+26,
+"Raichu",
+false
+],
+"5282": [
+26,
+"Raichu",
+true
+],
+"283": [
+27,
+"Sandshrew",
+false
+],
+"5283": [
+27,
+"Sandshrew",
+true
+],
+"284": [
+28,
+"Sandslash",
+false
+],
+"5284": [
+28,
+"Sandslash",
+true
+],
+"285": [
+29,
+"NidoranF",
+false
+],
+"5285": [
+29,
+"NidoranF",
+true
+],
+"286": [
+30,
+"Nidorina",
+false
+],
+"5286": [
+30,
+"Nidorina",
+true
+],
+"287": [
+31,
+"Nidoqueen",
+false
+],
+"5287": [
+31,
+"Nidoqueen",
+true
+],
+"288": [
+32,
+"NidoranM",
+false
+],
+"5288": [
+32,
+"NidoranM",
+true
+],
+"289": [
+33,
+"Nidorino",
+false
+],
+"5289": [
+33,
+"Nidorino",
+true
+],
+"290": [
+34,
+"Nidoking",
+false
+],
+"5290": [
+34,
+"Nidoking",
+true
+],
+"291": [
+35,
+"Clefairy",
+false
+],
+"5291": [
+35,
+"Clefairy",
+true
+],
+"292": [
+36,
+"Clefable",
+false
+],
+"5292": [
+36,
+"Clefable",
+true
+],
+"293": [
+37,
+"Vulpix",
+false
+],
+"5293": [
+37,
+"Vulpix",
+true
+],
+"294": [
+38,
+"Ninetales",
+false
+],
+"5294": [
+38,
+"Ninetales",
+true
+],
+"295": [
+39,
+"Jigglypuff",
+false
+],
+"5295": [
+39,
+"Jigglypuff",
+true
+],
+"296": [
+40,
+"Wigglytuff",
+false
+],
+"5296": [
+40,
+"Wigglytuff",
+true
+],
+"297": [
+41,
+"Zubat",
+false
+],
+"5297": [
+41,
+"Zubat",
+true
+],
+"298": [
+42,
+"Golbat",
+false
+],
+"5298": [
+42,
+"Golbat",
+true
+],
+"299": [
+43,
+"Oddish",
+false
+],
+"5299": [
+43,
+"Oddish",
+true
+],
+"300": [
+44,
+"Gloom",
+false
+],
+"5300": [
+44,
+"Gloom",
+true
+],
+"301": [
+45,
+"Vileplume",
+false
+],
+"5301": [
+45,
+"Vileplume",
+true
+],
+"302": [
+46,
+"Paras",
+false
+],
+"5302": [
+46,
+"Paras",
+true
+],
+"303": [
+47,
+"Parasect",
+false
+],
+"5303": [
+47,
+"Parasect",
+true
+],
+"304": [
+48,
+"Venonat",
+false
+],
+"5304": [
+48,
+"Venonat",
+true
+],
+"305": [
+49,
+"Venomoth",
+false
+],
+"5305": [
+49,
+"Venomoth",
+true
+],
+"306": [
+50,
+"Diglett",
+false
+],
+"5306": [
+50,
+"Diglett",
+true
+],
+"307": [
+51,
+"Dugtrio",
+false
+],
+"5307": [
+51,
+"Dugtrio",
+true
+],
+"308": [
+52,
+"Meowth",
+false
+],
+"5308": [
+52,
+"Meowth",
+true
+],
+"309": [
+53,
+"Persian",
+false
+],
+"5309": [
+53,
+"Persian",
+true
+],
+"310": [
+54,
+"Psyduck",
+false
+],
+"5310": [
+54,
+"Psyduck",
+true
+],
+"311": [
+55,
+"Golduck",
+false
+],
+"5311": [
+55,
+"Golduck",
+true
+],
+"312": [
+56,
+"Mankey",
+false
+],
+"5312": [
+56,
+"Mankey",
+true
+],
+"313": [
+57,
+"Primeape",
+false
+],
+"5313": [
+57,
+"Primeape",
+true
+],
+"314": [
+58,
+"Growlithe",
+false
+],
+"5314": [
+58,
+"Growlithe",
+true
+],
+"315": [
+59,
+"Arcanine",
+false
+],
+"5315": [
+59,
+"Arcanine",
+true
+],
+"316": [
+60,
+"Poliwag",
+false
+],
+"5316": [
+60,
+"Poliwag",
+true
+],
+"317": [
+61,
+"Poliwhirl",
+false
+],
+"5317": [
+61,
+"Poliwhirl",
+true
+],
+"318": [
+62,
+"Poliwrath",
+false
+],
+"5318": [
+62,
+"Poliwrath",
+true
+],
+"319": [
+63,
+"Abra",
+false
+],
+"5319": [
+63,
+"Abra",
+true
+],
+"320": [
+64,
+"Kadabra",
+false
+],
+"5320": [
+64,
+"Kadabra",
+true
+],
+"321": [
+65,
+"Alakazam",
+false
+],
+"5321": [
+65,
+"Alakazam",
+true
+],
+"322": [
+66,
+"Machop",
+false
+],
+"5322": [
+66,
+"Machop",
+true
+],
+"323": [
+67,
+"Machoke",
+false
+],
+"5323": [
+67,
+"Machoke",
+true
+],
+"324": [
+68,
+"Machamp",
+false
+],
+"5324": [
+68,
+"Machamp",
+true
+],
+"325": [
+69,
+"Bellsprout",
+false
+],
+"5325": [
+69,
+"Bellsprout",
+true
+],
+"326": [
+70,
+"Weepinbell",
+false
+],
+"5326": [
+70,
+"Weepinbell",
+true
+],
+"327": [
+71,
+"Victreebel",
+false
+],
+"5327": [
+71,
+"Victreebel",
+true
+],
+"328": [
+72,
+"Tentacool",
+false
+],
+"5328": [
+72,
+"Tentacool",
+true
+],
+"329": [
+73,
+"Tentacruel",
+false
+],
+"5329": [
+73,
+"Tentacruel",
+true
+],
+"330": [
+74,
+"Geodude",
+false
+],
+"5330": [
+74,
+"Geodude",
+true
+],
+"331": [
+75,
+"Graveler",
+false
+],
+"5331": [
+75,
+"Graveler",
+true
+],
+"332": [
+76,
+"Golem",
+false
+],
+"5332": [
+76,
+"Golem",
+true
+],
+"333": [
+77,
+"Ponyta",
+false
+],
+"5333": [
+77,
+"Ponyta",
+true
+],
+"334": [
+78,
+"Rapidash",
+false
+],
+"5334": [
+78,
+"Rapidash",
+true
+],
+"335": [
+79,
+"Slowpoke",
+false
+],
+"5335": [
+79,
+"Slowpoke",
+true
+],
+"336": [
+80,
+"Slowbro",
+false
+],
+"5336": [
+80,
+"Slowbro",
+true
+],
+"337": [
+81,
+"Magnemite",
+false
+],
+"5337": [
+81,
+"Magnemite",
+true
+],
+"338": [
+82,
+"Magneton",
+false
+],
+"5338": [
+82,
+"Magneton",
+true
+],
+"339": [
+83,
+"Farfetch'd",
+false
+],
+"5339": [
+83,
+"Farfetch'd",
+true
+],
+"340": [
+84,
+"Doduo",
+false
+],
+"5340": [
+84,
+"Doduo",
+true
+],
+"341": [
+85,
+"Dodrio",
+false
+],
+"5341": [
+85,
+"Dodrio",
+true
+],
+"342": [
+86,
+"Seel",
+false
+],
+"5342": [
+86,
+"Seel",
+true
+],
+"343": [
+87,
+"Dewgong",
+false
+],
+"5343": [
+87,
+"Dewgong",
+true
+],
+"344": [
+88,
+"Grimer",
+false
+],
+"5344": [
+88,
+"Grimer",
+true
+],
+"345": [
+89,
+"Muk",
+false
+],
+"5345": [
+89,
+"Muk",
+true
+],
+"346": [
+90,
+"Shellder",
+false
+],
+"5346": [
+90,
+"Shellder",
+true
+],
+"347": [
+91,
+"Cloyster",
+false
+],
+"5347": [
+91,
+"Cloyster",
+true
+],
+"348": [
+92,
+"Gastly",
+false
+],
+"5348": [
+92,
+"Gastly",
+true
+],
+"349": [
+93,
+"Haunter",
+false
+],
+"5349": [
+93,
+"Haunter",
+true
+],
+"350": [
+94,
+"Gengar",
+false
+],
+"5350": [
+94,
+"Gengar",
+true
+],
+"351": [
+95,
+"Onix",
+false
+],
+"5351": [
+95,
+"Onix",
+true
+],
+"352": [
+96,
+"Drowzee",
+false
+],
+"5352": [
+96,
+"Drowzee",
+true
+],
+"353": [
+97,
+"Hypno",
+false
+],
+"5353": [
+97,
+"Hypno",
+true
+],
+"354": [
+98,
+"Krabby",
+false
+],
+"5354": [
+98,
+"Krabby",
+true
+],
+"355": [
+99,
+"Kingler",
+false
+],
+"5355": [
+99,
+"Kingler",
+true
+],
+"356": [
+100,
+"Voltorb",
+false
+],
+"5356": [
+100,
+"Voltorb",
+true
+],
+"357": [
+101,
+"Electrode",
+false
+],
+"5357": [
+101,
+"Electrode",
+true
+],
+"358": [
+102,
+"Exeggcute",
+false
+],
+"5358": [
+102,
+"Exeggcute",
+true
+],
+"359": [
+103,
+"Exeggutor",
+false
+],
+"5359": [
+103,
+"Exeggutor",
+true
+],
+"360": [
+104,
+"Cubone",
+false
+],
+"5360": [
+104,
+"Cubone",
+true
+],
+"361": [
+105,
+"Marowak",
+false
+],
+"5361": [
+105,
+"Marowak",
+true
+],
+"362": [
+106,
+"Hitmonlee",
+false
+],
+"5362": [
+106,
+"Hitmonlee",
+true
+],
+"363": [
+107,
+"Hitmonchan",
+false
+],
+"5363": [
+107,
+"Hitmonchan",
+true
+],
+"364": [
+108,
+"Lickitung",
+false
+],
+"5364": [
+108,
+"Lickitung",
+true
+],
+"365": [
+109,
+"Koffing",
+false
+],
+"5365": [
+109,
+"Koffing",
+true
+],
+"366": [
+110,
+"Weezing",
+false
+],
+"5366": [
+110,
+"Weezing",
+true
+],
+"367": [
+111,
+"Rhyhorn",
+false
+],
+"5367": [
+111,
+"Rhyhorn",
+true
+],
+"368": [
+112,
+"Rhydon",
+false
+],
+"5368": [
+112,
+"Rhydon",
+true
+],
+"369": [
+113,
+"Chansey",
+false
+],
+"5369": [
+113,
+"Chansey",
+true
+],
+"370": [
+114,
+"Tangela",
+false
+],
+"5370": [
+114,
+"Tangela",
+true
+],
+"371": [
+115,
+"Kangaskhan",
+false
+],
+"5371": [
+115,
+"Kangaskhan",
+true
+],
+"372": [
+116,
+"Horsea",
+false
+],
+"5372": [
+116,
+"Horsea",
+true
+],
+"373": [
+117,
+"Seadra",
+false
+],
+"5373": [
+117,
+"Seadra",
+true
+],
+"374": [
+118,
+"Goldeen",
+false
+],
+"5374": [
+118,
+"Goldeen",
+true
+],
+"375": [
+119,
+"Seaking",
+false
+],
+"5375": [
+119,
+"Seaking",
+true
+],
+"376": [
+120,
+"Staryu",
+false
+],
+"5376": [
+120,
+"Staryu",
+true
+],
+"377": [
+121,
+"Starmie",
+false
+],
+"5377": [
+121,
+"Starmie",
+true
+],
+"378": [
+122,
+"Mr. Mime",
+false
+],
+"5378": [
+122,
+"Mr. Mime",
+true
+],
+"379": [
+123,
+"Scyther",
+false
+],
+"5379": [
+123,
+"Scyther",
+true
+],
+"380": [
+124,
+"Jynx",
+false
+],
+"5380": [
+124,
+"Jynx",
+true
+],
+"381": [
+125,
+"Electabuzz",
+false
+],
+"5381": [
+125,
+"Electabuzz",
+true
+],
+"382": [
+126,
+"Magmar",
+false
+],
+"5382": [
+126,
+"Magmar",
+true
+],
+"383": [
+127,
+"Pinsir",
+false
+],
+"5383": [
+127,
+"Pinsir",
+true
+],
+"384": [
+128,
+"Tauros",
+false
+],
+"5384": [
+128,
+"Tauros",
+true
+],
+"385": [
+129,
+"Magikarp",
+false
+],
+"5385": [
+129,
+"Magikarp",
+true
+],
+"386": [
+130,
+"Gyarados",
+false
+],
+"5386": [
+130,
+"Gyarados",
+true
+],
+"387": [
+131,
+"Lapras",
+false
+],
+"5387": [
+131,
+"Lapras",
+true
+],
+"388": [
+132,
+"Ditto",
+false
+],
+"5388": [
+132,
+"Ditto",
+true
+],
+"389": [
+133,
+"Eevee",
+false
+],
+"5389": [
+133,
+"Eevee",
+true
+],
+"390": [
+134,
+"Vaporeon",
+false
+],
+"5390": [
+134,
+"Vaporeon",
+true
+],
+"391": [
+135,
+"Jolteon",
+false
+],
+"5391": [
+135,
+"Jolteon",
+true
+],
+"392": [
+136,
+"Flareon",
+false
+],
+"5392": [
+136,
+"Flareon",
+true
+],
+"393": [
+137,
+"Porygon",
+false
+],
+"5393": [
+137,
+"Porygon",
+true
+],
+"394": [
+138,
+"Omanyte",
+false
+],
+"5394": [
+138,
+"Omanyte",
+true
+],
+"395": [
+139,
+"Omastar",
+false
+],
+"5395": [
+139,
+"Omastar",
+true
+],
+"396": [
+140,
+"Kabuto",
+false
+],
+"5396": [
+140,
+"Kabuto",
+true
+],
+"397": [
+141,
+"Kabutops",
+false
+],
+"5397": [
+141,
+"Kabutops",
+true
+],
+"398": [
+142,
+"Aerodactyl",
+false
+],
+"5398": [
+142,
+"Aerodactyl",
+true
+],
+"399": [
+143,
+"Snorlax",
+false
+],
+"5399": [
+143,
+"Snorlax",
+true
+],
+"400": [
+144,
+"Articuno",
+false
+],
+"5400": [
+144,
+"Articuno",
+true
+],
+"401": [
+145,
+"Zapdos",
+false
+],
+"5401": [
+145,
+"Zapdos",
+true
+],
+"402": [
+146,
+"Moltres",
+false
+],
+"5402": [
+146,
+"Moltres",
+true
+],
+"403": [
+147,
+"Dratini",
+false
+],
+"5403": [
+147,
+"Dratini",
+true
+],
+"404": [
+148,
+"Dragonair",
+false
+],
+"5404": [
+148,
+"Dragonair",
+true
+],
+"405": [
+149,
+"Dragonite",
+false
+],
+"5405": [
+149,
+"Dragonite",
+true
+],
+"406": [
+150,
+"Mewtwo",
+false
+],
+"5406": [
+150,
+"Mewtwo",
+true
+],
+"407": [
+151,
+"Mew",
+false
+],
+"5407": [
+151,
+"Mew",
+true
+],
+"408": [
+152,
+"Chikorita",
+false
+],
+"5408": [
+152,
+"Chikorita",
+true
+],
+"409": [
+153,
+"Bayleef",
+false
+],
+"5409": [
+153,
+"Bayleef",
+true
+],
+"410": [
+154,
+"Meganium",
+false
+],
+"5410": [
+154,
+"Meganium",
+true
+],
+"411": [
+155,
+"Cyndaquil",
+false
+],
+"5411": [
+155,
+"Cyndaquil",
+true
+],
+"412": [
+156,
+"Quilava",
+false
+],
+"5412": [
+156,
+"Quilava",
+true
+],
+"413": [
+157,
+"Typhlosion",
+false
+],
+"5413": [
+157,
+"Typhlosion",
+true
+],
+"414": [
+158,
+"Totodile",
+false
+],
+"5414": [
+158,
+"Totodile",
+true
+],
+"415": [
+159,
+"Croconaw",
+false
+],
+"5415": [
+159,
+"Croconaw",
+true
+],
+"416": [
+160,
+"Feraligatr",
+false
+],
+"5416": [
+160,
+"Feraligatr",
+true
+],
+"417": [
+161,
+"Sentret",
+false
+],
+"5417": [
+161,
+"Sentret",
+true
+],
+"418": [
+162,
+"Furret",
+false
+],
+"5418": [
+162,
+"Furret",
+true
+],
+"419": [
+163,
+"Hoothoot",
+false
+],
+"5419": [
+163,
+"Hoothoot",
+true
+],
+"420": [
+164,
+"Noctowl",
+false
+],
+"5420": [
+164,
+"Noctowl",
+true
+],
+"421": [
+165,
+"Ledyba",
+false
+],
+"5421": [
+165,
+"Ledyba",
+true
+],
+"422": [
+166,
+"Ledian",
+false
+],
+"5422": [
+166,
+"Ledian",
+true
+],
+"423": [
+167,
+"Spinarak",
+false
+],
+"5423": [
+167,
+"Spinarak",
+true
+],
+"424": [
+168,
+"Ariados",
+false
+],
+"5424": [
+168,
+"Ariados",
+true
+],
+"425": [
+169,
+"Crobat",
+false
+],
+"5425": [
+169,
+"Crobat",
+true
+],
+"426": [
+170,
+"Chinchou",
+false
+],
+"5426": [
+170,
+"Chinchou",
+true
+],
+"427": [
+171,
+"Lanturn",
+false
+],
+"5427": [
+171,
+"Lanturn",
+true
+],
+"428": [
+172,
+"Pichu",
+false
+],
+"5428": [
+172,
+"Pichu",
+true
+],
+"429": [
+173,
+"Cleffa",
+false
+],
+"5429": [
+173,
+"Cleffa",
+true
+],
+"430": [
+174,
+"Igglybuff",
+false
+],
+"5430": [
+174,
+"Igglybuff",
+true
+],
+"431": [
+175,
+"Togepi",
+false
+],
+"5431": [
+175,
+"Togepi",
+true
+],
+"432": [
+176,
+"Togetic",
+false
+],
+"5432": [
+176,
+"Togetic",
+true
+],
+"433": [
+177,
+"Natu",
+false
+],
+"5433": [
+177,
+"Natu",
+true
+],
+"434": [
+178,
+"Xatu",
+false
+],
+"5434": [
+178,
+"Xatu",
+true
+],
+"435": [
+179,
+"Mareep",
+false
+],
+"5435": [
+179,
+"Mareep",
+true
+],
+"436": [
+180,
+"Flaaffy",
+false
+],
+"5436": [
+180,
+"Flaaffy",
+true
+],
+"437": [
+181,
+"Ampharos",
+false
+],
+"5437": [
+181,
+"Ampharos",
+true
+],
+"438": [
+182,
+"Bellossom",
+false
+],
+"5438": [
+182,
+"Bellossom",
+true
+],
+"439": [
+183,
+"Marill",
+false
+],
+"5439": [
+183,
+"Marill",
+true
+],
+"440": [
+184,
+"Azumarill",
+false
+],
+"5440": [
+184,
+"Azumarill",
+true
+],
+"441": [
+185,
+"Sudowoodo",
+false
+],
+"5441": [
+185,
+"Sudowoodo",
+true
+],
+"442": [
+186,
+"Politoed",
+false
+],
+"5442": [
+186,
+"Politoed",
+true
+],
+"443": [
+187,
+"Hoppip",
+false
+],
+"5443": [
+187,
+"Hoppip",
+true
+],
+"444": [
+188,
+"Skiploom",
+false
+],
+"5444": [
+188,
+"Skiploom",
+true
+],
+"445": [
+189,
+"Jumpluff",
+false
+],
+"5445": [
+189,
+"Jumpluff",
+true
+],
+"446": [
+190,
+"Aipom",
+false
+],
+"5446": [
+190,
+"Aipom",
+true
+],
+"447": [
+191,
+"Sunkern",
+false
+],
+"5447": [
+191,
+"Sunkern",
+true
+],
+"448": [
+192,
+"Sunflora",
+false
+],
+"5448": [
+192,
+"Sunflora",
+true
+],
+"449": [
+193,
+"Yanma",
+false
+],
+"5449": [
+193,
+"Yanma",
+true
+],
+"450": [
+194,
+"Wooper",
+false
+],
+"5450": [
+194,
+"Wooper",
+true
+],
+"451": [
+195,
+"Quagsire",
+false
+],
+"5451": [
+195,
+"Quagsire",
+true
+],
+"452": [
+196,
+"Espeon",
+false
+],
+"5452": [
+196,
+"Espeon",
+true
+],
+"453": [
+197,
+"Umbreon",
+false
+],
+"5453": [
+197,
+"Umbreon",
+true
+],
+"454": [
+198,
+"Murkrow",
+false
+],
+"5454": [
+198,
+"Murkrow",
+true
+],
+"455": [
+199,
+"Slowking",
+false
+],
+"5455": [
+199,
+"Slowking",
+true
+],
+"456": [
+200,
+"Misdreavus",
+false
+],
+"5456": [
+200,
+"Misdreavus",
+true
+],
+"457": [
+201,
+"Unown",
+false
+],
+"5457": [
+201,
+"Unown",
+true
+],
+"458": [
+202,
+"Wobbuffet",
+false
+],
+"5458": [
+202,
+"Wobbuffet",
+true
+],
+"459": [
+203,
+"Girafarig",
+false
+],
+"5459": [
+203,
+"Girafarig",
+true
+],
+"460": [
+204,
+"Pineco",
+false
+],
+"5460": [
+204,
+"Pineco",
+true
+],
+"461": [
+205,
+"Forretress",
+false
+],
+"5461": [
+205,
+"Forretress",
+true
+],
+"462": [
+206,
+"Dunsparce",
+false
+],
+"5462": [
+206,
+"Dunsparce",
+true
+],
+"463": [
+207,
+"Gligar",
+false
+],
+"5463": [
+207,
+"Gligar",
+true
+],
+"464": [
+208,
+"Steelix",
+false
+],
+"5464": [
+208,
+"Steelix",
+true
+],
+"465": [
+209,
+"Snubbull",
+false
+],
+"5465": [
+209,
+"Snubbull",
+true
+],
+"466": [
+210,
+"Granbull",
+false
+],
+"5466": [
+210,
+"Granbull",
+true
+],
+"467": [
+211,
+"Qwilfish",
+false
+],
+"5467": [
+211,
+"Qwilfish",
+true
+],
+"468": [
+212,
+"Scizor",
+false
+],
+"5468": [
+212,
+"Scizor",
+true
+],
+"469": [
+213,
+"Shuckle",
+false
+],
+"5469": [
+213,
+"Shuckle",
+true
+],
+"470": [
+214,
+"Heracross",
+false
+],
+"5470": [
+214,
+"Heracross",
+true
+],
+"471": [
+215,
+"Sneasel",
+false
+],
+"5471": [
+215,
+"Sneasel",
+true
+],
+"472": [
+216,
+"Teddiursa",
+false
+],
+"5472": [
+216,
+"Teddiursa",
+true
+],
+"473": [
+217,
+"Ursaring",
+false
+],
+"5473": [
+217,
+"Ursaring",
+true
+],
+"474": [
+218,
+"Slugma",
+false
+],
+"5474": [
+218,
+"Slugma",
+true
+],
+"475": [
+219,
+"Magcargo",
+false
+],
+"5475": [
+219,
+"Magcargo",
+true
+],
+"476": [
+220,
+"Swinub",
+false
+],
+"5476": [
+220,
+"Swinub",
+true
+],
+"477": [
+221,
+"Piloswine",
+false
+],
+"5477": [
+221,
+"Piloswine",
+true
+],
+"478": [
+222,
+"Corsola",
+false
+],
+"5478": [
+222,
+"Corsola",
+true
+],
+"479": [
+223,
+"Remoraid",
+false
+],
+"5479": [
+223,
+"Remoraid",
+true
+],
+"480": [
+224,
+"Octillery",
+false
+],
+"5480": [
+224,
+"Octillery",
+true
+],
+"481": [
+225,
+"Delibird",
+false
+],
+"5481": [
+225,
+"Delibird",
+true
+],
+"482": [
+226,
+"Mantine",
+false
+],
+"5482": [
+226,
+"Mantine",
+true
+],
+"483": [
+227,
+"Skarmory",
+false
+],
+"5483": [
+227,
+"Skarmory",
+true
+],
+"484": [
+228,
+"Houndour",
+false
+],
+"5484": [
+228,
+"Houndour",
+true
+],
+"485": [
+229,
+"Houndoom",
+false
+],
+"5485": [
+229,
+"Houndoom",
+true
+],
+"486": [
+230,
+"Kingdra",
+false
+],
+"5486": [
+230,
+"Kingdra",
+true
+],
+"487": [
+231,
+"Phanpy",
+false
+],
+"5487": [
+231,
+"Phanpy",
+true
+],
+"488": [
+232,
+"Donphan",
+false
+],
+"5488": [
+232,
+"Donphan",
+true
+],
+"489": [
+233,
+"Porygon2",
+false
+],
+"5489": [
+233,
+"Porygon2",
+true
+],
+"490": [
+234,
+"Stantler",
+false
+],
+"5490": [
+234,
+"Stantler",
+true
+],
+"491": [
+235,
+"Smeargle",
+false
+],
+"5491": [
+235,
+"Smeargle",
+true
+],
+"492": [
+236,
+"Tyrogue",
+false
+],
+"5492": [
+236,
+"Tyrogue",
+true
+],
+"493": [
+237,
+"Hitmontop",
+false
+],
+"5493": [
+237,
+"Hitmontop",
+true
+],
+"494": [
+238,
+"Smoochum",
+false
+],
+"5494": [
+238,
+"Smoochum",
+true
+],
+"495": [
+239,
+"Elekid",
+false
+],
+"5495": [
+239,
+"Elekid",
+true
+],
+"496": [
+240,
+"Magby",
+false
+],
+"5496": [
+240,
+"Magby",
+true
+],
+"497": [
+241,
+"Miltank",
+false
+],
+"5497": [
+241,
+"Miltank",
+true
+],
+"498": [
+242,
+"Blissey",
+false
+],
+"5498": [
+242,
+"Blissey",
+true
+],
+"499": [
+243,
+"Raikou",
+false
+],
+"5499": [
+243,
+"Raikou",
+true
+],
+"500": [
+244,
+"Entei",
+false
+],
+"5500": [
+244,
+"Entei",
+true
+],
+"501": [
+245,
+"Suicune",
+false
+],
+"5501": [
+245,
+"Suicune",
+true
+],
+"502": [
+246,
+"Larvitar",
+false
+],
+"5502": [
+246,
+"Larvitar",
+true
+],
+"503": [
+247,
+"Pupitar",
+false
+],
+"5503": [
+247,
+"Pupitar",
+true
+],
+"504": [
+248,
+"Tyranitar",
+false
+],
+"5504": [
+248,
+"Tyranitar",
+true
+],
+"505": [
+249,
+"Lugia",
+false
+],
+"5505": [
+249,
+"Lugia",
+true
+],
+"506": [
+250,
+"Ho-Oh",
+false
+],
+"5506": [
+250,
+"Ho-Oh",
+true
+],
+"507": [
+251,
+"Celebi",
+false
+],
+"5507": [
+251,
+"Celebi",
+true
+],
+"508": [
+252,
+"Treecko",
+false
+],
+"5508": [
+252,
+"Treecko",
+true
+],
+"509": [
+253,
+"Grovyle",
+false
+],
+"5509": [
+253,
+"Grovyle",
+true
+],
+"510": [
+254,
+"Sceptile",
+false
+],
+"5510": [
+254,
+"Sceptile",
+true
+],
+"511": [
+255,
+"Torchic",
+false
+],
+"5511": [
+255,
+"Torchic",
+true
+],
+"512": [
+256,
+"Combusken",
+false
+],
+"5512": [
+256,
+"Combusken",
+true
+],
+"513": [
+257,
+"Blaziken",
+false
+],
+"5513": [
+257,
+"Blaziken",
+true
+],
+"514": [
+258,
+"Mudkip",
+false
+],
+"5514": [
+258,
+"Mudkip",
+true
+],
+"515": [
+259,
+"Marshtomp",
+false
+],
+"5515": [
+259,
+"Marshtomp",
+true
+],
+"516": [
+260,
+"Swampert",
+false
+],
+"5516": [
+260,
+"Swampert",
+true
+],
+"517": [
+261,
+"Poochyena",
+false
+],
+"5517": [
+261,
+"Poochyena",
+true
+],
+"518": [
+262,
+"Mightyena",
+false
+],
+"5518": [
+262,
+"Mightyena",
+true
+],
+"519": [
+263,
+"Zigzagoon",
+false
+],
+"5519": [
+263,
+"Zigzagoon",
+true
+],
+"520": [
+264,
+"Linoone",
+false
+],
+"5520": [
+264,
+"Linoone",
+true
+],
+"521": [
+265,
+"Wurmple",
+false
+],
+"5521": [
+265,
+"Wurmple",
+true
+],
+"522": [
+266,
+"Silcoon",
+false
+],
+"5522": [
+266,
+"Silcoon",
+true
+],
+"523": [
+267,
+"Beautifly",
+false
+],
+"5523": [
+267,
+"Beautifly",
+true
+],
+"524": [
+268,
+"Cascoon",
+false
+],
+"5524": [
+268,
+"Cascoon",
+true
+],
+"525": [
+269,
+"Dustox",
+false
+],
+"5525": [
+269,
+"Dustox",
+true
+],
+"526": [
+270,
+"Lotad",
+false
+],
+"5526": [
+270,
+"Lotad",
+true
+],
+"527": [
+271,
+"Lombre",
+false
+],
+"5527": [
+271,
+"Lombre",
+true
+],
+"528": [
+272,
+"Ludicolo",
+false
+],
+"5528": [
+272,
+"Ludicolo",
+true
+],
+"529": [
+273,
+"Seedot",
+false
+],
+"5529": [
+273,
+"Seedot",
+true
+],
+"530": [
+274,
+"Nuzleaf",
+false
+],
+"5530": [
+274,
+"Nuzleaf",
+true
+],
+"531": [
+275,
+"Shiftry",
+false
+],
+"5531": [
+275,
+"Shiftry",
+true
+],
+"532": [
+276,
+"Taillow",
+false
+],
+"5532": [
+276,
+"Taillow",
+true
+],
+"533": [
+277,
+"Swellow",
+false
+],
+"5533": [
+277,
+"Swellow",
+true
+],
+"534": [
+278,
+"Wingull",
+false
+],
+"5534": [
+278,
+"Wingull",
+true
+],
+"535": [
+279,
+"Pelipper",
+false
+],
+"5535": [
+279,
+"Pelipper",
+true
+],
+"536": [
+280,
+"Ralts",
+false
+],
+"5536": [
+280,
+"Ralts",
+true
+],
+"537": [
+281,
+"Kirlia",
+false
+],
+"5537": [
+281,
+"Kirlia",
+true
+],
+"538": [
+282,
+"Gardevoir",
+false
+],
+"5538": [
+282,
+"Gardevoir",
+true
+],
+"539": [
+283,
+"Surskit",
+false
+],
+"5539": [
+283,
+"Surskit",
+true
+],
+"540": [
+284,
+"Masquerain",
+false
+],
+"5540": [
+284,
+"Masquerain",
+true
+],
+"541": [
+285,
+"Shroomish",
+false
+],
+"5541": [
+285,
+"Shroomish",
+true
+],
+"542": [
+286,
+"Breloom",
+false
+],
+"5542": [
+286,
+"Breloom",
+true
+],
+"543": [
+287,
+"Slakoth",
+false
+],
+"5543": [
+287,
+"Slakoth",
+true
+],
+"544": [
+288,
+"Vigoroth",
+false
+],
+"5544": [
+288,
+"Vigoroth",
+true
+],
+"545": [
+289,
+"Slaking",
+false
+],
+"5545": [
+289,
+"Slaking",
+true
+],
+"546": [
+290,
+"Nincada",
+false
+],
+"5546": [
+290,
+"Nincada",
+true
+],
+"547": [
+291,
+"Ninjask",
+false
+],
+"5547": [
+291,
+"Ninjask",
+true
+],
+"548": [
+292,
+"Shedinja",
+false
+],
+"5548": [
+292,
+"Shedinja",
+true
+],
+"549": [
+293,
+"Whismur",
+false
+],
+"5549": [
+293,
+"Whismur",
+true
+],
+"550": [
+294,
+"Loudred",
+false
+],
+"5550": [
+294,
+"Loudred",
+true
+],
+"551": [
+295,
+"Exploud",
+false
+],
+"5551": [
+295,
+"Exploud",
+true
+],
+"552": [
+296,
+"Makuhita",
+false
+],
+"5552": [
+296,
+"Makuhita",
+true
+],
+"553": [
+297,
+"Hariyama",
+false
+],
+"5553": [
+297,
+"Hariyama",
+true
+],
+"554": [
+298,
+"Azurill",
+false
+],
+"5554": [
+298,
+"Azurill",
+true
+],
+"555": [
+299,
+"Nosepass",
+false
+],
+"5555": [
+299,
+"Nosepass",
+true
+],
+"556": [
+300,
+"Skitty",
+false
+],
+"5556": [
+300,
+"Skitty",
+true
+],
+"557": [
+301,
+"Delcatty",
+false
+],
+"5557": [
+301,
+"Delcatty",
+true
+],
+"558": [
+302,
+"Sableye",
+false
+],
+"5558": [
+302,
+"Sableye",
+true
+],
+"559": [
+303,
+"Mawile",
+false
+],
+"5559": [
+303,
+"Mawile",
+true
+],
+"560": [
+304,
+"Aron",
+false
+],
+"5560": [
+304,
+"Aron",
+true
+],
+"561": [
+305,
+"Lairon",
+false
+],
+"5561": [
+305,
+"Lairon",
+true
+],
+"562": [
+306,
+"Aggron",
+false
+],
+"5562": [
+306,
+"Aggron",
+true
+],
+"563": [
+307,
+"Meditite",
+false
+],
+"5563": [
+307,
+"Meditite",
+true
+],
+"564": [
+308,
+"Medicham",
+false
+],
+"5564": [
+308,
+"Medicham",
+true
+],
+"565": [
+309,
+"Electrike",
+false
+],
+"5565": [
+309,
+"Electrike",
+true
+],
+"566": [
+310,
+"Manectric",
+false
+],
+"5566": [
+310,
+"Manectric",
+true
+],
+"567": [
+311,
+"Plusle",
+false
+],
+"5567": [
+311,
+"Plusle",
+true
+],
+"568": [
+312,
+"Minun",
+false
+],
+"5568": [
+312,
+"Minun",
+true
+],
+"569": [
+313,
+"Volbeat",
+false
+],
+"5569": [
+313,
+"Volbeat",
+true
+],
+"570": [
+314,
+"Illumise",
+false
+],
+"5570": [
+314,
+"Illumise",
+true
+],
+"571": [
+315,
+"Roselia",
+false
+],
+"5571": [
+315,
+"Roselia",
+true
+],
+"572": [
+316,
+"Gulpin",
+false
+],
+"5572": [
+316,
+"Gulpin",
+true
+],
+"573": [
+317,
+"Swalot",
+false
+],
+"5573": [
+317,
+"Swalot",
+true
+],
+"574": [
+318,
+"Carvanha",
+false
+],
+"5574": [
+318,
+"Carvanha",
+true
+],
+"575": [
+319,
+"Sharpedo",
+false
+],
+"5575": [
+319,
+"Sharpedo",
+true
+],
+"576": [
+320,
+"Wailmer",
+false
+],
+"5576": [
+320,
+"Wailmer",
+true
+],
+"577": [
+321,
+"Wailord",
+false
+],
+"5577": [
+321,
+"Wailord",
+true
+],
+"578": [
+322,
+"Numel",
+false
+],
+"5578": [
+322,
+"Numel",
+true
+],
+"579": [
+323,
+"Camerupt",
+false
+],
+"5579": [
+323,
+"Camerupt",
+true
+],
+"580": [
+324,
+"Torkoal",
+false
+],
+"5580": [
+324,
+"Torkoal",
+true
+],
+"581": [
+325,
+"Spoink",
+false
+],
+"5581": [
+325,
+"Spoink",
+true
+],
+"582": [
+326,
+"Grumpig",
+false
+],
+"5582": [
+326,
+"Grumpig",
+true
+],
+"583": [
+327,
+"Spinda",
+false
+],
+"5583": [
+327,
+"Spinda",
+true
+],
+"584": [
+328,
+"Trapinch",
+false
+],
+"5584": [
+328,
+"Trapinch",
+true
+],
+"585": [
+329,
+"Vibrava",
+false
+],
+"5585": [
+329,
+"Vibrava",
+true
+],
+"586": [
+330,
+"Flygon",
+false
+],
+"5586": [
+330,
+"Flygon",
+true
+],
+"587": [
+331,
+"Cacnea",
+false
+],
+"5587": [
+331,
+"Cacnea",
+true
+],
+"588": [
+332,
+"Cacturne",
+false
+],
+"5588": [
+332,
+"Cacturne",
+true
+],
+"589": [
+333,
+"Swablu",
+false
+],
+"5589": [
+333,
+"Swablu",
+true
+],
+"590": [
+334,
+"Altaria",
+false
+],
+"5590": [
+334,
+"Altaria",
+true
+],
+"591": [
+335,
+"Zangoose",
+false
+],
+"5591": [
+335,
+"Zangoose",
+true
+],
+"592": [
+336,
+"Seviper",
+false
+],
+"5592": [
+336,
+"Seviper",
+true
+],
+"593": [
+337,
+"Lunatone",
+false
+],
+"5593": [
+337,
+"Lunatone",
+true
+],
+"594": [
+338,
+"Solrock",
+false
+],
+"5594": [
+338,
+"Solrock",
+true
+],
+"595": [
+339,
+"Barboach",
+false
+],
+"5595": [
+339,
+"Barboach",
+true
+],
+"596": [
+340,
+"Whiscash",
+false
+],
+"5596": [
+340,
+"Whiscash",
+true
+],
+"597": [
+341,
+"Corphish",
+false
+],
+"5597": [
+341,
+"Corphish",
+true
+],
+"598": [
+342,
+"Crawdaunt",
+false
+],
+"5598": [
+342,
+"Crawdaunt",
+true
+],
+"599": [
+343,
+"Baltoy",
+false
+],
+"5599": [
+343,
+"Baltoy",
+true
+],
+"600": [
+344,
+"Claydol",
+false
+],
+"5600": [
+344,
+"Claydol",
+true
+],
+"601": [
+345,
+"Lileep",
+false
+],
+"5601": [
+345,
+"Lileep",
+true
+],
+"602": [
+346,
+"Cradily",
+false
+],
+"5602": [
+346,
+"Cradily",
+true
+],
+"603": [
+347,
+"Anorith",
+false
+],
+"5603": [
+347,
+"Anorith",
+true
+],
+"604": [
+348,
+"Armaldo",
+false
+],
+"5604": [
+348,
+"Armaldo",
+true
+],
+"605": [
+349,
+"Feebas",
+false
+],
+"5605": [
+349,
+"Feebas",
+true
+],
+"606": [
+350,
+"Milotic",
+false
+],
+"5606": [
+350,
+"Milotic",
+true
+],
+"607": [
+351,
+"Castform",
+false
+],
+"5607": [
+351,
+"Castform",
+true
+],
+"608": [
+352,
+"Kecleon",
+false
+],
+"5608": [
+352,
+"Kecleon",
+true
+],
+"609": [
+353,
+"Shuppet",
+false
+],
+"5609": [
+353,
+"Shuppet",
+true
+],
+"610": [
+354,
+"Banette",
+false
+],
+"5610": [
+354,
+"Banette",
+true
+],
+"611": [
+355,
+"Duskull",
+false
+],
+"5611": [
+355,
+"Duskull",
+true
+],
+"612": [
+356,
+"Dusclops",
+false
+],
+"5612": [
+356,
+"Dusclops",
+true
+],
+"613": [
+357,
+"Tropius",
+false
+],
+"5613": [
+357,
+"Tropius",
+true
+],
+"614": [
+358,
+"Chimecho",
+false
+],
+"5614": [
+358,
+"Chimecho",
+true
+],
+"615": [
+359,
+"Absol",
+false
+],
+"5615": [
+359,
+"Absol",
+true
+],
+"616": [
+360,
+"Wynaut",
+false
+],
+"5616": [
+360,
+"Wynaut",
+true
+],
+"617": [
+361,
+"Snorunt",
+false
+],
+"5617": [
+361,
+"Snorunt",
+true
+],
+"618": [
+362,
+"Glalie",
+false
+],
+"5618": [
+362,
+"Glalie",
+true
+],
+"619": [
+363,
+"Spheal",
+false
+],
+"5619": [
+363,
+"Spheal",
+true
+],
+"620": [
+364,
+"Sealeo",
+false
+],
+"5620": [
+364,
+"Sealeo",
+true
+],
+"621": [
+365,
+"Walrein",
+false
+],
+"5621": [
+365,
+"Walrein",
+true
+],
+"622": [
+366,
+"Clamperl",
+false
+],
+"5622": [
+366,
+"Clamperl",
+true
+],
+"623": [
+367,
+"Huntail",
+false
+],
+"5623": [
+367,
+"Huntail",
+true
+],
+"624": [
+368,
+"Gorebyss",
+false
+],
+"5624": [
+368,
+"Gorebyss",
+true
+],
+"625": [
+369,
+"Relicanth",
+false
+],
+"5625": [
+369,
+"Relicanth",
+true
+],
+"626": [
+370,
+"Luvdisc",
+false
+],
+"5626": [
+370,
+"Luvdisc",
+true
+],
+"627": [
+371,
+"Bagon",
+false
+],
+"5627": [
+371,
+"Bagon",
+true
+],
+"628": [
+372,
+"Shelgon",
+false
+],
+"5628": [
+372,
+"Shelgon",
+true
+],
+"629": [
+373,
+"Salamence",
+false
+],
+"5629": [
+373,
+"Salamence",
+true
+],
+"630": [
+374,
+"Beldum",
+false
+],
+"5630": [
+374,
+"Beldum",
+true
+],
+"631": [
+375,
+"Metang",
+false
+],
+"5631": [
+375,
+"Metang",
+true
+],
+"632": [
+376,
+"Metagross",
+false
+],
+"5632": [
+376,
+"Metagross",
+true
+],
+"633": [
+377,
+"Regirock",
+false
+],
+"5633": [
+377,
+"Regirock",
+true
+],
+"634": [
+378,
+"Regice",
+false
+],
+"5634": [
+378,
+"Regice",
+true
+],
+"635": [
+379,
+"Registeel",
+false
+],
+"5635": [
+379,
+"Registeel",
+true
+],
+"636": [
+380,
+"Latias",
+false
+],
+"5636": [
+380,
+"Latias",
+true
+],
+"637": [
+381,
+"Latios",
+false
+],
+"5637": [
+381,
+"Latios",
+true
+],
+"638": [
+382,
+"Kyogre",
+false
+],
+"5638": [
+382,
+"Kyogre",
+true
+],
+"639": [
+383,
+"Groudon",
+false
+],
+"5639": [
+383,
+"Groudon",
+true
+],
+"640": [
+384,
+"Rayquaza",
+false
+],
+"5640": [
+384,
+"Rayquaza",
+true
+],
+"641": [
+385,
+"Jirachi",
+false
+],
+"5641": [
+385,
+"Jirachi",
+true
+],
+"642": [
+386,
+"Deoxys",
+false
+],
+"5642": [
+386,
+"Deoxys",
+true
+],
+"643": [
+387,
+"Turtwig",
+false
+],
+"5643": [
+387,
+"Turtwig",
+true
+],
+"644": [
+388,
+"Grotle",
+false
+],
+"5644": [
+388,
+"Grotle",
+true
+],
+"645": [
+389,
+"Torterra",
+false
+],
+"5645": [
+389,
+"Torterra",
+true
+],
+"646": [
+390,
+"Chimchar",
+false
+],
+"5646": [
+390,
+"Chimchar",
+true
+],
+"647": [
+391,
+"Monferno",
+false
+],
+"5647": [
+391,
+"Monferno",
+true
+],
+"648": [
+392,
+"Infernape",
+false
+],
+"5648": [
+392,
+"Infernape",
+true
+],
+"649": [
+393,
+"Piplup",
+false
+],
+"5649": [
+393,
+"Piplup",
+true
+],
+"650": [
+394,
+"Prinplup",
+false
+],
+"5650": [
+394,
+"Prinplup",
+true
+],
+"651": [
+395,
+"Empoleon",
+false
+],
+"5651": [
+395,
+"Empoleon",
+true
+],
+"652": [
+396,
+"Starly",
+false
+],
+"5652": [
+396,
+"Starly",
+true
+],
+"653": [
+397,
+"Staravia",
+false
+],
+"5653": [
+397,
+"Staravia",
+true
+],
+"654": [
+398,
+"Staraptor",
+false
+],
+"5654": [
+398,
+"Staraptor",
+true
+],
+"655": [
+399,
+"Bidoof",
+false
+],
+"5655": [
+399,
+"Bidoof",
+true
+],
+"656": [
+400,
+"Bibarel",
+false
+],
+"5656": [
+400,
+"Bibarel",
+true
+],
+"657": [
+401,
+"Kricketot",
+false
+],
+"5657": [
+401,
+"Kricketot",
+true
+],
+"658": [
+402,
+"Kricketune",
+false
+],
+"5658": [
+402,
+"Kricketune",
+true
+],
+"659": [
+403,
+"Shinx",
+false
+],
+"5659": [
+403,
+"Shinx",
+true
+],
+"660": [
+404,
+"Luxio",
+false
+],
+"5660": [
+404,
+"Luxio",
+true
+],
+"661": [
+405,
+"Luxray",
+false
+],
+"5661": [
+405,
+"Luxray",
+true
+],
+"662": [
+406,
+"Budew",
+false
+],
+"5662": [
+406,
+"Budew",
+true
+],
+"663": [
+407,
+"Roserade",
+false
+],
+"5663": [
+407,
+"Roserade",
+true
+],
+"664": [
+408,
+"Cranidos",
+false
+],
+"5664": [
+408,
+"Cranidos",
+true
+],
+"665": [
+409,
+"Rampardos",
+false
+],
+"5665": [
+409,
+"Rampardos",
+true
+],
+"666": [
+410,
+"Shieldon",
+false
+],
+"5666": [
+410,
+"Shieldon",
+true
+],
+"667": [
+411,
+"Bastiodon",
+false
+],
+"5667": [
+411,
+"Bastiodon",
+true
+],
+"668": [
+412,
+"Burmy",
+false
+],
+"5668": [
+412,
+"Burmy",
+true
+],
+"669": [
+413,
+"Wormadam",
+false
+],
+"5669": [
+413,
+"Wormadam",
+true
+],
+"670": [
+414,
+"Mothim",
+false
+],
+"5670": [
+414,
+"Mothim",
+true
+],
+"671": [
+415,
+"Combee",
+false
+],
+"5671": [
+415,
+"Combee",
+true
+],
+"672": [
+416,
+"Vespiquen",
+false
+],
+"5672": [
+416,
+"Vespiquen",
+true
+],
+"673": [
+417,
+"Pachirisu",
+false
+],
+"5673": [
+417,
+"Pachirisu",
+true
+],
+"674": [
+418,
+"Buizel",
+false
+],
+"5674": [
+418,
+"Buizel",
+true
+],
+"675": [
+419,
+"Floatzel",
+false
+],
+"5675": [
+419,
+"Floatzel",
+true
+],
+"676": [
+420,
+"Cherubi",
+false
+],
+"5676": [
+420,
+"Cherubi",
+true
+],
+"677": [
+421,
+"Cherrim",
+false
+],
+"5677": [
+421,
+"Cherrim",
+true
+],
+"678": [
+422,
+"Shellos",
+false
+],
+"5678": [
+422,
+"Shellos",
+true
+],
+"679": [
+423,
+"Gastrodon",
+false
+],
+"5679": [
+423,
+"Gastrodon",
+true
+],
+"680": [
+424,
+"Ambipom",
+false
+],
+"5680": [
+424,
+"Ambipom",
+true
+],
+"681": [
+425,
+"Drifloon",
+false
+],
+"5681": [
+425,
+"Drifloon",
+true
+],
+"682": [
+426,
+"Drifblim",
+false
+],
+"5682": [
+426,
+"Drifblim",
+true
+],
+"683": [
+427,
+"Buneary",
+false
+],
+"5683": [
+427,
+"Buneary",
+true
+],
+"684": [
+428,
+"Lopunny",
+false
+],
+"5684": [
+428,
+"Lopunny",
+true
+],
+"685": [
+429,
+"Mismagius",
+false
+],
+"5685": [
+429,
+"Mismagius",
+true
+],
+"686": [
+430,
+"Honchkrow",
+false
+],
+"5686": [
+430,
+"Honchkrow",
+true
+],
+"687": [
+431,
+"Glameow",
+false
+],
+"5687": [
+431,
+"Glameow",
+true
+],
+"688": [
+432,
+"Purugly",
+false
+],
+"5688": [
+432,
+"Purugly",
+true
+],
+"689": [
+433,
+"Chingling",
+false
+],
+"5689": [
+433,
+"Chingling",
+true
+],
+"690": [
+434,
+"Stunky",
+false
+],
+"5690": [
+434,
+"Stunky",
+true
+],
+"691": [
+435,
+"Skuntank",
+false
+],
+"5691": [
+435,
+"Skuntank",
+true
+],
+"692": [
+436,
+"Bronzor",
+false
+],
+"5692": [
+436,
+"Bronzor",
+true
+],
+"693": [
+437,
+"Bronzong",
+false
+],
+"5693": [
+437,
+"Bronzong",
+true
+],
+"694": [
+438,
+"Bonsly",
+false
+],
+"5694": [
+438,
+"Bonsly",
+true
+],
+"695": [
+439,
+"Mime Jr.",
+false
+],
+"5695": [
+439,
+"Mime Jr.",
+true
+],
+"696": [
+440,
+"Happiny",
+false
+],
+"5696": [
+440,
+"Happiny",
+true
+],
+"697": [
+441,
+"Chatot",
+false
+],
+"5697": [
+441,
+"Chatot",
+true
+],
+"698": [
+442,
+"Spiritomb",
+false
+],
+"5698": [
+442,
+"Spiritomb",
+true
+],
+"699": [
+443,
+"Gible",
+false
+],
+"5699": [
+443,
+"Gible",
+true
+],
+"700": [
+444,
+"Gabite",
+false
+],
+"5700": [
+444,
+"Gabite",
+true
+],
+"701": [
+445,
+"Garchomp",
+false
+],
+"5701": [
+445,
+"Garchomp",
+true
+],
+"702": [
+446,
+"Munchlax",
+false
+],
+"5702": [
+446,
+"Munchlax",
+true
+],
+"703": [
+447,
+"Riolu",
+false
+],
+"5703": [
+447,
+"Riolu",
+true
+],
+"704": [
+448,
+"Lucario",
+false
+],
+"5704": [
+448,
+"Lucario",
+true
+],
+"705": [
+449,
+"Hippopotas",
+false
+],
+"5705": [
+449,
+"Hippopotas",
+true
+],
+"706": [
+450,
+"Hippowdon",
+false
+],
+"5706": [
+450,
+"Hippowdon",
+true
+],
+"707": [
+451,
+"Skorupi",
+false
+],
+"5707": [
+451,
+"Skorupi",
+true
+],
+"708": [
+452,
+"Drapion",
+false
+],
+"5708": [
+452,
+"Drapion",
+true
+],
+"709": [
+453,
+"Croagunk",
+false
+],
+"5709": [
+453,
+"Croagunk",
+true
+],
+"710": [
+454,
+"Toxicroak",
+false
+],
+"5710": [
+454,
+"Toxicroak",
+true
+],
+"711": [
+455,
+"Carnivine",
+false
+],
+"5711": [
+455,
+"Carnivine",
+true
+],
+"712": [
+456,
+"Finneon",
+false
+],
+"5712": [
+456,
+"Finneon",
+true
+],
+"713": [
+457,
+"Lumineon",
+false
+],
+"5713": [
+457,
+"Lumineon",
+true
+],
+"714": [
+458,
+"Mantyke",
+false
+],
+"5714": [
+458,
+"Mantyke",
+true
+],
+"715": [
+459,
+"Snover",
+false
+],
+"5715": [
+459,
+"Snover",
+true
+],
+"716": [
+460,
+"Abomasnow",
+false
+],
+"5716": [
+460,
+"Abomasnow",
+true
+],
+"717": [
+461,
+"Weavile",
+false
+],
+"5717": [
+461,
+"Weavile",
+true
+],
+"718": [
+462,
+"Magnezone",
+false
+],
+"5718": [
+462,
+"Magnezone",
+true
+],
+"719": [
+463,
+"Lickilicky",
+false
+],
+"5719": [
+463,
+"Lickilicky",
+true
+],
+"720": [
+464,
+"Rhyperior",
+false
+],
+"5720": [
+464,
+"Rhyperior",
+true
+],
+"721": [
+465,
+"Tangrowth",
+false
+],
+"5721": [
+465,
+"Tangrowth",
+true
+],
+"722": [
+466,
+"Electivire",
+false
+],
+"5722": [
+466,
+"Electivire",
+true
+],
+"723": [
+467,
+"Magmortar",
+false
+],
+"5723": [
+467,
+"Magmortar",
+true
+],
+"724": [
+468,
+"Togekiss",
+false
+],
+"5724": [
+468,
+"Togekiss",
+true
+],
+"725": [
+469,
+"Yanmega",
+false
+],
+"5725": [
+469,
+"Yanmega",
+true
+],
+"726": [
+470,
+"Leafeon",
+false
+],
+"5726": [
+470,
+"Leafeon",
+true
+],
+"727": [
+471,
+"Glaceon",
+false
+],
+"5727": [
+471,
+"Glaceon",
+true
+],
+"728": [
+472,
+"Gliscor",
+false
+],
+"5728": [
+472,
+"Gliscor",
+true
+],
+"729": [
+473,
+"Mamoswine",
+false
+],
+"5729": [
+473,
+"Mamoswine",
+true
+],
+"730": [
+474,
+"Porygon-Z",
+false
+],
+"5730": [
+474,
+"Porygon-Z",
+true
+],
+"731": [
+475,
+"Gallade",
+false
+],
+"5731": [
+475,
+"Gallade",
+true
+],
+"732": [
+476,
+"Probopass",
+false
+],
+"5732": [
+476,
+"Probopass",
+true
+],
+"733": [
+477,
+"Dusknoir",
+false
+],
+"5733": [
+477,
+"Dusknoir",
+true
+],
+"734": [
+478,
+"Froslass",
+false
+],
+"5734": [
+478,
+"Froslass",
+true
+],
+"735": [
+479,
+"Rotom",
+false
+],
+"5735": [
+479,
+"Rotom",
+true
+],
+"736": [
+480,
+"Uxie",
+false
+],
+"5736": [
+480,
+"Uxie",
+true
+],
+"737": [
+481,
+"Mesprit",
+false
+],
+"5737": [
+481,
+"Mesprit",
+true
+],
+"738": [
+482,
+"Azelf",
+false
+],
+"5738": [
+482,
+"Azelf",
+true
+],
+"739": [
+483,
+"Dialga",
+false
+],
+"5739": [
+483,
+"Dialga",
+true
+],
+"740": [
+484,
+"Palkia",
+false
+],
+"5740": [
+484,
+"Palkia",
+true
+],
+"741": [
+485,
+"Heatran",
+false
+],
+"5741": [
+485,
+"Heatran",
+true
+],
+"742": [
+486,
+"Regigigas",
+false
+],
+"5742": [
+486,
+"Regigigas",
+true
+],
+"743": [
+487,
+"Giratina",
+false
+],
+"5743": [
+487,
+"Giratina",
+true
+],
+"744": [
+488,
+"Cresselia",
+false
+],
+"5744": [
+488,
+"Cresselia",
+true
+],
+"745": [
+489,
+"Phione",
+false
+],
+"5745": [
+489,
+"Phione",
+true
+],
+"746": [
+490,
+"Manaphy",
+false
+],
+"5746": [
+490,
+"Manaphy",
+true
+],
+"747": [
+491,
+"Darkrai",
+false
+],
+"5747": [
+491,
+"Darkrai",
+true
+],
+"748": [
+492,
+"Shaymin",
+false
+],
+"5748": [
+492,
+"Shaymin",
+true
+],
+"749": [
+493,
+"Arceus",
+false
+],
+"5749": [
+493,
+"Arceus",
+true
+],
+"750": [
+494,
+"Victini",
+false
+],
+"5750": [
+494,
+"Victini",
+true
+],
+"751": [
+495,
+"Snivy",
+false
+],
+"5751": [
+495,
+"Snivy",
+true
+],
+"752": [
+496,
+"Servine",
+false
+],
+"5752": [
+496,
+"Servine",
+true
+],
+"753": [
+497,
+"Serperior",
+false
+],
+"5753": [
+497,
+"Serperior",
+true
+],
+"754": [
+498,
+"Tepig",
+false
+],
+"5754": [
+498,
+"Tepig",
+true
+],
+"755": [
+499,
+"Pignite",
+false
+],
+"5755": [
+499,
+"Pignite",
+true
+],
+"756": [
+500,
+"Emboar",
+false
+],
+"5756": [
+500,
+"Emboar",
+true
+],
+"757": [
+501,
+"Oshawott",
+false
+],
+"5757": [
+501,
+"Oshawott",
+true
+],
+"758": [
+502,
+"Dewott",
+false
+],
+"5758": [
+502,
+"Dewott",
+true
+],
+"759": [
+503,
+"Samurott",
+false
+],
+"5759": [
+503,
+"Samurott",
+true
+],
+"760": [
+504,
+"Patrat",
+false
+],
+"5760": [
+504,
+"Patrat",
+true
+],
+"761": [
+505,
+"Watchog",
+false
+],
+"5761": [
+505,
+"Watchog",
+true
+],
+"762": [
+506,
+"Lillipup",
+false
+],
+"5762": [
+506,
+"Lillipup",
+true
+],
+"763": [
+507,
+"Herdier",
+false
+],
+"5763": [
+507,
+"Herdier",
+true
+],
+"764": [
+508,
+"Stoutland",
+false
+],
+"5764": [
+508,
+"Stoutland",
+true
+],
+"765": [
+509,
+"Purrloin",
+false
+],
+"5765": [
+509,
+"Purrloin",
+true
+],
+"766": [
+510,
+"Liepard",
+false
+],
+"5766": [
+510,
+"Liepard",
+true
+],
+"767": [
+511,
+"Pansage",
+false
+],
+"5767": [
+511,
+"Pansage",
+true
+],
+"768": [
+512,
+"Simisage",
+false
+],
+"5768": [
+512,
+"Simisage",
+true
+],
+"769": [
+513,
+"Pansear",
+false
+],
+"5769": [
+513,
+"Pansear",
+true
+],
+"770": [
+514,
+"Simisear",
+false
+],
+"5770": [
+514,
+"Simisear",
+true
+],
+"771": [
+515,
+"Panpour",
+false
+],
+"5771": [
+515,
+"Panpour",
+true
+],
+"772": [
+516,
+"Simipour",
+false
+],
+"5772": [
+516,
+"Simipour",
+true
+],
+"773": [
+517,
+"Munna",
+false
+],
+"5773": [
+517,
+"Munna",
+true
+],
+"774": [
+518,
+"Musharna",
+false
+],
+"5774": [
+518,
+"Musharna",
+true
+],
+"775": [
+519,
+"Pidove",
+false
+],
+"5775": [
+519,
+"Pidove",
+true
+],
+"776": [
+520,
+"Tranquill",
+false
+],
+"5776": [
+520,
+"Tranquill",
+true
+],
+"777": [
+521,
+"Unfezant",
+false
+],
+"5777": [
+521,
+"Unfezant",
+true
+],
+"778": [
+522,
+"Blitzle",
+false
+],
+"5778": [
+522,
+"Blitzle",
+true
+],
+"779": [
+523,
+"Zebstrika",
+false
+],
+"5779": [
+523,
+"Zebstrika",
+true
+],
+"780": [
+524,
+"Roggenrola",
+false
+],
+"5780": [
+524,
+"Roggenrola",
+true
+],
+"781": [
+525,
+"Boldore",
+false
+],
+"5781": [
+525,
+"Boldore",
+true
+],
+"782": [
+526,
+"Gigalith",
+false
+],
+"5782": [
+526,
+"Gigalith",
+true
+],
+"783": [
+527,
+"Woobat",
+false
+],
+"5783": [
+527,
+"Woobat",
+true
+],
+"784": [
+528,
+"Swoobat",
+false
+],
+"5784": [
+528,
+"Swoobat",
+true
+],
+"785": [
+529,
+"Drilbur",
+false
+],
+"5785": [
+529,
+"Drilbur",
+true
+],
+"786": [
+530,
+"Excadrill",
+false
+],
+"5786": [
+530,
+"Excadrill",
+true
+],
+"787": [
+531,
+"Audino",
+false
+],
+"5787": [
+531,
+"Audino",
+true
+],
+"788": [
+532,
+"Timburr",
+false
+],
+"5788": [
+532,
+"Timburr",
+true
+],
+"789": [
+533,
+"Gurdurr",
+false
+],
+"5789": [
+533,
+"Gurdurr",
+true
+],
+"790": [
+534,
+"Conkeldurr",
+false
+],
+"5790": [
+534,
+"Conkeldurr",
+true
+],
+"791": [
+535,
+"Tympole",
+false
+],
+"5791": [
+535,
+"Tympole",
+true
+],
+"792": [
+536,
+"Palpitoad",
+false
+],
+"5792": [
+536,
+"Palpitoad",
+true
+],
+"793": [
+537,
+"Seismitoad",
+false
+],
+"5793": [
+537,
+"Seismitoad",
+true
+],
+"794": [
+538,
+"Throh",
+false
+],
+"5794": [
+538,
+"Throh",
+true
+],
+"795": [
+539,
+"Sawk",
+false
+],
+"5795": [
+539,
+"Sawk",
+true
+],
+"796": [
+540,
+"Sewaddle",
+false
+],
+"5796": [
+540,
+"Sewaddle",
+true
+],
+"797": [
+541,
+"Swadloon",
+false
+],
+"5797": [
+541,
+"Swadloon",
+true
+],
+"798": [
+542,
+"Leavanny",
+false
+],
+"5798": [
+542,
+"Leavanny",
+true
+],
+"799": [
+543,
+"Venipede",
+false
+],
+"5799": [
+543,
+"Venipede",
+true
+],
+"800": [
+544,
+"Whirlipede",
+false
+],
+"5800": [
+544,
+"Whirlipede",
+true
+],
+"801": [
+545,
+"Scolipede",
+false
+],
+"5801": [
+545,
+"Scolipede",
+true
+],
+"802": [
+546,
+"Cottonee",
+false
+],
+"5802": [
+546,
+"Cottonee",
+true
+],
+"803": [
+547,
+"Whimsicott",
+false
+],
+"5803": [
+547,
+"Whimsicott",
+true
+],
+"804": [
+548,
+"Petilil",
+false
+],
+"5804": [
+548,
+"Petilil",
+true
+],
+"805": [
+549,
+"Lilligant",
+false
+],
+"5805": [
+549,
+"Lilligant",
+true
+],
+"806": [
+550,
+"Basculin",
+false
+],
+"5806": [
+550,
+"Basculin",
+true
+],
+"807": [
+551,
+"Sandile",
+false
+],
+"5807": [
+551,
+"Sandile",
+true
+],
+"808": [
+552,
+"Krokorok",
+false
+],
+"5808": [
+552,
+"Krokorok",
+true
+],
+"809": [
+553,
+"Krookodile",
+false
+],
+"5809": [
+553,
+"Krookodile",
+true
+],
+"810": [
+554,
+"Darumaka",
+false
+],
+"5810": [
+554,
+"Darumaka",
+true
+],
+"811": [
+555,
+"Darmanitan",
+false
+],
+"5811": [
+555,
+"Darmanitan",
+true
+],
+"812": [
+556,
+"Maractus",
+false
+],
+"5812": [
+556,
+"Maractus",
+true
+],
+"813": [
+557,
+"Dwebble",
+false
+],
+"5813": [
+557,
+"Dwebble",
+true
+],
+"814": [
+558,
+"Crustle",
+false
+],
+"5814": [
+558,
+"Crustle",
+true
+],
+"815": [
+559,
+"Scraggy",
+false
+],
+"5815": [
+559,
+"Scraggy",
+true
+],
+"816": [
+560,
+"Scrafty",
+false
+],
+"5816": [
+560,
+"Scrafty",
+true
+],
+"817": [
+561,
+"Sigilyph",
+false
+],
+"5817": [
+561,
+"Sigilyph",
+true
+],
+"818": [
+562,
+"Yamask",
+false
+],
+"5818": [
+562,
+"Yamask",
+true
+],
+"819": [
+563,
+"Cofagrigus",
+false
+],
+"5819": [
+563,
+"Cofagrigus",
+true
+],
+"820": [
+564,
+"Tirtouga",
+false
+],
+"5820": [
+564,
+"Tirtouga",
+true
+],
+"821": [
+565,
+"Carracosta",
+false
+],
+"5821": [
+565,
+"Carracosta",
+true
+],
+"822": [
+566,
+"Archen",
+false
+],
+"5822": [
+566,
+"Archen",
+true
+],
+"823": [
+567,
+"Archeops",
+false
+],
+"5823": [
+567,
+"Archeops",
+true
+],
+"824": [
+568,
+"Trubbish",
+false
+],
+"5824": [
+568,
+"Trubbish",
+true
+],
+"825": [
+569,
+"Garbodor",
+false
+],
+"5825": [
+569,
+"Garbodor",
+true
+],
+"826": [
+570,
+"Zorua",
+false
+],
+"5826": [
+570,
+"Zorua",
+true
+],
+"827": [
+571,
+"Zoroark",
+false
+],
+"5827": [
+571,
+"Zoroark",
+true
+],
+"828": [
+572,
+"Minccino",
+false
+],
+"5828": [
+572,
+"Minccino",
+true
+],
+"829": [
+573,
+"Cinccino",
+false
+],
+"5829": [
+573,
+"Cinccino",
+true
+],
+"830": [
+574,
+"Gothita",
+false
+],
+"5830": [
+574,
+"Gothita",
+true
+],
+"831": [
+575,
+"Gothorita",
+false
+],
+"5831": [
+575,
+"Gothorita",
+true
+],
+"832": [
+576,
+"Gothitelle",
+false
+],
+"5832": [
+576,
+"Gothitelle",
+true
+],
+"833": [
+577,
+"Solosis",
+false
+],
+"5833": [
+577,
+"Solosis",
+true
+],
+"834": [
+578,
+"Duosion",
+false
+],
+"5834": [
+578,
+"Duosion",
+true
+],
+"835": [
+579,
+"Reuniclus",
+false
+],
+"5835": [
+579,
+"Reuniclus",
+true
+],
+"836": [
+580,
+"Ducklett",
+false
+],
+"5836": [
+580,
+"Ducklett",
+true
+],
+"837": [
+581,
+"Swanna",
+false
+],
+"5837": [
+581,
+"Swanna",
+true
+],
+"838": [
+582,
+"Vanillite",
+false
+],
+"5838": [
+582,
+"Vanillite",
+true
+],
+"839": [
+583,
+"Vanillish",
+false
+],
+"5839": [
+583,
+"Vanillish",
+true
+],
+"840": [
+584,
+"Vanilluxe",
+false
+],
+"5840": [
+584,
+"Vanilluxe",
+true
+],
+"841": [
+585,
+"Deerling",
+false
+],
+"5841": [
+585,
+"Deerling",
+true
+],
+"842": [
+586,
+"Sawsbuck",
+false
+],
+"5842": [
+586,
+"Sawsbuck",
+true
+],
+"843": [
+587,
+"Emolga",
+false
+],
+"5843": [
+587,
+"Emolga",
+true
+],
+"844": [
+588,
+"Karrablast",
+false
+],
+"5844": [
+588,
+"Karrablast",
+true
+],
+"845": [
+589,
+"Escavalier",
+false
+],
+"5845": [
+589,
+"Escavalier",
+true
+],
+"846": [
+590,
+"Foongus",
+false
+],
+"5846": [
+590,
+"Foongus",
+true
+],
+"847": [
+591,
+"Amoonguss",
+false
+],
+"5847": [
+591,
+"Amoonguss",
+true
+],
+"848": [
+592,
+"Frillish",
+false
+],
+"5848": [
+592,
+"Frillish",
+true
+],
+"849": [
+593,
+"Jellicent",
+false
+],
+"5849": [
+593,
+"Jellicent",
+true
+],
+"850": [
+594,
+"Alomomola",
+false
+],
+"5850": [
+594,
+"Alomomola",
+true
+],
+"851": [
+595,
+"Joltik",
+false
+],
+"5851": [
+595,
+"Joltik",
+true
+],
+"852": [
+596,
+"Galvantula",
+false
+],
+"5852": [
+596,
+"Galvantula",
+true
+],
+"853": [
+597,
+"Ferroseed",
+false
+],
+"5853": [
+597,
+"Ferroseed",
+true
+],
+"854": [
+598,
+"Ferrothorn",
+false
+],
+"5854": [
+598,
+"Ferrothorn",
+true
+],
+"855": [
+599,
+"Klink",
+false
+],
+"5855": [
+599,
+"Klink",
+true
+],
+"856": [
+600,
+"Klang",
+false
+],
+"5856": [
+600,
+"Klang",
+true
+],
+"857": [
+601,
+"Klinklang",
+false
+],
+"5857": [
+601,
+"Klinklang",
+true
+],
+"858": [
+602,
+"Tynamo",
+false
+],
+"5858": [
+602,
+"Tynamo",
+true
+],
+"859": [
+603,
+"Eelektrik",
+false
+],
+"5859": [
+603,
+"Eelektrik",
+true
+],
+"860": [
+604,
+"Eelektross",
+false
+],
+"5860": [
+604,
+"Eelektross",
+true
+],
+"861": [
+605,
+"Elgyem",
+false
+],
+"5861": [
+605,
+"Elgyem",
+true
+],
+"862": [
+606,
+"Beheeyem",
+false
+],
+"5862": [
+606,
+"Beheeyem",
+true
+],
+"863": [
+607,
+"Litwick",
+false
+],
+"5863": [
+607,
+"Litwick",
+true
+],
+"864": [
+608,
+"Lampent",
+false
+],
+"5864": [
+608,
+"Lampent",
+true
+],
+"865": [
+609,
+"Chandelure",
+false
+],
+"5865": [
+609,
+"Chandelure",
+true
+],
+"866": [
+610,
+"Axew",
+false
+],
+"5866": [
+610,
+"Axew",
+true
+],
+"867": [
+611,
+"Fraxure",
+false
+],
+"5867": [
+611,
+"Fraxure",
+true
+],
+"868": [
+612,
+"Haxorus",
+false
+],
+"5868": [
+612,
+"Haxorus",
+true
+],
+"869": [
+613,
+"Cubchoo",
+false
+],
+"5869": [
+613,
+"Cubchoo",
+true
+],
+"870": [
+614,
+"Beartic",
+false
+],
+"5870": [
+614,
+"Beartic",
+true
+],
+"871": [
+615,
+"Cryogonal",
+false
+],
+"5871": [
+615,
+"Cryogonal",
+true
+],
+"872": [
+616,
+"Shelmet",
+false
+],
+"5872": [
+616,
+"Shelmet",
+true
+],
+"873": [
+617,
+"Accelgor",
+false
+],
+"5873": [
+617,
+"Accelgor",
+true
+],
+"874": [
+618,
+"Stunfisk",
+false
+],
+"5874": [
+618,
+"Stunfisk",
+true
+],
+"875": [
+619,
+"Mienfoo",
+false
+],
+"5875": [
+619,
+"Mienfoo",
+true
+],
+"876": [
+620,
+"Mienshao",
+false
+],
+"5876": [
+620,
+"Mienshao",
+true
+],
+"877": [
+621,
+"Druddigon",
+false
+],
+"5877": [
+621,
+"Druddigon",
+true
+],
+"878": [
+622,
+"Golett",
+false
+],
+"5878": [
+622,
+"Golett",
+true
+],
+"879": [
+623,
+"Golurk",
+false
+],
+"5879": [
+623,
+"Golurk",
+true
+],
+"880": [
+624,
+"Pawniard",
+false
+],
+"5880": [
+624,
+"Pawniard",
+true
+],
+"881": [
+625,
+"Bisharp",
+false
+],
+"5881": [
+625,
+"Bisharp",
+true
+],
+"882": [
+626,
+"Bouffalant",
+false
+],
+"5882": [
+626,
+"Bouffalant",
+true
+],
+"883": [
+627,
+"Rufflet",
+false
+],
+"5883": [
+627,
+"Rufflet",
+true
+],
+"884": [
+628,
+"Braviary",
+false
+],
+"5884": [
+628,
+"Braviary",
+true
+],
+"885": [
+629,
+"Vullaby",
+false
+],
+"5885": [
+629,
+"Vullaby",
+true
+],
+"886": [
+630,
+"Mandibuzz",
+false
+],
+"5886": [
+630,
+"Mandibuzz",
+true
+],
+"887": [
+631,
+"Heatmor",
+false
+],
+"5887": [
+631,
+"Heatmor",
+true
+],
+"888": [
+632,
+"Durant",
+false
+],
+"5888": [
+632,
+"Durant",
+true
+],
+"889": [
+633,
+"Deino",
+false
+],
+"5889": [
+633,
+"Deino",
+true
+],
+"890": [
+634,
+"Zweilous",
+false
+],
+"5890": [
+634,
+"Zweilous",
+true
+],
+"891": [
+635,
+"Hydreigon",
+false
+],
+"5891": [
+635,
+"Hydreigon",
+true
+],
+"892": [
+636,
+"Larvesta",
+false
+],
+"5892": [
+636,
+"Larvesta",
+true
+],
+"893": [
+637,
+"Volcarona",
+false
+],
+"5893": [
+637,
+"Volcarona",
+true
+],
+"894": [
+638,
+"Cobalion",
+false
+],
+"5894": [
+638,
+"Cobalion",
+true
+],
+"895": [
+639,
+"Terrakion",
+false
+],
+"5895": [
+639,
+"Terrakion",
+true
+],
+"896": [
+640,
+"Virizion",
+false
+],
+"5896": [
+640,
+"Virizion",
+true
+],
+"897": [
+641,
+"Tornadus",
+false
+],
+"5897": [
+641,
+"Tornadus",
+true
+],
+"898": [
+642,
+"Thundurus",
+false
+],
+"5898": [
+642,
+"Thundurus",
+true
+],
+"899": [
+643,
+"Reshiram",
+false
+],
+"5899": [
+643,
+"Reshiram",
+true
+],
+"900": [
+644,
+"Zekrom",
+false
+],
+"5900": [
+644,
+"Zekrom",
+true
+],
+"901": [
+645,
+"Landorus",
+false
+],
+"5901": [
+645,
+"Landorus",
+true
+],
+"902": [
+646,
+"Kyurem",
+false
+],
+"5902": [
+646,
+"Kyurem",
+true
+],
+"903": [
+647,
+"Keldeo",
+false
+],
+"5903": [
+647,
+"Keldeo",
+true
+],
+"904": [
+648,
+"Meloetta",
+false
+],
+"5904": [
+648,
+"Meloetta",
+true
+],
+"905": [
+649,
+"Genesect",
+false
+],
+"5905": [
+649,
+"Genesect",
+true
+],
+"906": [
+650,
+"Chespin",
+false
+],
+"5906": [
+650,
+"Chespin",
+true
+],
+"907": [
+651,
+"Quilladin",
+false
+],
+"5907": [
+651,
+"Quilladin",
+true
+],
+"908": [
+652,
+"Chesnaught",
+false
+],
+"5908": [
+652,
+"Chesnaught",
+true
+],
+"909": [
+653,
+"Fennekin",
+false
+],
+"5909": [
+653,
+"Fennekin",
+true
+],
+"910": [
+654,
+"Braixen",
+false
+],
+"5910": [
+654,
+"Braixen",
+true
+],
+"911": [
+655,
+"Delphox",
+false
+],
+"5911": [
+655,
+"Delphox",
+true
+],
+"912": [
+656,
+"Froakie",
+false
+],
+"5912": [
+656,
+"Froakie",
+true
+],
+"913": [
+657,
+"Frogadier",
+false
+],
+"5913": [
+657,
+"Frogadier",
+true
+],
+"914": [
+1085,
+"Greninja",
+false
+],
+"5914": [
+1085,
+"Greninja",
+true
+],
+"915": [
+659,
+"Bunnelby",
+false
+],
+"5915": [
+659,
+"Bunnelby",
+true
+],
+"916": [
+660,
+"Diggersby",
+false
+],
+"5916": [
+660,
+"Diggersby",
+true
+],
+"917": [
+661,
+"Fletchling",
+false
+],
+"5917": [
+661,
+"Fletchling",
+true
+],
+"918": [
+662,
+"Fletchinder",
+false
+],
+"5918": [
+662,
+"Fletchinder",
+true
+],
+"919": [
+663,
+"Talonflame",
+false
+],
+"5919": [
+663,
+"Talonflame",
+true
+],
+"920": [
+664,
+"Scatterbug",
+false
+],
+"5920": [
+664,
+"Scatterbug",
+true
+],
+"921": [
+665,
+"Spewpa",
+false
+],
+"5921": [
+665,
+"Spewpa",
+true
+],
+"922": [
+666,
+"Vivillon",
+false
+],
+"5922": [
+666,
+"Vivillon",
+true
+],
+"923": [
+667,
+"Litleo",
+false
+],
+"5923": [
+667,
+"Litleo",
+true
+],
+"924": [
+668,
+"Pyroar",
+false
+],
+"5924": [
+668,
+"Pyroar",
+true
+],
+"925": [
+669,
+"Flab?b?",
+false
+],
+"5925": [
+669,
+"Flab?b?",
+true
+],
+"926": [
+670,
+"Floette",
+false
+],
+"5926": [
+670,
+"Floette",
+true
+],
+"927": [
+671,
+"Florges",
+false
+],
+"5927": [
+671,
+"Florges",
+true
+],
+"928": [
+672,
+"Skiddo",
+false
+],
+"5928": [
+672,
+"Skiddo",
+true
+],
+"929": [
+673,
+"Gogoat",
+false
+],
+"5929": [
+673,
+"Gogoat",
+true
+],
+"930": [
+674,
+"Pancham",
+false
+],
+"5930": [
+674,
+"Pancham",
+true
+],
+"931": [
+675,
+"Pangoro",
+false
+],
+"5931": [
+675,
+"Pangoro",
+true
+],
+"932": [
+676,
+"Furfrou",
+false
+],
+"5932": [
+676,
+"Furfrou",
+true
+],
+"933": [
+677,
+"Espurr",
+false
+],
+"5933": [
+677,
+"Espurr",
+true
+],
+"934": [
+678,
+"Meowstic",
+false
+],
+"5934": [
+678,
+"Meowstic",
+true
+],
+"935": [
+679,
+"Honedge",
+false
+],
+"5935": [
+679,
+"Honedge",
+true
+],
+"936": [
+680,
+"Doublade",
+false
+],
+"5936": [
+680,
+"Doublade",
+true
+],
+"937": [
+681,
+"Aegislash",
+false
+],
+"5937": [
+681,
+"Aegislash",
+true
+],
+"938": [
+682,
+"Spritzee",
+false
+],
+"5938": [
+682,
+"Spritzee",
+true
+],
+"939": [
+683,
+"Aromatisse",
+false
+],
+"5939": [
+683,
+"Aromatisse",
+true
+],
+"940": [
+684,
+"Swirlix",
+false
+],
+"5940": [
+684,
+"Swirlix",
+true
+],
+"941": [
+685,
+"Slurpuff",
+false
+],
+"5941": [
+685,
+"Slurpuff",
+true
+],
+"942": [
+686,
+"Inkay",
+false
+],
+"5942": [
+686,
+"Inkay",
+true
+],
+"943": [
+687,
+"Malamar",
+false
+],
+"5943": [
+687,
+"Malamar",
+true
+],
+"944": [
+688,
+"Binacle",
+false
+],
+"5944": [
+688,
+"Binacle",
+true
+],
+"945": [
+689,
+"Barbaracle",
+false
+],
+"5945": [
+689,
+"Barbaracle",
+true
+],
+"946": [
+690,
+"Skrelp",
+false
+],
+"5946": [
+690,
+"Skrelp",
+true
+],
+"947": [
+691,
+"Dragalge",
+false
+],
+"5947": [
+691,
+"Dragalge",
+true
+],
+"948": [
+692,
+"Clauncher",
+false
+],
+"5948": [
+692,
+"Clauncher",
+true
+],
+"949": [
+693,
+"Clawitzer",
+false
+],
+"5949": [
+693,
+"Clawitzer",
+true
+],
+"950": [
+694,
+"Helioptile",
+false
+],
+"5950": [
+694,
+"Helioptile",
+true
+],
+"951": [
+695,
+"Heliolisk",
+false
+],
+"5951": [
+695,
+"Heliolisk",
+true
+],
+"952": [
+696,
+"Tyrunt",
+false
+],
+"5952": [
+696,
+"Tyrunt",
+true
+],
+"953": [
+697,
+"Tyrantrum",
+false
+],
+"5953": [
+697,
+"Tyrantrum",
+true
+],
+"954": [
+698,
+"Amaura",
+false
+],
+"5954": [
+698,
+"Amaura",
+true
+],
+"955": [
+699,
+"Aurorus",
+false
+],
+"5955": [
+699,
+"Aurorus",
+true
+],
+"956": [
+700,
+"Sylveon",
+false
+],
+"5956": [
+700,
+"Sylveon",
+true
+],
+"957": [
+701,
+"Hawlucha",
+false
+],
+"5957": [
+701,
+"Hawlucha",
+true
+],
+"958": [
+702,
+"Dedenne",
+false
+],
+"5958": [
+702,
+"Dedenne",
+true
+],
+"959": [
+703,
+"Carbink",
+false
+],
+"5959": [
+703,
+"Carbink",
+true
+],
+"960": [
+704,
+"Goomy",
+false
+],
+"5960": [
+704,
+"Goomy",
+true
+],
+"961": [
+705,
+"Sliggoo",
+false
+],
+"5961": [
+705,
+"Sliggoo",
+true
+],
+"962": [
+706,
+"Goodra",
+false
+],
+"5962": [
+706,
+"Goodra",
+true
+],
+"963": [
+707,
+"Klefki",
+false
+],
+"5963": [
+707,
+"Klefki",
+true
+],
+"964": [
+708,
+"Phantump",
+false
+],
+"5964": [
+708,
+"Phantump",
+true
+],
+"965": [
+709,
+"Trevenant",
+false
+],
+"5965": [
+709,
+"Trevenant",
+true
+],
+"966": [
+1132,
+"Pumpkaboo",
+false
+],
+"5966": [
+1132,
+"Pumpkaboo",
+true
+],
+"967": [
+1135,
+"Gourgeist",
+false
+],
+"5967": [
+1135,
+"Gourgeist",
+true
+],
+"968": [
+712,
+"Bergmite",
+false
+],
+"5968": [
+712,
+"Bergmite",
+true
+],
+"969": [
+713,
+"Avalugg",
+false
+],
+"5969": [
+713,
+"Avalugg",
+true
+],
+"970": [
+714,
+"Noibat",
+false
+],
+"5970": [
+714,
+"Noibat",
+true
+],
+"971": [
+715,
+"Noivern",
+false
+],
+"5971": [
+715,
+"Noivern",
+true
+],
+"1435": [
+716,
+"Xerneas",
+false
+],
+"6435": [
+716,
+"Xerneas",
+true
+],
+"973": [
+717,
+"Yveltal",
+false
+],
+"5973": [
+717,
+"Yveltal",
+true
+],
+"974": [
+1139,
+"Zygarde",
+false
+],
+"5974": [
+1139,
+"Zygarde",
+true
+],
+"975": [
+719,
+"Diancie",
+false
+],
+"5975": [
+719,
+"Diancie",
+true
+],
+"976": [
+720,
+"Hoopa",
+false
+],
+"5976": [
+720,
+"Hoopa",
+true
+],
+"977": [
+721,
+"Volcanion",
+false
+],
+"5977": [
+721,
+"Volcanion",
+true
+],
+"978": [
+722,
+"Rowlet",
+false
+],
+"5978": [
+722,
+"Rowlet",
+true
+],
+"979": [
+723,
+"Dartrix",
+false
+],
+"5979": [
+723,
+"Dartrix",
+true
+],
+"980": [
+724,
+"Decidueye",
+false
+],
+"5980": [
+724,
+"Decidueye",
+true
+],
+"981": [
+725,
+"Litten",
+false
+],
+"5981": [
+725,
+"Litten",
+true
+],
+"982": [
+726,
+"Torracat",
+false
+],
+"5982": [
+726,
+"Torracat",
+true
+],
+"983": [
+727,
+"Incineroar",
+false
+],
+"5983": [
+727,
+"Incineroar",
+true
+],
+"984": [
+728,
+"Popplio",
+false
+],
+"5984": [
+728,
+"Popplio",
+true
+],
+"985": [
+729,
+"Brionne",
+false
+],
+"5985": [
+729,
+"Brionne",
+true
+],
+"986": [
+730,
+"Primarina",
+false
+],
+"5986": [
+730,
+"Primarina",
+true
+],
+"987": [
+731,
+"Pikipek",
+false
+],
+"5987": [
+731,
+"Pikipek",
+true
+],
+"988": [
+732,
+"Trumbeak",
+false
+],
+"5988": [
+732,
+"Trumbeak",
+true
+],
+"989": [
+733,
+"Toucannon",
+false
+],
+"5989": [
+733,
+"Toucannon",
+true
+],
+"990": [
+734,
+"Yungoos",
+false
+],
+"5990": [
+734,
+"Yungoos",
+true
+],
+"991": [
+735,
+"Gumshoos",
+false
+],
+"5991": [
+735,
+"Gumshoos",
+true
+],
+"992": [
+736,
+"Grubbin",
+false
+],
+"5992": [
+736,
+"Grubbin",
+true
+],
+"993": [
+737,
+"Charjabug",
+false
+],
+"5993": [
+737,
+"Charjabug",
+true
+],
+"994": [
+738,
+"Vikavolt",
+false
+],
+"5994": [
+738,
+"Vikavolt",
+true
+],
+"995": [
+739,
+"Crabrawler",
+false
+],
+"5995": [
+739,
+"Crabrawler",
+true
+],
+"996": [
+740,
+"Crabominable",
+false
+],
+"5996": [
+740,
+"Crabominable",
+true
+],
+"997": [
+741,
+"Oricorio",
+false
+],
+"5997": [
+741,
+"Oricorio",
+true
+],
+"998": [
+742,
+"Cutiefly",
+false
+],
+"5998": [
+742,
+"Cutiefly",
+true
+],
+"999": [
+743,
+"Ribombee",
+false
+],
+"5999": [
+743,
+"Ribombee",
+true
+],
+"1000": [
+1145,
+"Rockruff",
+false
+],
+"6000": [
+1145,
+"Rockruff",
+true
+],
+"1001": [
+745,
+"Lycanroc",
+false
+],
+"6001": [
+745,
+"Lycanroc",
+true
+],
+"1002": [
+746,
+"Wishiwashi",
+false
+],
+"6002": [
+746,
+"Wishiwashi",
+true
+],
+"1003": [
+747,
+"Mareanie",
+false
+],
+"6003": [
+747,
+"Mareanie",
+true
+],
+"1004": [
+748,
+"Toxapex",
+false
+],
+"6004": [
+748,
+"Toxapex",
+true
+],
+"1005": [
+749,
+"Mudbray",
+false
+],
+"6005": [
+749,
+"Mudbray",
+true
+],
+"1006": [
+750,
+"Mudsdale",
+false
+],
+"6006": [
+750,
+"Mudsdale",
+true
+],
+"1007": [
+751,
+"Dewpider",
+false
+],
+"6007": [
+751,
+"Dewpider",
+true
+],
+"1008": [
+752,
+"Araquanid",
+false
+],
+"6008": [
+752,
+"Araquanid",
+true
+],
+"1009": [
+753,
+"Fomantis",
+false
+],
+"6009": [
+753,
+"Fomantis",
+true
+],
+"1010": [
+754,
+"Lurantis",
+false
+],
+"6010": [
+754,
+"Lurantis",
+true
+],
+"1011": [
+755,
+"Morelull",
+false
+],
+"6011": [
+755,
+"Morelull",
+true
+],
+"1012": [
+756,
+"Shiinotic",
+false
+],
+"6012": [
+756,
+"Shiinotic",
+true
+],
+"1013": [
+757,
+"Salandit",
+false
+],
+"6013": [
+757,
+"Salandit",
+true
+],
+"1014": [
+758,
+"Salazzle",
+false
+],
+"6014": [
+758,
+"Salazzle",
+true
+],
+"1015": [
+759,
+"Stufful",
+false
+],
+"6015": [
+759,
+"Stufful",
+true
+],
+"1016": [
+760,
+"Bewear",
+false
+],
+"6016": [
+760,
+"Bewear",
+true
+],
+"1017": [
+761,
+"Bounsweet",
+false
+],
+"6017": [
+761,
+"Bounsweet",
+true
+],
+"1018": [
+762,
+"Steenee",
+false
+],
+"6018": [
+762,
+"Steenee",
+true
+],
+"1019": [
+763,
+"Tsareena",
+false
+],
+"6019": [
+763,
+"Tsareena",
+true
+],
+"1020": [
+764,
+"Comfey",
+false
+],
+"6020": [
+764,
+"Comfey",
+true
+],
+"1021": [
+765,
+"Oranguru",
+false
+],
+"6021": [
+765,
+"Oranguru",
+true
+],
+"1022": [
+766,
+"Passimian",
+false
+],
+"6022": [
+766,
+"Passimian",
+true
+],
+"1023": [
+767,
+"Wimpod",
+false
+],
+"6023": [
+767,
+"Wimpod",
+true
+],
+"1024": [
+768,
+"Golisopod",
+false
+],
+"6024": [
+768,
+"Golisopod",
+true
+],
+"1025": [
+769,
+"Sandygast",
+false
+],
+"6025": [
+769,
+"Sandygast",
+true
+],
+"1026": [
+770,
+"Palossand",
+false
+],
+"6026": [
+770,
+"Palossand",
+true
+],
+"1027": [
+771,
+"Pyukumuku",
+false
+],
+"6027": [
+771,
+"Pyukumuku",
+true
+],
+"1028": [
+772,
+"Type: Null",
+false
+],
+"6028": [
+772,
+"Type: Null",
+true
+],
+"1029": [
+773,
+"Silvally",
+false
+],
+"6029": [
+773,
+"Silvally",
+true
+],
+"1030": [
+1171,
+"Minior",
+false
+],
+"6030": [
+1171,
+"Minior",
+true
+],
+"1031": [
+775,
+"Komala",
+false
+],
+"6031": [
+775,
+"Komala",
+true
+],
+"1032": [
+776,
+"Turtonator",
+false
+],
+"6032": [
+776,
+"Turtonator",
+true
+],
+"1033": [
+777,
+"Togedemaru",
+false
+],
+"6033": [
+777,
+"Togedemaru",
+true
+],
+"1034": [
+778,
+"Mimikyu",
+false
+],
+"6034": [
+778,
+"Mimikyu",
+true
+],
+"1035": [
+779,
+"Bruxish",
+false
+],
+"6035": [
+779,
+"Bruxish",
+true
+],
+"1036": [
+780,
+"Drampa",
+false
+],
+"6036": [
+780,
+"Drampa",
+true
+],
+"1037": [
+781,
+"Dhelmise",
+false
+],
+"6037": [
+781,
+"Dhelmise",
+true
+],
+"1038": [
+782,
+"Jangmo-o",
+false
+],
+"6038": [
+782,
+"Jangmo-o",
+true
+],
+"1039": [
+783,
+"Hakamo-o",
+false
+],
+"6039": [
+783,
+"Hakamo-o",
+true
+],
+"1040": [
+784,
+"Kommo-o",
+false
+],
+"6040": [
+784,
+"Kommo-o",
+true
+],
+"1041": [
+785,
+"Tapu Koko",
+false
+],
+"6041": [
+785,
+"Tapu Koko",
+true
+],
+"1042": [
+786,
+"Tapu Lele",
+false
+],
+"6042": [
+786,
+"Tapu Lele",
+true
+],
+"1043": [
+787,
+"Tapu Bulu",
+false
+],
+"6043": [
+787,
+"Tapu Bulu",
+true
+],
+"1044": [
+788,
+"Tapu Fini",
+false
+],
+"6044": [
+788,
+"Tapu Fini",
+true
+],
+"1045": [
+789,
+"Cosmog",
+false
+],
+"6045": [
+789,
+"Cosmog",
+true
+],
+"1046": [
+790,
+"Cosmoem",
+false
+],
+"6046": [
+790,
+"Cosmoem",
+true
+],
+"1047": [
+791,
+"Solgaleo",
+false
+],
+"6047": [
+791,
+"Solgaleo",
+true
+],
+"1048": [
+792,
+"Lunala",
+false
+],
+"6048": [
+792,
+"Lunala",
+true
+],
+"1049": [
+793,
+"Nihilego",
+false
+],
+"6049": [
+793,
+"Nihilego",
+true
+],
+"1050": [
+794,
+"Buzzwole",
+false
+],
+"6050": [
+794,
+"Buzzwole",
+true
+],
+"1051": [
+795,
+"Pheromosa",
+false
+],
+"6051": [
+795,
+"Pheromosa",
+true
+],
+"1052": [
+796,
+"Xurkitree",
+false
+],
+"6052": [
+796,
+"Xurkitree",
+true
+],
+"1053": [
+797,
+"Celesteela",
+false
+],
+"6053": [
+797,
+"Celesteela",
+true
+],
+"1054": [
+798,
+"Kartana",
+false
+],
+"6054": [
+798,
+"Kartana",
+true
+],
+"1055": [
+799,
+"Guzzlord",
+false
+],
+"6055": [
+799,
+"Guzzlord",
+true
+],
+"1056": [
+800,
+"Necrozma",
+false
+],
+"6056": [
+800,
+"Necrozma",
+true
+],
+"1057": [
+801,
+"Magearna",
+false
+],
+"6057": [
+801,
+"Magearna",
+true
+],
+"1058": [
+802,
+"Marshadow",
+false
+],
+"6058": [
+802,
+"Marshadow",
+true
+],
+"1059": [
+803,
+"Poipole",
+false
+],
+"6059": [
+803,
+"Poipole",
+true
+],
+"1060": [
+804,
+"Naganadel",
+false
+],
+"6060": [
+804,
+"Naganadel",
+true
+],
+"1061": [
+805,
+"Stakataka",
+false
+],
+"6061": [
+805,
+"Stakataka",
+true
+],
+"1062": [
+806,
+"Blacephalon",
+false
+],
+"6062": [
+806,
+"Blacephalon",
+true
+],
+"1063": [
+807,
+"Zeraora",
+false
+],
+"6063": [
+807,
+"Zeraora",
+true
+],
+"1064": [
+808,
+"Meltan",
+false
+],
+"6064": [
+808,
+"Meltan",
+true
+],
+"1065": [
+809,
+"Melmetal",
+false
+],
+"6065": [
+809,
+"Melmetal",
+true
+],
+"1066": [
+810,
+"Grookey",
+false
+],
+"6066": [
+810,
+"Grookey",
+true
+],
+"1067": [
+811,
+"Thwackey",
+false
+],
+"6067": [
+811,
+"Thwackey",
+true
+],
+"1068": [
+812,
+"Rillaboom",
+false
+],
+"6068": [
+812,
+"Rillaboom",
+true
+],
+"1069": [
+813,
+"Scorbunny",
+false
+],
+"6069": [
+813,
+"Scorbunny",
+true
+],
+"1070": [
+814,
+"Raboot",
+false
+],
+"6070": [
+814,
+"Raboot",
+true
+],
+"1071": [
+815,
+"Cinderace",
+false
+],
+"6071": [
+815,
+"Cinderace",
+true
+],
+"1072": [
+816,
+"Sobble",
+false
+],
+"6072": [
+816,
+"Sobble",
+true
+],
+"1073": [
+817,
+"Drizzile",
+false
+],
+"6073": [
+817,
+"Drizzile",
+true
+],
+"1074": [
+818,
+"Inteleon",
+false
+],
+"6074": [
+818,
+"Inteleon",
+true
+],
+"1075": [
+819,
+"Skwovet",
+false
+],
+"6075": [
+819,
+"Skwovet",
+true
+],
+"1076": [
+820,
+"Greedent",
+false
+],
+"6076": [
+820,
+"Greedent",
+true
+],
+"1077": [
+821,
+"Rookidee",
+false
+],
+"6077": [
+821,
+"Rookidee",
+true
+],
+"1078": [
+822,
+"Corvisquire",
+false
+],
+"6078": [
+822,
+"Corvisquire",
+true
+],
+"1079": [
+823,
+"Corviknight",
+false
+],
+"6079": [
+823,
+"Corviknight",
+true
+],
+"1080": [
+824,
+"Blipbug",
+false
+],
+"6080": [
+824,
+"Blipbug",
+true
+],
+"1081": [
+825,
+"Dottler",
+false
+],
+"6081": [
+825,
+"Dottler",
+true
+],
+"1082": [
+826,
+"Orbeetle",
+false
+],
+"6082": [
+826,
+"Orbeetle",
+true
+],
+"1083": [
+827,
+"Nickit",
+false
+],
+"6083": [
+827,
+"Nickit",
+true
+],
+"1084": [
+828,
+"Thievul",
+false
+],
+"6084": [
+828,
+"Thievul",
+true
+],
+"1085": [
+829,
+"Gossifleur",
+false
+],
+"6085": [
+829,
+"Gossifleur",
+true
+],
+"1086": [
+830,
+"Eldegoss",
+false
+],
+"6086": [
+830,
+"Eldegoss",
+true
+],
+"1087": [
+831,
+"Wooloo",
+false
+],
+"6087": [
+831,
+"Wooloo",
+true
+],
+"1088": [
+832,
+"Dubwool",
+false
+],
+"6088": [
+832,
+"Dubwool",
+true
+],
+"1089": [
+833,
+"Chewtle",
+false
+],
+"6089": [
+833,
+"Chewtle",
+true
+],
+"1090": [
+834,
+"Drednaw",
+false
+],
+"6090": [
+834,
+"Drednaw",
+true
+],
+"1091": [
+835,
+"Yamper",
+false
+],
+"6091": [
+835,
+"Yamper",
+true
+],
+"1092": [
+836,
+"Boltund",
+false
+],
+"6092": [
+836,
+"Boltund",
+true
+],
+"1093": [
+837,
+"Rolycoly",
+false
+],
+"6093": [
+837,
+"Rolycoly",
+true
+],
+"1094": [
+838,
+"Carkol",
+false
+],
+"6094": [
+838,
+"Carkol",
+true
+],
+"1095": [
+839,
+"Coalossal",
+false
+],
+"6095": [
+839,
+"Coalossal",
+true
+],
+"1096": [
+840,
+"Applin",
+false
+],
+"6096": [
+840,
+"Applin",
+true
+],
+"1097": [
+841,
+"Flapple",
+false
+],
+"6097": [
+841,
+"Flapple",
+true
+],
+"1098": [
+842,
+"Appletun",
+false
+],
+"6098": [
+842,
+"Appletun",
+true
+],
+"1099": [
+843,
+"Silicobra",
+false
+],
+"6099": [
+843,
+"Silicobra",
+true
+],
+"1100": [
+844,
+"Sandaconda",
+false
+],
+"6100": [
+844,
+"Sandaconda",
+true
+],
+"1101": [
+845,
+"Cramorant",
+false
+],
+"6101": [
+845,
+"Cramorant",
+true
+],
+"1102": [
+846,
+"Arrokuda",
+false
+],
+"6102": [
+846,
+"Arrokuda",
+true
+],
+"1103": [
+847,
+"Barraskewda",
+false
+],
+"6103": [
+847,
+"Barraskewda",
+true
+],
+"1104": [
+848,
+"Toxel",
+false
+],
+"6104": [
+848,
+"Toxel",
+true
+],
+"1105": [
+849,
+"Toxtricity",
+false
+],
+"6105": [
+849,
+"Toxtricity",
+true
+],
+"1106": [
+850,
+"Sizzlipede",
+false
+],
+"6106": [
+850,
+"Sizzlipede",
+true
+],
+"1107": [
+851,
+"Centiskorch",
+false
+],
+"6107": [
+851,
+"Centiskorch",
+true
+],
+"1108": [
+852,
+"Clobbopus",
+false
+],
+"6108": [
+852,
+"Clobbopus",
+true
+],
+"1109": [
+853,
+"Grapploct",
+false
+],
+"6109": [
+853,
+"Grapploct",
+true
+],
+"1110": [
+1187,
+"Sinistea",
+false
+],
+"6110": [
+1187,
+"Sinistea",
+true
+],
+"1111": [
+1188,
+"Polteageist",
+false
+],
+"6111": [
+1188,
+"Polteageist",
+true
+],
+"1112": [
+856,
+"Hatenna",
+false
+],
+"6112": [
+856,
+"Hatenna",
+true
+],
+"1113": [
+857,
+"Hattrem",
+false
+],
+"6113": [
+857,
+"Hattrem",
+true
+],
+"1114": [
+858,
+"Hatterene",
+false
+],
+"6114": [
+858,
+"Hatterene",
+true
+],
+"1115": [
+859,
+"Impidimp",
+false
+],
+"6115": [
+859,
+"Impidimp",
+true
+],
+"1116": [
+860,
+"Morgrem",
+false
+],
+"6116": [
+860,
+"Morgrem",
+true
+],
+"1117": [
+861,
+"Grimmsnarl",
+false
+],
+"6117": [
+861,
+"Grimmsnarl",
+true
+],
+"1118": [
+862,
+"Obstagoon",
+false
+],
+"6118": [
+862,
+"Obstagoon",
+true
+],
+"1119": [
+863,
+"Perrserker",
+false
+],
+"6119": [
+863,
+"Perrserker",
+true
+],
+"1120": [
+864,
+"Cursola",
+false
+],
+"6120": [
+864,
+"Cursola",
+true
+],
+"1121": [
+865,
+"Sirfetch'd",
+false
+],
+"6121": [
+865,
+"Sirfetch'd",
+true
+],
+"1122": [
+866,
+"Mr. Rime",
+false
+],
+"6122": [
+866,
+"Mr. Rime",
+true
+],
+"1123": [
+867,
+"Runerigus",
+false
+],
+"6123": [
+867,
+"Runerigus",
+true
+],
+"1124": [
+868,
+"Milcery",
+false
+],
+"6124": [
+868,
+"Milcery",
+true
+],
+"1125": [
+869,
+"Alcremie",
+false
+],
+"6125": [
+869,
+"Alcremie",
+true
+],
+"1126": [
+870,
+"Falinks",
+false
+],
+"6126": [
+870,
+"Falinks",
+true
+],
+"1127": [
+871,
+"Pincurchin",
+false
+],
+"6127": [
+871,
+"Pincurchin",
+true
+],
+"1128": [
+872,
+"Snom",
+false
+],
+"6128": [
+872,
+"Snom",
+true
+],
+"1129": [
+873,
+"Frosmoth",
+false
+],
+"6129": [
+873,
+"Frosmoth",
+true
+],
+"1130": [
+874,
+"Stonjourner",
+false
+],
+"6130": [
+874,
+"Stonjourner",
+true
+],
+"1131": [
+875,
+"Eiscue",
+false
+],
+"6131": [
+875,
+"Eiscue",
+true
+],
+"1132": [
+876,
+"Indeedee",
+false
+],
+"6132": [
+876,
+"Indeedee",
+true
+],
+"1133": [
+877,
+"Morpeko",
+false
+],
+"6133": [
+877,
+"Morpeko",
+true
+],
+"1134": [
+878,
+"Cufant",
+false
+],
+"6134": [
+878,
+"Cufant",
+true
+],
+"1135": [
+879,
+"Copperajah",
+false
+],
+"6135": [
+879,
+"Copperajah",
+true
+],
+"1136": [
+880,
+"Dracozolt",
+false
+],
+"6136": [
+880,
+"Dracozolt",
+true
+],
+"1137": [
+881,
+"Arctozolt",
+false
+],
+"6137": [
+881,
+"Arctozolt",
+true
+],
+"1138": [
+882,
+"Dracovish",
+false
+],
+"6138": [
+882,
+"Dracovish",
+true
+],
+"1139": [
+883,
+"Arctovish",
+false
+],
+"6139": [
+883,
+"Arctovish",
+true
+],
+"1140": [
+884,
+"Duraludon",
+false
+],
+"6140": [
+884,
+"Duraludon",
+true
+],
+"1141": [
+885,
+"Dreepy",
+false
+],
+"6141": [
+885,
+"Dreepy",
+true
+],
+"1142": [
+886,
+"Drakloak",
+false
+],
+"6142": [
+886,
+"Drakloak",
+true
+],
+"1143": [
+887,
+"Dragapult",
+false
+],
+"6143": [
+887,
+"Dragapult",
+true
+],
+"1144": [
+888,
+"Zacian",
+false
+],
+"6144": [
+888,
+"Zacian",
+true
+],
+"1145": [
+889,
+"Zamazenta",
+false
+],
+"6145": [
+889,
+"Zamazenta",
+true
+],
+"1146": [
+890,
+"Eternatus",
+false
+],
+"6146": [
+890,
+"Eternatus",
+true
+],
+"1147": [
+891,
+"Kubfu",
+false
+],
+"6147": [
+891,
+"Kubfu",
+true
+],
+"1148": [
+892,
+"Urshifu",
+false
+],
+"6148": [
+892,
+"Urshifu",
+true
+],
+"1149": [
+893,
+"Zarude",
+false
+],
+"6149": [
+893,
+"Zarude",
+true
+],
+"1150": [
+894,
+"Regieleki",
+false
+],
+"6150": [
+894,
+"Regieleki",
+true
+],
+"1151": [
+895,
+"Regidrago",
+false
+],
+"6151": [
+895,
+"Regidrago",
+true
+],
+"1152": [
+896,
+"Glastrier",
+false
+],
+"6152": [
+896,
+"Glastrier",
+true
+],
+"1153": [
+897,
+"Spectrier",
+false
+],
+"6153": [
+897,
+"Spectrier",
+true
+],
+"1154": [
+898,
+"Calyrex",
+false
+],
+"6154": [
+898,
+"Calyrex",
+true
+],
+"4000": [
+899,
+"Venusaur",
+false
+],
+"9000": [
+899,
+"Venusaur",
+true
+],
+"4001": [
+900,
+"Charizard",
+false
+],
+"9001": [
+900,
+"Charizard",
+true
+],
+"4002": [
+901,
+"Charizard",
+false
+],
+"9002": [
+901,
+"Charizard",
+true
+],
+"4003": [
+902,
+"Blastoise",
+false
+],
+"9003": [
+902,
+"Blastoise",
+true
+],
+"4004": [
+903,
+"Beedrill",
+false
+],
+"9004": [
+903,
+"Beedrill",
+true
+],
+"4005": [
+904,
+"Pidgeot",
+false
+],
+"9005": [
+904,
+"Pidgeot",
+true
+],
+"4006": [
+905,
+"Alakazam",
+false
+],
+"9006": [
+905,
+"Alakazam",
+true
+],
+"4007": [
+906,
+"Slowbro",
+false
+],
+"9007": [
+906,
+"Slowbro",
+true
+],
+"4008": [
+907,
+"Gengar",
+false
+],
+"9008": [
+907,
+"Gengar",
+true
+],
+"4009": [
+908,
+"Kangaskhan",
+false
+],
+"9009": [
+908,
+"Kangaskhan",
+true
+],
+"4010": [
+909,
+"Pinsir",
+false
+],
+"9010": [
+909,
+"Pinsir",
+true
+],
+"4011": [
+910,
+"Gyarados",
+false
+],
+"9011": [
+910,
+"Gyarados",
+true
+],
+"4012": [
+911,
+"Aerodactyl",
+false
+],
+"9012": [
+911,
+"Aerodactyl",
+true
+],
+"4013": [
+912,
+"Mewtwo",
+false
+],
+"9013": [
+912,
+"Mewtwo",
+true
+],
+"4014": [
+913,
+"Mewtwo",
+false
+],
+"9014": [
+913,
+"Mewtwo",
+true
+],
+"4015": [
+914,
+"Ampharos",
+false
+],
+"9015": [
+914,
+"Ampharos",
+true
+],
+"4016": [
+915,
+"Steelix",
+false
+],
+"9016": [
+915,
+"Steelix",
+true
+],
+"4017": [
+916,
+"Scizor",
+false
+],
+"9017": [
+916,
+"Scizor",
+true
+],
+"4018": [
+917,
+"Heracross",
+false
+],
+"9018": [
+917,
+"Heracross",
+true
+],
+"4019": [
+918,
+"Houndoom",
+false
+],
+"9019": [
+918,
+"Houndoom",
+true
+],
+"4020": [
+919,
+"Tyranitar",
+false
+],
+"9020": [
+919,
+"Tyranitar",
+true
+],
+"4021": [
+920,
+"Sceptile",
+false
+],
+"9021": [
+920,
+"Sceptile",
+true
+],
+"4022": [
+921,
+"Blaziken",
+false
+],
+"9022": [
+921,
+"Blaziken",
+true
+],
+"4023": [
+922,
+"Swampert",
+false
+],
+"9023": [
+922,
+"Swampert",
+true
+],
+"4024": [
+923,
+"Gardevoir",
+false
+],
+"9024": [
+923,
+"Gardevoir",
+true
+],
+"4025": [
+924,
+"Sableye",
+false
+],
+"9025": [
+924,
+"Sableye",
+true
+],
+"4026": [
+925,
+"Mawile",
+false
+],
+"9026": [
+925,
+"Mawile",
+true
+],
+"4027": [
+926,
+"Aggron",
+false
+],
+"9027": [
+926,
+"Aggron",
+true
+],
+"4028": [
+927,
+"Medicham",
+false
+],
+"9028": [
+927,
+"Medicham",
+true
+],
+"4029": [
+928,
+"Manectric",
+false
+],
+"9029": [
+928,
+"Manectric",
+true
+],
+"4030": [
+929,
+"Sharpedo",
+false
+],
+"9030": [
+929,
+"Sharpedo",
+true
+],
+"4031": [
+930,
+"Camerupt",
+false
+],
+"9031": [
+930,
+"Camerupt",
+true
+],
+"4032": [
+931,
+"Altaria",
+false
+],
+"9032": [
+931,
+"Altaria",
+true
+],
+"4033": [
+932,
+"Banette",
+false
+],
+"9033": [
+932,
+"Banette",
+true
+],
+"4034": [
+933,
+"Absol",
+false
+],
+"9034": [
+933,
+"Absol",
+true
+],
+"4035": [
+934,
+"Glalie",
+false
+],
+"9035": [
+934,
+"Glalie",
+true
+],
+"4036": [
+935,
+"Salamence",
+false
+],
+"9036": [
+935,
+"Salamence",
+true
+],
+"4037": [
+936,
+"Metagross",
+false
+],
+"9037": [
+936,
+"Metagross",
+true
+],
+"4038": [
+937,
+"Latias",
+false
+],
+"9038": [
+937,
+"Latias",
+true
+],
+"4039": [
+938,
+"Latios",
+false
+],
+"9039": [
+938,
+"Latios",
+true
+],
+"4043": [
+939,
+"Lopunny",
+false
+],
+"9043": [
+939,
+"Lopunny",
+true
+],
+"4044": [
+940,
+"Garchomp",
+false
+],
+"9044": [
+940,
+"Garchomp",
+true
+],
+"4045": [
+941,
+"Lucario",
+false
+],
+"9045": [
+941,
+"Lucario",
+true
+],
+"4046": [
+942,
+"Abomasnow",
+false
+],
+"9046": [
+942,
+"Abomasnow",
+true
+],
+"4047": [
+943,
+"Gallade",
+false
+],
+"9047": [
+943,
+"Gallade",
+true
+],
+"4048": [
+944,
+"Audino",
+false
+],
+"9048": [
+944,
+"Audino",
+true
+],
+"4049": [
+945,
+"Diancie",
+false
+],
+"9049": [
+945,
+"Diancie",
+true
+],
+"4042": [
+946,
+"Rayquaza",
+false
+],
+"9042": [
+946,
+"Rayquaza",
+true
+],
+"4040": [
+947,
+"Kyogre",
+false
+],
+"9040": [
+947,
+"Kyogre",
+true
+],
+"4041": [
+948,
+"Groudon",
+false
+],
+"9041": [
+948,
+"Groudon",
+true
+],
+"3500": [
+949,
+"Rattata",
+false
+],
+"8500": [
+949,
+"Rattata",
+true
+],
+"3501": [
+950,
+"Raticate",
+false
+],
+"8501": [
+950,
+"Raticate",
+true
+],
+"3502": [
+951,
+"Raichu",
+false
+],
+"8502": [
+951,
+"Raichu",
+true
+],
+"3503": [
+952,
+"Sandshrew",
+false
+],
+"8503": [
+952,
+"Sandshrew",
+true
+],
+"3504": [
+953,
+"Sandslash",
+false
+],
+"8504": [
+953,
+"Sandslash",
+true
+],
+"3505": [
+954,
+"Vulpix",
+false
+],
+"8505": [
+954,
+"Vulpix",
+true
+],
+"3506": [
+955,
+"Ninetales",
+false
+],
+"8506": [
+955,
+"Ninetales",
+true
+],
+"3507": [
+956,
+"Diglett",
+false
+],
+"8507": [
+956,
+"Diglett",
+true
+],
+"3508": [
+957,
+"Dugtrio",
+false
+],
+"8508": [
+957,
+"Dugtrio",
+true
+],
+"3509": [
+958,
+"Meowth",
+false
+],
+"8509": [
+958,
+"Meowth",
+true
+],
+"3510": [
+959,
+"Persian",
+false
+],
+"8510": [
+959,
+"Persian",
+true
+],
+"3511": [
+960,
+"Geodude",
+false
+],
+"8511": [
+960,
+"Geodude",
+true
+],
+"3512": [
+961,
+"Graveler",
+false
+],
+"8512": [
+961,
+"Graveler",
+true
+],
+"3513": [
+962,
+"Golem",
+false
+],
+"8513": [
+962,
+"Golem",
+true
+],
+"3514": [
+963,
+"Grimer",
+false
+],
+"8514": [
+963,
+"Grimer",
+true
+],
+"3515": [
+964,
+"Muk",
+false
+],
+"8515": [
+964,
+"Muk",
+true
+],
+"3516": [
+965,
+"Exeggutor",
+false
+],
+"8516": [
+965,
+"Exeggutor",
+true
+],
+"3517": [
+966,
+"Marowak",
+false
+],
+"8517": [
+966,
+"Marowak",
+true
+],
+"3518": [
+967,
+"Meowth",
+false
+],
+"8518": [
+967,
+"Meowth",
+true
+],
+"3519": [
+968,
+"Ponyta",
+false
+],
+"8519": [
+968,
+"Ponyta",
+true
+],
+"3520": [
+969,
+"Rapidash",
+false
+],
+"8520": [
+969,
+"Rapidash",
+true
+],
+"3521": [
+970,
+"Slowpoke",
+false
+],
+"8521": [
+970,
+"Slowpoke",
+true
+],
+"3522": [
+971,
+"Slowbro",
+false
+],
+"8522": [
+971,
+"Slowbro",
+true
+],
+"3523": [
+972,
+"Farfetch'd",
+false
+],
+"8523": [
+972,
+"Farfetch'd",
+true
+],
+"3524": [
+973,
+"Weezing",
+false
+],
+"8524": [
+973,
+"Weezing",
+true
+],
+"3525": [
+974,
+"Mr. Mime",
+false
+],
+"8525": [
+974,
+"Mr. Mime",
+true
+],
+"3526": [
+975,
+"Articuno",
+false
+],
+"8526": [
+975,
+"Articuno",
+true
+],
+"3527": [
+976,
+"Zapdos",
+false
+],
+"8527": [
+976,
+"Zapdos",
+true
+],
+"3528": [
+977,
+"Moltres",
+false
+],
+"8528": [
+977,
+"Moltres",
+true
+],
+"3529": [
+978,
+"Slowking",
+false
+],
+"8529": [
+978,
+"Slowking",
+true
+],
+"3530": [
+979,
+"Corsola",
+false
+],
+"8530": [
+979,
+"Corsola",
+true
+],
+"3531": [
+980,
+"Zigzagoon",
+false
+],
+"8531": [
+980,
+"Zigzagoon",
+true
+],
+"3532": [
+981,
+"Linoone",
+false
+],
+"8532": [
+981,
+"Linoone",
+true
+],
+"3533": [
+982,
+"Darumaka",
+false
+],
+"8533": [
+982,
+"Darumaka",
+true
+],
+"3534": [
+983,
+"Darmanitan",
+false
+],
+"8534": [
+983,
+"Darmanitan",
+true
+],
+"3536": [
+984,
+"Yamask",
+false
+],
+"8536": [
+984,
+"Yamask",
+true
+],
+"3537": [
+985,
+"Stunfisk",
+false
+],
+"8537": [
+985,
+"Stunfisk",
+true
+],
+"1313": [
+986,
+"Pikachu",
+false
+],
+"6313": [
+986,
+"Pikachu",
+true
+],
+"1314": [
+987,
+"Pikachu",
+false
+],
+"6314": [
+987,
+"Pikachu",
+true
+],
+"1315": [
+988,
+"Pikachu",
+false
+],
+"6315": [
+988,
+"Pikachu",
+true
+],
+"1316": [
+989,
+"Pikachu",
+false
+],
+"6316": [
+989,
+"Pikachu",
+true
+],
+"1317": [
+990,
+"Pikachu",
+false
+],
+"6317": [
+990,
+"Pikachu",
+true
+],
+"1318": [
+991,
+"Pikachu",
+false
+],
+"6318": [
+991,
+"Pikachu",
+true
+],
+"1319": [
+992,
+"Pikachu",
+false
+],
+"6319": [
+992,
+"Pikachu",
+true
+],
+"1320": [
+993,
+"Pikachu",
+false
+],
+"6320": [
+993,
+"Pikachu",
+true
+],
+"1321": [
+994,
+"Pikachu",
+false
+],
+"6321": [
+994,
+"Pikachu",
+true
+],
+"1322": [
+995,
+"Pikachu",
+false
+],
+"6322": [
+995,
+"Pikachu",
+true
+],
+"1323": [
+996,
+"Pikachu",
+false
+],
+"6323": [
+996,
+"Pikachu",
+true
+],
+"1324": [
+997,
+"Pikachu",
+false
+],
+"6324": [
+997,
+"Pikachu",
+true
+],
+"1325": [
+998,
+"Pikachu",
+false
+],
+"6325": [
+998,
+"Pikachu",
+true
+],
+"1326": [
+999,
+"Pikachu",
+false
+],
+"6326": [
+999,
+"Pikachu",
+true
+],
+"1327": [
+1000,
+"Pichu",
+false
+],
+"6327": [
+1000,
+"Pichu",
+true
+],
+"3000": [
+1001,
+"Unown",
+false
+],
+"8000": [
+1001,
+"Unown",
+true
+],
+"3001": [
+1002,
+"Unown",
+false
+],
+"8001": [
+1002,
+"Unown",
+true
+],
+"3002": [
+1003,
+"Unown",
+false
+],
+"8002": [
+1003,
+"Unown",
+true
+],
+"3003": [
+1004,
+"Unown",
+false
+],
+"8003": [
+1004,
+"Unown",
+true
+],
+"3004": [
+1005,
+"Unown",
+false
+],
+"8004": [
+1005,
+"Unown",
+true
+],
+"3005": [
+1006,
+"Unown",
+false
+],
+"8005": [
+1006,
+"Unown",
+true
+],
+"3006": [
+1007,
+"Unown",
+false
+],
+"8006": [
+1007,
+"Unown",
+true
+],
+"3007": [
+1008,
+"Unown",
+false
+],
+"8007": [
+1008,
+"Unown",
+true
+],
+"3008": [
+1009,
+"Unown",
+false
+],
+"8008": [
+1009,
+"Unown",
+true
+],
+"3009": [
+1010,
+"Unown",
+false
+],
+"8009": [
+1010,
+"Unown",
+true
+],
+"3010": [
+1011,
+"Unown",
+false
+],
+"8010": [
+1011,
+"Unown",
+true
+],
+"3011": [
+1012,
+"Unown",
+false
+],
+"8011": [
+1012,
+"Unown",
+true
+],
+"3012": [
+1013,
+"Unown",
+false
+],
+"8012": [
+1013,
+"Unown",
+true
+],
+"3013": [
+1014,
+"Unown",
+false
+],
+"8013": [
+1014,
+"Unown",
+true
+],
+"3014": [
+1015,
+"Unown",
+false
+],
+"8014": [
+1015,
+"Unown",
+true
+],
+"3015": [
+1016,
+"Unown",
+false
+],
+"8015": [
+1016,
+"Unown",
+true
+],
+"3016": [
+1017,
+"Unown",
+false
+],
+"8016": [
+1017,
+"Unown",
+true
+],
+"3017": [
+1018,
+"Unown",
+false
+],
+"8017": [
+1018,
+"Unown",
+true
+],
+"3018": [
+1019,
+"Unown",
+false
+],
+"8018": [
+1019,
+"Unown",
+true
+],
+"3019": [
+1020,
+"Unown",
+false
+],
+"8019": [
+1020,
+"Unown",
+true
+],
+"3020": [
+1021,
+"Unown",
+false
+],
+"8020": [
+1021,
+"Unown",
+true
+],
+"3021": [
+1022,
+"Unown",
+false
+],
+"8021": [
+1022,
+"Unown",
+true
+],
+"3022": [
+1023,
+"Unown",
+false
+],
+"8022": [
+1023,
+"Unown",
+true
+],
+"3023": [
+1024,
+"Unown",
+false
+],
+"8023": [
+1024,
+"Unown",
+true
+],
+"3024": [
+1025,
+"Unown",
+false
+],
+"8024": [
+1025,
+"Unown",
+true
+],
+"3025": [
+1026,
+"Unown",
+false
+],
+"8025": [
+1026,
+"Unown",
+true
+],
+"3026": [
+1027,
+"Unown",
+false
+],
+"8026": [
+1027,
+"Unown",
+true
+],
+"1444": [
+1028,
+"Castform",
+false
+],
+"6444": [
+1028,
+"Castform",
+true
+],
+"1445": [
+1029,
+"Castform",
+false
+],
+"6445": [
+1029,
+"Castform",
+true
+],
+"1446": [
+1030,
+"Castform",
+false
+],
+"6446": [
+1030,
+"Castform",
+true
+],
+"3027": [
+1031,
+"Deoxys",
+false
+],
+"8027": [
+1031,
+"Deoxys",
+true
+],
+"3028": [
+1032,
+"Deoxys",
+false
+],
+"8028": [
+1032,
+"Deoxys",
+true
+],
+"3029": [
+1033,
+"Deoxys",
+false
+],
+"8029": [
+1033,
+"Deoxys",
+true
+],
+"3030": [
+1034,
+"Burmy",
+false
+],
+"8030": [
+1034,
+"Burmy",
+true
+],
+"3031": [
+1035,
+"Burmy",
+false
+],
+"8031": [
+1035,
+"Burmy",
+true
+],
+"3032": [
+1036,
+"Wormadam",
+false
+],
+"8032": [
+1036,
+"Wormadam",
+true
+],
+"3033": [
+1037,
+"Wormadam",
+false
+],
+"8033": [
+1037,
+"Wormadam",
+true
+],
+"1447": [
+1038,
+"Cherrim",
+false
+],
+"6447": [
+1038,
+"Cherrim",
+true
+],
+"3034": [
+1039,
+"Shellos",
+false
+],
+"8034": [
+1039,
+"Shellos",
+true
+],
+"3035": [
+1040,
+"Gastrodon",
+false
+],
+"8035": [
+1040,
+"Gastrodon",
+true
+],
+"3036": [
+1041,
+"Rotom",
+false
+],
+"8036": [
+1041,
+"Rotom",
+true
+],
+"3037": [
+1042,
+"Rotom",
+false
+],
+"8037": [
+1042,
+"Rotom",
+true
+],
+"3038": [
+1043,
+"Rotom",
+false
+],
+"8038": [
+1043,
+"Rotom",
+true
+],
+"3039": [
+1044,
+"Rotom",
+false
+],
+"8039": [
+1044,
+"Rotom",
+true
+],
+"3040": [
+1045,
+"Rotom",
+false
+],
+"8040": [
+1045,
+"Rotom",
+true
+],
+"3041": [
+1046,
+"Giratina",
+false
+],
+"8041": [
+1046,
+"Giratina",
+true
+],
+"3042": [
+1047,
+"Shaymin",
+false
+],
+"8042": [
+1047,
+"Shaymin",
+true
+],
+"3043": [
+1048,
+"Arceus",
+false
+],
+"8043": [
+1048,
+"Arceus",
+true
+],
+"3044": [
+1049,
+"Arceus",
+false
+],
+"8044": [
+1049,
+"Arceus",
+true
+],
+"3045": [
+1050,
+"Arceus",
+false
+],
+"8045": [
+1050,
+"Arceus",
+true
+],
+"3046": [
+1051,
+"Arceus",
+false
+],
+"8046": [
+1051,
+"Arceus",
+true
+],
+"3047": [
+1052,
+"Arceus",
+false
+],
+"8047": [
+1052,
+"Arceus",
+true
+],
+"3048": [
+1053,
+"Arceus",
+false
+],
+"8048": [
+1053,
+"Arceus",
+true
+],
+"3049": [
+1054,
+"Arceus",
+false
+],
+"8049": [
+1054,
+"Arceus",
+true
+],
+"3050": [
+1055,
+"Arceus",
+false
+],
+"8050": [
+1055,
+"Arceus",
+true
+],
+"3051": [
+1056,
+"Arceus",
+false
+],
+"8051": [
+1056,
+"Arceus",
+true
+],
+"3052": [
+1057,
+"Arceus",
+false
+],
+"8052": [
+1057,
+"Arceus",
+true
+],
+"3053": [
+1058,
+"Arceus",
+false
+],
+"8053": [
+1058,
+"Arceus",
+true
+],
+"3054": [
+1059,
+"Arceus",
+false
+],
+"8054": [
+1059,
+"Arceus",
+true
+],
+"3055": [
+1060,
+"Arceus",
+false
+],
+"8055": [
+1060,
+"Arceus",
+true
+],
+"3056": [
+1061,
+"Arceus",
+false
+],
+"8056": [
+1061,
+"Arceus",
+true
+],
+"3057": [
+1062,
+"Arceus",
+false
+],
+"8057": [
+1062,
+"Arceus",
+true
+],
+"3058": [
+1063,
+"Arceus",
+false
+],
+"8058": [
+1063,
+"Arceus",
+true
+],
+"3059": [
+1064,
+"Arceus",
+false
+],
+"8059": [
+1064,
+"Arceus",
+true
+],
+"3060": [
+1065,
+"Basculin",
+false
+],
+"8060": [
+1065,
+"Basculin",
+true
+],
+"1448": [
+1066,
+"Darmanitan",
+false
+],
+"6448": [
+1066,
+"Darmanitan",
+true
+],
+"3535": [
+1067,
+"Darmanitan",
+false
+],
+"8535": [
+1067,
+"Darmanitan",
+true
+],
+"3061": [
+1068,
+"Deerling",
+false
+],
+"8061": [
+1068,
+"Deerling",
+true
+],
+"3062": [
+1069,
+"Deerling",
+false
+],
+"8062": [
+1069,
+"Deerling",
+true
+],
+"3063": [
+1070,
+"Deerling",
+false
+],
+"8063": [
+1070,
+"Deerling",
+true
+],
+"3064": [
+1071,
+"Sawsbuck",
+false
+],
+"8064": [
+1071,
+"Sawsbuck",
+true
+],
+"3065": [
+1072,
+"Sawsbuck",
+false
+],
+"8065": [
+1072,
+"Sawsbuck",
+true
+],
+"3066": [
+1073,
+"Sawsbuck",
+false
+],
+"8066": [
+1073,
+"Sawsbuck",
+true
+],
+"3067": [
+1074,
+"Tornadus",
+false
+],
+"8067": [
+1074,
+"Tornadus",
+true
+],
+"3068": [
+1075,
+"Thundurus",
+false
+],
+"8068": [
+1075,
+"Thundurus",
+true
+],
+"3069": [
+1076,
+"Landorus",
+false
+],
+"8069": [
+1076,
+"Landorus",
+true
+],
+"3070": [
+1077,
+"Kyurem",
+false
+],
+"8070": [
+1077,
+"Kyurem",
+true
+],
+"3071": [
+1078,
+"Kyurem",
+false
+],
+"8071": [
+1078,
+"Kyurem",
+true
+],
+"3072": [
+1079,
+"Keldeo",
+false
+],
+"8072": [
+1079,
+"Keldeo",
+true
+],
+"3073": [
+1080,
+"Meloetta",
+false
+],
+"8073": [
+1080,
+"Meloetta",
+true
+],
+"3077": [
+1081,
+"Genesect",
+false
+],
+"8077": [
+1081,
+"Genesect",
+true
+],
+"3074": [
+1082,
+"Genesect",
+false
+],
+"8074": [
+1082,
+"Genesect",
+true
+],
+"3075": [
+1083,
+"Genesect",
+false
+],
+"8075": [
+1083,
+"Genesect",
+true
+],
+"3076": [
+1084,
+"Genesect",
+false
+],
+"8076": [
+1084,
+"Genesect",
+true
+],
+"3078": [
+1086,
+"Greninja",
+false
+],
+"8078": [
+1086,
+"Greninja",
+true
+],
+"3079": [
+1087,
+"Vivillon",
+false
+],
+"8079": [
+1087,
+"Vivillon",
+true
+],
+"3080": [
+1088,
+"Vivillon",
+false
+],
+"8080": [
+1088,
+"Vivillon",
+true
+],
+"3081": [
+1089,
+"Vivillon",
+false
+],
+"8081": [
+1089,
+"Vivillon",
+true
+],
+"3082": [
+1090,
+"Vivillon",
+false
+],
+"8082": [
+1090,
+"Vivillon",
+true
+],
+"3083": [
+1091,
+"Vivillon",
+false
+],
+"8083": [
+1091,
+"Vivillon",
+true
+],
+"3084": [
+1092,
+"Vivillon",
+false
+],
+"8084": [
+1092,
+"Vivillon",
+true
+],
+"3085": [
+1093,
+"Vivillon",
+false
+],
+"8085": [
+1093,
+"Vivillon",
+true
+],
+"3086": [
+1094,
+"Vivillon",
+false
+],
+"8086": [
+1094,
+"Vivillon",
+true
+],
+"3087": [
+1095,
+"Vivillon",
+false
+],
+"8087": [
+1095,
+"Vivillon",
+true
+],
+"3088": [
+1096,
+"Vivillon",
+false
+],
+"8088": [
+1096,
+"Vivillon",
+true
+],
+"3089": [
+1097,
+"Vivillon",
+false
+],
+"8089": [
+1097,
+"Vivillon",
+true
+],
+"3090": [
+1098,
+"Vivillon",
+false
+],
+"8090": [
+1098,
+"Vivillon",
+true
+],
+"3095": [
+1099,
+"Vivillon",
+false
+],
+"8095": [
+1099,
+"Vivillon",
+true
+],
+"3091": [
+1100,
+"Vivillon",
+false
+],
+"8091": [
+1100,
+"Vivillon",
+true
+],
+"3092": [
+1101,
+"Vivillon",
+false
+],
+"8092": [
+1101,
+"Vivillon",
+true
+],
+"3093": [
+1102,
+"Vivillon",
+false
+],
+"8093": [
+1102,
+"Vivillon",
+true
+],
+"3094": [
+1103,
+"Vivillon",
+false
+],
+"8094": [
+1103,
+"Vivillon",
+true
+],
+"3097": [
+1104,
+"Vivillon",
+false
+],
+"8097": [
+1104,
+"Vivillon",
+true
+],
+"3096": [
+1105,
+"Vivillon",
+false
+],
+"8096": [
+1105,
+"Vivillon",
+true
+],
+"3099": [
+1106,
+"Flab?b?",
+false
+],
+"8099": [
+1106,
+"Flab?b?",
+true
+],
+"3100": [
+1107,
+"Flab?b?",
+false
+],
+"8100": [
+1107,
+"Flab?b?",
+true
+],
+"3101": [
+1108,
+"Flab?b?",
+false
+],
+"8101": [
+1108,
+"Flab?b?",
+true
+],
+"3102": [
+1109,
+"Flab?b?",
+false
+],
+"8102": [
+1109,
+"Flab?b?",
+true
+],
+"3103": [
+1110,
+"Floette",
+false
+],
+"8103": [
+1110,
+"Floette",
+true
+],
+"3104": [
+1111,
+"Floette",
+false
+],
+"8104": [
+1111,
+"Floette",
+true
+],
+"3105": [
+1112,
+"Floette",
+false
+],
+"8105": [
+1112,
+"Floette",
+true
+],
+"3106": [
+1113,
+"Floette",
+false
+],
+"8106": [
+1113,
+"Floette",
+true
+],
+"3107": [
+1114,
+"Floette",
+false
+],
+"8107": [
+1114,
+"Floette",
+true
+],
+"3108": [
+1115,
+"Florges",
+false
+],
+"8108": [
+1115,
+"Florges",
+true
+],
+"3109": [
+1116,
+"Florges",
+false
+],
+"8109": [
+1116,
+"Florges",
+true
+],
+"3110": [
+1117,
+"Florges",
+false
+],
+"8110": [
+1117,
+"Florges",
+true
+],
+"3111": [
+1118,
+"Florges",
+false
+],
+"8111": [
+1118,
+"Florges",
+true
+],
+"3112": [
+1119,
+"Furfrou",
+false
+],
+"8112": [
+1119,
+"Furfrou",
+true
+],
+"3113": [
+1120,
+"Furfrou",
+false
+],
+"8113": [
+1120,
+"Furfrou",
+true
+],
+"3114": [
+1121,
+"Furfrou",
+false
+],
+"8114": [
+1121,
+"Furfrou",
+true
+],
+"3118": [
+1122,
+"Furfrou",
+false
+],
+"8118": [
+1122,
+"Furfrou",
+true
+],
+"3119": [
+1123,
+"Furfrou",
+false
+],
+"8119": [
+1123,
+"Furfrou",
+true
+],
+"3120": [
+1124,
+"Furfrou",
+false
+],
+"8120": [
+1124,
+"Furfrou",
+true
+],
+"3115": [
+1125,
+"Furfrou",
+false
+],
+"8115": [
+1125,
+"Furfrou",
+true
+],
+"3116": [
+1126,
+"Furfrou",
+false
+],
+"8116": [
+1126,
+"Furfrou",
+true
+],
+"3117": [
+1127,
+"Furfrou",
+false
+],
+"8117": [
+1127,
+"Furfrou",
+true
+],
+"3121": [
+1128,
+"Meowstic",
+false
+],
+"8121": [
+1128,
+"Meowstic",
+true
+],
+"3122": [
+1129,
+"Aegislash",
+false
+],
+"8122": [
+1129,
+"Aegislash",
+true
+],
+"972": [
+1136,
+"Xerneas",
+false
+],
+"5972": [
+1136,
+"Xerneas",
+true
+],
+"3123": [
+1138,
+"Zygarde",
+false
+],
+"8123": [
+1138,
+"Zygarde",
+true
+],
+"3125": [
+1140,
+"Zygarde",
+false
+],
+"8125": [
+1140,
+"Zygarde",
+true
+],
+"3126": [
+1141,
+"Hoopa",
+false
+],
+"8126": [
+1141,
+"Hoopa",
+true
+],
+"3127": [
+1142,
+"Oricorio",
+false
+],
+"8127": [
+1142,
+"Oricorio",
+true
+],
+"3128": [
+1143,
+"Oricorio",
+false
+],
+"8128": [
+1143,
+"Oricorio",
+true
+],
+"3129": [
+1144,
+"Oricorio",
+false
+],
+"8129": [
+1144,
+"Oricorio",
+true
+],
+"3130": [
+1146,
+"Lycanroc",
+false
+],
+"8130": [
+1146,
+"Lycanroc",
+true
+],
+"3131": [
+1147,
+"Lycanroc",
+false
+],
+"8131": [
+1147,
+"Lycanroc",
+true
+],
+"3132": [
+1148,
+"Wishiwashi",
+false
+],
+"8132": [
+1148,
+"Wishiwashi",
+true
+],
+"3137": [
+1149,
+"Silvally",
+false
+],
+"8137": [
+1149,
+"Silvally",
+true
+],
+"3145": [
+1150,
+"Silvally",
+false
+],
+"8145": [
+1150,
+"Silvally",
+true
+],
+"3144": [
+1151,
+"Silvally",
+false
+],
+"8144": [
+1151,
+"Silvally",
+true
+],
+"3141": [
+1152,
+"Silvally",
+false
+],
+"8141": [
+1152,
+"Silvally",
+true
+],
+"3142": [
+1153,
+"Silvally",
+false
+],
+"8142": [
+1153,
+"Silvally",
+true
+],
+"3138": [
+1154,
+"Silvally",
+false
+],
+"8138": [
+1154,
+"Silvally",
+true
+],
+"3147": [
+1155,
+"Silvally",
+false
+],
+"8147": [
+1155,
+"Silvally",
+true
+],
+"3146": [
+1156,
+"Silvally",
+false
+],
+"8146": [
+1156,
+"Silvally",
+true
+],
+"3134": [
+1157,
+"Silvally",
+false
+],
+"8134": [
+1157,
+"Silvally",
+true
+],
+"3135": [
+1158,
+"Silvally",
+false
+],
+"8135": [
+1158,
+"Silvally",
+true
+],
+"3133": [
+1159,
+"Silvally",
+false
+],
+"8133": [
+1159,
+"Silvally",
+true
+],
+"3136": [
+1160,
+"Silvally",
+false
+],
+"8136": [
+1160,
+"Silvally",
+true
+],
+"3140": [
+1161,
+"Silvally",
+false
+],
+"8140": [
+1161,
+"Silvally",
+true
+],
+"3148": [
+1162,
+"Silvally",
+false
+],
+"8148": [
+1162,
+"Silvally",
+true
+],
+"3149": [
+1163,
+"Silvally",
+false
+],
+"8149": [
+1163,
+"Silvally",
+true
+],
+"3143": [
+1164,
+"Silvally",
+false
+],
+"8143": [
+1164,
+"Silvally",
+true
+],
+"3139": [
+1165,
+"Silvally",
+false
+],
+"8139": [
+1165,
+"Silvally",
+true
+],
+"3150": [
+1172,
+"Minior",
+false
+],
+"8150": [
+1172,
+"Minior",
+true
+],
+"3151": [
+1173,
+"Minior",
+false
+],
+"8151": [
+1173,
+"Minior",
+true
+],
+"3152": [
+1174,
+"Minior",
+false
+],
+"8152": [
+1174,
+"Minior",
+true
+],
+"3153": [
+1175,
+"Minior",
+false
+],
+"8153": [
+1175,
+"Minior",
+true
+],
+"3154": [
+1176,
+"Minior",
+false
+],
+"8154": [
+1176,
+"Minior",
+true
+],
+"3155": [
+1177,
+"Minior",
+false
+],
+"8155": [
+1177,
+"Minior",
+true
+],
+"3156": [
+1178,
+"Minior",
+false
+],
+"8156": [
+1178,
+"Minior",
+true
+],
+"3157": [
+1179,
+"Mimikyu",
+false
+],
+"8157": [
+1179,
+"Mimikyu",
+true
+],
+"3158": [
+1180,
+"Necrozma",
+false
+],
+"8158": [
+1180,
+"Necrozma",
+true
+],
+"3159": [
+1181,
+"Necrozma",
+false
+],
+"8159": [
+1181,
+"Necrozma",
+true
+],
+"3160": [
+1182,
+"Necrozma",
+false
+],
+"8160": [
+1182,
+"Necrozma",
+true
+],
+"3161": [
+1183,
+"Magearna",
+false
+],
+"8161": [
+1183,
+"Magearna",
+true
+],
+"1449": [
+1184,
+"Cramorant",
+false
+],
+"6449": [
+1184,
+"Cramorant",
+true
+],
+"1450": [
+1185,
+"Cramorant",
+false
+],
+"6450": [
+1185,
+"Cramorant",
+true
+],
+"3162": [
+1186,
+"Toxtricity",
+false
+],
+"8162": [
+1186,
+"Toxtricity",
+true
+],
+"1344": [
+1189,
+"Alcremie",
+false
+],
+"6344": [
+1189,
+"Alcremie",
+true
+],
+"1345": [
+1190,
+"Alcremie",
+false
+],
+"6345": [
+1190,
+"Alcremie",
+true
+],
+"1346": [
+1191,
+"Alcremie",
+false
+],
+"6346": [
+1191,
+"Alcremie",
+true
+],
+"1347": [
+1192,
+"Alcremie",
+false
+],
+"6347": [
+1192,
+"Alcremie",
+true
+],
+"1348": [
+1193,
+"Alcremie",
+false
+],
+"6348": [
+1193,
+"Alcremie",
+true
+],
+"1349": [
+1194,
+"Alcremie",
+false
+],
+"6349": [
+1194,
+"Alcremie",
+true
+],
+"1350": [
+1195,
+"Alcremie",
+false
+],
+"6350": [
+1195,
+"Alcremie",
+true
+],
+"1351": [
+1196,
+"Alcremie",
+false
+],
+"6351": [
+1196,
+"Alcremie",
+true
+],
+"3163": [
+1197,
+"Eiscue",
+false
+],
+"8163": [
+1197,
+"Eiscue",
+true
+],
+"3164": [
+1198,
+"Indeedee",
+false
+],
+"8164": [
+1198,
+"Indeedee",
+true
+],
+"3165": [
+1199,
+"Morpeko",
+false
+],
+"8165": [
+1199,
+"Morpeko",
+true
+],
+"3166": [
+1200,
+"Zacian",
+false
+],
+"8166": [
+1200,
+"Zacian",
+true
+],
+"3167": [
+1201,
+"Zamazenta",
+false
+],
+"8167": [
+1201,
+"Zamazenta",
+true
+],
+"1434": [
+1202,
+"Eternatus",
+false
+],
+"6434": [
+1202,
+"Eternatus",
+true
+],
+"3168": [
+1203,
+"Urshifu",
+false
+],
+"8168": [
+1203,
+"Urshifu",
+true
+],
+"1462": [
+1204,
+"Zarude",
+false
+],
+"6462": [
+1204,
+"Zarude",
+true
+],
+"3169": [
+1205,
+"Calyrex",
+false
+],
+"8169": [
+1205,
+"Calyrex",
+true
+],
+"3170": [
+1206,
+"Calyrex",
+false
+],
+"8170": [
+1206,
+"Calyrex",
+true
+],
+"1155": [
+1207,
+"Wyrdeer",
+false
+],
+"6155": [
+1207,
+"Wyrdeer",
+true
+],
+"1156": [
+1208,
+"Kleavor",
+false
+],
+"6156": [
+1208,
+"Kleavor",
+true
+],
+"1157": [
+1209,
+"Ursaluna",
+false
+],
+"6157": [
+1209,
+"Ursaluna",
+true
+],
+"1158": [
+1210,
+"Basculegion",
+false
+],
+"6158": [
+1210,
+"Basculegion",
+true
+],
+"1159": [
+1211,
+"Sneasler",
+false
+],
+"6159": [
+1211,
+"Sneasler",
+true
+],
+"1160": [
+1212,
+"Overqwil",
+false
+],
+"6160": [
+1212,
+"Overqwil",
+true
+],
+"1161": [
+1213,
+"Enamorus",
+false
+],
+"6161": [
+1213,
+"Enamorus",
+true
+],
+"1162": [
+1214,
+"Sprigatito",
+false
+],
+"6162": [
+1214,
+"Sprigatito",
+true
+],
+"1163": [
+1215,
+"Floragato",
+false
+],
+"6163": [
+1215,
+"Floragato",
+true
+],
+"1164": [
+1216,
+"Meowscarada",
+false
+],
+"6164": [
+1216,
+"Meowscarada",
+true
+],
+"1165": [
+1217,
+"Fuecoco",
+false
+],
+"6165": [
+1217,
+"Fuecoco",
+true
+],
+"1166": [
+1218,
+"Crocalor",
+false
+],
+"6166": [
+1218,
+"Crocalor",
+true
+],
+"1167": [
+1219,
+"Skeledirge",
+false
+],
+"6167": [
+1219,
+"Skeledirge",
+true
+],
+"1168": [
+1220,
+"Quaxly",
+false
+],
+"6168": [
+1220,
+"Quaxly",
+true
+],
+"1169": [
+1221,
+"Quaxwell",
+false
+],
+"6169": [
+1221,
+"Quaxwell",
+true
+],
+"1170": [
+1222,
+"Quaquaval",
+false
+],
+"6170": [
+1222,
+"Quaquaval",
+true
+],
+"1171": [
+1223,
+"Growlithe",
+false
+],
+"6171": [
+1223,
+"Growlithe",
+true
+],
+"1172": [
+1224,
+"Arcanine",
+false
+],
+"6172": [
+1224,
+"Arcanine",
+true
+],
+"1173": [
+1225,
+"Voltorb",
+false
+],
+"6173": [
+1225,
+"Voltorb",
+true
+],
+"1174": [
+1226,
+"Electrode",
+false
+],
+"6174": [
+1226,
+"Electrode",
+true
+],
+"1175": [
+1227,
+"Typhlosion",
+false
+],
+"6175": [
+1227,
+"Typhlosion",
+true
+],
+"1176": [
+1228,
+"Qwilfish",
+false
+],
+"6176": [
+1228,
+"Qwilfish",
+true
+],
+"1177": [
+1229,
+"Sneasel",
+false
+],
+"6177": [
+1229,
+"Sneasel",
+true
+],
+"1178": [
+1230,
+"Samurott",
+false
+],
+"6178": [
+1230,
+"Samurott",
+true
+],
+"1179": [
+1231,
+"Lilligant",
+false
+],
+"6179": [
+1231,
+"Lilligant",
+true
+],
+"1180": [
+1232,
+"Basculin",
+false
+],
+"6180": [
+1232,
+"Basculin",
+true
+],
+"1181": [
+1233,
+"Zorua",
+false
+],
+"6181": [
+1233,
+"Zorua",
+true
+],
+"1182": [
+1234,
+"Zoroark",
+false
+],
+"6182": [
+1234,
+"Zoroark",
+true
+],
+"1183": [
+1235,
+"Braviary",
+false
+],
+"6183": [
+1235,
+"Braviary",
+true
+],
+"1184": [
+1236,
+"Sliggoo",
+false
+],
+"6184": [
+1236,
+"Sliggoo",
+true
+],
+"1185": [
+1237,
+"Goodra",
+false
+],
+"6185": [
+1237,
+"Goodra",
+true
+],
+"1186": [
+1238,
+"Avalugg",
+false
+],
+"6186": [
+1238,
+"Avalugg",
+true
+],
+"1187": [
+1239,
+"Decidueye",
+false
+],
+"6187": [
+1239,
+"Decidueye",
+true
+],
+"1188": [
+1240,
+"Basculegion",
+false
+],
+"6188": [
+1240,
+"Basculegion",
+true
+],
+"1189": [
+1241,
+"Enamorus",
+false
+],
+"6189": [
+1241,
+"Enamorus",
+true
+],
+"1190": [
+1242,
+"Dialga",
+false
+],
+"6190": [
+1242,
+"Dialga",
+true
+],
+"1191": [
+1243,
+"Palkia",
+false
+],
+"6191": [
+1243,
+"Palkia",
+true
+],
+"1192": [
+1244,
+"Lechonk",
+false
+],
+"6192": [
+1244,
+"Lechonk",
+true
+],
+"1193": [
+1245,
+"Oinkologne",
+false
+],
+"6193": [
+1245,
+"Oinkologne",
+true
+],
+"1194": [
+1246,
+"Tarountula",
+false
+],
+"6194": [
+1246,
+"Tarountula",
+true
+],
+"1195": [
+1247,
+"Spidops",
+false
+],
+"6195": [
+1247,
+"Spidops",
+true
+],
+"1196": [
+1248,
+"Nymble",
+false
+],
+"6196": [
+1248,
+"Nymble",
+true
+],
+"1197": [
+1249,
+"Lokix",
+false
+],
+"6197": [
+1249,
+"Lokix",
+true
+],
+"1198": [
+1250,
+"Pawmi",
+false
+],
+"6198": [
+1250,
+"Pawmi",
+true
+],
+"1199": [
+1251,
+"Pawmo",
+false
+],
+"6199": [
+1251,
+"Pawmo",
+true
+],
+"1200": [
+1252,
+"Pawmot",
+false
+],
+"6200": [
+1252,
+"Pawmot",
+true
+],
+"1201": [
+1253,
+"Tandemaus",
+false
+],
+"6201": [
+1253,
+"Tandemaus",
+true
+],
+"1202": [
+1254,
+"Maushold",
+false
+],
+"6202": [
+1254,
+"Maushold",
+true
+],
+"1203": [
+1255,
+"Fidough",
+false
+],
+"6203": [
+1255,
+"Fidough",
+true
+],
+"1204": [
+1256,
+"Dachsbun",
+false
+],
+"6204": [
+1256,
+"Dachsbun",
+true
+],
+"1205": [
+1257,
+"Smoliv",
+false
+],
+"6205": [
+1257,
+"Smoliv",
+true
+],
+"1206": [
+1258,
+"Dolliv",
+false
+],
+"6206": [
+1258,
+"Dolliv",
+true
+],
+"1207": [
+1259,
+"Arboliva",
+false
+],
+"6207": [
+1259,
+"Arboliva",
+true
+],
+"1208": [
+1260,
+"Squawkabilly",
+false
+],
+"6208": [
+1260,
+"Squawkabilly",
+true
+],
+"1209": [
+1261,
+"Nacli",
+false
+],
+"6209": [
+1261,
+"Nacli",
+true
+],
+"1210": [
+1262,
+"Naclstack",
+false
+],
+"6210": [
+1262,
+"Naclstack",
+true
+],
+"1211": [
+1263,
+"Garganacl",
+false
+],
+"6211": [
+1263,
+"Garganacl",
+true
+],
+"1212": [
+1264,
+"Charcadet",
+false
+],
+"6212": [
+1264,
+"Charcadet",
+true
+],
+"1213": [
+1265,
+"Armarouge",
+false
+],
+"6213": [
+1265,
+"Armarouge",
+true
+],
+"1214": [
+1266,
+"Ceruledge",
+false
+],
+"6214": [
+1266,
+"Ceruledge",
+true
+],
+"1215": [
+1267,
+"Tadbulb",
+false
+],
+"6215": [
+1267,
+"Tadbulb",
+true
+],
+"1216": [
+1268,
+"Bellibolt",
+false
+],
+"6216": [
+1268,
+"Bellibolt",
+true
+],
+"1217": [
+1269,
+"Wattrel",
+false
+],
+"6217": [
+1269,
+"Wattrel",
+true
+],
+"1218": [
+1270,
+"Kilowattrel",
+false
+],
+"6218": [
+1270,
+"Kilowattrel",
+true
+],
+"1219": [
+1271,
+"Maschiff",
+false
+],
+"6219": [
+1271,
+"Maschiff",
+true
+],
+"1220": [
+1272,
+"Mabosstiff",
+false
+],
+"6220": [
+1272,
+"Mabosstiff",
+true
+],
+"1221": [
+1273,
+"Shroodle",
+false
+],
+"6221": [
+1273,
+"Shroodle",
+true
+],
+"1222": [
+1274,
+"Grafaiai",
+false
+],
+"6222": [
+1274,
+"Grafaiai",
+true
+],
+"1223": [
+1275,
+"Bramblin",
+false
+],
+"6223": [
+1275,
+"Bramblin",
+true
+],
+"1224": [
+1276,
+"Brambleghast",
+false
+],
+"6224": [
+1276,
+"Brambleghast",
+true
+],
+"1225": [
+1277,
+"Toedscool",
+false
+],
+"6225": [
+1277,
+"Toedscool",
+true
+],
+"1226": [
+1278,
+"Toedscruel",
+false
+],
+"6226": [
+1278,
+"Toedscruel",
+true
+],
+"1227": [
+1279,
+"Klawf",
+false
+],
+"6227": [
+1279,
+"Klawf",
+true
+],
+"1228": [
+1280,
+"Capsakid",
+false
+],
+"6228": [
+1280,
+"Capsakid",
+true
+],
+"1229": [
+1281,
+"Scovillain",
+false
+],
+"6229": [
+1281,
+"Scovillain",
+true
+],
+"1230": [
+1282,
+"Rellor",
+false
+],
+"6230": [
+1282,
+"Rellor",
+true
+],
+"1231": [
+1283,
+"Rabsca",
+false
+],
+"6231": [
+1283,
+"Rabsca",
+true
+],
+"1232": [
+1284,
+"Flittle",
+false
+],
+"6232": [
+1284,
+"Flittle",
+true
+],
+"1233": [
+1285,
+"Espathra",
+false
+],
+"6233": [
+1285,
+"Espathra",
+true
+],
+"1234": [
+1286,
+"Tinkatink",
+false
+],
+"6234": [
+1286,
+"Tinkatink",
+true
+],
+"1235": [
+1287,
+"Tinkatuff",
+false
+],
+"6235": [
+1287,
+"Tinkatuff",
+true
+],
+"1236": [
+1288,
+"Tinkaton",
+false
+],
+"6236": [
+1288,
+"Tinkaton",
+true
+],
+"1237": [
+1289,
+"Wiglett",
+false
+],
+"6237": [
+1289,
+"Wiglett",
+true
+],
+"1238": [
+1290,
+"Wugtrio",
+false
+],
+"6238": [
+1290,
+"Wugtrio",
+true
+],
+"1239": [
+1291,
+"Bombirdier",
+false
+],
+"6239": [
+1291,
+"Bombirdier",
+true
+],
+"1240": [
+1292,
+"Finizen",
+false
+],
+"6240": [
+1292,
+"Finizen",
+true
+],
+"1241": [
+1293,
+"Palafin",
+false
+],
+"6241": [
+1293,
+"Palafin",
+true
+],
+"1242": [
+1294,
+"Varoom",
+false
+],
+"6242": [
+1294,
+"Varoom",
+true
+],
+"1243": [
+1295,
+"Revavroom",
+false
+],
+"6243": [
+1295,
+"Revavroom",
+true
+],
+"1244": [
+1296,
+"Cyclizar",
+false
+],
+"6244": [
+1296,
+"Cyclizar",
+true
+],
+"1245": [
+1297,
+"Orthworm",
+false
+],
+"6245": [
+1297,
+"Orthworm",
+true
+],
+"1246": [
+1298,
+"Glimmet",
+false
+],
+"6246": [
+1298,
+"Glimmet",
+true
+],
+"1247": [
+1299,
+"Glimmora",
+false
+],
+"6247": [
+1299,
+"Glimmora",
+true
+],
+"1248": [
+1300,
+"Greavard",
+false
+],
+"6248": [
+1300,
+"Greavard",
+true
+],
+"1249": [
+1301,
+"Houndstone",
+false
+],
+"6249": [
+1301,
+"Houndstone",
+true
+],
+"1250": [
+1302,
+"Flamigo",
+false
+],
+"6250": [
+1302,
+"Flamigo",
+true
+],
+"1251": [
+1303,
+"Cetoddle",
+false
+],
+"6251": [
+1303,
+"Cetoddle",
+true
+],
+"1252": [
+1304,
+"Cetitan",
+false
+],
+"6252": [
+1304,
+"Cetitan",
+true
+],
+"1253": [
+1305,
+"Veluza",
+false
+],
+"6253": [
+1305,
+"Veluza",
+true
+],
+"1254": [
+1306,
+"Dondozo",
+false
+],
+"6254": [
+1306,
+"Dondozo",
+true
+],
+"1255": [
+1307,
+"Tatsugiri",
+false
+],
+"6255": [
+1307,
+"Tatsugiri",
+true
+],
+"1256": [
+1308,
+"Annihilape",
+false
+],
+"6256": [
+1308,
+"Annihilape",
+true
+],
+"1257": [
+1309,
+"Clodsire",
+false
+],
+"6257": [
+1309,
+"Clodsire",
+true
+],
+"1258": [
+1310,
+"Farigiraf",
+false
+],
+"6258": [
+1310,
+"Farigiraf",
+true
+],
+"1259": [
+1311,
+"Dudunsparce",
+false
+],
+"6259": [
+1311,
+"Dudunsparce",
+true
+],
+"1260": [
+1312,
+"Kingambit",
+false
+],
+"6260": [
+1312,
+"Kingambit",
+true
+],
+"1261": [
+1313,
+"Great Tusk",
+false
+],
+"6261": [
+1313,
+"Great Tusk",
+true
+],
+"1262": [
+1314,
+"Scream Tail",
+false
+],
+"6262": [
+1314,
+"Scream Tail",
+true
+],
+"1263": [
+1315,
+"Brute Bonnet",
+false
+],
+"6263": [
+1315,
+"Brute Bonnet",
+true
+],
+"1264": [
+1316,
+"Flutter Mane",
+false
+],
+"6264": [
+1316,
+"Flutter Mane",
+true
+],
+"1265": [
+1317,
+"Slither Wing",
+false
+],
+"6265": [
+1317,
+"Slither Wing",
+true
+],
+"1266": [
+1318,
+"Sandy Shocks",
+false
+],
+"6266": [
+1318,
+"Sandy Shocks",
+true
+],
+"1267": [
+1319,
+"Iron Treads",
+false
+],
+"6267": [
+1319,
+"Iron Treads",
+true
+],
+"1268": [
+1320,
+"Iron Bundle",
+false
+],
+"6268": [
+1320,
+"Iron Bundle",
+true
+],
+"1269": [
+1321,
+"Iron Hands",
+false
+],
+"6269": [
+1321,
+"Iron Hands",
+true
+],
+"1270": [
+1322,
+"Iron Jugulis",
+false
+],
+"6270": [
+1322,
+"Iron Jugulis",
+true
+],
+"1271": [
+1323,
+"Iron Moth",
+false
+],
+"6271": [
+1323,
+"Iron Moth",
+true
+],
+"1272": [
+1324,
+"Iron Thorns",
+false
+],
+"6272": [
+1324,
+"Iron Thorns",
+true
+],
+"1273": [
+1325,
+"Frigibax",
+false
+],
+"6273": [
+1325,
+"Frigibax",
+true
+],
+"1274": [
+1326,
+"Arctibax",
+false
+],
+"6274": [
+1326,
+"Arctibax",
+true
+],
+"1275": [
+1327,
+"Baxcalibur",
+false
+],
+"6275": [
+1327,
+"Baxcalibur",
+true
+],
+"1276": [
+1328,
+"Gimmighoul",
+false
+],
+"6276": [
+1328,
+"Gimmighoul",
+true
+],
+"1277": [
+1329,
+"Gholdengo",
+false
+],
+"6277": [
+1329,
+"Gholdengo",
+true
+],
+"1278": [
+1330,
+"Wo-Chien",
+false
+],
+"6278": [
+1330,
+"Wo-Chien",
+true
+],
+"1279": [
+1331,
+"Chien-Pao",
+false
+],
+"6279": [
+1331,
+"Chien-Pao",
+true
+],
+"1280": [
+1332,
+"Ting-Lu",
+false
+],
+"6280": [
+1332,
+"Ting-Lu",
+true
+],
+"1281": [
+1333,
+"Chi-Yu",
+false
+],
+"6281": [
+1333,
+"Chi-Yu",
+true
+],
+"1282": [
+1334,
+"Roaring Moon",
+false
+],
+"6282": [
+1334,
+"Roaring Moon",
+true
+],
+"1283": [
+1335,
+"Iron Valiant",
+false
+],
+"6283": [
+1335,
+"Iron Valiant",
+true
+],
+"1284": [
+1336,
+"Koraidon",
+false
+],
+"6284": [
+1336,
+"Koraidon",
+true
+],
+"1285": [
+1337,
+"Miraidon",
+false
+],
+"6285": [
+1337,
+"Miraidon",
+true
+],
+"1286": [
+1338,
+"Walking Wake",
+false
+],
+"6286": [
+1338,
+"Walking Wake",
+true
+],
+"1287": [
+1339,
+"Iron Leaves",
+false
+],
+"6287": [
+1339,
+"Iron Leaves",
+true
+],
+"1288": [
+1340,
+"Oinkologne",
+false
+],
+"6288": [
+1340,
+"Oinkologne",
+true
+],
+"1289": [
+1341,
+"Maushold",
+false
+],
+"6289": [
+1341,
+"Maushold",
+true
+],
+"1290": [
+1342,
+"Squawkabilly",
+false
+],
+"6290": [
+1342,
+"Squawkabilly",
+true
+],
+"1291": [
+1343,
+"Squawkabilly",
+false
+],
+"6291": [
+1343,
+"Squawkabilly",
+true
+],
+"1292": [
+1344,
+"Squawkabilly",
+false
+],
+"6292": [
+1344,
+"Squawkabilly",
+true
+],
+"1293": [
+1345,
+"Palafin",
+false
+],
+"6293": [
+1345,
+"Palafin",
+true
+],
+"1294": [
+1346,
+"Tatsugiri",
+false
+],
+"6294": [
+1346,
+"Tatsugiri",
+true
+],
+"1295": [
+1347,
+"Tatsugiri",
+false
+],
+"6295": [
+1347,
+"Tatsugiri",
+true
+],
+"1296": [
+1348,
+"Dudunsparce",
+false
+],
+"6296": [
+1348,
+"Dudunsparce",
+true
+],
+"1297": [
+1349,
+"Gimmighoul",
+false
+],
+"6297": [
+1349,
+"Gimmighoul",
+true
+],
+"1298": [
+1350,
+"Tauros",
+false
+],
+"6298": [
+1350,
+"Tauros",
+true
+],
+"1299": [
+1351,
+"Tauros",
+false
+],
+"6299": [
+1351,
+"Tauros",
+true
+],
+"1300": [
+1352,
+"Tauros",
+false
+],
+"6300": [
+1352,
+"Tauros",
+true
+],
+"1301": [
+1353,
+"Wooper",
+false
+],
+"6301": [
+1353,
+"Wooper",
+true
+],
+"1302": [
+1354,
+"Dipplin",
+false
+],
+"6302": [
+1354,
+"Dipplin",
+true
+],
+"1303": [
+1362,
+"Poltchageist",
+false
+],
+"6303": [
+1362,
+"Poltchageist",
+true
+],
+"1304": [
+1363,
+"Sinistcha",
+false
+],
+"6304": [
+1363,
+"Sinistcha",
+true
+],
+"1305": [
+1357,
+"Okidogi",
+false
+],
+"6305": [
+1357,
+"Okidogi",
+true
+],
+"1306": [
+1358,
+"Munkidori",
+false
+],
+"6306": [
+1358,
+"Munkidori",
+true
+],
+"1307": [
+1359,
+"Fezandipiti",
+false
+],
+"6307": [
+1359,
+"Fezandipiti",
+true
+],
+"1309": [
+1361,
+"Ursaluna",
+false
+],
+"6309": [
+1361,
+"Ursaluna",
+true
+],
+"1328": [
+1371,
+"Archaludon",
+false
+],
+"6328": [
+1371,
+"Archaludon",
+true
+],
+"1329": [
+1372,
+"Hydrapple",
+false
+],
+"6329": [
+1372,
+"Hydrapple",
+true
+],
+"1330": [
+1373,
+"Gouging Fire",
+false
+],
+"6330": [
+1373,
+"Gouging Fire",
+true
+],
+"1331": [
+1374,
+"Raging Bolt",
+false
+],
+"6331": [
+1374,
+"Raging Bolt",
+true
+],
+"1332": [
+1375,
+"Iron Boulder",
+false
+],
+"6332": [
+1375,
+"Iron Boulder",
+true
+],
+"1333": [
+1376,
+"Iron Crown",
+false
+],
+"6333": [
+1376,
+"Iron Crown",
+true
+],
+"1334": [
+1377,
+"Terapagos",
+false
+],
+"6334": [
+1377,
+"Terapagos",
+true
+],
+"1335": [
+1378,
+"Pecharunt",
+false
+],
+"6335": [
+1378,
+"Pecharunt",
+true
+],
+"1336": [
+1379,
+"Terapagos",
+false
+],
+"6336": [
+1379,
+"Terapagos",
+true
+],
+"1337": [
+1380,
+"Terapagos",
+false
+],
+"6337": [
+1380,
+"Terapagos",
+true
+],
+"1338": [
+1381,
+"Alcremie",
+false
+],
+"6338": [
+1381,
+"Alcremie",
+true
+],
+"1352": [
+1382,
+"Alcremie",
+false
+],
+"6352": [
+1382,
+"Alcremie",
+true
+],
+"1353": [
+1383,
+"Alcremie",
+false
+],
+"6353": [
+1383,
+"Alcremie",
+true
+],
+"1354": [
+1384,
+"Alcremie",
+false
+],
+"6354": [
+1384,
+"Alcremie",
+true
+],
+"1355": [
+1385,
+"Alcremie",
+false
+],
+"6355": [
+1385,
+"Alcremie",
+true
+],
+"1356": [
+1386,
+"Alcremie",
+false
+],
+"6356": [
+1386,
+"Alcremie",
+true
+],
+"1357": [
+1387,
+"Alcremie",
+false
+],
+"6357": [
+1387,
+"Alcremie",
+true
+],
+"1358": [
+1388,
+"Alcremie",
+false
+],
+"6358": [
+1388,
+"Alcremie",
+true
+],
+"1359": [
+1389,
+"Alcremie",
+false
+],
+"6359": [
+1389,
+"Alcremie",
+true
+],
+"1339": [
+1390,
+"Alcremie",
+false
+],
+"6339": [
+1390,
+"Alcremie",
+true
+],
+"1360": [
+1391,
+"Alcremie",
+false
+],
+"6360": [
+1391,
+"Alcremie",
+true
+],
+"1361": [
+1392,
+"Alcremie",
+false
+],
+"6361": [
+1392,
+"Alcremie",
+true
+],
+"1362": [
+1393,
+"Alcremie",
+false
+],
+"6362": [
+1393,
+"Alcremie",
+true
+],
+"1363": [
+1394,
+"Alcremie",
+false
+],
+"6363": [
+1394,
+"Alcremie",
+true
+],
+"1364": [
+1395,
+"Alcremie",
+false
+],
+"6364": [
+1395,
+"Alcremie",
+true
+],
+"1365": [
+1396,
+"Alcremie",
+false
+],
+"6365": [
+1396,
+"Alcremie",
+true
+],
+"1366": [
+1397,
+"Alcremie",
+false
+],
+"6366": [
+1397,
+"Alcremie",
+true
+],
+"1367": [
+1398,
+"Alcremie",
+false
+],
+"6367": [
+1398,
+"Alcremie",
+true
+],
+"1340": [
+1399,
+"Alcremie",
+false
+],
+"6340": [
+1399,
+"Alcremie",
+true
+],
+"1368": [
+1400,
+"Alcremie",
+false
+],
+"6368": [
+1400,
+"Alcremie",
+true
+],
+"1369": [
+1401,
+"Alcremie",
+false
+],
+"6369": [
+1401,
+"Alcremie",
+true
+],
+"1370": [
+1402,
+"Alcremie",
+false
+],
+"6370": [
+1402,
+"Alcremie",
+true
+],
+"1371": [
+1403,
+"Alcremie",
+false
+],
+"6371": [
+1403,
+"Alcremie",
+true
+],
+"1372": [
+1404,
+"Alcremie",
+false
+],
+"6372": [
+1404,
+"Alcremie",
+true
+],
+"1373": [
+1405,
+"Alcremie",
+false
+],
+"6373": [
+1405,
+"Alcremie",
+true
+],
+"1374": [
+1406,
+"Alcremie",
+false
+],
+"6374": [
+1406,
+"Alcremie",
+true
+],
+"1375": [
+1407,
+"Alcremie",
+false
+],
+"6375": [
+1407,
+"Alcremie",
+true
+],
+"1341": [
+1408,
+"Alcremie",
+false
+],
+"6341": [
+1408,
+"Alcremie",
+true
+],
+"1376": [
+1409,
+"Alcremie",
+false
+],
+"6376": [
+1409,
+"Alcremie",
+true
+],
+"1377": [
+1410,
+"Alcremie",
+false
+],
+"6377": [
+1410,
+"Alcremie",
+true
+],
+"1378": [
+1411,
+"Alcremie",
+false
+],
+"6378": [
+1411,
+"Alcremie",
+true
+],
+"1379": [
+1412,
+"Alcremie",
+false
+],
+"6379": [
+1412,
+"Alcremie",
+true
+],
+"1380": [
+1413,
+"Alcremie",
+false
+],
+"6380": [
+1413,
+"Alcremie",
+true
+],
+"1381": [
+1414,
+"Alcremie",
+false
+],
+"6381": [
+1414,
+"Alcremie",
+true
+],
+"1382": [
+1415,
+"Alcremie",
+false
+],
+"6382": [
+1415,
+"Alcremie",
+true
+],
+"1383": [
+1416,
+"Alcremie",
+false
+],
+"6383": [
+1416,
+"Alcremie",
+true
+],
+"1342": [
+1417,
+"Alcremie",
+false
+],
+"6342": [
+1417,
+"Alcremie",
+true
+],
+"1384": [
+1418,
+"Alcremie",
+false
+],
+"6384": [
+1418,
+"Alcremie",
+true
+],
+"1385": [
+1419,
+"Alcremie",
+false
+],
+"6385": [
+1419,
+"Alcremie",
+true
+],
+"1386": [
+1420,
+"Alcremie",
+false
+],
+"6386": [
+1420,
+"Alcremie",
+true
+],
+"1387": [
+1421,
+"Alcremie",
+false
+],
+"6387": [
+1421,
+"Alcremie",
+true
+],
+"1388": [
+1422,
+"Alcremie",
+false
+],
+"6388": [
+1422,
+"Alcremie",
+true
+],
+"1389": [
+1423,
+"Alcremie",
+false
+],
+"6389": [
+1423,
+"Alcremie",
+true
+],
+"1390": [
+1424,
+"Alcremie",
+false
+],
+"6390": [
+1424,
+"Alcremie",
+true
+],
+"1391": [
+1425,
+"Alcremie",
+false
+],
+"6391": [
+1425,
+"Alcremie",
+true
+],
+"1343": [
+1426,
+"Alcremie",
+false
+],
+"6343": [
+1426,
+"Alcremie",
+true
+],
+"1392": [
+1427,
+"Alcremie",
+false
+],
+"6392": [
+1427,
+"Alcremie",
+true
+],
+"1393": [
+1428,
+"Alcremie",
+false
+],
+"6393": [
+1428,
+"Alcremie",
+true
+],
+"1394": [
+1429,
+"Alcremie",
+false
+],
+"6394": [
+1429,
+"Alcremie",
+true
+],
+"1395": [
+1430,
+"Alcremie",
+false
+],
+"6395": [
+1430,
+"Alcremie",
+true
+],
+"1396": [
+1431,
+"Alcremie",
+false
+],
+"6396": [
+1431,
+"Alcremie",
+true
+],
+"1397": [
+1432,
+"Alcremie",
+false
+],
+"6397": [
+1432,
+"Alcremie",
+true
+],
+"1398": [
+1433,
+"Alcremie",
+false
+],
+"6398": [
+1433,
+"Alcremie",
+true
+],
+"1399": [
+1434,
+"Alcremie",
+false
+],
+"6399": [
+1434,
+"Alcremie",
+true
+],
+"1400": [
+1435,
+"Venusaur",
+false
+],
+"6400": [
+1435,
+"Venusaur",
+true
+],
+"1401": [
+1436,
+"Charizard",
+false
+],
+"6401": [
+1436,
+"Charizard",
+true
+],
+"1402": [
+1437,
+"Blastoise",
+false
+],
+"6402": [
+1437,
+"Blastoise",
+true
+],
+"1403": [
+1438,
+"Butterfree",
+false
+],
+"6403": [
+1438,
+"Butterfree",
+true
+],
+"1404": [
+1439,
+"Pikachu",
+false
+],
+"6404": [
+1439,
+"Pikachu",
+true
+],
+"1405": [
+1440,
+"Meowth",
+false
+],
+"6405": [
+1440,
+"Meowth",
+true
+],
+"1406": [
+1441,
+"Machamp",
+false
+],
+"6406": [
+1441,
+"Machamp",
+true
+],
+"1407": [
+1442,
+"Gengar",
+false
+],
+"6407": [
+1442,
+"Gengar",
+true
+],
+"1408": [
+1443,
+"Kingler",
+false
+],
+"6408": [
+1443,
+"Kingler",
+true
+],
+"1409": [
+1444,
+"Lapras",
+false
+],
+"6409": [
+1444,
+"Lapras",
+true
+],
+"1410": [
+1445,
+"Eevee",
+false
+],
+"6410": [
+1445,
+"Eevee",
+true
+],
+"1411": [
+1446,
+"Snorlax",
+false
+],
+"6411": [
+1446,
+"Snorlax",
+true
+],
+"1412": [
+1447,
+"Garbodor",
+false
+],
+"6412": [
+1447,
+"Garbodor",
+true
+],
+"1413": [
+1448,
+"Melmetal",
+false
+],
+"6413": [
+1448,
+"Melmetal",
+true
+],
+"1414": [
+1449,
+"Rillaboom",
+false
+],
+"6414": [
+1449,
+"Rillaboom",
+true
+],
+"1415": [
+1450,
+"Cinderace",
+false
+],
+"6415": [
+1450,
+"Cinderace",
+true
+],
+"1416": [
+1451,
+"Inteleon",
+false
+],
+"6416": [
+1451,
+"Inteleon",
+true
+],
+"1417": [
+1452,
+"Corviknight",
+false
+],
+"6417": [
+1452,
+"Corviknight",
+true
+],
+"1418": [
+1453,
+"Orbeetle",
+false
+],
+"6418": [
+1453,
+"Orbeetle",
+true
+],
+"1419": [
+1454,
+"Drednaw",
+false
+],
+"6419": [
+1454,
+"Drednaw",
+true
+],
+"1420": [
+1455,
+"Coalossal",
+false
+],
+"6420": [
+1455,
+"Coalossal",
+true
+],
+"1421": [
+1456,
+"Flapple",
+false
+],
+"6421": [
+1456,
+"Flapple",
+true
+],
+"1422": [
+1457,
+"Appletun",
+false
+],
+"6422": [
+1457,
+"Appletun",
+true
+],
+"1423": [
+1458,
+"Sandaconda",
+false
+],
+"6423": [
+1458,
+"Sandaconda",
+true
+],
+"1424": [
+1459,
+"Toxtricity",
+false
+],
+"6424": [
+1459,
+"Toxtricity",
+true
+],
+"1425": [
+1460,
+"Toxtricity",
+false
+],
+"6425": [
+1460,
+"Toxtricity",
+true
+],
+"1426": [
+1461,
+"Centiskorch",
+false
+],
+"6426": [
+1461,
+"Centiskorch",
+true
+],
+"1427": [
+1462,
+"Hatterene",
+false
+],
+"6427": [
+1462,
+"Hatterene",
+true
+],
+"1428": [
+1463,
+"Grimmsnarl",
+false
+],
+"6428": [
+1463,
+"Grimmsnarl",
+true
+],
+"1429": [
+1464,
+"Alcremie",
+false
+],
+"6429": [
+1464,
+"Alcremie",
+true
+],
+"1430": [
+1465,
+"Copperajah",
+false
+],
+"6430": [
+1465,
+"Copperajah",
+true
+],
+"1431": [
+1466,
+"Duraludon",
+false
+],
+"6431": [
+1466,
+"Duraludon",
+true
+],
+"1432": [
+1467,
+"Urshifu",
+false
+],
+"6432": [
+1467,
+"Urshifu",
+true
+],
+"1433": [
+1468,
+"Urshifu",
+false
+],
+"6433": [
+1468,
+"Urshifu",
+true
+],
+"1451": [
+1469,
+"Pikachu",
+false
+],
+"6451": [
+1469,
+"Pikachu",
+true
+],
+"1452": [
+1470,
+"Eevee",
+false
+],
+"6452": [
+1470,
+"Eevee",
+true
+],
+"4050": [
+1471,
+"Clefable",
+false
+],
+"9050": [
+1471,
+"Clefable",
+true
+],
+"4051": [
+1472,
+"Victreebel",
+false
+],
+"9051": [
+1472,
+"Victreebel",
+true
+],
+"4052": [
+1473,
+"Starmie",
+false
+],
+"9052": [
+1473,
+"Starmie",
+true
+],
+"4053": [
+1474,
+"Dragonite",
+false
+],
+"9053": [
+1474,
+"Dragonite",
+true
+],
+"4054": [
+1475,
+"Meganium",
+false
+],
+"9054": [
+1475,
+"Meganium",
+true
+],
+"4055": [
+1476,
+"Feraligatr",
+false
+],
+"9055": [
+1476,
+"Feraligatr",
+true
+],
+"4056": [
+1477,
+"Skarmory",
+false
+],
+"9056": [
+1477,
+"Skarmory",
+true
+],
+"4057": [
+1478,
+"Froslass",
+false
+],
+"9057": [
+1478,
+"Froslass",
+true
+],
+"4058": [
+1479,
+"Emboar",
+false
+],
+"9058": [
+1479,
+"Emboar",
+true
+],
+"4059": [
+1480,
+"Excadrill",
+false
+],
+"9059": [
+1480,
+"Excadrill",
+true
+],
+"4060": [
+1481,
+"Scolipede",
+false
+],
+"9060": [
+1481,
+"Scolipede",
+true
+],
+"4061": [
+1482,
+"Scrafty",
+false
+],
+"9061": [
+1482,
+"Scrafty",
+true
+],
+"4062": [
+1483,
+"Eelektross",
+false
+],
+"9062": [
+1483,
+"Eelektross",
+true
+],
+"4063": [
+1484,
+"Chandelure",
+false
+],
+"9063": [
+1484,
+"Chandelure",
+true
+],
+"4064": [
+1485,
+"Chesnaught",
+false
+],
+"9064": [
+1485,
+"Chesnaught",
+true
+],
+"4065": [
+1486,
+"Delphox",
+false
+],
+"9065": [
+1486,
+"Delphox",
+true
+],
+"4066": [
+1487,
+"Greninja",
+false
+],
+"9066": [
+1487,
+"Greninja",
+true
+],
+"4067": [
+1488,
+"Pyroar",
+false
+],
+"9067": [
+1488,
+"Pyroar",
+true
+],
+"4068": [
+1489,
+"Floette",
+false
+],
+"9068": [
+1489,
+"Floette",
+true
+],
+"4069": [
+1490,
+"Malamar",
+false
+],
+"9069": [
+1490,
+"Malamar",
+true
+],
+"4070": [
+1491,
+"Barbaracle",
+false
+],
+"9070": [
+1491,
+"Barbaracle",
+true
+],
+"4071": [
+1492,
+"Dragalge",
+false
+],
+"9071": [
+1492,
+"Dragalge",
+true
+],
+"4072": [
+1493,
+"Hawlucha",
+false
+],
+"9072": [
+1493,
+"Hawlucha",
+true
+],
+"4073": [
+1494,
+"Zygarde",
+false
+],
+"9073": [
+1494,
+"Zygarde",
+true
+],
+"4074": [
+1495,
+"Drampa",
+false
+],
+"9074": [
+1495,
+"Drampa",
+true
+],
+"4075": [
+1496,
+"Falinks",
+false
+],
+"9075": [
+1496,
+"Falinks",
+true
+],
+"4076": [
+1497,
+"Raichu",
+false
+],
+"9076": [
+1497,
+"Raichu",
+true
+],
+"4077": [
+1498,
+"Raichu",
+false
+],
+"9077": [
+1498,
+"Raichu",
+true
+],
+"4078": [
+1499,
+"Chimecho",
+false
+],
+"9078": [
+1499,
+"Chimecho",
+true
+],
+"4079": [
+1500,
+"Absol",
+false
+],
+"9079": [
+1500,
+"Absol",
+true
+],
+"4080": [
+1501,
+"Staraptor",
+false
+],
+"9080": [
+1501,
+"Staraptor",
+true
+],
+"4081": [
+1502,
+"Garchomp",
+false
+],
+"9081": [
+1502,
+"Garchomp",
+true
+],
+"4082": [
+1503,
+"Lucario",
+false
+],
+"9082": [
+1503,
+"Lucario",
+true
+],
+"4083": [
+1504,
+"Heatran",
+false
+],
+"9083": [
+1504,
+"Heatran",
+true
+],
+"4084": [
+1505,
+"Darkrai",
+false
+],
+"9084": [
+1505,
+"Darkrai",
+true
+],
+"4085": [
+1506,
+"Golurk",
+false
+],
+"9085": [
+1506,
+"Golurk",
+true
+],
+"4086": [
+1508,
+"Meowstic",
+false
+],
+"9086": [
+1508,
+"Meowstic",
+true
+],
+"4087": [
+1509,
+"Crabominable",
+false
+],
+"9087": [
+1509,
+"Crabominable",
+true
+],
+"4088": [
+1510,
+"Golisopod",
+false
+],
+"9088": [
+1510,
+"Golisopod",
+true
+],
+"4089": [
+1511,
+"Magearna",
+false
+],
+"9089": [
+1511,
+"Magearna",
+true
+],
+"4090": [
+1512,
+"Magearna",
+false
+],
+"9090": [
+1512,
+"Magearna",
+true
+],
+"4091": [
+1513,
+"Zeraora",
+false
+],
+"9091": [
+1513,
+"Zeraora",
+true
+],
+"4092": [
+1514,
+"Scovillain",
+false
+],
+"9092": [
+1514,
+"Scovillain",
+true
+],
+"4093": [
+1515,
+"Glimmora",
+false
+],
+"9093": [
+1515,
+"Glimmora",
+true
+],
+"4094": [
+1516,
+"Tatsugiri",
+false
+],
+"9094": [
+1516,
+"Tatsugiri",
+true
+],
+"4095": [
+1517,
+"Tatsugiri",
+false
+],
+"9095": [
+1517,
+"Tatsugiri",
+true
+],
+"4096": [
+1518,
+"Tatsugiri",
+false
+],
+"9096": [
+1518,
+"Tatsugiri",
+true
+],
+"4097": [
+1519,
+"Baxcalibur",
+false
+],
+"9097": [
+1519,
+"Baxcalibur",
+true
+],
+"1453": [
+1520,
+"Browt",
+false
+],
+"6453": [
+1520,
+"Browt",
+true
+],
+"1454": [
+1521,
+"Browt 2",
+false
+],
+"6454": [
+1521,
+"Browt 2",
+true
+],
+"1455": [
+1522,
+"Browt 3",
+false
+],
+"6455": [
+1522,
+"Browt 3",
+true
+],
+"1456": [
+1523,
+"Pombon",
+false
+],
+"6456": [
+1523,
+"Pombon",
+true
+],
+"1457": [
+1524,
+"Pombon 2",
+false
+],
+"6457": [
+1524,
+"Pombon 2",
+true
+],
+"1458": [
+1525,
+"Pombon 3",
+false
+],
+"6458": [
+1525,
+"Pombon 3",
+true
+],
+"1459": [
+1526,
+"Gecqua",
+false
+],
+"6459": [
+1526,
+"Gecqua",
+true
+],
+"1460": [
+1527,
+"Gecqua 2",
+false
+],
+"6460": [
+1527,
+"Gecqua 2",
+true
+],
+"1461": [
+1528,
+"Gecqua 3",
+false
+],
+"6461": [
+1528,
+"Gecqua 3",
+true
+]
+}
+}

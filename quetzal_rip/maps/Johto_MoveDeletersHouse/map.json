@@ -1,0 +1,45 @@
+{
+  "id": "MAP_JOHTO_MOVE_DELETERS_HOUSE",
+  "name": "Johto_MoveDeletersHouse",
+  "layout": "LAYOUT_JOHTO_MOVE_DELETERS_HOUSE",
+  "music": "MUS_QZ_614",
+  "region_map_section": "MAPSEC_JOHTO_BLACKTHORN_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_BLACKTHORN_CITY",
+      "dest_warp_id": "7"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 11,
+    "region": "johto",
+    "header": "0x89353E8",
+    "layout_id": 453,
+    "mapsec_index": 11,
+    "mapsec_name": "BLACKTHORN CITY",
+    "music_id": 614,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_BlackthornCity_House2"
+    }
+  }
+}

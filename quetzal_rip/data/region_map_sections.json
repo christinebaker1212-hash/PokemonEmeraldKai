@@ -1,0 +1,2342 @@
+[
+ {
+  "region": "johto",
+  "index": 0,
+  "x": 19,
+  "y": 10,
+  "width": 1,
+  "height": 1,
+  "name": "NEW BARK TOWN",
+  "names_all_languages": [
+   "NEW BARK TOWN",
+   "PUEBLO PRIMAVERA",
+   "PUEBLO PRIMAVERA",
+   "NEW BARK"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 1,
+  "x": 14,
+  "y": 10,
+  "width": 1,
+  "height": 1,
+  "name": "CHERRYGROVE CITY",
+  "names_all_languages": [
+   "CHERRYGROVE CITY",
+   "CIUDAD CEREZO",
+   "CIUDAD CEREZO",
+   "CHERRYGROVE"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 2,
+  "x": 12,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "VIOLET CITY",
+  "names_all_languages": [
+   "VIOLET CITY",
+   "CIUDAD MALVA",
+   "CIUDAD VIOLETA",
+   "VIOLET"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 3,
+  "x": 10,
+  "y": 13,
+  "width": 1,
+  "height": 1,
+  "name": "AZALEA TOWN",
+  "names_all_languages": [
+   "AZALEA TOWN",
+   "PUEBLO AZALEA",
+   "PUEBLO AZALEA",
+   "AZALEA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 4,
+  "x": 8,
+  "y": 8,
+  "width": 1,
+  "height": 2,
+  "name": "GOLDENROD CITY",
+  "names_all_languages": [
+   "GOLDENROD CITY",
+   "CIUDAD TRIGAL",
+   "CIUDAD CAÑA DORADA",
+   "GOLDENROD"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 5,
+  "x": 10,
+  "y": 2,
+  "width": 1,
+  "height": 1,
+  "name": "ECRUTEAK CITY",
+  "names_all_languages": [
+   "ECRUTEAK CITY",
+   "CIUDAD IRIS",
+   "CIUDAD IRIS",
+   "ECRUTEAK"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 6,
+  "x": 6,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "OLIVINE CITY",
+  "names_all_languages": [
+   "OLIVINE CITY",
+   "CIUDAD OLIVO",
+   "CIUDAD OLIVO",
+   "OLIVINE"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 7,
+  "x": 4,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "CIANWOOD CITY",
+  "names_all_languages": [
+   "CIANWOOD CITY",
+   "CIUDAD ORQUÍDEA",
+   "CIUDAD ORQUÍDEA",
+   "CIANWOOD"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 8,
+  "x": 2,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "SAFARI ZONE GATE",
+  "names_all_languages": [
+   "SAFARI ZONE GATE",
+   "ENTRADA SAFARI",
+   "ENTRADA SAFARI",
+   "PORTぃO SAFÁRI"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 9,
+  "x": 15,
+  "y": 2,
+  "width": 1,
+  "height": 1,
+  "name": "MAHOGANY TOWN",
+  "names_all_languages": [
+   "MAHOGANY TOWN",
+   "PUEBLO CAOBA",
+   "PUEBLO CAOBA",
+   "MAHOGANY"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 10,
+  "x": 15,
+  "y": 0,
+  "width": 1,
+  "height": 1,
+  "name": "LAKE OF RAGE",
+  "names_all_languages": [
+   "LAKE OF RAGE",
+   "LAGO DE LA FURIA",
+   "LAGO DE LA FURIA",
+   "LAGO DA FÚRIA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 11,
+  "x": 18,
+  "y": 2,
+  "width": 1,
+  "height": 1,
+  "name": "BLACKTHORN CITY",
+  "names_all_languages": [
+   "BLACKTHORN CITY",
+   "CIUDAD ENDRINO",
+   "CIUDAD ENDRINO",
+   "BLACKTHORN"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 23,
+  "x": 20,
+  "y": 5,
+  "width": 1,
+  "height": 1,
+  "name": "MT. SILVER",
+  "names_all_languages": [
+   "MT. SILVER",
+   "MONTE PLATEADO",
+   "MONTE PLATEADO",
+   "MONTE SILVER"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 28,
+  "x": 7,
+  "y": 2,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 38",
+  "names_all_languages": [
+   "ROUTE 38",
+   "RUTA 38",
+   "RUTA 38",
+   "ROTA 38"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 29,
+  "x": 6,
+  "y": 2,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 39",
+  "names_all_languages": [
+   "ROUTE 39",
+   "RUTA 39",
+   "RUTA 39",
+   "ROTA 39"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 30,
+  "x": 5,
+  "y": 4,
+  "width": 1,
+  "height": 5,
+  "name": "ROUTE 40",
+  "names_all_languages": [
+   "ROUTE 40",
+   "RUTA 40",
+   "RUTA 40",
+   "ROTA 40"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 31,
+  "x": 5,
+  "y": 9,
+  "width": 1,
+  "height": 3,
+  "name": "ROUTE 41",
+  "names_all_languages": [
+   "ROUTE 41",
+   "RUTA 41",
+   "RUTA 41",
+   "ROTA 41"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 32,
+  "x": 11,
+  "y": 2,
+  "width": 4,
+  "height": 1,
+  "name": "ROUTE 42",
+  "names_all_languages": [
+   "ROUTE 42",
+   "RUTA 42",
+   "RUTA 42",
+   "ROTA 42"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 33,
+  "x": 15,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "ROUTE 43",
+  "names_all_languages": [
+   "ROUTE 43",
+   "RUTA 43",
+   "RUTA 43",
+   "ROTA 43"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 34,
+  "x": 16,
+  "y": 2,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 44",
+  "names_all_languages": [
+   "ROUTE 44",
+   "RUTA 44",
+   "RUTA 44",
+   "ROTA 44"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 35,
+  "x": 18,
+  "y": 3,
+  "width": 1,
+  "height": 4,
+  "name": "ROUTE 45",
+  "names_all_languages": [
+   "ROUTE 45",
+   "RUTA 45",
+   "RUTA 45",
+   "ROTA 45"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 36,
+  "x": 17,
+  "y": 6,
+  "width": 1,
+  "height": 4,
+  "name": "ROUTE 46",
+  "names_all_languages": [
+   "ROUTE 46",
+   "RUTA 46",
+   "RUTA 46",
+   "ROTA 46"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 37,
+  "x": 2,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "ROUTE 47",
+  "names_all_languages": [
+   "ROUTE 47",
+   "RUTA 47",
+   "RUTA 47",
+   "ROTA 47"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 38,
+  "x": 2,
+  "y": 10,
+  "width": 1,
+  "height": 1,
+  "name": "ROUTE 48",
+  "names_all_languages": [
+   "ROUTE 48",
+   "RUTA 48",
+   "RUTA 48",
+   "ROTA 48"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 39,
+  "x": 15,
+  "y": 4,
+  "width": 3,
+  "height": 2,
+  "name": "DARK CAVE",
+  "names_all_languages": [
+   "DARK CAVE",
+   "CUEVA OSCURA",
+   "CUEVA OSCURA",
+   "CAVERNA ESCURA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 40,
+  "x": 12,
+  "y": 11,
+  "width": 1,
+  "height": 2,
+  "name": "UNION CAVE",
+  "names_all_languages": [
+   "UNION CAVE",
+   "CUEVA UNIÓN",
+   "CUEVA UNIÓN",
+   "CAVERNA UNIぃO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 41,
+  "x": 8,
+  "y": 12,
+  "width": 2,
+  "height": 2,
+  "name": "ILEX FOREST",
+  "names_all_languages": [
+   "ILEX FOREST",
+   "ENCINAR",
+   "ENCINAR",
+   "BOSQUE ILEX"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 42,
+  "x": 8,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "NATIONAL PARK",
+  "names_all_languages": [
+   "NATIONAL PARK",
+   "PARQUE NACIONAL",
+   "PARQUE NACIONAL",
+   "PARQUE NACIONAL"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 43,
+  "x": 6,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "WHIRL ISLANDS",
+  "names_all_languages": [
+   "WHIRL ISLANDS",
+   "ISLAS REMOLINO",
+   "ISLAS REMOLINO",
+   "ILHAS REDEMOINHO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 44,
+  "x": 3,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "CLIFF CAVE",
+  "names_all_languages": [
+   "CLIFF CAVE",
+   "CUEVA ACANTILADO",
+   "CUEVA ACANTILADO",
+   "CAVERNA PENHASCO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 45,
+  "x": 12,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "MT MORTAR",
+  "names_all_languages": [
+   "MT MORTAR",
+   "MONTE MORTERO",
+   "MONTE MORTERO",
+   "MONTE MORTAR"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 46,
+  "x": 20,
+  "y": 10,
+  "width": 4,
+  "height": 1,
+  "name": "ROUTE 27",
+  "names_all_languages": [
+   "ROUTE 27",
+   "RUTA 27",
+   "RUTA 27",
+   "ROTA 27"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 47,
+  "x": 17,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "ICE PATH",
+  "names_all_languages": [
+   "ICE PATH",
+   "RUTA HELADA",
+   "RUTA HELADA",
+   "CAMINHO DE GELO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 48,
+  "x": 21,
+  "y": 5,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 28",
+  "names_all_languages": [
+   "ROUTE 28",
+   "RUTA 28",
+   "RUTA 28",
+   "ROTA 28"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 49,
+  "x": 20,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "TOHJO FALLS",
+  "names_all_languages": [
+   "TOHJO FALLS",
+   "CATARATAS TOHJO",
+   "CATARATAS TOHJO",
+   "QUEDAS TOHJO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 50,
+  "x": 12,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "SPROUT TOWER",
+  "names_all_languages": [
+   "SPROUT TOWER",
+   "TORRE BELLSPROUT",
+   "TORRE BELLSPROUT",
+   "TORRE SPROUT"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 51,
+  "x": 10,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "SLOWPOKE WELL",
+  "names_all_languages": [
+   "SLOWPOKE WELL",
+   "POZO SLOWPOKE",
+   "POZO SLOWPOKE",
+   "POÇO SLOWPOKE"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 52,
+  "x": 9,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "BURNED TOWER",
+  "names_all_languages": [
+   "BURNED TOWER",
+   "TORRE QUEMADA",
+   "TORRE QUEMADA",
+   "TORRE QUEIMADA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 53,
+  "x": 7,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "LIGHTHOUSE",
+  "names_all_languages": [
+   "LIGHTHOUSE",
+   "FARO DE OLIVO",
+   "FARO DE OLIVO",
+   "FAROL OLIVINE"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 54,
+  "x": 10,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "TIN TOWER",
+  "names_all_languages": [
+   "TIN TOWER",
+   "TORRE CAMPANA",
+   "TORRE CAMPANA",
+   "TORRE DO SINO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 57,
+  "x": 0,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "SAFARI ZONE",
+  "names_all_languages": [
+   "SAFARI ZONE",
+   "ZONA SAFARI",
+   "ZONA SAFARI",
+   "ZONA SAFÁRI"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 59,
+  "x": 18,
+  "y": 1,
+  "width": 1,
+  "height": 1,
+  "name": "DRAGON’S DEN",
+  "names_all_languages": [
+   "DRAGON’S DEN",
+   "GUARIDA DRAGÓN",
+   "GUARIDA DRAGÓN",
+   "TOCA DO DRAGぃO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 60,
+  "x": 10,
+  "y": 5,
+  "width": 2,
+  "height": 2,
+  "name": "RUINS OF ALPH",
+  "names_all_languages": [
+   "RUINS OF ALPH",
+   "RUINAS ALFA",
+   "RUINAS ALFA",
+   "RUÍNAS DE ALPH"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 63,
+  "x": 1,
+  "y": 10,
+  "width": 1,
+  "height": 2,
+  "name": "EMBEDDED TOWER",
+  "names_all_languages": [
+   "EMBEDDED TOWER",
+   "TORRE OCULTA",
+   "TORRE OCULTA",
+   "TORRE OCULTA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 70,
+  "x": 24,
+  "y": 5,
+  "width": 1,
+  "height": 1,
+  "name": "VICTORY ROAD",
+  "names_all_languages": [
+   "VICTORY ROAD",
+   "CALLE VICTORIA",
+   "RUTA DE LA VICTORIA",
+   "ESTRADA VITÓRIA"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 88,
+  "x": 15,
+  "y": 10,
+  "width": 4,
+  "height": 1,
+  "name": "ROUTE 29",
+  "names_all_languages": [
+   "ROUTE 29",
+   "RUTA 29",
+   "RUTA 29",
+   "ROTA 29"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 89,
+  "x": 14,
+  "y": 5,
+  "width": 1,
+  "height": 5,
+  "name": "ROUTE 30",
+  "names_all_languages": [
+   "ROUTE 30",
+   "RUTA 30",
+   "RUTA 30",
+   "ROTA 30"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 90,
+  "x": 13,
+  "y": 4,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 31",
+  "names_all_languages": [
+   "ROUTE 31",
+   "RUTA 31",
+   "RUTA 31",
+   "ROTA 31"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 91,
+  "x": 12,
+  "y": 5,
+  "width": 1,
+  "height": 6,
+  "name": "ROUTE 32",
+  "names_all_languages": [
+   "ROUTE 32",
+   "RUTA 32",
+   "RUTA 32",
+   "ROTA 32"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 92,
+  "x": 11,
+  "y": 13,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 33",
+  "names_all_languages": [
+   "ROUTE 33",
+   "RUTA 33",
+   "RUTA 33",
+   "ROTA 33"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 93,
+  "x": 8,
+  "y": 10,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 34",
+  "names_all_languages": [
+   "ROUTE 34",
+   "RUTA 34",
+   "RUTA 34",
+   "ROTA 34"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 94,
+  "x": 8,
+  "y": 5,
+  "width": 1,
+  "height": 3,
+  "name": "ROUTE 35",
+  "names_all_languages": [
+   "ROUTE 35",
+   "RUTA 35",
+   "RUTA 35",
+   "ROTA 35"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 95,
+  "x": 9,
+  "y": 4,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 36",
+  "names_all_languages": [
+   "ROUTE 36",
+   "RUTA 36",
+   "RUTA 36",
+   "ROTA 36"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 96,
+  "x": 10,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "ROUTE 37",
+  "names_all_languages": [
+   "ROUTE 37",
+   "RUTA 37",
+   "RUTA 37",
+   "ROTA 37"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 97,
+  "x": 24,
+  "y": 3,
+  "width": 1,
+  "height": 2,
+  "name": "INDIGO PLATEAU",
+  "names_all_languages": [
+   "INDIGO PLATEAU",
+   "MESETA AÑIL",
+   "MESETA AÑIL",
+   "PLANALTO ÍNDIGO"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 98,
+  "x": 24,
+  "y": 6,
+  "width": 1,
+  "height": 5,
+  "name": "ROUTE 26",
+  "names_all_languages": [
+   "ROUTE 26",
+   "RUTA 26",
+   "RUTA 26",
+   "ROTA 26"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 133,
+  "x": 15,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "ROCKET HIDEOUT",
+  "names_all_languages": [
+   "ROCKET HIDEOUT",
+   "GUARIDA ROCKET",
+   "GUARIDA ROCKET",
+   "ESCOND. ROCKET"
+  ]
+ },
+ {
+  "region": "johto",
+  "index": 212,
+  "x": 5,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "TRAINER HILL",
+  "names_all_languages": [
+   "TRAINER HILL",
+   "COLINA DESAFÍO",
+   "COLINA DESAFÍO",
+   "COLINA DESAFIO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 88,
+  "x": 4,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "PALLET TOWN",
+  "names_all_languages": [
+   "PALLET TOWN",
+   "PUEBLO PALETA",
+   "PUEBLO PALETA",
+   "PALLET"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 89,
+  "x": 4,
+  "y": 8,
+  "width": 1,
+  "height": 1,
+  "name": "VIRIDIAN CITY",
+  "names_all_languages": [
+   "VIRIDIAN CITY",
+   "CIUDAD VERDE",
+   "CIUDAD VERDE",
+   "VIRIDIAN"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 90,
+  "x": 4,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "PEWTER CITY",
+  "names_all_languages": [
+   "PEWTER CITY",
+   "CIUDAD PLATEADA",
+   "CIUDAD PLATEADA",
+   "PEWTER"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 91,
+  "x": 14,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "CERULEAN CITY",
+  "names_all_languages": [
+   "CERULEAN CITY",
+   "CIUDAD CELESTE",
+   "CIUDAD CELESTE",
+   "CERULEAN"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 92,
+  "x": 18,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "LAVENDER TOWN",
+  "names_all_languages": [
+   "LAVENDER TOWN",
+   "PUEBLO LAVANDA",
+   "PUEBLO LAVANDA",
+   "LAVENDER"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 93,
+  "x": 14,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "VERMILION CITY",
+  "names_all_languages": [
+   "VERMILION CITY",
+   "CIUDAD CARMÍN",
+   "CIUDAD CARMÍN",
+   "VERMILION"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 94,
+  "x": 11,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "CELADON CITY",
+  "names_all_languages": [
+   "CELADON CITY",
+   "CIUDAD AZULONA",
+   "CIUDAD AZULONA",
+   "CELADON"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 95,
+  "x": 12,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "FUCHSIA CITY",
+  "names_all_languages": [
+   "FUCHSIA CITY",
+   "CIUDAD FUCSIA",
+   "CIUDAD FUCSIA",
+   "FUCHSIA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 96,
+  "x": 4,
+  "y": 14,
+  "width": 1,
+  "height": 1,
+  "name": "CINNABAR ISLAND",
+  "names_all_languages": [
+   "CINNABAR ISLAND",
+   "ISLA CANELA",
+   "ISLA CANELA",
+   "ILHA CINNABAR"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 97,
+  "x": 2,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "INDIGO PLATEAU",
+  "names_all_languages": [
+   "INDIGO PLATEAU",
+   "MESETA AÑIL",
+   "MESETA AÑIL",
+   "PLANALTO ÍNDIGO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 98,
+  "x": 14,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "SAFFRON CITY",
+  "names_all_languages": [
+   "SAFFRON CITY",
+   "CIUDAD AZAFRÁN",
+   "CIUDAD AZAFRÁN",
+   "SAFFRON"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 101,
+  "x": 4,
+  "y": 9,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 1",
+  "names_all_languages": [
+   "ROUTE 1",
+   "RUTA 1",
+   "RUTA 1",
+   "ROTA 1"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 102,
+  "x": 4,
+  "y": 5,
+  "width": 1,
+  "height": 3,
+  "name": "ROUTE 2",
+  "names_all_languages": [
+   "ROUTE 2",
+   "RUTA 2",
+   "RUTA 2",
+   "ROTA 2"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 103,
+  "x": 5,
+  "y": 4,
+  "width": 4,
+  "height": 1,
+  "name": "ROUTE 3",
+  "names_all_languages": [
+   "ROUTE 3",
+   "RUTA 3",
+   "RUTA 3",
+   "ROTA 3"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 104,
+  "x": 8,
+  "y": 3,
+  "width": 6,
+  "height": 1,
+  "name": "ROUTE 4",
+  "names_all_languages": [
+   "ROUTE 4",
+   "RUTA 4",
+   "RUTA 4",
+   "ROTA 4"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 105,
+  "x": 14,
+  "y": 4,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 5",
+  "names_all_languages": [
+   "ROUTE 5",
+   "RUTA 5",
+   "RUTA 5",
+   "ROTA 5"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 106,
+  "x": 14,
+  "y": 7,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 6",
+  "names_all_languages": [
+   "ROUTE 6",
+   "RUTA 6",
+   "RUTA 6",
+   "ROTA 6"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 107,
+  "x": 12,
+  "y": 6,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 7",
+  "names_all_languages": [
+   "ROUTE 7",
+   "RUTA 7",
+   "RUTA 7",
+   "ROTA 7"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 108,
+  "x": 15,
+  "y": 6,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 8",
+  "names_all_languages": [
+   "ROUTE 8",
+   "RUTA 8",
+   "RUTA 8",
+   "ROTA 8"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 109,
+  "x": 15,
+  "y": 3,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 9",
+  "names_all_languages": [
+   "ROUTE 9",
+   "RUTA 9",
+   "RUTA 9",
+   "ROTA 9"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 110,
+  "x": 18,
+  "y": 3,
+  "width": 1,
+  "height": 3,
+  "name": "ROUTE 10",
+  "names_all_languages": [
+   "ROUTE 10",
+   "RUTA 10",
+   "RUTA 10",
+   "ROTA 10"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 111,
+  "x": 15,
+  "y": 9,
+  "width": 3,
+  "height": 1,
+  "name": "ROUTE 11",
+  "names_all_languages": [
+   "ROUTE 11",
+   "RUTA 11",
+   "RUTA 11",
+   "ROTA 11"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 112,
+  "x": 18,
+  "y": 7,
+  "width": 1,
+  "height": 5,
+  "name": "ROUTE 12",
+  "names_all_languages": [
+   "ROUTE 12",
+   "RUTA 12",
+   "RUTA 12",
+   "ROTA 12"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 113,
+  "x": 16,
+  "y": 11,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 13",
+  "names_all_languages": [
+   "ROUTE 13",
+   "RUTA 13",
+   "RUTA 13",
+   "ROTA 13"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 114,
+  "x": 15,
+  "y": 11,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 14",
+  "names_all_languages": [
+   "ROUTE 14",
+   "RUTA 14",
+   "RUTA 14",
+   "ROTA 14"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 115,
+  "x": 13,
+  "y": 12,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 15",
+  "names_all_languages": [
+   "ROUTE 15",
+   "RUTA 15",
+   "RUTA 15",
+   "ROTA 15"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 116,
+  "x": 7,
+  "y": 6,
+  "width": 4,
+  "height": 1,
+  "name": "ROUTE 16",
+  "names_all_languages": [
+   "ROUTE 16",
+   "RUTA 16",
+   "RUTA 16",
+   "ROTA 16"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 117,
+  "x": 7,
+  "y": 7,
+  "width": 1,
+  "height": 5,
+  "name": "ROUTE 17",
+  "names_all_languages": [
+   "ROUTE 17",
+   "RUTA 17",
+   "RUTA 17",
+   "ROTA 17"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 118,
+  "x": 7,
+  "y": 12,
+  "width": 5,
+  "height": 1,
+  "name": "ROUTE 18",
+  "names_all_languages": [
+   "ROUTE 18",
+   "RUTA 18",
+   "RUTA 18",
+   "ROTA 18"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 119,
+  "x": 12,
+  "y": 13,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 19",
+  "names_all_languages": [
+   "ROUTE 19",
+   "RUTA 19",
+   "RUTA 19",
+   "ROTA 19"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 120,
+  "x": 5,
+  "y": 14,
+  "width": 7,
+  "height": 1,
+  "name": "ROUTE 20",
+  "names_all_languages": [
+   "ROUTE 20",
+   "RUTA 20",
+   "RUTA 20",
+   "ROTA 20"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 121,
+  "x": 4,
+  "y": 12,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 21",
+  "names_all_languages": [
+   "ROUTE 21",
+   "RUTA 21",
+   "RUTA 21",
+   "ROTA 21"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 122,
+  "x": 2,
+  "y": 8,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 22",
+  "names_all_languages": [
+   "ROUTE 22",
+   "RUTA 22",
+   "RUTA 22",
+   "ROTA 22"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 123,
+  "x": 2,
+  "y": 4,
+  "width": 1,
+  "height": 4,
+  "name": "ROUTE 23",
+  "names_all_languages": [
+   "ROUTE 23",
+   "RUTA 23",
+   "RUTA 23",
+   "ROTA 23"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 124,
+  "x": 14,
+  "y": 1,
+  "width": 1,
+  "height": 2,
+  "name": "ROUTE 24",
+  "names_all_languages": [
+   "ROUTE 24",
+   "RUTA 24",
+   "RUTA 24",
+   "ROTA 24"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 125,
+  "x": 15,
+  "y": 1,
+  "width": 2,
+  "height": 1,
+  "name": "ROUTE 25",
+  "names_all_languages": [
+   "ROUTE 25",
+   "RUTA 25",
+   "RUTA 25",
+   "ROTA 25"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 126,
+  "x": 4,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "VIRIDIAN FOREST",
+  "names_all_languages": [
+   "VIRIDIAN FOREST",
+   "BOSQUE VERDE",
+   "BOSQUE VERDE",
+   "BOSQUE VIRIDIAN"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 127,
+  "x": 9,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "MT. MOON",
+  "names_all_languages": [
+   "MT. MOON",
+   "MT. MOON",
+   "MONTE LUNA",
+   "MONTE LUA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 128,
+  "x": 14,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "S.S. ANNE",
+  "names_all_languages": [
+   "S.S. ANNE",
+   "S.S. ANNE",
+   "S.S. ANNE",
+   "S.S. ANNE"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 129,
+  "x": 14,
+  "y": 7,
+  "width": 1,
+  "height": 1,
+  "name": "UNDERGROUND PATH",
+  "names_all_languages": [
+   "UNDERGROUND PATH",
+   "VÍA SUBTERRÁNEA",
+   "VÍA SUBTERRÁNEA",
+   "CAMINHO SUBTERR."
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 130,
+  "x": 12,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "UNDERGROUND PATH",
+  "names_all_languages": [
+   "UNDERGROUND PATH",
+   "VÍA SUBTERRÁNEA",
+   "VÍA SUBTERRÁNEA",
+   "CAMINHO SUBTERR."
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 131,
+  "x": 15,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "DIGLETT’S CAVE",
+  "names_all_languages": [
+   "DIGLETT’S CAVE",
+   "CUEVA DIGLETT",
+   "CUEVA DIGLETT",
+   "CAVERNA DIGLETT"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 132,
+  "x": 2,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "VICTORY ROAD",
+  "names_all_languages": [
+   "VICTORY ROAD",
+   "CALLE VICTORIA",
+   "RUTA DE LA VICTORIA",
+   "ESTRADA VITÓRIA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 133,
+  "x": 11,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "ROCKET HIDEOUT",
+  "names_all_languages": [
+   "ROCKET HIDEOUT",
+   "GUARIDA ROCKET",
+   "GUARIDA ROCKET",
+   "ESCOND. ROCKET"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 134,
+  "x": 14,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "SILPH CO.",
+  "names_all_languages": [
+   "SILPH CO.",
+   "SILPH S.A.",
+   "SILPH S.A.",
+   "SILPH S.A."
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 135,
+  "x": 4,
+  "y": 14,
+  "width": 1,
+  "height": 1,
+  "name": "POKéMON MANSION",
+  "names_all_languages": [
+   "POKéMON MANSION",
+   "MANSIÓN POKéMON",
+   "MANSIÓN POKéMON",
+   "MANSぃO POKéMON"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 136,
+  "x": 12,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "SAFARI ZONE",
+  "names_all_languages": [
+   "SAFARI ZONE",
+   "ZONA SAFARI",
+   "ZONA SAFARI",
+   "ZONA SAFÁRI"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 137,
+  "x": 2,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "POKéMON LEAGUE",
+  "names_all_languages": [
+   "POKéMON LEAGUE",
+   "LIGA POKéMON",
+   "LIGA POKéMON",
+   "LIGA POKéMON"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 138,
+  "x": 18,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "ROCK TUNNEL",
+  "names_all_languages": [
+   "ROCK TUNNEL",
+   "TÚNEL ROCA",
+   "TÚNEL DE ROCA",
+   "TÚNEL ROCHOSO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 139,
+  "x": 8,
+  "y": 14,
+  "width": 1,
+  "height": 1,
+  "name": "SEAFOAM ISLANDS",
+  "names_all_languages": [
+   "SEAFOAM ISLANDS",
+   "ISLAS ESPUMA",
+   "ISLAS ESPUMA",
+   "ILHAS ESPUMA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 140,
+  "x": 18,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "POKéMON TOWER",
+  "names_all_languages": [
+   "POKéMON TOWER",
+   "TORRE POKéMON",
+   "TORRE POKéMON",
+   "TORRE POKéMON"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 141,
+  "x": 14,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "CERULEAN CAVE",
+  "names_all_languages": [
+   "CERULEAN CAVE",
+   "CUEVA CELESTE",
+   "CUEVA CELESTE",
+   "CAVERNA CERULEAN"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 142,
+  "x": 18,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "POWER PLANT",
+  "names_all_languages": [
+   "POWER PLANT",
+   "CENTRAL ENERGÍA",
+   "CENTRAL ENERGÍA",
+   "USINA ELÉTRICA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 143,
+  "x": 1,
+  "y": 8,
+  "width": 1,
+  "height": 1,
+  "name": "ONE ISLAND",
+  "names_all_languages": [
+   "ONE ISLAND",
+   "ISLA PRIMA",
+   "ISLA PRIMA",
+   "ILHA UM"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 144,
+  "x": 9,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "TWO ISLAND",
+  "names_all_languages": [
+   "TWO ISLAND",
+   "ISLA SECUNDA",
+   "ISLA SECUNDA",
+   "ILHA DOIS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 145,
+  "x": 18,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "THREE ISLAND",
+  "names_all_languages": [
+   "THREE ISLAND",
+   "ISLA TERA",
+   "ISLA TERA",
+   "ILHA TRÊS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 146,
+  "x": 3,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "FOUR ISLAND",
+  "names_all_languages": [
+   "FOUR ISLAND",
+   "ISLA QUARTA",
+   "ISLA QUARTA",
+   "ILHA QUATRO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 147,
+  "x": 16,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "FIVE ISLAND",
+  "names_all_languages": [
+   "FIVE ISLAND",
+   "ISLA INTA",
+   "ISLA INTA",
+   "ILHA CINCO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 148,
+  "x": 5,
+  "y": 8,
+  "width": 1,
+  "height": 1,
+  "name": "SEVEN ISLAND",
+  "names_all_languages": [
+   "SEVEN ISLAND",
+   "ISLA SÉTIMA",
+   "ISLA SÉTIMA",
+   "ILHA SETE"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 149,
+  "x": 17,
+  "y": 5,
+  "width": 1,
+  "height": 1,
+  "name": "SIX ISLAND",
+  "names_all_languages": [
+   "SIX ISLAND",
+   "ISLA EXTA",
+   "ISLA EXTA",
+   "ILHA SEIS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 150,
+  "x": 2,
+  "y": 3,
+  "width": 1,
+  "height": 6,
+  "name": "KINDLE ROAD",
+  "names_all_languages": [
+   "KINDLE ROAD",
+   "CAMINO CANDENTE",
+   "CAMINO CANDENTE",
+   "ESTRADA ÍGNEA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 151,
+  "x": 1,
+  "y": 9,
+  "width": 1,
+  "height": 2,
+  "name": "TREASURE BEACH",
+  "names_all_languages": [
+   "TREASURE BEACH",
+   "PLAYA TESORO",
+   "PLAYA TESORO",
+   "PRAIA TESOURO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 152,
+  "x": 9,
+  "y": 7,
+  "width": 1,
+  "height": 2,
+  "name": "CAPE BRINK",
+  "names_all_languages": [
+   "CAPE BRINK",
+   "CABO EXTREMO",
+   "CABO EXTREMO",
+   "CABO EXTREMO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 153,
+  "x": 14,
+  "y": 12,
+  "width": 4,
+  "height": 1,
+  "name": "BOND BRIDGE",
+  "names_all_languages": [
+   "BOND BRIDGE",
+   "PUENTE UNIÓN",
+   "PUENTE UNIÓN",
+   "PONTE AMIZADE"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 154,
+  "x": 18,
+  "y": 13,
+  "width": 2,
+  "height": 1,
+  "name": "THREE ISLE PORT",
+  "names_all_languages": [
+   "THREE ISLE PORT",
+   "PUERTO ISLA TERA",
+   "PUERTO ISLA TERA",
+   "PORTO ILHA TRÊS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 159,
+  "x": 16,
+  "y": 9,
+  "width": 3,
+  "height": 1,
+  "name": "RESORT GORGEOUS",
+  "names_all_languages": [
+   "RESORT GORGEOUS",
+   "LUGAR DE RECREO",
+   "LUGAR DE RECREO",
+   "RESORT MAGNÍFICO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 160,
+  "x": 14,
+  "y": 10,
+  "width": 3,
+  "height": 1,
+  "name": "WATER LABYRINTH",
+  "names_all_languages": [
+   "WATER LABYRINTH",
+   "AQUARINTO",
+   "AQUARINTO",
+   "LABIRINTO ÁGUA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 161,
+  "x": 17,
+  "y": 11,
+  "width": 1,
+  "height": 2,
+  "name": "FIVE ISLE MEADOW",
+  "names_all_languages": [
+   "FIVE ISLE MEADOW",
+   "PRADO ISLA INTA",
+   "PRADO ISLA INTA",
+   "PRADO ILHA CINCO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 162,
+  "x": 18,
+  "y": 12,
+  "width": 1,
+  "height": 3,
+  "name": "MEMORIAL PILLAR",
+  "names_all_languages": [
+   "MEMORIAL PILLAR",
+   "PILAR RECUERDO",
+   "PILAR RECUERDO",
+   "PILAR MEMORIAL"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 163,
+  "x": 15,
+  "y": 0,
+  "width": 1,
+  "height": 3,
+  "name": "OUTCAST ISLAND",
+  "names_all_languages": [
+   "OUTCAST ISLAND",
+   "ISLA AISLADA",
+   "ISLA AISLADA",
+   "ILHA EXCLUÍDA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 164,
+  "x": 15,
+  "y": 3,
+  "width": 3,
+  "height": 1,
+  "name": "GREEN PATH",
+  "names_all_languages": [
+   "GREEN PATH",
+   "VÍA VERDE",
+   "VÍA VERDE",
+   "CAMINHO VERDE"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 165,
+  "x": 18,
+  "y": 3,
+  "width": 1,
+  "height": 5,
+  "name": "WATER PATH",
+  "names_all_languages": [
+   "WATER PATH",
+   "VÍA ACUÁTICA",
+   "VÍA ACUÁTICA",
+   "CAMINHO D’ÁGUA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 166,
+  "x": 16,
+  "y": 7,
+  "width": 2,
+  "height": 2,
+  "name": "RUIN VALLEY",
+  "names_all_languages": [
+   "RUIN VALLEY",
+   "VALLE RUINAS",
+   "VALLE RUINAS",
+   "VALE DAS RUÍNAS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 167,
+  "x": 5,
+  "y": 6,
+  "width": 1,
+  "height": 2,
+  "name": "TRAINER TOWER",
+  "names_all_languages": [
+   "TRAINER TOWER",
+   "TORRE DESAFÍO",
+   "TORRE DESAFÍO",
+   "TORRE DESAFIO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 168,
+  "x": 5,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "CANYON ENTRANCE",
+  "names_all_languages": [
+   "CANYON ENTRANCE",
+   "ENTRADA AL CAÑÓN",
+   "ENTRADA AL CAÑÓN",
+   "ENTRADA CÂNION"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 169,
+  "x": 6,
+  "y": 9,
+  "width": 1,
+  "height": 3,
+  "name": "SEVAULT CANYON",
+  "names_all_languages": [
+   "SEVAULT CANYON",
+   "CAÑÓN SÉTANO",
+   "CAÑÓN SÉTANO",
+   "CÂNION SEVAULT"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 170,
+  "x": 3,
+  "y": 12,
+  "width": 7,
+  "height": 1,
+  "name": "TANOBY RUINS",
+  "names_all_languages": [
+   "TANOBY RUINS",
+   "RUINAS SETE",
+   "RUINAS SETE",
+   "RUÍNAS TANOBY"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 175,
+  "x": 2,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "MT. EMBER",
+  "names_all_languages": [
+   "MT. EMBER",
+   "MT. ASCUAS",
+   "MT. ASCUAS",
+   "MONTE BRASA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 176,
+  "x": 14,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "BERRY FOREST",
+  "names_all_languages": [
+   "BERRY FOREST",
+   "BOSQUE BAYA",
+   "BOSQUE BAYA",
+   "BOSQUE BERRY"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 177,
+  "x": 3,
+  "y": 4,
+  "width": 1,
+  "height": 1,
+  "name": "ICEFALL CAVE",
+  "names_all_languages": [
+   "ICEFALL CAVE",
+   "CUEVA GLACIADA",
+   "CUEVA GLACIADA",
+   "CAVERNA GELO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 178,
+  "x": 17,
+  "y": 11,
+  "width": 1,
+  "height": 1,
+  "name": "ROCKET WAREHOUSE",
+  "names_all_languages": [
+   "ROCKET WAREHOUSE",
+   "ALMACÉN ROCKET",
+   "ALMACÉN ROCKET",
+   "ARMAZÉM ROCKET"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 179,
+  "x": 5,
+  "y": 6,
+  "width": 1,
+  "height": 1,
+  "name": "TRAINER TOWER",
+  "names_all_languages": [
+   "TRAINER TOWER",
+   "TORRE DESAFÍO",
+   "TORRE DESAFÍO",
+   "TORRE DESAFIO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 180,
+  "x": 16,
+  "y": 8,
+  "width": 1,
+  "height": 1,
+  "name": "DOTTED HOLE",
+  "names_all_languages": [
+   "DOTTED HOLE",
+   "CUEVA PUNTEADA",
+   "CUEVA PUNTEADA",
+   "CAVERNA PONTOS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 181,
+  "x": 18,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "LOST CAVE",
+  "names_all_languages": [
+   "LOST CAVE",
+   "CUEVA PERDIDA",
+   "CUEVA PERDIDA",
+   "CAVERNA PERDIDA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 182,
+  "x": 17,
+  "y": 3,
+  "width": 1,
+  "height": 1,
+  "name": "PATTERN BUSH",
+  "names_all_languages": [
+   "PATTERN BUSH",
+   "BOSQUEJO",
+   "BOSQUEJO",
+   "BOSQUE PADRぃO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 185,
+  "x": 18,
+  "y": 13,
+  "width": 2,
+  "height": 1,
+  "name": "THREE ISLE PATH",
+  "names_all_languages": [
+   "THREE ISLE PATH",
+   "VÍA ISLA TERA",
+   "VÍA ISLA TERA",
+   "CAMINHO ILHA 3"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 186,
+  "x": 6,
+  "y": 9,
+  "width": 1,
+  "height": 1,
+  "name": "TANOBY KEY",
+  "names_all_languages": [
+   "TANOBY KEY",
+   "LLAVE SETE",
+   "LLAVE SETE",
+   "CHAVE TANOBY"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 188,
+  "x": 9,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "MONEAN CHAMBER",
+  "names_all_languages": [
+   "MONEAN CHAMBER",
+   "CÁMARA ANÉMUNA",
+   "CÁMARA ANÉMUNA",
+   "CÂMARA MONEAN"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 189,
+  "x": 8,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "LIPTOO CHAMBER",
+  "names_all_languages": [
+   "LIPTOO CHAMBER",
+   "CÁMARA TULIPDOS",
+   "CÁMARA TULIPDOS",
+   "CÂMARA LIPTOO"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 190,
+  "x": 7,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "WEEPTH CHAMBER",
+  "names_all_languages": [
+   "WEEPTH CHAMBER",
+   "CÁMARA TRISANTE",
+   "CÁMARA TRISANTE",
+   "CÂMARA WEEPTH"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 191,
+  "x": 5,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "DILFORD CHAMBER",
+  "names_all_languages": [
+   "DILFORD CHAMBER",
+   "CÁMARA QUARCISO",
+   "CÁMARA QUARCISO",
+   "CÂMARA DILFORD"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 192,
+  "x": 4,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "SCUFIB CHAMBER",
+  "names_all_languages": [
+   "SCUFIB CHAMBER",
+   "CÁMARA HIBINCA",
+   "CÁMARA HIBINCA",
+   "CÂMARA SCUFIB"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 193,
+  "x": 3,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "RIXY CHAMBER",
+  "names_all_languages": [
+   "RIXY CHAMBER",
+   "CÁMARA SEIRIS",
+   "CÁMARA SEIRIS",
+   "CÂMARA RIXY"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 194,
+  "x": 3,
+  "y": 12,
+  "width": 1,
+  "height": 1,
+  "name": "VIAPOIS CHAMBER",
+  "names_all_languages": [
+   "VIAPOIS CHAMBER",
+   "CÁMARA PASIETE",
+   "CÁMARA PASIETE",
+   "CÂMARA VIAPOIS"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 195,
+  "x": 2,
+  "y": 5,
+  "width": 1,
+  "height": 1,
+  "name": "EMBER SPA",
+  "names_all_languages": [
+   "EMBER SPA",
+   "BALNEARIO ASCUAS",
+   "BALNEARIO ASCUAS",
+   "TERMAS BRASA"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 200,
+  "x": 0,
+  "y": 0,
+  "width": 1,
+  "height": 1,
+  "name": "BIRTH ISLAND",
+  "names_all_languages": [
+   "BIRTH ISLAND",
+   "ISLA ORIGEN",
+   "ISLA ORIGEN",
+   "ILHA NATAL"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 210,
+  "x": 6,
+  "y": 8,
+  "width": 1,
+  "height": 1,
+  "name": "ALTERING CAVE",
+  "names_all_languages": [
+   "ALTERING CAVE",
+   "CUEVA CAMBIANTE",
+   "CUEVA CAMBIANTE",
+   "CAVERNA MUTÁVEL"
+  ]
+ },
+ {
+  "region": "kanto",
+  "index": 211,
+  "x": 0,
+  "y": 0,
+  "width": 1,
+  "height": 1,
+  "name": "NAVEL ROCK",
+  "names_all_languages": [
+   "NAVEL ROCK",
+   "ROCA OMBLIGO",
+   "ROCA OMBLIGO",
+   "ROCHA UMBIGO"
+  ]
+ }
+]

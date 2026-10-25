@@ -1,0 +1,7 @@
+Kanto_SixIsland_DottedHole_1F_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_SixIsland_DottedHole_1F_EventScript_8413F68
+	.byte 0
+
+Kanto_SixIsland_DottedHole_1F_EventScript_8413F68::
+	setflag FLAG_QZ_0x2258
+	end

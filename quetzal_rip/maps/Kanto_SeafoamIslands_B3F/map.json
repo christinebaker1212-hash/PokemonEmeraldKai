@@ -1,0 +1,194 @@
+{
+  "id": "MAP_KANTO_SEAFOAM_ISLANDS_B3F",
+  "name": "Kanto_SeafoamIslands_B3F",
+  "layout": "LAYOUT_KANTO_SEAFOAM_ISLANDS_B3F",
+  "music": "MUS_RG_VIRIDIAN_FOREST",
+  "region_map_section": "MAPSEC_SEAFOAM_ISLANDS",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 23,
+      "y": 8,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x21C1"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 24,
+      "y": 8,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x21C2"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 12,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "8648",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "FLAG_QZ_0x21C5"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 13,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "FLAG_QZ_0x21C6"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 9,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "FLAG_QZ_0x21C4"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16186",
+      "x": 6,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "8647",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B5EA",
+      "flag": "FLAG_QZ_0x21C3"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 14,
+      "elevation": 4,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B2F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 31,
+      "y": 4,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B2F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 31,
+      "y": 16,
+      "elevation": 4,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B2F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 12,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B4F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 5,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B4F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 23,
+      "y": 9,
+      "elevation": 1,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B2F",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 24,
+      "y": 9,
+      "elevation": 1,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B2F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 6,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B4F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 9,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SEAFOAM_ISLANDS_B4F",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 5,
+      "y": 12,
+      "elevation": 0,
+      "item": "ITEM_NUGGET",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_29"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 86,
+    "region": "kanto",
+    "header": "0x8937758",
+    "layout_id": 792,
+    "mapsec_index": 139,
+    "mapsec_name": "SEAFOAM ISLANDS",
+    "music_id": 499,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "SeafoamIslands_B3F"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "MAP_KANTO_MT_MOON_ROUTE4_CAVE",
+  "name": "Kanto_MtMoon_Route4Cave",
+  "layout": "LAYOUT_KANTO_MT_MOON_ROUTE4_CAVE",
+  "music": "MUS_RG_MT_MOON",
+  "region_map_section": "MAPSEC_MT_MOON",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE4",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 39,
+    "num": 34,
+    "region": "kanto",
+    "header": "0x8939B00",
+    "layout_id": 990,
+    "mapsec_index": 127,
+    "mapsec_name": "MT. MOON",
+    "music_id": 500,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": null,
+      "note": "new map in Quetzal",
+      "proposed_name": "Kanto_MtMoon_Route4Cave"
+    }
+  }
+}

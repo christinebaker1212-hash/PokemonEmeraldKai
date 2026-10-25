@@ -1,0 +1,100 @@
+{
+  "id": "MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F",
+  "name": "Kanto_PalletTown_PlayersHouse_2F",
+  "layout": "LAYOUT_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F",
+  "music": "MUS_RG_PALLET",
+  "region_map_section": "MAPSEC_PALLET_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_749",
+      "x": 5,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FC18",
+      "flag": "FLAG_QZ_0x2E14"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_1F",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 5,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_PlayersHouse_2F_EventScript_8418AE3"
+    },
+    {
+      "type": "sign",
+      "x": 1,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_PlayersHouse_2F_EventScript_8418AF5"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_PlayersHouse_2F_EventScript_8418AEC"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_PlayersHouse_2F_EventScript_8418B06"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 6,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PalletTown_PlayersHouse_2F_EventScript_8418B06"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 120,
+    "region": "kanto",
+    "header": "0x89388D8",
+    "layout_id": 686,
+    "mapsec_index": 88,
+    "mapsec_name": "PALLET TOWN",
+    "music_id": 512,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PalletTown_PlayersHouse_2F"
+    }
+  }
+}

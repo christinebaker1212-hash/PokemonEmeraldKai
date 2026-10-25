@@ -1,0 +1,338 @@
+{
+  "id": "MAP_KANTO_PEWTER_CITY",
+  "name": "Kanto_PewterCity",
+  "layout": "LAYOUT_KANTO_PEWTER_CITY",
+  "music": "MUS_RG_PEWTER",
+  "region_map_section": "MAPSEC_PEWTER_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_ROUTE2",
+      "offset": 12,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_KANTO_ROUTE3",
+      "offset": 10,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16150",
+      "x": 6,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_8415E86",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16158",
+      "x": 33,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_8415E8F",
+      "flag": "FLAG_QZ_0x21A7"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16132",
+      "x": 21,
+      "y": 28,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_841603C",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16113",
+      "x": 33,
+      "y": 27,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_8416055",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16110",
+      "x": 42,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_84159AE",
+      "flag": "FLAG_QZ_0x21A5"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 30,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_12"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 7,
+      "y": 25,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 8,
+      "y": 25,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 8,
+      "y": 24,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 9,
+      "y": 25,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C303A",
+      "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_748",
+      "x": 28,
+      "y": 27,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2DF6"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_MUSEUM_1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 25,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_MUSEUM_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 15,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_GYM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 28,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_MART",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 33,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_HOUSE1",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_POKEMON_CENTER_1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_HOUSE2",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 42,
+      "y": 21,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511D",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_EventScript_8415B9F"
+    },
+    {
+      "type": "trigger",
+      "x": 42,
+      "y": 22,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511D",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_EventScript_8415BAB"
+    },
+    {
+      "type": "trigger",
+      "x": 42,
+      "y": 23,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511D",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_EventScript_8415BB7"
+    },
+    {
+      "type": "trigger",
+      "x": 43,
+      "y": 23,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511D",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_EventScript_8415BC3"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_EventScript_8416090"
+    },
+    {
+      "type": "sign",
+      "x": 39,
+      "y": 19,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_EventScript_8416087"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 16,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_EventScript_8416099"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 30,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_EventScript_841607E"
+    },
+    {
+      "type": "sign",
+      "x": 31,
+      "y": 25,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_EventScript_84160B1"
+    },
+    {
+      "type": "hidden_item",
+      "x": 6,
+      "y": 3,
+      "elevation": 3,
+      "item": "ITEM_POKE_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_112"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 59,
+    "region": "kanto",
+    "header": "0x893822C",
+    "layout_id": 713,
+    "mapsec_index": 90,
+    "mapsec_name": "PEWTER CITY",
+    "music_id": 526,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PewterCity"
+    }
+  }
+}

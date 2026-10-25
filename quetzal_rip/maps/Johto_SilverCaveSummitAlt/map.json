@@ -1,0 +1,60 @@
+{
+  "id": "MAP_JOHTO_SILVER_CAVE_SUMMIT_ALT",
+  "name": "Johto_SilverCaveSummitAlt",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_SUMMIT_ALT",
+  "music": "MUS_QZ_65535",
+  "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
+  "requires_flash": false,
+  "weather": "WEATHER_SNOW",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10027",
+      "x": 10,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83E05E8",
+      "flag": "FLAG_QZ_0x1063"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_ROOM3",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 120,
+    "region": "johto",
+    "header": "0x8935FD4",
+    "layout_id": 562,
+    "mapsec_index": 23,
+    "mapsec_name": "MT. SILVER",
+    "music_id": 65535,
+    "weather_id": 4,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_MtSilver_Area4"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "id": "MAP_JOHTO_SILVER_CAVE_ROOM2",
+  "name": "Johto_SilverCaveRoom2",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_ROOM2",
+  "music": "MUS_QZ_636",
+  "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_86",
+      "x": 48,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_837EF35",
+      "flag": "FLAG_TEMP_5"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_86",
+      "x": 47,
+      "y": 2,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_837EF35",
+      "flag": "FLAG_TEMP_4"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_86",
+      "x": 3,
+      "y": 26,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_837EF35",
+      "flag": "FLAG_TEMP_3"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_86",
+      "x": 3,
+      "y": 25,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_837EF35",
+      "flag": "FLAG_TEMP_2"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_86",
+      "x": 3,
+      "y": 24,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_837EF35",
+      "flag": "FLAG_TEMP_1"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 25,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_ROOM1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 26,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 35,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 48,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 48,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 48,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 25,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "6"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 113,
+    "region": "johto",
+    "header": "0x8935F10",
+    "layout_id": 555,
+    "mapsec_index": 23,
+    "mapsec_name": "MT. SILVER",
+    "music_id": 636,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_MtSilver_Cave4"
+    }
+  }
+}

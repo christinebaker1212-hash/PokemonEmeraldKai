@@ -1,0 +1,593 @@
+{
+  "id": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+  "name": "Johto_OlivineLighthouse",
+  "layout": "LAYOUT_JOHTO_OLIVINE_LIGHTHOUSE",
+  "music": "MUS_QZ_636",
+  "region_map_section": "MAPSEC_JOHTO_LIGHTHOUSE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_24",
+      "x": 19,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59F7",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_49",
+      "x": 5,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59EA",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_49",
+      "x": 47,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_LEFT_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5AE0",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_48",
+      "x": 43,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5AF7",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_49",
+      "x": 67,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5C54",
+      "flag": "0"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16046",
+      "x": 61,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_UP_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5C3D",
+      "flag": "0"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_48",
+      "x": 78,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5C6B",
+      "flag": "0"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_49",
+      "x": 101,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5E96",
+      "flag": "0"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16015",
+      "x": 101,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E5EAD",
+      "flag": "0"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16046",
+      "x": 127,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E6095",
+      "flag": "0"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_49",
+      "x": 126,
+      "y": 12,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_OlivineLighthouse_EventScript_83E607E",
+      "flag": "0"
+    },
+    {
+      "local_id": "12",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16026",
+      "x": 156,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E6220",
+      "flag": "FLAG_QZ_0x10B7"
+    },
+    {
+      "local_id": "13",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_437",
+      "x": 156,
+      "y": 8,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x56",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E6275",
+      "flag": "0"
+    },
+    {
+      "local_id": "14",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 149,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59DD",
+      "flag": "FLAG_QZ_0x10F8"
+    },
+    {
+      "local_id": "15",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 135,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59D0",
+      "flag": "FLAG_QZ_0x10F7"
+    },
+    {
+      "local_id": "16",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 125,
+      "y": 15,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83E42D0",
+      "flag": "FLAG_QZ_0x1140"
+    },
+    {
+      "local_id": "17",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 119,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59B6",
+      "flag": "FLAG_QZ_0x10F5"
+    },
+    {
+      "local_id": "18",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 66,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineLighthouse_EventScript_83E59A9",
+      "flag": "FLAG_QZ_0x10F4"
+    },
+    {
+      "local_id": "19",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_401",
+      "x": 156,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x11D8"
+    },
+    {
+      "local_id": "20",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_750",
+      "x": 19,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x1241"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 5,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 34,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 36,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 62,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 69,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 75,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 97,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 104,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 90,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 96,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "12"
+    },
+    {
+      "x": 120,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 127,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 129,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "14"
+    },
+    {
+      "x": 156,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 166,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "37"
+    },
+    {
+      "x": 167,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "38"
+    },
+    {
+      "x": 136,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 137,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "20"
+    },
+    {
+      "x": 107,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 108,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 107,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "25"
+    },
+    {
+      "x": 108,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "26"
+    },
+    {
+      "x": 97,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "29"
+    },
+    {
+      "x": 98,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 78,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 79,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 78,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "31"
+    },
+    {
+      "x": 79,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "32"
+    },
+    {
+      "x": 67,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 68,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 49,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 50,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 49,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "35"
+    },
+    {
+      "x": 50,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "36"
+    },
+    {
+      "x": 20,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 136,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 137,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_LIGHTHOUSE",
+      "dest_warp_id": "16"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 9,
+    "region": "johto",
+    "header": "0x8936178",
+    "layout_id": 577,
+    "mapsec_index": 53,
+    "mapsec_name": "LIGHTHOUSE",
+    "music_id": 636,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "OlivineLighthouse6F",
+      "text_match": 0.82,
+      "renamed_from": "Johto_OlivineLighthouse6F"
+    }
+  }
+}

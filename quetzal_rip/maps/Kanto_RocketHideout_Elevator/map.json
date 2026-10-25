@@ -1,0 +1,60 @@
+{
+  "id": "MAP_KANTO_ROCKET_HIDEOUT_ELEVATOR",
+  "name": "Kanto_RocketHideout_Elevator",
+  "layout": "LAYOUT_KANTO_ROCKET_HIDEOUT_ELEVATOR",
+  "music": "MUS_RG_ROCKET_HIDEOUT",
+  "region_map_section": "MAPSEC_ROCKET_HIDEOUT",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 5,
+      "elevation": 3,
+      "dest_map": "MAP_DYNAMIC",
+      "dest_warp_id": "127"
+    },
+    {
+      "x": 2,
+      "y": 5,
+      "elevation": 3,
+      "dest_map": "MAP_DYNAMIC",
+      "dest_warp_id": "127"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 0,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_RocketHideout_Elevator_EventScript_84111D4"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 46,
+    "region": "kanto",
+    "header": "0x89372F8",
+    "layout_id": 857,
+    "mapsec_index": 133,
+    "mapsec_name": "ROCKET HIDEOUT",
+    "music_id": 486,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "RocketHideout_Elevator"
+    }
+  }
+}

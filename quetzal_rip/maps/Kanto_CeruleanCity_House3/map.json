@@ -1,0 +1,87 @@
+{
+  "id": "MAP_KANTO_CERULEAN_CITY_HOUSE3",
+  "name": "Kanto_CeruleanCity_House3",
+  "layout": "LAYOUT_KANTO_CERULEAN_CITY_HOUSE3",
+  "music": "MUS_RG_FUCHSIA",
+  "region_map_section": "MAPSEC_CERULEAN_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 2,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CeruleanCity_House3_EventScript_841A9AF",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16175",
+      "x": 7,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CeruleanCity_House3_EventScript_841A9A6",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 3,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 4,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 38,
+    "num": 13,
+    "region": "kanto",
+    "header": "0x8938AEC",
+    "layout_id": 689,
+    "mapsec_index": 91,
+    "mapsec_name": "CERULEAN CITY",
+    "music_id": 520,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "CeruleanCity_House3"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "id": "MAP_KANTO_THREE_ISLAND_HARBOR",
+  "name": "Kanto_ThreeIsland_Harbor",
+  "layout": "LAYOUT_KANTO_BIRTH_ISLAND_HARBOR",
+  "music": "MUS_RG_SEVII_123",
+  "region_map_section": "MAPSEC_THREE_ISLE_PORT",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16196",
+      "x": 8,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16193",
+      "x": 8,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_ThreeIsland_Harbor_EventScript_8421BAC",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_PORT",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 39,
+    "num": 28,
+    "region": "kanto",
+    "header": "0x8939A58",
+    "layout_id": 936,
+    "mapsec_index": 154,
+    "mapsec_name": "THREE ISLE PORT",
+    "music_id": 547,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "ThreeIsland_Harbor"
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "id": "MAP_KANTO_POKEMON_MANSION_1F",
+  "name": "Kanto_PokemonMansion_1F",
+  "layout": "LAYOUT_KANTO_POKEMON_MANSION_1F",
+  "music": "MUS_RG_POKE_MANSION",
+  "region_map_section": "MAPSEC_POKEMON_MANSION",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 22,
+      "y": 24,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_PokemonMansion_1F_EventScript_8411F68",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 29,
+      "y": 32,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PokemonMansion_1F_EventScript_846BE33",
+      "flag": "FLAG_QZ_0x22A6"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 22,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PokemonMansion_1F_EventScript_846BE40",
+      "flag": "FLAG_QZ_0x22A7"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 27,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PokemonMansion_1F_EventScript_846C04B",
+      "flag": "FLAG_QZ_0x22A8"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16220",
+      "x": 8,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_PokemonMansion_1F_EventScript_8411F7F",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 33,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 33,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 9,
+      "y": 33,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 13,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_MANSION_2F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 25,
+      "y": 27,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_MANSION_B1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 34,
+      "y": 33,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 35,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 22,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_MANSION_3F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 20,
+      "y": 22,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_MANSION_3F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 11,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_POKEMON_MANSION_2F",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_PokemonMansion_1F_EventScript_8411F54"
+    },
+    {
+      "type": "hidden_item",
+      "x": 2,
+      "y": 21,
+      "elevation": 0,
+      "item": "ITEM_MOON_STONE",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_31"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 59,
+    "region": "kanto",
+    "header": "0x8937464",
+    "layout_id": 776,
+    "mapsec_index": 135,
+    "mapsec_name": "POKéMON MANSION",
+    "music_id": 501,
+    "weather_id": 11,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PokemonMansion_1F"
+    }
+  }
+}

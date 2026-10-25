@@ -1,0 +1,8 @@
+Kanto_SevenIsland_TanobyRuins_LiptooChamber_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_SevenIsland_TanobyRuins_LiptooChamber_EventScript_8414AAC
+	.byte 0
+
+Kanto_SevenIsland_TanobyRuins_LiptooChamber_EventScript_8414AAC::
+	call Quetzal_EventScript_8459544
+	call Quetzal_EventScript_840FBB5
+	end

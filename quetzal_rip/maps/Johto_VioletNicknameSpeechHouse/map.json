@@ -1,0 +1,74 @@
+{
+  "id": "MAP_JOHTO_VIOLET_NICKNAME_SPEECH_HOUSE",
+  "name": "Johto_VioletNicknameSpeechHouse",
+  "layout": "LAYOUT_JOHTO_VIOLET_NICKNAME_SPEECH_HOUSE",
+  "music": "MUS_QZ_613",
+  "region_map_section": "MAPSEC_JOHTO_VIOLET_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_24",
+      "x": 5,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_VioletNicknameSpeechHouse_EventScript_83FFB56",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16",
+      "x": 8,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP_AND_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_VioletNicknameSpeechHouse_EventScript_83FFB49",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_VIOLET_CITY",
+      "dest_warp_id": "5"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 105,
+    "region": "johto",
+    "header": "0x8936BF8",
+    "layout_id": 673,
+    "mapsec_index": 2,
+    "mapsec_name": "VIOLET CITY",
+    "music_id": 613,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "VioletNicknameSpeechHouse",
+      "text_match": 1.14
+    }
+  }
+}

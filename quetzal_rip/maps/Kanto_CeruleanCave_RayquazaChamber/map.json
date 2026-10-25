@@ -1,0 +1,61 @@
+{
+  "id": "MAP_KANTO_CERULEAN_CAVE_RAYQUAZA_CHAMBER",
+  "name": "Kanto_CeruleanCave_RayquazaChamber",
+  "layout": "LAYOUT_KANTO_CERULEAN_CAVE_RAYQUAZA_CHAMBER",
+  "music": "MUS_RG_SEVII_CAVE",
+  "region_map_section": "MAPSEC_CERULEAN_CAVE",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_640",
+      "x": 9,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2EA8"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CERULEAN_CAVE_2F",
+      "dest_warp_id": "6"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 39,
+    "num": 36,
+    "region": "kanto",
+    "header": "0x8939B38",
+    "layout_id": 992,
+    "mapsec_index": 141,
+    "mapsec_name": "CERULEAN CAVE",
+    "music_id": 543,
+    "weather_id": 11,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": null,
+      "note": "new map in Quetzal",
+      "proposed_name": "Kanto_CeruleanCave_RayquazaChamber"
+    }
+  }
+}

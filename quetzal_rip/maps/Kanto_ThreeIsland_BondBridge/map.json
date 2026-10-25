@@ -1,0 +1,239 @@
+{
+  "id": "MAP_KANTO_THREE_ISLAND_BOND_BRIDGE",
+  "name": "Kanto_ThreeIsland_BondBridge",
+  "layout": "LAYOUT_KANTO_THREE_ISLAND_BOND_BRIDGE",
+  "music": "MUS_RG_ROUTE3",
+  "region_map_section": "MAPSEC_BOND_BRIDGE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_THREE_ISLAND",
+      "offset": 0,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16216",
+      "x": 27,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "5",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C336",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16216",
+      "x": 68,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "2",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C374",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16210",
+      "x": 33,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C3B2",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16210",
+      "x": 50,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WALK_LEFT_AND_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C3F0",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16205",
+      "x": 36,
+      "y": 4,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C42E",
+      "flag": "0"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16152",
+      "x": 77,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C46C",
+      "flag": "0"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16152",
+      "x": 78,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_845C4B2",
+      "flag": "0"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 72,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_12"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16127",
+      "x": 86,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_846B413",
+      "flag": "FLAG_TEMP_13"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1307",
+      "x": 77,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x23C1"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 12,
+      "y": 6,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_BERRY_FOREST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 6,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_THREE_ISLAND_BERRY_FOREST",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_8418470"
+    },
+    {
+      "type": "hidden_item",
+      "x": 61,
+      "y": 5,
+      "elevation": 0,
+      "item": "ITEM_MAX_REPEL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_165"
+    },
+    {
+      "type": "hidden_item",
+      "x": 44,
+      "y": 12,
+      "elevation": 3,
+      "item": "ITEM_PEARL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_166"
+    },
+    {
+      "type": "hidden_item",
+      "x": 33,
+      "y": 7,
+      "elevation": 3,
+      "item": "ITEM_STARDUST",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_167"
+    },
+    {
+      "type": "sign",
+      "x": 91,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_ThreeIsland_BondBridge_EventScript_8418479"
+    }
+  ],
+  "quetzal": {
+    "group": 37,
+    "num": 105,
+    "region": "kanto",
+    "header": "0x8938734",
+    "layout_id": 872,
+    "mapsec_index": 153,
+    "mapsec_name": "BOND BRIDGE",
+    "music_id": 505,
+    "weather_id": 2,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "ThreeIsland_BondBridge"
+    }
+  }
+}

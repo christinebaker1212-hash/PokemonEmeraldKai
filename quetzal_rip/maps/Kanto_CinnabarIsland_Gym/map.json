@@ -1,0 +1,306 @@
+{
+  "id": "MAP_KANTO_CINNABAR_ISLAND_GYM",
+  "name": "Kanto_CinnabarIsland_Gym",
+  "layout": "LAYOUT_KANTO_CINNABAR_ISLAND_GYM",
+  "music": "MUS_RG_GYM",
+  "region_map_section": "MAPSEC_CINNABAR_ISLAND",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_GYM",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16203",
+      "x": 25,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DD46",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 25,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DC9E",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 17,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DCB5",
+      "flag": "0"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16203",
+      "x": 16,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DD72",
+      "flag": "0"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 16,
+      "y": 18,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DCE1",
+      "flag": "0"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16203",
+      "x": 4,
+      "y": 19,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DD9E",
+      "flag": "0"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 4,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DD1A",
+      "flag": "0"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16108",
+      "x": 5,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DBDA",
+      "flag": "0"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16139",
+      "x": 24,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DDCA",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 24,
+      "y": 23,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 25,
+      "y": 23,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 26,
+      "y": 23,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CINNABAR_ISLAND",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 20,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DDE9"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 20,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DDE9"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DE07"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DE13"
+    },
+    {
+      "type": "sign",
+      "x": 15,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DEFC"
+    },
+    {
+      "type": "sign",
+      "x": 16,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DF08"
+    },
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DFDA"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841DFE6"
+    },
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E0B1"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E0BD"
+    },
+    {
+      "type": "sign",
+      "x": 1,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E188"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E194"
+    },
+    {
+      "type": "sign",
+      "x": 1,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E25F"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_841E26B"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_CinnabarIsland_Gym_EventScript_845D2D8"
+    }
+  ],
+  "quetzal": {
+    "group": 38,
+    "num": 65,
+    "region": "kanto",
+    "header": "0x893909C",
+    "layout_id": 708,
+    "mapsec_index": 96,
+    "mapsec_name": "CINNABAR ISLAND",
+    "music_id": 487,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "CinnabarIsland_Gym"
+    }
+  }
+}

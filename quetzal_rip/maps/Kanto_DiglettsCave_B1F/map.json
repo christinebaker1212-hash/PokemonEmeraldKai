@@ -1,0 +1,66 @@
+{
+  "id": "MAP_KANTO_DIGLETTS_CAVE_B1F",
+  "name": "Kanto_DiglettsCave_B1F",
+  "layout": "LAYOUT_KANTO_DIGLETTS_CAVE_B1F",
+  "music": "MUS_RG_VIRIDIAN_FOREST",
+  "region_map_section": "MAPSEC_DIGLETTS_CAVE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_974",
+      "x": 43,
+      "y": 40,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2912"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 3,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_DIGLETTS_CAVE_NORTH_ENTRANCE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 82,
+      "y": 71,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_DIGLETTS_CAVE_SOUTH_ENTRANCE",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 36,
+    "num": 37,
+    "region": "kanto",
+    "header": "0x89371FC",
+    "layout_id": 757,
+    "mapsec_index": 131,
+    "mapsec_name": "DIGLETT’S CAVE",
+    "music_id": 499,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "DiglettsCave_B1F"
+    }
+  }
+}

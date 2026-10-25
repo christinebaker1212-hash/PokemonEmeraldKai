@@ -1,0 +1,7 @@
+Kanto_FiveIsland_LostCave_Entrance_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_FiveIsland_LostCave_Entrance_EventScript_84149AE
+	.byte 0
+
+Kanto_FiveIsland_LostCave_Entrance_EventScript_84149AE::
+	setflag FLAG_QZ_0x223A
+	end

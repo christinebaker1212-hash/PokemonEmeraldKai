@@ -1,0 +1,2709 @@
+[
+ {
+  "name": "gTileset_Emerald_87910E8",
+  "quetzal_addr": "0x87910E8",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 512,
+  "metatiles": 512,
+  "png_palette": 0,
+  "anim_callback": "0x80F08D9",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CinnabarIsland_PrimalChamber"
+  ],
+  "source": "also used by 227 Hoenn maps: a stock Emerald tileset"
+ },
+ {
+  "name": "gTileset_Emerald_87912B0",
+  "quetzal_addr": "0x87912B0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 425,
+  "metatiles": 414,
+  "png_palette": 6,
+  "anim_callback": "0x80F0CF5",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CinnabarIsland_PrimalChamber"
+  ],
+  "source": "also used by 44 Hoenn maps: a stock Emerald tileset"
+ },
+ {
+  "name": "gTileset_Johto_AzaleaTown",
+  "quetzal_addr": "0x87917F8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 144,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaTown",
+   "Johto_Route33"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_AzaleaGym",
+  "quetzal_addr": "0x8791810",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 135,
+  "png_palette": 0,
+  "anim_callback": "0x80F194D",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaGym"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_CharcoalKiln",
+  "quetzal_addr": "0x8791828",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 180,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_CharcoalKiln",
+   "Johto_Route39Barn"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_EcruteakCityNorth",
+  "quetzal_addr": "0x8791840",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EcruteakCityNorth"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_CianwoodPharmacy",
+  "quetzal_addr": "0x8791858",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 66,
+  "png_palette": 0,
+  "anim_callback": "0x80F0D71",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_CianwoodPharmacy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_BlackthornCity",
+  "quetzal_addr": "0x8791870",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 151,
+  "png_palette": 1,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BlackthornCity",
+   "Johto_SilverCaveMountainside",
+   "Johto_Route26South",
+   "Johto_Route45"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_BlackthornGym1F",
+  "quetzal_addr": "0x8791888",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 330,
+  "png_palette": 10,
+  "anim_callback": "0x80F0B01",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BlackthornGym1F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_BurnedTower1F",
+  "quetzal_addr": "0x87918A0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 352,
+  "metatiles": 258,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BurnedTower1F",
+   "Johto_BurnedTowerB1F",
+   "Johto_EmbeddedTower"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodGym",
+  "quetzal_addr": "0x87918B8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 169,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodGym",
+   "Johto_OlivineCafe"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_CliffCave",
+  "quetzal_addr": "0x87918D0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 296,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto",
+   "kanto"
+  ],
+  "used_by": [
+   "Johto_CliffCave",
+   "Johto_CliffEdgeCave",
+   "Johto_DarkCaveBlackthornEntrance",
+   "Johto_DarkCaveVioletEntrance",
+   "Johto_TohjoFalls",
+   "Johto_TohjoFallsGiovannisRoom",
+   "Johto_UnionCave1F",
+   "Johto_UnionCaveB1F",
+   "Johto_UnionCaveB2F",
+   "Johto_VictoryRoad3F",
+   "Johto_VictoryRoad2F",
+   "Johto_VictoryRoad1F",
+   "...2 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_DragonsDenB1F",
+  "quetzal_addr": "0x87918E8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 251,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_DragonsDenB1F",
+   "Johto_DragonsDen1F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_MountMortar1FInside",
+  "quetzal_addr": "0x8791900",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_MountMortar1FInside",
+   "Johto_MountMortar1FOutside",
+   "Johto_MountMortar2FInside",
+   "Johto_MountMortarB1F",
+   "Johto_SilverCaveItemRoom",
+   "Johto_MtSilver_Cave2",
+   "Johto_SilverCaveRoom1",
+   "Johto_SilverCaveRoom2",
+   "Johto_SilverCaveRoom3",
+   "Johto_SlowpokeWellB1F",
+   "Johto_SlowpokeWellB2F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_IcePath1F",
+  "quetzal_addr": "0x8791918",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_IcePath1F",
+   "Johto_IcePathB1F",
+   "Johto_IcePathB2FMahoganySide",
+   "Johto_IcePathB2FBlackthornSide",
+   "Johto_IcePathB3F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_CherrygroveCity",
+  "quetzal_addr": "0x8791930",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 200,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_CherrygroveCity",
+   "Johto_Route30",
+   "Johto_Route31",
+   "Johto_Route46"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_CianwoodCity",
+  "quetzal_addr": "0x8791948",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 240,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_CianwoodCity",
+   "Johto_Route41",
+   "Johto_Route44",
+   "Johto_Route47",
+   "Johto_Route48",
+   "Johto_SafariZone_Beach"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_CeruleanGym",
+  "quetzal_addr": "0x8791960",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_CianwoodGym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/cerulean_gym (first 84 metatiles)"
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodDeptStore1F",
+  "quetzal_addr": "0x8791978",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodDeptStore1F",
+   "Johto_GoldenrodDeptStore2F",
+   "Johto_GoldenrodDeptStore3F",
+   "Johto_GoldenrodDeptStore4F",
+   "Johto_GoldenrodDeptStore5F",
+   "Johto_GoldenrodDeptStore6F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_DragonShrine",
+  "quetzal_addr": "0x8791990",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 257,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_DragonShrine"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_PokemonTower",
+  "quetzal_addr": "0x87919A8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EcruteakGym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pokemon_tower (first 101 metatiles)"
+ },
+ {
+  "name": "gTileset_Johto_EcruteakTinTowerEntrance",
+  "quetzal_addr": "0x87919C0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": "0x80F18CD",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EcruteakTinTowerEntrance",
+   "Johto_WiseTriosRoom",
+   "Johto_DanceTheater",
+   "Johto_OlivineGym",
+   "Johto_VioletGym"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_EcruteakCity",
+  "quetzal_addr": "0x87919D8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EcruteakCity",
+   "Johto_Route37"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodGameCorner",
+  "quetzal_addr": "0x87919F0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 173,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodGameCorner"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_IlexForestAzaleaGate",
+  "quetzal_addr": "0x8791A08",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 197,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_IlexForestAzaleaGate",
+   "Johto_Route38EcruteakGate",
+   "Johto_Route42EcruteakGate",
+   "Johto_Route35GoldenrodGate",
+   "Johto_Route34IlexForestGate",
+   "Johto_Route43MahoganyGate",
+   "Johto_Route35NationalParkGate",
+   "Johto_Route29Route46Gate",
+   "Johto_Route31VioletGate",
+   "Johto_Route40TrainerHillGate",
+   "Johto_Route43Gate",
+   "Johto_Route32RuinsOfAlphGate",
+   "...2 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodCity",
+  "quetzal_addr": "0x8791A20",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodCity",
+   "Johto_Route34",
+   "Johto_Route35",
+   "Johto_Route34_Copy",
+   "Johto_GoldenrodCity_Copy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodMagnetTrainStation",
+  "quetzal_addr": "0x8791A38",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 376,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodMagnetTrainStation"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodDeptStoreElevator",
+  "quetzal_addr": "0x8791A50",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodDeptStoreElevator",
+   "Johto_RadioTower1F",
+   "Johto_RadioTower2F",
+   "Johto_RadioTower3F",
+   "Johto_RadioTower4F",
+   "Johto_RadioTower5F",
+   "Johto_GoldenrodUndergroundSwitchRoomEntrances",
+   "Johto_TeamRocketBaseB1F",
+   "Johto_TeamRocketBaseB2F",
+   "Johto_TeamRocketBaseB3F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodUndergroundEntrances",
+  "quetzal_addr": "0x8791A68",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodUndergroundEntrances",
+   "Johto_GoldenrodUnderground"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodDeptStoreB1F",
+  "quetzal_addr": "0x8791A80",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodDeptStoreB1F",
+   "Johto_GoldenrodUndergroundWarehouse"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_HallOfFame",
+  "quetzal_addr": "0x8791A98",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 118,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_HallOfFame"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_MahoganyMart1F",
+  "quetzal_addr": "0x8791AB0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 75,
+  "png_palette": 1,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_MahoganyMart1F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_BlackthornDragonSpeechHouse",
+  "quetzal_addr": "0x8791AC8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 216,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BlackthornDragonSpeechHouse",
+   "Johto_BlackthornEmysHouse",
+   "Johto_MoveDeletersHouse",
+   "Johto_CherrygroveGymSpeechHouse",
+   "Johto_GuideGentsHouse",
+   "Johto_CherrygroveEvolutionSpeechHouse",
+   "Johto_CianwoodCity_House1",
+   "Johto_CianwoodLugiaSpeechHouse",
+   "Johto_ManiasHouse",
+   "Johto_EcruteakLugiaSpeechHouse",
+   "Johto_EcruteakItemfinderHouse",
+   "Johto_BillsFamilysHouse",
+   "...22 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_IlexForest",
+  "quetzal_addr": "0x8791AE0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 59,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_IlexForest",
+   "Johto_IlexForest_Copy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_IndigoPlateau",
+  "quetzal_addr": "0x8791AF8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_IndigoPlateau",
+   "Johto_Route23"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodBikeShop",
+  "quetzal_addr": "0x8791B10",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 66,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodBikeShop"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_AzaleaMart",
+  "quetzal_addr": "0x8791B28",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 114,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaMart",
+   "Johto_BlackthornMart",
+   "Johto_CherrygroveMart",
+   "Johto_EcruteakMart",
+   "Johto_OlivineMart",
+   "Johto_VioletMart"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary1",
+  "quetzal_addr": "0x8791B40",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaGym",
+   "Johto_CharcoalKiln",
+   "Johto_KurtsHouse",
+   "Johto_AzaleaMart",
+   "Johto_AzaleaPokecenter1F",
+   "Johto_BlackthornGym1F",
+   "Johto_BlackthornDragonSpeechHouse",
+   "Johto_BlackthornEmysHouse",
+   "Johto_MoveDeletersHouse",
+   "Johto_BlackthornMart",
+   "Johto_BlackthornPokecenter1F",
+   "Johto_BurnedTower1F",
+   "...137 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary2",
+  "quetzal_addr": "0x8791B58",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F16AD",
+  "regions": [
+   "johto",
+   "kanto"
+  ],
+  "used_by": [
+   "Johto_CherrygroveCity",
+   "Johto_CliffCave",
+   "Johto_CliffEdgeCave",
+   "Johto_DarkCaveBlackthornEntrance",
+   "Johto_DarkCaveVioletEntrance",
+   "Johto_DragonsDen1F",
+   "Johto_GoldenrodCity",
+   "Johto_IcePath1F",
+   "Johto_IcePathB1F",
+   "Johto_IcePathB2FMahoganySide",
+   "Johto_IcePathB2FBlackthornSide",
+   "Johto_IcePathB3F",
+   "...43 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary3",
+  "quetzal_addr": "0x8791B70",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F16AD",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BlackthornCity",
+   "Johto_CianwoodCity",
+   "Johto_DragonsDenB1F",
+   "Johto_LakeOfRage",
+   "Johto_LakeOfRage_Alt",
+   "Johto_MahoganyTown",
+   "Johto_MountMortar1FOutside",
+   "Johto_MountMortar2FInside",
+   "Johto_MountMortarB1F",
+   "Johto_SilverCaveRoom2",
+   "Johto_SilverCaveRoom3",
+   "Johto_SilverCaveMountainside",
+   "...26 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary4",
+  "quetzal_addr": "0x8791B88",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F16AD",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EcruteakCityNorth",
+   "Johto_EcruteakCity"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary5",
+  "quetzal_addr": "0x8791BA0",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F16AD",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaTown",
+   "Johto_IlexForest",
+   "Johto_Route33",
+   "Johto_IlexForest_Copy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Primary6",
+  "quetzal_addr": "0x8791BB8",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F16AD",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_NationalParkBugContest",
+   "Johto_NationalPark"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_AzaleaPokecenter1F",
+  "quetzal_addr": "0x8791BD0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 258,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_AzaleaPokecenter1F",
+   "Johto_BlackthornPokecenter1F",
+   "Johto_CherrygrovePokecenter1F",
+   "Johto_CianwoodPokecenter1F",
+   "Johto_EcruteakPokecenter1F",
+   "Johto_GoldenrodPokecenter1F",
+   "Johto_MahoganyPokecenter1F",
+   "Johto_OlivinePokecenter1F",
+   "Johto_Route32Pokecenter1F",
+   "Johto_SafariZoneGatePokecenter1F",
+   "Johto_VioletPokecenter1F",
+   "Johto_GoldenrodPokecenter1F_Copy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_KurtsHouse",
+  "quetzal_addr": "0x8791BE8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_KurtsHouse"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_OlivineLighthouse",
+  "quetzal_addr": "0x8791C00",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 352,
+  "metatiles": 344,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_OlivineLighthouse"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_LakeOfRage",
+  "quetzal_addr": "0x8791C18",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 318,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_LakeOfRage",
+   "Johto_LakeOfRage_Alt",
+   "Johto_MahoganyTown",
+   "Johto_SilverCaveOutside",
+   "Johto_Route42",
+   "Johto_Route43"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_SilverCaveSnowySlope",
+  "quetzal_addr": "0x8791C30",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_SilverCaveSnowySlope",
+   "Johto_SilverCaveSummit",
+   "Johto_SilverCaveSummitAlt"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_NationalParkBugContest",
+  "quetzal_addr": "0x8791C48",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 130,
+  "png_palette": 0,
+  "anim_callback": "0x80F1799",
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_NationalParkBugContest",
+   "Johto_NationalPark"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_NewBarkTown",
+  "quetzal_addr": "0x8791C60",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 144,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_NewBarkTown",
+   "Johto_Route27",
+   "Johto_Route29"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_OlivineCity",
+  "quetzal_addr": "0x8791C78",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 240,
+  "metatiles": 340,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_OlivineCity",
+   "Johto_Route40"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_PlayersHouse1F",
+  "quetzal_addr": "0x8791C90",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 30,
+  "png_palette": 4,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_PlayersHouse1F",
+   "Johto_PlayersHouse2F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_IndigoPlateauPokecenter1F",
+  "quetzal_addr": "0x8791CA8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 255,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_IndigoPlateauPokecenter1F",
+   "Johto_SilverCavePokecenter1F",
+   "Johto_VictoryRoadGate"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodFlowerShop",
+  "quetzal_addr": "0x8791CC0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 202,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodFlowerShop",
+   "Johto_DayCare"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_BrunosRoom",
+  "quetzal_addr": "0x8791CD8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_BrunosRoom",
+   "Johto_LancesRoom",
+   "Johto_KarensRoom",
+   "Johto_KogasRoom",
+   "Johto_WillsRoom"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_OlivinePort",
+  "quetzal_addr": "0x8791CF0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 290,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_OlivinePort",
+   "Johto_OlivineCityPier"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_SproutTower1F",
+  "quetzal_addr": "0x8791D08",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 201,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_SproutTower1F",
+   "Johto_SproutTower2F",
+   "Johto_SproutTower3F",
+   "Johto_TinTower1F",
+   "Johto_TinTower2F",
+   "Johto_TinTower3F",
+   "Johto_TinTower4F",
+   "Johto_TinTower5F",
+   "Johto_TinTower6F",
+   "Johto_TinTower7F",
+   "Johto_TinTower9F",
+   "Johto_TinTower8F",
+   "...2 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Route32",
+  "quetzal_addr": "0x8791D20",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 340,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_Route32"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Route38",
+  "quetzal_addr": "0x8791D38",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 340,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_Route38",
+   "Johto_Route39"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_TanobyRuins",
+  "quetzal_addr": "0x8791D50",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_RuinsOfAlphChambers",
+   "Johto_RuinsOfAlphHoOhWordRoom",
+   "Johto_RuinsOfAlphAerodactylWordRoom",
+   "Johto_RuinsOfAlphOmanyteWordRoom",
+   "Johto_RuinsOfAlphKabutoWordRoom",
+   "Johto_RuinsOfAlphArceusChamber"
+  ],
+  "source": "pokefirered data/tilesets/secondary/tanoby_ruins (first 94 metatiles)"
+ },
+ {
+  "name": "gTileset_Johto_RuinsOfAlphInnerChamber",
+  "quetzal_addr": "0x8791D68",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 200,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_RuinsOfAlphInnerChamber"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_RuinsOfAlphOutside",
+  "quetzal_addr": "0x8791D80",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 186,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_RuinsOfAlphOutside"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_SafariZoneGate",
+  "quetzal_addr": "0x8791D98",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 312,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_SafariZoneGate",
+   "Johto_SafariZone_EntrancePath",
+   "Johto_SafariZone_Desert",
+   "Johto_SafariZone_Forest",
+   "Johto_SafariZoneGate_Area6"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_SafariZoneEntrance",
+  "quetzal_addr": "0x8791DB0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 200,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_SafariZoneEntrance"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_GoldenrodDeptStoreRoof",
+  "quetzal_addr": "0x8791DC8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_GoldenrodDeptStoreRoof",
+   "Johto_GoldenrodDeptStoreRoofAlt"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_MahoganyGym",
+  "quetzal_addr": "0x8791DE0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 496,
+  "metatiles": 200,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_MahoganyGym"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_TrainerHillOutside",
+  "quetzal_addr": "0x8791DF8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_TrainerHillOutside"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_EarlsPokemonAcademy",
+  "quetzal_addr": "0x8791E10",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 64,
+  "metatiles": 50,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_EarlsPokemonAcademy"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Route36",
+  "quetzal_addr": "0x8791E28",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 340,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_Route36",
+   "Johto_VioletCity"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_Route26",
+  "quetzal_addr": "0x8791E40",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 190,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_Route26",
+   "Johto_Route28"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Johto_SafariZone_Plains",
+  "quetzal_addr": "0x8791E58",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 384,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "johto"
+  ],
+  "used_by": [
+   "Johto_SafariZone_Plains",
+   "Johto_SafariZoneGate_Area5",
+   "Johto_WhirlIslandEntrances",
+   "Johto_WhirlIslandB1F",
+   "Johto_WhirlIslands_Cave3",
+   "Johto_WhirlIslands_Cave4",
+   "Johto_WhirlIslands_Cave5",
+   "Johto_WhirlIslandB2F",
+   "Johto_WhirlIslandLugiaChamber"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_BerryForest",
+  "quetzal_addr": "0x8791E70",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 112,
+  "metatiles": 42,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ThreeIsland_BerryForest"
+  ],
+  "source": "pokefirered data/tilesets/secondary/berry_forest"
+ },
+ {
+  "name": "gTileset_Kanto_BikeShop",
+  "quetzal_addr": "0x8791E88",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 64,
+  "metatiles": 42,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeruleanCity_BikeShop"
+  ],
+  "source": "pokefirered data/tilesets/secondary/bike_shop"
+ },
+ {
+  "name": "gTileset_Kanto_Primary7",
+  "quetzal_addr": "0x8791EA0",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_UndergroundPath_NorthEntrance",
+   "Kanto_UndergroundPath_NorthSouthTunnel",
+   "Kanto_UndergroundPath_SouthEntrance",
+   "Kanto_UndergroundPath_WestEntrance",
+   "Kanto_UndergroundPath_EastWestTunnel",
+   "Kanto_UndergroundPath_EastEntrance",
+   "Kanto_RocketHideout_B1F",
+   "Kanto_RocketHideout_B2F",
+   "Kanto_RocketHideout_B3F",
+   "Kanto_RocketHideout_B4F",
+   "Kanto_RocketHideout_Elevator",
+   "Kanto_SilphCo_1F",
+   "...213 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_BurgledHouse",
+  "quetzal_addr": "0x8791EB8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 176,
+  "metatiles": 57,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeruleanCity_House2"
+  ],
+  "source": "pokefirered data/tilesets/secondary/burgled_house"
+ },
+ {
+  "name": "gTileset_Kanto_Cave",
+  "quetzal_addr": "0x8791ED0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 161,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_MtMoon_1F",
+   "Kanto_MtMoon_B1F",
+   "Kanto_MtMoon_B2F",
+   "Kanto_VictoryRoad_1F",
+   "Kanto_VictoryRoad_2F",
+   "Kanto_VictoryRoad_3F",
+   "Kanto_FiveIsland_LostCave_Entrance",
+   "Kanto_FiveIsland_LostCave_Room1",
+   "Kanto_FiveIsland_LostCave_Room2",
+   "Kanto_FiveIsland_LostCave_Room3",
+   "Kanto_FiveIsland_LostCave_Room4",
+   "Kanto_FiveIsland_LostCave_Room5",
+   "...10 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/cave"
+ },
+ {
+  "name": "gTileset_Kanto_CeladonCity",
+  "quetzal_addr": "0x8791EE8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 256,
+  "png_palette": 0,
+  "anim_callback": "0x80F0601",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity",
+   "Kanto_Route7",
+   "Kanto_Route16",
+   "Kanto_Route17",
+   "Kanto_Route18"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_CeladonGym",
+  "quetzal_addr": "0x8791F00",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 112,
+  "metatiles": 64,
+  "png_palette": 0,
+  "anim_callback": "0x80F07A9",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/celadon_gym"
+ },
+ {
+  "name": "gTileset_Kanto_CeruleanCave",
+  "quetzal_addr": "0x8791F18",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 134,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeruleanCave_1F",
+   "Kanto_CeruleanCave_2F",
+   "Kanto_CeruleanCave_B1F"
+  ],
+  "source": "pokefirered data/tilesets/secondary/cerulean_cave"
+ },
+ {
+  "name": "gTileset_Kanto_CeruleanCity",
+  "quetzal_addr": "0x8791F30",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 160,
+  "metatiles": 146,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeruleanCity",
+   "Kanto_Route4",
+   "Kanto_Route5",
+   "Kanto_Route9",
+   "Kanto_Route24",
+   "Kanto_Route25"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_CeruleanGym_2",
+  "quetzal_addr": "0x8791F48",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 128,
+  "metatiles": 84,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeruleanCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/cerulean_gym"
+ },
+ {
+  "name": "gTileset_Kanto_CinnabarGym",
+  "quetzal_addr": "0x8791F60",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 160,
+  "metatiles": 96,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CinnabarIsland_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/cinnabar_gym"
+ },
+ {
+  "name": "gTileset_Kanto_CinnabarIsland",
+  "quetzal_addr": "0x8791F78",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 128,
+  "metatiles": 72,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CinnabarIsland",
+   "Kanto_Route20",
+   "Kanto_Route21_South"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_CeladonCity_Condominiums_1F",
+  "quetzal_addr": "0x8791F90",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 215,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity_Condominiums_1F",
+   "Kanto_CeladonCity_Condominiums_2F",
+   "Kanto_CeladonCity_Condominiums_3F",
+   "Kanto_CeladonCity_Condominiums_Roof"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_DepartmentStore",
+  "quetzal_addr": "0x8791FA8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 208,
+  "metatiles": 246,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity_DepartmentStore_1F",
+   "Kanto_CeladonCity_DepartmentStore_2F",
+   "Kanto_CeladonCity_DepartmentStore_3F",
+   "Kanto_CeladonCity_DepartmentStore_4F",
+   "Kanto_CeladonCity_DepartmentStore_5F",
+   "Kanto_CeladonCity_DepartmentStore_Roof"
+  ],
+  "source": "pokefirered data/tilesets/secondary/department_store"
+ },
+ {
+  "name": "gTileset_Kanto_DiglettsCave",
+  "quetzal_addr": "0x8791FC0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 157,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_DiglettsCave_NorthEntrance",
+   "Kanto_DiglettsCave_B1F",
+   "Kanto_DiglettsCave_SouthEntrance",
+   "Kanto_SevenIsland_SevaultCanyon_TanobyKey"
+  ],
+  "source": "pokefirered data/tilesets/secondary/digletts_cave"
+ },
+ {
+  "name": "gTileset_Kanto_FanClubDaycare",
+  "quetzal_addr": "0x8791FD8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 96,
+  "metatiles": 170,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_LavenderTown_VolunteerPokemonHouse",
+   "Kanto_VermilionCity_PokemonFanClub",
+   "Kanto_SaffronCity_PokemonTrainerFanClub",
+   "Kanto_Route5_PokemonDayCare",
+   "Kanto_FourIsland_PokemonDayCare"
+  ],
+  "source": "pokefirered data/tilesets/secondary/fan_club_daycare"
+ },
+ {
+  "name": "gTileset_Kanto_SafariZone_Center",
+  "quetzal_addr": "0x8791FF0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 192,
+  "metatiles": 204,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SafariZone_Center",
+   "Kanto_SafariZone_East",
+   "Kanto_SafariZone_North",
+   "Kanto_SafariZone_West",
+   "Kanto_FuchsiaCity",
+   "Kanto_Route15",
+   "Kanto_Route19"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_FuchsiaGym",
+  "quetzal_addr": "0x8792008",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 96,
+  "metatiles": 34,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_FuchsiaCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/fuchsia_gym"
+ },
+ {
+  "name": "gTileset_Kanto_GameCorner",
+  "quetzal_addr": "0x8792020",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 176,
+  "metatiles": 152,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity_GameCorner",
+   "Kanto_CeladonCity_GameCorner_PrizeRoom",
+   "Kanto_TwoIsland_JoyfulGameCorner"
+  ],
+  "source": "pokefirered data/tilesets/secondary/game_corner"
+ },
+ {
+  "name": "gTileset_Kanto_General",
+  "quetzal_addr": "0x8792038",
+  "kind": "primary",
+  "compressed": true,
+  "tiles": 640,
+  "metatiles": 640,
+  "png_palette": 0,
+  "anim_callback": "0x80F057D",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianForest",
+   "Kanto_MtMoon_1F",
+   "Kanto_MtMoon_B1F",
+   "Kanto_MtMoon_B2F",
+   "Kanto_SSAnne_Exterior",
+   "Kanto_SSAnne_1F_Corridor",
+   "Kanto_SSAnne_2F_Corridor",
+   "Kanto_SSAnne_3F_Corridor",
+   "Kanto_SSAnne_B1F_Corridor",
+   "Kanto_SSAnne_Deck",
+   "Kanto_SSAnne_Kitchen",
+   "Kanto_SSAnne_CaptainsOffice",
+   "...176 more"
+  ],
+  "source": "pokefirered data/tilesets/primary/general"
+ },
+ {
+  "name": "gTileset_Kanto_GenericBuilding1",
+  "quetzal_addr": "0x8792050",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 64,
+  "metatiles": 24,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PalletTown_PlayersHouse_1F",
+   "Kanto_PalletTown_PlayersHouse_2F",
+   "Kanto_CeruleanCity_House3",
+   "Kanto_CeruleanCity_House4",
+   "Kanto_LavenderTown_House1",
+   "Kanto_LavenderTown_House2",
+   "Kanto_VermilionCity_House1",
+   "Kanto_VermilionCity_House2",
+   "Kanto_VermilionCity_House3",
+   "Kanto_CeladonCity_House1",
+   "Kanto_FuchsiaCity_House1",
+   "Kanto_FuchsiaCity_House3",
+   "...5 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/generic_building_1"
+ },
+ {
+  "name": "gTileset_Kanto_GenericBuilding2",
+  "quetzal_addr": "0x8792068",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 160,
+  "metatiles": 184,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_UndergroundPath_NorthEntrance",
+   "Kanto_UndergroundPath_SouthEntrance",
+   "Kanto_UndergroundPath_WestEntrance",
+   "Kanto_UndergroundPath_EastEntrance",
+   "Kanto_PalletTown_RivalsHouse",
+   "Kanto_ViridianCity_House",
+   "Kanto_PewterCity_House1",
+   "Kanto_PewterCity_House2",
+   "Kanto_CeruleanCity_House1",
+   "Kanto_CeruleanCity_House5",
+   "Kanto_Route2_ViridianForest_SouthEntrance",
+   "Kanto_Route2_House",
+   "...35 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/generic_building_2"
+ },
+ {
+  "name": "gTileset_Kanto_HallOfFame",
+  "quetzal_addr": "0x8792080",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 208,
+  "metatiles": 118,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PokemonLeague_HallOfFame"
+  ],
+  "source": "pokefirered data/tilesets/secondary/hall_of_fame"
+ },
+ {
+  "name": "gTileset_Kanto_IndigoPlateau",
+  "quetzal_addr": "0x8792098",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 176,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_IndigoPlateau_Exterior",
+   "Kanto_Route23"
+  ],
+  "source": "pokefirered data/tilesets/secondary/indigo_plateau"
+ },
+ {
+  "name": "gTileset_Kanto_IslandHarbor",
+  "quetzal_addr": "0x87920B0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 176,
+  "metatiles": 79,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_BirthIsland_Harbor",
+   "Kanto_NavelRock_Harbor",
+   "Kanto_SevenIsland_Harbor",
+   "Kanto_OneIsland_Harbor",
+   "Kanto_TwoIsland_Harbor",
+   "Kanto_FourIsland_Harbor",
+   "Kanto_FiveIsland_Harbor",
+   "Kanto_SixIsland_Harbor",
+   "Kanto_ThreeIsland_Harbor"
+  ],
+  "source": "pokefirered data/tilesets/secondary/island_harbor"
+ },
+ {
+  "name": "gTileset_Kanto_Lab",
+  "quetzal_addr": "0x87920C8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 112,
+  "metatiles": 175,
+  "png_palette": 3,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PalletTown_ProfessorOaksLab",
+   "Kanto_CinnabarIsland_PokemonLab_Entrance",
+   "Kanto_CinnabarIsland_PokemonLab_Lounge",
+   "Kanto_CinnabarIsland_PokemonLab_ResearchRoom",
+   "Kanto_CinnabarIsland_PokemonLab_ExperimentRoom",
+   "Kanto_ThreeIsland_House1"
+  ],
+  "source": "pokefirered data/tilesets/secondary/lab"
+ },
+ {
+  "name": "gTileset_Kanto_LavenderTown",
+  "quetzal_addr": "0x87920E0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 227,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_LavenderTown",
+   "Kanto_Route8",
+   "Kanto_Route10",
+   "Kanto_Route12",
+   "Kanto_Route13",
+   "Kanto_Route14"
+  ],
+  "source": "pokefirered data/tilesets/secondary/lavender_town (first 218 metatiles)"
+ },
+ {
+  "name": "gTileset_Kanto_Mart",
+  "quetzal_addr": "0x87920F8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 48,
+  "metatiles": 67,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianCity_Mart",
+   "Kanto_PewterCity_Mart",
+   "Kanto_CeruleanCity_Mart",
+   "Kanto_LavenderTown_Mart",
+   "Kanto_VermilionCity_Mart",
+   "Kanto_FuchsiaCity_Mart",
+   "Kanto_CinnabarIsland_Mart",
+   "Kanto_SaffronCity_Mart",
+   "Kanto_SevenIsland_Mart",
+   "Kanto_ThreeIsland_Mart",
+   "Kanto_FourIsland_Mart",
+   "Kanto_SixIsland_Mart"
+  ],
+  "source": "pokefirered data/tilesets/secondary/mart"
+ },
+ {
+  "name": "gTileset_Kanto_MtEmber",
+  "quetzal_addr": "0x8792110",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 288,
+  "metatiles": 226,
+  "png_palette": 8,
+  "anim_callback": "0x80F06DD",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_MtEmber_RubyPath_B4F",
+   "Kanto_MtEmber_SummitPath_1F",
+   "Kanto_MtEmber_SummitPath_2F",
+   "Kanto_MtEmber_SummitPath_3F",
+   "Kanto_MtEmber_RubyPath_B5F",
+   "Kanto_MtEmber_RubyPath_1F",
+   "Kanto_MtEmber_RubyPath_B1F",
+   "Kanto_MtEmber_RubyPath_B2F",
+   "Kanto_MtEmber_RubyPath_B3F",
+   "Kanto_MtEmber_RubyPath_B1F_Stairs",
+   "Kanto_MtEmber_RubyPath_B2F_Stairs",
+   "Kanto_OneIsland_KindleRoad_EmberSpa"
+  ],
+  "source": "pokefirered data/tilesets/secondary/mt_ember"
+ },
+ {
+  "name": "gTileset_Kanto_Museum",
+  "quetzal_addr": "0x8792128",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 144,
+  "metatiles": 135,
+  "png_palette": 9,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PewterCity_Museum_1F",
+   "Kanto_PewterCity_Museum_2F",
+   "Kanto_FuchsiaCity_WardensHouse",
+   "Kanto_FuchsiaCity_House2",
+   "Kanto_FiveIsland_ResortGorgeous_House"
+  ],
+  "source": "pokefirered data/tilesets/secondary/museum"
+ },
+ {
+  "name": "gTileset_Kanto_NavelRock",
+  "quetzal_addr": "0x8792140",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 288,
+  "metatiles": 220,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SixIsland_DottedHole_1F",
+   "Kanto_SixIsland_DottedHole_B1F",
+   "Kanto_SixIsland_DottedHole_B2F",
+   "Kanto_SixIsland_DottedHole_B3F",
+   "Kanto_SixIsland_DottedHole_B4F",
+   "Kanto_SixIsland_DottedHole_SapphireRoom",
+   "Kanto_NavelRock_1F",
+   "Kanto_NavelRock_Summit",
+   "Kanto_NavelRock_Base",
+   "Kanto_NavelRock_SummitPath_2F",
+   "Kanto_NavelRock_SummitPath_3F",
+   "Kanto_NavelRock_SummitPath_4F",
+   "...15 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/navel_rock"
+ },
+ {
+  "name": "gTileset_Kanto_PalletTown",
+  "quetzal_addr": "0x8792158",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 80,
+  "metatiles": 89,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PalletTown",
+   "Kanto_Route1",
+   "Kanto_Route21_North"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_PewterCity",
+  "quetzal_addr": "0x8792170",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 288,
+  "metatiles": 88,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PewterCity",
+   "Kanto_Route3"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pewter_city (first 79 metatiles)"
+ },
+ {
+  "name": "gTileset_Kanto_PewterGym",
+  "quetzal_addr": "0x8792188",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 208,
+  "metatiles": 101,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PewterCity_Gym",
+   "Kanto_SaffronCity_Dojo"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pewter_gym"
+ },
+ {
+  "name": "gTileset_Kanto_PokemonCenter",
+  "quetzal_addr": "0x87921A0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 255,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianCity_PokemonCenter_1F",
+   "Kanto_ViridianCity_PokemonCenter_2F",
+   "Kanto_PewterCity_PokemonCenter_1F",
+   "Kanto_PewterCity_PokemonCenter_2F",
+   "Kanto_CeruleanCity_PokemonCenter_1F",
+   "Kanto_CeruleanCity_PokemonCenter_2F",
+   "Kanto_LavenderTown_PokemonCenter_1F",
+   "Kanto_LavenderTown_PokemonCenter_2F",
+   "Kanto_VermilionCity_PokemonCenter_1F",
+   "Kanto_VermilionCity_PokemonCenter_2F",
+   "Kanto_CeladonCity_PokemonCenter_1F",
+   "Kanto_CeladonCity_PokemonCenter_2F",
+   "...26 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pokemon_center"
+ },
+ {
+  "name": "gTileset_Kanto_PokemonLeague",
+  "quetzal_addr": "0x87921B8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 352,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PokemonLeague_LoreleisRoom",
+   "Kanto_PokemonLeague_BrunosRoom",
+   "Kanto_PokemonLeague_AgathasRoom",
+   "Kanto_PokemonLeague_LancesRoom",
+   "Kanto_PokemonLeague_ChampionsRoom"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pokemon_league"
+ },
+ {
+  "name": "gTileset_Kanto_PokemonMansion_1F",
+  "quetzal_addr": "0x87921D0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 352,
+  "metatiles": 258,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PokemonMansion_1F",
+   "Kanto_PokemonMansion_2F",
+   "Kanto_PokemonMansion_3F",
+   "Kanto_PokemonMansion_B1F"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_PokemonTower_2",
+  "quetzal_addr": "0x87921E8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 128,
+  "metatiles": 101,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PokemonTower_1F",
+   "Kanto_PokemonTower_2F",
+   "Kanto_PokemonTower_3F",
+   "Kanto_PokemonTower_4F",
+   "Kanto_PokemonTower_5F",
+   "Kanto_PokemonTower_6F",
+   "Kanto_PokemonTower_7F"
+  ],
+  "source": "pokefirered data/tilesets/secondary/pokemon_tower"
+ },
+ {
+  "name": "gTileset_Kanto_PowerPlant",
+  "quetzal_addr": "0x8792200",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 80,
+  "metatiles": 153,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_PowerPlant"
+  ],
+  "source": "pokefirered data/tilesets/secondary/power_plant"
+ },
+ {
+  "name": "gTileset_Kanto_RestaurantHotel",
+  "quetzal_addr": "0x8792218",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 80,
+  "metatiles": 104,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_CeladonCity_Restaurant",
+   "Kanto_CeladonCity_Hotel"
+  ],
+  "source": "pokefirered data/tilesets/secondary/restaurant_hotel"
+ },
+ {
+  "name": "gTileset_Kanto_RockTunnel",
+  "quetzal_addr": "0x8792230",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 152,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_RockTunnel_1F",
+   "Kanto_RockTunnel_B1F",
+   "Kanto_SixIsland_AlteringCave"
+  ],
+  "source": "pokefirered data/tilesets/secondary/rock_tunnel"
+ },
+ {
+  "name": "gTileset_Kanto_SSAnne_1F_Corridor",
+  "quetzal_addr": "0x8792248",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 256,
+  "metatiles": 336,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SSAnne_1F_Corridor",
+   "Kanto_SSAnne_2F_Corridor",
+   "Kanto_SSAnne_3F_Corridor",
+   "Kanto_SSAnne_B1F_Corridor",
+   "Kanto_SSAnne_Deck",
+   "Kanto_SSAnne_Kitchen",
+   "Kanto_SSAnne_CaptainsOffice",
+   "Kanto_SSAnne_1F_Room1",
+   "Kanto_SSAnne_1F_Room2",
+   "Kanto_SSAnne_1F_Room3",
+   "Kanto_SSAnne_1F_Room4",
+   "Kanto_SSAnne_1F_Room5",
+   "...13 more"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_SafariZoneBuilding",
+  "quetzal_addr": "0x8792260",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 96,
+  "metatiles": 128,
+  "png_palette": 9,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SafariZone_Center_RestHouse",
+   "Kanto_SafariZone_East_RestHouse",
+   "Kanto_SafariZone_North_RestHouse",
+   "Kanto_SafariZone_West_RestHouse",
+   "Kanto_SafariZone_SecretHouse",
+   "Kanto_FuchsiaCity_SafariZone_Entrance",
+   "Kanto_FuchsiaCity_SafariZone_Office",
+   "Kanto_FourIsland_LoreleisHouse"
+  ],
+  "source": "pokefirered data/tilesets/secondary/safari_zone_building"
+ },
+ {
+  "name": "gTileset_Kanto_SaffronCity",
+  "quetzal_addr": "0x8792278",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 272,
+  "metatiles": 211,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SaffronCity",
+   "Kanto_SaffronCity_Connection"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_SaffronGym",
+  "quetzal_addr": "0x8792290",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 96,
+  "metatiles": 46,
+  "png_palette": 12,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SaffronCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/saffron_gym"
+ },
+ {
+  "name": "gTileset_Kanto_School",
+  "quetzal_addr": "0x87922A8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 64,
+  "metatiles": 46,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianCity_School",
+   "Kanto_CeladonCity_Condominiums_RoofRoom"
+  ],
+  "source": "pokefirered data/tilesets/secondary/school"
+ },
+ {
+  "name": "gTileset_Kanto_SeaCottage",
+  "quetzal_addr": "0x87922C0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 80,
+  "metatiles": 59,
+  "png_palette": 9,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_Route25_SeaCottage"
+  ],
+  "source": "pokefirered data/tilesets/secondary/sea_cottage"
+ },
+ {
+  "name": "gTileset_Kanto_SeafoamIslands",
+  "quetzal_addr": "0x87922D8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 320,
+  "metatiles": 248,
+  "png_palette": 8,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SeafoamIslands_1F",
+   "Kanto_SeafoamIslands_B1F",
+   "Kanto_SeafoamIslands_B2F",
+   "Kanto_SeafoamIslands_B3F",
+   "Kanto_SeafoamIslands_B4F",
+   "Kanto_FourIsland_IcefallCave_Entrance",
+   "Kanto_FourIsland_IcefallCave_1F",
+   "Kanto_FourIsland_IcefallCave_B1F",
+   "Kanto_FourIsland_IcefallCave_Back",
+   "Kanto_SevenIsland_House_Room1"
+  ],
+  "source": "pokefirered data/tilesets/secondary/seafoam_islands"
+ },
+ {
+  "name": "gTileset_Kanto_MtEmber_Exterior",
+  "quetzal_addr": "0x87922F0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 289,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_MtEmber_Exterior",
+   "Kanto_MtEmber_Summit",
+   "Kanto_NavelRock_Exterior",
+   "Kanto_OneIsland",
+   "Kanto_TwoIsland",
+   "Kanto_ThreeIsland",
+   "Kanto_OneIsland_KindleRoad",
+   "Kanto_OneIsland_TreasureBeach",
+   "Kanto_TwoIsland_CapeBrink",
+   "Kanto_ThreeIsland_BondBridge",
+   "Kanto_ThreeIsland_Port"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_FourIsland",
+  "quetzal_addr": "0x8792308",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 156,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_FourIsland",
+   "Kanto_FiveIsland",
+   "Kanto_FiveIsland_ResortGorgeous",
+   "Kanto_FiveIsland_WaterLabyrinth",
+   "Kanto_FiveIsland_Meadow",
+   "Kanto_FiveIsland_MemorialPillar"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_BirthIsland_Exterior",
+  "quetzal_addr": "0x8792320",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 244,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_BirthIsland_Exterior",
+   "Kanto_SevenIsland",
+   "Kanto_SixIsland",
+   "Kanto_SixIsland_OutcastIsland",
+   "Kanto_SixIsland_GreenPath",
+   "Kanto_SixIsland_WaterPath",
+   "Kanto_SixIsland_RuinValley",
+   "Kanto_SevenIsland_TrainerTower",
+   "Kanto_SevenIsland_SevaultCanyon_Entrance",
+   "Kanto_SevenIsland_SevaultCanyon",
+   "Kanto_SevenIsland_TanobyRuins"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_SilphCo",
+  "quetzal_addr": "0x8792338",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 384,
+  "metatiles": 378,
+  "png_palette": 0,
+  "anim_callback": "0x80F0679",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_RocketHideout_B1F",
+   "Kanto_RocketHideout_B2F",
+   "Kanto_RocketHideout_B3F",
+   "Kanto_RocketHideout_B4F",
+   "Kanto_RocketHideout_Elevator",
+   "Kanto_SilphCo_1F",
+   "Kanto_SilphCo_2F",
+   "Kanto_SilphCo_3F",
+   "Kanto_SilphCo_4F",
+   "Kanto_SilphCo_5F",
+   "Kanto_SilphCo_6F",
+   "Kanto_SilphCo_7F",
+   "...8 more"
+  ],
+  "source": "pokefirered data/tilesets/secondary/silph_co"
+ },
+ {
+  "name": "gTileset_Kanto_TanobyRuins_2",
+  "quetzal_addr": "0x8792350",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 80,
+  "metatiles": 94,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SevenIsland_TanobyRuins_MoneanChamber",
+   "Kanto_SevenIsland_TanobyRuins_LiptooChamber",
+   "Kanto_SevenIsland_TanobyRuins_WeepthChamber",
+   "Kanto_SevenIsland_TanobyRuins_DilfordChamber",
+   "Kanto_SevenIsland_TanobyRuins_ScufibChamber",
+   "Kanto_SevenIsland_TanobyRuins_RixyChamber",
+   "Kanto_SevenIsland_TanobyRuins_ViapoisChamber"
+  ],
+  "source": "pokefirered data/tilesets/secondary/tanoby_ruins"
+ },
+ {
+  "name": "gTileset_Kanto_TrainerTower",
+  "quetzal_addr": "0x8792368",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 352,
+  "metatiles": 288,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_TrainerTower_1F",
+   "Kanto_TrainerTower_2F",
+   "Kanto_TrainerTower_3F",
+   "Kanto_TrainerTower_4F",
+   "Kanto_TrainerTower_5F",
+   "Kanto_TrainerTower_6F",
+   "Kanto_TrainerTower_7F",
+   "Kanto_TrainerTower_8F",
+   "Kanto_TrainerTower_Roof",
+   "Kanto_TrainerTower_Lobby"
+  ],
+  "source": "pokefirered data/tilesets/secondary/trainer_tower"
+ },
+ {
+  "name": "gTileset_Kanto_UndergroundPath",
+  "quetzal_addr": "0x8792380",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 64,
+  "metatiles": 72,
+  "png_palette": 7,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_UndergroundPath_NorthSouthTunnel",
+   "Kanto_UndergroundPath_EastWestTunnel"
+  ],
+  "source": "pokefirered data/tilesets/secondary/underground_path"
+ },
+ {
+  "name": "gTileset_Kanto_VermilionCity",
+  "quetzal_addr": "0x8792398",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 140,
+  "metatiles": 180,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_SSAnne_Exterior",
+   "Kanto_VermilionCity",
+   "Kanto_Route6",
+   "Kanto_Route11"
+  ],
+  "source": "pokefirered data/tilesets/secondary/vermilion_city (first 168 metatiles)"
+ },
+ {
+  "name": "gTileset_Kanto_VermilionGym",
+  "quetzal_addr": "0x87923B0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 247,
+  "metatiles": 75,
+  "png_palette": 7,
+  "anim_callback": "0x80F0745",
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_VermilionCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/vermilion_gym"
+ },
+ {
+  "name": "gTileset_Kanto_ViridianCity",
+  "quetzal_addr": "0x87923C8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 112,
+  "metatiles": 108,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianCity",
+   "Kanto_Route2",
+   "Kanto_Route22"
+  ],
+  "source": ""
+ },
+ {
+  "name": "gTileset_Kanto_ViridianForest",
+  "quetzal_addr": "0x87923E0",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 112,
+  "metatiles": 46,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianForest",
+   "Kanto_SixIsland_PatternBush"
+  ],
+  "source": "pokefirered data/tilesets/secondary/viridian_forest (first 43 metatiles)"
+ },
+ {
+  "name": "gTileset_Kanto_ViridianGym",
+  "quetzal_addr": "0x87923F8",
+  "kind": "secondary",
+  "compressed": true,
+  "tiles": 96,
+  "metatiles": 384,
+  "png_palette": 0,
+  "anim_callback": null,
+  "regions": [
+   "kanto"
+  ],
+  "used_by": [
+   "Kanto_ViridianCity_Gym"
+  ],
+  "source": "pokefirered data/tilesets/secondary/viridian_gym (first 84 metatiles)"
+ }
+]

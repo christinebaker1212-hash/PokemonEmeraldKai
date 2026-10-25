@@ -1,0 +1,60 @@
+{
+  "id": "MAP_JOHTO_BLACKTHORN_DRAGON_SPEECH_HOUSE",
+  "name": "Johto_BlackthornDragonSpeechHouse",
+  "layout": "LAYOUT_JOHTO_BLACKTHORN_DRAGON_SPEECH_HOUSE",
+  "music": "MUS_QZ_614",
+  "region_map_section": "MAPSEC_JOHTO_BLACKTHORN_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_30",
+      "x": 2,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_BlackthornDragonSpeechHouse_EventScript_83C7F5F",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_BLACKTHORN_CITY",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 9,
+    "region": "johto",
+    "header": "0x89353B0",
+    "layout_id": 451,
+    "mapsec_index": 11,
+    "mapsec_name": "BLACKTHORN CITY",
+    "music_id": 614,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": "BlackthornDragonSpeechHouse",
+      "text_match": 1.09
+    }
+  }
+}

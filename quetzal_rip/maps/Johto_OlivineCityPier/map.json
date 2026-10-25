@@ -1,0 +1,80 @@
+{
+  "id": "MAP_JOHTO_OLIVINE_CITY_PIER",
+  "name": "Johto_OlivineCityPier",
+  "layout": "LAYOUT_JOHTO_OLIVINE_CITY_PIER",
+  "music": "MUS_QZ_612",
+  "region_map_section": "MAPSEC_JOHTO_OLIVINE_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_RAIN",
+  "map_type": "MAP_TYPE_OCEAN_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_JOHTO_OLIVINE_CITY",
+      "offset": -5,
+      "direction": "up"
+    }
+  ],
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16021",
+      "x": 12,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineCityPier_EventScript_83E6F8B",
+      "flag": "0"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16021",
+      "x": 21,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_OlivineCityPier_EventScript_83E6F98",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_OLIVINE_PORT",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 13,
+    "region": "johto",
+    "header": "0x89361E8",
+    "layout_id": 581,
+    "mapsec_index": 6,
+    "mapsec_name": "OLIVINE CITY",
+    "music_id": 612,
+    "weather_id": 3,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_OlivineCity_Area1"
+    }
+  }
+}

@@ -1,0 +1,428 @@
+{
+  "id": "MAP_KANTO_FIVE_ISLAND_ROCKET_WAREHOUSE",
+  "name": "Kanto_FiveIsland_RocketWarehouse",
+  "layout": "LAYOUT_KANTO_FIVE_ISLAND_ROCKET_WAREHOUSE",
+  "music": "MUS_RG_ROCKET_HIDEOUT",
+  "region_map_section": "MAPSEC_ROCKET_WAREHOUSE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 15,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413DBB",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 17,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413DD2",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16188",
+      "x": 27,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413E5C",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "local_id": "4",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 25,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413DE9",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "local_id": "5",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16188",
+      "x": 6,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413E45",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "local_id": "6",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 27,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D4B",
+      "flag": "0"
+    },
+    {
+      "local_id": "7",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 8,
+      "y": 25,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_846C26D",
+      "flag": "FLAG_QZ_0x2282"
+    },
+    {
+      "local_id": "8",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 17,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_846C27A",
+      "flag": "FLAG_QZ_0x2284"
+    },
+    {
+      "local_id": "9",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 1,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_846C287",
+      "flag": "FLAG_QZ_0x2283"
+    },
+    {
+      "local_id": "10",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 4,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_846C294",
+      "flag": "FLAG_QZ_0x2285"
+    },
+    {
+      "local_id": "11",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_905",
+      "x": 17,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2906"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 24,
+      "y": 25,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_FIVE_ISLAND_MEADOW",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 22,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5123",
+      "var_value": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D39"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5123",
+      "var_value": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D39"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5123",
+      "var_value": "0",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D39"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 26,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D30"
+    },
+    {
+      "type": "hidden_item",
+      "x": 27,
+      "y": 2,
+      "elevation": 0,
+      "item": "ITEM_NEST_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_68"
+    },
+    {
+      "type": "hidden_item",
+      "x": 7,
+      "y": 16,
+      "elevation": 0,
+      "item": "ITEM_NET_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_69"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 2,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 3,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 3,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_FiveIsland_RocketWarehouse_EventScript_8413D12"
+    }
+  ],
+  "quetzal": {
+    "group": 36,
+    "num": 114,
+    "region": "kanto",
+    "header": "0x8937A68",
+    "layout_id": 913,
+    "mapsec_index": 178,
+    "mapsec_name": "ROCKET WAREHOUSE",
+    "music_id": 486,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "FiveIsland_RocketWarehouse"
+    }
+  }
+}

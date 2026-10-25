@@ -1,0 +1,80 @@
+{
+  "id": "MAP_KANTO_CERULEAN_CITY_HOUSE1",
+  "name": "Kanto_CeruleanCity_House1",
+  "layout": "LAYOUT_KANTO_CERULEAN_CITY_HOUSE1",
+  "music": "MUS_RG_FUCHSIA",
+  "region_map_section": "MAPSEC_CERULEAN_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16137",
+      "x": 6,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_CeruleanCity_House1_EventScript_841A7EE",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 2,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 4,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_CERULEAN_CITY",
+      "dest_warp_id": "8"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 38,
+    "num": 11,
+    "region": "kanto",
+    "header": "0x8938AB4",
+    "layout_id": 815,
+    "mapsec_index": 91,
+    "mapsec_name": "CERULEAN CITY",
+    "music_id": 520,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "CeruleanCity_House1"
+    }
+  }
+}

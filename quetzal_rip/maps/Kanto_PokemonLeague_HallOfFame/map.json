@@ -1,0 +1,59 @@
+{
+  "id": "MAP_KANTO_POKEMON_LEAGUE_HALL_OF_FAME",
+  "name": "Kanto_PokemonLeague_HallOfFame",
+  "layout": "LAYOUT_KANTO_POKEMON_LEAGUE_HALL_OF_FAME",
+  "music": "MUS_RG_SLOW_PALLET",
+  "region_map_section": "MAPSEC_POKEMON_LEAGUE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16184",
+      "x": 6,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 5,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_LEAGUE_CHAMPIONS_ROOM",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 36,
+    "num": 80,
+    "region": "kanto",
+    "header": "0x89376B0",
+    "layout_id": 850,
+    "mapsec_index": 137,
+    "mapsec_name": "POKéMON LEAGUE",
+    "music_id": 557,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokefirered": "PokemonLeague_HallOfFame"
+    }
+  }
+}

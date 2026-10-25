@@ -1,0 +1,7 @@
+Kanto_UndergroundPath_EastWestTunnel_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_UndergroundPath_EastWestTunnel_EventScript_8410B71
+	.byte 0
+
+Kanto_UndergroundPath_EastWestTunnel_EventScript_8410B71::
+	setflag FLAG_QZ_0x2260
+	end

@@ -1,0 +1,79 @@
+{
+  "id": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+  "name": "Johto_WhirlIslands_Cave3",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLANDS_CAVE3",
+  "music": "MUS_QZ_631",
+  "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 8,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 21,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 21,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE4",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 8,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 21,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B1F",
+      "dest_warp_id": "11"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 111,
+    "region": "johto",
+    "header": "0x8936CA0",
+    "layout_id": 679,
+    "mapsec_index": 43,
+    "mapsec_name": "WHIRL ISLANDS",
+    "music_id": 631,
+    "weather_id": 11,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null
+    }
+  }
+}

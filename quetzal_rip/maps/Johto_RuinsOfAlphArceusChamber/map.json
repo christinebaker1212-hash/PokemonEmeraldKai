@@ -1,0 +1,74 @@
+{
+  "id": "MAP_JOHTO_RUINS_OF_ALPH_ARCEUS_CHAMBER",
+  "name": "Johto_RuinsOfAlphArceusChamber",
+  "layout": "LAYOUT_JOHTO_RUINS_OF_ALPH_ARCEUS_CHAMBER",
+  "music": "MUS_QZ_632",
+  "region_map_section": "MAPSEC_JOHTO_RUINS_OF_ALPH",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_749",
+      "x": 15,
+      "y": 12,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphArceusChamber_EventScript_840EB14",
+      "flag": "FLAG_QZ_0x123E"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16065",
+      "x": 15,
+      "y": 12,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphArceusChamber_EventScript_8401CF3",
+      "flag": "FLAG_QZ_0x131D"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OUTSIDE",
+      "dest_warp_id": "10"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 35,
+    "num": 116,
+    "region": "johto",
+    "header": "0x8936D2C",
+    "layout_id": 684,
+    "mapsec_index": 60,
+    "mapsec_name": "RUINS OF ALPH",
+    "music_id": 632,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_RuinsOfAlph_Cave5"
+    }
+  }
+}

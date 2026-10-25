@@ -1,0 +1,88 @@
+{
+  "id": "MAP_JOHTO_SILVER_CAVE_ITEM_ROOM",
+  "name": "Johto_SilverCaveItemRoom",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_ITEM_ROOM",
+  "music": "MUS_QZ_636",
+  "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "local_id": "1",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 10,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SilverCaveItemRoom_EventScript_83E032C",
+      "flag": "FLAG_QZ_0x1155"
+    },
+    {
+      "local_id": "2",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_97",
+      "x": 8,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SilverCaveItemRoom_EventScript_840EA8C",
+      "flag": "0"
+    },
+    {
+      "local_id": "3",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1056",
+      "x": 11,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x12A1"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_ROOM1",
+      "dest_warp_id": "5"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [],
+  "quetzal": {
+    "group": 34,
+    "num": 110,
+    "region": "johto",
+    "header": "0x8935EBC",
+    "layout_id": 552,
+    "mapsec_index": 23,
+    "mapsec_name": "MT. SILVER",
+    "music_id": 636,
+    "weather_id": 0,
+    "header_filler": "0000",
+    "flags_high_bits": 0,
+    "source": {
+      "pokecrystal": null,
+      "renamed_from": "Johto_MtSilver_Cave1"
+    }
+  }
+}
