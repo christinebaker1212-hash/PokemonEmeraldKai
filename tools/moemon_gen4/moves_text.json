@@ -1,0 +1,893 @@
+{
+ "MOVE_ROOST": {
+  "description": "Restores the user's HP by\\nhalf of its max HP.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_BRAVE_BIRD"
+  ]
+ },
+ "MOVE_GRAVITY": {
+  "description": "Gravity is intensified\\nnegating levitation.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MIRACLE_EYE": {
+  "description": "Negates evasion and the\\nDark type's immunities.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_WAKE_UP_SLAP": {
+  "description": "Powerful against a sleeping\\nfoe, but also wakes it.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONE",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_LOVELY_KISS",
+   "COMBO_STARTER_SPORE",
+   "COMBO_STARTER_ENTRAINMENT",
+   "COMBO_STARTER_PLAY_NICE",
+   "COMBO_STARTER_SING",
+   "COMBO_STARTER_YAWN",
+   "COMBO_STARTER_HYPNOSIS",
+   "COMBO_STARTER_DARK_VOID",
+   "COMBO_STARTER_GRASS_WHISTLE",
+   "COMBO_STARTER_SLEEP_POWDER"
+  ]
+ },
+ "MOVE_HAMMER_ARM": {
+  "description": "Swings with a heavy fist.\\nLowers the user's Speed.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_GYRO_BALL": {
+  "description": "A high-speed spin that does\\nmore damage to faster a foe.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WHEN_LATER",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_HEALING_WISH": {
+  "description": "Faints to restore the HP and\\nstatus of the next Pokémon.",
+  "contestEffect": "CONTEST_EFFECT_GREAT_APPEAL_BUT_NO_MORE_MOVES",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_BRINE": {
+  "description": "Does double damage to a foe\\nwith half HP or less.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONE",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_RAIN_DANCE"
+  ]
+ },
+ "MOVE_NATURAL_GIFT": {
+  "description": "The effectiveness varies\\nwith the held Berry.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WHEN_AUDIENCE_EXCITED",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_FEINT": {
+  "description": "Hits a protecting foe\\nand lifts those effects.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_PLUCK": {
+  "description": "Eats the foe's held Berry\\nand gains its effect.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_TAILWIND": {
+  "description": "Whips up a wind that boosts\\nallies' Speed for 4 turns.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ACUPRESSURE": {
+  "description": "The user sharply raises\\none of its stats.",
+  "contestEffect": "CONTEST_EFFECT_QUALITY_DEPENDS_ON_TIMING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_METAL_BURST": {
+  "description": "Retaliates against the foe\\nthat last damaged the user.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_LAST",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_METAL_SOUND",
+   "COMBO_STARTER_ENCORE",
+   "COMBO_STARTER_TAUNT",
+   "COMBO_STARTER_TORMENT"
+  ]
+ },
+ "MOVE_U_TURN": {
+  "description": "Attacks and rushes back to\\nswitch with a party Pokémon.",
+  "contestEffect": "CONTEST_EFFECT_AVOID_STARTLE",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_CLOSE_COMBAT": {
+  "description": "Fights up close. This lowers\\nthe user's defensive stats.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY",
+   "COMBO_STARTER_MIND_READER"
+  ]
+ },
+ "MOVE_PAYBACK": {
+  "description": "An attack that gains power\\nif the user moves last.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_LAST",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "COMBO_STARTER_PAYBACK",
+  "contestComboMoves": [
+   "COMBO_STARTER_REVENGE"
+  ]
+ },
+ "MOVE_ASSURANCE": {
+  "description": "An attack that gains power\\nif the foe has been hurt.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_LATER",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_PAYBACK",
+   "COMBO_STARTER_REVENGE"
+  ]
+ },
+ "MOVE_EMBARGO": {
+  "description": "Prevents the foe from\\nusing any items.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_FLING": {
+  "description": "The effectiveness varies\\nwith the held item.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_CELEBRATE",
+   "COMBO_STARTER_COVET",
+   "COMBO_STARTER_HAPPY_HOUR",
+   "COMBO_STARTER_WISH"
+  ]
+ },
+ "MOVE_PSYCHO_SHIFT": {
+  "description": "Transfers status problems\\nto the foe.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_LAST",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_TRUMP_CARD": {
+  "description": "The less PP the move has\\nthe more damage it does.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WHEN_LATER",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_HEAL_BLOCK": {
+  "description": "Prevents the foes from\\nrecovering HP for 5 turns.",
+  "contestEffect": "CONTEST_EFFECT_DONT_EXCITE_AUDIENCE",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_WRING_OUT": {
+  "description": "The more HP the foe has,\\nthe greater the power.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MON_WITH_JUDGES_ATTENTION",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_POWER_TRICK": {
+  "description": "The user swaps its Attack\\nand Defense stats.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_SAME_TYPE",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_GASTRO_ACID": {
+  "description": "Stomach acid suppresses\\nthe foe's Ability.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_LUCKY_CHANT": {
+  "description": "Prevents the foe from\\nlanding critical hits.",
+  "contestEffect": "CONTEST_EFFECT_IMPROVE_CONDITION_PREVENT_NERVOUSNESS",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "COMBO_STARTER_LUCKY_CHANT",
+  "contestComboMoves": [
+   "COMBO_STARTER_HEAL_BELL"
+  ]
+ },
+ "MOVE_ME_FIRST": {
+  "description": "Executes the foe's attack\\nwith greater power.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_COPYCAT": {
+  "description": "The user mimics the last\\nmove used by a foe.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONE",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_POWER_SWAP": {
+  "description": "Swaps changes to Attack\\nand Sp. Atk with the foe.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONES",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_GUARD_SWAP": {
+  "description": "Swaps changes to Defense\\nand Sp. Def with the foe.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONES",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_PUNISHMENT": {
+  "description": "Does more damage the more\\nthe foe has powered up.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MON_WITH_JUDGES_ATTENTION",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_LAST_RESORT": {
+  "description": "Can only be used if every\\nother move has been used.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WITH_GOOD_CONDITION",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_WORRY_SEED": {
+  "description": "Plants a seed on the foe\\ngiving it Insomnia.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "COMBO_STARTER_WORRY_SEED",
+  "contestComboMoves": [
+   "COMBO_STARTER_LEECH_SEED",
+   "COMBO_STARTER_ROTOTILLER"
+  ]
+ },
+ "MOVE_SUCKER_PUNCH": {
+  "description": "Attacks first if the foe\\nis readying an attack.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_TOXIC_SPIKES": {
+  "description": "Sets spikes that poison a\\nfoe switching in.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_TOXIC_SPIKES",
+  "contestComboMoves": []
+ },
+ "MOVE_HEART_SWAP": {
+  "description": "Swaps any stat changes\\nwith the foe.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONES",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_AQUA_RING": {
+  "description": "Forms a veil of water\\nthat restores HP.",
+  "contestEffect": "CONTEST_EFFECT_IMPROVE_CONDITION_PREVENT_NERVOUSNESS",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MAGNET_RISE": {
+  "description": "The user levitates with\\nelectromagnetism.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_FLARE_BLITZ": {
+  "description": "A charge that may burn the\\nfoe. Also hurts the user.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_SUNNY_DAY"
+  ]
+ },
+ "MOVE_FORCE_PALM": {
+  "description": "A shock wave attack that\\nmay paralyze the foe.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "COMBO_STARTER_FORCE_PALM",
+  "contestComboMoves": []
+ },
+ "MOVE_AURA_SPHERE": {
+  "description": "Attacks with an aura blast\\nthat cannot be evaded.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ROCK_POLISH": {
+  "description": "Polishes the body to\\nsharply raise Speed.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "COMBO_STARTER_ROCK_POLISH",
+  "contestComboMoves": []
+ },
+ "MOVE_POISON_JAB": {
+  "description": "A stabbing attack that\\nmay poison the foe.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DARK_PULSE": {
+  "description": "Attacks with a horrible\\naura. May cause flinching.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_NIGHT_SLASH": {
+  "description": "Hits as soon as possible.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_AFFECTED_BY_PREV_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_AQUA_TAIL": {
+  "description": "The user swings its tail\\nlike a wave to attack.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_RAIN_DANCE"
+  ]
+ },
+ "MOVE_SEED_BOMB": {
+  "description": "A barrage of hard seeds\\nis fired at the foe.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_ROTOTILLER"
+  ]
+ },
+ "MOVE_AIR_SLASH": {
+  "description": "Attacks with a blade of\\nair. May cause flinching.",
+  "contestEffect": "CONTEST_EFFECT_BADLY_STARTLE_FRONT_MON",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_X_SCISSOR": {
+  "description": "Slashes the foe with crossed\\nscythes, claws, etc.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MONS_SAME_TYPE_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_SWORDS_DANCE"
+  ]
+ },
+ "MOVE_BUG_BUZZ": {
+  "description": "A damaging sound wave that\\nmay lower Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_BADLY_STARTLE_FRONT_MON",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DRAGON_PULSE": {
+  "description": "Generates a shock wave to\\ndamage the foe.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DRAGON_RUSH": {
+  "description": "Tackles the foe with menace.\\nMay cause flinching.",
+  "contestEffect": "CONTEST_EFFECT_AFFECTED_BY_PREV_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "COMBO_STARTER_DRAGON_RUSH",
+  "contestComboMoves": [
+   "COMBO_STARTER_DRAGON_BREATH",
+   "COMBO_STARTER_DRAGON_DANCE",
+   "COMBO_STARTER_DRAGON_RAGE",
+   "COMBO_STARTER_DRAGON_TAIL"
+  ]
+ },
+ "MOVE_POWER_GEM": {
+  "description": "Attacks with rays of light\\nthat sparkle like diamonds.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DRAIN_PUNCH": {
+  "description": "A punch that drains\\nhalf the damage inflicted.",
+  "contestEffect": "CONTEST_EFFECT_APPEAL_AS_GOOD_AS_PREV_ONE",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_VACUUM_WAVE": {
+  "description": "Whirls its fists to send\\na wave that strikes first.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_FOCUS_BLAST": {
+  "description": "Attacks at full power.\\nMay lower Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_ENERGY_BALL": {
+  "description": "Draws power from nature to\\nattack. May lower Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_GROWTH"
+  ]
+ },
+ "MOVE_BRAVE_BIRD": {
+  "description": "A low altitude charge that\\nalso hurts the user.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "COMBO_STARTER_BRAVE_BIRD",
+  "contestComboMoves": []
+ },
+ "MOVE_EARTH_POWER": {
+  "description": "Makes the ground erupt with\\npower. May lower Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_SWITCHEROO": {
+  "description": "Swaps items with the foe\\nfaster than the eye can see.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MONS_SAME_TYPE_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_GIGA_IMPACT": {
+  "description": "Powerful, but leaves the\\nuser immobile the next turn.",
+  "contestEffect": "CONTEST_EFFECT_JAMS_OTHERS_BUT_MISS_ONE_TURN",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_NASTY_PLOT": {
+  "description": "Thinks bad thoughts to\\nsharply raise Sp. Atk.",
+  "contestEffect": "CONTEST_EFFECT_IMPROVE_CONDITION_PREVENT_NERVOUSNESS",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "COMBO_STARTER_NASTY_PLOT",
+  "contestComboMoves": []
+ },
+ "MOVE_BULLET_PUNCH": {
+  "description": "Punches as fast as a bul-\\nlet. It always hits first.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_AVALANCHE": {
+  "description": "An attack that gains power\\nif injured by the foe.",
+  "contestEffect": "CONTEST_EFFECT_AFFECTED_BY_PREV_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ICE_SHARD": {
+  "description": "Hurls a chunk of ice that\\nalways strikes first.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_SHADOW_CLAW": {
+  "description": "Strikes with a shadow claw.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_THUNDER_FANG": {
+  "description": "May cause flinching or\\nleave the foe paralyzed.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_THUNDER_FANG",
+  "contestComboMoves": [
+   "COMBO_STARTER_CHARGE",
+   "COMBO_STARTER_FIRE_FANG",
+   "COMBO_STARTER_ICE_FANG"
+  ]
+ },
+ "MOVE_ICE_FANG": {
+  "description": "May cause flinching or\\nleave the foe with frostbite.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "COMBO_STARTER_ICE_FANG",
+  "contestComboMoves": [
+   "COMBO_STARTER_FIRE_FANG",
+   "COMBO_STARTER_THUNDER_FANG"
+  ]
+ },
+ "MOVE_FIRE_FANG": {
+  "description": "May cause flinching or\\nleave the foe with a burn.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "COMBO_STARTER_FIRE_FANG",
+  "contestComboMoves": [
+   "COMBO_STARTER_ICE_FANG",
+   "COMBO_STARTER_THUNDER_FANG"
+  ]
+ },
+ "MOVE_SHADOW_SNEAK": {
+  "description": "Extends the user's shadow\\nto strike first.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MUD_BOMB": {
+  "description": "Throws a blob of mud to\\ndamage and cut accuracy.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_PREV_MON",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_PSYCHO_CUT": {
+  "description": "Tears with psychic blades.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ZEN_HEADBUTT": {
+  "description": "Hits with a strong head-\\nbutt. May cause flinching.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MIRROR_SHOT": {
+  "description": "Emits a flash of energy to\\ndamage and cut accuracy.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_PREV_MON",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_FLASH_CANNON": {
+  "description": "Releases a blast of light\\nthat may lower Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ROCK_CLIMB": {
+  "description": "A charging attack that may\\nconfuse the foe.",
+  "contestEffect": "CONTEST_EFFECT_SHIFT_JUDGE_ATTENTION",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DEFOG": {
+  "description": "Removes obstacles and\\nlowers evasion.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_TRICK_ROOM": {
+  "description": "Slower Pokémon get to move\\nfirst for 5 turns.",
+  "contestEffect": "CONTEST_EFFECT_SCRAMBLE_NEXT_TURN_ORDER",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DRACO_METEOR": {
+  "description": "Summons comets from the sky,\\nbut harshly lowers Sp. Atk.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DISCHARGE": {
+  "description": "Zaps all others with\\nelectricity. May paralyze.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_CHARGE"
+  ]
+ },
+ "MOVE_LAVA_PLUME": {
+  "description": "Torches all others with\\nscarlet flames. May burn.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_SUNNY_DAY"
+  ]
+ },
+ "MOVE_LEAF_STORM": {
+  "description": "Whips up a storm of leaves,\\nbut harshly lowers Sp. Atk.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_CUTE",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_POWER_WHIP": {
+  "description": "Violently lashes the foe\\nwith vines or tentacles.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WHEN_AUDIENCE_EXCITED",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_GROWTH"
+  ]
+ },
+ "MOVE_ROCK_WRECKER": {
+  "description": "Powerful, but leaves the\\nuser immobile the next turn.",
+  "contestEffect": "CONTEST_EFFECT_JAMS_OTHERS_BUT_MISS_ONE_TURN",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_CROSS_POISON": {
+  "description": "A slash that may poison a\\nfoe and do critical damage.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MONS_SAME_TYPE_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_GUNK_SHOT": {
+  "description": "Shoots filthy garbage at\\nthe foe. May also poison.",
+  "contestEffect": "CONTEST_EFFECT_BADLY_STARTLE_MONS_WITH_GOOD_APPEALS",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_IRON_HEAD": {
+  "description": "Slams the foe with a hard\\nhead. May cause flinching.",
+  "contestEffect": "CONTEST_EFFECT_HIGHLY_APPEALING",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MAGNET_BOMB": {
+  "description": "Launches a magnet that\\nstrikes without fail.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_STONE_EDGE": {
+  "description": "Stabs the foe with stones.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_AFFECTED_BY_PREV_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_FOCUS_ENERGY"
+  ]
+ },
+ "MOVE_CAPTIVATE": {
+  "description": "Makes the opposite gender\\nharshly lower its Sp. Atk.",
+  "contestEffect": "CONTEST_EFFECT_DONT_EXCITE_AUDIENCE",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_CHARM"
+  ]
+ },
+ "MOVE_STEALTH_ROCK": {
+  "description": "Sets floating stones that\\nhurt a foe switching in.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_STEALTH_ROCK"
+  ]
+ },
+ "MOVE_GRASS_KNOT": {
+  "description": "A snare attack that does\\nmore damage to a heavier foe.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WHEN_LATER",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_CHATTER": {
+  "description": "Attacks with a sound wave\\nthat causes confusion.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_JUDGMENT": {
+  "description": "The type varies with the\\nkind of Plate held.",
+  "contestEffect": "CONTEST_EFFECT_REPETITION_NOT_BORING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_BUG_BITE": {
+  "description": "Eats the foe's held Berry\\nand gains its effect.",
+  "contestEffect": "CONTEST_EFFECT_WORSEN_CONDITION_OF_PREV_MONS",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_CHARGE_BEAM": {
+  "description": "Fires a beam of electricity.\\nMay raise Sp. Atk.",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WITH_GOOD_CONDITION",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_CHARGE"
+  ]
+ },
+ "MOVE_WOOD_HAMMER": {
+  "description": "Slams the body into a foe.\\nThe user gets hurt too.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_AQUA_JET": {
+  "description": "Strikes first by dashing\\nat the foe at a high speed.",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_RAIN_DANCE"
+  ]
+ },
+ "MOVE_ATTACK_ORDER": {
+  "description": "Underlings pummel the foe.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_REPETITION_NOT_BORING",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_ATTACK_ORDER",
+  "contestComboMoves": [
+   "COMBO_STARTER_DEFEND_ORDER",
+   "COMBO_STARTER_HEAL_ORDER"
+  ]
+ },
+ "MOVE_DEFEND_ORDER": {
+  "description": "Raises Defense and Sp. Def\\nwith a living shield.",
+  "contestEffect": "CONTEST_EFFECT_AVOID_STARTLE_ONCE",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_DEFEND_ORDER",
+  "contestComboMoves": [
+   "COMBO_STARTER_ATTACK_ORDER",
+   "COMBO_STARTER_HEAL_ORDER"
+  ]
+ },
+ "MOVE_HEAL_ORDER": {
+  "description": "The user's underlings heal\\nup to half of its max HP.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MONS_SAME_TYPE_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_HEAL_ORDER",
+  "contestComboMoves": [
+   "COMBO_STARTER_ATTACK_ORDER",
+   "COMBO_STARTER_DEFEND_ORDER"
+  ]
+ },
+ "MOVE_HEAD_SMASH": {
+  "description": "A life-risking headbutt that\\nseriously hurts the user.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_DOUBLE_HIT": {
+  "description": "Slams the foe with a tail\\netc. Strikes twice.",
+  "contestEffect": "CONTEST_EFFECT_STARTLE_MONS_SAME_TYPE_APPEAL",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_ROAR_OF_TIME": {
+  "description": "Powerful, but leaves the\\nuser immobile the next turn.",
+  "contestEffect": "CONTEST_EFFECT_JAMS_OTHERS_BUT_MISS_ONE_TURN",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_SPACIAL_REND": {
+  "description": "Tears the foe, and space.\\nHigh critical-hit ratio.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_LUNAR_DANCE": {
+  "description": "Faints to heal the HP, PP, and\\nstatus of the next Pokémon.",
+  "contestEffect": "CONTEST_EFFECT_GREAT_APPEAL_BUT_NO_MORE_MOVES",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_CRUSH_GRIP": {
+  "description": "The more HP the foe has,\\nthe greater the power.",
+  "contestEffect": "CONTEST_EFFECT_REPETITION_NOT_BORING",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_MAGMA_STORM": {
+  "description": "Traps the foe in a vortex\\nof fire for  turns.",
+  "contestEffect": "CONTEST_EFFECT_DONT_EXCITE_AUDIENCE",
+  "contestCategory": "CONTEST_CATEGORY_TOUGH",
+  "contestComboStarterId": "0",
+  "contestComboMoves": [
+   "COMBO_STARTER_SUNNY_DAY"
+  ]
+ },
+ "MOVE_DARK_VOID": {
+  "description": "Drags the foes into total\\ndarkness, inducing Sleep.",
+  "contestEffect": "CONTEST_EFFECT_MAKE_FOLLOWING_MONS_NERVOUS",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "COMBO_STARTER_DARK_VOID",
+  "contestComboMoves": []
+ },
+ "MOVE_SEED_FLARE": {
+  "description": "Generates a shock wave that\\nharshly lowers Sp. Def.",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestCategory": "CONTEST_CATEGORY_COOL",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_OMINOUS_WIND": {
+  "description": "A repulsive attack that may\\nraise all stats.",
+  "contestEffect": "CONTEST_EFFECT_IMPROVE_CONDITION_PREVENT_NERVOUSNESS",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ },
+ "MOVE_SHADOW_FORCE": {
+  "description": "Vanishes, then strikes next\\nturn. Ignores protection.",
+  "contestEffect": "CONTEST_EFFECT_AVOID_STARTLE",
+  "contestCategory": "CONTEST_CATEGORY_SMART",
+  "contestComboStarterId": "0",
+  "contestComboMoves": []
+ }
+}

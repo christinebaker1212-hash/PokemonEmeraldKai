@@ -82,6 +82,7 @@ EWRAM_DATA struct SpriteTemplate gMultiuseSpriteTemplate = {0};
 EWRAM_DATA static struct MonSpritesGfxManager *sMonSpritesGfxManagers[MON_SPR_GFX_MANAGERS_COUNT] = {NULL};
 
 #include "data/battle_moves.h"
+#include "data/move_categories.h"
 
 // Used in an unreferenced function in RS.
 // Unreferenced here and in FRLG.

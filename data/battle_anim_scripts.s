@@ -371,7 +371,8 @@ gBattleAnims_Moves::
 	ptrvalue Move_WATER_PULSE
 	ptrvalue Move_DOOM_DESIRE
 	ptrvalue Move_PSYCHO_BOOST
-	ptrvalue Move_COUNT /* cannot be reached, because last move is Psycho Boost*/
+	.include "data/battle_anim_ptrs_gen4.inc"   @ Moemon Kai: Gen 4 moves
+	ptrvalue Move_COUNT /* cannot be reached */
 
 	.align 2
 gBattleAnims_StatusConditions::
@@ -10764,3 +10765,6 @@ Special_SubstituteToMon:
 Special_MonToSubstitute:
 	createvisualtask AnimTask_SwapMonSpriteToFromSubstitute, 2, FALSE
 	end
+
+@ Moemon Kai: Gen 4 moves
+	.include "data/battle_anim_scripts_gen4.inc"

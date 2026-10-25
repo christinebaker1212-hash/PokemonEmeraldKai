@@ -232,6 +232,7 @@ gBattleScriptsForMoveEffects::
 	ptrvalue BattleScript_EffectCalmMind               /* EFFECT_CALM_MIND*/
 	ptrvalue BattleScript_EffectDragonDance            /* EFFECT_DRAGON_DANCE*/
 	ptrvalue BattleScript_EffectCamouflage             /* EFFECT_CAMOUFLAGE*/
+	.include "data/battle_effect_ptrs_gen4.inc"         @ Moemon Kai: Gen 4 effects
 
 BattleScript_EffectHit::
 	jumpifnotmove MOVE_SURF, BattleScript_HitFromAtkCanceler
@@ -4718,3 +4719,6 @@ BattleScript_PrintPlayerForfeitedLinkBattle::
 	endlinkbattle
 	waitmessage B_WAIT_TIME_LONG
 	end2
+
+@ Moemon Kai: Gen 4 move effects
+	.include "data/battle_scripts_gen4.inc"
