@@ -1,0 +1,10 @@
+# A friend's follower on the ground: ALICE walks her TORCHIC into Route 101's tall grass; BOB, standing by, sees the
+# grass shake and cover its feet on his screen too (mp_followfx.c runs for friends' followers)
+MODE=2
+WARP=0,16,9,11
+WARP_B=0,16,9,13
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20 MOEMON_FOLLOWFXTRACE=1"
+ENV_B="MOEMON_FOLLOWFXTRACE=1"
+EXPECT_A=("followfx slot 0: tall grass at 11,11")
+EXPECT_B=("tall grass at 11,11")

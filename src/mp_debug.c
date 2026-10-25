@@ -734,9 +734,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
             struct Sprite *sp = &gSprites[i];
             if (!sp->inUse)
                 continue;
-            printf("[test] spr %2d x %d y %d x2 %d y2 %d shape %d size %d tile %d pal %d tag %04x ptag %04x inv %d cb %p\n", i, sp->x, sp->y, sp->x2, sp->y2,
+            printf("[test] spr %2d x %d y %d x2 %d y2 %d shape %d size %d tile %d pal %d tag %04x ptag %04x inv %d prio %d sub %d cb %p\n", i, sp->x, sp->y, sp->x2, sp->y2,
                    sp->oam.shape, sp->oam.size, sp->oam.tileNum, sp->oam.paletteNum, sp->template ? sp->template->tileTag : 0,
-                   sp->template ? sp->template->paletteTag : 0, sp->invisible, (void *)sp->callback);
+                   sp->template ? sp->template->paletteTag : 0, sp->invisible, sp->oam.priority, sp->subpriority, (void *)sp->callback);
         }
     }
     else if (strcmp(cmd, "objtiles") == 0)

@@ -143,7 +143,14 @@ L/R/extra live in the .coop file (reg:L, reg:R, reg:X, MP_REG_SLOTS), one button
 button / F key (INPUT_ACTION_ITEM_X -> gMpItemXPressed -> field_control_avatar.c). No auto-run any more; STICK RUN defaults off
 and NewGameInitData turns it off. Exe icon: tools/app_icon/build.py writes DIB images up to 64 px + PNG 128/256, res.rc ID 1.
 Follower Pokémon (SELECT in the party menu): local trailing, 64x64 sprites, talking to it,
-and remote followers seen by the other client.
+and remote followers seen by the other client. Ground effects (mp_followfx.c, 1.18.3): a follower is a plain sprite, so
+UpdateSlot hands its step (prev / cur tile, pixels into it, facing, size, owner elevation, hidden) to MP_FollowFx_Update,
+which plays the game's own field effects from its tiles with GetAllGroundEffectFlags_*'s rules: tall / long grass
+(FLDEFFOBJ templates with our callback, stopping like UpdateTallGrassFieldEffect), sand / deep sand footprints and
+ripples (FieldEffectStart with arguments), puddle splash, flowing water, hot springs, sand heap, short grass (sprites
+following the follower), and a reflection (CreateCopySpriteAt like SetUpReflection, priority 3, own colors in slot 16+;
+MP_IsReflectionSprite knows it). UpdateGrassFieldEffectSubpriority counts followers (MP_FollowFx_GrassSubpriority).
+Friends' followers get it too. MOEMON_FOLLOWFXTRACE=1 logs each effect; tests follow_ground, follow_ground_remote.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), FRIENDS > GO TO, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge
 (test: MOEMON_DEBUG_WARP=11,3,5,3 / 11,3,5,4, MOEMON_DEBUG_PARTY=283:46, `mp badges`).

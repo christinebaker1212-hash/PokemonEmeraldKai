@@ -173,8 +173,14 @@ static bool8 SpriteIsOurs(struct FollowerSlot *s)
         && gSprites[s->spriteId].data[7] == (s16)(s - sSlots);
 }
 
+bool8 MP_Follower_IsFollowerSprite(struct Sprite *sprite)
+{
+    return sprite->inUse && sprite->callback == SpriteCB_Follower;
+}
+
 static void DestroySlotSprite(struct FollowerSlot *s)
 {
+    MP_FollowFx_Remove(s - sSlots);   // its grass, splashes and reflection go with it
     if (SpriteIsOurs(s))
     {
         u16 tag = TAG_FOLLOWER + (s - sSlots);
@@ -551,6 +557,8 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     s16 dxPix, dyPix;
     s32 fx, fy;
     u8 frame;
+    struct Coords16 fxPrev, fxCur;   // the tiles of its step, and how far into it (for its ground effects)
+    u8 fxMoved, fxDir;
 
     if (!s->gfx || ownerObj >= OBJECT_EVENTS_COUNT || !gObjectEvents[ownerObj].active)
     {
@@ -576,6 +584,7 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         u8 palSlot = IndexOfSpritePaletteTag(TAG_FOLLOWER + (s - sSlots));
         if (palSlot == 0xFF)
         {
+            MP_FollowFx_Remove(s - sSlots);
             DestroySprite(fs);
             s->spriteId = SPRITE_NONE;
             return;
@@ -663,12 +672,20 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         fvx = s->prev.x * 256 + (s->cur.x - s->prev.x) * frac;
         fvy = s->prev.y * 256 + (s->cur.y - s->prev.y) * frac;
+        fxPrev = s->prev;
+        fxCur = s->cur;
+        fxMoved = frac >= 256 ? 16 : frac * 16 / 256;
+        fxDir = s->dir;
         if (s->autoOn)
         {
             // its own walk (MOéMON GARDEN)
             AutoStep(s, owner);
             fvx = s->aPrev.x * 256 + (s->aCur.x - s->aPrev.x) * s->aMoved * 16;
             fvy = s->aPrev.y * 256 + (s->aCur.y - s->aPrev.y) * s->aMoved * 16;
+            fxPrev = s->aPrev;
+            fxCur = s->aCur;
+            fxMoved = s->aMoved >= 16 ? 16 : s->aMoved;
+            fxDir = s->aDir;
         }
         dxPix = (s16)((fvx - ovx) * 16 / 256);
         dyPix = (s16)((fvy - ovy) * 16 / 256);
@@ -719,6 +736,9 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         if (other != OBJECT_EVENTS_COUNT && other != ownerObj)
             fs->invisible = TRUE;
     }
+    // Grass, sand, water and reflections under it, as under its Trainer (mp_followfx.c)
+    MP_FollowFx_Update(s - sSlots, s->spriteId, fxPrev.x, fxPrev.y, fxCur.x, fxCur.y, fxMoved, fxDir, s->gfx->size,
+                       owner->previousElevation, fs->invisible);
 }
 
 // ---------------------------------------------------------------------------

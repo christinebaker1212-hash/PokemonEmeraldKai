@@ -994,6 +994,14 @@ bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);
 u16 MP_Follower_LocalDex(bool8 *female);
 bool8 MP_Follower_LocalTile(s16 *x, s16 *y);
+bool8 MP_Follower_IsFollowerSprite(struct Sprite *sprite);
+// mp_followfx.c: followers' ground effects (grass, sand, puddles, flowing water, hot springs, ripples, reflections)
+void MP_FollowFx_Update(u8 slot, u8 spriteId, s16 prevX, s16 prevY, s16 curX, s16 curY, u8 moved, u8 fdir, u8 size,
+                        u8 elevation, bool8 hidden);
+void MP_FollowFx_Remove(u8 slot);
+void MP_FollowFx_GrassSubpriority(struct Sprite *grass);
+bool8 MP_FollowFx_IsReflection(struct Sprite *sprite);
+void MP_UpdateGrassFieldEffectSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority);
 
 // mp_coop.c (walk up to a challenged player to team up for a Double Battle)
 extern bool8 gMpCoopBattle;          // TRUE while a co-op battle runs (on both games)

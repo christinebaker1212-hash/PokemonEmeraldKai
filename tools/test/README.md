@@ -77,6 +77,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
+| `follow_ground` | the follower in tall grass (Route 101), its reflection (Petalburg's pond), footprints (Route 109), puddle splashes (Route 120), hot springs (Lavaridge) |
+| `follow_ground_remote` | NA-JP lag: BOB sees the grass shake around ALICE's follower |
 | `life_return` | Route 104: the follower off on its own runs back after its Trainer and falls in behind them, never popping over (check_followtrace.py) |
 | `life_arrival` | arrival bubbles only in a new area: nothing at the start or in and out of a house, a curious look in PETALBURG (check_arrival.py) |
 | `life_watch` | WATCH QUIETLY: learned, nothing new, nothing new, then learned again half an hour later (check_watch.py) |

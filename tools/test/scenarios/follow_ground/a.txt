@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 90
+press RIGHT 48
+wait 6
+shot grass_step
+wait 40
+shot grass
+mp warp 0,0,4,13
+waitfor field 600
+wait 60
+press RIGHT 40
+wait 40
+shot reflection
+mp warp 0,24,10,7
+waitfor field 600
+wait 60
+press RIGHT 80
+wait 20
+shot sand
+mp warp 0,35,7,30
+waitfor field 600
+wait 60
+press RIGHT 64
+wait 4
+shot puddle
+mp warp 0,12,6,2
+waitfor field 600
+wait 60
+press DOWN 56
+wait 40
+shot springs
+quit

@@ -1,0 +1,9 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp follow 0
+wait 200
+barrier walk 2
+press RIGHT 48
+wait 300
+quit

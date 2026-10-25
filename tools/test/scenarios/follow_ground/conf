@@ -1,0 +1,8 @@
+# A follower on the ground (mp_followfx.c), as its Trainer: ALICE walks her TORCHIC through Route 101's tall grass,
+# along Petalburg's pond (its reflection), over Route 109's beach sand (footprints), across Route 120's puddles
+# (splashes) and into Lavaridge's hot springs. Shots of each.
+MODE=1
+WARP=0,16,9,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20 MOEMON_FOLLOWFXTRACE=1"
+EXPECT_A=("followfx slot 0: tall grass at 11,11" "followfx slot 0: water reflection" "followfx slot 0: footprints" "followfx slot 0: splash" "followfx slot 0: hot springs")

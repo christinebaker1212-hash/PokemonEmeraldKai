@@ -77,7 +77,7 @@ void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, boo
 // Moemon Co-op: reflections share their owner's palette slot (sprite.c palette moves skip them)
 bool8 MP_IsReflectionSprite(struct Sprite *sprite)
 {
-    return sprite->callback == UpdateObjectReflectionSprite;
+    return sprite->callback == UpdateObjectReflectionSprite || MP_FollowFx_IsReflection(sprite);
 }
 
 static s16 GetReflectionVerticalOffset(struct ObjectEvent *objectEvent)
@@ -1717,6 +1717,13 @@ static void UpdateGrassFieldEffectSubpriority(struct Sprite *sprite, u8 elevatio
             }
         }
     }
+    MP_FollowFx_GrassSubpriority(sprite);   // Moemon Co-op: followers count too
+}
+
+// Moemon Co-op: for followers' grass (mp_followfx.c)
+void MP_UpdateGrassFieldEffectSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority)
+{
+    UpdateGrassFieldEffectSubpriority(sprite, elevation, subpriority);
 }
 
 // Unused, duplicates of data in event_object_movement.c

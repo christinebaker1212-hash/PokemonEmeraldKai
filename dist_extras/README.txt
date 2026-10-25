@@ -840,7 +840,9 @@ it walks behind you. Press SELECT on it again to put it back in its Ball.
 All 386 Moemon have their own walking sprites (with female and form
 differences). Talk to it (A) and it's happy to see you. Other players see
 your follower walking behind you too. It hides while you surf or dive and
-comes back when you land. The choice is remembered in moemon_coop.ini.
+comes back when you land. It walks the ground as you do: tall grass shakes
+around it, it leaves footprints in sand, splashes through puddles and
+shallow water, sinks into hot springs, and shows in ponds and on ice. The choice is remembered in moemon_coop.ini.
 Walking together makes it happier: choosing it gives a little friendship
 (once a day per Moemon), and it gains more than the rest of the party as
 you walk.
