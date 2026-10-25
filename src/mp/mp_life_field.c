@@ -49,6 +49,7 @@ struct Brain
     s16 fx, fy;         // the tile it faces while doing it (or 0x7FFF)
     bool8 inviting;
     u16 idle;           // frames its Trainer has stood still
+    u8 lastLevel;       // its level when last seen (it twirls when it has gone up)
     s16 ownerX, ownerY;
     u8 ownerDir;
     u16 cooldown;       // frames before it starts something again
@@ -352,6 +353,12 @@ static void Plan(u8 act, s16 tx, s16 ty, s16 fx, s16 fy, u16 duration, u8 pose, 
 }
 
 // Its type need, if this place lets it: where to go, how to look doing it
+static bool8 IsFloaty(u16 species)
+{
+    return gSpeciesInfo[species].types[0] == TYPE_GHOST || gSpeciesInfo[species].types[1] == TYPE_GHOST
+        || gSpeciesInfo[species].types[0] == TYPE_PSYCHIC || gSpeciesInfo[species].types[1] == TYPE_PSYCHIC;
+}
+
 static bool8 PlanTypeNeed(struct MpLifeRec *rec, u8 tneed)
 {
     s16 x, y, fx = 0x7FFF, fy = 0;
@@ -363,19 +370,19 @@ static bool8 PlanTypeNeed(struct MpLifeRec *rec, u8 tneed)
     {
     case TNEED_SOAK:    ok = FindTile(Test_ByWater, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_WATER; break;
     case TNEED_BASK:
-    case TNEED_SUN:     ok = Sunny() && FindTile(Test_Open, 3, &x, &y, &fx, &fy); emote = LIFE_EMOTE_SUN; break;
+    case TNEED_SUN:     ok = Sunny() && FindTile(Test_Open, 3, &x, &y, &fx, &fy); pose = LIFE_POSE_LAY; emote = LIFE_EMOTE_SUN; break;
     case TNEED_DIG:     ok = FindTile(Test_Sand, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_DOTS; break;
-    case TNEED_FOLIAGE: ok = FindTile(Test_Grass, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_LEAF; break;
+    case TNEED_FOLIAGE: ok = FindTile(Test_Grass, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_EAT; emote = LIFE_EMOTE_LEAF; break;
     case TNEED_SHADE:   ok = (Indoors() || Underground() || IsNight()) ? FindTile(Test_Any, 2, &x, &y, &fx, &fy)
                                                                        : FindTile(Test_Wall, 3, &x, &y, &fx, &fy); break;
     case TNEED_SKY:     ok = Outdoors() && FindTile(Test_Open, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_NOTE; break;
-    case TNEED_STORM:   ok = Rainy() && FindTile(Test_Open, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_EXCLAIM; break;
+    case TNEED_STORM:   ok = Rainy() && FindTile(Test_Open, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_CHARGE; emote = LIFE_EMOTE_EXCLAIM; break;
     case TNEED_STILL:   ok = FindTile(Test_Wall, 3, &x, &y, &fx, &fy) || FindTile(Test_Any, 2, &x, &y, &fx, &fy); break;
     case TNEED_COOL:    ok = (Underground() || IsNight()) ? FindTile(Test_Any, 2, &x, &y, &fx, &fy)
                                                           : FindTile(Test_ByWater, 4, &x, &y, &fx, &fy); break;
     case TNEED_HEIGHT:  ok = Outdoors() && FindTile(Test_Open, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_NIGHT:   ok = IsNight() && FindTile(Test_Any, 3, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_NOTE; break;
-    case TNEED_SPAR:    ok = FindTile(Test_Open, 2, &x, &y, &fx, &fy) || FindTile(Test_Any, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_SPARKLE; break;
+    case TNEED_SPAR:    ok = FindTile(Test_Open, 2, &x, &y, &fx, &fy) || FindTile(Test_Any, 2, &x, &y, &fx, &fy); pose = LIFE_POSE_SPAR; emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_SHINE:   ok = FindTile(Test_ByObject, 4, &x, &y, &fx, &fy); emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_DAMP:    ok = FindTile(Test_Puddle, 4, &x, &y, &fx, &fy) || (Rainy() && FindTile(Test_Any, 2, &x, &y, &fx, &fy)); break;
     case TNEED_STONE:   ok = (Underground() || gMapHeader.mapType == MAP_TYPE_ROUTE) && FindTile(Test_Wall, 3, &x, &y, &fx, &fy); break;
@@ -479,13 +486,16 @@ static void ChooseActivity(struct MpLifeRec *rec)
             Plan(LIFE_ACT_WANDER, x, y, 0x7FFF, 0, 40 + Random() % 60, LIFE_POSE_NONE, LIFE_EMOTE_NONE);
         break;
     case LIFE_ACT_INVESTIGATE:
-        if (FindTile(Test_ByObject, 4, &x, &y, &fx, &fy) || FindTile(Test_ByWater, 3, &x, &y, &fx, &fy)
+        // a Ghost or Psychic type now and then floats by the water instead, lost in thought
+        if (IsFloaty(rec->species) && (Random() % 2) == 0 && FindTile(Test_ByWater, 4, &x, &y, &fx, &fy))
+            Plan(LIFE_ACT_INVESTIGATE, x, y, fx, fy, 60 * 5, LIFE_POSE_FLOAT, LIFE_EMOTE_NONE);
+        else if (FindTile(Test_ByObject, 4, &x, &y, &fx, &fy) || FindTile(Test_ByWater, 3, &x, &y, &fx, &fy)
          || FindTile(Test_Grass, 3, &x, &y, &fx, &fy))
             Plan(LIFE_ACT_INVESTIGATE, x, y, fx, fy, 120 + Random() % 60, LIFE_POSE_NONE, LIFE_EMOTE_QUESTION);
         break;
     case LIFE_ACT_FORAGE:
         if (FindTile(Test_Grass, 4, &x, &y, &fx, &fy) || FindTile(Test_Any, 2, &x, &y, &fx, &fy))
-            Plan(LIFE_ACT_FORAGE, x, y, 0x7FFF, 0, 200 + Random() % 100, LIFE_POSE_SHAKE, LIFE_EMOTE_FOOD);
+            Plan(LIFE_ACT_FORAGE, x, y, 0x7FFF, 0, 200 + Random() % 100, LIFE_POSE_EAT, LIFE_EMOTE_FOOD);
         break;
     case LIFE_ACT_NAP:
         // a cozy spot: by a wall, in the grass, or (warm ones) right by its Trainer
@@ -561,6 +571,14 @@ static void Finish(struct MpLifeRec *rec)
 {
     if (sB.act == LIFE_ACT_FORAGE)
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, LIFE_EMOTE_NOTE);   // found something good
+    if (sB.act == LIFE_ACT_NAP)
+    {
+        // waking up: a deep breath (then back to its Trainer: MP_LifeField_Reaction's end)
+        sB.act = LIFE_ACT_NONE;
+        sB.inviting = FALSE;
+        MP_LifeField_Reaction(LIFE_EMOTE_NONE, LIFE_POSE_BREATH, 75);
+        return;
+    }
     sB.act = LIFE_ACT_NONE;
     sB.inviting = FALSE;
     MP_Follower_AutoPose(LIFE_POSE_NONE);
@@ -617,6 +635,17 @@ static void RunActivity(struct MpLifeRec *rec)
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_LOCAL, sB.emote);
     if (sB.act == LIFE_ACT_PLAY && (sB.timer % 60) == 0)
         MP_Follower_AutoFaceTile(owner->currentCoords.x, owner->currentCoords.y);
+    if (sB.act == LIFE_ACT_HINT && sB.timer == sB.duration / 2)
+    {
+        // sniffed it out: it turns to its Trainer and tugs at their sleeve (when they're close enough)
+        s16 x, y;
+        u8 d;
+        if (MP_Follower_LocalPos(&x, &y, &d) && abs(x - owner->currentCoords.x) + abs(y - owner->currentCoords.y) <= 3)
+        {
+            MP_Follower_AutoFaceTile(owner->currentCoords.x, owner->currentCoords.y);
+            MP_Follower_AutoPose(LIFE_POSE_PULL);
+        }
+    }
     if (sB.timer >= sB.duration)
         Finish(rec);
 }
@@ -865,7 +894,7 @@ static void LongTerm(struct MpLifeRec *rec)
         bool8 walking = sB.idle == 0;
         sB.newBody++;
         if (walking)
-            MP_LifeField_Reaction(LIFE_EMOTE_SWEAT, LIFE_POSE_SHAKE, 30);
+            MP_LifeField_Reaction(LIFE_EMOTE_SWEAT, LIFE_POSE_TRIP, 30);
         else
             MP_LifeField_Reaction(LIFE_EMOTE_EXCLAIM, LIFE_POSE_SPIN, 90);
         MPNet_Log("life: new body (%s)", walking ? "stumble" : "look");
@@ -975,6 +1004,16 @@ void MP_LifeField_Update(void)
     Surroundings(rec);
     if (!MP_IsLocalFree())
         return;   // a script, a menu: it stays as it is
+    {
+        // it leveled up (back on the map after the battle): a twirl
+        u8 level = GetLevelFromBoxMonExp(box);
+        if (sB.lastLevel && level > sB.lastLevel && sB.reactTimer == 0)
+        {
+            MP_LifeField_Reaction(LIFE_EMOTE_SPARKLE, LIFE_POSE_TWIRL, 70);
+            MPNet_Log("life field: leveled up to %d (twirl)", level);
+        }
+        sB.lastLevel = level;
+    }
     Cues(rec);
     LongTerm(rec);
 
@@ -1051,4 +1090,19 @@ void MP_LifeField_Debug(void)
     bool8 pos = MP_Follower_LocalPos(&x, &y, &d);
     printf("[test] life field act %u phase %u idle %u cooldown %u auto %d free %d pos %d %d,%d box %d\n", sB.act, sB.phase, sB.idle,
            sB.cooldown, MP_Follower_AutoActive(), MP_IsLocalFree(), pos, x - MAP_OFFSET, y - MAP_OFFSET, FollowerBox() != NULL);
+}
+
+// The pose a Moemon (non-PMD) sprite shows for a PMD action pose: the nearest of the first seven
+u8 MP_LifePose_Base(u8 pose)
+{
+    static const u8 sBase[LIFE_POSE_COUNT] = {
+        [LIFE_POSE_NONE] = LIFE_POSE_NONE,     [LIFE_POSE_SIT] = LIFE_POSE_SIT,       [LIFE_POSE_NAP] = LIFE_POSE_NAP,
+        [LIFE_POSE_HOP] = LIFE_POSE_HOP,       [LIFE_POSE_SHAKE] = LIFE_POSE_SHAKE,   [LIFE_POSE_SPIN] = LIFE_POSE_SPIN,
+        [LIFE_POSE_LOOKUP] = LIFE_POSE_LOOKUP, [LIFE_POSE_EAT] = LIFE_POSE_SHAKE,     [LIFE_POSE_SPAR] = LIFE_POSE_SHAKE,
+        [LIFE_POSE_NOD] = LIFE_POSE_NONE,      [LIFE_POSE_JOY] = LIFE_POSE_HOP,       [LIFE_POSE_TWIRL] = LIFE_POSE_SPIN,
+        [LIFE_POSE_TRIP] = LIFE_POSE_SHAKE,    [LIFE_POSE_HURT] = LIFE_POSE_SHAKE,    [LIFE_POSE_CHARGE] = LIFE_POSE_SHAKE,
+        [LIFE_POSE_FLOAT] = LIFE_POSE_HOP,     [LIFE_POSE_LEAP] = LIFE_POSE_HOP,      [LIFE_POSE_PULL] = LIFE_POSE_SHAKE,
+        [LIFE_POSE_BREATH] = LIFE_POSE_NONE,   [LIFE_POSE_LAY] = LIFE_POSE_NAP,
+    };
+    return pose < LIFE_POSE_COUNT ? sBase[pose] : LIFE_POSE_NONE;
 }

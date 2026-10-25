@@ -557,3 +557,5 @@ gSpecials::
 	def_special MP_Coop_TakeJoinedOther
 	def_special MP_Garden_OpenBoard, waitstate=1
 	def_special MP_Garden_ShowDecorationMenu
+	def_special MP_Farm_AskPlant
+	def_special MP_Farm_AskPick

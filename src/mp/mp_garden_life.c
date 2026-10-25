@@ -16,7 +16,9 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_pmd.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 #include "mp_life.h"
 #include "mp_life_emote.h"
 #include "mp_life_field.h"
@@ -58,8 +60,13 @@ struct Actor
     u16 dex;
     bool8 female;
     s16 hue;
+    bool8 shiny;
     u8 spriteId;
     u8 size;
+    // PMD Collab picture (mp_pmd.c), when there's one for it: drawn whole, 8 directions turning smoothly
+    bool8 pmdOn;
+    u8 pdir, pturn;
+    struct MpPmdView pmd;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
     struct Coords16 prev, cur, target;
@@ -84,6 +91,8 @@ struct Actor
     bool8 learner;          // GA_PURSUIT: it's the one being taught
     bool8 seen;             // GA_RARE: the Trainer saw it happen
     u8 newBody;             // times it showed it's still getting used to a new body (this visit)
+    s8 farmPlot;            // GA_FARM: the plot it's seeing to, and what it does there (FARM_WORK_*)
+    u8 farmWork;
     // the network: the tile it last stepped from (ours: sent with cur); a friend's: the tiles their game says it
     // stepped on, replayed in order (the same path and facings on every screen)
     struct Coords16 from;
@@ -139,6 +148,9 @@ static bool8 SpriteIsOurs(struct Actor *a)
 
 static void DestroyActorSprite(struct Actor *a)
 {
+    if (a->pmdOn)
+        MP_Pmd_Detach(&a->pmd, SpriteIsOurs(a) ? &gSprites[a->spriteId] : NULL);
+    a->pmdOn = FALSE;
     if (SpriteIsOurs(a))
     {
         DestroySprite(&gSprites[a->spriteId]);
@@ -551,6 +563,7 @@ static void SyncLocalActors(void)
         a->dex = SpeciesToNationalPokedexNum(species);
         a->female = GetMonGender(mon) == MON_FEMALE;
         a->hue = MP_Hue_OfBoxMon(&mon->box);
+        a->shiny = IsMonShiny(mon);
         MP_Life_Get(&mon->box, TRUE);
         if (!SpawnNear(a, me->currentCoords.x, me->currentCoords.y))
         {
@@ -710,6 +723,12 @@ static void UpdateAnchor(void)
     sL.ovy = owner->previousCoords.y * 256 + (owner->currentCoords.y - owner->previousCoords.y) * frac;
 }
 
+static bool8 IsFloaty(u16 species)
+{
+    return gSpeciesInfo[species].types[0] == TYPE_GHOST || gSpeciesInfo[species].types[1] == TYPE_GHOST
+        || gSpeciesInfo[species].types[0] == TYPE_PSYCHIC || gSpeciesInfo[species].types[1] == TYPE_PSYCHIC;
+}
+
 static u8 PoseFrame(struct Actor *a, struct Sprite *sp)
 {
     u16 t = a->animTimer;
@@ -718,7 +737,7 @@ static u8 PoseFrame(struct Actor *a, struct Sprite *sp)
     sp->y2 = 0;
     if (moving)
         return a->dir * 2 + ((t / 8) & 1);
-    switch (a->pose)
+    switch (MP_LifePose_Base(a->pose))
     {
     case LIFE_POSE_NAP:
         sp->y2 = 1;
@@ -762,6 +781,20 @@ static void Draw(struct Actor *a)
         gSprites[a->spriteId].data[6] = ACTOR_MAGIC;
         gSprites[a->spriteId].data[7] = idx;
         a->anim = 0xFF;
+        {
+            u16 colors[16];
+            u8 slot = IndexOfSpritePaletteTag(TAG_GARDEN_PAL + idx);
+            a->pmdOn = MP_PmdWanted(TRUE) && MP_Pmd_Attach(&a->pmd, &gSprites[a->spriteId], a->dex, a->female, a->shiny, a->hue, colors);
+            if (a->pmdOn && slot != 0xFF)
+                LoadPalette(colors, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
+            a->pdir = MP_Pmd_DirFrom4(a->dir);
+            a->pturn = 0;
+        }
+    }
+    if (a->pmdOn != (MP_PmdWanted(TRUE) && MP_Pmd_Has(a->dex)))
+    {
+        DestroyActorSprite(a);   // OPTIONS > FOLLOWERS changed: the other kind of sprite next frame
+        return;
     }
     sp = &gSprites[a->spriteId];
     {
@@ -776,23 +809,35 @@ static void Draw(struct Actor *a)
     ax = a->prev.x * 256 + (a->cur.x - a->prev.x) * a->moved * 16;
     ay = a->prev.y * 256 + (a->cur.y - a->prev.y) * a->moved * 16;
     sp->x = os->x + (s16)((ax - sL.ovx) * 16 / 256);
-    sp->y = os->y + (s16)((ay - sL.ovy) * 16 / 256) - (a->size == 64 ? 16 : 0);
+    sp->y = os->y + (s16)((ay - sL.ovy) * 16 / 256) + (a->pmdOn ? PMD_GROUND_DY : a->size == 64 ? -16 : 0);
     a->animTimer++;
     frame = PoseFrame(a, sp);
+    if (a->pmdOn)   // the PMD picture moves by itself: no bobbing offsets
+    {
+        sp->x2 = sp->y2 = 0;
+        MP_Pmd_Animate(&a->pmd, &a->pdir, &a->pturn, a->moved < 16 && (a->prev.x != a->cur.x || a->prev.y != a->cur.y),
+                       a->dir, a->pose, a->speed > 1);
+        MP_Pmd_Tick(&a->pmd, sp);
+    }
     if (frame != a->anim)
     {
         StartSpriteAnim(sp, frame);
         a->anim = frame;
     }
     sp->oam.priority = os->oam.priority;
-    SetObjectSubpriorityByElevation(3, sp, 1);
+    if (a->pmdOn)
+        MP_Pmd_SetSubpriority(sp, 3, 1);
+    else
+        SetObjectSubpriorityByElevation(3, sp, 1);
     {
         s16 x = sp->x + sp->x2 + gSpriteCoordOffsetX, y = sp->y + sp->y2 + gSpriteCoordOffsetY;
-        bool8 onScreen = x > -32 && x < DISPLAY_WIDTH + 32 && y > -32 && y < DISPLAY_HEIGHT + 48;
+        s16 m = a->pmdOn ? 136 : 32;   // a PMD picture can reach far from its feet (it's drawn whole, at its exact place)
+        bool8 onScreen = x > -m && x < DISPLAY_WIDTH + m && y > -32 && y < DISPLAY_HEIGHT + m + 16;
         // off the screen it's hidden: a sprite's place on the screen wraps round (every 512 pixels across, 256 down),
         // and in the big GARDEN one far away would show up again in the middle of the view
         sp->invisible = !onScreen;
-        MP_LifeEmote_Place(LIFE_EMOTE_SLOT_GARDEN(idx), onScreen, x, y - a->size / 2 + (a->size == 64 ? 16 : 4),
+        MP_LifeEmote_Place(LIFE_EMOTE_SLOT_GARDEN(idx), onScreen, x,
+                           a->pmdOn ? y - MP_Pmd_Height(&a->pmd) : y - a->size / 2 + (a->size == 64 ? 16 : 4),
                            sp->subpriority > 0 ? sp->subpriority - 1 : 0);
     }
 }
@@ -976,12 +1021,12 @@ static const u8 sPursuitStep[LIFE_PURSUIT_MILESTONES] = {60, 150, 250};
 
 // how it looks at it: [pursuit][0 a beginner, 1 getting there, 2 a natural] = pose, emote
 static const u8 sPursuitLook[LIFE_PURSUIT_COUNT][3][2] = {
-    [LIFE_PURSUIT_CLIMB]   = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE}},
-    [LIFE_PURSUIT_SWIM]    = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_SHAKE, LIFE_EMOTE_WATER}, {LIFE_POSE_HOP, LIFE_EMOTE_WATER}},
-    [LIFE_PURSUIT_SING]    = {{LIFE_POSE_SIT, LIFE_EMOTE_DOTS}, {LIFE_POSE_SIT, LIFE_EMOTE_NOTE}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}},
-    [LIFE_PURSUIT_COLLECT] = {{LIFE_POSE_SHAKE, LIFE_EMOTE_QUESTION}, {LIFE_POSE_SHAKE, LIFE_EMOTE_SPARKLE}, {LIFE_POSE_HOP, LIFE_EMOTE_SPARKLE}},
-    [LIFE_PURSUIT_DIG]     = {{LIFE_POSE_SHAKE, LIFE_EMOTE_DOTS}, {LIFE_POSE_SHAKE, LIFE_EMOTE_EXCLAIM}, {LIFE_POSE_HOP, LIFE_EMOTE_EXCLAIM}},
-    [LIFE_PURSUIT_TEACH]   = {{LIFE_POSE_HOP, LIFE_EMOTE_DOTS}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_HOP, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_CLIMB]   = {{LIFE_POSE_TRIP, LIFE_EMOTE_SWEAT}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_SWIM]    = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_SHAKE, LIFE_EMOTE_WATER}, {LIFE_POSE_LEAP, LIFE_EMOTE_WATER}},
+    [LIFE_PURSUIT_SING]    = {{LIFE_POSE_SIT, LIFE_EMOTE_DOTS}, {LIFE_POSE_SIT, LIFE_EMOTE_NOTE}, {LIFE_POSE_JOY, LIFE_EMOTE_NOTE}},
+    [LIFE_PURSUIT_COLLECT] = {{LIFE_POSE_SHAKE, LIFE_EMOTE_QUESTION}, {LIFE_POSE_SHAKE, LIFE_EMOTE_SPARKLE}, {LIFE_POSE_LEAP, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_DIG]     = {{LIFE_POSE_SHAKE, LIFE_EMOTE_DOTS}, {LIFE_POSE_SHAKE, LIFE_EMOTE_EXCLAIM}, {LIFE_POSE_LEAP, LIFE_EMOTE_EXCLAIM}},
+    [LIFE_PURSUIT_TEACH]   = {{LIFE_POSE_NOD, LIFE_EMOTE_DOTS}, {LIFE_POSE_NOD, LIFE_EMOTE_NOTE}, {LIFE_POSE_JOY, LIFE_EMOTE_SPARKLE}},
 };
 
 static bool8 IsYounger(struct Actor *a, struct Actor *b)
@@ -1254,6 +1299,18 @@ static void SongDone(struct Actor *a)
         MP_Life_Feel(RecOf(b), EMO_JOY, 12);
 }
 
+// The farm work done (beside its plot; the plot may not need it any more: someone got there first)
+static void FarmDone(struct Actor *a)
+{
+    s16 px, py;
+    if (a->farmPlot < 0)
+        return;
+    MP_Farm_PlotPos(a->farmPlot, &px, &py);
+    if (abs(a->cur.x - px) + abs(a->cur.y - py) == 1 && MP_Farm_DoWork(a->farmWork, a->farmPlot, a->dex))
+        MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->farmWork == FARM_WORK_NIBBLE ? LIFE_EMOTE_HEART : LIFE_EMOTE_NOTE);
+    a->farmPlot = -1;
+}
+
 // --- Evolution: friends come to see the new body; the evolved one isn't used to it yet
 
 static bool8 TryReact(struct Actor *a, struct MpLifeRec *rec)
@@ -1270,7 +1327,7 @@ static bool8 TryReact(struct Actor *a, struct MpLifeRec *rec)
         kind = MP_Life_EvolutionReaction(rec, rb);
         if (kind == LIFE_EVO_REACT_NONE)
             continue;
-        pose = kind == LIFE_EVO_REACT_PROUD ? LIFE_POSE_HOP : LIFE_POSE_SIT;
+        pose = kind == LIFE_EVO_REACT_PROUD ? LIFE_POSE_JOY : LIFE_POSE_SIT;
         emote = kind == LIFE_EVO_REACT_PROUD ? LIFE_EMOTE_SPARKLE : kind == LIFE_EVO_REACT_AWED ? LIFE_EMOTE_EXCLAIM : LIFE_EMOTE_ANGRY;
         if (!BesideActor(a, b, &x, &y))
             x = a->cur.x, y = a->cur.y;
@@ -1320,13 +1377,13 @@ static bool8 TypePlace(struct Actor *a, u8 tneed, bool8 anyTime)
     switch (tneed)
     {
     case TNEED_SOAK:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_WATER; break;
-    case TNEED_BASK:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || ((anyTime || Sunny()) && FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
+    case TNEED_BASK:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || ((anyTime || Sunny()) && FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); pose = LIFE_POSE_LAY; emote = LIFE_EMOTE_SUN; break;
     case TNEED_SUN:     ok = (anyTime || Sunny()) && (FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
     case TNEED_DIG:     ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_DOTS; break;
-    case TNEED_FOLIAGE: ok = FindZone(a, tneed, T_Tall, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Tall, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_LEAF; break;
+    case TNEED_FOLIAGE: ok = FindZone(a, tneed, T_Tall, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Tall, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_EAT; emote = LIFE_EMOTE_LEAF; break;
     case TNEED_HEIGHT:  ok = FindZone(a, tneed, T_Lookout, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_SKY:     ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
-    case TNEED_STORM:   ok = FindZone(a, tneed, T_ByStone, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_EXCLAIM; break;
+    case TNEED_STORM:   ok = FindZone(a, tneed, T_ByStone, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_CHARGE; emote = LIFE_EMOTE_EXCLAIM; break;
     case TNEED_DAMP:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Puddle, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
     case TNEED_STONE:   ok = FindZone(a, tneed, T_ByRock, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy); break;
     case TNEED_SHADE:
@@ -1334,13 +1391,63 @@ static bool8 TypePlace(struct Actor *a, u8 tneed, bool8 anyTime)
     case TNEED_COZY:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy); break;
     case TNEED_COOL:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
     case TNEED_NIGHT:   ok = (anyTime || IsNight()) && (FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_NOTE; break;
-    case TNEED_SPAR:    ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_SPARKLE; break;
+    case TNEED_SPAR:    ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); pose = LIFE_POSE_SPAR; emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_SHINE:   ok = FindZone(a, tneed, T_ByRock, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy); emote = LIFE_EMOTE_SPARKLE; break;
     }
     if (!ok)
         return FALSE;
     a->tneed = tneed;
     Plan(a, GA_TYPE, x, y, fx, fy, 240 + Random() % 180, pose, emote);
+    return TRUE;
+}
+
+// What it would do on the BERRY farm, by its nature (and how much it wants to: 0 nothing)
+static u16 FarmWork(struct Actor *a, struct MpLifeRec *rec, s8 *plot, u8 *work)
+{
+    u32 busy = 0;
+    u8 i;
+    s8 p;
+    if (a->owner >= 0 || MP_Farm_Plots() == 0)
+        return 0;
+    for (i = 0; i < MAX_ACTORS; i++)   // (one of ours to a plot)
+        if (sL.a[i].used && &sL.a[i] != a && sL.a[i].act == GA_FARM && sL.a[i].farmPlot >= 0)
+            busy |= 1u << sL.a[i].farmPlot;
+    if (HasType(rec, TYPE_GRASS) && (p = MP_Farm_FindWork(FARM_WORK_TEND, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_TEND;
+        return 26 + rec->cur[LIFE_WARM] / 16;
+    }
+    if ((HasType(rec, TYPE_WATER) || rec->cur[LIFE_WARM] >= 150)
+     && (p = MP_Farm_FindWork(FARM_WORK_WATER, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_WATER;
+        return 14 + rec->cur[LIFE_WARM] / 10 + (HasType(rec, TYPE_WATER) ? 12 : 0);
+    }
+    if ((rec->need[NEED_HUNGER] >= 110 || (rec->cur[LIFE_LIVELY] >= 160 && rec->cur[LIFE_WARM] < 110))
+     && (p = MP_Farm_FindWork(FARM_WORK_NIBBLE, a->cur.x, a->cur.y, busy)) >= 0)
+    {
+        *plot = p, *work = FARM_WORK_NIBBLE;
+        return 10 + rec->need[NEED_HUNGER] / 10;
+    }
+    return 0;
+}
+
+// Off to a plot: beside it, facing it (watering: a nod; helping it grow: powering up; a nibble: eating)
+static bool8 PlanFarm(struct Actor *a, s8 plot, u8 work)
+{
+    static const u8 sPose[FARM_WORK_COUNT] = {LIFE_POSE_NOD, LIFE_POSE_CHARGE, LIFE_POSE_EAT};
+    static const u8 sEmote[FARM_WORK_COUNT] = {LIFE_EMOTE_WATER, LIFE_EMOTE_LEAF, LIFE_EMOTE_FOOD};
+    s16 px, py, x, y, fx, fy;
+    if (plot < 0 || work >= FARM_WORK_COUNT)
+        return FALSE;
+    MP_Farm_PlotPos(plot, &px, &py);
+    sSearcher = a;
+    if (!FindNear(px, py, T_Any, 1, &x, &y, &fx, &fy))
+        return FALSE;
+    Plan(a, GA_FARM, x, y, px, py, work == FARM_WORK_NIBBLE ? 60 * 3 : 60 * 4, sPose[work], sEmote[work]);
+    a->farmPlot = plot;
+    a->farmWork = work;
+    MPNet_Log("garden: %u goes to plot %d (work %u)", a->dex, plot, work);
     return TRUE;
 }
 
@@ -1353,7 +1460,9 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     struct Actor *friendA = NULL, *rivalA = NULL, *songMate = NULL;
     s16 dX = 0, dY = 0;
-    s8 decor;
+    s8 decor, farmPlot = -1;
+    u8 farmWork = 0;
+    u16 farmScore;
     memset(score, 0, sizeof(score));
     // long-term life first (docs 12): a friend's new body, a rare moment, its own new body
     if (TryReact(a, rec) || TryRare(a, rec, 0) || NewBody(a, rec))
@@ -1389,6 +1498,10 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
     // a song its family sings, with family close by
     if (MP_Life_FamilyTrait(rec, TRAIT_FAMILY_SONG) && (songMate = OursNear(a, 8, IsFamilyOf)) != NULL)
         score[GA_SONG] = 20 + rec->cur[LIFE_WARM] / 10;
+    // the BERRY farm, by its nature: Grass types help a plant grow, Water types and warm ones water dry soil, and a
+    // hungry or mischievous one may nibble BERRIES left too long
+    farmScore = FarmWork(a, rec, &farmPlot, &farmWork);
+    score[GA_FARM] = farmScore;
     for (i = 0; i < GA_COUNT; i++)
         total += score[i];
     if (total == 0)
@@ -1407,8 +1520,12 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
             Plan(a, GA_WANDER, x, y, 0x7FFF, 0, 30 + Random() % 60, LIFE_POSE_NONE, LIFE_EMOTE_NONE);
         break;
     case GA_LOOK:
-        Plan(a, GA_LOOK, a->cur.x, a->cur.y, 0x7FFF, 0, 90 + Random() % 90, LIFE_POSE_SPIN,
-             rec->cur[LIFE_CURIOUS] >= 170 ? LIFE_EMOTE_QUESTION : LIFE_EMOTE_NONE);
+        // a Ghost or Psychic type now and then floats by the water instead
+        if (IsFloaty(rec->species) && (Random() % 2) == 0 && FindNear(a->cur.x, a->cur.y, T_ByWater, 10, &x, &y, &fx, &fy))
+            Plan(a, GA_LOOK, x, y, fx, fy, 60 * 5, LIFE_POSE_FLOAT, LIFE_EMOTE_NONE);
+        else
+            Plan(a, GA_LOOK, a->cur.x, a->cur.y, 0x7FFF, 0, 90 + Random() % 90, LIFE_POSE_SPIN,
+                 rec->cur[LIFE_CURIOUS] >= 170 ? LIFE_EMOTE_QUESTION : LIFE_EMOTE_NONE);
         break;
     case GA_NAP:
     {
@@ -1428,7 +1545,7 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
     }
     case GA_FORAGE:
         if (FindNear(a->cur.x, a->cur.y, T_Tall, 12, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 6, &x, &y, &fx, &fy))
-            Plan(a, GA_FORAGE, x, y, 0x7FFF, 0, 200 + Random() % 100, LIFE_POSE_SHAKE, LIFE_EMOTE_FOOD);
+            Plan(a, GA_FORAGE, x, y, 0x7FFF, 0, 200 + Random() % 100, LIFE_POSE_EAT, LIFE_EMOTE_FOOD);
         break;
     case GA_TYPE:
         TypePlace(a, tneed, FALSE);
@@ -1458,11 +1575,11 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
         if (rivalA && BesideActor(a, rivalA, &x, &y))
         {
             a->partner = rivalA - sL.a;
-            Plan(a, GA_SQUABBLE, x, y, rivalA->cur.x, rivalA->cur.y, 60 * 3, LIFE_POSE_SHAKE, LIFE_EMOTE_ANGRY);
+            Plan(a, GA_SQUABBLE, x, y, rivalA->cur.x, rivalA->cur.y, 60 * 3, LIFE_POSE_HURT, LIFE_EMOTE_ANGRY);
             a->partner = rivalA - sL.a;
             if (rivalA->owner < 0)
             {
-                Plan(rivalA, GA_SQUABBLE, rivalA->cur.x, rivalA->cur.y, a->cur.x, a->cur.y, 60 * 3, LIFE_POSE_SHAKE,
+                Plan(rivalA, GA_SQUABBLE, rivalA->cur.x, rivalA->cur.y, a->cur.x, a->cur.y, 60 * 3, LIFE_POSE_HURT,
                      LIFE_EMOTE_ANGRY);
                 rivalA->partner = a - sL.a;
             }
@@ -1474,7 +1591,7 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
         {
             // a family greeting: a happy twirl first (docs 12)
             bool8 greet = MP_Life_FamilyTrait(rec, TRAIT_FAMILY_GREETING) != NULL;
-            Plan(a, GA_COMPANY, x, y, me->currentCoords.x, me->currentCoords.y, 60 * 6, greet ? LIFE_POSE_SPIN : LIFE_POSE_SIT,
+            Plan(a, GA_COMPANY, x, y, me->currentCoords.x, me->currentCoords.y, 60 * 6, greet ? LIFE_POSE_TWIRL : LIFE_POSE_SIT,
                  greet || rec->cur[LIFE_WARM] >= 130 ? LIFE_EMOTE_HEART : LIFE_EMOTE_CALM);
         }
         break;
@@ -1525,6 +1642,9 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
             a->decor = decor;
         }
         break;
+    case GA_FARM:
+        PlanFarm(a, farmPlot, farmWork);
+        break;
     }
 }
 
@@ -1545,6 +1665,12 @@ static void Satisfy(struct Actor *a, struct MpLifeRec *rec)
     case GA_RARE:
     case GA_SONG:     MP_Life_Satisfy(rec, NEED_COMPANY, 10); MP_Life_Feel(rec, EMO_JOY, 2); MP_Life_Feel(rec, EMO_CALM, 2); break;
     case GA_REACT:    MP_Life_Satisfy(rec, NEED_COMPANY, 4); break;
+    case GA_FARM:
+        if (a->farmWork == FARM_WORK_NIBBLE)
+            MP_Life_Satisfy(rec, NEED_HUNGER, 12);
+        else
+            MP_Life_Feel(rec, EMO_CALM, 1);
+        break;
     default:          MP_Life_Satisfy(rec, NEED_EXPLORE, 5); break;
     }
 }
@@ -1640,7 +1766,7 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         a->emote = LIFE_EMOTE_WATER;
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), LIFE_EMOTE_EXCLAIM);
     }
-    if (a->act == GA_COMPANY && a->pose == LIFE_POSE_SPIN && a->timer == 45)
+    if (a->act == GA_COMPANY && a->pose == LIFE_POSE_TWIRL && a->timer == 45)
         a->pose = LIFE_POSE_SIT;
     if (a->emote != LIFE_EMOTE_NONE && a->timer && (a->timer % 180) == 0)
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->emote);
@@ -1648,7 +1774,7 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         a->dir = DirToward(a->cur, sL.a[a->partner].cur.x, sL.a[a->partner].cur.y, a->dir);
     if (a->timer >= a->duration)
     {
-        bool8 celebrate = FALSE;
+        bool8 celebrate = FALSE, woke = a->act == GA_NAP;
         if (a->act == GA_PLAY || a->act == GA_CHASE || a->act == GA_SQUABBLE)
             Shared(a, rec);
         if (a->act == GA_FORAGE)
@@ -1659,6 +1785,8 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
             RareDone(a, rec);
         if (a->act == GA_SONG && a->lead)
             SongDone(a);
+        if (a->act == GA_FARM)
+            FarmDone(a);
         a->act = GA_NONE;
         a->pose = LIFE_POSE_NONE;
         a->partner = -1;
@@ -1667,7 +1795,9 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         a->lead = a->learner = FALSE;
         a->cooldown = 40 + Random() % 120;
         if (celebrate)
-            MP_Garden_ActorReaction(a - sL.a, LIFE_EMOTE_SPARKLE, LIFE_POSE_HOP, 90);   // a milestone!
+            MP_Garden_ActorReaction(a - sL.a, LIFE_EMOTE_SPARKLE, LIFE_POSE_LEAP, 90);   // a milestone: a leap for joy
+        else if (woke)
+            MP_Garden_ActorReaction(a - sL.a, LIFE_EMOTE_NONE, LIFE_POSE_BREATH, 60);    // up from a nap: a deep breath
     }
 }
 
@@ -1761,6 +1891,8 @@ u8 MP_GardenLife_Detail(u8 i)
         return a->rare | (a->lead ? 0 : 0x80);
     if (a->act == GA_PURSUIT)
         return a->learner ? 0x80 : (rec = RecOf(a)) != NULL ? rec->pursuit : 0;
+    if (a->act == GA_FARM)
+        return 0x80 | a->farmWork;
     return 0;
 }
 
@@ -1803,7 +1935,7 @@ static void QueueTurn(struct Actor *a, u8 dir)
 
 // A friend's Garden Pokémon, as their game says: the tile it's on or stepping onto (x, y) and the one it stepped
 // from (fx, fy), queued and replayed in order; its pace; its facing and pose once it's there
-s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s16 hue, s16 x, s16 y, s16 fx, s16 fy,
+s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, u8 female, s16 hue, s16 x, s16 y, s16 fx, s16 fy,
                            u8 speed, u8 dir, u8 pose, u8 act)
 {
     u8 i;
@@ -1827,7 +1959,8 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         a->slot = index;
         a->key = key;
         a->dex = dex;
-        a->female = female;
+        a->female = female & 1;          // bit 1: shiny (its PMD picture's colors)
+        a->shiny = (female >> 1) & 1;
         a->hue = hue;
         a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
@@ -1878,7 +2011,7 @@ bool8 MP_GardenLife_Local(u8 n, u32 *key, u16 *dex, u8 *female, s16 *hue, s16 *x
             continue;
         *key = a->key;
         *dex = a->dex;
-        *female = a->female;
+        *female = a->female | (a->shiny << 1);   // (bit 1: shiny)
         *hue = a->hue;
         *x = a->cur.x;     // the tile it's on or stepping onto, and the one it stepped from: friends' games
         *y = a->cur.y;     // replay its steps
@@ -2047,9 +2180,9 @@ void MP_GardenLife_Debug(const char *args)
         struct Actor *a = &sL.a[i];
         if (!a->used)
             continue;
-        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u\n", i,
+        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u pmd %d lift %d\n", i,
                a->dex, a->owner, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner, a->rare,
-               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir);
+               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir, a->pmdOn, a->pmdOn ? a->pmd.big.lift : 0);
     }
 }
 
@@ -2084,6 +2217,16 @@ void MP_GardenLife_DebugForce(u8 actor, u8 act)
         case GA_PLAY: case GA_CHASE: rec->need[NEED_PLAY] = 250; rec->cur[LIFE_LIVELY] = 200; break;
         case GA_COMPANY: rec->need[NEED_COMPANY] = 250; rec->cur[LIFE_SOCIAL] = 220; break;
         case GA_QUIET: rec->need[NEED_QUIET] = 250; rec->cur[LIFE_SOCIAL] = 40; break;
+        case GA_FARM:
+        {
+            // the farm work its nature picks (none: nothing)
+            s8 plot = -1;
+            u8 work = 0;
+            if (FarmWork(&sL.a[actor], rec, &plot, &work))
+                PlanFarm(&sL.a[actor], plot, work);
+            printf("[test] garden farm actor %u -> plot %d work %u\n", actor, sL.a[actor].act == GA_FARM ? plot : -1, work);
+            return;
+        }
         }
     }
     Choose(&sL.a[actor], rec);

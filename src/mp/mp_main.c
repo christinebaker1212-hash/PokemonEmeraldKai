@@ -10,6 +10,7 @@
 #include "mp_join.h"
 #include "global.h"
 #include "mp.h"
+#include "mp_pmd.h"
 #include "main.h"
 #include "overworld.h"
 #include "pokemon.h"
@@ -25,6 +26,7 @@
 #include "mp_life_battle.h"
 #include "mp_life_social.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
 #define STATE_HEARTBEAT_FRAMES 30
@@ -122,6 +124,7 @@ static u8 AsciiCharToGame(char c)
 
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
+static s8 sRoomHostId = -1;          // ... and who sent them (the host's player id)
 static bool8 sRoomLevelScaling;
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
@@ -376,6 +379,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
+        else if (strcmp(key, "follower_sprites") == 0)
+            gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
+                                      : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -490,6 +496,8 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
+        "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
+        "follower_sprites = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -498,7 +506,9 @@ void MP_SaveConfig(void)
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
-        gMpConfig.moenavCalls ? "battles" : "all", gMpConfig.lobby);
+        gMpConfig.moenavCalls ? "battles" : "all",
+        gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
+        gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -880,7 +890,8 @@ static void CollectLocalState(struct MpState *s)
         s->followerDex = MP_Follower_LocalDex(&female);
         s->followerFx = MP_Follower_LocalFx(&sound);
         s->followerHue = s->followerDex ? MP_Follower_LocalHue() : 0;
-        s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0);
+        s->followerFlags = (female ? 1 : 0) | ((sound & 7) << 1) | ((MP_Follower_LocalToggleSeq() & 3) << 4) | ((sound & 8) ? 0x40 : 0)
+                         | (s->followerDex && MP_Follower_LocalShiny() ? 0x80 : 0);
     }
     MP_LifeSocial_CollectState(s);   // MOéMON GARDEN: the follower's own life
     sLastLocalState = *s;
@@ -1195,6 +1206,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomLevelScaling = len >= 4 ? data[3] != 0 : TRUE;
             sRoomRulesHeard = TRUE;
+            sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
                       sRoomPadding ? "on" : "off", sRoomAnimSpeed, sRoomLevelScaling ? "on" : "off");
         }
@@ -1249,6 +1261,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_Join_OnRelay(from, data, len);
     else if (data[0] >= MPR_GARDEN_FIRST && data[0] < MPR_GARDEN_FIRST + 2)
         MP_GardenNet_OnRelay(from, data, len);
+    else if (data[0] >= MPR_FARM_FIRST && data[0] < MPR_FARM_FIRST + 3)
+        MP_Farm_OnRelay(from, data, len);
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -1344,6 +1358,30 @@ static void ShowWelcome(u8 from, const u8 *text, u16 len)
 }
 
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
+
+bool8 MP_PmdWanted(bool8 garden)
+{
+    static bool8 sEnvRead;
+    u8 mode;
+    if (!sEnvRead)
+    {
+        sEnvRead = TRUE;
+        if (getenv("MOEMON_FOLLOWER_SPRITES"))   // tests: the starting value (0 default, 1 pmd, 2 original)
+            gMpConfig.followerSprites = atoi(getenv("MOEMON_FOLLOWER_SPRITES")) % MP_FOLLOW_SPRITES_COUNT;
+    }
+    mode = gMpConfig.followerSprites;
+    return mode == MP_FOLLOW_SPRITES_PMD || (mode == MP_FOLLOW_SPRITES_DEFAULT && garden);
+}
+bool8 MP_Lobby_IsCreator(void) { return sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM; }
+
+// The room's host (who made it), heard with its rules when we joined: while they're still here
+s8 MP_RoomHostId(void)
+{
+    if (sLobby.creator || !sRoomRulesHeard || sRoomHostId < 0 || sRoomHostId >= MP_MAX_PLAYERS || sRoomHostId == gMpLocalId
+     || (sLobby.state != MP_LOBBY_IN_ROOM && sLobby.state != MP_LOBBY_RECONNECT_WAIT) || !gMpPlayers[sRoomHostId].present)
+        return -1;
+    return sRoomHostId;
+}
 
 // TEAM PADDING: the host's choice, heard when we joined (our own when we made the room,
 // before we hear it, or with nobody around)
@@ -1525,6 +1563,7 @@ static void StartRequest(u8 req, const char *room, const char *password, bool8 h
     sLobby.request = req;
     sLobby.creator = (req == REQ_CREATE);
     sRoomRulesHeard = FALSE;
+    sRoomHostId = -1;
     sHostClockHeard = FALSE;
     sLobby.error = MP_LOBBY_ERR_NONE;
     if (sLobby.state == MP_LOBBY_READY || sLobby.state == MP_LOBBY_ERROR)
@@ -1772,6 +1811,7 @@ void MP_FrameUpdate(void)
         MP_Init();
     MP_Qol_Update();
     MP_ReflectionPalettes_Sweep();   // reflection palettes no sprite shows any more
+    MP_Pmd_FrameUpdate();            // PMD sheets nobody shows any more (mp_pmd.c)
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_TmRefund_Update();       // the LOTTERY CORNER clerk brings back TMs used up before they became reusable
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)

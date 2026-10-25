@@ -1,0 +1,390 @@
+PMD Collab overworld sprites (https://sprites.pmdcollab.org, github.com/PMDCollab/SpriteCollab)
+Used for followers and Garden Pokemon under CC BY-NC 4.0 (non-commercial, with credit).
+Sprite artists for each Pokemon:
+
+#001 Bulbasaur: CHUNSOFT
+#002 Ivysaur: CHUNSOFT
+#003 Venusaur: CHUNSOFT
+#004 Charmander: CHUNSOFT
+#005 Charmeleon: CHUNSOFT, 199989579682414592, bwappi, Grimlin
+#006 Charizard: CHUNSOFT, Emboarger
+#007 Squirtle: CHUNSOFT
+#008 Wartortle: CHUNSOFT
+#009 Blastoise: CHUNSOFT
+#010 Caterpie: CHUNSOFT
+#011 Metapod: CHUNSOFT
+#012 Butterfree: CHUNSOFT, Emmuffin
+#013 Weedle: CHUNSOFT
+#014 Kakuna: CHUNSOFT
+#015 Beedrill: CHUNSOFT
+#016 Pidgey: CHUNSOFT, JFain
+#017 Pidgeotto: CHUNSOFT
+#018 Pidgeot: CHUNSOFT
+#019 Rattata: CHUNSOFT
+#020 Raticate: CHUNSOFT
+#021 Spearow: CHUNSOFT
+#022 Fearow: CHUNSOFT
+#023 Ekans: CHUNSOFT, Emmuffin
+#024 Arbok: CHUNSOFT
+#025 Pikachu: CHUNSOFT
+#026 Raichu: CHUNSOFT, Grimlin, Top_Kec
+#027 Sandshrew: CHUNSOFT, Emboarger, 3P1C
+#028 Sandslash: CHUNSOFT, Emmuffin, XModxGodX
+#029 Nidoran_F: CHUNSOFT
+#030 Nidorina: CHUNSOFT
+#031 Nidoqueen: CHUNSOFT
+#032 Nidoran_M: CHUNSOFT
+#033 Nidorino: CHUNSOFT
+#034 Nidoking: CHUNSOFT
+#035 Clefairy: CHUNSOFT
+#036 Clefable: CHUNSOFT
+#037 Vulpix: CHUNSOFT
+#038 Ninetales: CHUNSOFT, baronessfaron
+#039 Jigglypuff: CHUNSOFT, JFain
+#040 Wigglytuff: CHUNSOFT
+#041 Zubat: CHUNSOFT
+#042 Golbat: CHUNSOFT
+#043 Oddish: CHUNSOFT
+#044 Gloom: CHUNSOFT
+#045 Vileplume: CHUNSOFT, Emmuffin
+#046 Paras: CHUNSOFT
+#047 Parasect: CHUNSOFT
+#048 Venonat: CHUNSOFT, anomalocaris
+#049 Venomoth: CHUNSOFT
+#050 Diglett: CHUNSOFT, Audino
+#051 Dugtrio: CHUNSOFT, Audino
+#052 Meowth: CHUNSOFT
+#053 Persian: CHUNSOFT
+#054 Psyduck: CHUNSOFT
+#055 Golduck: CHUNSOFT
+#056 Mankey: CHUNSOFT
+#057 Primeape: CHUNSOFT
+#058 Growlithe: CHUNSOFT, Emmuffin, JustAGunk
+#059 Arcanine: CHUNSOFT
+#060 Poliwag: CHUNSOFT
+#061 Poliwhirl: CHUNSOFT
+#062 Poliwrath: CHUNSOFT
+#063 Abra: CHUNSOFT, Emmuffin
+#064 Kadabra: CHUNSOFT
+#065 Alakazam: CHUNSOFT
+#066 Machop: CHUNSOFT, Emboarger
+#067 Machoke: CHUNSOFT
+#068 Machamp: CHUNSOFT
+#069 Bellsprout: CHUNSOFT
+#070 Weepinbell: CHUNSOFT
+#071 Victreebel: CHUNSOFT
+#072 Tentacool: CHUNSOFT
+#073 Tentacruel: CHUNSOFT
+#074 Geodude: CHUNSOFT
+#075 Graveler: CHUNSOFT, Emmuffin
+#076 Golem: CHUNSOFT, Emmuffin
+#077 Ponyta: CHUNSOFT, JFain
+#078 Rapidash: CHUNSOFT
+#079 Slowpoke: CHUNSOFT
+#080 Slowbro: CHUNSOFT
+#081 Magnemite: CHUNSOFT
+#082 Magneton: CHUNSOFT
+#083 Farfetch_d: CHUNSOFT
+#084 Doduo: CHUNSOFT
+#085 Dodrio: CHUNSOFT
+#086 Seel: CHUNSOFT
+#087 Dewgong: CHUNSOFT
+#088 Grimer: CHUNSOFT
+#089 Muk: CHUNSOFT
+#090 Shellder: CHUNSOFT
+#091 Cloyster: CHUNSOFT
+#092 Gastly: CHUNSOFT
+#093 Haunter: CHUNSOFT
+#094 Gengar: CHUNSOFT, Emboarger
+#095 Onix: CHUNSOFT
+#096 Drowzee: CHUNSOFT
+#097 Hypno: CHUNSOFT
+#098 Krabby: CHUNSOFT
+#099 Kingler: CHUNSOFT
+#100 Voltorb: CHUNSOFT, Emboarger
+#101 Electrode: CHUNSOFT
+#102 Exeggcute: CHUNSOFT
+#103 Exeggutor: CHUNSOFT
+#104 Cubone: CHUNSOFT, Emmuffin, Sceptile, Some_Shinx
+#105 Marowak: CHUNSOFT
+#106 Hitmonlee: CHUNSOFT
+#107 Hitmonchan: CHUNSOFT
+#108 Lickitung: CHUNSOFT
+#109 Koffing: CHUNSOFT
+#110 Weezing: CHUNSOFT
+#111 Rhyhorn: CHUNSOFT, Pokejavi.
+#112 Rhydon: CHUNSOFT
+#113 Chansey: CHUNSOFT
+#114 Tangela: CHUNSOFT
+#115 Kangaskhan: CHUNSOFT
+#116 Horsea: CHUNSOFT
+#117 Seadra: CHUNSOFT
+#118 Goldeen: CHUNSOFT
+#119 Seaking: CHUNSOFT
+#120 Staryu: CHUNSOFT
+#121 Starmie: CHUNSOFT
+#122 Mr_Mime: CHUNSOFT
+#123 Scyther: CHUNSOFT
+#124 Jynx: CHUNSOFT
+#125 Electabuzz: CHUNSOFT
+#126 Magmar: CHUNSOFT
+#127 Pinsir: CHUNSOFT
+#128 Tauros: CHUNSOFT
+#129 Magikarp: CHUNSOFT
+#130 Gyarados: CHUNSOFT
+#131 Lapras: CHUNSOFT
+#132 Ditto: CHUNSOFT
+#133 Eevee: CHUNSOFT, Emmuffin
+#134 Vaporeon: CHUNSOFT
+#135 Jolteon: CHUNSOFT, dmDash
+#136 Flareon: CHUNSOFT, Ginnie, JFain
+#137 Porygon: CHUNSOFT
+#138 Omanyte: CHUNSOFT
+#139 Omastar: CHUNSOFT
+#140 Kabuto: CHUNSOFT, anomalocaris
+#141 Kabutops: CHUNSOFT
+#142 Aerodactyl: CHUNSOFT
+#143 Snorlax: CHUNSOFT
+#144 Articuno: CHUNSOFT
+#145 Zapdos: CHUNSOFT
+#146 Moltres: CHUNSOFT
+#147 Dratini: CHUNSOFT, JFain
+#148 Dragonair: CHUNSOFT
+#149 Dragonite: CHUNSOFT, SethY, Deeshura
+#150 Mewtwo: CHUNSOFT, JFain
+#151 Mew: CHUNSOFT, JFain
+#152 Chikorita: CHUNSOFT
+#153 Bayleef: CHUNSOFT
+#154 Meganium: CHUNSOFT
+#155 Cyndaquil: CHUNSOFT
+#156 Quilava: CHUNSOFT, JFain
+#157 Typhlosion: CHUNSOFT, Emmuffin
+#158 Totodile: CHUNSOFT
+#159 Croconaw: CHUNSOFT
+#160 Feraligatr: CHUNSOFT
+#161 Sentret: CHUNSOFT, Emmuffin, Neat_Neato
+#162 Furret: CHUNSOFT, Neat_Neato
+#163 Hoothoot: CHUNSOFT
+#164 Noctowl: CHUNSOFT, Emmuffin
+#165 Ledyba: CHUNSOFT, JFain
+#166 Ledian: CHUNSOFT
+#167 Spinarak: CHUNSOFT
+#168 Ariados: CHUNSOFT
+#169 Crobat: CHUNSOFT
+#170 Chinchou: CHUNSOFT
+#171 Lanturn: CHUNSOFT, JFain
+#172 Pichu: CHUNSOFT, Spikey-Valentine
+#173 Cleffa: CHUNSOFT
+#174 Igglybuff: CHUNSOFT
+#175 Togepi: CHUNSOFT
+#176 Togetic: CHUNSOFT, Emmuffin, XModxGodX
+#177 Natu: CHUNSOFT, Hanbei
+#178 Xatu: CHUNSOFT
+#179 Mareep: CHUNSOFT, Emmuffin
+#180 Flaaffy: CHUNSOFT, Emmuffin
+#181 Ampharos: CHUNSOFT
+#182 Bellossom: CHUNSOFT
+#183 Marill: CHUNSOFT, JFain
+#184 Azumarill: CHUNSOFT
+#185 Sudowoodo: CHUNSOFT
+#186 Politoed: CHUNSOFT
+#187 Hoppip: CHUNSOFT
+#188 Skiploom: CHUNSOFT
+#189 Jumpluff: CHUNSOFT
+#190 Aipom: CHUNSOFT, JFain
+#191 Sunkern: CHUNSOFT, Emboarger
+#192 Sunflora: CHUNSOFT
+#193 Yanma: CHUNSOFT
+#194 Wooper: CHUNSOFT, Caitemis, Anon, Uni
+#195 Quagsire: CHUNSOFT
+#196 Espeon: CHUNSOFT
+#197 Umbreon: CHUNSOFT, JFain, Emmuffin
+#198 Murkrow: CHUNSOFT, Smalusion, Caitemis
+#199 Slowking: CHUNSOFT
+#200 Misdreavus: CHUNSOFT, Emboarger
+#201 Unown: CHUNSOFT
+#202 Wobbuffet: CHUNSOFT
+#203 Girafarig: CHUNSOFT, JFain, Emmuffin
+#204 Pineco: CHUNSOFT
+#205 Forretress: CHUNSOFT
+#206 Dunsparce: CHUNSOFT, G〜, Hanbei
+#207 Gligar: CHUNSOFT, JFain
+#208 Steelix: CHUNSOFT
+#209 Snubbull: CHUNSOFT, Emmuffin
+#210 Granbull: CHUNSOFT
+#211 Qwilfish: CHUNSOFT
+#212 Scizor: CHUNSOFT
+#213 Shuckle: CHUNSOFT
+#214 Heracross: CHUNSOFT
+#215 Sneasel: CHUNSOFT, JFain, Grimlin
+#216 Teddiursa: CHUNSOFT, Emmuffin
+#217 Ursaring: CHUNSOFT
+#218 Slugma: CHUNSOFT
+#219 Magcargo: CHUNSOFT
+#220 Swinub: CHUNSOFT, Caitemis
+#221 Piloswine: CHUNSOFT
+#222 Corsola: CHUNSOFT
+#223 Remoraid: CHUNSOFT
+#224 Octillery: CHUNSOFT
+#225 Delibird: CHUNSOFT, G〜, FlowerSnek
+#226 Mantine: CHUNSOFT
+#227 Skarmory: CHUNSOFT
+#228 Houndour: CHUNSOFT, JFain
+#229 Houndoom: CHUNSOFT
+#230 Kingdra: CHUNSOFT
+#231 Phanpy: CHUNSOFT
+#232 Donphan: CHUNSOFT, Emmuffin
+#233 Porygon2: CHUNSOFT
+#234 Stantler: CHUNSOFT
+#235 Smeargle: CHUNSOFT, Emmuffin
+#236 Tyrogue: CHUNSOFT, Caitemis
+#237 Hitmontop: CHUNSOFT
+#238 Smoochum: CHUNSOFT, baronessfaron
+#239 Elekid: CHUNSOFT
+#240 Magby: CHUNSOFT, Emboarger
+#241 Miltank: CHUNSOFT
+#242 Blissey: CHUNSOFT
+#243 Raikou: CHUNSOFT
+#244 Entei: CHUNSOFT
+#245 Suicune: CHUNSOFT
+#246 Larvitar: CHUNSOFT, JFain
+#247 Pupitar: CHUNSOFT
+#248 Tyranitar: CHUNSOFT
+#249 Lugia: CHUNSOFT
+#250 Ho_Oh: CHUNSOFT
+#251 Celebi: CHUNSOFT, Smalusion, Emmuffin
+#252 Treecko: CHUNSOFT
+#253 Grovyle: CHUNSOFT, Deeshura, JFain
+#254 Sceptile: CHUNSOFT
+#255 Torchic: CHUNSOFT
+#256 Combusken: CHUNSOFT
+#257 Blaziken: CHUNSOFT
+#258 Mudkip: CHUNSOFT
+#259 Marshtomp: CHUNSOFT
+#260 Swampert: CHUNSOFT, Emmuffin
+#261 Poochyena: CHUNSOFT, Smalusion
+#262 Mightyena: CHUNSOFT, KCN015
+#263 Zigzagoon: CHUNSOFT, Caitemis, Emmuffin
+#264 Linoone: CHUNSOFT
+#265 Wurmple: CHUNSOFT
+#266 Silcoon: CHUNSOFT
+#267 Beautifly: CHUNSOFT
+#268 Cascoon: CHUNSOFT
+#269 Dustox: CHUNSOFT
+#270 Lotad: CHUNSOFT
+#271 Lombre: CHUNSOFT
+#272 Ludicolo: CHUNSOFT
+#273 Seedot: CHUNSOFT, Caitemis
+#274 Nuzleaf: CHUNSOFT, JFain, Emmuffin
+#275 Shiftry: CHUNSOFT
+#276 Taillow: CHUNSOFT
+#277 Swellow: CHUNSOFT, Emmuffin
+#278 Wingull: CHUNSOFT
+#279 Pelipper: CHUNSOFT
+#280 Ralts: CHUNSOFT, JFain, NeroIntruder
+#281 Kirlia: CHUNSOFT, JFain
+#282 Gardevoir: CHUNSOFT
+#283 Surskit: CHUNSOFT
+#284 Masquerain: CHUNSOFT
+#285 Shroomish: CHUNSOFT
+#286 Breloom: CHUNSOFT, Emmuffin
+#287 Slakoth: CHUNSOFT
+#288 Vigoroth: CHUNSOFT
+#289 Slaking: CHUNSOFT
+#290 Nincada: CHUNSOFT
+#291 Ninjask: CHUNSOFT
+#292 Shedinja: CHUNSOFT
+#293 Whismur: CHUNSOFT
+#294 Loudred: CHUNSOFT
+#295 Exploud: CHUNSOFT
+#296 Makuhita: CHUNSOFT, anomalocaris
+#297 Hariyama: CHUNSOFT
+#298 Azurill: CHUNSOFT
+#299 Nosepass: CHUNSOFT
+#300 Skitty: CHUNSOFT
+#301 Delcatty: CHUNSOFT, Ginnie
+#302 Sableye: CHUNSOFT
+#303 Mawile: CHUNSOFT
+#304 Aron: CHUNSOFT, Emboarger
+#305 Lairon: CHUNSOFT
+#306 Aggron: CHUNSOFT
+#307 Meditite: CHUNSOFT
+#308 Medicham: CHUNSOFT
+#309 Electrike: CHUNSOFT, JFain
+#310 Manectric: CHUNSOFT, Caitemis
+#311 Plusle: CHUNSOFT, baronessfaron
+#312 Minun: CHUNSOFT, baronessfaron
+#313 Volbeat: CHUNSOFT
+#314 Illumise: CHUNSOFT
+#315 Roselia: CHUNSOFT, JFain
+#316 Gulpin: CHUNSOFT, Emmuffin
+#317 Swalot: CHUNSOFT, Emmuffin
+#318 Carvanha: CHUNSOFT
+#319 Sharpedo: CHUNSOFT
+#320 Wailmer: CHUNSOFT
+#321 Wailord: CHUNSOFT
+#322 Numel: CHUNSOFT, Emmuffin
+#323 Camerupt: CHUNSOFT
+#324 Torkoal: CHUNSOFT
+#325 Spoink: CHUNSOFT
+#326 Grumpig: CHUNSOFT
+#327 Spinda: CHUNSOFT, JFain
+#328 Trapinch: CHUNSOFT, Caitemis, Emmuffin
+#329 Vibrava: CHUNSOFT
+#330 Flygon: CHUNSOFT
+#331 Cacnea: CHUNSOFT
+#332 Cacturne: CHUNSOFT, G〜
+#333 Swablu: CHUNSOFT, Emmuffin
+#334 Altaria: CHUNSOFT, TawnySoup
+#335 Zangoose: CHUNSOFT, KCN015
+#336 Seviper: CHUNSOFT
+#337 Lunatone: CHUNSOFT
+#338 Solrock: CHUNSOFT
+#339 Barboach: CHUNSOFT
+#340 Whiscash: CHUNSOFT
+#341 Corphish: CHUNSOFT, Caitemis
+#342 Crawdaunt: CHUNSOFT
+#343 Baltoy: CHUNSOFT
+#344 Claydol: CHUNSOFT
+#345 Lileep: CHUNSOFT
+#346 Cradily: CHUNSOFT, JFain
+#347 Anorith: CHUNSOFT
+#348 Armaldo: CHUNSOFT
+#349 Feebas: CHUNSOFT
+#350 Milotic: CHUNSOFT
+#351 Castform: CHUNSOFT
+#352 Kecleon: CHUNSOFT, Top_Kec
+#353 Shuppet: CHUNSOFT, Caitemis
+#354 Banette: CHUNSOFT
+#355 Duskull: CHUNSOFT, JFain
+#356 Dusclops: CHUNSOFT
+#357 Tropius: CHUNSOFT, Emmuffin
+#358 Chimecho: CHUNSOFT
+#359 Absol: CHUNSOFT, Deeshura, Top_Kec
+#360 Wynaut: CHUNSOFT
+#361 Snorunt: CHUNSOFT, JFain
+#362 Glalie: CHUNSOFT
+#363 Spheal: CHUNSOFT, JFain
+#364 Sealeo: CHUNSOFT
+#365 Walrein: CHUNSOFT
+#366 Clamperl: CHUNSOFT
+#367 Huntail: CHUNSOFT
+#368 Gorebyss: CHUNSOFT
+#369 Relicanth: CHUNSOFT
+#370 Luvdisc: CHUNSOFT
+#371 Bagon: CHUNSOFT, JFain
+#372 Shelgon: CHUNSOFT
+#373 Salamence: CHUNSOFT, Emmuffin
+#374 Beldum: CHUNSOFT
+#375 Metang: CHUNSOFT
+#376 Metagross: CHUNSOFT
+#377 Regirock: CHUNSOFT
+#378 Regice: CHUNSOFT
+#379 Registeel: CHUNSOFT
+#380 Latias: CHUNSOFT, Emmuffin
+#381 Latios: CHUNSOFT
+#382 Kyogre: CHUNSOFT
+#383 Groudon: CHUNSOFT
+#384 Rayquaza: CHUNSOFT
+#385 Jirachi: CHUNSOFT, Grimlin
+#386 Deoxys: CHUNSOFT

@@ -466,7 +466,7 @@ static void SpriteCB_Reflection(struct Sprite *r)
     r->oam.matrixNum = r->sReflStill ? ST_OAM_VFLIP : 0;
     r->invisible = fs->invisible || f->hidden;
     r->x = fs->x;
-    r->y = fs->y + f->size - 2;
+    r->y = fs->mpBig ? fs->y + 6 : fs->y + f->size - 2;   // a PMD picture mirrors at the bottom of its tile, as the player does
     r->centerToCornerVecX = fs->centerToCornerVecX;
     r->centerToCornerVecY = fs->centerToCornerVecY;
     r->x2 = fs->x2;

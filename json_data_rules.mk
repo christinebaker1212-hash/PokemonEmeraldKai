@@ -38,3 +38,6 @@ $(DATA_SRC_SUBDIR)/mp_patchnotes.h: tools/release/gen_patchnotes.py $(PATCH_NOTE
 	python3 tools/release/gen_patchnotes.py $@ $(PATCH_NOTES)
 
 $(C_BUILDDIR)/mp/mp_patchnotes.o: c_dep += $(DATA_SRC_SUBDIR)/mp_patchnotes.h
+
+# Moemon Co-op: the PMD Collab sheets go in with .incbin (scaninc doesn't see it)
+$(C_BUILDDIR)/mp/mp_pmd_data.o: graphics/moemon/pmd/pmd.bin

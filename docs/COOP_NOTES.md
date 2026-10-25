@@ -648,6 +648,58 @@ MP_Coop_FinishTrainerParty (exactly +1 when on, never more; logs "coop: trainer 
 padding"). Protocol 26. Tests: tri_padded (Tommy 2 -> 3, Triple), coop_one_mon (Josh 1 -> 2, Double), tri_no_triple
 (padding off: Tommy's own two, Double, "room rules ... off" heard by BOB).
 
+## PMD Collab followers (mp_pmd.c, mp_bigsprite.c; data from tools/moemon_pmd)
+Followers (yours and friends') and Garden Pokémon are PMD Collab overworld sprites (github PMDCollab/SpriteCollab,
+CC BY-NC 4.0; artists in dist_extras/PMD_CREDITS.txt, packaged). tools/moemon_pmd/import.py SPRITECOLLAB_DIR writes
+graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-386, variant 0 normal, 1 female, 2/3
+shiny / female shiny when the shiny colors need pixels of their own), src/data/mp_pmd.h (the index) and the credits.
+A chunk ('PMD2'): bpp 4 (8 for the few shiny sheets with 16+ colors: all colors kept), palette and shiny palette (one
+set of pixels when the (normal, shiny) color pairs fit in 15), 29 animations (PMD_ANIM_*), each frames x 8 directions
+(rows: down, down-right, right, up-right, up, up-left, left, down-left; 1 row when the sheet has one) with durations in
+60ths; a frame = the picture cropped to its pixels with its top-left from the ground point (the sheet frame's center,
+where PMD draws the shadow). pmd.bin goes in with __asm__ .incbin (mp_pmd_data.c; .rdata on Windows; json_data_rules.mk
+makes the object depend on it): INCBIN would spell 13 MB out as C text. mp_pmd.c inflates a sheet (stbi_zlib) when it's
+first shown, shares it, frees it 5 s after the last view lets go (CACHE_MAX 48).
+Big sprites (PC only): struct Sprite has mpBig. AddSpriteToOamBuffer writes such a sprite's entry in its sorted place with
+shape 3 (prohibited on the GBA) and tileNum = an index into a side list (mp_bigsprite.c: picture, exact position,
+flips, an affine pivot); the list is double-buffered and swapped in LoadOam, so it always matches the OAM shown.
+gba_easy_draw.c DrawBigSprite draws the whole picture on each line through the same PutObjPixel as other sprites
+(priority, blending, windows, battle weather), so depth with the player, NPCs and grass is the game's own. Colors 1-15
+are the sprite's palette slot (fades, weather, Stadium hue); 8-bit pictures' colors 16+ follow the slot's fade
+(MP_FadeFit_FromColors, MP_Pmd_Tick). Affine: a reflection copy turns around its own point (mirrors at the feet:
+followfx puts it at ground + 6, the bottom of the tile, as the player's); anything else around the picture's middle
+(ball effects: mp_ballfx.c BigFrame / BodyHeight / MonX / MonY / MonPixel read the big frame).
+Placement: the ground point is PMD_GROUND_DY (8) below the old 32x32 frames' center (the tile's middle). Depth: Attach
+zeroes centerToCornerVec, so MP_Pmd_SetSubpriority reads the depth as the old frames had it (centerToCornerVecY -8 for
+the call); before 1.22 a Pokémon right below its Trainer shared their depth band half the time and was drawn behind.
+A big follower (MP_Pmd_Reach, half its picture's bigger side, over 18) is drawn up to 16 pixels farther from its Trainer
+(pushX / pushY, away from their tile, 1 pixel a frame; the depth from where it stands). Facing: the 4 ways only (1.22:
+no diagonal rows or turning steps; SPIN looks down, right, up, left). Hops (HOP, LEAPFORTH, ROTATE, POSE, TUMBLE): the
+sheets' rise (made for a top-down dungeon) is cut to a third (MpBigSprite.lift, UpdateLift: the lowest frame's bottom
+is the ground). Fast (running, biking): a walk whose whole cycle is over 30 frames gets an extra tick every other frame;
+quicker ones keep their pace (1.21 doubled every walk: some ran far too fast).
+OPTIONS > GAME > FOLLOWERS (gMpConfig.followerSprites, ini follower_sprites, MP_PmdWanted): DEFAULT the original Moemon
+sprite for followers on the map and PMD for the Garden's Pokémon, PMD both, ORIGINAL both; switching rebuilds the
+sprites at once (MP_Follower_Update / Draw compare pmdOn). Tests: MOEMON_FOLLOWER_SPRITES (the starting value),
+`mp followsprites N`; follow_sprites, pmd_depth. Standing with nothing to do: a DEEPBREATH every 12 s,
+SIT after 40 s. A sheet missing an animation plays the nearest it has (sFallbacks: SLEEP -> LAYING -> EVENTSLEEP -> SIT ->
+IDLE, EAT -> NOD -> IDLE, ...; WALK last, every sheet has it). No PMD sheet: the Moemon frames as before.
+Poses -> animations (LIFE_POSE_*, MP_Pmd_Animate; Moemon sprites show MP_LifePose_Base's nearest old pose):
+NONE IDLE (DEEPBREATH, SIT) | SIT SIT | NAP SLEEP (facing down) | HOP HOP | SHAKE EAT (rummaging, digging, sniffing) |
+SPIN IDLE turning round | LOOKUP LOOKUP | EAT EAT | SPAR ATTACK / SHOOT / STRIKE (dex % 3) | NOD NOD | JOY POSE |
+TWIRL ROTATE | TRIP TRIP / TUMBLE | HURT HURT / CRINGE | CHARGE CHARGE / SHOCK (dex odd: the second) | FLOAT FLOAT |
+LEAP LEAPFORTH | PULL PULL | BREATH DEEPBREATH | LAY LAYING.
+Where they come from: foraging and munching foliage EAT; basking LAY; storms CHARGE; sparring SPAR; the new-body stumble
+TRIP; a squabble HURT; greeting a friend it's fond of / the double take / greeting its Trainer in the Garden TWIRL;
+leveling up (back on the map: mp_life_field.c lastLevel) TWIRL; talking NOD; petting (warm) and praise, keepsakes,
+being loved, a proud evolution JOY; fed EAT (a flavor it dislikes HURT); after a nap BREATH; partway through a hint,
+with its Trainer within 3 tiles, PULL (facing them); Ghost / Psychic types investigating (field) or looking about
+(Garden) sometimes FLOAT by the water; Garden pursuits end in LEAP / JOY, teaching NODs, a milestone LEAPs.
+Network (protocol 47): poses 7-19 travel as before (wire state lifePose; Garden actors: byte 11 = dir (2 bits) | pose
+<< 2), shiny in followerFlags bit 7 and the Garden actor's byte 6 bit 1. Debug: `mp pmd [SLOT]`; MOEMON_DEBUG_PARTY
+"280:15*" = shiny. Tests pmd_follower, pmd_remote (and every follow_*, fx_follow*, garden_*, life_* test runs with them).
+A very tall follower trailing south of its Trainer covers them (the depth order is the game's: it's in front).
+
 ## Graphics past the GBA limits (PC only)
 
 include/gba/defines.h: OBJ_PAL_SLOTS 64 sprite palettes (the GBA's 16, then 16-63 right after them in PLTT and the
@@ -882,6 +934,10 @@ hail 4/16 black (BG, as Move_HAIL), sun 4/16 warm white on the Pokémon and 2/16
 Healthboxes and the message box are never touched. Colors fade with the scene (MP_FadeFit on BG palette 0); tints are
 off during palette fades. Own RNG (never the battle's). Debug `mp bweather rain|downpour|sun|sand|hail|none`; log
 "battle weather on screen: ..."; tests battle_weather (shots of each, a turn in the rain), battle_weather_map.
+From the first frame (1.22): until the battle's own weather is known (gBattleWeather set, or MP_BattleWeather_TurnStart
+from battle_main.c where a turn's action selection begins), Composite draws the weather the field will give it
+(FieldWeather: ABILITYEFFECT_SWITCH_IN_WEATHER's mapping; not in recorded battles), so the rain falls during the intro;
+"It's raining." still comes after the send-out. `mp bwshown`; test battle_weather_intro.
 
 ## Shared world and lights (mp_world.c)
 Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
@@ -1605,3 +1661,47 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   Tests garden_places (each of the 17 types reaches a place of its own with 0 and 8 badges:
   check_garden_places.py), garden_together (a friend's badges grow your Garden live), the other garden_* at the new
   spots.
+
+## BERRY farm (mp_farm.c, include/mp_farm.h; the map from tools/moemon_garden/gen_garden.py)
+The MOéMON GARDEN's farm: two rows of 10 plots south of the main path by the landing (gen_garden.py FARM_ROWS:
+soil x 7-16 on rows 23 and 25, the lanes 22 / 24 / 26 kept clear; mp_garden_map.h sGardenFarmRows). Plots open in
+order, a row at a time: 4 + 2 per badge (MP_Badges, at most 20). MP_Farm_OnMapLoad (from MP_Garden_OnMapLoad, in
+InitMap, before the objects spawn) stamps them framed as ROUTE 104 / 110 / 116 / 119 frame theirs: General's 14B / 14C
+(soil, collision 1) / 14D on the row and the lip 113 / 114 / 115 below, round the open plots only (grass 0x001 past
+them). Each plot is a BERRY tree object event of the game's own (map.json, generated: local ids 1-20, berry tree ids
+100-119 = GARDEN_FARM_TREE_FIRST.., MOVEMENT_TYPE_BERRY_TREE_GROWTH, BerryTreeScript, hidden by FLAG_TEMP_1 + plot while
+closed: set in OnMapLoad, so they never spawn); planting, watering, the stages and sprites, yields, regrowth, Emerald's
+rules are berry.c's. Ours are the save's berryTrees[100..119] and grow with every other tree on our own clock (clock.c,
+MP_ClockShift). When the open count changes while we're there (a host's farm heard, a room left), MP_Farm_FrameUpdate
+restamps (drawn), sets the flags, removes or spawns the objects (spawn only in view, as TrySpawnObjectEvents would) and
+runs MP_GardenDecor_CheckPlaces; every 30 frames CheckObjects puts a game loaded from a save (objects as saved) right.
+Decorations stay off the farm's rows, lips and lanes, open or not (MP_Farm_IsFarmGround in GroundFree / CanPlaceAt).
+Online (protocol 48), in a room someone else made (MP_RoomHostId: the MPR_RULES sender, while present), the plots show
+the host's farm: berry.c GetBerryTreeInfo asks MP_Farm_Tree, which hands back the mirror for ids 100-119, and
+GetBerryTypeByBerryTreeId / GetStageByBerryTreeId / GetBerryCountByBerryTreeId / RemoveBerryTree go through it (they
+read the save directly before). BerryTreeTimeUpdate still works on the save: our own farm keeps growing, unseen, and
+the save never gets the host's farm. The host (MP_Lobby_IsCreator) sends MPR_FARM_STATE (252: open plots, 7 bytes a
+tree packed field by field: berry, stage | stopGrowth << 7, minutes (2), yield, regrowth | watered1-4 << 4, mpCare)
+every 10 frames when changed, every 5 s, and at once to someone new. A friend asks before taking anything:
+MPR_FARM_ASK (253: kind PLANT / PICK / WATER / TEND / NIBBLE, plot, berry, stage, seq). The BERRY tree script's
+specialvar MP_Farm_AskPlant / MP_Farm_AskPick (constants/berry.h MP_FARM_*) answer GO at once on our own farm;
+on the host's they return WAIT and the script waits (BerryTree_EventScript_FarmWait: waitstate) for MPR_FARM_ANSWER
+(254: seq, ok, plot, berry, count) or 8 s (NO_ANSWER: "The farm's host didn't answer."). The host plants / removes on
+its own tree only if the plot is still empty / still has those BERRIES ("Someone else planted a BERRY here just now." /
+"Someone else picked these BERRIES just now."); a pick's answer carries the count really handed over, which
+ObjectEventInteractionPickBerryTree adds (MP_Farm_PickedCount) and the message shows. A friend checks the BAG's room
+first (no room: nothing asked, the game's "BERRIES POCKET is full"). Planted from the BAG (item_use.c removes the BERRY
+first): a refusal gives it back (additem). Watering is sent with the stage seen (a late message never waters the next
+stage); the change shows here at once and the host's next state settles it.
+Garden Pokémon (mp_garden_life.c GA_FARM, ours only; friends' games run theirs on the same farm through the host): by
+nature (FarmWork in Choose) a Grass type helps a plant grow (FARM_WORK_TEND: a tenth of the stage off, once a stage:
+mpCare & FARM_CARE_TENDED = the stage), a Water type or a warm one (150+) waters dry soil (the stage's watered bit, as
+the WAILMER PAIL), a hungry (110+) or mischievous (lively 160+, warm under 110) one nibbles one BERRY (yield - 1, at
+least 1 left, once a crop: FARM_CARE_NIBBLED) of a plot ripe past half its time (minutesUntilNextStage <= 2 stages).
+mpCare is a byte in struct BerryTree's padding (still 8 bytes: STATIC_ASSERT); BerryTreeGrow clears it when the BERRIES
+regrow. One of our Pokémon to a plot; it walks beside it (FindNear), faces it (NOD + water bubble, CHARGE + leaf,
+EAT + food) and does it at the end if the plot still needs it (MP_Farm_DoWork; a note or heart bubble). WATCH: interest
+42, "is watering the BERRY plants." / "is helping a BERRY plant grow." / "is sneaking a bite of a BERRY!" (a friend's:
+"is looking after the BERRY plants.").
+Debug `mp farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT`, `mp life garden force ACTOR 20` (GA_FARM: the
+work its nature picks). Tests farm_solo, farm_together (NA-JP lag).

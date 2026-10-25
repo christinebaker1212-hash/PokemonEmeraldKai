@@ -129,4 +129,10 @@
 
 #define BERRY_TREES_COUNT 128
 
+// Moemon Co-op: the MOéMON GARDEN farm (mp_farm.c) answers to the BERRY tree script's MP_Farm_AskPlant / AskPick
+#define MP_FARM_TAKEN     0   // a friend's farm: someone else got there first
+#define MP_FARM_GO        1   // go ahead (our own farm, or the host said yes)
+#define MP_FARM_WAIT      2   // asked the farm's host: waitstate until the answer
+#define MP_FARM_NO_ANSWER 3   // the host didn't answer
+
 #endif // GUARD_CONSTANTS_BERRY_H

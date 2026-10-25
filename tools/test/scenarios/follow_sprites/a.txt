@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+wait 120
+press UP 10
+wait 40
+mp pmd
+shot map_default
+mp followsprites 1
+wait 30
+mp pmd
+shot map_pmd
+mp followsprites 0
+mp warp 0,57,30,15
+wait 400
+pressuntil B field 900
+wait 120
+mp life garden force 0 7
+wait 300
+mp life garden actors
+shot garden_default
+mp followsprites 2
+wait 30
+mp life garden actors
+shot garden_original
+quit

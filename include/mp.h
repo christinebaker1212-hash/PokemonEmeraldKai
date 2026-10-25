@@ -149,7 +149,7 @@ struct MpState
     u8 emote;
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
-    u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing
+    u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing, bit 7: shiny
     u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
     s16 followerHue;   // its Stadium hue in degrees (mp_hue.c; 0 = its own colors)
     u8 badges;         // how many gym badges (catch-up bonus)
@@ -226,7 +226,12 @@ struct MpConfig
     u8 bikeMusic;             // OPTIONS > GAME > BIKE MUSIC: the cycling song on a bike (1) or the map's own (0)
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
+    u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
 };
+enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
+// FOLLOWERS: the PMD Collab pictures for a follower on the map (garden FALSE) or a Garden Pokémon (TRUE)?
+// DEFAULT: the Moemon overworld sprites on the map, PMD in the MOéMON GARDEN; PMD / ORIGINAL: everywhere
+bool8 MP_PmdWanted(bool8 garden);
 
 extern struct MpConfig gMpConfig;
 extern struct MpPlayer gMpPlayers[MP_MAX_PLAYERS];
@@ -274,6 +279,8 @@ const char *MP_Lobby_RoomName(void);
 u16 MP_Lobby_OtherVersion(void);
 void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
+bool8 MP_Lobby_IsCreator(void);  // we made the room we're in (its host)
+s8 MP_RoomHostId(void);          // online in a room someone else made: the host's player id while they're here; else -1
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
 bool8 MP_LevelScaling(void);     // ... and LEVEL SCALING
@@ -389,6 +396,7 @@ void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
 void MP_Candy_Composite(u16 *frame);
+void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
 // The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel
 extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
@@ -1126,6 +1134,7 @@ enum {
     MPR_GATCHA_FIRST = 230,    // the weekly PICKUP vote (mp_gatcha.c)
     MPR_JOIN_FIRST = 240,      // joining a friend's battle in progress (mp_join.c)
     MPR_GARDEN_FIRST = 250,    // the MOéMON GARDEN: 250 Pokémon there, 251 decorations (mp_garden_net.c)
+    MPR_FARM_FIRST = 252,      // the Garden's BERRY farm: 252 the host's farm, 253 a friend asks, 254 the answer (mp_farm.c)
 };
 
 // mp_world.c: map changes and lights shared by friends on the same map
@@ -1346,6 +1355,7 @@ void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
 u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
 s16 MP_Follower_LocalHue(void);          // mp_follower.c: the follower's Stadium hue, for the network
+bool8 MP_Follower_LocalShiny(void);      // ... whether it's shiny (followerFlags bit 7: its PMD picture's colors)
 u8 MP_Follower_LocalToggleSeq(void);     // counts sending it out
 void MP_BallFx_Composite(u16 *frame);   // the effects layer, over the finished frame
 void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));

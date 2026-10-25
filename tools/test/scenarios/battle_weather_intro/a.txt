@@ -1,0 +1,11 @@
+pressuntil A field 5000
+mp wild 288:2
+waitfor battle 600
+wait 40
+mp bwshown
+shot intro
+pressuntil A action 4000
+wait 30
+mp bwshown
+shot sentout
+quit

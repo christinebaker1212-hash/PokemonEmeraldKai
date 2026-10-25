@@ -8,6 +8,7 @@
 #include "item.h"
 #include "item_menu.h"
 #include "main.h"
+#include "mp_farm.h"
 #include "random.h"
 #include "string_util.h"
 #include "text.h"
@@ -1253,6 +1254,10 @@ const struct Berry *GetBerryInfo(u8 berry)
 
 struct BerryTree *GetBerryTreeInfo(u8 id)
 {
+    // Moemon Co-op: the MOéMON GARDEN's farm plots show the room host's farm online (mp_farm.c)
+    struct BerryTree *farm = MP_Farm_Tree(id);
+    if (farm != NULL)
+        return farm;
     return &gSaveBlock1Ptr->berryTrees[id];
 }
 
@@ -1277,6 +1282,7 @@ bool32 ObjectEventInteractionWaterBerryTree(void)
     default:
         return FALSE;
     }
+    MP_Farm_Watered(GetObjectEventBerryTreeId(gSelectedObjectEvent));   // Moemon Co-op
     return TRUE;
 }
 
@@ -1327,6 +1333,7 @@ static bool32 BerryTreeGrow(struct BerryTree *tree)
         tree->watered3 = 0;
         tree->watered4 = 0;
         tree->berryYield = 0;
+        tree->mpCare = 0;   // Moemon Co-op: the Garden Pokémon's care counts for one round of growth
         tree->stage = BERRY_STAGE_SPROUTED;
         if (++tree->regrowthCount == 10)
             *tree = gBlankBerryTree;
@@ -1395,17 +1402,17 @@ void PlantBerryTree(u8 id, u8 berry, u8 stage, bool8 allowGrowth)
 
 void RemoveBerryTree(u8 id)
 {
-    gSaveBlock1Ptr->berryTrees[id] = gBlankBerryTree;
+    *GetBerryTreeInfo(id) = gBlankBerryTree;
 }
 
 u8 GetBerryTypeByBerryTreeId(u8 id)
 {
-    return gSaveBlock1Ptr->berryTrees[id].berry;
+    return GetBerryTreeInfo(id)->berry;
 }
 
 u8 GetStageByBerryTreeId(u8 id)
 {
-    return gSaveBlock1Ptr->berryTrees[id].stage;
+    return GetBerryTreeInfo(id)->stage;
 }
 
 u8 ItemIdToBerryType(u16 item)
@@ -1500,7 +1507,7 @@ static u8 CalcBerryYield(struct BerryTree *tree)
 
 static u8 GetBerryCountByBerryTreeId(u8 id)
 {
-    return gSaveBlock1Ptr->berryTrees[id].berryYield;
+    return GetBerryTreeInfo(id)->berryYield;
 }
 
 static u16 GetStageDurationByBerryType(u8 berry)
@@ -1555,6 +1562,7 @@ void ObjectEventInteractionPlantBerryTree(void)
     u8 berry = ItemIdToBerryType(gSpecialVar_ItemId);
 
     PlantBerryTree(GetObjectEventBerryTreeId(gSelectedObjectEvent), berry, BERRY_STAGE_PLANTED, TRUE);
+    MP_Farm_Changed(GetObjectEventBerryTreeId(gSelectedObjectEvent));   // Moemon Co-op
     ObjectEventInteractionGetBerryTreeData();
 }
 
@@ -1562,13 +1570,16 @@ void ObjectEventInteractionPickBerryTree(void)
 {
     u8 id = GetObjectEventBerryTreeId(gSelectedObjectEvent);
     u8 berry = GetBerryTypeByBerryTreeId(id);
+    u8 count = GetBerryCountByBerryTreeId(id);
 
-    gSpecialVar_0x8004 = AddBagItem(BerryTypeToItemId(berry), GetBerryCountByBerryTreeId(id));
+    MP_Farm_PickedCount(id, &berry, &count);   // Moemon Co-op: a friend's farm: what its host gave us
+    gSpecialVar_0x8004 = AddBagItem(BerryTypeToItemId(berry), count);
 }
 
 void ObjectEventInteractionRemoveBerryTree(void)
 {
     RemoveBerryTree(GetObjectEventBerryTreeId(gSelectedObjectEvent));
+    MP_Farm_Changed(GetObjectEventBerryTreeId(gSelectedObjectEvent));   // Moemon Co-op
     SetBerryTreeJustPicked(gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
 }
 

@@ -72,6 +72,7 @@ struct BerryTree
     u8 watered2:1;
     u8 watered3:1;
     u8 watered4:1;
+    u8 mpCare;   // Moemon Co-op: the MOéMON GARDEN farm's Pokémon (mp_farm.c): FARM_CARE_*; in what was padding
 } ALIGNED(4);
 
 #endif // GUARD_GLOBAL_BERRY_H

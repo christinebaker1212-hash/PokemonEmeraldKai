@@ -1,0 +1,9 @@
+pressuntil A field 5000
+waitfor online 6000
+barrier seen 2
+wait 100
+mp pmd 1
+mp pmd 2
+shot bob_sees
+wait 60
+quit

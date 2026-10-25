@@ -1,0 +1,9 @@
+# OPTIONS > GAME > FOLLOWERS. DEFAULT: the follower is the original Moemon sprite on the map, and in the MOéMON GARDEN
+# the Garden Pokémon are PMD Collab pictures. PMD: the follower too. ORIGINAL: the Garden Pokémon too (switched live:
+# the sprites change at once). Shots map_default, map_pmd, garden_default, garden_original.
+MODE=1
+WARP=0,16,16,14
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("pmd slot 0: dex 255 on 0" "[test] follower sprites 1" "pmd slot 0: dex 255 on 1" " pmd 1" " pmd 0")
+UNEXPECT_A=("[crash]")

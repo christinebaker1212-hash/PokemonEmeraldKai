@@ -1,0 +1,10 @@
+# A friend's PMD follower: ALICE's shiny ONIX follows her; BOB, next to her, sees it as the same shiny PMD picture
+# (followerFlags bit 7, protocol 47) at NA-JP lag. Shot on BOB's screen.
+MODE=2
+WARP=0,0,10,12
+WARP_B=0,0,12,14
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=95:30* MOEMON_FOLLOWER_SPRITES=1"
+ENV_B="MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("follower: slot 0 dex 95 hue 0 shiny (PMD)")
+EXPECT_B=("dex 95 hue 0 shiny (PMD)" "on 1 shiny 1")

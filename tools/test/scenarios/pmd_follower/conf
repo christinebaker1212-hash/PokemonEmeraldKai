@@ -1,0 +1,8 @@
+# PMD Collab followers (mp_pmd.c, mp_bigsprite.c): a shiny TORCHIC follows ALICE as a PMD picture drawn whole by a big
+# sprite: walking while she walks, then its idle; its shiny colors (mp pmd prints its state). Shots: walking, standing.
+MODE=1
+WARP=0,0,10,12
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15* MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("follower: slot 0 dex 255 hue 0 shiny (PMD)" "pmd slot 0: dex 255 on 1 shiny 1 anim 0 shown 0 dir 2" "pmd slot 0: dex 255 on 1 shiny 1 anim 1")
+UNEXPECT_A=("pmd: sheet")

@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 100
+mp follow 0
+wait 200
+barrier seen 2
+wait 200
+quit

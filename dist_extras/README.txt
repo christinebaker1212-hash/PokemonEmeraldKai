@@ -860,8 +860,16 @@ MOEMON THAT FOLLOW YOU
 -----------------------
 Open the MOEMON menu, pick a Moemon with the cursor and press SELECT:
 it walks behind you. Press SELECT on it again to put it back in its Ball.
-All 386 Moemon have their own walking sprites (with female and form
-differences). Talk to it (A) and it's happy to see you. Other players see
+The MOEMON GARDEN's Moemon use the PMD Collab's overworld sprites (the
+Pokemon Mystery Dungeon style, every one of the 386): drawn whole at their
+real size, with their own walking, idle, sleeping, eating, sparring,
+hopping, twirling and more animations for whatever they're doing.
+OPTIONS > GAME > FOLLOWERS: DEFAULT (the original sprites for the MOEMON
+following you, PMD in the GARDEN), PMD (everywhere) or ORIGINAL
+(everywhere). Shiny ones have their shiny
+colors (and female ones their own look where the collab drew one), and a
+nickname's POKeMON STADIUM colors go on top. The artists are listed in
+PMD_CREDITS.txt next to the game. Talk to it (A) and it's happy to see you. Other players see
 your follower walking behind you too. It hides while you surf or dive and
 comes back when you land. It walks the ground as you do: tall grass shakes
 around it, it leaves footprints in sand, splashes through puddles and
@@ -1181,6 +1189,23 @@ shows the most badges among you.
                 B stands up.
 With friends there, everyone's MOEMON and decorations are there
 together (whichever CENTER each of you came up in).
+
+THE BERRY FARM: two rows of soft, loamy soil just below the landing.
+4 plots are open at first, and each badge opens 2 more (20 with all
+eight). They work like the BERRY patches on the routes: talk to one
+(or use a BERRY on it from the BAG) to plant a BERRY, water it with the
+WAILMER PAIL at each stage for more BERRIES, and pick them when they're
+ripe. They grow on your own PC's clock, even while you're away, and
+BERRIES left too long fall and grow again, as on the routes.
+Your MOEMON lend a hand, each in its own way: GRASS types help a plant
+grow a little faster, WATER types and the kindest MOEMON water dry
+soil, and a hungry or mischievous one may sneak a bite of BERRIES you
+leave ripe for too long.
+Online, the Garden's farm is the host's (whoever made the room): all of
+you plant, water and pick there together, and its plots are the host's
+(their badges). Whoever gets to a plot first plants it or picks its
+BERRIES. Your own farm waits for you, growing, until you play alone or
+host.
 
 Over time, a MOEMON may take up something it loves in the Garden:
 climbing the trees, splashing in the pond, singing, collecting pretty

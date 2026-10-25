@@ -19,7 +19,9 @@
 #include "palette.h"
 #include "constants/rgb.h"
 #include "sprite.h"
+#include "field_weather.h"
 #include "constants/battle_anim.h"
+#include "constants/weather.h"
 #include "mp.h"
 
 #define SCENE_H       112        // the message box starts here
@@ -64,6 +66,7 @@ static struct
     u16 frame;
     s16 sandX, sandY;
     u16 lastWeather;
+    bool8 settled;               // the battle's own weather is known (it set one, or the first turn began)
     // what ScenePixel does this frame
     u8 tintBg, tintMons;
     u16 tintColor;
@@ -388,11 +391,46 @@ static void Clear(void)
     memset(sW.sand, 0, sizeof(sW.sand));
 }
 
+// Tests: the weather on screen now and the battle's own
+void MP_BattleWeather_Debug(void)
+{
+    printf("[test] bweather shown %s battle %s\n", (sW.lastWeather & B_WEATHER_RAIN) ? "rain" : sW.lastWeather ? "other" : "none",
+           (gBattleWeather & B_WEATHER_RAIN) ? "rain" : gBattleWeather ? "other" : "none");
+}
+
+// battle_main.c: the first turn (or a later one) begins: from now on the battle's own weather is all there is
+void MP_BattleWeather_TurnStart(void)
+{
+    sW.settled = TRUE;
+}
+
+// The field's weather becomes the battle's once everyone is out (battle_util.c ABILITYEFFECT_SWITCH_IN_WEATHER, with
+// its "It's raining." line). Until then, the weather it's going to be: on screen from the battle's first frame.
+static u16 FieldWeather(void)
+{
+    if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
+        return 0;
+    switch (GetCurrentWeather())
+    {
+    case WEATHER_RAIN:
+    case WEATHER_RAIN_THUNDERSTORM:
+    case WEATHER_DOWNPOUR:
+        return B_WEATHER_RAIN_TEMPORARY | B_WEATHER_RAIN_PERMANENT;
+    case WEATHER_SANDSTORM:
+        return B_WEATHER_SANDSTORM;
+    case WEATHER_DROUGHT:
+        return B_WEATHER_SUN;
+    }
+    return 0;
+}
+
 void MP_BattleWeather_Composite(u16 *frame)
 {
     u16 w;
 
     InitIfNeeded();
+    if (!gMain.inBattle)
+        sW.settled = FALSE;
     if (!gMain.inBattle || gMain.callback2 != BattleMainCB2 || gBattleResources == NULL)
     {
         gMpScenePixel = NULL;
@@ -400,6 +438,10 @@ void MP_BattleWeather_Composite(u16 *frame)
         return;
     }
     w = gBattleWeather;
+    if (w != 0)
+        sW.settled = TRUE;
+    else if (!sW.settled)
+        w = FieldWeather();
     if (w != sW.lastWeather)
     {
         printf("[mp] battle weather on screen:%s%s%s%s%s\n", (w & B_WEATHER_RAIN) ? " rain" : "", (w & B_WEATHER_SUN) ? " sun" : "",

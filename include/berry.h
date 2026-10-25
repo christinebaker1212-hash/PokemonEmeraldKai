@@ -18,6 +18,7 @@ u8 GetBerryTypeByBerryTreeId(u8 id);
 u8 GetStageByBerryTreeId(u8 id);
 u8 ItemIdToBerryType(u16 item);
 void GetBerryNameByBerryType(u8 berry, u8 *string);
+void GetBerryCountStringByBerryType(u8 berry, u8 *dest, u32 berryCount);
 void Bag_ChooseBerry(void);
 void ObjectEventInteractionGetBerryTreeData(void);
 void ObjectEventInteractionPlantBerryTree(void);

@@ -1,0 +1,10 @@
+# PMD followers in the map's depth order, at every scroll position: TORCHIC follows its Trainer up the grass, a step
+# at a time; directly below them it's drawn in front of them every step (the depth read from its feet, as the old
+# sprites'). Then ONIX, whose big picture stands a little farther back (push), facing 4 ways only. Shots.
+MODE=1
+WARP=0,16,16,14
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:15,95:30 MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("pmd depth: follower 16,13 trainer 16,12 front 1" "pmd depth: follower 16,12 trainer 16,11 front 1"
+          "pmd depth: follower 16,11 trainer 16,10 front 1" "pmd depth: follower 16,10 trainer 16,9 front 1" "(back)")
+UNEXPECT_A=("front 0" "dir 1 " "dir 3 " "dir 5 " "dir 7 ")

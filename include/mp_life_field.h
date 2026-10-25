@@ -14,7 +14,24 @@ enum
     LIFE_POSE_SHAKE,    // a little shake (rummaging, digging, splashing, practicing)
     LIFE_POSE_SPIN,     // turning around (looking about)
     LIFE_POSE_LOOKUP,   // looking up at the sky
+    // PMD Collab sprites' actions (mp_pmd.c MP_Pmd_Animate); the Moemon sprites show the nearest pose above
+    // (MP_LifePose_Base). Sent to friends like the others (protocol 47).
+    LIFE_POSE_EAT,      // eating, foraging, munching leaves
+    LIFE_POSE_SPAR,     // practicing moves (Attack / Shoot / Strike)
+    LIFE_POSE_NOD,      // nodding along, talking
+    LIFE_POSE_JOY,      // a happy pose
+    LIFE_POSE_TWIRL,    // a twirl (leveled up, met a friend)
+    LIFE_POSE_TRIP,     // stumbling
+    LIFE_POSE_HURT,     // stung, squabbling
+    LIFE_POSE_CHARGE,   // charged up in a storm
+    LIFE_POSE_FLOAT,    // floating (Ghost / Psychic types by water)
+    LIFE_POSE_LEAP,     // leaping forward for joy
+    LIFE_POSE_PULL,     // tugging at its Trainer's sleeve
+    LIFE_POSE_BREATH,   // a deep breath (just woke up)
+    LIFE_POSE_LAY,      // lying down, awake (basking)
+    LIFE_POSE_COUNT
 };
+u8 MP_LifePose_Base(u8 pose);   // the pose a Moemon sprite shows for it (the first seven)
 
 // What it's doing (also sent to friends, G4)
 enum

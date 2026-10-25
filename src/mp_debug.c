@@ -21,6 +21,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "mp_farm.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_interface.h"
@@ -81,7 +82,7 @@ void MP_DebugSetupNameAndGender(void)
 // Called at the end of NewGameInitData in quick-start mode
 void MP_DebugQuickStartNewGame(void)
 {
-    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18+" (+ = about to level up)
+    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18+" (+ = about to level up, * = shiny)
     const char *mapEnv = getenv("MOEMON_DEBUG_WARP");     // "group,num,x,y"
     int group = MAP_GROUP(MAP_OLDALE_TOWN), num = MAP_NUM(MAP_OLDALE_TOWN), x = 10, y = 10;
     char buf[256];
@@ -128,7 +129,13 @@ void MP_DebugQuickStartNewGame(void)
         int species = 0, level = 5;
         if (sscanf(tok, "%d:%d", &species, &level) >= 1 && species > 0 && species < NUM_SPECIES)
         {
-            if (getenv("MOEMON_DEBUG_PID_SALT"))   // tests with two players: Pokémon of their own (MOéMON GARDEN keys)
+            if (strchr(tok, '*'))   // "280:15*" = shiny (a personality that's shiny with the player's Trainer ID)
+            {
+                u32 otId = T1_READ_32(gSaveBlock2Ptr->playerTrainerId);
+                CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, TRUE, ((otId >> 16) ^ (otId & 0xFFFF)) << 16,
+                          OT_ID_PLAYER_ID, 0);
+            }
+            else if (getenv("MOEMON_DEBUG_PID_SALT"))   // tests with two players: Pokémon of their own (MOéMON GARDEN keys)
                 CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, TRUE,
                           (u32)strtoul(getenv("MOEMON_DEBUG_PID_SALT"), NULL, 0) * 2654435761u + slot, OT_ID_PLAYER_ID, 0);
             else
@@ -314,10 +321,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
     }
-    else if (strcmp(cmd, "summary") == 0)   // the summary screen's page and input mode
+    else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
     {
         void MP_Summary_Debug(void);
         MP_Summary_Debug();
+    }
+    else if (strcmp(cmd, "pmd") == 0)   // mp pmd [SLOT]: a follower's PMD Collab picture (mp_pmd.c)
+    {
+        void MP_Follower_PmdDebug(u8 slot);
+        MP_Follower_PmdDebug(arg[0] ? atoi(arg) : 0);
     }
     else if (strcmp(cmd, "landwild") == 0)
     {
@@ -392,6 +404,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (cmd[3] == 'c')
             GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
+    }
+    else if (strcmp(cmd, "followsprites") == 0)
+    {
+        // followsprites N - OPTIONS > GAME > FOLLOWERS: 0 default, 1 pmd, 2 original
+        gMpConfig.followerSprites = atoi(arg) % MP_FOLLOW_SPRITES_COUNT;
+        printf("[test] follower sprites %d\n", gMpConfig.followerSprites);
+    }
+    else if (strcmp(cmd, "farm") == 0)
+    {
+        // farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT: the MOéMON GARDEN's BERRY farm (mp_farm.c)
+        MP_Farm_Debug(arg);
     }
     else if (strcmp(cmd, "life") == 0)
     {
@@ -2064,6 +2087,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG) ? ":BADEGG" : "");
         }
         printf("\n");
+    }
+    else if (strcmp(cmd, "bwshown") == 0)   // bwshown - the weather on screen and the battle's own (mp_battleweather.c)
+    {
+        void MP_BattleWeather_Debug(void);
+        MP_BattleWeather_Debug();
     }
     else if (strcmp(cmd, "bweather") == 0)   // bweather rain|downpour|sun|sand|hail|none - the battle's weather now
     {

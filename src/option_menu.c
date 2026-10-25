@@ -51,6 +51,7 @@ enum
     OPT_TYPEICONS,
     OPT_NAMECASE,
     OPT_CREATURES,
+    OPT_FOLLOWSPRITES,
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
@@ -132,6 +133,10 @@ static const u8 sText_NewFriends[] = _("NEW FRIENDS");
 static const u8 sText_Autosave[] = _("AUTOSAVE");
 static const u8 sText_FlagRange[] = _("FLAG RANGE");
 static const u8 sText_BikeMusic[] = _("BIKE MUSIC");
+static const u8 sText_Followers[] = _("FOLLOWERS");
+static const u8 sText_FollowDefault[] = _("DEFAULT");
+static const u8 sText_FollowPmd[] = _("PMD");
+static const u8 sText_FollowOriginal[] = _("ORIGINAL");
 static const u8 sText_LevelScale[] = _("LEVEL SCALING");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
@@ -275,6 +280,7 @@ static void BuildRows(void)
         AddRow(OPT_TYPEICONS, 0);
         AddRow(OPT_NAMECASE, 0);
         AddRow(OPT_CREATURES, 0);
+        AddRow(OPT_FOLLOWSPRITES, 0);
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_LEVELSCALE, 0);
@@ -380,6 +386,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MOENAV:
         names[0] = sText_AllCalls, names[1] = sText_Battles;
         return 2;
+    case OPT_FOLLOWSPRITES:
+        names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
+        return 3;
     }
     // one free-form value
     buf[0] = EOS;
@@ -487,6 +496,7 @@ static u8 Current(u8 row)
     case OPT_LEVELSCALE:  return gMpConfig.levelScaling != 0;
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
+    case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     }
     return 0;
 }
@@ -533,6 +543,10 @@ static void Change(u8 row, int dir)
     case OPT_AUTOSAVE:    gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
+    case OPT_FOLLOWSPRITES:
+        gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
+        MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
+        break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
     case OPT_LEVELSCALE:  gMpConfig.levelScaling = !gMpConfig.levelScaling; MP_SendRoomRules(); break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
@@ -599,6 +613,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_AUTOSAVE:    return sText_Autosave;
     case OPT_FLAGRANGE:   return sText_FlagRange;
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
+    case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
@@ -707,6 +722,10 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "HOW FAR YOU SEE WITH THE BATTLE FLAG");
     else if (opt == OPT_BIKEMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S OWN SONG ON A BIKE");
+    else if (opt == OPT_FOLLOWSPRITES)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "PMD PICTURES EVERYWHERE"
+                 : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "THE ORIGINAL SPRITES EVERYWHERE"
+                 : "ORIGINAL OUTSIDE, PMD IN THE GARDEN");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)

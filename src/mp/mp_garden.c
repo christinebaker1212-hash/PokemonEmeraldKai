@@ -16,6 +16,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_garden.h"
+#include "mp_farm.h"
 #include "mp_life.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
@@ -133,6 +134,7 @@ void MP_Garden_OnMapLoad(void)
     MP_GardenLife_OnMapLoad();
     sG.growth = 0;
     ApplyGrowth(FALSE);
+    MP_Farm_OnMapLoad();
     MP_GardenDecor_CheckPlaces();
 }
 
@@ -465,6 +467,7 @@ void MP_Garden_Update(void)
 
 void MP_Garden_FrameUpdate(void)
 {
+    MP_Farm_FrameUpdate();   // (the host answers friends about its farm wherever it is)
     MP_Garden_Update();
     MP_GardenLife_Update();
 }
