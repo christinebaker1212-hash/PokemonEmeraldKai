@@ -1895,6 +1895,18 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         return;
     }
     a->timer++;
+    if (a->phase == 0 && a->inWater && (a->cur.x != a->target.x || a->cur.y != a->target.y))
+    {
+        // off somewhere else while swimming: out onto the shore first (no path starts in the water), then on its way
+        struct Coords16 target = a->target;
+        if (a->moved >= 16 && LeaveWater(a))
+        {
+            a->target = target;
+            a->pose = LIFE_POSE_NONE;
+        }
+        if (a->timer <= a->walkLimit)
+            return;
+    }
     if (a->phase == 0)
     {
         // a partner moving off (tag): follow it
