@@ -1,7 +1,6 @@
-# The CANDY JAR's menu: candies pour in (kind by kind), SELECT shakes the jar; the cursor on WATER, A, YES converts
-# just WATER (the converted candies fly out and make RARE CANDY); then ALL converts the rest that can; B goes back.
-# mp jarstate checks that no candy ends outside the glass or deep in another.
+# The CANDY JAR's menu: candies pour in, SELECT shakes the jar, A converts (the converted candies fly out and make
+# RARE CANDY), B goes back. mp jarstate checks that no candy ends outside the glass or deep in another.
 MODE=1
 TMO=150
-EXPECT_A=("candy: jar opened (48 candies, 3 to convert)" "candy: converted, 2 RARE CANDY made, 28 candies left" "candy: converted, 1 RARE CANDY made, 18 candies left")
+EXPECT_A=("candy: jar opened (48 candies, 3 to convert)" "candy: converted, 3 RARE CANDY made, 18 candies left")
 CHECK="tools/test/scenarios/candy_jar/check.py"

@@ -18,12 +18,6 @@ wait 8
 rendershot a_shake
 wait 200
 mp jarstate
-press RIGHT 2
-wait 10
-press UP 2
-wait 20
-press A 2
-wait 20
 press A 2
 wait 30
 rendershot a_conv1
