@@ -1610,6 +1610,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 gMpCandies[t] = n;
         printf("[test] candies: %d\n", (int)MP_Candy_Total());
     }
+    else if (strcmp(cmd, "mart") == 0)
+    {
+        // mart ITEM... - a POKé MART selling these (up to 15)
+        static u16 sItems[16];
+        void CreatePokemartMenu(const u16 *items);
+        const char *p = arg;
+        int id, used, n = 0;
+        while (n < 15 && sscanf(p, "%d%n", &id, &used) == 1)
+        {
+            sItems[n++] = id;
+            p += used;
+        }
+        sItems[n] = ITEM_NONE;
+        CreatePokemartMenu(sItems);
+    }
+    else if (strcmp(cmd, "tmrefund") == 0)
+    {
+        // tmrefund [reset]: the TMs the LOTTERY CORNER clerk would bring back (reset: she may come again)
+        MP_TmRefund_Debug(arg);
+    }
     else if (strcmp(cmd, "candyreload") == 0)
     {
         // candyreload - forget the candies and the BAG, then load them back from the save and its sidecar

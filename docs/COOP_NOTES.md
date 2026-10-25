@@ -1140,6 +1140,21 @@ list's candies under it hide: JarHideUnderYesNo); YES converts that kind (MP_Can
 (JarHopKind, idle only). New candies pour in kind by kind (no shuffle): they settle in layers of color. Tests candy_jar
 (WATER alone, then ALL), candy_jar_full (96 candies at radius 3.0, none outside the glass or overlapping).
 
+## Reusable TMs (1.18.1: party_menu.c, shop.c, mp_tmrefund.c; data from tools/moemon_tms)
+As in later games a TM never wears out: party_menu.c Task_LearnedMove no longer removes it. shop.c: a TM already in
+the BAG or the PC isn't sold again ("You already have that TM."), one sells at a time (maxQuantity 1; maxQuantity is a
+u16 now, a u8 wrapped the 999 cap round to 231). Saves from before: MP_TmRefund_Update (every frame, once per save:
+MP_SaveData "tm:refund") gives back every TM the save got and has in neither the BAG nor the PC. "Got": an event flag
+from mp_tm_sources.h (tools/moemon_tms/gen_tm_sources.py reads the maps: item balls = map.json object events whose
+script is in item_ball_scripts.inc, hidden items = bg_events, gifts = a script with `giveitem ITEM_TM*` and a `setflag`;
+daily / weekly flags and variables prove nothing: Pacifidlog's RETURN / FRUSTRATION are left out), and the TRICK HOUSE's
+puzzle 5 TAUNT by its variables (VAR_TRICK_HOUSE_LEVEL > 5, or 5 with VAR_TRICK_HOUSE_PRIZE_PICKUP 0). Shop, Game Corner
+and Battle Frontier TMs leave no trace. With anything to give, the LILYCOVE LOTTERY CORNER clerk (OBJ_EVENT_GFX_BEAUTY,
+LOCALID_CLERK 0xDB) walks up as PROF. BIRCH does with the CANDY JAR (Task_LotteryClerk: the side with the longest free
+line, up to 4 tiles; nowhere to stand: a delivery note), calls them "lottery winnings", hands them over (MUS_OBTAIN_TMHM,
+"@ received TM03, TM08 and TM27!") and leaves; with nothing to give (a new game too) the key is set quietly. Debug
+`mp tmrefund [reset]`, `mp mart ITEM...` (a POKé MART). Test tm_reuse.
+
 ## POKéDEX entries from four games (H9, pokedex.c; data from tools/moemon_dex)
 tools/moemon_dex/import_dex.py reads pret pokeruby `src/data/pokedex_entries_en.h` (`#ifdef SAPPHIRE` = Sapphire,
 `#else` = Ruby, the _1/_2 page halves joined) and pokefirered `src/data/pokemon/pokedex_text_fr.h` (REVISION 1 text),

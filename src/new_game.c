@@ -217,6 +217,7 @@ void NewGameInitData(void)
     // Moemon Co-op QoL: a new game starts with STICK RUN off and no extra item buttons
     Gamepad_SetAnalogRun(0);
     Gamepad_SaveSettings();
+    MP_SaveData_Set("tm:refund", 1);   // TMs are reusable: a new game never used one up (mp_tmrefund.c)
     MP_SaveData_Set("reg:L", 0);
     MP_SaveData_Set("reg:R", 0);
     MP_SaveData_Set("reg:X", 0);

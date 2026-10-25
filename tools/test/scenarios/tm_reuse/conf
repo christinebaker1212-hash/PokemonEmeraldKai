@@ -1,0 +1,11 @@
+# TMs are reusable (1.18.1): a save that got TM39 (ROCK TOMB, its flag) and TM08 (BULK UP) but only has TM08 left
+# gets TM39 back from the LOTTERY CORNER clerk, who walks up once; then TM39 taught from the BAG (to TORCHIC) stays in the BAG.
+# A POKé MART sells TM01 one at a time (UP doesn't raise it), and won't sell TM01 again or TM39 ("You already have
+# that TM."): one TM01 bought, the money taken once.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("tms: the lottery clerk comes" "gave back 1 used-up TMs" "[test] tmrefund done 1, 0 used up:" "[test] bagqty 327: 1"
+          "[test] bagqty 296: 1" "[test] monmoves: slot 0 species 280 moves 10 45 317 0"
+          "[test] bagqty 289: 1" "[test] money 47000")
+UNEXPECT_A=("bagqty 327: 0" "bagqty 296: 0" "bagqty 289: 2" "[test] money 44000")

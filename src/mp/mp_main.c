@@ -1726,6 +1726,7 @@ void MP_FrameUpdate(void)
         MP_Init();
     MP_Qol_Update();
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
+    MP_TmRefund_Update();       // the LOTTERY CORNER clerk brings back TMs used up before they became reusable
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)
     MP_LifeSocial_Update();     // ... and among friends (mp_life_social.c)
     MP_Garden_FrameUpdate();    // the MOéMON GARDEN (mp_garden.c, mp_garden_life.c)

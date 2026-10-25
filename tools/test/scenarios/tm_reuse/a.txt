@@ -1,0 +1,81 @@
+pressuntil A field 5000
+wait 200
+mp setflag 165
+mp setflag 166
+mp additem 296 1
+mp moves 0 10 45
+watchlog tms: the lottery clerk comes
+mp tmrefund reset
+waitlog 600
+wait 40
+shot clerk
+pressuntil A field 3000
+wait 60
+mp tmrefund
+mp bagqty 327
+mp bagqty 296
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 20
+shot tmpocket
+press A 2
+wait 30
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 90
+shot party
+press A 2
+wait 120
+shot learned
+pressuntil B field 1500
+wait 30
+mp monmoves 0
+mp bagqty 327
+mp money 50000
+mp mart 289 327
+wait 40
+press A 2
+wait 90
+press A 2
+wait 60
+press UP 2
+wait 10
+press UP 2
+wait 10
+shot howmany
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 90
+press A 2
+wait 60
+mp bagqty 289
+mp money
+press A 2
+wait 60
+shot havetm
+press A 2
+wait 60
+press DOWN 2
+wait 10
+press A 2
+wait 60
+shot havetm39
+press A 2
+wait 60
+mp bagqty 289
+mp money
+quit

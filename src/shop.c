@@ -99,7 +99,7 @@ struct ShopData
     u16 itemsShowed;
     u16 selectedRow;
     u16 scrollOffset;
-    u8 maxQuantity;
+    u16 maxQuantity;   // Moemon Co-op: up to MP_BAG_ITEM_CAPACITY (999; a u8 wrapped it round)
     u8 scrollIndicatorsTaskId;
     u8 iconSlot;
     u8 itemSpriteIds[2];
@@ -987,7 +987,15 @@ static void Task_BuyMenu(u8 taskId)
             else
                 sShopData->totalCost = gDecorations[itemId].price;
 
-            if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sShopData->totalCost))
+            if (sMartInfo.martType == MART_TYPE_NORMAL && GetItemPocket(itemId) == POCKET_TM_HM
+             && (CheckBagHasItem(itemId, 1) || CheckPCHasItem(itemId, 1)))
+            {
+                // Moemon Co-op: TMs are reusable (as in later games): one is all anyone needs
+                static u8 sHaveIt[80];
+                MP_AsciiToGame(sHaveIt, "You already have that TM.\nIt can be used again and again!", sizeof(sHaveIt) - 1);
+                BuyMenuDisplayMessage(taskId, sHaveIt, BuyMenuReturnToItemList);
+            }
+            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sShopData->totalCost))
             {
                 BuyMenuDisplayMessage(taskId, gText_YouDontHaveMoney, BuyMenuReturnToItemList);
             }
@@ -1046,6 +1054,8 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
         sShopData->maxQuantity = MP_BAG_ITEM_CAPACITY;
     else
         sShopData->maxQuantity = maxQuantity;
+    if (GetItemPocket(tItemId) == POCKET_TM_HM && sShopData->maxQuantity > 1)
+        sShopData->maxQuantity = 1;   // Moemon Co-op: a reusable TM sells one at a time
 
     gTasks[taskId].func = Task_BuyHowManyDialogueHandleInput;
 }

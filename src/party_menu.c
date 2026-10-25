@@ -4999,8 +4999,8 @@ static void Task_LearnedMove(u8 taskId)
     if (move[1] == 0)
     {
         AdjustFriendship(mon, FRIENDSHIP_EVENT_LEARN_TMHM);
-        if (item < ITEM_HM01)
-            RemoveBagItem(item, 1);
+        // Moemon Co-op: TMs are reusable, as in later games (the TM stays in the BAG; mp_tmrefund.c gave back the
+        // ones saves from before had used up)
     }
     GetMonNickname(mon, gStringVar1);
     StringCopy(gStringVar2, gMoveNames[move[0]]);

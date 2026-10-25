@@ -845,6 +845,16 @@ Walking together makes it happier: choosing it gives a little friendship
 you walk.
 
 
+TMs
+---
+  TMs never wear out, as in later games: teach a TM's move as often as
+  you like, it stays in your BAG. A POKé MART sells each TM once ("You
+  already have that TM."). If your save used TMs up before 1.18.1, the
+  LOTTERY CORNER clerk from Lilycove walks up to you once with your
+  "lottery winnings": every TM your save got from a person, a gym or an
+  item ball and no longer has. (TMs bought or won at a counter left no
+  trace in the save, so those can't come back.)
+
 HMs
 ---
   No HM restrictions: an HM move can be forgotten like any other move
