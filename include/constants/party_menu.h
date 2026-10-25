@@ -48,7 +48,8 @@
 #define PARTY_LAYOUT_DOUBLE          1
 #define PARTY_LAYOUT_MULTI           2
 #define PARTY_LAYOUT_MULTI_SHOWCASE  3  // The layout during the screen that appears just before a multi battle
-#define PARTY_LAYOUT_COUNT           4
+#define PARTY_LAYOUT_TRIPLE          4  // Moemon Co-op: a co-op Triple Battle (three actives left, reserves right)
+#define PARTY_LAYOUT_COUNT           5
 #define KEEP_PARTY_LAYOUT            0xFF
 
 #define PARTY_MENU_TYPE_FIELD                     0

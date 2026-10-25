@@ -139,6 +139,8 @@ enum {
 enum {
     PARTY_BOX_LEFT_COLUMN,
     PARTY_BOX_RIGHT_COLUMN,
+    PARTY_BOX_TRIPLE_PANEL,  // Moemon Co-op: co-op Triple Battle boxes
+    PARTY_BOX_TRIPLE_WIDE,
 };
 
 enum {
@@ -329,6 +331,7 @@ static void Task_ReturnToChooseMonAfterText(u8);
 static void UpdateCurrentPartySelection(s8 *, s8);
 static void UpdatePartySelectionSingleLayout(s8 *, s8);
 static void UpdatePartySelectionDoubleLayout(s8 *, s8);
+static void UpdatePartySelectionTripleLayout(s8 *, s8);
 static s8 GetNewSlotDoubleLayout(s8, s8);
 static void PrintMessage(const u8 *);
 static void Task_PrintAndWaitForText(u8);
@@ -464,6 +467,8 @@ static void Task_BattlePyramidChooseMonHeldItems(u8);
 static void ShiftMoveSlot(struct Pokemon *, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, bool8);
 static void BlitBitmapToPartyWindow_RightColumn(u8, u8, u8, u8, u8, bool8);
+static void BlitBitmapToPartyWindow_TriplePanel(u8, u8, u8, u8, u8, bool8);
+static void BlitBitmapToPartyWindow_TripleWide(u8, u8, u8, u8, u8, bool8);
 static void CursorCb_Summary(u8);
 static void CursorCb_MpTeam(u8);
 static const u8 sText_MpTeamAction[] = _("CO-OP TEAM");
@@ -830,7 +835,12 @@ static void InitPartyMenuBoxes(u8 layout)
     // The first party mon goes in the left column
     sPartyMenuBoxes[0].infoRects = &sPartyBoxInfoRects[PARTY_BOX_LEFT_COLUMN];
 
-    if (layout == PARTY_LAYOUT_MULTI_SHOWCASE)
+    if (layout == PARTY_LAYOUT_TRIPLE)
+    {
+        for (i = 0; i < PARTY_SIZE; i++)
+            sPartyMenuBoxes[i].infoRects = &sPartyBoxInfoRects[i < 3 ? PARTY_BOX_TRIPLE_PANEL : PARTY_BOX_TRIPLE_WIDE];
+    }
+    else if (layout == PARTY_LAYOUT_MULTI_SHOWCASE)
         sPartyMenuBoxes[3].infoRects = &sPartyBoxInfoRects[PARTY_BOX_LEFT_COLUMN];
     else if (layout != PARTY_LAYOUT_SINGLE)
         sPartyMenuBoxes[1].infoRects = &sPartyBoxInfoRects[PARTY_BOX_LEFT_COLUMN];
@@ -1219,20 +1229,20 @@ static u8 GetPartyBoxPaletteFlags(u8 slot, u8 animNum)
     return palFlags;
 }
 
-// Moemon Co-op: a linked triple's party screen in battle order: 0 = our active
-// Pokemon, 1 = the first ally's, 2 = our reserve, 3 = the second ally's
-// active one, 4-5 = the allies' reserves. Allies' boxes use the partner color.
+// Moemon Co-op: a linked triple's party screen in battle order (PARTY_LAYOUT_TRIPLE): the actives on the left,
+// 0 = ours, 1 = the first ally's, 2 = the second ally's; their reserves on the right in the same order (3-5).
+// Allies' boxes use the partner color.
 static bool8 MpIsAllySlot(u8 slot)
 {
     if (IS_TRIPLE_BATTLE() && gMpCoopBattle && gMain.inBattle)
-        return slot == 1 || slot == 3 || slot == 4 || slot == 5;
+        return slot == 1 || slot == 2 || slot == 4 || slot == 5;
     return slot == 1 || slot == 4 || slot == 5;
 }
 
 // gBattlePartyCurrentOrder for a linked triple, from who is out right now
 void MP_TripleFixPartyOrder(void)
 {
-    u8 ids[PARTY_SIZE], seat, i, n = 0;
+    u8 ids[PARTY_SIZE], seat, i;
     if (!IS_TRIPLE_BATTLE() || !gMpCoopBattle)
         return;
     seat = GetMultiplayerId();
@@ -1241,17 +1251,16 @@ void MP_TripleFixPartyOrder(void)
         u8 s = (seat + i) % 3, active = gBattlerPartyIndexes[s * 2];
         if (active / 2 != s)
             active = s * 2;
-        ids[i == 0 ? 0 : (i == 1 ? 1 : 3)] = active;
-        ids[i == 0 ? 2 : (i == 1 ? 4 : 5)] = active ^ 1;
+        ids[i] = active;
+        ids[i + 3] = active ^ 1;
     }
     for (i = 0; i < PARTY_SIZE / 2; i++)
         gBattlePartyCurrentOrder[i] = (ids[i * 2] << 4) | ids[i * 2 + 1];
-    (void)n;
 }
 
 static bool8 PartyBoxPal_ParnterOrDisqualifiedInArena(u8 slot)
 {
-    if (gPartyMenu.layout == PARTY_LAYOUT_MULTI && MpIsAllySlot(slot))
+    if ((gPartyMenu.layout == PARTY_LAYOUT_MULTI || gPartyMenu.layout == PARTY_LAYOUT_TRIPLE) && MpIsAllySlot(slot))
         return TRUE;
 
     if (slot < MULTI_PARTY_SIZE && (gBattleTypeFlags & BATTLE_TYPE_ARENA) && gMain.inBattle && (gBattleStruct->arenaLostPlayerMons >> GetPartyIdFromBattleSlot(slot) & 1))
@@ -1616,6 +1625,8 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
 
     if (layout == PARTY_LAYOUT_SINGLE)
         UpdatePartySelectionSingleLayout(slotPtr, movementDir);
+    else if (layout == PARTY_LAYOUT_TRIPLE)
+        UpdatePartySelectionTripleLayout(slotPtr, movementDir);
     else
         UpdatePartySelectionDoubleLayout(slotPtr, movementDir);
 
@@ -1689,6 +1700,78 @@ static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
             *slotPtr = 0;
         }
         break;
+    }
+}
+
+// Moemon Co-op: the co-op Triple Battle layout: actives 0-2 down the left, reserves 3-5 down the right (empty
+// ones skipped), CANCEL below both columns
+static bool8 MpTripleSlotUsed(s8 slot)
+{
+    return slot >= 0 && slot < PARTY_SIZE && GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) != SPECIES_NONE;
+}
+
+static void UpdatePartySelectionTripleLayout(s8 *slotPtr, s8 movementDir)
+{
+    s8 slot = *slotPtr, s;
+
+    switch (movementDir)
+    {
+    case MENU_DIR_UP:
+    case MENU_DIR_DOWN:
+        if (slot == PARTY_SIZE + 1)
+        {
+            // From CANCEL: up goes to the bottom of the column it was left from, down to the top
+            u8 base = sPartyMenuInternal->lastSelectedSlot >= 3 ? 3 : 0;
+            if (movementDir == MENU_DIR_DOWN)
+            {
+                for (s = base; s < base + 3; s++)
+                    if (MpTripleSlotUsed(s)) { *slotPtr = s; return; }
+            }
+            else
+            {
+                for (s = base + 2; s >= base; s--)
+                    if (MpTripleSlotUsed(s)) { *slotPtr = s; return; }
+            }
+            *slotPtr = 0;
+            return;
+        }
+        if (slot >= PARTY_SIZE)
+            return;
+        s = slot;
+        while (TRUE)
+        {
+            s += movementDir;
+            if (s < (slot >= 3 ? 3 : 0) || s > (slot >= 3 ? 5 : 2))
+            {
+                sPartyMenuInternal->lastSelectedSlot = slot;
+                *slotPtr = PARTY_SIZE + 1;
+                return;
+            }
+            if (MpTripleSlotUsed(s))
+            {
+                *slotPtr = s;
+                return;
+            }
+        }
+    case MENU_DIR_RIGHT:
+    case MENU_DIR_LEFT:
+        if (slot >= PARTY_SIZE || (movementDir == MENU_DIR_RIGHT) != (slot < 3))
+            return;
+        s = movementDir == MENU_DIR_RIGHT ? slot + 3 : slot - 3;
+        if (!MpTripleSlotUsed(s))
+        {
+            // The same row is empty: the nearest used one in the other column
+            u8 base = s >= 3 ? 3 : 0, d;
+            for (d = 1; d < 3; d++)
+            {
+                if (s - d >= base && MpTripleSlotUsed(s - d)) { s -= d; break; }
+                if (s + d < base + 3 && MpTripleSlotUsed(s + d)) { s += d; break; }
+            }
+            if (!MpTripleSlotUsed(s))
+                return;
+        }
+        *slotPtr = s;
+        return;
     }
 }
 
@@ -2195,6 +2278,9 @@ static void InitPartyMenuWindows(u8 layout)
     case PARTY_LAYOUT_MULTI:
         InitWindows(sMultiPartyMenuWindowTemplate);
         break;
+    case PARTY_LAYOUT_TRIPLE:
+        InitWindows(sTriplePartyMenuWindowTemplate);
+        break;
     default: // PARTY_LAYOUT_MULTI_SHOWCASE
         InitWindows(sShowcaseMultiPartyMenuWindowTemplate);
         break;
@@ -2299,8 +2385,91 @@ static void BlitBitmapToPartyWindow_RightColumn(u8 windowId, u8 x, u8 y, u8 widt
         BlitBitmapToPartyWindow(windowId, sSlotTilemap_WideNoHP, 18, x, y, width, height);
 }
 
+// Moemon Co-op: the co-op Triple Battle boxes are the stock box art with rows taken out or moved, so they're built
+// pixel by pixel. A panel (10x5 tiles) keeps the stock left box's rows 2-5, 15-36 and 38-51 (no space above the
+// name, a 2-row HP bar); a wide box is the stock one a pixel higher. Text lines don't sit on tile rows any more, so a
+// "tile row" a caller asks to redraw stands for the band of pixel rows holding that line's text (sTriplePanelBands:
+// row 0 = name, 2 = level and gender, 3-4 = description, 4 = HP).
+static const u8 sTriplePanelBands[] = {0, 13, 13, 21, 27, 40};
+static const u8 sTripleWideBands[] = {0, 14, 14, 24};
+
+static u8 MpBoxArtPixel(const u8 *tilemap, u8 cols, u16 x, u16 y)
+{
+    const u8 *tile = GetPartyMenuBgTile(tilemap[(y / 8) * cols + x / 8]);
+    u8 b = tile[(y % 8) * 4 + (x % 8) / 2];
+    return (x & 1) ? (b >> 4) : (b & 0xF);
+}
+
+static void MpBoxArtPut(u8 *pixels, u8 wTiles, u16 x, u16 y, u8 c)
+{
+    u8 *b = &pixels[((y / 8) * wTiles + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2];
+    if (x & 1)
+        *b = (*b & 0x0F) | (c << 4);
+    else
+        *b = (*b & 0xF0) | c;
+}
+
+static void MpBlitTripleArt(u8 windowId, const u8 *tilemap, bool8 panel, u8 x, u8 y, u8 width, u8 height)
+{
+    u8 wTiles = panel ? 10 : 18, hTiles = panel ? 5 : 3;
+    const u8 *bands = panel ? sTriplePanelBands : sTripleWideBands;
+    u8 *pixels;
+    u16 px, row, r0, r1;
+
+    if (width == 0 && height == 0)
+    {
+        width = wTiles;
+        height = hTiles;
+    }
+    if (x >= wTiles || y >= hTiles)
+        return;
+    if (x + width > wTiles)
+        width = wTiles - x;
+    if (y + height > hTiles)
+        height = hTiles - y;
+    r0 = bands[y];
+    r1 = bands[y + height];
+    if (r1 <= r0 || width == 0)
+        return;
+    pixels = AllocZeroed(wTiles * hTiles * 32);
+    if (pixels == NULL)
+        return;
+    for (row = r0; row < r1; row++)
+    {
+        s16 src;
+        if (panel)
+            src = row < 4 ? row + 2 : (row < 26 ? row + 11 : row + 12);
+        else
+            src = row < 23 ? row + 1 : -1;
+        if (src < 0)
+            continue;
+        for (px = x * 8; px < (x + width) * 8; px++)
+            MpBoxArtPut(pixels, wTiles, px, row, MpBoxArtPixel(tilemap, wTiles, px, src));
+    }
+    FillWindowPixelRect(windowId, PIXEL_FILL(0), x * 8, r0, width * 8, r1 - r0);
+    BlitBitmapRectToWindow(windowId, pixels, x * 8, r0, wTiles * 8, hTiles * 8, x * 8, r0, width * 8, r1 - r0);
+    Free(pixels);
+}
+
+static void BlitBitmapToPartyWindow_TriplePanel(u8 windowId, u8 x, u8 y, u8 width, u8 height, bool8 hideHP)
+{
+    MpBlitTripleArt(windowId, hideHP ? sSlotTilemap_MainNoHP : sSlotTilemap_Main, TRUE, x, y, width, height);
+}
+
+static void BlitBitmapToPartyWindow_TripleWide(u8 windowId, u8 x, u8 y, u8 width, u8 height, bool8 hideHP)
+{
+    MpBlitTripleArt(windowId, hideHP ? sSlotTilemap_WideNoHP : sSlotTilemap_Wide, FALSE, x, y, width, height);
+}
+
 static void DrawEmptySlot(u8 windowId)
 {
+    if (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE)
+    {
+        // An empty active panel can't happen in a co-op triple; draw nothing there rather than a wide box
+        if (windowId >= 3)
+            MpBlitTripleArt(windowId, sSlotTilemap_WideEmpty, FALSE, 0, 0, 18, 3);
+        return;
+    }
     BlitBitmapToPartyWindow(windowId, sSlotTilemap_WideEmpty, 18, 0, 0, 18, 3);
 }
 
@@ -2386,6 +2555,11 @@ static void LoadPartyBoxPalette(struct PartyMenuBox *menuBox, u8 palFlags)
         LOAD_PARTY_BOX_PAL(sPartyBoxEmptySlotPalIds1, sPartyBoxPalOffsets1);
         LOAD_PARTY_BOX_PAL(sPartyBoxEmptySlotPalIds2, sPartyBoxPalOffsets2);
     }
+
+    // Moemon Co-op: the Pokemon out in a co-op triple have an orange inner edge (the selection orange)
+    if (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE && menuBox->windowId < 3
+     && !(palFlags & (PARTY_PAL_NO_MON | PARTY_PAL_SWITCHING | PARTY_PAL_TO_SWITCH | PARTY_PAL_TO_SOFTBOIL)))
+        LoadPalette(GetPartyMenuPalBufferPtr(sPartyBoxCurrSelectionPalIds2[2]), sPartyBoxPalOffsets2[2] + palOffset, PLTT_SIZEOF(1));
 }
 
 static void DisplayPartyPokemonBarDetail(u8 windowId, const u8 *str, u8 color, const u8 *align)
@@ -2532,12 +2706,12 @@ static void DisplayPartyPokemonHPBar(u16 hp, u16 maxhp, struct PartyMenuBox *men
 
     hpFraction = GetScaledHPFraction(hp, maxhp, menuBox->infoRects->dimensions[22]);
     FillWindowPixelRect(menuBox->windowId, sHPBarPalOffsets[1], menuBox->infoRects->dimensions[20], menuBox->infoRects->dimensions[21], hpFraction, 1);
-    FillWindowPixelRect(menuBox->windowId, sHPBarPalOffsets[0], menuBox->infoRects->dimensions[20], menuBox->infoRects->dimensions[21] + 1, hpFraction, 2);
+    FillWindowPixelRect(menuBox->windowId, sHPBarPalOffsets[0], menuBox->infoRects->dimensions[20], menuBox->infoRects->dimensions[21] + 1, hpFraction, menuBox->infoRects->dimensions[23] - 1);
     if (hpFraction != menuBox->infoRects->dimensions[22])
     {
         // This appears to be an alternating fill
         FillWindowPixelRect(menuBox->windowId, 0x0D, menuBox->infoRects->dimensions[20] + hpFraction, menuBox->infoRects->dimensions[21], menuBox->infoRects->dimensions[22] - hpFraction, 1);
-        FillWindowPixelRect(menuBox->windowId, 0x02, menuBox->infoRects->dimensions[20] + hpFraction, menuBox->infoRects->dimensions[21] + 1, menuBox->infoRects->dimensions[22] - hpFraction, 2);
+        FillWindowPixelRect(menuBox->windowId, 0x02, menuBox->infoRects->dimensions[20] + hpFraction, menuBox->infoRects->dimensions[21] + 1, menuBox->infoRects->dimensions[22] - hpFraction, menuBox->infoRects->dimensions[23] - 1);
     }
     CopyWindowToVram(menuBox->windowId, COPYWIN_GFX);
 }
@@ -6005,6 +6179,8 @@ static u8 GetPartyLayoutFromBattleType(void)
 {
     if (IsDoubleBattle() == FALSE)
         return PARTY_LAYOUT_SINGLE;
+    if (IS_TRIPLE_BATTLE() && gMpCoopBattle)
+        return PARTY_LAYOUT_TRIPLE;
     if (IsMultiBattle() == TRUE)
         return PARTY_LAYOUT_MULTI;
     return PARTY_LAYOUT_DOUBLE;
@@ -6042,7 +6218,7 @@ static bool8 TrySwitchInPokemon(void)
     u8 newSlot;
     u8 i;
 
-    // In a multi battle, slots 1, 4, and 5 are the partner's Pokémon (a triple: 3 too)
+    // In a multi battle, slots 1, 4, and 5 are the partner's Pokémon (a co-op triple: 1, 2, 4 and 5)
     if (IsMultiBattle() == TRUE && MpIsAllySlot(slot))
     {
         StringCopy(gStringVar1, GetTrainerPartnerName());

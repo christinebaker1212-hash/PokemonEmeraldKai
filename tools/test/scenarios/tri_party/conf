@@ -1,0 +1,15 @@
+# Co-op wild triple party screen (PARTY_LAYOUT_TRIPLE) against the user's mock-up (tools/moemon_tricards/party_mock.png):
+# ALICE opens POKéMON: the three actives in panels on the left, the reserves on the right (hers blue, BOB's gold,
+# CARL has none), checked pixel for pixel; RIGHT moves to her reserve, DOWN to BOB's and on to CANCEL
+MODE=3
+WARP=0,16,13,12
+WARP_B=0,16,14,11
+WARP_C=0,16,12,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:20,258:20"
+ENV_B="MOEMON_DEBUG_PARTY=280:20,252:20"
+ENV_C="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("party menu cursor 3" "party menu cursor 4" "party menu cursor 7" "co-op: battle over")
+EXPECT_B=("co-op: battle over")
+EXPECT_C=("co-op: battle over")
+CHECK="python3 tools/moemon_tricards/check_party.py"

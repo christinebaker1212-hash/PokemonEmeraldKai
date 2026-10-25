@@ -59,6 +59,34 @@ static const struct PartyMenuBoxInfoRects sPartyBoxInfoRects[] =
         },
         77, 4, 64, 16        // Description text
     },
+    // Moemon Co-op: the co-op Triple Battle layout (images/25 of the design): three short panels on the left
+    // (the box art without the space above the name and one HP bar row) and the wide boxes one pixel higher
+    [PARTY_BOX_TRIPLE_PANEL] =
+    {
+        BlitBitmapToPartyWindow_TriplePanel,
+        {
+            24,  0, 40, 13, // Nickname
+            32,  9, 32,  8, // Level
+            64,  9,  8,  8, // Gender
+            38, 25, 24,  8, // HP
+            53, 25, 24,  8, // Max HP
+            24, 24, 48,  2  // HP bar
+        },
+        12, 24, 64, 16      // Description text
+    },
+    [PARTY_BOX_TRIPLE_WIDE] =
+    {
+        BlitBitmapToPartyWindow_TripleWide,
+        {
+             22,  2, 40, 13, // Nickname
+             30, 11, 32,  8, // Level
+             62, 11,  8,  8, // Gender
+            102, 11, 24,  8, // HP
+            117, 11, 24,  8, // Max HP
+             88,  9, 48,  3  // HP bar
+        },
+        77, 3, 64, 16        // Description text
+    },
 };
 
 
@@ -102,6 +130,15 @@ static const u8 sPartyMenuSpriteCoords[PARTY_LAYOUT_COUNT][PARTY_SIZE][4 * 2] =
         {16, 104, 20, 114, 50, 116, 16, 98},
         {104, 106, 106, 116, 136, 115, 102, 113},
         {104, 130, 106, 140, 136, 139, 102, 137},
+    },
+    [PARTY_LAYOUT_TRIPLE] =
+    {
+        {16, 20, 20, 30, 50, 25, 16, 22},
+        {16, 60, 20, 70, 50, 65, 16, 62},
+        {16, 100, 20, 110, 50, 105, 16, 102},
+        {104, 25, 106, 35, 136, 34, 102, 32},
+        {104, 65, 106, 75, 136, 74, 102, 72},
+        {104, 105, 106, 115, 136, 114, 102, 112},
     },
 };
 
@@ -380,6 +417,19 @@ static const struct WindowTemplate sShowcaseMultiPartyMenuWindowTemplate[] =
         .paletteNum = 8,
         .baseBlock = 0x1A1,
     },
+    DUMMY_WIN_TEMPLATE
+};
+
+// Moemon Co-op: the co-op Triple Battle layout: the actives on the left (10x5 each), the reserves on the right
+static const struct WindowTemplate sTriplePartyMenuWindowTemplate[] =
+{
+    { .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 10, .height = 5, .paletteNum = 3, .baseBlock = 0x63 },
+    { .bg = 0, .tilemapLeft = 1, .tilemapTop = 6, .width = 10, .height = 5, .paletteNum = 4, .baseBlock = 0x95 },
+    { .bg = 0, .tilemapLeft = 1, .tilemapTop = 11, .width = 10, .height = 5, .paletteNum = 5, .baseBlock = 0xC7 },
+    { .bg = 0, .tilemapLeft = 12, .tilemapTop = 2, .width = 18, .height = 3, .paletteNum = 6, .baseBlock = 0xF9 },
+    { .bg = 0, .tilemapLeft = 12, .tilemapTop = 7, .width = 18, .height = 3, .paletteNum = 7, .baseBlock = 0x12F },
+    { .bg = 0, .tilemapLeft = 12, .tilemapTop = 12, .width = 18, .height = 3, .paletteNum = 8, .baseBlock = 0x165 },
+    [WIN_MSG] = { .bg = 2, .tilemapLeft = 1, .tilemapTop = 15, .width = 28, .height = 4, .paletteNum = 14, .baseBlock = 0x1DF },
     DUMMY_WIN_TEMPLATE
 };
 

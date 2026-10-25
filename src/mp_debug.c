@@ -45,6 +45,7 @@
 #include "constants/species.h"
 #include "gpu_regs.h"
 #include "bg.h"
+#include "party_menu.h"
 #include "constants/items.h"
 #include "constants/flags.h"
 #include "constants/heal_locations.h"
@@ -2040,6 +2041,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG) ? ":BADEGG" : "");
         }
         printf("\n");
+    }
+    else if (strcmp(cmd, "partycursor") == 0)   // where the party screen's cursor is (7 = CANCEL) and its layout
+    {
+        printf("[test] party menu cursor %d layout %d\n", gPartyMenu.slotId, gPartyMenu.layout);
     }
     else if (strcmp(cmd, "party") == 0)
     {
