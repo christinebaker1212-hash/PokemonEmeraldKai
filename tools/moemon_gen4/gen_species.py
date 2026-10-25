@@ -228,6 +228,7 @@ def main():
     block('include/constants/species.h', '// Moemon Kai: Gen 4 species (tools/moemon_gen4/gen_species.py)',
           '// end of Gen 4 species', ''.join('#define %s %d\n' % (c, ids[c]) for c in consts) +
           '#define FIRST_GEN4_SPECIES SPECIES_TURTWIG\n#define LAST_GEN4_SPECIES  SPECIES_ARCEUS\n'
+          '#define IS_GEN4_SPECIES(species) ((species) >= FIRST_GEN4_SPECIES && (species) <= LAST_GEN4_SPECIES)\n'
           '#define SPECIES_EGG %d\n' % (FIRST_ID + len(species)))
     block('include/constants/pokedex.h', '    // Moemon Kai: Gen 4 national dex (tools/moemon_gen4/gen_species.py)',
           '    // end of Gen 4 national dex', ''.join('    NATIONAL_DEX_%s,\n' % n for n in names))
@@ -328,7 +329,9 @@ def main():
         txt.append('const u8 %s[] = _(\n%s);\n\n' % (sym, '\n'.join(
             '    "%s%s"' % (l.replace('"', '\\"'), '\\n' if i < len(lines) - 1 else '') for i, l in enumerate(lines))))
         cat = (s['category'] or '').upper()
-        cat = cat[:-len(' POKéMON')] if cat.endswith(' POKéMON') else cat[:-len(' POKEMON')] if cat.endswith(' POKEMON') else cat
+        for tail in (' POKéMON', ' POKÉMON', ' POKEMON'):
+            if cat.endswith(tail):
+                cat = cat[:-len(tail)]
         ent.append('''    [NATIONAL_DEX_%s] =
     {
         .categoryName = _("%s"),
