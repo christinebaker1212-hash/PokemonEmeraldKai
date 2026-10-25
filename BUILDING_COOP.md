@@ -62,7 +62,11 @@ Server: `cd tools/mp_server && gcc -O2 -pthread -o moemon_server main.c ../../sr
 The game updates itself from this repository's GitHub releases (`src/platform/updater.c`, player side in
 `dist_extras/README.txt` UPDATES). To publish a version:
 1. Bump `MOEMON_VERSION` in `include/mp_version.h` (it must go up: the updater only installs a higher one).
-2. Write `tools/release/notes/v<version>.md` (the release's description).
+2. Write `tools/release/notes/v<version>.md` (the release's description). Its first line,
+   `Moemon Emerald Kai Co-op <version> "<Catchy Title!>": <one line>`, gives the build's title (also the GitHub
+   release's name) and the one-line patch note players see in PATCH NOTES on the
+   CO-OP setup screen, and the rest is that version's page there (`tools/release/gen_patchnotes.py` builds
+   `src/data/mp_patchnotes.h` from every notes file at build time; `## Installing` sections are left out).
 3. Commit and push to the default branch. A push that changes `include/mp_version.h` starts
    `.github/workflows/release.yml` (it can also be started by hand: Actions > Release > Run workflow; a version
    that already has a release is skipped). It creates the tag `v<version>` itself.

@@ -1,0 +1,8 @@
+# PATCH NOTES on the CO-OP setup screen (mp_setup.c, mp_patchnotes.c): the last row of the main screen opens the list of
+# version lines with their titles (newest first); A on 1.18 shows its five updates oldest first, scrolled line by line and by page; the
+# last line, 0.1, is the first build. Shots of each.
+MODE=1
+TMO=120
+ENV_A="MOEMON_SKIP_COOP_SETUP=0"
+EXPECT_A=("patch notes: line 1.18, 5 notes" "patch notes: line 0.1, 1 notes")
+UNEXPECT_A=("crash")

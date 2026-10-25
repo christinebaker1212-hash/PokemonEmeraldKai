@@ -1024,6 +1024,12 @@ void MP_FollowFx_Update(u8 slot, u8 spriteId, s16 prevX, s16 prevY, s16 curX, s1
 void MP_FollowFx_Remove(u8 slot);
 void MP_FollowFx_GrassSubpriority(struct Sprite *grass);
 bool8 MP_FollowFx_IsReflection(struct Sprite *sprite);
+// PATCH NOTES (mp_patchnotes.c, from tools/release/notes): version "1.17.1", its title ("Garden Tidy-Up!"), its one-line
+// summary, and the body (one item per line, the first character its kind: H heading, B item, S sub-item, P paragraph).
+// Newest first.
+struct MpPatchNote { const char *version, *title, *summary, *body; };
+u16 MP_PatchNotes_Count(void);
+const struct MpPatchNote *MP_PatchNotes_Get(u16 index);
 u16 MP_ReflectionTint(u16 color);                 // a color washed out for a reflection in water
 bool8 MP_ReflectionNeedsOwnPalette(u8 slot);      // co-op colors in this sprite palette slot
 u8 MP_ReflectionPalette(u8 src);                  // the reflection palette for the colors in slot src

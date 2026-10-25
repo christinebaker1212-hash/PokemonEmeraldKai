@@ -13,6 +13,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `src/platform/updater.c` + `tools/release/`: the auto-updater and releases. Publishing a version = bump
   `MOEMON_VERSION` (include/mp_version.h), add `tools/release/notes/v<ver>.md`, push to the default branch
   (.github/workflows/release.yml builds, tags and publishes; BUILDING_COOP.md). Sessions can't push tags.
+  Every release's notes file starts with `Moemon Emerald Kai Co-op <ver> "<Catchy Title!>": <one-line note>`: that line and the rest
+  are the game's PATCH NOTES (CO-OP setup screen only; gen_patchnotes.py at build time; v0.1-v0.4 = the days before 1.0).
+  Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
+  tests, file names).
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)

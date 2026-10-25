@@ -969,6 +969,21 @@ Releases: .github/workflows/release.yml runs on a push to the default branch tha
 by hand), skips a version that already has a release, builds both platforms, packages, runs the updater test and
 publishes with `gh release create --target <commit>` (which makes the tag); notes from tools/release/notes/v<ver>.md.
 
+## PATCH NOTES (mp_setup.c, mp_patchnotes.c; data from tools/release/notes)
+The CO-OP setup screen (after the title screen; not when it opens from the field: BuildMainItems checks fromField)
+has PATCH NOTES as its last row. tools/release/gen_patchnotes.py turns every `tools/release/notes/v*.md` into
+src/data/mp_patchnotes.h (generated, gitignored; json_data_rules.mk, AUTO_GEN_TARGETS, so `make generated` builds it
+before scaninc): `{version, title, summary, body}` newest first, title and summary from the first line ('Moemon Emerald
+Kai Co-op <ver> "<Catchy Title!>": <summary>', required; release.yml names the GitHub release with the title too), the body one item per line with a kind letter (H heading, B item, S sub-item, P
+paragraph), `**` / backticks dropped, `## Installing` and the "installs this update by itself" line left out, only é
+outside ASCII and no braces (button tokens). SCR_PATCHES lists version lines (major.minor, BuildPatchLines) with the
+line's x.y.0 title cut to fit (FitAscii); the reader opens each update with "<ver>  <title>" and its summary; A builds the reader rows (BuildPatchText: oldest update first, word-wrapped in
+FONT_SMALL, 12 px rows, malloc'd PatchRow array) into WIN_FULL (28x16 at baseBlock 512, the last tiles before the
+tilemap), shown by clearing rows 2-19 and framing it (ShowPatchReader; CopyBgTilemapBufferToVram: this screen runs no
+scheduled copies). UP/DOWN scroll, LEFT/RIGHT/L/R/A page, B back. v0.1.0-v0.4.0 are the days before 1.0 (Oct 18-21),
+written from the commit log. Test patch_notes (MOEMON_SKIP_COOP_SETUP=0 shows the screen in a test; waitfor
+patchlist / patchtext; log "patch notes: line X, N notes").
+
 ## Full 7-letter names (1.4.1)
 StringCopyN / StringAppendN copy exactly N bytes and never end the string. A name that fills all 7 letters has no end
 mark inside those 7 bytes, so a label built with `StringAppendN(buf, name, PLAYER_NAME_LENGTH)` ran on into whatever

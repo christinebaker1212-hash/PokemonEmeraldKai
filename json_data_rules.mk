@@ -30,3 +30,11 @@ $(C_BUILDDIR)/heal_location.o: c_dep += $(DATA_SRC_SUBDIR)/heal_locations.h
 AUTO_GEN_TARGETS += include/constants/heal_locations.h
 include/constants/heal_locations.h: $(DATA_SRC_SUBDIR)/heal_locations.json $(DATA_SRC_SUBDIR)/heal_locations.constants.json.txt
 	$(JSONPROC) $^ $@
+
+# Moemon Co-op: the PATCH NOTES on the CO-OP setup screen, from the release notes (tools/release/notes/v<ver>.md)
+PATCH_NOTES := $(wildcard tools/release/notes/v*.md)
+AUTO_GEN_TARGETS += $(DATA_SRC_SUBDIR)/mp_patchnotes.h
+$(DATA_SRC_SUBDIR)/mp_patchnotes.h: tools/release/gen_patchnotes.py $(PATCH_NOTES)
+	python3 tools/release/gen_patchnotes.py $@ $(PATCH_NOTES)
+
+$(C_BUILDDIR)/mp/mp_patchnotes.o: c_dep += $(DATA_SRC_SUBDIR)/mp_patchnotes.h

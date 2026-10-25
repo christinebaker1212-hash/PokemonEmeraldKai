@@ -43,6 +43,7 @@ enum {
     WIN_TITLE,
     WIN_MAIN,
     WIN_HELP,
+    WIN_FULL,      // PATCH NOTES reader: the whole screen under the title (only shown there)
     WIN_COUNT
 };
 
@@ -51,6 +52,8 @@ static const struct WindowTemplate sWindowTemplates[] = {
     [WIN_TITLE] = { .bg = 0, .tilemapLeft = 1, .tilemapTop = 0, .width = 28, .height = 2, .paletteNum = TEXT_PAL, .baseBlock = 1 },
     [WIN_MAIN]  = { .bg = 0, .tilemapLeft = 2, .tilemapTop = 3, .width = 26, .height = 10, .paletteNum = TEXT_PAL, .baseBlock = 1 + 56 },
     [WIN_HELP]  = { .bg = 0, .tilemapLeft = 2, .tilemapTop = 15, .width = 26, .height = 4, .paletteNum = TEXT_PAL, .baseBlock = 1 + 56 + 260 },
+    // past the frame's tiles (FRAME_TILE): 28 x 16 = 448 tiles, up to the tilemap at 0xF800 (tile 960)
+    [WIN_FULL]  = { .bg = 0, .tilemapLeft = 1, .tilemapTop = 3, .width = 28, .height = 16, .paletteNum = TEXT_PAL, .baseBlock = 512 },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -79,6 +82,8 @@ enum {
     SCR_JOIN,
     SCR_WORKING,
     SCR_MESSAGE,
+    SCR_PATCHES,       // PATCH NOTES: the versions
+    SCR_PATCHTEXT,     // ... one version's notes, full screen
 };
 
 // Main screen choices
@@ -89,6 +94,7 @@ enum {
     MAIN_HOST,
     MAIN_JOIN,
     MAIN_SOLO,
+    MAIN_PATCHES,      // PATCH NOTES (only here, before the game starts)
 };
 
 // Host form rows
@@ -121,6 +127,21 @@ enum {
 };
 
 #define MAX_JOIN_ENTRIES (1 + MP_LIST_MAX + MP_LAN_MAX_GAMES)
+
+// PATCH NOTES
+#define PATCH_LINES_MAX  128
+#define PATCH_FONT       FONT_SMALL
+#define PATCH_ROW_H      12
+#define PATCH_ROWS       10      // rows on the reader's page (WIN_FULL is 128 px tall)
+#define PATCH_TEXT_W     202     // WIN_FULL's 224 px less the margins and the scroll arrows' column (x 214)
+
+struct PatchRow
+{
+    char text[80];
+    u8 x;
+    u8 kind;    // 'V' version title, 'H' heading, 'B' / 'S' items, 'P' paragraph
+    bool8 mark; // the item's first row: the dash in front
+};
 
 struct JoinEntry
 {
@@ -164,6 +185,14 @@ static EWRAM_DATA struct
     bool8 messageIsError;
     // text entry return
     u8 returnTo;               // 0 none, 1 = host name, 2 = host password, 3 = join password, 4 = join by name, 5 = join by name password
+    // PATCH NOTES
+    u8 patchLineCount;
+    struct { u16 first; u8 count; } patchLine[PATCH_LINES_MAX];   // a version line ("1.17"): its notes, newest first
+    u8 patchCursor;
+    u8 patchScroll;
+    struct PatchRow *rows;     // the line's notes, laid out (malloc)
+    u16 rowCount;
+    u16 rowTop;
 } sSetup;
 
 static void Task_Setup(u8 taskId);
@@ -317,7 +346,7 @@ static void InitGraphics(void)
     LoadPalette(sBgColor, BG_PLTT_ID(0), sizeof(sBgColor));
     LoadPalette(gStandardMenuPalette, BG_PLTT_ID(TEXT_PAL), PLTT_SIZE_4BPP);
     LoadUserWindowBorderGfx(WIN_TITLE, FRAME_TILE, BG_PLTT_ID(FRAME_PAL));
-    for (i = 0; i < WIN_COUNT; i++)
+    for (i = 0; i < WIN_FULL; i++)   // WIN_FULL only shows in the PATCH NOTES reader
     {
         FillWindowPixelBuffer(i, PIXEL_FILL(i == WIN_TITLE ? 0 : 1));
         PutWindowTilemap(i);
@@ -343,6 +372,8 @@ static void BuildMainItems(void)
     {
         sSetup.mainItems[sSetup.mainCount++] = MAIN_CONTINUE;
         sSetup.mainItems[sSetup.mainCount++] = MAIN_LEAVE;
+        if (!sSetup.fromField)
+            sSetup.mainItems[sSetup.mainCount++] = MAIN_PATCHES;
         return;
     }
     if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0])
@@ -350,6 +381,8 @@ static void BuildMainItems(void)
     sSetup.mainItems[sSetup.mainCount++] = MAIN_HOST;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_JOIN;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_SOLO;   // "BACK" when opened during the game
+    if (!sSetup.fromField)
+        sSetup.mainItems[sSetup.mainCount++] = MAIN_PATCHES;   // what changed in each version (not during the game)
 }
 
 static void MainItemLabel(u8 item, char *out, int len)
@@ -361,6 +394,7 @@ static void MainItemLabel(u8 item, char *out, int len)
     case MAIN_REJOIN:   snprintf(out, len, "REJOIN %s", gMpConfig.lastRoom); break;
     case MAIN_HOST:     snprintf(out, len, "HOST A GAME"); break;
     case MAIN_JOIN:     snprintf(out, len, "JOIN A GAME"); break;
+    case MAIN_PATCHES:  snprintf(out, len, "PATCH NOTES"); break;
     default:            snprintf(out, len, sSetup.fromField ? "BACK" : "PLAY SOLO"); break;
     }
 }
@@ -381,6 +415,7 @@ static const char *MainItemHelp(u8 item)
     case MAIN_REJOIN:   return "Join the server you played on last time.";
     case MAIN_HOST:     return "Open a server. Pick a name and an optional password.";
     case MAIN_JOIN:     return "Find a friend's server and hop in.";
+    case MAIN_PATCHES:  return "What changed in each version, back to the very first build.";
     default:            return sSetup.fromField ? "Return to the game." : "Play alone. Go online later with {COOP}.";
     }
 }
@@ -810,6 +845,335 @@ static void JoinEntryNow(u8 index)
 
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// PATCH NOTES: every version back to the first build (mp_patchnotes.c, from tools/release/notes). The list shows each
+// version line ("1.17") with its latest summary; A opens the line's notes full screen, oldest update first.
+
+static void PrintFont(u8 win, u8 font, const char *ascii, u8 x, u8 y, const u8 *color)
+{
+    u8 buf[128];
+    MP_AsciiToGame(buf, ascii, 120);
+    AddTextPrinterParameterized3(win, font, x, y, color, TEXT_SKIP_DRAW, buf);
+}
+
+static u16 AsciiWidth(u8 font, const char *ascii)
+{
+    u8 buf[128];
+    MP_AsciiToGame(buf, ascii, 120);
+    return GetStringWidth(font, buf, 0);
+}
+
+// "1.17.2" -> "1.17"
+static void PatchLineName(const char *version, char *out, int len)
+{
+    int i, dots = 0;
+    for (i = 0; version[i] && i < len - 1; i++)
+    {
+        if (version[i] == '.' && ++dots == 2)
+            break;
+        out[i] = version[i];
+    }
+    out[i] = 0;
+}
+
+static void BuildPatchLines(void)
+{
+    u16 i, n = MP_PatchNotes_Count();
+    char prev[16] = "", name[16];
+
+    sSetup.patchLineCount = 0;
+    for (i = 0; i < n; i++)
+    {
+        PatchLineName(MP_PatchNotes_Get(i)->version, name, sizeof(name));
+        if (sSetup.patchLineCount > 0 && strcmp(name, prev) == 0)
+            sSetup.patchLine[sSetup.patchLineCount - 1].count++;
+        else if (sSetup.patchLineCount < PATCH_LINES_MAX)
+        {
+            sSetup.patchLine[sSetup.patchLineCount].first = i;
+            sSetup.patchLine[sSetup.patchLineCount].count = 1;
+            sSetup.patchLineCount++;
+        }
+        else
+            break;
+        strcpy(prev, name);
+    }
+}
+
+// Cuts an ASCII line to fit `width` pixels, ending it with "..."
+static void FitAscii(char *text, u8 font, u16 width)
+{
+    int n = strlen(text);
+    if (AsciiWidth(font, text) <= width)
+        return;
+    while (n > 0)
+    {
+        n--;
+        while (n > 0 && text[n - 1] == ' ')
+            n--;
+        if ((u8)text[n] >= 0x80 && n > 0 && (u8)text[n - 1] == 0xC3)   // never split an é
+            n--;
+        strcpy(text + n, "...");
+        if (AsciiWidth(font, text) <= width)
+            return;
+    }
+}
+
+static void DrawPatches(void)
+{
+    u8 r;
+    char label[96];
+    u8 arrowUp[] = {CHAR_UP_ARROW, EOS}, arrowDown[] = {CHAR_DOWN_ARROW, EOS};
+
+    FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
+    for (r = 0; r < LIST_ROWS && sSetup.patchScroll + r < sSetup.patchLineCount; r++)
+    {
+        u8 idx = sSetup.patchScroll + r, y = 1 + LINE_H * r;
+        const struct MpPatchNote *latest = MP_PatchNotes_Get(sSetup.patchLine[idx].first);
+        const struct MpPatchNote *build = MP_PatchNotes_Get(sSetup.patchLine[idx].first + sSetup.patchLine[idx].count - 1);
+        PatchLineName(latest->version, label, sizeof(label));
+        Print(WIN_MAIN, label, 14, y, idx == 0 ? sColorAccent : sColorNormal);
+        snprintf(label, sizeof(label), "%s", build->title);   // the line's own build (x.y.0): its title
+        FitAscii(label, FONT_NORMAL, 196 - 50);
+        Print(WIN_MAIN, label, 50, y, sColorNormal);
+        if (idx == sSetup.patchCursor)
+            DrawCursor(WIN_MAIN, y);
+    }
+    if (sSetup.patchScroll > 0)
+        PrintGame(WIN_MAIN, arrowUp, 198, 1, sColorAccent);
+    if (sSetup.patchScroll + LIST_ROWS < sSetup.patchLineCount)
+        PrintGame(WIN_MAIN, arrowDown, 198, 1 + LINE_H * (LIST_ROWS - 1), sColorAccent);
+    CopyWindowToVram(WIN_MAIN, COPYWIN_GFX);
+
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    if (sSetup.patchLineCount > 0)
+    {
+        u16 first = sSetup.patchLine[sSetup.patchCursor].first;
+        u8 count = sSetup.patchLine[sSetup.patchCursor].count;
+        if (count == 1)
+            snprintf(label, sizeof(label), "1 update: %s", MP_PatchNotes_Get(first)->version);
+        else
+            snprintf(label, sizeof(label), "%d updates: %s to %s", count, MP_PatchNotes_Get(first + count - 1)->version,
+                     MP_PatchNotes_Get(first)->version);
+        Print(WIN_HELP, label, 4, 1, sColorDim);
+    }
+    Print(WIN_HELP, "{A} READ    {B} BACK", 4, 1 + LINE_H, sColorDim);
+    CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
+}
+
+static void FreePatchRows(void)
+{
+    free(sSetup.rows);
+    sSetup.rows = NULL;
+    sSetup.rowCount = 0;
+    sSetup.rowTop = 0;
+}
+
+static void AddPatchRow(const char *text, u8 x, u8 kind, bool8 mark)
+{
+    struct PatchRow *row;
+    if (sSetup.rowCount % 64 == 0)
+    {
+        struct PatchRow *more = realloc(sSetup.rows, (sSetup.rowCount + 64) * sizeof(struct PatchRow));
+        if (more == NULL)
+            return;
+        sSetup.rows = more;
+    }
+    row = &sSetup.rows[sSetup.rowCount++];
+    snprintf(row->text, sizeof(row->text), "%s", text);
+    row->x = x;
+    row->kind = kind;
+    row->mark = mark;
+}
+
+// Word-wraps one item of the notes into rows starting at x
+static void WrapPatchItem(const char *src, int len, u8 x, u8 kind)
+{
+    char line[80], cand[80];
+    u16 width = PATCH_TEXT_W - x;
+    bool8 first = TRUE;
+    int i = 0;
+
+    line[0] = 0;
+    while (i < len)
+    {
+        int start, wordLen;
+        while (i < len && src[i] == ' ')
+            i++;
+        start = i;
+        while (i < len && src[i] != ' ')
+            i++;
+        wordLen = i - start;
+        if (wordLen == 0)
+            break;
+        if (wordLen > 70)
+            wordLen = 70;
+        if (line[0])
+            snprintf(cand, sizeof(cand), "%s %.*s", line, wordLen, src + start);
+        else
+            snprintf(cand, sizeof(cand), "%.*s", wordLen, src + start);
+        if (line[0] && (AsciiWidth(PATCH_FONT, cand) > width || strlen(cand) >= sizeof(line) - 1))
+        {
+            AddPatchRow(line, x, kind, first && (kind == 'B' || kind == 'S'));
+            first = FALSE;
+            snprintf(line, sizeof(line), "%.*s", wordLen, src + start);
+        }
+        else
+            strcpy(line, cand);
+    }
+    if (line[0])
+        AddPatchRow(line, x, kind, first && (kind == 'B' || kind == 'S'));
+}
+
+static void BuildPatchText(u8 lineIndex)
+{
+    u16 first = sSetup.patchLine[lineIndex].first;
+    u8 count = sSetup.patchLine[lineIndex].count;
+    int k;
+    char name[16];
+
+    FreePatchRows();
+    for (k = count - 1; k >= 0; k--)   // oldest update first
+    {
+        const struct MpPatchNote *note = MP_PatchNotes_Get(first + k);
+        const char *p = note->body;
+        char title[160];
+
+        snprintf(title, sizeof(title), "%s  %s", note->version, note->title);
+        WrapPatchItem(title, strlen(title), 0, 'V');
+        WrapPatchItem(note->summary, strlen(note->summary), 0, 'P');
+        while (*p)
+        {
+            const char *end = strchr(p, '\n');
+            int len = end ? (int)(end - p) : (int)strlen(p);
+            char kind = *p;
+            if (len > 1)
+            {
+                if (kind == 'H')
+                {
+                    char upper[64];
+                    int j, n = len - 1 < (int)sizeof(upper) - 1 ? len - 1 : (int)sizeof(upper) - 1;
+                    for (j = 0; j < n; j++)
+                        upper[j] = (p[1 + j] >= 'a' && p[1 + j] <= 'z') ? p[1 + j] - 'a' + 'A' : p[1 + j];
+                    upper[n] = 0;
+                    WrapPatchItem(upper, n, 0, 'H');
+                }
+                else
+                    WrapPatchItem(p + 1, len - 1, kind == 'B' ? 8 : kind == 'S' ? 18 : 0, kind == 'B' || kind == 'S' ? kind : 'P');
+            }
+            p += len;
+            if (*p == '\n')
+                p++;
+        }
+        if (k > 0)
+            AddPatchRow("", 0, 'P', FALSE);   // a gap before the next update
+    }
+    PatchLineName(MP_PatchNotes_Get(first)->version, name, sizeof(name));
+    MPNet_Log("patch notes: line %s, %d notes, %d rows", name, count, sSetup.rowCount);
+}
+
+static void DrawPatchText(void)
+{
+    u8 r;
+    u8 arrowUp[] = {CHAR_UP_ARROW, EOS}, arrowDown[] = {CHAR_DOWN_ARROW, EOS};
+
+    FillWindowPixelBuffer(WIN_FULL, PIXEL_FILL(1));
+    for (r = 0; r < PATCH_ROWS && sSetup.rowTop + r < sSetup.rowCount; r++)
+    {
+        const struct PatchRow *row = &sSetup.rows[sSetup.rowTop + r];
+        u8 y = 2 + PATCH_ROW_H * r, x = 4 + row->x;
+        const u8 *color = row->kind == 'V' ? sColorAccent : row->kind == 'H' ? sColorError : sColorNormal;
+        if (row->mark)
+            PrintFont(WIN_FULL, PATCH_FONT, "-", x - 7, y, sColorNormal);
+        PrintFont(WIN_FULL, PATCH_FONT, row->text, x, y, color);
+    }
+    if (sSetup.rowTop > 0)
+        PrintGame(WIN_FULL, arrowUp, 214, 0, sColorAccent);
+    if (sSetup.rowTop + PATCH_ROWS < sSetup.rowCount)
+        PrintGame(WIN_FULL, arrowDown, 214, 112, sColorAccent);
+    CopyWindowToVram(WIN_FULL, COPYWIN_GFX);
+}
+
+// The reader covers the whole screen under the title; leaving it brings the usual two boxes back
+static void ShowPatchReader(bool8 on)
+{
+    FillBgTilemapBufferRect(0, 0, 0, 2, 30, 18, 0);
+    if (on)
+    {
+        PutWindowTilemap(WIN_FULL);
+        DrawStdFrameWithCustomTileAndPalette(WIN_FULL, FALSE, FRAME_TILE, FRAME_PAL);
+    }
+    else
+    {
+        PutWindowTilemap(WIN_MAIN);
+        PutWindowTilemap(WIN_HELP);
+        DrawStdFrameWithCustomTileAndPalette(WIN_MAIN, FALSE, FRAME_TILE, FRAME_PAL);
+        DrawStdFrameWithCustomTileAndPalette(WIN_HELP, FALSE, FRAME_TILE, FRAME_PAL);
+    }
+    CopyBgTilemapBufferToVram(0);   // (this screen runs no scheduled copies)
+}
+
+static void HandlePatches(void)
+{
+    if (JOY_REPEAT(DPAD_UP) && sSetup.patchCursor > 0)
+    {
+        sSetup.patchCursor--;
+        if (sSetup.patchCursor < sSetup.patchScroll)
+            sSetup.patchScroll = sSetup.patchCursor;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_REPEAT(DPAD_DOWN) && sSetup.patchCursor + 1 < sSetup.patchLineCount)
+    {
+        sSetup.patchCursor++;
+        if (sSetup.patchCursor >= sSetup.patchScroll + LIST_ROWS)
+            sSetup.patchScroll = sSetup.patchCursor - LIST_ROWS + 1;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(A_BUTTON) && sSetup.patchLineCount > 0)
+    {
+        PlaySE(SE_SELECT);
+        BuildPatchText(sSetup.patchCursor);
+        sSetup.screen = SCR_PATCHTEXT;
+        ShowPatchReader(TRUE);
+        DrawScreen();
+    }
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sSetup.screen = SCR_MAIN;
+        DrawScreen();
+    }
+}
+
+static void HandlePatchText(void)
+{
+    u16 maxTop = sSetup.rowCount > PATCH_ROWS ? sSetup.rowCount - PATCH_ROWS : 0, top = sSetup.rowTop;
+
+    if (JOY_REPEAT(DPAD_UP) && top > 0)
+        top--;
+    else if (JOY_REPEAT(DPAD_DOWN) && top < maxTop)
+        top++;
+    else if (JOY_REPEAT(DPAD_LEFT | L_BUTTON))
+        top = top > PATCH_ROWS - 1 ? top - (PATCH_ROWS - 1) : 0;
+    else if (JOY_REPEAT(DPAD_RIGHT | R_BUTTON | A_BUTTON))
+        top = top + (PATCH_ROWS - 1) < maxTop ? top + (PATCH_ROWS - 1) : maxTop;
+    else if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        FreePatchRows();
+        sSetup.screen = SCR_PATCHES;
+        ShowPatchReader(FALSE);
+        DrawScreen();
+        return;
+    }
+    if (top != sSetup.rowTop)
+    {
+        sSetup.rowTop = top;
+        DrawPatchText();
+    }
+}
+
 static void DrawScreen(void)
 {
     FillWindowPixelBuffer(WIN_TITLE, PIXEL_FILL(0));
@@ -817,6 +1181,16 @@ static void DrawScreen(void)
     {
     case SCR_HOST:    Print(WIN_TITLE, "HOST A GAME", 12, 2, sColorTitle); break;
     case SCR_JOIN:    Print(WIN_TITLE, "JOIN A GAME", 12, 2, sColorTitle); break;
+    case SCR_PATCHES: Print(WIN_TITLE, "PATCH NOTES", 12, 2, sColorTitle); break;
+    case SCR_PATCHTEXT:
+    {
+        char title[32], name[16];
+        PatchLineName(MP_PatchNotes_Get(sSetup.patchLine[sSetup.patchCursor].first)->version, name, sizeof(name));
+        snprintf(title, sizeof(title), "PATCH NOTES  %s", name);
+        Print(WIN_TITLE, title, 12, 2, sColorTitle);
+        PrintRight(WIN_TITLE, "{UPDOWN} {B} BACK", 220, 2, sColorTitle);
+        break;
+    }
     default:          Print(WIN_TITLE, "PLAY WITH FRIENDS", 12, 2, sColorTitle); break;
     }
     CopyWindowToVram(WIN_TITLE, COPYWIN_GFX);
@@ -827,6 +1201,8 @@ static void DrawScreen(void)
     case SCR_JOIN:    DrawJoin(); break;
     case SCR_WORKING: DrawWorking(); break;
     case SCR_MESSAGE: DrawMessage(); break;
+    case SCR_PATCHES: DrawPatches(); break;
+    case SCR_PATCHTEXT: DrawPatchText(); break;
     }
 }
 
@@ -843,6 +1219,7 @@ static void OpenTextEntry(u8 which, u8 template, u8 *buffer)
 
 static void Finish(void)
 {
+    FreePatchRows();
     MPLan_StopSearch();
     if (!MP_Lobby_InRoom() && MP_Lobby_State() != MP_LOBBY_RECONNECT_WAIT)
         MP_Lobby_Disconnect(); // the lobby connection used for the server list
@@ -913,6 +1290,12 @@ static void HandleMain(void)
         case MAIN_JOIN:
             memset(sSetup.password, EOS, sizeof(sSetup.password));
             EnterJoinList();
+            break;
+        case MAIN_PATCHES:
+            BuildPatchLines();
+            sSetup.patchCursor = sSetup.patchScroll = 0;
+            sSetup.screen = SCR_PATCHES;
+            DrawScreen();
             break;
         default:
             Finish();
@@ -1280,6 +1663,8 @@ static void Task_Setup(u8 taskId)
         case SCR_JOIN:    HandleJoin(); break;
         case SCR_WORKING: HandleWorking(); break;
         case SCR_MESSAGE: HandleMessage(); break;
+        case SCR_PATCHES: HandlePatches(); break;
+        case SCR_PATCHTEXT: HandlePatchText(); break;
         }
         break;
     case 1: // fading out to the keyboard
@@ -1420,8 +1805,8 @@ static void InitSetup(bool8 fromField)
 
 void CB2_InitCoopSetup(void)
 {
-    // Automated tests skip this screen
-    if (getenv("MOEMON_COOP_AUTO") || getenv("MOEMON_SKIP_COOP_SETUP"))
+    // Automated tests skip this screen (MOEMON_SKIP_COOP_SETUP=0: a test of the screen itself)
+    if (getenv("MOEMON_COOP_AUTO") || (getenv("MOEMON_SKIP_COOP_SETUP") && strcmp(getenv("MOEMON_SKIP_COOP_SETUP"), "0") != 0))
     {
         SetMainCallback2(CB2_InitMainMenu);
         return;

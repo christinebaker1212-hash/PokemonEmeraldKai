@@ -1,0 +1,49 @@
+pressuntil A setup 5000
+wait 30
+shot main
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+shot main_patch
+press A 2
+waitfor patchlist 300
+wait 10
+shot list
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press A 2
+waitfor patchtext 300
+wait 10
+shot text_top
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+shot text_down2
+press RIGHT 2
+wait 6
+shot text_page
+mash RIGHT 30 6
+wait 10
+shot text_end
+press B 2
+waitfor patchlist 300
+wait 10
+mash DOWN 40 6
+wait 10
+shot list_end
+press A 2
+waitfor patchtext 300
+wait 10
+shot text_first
+press B 2
+waitfor patchlist 300
+press B 2
+wait 20
+shot back_main
+quit

@@ -81,6 +81,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `levelscale_trainer` | ROXANNE's ace Lv15 -> 20 against a team averaging 42 (boss margin, no-badge cap) |
 | `levelscale_off` | LEVEL SCALING off: no scaling |
 | `coop_levelscale` | NA-JP lag: ROXANNE scaled for the average of both teams (Lv30 and Lv50) |
+| `patch_notes` | PATCH NOTES on the CO-OP setup screen: the list of version lines, 1.18's five updates full screen (scroll, page), 0.1 at the end (shots) |
 | `summary_wrap` | the summary screen wraps (LEFT on the first page -> the one-page JOURNAL, RIGHT -> back); A on a one-page journal does nothing and opens no move selection |
 | `battle_weather` | rain, hail, sandstorm and sunlight on screen in a wild battle (shots), a turn in the rain with no repeated line |
 | `battle_weather_map` | a wild battle on rainy Route 120 starts in the rain, on screen |

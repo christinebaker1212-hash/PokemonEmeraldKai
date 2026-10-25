@@ -46,6 +46,11 @@ QUICK START
                     Friends on the same Wi-Fi also show up in the list.
      PLAY SOLO    - play alone. Go online later from the CO-OP menu (C key, or
                     Y/Triangle on a controller).
+     PATCH NOTES  - what changed in each version, all the way back to the
+                    very first build. Pick a version (1.19, 1.18...) and
+                    press A to read every update in it, oldest first:
+                    UP/DOWN scroll, LEFT/RIGHT turn a page, B goes back.
+                    Only here, before the game starts.
 4. Load your save or start a new game. That's it.
    In a new game, PROF. BIRCH asks to see you right after "boy or girl?":
    that's the LOOK menu, so you can dress your trainer before the adventure.

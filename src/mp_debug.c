@@ -193,6 +193,10 @@ int MP_TestCondition(const char *name)
         return MP_Setup_ScreenIs(2);
     if (strcmp(name, "message") == 0)
         return MP_Setup_ScreenIs(4);
+    if (strcmp(name, "patchlist") == 0)   // the CO-OP setup screen's PATCH NOTES list
+        return MP_Setup_ScreenIs(5);
+    if (strcmp(name, "patchtext") == 0)   // ... and one version line's notes
+        return MP_Setup_ScreenIs(6);
     if (strcmp(name, "easychat") == 0)   // the easy chat word screen is up
     {
         bool8 MP_EasyChatOpen(void);
