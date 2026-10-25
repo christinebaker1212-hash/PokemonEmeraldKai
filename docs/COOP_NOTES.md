@@ -847,6 +847,19 @@ after its first time (the box is cleared instead), mode 2 the same for the "Ever
 forgets; MP_Battle_ResetWeatherLines at battle start. Logs: "battle: weather hits N at once / (named)", "... line
 already shown". Only the master runs battle scripts, so co-op and PvP see the same thing. Test: coop_weather.
 
+Weather on screen (1.18.4, mp_battleweather.c): the "continues" scripts (RainContinuesOrEnds, DamagingWeatherContinues,
+SunlightContinues) no longer print or animate (mpweathermsg 0 is unused now), OverworldWeatherStarts keeps its line
+but not its animation. MP_BattleWeather_Composite (sdl2.c, after the Candy Jar) draws the particles over the scene
+(y < 112, the message box below) from the game's art, decompressed once with malloc: Rain Dance's drops (AnimRainDrop
+motion, one a frame, two in a downpour), Hail's stones and large ice crystal (AnimHailBegin), Sandstorm's 64x16 sand
+crescents. The renderer hook gMpScenePixel (gba_easy_draw.c) runs every pixel of BG1-3 and of the battlers' sprite
+palettes (gMpSceneObjPal) through ScenePixel: Sandstorm's background (gBattleAnimBgImage_Sandstorm, 256x256, scrolled
+6 left / 1 up a frame) blended 5/16 like its BG1, and the tint: rain 4/16 black (BG and Pokémon, as General_Rain),
+hail 4/16 black (BG, as Move_HAIL), sun 4/16 warm white on the Pokémon and 2/16 on the BG (Move_SUNNY_DAY's blend).
+Healthboxes and the message box are never touched. Colors fade with the scene (MP_FadeFit on BG palette 0); tints are
+off during palette fades. Own RNG (never the battle's). Debug `mp bweather rain|downpour|sun|sand|hail|none`; log
+"battle weather on screen: ..."; tests battle_weather (shots of each, a turn in the rain), battle_weather_map.
+
 ## Shared world and lights (mp_world.c)
 Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
 walked onto the map: MP_World_Update watches friends' state maps). Each game keeps the change list of the map it is

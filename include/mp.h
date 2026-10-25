@@ -374,6 +374,11 @@ void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
 void MP_Candy_Composite(u16 *frame);
+void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
+// The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel
+extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
+extern u8 gMpSceneLayers;                     // a bit per BG layer
+extern u8 gMpSceneObjPal[64];                 // non-zero: that sprite palette
 void MP_TmRefund_Update(void);   // mp_tmrefund.c: TMs used up before they became reusable come back, once per save
 void MP_TmRefund_Debug(const char *args);   // the CANDY JAR's full-color picture under the frame (sdl2.c VDraw)
 bool8 MP_Candy_JarBusy(void);

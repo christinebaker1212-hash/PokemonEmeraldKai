@@ -2042,6 +2042,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         printf("\n");
     }
+    else if (strcmp(cmd, "bweather") == 0)   // bweather rain|downpour|sun|sand|hail|none - the battle's weather now
+    {
+        static const struct { const char *name; u16 flags; } sW[] = {
+            {"rain", B_WEATHER_RAIN_TEMPORARY}, {"downpour", B_WEATHER_RAIN_DOWNPOUR}, {"sun", B_WEATHER_SUN_TEMPORARY},
+            {"sand", B_WEATHER_SANDSTORM_TEMPORARY}, {"hail", B_WEATHER_HAIL_TEMPORARY}, {"none", 0},
+        };
+        int i;
+        for (i = 0; i < (int)ARRAY_COUNT(sW); i++)
+            if (strcmp(arg, sW[i].name) == 0 && gMain.inBattle)
+            {
+                gBattleWeather = sW[i].flags;
+                gWishFutureKnock.weatherDuration = sW[i].flags ? 5 : 0;
+                printf("[test] battle weather: %s\n", sW[i].name);
+            }
+    }
     else if (strcmp(cmd, "partycursor") == 0)   // where the party screen's cursor is (7 = CANCEL) and its layout
     {
         printf("[test] party menu cursor %d layout %d type %d (triple %d co-op %d flags %x)\n", gPartyMenu.slotId, gPartyMenu.layout,

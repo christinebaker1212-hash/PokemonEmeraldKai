@@ -3321,15 +3321,8 @@ BattleScript_MpCoopLearnAll::
 
 BattleScript_RainContinuesOrEnds::
 	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_RAIN_STOPPED, BattleScript_RainStops
-	@ Moemon Co-op: "Rain continues to fall." the first time only
-	mpweathermsg 0, BattleScript_RainContinuesNoLine
-	printfromtable gRainContinuesStringIds
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_RainContinuesAnim
-BattleScript_RainContinuesNoLine::
-	printstring STRINGID_EMPTYSTRING3
-BattleScript_RainContinuesAnim::
-	playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES
+	@ Moemon Co-op: the rain keeps falling on screen the whole time (mp_battleweather.c): no "Rain continues to
+	@ fall." line or rain animation every turn
 	end2
 BattleScript_RainStops::
 	mpweathermsg 1
@@ -3339,15 +3332,8 @@ BattleScript_RainContinuesOrEndsEnd::
 	end2
 
 BattleScript_DamagingWeatherContinues::
-	@ Moemon Co-op: "The sandstorm rages." the first time only, then everyone hit at once
-	mpweathermsg 0, BattleScript_DamagingWeatherNoLine
-	printfromtable gSandStormHailContinuesStringIds
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_DamagingWeatherAnim
-BattleScript_DamagingWeatherNoLine::
-	printstring STRINGID_EMPTYSTRING3
-BattleScript_DamagingWeatherAnim::
-	playanimation_var BS_ATTACKER, sB_ANIM_ARG1
+	@ Moemon Co-op: the sandstorm / hail is on screen the whole time (mp_battleweather.c): no "The sandstorm
+	@ rages." line or animation every turn, just who it hurts (everyone hit at once)
 	mpweathergroup 0, BattleScript_DamagingWeatherOneByOne
 	mpweathermsg 2, BattleScript_MpWeatherHit
 	printfromtable gMpWeatherAllStringIds
@@ -3401,15 +3387,8 @@ BattleScript_SandStormHailEnds::
 	end2
 
 BattleScript_SunlightContinues::
-	@ Moemon Co-op: "The sunlight is strong." the first time only
-	mpweathermsg 0, BattleScript_SunlightContinuesNoLine
-	printstring STRINGID_SUNLIGHTSTRONG
-	waitmessage B_WAIT_TIME_LONG
-	goto BattleScript_SunlightContinuesAnim
-BattleScript_SunlightContinuesNoLine::
-	printstring STRINGID_EMPTYSTRING3
-BattleScript_SunlightContinuesAnim::
-	playanimation BS_ATTACKER, B_ANIM_SUN_CONTINUES
+	@ Moemon Co-op: the Pokémon stay bright in the sun the whole time (mp_battleweather.c): no "The sunlight is
+	@ strong." line or animation every turn
 	end2
 
 BattleScript_SunlightFaded::
@@ -3421,7 +3400,7 @@ BattleScript_SunlightFaded::
 BattleScript_OverworldWeatherStarts::
 	printfromtable gWeatherStartsStringIds
 	waitmessage B_WAIT_TIME_LONG
-	playanimation_var BS_ATTACKER, sB_ANIM_ARG1
+	@ Moemon Co-op: no animation, the weather is already on screen (mp_battleweather.c)
 	end3
 
 BattleScript_SideStatusWoreOff::

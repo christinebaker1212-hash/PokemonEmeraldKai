@@ -53,7 +53,22 @@ static const uint16_t bgMapSizes[][2] =
     {64, 64},
 };
 
+static void RenderBGScanline_(int bgNum, uint16_t control, uint16_t hoffs, uint16_t voffs, int lineNum, uint16_t *line);
+
 static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16_t voffs, int lineNum, uint16_t *line)
+{
+    RenderBGScanline_(bgNum, control, hoffs, voffs, lineNum, line);
+    // Moemon Co-op: the battle scene's layers in battle weather (mp_battleweather.c: the sandstorm, and dimmer in
+    // rain and hail, brighter in sunlight)
+    if (gMpScenePixel && (gMpSceneLayers & (1 << bgNum)))
+    {
+        for (unsigned int x = 0; x < DISPLAY_WIDTH; x++)
+            if (line[x] & 0x8000)
+                line[x] = gMpScenePixel(line[x], x, lineNum, FALSE);
+    }
+}
+
+static void RenderBGScanline_(int bgNum, uint16_t control, uint16_t hoffs, uint16_t voffs, int lineNum, uint16_t *line)
 {
     unsigned int charBaseBlock = (control >> 2) & 3;
     unsigned int screenBaseBlock = (control >> 8) & 0x1F;
@@ -626,6 +641,10 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
                 if (pixel != 0)
                 {
                     uint16_t color = palette[pixel];;
+
+                    // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
+                    if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
+                        color = gMpScenePixel(color, global_x, vcount, TRUE);
                     
                     // Moemon Co-op: co-op notes and bubbles show through a dark cave's darkness
                     if (gMpDarkUiPal != 0xFF && !is8BPP && oam->paletteNum == gMpDarkUiPal && global_x >= 0 && global_x < DISPLAY_WIDTH)

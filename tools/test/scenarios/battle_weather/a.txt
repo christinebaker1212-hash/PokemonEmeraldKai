@@ -1,0 +1,31 @@
+pressuntil A field 5000
+mp teach 0 45
+mp wild 288:2
+pressuntil A action 4000
+wait 20
+shot none
+mp bweather rain
+wait 30
+shot rain
+mp bweather hail
+wait 40
+shot hail
+mp bweather sand
+wait 30
+shot sand
+mp bweather sun
+wait 10
+shot sun
+mp bweather none
+wait 10
+shot none2
+mp bweather rain
+wait 10
+press A 2
+wait 20
+press A 2
+wait 60
+waitfor action 3000
+wait 30
+shot rain_turn2
+quit

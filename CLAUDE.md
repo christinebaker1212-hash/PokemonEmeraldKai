@@ -91,6 +91,8 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
+Also battle weather on screen the whole battle (mp_battleweather.c: particles over the frame, the renderer hook gMpScenePixel
+for the sandstorm and tints; no per-turn weather lines; tests battle_weather*).
 Also followers on the ground (mp_followfx.c: the game's grass, sand, puddle, water, hot springs and reflection effects driven
 from a follower's tiles; tests follow_ground*).
 Also MOéMON GARDEN (A-Life, spec docs/POKEMON_GARDEN.md, built in milestones G1-G6: mp_life*.c, include/mp_life*.h; per-Pokémon

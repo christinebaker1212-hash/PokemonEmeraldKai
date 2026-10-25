@@ -1,0 +1,6 @@
+# A wild battle on rainy Route 120: it starts in the rain ("It is raining.", no animation) and the rain stays on screen
+MODE=1
+WARP=0,35,7,30
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("battle weather on screen: rain" "action menu at frame")

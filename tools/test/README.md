@@ -77,6 +77,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
+| `battle_weather` | rain, hail, sandstorm and sunlight on screen in a wild battle (shots), a turn in the rain with no repeated line |
+| `battle_weather_map` | a wild battle on rainy Route 120 starts in the rain, on screen |
 | `follow_ground` | the follower in tall grass (Route 101), its reflection (Petalburg's pond), footprints (Route 109), puddle splashes (Route 120), hot springs (Lavaridge) |
 | `follow_ground_remote` | NA-JP lag: BOB sees the grass shake around ALICE's follower |
 | `life_return` | Route 104: the follower off on its own runs back after its Trainer and falls in behind them, never popping over (check_followtrace.py) |

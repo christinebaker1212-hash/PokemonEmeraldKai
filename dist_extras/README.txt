@@ -817,9 +817,14 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   Moemon female): Torchic is mostly male, Zigzagoon half and half...
 * Weather in battle: SANDSTORM and HAIL hit everyone at the same time with
   one line ("Everyone was buffeted by the sandstorm!"); only one Pokemon
-  hit is named as before. "The sunlight is strong.", "Rain continues to
-  fall." and the like, and the "Everyone..." line, show the first time only
+  hit is named as before. The "Everyone..." line shows the first time only
   until that weather ends.
+* Weather stays on screen the whole battle: the rain keeps falling (the
+  field a little darker), hail keeps coming down, the sandstorm blows
+  across the field, and in strong sunlight the Moemon look brighter. So
+  there's no "Rain continues to fall." or "The sunlight is strong." line or
+  weather animation every turn any more; you still see when it starts and
+  stops, and who the sandstorm or hail hurts.
 * When a REPEL wears off you're asked if you want to use another one.
 * PC: R on a Moemon in a box takes it into your party; R on a party Moemon
   stores it (you pick the box).

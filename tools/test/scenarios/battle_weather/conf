@@ -1,0 +1,7 @@
+# Battle weather on screen the whole battle (mp_battleweather.c): rain, hail, the sandstorm and sunlight in a wild battle,
+# a shot of each (the game's own art), and a turn in the rain with no "Rain continues to fall." line or animation
+MODE=1
+WARP=0,16,10,11
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:20"
+EXPECT_A=("battle weather on screen: rain" "battle weather on screen: hail" "battle weather on screen: sandstorm" "battle weather on screen: sun")
