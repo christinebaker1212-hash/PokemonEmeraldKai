@@ -977,6 +977,37 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
     }
+    else if (strcmp(cmd, "setmove") == 0)
+    {
+        // mp setmove SLOT INDEX MOVE: sets one of a party Pokémon's four moves (INDEX 0-3)
+        int slot = 0, idx = 0, move = 0;
+        if (sscanf(arg, "%d %d %d", &slot, &idx, &move) == 3 && slot >= 0 && slot < PARTY_SIZE && idx >= 0 && idx < MAX_MON_MOVES
+         && move >= 0 && move < MOVES_COUNT)
+        {
+            u16 m = move;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + idx, &m);
+            printf("[test] setmove: slot %d move %d = %d\n", slot, idx, move);
+        }
+    }
+    else if (strcmp(cmd, "hold") == 0)
+    {
+        // mp hold SLOT ITEM: gives a party Pokémon a held item
+        int slot = 0, item = 0;
+        if (sscanf(arg, "%d %d", &slot, &item) == 2 && slot >= 0 && slot < PARTY_SIZE && item >= 0 && item < ITEMS_COUNT)
+        {
+            u16 it = item;
+            SetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM, &it);
+            printf("[test] hold: slot %d item %d\n", slot, item);
+        }
+    }
+    else if (strcmp(cmd, "species") == 0)
+    {
+        // mp species SLOT - logs a party Pokémon's species and held item
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            printf("[test] species: slot %d = %d item %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM));
+    }
     else if (strcmp(cmd, "moves") == 0)
     {
         // mp moves SLOT M1 [M2 M3 M4] - the party Moemon in SLOT knows these moves (full PP); missing ones are emptied

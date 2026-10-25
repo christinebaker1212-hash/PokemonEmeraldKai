@@ -255,8 +255,18 @@
 #define EVO_LEVEL_NINJASK    13 // Pokémon reaches the specified level (special value for Ninjask)
 #define EVO_LEVEL_SHEDINJA   14 // Pokémon reaches the specified level (special value for Shedinja)
 #define EVO_BEAUTY           15 // Pokémon levels up with beauty ≥ specified value
+// Moemon Kai: Gen 4's evolutions
+#define EVO_ITEM_HOLD_DAY    16 // levels up during the day holding the specified item (used up)
+#define EVO_ITEM_HOLD_NIGHT  17 // levels up at night holding the specified item (used up)
+#define EVO_ITEM_HOLD        18 // levels up holding the specified item (used up)
+#define EVO_MOVE             19 // levels up knowing the specified move
+#define EVO_ITEM_MALE        20 // specified item is used on a male
+#define EVO_ITEM_FEMALE      21 // specified item is used on a female
+#define EVO_LEVEL_MALE       22 // a male reaches the specified level
+#define EVO_LEVEL_FEMALE     23 // a female reaches the specified level
+#define EVO_SPECIES_IN_PARTY 24 // levels up with the specified species in the party
 
-#define EVOS_PER_MON 5
+#define EVOS_PER_MON 8   // Moemon Kai: Eevee has 7 since Gen 4
 
 // Evolution 'modes,' for GetEvolutionTargetSpecies
 #define EVO_MODE_NORMAL     0

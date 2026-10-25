@@ -732,9 +732,33 @@ void RejectEggFromDayCare(void)
     RemoveEggFromDayCare(&gSaveBlock1Ptr->daycare);
 }
 
+// Moemon Kai: Gen 4's babies hatch only with their incense held, else the egg is the next stage
+static const u16 sIncenseBabies[][3] =
+{
+    {SPECIES_BUDEW, ITEM_ROSE_INCENSE, SPECIES_ROSELIA},
+    {SPECIES_CHINGLING, ITEM_PURE_INCENSE, SPECIES_CHIMECHO},
+    {SPECIES_BONSLY, ITEM_ROCK_INCENSE, SPECIES_SUDOWOODO},
+    {SPECIES_MIME_JR, ITEM_ODD_INCENSE, SPECIES_MR_MIME},
+    {SPECIES_HAPPINY, ITEM_LUCK_INCENSE, SPECIES_CHANSEY},
+    {SPECIES_MUNCHLAX, ITEM_FULL_INCENSE, SPECIES_SNORLAX},
+    {SPECIES_MANTYKE, ITEM_WAVE_INCENSE, SPECIES_MANTINE},
+};
+
 static void AlterEggSpeciesWithIncenseItem(u16 *species, struct DayCare *daycare)
 {
     u16 motherItem, fatherItem;
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sIncenseBabies); i++)
+    {
+        if (*species == sIncenseBabies[i][0])
+        {
+            motherItem = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_HELD_ITEM);
+            fatherItem = GetBoxMonData(&daycare->mons[1].mon, MON_DATA_HELD_ITEM);
+            if (motherItem != sIncenseBabies[i][1] && fatherItem != sIncenseBabies[i][1])
+                *species = sIncenseBabies[i][2];
+            return;
+        }
+    }
     if (*species == SPECIES_WYNAUT || *species == SPECIES_AZURILL)
     {
         motherItem = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_HELD_ITEM);
