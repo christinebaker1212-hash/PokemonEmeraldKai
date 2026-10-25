@@ -1,11 +1,14 @@
 // Moemon Co-op: the MOéMON GARDEN (docs/POKEMON_GARDEN.md 11).
 //
-// PROF. BIRCH's research meadow, a real map west of LITTLEROOT (data/maps/MoemonGarden, built by
-// tools/moemon_garden/gen_map.py from Littleroot's and Petalburg's own pieces). Walk there the first time;
-// after that the PC offers a shortcut there and back.
+// Every POKéMON CENTER's second floor: a meadow inside the CENTER (data/maps/MoemonGarden, built by
+// tools/moemon_garden/gen_map.py and gen_tileset.py). The CENTER's escalator leads up into it, and the escalator at
+// its west edge leads back down to the CENTER you came from. The old 2F maps (the CABLE CLUB and the rest) stay in
+// the game, unreached. After the first visit, START > GARDEN and the PC's MOéMON GARDEN row take you there from
+// outdoors or a CENTER (never from a cave, a dungeon or the middle of a story moment), and the way down leads to the
+// last POKéMON CENTER you visited.
 //   - It grows with the journey: patches appear as the group's badges grow (tall grass, puddles, a dig patch,
 //     a perch grove, a storm stone): the group's travels leave their marks.
-//   - Alone it's a full small Garden (the east part); with friends there, the hedge opens to the extra meadow.
+//   - One open meadow, alone or with friends: everyone's Pokémon and decorations are there together.
 //   - The party lives here freely (mp_garden_life.c): needs, play, naps, bonds, decorations, WATCH mode.
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +16,8 @@
 #include "mp.h"
 #include "mp_garden.h"
 #include "mp_life.h"
+#include "battle_pike.h"
+#include "battle_pyramid.h"
 #include "event_data.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
@@ -21,6 +26,9 @@
 #include "field_screen_effect.h"
 #include "fieldmap.h"
 #include "field_camera.h"
+#include "heal_location.h"
+#include "safari_zone.h"
+#include "trainer_hill.h"
 #include "text.h"
 #include "main.h"
 #include "overworld.h"
@@ -29,6 +37,8 @@
 #include "string_util.h"
 #include "task.h"
 #include "constants/flags.h"
+#include "constants/heal_locations.h"
+#include "constants/map_types.h"
 #include "constants/map_groups.h"
 #include "constants/songs.h"
 #include "mp_garden_map.h"
@@ -48,12 +58,11 @@ static const u8 sGrowBadges[GROW_COUNT] = {
 static struct
 {
     bool8 here;
-    bool8 hedgeOpen;
     u8 growth;              // GROW_* bits stamped on the map
     u8 groupBadges;
-    bool8 warpPending;      // the PC's shortcut, once the PC script is over
+    bool8 warpPending;      // quick travel, once the PC script / START menu is over
     bool8 welcomePending;
-    bool8 wasHere;          // in the Garden last frame
+    const u8 *msgPending;   // why quick travel can't go (shown once the field is free)
     u8 msgTask;
 } sG = {.msgTask = TASK_NONE};
 
@@ -69,17 +78,7 @@ bool8 MP_Garden_Visited(void)
 }
 
 // ---------------------------------------------------------------------------
-// The map: growth marks and the hedge
-
-static bool8 FriendsHere(void)
-{
-    u8 i;
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
-        if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasState
-         && gMpPlayers[i].state.mapGroup == MAP_GROUP(MAP_MOEMON_GARDEN) && gMpPlayers[i].state.mapNum == MAP_NUM(MAP_MOEMON_GARDEN))
-            return TRUE;
-    return FALSE;
-}
+// The map: growth marks
 
 // The group's journey: the most badges among the Trainers here
 static u8 GroupBadges(void)
@@ -126,7 +125,7 @@ static void Grow(u8 which, bool8 draw)
         break;
     case GROW_GROVE:
         for (x = 0; x < GROWTH_GROVE_W; x += 2)
-            for (y = 0; y < 2; y++)
+            for (y = 0; y < GROWTH_GROVE_H; y++)
             {
                 SetTile(GROWTH_GROVE_X + x, GROWTH_GROVE_Y + y, sGardenTree[y][0], draw);
                 SetTile(GROWTH_GROVE_X + x + 1, GROWTH_GROVE_Y + y, sGardenTree[y][1], draw);
@@ -153,62 +152,163 @@ bool8 MP_Garden_StoneShown(void)
     return (sG.growth & (1 << GROW_STONE)) != 0;
 }
 
-static bool8 SomeoneOnHedge(void)
-{
-    u8 i;
-    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
-    {
-        struct ObjectEvent *o = &gObjectEvents[i];
-        if (o->active && (o->currentCoords.x == GX(GARDEN_HEDGE_X) || o->currentCoords.x == GX(GARDEN_HEDGE_X + 1)))
-            return TRUE;
-    }
-    return FALSE;
-}
-
-static void SetHedge(bool8 open, bool8 draw)
-{
-    s16 y;
-    for (y = GARDEN_Y0; y <= GARDEN_Y1; y++)
-    {
-        u16 a, b;
-        if (open)
-        {
-            a = (y % 5) == 2 ? sGardenHedgeOpen[1] : sGardenHedgeOpen[0];
-            b = (y % 7) == 4 ? sGardenHedgeOpen[1] : sGardenHedgeOpen[0];
-        }
-        else
-        {
-            // the forest pattern of the generator: top halves on even rows, bottom halves on odd ones
-            a = (y % 2) == 0 ? 0x1D4 : 0x1DC;
-            b = a + 1;
-            a |= (3 << 10) | (GARDEN_GRASS & 0xF000);
-            b |= (3 << 10) | (GARDEN_GRASS & 0xF000);
-        }
-        SetTile(GARDEN_HEDGE_X, y, a, draw);
-        SetTile(GARDEN_HEDGE_X + 1, y, b, draw);
-    }
-    sG.hedgeOpen = open;
-    MPNet_Log("garden: hedge %s", open ? "open" : "closed");
-}
+static void NoteCenter(void);
 
 void MP_Garden_OnMapLoad(void)
 {
+    NoteCenter();
     sG.here = MP_Garden_IsHere();
     if (!sG.here)
         return;
     MP_GardenLife_OnMapLoad();
     sG.growth = 0;
     ApplyGrowth(FALSE);
-    if (FriendsHere())
-        SetHedge(TRUE, FALSE);
-    else
-        sG.hedgeOpen = FALSE;
+    MP_GardenDecor_CheckPlaces();
+}
+
+// ---------------------------------------------------------------------------
+// Upstairs in every POKéMON CENTER
+
+// The CENTERs: their 1F (whose escalator went up to the 2F), the 2F it went to, and the heal location the 1F sets
+// (a save from before 1.16 knows its last CENTER only from that)
+static const struct
+{
+    u16 center, upstairs;
+    u8 heal;
+} sCenters[] = {
+    {MAP_OLDALE_TOWN_POKEMON_CENTER_1F, MAP_OLDALE_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_OLDALE_TOWN},
+    {MAP_DEWFORD_TOWN_POKEMON_CENTER_1F, MAP_DEWFORD_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_DEWFORD_TOWN},
+    {MAP_LAVARIDGE_TOWN_POKEMON_CENTER_1F, MAP_LAVARIDGE_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_LAVARIDGE_TOWN},
+    {MAP_FALLARBOR_TOWN_POKEMON_CENTER_1F, MAP_FALLARBOR_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_FALLARBOR_TOWN},
+    {MAP_VERDANTURF_TOWN_POKEMON_CENTER_1F, MAP_VERDANTURF_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_VERDANTURF_TOWN},
+    {MAP_PACIFIDLOG_TOWN_POKEMON_CENTER_1F, MAP_PACIFIDLOG_TOWN_POKEMON_CENTER_2F, HEAL_LOCATION_PACIFIDLOG_TOWN},
+    {MAP_PETALBURG_CITY_POKEMON_CENTER_1F, MAP_PETALBURG_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_PETALBURG_CITY},
+    {MAP_SLATEPORT_CITY_POKEMON_CENTER_1F, MAP_SLATEPORT_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_SLATEPORT_CITY},
+    {MAP_MAUVILLE_CITY_POKEMON_CENTER_1F, MAP_MAUVILLE_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_MAUVILLE_CITY},
+    {MAP_RUSTBORO_CITY_POKEMON_CENTER_1F, MAP_RUSTBORO_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_RUSTBORO_CITY},
+    {MAP_FORTREE_CITY_POKEMON_CENTER_1F, MAP_FORTREE_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_FORTREE_CITY},
+    {MAP_LILYCOVE_CITY_POKEMON_CENTER_1F, MAP_LILYCOVE_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_LILYCOVE_CITY},
+    {MAP_MOSSDEEP_CITY_POKEMON_CENTER_1F, MAP_MOSSDEEP_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_MOSSDEEP_CITY},
+    {MAP_SOOTOPOLIS_CITY_POKEMON_CENTER_1F, MAP_SOOTOPOLIS_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_SOOTOPOLIS_CITY},
+    {MAP_EVER_GRANDE_CITY_POKEMON_CENTER_1F, MAP_EVER_GRANDE_CITY_POKEMON_CENTER_2F, HEAL_LOCATION_EVER_GRANDE_CITY},
+    {MAP_EVER_GRANDE_CITY_POKEMON_LEAGUE_1F, MAP_EVER_GRANDE_CITY_POKEMON_LEAGUE_2F, HEAL_LOCATION_EVER_GRANDE_CITY_POKEMON_LEAGUE},
+    {MAP_BATTLE_FRONTIER_POKEMON_CENTER_1F, MAP_BATTLE_FRONTIER_POKEMON_CENTER_2F, HEAL_LOCATION_BATTLE_FRONTIER_OUTSIDE_EAST},
+};
+
+// Outdoor maps that are dungeons or story places all the same: no quick travel from them
+static const u16 sNoTravelMaps[] = {
+    MAP_PETALBURG_WOODS, MAP_JAGGED_PASS, MAP_MT_CHIMNEY, MAP_MT_PYRE_EXTERIOR, MAP_MT_PYRE_SUMMIT,
+    MAP_SKY_PILLAR_OUTSIDE, MAP_SKY_PILLAR_TOP, MAP_SOUTHERN_ISLAND_EXTERIOR, MAP_SOUTHERN_ISLAND_INTERIOR,
+    MAP_SAFARI_ZONE_NORTH, MAP_SAFARI_ZONE_NORTHEAST, MAP_SAFARI_ZONE_NORTHWEST, MAP_SAFARI_ZONE_SOUTH,
+    MAP_SAFARI_ZONE_SOUTHEAST, MAP_SAFARI_ZONE_SOUTHWEST,
+};
+
+static s8 CenterAt(u8 group, u8 num)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sCenters); i++)
+        if (MAP_GROUP(sCenters[i].center) == group && MAP_NUM(sCenters[i].center) == num)
+            return i;
+    return -1;
+}
+
+static s8 CenterBelow(u8 group, u8 num)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sCenters); i++)
+        if (MAP_GROUP(sCenters[i].upstairs) == group && MAP_NUM(sCenters[i].upstairs) == num)
+            return i;
+    return -1;
+}
+
+// Its escalator: the 1F warp that went up (from the map's own data)
+static s8 EscalatorOf(u8 center)
+{
+    const struct MapHeader *h = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(sCenters[center].center), MAP_NUM(sCenters[center].center));
+    s8 i;
+    for (i = 0; i < h->events->warpCount; i++)
+        if (h->events->warps[i].mapGroup == MAP_GROUP(sCenters[center].upstairs)
+         && h->events->warps[i].mapNum == MAP_NUM(sCenters[center].upstairs))
+            return i;
+    return WARP_ID_NONE;
+}
+
+// On every map load: in a CENTER, it's the last one visited
+static void NoteCenter(void)
+{
+    struct MpGardenSave *gs;
+    s8 c;
+    if (gSaveBlock1Ptr == NULL)
+        return;
+    c = CenterAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (c < 0)
+        return;
+    gs = MP_Life_GardenSave();
+    gs->lastPcGroup = MAP_GROUP(sCenters[c].center);
+    gs->lastPcNum = MAP_NUM(sCenters[c].center);
+    gs->lastPcWarp = EscalatorOf(c);
+    gs->flags |= MP_GARDEN_LASTPC;
+}
+
+// The CENTER the way down leads to: the last one visited (-1: none known)
+static s8 ReturnCenter(void)
+{
+    struct MpGardenSave *gs = MP_Life_GardenSave();
+    const struct WarpData *w = &gSaveBlock1Ptr->lastHealLocation;
+    s8 i;
+    if (gs->flags & MP_GARDEN_LASTPC)
+    {
+        i = CenterAt(gs->lastPcGroup, gs->lastPcNum);
+        if (i >= 0 && EscalatorOf(i) != WARP_ID_NONE)
+            return i;
+    }
+    // (a save from before 1.16: the CENTER the game would rush you to after a loss)
+    for (i = 0; i < (s8)ARRAY_COUNT(sCenters); i++)
+    {
+        const struct HealLocation *h = GetHealLocation(sCenters[i].heal);
+        if (h != NULL && w->mapGroup == h->mapGroup && w->mapNum == h->mapNum && w->x == h->x && w->y == h->y
+         && EscalatorOf(i) != WARP_ID_NONE)
+            return i;
+    }
+    return -1;
+}
+
+// field_control_avatar.c SetupWarp, after it set the destination of a warp the player stepped on: going up a
+// CENTER's escalator leads into the Garden; the Garden's escalator leads down to the CENTER you came from
+void MP_Garden_RedirectWarp(s8 destGroup, s8 destNum)
+{
+    if (gSaveBlock1Ptr == NULL)
+        return;
+    if (MP_Garden_IsHere())
+    {
+        s8 c = ReturnCenter();
+        if (c >= 0)
+        {
+            SetWarpDestination(MAP_GROUP(sCenters[c].center), MAP_NUM(sCenters[c].center), EscalatorOf(c), -1, -1);
+            MPNet_Log("garden: down to center %d", c);
+        }
+        else
+        {
+            SetWarpDestinationToLastHealLocation();   // (never: a CENTER is always known by now; still somewhere real)
+            MPNet_Log("garden: down to the last heal location");
+        }
+        return;
+    }
+    if (CenterBelow(destGroup, destNum) >= 0)
+    {
+        NoteCenter();
+        SetWarpDestination(MAP_GROUP(MAP_MOEMON_GARDEN), MAP_NUM(MAP_MOEMON_GARDEN), 0, -1, -1);
+        MPNet_Log("garden: up the escalator of center %d", CenterAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum));
+    }
 }
 
 // ---------------------------------------------------------------------------
 // Coming and going
 
-static const u8 sText_Welcome[] = _("PROF. BIRCH's research meadow: the\nMOéMON GARDEN. Your MOéMON can live\pfreely here. The GARDEN BOARD has more,\nand your PC knows the way back here.");
+static const u8 sText_Welcome[] = _("The POKéMON CENTER's second floor: the\nMOéMON GARDEN. Your MOéMON can live\pfreely here, in every CENTER. The GARDEN\nBOARD has more. From now on, START >\pGARDEN brings you here from outdoors.");
+static const u8 sText_NotNow[] = _("This isn't the time to go to the\nMOéMON GARDEN.");
+static const u8 sText_NotHere[] = _("The way to the MOéMON GARDEN can't be\nfound from here. Try from outdoors or a\nPOKéMON CENTER.");
+static const u8 sText_NoCenter[] = _("The MOéMON GARDEN is upstairs in every\nPOKéMON CENTER. Visit one first!");
 
 static void Task_Message(u8 taskId)
 {
@@ -243,7 +343,7 @@ static void ShowMessage(const u8 *text)
     sG.msgTask = CreateTask(Task_Message, 80);
 }
 
-// The first visit: a memory for everyone in the party, and the shortcut from then on
+// The first visit: a memory for everyone in the party, and quick travel from then on
 static void FirstVisit(void)
 {
     struct MpGardenSave *gs = MP_Life_GardenSave();
@@ -262,14 +362,50 @@ static void FirstVisit(void)
     MPNet_Log("garden: first visit");
 }
 
-void MP_Garden_ShortcutFromPC(void)
+static bool8 InList(const u16 *maps, u8 count)
 {
-    struct MpGardenSave *gs = MP_Life_GardenSave();
-    struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
-    gs->retGroup = gSaveBlock1Ptr->location.mapGroup;
-    gs->retNum = gSaveBlock1Ptr->location.mapNum;
-    gs->retX = me->currentCoords.x - MAP_OFFSET;
-    gs->retY = me->currentCoords.y - MAP_OFFSET;
+    u8 i;
+    for (i = 0; i < count; i++)
+        if (MAP_GROUP(maps[i]) == gSaveBlock1Ptr->location.mapGroup && MAP_NUM(maps[i]) == gSaveBlock1Ptr->location.mapNum)
+            return TRUE;
+    return FALSE;
+}
+
+// Why quick travel can't go from here (NULL: it can). From the START menu: only outdoors where flying would work
+// (not a cave, the sea floor or a building) and not a dungeon-like outdoor map, or in a CENTER; from a PC: the PC
+// is in a CENTER or a home. Never in the middle of something (a story moment the game is running, the SAFARI ZONE,
+// a BATTLE FRONTIER challenge, TRAINER HILL, a co-op battle, riding piggyback), and only once a CENTER is known,
+// so the way down always leads somewhere real.
+static const u8 *QuickTravelBlocked(bool8 fromPc)
+{
+    if (!FlagGet(FLAG_SYS_POKEMON_GET) || GetSafariZoneFlag() || InBattlePyramid_() || InBattlePike()
+     || InTrainerHillChallenge() || MP_Coop_IsBusy() || MP_Piggy_IsRiding())
+        return sText_NotNow;
+    if (!fromPc && CenterAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) < 0
+     && (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType) || InList(sNoTravelMaps, ARRAY_COUNT(sNoTravelMaps))))
+        return sText_NotHere;
+    if (ReturnCenter() < 0)
+        return sText_NoCenter;
+    return NULL;
+}
+
+// START > GARDEN is there once the Garden's been found (and not while you're in it)
+bool8 MP_Garden_QuickTravelShown(void)
+{
+    return gSaveBlock1Ptr != NULL && MP_Garden_Visited() && !MP_Garden_IsHere();
+}
+
+// START > GARDEN (fromPc FALSE) and the PC's MOéMON GARDEN row (TRUE): off once the menu or the PC is closed, or
+// a message saying why not
+void MP_Garden_QuickTravel(bool8 fromPc)
+{
+    const u8 *why = QuickTravelBlocked(fromPc);
+    if (why != NULL)
+    {
+        sG.msgPending = why;
+        MPNet_Log("garden: quick travel not from here (%s)", why == sText_NotNow ? "not now" : why == sText_NotHere ? "place" : "no center");
+        return;
+    }
     sG.warpPending = TRUE;
 }
 
@@ -280,42 +416,67 @@ static void GoTo(u8 group, u8 num, s16 x, s16 y)
     DoWarp();
 }
 
+// Standing where nobody could (a save from an older Garden whose layout changed): back to the landing
+static bool8 StuckHere(void)
+{
+    struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x = me->currentCoords.x - MAP_OFFSET, y = me->currentCoords.y - MAP_OFFSET;
+    if (x >= GARDEN_PAD_X0 && x <= GARDEN_PAD_X1 && y >= GARDEN_PAD_Y0 && y <= GARDEN_PAD_Y1)
+        return FALSE;
+    return x < 1 || x >= GARDEN_W - 1 || y < 1 || y >= GARDEN_H - 1
+        || MapGridGetCollisionAt(me->currentCoords.x, me->currentCoords.y) != 0;
+}
+
 void MP_Garden_Update(void)
 {
     struct MpGardenSave *gs = MP_Life_GardenSave();
     if (!MP_IsInOverworld() || gSaveBlock1Ptr == NULL)
         return;
+    if (sG.msgPending != NULL && MP_IsLocalFree())
+    {
+        ShowMessage(sG.msgPending);
+        sG.msgPending = NULL;
+        return;
+    }
     if (sG.warpPending && MP_IsLocalFree())
     {
+        s8 c = ReturnCenter();
         sG.warpPending = FALSE;
-        gs->flags |= MP_GARDEN_SHORTCUT;
-        MPNet_Log("garden: shortcut there");
+        if (c >= 0)
+        {
+            // the way down leads to this CENTER (kept, for a save from before 1.16 too)
+            gs->lastPcGroup = MAP_GROUP(sCenters[c].center);
+            gs->lastPcNum = MAP_NUM(sCenters[c].center);
+            gs->lastPcWarp = EscalatorOf(c);
+            gs->flags |= MP_GARDEN_LASTPC;
+        }
+        MPNet_Log("garden: quick travel there (back to center %d)", c);
         GoTo(MAP_GROUP(MAP_MOEMON_GARDEN), MAP_NUM(MAP_MOEMON_GARDEN), GARDEN_ENTRY_X, GARDEN_ENTRY_Y);
         return;
     }
     if (MP_Garden_IsHere() != sG.here)
-        MP_Garden_OnMapLoad();   // (a connection crossed without a full load)
+        MP_Garden_OnMapLoad();   // (in case a map was entered without a full load)
     if (!sG.here)
-    {
-        // walked off elsewhere (not just arriving by the shortcut): the board's way back is only for the shortcut
-        if (sG.wasHere)
-            gs->flags &= ~MP_GARDEN_SHORTCUT;
-        sG.wasHere = FALSE;
         return;
-    }
-    sG.wasHere = TRUE;
+    gs->flags &= ~MP_GARDEN_SHORTCUT;   // (1.15's flag)
     if (!(gs->flags & MP_GARDEN_VISITED))
         FirstVisit();
+    if (MP_IsLocalFree() && StuckHere())
+    {
+        MPNet_Log("garden: stuck, back to the landing");
+        GoTo(MAP_GROUP(MAP_MOEMON_GARDEN), MAP_NUM(MAP_MOEMON_GARDEN), GARDEN_ENTRY_X, GARDEN_ENTRY_Y);
+        return;
+    }
     if (sG.welcomePending && MP_IsLocalFree())
     {
         sG.welcomePending = FALSE;
         ShowMessage(sText_Welcome);
     }
-    // friends here: the hedge opens to the extra meadow (and closes when they've gone and nobody stands there)
-    if (FriendsHere() != sG.hedgeOpen && (!sG.hedgeOpen || !SomeoneOnHedge()))
-        SetHedge(!sG.hedgeOpen, TRUE);
     if (GroupBadges() != sG.groupBadges)
+    {
         ApplyGrowth(TRUE);
+        MP_GardenDecor_CheckPlaces();
+    }
 }
 
 void MP_Garden_FrameUpdate(void)
@@ -327,8 +488,8 @@ void MP_Garden_FrameUpdate(void)
 // ---------------------------------------------------------------------------
 // The GARDEN BOARD (a sign by the pond)
 
-enum { BOARD_DECORATE, BOARD_WATCH, BOARD_BACK, BOARD_CANCEL, BOARD_COUNT };
-static const char *const sBoardRows[BOARD_COUNT] = {"DECORATE", "WATCH", "GO BACK", "CANCEL"};
+enum { BOARD_DECORATE, BOARD_WATCH, BOARD_CANCEL, BOARD_COUNT };
+static const char *const sBoardRows[BOARD_COUNT] = {"DECORATE", "WATCH", "CANCEL"};
 
 static struct
 {
@@ -373,15 +534,6 @@ static void Task_Board(u8 taskId)
         ScriptContext_Enable();
         MP_Garden_StartWatch();
         return;
-    case BOARD_BACK:
-    {
-        struct MpGardenSave *gs = MP_Life_GardenSave();
-        gs->flags &= ~MP_GARDEN_SHORTCUT;
-        ScriptContext_Enable();
-        MPNet_Log("garden: shortcut back");
-        GoTo(gs->retGroup, gs->retNum, gs->retX, gs->retY);
-        return;
-    }
     }
     ScriptContext_Enable();
 }
@@ -391,8 +543,6 @@ void MP_Garden_OpenBoard(void)
     memset(&sBoard, 0, sizeof(sBoard));
     sBoard.rows[sBoard.count++] = BOARD_DECORATE;
     sBoard.rows[sBoard.count++] = BOARD_WATCH;
-    if (MP_Life_GardenSave()->flags & MP_GARDEN_SHORTCUT)
-        sBoard.rows[sBoard.count++] = BOARD_BACK;
     sBoard.rows[sBoard.count++] = BOARD_CANCEL;
     PlaySE(SE_WIN_OPEN);
     MpUi_Open();
@@ -408,13 +558,22 @@ void MP_Garden_Debug(const char *args)
     sscanf(args, "%31s %d", cmd, &a);
     if (strcmp(cmd, "state") == 0)
     {
-        printf("[test] garden here %d hedge %d growth %02x badges %u visited %d shortcut %d\n", sG.here, sG.hedgeOpen,
-               sG.growth, sG.groupBadges, MP_Garden_Visited(), (MP_Life_GardenSave()->flags & MP_GARDEN_SHORTCUT) != 0);
+        struct MpGardenSave *gs = MP_Life_GardenSave();
+        printf("[test] garden here %d growth %02x badges %u visited %d lastpc %d %u.%u warp %u return %d\n", sG.here,
+               sG.growth, sG.groupBadges, MP_Garden_Visited(), (gs->flags & MP_GARDEN_LASTPC) != 0, gs->lastPcGroup,
+               gs->lastPcNum, gs->lastPcWarp, ReturnCenter());
     }
-    else if (strcmp(cmd, "shortcut") == 0)
+    else if (strcmp(cmd, "travel") == 0)
     {
-        MP_Garden_ShortcutFromPC();
-        printf("[test] garden shortcut\n");
+        // travel 1: the PC's MOéMON GARDEN row; travel 0: START > GARDEN
+        MP_Garden_QuickTravel(a != 0);
+        printf("[test] garden travel %d\n", a);
+    }
+    else if (strcmp(cmd, "forget") == 0)
+    {
+        // forget: no CENTER known (a save from before 1.16: only the last heal location tells)
+        MP_Life_GardenSave()->flags &= ~MP_GARDEN_LASTPC;
+        printf("[test] garden forget\n");
     }
     else if (strcmp(cmd, "actors") == 0)
     {

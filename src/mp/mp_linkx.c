@@ -22,6 +22,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_garden.h"
 #include "daycare.h"
 #include "event_data.h"
 #include "event_object_lock.h"
@@ -871,7 +872,9 @@ static void Draw(void)
         u16 dest = MP_Friends_Destination(sUi.friend);
         char right[24] = "";
         u8 town[24];
-        if (dest < MAPSEC_NONE)
+        if (MP_Friends_InGarden(sUi.friend))
+            snprintf(right, sizeof(right), "MOEMON GARDEN");
+        else if (dest < MAPSEC_NONE)
         {
             GetMapName(town, dest, 0);
             MP_GameToAscii(right, town, sizeof(right) - 1);
@@ -1095,6 +1098,19 @@ static void Task_LinkxUi(u8 taskId)
     case FR_GOTO:
     {
         u8 who = sUi.friend;
+        if (MP_Friends_InGarden(who))
+        {
+            // in the MOéMON GARDEN: quick travel there (its own rules; a message if not from here)
+            if (!MP_Garden_Visited())
+            {
+                PlaySE(SE_FAILURE);
+                snprintf(sUi.note, sizeof(sUi.note), "Find the GARDEN first: upstairs in a CENTER.");
+                break;
+            }
+            CloseUi(taskId);
+            MP_Garden_QuickTravel(FALSE);
+            return;
+        }
         if (MP_Friends_Destination(who) >= MAPSEC_NONE)
         {
             PlaySE(SE_FAILURE);

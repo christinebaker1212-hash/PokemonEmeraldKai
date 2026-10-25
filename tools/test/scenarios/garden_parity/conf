@@ -2,8 +2,8 @@
 # playing, tag); every Garden Pokémon takes the same steps and faces the same ways on both screens
 # (MOEMON_MOVETRACE, check_movetrace.py).
 MODE=2
-WARP=0,57,26,10
-WARP_B=0,57,28,12
+WARP=0,57,26,13
+WARP_B=0,57,28,15
 DELAY=250
 JIT=80
 FPS=60

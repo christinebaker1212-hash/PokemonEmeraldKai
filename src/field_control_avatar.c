@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp_garden.h"   // Moemon Co-op
 #include "battle_setup.h"
 #include "bike.h"
 #include "coord_event_weather.h"
@@ -880,6 +881,8 @@ static void SetupWarp(struct MapHeader *unused, s8 warpEventId, struct MapPositi
         mapHeader = Overworld_GetMapHeaderByGroupAndId(warpEvent->mapGroup, warpEvent->mapNum);
         if (mapHeader->events->warps[warpEvent->warpId].mapNum == MAP_NUM(MAP_DYNAMIC))
             SetDynamicWarp(mapHeader->events->warps[warpEventId].warpId, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, warpEventId);
+        // Moemon Co-op: every POKéMON CENTER's escalator goes up to the MOéMON GARDEN, whose escalator goes back down
+        MP_Garden_RedirectWarp(warpEvent->mapGroup, warpEvent->mapNum);
     }
 }
 

@@ -4414,10 +4414,10 @@
     {
       "id": "LAYOUT_MOEMON_GARDEN",
       "name": "MoemonGarden_Layout",
-      "width": 34,
-      "height": 20,
+      "width": 40,
+      "height": 25,
       "primary_tileset": "gTileset_General",
-      "secondary_tileset": "gTileset_Petalburg",
+      "secondary_tileset": "gTileset_MoemonGarden",
       "border_filepath": "data/layouts/MoemonGarden/border.bin",
       "blockdata_filepath": "data/layouts/MoemonGarden/map.bin"
     }

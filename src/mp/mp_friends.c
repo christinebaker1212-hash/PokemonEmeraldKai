@@ -6,6 +6,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_garden.h"
 #include "event_data.h"
 #include "field_screen_effect.h"
 #include "overworld.h"
@@ -52,13 +53,26 @@ mapsec_u16_t MP_Friends_Mapsec(u8 id)
     return Overworld_GetMapHeaderByGroupAndId(s->mapGroup, s->mapNum)->regionMapSectionId;
 }
 
-// "ROUTE 104", "IN BATTLE" or "?" (game text)
+// In the MOéMON GARDEN (every POKéMON CENTER's second floor: its map section is LITTLEROOT's, but it's no town)
+bool8 MP_Friends_InGarden(u8 id)
+{
+    return id < MP_MAX_PLAYERS && gMpPlayers[id].present && gMpPlayers[id].hasState
+        && gMpPlayers[id].state.mapGroup == MAP_GROUP(MAP_MOEMON_GARDEN) && gMpPlayers[id].state.mapNum == MAP_NUM(MAP_MOEMON_GARDEN);
+}
+
+// "ROUTE 104", "MOéMON GARDEN", "IN BATTLE" or "?" (game text)
 void MP_Friends_LocationName(u8 id, u8 *dst)
 {
     mapsec_u16_t sec;
     if (gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_BATTLE))
     {
         MP_AsciiToGame(dst, "IN BATTLE", 16);
+        return;
+    }
+    if (MP_Friends_InGarden(id))
+    {
+        static const u8 sGarden[] = _("MOéMON GARDEN");
+        StringCopy(dst, sGarden);
         return;
     }
     sec = MP_Friends_Mapsec(id);

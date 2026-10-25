@@ -1,14 +1,13 @@
-# The MOéMON GARDEN with a friend, at NA-JP lag: both in the Garden, the hedge opens to the extra meadow on both
-# games; each sees the other's Pokémon walking about; ALICE's PIKACHU DOLL shows on BOB's screen; BOB talks to
+# The MOéMON GARDEN with a friend, at NA-JP lag: both in the Garden; each sees the other's Pokémon walking about; ALICE's PIKACHU DOLL shows on BOB's screen; BOB talks to
 # one of ALICE's Pokémon and her game answers. Shots alice, bob, answer.
 MODE=2
-WARP=0,57,26,10
-WARP_B=0,57,28,12
+WARP=0,57,26,13
+WARP_B=0,57,28,15
 DELAY=250
 JIT=80
 FPS=60
 TMO=300
 ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15"
 ENV_B="MOEMON_DEBUG_PARTY=277:15,255:15 MOEMON_DEBUG_PID_SALT=7"
-EXPECT_A=("garden: hedge open" "garden: player 2's" "garden: placed decoration 77" "life social: player 2 did verb")
-EXPECT_B=("garden: hedge open" "garden: player 1's" "garden: player 1's decoration 77" "life social: answer")
+EXPECT_A=("garden: player 2's" "garden: placed decoration 77" "life social: player 2 did verb")
+EXPECT_B=("garden: player 1's" "garden: player 1's decoration 77" "life social: answer")

@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp_garden.h"   // Moemon Co-op: START > GARDEN
 #include "platform/display.h" // Moemon Kai PC: START > DISPLAY
 #include "battle_pike.h"
 #include "battle_pyramid.h"
@@ -66,6 +67,7 @@ enum
     MENU_ACTION_RETIRE_FRONTIER,
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_COOP,
+    MENU_ACTION_GARDEN,   // Moemon Co-op: quick travel to the MOéMON GARDEN
 };
 
 // Save status
@@ -108,6 +110,8 @@ static bool8 StartMenuBattlePyramidRetireCallback(void);
 static bool8 StartMenuBattlePyramidBagCallback(void);
 static bool8 StartMenuCoopCallback(void);
 static const u8 sText_MenuCoop[] = _("CO-OP");
+static bool8 StartMenuGardenCallback(void);
+static const u8 sText_MenuGarden[] = _("GARDEN");
 
 // Menu callbacks
 static bool8 SaveStartCallback(void);
@@ -195,6 +199,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_OPTION]          = {gText_MenuOption,  {.u8_void = StartMenuOptionCallback}},
     [MENU_ACTION_EXIT]            = {gText_MenuExit,    {.u8_void = StartMenuExitCallback}},
     [MENU_ACTION_COOP]            = {sText_MenuCoop,    {.u8_void = StartMenuCoopCallback}},
+    [MENU_ACTION_GARDEN]          = {sText_MenuGarden,  {.u8_void = StartMenuGardenCallback}},
     [MENU_ACTION_RETIRE_SAFARI]   = {gText_MenuRetire,  {.u8_void = StartMenuSafariZoneRetireCallback}},
     [MENU_ACTION_PLAYER_LINK]     = {gText_MenuPlayer,  {.u8_void = StartMenuLinkModePlayerNameCallback}},
     [MENU_ACTION_REST_FRONTIER]   = {gText_MenuRest,    {.u8_void = StartMenuSaveCallback}},
@@ -339,7 +344,9 @@ static void BuildNormalStartMenu(void)
     AddStartMenuAction(MENU_ACTION_PLAYER);
     AddStartMenuAction(MENU_ACTION_SAVE);
     AddStartMenuAction(MENU_ACTION_OPTION);
-    // Moemon Co-op: CO-OP isn't here; its own button opens it (C, or Y/Triangle)
+    // Moemon Co-op: CO-OP isn't here; its own button opens it (C, or Y/Triangle). GARDEN once it's been found.
+    if (MP_Garden_QuickTravelShown())
+        AddStartMenuAction(MENU_ACTION_GARDEN);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }
 
@@ -763,6 +770,15 @@ static bool8 StartMenuCoopCallback(void)
     RemoveExtraStartMenuWindows();
     HideStartMenu();
     MP_OpenMenu();
+    return TRUE;
+}
+
+// Moemon Co-op: off to the MOéMON GARDEN once the menu is closed (or a message saying why not)
+static bool8 StartMenuGardenCallback(void)
+{
+    RemoveExtraStartMenuWindows();
+    HideStartMenu();
+    MP_Garden_QuickTravel(FALSE);
     return TRUE;
 }
 

@@ -158,12 +158,10 @@ static bool8 IsWater(s16 x, s16 y) { return MetatileBehavior_IsSurfableWaterOrUn
 static bool8 InGarden(s16 x, s16 y)
 {
     s16 mx = x - MAP_OFFSET, my = y - MAP_OFFSET;
-    if (my < GARDEN_Y0 || my > GARDEN_Y1)
+    if (my < GARDEN_Y0 || my > GARDEN_Y1 || mx < GARDEN_X0 || mx > GARDEN_X1)
         return FALSE;
-    if (mx >= GARDEN_EAST_X0 && mx <= GARDEN_EAST_X1)
-        return TRUE;
-    // the extra meadow (and the hedge's gap) only when it's open: the ground says so
-    return mx >= GARDEN_WEST_X0 && mx <= GARDEN_HEDGE_X + 1;
+    // never on the escalator's landing: the way in and out stays clear
+    return !(mx >= GARDEN_PAD_X0 && mx <= GARDEN_PAD_X1 && my >= GARDEN_PAD_Y0 && my <= GARDEN_PAD_Y1);
 }
 
 static struct Actor *ActorAtTile(s16 x, s16 y, struct Actor *except)
@@ -243,8 +241,9 @@ static bool8 T_ByEdgeTree(s16 x, s16 y, s16 *fx, s16 *fy)
     if (MapGridGetCollisionAt(x, y - 1) == 0 || IsWater(x, y - 1) || MP_GardenDecor_At(x, y - 1)
      || GetObjectEventIdByXY(x, y - 1) != OBJECT_EVENTS_COUNT)
         return FALSE;
-    if ((x == GX(GARDEN_BOARD_X) && y - 1 == GY(GARDEN_BOARD_Y)) || (x >= GX(GARDEN_HEDGE_X) && x <= GX(GARDEN_HEDGE_X) + 1))
-        return FALSE;   // (the GARDEN BOARD, the hedge: not trees)
+    if ((x == GX(GARDEN_BOARD_X) && y - 1 == GY(GARDEN_BOARD_Y))
+     || (x <= GX(GARDEN_PAD_X1) && y - 1 >= GY(GARDEN_PAD_Y0) && y - 1 <= GY(GARDEN_PAD_Y1)))
+        return FALSE;   // (the GARDEN BOARD, the escalator's landing: not trees)
     *fx = x;
     *fy = y - 1;
     return TRUE;
@@ -1290,7 +1289,7 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
         int best = -1;
         for (k = 0; k < 12; k++)
         {
-            s16 tx = GX(GARDEN_EAST_X0 + Random() % (GARDEN_EAST_X1 - GARDEN_EAST_X0 + 1));
+            s16 tx = GX(GARDEN_X0 + Random() % (GARDEN_X1 - GARDEN_X0 + 1));
             s16 ty = GY(GARDEN_Y0 + Random() % (GARDEN_Y1 - GARDEN_Y0 + 1));
             int dmin = 99;
             u8 j;

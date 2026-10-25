@@ -2,46 +2,48 @@
 #ifndef GUARD_MP_GARDEN_MAP_H
 #define GUARD_MP_GARDEN_MAP_H
 
-#define GARDEN_W 34
-#define GARDEN_H 20
-#define GARDEN_HEDGE_X 12   // and the next column; rows 2..18
-#define GARDEN_EAST_X0 14
-#define GARDEN_EAST_X1 31
-#define GARDEN_WEST_X0 2
-#define GARDEN_WEST_X1 11
+#define GARDEN_W 40
+#define GARDEN_H 25
+#define GARDEN_X0 2
+#define GARDEN_X1 37
 #define GARDEN_Y0 2
-#define GARDEN_Y1 18
-#define GARDEN_BOARD_X 26
-#define GARDEN_BOARD_Y 5
-#define GARDEN_ENTRY_X 31
-#define GARDEN_ENTRY_Y 10   // where the shortcut puts you
+#define GARDEN_Y1 23
+#define GARDEN_BOARD_X 6
+#define GARDEN_BOARD_Y 9
+#define GARDEN_WARP_X 1   // the escalator (warp 0): in and out
+#define GARDEN_WARP_Y 12
+#define GARDEN_ENTRY_X 2   // the floor beside it, where the ride up ends
+#define GARDEN_ENTRY_Y 12
+#define GARDEN_PAD_X0 0   // the landing (no Garden Pokemon or decorations on it)
+#define GARDEN_PAD_Y0 10
+#define GARDEN_PAD_X1 4
+#define GARDEN_PAD_Y1 15
 #define GARDEN_GRASS 0x3001
 #define GARDEN_FLOWER 0x3004
 
-static const u16 sGardenHedgeOpen[2] = {0x3001, 0x3004};   // grass, flowers
-#define GROWTH_TALL_GRASS_X 26
-#define GROWTH_TALL_GRASS_Y 12
+#define GROWTH_TALL_GRASS_X 27
+#define GROWTH_TALL_GRASS_Y 16
 #define GROWTH_TALL_GRASS_W 4
 #define GROWTH_TALL_GRASS_H 3
-#define GROWTH_PUDDLES_X 15
-#define GROWTH_PUDDLES_Y 13
+#define GROWTH_PUDDLES_X 17
+#define GROWTH_PUDDLES_Y 15
 #define GROWTH_PUDDLES_W 3
 #define GROWTH_PUDDLES_H 3
-#define GROWTH_SAND_X 21
-#define GROWTH_SAND_Y 15
+#define GROWTH_SAND_X 20
+#define GROWTH_SAND_Y 19
 #define GROWTH_SAND_W 4
 #define GROWTH_SAND_H 2
-#define GROWTH_GROVE_X 28
-#define GROWTH_GROVE_Y 8
+#define GROWTH_GROVE_X 32
+#define GROWTH_GROVE_Y 9
 #define GROWTH_GROVE_W 4
-#define GROWTH_GROVE_H 2
-#define GROWTH_STONE_X 24
-#define GROWTH_STONE_Y 10
+#define GROWTH_GROVE_H 3
+#define GROWTH_STONE_X 34
+#define GROWTH_STONE_Y 16
 #define GROWTH_STONE_W 1
 #define GROWTH_STONE_H 1
 #define GARDEN_TALL_GRASS 0x300D
 #define GARDEN_SAND 0x311C
 static const u16 sGardenPuddles[3][3] = {{0x30C8, 0x30C9, 0x30CA}, {0x30D0, 0x30D1, 0x30D2}, {0x30D8, 0x30D9, 0x30DA}};
-static const u16 sGardenTree[2][2] = {{0x31CE, 0x31CF}, {0x3DD6, 0x3DD7}};
+static const u16 sGardenTree[3][2] = {{0x31CE, 0x31CF}, {0x05D6, 0x05D7}, {0x05DC, 0x05DD}};   // a lone tree: crown, top, bottom
 
 #endif // GUARD_MP_GARDEN_MAP_H

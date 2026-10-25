@@ -4,6 +4,6 @@
 # going on, A tells it, B brings the view back. Shots out, play, talk, doll, dollplay, watch, told, back.
 MODE=1
 TMO=200
-WARP="0,57,24,10"
+WARP="0,57,26,13"
 ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15,277:15"
 EXPECT_A=("garden: 255 out" "garden: 258 out" "garden: 252 out" "life interact: verb" "garden: placed decoration 77" "garden watch: start" "garden watch: told" "garden watch: end")

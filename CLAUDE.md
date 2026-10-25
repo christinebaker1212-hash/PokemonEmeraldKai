@@ -87,8 +87,10 @@ reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_
 Also MOéMON GARDEN (A-Life, spec docs/POKEMON_GARDEN.md, built in milestones G1-G6: mp_life*.c, include/mp_life*.h; per-Pokémon
 records in a "<save>.life" sidecar, Friendship only raised through moments and never lowered by the Garden; JOURNAL summary page;
 the follower's own activities, Pokémon emote bubbles (round, pink, never like Trainer emotes), smart A + hold-A verb wheel,
-story beats; battle memories and rare pink lines; friends' Pokémon and records in trades; the Garden map west of
-LITTLEROOT (mp_garden*.c); G6 pursuits, rare moments, eggs and family, evolution; tests life_*, garden_*).
+story beats; battle memories and rare pink lines; friends' Pokémon and records in trades; the Garden map (mp_garden*.c:
+every POKéMON CENTER's 2F, its escalator redirected in SetupWarp, START > GARDEN quick travel; tilesets via
+tools/moemon_garden/gen_tileset.py + gen_map.py, the escalator kept at its fldeff_escalator.c ids); G6 pursuits, rare
+moments, eggs and family, evolution; tests life_*, garden_*).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

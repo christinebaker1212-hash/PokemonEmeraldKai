@@ -1,0 +1,62 @@
+pressuntil A field 5000
+wait 60
+mp life garden travel 0
+waitlog 900 garden: quick travel there
+wait 300
+pressuntil B field 1200
+wait 60
+mp where
+mp life garden state
+shot there
+press LEFT 20
+wait 300
+mp where
+shot down
+mp warp 0,10,10,10
+wait 200
+pressuntil B field 900
+press START 2
+wait 40
+shot startmenu
+press B 2
+wait 40
+mp life garden pc
+wait 120
+press A 2
+wait 150
+press DOWN 2
+wait 20
+press A 2
+wait 150
+press A 2
+wait 150
+shot pcmenu
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+watchlog garden: quick travel there
+press A 2
+waitlog 900
+wait 300
+pressuntil B field 1200
+wait 60
+mp where
+shot pcthere
+mp warp 24,4,5,9
+wait 200
+pressuntil B field 900
+mp life garden travel 0
+wait 60
+shot cave
+pressuntil B field 900
+mp warp 0,10,10,10
+wait 200
+pressuntil B field 900
+mp clearflag 2144
+wait 10
+mp life garden travel 0
+wait 60
+shot notnow
+pressuntil B field 900
+quit

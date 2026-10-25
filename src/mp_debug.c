@@ -689,6 +689,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // setflag N - an event flag (include/constants/flags.h)
         FlagSet(atoi(arg));
     }
+    else if (strcmp(cmd, "clearflag") == 0)
+    {
+        // clearflag N - an event flag off (2144 = FLAG_SYS_POKEMON_GET)
+        FlagClear(atoi(arg));
+        printf("[test] clearflag %d\n", atoi(arg));
+    }
     else if (strcmp(cmd, "ticketbackfill") == 0)
     {
         // ticketbackfill [reset] - the once-per-save MOEGATCHA TICKETS for story items already got (reset: as if never run)

@@ -648,6 +648,7 @@ void MP_Emote_OnPlayerLeft(u8 id);
 // Friends' whereabouts, GO TO FRIEND (mp_friends.c)
 u8 MP_Friends_List(u8 *ids);
 u16 MP_Friends_Mapsec(u8 id);
+bool8 MP_Friends_InGarden(u8 id);             // in the MOéMON GARDEN
 void MP_Friends_LocationName(u8 id, u8 *dst);
 u16 MP_Friends_Destination(u8 id);
 bool8 MP_Friends_GoTo(u8 id);

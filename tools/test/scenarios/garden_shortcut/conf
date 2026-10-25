@@ -1,8 +1,0 @@
-# The PC's shortcut to the MOéMON GARDEN (here from Oldale: the PC's MOéMON GARDEN row calls the same thing),
-# and the GARDEN BOARD's GO BACK: back to where you were. Then a Pokémon Center PC: <PLAYER>'s PC > MOéMON GARDEN turns the PC off and goes. Shots there, board, back,
-# pcmenu, pcthere.
-MODE=1
-TMO=120
-WARP="0,10,10,10"
-ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("garden: shortcut there" "garden: first visit" "garden: board" "garden: shortcut back" "[test] where" "garden here 1 hedge 0 growth 00 badges 0 visited 1 shortcut 1")

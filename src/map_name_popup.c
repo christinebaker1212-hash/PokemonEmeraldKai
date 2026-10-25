@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_garden.h"   // Moemon Co-op
 #include "battle_pyramid.h"
 #include "bg.h"
 #include "event_data.h"
@@ -352,6 +353,13 @@ static void ShowMapNamePopUpWindow(void)
             mapDisplayHeaderSource = sBattlePyramid_MapHeaderStrings[gSaveBlock2Ptr->frontier.curChallengeBattleNum];
         }
         StringCopy(withoutPrefixPtr, mapDisplayHeaderSource);
+    }
+    else if (MP_Garden_IsHere())
+    {
+        // Moemon Co-op: the MOéMON GARDEN has its own name (its map section is LITTLEROOT's)
+        static const u8 sGardenName[] = _("MOéMON GARDEN");
+        withoutPrefixPtr = &(mapDisplayHeader[3]);
+        StringCopy(withoutPrefixPtr, sGardenName);
     }
     else
     {

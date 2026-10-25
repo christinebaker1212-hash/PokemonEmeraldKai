@@ -1378,3 +1378,33 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
 - A+B+START+SELECT (main.c) went through the wireless adapter (rfu_REQ_stopMode with gSTWIStatus never set up:
   1.8.0 crash report). On PC it now goes straight to DoSoftReset, which closes the game like CTRL+R. Test soft_reset.
 - Menu text written with é in the source (UTF-8) keeps it (MP_AsciiToGame): the GARDEN BOARD read MOMON GARDEN.
+
+1.16.0 (protocol 44): the MOéMON GARDEN is every POKéMON CENTER's second floor.
+- The stairs: field_control_avatar.c SetupWarp calls MP_Garden_RedirectWarp after setting a warp's destination.
+  A warp to one of the 17 CENTERs' 2F maps (mp_garden.c sCenters: 16 CENTERs + the POKéMON LEAGUE) goes to the
+  Garden's warp 0 instead; the Garden's warp 0 goes to the last CENTER visited, at its escalator (the 1F warp that
+  went up, found in the map's own data: EscalatorOf). The 2F maps, the CABLE CLUB, UNION ROOM and the rest stay in
+  the game, unreached. Its own data names OLDALE's CENTER (never used: the redirect always decides).
+- The escalator: the Garden's tileset (gTileset_MoemonGarden, tools/moemon_garden/gen_tileset.py) is Petalburg's
+  plus the CENTER's 2F escalator at its own metatile ids (0x298/0x299, 0x2A0-0x2AD: fldeff_escalator.c animates by
+  id) and the CENTER's floor and west wall at 0x2B0-0x2B2, recolored into palette slot 7 (14 colors). gen_map.py
+  copies the escalator's neighbourhood from the 2F with its bits (the floor tile east of the escalator has
+  elevation 0, the step between the escalator's 4 and the floor's 3; without it nobody can step on) and writes the
+  warp and the GARDEN BOARD into map.json. Riding up plays the CENTER's own escalator animation (FieldCallback_
+  EscalatorWarpIn: MB_DOWN_ESCALATOR at the destination) and ends on the floor east of it (GARDEN_ENTRY).
+- The last CENTER: MpGardenSave.lastPc* (the old reserved bytes; MP_GARDEN_LASTPC), noted on every map load in a
+  CENTER (NoteCenter). A save from before 1.16 has none: ReturnCenter matches the last heal location against the
+  CENTERs' heal locations, and with nothing at all the way down goes to the last heal location itself (always real).
+- Quick travel: START > GARDEN (start_menu.c, after OPTION, once the Garden was found, not inside it) and the PC's
+  MOéMON GARDEN row call MP_Garden_QuickTravel; GO TO FRIEND to a friend in the Garden too (mp_linkx.c). Refused
+  with a message (shown once the field is free): not before FLAG_SYS_POKEMON_GET, not in the SAFARI ZONE, BATTLE
+  PYRAMID / PIKE, TRAINER HILL, a co-op battle or riding piggyback; from START, only where Fly would work (towns,
+  cities, routes, the sea) and not the dungeon-like outdoor maps (sNoTravelMaps: PETALBURG WOODS, JAGGED PASS,
+  MT. CHIMNEY, MT. PYRE, SKY PILLAR, SOUTHERN ISLAND, SAFARI ZONE), or in a CENTER; and only once a CENTER is known.
+  You arrive beside the escalator (a fade), and it leads down to the last CENTER.
+- One open meadow (no hedge: it read as a fence, and closed on a player left in the extra meadow when friends left).
+  Garden Pokémon and decorations stay off the escalator's landing (GARDEN_PAD_*). Safety nets for older saves:
+  standing where nobody could (StuckHere: a tree, outside the meadow) warps back to the landing; decorations whose
+  place isn't open ground any more go back to the collection (MP_GardenDecor_CheckPlaces, also after growth).
+- LITTLEROOT has no map connection to the Garden any more. The map name popup and friends' places say MOéMON GARDEN.
+  Tests garden_map, garden_centers, garden_travel, garden_stuck (and the other garden_* at new spots).

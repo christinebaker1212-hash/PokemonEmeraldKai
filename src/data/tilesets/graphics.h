@@ -20,6 +20,29 @@ const u16 gTilesetPalettes_Petalburg[][16] =
 	INCGFX_U16("data/tilesets/secondary/petalburg/palettes/15.pal", ".gbapal"),
 };
 
+// Moemon Co-op: the MOéMON GARDEN (tools/moemon_garden/gen_tileset.py: Petalburg + the POKéMON CENTER's escalator)
+const u32 gTilesetTiles_MoemonGarden[] = INCGFX_U32("data/tilesets/secondary/moemon_garden/tiles.png", ".4bpp.lz", "-num_tiles 207 -Wnum_tiles");
+
+const u16 gTilesetPalettes_MoemonGarden[][16] =
+{
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/00.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/01.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/02.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/03.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/04.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/05.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/06.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/07.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/08.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/09.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/10.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/11.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/12.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/13.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/14.pal", ".gbapal"),
+	INCGFX_U16("data/tilesets/secondary/moemon_garden/palettes/15.pal", ".gbapal"),
+};
+
 const u32 gTilesetTiles_Rustboro[] = INCGFX_U32("data/tilesets/secondary/rustboro/tiles.png", ".4bpp.lz", "-num_tiles 498 -Wnum_tiles");
 
 const u16 gTilesetPalettes_Rustboro[][16] =

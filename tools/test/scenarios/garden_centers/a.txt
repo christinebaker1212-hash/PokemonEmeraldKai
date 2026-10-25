@@ -1,0 +1,190 @@
+pressuntil A field 5000
+wait 30
+mp warp 2,2,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 3,1,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 4,5,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 5,4,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 6,4,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 7,0,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 8,4,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 9,11,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 10,5,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 11,5,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 12,2,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 13,6,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 14,3,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 15,2,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 16,12,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 16,10,2,7
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+mp warp 26,53,2,6
+wait 200
+pressuntil B field 900
+press LEFT 20
+wait 300
+pressuntil B field 900
+wait 120
+pressuntil B field 900
+press LEFT 20
+wait 300
+mp where
+quit

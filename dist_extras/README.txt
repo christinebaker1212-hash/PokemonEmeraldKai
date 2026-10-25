@@ -1110,17 +1110,21 @@ With friends, MOEMON get to know each other and you: followers meet
 when you stand together, friends can pet or feed yours (from their own
 bag), and a MOEMON's life story travels with it in a trade.
 
-THE GARDEN: walk west out of LITTLEROOT into PROF. BIRCH's research
-meadow. Your whole party lives there freely: napping, playing tag,
-splashing at the pond, keeping you company. After your first visit,
-your PC (MOEMON GARDEN) takes you there, and the GARDEN BOARD by the
-pond takes you back. The Garden grows as your journey goes on.
+THE GARDEN: every POKEMON CENTER's second floor. Ride the escalator up
+and you're in a meadow inside the CENTER, where your whole party lives
+freely: napping, playing tag, splashing at the pond, keeping you
+company. The escalator right where you arrive takes you back down to
+the CENTER you came from. After your first visit, START > GARDEN (and
+your PC's MOEMON GARDEN row) takes you there from outdoors or a CENTER;
+the way down then leads to the last POKEMON CENTER you visited. Not
+from caves, dungeons, the SAFARI ZONE or the middle of a story moment:
+a message says so. The Garden grows as your journey goes on.
   GARDEN BOARD  DECORATE: put dolls and cushions from your SECRET BASE
                 collection out for them (and put them away again).
                 WATCH: sit down and watch; A tells you what's going on,
                 B stands up.
-With friends there, a hedge opens to a bigger meadow, and everyone's
-MOEMON and decorations are there together.
+With friends there, everyone's MOEMON and decorations are there
+together (whichever CENTER each of you came up in).
 
 Over time, a MOEMON may take up something it loves in the Garden:
 climbing the trees, splashing in the pond, singing, collecting pretty

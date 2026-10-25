@@ -4,6 +4,9 @@ const u16 gMetatileAttributes_General[] = INCBIN_U16("data/tilesets/primary/gene
 const u16 gMetatiles_Petalburg[] = INCBIN_U16("data/tilesets/secondary/petalburg/metatiles.bin");
 const u16 gMetatileAttributes_Petalburg[] = INCBIN_U16("data/tilesets/secondary/petalburg/metatile_attributes.bin");
 
+const u16 gMetatiles_MoemonGarden[] = INCBIN_U16("data/tilesets/secondary/moemon_garden/metatiles.bin");   // Moemon Co-op
+const u16 gMetatileAttributes_MoemonGarden[] = INCBIN_U16("data/tilesets/secondary/moemon_garden/metatile_attributes.bin");
+
 const u16 gMetatiles_Rustboro[] = INCBIN_U16("data/tilesets/secondary/rustboro/metatiles.bin");
 const u16 gMetatileAttributes_Rustboro[] = INCBIN_U16("data/tilesets/secondary/rustboro/metatile_attributes.bin");
 

@@ -374,15 +374,43 @@ static void DrawMenu(void)
                                 : (sM.count ? "{A} PUT IT AWAY   {B} BACK" : "Nothing placed yet."));
 }
 
+// Open ground of the meadow (map coords with MAP_OFFSET): not a tree, the pond, the escalator's landing
+static bool8 GroundFree(s16 x, s16 y)
+{
+    s16 mx = x - MAP_OFFSET, my = y - MAP_OFFSET;
+    return mx >= GARDEN_X0 && mx <= GARDEN_X1 && my >= GARDEN_Y0 && my <= GARDEN_Y1
+        && !(mx <= GARDEN_PAD_X1 && my >= GARDEN_PAD_Y0 && my <= GARDEN_PAD_Y1)
+        && MapGridGetCollisionAt(x, y) == 0 && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(x, y));
+}
+
+// On load (and when the Garden grows): a decoration whose place isn't open ground any more (a save from an older
+// Garden, a grove grown there) goes back to the collection
+void MP_GardenDecor_CheckPlaces(void)
+{
+    struct MpGardenSave *gs = MP_Life_GardenSave();
+    u8 i;
+    for (i = 0; i < GARDEN_DECOR_MAX; i++)
+    {
+        u8 decor = gs->decor[i].decor;
+        s16 x = GX(gs->decor[i].x), y = GY(gs->decor[i].y);
+        if (decor == DECOR_NONE)
+            continue;
+        if (GroundFree(x, y) && (gDecorations[decor].shape == DECORSHAPE_1x1
+             || (MapGridGetCollisionAt(x + 1, y) == 0 && MapGridGetCollisionAt(x, y - 1) == 0 && MapGridGetCollisionAt(x + 1, y - 1) == 0)))
+            continue;
+        gs->decor[i].decor = DECOR_NONE;
+        sD.seq++;
+        MPNet_Log("garden: decoration %u put away (its place is gone)", decor);
+    }
+}
+
 static bool8 FrontTile(s16 *x, s16 *y)
 {
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     *x = me->currentCoords.x;
     *y = me->currentCoords.y;
     MoveCoords(me->facingDirection, x, y);
-    return *x >= GX(GARDEN_WEST_X0) && *x <= GX(GARDEN_EAST_X1) && *y >= GY(GARDEN_Y0) && *y <= GY(GARDEN_Y1)
-        && MapGridGetCollisionAt(*x, *y) == 0 && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(*x, *y))
-        && GetObjectEventIdByXY(*x, *y) == OBJECT_EVENTS_COUNT && !MP_Garden_ActorAt(*x, *y);
+    return GroundFree(*x, *y) && GetObjectEventIdByXY(*x, *y) == OBJECT_EVENTS_COUNT && !MP_Garden_ActorAt(*x, *y);
 }
 
 bool8 MP_GardenDecor_Place(u8 decor)

@@ -462,7 +462,7 @@ void ReshowPlayerPC(u8 var)
 static void PlayerPC_MpGarden(u8 taskId)
 {
     extern const u8 EventScript_TurnOffPC[];
-    MP_Garden_ShortcutFromPC();
+    MP_Garden_QuickTravel(TRUE);
     if (sMpBedroomPC)
     {
         PlayerPC_TurnOff(taskId);   // (its turn-off script ends the PC script)

@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+shot stuck
+wait 300
+pressuntil B field 900
+wait 300
+pressuntil B field 900
+wait 60
+mp where
+shot landing
+mp life garden forget
+mp life garden state
+press LEFT 20
+wait 300
+mp where
+shot down
+quit

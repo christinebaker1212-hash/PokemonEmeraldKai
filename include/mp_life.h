@@ -322,7 +322,8 @@ void MP_Life_AddNews(u8 kind, u16 param, u32 teller);
 // The MOéMON GARDEN's own save data (mp_garden.c), kept in the .life sidecar
 #define GARDEN_DECOR_MAX 16
 #define MP_GARDEN_VISITED  (1 << 0)
-#define MP_GARDEN_SHORTCUT (1 << 1)   // came by the shortcut: the board offers the way back
+#define MP_GARDEN_SHORTCUT (1 << 1)   // (1.15: came by the shortcut; no longer used)
+#define MP_GARDEN_LASTPC   (1 << 2)   // lastPc* hold the last POKéMON CENTER visited
 struct MpGardenDecor
 {
     u8 decor;       // DECOR_* (0 = none)
@@ -332,9 +333,10 @@ struct MpGardenDecor
 struct MpGardenSave
 {
     u32 flags;
-    u8 retGroup, retNum, retX, retY;   // where the shortcut came from
+    u8 retGroup, retNum, retX, retY;   // (1.15: where the shortcut came from; no longer used)
     struct MpGardenDecor decor[GARDEN_DECOR_MAX];
-    u32 reserved[4];
+    u8 lastPcGroup, lastPcNum, lastPcWarp, lastPcPad;   // the last POKéMON CENTER visited: its 1F, its stairs
+    u32 reserved[3];
 };
 struct MpGardenSave *MP_Life_GardenSave(void);
 u32 MP_Life_LastLineMin(void);           // the last rare battle line (play minutes, 0 = never)

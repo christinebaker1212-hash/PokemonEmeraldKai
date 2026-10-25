@@ -20,6 +20,18 @@ const struct Tileset gTileset_Petalburg =
     .callback = InitTilesetAnim_Petalburg,
 };
 
+// Moemon Co-op: the MOéMON GARDEN (Petalburg's pieces + the POKéMON CENTER's escalator at its own ids)
+const struct Tileset gTileset_MoemonGarden =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_MoemonGarden,
+    .palettes = gTilesetPalettes_MoemonGarden,
+    .metatiles = gMetatiles_MoemonGarden,
+    .metatileAttributes = gMetatileAttributes_MoemonGarden,
+    .callback = InitTilesetAnim_Petalburg,
+};
+
 const struct Tileset gTileset_Rustboro =
 {
     .isCompressed = TRUE,

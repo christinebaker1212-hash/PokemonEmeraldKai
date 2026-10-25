@@ -361,8 +361,10 @@ Groudon, cheering after a Gym). If the scene moves the Trainer, the follower rea
 
 ### 11.2 Getting there
 
-The Garden is a real place, reached through the story (for example PROF. BIRCH's research meadow near LITTLEROOT,
-opened early). After the first visit, a shortcut (from a PC or a key item) goes there and back to where you were.
+The Garden is every POKéMON CENTER's second floor (since 1.16; it was a meadow west of LITTLEROOT before): the
+CENTER's escalator rides up into it and its own escalator rides back down to that CENTER. After the first visit,
+START > GARDEN and the PC's row go there from outdoors or a CENTER, and the way down leads to the last CENTER
+visited (COOP_NOTES 1.16.0).
 
 ### 11.3 The place
 

@@ -1,0 +1,11 @@
+# Quick travel to the MOéMON GARDEN. From OLDALE (outdoors): START > GARDEN (the same call) goes there, and the
+# Garden's escalator rides down to OLDALE's CENTER, the last one visited (a fresh save knows it from the heal
+# location, as a save from before 1.16 would). START shows GARDEN once it's been found. A POKéMON CENTER PC's
+# MOéMON GARDEN row turns the PC off and goes. Not from a cave (RUSTURF TUNNEL), not before having a Pokémon: a
+# message says why. Shots there, down, startmenu, pcmenu, pcthere, cave, notnow.
+MODE=1
+TMO=180
+WARP="0,10,10,10"
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("garden: quick travel there (back to center 0)" "garden: first visit" "garden: down to center 0" "[test] where map 2.2 xy 2,6" "garden: quick travel not from here (place)" "garden: quick travel not from here (not now)" "[test] where map 0.57 xy 2,12")
+UNEXPECT_A=("stuck" "back to center -1")

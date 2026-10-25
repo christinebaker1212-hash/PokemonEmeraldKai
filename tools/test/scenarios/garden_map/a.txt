@@ -1,23 +1,26 @@
 pressuntil A field 5000
 wait 60
-press LEFT 30
-wait 30
-press LEFT 60
-wait 60
-shot entered
-mp life garden state
-pressuntil B field 900
-wait 30
 mp givebadges
-wait 30
+wait 60
+pressuntil B field 3000
+wait 600
+pressuntil B field 3000
+press LEFT 20
+wait 300
+shot up
+wait 200
+pressuntil B field 900
+wait 60
 mp life garden state
-press LEFT 90
-wait 30
-shot east
-press UP 60
-wait 30
+press RIGHT 60
+wait 20
+press UP 40
+wait 20
 shot pond
+press DOWN 40
+wait 10
 press LEFT 120
-wait 30
-shot hedge
+wait 300
+mp where
+shot down
 quit
