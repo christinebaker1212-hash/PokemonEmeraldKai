@@ -2543,11 +2543,18 @@ static void BoostWild(struct Pokemon *mon)
     GiveMonInitialMoveset(mon);
 }
 
+// Level scaling (mp_levelscale.c): raised to the whole team's level, then the team-of-two boost
+static void ScaleAndBoostWild(struct Pokemon *mon)
+{
+    MP_LevelScale_CoopWild(mon);
+    BoostWild(mon);
+}
+
 void MP_Coop_SetWildEnemyParty(void)
 {
     ZeroEnemyPartyMons();
     gEnemyParty[0] = sCoop.wildMon;
-    BoostWild(&gEnemyParty[0]);
+    ScaleAndBoostWild(&gEnemyParty[0]);
     if (sCoop.count == 3)
     {
         // A triple: battlers 1, 3, 5 take slots 0, 1, 2 (no interleaving). With
@@ -2555,19 +2562,19 @@ void MP_Coop_SetWildEnemyParty(void)
         if (sCoop.wildExtra >= 1)
         {
             gEnemyParty[1] = sCoop.wildMon2;
-            BoostWild(&gEnemyParty[1]);
+            ScaleAndBoostWild(&gEnemyParty[1]);
         }
         if (sCoop.wildExtra >= 2)
         {
             gEnemyParty[2] = sCoop.wildMon3;
-            BoostWild(&gEnemyParty[2]);
+            ScaleAndBoostWild(&gEnemyParty[2]);
         }
         return;
     }
     if (sCoop.wildDouble)
     {
         gEnemyParty[1] = sCoop.wildMon2;   // MP_Coop_ArrangeEnemyParty puts it on the right
-        BoostWild(&gEnemyParty[1]);
+        ScaleAndBoostWild(&gEnemyParty[1]);
     }
 }
 

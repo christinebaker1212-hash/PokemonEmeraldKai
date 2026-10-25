@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+press UP 2
+wait 30
+pressuntil A action 6000
+wait 20
+shot roxanne
+quit

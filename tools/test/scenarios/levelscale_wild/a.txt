@@ -1,0 +1,25 @@
+pressuntil A field 5000
+wait 30
+mp landwild
+pressuntil A action 4000
+wait 20
+shot capped
+press DOWN 2
+wait 6
+press RIGHT 2
+wait 6
+pressuntil A field 4000
+wait 30
+mp setflag 2151
+mp setflag 2152
+mp setflag 2153
+mp setflag 2154
+mp setflag 2155
+mp setflag 2156
+mp setflag 2157
+mp setflag 2158
+mp landwild
+pressuntil A action 4000
+wait 20
+shot eightbadges
+quit

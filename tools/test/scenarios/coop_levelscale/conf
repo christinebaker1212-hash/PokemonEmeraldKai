@@ -1,0 +1,9 @@
+# Level scaling in co-op (NA-JP lag): ALICE's team is Lv30, BOB's Lv50: ROXANNE is scaled for the average of both
+# teams (40), held by the cap with no badges (18, +2 for a boss)
+MODE=2
+WARP=11,3,5,3
+WARP_B=11,3,5,6
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:50"
+EXPECT_A=("joins the battle against trainer" "ace 15 -> 20 (team 40, cap 20)")

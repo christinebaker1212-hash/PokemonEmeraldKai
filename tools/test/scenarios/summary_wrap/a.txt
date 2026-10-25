@@ -1,0 +1,28 @@
+pressuntil A field 5000
+wait 60
+press START 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 30
+press A 2
+wait 90
+mp summary
+press LEFT 2
+wait 40
+mp summary
+shot journal_one_page
+press A 2
+wait 30
+mp summary
+shot journal_after_a
+press RIGHT 2
+wait 40
+mp summary
+press RIGHT 2
+wait 40
+mp summary
+quit

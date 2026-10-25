@@ -77,6 +77,11 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
+| `levelscale_wild` | a Lv46 team on Route 101: wild Pokémon capped at 18 with no badges, 40-43 and evolved with eight |
+| `levelscale_trainer` | ROXANNE's ace Lv15 -> 20 against a team averaging 42 (boss margin, no-badge cap) |
+| `levelscale_off` | LEVEL SCALING off: no scaling |
+| `coop_levelscale` | NA-JP lag: ROXANNE scaled for the average of both teams (Lv30 and Lv50) |
+| `summary_wrap` | the summary screen wraps (LEFT on the first page -> the one-page JOURNAL, RIGHT -> back); A on a one-page journal does nothing and opens no move selection |
 | `battle_weather` | rain, hail, sandstorm and sunlight on screen in a wild battle (shots), a turn in the rain with no repeated line |
 | `battle_weather_map` | a wild battle on rainy Route 120 starts in the rain, on screen |
 | `follow_ground` | the follower in tall grass (Route 101), its reflection (Petalburg's pond), footprints (Route 109), puddle splashes (Route 120), hot springs (Lavaridge) |

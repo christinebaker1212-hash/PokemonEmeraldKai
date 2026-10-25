@@ -2191,6 +2191,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
     u8 fixedIV;
     s32 i, j;
     u8 monsCount;
+    u8 partyMax;
 
     if (trainerNum == TRAINER_SECRET_BASE)
         return 0;
@@ -2213,6 +2214,23 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         {
             monsCount = gTrainers[trainerNum].partySize;
         }
+
+        // Moemon Co-op: level scaling (mp_levelscale.c) needs the level of the trainer's strongest Pokémon
+        partyMax = 0;
+        for (i = 0; i < monsCount; i++)
+        {
+            u8 lvl;
+            switch (gTrainers[trainerNum].partyFlags)
+            {
+            case 0: lvl = gTrainers[trainerNum].party.NoItemDefaultMoves[i].lvl; break;
+            case F_TRAINER_PARTY_CUSTOM_MOVESET: lvl = gTrainers[trainerNum].party.NoItemCustomMoves[i].lvl; break;
+            case F_TRAINER_PARTY_HELD_ITEM: lvl = gTrainers[trainerNum].party.ItemDefaultMoves[i].lvl; break;
+            default: lvl = gTrainers[trainerNum].party.ItemCustomMoves[i].lvl; break;
+            }
+            if (lvl > partyMax)
+                partyMax = lvl;
+        }
+        MP_LevelScale_LogTrainer(trainerNum, partyMax);
 
         for (i = 0; i < monsCount; i++)
         {
@@ -2238,7 +2256,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
                 personalityValue += nameHash << 8;
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
-                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, partyData[i].lvl + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                if (MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) > partyData[i].lvl)
+                    MP_LevelScale_EvolveMon(&party[i]);   // Moemon Co-op: raised past an evolution (set moves still follow)
                 break;
             }
             case F_TRAINER_PARTY_CUSTOM_MOVESET:
@@ -2250,7 +2270,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
                 personalityValue += nameHash << 8;
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
-                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, partyData[i].lvl + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                if (MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) > partyData[i].lvl)
+                    MP_LevelScale_EvolveMon(&party[i]);   // Moemon Co-op: raised past an evolution (set moves still follow)
 
                 for (j = 0; j < MAX_MON_MOVES; j++)
                 {
@@ -2268,7 +2290,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
                 personalityValue += nameHash << 8;
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
-                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, partyData[i].lvl + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                if (MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) > partyData[i].lvl)
+                    MP_LevelScale_EvolveMon(&party[i]);   // Moemon Co-op: raised past an evolution (set moves still follow)
 
                 SetMonData(&party[i], MON_DATA_HELD_ITEM, &partyData[i].heldItem);
                 break;
@@ -2282,7 +2306,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
                 personalityValue += nameHash << 8;
                 fixedIV = partyData[i].iv * MAX_PER_STAT_IVS / 255;
-                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, partyData[i].lvl + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                CreateMon(&party[i], partyData[i].species, min(MAX_LEVEL, MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) + gMpEnemyLevelBonus), fixedIV, TRUE, personalityValue, OT_ID_RANDOM_NO_SHINY, 0);
+                if (MP_LevelScale_TrainerMon(trainerNum, partyData[i].lvl, partyMax) > partyData[i].lvl)
+                    MP_LevelScale_EvolveMon(&party[i]);   // Moemon Co-op: raised past an evolution (set moves still follow)
 
                 SetMonData(&party[i], MON_DATA_HELD_ITEM, &partyData[i].heldItem);
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_gfx_sfx_util.h"
 #include "berry.h"
@@ -139,7 +140,9 @@ void CreateScriptedWildMon(u16 species, u8 level, u16 item)
     u8 heldItem[2];
 
     ZeroEnemyPartyMons();
+    level = MP_LevelScale_Wild(level);   // Moemon Co-op: level scaling (mp_levelscale.c)
     CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, 0, 0, OT_ID_PLAYER_ID, 0);
+    MP_LevelScale_WildMade(&gEnemyParty[0]);
     if (item)
     {
         heldItem[0] = item;

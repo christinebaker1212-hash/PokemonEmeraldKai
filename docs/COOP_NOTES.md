@@ -243,6 +243,23 @@ result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11
 wild_encounter.c MP_RollExtraLandMon on the right (enemy slot 3); a catch with the other still out runs
 BattleScript_MpCoopBallCaughtGoOn (VARIOUS_MP_COOP_CAUGHT_ONE/REMOVE_CAUGHT). Only the link master runs battle scripts:
 visuals for both screens must go through controller emits (sprite invisibility value 2 = caught, link partner ball throw). Also gym rematches and tournaments.
+Level scaling (1.19.0, mp_levelscale.c; OPTIONS > GAME > LEVEL SCALING, gMpConfig.levelScaling / ini level_scaling,
+on by default; online the host's, MPR_RULES byte 3, re-sent by MP_SendRoomRules when the host changes it): the team's
+level = MP_LevelScale_Top3 (average of the 3 highest-level party Pokémon, eggs left out); in a co-op battle the average
+of every seat's (MpState.top3, wire byte 39, protocol 46). Trainers (battle_main.c CreateNPCTrainerParty): the party's
+strongest normal level (partyMax) is raised to the team (+BossMargin: Gym Leaders, team admins / leaders, rematches via
+MP_Coop_IsBossTrainer and the rival +2..+5 with badges, Elite Four / Champion +5), everyone in the party by the same
+amount, never down, the ace never above the badge cap (sCaps 18..65, 100 after FLAG_SYS_GAME_CLEAR) + the margin; then
+gMpEnemyLevelBonus (co-op) on top. A raised Pokémon goes through MP_LevelScale_EvolveMon (level evolutions incl.
+Wurmple / Tyrogue / Nincada rules, its name and level-up moves; custom-moveset trainers keep their moves, set after).
+Wild (wild_encounter.c ChooseWildMonLevel -> MP_LevelScale_Wild: team - 3..6, capped, never below the table's level;
+CreateWildMon -> MP_LevelScale_WildMade evolves and remembers personality -> normal level; CreateScriptedWildMon too).
+Co-op wild (MP_Coop_SetWildEnemyParty -> MP_LevelScale_CoopWild): the master re-scales each foe for the team (spread
+from its personality, no Random), then BoostWild +2. Not scaled: Battle Frontier / Pike / Pyramid, mass outbreaks
+(MP_LevelScale_ForgetPending), roamers, Battle Tower etc. Logs "level scale: trainer N ace A -> B (team T, cap C)",
+"level scale: wild S LvA -> LvB", "level scale: evolved"; debug `mp landwild` (an encounter from the map's grass table);
+env MOEMON_LEVEL_SCALING=0/1. Tests levelscale_wild, levelscale_trainer, levelscale_off, coop_levelscale.
+
 Difficulty: trainer/wild levels were vanilla Emerald; route/gym trainers got +2..+6 per story segment, gym aces 15/20/27/33/36/41/47/51,
 E4 53-59, Wallace 62, land wild levels +3/+4 on under-leveled routes and dungeons, route trainers from badge 3 AI TRY_TO_FAINT
 (scripted from the audit; see git history). Co-op team-ups (master only): MP_Coop_PrepareTrainerParty sets gMpEnemyLevelBonus
@@ -1232,7 +1249,10 @@ else the plain file); records of another size are copied field by field. Limits 
 JOURNAL summary page (pokemon_summary_screen.c PSS_PAGE_JOURNAL after the POKé BALL page; mp_life_journal.c):
 sentences written as the Trainer's observations ({STR_VAR_1} Trainer, {STR_VAR_2} place, {STR_VAR_3} other), facts
 revealed with familiarity or by WATCH (unknown ones are one "??? (not known yet)" line), on a lined sheet (INFO rows
-4-7), FONT_NARROW, 7 rows a page, A turns pages.
+4-7), FONT_NARROW, 7 rows a page, A turns pages. The "Ⓐ MORE" prompt (its own promptWindow at 22,0, baseBlock 762) shows
+only when there is more than one page; A on a one-page journal does nothing (MpJournal_HandleInput still takes it, so it
+never reaches the INFO page's move selection). LEFT on the first summary page goes to the last and RIGHT on the last to
+the first (ChangePage: a left wrap stages the target page's tilemap in the under BG first); test summary_wrap.
 
 G2 field life. Emotes (mp_life_emote.c): 16 round pink bubbles drawn in code (NOTE HEART ZZZ EXCLAIM QUESTION SWEAT
 ANGRY TEAR SPARKLE FOOD DOTS CALM SUN WATER BALL LEAF), never the Trainers' square emotes; one co-op palette

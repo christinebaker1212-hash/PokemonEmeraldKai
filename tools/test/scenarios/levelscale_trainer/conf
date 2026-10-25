@@ -1,0 +1,7 @@
+# Level scaling, trainers: ROXANNE (no badges yet, ace Lv15) against a team whose top three average 42: a boss is 2
+# above the team but no more than 2 above the cap (18 with no badges), so her ace is Lv20 and the rest rise with it
+MODE=1
+WARP=11,3,5,3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40,277:40,283:5"
+EXPECT_A=("ace 15 -> 20 (team 42, cap 20)")

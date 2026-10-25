@@ -294,13 +294,13 @@ static u8 ChooseWildMonLevel(const struct WildPokemon *wildPokemon)
         if (ability == ABILITY_HUSTLE || ability == ABILITY_VITAL_SPIRIT || ability == ABILITY_PRESSURE)
         {
             if (Random() % 2 == 0)
-                return max;
+                return MP_LevelScale_Wild(max);   // Moemon Co-op: level scaling (mp_levelscale.c)
 
             if (rand != 0)
                 rand--;
         }
     }
-    return min + rand;
+    return MP_LevelScale_Wild(min + rand);   // Moemon Co-op: level scaling (mp_levelscale.c)
 }
 
 static u16 GetCurrentMapWildMonHeaderId(void)
@@ -377,7 +377,16 @@ static u8 PickWildMonNature(void)
     return Random() % NUM_NATURES;
 }
 
+static void CreateWildMon_(u16 species, u8 level);
+
+// Moemon Co-op: a wild Pokémon raised by level scaling evolves as it would have by its level (mp_levelscale.c)
 static void CreateWildMon(u16 species, u8 level)
+{
+    CreateWildMon_(species, level);
+    MP_LevelScale_WildMade(&gEnemyParty[0]);
+}
+
+static void CreateWildMon_(u16 species, u8 level)
 {
     bool32 checkCuteCharm;
 
@@ -482,6 +491,7 @@ static bool8 SetUpMassOutbreakEncounter(u8 flags)
     if (flags & WILD_CHECK_REPEL && !IsWildLevelAllowedByRepel(gSaveBlock1Ptr->outbreakPokemonLevel))
         return FALSE;
 
+    MP_LevelScale_ForgetPending();   // Moemon Co-op: a mass outbreak keeps its level and moves
     CreateWildMon(gSaveBlock1Ptr->outbreakPokemonSpecies, gSaveBlock1Ptr->outbreakPokemonLevel);
     for (i = 0; i < MAX_MON_MOVES; i++)
         SetMonMoveSlot(&gEnemyParty[0], gSaveBlock1Ptr->outbreakPokemonMoves[i], i);

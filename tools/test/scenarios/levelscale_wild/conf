@@ -1,0 +1,7 @@
+# Level scaling, wild (mp_levelscale.c): a Lv46 team on Route 101 (Lv2-3 there). No badges: the cap holds them at 18.
+# Eight badges: 3-6 below the team (40-43), and they evolve as they would have by that level
+MODE=1
+WARP=0,16,10,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:46,277:46"
+EXPECT_A=("-> Lv18 (team 46, cap 18)" "(team 46, cap 65)" "level scale: evolved")

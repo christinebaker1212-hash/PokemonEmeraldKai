@@ -53,6 +53,7 @@ enum
     OPT_CREATURES,
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
+    OPT_LEVELSCALE,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
@@ -131,6 +132,7 @@ static const u8 sText_NewFriends[] = _("NEW FRIENDS");
 static const u8 sText_Autosave[] = _("AUTOSAVE");
 static const u8 sText_FlagRange[] = _("FLAG RANGE");
 static const u8 sText_BikeMusic[] = _("BIKE MUSIC");
+static const u8 sText_LevelScale[] = _("LEVEL SCALING");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
@@ -275,6 +277,7 @@ static void BuildRows(void)
         AddRow(OPT_CREATURES, 0);
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
+        AddRow(OPT_LEVELSCALE, 0);
         break;
     case TAB_DISPLAY:
         AddRow(OPT_FULLSCREEN, 0);
@@ -348,7 +351,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_LEVELSCALE:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -481,6 +484,7 @@ static u8 Current(u8 row)
     case OPT_FR_PLACE:    return FriendPlace(MP_Spectate_Friend(arg, FALSE));
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
+    case OPT_LEVELSCALE:  return gMpConfig.levelScaling != 0;
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     }
@@ -530,6 +534,7 @@ static void Change(u8 row, int dir)
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
+    case OPT_LEVELSCALE:  gMpConfig.levelScaling = !gMpConfig.levelScaling; MP_SendRoomRules(); break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
@@ -595,6 +600,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FLAGRANGE:   return sText_FlagRange;
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
+    case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FR_SHOW:     return sText_Show;
@@ -703,6 +709,9 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S OWN SONG ON A BIKE");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
+    else if (opt == OPT_LEVELSCALE)
+        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s" : "WILD AND TRAINERS KEEP UP WITH YOU",
+                 MP_LevelScaling() ? "ON" : "OFF");
     else if (opt == OPT_BUTTONICONS)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)

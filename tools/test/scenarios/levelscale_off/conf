@@ -1,0 +1,7 @@
+# LEVEL SCALING off: ROXANNE and Route 101's wild Pokémon keep their own levels
+MODE=1
+WARP=11,3,5,3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40,277:40 MOEMON_LEVEL_SCALING=0"
+EXPECT_A=("action menu at frame")
+UNEXPECT_A=("level scale:")

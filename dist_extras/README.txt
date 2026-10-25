@@ -146,6 +146,17 @@ TEAMING UP FOR A DOUBLE BATTLE
   never grew and daily events never came round (SKIP THE INTRO also left
   them off). Old saves are fixed when loaded: Berry trees carry on from where
   they are (no years of growth at once) and daily events get one new day.
+* LEVEL SCALING (OPTIONS > GAME, ON at first): wild Moemon and trainers keep
+  up with your team, so you can't out-level the whole game. Your team's level
+  is the average of your three highest-level Moemon (in a co-op battle, of
+  everyone's teams). Trainers' strongest Moemon are at that level, Gym
+  Leaders, team bosses, your rival, the Elite Four and the Champion 2 to 5
+  above it, wild Moemon 3 to 6 below. Nothing is ever weaker than it
+  normally is, and nothing goes above a cap that rises with your badges (18
+  with none, 65 with all eight; no cap after the League). A raised Moemon
+  evolves if it would have by that level and knows its moves for it. EXP
+  is the usual for its level. Online, the host's setting counts. The Battle
+  Frontier and mass outbreaks keep their own levels.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   use their items and they choose their moves smarter.
@@ -639,6 +650,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Summary screen: the stat your Moemon's nature raises is red, the one it
   lowers is blue. SELECT on the first page renames a Moemon
   (traded ones too; the NAME RATER in SLATEPORT renames them as well).
+  LEFT on the first page goes to the last one, RIGHT on the last back to
+  the first.
 * POKeMON STADIUM COLORS: a Moemon with a nickname gets its own colors,
   worked out the way POKeMON STADIUM does it: its nickname, its OT's name
   and the Trainer ID pick a hue within what suits its species. The same
@@ -1117,7 +1130,8 @@ away; a MOEMON doesn't suffer or sulk because you didn't play.
                 Each MOEMON likes some things more than others, and some
                 would rather not be petted; it'll just step aside.
   JOURNAL       A page in its summary (after the POKE BALL page): what
-                you've noticed about it so far. A = next page.
+                you've noticed about it so far. A = next page (when there
+                is more than one: the top shows A MORE).
 Big moments together (a badge, a hungry MOEMON fed, comfort when it was
 scared) can raise its friendship a little, once. A MOEMON that wants to
 come out wiggles on the party screen, and the hold-SELECT follower

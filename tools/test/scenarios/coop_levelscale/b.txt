@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 4000 is waiting for a partner
+wait 30
+press UP 12
+wait 20
+press UP 12
+waitfor action 8000
+wait 30
+quit

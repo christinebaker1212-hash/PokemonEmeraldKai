@@ -91,6 +91,9 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
+Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING, the host's online; the team's top-3 average,
+co-op seats average via MpState.top3; trainers, wild, scripted wild; badge caps, boss margins, evolutions; tests levelscale_*,
+coop_levelscale).
 Also battle weather on screen the whole battle (mp_battleweather.c: particles over the frame, the renderer hook gMpScenePixel
 for the sandstorm and tints; no per-turn weather lines; tests battle_weather*).
 Also followers on the ground (mp_followfx.c: the game's grass, sand, puddle, water, hot springs and reflection effects driven

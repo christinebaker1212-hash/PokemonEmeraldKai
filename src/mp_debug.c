@@ -310,6 +310,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
         BattleSetup_StartWildBattle();
     }
+    else if (strcmp(cmd, "summary") == 0)   // the summary screen's page and input mode
+    {
+        void MP_Summary_Debug(void);
+        MP_Summary_Debug();
+    }
+    else if (strcmp(cmd, "landwild") == 0)
+    {
+        // landwild - a wild battle with a Pokémon from this map's grass table, as an encounter makes it (its level
+        // through ChooseWildMonLevel: level scaling, mp_levelscale.c)
+        bool8 MP_RollExtraLandMon(struct Pokemon *out);   // wild_encounter.c
+        struct Pokemon m;
+        if (MP_RollExtraLandMon(&m))
+        {
+            ZeroEnemyPartyMons();
+            gEnemyParty[0] = m;
+            printf("[test] landwild: %d Lv%d\n", (int)GetMonData(&m, MON_DATA_SPECIES), (int)GetMonData(&m, MON_DATA_LEVEL));
+            BattleSetup_StartWildBattle();
+        }
+    }
     else if (strcmp(cmd, "triple") == 0)
     {
         // triple S:L S:L S:L [S:L...] - a local wild Triple Battle (you command party

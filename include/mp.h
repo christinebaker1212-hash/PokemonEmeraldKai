@@ -165,6 +165,7 @@ struct MpState
     s8 lifePx, lifePy; // ... the tile it stepped from (friends' games replay its exact path: a step merged
                        // into the next state still shows)
     u8 lifeFace;       // bits 0-1 its facing (0 down, 1 up, 2 left, 3 right), bits 2-4 its pace (pixels a frame)
+    u8 top3;           // the average level of their 3 highest-level Pokémon (level scaling, mp_levelscale.c)
 };
 #define MP_LIFE_NO_AUTO 127
 
@@ -217,6 +218,7 @@ struct MpConfig
     u8 autosaveMinutes;       // mp_autosave.c: quiet save on the map every N minutes (0 = off)
     u8 trainerPadding;        // host setting: co-op trainers get one extra Moemon (HOST A GAME > TEAM PADDING)
     u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
+    u8 levelScaling;          // OPTIONS > GAME > LEVEL SCALING (online the room host's counts; mp_levelscale.c)
     u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
     u8 spectateScale;         // ... each 1-4 times 240x160 (the size for friends without their own)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
@@ -274,6 +276,19 @@ void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
+bool8 MP_LevelScaling(void);     // ... and LEVEL SCALING
+bool8 MP_LevelScalingIsOurs(void);
+void MP_SendRoomRules(void);     // the host tells everyone again (a setting changed)
+// mp_levelscale.c: FF8-style level scaling
+u8 MP_LevelScale_Top3(void);
+u8 MP_LevelScale_TrainerMon(u16 trainerId, u8 normal, u8 partyMax);
+void MP_LevelScale_LogTrainer(u16 trainerId, u8 partyMax);
+u8 MP_LevelScale_Wild(u8 normal);
+void MP_LevelScale_ForgetPending(void);
+u16 MP_LevelScale_Evolve(u16 species, u8 level, u32 personality);
+void MP_LevelScale_EvolveMon(struct Pokemon *mon);
+void MP_LevelScale_WildMade(struct Pokemon *mon);
+void MP_LevelScale_CoopWild(struct Pokemon *mon);
 u8 MP_BattleAnimSpeed(void);     // the room host's ANIM SPEED: 0, 25 or 30 (percent faster)
 bool8 MP_BattleAnimInTask(void); // battle_gfx_sfx_util.c: the anim script steps in a task (not a move anim)
 const char *MP_OnlineLobbyAddress(void);
@@ -587,6 +602,9 @@ bool8 MP_Coop_IsTriple(void);
 s8 MP_Coop_SlotOwnerPlayer(u8 slot);     // battle party slot -> its owner (-1 = us)
 u8 MP_Coop_OwnBase(void);                // our first battle party slot
 u8 MP_Coop_SeatSize(void);               // Pokemon per player (3, or 2 in a triple)
+u8 MP_Coop_SeatCount(void);               // players in this co-op battle (1 when not in one)
+u8 MP_Coop_SeatPlayer(u8 seat);           // the player id in a seat
+u8 MP_Coop_Seat(void);                    // our seat
 s8 MP_Battle_PeerId(void);
 
 // sprite.c: palette slots for co-op sprites (borrowed NPC reflection slots or free ones)
@@ -1083,7 +1101,7 @@ enum {
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
-    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed (mp_main.c)
+    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed, u8 levelScaling (mp_main.c)
     MPR_CLOCK = 96,
     MPR_LIFE_FIRST = 97,       // MOéMON GARDEN: 97 verb on a friend's follower, 98 its answer, 99 a record (mp_life_social.c)            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,

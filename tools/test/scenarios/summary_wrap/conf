@@ -1,0 +1,7 @@
+# The summary screen: the pages wrap around (LEFT on INFO goes to the JOURNAL, RIGHT on the JOURNAL back to INFO), and
+# on a one-page JOURNAL A does nothing (it used to fall through to the moves pages' SWITCH and garble the page)
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:15,283:12"
+EXPECT_A=("summary: page 0 (pages 0-5) input" "summary: page 5 (pages 0-5) input journal pages 1" "journal: shown, 2 rows, 1 pages")
+UNEXPECT_A=("move select")

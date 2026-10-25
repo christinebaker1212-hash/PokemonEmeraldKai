@@ -221,6 +221,7 @@ static void MpJournal_HideTitle(void);
 static bool8 MpJournal_HandleInput(u8 taskId);
 static void MpJournal_Free(void);
 static void PrintTextOnWindow(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId);
+static void PrintAOrBButtonIcon(u8 windowId, bool8 bButton, u32 x);
 static void Task_HandleInput(u8);
 static void ChangeSummaryPokemon(u8, s8);
 static void Task_ChangeSummaryMon(u8);
@@ -1954,16 +1955,30 @@ static void ChangePage(u8 taskId, s8 delta)
     struct PokeSummary *summary = &sMonSummaryScreen->summary;
     s16 *data = gTasks[taskId].data;
 
+    s8 target;
+
     if (summary->isEgg)
         return;
-    else if (delta == -1 && sMonSummaryScreen->currPageIndex == sMonSummaryScreen->minPageIndex)
-        return;
-    else if (delta == 1 && sMonSummaryScreen->currPageIndex == sMonSummaryScreen->maxPageIndex)
+    // Moemon Co-op: the pages wrap around (LEFT on the first goes to the last, RIGHT on the last to the first)
+    target = sMonSummaryScreen->currPageIndex + delta;
+    if (target < sMonSummaryScreen->minPageIndex)
+        target = sMonSummaryScreen->maxPageIndex;
+    else if (target > sMonSummaryScreen->maxPageIndex)
+        target = sMonSummaryScreen->minPageIndex;
+    if (target == sMonSummaryScreen->currPageIndex)
         return;
 
     PlaySE(SE_SELECT);
     ClearPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
-    sMonSummaryScreen->currPageIndex += delta;
+    if (delta == -1 && target > sMonSummaryScreen->currPageIndex)
+    {
+        // scrolling left uncovers the layer underneath: it holds the page before, so put the last page there
+        u8 under = sMonSummaryScreen->bgDisplayOrder == 0 ? 1 : 2;
+        SetBgTilemapBuffer(under, sMonSummaryScreen->bgTilemapBuffers[target][0]);
+        ChangeBgX(under, 0, BG_COORD_SET);
+        ScheduleBgCopyTilemapToVram(under);
+    }
+    sMonSummaryScreen->currPageIndex = target;
     data[0] = 0;
     if (delta == 1)
         SetTaskFuncWithFollowupFunc(taskId, PssScrollRight, gTasks[taskId].func);
@@ -3228,6 +3243,10 @@ static const struct WindowTemplate sMpJournalTitleTemplate = {
 static const struct WindowTemplate sMpJournalBodyTemplate = {
     .bg = 0, .tilemapLeft = 11, .tilemapTop = 4, .width = 18, .height = 16, .paletteNum = 6, .baseBlock = 450,
 };
+// "A MORE" in the corner the other pages' prompts use, only when there's another page
+static const struct WindowTemplate sMpJournalPromptTemplate = {
+    .bg = 0, .tilemapLeft = 22, .tilemapTop = 0, .width = 8, .height = 2, .paletteNum = 7, .baseBlock = 762,
+};
 
 #define MPJ_ROWS     8       // rows on a page (the last one: the page count)
 #define MPJ_ROW_H    16      // one green or white row of the sheet
@@ -3237,6 +3256,7 @@ static EWRAM_DATA struct
 {
     u8 titleWindow;
     u8 bodyWindow;
+    u8 promptWindow;
     u8 page;
     u8 pages;
     u8 rowCount;
@@ -3246,6 +3266,7 @@ static EWRAM_DATA struct
 static const u8 sMpJournalText_Title[] = _("JOURNAL");
 static const u8 sMpJournalText_NoRecord[] = _("Spend time together in your party to get to know it.");
 static const u8 sMpJournalText_More[] = _("{A_BUTTON} more");
+static const u8 sMpJournalText_MorePrompt[] = _("MORE");
 
 static void MpJournal_InitWindows(void)
 {
@@ -3255,6 +3276,14 @@ static void MpJournal_InitWindows(void)
         return;
     sMpJournal->titleWindow = AddWindow(&sMpJournalTitleTemplate);
     sMpJournal->bodyWindow = AddWindow(&sMpJournalBodyTemplate);
+    sMpJournal->promptWindow = AddWindow(&sMpJournalPromptTemplate);
+    if (sMpJournal->promptWindow != WINDOW_NONE)
+    {
+        int x = GetStringRightAlignXOffset(FONT_NORMAL, sMpJournalText_MorePrompt, 62);
+        FillWindowPixelBuffer(sMpJournal->promptWindow, PIXEL_FILL(0));
+        PrintAOrBButtonIcon(sMpJournal->promptWindow, FALSE, x - 16 < 0 ? 0 : x - 16);
+        PrintTextOnWindow(sMpJournal->promptWindow, sMpJournalText_MorePrompt, x, 1, 0, 0);
+    }
     sMpJournal->page = 0;
     if (sMpJournal->titleWindow != WINDOW_NONE)
     {
@@ -3380,6 +3409,19 @@ static void MpJournal_Draw(void)
     }
     PutWindowTilemap(w);
     CopyWindowToVram(w, COPYWIN_FULL);
+    if (sMpJournal->promptWindow != WINDOW_NONE)
+    {
+        if (sMpJournal->pages > 1 && sMonSummaryScreen->currPageIndex == PSS_PAGE_JOURNAL)
+        {
+            PutWindowTilemap(sMpJournal->promptWindow);
+            CopyWindowToVram(sMpJournal->promptWindow, COPYWIN_FULL);
+        }
+        else
+        {
+            ClearWindowTilemap(sMpJournal->promptWindow);
+        }
+        ScheduleBgCopyTilemapToVram(0);
+    }
 }
 
 static void MpJournal_ShowPage(void)
@@ -3391,7 +3433,6 @@ static void MpJournal_ShowPage(void)
         PutWindowTilemap(sMpJournal->titleWindow);
         CopyWindowToVram(sMpJournal->titleWindow, COPYWIN_FULL);
     }
-    PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
     sMpJournal->page = 0;
     MpJournal_Build();
     MpJournal_Draw();
@@ -3404,7 +3445,8 @@ static void MpJournal_HidePage(void)
         return;
     if (sMpJournal->bodyWindow != WINDOW_NONE)
         ClearWindowTilemap(sMpJournal->bodyWindow);
-    ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+    if (sMpJournal->promptWindow != WINDOW_NONE)
+        ClearWindowTilemap(sMpJournal->promptWindow);
     MpJournal_HideTitle();
 }
 
@@ -3433,16 +3475,34 @@ static void MpJournal_Free(void)
     }
 }
 
-// A turns the page (TRUE = the input was used)
+// A turns the page (TRUE = the input was used). With one page A does nothing here: it must never fall through to the
+// moves pages' A (SWITCH), which garbled the journal
 static bool8 MpJournal_HandleInput(u8 taskId)
 {
-    if (sMpJournal == NULL || !JOY_NEW(A_BUTTON) || sMpJournal->pages <= 1)
+    if (sMpJournal == NULL || !JOY_NEW(A_BUTTON))
         return FALSE;
+    if (sMpJournal->pages <= 1)
+        return TRUE;
     sMpJournal->page = (sMpJournal->page + 1) % sMpJournal->pages;
     PlaySE(SE_SELECT);
     MpJournal_Draw();
     MPNet_Log("journal: page %u of %u", sMpJournal->page + 1, sMpJournal->pages);
     return TRUE;
+}
+
+// Moemon Co-op tests (mp summary): the page shown and whether it's taking input as usual or picking a move
+void MP_Summary_Debug(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_HandleInput), mode;
+    if (sMonSummaryScreen == NULL)
+    {
+        printf("[test] summary: closed\n");
+        return;
+    }
+    mode = taskId != TASK_NONE ? 0 : FindTaskIdByFunc(Task_HandleInput_MoveSelect) != TASK_NONE ? 1 : 2;
+    printf("[test] summary: page %d (pages %d-%d) %s journal pages %d\n", sMonSummaryScreen->currPageIndex,
+           sMonSummaryScreen->minPageIndex, sMonSummaryScreen->maxPageIndex, mode == 0 ? "input" : mode == 1 ? "move select" : "busy",
+           sMpJournal ? sMpJournal->pages : 0);
 }
 
 static void MpBall_RefreshCaughtBall(void)
