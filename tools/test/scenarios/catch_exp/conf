@@ -3,4 +3,5 @@
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:15+"
-EXPECT_A=("catch exp: hp 19/19, 10% of a faint" "[test] party: 281(")
+EXPECT_A=("10% of a faint" "[test] party: 281(")
+CHECK="tools/test/scenarios/catch_exp/check.sh"
