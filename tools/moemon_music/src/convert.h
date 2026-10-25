@@ -20,6 +20,10 @@ typedef struct {
     int loopMode;
     uint32_t loopStart, loopEnd;  // MIDI ticks, LOOP_CUSTOM
     uint64_t exclude;        // candidate tracks left out (bit per candidate)
+    const void *voices;      // GM fixes: the song's 128 voices (SfVoice), so drum notes a kit has no sound
+                             // for move to its closest sound (NULL: leave them)
+    const float *slotGain;   // GM fixes: a volume factor per voice slot (evens out how loud the game's
+                             // instruments are), applied to every VOL a track sends (NULL: none)
 } ConvOpts;
 
 typedef struct {
@@ -27,6 +31,7 @@ typedef struct {
     char name[64];
     int notes;
     int drum;                // MIDI channel 10
+    int drumMoved;           // drum notes moved to a sound the kit has
     int program;             // first program (-1 = none)
     int slot;                // first voice slot it selects (-1 = none / not converted)
 } ConvCand;

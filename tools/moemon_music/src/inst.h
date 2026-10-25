@@ -15,6 +15,15 @@ void voice_name(const SfVoice *v, char *buf, int n);       // the preset's name,
 void voice_detail(const SfVoice *v, char *buf, int n);     // sample / duty / kit and the envelope
 int voice_is_cgb(const SfVoice *v);
 int voice_is_group(const SfVoice *v);
+// The key a drum kit should play for MIDI drum note `key`: the key itself when the kit has a sound
+// there, else the closest sound it has (same kind of drum first, then the nearest note). Not a kit: key.
+int drum_resolve(const SfVoice *kit, int key);
+// How loud a voice plays in the game engine (a note at full volume and velocity; the loudest
+// 1/60 s of its first half second). Kits: the average of kick, snare and hi-hat.
+float voice_loudness(const SfVoice *v);
+// The factor that brings a voice to the loudness of the game's piano (what GM instruments are
+// balanced against), kept within 1/4 and 4.
+float voice_gm_gain(const SfVoice *v);
 // Voice <-> the text the project file and exports use, e.g.
 // "type=0x00 key=60 length=0 pansweep=0x00 ref=sample:sc88pro_flute adsr=255,0,255,165"
 void voice_to_text(const SfVoice *v, char *buf, int n);

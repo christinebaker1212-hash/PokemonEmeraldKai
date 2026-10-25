@@ -11,6 +11,7 @@ typedef struct {
     Conv c;
     int haveConv;
     EInst voices[128];
+    float gain[128];          // each slot's volume factor (1 = as the game plays it)
     ESong song;
     // from a quiet run through the song
     int totalFrames;          // to the end, or to the loop end

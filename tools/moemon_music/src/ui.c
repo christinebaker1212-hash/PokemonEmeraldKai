@@ -174,8 +174,19 @@ static void rebuild(void)
     else sFrames = pos < S.totalFrames ? pos : 0;
 }
 
+static void rebuild(void);
+
 static void voices_changed(void)
 {
+    // a different instrument changes its volume factor, and a different kit moves drum notes: convert again
+    int again = S.p.gmFixes && S.p.balance;
+    for (int i = 0; i < 128; i++)
+        if (S.c.slotDrum[i] && S.p.gmFixes) again = 1;
+    if (again) {
+        S.p.dirty = 1;
+        rebuild();
+        return;
+    }
     lock();
     studio_refresh_voices(&S);
     eng_refresh_instruments(&E);
@@ -575,7 +586,7 @@ static void draw_transport(void)
     // DirectSound voices in use (the game mixes 5 at once)
     int busy = eng_ds_busy(&E);
     char v[64];
-    int nv = E.numChans;
+    int nv = E.playing ? E.numChans : (have_song() ? S.p.voices : ENG_DS_CHANNELS);
     snprintf(v, sizeof(v), "Voices %d/%d", busy, nv);
     text(1036, y + 6, v, busy >= nv ? C_WARN : C_DIM);
     for (int i = 0; i < nv; i++) fill(1036 + i * 10, y + 26, 8, 8, i < busy ? (busy >= nv ? C_WARN : C_OK) : C_ROW);
@@ -709,6 +720,11 @@ static void draw_slots(void)
         snprintf(u, sizeof(u), "In the game: %s", sf_presets[pi].songs);
         textfit(x + 16, ey + 46, w - 32, u, C_DIM);
     }
+    if (S.p.gmFixes && S.p.balance && S.gain[sSelSlot] != 1.0f) {
+        char g[64];
+        snprintf(g, sizeof(g), "volume x%.2f", S.gain[sSelSlot]);
+        text(x + w - 16 - textw(g), ey + 8, g, C_OK);
+    }
     int by = ey + 70;
     if (button(x + 16, by, 160, 26, "Change...", 1)) open_instrument_picker();
     if (button(x + 182, by, 120, 26, "GM match", 1)) {
@@ -806,8 +822,9 @@ static void draw_song(void)
     }
     row += 26;
     if (p->gmFixes) {
-        text(col1, row, "GM fixes: expression, bend range, drum channel, loop clean-up.", C_DIM);
-        text(col1, row + 18, "Off = converted exactly like the game's own songs.", C_DIM);
+        if (checkbox(col1, row, "Even out instrument volumes (like GM)", &p->balance)) { p->dirty = 1; rebuild(); }
+        text(col1, row + 24, "GM fixes: expression, bend range, drums, loop clean-up, volumes.", C_DIM);
+        text(col1, row + 42, "Off = converted exactly like the game's own songs.", C_DIM);
     } else {
         text(col1, row, "Converted exactly like the game's own songs (mid2agb).", C_DIM);
     }

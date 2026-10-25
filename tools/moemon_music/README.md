@@ -14,7 +14,10 @@ song in a form the game can use.
 - **General MIDI in, game instruments out.** Each MIDI program starts as the closest of the
   game's 775 instruments (`GM_MAP` in `gen_soundfont.py`); channel 10 gets a game drum kit. Optional
   GM fixes: expression (CC11), RPN bend range, missing program changes, `loopStart` / `loopEnd`
-  markers and CC111, notes cut at the loop end, track state re-sent at the loop start.
+  markers and CC111, notes cut at the loop end, track state re-sent at the loop start, drum notes a
+  kit has no sound for moved to its closest sound (same kind of drum first, then the nearest note),
+  and instrument volumes evened out: each instrument's loudness is measured in the engine against
+  the game's piano and the factor goes into the track's VOL commands (*Even out instrument volumes*).
 - **Projects.** `.mmsproj` is a text file holding every setting and instrument choice, with the
   MIDI inside, so it opens anywhere.
 - **Exports.** `.kaisong` (one file: song, voicegroup, sample names; layout and loader plan in

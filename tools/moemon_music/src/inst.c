@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "inst.h"
 
 const SfVoice VOICE_PLACEHOLDER = {1, 60, 0, 0, 2, -1, -1, 0, 0, 15, 0};
@@ -201,4 +202,96 @@ int song_group_by_name(const char *name)
 {
     for (int i = 0; i < SF_NUM_SONG_GROUPS; i++) if (!strcmp(sf_song_group_names[i], name)) return i;
     return -1;
+}
+
+// General MIDI drums that can stand in for each other, closest first.
+static const struct { uint8_t key; uint8_t alt[8]; } kDrumAlt[] = {
+    {35, {36}}, {36, {35}},
+    {37, {38, 40, 39, 75, 76}}, {38, {40, 37, 39}}, {39, {38, 40, 37}}, {40, {38, 39, 37}},
+    {41, {43, 45, 47, 48, 50, 35, 36}}, {43, {41, 45, 47, 48, 50}}, {45, {47, 43, 48, 41, 50}},
+    {47, {45, 48, 43, 50, 41}}, {48, {50, 47, 45, 43, 41}}, {50, {48, 47, 45, 43, 41}},
+    {42, {44, 46, 54, 70, 69}}, {44, {42, 46, 54}}, {46, {42, 44, 49, 55, 54}},
+    {49, {57, 55, 52, 51, 46}}, {57, {49, 55, 52, 51}}, {55, {49, 57, 52, 46}}, {52, {49, 57, 55}},
+    {51, {59, 53, 49, 42}}, {59, {51, 53, 49}}, {53, {51, 59, 56, 80, 81}},
+    {54, {69, 70, 42, 46}}, {56, {53, 67, 68, 80}}, {58, {69, 70, 54}},
+    {60, {61, 62, 63, 64, 65, 66}}, {61, {60, 64, 63, 62, 66, 65}}, {62, {63, 60, 64, 61}},
+    {63, {62, 64, 60, 61}}, {64, {63, 61, 62, 66}}, {65, {66, 60, 61}}, {66, {65, 61, 64}},
+    {67, {68, 56, 76}}, {68, {67, 56, 77}}, {69, {70, 54, 42}}, {70, {69, 54, 42}},
+    {71, {72, 78, 79}}, {72, {71, 79}}, {73, {74, 69, 70}}, {74, {73, 69}},
+    {75, {76, 77, 37}}, {76, {77, 75, 37}}, {77, {76, 75}}, {78, {79, 62}}, {79, {78, 63}},
+    {80, {81, 53}}, {81, {80, 53}},
+};
+
+static int kit_has(const SfVoice *g, int key)
+{
+    if (key < 0 || key > 127) return 0;
+    const SfVoice *v = &g[key];
+    if (v->type & 0xC0) return 0;                       // the game never plays a kit inside a kit
+    if (voice_same(v, &VOICE_PLACEHOLDER)) return 0;    // an empty slot (it would beep)
+    if (!(v->type & 7) && v->ref < 0) return 0;          // a sample this build doesn't have
+    return 1;
+}
+
+int drum_resolve(const SfVoice *kit, int key)
+{
+    if (!(kit->type & 0x80) || kit->sub < 0 || kit->sub >= SF_NUM_GROUPS) return key;
+    const SfVoice *g = sf_groups[kit->sub];
+    if (kit_has(g, key)) return key;
+    for (size_t i = 0; i < sizeof(kDrumAlt) / sizeof(kDrumAlt[0]); i++) {
+        if (kDrumAlt[i].key != key) continue;
+        for (int j = 0; j < 8 && kDrumAlt[i].alt[j]; j++)
+            if (kit_has(g, kDrumAlt[i].alt[j])) return kDrumAlt[i].alt[j];
+        break;
+    }
+    for (int d = 1; d < 128; d++) {   // the nearest note with a sound, lower first
+        if (kit_has(g, key - d)) return key - d;
+        if (kit_has(g, key + d)) return key + d;
+    }
+    return key;
+}
+
+static float loudness_at(const SfVoice *v, int key)
+{
+    static Engine e;
+    static EInst inst;
+    static float buf[ENG_FRAME_SAMPLES * 2];
+    eng_init(&e);
+    inst_make(v, &inst);
+    eng_preview_on(&e, &inst, key, 127);
+    float best = 0;
+    for (int f = 0; f < 30; f++) {
+        if (f == 20) eng_preview_off(&e);
+        eng_frame(&e, buf);
+        double sum = 0;
+        for (int i = 0; i < ENG_FRAME_SAMPLES * 2; i++) sum += (double)buf[i] * buf[i];
+        float rms = (float)sqrt(sum / (ENG_FRAME_SAMPLES * 2));
+        if (rms > best) best = rms;
+    }
+    return best;
+}
+
+float voice_loudness(const SfVoice *v)
+{
+    if (v->type & 0x80) {
+        static const int keys[] = {36, 38, 42};
+        float sum = 0;
+        int n = 0;
+        for (int i = 0; i < 3; i++) {
+            float l = loudness_at(v, drum_resolve(v, keys[i]));
+            if (l > 0) { sum += l; n++; }
+        }
+        return n ? sum / n : 0;
+    }
+    return loudness_at(v, 60);
+}
+
+float voice_gm_gain(const SfVoice *v)
+{
+    static float ref = -1;
+    if (ref < 0) ref = voice_loudness(&sf_presets[sf_gm_preset[0]].voice);
+    if (voice_same(v, &VOICE_PLACEHOLDER)) return 1.0f;
+    float l = voice_loudness(v);
+    if (l <= 0 || ref <= 0) return 1.0f;
+    float g = ref / l;
+    return g < 0.25f ? 0.25f : g > 4.0f ? 4.0f : g;
 }

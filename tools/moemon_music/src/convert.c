@@ -8,6 +8,7 @@
 #include <math.h>
 #include "convert.h"
 #include "sf.h"
+#include "inst.h"
 
 enum {
     EV_EndOfTie = 0x01, EV_Label = 0x11, EV_LoopEnd = 0x12, EV_LoopEndBegin = 0x13, EV_LoopBegin = 0x14,
@@ -593,7 +594,7 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
                     x.param1 = (uint8_t)(cd->drum && drumSlot[cs.program] >= 0 ? drumSlot[cs.program] : cs.program);
                     push(&tr, x);
                 }
-                x.type = EV_Controller; x.param1 = 7; x.param2 = cs.vol * cs.expr / 127; push(&tr, x);
+                x.type = EV_Controller; x.param1 = 7; x.param2 = cs.vol * cs.expr / 127; x.note = 1; push(&tr, x); x.note = 0;
                 if (cs.havePan) { x.param1 = 10; x.param2 = cs.pan; push(&tr, x); }
                 if (cs.haveMod) { x.param1 = 1; x.param2 = cs.mod; push(&tr, x); }
                 if (cs.haveBendr) { x.param1 = 0x14; x.param2 = cs.bendr; push(&tr, x); }
@@ -619,6 +620,12 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
                 }
                 firstNoteSeen = 1;
                 e.type = EV_Note; e.note = me->a; e.param1 = me->b; e.param2 = (int32_t)dur;
+                if (gm && cd->drum && o->voices) {
+                    int prog = cs.program < 0 ? 0 : cs.program;
+                    int slot = drumSlot[prog] >= 0 ? drumSlot[prog] : prog;
+                    int nk = drum_resolve(&((const SfVoice *)o->voices)[slot], me->a);
+                    if (nk != me->a) { e.note = (uint8_t)nk; c->cand[k].drumMoved++; }
+                }
                 break;
             }
             case 0xB0:
@@ -627,7 +634,7 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
                     int cc = me->a, v = me->b;
                     if (cc == 7 || cc == 11) {
                         if (cc == 7) cs.vol = v; else cs.expr = v;
-                        e.param1 = 7; e.param2 = cs.vol * cs.expr / 127;
+                        e.param1 = 7; e.param2 = cs.vol * cs.expr / 127; e.note = 1;
                     } else if (cc == 101) { cs.rpnM = v; continue; }
                     else if (cc == 100) { cs.rpnL = v; continue; }
                     else if (cc == 6) {
@@ -665,6 +672,38 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
         eot.time = t->end;
         eot.type = EV_EndOfTrack;
         push(&tr, eot);
+
+        // GM fixes: each instrument's volume factor, on every VOL the track sends (VOL is sent again
+        // whenever the track changes instrument, so the factor follows the instrument)
+        if (gm && o->slotGain) {
+            stable_sort(&tr);
+            EvList g = {0};
+            int raw = 127, slot = cd->drum && drumSlot[0] >= 0 ? drumSlot[0] : 0;
+            for (int i = 0; i < tr.n; i++) {
+                Ev e = tr.v[i];
+                if (e.type == EV_Controller && e.param1 == 7) {
+                    raw = e.param2;
+                    float v = raw * o->slotGain[slot] + 0.5f;
+                    e.param2 = v > 127 ? 127 : (int)v;
+                    e.note = 0;
+                    push(&g, e);
+                } else if (e.type == EV_InstrumentChange) {
+                    push(&g, e);
+                    slot = e.param1 & 0x7F;
+                    Ev vol = {0};
+                    vol.time = e.time;
+                    vol.type = EV_Controller;
+                    vol.param1 = 7;
+                    float v = raw * o->slotGain[slot] + 0.5f;
+                    vol.param2 = v > 127 ? 127 : (int)v;
+                    push(&g, vol);
+                } else {
+                    push(&g, e);
+                }
+            }
+            free(tr.v);
+            tr = g;
+        }
 
         // which slots this track selects
         for (int i = 0; i < tr.n; i++) {

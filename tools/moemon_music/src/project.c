@@ -37,6 +37,7 @@ void project_init(Project *p)
     p->gmFixes = 1;
     p->loopMode = LOOP_MARKERS;
     p->voices = 5;
+    p->balance = 1;
     for (int i = 0; i < 128; i++) p->voice[i] = VOICE_PLACEHOLDER;
 }
 
@@ -57,6 +58,7 @@ void project_conv_opts(const Project *p, ConvOpts *o)
     o->loopStart = p->loopStart;
     o->loopEnd = p->loopEnd;
     o->exclude = p->muted;
+    o->voices = p->voice;
 }
 
 uint8_t project_reverb_byte(const Project *p)
@@ -124,6 +126,7 @@ int project_load_midi(Project *p, const char *path, char *err, int errlen)
         np.priority = s->priority;
         np.exactGate = s->exact;
         np.gmFixes = 0;
+        np.balance = 0;
         int g = song_group_by_name(s->group);
         if (g >= 0) {
             Conv c;
@@ -190,6 +193,7 @@ int project_save(Project *p, const char *path, char *err, int errlen)
     fprintf(f, "loop=%s\n", LOOP_NAMES[p->loopMode]);
     fprintf(f, "more_tracks=%d\n", p->moreTracks);
     fprintf(f, "voices=%d\n", p->voices);
+    fprintf(f, "balance=%d\n", p->balance);
     fprintf(f, "loop_start=%u\n", p->loopStart);
     fprintf(f, "loop_end=%u\n", p->loopEnd);
     fprintf(f, "muted=");
@@ -249,6 +253,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "gm_fixes")) np.gmFixes = atoi(v);
         else if (!strcmp(k, "loop")) { for (int i = 0; i < 4; i++) if (!strcmp(v, LOOP_NAMES[i])) np.loopMode = i; }
         else if (!strcmp(k, "more_tracks")) np.moreTracks = atoi(v);
+        else if (!strcmp(k, "balance")) np.balance = atoi(v);
         else if (!strcmp(k, "voices")) np.voices = atoi(v) < 1 ? 5 : atoi(v) > 12 ? 12 : atoi(v);
         else if (!strcmp(k, "loop_start")) np.loopStart = (uint32_t)strtoul(v, NULL, 10);
         else if (!strcmp(k, "loop_end")) np.loopEnd = (uint32_t)strtoul(v, NULL, 10);

@@ -46,6 +46,17 @@ int studio_rebuild(Studio *s)
         return 0;
     s->haveConv = 1;
     project_default_voices(&s->p, &s->c, 0);
+    // with the instruments chosen: drum notes move to sounds the kits have, and each instrument's
+    // volume is evened out, so convert once more
+    for (int i = 0; i < 128; i++) s->gain[i] = 1.0f;
+    if (s->p.gmFixes && s->p.balance)
+        for (int i = 0; i < 128; i++)
+            if (s->c.slotUsed[i]) s->gain[i] = voice_gm_gain(&s->p.voice[i]);
+    o.slotGain = s->p.gmFixes && s->p.balance ? s->gain : NULL;
+    if (s->p.gmFixes) {
+        conv_free(&s->c);
+        if (!conv_build(&s->c, &s->p.midi, &o, s->msg, sizeof(s->msg))) { s->haveConv = 0; return 0; }
+    }
     studio_refresh_voices(s);
     s->song.ntracks = s->c.ntracks;
     for (int i = 0; i < s->c.ntracks; i++) {

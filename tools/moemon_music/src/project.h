@@ -26,6 +26,7 @@ typedef struct {
     int loopMode;
     int moreTracks;           // go over the game's 10 tracks (plays and exports up to 32)
     int voices;               // sample voices mixed at once: 5 like the game, up to 12
+    int balance;              // GM fixes: even out instrument volumes (the game's piano as the reference)
     uint32_t loopStart, loopEnd;   // MIDI ticks (LOOP_CUSTOM)
     uint64_t muted;           // candidate tracks left out
     uint64_t solo;            // candidate tracks soloed (listening only, not saved)
