@@ -77,6 +77,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
 | `garden_doing` | What Garden Pokémon do shows: MUDKIP swims in the pond (cut off at the water line, a dive under), TREECKO climbs a tree, SANDSHREW digs half in the ground (sink / up / water checked from the log) |
+| `bag_pockets` | The BAG's eight pockets, RIGHT through all of them and round again; POTION marked FAVORITE shows in FAVORITES, UNFAVORITE takes it out (`mp bagview`) |
+| `bag_more` | MAY's bag: MEDICINE scrolls, SELECT moves an item (gray frame where it was, the save pocket in its new order), TM info, BERRY tag and back |
+| `item_desc` | Gen 4 item descriptions wrapped to their windows: the BAG's box fits them, a POKé MART's narrow box turns pages by itself (`mp itemdesc`) |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
 | `levelscale_wild` | a Lv46 team on Route 101: wild Pokémon capped at 18 with no badges, halfway (22-24) with eight; the rare evolved form (forced on) |
 | `levelscale_options` | OPTIONS > GAME > LEVEL SCALING's page with the keys: WILD HIGH, BOSS MARGIN +0, saved in the ini; a wild one at 40-43, never the evolved form (forced off) |
@@ -126,6 +129,10 @@ Species ids are the game's internal ones (Torchic 280, Mudkip 283; 252-276 are u
 The Windows build under Wine (`apt install wine64`), from the unzipped package:
 
     tools/test/wine_smoke.sh PKG_DIR     # solo boot + battle, then Windows server + Windows host + Linux joiner at 250 ms
+
+REJOIN through a friend's own server (three sessions of one joiner, a host on a local server):
+
+    tools/test/rejoin_smoke.sh [OUT]     # invite code + password once, then REJOIN and the remembered code (no typing)
 
 Lower level, for trying things out (results and logs land in DIR):
 

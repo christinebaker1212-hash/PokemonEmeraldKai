@@ -609,7 +609,10 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
     }
 
     FillWindowPixelBuffer(WIN_ITEM_DESCRIPTION, PIXEL_FILL(0));
-    BuyMenuPrint(WIN_ITEM_DESCRIPTION, description, 3, 1, 0, COLORID_NORMAL);
+    if (item != LIST_CANCEL && sMartInfo.martType == MART_TYPE_NORMAL)   // Moemon Co-op: wrapped to the box (mp_itemdesc.c)
+        MP_ItemDesc_Print(WIN_ITEM_DESCRIPTION, description, 3, 1, 14 * 8 - 4, 48, sShopBuyMenuTextColors[COLORID_NORMAL], PIXEL_FILL(0));
+    else
+        BuyMenuPrint(WIN_ITEM_DESCRIPTION, description, 3, 1, 0, COLORID_NORMAL);
 }
 
 static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)

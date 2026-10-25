@@ -180,6 +180,9 @@ static EWRAM_DATA struct
     u8 after;
     u8 message[240];
     u8 inviteCode[WALDA_PHRASE_LENGTH + 1];
+    char joiningCode[24];      // the invite code being joined (remembered once we're in: gMpConfig.lastJoinCode)
+    bool8 rejoining;           // REJOIN to a friend's own server (its own message when it can't be reached)
+    bool8 triedKey;            // joining a locked room with the key remembered from last time (wrong: ask the password)
     u8 note[2][WALDA_PHRASE_LENGTH + 1];       // welcome note lines, game charset
     char codeHost[24];
     int codePort;
@@ -377,7 +380,7 @@ static void BuildMainItems(void)
             sSetup.mainItems[sSetup.mainCount++] = MAIN_PATCHES;
         return;
     }
-    if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0])
+    if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0] && strcmp(gMpConfig.lastRoomAddr, "home") != 0)
         sSetup.mainItems[sSetup.mainCount++] = MAIN_REJOIN;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_HOST;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_JOIN;
@@ -806,6 +809,9 @@ static void DrawJoin(void)
 
 static void EnterJoinList(void)
 {
+    sSetup.joiningCode[0] = 0;
+    sSetup.rejoining = FALSE;
+    sSetup.triedKey = FALSE;
     sSetup.screen = SCR_JOIN;
     sSetup.joinCursor = 0;
     sSetup.scroll = 0;
@@ -821,6 +827,18 @@ static void EnterJoinList(void)
     }
     RefreshJoinList();
     DrawScreen();
+}
+
+// The key of the room we were last in (from the ini)
+static void LastRoomKey(u8 *key)
+{
+    int i;
+    for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
+    {
+        unsigned v = 0;
+        sscanf(gMpConfig.lastRoomKey + i * 2, "%2x", &v);
+        key[i] = (u8)v;
+    }
 }
 
 static void JoinEntryNow(u8 index)
@@ -1386,19 +1404,20 @@ static void HandleMain(void)
         case MAIN_REJOIN:
         {
             u8 key[MP_ROOM_KEY_SIZE];
-            int i;
-            for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
-            {
-                unsigned v = 0;
-                sscanf(gMpConfig.lastRoomKey + i * 2, "%2x", &v);
-                key[i] = (u8)v;
-            }
-            if (!MP_HasOnlineLobby())
+            LastRoomKey(key);
+            // Moemon Co-op: where the room was: a friend's own server (joined with an invite code, or at home) or
+            // the online lobby. No code or password to type again.
+            sSetup.rejoining = gMpConfig.lastRoomAddr[0] != 0;
+            if (sSetup.rejoining)
+                MP_Lobby_Connect(gMpConfig.lastRoomAddr, FALSE);
+            else if (!MP_HasOnlineLobby())
             {
                 EnterJoinList();
                 break;
             }
-            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            else
+                MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            MPNet_Log("rejoin: %s at %s", gMpConfig.lastRoom, sSetup.rejoining ? gMpConfig.lastRoomAddr : "the online lobby");
             MP_Lobby_JoinRoomWithKey(gMpConfig.lastRoom, key);
             MP_AsciiToGame(sSetup.roomName, gMpConfig.lastRoom, WALDA_PHRASE_LENGTH);
             StartWorking(WORK_JOIN);
@@ -1552,7 +1571,9 @@ static void HandleJoin(void)
         struct JoinEntry *e = &sSetup.entries[sSetup.joinCursor];
         if (e->byCode)
         {
+            // (the last code that worked, ready to use again)
             memset(sSetup.inviteCode, EOS, sizeof(sSetup.inviteCode));
+            MP_AsciiToGame(sSetup.inviteCode, gMpConfig.lastJoinCode, WALDA_PHRASE_LENGTH);
             OpenTextEntry(6, NAMING_SCREEN_COOP_CODE, sSetup.inviteCode);
             return;
         }
@@ -1628,6 +1649,17 @@ static void OnRoomJoined(void)
     snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", MP_Lobby_RoomName());
     for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
         snprintf(gMpConfig.lastRoomKey + i * 2, 3, "%02x", key[i]);
+    // Moemon Co-op: and where it is, so REJOIN finds it again (a friend's own server too: no code to type)
+    if (sSetup.work == WORK_HOST_LOCAL)
+        snprintf(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr), "home");
+    else if (!MP_Lobby_ServerAddress(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr)))
+        gMpConfig.lastRoomAddr[0] = 0;
+    if (sSetup.joiningCode[0])
+        snprintf(gMpConfig.lastJoinCode, sizeof(gMpConfig.lastJoinCode), "%s", sSetup.joiningCode);
+    sSetup.joiningCode[0] = 0;
+    sSetup.rejoining = FALSE;
+    sSetup.triedKey = FALSE;
+    MPNet_Log("joined %s (at %s)", gMpConfig.lastRoom, gMpConfig.lastRoomAddr[0] ? gMpConfig.lastRoomAddr : "the online lobby");
     MP_SaveConfig();
     MPLan_StopSearch();
     if (sSetup.work == WORK_HOST_ONLINE)
@@ -1689,7 +1721,18 @@ static void HandleWorking(void)
         }
         sSetup.pendingJoin = 0;
         memset(sSetup.password, EOS, sizeof(sSetup.password));
-        if (e->room.flags & MP_ROOM_FLAG_LOCKED)
+        if ((e->room.flags & MP_ROOM_FLAG_LOCKED) && gMpConfig.lastRoomKey[0] && strcmp(e->room.name, gMpConfig.lastRoom) == 0)
+        {
+            // Moemon Co-op: the room we were in last time: its key, no password to type again
+            u8 key[MP_ROOM_KEY_SIZE];
+            LastRoomKey(key);
+            MPNet_Log("invite code: %s again, with its key", e->room.name);
+            sSetup.triedKey = TRUE;
+            MP_Lobby_JoinRoomWithKey(e->room.name, key);
+            MP_AsciiToGame(sSetup.roomName, e->room.name, WALDA_PHRASE_LENGTH);
+            StartWorking(WORK_JOIN);
+        }
+        else if (e->room.flags & MP_ROOM_FLAG_LOCKED)
             OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
         else
             JoinEntryNow(0);
@@ -1716,6 +1759,18 @@ static void HandleWorking(void)
         MP_Lobby_Disconnect();
         if (sSetup.work == WORK_CODE)
             ShowMessage("Couldn't reach your friend's game. Check the code, and ask them to make sure they're still hosting.", TRUE, AFTER_JOIN);
+        else if (sSetup.triedKey && err == MP_LOBBY_ERR_BAD_PASSWORD)
+        {
+            // the host changed the password since: ask it (the room's entry is still there to join)
+            sSetup.triedKey = FALSE;
+            MPNet_Log("invite code: the room's password changed, asking for it");
+            OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+        }
+        else if (sSetup.rejoining && (err == MP_LOBBY_ERR_UNREACHABLE || err == MP_LOBBY_ERR_NOT_FOUND))
+        {
+            sSetup.rejoining = FALSE;
+            ShowMessage("Couldn't reach your friend's game. Ask them to make sure they're hosting. If their invite code changed, use JOIN A GAME > ENTER CODE OR IP.", TRUE, AFTER_JOIN);
+        }
         else
             ShowMessage(LobbyErrorText(err), TRUE, sSetup.work == WORK_JOIN ? AFTER_JOIN : AFTER_HOST);
         return;
@@ -1875,6 +1930,7 @@ static void CB2_ReturnFromTextEntry(void)
             break;
         }
     haveAddress:
+        snprintf(sSetup.joiningCode, sizeof(sSetup.joiningCode), "%s", code);
         snprintf(addr, sizeof(addr), "%u.%u.%u.%u:%d", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255, port);
         snprintf(sSetup.codeHost, sizeof(sSetup.codeHost), "%u.%u.%u.%u", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255);
         sSetup.codePort = port;

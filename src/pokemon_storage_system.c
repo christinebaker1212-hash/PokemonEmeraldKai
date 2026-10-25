@@ -9484,7 +9484,7 @@ static void PrintItemDescription(void)
         description = GetItemDescription(sStorage->displayMonItemId);
 
     FillWindowPixelBuffer(WIN_ITEM_DESC, PIXEL_FILL(1));
-    AddTextPrinterParameterized5(WIN_ITEM_DESC, FONT_NORMAL, description, 4, 0, 0, NULL, 0, 1);
+    MP_ItemDesc_Print(WIN_ITEM_DESC, description, 4, 0, 21 * 8 - 8, 56, NULL, PIXEL_FILL(1));   // Moemon Co-op: wrapped (mp_itemdesc.c)
 }
 
 static void InitItemInfoWindow(void)

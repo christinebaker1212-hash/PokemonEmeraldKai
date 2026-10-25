@@ -729,6 +729,7 @@ void VDraw(void)
     MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
+    MP_BagUI_Composite(image);      // ... and the BAG's
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)

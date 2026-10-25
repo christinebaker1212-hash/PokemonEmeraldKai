@@ -217,6 +217,8 @@ struct MpConfig
     char lastRoom[24];
     char lastRoomKey[65];     // hex SHA-256 room key (not the password)
     char lastHostName[24];
+    char lastRoomAddr[64];    // where lastRoom is: "" the online lobby, "home" hosted on this PC, else a friend's server
+    char lastJoinCode[24];    // the invite code (or address) that last got us into a game (ENTER CODE OR IP starts with it)
     char welcome[40];             // the host's welcome note: "line 1|line 2" (ASCII)
     char name[32];
     struct MpAppearance app;
@@ -287,6 +289,7 @@ void MP_Lobby_JoinRoom(const char *room, const char *password);
 void MP_Lobby_JoinRoomWithKey(const char *room, const u8 *key);
 const u8 *MP_Lobby_RoomKey(void);
 const char *MP_Lobby_RoomName(void);
+bool8 MP_Lobby_ServerAddress(char *out, int len);   // the server we're on, "host:port" (FALSE: the online lobby or none)
 // The co-op version a server or room reported when it didn't match ours (0 = it didn't say)
 u16 MP_Lobby_OtherVersion(void);
 void MP_Lobby_SetOtherVersion(u16 version);
@@ -359,6 +362,16 @@ bool8 MP_Bag_IsNew(u16 item);
 void MP_Bag_ClearNew(u16 item);
 void MP_Bag_NoteAdded(u16 item);
 void MP_Bag_ResetMarks(void);
+// the BAG's eight pockets, views of the save's five (mp_bag.c)
+enum { MP_BAGVIEW_ITEMS, MP_BAGVIEW_MEDICINE, MP_BAGVIEW_BALLS, MP_BAGVIEW_TMHM, MP_BAGVIEW_BERRIES, MP_BAGVIEW_BATTLE,
+       MP_BAGVIEW_KEY, MP_BAGVIEW_FAVORITES, MP_BAGVIEW_COUNT };
+struct ItemSlot;
+u8 MP_Bag_ViewOfItem(u16 item);
+u8 MP_Bag_ViewPocket(u8 view);
+u8 MP_Bag_PocketView(u8 pocket);
+u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max);
+bool8 MP_Bag_IsFavorite(u16 item);
+void MP_Bag_SetFavorite(u16 item, bool8 on);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 // mp_hue.c: Pokémon Stadium hues for nicknamed Pokémon
 #define MP_HUE_TAG_BASE 0x6F00   // 0x6F00-0x6F7F: sprite palette tags of turned palettes
@@ -412,6 +425,10 @@ void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
 void MP_Candy_Composite(u16 *frame);
+void MP_BagUI_Composite(u16 *frame);   // mp_bagui.c: the BAG screen's picture
+// mp_itemdesc.c: an item's description wrapped to a window (normal or narrow font; pages when it still doesn't fit)
+void MP_ItemDesc_Print(u8 windowId, const u8 *desc, u8 x, u8 y, u16 width, u16 height, const u8 *colors, u8 fill);
+void MP_ItemDesc_Update(void);
 void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
 // The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel

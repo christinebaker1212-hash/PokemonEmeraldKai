@@ -46,14 +46,19 @@ enum {
     ITEMMENUSPRITE_COUNT = ITEMMENUSPRITE_SWAP_LINE + ITEMMENU_SWAP_LINE_LENGTH,
 };
 
+// Moemon Co-op: the BAG shows eight pockets (HGSS's), views of the save's five (mp_bag.c MP_BAGVIEW_*): `pocket` and
+// the positions are the view's
+#define BAG_VIEWS 8
+#define BAG_LIST_ROWS 5   // item rows shown at a time
+
 struct BagPosition
 {
     MainCallback exitCallback;
     u8 location;
     u8 pocket;
     u16 pocketSwitchArrowPos;
-    u16 cursorPosition[POCKETS_COUNT];
-    u16 scrollPosition[POCKETS_COUNT];
+    u16 cursorPosition[BAG_VIEWS];
+    u16 scrollPosition[BAG_VIEWS];
 };
 
 extern struct BagPosition gBagPosition;
@@ -73,10 +78,10 @@ struct BagMenu
     u8 pocketScrollArrowsTask;
     u8 pocketSwitchArrowsTask;
     const u8 *contextMenuItemsPtr;
-    u8 contextMenuItemsBuffer[4];
+    u8 contextMenuItemsBuffer[6];
     u8 contextMenuNumItems;
-    u8 numItemStacks[POCKETS_COUNT];
-    u8 numShownItems[POCKETS_COUNT];
+    u16 numItemStacks[BAG_VIEWS];
+    u16 numShownItems[BAG_VIEWS];
     s16 graphicsLoadState;
     u8 unused2[14];
     u8 ALIGNED(4) pocketNameBuffer[32][32];
@@ -94,6 +99,7 @@ void CB2_BagMenuFromBattle(void);
 void UpdatePocketListPosition(u8 pocketId);
 void CB2_ReturnToBagMenuPocket(void);
 void CB2_BagMenuFromStartMenu(void);
+void CB2_BagMenuRun(void);
 u8 GetItemListPosition(u8 pocketId);
 bool8 UseRegisteredKeyItemOnField(void);
 void CB2_GoToSellMenu(void);

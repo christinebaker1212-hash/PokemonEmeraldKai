@@ -821,13 +821,70 @@ The OPTION header (the game's own name, "Moémon Emerald Kai") is printed with t
 
 ## Bigger BAG (mp_bag.c)
 
-gBagPockets point at mp_bag.c's arrays (MP_BAG_*_COUNT in constants/global.h: 200 items, 64 of the others; stacks
+gBagPockets point at mp_bag.c's arrays (MP_BAG_*_COUNT in constants/global.h: 224 items, 64 of the others; stacks
 MP_BAG_ITEM_CAPACITY 999, BAG_ITEM_CAPACITY_DIGITS 3; the Battle Pyramid's u8 bag keeps MAX_BAG_ITEM_CAPACITY 99).
 SaveBlock1's pockets are untouched in size: save.c copies the first slots there before every write
 (MP_Bag_SyncToSaveBlock in WriteSaveSectorOrSlot / HandleReplaceSector), sdl2.c StoreSaveFile writes the rest to
 "<save>.bag" with gSaveCounter and a checksum of SaveBlock1's pockets, and LoadGameSave takes them back only when both
 match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loading tries "<save>.bag" then each
 "<save>.bakN.bag", so a .bak renamed back to the save gets its own extra slots. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
+
+## REJOIN and remembered invite codes (mp_setup.c)
+
+OnRoomJoined saves the room (last_room, last_room_key: the room's key, not its password) and where it is:
+last_room_address = "" (the online lobby), "home" (hosted on this PC: no REJOIN, its server ends with the session) or a
+friend's own server's "host:port" (MP_Lobby_ServerAddress: the server we're on when it isn't the online lobby: an
+invite code, a typed address, a home-network game). MAIN_REJOIN connects there and joins with the key, so a game joined
+with an invite code (and a password) comes back without either. ENTER CODE OR IP starts with last_join_code (the code
+that got us in, saved only once a join succeeds); a locked room that is the last one we were in is joined with its
+key (no password), and a wrong key (the host changed the password) asks for the password. A friend's server that
+doesn't answer on REJOIN says so and points at ENTER CODE OR IP (its address may have changed). Test:
+tools/test/rejoin_smoke.sh (b1 address + password, b2 REJOIN, b3 the remembered code).
+
+## Item descriptions from the Gen 4 games (mp_itemdesc.c)
+
+src/data/text/item_descriptions.h holds the Gen 4 games' texts (HEARTGOLD / SOULSILVER, else PLATINUM, else DIAMOND /
+PEARL; a TM's or HM's is its move's Gen 4 text): tools/moemon_items/gen_desc.py from PokeAPI's csv tables, in the
+game's style (MOéMON, POKé, names in capitals). Items those games don't have keep their texts. The texts have no line
+breaks: MP_ItemDesc_Print wraps one to its window's width (the normal font if it fits the window's lines, else the
+narrow one) and, where it still doesn't fit (the narrow boxes of shops, the PC's item storage and the BATTLE PYRAMID
+bag), shows a page of lines at a time (MP_ItemDesc_Update from MP_FrameUpdate, every 2.5 s, the first page 3.5 s).
+The pager stops as soon as the window holds anything it didn't draw (a checksum of the window's pixels), the screen
+changes or another description is printed. Callers: item_menu.c, shop.c, player_pc.c, battle_pyramid_bag.c,
+pokemon_storage_system.c. Debug `mp itemdesc`. Test item_desc.
+
+## The BAG's eight pockets (HGSS-style screen)
+
+The BAG shows eight pockets in this order: ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, BATTLE ITEMS, KEY ITEMS,
+FAVORITES (MP_BAGVIEW_*, include/mp.h). They're views of the save's five pockets, which stay as they are:
+MP_Bag_ViewOfItem puts an ITEMS-pocket item in MEDICINE (battle usage MEDICINE, or the field functions Medicine / PPUp /
+PPRecovery / RareCandy / SacredAsh), BATTLE ITEMS (battle usage OTHER: X items, GUARD SPEC., POKé DOLL...) or ITEMS
+(the rest); the other pockets are one view each. FAVORITES holds every item the player marked (MP_Bag_IsFavorite:
+MP_SaveData "bag:fav%d", 31 items a key), from any pocket, in pocket order. MP_BAG_ITEMS_COUNT is 224: room for every
+ITEMS-pocket item (201) at once.
+
+item_menu.c: gBagPosition.pocket, cursorPosition[] and scrollPosition[] are the VIEW's (BAG_VIEWS 8). sViewSlots[v]
+holds each view's stacks as pointers into the save pockets; UpdatePocketItemList (whatever pocket it's given) compacts and
+sorts all five pockets, then rebuilds every view. ViewItem / ViewQuantity read the view under the cursor; anything that
+depends on the kind of item uses GetItemPocket(item) (the context menu, TM data, berries, holding rules), never the
+pocket shown. GetItemListPosition (item.c RemoveBagItem's hint) maps the cursor back to its save slot (SlotPlace).
+SELECT moves an item within its view: it goes before the item it's dropped on in the save pocket (after the view's last
+one at the end), the others keep their places, and that save pocket's sort order becomes MANUAL; START sorts the save
+pocket (ITEMS, MEDICINE and BATTLE ITEMS share one order). FAVORITES has neither. Every pocket's item menu has FAVORITE /
+UNFAVORITE (ACTION_FAVORITE, its label set by OpenContextMenu; 2x2 menus fill their blank, ITEMS gets a 2x3 one); the
+item menus sit over the list (15 tiles wide for UNFAVORITE). Wally's tutorial opens on MEDICINE (the POTION) and goes
+right to POKé BALLS. berry_tag_screen.c follows the BERRIES view with BAG_LIST_ROWS rows.
+
+The screen: tools/moemon_bag/gen_bag.py fits docs/user_images/31.png (256x192) to 240x160 and writes
+src/mp/mp_bag_gfx.h (a full-color background, its colors, the eight pocket icons). mp_bagui.c MP_BagUI_Composite (sdl2.c,
+after MP_Candy_Composite) draws it under the game's layers wherever nothing else drew (CB2_BagMenuRun only), plus the
+pocket shown picked out (red icon, red frame) and a red frame on the list's cursor row (gray on an item being moved);
+the fade comes from the backdrop color (white). BG2, the old background, is hidden; palette 1's colors 1-3 are the
+design's text colors (dark / white / shadow; 7 is black). Windows: the list x14 y1 15x12 (5 rows, BAG_LIST_FIRST_Y 9,
+no cursor arrow), the description x5 y14 24x6 (white text, COLORID_DESC), the pocket name on the plate x1 y11, the sort
+hint left of the bag. Emerald's BRENDAN / MAY bag (per gender, its pocket frame = the view's save pocket, FAVORITES =
+ITEMS) at 74,41; the item icon in the description box. No rotating ball and no switch arrows: L / R / LEFT / RIGHT go
+straight to the next pocket, round and round. Test bag_pockets (`mp bagview V`).
 
 ## Player stand-ins wear the player's look
 Scenes that show the player as another object take Brendan / May by gender: the Battle Tent and Frontier battle

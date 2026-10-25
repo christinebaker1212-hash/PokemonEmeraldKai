@@ -30,6 +30,7 @@
 #include "task.h"
 #include "window.h"
 #include "menu_specialized.h"
+#include "mp.h"
 
 // Top level PC menu options
 enum {
@@ -1076,9 +1077,12 @@ static void ItemStorage_PrintDescription(s32 id)
 
     // Get item description (or Cancel text)
     if (id != LIST_CANCEL)
-        description = (u8 *)GetItemDescription(gSaveBlock1Ptr->pcItems[id].itemId);
-    else
-        description = ItemStorage_GetMessage(MSG_GO_BACK_TO_PREV);
+    {
+        // Moemon Co-op: wrapped to the box (mp_itemdesc.c)
+        MP_ItemDesc_Print(windowId, GetItemDescription(gSaveBlock1Ptr->pcItems[id].itemId), 0, 1, 13 * 8, 48, NULL, PIXEL_FILL(1));
+        return;
+    }
+    description = ItemStorage_GetMessage(MSG_GO_BACK_TO_PREV);
 
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     AddTextPrinterParameterized(windowId, FONT_NORMAL, description, 0, 1, 0, NULL);

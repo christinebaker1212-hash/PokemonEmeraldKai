@@ -1,0 +1,17 @@
+pressuntil A setup 5000
+wait 30
+shot b1_main
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 90
+type @ADDR@\n
+waitlog 900 invite code entered
+wait 120
+type secret\n
+waitlog 1200 joined
+wait 30
+shot b1_joined
+quit

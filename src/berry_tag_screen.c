@@ -4,6 +4,7 @@
 #include "decompress.h"
 #include "event_object_movement.h"
 #include "item_menu.h"
+#include "mp.h"
 #include "item.h"
 #include "item_use.h"
 #include "main.h"
@@ -554,7 +555,7 @@ static void Task_HandleInput(u8 taskId)
 static void TryChangeDisplayedBerry(u8 taskId, s8 toMove)
 {
     s16 *data = gTasks[taskId].data;
-    s16 currPocketPosition = gBagPosition.scrollPosition[BERRIES_POCKET] + gBagPosition.cursorPosition[BERRIES_POCKET];
+    s16 currPocketPosition = gBagPosition.scrollPosition[MP_BAGVIEW_BERRIES] + gBagPosition.cursorPosition[MP_BAGVIEW_BERRIES];
     u32 newPocketPosition = currPocketPosition + toMove;
     if (newPocketPosition < gBagPockets[BERRIES_POCKET].capacity && BagGetItemIdByPocketPosition(POCKET_BERRIES, newPocketPosition) != ITEM_NONE)
     {
@@ -572,18 +573,21 @@ static void TryChangeDisplayedBerry(u8 taskId, s8 toMove)
 
 static void HandleBagCursorPositionChange(s8 toMove)
 {
-    u16 *scrollPos = &gBagPosition.scrollPosition[BERRIES_POCKET];
-    u16 *cursorPos = &gBagPosition.cursorPosition[BERRIES_POCKET];
+    u16 *scrollPos = &gBagPosition.scrollPosition[MP_BAGVIEW_BERRIES];
+    u16 *cursorPos = &gBagPosition.cursorPosition[MP_BAGVIEW_BERRIES];
+    // Moemon Co-op: as the BAG's list moves (list_menu.c, BAG_LIST_ROWS rows; the BERRIES pocket shows every Berry
+    // in the pocket's order)
     if (toMove > 0)
     {
-        if (*cursorPos < 4 || BagGetItemIdByPocketPosition(POCKET_BERRIES, *scrollPos + 8) == 0)
+        if (*cursorPos < BAG_LIST_ROWS / 2 + BAG_LIST_ROWS % 2
+         || BagGetItemIdByPocketPosition(POCKET_BERRIES, *scrollPos + BAG_LIST_ROWS) == 0)
             *cursorPos += toMove;
         else
             *scrollPos += toMove;
     }
     else
     {
-        if (*cursorPos > 3 || *scrollPos == 0)
+        if (*cursorPos > BAG_LIST_ROWS - (BAG_LIST_ROWS / 2 + BAG_LIST_ROWS % 2) - 1 || *scrollPos == 0)
             *cursorPos += toMove;
         else
             *scrollPos += toMove;

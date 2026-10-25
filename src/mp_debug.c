@@ -1109,6 +1109,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("\n");
         }
     }
+    else if (strcmp(cmd, "itemdesc") == 0)
+    {
+        // itemdesc - how the last item description was laid out (font, lines, paging)
+        void MP_ItemDesc_Debug(void);
+        MP_ItemDesc_Debug();
+    }
+    else if (strcmp(cmd, "bagview") == 0)
+    {
+        // bagview VIEW - the item numbers one of the BAG's eight pockets shows (MP_BAGVIEW_*), in its order
+        static struct ItemSlot *slots[MP_BAG_ITEMS_COUNT + MP_BAG_KEYITEMS_COUNT + MP_BAG_POKEBALLS_COUNT
+                                      + MP_BAG_TMHM_COUNT + MP_BAG_BERRIES_COUNT];
+        int v = 0;
+        u16 i, n;
+        sscanf(arg, "%d", &v);
+        if (v >= 0 && v < MP_BAGVIEW_COUNT)
+        {
+            n = MP_Bag_ViewSlots(v, slots, ARRAY_COUNT(slots));
+            printf("[test] bagview %d:", v);
+            for (i = 0; i < n; i++)
+                printf(" %d", slots[i]->itemId);
+            printf("\n");
+        }
+    }
     else if (strcmp(cmd, "bag") == 0)
     {
         // bag - how many kinds of item each pocket holds, and the biggest stack
@@ -1497,6 +1520,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void ShowPokemonStorageSystemPC(void);
         LockPlayerFieldControls();
         ShowPokemonStorageSystemPC();
+    }
+    else if (strcmp(cmd, "itempc") == 0)
+    {
+        // itempc - the player's PC (ITEM STORAGE, MAILBOX...), as from a PC
+        void PlayerPC(void);
+        LockPlayerFieldControls();
+        PlayerPC();
     }
     else if (strcmp(cmd, "holdtest") == 0)
     {

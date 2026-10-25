@@ -19,6 +19,8 @@ press DOWN 2
 wait 6
 press A 2
 wait 90
+press RIGHT 2
+wait 20
 shot bag_items
 press DOWN 2
 wait 20

@@ -88,6 +88,12 @@ If the game says it couldn't open your router:
      host again: the game notices Radmin VPN and gives you an invite code
      that works inside that network.
 
+Joining the same friend again: the CO-OP screen remembers the last game you
+joined. Pick REJOIN <name> at the top and you're back in, with no code or
+password to type. ENTER CODE OR IP also starts with the last code you used,
+so pressing START (or Enter) is enough. If your friend's code has changed
+(a new internet address), type the new one once and it's remembered again.
+
 If a friend can't connect:
   * Internet games never show up in your friend's JOIN list (that list is
     only for the same home network). Your friend must choose JOIN A GAME >
@@ -776,11 +782,17 @@ HANDY EXTRAS (they save time, they don't make the game easier)
                   SHALOUR SABLE, BIG MALASADA, PEWTERCRUNCHY (Pewter
                   Crunchies), RAGECANDYBAR: heal all status problems and
                   confusion, from the BAG or in battle, like a LAVA COOKIE.
+* Bag: eight pockets, in this order: ITEMS, MEDICINE, POKE BALLS, TMs & HMs,
+  BERRIES, BATTLE ITEMS, KEY ITEMS and FAVORITES. LEFT / RIGHT (or L / R)
+  go from one to the next, round and round; the row of icons shows where you
+  are. FAVORITE in an item's menu puts it in FAVORITES too (as many items as
+  you like, from every pocket); UNFAVORITE takes it out again.
 * Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
   Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
   OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items
   with SELECT; moving one switches the pocket to MANUAL). Each pocket keeps
-  its order, shown under {START} at the left. TMs and Berries are by number
+  its order, shown under {START} at the left (ITEMS, MEDICINE and BATTLE
+  ITEMS share one; FAVORITES follows the others). TMs and Berries are by number
   until you pick something else. Items you just got have a "!" before their
   name until the cursor lands on them.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
@@ -823,7 +835,7 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   game started over an older save waits until you save it by hand once.
   moemon_coop.ini: autosave = minutes (0 = off). Older saves are kept as
   <save>.bak1-3.
-* A bigger BAG: up to 200 kinds of items, 64 kinds of POKE BALLS, key items,
+* A bigger BAG: room for every kind of item, 64 kinds of POKE BALLS, key items,
   TMs/HMs and BERRIES, and up to 999 of each. The save file stays a normal
   Emerald save (its own BAG is the first slots); the rest is kept next to it
   in <save>.bag, written with every save (the .bak files keep theirs as

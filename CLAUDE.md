@@ -99,6 +99,13 @@ Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING an
 online, set on HOST A GAME > GAME RULES; the team's top-3 average, co-op seats average via MpState.top3; trainers, wild (halfway
 by default), scripted wild; badge caps, boss margins, trainer evolutions, a raised wild one's evolved form as a rare encounter;
 tests levelscale_*, coop_levelscale, host_rules).
+Also the BAG's eight pockets (ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, BATTLE ITEMS, KEY ITEMS, FAVORITES: views of
+the save's five pockets, MP_BAGVIEW_*; gBagPosition is per view, use GetItemPocket(item) for anything about the item; the
+HGSS-style screen from docs/user_images/31.png drawn in full color by mp_bagui.c; COOP_NOTES "The BAG's eight pockets";
+tests bag_pockets, bag_more). Also item descriptions from the Gen 4 games (tools/moemon_items/gen_desc.py from PokeAPI's
+tables; no line breaks: mp_itemdesc.c MP_ItemDesc_Print wraps them to each window, narrow font or self-turning pages when
+they don't fit; test item_desc) and REJOIN that remembers where the room is (a friend's own server too) plus the last
+invite code (COOP_NOTES "REJOIN and remembered invite codes"; tools/test/rejoin_smoke.sh).
 Also the Garden's BERRY farm (mp_farm.c: the game's own BERRY trees, ids 100-119, framed soil stamped as plots open; online the room host's
 farm through MP_Farm_Tree in GetBerryTreeInfo, plant / pick asked of the host; GA_FARM Pokémon work by nature; COOP_NOTES "BERRY farm"; tests farm_*).
 Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin; big sprites:

@@ -1,0 +1,81 @@
+pressuntil A field 5000
+wait 200
+mp item 13 1
+mp item 14 1
+mp item 15 1
+mp item 16 1
+mp item 17 1
+mp item 18 1
+mp item 19 1
+mp item 20 1
+mp item 21 1
+mp item 86 1
+mp item 289 1
+mp item 339 1
+mp item 139 3
+mp item 133 2
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+shot medicine
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 20
+shot scrolled
+press SELECT 2
+wait 10
+press DOWN 2
+wait 8
+press DOWN 2
+wait 20
+shot moving
+press SELECT 2
+wait 20
+mp bagorder 0
+mp bagview 1
+shot moved
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 10
+shot tmhm
+press UP 2
+wait 10
+press A 2
+wait 20
+shot tm_menu
+press B 2
+wait 20
+press RIGHT 2
+wait 20
+press A 2
+wait 20
+press A 2
+wait 90
+shot berry_tag
+press DOWN 2
+wait 40
+shot berry_tag2
+press B 2
+wait 90
+shot berries_back
+quit

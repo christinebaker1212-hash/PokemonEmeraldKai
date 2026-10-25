@@ -345,6 +345,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "last_room") == 0) snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", val);
         else if (strcmp(key, "last_room_key") == 0 && strlen(val) == MP_ROOM_KEY_SIZE * 2) snprintf(gMpConfig.lastRoomKey, sizeof(gMpConfig.lastRoomKey), "%s", val);
         else if (strcmp(key, "last_host_name") == 0) snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", val);
+        else if (strcmp(key, "last_room_address") == 0) snprintf(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr), "%s", val);
+        else if (strcmp(key, "last_join_code") == 0) snprintf(gMpConfig.lastJoinCode, sizeof(gMpConfig.lastJoinCode), "%s", val);
         else if (strcmp(key, "welcome") == 0) snprintf(gMpConfig.welcome, sizeof(gMpConfig.welcome), "%s", val);
         else if (strcmp(key, "sprite") == 0)
         {
@@ -496,6 +498,8 @@ void MP_SaveConfig(void)
         "autosave = %d\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
+        "; where that room is (empty: the online lobby; home: hosted on this PC) and the code that got you in\n"
+        "last_room_address = %s\nlast_join_code = %s\n"
         "; shown to friends who join a server you host (HOST A GAME > WELCOME NOTE); | starts line 2\n"
         "welcome = %s\n"
         "; servers you host: co-op trainers get one extra Moemon, so Double / Triple Battles work\n"
@@ -522,7 +526,7 @@ void MP_SaveConfig(void)
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling,
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
@@ -1569,6 +1573,23 @@ void MP_Lobby_Connect(const char *address, bool8 isLocal)
     OpenConnection();
 }
 
+// The server we're connected to, "host:port" (FALSE: the online lobby, or none)
+bool8 MP_Lobby_ServerAddress(char *out, int len)
+{
+    char host[128];
+    int port = MP_DEFAULT_PORT;
+    if (sLobby.host[0] == 0)
+        return FALSE;
+    if (MP_OnlineLobbyAddress()[0])
+    {
+        MPNet_ParseAddress(MP_OnlineLobbyAddress(), host, sizeof(host), &port);
+        if (strcmp(host, sLobby.host) == 0 && port == sLobby.port)
+            return FALSE;
+    }
+    snprintf(out, len, "%s:%d", sLobby.host, sLobby.port);
+    return TRUE;
+}
+
 void MP_Lobby_Disconnect(void)
 {
     if (MPNet_ClientStatus() != MPNET_DISCONNECTED && sLobby.state == MP_LOBBY_IN_ROOM)
@@ -1885,6 +1906,7 @@ void MP_FrameUpdate(void)
     MP_Achieve_Update();        // achievements are personal: offline too
     MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes
+    MP_ItemDesc_Update();       // the next page of an item's description too long for its window (mp_itemdesc.c)
     MpUi_RefreshIcons();        // help lines follow keyboard / pad switches
 
     if (!sInitDone)

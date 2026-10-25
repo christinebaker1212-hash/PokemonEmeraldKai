@@ -1,0 +1,12 @@
+# Item descriptions from the Gen 4 games, wrapped to their windows: in the BAG (POTION, POKé BALL) they fit the
+# description box (three lines: POTION's in the normal font, POKé BALL's in the narrow one); a POKé MART's narrow
+# box shows GREAT BALL's in pages that turn by themselves and come round again, and moving to another item starts that one's; the PC's ITEM STORAGE (its POTION)
+# pages too. Shots bag_medicine, bag_balls, mart_page1, mart_page2, mart_page1_again, mart_pokeball, pc_withdraw,
+# pc_withdraw_page2.
+MODE=1
+TMO=120
+EXPECT_A=("[test] itemdesc: font 1, 3 lines, 3 shown, top 0, paging 0" "[test] itemdesc: font 7, 3 lines, 3 shown, top 0, paging 0"
+          "[test] itemdesc: font 7, 5 lines, 3 shown, top 0, paging 1" "[test] itemdesc: font 7, 5 lines, 3 shown, top 3, paging 1"
+)
+UNEXPECT_A=("[heap] out of memory")
+CHECK="bash tools/test/scenarios/item_desc/check.sh"

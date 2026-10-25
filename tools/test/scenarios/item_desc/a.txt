@@ -1,0 +1,55 @@
+pressuntil A field 5000
+wait 200
+mp item 1 1
+mp item 13 1
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+shot bag_medicine
+mp itemdesc
+press RIGHT 2
+wait 20
+shot bag_balls
+mp itemdesc
+pressuntil B field 900
+wait 30
+mp mart 3 4 13
+wait 40
+press A 2
+wait 90
+shot mart_page1
+mp itemdesc
+wait 230
+shot mart_page2
+mp itemdesc
+wait 170
+shot mart_page1_again
+mp itemdesc
+press DOWN 2
+wait 20
+shot mart_pokeball
+mp itemdesc
+pressuntil B field 900
+wait 30
+mp itempc
+wait 90
+press A 2
+wait 60
+press A 2
+wait 60
+press A 2
+wait 90
+shot pc_withdraw
+mp itemdesc
+wait 230
+shot pc_withdraw_page2
+mp itemdesc
+quit
