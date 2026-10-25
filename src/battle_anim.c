@@ -91,6 +91,10 @@ static void LoadMoveBg(u16 bgId);
 
 EWRAM_DATA static const u8 *sBattleAnimScriptPtr = NULL;
 EWRAM_DATA static const u8 *sBattleAnimScriptRetAddr = NULL;
+// Moemon Kai: calls nest (newer animations call routines that call routines); the stock scripts use one level
+#define ANIM_CALL_DEPTH 8
+static const u8 *sAnimCallStack[ANIM_CALL_DEPTH];
+static u8 sAnimCallDepth;
 EWRAM_DATA void (*gAnimScriptCallback)(void) = NULL;
 EWRAM_DATA static s8 sAnimFramesToWait = 0;
 EWRAM_DATA bool8 gAnimScriptActive = FALSE;
@@ -240,6 +244,7 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     sBattleAnimScriptPtr = animsTable[tableId];
     gAnimScriptActive = TRUE;
     sAnimFramesToWait = 0;
+    sAnimCallDepth = 0;
     gAnimScriptCallback = RunAnimScriptCommand;
 
     for (i = 0; i < ANIM_SPRITE_INDEX_COUNT; i++)
@@ -1048,11 +1053,15 @@ static void Cmd_call(void)
 {
     sBattleAnimScriptPtr++;
     sBattleAnimScriptRetAddr = sBattleAnimScriptPtr + DSIZEPTR;
+    if (sAnimCallDepth < ANIM_CALL_DEPTH)
+        sAnimCallStack[sAnimCallDepth++] = sBattleAnimScriptRetAddr;
     sBattleAnimScriptPtr = T2_READ_PTR(sBattleAnimScriptPtr);
 }
 
 static void Cmd_return(void)
 {
+    if (sAnimCallDepth > 0)
+        sBattleAnimScriptRetAddr = sAnimCallStack[--sAnimCallDepth];
     sBattleAnimScriptPtr = sBattleAnimScriptRetAddr;
 }
 

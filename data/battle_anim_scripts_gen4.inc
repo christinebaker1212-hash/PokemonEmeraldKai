@@ -98,24 +98,7 @@ Move_GYRO_BALL:
 	end
 
 Move_HEALING_WISH:
-	loadspritegfx ANIM_TAG_GREEN_SPARKLE
-	setalpha 0, 16
-	createvisualtask AnimTask_AlphaFadeIn, 3, 0, 16, 16, 0, 1
-	playsewithpan SE_M_MOONLIGHT, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, -12, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, -24, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 21, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 0, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 10, 0
-	delay 20
-	createvisualtask AnimTask_MoonlightEndFade, 2
-	waitforvisualfinish
-	end
+	goto Move_WISH
 
 Move_BRINE:
 	goto Move_WATER_PULSE
@@ -822,13 +805,7 @@ Move_EARTH_POWER:
 	end
 
 Move_SWITCHEROO:
-	loadspritegfx ANIM_TAG_ITEM_BAG
-	fadetobg BG_DARK
-	waitbgfadein
-	call G4_SwapItems
-	restorebg
-	waitbgfadein
-	end
+	goto Move_TRICK
 
 Move_GIGA_IMPACT:
 	goto Move_DOUBLE_EDGE
@@ -1435,39 +1412,7 @@ Move_SPACIAL_REND:
 	goto Move_PSYCHO_BOOST
 
 Move_LUNAR_DANCE:
-	loadspritegfx ANIM_TAG_GREEN_SPARKLE
-	loadspritegfx ANIM_TAG_HOLLOW_ORB
-	loadspritegfx ANIM_TAG_MOON
-	setalpha 0, 16
-	simple_palette_blend selector=F_PAL_BG, delay=1, initial_blend_y=0, target_blend_y=16, color=RGB_BLACK
-	waitforvisualfinish
-	createsprite gMoonSpriteTemplate, ANIM_ATTACKER, 2, 120, 56
-	createvisualtask AnimTask_AlphaFadeIn, 3, 0, 16, 16, 0, 1
-	playsewithpan SE_M_MOONLIGHT, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, -12, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, -18, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 21, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 0, 0
-	delay 30
-	createsprite gMoonlightSparkleSpriteTemplate, ANIM_ATTACKER, 40, 10, 0
-	delay 20
-	createvisualtask AnimTask_MoonlightEndFade, 2
-	createvisualtask AnimTask_DragonDanceWaver, 5
-	playsewithpan SE_M_TELEPORT, SOUND_PAN_ATTACKER
-	delay 8
-	createvisualtask AnimTask_BlendPalInAndOutByTag, 5, ANIM_TAG_HOLLOW_ORB, RGB(0, 0, 19), 14, 0, 3
-	call G4_CreateDragonDanceOrbs
-	delay 30
-	playsewithpan SE_M_TELEPORT, SOUND_PAN_ATTACKER
-	delay 30
-	playsewithpan SE_M_TELEPORT, SOUND_PAN_ATTACKER
-	waitforvisualfinish
-	delay 1
-	end
+	goto Move_MOONLIGHT
 
 Move_CRUSH_GRIP:
 	goto Move_VICE_GRIP
@@ -1482,21 +1427,7 @@ Move_SEED_FLARE:
 	goto Move_SOLAR_BEAM
 
 Move_OMINOUS_WIND:
-	loadspritegfx ANIM_TAG_SPARKLE_6
-	panse SE_M_GUST, SOUND_PAN_ATTACKER, SOUND_PAN_TARGET 2, 0
-	playsewithpan SE_M_MORNING_SUN, 0
-	delay 0
-	monbg ANIM_DEF_PARTNER
-	@bankBG_over_partnerBG
-	delay 0
-	createvisualtask AnimTask_BlendBattleAnimPalExclude, 10, ANIM_TARGET, 0, 0, 0, RGB_BLACK
-	delay 0
-	createvisualtask AnimTask_GetAttackerSide, 2
-	jumpargeq 7, 1, G4_OminousWindFadeToBg
-	fadetobg BG_GHOST
-	waitbgfadeout
-	createvisualtask AnimTask_StartSlidingBg, 5, RGB(0, 16, 1), 0, 0, -1
-	goto G4_OminousWindHit
+	goto Move_SILVER_WIND
 
 Move_SHADOW_FORCE:
 	choosetwoturnanim ShadowForceVanish, ShadowForceStrike
@@ -1544,7 +1475,7 @@ ShadowForceStrike:
 	waitbgfadein
 	goto ShadowForceEnd
 
-@ ---- routines shared by the animations above (from pokeemerald-expansion, G4_ prefixed)
+@ ---- routines shared by the animations above (from pokeemerald-expansion, prefixed)
 G4_CreateBite:
 	playsewithpan SE_M_BITE, SOUND_PAN_TARGET
 	create_sharp_teeth_sprite ANIM_ATTACKER, 2, x=0, y=-32, animation=0, x_velocity=0/256, y_velocity=819/256, half_duration=10
@@ -1752,48 +1683,6 @@ G4_MindReaderEyeSpikeEffect:
 	createsprite gTealAlertSpriteTemplate, ANIM_ATTACKER, 4, 35, 40, 6
 	delay 2
 	return
-G4_OminousWindFadeToBg:
-	fadetobg BG_GHOST
-	waitbgfadeout
-	createvisualtask AnimTask_StartSlidingBg, 5, -1535, 0, 0, -1
-	goto G4_OminousWindHit
-G4_OminousWindHit:
-	delay 0
-	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 0, 4, 4, RGB_BLACK
-	waitbgfadein
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_TARGET, 66, -32, 16, 0, 6, 2, 3, 1
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_TARGET, 66, -8, 18, 64, 3, 2, 2, 1
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_ATTACKER, 120, -24, 18, 90, 5, 1, 2, 1
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_ATTACKER, 120, -40, 14, 128, 4, 1, 2, 1
-	delay 0
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_TARGET, 66, -32, 16, 0, 6, 2, 3, 1
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_TARGET, 66, -8, 18, 64, 3, 2, 2, 1
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_ATTACKER, 120, -24, 18, 90, 5, 1, 2, 1
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_ATTACKER, 120, -40, 14, 128, 4, 1, 2, 1
-	delay 0
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, -32, 16, 0, 6, 2, 3, 1
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, -8, 18, 64, 3, 2, 2, 1
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_ATTACKER, 120, -24, 18, 90, 5, 1, 2, 1
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_ATTACKER, 120, -40, 14, 128, 4, 1, 2, 1
-	delay 6
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_TARGET, 66, -4, 16, 0, 6, 1, 2, 1
-	createsprite gSilverWindBigSparkSpriteTemplate, ANIM_TARGET, 66, -16, 12, 192, 5, 2, 3, 1
-	delay 0
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_TARGET, 66, -4, 16, 0, 6, 1, 2, 1
-	createsprite gSilverWindMediumSparkSpriteTemplate, ANIM_TARGET, 66, -16, 12, 192, 5, 2, 3, 1
-	delay 0
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, -4, 16, 0, 6, 1, 2, 1
-	createsprite gSilverWindSmallSparkSpriteTemplate, ANIM_TARGET, 66, -16, 12, 192, 5, 2, 3, 1
-	waitforvisualfinish
-	playsewithpan SE_M_GUST2, SOUND_PAN_TARGET
-	clearmonbg ANIM_DEF_PARTNER
-	delay 0
-	restorebg
-	waitbgfadeout
-	createvisualtask AnimTask_BlendBattleAnimPalExclude, 10, ANIM_TARGET, 0, 4, 0, RGB_BLACK
-	setarg 7, -1
-	waitbgfadein
-	end
 G4_PoisonBubblesEffect:
 	createsprite gPoisonBubbleSpriteTemplate, ANIM_TARGET, 2, 10, 10, 0
 	playsewithpan SE_M_TOXIC, SOUND_PAN_TARGET
@@ -1869,6 +1758,7 @@ G4_SetBugBgPlayer:
 	fadetobg BG_BUG_PLAYER
 	waitbgfadeout
 	createvisualtask AnimTask_StartSlidingBg, 5, -1536, 0, 0, -1
+	goto G4_SetBugBgFade
 G4_SetHighSpeedBg:
 	createvisualtask AnimTask_GetAttackerSide, 2
 	jumprettrue G4_SetHighSpeedBgPlayer
@@ -1881,6 +1771,7 @@ G4_SetHighSpeedBgFade:
 	return
 G4_SetHighSpeedBgPlayer:
 	fadetobg BG_HIGHSPEED_PLAYER
+	goto G4_SetHighSpeedBgFade
 G4_SetImpactBackground:
 	delay 2
 	createvisualtask AnimTask_IsContest, 2
@@ -1910,6 +1801,7 @@ G4_SetSkyBg:
 	fadetobg BG_SKY
 	waitbgfadeout
 	createvisualtask AnimTask_StartSlidingBg, 5, -2304, 768, 1, -1
+	goto G4_SetSkyBgContinue
 G4_SetSkyBgContest:
 	fadetobg BG_SKY_CONTESTS
 	waitbgfadeout
@@ -1935,31 +1827,6 @@ G4_StockpileAbsorb:
 	delay 1
 	create_stockpile_absorption_orb_sprite ANIM_ATTACKER, 2, x=-55, y=34, duration=13
 	delay 1
-	return
-G4_SwapItems:
-	create_trick_bag_sprite ANIM_ATTACKER, 2, initial_y=-40, wave_offset=80
-	create_trick_bag_sprite ANIM_ATTACKER, 2, initial_y=-40, wave_offset=208
-	delay 16
-	playsewithpan SE_M_SKETCH, 0
-	createvisualtask AnimTask_StretchTargetUp, 3
-	createvisualtask AnimTask_StretchAttackerUp, 3
-	delay 30
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 24
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 16
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 16
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 16
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 16
-	playsewithpan SE_M_DOUBLE_TEAM, 0
-	delay 16
-	playsewithpan SE_M_ATTRACT, 0
-	createvisualtask AnimTask_ShakeMon, 3, ANIM_ATTACKER, 5, 0, 7, 2
-	createvisualtask AnimTask_ShakeMon, 3, ANIM_TARGET, 5, 0, 7, 2
-	waitforvisualfinish
 	return
 G4_UnsetBackground:
 	restorebg
