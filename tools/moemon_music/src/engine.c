@@ -24,7 +24,6 @@
 #define TYPE_SPL 0x40
 #define TYPE_RHY 0x80
 
-#define PAUSE 0x80000000u
 
 // GB sound registers, as offsets into e->io (GBA address - 0x04000060)
 enum {
@@ -592,7 +591,7 @@ static void play_note(Engine *e, ETrack *t, int ti)   // the second half of MP2K
         ETrack *tt = t;
         int foundStopping = 0;
         c = NULL;
-        for (int i = 0; i < ENG_DS_CHANNELS; i++) {
+        for (int i = 0; i < e->numChans; i++) {
             EChan *cc = &e->chans[i];
             if (!(cc->status & SF_ON)) { c = cc; break; }
             if ((cc->status & SF_STOP) && !foundStopping) {
@@ -780,16 +779,16 @@ static void run_event(Engine *e, ETrack *t, uint8_t ev)
 
 static void player_main(Engine *e)   // MP2KPlayerMain
 {
-    if (e->status & PAUSE && !(e->tracks[ENG_PREVIEW_TRACK].status & MPT_FLG_EXIST))
+    if (e->paused && !(e->tracks[ENG_PREVIEW_TRACK].status & MPT_FLG_EXIST))
         return;
     e->tempoCounter += e->tempoInterval;
     while (e->tempoCounter >= 150) {
-        uint16_t trackBits = 0;
+        uint32_t trackBits = 0;
         for (int i = 0; i <= ENG_MAX_TRACKS; i++) {
             ETrack *t = &e->tracks[i];
             if (!(t->status & MPT_FLG_EXIST))
                 continue;
-            if (i < ENG_MAX_TRACKS) trackBits |= (uint16_t)(1 << i);
+            if (i < ENG_MAX_TRACKS) trackBits |= 1u << i;
             for (EChan *c = t->chan; c; c = c->next) {
                 if (!(c->status & SF_ON)) ClearChain(c);
                 else if (c->gateTime && --c->gateTime == 0) c->status |= SF_STOP;
@@ -845,11 +844,13 @@ static void player_main(Engine *e)   // MP2KPlayerMain
         }
         e->clock++;
         if (trackBits == 0) {
-            e->status = PAUSE;
+            e->status = 0;
+            e->paused = 1;
             if (!(e->tracks[ENG_PREVIEW_TRACK].status & MPT_FLG_EXIST))
                 return;
         } else {
             e->status = trackBits;
+            e->paused = 0;
         }
         e->tempoCounter -= 150;
     }
@@ -1026,7 +1027,7 @@ static void SampleMixer(Engine *e, float *out)
     } else {
         memset(buf, 0, sizeof(float) * n * 2);
     }
-    for (int i = 0; i < ENG_DS_CHANNELS; i++) {
+    for (int i = 0; i < e->numChans; i++) {
         EChan *c = &e->chans[i];
         if (TickEnvelope(c))
             GenerateAudio(c, buf, n);
@@ -1040,7 +1041,9 @@ static void SampleMixer(Engine *e, float *out)
 void eng_init(Engine *e)
 {
     memset(e, 0, sizeof(*e));
-    e->status = PAUSE;
+    e->status = 0;
+    e->paused = 1;
+    e->numChans = ENG_DS_CHANNELS;
     e->tempoScale = 0x100;
     cgb_audio_init(e);
     // SoundInit / m4aSoundMode(DA_BIT_8) / MPlayExtender
@@ -1065,7 +1068,8 @@ void eng_stop(Engine *e)
         TrackStop(e, &e->tracks[i]);
         e->tracks[i].status = 0;
     }
-    e->status = PAUSE;
+    e->status = 0;
+    e->paused = 1;
     e->playing = 0;
 }
 
@@ -1081,7 +1085,17 @@ void eng_start(Engine *e, const ESong *song)   // MPlayStart
     e->tempoScale = 0x100;
     e->tempoCounter = 0;
     e->status = 0;
-    for (int i = 0; i < song->ntracks && i < ENG_MAX_TRACKS; i++) {
+    e->paused = 0;
+    // m4aSoundMode with a channel count: every sample channel stops, then that many mix
+    int voices = song->dsVoices > 0 ? song->dsVoices : ENG_DS_CHANNELS;
+    if (voices > ENG_DS_MAX) voices = ENG_DS_MAX;
+    if (voices != e->numChans) {
+        for (int i = 0; i < ENG_DS_MAX; i++) { ClearChain(&e->chans[i]); e->chans[i].status = 0; }
+        e->numChans = voices;
+    }
+    int limit = song->trackLimit > 0 ? song->trackLimit : ENG_GAME_TRACKS;
+    if (limit > ENG_MAX_TRACKS) limit = ENG_MAX_TRACKS;
+    for (int i = 0; i < song->ntracks && i < limit; i++) {
         ETrack *t = &e->tracks[i];
         t->status = MPT_FLG_EXIST | MPT_FLG_START;
         t->chan = NULL;
@@ -1128,7 +1142,7 @@ int eng_finished(const Engine *e)
 int eng_ds_busy(const Engine *e)
 {
     int n = 0;
-    for (int i = 0; i < ENG_DS_CHANNELS; i++)
+    for (int i = 0; i < e->numChans; i++)
         if (e->chans[i].status & SF_ON) n++;
     return n;
 }
@@ -1169,7 +1183,7 @@ void eng_copy(Engine *dst, const Engine *src)
 #define FIXC(p) do { if (p) (p) = (EChan *)((const char *)(p) - (const char *)src + (char *)dst); } while (0)
 #define FIXT(p) do { if (p) (p) = (ETrack *)((const char *)(p) - (const char *)src + (char *)dst); } while (0)
     for (int i = 0; i <= ENG_MAX_TRACKS; i++) FIXC(dst->tracks[i].chan);
-    for (int i = 0; i < ENG_DS_CHANNELS; i++) { FIXT(dst->chans[i].track); FIXC(dst->chans[i].prev); FIXC(dst->chans[i].next); }
+    for (int i = 0; i < ENG_DS_MAX; i++) { FIXT(dst->chans[i].track); FIXC(dst->chans[i].prev); FIXC(dst->chans[i].next); }
     for (int i = 0; i < 4; i++) { FIXT(dst->cgb[i].track); FIXC(dst->cgb[i].prev); FIXC(dst->cgb[i].next); }
 #undef FIXC
 #undef FIXT

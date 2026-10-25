@@ -26,5 +26,18 @@ printf '\t.include "asm/macros/m4a.inc"\n\t.include "asm/macros/music_voice.inc"
 (cd ../.. && as --64 --defsym VER_64BIT=1 --defsym MODERN=1 --defsym PORTABLE=1 -I sound -I . -o "$T/song.o" "$T/mus_vs_trainer.s" \
           && as --64 --defsym VER_64BIT=1 --defsym MODERN=1 --defsym PORTABLE=1 -I sound -I . -o "$T/vg.o" "$T/vg.s")
 "$B" --render "$T/gm.mmsproj" "$T/gm.wav" 5
+
+echo "== going over 10 tracks"
+python3 test/make_test_midi.py "$T/many.mid" 9          # 14 tracks
+"$B" --save "$T/many.mid" "$T/many.mmsproj" mus_route104
+"$B" --export "$T/many.mmsproj" "$T/many10.kaisong"
+python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 tracks"
+sed -i 's/^more_tracks=0/more_tracks=1/' "$T/many.mmsproj"
+"$B" --export "$T/many.mmsproj" "$T/many14.kaisong"
+python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "^version 1, 14 tracks"
+sed -i 's/^voices=5/voices=12/' "$T/many.mmsproj"
+"$B" --export "$T/many.mmsproj" "$T/many14.kaisong"
+python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "voices: 12"
+"$B" --raw "$T/many.mmsproj" "$T/many.f32" 600
 test -s "$T/gm.wav"
 echo "all passed"

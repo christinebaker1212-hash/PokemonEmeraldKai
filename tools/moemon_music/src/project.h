@@ -24,6 +24,8 @@ typedef struct {
     int exactGate;
     int gmFixes;
     int loopMode;
+    int moreTracks;           // go over the game's 10 tracks (plays and exports up to 32)
+    int voices;               // sample voices mixed at once: 5 like the game, up to 12
     uint32_t loopStart, loopEnd;   // MIDI ticks (LOOP_CUSTOM)
     uint64_t muted;           // candidate tracks left out
     uint64_t solo;            // candidate tracks soloed (listening only, not saved)

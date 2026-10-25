@@ -17,8 +17,8 @@ def read(path):
     version, hsize, ntracks, priority, reverb, mvl, nchunks = struct.unpack_from('<HHBBBBI', data, 8)
     if version != 1:
         raise Bad('version %d (this reader knows 1)' % version)
-    if not 1 <= ntracks <= 10:
-        raise Bad('%d tracks (the game plays 1-10)' % ntracks)
+    if not 1 <= ntracks <= 32:
+        raise Bad('%d tracks (1-32; the game plays 10 until its music player gets more)' % ntracks)
     song = dict(version=version, ntracks=ntracks, priority=priority, reverb=reverb, volume=mvl, chunks={})
     pos = hsize
     for _ in range(nchunks):

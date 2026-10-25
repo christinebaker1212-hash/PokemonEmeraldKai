@@ -6,18 +6,25 @@
 #include "inst.h"
 #include "engine.h"
 
-static int exported_tracks(const Conv *c) { return c->ntracks < ENG_MAX_TRACKS ? c->ntracks : ENG_MAX_TRACKS; }
+static int track_limit(const Project *p) { return p->moreTracks ? ENG_MAX_TRACKS : ENG_GAME_TRACKS; }
+static int exported_tracks(const Project *p, const Conv *c) { return c->ntracks < track_limit(p) ? c->ntracks : track_limit(p); }
 
 void export_warnings(const Project *p, const Conv *c, char *buf, int n)
 {
     buf[0] = 0;
     if (!p->target[0])
         snprintf(buf + strlen(buf), n - strlen(buf), "Pick the game song it replaces. ");
-    if (c->ntracks > ENG_MAX_TRACKS)
-        snprintf(buf + strlen(buf), n - strlen(buf), "The game plays 10 tracks: %d will be left out (mute some). ",
-                 c->ntracks - ENG_MAX_TRACKS);
+    if (c->ntracks > track_limit(p))
+        snprintf(buf + strlen(buf), n - strlen(buf), "Only %d tracks fit: %d will be left out (mute some). ",
+                 track_limit(p), c->ntracks - track_limit(p));
+    if (p->voices != ENG_DS_CHANNELS)
+        snprintf(buf + strlen(buf), n - strlen(buf), "%d sample voices: the game mixes 5 until it's set to more. ", p->voices);
+    if (c->ntracks > track_limit(p)) {}
+    else if (c->ntracks > ENG_GAME_TRACKS)
+        snprintf(buf + strlen(buf), n - strlen(buf), "%d tracks: the game plays 10 until its music player gets more. ",
+                 c->ntracks);
     if (c->dropped)
-        snprintf(buf + strlen(buf), n - strlen(buf), "%d track(s) over the 16-track limit were left out. ", c->dropped);
+        snprintf(buf + strlen(buf), n - strlen(buf), "%d track(s) over %d were left out. ", c->dropped, CONV_MAX_OUT);
 }
 
 // ------------------------------------------------------------------ .kaisong
@@ -106,7 +113,7 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
 {
     Tables t = {0};
     Buf info = {0}, names = {0}, grp = {0}, ksp = {0}, trk = {0}, out = {0};
-    int ntr = exported_tracks(c);
+    int ntr = exported_tracks(p, c);
 
     // group 0: the song's voicegroup (sub-groups get added to t as they are met)
     Buf g0 = {0};
@@ -148,8 +155,8 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
     time_t now = time(NULL);
     strftime(when, sizeof(when), "%Y-%m-%d %H:%M", localtime(&now));
     snprintf(line, sizeof(line),
-             "song=%s\ntitle=%s\nmidi=%s\nvolume=%d\nreverb=%d\npriority=%d\nloop=%s\ntool=Moemon Music Studio %s\nmade=%s\n",
-             p->target, p->title, p->midiName, p->masterVol, p->reverb, p->priority, c->hasLoop ? "yes" : "no",
+             "song=%s\ntitle=%s\nmidi=%s\nvolume=%d\nreverb=%d\npriority=%d\nloop=%s\nvoices=%d\ntool=Moemon Music Studio %s\nmade=%s\n",
+             p->target, p->title, p->midiName, p->masterVol, p->reverb, p->priority, c->hasLoop ? "yes" : "no", p->voices,
              STUDIO_VERSION, when);
     bput(&info, line, strlen(line));
 
@@ -294,7 +301,7 @@ int export_decomp(const Project *p, const Conv *c, const char *dir, char *err, i
     char path[1200], label[80], vg[96];
     snprintf(label, sizeof(label), "%s", p->target[0] ? p->target : "mus_custom");
     snprintf(vg, sizeof(vg), "%s_kai", label);
-    int ntr = exported_tracks(c);
+    int ntr = exported_tracks(p, c);
 
     snprintf(path, sizeof(path), "%s/%s.s", dir, label);
     FILE *f = fopen(path, "w");

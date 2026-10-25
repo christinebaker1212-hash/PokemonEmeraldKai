@@ -52,6 +52,8 @@ int studio_rebuild(Studio *s)
         s->song.data[i] = s->c.data[i];
         s->song.len[i] = s->c.len[i];
     }
+    s->song.trackLimit = s->p.moreTracks ? ENG_MAX_TRACKS : ENG_GAME_TRACKS;
+    s->song.dsVoices = s->p.voices;
     s->song.priority = (uint8_t)s->p.priority;
     s->song.reverb = project_reverb_byte(&s->p);
     s->song.voices = s->voices;

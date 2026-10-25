@@ -8,7 +8,7 @@
 #include "midi.h"
 
 #define CONV_MAX_CAND 64     // MIDI track x channel pairs that have notes
-#define CONV_MAX_OUT 16
+#define CONV_MAX_OUT 32
 
 enum { LOOP_MARKERS, LOOP_NONE, LOOP_WHOLE, LOOP_CUSTOM };
 

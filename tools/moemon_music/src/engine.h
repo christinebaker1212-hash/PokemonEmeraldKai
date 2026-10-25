@@ -8,8 +8,10 @@
 
 #define ENG_RATE            42048    // what the game opens SDL audio at
 #define ENG_FRAME_SAMPLES   701      // samples the game mixes per frame
-#define ENG_MAX_TRACKS      10       // the game's BGM player has 10 tracks
+#define ENG_GAME_TRACKS     10       // the game's BGM player has 10 tracks
+#define ENG_MAX_TRACKS      32       // what the studio can play when a song goes over that (ESong.trackLimit)
 #define ENG_DS_CHANNELS     5        // m4aSoundInit: 5 DirectSound channels
+#define ENG_DS_MAX          12       // MAX_DIRECTSOUND_CHANNELS: what m4aSoundMode allows (ESong.dsVoices)
 #define ENG_MASTER_VOL      12       // m4aSoundInit: master volume 12
 #define ENG_PREVIEW_TRACK   ENG_MAX_TRACKS   // one extra track for auditioning instruments
 
@@ -32,8 +34,10 @@ typedef struct EInst {
 
 typedef struct {
     int ntracks;
-    const uint8_t *data[16];         // track bytecode; GOTO / PATT / REPT targets are 4-byte LE offsets into the track
-    int len[16];
+    const uint8_t *data[ENG_MAX_TRACKS];   // track bytecode; GOTO / PATT / REPT targets are 4-byte LE offsets into the track
+    int len[ENG_MAX_TRACKS];
+    int trackLimit;                  // tracks that play: ENG_GAME_TRACKS like the game (0 = that), up to ENG_MAX_TRACKS
+    int dsVoices;                    // sample channels: ENG_DS_CHANNELS like the game (0 = that), up to ENG_DS_MAX
     uint8_t priority, reverb;        // reverb: 0x80 | level, or 0 (keep)
     const EInst *voices;             // 128
 } ESong;
@@ -81,7 +85,8 @@ typedef struct ETrack {
 typedef struct {
     // player
     const ESong *song;
-    uint32_t status;
+    uint32_t status;                  // a bit per playing track
+    int paused;                       // MUSICPLAYER_STATUS_PAUSE, kept apart so 32 tracks fit in status
     uint8_t trackCount, priority;
     uint32_t clock;
     uint16_t tempoRawBPM, tempoScale, tempoInterval, tempoCounter;
@@ -91,7 +96,8 @@ typedef struct {
     uint32_t muteMask;                // tracks whose notes are skipped (listening only)
     uint8_t memacc[16];               // gMPlayMemAccArea
     // mixer
-    EChan chans[ENG_DS_CHANNELS];
+    EChan chans[ENG_DS_MAX];
+    int numChans;                     // sample channels in use (soundInfo->maxChans)
     EChan cgb[4];
     uint8_t reverb;
     float ring[7][ENG_FRAME_SAMPLES * 2];

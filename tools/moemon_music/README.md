@@ -6,9 +6,9 @@ song in a form the game can use.
 
 - **Plays like the game.** `src/engine.c` is the game's MP2K engine (`src/music_player.c`,
   `src/sound_mixer.c`, `src/m4a.c`, `src/platform/cgb_audio.c`) ported line for line, with the
-  game's 5 sample channels, 4 Game Boy channels, 10 tracks and reverb. On 15 game songs, 14 come
-  out sample for sample identical to the game's audio; the other differs by one 2-sample blip at a
-  loop point (0.002 amplitude).
+  game's 5 sample channels, 4 Game Boy channels, 10 tracks and reverb. On 15 game songs the
+  audio comes out sample for sample identical to the game's (the game's mixer reads one byte past
+  a sample's end, which is zero in the game; `gen_soundfont.py` pads the samples to match).
 - **Converts like the game.** `src/convert.c` is `tools/mid2agb`'s pipeline. All 529 game MIDIs
   give the same bytes as `mid2agb -E -N` (`make test`).
 - **General MIDI in, game instruments out.** Each MIDI program starts as the closest of the
@@ -46,7 +46,9 @@ the song, **S** plays it alone. INSTRUMENTS lists the voice slots the song uses:
 **Change...** (every game instrument, by category, with search; click to hear), **GM match**,
 **Hold to hear** or keys Z-M, and its envelope. SONG sets the game song it replaces, volume,
 reverb, priority, the loop (MIDI markers, none, whole song, custom bars), and can take every
-instrument from a game song's voicegroup. Then **Save** and **Export .kaisong** / **Export decomp**.
+instrument from a game song's voicegroup. Past the game's limits: **Go over 10 tracks** plays and
+exports up to 32 tracks, and **Voices** mixes up to 12 samples at once (the game: 5; extra tracks
+only sound when voices are free for them). The game plays neither yet. Then **Save** and **Export .kaisong** / **Export decomp**.
 **Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
 and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
 

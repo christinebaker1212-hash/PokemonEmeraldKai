@@ -5,8 +5,7 @@ voicegroup and the names of the game samples it plays. **The game doesn't read t
 page is the format and a plan for the loader.
 
 The studio plays songs with a C port of the game's sound engine (MP2K as the PC port runs it). Checked
-against the game on 15 songs: 14 match the game's audio sample for sample, and the last differs only by one
-2-sample blip of 0.002 where a sample loops. So a `.kaisong` loaded the way described below sounds the same
+against the game on 15 songs: all 15 match the game's audio sample for sample. So a `.kaisong` loaded the way described below sounds the same
 in the game as in the studio.
 
 ## The file
@@ -18,7 +17,7 @@ Everything is little-endian. The file starts with a 32-byte header, then chunks.
 | 0      | char[8]  | `"KAISONG\0"`                                                          |
 | 8      | u16      | version: `1`                                                           |
 | 10     | u16      | header size: `32` (chunks start here)                                  |
-| 12     | u8       | track count, 1-10                                                      |
+| 12     | u8       | track count: 1-10, or up to 32 when the song was made with *Go over 10 tracks* |
 | 13     | u8       | priority (`SongHeader.priority`, mid2agb `-P`)                         |
 | 14     | u8       | reverb (`SongHeader.reverb`: `0x80 \| level`, or `0` for no change)      |
 | 15     | u8       | master volume 0-127, for information only (already in the VOL commands) |
@@ -40,6 +39,7 @@ volume=100
 reverb=50                  -1 = off
 priority=0
 loop=yes                   yes / no
+voices=5                   sample voices the song was made for (the game mixes 5; up to 12)
 tool=Moemon Music Studio 1.0
 made=2026-10-25 14:55
 ```
@@ -169,8 +169,13 @@ should check and prints the voices; `--bytecode` prints the tracks.
    `gMPlayInfo_BGM.songHeader` (it needs the custom header to map back to `i`, or a spectator hears
    nothing). Song names for the file lookup: `include/constants/songs.h` / `sound/song_table.inc`.
 
-7. **Limits.** The BGM player has 10 tracks (`gMPlayTrack_BGM[10]`; the studio exports at most 10 and
-   says so), 5 sample channels plus the 4 Game Boy channels (the studio shows how many are busy), and
+7. **Limits.** The BGM player has 10 tracks (`gMPlayTrack_BGM[10]`; `MPlayStart` ignores parts past the
+   player's track count). The studio exports at most 10 unless the song's *Go over 10 tracks* option is
+   on: then up to 32, and playing those in full needs a bigger BGM player (`gMPlayTrack_BGM`, `NUM_TRACKS_BGM`
+   in `sound/music_player_table.inc`, the `trackBits` / status masks in `MP2KPlayerMain`, which are 16 bits).
+   Songs made with more *Voices* than 5 (INFO `voices=`) expect `m4aSoundMode` with that channel count
+   (`SOUND_MODE_MAXCHN`, up to `MAX_DIRECTSOUND_CHANNELS` = 12; m4aSoundInit sets 5): extra tracks only sound
+   when there are voices free for them, since earlier tracks win the channels, 5 sample channels plus the 4 Game Boy channels (the studio shows how many are busy), and
    reverb only changes when bit 7 is set, then stays for later songs, as in the game.
 
 8. **Known engine quirk.** On 64-bit, `ply_memacc` (src/m4a.c) skips 4 bytes when a MEMACC branch is not

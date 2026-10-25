@@ -575,10 +575,11 @@ static void draw_transport(void)
     // DirectSound voices in use (the game mixes 5 at once)
     int busy = eng_ds_busy(&E);
     char v[64];
-    snprintf(v, sizeof(v), "Voices %d/5", busy);
-    text(1036, y + 6, v, busy >= 5 ? C_WARN : C_DIM);
-    for (int i = 0; i < 5; i++) fill(1036 + i * 18, y + 26, 14, 8, i < busy ? (busy >= 5 ? C_WARN : C_OK) : C_ROW);
-    if (S.peakVoices >= 5) text(1134, y + 6, "5 at once:", C_WARN), text(1134, y + 24, "notes cut", C_WARN);
+    int nv = E.numChans;
+    snprintf(v, sizeof(v), "Voices %d/%d", busy, nv);
+    text(1036, y + 6, v, busy >= nv ? C_WARN : C_DIM);
+    for (int i = 0; i < nv; i++) fill(1036 + i * 10, y + 26, 8, 8, i < busy ? (busy >= nv ? C_WARN : C_OK) : C_ROW);
+    if (have_song() && S.peakVoices >= S.p.voices) text(1164, y + 6, "all busy:", C_WARN), text(1164, y + 24, "notes cut", C_WARN);
 }
 
 static const char *slot_label(int slot, char *buf, int n)
@@ -609,7 +610,7 @@ static void draw_tracks(void)
         int ry = top + r * rowH;
         int muted = (S.p.muted >> k) & 1, solo = (S.p.solo >> k) & 1;
         int ot = outIdx[k];
-        int over = ot >= ENG_MAX_TRACKS;
+        int over = ot >= (S.p.moreTracks ? ENG_MAX_TRACKS : ENG_GAME_TRACKS);
         int slot = cd->slot;
         if (slot < 0 && cd->program >= 0) slot = cd->program;
         fill(x + 6, ry, w - 22, rowH - 2, (slot >= 0 && slot == sSelSlot) ? C_HOT : C_ROW);
@@ -635,7 +636,7 @@ static void draw_tracks(void)
         textfit(x + 84, ry + 3, 200, lab, muted ? C_DIM : C_TEXT);
         char nm[160];
         slot_label(slot, nm, sizeof(nm));
-        if (over && !muted) snprintf(nm, sizeof(nm), "over the 10-track limit");
+        if (over && !muted) snprintf(nm, sizeof(nm), S.p.moreTracks ? "over the 32-track limit" : "over 10 tracks: see SONG");
         textfit(x + 292, ry + 3, 260, nm, over && !muted ? C_WARN : muted ? C_DIM : C_TEXT);
         if (slot >= 0 && clicked(x + 292, ry, 260, rowH)) sSelSlot = slot;
         // activity
@@ -735,9 +736,9 @@ static void draw_slots(void)
     int a = v->attack, d = v->decay, s = v->sustain, r = v->release;
     int ch = 0;
     ch |= stepper(x + 12, ry, "Attack", &a, 0, cgb ? 7 : 255, 1, NULL);
-    ch |= stepper(x + 156, ry, "Decay", &d, 0, cgb ? 7 : 255, 1, NULL);
-    ch |= stepper(x + 296, ry, "Sustain", &s, 0, cgb ? 15 : 255, 1, NULL);
-    ch |= stepper(x + 452, ry, "Release", &r, 0, cgb ? 7 : 255, 1, NULL);
+    ch |= stepper(x + 162, ry, "Decay", &d, 0, cgb ? 7 : 255, 1, NULL);
+    ch |= stepper(x + 306, ry, "Sustain", &s, 0, cgb ? 15 : 255, 1, NULL);
+    ch |= stepper(x + 466, ry, "Release", &r, 0, cgb ? 7 : 255, 1, NULL);
     if (ch) {
         v->attack = (uint8_t)a; v->decay = (uint8_t)d; v->sustain = (uint8_t)s; v->release = (uint8_t)r;
         voices_changed();
@@ -777,20 +778,32 @@ static void draw_song(void)
     int rev = p->reverb;
     char rb[16];
     snprintf(rb, sizeof(rb), rev < 0 ? "off" : "%d", rev);
-    if (stepper(col1 + 170, row, "Reverb", &rev, -1, 127, rev < 0 ? 1 : 5, rb)) {
+    if (stepper(col1 + 150, row, "Reverb", &rev, -1, 127, rev < 0 ? 1 : 5, rb)) {
         if (rev > 127) rev = 127;
         p->reverb = rev;
         S.song.reverb = project_reverb_byte(p);
         lock(); E.reverb = rev < 0 ? 0 : (uint8_t)rev; unlock();
         p->dirty = 1;
     }
-    if (stepper(col1 + 340, row, "Priority", &p->priority, 0, 255, 1, NULL)) {
+    if (stepper(col1 + 300, row, "Priority", &p->priority, 0, 255, 1, NULL)) {
         S.song.priority = (uint8_t)p->priority;
         p->dirty = 1;
+    }
+    if (stepper(col1 + 466, row, "Voices", &p->voices, 1, ENG_DS_MAX, 1, NULL)) {
+        p->dirty = 1;
+        rebuild();
+        set_status("%s", p->voices > 5 ? "More sample voices mix at once. The game mixes 5 until it's set to more (m4aSoundMode)."
+                                       : "Sample voices mixed at once (the game: 5).");
     }
     row += 30;
     if (checkbox(col1, row, "Exact note lengths (-E)", &p->exactGate)) { p->dirty = 1; rebuild(); }
     if (checkbox(col1 + 250, row, "GM MIDI fixes", &p->gmFixes)) { p->dirty = 1; rebuild(); }
+    if (checkbox(col1 + 410, row, "Go over 10 tracks", &p->moreTracks)) {
+        p->dirty = 1;
+        rebuild();
+        set_status("%s", p->moreTracks ? "Up to 32 tracks play and export. The game itself plays 10 until its music player gets more."
+                                       : "Back to the game's 10 tracks.");
+    }
     row += 26;
     if (p->gmFixes) {
         text(col1, row, "GM fixes: expression, bend range, drum channel, loop clean-up.", C_DIM);
@@ -1104,7 +1117,9 @@ static void draw_help(void)
     modal_box(&x, &y, w, h, "MOEMON MUSIC STUDIO " STUDIO_VERSION);
     static const char *lines[] = {
         "Plays MIDI files with Moemon Emerald Kai's own instruments and sound engine, so a song",
-        "sounds here as it will in the game (5 sample voices + 4 Game Boy channels, 10 tracks).",
+        "sounds here as it will in the game (5 sample voices + 4 Game Boy channels, 10 tracks;",
+        "SONG > Go over 10 tracks plays and exports up to 32 and Voices mixes up to 12 samples",
+        "at once; the game can't play those yet).",
         "",
         "1. Open MIDI (or drop a .mid on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",

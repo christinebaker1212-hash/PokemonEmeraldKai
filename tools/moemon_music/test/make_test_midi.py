@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes a small General MIDI test song (piano, bass, strings with expression swells, a square
 lead with a pitch bend and an RPN bend range, drums on channel 10, loopStart / loopEnd markers).
-  python3 make_test_midi.py OUT.mid"""
+  python3 make_test_midi.py OUT.mid [EXTRA_TRACKS]   (EXTRA_TRACKS more melodic tracks, for the track limit)"""
 import struct, sys
 
 def vlq(n):
@@ -56,5 +56,12 @@ for bar in range(20):
         drums += note(9, t + i * Q, 36 if i % 2 == 0 else 38, Q // 4, 110)
         drums += note(9, t + i * Q + Q // 2, 42, Q // 8, 80)
 tracks = [conductor, piano, bass, strings, lead, drums]
+extra_ch = [c for c in range(16) if c not in (0, 1, 2, 3, 9)]
+for i in range(int(sys.argv[2]) if len(sys.argv) > 2 else 0):
+    ch = extra_ch[i % len(extra_ch)]
+    tr = [name('Extra %d' % (i + 1)), (0, bytes([0xC0 | ch, 40 + i]))]
+    for bar in range(20):
+        tr += note(ch, bar * Q * 4 + i * 30, 60 + i, Q, 70)
+    tracks.append(tr)
 out = b'MThd' + struct.pack('>IHHH', 6, 1, len(tracks), Q) + b''.join(track(t) for t in tracks)
 open(sys.argv[1], 'wb').write(out)
