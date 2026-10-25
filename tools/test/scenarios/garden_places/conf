@@ -1,0 +1,13 @@
+# A place for every type in the MOéMON GARDEN: TORCHIC is sent to each type's place (TNEED_* 1-17: the cozy nook,
+# the training ground, the meadow, the puddle / marsh, the dig patch, the plateau's boulders, the tall / long grass,
+# the hollow, the shiny stones, the hot spring, the pond, the flower beds, the storm stone, the standing stone, the
+# shaded spring, the lookout above the ledge, the hollow at night) with no badges, then with all eight (every
+# badge's place grown). Each time it finds a place of that type's own (a zone) and walks all the way there round the
+# trees, rocks and water (check_garden_places.py). Shots base, badges.
+MODE=1
+TMO=900
+WARP="0,57,26,20"
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("garden here 1 growth 0 badges 0" "garden here 1 growth 8 badges 8" "garden: growth 8")
+UNEXPECT_A=("short of it" "-> none" "stuck")
+CHECK="python3 tools/test/check_garden_places.py"

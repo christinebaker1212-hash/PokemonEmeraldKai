@@ -4,6 +4,6 @@
 # to see its new body. Shots pursuit, milestone, paddle, paddled, stars, evolved, react, journal (COMBUSKEN's), journal2.
 MODE=1
 TMO=240
-WARP="0,57,26,13"
+WARP="0,57,28,11"
 ENV_A="MOEMON_DEBUG_PARTY=283:15,280:15,277:20"
 EXPECT_A=("garden: 252 out" "garden pursuit" "milestone 0" "garden: rare 2: 258 and 255" "garden: rare 2 done (seen 1)" "garden: rare 1 done" "life: memory 2 (" "garden: 258 reacts" "garden: 252 reacts" "journal 1: Stargazed with" "taught it to paddle. Brave!" "journal 2: Climbed its first tree!")

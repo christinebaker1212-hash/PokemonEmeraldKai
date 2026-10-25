@@ -1118,7 +1118,19 @@ the CENTER you came from. After your first visit, START > GARDEN (and
 your PC's MOEMON GARDEN row) takes you there from outdoors or a CENTER;
 the way down then leads to the last POKEMON CENTER you visited. Not
 from caves, dungeons, the SAFARI ZONE or the middle of a story moment:
-a message says so. The Garden grows as your journey goes on.
+a message says so.
+Every type has a place of its own there, where its MOEMON go for what
+they love: a cozy nook (NORMAL), a sand training ground (FIGHTING), the
+open meadow (FLYING), a puddle (POISON), soft sand to dig (GROUND), a
+plateau of boulders (ROCK) with a lookout over its ledge (DRAGON), tall
+grass (BUG), a dark hollow in the trees (GHOST, DARK), shiny stones
+(STEEL), a hot spring you can walk into (FIRE), the pond (WATER), the
+flower bed (GRASS), the storm stone (ELECTRIC), a standing stone in a
+ring of flowers (PSYCHIC) and a shaded spring with frost crystals (ICE).
+Every badge your group holds adds a place: 1 a long grass field, 2 a
+marsh, 3 a boulder field, 4 a dig field, 5 more shiny stones, 6 a perch
+grove, 7 a second flower bed, 8 a stone circle. With friends, the Garden
+shows the most badges among you.
   GARDEN BOARD  DECORATE: put dolls and cushions from your SECRET BASE
                 collection out for them (and put them away again).
                 WATCH: sit down and watch; A tells you what's going on,

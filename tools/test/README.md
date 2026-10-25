@@ -67,6 +67,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `life_social` | NA-JP lag, Oldale: ALICE's follower meets BOB's (a bond in her save), its bubbles show on BOB's screen, BOB pets it (her game answers: a sidestep, PET is beyond its boundary), BOB's new LOOK gets a double take |
 | `garden_map` | OLDALE's CENTER escalator rides up into the MOéMON GARDEN (first visit: welcome, a memory; every growth mark with all badges) and its escalator back down to OLDALE |
 | `garden_centers` | all 17 CENTERs (LEAGUE and BATTLE FRONTIER too): up into the Garden and back down to the same CENTER |
+| `garden_places` | a place for every type: TORCHIC is sent to each of the 17 types' places with no badges, then with all eight, and walks all the way there round the trees, rocks and water (check_garden_places.py) |
 | `garden_stuck` | an older save standing inside a tree goes back to the landing; with no CENTER recorded the way down follows the heal location |
 | `garden_life` | three Pokémon live in the Garden: play, talking to one, a PIKACHU DOLL placed and played with, WATCH mode (A tells, B back) |
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
@@ -79,7 +80,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_switch_twice` | Co-op wild double at lag: ALICE switches, then opens the party menu again (the party in battle order crashed 1.15.0); both finish |
 | `soft_reset` | A+B+START+SELECT on the overworld closes the game like CTRL+R (it crashed in the wireless adapter code) |
 | `garden_parity` | NA-JP lag: both players' Garden Pokémon take the same steps and face the same ways on both screens (check_movetrace.py) |
-| `garden_together` | NA-JP lag: two in the Garden: each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP |
+| `garden_together` | NA-JP lag: two in the Garden: each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP; BOB's eight badges grow ALICE's Garden live |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:

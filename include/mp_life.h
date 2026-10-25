@@ -324,6 +324,7 @@ void MP_Life_AddNews(u8 kind, u16 param, u32 teller);
 #define MP_GARDEN_VISITED  (1 << 0)
 #define MP_GARDEN_SHORTCUT (1 << 1)   // (1.15: came by the shortcut; no longer used)
 #define MP_GARDEN_LASTPC   (1 << 2)   // lastPc* hold the last POKéMON CENTER visited
+#define MP_GARDEN_HABITATS (1 << 3)   // decorations placed in the 1.17 Garden (older ones went back to the collection)
 struct MpGardenDecor
 {
     u8 decor;       // DECOR_* (0 = none)

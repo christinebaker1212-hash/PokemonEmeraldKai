@@ -368,9 +368,13 @@ visited (COOP_NOTES 1.16.0).
 
 ### 11.3 The place
 
-- **It grows with the journey.** It starts as a meadow with a pond, a few berry trees and shade. Places the group has
-  been leave their mark: a cutting from FORTREE's trees grows into a perch grove, warm sand from the desert becomes a
-  dig patch, a stone from a storm becomes a spot where Electric types gather. Every type need gets a home in time.
+- **A place for every type** (since 1.17): a cozy nook (NORMAL), a sand training ground (FIGHTING), the open meadow
+  (FLYING), a puddle (POISON), soft sand (GROUND), a plateau of boulders (ROCK) with a lookout over its ledge (DRAGON),
+  tall grass (BUG), a dark hollow in the trees (GHOST, DARK), shiny stones (STEEL), a hot spring (FIRE), the pond
+  (WATER), a flower bed (GRASS), the storm stone (ELECTRIC), a standing stone in a ring of flowers (PSYCHIC), a
+  shaded spring with frost crystals (ICE). A Pokémon's type need takes it there (COOP_NOTES 1.17.0).
+- **It grows with the journey.** Every badge the group holds adds a place: a long grass field, a marsh, a boulder
+  field, a dig field, more shiny stones, a perch grove (FORTREE's trees), a second flower bed, a stone circle.
 - **Decorations.** Players place earned SECRET BASE decorations as they please. They come from the placer's
   collection and can be moved back at any time; a decoration in the Garden isn't in the Secret Base at the same time.
 - **Pokémon use decorations their own way:** cushions and mats for naps, dolls and balls for play, plants as shade, a

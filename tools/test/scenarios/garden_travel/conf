@@ -7,5 +7,5 @@ MODE=1
 TMO=180
 WARP="0,10,10,10"
 ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("garden: quick travel there (back to center 0)" "garden: first visit" "garden: down to center 0" "[test] where map 2.2 xy 2,6" "garden: quick travel not from here (place)" "garden: quick travel not from here (not now)" "[test] where map 0.57 xy 2,12")
+EXPECT_A=("garden: quick travel there (back to center 0)" "garden: first visit" "garden: down to center 0" "[test] where map 2.2 xy 2,6" "garden: quick travel not from here (place)" "garden: quick travel not from here (not now)" "[test] where map 0.57 xy 2,20")
 UNEXPECT_A=("stuck" "back to center -1")

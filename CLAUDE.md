@@ -89,7 +89,8 @@ records in a "<save>.life" sidecar, Friendship only raised through moments and n
 the follower's own activities, Pokémon emote bubbles (round, pink, never like Trainer emotes), smart A + hold-A verb wheel,
 story beats; battle memories and rare pink lines; friends' Pokémon and records in trades; the Garden map (mp_garden*.c:
 every POKéMON CENTER's 2F, its escalator redirected in SetupWarp, START > GARDEN quick travel; tilesets via
-tools/moemon_garden/gen_tileset.py + gen_map.py, the escalator kept at its fldeff_escalator.c ids); G6 pursuits, rare
+tools/moemon_garden/gen_garden.py: original pieces joined by the original maps' rules, a place per type (zones) and
+per badge (growth table), pathfinding to them; the escalator kept at its fldeff_escalator.c ids; test garden_places); G6 pursuits, rare
 moments, eggs and family, evolution; tests life_*, garden_*).
 
 Gotchas worth knowing before touching battles:

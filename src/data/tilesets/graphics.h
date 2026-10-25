@@ -20,8 +20,8 @@ const u16 gTilesetPalettes_Petalburg[][16] =
 	INCGFX_U16("data/tilesets/secondary/petalburg/palettes/15.pal", ".gbapal"),
 };
 
-// Moemon Co-op: the MOéMON GARDEN (tools/moemon_garden/gen_tileset.py: Petalburg + the POKéMON CENTER's escalator)
-const u32 gTilesetTiles_MoemonGarden[] = INCGFX_U32("data/tilesets/secondary/moemon_garden/tiles.png", ".4bpp.lz", "-num_tiles 207 -Wnum_tiles");
+// Moemon Co-op: the MOéMON GARDEN (tools/moemon_garden/gen_garden.py: pieces of several tilesets + the POKéMON CENTER's escalator)
+const u32 gTilesetTiles_MoemonGarden[] = INCGFX_U32("data/tilesets/secondary/moemon_garden/tiles.png", ".4bpp.lz", "-num_tiles 127 -Wnum_tiles");
 
 const u16 gTilesetPalettes_MoemonGarden[][16] =
 {

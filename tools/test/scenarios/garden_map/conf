@@ -5,5 +5,5 @@ MODE=1
 TMO=150
 WARP="2,2,2,6"
 ENV_A="MOEMON_DEBUG_PARTY=280:15,283:15"
-EXPECT_A=("garden: up the escalator of center 0" "garden: first visit" "life: memory 27" "garden here 1 growth 1f badges 8 visited 1 lastpc 1 2.2 warp 2 return 0" "garden: growth 0" "garden: growth 3" "garden: down to center 0" "[test] where map 2.2 xy 2,6")
+EXPECT_A=("garden: up the escalator of center 0" "garden: first visit" "life: memory 27" "garden here 1 growth 8 badges 8 visited 1 lastpc 1 2.2 warp 2 return 0" "garden: growth 1" "garden: growth 8" "garden: down to center 0" "[test] where map 2.2 xy 2,6")
 UNEXPECT_A=("stuck")

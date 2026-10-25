@@ -6,4 +6,4 @@ MODE=1
 TMO=120
 WARP="0,57,15,1"
 ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("garden: stuck, back to the landing" "[test] where map 0.57 xy 2,12" "[test] garden forget" "garden here 1 growth 00 badges 0 visited 1 lastpc 0" "return 0" "garden: down to center 0" "[test] where map 2.2 xy 2,6")
+EXPECT_A=("garden: stuck, back to the landing" "[test] where map 0.57 xy 2,20" "[test] garden forget" "garden here 1 growth 0 badges 0 visited 1 lastpc 0" "return 0" "garden: down to center 0" "[test] where map 2.2 xy 2,6")

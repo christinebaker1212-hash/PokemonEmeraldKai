@@ -38,6 +38,7 @@
 #include "task.h"
 #include "constants/songs.h"
 #include "constants/weather.h"
+#define GARDEN_WANT_ZONES
 #include "mp_garden_map.h"
 
 #define MAX_ACTORS     24
@@ -67,6 +68,7 @@ struct Actor
     u8 dir, pose, anim;
     u16 animTimer;
     u16 stuck;
+    u16 walkLimit;          // frames it walks toward its target before doing it where it is
     // its own mind (ours only)
     u8 act, phase;
     u16 timer, duration, cooldown, reactTimer;
@@ -86,8 +88,10 @@ struct Actor
     // stepped on, replayed in order (the same path and facings on every screen)
     struct Coords16 from;
     u8 qLen;
-    struct Coords16 q[6];
+    struct Coords16 q[8];
+    u8 qDir[8];             // a turn on that tile (0xFF: a step): turns replay in order too, after the step before
     struct Coords16 qLast;
+    u8 qLastDir;
     s16 traceX, traceY;     // tests: the last tile and facing logged (MOEMON_MOVETRACE)
     u8 traceDir;
 };
@@ -107,6 +111,7 @@ static struct
 } sL;
 
 bool8 MP_Garden_StoneShown(void);
+u8 MP_Garden_GrowthLevel(void);
 void MP_GardenDecor_Update(void);
 bool8 MP_GardenDecor_At(s16 x, s16 y);
 s8 MP_GardenDecor_Near(s16 x, s16 y, u8 radius, u8 kind, s16 *dx, s16 *dy);
@@ -201,7 +206,7 @@ static u8 WallsAround(s16 x, s16 y)
 typedef bool8 (*GroundTest)(s16 x, s16 y, s16 *fx, s16 *fy);
 
 static bool8 T_Any(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return TRUE; }
-static bool8 T_Tall(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return MetatileBehavior_IsTallGrass(Behavior(x, y)); }
+static bool8 T_Tall(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return MetatileBehavior_IsTallGrass(Behavior(x, y)) || MetatileBehavior_IsLongGrass(Behavior(x, y)); }
 static bool8 T_Sand(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return MetatileBehavior_IsSandOrDeepSand(Behavior(x, y)); }
 static bool8 T_Puddle(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return MetatileBehavior_IsPuddle(Behavior(x, y)); }
 static bool8 T_Flower(s16 x, s16 y, s16 *fx, s16 *fy) { *fx = 0x7FFF; return MapGridGetMetatileIdAt(x, y) == (GARDEN_FLOWER & 0x3FF); }
@@ -222,16 +227,47 @@ static bool8 T_ByWater(s16 x, s16 y, s16 *fx, s16 *fy)
     return FALSE;
 }
 
-// Beside one of the grove's trees (FORTREE's mark)
+// Below a tree's trunk (a lone tree or the forest's edge: the 2x2 trees' bottom halves over open ground)
+static bool8 IsTrunk(s16 x, s16 y)
+{
+    u16 id = MapGridGetMetatileIdAt(x, y);
+    return id >= 0x1E4 && id <= 0x1E7;
+}
+
 static bool8 T_ByTree(s16 x, s16 y, s16 *fx, s16 *fy)
 {
-    s16 tx = GX(GROWTH_GROVE_X), ty = GY(GROWTH_GROVE_Y + 1);
-    if (y < ty - 1 || y > ty + 1 || x < tx - 1 || x > tx + GROWTH_GROVE_W)
-        return FALSE;
-    if (MapGridGetCollisionAt(x, y - 1) == 0 && MapGridGetCollisionAt(x - 1, y) == 0 && MapGridGetCollisionAt(x + 1, y) == 0)
+    if (!IsTrunk(x, y - 1) || MP_GardenDecor_At(x, y - 1))
         return FALSE;
     *fx = x;
     *fy = y - 1;
+    return TRUE;
+}
+
+// Beside something solid on the ground (a rock, a crystal, a boulder): facing it
+static bool8 T_ByRock(s16 x, s16 y, s16 *fx, s16 *fy)
+{
+    static const s8 d[4][2] = {{0, -1}, {1, 0}, {-1, 0}, {0, 1}};
+    u8 i;
+    for (i = 0; i < 4; i++)
+    {
+        s16 nx = x + d[i][0], ny = y + d[i][1];
+        if (MapGridGetCollisionAt(nx, ny) != 0 && !IsWater(nx, ny) && !IsTrunk(nx, ny) && InGarden(nx, ny)
+         && !MetatileBehavior_IsJumpSouth(Behavior(nx, ny))   // (the ledge isn't a rock)
+         && GetObjectEventIdByXY(nx, ny) == OBJECT_EVENTS_COUNT && !MP_GardenDecor_At(nx, ny))
+        {
+            *fx = nx;
+            *fy = ny;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// On the edge of a high place, looking out over the ledge below (DRAGON's lookout)
+static bool8 T_Lookout(s16 x, s16 y, s16 *fx, s16 *fy)
+{
+    *fx = x;
+    *fy = y + 1;
     return TRUE;
 }
 
@@ -251,7 +287,7 @@ static bool8 T_ByEdgeTree(s16 x, s16 y, s16 *fx, s16 *fy)
 
 static bool8 T_ByStone(s16 x, s16 y, s16 *fx, s16 *fy)
 {
-    s16 sx = GX(GROWTH_STONE_X), sy = GY(GROWTH_STONE_Y);
+    s16 sx = GX(GARDEN_STONE_X), sy = GY(GARDEN_STONE_Y);
     if (!MP_Garden_StoneShown() || abs(x - sx) + abs(y - sy) != 1)
         return FALSE;
     *fx = sx;
@@ -285,6 +321,132 @@ static bool8 FindNear(s16 cx, s16 cy, GroundTest test, u8 radius, s16 *ox, s16 *
                     return TRUE;
                 }
             }
+    return FALSE;
+}
+
+// ---------------------------------------------------------------------------
+// The way there. The Garden has trees, rocks and water in the way, so a Pokémon going somewhere follows the steps
+// counted back from where it's going (a breadth-first count over the open ground); other Pokémon and people only
+// make it wait.
+
+#define PATH_FAR 0xFFFF
+static u16 sDist[GARDEN_H][GARDEN_W];
+static u16 sQueue[GARDEN_W * GARDEN_H];
+static struct Coords16 sFlooded = {-1, -1};
+static s8 sLastZone;     // the zone FindZone chose (tests)
+static u32 sFloodedFrame;
+
+static bool8 OpenGround(s16 x, s16 y)
+{
+    return InGarden(x, y) && MapGridGetCollisionAt(x, y) == 0 && !IsWater(x, y) && !MP_GardenDecor_At(x, y);
+}
+
+// Steps from every tile to (x, y) (map coordinates)
+static void Flood(s16 x, s16 y)
+{
+    static const s8 d[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    u16 head = 0, tail = 0;
+    s16 mx = x - MAP_OFFSET, my = y - MAP_OFFSET;
+    if (sFlooded.x == x && sFlooded.y == y && sFloodedFrame == sL.frame)
+        return;
+    sFlooded.x = x;
+    sFlooded.y = y;
+    sFloodedFrame = sL.frame;
+    memset(sDist, 0xFF, sizeof(sDist));
+    if (mx < 0 || my < 0 || mx >= GARDEN_W || my >= GARDEN_H)
+        return;
+    sDist[my][mx] = 0;
+    sQueue[tail++] = my * GARDEN_W + mx;
+    while (head < tail)
+    {
+        u16 c = sQueue[head++];
+        s16 cx = c % GARDEN_W, cy = c / GARDEN_W;
+        u8 i;
+        for (i = 0; i < 4; i++)
+        {
+            s16 nx = cx + d[i][0], ny = cy + d[i][1];
+            if (nx < 0 || ny < 0 || nx >= GARDEN_W || ny >= GARDEN_H || sDist[ny][nx] != PATH_FAR)
+                continue;
+            if (!OpenGround(GX(nx), GY(ny)))
+                continue;
+            sDist[ny][nx] = sDist[cy][cx] + 1;
+            sQueue[tail++] = ny * GARDEN_W + nx;
+        }
+    }
+}
+
+static u16 DistAt(s16 x, s16 y)
+{
+    s16 mx = x - MAP_OFFSET, my = y - MAP_OFFSET;
+    if (mx < 0 || my < 0 || mx >= GARDEN_W || my >= GARDEN_H)
+        return PATH_FAR;
+    return sDist[my][mx];
+}
+
+enum { PATH_NONE, PATH_STEP, PATH_WAIT };
+
+// The next step toward its target along the counted steps: PATH_NONE when there's no way (walk straight at it),
+// PATH_WAIT when the way is there but someone stands on it
+static u8 PathStep(struct Actor *a, struct Coords16 *n)
+{
+    static const s8 d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    u16 here;
+    u8 i, first;
+    bool8 blocked = FALSE;
+    Flood(a->target.x, a->target.y);
+    here = DistAt(a->cur.x, a->cur.y);
+    if (here == PATH_FAR || here == 0)
+        return PATH_NONE;
+    // the longer way first (as it walked before), then the others
+    first = abs(a->target.x - a->cur.x) >= abs(a->target.y - a->cur.y) ? (a->target.x > a->cur.x ? 0 : 1)
+                                                                          : (a->target.y > a->cur.y ? 2 : 3);
+    for (i = 0; i < 4; i++)
+    {
+        u8 k = (first + i) & 3;
+        struct Coords16 c = {a->cur.x + d[k][0], a->cur.y + d[k][1]};
+        if (DistAt(c.x, c.y) != here - 1)
+            continue;
+        if (CanStand(c.x, c.y, a) || (c.x == a->target.x && c.y == a->target.y && ActorAtTile(c.x, c.y, a) == NULL
+                                       && GetObjectEventIdByXY(c.x, c.y) == OBJECT_EVENTS_COUNT && OpenGround(c.x, c.y)))
+        {
+            *n = c;
+            return PATH_STEP;
+        }
+        blocked = TRUE;
+    }
+    return blocked ? PATH_WAIT : PATH_NONE;
+}
+
+// A tile in one of this type's places (mp_garden_map.h sGardenZones, those the group's badges have opened) that it
+// can get to and that passes the test; it faces what the test or the place says
+static bool8 FindZone(struct Actor *a, u8 need, GroundTest test, s16 *ox, s16 *oy, s16 *fx, s16 *fy)
+{
+    u8 cand[ARRAY_COUNT(sGardenZones)];
+    u8 n = 0, i, k, level = MP_Garden_GrowthLevel();
+    for (i = 0; i < ARRAY_COUNT(sGardenZones); i++)
+        if (sGardenZones[i].need == need && sGardenZones[i].badges <= level)
+            cand[n++] = i;
+    if (n == 0)
+        return FALSE;
+    Flood(a->cur.x, a->cur.y);
+    for (k = 0; k < 48; k++)
+    {
+        const struct GardenZone *z = &sGardenZones[cand[Random() % n]];
+        s16 x = GX(z->x0 + Random() % (z->x1 - z->x0 + 1));
+        s16 y = GY(z->y0 + Random() % (z->y1 - z->y0 + 1));
+        *fx = 0x7FFF;
+        if (DistAt(x, y) == PATH_FAR || !CanStand(x, y, a) || !test(x, y, fx, fy))
+            continue;
+        if (*fx == 0x7FFF && z->fx >= 0)
+        {
+            *fx = GX(z->fx);
+            *fy = GY(z->fy);
+        }
+        *ox = x;
+        *oy = y;
+        sLastZone = z - sGardenZones;
+        return TRUE;
+    }
     return FALSE;
 }
 
@@ -404,6 +566,21 @@ static void SyncLocalActors(void)
 // ---------------------------------------------------------------------------
 // Moving and drawing
 
+static void PopStep(struct Actor *a)
+{
+    memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));
+    memmove(&a->qDir[0], &a->qDir[1], a->qLen - 1);
+    a->qLen--;
+}
+
+static u8 QueuedSteps(struct Actor *a)
+{
+    u8 i, n = 0;
+    for (i = 0; i < a->qLen; i++)
+        n += a->qDir[i] == 0xFF;
+    return n;
+}
+
 static u8 DirToward(struct Coords16 from, s16 x, s16 y, u8 fallback)
 {
     s16 dx = x - from.x, dy = y - from.y;
@@ -420,7 +597,7 @@ static void Step(struct Actor *a)
     struct Coords16 n;
     if (a->moved < 16)
     {
-        a->moved += a->owner >= 0 && a->qLen >= 2 ? a->speed * 2 : a->speed;   // (a friend's, behind: catching up)
+        a->moved += a->owner >= 0 && QueuedSteps(a) >= 2 ? a->speed * 2 : a->speed;   // (a friend's, behind: catching up)
         if (a->moved >= 16)
         {
             a->moved = 16;
@@ -433,16 +610,20 @@ static void Step(struct Actor *a)
         // a friend's: their game's steps in order (no searching of its own)
         while (a->qLen && a->q[0].x == a->cur.x && a->q[0].y == a->cur.y)
         {
-            memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));
-            a->qLen--;
+            u8 turn = a->qDir[0];
+            PopStep(a);
+            if (turn != 0xFF)
+            {
+                a->dir = turn;   // (one turn a frame: each one shows, as in its own game)
+                return;
+            }
         }
         if (a->qLen == 0)
             return;
         if (abs(a->q[0].x - a->cur.x) + abs(a->q[0].y - a->cur.y) == 1)
         {
             n = a->q[0];
-            memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));
-            a->qLen--;
+            PopStep(a);
             a->dir = DirToward(a->cur, n.x, n.y, a->dir);
             a->from = a->prev = a->cur;
             a->cur = n;
@@ -453,10 +634,27 @@ static void Step(struct Actor *a)
     }
     if (a->cur.x == a->target.x && a->cur.y == a->target.y)
         return;
+    switch (PathStep(a, &n))
+    {
+    case PATH_STEP:
+        a->stuck = 0;
+        a->dir = DirToward(a->cur, n.x, n.y, a->dir);
+        a->from = a->prev = a->cur;
+        a->cur = n;
+        a->moved = 0;
+        return;
+    case PATH_WAIT:
+        if (++a->stuck > 40)
+        {
+            a->target = a->cur;   // someone's in the way for too long: it does it here
+            a->stuck = 0;
+        }
+        return;
+    }
     dx = a->target.x - a->cur.x;
     dy = a->target.y - a->cur.y;
     n = a->cur;
-    // the longer way first; around an obstacle by the other
+    // (no way round: the longer way first; around an obstacle by the other)
     if (abs(dx) >= abs(dy) && dx)
         n.x += dx > 0 ? 1 : -1;
     else
@@ -608,6 +806,8 @@ static void Plan(struct Actor *a, u8 act, s16 x, s16 y, s16 fx, s16 fy, u16 dura
     a->stuck = 0;
     a->target.x = x;
     a->target.y = y;
+    // (the bigger Garden: far places take a while, and the way round trees and water is longer than straight)
+    a->walkLimit = 420 + 32 * (abs(x - a->cur.x) + abs(y - a->cur.y));
     a->fx = fx;
     a->fy = fy;
     a->duration = duration;
@@ -799,10 +999,10 @@ static bool8 StartPursuit(struct Actor *a, struct MpLifeRec *rec, u8 p)
     switch (p)
     {
     case LIFE_PURSUIT_CLIMB:   ok = FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByEdgeTree, 14, &x, &y, &fx, &fy); break;
-    case LIFE_PURSUIT_SWIM:    ok = FindNear(a->cur.x, a->cur.y, T_ByWater, 14, &x, &y, &fx, &fy); break;
-    case LIFE_PURSUIT_SING:    ok = FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); break;
-    case LIFE_PURSUIT_COLLECT: ok = FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
-    case LIFE_PURSUIT_DIG:     ok = FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_SWIM:    ok = FindZone(a, TNEED_SOAK, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_SING:    ok = FindZone(a, TNEED_SUN, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_COLLECT: ok = FindZone(a, TNEED_SHINE, T_ByRock, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
+    case LIFE_PURSUIT_DIG:     ok = FindZone(a, TNEED_DIG, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); break;
     case LIFE_PURSUIT_TEACH:
         if ((student = OursNear(a, 8, IsYounger)) != NULL && BesideActor(a, student, &x, &y))
         {
@@ -1106,6 +1306,42 @@ static bool8 NewBody(struct Actor *a, struct MpLifeRec *rec)
     return TRUE;
 }
 
+// Its type's place (mp_garden_map.h's zones first, the ground near it if none can be reached) and what it does
+// there. anyTime (tests): sun and night needs go even when it's cloudy or day.
+static bool8 TypePlace(struct Actor *a, u8 tneed, bool8 anyTime)
+{
+    bool8 ok = FALSE;
+    u8 pose = LIFE_POSE_SIT, emote = LIFE_EMOTE_CALM;
+    s16 x, y, fx, fy;
+    sSearcher = a;
+    sLastZone = -1;
+    switch (tneed)
+    {
+    case TNEED_SOAK:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_WATER; break;
+    case TNEED_BASK:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || ((anyTime || Sunny()) && FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
+    case TNEED_SUN:     ok = (anyTime || Sunny()) && (FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
+    case TNEED_DIG:     ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_DOTS; break;
+    case TNEED_FOLIAGE: ok = FindZone(a, tneed, T_Tall, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Tall, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_LEAF; break;
+    case TNEED_HEIGHT:  ok = FindZone(a, tneed, T_Lookout, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
+    case TNEED_SKY:     ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
+    case TNEED_STORM:   ok = FindZone(a, tneed, T_ByStone, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_EXCLAIM; break;
+    case TNEED_DAMP:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Puddle, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
+    case TNEED_STONE:   ok = FindZone(a, tneed, T_ByRock, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy); break;
+    case TNEED_SHADE:
+    case TNEED_STILL:
+    case TNEED_COZY:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy); break;
+    case TNEED_COOL:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
+    case TNEED_NIGHT:   ok = (anyTime || IsNight()) && (FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_NOTE; break;
+    case TNEED_SPAR:    ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_SPARKLE; break;
+    case TNEED_SHINE:   ok = FindZone(a, tneed, T_ByRock, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy); emote = LIFE_EMOTE_SPARKLE; break;
+    }
+    if (!ok)
+        return FALSE;
+    a->tneed = tneed;
+    Plan(a, GA_TYPE, x, y, fx, fy, 240 + Random() % 180, pose, emote);
+    return TRUE;
+}
+
 static void Choose(struct Actor *a, struct MpLifeRec *rec)
 {
     u16 score[GA_COUNT];
@@ -1193,36 +1429,8 @@ static void Choose(struct Actor *a, struct MpLifeRec *rec)
             Plan(a, GA_FORAGE, x, y, 0x7FFF, 0, 200 + Random() % 100, LIFE_POSE_SHAKE, LIFE_EMOTE_FOOD);
         break;
     case GA_TYPE:
-    {
-        bool8 ok = FALSE;
-        u8 pose = LIFE_POSE_SIT, emote = LIFE_EMOTE_CALM;
-        switch (tneed)
-        {
-        case TNEED_SOAK:    ok = FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_WATER; break;
-        case TNEED_BASK:
-        case TNEED_SUN:     ok = Sunny() && (FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
-        case TNEED_DIG:     ok = FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_DOTS; break;
-        case TNEED_FOLIAGE: ok = FindNear(a->cur.x, a->cur.y, T_Tall, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_LEAF; break;
-        case TNEED_HEIGHT:
-        case TNEED_SKY:     ok = FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
-        case TNEED_STORM:   ok = FindNear(a->cur.x, a->cur.y, T_ByStone, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_EXCLAIM; break;
-        case TNEED_DAMP:    ok = FindNear(a->cur.x, a->cur.y, T_Puddle, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
-        case TNEED_SHADE:
-        case TNEED_STILL:
-        case TNEED_COZY:
-        case TNEED_STONE:   ok = FindNear(a->cur.x, a->cur.y, T_Cozy, 8, &x, &y, &fx, &fy); break;
-        case TNEED_COOL:    ok = FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); break;
-        case TNEED_NIGHT:   ok = IsNight() && FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); pose = LIFE_POSE_HOP; emote = LIFE_EMOTE_NOTE; break;
-        case TNEED_SPAR:    ok = FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_SPARKLE; break;
-        case TNEED_SHINE:   ok = FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy); emote = LIFE_EMOTE_SPARKLE; break;
-        }
-        if (ok)
-        {
-            a->tneed = tneed;
-            Plan(a, GA_TYPE, x, y, fx, fy, 240 + Random() % 180, pose, emote);
-        }
+        TypePlace(a, tneed, FALSE);
         break;
-    }
     case GA_PLAY:
     case GA_CHASE:
         if (friendA && BesideActor(a, friendA, &x, &y))
@@ -1397,8 +1605,11 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
                     a->target.x = x, a->target.y = y;
             }
         }
-        if ((a->moved >= 16 && a->cur.x == a->target.x && a->cur.y == a->target.y) || a->timer > 420)
+        if ((a->moved >= 16 && a->cur.x == a->target.x && a->cur.y == a->target.y) || a->timer > a->walkLimit)
         {
+            if (a->act == GA_TYPE)
+                MPNet_Log("garden: %u at its place for %u: %d,%d%s", a->dex, a->tneed, a->cur.x - MAP_OFFSET,
+                          a->cur.y - MAP_OFFSET, a->cur.x == a->target.x && a->cur.y == a->target.y ? "" : " (short of it)");
             a->phase = 1;
             a->timer = 0;
             a->target = a->cur;
@@ -1562,17 +1773,30 @@ u8 MP_GardenLife_Dir(u8 i)
 }
 
 // A friend's Pokémon, as their game says (mp_garden_net.c): it walks to its tile here
+static void QueueEntry(struct Actor *a, struct Coords16 t, u8 turn)
+{
+    if (a->qLen == ARRAY_COUNT(a->q))
+        PopStep(a);   // far behind: the oldest goes
+    a->qDir[a->qLen] = turn;
+    a->q[a->qLen++] = t;
+}
+
 static void QueueStep(struct Actor *a, struct Coords16 t)
 {
     if (t.x == a->qLast.x && t.y == a->qLast.y)
         return;
-    if (a->qLen == ARRAY_COUNT(a->q))
-    {
-        memmove(&a->q[0], &a->q[1], (a->qLen - 1) * sizeof(a->q[0]));   // far behind: the oldest step goes
-        a->qLen--;
-    }
-    a->q[a->qLen++] = t;
+    QueueEntry(a, t, 0xFF);
     a->qLast = t;
+}
+
+// Its facing, as their game says: a turn after the steps queued before it (a turn that came while the copy was
+// still finishing a step was lost before 1.17)
+static void QueueTurn(struct Actor *a, u8 dir)
+{
+    if (dir == a->qLastDir)
+        return;
+    QueueEntry(a, a->qLast, dir);
+    a->qLastDir = dir;
 }
 
 // A friend's Garden Pokémon, as their game says: the tile it's on or stepping onto (x, y) and the one it stepped
@@ -1605,7 +1829,7 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         a->hue = hue;
         a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
-        a->dir = dir;
+        a->dir = a->qLastDir = dir;
         MPNet_Log("garden: player %d's %u here", owner + 1, dex);
     }
     if (abs(x - a->qLast.x) + abs(y - a->qLast.y) > 4)
@@ -1614,6 +1838,7 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
         a->qLen = 0;
         a->from = a->prev = a->cur = a->target = a->qLast = t;
         a->moved = 16;
+        a->dir = a->qLastDir = dir;
     }
     else if (!(t.x == a->qLast.x && t.y == a->qLast.y))
     {
@@ -1623,10 +1848,10 @@ s8 MP_GardenLife_SetRemote(s8 owner, u8 index, u32 key, u16 dex, bool8 female, s
             QueueStep(a, f);
         QueueStep(a, t);
     }
+    QueueTurn(a, dir);
     a->speed = speed ? speed : 1;
     if (a->qLen == 0 && a->moved >= 16 && a->cur.x == x && a->cur.y == y)
     {
-        a->dir = dir;
         a->pose = pose;
     }
     else
@@ -1795,9 +2020,9 @@ void MP_GardenLife_Debug(const char *args)
         struct Actor *a = &sL.a[i];
         if (!a->used)
             continue;
-        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d\n", i,
+        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u\n", i,
                a->dex, a->owner, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner, a->rare,
-               a->lead, a->learner);
+               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir);
     }
 }
 
@@ -1835,6 +2060,22 @@ void MP_GardenLife_DebugForce(u8 actor, u8 act)
         }
     }
     Choose(&sL.a[actor], rec);
+}
+
+// Tests: actor N goes to its type's place for TNEED_* need (whatever the hour and the weather)
+void MP_GardenLife_DebugPlace(u8 actor, u8 need)
+{
+    struct Actor *a;
+    if (actor >= MAX_ACTORS || !sL.a[actor].used || sL.a[actor].owner >= 0 || need == TNEED_NONE || need >= TNEED_COUNT)
+        return;
+    a = &sL.a[actor];
+    a->act = GA_NONE;
+    a->partner = -1;
+    if (TypePlace(a, need, TRUE))
+        printf("[test] garden place need %u -> %d,%d zone %d (%d,%d)\n", need, a->target.x - MAP_OFFSET,
+               a->target.y - MAP_OFFSET, sLastZone, a->fx == 0x7FFF ? -1 : a->fx - MAP_OFFSET, a->fx == 0x7FFF ? -1 : a->fy - MAP_OFFSET);
+    else
+        printf("[test] garden place need %u -> none\n", need);
 }
 
 // Tests: line everything up for a rare moment (bonds, temperament; time and weather waived) and let it happen

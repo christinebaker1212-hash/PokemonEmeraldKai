@@ -228,8 +228,8 @@ void MP_GardenDecor_Update(void)
         {
             Remove(s, GARDEN_DECOR_MAX);
             s->decor = want;
-            s->x = GX(GROWTH_STONE_X);
-            s->y = GY(GROWTH_STONE_Y);
+            s->x = GX(GARDEN_STONE_X);
+            s->y = GY(GARDEN_STONE_Y);
         }
         DrawOne(s, GARDEN_DECOR_MAX);
     }
@@ -389,6 +389,19 @@ void MP_GardenDecor_CheckPlaces(void)
 {
     struct MpGardenSave *gs = MP_Life_GardenSave();
     u8 i;
+    if (!(gs->flags & MP_GARDEN_HABITATS))
+    {
+        // a save from before 1.17: its decorations stood in the old, smaller Garden, so their places mean nothing
+        // in this one (they could stand anywhere, even across a way through): back to the collection, once
+        for (i = 0; i < GARDEN_DECOR_MAX; i++)
+            if (gs->decor[i].decor != DECOR_NONE)
+            {
+                MPNet_Log("garden: decoration %u put away (the Garden has changed)", gs->decor[i].decor);
+                gs->decor[i].decor = DECOR_NONE;
+                sD.seq++;
+            }
+        gs->flags |= MP_GARDEN_HABITATS;
+    }
     for (i = 0; i < GARDEN_DECOR_MAX; i++)
     {
         u8 decor = gs->decor[i].decor;

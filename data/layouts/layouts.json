@@ -4414,8 +4414,8 @@
     {
       "id": "LAYOUT_MOEMON_GARDEN",
       "name": "MoemonGarden_Layout",
-      "width": 40,
-      "height": 26,
+      "width": 56,
+      "height": 40,
       "primary_tileset": "gTileset_General",
       "secondary_tileset": "gTileset_MoemonGarden",
       "border_filepath": "data/layouts/MoemonGarden/border.bin",

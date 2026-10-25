@@ -1,0 +1,149 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 200
+mp life garden state
+watchlog at its place for 1:
+mp life garden place 0 1
+waitlog 4000
+wait 30
+watchlog at its place for 2:
+mp life garden place 0 2
+waitlog 4000
+wait 30
+watchlog at its place for 3:
+mp life garden place 0 3
+waitlog 4000
+wait 30
+watchlog at its place for 4:
+mp life garden place 0 4
+waitlog 4000
+wait 30
+watchlog at its place for 5:
+mp life garden place 0 5
+waitlog 4000
+wait 30
+watchlog at its place for 6:
+mp life garden place 0 6
+waitlog 4000
+wait 30
+watchlog at its place for 7:
+mp life garden place 0 7
+waitlog 4000
+wait 30
+watchlog at its place for 8:
+mp life garden place 0 8
+waitlog 4000
+wait 30
+watchlog at its place for 9:
+mp life garden place 0 9
+waitlog 4000
+wait 30
+watchlog at its place for 10:
+mp life garden place 0 10
+waitlog 4000
+wait 30
+watchlog at its place for 11:
+mp life garden place 0 11
+waitlog 4000
+wait 30
+watchlog at its place for 12:
+mp life garden place 0 12
+waitlog 4000
+wait 30
+watchlog at its place for 13:
+mp life garden place 0 13
+waitlog 4000
+wait 30
+watchlog at its place for 14:
+mp life garden place 0 14
+waitlog 4000
+wait 30
+watchlog at its place for 15:
+mp life garden place 0 15
+waitlog 4000
+wait 30
+watchlog at its place for 16:
+mp life garden place 0 16
+waitlog 4000
+wait 30
+watchlog at its place for 17:
+mp life garden place 0 17
+waitlog 4000
+wait 30
+shot base
+mp givebadges
+wait 400
+pressuntil B field 3000
+wait 200
+mp life garden state
+watchlog at its place for 1:
+mp life garden place 0 1
+waitlog 4000
+wait 30
+watchlog at its place for 2:
+mp life garden place 0 2
+waitlog 4000
+wait 30
+watchlog at its place for 3:
+mp life garden place 0 3
+waitlog 4000
+wait 30
+watchlog at its place for 4:
+mp life garden place 0 4
+waitlog 4000
+wait 30
+watchlog at its place for 5:
+mp life garden place 0 5
+waitlog 4000
+wait 30
+watchlog at its place for 6:
+mp life garden place 0 6
+waitlog 4000
+wait 30
+watchlog at its place for 7:
+mp life garden place 0 7
+waitlog 4000
+wait 30
+watchlog at its place for 8:
+mp life garden place 0 8
+waitlog 4000
+wait 30
+watchlog at its place for 9:
+mp life garden place 0 9
+waitlog 4000
+wait 30
+watchlog at its place for 10:
+mp life garden place 0 10
+waitlog 4000
+wait 30
+watchlog at its place for 11:
+mp life garden place 0 11
+waitlog 4000
+wait 30
+watchlog at its place for 12:
+mp life garden place 0 12
+waitlog 4000
+wait 30
+watchlog at its place for 13:
+mp life garden place 0 13
+waitlog 4000
+wait 30
+watchlog at its place for 14:
+mp life garden place 0 14
+waitlog 4000
+wait 30
+watchlog at its place for 15:
+mp life garden place 0 15
+waitlog 4000
+wait 30
+watchlog at its place for 16:
+mp life garden place 0 16
+waitlog 4000
+wait 30
+watchlog at its place for 17:
+mp life garden place 0 17
+waitlog 4000
+wait 30
+shot badges
+quit

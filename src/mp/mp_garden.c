@@ -1,13 +1,14 @@
 // Moemon Co-op: the MOéMON GARDEN (docs/POKEMON_GARDEN.md 11).
 //
 // Every POKéMON CENTER's second floor: a meadow inside the CENTER (data/maps/MoemonGarden, built by
-// tools/moemon_garden/gen_map.py and gen_tileset.py). The CENTER's escalator leads up into it, and the escalator at
+// tools/moemon_garden/gen_garden.py). The CENTER's escalator leads up into it, and the escalator at
 // its west edge leads back down to the CENTER you came from. The old 2F maps (the CABLE CLUB and the rest) stay in
 // the game, unreached. After the first visit, START > GARDEN and the PC's MOéMON GARDEN row take you there from
 // outdoors or a CENTER (never from a cave, a dungeon or the middle of a story moment), and the way down leads to the
 // last POKéMON CENTER you visited.
-//   - It grows with the journey: patches appear as the group's badges grow (tall grass, puddles, a dig patch,
-//     a perch grove, a storm stone): the group's travels leave their marks.
+//   - A place for every type (mp_garden_map.h sGardenZones: where each type's Pokémon go for what they love), and
+//     every badge the group holds adds one (sGardenGrowth: a long grass field, a marsh, a boulder field, a dig field,
+//     more shiny stones, a perch grove, a second flower bed, a stone circle): the group's travels leave their marks.
 //   - One open meadow, alone or with friends: everyone's Pokémon and decorations are there together.
 //   - The party lives here freely (mp_garden_life.c): needs, play, naps, bonds, decorations, WATCH mode.
 #include <stdio.h>
@@ -41,24 +42,16 @@
 #include "constants/map_types.h"
 #include "constants/map_groups.h"
 #include "constants/songs.h"
+#define GARDEN_WANT_GROWTH
 #include "mp_garden_map.h"
 
 #define GX(x) ((x) + MAP_OFFSET)
 #define GY(y) ((y) + MAP_OFFSET)
 
-enum { GROW_TALL_GRASS, GROW_PUDDLES, GROW_SAND, GROW_GROVE, GROW_STONE, GROW_COUNT };
-static const u8 sGrowBadges[GROW_COUNT] = {
-    [GROW_TALL_GRASS] = 1,   // through PETALBURG WOODS: foliage
-    [GROW_PUDDLES] = 2,      // SLATEPORT's sea air: a damp corner
-    [GROW_SAND] = 4,         // the desert: a dig patch
-    [GROW_STONE] = 5,        // the WEATHER INSTITUTE: a storm stone
-    [GROW_GROVE] = 6,        // FORTREE: a perch grove
-};
-
 static struct
 {
     bool8 here;
-    u8 growth;              // GROW_* bits stamped on the map
+    u8 growth;              // the badges whose additions are on the map (sGardenGrowth up to there)
     u8 groupBadges;
     bool8 warpPending;      // quick travel, once the PC script / START menu is over
     bool8 welcomePending;
@@ -99,57 +92,33 @@ static void SetTile(s16 x, s16 y, u16 tile, bool8 draw)
         CurrentMapDrawMetatileAt(GX(x), GY(y));
 }
 
-static void StampRect(s16 x0, s16 y0, s16 w, s16 h, u16 tile, bool8 draw)
-{
-    s16 x, y;
-    for (y = y0; y < y0 + h; y++)
-        for (x = x0; x < x0 + w; x++)
-            SetTile(x, y, tile, draw);
-}
-
-static void Grow(u8 which, bool8 draw)
-{
-    s16 x, y;
-    switch (which)
-    {
-    case GROW_TALL_GRASS:
-        StampRect(GROWTH_TALL_GRASS_X, GROWTH_TALL_GRASS_Y, GROWTH_TALL_GRASS_W, GROWTH_TALL_GRASS_H, GARDEN_TALL_GRASS, draw);
-        break;
-    case GROW_PUDDLES:
-        for (y = 0; y < 3; y++)
-            for (x = 0; x < 3; x++)
-                SetTile(GROWTH_PUDDLES_X + x, GROWTH_PUDDLES_Y + y, sGardenPuddles[y][x], draw);
-        break;
-    case GROW_SAND:
-        StampRect(GROWTH_SAND_X, GROWTH_SAND_Y, GROWTH_SAND_W, GROWTH_SAND_H, GARDEN_SAND, draw);
-        break;
-    case GROW_GROVE:
-        for (x = 0; x < GROWTH_GROVE_W; x += 2)
-            for (y = 0; y < GROWTH_GROVE_H; y++)
-            {
-                SetTile(GROWTH_GROVE_X + x, GROWTH_GROVE_Y + y, sGardenTree[y][0], draw);
-                SetTile(GROWTH_GROVE_X + x + 1, GROWTH_GROVE_Y + y, sGardenTree[y][1], draw);
-            }
-        break;
-    case GROW_STONE:
-        break;   // a sprite (mp_garden_life.c)
-    }
-    sG.growth |= 1 << which;
-    MPNet_Log("garden: growth %u", which);
-}
-
+// Every badge the group holds adds a place (gen_garden.py's GROWTH table, in badge order): stamp what's new
 static void ApplyGrowth(bool8 draw)
 {
-    u8 i;
+    u16 i;
+    u8 upTo;
     sG.groupBadges = GroupBadges();
-    for (i = 0; i < GROW_COUNT; i++)
-        if (!(sG.growth & (1 << i)) && sG.groupBadges >= sGrowBadges[i])
-            Grow(i, draw);
+    upTo = sG.groupBadges > 8 ? 8 : sG.groupBadges;
+    if (upTo <= sG.growth)
+        return;
+    for (i = 0; i < ARRAY_COUNT(sGardenGrowth); i++)
+        if (sGardenGrowth[i].badges > sG.growth && sGardenGrowth[i].badges <= upTo)
+            SetTile(sGardenGrowth[i].x, sGardenGrowth[i].y, sGardenGrowth[i].tile, draw);
+    for (i = sG.growth + 1; i <= upTo; i++)
+        MPNet_Log("garden: growth %u", i);
+    sG.growth = upTo;
 }
 
+// ELECTRIC's storm stone stands in the Garden from the start (a sprite: mp_garden_decor.c)
 bool8 MP_Garden_StoneShown(void)
 {
-    return (sG.growth & (1 << GROW_STONE)) != 0;
+    return sG.here;
+}
+
+// The badges whose places are on the map now (which places the Garden's Pokémon can go to)
+u8 MP_Garden_GrowthLevel(void)
+{
+    return sG.here ? sG.growth : 0;
 }
 
 static void NoteCenter(void);
@@ -559,7 +528,7 @@ void MP_Garden_Debug(const char *args)
     if (strcmp(cmd, "state") == 0)
     {
         struct MpGardenSave *gs = MP_Life_GardenSave();
-        printf("[test] garden here %d growth %02x badges %u visited %d lastpc %d %u.%u warp %u return %d\n", sG.here,
+        printf("[test] garden here %d growth %u badges %u visited %d lastpc %d %u.%u warp %u return %d\n", sG.here,
                sG.growth, sG.groupBadges, MP_Garden_Visited(), (gs->flags & MP_GARDEN_LASTPC) != 0, gs->lastPcGroup,
                gs->lastPcNum, gs->lastPcWarp, ReturnCenter());
     }
@@ -588,6 +557,14 @@ void MP_Garden_Debug(const char *args)
         sscanf(args, "%31s %d %d", cmd, &a, &b);
         MP_GardenLife_DebugForce(a, b);
         printf("[test] garden force %d %d\n", a, b);
+    }
+    else if (strcmp(cmd, "place") == 0)
+    {
+        // place ACTOR NEED: that Garden Pokémon goes to its type's place for TNEED_* NEED
+        void MP_GardenLife_DebugPlace(u8 actor, u8 need);
+        int b = 0;
+        sscanf(args, "%31s %d %d", cmd, &a, &b);
+        MP_GardenLife_DebugPlace(a, b);
     }
     else if (strcmp(cmd, "rare") == 0)
     {
