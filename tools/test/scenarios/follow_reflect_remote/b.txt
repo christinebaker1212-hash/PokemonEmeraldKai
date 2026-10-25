@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 400
+barrier walk 2
+wait 200
+shot bob_pond
+wait 60
+quit

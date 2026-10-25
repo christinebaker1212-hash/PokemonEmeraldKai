@@ -62,6 +62,7 @@ void MP_BlendSpritePalette(u8 slot, u8 coeff, u16 color);   // BlendPalettes for
 void MP_BeginSpritePaletteFade(u8 slot, s8 delay, u8 startY, u8 targetY, u16 color);
 struct MpFadeFit { bool8 on; s32 s256, b256[3]; };
 void MP_FadeFit_FromPalette(struct MpFadeFit *fit, u16 plttIndex);   // the fade a shown palette is under
+void MP_FadeFit_FromColors(struct MpFadeFit *fit, const u16 *own, const u16 *shown);
 u16 MP_FadeFit_Apply(const struct MpFadeFit *fit, u16 color);         // ... applied to another color
 
 void LoadCompressedPalette(const u32 *src, u16 offset, u16 size);

@@ -1771,6 +1771,7 @@ void MP_FrameUpdate(void)
     if (!sInitDone)
         MP_Init();
     MP_Qol_Update();
+    MP_ReflectionPalettes_Sweep();   // reflection palettes no sprite shows any more
     MP_Candy_Update();          // PROF. BIRCH brings the CANDY JAR after the first release
     MP_TmRefund_Update();       // the LOTTERY CORNER clerk brings back TMs used up before they became reusable
     MP_Life_FrameUpdate();      // MOéMON GARDEN: needs, feelings, places (mp_life.c)

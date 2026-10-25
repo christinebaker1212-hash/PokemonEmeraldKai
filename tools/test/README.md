@@ -86,6 +86,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `battle_weather_map` | a wild battle on rainy Route 120 starts in the rain, on screen |
 | `follow_ground` | the follower in tall grass (Route 101), its reflection (Petalburg's pond), footprints (Route 109), puddle splashes (Route 120), hot springs (Lavaridge) |
 | `follow_ground_remote` | NA-JP lag: BOB sees the grass shake around ALICE's follower |
+| `follow_reflect_remote` | NA-JP lag at Petalburg's pond: each screen shows the friend's and the TORCHIC's reflections washed out like the player's (shots) |
 | `life_return` | Route 104: the follower off on its own runs back after its Trainer and falls in behind them, never popping over (check_followtrace.py) |
 | `life_arrival` | arrival bubbles only in a new area: nothing at the start or in and out of a house, a curious look in PETALBURG (check_arrival.py) |
 | `life_watch` | WATCH QUIETLY: learned, nothing new, nothing new, then learned again half an hour later (check_watch.py) |

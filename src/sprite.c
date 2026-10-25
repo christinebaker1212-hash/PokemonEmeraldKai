@@ -1856,7 +1856,8 @@ bool8 MP_IsCoopPaletteTag(u16 tag)
     return (tag >= 0x1150 && tag < 0x1158)   // followers (mp_follower.c)
         || (tag >= 0x5390 && tag < 0x5398)   // friends (mp_overworld.c)
         || tag == 0x53C0                     // bubbles, toasts, compass (MP_TAG_UI_PAL)
-        || tag == 0x53C1 || tag == 0x53C2;   // surf blobs (MP_TAG_BLOB_PAL)
+        || tag == 0x53C1 || tag == 0x53C2    // surf blobs (MP_TAG_BLOB_PAL)
+        || (tag >= 0x5B00 && tag < 0x5B40);  // their reflections in water (mp_followfx.c MP_ReflectionPalette)
 }
 
 static bool8 MpSlotHasSprites(u8 slot)
@@ -1950,7 +1951,7 @@ static u8 MP_MakeRoomForPalette(void)
         u8 rank;
         if (!MP_IsCoopPaletteTag(tag))
             continue;
-        if (tag > 0x1150 && tag < 0x1158)
+        if ((tag > 0x1150 && tag < 0x1158) || (tag >= 0x5B00 && tag < 0x5B40))   // reflections fall back to their colors
             rank = 0;
         else if (tag == 0x1150)
             rank = 1;

@@ -1024,6 +1024,10 @@ void MP_FollowFx_Update(u8 slot, u8 spriteId, s16 prevX, s16 prevY, s16 curX, s1
 void MP_FollowFx_Remove(u8 slot);
 void MP_FollowFx_GrassSubpriority(struct Sprite *grass);
 bool8 MP_FollowFx_IsReflection(struct Sprite *sprite);
+u16 MP_ReflectionTint(u16 color);                 // a color washed out for a reflection in water
+bool8 MP_ReflectionNeedsOwnPalette(u8 slot);      // co-op colors in this sprite palette slot
+u8 MP_ReflectionPalette(u8 src);                  // the reflection palette for the colors in slot src
+void MP_ReflectionPalettes_Sweep(void);
 void MP_UpdateGrassFieldEffectSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority);
 
 // mp_coop.c (walk up to a challenged player to team up for a Double Battle)

@@ -6,6 +6,7 @@
 // rules as event_object_movement.c's GetAllGroundEffectFlags_*), driven from the follower's tiles.
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "global.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
@@ -14,6 +15,7 @@
 #include "field_weather.h"
 #include "fieldmap.h"
 #include "metatile_behavior.h"
+#include "palette.h"
 #include "sound.h"
 #include "sprite.h"
 #include "constants/field_effects.h"
@@ -326,6 +328,81 @@ static u8 NearbyReflectionType(struct FollowFx *f)
     return REFL_TYPE_NONE;
 }
 
+// Reflection palettes for co-op colors. The game's own palettes reflect in their hand-made reflection palettes
+// (paler, toward the water's blue: brendan_reflection.pal...); a co-op palette (a follower, a friend, a custom look)
+// gets the same treatment here: a slot of its own (tag MP_TAG_REFL_PAL + the palette's slot) holding its colors washed
+// 42% toward white, the tint the local player's custom looks get (LoadPlayerObjectReflectionPalette). It follows the
+// palette it copies, fades included, and goes when no sprite uses it (MP_ReflectionPalettes_Sweep).
+#define MP_TAG_REFL_PAL 0x5B00
+
+u16 MP_ReflectionTint(u16 c)
+{
+    u16 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
+    r += (31 - r) * 42 / 100;
+    g += (31 - g) * 42 / 100;
+    b += (31 - b) * 42 / 100;
+    return r | (g << 5) | (b << 10);
+}
+
+// Does this sprite palette slot hold co-op colors (no reflection palette of the game's)?
+bool8 MP_ReflectionNeedsOwnPalette(u8 slot)
+{
+    return slot >= 16 || MP_IsCoopPaletteTag(GetSpritePaletteTagByPaletteNum(slot));
+}
+
+// The slot of the reflection palette for the colors in `src` (`src` itself when there's no room)
+u8 MP_ReflectionPalette(u8 src)
+{
+    u16 tag = MP_TAG_REFL_PAL + src, tinted[16], shown[16];
+    const u16 *srcOwn = &gPlttBufferUnfaded[OBJ_PLTT_ID(src)], *srcShown = &gPlttBufferFaded[OBJ_PLTT_ID(src)];
+    struct MpFadeFit fit;
+    u8 slot, i;
+
+    if (src >= 64)
+        return src;
+    slot = IndexOfSpritePaletteTag(tag);
+    if (slot == 0xFF)
+    {
+        if ((slot = MP_AllocCoopPalette(tag, NULL)) == 0xFF)
+            return src;
+        MPNet_Log("reflection palette: slot %d for the colors in slot %d (tag %04X)", slot, src,
+                  GetSpritePaletteTagByPaletteNum(src));
+    }
+    for (i = 0; i < 16; i++)
+        tinted[i] = MP_ReflectionTint(srcOwn[i]);
+    MP_FadeFit_FromColors(&fit, srcOwn, srcShown);   // a fade or blend on the colors it copies: the same on the copy
+    for (i = 0; i < 16; i++)
+        shown[i] = MP_FadeFit_Apply(&fit, tinted[i]);
+    if (memcmp(&gPlttBufferUnfaded[OBJ_PLTT_ID(slot)], tinted, sizeof(tinted)) != 0)
+        memcpy(&gPlttBufferUnfaded[OBJ_PLTT_ID(slot)], tinted, sizeof(tinted));
+    if (memcmp(&gPlttBufferFaded[OBJ_PLTT_ID(slot)], shown, sizeof(shown)) != 0)
+        memcpy(&gPlttBufferFaded[OBJ_PLTT_ID(slot)], shown, sizeof(shown));
+    return slot;
+}
+
+// MP_FrameUpdate: reflection palettes no sprite shows any more are freed
+void MP_ReflectionPalettes_Sweep(void)
+{
+    u64 used = 0, ours = 0;
+    u8 slot;
+    u32 i;
+
+    for (slot = 0; slot < 64; slot++)
+    {
+        u16 tag = GetSpritePaletteTagByPaletteNum(slot);
+        if (tag >= MP_TAG_REFL_PAL && tag < MP_TAG_REFL_PAL + 64)
+            ours |= (u64)1 << slot;
+    }
+    if (!ours)
+        return;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].oam.paletteNum < 64)
+            used |= (u64)1 << gSprites[i].oam.paletteNum;
+    for (slot = 0; slot < 64; slot++)
+        if ((ours & ((u64)1 << slot)) && !(used & ((u64)1 << slot)))
+            FreeSpritePaletteByTag(GetSpritePaletteTagByPaletteNum(slot));
+}
+
 #define sReflStill data[1]
 
 static bool8 ReflectionIsOurs(struct FollowFx *f)
@@ -381,8 +458,8 @@ static void SpriteCB_Reflection(struct Sprite *r)
         DestroySprite(r);
         return;
     }
-    // co-op palettes (slots 16+) reflect in their own colors, as friends' reflections do
-    r->oam.paletteNum = fs->oam.paletteNum;
+    // the follower's colors washed out like the player's reflection (its own reflection palette)
+    r->oam.paletteNum = MP_ReflectionPalette(fs->oam.paletteNum);
     r->oam.shape = fs->oam.shape;
     r->oam.size = fs->oam.size;
     r->oam.tileNum = fs->oam.tileNum;

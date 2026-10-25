@@ -1168,7 +1168,12 @@ void MP_BeginSpritePaletteFade(u8 slot, s8 delay, u8 startY, u8 targetY, u16 col
 // alone, where the old "follow gPaletteFade.y" turned them white.
 void MP_FadeFit_FromPalette(struct MpFadeFit *fit, u16 plttIndex)
 {
-    const u16 *own = &gPlttBufferUnfaded[plttIndex], *shown = &((const u16 *)PLTT)[plttIndex];
+    MP_FadeFit_FromColors(fit, &gPlttBufferUnfaded[plttIndex], &((const u16 *)PLTT)[plttIndex]);
+}
+
+// The same for 16 colors and what they are shown as
+void MP_FadeFit_FromColors(struct MpFadeFit *fit, const u16 *own, const u16 *shown)
+{
     s32 mu[3] = {0}, mf[3] = {0}, num = 0, den = 0, i, c;
     bool8 same = TRUE;
     for (i = 0; i < 16; i++)

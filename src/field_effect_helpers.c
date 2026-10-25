@@ -45,10 +45,13 @@ static u32 ShowDisguiseFieldEffect(u8, u8, u8);
 #define sReflectionVerticalOffset   data[2]
 #define sIsStillReflection          data[7]
 
-// Moemon PC: sprites in palette slots 16+ (co-op ones) reflect in their own colors
+// Moemon Co-op: sprites in co-op palettes (friends, slots 16+) reflect in a washed-out copy of their colors
+// (mp_followfx.c MP_ReflectionPalette), as the game's own palettes reflect in their reflection palettes
 static u8 ReflectionPaletteFor(u8 paletteNum)
 {
-    return paletteNum < 16 ? gReflectionEffectPaletteMap[paletteNum] : paletteNum;
+    if (MP_ReflectionNeedsOwnPalette(paletteNum))
+        return MP_ReflectionPalette(paletteNum);
+    return gReflectionEffectPaletteMap[paletteNum];
 }
 
 void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, bool8 stillReflection)
@@ -74,7 +77,7 @@ void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, boo
         reflectionSprite->oam.affineMode = ST_OAM_AFFINE_NORMAL;
 }
 
-// Moemon Co-op: reflections share their owner's palette slot (sprite.c palette moves skip them)
+// Moemon Co-op: reflection sprites (sprite.c palette moves skip them: they look up their palette every frame)
 bool8 MP_IsReflectionSprite(struct Sprite *sprite)
 {
     return sprite->callback == UpdateObjectReflectionSprite || MP_FollowFx_IsReflection(sprite);

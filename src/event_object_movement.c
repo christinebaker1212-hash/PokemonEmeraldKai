@@ -2139,14 +2139,7 @@ void LoadPlayerObjectReflectionPalette(u16 tag, u8 slot)
         if (pal == NULL)
             return;
         for (i = 0; i < 16; i++)
-        {
-            u16 c = pal[i];
-            u16 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
-            r += (31 - r) * 42 / 100;
-            g += (31 - g) * 42 / 100;
-            b += (31 - b) * 42 / 100;
-            refl[i] = r | (g << 5) | (b << 10);
-        }
+            refl[i] = MP_ReflectionTint(pal[i]);
         MP_VacatePaletteSlot(gReflectionEffectPaletteMap[slot]);
         LoadPalette(refl, OBJ_PLTT_ID(gReflectionEffectPaletteMap[slot]), PLTT_SIZE_4BPP);
     }

@@ -1,0 +1,11 @@
+# Reflections in co-op colors (mp_followfx.c MP_ReflectionPalette): at Petalburg's pond ALICE walks her TORCHIC to the
+# water's edge next to BOB. Each screen shows the other Trainer's reflection and the TORCHIC's in a washed-out copy of
+# their colors, like the local player's reflection palette (shots alice_pond, bob_pond)
+MODE=2
+WARP=0,0,2,13
+WARP_B=0,0,6,13
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20 MOEMON_FOLLOWFXTRACE=1"
+ENV_B="MOEMON_FOLLOWFXTRACE=1"
+EXPECT_A=("followfx slot 0: water reflection" "reflection palette: slot")
+EXPECT_B=("water reflection" "reflection palette: slot")

@@ -1,0 +1,11 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp follow 0
+wait 200
+barrier walk 2
+press RIGHT 32
+wait 120
+shot alice_pond
+wait 60
+quit

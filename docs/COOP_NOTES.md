@@ -148,8 +148,8 @@ UpdateSlot hands its step (prev / cur tile, pixels into it, facing, size, owner 
 which plays the game's own field effects from its tiles with GetAllGroundEffectFlags_*'s rules: tall / long grass
 (FLDEFFOBJ templates with our callback, stopping like UpdateTallGrassFieldEffect), sand / deep sand footprints and
 ripples (FieldEffectStart with arguments), puddle splash, flowing water, hot springs, sand heap, short grass (sprites
-following the follower), and a reflection (CreateCopySpriteAt like SetUpReflection, priority 3, own colors in slot 16+;
-MP_IsReflectionSprite knows it). UpdateGrassFieldEffectSubpriority counts followers (MP_FollowFx_GrassSubpriority).
+following the follower), and a reflection (CreateCopySpriteAt like SetUpReflection, priority 3; MP_IsReflectionSprite
+knows it) in a reflection palette of its own (below). UpdateGrassFieldEffectSubpriority counts followers (MP_FollowFx_GrassSubpriority).
 Friends' followers get it too. MOEMON_FOLLOWFXTRACE=1 logs each effect; tests follow_ground, follow_ground_remote.
 Phase 1 co-op: emotes/phrases (bubbles seen remotely), FRIENDS > GO TO, Town/Fly map heads, door
 labels, shared Pokédex (+ CAUGHT BY), buddy bonus, co-op Roxanne win giving both players the badge
@@ -666,7 +666,13 @@ MP_MaskTakesExtraPalettes includes them in fades / blends / tints whose mask has
 but the attacker"), not in ones aimed at a sprite or two. Use MP_BlendSpritePalette / MP_BeginSpritePaletteFade (by
 slot) for one sprite's palette when it may be 16+ (the capture "ball darkens", battle_anim_throw.c). Weather tints
 16+ like the game's dynamic sprite palettes (field_weather.c WEATHER_PAL_COUNT; the co-op overlay palette stays
-untinted). Reflections of sprites in 16+ keep their palette (field_effect_helpers.c ReflectionPaletteFor).
+untinted). Reflections of sprites in co-op palettes (16+, or a borrowed slot holding a co-op tag: friends, followers)
+use mp_followfx.c MP_ReflectionPalette (field_effect_helpers.c ReflectionPaletteFor, SpriteCB_Reflection): a co-op slot
+tagged 0x5B00 + the source slot, holding the source's colors washed 42% toward white (MP_ReflectionTint, the tint of
+LoadPlayerObjectReflectionPalette for the player's own looks), rewritten each frame from the source (its fade fitted
+with MP_FadeFit_FromColors). The game's palettes keep their hand-made reflection palettes. MP_ReflectionPalettes_Sweep
+(MP_FrameUpdate) frees the ones no sprite shows; MP_MakeRoomForPalette gives them up first (the reflection then falls
+back to the source's colors). Log "reflection palette: slot"; test follow_reflect_remote.
 Running out of sprites, palettes or tiles prints "[gfx] out of ..." (tests: UNEXPECT "[gfx] out of"); `mp pals`
 lists every used slot. Test: gfx_pals_triple.
 OAM indexes are u16 (sprite.c AddSpritesToOamBuffer / AddSpriteToOamBuffer / AddSubspritesToOamBuffer): the slot
