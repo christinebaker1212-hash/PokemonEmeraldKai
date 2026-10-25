@@ -76,7 +76,11 @@ gPokemonStoragePtr is theirs while the PC is open) with MY PC, SEND TO, friends'
 Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
 Also joining a battle in progress (mp_join.c: JOIN in front of a battling friend; mp_coop.c MP_Coop_JoinConvertMaster
-rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*).
+rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*), also when the trainer a friend is battling
+spots you (MPR_COOP_BATTLING: JOIN BATTLE / BATTLE ALONE; tests coop_spot_*).
+Link battles: only the master's engine runs, so anything the others' screens show from battle state must reach them
+(battle weather: B_COMM_MP_WEATHER blocks; Pokemon emotes: MPR_BATTLE_MONEMOTE; tests coop_fieldweather*, coop_life_emote).
+Whole-screen fades (28+ of the 32 palettes, 0<->16) are 30% quicker (palette.c sQuickFade).
 Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two trainers at once"; tests coop_two_*, coop_held_spot,
 coop_wait_merge). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
 tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens beside yours, each friend below / above / left / right /

@@ -43,6 +43,8 @@ void MP_Join_OnTurnStart(void);
 bool8 MP_Join_TurnHook(void);
 bool8 MP_Join_NextEntering(bool8 foes);
 void MP_Join_Ask(u8 target);
+bool8 MP_Join_AskFromScript(u8 target);   // mp_coop.c: JOIN BATTLE picked in a trainer's script
+bool8 MP_Join_CanBeJoined(void);
 bool8 MP_Join_IsAsking(void);
 void MP_Join_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Join_OnPlayerLeft(u8 id);

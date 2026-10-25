@@ -1,0 +1,14 @@
+# ROUTE 116: JERRY spots ALICE and battles her (BOB is on another map: nobody to wait for). BOB comes to ROUTE 116
+# and steps into JERRY's sight on his own game: JERRY walks up, and BOB is asked "ALICE is battling this trainer!
+# Join their battle, or battle alone?" (shot b_choice). JOIN BATTLE: ALICE lets him in at the next turn, they win,
+# and JERRY counts as beaten on both games (BOB's trainer script ends as after his own battle).
+MODE=2
+WARP=0,31,29,4
+WARP_B=0,10,10,10
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("join: our player said yes" "join: everyone is in" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+EXPECT_B=("player 1 is battling trainer 273" "spotted by the trainer player 1 is battling: join or battle alone?" "joining player 1's battle with this trainer" "join: player 1 said yes" "join: we're in the battle" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG" "battling the trainer alone" "Couldn't join")

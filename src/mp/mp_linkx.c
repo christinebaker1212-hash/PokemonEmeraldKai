@@ -622,8 +622,13 @@ static void UpdateWorld(void)
 
     // Routes 119/123 weather: everyone follows the leader
     lead = WorldLeader(0);
-    if (lead >= 0 && gSaveBlock1Ptr->weatherCycleStage != sWorld[lead].stage)
+    if (lead >= 0 && gSaveBlock1Ptr->weatherCycleStage != sWorld[lead].stage && sWorld[lead].stage < 4)
+    {
+        void MP_Weather_CycleStageChanged(u8 oldStage);
+        u8 old = gSaveBlock1Ptr->weatherCycleStage;
         gSaveBlock1Ptr->weatherCycleStage = sWorld[lead].stage;
+        MP_Weather_CycleStageChanged(old);   // (the route's sky changes now if it follows the cycle)
+    }
 
     // Latias/Latios: roam where the leader's does
     lead = WorldLeader(2);

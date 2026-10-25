@@ -1211,7 +1211,9 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
 // Routes peer messages to the module that owns the message id
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
 {
-    if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
+    if (data[0] == MPR_COOP_BATTLING)
+        MP_Coop_OnRelay(from, data, len);
+    else if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
         MP_Battle_OnRelay(from, data, len);
     else if (data[0] >= MPR_SPECTATE_FIRST && data[0] < MPR_COOP_FIRST)
         MP_Spectate_OnRelay(from, data, len);

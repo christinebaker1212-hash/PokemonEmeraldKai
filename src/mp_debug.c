@@ -502,6 +502,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", gSaveBlock1Ptr->secretBases[n].secretBaseId);
         printf(" tv0kind %d\n", gSaveBlock1Ptr->tvShows[5].common.kind);
     }
+    else if (strcmp(cmd, "fieldweather") == 0)   // fieldweather N - this game's field weather now (WEATHER_*), not the map's
+    {
+        void SetCurrentAndNextWeatherNoDelay(u8 weather);
+        int v = 0;
+        sscanf(arg, "%d", &v);
+        SetCurrentAndNextWeatherNoDelay(v);
+        printf("[test] field weather %d\n", v);
+    }
     else if (strcmp(cmd, "setstage") == 0)
     {
         int v = 0;

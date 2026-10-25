@@ -1010,6 +1010,21 @@ From the first frame (1.22): until the battle's own weather is known (gBattleWea
 from battle_main.c where a turn's action selection begins), Composite draws the weather the field will give it
 (FieldWeather: ABILITYEFFECT_SWITCH_IN_WEATHER's mapping; not in recorded battles), so the rain falls during the intro;
 "It's raining." still comes after the send-out. `mp bwshown`; test battle_weather_intro.
+The others' screens (1.25, protocol 50): in a link battle only the master's engine runs (the others' gBattleMainFunc
+is BeginBattleIntroDummy), so their gBattleWeather never changed and their screens showed their own FIELD weather the
+whole battle: a friend still in the rain of a route, or in a dry room while the master's field rained, saw a sky that
+wasn't the battle's, and a RAIN DANCE never showed. Now the master's PrepareBufferDataTransferLink puts a
+B_COMM_MP_WEATHER block (MP_BattleWeather_LinkState: gBattleWeather, the master's field weather, settled) in the
+stream ahead of the next command whenever that changes (and first thing after the link tasks start, so a joiner gets
+it). The others take it in its place (CopyReceivedLinkBuffersData: after their screen finished what it shows, at most
+90 frames) and set gBattleWeather, their FieldWeather and settled from it. Before the first block, a co-op battle
+already knows the master's field weather: MPR_COOP_ACCEPT (2 bytes after the second lose text) and MPR_COOP_WILD_GO
+(bytes 6-7) carry MP_BattleWeather_FieldFlags, kept by MP_BattleWeather_SetMasterField until NewBattle
+(SetUpBattleVarsAndBirchZigzagoon, which also clears gBattleWeather on every game). A joiner's battle is settled from
+the snapshot. Debug `mp fieldweather N` (this game's field weather now); tests coop_fieldweather (a dry master and a
+rainy friend, then RAIN DANCE), coop_fieldweather2 (the other way round), tri_rain (a triple at NA-JP lag).
+Routes 119 / 123 (mp_linkx.c UpdateWorld): when a friend's weather cycle stage is taken over, MP_Weather_CycleStageChanged
+brings the new stage's weather in at once on a route following the cycle (SetNextWeather), not on the next visit.
 
 ## Shared world and lights (mp_world.c)
 Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
@@ -1279,6 +1294,30 @@ EventScript_MpCoopAfterTrainerBattle (the post-dotrainerbattle steps), 2 -> rele
 (unflagged, CONTINUE_SCRIPT partners never get the flag) spotted the joiner again at once.
 Tests: coop_two_trainers (ROUTE 116 JANICE + JERRY, tile 28,6), coop_two_alone, coop_held_spot, coop_wait_merge
 (check.py: one led, one joined, the leader waited longer). Debug: `mp trainerflag ID...`.
+
+A trainer already battling a friend spots us (1.25): whoever leads a battle against a trainer from the field (solo,
+or a co-op battle's master) sends MPR_COOP_BATTLING (39, routed to mp_coop.c) every second: map, the trainer's
+object (MP_TrainerBattleLocalId: battle_setup.c's object id, or gSpecialVar_LastTalked as the stock trainer scripts
+leave that 0, if it's a trainer object on the map), trainer id and whether the battle can take a friend now
+(MP_Join_CanBeJoined = mp_join.c's JoinableReason); "off" when it ends. When that trainer walks up to another player
+on that map (one trainer: gNoOfApproachingTrainers 1), MP_Coop_TryJoinHeldTrainer (TryOfferBattleInProgress) asks
+"X is battling this trainer! Join their battle, or battle alone?" with JOIN BATTLE / BATTLE ALONE beside the message
+(yes / no box tiles). JOIN BATTLE: MP_Join_AskFromScript (the join-in-progress request, sJoin.fromScript: no field lock,
+the script waits); let in, MP_Coop_JoinedFromTrainerScript sets joinedOther when the snapshot comes, so the battle ends
+as the held-trainer join does (MP_EndJoinedTrainerBattle, the script goes on: MP_Coop_TakeJoinedOther 1). Not let in
+(NO, can't, no answer, B, called off before it started): the script goes on to our own battle with the trainer.
+BATTLE ALONE: the usual speech and battle. Tests coop_spot_join, coop_spot_alone (ROUTE 116 JERRY).
+
+Pokémon battle emotes in link battles (1.25): Emote() sends MPR_BATTLE_MONEMOTE (battler, icon, happy) to the battle
+link's other games (MP_Battle_SendToPeers); MP_LifeBattle_OnPeerEmote shows it over that battler (battler ids are the
+same on every game) with its sound. After a won trainer battle only the Pokémon that knocked out the last foe bubbles
+for it in co-op (it was "the first of ours still out", so every game had its own Pokémon celebrate a friend's
+knockout). Test coop_life_emote (check.sh: each game's emotes are what the other saw, on the same battler).
+
+Quicker screen fades (1.25, palette.c): a BeginNormalPaletteFade of (nearly) every palette, 28 of 32 or more, between 0 and 16 (a
+screen opening or closing: the party menu, the BAG, the POKéDEX pages, warps...) runs UpdateNormalPaletteFade an extra time on 3 of every 7 frames
+(sQuickFade, sQuickFadeCredit): 30% shorter, its delays included. Fades of some palettes or to other levels (battle
+animations, flashes) keep their speed.
 
 ## CANDY JAR (D3, mp_candy.c; ITEM_CANDY_JAR 398, ITEMS_COUNT 399)
 gMpCandies[type]: ReleaseMon (stock release) and Tag_ReleaseAll call MP_Candy_OnRelease(species): +1 of the first

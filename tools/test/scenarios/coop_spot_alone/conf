@@ -1,0 +1,12 @@
+# the same, but BOB picks BATTLE ALONE: JERRY's speech and his own battle with BOB; ALICE's battle goes on without
+# a question; both win their own battle and JERRY counts as beaten on both games
+MODE=2
+WARP=0,31,29,4
+WARP_B=0,10,10,10
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("trainerflag 273 = 1")
+EXPECT_B=("spotted by the trainer player 1 is battling: join or battle alone?" "battling the trainer alone (player 1 is battling it too)" "trainerflag 273 = 1")
+UNEXPECT_A=("crash" "BAD EGG" "join: our player said yes")
+UNEXPECT_B=("crash" "BAD EGG" "join: asking")

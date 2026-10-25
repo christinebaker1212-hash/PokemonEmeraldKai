@@ -215,6 +215,23 @@ static void Emote(struct LbSlot *s, u8 icon, bool8 happy)
     MP_LifeEmote_Show(LIFE_EMOTE_SLOT_BATTLER(b), icon);
     MP_LifeSfx_Play(happy ? LIFE_SFX_BLOOP_UP : LIFE_SFX_BLOOP_DOWN);
     MPNet_Log("life battle: emote %u on battler %u", icon, b);
+    if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+    {
+        // the others in the battle see it over this Pokémon too (battler ids are the same on every game)
+        u8 buf[4] = {MPR_BATTLE_MONEMOTE, b, icon, happy};
+        MP_Battle_SendToPeers(buf, sizeof(buf));
+    }
+}
+
+// mp_battle.c: a friend's (or the PvP opponent's) Pokémon emoted on their game
+void MP_LifeBattle_OnPeerEmote(u8 battler, u8 icon, bool8 happy)
+{
+    if (battler >= gBattlersCount || battler >= MAX_BATTLERS_COUNT || icon >= LIFE_EMOTE_COUNT || icon == LIFE_EMOTE_NONE
+     || (gAbsentBattlerFlags & gBitTable[battler]))
+        return;
+    MP_LifeEmote_Show(LIFE_EMOTE_SLOT_BATTLER(battler), icon);
+    MP_LifeSfx_Play(happy ? LIFE_SFX_BLOOP_UP : LIFE_SFX_BLOOP_DOWN);
+    MPNet_Log("life battle: a friend's emote %u on battler %u", icon, battler);
 }
 
 static void PlaceEmotes(void)
@@ -816,7 +833,8 @@ static void OnWin(void)
         struct MpLifeRec *rec = RecOf(s);
         if (rec == NULL || s->fainted || BattlerOfSlot(B_SIDE_PLAYER, i) >= MAX_BATTLERS_COUNT)
             continue;
-        if (sB.kind == LB_BOSS || sB.kind == LB_PVP || s->hungOn || s == lead)
+        // (the one that knocked out the last foe, never just the first of ours still out: a friend's may have)
+        if (sB.kind == LB_BOSS || sB.kind == LB_PVP || s->hungOn || (s == lead && (sB.finalKoBy == i + 1 || !gMpCoopBattle)))
             Emote(s, rec->cur[LIFE_PROUD] >= 160 ? LIFE_EMOTE_SPARKLE : LIFE_EMOTE_NOTE, TRUE);
     }
 }

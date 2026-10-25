@@ -35,6 +35,11 @@ bool8 IsBattleLinkTaskFunc(TaskFunc func)
     return func == Task_HandleSendLinkBuffersData || func == Task_HandleCopyReceivedLinkBuffersData;
 }
 
+// Moemon Co-op: what the others' screens were last told about the battle's weather (B_COMM_MP_WEATHER)
+static u8 sLinkWeatherSent[MP_BATTLE_WEATHER_STATE];
+static bool8 sLinkWeatherSentValid;
+static u8 sLinkWeatherWait;
+
 static EWRAM_DATA u8 sLocalFastBusy;
 
 void HandleLinkBattleSetup(void)
@@ -56,6 +61,8 @@ void SetUpBattleVarsAndBirchZigzagoon(void)
     s32 i;
 
     gBattleMainFunc = BeginBattleIntroDummy;
+    gBattleWeather = 0;             // Moemon Co-op: in a link battle only the master's engine clears it: the others'
+    MP_BattleWeather_NewBattle();   // screens start clear too, until the master says (B_COMM_MP_WEATHER)
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
@@ -763,6 +770,8 @@ static void PrepareBufferDataTransfer(u8 bufferId, u8 *data, u16 size)
 
 static void CreateTasksForSendRecvLinkBuffers(void)
 {
+    sLinkWeatherSentValid = FALSE;   // (Moemon Co-op: told again, a joiner too)
+    sLinkWeatherWait = 0;
     sLinkSendTaskId = CreateTask(Task_HandleSendLinkBuffersData, 0);
     gTasks[sLinkSendTaskId].tState                 = 0;
     gTasks[sLinkSendTaskId].tCurrentBlock_WrapFrom = 0;
@@ -891,7 +900,27 @@ static bool8 UseFastLinkSync(void)
     return gNetLinkActive && !sStrict;
 }
 
+static void WriteLinkBlock(u8 bufferId, u16 size, u8 *data);
+
 void PrepareBufferDataTransferLink(u8 bufferId, u16 size, u8 *data)
+{
+    if (gNetLinkActive && (gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+    {
+        u8 state[MP_BATTLE_WEATHER_STATE];
+        MP_BattleWeather_LinkState(state);
+        if (!sLinkWeatherSentValid || memcmp(state, sLinkWeatherSent, sizeof(state)) != 0)
+        {
+            u8 battler = gActiveBattler;
+            memcpy(sLinkWeatherSent, state, sizeof(state));
+            sLinkWeatherSentValid = TRUE;
+            WriteLinkBlock(B_COMM_MP_WEATHER, sizeof(state), state);
+            gActiveBattler = battler;
+        }
+    }
+    WriteLinkBlock(bufferId, size, data);
+}
+
+static void WriteLinkBlock(u8 bufferId, u16 size, u8 *data)
 {
     s32 alignedSize;
     s32 i;
@@ -1224,6 +1253,17 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
                 gBattlerTarget      = BYTE_TO_RECEIVE(LINK_BUFF_TARGET);
                 gAbsentBattlerFlags = BYTE_TO_RECEIVE(LINK_BUFF_ABSENT_BATTLER_FLAGS);
                 gEffectBattler      = BYTE_TO_RECEIVE(LINK_BUFF_EFFECT_BATTLER);
+            }
+            break;
+        case B_COMM_MP_WEATHER:
+            // Moemon Co-op: the master's battle weather, in its place among the commands. Our screen finishes what
+            // it's showing first (the master changed it after that), but never waits long for it.
+            if (!(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+            {
+                if ((gBattleControllerExecFlags & EXEC_FLAGS_LOCAL_MASK) && ++sLinkWeatherWait < 90)
+                    return FALSE;
+                sLinkWeatherWait = 0;
+                MP_BattleWeather_OnLinkState(&BYTE_TO_RECEIVE(LINK_BUFF_DATA), blockSize);
             }
             break;
         case B_COMM_TO_ENGINE:

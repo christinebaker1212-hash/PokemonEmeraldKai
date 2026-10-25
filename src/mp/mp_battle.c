@@ -8,6 +8,7 @@
 // carry the data through the relay server to the opponent.
 #include "global.h"
 #include "mp.h"
+#include "mp_life_battle.h"
 #include "map_name_popup.h"
 #include "main.h"
 #include "link.h"
@@ -143,6 +144,12 @@ static void SendAll(const u8 *buf, u16 len)
     for (i = 0; i < sNet.linkCount && i < NET_MAX_LINK; i++)
         if (i != sNet.linkId)
             MP_SendRelay(sNet.peers[i], buf, len);
+}
+
+void MP_Battle_SendToPeers(const u8 *buf, u16 len)
+{
+    if (sNet.battleActive)
+        SendAll(buf, len);
 }
 
 u8 NetLink_GetMultiplayerId(void)
@@ -804,6 +811,10 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
         PumpBlocks();
         break;
     }
+    case MPR_BATTLE_MONEMOTE:
+        if (len >= 4 && gMain.inBattle)
+            MP_LifeBattle_OnPeerEmote(data[1], data[2], data[3]);
+        break;
     case MPR_LINK_SYNC:
         if (len < 4)
             return;

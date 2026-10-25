@@ -180,6 +180,8 @@ static EWRAM_DATA struct
     u8 nPicks;
     bool8 gotState;
     bool8 aborted;
+    bool8 fromScript;                // asked from the trainer's script (it spotted us while battling them): the
+                                     // script waits; not let in, it goes on to our own battle (MP_Join_AskFromScript)
     u8 fmsg[200];
 } sJoin;
 
@@ -841,8 +843,16 @@ static void FriendDone(u8 taskId)
 {
     sJoin.fstate = FJS_NONE;
     sJoin.target = -1;
-    UnlockPlayerFieldControls();
     DestroyTask(taskId);
+    if (sJoin.fromScript)
+    {
+        // not let in: the trainer's script goes on to our own battle with them
+        sJoin.fromScript = FALSE;
+        MPNet_Log("join: not joined, battling the trainer alone");
+        ScriptContext_Enable();
+        return;
+    }
+    UnlockPlayerFieldControls();
 }
 
 static void FriendShowEnd(u8 taskId, const char *fmt, u8 who)
@@ -918,7 +928,8 @@ static void Task_JoinFriend(u8 taskId)
             CleanupOverworldWindowsAndTilemaps();
             sJoin.ftimer = 0;
             SetMainCallback2(CB2_JoinWaitState);
-            UnlockPlayerFieldControls();
+            if (!sJoin.fromScript)
+                UnlockPlayerFieldControls();
             DestroyTask(taskId);
         }
         break;
@@ -971,10 +982,34 @@ void MP_Join_Ask(u8 target)
     sJoin.aborted = FALSE;
     Send(target, buf, 1);
     MPNet_Log("join: asking player %d to let us join", target + 1);
-    LockPlayerFieldControls();
+    if (!sJoin.fromScript)
+        LockPlayerFieldControls();
     FriendMessage("Asking %s to let you\njoin… ({B_BUTTON} never mind)", target);
     taskId = CreateTask(Task_JoinFriend, 80);
     gTasks[taskId].data[0] = 0;
+}
+
+// mp_coop.c: JOIN BATTLE picked when a trainer battling this friend spotted us. The trainer's script waits (waitstate):
+// let in, it goes on after the battle (MP_Coop_TakeJoinedOther); not, it goes on to our own battle with the trainer.
+// FALSE: couldn't ask (the script goes on at once)
+bool8 MP_Join_AskFromScript(u8 target)
+{
+    if (FuncIsActiveTask(Task_JoinFriend) || sJoin.fstate != FJS_NONE)
+        return FALSE;
+    sJoin.fromScript = TRUE;
+    MP_Join_Ask(target);
+    if (!FuncIsActiveTask(Task_JoinFriend))
+    {
+        sJoin.fromScript = FALSE;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// mp_coop.c: can this battle be joined now (a friend its trainer spots may choose to)
+bool8 MP_Join_CanBeJoined(void)
+{
+    return JoinableReason() == 0xFF;
 }
 
 bool8 MP_Join_IsAsking(void)
@@ -1057,6 +1092,9 @@ static void CB2_JoinWaitState(void)
         memcpy(gEnemyParty, parties + PARTY_SIZE, sizeof(struct Pokemon) * PARTY_SIZE);
         sJoin.entering = snap->plan.entering;
         gMpJoinedBattle = TRUE;
+        if (sJoin.fromScript)
+            MP_Coop_JoinedFromTrainerScript();   // (the trainer's script goes on after the battle)
+        sJoin.fromScript = FALSE;
         SetMainCallback2(CB2_MpJoinBattle);
         return;
     }
@@ -1070,6 +1108,13 @@ static void CB2_JoinWaitState(void)
         sJoin.aborted = FALSE;
         MP_Events_QueueToast(text);
         Overworld_ResetMapMusic();
+        if (sJoin.fromScript)
+        {
+            // the trainer's script goes on to our own battle with them
+            sJoin.fromScript = FALSE;
+            SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            return;
+        }
         SetMainCallback2(CB2_ReturnToField);
     }
 }
@@ -1093,6 +1138,7 @@ void MP_Join_ApplySnapshot(void)
     gSideStatuses[0] = snap->sideStatuses[0];
     gSideStatuses[1] = snap->sideStatuses[1];
     gBattleWeather = snap->plan.weather;
+    MP_BattleWeather_TurnStart();   // (the battle has its own weather by now: never the field's)
     MP_Battle_JoinLink(snap->plan.seatPlayer, snap->plan.count, snap->seat, snap->syncSeq, TRUE);
     SaveLinkPlayers(snap->plan.count);
     gBattleScripting.multiplayerId = GetMultiplayerId();

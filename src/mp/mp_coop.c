@@ -67,6 +67,7 @@
 #include "battle_message.h"
 #include "trainer_hill.h"
 #include "trainer_see.h"
+#include "window.h"
 #include "constants/battle.h"
 #include "constants/battle_setup.h"
 #include "constants/items.h"
@@ -694,7 +695,7 @@ static bool8 FriendOnMap(void)
 // u16 trainer, u8 mode, u8 count, u8 seat, 3x u8 player, lose text
 static void AcceptRequester(void)
 {
-    u8 buf[11 + (LOSE_TEXT_MAX + 1) * 2];
+    u8 buf[11 + (LOSE_TEXT_MAX + 1) * 2 + 2];
     const u8 *lose;
     u16 len = 0;
     u8 i;
@@ -740,6 +741,12 @@ static void AcceptRequester(void)
             buf[11 + len++] = lose[k++];
     }
     buf[11 + len++] = EOS;
+    {
+        // the weather here: the battle starts in it on every screen (only this game runs the battle)
+        u16 field = MP_BattleWeather_FieldFlags();
+        buf[11 + len++] = field & 0xFF;
+        buf[11 + len++] = field >> 8;
+    }
     for (i = 1; i < sCoop.joinCount; i++)
     {
         buf[5] = i;
@@ -857,6 +864,8 @@ static void FinishJoinCheck(u8 taskId)
     DestroyTask(taskId);
 }
 
+static bool8 sAloneChosen;   // BATTLE ALONE picked when this trainer walked up (no "wait for a partner?" then)
+
 static void Task_JoinCheck(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -882,8 +891,10 @@ static void Task_JoinCheck(u8 taskId)
         if (!PlayerValid(sCoop.requester))
         {
             // Nobody asked yet: offer to wait for a friend on this map
-            if (CoopTrainerTeamSize(sCoop.trainerId) <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+            if (CoopTrainerTeamSize(sCoop.trainerId) <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT
+             || sAloneChosen)
             {
+                sAloneChosen = FALSE;
                 FinishJoinCheck(taskId);
                 break;
             }
@@ -1315,21 +1326,214 @@ static void Task_JoinHeld(u8 taskId)
     }
 }
 
+static bool8 TryOfferBattleInProgress(void);
+
 // Special, after a trainer walked up to us (data/scripts/trainer_battle.inc): VAR_RESULT TRUE = asking to join the
-// friend waiting on that trainer (the script waits), FALSE = the usual speech and battle
+// friend waiting on that trainer, or asking whether to join the battle a friend is having with it (the script
+// waits either way), FALSE = the usual speech and battle
 void MP_Coop_TryJoinHeldTrainer(void)
 {
     s8 host = sCoop.heldJoin;
     gSpecialVar_Result = FALSE;
     sCoop.heldJoin = -1;
     sCoop.joinedOther = FALSE;
-    if (host < 0 || gApproachingTrainerId != 0)
+    sAloneChosen = FALSE;
+    if (gApproachingTrainerId != 0)
         return;
+    if (host < 0)
+    {
+        gSpecialVar_Result = TryOfferBattleInProgress();
+        return;
+    }
     if (!PlayerValid(host) || !sHeld[host].ttl || sCoop.role != ROLE_NONE || gMpCoopBattle)
         return;
     StartJoiningFriend(host);
     CreateTask(Task_JoinHeld, 80);
     gSpecialVar_Result = TRUE;
+}
+
+// ---------------------------------------------------------------------------
+// A trainer some friend is battling spots us: JOIN BATTLE (their battle in progress, mp_join.c) or BATTLE ALONE.
+// Whoever runs a battle against a trainer on the field says so to everyone (MPR_COOP_BATTLING) every second.
+
+#define BATTLING_PERIOD 60
+#define BATTLING_TTL    (BATTLING_PERIOD * 3)
+
+static struct
+{
+    u16 ttl;
+    u8 mapGroup, mapNum, localId;
+    u16 trainerId;
+    bool8 joinable;   // their battle can take a friend now (mp_join.c)
+} sBattling[MP_MAX_PLAYERS];
+static u16 sBattlingTimer;
+static bool8 sBattlingSent;
+
+static void SendBattling(bool8 on)
+{
+    u16 trainer = gTrainerBattleOpponent_A;
+    u8 buf[8] = {MPR_COOP_BATTLING, on, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+                 MP_TrainerBattleLocalId(), trainer & 0xFF, trainer >> 8, on && MP_Join_CanBeJoined()};
+    MP_SendRelay(0xFF, buf, sizeof(buf));
+    sBattlingSent = on;
+}
+
+// MP_Coop_Update: in a battle against a trainer met on the field, led by this game
+static void UpdateBattling(void)
+{
+    u8 i;
+    bool8 on = gMain.inBattle && (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && gBattleOutcome == 0
+            && gTrainerBattleOpponent_A != 0 && gTrainerBattleOpponent_A < TRAINERS_COUNT && MP_TrainerBattleLocalId() != 0
+            && (gMpCoopBattle ? sCoop.isMaster : !gNetLinkActive);
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (sBattling[i].ttl && (--sBattling[i].ttl == 0 || !PlayerValid(i)))
+            sBattling[i].ttl = 0;
+    if (!on)
+    {
+        if (sBattlingSent && MP_IsConnected())
+            SendBattling(FALSE);
+        sBattlingSent = FALSE;
+        sBattlingTimer = 0;
+        return;
+    }
+    if (sBattlingTimer)
+    {
+        sBattlingTimer--;
+        return;
+    }
+    sBattlingTimer = BATTLING_PERIOD;
+    if (MP_IsConnected())
+        SendBattling(TRUE);
+}
+
+static void OnBattling(u8 from, const u8 *data, u16 len)
+{
+    if (from >= MP_MAX_PLAYERS || len < 8)
+        return;
+    if (!data[1])
+    {
+        sBattling[from].ttl = 0;
+        return;
+    }
+    if (!sBattling[from].ttl)
+        MPNet_Log("co-op: player %d is battling trainer %d (NPC %d)%s", from + 1, data[5] | (data[6] << 8), data[4],
+                  data[7] ? "" : ", not joinable");
+    sBattling[from].ttl = BATTLING_TTL;
+    sBattling[from].mapGroup = data[2];
+    sBattling[from].mapNum = data[3];
+    sBattling[from].localId = data[4];
+    sBattling[from].trainerId = data[5] | (data[6] << 8);
+    sBattling[from].joinable = data[7];
+}
+
+static const u8 sText_BattlingThem[] = _("{STR_VAR_1} is battling this trainer!\nJoin their battle, or battle alone?");
+static const u8 sText_ChoiceJoinBattle[] = _("JOIN BATTLE");
+static const u8 sText_ChoiceBattleAlone[] = _("BATTLE ALONE");
+static const struct MenuAction sInProgressChoices[] =
+{
+    {sText_ChoiceJoinBattle, {NULL}},
+    {sText_ChoiceBattleAlone, {NULL}},
+};
+// beside the message (the yes / no box's tiles: it isn't up)
+static const struct WindowTemplate sInProgressWindow =
+{
+    .bg = 0,
+    .tilemapLeft = 17,
+    .tilemapTop = 9,
+    .width = 12,
+    .height = 4,
+    .paletteNum = 15,
+    .baseBlock = 0x125,
+};
+
+#define tFriend data[1]
+#define tWindow data[2]
+
+static void Task_OfferBattleInProgress(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    switch (tState)
+    {
+    case 0:
+        if (!IsTextPrinterActive(0))
+        {
+            tWindow = AddWindow(&sInProgressWindow);
+            DrawStdWindowFrame(tWindow, FALSE);
+            PrintMenuTable(tWindow, ARRAY_COUNT(sInProgressChoices), sInProgressChoices);
+            InitMenuInUpperLeftCornerNormal(tWindow, ARRAY_COUNT(sInProgressChoices), 0);
+            CopyWindowToVram(tWindow, COPYWIN_FULL);
+            MPNet_Log("co-op: JOIN BATTLE / BATTLE ALONE");
+            tState++;
+        }
+        break;
+    case 1:
+    {
+        s8 answer = Menu_ProcessInputNoWrap();
+        u8 f = tFriend;
+        if (answer == MENU_NOTHING_CHOSEN)
+            break;
+        ClearStdWindowAndFrameToTransparent(tWindow, TRUE);
+        RemoveWindow(tWindow);
+        HideFieldMessageBox();
+        DestroyTask(taskId);
+        if (answer == 0 && PlayerValid(f) && (gMpPlayers[f].state.flags & MPF_IN_BATTLE))
+        {
+            MPNet_Log("co-op: joining player %d's battle with this trainer", f + 1);
+            if (MP_Join_AskFromScript(f))
+                return;   // (mp_join.c goes on with the script)
+        }
+        else
+        {
+            MPNet_Log("co-op: battling the trainer alone (player %d is battling it too)", f + 1);
+            sAloneChosen = TRUE;
+        }
+        ScriptContext_Enable();   // our own battle with the trainer
+        break;
+    }
+    }
+}
+
+#undef tFriend
+#undef tWindow
+
+// The trainer walking up to us is the one a friend is battling now, and they can take a friend in: ask
+static bool8 TryOfferBattleInProgress(void)
+{
+    struct ObjectEvent *trainer;
+    u8 i, taskId;
+    if (gNoOfApproachingTrainers != 1 || sCoop.role != ROLE_NONE || gMpCoopBattle || sCoop.waitStage != WAIT_NONE
+     || MP_Join_IsAsking() || !MP_IsConnected())
+        return FALSE;
+    trainer = &gObjectEvents[gApproachingTrainers[0].objectEventId];
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        if (!sBattling[i].ttl || !sBattling[i].joinable || !PlayerValid(i) || !(gMpPlayers[i].state.flags & MPF_IN_BATTLE))
+            continue;
+        if (sBattling[i].mapGroup != gSaveBlock1Ptr->location.mapGroup || sBattling[i].mapNum != gSaveBlock1Ptr->location.mapNum
+         || sBattling[i].localId != trainer->localId || sBattling[i].trainerId != gTrainerBattleOpponent_A)
+            continue;
+        SetNameVar(i);
+        StringExpandPlaceholders(sText, sText_BattlingThem);
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
+        MP_ShowFieldMessageFitted(sText);
+        taskId = CreateTask(Task_OfferBattleInProgress, 80);
+        gTasks[taskId].data[0] = 0;
+        gTasks[taskId].data[1] = i;
+        MPNet_Log("co-op: spotted by the trainer player %d is battling: join or battle alone?", i + 1);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// mp_join.c: we're in the friend's battle now (asked from our trainer's script): our own challenge is theirs, and
+// the script goes on after the battle as after our own (MP_Coop_TakeJoinedOther)
+void MP_Coop_JoinedFromTrainerScript(void)
+{
+    sCoop.joinedOther = TRUE;
+    sCoop.challenged = FALSE;
+    sCoop.accepted = FALSE;
+    sCoop.requester = -1;
+    sCoop.requester2 = -1;
 }
 
 // Specialvar: we went into a friend's battle from this trainer script. 1: won (the script ends as after its own
@@ -2267,6 +2471,9 @@ static void OnAccepted(u8 from, const u8 *data, u16 len)
         sCoop.loseTextB[i] = data[pos++];
     sCoop.loseTextB[i] = EOS;
     sCoop.haveLoseTextB = i > 0;
+    pos++;
+    if (pos + 2 <= len)
+        MP_BattleWeather_SetMasterField(data[pos] | (data[pos + 1] << 8));   // (the master's field weather)
     if (sCoop.trainerId >= TRAINERS_COUNT || trainerB >= TRAINERS_COUNT)
         return;
     sCoop.twoTrainers = trainerB != 0;
@@ -2484,8 +2691,10 @@ static void StartWildCoop(const u8 *players, u8 count)
     IncrementGameStat(GAME_STAT_WILD_BATTLES);
     for (i = 1; i < count; i++)
     {
-        // u8 seat count, u8 their seat, the seats' players
-        u8 buf[6] = {MPR_COOP_WILD_GO, count, i, players[0], players[1], count == 3 ? players[2] : 0xFF};
+        // u8 seat count, u8 their seat, the seats' players, u16 the weather here (the battle starts in it)
+        u16 field = MP_BattleWeather_FieldFlags();
+        u8 buf[8] = {MPR_COOP_WILD_GO, count, i, players[0], players[1], count == 3 ? players[2] : 0xFF,
+                     field & 0xFF, field >> 8};
         Send(players[i], buf, sizeof(buf));
     }
     CreateTask(Task_StartJoinerBattle, 1);
@@ -2677,6 +2886,8 @@ static void OnWildRelay(u8 from, const u8 *data, u16 len)
                 players[1] = data[4];
                 players[2] = data[5];
             }
+            if (len >= 8)
+                MP_BattleWeather_SetMasterField(data[6] | (data[7] << 8));
             sCoop.wildFrom = -1;
             gTrainerBattleOpponent_A = 0;
             gTrainerBattleOpponent_B = 0;
@@ -3074,6 +3285,7 @@ void MP_Coop_Update(void)
     UpdateBattleStatus();
     TryRunPendingScript();
     UpdateHeld();
+    UpdateBattling();
 
     if (sCoop.wildAsking)
         UpdateWildAsking();
@@ -3164,6 +3376,9 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
 {
     switch (data[0])
     {
+    case MPR_COOP_BATTLING:
+        OnBattling(from, data, len);
+        break;
     case MPR_COOP_WAIT:
         if (from < MP_MAX_PLAYERS && len >= 5)
         {

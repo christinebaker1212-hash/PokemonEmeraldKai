@@ -431,6 +431,14 @@ void MP_ItemDesc_Print(u8 windowId, const u8 *desc, u8 x, u8 y, u16 width, u16 h
 void MP_ItemDesc_Update(void);
 void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
+#define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled
+void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
+void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now
+void MP_BattleWeather_NewBattle(void);           // battle_controllers.c: a battle starts (every game)
+void MP_Battle_SendToPeers(const u8 *buf, u16 len);   // mp_battle.c: to every other game in the battle link
+bool8 MP_QuickFadeActive(void);   // palette.c: a whole-screen fade, already 30% quicker, is running
+u16 MP_BattleWeather_FieldFlags(void);          // this game's field weather as a battle's (B_WEATHER_*)
+void MP_BattleWeather_SetMasterField(u16 flags); // mp_coop.c: the master's, for the co-op battle on its way
 // The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel
 extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
 extern u8 gMpSceneLayers;                     // a bit per BG layer
@@ -1124,6 +1132,8 @@ u8 MP_Coop_TakeJoinedOther(void);        // specialvar: we were in a friend's ba
 bool8 MP_Coop_CanJoinHeldTrainer(void);  // trainer_see.c: a held trainer may spot us
 void MP_Coop_NoteHeldSpotter(void);      // trainer_see.c: it did (right after MP_Coop_IsNpcHeld)
 void MP_EndJoinedTrainerBattle(void);    // battle_setup.c: our trainer script's battle was a friend's, and won
+u8 MP_TrainerBattleLocalId(void);          // battle_setup.c: the trainer this battle is against (object local id, 0 none)
+void MP_Coop_JoinedFromTrainerScript(void); // mp_join.c: JOIN BATTLE from our trainer's script got us in
 void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 
 // mp_notify.c
@@ -1147,6 +1157,8 @@ enum {
     MPR_LINK_BLOCK,        // block data
     MPR_LINK_SYNC,         // standby / close barrier
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
+    MPR_BATTLE_MONEMOTE,   // our Pokémon's battle emote, for the others' screens: u8 battler, icon, happy (mp_life_battle.c)
+    MPR_COOP_BATTLING = 39,    // battling a trainer met on the field: u8 on, mapGroup, mapNum, localId, u16 trainer, u8 joinable (mp_coop.c)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)
     MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
