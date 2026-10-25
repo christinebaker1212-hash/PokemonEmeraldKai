@@ -1750,7 +1750,11 @@ COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_Batt
 - Followers: the default (HGSS-style) sprites of 387-493 come from Moemon Quetzal's overworld sprites
   (tools/moemon_gen4/gen_followers.py QUETZAL_ROM: appended to followers.bin, "sheet": "quetzal" in index.json);
   the PMD ones from the PMD Collab (tools/moemon_pmd/import.py --append 387-493).
-- Not yet: STEADFAST, LEAF GUARD, STORM DRAIN's redirect, STICKY BARB passing on contact, and real animations for
-  the moves still borrowing Gen 3 ones (data/battle_anim_scripts_gen4.inc).
+- Animations: 47 Gen 4 moves have expansion's (tools/moemon_gen4/gen_anims.py EXPANSION_DIR: only scripts whose
+  templates, tasks, tags, sounds and commands Kai has; their shared routines copied with a G4_ prefix; a
+  loadspritegfx added for each template's tag, since expansion loads them by itself; invert_screen_color's mask
+  turned into Kai's three flags). SHADOW FORCE's is hand-written. The other 65 still borrow a Gen 3 animation.
+- Not yet: STEADFAST, LEAF GUARD, STORM DRAIN's redirect, STICKY BARB passing on contact, and animations of their
+  own for the 65 moves that borrow.
 Debug `mp g4side SIDE ROCK TSPIKES WISH` lays hazards (0 = the player's side), `mp setmove SLOT IDX MOVE`, `mp hold SLOT ITEM`,
 `mp foehold ITEM` (in a battle: the first foe holds ITEM).
