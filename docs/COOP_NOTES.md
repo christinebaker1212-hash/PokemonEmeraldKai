@@ -1408,3 +1408,5 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   place isn't open ground any more go back to the collection (MP_GardenDecor_CheckPlaces, also after growth).
 - LITTLEROOT has no map connection to the Garden any more. The map name popup and friends' places say MOéMON GARDEN.
   Tests garden_map, garden_centers, garden_travel, garden_stuck (and the other garden_* at new spots).
+- 1.16.1: the Garden's lone trees (and the grove growth mark, sGardenTree) are Rustboro's standalone tree (crown
+  1CE/1CF, middle 1D6/1D7, trunk on grass 1E6/1E7), not a forest column's 1DC/1DD bottom half that joins the next tree.

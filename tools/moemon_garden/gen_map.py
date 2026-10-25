@@ -81,9 +81,11 @@ def stamp(src, sr, sc, h, w, dr, dc):
         for c in range(w):
             g[dr + r][dc + c] = src[sr + r][sc + c]
 
-# a lone tree, three rows (Petalburg's, rows 23-25 cols 12-13): its crown over open ground, then its top and bottom
-# halves (people walk behind the crown)
-TREE_SET = [[pb[23][12], pb[23][13]], [pb[24][12], pb[24][13]], [pb[25][12], pb[25][13]]]
+# a lone tree, three rows (Rustboro's standalone one, rows 26-28 cols 26-27): its crown over open ground, its middle,
+# and its trunk standing on the grass (1E6/1E7: not the forest's bottom half 1DC/1DD, which joins the next tree)
+rb = load('RustboroCity', 40)
+TREE_SET = [[rb[26 + k][26], rb[26 + k][27]] for k in range(3)]
+assert [v & 0x3FF for row in TREE_SET for v in row] == [0x1CE, 0x1CF, 0x1D6, 0x1D7, 0x1E6, 0x1E7]
 
 def tree(r, c):
     for k in range(3):

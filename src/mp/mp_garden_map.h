@@ -44,6 +44,6 @@
 #define GARDEN_TALL_GRASS 0x300D
 #define GARDEN_SAND 0x311C
 static const u16 sGardenPuddles[3][3] = {{0x30C8, 0x30C9, 0x30CA}, {0x30D0, 0x30D1, 0x30D2}, {0x30D8, 0x30D9, 0x30DA}};
-static const u16 sGardenTree[3][2] = {{0x31CE, 0x31CF}, {0x05D6, 0x05D7}, {0x05DC, 0x05DD}};   // a lone tree: crown, top, bottom
+static const u16 sGardenTree[3][2] = {{0x31CE, 0x31CF}, {0x05D6, 0x05D7}, {0x05E6, 0x05E7}};   // a lone tree: crown, top, bottom
 
 #endif // GUARD_MP_GARDEN_MAP_H
