@@ -268,6 +268,7 @@ extern const u8 BattleScript_G4AttackerHurt[];
 extern const u8 BattleScript_G4TargetBerryMsg[];
 extern const u8 BattleScript_G4BerryHurtsAttacker[];
 extern const u8 BattleScript_G4Custap[];
+extern const u8 BattleScript_G4Steadfast[];
 extern const u8 BattleScript_G4MotorDrive[];
 extern const u8 BattleScript_G4MotorDrive_PPLoss[];
 

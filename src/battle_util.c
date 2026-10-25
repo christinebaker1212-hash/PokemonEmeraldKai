@@ -2288,6 +2288,9 @@ u8 AtkCanceler_UnableToUseMove(void)
                 gProtectStructs[gBattlerAttacker].flinchImmobility = 1;
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gBattlescriptCurrInstr = BattleScript_MoveUsedFlinched;
+                if (gBattleMons[gBattlerAttacker].ability == ABILITY_STEADFAST
+                 && gBattleMons[gBattlerAttacker].statStages[STAT_SPEED] < MAX_STAT_STAGE)
+                    gBattlescriptCurrInstr = BattleScript_G4Steadfast;   // Moemon Kai: STEADFAST, +1 SPEED
                 gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
                 effect = 1;
             }

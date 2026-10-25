@@ -2325,6 +2325,12 @@ void SetMoveEffect(bool8 primary, u8 certain)
         && !primary && gBattleCommunication[MOVE_EFFECT_BYTE] <= 7)
         INCREMENT_RESET_RETURN
 
+    // Moemon Kai: LEAF GUARD keeps every status off in sunshine
+    if (MP_Gen4_TargetAbility(gBattlerAttacker, gEffectBattler) == ABILITY_LEAF_GUARD && WEATHER_HAS_EFFECT2
+        && (gBattleWeather & B_WEATHER_SUN) && gBattleCommunication[MOVE_EFFECT_BYTE] >= MOVE_EFFECT_SLEEP
+        && gBattleCommunication[MOVE_EFFECT_BYTE] <= MOVE_EFFECT_TOXIC && affectsUser != MOVE_EFFECT_AFFECTS_USER)
+        INCREMENT_RESET_RETURN
+
     if (gBattleMons[gEffectBattler].hp == 0
         && gBattleCommunication[MOVE_EFFECT_BYTE] != MOVE_EFFECT_PAYDAY
         && gBattleCommunication[MOVE_EFFECT_BYTE] != MOVE_EFFECT_STEAL_ITEM)

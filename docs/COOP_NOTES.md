@@ -1754,7 +1754,8 @@ COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_Batt
   templates, tasks, tags, sounds and commands Kai has; their shared routines copied with a G4_ prefix; a
   loadspritegfx added for each template's tag, since expansion loads them by itself; invert_screen_color's mask
   turned into Kai's three flags). SHADOW FORCE's is hand-written. The other 65 still borrow a Gen 3 animation.
-- Not yet: STEADFAST, LEAF GUARD, STORM DRAIN's redirect, STICKY BARB passing on contact, and animations of their
-  own for the 65 moves that borrow.
+- STEADFAST (CANCELER_FLINCH -> BattleScript_G4Steadfast), LEAF GUARD (SetMoveEffect: no status in sunshine).
+- Not yet: STORM DRAIN's redirect (doubles), STICKY BARB passing on contact, and animations of their own for the 65
+  moves that borrow.
 Debug `mp g4side SIDE ROCK TSPIKES WISH` lays hazards (0 = the player's side), `mp setmove SLOT IDX MOVE`, `mp hold SLOT ITEM`,
 `mp foehold ITEM` (in a battle: the first foe holds ITEM).

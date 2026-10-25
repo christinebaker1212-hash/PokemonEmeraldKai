@@ -633,3 +633,15 @@ BattleScript_G4Custap::
 	waitmessage B_WAIT_TIME_LONG
 	removeitem BS_ATTACKER
 	return
+
+@ STEADFAST: flinching raises its SPEED
+BattleScript_G4Steadfast::
+	printstring STRINGID_PKMNFLINCHED
+	waitmessage B_WAIT_TIME_LONG
+	setstatchanger STAT_SPEED, 1, FALSE
+	statbuffchange MOVE_EFFECT_AFFECTS_USER | STAT_CHANGE_ALLOW_PTR, BattleScript_MoveEnd
+	setgraphicalstatchangevalues
+	playanimation BS_ATTACKER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
