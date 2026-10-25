@@ -1,0 +1,25 @@
+pressuntil A field 5000
+waitfor online 6000
+barrier surfing 2
+wait 120
+mp objs
+shot b0_surfing
+mp options
+wait 90
+press B 2
+pressuntil B field 900
+wait 120
+mp objs
+shot b1_reloaded
+barrier reloaded 2
+barrier moved 2
+mp objs
+shot b2_moved
+barrier looked 2
+mp warp 0,17,4,11
+wait 300
+mp objs
+shot b3_far
+barrier far 2
+barrier done 2
+quit

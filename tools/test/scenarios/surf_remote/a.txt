@@ -1,0 +1,21 @@
+pressuntil A field 5000
+waitfor online 6000
+mp givebadges
+mp teach 0 57
+wait 240
+press LEFT 2
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 30
+press A 2
+pressuntil A surfing 900
+barrier surfing 2
+barrier reloaded 2
+press DOWN 8
+wait 200
+barrier moved 2
+barrier looked 2
+barrier far 2
+barrier done 2
+quit

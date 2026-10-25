@@ -401,10 +401,22 @@ static u8 AvatarModeOf(u8 id)
     return gMpPlayers[id].hasState ? gMpPlayers[id].state.avatarMode : MP_AVATAR_FOOT;
 }
 
+// The sprite we noted is still this friend's blob (a map reload remakes every sprite, and the number may be another one's now)
+static bool8 BlobIsOurs(u8 id)
+{
+    struct RemoteObj *r = &sRemote[id];
+    struct Sprite *b;
+    if (r->blobSpriteId >= MAX_SPRITES)
+        return FALSE;
+    b = &gSprites[r->blobSpriteId];
+    return b->inUse && b->callback == UpdateSurfBlobFieldEffect && b->data[2] == r->objId
+        && b->data[2] != gPlayerAvatar.objectEventId;   // never our own blob
+}
+
 static void DestroyBlob(u8 id)
 {
     struct RemoteObj *r = &sRemote[id];
-    if (r->blobSpriteId < MAX_SPRITES && gSprites[r->blobSpriteId].inUse)
+    if (BlobIsOurs(id))
         DestroySprite(&gSprites[r->blobSpriteId]);
     r->blobSpriteId = MAX_SPRITES;
 }
@@ -622,7 +634,7 @@ static void UpdateBlob(u8 id, struct ObjectEvent *obj)
 {
     struct RemoteObj *r = &sRemote[id];
     bool8 surfing = (AvatarModeOf(id) == MP_AVATAR_SURF);
-    bool8 blobValid = r->blobSpriteId < MAX_SPRITES && gSprites[r->blobSpriteId].inUse;
+    bool8 blobValid = BlobIsOurs(id);
 
     if (surfing && !blobValid)
     {
@@ -637,7 +649,7 @@ static void UpdateBlob(u8 id, struct ObjectEvent *obj)
     {
         DestroyBlob(id);
     }
-    if (surfing && r->blobSpriteId < MAX_SPRITES)
+    if (surfing && BlobIsOurs(id))
     {
         u8 slot = MP_Avatar_SurfBlobPalette(id);
         gSprites[r->blobSpriteId].oam.paletteNum = (slot != 0xFF) ? slot : r->palSlot;
@@ -666,9 +678,9 @@ static void UpdateRemote(u8 id)
 
     if (!IsSpawnValid(id))
     {
+        DestroyBlob(id);   // before objId changes: it checks the blob was following this friend
         r->spawned = FALSE;
         DestroyNametag(id);
-        r->blobSpriteId = MAX_SPRITES;
         Spawn(id, x, y);
         if (!IsSpawnValid(id))
             return;
@@ -795,5 +807,11 @@ void MP_Overworld_DebugDump(void)
             printf(" inUse %d sinv %d xy %d,%d off %d,%d pal %d prio %d", s->inUse, s->invisible, s->x, s->y, s->x2, s->y2, s->oam.paletteNum, s->oam.priority);
         }
         printf("\n");
+        if (r->blobSpriteId < MAX_SPRITES)
+        {
+            struct Sprite *b = &gSprites[r->blobSpriteId];
+            printf("[test] remote %d blob sprite %d inUse %d isBlob %d owner %d xy %d,%d shown %d\n", i, r->blobSpriteId, b->inUse,
+                   b->callback == UpdateSurfBlobFieldEffect, b->data[2], b->x, b->y, !b->invisible);
+        }
     }
 }

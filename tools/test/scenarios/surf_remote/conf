@@ -1,0 +1,11 @@
+# A friend's Surf blob stays with them: ALICE surfs Petalburg's pond while BOB watches, BOB's map reloads (OPTIONS
+# and back: every sprite is made again), then BOB goes 28 tiles east onto ROUTE 102. Before 1.17.2 the game hid
+# ALICE there but not her blob, whose place wrapped round (every 512 pixels across) onto BOB's screen, riderless.
+MODE=2
+WARP=0,0,7,20
+WARP_B=0,0,9,21
+FPS=60
+TMO=240
+EXPECT_A=("barrier far passed")
+EXPECT_B=("isBlob 1 owner 4 xy 72,104 shown 1" "isBlob 1 owner 3 xy -328,104 shown 0")
+UNEXPECT_B=("isBlob 0")

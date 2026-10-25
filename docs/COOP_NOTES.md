@@ -756,6 +756,12 @@ MP_SpriteRefreshImages takes old and new block sizes (the object's info size, wh
 allocates and frees). The surf blob draws with colors 5, 6, 15 of the surfer's palette: a look whose palette isn't
 Brendan's / May's gets a blob palette of its own (MP_Avatar_SurfBlobPalette, tags 0x53C1/2). The player's water
 reflection takes the look's colors, washed out (LoadPlayerObjectReflectionPalette for the MP tags).
+1.17.2: a friend's blob hides with their sprite (UpdateSurfBlobFieldEffect, MP objects only), and so does an emote
+icon over them (trainer_see.c SpriteCB_TrainerIcons) and a bubble over a door tile (mp_emote.c, from its screen
+place). Off the screen the game hides object sprites, but a plain sprite's place wraps (OAM x every 512, y every
+256): a friend surfing about 28 tiles away had their blob show, riderless, on the other side of the view. The
+remote's blob is checked to still be theirs (BlobIsOurs: the blob callback, following their object, never the
+player's) before it is reused, recolored or destroyed, and destroyed before a respawn. Test surf_remote.
 
 ## Characters from Moemon's other branch (F1, protocol 39: mp_chars_gfx.h, tools/moemon_chars)
 The user's sprite zip (113 characters, 284 trainer pictures, 115 back pictures) is imported by

@@ -904,6 +904,9 @@ static void SpriteCB_TrainerIcons(struct Sprite *sprite)
         sprite->y = objEventSprite->y - 16;
         sprite->x2 = objEventSprite->x2;
         sprite->y2 = objEventSprite->y2 + sprite->sYOffset;
+        // Moemon Co-op: a friend's icon hides with them (far away its place on the screen would wrap round onto ours)
+        if (MP_IsMpObjectEvent(&gObjectEvents[objEventId]))
+            sprite->invisible = objEventSprite->invisible;
         if (sprite->sYOffset)
             sprite->sYVelocity++;
         else

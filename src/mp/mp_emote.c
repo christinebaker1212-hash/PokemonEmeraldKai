@@ -615,8 +615,11 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
         s->y = y;
         if (b->toast)
             s->invisible = ArePlayerFieldControlsLocked();
+        else if (b->atTile)   // over a door far away its place would wrap round onto the screen
+            s->invisible = !(x + gSpriteCoordOffsetX > -64 && x + gSpriteCoordOffsetX < DISPLAY_WIDTH + 64
+                          && y + gSpriteCoordOffsetY > -32 && y + gSpriteCoordOffsetY < DISPLAY_HEIGHT + 48);
         else
-            s->invisible = b->atTile ? FALSE : os->invisible;
+            s->invisible = os->invisible;
         s->subpriority = b->atTile ? 1 : 0;
         s->coordOffsetEnabled = !b->toast;
         if (b->toast)

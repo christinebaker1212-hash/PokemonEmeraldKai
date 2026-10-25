@@ -1081,6 +1081,10 @@ void UpdateSurfBlobFieldEffect(struct Sprite *sprite)
     SynchronizeSurfPosition(playerObj, sprite);
     UpdateBobbingEffect(playerObj, playerSprite, sprite);
     sprite->oam.priority = playerSprite->oam.priority;
+    // Moemon Co-op: a friend's blob hides with them. Off the screen the game hides their sprite, but a sprite's place
+    // wraps round (every 512 pixels across, 256 down), so a friend surfing far away left their blob, riderless, on ours
+    if (MP_IsMpObjectEvent(playerObj))
+        sprite->invisible = playerSprite->invisible;
 }
 
 static void SynchronizeSurfAnim(struct ObjectEvent *playerObj, struct Sprite *sprite)
