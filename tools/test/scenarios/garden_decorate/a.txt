@@ -1,0 +1,52 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 60
+mp life garden decor give 77
+mp life garden decor give 101
+press UP 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 30
+press A 2
+wait 30
+watchlog garden: carrying decoration 77
+press A 2
+waitlog 300
+pressuntil A field 900
+wait 30
+press DOWN 20
+wait 30
+press RIGHT 20
+wait 30
+press RIGHT 2
+wait 20
+shot carry
+press A 2
+wait 60
+shot placed
+mp warp 0,57,6,18
+wait 300
+press UP 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 30
+press A 2
+wait 30
+watchlog garden: carrying decoration 101
+press A 2
+waitlog 300
+pressuntil A field 900
+wait 30
+press B 2
+wait 60
+mp warp 0,57,44,8
+wait 300
+press DOWN 30
+wait 120
+mp where
+quit

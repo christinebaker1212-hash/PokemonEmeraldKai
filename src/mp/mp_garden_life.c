@@ -786,10 +786,12 @@ static void Draw(struct Actor *a)
     }
     sp->oam.priority = os->oam.priority;
     SetObjectSubpriorityByElevation(3, sp, 1);
-    sp->invisible = FALSE;
     {
         s16 x = sp->x + sp->x2 + gSpriteCoordOffsetX, y = sp->y + sp->y2 + gSpriteCoordOffsetY;
         bool8 onScreen = x > -32 && x < DISPLAY_WIDTH + 32 && y > -32 && y < DISPLAY_HEIGHT + 48;
+        // off the screen it's hidden: a sprite's place on the screen wraps round (every 512 pixels across, 256 down),
+        // and in the big GARDEN one far away would show up again in the middle of the view
+        sp->invisible = !onScreen;
         MP_LifeEmote_Place(LIFE_EMOTE_SLOT_GARDEN(idx), onScreen, x, y - a->size / 2 + (a->size == 64 ? 16 : 4),
                            sp->subpriority > 0 ? sp->subpriority - 1 : 0);
     }

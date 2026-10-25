@@ -32,6 +32,7 @@
 #include "trainer_hill.h"
 #include "text.h"
 #include "main.h"
+#include "metatile_behavior.h"
 #include "overworld.h"
 #include "script.h"
 #include "sound.h"
@@ -388,12 +389,25 @@ static void GoTo(u8 group, u8 num, s16 x, s16 y)
 // Standing where nobody could (a save from an older Garden whose layout changed): back to the landing
 static bool8 StuckHere(void)
 {
+    static u8 sStuckFrames;
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     s16 x = me->currentCoords.x - MAP_OFFSET, y = me->currentCoords.y - MAP_OFFSET;
+    bool8 stuck;
     if (x >= GARDEN_PAD_X0 && x <= GARDEN_PAD_X1 && y >= GARDEN_PAD_Y0 && y <= GARDEN_PAD_Y1)
-        return FALSE;
-    return x < 1 || x >= GARDEN_W - 1 || y < 1 || y >= GARDEN_H - 1
-        || MapGridGetCollisionAt(me->currentCoords.x, me->currentCoords.y) != 0;
+        stuck = FALSE;
+    else if (x < 1 || x >= GARDEN_W - 1 || y < 1 || y >= GARDEN_H - 1)
+        stuck = TRUE;
+    else
+        // (a jump down the ledge passes over the ledge's tile: never stuck there, nor while on the move)
+        stuck = MapGridGetCollisionAt(me->currentCoords.x, me->currentCoords.y) != 0
+             && !MetatileBehavior_IsJumpSouth(MapGridGetMetatileBehaviorAt(me->currentCoords.x, me->currentCoords.y))
+             && gPlayerAvatar.tileTransitionState == T_NOT_MOVING && !ObjectEventIsMovementOverridden(me);
+    // standing there a moment first (half a second): a step or a jump in progress never counts
+    if (!stuck)
+        sStuckFrames = 0;
+    else if (sStuckFrames < 30)
+        sStuckFrames++;
+    return sStuckFrames >= 30;
 }
 
 void MP_Garden_Update(void)

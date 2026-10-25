@@ -17,6 +17,8 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
+#include "field_message_box.h"
+#include "text.h"
 #include "main.h"
 #include "metatile_behavior.h"
 #include "script.h"
@@ -51,6 +53,17 @@ static struct
     struct DecorSprite remote[REMOTE_DECOR];          // friends' (player id * 16 + index)
     u16 seq;                                          // our list changed (mp_garden_net.c sends it)
 } sD;
+
+// Carrying a decoration to its spot (DECORATE > PLACE ONE): it shows, blinking, on the tile in front of the player;
+// A puts it down there, B puts it back
+#define TAG_CARRY 200
+static struct
+{
+    u8 decor;               // DECOR_NONE: not carrying
+    u8 pending;             // picked: carried once the note about it is closed
+    struct DecorSprite ghost;
+    u16 timer;
+} sCarry;
 
 static void SpriteCB_Decor(struct Sprite *sprite)
 {
@@ -106,6 +119,10 @@ static void DrawOne(struct DecorSprite *d, u16 tag)
     sp->y = y + (big ? 0 : 8);
     sp->oam.priority = gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].oam.priority;
     SetObjectSubpriorityByElevation(3, sp, 1);
+    // hidden off the screen (a sprite's place wraps round: far away it would show up again in view)
+    x = sp->x + gSpriteCoordOffsetX;
+    y = sp->y + gSpriteCoordOffsetY;
+    sp->invisible = !(x > -32 && x < DISPLAY_WIDTH + 32 && y > -32 && y < DISPLAY_HEIGHT + 48);
 }
 
 static bool8 Covers(struct DecorSprite *d, s16 x, s16 y)
@@ -203,6 +220,81 @@ bool8 MP_GardenDecor_IsFavorite(s8 index, struct MpLifeRec *rec)
     return rec && type != DECOR_NONE && (rec->favDecor & 0xFF) == type && (rec->favDecor >> 8) >= 5;
 }
 
+static bool8 FrontTile(s16 *x, s16 *y);
+static bool8 CanPlaceAt(u8 decor, s16 x, s16 y);
+bool8 MP_GardenDecor_Place(u8 decor);
+
+static void CarryStop(void)
+{
+    Remove(&sCarry.ghost, TAG_CARRY);
+    sCarry.ghost.decor = DECOR_NONE;
+    sCarry.decor = DECOR_NONE;
+}
+
+static void CarryDraw(void)
+{
+    s16 x, y;
+    bool8 ok;
+    if (sCarry.decor == DECOR_NONE)
+        return;
+    if (!MP_Garden_IsHere())
+    {
+        CarryStop();
+        return;
+    }
+    ok = FrontTile(&x, &y) && CanPlaceAt(sCarry.decor, x, y);
+    if (sCarry.ghost.decor != sCarry.decor || sCarry.ghost.x != x || sCarry.ghost.y != y)
+    {
+        if (sCarry.ghost.decor != sCarry.decor)
+            Remove(&sCarry.ghost, TAG_CARRY);
+        sCarry.ghost.decor = sCarry.decor;
+        sCarry.ghost.x = x;
+        sCarry.ghost.y = y;
+    }
+    DrawOne(&sCarry.ghost, TAG_CARRY);
+    sCarry.timer++;
+    if (SpriteIsOurs(&sCarry.ghost, TAG_CARRY) && !gSprites[sCarry.ghost.spriteId].invisible)
+        // a free spot: a slow blink; somewhere it can't go: a quick one
+        gSprites[sCarry.ghost.spriteId].invisible = ok ? (sCarry.timer % 40) >= 30 : (sCarry.timer % 8) >= 4;
+}
+
+// field_control_avatar.c: A / B while carrying one (TRUE: handled here)
+bool8 MP_GardenDecor_CarryInput(bool8 a, bool8 b)
+{
+    u8 decor = sCarry.decor;
+    if (decor == DECOR_NONE)
+        return FALSE;
+    if (!MP_Garden_IsHere())
+    {
+        CarryStop();
+        return FALSE;
+    }
+    if (a)
+    {
+        if (MP_GardenDecor_Place(decor))
+        {
+            PlaySE(SE_SUCCESS);
+            CarryStop();
+        }
+        else
+            PlaySE(SE_FAILURE);
+        return TRUE;
+    }
+    if (b)
+    {
+        PlaySE(SE_SELECT);
+        MPNet_Log("garden: carrying decoration %u: put back", decor);
+        CarryStop();
+        return TRUE;
+    }
+    return FALSE;
+}
+
+bool8 MP_GardenDecor_Carrying(void)
+{
+    return sCarry.decor != DECOR_NONE;
+}
+
 void MP_GardenDecor_Update(void)
 {
     struct MpGardenSave *gs = MP_Life_GardenSave();
@@ -233,6 +325,7 @@ void MP_GardenDecor_Update(void)
         }
         DrawOne(s, GARDEN_DECOR_MAX);
     }
+    CarryDraw();
     for (i = 0; i < REMOTE_DECOR; i++)
     {
         u8 owner = i / GARDEN_DECOR_MAX;
@@ -344,14 +437,14 @@ static void DrawMenu(void)
     if (sM.mode == 0)
     {
         MpUi_Begin("DECORATE");
-        MpUi_RowAscii(0, sM.cursor == 0, "PLACE ONE HERE", NULL);
+        MpUi_RowAscii(0, sM.cursor == 0, "PLACE ONE", NULL);
         MpUi_RowAscii(1, sM.cursor == 1, "PUT ONE AWAY", NULL);
         MpUi_RowAscii(2, sM.cursor == 2, "DONE", NULL);
         MpUi_End();
         MpUi_HelpAscii(sM.note[0] ? sM.note : "Dolls and cushions from your SECRET BASE collection.");
         return;
     }
-    MpUi_Begin(sM.mode == 1 ? "PLACE ONE HERE" : "PUT ONE AWAY");
+    MpUi_Begin(sM.mode == 1 ? "PLACE ONE" : "PUT ONE AWAY");
     if (sM.cursor < sM.scroll)
         sM.scroll = sM.cursor;
     if (sM.cursor >= sM.scroll + DM_ROWS)
@@ -370,7 +463,7 @@ static void DrawMenu(void)
         }
     }
     MpUi_End();
-    MpUi_HelpAscii(sM.mode == 1 ? (sM.count ? "{A} PLACE IT IN FRONT OF YOU   {B} BACK" : "No dolls or cushions to place.")
+    MpUi_HelpAscii(sM.mode == 1 ? (sM.count ? "{A} CARRY IT TO ITS SPOT   {B} BACK" : "No dolls or cushions to place.")
                                 : (sM.count ? "{A} PUT IT AWAY   {B} BACK" : "Nothing placed yet."));
 }
 
@@ -426,15 +519,20 @@ static bool8 FrontTile(s16 *x, s16 *y)
     return GroundFree(*x, *y) && GetObjectEventIdByXY(*x, *y) == OBJECT_EVENTS_COUNT && !MP_Garden_ActorAt(*x, *y);
 }
 
+// A big doll (2x2) needs the tiles above and to the right free too
+static bool8 CanPlaceAt(u8 decor, s16 x, s16 y)
+{
+    return gDecorations[decor].shape == DECORSHAPE_1x1
+        || !(MapGridGetCollisionAt(x + 1, y) || MapGridGetCollisionAt(x, y - 1) || MapGridGetCollisionAt(x + 1, y - 1)
+             || MP_Garden_ActorAt(x + 1, y) || MP_Garden_ActorAt(x, y - 1));
+}
+
 bool8 MP_GardenDecor_Place(u8 decor)
 {
     struct MpGardenSave *gs = MP_Life_GardenSave();
     s16 x, y;
     u8 i;
-    if (!IsSpriteDecor(decor) || !FreeCopies(decor) || !FrontTile(&x, &y))
-        return FALSE;
-    if (gDecorations[decor].shape != DECORSHAPE_1x1 && (MapGridGetCollisionAt(x + 1, y) || MapGridGetCollisionAt(x, y - 1)
-         || MapGridGetCollisionAt(x + 1, y - 1) || MP_Garden_ActorAt(x + 1, y) || MP_Garden_ActorAt(x, y - 1)))
+    if (!IsSpriteDecor(decor) || !FreeCopies(decor) || !FrontTile(&x, &y) || !CanPlaceAt(decor, x, y))
         return FALSE;
     for (i = 0; i < GARDEN_DECOR_MAX; i++)
         if (gs->decor[i].decor == DECOR_NONE)
@@ -447,6 +545,32 @@ bool8 MP_GardenDecor_Place(u8 decor)
             return TRUE;
         }
     return FALSE;
+}
+
+// The note about carrying: once it's read, the player walks with it (the GARDEN BOARD's script ends)
+static void Task_CarryNote(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    switch (data[0])
+    {
+    case 0:
+        if (!IsTextPrinterActive(0) && JOY_NEW(A_BUTTON | B_BUTTON))
+        {
+            HideFieldMessageBox();
+            data[0] = 1;
+        }
+        break;
+    case 1:
+        if (IsFieldMessageBoxHidden())
+        {
+            DestroyTask(taskId);
+            sCarry.decor = sCarry.pending;
+            sCarry.pending = DECOR_NONE;
+            UnlockPlayerFieldControls();
+            ScriptContext_Enable();
+        }
+        break;
+    }
 }
 
 static void Task_Decorate(u8 taskId)
@@ -504,18 +628,22 @@ static void Task_Decorate(u8 taskId)
     }
     if (sM.mode == 1)
     {
-        if (MP_GardenDecor_Place(sM.list[sM.cursor]))
-        {
-            PlaySE(SE_SUCCESS);
-            MpUi_Close();
-            DestroyTask(taskId);
-            ScriptContext_Enable();
-            return;
-        }
-        PlaySE(SE_FAILURE);
-        snprintf(sM.note, sizeof(sM.note), "Face a free spot of the GARDEN first.");
-        sM.mode = 0;
-        sM.cursor = 0;
+        // (facing the GARDEN BOARD here: it's carried to its spot, then put down there)
+        u8 decor = sM.list[sM.cursor];
+        u8 *p;
+        PlaySE(SE_SELECT);
+        MpUi_Close();
+        LockPlayerFieldControls();   // (still: the note first)
+        sCarry.pending = decor;
+        sCarry.timer = 0;
+        MPNet_Log("garden: carrying decoration %u", decor);
+        p = gStringVar4;
+        MP_AsciiToGame(p, "Carry the ", 40);
+        p = StringCopy(p + StringLength(p), gDecorations[decor].name);
+        MP_AsciiToGame(p, " to its spot.\n{A} puts it down there, {B} puts it back.", 120);
+        MP_ShowFieldMessageFitted(gStringVar4);
+        gTasks[taskId].func = Task_CarryNote;
+        return;
     }
     else
     {
@@ -533,6 +661,7 @@ static void Task_Decorate(u8 taskId)
 
 void MP_Garden_OpenDecorate(void)
 {
+    CarryStop();
     memset(&sM, 0, sizeof(sM));
     PlaySE(SE_WIN_OPEN);
     MpUi_Open();

@@ -1,0 +1,10 @@
+# DECORATE from the GARDEN BOARD with the buttons a player uses: facing the board, DECORATE > PLACE ONE > the PIKACHU
+# DOLL; a note says how to carry it; walk off with it (it blinks on the tile ahead), A puts it down; then a second one
+# carried and put back with B. Jumping down the plateau's ledge lands below it (no trip back to the escalator).
+# Shots carry, placed.
+MODE=1
+TMO=200
+WARP="0,57,6,18"
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("garden: carrying decoration 77" "garden: placed decoration 77 at 9,19" "garden: carrying decoration 101" "garden: carrying decoration 101: put back" "[test] where map 0.57 xy 44,11")
+UNEXPECT_A=("stuck" "placed decoration 101")

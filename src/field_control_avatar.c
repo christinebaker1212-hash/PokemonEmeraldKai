@@ -183,6 +183,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (TryRunOnFrameMapScript() == TRUE)
         return TRUE;
 
+    // Moemon Co-op: carrying a decoration in the MOéMON GARDEN: A puts it down in front, B puts it back
+    if ((input->pressedAButton || input->pressedBButton) && MP_GardenDecor_CarryInput(input->pressedAButton, input->pressedBButton))
+        return TRUE;
     if (input->pressedBButton && TrySetupDiveEmergeScript() == TRUE)
         return TRUE;
     if (input->tookStep)

@@ -36,6 +36,7 @@ bool8 MP_Garden_Visited(void);            // quick travel appears after the firs
 bool8 MP_Garden_QuickTravelShown(void);   // start_menu.c: START > GARDEN
 void MP_Garden_QuickTravel(bool8 fromPc); // START > GARDEN, the PC's row: off to the Garden, or why not
 void MP_Garden_RedirectWarp(s8 destGroup, s8 destNum);   // field_control_avatar.c SetupWarp: the CENTERs' 2F
+bool8 MP_GardenDecor_CarryInput(bool8 a, bool8 b);   // field_control_avatar.c: A puts a carried decoration down, B back
 void MP_GardenDecor_CheckPlaces(void);    // on load: decorations where nobody could reach them go back
 bool8 MP_Garden_TryInteract(void);        // A in front of a Garden Pokémon (mp_overworld.c)
 void MP_Garden_Debug(const char *args);
