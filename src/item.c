@@ -22,6 +22,7 @@ static bool8 CheckPyramidBagHasSpace(u16 itemId, u16 count);
 EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 
 #include "data/text/item_descriptions.h"
+#include "data/text/item_descriptions_gen4.h"   // Moemon Kai: Gen 4 items
 #include "data/items.h"
 
 static u16 GetBagItemQuantity(u16 *quantity)

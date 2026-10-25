@@ -1,0 +1,652 @@
+{
+ "ITEM_X_SP_DEF": {
+  "description": "Raises the stat\\nSp. Def during one\\nbattle.",
+  "holdEffectParam": "X_ITEM_STAGES",
+  "iconPic": "gItemIcon_BattleStatItem",
+  "iconPalette": "gItemIconPalette_XSpecialDefense",
+  "icon_png": "graphics/items/icons/battle_stat_item.png",
+  "icon_pal": "graphics/items/icon_palettes/x_special_defense.pal"
+ },
+ "ITEM_HONEY": {
+  "description": "A sweet honey that\\nattracts wild\\nPokémon when used.",
+  "iconPic": "gItemIcon_Honey",
+  "iconPalette": "gItemIconPalette_Honey",
+  "icon_png": "graphics/items/icons/honey.png",
+  "icon_pal": "graphics/items/icon_palettes/honey.pal"
+ },
+ "ITEM_ARMOR_FOSSIL": {
+  "description": "A part of an\\nancient land\\nPokémon's collar.",
+  "iconPic": "gItemIcon_ArmorFossil",
+  "iconPalette": "gItemIconPalette_ArmorFossil",
+  "icon_png": "graphics/items/icons/armor_fossil.png",
+  "icon_pal": "graphics/items/icon_palettes/armor_fossil.pal"
+ },
+ "ITEM_SKULL_FOSSIL": {
+  "description": "A part of an\\nancient land\\nPokémon's head.",
+  "iconPic": "gItemIcon_SkullFossil",
+  "iconPalette": "gItemIconPalette_SkullFossil",
+  "icon_png": "graphics/items/icons/skull_fossil.png",
+  "icon_pal": "graphics/items/icon_palettes/skull_fossil.pal"
+ },
+ "ITEM_RARE_BONE": {
+  "description": "A bone for study\\nthat would sell at a\\nhigh price.",
+  "iconPic": "gItemIcon_Bone",
+  "iconPalette": "gItemIconPalette_Bone",
+  "icon_png": "graphics/items/icons/bone.png",
+  "icon_pal": "graphics/items/icon_palettes/bone.pal"
+ },
+ "ITEM_SHINY_STONE": {
+  "description": "Makes certain\\nspecies of Pokémon\\nevolve.",
+  "iconPic": "gItemIcon_ShinyStone",
+  "iconPalette": "gItemIconPalette_ShinyStone",
+  "icon_png": "graphics/items/icons/shiny_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/shiny_stone.pal"
+ },
+ "ITEM_DUSK_STONE": {
+  "description": "Makes certain\\nspecies of Pokémon\\nevolve.",
+  "iconPic": "gItemIcon_DuskStone",
+  "iconPalette": "gItemIconPalette_DuskStone",
+  "icon_png": "graphics/items/icons/dusk_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/dusk_stone.pal"
+ },
+ "ITEM_DAWN_STONE": {
+  "description": "Makes certain\\nspecies of Pokémon\\nevolve.",
+  "iconPic": "gItemIcon_DawnStone",
+  "iconPalette": "gItemIconPalette_DawnStone",
+  "icon_png": "graphics/items/icons/dawn_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/dawn_stone.pal"
+ },
+ "ITEM_OVAL_STONE": {
+  "description": "Makes certain\\nspecies of Pokémon\\nevolve.",
+  "iconPic": "gItemIcon_OvalStone",
+  "iconPalette": "gItemIconPalette_OvalStone",
+  "icon_png": "graphics/items/icons/oval_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/oval_stone.pal"
+ },
+ "ITEM_ODD_KEYSTONE": {
+  "description": "A vital item. Voices\\ncan be heard from\\nit occasionally.",
+  "iconPic": "gItemIcon_OddKeystone",
+  "iconPalette": "gItemIconPalette_OddKeystone",
+  "icon_png": "graphics/items/icons/odd_keystone.png",
+  "icon_pal": "graphics/items/icon_palettes/odd_keystone.pal"
+ },
+ "ITEM_GRISEOUS_ORB": {
+  "description": "Boosts Giratina's\\nDragon- and Ghost-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_GRISEOUS_ORB",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_GriseousOrb",
+  "iconPalette": "gItemIconPalette_GriseousOrb",
+  "icon_png": "graphics/items/icons/griseous_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/griseous_orb.pal"
+ },
+ "ITEM_ADAMANT_ORB": {
+  "description": "Boosts Dialga's\\nDragon- and Steel-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_ADAMANT_ORB",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_AdamantOrb",
+  "iconPalette": "gItemIconPalette_AdamantOrb",
+  "icon_png": "graphics/items/icons/adamant_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/adamant_orb.pal"
+ },
+ "ITEM_LUSTROUS_ORB": {
+  "description": "Boosts Palkia's\\nDragon- and Water-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_LUSTROUS_ORB",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_LustrousOrb",
+  "iconPalette": "gItemIconPalette_LustrousOrb",
+  "icon_png": "graphics/items/icons/lustrous_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/lustrous_orb.pal"
+ },
+ "ITEM_WIDE_LENS": {
+  "description": "A magnifying lens\\nthat boosts the\\naccuracy of moves.",
+  "holdEffect": "HOLD_EFFECT_WIDE_LENS",
+  "holdEffectParam": "10",
+  "iconPic": "gItemIcon_WideLens",
+  "iconPalette": "gItemIconPalette_WideLens",
+  "icon_png": "graphics/items/icons/wide_lens.png",
+  "icon_pal": "graphics/items/icon_palettes/wide_lens.pal"
+ },
+ "ITEM_MUSCLE_BAND": {
+  "description": "A headband that\\nslightly boosts\\nphysical moves.",
+  "holdEffect": "HOLD_EFFECT_MUSCLE_BAND",
+  "holdEffectParam": "10",
+  "iconPic": "gItemIcon_MuscleBand",
+  "iconPalette": "gItemIconPalette_MuscleBand",
+  "icon_png": "graphics/items/icons/muscle_band.png",
+  "icon_pal": "graphics/items/icon_palettes/muscle_band.pal"
+ },
+ "ITEM_WISE_GLASSES": {
+  "description": "Thick glasses that\\nslightly boost\\nspecial moves.",
+  "holdEffect": "HOLD_EFFECT_WISE_GLASSES",
+  "holdEffectParam": "10",
+  "iconPic": "gItemIcon_WiseGlasses",
+  "iconPalette": "gItemIconPalette_WiseGlasses",
+  "icon_png": "graphics/items/icons/wise_glasses.png",
+  "icon_pal": "graphics/items/icon_palettes/wise_glasses.pal"
+ },
+ "ITEM_EXPERT_BELT": {
+  "description": "A well-worn belt\\nthat boosts super\\neffective moves.",
+  "holdEffect": "HOLD_EFFECT_EXPERT_BELT",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_ExpertBelt",
+  "iconPalette": "gItemIconPalette_ExpertBelt",
+  "icon_png": "graphics/items/icons/expert_belt.png",
+  "icon_pal": "graphics/items/icon_palettes/expert_belt.pal"
+ },
+ "ITEM_LIGHT_CLAY": {
+  "description": "Barrier moves\\nlike Light Screen\\nlast longer.",
+  "holdEffect": "HOLD_EFFECT_LIGHT_CLAY",
+  "iconPic": "gItemIcon_LightClay",
+  "iconPalette": "gItemIconPalette_LightClay",
+  "icon_png": "graphics/items/icons/light_clay.png",
+  "icon_pal": "graphics/items/icon_palettes/light_clay.pal"
+ },
+ "ITEM_LIFE_ORB": {
+  "description": "Boosts moves, but\\ncuts HP when the\\nholder lands hits.",
+  "holdEffect": "HOLD_EFFECT_LIFE_ORB",
+  "iconPic": "gItemIcon_LifeOrb",
+  "iconPalette": "gItemIconPalette_LifeOrb",
+  "icon_png": "graphics/items/icons/life_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/life_orb.pal"
+ },
+ "ITEM_POWER_HERB": {
+  "description": "Allows immediate\\nuse of a move that\\nrequires charging.",
+  "holdEffect": "HOLD_EFFECT_POWER_HERB",
+  "iconPic": "gItemIcon_PowerHerb",
+  "iconPalette": "gItemIconPalette_PowerHerb",
+  "icon_png": "graphics/items/icons/power_herb.png",
+  "icon_pal": "graphics/items/icon_palettes/power_herb.pal"
+ },
+ "ITEM_TOXIC_ORB": {
+  "description": "A bizarre orb that\\nbadly poisons the\\nholder in battle.",
+  "holdEffect": "HOLD_EFFECT_TOXIC_ORB",
+  "iconPic": "gItemIcon_ToxicOrb",
+  "iconPalette": "gItemIconPalette_ToxicOrb",
+  "icon_png": "graphics/items/icons/toxic_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/toxic_orb.pal"
+ },
+ "ITEM_FLAME_ORB": {
+  "description": "A bizarre orb that\\nburns the\\nholder in battle.",
+  "holdEffect": "HOLD_EFFECT_FLAME_ORB",
+  "iconPic": "gItemIcon_FlameOrb",
+  "iconPalette": "gItemIconPalette_FlameOrb",
+  "icon_png": "graphics/items/icons/flame_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/flame_orb.pal"
+ },
+ "ITEM_FOCUS_SASH": {
+  "description": "If the holder has\\nfull HP, it endures\\none KO with 1 HP.",
+  "holdEffect": "HOLD_EFFECT_FOCUS_SASH",
+  "iconPic": "gItemIcon_FocusSash",
+  "iconPalette": "gItemIconPalette_FocusSash",
+  "icon_png": "graphics/items/icons/focus_sash.png",
+  "icon_pal": "graphics/items/icon_palettes/focus_sash.pal"
+ },
+ "ITEM_ZOOM_LENS": {
+  "description": "Boosts accuracy if\\nthe holder moves\\nafter the foe.",
+  "holdEffect": "HOLD_EFFECT_ZOOM_LENS",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_ZoomLens",
+  "iconPalette": "gItemIconPalette_ZoomLens",
+  "icon_png": "graphics/items/icons/zoom_lens.png",
+  "icon_pal": "graphics/items/icon_palettes/zoom_lens.pal"
+ },
+ "ITEM_METRONOME": {
+  "description": "Boosts the power\\nof a move that is\\nused repeatedly.",
+  "holdEffect": "HOLD_EFFECT_METRONOME",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Metronome",
+  "iconPalette": "gItemIconPalette_Metronome",
+  "icon_png": "graphics/items/icons/metronome.png",
+  "icon_pal": "graphics/items/icon_palettes/metronome.pal"
+ },
+ "ITEM_IRON_BALL": {
+  "description": "Cuts Speed and\\nmakes Ground moves\\nhit the holder.",
+  "holdEffect": "HOLD_EFFECT_IRON_BALL",
+  "iconPic": "gItemIcon_IronBall",
+  "iconPalette": "gItemIconPalette_IronBall",
+  "icon_png": "graphics/items/icons/iron_ball.png",
+  "icon_pal": "graphics/items/icon_palettes/iron_ball.pal"
+ },
+ "ITEM_LAGGING_TAIL": {
+  "description": "An item that makes\\nthe holder move\\nslower than usual.",
+  "holdEffect": "HOLD_EFFECT_LAGGING_TAIL",
+  "iconPic": "gItemIcon_LaggingTail",
+  "iconPalette": "gItemIconPalette_LaggingTail",
+  "icon_png": "graphics/items/icons/lagging_tail.png",
+  "icon_pal": "graphics/items/icon_palettes/lagging_tail.pal"
+ },
+ "ITEM_DESTINY_KNOT": {
+  "description": "If the holder falls\\nin love, the foe\\ndoes too.",
+  "holdEffect": "HOLD_EFFECT_DESTINY_KNOT",
+  "iconPic": "gItemIcon_DestinyKnot",
+  "iconPalette": "gItemIconPalette_DestinyKnot",
+  "icon_png": "graphics/items/icons/destiny_knot.png",
+  "icon_pal": "graphics/items/icon_palettes/destiny_knot.pal"
+ },
+ "ITEM_BLACK_SLUDGE": {
+  "description": "Gradually restores\\nPoison-types' HP.\\nDamages all others.",
+  "holdEffect": "HOLD_EFFECT_BLACK_SLUDGE",
+  "iconPic": "gItemIcon_BlackSludge",
+  "iconPalette": "gItemIconPalette_BlackSludge",
+  "icon_png": "graphics/items/icons/black_sludge.png",
+  "icon_pal": "graphics/items/icon_palettes/black_sludge.pal"
+ },
+ "ITEM_ICY_ROCK": {
+  "description": "Extends hail or\\nsnow when the\\nholder summons it.",
+  "holdEffect": "HOLD_EFFECT_ICY_ROCK",
+  "iconPic": "gItemIcon_IcyRock",
+  "iconPalette": "gItemIconPalette_IcyRock",
+  "icon_png": "graphics/items/icons/icy_rock.png",
+  "icon_pal": "graphics/items/icon_palettes/icy_rock.pal"
+ },
+ "ITEM_SMOOTH_ROCK": {
+  "description": "Extends a\\nsandstorm when the\\nholder summons it.",
+  "holdEffect": "HOLD_EFFECT_SMOOTH_ROCK",
+  "iconPic": "gItemIcon_SmoothRock",
+  "iconPalette": "gItemIconPalette_SmoothRock",
+  "icon_png": "graphics/items/icons/smooth_rock.png",
+  "icon_pal": "graphics/items/icon_palettes/smooth_rock.pal"
+ },
+ "ITEM_HEAT_ROCK": {
+  "description": "Extends harsh\\nsunlight when the\\nholder summons it.",
+  "holdEffect": "HOLD_EFFECT_HEAT_ROCK",
+  "iconPic": "gItemIcon_HeatRock",
+  "iconPalette": "gItemIconPalette_HeatRock",
+  "icon_png": "graphics/items/icons/heat_rock.png",
+  "icon_pal": "graphics/items/icon_palettes/heat_rock.pal"
+ },
+ "ITEM_DAMP_ROCK": {
+  "description": "Extends rain\\nwhen the\\nholder summons it.",
+  "holdEffect": "HOLD_EFFECT_DAMP_ROCK",
+  "iconPic": "gItemIcon_DampRock",
+  "iconPalette": "gItemIconPalette_DampRock",
+  "icon_png": "graphics/items/icons/damp_rock.png",
+  "icon_pal": "graphics/items/icon_palettes/damp_rock.pal"
+ },
+ "ITEM_GRIP_CLAW": {
+  "description": "Multi-turn moves\\nlike Bind and Wrap\\nlast longer.",
+  "holdEffect": "HOLD_EFFECT_GRIP_CLAW",
+  "iconPic": "gItemIcon_GripClaw",
+  "iconPalette": "gItemIconPalette_GripClaw",
+  "icon_png": "graphics/items/icons/grip_claw.png",
+  "icon_pal": "graphics/items/icon_palettes/grip_claw.pal"
+ },
+ "ITEM_CHOICE_SCARF": {
+  "description": "Boosts Speed,\\nbut permits\\nonly one move.",
+  "holdEffect": "HOLD_EFFECT_CHOICE_SCARF",
+  "iconPic": "gItemIcon_ChoiceScarf",
+  "iconPalette": "gItemIconPalette_ChoiceScarf",
+  "icon_png": "graphics/items/icons/choice_scarf.png",
+  "icon_pal": "graphics/items/icon_palettes/choice_scarf.pal"
+ },
+ "ITEM_STICKY_BARB": {
+  "description": "Damages the holder\\neach turn. Latches\\non from contact.",
+  "holdEffect": "HOLD_EFFECT_STICKY_BARB",
+  "iconPic": "gItemIcon_StickyBarb",
+  "iconPalette": "gItemIconPalette_StickyBarb",
+  "icon_png": "graphics/items/icons/sticky_barb.png",
+  "icon_pal": "graphics/items/icon_palettes/sticky_barb.pal"
+ },
+ "ITEM_POWER_BRACER": {
+  "description": "Promotes Attack\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerBracer",
+  "iconPalette": "gItemIconPalette_PowerBracer",
+  "secondaryId": "STAT_ATK",
+  "icon_png": "graphics/items/icons/power_bracer.png",
+  "icon_pal": "graphics/items/icon_palettes/power_bracer.pal"
+ },
+ "ITEM_POWER_BELT": {
+  "description": "Promotes Defense\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerBelt",
+  "iconPalette": "gItemIconPalette_PowerBelt",
+  "secondaryId": "STAT_DEF",
+  "icon_png": "graphics/items/icons/power_belt.png",
+  "icon_pal": "graphics/items/icon_palettes/power_belt.pal"
+ },
+ "ITEM_POWER_LENS": {
+  "description": "Promotes Sp. Atk\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerLens",
+  "iconPalette": "gItemIconPalette_PowerLens",
+  "secondaryId": "STAT_SPATK",
+  "icon_png": "graphics/items/icons/power_lens.png",
+  "icon_pal": "graphics/items/icon_palettes/power_lens.pal"
+ },
+ "ITEM_POWER_BAND": {
+  "description": "Promotes Sp. Def\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerBand",
+  "iconPalette": "gItemIconPalette_PowerBand",
+  "secondaryId": "STAT_SPDEF",
+  "icon_png": "graphics/items/icons/power_band.png",
+  "icon_pal": "graphics/items/icon_palettes/power_band.pal"
+ },
+ "ITEM_POWER_ANKLET": {
+  "description": "Promotes Speed\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerAnklet",
+  "iconPalette": "gItemIconPalette_PowerAnklet",
+  "secondaryId": "STAT_SPEED",
+  "icon_png": "graphics/items/icons/power_anklet.png",
+  "icon_pal": "graphics/items/icon_palettes/power_anklet.pal"
+ },
+ "ITEM_POWER_WEIGHT": {
+  "description": "Promotes HP\\ngain, but cuts\\nSpeed in battle.",
+  "holdEffect": "HOLD_EFFECT_POWER_ITEM",
+  "holdEffectParam": "POWER_ITEM_BOOST",
+  "iconPic": "gItemIcon_PowerWeight",
+  "iconPalette": "gItemIconPalette_PowerWeight",
+  "secondaryId": "STAT_HP",
+  "icon_png": "graphics/items/icons/power_weight.png",
+  "icon_pal": "graphics/items/icon_palettes/power_weight.pal"
+ },
+ "ITEM_SHED_SHELL": {
+  "description": "Enables the holder\\nto switch out\\nwithout fail.",
+  "holdEffect": "HOLD_EFFECT_SHED_SHELL",
+  "iconPic": "gItemIcon_ShedShell",
+  "iconPalette": "gItemIconPalette_ShedShell",
+  "icon_png": "graphics/items/icons/shed_shell.png",
+  "icon_pal": "graphics/items/icon_palettes/shed_shell.pal"
+ },
+ "ITEM_BIG_ROOT": {
+  "description": "Boosts the amount\\nof HP restored from\\nHP-stealing moves.",
+  "holdEffect": "HOLD_EFFECT_BIG_ROOT",
+  "holdEffectParam": "30",
+  "iconPic": "gItemIcon_BigRoot",
+  "iconPalette": "gItemIconPalette_BigRoot",
+  "icon_png": "graphics/items/icons/big_root.png",
+  "icon_pal": "graphics/items/icon_palettes/big_root.pal"
+ },
+ "ITEM_CHOICE_SPECS": {
+  "description": "Boosts Sp. Atk,\\nbut permits\\nonly one move.",
+  "holdEffect": "HOLD_EFFECT_CHOICE_SPECS",
+  "iconPic": "gItemIcon_ChoiceSpecs",
+  "iconPalette": "gItemIconPalette_ChoiceSpecs",
+  "icon_png": "graphics/items/icons/choice_specs.png",
+  "icon_pal": "graphics/items/icon_palettes/choice_specs.pal"
+ },
+ "ITEM_FLAME_PLATE": {
+  "description": "A held item that\\nraises the power of\\nFire-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_FlamePlate",
+  "secondaryId": "TYPE_FIRE",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/flame_plate.pal"
+ },
+ "ITEM_SPLASH_PLATE": {
+  "description": "A held item that\\nraises the power of\\nWater-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_SplashPlate",
+  "secondaryId": "TYPE_WATER",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/splash_plate.pal"
+ },
+ "ITEM_ZAP_PLATE": {
+  "description": "A held item that\\nboosts Electric-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_ZapPlate",
+  "secondaryId": "TYPE_ELECTRIC",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/zap_plate.pal"
+ },
+ "ITEM_MEADOW_PLATE": {
+  "description": "A held item that\\nraises the power of\\nGrass-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_MeadowPlate",
+  "secondaryId": "TYPE_GRASS",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/meadow_plate.pal"
+ },
+ "ITEM_ICICLE_PLATE": {
+  "description": "A held item that\\nraises the power of\\nIce-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_IciclePlate",
+  "secondaryId": "TYPE_ICE",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/icicle_plate.pal"
+ },
+ "ITEM_FIST_PLATE": {
+  "description": "A held item that\\nboosts Fighting-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_FistPlate",
+  "secondaryId": "TYPE_FIGHTING",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/fist_plate.pal"
+ },
+ "ITEM_TOXIC_PLATE": {
+  "description": "A held item that\\nraises the power of\\nPoison-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_ToxicPlate",
+  "secondaryId": "TYPE_POISON",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/toxic_plate.pal"
+ },
+ "ITEM_EARTH_PLATE": {
+  "description": "A held item that\\nraises the power of\\nGround-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_EarthPlate",
+  "secondaryId": "TYPE_GROUND",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/earth_plate.pal"
+ },
+ "ITEM_SKY_PLATE": {
+  "description": "A held item that\\nraises the power of\\nFlying-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_SkyPlate",
+  "secondaryId": "TYPE_FLYING",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/sky_plate.pal"
+ },
+ "ITEM_MIND_PLATE": {
+  "description": "A held item that\\nboosts Psychic-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_MindPlate",
+  "secondaryId": "TYPE_PSYCHIC",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/mind_plate.pal"
+ },
+ "ITEM_INSECT_PLATE": {
+  "description": "A held item that\\nraises the power of\\nBug-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_InsectPlate",
+  "secondaryId": "TYPE_BUG",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/insect_plate.pal"
+ },
+ "ITEM_STONE_PLATE": {
+  "description": "A held item that\\nraises the power of\\nRock-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_StonePlate",
+  "secondaryId": "TYPE_ROCK",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/stone_plate.pal"
+ },
+ "ITEM_SPOOKY_PLATE": {
+  "description": "A held item that\\nraises the power of\\nGhost-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_SpookyPlate",
+  "secondaryId": "TYPE_GHOST",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/spooky_plate.pal"
+ },
+ "ITEM_DRACO_PLATE": {
+  "description": "A held item that\\nraises the power of\\nDragon-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_DracoPlate",
+  "secondaryId": "TYPE_DRAGON",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/draco_plate.pal"
+ },
+ "ITEM_DREAD_PLATE": {
+  "description": "A held item that\\nraises the power of\\nDark-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_DreadPlate",
+  "secondaryId": "TYPE_DARK",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/dread_plate.pal"
+ },
+ "ITEM_IRON_PLATE": {
+  "description": "A held item that\\nraises the power of\\nSteel-type moves.",
+  "holdEffect": "HOLD_EFFECT_PLATE",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_IronPlate",
+  "secondaryId": "TYPE_STEEL",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/iron_plate.pal"
+ },
+ "ITEM_ODD_INCENSE": {
+  "description": "A held item that\\nboosts Psychic-\\ntype moves.",
+  "holdEffect": "HOLD_EFFECT_TYPE_POWER",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_OddIncense",
+  "iconPalette": "gItemIconPalette_OddIncense",
+  "secondaryId": "TYPE_PSYCHIC",
+  "icon_png": "graphics/items/icons/odd_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/odd_incense.pal"
+ },
+ "ITEM_ROCK_INCENSE": {
+  "description": "A held item that\\nraises the power of\\nRock-type moves.",
+  "holdEffect": "HOLD_EFFECT_TYPE_POWER",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_RockIncense",
+  "iconPalette": "gItemIconPalette_RockIncense",
+  "secondaryId": "TYPE_ROCK",
+  "icon_png": "graphics/items/icons/rock_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/rock_incense.pal"
+ },
+ "ITEM_FULL_INCENSE": {
+  "description": "An item that makes\\nthe holder move\\nslower than usual.",
+  "holdEffect": "HOLD_EFFECT_LAGGING_TAIL",
+  "holdEffectParam": "5",
+  "iconPic": "gItemIcon_FullIncense",
+  "iconPalette": "gItemIconPalette_FullIncense",
+  "icon_png": "graphics/items/icons/full_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/full_incense.pal"
+ },
+ "ITEM_WAVE_INCENSE": {
+  "description": "A held item that\\nraises the power of\\nWater-type moves.",
+  "holdEffect": "HOLD_EFFECT_TYPE_POWER",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_WaveIncense",
+  "iconPalette": "gItemIconPalette_WaveIncense",
+  "secondaryId": "TYPE_WATER",
+  "icon_png": "graphics/items/icons/wave_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/wave_incense.pal"
+ },
+ "ITEM_ROSE_INCENSE": {
+  "description": "A held item that\\nraises the power of\\nGrass-type moves.",
+  "holdEffect": "HOLD_EFFECT_TYPE_POWER",
+  "holdEffectParam": "20",
+  "iconPic": "gItemIcon_RoseIncense",
+  "iconPalette": "gItemIconPalette_RoseIncense",
+  "secondaryId": "TYPE_GRASS",
+  "icon_png": "graphics/items/icons/rose_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/rose_incense.pal"
+ },
+ "ITEM_LUCK_INCENSE": {
+  "description": "Doubles money in\\nbattle if the\\nholder takes part.",
+  "holdEffect": "HOLD_EFFECT_DOUBLE_PRIZE",
+  "iconPic": "gItemIcon_LuckIncense",
+  "iconPalette": "gItemIconPalette_LuckIncense",
+  "icon_png": "graphics/items/icons/luck_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/luck_incense.pal"
+ },
+ "ITEM_PURE_INCENSE": {
+  "description": "A held item that\\nhelps repel wild\\nPokémon.",
+  "holdEffect": "HOLD_EFFECT_REPEL",
+  "iconPic": "gItemIcon_PureIncense",
+  "iconPalette": "gItemIconPalette_PureIncense",
+  "icon_png": "graphics/items/icons/pure_incense.png",
+  "icon_pal": "graphics/items/icon_palettes/pure_incense.pal"
+ },
+ "ITEM_PROTECTOR": {
+  "description": "A protective item.\\nIt is loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_Protector",
+  "iconPalette": "gItemIconPalette_Protector",
+  "icon_png": "graphics/items/icons/protector.png",
+  "icon_pal": "graphics/items/icon_palettes/protector.pal"
+ },
+ "ITEM_ELECTIRIZER": {
+  "description": "A box of electric\\nenergy loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_Electirizer",
+  "iconPalette": "gItemIconPalette_Electirizer",
+  "icon_png": "graphics/items/icons/electirizer.png",
+  "icon_pal": "graphics/items/icon_palettes/electirizer.pal"
+ },
+ "ITEM_MAGMARIZER": {
+  "description": "A box of magma\\nenergy loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_Magmarizer",
+  "iconPalette": "gItemIconPalette_Magmarizer",
+  "icon_png": "graphics/items/icons/magmarizer.png",
+  "icon_pal": "graphics/items/icon_palettes/magmarizer.pal"
+ },
+ "ITEM_DUBIOUS_DISC": {
+  "description": "A transparent\\ndevice overflowing\\nwith dubious data.",
+  "iconPic": "gItemIcon_DubiousDisc",
+  "iconPalette": "gItemIconPalette_DubiousDisc",
+  "icon_png": "graphics/items/icons/dubious_disc.png",
+  "icon_pal": "graphics/items/icon_palettes/dubious_disc.pal"
+ },
+ "ITEM_REAPER_CLOTH": {
+  "description": "A cloth imbued with\\nenergy loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_ReaperCloth",
+  "iconPalette": "gItemIconPalette_ReaperCloth",
+  "icon_png": "graphics/items/icons/reaper_cloth.png",
+  "icon_pal": "graphics/items/icon_palettes/reaper_cloth.pal"
+ },
+ "ITEM_RAZOR_CLAW": {
+  "description": "A held item that\\nimproves the\\ncritical-hit rate.",
+  "holdEffect": "HOLD_EFFECT_SCOPE_LENS",
+  "iconPic": "gItemIcon_RazorClaw",
+  "iconPalette": "gItemIconPalette_RazorClaw",
+  "icon_png": "graphics/items/icons/razor_claw.png",
+  "icon_pal": "graphics/items/icon_palettes/razor_claw.pal"
+ },
+ "ITEM_RAZOR_FANG": {
+  "description": "A held item that\\nmay cause flinching\\nwhen the foe is hit.",
+  "holdEffect": "HOLD_EFFECT_FLINCH",
+  "holdEffectParam": "10",
+  "iconPic": "gItemIcon_RazorFang",
+  "iconPalette": "gItemIconPalette_RazorFang",
+  "icon_png": "graphics/items/icons/razor_fang.png",
+  "icon_pal": "graphics/items/icon_palettes/razor_fang.pal"
+ }
+}

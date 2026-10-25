@@ -1187,6 +1187,7 @@ const u32 gPokeblockFeedBg_Tilemap[] = INCGFX_U32("graphics/pokeblock/feeding_bg
 #include "data/graphics/berries.h"
 #include "data/graphics/rayquaza_scene.h"
 #include "data/graphics/items.h"
+#include "data/graphics/items_gen4.h"   // Moemon Kai: Gen 4 items
 #include "data/graphics/decorations.h"
 
 const u32 gBattleAnimSpritePal_Shock3[] = INCGFX_U32("graphics/battle_anims/sprites/shock_3.png", ".gbapal.lz");

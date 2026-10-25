@@ -70,5 +70,37 @@
 #define HOLD_EFFECT_STICK          66
 #define HOLD_EFFECT_QUICK_POWDER   67   // Moemon Kai
 #define HOLD_EFFECT_EVIOLITE       68   // Moemon Kai
+// Moemon Kai: Gen 4 hold effects (tools/moemon_gen4/gen_items.py)
+#define HOLD_EFFECT_GRISEOUS_ORB       69
+#define HOLD_EFFECT_ADAMANT_ORB        70
+#define HOLD_EFFECT_LUSTROUS_ORB       71
+#define HOLD_EFFECT_WIDE_LENS          72
+#define HOLD_EFFECT_MUSCLE_BAND        73
+#define HOLD_EFFECT_WISE_GLASSES       74
+#define HOLD_EFFECT_EXPERT_BELT        75
+#define HOLD_EFFECT_LIGHT_CLAY         76
+#define HOLD_EFFECT_LIFE_ORB           77
+#define HOLD_EFFECT_POWER_HERB         78
+#define HOLD_EFFECT_TOXIC_ORB          79
+#define HOLD_EFFECT_FLAME_ORB          80
+#define HOLD_EFFECT_FOCUS_SASH         81
+#define HOLD_EFFECT_ZOOM_LENS          82
+#define HOLD_EFFECT_METRONOME          83
+#define HOLD_EFFECT_IRON_BALL          84
+#define HOLD_EFFECT_LAGGING_TAIL       85
+#define HOLD_EFFECT_DESTINY_KNOT       86
+#define HOLD_EFFECT_BLACK_SLUDGE       87
+#define HOLD_EFFECT_ICY_ROCK           88
+#define HOLD_EFFECT_SMOOTH_ROCK        89
+#define HOLD_EFFECT_HEAT_ROCK          90
+#define HOLD_EFFECT_DAMP_ROCK          91
+#define HOLD_EFFECT_GRIP_CLAW          92
+#define HOLD_EFFECT_CHOICE_SCARF       93
+#define HOLD_EFFECT_STICKY_BARB        94
+#define HOLD_EFFECT_POWER_ITEM         95
+#define HOLD_EFFECT_SHED_SHELL         96
+#define HOLD_EFFECT_BIG_ROOT           97
+#define HOLD_EFFECT_CHOICE_SPECS       98
+// end of Gen 4 hold effects
 
 #endif // GUARD_HOLD_EFFECTS_H

@@ -4840,4 +4840,5 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
     },
+#include "items_gen4.h"   // Moemon Kai: Gen 4 items
 };
