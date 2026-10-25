@@ -43,7 +43,7 @@ bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex)
     e->hflip = !(sprite->oam.affineMode & 1) && ((sprite->oam.matrixNum >> 3) & 1);
     e->vflip = !(sprite->oam.affineMode & 1) && ((sprite->oam.matrixNum >> 4) & 1);
     gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0);
-    gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0);
+    gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + big->lift;
     e->left = e->hflip ? gx - dx - e->w : gx + dx;   // flips mirror the picture around the sprite's x / y
     e->top = e->vflip ? gy - dy - e->h : gy + dy;
     // affine: a reflection mirrors at the feet (the sprite's own point); anything else (ball effects scaling and

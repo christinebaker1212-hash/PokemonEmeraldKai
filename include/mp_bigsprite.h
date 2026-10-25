@@ -11,6 +11,7 @@ struct MpBigSprite
     const u8 *frame;        // s16 dx, s16 dy (top-left from the sprite's x / y), u16 w, u16 h, then the pixels
     u8 bpp;                 // 4 (rows of (w + 1) / 2 bytes, low nibble first) or 8 (rows of w bytes)
     u8 colorCount;          // palette entries (0 = transparent)
+    s16 lift;               // pixels the picture is drawn lower than its frame says (a PMD hop's rise, cut down)
     u16 extraShown[240];    // 8 bpp: colors 16-255 as shown now (faded like the palette slot)
 };
 

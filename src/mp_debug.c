@@ -405,6 +405,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "followsprites") == 0)
+    {
+        // followsprites N - OPTIONS > GAME > FOLLOWERS: 0 default, 1 pmd, 2 original
+        gMpConfig.followerSprites = atoi(arg) % MP_FOLLOW_SPRITES_COUNT;
+        printf("[test] follower sprites %d\n", gMpConfig.followerSprites);
+    }
     else if (strcmp(cmd, "farm") == 0)
     {
         // farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT: the MOéMON GARDEN's BERRY farm (mp_farm.c)

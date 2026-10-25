@@ -81,6 +81,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `levelscale_trainer` | ROXANNE's ace Lv15 -> 20 against a team averaging 42 (boss margin, no-badge cap) |
 | `levelscale_off` | LEVEL SCALING off: no scaling |
 | `coop_levelscale` | NA-JP lag: ROXANNE scaled for the average of both teams (Lv30 and Lv50) |
+| `pmd_depth` | a PMD follower right below its Trainer is drawn in front of them at every step (scroll); ONIX stands a little farther back; 4 ways only |
+| `follow_sprites` | OPTIONS > FOLLOWERS: DEFAULT (original follower, PMD Garden Pokémon), PMD, ORIGINAL, switched live |
+| `battle_weather_intro` | rainy ROUTE 120: the rain shows during the battle's intro, before the battle's own weather is set |
 | `farm_solo` | the Garden's BERRY farm: 4 plots open, plant a CHERI BERRY by talking to plot 0, grow, pick it; TREECKO tends, MUDKIP waters, a hungry MUDKIP nibbles |
 | `farm_together` | NA-JP lag: BOB sees ALICE's (the host's) farm, picks her ripe plot (her game hands the BERRIES over) and plants one back |
 | `pmd_follower` | a shiny TORCHIC follows as a PMD Collab picture (big sprite): walking right, then idle (mp pmd), shots |

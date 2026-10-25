@@ -784,12 +784,17 @@ static void Draw(struct Actor *a)
         {
             u16 colors[16];
             u8 slot = IndexOfSpritePaletteTag(TAG_GARDEN_PAL + idx);
-            a->pmdOn = MP_Pmd_Attach(&a->pmd, &gSprites[a->spriteId], a->dex, a->female, a->shiny, a->hue, colors);
+            a->pmdOn = MP_PmdWanted(TRUE) && MP_Pmd_Attach(&a->pmd, &gSprites[a->spriteId], a->dex, a->female, a->shiny, a->hue, colors);
             if (a->pmdOn && slot != 0xFF)
                 LoadPalette(colors, OBJ_PLTT_ID(slot), PLTT_SIZE_4BPP);
             a->pdir = MP_Pmd_DirFrom4(a->dir);
             a->pturn = 0;
         }
+    }
+    if (a->pmdOn != (MP_PmdWanted(TRUE) && MP_Pmd_Has(a->dex)))
+    {
+        DestroyActorSprite(a);   // OPTIONS > FOLLOWERS changed: the other kind of sprite next frame
+        return;
     }
     sp = &gSprites[a->spriteId];
     {
@@ -820,7 +825,10 @@ static void Draw(struct Actor *a)
         a->anim = frame;
     }
     sp->oam.priority = os->oam.priority;
-    SetObjectSubpriorityByElevation(3, sp, 1);
+    if (a->pmdOn)
+        MP_Pmd_SetSubpriority(sp, 3, 1);
+    else
+        SetObjectSubpriorityByElevation(3, sp, 1);
     {
         s16 x = sp->x + sp->x2 + gSpriteCoordOffsetX, y = sp->y + sp->y2 + gSpriteCoordOffsetY;
         s16 m = a->pmdOn ? 136 : 32;   // a PMD picture can reach far from its feet (it's drawn whole, at its exact place)
@@ -2172,9 +2180,9 @@ void MP_GardenLife_Debug(const char *args)
         struct Actor *a = &sL.a[i];
         if (!a->used)
             continue;
-        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u\n", i,
+        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u pmd %d lift %d\n", i,
                a->dex, a->owner, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner, a->rare,
-               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir);
+               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir, a->pmdOn, a->pmdOn ? a->pmd.big.lift : 0);
     }
 }
 

@@ -6,6 +6,7 @@
 #include "global.h"
 #include "palette.h"
 #include "sprite.h"
+#include "event_object_movement.h"
 #include "mp.h"
 #include "mp_pmd.h"
 #include "mp_life_field.h"
@@ -165,7 +166,7 @@ bool8 MP_Pmd_HasAnim(const struct MpPmdView *v, u8 anim)
 }
 
 // The frame's record for the view's animation, direction and frame
-static const u8 *FrameRecord(const struct MpPmdView *v)
+static const u8 *FrameAt(const struct MpPmdView *v, u8 frame)
 {
     const u8 *a = AnimRecord(v->chunk, v->shown);
     u8 frames, dirs, d, f;
@@ -174,8 +175,39 @@ static const u8 *FrameRecord(const struct MpPmdView *v)
     frames = a[0];
     dirs = a[1];
     d = dirs >= 8 ? v->dir & 7 : 0;
-    f = v->frame < frames ? v->frame : frames - 1;
+    f = frame < frames ? frame : frames - 1;
     return v->chunk->raw + Rd32(a + 4 + ((frames + 3) & ~3) + 4 * (d * frames + f));
+}
+
+static const u8 *FrameRecord(const struct MpPmdView *v)
+{
+    return FrameAt(v, v->frame);
+}
+
+// The hops and leaps rise a long way in the PMD sheets (made for a top-down dungeon view): on the map their rise is
+// cut to a third (the lowest frame's bottom is the ground; how far above it this frame's bottom is, is the rise)
+static void UpdateLift(struct MpPmdView *v)
+{
+    const u8 *a = AnimRecord(v->chunk, v->shown), *f;
+    s16 ground = -0x7FFF, bottom;
+    u8 i;
+    v->big.lift = 0;
+    if (!a || !(v->shown == PMD_ANIM_HOP || v->shown == PMD_ANIM_LEAPFORTH || v->shown == PMD_ANIM_ROTATE
+             || v->shown == PMD_ANIM_POSE || v->shown == PMD_ANIM_TUMBLE))
+        return;
+    for (i = 0; i < a[0]; i++)
+    {
+        f = FrameAt(v, i);
+        bottom = (s16)Rd16(f + 2) + (s16)Rd16(f + 6);
+        if (bottom > ground)
+            ground = bottom;
+    }
+    f = v->big.frame;
+    if (!f)
+        return;
+    bottom = (s16)Rd16(f + 2) + (s16)Rd16(f + 6);
+    if (ground > bottom)
+        v->big.lift = (ground - bottom) * 2 / 3;
 }
 
 static void Colors(const struct MpPmdChunk *c, bool8 shiny, u16 *out, u16 count)
@@ -272,6 +304,7 @@ void MP_Pmd_SetAnim(struct MpPmdView *v, u8 anim, u8 dir, bool8 loop)
         v->done = FALSE;
     }
     v->big.frame = FrameRecord(v);
+    UpdateLift(v);
 }
 
 void MP_Pmd_Tick(struct MpPmdView *v, struct Sprite *sprite)
@@ -293,6 +326,7 @@ void MP_Pmd_Tick(struct MpPmdView *v, struct Sprite *sprite)
             v->done = TRUE;
     }
     v->big.frame = FrameRecord(v);
+    UpdateLift(v);
     // 8 bpp: colors 16+ fade with the palette slot (the slot holds colors 0-15)
     if (v->big.bpp == 8 && sprite)
     {
@@ -356,12 +390,10 @@ void MP_Pmd_FrameUpdate(void)
     }
 }
 
-// What it's doing as an animation, and its facing turning 45 degrees at a time toward the way it wants to face (a
-// turn shows the diagonals between)
-#define TURN_FRAMES 3
+// What it's doing as an animation, facing one of the 4 ways (as the map's own sprites do: no diagonals)
 void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 face4, u8 pose, bool8 fast)
 {
-    u8 anim = PMD_ANIM_IDLE, want = MP_Pmd_DirFrom4(face4), turnFrames = TURN_FRAMES;
+    u8 anim = PMD_ANIM_IDLE, want = MP_Pmd_DirFrom4(face4);
 
     u16 dex = v->chunk ? v->chunk->index->dex : 0;   // picks between a pose's animations (each Pokémon its own)
 
@@ -382,9 +414,15 @@ void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 
     case LIFE_POSE_HOP:    anim = PMD_ANIM_HOP; break;
     case LIFE_POSE_SHAKE:  anim = PMD_ANIM_EAT; break;   // rummaging, digging, sniffing about
     case LIFE_POSE_LOOKUP: anim = PMD_ANIM_LOOKUP; break;
-    case LIFE_POSE_SPIN:   // looking all around: keeps turning
-        want = (*pdir + 1) & 7;
-        turnFrames = 8;
+    case LIFE_POSE_SPIN:   // looking all around: down, right, up, left, a moment each
+        if (*pturn > 0)
+            (*pturn)--;
+        else
+        {
+            *pdir = ((*pdir & 6) + 2) & 7;
+            *pturn = 20;
+        }
+        want = *pdir;
         break;
     case LIFE_POSE_EAT:    anim = PMD_ANIM_EAT; break;
     case LIFE_POSE_SPAR:
@@ -405,22 +443,44 @@ void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 
     case LIFE_POSE_BREATH: anim = PMD_ANIM_DEEPBREATH; break;
     case LIFE_POSE_LAY:    anim = PMD_ANIM_LAYING; break;
     }
-    if (*pdir != want)
+    if (pose != LIFE_POSE_SPIN)
     {
-        if (*pturn > 0)
-            (*pturn)--;
-        else
-        {
-            u8 cw = (want - *pdir) & 7;   // steps clockwise (down -> down-right -> right ...)
-            *pdir = (*pdir + (cw <= 4 ? 1 : 7)) & 7;
-            *pturn = turnFrames;
-        }
-    }
-    else
-    {
+        *pdir = want & 6;
         *pturn = 0;
     }
     MP_Pmd_SetAnim(v, anim, *pdir, TRUE);
-    if (fast && walking)   // running or biking: the steps go by twice as fast
-        MP_Pmd_Tick(v, NULL);
+    // running or biking: a slow walk goes a little faster (every other frame an extra tick when its whole cycle is
+    // longer than half a second); quick ones keep their own pace
+    if (fast && walking && v->chunk)
+    {
+        const u8 *a = AnimRecord(v->chunk, v->shown);
+        u16 cycle = 0;
+        u8 i;
+        for (i = 0; a && i < a[0]; i++)
+            cycle += a[4 + i];
+        if (cycle > 30 && (++v->fastPhase & 1))
+            MP_Pmd_Tick(v, NULL);
+    }
+}
+
+// Tests and the depth order: half the bigger side of the picture now (how far it reaches from its point)
+u16 MP_Pmd_Reach(const struct MpPmdView *v)
+{
+    const u8 *f = v->big.frame;
+    u16 w, h;
+    if (!f)
+        return 0;
+    w = Rd16(f + 4);
+    h = Rd16(f + 6);
+    return (w > h ? w : h) / 2;
+}
+
+// The depth among the map's sprites, as the old 32x32 frames had it: a PMD sprite's point is its feet (8 below the
+// old frames' middle), and the game reads the depth from the sprite's top-left corner (centerToCornerVec, 0 here)
+void MP_Pmd_SetSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority)
+{
+    s8 cv = sprite->centerToCornerVecY;
+    sprite->centerToCornerVecY = -PMD_GROUND_DY;
+    SetObjectSubpriorityByElevation(elevation, sprite, subpriority);
+    sprite->centerToCornerVecY = cv;
 }

@@ -70,6 +70,7 @@ struct MpPmdView
     bool8 done;
     bool8 shiny;
     u16 idle;                   // MP_Pmd_Animate: frames standing with nothing to do
+    u8 fastPhase;               // ... running: every other frame
     struct MpBigSprite big;
     u16 extraOwn[240];          // 8 bpp: colors 16+ before fades (big.extraShown = these, faded)
 };
@@ -91,6 +92,8 @@ bool8 MP_Pmd_HasAnim(const struct MpPmdView *v, u8 anim);
 // A follower's / Garden Pokémon's state as an animation: walking, or its pose (LIFE_POSE_*), facing face4 (0 down, 1 up,
 // 2 left, 3 right); *pdir turns 45 degrees at a time toward it (*pturn: frames to the next step)
 void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 face4, u8 pose, bool8 fast);
+u16 MP_Pmd_Reach(const struct MpPmdView *v);                    // half the bigger side of the picture now
+void MP_Pmd_SetSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority);   // SetObjectSubpriorityByElevation for it
 #define PMD_GROUND_DY 8   // a PMD picture's ground point below the old 32x32 frames' center: the tile's middle
 
 #endif // GUARD_MP_PMD_H

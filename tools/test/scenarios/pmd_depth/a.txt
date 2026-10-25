@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp follow 0
+wait 120
+press UP 10
+wait 30
+press UP 10
+wait 30
+mp pmd
+shot up1
+press UP 10
+wait 30
+mp pmd
+press UP 10
+wait 30
+mp pmd
+press UP 10
+wait 30
+mp pmd
+shot up4
+mp follow 1
+wait 90
+press UP 10
+wait 30
+press UP 10
+wait 90
+mp pmd
+shot onix
+quit

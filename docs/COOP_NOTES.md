@@ -669,9 +669,19 @@ are the sprite's palette slot (fades, weather, Stadium hue); 8-bit pictures' col
 (MP_FadeFit_FromColors, MP_Pmd_Tick). Affine: a reflection copy turns around its own point (mirrors at the feet:
 followfx puts it at ground + 6, the bottom of the tile, as the player's); anything else around the picture's middle
 (ball effects: mp_ballfx.c BigFrame / BodyHeight / MonX / MonY / MonPixel read the big frame).
-Placement: the ground point is PMD_GROUND_DY (8) below the old 32x32 frames' center (the tile's middle). Facing: 8
-ways, MP_Pmd_Animate turns 45 degrees every 3 frames toward the wanted facing (a turn shows the diagonals); steps face
-the 4 ways. Fast (running, biking): the walk plays twice as fast. Standing with nothing to do: a DEEPBREATH every 12 s,
+Placement: the ground point is PMD_GROUND_DY (8) below the old 32x32 frames' center (the tile's middle). Depth: Attach
+zeroes centerToCornerVec, so MP_Pmd_SetSubpriority reads the depth as the old frames had it (centerToCornerVecY -8 for
+the call); before 1.22 a Pokémon right below its Trainer shared their depth band half the time and was drawn behind.
+A big follower (MP_Pmd_Reach, half its picture's bigger side, over 18) is drawn up to 16 pixels farther from its Trainer
+(pushX / pushY, away from their tile, 1 pixel a frame; the depth from where it stands). Facing: the 4 ways only (1.22:
+no diagonal rows or turning steps; SPIN looks down, right, up, left). Hops (HOP, LEAPFORTH, ROTATE, POSE, TUMBLE): the
+sheets' rise (made for a top-down dungeon) is cut to a third (MpBigSprite.lift, UpdateLift: the lowest frame's bottom
+is the ground). Fast (running, biking): a walk whose whole cycle is over 30 frames gets an extra tick every other frame;
+quicker ones keep their pace (1.21 doubled every walk: some ran far too fast).
+OPTIONS > GAME > FOLLOWERS (gMpConfig.followerSprites, ini follower_sprites, MP_PmdWanted): DEFAULT the original Moemon
+sprite for followers on the map and PMD for the Garden's Pokémon, PMD both, ORIGINAL both; switching rebuilds the
+sprites at once (MP_Follower_Update / Draw compare pmdOn). Tests: MOEMON_FOLLOWER_SPRITES (the starting value),
+`mp followsprites N`; follow_sprites, pmd_depth. Standing with nothing to do: a DEEPBREATH every 12 s,
 SIT after 40 s. A sheet missing an animation plays the nearest it has (sFallbacks: SLEEP -> LAYING -> EVENTSLEEP -> SIT ->
 IDLE, EAT -> NOD -> IDLE, ...; WALK last, every sheet has it). No PMD sheet: the Moemon frames as before.
 Poses -> animations (LIFE_POSE_*, MP_Pmd_Animate; Moemon sprites show MP_LifePose_Base's nearest old pose):

@@ -226,7 +226,12 @@ struct MpConfig
     u8 bikeMusic;             // OPTIONS > GAME > BIKE MUSIC: the cycling song on a bike (1) or the map's own (0)
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
+    u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
 };
+enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
+// FOLLOWERS: the PMD Collab pictures for a follower on the map (garden FALSE) or a Garden Pokémon (TRUE)?
+// DEFAULT: the Moemon overworld sprites on the map, PMD in the MOéMON GARDEN; PMD / ORIGINAL: everywhere
+bool8 MP_PmdWanted(bool8 garden);
 
 extern struct MpConfig gMpConfig;
 extern struct MpPlayer gMpPlayers[MP_MAX_PLAYERS];

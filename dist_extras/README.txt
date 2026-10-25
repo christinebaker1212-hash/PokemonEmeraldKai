@@ -860,11 +860,13 @@ MOEMON THAT FOLLOW YOU
 -----------------------
 Open the MOEMON menu, pick a Moemon with the cursor and press SELECT:
 it walks behind you. Press SELECT on it again to put it back in its Ball.
-Followers and the MOEMON GARDEN's Moemon use the PMD Collab's overworld
-sprites (the Pokemon Mystery Dungeon style, every one of the 386): drawn
-whole at their real size, turning smoothly through 8 directions, with
-their own walking, idle, sleeping, eating, sparring, hopping, twirling and
-more animations for whatever they're doing. Shiny ones have their shiny
+The MOEMON GARDEN's Moemon use the PMD Collab's overworld sprites (the
+Pokemon Mystery Dungeon style, every one of the 386): drawn whole at their
+real size, with their own walking, idle, sleeping, eating, sparring,
+hopping, twirling and more animations for whatever they're doing.
+OPTIONS > GAME > FOLLOWERS: DEFAULT (the original sprites for the MOEMON
+following you, PMD in the GARDEN), PMD (everywhere) or ORIGINAL
+(everywhere). Shiny ones have their shiny
 colors (and female ones their own look where the collab drew one), and a
 nickname's POKeMON STADIUM colors go on top. The artists are listed in
 PMD_CREDITS.txt next to the game. Talk to it (A) and it's happy to see you. Other players see

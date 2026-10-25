@@ -110,6 +110,7 @@ struct FollowerSlot
     struct Coords16 qLast;   // the last tile queued (or where it started)
     // PMD Collab sprite (mp_pmd.c): the whole picture as a big sprite, 8 directions, turning smoothly
     bool8 pmdOn;
+    s8 pushX, pushY;        // a big PMD picture drawn this far back from its Trainer
     u8 pdir;                 // PMD_DIR_* shown
     u8 pturn;                // frames until its next 45-degree step toward the facing it wants
     struct MpPmdView pmd;
@@ -244,7 +245,7 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     s->anim = 0xFF;
     // The PMD Collab picture when there's one (the Moemon frames above stay as the fallback)
     s->pmdOn = FALSE;
-    if (MP_Pmd_Attach(&s->pmd, &gSprites[id], s->dex, s->female, s->shiny, s->hue, colors))
+    if (MP_PmdWanted(FALSE) && MP_Pmd_Attach(&s->pmd, &gSprites[id], s->dex, s->female, s->shiny, s->hue, colors))
     {
         u8 slot = IndexOfSpritePaletteTag(tag);
         if (slot != 0xFF)
@@ -734,7 +735,21 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         fx = os->x + dxPix;
         fy = os->y + dyPix;
         if (s->pmdOn)
-            fy += PMD_GROUND_DY;   // a PMD picture hangs from its ground point (its feet)
+        {
+            // a PMD picture hangs from its ground point (its feet). A big one stands a little farther back from its
+            // Trainer, so its body doesn't spread over them (up to a tile more, easing in and out)
+            // (away from its Trainer: the way from their tile to its tile)
+            u16 reach = MP_Pmd_Reach(&s->pmd);
+            s16 want = s->autoOn || reach <= 18 ? 0 : (reach - 16 > 16 ? 16 : reach - 16);
+            s16 ax = s->cur.x - owner->currentCoords.x, ay = s->cur.y - owner->currentCoords.y;
+            s16 tx = (ax > 0) - (ax < 0), ty = (ay > 0) - (ay < 0);
+            tx *= want;
+            ty *= want;
+            s->pushX += tx > s->pushX ? 1 : tx < s->pushX ? -1 : 0;
+            s->pushY += ty > s->pushY ? 1 : ty < s->pushY ? -1 : 0;
+            fx += s->pushX;
+            fy += PMD_GROUND_DY + s->pushY;
+        }
         else if (s->gfx->size == 64)
             fy -= 16;
         fs->x = fx;
@@ -779,7 +794,14 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     }
     // Same layer as the owner; behind them when level with them
     fs->oam.priority = os->oam.priority;
-    SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
+    if (s->pmdOn)
+    {
+        fs->y -= s->pushY;   // (the depth of where it stands, not of the picture drawn back)
+        MP_Pmd_SetSubpriority(fs, owner->previousElevation, 2);
+        fs->y += s->pushY;
+    }
+    else
+        SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
     fs->invisible = hidden || os->invisible || s->fxHide
         || (!s->autoOn && s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
     if (s->recalling && !MP_BallFx_BodyRunning(s->spriteId))
@@ -1157,6 +1179,13 @@ void MP_Follower_Update(void)
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    // OPTIONS > FOLLOWERS changed: every follower's sprite again (the other kind)
+    for (i = 0; i < ARRAY_COUNT(sSlots); i++)
+        if (SpriteIsOurs(&sSlots[i]) && sSlots[i].pmdOn != (MP_PmdWanted(FALSE) && MP_Pmd_Has(sSlots[i].dex)))
+        {
+            DestroySlotSprite(&sSlots[i]);
+            sSlots[i].placed = FALSE;
+        }
 
     dex = MP_Follower_LocalDex(&female);
     SetSlotPokemon(&sSlots[0], dex, female, dex && MP_Follower_LocalShiny(), dex ? MP_Follower_LocalHue() : 0);
@@ -1671,4 +1700,14 @@ void MP_Follower_PmdDebug(u8 slot)
     s = &sSlots[slot];
     printf("[test] pmd slot %d: dex %d on %d shiny %d anim %d shown %d dir %d frame %d height %d\n", slot, s->dex, s->pmdOn,
            s->shiny, s->pmd.anim, s->pmd.shown, s->pmd.dir, s->pmd.frame, s->pmdOn ? MP_Pmd_Height(&s->pmd) : 0);
+    if (slot == 0 && SpriteIsOurs(s))
+    {
+        // depth: is it drawn in front of its Trainer? (lower subpriority: in front), and where it is beside them
+        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+        struct Sprite *fs = &gSprites[s->spriteId], *os = &gSprites[me->spriteId];
+        printf("[test] pmd depth: follower %d,%d trainer %d,%d front %d push %d,%d%s lift %d\n", s->cur.x - MAP_OFFSET,
+               s->cur.y - MAP_OFFSET, me->currentCoords.x - MAP_OFFSET, me->currentCoords.y - MAP_OFFSET,
+               fs->oam.priority < os->oam.priority || (fs->oam.priority == os->oam.priority && fs->subpriority < os->subpriority),
+               s->pushX, s->pushY, s->pushX || s->pushY ? " (back)" : "", s->pmd.big.lift);
+    }
 }

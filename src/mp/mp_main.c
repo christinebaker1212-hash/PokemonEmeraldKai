@@ -379,6 +379,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
+        else if (strcmp(key, "follower_sprites") == 0)
+            gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
+                                      : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -493,6 +496,8 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
+        "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
+        "follower_sprites = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -501,7 +506,9 @@ void MP_SaveConfig(void)
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
-        gMpConfig.moenavCalls ? "battles" : "all", gMpConfig.lobby);
+        gMpConfig.moenavCalls ? "battles" : "all",
+        gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
+        gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -1351,6 +1358,20 @@ static void ShowWelcome(u8 from, const u8 *text, u16 len)
 }
 
 bool8 MP_Lobby_IsLocalHost(void) { return sLobby.isLocal; }
+
+bool8 MP_PmdWanted(bool8 garden)
+{
+    static bool8 sEnvRead;
+    u8 mode;
+    if (!sEnvRead)
+    {
+        sEnvRead = TRUE;
+        if (getenv("MOEMON_FOLLOWER_SPRITES"))   // tests: the starting value (0 default, 1 pmd, 2 original)
+            gMpConfig.followerSprites = atoi(getenv("MOEMON_FOLLOWER_SPRITES")) % MP_FOLLOW_SPRITES_COUNT;
+    }
+    mode = gMpConfig.followerSprites;
+    return mode == MP_FOLLOW_SPRITES_PMD || (mode == MP_FOLLOW_SPRITES_DEFAULT && garden);
+}
 bool8 MP_Lobby_IsCreator(void) { return sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM; }
 
 // The room's host (who made it), heard with its rules when we joined: while they're still here
