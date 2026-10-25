@@ -18,6 +18,9 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
   tests, file names).
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
+- `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs with the game's own instruments
+  and engine (ported from src/music_player.c etc.; check engine changes against it), exports `.kaisong` songs
+  (docs/KAISONG_FORMAT.md: format and the plan for loading them, not in the game yet) and decomp sources. `make test` there
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
