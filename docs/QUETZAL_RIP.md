@@ -4,7 +4,7 @@ This branch holds a full rip of the Kanto and Johto regions of **Moemon Quetzal 
 pokeemerald-based hack with Hoenn + Johto + Kanto, plus notes for porting them into Emerald Kai. Nothing here is
 built into the game yet: `quetzal_rip/` is data for a later session to wire in.
 
-Read in this order:
+Read in this order (`docs/quetzal/REGIONS.md` explains how Quetzal runs three regions):
 1. This file: what was ripped, where it is, what is verified, and a porting plan.
 2. `docs/quetzal/ENGINE.md`: what Quetzal's engine does differently (tileset split, regions, save data, flags).
 3. `docs/quetzal/JOHTO.md` and `docs/quetzal/KANTO.md`: every place compared with Gen 2 (pokecrystal) and with
