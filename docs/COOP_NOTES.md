@@ -934,6 +934,10 @@ hail 4/16 black (BG, as Move_HAIL), sun 4/16 warm white on the Pokémon and 2/16
 Healthboxes and the message box are never touched. Colors fade with the scene (MP_FadeFit on BG palette 0); tints are
 off during palette fades. Own RNG (never the battle's). Debug `mp bweather rain|downpour|sun|sand|hail|none`; log
 "battle weather on screen: ..."; tests battle_weather (shots of each, a turn in the rain), battle_weather_map.
+From the first frame (1.22): until the battle's own weather is known (gBattleWeather set, or MP_BattleWeather_TurnStart
+from battle_main.c where a turn's action selection begins), Composite draws the weather the field will give it
+(FieldWeather: ABILITYEFFECT_SWITCH_IN_WEATHER's mapping; not in recorded battles), so the rain falls during the intro;
+"It's raining." still comes after the send-out. `mp bwshown`; test battle_weather_intro.
 
 ## Shared world and lights (mp_world.c)
 Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
