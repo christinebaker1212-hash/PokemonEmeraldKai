@@ -99,7 +99,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 
 A scenario is a folder in `scenarios/` with `a.txt` (+ `b.txt` for a second client) and `conf`:
 `MODE=1|2`, optional `DELAY`/`JIT` (ms, through lagproxy), `FPS`, `TMO` (seconds), `WARP`/`WARP_B`,
-`ENV_A`/`ENV_B` (extra environment, e.g. `MOEMON_DEBUG_PARTY=280:12`),
+`ENV_A`/`ENV_B` (extra environment, e.g. `MOEMON_DEBUG_PARTY=280:12`; LEVEL SCALING is off in tests unless a scenario
+sets `MOEMON_LEVEL_SCALING=1`, common.sh),
 and `EXPECT_A=(...)` / `EXPECT_B=(...)`: text that must show up in that client's log.
 
 Scripts wait on game state (`waitfor`/`pressuntil` with a condition such as `field`, `action`, `battle`,

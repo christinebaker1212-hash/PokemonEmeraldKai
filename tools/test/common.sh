@@ -4,6 +4,9 @@ TOOLS="$REPO/tools/test"
 BIN="${BIN:-$REPO/pokeemerald64}"
 OUT="${OUT:-${TMPDIR:-/tmp}/moemon_tests}"
 SERVER="$TOOLS/.bin/moemon_server"
+# Scenarios are written for the game's own levels: LEVEL SCALING is off unless one asks for it
+# (MOEMON_LEVEL_SCALING=1 in its ENV_*, which comes after this on the env line)
+export MOEMON_LEVEL_SCALING="${MOEMON_LEVEL_SCALING:-0}"
 
 # The relay server, rebuilt when its sources change
 build_server() {
