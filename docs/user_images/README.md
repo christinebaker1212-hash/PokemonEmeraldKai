@@ -26,6 +26,4 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 27 | a friend's Surf blob off-axis | 1.17.2 fix |
 | 28 | "I liked the right message box for the Candy Jar much better" | CANDY JAR message box |
 | 29-30 | JOURNAL with one page: the page prompt is missing, INFO shows and the text garbles | summary JOURNAL fix (to do) |
-
-Not saved: the bag design (HGSS-style BAG: bag picture, 8 pocket icons, pocket name plate, item list with "x N" and
-CLOSE BAG, description box at the bottom) came without a file. Ask the user to send it again before the bag rework.
+| 31 | bag design (HGSS-style BAG: 8 pockets Items, Medicine, Poké Balls, TMs & HMs, Berries, Battle Items, Key Items, Favorites; item list with "x N" and CLOSE BAG; description box) | bag rework (to do) |
