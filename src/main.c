@@ -99,8 +99,11 @@ void MainLoop()
      && JOY_HELD_RAW(A_BUTTON)
      && JOY_HELD_RAW(B_START_SELECT) == B_START_SELECT)
     {
+#ifndef PORTABLE
+        // Moemon Co-op: no wireless adapter on PC (its state was never set up: this crashed the game)
         rfu_REQ_stopMode();
         rfu_waitREQComplete();
+#endif
         DoSoftReset();
     }
 

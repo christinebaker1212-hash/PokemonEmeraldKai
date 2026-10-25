@@ -181,6 +181,13 @@ void MP_AsciiToGame(u8 *dst, const char *src, int maxLen)
             if (len > 0 && k < (int)ARRAY_COUNT(sButtonTokens))
                 continue;
         }
+        // é / É written straight into the text (UTF-8: "MOéMON", "POKéMON")
+        if ((u8)src[i] == 0xC3 && ((u8)src[i + 1] == 0xA9 || (u8)src[i + 1] == 0x89))
+        {
+            dst[n++] = (u8)src[i + 1] == 0xA9 ? CHAR_e_ACUTE : CHAR_E_ACUTE;
+            i++;
+            continue;
+        }
         u8 g = AsciiCharToGame(src[i]);
         if (g != 0xFF)
             dst[n++] = g;
@@ -213,6 +220,16 @@ static char GameCharToAscii(u8 g)
     case CHAR_DBL_QUOTE_LEFT: case CHAR_DBL_QUOTE_RIGHT: return '"';
     }
     return ' ';
+}
+
+u8 *MP_CopyPlayerName(u8 *dst, u8 id)
+{
+    u8 i;
+    if (id < MP_MAX_PLAYERS)
+        for (i = 0; i < MP_NAME_LEN && gMpPlayers[id].name[i] != EOS; i++)
+            *dst++ = gMpPlayers[id].name[i];
+    *dst = EOS;
+    return dst;
 }
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen)
@@ -943,6 +960,7 @@ static void ClearPlayer(u8 id)
     for (k = 0; k < MP_BLOB_KINDS; k++)
         free(gMpPlayers[id].blobBuf[k]);
     memset(&gMpPlayers[id], 0, sizeof(gMpPlayers[id]));
+    gMpPlayers[id].name[0] = EOS;   // zeros are spaces in the game's text: a name needs its end marker
 }
 
 static void HandlePlayerLeft(u8 id)
@@ -1055,7 +1073,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
     case MPMSG_S_WELCOME:
         if (len < 1)
             return;
+        if (data[0] >= MP_MAX_PLAYERS)
+            return;
         gMpLocalId = data[0];
+        gMpPlayers[gMpLocalId].name[0] = EOS;   // our own entry is never filled in
         snprintf(sStatus, sizeof(sStatus), "ONLINE (PLAYER %d)", gMpLocalId + 1);
         MPNet_Log("joined \"%s\" as player %d", sLobby.room, gMpLocalId + 1);
         SendLocalBlobs();
@@ -1083,7 +1104,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         id = data[0];
         p = &gMpPlayers[id];
         if (!p->present)
+        {
             memset(p, 0, sizeof(*p));
+            p->name[0] = EOS;
+        }
         p->present = TRUE;
         if (!p->hasInfo)
             SendWelcome(id);   // someone new: the host's welcome note
@@ -1112,7 +1136,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         id = data[0];
         p = &gMpPlayers[id];
         if (!p->present)
+        {
             memset(p, 0, sizeof(*p));
+            p->name[0] = EOS;
+        }
         p->present = TRUE;
         old = p->state;
         if (!p->hasState)

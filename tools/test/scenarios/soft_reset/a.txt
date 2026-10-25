@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 60
+press A+B+START+SELECT 10
+wait 120
+log still running after the soft reset keys
+quit

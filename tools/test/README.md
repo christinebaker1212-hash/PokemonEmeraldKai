@@ -74,6 +74,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `life_arrival` | arrival bubbles only in a new area: nothing at the start or in and out of a house, a curious look in PETALBURG (check_arrival.py) |
 | `life_watch` | WATCH QUIETLY: learned, nothing new, nothing new, then learned again half an hour later (check_watch.py) |
 | `move_parity` | NA-JP lag, Oldale: both players' and followers' steps and facings the same on both screens, a follower on its own and running back included (check_movetrace.py) |
+| `coop_switch_twice` | Co-op wild double at lag: ALICE switches, then opens the party menu again (the party in battle order crashed 1.15.0); both finish |
+| `soft_reset` | A+B+START+SELECT on the overworld closes the game like CTRL+R (it crashed in the wireless adapter code) |
 | `garden_parity` | NA-JP lag: both players' Garden Pokémon take the same steps and face the same ways on both screens (check_movetrace.py) |
 | `garden_together` | NA-JP lag: two in the Garden: the hedge opens, each sees the other's Pokémon and decorations, BOB talks to ALICE's MUDKIP |
 | `version_check` | (`version_check.sh`, part of the full run) a server one co-op version ahead: the game says so |

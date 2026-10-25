@@ -1,0 +1,13 @@
+# Co-op wild double: ALICE switches her lead out, then opens the party menu again next turn (the party is then put
+# in battle order, which the Garden's battle watcher took for new Pokémon: a crash on 1.15.0 when switching or
+# using an item like REVIVE). Both finish the battle.
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=280:20,283:60,277:20 MOEMON_DEBUG_PID_SALT=1"
+ENV_B="MOEMON_DEBUG_PARTY=280:20,277:20 MOEMON_DEBUG_PID_SALT=2"
+EXPECT_A=("co-op: intent 4" "co-op: battle over")
+EXPECT_B=("co-op: battle over")
+UNEXPECT_A=("crash" "stack smashing")
+UNEXPECT_B=("crash" "stack smashing")

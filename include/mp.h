@@ -340,6 +340,8 @@ u16 MP_Hue_IconPaletteTag(u16 baseTag, const u16 *colors, s16 hue);
 void MP_Hue_FreeUnusedIconPalettes(void);
 bool8 MP_Hue_IsHueTag(u16 tag);
 bool8 MP_MonArtPokemon(void);   // ... TRUE: the original POKéMON pictures
+// A player's name (at most MP_NAME_LEN letters) with an end marker; returns where the marker is
+u8 *MP_CopyPlayerName(u8 *dst, u8 id);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_SendBlob(u8 kind, const void *data, u32 len);
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len);

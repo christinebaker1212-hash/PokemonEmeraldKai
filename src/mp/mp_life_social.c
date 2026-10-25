@@ -99,7 +99,7 @@ static u32 FriendKey(u8 id)
 static void FriendMonNameOf(u8 id, u16 dex, u8 *out)
 {
     u16 species = NationalPokedexNumToSpecies(dex);
-    u8 *end = StringCopy(out, gMpPlayers[id].name);
+    u8 *end = MP_CopyPlayerName(out, id);
     static const u8 sS_[] = _("'s ");
     end = StringCopy(end, sS_);
     StringCopy(end, gSpeciesNames[species]);

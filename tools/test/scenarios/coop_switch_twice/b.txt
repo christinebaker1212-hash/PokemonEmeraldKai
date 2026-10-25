@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+mp moves 0 45
+wait 300
+mp wilddouble 100
+mp wild 288:20
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 10
+pressuntillog A 15000 co-op: battle over
+wait 300
+quit

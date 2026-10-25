@@ -1366,3 +1366,15 @@ pursuit N LEVEL`. Tests garden_longterm, life_family.
   lists: the same, in order, the viewer allowed to trail by up to 3 steps when the games quit).
 - DEOXYS's icon (pokemon_icon.c GetMonIconTiles): Kai's icon has one form, so the PC box and party menu no longer
   read Emerald's Speed Forme 0x400 bytes on (past the end: garbage).
+- Crash fix, co-op battles (1.15.0 crash reports: switching after a paralysis, using a REVIVE). Opening the party
+  menu in battle puts gPlayerParty in battle order (party_menu.c UpdatePartyToBattleOrder) while
+  gBattlerPartyIndexes keep the field order, so mp_life_battle.c's Poll saw "new" Pokémon in the slots. On the local
+  player's battler holding a friend's Pokémon it noted the name as owned by MP_Coop_BattlerPlayer = gMpLocalId, whose
+  gMpPlayers entry is never filled in: all zeros, and 0x00 is a space in the game's text, so StringCopy ran through
+  the roster past a 40-byte stack buffer. Now: Poll and the battle emotes only run while gMain.callback2 is
+  BattleMainCB2 (menus over the battle wait), names are copied with a limit (CopyName, MP_CopyPlayerName), our own
+  name comes from the save, and a cleared roster entry gets an end marker (ClearPlayer, WELCOME, a state before the
+  hello). Test coop_switch_twice (MOEMON_DEBUG_PID_SALT so the two players' Pokémon differ; it crashed before).
+- A+B+START+SELECT (main.c) went through the wireless adapter (rfu_REQ_stopMode with gSTWIStatus never set up:
+  1.8.0 crash report). On PC it now goes straight to DoSoftReset, which closes the game like CTRL+R. Test soft_reset.
+- Menu text written with é in the source (UTF-8) keeps it (MP_AsciiToGame): the GARDEN BOARD read MOMON GARDEN.

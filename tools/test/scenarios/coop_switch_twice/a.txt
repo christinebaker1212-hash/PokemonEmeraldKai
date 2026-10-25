@@ -1,0 +1,36 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+pressuntil A action 4000
+wait 20
+shot turn1
+press DOWN 2
+wait 10
+press A 2
+waitfor partymenu 600
+wait 30
+shot party1
+press RIGHT 2
+wait 20
+press A 2
+wait 30
+shot submenu1
+press A 2
+waitfor action 4000
+wait 30
+shot turn2
+press DOWN 2
+wait 10
+press A 2
+waitfor partymenu 600
+wait 60
+shot party2
+press B 2
+waitfor action 600
+wait 20
+shot back
+press UP 2
+wait 10
+pressuntillog A 15000 co-op: battle over
+wait 300
+quit

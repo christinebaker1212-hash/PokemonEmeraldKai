@@ -152,7 +152,7 @@ void MP_GardenNet_OnRelay(u8 from, const u8 *data, u16 len)
         // noted by name for the journal (their species; nicknames stay theirs)
         if (MP_Life_FindKey(key) == NULL)
         {
-            u8 name[32], *end = StringCopy(name, gMpPlayers[from].name);
+            u8 name[32], *end = MP_CopyPlayerName(name, from);
             static const u8 sS_[] = _("'s ");
             end = StringCopy(end, sS_);
             StringCopy(end, gSpeciesNames[NationalPokedexNumToSpecies(GetU16(p + 4))]);

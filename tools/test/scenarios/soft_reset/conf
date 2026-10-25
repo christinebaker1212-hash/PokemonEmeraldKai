@@ -1,0 +1,6 @@
+# A+B+START+SELECT (the GBA's soft reset) on the overworld: it went through the wireless adapter code, whose
+# state is never set up on PC, and crashed (1.8.0 crash report). Now it does what CTRL+R does: the game closes.
+MODE=1
+TMO=60
+EXPECT_A=("Soft Reset called")
+UNEXPECT_A=("crash" "still running after")

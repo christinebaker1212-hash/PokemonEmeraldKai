@@ -25,6 +25,7 @@
 #include "mp_life_sound.h"
 #include "battle.h"
 #include "battle_anim.h"
+#include "battle_main.h"
 #include "util.h"
 #include "battle_controllers.h"
 #include "battle_message.h"
@@ -145,9 +146,10 @@ static u16 FamilyBase(u16 species)
     return species;
 }
 
-static u32 HashText(u32 h, const u8 *text)
+// (at most max letters: a name that fills its array has no end marker)
+static u32 HashText(u32 h, const u8 *text, u8 max)
 {
-    while (*text != EOS)
+    while (max-- && *text != EOS)
         h = (h ^ *text++) * 16777619u;
     return h;
 }
@@ -473,17 +475,49 @@ static void Begin(void)
     MPNet_Log("life battle: begin kind %u", sB.kind);
 }
 
+// At most max letters of src, then an end marker; returns where the marker is. Names are copied this way
+// only: a name that fills its array has no end marker, and an unbounded copy ran past this buffer and
+// over the stack (the 1.15.0 crash on opening the party menu in a co-op battle, to switch or use REVIVE).
+static u8 *CopyName(u8 *dst, const u8 *src, u8 max)
+{
+    u8 i;
+    for (i = 0; i < max && src[i] != EOS; i++)
+        *dst++ = src[i];
+    *dst = EOS;
+    return dst;
+}
+
+#define OWNER_MAX 12   // >= MP_NAME_LEN, PLAYER_NAME_LENGTH, TRAINER_NAME_LENGTH
+
+// owner: an end-marked name of at most OWNER_MAX letters (or NULL)
 static void NoteOwnedName(u32 key, const u8 *owner, const u8 *name)
 {
-    u8 buf[40];
+    u8 buf[OWNER_MAX + 3 + POKEMON_NAME_LENGTH + 1];
     u8 *end = buf;
     if (owner && owner[0] != EOS)
     {
-        end = StringCopy(buf, owner);
-        end = StringCopy(end, sTxt_25);
+        end = CopyName(buf, owner, OWNER_MAX);
+        end = CopyName(end, sTxt_25, 3);   // "'s "
     }
-    StringCopy(end, name);
+    CopyName(end, name, POKEMON_NAME_LENGTH);
     MP_Life_NoteName(key, buf);
+}
+
+// A player's name into buf (OWNER_MAX + 1), or NULL. Our own entry in gMpPlayers is never filled in, and a
+// slot nobody is in is cleared: ours comes from the save.
+static const u8 *PlayerName(s8 p, u8 *buf)
+{
+    if (p < 0 || p >= MP_MAX_PLAYERS)
+        return NULL;
+    if (p == gMpLocalId)
+    {
+        CopyName(buf, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        return buf;
+    }
+    if (!gMpPlayers[p].present)
+        return NULL;
+    MP_CopyPlayerName(buf, p);
+    return buf;
 }
 
 static void InitSlot(struct LbSlot *s, u8 b, struct Pokemon *mon, u8 side)
@@ -506,8 +540,8 @@ static void InitSlot(struct LbSlot *s, u8 b, struct Pokemon *mon, u8 side)
         if (!s->mine)
         {
             // a friend's (co-op) or STEVEN's Pokémon: remembered by its Trainer's name
-            s8 p = MP_Coop_BattlerPlayer(b);
-            NoteOwnedName(s->key, (p >= 0 && p < MP_MAX_PLAYERS) ? gMpPlayers[p].name : NULL, s->name);
+            u8 owner[OWNER_MAX + 1];
+            NoteOwnedName(s->key, PlayerName(MP_Coop_BattlerPlayer(b), owner), s->name);
         }
         return;
     }
@@ -515,30 +549,32 @@ static void InitSlot(struct LbSlot *s, u8 b, struct Pokemon *mon, u8 side)
     {
     case LB_PVP:
     {
-        s8 peer = MP_Battle_PeerId();
+        u8 owner[OWNER_MAX + 1];
         s->key = MP_Life_MonKey(personality, otId);
         s->notable = TRUE;
-        NoteOwnedName(s->key, (peer >= 0 && peer < MP_MAX_PLAYERS) ? gMpPlayers[peer].name : NULL, s->name);
+        NoteOwnedName(s->key, PlayerName(MP_Battle_PeerId(), owner), s->name);
         break;
     }
     case LB_LEGEND:
         s->key = MP_Life_MonKey(personality, otId);
         s->notable = TRUE;
-        MP_Life_NoteName(s->key, gSpeciesNames[s->species]);
+        NoteOwnedName(s->key, NULL, gSpeciesNames[s->species]);
         break;
     case LB_TRAINER:
     case LB_BOSS:
     {
         // a trainer's Pokémon: the trainer and the evolution family (the same rival across the story)
         u16 trainer = (sB.trainerB && GetBattlerPosition(b) == B_POSITION_OPPONENT_RIGHT) ? sB.trainerB : sB.trainerA;
+        u8 owner[OWNER_MAX + 1];
         if (trainer == 0)
             break;
-        s->key = HashText(2166136261u ^ FamilyBase(s->species), gTrainers[trainer].trainerName) & 0x7FFFFFFF;
+        s->key = HashText(2166136261u ^ FamilyBase(s->species), gTrainers[trainer].trainerName, TRAINER_NAME_LENGTH + 1) & 0x7FFFFFFF;
         if (s->key == 0)
             s->key = 1;
         s->notable = IsBossClass(gTrainers[trainer].trainerClass);
-        StringCopy(s->name, gSpeciesNames[s->species]);
-        NoteOwnedName(s->key, gTrainers[trainer].trainerName, gSpeciesNames[s->species]);
+        CopyName(s->name, gSpeciesNames[s->species], POKEMON_NAME_LENGTH);
+        CopyName(owner, gTrainers[trainer].trainerName, TRAINER_NAME_LENGTH);
+        NoteOwnedName(s->key, owner, gSpeciesNames[s->species]);
         break;
     }
     }
@@ -918,9 +954,20 @@ void MP_LifeBattle_Update(void)
     sB.frames++;
     if (sB.kind == LB_SKIP)
         return;
-    if (gBattlersCount > 0 && gBattlersCount <= MAX_BATTLERS_COUNT)
-        Poll();
-    PlaceEmotes();
+    if (gMain.callback2 == BattleMainCB2)
+    {
+        if (gBattlersCount > 0 && gBattlersCount <= MAX_BATTLERS_COUNT)
+            Poll();
+        PlaceEmotes();
+    }
+    else
+    {
+        // a menu over the battle (party, bag, summary): the battle's sprites are gone, and the party menu puts
+        // the party in battle order, which isn't what gBattlerPartyIndexes point to. Wait for the battle.
+        u8 b;
+        for (b = 0; b < MAX_BATTLERS_COUNT; b++)
+            MP_LifeEmote_Place(LIFE_EMOTE_SLOT_BATTLER(b), FALSE, 0, 0, 0);
+    }
     if (sLine.state == LINE_QUEUED && ++sLine.timer > LINE_TIMEOUT)
     {
         sLine.state = LINE_IDLE;
