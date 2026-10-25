@@ -343,13 +343,12 @@ void MP_Candy_Update(void)
 // full and the mix follows the counts), each type's count on the right, A = CONVERT, B = back.
 
 
-#define JAR_X 8
-#define JAR_Y 0      // (the picture's own rows 0-1 are empty: the lid sits just under the top edge)
+#include "mp_candyjar_gfx.h"   // the screen drawn from the user's mock-up (tools/moemon_candyjar)
+
+#define JAR_X CJ_JAR_X     // the jar's box on the screen (the glass's map: sCJ_JarRole)
+#define JAR_Y CJ_JAR_Y
 #define JAR_SHOWN 96
 #define TAG_CANDY 0x5C40   // + type (tiles and palette)
-
-static const u32 sJar_Gfx[] = INCGFX_U32("graphics/moemon/candies/jar.png", ".4bpp");
-static const u32 sJar_Pal[] = INCGFX_U32("graphics/moemon/candies/jar.png", ".gbapal");
 static const u32 sCandyGfx_Normal[] = INCGFX_U32("graphics/moemon/candies/normal.png", ".4bpp");
 static const u32 sCandyPal_Normal[] = INCGFX_U32("graphics/moemon/candies/normal.png", ".gbapal");
 static const u32 sCandyGfx_Fighting[] = INCGFX_U32("graphics/moemon/candies/fighting.png", ".4bpp");
@@ -406,32 +405,38 @@ static const struct { const u32 *gfx; const u32 *pal; const char *name; } sCandy
     [TYPE_DARK] = {sCandyGfx_Dark, sCandyPal_Dark, "DAR"},
 };
 
-enum { WIN_JAR, WIN_LIST, WIN_HELP, WIN_JAR_COUNT };
+enum { WIN_LIST, WIN_HELP, WIN_JAR_COUNT };
 
 // The list: the 17 kinds in two columns (9 + 8, as the types go), ALL at the bottom of the right one
 #define LIST_ROWS 9
 #define LIST_ALL 17          // the cursor on ALL
 #define LIST_COL_W 56
-#define LIST_ROW_H 11
-#define LIST_TOP 12
-#define LIST_LEFT_PX (15 * 8)
-#define LIST_TOP_PX (1 * 8)
-#define FRAME_TILE 0x200     // the user's window frame (LoadUserWindowBorderGfx: 9 tiles)
+#define LIST_X 112           // WIN_LIST's place on the screen
+#define LIST_Y 8
+#define LIST_NAME_X 25       // in the window: the left column's name, count, candy (center) and cursor
+#define LIST_COUNT_X 44
+#define LIST_ICON_X 17
+#define LIST_CURSOR_X 7
+#define FRAME_TILE 0x200     // the YES / NO box's frame (LoadUserWindowBorderGfx: 9 tiles)
 #define FRAME_PAL 14
-#define MSGBOX_TILE 0x214    // the message box frame (LoadMessageBoxGfx)
-#define MSGBOX_PAL 13
 #define TAG_ALL_ICON 0x5C62
 
+// The rows' print positions (the mock-up's rows: 12 pixels apart, one 13); the capitals start 4 lower
+static const u8 sListRowY[LIST_ROWS] = {15, 27, 39, 51, 63, 76, 88, 100, 112};
+
+// Text colors: the standard menu palette (the YES / NO box, button icons) with the mock-up's in 10-15
+enum { INK_TEXT = 10, INK_TEXT_SHADOW, INK_COUNT, INK_COUNT_SHADOW, INK_CURSOR, INK_MSG_SHADOW };
+static const u16 sJarInks[6] = {RGB(0, 0, 0), RGB(28, 27, 25), RGB(9, 10, 14), RGB(21, 23, 25), RGB(14, 14, 14), RGB(26, 25, 22)};
+
+// One layer: the text. The background, the jar's glass are drawn under it in full color (MP_Candy_Composite).
 static const struct BgTemplate sJarBgs[] = {
     {.bg = 0, .charBaseIndex = 2, .mapBaseIndex = 31, .screenSize = 0, .paletteMode = 0, .priority = 0, .baseTile = 0},
-    {.bg = 1, .charBaseIndex = 0, .mapBaseIndex = 30, .screenSize = 0, .paletteMode = 0, .priority = 2, .baseTile = 0},
 };
 
 static const struct WindowTemplate sJarWindows[] = {
-    [WIN_JAR] = {.bg = 1, .tilemapLeft = JAR_X / 8, .tilemapTop = JAR_Y / 8, .width = 12, .height = 16, .paletteNum = 1, .baseBlock = 1},
-    // (the list's frame round rows 0-15; the message box's round rows 16-19, two tiles wide at its sides)
-    [WIN_LIST] = {.bg = 0, .tilemapLeft = 15, .tilemapTop = 1, .width = 14, .height = 14, .paletteNum = 15, .baseBlock = 1},
-    [WIN_HELP] = {.bg = 0, .tilemapLeft = 2, .tilemapTop = 17, .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 1 + 14 * 14},
+    // see-through over the picture's list (from its frame to the screen's edge) and its message box
+    [WIN_LIST] = {.bg = 0, .tilemapLeft = LIST_X / 8, .tilemapTop = LIST_Y / 8, .width = 16, .height = 17, .paletteNum = 15, .baseBlock = 1},
+    [WIN_HELP] = {.bg = 0, .tilemapLeft = 0, .tilemapTop = 18, .width = 30, .height = 2, .paletteNum = 15, .baseBlock = 1 + 16 * 17},
     DUMMY_WIN_TEMPLATE,
 };
 
@@ -452,7 +457,7 @@ static EWRAM_DATA struct
     s8 shakeX;
 } sJar = {0};
 
-static const u8 sTextInk[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+static const u8 sTextInk[] = {TEXT_COLOR_TRANSPARENT, INK_TEXT, INK_TEXT_SHADOW};
 
 static void JarText(u8 win, u8 x, u8 y, const char *ascii)
 {
@@ -461,27 +466,38 @@ static void JarText(u8 win, u8 x, u8 y, const char *ascii)
     AddTextPrinterParameterized3(win, FONT_SMALL, x, y, sTextInk, TEXT_SKIP_DRAW, buf);
 }
 
+#define MSG_X 12        // the message box's text (as the mock-up: from x 12, capitals at y 150)
+#define MSG_Y 3
+#define MSG_RIGHT 206   // the buttons end there
+
 // The message box: what's going on (left, in the message font, narrower when it's long) and the buttons (right)
 static void JarMessage(const char *ascii, const char *buttons)
 {
-    static const u8 sMsgInk[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+    static const u8 sMsgInk[] = {TEXT_COLOR_TRANSPARENT, INK_TEXT, INK_MSG_SHADOW};
     u8 text[96], keys[48];
     s32 keysW = 0, room;
-    u8 font = FONT_NORMAL;
-    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(1));
+    u8 font = FONT_NORMAL, keysFont = FONT_NORMAL;
+    FillWindowPixelBuffer(WIN_HELP, PIXEL_FILL(0));
+    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
     if (buttons != NULL)
     {
         MP_AsciiToGame(keys, buttons, sizeof(keys) - 1);
-        keysW = GetStringWidth(FONT_SMALL, keys, 0);
-        AddTextPrinterParameterized3(WIN_HELP, FONT_SMALL, 26 * 8 - keysW - 2, 3, sMsgInk, TEXT_SKIP_DRAW, keys);
+        keysW = GetStringWidth(FONT_NORMAL, keys, 0);
+        // a long message that wouldn't fit even narrow: the buttons go small instead
+        if (GetStringWidth(FONT_SMALL_NARROW, text, 0) > MSG_RIGHT - keysW - 8 - MSG_X)
+        {
+            keysFont = FONT_SMALL;
+            keysW = GetStringWidth(FONT_SMALL, keys, 0);
+        }
+        AddTextPrinterParameterized3(WIN_HELP, keysFont, MSG_RIGHT - keysW, MSG_Y + (keysFont == FONT_SMALL ? 1 : 0),
+                                     sMsgInk, TEXT_SKIP_DRAW, keys);
     }
-    MP_AsciiToGame(text, ascii, sizeof(text) - 1);
-    room = 26 * 8 - keysW - 8;
+    room = (buttons != NULL ? MSG_RIGHT - keysW - 8 : 30 * 8 - 4) - MSG_X;
     if (GetStringWidth(FONT_NORMAL, text, 0) > room)
         font = FONT_NARROW;
     if (GetStringWidth(FONT_NARROW, text, 0) > room)
         font = FONT_SMALL_NARROW;
-    AddTextPrinterParameterized3(WIN_HELP, font, 2, 1, sMsgInk, TEXT_SKIP_DRAW, text);
+    AddTextPrinterParameterized3(WIN_HELP, font, MSG_X, MSG_Y, sMsgInk, TEXT_SKIP_DRAW, text);
     CopyWindowToVram(WIN_HELP, COPYWIN_GFX);
 }
 
@@ -511,16 +527,16 @@ static u8 CandySprite(u8 type, s16 x, s16 y, u8 subpriority)
 #define BALL_PASSES 4   // rounds of pushing balls apart in each substep
 #define GRAVITY (0.22f / SUBSTEPS)
 #define MAX_SPEED 6.0f
-#define JAR_W 96
-#define JAR_H 128
-#define LID_ROWS 18            // the lid's rows in the picture
-#define NECK_L 19              // the opening (picture x, inclusive)
-#define NECK_R 76
+#define JAR_W CJ_JAR_W
+#define JAR_H CJ_JAR_H
+#define LID_ROWS CJ_LID_ROWS   // the box's rows above the glass: the lid's
+#define NECK_L CJ_NECK_L       // the opening (box x, inclusive)
+#define NECK_R CJ_NECK_R
 #define MAX_WALL_POINTS 640
 #define TAG_LID 0x5C60
 #define TAG_PRIZE 0x5C61
-#define LID_UP_Y (-40)         // the lid's offset when it's off the jar
-#define GATHER_X (JAR_X + 48)  // where leaving candies meet and the RARE CANDY shows
+#define LID_UP_Y (-(CJ_LID_BOTTOM + 8))           // the lid's offset when it's off the jar (above the screen)
+#define GATHER_X (JAR_X + (NECK_L + NECK_R) / 2)  // where leaving candies meet and the RARE CANDY shows
 #define GATHER_Y 14
 
 struct Ball
@@ -545,8 +561,7 @@ static EWRAM_DATA u8 sMatrices[ROT_STEPS + 3] = {0};   // then the RARE CANDY's,
 static EWRAM_DATA u8 sInside[JAR_H][JAR_W] = {0};      // 1 = glass (a ball's center may be there)
 static EWRAM_DATA u8 sWallX[MAX_WALL_POINTS] = {0}, sWallY[MAX_WALL_POINTS] = {0};
 static EWRAM_DATA u16 sWallCount = 0;
-static EWRAM_DATA u8 sLidTiles[3][32 * 32 / 2] = {0};
-static EWRAM_DATA u8 sLidSprites[3] = {0};
+static EWRAM_DATA u8 sLidSprites[3] = {0};   // one 64x32 sprite now ([0]; the others MAX_SPRITES)
 static EWRAM_DATA struct
 {
     u8 phase;
@@ -570,29 +585,19 @@ static float sqrtf_(float v)
     return g;
 }
 
-static u8 JarPixel(u32 x, u32 y)
-{
-    const u8 *p = (const u8 *)sJar_Gfx;
-    u32 tile = (y / 8) * (JAR_W / 8) + x / 8, b = p[tile * 32 + (y % 8) * 4 + (x % 8) / 2];
-    return (x & 1) ? (b >> 4) : (b & 0xF);
-}
-
-// Reads the glass and its walls from the picture: color 1 is the outline, 6-8 the glass
+// Reads the glass and its walls from the jar's map (sCJ_JarRole: 1 the outline, 2 the glass)
 static void JarReadGlass(void)
 {
     u32 x, y;
     sWallCount = 0;
     for (y = 0; y < JAR_H; y++)
         for (x = 0; x < JAR_W; x++)
-        {
-            u8 c = JarPixel(x, y);
-            sInside[y][x] = (y >= LID_ROWS && c >= 6 && c <= 8) || (y < LID_ROWS && x >= NECK_L && x <= NECK_R);
-        }
+            sInside[y][x] = (y >= LID_ROWS && sCJ_JarRole[y][x] == 2) || (y < LID_ROWS && x >= NECK_L && x <= NECK_R);
     for (y = LID_ROWS; y < JAR_H; y++)
         for (x = 0; x < JAR_W; x++)
         {
             bool8 touches;
-            if (JarPixel(x, y) != 1)
+            if (sCJ_JarRole[y][x] != 1)
                 continue;
             touches = (x > 0 && sInside[y][x - 1]) || (x + 1 < JAR_W && sInside[y][x + 1])
                    || (sInside[y - 1][x]) || (y + 1 < JAR_H && sInside[y + 1][x]);
@@ -619,12 +624,12 @@ static bool8 InGlass(float x, float y)
 // The ball radius for n balls: they fill about half the glass
 static float BallRadius(u32 n)
 {
-    float area = 80.0f * 90.0f * 0.55f, r;
+    float area = CJ_GLASS_AREA * 0.55f, r;
     if (n == 0)
-        return 7.5f;
+        return 6.0f;
     r = sqrtf_(area / n / 3.14159f);
-    if (r > 7.5f)
-        r = 7.5f;
+    if (r > 6.0f)
+        r = 6.0f;   // the mock-up's candies: 12 pixels
     if (r < 3.0f)
         r = 3.0f;
     return r;
@@ -953,8 +958,7 @@ static void JarPhysics(void)
     if (sJar.shakeTimer)
     {
         sJar.shakeTimer--;
-        sJar.shakeX = (sJar.shakeTimer == 0) ? 0 : ((sJar.shakeTimer / 2) & 1) ? 2 : -2;
-        ChangeBgX(1, -sJar.shakeX * 256, BG_COORD_SET);
+        sJar.shakeX = (sJar.shakeTimer == 0) ? 0 : ((sJar.shakeTimer / 2) & 1) ? 2 : -2;   // the glass follows (MP_Candy_Composite)
     }
     for (step = 0; step < SUBSTEPS; step++)
     {
@@ -1075,36 +1079,19 @@ static void JarShake(void)
 // The lid: three 32x32 sprites cut from the picture's top rows
 static void JarMakeLid(void)
 {
-    u8 part, i;
-    static const struct OamData sOam_Lid = {.shape = SPRITE_SHAPE(32x32), .size = SPRITE_SIZE(32x32), .priority = 1};
-    memset(sLidTiles, 0, sizeof(sLidTiles));
-    for (part = 0; part < 3; part++)
-    {
-        u32 x, y;
-        for (y = 0; y < LID_ROWS; y++)
-            for (x = 0; x < 32; x++)
-            {
-                u8 c = JarPixel(part * 32 + x, y), *dst = &sLidTiles[part][((y / 8) * 4 + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2];
-                *dst |= (x & 1) ? (c << 4) : c;
-            }
-    }
-    {
-        struct SpritePalette pal = {(const u16 *)sJar_Pal, TAG_LID};
-        LoadSpritePalette(&pal);
-    }
-    for (part = 0; part < 3; part++)
-    {
-        struct SpriteSheet sheet = {sLidTiles[part], sizeof(sLidTiles[part]), TAG_LID + 0x10 + part};
-        struct SpriteTemplate t = {
-            .tileTag = TAG_LID + 0x10 + part, .paletteTag = TAG_LID, .oam = &sOam_Lid, .anims = gDummySpriteAnimTable,
-            .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
-        };
-        LoadSpriteSheet(&sheet);
-        sLidSprites[part] = CreateSprite(&t, JAR_X + part * 32 + 16, JAR_Y + 16, 1);
-    }
-    for (i = 0; i < 3; i++)
-        if (sLidSprites[i] != MAX_SPRITES)
-            gSprites[sLidSprites[i]].y2 = (s16)sFx.lidY;
+    static const struct OamData sOam_Lid = {.shape = SPRITE_SHAPE(64x32), .size = SPRITE_SIZE(64x32), .priority = 1};
+    struct SpritePalette pal = {sCJ_LidPal, TAG_LID};
+    struct SpriteSheet sheet = {(const void *)sCJ_LidTiles, sizeof(sCJ_LidTiles), TAG_LID + 0x10};
+    struct SpriteTemplate t = {
+        .tileTag = TAG_LID + 0x10, .paletteTag = TAG_LID, .oam = &sOam_Lid, .anims = gDummySpriteAnimTable,
+        .images = NULL, .affineAnims = gDummySpriteAffineAnimTable, .callback = SpriteCallbackDummy,
+    };
+    LoadSpritePalette(&pal);
+    LoadSpriteSheet(&sheet);
+    sLidSprites[0] = CreateSprite(&t, CJ_LID_X, CJ_LID_Y, 1);
+    sLidSprites[1] = sLidSprites[2] = MAX_SPRITES;
+    if (sLidSprites[0] != MAX_SPRITES)
+        gSprites[sLidSprites[0]].y2 = (s16)sFx.lidY;
 }
 
 // The lid flies up when it isn't wanted and drops back (with a clink) when it is
@@ -1336,10 +1323,11 @@ static u8 ListType(u8 i)
     return NUMBER_OF_MON_TYPES;
 }
 
+// A row's place in WIN_LIST: x of its column, y where its text prints
 static void ListPlace(u8 i, s16 *x, s16 *y)
 {
     *x = (i / LIST_ROWS) * LIST_COL_W;
-    *y = LIST_TOP + (i % LIST_ROWS) * LIST_ROW_H;
+    *y = sListRowY[i % LIST_ROWS];
 }
 
 static void TypeName(u8 type, char *out, u32 size)
@@ -1347,41 +1335,51 @@ static void TypeName(u8 type, char *out, u32 size)
     MP_GameToAscii(out, gTypeNames[type], size);
 }
 
-// The list: each kind's candy, its short name and count. Kinds that make a RARE CANDY stand out (blue), empty ones
-// are dimmed; the cursor is the menus' arrow. ALL (the RARE CANDY) at the bottom of the right column.
+// The mock-up's cursor: a small gray arrow (4x6) just left of the candy, a pixel under the capitals' top
+static void JarDrawCursor(s16 x, s16 y)
+{
+    static const u8 sWidth[6] = {2, 3, 4, 3, 2, 1};
+    u8 j;
+    for (j = 0; j < 6; j++)
+        FillWindowPixelRect(WIN_LIST, PIXEL_FILL(INK_CURSOR), x + LIST_CURSOR_X, y + 5 + j, sWidth[j], 1);
+}
+
+// The list, as the mock-up: each kind's candy, its short name (dark) and count (blue-gray); a kind that makes a
+// RARE CANDY has its count in blue. ALL (the RARE CANDY) in the right column's empty last row.
 static void JarDrawList(void)
 {
-    static const u8 sInkDim[] = {TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_WHITE};
-    static const u8 sInkReady[] = {TEXT_COLOR_WHITE, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_BLUE};
+    static const u8 sInkCount[] = {TEXT_COLOR_TRANSPARENT, INK_COUNT, INK_COUNT_SHADOW};
+    static const u8 sInkReady[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_BLUE, TEXT_COLOR_LIGHT_BLUE};
     u8 i;
     char line[24];
     u8 buf[32];
-    FillWindowPixelBuffer(WIN_LIST, PIXEL_FILL(1));
-    JarText(WIN_LIST, 4, 0, "CANDY JAR");
+    FillWindowPixelBuffer(WIN_LIST, PIXEL_FILL(0));
+    JarText(WIN_LIST, 12, 1, "CANDY JAR");
     for (i = 0; i <= LIST_ALL; i++)
     {
         u8 t = ListType(i);
         s16 x, y;
-        const u8 *ink;
+        u16 n;
         ListPlace(i, &x, &y);
         if (i == sJar.cursor)
-            AddTextPrinterParameterized3(WIN_LIST, FONT_SMALL, x + 1, y, sTextInk, TEXT_SKIP_DRAW, gText_SelectorArrow2);
+            JarDrawCursor(x, y);
         if (t == NUMBER_OF_MON_TYPES)
         {
-            u16 n = MP_Candy_ConvertCount();
-            snprintf(line, sizeof(line), "ALL %d", n);
-            ink = n ? sInkReady : sInkDim;
+            n = MP_Candy_ConvertCount();
+            JarText(WIN_LIST, x + LIST_NAME_X, y, "ALL");
         }
         else
         {
-            snprintf(line, sizeof(line), "%s %d", sCandyArt[t].name, gMpCandies[t]);
-            ink = gMpCandies[t] >= 10 ? sInkReady : gMpCandies[t] == 0 ? sInkDim : sTextInk;
+            n = gMpCandies[t];
+            JarText(WIN_LIST, x + LIST_NAME_X, y, sCandyArt[t].name);
         }
+        snprintf(line, sizeof(line), "%d", n);
         MP_AsciiToGame(buf, line, sizeof(buf) - 1);
-        AddTextPrinterParameterized3(WIN_LIST, FONT_SMALL, x + 20, y, ink, TEXT_SKIP_DRAW, buf);
+        AddTextPrinterParameterized3(WIN_LIST, FONT_SMALL, x + LIST_COUNT_X, y, (t == NUMBER_OF_MON_TYPES ? n > 0 : n >= 10)
+                                     ? sInkReady : sInkCount, TEXT_SKIP_DRAW, buf);
         if (t < NUMBER_OF_MON_TYPES && sJar.listSprites[t] == MAX_SPRITES)
         {
-            sJar.listSprites[t] = CandySprite(t, LIST_LEFT_PX + x + 13, LIST_TOP_PX + y + 6, 0);
+            sJar.listSprites[t] = CandySprite(t, LIST_X + x + LIST_ICON_X, LIST_Y + y + 7, 0);
             if (sJar.listSprites[t] != MAX_SPRITES)
             {
                 gSprites[sJar.listSprites[t]].oam.priority = 0;   // over the list's window
@@ -1394,8 +1392,8 @@ static void JarDrawList(void)
             if (sJar.allIcon != MAX_SPRITES)
             {
                 struct Sprite *sp = &gSprites[sJar.allIcon];
-                sp->x = LIST_LEFT_PX + x + 13;
-                sp->y = LIST_TOP_PX + y + 6;
+                sp->x = LIST_X + x + LIST_ICON_X;
+                sp->y = LIST_Y + y + 7;
                 sp->oam.priority = 0;
                 UseMatrix(sp, sMatrices[ALL_MATRIX]);
             }
@@ -1431,7 +1429,7 @@ static void JarIdleHelp(void)
         u16 n = MP_Candy_ConvertCount();
         if (n)
         {
-            snprintf(text, sizeof(text), "Every kind: %d RARE CANDY to make.", n);
+            snprintf(text, sizeof(text), "%d RARE CANDY from every kind.", n);
             JarMessage(text, "{A}MAKE {B}BACK");
         }
         else
@@ -1441,7 +1439,7 @@ static void JarIdleHelp(void)
     TypeName(t, name, sizeof(name));
     if (gMpCandies[t] >= 10)
     {
-        snprintf(text, sizeof(text), "%s: %d RARE CANDY to make.", name, gMpCandies[t] / 10);
+        snprintf(text, sizeof(text), "%d RARE CANDY from %s.", gMpCandies[t] / 10, name);
         JarMessage(text, "{A}MAKE {B}BACK");
     }
     else if (gMpCandies[t] == 0)
@@ -1470,8 +1468,9 @@ static void JarHopKind(u8 t)
         PlaySE(SE_BALL_BOUNCE_1);
 }
 
-static const struct WindowTemplate sJarYesNo = {.bg = 0, .tilemapLeft = 23, .tilemapTop = 10, .width = 5, .height = 4,
-                                                .paletteNum = 15, .baseBlock = 1 + 14 * 14 + 26 * 2};
+// Over the list's lower right rows, just above the message box
+static const struct WindowTemplate sJarYesNo = {.bg = 0, .tilemapLeft = 24, .tilemapTop = 12, .width = 5, .height = 4,
+                                                .paletteNum = 15, .baseBlock = 1 + 16 * 17 + 30 * 2};
 
 // The list's candies under the YES / NO box hide while it's up (sprites draw over windows)
 static void JarHideUnderYesNo(bool8 hide)
@@ -1494,7 +1493,6 @@ static void JarHideUnderYesNo(bool8 hide)
 static void JarRedrawList(void)
 {
     JarHideUnderYesNo(FALSE);
-    DrawStdFrameWithCustomTileAndPalette(WIN_LIST, FALSE, FRAME_TILE, FRAME_PAL);
     PutWindowTilemap(WIN_LIST);
     JarDrawList();
     CopyBgTilemapBufferToVram(0);
@@ -1559,7 +1557,7 @@ static void Task_Jar(u8 taskId)
             if (sJar.allIcon != MAX_SPRITES)
                 DestroySpriteAndFreeResources(&gSprites[sJar.allIcon]);
             sJar.allIcon = MAX_SPRITES;
-            ChangeBgX(1, 0, BG_COORD_SET);
+            sJar.shakeX = 0;
             DestroyTask(taskId);
             FreeAllWindowBuffers();
             SetMainCallback2(sJar.back);
@@ -1629,12 +1627,8 @@ static void CB2_OpenJar(void)
     SetGpuReg(REG_OFFSET_DISPCNT, 0);
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sJarBgs, ARRAY_COUNT(sJarBgs));
-    for (i = 0; i < 2; i++)
-    {
-        // the map's scroll would still be there
-        ChangeBgX(i, 0, BG_COORD_SET);
-        ChangeBgY(i, 0, BG_COORD_SET);
-    }
+    ChangeBgX(0, 0, BG_COORD_SET);   // the map's scroll would still be there
+    ChangeBgY(0, 0, BG_COORD_SET);
     DmaFill16(3, 0, VRAM, VRAM_SIZE);
     DmaFill32(3, 0, OAM, OAM_SIZE);
     DmaFill16(3, 0, PLTT, PLTT_SIZE);
@@ -1645,13 +1639,13 @@ static void CB2_OpenJar(void)
     ResetTasks();
     InitWindows(sJarWindows);
     DeactivateAllTextPrinters();
-    // a soft backdrop, the jar's colors, the text's
+    // the backdrop: white (MP_Candy_Composite draws the picture there, its fade read from this color); the text's
     {
-        static const u16 sBackdrop = RGB(29, 27, 24);
+        static const u16 sBackdrop = RGB_WHITE;
         LoadPalette(&sBackdrop, BG_PLTT_ID(0), 2);
     }
-    LoadPalette(sJar_Pal, BG_PLTT_ID(1), PLTT_SIZE_4BPP);
     LoadPalette(gStandardMenuPalette, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    LoadPalette(sJarInks, BG_PLTT_ID(15) + INK_TEXT, sizeof(sJarInks));
     for (i = 0; i < NUMBER_OF_MON_TYPES; i++)
     {
         if (sCandyArt[i].gfx != NULL)
@@ -1680,15 +1674,7 @@ static void CB2_OpenJar(void)
     sJar.shakeTimer = 0;
     sRand = Random() | (Random() << 16);
     JarReadGlass();
-    FillWindowPixelBuffer(WIN_JAR, PIXEL_FILL(0));
-    BlitBitmapToWindow(WIN_JAR, (const u8 *)sJar_Gfx, 0, 0, 96, 128);
-    FillWindowPixelRect(WIN_JAR, PIXEL_FILL(0), 0, 0, 96, LID_ROWS);   // the lid is sprites
-    PutWindowTilemap(WIN_JAR);
-    CopyWindowToVram(WIN_JAR, COPYWIN_FULL);
-    LoadUserWindowBorderGfx(WIN_LIST, FRAME_TILE, BG_PLTT_ID(FRAME_PAL));
-    DrawStdFrameWithCustomTileAndPalette(WIN_LIST, FALSE, FRAME_TILE, FRAME_PAL);
-    LoadMessageBoxGfx(WIN_HELP, MSGBOX_TILE, BG_PLTT_ID(MSGBOX_PAL));
-    DrawDialogFrameWithCustomTileAndPalette(WIN_HELP, FALSE, MSGBOX_TILE, MSGBOX_PAL);
+    LoadUserWindowBorderGfx(WIN_LIST, FRAME_TILE, BG_PLTT_ID(FRAME_PAL));   // for the YES / NO box
     PutWindowTilemap(WIN_LIST);
     PutWindowTilemap(WIN_HELP);
     JarDrawList();
@@ -1700,11 +1686,9 @@ static void CB2_OpenJar(void)
     sFx.phase = CountBalls(BALL_WAITING) ? PHASE_POUR : PHASE_IDLE;
     JarIdleHelp();
     CopyBgTilemapBufferToVram(0);
-    CopyBgTilemapBufferToVram(1);
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     ShowBg(0);
-    ShowBg(1);
     sJar.leaving = FALSE;
     CreateTask(Task_Jar, 80);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
@@ -1723,4 +1707,52 @@ void MP_Candy_OpenJar(MainCallback back)
 bool8 MP_Candy_JarOpen(void)
 {
     return gMain.callback2 == CB2_Jar && !sJar.leaving && !gPaletteFade.active;
+}
+
+// The jar's screen in full color, under the game's layers (sdl2.c VDraw, right after DrawFrame): every pixel that
+// nothing was drawn on (the backdrop: the renderer leaves its bit 15 clear) takes the mock-up's background, or the
+// jar's glass (shaken with the jar). It fades as the palettes do: the backdrop is white, so its faded color tells how
+// far the fade to black has gone (the same math as palette.c BlendPalette).
+void MP_Candy_Composite(u16 *frame)
+{
+    s8 fadeOf[32];
+    u16 bd = 0x7FFF;
+    int i, x, y, coeff;
+    if (gMain.callback2 != CB2_Jar)
+        return;
+    for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+        if (!(frame[i] & 0x8000))
+        {
+            bd = frame[i];
+            break;
+        }
+    memset(fadeOf, -1, sizeof(fadeOf));
+    for (coeff = 16; coeff >= 0; coeff--)
+        fadeOf[31 + ((-31 * coeff) >> 4)] = coeff;
+    coeff = fadeOf[bd & 0x1F];
+    if (coeff < 0)
+        coeff = 0;
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+    {
+        u16 *row = &frame[y * DISPLAY_WIDTH];
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            u16 c;
+            s32 jx = x - JAR_X - sJar.shakeX, jy = y - JAR_Y;
+            u8 k;
+            if (row[x] & 0x8000)
+                continue;
+            k = (jx >= 0 && jx < JAR_W && jy >= 0 && jy < JAR_H) ? sCJ_Jar[jy][jx] : 0;
+            c = sCJ_Colors[k ? k : sCJ_Bg[y][x]];
+            if (coeff)
+            {
+                s32 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+                r += (-r * coeff) >> 4;
+                g += (-g * coeff) >> 4;
+                b += (-b * coeff) >> 4;
+                c = r | (g << 5) | (b << 10);
+            }
+            row[x] = c | 0x8000;
+        }
+    }
 }

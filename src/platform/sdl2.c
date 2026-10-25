@@ -728,6 +728,7 @@ void VDraw(void)
     memset(image, 0, sizeof(sFrameImage));
     MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     DrawFrame(image);
+    MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)

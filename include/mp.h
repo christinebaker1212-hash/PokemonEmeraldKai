@@ -373,6 +373,7 @@ void MP_Candy_Read(FILE *f);
 void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
+void MP_Candy_Composite(u16 *frame);   // the CANDY JAR's full-color picture under the frame (sdl2.c VDraw)
 bool8 MP_Candy_JarBusy(void);
 void MP_Candy_LogJar(void);
 u8 MP_GetPartyTopLevel(void);

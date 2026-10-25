@@ -780,8 +780,8 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   go into it by themselves. Use the jar from the BAG or a registered
   button: the lid pops off and your candies pour in, a candy for each one
   (past 96 the jar is full and the candies get smaller, each standing for
-  several); they settle in layers, kind by kind. The list shows each kind:
-  blue ones have enough for a RARE CANDY, gray ones are empty. Move the
+  several); they settle in layers, kind by kind. The list shows each kind
+  and its count: a blue count has enough for a RARE CANDY. Move the
   cursor to a kind (its candies hop in the jar) and the message box says
   how many more it needs; A on a blue one asks, YES turns every ten of it
   into a RARE CANDY: they fly out of the jar and the RARE CANDY goes to
