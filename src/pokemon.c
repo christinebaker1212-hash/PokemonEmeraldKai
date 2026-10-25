@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "malloc.h"
 #include "apprentice.h"
@@ -3228,6 +3229,8 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     u8 defenderHoldEffectParam;
     u8 attackerHoldEffect;
     u8 attackerHoldEffectParam;
+    bool8 phys;
+    s8 savedAtkStage[2], savedDefStage[2];
 
     if (!powerOverride)
         gBattleMovePower = gBattleMoves[move].power;
@@ -3235,9 +3238,11 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         gBattleMovePower = powerOverride;
 
     if (!typeOverride)
-        type = gBattleMoves[move].type;
+        type = MP_Gen4_MoveType(move, battlerIdAtk);   // Moemon Kai: NORMALIZE, JUDGMENT
     else
         type = typeOverride & DYNAMIC_TYPE_MASK;
+    gBattleMovePower = MP_Gen4_MovePower(move, battlerIdAtk, battlerIdDef, gBattleMovePower);   // Moemon Kai: Gen 4
+    phys = MP_IsPhysicalMove(move, type);   // Moemon Kai: OPTIONS > GAME > MOVE KIND
 
     attack = attacker->attack;
     defense = defender->defense;
@@ -3252,7 +3257,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     }
     else
     {
-        attackerHoldEffect = GetItemHoldEffect(attacker->item);
+        attackerHoldEffect = MP_Gen4_HoldEffect(battlerIdAtk);   // Moemon Kai: EMBARGO, KLUTZ
         attackerHoldEffectParam = GetItemHoldEffectParam(attacker->item);
     }
 
@@ -3264,7 +3269,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     }
     else
     {
-        defenderHoldEffect = GetItemHoldEffect(defender->item);
+        defenderHoldEffect = MP_Gen4_HoldEffect(battlerIdDef);   // Moemon Kai: EMBARGO, KLUTZ
         defenderHoldEffectParam = GetItemHoldEffectParam(defender->item);
     }
 
@@ -3286,7 +3291,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         if (attackerHoldEffect == sHoldEffectToType[i][0]
             && type == sHoldEffectToType[i][1])
         {
-            if (IS_TYPE_PHYSICAL(type))
+            if (phys)
                 attack = (attack * (attackerHoldEffectParam + 100)) / 100;
             else
                 spAttack = (spAttack * (attackerHoldEffectParam + 100)) / 100;
@@ -3319,8 +3324,21 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         attack *= 2;
 
     // Apply abilities / field sports
-    if (defender->ability == ABILITY_THICK_FAT && (type == TYPE_FIRE || type == TYPE_ICE))
-        spAttack /= 2;
+    if (MP_Gen4_TargetAbility(battlerIdAtk, battlerIdDef) == ABILITY_THICK_FAT && (type == TYPE_FIRE || type == TYPE_ICE))
+    {
+        if (phys)   // Moemon Kai: a physical FIRE / ICE move (Gen 4's split)
+            attack /= 2;
+        else
+            spAttack /= 2;
+    }
+    MP_Gen4_AttackStats(move, type, battlerIdAtk, battlerIdDef, &attack, &spAttack, &defense, &spDefense);   // Moemon Kai
+    // Moemon Kai: UNAWARE ignores the other side's stat changes
+    savedAtkStage[0] = attacker->statStages[STAT_ATK], savedAtkStage[1] = attacker->statStages[STAT_SPATK];
+    savedDefStage[0] = defender->statStages[STAT_DEF], savedDefStage[1] = defender->statStages[STAT_SPDEF];
+    if (MP_Gen4_TargetAbility(battlerIdAtk, battlerIdDef) == ABILITY_UNAWARE)
+        attacker->statStages[STAT_ATK] = attacker->statStages[STAT_SPATK] = DEFAULT_STAT_STAGE;
+    if (attacker->ability == ABILITY_UNAWARE)
+        defender->statStages[STAT_DEF] = defender->statStages[STAT_SPDEF] = DEFAULT_STAT_STAGE;
     if (attacker->ability == ABILITY_HUSTLE)
         attack = (150 * attack) / 100;
     if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS))
@@ -3348,9 +3366,9 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     if (gBattleMoves[gCurrentMove].effect == EFFECT_EXPLOSION)
         defense /= 2;
 
-    if (IS_TYPE_PHYSICAL(type))
+    if (phys)
     {
-        if (gCritMultiplier == 2)
+        if (gCritMultiplier >= 2)
         {
             // Critical hit, if attacker has lost attack stat stages then ignore stat drop
             if (attacker->statStages[STAT_ATK] > DEFAULT_STAT_STAGE)
@@ -3364,7 +3382,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         damage = damage * gBattleMovePower;
         damage *= (2 * attacker->level / 5 + 2);
 
-        if (gCritMultiplier == 2)
+        if (gCritMultiplier >= 2)
         {
             // Critical hit, if defender has gained defense stat stages then ignore stat increase
             if (defender->statStages[STAT_DEF] < DEFAULT_STAT_STAGE)
@@ -3383,7 +3401,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
             damage /= 2;
 
         // Apply Reflect
-        if ((sideStatus & SIDE_STATUS_REFLECT) && gCritMultiplier == 1)
+        if ((sideStatus & SIDE_STATUS_REFLECT) && gCritMultiplier <= 1)
         {
             if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && MultiTargetSide(CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE)))
                 damage = 2 * (damage / 3);
@@ -3403,9 +3421,9 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     if (type == TYPE_MYSTERY)
         damage = 0; // is ??? type. does 0 damage.
 
-    if (IS_TYPE_SPECIAL(type))
+    if (!phys && type != TYPE_MYSTERY)
     {
-        if (gCritMultiplier == 2)
+        if (gCritMultiplier >= 2)
         {
             // Critical hit, if attacker has lost sp. attack stat stages then ignore stat drop
             if (attacker->statStages[STAT_SPATK] > DEFAULT_STAT_STAGE)
@@ -3419,7 +3437,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         damage = damage * gBattleMovePower;
         damage *= (2 * attacker->level / 5 + 2);
 
-        if (gCritMultiplier == 2)
+        if (gCritMultiplier >= 2)
         {
             // Critical hit, if defender has gained sp. defense stat stages then ignore stat increase
             if (defender->statStages[STAT_SPDEF] < DEFAULT_STAT_STAGE)
@@ -3434,7 +3452,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         damage /= 50;
 
         // Apply Lightscreen
-        if ((sideStatus & SIDE_STATUS_LIGHTSCREEN) && gCritMultiplier == 1)
+        if ((sideStatus & SIDE_STATUS_LIGHTSCREEN) && gCritMultiplier <= 1)
         {
             if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && MultiTargetSide(CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE)))
                 damage = 2 * (damage / 3);
@@ -3446,6 +3464,14 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == MOVE_TARGET_BOTH)
             damage = SpreadDamage(damage);
 
+    }
+
+    // Moemon Kai: weather and FLASH FIRE apply to physical FIRE / WATER moves too (Gen 4's split); Kai had them
+    // only in the special branch, where every FIRE / WATER move was
+    attacker->statStages[STAT_ATK] = savedAtkStage[0], attacker->statStages[STAT_SPATK] = savedAtkStage[1];
+    defender->statStages[STAT_DEF] = savedDefStage[0], defender->statStages[STAT_SPDEF] = savedDefStage[1];
+    if (type != TYPE_MYSTERY)
+    {
         // Are effects of weather negated with cloud nine or air lock
         if (WEATHER_HAS_EFFECT2)
         {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -333,6 +334,7 @@ static void Cmd_mpcoopresolve(void);
 static void Cmd_mpweathergroup(void);
 static void Cmd_mpweathermsg(void);
 static void Cmd_mpjoin(void);
+static void Cmd_gen4(void);
 
 void (*const gBattleScriptingCommandsTable[])(void) =
 {
@@ -590,6 +592,7 @@ void (*const gBattleScriptingCommandsTable[])(void) =
     [B_SCR_OP_MPWEATHERGROUP]                  = Cmd_mpweathergroup,                          //0xFB
     [B_SCR_OP_MPWEATHERMSG]                    = Cmd_mpweathermsg,                            //0xFC
     [B_SCR_OP_MPJOIN]                          = Cmd_mpjoin,                                  //0xFD
+    [B_SCR_OP_GEN4]                            = Cmd_gen4,                                    //0xFE
 };
 
 struct StatFractions
@@ -678,6 +681,8 @@ static const u8 *const sMoveEffectBS_Ptrs[] =
     [MOVE_EFFECT_REMOVE_PARALYSIS] = BattleScript_MoveEffectSleep,
     [MOVE_EFFECT_ATK_DEF_DOWN]     = BattleScript_MoveEffectSleep,
     [MOVE_EFFECT_RECOIL_33]        = BattleScript_MoveEffectRecoil,
+    [MOVE_EFFECT_DEF_SPDEF_DOWN]   = BattleScript_MoveEffectSleep,
+    [MOVE_EFFECT_RECOIL_50]        = BattleScript_MoveEffectRecoil,
 };
 
 static const struct WindowTemplate sUnusedWinTemplate =
@@ -1090,6 +1095,14 @@ static bool8 AccuracyCalcHelper(u16 move)
 
     gHitMarker &= ~HITMARKER_IGNORE_UNDERGROUND;
 
+    // Moemon Kai: nothing reaches a Pokémon vanished by SHADOW FORCE
+    if (gStatuses3[gBattlerTarget] & STATUS3_PHANTOM)
+    {
+        gMoveResultFlags |= MOVE_RESULT_MISSED;
+        JumpIfMoveFailed(DSIZE8BIT + DSIZEPTR + DSIZE16BIT, move);
+        return TRUE;
+    }
+
     if (!(gHitMarker & HITMARKER_IGNORE_UNDERWATER) && gStatuses3[gBattlerTarget] & STATUS3_UNDERWATER)
     {
         gMoveResultFlags |= MOVE_RESULT_MISSED;
@@ -1137,8 +1150,13 @@ static void Cmd_accuracycheck(void)
             return;
         if (AccuracyCalcHelper(move))
             return;
+        if (MP_Gen4_IgnoresAccuracy(move, gBattlerAttacker, gBattlerTarget))   // Moemon Kai: NO GUARD
+        {
+            JumpIfMoveFailed(DSIZE8BIT + DSIZEPTR + DSIZE16BIT, move);
+            return;
+        }
 
-        if (gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT)
+        if ((gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT) || gGen4Battlers[gBattlerTarget].miracleEye)
         {
             u8 acc = gBattleMons[gBattlerAttacker].statStages[STAT_ACC];
             buff = acc;
@@ -1164,10 +1182,11 @@ static void Cmd_accuracycheck(void)
 
         if (gBattleMons[gBattlerAttacker].ability == ABILITY_COMPOUND_EYES)
             calc = (calc * 130) / 100; // 1.3 compound eyes boost
-        if (WEATHER_HAS_EFFECT && gBattleMons[gBattlerTarget].ability == ABILITY_SAND_VEIL && gBattleWeather & B_WEATHER_SANDSTORM)
+        if (WEATHER_HAS_EFFECT && MP_Gen4_TargetAbility(gBattlerAttacker, gBattlerTarget) == ABILITY_SAND_VEIL && gBattleWeather & B_WEATHER_SANDSTORM)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
-        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_TYPE_PHYSICAL(type))
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && MP_IsPhysicalMove(move, type))
             calc = (calc * 80) / 100; // 1.2 hustle loss
+        calc = MP_Gen4_Accuracy(move, gBattlerAttacker, gBattlerTarget, calc);   // Moemon Kai: Gen 4
 
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
         {
@@ -1284,16 +1303,18 @@ static void Cmd_critcalc(void)
                 + (gBattleMoves[gCurrentMove].effect == EFFECT_POISON_TAIL)
                 + (holdEffect == HOLD_EFFECT_SCOPE_LENS)
                 + 2 * (holdEffect == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[gBattlerAttacker].species == SPECIES_CHANSEY)
-                + 2 * (holdEffect == HOLD_EFFECT_STICK && gBattleMons[gBattlerAttacker].species == SPECIES_FARFETCHD);
+                + 2 * (holdEffect == HOLD_EFFECT_STICK && gBattleMons[gBattlerAttacker].species == SPECIES_FARFETCHD)
+                + MP_Gen4_CritStage(gBattlerAttacker);   // Moemon Kai: SUPER LUCK, RAZOR CLAW
 
     if (critChance >= ARRAY_COUNT(sCriticalHitChance))
         critChance = ARRAY_COUNT(sCriticalHitChance) - 1;
 
-    if ((gBattleMons[gBattlerTarget].ability != ABILITY_BATTLE_ARMOR && gBattleMons[gBattlerTarget].ability != ABILITY_SHELL_ARMOR)
+    if ((MP_Gen4_TargetAbility(gBattlerAttacker, gBattlerTarget) != ABILITY_BATTLE_ARMOR && MP_Gen4_TargetAbility(gBattlerAttacker, gBattlerTarget) != ABILITY_SHELL_ARMOR)
      && !(gStatuses3[gBattlerAttacker] & STATUS3_CANT_SCORE_A_CRIT)
+     && !gGen4Sides[GetBattlerSide(gBattlerTarget)].luckyChant   // Moemon Kai: LUCKY CHANT
      && !(gBattleTypeFlags & (BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE))
      && !(Random() % sCriticalHitChance[critChance]))
-        gCritMultiplier = 2;
+        gCritMultiplier = MP_Gen4_CritMultiplier(gBattlerAttacker);   // Moemon Kai: SNIPER
     else
         gCritMultiplier = 1;
 
@@ -1365,6 +1386,29 @@ static void ModulateDmgByType(u8 multiplier)
     }
 }
 
+// Moemon Kai: GROUND moves miss a LEVITATE / MAGNET RISE target (not under GRAVITY or holding an IRON BALL)
+static bool8 Gen4GroundImmune(u8 attacker, u8 target)
+{
+    if (gGen4Field.gravity || MP_Gen4_HoldEffect(target) == HOLD_EFFECT_IRON_BALL)
+        return FALSE;
+    return gGen4Battlers[target].magnetRise || MP_Gen4_TargetAbility(attacker, target) == ABILITY_LEVITATE;
+}
+
+// Moemon Kai: type chart entries Gen 4 skips: GROUND on FLYING under GRAVITY / IRON BALL, PSYCHIC on DARK after
+// MIRACLE EYE, anything on a ROOSTing Pokémon's FLYING type
+static bool8 Gen4SkipTypeEntry(s32 i, u8 attacker, u8 target)
+{
+    u8 atk = TYPE_EFFECT_ATK_TYPE(i), def = TYPE_EFFECT_DEF_TYPE(i);
+    if (def == TYPE_FLYING && gGen4Battlers[target].roosted)
+        return TRUE;
+    if (atk == TYPE_GROUND && def == TYPE_FLYING && TYPE_EFFECT_MULTIPLIER(i) == TYPE_MUL_NO_EFFECT
+     && (gGen4Field.gravity || MP_Gen4_HoldEffect(target) == HOLD_EFFECT_IRON_BALL))
+        return TRUE;
+    if (atk == TYPE_PSYCHIC && def == TYPE_DARK && TYPE_EFFECT_MULTIPLIER(i) == TYPE_MUL_NO_EFFECT && gGen4Battlers[target].miracleEye)
+        return TRUE;
+    return FALSE;
+}
+
 static void Cmd_typecalc(void)
 {
     s32 i = 0;
@@ -1380,12 +1424,9 @@ static void Cmd_typecalc(void)
 
     // check stab
     if (IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
-    {
-        gBattleMoveDamage = gBattleMoveDamage * 15;
-        gBattleMoveDamage = gBattleMoveDamage / 10;
-    }
+        gBattleMoveDamage = MP_Gen4_Stab(gBattleMoveDamage, gBattlerAttacker);   // Moemon Kai: ADAPTABILITY
 
-    if (gBattleMons[gBattlerTarget].ability == ABILITY_LEVITATE && moveType == TYPE_GROUND)
+    if (moveType == TYPE_GROUND && Gen4GroundImmune(gBattlerAttacker, gBattlerTarget))   // Moemon Kai: MAGNET RISE, MOLD BREAKER, GRAVITY
     {
         gLastUsedAbility = gBattleMons[gBattlerTarget].ability;
         gMoveResultFlags |= (MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE);
@@ -1400,12 +1441,12 @@ static void Cmd_typecalc(void)
         {
             if (TYPE_EFFECT_ATK_TYPE(i) == TYPE_FORESIGHT)
             {
-                if (gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT)
+                if ((gBattleMons[gBattlerTarget].status2 & STATUS2_FORESIGHT) || gBattleMons[gBattlerAttacker].ability == ABILITY_SCRAPPY)
                     break;
                 i += 3;
                 continue;
             }
-            else if (TYPE_EFFECT_ATK_TYPE(i) == moveType)
+            else if (TYPE_EFFECT_ATK_TYPE(i) == moveType && !Gen4SkipTypeEntry(i, gBattlerAttacker, gBattlerTarget))
             {
                 // check type1
                 if (TYPE_EFFECT_DEF_TYPE(i) == gBattleMons[gBattlerTarget].types[0])
@@ -1419,7 +1460,7 @@ static void Cmd_typecalc(void)
         }
     }
 
-    if (gBattleMons[gBattlerTarget].ability == ABILITY_WONDER_GUARD && AttacksThisTurn(gBattlerAttacker, gCurrentMove) == 2
+    if (MP_Gen4_TargetAbility(gBattlerAttacker, gBattlerTarget) == ABILITY_WONDER_GUARD && AttacksThisTurn(gBattlerAttacker, gCurrentMove) == 2
      && (!(gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE) || ((gMoveResultFlags & (MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE)) == (MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE)))
      && gBattleMoves[gCurrentMove].power)
     {
@@ -1432,6 +1473,8 @@ static void Cmd_typecalc(void)
     }
     if (gMoveResultFlags & MOVE_RESULT_DOESNT_AFFECT_FOE)
         gProtectStructs[gBattlerAttacker].targetNotAffected = 1;
+    // Moemon Kai: Gen 4's last multipliers (LIFE ORB, EXPERT BELT, TINTED LENS, FILTER...)
+    gBattleMoveDamage = MP_Gen4_FinalDamage(gBattleMoveDamage, gCurrentMove, moveType, gBattlerAttacker, gBattlerTarget, gMoveResultFlags);
 
     gBattlescriptCurrInstr++;
 }
@@ -1500,7 +1543,7 @@ static void CheckWonderGuardAndLevitate(void)
         i += 3;
     }
 
-    if (gBattleMons[gBattlerTarget].ability == ABILITY_WONDER_GUARD && AttacksThisTurn(gBattlerAttacker, gCurrentMove) == 2)
+    if (MP_Gen4_TargetAbility(gBattlerAttacker, gBattlerTarget) == ABILITY_WONDER_GUARD && AttacksThisTurn(gBattlerAttacker, gCurrentMove) == 2)
     {
         if (((flags & 2) || !(flags & 1)) && gBattleMoves[gCurrentMove].power)
         {
@@ -1687,6 +1730,8 @@ static void Cmd_adjustnormaldamage(void)
 
     gPotentialItemEffectBattler = gBattlerTarget;
 
+    if (MP_Gen4_FocusSash(gBattlerTarget))   // Moemon Kai: FOCUS SASH
+        gSpecialStatuses[gBattlerTarget].focusBanded = 1;
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < param)
     {
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
@@ -1730,6 +1775,8 @@ static void Cmd_adjustnormaldamage2(void)
 
     gPotentialItemEffectBattler = gBattlerTarget;
 
+    if (MP_Gen4_FocusSash(gBattlerTarget))   // Moemon Kai: FOCUS SASH
+        gSpecialStatuses[gBattlerTarget].focusBanded = 1;
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < param)
     {
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
@@ -1948,7 +1995,9 @@ static void Cmd_datahpupdate(void)
                 // Note: While physicalDmg/specialDmg below are only distinguished between for Counter/Mirror Coat, they are
                 //       used in combination as general damage trackers for other purposes. specialDmg is additionally used
                 //       to help determine if a fire move should defrost the target.
-                if (IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE) && gCurrentMove != MOVE_PAIN_SPLIT)
+                if (!(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE) && gCurrentMove != MOVE_PAIN_SPLIT)
+                    MP_Gen4_OnDamaged(gActiveBattler, gBattlescriptCurrInstr[1] == BS_TARGET ? gBattlerAttacker : gBattlerTarget, gHpDealt);   // Moemon Kai
+                if (MP_IsPhysicalMove(gCurrentMove, moveType) && !(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE) && gCurrentMove != MOVE_PAIN_SPLIT)
                 {
                     // Record physical damage/attacker for Counter
                     gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
@@ -1964,7 +2013,7 @@ static void Cmd_datahpupdate(void)
                         gSpecialStatuses[gActiveBattler].physicalBattlerId = gBattlerTarget;
                     }
                 }
-                else if (!IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE))
+                else if (!MP_IsPhysicalMove(gCurrentMove, moveType) && !(gHitMarker & HITMARKER_PASSIVE_HP_UPDATE))
                 {
                     // Record special damage/attacker for Mirror Coat
                     gProtectStructs[gActiveBattler].specialDmg = gHpDealt;
@@ -2002,7 +2051,7 @@ static void Cmd_critmessage(void)
 {
     if (gBattleControllerExecFlags == 0)
     {
-        if (gCritMultiplier == 2 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+        if (gCritMultiplier >= 2 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
         {
             PrepareStringBattle(STRINGID_CRITICALHIT, gBattlerAttacker);
             gBattleCommunication[MSG_DISPLAY] = 1;
@@ -2859,6 +2908,17 @@ void SetMoveEffect(bool8 primary, u8 certain)
                 BattleScriptPush(gBattlescriptCurrInstr + 1);
                 gBattlescriptCurrInstr = BattleScript_AtkDefDown;
                 break;
+            case MOVE_EFFECT_DEF_SPDEF_DOWN: // Moemon Kai: CLOSE COMBAT
+                BattleScriptPush(gBattlescriptCurrInstr + 1);
+                gBattlescriptCurrInstr = BattleScript_G4DefSpDefDown;
+                break;
+            case MOVE_EFFECT_RECOIL_50: // Moemon Kai: HEAD SMASH
+                gBattleMoveDamage = gHpDealt / 2;
+                if (gBattleMoveDamage == 0)
+                    gBattleMoveDamage = 1;
+                BattleScriptPush(gBattlescriptCurrInstr + 1);
+                gBattlescriptCurrInstr = BattleScript_MoveEffectRecoil;
+                break;
             case MOVE_EFFECT_RECOIL_33: // Double Edge
                 gBattleMoveDamage = gHpDealt / 3;
                 if (gBattleMoveDamage == 0)
@@ -2995,6 +3055,7 @@ static void Cmd_tryfaintmon(void)
             BattleScriptPop();
             gBattlescriptCurrInstr = BS_ptr;
             gSideStatuses[GetBattlerSide(gActiveBattler)] &= ~SIDE_STATUS_SPIKES_DAMAGED;
+            MP_Gen4_ArrivalDone(gActiveBattler);   // Moemon Kai
         }
         else
         {
@@ -4670,7 +4731,7 @@ static void Cmd_moveend(void)
             break;
         case MOVEEND_CHOICE_MOVE: // update choice band move
             if (gHitMarker & HITMARKER_OBEYS
-             && holdEffectAtk == HOLD_EFFECT_CHOICE_BAND
+             && MP_IS_CHOICE_ITEM(holdEffectAtk)
              && gChosenMove != MOVE_STRUGGLE
              && (*choicedMoveAtk == MOVE_NONE || *choicedMoveAtk == MOVE_UNAVAILABLE))
             {
@@ -4709,6 +4770,15 @@ static void Cmd_moveend(void)
                 gBattleScripting.moveendState++;
             break;
         case MOVEEND_KINGSROCK_SHELLBELL: // king's rock and shell bell
+        {
+            const u8 *gen4 = MP_Gen4_MoveEnd();   // Moemon Kai: FOCUS SASH, ANGER POINT, AFTERMATH, LIFE ORB
+            if (gen4 != NULL)
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = gen4;
+                return;
+            }
+        }
             if (ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL, 0, FALSE))
                 effect = TRUE;
             gBattleScripting.moveendState++;
@@ -5636,6 +5706,19 @@ static void Cmd_switchineffects(void)
     gBattlerFaintMarks &= ~gBitTable[gActiveBattler];
     gSpecialStatuses[gActiveBattler].faintedHasReplacement = FALSE;
 
+    // Moemon Kai: Gen 4's arrival effects (HEALING WISH, STEALTH ROCK, TOXIC SPIKES), one at a time like SPIKES
+    {
+        const u8 *gen4 = MP_Gen4_ArrivalEffect(gActiveBattler, gBattlescriptCurrInstr[1]);
+        if (gen4 != NULL)
+        {
+            gBattleMons[gActiveBattler].status2 &= ~STATUS2_DESTINY_BOND;
+            gHitMarker &= ~HITMARKER_DESTINYBOND;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = gen4;
+            return;
+        }
+    }
+
     if (!(gSideStatuses[GetBattlerSide(gActiveBattler)] & SIDE_STATUS_SPIKES_DAMAGED)
         && (gSideStatuses[GetBattlerSide(gActiveBattler)] & SIDE_STATUS_SPIKES)
         && !IS_BATTLER_OF_TYPE(gActiveBattler, TYPE_FLYING)
@@ -5676,6 +5759,7 @@ static void Cmd_switchineffects(void)
             && !ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN, gActiveBattler, FALSE))
         {
             gSideStatuses[GetBattlerSide(gActiveBattler)] &= ~SIDE_STATUS_SPIKES_DAMAGED;
+            MP_Gen4_ArrivalDone(gActiveBattler);   // Moemon Kai
 
             for (i = 0; i < gBattlersCount; i++)
             {
@@ -6303,6 +6387,8 @@ static void Cmd_adjustsetdamage(void)
 
     gPotentialItemEffectBattler = gBattlerTarget;
 
+    if (MP_Gen4_FocusSash(gBattlerTarget))   // Moemon Kai: FOCUS SASH
+        gSpecialStatuses[gBattlerTarget].focusBanded = 1;
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < param)
     {
         RecordItemEffectBattle(gBattlerTarget, holdEffect);
@@ -6335,6 +6421,7 @@ static void Cmd_removeitem(void)
     usedHeldItem = &gBattleStruct->usedHeldItems[gActiveBattler];
     *usedHeldItem = gBattleMons[gActiveBattler].item;
     gBattleMons[gActiveBattler].item = ITEM_NONE;
+    MP_Gen4_ItemLost(gActiveBattler);   // Moemon Kai: UNBURDEN
 
     BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[gActiveBattler].item), &gBattleMons[gActiveBattler].item);
     MarkBattlerForControllerExec(gActiveBattler);
@@ -7254,7 +7341,7 @@ static void Cmd_setrain(void)
     {
         gBattleWeather = B_WEATHER_RAIN_TEMPORARY;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_RAIN;
-        gWishFutureKnock.weatherDuration = 5;
+        gWishFutureKnock.weatherDuration = MP_Gen4_WeatherTurns(gBattlerAttacker, HOLD_EFFECT_DAMP_ROCK);
     }
     gBattlescriptCurrInstr++;
 }
@@ -7269,7 +7356,7 @@ static void Cmd_setreflect(void)
     else
     {
         gSideStatuses[GET_BATTLER_SIDE(gBattlerAttacker)] |= SIDE_STATUS_REFLECT;
-        gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].reflectTimer = 5;
+        gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].reflectTimer = MP_Gen4_ScreenTurns(gBattlerAttacker);
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].reflectBattlerId = gBattlerAttacker;
 
         if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) >= 2)   // (Moemon Co-op: >= for triples)
@@ -7491,6 +7578,8 @@ static void Cmd_stockpiletohpheal(void)
 static void Cmd_negativedamage(void)
 {
     gBattleMoveDamage = -(gHpDealt / 2);
+    if (MP_Gen4_HoldEffect(gBattlerAttacker) == HOLD_EFFECT_BIG_ROOT)   // Moemon Kai: BIG ROOT
+        gBattleMoveDamage = gBattleMoveDamage * 13 / 10;
     if (gBattleMoveDamage == 0)
         gBattleMoveDamage = -1;
 
@@ -7605,9 +7694,11 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
         else // try to decrease
         {
             statValue = -GET_STAT_BUFF_VALUE(statValue);
+            if (gBattleMons[gActiveBattler].ability == ABILITY_SIMPLE)   // Moemon Kai: SIMPLE
+                statValue *= 2;
             gBattleTextBuff2[0] = B_BUFF_PLACEHOLDER_BEGIN;
             index = 1;
-            if (statValue == -2)
+            if (statValue <= -2)
             {
                 gBattleTextBuff2[1] = B_BUFF_STRING;
                 gBattleTextBuff2[2] = STRINGID_STATHARSHLY;
@@ -7628,9 +7719,11 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
     else // stat increase
     {
         statValue = GET_STAT_BUFF_VALUE(statValue);
+        if (gBattleMons[gActiveBattler].ability == ABILITY_SIMPLE)   // Moemon Kai: SIMPLE
+            statValue *= 2;
         gBattleTextBuff2[0] = B_BUFF_PLACEHOLDER_BEGIN;
         index = 1;
-        if (statValue == 2)
+        if (statValue >= 2)
         {
             gBattleTextBuff2[1] = B_BUFF_STRING;
             gBattleTextBuff2[2] = STRINGID_STATSHARPLY;
@@ -7715,6 +7808,8 @@ static void Cmd_setmultihitcounter(void)
             gMultiHitCounter = (Random() & 3) + 2;
         else
             gMultiHitCounter += 2;
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_SKILL_LINK)   // Moemon Kai: SKILL LINK
+            gMultiHitCounter = 5;
     }
 
     gBattlescriptCurrInstr += 2;
@@ -8063,7 +8158,7 @@ static void Cmd_setlightscreen(void)
     else
     {
         gSideStatuses[GET_BATTLER_SIDE(gBattlerAttacker)] |= SIDE_STATUS_LIGHTSCREEN;
-        gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].lightscreenTimer = 5;
+        gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].lightscreenTimer = MP_Gen4_ScreenTurns(gBattlerAttacker);
         gSideTimers[GET_BATTLER_SIDE(gBattlerAttacker)].lightscreenBattlerId = gBattlerAttacker;
 
         if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE && CountAliveMonsInBattle(BATTLE_ALIVE_ATK_SIDE) >= 2)   // (Moemon Co-op: >= for triples)
@@ -8092,6 +8187,8 @@ static void Cmd_tryKO(void)
 
     gPotentialItemEffectBattler = gBattlerTarget;
 
+    if (MP_Gen4_FocusSash(gBattlerTarget))   // Moemon Kai: FOCUS SASH
+        gSpecialStatuses[gBattlerTarget].focusBanded = 1;
     if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < param)
     {
         RecordItemEffectBattle(gBattlerTarget, HOLD_EFFECT_FOCUS_BAND);
@@ -8182,7 +8279,7 @@ static void Cmd_setsandstorm(void)
     {
         gBattleWeather = B_WEATHER_SANDSTORM_TEMPORARY;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_SANDSTORM;
-        gWishFutureKnock.weatherDuration = 5;
+        gWishFutureKnock.weatherDuration = MP_Gen4_WeatherTurns(gBattlerAttacker, HOLD_EFFECT_SMOOTH_ROCK);
     }
     gBattlescriptCurrInstr++;
 }
@@ -9420,7 +9517,7 @@ static void Cmd_setsunny(void)
     {
         gBattleWeather = B_WEATHER_SUN_TEMPORARY;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_SUNLIGHT;
-        gWishFutureKnock.weatherDuration = 5;
+        gWishFutureKnock.weatherDuration = MP_Gen4_WeatherTurns(gBattlerAttacker, HOLD_EFFECT_HEAT_ROCK);
     }
 
     gBattlescriptCurrInstr++;
@@ -9665,6 +9762,9 @@ static void Cmd_setsemiinvulnerablebit(void)
     case MOVE_DIVE:
         gStatuses3[gBattlerAttacker] |= STATUS3_UNDERWATER;
         break;
+    case MOVE_SHADOW_FORCE: // Moemon Kai
+        gStatuses3[gBattlerAttacker] |= STATUS3_PHANTOM;
+        break;
     }
 
     gBattlescriptCurrInstr++;
@@ -9683,6 +9783,8 @@ static void Cmd_clearsemiinvulnerablebit(void)
         break;
     case MOVE_DIVE:
         gStatuses3[gBattlerAttacker] &= ~STATUS3_UNDERWATER;
+        break;    case MOVE_SHADOW_FORCE: // Moemon Kai
+        gStatuses3[gBattlerAttacker] &= ~STATUS3_PHANTOM;
         break;
     }
 
@@ -9708,7 +9810,7 @@ static void Cmd_sethail(void)
     {
         gBattleWeather = B_WEATHER_HAIL_TEMPORARY;
         gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STARTED_HAIL;
-        gWishFutureKnock.weatherDuration = 5;
+        gWishFutureKnock.weatherDuration = MP_Gen4_WeatherTurns(gBattlerAttacker, HOLD_EFFECT_ICY_ROCK);
     }
 
     gBattlescriptCurrInstr++;
@@ -11718,3 +11820,19 @@ bool8 MP_Coop_ResolveTaskActive(void)
 #undef tTimer
 #undef tCursor
 #undef tIndex
+
+// Moemon Kai: "gen4 MODE, ptr": Gen 4's effects (battle_gen4.c). 0 = go on, 1 = jump to ptr, 2 = the mode moved the script
+static void Cmd_gen4(void)
+{
+    u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
+    const u8 *ptr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT + DSIZE8BIT);
+    switch (MP_Gen4_Command(mode))
+    {
+    case 0:
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        break;
+    case 1:
+        gBattlescriptCurrInstr = ptr;
+        break;
+    }
+}

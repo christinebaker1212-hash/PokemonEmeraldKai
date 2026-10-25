@@ -1294,6 +1294,13 @@
 	ptrvalue \ptr
 	.endm
 
+	@ Moemon Kai: Gen 4's effects (src/battle_gen4.c; modes in constants/battle_gen4.h)
+	.macro gen4 mode:req, ptr=NULL
+	.byte B_SCR_OP_GEN4
+	.byte \mode
+	ptrvalue \ptr
+	.endm
+
 /* various command changed to more readable macros*/
 	.macro cancelmultiturnmoves battler:req
 	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES

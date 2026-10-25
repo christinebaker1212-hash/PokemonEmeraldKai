@@ -191,8 +191,8 @@ u16 MP_LevelScale_Evolve(u16 species, u8 level, u32 personality)
                 break;
             }
         }
-        if (to == SPECIES_NONE)
-            break;
+        if (to == SPECIES_NONE || (IS_GEN4_SPECIES(to) && !IS_GEN4_SPECIES(species)))
+            break;   // (Moemon Kai: never into a Gen 4 Moemon on the way)
         species = to;
     }
     return species;

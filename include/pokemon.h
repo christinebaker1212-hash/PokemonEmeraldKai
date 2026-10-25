@@ -330,7 +330,7 @@ struct SpeciesInfo
 
 struct BattleMove
 {
-    u8 effect;
+    u16 effect; // Moemon Kai: u16, Gen 4 effects go past 255
     u8 power;
     u8 type;
     u8 accuracy;

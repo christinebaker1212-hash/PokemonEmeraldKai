@@ -55,6 +55,7 @@ enum
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
+    OPT_MOVESPLIT,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
@@ -138,6 +139,9 @@ static const u8 sText_FollowDefault[] = _("DEFAULT");
 static const u8 sText_FollowPmd[] = _("PMD");
 static const u8 sText_FollowOriginal[] = _("ORIGINAL");
 static const u8 sText_LevelScale[] = _("LEVEL SCALING");
+static const u8 sText_MoveSplit[] = _("MOVE KIND");
+static const u8 sText_MoveSplitGen3[] = _("GEN 3");
+static const u8 sText_MoveSplitGen4[] = _("GEN 4");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
@@ -284,6 +288,7 @@ static void BuildRows(void)
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_LEVELSCALE, 0);
+        AddRow(OPT_MOVESPLIT, 0);
         break;
     case TAB_DISPLAY:
         AddRow(OPT_FULLSCREEN, 0);
@@ -365,6 +370,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_CREATURES:
         names[0] = sText_CreaturesMoemon, names[1] = sText_CreaturesPokemon;
+        return 2;
+    case OPT_MOVESPLIT:
+        names[0] = sText_MoveSplitGen3, names[1] = sText_MoveSplitGen4;
         return 2;
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
@@ -494,6 +502,7 @@ static u8 Current(u8 row)
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
     case OPT_LEVELSCALE:  return gMpConfig.levelScaling != 0;
+    case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
@@ -549,6 +558,7 @@ static void Change(u8 row, int dir)
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
     case OPT_LEVELSCALE:  gMpConfig.levelScaling = !gMpConfig.levelScaling; MP_SendRoomRules(); break;
+    case OPT_MOVESPLIT:   gMpConfig.moveSplit = !gMpConfig.moveSplit; MP_SendRoomRules(); break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
@@ -616,6 +626,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
+    case OPT_MOVESPLIT:   return sText_MoveSplit;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FR_SHOW:     return sText_Show;
@@ -731,6 +742,9 @@ static void DrawHint(void)
     else if (opt == OPT_LEVELSCALE)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s" : "WILD AND TRAINERS KEEP UP WITH YOU",
                  MP_LevelScaling() ? "ON" : "OFF");
+    else if (opt == OPT_MOVESPLIT)
+        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
+                 : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");
     else if (opt == OPT_BUTTONICONS)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)

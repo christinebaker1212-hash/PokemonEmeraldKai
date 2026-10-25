@@ -1212,6 +1212,7 @@ const u16 gFirstTurnOfTwoStringIds[] =
     [B_MSG_TURN1_DIG]        = STRINGID_PKMNDUGHOLE,
     [B_MSG_TURN1_DIVE]       = STRINGID_PKMNHIDUNDERWATER,
     [B_MSG_TURN1_BOUNCE]     = STRINGID_PKMNSPRANGUP,
+    [B_MSG_TURN1_SHADOW_FORCE] = STRINGID_G4_SHADOW_FORCE, // Moemon Kai
 };
 
 // Index copied from move's index in gTrappingMoves
@@ -2180,6 +2181,8 @@ static bool8 MpTripleCenterFoeOut(void)
     return TRUE;
 }
 
+#include "data/text/battle_gen4_strings.h"   // Moemon Kai: Gen 4
+
 void BufferStringBattle(u16 stringID)
 {
     s32 i;
@@ -2581,6 +2584,11 @@ void BufferStringBattle(u16 stringID)
             stringPtr = gBattleStringsTable[stringID - BATTLESTRINGS_TABLE_START];
         break;
     default: // load a string from the table
+        if (stringID >= STRINGID_G4_FIRST && stringID < STRINGID_G4_FIRST + STRINGID_G4_COUNT)   // Moemon Kai: Gen 4
+        {
+            stringPtr = sGen4BattleTexts[stringID - STRINGID_G4_FIRST];
+            break;
+        }
         if (stringID >= BATTLESTRINGS_COUNT)
         {
             gDisplayedStringBattle[0] = EOS;

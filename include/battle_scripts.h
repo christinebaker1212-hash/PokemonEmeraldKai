@@ -243,4 +243,32 @@ extern const u8 BattleScript_MpCoopSmokeBallEscape[];
 extern const u8 BattleScript_MpCoopRanUsingAbility[];
 extern const u8 BattleScript_MpCoopCantRunFromTrainer[];
 
+// Moemon Kai: Gen 4 (data/battle_scripts_gen4.inc)
+extern const u8 BattleScript_G4DefSpDefDown[];
+extern const u8 BattleScript_G4HealingWishArrive[];
+extern const u8 BattleScript_G4LunarDanceArrive[];
+extern const u8 BattleScript_G4RockOnAttacker[];
+extern const u8 BattleScript_G4RockOnTarget[];
+extern const u8 BattleScript_G4RockOnFainted[];
+extern const u8 BattleScript_G4ToxicSpikesGone[];
+extern const u8 BattleScript_G4ToxicSpikesPoisoned[];
+extern const u8 BattleScript_G4ToxicSpikesBadlyPoisoned[];
+extern const u8 BattleScript_G4TurnHeal[];
+extern const u8 BattleScript_G4TurnHurt[];
+extern const u8 BattleScript_G4TurnMsg[];
+extern const u8 BattleScript_G4TurnStatus[];
+extern const u8 BattleScript_G4TurnStatusAnim[];
+extern const u8 BattleScript_G4AbilityStat[];
+extern const u8 BattleScript_G4AbilityMsg[];
+extern const u8 BattleScript_G4SnowWarning[];
+extern const u8 BattleScript_G4MoveBanned[];
+extern const u8 BattleScript_G4RemoveTargetItem[];
+extern const u8 BattleScript_G4AngerPoint[];
+extern const u8 BattleScript_G4AttackerHurt[];
+extern const u8 BattleScript_G4TargetBerryMsg[];
+extern const u8 BattleScript_G4BerryHurtsAttacker[];
+extern const u8 BattleScript_G4Custap[];
+extern const u8 BattleScript_G4MotorDrive[];
+extern const u8 BattleScript_G4MotorDrive_PPLoss[];
+
 #endif // GUARD_BATTLE_SCRIPTS_H

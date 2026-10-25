@@ -102,5 +102,12 @@
 #define HOLD_EFFECT_BIG_ROOT           97
 #define HOLD_EFFECT_CHOICE_SPECS       98
 // end of Gen 4 hold effects
+// Moemon Kai: Gen 4 berry hold effects (tools/moemon_gen4/gen_berries.py)
+#define HOLD_EFFECT_RESIST_BERRY       99
+#define HOLD_EFFECT_MICLE_BERRY        100
+#define HOLD_EFFECT_CUSTAP_BERRY       101
+#define HOLD_EFFECT_JABOCA_BERRY       102
+#define HOLD_EFFECT_ROWAP_BERRY        103
+// end of Gen 4 berry hold effects
 
 #endif // GUARD_HOLD_EFFECTS_H

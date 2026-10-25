@@ -1705,3 +1705,48 @@ EAT + food) and does it at the end if the plot still needs it (MP_Farm_DoWork; a
 "is looking after the BERRY plants.").
 Debug `mp farm state|plant PLOT BERRY [STAGE]|grow MINUTES|ripe PLOT`, `mp life garden force ACTOR 20` (GA_FARM: the
 work its nature picks). Tests farm_solo, farm_together (NA-JP lag).
+
+## Gen 4 battles (src/battle_gen4.c, include/battle_gen4.h, data/battle_scripts_gen4.inc)
+The engine stays Gen 3's; battle_gen4.c adds what Gen 4 changed. State: gGen4Battlers (EMBARGO, HEAL BLOCK, MAGNET RISE,
+SLOW START, AQUA RING, ROOST, choice lock, METRONOME count, LAST RESORT slots, arrival / end-turn steps), gGen4Sides
+(TAILWIND, LUCKY CHANT, TOXIC SPIKES, STEALTH ROCK, HEALING WISH / LUNAR DANCE) and gGen4Field (GRAVITY, TRICK ROOM,
+COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_BattleStart); a switch-in resets the battler
+(BATON PASS keeps what Gen 4 passes).
+- Physical / special: OPTIONS > GAME > MOVE KIND (GEN 3 by type, GEN 4 by move: gMoveCategories); online the host's
+  (MPR_RULES byte 4, protocol 49). MP_IsPhysicalMove decides; Counter / Mirror Coat / Hustle follow it.
+- Moves 355-467 have effects 214-266. struct BattleMove.effect is a u16 since then (a u8 wrapped 256+ around:
+  SHADOW FORCE ran "ATTACK UP"). The scripts use one command, `gen4 MODE, ptr` (0xFE, constants/battle_gen4.h G4_*):
+  each mode goes on, jumps to ptr (usually "but it failed"), or moves the script itself (ME FIRST, COPYCAT, POWER HERB).
+  MOVE_EFFECT 55 / 56 = CLOSE COMBAT's DEF + SP. DEF drop and HEAD SMASH's 1/2 recoil. SHADOW FORCE vanishes with
+  STATUS3_PHANTOM (part of STATUS3_SEMI_INVULNERABLE: nothing hits it) and lifts PROTECT on its second turn.
+- Damage: MP_Gen4_MovePower (GYRO BALL, BRINE, PAYBACK, PUNISHMENT...), MP_Gen4_AttackStats, MP_Gen4_FinalDamage
+  (LIFE ORB, EXPERT BELT, FILTER, TINTED LENS...), MP_Gen4_Stab (ADAPTABILITY), MP_Gen4_MoveType (JUDGMENT, NORMALIZE,
+  NATURAL GIFT), MP_Gen4_TargetAbility (MOLD BREAKER), crit stages and SNIPER, accuracy (NO GUARD, GRAVITY, ZOOM LENS...),
+  MP_Gen4_OrderKey (TRICK ROOM, TAILWIND, CHOICE SCARF, UNBURDEN, QUICK FEET, STALL, LAGGING TAIL, SLOW START).
+- Arrival (Cmd_switchineffects, before SPIKES, one effect per pass): HEALING WISH / LUNAR DANCE (the status and PP go to
+  the games by G4_ARRIVE_SYNC, one controller message at a time), STEALTH ROCK (1/8 x ROCK effectiveness), TOXIC SPIKES
+  (grounded; a POISON type takes them away). Arrival abilities (ABILITYEFFECT_ON_SWITCHIN -> MP_Gen4_SwitchInAbility):
+  DOWNLOAD, ANTICIPATION, FOREWARN, FRISK, SNOW WARNING (B_WEATHER_HAIL_PERMANENT), MOLD BREAKER, SLOW START.
+- Before a move: GRAVITY and HEAL BLOCK stop the moves they ban (MP_Gen4_MoveBanned in HandleAction_UseMove).
+  POWER HERB: BattleScriptFirstChargingTurn ends with G4_CHARGE_HERB; the move's script runs again and takes its
+  second-turn path (STATUS2_MULTIPLETURNS is already set).
+- Move end (MOVEEND_KINGSROCK_SHELLBELL -> MP_Gen4_MoveEnd, once a move each): FOCUS SASH used up, ANGER POINT,
+  AFTERMATH, LIFE ORB recoil. FOCUS SASH holds in the four FOCUS BAND spots (MP_Gen4_FocusSash).
+- End of turn: ENDTURN_GEN4 per battler (AQUA RING, POISON HEAL, DRY SKIN / SOLAR POWER / ICE BODY, HYDRATION, BLACK
+  SLUDGE, BAD DREAMS, TOXIC / FLAME ORB, STICKY BARB, the EMBARGO / HEAL BLOCK / MAGNET RISE / SLOW START counters) and
+  ENDTURN_GEN4_FIELD (GRAVITY, TRICK ROOM, TAILWIND, LUCKY CHANT). Messages come from gGen4TurnStringIds via
+  cMULTISTRING_CHOOSER. MAGIC GUARD skips poison, burn, LEECH SEED, NIGHTMARE, CURSE, recoil and the Gen 4 hurts.
+- Also: SIMPLE (ChangeStatBuffs), SKILL LINK, BIG ROOT, LIGHT CLAY, the weather rocks, CHOICE SCARF / SPECS lock
+  (MP_IS_CHOICE_ITEM where CHOICE BAND was), UNBURDEN (Cmd_removeitem), MOTOR DRIVE and DRY SKIN's water absorb.
+- Strings: STRINGID_G4_* from 420 (tools/moemon_gen4/gen_battle_strings.py).
+- Gen 4 BERRIES (items 474-493, berry numbers 59-78 after the e-Reader ones: IS_GEN4_BERRY, FIRST_GEN4_BERRY_TYPE in
+  ITEM_TO_BERRY / BERRY_TO_ITEM; tools/moemon_gen4/gen_berries.py writes src/data/berries_gen4.h, whose macros the
+  berry-number tables include). Kai's own CHILAN BERRY (e-Reader, 381) only gained the NORMAL resist. Battle: the
+  type-resist BERRIES halve the hit (MP_Gen4_FinalDamage) and are eaten when the move ends with "The X weakened the
+  damage", JABOCA / ROWAP hurt a physical / special attacker by 1/8, MICLE gives the next move x1.2 accuracy,
+  CUSTAP moves first at 1/4 HP (MP_Gen4_OrderKey, eaten in MP_Gen4_BeforeMove). Trees: a vanilla tree of the berry's
+  color. They have no place to be found yet (debug `mp additem`); the other regions will sell or grow them.
+- Not yet: STEADFAST, LEAF GUARD, STORM DRAIN's redirect, STICKY BARB passing on contact, and real animations for
+  the moves still borrowing Gen 3 ones (data/battle_anim_scripts_gen4.inc).
+Debug `mp g4side SIDE ROCK TSPIKES WISH` lays hazards (0 = the player's side), `mp setmove SLOT IDX MOVE`, `mp hold SLOT ITEM`,
+`mp foehold ITEM` (in a battle: the first foe holds ITEM).

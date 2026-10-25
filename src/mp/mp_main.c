@@ -126,6 +126,7 @@ static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
 static s8 sRoomHostId = -1;          // ... and who sent them (the host's player id)
 static bool8 sRoomLevelScaling;
+static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
 static s64 sHostClockOffset;      // the host's local time minus our time(NULL), in seconds
@@ -134,6 +135,7 @@ static u8 sRoomAnimSpeed;
 static bool8 OwnPadding(void);
 static u8 OwnAnimSpeed(void);
 static bool8 OwnLevelScaling(void);
+static bool8 OwnMoveSplit(void);
 static void ShowWelcome(u8 from, const u8 *text, u16 len);
 
 // Button icons in co-op text: "{A}", "{START}", "{LT}"... (mp_buttons.c draws the controller's)
@@ -309,6 +311,7 @@ static void LoadConfig(void)
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.levelScaling = TRUE;
+    gMpConfig.moveSplit = TRUE;
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
@@ -375,6 +378,7 @@ static void LoadConfig(void)
         }
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "level_scaling") == 0) gMpConfig.levelScaling = atoi(val) != 0;
+        else if (strcmp(key, "move_split") == 0) gMpConfig.moveSplit = atoi(val) != 0;
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
@@ -488,6 +492,8 @@ void MP_SaveConfig(void)
         "trainer_padding = %d\n"
         "; OPTIONS > GAME > LEVEL SCALING: wild Pokemon and trainers keep up with your team (online, the host's counts)\n"
         "level_scaling = %d\n"
+        "; OPTIONS > GAME > MOVE KIND: 1 = each move physical or special on its own (Gen 4), 0 = by type (Gen 3)\n"
+        "move_split = %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
@@ -504,7 +510,7 @@ void MP_SaveConfig(void)
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.animSpeed,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
@@ -1205,6 +1211,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomPadding = data[1] != 0;
             sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomLevelScaling = len >= 4 ? data[3] != 0 : TRUE;
+            sRoomMoveSplit = len >= 5 ? data[4] != 0 : TRUE;
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1329,8 +1336,8 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[4] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
-        MP_SendRelay(id, rules, 4);
+        u8 rules[5] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling(), OwnMoveSplit()};
+        MP_SendRelay(id, rules, 5);
         SendClock(id);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
@@ -1413,6 +1420,22 @@ static bool8 OwnLevelScaling(void)
     return gMpConfig.levelScaling;
 }
 
+// Moemon Kai: OPTIONS > GAME > MOVE KIND: GEN 4 = each move is physical or special on its own (gMoveCategories);
+// GEN 3 = by its type, as Kai was. Online, the host's counts.
+static bool8 OwnMoveSplit(void)
+{
+    if (getenv("MOEMON_MOVE_SPLIT"))   // tests
+        return atoi(getenv("MOEMON_MOVE_SPLIT")) != 0;
+    return gMpConfig.moveSplit;
+}
+
+bool8 MP_MoveSplit(void)
+{
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomMoveSplit;
+    return OwnMoveSplit();
+}
+
 bool8 MP_LevelScalingIsOurs(void)   // not a joiner who heard the host's rules
 {
     return sLobby.creator || !sRoomRulesHeard;
@@ -1428,7 +1451,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[4];
+    u8 rules[5];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1436,9 +1459,10 @@ void MP_SendRoomRules(void)
     rules[1] = OwnPadding();
     rules[2] = OwnAnimSpeed();
     rules[3] = OwnLevelScaling();
+    rules[4] = OwnMoveSplit();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
-            MP_SendRelay(i, rules, 4);
+            MP_SendRelay(i, rules, 5);
 }
 
 bool8 MP_TrainerPadding(void)

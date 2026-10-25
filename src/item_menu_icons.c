@@ -10,6 +10,7 @@
 #include "sprite.h"
 #include "window.h"
 #include "constants/items.h"
+#include "data/berries_gen4.h"   // Moemon Kai: Gen 4 berries
 
 enum {
     TAG_BAG_GFX = 100,
@@ -382,6 +383,7 @@ static const struct CompressedTilesPal sBerryPicTable[] =
     [BERRY_SLOT(ITEM_TOUGA_BERRY)] = {gBerryPic_Touga, gBerryPalette_Touga},
     [BERRY_SLOT(ITEM_NINIKU_BERRY)] = {gBerryPic_Niniku, gBerryPalette_Niniku},
     [BERRY_SLOT(ITEM_TOPO_BERRY)] = {gBerryPic_Topo, gBerryPalette_Topo},
+    BERRY_PICS_GEN4
 };
 
 const struct CompressedSpriteSheet gBerryCheckCircleSpriteSheet =

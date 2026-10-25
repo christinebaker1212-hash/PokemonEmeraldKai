@@ -1564,7 +1564,7 @@ static void SetOpponentsBerryData(u16 playerBerryItemId, u8 playersNum, struct B
     u16 berryMasterDiff;
     u16 i;
 
-    if (playerBerryItemId == ITEM_ENIGMA_BERRY || IS_EREADER_BERRY(playerBerryItemId))   // Moemon Kai: e-Reader Berries too
+    if (playerBerryItemId == ITEM_ENIGMA_BERRY || IS_EREADER_BERRY(playerBerryItemId) || IS_GEN4_BERRY(playerBerryItemId))   // Moemon Kai: e-Reader Berries too
     {
         for (i = 0; i < FLAVOR_COUNT; i++)
         {

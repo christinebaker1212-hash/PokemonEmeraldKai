@@ -197,7 +197,8 @@ enum BattlerId
 #define STATUS3_UNDERWATER              (1 << 18)
 #define STATUS3_INTIMIDATE_POKES        (1 << 19)
 #define STATUS3_TRACE                   (1 << 20)
-#define STATUS3_SEMI_INVULNERABLE       (STATUS3_UNDERGROUND | STATUS3_ON_AIR | STATUS3_UNDERWATER)
+#define STATUS3_PHANTOM                 (1 << 24) // Moemon Kai: SHADOW FORCE's first turn
+#define STATUS3_SEMI_INVULNERABLE       (STATUS3_UNDERGROUND | STATUS3_ON_AIR | STATUS3_UNDERWATER | STATUS3_PHANTOM)
 
 // Not really sure what a "hitmarker" is.
 #define HITMARKER_WAKE_UP_CLEAR         (1 << 4) // Cleared when waking up. Never set or checked.
@@ -262,7 +263,8 @@ enum BattlerId
 #define B_WEATHER_SUN_PERMANENT       (1 << 6)
 #define B_WEATHER_SUN                 (B_WEATHER_SUN_TEMPORARY | B_WEATHER_SUN_PERMANENT)
 #define B_WEATHER_HAIL_TEMPORARY      (1 << 7)
-#define B_WEATHER_HAIL                (B_WEATHER_HAIL_TEMPORARY)
+#define B_WEATHER_HAIL_PERMANENT      (1 << 8)  // Moemon Kai: SNOW WARNING
+#define B_WEATHER_HAIL                (B_WEATHER_HAIL_TEMPORARY | B_WEATHER_HAIL_PERMANENT)
 #define B_WEATHER_ANY                 (B_WEATHER_RAIN | B_WEATHER_SANDSTORM | B_WEATHER_SUN | B_WEATHER_HAIL)
 
 // Move Effects
@@ -321,8 +323,8 @@ enum BattlerId
 #define MOVE_EFFECT_EVS_MINUS_2         52
 #define MOVE_EFFECT_THRASH              53
 #define MOVE_EFFECT_KNOCK_OFF           54
-#define MOVE_EFFECT_NOTHING_37          55
-#define MOVE_EFFECT_NOTHING_38          56
+#define MOVE_EFFECT_DEF_SPDEF_DOWN      55 // Moemon Kai: CLOSE COMBAT
+#define MOVE_EFFECT_RECOIL_50          56 // Moemon Kai: HEAD SMASH
 #define MOVE_EFFECT_NOTHING_39          57
 #define MOVE_EFFECT_NOTHING_3A          58
 #define MOVE_EFFECT_SP_ATK_TWO_DOWN     59

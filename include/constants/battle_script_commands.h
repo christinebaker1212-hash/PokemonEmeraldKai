@@ -257,6 +257,7 @@ enum BattleScriptOpcode
     B_SCR_OP_MPWEATHERGROUP, // Moemon Co-op: sandstorm / hail hit everyone at once, one line
     B_SCR_OP_MPWEATHERMSG,   // Moemon Co-op: a weather's "continues" line only the first time
     B_SCR_OP_MPJOIN,         // Moemon Co-op: friends joining a battle in progress come in (mp_join.c)
+    B_SCR_OP_GEN4,           // Moemon Kai: Gen 4's effects (battle_gen4.c, constants/battle_gen4.h)
 };
 
 // Moemon Co-op: mpjoin modes

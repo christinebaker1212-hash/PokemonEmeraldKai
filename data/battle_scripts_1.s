@@ -3,6 +3,7 @@
 #include "constants/pokemon.h"
 #include "constants/battle_arena.h"
 #include "constants/battle_script_commands.h"
+#include "constants/battle_gen4.h"
 #include "constants/battle_anim.h"
 #include "constants/battle_string_ids.h"
 #include "constants/abilities.h"
@@ -534,6 +535,7 @@ BattleScript_EffectEvasionDown::
 	setstatchanger STAT_EVASION, 1, TRUE
 BattleScript_EffectStatDown::
 	attackcanceler
+BattleScript_EffectStatDownAfterAtkCanceler::   @ Moemon Kai
 	jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_FailedFromAtkString
 	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
 	attackstring
@@ -807,6 +809,7 @@ BattleScriptFirstChargingTurn::
 	copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID
 	printfromtable gFirstTurnOfTwoStringIds
 	waitmessage B_WAIT_TIME_LONG
+	gen4 G4_CHARGE_HERB, BattleScript_G4PowerHerb   @ Moemon Kai
 	return
 
 BattleScript_EffectSuperFang::
@@ -4097,6 +4100,7 @@ BattleScript_MoveEffectConfusion::
 BattleScript_MoveEffectRecoil::
 	jumpifmove MOVE_STRUGGLE, BattleScript_DoRecoil
 	jumpifability BS_ATTACKER, ABILITY_ROCK_HEAD, BattleScript_RecoilEnd
+	jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_RecoilEnd   @ Moemon Kai
 BattleScript_DoRecoil::
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE
 	healthbarupdate BS_ATTACKER

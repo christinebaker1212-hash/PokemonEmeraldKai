@@ -14,6 +14,7 @@
 #include "text.h"
 #include "constants/event_object_movement.h"
 #include "constants/items.h"
+#include "data/berries_gen4.h"   // Moemon Kai: Gen 4 berries
 
 static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry);
 static bool32 BerryTreeGrow(struct BerryTree *tree);
@@ -137,6 +138,8 @@ static const u8 sBerryDescriptionPart1_Niniku[] = _("Its pungent smell fills a w
 static const u8 sBerryDescriptionPart2_Niniku[] = _("Dry and bitter: a POKéBLOCK favorite.");
 static const u8 sBerryDescriptionPart1_Topo[] = _("Grows under the soil like a root. Its");
 static const u8 sBerryDescriptionPart2_Topo[] = _("flesh is sweet and a little sour.");
+
+BERRY_TAG_TEXT_GEN4
 
 const struct Berry gBerries[] =
 {
@@ -1129,6 +1132,7 @@ const struct Berry gBerries[] =
         .sour = 30,
         .smoothness = 85,
     },
+    BERRIES_GEN4
 };
 
 const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
@@ -1187,6 +1191,7 @@ const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
     [BERRY_SLOT(ITEM_TOUGA_BERRY)] = {.difficulty = 150, .powder = 200},
     [BERRY_SLOT(ITEM_NINIKU_BERRY)] = {.difficulty = 150, .powder = 200},
     [BERRY_SLOT(ITEM_TOPO_BERRY)] = {.difficulty = 150, .powder = 200},
+    BERRY_CRUSH_GEN4
 };
 
 const struct BerryTree gBlankBerryTree = {};

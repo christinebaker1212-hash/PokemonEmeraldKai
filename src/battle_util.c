@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -290,6 +291,19 @@ void HandleAction_UseMove(void)
     else
     {
         gBattlescriptCurrInstr = gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect];
+    }
+    MP_Gen4_OnMoveStart(gBattlerAttacker, gCurrentMove);   // Moemon Kai: PAYBACK, METRONOME, COPYCAT, LAST RESORT
+    {
+        const u8 *banned = MP_Gen4_MoveBanned(gBattlerAttacker, gCurrentMove);   // Moemon Kai: GRAVITY, HEAL BLOCK
+        if (banned != NULL)
+        {
+            gBattlescriptCurrInstr = banned;
+        }
+        else if ((banned = MP_Gen4_BeforeMove(gBattlerAttacker)) != NULL)   // CUSTAP BERRY: its message, then the move
+        {
+            BattleScriptPush(gBattlescriptCurrInstr);
+            gBattlescriptCurrInstr = banned;
+        }
     }
 
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
@@ -1162,7 +1176,7 @@ u8 TrySetCantSelectMoveBattleScript(void)
 
     gPotentialItemEffectBattler = gActiveBattler;
 
-    if (holdEffect == HOLD_EFFECT_CHOICE_BAND && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != move)
+    if (MP_IS_CHOICE_ITEM(holdEffect) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != move)
     {
         gCurrentMove = *choicedMove;
         gLastUsedItem = gBattleMons[gActiveBattler].item;
@@ -1230,7 +1244,7 @@ u8 CheckMoveLimitations(u8 battler, u8 unusableMoves, u8 check)
         if (gDisableStructs[battler].encoreTimer && gDisableStructs[battler].encoredMove != gBattleMons[battler].moves[i])
             unusableMoves |= gBitTable[i];
         // Choice Band
-        if (holdEffect == HOLD_EFFECT_CHOICE_BAND && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
+        if (MP_IS_CHOICE_ITEM(holdEffect) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])
             unusableMoves |= gBitTable[i];
     }
     return unusableMoves;
@@ -1289,6 +1303,7 @@ enum
     ENDTURN_SANDSTORM,
     ENDTURN_SUN,
     ENDTURN_HAIL,
+    ENDTURN_GEN4_FIELD,  // Moemon Kai: GRAVITY, TRICK ROOM, TAILWIND, LUCKY CHANT
     ENDTURN_FIELD_COUNT,
 };
 
@@ -1526,7 +1541,7 @@ u8 DoFieldEndTurnEffects(void)
         case ENDTURN_HAIL:
             if (gBattleWeather & B_WEATHER_HAIL)
             {
-                if (--gWishFutureKnock.weatherDuration == 0)
+                if (!(gBattleWeather & B_WEATHER_HAIL_PERMANENT) && --gWishFutureKnock.weatherDuration == 0)
                 {
                     gBattleWeather &= ~B_WEATHER_HAIL_TEMPORARY;
                     gBattlescriptCurrInstr = BattleScript_SandStormHailEnds;
@@ -1543,6 +1558,20 @@ u8 DoFieldEndTurnEffects(void)
             }
             gBattleStruct->turnCountersTracker++;
             break;
+        case ENDTURN_GEN4_FIELD:
+        {
+            const u8 *gen4 = MP_Gen4_FieldEndTurn();
+            if (gen4 != NULL)
+            {
+                BattleScriptExecute(gen4);
+                effect++;
+            }
+            else
+            {
+                gBattleStruct->turnCountersTracker++;
+            }
+            break;
+        }
         case ENDTURN_FIELD_COUNT:
             effect++;
             break;
@@ -1572,6 +1601,7 @@ enum
     ENDTURN_TAUNT,
     ENDTURN_YAWN,
     ENDTURN_ITEMS2,
+    ENDTURN_GEN4,        // Moemon Kai: AQUA RING, Gen 4 abilities and items, Gen 4 timers
     ENDTURN_BATTLER_COUNT
 };
 
@@ -1592,7 +1622,7 @@ u8 DoBattlerEndTurnEffects(void)
             switch (gBattleStruct->turnEffectsTracker)
             {
             case ENDTURN_INGRAIN:  // ingrain
-                if ((gStatuses3[gActiveBattler] & STATUS3_ROOTED)
+                if ((gStatuses3[gActiveBattler] & STATUS3_ROOTED) && !gGen4Battlers[gActiveBattler].healBlock
                  && gBattleMons[gActiveBattler].hp != gBattleMons[gActiveBattler].maxHP
                  && gBattleMons[gActiveBattler].hp != 0)
                 {
@@ -1621,7 +1651,7 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_LEECH_SEED:  // leech seed
-                if ((gStatuses3[gActiveBattler] & STATUS3_LEECHSEED)
+                if ((gStatuses3[gActiveBattler] & STATUS3_LEECHSEED) && !MP_Gen4_NoIndirectDamage(gActiveBattler)
                  && gBattleMons[STATUS3_LEECHSEED_SOURCE(gStatuses3[gActiveBattler])].hp != 0
                  && gBattleMons[gActiveBattler].hp != 0)
                 {
@@ -1637,7 +1667,8 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_POISON:  // poison
-                if ((gBattleMons[gActiveBattler].status1 & STATUS1_POISON) && gBattleMons[gActiveBattler].hp != 0)
+                if ((gBattleMons[gActiveBattler].status1 & STATUS1_POISON) && gBattleMons[gActiveBattler].hp != 0
+                 && !MP_Gen4_NoIndirectDamage(gActiveBattler) && !MP_Gen4_PoisonHeal(gActiveBattler))
                 {
                     gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP / 8;
                     if (gBattleMoveDamage == 0)
@@ -1648,7 +1679,8 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_BAD_POISON:  // toxic poison
-                if ((gBattleMons[gActiveBattler].status1 & STATUS1_TOXIC_POISON) && gBattleMons[gActiveBattler].hp != 0)
+                if ((gBattleMons[gActiveBattler].status1 & STATUS1_TOXIC_POISON) && gBattleMons[gActiveBattler].hp != 0
+                 && !MP_Gen4_NoIndirectDamage(gActiveBattler) && !MP_Gen4_PoisonHeal(gActiveBattler))
                 {
                     gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP / 16;
                     if (gBattleMoveDamage == 0)
@@ -1662,7 +1694,8 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_BURN:  // burn
-                if ((gBattleMons[gActiveBattler].status1 & STATUS1_BURN) && gBattleMons[gActiveBattler].hp != 0)
+                if ((gBattleMons[gActiveBattler].status1 & STATUS1_BURN) && gBattleMons[gActiveBattler].hp != 0
+                 && !MP_Gen4_NoIndirectDamage(gActiveBattler)) // Moemon Kai: MAGIC GUARD
                 {
                     gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP / 8;
                     if (gBattleMoveDamage == 0)
@@ -1673,7 +1706,8 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_NIGHTMARES:  // spooky nightmares
-                if ((gBattleMons[gActiveBattler].status2 & STATUS2_NIGHTMARE) && gBattleMons[gActiveBattler].hp != 0)
+                if ((gBattleMons[gActiveBattler].status2 & STATUS2_NIGHTMARE) && gBattleMons[gActiveBattler].hp != 0
+                 && !MP_Gen4_NoIndirectDamage(gActiveBattler)) // Moemon Kai: MAGIC GUARD
                 {
                     // R/S does not perform this sleep check, which causes the nightmare effect to
                     // persist even after the affected Pokémon has been awakened by Shed Skin.
@@ -1693,7 +1727,8 @@ u8 DoBattlerEndTurnEffects(void)
                 gBattleStruct->turnEffectsTracker++;
                 break;
             case ENDTURN_CURSE:  // curse
-                if ((gBattleMons[gActiveBattler].status2 & STATUS2_CURSED) && gBattleMons[gActiveBattler].hp != 0)
+                if ((gBattleMons[gActiveBattler].status2 & STATUS2_CURSED) && gBattleMons[gActiveBattler].hp != 0
+                 && !MP_Gen4_NoIndirectDamage(gActiveBattler)) // Moemon Kai: MAGIC GUARD
                 {
                     gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP / 4;
                     if (gBattleMoveDamage == 0)
@@ -1883,6 +1918,20 @@ u8 DoBattlerEndTurnEffects(void)
                 }
                 gBattleStruct->turnEffectsTracker++;
                 break;
+            case ENDTURN_GEN4:
+            {
+                const u8 *gen4 = MP_Gen4_BattlerEndTurn(gActiveBattler);
+                if (gen4 != NULL)
+                {
+                    BattleScriptExecute(gen4);
+                    effect++;
+                }
+                else
+                {
+                    gBattleStruct->turnEffectsTracker++;
+                }
+                break;
+            }
             case ENDTURN_BATTLER_COUNT:  // done
                 gBattleStruct->turnEffectsTracker = 0;
                 gBattleStruct->turnEffectsBattlerId++;
@@ -2186,7 +2235,7 @@ u8 AtkCanceler_UnableToUseMove(void)
             {
                 if (Random() % 5)
                 {
-                    if (gBattleMoves[gCurrentMove].effect != EFFECT_THAW_HIT) // unfreezing via a move effect happens in case 13
+                    if (gBattleMoves[gCurrentMove].effect != EFFECT_THAW_HIT && gBattleMoves[gCurrentMove].effect != EFFECT_FLARE_BLITZ) // unfreezing via a move effect happens in case 13
                     {
                         gBattlescriptCurrInstr = BattleScript_MoveUsedIsFrozen;
                         gHitMarker |= HITMARKER_NO_ATTACKSTRING;
@@ -2375,7 +2424,7 @@ u8 AtkCanceler_UnableToUseMove(void)
         case CANCELER_THAW: // move thawing
             if (gBattleMons[gBattlerAttacker].status1 & STATUS1_FREEZE)
             {
-                if (gBattleMoves[gCurrentMove].effect == EFFECT_THAW_HIT)
+                if (gBattleMoves[gCurrentMove].effect == EFFECT_THAW_HIT || gBattleMoves[gCurrentMove].effect == EFFECT_FLARE_BLITZ) // Moemon Kai
                 {
                     gBattleMons[gBattlerAttacker].status1 &= ~STATUS1_FREEZE;
                     BattleScriptPushCursor();
@@ -2792,6 +2841,15 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u8 ability, u8 special, u16 moveA
                     effect++;
                 }
                 break;
+            case ABILITY_DOWNLOAD:      // Moemon Kai: Gen 4 abilities that act on arrival
+            case ABILITY_ANTICIPATION:
+            case ABILITY_FOREWARN:
+            case ABILITY_FRISK:
+            case ABILITY_SNOW_WARNING:
+            case ABILITY_MOLD_BREAKER:
+            case ABILITY_SLOW_START:
+                effect = MP_Gen4_SwitchInAbility(battler);
+                break;
             case ABILITY_INTIMIDATE:
                 if (!(gSpecialStatuses[battler].intimidatedMon))
                 {
@@ -2926,6 +2984,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u8 ability, u8 special, u16 moveA
                     }
                     break;
                 case ABILITY_WATER_ABSORB:
+                case ABILITY_DRY_SKIN: // Moemon Kai
                     if (moveType == TYPE_WATER && gBattleMoves[move].power != 0)
                     {
                         if (gProtectStructs[gBattlerAttacker].notFirstStrike)
@@ -2934,6 +2993,17 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u8 ability, u8 special, u16 moveA
                             gBattlescriptCurrInstr = BattleScript_MoveHPDrain_PPLoss;
 
                         effect = 1;
+                    }
+                    break;
+                case ABILITY_MOTOR_DRIVE: // Moemon Kai: every ELECTRIC move, and +1 SPEED
+                    if (moveType == TYPE_ELECTRIC)
+                    {
+                        gBattleScripting.battler = battler;
+                        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
+                            gBattlescriptCurrInstr = BattleScript_G4MotorDrive;
+                        else
+                            gBattlescriptCurrInstr = BattleScript_G4MotorDrive_PPLoss;
+                        effect = 2;
                     }
                     break;
                 case ABILITY_FLASH_FIRE:

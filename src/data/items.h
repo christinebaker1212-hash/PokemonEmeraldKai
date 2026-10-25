@@ -4622,6 +4622,8 @@ const struct Item gItems[] =
         .name = _("CHILAN BERRY"),
         .itemId = ITEM_CHILAN_BERRY,
         .price = 20,
+        .holdEffect = HOLD_EFFECT_RESIST_BERRY,   // Moemon Kai: Gen 4's CHILAN BERRY: a NORMAL move halved
+        .holdEffectParam = TYPE_NORMAL,
         .description = sChilanBerryDesc,
         .pocket = POCKET_BERRIES,
         .type = ITEM_USE_BAG_MENU,
@@ -4841,4 +4843,5 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
     },
 #include "items_gen4.h"   // Moemon Kai: Gen 4 items
+#include "items_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 };

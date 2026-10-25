@@ -23,6 +23,7 @@ EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 
 #include "data/text/item_descriptions.h"
 #include "data/text/item_descriptions_gen4.h"   // Moemon Kai: Gen 4 items
+#include "data/text/item_descriptions_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 #include "data/items.h"
 
 static u16 GetBagItemQuantity(u16 *quantity)
@@ -149,10 +150,12 @@ bool8 HasAtLeastOneBerry(void)
 {
     u16 i;
 
-    for (i = FIRST_BERRY_INDEX; i <= LAST_EREADER_BERRY; i++)
+    for (i = FIRST_BERRY_INDEX; i <= LAST_GEN4_BERRY; i++)
     {
         if (i == ITEM_BRIGHT_POWDER)
             i = FIRST_EREADER_BERRY;   // Moemon Kai: and the e-Reader Berries
+        if (i == LAST_EREADER_BERRY + 1)
+            i = FIRST_GEN4_BERRY;      // and the Gen 4 ones
         if (CheckBagHasItem(i, 1) == TRUE)
         {
             gSpecialVar_Result = TRUE;

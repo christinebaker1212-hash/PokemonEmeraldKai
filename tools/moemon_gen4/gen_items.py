@@ -132,7 +132,7 @@ def main():
     body = ''.join('#define %s %d\n' % (c, i) for c, i in ids.items())
     body += '#define FIRST_GEN4_ITEM ITEM_X_SP_DEF\n#define LAST_GEN4_ITEM  %s\n' % ITEMS[-1][0]
     body += '#define FIRST_PLATE_ITEM ITEM_FLAME_PLATE\n#define LAST_PLATE_ITEM  ITEM_IRON_PLATE\n'
-    body += '\n#define ITEMS_COUNT %d\n' % (FIRST_ID + len(ITEMS))
+    # ITEMS_COUNT: after the Gen 4 berries (gen_berries.py)
     block('include/constants/items.h', '// Moemon Kai: Gen 4 items (tools/moemon_gen4/gen_items.py)',
           '// end of Gen 4 items', body)
 

@@ -1,3 +1,4 @@
+#include "../berries_gen4.h"   // Moemon Kai: Gen 4 berries
 static const struct SpriteFrameImage sPicTable_PechaBerryTree[] = {
     overworld_frame(gObjectEventPic_BerryTreeDirtPile, 2, 2, 0),
     overworld_frame(gObjectEventPic_BerryTreeSprout, 2, 2, 0),
@@ -479,6 +480,7 @@ const struct SpriteFrameImage *const gBerryTreePicTablePointers[] = {
     [BERRY_SLOT(ITEM_TOUGA_BERRY)] = sPicTable_PomegBerryTree,
     [BERRY_SLOT(ITEM_NINIKU_BERRY)] = sPicTable_PechaBerryTree,
     [BERRY_SLOT(ITEM_TOPO_BERRY)] = sPicTable_SpelonBerryTree,
+    BERRY_TREE_PICS_GEN4
 };
 
 const u8 *const gBerryTreePaletteSlotTablePointers[] = {
@@ -537,6 +539,7 @@ const u8 *const gBerryTreePaletteSlotTablePointers[] = {
     [BERRY_SLOT(ITEM_TOUGA_BERRY)] = gBerryTreePaletteSlotTable_Pomeg,
     [BERRY_SLOT(ITEM_NINIKU_BERRY)] = gBerryTreePaletteSlotTable_Pecha,
     [BERRY_SLOT(ITEM_TOPO_BERRY)] = gBerryTreePaletteSlotTable_Spelon,
+    BERRY_TREE_PALETTES_GEN4
 };
 
 const u8 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
@@ -599,4 +602,5 @@ const u8 *const gBerryTreeObjectEventGraphicsIdTablePointers[] = {
     [BERRY_SLOT(ITEM_TOUGA_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
     [BERRY_SLOT(ITEM_NINIKU_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
     [BERRY_SLOT(ITEM_TOPO_BERRY)] = gBerryTreeObjectEventGraphicsIdTable,
+    BERRY_TREE_GFX_IDS_GEN4
 };

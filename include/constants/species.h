@@ -525,6 +525,7 @@
 #define SPECIES_ARCEUS 518
 #define FIRST_GEN4_SPECIES SPECIES_TURTWIG
 #define LAST_GEN4_SPECIES  SPECIES_ARCEUS
+#define IS_GEN4_SPECIES(species) ((species) >= FIRST_GEN4_SPECIES && (species) <= LAST_GEN4_SPECIES)
 #define SPECIES_EGG 519
 // end of Gen 4 species
 

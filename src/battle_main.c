@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -3296,6 +3297,7 @@ static void BattleStartClearSetData(void)
 
     TurnValuesCleanUp(FALSE);
     SpecialStatusesClear();
+    MP_Gen4_BattleStart();   // Moemon Kai
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
@@ -3410,6 +3412,8 @@ void SwitchInClearSetData(void)
     s32 i;
     u8 *ptr;
 
+    MP_Gen4_SwitchIn(gActiveBattler, gBattleMoves[gCurrentMove].effect == EFFECT_BATON_PASS);   // Moemon Kai
+
     if (gBattleMoves[gCurrentMove].effect != EFFECT_BATON_PASS)
     {
         for (i = 0; i < NUM_BATTLE_STATS; i++)
@@ -3517,6 +3521,8 @@ void FaintClearSetData(void)
 {
     s32 i;
     u8 *ptr;
+
+    MP_Gen4_SwitchIn(gActiveBattler, FALSE);   // Moemon Kai
 
     for (i = 0; i < NUM_BATTLE_STATS; i++)
         gBattleMons[gActiveBattler].statStages[i] = DEFAULT_STAT_STAGE;
@@ -4273,6 +4279,7 @@ void BattleTurnPassed(void)
         return;
 
     TurnValuesCleanUp(FALSE);
+    MP_Gen4_TurnEnd();   // Moemon Kai
     gHitMarker &= ~HITMARKER_NO_ATTACKSTRING;
     gHitMarker &= ~HITMARKER_UNABLE_TO_USE_MOVE;
     gHitMarker &= ~HITMARKER_PLAYER_FAINTED;
@@ -5058,6 +5065,10 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
 
     if (holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100)
         speedBattler2 = UINT_MAX;
+
+    // Moemon Kai: Gen 4's order: CHOICE SCARF, TAILWIND, TRICK ROOM, STALL / LAGGING TAIL last...
+    speedBattler1 = MP_Gen4_OrderKey(battler1, speedBattler1, 0);
+    speedBattler2 = MP_Gen4_OrderKey(battler2, speedBattler2, 0);
 
     if (ignoreChosenMoves)
     {

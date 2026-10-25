@@ -338,4 +338,47 @@ Move_OMINOUS_WIND:
 	goto Move_SILVER_WIND
 
 Move_SHADOW_FORCE:
-	goto Move_FAINT_ATTACK
+	choosetwoturnanim ShadowForceVanish, ShadowForceStrike
+ShadowForceEnd:
+	end
+ShadowForceVanish:
+	monbg ANIM_ATTACKER
+	fadetobg BG_DARK
+	waitbgfadein
+	delay 0
+	playsewithpan SE_M_FAINT_ATTACK, SOUND_PAN_ATTACKER
+	createvisualtask AnimTask_TranslateMonEllipticalRespectSide, 2, ANIM_ATTACKER, 18, 6, 1, 3
+	attacker_fade_to_invisible step_delay=1
+	waitforvisualfinish
+	clearmonbg ANIM_ATTACKER
+	invisible ANIM_ATTACKER
+	delay 1
+	restorebg
+	waitbgfadein
+	goto ShadowForceEnd
+ShadowForceStrike:
+	loadspritegfx ANIM_TAG_IMPACT
+	fadetobg BG_DARK
+	waitbgfadein
+	createvisualtask AnimTask_SetAttackerInvisibleWaitForSignal, 2
+	setalpha 12, 8
+	monbg ANIM_TARGET
+	delay 1
+	playsewithpan SE_M_VITAL_THROW2, SOUND_PAN_TARGET
+	create_basic_hitsplat_sprite ANIM_ATTACKER, 2, x=0, y=0, relative_to=ANIM_TARGET, animation=1
+	createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 2, 0, 9, 1
+	waitforvisualfinish
+	clearmonbg ANIM_TARGET
+	blendoff
+	delay 1
+	setarg 7, 0x1000
+	delay 32
+	createvisualtask AnimTask_InitAttackerFadeFromInvisible, 2
+	monbg ANIM_ATTACKER
+	attacker_fade_from_invisible step_delay=1
+	waitforvisualfinish
+	clearmonbg ANIM_ATTACKER
+	delay 1
+	restorebg
+	waitbgfadein
+	goto ShadowForceEnd

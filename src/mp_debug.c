@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "battle_gen4.h"
 #include "data.h"
 #include "platform.h"
 #include "siirtc.h"
@@ -361,6 +362,24 @@ void MP_TestCommand(const char *cmd, const char *arg)
             CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();
+    }
+    else if (strcmp(cmd, "foehold") == 0)
+    {
+        // foehold ITEM - in a battle: the first foe holds ITEM (tests of held items on the other side)
+        u8 b = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
+        gBattleMons[b].item = atoi(arg);
+        SetMonData(&gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_HELD_ITEM, &gBattleMons[b].item);
+        printf("[test] foehold: battler %d item %d\n", b, gBattleMons[b].item);
+    }
+    else if (strcmp(cmd, "g4side") == 0)
+    {
+        // g4side SIDE ROCK TSPIKES WISH - Gen 4 hazards on a battle side (0 = the player's), for tests
+        int side = 0, rock = 0, tsp = 0, wish = 0;
+        sscanf(arg, "%d %d %d %d", &side, &rock, &tsp, &wish);
+        gGen4Sides[side & 1].stealthRock = rock;
+        gGen4Sides[side & 1].toxicSpikes = tsp;
+        gGen4Sides[side & 1].healingWish = wish != 0;
+        gGen4Sides[side & 1].lunarDance = wish == 2;
     }
     else if (strcmp(cmd, "double") == 0)
     {
@@ -1018,20 +1037,6 @@ void MP_TestCommand(const char *cmd, const char *arg)
             for (i = 0; i < MAX_MON_MOVES; i++)
                 SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
             printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
-        }
-    }
-    else if (strcmp(cmd, "hold") == 0)
-    {
-        // mp hold SLOT ITEM - the party Moemon in SLOT holds ITEM
-        int slot = atoi(arg), v = 0;
-        const char *sp = strchr(arg, ' ');
-        if (sp)
-            v = atoi(sp + 1);
-        if (slot >= 0 && slot < PARTY_SIZE)
-        {
-            u16 item = v;
-            SetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM, &item);
-            printf("[test] hold: slot %d = item %d\n", slot, v);
         }
     }
     else if (strcmp(cmd, "hp") == 0)

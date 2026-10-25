@@ -553,8 +553,34 @@
 #define FIRST_PLATE_ITEM ITEM_FLAME_PLATE
 #define LAST_PLATE_ITEM  ITEM_IRON_PLATE
 
-#define ITEMS_COUNT 474
 // end of Gen 4 items
+// Moemon Kai: Gen 4 berries (tools/moemon_gen4/gen_berries.py)
+#define ITEM_OCCA_BERRY 474
+#define ITEM_PASSHO_BERRY 475
+#define ITEM_WACAN_BERRY 476
+#define ITEM_RINDO_BERRY 477
+#define ITEM_YACHE_BERRY 478
+#define ITEM_CHOPLE_BERRY 479
+#define ITEM_KEBIA_BERRY 480
+#define ITEM_SHUCA_BERRY 481
+#define ITEM_COBA_BERRY 482
+#define ITEM_PAYAPA_BERRY 483
+#define ITEM_TANGA_BERRY 484
+#define ITEM_CHARTI_BERRY 485
+#define ITEM_KASIB_BERRY 486
+#define ITEM_HABAN_BERRY 487
+#define ITEM_COLBUR_BERRY 488
+#define ITEM_BABIRI_BERRY 489
+#define ITEM_MICLE_BERRY 490
+#define ITEM_CUSTAP_BERRY 491
+#define ITEM_JABOCA_BERRY 492
+#define ITEM_ROWAP_BERRY 493
+#define FIRST_GEN4_BERRY ITEM_OCCA_BERRY
+#define LAST_GEN4_BERRY  ITEM_ROWAP_BERRY
+#define NUM_GEN4_BERRIES (LAST_GEN4_BERRY - FIRST_GEN4_BERRY + 1)
+
+#define ITEMS_COUNT 494
+// end of Gen 4 berries
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow
@@ -580,17 +606,21 @@
 
 // Berry numbers: 1.. for CHERI..ENIGMA (and the three unused slots), then the e-Reader Berries
 #define IS_EREADER_BERRY(itemId) ((itemId) >= FIRST_EREADER_BERRY && (itemId) <= LAST_EREADER_BERRY)
-#define IS_BERRY_ITEM(itemId) (((itemId) >= FIRST_BERRY_INDEX && (itemId) <= LAST_BERRY_INDEX) || IS_EREADER_BERRY(itemId))
+#define IS_GEN4_BERRY(itemId) ((itemId) >= FIRST_GEN4_BERRY && (itemId) <= LAST_GEN4_BERRY)   // Moemon Kai: OCCA..ROWAP
+#define IS_BERRY_ITEM(itemId) (((itemId) >= FIRST_BERRY_INDEX && (itemId) <= LAST_BERRY_INDEX) || IS_EREADER_BERRY(itemId) || IS_GEN4_BERRY(itemId))
 #define FIRST_EREADER_BERRY_TYPE (MAX_BERRY_INDEX - FIRST_BERRY_INDEX + 2)
+#define FIRST_GEN4_BERRY_TYPE (FIRST_EREADER_BERRY_TYPE + NUM_EREADER_BERRIES)   // the Gen 4 berries follow the e-Reader ones
 #ifdef MODERN   // C (only defined for C files; the scripts' assembler has no ?: and only names CHERI..ENIGMA)
-#define ITEM_TO_BERRY(itemId) (IS_EREADER_BERRY(itemId) ? ((itemId) - FIRST_EREADER_BERRY + FIRST_EREADER_BERRY_TYPE) \
+#define ITEM_TO_BERRY(itemId) (IS_GEN4_BERRY(itemId) ? ((itemId) - FIRST_GEN4_BERRY + FIRST_GEN4_BERRY_TYPE) \
+                             : IS_EREADER_BERRY(itemId) ? ((itemId) - FIRST_EREADER_BERRY + FIRST_EREADER_BERRY_TYPE) \
                                                           : (((itemId) - FIRST_BERRY_INDEX) + 1))
 #else
 #define ITEM_TO_BERRY(itemId) (((itemId) - FIRST_BERRY_INDEX) + 1)
 #endif
-#define BERRY_TO_ITEM(berry) ((berry) >= FIRST_EREADER_BERRY_TYPE ? ((berry) - FIRST_EREADER_BERRY_TYPE + FIRST_EREADER_BERRY) \
+#define BERRY_TO_ITEM(berry) ((berry) >= FIRST_GEN4_BERRY_TYPE ? ((berry) - FIRST_GEN4_BERRY_TYPE + FIRST_GEN4_BERRY) \
+                            : (berry) >= FIRST_EREADER_BERRY_TYPE ? ((berry) - FIRST_EREADER_BERRY_TYPE + FIRST_EREADER_BERRY) \
                                                                   : ((berry) + FIRST_BERRY_INDEX - 1))
-#define LAST_BERRY_TYPE ITEM_TO_BERRY(LAST_EREADER_BERRY)   // the highest berry number
+#define LAST_BERRY_TYPE ITEM_TO_BERRY(LAST_GEN4_BERRY)   // the highest berry number
 // A berry's slot in tables made for the berry numbers (0-based)
 #define BERRY_SLOT(itemId) (ITEM_TO_BERRY(itemId) - 1)
 #define ITEM_TO_MAIL(itemId) ((itemId) - FIRST_MAIL_INDEX)

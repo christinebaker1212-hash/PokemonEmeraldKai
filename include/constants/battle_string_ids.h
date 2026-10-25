@@ -400,6 +400,9 @@
 #define STRINGID_MP_WEATHER_ALL_HAIL        405   // "Everyone was pelted by HAIL!"
 #define STRINGID_MP_JOIN_HELP               406   // "X has come to help!" (a friend joined the battle, mp_join.c)
 
+// Moemon Kai: Gen 4 messages, 420 on (handled in BufferStringBattle, not the table)
+#include "constants/battle_gen4_strings.h"
+
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,
 // and are instead handled explicitly by BufferStringBattle.
@@ -451,6 +454,7 @@
 #define B_MSG_TURN1_DIG         5
 #define B_MSG_TURN1_DIVE        6
 #define B_MSG_TURN1_BOUNCE      7
+#define B_MSG_TURN1_SHADOW_FORCE 8 // Moemon Kai
 
 // gMoveWeatherChangeStringIds
 #define B_MSG_STARTED_RAIN      0
