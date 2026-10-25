@@ -1112,6 +1112,17 @@ vanishes; then any new balls pour). SELECT: shake (BG1 jiggles, walls move with 
 candy_jar, candy_jar_full (check.py reads mp jarstate: nothing outside the glass, no deep overlaps, all still),
 candy_flow (release -> Birch -> BAG / registered jar -> save reload). mp candy TYPE N (-1 = all), candyjar,
 jarstate, candyreload; harness conditions jar, jaridle.
+1.18 rework (the user's screenshot as the layout): the jar at JAR_Y 0 (its picture's top rows are empty), the list
+window rows 1-14 (frame rows 0-15) and a message box (LoadMessageBoxGfx / DrawDialogFrameWithCustomTileAndPalette,
+rows 16-19). The list: the 17 kinds in two columns (ListType: 9 + 8, MYSTERY skipped) and ALL at the bottom right
+(the RARE CANDY's item icon on ALL_MATRIX); the menus' arrow is the cursor (JarMoveCursor: UP / DOWN wrap in a
+column, LEFT / RIGHT change column); counts in blue when >= 10, light gray when 0. JarIdleHelp says what the kind
+under the cursor needs ("N more FIRE for a RARE CANDY.", "WATER: 2 RARE CANDY to make." with {A}MAKE). A on a kind
+with 10+ (or ALL with anything) asks YES / NO (CreateYesNoMenu at the list's bottom right; the list's candies under it
+hide while it's up: JarHideUnderYesNo); YES converts that kind (MP_Candy_ConvertType) or all (MP_Candy_Convert), and
+JarSyncBalls sends just those candies flying. Moving the cursor makes that kind's candies hop (JarHopKind, idle only).
+New candies pour in kind by kind (no shuffle): they settle in layers of color. Test candy_jar converts WATER alone,
+then ALL.
 
 ## POKéDEX entries from four games (H9, pokedex.c; data from tools/moemon_dex)
 tools/moemon_dex/import_dex.py reads pret pokeruby `src/data/pokedex_entries_en.h` (`#ifdef SAPPHIRE` = Sapphire,
