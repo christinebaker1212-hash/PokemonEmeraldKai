@@ -660,7 +660,7 @@ static void ev_nxx(Engine *e, ETrack *t, int ti, uint8_t clock)   // MP2K_event_
                 t->gateTime += rd(t);
         }
     }
-    if (e->muteMask & (1u << ti))
+    if (ti < 64 && (e->muteMask >> ti) & 1)
         return;
     play_note(e, t, ti);
 }
@@ -783,12 +783,12 @@ static void player_main(Engine *e)   // MP2KPlayerMain
         return;
     e->tempoCounter += e->tempoInterval;
     while (e->tempoCounter >= 150) {
-        uint32_t trackBits = 0;
+        uint64_t trackBits = 0;
         for (int i = 0; i <= ENG_MAX_TRACKS; i++) {
             ETrack *t = &e->tracks[i];
             if (!(t->status & MPT_FLG_EXIST))
                 continue;
-            if (i < ENG_MAX_TRACKS) trackBits |= 1u << i;
+            if (i < ENG_MAX_TRACKS) trackBits |= 1ull << i;
             for (EChan *c = t->chan; c; c = c->next) {
                 if (!(c->status & SF_ON)) ClearChain(c);
                 else if (c->gateTime && --c->gateTime == 0) c->status |= SF_STOP;

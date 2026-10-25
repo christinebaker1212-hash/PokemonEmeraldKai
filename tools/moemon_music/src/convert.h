@@ -8,7 +8,7 @@
 #include "midi.h"
 
 #define CONV_MAX_CAND 64     // MIDI track x channel pairs that have notes
-#define CONV_MAX_OUT 32
+#define CONV_MAX_OUT 64
 
 enum { LOOP_MARKERS, LOOP_NONE, LOOP_WHOLE, LOOP_CUSTOM };
 
@@ -22,6 +22,7 @@ typedef struct {
     uint64_t exclude;        // candidate tracks left out (bit per candidate)
     const void *voices;      // GM fixes: the song's 128 voices (SfVoice), so drum notes a kit has no sound
                              // for move to its closest sound (NULL: leave them)
+    int drumsFirst;          // GM fixes: drum-channel tracks get priority 1 (PRIO), so drum hits win a voice
     const float *slotGain;   // GM fixes: a volume factor per voice slot (evens out how loud the game's
                              // instruments are), applied to every VOL a track sends (NULL: none)
 } ConvOpts;

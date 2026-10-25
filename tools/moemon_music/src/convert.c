@@ -673,6 +673,16 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
         eot.type = EV_EndOfTrack;
         push(&tr, eot);
 
+        // GM fixes: drums first. A drum-channel track gets priority 1, so its hits take a voice from
+        // the melodic tracks (priority 0) and aren't cut off by them; sound effects (priority 2+) still win.
+        if (gm && o->drumsFirst && cd->drum) {
+            Ev pr = {0};
+            pr.time = 0; pr.type = EV_Controller; pr.param1 = 0x21; pr.param2 = 1;
+            push(&tr, pr);
+            memmove(&tr.v[1], &tr.v[0], sizeof(Ev) * (tr.n - 1));
+            tr.v[0] = pr;
+        }
+
         // GM fixes: each instrument's volume factor, on every VOL the track sends (VOL is sent again
         // whenever the track changes instrument, so the factor follows the instrument)
         if (gm && o->slotGain) {

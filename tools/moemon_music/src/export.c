@@ -17,12 +17,8 @@ void export_warnings(const Project *p, const Conv *c, char *buf, int n)
     if (c->ntracks > track_limit(p))
         snprintf(buf + strlen(buf), n - strlen(buf), "Only %d tracks fit: %d will be left out (mute some). ",
                  track_limit(p), c->ntracks - track_limit(p));
-    if (p->voices != ENG_DS_CHANNELS)
-        snprintf(buf + strlen(buf), n - strlen(buf), "%d sample voices: the game mixes 5 until it's set to more. ", p->voices);
-    if (c->ntracks > track_limit(p)) {}
-    else if (c->ntracks > ENG_GAME_TRACKS)
-        snprintf(buf + strlen(buf), n - strlen(buf), "%d tracks: the game plays 10 until its music player gets more. ",
-                 c->ntracks);
+    if (!p->gbaAccurate)
+        snprintf(buf + strlen(buf), n - strlen(buf), "Not GBA accurate: the game plays 10 tracks and 5 sample voices until it's changed. ");
     if (c->dropped)
         snprintf(buf + strlen(buf), n - strlen(buf), "%d track(s) over %d were left out. ", c->dropped, CONV_MAX_OUT);
 }

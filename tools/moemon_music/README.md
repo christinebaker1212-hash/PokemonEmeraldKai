@@ -49,9 +49,11 @@ the song, **S** plays it alone. INSTRUMENTS lists the voice slots the song uses:
 **Change...** (every game instrument, by category, with search; click to hear), **GM match**,
 **Hold to hear** or keys Z-M, and its envelope. SONG sets the game song it replaces, volume,
 reverb, priority, the loop (MIDI markers, none, whole song, custom bars), and can take every
-instrument from a game song's voicegroup. Past the game's limits: **Go over 10 tracks** plays and
-exports up to 32 tracks, and **Voices** mixes up to 12 samples at once (the game: 5; extra tracks
-only sound when voices are free for them). The game plays neither yet. Then **Save** and **Export .kaisong** / **Export decomp**.
+instrument from a game song's voicegroup. **GBA accurate** (on by default) plays and exports the way the game
+would: 10 tracks, 5 sample voices, the rest of a busy moment cut off. Off, up to 64 tracks and 64
+sample voices play, so nothing is cut (the 4 Game Boy channels still play one note each); the game
+can't play such songs until its music player gets more tracks and voices. **Drums first** (a GM fix)
+gives drum tracks priority 1 so their hits win voices in GBA accurate mode. Then **Save** and **Export .kaisong** / **Export decomp**.
 **Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
 and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
 

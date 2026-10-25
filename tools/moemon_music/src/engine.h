@@ -9,9 +9,9 @@
 #define ENG_RATE            42048    // what the game opens SDL audio at
 #define ENG_FRAME_SAMPLES   701      // samples the game mixes per frame
 #define ENG_GAME_TRACKS     10       // the game's BGM player has 10 tracks
-#define ENG_MAX_TRACKS      32       // what the studio can play when a song goes over that (ESong.trackLimit)
+#define ENG_MAX_TRACKS      64       // tracks the studio plays when not GBA accurate (ESong.trackLimit)
 #define ENG_DS_CHANNELS     5        // m4aSoundInit: 5 DirectSound channels
-#define ENG_DS_MAX          12       // MAX_DIRECTSOUND_CHANNELS: what m4aSoundMode allows (ESong.dsVoices)
+#define ENG_DS_MAX          64       // sample voices when not GBA accurate (the game itself allows 12: MAX_DIRECTSOUND_CHANNELS)
 #define ENG_MASTER_VOL      12       // m4aSoundInit: master volume 12
 #define ENG_PREVIEW_TRACK   ENG_MAX_TRACKS   // one extra track for auditioning instruments
 
@@ -85,7 +85,7 @@ typedef struct ETrack {
 typedef struct {
     // player
     const ESong *song;
-    uint32_t status;                  // a bit per playing track
+    uint64_t status;                  // a bit per playing track
     int paused;                       // MUSICPLAYER_STATUS_PAUSE, kept apart so 32 tracks fit in status
     uint8_t trackCount, priority;
     uint32_t clock;
@@ -93,7 +93,7 @@ typedef struct {
     ETrack tracks[ENG_MAX_TRACKS + 1];
     const EInst *voicegroup;
     int playing;
-    uint32_t muteMask;                // tracks whose notes are skipped (listening only)
+    uint64_t muteMask;                // tracks whose notes are skipped (listening only)
     uint8_t memacc[16];               // gMPlayMemAccArea
     // mixer
     EChan chans[ENG_DS_MAX];

@@ -17,7 +17,7 @@ Everything is little-endian. The file starts with a 32-byte header, then chunks.
 | 0      | char[8]  | `"KAISONG\0"`                                                          |
 | 8      | u16      | version: `1`                                                           |
 | 10     | u16      | header size: `32` (chunks start here)                                  |
-| 12     | u8       | track count: 1-10, or up to 32 when the song was made with *Go over 10 tracks* |
+| 12     | u8       | track count: 1-10, or up to 64 when the song was made with *GBA accurate* off |
 | 13     | u8       | priority (`SongHeader.priority`, mid2agb `-P`)                         |
 | 14     | u8       | reverb (`SongHeader.reverb`: `0x80 \| level`, or `0` for no change)      |
 | 15     | u8       | master volume 0-127, for information only (already in the VOL commands) |
@@ -39,7 +39,7 @@ volume=100
 reverb=50                  -1 = off
 priority=0
 loop=yes                   yes / no
-voices=5                   sample voices the song was made for (the game mixes 5; up to 12)
+voices=5                   sample voices the song was made for (5 = GBA accurate; 64 = no limit)
 tool=Moemon Music Studio 1.0
 made=2026-10-25 14:55
 ```
@@ -170,11 +170,11 @@ should check and prints the voices; `--bytecode` prints the tracks.
    nothing). Song names for the file lookup: `include/constants/songs.h` / `sound/song_table.inc`.
 
 7. **Limits.** The BGM player has 10 tracks (`gMPlayTrack_BGM[10]`; `MPlayStart` ignores parts past the
-   player's track count). The studio exports at most 10 unless the song's *Go over 10 tracks* option is
-   on: then up to 32, and playing those in full needs a bigger BGM player (`gMPlayTrack_BGM`, `NUM_TRACKS_BGM`
+   player's track count). The studio exports at most 10 unless the song's *GBA accurate* option is
+   off: then up to 64, and playing those in full needs a bigger BGM player (`gMPlayTrack_BGM`, `NUM_TRACKS_BGM`
    in `sound/music_player_table.inc`, the `trackBits` / status masks in `MP2KPlayerMain`, which are 16 bits).
    Songs made with more *Voices* than 5 (INFO `voices=`) expect `m4aSoundMode` with that channel count
-   (`SOUND_MODE_MAXCHN`, up to `MAX_DIRECTSOUND_CHANNELS` = 12; m4aSoundInit sets 5): extra tracks only sound
+   (`SOUND_MODE_MAXCHN`, up to `MAX_DIRECTSOUND_CHANNELS` = 12, which would need raising for 64; m4aSoundInit sets 5): extra tracks only sound
    when there are voices free for them, since earlier tracks win the channels, 5 sample channels plus the 4 Game Boy channels (the studio shows how many are busy), and
    reverb only changes when bit 7 is set, then stays for later songs, as in the game.
 

@@ -151,10 +151,10 @@ static long song_pos(void)
 
 static void update_mute_mask(void)
 {
-    uint32_t m = 0;
+    uint64_t m = 0;
     if (S.p.solo) {
         for (int t = 0; t < S.c.ntracks; t++)
-            if (!((S.p.solo >> S.c.candOf[t]) & 1)) m |= 1u << t;
+            if (!((S.p.solo >> S.c.candOf[t]) & 1)) m |= 1ull << t;
     }
     lock();
     E.muteMask = m;
@@ -587,9 +587,13 @@ static void draw_transport(void)
     int busy = eng_ds_busy(&E);
     char v[64];
     int nv = E.playing ? E.numChans : (have_song() ? S.p.voices : ENG_DS_CHANNELS);
-    snprintf(v, sizeof(v), "Voices %d/%d", busy, nv);
+    if (nv > ENG_DS_CHANNELS) snprintf(v, sizeof(v), "Voices %d", busy);
+    else snprintf(v, sizeof(v), "Voices %d/%d", busy, nv);
     text(1036, y + 6, v, busy >= nv ? C_WARN : C_DIM);
-    for (int i = 0; i < nv; i++) fill(1036 + i * 10, y + 26, 8, 8, i < busy ? (busy >= nv ? C_WARN : C_OK) : C_ROW);
+    if (nv <= 12)
+        for (int i = 0; i < nv; i++) fill(1036 + i * 10, y + 26, 8, 8, i < busy ? (busy >= nv ? C_WARN : C_OK) : C_ROW);
+    else
+        fill(1036, y + 26, 120, 8, C_ROW), fill(1036, y + 26, busy > 24 ? 120 : busy * 5, 8, C_OK);
     if (have_song() && S.peakVoices >= S.p.voices) text(1164, y + 6, "all busy:", C_WARN), text(1164, y + 24, "notes cut", C_WARN);
 }
 
@@ -647,7 +651,7 @@ static void draw_tracks(void)
         textfit(x + 84, ry + 3, 200, lab, muted ? C_DIM : C_TEXT);
         char nm[160];
         slot_label(slot, nm, sizeof(nm));
-        if (over && !muted) snprintf(nm, sizeof(nm), S.p.moreTracks ? "over the 32-track limit" : "over 10 tracks: see SONG");
+        if (over && !muted) snprintf(nm, sizeof(nm), S.p.moreTracks ? "over the 64-track limit" : "over 10 tracks (GBA accurate)");
         textfit(x + 292, ry + 3, 260, nm, over && !muted ? C_WARN : muted ? C_DIM : C_TEXT);
         if (slot >= 0 && clicked(x + 292, ry, 260, rowH)) sSelSlot = slot;
         // activity
@@ -805,24 +809,21 @@ static void draw_song(void)
         S.song.priority = (uint8_t)p->priority;
         p->dirty = 1;
     }
-    if (stepper(col1 + 466, row, "Voices", &p->voices, 1, ENG_DS_MAX, 1, NULL)) {
-        p->dirty = 1;
-        rebuild();
-        set_status("%s", p->voices > 5 ? "More sample voices mix at once. The game mixes 5 until it's set to more (m4aSoundMode)."
-                                       : "Sample voices mixed at once (the game: 5).");
-    }
+
     row += 30;
     if (checkbox(col1, row, "Exact note lengths (-E)", &p->exactGate)) { p->dirty = 1; rebuild(); }
     if (checkbox(col1 + 250, row, "GM MIDI fixes", &p->gmFixes)) { p->dirty = 1; rebuild(); }
-    if (checkbox(col1 + 410, row, "Go over 10 tracks", &p->moreTracks)) {
+    if (checkbox(col1 + 410, row, "GBA accurate", &p->gbaAccurate)) {
+        project_apply_mode(p);
         p->dirty = 1;
         rebuild();
-        set_status("%s", p->moreTracks ? "Up to 32 tracks play and export. The game itself plays 10 until its music player gets more."
-                                       : "Back to the game's 10 tracks.");
+        set_status("%s", p->gbaAccurate ? "GBA accurate: 10 tracks and 5 sample voices, as the game plays it."
+                                        : "No GBA limits: up to 64 tracks and 64 sample voices play and export.");
     }
     row += 26;
     if (p->gmFixes) {
         if (checkbox(col1, row, "Even out instrument volumes (like GM)", &p->balance)) { p->dirty = 1; rebuild(); }
+        if (checkbox(col1 + 340, row, "Drums first", &p->drumsFirst)) { p->dirty = 1; rebuild(); }
         text(col1, row + 24, "GM fixes: expression, bend range, drums, loop clean-up, volumes.", C_DIM);
         text(col1, row + 42, "Off = converted exactly like the game's own songs.", C_DIM);
     } else {
@@ -1135,8 +1136,7 @@ static void draw_help(void)
     static const char *lines[] = {
         "Plays MIDI files with Moemon Emerald Kai's own instruments and sound engine, so a song",
         "sounds here as it will in the game (5 sample voices + 4 Game Boy channels, 10 tracks;",
-        "SONG > Go over 10 tracks plays and exports up to 32 and Voices mixes up to 12 samples",
-        "at once; the game can't play those yet).",
+        "SONG > GBA accurate off: up to 64 tracks and 64 sample voices, which the game can't play yet).",
         "",
         "1. Open MIDI (or drop a .mid on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",

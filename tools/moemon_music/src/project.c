@@ -36,9 +36,17 @@ void project_init(Project *p)
     p->exactGate = 1;
     p->gmFixes = 1;
     p->loopMode = LOOP_MARKERS;
-    p->voices = 5;
+    p->gbaAccurate = 1;
+    project_apply_mode(p);
     p->balance = 1;
+    p->drumsFirst = 1;
     for (int i = 0; i < 128; i++) p->voice[i] = VOICE_PLACEHOLDER;
+}
+
+void project_apply_mode(Project *p)
+{
+    p->moreTracks = !p->gbaAccurate;
+    p->voices = p->gbaAccurate ? 5 : 64;
 }
 
 void project_free(Project *p)
@@ -59,6 +67,7 @@ void project_conv_opts(const Project *p, ConvOpts *o)
     o->loopEnd = p->loopEnd;
     o->exclude = p->muted;
     o->voices = p->voice;
+    o->drumsFirst = p->drumsFirst;
 }
 
 uint8_t project_reverb_byte(const Project *p)
@@ -191,9 +200,9 @@ int project_save(Project *p, const char *path, char *err, int errlen)
     fprintf(f, "exact_gate=%d\n", p->exactGate);
     fprintf(f, "gm_fixes=%d\n", p->gmFixes);
     fprintf(f, "loop=%s\n", LOOP_NAMES[p->loopMode]);
-    fprintf(f, "more_tracks=%d\n", p->moreTracks);
-    fprintf(f, "voices=%d\n", p->voices);
+    fprintf(f, "gba_accurate=%d\n", p->gbaAccurate);
     fprintf(f, "balance=%d\n", p->balance);
+    fprintf(f, "drums_first=%d\n", p->drumsFirst);
     fprintf(f, "loop_start=%u\n", p->loopStart);
     fprintf(f, "loop_end=%u\n", p->loopEnd);
     fprintf(f, "muted=");
@@ -252,9 +261,11 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "exact_gate")) np.exactGate = atoi(v);
         else if (!strcmp(k, "gm_fixes")) np.gmFixes = atoi(v);
         else if (!strcmp(k, "loop")) { for (int i = 0; i < 4; i++) if (!strcmp(v, LOOP_NAMES[i])) np.loopMode = i; }
-        else if (!strcmp(k, "more_tracks")) np.moreTracks = atoi(v);
+        else if (!strcmp(k, "gba_accurate")) np.gbaAccurate = atoi(v) != 0;
+        else if (!strcmp(k, "more_tracks")) { if (atoi(v)) np.gbaAccurate = 0; }   // projects from before GBA accurate
         else if (!strcmp(k, "balance")) np.balance = atoi(v);
-        else if (!strcmp(k, "voices")) np.voices = atoi(v) < 1 ? 5 : atoi(v) > 12 ? 12 : atoi(v);
+        else if (!strcmp(k, "drums_first")) np.drumsFirst = atoi(v);
+        else if (!strcmp(k, "voices")) { if (atoi(v) > 5) np.gbaAccurate = 0; }
         else if (!strcmp(k, "loop_start")) np.loopStart = (uint32_t)strtoul(v, NULL, 10);
         else if (!strcmp(k, "loop_end")) np.loopEnd = (uint32_t)strtoul(v, NULL, 10);
         else if (!strcmp(k, "muted")) {
@@ -279,6 +290,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
     np.midiLen = b64_read(midiText, np.midiData);
     free(midiText);
     if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); return 0; }
+    project_apply_mode(&np);
     if (np.masterVol < 0) np.masterVol = 0;
     if (np.masterVol > 127) np.masterVol = 127;
     project_free(p);

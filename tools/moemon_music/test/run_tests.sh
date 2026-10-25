@@ -32,12 +32,10 @@ python3 test/make_test_midi.py "$T/many.mid" 9          # 14 tracks
 "$B" --save "$T/many.mid" "$T/many.mmsproj" mus_route104
 "$B" --export "$T/many.mmsproj" "$T/many10.kaisong"
 python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 tracks"
-sed -i 's/^more_tracks=0/more_tracks=1/' "$T/many.mmsproj"
+sed -i 's/^gba_accurate=1/gba_accurate=0/' "$T/many.mmsproj"
 "$B" --export "$T/many.mmsproj" "$T/many14.kaisong"
 python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "^version 1, 14 tracks"
-sed -i 's/^voices=5/voices=12/' "$T/many.mmsproj"
-"$B" --export "$T/many.mmsproj" "$T/many14.kaisong"
-python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "voices: 12"
+python3 test/read_kaisong.py "$T/many14.kaisong" | grep -q "voices: 64"
 "$B" --raw "$T/many.mmsproj" "$T/many.f32" 600
 test -s "$T/gm.wav"
 echo "all passed"

@@ -24,8 +24,10 @@ typedef struct {
     int exactGate;
     int gmFixes;
     int loopMode;
-    int moreTracks;           // go over the game's 10 tracks (plays and exports up to 32)
-    int voices;               // sample voices mixed at once: 5 like the game, up to 12
+    int gbaAccurate;          // play and export like the game: 10 tracks, 5 sample voices (else 64 / 64)
+    int moreTracks;           // derived from gbaAccurate (project_apply_mode)
+    int voices;               // derived: sample voices mixed at once
+    int drumsFirst;           // GM fixes: drum tracks win voices over melodic ones
     int balance;              // GM fixes: even out instrument volumes (the game's piano as the reference)
     uint32_t loopStart, loopEnd;   // MIDI ticks (LOOP_CUSTOM)
     uint64_t muted;           // candidate tracks left out
@@ -36,6 +38,8 @@ typedef struct {
 } Project;
 
 void project_init(Project *p);
+// Sets the track and voice limits from gbaAccurate.
+void project_apply_mode(Project *p);
 void project_free(Project *p);
 // Loads a MIDI into a fresh project. A game MIDI (file named like a game song) starts with that
 // song's instruments and settings.
