@@ -24,12 +24,12 @@
       "direction": "left"
     },
     {
-      "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA5",
+      "map": "MAP_JOHTO_SAFARI_ZONE_PEAK",
       "offset": -6,
       "direction": "right"
     },
     {
-      "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA6",
+      "map": "MAP_JOHTO_SAFARI_ZONE_SAVANNAH",
       "offset": 0,
       "direction": "up"
     }

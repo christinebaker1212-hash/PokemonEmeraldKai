@@ -2250,8 +2250,8 @@ Quetzal_EventScript_840EA66::
 @ Johto_MountMortarB1F object 9 (local id 9, gfx 0x387) at 31,11
 @ Johto_MountMortarB1F object 10 (local id 10, gfx 0x47B) at 17,4
 @ Johto_SilverCaveItemRoom object 3 (local id 3, gfx 0x420) at 11,8
-@ Johto_MtSilver_Cave2 object 1 (local id 1, gfx 0x192) at 17,20
-@ Johto_MtSilver_Cave2 object 2 (local id 2, gfx 0x2E5) at 17,6
+@ Johto_SilverCaveFireRoom object 1 (local id 1, gfx 0x192) at 17,20
+@ Johto_SilverCaveFireRoom object 2 (local id 2, gfx 0x2E5) at 17,6
 @ Johto_SilverCaveRoom3 object 2 (local id 2, gfx 0x282) at 16,14
 @ Johto_SilverCaveMountainside object 1 (local id 1, gfx 0x281) at 43,20
 @ Johto_SilverCaveSnowySlope object 3 (local id 3, gfx 0x482) at 23,41
@@ -2290,7 +2290,7 @@ Quetzal_EventScript_840EA66::
 @ Johto_RuinsOfAlphChambers object 21 (local id 21, gfx 0x47E) at 3,7
 @ Johto_RuinsOfAlphChambers object 22 (local id 22, gfx 0x47F) at 6,7
 @ Johto_SafariZone_Desert object 1 (local id 1, gfx 0x41B) at 20,15
-@ Johto_SafariZoneGate_Area5 object 1 (local id 1, gfx 0x2E8) at 7,21
+@ Johto_SafariZone_Peak object 1 (local id 1, gfx 0x2E8) at 7,21
 @ Johto_SafariZone_Forest object 1 (local id 1, gfx 0x41A) at 18,12
 @ Johto_SproutTower1F object 8 (local id 8, gfx 0x422) at 5,12
 @ Johto_SproutTower2F object 5 (local id 5, gfx 0x481) at 17,6
@@ -2303,8 +2303,8 @@ Quetzal_EventScript_840EA66::
 @ Johto_VictoryRoad2F object 6 (local id 6, gfx 0x37F) at 23,13
 @ Johto_VictoryRoad2F object 7 (local id 7, gfx 0x534) at 23,13
 @ Johto_VictoryRoad1F object 7 (local id 7, gfx 0x425) at 20,18
-@ Johto_WhirlIslands_Cave5 object 1 (local id 1, gfx 0x2EA) at 35,14
-@ Johto_WhirlIslands_Cave5 object 2 (local id 2, gfx 0x419) at 45,14
+@ Johto_WhirlIslandTunnelEast object 1 (local id 1, gfx 0x2EA) at 35,14
+@ Johto_WhirlIslandTunnelEast object 2 (local id 2, gfx 0x419) at 45,14
 Quetzal_EventScript_840EA6A::
 	lock
 	faceplayer

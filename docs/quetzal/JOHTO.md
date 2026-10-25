@@ -38,7 +38,7 @@ Audience: a developer porting Quetzal's Johto into Emerald Kai.
 | Rival | SILVER always uses the Totodile line. Each of his battles has 3 identical parties in trainers.json, so his team does not change with the player's starter (inferred) | Starter-dependent |
 | HMs | Key items (682-689). "HMs, once unlocked, don't need to be taught" (Earl's Academy blackboard) | TMs/HMs taught to a Pokémon |
 | Evolution | Trade evolutions happen by level (MACHOKE/GRAVELER at 38, KADABRA/HAUNTER at 42; Dept Store 4F, Academy). Friendship evolutions become level evolutions (RIOLU at 28). RETURN and FRUSTRATION are always 102 power (`GoldenrodHappinessRater`) | Trade/happiness evolutions |
-| Options mentioned in dialogue | EXP SHARE on/off (Academy), NUZLOCKE mode (gift Pokémon withheld: `Quetzal_EventScript_8361A4D` / `QZ_SPECIAL_779`), berry respawning ("If respawning is enabled, defeating POKéMON can replenish them", Route30BerryHouse), auto-run toggled with L (mom), RADIANT Pokémon colour filters (GoldenrodCity_House3), "New region" in the START menu (Elm, after the League) | — |
+| Options mentioned in dialogue | EXP SHARE on/off (Academy), NUZLOCKE mode (gift Pokémon withheld: `Quetzal_EventScript_8361A4D` / `QZ_SPECIAL_779`), berry respawning ("If respawning is enabled, defeating POKéMON can replenish them", Route30BerryHouse), auto-run toggled with L (mom), RADIANT Pokémon colour filters (GoldenrodNameRater), "New region" in the START menu (Elm, after the League) | — |
 | Multiplayer | Bill: "To travel to the future, disconnect from multiplayer." Quetzal has its own online mode; parts of it live in specials | — |
 | Day-Care | "The DAY-CARE service is now available from any PC" (Route 34 NPC, `Quetzal_Text_83F0C34`) | Route 34 Day-Care couple |
 | Berry trees | `setberrytree` objects (`berry_trees/dirt_pile`) on most routes. New Bark Town's on-transition script sets up trees 0x5A-0x6D | Fruit trees |
@@ -86,12 +86,12 @@ Audience: a developer porting Quetzal's Johto into Emerald Kai.
 - The stolen-Pokémon police scene is kept. NEW: you must say "SILVER" (`Text_83E3A0D`, "Right! His name was SILVER").
   Crystal names the rival here through a naming screen.
 - NEW: the Arceus egg hatches here (`EventScript_8401D20`: "This Egg belongs to no known era... That Pokémon... is
-  ARCEUS!"), with an Arceus object (`FLAG_QZ_0x131F`). It follows the RuinsOfAlph_Cave5 event (section 5). Poipole is an
+  ARCEUS!"), with an Arceus object (`FLAG_QZ_0x131F`). It follows the RuinsOfAlphArceusChamber event (section 5). Poipole is an
   overworld legendary here.
 
 **ElmsHouse, PlayersNeighborsHouse**: Crystal text with small edits.
 
-**Route27** (160x40) **/ Route27SandstormHouse / TohjoFalls / TohjoFalls_Cave2**
+**Route27** (160x40) **/ Route27SandstormHouse / TohjoFalls / TohjoFallsGiovannisRoom**
 - Route27 has the Crystal trainers' dialogue with Lv42-45 mixed-generation parties, Latias as an overworld legendary
   (`FLAG_QZ_0x1205`), and the Crystal "you've crossed into KANTO" line.
 - In the Sandstorm house an old woman gives a SMOOTH ROCK (Crystal: TM Sandstorm).
@@ -178,9 +178,9 @@ Audience: a developer porting Quetzal's Johto into Emerald Kai.
 - **RuinsOfAlphOutside**:
   - Crystal NPCs.
   - NEW **DUDUNSPARCE drilling a tunnel** (`Text_840ED22`, `QZ_SPECIAL_707/711`). Inferred: it opens the way to
-    RuinsOfAlph_Cave5.
+    RuinsOfAlphArceusChamber.
   - Koraidon and Uxie are overworld legendaries.
-- **Route32RuinsOfAlphGate** and **Route36RuinsOfAlphGate**: both gates reuse
+- **Route36RuinsOfAlphGate** and **Route36RuinsOfAlphGate**: both gates reuse
   Crystal's Route 32 gate text.
 - **RuinsOfAlphChambers** (NEW layout): all four sliding-puzzle chambers plus their four item
   rooms in one 26x68 map.
@@ -191,7 +191,7 @@ Audience: a developer porting Quetzal's Johto into Emerald Kai.
   - Item rooms: Lum, Charcoal, Max Revive, Sacred Ash, berries, stones... (16 hidden or visible items).
   - **Regirock, Regice, Registeel, Regieleki and Regidrago** are overworld legendaries here; Regigigas is in the
     InnerChamber.
-- **RuinsOfAlph_Cave1-4 [Ho-Oh/Aerodactyl/Omanyte/Kabuto WordRooms]**: empty rooms leading to the InnerChamber.
+- **RuinsOfAlphHoOhWordRoom-4 [Ho-Oh/Aerodactyl/Omanyte/Kabuto WordRooms]**: empty rooms leading to the InnerChamber.
 - **RuinsOfAlphInnerChamber**:
   - Crystal NPCs.
   - Fossil items: HELIX, DOME, OLD AMBER (NEW).
@@ -418,7 +418,7 @@ Meloetta is an overworld legendary here.
 - Postgame MORTY stands in front of it ("find me at the FIGHTING DOJO").
 - Wo-Chien is an overworld legendary.
 
-**TinTower1F, TinTower_Cave1-4 and the 4 mislabeled "RuinsOfAlph*ItemRoom" maps [TinTower2F-9F]**: Crystal's warp maze,
+**TinTower1F, TinTower2F-4 and the 4 mislabeled "RuinsOfAlph*ItemRoom" maps [TinTower2F-9F]**: Crystal's warp maze,
 Gen-mixed ghost and psychic encounters, items.
 
 **TinTowerRoof**
@@ -469,7 +469,7 @@ Gen-mixed ghost and psychic encounters, items.
 - **CianwoodGym**: CHUCK (Pangoro, Sneasler, Lucario, Poliwrath); gift **PUNCHING GLOVE** (762).
 - **CianwoodPharmacy**: SECRET POTION.
 - **ManiasHouse**: Mania's Shuckle is now a gift to keep ("You can keep it for good!", `qz_cmd_e9 2`).
-- **CianwoodCity_House1** (NEW, unsure name): an old woman reacts to the CLEAR BELL and the TIDAL BELL (HGSS flavour).
+- **CianwoodOldWomansHouse** (NEW, unsure name): an old woman reacts to the CLEAR BELL and the TIDAL BELL (HGSS flavour).
 - **CianwoodLugiaSpeechHouse**: Crystal text.
 - **Route40/41**:
   - Crystal swimmers with mixed parties.
@@ -477,7 +477,7 @@ Gen-mixed ghost and psychic encounters, items.
   - Route 41 is a separate map reached through a row of warps.
   - Thundurus is an overworld legendary on Route 41.
   - **Route40TrainerHillGate** leads north to Trainer Hill (section 11).
-- **WhirlIslands_Cave1-7**: redesigned (1F with all four island entrances, B1F, an extra chain of caves 3-5, B2F, Lugia
+- **WhirlIslandEntrances-7**: redesigned (1F with all four island entrances, B1F, an extra chain of caves 3-5, B2F, Lugia
   Chamber).
   - **WhirlIslandLugiaChamber**: the Kimono Girls' dance with the TIDAL BELL
     (`EventScript_8400ED8`), then `setwildbattle SPECIES_LUGIA, 50`. Crystal needs the Silver Wing; Lugia is
@@ -527,7 +527,7 @@ Gen-mixed ghost and psychic encounters, items.
   - Gift: FOCUS SASH.
   - Trainer EXPERT "ROXANNE" (a name collision with the Hoenn leader).
 - **Route44**: Crystal trainers; Virizion and Iron Leaves are overworld legendaries.
-- **IcePath_Cave1-5 [IcePath1F, B1F, B2FMahoganySide, B2FBlackthornSide, B3F]**:
+- **IcePath1F-5 [IcePath1F, B1F, B2FMahoganySide, B2FBlackthornSide, B3F]**:
   - 1F: NEW Kimono Girl **SAYO stuck on the ice**, push her free (`EventScript_83DB642`). Same idea as HGSS.
   - B2F Blackthorn side: NEW **SWINUB event** (`EventScript_83DBAB8`). Feed it an ASPEAR BERRY; it evolves "straight into
     MAMOSWINE"; you battle it (`setwildbattle MAMOSWINE, 45`, `QZ_SPECIAL_771`); it leaves the **ICIUM Z** (Z-crystal).
@@ -566,7 +566,7 @@ Gen-mixed ghost and psychic encounters, items.
 - **Route26South / Route26**: Route 26 is split in two maps. Crystal trainers with Lv41-50 parties.
   Latios is an overworld legendary.
 - **Route26HealHouse, DayOfWeekSiblingsHouse**: Crystal.
-- **VictoryRoad_Cave2/Cave1/VictoryRoad [VictoryRoad1F/2F/3F]**:
+- **VictoryRoad1F/Cave1/VictoryRoad3F [VictoryRoad1F/2F/3F]**:
   - Three floors (Crystal: one map).
   - SILVER battle on 3F.
   - Terrakion, Iron Boulder and Stakataka are overworld legendaries.
@@ -602,7 +602,7 @@ Gen-mixed ghost and psychic encounters, items.
   Articuno).
   - Cave5 holds a **Deoxys** with a Birth Island-style stone (`FLAG_QZ_0x1423`, plays the RG Deoxys music).
   - Wild Pokémon Lv55-73, fully evolved Gen 1-9.
-- **MtSilver_Area3/Area4 [SilverCaveSummit/Alt]**:
+- **SilverCaveSummit/Area4 [SilverCaveSummit/Alt]**:
   - **RED** (`TRAINER_QZ_4327`, Lv100 Pikachu-cap, Snorlax, Charizard, Venusaur, Blastoise, Lapras;
     `Quetzal_EventScript_83E05E8`) stands outdoors in a blizzard. Crystal puts him inside Room 3.
   - Win: "RED offers you a Z-Crystal" (**PIKASHUNIUM Z**).
@@ -636,9 +636,9 @@ Gen-mixed ghost and psychic encounters, items.
   - Pheromosa, Cresselia and Buzzwole are overworld legendaries.
 - **TrainerHillOutside** (north of Route 40, replacing Crystal's Battle Tower):
   - Signs for TRAINER HILL and BATTLE TENTS (Factory, Palace, Arena).
-  - TrainerHill_Cave1 is an empty interior. Inferred: the facilities are code/menus or unfinished; nothing in the
+  - TrainerHillEntrance is an empty interior. Inferred: the facilities are code/menus or unfinished; nothing in the
     Johto scripts runs them.
-- **GoldenrodCity_House4 [Magnet Train Station]**: kept but out of service (section 5).
+- **GoldenrodMagnetTrainStation [Magnet Train Station]**: kept but out of service (section 5).
 
 ---
 
@@ -659,7 +659,7 @@ Gen-mixed ghost and psychic encounters, items.
 | Gym and Elite Four rematches | Johto Champion | `QZ_SPECIAL_670` in every gym, `QZ_SPECIAL_672` in the E4 rooms |
 | Former leaders | Postgame: Morty, Whitney, Jasmine, Pryce and Clair point to the FIGHTING DOJO in Saffron | Kanto-side battles |
 | Overworld legendaries | Inferred: post-League or other conditions | `QZ_SPECIAL_705` returns 0 = show "..." only |
-| Celebi alternate past | Celebi in the party, then Giovanni at Tohjo Falls | `TohjoFalls_Cave2_EventScript_8401997` |
+| Celebi alternate past | Celebi in the party, then Giovanni at Tohjo Falls | `TohjoFallsGiovannisRoom_EventScript_8401997` |
 | Bill's future | Johto Champion, an original-colour Magearna, then Celebi as the playable character, single player | `BillsFamilysHouse_EventScript_8407185/840727F` |
 
 ---
@@ -667,7 +667,7 @@ Gen-mixed ghost and psychic encounters, items.
 ## 13. Big postgame storylines (NEW, nothing like them in Gen 2)
 
 1. **Celebi alternate past / Team Rocket Johto**:
-   - Start: Giovanni at TohjoFalls_Cave2. CELEBI takes you to "an alternate past" where Giovanni answered his men's call
+   - Start: Giovanni at TohjoFallsGiovannisRoom. CELEBI takes you to "an alternate past" where Giovanni answered his men's call
      at the Radio Tower (`Text_840203D`).
    - RadioTower5F: you fight **beside Giovanni** in a multi battle against **ETHAN**: "Choose up to three Pokémon. I'll
      bring three of my own." (`EventScript_84034C7`).
@@ -683,7 +683,7 @@ Gen-mixed ghost and psychic encounters, items.
    - Celebi exiles Giovanni. SILVER gives rewards and heads to the Dragon's Den. Giovanni at Tohjo later remembers "your
      betrayal".
    - Machinery: `QZ_SPECIAL_572/797/698/699/693-695/792` (camera, object and party swaps); warps to RadioTower5F and
-     NewBarkTown_PokemonCenter_1F1.
+     PlayersHouse1F.
 2. **Bill and Magearna, the "possible future"** (BillsFamilysHouse, labels `84071xx-84082xx`): give BILL an original-colour
    Magearna for an emotion-translator experiment. He wants to visit a future where people and Pokémon can talk, using
    **CELEBI as your playable character** ("Use CELEBI as your playable character", "disconnect from multiplayer"). The
@@ -703,14 +703,14 @@ Gen-mixed ghost and psychic encounters, items.
 | BurnedTower1F | Moltres (11E1) |
 | BurnedTowerB1F | Chi-Yu (12E3), Yveltal (126B) |
 | CianwoodCity | Tapu Fini (1286) |
-| CliffCave_Cave1 | Diancie (1271) |
+| CliffCave | Diancie (1271) |
 | DanceTheater | Meloetta (1262) |
-| DarkCave_Cave1 | Giratina (122F) |
+| DarkCaveVioletEntrance | Giratina (122F) |
 | DarkCaveBlackthornEntrance | Darkrai (1238, own script) |
 | DragonShrine | Reshiram (1253), Zekrom (1256) |
 | DragonsDenB1F | Azelf (1220) |
 | EcruteakCity | Tapu Lele (1280), Entei (11ED), Gouging Fire (12FE) |
-| EcruteakCity_Area1 | Wo-Chien (12DA) |
+| EcruteakCityNorth | Wo-Chien (12DA) |
 | ElmsLab | Poipole (12AA) |
 | EmbeddedTower | Kyogre (120B), Groudon (120E), Rayquaza (1211) |
 | GoldenrodBikeShop | Meltan (12B6) |

@@ -1,7 +1,7 @@
 {
-  "id": "MAP_JOHTO_CIANWOOD_CITY_HOUSE1",
-  "name": "Johto_CianwoodCity_House1",
-  "layout": "LAYOUT_JOHTO_CIANWOOD_CITY_HOUSE1",
+  "id": "MAP_JOHTO_CIANWOOD_OLD_WOMANS_HOUSE",
+  "name": "Johto_CianwoodOldWomansHouse",
+  "layout": "LAYOUT_JOHTO_CIANWOOD_OLD_WOMANS_HOUSE",
   "music": "MUS_QZ_617",
   "region_map_section": "MAPSEC_JOHTO_CIANWOOD_CITY",
   "requires_flash": false,
@@ -25,7 +25,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_CianwoodCity_House1_EventScript_83CAC29",
+      "script": "Johto_CianwoodOldWomansHouse_EventScript_83CAC29",
       "flag": "0"
     }
   ],
@@ -53,7 +53,8 @@
     "header_filler": "0000",
     "flags_high_bits": 0,
     "source": {
-      "pokecrystal": null
+      "pokecrystal": null,
+      "renamed_from": "Johto_CianwoodCity_House1"
     }
   }
 }

@@ -337,14 +337,15 @@
    "height": 17
   },
   {
-   "name": "Johto_CianwoodCity_House1",
-   "const": "MAP_JOHTO_CIANWOOD_CITY_HOUSE1",
+   "name": "Johto_CianwoodOldWomansHouse",
+   "const": "MAP_JOHTO_CIANWOOD_OLD_WOMANS_HOUSE",
    "group": 34,
    "num": 24,
    "region": "johto",
    "mapsec": "CIANWOOD CITY",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_CianwoodCity_House1"
    },
    "width": 13,
    "height": 10
@@ -1556,14 +1557,15 @@
    "height": 20
   },
   {
-   "name": "Johto_MtSilver_Cave2",
-   "const": "MAP_JOHTO_MT_SILVER_CAVE2",
+   "name": "Johto_SilverCaveFireRoom",
+   "const": "MAP_JOHTO_SILVER_CAVE_FIRE_ROOM",
    "group": 34,
    "num": 111,
    "region": "johto",
    "mapsec": "MT. SILVER",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_MtSilver_Cave2"
    },
    "width": 35,
    "height": 35
@@ -2789,14 +2791,15 @@
    "height": 30
   },
   {
-   "name": "Johto_SafariZoneGate_Area5",
-   "const": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA5",
+   "name": "Johto_SafariZone_Peak",
+   "const": "MAP_JOHTO_SAFARI_ZONE_PEAK",
    "group": 35,
    "num": 73,
    "region": "johto",
    "mapsec": "SAFARI ZONE GATE",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_SafariZoneGate_Area5"
    },
    "width": 34,
    "height": 38
@@ -2816,14 +2819,15 @@
    "height": 30
   },
   {
-   "name": "Johto_SafariZoneGate_Area6",
-   "const": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA6",
+   "name": "Johto_SafariZone_Savannah",
+   "const": "MAP_JOHTO_SAFARI_ZONE_SAVANNAH",
    "group": 35,
    "num": 75,
    "region": "johto",
    "mapsec": "SAFARI ZONE GATE",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_SafariZoneGate_Area6"
    },
    "width": 38,
    "height": 30
@@ -3324,40 +3328,43 @@
    "height": 80
   },
   {
-   "name": "Johto_WhirlIslands_Cave3",
-   "const": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+   "name": "Johto_WhirlIslandCave",
+   "const": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
    "group": 35,
    "num": 111,
    "region": "johto",
    "mapsec": "WHIRL ISLANDS",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_WhirlIslands_Cave3"
    },
    "width": 30,
    "height": 30
   },
   {
-   "name": "Johto_WhirlIslands_Cave4",
-   "const": "MAP_JOHTO_WHIRL_ISLANDS_CAVE4",
+   "name": "Johto_WhirlIslandTunnelWest",
+   "const": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
    "group": 35,
    "num": 112,
    "region": "johto",
    "mapsec": "WHIRL ISLANDS",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_WhirlIslands_Cave4"
    },
    "width": 70,
    "height": 27
   },
   {
-   "name": "Johto_WhirlIslands_Cave5",
-   "const": "MAP_JOHTO_WHIRL_ISLANDS_CAVE5",
+   "name": "Johto_WhirlIslandTunnelEast",
+   "const": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
    "group": 35,
    "num": 113,
    "region": "johto",
    "mapsec": "WHIRL ISLANDS",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_WhirlIslands_Cave5"
    },
    "width": 70,
    "height": 27
@@ -3405,14 +3412,15 @@
    "height": 24
   },
   {
-   "name": "Johto_TrainerHill_Cave1",
-   "const": "MAP_JOHTO_TRAINER_HILL_CAVE1",
+   "name": "Johto_TrainerHillEntrance",
+   "const": "MAP_JOHTO_TRAINER_HILL_ENTRANCE",
    "group": 35,
    "num": 117,
    "region": "johto",
    "mapsec": "TRAINER HILL",
    "source": {
-    "pokecrystal": null
+    "pokecrystal": null,
+    "renamed_from": "Johto_TrainerHill_Cave1"
    },
    "width": 21,
    "height": 20

@@ -2656,7 +2656,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_MT_SILVER_CAVE2",
+     "map": "MAP_JOHTO_SILVER_CAVE_FIRE_ROOM",
      "base_label": "gQuetzal_34_111",
      "land_mons": {
       "encounter_rate": 10,
@@ -7665,7 +7665,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA5",
+     "map": "MAP_JOHTO_SAFARI_ZONE_PEAK",
      "base_label": "gQuetzal_35_73",
      "land_mons": {
       "encounter_rate": 20,
@@ -7888,7 +7888,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA6",
+     "map": "MAP_JOHTO_SAFARI_ZONE_SAVANNAH",
      "base_label": "gQuetzal_35_75",
      "land_mons": {
       "encounter_rate": 20,
@@ -10520,7 +10520,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+     "map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
      "base_label": "gQuetzal_35_111",
      "land_mons": {
       "encounter_rate": 10,
@@ -10589,7 +10589,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE4",
+     "map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
      "base_label": "gQuetzal_35_112",
      "land_mons": {
       "encounter_rate": 10,
@@ -10763,7 +10763,7 @@
      }
     },
     {
-     "map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE5",
+     "map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
      "base_label": "gQuetzal_35_113",
      "land_mons": {
       "encounter_rate": 10,

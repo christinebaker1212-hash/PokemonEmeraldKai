@@ -260,7 +260,7 @@
    "Johto_MountMortar2FInside",
    "Johto_MountMortarB1F",
    "Johto_SilverCaveItemRoom",
-   "Johto_MtSilver_Cave2",
+   "Johto_SilverCaveFireRoom",
    "Johto_SilverCaveRoom1",
    "Johto_SilverCaveRoom2",
    "Johto_SilverCaveRoom3",
@@ -643,7 +643,7 @@
    "Johto_CherrygroveGymSpeechHouse",
    "Johto_GuideGentsHouse",
    "Johto_CherrygroveEvolutionSpeechHouse",
-   "Johto_CianwoodCity_House1",
+   "Johto_CianwoodOldWomansHouse",
    "Johto_CianwoodLugiaSpeechHouse",
    "Johto_ManiasHouse",
    "Johto_EcruteakLugiaSpeechHouse",
@@ -1261,7 +1261,7 @@
    "Johto_SafariZone_EntrancePath",
    "Johto_SafariZone_Desert",
    "Johto_SafariZone_Forest",
-   "Johto_SafariZoneGate_Area6"
+   "Johto_SafariZone_Savannah"
   ],
   "source": ""
  },
@@ -1401,12 +1401,12 @@
   ],
   "used_by": [
    "Johto_SafariZone_Plains",
-   "Johto_SafariZoneGate_Area5",
+   "Johto_SafariZone_Peak",
    "Johto_WhirlIslandEntrances",
    "Johto_WhirlIslandB1F",
-   "Johto_WhirlIslands_Cave3",
-   "Johto_WhirlIslands_Cave4",
-   "Johto_WhirlIslands_Cave5",
+   "Johto_WhirlIslandCave",
+   "Johto_WhirlIslandTunnelWest",
+   "Johto_WhirlIslandTunnelEast",
    "Johto_WhirlIslandB2F",
    "Johto_WhirlIslandLugiaChamber"
   ],

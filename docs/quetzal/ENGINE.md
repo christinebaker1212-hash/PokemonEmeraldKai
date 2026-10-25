@@ -47,7 +47,7 @@ The Johto and Kanto caught arrays lie inside the new flag blocks (below): Johto 
 0x2940+ (inference from the offsets). This is how "Kanto and Johto catches have their own records" is implemented.
 Map names: the region-map section table switches to 0x09233C94 (Johto, 8-byte entries, names at +4) in Johto,
 0x09232A00 otherwise (from the earlier rip). Field-move badge requirements are per region (0x082A0FC0 ->
-0x082A0E98 Hoenn / 0x082A0F04 Johto / 0x082A0F64 Kanto). Healing / fly locations per region: not traced.
+0x082A0E98 Hoenn / 0x082A0F04 Johto / 0x082A0F64 Kanto). Healing / fly locations and region map graphics: see "Region map, fly and heal locations" below.
 Inter-region travel: special 782/783 (ports listed in table 0x095C1C88, one per region).
 
 ## New flag / var ranges
@@ -91,3 +91,20 @@ VAR_TRAINER_BATTLE_OPPONENT_A 0x0203A6D4 (same ids as stock).
   cans, museum fossil pics, early-rival trainerbattle 13); Quest Log calls left as a no-op (special 737).
 - HGSS/GSC events for Johto (Bug-Catching Contest with its own EWRAM state 0x0203EE8C, Kenya/Shuckie, Odd Egg,
   Ruins of Alph puzzles, Celebi/Giovanni alternate past, Darkrai/Cresselia dream events).
+
+## Region map, fly and heal locations
+
+Established (code around 0x08194C00-0x08199000; the rip is `quetzal_rip/region_map/`, made by
+`tools/quetzal_rip/region_map.py`, whose docstring lists every address).
+
+- Region map graphics are chosen per region by LoadRegionMapGfx (0x08195244 / 0x08195170): Hoenn stock,
+  Johto its own set, Kanto one of four sets (Kanto, Sevii 1-3, 4-5, 6-7) picked by the byte at 0x030012C5,
+  which 0x08195134 cycles like FRLG's map switch. Same format as Emerald's (8bpp affine BG, 64x64 byte tilemap,
+  palette at BG palette 7); Johto / Kanto palettes have 32 colors.
+- The 15x28 section grids: Johto 0x0922FFE0, Kanto 0x0922B030 + 420 * sub map; Kanto's section -> sub map byte
+  table is 0x0922B6C0.
+- Fly: SetFlyDestination (0x08194F3C) uses a per-region list {mapsec, heal location, unlock flag}: Johto 0x092347AC
+  (14 towns, flags 0x11BA-0x11C7), Kanto 0x0923470C (20, flags 0x2234-0x2264, FRLG's FLAG_WORLD_MAP_* by
+  kanto_frlg_flags.json); Hoenn keeps the stock table.
+- Heal locations: one table, 0x09225C60, ids 0x17-0x25 Johto and 0x26-0x39 Kanto, {group, num, x, y}. No
+  per-heal-location Pokémon Center / nurse table was found (Emerald's whiteout respawn tables).

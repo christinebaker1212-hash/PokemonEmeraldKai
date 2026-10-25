@@ -416,7 +416,7 @@
   "const": "OBJ_EVENT_GFX_QZ_30",
   "used_by": [
    "Johto_BlackthornDragonSpeechHouse",
-   "Johto_CianwoodCity_House1",
+   "Johto_CianwoodOldWomansHouse",
    "Johto_DanceTheater",
    "Johto_DayCare",
    "Johto_EcruteakMart",
@@ -1760,7 +1760,7 @@
   "id": 402,
   "const": "OBJ_EVENT_GFX_QZ_402",
   "used_by": [
-   "Johto_MtSilver_Cave2"
+   "Johto_SilverCaveFireRoom"
   ],
   "maps_using": 1,
   "tile_tag": 65535,
@@ -2830,7 +2830,7 @@
   "id": 741,
   "const": "OBJ_EVENT_GFX_QZ_741",
   "used_by": [
-   "Johto_MtSilver_Cave2",
+   "Johto_SilverCaveFireRoom",
    "Kanto_MtEmber_SummitPath_3F"
   ],
   "maps_using": 2,
@@ -2932,7 +2932,7 @@
   "id": 744,
   "const": "OBJ_EVENT_GFX_QZ_744",
   "used_by": [
-   "Johto_SafariZoneGate_Area5",
+   "Johto_SafariZone_Peak",
    "Kanto_Route4"
   ],
   "maps_using": 2,
@@ -2964,7 +2964,7 @@
   "id": 746,
   "const": "OBJ_EVENT_GFX_QZ_746",
   "used_by": [
-   "Johto_WhirlIslands_Cave5",
+   "Johto_WhirlIslandTunnelEast",
    "Kanto_OneIsland_TreasureBeach"
   ],
   "maps_using": 2,
@@ -3829,7 +3829,7 @@
   "id": 1049,
   "const": "OBJ_EVENT_GFX_QZ_1049",
   "used_by": [
-   "Johto_WhirlIslands_Cave5",
+   "Johto_WhirlIslandTunnelEast",
    "Kanto_SeafoamIslands_1F"
   ],
   "maps_using": 2,

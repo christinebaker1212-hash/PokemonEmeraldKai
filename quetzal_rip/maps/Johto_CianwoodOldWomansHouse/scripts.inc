@@ -1,36 +1,36 @@
-Johto_CianwoodCity_House1_MapScripts::
+Johto_CianwoodOldWomansHouse_MapScripts::
 	.byte 0
 
-@ Johto_CianwoodCity_House1 object 1 (local id 1, gfx 0x1E) at 4,4
-Johto_CianwoodCity_House1_EventScript_83CAC29::
+@ Johto_CianwoodOldWomansHouse object 1 (local id 1, gfx 0x1E) at 4,4
+Johto_CianwoodOldWomansHouse_EventScript_83CAC29::
 	lock
 	faceplayer
-	msgbox Johto_CianwoodCity_House1_Text_83CAC79, MSGBOX_DEFAULT
+	msgbox Johto_CianwoodOldWomansHouse_Text_83CAC79, MSGBOX_DEFAULT
 	checkitem ITEM_TIDAL_BELL, 1
-	goto_if_eq VAR_RESULT, 1, Johto_CianwoodCity_House1_EventScript_83CAC48
-	goto Johto_CianwoodCity_House1_EventScript_83CAC53
+	goto_if_eq VAR_RESULT, 1, Johto_CianwoodOldWomansHouse_EventScript_83CAC48
+	goto Johto_CianwoodOldWomansHouse_EventScript_83CAC53
 
-Johto_CianwoodCity_House1_EventScript_83CAC48::
-	msgbox Johto_CianwoodCity_House1_Text_83CAF9C, MSGBOX_DEFAULT
+Johto_CianwoodOldWomansHouse_EventScript_83CAC48::
+	msgbox Johto_CianwoodOldWomansHouse_Text_83CAF9C, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_CianwoodCity_House1_EventScript_83CAC53::
+Johto_CianwoodOldWomansHouse_EventScript_83CAC53::
 	checkitem ITEM_CLEAR_BELL, 1
-	goto_if_eq VAR_RESULT, 1, Johto_CianwoodCity_House1_EventScript_83CAC6E
-	msgbox Johto_CianwoodCity_House1_Text_83CAD8C, MSGBOX_DEFAULT
+	goto_if_eq VAR_RESULT, 1, Johto_CianwoodOldWomansHouse_EventScript_83CAC6E
+	msgbox Johto_CianwoodOldWomansHouse_Text_83CAD8C, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_CianwoodCity_House1_EventScript_83CAC6E::
-	msgbox Johto_CianwoodCity_House1_Text_83CAED4, MSGBOX_DEFAULT
+Johto_CianwoodOldWomansHouse_EventScript_83CAC6E::
+	msgbox Johto_CianwoodOldWomansHouse_Text_83CAED4, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_CianwoodCity_House1_Text_83CAC79::
+Johto_CianwoodOldWomansHouse_Text_83CAC79::
 	.string "I don’t remember the last time\n"
 	.string "someone came to visit me.\p"
 	.string "When I was young, I was a\n"
@@ -43,7 +43,7 @@ Johto_CianwoodCity_House1_Text_83CAC79::
 	.string "listening to the waves and winds\l"
 	.string "on this beach.$"
 
-Johto_CianwoodCity_House1_Text_83CAD8C::
+Johto_CianwoodOldWomansHouse_Text_83CAD8C::
 	.string "Have you heard of the TIN TOWER\n"
 	.string "in ECRUTEAK?\p"
 	.string "There are what they call Clear Bells\n"
@@ -58,7 +58,7 @@ Johto_CianwoodCity_House1_Text_83CAD8C::
 	.string "I went after it when I was young.\n"
 	.string "But I never got one...$"
 
-Johto_CianwoodCity_House1_Text_83CAED4::
+Johto_CianwoodOldWomansHouse_Text_83CAED4::
 	.string "Oh! You’ve managed to get a\n"
 	.string "CLEAR BELL?\p"
 	.string "The old-time dream of mine...\n"
@@ -70,7 +70,7 @@ Johto_CianwoodCity_House1_Text_83CAED4::
 	.string "coming from the direction of the\l"
 	.string "TIN TOWER...$"
 
-Johto_CianwoodCity_House1_Text_83CAF9C::
+Johto_CianwoodOldWomansHouse_Text_83CAF9C::
 	.string "Oh! You’ve managed to get a\n"
 	.string "Tidal Bell?\p"
 	.string "The old-time dream of mine...\n"

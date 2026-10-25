@@ -125,7 +125,7 @@
       "x": 43,
       "y": 36,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "0"
     },
     {
@@ -160,28 +160,28 @@
       "x": 31,
       "y": 16,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "1"
     },
     {
       "x": 55,
       "y": 16,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "2"
     },
     {
       "x": 32,
       "y": 23,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "4"
     },
     {
       "x": 54,
       "y": 23,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "5"
     },
     {

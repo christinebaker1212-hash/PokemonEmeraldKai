@@ -14,12 +14,12 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA6",
+      "map": "MAP_JOHTO_SAFARI_ZONE_SAVANNAH",
       "offset": 0,
       "direction": "left"
     },
     {
-      "map": "MAP_JOHTO_SAFARI_ZONE_GATE_AREA5",
+      "map": "MAP_JOHTO_SAFARI_ZONE_PEAK",
       "offset": 0,
       "direction": "down"
     }

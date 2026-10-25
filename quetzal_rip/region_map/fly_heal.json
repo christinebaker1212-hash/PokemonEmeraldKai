@@ -1,0 +1,545 @@
+{
+ "heal_locations": {
+  "johto": [
+   {
+    "heal_location": 23,
+    "map": "Johto_NewBarkTown",
+    "group": 34,
+    "num": 123,
+    "x": 20,
+    "y": 12
+   },
+   {
+    "heal_location": 24,
+    "map": "Johto_CherrygroveCity",
+    "group": 34,
+    "num": 16,
+    "x": 47,
+    "y": 8
+   },
+   {
+    "heal_location": 25,
+    "map": "Johto_VioletCity",
+    "group": 35,
+    "num": 102,
+    "x": 39,
+    "y": 46
+   },
+   {
+    "heal_location": 26,
+    "map": "Johto_AzaleaTown",
+    "group": 34,
+    "num": 0,
+    "x": 31,
+    "y": 16
+   },
+   {
+    "heal_location": 27,
+    "map": "Johto_GoldenrodCity",
+    "group": 34,
+    "num": 59,
+    "x": 28,
+    "y": 37
+   },
+   {
+    "heal_location": 28,
+    "map": "Johto_EcruteakCity",
+    "group": 34,
+    "num": 36,
+    "x": 39,
+    "y": 48
+   },
+   {
+    "heal_location": 29,
+    "map": "Johto_OlivineCity",
+    "group": 35,
+    "num": 3,
+    "x": 15,
+    "y": 44
+   },
+   {
+    "heal_location": 30,
+    "map": "Johto_CianwoodCity",
+    "group": 34,
+    "num": 22,
+    "x": 31,
+    "y": 46
+   },
+   {
+    "heal_location": 31,
+    "map": "Johto_SafariZoneGate",
+    "group": 35,
+    "num": 67,
+    "x": 11,
+    "y": 16
+   },
+   {
+    "heal_location": 32,
+    "map": "Johto_MahoganyTown",
+    "group": 34,
+    "num": 105,
+    "x": 21,
+    "y": 20
+   },
+   {
+    "heal_location": 33,
+    "map": "Johto_LakeOfRage",
+    "group": 34,
+    "num": 97,
+    "x": 31,
+    "y": 43
+   },
+   {
+    "heal_location": 34,
+    "map": "Johto_BlackthornCity",
+    "group": 34,
+    "num": 7,
+    "x": 27,
+    "y": 49
+   },
+   {
+    "heal_location": 35,
+    "map": "Johto_IndigoPlateau",
+    "group": 34,
+    "num": 95,
+    "x": 11,
+    "y": 7
+   },
+   {
+    "heal_location": 36,
+    "map": "Johto_SilverCaveOutside",
+    "group": 34,
+    "num": 116,
+    "x": 25,
+    "y": 15
+   },
+   {
+    "heal_location": 37,
+    "map": "Johto_Route32",
+    "group": 35,
+    "num": 38,
+    "x": 25,
+    "y": 85
+   }
+  ],
+  "kanto": [
+   {
+    "heal_location": 38,
+    "map": "Kanto_CeladonCity",
+    "group": 37,
+    "num": 63,
+    "x": 48,
+    "y": 12
+   },
+   {
+    "heal_location": 39,
+    "map": "Kanto_CeruleanCity",
+    "group": 37,
+    "num": 60,
+    "x": 22,
+    "y": 20
+   },
+   {
+    "heal_location": 40,
+    "map": "Kanto_CinnabarIsland",
+    "group": 37,
+    "num": 65,
+    "x": 14,
+    "y": 12
+   },
+   {
+    "heal_location": 41,
+    "map": "Kanto_FiveIsland",
+    "group": 37,
+    "num": 73,
+    "x": 18,
+    "y": 7
+   },
+   {
+    "heal_location": 42,
+    "map": "Kanto_FourIsland",
+    "group": 37,
+    "num": 72,
+    "x": 18,
+    "y": 21
+   },
+   {
+    "heal_location": 43,
+    "map": "Kanto_FuchsiaCity",
+    "group": 37,
+    "num": 64,
+    "x": 25,
+    "y": 32
+   },
+   {
+    "heal_location": 44,
+    "map": "Kanto_IndigoPlateau_Exterior",
+    "group": 37,
+    "num": 66,
+    "x": 11,
+    "y": 7
+   },
+   {
+    "heal_location": 45,
+    "map": "Kanto_LavenderTown",
+    "group": 37,
+    "num": 61,
+    "x": 6,
+    "y": 6
+   },
+   {
+    "heal_location": 46,
+    "map": "Kanto_OneIsland",
+    "group": 37,
+    "num": 69,
+    "x": 14,
+    "y": 6
+   },
+   {
+    "heal_location": 47,
+    "map": "Kanto_PalletTown",
+    "group": 37,
+    "num": 57,
+    "x": 6,
+    "y": 8
+   },
+   {
+    "heal_location": 48,
+    "map": "Kanto_PewterCity",
+    "group": 37,
+    "num": 59,
+    "x": 17,
+    "y": 26
+   },
+   {
+    "heal_location": 49,
+    "map": "Kanto_Route10",
+    "group": 37,
+    "num": 85,
+    "x": 13,
+    "y": 21
+   },
+   {
+    "heal_location": 50,
+    "map": "Kanto_Route4",
+    "group": 37,
+    "num": 79,
+    "x": 12,
+    "y": 6
+   },
+   {
+    "heal_location": 51,
+    "map": "Kanto_SaffronCity",
+    "group": 37,
+    "num": 67,
+    "x": 24,
+    "y": 39
+   },
+   {
+    "heal_location": 52,
+    "map": "Kanto_SevenIsland",
+    "group": 37,
+    "num": 74,
+    "x": 12,
+    "y": 4
+   },
+   {
+    "heal_location": 53,
+    "map": "Kanto_SixIsland",
+    "group": 37,
+    "num": 75,
+    "x": 11,
+    "y": 12
+   },
+   {
+    "heal_location": 54,
+    "map": "Kanto_ThreeIsland",
+    "group": 37,
+    "num": 71,
+    "x": 14,
+    "y": 28
+   },
+   {
+    "heal_location": 55,
+    "map": "Kanto_TwoIsland",
+    "group": 37,
+    "num": 70,
+    "x": 21,
+    "y": 8
+   },
+   {
+    "heal_location": 56,
+    "map": "Kanto_VermilionCity",
+    "group": 37,
+    "num": 62,
+    "x": 15,
+    "y": 7
+   },
+   {
+    "heal_location": 57,
+    "map": "Kanto_ViridianCity",
+    "group": 37,
+    "num": 58,
+    "x": 26,
+    "y": 27
+   }
+  ]
+ },
+ "fly_destinations": {
+  "johto": [
+   {
+    "mapsec": 0,
+    "name": "NEW BARK TOWN",
+    "heal_location": 23,
+    "unlock_flag": "FLAG_QZ_0x11BA"
+   },
+   {
+    "mapsec": 1,
+    "name": "CHERRYGROVE CITY",
+    "heal_location": 24,
+    "unlock_flag": "FLAG_QZ_0x11BB"
+   },
+   {
+    "mapsec": 2,
+    "name": "VIOLET CITY",
+    "heal_location": 25,
+    "unlock_flag": "FLAG_QZ_0x11BC"
+   },
+   {
+    "mapsec": 3,
+    "name": "AZALEA TOWN",
+    "heal_location": 26,
+    "unlock_flag": "FLAG_QZ_0x11BD"
+   },
+   {
+    "mapsec": 4,
+    "name": "GOLDENROD CITY",
+    "heal_location": 27,
+    "unlock_flag": "FLAG_QZ_0x11BE"
+   },
+   {
+    "mapsec": 5,
+    "name": "ECRUTEAK CITY",
+    "heal_location": 28,
+    "unlock_flag": "FLAG_QZ_0x11BF"
+   },
+   {
+    "mapsec": 6,
+    "name": "OLIVINE CITY",
+    "heal_location": 29,
+    "unlock_flag": "FLAG_QZ_0x11C0"
+   },
+   {
+    "mapsec": 7,
+    "name": "CIANWOOD CITY",
+    "heal_location": 30,
+    "unlock_flag": "FLAG_QZ_0x11C1"
+   },
+   {
+    "mapsec": 8,
+    "name": "SAFARI ZONE GATE",
+    "heal_location": 31,
+    "unlock_flag": "FLAG_QZ_0x11C2"
+   },
+   {
+    "mapsec": 9,
+    "name": "MAHOGANY TOWN",
+    "heal_location": 32,
+    "unlock_flag": "FLAG_QZ_0x11C3"
+   },
+   {
+    "mapsec": 10,
+    "name": "LAKE OF RAGE",
+    "heal_location": 33,
+    "unlock_flag": "FLAG_QZ_0x11C4"
+   },
+   {
+    "mapsec": 11,
+    "name": "BLACKTHORN CITY",
+    "heal_location": 34,
+    "unlock_flag": "FLAG_QZ_0x11C5"
+   },
+   {
+    "mapsec": 97,
+    "name": "INDIGO PLATEAU",
+    "heal_location": 35,
+    "unlock_flag": "FLAG_QZ_0x11C6"
+   },
+   {
+    "mapsec": 23,
+    "name": "MT. SILVER",
+    "heal_location": 36,
+    "unlock_flag": "FLAG_QZ_0x11C7"
+   }
+  ],
+  "kanto": [
+   {
+    "mapsec": 88,
+    "name": "PALLET TOWN",
+    "heal_location": 47,
+    "unlock_flag": "FLAG_QZ_0x2245",
+    "frlg_flag": "FLAG_WORLD_MAP_PALLET_TOWN",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 89,
+    "name": "VIRIDIAN CITY",
+    "heal_location": 57,
+    "unlock_flag": "FLAG_QZ_0x2264",
+    "frlg_flag": "FLAG_WORLD_MAP_VIRIDIAN_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 90,
+    "name": "PEWTER CITY",
+    "heal_location": 48,
+    "unlock_flag": "FLAG_QZ_0x2246",
+    "frlg_flag": "FLAG_WORLD_MAP_PEWTER_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 91,
+    "name": "CERULEAN CITY",
+    "heal_location": 39,
+    "unlock_flag": "FLAG_QZ_0x2236",
+    "frlg_flag": "FLAG_WORLD_MAP_CERULEAN_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 92,
+    "name": "LAVENDER TOWN",
+    "heal_location": 45,
+    "unlock_flag": "FLAG_QZ_0x2240",
+    "frlg_flag": "FLAG_WORLD_MAP_LAVENDER_TOWN",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 93,
+    "name": "VERMILION CITY",
+    "heal_location": 56,
+    "unlock_flag": "FLAG_QZ_0x2262",
+    "frlg_flag": "FLAG_WORLD_MAP_VERMILION_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 94,
+    "name": "CELADON CITY",
+    "heal_location": 38,
+    "unlock_flag": "FLAG_QZ_0x2234",
+    "frlg_flag": "FLAG_WORLD_MAP_CELADON_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 95,
+    "name": "FUCHSIA CITY",
+    "heal_location": 43,
+    "unlock_flag": "FLAG_QZ_0x223E",
+    "frlg_flag": "FLAG_WORLD_MAP_FUCHSIA_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 96,
+    "name": "CINNABAR ISLAND",
+    "heal_location": 40,
+    "unlock_flag": "FLAG_QZ_0x2237",
+    "frlg_flag": "FLAG_WORLD_MAP_CINNABAR_ISLAND",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 97,
+    "name": "INDIGO PLATEAU",
+    "heal_location": 44,
+    "unlock_flag": "FLAG_QZ_0x223F",
+    "frlg_flag": "FLAG_WORLD_MAP_INDIGO_PLATEAU_EXTERIOR",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 98,
+    "name": "SAFFRON CITY",
+    "heal_location": 51,
+    "unlock_flag": "FLAG_QZ_0x2250",
+    "frlg_flag": "FLAG_WORLD_MAP_SAFFRON_CITY",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 99,
+    "name": "ROUTE 4",
+    "heal_location": 50,
+    "unlock_flag": "FLAG_QZ_0x224E",
+    "frlg_flag": "FLAG_WORLD_MAP_ROUTE4_POKEMON_CENTER_1F",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 100,
+    "name": "ROUTE 10",
+    "heal_location": 49,
+    "unlock_flag": "FLAG_QZ_0x224D",
+    "frlg_flag": "FLAG_WORLD_MAP_ROUTE10_POKEMON_CENTER_1F",
+    "submap": "Kanto"
+   },
+   {
+    "mapsec": 143,
+    "name": "ONE ISLAND",
+    "heal_location": 46,
+    "unlock_flag": "FLAG_QZ_0x2244",
+    "frlg_flag": "FLAG_WORLD_MAP_ONE_ISLAND",
+    "submap": "Sevii 1-3"
+   },
+   {
+    "mapsec": 144,
+    "name": "TWO ISLAND",
+    "heal_location": 55,
+    "unlock_flag": "FLAG_QZ_0x225F",
+    "frlg_flag": "FLAG_WORLD_MAP_TWO_ISLAND",
+    "submap": "Sevii 1-3"
+   },
+   {
+    "mapsec": 145,
+    "name": "THREE ISLAND",
+    "heal_location": 54,
+    "unlock_flag": "FLAG_QZ_0x225B",
+    "frlg_flag": "FLAG_WORLD_MAP_THREE_ISLAND",
+    "submap": "Sevii 1-3"
+   },
+   {
+    "mapsec": 146,
+    "name": "FOUR ISLAND",
+    "heal_location": 42,
+    "unlock_flag": "FLAG_QZ_0x223C",
+    "frlg_flag": "FLAG_WORLD_MAP_FOUR_ISLAND",
+    "submap": "Sevii 4-5"
+   },
+   {
+    "mapsec": 147,
+    "name": "FIVE ISLAND",
+    "heal_location": 41,
+    "unlock_flag": "FLAG_QZ_0x2239",
+    "frlg_flag": "FLAG_WORLD_MAP_FIVE_ISLAND",
+    "submap": "Sevii 4-5"
+   },
+   {
+    "mapsec": 149,
+    "name": "SIX ISLAND",
+    "heal_location": 53,
+    "unlock_flag": "FLAG_QZ_0x2256",
+    "frlg_flag": "FLAG_WORLD_MAP_SIX_ISLAND",
+    "submap": "Sevii 6-7"
+   },
+   {
+    "mapsec": 148,
+    "name": "SEVEN ISLAND",
+    "heal_location": 52,
+    "unlock_flag": "FLAG_QZ_0x2252",
+    "frlg_flag": "FLAG_WORLD_MAP_SEVEN_ISLAND",
+    "submap": "Sevii 6-7"
+   }
+  ],
+  "johto_extra_checks": {
+   "2 (Violet City)": "also checks VAR_QZ_0x5008 == 3 (0x08194E84; which way is not traced)",
+   "6 (Olivine City)": "also checks VAR_QZ_0x500D == 1 (0x08194E84; which way is not traced)"
+  },
+  "kanto_always_open": [
+   "0x58 PALLET TOWN"
+  ]
+ }
+}

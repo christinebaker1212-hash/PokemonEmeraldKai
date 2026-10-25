@@ -1,7 +1,7 @@
 {
-  "id": "MAP_JOHTO_MT_SILVER_CAVE2",
-  "name": "Johto_MtSilver_Cave2",
-  "layout": "LAYOUT_JOHTO_MT_SILVER_CAVE2",
+  "id": "MAP_JOHTO_SILVER_CAVE_FIRE_ROOM",
+  "name": "Johto_SilverCaveFireRoom",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_FIRE_ROOM",
   "music": "MUS_QZ_636",
   "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
   "requires_flash": false,
@@ -67,7 +67,8 @@
     "header_filler": "0000",
     "flags_high_bits": 0,
     "source": {
-      "pokecrystal": null
+      "pokecrystal": null,
+      "renamed_from": "Johto_MtSilver_Cave2"
     }
   }
 }

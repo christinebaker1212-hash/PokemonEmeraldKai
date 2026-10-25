@@ -2021,7 +2021,6 @@
     "Johto_MountMortar1FInside",
     "Johto_MountMortar1FOutside",
     "Johto_MountMortarB1F",
-    "Johto_MtSilver_Cave2",
     "Johto_NationalPark",
     "Johto_OlivineCity",
     "Johto_OlivineLighthouse",
@@ -2040,9 +2039,10 @@
     "Johto_RuinsOfAlphInnerChamber",
     "Johto_RuinsOfAlphOutside",
     "Johto_RuinsOfAlphResearchCenter",
-    "Johto_SafariZoneGate_Area5",
     "Johto_SafariZone_Desert",
     "Johto_SafariZone_Forest",
+    "Johto_SafariZone_Peak",
+    "Johto_SilverCaveFireRoom",
     "Johto_SilverCaveItemRoom",
     "Johto_SilverCaveMountainside",
     "Johto_SilverCaveRoom3",
@@ -2061,7 +2061,7 @@
     "Johto_VictoryRoad1F",
     "Johto_VictoryRoad2F",
     "Johto_WhirlIslandLugiaChamber",
-    "Johto_WhirlIslands_Cave5",
+    "Johto_WhirlIslandTunnelEast",
     "Kanto_CeladonCity",
     "Kanto_CeruleanCave_1F",
     "Kanto_CeruleanCave_RayquazaChamber",
@@ -2185,7 +2185,6 @@
     "Johto_MountMortar1FInside",
     "Johto_MountMortar1FOutside",
     "Johto_MountMortarB1F",
-    "Johto_MtSilver_Cave2",
     "Johto_NationalPark",
     "Johto_OlivineCity",
     "Johto_OlivineLighthouse",
@@ -2204,9 +2203,10 @@
     "Johto_RuinsOfAlphInnerChamber",
     "Johto_RuinsOfAlphOutside",
     "Johto_RuinsOfAlphResearchCenter",
-    "Johto_SafariZoneGate_Area5",
     "Johto_SafariZone_Desert",
     "Johto_SafariZone_Forest",
+    "Johto_SafariZone_Peak",
+    "Johto_SilverCaveFireRoom",
     "Johto_SilverCaveItemRoom",
     "Johto_SilverCaveMountainside",
     "Johto_SilverCaveRoom3",
@@ -2225,7 +2225,7 @@
     "Johto_VictoryRoad1F",
     "Johto_VictoryRoad2F",
     "Johto_WhirlIslandLugiaChamber",
-    "Johto_WhirlIslands_Cave5",
+    "Johto_WhirlIslandTunnelEast",
     "Kanto_CeladonCity",
     "Kanto_CeruleanCave_1F",
     "Kanto_CeruleanCave_RayquazaChamber",
@@ -6382,7 +6382,7 @@
    "value": "0x11DE",
    "range": "Quetzal block 0x1000-0x1FFF (Johto)",
    "hides_objects_in": [
-    "Johto_MtSilver_Cave2"
+    "Johto_SilverCaveFireRoom"
    ]
   },
   "FLAG_QZ_0x11E1": {
@@ -6556,7 +6556,7 @@
    "value": "0x1229",
    "range": "Quetzal block 0x1000-0x1FFF (Johto)",
    "hides_objects_in": [
-    "Johto_MtSilver_Cave2"
+    "Johto_SilverCaveFireRoom"
    ]
   },
   "FLAG_QZ_0x122C": {
@@ -6577,14 +6577,14 @@
    "value": "0x1232",
    "range": "Quetzal block 0x1000-0x1FFF (Johto)",
    "hides_objects_in": [
-    "Johto_SafariZoneGate_Area5"
+    "Johto_SafariZone_Peak"
    ]
   },
   "FLAG_QZ_0x1235": {
    "value": "0x1235",
    "range": "Quetzal block 0x1000-0x1FFF (Johto)",
    "hides_objects_in": [
-    "Johto_WhirlIslands_Cave5"
+    "Johto_WhirlIslandTunnelEast"
    ]
   },
   "FLAG_QZ_0x1238": {
@@ -6780,7 +6780,7 @@
    "value": "0x128C",
    "range": "Quetzal block 0x1000-0x1FFF (Johto)",
    "hides_objects_in": [
-    "Johto_WhirlIslands_Cave5"
+    "Johto_WhirlIslandTunnelEast"
    ]
   },
   "FLAG_QZ_0x128F": {

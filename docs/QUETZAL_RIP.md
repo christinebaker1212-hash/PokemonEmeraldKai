@@ -29,6 +29,7 @@ The ROM itself is not in the repo.
 | `quetzal_rip/data/` | `trainers.json` (793 trainers, parties), `wild_encounters.json` (229 maps), `region_map_sections.json`, `flags_vars.json` (every flag/var: where set, checked, hides objects), `id_map.json` (every species/item/move used, with Kai's constant or null) | JSON |
 | `quetzal_rip/include/` | `quetzal_constants.h` (every FLAG_QZ/VAR_QZ/TRAINER_QZ/OBJ_EVENT_GFX_QZ/MUS_QZ value), `quetzal_macros.inc` (custom commands, Quetzal specials), `quetzal_ids.h` (Quetzal's species/item/move numbers, for checks only) | |
 | `quetzal_rip/sound/` | Quetzal's 107 new songs (ids 559-665): 56 Johto music tracks + 51 sound-effect copies, as `.mid` + `midi.cfg` lines for Kai's build, `.s` (exact ROM bytes), 2 new voicegroups, 192 new samples (`.wav`); `README.md` names each song from where it plays | Kai's sound formats; `tools/quetzal_rip/songs.py [--verify]` |
+| `quetzal_rip/region_map/` | Johto map + Kanto's 4 maps (Kanto, Sevii 1-3 / 4-5 / 6-7): `map.png` / `map.bin` / `map.pal` like Kai's `graphics/pokenav/region_map/`, `preview.png`; `layouts.json` (15x28 section grids like `region_map_layout.h`); `fly_heal.json` (35 heal locations, 34 fly spots with unlock flags) | `tools/quetzal_rip/region_map.py` |
 | `quetzal_rip/previews/` | `johto_overview.png`, `kanto_overview.png`: all outdoor maps stitched by their connections | 1/4 scale |
 
 ### Verified
@@ -39,15 +40,11 @@ The ROM itself is not in the repo.
   (`asm/macros/event.inc`) through `preproc` / `cpp` / `as`;
 - **all 12,344 labelled script, text, movement and mart blocks are byte-identical to the ROM** (pointers masked).
   So no command, argument or character was decoded wrongly.
-Map renders (`tools/quetzal_rip/render.py`, `overview.py`), sprite sheets and trainer pics were checked by eye.
+Map renders (`tools/quetzal_rip/render.py`, `overview.py`), sprite sheets, trainer pics and region maps were checked
+by eye.
 `python3 tools/quetzal_rip/songs.py ROM --verify`: all 107 songs assemble back to the ROM's bytes, all 107 `.mid`
 files rebuild through Kai's `mid2agb` into the same notes / controllers / tempo / loop, and all 192 `.wav` samples
 convert back to the ROM's bytes with Kai's `wav2agb`.
-
-### Not ripped yet
-
-- **Region map graphics and fly / heal locations** for Johto and Kanto (ENGINE.md has the region logic; the map
-  section tables are ripped in `data/region_map_sections.json`).
 
 ### Naming conventions in the rip
 
@@ -68,25 +65,30 @@ convert back to the ROM's bytes with Kai's `wav2agb`.
 
 ## What Kai needs before the content can run
 
-In rough order of size. Each item says where the details are.
+Kai is a PC port, so none of the GBA's size limits apply: ROM space, VRAM, save size and id widths can simply grow.
+Where Quetzal squeezed things (640-tile primaries, a lazily-created save block, u16 ids packed into old structs),
+Kai can take the straightforward route. In rough order of size; each item says where the details are.
 
 1. **Regions.** Quetzal decides the region from the map group (34-35 Johto, 36-39 Kanto). Per region it switches:
    the region map + map section names (Johto has its own section table), badges and field-move badge checks,
    Pokédex "caught" records, the "region cleared" bit, fly/heal points, wild/trainer tables. Kai has none of this;
    decide whether Kai keeps one dex/badge set or adds regions (ENGINE.md, "Region").
 2. **640-tile primaries.** 8 of the primaries (6 Johto, 2 Kanto) are FRLG-style: 640 tiles / 640 metatiles /
-   7 palettes, and their secondaries 384 / 384 / 6. Kai is 512/512/6. Either add the per-layout split Quetzal uses
-   (ENGINE.md lists every function it touches) or re-split those tilesets offline. Animated tiles: the callbacks in
+   7 palettes, and their secondaries 384 / 384 / 6. Kai is 512/512/6. Add the per-layout split Quetzal uses (ENGINE.md
+   lists every function it touches); on PC the tile / metatile / palette counts can also just be raised for every
+   tileset, since VRAM is not a limit. Animated tiles: the callbacks in
    `tilesets.json` (`anim_callback`) are Quetzal code; the FRLG ones match pokefirered's `tileset_anims.c`.
 3. **16-bit object graphics ids.** Quetzal's object event struct has a u16 graphics id (Kai's `object_event` macro
-   writes a byte; `check_build.sh` shows the truncation warnings). The 382 sprites used are in `object_events/`:
+   writes a byte; `check_build.sh` shows the truncation warnings): widen Kai's field to u16 (Kai already uses
+   ids 0x9000+ for its own looks). The 382 sprites used are in `object_events/`:
    - 141 are Pokémon overworld sprites (`"pokemon"` in the json; id = species + 256): Kai's follower graphics for that
      species are the natural replacement.
    - 186 match an Emerald or FRLG sprite already (`"matches"`): use Kai's / pokefirered's.
    - the rest are new NPCs (Johto gym leaders, Ethan/Kris/Lyra, Kimono Girls...): add them.
 4. **Flags and vars.** The content uses 1,439 flags and 129 vars: Johto in Quetzal's new blocks 0x1000-0x1FFF / vars
    0x5000-0x50FF, Kanto in 0x2000-0x2FFF / 0x5100-0x51FF, plus 164 of Emerald's unused low flags (0x20-0xBE) for item
-   balls. Kai needs room for them (Quetzal added a lazily-created 0x800-byte block to SaveBlock1, ENGINE.md).
+   balls. Kai needs room for them: on PC just enlarge the flag / var arrays or add a block like Quetzal's 0x800-byte
+   SaveBlock1 extension (ENGINE.md), with a save-version bump so old saves upgrade.
    `data/flags_vars.json` lists every use. For Kanto, `tools/quetzal_rip/kanto_frlg_flags.json` maps 499 flags and
    61 vars to pokefirered's names by script alignment, so Kanto can take FRLG's flag names.
 5. **Pokémon, items, moves.** The trainers, wild tables, gifts and marts use 992 species (629 not in Kai: Gen 4-9

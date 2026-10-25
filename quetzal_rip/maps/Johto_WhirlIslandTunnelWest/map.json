@@ -1,7 +1,7 @@
 {
-  "id": "MAP_JOHTO_WHIRL_ISLANDS_CAVE4",
-  "name": "Johto_WhirlIslands_Cave4",
-  "layout": "LAYOUT_JOHTO_WHIRL_ISLANDS_CAVE4",
+  "id": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
+  "name": "Johto_WhirlIslandTunnelWest",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
   "music": "MUS_QZ_631",
   "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
   "requires_flash": false,
@@ -19,14 +19,14 @@
       "x": 9,
       "y": 16,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE5",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
       "dest_warp_id": "0"
     },
     {
       "x": 60,
       "y": 17,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
       "dest_warp_id": "3"
     }
   ],
@@ -45,7 +45,8 @@
     "header_filler": "0000",
     "flags_high_bits": 0,
     "source": {
-      "pokecrystal": null
+      "pokecrystal": null,
+      "renamed_from": "Johto_WhirlIslands_Cave4"
     }
   }
 }

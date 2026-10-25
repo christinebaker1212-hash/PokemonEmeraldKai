@@ -135,7 +135,7 @@ Length = to the loop end (or the end) at the song's tempo; "loop" = where it loo
 | 614 | Azalea Town (also Blackthorn City) | BGM | 12 | qz_songs | 1:08.2 (3276 ticks) | 972 | Johto_AzaleaTown, Johto_BlackthornCity, Johto_BlackthornDragonSpeechHouse, Johto_BlackthornEmysHouse, Johto_CharcoalKiln, Johto_IlexForestAzaleaGate, +3 more maps |
 | 615 | Goldenrod City | BGM | 11 | qz_songs | 0:42.4 (2304 ticks) | 384 | Johto_BillsFamilysHouse, Johto_GoldenrodCity, Johto_GoldenrodCity_Copy, Johto_GoldenrodDeptStoreElevator, Johto_GoldenrodDeptStoreRoof, Johto_GoldenrodDeptStoreRoofAlt, +12 more maps, Johto_RadioTower5F (playbgm) |
 | 616 | Ecruteak City | BGM | 9 | qz_songs | 1:20.0 (2688 ticks) | 0 | Johto_EcruteakCity, Johto_EcruteakItemfinderHouse, Johto_EcruteakLugiaSpeechHouse, Johto_EcruteakTinTowerEntrance, Johto_WiseTriosRoom |
-| 617 | Cianwood City | BGM | 7 | qz_songs | 1:13.6 (2592 ticks) | 0 | Johto_CianwoodCity, Johto_CianwoodCity_House1, Johto_CianwoodLugiaSpeechHouse, Johto_CianwoodPharmacy, Johto_ManiasHouse |
+| 617 | Cianwood City | BGM | 7 | qz_songs | 1:13.6 (2592 ticks) | 0 | Johto_CianwoodCity, Johto_CianwoodLugiaSpeechHouse, Johto_CianwoodOldWomansHouse, Johto_CianwoodPharmacy, Johto_ManiasHouse |
 | 618 | Route 29 | BGM | 9 | qz_songs | 0:58.6 (2268 ticks) | 300 | Johto_Route29, Johto_Route29Route46Gate |
 | 619 | Route 30 (Routes 30-33) | BGM | 14 | qz_songs | 0:37.7 (1932 ticks) | 396 | Johto_MrPokemonsHouse, Johto_Route30, Johto_Route30BerryHouse, Johto_Route31, Johto_Route31VioletGate, Johto_Route32, +2 more maps |
 | 620 | Route 34 (Routes 34-37) | BGM | 9 | qz_songs | 0:54.5 (2880 ticks) | 960 | Johto_DayCare, Johto_Route34, Johto_Route34IlexForestGate, Johto_Route34IlexForestGate_Copy, Johto_Route34_Copy, Johto_Route35, +5 more maps |
@@ -154,7 +154,7 @@ Length = to the loop end (or the end) at the song's tempo; "loop" = where it loo
 | 633 | National Park / Bug-Catching Contest | BGM | 12 | qz_songs | 1:50.9 (4035 ticks) | 771 | Johto_NationalPark, Johto_NationalParkBugContest |
 | 634 | Burned Tower | BGM | 11 | qz_songs | 0:52.8 (2016 ticks) | 864 | Johto_BurnedTower1F, Johto_BurnedTowerB1F |
 | 635 | Tin (Bell) Tower | BGM | 14 | qz_songs | 0:53.7 (1920 ticks) | 384 | Johto_EcruteakCityNorth, Johto_TinTower1F, Johto_TinTower2F, Johto_TinTower3F, Johto_TinTower4F, Johto_TinTower5F, +6 more maps |
-| 636 | Mt. Silver (also Olivine Lighthouse) | BGM | 8 | qz_songs | 0:36.4 (1920 ticks) | 192 | Johto_MtSilver_Cave2, Johto_OlivineLighthouse, Johto_SilverCaveItemRoom, Johto_SilverCaveMountainside, Johto_SilverCaveOutside, Johto_SilverCaveRoom1, +3 more maps |
+| 636 | Mt. Silver (also Olivine Lighthouse) | BGM | 8 | qz_songs | 0:36.4 (1920 ticks) | 192 | Johto_OlivineLighthouse, Johto_SilverCaveFireRoom, Johto_SilverCaveItemRoom, Johto_SilverCaveMountainside, Johto_SilverCaveOutside, Johto_SilverCaveRoom1, +3 more maps |
 | 637 | Team Rocket Hideout | BGM | 11 | qz_songs | 0:48.0 (2496 ticks) | 192 | Johto_TeamRocketBaseB1F, Johto_TeamRocketBaseB2F, Johto_TeamRocketBaseB3F, Johto_MahoganyMart1F (playbgm) |
 | 638 | Ice Path | BGM | 9 | qz_songs | 1:21.0 (5184 ticks) | 960 | Johto_IcePath1F, Johto_IcePathB1F, Johto_IcePathB2FBlackthornSide, Johto_IcePathB2FMahoganySide, Johto_IcePathB3F |
 | 639 | Dragon's Den / Dragon Shrine | BGM | 14 | qz_songs | 1:12.0 (3744 ticks) | 672 | Johto_DragonShrine, Johto_DragonsDen1F, Johto_DragonsDenB1F |
@@ -163,7 +163,7 @@ Length = to the loop end (or the end) at the song's tempo; "loop" = where it loo
 | 642 | Goldenrod Underground (warehouse) | BGM | 9 | qz_songs | 0:37.7 (2412 ticks) | 12 | Johto_GoldenrodUndergroundSwitchRoomEntrances, Johto_GoldenrodUndergroundWarehouse, Johto_GoldenrodCity (playbgm) |
 | 643 | Cliff Cave / Routes 47-48 | BGM | 9 | qz_songs | 1:10.8 (2832 ticks) | 144 | Johto_CliffCave, Johto_CliffEdgeCave, Johto_EmbeddedTower, Johto_Route47, Johto_Route48 |
 | 644 | Safari Zone Gate | BGM | 7 | qz_songs | 0:56.0 (2688 ticks) | 576 | Johto_SafariZoneEntrance, Johto_SafariZoneGate |
-| 645 | Safari Zone (Johto) | BGM | 9 | qz_songs | 1:04.0 (3072 ticks) | 192 | Johto_SafariZoneGate_Area5, Johto_SafariZoneGate_Area6, Johto_SafariZone_Beach, Johto_SafariZone_Desert, Johto_SafariZone_EntrancePath, Johto_SafariZone_Forest, +1 more maps |
+| 645 | Safari Zone (Johto) | BGM | 9 | qz_songs | 1:04.0 (3072 ticks) | 192 | Johto_SafariZone_Beach, Johto_SafariZone_Desert, Johto_SafariZone_EntrancePath, Johto_SafariZone_Forest, Johto_SafariZone_Peak, Johto_SafariZone_Plains, +1 more maps |
 | 646 | Prof. Oak (scene at Mr. Pokemon's House) | BGM | 13 | qz_songs | 0:47.8 (3096 ticks) | 600 | Johto_MrPokemonsHouse (playbgm) |
 | 647 | Follow me! (Guide Gent in Cherrygrove, Violet scene) | BGM | 7 | qz_songs | 0:15.7 (804 ticks) | 420 | Johto_CherrygroveCity (playbgm), Johto_VioletCity (playbgm) |
 | 648 | Rival appears (Johto rival encounter; encounter music 15) | BGM | 10 | qz_songs | 0:27.0 (1968 ticks) | 432 | Johto_AzaleaTown (playbgm), Johto_CherrygroveCity (playbgm), Johto_EcruteakCity (playbgm), +7 more scripts |

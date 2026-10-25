@@ -1,7 +1,7 @@
 {
-  "id": "MAP_JOHTO_WHIRL_ISLANDS_CAVE3",
-  "name": "Johto_WhirlIslands_Cave3",
-  "layout": "LAYOUT_JOHTO_WHIRL_ISLANDS_CAVE3",
+  "id": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
+  "name": "Johto_WhirlIslandCave",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLAND_CAVE",
   "music": "MUS_QZ_631",
   "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
   "requires_flash": false,
@@ -40,7 +40,7 @@
       "x": 21,
       "y": 20,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_WHIRL_ISLANDS_CAVE4",
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
       "dest_warp_id": "1"
     },
     {
@@ -73,7 +73,8 @@
     "header_filler": "0000",
     "flags_high_bits": 0,
     "source": {
-      "pokecrystal": null
+      "pokecrystal": null,
+      "renamed_from": "Johto_WhirlIslands_Cave3"
     }
   }
 }

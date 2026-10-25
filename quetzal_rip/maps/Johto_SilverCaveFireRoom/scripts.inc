@@ -1,0 +1,7 @@
+Johto_SilverCaveFireRoom_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_SilverCaveFireRoom_EventScript_83E02A4
+	.byte 0
+
+Johto_SilverCaveFireRoom_EventScript_83E02A4::
+	call Quetzal_EventScript_840EA62
+	end
