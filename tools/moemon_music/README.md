@@ -1,7 +1,7 @@
 # Moemon Music Studio
 
 A desktop program (Linux / Windows, SDL2) that plays MIDI files, and music ripped from other games
-(PSF, PSF2, USF, GBS, 2SF, GSF), with Moemon Emerald Kai's own instruments **and its own sound
+(PSF, PSF2, USF, GBS, 2SF, GSF, GameCube ISH/ISD/DSP), with Moemon Emerald Kai's own instruments **and its own sound
 engine**, lets you pick and tune the instruments, and exports the song in a form the game can use.
 
 ## Music from other games
@@ -14,6 +14,13 @@ engine**, lets you pick and tune the instruments, and exports the song in a form
 | GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
 | 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
 | GSF, minigsf | Game Boy Advance | VBA-M (in_gsf) | games on MP2K (the game's own engine): the song and voicegroup read from the ROM, unchanged |
+| ISH + ISD, DSP | GameCube (Pokemon Colosseum, XD) | decoded here (DSP-ADPCM) | streamed recordings: no notes to read, so the song is the recording (see below) |
+
+GameCube music in Colosseum and XD is streamed: a recording, not notes. Its song is the recording
+itself, an intro sample and a loop sample per stereo side at the GBA's rate, each played by one long
+note. The loop is stretched by a hair (well under 0.1%) to last a whole number of game frames, so the
+song loops forever in the game like any other. A `.dsp` that is only a 192-byte `I_SF` header has no
+sound in it (its data file is missing from the rip).
 
 PlayStation music needs a PlayStation 2 BIOS (4 MB, e.g. `scph39001.bin`, from your own console):
 **Aa > BIOS folder**, or put it next to the music. The studio makes the small sound BIOS it needs from

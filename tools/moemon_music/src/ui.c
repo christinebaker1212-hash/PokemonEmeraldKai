@@ -396,6 +396,8 @@ static void after_open(const char *path)
     if (S.msg[0]) snprintf(m, sizeof(m), "Opened %s. Note: %s", path_base(path), S.msg);
     else if (S.p.isRip && S.p.ripKind == RIP_GSF)
         snprintf(m, sizeof(m), "Opened %s: read from the game's ROM with its own instruments (the same engine as Moemon). Original = the GBA's sound.", path_base(path));
+    else if (S.p.isRip && S.p.ripKind == RIP_GCN)
+        snprintf(m, sizeof(m), "Opened %s: a recording, not notes, so the song is the recording itself at the GBA's rate, looping where the game does.", path_base(path));
     else if (S.p.isRip)
         snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original to compare with the console.", path_base(path), S.p.ncustom);
     else if (S.p.target[0] && !S.p.gmFixes) snprintf(m, sizeof(m), "Opened %s: a game song, with the game's own instruments and settings.", path_base(path));
@@ -524,8 +526,8 @@ static void run_action(int act)
     int r;
     switch (act) {
     case ACT_OPEN_MIDI:
-        r = dlg_open(path, sizeof(path), "Open music: MIDI, or a PSF / PSF2 / USF / GBS / 2SF / GSF rip", "Music",
-                     "*.mid;*.midi;*.psf;*.minipsf;*.psf2;*.minipsf2;*.usf;*.miniusf;*.gbs;*.m3u;*.2sf;*.mini2sf;*.gsf;*.minigsf");
+        r = dlg_open(path, sizeof(path), "Open music: MIDI, or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube rip", "Music",
+                     "*.mid;*.midi;*.psf;*.minipsf;*.psf2;*.minipsf2;*.usf;*.miniusf;*.gbs;*.m3u;*.2sf;*.mini2sf;*.gsf;*.minigsf;*.ish;*.isd;*.dsp");
         if (r > 0) open_path(path);
         else if (r < 0) ask_path(act, "");
         break;

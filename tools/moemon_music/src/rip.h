@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_NUM_KINDS };
+enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_NUM_KINDS };
 
 #define RIP_MAX_VOICES 64
 #define RIP_MAX_SECONDS 900          // longest a rip plays (15 minutes)
@@ -68,6 +68,10 @@ typedef struct Rip {
     uint32_t mp2kHeader;             // GBA address of the playing song's SongHeader (0 = not found)
     uint8_t *rom;                    // a copy of the ROM (GSF only)
     size_t romLen;
+    // streamed music (GameCube): the recording itself, at its own rate
+    int16_t *streamPcm;              // stereo
+    long streamFrames, streamLoopStart, streamLoopEnd;   // loop -1 = none
+    int streamRate, streamStereo;
 } Rip;
 
 // Loads and plays a rip (and its _lib files) to the end of its length + fade (or `seconds` when the
@@ -105,6 +109,7 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gbs(RipEmu *e, Rip *r, int track, char *err, int errlen);
 int rip_open_2sf(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gsf(RipEmu *e, Rip *r, char *err, int errlen);
+int rip_open_gcn(RipEmu *e, Rip *r, char *err, int errlen);
 
 // psflib tags -> Rip fields (title, artist, game, year, copyright, length, fade...)
 int rip_psf_tag(Rip *r, const char *name, const char *value);

@@ -175,7 +175,12 @@ static void set_loop(EvList *seq, int mode, uint32_t start, uint32_t end)
         for (int k = 0; k < 2; k++) {
             Ev x = k ? e : b;
             int at = seq->n;
-            for (int i = 0; i < seq->n; i++) if (seq->v[i].time > x.time) { at = i; break; }
+            // (before the sequence's end of track even at the same time, or a loop ending there is lost;
+            // a loop running past it moves the end)
+            for (int i = 0; i < seq->n; i++) {
+                if (seq->v[i].type == EV_EndOfTrack && seq->v[i].time < x.time) seq->v[i].time = x.time;
+                if (seq->v[i].time > x.time || seq->v[i].type == EV_EndOfTrack) { at = i; break; }
+            }
             push(seq, x);
             memmove(&seq->v[at + 1], &seq->v[at], sizeof(Ev) * (seq->n - 1 - at));
             seq->v[at] = x;

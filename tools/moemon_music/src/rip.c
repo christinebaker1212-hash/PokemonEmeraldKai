@@ -8,7 +8,7 @@
 #include "rip.h"
 #include "engine.h"
 
-static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF"};
+static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream"};
 
 const char *rip_kind_name(int kind) { return kind >= 0 && kind < RIP_NUM_KINDS ? k_kindNames[kind] : "?"; }
 int rip_needs_bios(int kind) { return kind == RIP_PSF1 || kind == RIP_PSF2; }
@@ -42,6 +42,7 @@ int rip_kind_of(const char *path) {
     }
     if (ext_is(path, "2sf") || ext_is(path, "mini2sf") || ext_is(path, "2sflib")) return RIP_2SF;
     if (ext_is(path, "gsf") || ext_is(path, "minigsf") || ext_is(path, "gsflib")) return RIP_GSF;
+    if (ext_is(path, "ish") || ext_is(path, "isd") || ext_is(path, "dsp")) return RIP_GCN;
     return -1;
 }
 
@@ -132,6 +133,7 @@ void rip_free(Rip *r) {
     free(r->vf);
     free(r->pcm);
     free(r->rom);
+    free(r->streamPcm);
     memset(r, 0, sizeof *r);
 }
 
@@ -161,6 +163,7 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     case RIP_GBS: ok = rip_open_gbs(&e, r, gbsTrack, err, errlen); break;
     case RIP_2SF: ok = rip_open_2sf(&e, r, err, errlen); break;
     case RIP_GSF: ok = rip_open_gsf(&e, r, err, errlen); break;
+    case RIP_GCN: ok = rip_open_gcn(&e, r, err, errlen); break;
     }
     if (!ok) {
         if (!err[0]) snprintf(err, errlen, "couldn't play %s", path);
@@ -178,7 +181,7 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     r->nframes = nframes;
     long total = (long)ceil((double)nframes * e.rate / fps);
     r->pcm = malloc(sizeof(int16_t) * 2 * (size_t)(total + 16));
-    r->vf = calloc((size_t)nframes * e.nvoices, sizeof(RipVF));
+    r->vf = calloc((size_t)nframes * (e.nvoices > 0 ? e.nvoices : 1), sizeof(RipVF));
     if (!r->pcm || !r->vf) {
         snprintf(err, errlen, "out of memory");
         e.close(&e);

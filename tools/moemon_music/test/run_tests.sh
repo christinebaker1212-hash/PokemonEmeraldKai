@@ -45,7 +45,7 @@ test -s "$T/gm.wav"
 if [ -n "$MMS_RIPS" ]; then
     echo "== rips in $MMS_RIPS"
     find "$MMS_RIPS" -maxdepth 2 \( -iname '*.minipsf' -o -iname '*.psf' -o -iname '*.minipsf2' -o -iname '*.miniusf' \
-        -o -iname '*.m3u' -o -iname '*.mini2sf' -o -iname '*.minigsf' \) ! -name '!*' | sort | awk -F/ '!seen[$(NF-1)]++' | while read -r f; do
+        -o -iname '*.m3u' -o -iname '*.mini2sf' -o -iname '*.minigsf' -o -iname '*.ish' \) ! -name '!*' | sort | awk -F/ '!seen[$(NF-1)]++' | while read -r f; do
         "$B" --render "$f" "$T/rip_kai.wav" 30
         "$B" --original "$f" "$T/rip_orig.wav"
         d=$(python3 test/compare_audio.py "$T/rip_orig.wav" "$T/rip_kai.wav" 30 10 | grep overall | awk '{print $2}')

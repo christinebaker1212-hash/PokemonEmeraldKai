@@ -20,7 +20,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
   tests, file names).
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
-- `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips,
+- `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
   through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments
   and engine (ported from src/music_player.c etc.; check engine changes against it), exports `.kaisong` songs
   (docs/KAISONG_FORMAT.md: format and the plan for loading them, not in the game yet) and decomp sources. `make test` there

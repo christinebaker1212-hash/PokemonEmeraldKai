@@ -14,10 +14,16 @@
 #include <ctype.h>
 #include "rip_song.h"
 #include "inst.h"
+#include "engine.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+// The game's mixer steps through a sample as if it put out 60 x 701 = 42060 samples a second; it puts
+// out 42048 (ENG_RATE). Every sample plays 0.03% slow (half a cent): a song's own samples get their
+// rate raised by that, so they play at the original's pitch and speed.
+#define MIX_FIX ((60.0 * ENG_FRAME_SAMPLES) / (double)ENG_RATE)
 
 // ------------------------------------------------------------------ MIDI writing
 typedef struct { uint8_t *b; size_t n, cap; } MBuf;
@@ -323,8 +329,165 @@ void rip_song_free(RipSong *s) {
     s->midLen = 0;
 }
 
+// ------------------------------------------------------------------ streamed music (GameCube)
+// The recording itself: per stereo side an intro sample and a loop sample, played by one note each.
+// The loop is stretched by a hair (well under 0.1%) so it lasts a whole number of game frames: then the
+// song can loop forever, jumping back on a frame like any other song, without the jump drifting.
+static int add_stream_sample(RipSong *out, const char *name, const int16_t *pcm, long n, int stride, int rate,
+                             double speed, int loops, float *peakOut) {
+    int16_t *mono = malloc(sizeof(int16_t) * (size_t)(n > 0 ? n : 1));
+    if (!mono) return -1;
+    for (long i = 0; i < n; i++) mono[i] = pcm[i * stride];
+    double to = RIP_GBA_RATE;
+    if (to > rate) to = rate;
+    int16_t *rs = NULL;
+    int rloop = 0;
+    int rl = rip_resample(mono, (int)n, rate, 0, 0, to, &rs, &rloop);
+    free(mono);
+    if (!rs || rl <= 0) { free(rs); return -1; }
+    int pk = 1;
+    for (int k = 0; k < rl; k++) if (abs(rs[k]) > pk) pk = abs(rs[k]);
+    int8_t *d8 = malloc((size_t)rl + 1);
+    if (!d8) { free(rs); return -1; }
+    for (int k = 0; k < rl; k++) {
+        int q = (int)lround(rs[k] * 127.0 / pk);
+        d8[k] = (int8_t)(q > 127 ? 127 : q < -128 ? -128 : q);
+    }
+    free(rs);
+    CustomSample cs;
+    memset(&cs, 0, sizeof cs);
+    snprintf(cs.name, sizeof cs.name, "%s", name);
+    cs.data = d8;
+    cs.size = (uint32_t)rl;
+    cs.loops = loops;
+    cs.loopStart = 0;
+    cs.freq = (uint32_t)llround(to * speed * 1024.0 * MIX_FIX);   // key 60 plays it at its own pitch (sped up by `speed`)
+    int ref = custom_list_add(&out->custom, &out->ncustom, &cs);
+    free(d8);
+    *peakOut = pk / 32768.0f;
+    return ref;
+}
+
+static int stream_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
+    double fps = (double)ENG_RATE / ENG_FRAME_SAMPLES;
+    long n = r->streamFrames, ls = r->streamLoopStart, le = r->streamLoopEnd;
+    int loops = ls >= 0 && le > ls;
+    double speed = 1;
+    long introFrames = 0, loopFrames = 0, padFrames = 0;
+    if (loops) {
+        double body = (double)(le - ls) / r->streamRate * fps;          // frames, not whole
+        loopFrames = lround(body);
+        if (loopFrames < 1) loopFrames = 1;
+        speed = body / loopFrames;
+        double intro = (double)ls / r->streamRate * fps / speed;
+        introFrames = (long)ceil(intro - 1e-9);
+        padFrames = 0;
+        (void)intro;
+    } else {
+        introFrames = (long)ceil((double)n / r->streamRate * fps);
+    }
+    int sides = r->streamStereo ? 2 : 1;
+    int introRef[2] = {-1, -1}, loopRef[2] = {-1, -1};
+    float peak = 0, pk;
+    for (int c = 0; c < sides; c++) {
+        char nm[40];
+        long introLen = loops ? ls : n;
+        if (introLen > 0) {
+            // the intro ends exactly where the loop starts: a little silence first makes up the part of a frame
+            double introExact = (double)introLen / r->streamRate * fps / speed;
+            long pad = (long)llround((introFrames - introExact) / fps * r->streamRate * speed);
+            if (pad < 0) pad = 0;
+            int16_t *tmp = calloc((size_t)(introLen + pad) * 2, sizeof(int16_t));
+            if (!tmp) { snprintf(err, errlen, "out of memory"); return 0; }
+            for (long i = 0; i < introLen; i++) tmp[(pad + i) * 2] = r->streamPcm[i * 2 + c];
+            snprintf(nm, sizeof nm, "%s_%s", out->prefix, loops ? (c ? "intro_r" : "intro_l") : (c ? "r" : "l"));
+            if (sides == 1) snprintf(nm, sizeof nm, "%s_%s", out->prefix, loops ? "intro" : "song");
+            introRef[c] = add_stream_sample(out, nm, tmp, introLen + pad, 2, r->streamRate, speed, 0, &pk);
+            free(tmp);
+            if (pk > peak) peak = pk;
+        }
+        if (loops) {
+            snprintf(nm, sizeof nm, "%s_%s", out->prefix, sides == 1 ? "loop" : c ? "loop_r" : "loop_l");
+            loopRef[c] = add_stream_sample(out, nm, r->streamPcm + ls * 2 + c, le - ls, 2, r->streamRate, speed, 1, &pk);
+            if (pk > peak) peak = pk;
+        }
+    }
+    (void)padFrames;
+    // voices: 0/1 intro (left/right), 2/3 loop
+    for (int c = 0; c < sides; c++) {
+        int refs[2] = {introRef[c], loopRef[c]};
+        for (int k = 0; k < 2; k++) {
+            if (refs[k] < 0) continue;
+            int slot = k * 2 + c;
+            SfVoice v;
+            memset(&v, 0, sizeof v);
+            v.type = 0; v.key = 60; v.sub = v.ks = -1; v.ref = (int16_t)refs[k];
+            v.attack = 255; v.decay = 0; v.sustain = 255; v.release = 0;
+            if (sides == 2) v.panSweep = (uint8_t)(0x80 | (c ? 127 : 0));   // the side it belongs to
+            out->orig[slot] = v;
+            out->slotSample[slot] = 0;
+            out->nslots = slot + 1;
+        }
+    }
+    // the MIDI: tempo, loop markers, a track per side
+    int vel = (int)lroundf(127.0f * gain);
+    if (vel < 1) vel = 1;
+    if (vel > 127) vel = 127;
+    int nTracks = 1 + sides;
+    MTrk *tr = calloc((size_t)nTracks, sizeof(MTrk));
+    uint8_t tempo[3] = {0x06, 0x1A, 0x80};
+    mmeta(&tr[0], 0, 0x51, tempo, 3);
+    mmeta(&tr[0], 0, 0x03, r->title, (int)strlen(r->title));
+    for (int c = 0; c < sides; c++) {
+        MTrk *t = &tr[1 + c];
+        char nm[16];
+        snprintf(nm, sizeof nm, sides == 2 ? (c ? "Right" : "Left") : "Recording");
+        mmeta(t, 0, 0x03, nm, (int)strlen(nm));
+        mev(t, 0, 0xB0 | c, 7, 127);
+        mev(t, 0, 0xB0 | c, 10, sides == 2 ? (c ? 127 : 0) : 64);
+        if (introRef[c] >= 0 && introFrames > 0) {
+            mev(t, 0, 0xC0 | c, c, 0);
+            mev(t, 0, 0x90 | c, 60, vel);
+            mev(t, (uint32_t)introFrames, 0x80 | c, 60, 0);
+        }
+        if (loops && loopRef[c] >= 0) {
+            mev(t, (uint32_t)introFrames, 0xC0 | c, 2 + c, 0);
+            mev(t, (uint32_t)introFrames, 0x90 | c, 60, vel);
+            mev(t, (uint32_t)(introFrames + loopFrames), 0x80 | c, 60, 0);
+        }
+    }
+    out->hasLoop = loops;
+    if (loops) { out->loopStart = (uint32_t)introFrames; out->loopEnd = (uint32_t)(introFrames + loopFrames); }
+    MBuf mf = {0};
+    mput(&mf, "MThd", 4);
+    uint8_t hd[10] = {0, 0, 0, 6, 0, 1, 0, (uint8_t)nTracks, 0, 24};
+    mput(&mf, hd, 10);
+    for (int i = 0; i < nTracks; i++) {
+        MTrk *t = &tr[i];
+        mvar(&t->b, 0);
+        m8(&t->b, 0xFF); m8(&t->b, 0x2F); m8(&t->b, 0);
+        mput(&mf, "MTrk", 4);
+        uint8_t ln[4] = {(uint8_t)(t->b.n >> 24), (uint8_t)(t->b.n >> 16), (uint8_t)(t->b.n >> 8), (uint8_t)t->b.n};
+        mput(&mf, ln, 4);
+        mput(&mf, t->b.b, t->b.n);
+        free(t->b.b);
+    }
+    free(tr);
+    out->mid = mf.b;
+    out->midLen = mf.n;
+    out->voicesUsed = sides;
+    (void)peak;
+    return 1;
+}
+
 int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
     memset(out, 0, sizeof *out);
+    if (r->streamPcm) {
+        for (int i = 0; i < 128; i++) { out->slotSample[i] = -1; out->gm[i] = -1; out->orig[i] = VOICE_PLACEHOLDER; }
+        out->reverb = -1;
+        make_prefix(r, out->prefix, sizeof out->prefix);
+        return stream_build(r, out, gain, err, errlen);
+    }
     for (int i = 0; i < 128; i++) { out->slotSample[i] = -1; out->gm[i] = -1; out->orig[i] = VOICE_PLACEHOLDER; }
     out->reverb = -1;
     make_prefix(r, out->prefix, sizeof out->prefix);
@@ -545,7 +708,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
             cs.size = (uint32_t)rl;
             cs.loopStart = (uint32_t)rloop;
             cs.loops = s->loops;
-            cs.freq = (uint32_t)llround(to * 1024.0 * pow(2.0, (60.0 - s->rootKey) / 12.0));
+            cs.freq = (uint32_t)llround(to * 1024.0 * pow(2.0, (60.0 - s->rootKey) / 12.0) * MIX_FIX);
             int ref = custom_list_add(&out->custom, &out->ncustom, &cs);
             free(d8);
             if (ref < 0) continue;
