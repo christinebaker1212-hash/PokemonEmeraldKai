@@ -104,4 +104,58 @@ grep -q 'field challenge accepted: 1' "$OUT/field/log.txt"
 grep -q 'screen 1 opted 0' "$OUT/field/log.txt"
 grep -q 'screen 0 opted 0' "$OUT/field/log.txt"
 echo 'PASS real Oldale NPC challenge, decline and no save/profile writes'
+cat > "$OUT/check.txt" <<'EOF'
+pressuntil A field 5000
+wait 600
+mp cards starter 0
+mp cards open
+press A 2
+wait 3
+mp cards ready
+wait 3
+mp cards snapshot
+rendershot duel-main
+# Original menu: RIGHT moves from HAND to CHECK.
+press RIGHT 2
+wait 3
+press A 2
+wait 3
+rendershot check-menu
+press A 2
+wait 3
+rendershot your-play-area
+mp cards state
+press A 2
+wait 3
+press B 2
+wait 3
+press B 2
+wait 3
+press DOWN 2
+wait 3
+press DOWN 2
+wait 3
+press A 2
+wait 3
+rendershot your-discard
+mp cards state
+press B 2
+wait 3
+# Check the opponent's public play area as well.
+press DOWN 2
+wait 3
+press A 2
+wait 3
+rendershot opponent-play-area
+mp cards state
+mp cards snapshot
+quit
+EOF
+run check
+grep -q 'ready phase 1 current 0 conserved 1' "$OUT/check/log.txt"
+grep -q 'screen 20 opted 1' "$OUT/check/log.txt"
+grep -q 'screen 21 opted 1' "$OUT/check/log.txt"
+test "$(grep -c 'rules snapshot' "$OUT/check/log.txt")" -eq 2
+test "$(grep 'rules snapshot' "$OUT/check/log.txt" | sort -u | wc -l)" -eq 1
+echo 'PASS original duel menu navigation, public play/discard views and unchanged rules state'
 echo "Screenshots and logs: $OUT"

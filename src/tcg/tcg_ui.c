@@ -38,7 +38,11 @@ enum
     UI_ART,
     UI_DECK_ACTIONS,
     UI_COPY_DECK,
-    UI_COPY_CONFIRM
+    UI_COPY_CONFIRM,
+    UI_CHECK,
+    UI_FIELD,
+    UI_DISCARD,
+    UI_POWERS
 };
 enum
 {
@@ -56,7 +60,7 @@ enum
 static struct
 {
     int screen, back, cursor, scroll, card, deck, pack, editing, showAll, selectedSlot, frame;
-    int inspectScroll, inspectMax, zoom, panX, panY, copyTarget, filter;
+    int inspectScroll, inspectMax, zoom, panX, panY, copyTarget, filter, viewWho;
     unsigned previousKeys, age, aiDelay;
     const char *opponent, *opponentDeck;
     unsigned rewardPack;
@@ -490,7 +494,15 @@ static void Card(SDL_Renderer *r, unsigned id, int x, int y, int w, int h, int f
     a = Art(r, id, full);
     if (a && a->texture && !a->fallback)
     {
-        dst = Rect(x, y, w, h);
+        /* Fit the printed scan within the caller's padded content rectangle.
+         * Keep its aspect ratio even when a menu uses a short preview area. */
+        int fitW = w, fitH = (int)((long)w * a->h / a->w);
+        if (fitH > h)
+        {
+            fitH = h;
+            fitW = (int)((long)h * a->w / a->h);
+        }
+        dst = Rect(x + (w - fitW) / 2, y + (h - fitH) / 2, fitW, fitH);
         SDL_RenderCopy(r, a->texture, NULL, &dst);
         return;
     }
@@ -502,6 +514,42 @@ static void Card(SDL_Renderer *r, unsigned id, int x, int y, int w, int h, int f
     }
     if (c && h > 70)
         Text(r, x + 2, y + h - 13, 0x383838, "GB", w - 4);
+}
+/* Compact deck-builder preview: illustration only, with a centered frame.
+ * Coordinates are relative to the original 600x825 printed-card layout. */
+static void DeckIllustration(SDL_Renderer *r, unsigned id)
+{
+    struct ArtTexture *art = id ? Art(r, id, 1) : NULL;
+    const struct TcgCard *card = Tcg_Card(id);
+    SDL_Rect src, dst;
+    int width = 56, height, contentH, panelY;
+    if (!art || !art->texture || !card)
+        return;
+    src = Rect(0, 0, art->w, art->h);
+    if (!art->fallback)
+    {
+        int x = 64, y = 99, w = 474, h = 328;
+        if (card->kind == TCG_TRAINER)
+        {
+            x = 64;
+            y = 199;
+            w = 480;
+            h = 255;
+        }
+        else if (card->kind == TCG_ENERGY)
+        {
+            x = 136;
+            y = 410;
+            w = h = 330;
+        }
+        src = Rect(x * art->w / 600, y * art->h / 825, w * art->w / 600, h * art->h / 825);
+    }
+    height = (width * src.h + src.w / 2) / src.w;
+    contentH = (height + 7) / 8 * 8;
+    panelY = 96 - (contentH + 16) / 2;
+    Window(r, 168, panelY, 72, contentH + 16);
+    dst = Rect(176, panelY + 8 + (contentH - height) / 2, width, height);
+    SDL_RenderCopy(r, art->texture, &src, &dst);
 }
 static unsigned DeckCount(unsigned deck, unsigned card)
 {
@@ -619,6 +667,13 @@ static int MenuSize(void)
         return 4;
     case UI_REVEAL:
         return 10;
+    case UI_CHECK:
+        return 5;
+    case UI_FIELD:
+    case UI_POWERS:
+        return TCG_FIELD_SIZE;
+    case UI_DISCARD:
+        return U.duel.players[U.viewWho].discardSize;
     case UI_ATTACKS:
         return 2;
     case UI_CONFIRM_QUIT:
@@ -788,26 +843,63 @@ static void Choose(void)
         if (U.cursor == 1)
             Screen(UI_ATTACKS);
         else if (U.cursor == 2)
+            Screen(UI_CHECK);
+        else if (U.cursor == 3)
+            Screen(UI_POWERS);
+        else if (U.cursor == 4)
         {
             memset(&U.action, 0, sizeof(U.action));
             U.action.type = TCG_RETREAT;
             Screen(UI_TARGET);
         }
-        else if (U.cursor == 3)
+        else
         {
             memset(&a, 0, sizeof(a));
-            a.type = U.duel.phase == TCG_SETUP ? TCG_FINISH_SETUP : TCG_PASS;
+            a.type = TCG_PASS;
             Apply(&a);
         }
-        else if (U.cursor == 4)
-        {
-            const struct TcgCard *card = TcgDuel_Field(&U.duel, 0, 0);
-            if (card)
-                Inspect(card->id, UI_DUEL);
-        }
-        else
-            Screen(UI_CONFIRM_QUIT);
         break;
+    case UI_CHECK:
+        U.viewWho = U.cursor == 1 || U.cursor == 3;
+        if (U.cursor < 2)
+            Screen(UI_FIELD);
+        else if (U.cursor < 4)
+            Screen(UI_DISCARD);
+        else
+            Screen(UI_HAND);
+        break;
+    case UI_FIELD:
+    {
+        const struct TcgCard *card = TcgDuel_Field(&U.duel, U.viewWho, U.cursor);
+        if (card)
+            Inspect(card->id, UI_FIELD);
+        break;
+    }
+    case UI_DISCARD:
+    {
+        const struct TcgPlayer *p = &U.duel.players[U.viewWho];
+        if ((unsigned)U.cursor < p->discardSize)
+            Inspect(p->cards[p->discard[U.cursor]], UI_DISCARD);
+        break;
+    }
+    case UI_POWERS:
+    {
+        const struct TcgCard *card = TcgDuel_Field(&U.duel, 0, U.cursor);
+        if (!card)
+            break;
+        for (i = 0; i < 2; i++)
+            if (card->attacks[i].category == TCG_POKEMON_POWER && card->attacks[i].name[0])
+            {
+                memset(&a, 0, sizeof(a));
+                a.type = TCG_USE_POWER;
+                a.slot = U.cursor;
+                a.attack = i;
+                Apply(&a);
+                return;
+            }
+        Message("This Pokemon has no Pokemon Power.");
+        break;
+    }
     case UI_HAND:
         if ((unsigned)U.cursor >= U.duel.players[0].handSize)
             break;
@@ -903,7 +995,7 @@ int Tcg_Step(unsigned keys)
         }
         return 1;
     }
-    if (U.message[0] && U.screen != UI_DUEL && (pressed & (KEY_A | KEY_B)))
+    if (U.message[0] && (pressed & (KEY_A | KEY_B)))
     {
         U.message[0] = 0;
         return 1;
@@ -934,6 +1026,12 @@ int Tcg_Step(unsigned keys)
             Screen(UI_DECKS);
             U.cursor = U.deck;
             break;
+        case UI_FIELD:
+        case UI_DISCARD:
+            Screen(UI_CHECK);
+            break;
+        case UI_CHECK:
+        case UI_POWERS:
         case UI_HAND:
         case UI_TARGET:
         case UI_ATTACKS:
@@ -1029,9 +1127,9 @@ int Tcg_Step(unsigned keys)
     if (pressed & KEY_DOWN)
         U.cursor++;
     if (pressed & KEY_LEFT)
-        U.cursor -= U.screen == UI_EDIT ? 6 : 1;
+        U.cursor -= U.screen == UI_DUEL && U.duel.phase == TCG_TURN ? 2 : 1;
     if (pressed & KEY_RIGHT)
-        U.cursor += U.screen == UI_EDIT ? 6 : 1;
+        U.cursor += U.screen == UI_DUEL && U.duel.phase == TCG_TURN ? 2 : 1;
     if (pressed & KEY_L)
         U.cursor -= 10;
     if (pressed & KEY_R && U.screen != UI_EDIT)
@@ -1055,6 +1153,8 @@ int Tcg_Step(unsigned keys)
             Inspect(CollectionCard(U.cursor), UI_COLLECTION);
         else if (U.screen == UI_REVEAL)
             Inspect(U.revealed[U.cursor], UI_REVEAL);
+        else if (U.screen == UI_DUEL && TcgDuel_Field(&U.duel, 1, 0))
+            Inspect(TcgDuel_Field(&U.duel, 1, 0)->id, UI_DUEL);
     }
     if (pressed & KEY_START && U.screen == UI_DUEL && U.duel.phase == TCG_SETUP)
     {
@@ -1062,6 +1162,8 @@ int Tcg_Step(unsigned keys)
         a.type = TCG_FINISH_SETUP;
         Apply(&a);
     }
+    if (pressed & KEY_START && U.screen == UI_DUEL && U.duel.phase == TCG_TURN && TcgDuel_Field(&U.duel, 0, 0))
+        Inspect(TcgDuel_Field(&U.duel, 0, 0)->id, UI_DUEL);
     if (pressed & KEY_A)
         Choose();
     return 1;
@@ -1079,61 +1181,64 @@ static void Board(SDL_Renderer *r)
     for (who = 0; who < 2; who++)
     {
         const struct TcgPlayer *p = &U.duel.players[who];
-        int y = who ? 12 : 80;
-        Text(r, 7, y - 8, 0x183820, who ? "OPPONENT" : "YOU", 85);
+        int y = who ? 3 : 54;
+        Text(r, 7, y, 0x183820, who ? "OPPONENT" : "YOU", 85);
         for (s = 1; s < TCG_FIELD_SIZE; s++)
         {
             const struct TcgCard *c = TcgDuel_Field(&U.duel, who, s);
             if (c)
-                Card(r, c->id, 7 + (s - 1) * 18, y + 9, 15, 21, 0);
+                Card(r, c->id, 7 + (s - 1) * 18, y + 13, 15, 21, 0);
             else
-                Fill(r, 7 + (s - 1) * 18, y + 9, 15, 21, 0x507058);
+                Fill(r, 7 + (s - 1) * 18, y + 13, 15, 21, 0x507058);
         }
         const struct TcgCard *c = TcgDuel_Field(&U.duel, who, 0);
         if (c)
         {
             unsigned hp = c->hp > p->field[0].damage ? c->hp - p->field[0].damage : 0;
-            Card(r, c->id, 105, y + 2, 28, 39, 0);
-            Window(r, 94, y + 40, 48, 16);
-            snprintf(line, sizeof(line), "%u/%u", hp, c->hp);
-            Text(r, 99, y + 42, 0x383838, line, 40);
+            Card(r, c->id, 106, y + 2, 28, 39, 0);
+            snprintf(line, sizeof(line), "%u/%u HP", hp, c->hp);
+            Text(r, 96, y + 41, 0x183820, line, 57);
+            Text(r, 159, y + 2, 0x183820, c->name, 75);
         }
-        snprintf(line, sizeof(line), "DECK %u  HAND %u", p->deckSize, p->handSize);
-        Text(r, 7, y + 33, 0x183820, line, 85);
+        snprintf(line, sizeof(line), "DECK %u", p->deckSize);
+        Text(r, 159, y + 16, 0x183820, line, 75);
+        snprintf(line, sizeof(line), "HAND %u", p->handSize);
+        Text(r, 159, y + 28, 0x183820, line, 75);
         snprintf(line, sizeof(line), "PRIZES %u", p->prizeSize);
-        Text(r, 7, y + 45, 0x183820, line, 85);
+        Text(r, 159, y + 40, 0x183820, line, 75);
     }
-    Window(r, 152, 8, 88, 128);
+    Window(r, 0, 108, 240, 52);
     if (U.duel.phase == TCG_FINISHED)
     {
-        NativeText(r, 163, 18, 0x383838, U.duel.winner == 0 ? "YOU WIN!" : "DUEL OVER", 69, 0);
-        Option(r, 0, 168, 54, "RETURN");
+        Text(r, 8, 117, 0x383838, U.duel.winner == 0 ? "YOU WIN! A: RETURN" : "DUEL OVER. A: RETURN", 224);
     }
     else if (U.duel.phase == TCG_PROMOTION)
     {
-        Text(r, 160, 13, 0x383838, "PROMOTE", 70);
+        Text(r, 8, 117, 0x383838, "Choose your next Active Pokemon.", 224);
         for (s = 1; s < TCG_FIELD_SIZE; s++)
         {
-            const struct TcgCard *c = TcgDuel_Field(&U.duel, U.duel.promotePlayer, s);
-            Option(r, s, 168, 27 + (s - 1) * 17, c ? c->name : "---");
+            snprintf(line, sizeof(line), "%u", s);
+            Option(r, s, 20 + (s - 1) * 42, 135, line);
         }
     }
     else if (U.duel.phase == TCG_SETUP)
     {
-        Option(r, 0, 168, 18, "HAND");
-        Text(r, 160, 43, 0x383838, "Choose an Active Pokemon and Bench.\nSTART: READY", 70);
+        Option(r, 0, 16, 117, "HAND");
+        Text(r, 96, 117, 0x383838, "START: READY", 132);
+        Text(r, 8, 135, 0x383838, "Choose an Active Pokemon and Bench.", 224);
     }
     else
     {
-        static const char *const labels[] = {"HAND", "ATTACK", "RETREAT", "END TURN", "DETAILS", "CONCEDE"};
+        /* Same column-major layout as DuelMenuData in the original core.asm. */
+        static const char *const labels[] = {"HAND", "ATTACK", "CHECK", "PKMN POWER", "RETREAT", "DONE"};
         for (s = 0; s < 6; s++)
-            Option(r, s, 168, 16 + 18 * s, labels[s]);
+            Option(r, s, 16 + (s / 2) * 76, 117 + (s % 2) * 18, labels[s]);
     }
-    Window(r, 0, 136, 240, 24);
     if (U.message[0])
-        Text(r, 8, 142, 0x383838, U.message, 224);
-    else if (U.duel.logCount)
-        Text(r, 8, 142, 0x383838, U.duel.log[U.duel.logCount - 1], 224);
+    {
+        Window(r, 0, 104, 240, 56);
+        Text(r, 8, 111, 0x383838, U.message, 224);
+    }
 }
 void Tcg_Render(struct SDL_Renderer *r, int width, int height)
 {
@@ -1281,7 +1386,6 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
             Text(r, 29 + i * 25 - Measure(line, 1), 37, 0x385060, line, 14);
         }
         Window(r, 0, 56, 168, 80);
-        Window(r, 168, 56, 72, 80);
         U.scroll = U.cursor / 4 * 4;
         for (i = 0; i < 4; i++)
         {
@@ -1304,7 +1408,7 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         }
         unsigned id = CollectionCard(U.cursor);
         if (id)
-            Card(r, id, 176, 60, 54, 72, 0);
+            DeckIllustration(r, id);
         else
             Text(r, 16, 64, 0x383838, "No cards in this category.", 145);
         Footer(r, "LEFT:- RIGHT:+ A:INFO L/R:TYPE");
@@ -1386,6 +1490,65 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         Option(r, 1, 20, 106, "REPLACE");
         Footer(r, "A: SELECT   B: CANCEL");
         break;
+    case UI_CHECK:
+    {
+        static const char *const labels[] = {"YOUR POKEMON", "OPPONENT'S POKEMON", "YOUR DISCARD PILE",
+                                             "OPPONENT'S DISCARD", "YOUR HAND"};
+        Mat(r);
+        Header(r, "CHECK PLAY AREA", NULL);
+        Window(r, 0, 32, 240, 104);
+        for (i = 0; i < 5; i++)
+            Option(r, i, 16, 39 + i * 18, labels[i]);
+        Footer(r, "A: CHECK   B: DUEL");
+        break;
+    }
+    case UI_FIELD:
+    case UI_POWERS:
+    {
+        unsigned who = U.screen == UI_POWERS ? 0 : U.viewWho;
+        Mat(r);
+        Header(r, U.screen == UI_POWERS ? "POKEMON POWERS" : who ? "OPPONENT'S POKEMON" : "YOUR POKEMON", NULL);
+        Window(r, 0, 32, 160, 104);
+        Window(r, 160, 32, 80, 104);
+        for (i = 0; i < TCG_FIELD_SIZE; i++)
+        {
+            const struct TcgCard *card = TcgDuel_Field(&U.duel, who, i);
+            snprintf(line, sizeof(line), "%s %s", i ? "B" : "A", card ? card->name : "---");
+            Option(r, i, 16, 37 + i * 15, line);
+        }
+        const struct TcgCard *card = TcgDuel_Field(&U.duel, who, U.cursor);
+        if (card)
+        {
+            const struct TcgFieldCard *f = &U.duel.players[who].field[U.cursor];
+            Card(r, card->id, 177, 40, 45, 62, 0);
+            snprintf(line, sizeof(line), "HP %u/%u", card->hp > f->damage ? card->hp - f->damage : 0, card->hp);
+            Text(r, 167, 104, 0x383838, line, 65);
+            snprintf(line, sizeof(line), "ENERGY %u", TcgDuel_Energy(&U.duel, who, U.cursor, TCG_NONE));
+            Text(r, 167, 116, 0x383838, line, 65);
+        }
+        Footer(r, U.screen == UI_POWERS ? "A: USE POWER   B: DUEL" : "A: DETAILS   B: CHECK MENU");
+        break;
+    }
+    case UI_DISCARD:
+    {
+        const struct TcgPlayer *p = &U.duel.players[U.viewWho];
+        Mat(r);
+        Header(r, U.viewWho ? "OPPONENT'S DISCARD" : "YOUR DISCARD PILE", NULL);
+        Window(r, 0, 32, 152, 104);
+        Window(r, 152, 32, 88, 104);
+        U.scroll = U.cursor / 6 * 6;
+        for (i = 0; i < 6 && U.scroll + i < p->discardSize; i++)
+        {
+            unsigned id = p->cards[p->discard[U.scroll + i]];
+            Option(r, U.scroll + i, 16, 39 + i * 15, Tcg_Card(id)->name);
+        }
+        if (p->discardSize)
+            Card(r, p->cards[p->discard[U.cursor]], 164, 40, 64, 88, 0);
+        else
+            Text(r, 16, 40, 0x383838, "No discarded cards.", 128);
+        Footer(r, "A: DETAILS   B: CHECK MENU");
+        break;
+    }
     case UI_PACKS:
     {
         static const char *const names[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
@@ -1552,6 +1715,29 @@ void Tcg_Debug(const char *command)
             Tcg_AwardPack(c, 0);
             Screen(UI_PACKS);
         }
+        return;
+    }
+    if (!strcmp(command, "ready"))
+    {
+        /* Harness helper: use legal AI actions for setup, then wait for the
+         * player's first turn. It never relocates or reveals hidden cards. */
+        struct TcgAction a;
+        unsigned steps = 0;
+        while (steps++ < 128 && U.duel.phase != TCG_FINISHED && (U.duel.phase == TCG_SETUP || U.duel.current == 1))
+            if (!TcgDuel_AiAction(&U.duel, &a) || TcgDuel_Apply(&U.duel, &a) != TCG_OK)
+                break;
+        printf("[tcg] ready phase %u current %u conserved %d\n", U.duel.phase, U.duel.current,
+               TcgDuel_Conserved(&U.duel));
+        return;
+    }
+    if (!strcmp(command, "snapshot"))
+    {
+        const unsigned char *bytes = (const unsigned char *)&U.duel;
+        uint32_t hash = 2166136261u;
+        unsigned i;
+        for (i = 0; i < sizeof(U.duel); i++)
+            hash = (hash ^ bytes[i]) * 16777619u;
+        printf("[tcg] rules snapshot %08x conserved %d\n", hash, TcgDuel_Conserved(&U.duel));
         return;
     }
     if (!strcmp(command, "ai"))

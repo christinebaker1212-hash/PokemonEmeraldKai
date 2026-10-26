@@ -69,7 +69,8 @@ unchanged. No card feature may appear in main builds until explicitly promoted.
 - Content-pack installation/versioning/checksum verification and cache support.
 - Finish the native 240x160 interface, Trainer selection flows, tutorial and duel
   inspection. Deck building follows the original type filters, in-deck/owned counts
-  and left/right remove/add controls, using the wider Emerald screen for a preview.
+  and left/right remove/add controls, using the wider Emerald screen for a
+  compact, centered illustration-only preview. Full-card art remains in the inspector.
   The existing basic deck editor, opt-in/decline and real Oldale challenge have
   controller-input smoke coverage. Rename and more complete deck tools remain.
 - Emerald animation adapter, NPC definitions, victory rewards and card-only MoeGatcha.
@@ -112,11 +113,15 @@ Use the pinned pret/poketcg source as the interface reference, adapting its
   and START for checking the completed deck. Extra width fits a side preview.
 - `src/engine/duel/core.asm`: `DuelMenuData`, `DuelMenuFunctionTable` and Check
   shortcuts. The original six actions are Hand / Attack / Check / PKMN Power /
-  Retreat / Done. The present basic duel sidebar still needs this alignment.
+  Retreat / Done. The native duel menu now uses the same three-column/two-row
+  arrangement. Check opens public play-area/discard views and the player's hand;
+  an opponent's hidden hand/deck is never listed. The original glossary and
+  advanced viewing shortcuts remain to be implemented.
 - `src/constants/duel_interface_constants.asm`: public play-area positions and
   card/attack detail pages. Do not expose an opponent's hidden hand/deck.
 
 Milestone verification: rules/collection/Trainer/AI sanitizer suites passed;
 Linux and Windows dev targets compiled; controller-input UI smoke tests and
-main/dev save-protection regression passed. Windows runtime is not exercised
+main/dev save-protection regression passed. Inspecting both play areas/discards
+was also checked against an unchanged rules-state snapshot. Windows runtime is not exercised
 in this Linux environment. No full card-system release has been published.
