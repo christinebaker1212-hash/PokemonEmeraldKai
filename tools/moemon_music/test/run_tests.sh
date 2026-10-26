@@ -51,6 +51,11 @@ if [ -n "$MMS_RIPS" ]; then
         d=$(python3 test/compare_audio.py "$T/rip_orig.wav" "$T/rip_kai.wav" 30 10 | grep overall | awk '{print $2}')
         echo "  $(basename "$f"): $d dB"
         python3 -c "import sys; sys.exit(0 if float('$d') <= 4.5 else 1)"
+        case "$f" in *.miniusf|*.usf)   # N64: steady timing (notes placed by when their audio buffer plays)
+            sp=$(python3 test/compare_timing.py "$T/rip_orig.wav" "$T/rip_kai.wav" 20 | tail -1 | sed 's/.*spread (mean |lag - median|) \([0-9.]*\).*/\1/')
+            echo "    timing spread $sp ms"
+            python3 -c "import sys; sys.exit(0 if float('$sp') <= 10 else 1)" ;;
+        esac
         "$B" --save "$f" "$T/rip.mmsproj"
         "$B" --export "$T/rip.mmsproj" "$T/rip.kaisong"
         python3 test/read_kaisong.py "$T/rip.kaisong" > /dev/null

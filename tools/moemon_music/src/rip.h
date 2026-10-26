@@ -95,6 +95,9 @@ typedef struct RipEmu {
     // Every voice's state now (out[nvoices]); key-ons since the last call are reported and cleared.
     void (*snapshot)(struct RipEmu *e, RipVF *out);
     void (*close)(struct RipEmu *e);
+    // optional: after the last frame, rewrite rip->vf from what was recorded (consoles whose sound is
+    // mixed ahead of time can only be placed in time afterwards)
+    void (*finalize)(struct RipEmu *e);
 } RipEmu;
 
 int rip_open_psf(RipEmu *e, Rip *r, const char *biosDir, char *err, int errlen);

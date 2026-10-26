@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <fenv.h>
 #include "rip.h"
 #include "engine.h"
 
@@ -134,7 +135,19 @@ void rip_free(Rip *r) {
     memset(r, 0, sizeof *r);
 }
 
+static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbsTrack, int seconds, char *err, int errlen);
+
+// The emulators change the CPU's floating-point rounding (the N64 core sets the N64's own); the game
+// engine's mixing must not inherit it, so the environment is put back afterwards.
 int rip_load(Rip *r, const char *path, const char *biosDir, int gbsTrack, int seconds, char *err, int errlen) {
+    fenv_t env;
+    fegetenv(&env);
+    int ok = rip_load_inner(r, path, biosDir, gbsTrack, seconds, err, errlen);
+    fesetenv(&env);
+    return ok;
+}
+
+static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbsTrack, int seconds, char *err, int errlen) {
     memset(r, 0, sizeof *r);
     r->kind = rip_kind_of(path);
     snprintf(r->path, sizeof r->path, "%s", path);
@@ -188,6 +201,7 @@ int rip_load(Rip *r, const char *path, const char *biosDir, int gbsTrack, int se
         e.snapshot(&e, r->vf + (size_t)f * e.nvoices);
     }
     r->pcmFrames = (int)pos;
+    if (e.finalize) e.finalize(&e);
     e.close(&e);
     // the tags' fade-out, for the original-instruments player
     if (r->length > 0 && r->fade > 0) {

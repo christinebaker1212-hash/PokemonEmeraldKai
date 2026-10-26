@@ -179,7 +179,7 @@ void alist_overload(
 #define A_MIX           0x10
 
 /* Moemon Music Studio: what the capture hears (rip_usf.c). */
-enum { ALIST_TAP_TASK, ALIST_TAP_LOAD, ALIST_TAP_BOOK, ALIST_TAP_ADPCM, ALIST_TAP_RESAMPLE, ALIST_TAP_ENVMIX, ALIST_TAP_ENVMIX_NEAD };
+enum { ALIST_TAP_TASK, ALIST_TAP_LOAD, ALIST_TAP_BOOK, ALIST_TAP_ADPCM, ALIST_TAP_RESAMPLE, ALIST_TAP_ENVMIX, ALIST_TAP_ENVMIX_NEAD, ALIST_TAP_SAVE };
 extern void (*alist_tap)(struct hle_t* hle, int what, uint32_t a, int32_t b, int32_t c, int32_t d);
 
 

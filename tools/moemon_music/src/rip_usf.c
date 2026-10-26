@@ -16,6 +16,7 @@
 #include "usf/usf.h"
 #include "rsp_hle/hle_internal.h"
 #include "rsp_hle/alist.h"
+#include "ai/ai_controller.h"
 
 extern const psf_file_callbacks rip_psf_files;
 
@@ -33,9 +34,26 @@ typedef struct {
     int twoBit;
 } UVoice;
 
+typedef struct {             // a voice as one audio task left it
+    int16_t sample;
+    uint8_t active, keyon;
+    float rate, l, r;
+} TaskVoice;
+
+typedef struct {
+    long play;               // native sample where its sound starts playing (-1 = not heard yet)
+    int nsave;
+    uint32_t saveLo[8], saveHi[8];
+    TaskVoice v[USF_VOICES];
+} Task;
+
 typedef struct {
     Rip *rip;
     void *state;
+    Task *tasks;
+    int ntasks, capTasks;
+    long aiTotal;            // samples the audio interface has started playing
+    int taskKeyon[USF_VOICES];
     int compare, fifo;
     int task;
     uint32_t book, load;
@@ -162,13 +180,74 @@ static int find_sample_uncached(Usf *u, struct hle_t *hle, UVoice *v) {
     return -1;
 }
 
+static void begin_task(Usf *u) {
+    if (u->ntasks == u->capTasks) {
+        int cap = u->capTasks ? u->capTasks * 2 : 1024;
+        Task *nt = realloc(u->tasks, sizeof(Task) * (size_t)cap);
+        if (!nt) return;
+        u->tasks = nt;
+        u->capTasks = cap;
+    }
+    Task *t = &u->tasks[u->ntasks++];
+    memset(t, 0, sizeof *t);
+    t->play = -1;
+    memset(u->taskKeyon, 0, sizeof u->taskKeyon);
+}
+
+static void end_task(Usf *u) {
+    if (!u->ntasks) return;
+    Task *t = &u->tasks[u->ntasks - 1];
+    double rate = usf_tap_sample_rate(u->state) > 0 ? usf_tap_sample_rate(u->state) : 32000;
+    for (int i = 0; i < USF_VOICES; i++) {
+        UVoice *v = &u->v[i];
+        TaskVoice *x = &t->v[i];
+        x->sample = (int16_t)v->sample;
+        x->active = v->state && v->seenTask == u->task && v->sample >= 0;
+        x->keyon = u->taskKeyon[i] > 0;
+        x->rate = (float)(v->pitch / 65536.0 * rate);
+        x->l = v->l;
+        x->r = v->r;
+    }
+}
+
+static void ai_played(uint32_t address, uint32_t length) {
+    Usf *u = g_usf;
+    if (!u) return;
+    uint32_t a = address & 0xFFFFFF;
+    // the newest task that saved its sound there
+    for (int i = u->ntasks - 1; i >= 0 && i >= u->ntasks - 64; i--) {
+        Task *t = &u->tasks[i];
+        if (t->play >= 0) continue;
+        for (int k = 0; k < t->nsave; k++)
+            if (a >= t->saveLo[k] && a < t->saveHi[k]) { t->play = u->aiTotal; i = -1; break; }
+    }
+    u->aiTotal += length / 4;
+}
+
 static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, int32_t d) {
     Usf *u = g_usf;
     if (!u) return;
     switch (what) {
     case ALIST_TAP_TASK:
+        if (u->task > 0) end_task(u);
         u->task++;
         u->cur = -1;
+        begin_task(u);
+        break;
+    case ALIST_TAP_SAVE:
+        if (u->ntasks > 0) {
+            Task *t = &u->tasks[u->ntasks - 1];
+            uint32_t lo = a & 0xFFFFFF, hi = lo + (uint32_t)b;
+            int merged = 0;
+            for (int i = 0; i < t->nsave; i++)
+                if (lo <= t->saveHi[i] && hi >= t->saveLo[i]) {
+                    if (lo < t->saveLo[i]) t->saveLo[i] = lo;
+                    if (hi > t->saveHi[i]) t->saveHi[i] = hi;
+                    merged = 1;
+                    break;
+                }
+            if (!merged && t->nsave < 8) { t->saveLo[t->nsave] = lo; t->saveHi[t->nsave] = hi; t->nsave++; }
+        }
         break;
     case ALIST_TAP_BOOK: u->book = a & 0xFFFFFF; break;
     case ALIST_TAP_LOAD: u->load = a & 0xFFFFFF; break;
@@ -192,6 +271,7 @@ static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, i
         v->seenTask = u->task;
         if (b && first) {          // a note starts
             v->keyon++;
+            u->taskKeyon[k]++;
             v->book = u->book;
             v->load = u->load;
             v->twoBit = d;
@@ -242,22 +322,48 @@ static int usf_render_cb(RipEmu *e, int16_t *buf, int n) {
     return 0;
 }
 
-static void usf_snapshot(RipEmu *e, RipVF *out) {
+static void usf_snapshot(RipEmu *e, RipVF *out) { (void)e; (void)out; }   // finalize() does it
+
+// The tasks on the game's frames: each frame gets the voices as the last task heard by its end left
+// them, and the notes started by the tasks heard during it.
+static void usf_finalize(RipEmu *e) {
     Usf *u = e->ctx;
+    Rip *r = e->rip;
+    if (u->task > 0) end_task(u);
     double rate = usf_tap_sample_rate(u->state) > 0 ? usf_tap_sample_rate(u->state) : 32000;
-    for (int i = 0; i < USF_VOICES; i++) {
-        UVoice *v = &u->v[i];
-        RipVF *x = &out[i];
-        memset(x, 0, sizeof *x);
-        x->sample = -1;
-        x->keyon = v->keyon > 0;
-        v->keyon = 0;
-        // in the last couple of audio frames (a voice that stopped isn't in the list any more)
-        if (!v->state || v->seenTask < u->task - 2 || v->sample < 0) continue;
-        x->sample = (int16_t)v->sample;
-        x->rate = (float)(v->pitch / 65536.0 * rate);
-        x->l = v->l;
-        x->r = v->r;
+    double fps = 42048.0 / 701.0;
+    // tasks never matched to a buffer: halfway between their neighbours
+    long last = 0;
+    for (int i = 0; i < u->ntasks; i++) {
+        if (u->tasks[i].play >= 0) { last = u->tasks[i].play; continue; }
+        long next = -1;
+        for (int j = i + 1; j < u->ntasks && j < i + 64; j++) if (u->tasks[j].play >= 0) { next = u->tasks[j].play; break; }
+        u->tasks[i].play = next >= 0 ? (last + next) / 2 : last;
+    }
+    int ti = 0;
+    const Task *cur = NULL;
+    for (int f = 0; f < r->nframes; f++) {
+        long end = (long)((f + 1) * rate / fps);
+        uint8_t kon[USF_VOICES] = {0};
+        while (ti < u->ntasks && u->tasks[ti].play < end) {
+            cur = &u->tasks[ti];
+            for (int i = 0; i < USF_VOICES; i++) if (cur->v[i].keyon) kon[i] = 1;
+            ti++;
+        }
+        RipVF *row = r->vf + (size_t)f * r->nvoices;
+        for (int i = 0; i < USF_VOICES; i++) {
+            RipVF *x = &row[i];
+            memset(x, 0, sizeof *x);
+            x->sample = -1;
+            if (!cur) continue;
+            const TaskVoice *tv = &cur->v[i];
+            x->keyon = kon[i];
+            if (!tv->active || tv->sample < 0) continue;
+            x->sample = tv->sample;
+            x->rate = tv->rate;
+            x->l = tv->l;
+            x->r = tv->r;
+        }
     }
 }
 
@@ -265,7 +371,9 @@ static void usf_close(RipEmu *e) {
     Usf *u = e->ctx;
     if (!u) return;
     alist_tap = NULL;
+    ai_tap = NULL;
     if (g_usf == u) g_usf = NULL;
+    free(u->tasks);
     usf_shutdown(u->state);
     free(u->state);
     free(u);
@@ -293,6 +401,7 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen) {
     for (int i = 0; i < USF_VOICES; i++) u->v[i].sample = -1;
     g_usf = u;
     alist_tap = tap;
+    ai_tap = ai_played;
     snprintf(r->console, sizeof r->console, "Nintendo 64");
     e->ctx = u;
     e->rip = r;
@@ -301,5 +410,6 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen) {
     e->render = usf_render_cb;
     e->snapshot = usf_snapshot;
     e->close = usf_close;
+    e->finalize = usf_finalize;
     return 1;
 }

@@ -229,7 +229,7 @@ static int find_loop(const Note *notes, int nn, int nframes, int *ls, int *le) {
     int lastF = ev[nn - 1].f;
     // candidate periods: differences between same-key events, the most common first
     int maxP = lastF / 2 + 1;
-    if (maxP < 60) { free(ev); return 0; }
+    if (maxP < 180) { free(ev); return 0; }
     int *hist = calloc((size_t)maxP + 2, sizeof(int));
     if (!hist) { free(ev); return 0; }
     for (int i = 0; i < nn; i++)
@@ -278,6 +278,12 @@ static int find_loop(const Note *notes, int nn, int nframes, int *ls, int *le) {
             if (start < 0) start = 0;
             // the repeating part has to be long enough to be the song, not a fade-out
             if (lastF - start < 2 * p - 2) continue;
+            // and a real loop: at least 3 seconds with a dozen notes in it (a jingle's last bars can look
+            // like a short repeat)
+            if (p < 180) continue;
+            int inside = 0;
+            for (int i = 0; i < nn; i++) if (ev[i].f >= start && ev[i].f < start + p) inside++;
+            if (inside < 12) continue;
             if (!found || p < bestP || (p == bestP && start < bestS)) {
                 // prefer the shorter period only if it really is a loop of the music (covers > 1/4 of the song)
                 if (p * 4 < lastF && found) continue;

@@ -177,6 +177,7 @@ void alist_load(struct hle_t* hle, uint16_t dmem, uint32_t address, uint16_t cou
 
 void alist_save(struct hle_t* hle, uint16_t dmem, uint32_t address, uint16_t count)
 {
+    if (alist_tap) alist_tap(hle, ALIST_TAP_SAVE, address, count, 0, 0);   /* Moemon Music Studio */
     /* enforce DMA alignment constraints */
     dmem    &= ~3;
     address &= ~7;

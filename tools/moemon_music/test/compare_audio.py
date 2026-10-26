@@ -17,8 +17,14 @@ def bands(a, r, t0, t1, nb=24):
 A, ra = load(sys.argv[1], float(sys.argv[3])); B, rb = load(sys.argv[2], float(sys.argv[3]))
 step = float(sys.argv[4]) if len(sys.argv) > 4 else 5
 tot = []
+# windows where the original has faded out (the end of its length tag) don't count
+def level(a, r, t0, t1):
+    seg = a[int(t0 * r):int(t1 * r)]
+    return float(np.sqrt((seg ** 2).mean())) if len(seg) else 0.0
+full = level(A, ra, 0, float(sys.argv[3]))
 edges = None
 for t in np.arange(0, float(sys.argv[3]) - step + 0.01, step):
+    if level(A, ra, t, t + step) < 0.25 * full: continue
     x = bands(A, ra, t, t + step); y = bands(B, rb, t, t + step)
     if x is None or y is None: continue
     edges = x[1]

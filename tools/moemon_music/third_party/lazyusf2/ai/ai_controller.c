@@ -25,6 +25,9 @@
 
 #include "ai_controller.h"
 
+/* Moemon Music Studio: when each audio buffer starts playing (rip_usf.c times its notes by it) */
+void (*ai_tap)(uint32_t address, uint32_t length) = 0;
+
 #include "main/rom.h"
 #include "memory/memory.h"
 #include "r4300/cp0.h"
@@ -97,6 +100,7 @@ static void do_dma(struct ai_controller* ai, const struct ai_dma* dma)
     }
 
     /* push audio samples to external sink */
+    if (ai_tap) ai_tap(dma->address, dma->length);   /* Moemon Music Studio */
     push_audio_samples(ai, &ai->ri->rdram.dram[dma->address/4], dma->length);
 
     /* schedule end of dma event */
