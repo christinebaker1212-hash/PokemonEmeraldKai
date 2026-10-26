@@ -432,13 +432,22 @@ void MP_GardenDecor_PutAway(u8 i)
     sD.seq++;
 }
 
-// (the harness) in front of the player
+// (the harness) in front of the player, or the nearest free tile around them (their follower or a Garden Pokémon
+// may stand in front)
 bool8 MP_GardenDecor_Place(u8 decor)
 {
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
-    s16 x = me->currentCoords.x, y = me->currentCoords.y;
+    s16 x = me->currentCoords.x, y = me->currentCoords.y, r, dx, dy;
     MoveCoords(me->facingDirection, &x, &y);
-    return MP_GardenDecor_PlaceAt(decor, x, y);
+    if (MP_GardenDecor_PlaceAt(decor, x, y))
+        return TRUE;
+    for (r = 1; r <= 3; r++)
+        for (dy = -r; dy <= r; dy++)
+            for (dx = -r; dx <= r; dx++)
+                if ((dx == -r || dx == r || dy == -r || dy == r)
+                 && MP_GardenDecor_PlaceAt(decor, me->currentCoords.x + dx, me->currentCoords.y + dy))
+                    return TRUE;
+    return FALSE;
 }
 
 void MP_GardenDecor_Debug(const char *args)

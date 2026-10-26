@@ -12,6 +12,10 @@ shot swim
 wait 150
 mp life garden actors
 shot dive
+watchlog out of the pond
+waitlog 3000
+wait 30
+mp life garden actors
 watchlog climbs a tree
 mp life garden pursuit 1 200 1
 waitlog 3000
@@ -27,8 +31,5 @@ waitlog 3000
 wait 60
 mp life garden actors
 shot dig
-watchlog out of the pond
-waitlog 3000
-wait 30
 mp life garden actors
 quit
