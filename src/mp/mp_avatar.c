@@ -10,6 +10,10 @@
 #include <direct.h>
 #endif
 
+#include "mp_version.h"
+#if MOEMON_DEV_BUILD
+#define STBI_ONLY_JPEG
+#endif
 #define STBI_ONLY_PNG
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR

@@ -1,4 +1,5 @@
 #include "mp_version.h"
+#include "tcg/integration.h"
 #ifdef PLATFORM_SDL2
 #include <assert.h>
 #include <stdbool.h>
@@ -239,7 +240,7 @@ int main(int argc, char **argv)
             }
             TestHarnessStep();
             MP_FrameUpdate();
-            if (SpectateStep())
+            if (Tcg_Step(Platform_GetKeyInput()) || SpectateStep())
             {
                 AudioUpdate();
                 sFrameCounter++;
@@ -326,7 +327,7 @@ int main(int argc, char **argv)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
-                if (SpectateStep())
+                if (Tcg_Step(Platform_GetKeyInput()) || SpectateStep())
                     continue;
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
@@ -351,7 +352,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
@@ -499,6 +500,16 @@ void Platform_StoreSaveFile(void)
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 {
+#if MOEMON_DEV_BUILD
+    // The dev session's flash image was loaded read-only at startup. Fresh
+    // profiles deliberately have no file, and must work without creating one.
+    u32 base = ((u32)sectorNum << gFlash->sector.shift) + offset;
+    if (base <= sizeof(FLASH_BASE) && size <= sizeof(FLASH_BASE) - base)
+        memcpy(dest, FLASH_BASE + base, size);
+    else
+        memset(dest, 0xFF, size);
+    return;
+#endif
     // (one line per sector on every save load: only with MOEMON_FLASHDEBUG=1)
     {
         static int sFlashDbg = -1;

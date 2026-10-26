@@ -472,7 +472,12 @@
 // Moemon Kai: the CANDY JAR (key item: candies from released Moemon, CONVERT to RARE CANDY; mp_candy.c)
 #define ITEM_CANDY_JAR 398
 
+#if MOEMON_DEV_BUILD
+#define ITEM_CARD_CASE 399
+#define ITEMS_COUNT 400
+#else
 #define ITEMS_COUNT 399
+#endif
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow

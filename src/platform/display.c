@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "platform/display.h"
+#include "tcg/integration.h"
 
 #ifdef PLATFORM_SDL2
 
@@ -455,6 +456,7 @@ static int CreateRenderer(void)
 
 static void RecreateRenderer(void)
 {
+    Tcg_DestroyTextures();
     DestroyTextures();
     if (sRenderer)
         SDL_DestroyRenderer(sRenderer);
@@ -1301,6 +1303,7 @@ static void RenderToBackbuffer(void)
     sLastPanelH = panelH;
     if (sPanelCount > 0)
         DrawPanel(&L, fullW, fullH);   // last: drawing to a render target above may not keep it
+    Tcg_Render(sRenderer, fullW, fullH);
 }
 
 static void ClearToBlack(void)
@@ -1410,6 +1413,7 @@ int Display_Init(const char *title)
 
 void Display_Shutdown(void)
 {
+    Tcg_DestroyTextures();
     DestroyAllPopouts();
     DestroyTextures();
     if (sRenderer)

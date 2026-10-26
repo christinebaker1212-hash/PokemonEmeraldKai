@@ -1053,6 +1053,12 @@ static const u8 sPewterCrunchiesDesc[] = _(
 static const u8 sRageCandyBarDesc[] = _(
     "A famous candy in MAHOGANY TOWN. Many tourists like to buy them to take home.");
 
+#if MOEMON_DEV_BUILD
+static const u8 sCardCaseDesc[] = _(
+    "Keeps your cards and decks.\n"
+    "Use it to browse or play.");
+#endif
+
 static const u8 sCandyJarDesc[] = _(
     "Keeps the candies released MOéMON leave behind.");
 

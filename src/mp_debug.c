@@ -21,6 +21,7 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "tcg/integration.h"
 #include "map_name_popup.h"
 #include "mp_farm.h"
 #include "battle.h"
@@ -163,6 +164,8 @@ bool8 MP_Setup_IsReady(void);
 bool8 MP_Setup_ScreenIs(int screen);
 int MP_TestCondition(const char *name)
 {
+    if (strcmp(name, "cards") == 0)
+        return Tcg_IsActive();
     if (strcmp(name, "log") == 0)   // harness waitlog
     {
         extern int gMpLogSeen;
@@ -307,6 +310,13 @@ int MP_TestCondition(const char *name)
 void MP_OnFileDropped(const char *path);
 void MP_TestCommand(const char *cmd, const char *arg)
 {
+#if MOEMON_DEV_BUILD
+    if (strcmp(cmd, "cards") == 0)
+    {
+        Tcg_Debug(arg);
+        return;
+    }
+#endif
     if (strcmp(cmd, "export") == 0)
     {
         char path[200];

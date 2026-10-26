@@ -4840,4 +4840,18 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
     },
+#if MOEMON_DEV_BUILD
+    [ITEM_CARD_CASE] =
+    {
+        .name = _("CARD CASE"),
+        .itemId = ITEM_CARD_CASE,
+        .price = 0,
+        .description = sCardCaseDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_CardCase,
+    },
+#endif
 };

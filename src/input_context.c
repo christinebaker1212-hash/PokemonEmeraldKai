@@ -3,6 +3,7 @@
 #include "global.h"
 #include "main.h"
 #include "mp.h"
+#include "tcg/integration.h"
 #include "overworld.h"
 #include "script.h"
 #include "sound.h"
@@ -13,6 +14,8 @@ bool8 NamingScreen_IsActive(void);
 
 int Platform_InputContext(void)
 {
+    if (Tcg_IsActive())
+        return INPUT_CONTEXT_OTHER;
     if (NamingScreen_IsActive())
         return INPUT_CONTEXT_NAMING;
     if (MP_QuickPickOpen() || MP_BattleChat_IsOpen())
@@ -46,6 +49,8 @@ void Platform_ContextAction(int action)
     switch (action)
     {
     case INPUT_ACTION_COOP_MENU:
+        if (Tcg_TryChallenge())
+            break;
         PlaySE(SE_WIN_OPEN);
         MP_OpenMenu();
         break;
