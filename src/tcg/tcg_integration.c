@@ -26,6 +26,34 @@ struct TcgCollection *Tcg_GetCollection(void)
     }
     return &sCollection;
 }
+static struct TcgLink sOnline;
+static int sOnlineInit;
+static void OnlineSend(void *context, unsigned to, const uint8_t *data, unsigned len)
+{
+    (void)context;
+    MP_SendRelay(to, data, len);
+}
+struct TcgLink *Tcg_Online(void)
+{
+    if (!sOnlineInit)
+    {
+        TcgLink_Init(&sOnline, OnlineSend, NULL);
+        sOnlineInit = 1;
+    }
+    return &sOnline;
+}
+void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len)
+{
+    if (from >= MP_MAX_PLAYERS || from == (unsigned)gMpLocalId || !gMpPlayers[from].present)
+        return;
+    TcgLink_Receive(Tcg_Online(), from, data, len, Tcg_OnlineWilling(), SDL_GetTicks());
+}
+void Tcg_OnlineTick(void)
+{
+    if (sOnlineInit)
+        TcgLink_Tick(&sOnline, MP_IsConnected() && sOnline.peer < MP_MAX_PLAYERS && gMpPlayers[sOnline.peer].present,
+                     SDL_GetTicks());
+}
 #define NPC(script, name, deck, pack) {script, name, deck, pack}
 extern const u8 OldaleTown_EventScript_FootprintsMan[];
 extern const u8 PetalburgCity_EventScript_Boy[];

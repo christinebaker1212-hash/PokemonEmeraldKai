@@ -7,6 +7,7 @@
 #include <string.h>
 #include "global.h"
 #include "fonts.h"
+#include "mp.h"
 #include "text_window.h"
 #include "constants/characters.h"
 #include "tcg/art_pack.h"
@@ -42,7 +43,10 @@ enum
     UI_CHECK,
     UI_FIELD,
     UI_DISCARD,
-    UI_POWERS
+    UI_POWERS,
+    UI_ONLINE,
+    UI_ONLINE_INVITE,
+    UI_ONLINE_WAIT
 };
 enum
 {
@@ -60,7 +64,7 @@ enum
 static struct
 {
     int screen, back, cursor, scroll, card, deck, pack, editing, showAll, selectedSlot, frame;
-    int inspectScroll, inspectMax, zoom, panX, panY, copyTarget, filter, viewWho;
+    int inspectScroll, inspectMax, zoom, panX, panY, copyTarget, filter, viewWho, online;
     unsigned previousKeys, age, aiDelay;
     const char *opponent, *opponentDeck;
     unsigned rewardPack;
@@ -99,9 +103,30 @@ static void Screen(int screen)
     U.message[0] = 0;
 }
 int Tcg_IsActive(void) { return U.screen != UI_CLOSED; }
+int Tcg_OnlineWilling(void) { return U.screen == UI_ONLINE && Tcg_GetCollection()->optedIn; }
+static void OnlineView(void)
+{
+    struct TcgLink *l = Tcg_Online();
+    U.duel = l->game;
+    if (l->seat)
+    {
+        struct TcgPlayer temp = U.duel.players[0];
+        U.duel.players[0] = U.duel.players[1];
+        U.duel.players[1] = temp;
+        U.duel.current ^= 1;
+        U.duel.first ^= 1;
+        if (U.duel.promotePlayer < 2)
+            U.duel.promotePlayer ^= 1;
+        if (U.duel.winner < 2)
+            U.duel.winner ^= 1;
+    }
+}
 static void Close(void)
 {
     void (*callback)(void) = U.returnToGame;
+    if (U.online)
+        TcgLink_Cancel(Tcg_Online(), "Card session closed.");
+    U.online = 0;
     Screen(UI_CLOSED);
     U.returnToGame = NULL;
     Tcg_ResumeGame(callback);
@@ -605,7 +630,20 @@ static void Inspect(unsigned id, int back)
 }
 static void Apply(const struct TcgAction *a)
 {
-    int result = TcgDuel_Apply(&U.duel, a);
+    int result;
+    if (U.online)
+    {
+        if (!TcgLink_Submit(Tcg_Online(), a, SDL_GetTicks()))
+            Message("%s", Tcg_Online()->error[0] ? Tcg_Online()->error
+                                                 : "Wait for your turn and the other player's acknowledgement.");
+        else
+        {
+            OnlineView();
+            Screen(UI_DUEL);
+        }
+        return;
+    }
+    result = TcgDuel_Apply(&U.duel, a);
     if (result != TCG_OK)
         Message("%s", U.duel.error[0] ? U.duel.error : "Choose the required cards and targets.");
     else
@@ -652,7 +690,11 @@ static int MenuSize(void)
     case UI_STARTER:
         return 3;
     case UI_CASE:
-        return 8;
+        return 9;
+    case UI_ONLINE:
+        return MP_MAX_PLAYERS;
+    case UI_ONLINE_INVITE:
+        return 2;
     case UI_COLLECTION:
     case UI_EDIT:
         return CollectionSize();
@@ -738,8 +780,40 @@ static void Choose(void)
             Message("Animations: %s", c->fastAnimations ? "fast" : "normal");
             break;
         case 7:
+            Screen(UI_ONLINE);
+            break;
+        case 8:
             Close();
             break;
+        }
+        break;
+    case UI_ONLINE:
+    {
+        struct TcgLink *l = Tcg_Online();
+        if (!MP_IsConnected() || U.cursor == (int)gMpLocalId || !gMpPlayers[U.cursor].present)
+            Message("Choose a connected friend. Both players must open ONLINE CARDS.");
+        else if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
+            Message("%s", reason);
+        else if (TcgLink_Invite(l, U.cursor, Tcg_Random(&c->rng), c->decks[c->activeDeck].cards, SDL_GetTicks()))
+        {
+            U.online = 1;
+            Screen(UI_ONLINE_WAIT);
+        }
+        break;
+    }
+    case UI_ONLINE_INVITE:
+        if (U.cursor)
+        {
+            TcgLink_Cancel(Tcg_Online(), "Invitation declined.");
+            U.online = 0;
+            Screen(UI_ONLINE);
+        }
+        else if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
+            Message("%s", reason);
+        else if (TcgLink_Accept(Tcg_Online(), c->decks[c->activeDeck].cards, SDL_GetTicks()))
+        {
+            U.online = 1;
+            Screen(UI_ONLINE_WAIT);
         }
         break;
     case UI_INSPECT:
@@ -824,6 +898,11 @@ static void Choose(void)
     case UI_DUEL:
         if (U.duel.phase == TCG_FINISHED)
         {
+            if (U.online)
+            {
+                TcgLink_Cancel(Tcg_Online(), "Duel complete.");
+                U.online = 0;
+            }
             Screen(UI_CASE);
             break;
         }
@@ -901,6 +980,11 @@ static void Choose(void)
         break;
     }
     case UI_HAND:
+        if (U.online && U.duel.current != 0)
+        {
+            Message("Wait for your turn.");
+            break;
+        }
         if ((unsigned)U.cursor >= U.duel.players[0].handSize)
             break;
         id = U.duel.players[0].cards[U.duel.players[0].hand[U.cursor]];
@@ -964,7 +1048,27 @@ int Tcg_Step(unsigned keys)
         return 0;
     U.age++;
     U.frame++;
-    if ((U.screen == UI_DUEL || U.screen == UI_HAND || U.screen == UI_TARGET || U.screen == UI_ATTACKS) &&
+    {
+        struct TcgLink *l = Tcg_Online();
+        if (U.screen == UI_ONLINE && l->state == TCG_LINK_INVITED)
+        {
+            U.online = 1;
+            Screen(UI_ONLINE_INVITE);
+        }
+        if (U.online && l->state == TCG_LINK_PLAYING)
+        {
+            OnlineView();
+            if (U.screen == UI_ONLINE_WAIT)
+                Screen(UI_DUEL);
+        }
+        if (U.online && l->state == TCG_LINK_ENDED)
+        {
+            U.online = 0;
+            Screen(UI_CASE);
+            Message("%s", l->error);
+        }
+    }
+    if ((U.screen == UI_DUEL || U.screen == UI_HAND || U.screen == UI_TARGET || U.screen == UI_ATTACKS) && !U.online &&
         U.duel.phase == TCG_FINISHED && !U.duel.rewardClaimed)
     {
         U.duel.rewardClaimed = 1;
@@ -977,7 +1081,7 @@ int Tcg_Step(unsigned keys)
         else
             Message("The duel is over. No cards or ordinary progress were lost.");
     }
-    if (U.screen == UI_DUEL && U.duel.phase != TCG_FINISHED &&
+    if (!U.online && U.screen == UI_DUEL && U.duel.phase != TCG_FINISHED &&
         (U.duel.phase == TCG_PROMOTION ? U.duel.promotePlayer : U.duel.current) == 1)
     {
         struct TcgAction a;
@@ -1025,6 +1129,12 @@ int Tcg_Step(unsigned keys)
         case UI_DECK_ACTIONS:
             Screen(UI_DECKS);
             U.cursor = U.deck;
+            break;
+        case UI_ONLINE_WAIT:
+        case UI_ONLINE_INVITE:
+            TcgLink_Cancel(Tcg_Online(), "Card session cancelled.");
+            U.online = 0;
+            Screen(UI_ONLINE);
             break;
         case UI_FIELD:
         case UI_DISCARD:
@@ -1182,7 +1292,9 @@ static void Board(SDL_Renderer *r)
     {
         const struct TcgPlayer *p = &U.duel.players[who];
         int y = who ? 3 : 54;
-        Text(r, 7, y, 0x183820, who ? "OPPONENT" : "YOU", 85);
+        Text(r, 7, y, 0x183820,
+             who ? (U.duel.current == 1 ? "THEIR TURN" : "OPPONENT") :
+                   (U.duel.current == 0 ? "YOUR TURN" : "YOU"), 85);
         for (s = 1; s < TCG_FIELD_SIZE; s++)
         {
             const struct TcgCard *c = TcgDuel_Field(&U.duel, who, s);
@@ -1306,8 +1418,9 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
     }
     case UI_CASE:
     {
-        static const char *const names[] = {"CHALLENGE", "COLLECTION",  "DECKS",           "BOOSTER PACKS",
-                                            "PRACTICE",  "OWNED / ALL", "ANIMATION SPEED", "PUT CASE AWAY"};
+        static const char *const names[] = {"CHALLENGE",       "COLLECTION",   "DECKS",
+                                            "BOOSTER PACKS",   "PRACTICE",     "OWNED / ALL",
+                                            "ANIMATION SPEED", "ONLINE CARDS", "PUT CASE AWAY"};
         unsigned selected = c->decks[c->activeDeck].cards[0];
         for (i = 0; i < TCG_DECK_SIZE; i++)
         {
@@ -1323,7 +1436,7 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         Window(r, 0, 32, 144, 104);
         Window(r, 144, 32, 96, 104);
         U.scroll = U.cursor / 5 * 5;
-        for (i = 0; i < 5 && U.scroll + (int)i < 8; i++)
+        for (i = 0; i < 5 && U.scroll + (int)i < 9; i++)
             Option(r, U.scroll + i, 16, 39 + 18 * i, names[U.scroll + i]);
         if (selected)
             Card(r, selected, 172, 42, 40, 55, 0);
@@ -1489,6 +1602,37 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         Option(r, 0, 20, 83, "CANCEL");
         Option(r, 1, 20, 106, "REPLACE");
         Footer(r, "A: SELECT   B: CANCEL");
+        break;
+    case UI_ONLINE:
+        Mat(r);
+        Header(r, "ONLINE CARDS", NULL);
+        Window(r, 0, 32, 240, 104);
+        for (i = 0; i < MP_MAX_PLAYERS; i++)
+        {
+            snprintf(line, sizeof(line), "%s%s", i == (unsigned)gMpLocalId ? "YOU: " : "",
+                     gMpPlayers[i].present ? (const char *)gMpPlayers[i].name : "---");
+            Option(r, i, 16, 39 + i * 20, line);
+        }
+        Footer(r, "A: INVITE   B: BACK");
+        break;
+    case UI_ONLINE_INVITE:
+        Mat(r);
+        Header(r, "CARD DUEL INVITATION", NULL);
+        Window(r, 0, 32, 240, 104);
+        snprintf(line, sizeof(line), "%s would like a card duel.", gMpPlayers[Tcg_Online()->peer].name);
+        Text(r, 8, 40, 0x383838, line, 224);
+        Text(r, 8, 65, 0x383838, "No cards or money are wagered.", 224);
+        Option(r, 0, 20, 87, "ACCEPT");
+        Option(r, 1, 20, 108, "DECLINE");
+        Footer(r, "A: SELECT   B: DECLINE");
+        break;
+    case UI_ONLINE_WAIT:
+        Mat(r);
+        Header(r, "ONLINE CARDS", NULL);
+        Window(r, 0, 32, 240, 104);
+        Text(r, 8, 42, 0x383838,
+             "Waiting for the other player...\nBoth players need this dev build\nand ONLINE CARDS open.", 224);
+        Footer(r, "B: CANCEL");
         break;
     case UI_CHECK:
     {
@@ -1715,6 +1859,36 @@ void Tcg_Debug(const char *command)
             Tcg_AwardPack(c, 0);
             Screen(UI_PACKS);
         }
+        return;
+    }
+    if (!strcmp(command, "online"))
+    {
+        Screen(UI_ONLINE);
+        return;
+    }
+    if (sscanf(command, "invite %u", &n) == 1)
+    {
+        U.cursor = n % MP_MAX_PLAYERS;
+        Screen(UI_ONLINE);
+        U.cursor = n % MP_MAX_PLAYERS;
+        Choose();
+        return;
+    }
+    if (!strcmp(command, "netconcede"))
+    {
+        struct TcgAction a = {0};
+        a.type = TCG_CONCEDE;
+        TcgLink_Submit(Tcg_Online(), &a, SDL_GetTicks());
+        return;
+    }
+    if (!strcmp(command, "netstep"))
+    {
+        struct TcgAction a;
+        struct TcgLink *l = Tcg_Online();
+        if (l->state == TCG_LINK_PLAYING && TcgDuel_AiAction(&l->game, &a))
+            TcgLink_Submit(l, &a, SDL_GetTicks());
+        printf("[tcg-net] state %u seq %u phase %u hash %08x winner %u\n", l->state, l->sequence, l->game.phase,
+               TcgLink_Hash(&l->game), l->game.winner);
         return;
     }
     if (!strcmp(command, "ready"))

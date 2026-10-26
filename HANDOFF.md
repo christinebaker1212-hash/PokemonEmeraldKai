@@ -35,6 +35,20 @@ in-game; their CI runs weren't checked either.
 - Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the
   existing tools/test/update_test.sh continues to exercise update integrity.
 
+### Card system (active dev work)
+- Work only on `dev/pokemon-card-system`; do not merge/publish as main.
+- User explicitly expanded scope to online player-versus-player card duels.
+- Current code/status, remaining rule/UI work, interface references and verification:
+  `docs/TCG_IMPLEMENTATION.md`. Do not describe the whole 228-card system as finished.
+- Native 240x160 Emerald font/windows; reference original poketcg layout while using
+  Emerald's wider screen. Deck preview is a compact centered illustration-only
+  panel; full scans are in card inspection. Send actual WIP screenshots.
+- ONLINE CARDS is explicit opt-in on both clients; invites, deck validation,
+  deterministic action/ACK synchronization, hashes, cancel/timeout/disconnect.
+- Tests: `tools/tcg/test.sh`, `tools/tcg/test_ui.sh`, `tools/tcg/test_online.sh`
+  (optional `250` for each-way latency plus jitter). Two real clients completed
+  normal duels; dev profiles remain read-only. Main release workflow unchanged.
+
 ### 1. Joining a battle against two trainers (user's report; unfinished, backed out of the branch)
 Report: "if two players enter a battle that was started by the initial trainer being seen by two trainers, a third
 player who attempts to join after the battle starts will never prompt the battling two players." In the code,

@@ -28,3 +28,9 @@ gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     tools/tcg/test_ai.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/ai"
 "$OUT/ai"
+
+gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
+    -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
+    tools/tcg/test_link.c src/tcg/tcg_link.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/link"
+"$OUT/link"

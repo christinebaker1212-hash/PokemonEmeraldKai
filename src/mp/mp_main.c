@@ -1,3 +1,4 @@
+#include "tcg/integration.h"
 #include "mp_version.h"
 // Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
@@ -791,6 +792,8 @@ bool8 MP_SmallTweaksAllowed(void)
 
 bool8 MP_IsLocalFree(void)
 {
+    if (Tcg_IsActive())
+        return FALSE;
     if (!MP_IsInOverworld() || gPaletteFade.active)
         return FALSE;
     if (ArePlayerFieldControlsLocked() || ScriptContext_IsEnabled())
@@ -1218,7 +1221,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
 // Routes peer messages to the module that owns the message id
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
 {
-    if (data[0] == MPR_COOP_BATTLING)
+    if (!len) return;
+    if (data[0] == 255)
+        Tcg_OnlineRelay(from, data, len);
+    else if (data[0] == MPR_COOP_BATTLING)
         MP_Coop_OnRelay(from, data, len);
     else if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
         MP_Battle_OnRelay(from, data, len);
@@ -1915,6 +1921,7 @@ void MP_FrameUpdate(void)
     u16 len;
     int guard;
 
+    Tcg_OnlineTick();
     MP_Achieve_Update();        // achievements are personal: offline too
     MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes

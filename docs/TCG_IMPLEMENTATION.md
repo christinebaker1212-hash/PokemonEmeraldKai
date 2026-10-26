@@ -20,7 +20,8 @@ unchanged. No card feature may appear in main builds until explicitly promoted.
 - Separate **one-time versioned artwork pack**, confirmed by the user. Keep routine
   updates small. Compress aggressively without sacrificing text readability.
 - Dev collection changes are temporary; no writes to any real save or card profile.
-- Online card duels and player trading are a separate expansion, not this pass.
+- Online card duels are now explicitly requested by the user and implemented as
+  a dev-only extension. Player trading remains outside this pass.
 
 ## Completed and tested
 
@@ -125,3 +126,47 @@ Linux and Windows dev targets compiled; controller-input UI smoke tests and
 main/dev save-protection regression passed. Inspecting both play areas/discards
 was also checked against an unchanged rules-state snapshot. Windows runtime is not exercised
 in this Linux environment. No full card-system release has been published.
+
+## Online card duels
+
+The Card Case now has ONLINE CARDS. Join the same co-op room, both explicitly
+open that screen, choose a connected friend and invite them. Accepting uses each
+player's active validated deck. Invites never appear during ordinary Emerald play.
+B cancels an invitation; B in a duel opens the existing concede confirmation.
+Card duels wager no cards or money and do not grant farmable online win rewards.
+
+`tcg_link.c` uses the existing TCP relay with extension ID 255 and card protocol
+version 1. Existing main clients and the relay's base protocol are unchanged;
+main clients ignore this optional message. Bump the card protocol version when
+rules/catalogue or wire compatibility changes. This extension needs both clients
+on a compatible dev build; ordinary main clients cannot accept card invitations.
+
+The inviter is canonical player 0 and the recipient player 1. The presentation
+swaps the recipient's view so their own hand is always on their side. Both peers
+validate the decks and every action. Messages carry a session nonce, ordered
+sequence and portable before/after rules hashes. Each action needs acknowledgment
+before another local action. Invalid, stale or divergent actions stop the session.
+Timeout/disconnect returns to the Card Case without a result or progression loss.
+Do not serialize native C structs or send save/profile data.
+
+This is deterministic peer replication, like a local link emulator: both client
+processes contain the canonical duel, including hidden piles. The interface does
+not reveal the opponent's hand/deck, but modified clients could inspect them.
+It is not an authoritative competitive server or an anti-cheat implementation.
+
+Verification: 20 deterministic paired-client engine duels under sanitizers;
+real relay clients completing normal duels with matching winner/state hashes;
+250 ms each-way latency plus 80 ms jitter with live actions and concession;
+real peer disconnect leaving winner unset; malformed/foreign/stale packets;
+turn ownership, consent, ACK gating, timeout and card conservation. Existing
+native UI and dev save-protection tests also pass. The card rules/effects and
+Trainer choice UI limitations listed above still apply; this does not claim a
+complete 228-card release.
+
+```
+NOBUILD=1 tools/tcg/test_online.sh
+NOBUILD=1 OUT="$PWD/dev/test-results/online-lag" tools/tcg/test_online.sh 250
+```
+
+Both native dev binaries are staged under `dev/builds/` by the normal dev helper.
+Routine main release jobs and workflows have no added card-system build steps.
