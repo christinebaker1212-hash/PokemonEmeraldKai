@@ -315,11 +315,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "wild") == 0)
     {
-        // wild SPECIES:LEVEL - start a wild battle right now
-        int species = 263, level = 3;
-        sscanf(arg, "%d:%d", &species, &level);
+        // wild SPECIES:LEVEL [M1 M2 M3 M4] - start a wild battle right now (with only these moves, if given: a test
+        // that needs the foe to hit doesn't leave it to the moves it picks)
+        int species = 263, level = 3, m[MAX_MON_MOVES] = {0}, n, i;
+        n = sscanf(arg, "%d:%d %d %d %d %d", &species, &level, &m[0], &m[1], &m[2], &m[3]);
         ZeroEnemyPartyMons();
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        if (n >= 3)
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                SetMonMoveSlot(&gEnemyParty[0], m[i], i);
         BattleSetup_StartWildBattle();
     }
     else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
@@ -353,13 +357,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void BattleSetup_StartLocalTripleWildBattle(void);
         int sp[PARTY_SIZE] = {288, 286, 290}, lv[PARTY_SIZE] = {5, 5, 5}, i, n = 0, used;
         const char *p = arg;
+        // (S:Lf / S:Lm: that one female / male, for tests that check a card's gender icon)
+        char gender[PARTY_SIZE] = {0};
         while (n < PARTY_SIZE && sscanf(p, "%d:%d%n", &sp[n], &lv[n], &used) == 2)
-            p += used, n++;
+        {
+            p += used;
+            if (*p == 'f' || *p == 'm')
+                gender[n] = *p++;
+            n++;
+        }
         if (n < 3)
             n = 3;
         ZeroEnemyPartyMons();
         for (i = 0; i < n; i++)
-            CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        {
+            if (gender[i])
+                CreateMonWithGenderNatureLetter(&gEnemyParty[i], sp[i], lv[i], 32, gender[i] == 'f' ? MON_FEMALE : MON_MALE,
+                                                0, 0);
+            else
+                CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        }
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();
     }

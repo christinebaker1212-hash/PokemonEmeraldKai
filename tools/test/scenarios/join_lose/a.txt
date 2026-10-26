@@ -3,7 +3,7 @@ waitfor online 6000
 wait 60
 mp moves 0 45
 mp partyids
-mp wild 288:22
+mp wild 288:22 29
 pressuntil A joinprompt 15000
 wait 10
 press A 2
