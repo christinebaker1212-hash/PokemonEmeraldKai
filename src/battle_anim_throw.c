@@ -918,6 +918,7 @@ static void SpriteCB_Ball_Throw(struct Sprite *sprite)
     sprite->sTargetY = targetY;
     sprite->sAmplitude = -40;
     InitAnimArcTranslation(sprite);
+    StartBallSpin(sprite);   // Moemon Co-op: the HGSS ball spins in the air
     sprite->callback = SpriteCB_Ball_Arc;
 }
 

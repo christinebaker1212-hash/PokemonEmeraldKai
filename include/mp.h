@@ -886,6 +886,7 @@ const u8 *MP_BallStyle_DecorationName(u8 decoration);
 bool8 MP_BallStyle_CanColor(u8 ballId);
 bool8 MP_BallStyle_CanDecorate(u8 ballId);
 void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style);
+bool8 MP_BallStyle_SpriteHasSpin(u8 spriteId);   // FALSE: a GENESIS / EPOCH BALL (turn it instead)
 void MP_BallStyle_ApplyToIconPalette(u8 paletteNum, u8 ballId, u16 style);
 void MP_BallStyle_DecorateIcon(u8 spriteId, u8 ballId, u16 style);
 u8 MP_BallStyle_DecorationJump(u8 decoration, s8 dir);

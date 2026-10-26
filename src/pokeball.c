@@ -60,18 +60,18 @@ static u16 GetBattlerPokeballItemId(u8 battler);
 
 const struct CompressedSpriteSheet gBallSpriteSheets[POKEBALL_COUNT] =
 {
-    [BALL_POKE]    = {gBallGfx_Poke,    384, GFX_TAG_POKE_BALL},
-    [BALL_GREAT]   = {gBallGfx_Great,   384, GFX_TAG_GREAT_BALL},
-    [BALL_SAFARI]  = {gBallGfx_Safari,  384, GFX_TAG_SAFARI_BALL},
-    [BALL_ULTRA]   = {gBallGfx_Ultra,   384, GFX_TAG_ULTRA_BALL},
-    [BALL_MASTER]  = {gBallGfx_Master,  384, GFX_TAG_MASTER_BALL},
-    [BALL_NET]     = {gBallGfx_Net,     384, GFX_TAG_NET_BALL},
-    [BALL_DIVE]    = {gBallGfx_Dive,    384, GFX_TAG_DIVE_BALL},
-    [BALL_NEST]    = {gBallGfx_Nest,    384, GFX_TAG_NEST_BALL},
-    [BALL_REPEAT]  = {gBallGfx_Repeat,  384, GFX_TAG_REPEAT_BALL},
-    [BALL_TIMER]   = {gBallGfx_Timer,   384, GFX_TAG_TIMER_BALL},
-    [BALL_LUXURY]  = {gBallGfx_Luxury,  384, GFX_TAG_LUXURY_BALL},
-    [BALL_PREMIER] = {gBallGfx_Premier, 384, GFX_TAG_PREMIER_BALL},
+    [BALL_POKE]    = {gBallGfx_Poke,    BALL_SHEET_SIZE, GFX_TAG_POKE_BALL},
+    [BALL_GREAT]   = {gBallGfx_Great,   BALL_SHEET_SIZE, GFX_TAG_GREAT_BALL},
+    [BALL_SAFARI]  = {gBallGfx_Safari,  BALL_SHEET_SIZE, GFX_TAG_SAFARI_BALL},
+    [BALL_ULTRA]   = {gBallGfx_Ultra,   BALL_SHEET_SIZE, GFX_TAG_ULTRA_BALL},
+    [BALL_MASTER]  = {gBallGfx_Master,  BALL_SHEET_SIZE, GFX_TAG_MASTER_BALL},
+    [BALL_NET]     = {gBallGfx_Net,     BALL_SHEET_SIZE, GFX_TAG_NET_BALL},
+    [BALL_DIVE]    = {gBallGfx_Dive,    BALL_SHEET_SIZE, GFX_TAG_DIVE_BALL},
+    [BALL_NEST]    = {gBallGfx_Nest,    BALL_SHEET_SIZE, GFX_TAG_NEST_BALL},
+    [BALL_REPEAT]  = {gBallGfx_Repeat,  BALL_SHEET_SIZE, GFX_TAG_REPEAT_BALL},
+    [BALL_TIMER]   = {gBallGfx_Timer,   BALL_SHEET_SIZE, GFX_TAG_TIMER_BALL},
+    [BALL_LUXURY]  = {gBallGfx_Luxury,  BALL_SHEET_SIZE, GFX_TAG_LUXURY_BALL},
+    [BALL_PREMIER] = {gBallGfx_Premier, BALL_SHEET_SIZE, GFX_TAG_PREMIER_BALL},
 };
 
 const struct CompressedSpritePalette gBallSpritePalettes[POKEBALL_COUNT] =
@@ -97,58 +97,74 @@ static const struct OamData sBallOamData =
     .objMode = ST_OAM_OBJ_NORMAL,
     .mosaic = FALSE,
     .bpp = ST_OAM_4BPP,
-    .shape = SPRITE_SHAPE(16x16),
+    .shape = SPRITE_SHAPE(16x32),   // Moemon Co-op: the HGSS balls' frames (the open ball is 23 px tall)
     .x = 0,
     .matrixNum = 0,
-    .size = SPRITE_SIZE(16x16),
+    .size = SPRITE_SIZE(16x32),
     .tileNum = 0,
     .priority = 2,
     .paletteNum = 0,
     .affineParam = 0,
 };
 
+#define BALL_FRAME(n) ((n) * BALL_FRAME_TILES)
+
 static const union AnimCmd sBallAnimSeq3[] =
 {
-    ANIMCMD_FRAME(0, 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_REST), 5),
     ANIMCMD_JUMP(0),
 };
 
 static const union AnimCmd sBallAnimSeq5[] =
 {
-    ANIMCMD_FRAME(4, 1),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_OPEN), 1),
     ANIMCMD_JUMP(0),
 };
 
 static const union AnimCmd sBallAnimSeq4[] =
 {
-    ANIMCMD_FRAME(8, 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_EMPTY), 5),
     ANIMCMD_JUMP(0),
 };
 
 static const union AnimCmd sBallAnimSeq6[] =
 {
-    ANIMCMD_FRAME(12, 1),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN), 1),
     ANIMCMD_JUMP(0),
 };
 
 static const union AnimCmd sBallAnimSeq0[] =
 {
-    ANIMCMD_FRAME(0, 1),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_REST), 1),
     ANIMCMD_END,
 };
 
 static const union AnimCmd sBallAnimSeq1[] =
 {
-    ANIMCMD_FRAME(4, 5),
-    ANIMCMD_FRAME(8, 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_OPEN), 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_EMPTY), 5),
     ANIMCMD_END,
 };
 
 static const union AnimCmd sBallAnimSeq2[] =
 {
-    ANIMCMD_FRAME(4, 5),
-    ANIMCMD_FRAME(0, 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_OPEN), 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_REST), 5),
     ANIMCMD_END,
+};
+
+// Moemon Co-op: a ball in the air spins through the HGSS frames (BALL_ANIM_SPIN)
+static const union AnimCmd sBallAnimSeqSpin[] =
+{
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 0), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 1), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 2), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 3), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 4), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 5), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 6), 2),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SPIN + 7), 2),
+    ANIMCMD_JUMP(0),
 };
 
 static const union AnimCmd *const sBallAnimSequences[] =
@@ -162,6 +178,7 @@ static const union AnimCmd *const sBallAnimSequences[] =
     sBallAnimSeq4,
     sBallAnimSeq5,
     sBallAnimSeq6,
+    [BALL_ANIM_SPIN] = sBallAnimSeqSpin,
 };
 
 static const union AffineAnimCmd sAffineAnim_BallRotate_0[] =
@@ -1031,8 +1048,18 @@ static void SpriteCB_BallThrow_CaptureMon(struct Sprite *sprite)
     }
 }
 
+// Moemon Co-op: a ball in the air spins through its HGSS frames
+bool8 StartBallSpin(struct Sprite *sprite)
+{
+    if (!MP_BallStyle_SpriteHasSpin(sprite - gSprites))
+        return FALSE;
+    StartSpriteAnim(sprite, BALL_ANIM_SPIN);
+    return TRUE;
+}
+
 static void SpriteCB_PlayerMonSendOut_1(struct Sprite *sprite)
 {
+    StartBallSpin(sprite);   // Moemon Co-op
     sprite->data[0] = 25;
     sprite->data[2] = GetBattlerSpriteCoord(sprite->sBattler, BATTLER_COORD_X_2);
     sprite->data[4] = GetBattlerSpriteCoord(sprite->sBattler, BATTLER_COORD_Y_PIC_OFFSET) + 24;
@@ -1059,7 +1086,8 @@ static void SpriteCB_PlayerMonSendOut_2(struct Sprite *sprite)
             r7 = sprite->data[2] & 1;
             sprite->data[1] = ((sprite->data[1] / 3) & ~1) | r6;
             sprite->data[2] = ((sprite->data[2] / 3) & ~1) | r7;
-            StartSpriteAffineAnim(sprite, 4);
+            if (!MP_BallStyle_SpriteHasSpin(sprite - gSprites))   // Moemon Co-op: its frames spin it
+                StartSpriteAffineAnim(sprite, 4);
         }
         r4 = sprite->data[0];
         AnimTranslateLinear(sprite);
@@ -1096,6 +1124,7 @@ static void SpriteCB_PlayerMonSendOut_2(struct Sprite *sprite)
                 sprite->callback = SpriteCB_ReleaseMonFromBall;
 
             StartSpriteAffineAnim(sprite, 0);
+            StartSpriteAnim(sprite, 0);   // Moemon Co-op: done spinning
         }
     }
 }
