@@ -1016,6 +1016,9 @@ A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.
 
+The POKé BALLS thrown and sent out in battle (and on the summary) are the
+HEARTGOLD / SOULSILVER ones, ripped by Sunday-Doneko.
+
 
 SPRITE EDITOR
 -------------
