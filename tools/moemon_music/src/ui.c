@@ -7,6 +7,7 @@
 #include <SDL.h>
 #include "studio.h"
 #include "inst.h"
+#include "rip.h"
 #include "export.h"
 #include "dialog.h"
 #include "font.h"
@@ -15,6 +16,7 @@
 #define H 800
 
 int studio_open(Studio *s, const char *path);
+int studio_open_track(Studio *s, const char *path, int gbsTrack);
 
 // ------------------------------------------------------------------ state
 
@@ -41,12 +43,14 @@ static float sPending[ENG_FRAME_SAMPLES * 2];
 static int sPendingPos = ENG_FRAME_SAMPLES;
 static int sPreviewFrames;        // auditions stop by themselves after this many frames
 static int sHolding;              // a hold-to-hear button or piano key is down
+static int sOriginal;             // rips: hear the console's own sound instead of the game engine
 
 static char sStatus[512] = "Open a MIDI file (or drop one on the window) to start.";
 static int sSelSlot = -1;
 static int sTrackScroll, sSlotScroll;
 
-enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY };
+enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY,
+       MODAL_GBS_TRACK };
 static int sModal;
 static int sInModal;              // drawing the modal (its widgets take input)
 static char sSearch[64];
@@ -57,7 +61,10 @@ static char sPathBuf[1024];
 static int sConfirmAction;        // what "Discard" continues with
 static char sConfirmText[256];
 
-enum { ACT_OPEN_MIDI = 1, ACT_OPEN_PROJECT, ACT_SAVE_AS, ACT_EXPORT_KAISONG, ACT_EXPORT_DECOMP, ACT_QUIT, ACT_OPEN_DROPPED };
+enum { ACT_OPEN_MIDI = 1, ACT_OPEN_PROJECT, ACT_SAVE_AS, ACT_EXPORT_KAISONG, ACT_EXPORT_DECOMP, ACT_QUIT, ACT_OPEN_DROPPED,
+       ACT_BIOS_FOLDER };
+static char sGbsPath[1024];       // a .gbs waiting for its track number
+static int sGbsTrack;
 static char sDropped[1024];
 static int sQuit;
 
@@ -93,6 +100,20 @@ static void audio_cb(void *u, Uint8 *stream, int len)
             sPendingPos = 0;
         }
         float l = sPending[sPendingPos * 2], r = sPending[sPendingPos * 2 + 1];
+        const Rip *rp = S.p.rip;
+        if (sOriginal && rp && rp->pcm && sPlaying) {
+            // the same moment of the rip's own sound (frames line up: the rip was recorded a game frame at a time)
+            long f = sFrames > 0 ? sFrames - 1 : 0;
+            if (S.loopStartFrame >= 0 && S.totalFrames > S.loopStartFrame && f >= S.totalFrames)
+                f = S.loopStartFrame + (f - S.loopStartFrame) % (S.totalFrames - S.loopStartFrame);
+            double t = ((double)f * ENG_FRAME_SAMPLES + sPendingPos) / ENG_RATE * rp->rate;
+            long k = (long)t;
+            float fr = (float)(t - (double)k);
+            if (k + 1 < rp->pcmFrames) {
+                l += (rp->pcm[k * 2] * (1 - fr) + rp->pcm[k * 2 + 2] * fr) / 32768.0f;
+                r += (rp->pcm[k * 2 + 1] * (1 - fr) + rp->pcm[k * 2 + 3] * fr) / 32768.0f;
+            }
+        }
         out[i * 2] = l > 1 ? 1 : l < -1 ? -1 : l;
         out[i * 2 + 1] = r > 1 ? 1 : r < -1 ? -1 : r;
         sPendingPos++;
@@ -156,6 +177,7 @@ static void update_mute_mask(void)
         for (int t = 0; t < S.c.ntracks; t++)
             if (!((S.p.solo >> S.c.candOf[t]) & 1)) m |= 1ull << t;
     }
+    if (sOriginal && S.p.rip) m = ~0ull;   // the console's sound plays instead (auditions still sound)
     lock();
     E.muteMask = m;
     unlock();
@@ -179,7 +201,7 @@ static void rebuild(void);
 static void voices_changed(void)
 {
     // a different instrument changes its volume factor, and a different kit moves drum notes: convert again
-    int again = S.p.gmFixes && S.p.balance;
+    int again = (S.p.gmFixes && S.p.balance) || S.p.isRip;   // rips: a GM instrument brings its volume factor
     for (int i = 0; i < 128; i++)
         if (S.c.slotDrum[i] && S.p.gmFixes) again = 1;
     if (again) {
@@ -372,6 +394,10 @@ static void after_open(const char *path)
     sFrames = 0;
     char m[700];
     if (S.msg[0]) snprintf(m, sizeof(m), "Opened %s. Note: %s", path_base(path), S.msg);
+    else if (S.p.isRip && S.p.ripKind == RIP_GSF)
+        snprintf(m, sizeof(m), "Opened %s: read from the game's ROM with its own instruments (the same engine as Moemon). Original = the GBA's sound.", path_base(path));
+    else if (S.p.isRip)
+        snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original to compare with the console.", path_base(path), S.p.ncustom);
     else if (S.p.target[0] && !S.p.gmFixes) snprintf(m, sizeof(m), "Opened %s: a game song, with the game's own instruments and settings.", path_base(path));
     else snprintf(m, sizeof(m), "Opened %s. Each instrument starts as the closest match from the game; click one to change it.", path_base(path));
     snprintf(sStatus, sizeof(sStatus), "%s", m);
@@ -385,15 +411,49 @@ static int ends_with(const char *s, const char *e)
     return 1;
 }
 
-static void open_path(const char *path)
+static void draw_status(void);
+static void settings_save(void);
+
+// Opening a rip plays it through its console's emulator first: say so while that runs.
+static void busy(const char *msg)
 {
+    snprintf(sStatus, sizeof(sStatus), "%s", msg);
+    color(C_BG);
+    SDL_RenderClear(sRen);
+    fill(W / 2 - 330, H / 2 - 40, 660, 80, C_PANEL);
+    frame_rect(W / 2 - 330, H / 2 - 40, 660, 80, C_ACCENT);
+    textfit(W / 2 - 310, H / 2 - 8, 620, msg, C_TEXT);
+    SDL_RenderPresent(sRen);
+}
+
+static void open_path_track(const char *path, int gbsTrack);
+
+static void open_path(const char *path) { open_path_track(path, -1); }
+
+static void open_path_track(const char *path, int gbsTrack)
+{
+    // a .gbs holds many songs: ask which first
+    if (ends_with(path, ".gbs") && gbsTrack < 0) {
+        snprintf(sGbsPath, sizeof(sGbsPath), "%s", path);
+        sGbsTrack = 0;
+        sModal = MODAL_GBS_TRACK;
+        return;
+    }
     stop_song();
+    sOriginal = 0;
+    int kind = rip_kind_of(path);
+    if (kind >= 0) {
+        char m[600];
+        snprintf(m, sizeof(m), "Playing %s through its console's emulator and listening to its sound chip...", path_base(path));
+        busy(m);
+    }
     static Studio tmp;
     studio_init(&tmp);
-    if (!studio_open(&tmp, path)) {
+    if (!studio_open_track(&tmp, path, gbsTrack)) {
         set_status("Couldn't open it: %s", tmp.msg);
         project_free(&tmp.p);
         if (tmp.haveConv) conv_free(&tmp.c);
+        project_bind(&S.p);
         return;
     }
     if (S.haveConv) conv_free(&S.c);
@@ -464,7 +524,8 @@ static void run_action(int act)
     int r;
     switch (act) {
     case ACT_OPEN_MIDI:
-        r = dlg_open(path, sizeof(path), "Open a MIDI file", "MIDI files", "*.mid;*.midi");
+        r = dlg_open(path, sizeof(path), "Open music: MIDI, or a PSF / PSF2 / USF / GBS / 2SF / GSF rip", "Music",
+                     "*.mid;*.midi;*.psf;*.minipsf;*.psf2;*.minipsf2;*.usf;*.miniusf;*.gbs;*.m3u;*.2sf;*.mini2sf;*.gsf;*.minigsf");
         if (r > 0) open_path(path);
         else if (r < 0) ask_path(act, "");
         break;
@@ -499,6 +560,11 @@ static void run_action(int act)
         if (r > 0) do_export_decomp(path);
         else if (r < 0) ask_path(act, ".");
         break;
+    case ACT_BIOS_FOLDER:
+        r = dlg_folder(path, sizeof(path), "Folder with a PlayStation 2 BIOS (for PlayStation music)");
+        if (r > 0) { snprintf(g_biosDir, sizeof(g_biosDir), "%s", path); settings_save(); set_status("BIOS folder: %s", g_biosDir); }
+        else if (r < 0) ask_path(act, g_biosDir);
+        break;
     case ACT_QUIT:
         sQuit = 1;
         break;
@@ -524,7 +590,7 @@ static void draw_top(void)
     fill(0, 0, W, 44, C_PANEL);
     text(14, 14, "Moemon Music Studio", C_ACCENT);
     int x = 190;
-    if (button(x, 8, 104, 28, "Open MIDI", 1)) guarded(ACT_OPEN_MIDI);
+    if (button(x, 8, 104, 28, "Open...", 1)) guarded(ACT_OPEN_MIDI);
     x += 110;
     if (button(x, 8, 120, 28, "Open Project", 1)) guarded(ACT_OPEN_PROJECT);
     x += 126;
@@ -558,14 +624,31 @@ static void draw_transport(void)
         else play_from(sFrames >= S.totalFrames && S.loopStartFrame < 0 ? 0 : sFrames);
     }
     if (button(106, y + 8, 70, 30, "Stop", playable)) { stop_song(); sFrames = 0; }
+    // rips: the game engine's version or the console's own sound
+    if (S.p.isRip && playable) {
+        for (int i = 0; i < 2; i++) {
+            int bx2 = 184 + i * 86;
+            if (sOriginal == i) fill(bx2 - 2, y + 6, 84, 34, C_ACCENT);
+            if (button(bx2, y + 8, 80, 30, i ? "Original" : "Kai", 1) && sOriginal != i) {
+                if (i && !S.p.rip) {
+                    busy("Playing the original through its console's emulator...");
+                    char err[512] = "";
+                    if (!project_reload_rip(&S.p, g_biosDir, err, sizeof(err))) { set_status("Can't play the original: %s", err); continue; }
+                }
+                sOriginal = i;
+                update_mute_mask();
+                set_status("%s", i ? "Original: the console's own sound (from its emulator)." : "Kai: the song as Moemon's sound engine plays it.");
+            }
+        }
+    }
     char t[64], tt[32];
     fmt_time(song_pos(), t, sizeof(t));
     fmt_time(S.totalFrames, tt, sizeof(tt));
     char both[96];
     snprintf(both, sizeof(both), "%s / %s", t, tt);
-    text(190, y + 15, both, C_TEXT);
+    text(364, y + 15, both, C_TEXT);
     // seek bar
-    int bx = 320, bw = 700, by = y + 18;
+    int bx = 470, bw = 550, by = y + 18;
     fill(bx, by, bw, 10, C_ROW);
     if (S.totalFrames > 0) {
         if (S.loopStartFrame >= 0) {
@@ -694,6 +777,7 @@ static void draw_slots(void)
         text(x + 12, ry + 3, lab, C_DIM);
         if (S.c.slotDrum[s]) snprintf(lab, sizeof(lab), "Drums (ch 10)");
         else if (!S.p.gmFixes) snprintf(lab, sizeof(lab), "voice %d", s);   // the game's own numbering, not GM
+        else if (S.p.isRip) snprintf(lab, sizeof(lab), "Instrument %d", s + 1);   // the original's, in order of use
         else snprintf(lab, sizeof(lab), "%s", sf_gm_names[S.c.slotGm[s] >= 0 ? S.c.slotGm[s] : s]);
         textfit(x + 48, ry + 3, 210, lab, C_TEXT);
         char nm[160];
@@ -731,7 +815,12 @@ static void draw_slots(void)
     }
     int by = ey + 70;
     if (button(x + 16, by, 160, 26, "Change...", 1)) open_instrument_picker();
-    if (button(x + 182, by, 120, 26, "GM match", 1)) {
+    if (S.p.isRip && S.p.ripKind != RIP_GSF) {
+        // a rip's instrument: back to the original, or the closest GM instrument found for it
+        int hasGm = S.p.ripGm[sSelSlot].type != 0xFF;
+        if (button(x + 182, by, 58, 26, "Orig", 1)) { *v = S.p.ripOrig[sSelSlot]; voices_changed(); }
+        if (button(x + 244, by, 58, 26, "GM", hasGm)) { *v = S.p.ripGm[sSelSlot]; voices_changed(); }
+    } else if (button(x + 182, by, 120, 26, "GM match", 1)) {
         int preset = S.c.slotDrum[sSelSlot] ? SF_GM_DRUM_PRESET : sf_gm_preset[S.c.slotGm[sSelSlot] >= 0 ? S.c.slotGm[sSelSlot] : sSelSlot];
         *v = sf_presets[preset].voice;
         voices_changed();
@@ -793,6 +882,12 @@ static void draw_song(void)
     }
     text(col1 + 310, row + 2, "Title", C_DIM);
     textfit(col1 + 360, row + 2, 230, p->title, C_TEXT);
+    if (p->isRip) {
+        // where it came from, under the panel title
+        char src[300];
+        snprintf(src, sizeof(src), "From %s (%s)", p->ripInfo[0] ? p->ripInfo : "a rip", rip_kind_name(p->ripKind));
+        textfit(x + 60, y + 6, 560, src, C_DIM);
+    }
     row += 30;
     if (stepper(col1, row, "Volume", &p->masterVol, 0, 127, 1, NULL)) { p->dirty = 1; rebuild(); }
     int rev = p->reverb;
@@ -874,7 +969,21 @@ static void draw_song(void)
     if (button(lx + 50, ly, 300, 24, "Use a game song's instruments...", 1)) {
         sModal = MODAL_SONG_VOICES; sSearch[0] = 0; sPickSel = -1; sPickScroll = 0;
     }
-    if (button(lx + 360, ly, 200, 24, "All to GM matches", 1)) {
+    if (p->isRip && p->ripKind != RIP_GSF) {
+        // rips: the original instruments, or the closest General MIDI instruments of the game
+        for (int g = 0; g < 2; g++) {
+            if (!button(lx + 360 + g * 136, ly, g ? 100 : 130, 24, g ? "All GM" : "All original", 1)) continue;
+            stop_song();
+            project_rip_instruments(p, g);
+            busy("Matching the original's loudness...");
+            studio_rebuild(&S);
+            studio_match_rip(&S);
+            update_mute_mask();
+            sFrames = 0;
+            set_status("%s", g ? "Every instrument with a close General MIDI match now uses the game's GM instrument; the rest stay original."
+                               : "Every instrument is the original's sample again.");
+        }
+    } else if (button(lx + 360, ly, 200, 24, "All to GM matches", 1)) {
         project_default_voices(p, &S.c, 1);
         voices_changed();
     }
@@ -934,7 +1043,7 @@ static void draw_instrument_picker(void)
     modal_box(&x, &y, w, h, "CHOOSE AN INSTRUMENT FROM THE GAME");
     char sub[200];
     snprintf(sub, sizeof(sub), "for slot %d (%s). Click to hear it, double-click or Use to pick it.", sSelSlot,
-             S.c.slotDrum[sSelSlot] ? "drums" : sf_gm_names[S.c.slotGm[sSelSlot] >= 0 ? S.c.slotGm[sSelSlot] : sSelSlot]);
+             S.c.slotDrum[sSelSlot] ? "drums" : S.p.isRip ? "an original instrument" : sf_gm_names[S.c.slotGm[sSelSlot] >= 0 ? S.c.slotGm[sSelSlot] : sSelSlot]);
     text(x + 320, y + 10, sub, C_DIM);
     // categories
     int cy = y + 40;
@@ -1108,6 +1217,7 @@ static void draw_path_prompt(void)
         sModal = MODAL_NONE;
         switch (sPathAction) {
         case ACT_OPEN_MIDI: case ACT_OPEN_PROJECT: open_path(sPathBuf); break;
+        case ACT_BIOS_FOLDER: snprintf(g_biosDir, sizeof(g_biosDir), "%s", sPathBuf); settings_save(); break;
         case ACT_SAVE_AS: do_save(sPathBuf); break;
         case ACT_EXPORT_KAISONG: do_export_kaisong(sPathBuf); break;
         case ACT_EXPORT_DECOMP: do_export_decomp(sPathBuf); break;
@@ -1131,15 +1241,17 @@ static void draw_confirm(void)
 
 static void draw_help(void)
 {
-    int x, y, w = 900, h = 520;
+    int x, y, w = 900, h = 560;
     modal_box(&x, &y, w, h, "MOEMON MUSIC STUDIO " STUDIO_VERSION);
     static const char *lines[] = {
         "Plays MIDI files with Moemon Emerald Kai's own instruments and sound engine, so a song",
         "sounds here as it will in the game (5 sample voices + 4 Game Boy channels, 10 tracks;",
         "SONG > GBA accurate off: up to 64 tracks and 64 sample voices, which the game can't play yet).",
         "",
-        "1. Open MIDI (or drop a .mid on the window). Each MIDI instrument starts as the game",
+        "1. Open... a MIDI (or drop it on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",
+        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF rip: it plays in its console's emulator once and",
+        "   comes in with its original instruments. Kai / Original compares; All GM swaps instruments.",
         "2. Click an instrument and Change... it, or tune its envelope. Hold to hear / keys Z-M.",
         "3. M leaves a track out of the song, S plays a track alone.",
         "4. SONG: pick the game song it replaces, its volume, reverb and loop.",
@@ -1211,13 +1323,17 @@ static void settings_path(char *buf, int n)
 
 static void settings_load(void)
 {
-    char path[1024], line[128];
+    char path[1024], line[1200];
     settings_path(path, sizeof(path));
     FILE *f = fopen(path, "r");
     if (!f) return;
     while (fgets(line, sizeof(line), f)) {
         int v;
         if (sscanf(line, "font=%d", &v) == 1 && v >= 0 && v < NUM_FONTS) sFontChoice = v;
+        if (!strncmp(line, "bios=", 5)) {
+            snprintf(g_biosDir, sizeof(g_biosDir), "%s", line + 5);
+            g_biosDir[strcspn(g_biosDir, "\r\n")] = 0;
+        }
         if (sscanf(line, "window=%d", &v) == 1) {
             for (int i = 0; i < NUM_WIN_SIZES; i++) if (WIN_SIZES[i] == v) sWinSize = i;
         }
@@ -1231,7 +1347,7 @@ static void settings_save(void)
     settings_path(path, sizeof(path));
     FILE *f = fopen(path, "w");
     if (!f) return;
-    fprintf(f, "font=%d\nwindow=%d\n", sFontChoice, WIN_SIZES[sWinSize]);
+    fprintf(f, "font=%d\nwindow=%d\nbios=%s\n", sFontChoice, WIN_SIZES[sWinSize], g_biosDir);
     fclose(f);
 }
 
@@ -1250,9 +1366,21 @@ static void apply_window_size(void)
     SDL_SetWindowPosition(sWin, SDL_WINDOWPOS_CENTERED_DISPLAY(d < 0 ? 0 : d), SDL_WINDOWPOS_CENTERED_DISPLAY(d < 0 ? 0 : d));
 }
 
+static void draw_gbs_track(void)
+{
+    int x, y, w = 520, h = 170;
+    modal_box(&x, &y, w, h, "GAME BOY SONG");
+    textfit(x + 20, y + 44, w - 40, path_base(sGbsPath), C_DIM);
+    char lab[32];
+    snprintf(lab, sizeof(lab), "%d", sGbsTrack + 1);
+    stepper(x + 20, y + 74, "Song number", &sGbsTrack, 0, 255, 1, lab);
+    if (button(x + w - 240, y + h - 44, 110, 30, "Open", 1) || kEnter) { sModal = MODAL_NONE; open_path_track(sGbsPath, sGbsTrack); }
+    if (button(x + w - 120, y + h - 44, 104, 30, "Cancel", 1) || kEsc) sModal = MODAL_NONE;
+}
+
 static void draw_display(void)
 {
-    int x, y, w = 760, h = 330;
+    int x, y, w = 760, h = 360;
     modal_box(&x, &y, w, h, "DISPLAY");
     text(x + 20, y + 44, "Font", C_DIM);
     for (int i = 0; i < NUM_FONTS; i++) {
@@ -1274,6 +1402,10 @@ static void draw_display(void)
     }
     text(x + 20, y + 214, "A bigger window makes everything bigger. Smooth and Bold stay sharp at any size;", C_DIM);
     text(x + 20, y + 234, "the window can also be resized by dragging its edges.", C_DIM);
+    text(x + 20, y + 268, "BIOS folder", C_DIM);
+    if (button(x + 120, y + 262, 120, 28, "Choose...", 1)) run_action(ACT_BIOS_FOLDER);
+    textfit(x + 250, y + 268, w - 390, g_biosDir[0] ? g_biosDir : "(none: PlayStation music needs a PS2 BIOS file, e.g. scph39001.bin)",
+            g_biosDir[0] ? C_TEXT : C_DIM);
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
 }
 
@@ -1404,6 +1536,7 @@ int ui_main(int argc, char **argv)
         case MODAL_CONFIRM: draw_confirm(); break;
         case MODAL_HELP: draw_help(); break;
         case MODAL_DISPLAY: draw_display(); break;
+        case MODAL_GBS_TRACK: draw_gbs_track(); break;
         }
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit

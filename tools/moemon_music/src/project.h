@@ -45,6 +45,7 @@ typedef struct {
     SfVoice ripOrig[128];     // each slot as the original instrument
     SfVoice ripGm[128];       // each slot as its closest General MIDI instrument (type 0xFF = none)
     int ripUseGm;             // the instruments in use: 0 original, 1 General MIDI
+    float ripGmGain[128];     // a GM instrument's volume factor (its sample against the original's)
     struct Rip *rip;          // the recording (its sound plays as "original"); NULL when the file is gone
     float ripGain;            // the loudness match (studio_match_rip)
     // samples the project brings (rips' original instruments); voices refer to them as INST_CUSTOM + i
@@ -69,6 +70,8 @@ int project_load(Project *p, const char *path, char *err, int errlen);
 int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsTrack, char *err, int errlen);
 // Rip projects: switch every slot between the original instruments and General MIDI ones.
 void project_rip_instruments(Project *p, int useGm);
+// A saved rip project: plays its rip again for the original-sound player (needs the file).
+int project_reload_rip(Project *p, const char *biosDir, char *err, int errlen);
 // Makes the MIDI again from the recording with a new loudness (instrument choices stay).
 int project_rip_regain(Project *p, float gain, char *err, int errlen);
 // Points the instrument layer at this project's custom samples (before converting or playing it).

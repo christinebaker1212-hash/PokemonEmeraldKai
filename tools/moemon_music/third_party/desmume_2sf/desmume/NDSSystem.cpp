@@ -44,7 +44,7 @@ int NDS_Init()
 	nds.VCount = 0;
 
 	// got to print this somewhere..
-	fprintf(stderr, "%s\n", EMU_DESMUME_NAME_AND_VERSION());
+	/* Moemon Music Studio: quiet (was the version banner) */
 
 	armcpu_new(&NDS_ARM7, 1);
 	armcpu_new(&NDS_ARM9, 0);

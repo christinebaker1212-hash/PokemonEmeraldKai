@@ -28,7 +28,17 @@ int rip_kind_of(const char *path) {
     if (ext_is(path, "psf") || ext_is(path, "minipsf") || ext_is(path, "psflib")) return RIP_PSF1;
     if (ext_is(path, "psf2") || ext_is(path, "minipsf2") || ext_is(path, "psf2lib")) return RIP_PSF2;
     if (ext_is(path, "usf") || ext_is(path, "miniusf") || ext_is(path, "usflib")) return RIP_USF;
-    if (ext_is(path, "gbs") || ext_is(path, "m3u")) return RIP_GBS;
+    if (ext_is(path, "gbs")) return RIP_GBS;
+    if (ext_is(path, "m3u")) {
+        // a Game Boy playlist line names its .gbs ("file.gbs::GBS,..."); other playlists aren't rips
+        FILE *f = fopen(path, "rb");
+        char buf[4096];
+        size_t n = f ? fread(buf, 1, sizeof buf - 1, f) : 0;
+        if (f) fclose(f);
+        buf[n] = 0;
+        for (char *p = buf; *p; p++) *p = (char)toupper((unsigned char)*p);
+        return strstr(buf, "::GBS") ? RIP_GBS : -1;
+    }
     if (ext_is(path, "2sf") || ext_is(path, "mini2sf") || ext_is(path, "2sflib")) return RIP_2SF;
     if (ext_is(path, "gsf") || ext_is(path, "minigsf") || ext_is(path, "gsflib")) return RIP_GSF;
     return -1;

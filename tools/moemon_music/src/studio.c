@@ -103,8 +103,16 @@ int studio_rebuild(Studio *s)
     if (s->p.gmFixes && s->p.balance)
         for (int i = 0; i < 128; i++)
             if (s->c.slotUsed[i]) s->gain[i] = voice_gm_gain(&s->p.voice[i]);
-    o.slotGain = s->p.gmFixes && s->p.balance ? s->gain : NULL;
-    if (s->p.gmFixes) {
+    // rips: a General MIDI instrument picked for an original one is brought to the original's loudness
+    int ripGains = 0;
+    if (s->p.isRip && s->p.gmFixes)
+        for (int i = 0; i < 128; i++)
+            if (s->c.slotUsed[i] && s->p.ripGm[i].type != 0xFF && voice_same(&s->p.voice[i], &s->p.ripGm[i])) {
+                s->gain[i] = s->p.ripGmGain[i];
+                ripGains = 1;
+            }
+    o.slotGain = (s->p.gmFixes && s->p.balance) || ripGains ? s->gain : NULL;
+    if (s->p.gmFixes || ripGains) {
         conv_free(&s->c);
         if (!conv_build(&s->c, &s->p.midi, &o, s->msg, sizeof(s->msg))) { s->haveConv = 0; return 0; }
     }

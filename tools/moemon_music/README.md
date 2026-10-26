@@ -1,8 +1,40 @@
 # Moemon Music Studio
 
-A desktop program (Linux / Windows, SDL2) that plays MIDI files with Moemon Emerald Kai's own
-instruments **and its own sound engine**, lets you pick and tune the instruments, and exports the
-song in a form the game can use.
+A desktop program (Linux / Windows, SDL2) that plays MIDI files, and music ripped from other games
+(PSF, PSF2, USF, GBS, 2SF, GSF), with Moemon Emerald Kai's own instruments **and its own sound
+engine**, lets you pick and tune the instruments, and exports the song in a form the game can use.
+
+## Music from other games
+
+| format | console | played by (`third_party/`) | how the notes are read |
+|---|---|---|---|
+| PSF, minipsf | PlayStation | Highly Experimental | the SPU's 24 voices: key-ons, pitch, envelope and volume; samples decoded from sound RAM |
+| PSF2, minipsf2 | PlayStation 2 | Highly Experimental | the same for both SPU2 cores (48 voices) |
+| USF, miniusf | Nintendo 64 | lazyusf2 | the audio microcode's command lists (libultra n_audio, EAD): codebook, decode, pitch, envelope; samples found from the driver's wavetables and decoded (VADPCM) from the ROM |
+| GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
+| 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
+| GSF, minigsf | Game Boy Advance | VBA-M (in_gsf) | games on MP2K (the game's own engine): the song and voicegroup read from the ROM, unchanged |
+
+PlayStation music needs a PlayStation 2 BIOS (4 MB, e.g. `scph39001.bin`, from your own console):
+**Aa > BIOS folder**, or put it next to the music. The studio makes the small sound BIOS it needs from
+it each time (mkhebios); no BIOS is in this repository.
+
+Opening a rip plays it through its console's emulator once (a few seconds), writing down what the
+sound chip does every game frame. That becomes a MIDI (a track per chip voice, one tick per game frame
+so the timing is the original's to the frame, each note on the closest key with pitch bends for the
+rest, its volume each frame as expression, pan) and **the original instruments**: each sample, at
+about the GBA's 13379 Hz as you hear it (a sample usually played low keeps more detail) and 8-bit like
+the game's, with its loop. The loop is found from where the key-ons start repeating. The whole song
+is then matched to the original's loudness (Game Boy channels keep the hardware's own levels).
+GBA songs on MP2K need none of that: their own commands and samples come straight from the ROM.
+
+- **Kai / Original** (next to Play): hear the song in the game's engine, or the console's own sound
+  from its emulator, at the same place.
+- **All original / All GM** (SONG): each original instrument, or the closest General MIDI instrument
+  of the game (compared by harmonic make-up, whether notes hold or die away, and the instrument's
+  usual range; drums by brightness and length). Instruments with no close GM match keep the
+  original sample. Per instrument: **Orig** / **GM**, or **Change...** as usual.
+- Exports carry the original samples: `.kaisong` version 2 (`SMPL` / `WAVE` chunks), decomp WAVs.
 
 - **Plays like the game.** `src/engine.c` is the game's MP2K engine (`src/music_player.c`,
   `src/sound_mixer.c`, `src/m4a.c`, `src/platform/cgb_audio.c`) ported line for line, with the
@@ -31,9 +63,9 @@ reverb and priority from `midi.cfg`.
 
 ```
 cd tools/moemon_music
-make                        # Linux: build/linux/moemon_music_studio (libsdl2-dev, python3)
-make windows SDL2_DIR=...   # build/windows/MoemonMusicStudio.exe + SDL2.dll (x86_64-w64-mingw32-gcc,
-                            # SDL2 mingw development package; default ../../SDL2)
+make                        # Linux: build/linux/moemon_music_studio (libsdl2-dev, python3, g++)
+make windows SDL2_DIR=...   # build/windows/MoemonMusicStudio.exe + SDL2.dll + libwinpthread-1.dll
+                            # (x86_64-w64-mingw32-gcc and -g++, SDL2 mingw development package; default ../../SDL2)
 make test                   # converter vs mid2agb on every game MIDI, exports, round trips
 ```
 
@@ -60,7 +92,8 @@ and the window size (fit the screen, 100-200%); both are remembered in the user'
 Command line (also what the tests use):
 
 ```
-moemon_music_studio [FILE]                          the window (FILE: .mid or .mmsproj)
+moemon_music_studio [FILE]                          the window (FILE: .mid, .mmsproj or a rip)
+moemon_music_studio --original RIP OUT.wav           the rip's own sound (its emulator); MMS_BIOS = BIOS folder
 moemon_music_studio --render IN OUT.wav [SECONDS]   to the loop end, or SECONDS
 moemon_music_studio --export IN OUT.kaisong
 moemon_music_studio --decomp IN DIR
@@ -81,4 +114,6 @@ moemon_music_studio --raw IN OUT.f32 FRAMES         the engine's float output, f
 | `src/project.c` | projects (`.mmsproj`) and loading MIDIs |
 | `src/export.c` | `.kaisong` and decomp sources |
 | `src/studio.c`, `src/cli.c`, `src/ui.c`, `src/dialog.c` | the open song, command line, window, file dialogs |
+| `src/rip.c`, `src/rip_*.c(pp)` | rips: loading, each console's emulator and capture, the MIDI and instruments made from it (`rip_song.c`), MP2K from the ROM (`rip_mp2k.c`), GM matching (`rip_gm.c`) |
+| `third_party/` | the emulators, psflib, zlib (`third_party/README.md`: sources and licenses; the studio as a whole is GPL 2+) |
 | `test/` | `run_tests.sh`, `check_mid2agb.py`, `read_kaisong.py` (reference reader), `make_test_midi.py` |

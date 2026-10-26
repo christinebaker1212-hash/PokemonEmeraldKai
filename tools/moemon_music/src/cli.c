@@ -28,11 +28,14 @@ static int ends_with(const char *s, const char *e)
     return 1;
 }
 
-int studio_open(Studio *s, const char *path)
+int studio_open_track(Studio *s, const char *path, int gbsTrack);
+int studio_open(Studio *s, const char *path) { return studio_open_track(s, path, -1); }
+
+int studio_open_track(Studio *s, const char *path, int gbsTrack)
 {
     char err[512];
     int ok = ends_with(path, ".mmsproj") ? project_load(&s->p, path, err, sizeof(err))
-           : rip_kind_of(path) >= 0      ? project_load_rip(&s->p, path, g_biosDir, -1, err, sizeof(err))
+           : rip_kind_of(path) >= 0      ? project_load_rip(&s->p, path, g_biosDir, gbsTrack, err, sizeof(err))
                                          : project_load_midi(&s->p, path, err, sizeof(err));
     if (!ok) { snprintf(s->msg, sizeof(s->msg), "%s", err); return 0; }
     if (!studio_rebuild(s)) return 0;

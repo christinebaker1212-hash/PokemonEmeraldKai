@@ -19,7 +19,7 @@ CFLAGS  += -std=c99 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initi
 # the consoles' emulators (third_party/README.md): include paths for the files that talk to them
 TPINC   := -I$(TP)/he -I$(TP)/psflib -I$(TP)/lazyusf2 -I$(TP)/zlib -DEMU_COMPILE -DEMU_LITTLE_ENDIAN
 CXXINC  := -I$(TP)/desmume_2sf -I$(TP)/desmume_2sf/desmume -I$(TP)/desmume_2sf/spu -I$(TP) -I$(TP)/gme_gbs -I$(TP)/vbam_gsf -I$(TP)/compat \
-           -I$(TP)/psflib -DBLARGG_LITTLE_ENDIAN=1
+           -I$(TP)/psflib -I$(TP)/zlib -DBLARGG_LITTLE_ENDIAN=1
 CXXFLAGS ?= -O2
 CXXFLAGS += -std=c++20 -w -Isrc
 
@@ -108,8 +108,10 @@ build/windows/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin src/fonts.bin
 	@mkdir -p build/windows
 	$(WCC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' -DFONTS_BIN='"src/fonts.bin"' $< -o $@
 build/windows/MoemonMusicStudio.exe: $(WOBJ)
-	$(WCXX) -o $@ $^ -L$(WSDL)/lib -lmingw32 -lSDL2main -lSDL2 -lcomdlg32 -lole32 -lshell32 -mwindows -static
+	$(WCXX) -o $@ $^ -L$(WSDL)/lib -lmingw32 -lSDL2main -lSDL2 -lcomdlg32 -lole32 -lshell32 -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
 	cp $(WSDL)/bin/SDL2.dll build/windows/
+	cp $$(dirname $$($(WCC) -print-file-name=libwinpthread.a))/../bin/libwinpthread-1.dll build/windows/ 2>/dev/null || \
+	    cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll build/windows/
 
 test: build/linux/moemon_music_studio
 	test/run_tests.sh build/linux/moemon_music_studio

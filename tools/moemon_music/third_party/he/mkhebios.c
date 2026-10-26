@@ -529,7 +529,7 @@ giveup:
   { log_error; return 1; }
 
 codecheck:
-  printf(" ");
+  /* Moemon Music Studio: no stray output (was printf(" ")) */
   // if we're using an override code, great
   if(code != 0xFFFFFFFF) {
     mod.code = code;

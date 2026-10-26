@@ -7,6 +7,7 @@
 #include "rip.h"
 #include "rip_song.h"
 #include "rip_mp2k.h"
+#include "rip_gm.h"
 
 int read_file(const char *path, uint8_t **data, size_t *len)
 {
@@ -33,7 +34,7 @@ const char *path_base(const char *path)
 void project_init(Project *p)
 {
     memset(p, 0, sizeof(*p));
-    for (int i = 0; i < 128; i++) p->ripGm[i].type = 0xFF;
+    for (int i = 0; i < 128; i++) { p->ripGm[i].type = 0xFF; p->ripGmGain[i] = 1; }
     p->ripGain = 1;
     p->masterVol = 100;
     p->reverb = 50;
@@ -176,6 +177,17 @@ void project_rip_instruments(Project *p, int useGm)
     p->dirty = 1;
 }
 
+int project_reload_rip(Project *p, const char *biosDir, char *err, int errlen)
+{
+    if (p->rip) return 1;
+    if (!p->isRip || !p->ripPath[0]) { snprintf(err, errlen, "this project isn't from a rip"); return 0; }
+    Rip *r = calloc(1, sizeof(Rip));
+    if (!r) { snprintf(err, errlen, "out of memory"); return 0; }
+    if (!rip_load(r, p->ripPath, biosDir, p->ripKind == RIP_GBS ? p->ripTrack : -1, 0, err, errlen)) { free(r); return 0; }
+    p->rip = r;
+    return 1;
+}
+
 void project_bind(Project *p)
 {
     inst_custom_bind(p->custom, p->ncustom);
@@ -311,6 +323,12 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
         np.ripOrig[s] = song.orig[s];
         if (song.slotSample[s] >= 0) { np.voice[s] = song.orig[s]; np.voiceSet[s] = 1; }
     }
+    // the closest General MIDI instruments of the game (the "All GM" set)
+    {
+        RipGm gm;
+        rip_gm_match(r, &song, &gm);
+        for (int s = 0; s < 128; s++) { np.ripGm[s] = gm.voice[s]; np.ripGmGain[s] = gm.gain[s]; }
+    }
     np.rip = r;
     np.custom = song.custom;
     np.ncustom = song.ncustom;
@@ -420,7 +438,11 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         for (int s = 0; s < 128; s++) {
             char t[300];
             if (p->voiceSet[s]) { voice_to_text(&p->ripOrig[s], t, sizeof(t)); fprintf(f, "rip_orig%d=%s\n", s, t); }
-            if (p->voiceSet[s] && p->ripGm[s].type != 0xFF) { voice_to_text(&p->ripGm[s], t, sizeof(t)); fprintf(f, "rip_gm%d=%s\n", s, t); }
+            if (p->voiceSet[s] && p->ripGm[s].type != 0xFF) {
+                voice_to_text(&p->ripGm[s], t, sizeof(t));
+                fprintf(f, "rip_gm%d=%s\n", s, t);
+                fprintf(f, "rip_gmgain%d=%.4f\n", s, p->ripGmGain[s]);
+            }
         }
     }
     fprintf(f, "midi_name=%s\n", p->midiName);
@@ -549,6 +571,9 @@ int project_load(Project *p, const char *path, char *err, int errlen)
                 cur.freq = fr; cur.loopStart = ls; cur.loops = lp; cur.isWave = wv; cur.size = sz;
                 inCustom = 1;
             } else bad++;
+        } else if (!strncmp(k, "rip_gmgain", 10)) {
+            int s = atoi(k + 10);
+            if (s >= 0 && s < 128) np.ripGmGain[s] = (float)atof(v);
         } else if (!strncmp(k, "voice", 5) || !strncmp(k, "rip_orig", 8) || !strncmp(k, "rip_gm", 6)) {
             if (!bound) { inst_custom_bind(np.custom, np.ncustom); bound = 1; }
             inst_custom_groups_bind(np.cgroup, np.ncgroup, np.csplit, np.ncsplit);

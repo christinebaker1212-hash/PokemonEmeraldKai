@@ -23,6 +23,10 @@ typedef struct {
     int nslots;
     int reverb;                  // -1 or 0-127 for the project
     int voicesUsed;              // chip voices that sound
+    float slotKey[128];          // the key the slot's notes are around (median), 0 = none
+    float slotSustain[128];      // what's left of a note 0.5 s after its peak (median), -1 = notes too short
+    float slotDur[128];          // median note length (s)
+    uint8_t slotNoise[128];      // played at one pitch all the time (a drum)
     int hardwareLevels;          // only Game Boy channels: their volume is the hardware's (no loudness match)
     char prefix[24];             // custom sample names start with this
     CustomSample *custom;        // the original instruments (voices' refs are INST_CUSTOM + index)

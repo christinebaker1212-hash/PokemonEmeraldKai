@@ -38,4 +38,24 @@ sed 's/^gba_accurate=0/gba_accurate=1/' "$T/many.mmsproj" > "$T/many_gba.mmsproj
 python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 tracks"
 "$B" --raw "$T/many.mmsproj" "$T/many.f32" 600
 test -s "$T/gm.wav"
+
+# Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
+# PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
+# band, export a .kaisong the reader accepts and come back the same from its project.
+if [ -n "$MMS_RIPS" ]; then
+    echo "== rips in $MMS_RIPS"
+    find "$MMS_RIPS" -maxdepth 2 \( -iname '*.minipsf' -o -iname '*.psf' -o -iname '*.minipsf2' -o -iname '*.miniusf' \
+        -o -iname '*.m3u' -o -iname '*.mini2sf' -o -iname '*.minigsf' \) ! -name '!*' | sort | awk -F/ '!seen[$(NF-1)]++' | while read -r f; do
+        "$B" --render "$f" "$T/rip_kai.wav" 30
+        "$B" --original "$f" "$T/rip_orig.wav"
+        d=$(python3 test/compare_audio.py "$T/rip_orig.wav" "$T/rip_kai.wav" 30 10 | grep overall | awk '{print $2}')
+        echo "  $(basename "$f"): $d dB"
+        python3 -c "import sys; sys.exit(0 if float('$d') <= 4.5 else 1)"
+        "$B" --save "$f" "$T/rip.mmsproj"
+        "$B" --export "$T/rip.mmsproj" "$T/rip.kaisong"
+        python3 test/read_kaisong.py "$T/rip.kaisong" > /dev/null
+        "$B" --render "$T/rip.mmsproj" "$T/rip_proj.wav" 30
+        cmp -s "$T/rip_kai.wav" "$T/rip_proj.wav"
+    done
+fi
 echo "all passed"

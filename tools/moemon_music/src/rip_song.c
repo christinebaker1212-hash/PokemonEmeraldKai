@@ -439,6 +439,50 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
     }
     free(tmp);
 
+    // how each instrument is played: register, envelope, note length
+    for (int si = 0; si < nslots; si++) {
+        int sidx = out->slotSample[si];
+        int cnt = 0, nlong = 0;
+        float *keys = malloc(sizeof(float) * nn), *sus = malloc(sizeof(float) * nn), *dur = malloc(sizeof(float) * nn);
+        int pitches = 0, distinct = 0, lastKey = -1;
+        for (int i = 0; i < nn; i++) {
+            Note *n = &notes[i];
+            if (n->sample != sidx) continue;
+            keys[cnt] = (float)n->key;
+            dur[cnt] = (n->f1 - n->f0) / 60.0f;
+            cnt++;
+            if (lastKey >= 0 && n->key != lastKey) distinct = 1;
+            lastKey = n->key;
+            pitches++;
+            int fp = n->f0;
+            float pk = 0;
+            for (int f = n->f0; f < n->f1; f++) {
+                float a = amp_of(r, &r->vf[(size_t)f * nv + n->voice]);
+                if (a > pk) { pk = a; fp = f; }
+            }
+            // what's left after half a second: measured over up to 30 frames past the peak, scaled to 30
+            int span = n->f1 - 1 - fp;
+            if (span > 30) span = 30;
+            if (span >= 6 && pk > 0) {
+                float a = amp_of(r, &r->vf[(size_t)(fp + span) * nv + n->voice]) / pk;
+                if (a < 1e-4f) a = 1e-4f;
+                float v = powf(a, 30.0f / span);
+                sus[nlong++] = v > 1 ? 1 : v;
+            }
+        }
+        if (cnt) {
+            qsort(keys, cnt, sizeof(float), cmp_float);
+            qsort(dur, cnt, sizeof(float), cmp_float);
+            out->slotKey[si] = keys[cnt / 2];
+            out->slotDur[si] = dur[cnt / 2];
+        }
+        if (nlong) { qsort(sus, nlong, sizeof(float), cmp_float); out->slotSustain[si] = sus[nlong / 2]; }
+        else out->slotSustain[si] = -1;
+        out->slotNoise[si] = cnt >= 4 && !distinct;
+        (void)pitches;
+        free(keys); free(sus); free(dur);
+    }
+
     // the loop
     int ls = 0, le = 0;
     out->hasLoop = find_loop(notes, nn, nf, &ls, &le);
