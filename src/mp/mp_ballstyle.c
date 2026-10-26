@@ -12,11 +12,11 @@
 // The color recolors the red top of the ball (battle sprite, summary ball and
 // the item icon used as a preview). A decoration (POKé BALLS only) is a small
 // emblem drawn into the ball's own pixels: on the item icon (summary POKé BALL
-// page) and on the resting and spinning frames of the battle / summary ball. Art: tools/moemon_balls/decorations.py.
+// page) and on the first frame of the battle / summary ball (the thrown and
+// opening frames only show up when catching). Art: tools/moemon_balls/decorations.py.
 #include "global.h"
 #include "mp.h"
 #include "decompress.h"
-#include "graphics.h"
 #include "item.h"
 #include "item_icon.h"
 #include "palette.h"
@@ -162,11 +162,10 @@ static const u8 sColorNames[MP_BALL_COLORS][8] = {
 
 #define TAG_MP_BALL_DECO 0x5710    // + decoration: a POKé BALL sheet with it drawn in
 #define TAG_MP_BALL_LEGACY 0x5760  // + special: the GENESIS / EPOCH BALL's own art in every frame
-#define TAG_MP_BALL_HGSS 0x57B0    // + special: a special ball's own sheet (graphics/balls/<ball>.png)
 #define DECO_ICON_X 7              // where the 5x5 icon art goes on the 24x24 item icon
 #define DECO_ICON_Y 7
-#define DECO_BALL_X 6              // where the 3x4 ball art goes on the closed ball's frame (16x32: the
-#define DECO_BALL_Y 11             // ball's art is rows 9-22, its red top rows 10-16)
+#define DECO_BALL_X 6              // where the 3x4 ball art goes on the 16x16 ball's first frame
+#define DECO_BALL_Y 3
 #define DECO_ICON_FIRST_SLOT 12    // the item icon's palette slots 12-15 are free
 
 static const u8 sText_None[] = _("NONE");
@@ -411,32 +410,37 @@ static void PutPixel4bpp(u8 *tiles, u8 tilesWide, u8 x, u8 y, u8 c)
         *p = (*p & 0xF0) | c;
 }
 
-// Sheets nothing shows any more go (a battle can see a few of them)
-static void FreeUnusedSheets(u16 firstTag, u16 count)
+// Decorated sheets nothing shows any more go (a battle can see a few of them)
+static void FreeUnusedDecoSheets(void)
 {
-    u16 t;
-    u8 i;
-    for (t = firstTag; t < firstTag + count; t++)
+    u8 d, i;
+    for (d = 1; d <= MP_DECO_COUNT; d++)
     {
-        u16 start = GetSpriteTileStartByTag(t);
+        u16 start = GetSpriteTileStartByTag(TAG_MP_BALL_DECO + d);
         bool8 used = FALSE;
         if (start == 0xFFFF)
             continue;
         for (i = 0; i < MAX_SPRITES && !used; i++)
             used = gSprites[i].inUse && gSprites[i].sheetTileStart == start;
         if (!used)
-            FreeSpriteTilesByTag(t);
+            FreeSpriteTilesByTag(TAG_MP_BALL_DECO + d);
     }
 }
 
-// One buffer for the sheets made here (LoadSpriteSheet copies it at once)
-static u8 sSheetBuf[BALL_SHEET_SIZE];
-
-// Points a ball sprite at another sheet laid out like its own (same frame, same animation)
-static void UseSheet(struct Sprite *sprite, u16 start)
+static void FreeUnusedLegacySheets(void)
 {
-    sprite->oam.tileNum = start + (sprite->oam.tileNum - sprite->sheetTileStart);
-    sprite->sheetTileStart = start;
+    u8 special, i;
+    for (special = MP_SPECIAL_GENESIS; special <= MP_SPECIAL_EPOCH; special++)
+    {
+        u16 start = GetSpriteTileStartByTag(TAG_MP_BALL_LEGACY + special);
+        bool8 used = FALSE;
+        if (start == 0xFFFF)
+            continue;
+        for (i = 0; i < MAX_SPRITES && !used; i++)
+            used = gSprites[i].inUse && gSprites[i].sheetTileStart == start;
+        if (!used)
+            FreeSpriteTilesByTag(TAG_MP_BALL_LEGACY + special);
+    }
 }
 
 // The GENESIS / EPOCH BALL: the supplied art (mp_legacy_ball_art.h) in place of
@@ -450,97 +454,26 @@ static void LegacyBallSprite(u8 spriteId, u8 special)
     u16 tag = TAG_MP_BALL_LEGACY + special, start = GetSpriteTileStartByTag(tag);
     if (start == 0xFFFF)
     {
-        struct SpriteSheet sheet = {sSheetBuf, sizeof(sSheetBuf), tag};
-        FreeUnusedSheets(TAG_MP_BALL_LEGACY + MP_SPECIAL_GENESIS, 2);
-        memset(sSheetBuf, 0, sizeof(sSheetBuf));
-        // the 16x16 art in the middle of each 16x32 frame (the ball's center stays where it is)
-        for (f = 0; f < BALL_FRAME_COUNT; f++)
+        static u8 sSheet[384];   // three 16x16 frames, like the POKé BALL's
+        struct SpriteSheet sheet = {sSheet, sizeof(sSheet), tag};
+        FreeUnusedLegacySheets();
+        memset(sSheet, 0, sizeof(sSheet));
+        for (f = 0; f < 3; f++)
             for (y = 0; y < 16; y++)
                 for (x = 0; x < 16; x++)
                     if (sLegacyBallArt[art][y][x])
-                        PutPixel4bpp(sSheetBuf, 2, x, f * 32 + 8 + y, sLegacyBallArt[art][y][x]);
+                        PutPixel4bpp(sSheet, 2, x, f * 16 + y, sLegacyBallArt[art][y][x]);
         LoadSpriteSheet(&sheet);
         start = GetSpriteTileStartByTag(tag);
         if (start == 0xFFFF)
             return;   // no room: the POKé BALL in its colors
     }
-    UseSheet(sprite, start);
-}
-
-// The special balls with their own art (all but the DREAM BALL and the GENESIS / EPOCH BALLS)
-static const u32 *const sSpecialGfx[MP_SPECIAL_COUNT][2] = {
-    [MP_SPECIAL_LOVE - 1]   = {gBallGfx_Love, gBallPal_Love},
-    [MP_SPECIAL_FRIEND - 1] = {gBallGfx_Friend, gBallPal_Friend},
-    [MP_SPECIAL_FAST - 1]   = {gBallGfx_Fast, gBallPal_Fast},
-    [MP_SPECIAL_LEVEL - 1]  = {gBallGfx_Level, gBallPal_Level},
-    [MP_SPECIAL_LURE - 1]   = {gBallGfx_Lure, gBallPal_Lure},
-    [MP_SPECIAL_HEAVY - 1]  = {gBallGfx_Heavy, gBallPal_Heavy},
-    [MP_SPECIAL_MOON - 1]   = {gBallGfx_Moon, gBallPal_Moon},
-    [MP_SPECIAL_HEAL - 1]   = {gBallGfx_Heal, gBallPal_Heal},
-    [MP_SPECIAL_DUSK - 1]   = {gBallGfx_Dusk, gBallPal_Dusk},
-    [MP_SPECIAL_QUICK - 1]  = {gBallGfx_Quick, gBallPal_Quick},
-};
-
-static bool8 SpecialHasArt(u8 special)
-{
-    return special >= 1 && special <= MP_SPECIAL_COUNT && sSpecialGfx[special - 1][0] != NULL;
-}
-
-static void SpecialBallSprite(u8 spriteId, u8 special)
-{
-    u16 tag = TAG_MP_BALL_HGSS + special, start = GetSpriteTileStartByTag(tag);
-    if (start == 0xFFFF)
-    {
-        struct SpriteSheet sheet = {sSheetBuf, sizeof(sSheetBuf), tag};
-        FreeUnusedSheets(TAG_MP_BALL_HGSS + 1, MP_SPECIAL_COUNT);
-        LZDecompressWram(sSpecialGfx[special - 1][0], sSheetBuf);
-        LoadSpriteSheet(&sheet);
-        start = GetSpriteTileStartByTag(tag);
-        if (start == 0xFFFF)
-            return;   // no room: the POKé BALL (in the ball's own palette)
-    }
-    UseSheet(&gSprites[spriteId], start);
-}
-
-static u8 GetPixel4bpp(const u8 *tiles, u8 tilesWide, u8 x, u8 y)
-{
-    const u8 *p = tiles + ((y / 8) * tilesWide + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2;
-    return (x & 1) ? (*p >> 4) : (*p & 0xF);
-}
-
-// The spinning frames: the decoration rides on the red top wherever enough of it faces the
-// screen (the middle of its red pixels, slots 1-3), drawn over red pixels only
-#define DECO_SPIN_MIN_RED 40
-static void DecorateSpinFrames(u8 *sheet, u8 deco)
-{
-    u8 f, x, y, c;
-    for (f = BALL_FRAME_SPIN; f < BALL_FRAME_COUNT; f++)
-    {
-        u16 n = 0, sumX = 0, sumY = 0, top = f * 32;
-        s16 x0, y0;
-        for (y = 0; y < 32; y++)
-            for (x = 0; x < 16; x++)
-                if ((c = GetPixel4bpp(sheet, 2, x, top + y)) >= 1 && c <= 3)
-                    n++, sumX += x, sumY += y;
-        if (n < DECO_SPIN_MIN_RED)
-            continue;
-        x0 = sumX / n - 1;   // the resting frame's spot when the top faces up (columns 6-8)
-        y0 = sumY / n - 2;
-        for (y = 0; y < MP_DECO_BALL_H; y++)
-            for (x = 0; x < MP_DECO_BALL_W; x++)
-            {
-                s16 px = x0 + x, py = y0 + y;
-                if (!sDecoArt[deco - 1].ball[y][x] || px < 0 || px >= 16 || py < 0 || py >= 32)
-                    continue;
-                c = GetPixel4bpp(sheet, 2, px, top + py);
-                if (c >= 1 && c <= 3)
-                    PutPixel4bpp(sheet, 2, px, top + py, sDecoArt[deco - 1].ball[y][x]);
-            }
-    }
+    sprite->oam.tileNum = start + (sprite->oam.tileNum - sprite->sheetTileStart);
+    sprite->sheetTileStart = start;
 }
 
 // A POKé BALL sprite gets its own copy of the sheet with the decoration drawn
-// into the resting and spinning frames, so other POKé BALLS on the screen keep the plain art
+// into the first frame, so other POKé BALLS on the screen keep the plain art
 static void DecorateBallSprite(u8 spriteId, u8 deco)
 {
     struct Sprite *sprite = &gSprites[spriteId];
@@ -549,20 +482,21 @@ static void DecorateBallSprite(u8 spriteId, u8 deco)
 
     if (start == 0xFFFF)
     {
-        struct SpriteSheet sheet = {sSheetBuf, sizeof(sSheetBuf), tag};
-        FreeUnusedSheets(TAG_MP_BALL_DECO + 1, MP_DECO_COUNT);
-        LZDecompressWram(gBallSpriteSheets[BALL_POKE].data, sSheetBuf);
+        static u8 sSheet[384];
+        struct SpriteSheet sheet = {sSheet, sizeof(sSheet), tag};
+        FreeUnusedDecoSheets();
+        LZDecompressWram(gBallSpriteSheets[BALL_POKE].data, sSheet);
         for (y = 0; y < MP_DECO_BALL_H; y++)
             for (x = 0; x < MP_DECO_BALL_W; x++)
                 if (sDecoArt[deco - 1].ball[y][x])
-                    PutPixel4bpp(sSheetBuf, 2, DECO_BALL_X + x, DECO_BALL_Y + y, sDecoArt[deco - 1].ball[y][x]);
-        DecorateSpinFrames(sSheetBuf, deco);
+                    PutPixel4bpp(sSheet, 2, DECO_BALL_X + x, DECO_BALL_Y + y, sDecoArt[deco - 1].ball[y][x]);
         LoadSpriteSheet(&sheet);
         start = GetSpriteTileStartByTag(tag);
         if (start == 0xFFFF)
             return;   // no room: the plain ball
     }
-    UseSheet(sprite, start);
+    sprite->oam.tileNum = start + (sprite->oam.tileNum - sprite->sheetTileStart);
+    sprite->sheetTileStart = start;
     // Its colors go into the ball palette's free slots 9-15
     for (i = 0; i < ARRAY_COUNT(sDecoBallColors); i++)
     {
@@ -571,16 +505,17 @@ static void DecorateBallSprite(u8 spriteId, u8 deco)
     }
 }
 
-// The battle / summary ball: palette indices 1-3 are the red top (shadow, red, shine)
-static void RecolorBallPalette(u16 *pal, const u16 *ramp)
+// The battle / summary ball: palette indices 1-4 are the red top
+static void RecolorBallPalette(u16 *pal, u8 color)
 {
-    pal[1] = ramp[1];
-    pal[2] = ramp[2];
-    pal[3] = ramp[3];
+    pal[1] = sRamps[color][0];
+    pal[2] = sRamps[color][1];
+    pal[3] = sRamps[color][2];
+    pal[4] = sRamps[color][3];
 }
 
 // Gives a ball sprite of a Moemon its color (call right after creating it).
-// A special ball has its own art (the DREAM BALL is the POKé BALL in its colors).
+// A special ball is the POKé BALL sprite in its own colors.
 void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
 {
     u8 color = MP_BallStyle_Color(style), slot, special = MP_BallStyle_Special(style);
@@ -595,15 +530,15 @@ void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
         {
             static u16 sPal[16];
             struct SpritePalette pal = {sPal, tag};
-            if (SpecialHasArt(special))
-                LZDecompressWram(sSpecialGfx[special - 1][1], sPal);
+            LZDecompressWram(gBallSpritePalettes[BALL_POKE].data, sPal);
+            if (special == MP_SPECIAL_GENESIS || special == MP_SPECIAL_EPOCH)
+                memcpy(&sPal[1], sLegacyBallColors[special == MP_SPECIAL_GENESIS ? 0 : 1], 4 * sizeof(u16));
             else
             {
-                LZDecompressWram(gBallSpritePalettes[BALL_POKE].data, sPal);
-                if (special == MP_SPECIAL_GENESIS || special == MP_SPECIAL_EPOCH)
-                    memcpy(&sPal[1], sLegacyBallColors[special == MP_SPECIAL_GENESIS ? 0 : 1], 4 * sizeof(u16));   // its art uses 1-4 only
-                else
-                    RecolorBallPalette(sPal, sSpecialRamps[special - 1]);
+                sPal[1] = sSpecialRamps[special - 1][0];
+                sPal[2] = sSpecialRamps[special - 1][1];
+                sPal[3] = sSpecialRamps[special - 1][2];
+                sPal[4] = sSpecialRamps[special - 1][3];
             }
             slot = LoadSpritePalette(&pal);
             if (slot == 0xFF)
@@ -612,8 +547,6 @@ void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
         gSprites[spriteId].oam.paletteNum = slot;
         if (special == MP_SPECIAL_GENESIS || special == MP_SPECIAL_EPOCH)
             LegacyBallSprite(spriteId, special);
-        else if (SpecialHasArt(special))
-            SpecialBallSprite(spriteId, special);
         return;
     }
     if (MP_BallStyle_CanColor(ballId) && color != MP_BALL_RED)
@@ -625,7 +558,7 @@ void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
             static u16 sPal[16];
             struct SpritePalette pal = {sPal, tag};
             LZDecompressWram(gBallSpritePalettes[BALL_POKE].data, sPal);
-            RecolorBallPalette(sPal, sRamps[color]);
+            RecolorBallPalette(sPal, color);
             slot = LoadSpritePalette(&pal);
         }
         if (slot != 0xFF)
@@ -633,23 +566,6 @@ void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style)
     }
     if (MP_BallStyle_CanDecorate(ballId) && MP_BallStyle_Decoration(style))
         DecorateBallSprite(spriteId, MP_BallStyle_Decoration(style));
-}
-
-// A ball in the air spins through its frames, but the GENESIS / EPOCH BALLS' art has
-// no spinning frames: those turn (the sprite's affine animation) as before
-bool8 MP_BallStyle_SpriteHasSpin(u8 spriteId)
-{
-    u16 start;
-    u8 special;
-    if (spriteId >= MAX_SPRITES)
-        return FALSE;
-    for (special = MP_SPECIAL_GENESIS; special <= MP_SPECIAL_EPOCH; special++)
-    {
-        start = GetSpriteTileStartByTag(TAG_MP_BALL_LEGACY + special);
-        if (start != 0xFFFF && gSprites[spriteId].sheetTileStart == start)
-            return FALSE;
-    }
-    return TRUE;
 }
 
 // The item icon (the summary's preview): the decoration drawn into its tiles

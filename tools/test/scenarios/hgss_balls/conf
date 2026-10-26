@@ -1,6 +1,0 @@
-# HGSS POKé BALLS: send-out flight (a LOVE BALL Moemon), a thrown MASTER BALL spinning, a blue POKé BALL with a
-# STAR (send-out + catch), a GENESIS BALL (no spin frames: it turns), the summary ball. Shots are looked at by hand.
-MODE=1
-TMO=200
-ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=()
