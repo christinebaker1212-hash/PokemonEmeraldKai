@@ -272,6 +272,9 @@ const union AnimCmd *const gSolarBeamBigOrbAnimTable[] =
     gSolarBeamBigOrbAnimCmds5,
     gSolarBeamBigOrbAnimCmds6,
     gSolarBeamBigOrbAnimCmds7,
+    // Moemon Co-op: AnimHyperBeamOrb picks one of 8 (Random2() % 8). On the GBA the 8th read the table after this
+    // one (gSolarBeamSmallOrbAnimTable: the small orb); on PC that memory is anything (a crash): the same orb here
+    gSolarBeamSmallOrbAnimCms,
 };
 
 const union AnimCmd *const gSolarBeamSmallOrbAnimTable[] =
