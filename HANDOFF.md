@@ -21,6 +21,18 @@ in-game; their CI runs weren't checked either.
 
 ## Open work
 
+### 0. NEXT PROJECT: Dev auto-updater (requested, not started)
+Spec from the user:
+- With `AllowSmallTweaks = 1` (moemon_coop.ini; see sdl2.c / mp_main.c), the auto-updater follows a **dev channel**,
+  so new updates can be tried out before they go live in the main game.
+- Dev updates are at parity with main updates: the same game, plus whatever is being tested.
+- In a dev build, autosave is turned off automatically and saving is disabled entirely (no save file is ever written).
+- Run again with `AllowSmallTweaks = 0`, the game redownloads the main update data (back to the live release).
+- Suggested approach (not decided): CI publishes dev builds as prereleases (tag `dev-<ver>`, `update.txt` of their
+  own); `src/platform/updater.c` picks the channel from AllowSmallTweaks; the in-game version carries a dev mark.
+- **Rule (also in CLAUDE.md):** unless the user asks for a new feature with "As a dev update..." or something like it,
+  treat it as a main update. Then don't test it as a dev update and don't push a dev update.
+
 ### 1. Joining a battle against two trainers (user's report; unfinished, backed out of the branch)
 Report: "if two players enter a battle that was started by the initial trainer being seen by two trainers, a third
 player who attempts to join after the battle starts will never prompt the battling two players." In the code,

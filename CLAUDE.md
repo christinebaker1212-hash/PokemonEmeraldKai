@@ -17,6 +17,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   are the game's PATCH NOTES (CO-OP setup screen only; gen_patchnotes.py at build time; v0.1-v0.4 = the days before 1.0).
   Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
   tests, file names).
+- Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
+  it is a main update: don't test it as a dev update and don't push a dev update.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
