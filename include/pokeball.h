@@ -25,7 +25,7 @@ enum
 enum {
     BALL_FRAME_REST,       // closed
     BALL_FRAME_OPEN,
-    BALL_FRAME_EMPTY,      // gone (the Moemon is out)
+    BALL_FRAME_SQUISH,     // squashed, just before it opens
     BALL_FRAME_SPIN,       // 3-10: spinning in the air
 };
 #define BALL_ANIM_SPIN 7   // sBallAnimSequences: the spin frames over and over (a ball in the air)

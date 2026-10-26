@@ -123,7 +123,7 @@ static const union AnimCmd sBallAnimSeq5[] =
 
 static const union AnimCmd sBallAnimSeq4[] =
 {
-    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_EMPTY), 5),
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SQUISH), 5),
     ANIMCMD_JUMP(0),
 };
 
@@ -141,8 +141,8 @@ static const union AnimCmd sBallAnimSeq0[] =
 
 static const union AnimCmd sBallAnimSeq1[] =
 {
+    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_SQUISH), 3),   // Moemon Co-op: squashed, then open (held while the Moemon comes out / goes in)
     ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_OPEN), 5),
-    ANIMCMD_FRAME(BALL_FRAME(BALL_FRAME_EMPTY), 5),
     ANIMCMD_END,
 };
 

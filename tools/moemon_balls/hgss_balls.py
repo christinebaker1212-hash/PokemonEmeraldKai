@@ -30,6 +30,7 @@ FRAMES = 11
 FH = 32
 # (source rect top, height) -> destination y in the frame
 REST = (0, 16, 8)   # the first row: the closed ball
+SQUISH = (128, 16, 7)   # row 8: squashed (just before it opens)
 OPEN = (144, 24, 0)
 SPIN = [(r * 16, 16, 8) for r in range(8)]
 
@@ -40,7 +41,7 @@ def main():
         c = COLUMNS.index(name)
         x0 = c * 16
         bg = sheet.getpixel((x0, 0))
-        frames = [REST, OPEN, None] + SPIN
+        frames = [REST, OPEN, SQUISH] + SPIN
         canvas = [[None] * 16 for _ in range(FRAMES * FH)]
         for f, spec in enumerate(frames):
             if spec is None:
