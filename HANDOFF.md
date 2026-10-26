@@ -29,7 +29,7 @@ in-game; their CI runs weren't checked either.
 - Dev builds disable manual save, autosave and player-progress disk writes,
   including sidecars; existing saves are read-only. DEV is shown in the title.
 - Main releases refresh dev from the same commit. Explicit experiments are
-  workflow dispatches with `channel=dev`; keep experimental code gated with
+  dispatches of the separate Dev Release workflow; keep experimental code gated with
   `MOEMON_DEV_BUILD` until promoted. Ordinary work remains main by default.
 - Build/release instructions: BUILDING_COOP.md, "Dev update channel".
 - Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the

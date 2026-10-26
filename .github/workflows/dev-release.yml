@@ -1,0 +1,110 @@
+# Dev builds run independently. Main publication never waits for this workflow.
+name: Dev Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dev_notes:
+        description: 'What is being tested'
+        type: string
+        default: 'Current main game plus changes under testing.'
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  push:
+    paths: ['.github/workflows/dev-release.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: moemon-dev-release
+  cancel-in-progress: false
+
+jobs:
+  recover_previous_release:
+    # One-time recovery of the superseded run, whose head and ID are verified
+    # before cancellation. This adds no steps to the main release workflow.
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[recover-release]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Cancel superseded release run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN="repos/$GITHUB_REPOSITORY/actions/runs/40325037741"
+          HEAD=$(gh api "$RUN" --jq .head_sha)
+          STATUS=$(gh api "$RUN" --jq .status)
+          if [ "$HEAD" != 700d48ca1ae0ff6528e80ba207c907321203171d ]; then
+            echo 'Unexpected run head; refusing cancellation.' >&2
+            exit 1
+          fi
+          if [ "$STATUS" != completed ]; then
+            gh api --method POST "$RUN/cancel"
+          fi
+
+  dev:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref_name == github.event.repository.default_branch) ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      CHANNEL: dev
+      DEV_BUILD: 1
+      DEV_REVISION: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Download existing main build for channel verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
+          gh release download "v$VER" --repo "$GITHUB_REPOSITORY" --pattern MoemonEmeraldKaiCoop-linux.zip --dir "$RUNNER_TEMP/main-reference"
+          unzip -p "$RUNNER_TEMP/main-reference/MoemonEmeraldKaiCoop-linux.zip" MoemonEmeraldKaiCoop/MoemonEmeraldKaiCoop > pokeemerald64
+          chmod +x pokeemerald64
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
+      - name: SDL2 for Windows (checked)
+        run: |
+          curl --fail --location -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
+          echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
+          tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
+      - name: Build and package dev games
+        run: |
+          make linux DEV_BUILD=1 DEV_REVISION="$DEV_REVISION" -j"$(nproc)"
+          tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
+          tools/release/package.sh linux dist
+          SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist
+          tools/release/manifest.sh dist
+      - name: Dev save protection and channel switching
+        run: |
+          NOBUILD=1 tools/test/dev_save_test.sh
+          NOBUILD=1 tools/test/dev_update_test.sh
+      - name: Publish dev prerelease and discovery manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEV_NOTES: ${{ inputs.dev_notes }}
+        run: |
+          . tools/release/channel.sh
+          # Immutable payloads first; discovery changes only after they exist.
+          printf 'Dev build %s. Saving and autosave are disabled.\n\n%s\n' "$VER" "${DEV_NOTES:-Current main game, refreshed from the main release.}" > "$RUNNER_TEMP/dev-notes.md"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt --target "$GITHUB_SHA" --prerelease --title "Dev $VER" --notes-file "$RUNNER_TEMP/dev-notes.md"
+          else
+            gh release download "$TAG" --pattern update.txt --dir "$RUNNER_TEMP/published-dev"
+            cp "$RUNNER_TEMP/published-dev/update.txt" dist/update.txt
+          fi
+          if ! gh release view dev-latest >/dev/null 2>&1; then
+            gh release create dev-latest --target "$GITHUB_SHA" --prerelease --title 'Dev channel' --notes 'Opt-in testing channel. Saving is disabled.'
+          fi
+          gh release upload dev-latest dist/update.txt --clobber

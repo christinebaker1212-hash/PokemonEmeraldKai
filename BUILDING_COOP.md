@@ -114,15 +114,17 @@ The tests need both `pokeemerald64` (main) and `pokeemerald-dev64` (dev).
 Dev objects are separate by revision and OS, while generated assets are shared.
 The installed filename stays `MoemonEmeraldKaiCoop[.exe]` on both channels.
 
-To publish a dev update, use Actions > Release > Run workflow with `channel=dev`
+To publish a dev update, use Actions > Dev Release > Run workflow
 and describe what is being tested in `dev_notes`. CI uses its increasing run
 number as the revision, builds both platforms, tests save protection and channel
 switching, publishes immutable prerelease assets, then updates `dev-latest`'s
 manifest. Prereleases never become the latest stable release. To retry an already
 published run, start a new workflow run so it receives a new revision.
 
-A main release follows the existing version-bump workflow and then refreshes dev
-from the same commit, preserving parity. Keep experiments under
+A main release follows Claude's original version-bump workflow. A separate Dev
+Release workflow then refreshes dev from the same commit, preserving parity. Main
+publication does not wait for dev. Dev verification downloads the published main
+binary instead of recompiling it. Both jobs have a five-minute safety limit. Keep experiments under
 `#if MOEMON_DEV_BUILD` until approved for main. Unless the user explicitly asks
 for a dev update, changes target main; do not publish an experimental dev release
 for an ordinary main change. The automatic dev refresh after a main release is

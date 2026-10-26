@@ -3,7 +3,7 @@
 
 // Moemon Co-op: this build's version. tools/release/package.sh puts it in moemon_release.txt and update.txt,
 // and the GitHub release that ships it is tagged v<this>. Bump it for every release (the updater only
-// installs a release whose version is higher than the running one).
+// installs newer releases within a channel, or switches channels explicitly).
 #define MOEMON_VERSION "1.26.4"
 
 // Main and dev compile the same sources. CI supplies its increasing run number
