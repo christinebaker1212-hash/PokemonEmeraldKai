@@ -52,6 +52,19 @@ const CustomSample *inst_custom_get(int ref);     // NULL when ref isn't a custo
 int inst_is_custom_ref(int ref);
 int custom_by_name(const char *name);             // its ref, or -1
 
+// Drum kits / key-split instrument groups and key-split tables a project brings (from GBA rips).
+// A voice's sub of INST_CUSTOM + i is custom group i; its ks of INST_CUSTOM + i is custom table i.
+typedef struct { char name[40]; SfVoice v[128]; } CustomGroup;
+typedef struct { char name[40]; uint8_t t[128]; } CustomSplit;
+// Binds the project's groups and tables (after its samples: the groups' voices can play them).
+void inst_custom_groups_bind(CustomGroup *g, int ng, CustomSplit *k, int nk);
+const SfVoice *group_voices(int sub);            // the 128 voices of a game or custom group (NULL)
+const uint8_t *keysplit_table(int ks);           // a game or custom key-split table (NULL)
+const char *group_name(int sub);                 // "" when unknown
+const char *keysplit_name(int ks);
+int inst_is_custom_group(int sub);
+int inst_is_custom_split(int ks);
+
 int sample_by_name(const char *name);
 int wave_by_name(const char *name);
 int group_by_name(const char *name);

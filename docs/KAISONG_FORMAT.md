@@ -15,17 +15,18 @@ Everything is little-endian. The file starts with a 32-byte header, then chunks.
 | offset | type     | field                                                                  |
 |-------:|----------|------------------------------------------------------------------------|
 | 0      | char[8]  | `"KAISONG\0"`                                                          |
-| 8      | u16      | version: `1`                                                           |
+| 8      | u16      | version: `1`, or `2` when the song brings its own samples (`SMPL` / `WAVE`) |
 | 10     | u16      | header size: `32` (chunks start here)                                  |
 | 12     | u8       | track count: 1-10, or up to 64 when the song was made with *GBA accurate* off |
 | 13     | u8       | priority (`SongHeader.priority`, mid2agb `-P`)                         |
 | 14     | u8       | reverb (`SongHeader.reverb`: `0x80 \| level`, or `0` for no change)      |
 | 15     | u8       | master volume 0-127, for information only (already in the VOL commands) |
-| 16     | u32      | chunk count (5)                                                        |
+| 16     | u32      | chunk count (5, version 2: 7)                                          |
 | 20     | u8[12]   | zero                                                                   |
 
 Each chunk is a 4-letter id, a u32 size, then `size` bytes, padded with zeros to a multiple of 4. Skip
-chunks you don't know. Version 1 writes these five, in this order:
+chunks you don't know. Version 1 writes these five, in this order (version 2 adds `SMPL` and `WAVE`
+after them):
 
 ### `INFO`: text
 
@@ -42,6 +43,7 @@ loop=yes                   yes / no
 voices=5                   sample voices the song was made for (5 = GBA accurate; 64 = no limit)
 tool=Moemon Music Studio 1.0
 made=2026-10-25 14:55
+source=Final Fantasy 7 - Nobuo Uematsu - PlayStation      (songs made from music of another game)
 ```
 
 ### `NAME`: sample and wave names
@@ -85,6 +87,8 @@ Voice record:
 | 3    | the value `ref`: square duty 0-3 or noise period 0-1 (`squareNoiseConfig`)                   |
 | 4    | drum kit: `group` = group `ref` (1+), `keySplitTable` = NULL                                 |
 | 5    | key-split: `group` = group `ref` (1+), `keySplitTable` = `KSPL` table `ks`                   |
+| 6    | version 2: the song's own sample `SMPL[ref]` (`struct WaveData *`)                           |
+| 7    | version 2: the song's own programmable wave `WAVE[ref]` (16 bytes)                            |
 
 Bytes 0-7 are the game's own `ToneData` bytes, exactly as the voice macros in `asm/macros/music_voice.inc`
 lay them out (pan for a sample is in byte 3 as `0x80 | pan`; for Game Boy voices the macros put it in byte
@@ -131,6 +135,25 @@ the bytecode. Version 1 writes:
 No running status, no `PATT` / `PEND` / `REPT` (no pattern compression), so the code is a bit bigger
 than the game's songs and plays the same.
 
+### `SMPL` and `WAVE` (version 2): the song's own samples
+
+Songs made from another game's music (PSF, USF, 2SF... rips) bring their original instruments. `SMPL`:
+`u32 count`, then per sample: `u16 nameLength`, the name (ASCII, `[a-z0-9_]`), zero padding to a multiple
+of 4 (from the chunk's start), then exactly a `struct WaveData` as the game lays it out:
+
+```
+u16 type        0
+u16 status      0x4000 = loops (the game's WaveData.status)
+u32 freq        22.10 fixed point: the rate a note on key 60 plays it at
+u32 loopStart   in samples
+u32 size        in samples
+s8  data[size]  8-bit signed PCM, then zero padding to a multiple of 4
+```
+
+so a loader can allocate `16 + size` bytes (plus a few zero bytes: the mixer reads one sample past the
+end) and copy the header and data in as they are. `WAVE`: `u32 count`, then per wave the name the same way
+(length, name, padding) and its 16 bytes (32 4-bit steps, like `ProgrammableWaveData_*`).
+
 `tools/moemon_music/test/read_kaisong.py FILE` is the reference reader: it checks everything a loader
 should check and prints the voices; `--bytecode` prints the tracks.
 
@@ -141,7 +164,8 @@ should check and prints the voices; `--bytecode` prints the tracks.
    switch, so players can swap songs by renaming files. `INFO song=` says what the studio meant it for.
    Online, the music is each player's own business: nothing needs sending.
 
-2. **Samples.** Generate a table `{ "DirectSoundWaveData_x", DirectSoundWaveData_x }` for every sample in
+2. **Samples.** Version 2 files carry some of their own (`SMPL` / `WAVE`, above): load those as they
+   are. For the rest, generate a table `{ "DirectSoundWaveData_x", DirectSoundWaveData_x }` for every sample in
    `sound/direct_sound_data.inc` and every wave in `sound/programmable_wave_data.inc`. They are
    global symbols (`::`), visible from C like `voicegroup_dummy` is (`include/gba/m4a_internal.h`);
    `tools/moemon_music/gen_soundfont.py` has the parsing to copy. An unknown name means the file is
@@ -193,7 +217,11 @@ song, called `m4aSoundMain` / `m4aSoundVSync` in a loop and wrote `audioBuffer` 
 ## Building a song into the game instead
 
 **Export decomp** writes `<song>.s` and `<song>_kai.inc` (`voice_group <song>_kai`), the same text format
-as the game's sound folder, using the game's own voice macros and sample symbols. They assemble with the
+as the game's sound folder, using the game's own voice macros and sample symbols. A song with its own
+samples also gets a WAV per sample (8-bit, with a `smpl` loop and an `agbp` chunk holding the exact
+`freq`, so `tools/wav2agb` makes exactly the studio's sample from it), a 16-byte `.pcm` per Game Boy wave,
+and `<song>_samples.inc` with their `DirectSoundWaveData_*` / `ProgrammableWaveData_*` labels to add to
+`sound/direct_sound_data.inc` / `sound/programmable_wave_data.inc`. They assemble with the
 game's flags (the studio's tests do this). The build only makes songs from `sound/songs/midi/*.mid`
 (`MID_OBJS` in the Makefile; the `$(SONG_BUILDDIR)` rule in `audio_rules.mk` uses a `SONG_SUBDIR` nothing
 defines), so adding one needs: a rule and an `OBJS` entry for the `.s` (assembled like the MIDI songs:

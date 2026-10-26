@@ -8,7 +8,8 @@
 #include "project.h"
 #include "convert.h"
 
-#define KAISONG_VERSION 1
+#define KAISONG_VERSION 1           // songs with only the game's samples
+#define KAISONG_VERSION_CUSTOM 2    // songs that bring their own samples (SMPL / WAVE chunks)
 
 int export_kaisong(const Project *p, const Conv *c, const char *path, char *err, int errlen);
 int export_decomp(const Project *p, const Conv *c, const char *dir, char *err, int errlen);

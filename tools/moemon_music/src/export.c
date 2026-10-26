@@ -40,6 +40,10 @@ static void bpad(Buf *b) { while (b->n & 3) b8(b, 0); }
 typedef struct {
     const char *names[256];
     int nnames;
+    int custom[INST_MAX_CUSTOM];   // custom refs in SMPL order
+    int ncustom;
+    int waves[INST_MAX_CUSTOM];    // custom wave refs in WAVE order
+    int nwaves;
     int groups[64];          // sf group index for kaisong groups 1..
     int ngroups;
     int keysplits[16];
@@ -73,12 +77,24 @@ static void voice_record(Buf *b, Tables *t, const SfVoice *v, int top)
             ks = k;
             kind = 5;
         }
+    } else if ((vv.type & 7) == 3 && inst_is_custom_ref(vv.ref)) {
+        kind = 7;
+        int k = -1;
+        for (int i = 0; i < t->nwaves; i++) if (t->waves[i] == vv.ref) k = i;
+        if (k < 0) { k = t->nwaves; t->waves[t->nwaves++] = vv.ref; }
+        ref = k;
     } else if ((vv.type & 7) == 3) {
         kind = 2;
         ref = name_index(t, sf_waves[vv.ref < 0 ? 0 : vv.ref].name);
     } else if (vv.type & 7) {
         kind = 3;
         ref = vv.ref < 0 ? 0 : vv.ref;
+    } else if (inst_is_custom_ref(vv.ref)) {
+        kind = 6;
+        int k = -1;
+        for (int i = 0; i < t->ncustom; i++) if (t->custom[i] == vv.ref) k = i;
+        if (k < 0) { k = t->ncustom; t->custom[t->ncustom++] = vv.ref; }
+        ref = k;
     } else {
         kind = 1;
         int s = vv.ref < 0 ? 0 : vv.ref;
@@ -119,7 +135,7 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
     Buf gs = {0};
     for (int i = 0; i < t.ngroups; i++)
         for (int s = 0; s < 128; s++)
-            voice_record(&gs, &t, &sf_groups[t.groups[i]][s], 0);
+            voice_record(&gs, &t, &group_voices(t.groups[i])[s], 0);
     b32(&grp, (uint32_t)(1 + t.ngroups));
     bput(&grp, g0.b, g0.n);
     if (gs.n) bput(&grp, gs.b, gs.n);
@@ -127,7 +143,35 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
     free(gs.b);
 
     b32(&ksp, (uint32_t)t.nks);
-    for (int i = 0; i < t.nks; i++) bput(&ksp, sf_keysplits[t.keysplits[i]], 128);
+    for (int i = 0; i < t.nks; i++) bput(&ksp, keysplit_table(t.keysplits[i]), 128);
+
+    // the song's own samples, laid out like the game's WaveData (header, then the 8-bit PCM)
+    Buf smpl = {0}, wave = {0};
+    b32(&smpl, (uint32_t)t.ncustom);
+    for (int i = 0; i < t.ncustom; i++) {
+        const CustomSample *cs = inst_custom_get(t.custom[i]);
+        int l = (int)strlen(cs->name);
+        b16(&smpl, l);
+        bput(&smpl, cs->name, (size_t)l);
+        bpad(&smpl);
+        b16(&smpl, 0);                              // WaveData.type
+        b16(&smpl, cs->loops ? 0x4000 : 0);         // WaveData.status: loops
+        b32(&smpl, cs->freq);
+        b32(&smpl, cs->loopStart);
+        b32(&smpl, cs->size);
+        bput(&smpl, cs->data, cs->size);
+        bpad(&smpl);
+    }
+    b32(&wave, (uint32_t)t.nwaves);
+    for (int i = 0; i < t.nwaves; i++) {
+        const CustomSample *cs = inst_custom_get(t.waves[i]);
+        int l = (int)strlen(cs->name);
+        b16(&wave, l);
+        bput(&wave, cs->name, (size_t)l);
+        bpad(&wave);
+        bput(&wave, cs->data, 16);
+    }
+    int custom = t.ncustom || t.nwaves;
 
     b32(&names, (uint32_t)t.nnames);
     for (int i = 0; i < t.nnames; i++) {
@@ -154,21 +198,32 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
              p->target, p->title, p->midiName, p->masterVol, p->reverb, p->priority, c->hasLoop ? "yes" : "no", p->voices,
              STUDIO_VERSION, when);
     bput(&info, line, strlen(line));
+    if (p->isRip) {
+        snprintf(line, sizeof(line), "source=%s\n", p->ripInfo);
+        bput(&info, line, strlen(line));
+    }
 
     bput(&out, "KAISONG", 8);              // 8 bytes with the terminating 0
-    b16(&out, KAISONG_VERSION);
+    b16(&out, custom ? KAISONG_VERSION_CUSTOM : KAISONG_VERSION);
     b16(&out, 32);                         // header size
     b8(&out, ntr);
     b8(&out, p->priority);
     b8(&out, project_reverb_byte(p));
     b8(&out, p->masterVol);
-    b32(&out, 5);                          // chunk count
+    b32(&out, custom ? 7 : 5);             // chunk count
     while (out.n < 32) b8(&out, 0);
     chunk(&out, "INFO", &info);
     chunk(&out, "NAME", &names);
     chunk(&out, "VGRP", &grp);
     chunk(&out, "KSPL", &ksp);
     chunk(&out, "TRAK", &trk);
+    if (custom) {
+        chunk(&out, "SMPL", &smpl);
+        chunk(&out, "WAVE", &wave);
+    } else {
+        free(smpl.b);
+        free(wave.b);
+    }
 
     FILE *f = fopen(path, "wb");
     if (!f) { snprintf(err, errlen, "can't write %s", path); free(out.b); return 0; }
@@ -262,9 +317,9 @@ static const char *voice_macro_line(const SfVoice *v, char *buf, int n)
     int pan = v->panSweep & 0x80 ? v->panSweep & 0x7F : 0;
     int cpan = v->length & 0x80 ? v->length & 0x7F : 0;
     if (v->type & 0x80)
-        snprintf(buf, n, "voice_keysplit_all voicegroup_%s", v->sub >= 0 ? sf_group_names[v->sub] : "dummy");
+        snprintf(buf, n, "voice_keysplit_all voicegroup_%s", group_voices(v->sub) ? group_name(v->sub) : "dummy");
     else if (v->type & 0x40)
-        snprintf(buf, n, "voice_keysplit voicegroup_%s, keysplit_%s", sf_group_names[v->sub], sf_keysplit_names[v->ks]);
+        snprintf(buf, n, "voice_keysplit voicegroup_%s, keysplit_%s", group_name(v->sub), keysplit_name(v->ks));
     else switch (v->type & 7) {
     case 1:
         snprintf(buf, n, "voice_square_1%s %d, %d, %d, %d, %d, %d, %d, %d", v->type & 8 ? "_alt" : "", v->key, cpan,
@@ -275,6 +330,11 @@ static const char *voice_macro_line(const SfVoice *v, char *buf, int n)
                  v->ref & 3, v->attack, v->decay, v->sustain, v->release);
         break;
     case 3:
+        if (inst_is_custom_ref(v->ref)) {
+            snprintf(buf, n, "voice_programmable_wave%s %d, %d, ProgrammableWaveData_%s, %d, %d, %d, %d", v->type & 8 ? "_alt" : "",
+                     v->key, cpan, inst_custom_get(v->ref)->name, v->attack, v->decay, v->sustain, v->release);
+            break;
+        }
         snprintf(buf, n, "voice_programmable_wave%s %d, %d, %s, %d, %d, %d, %d", v->type & 8 ? "_alt" : "", v->key, cpan,
                  sf_waves[v->ref < 0 ? 0 : v->ref].name, v->attack, v->decay, v->sustain, v->release);
         break;
@@ -285,10 +345,76 @@ static const char *voice_macro_line(const SfVoice *v, char *buf, int n)
     default:
         snprintf(buf, n, "voice_directsound%s %d, %d, DirectSoundWaveData_%s, %d, %d, %d, %d",
                  v->type & 0x10 ? "_alt" : v->type & 8 ? "_no_resample" : "", v->key, pan,
-                 sf_samples[v->ref < 0 ? 0 : v->ref].name, v->attack, v->decay, v->sustain, v->release);
+                 inst_is_custom_ref(v->ref) ? inst_custom_get(v->ref)->name : sf_samples[v->ref < 0 ? 0 : v->ref].name,
+                 v->attack, v->decay, v->sustain, v->release);
         break;
     }
     return buf;
+}
+
+static void put16(FILE *f, int v) { fputc(v & 255, f); fputc((v >> 8) & 255, f); }
+static void put32(FILE *f, uint32_t v) { put16(f, (int)(v & 0xFFFF)); put16(f, (int)(v >> 16)); }
+
+// An 8-bit WAV the game's wav2agb turns back into exactly this sample: 'smpl' has the loop and
+// 'agbp' the exact pitch value (WaveData.freq).
+static int write_sample_wav(const char *path, const CustomSample *cs)
+{
+    FILE *f = fopen(path, "wb");
+    if (!f) return 0;
+    uint32_t rate = (uint32_t)(cs->freq / 1024.0 + 0.5);
+    if (!rate) rate = 13379;
+    uint32_t smplSize = 36 + (cs->loops ? 24 : 0);
+    uint32_t dataPad = cs->size & 1;
+    uint32_t riff = 4 + 8 + 16 + 8 + cs->size + dataPad + 8 + smplSize + 8 + 4;
+    fwrite("RIFF", 1, 4, f); put32(f, riff); fwrite("WAVE", 1, 4, f);
+    fwrite("fmt ", 1, 4, f); put32(f, 16); put16(f, 1); put16(f, 1); put32(f, rate); put32(f, rate); put16(f, 1); put16(f, 8);
+    fwrite("data", 1, 4, f); put32(f, cs->size);
+    for (uint32_t i = 0; i < cs->size; i++) fputc((uint8_t)(cs->data[i] + 128), f);   // WAV 8-bit is unsigned
+    if (dataPad) fputc(0, f);
+    fwrite("smpl", 1, 4, f); put32(f, smplSize);
+    put32(f, 0); put32(f, 0); put32(f, 1000000000u / rate); put32(f, 60); put32(f, 0); put32(f, 0); put32(f, 0);
+    put32(f, cs->loops ? 1 : 0); put32(f, 0);
+    if (cs->loops) { put32(f, 0); put32(f, 0); put32(f, cs->loopStart); put32(f, cs->size - 1); put32(f, 0); put32(f, 0); }
+    fwrite("agbp", 1, 4, f); put32(f, 4); put32(f, cs->freq);
+    return fclose(f) == 0;
+}
+
+// The song's own samples: a WAV (or a 16-byte .pcm wave) each, and the labels for the game's
+// sound/direct_sound_data.inc and sound/programmable_wave_data.inc.
+static int export_decomp_samples(const Project *p, const Conv *c, const char *dir, const char *label, char *err, int errlen)
+{
+    int used[INST_MAX_CUSTOM] = {0}, any = 0;
+    for (int s = 0; s < 128; s++) {
+        if (!c->slotUsed[s]) continue;
+        const SfVoice *v = &p->voice[s];
+        if ((v->type & 0xC0) || !(((v->type & 7) == 0) || ((v->type & 7) == 3))) continue;
+        if (inst_is_custom_ref(v->ref)) { used[v->ref - INST_CUSTOM] = 1; any = 1; }
+    }
+    if (!any) return 1;
+    char path[1200];
+    snprintf(path, sizeof(path), "%s/%s_samples.inc", dir, label);
+    FILE *inc = fopen(path, "w");
+    if (!inc) { snprintf(err, errlen, "can't write %s", path); return 0; }
+    fprintf(inc, "/* The samples %s brings with it. Put the WAVs in sound/direct_sound_samples/ (wav2agb converts\n"
+                 "   them) and the .pcm waves in sound/programmable_wave_samples/, then add these to\n"
+                 "   sound/direct_sound_data.inc and sound/programmable_wave_data.inc. */\n", label);
+    for (int i = 0; i < inst_custom_count(); i++) {
+        if (!used[i]) continue;
+        const CustomSample *cs = inst_custom_get(INST_CUSTOM + i);
+        if (cs->isWave) {
+            snprintf(path, sizeof(path), "%s/%s.pcm", dir, cs->name);
+            FILE *w = fopen(path, "wb");
+            if (!w || fwrite(cs->data, 1, 16, w) != 16) { if (w) fclose(w); fclose(inc); snprintf(err, errlen, "can't write %s", path); return 0; }
+            fclose(w);
+            fprintf(inc, "\n\t.align 2\nProgrammableWaveData_%s::\n\t.incbin \"sound/programmable_wave_samples/%s.pcm\"\n", cs->name, cs->name);
+        } else {
+            snprintf(path, sizeof(path), "%s/%s.wav", dir, cs->name);
+            if (!write_sample_wav(path, cs)) { fclose(inc); snprintf(err, errlen, "can't write %s", path); return 0; }
+            fprintf(inc, "\n\t.align 2\nDirectSoundWaveData_%s::\n\t.incbin \"sound/direct_sound_samples/%s.bin\"\n", cs->name, cs->name);
+        }
+    }
+    if (fclose(inc) != 0) { snprintf(err, errlen, "couldn't finish writing the sample list"); return 0; }
+    return 1;
 }
 
 int export_decomp(const Project *p, const Conv *c, const char *dir, char *err, int errlen)
@@ -332,7 +458,39 @@ int export_decomp(const Project *p, const Conv *c, const char *dir, char *err, i
         const SfVoice *v = c->slotUsed[s] ? &p->voice[s] : &VOICE_PLACEHOLDER;
         fprintf(f, "\t%s\n", voice_macro_line(v, line, sizeof(line)));
     }
+    // the song's own drum kits / key-split groups and their tables
+    int doneG[64], ndg = 0, doneK[64], ndk = 0;
+    for (int s = 0; s < 128; s++) {
+        const SfVoice *v = &p->voice[s];
+        if (!c->slotUsed[s] || !(v->type & 0xC0)) continue;
+        if (inst_is_custom_group(v->sub)) {
+            int seen = 0;
+            for (int i = 0; i < ndg; i++) if (doneG[i] == v->sub) seen = 1;
+            if (!seen && ndg < 64) {
+                doneG[ndg++] = v->sub;
+                fprintf(f, "\n/* a group the song brings */\nvoice_group %s\n", group_name(v->sub));
+                const SfVoice *g = group_voices(v->sub);
+                for (int k = 0; k < 128; k++) {
+                    char line[300];
+                    SfVoice gv = g[k];
+                    if (gv.type & 0xC0) gv = VOICE_PLACEHOLDER;
+                    fprintf(f, "\t%s\n", voice_macro_line(&gv, line, sizeof(line)));
+                }
+            }
+        }
+        if ((v->type & 0x40) && inst_is_custom_split(v->ks)) {
+            int seen = 0;
+            for (int i = 0; i < ndk; i++) if (doneK[i] == v->ks) seen = 1;
+            if (!seen && ndk < 64) {
+                doneK[ndk++] = v->ks;
+                const uint8_t *t = keysplit_table(v->ks);
+                fprintf(f, "\n/* a key-split table the song brings (sound/keysplit_tables.inc form) */\nkeysplit %s, 0\n", keysplit_name(v->ks));
+                for (int k = 0; k < 128; k++)
+                    if (k == 127 || t[k + 1] != t[k]) fprintf(f, "\tsplit %d, %d\n", t[k], k);
+            }
+        }
+    }
     if (fclose(f) != 0) ok = 0;
     if (!ok) { snprintf(err, errlen, "couldn't finish writing the files in %s", dir); return 0; }
-    return 1;
+    return export_decomp_samples(p, c, dir, label, err, errlen);
 }

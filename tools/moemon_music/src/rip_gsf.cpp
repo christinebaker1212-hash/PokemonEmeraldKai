@@ -70,9 +70,44 @@ int gsf_render(RipEmu *e, int16_t *buf, int n) {
     return 0;
 }
 
-void gsf_snapshot(RipEmu *, RipVF *) {}
+int g_frame;
+
+uint32_t rd32(const uint8_t *p) { return p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24; }
+
+// MP2K's MusicPlayerInfo has ident 'Smsh' (ID_NUMBER) at 0x34 and the song header at 0. The player
+// with the most tracks playing a song from the ROM is the music.
+void find_mp2k_player(Rip *r) {
+    const uint8_t *areas[2] = {workRAM, internalRAM};
+    const uint32_t sizes[2] = {0x40000, 0x8000};
+    uint32_t best = 0;
+    int bestTracks = 0;
+    for (int a = 0; a < 2; a++) {
+        const uint8_t *m = areas[a];
+        for (uint32_t o = 0x34; o + 4 <= sizes[a]; o += 4) {
+            if (rd32(m + o) != 0x68736D53u) continue;
+            uint32_t base = o - 0x34;
+            uint32_t header = rd32(m + base), status = rd32(m + base + 4);
+            int tracks = m[base + 8];
+            if ((header >> 24) != 8 && (header >> 24) != 9) continue;
+            if (!(status & 0xFFFF) || tracks <= 0) continue;
+            if (tracks > bestTracks) { bestTracks = tracks; best = header; }
+        }
+    }
+    if (best) r->mp2kHeader = best;
+}
+
+void gsf_snapshot(RipEmu *e, RipVF *) {
+    g_frame++;
+    // look a few times in the first seconds (the song may start after a short wait)
+    if (!e->rip->mp2kHeader && g_frame % 15 == 0 && g_frame <= 600) find_mp2k_player(e->rip);
+}
 
 void gsf_close(RipEmu *e) {
+    // keep the ROM for reading the song
+    if (e->rip && e->rip->mp2kHeader && !e->rip->rom && !g_rom.empty()) {
+        e->rip->rom = (uint8_t *)malloc(g_rom.size());
+        if (e->rip->rom) { memcpy(e->rip->rom, &g_rom[0], g_rom.size()); e->rip->romLen = g_rom.size(); }
+    }
     soundShutdown();
     g_rom.clear();
     g_rip = nullptr;
@@ -103,6 +138,7 @@ extern "C" int rip_open_gsf(RipEmu *e, Rip *r, char *err, int errlen) {
         return 0;
     }
     g_rip = r;
+    g_frame = 0;
     cpuIsMultiBoot = (g_entry >> 24) == 2;
     CPULoadRom();
     soundSetSampleRate(44100);

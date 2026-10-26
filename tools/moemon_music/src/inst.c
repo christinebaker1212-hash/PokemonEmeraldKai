@@ -66,6 +66,54 @@ void custom_list_free(CustomSample **list, int *n)
     *n = 0;
 }
 
+// ------------------------------------------------------------------ custom groups
+static CustomGroup *sCGroup;
+static CustomSplit *sCSplit;
+static int sNumCGroup, sNumCSplit;
+static EInst (*sCGroupInst)[128];
+static void make(const SfVoice *v, EInst *o, int depth);
+
+int inst_is_custom_group(int sub) { return sub >= INST_CUSTOM && sub < INST_CUSTOM + sNumCGroup; }
+int inst_is_custom_split(int ks) { return ks >= INST_CUSTOM && ks < INST_CUSTOM + sNumCSplit; }
+
+void inst_custom_groups_bind(CustomGroup *g, int ng, CustomSplit *k, int nk)
+{
+    sCGroup = g;
+    sNumCGroup = g ? ng : 0;
+    sCSplit = k;
+    sNumCSplit = k ? nk : 0;
+    free(sCGroupInst);
+    sCGroupInst = sNumCGroup ? calloc((size_t)sNumCGroup, sizeof(*sCGroupInst)) : NULL;
+    if (!sCGroupInst) sNumCGroup = 0;
+    for (int i = 0; i < sNumCGroup; i++)
+        for (int j = 0; j < 128; j++) make(&sCGroup[i].v[j], &sCGroupInst[i][j], 1);
+}
+
+const SfVoice *group_voices(int sub)
+{
+    if (sub >= 0 && sub < SF_NUM_GROUPS) return sf_groups[sub];
+    if (inst_is_custom_group(sub)) return sCGroup[sub - INST_CUSTOM].v;
+    return NULL;
+}
+const uint8_t *keysplit_table(int ks)
+{
+    if (ks >= 0 && ks < SF_NUM_KEYSPLITS) return sf_keysplits[ks];
+    if (inst_is_custom_split(ks)) return sCSplit[ks - INST_CUSTOM].t;
+    return NULL;
+}
+const char *group_name(int sub)
+{
+    if (sub >= 0 && sub < SF_NUM_GROUPS) return sf_group_names[sub];
+    if (inst_is_custom_group(sub)) return sCGroup[sub - INST_CUSTOM].name;
+    return "";
+}
+const char *keysplit_name(int ks)
+{
+    if (ks >= 0 && ks < SF_NUM_KEYSPLITS) return sf_keysplit_names[ks];
+    if (inst_is_custom_split(ks)) return sCSplit[ks - INST_CUSTOM].name;
+    return "";
+}
+
 const EWave *inst_wave(int s)
 {
     if (s >= 0 && s < SF_NUM_SAMPLES) return &sWaves[s];
@@ -86,7 +134,8 @@ static void make(const SfVoice *v, EInst *o, int depth)
     o->release = v->release;
     if (v->type & 0xC0) {
         if (v->sub >= 0 && v->sub < SF_NUM_GROUPS && depth == 0) o->group = sGroups[v->sub];
-        if ((v->type & 0x40) && v->ks >= 0 && v->ks < SF_NUM_KEYSPLITS) o->split = sf_keysplits[v->ks];
+        else if (inst_is_custom_group(v->sub) && depth == 0) o->group = sCGroupInst[v->sub - INST_CUSTOM];
+        if (v->type & 0x40) o->split = keysplit_table(v->ks);
         // a key-split / kit entry has no envelope of its own (those bytes are the table pointer in the game)
         o->attack = o->decay = o->sustain = o->release = 0;
     } else if ((v->type & 7) == 3) {
@@ -179,10 +228,10 @@ void voice_name(const SfVoice *v, char *buf, int n)
 void voice_detail(const SfVoice *v, char *buf, int n)
 {
     if (v->type & 0x80) {
-        snprintf(buf, n, "Drum kit %s", v->sub >= 0 ? sf_group_names[v->sub] : "?");
+        snprintf(buf, n, "Drum kit %s", group_voices(v->sub) ? group_name(v->sub) : "?");
     } else if (v->type & 0x40) {
-        snprintf(buf, n, "Key-split %s / table %s", v->sub >= 0 ? sf_group_names[v->sub] : "?",
-                 v->ks >= 0 ? sf_keysplit_names[v->ks] : "?");
+        snprintf(buf, n, "Key-split %s / table %s", group_voices(v->sub) ? group_name(v->sub) : "?",
+                 keysplit_table(v->ks) ? keysplit_name(v->ks) : "?");
     } else if ((v->type & 7) == 1 || (v->type & 7) == 2) {
         static const char *duty[] = {"12.5%", "25%", "50%", "75%"};
         snprintf(buf, n, "%s duty %s  key %d  A%d D%d S%d R%d", voice_kind(v), duty[v->ref & 3], v->key,
@@ -209,9 +258,8 @@ void voice_detail(const SfVoice *v, char *buf, int n)
 void voice_to_text(const SfVoice *v, char *buf, int n)
 {
     char ref[160];
-    if (v->type & 0x80) snprintf(ref, sizeof(ref), "kit:%s", v->sub >= 0 ? sf_group_names[v->sub] : "");
-    else if (v->type & 0x40) snprintf(ref, sizeof(ref), "split:%s:%s", v->sub >= 0 ? sf_group_names[v->sub] : "",
-                                      v->ks >= 0 ? sf_keysplit_names[v->ks] : "");
+    if (v->type & 0x80) snprintf(ref, sizeof(ref), "kit:%s", group_name(v->sub));
+    else if (v->type & 0x40) snprintf(ref, sizeof(ref), "split:%s:%s", group_name(v->sub), keysplit_name(v->ks));
     else if (((v->type & 7) == 3 || !(v->type & 7)) && inst_is_custom_ref(v->ref))
         snprintf(ref, sizeof(ref), "custom:%s", sCustom[v->ref - INST_CUSTOM].name);
     else if ((v->type & 7) == 3) snprintf(ref, sizeof(ref), "wave:%s", v->ref >= 0 && v->ref < SF_NUM_WAVES ? sf_waves[v->ref].name : "");
@@ -262,11 +310,13 @@ int wave_by_name(const char *name)
 int group_by_name(const char *name)
 {
     for (int i = 0; i < SF_NUM_GROUPS; i++) if (!strcmp(sf_group_names[i], name)) return i;
+    for (int i = 0; i < sNumCGroup; i++) if (!strcmp(sCGroup[i].name, name)) return INST_CUSTOM + i;
     return -1;
 }
 int keysplit_by_name(const char *name)
 {
     for (int i = 0; i < SF_NUM_KEYSPLITS; i++) if (!strcmp(sf_keysplit_names[i], name)) return i;
+    for (int i = 0; i < sNumCSplit; i++) if (!strcmp(sCSplit[i].name, name)) return INST_CUSTOM + i;
     return -1;
 }
 int song_by_name(const char *name)
@@ -310,8 +360,8 @@ static int kit_has(const SfVoice *g, int key)
 
 int drum_resolve(const SfVoice *kit, int key)
 {
-    if (!(kit->type & 0x80) || kit->sub < 0 || kit->sub >= SF_NUM_GROUPS) return key;
-    const SfVoice *g = sf_groups[kit->sub];
+    if (!(kit->type & 0x80) || !group_voices(kit->sub)) return key;
+    const SfVoice *g = group_voices(kit->sub);
     if (kit_has(g, key)) return key;
     for (size_t i = 0; i < sizeof(kDrumAlt) / sizeof(kDrumAlt[0]); i++) {
         if (kDrumAlt[i].key != key) continue;

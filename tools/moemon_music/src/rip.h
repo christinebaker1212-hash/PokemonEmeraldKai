@@ -64,6 +64,10 @@ typedef struct Rip {
     RipSample *samples;
     float reverb;                    // how much reverb the song uses (0-1)
     char console[32];
+    // GSF on the game's own engine (MP2K): the song as the ROM has it
+    uint32_t mp2kHeader;             // GBA address of the playing song's SongHeader (0 = not found)
+    uint8_t *rom;                    // a copy of the ROM (GSF only)
+    size_t romLen;
 } Rip;
 
 // Loads and plays a rip (and its _lib files) to the end of its length + fade (or `seconds` when the

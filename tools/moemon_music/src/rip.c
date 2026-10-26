@@ -120,6 +120,7 @@ void rip_free(Rip *r) {
     free(r->samples);
     free(r->vf);
     free(r->pcm);
+    free(r->rom);
     memset(r, 0, sizeof *r);
 }
 

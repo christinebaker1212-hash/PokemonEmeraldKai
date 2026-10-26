@@ -15,8 +15,8 @@ def read(path):
     if len(data) < 32 or data[:8] != b'KAISONG\0':
         raise Bad('not a .kaisong file')
     version, hsize, ntracks, priority, reverb, mvl, nchunks = struct.unpack_from('<HHBBBBI', data, 8)
-    if version != 1:
-        raise Bad('version %d (this reader knows 1)' % version)
+    if version not in (1, 2):
+        raise Bad('version %d (this reader knows 1 and 2)' % version)
     if not 1 <= ntracks <= 64:
         raise Bad('%d tracks (1-64; the game plays 10 until its music player gets more)' % ntracks)
     song = dict(version=version, ntracks=ntracks, priority=priority, reverb=reverb, volume=mvl, chunks={})
@@ -31,9 +31,42 @@ def read(path):
             raise Bad('chunk %s past the end' % cid)
         song['chunks'][cid] = body
         pos += 8 + size + (-size % 4)
-    for need in ('INFO', 'NAME', 'VGRP', 'KSPL', 'TRAK'):
+    for need in ('INFO', 'NAME', 'VGRP', 'KSPL', 'TRAK') + (('SMPL', 'WAVE') if version == 2 else ()):
         if need not in song['chunks']:
             raise Bad('no %s chunk' % need)
+
+    # version 2: the song's own samples (WaveData layout) and Game Boy waves
+    song['samples'], song['waves'] = [], []
+    if version == 2:
+        b = song['chunks']['SMPL']
+        n, = struct.unpack_from('<I', b, 0)
+        p = 4
+        for _ in range(n):
+            l, = struct.unpack_from('<H', b, p)
+            name = b[p + 2:p + 2 + l].decode('ascii')
+            p += 2 + l
+            p += -p % 4
+            typ, status, freq, loop, size = struct.unpack_from('<HHIII', b, p)
+            p += 16
+            if p + size > len(b):
+                raise Bad('sample %s past the chunk' % name)
+            if loop > size:
+                raise Bad('sample %s loops from %d of %d' % (name, loop, size))
+            song['samples'].append(dict(name=name, status=status, freq=freq, loop=loop, size=size))
+            p += size
+            p += -p % 4
+        b = song['chunks']['WAVE']
+        n, = struct.unpack_from('<I', b, 0)
+        p = 4
+        for _ in range(n):
+            l, = struct.unpack_from('<H', b, p)
+            name = b[p + 2:p + 2 + l].decode('ascii')
+            p += 2 + l
+            p += -p % 4
+            if p + 16 > len(b):
+                raise Bad('wave %s past the chunk' % name)
+            song['waves'].append(dict(name=name))
+            p += 16
 
     info = {}
     for line in song['chunks']['INFO'].decode('utf-8', 'replace').splitlines():
@@ -64,6 +97,10 @@ def read(path):
             v = dict(type=t, key=key, length=length, pan_sweep=ps, adsr=(a, d, s, r), kind=kind, ref=ref, ks=ks)
             if kind in (1, 2) and ref >= len(names):
                 raise Bad('group %d voice %d names string %d of %d' % (g, i, ref, len(names)))
+            if kind == 6 and ref >= len(song['samples']):
+                raise Bad('group %d voice %d plays sample %d of %d' % (g, i, ref, len(song['samples'])))
+            if kind == 7 and ref >= len(song['waves']):
+                raise Bad('group %d voice %d plays wave %d of %d' % (g, i, ref, len(song['waves'])))
             if kind in (4, 5):
                 if g != 0:
                     raise Bad('group %d voice %d is a kit inside a kit' % (g, i))
@@ -107,11 +144,12 @@ def read(path):
     song['tracks'] = tracks
     return song
 
-KINDS = {0: 'none', 1: 'sample', 2: 'wave', 3: 'value', 4: 'kit', 5: 'key-split'}
+KINDS = {0: 'none', 1: 'sample', 2: 'wave', 3: 'value', 4: 'kit', 5: 'key-split', 6: 'own sample', 7: 'own wave'}
 
 def describe(song, v):
     k = v['kind']
-    ref = song['names'][v['ref']] if k in (1, 2) else v['ref']
+    ref = song['names'][v['ref']] if k in (1, 2) else song['samples'][v['ref']]['name'] if k == 6 else \
+        song['waves'][v['ref']]['name'] if k == 7 else v['ref']
     return 'type 0x%02X key %3d len %3d pan/sweep 0x%02X adsr %-17s %s %s' % (
         v['type'], v['key'], v['length'], v['pan_sweep'], '%d,%d,%d,%d' % v['adsr'], KINDS.get(k, '?'), ref)
 
@@ -129,7 +167,8 @@ def main():
     print('version %(version)d, %(ntracks)d tracks, priority %(priority)d, reverb 0x%(reverb)02X, volume %(volume)d' % song)
     for k, v in song['info'].items():
         print('  %s: %s' % (k, v))
-    print('%d sample / wave names, %d voice groups, %d key-split tables' % (len(song['names']), len(song['groups']), len(song['keysplits'])))
+    print('%d sample / wave names, %d voice groups, %d key-split tables, %d own samples, %d own waves' % (
+        len(song['names']), len(song['groups']), len(song['keysplits']), len(song['samples']), len(song['waves'])))
     for i, v in enumerate(song['groups'][0]):
         if not (v['type'] == 1 and v['kind'] == 3 and v['adsr'] == (0, 0, 15, 0)):   # skip the empty-slot square
             print('  voice %3d: %s' % (i, describe(song, v)))

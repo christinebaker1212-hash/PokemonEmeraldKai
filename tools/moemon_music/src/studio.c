@@ -65,7 +65,7 @@ void studio_rip_levels(Studio *s, int frames, double *kai, double *orig)
 
 float studio_match_rip(Studio *s)
 {
-    if (!s->p.rip) return s->p.ripGain;
+    if (!s->p.rip || s->p.ripKind == RIP_GSF) return s->p.ripGain;   // GBA songs: the same engine, the same volume
     int anyPcm = 0;
     for (int i = 0; i < s->p.rip->nsamples; i++) if (s->p.rip->samples[i].kind == RIPS_PCM) anyPcm = 1;
     if (!anyPcm) return s->p.ripGain;     // Game Boy channels play at the hardware's own volume

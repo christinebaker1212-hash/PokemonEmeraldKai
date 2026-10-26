@@ -50,6 +50,10 @@ typedef struct {
     // samples the project brings (rips' original instruments); voices refer to them as INST_CUSTOM + i
     CustomSample *custom;
     int ncustom;
+    CustomGroup *cgroup;      // drum kits / key-split groups it brings (sub = INST_CUSTOM + i)
+    int ncgroup;
+    CustomSplit *csplit;      // key-split tables it brings (ks = INST_CUSTOM + i)
+    int ncsplit;
 } Project;
 
 void project_init(Project *p);

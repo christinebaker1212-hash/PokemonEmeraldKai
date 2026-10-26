@@ -6,6 +6,7 @@
 #include "inst.h"
 #include "rip.h"
 #include "rip_song.h"
+#include "rip_mp2k.h"
 
 int read_file(const char *path, uint8_t **data, size_t *len)
 {
@@ -59,6 +60,9 @@ void project_free(Project *p)
     free(p->midiData);
     if (p->rip) { rip_free(p->rip); free(p->rip); }
     custom_list_free(&p->custom, &p->ncustom);
+    if (p->cgroup || p->csplit) inst_custom_groups_bind(NULL, 0, NULL, 0);
+    free(p->cgroup);
+    free(p->csplit);
     project_init(p);
 }
 
@@ -172,11 +176,16 @@ void project_rip_instruments(Project *p, int useGm)
     p->dirty = 1;
 }
 
-void project_bind(Project *p) { inst_custom_bind(p->custom, p->ncustom); }
+void project_bind(Project *p)
+{
+    inst_custom_bind(p->custom, p->ncustom);
+    inst_custom_groups_bind(p->cgroup, p->ncgroup, p->csplit, p->ncsplit);
+}
 
 int project_rip_regain(Project *p, float gain, char *err, int errlen)
 {
     if (!p->rip) { snprintf(err, errlen, "the rip isn't loaded"); return 0; }
+    if (p->ripKind == RIP_GSF) { snprintf(err, errlen, "GBA songs play at their own volume"); return 0; }
     RipSong song;
     if (!rip_song_build(p->rip, &song, gain, err, errlen)) return 0;
     Midi m;
@@ -199,12 +208,80 @@ int project_rip_regain(Project *p, float gain, char *err, int errlen)
     return 1;
 }
 
+// A GBA song on the game's own engine: its commands and instruments as they are (no recording needed).
+static int load_gsf(Project *p, Rip *r, const char *path, char *err, int errlen)
+{
+    if (!r->mp2kHeader || !r->rom) {
+        snprintf(err, errlen, "this GBA game doesn't use the game's sound engine (MP2K), so its notes can't be read");
+        rip_free(r);
+        free(r);
+        return 0;
+    }
+    RipSong pre;
+    memset(&pre, 0, sizeof(pre));
+    // names for the song's own samples: from the title
+    char prefix[24] = "gba";
+    {
+        int k = 0;
+        for (const char *q = r->title; *q && k < 14; q++) {
+            unsigned char ch = (unsigned char)*q;
+            if (isalnum(ch)) prefix[k++] = (char)tolower(ch);
+            else if (k && prefix[k - 1] != '_') prefix[k++] = '_';
+        }
+        while (k && prefix[k - 1] == '_') k--;
+        if (k) prefix[k] = 0; else strcpy(prefix, "gba");
+        if (isdigit((unsigned char)prefix[0])) { memmove(prefix + 1, prefix, strlen(prefix) + 1); prefix[0] = 'g'; }
+    }
+    Mp2kSong song;
+    if (!rip_mp2k_song(r->rom, r->romLen, r->mp2kHeader, prefix, &song, err, errlen)) { rip_free(r); free(r); return 0; }
+    Project np;
+    project_init(&np);
+    np.midiData = song.mid;
+    np.midiLen = song.midLen;
+    song.mid = NULL;
+    snprintf(np.midiName, sizeof(np.midiName), "%s.mid", prefix);
+    np.custom = song.custom; np.ncustom = song.ncustom; song.custom = NULL; song.ncustom = 0;
+    np.cgroup = song.groups; np.ncgroup = song.ngroups; song.groups = NULL; song.ngroups = 0;
+    np.csplit = song.splits; np.ncsplit = song.nsplits; song.splits = NULL; song.nsplits = 0;
+    project_bind(&np);
+    if (!load_midi_bytes(&np, err, errlen)) { project_free(&np); project_bind(p); rip_free(r); free(r); return 0; }
+    snprintf(np.title, sizeof(np.title), "%.63s", r->title);
+    np.isRip = 1;
+    np.ripKind = r->kind;
+    snprintf(np.ripPath, sizeof(np.ripPath), "%s", path);
+    snprintf(np.ripInfo, sizeof(np.ripInfo), "%s%s%s%s%s", r->game, r->game[0] && r->artist[0] ? " - " : "", r->artist,
+             (r->game[0] || r->artist[0]) ? " - " : "", r->console);
+    // converted exactly like the game's own songs: the same engine, the same commands
+    np.gmFixes = 0;
+    np.exactGate = 1;
+    np.balance = 0;
+    np.drumsFirst = 0;
+    np.masterVol = 127;
+    np.priority = song.priority;
+    np.reverb = song.reverb;
+    np.loopMode = song.hasLoop ? LOOP_MARKERS : LOOP_NONE;
+    for (int s = 0; s < 128; s++) {
+        np.voice[s] = song.voice[s];
+        np.ripOrig[s] = song.voice[s];
+        np.voiceSet[s] = !voice_same(&song.voice[s], &VOICE_PLACEHOLDER);
+    }
+    rip_mp2k_free(&song);
+    (void)pre;
+    np.rip = r;
+    project_free(p);
+    *p = np;
+    project_bind(p);
+    p->dirty = 1;
+    return 1;
+}
+
 int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsTrack, char *err, int errlen)
 {
     Rip *r = calloc(1, sizeof(Rip));
     if (!r) { snprintf(err, errlen, "out of memory"); return 0; }
     err[0] = 0;
     if (!rip_load(r, path, biosDir, gbsTrack, 0, err, errlen)) { free(r); return 0; }
+    if (r->kind == RIP_GSF) return load_gsf(p, r, path, err, errlen);
     RipSong song;
     if (!rip_song_build(r, &song, 1.0f, err, errlen)) { rip_free(r); free(r); return 0; }
     Project np;
@@ -318,6 +395,21 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         b64_write(f, (const uint8_t *)c->data, c->isWave ? 16 : c->size);
         fprintf(f, "end\n");
     }
+    for (int i = 0; i < p->ncsplit; i++) {
+        fprintf(f, "split=%s", p->csplit[i].name);
+        for (int k = 0; k < 128; k++) fprintf(f, ",%d", p->csplit[i].t[k]);
+        fprintf(f, "\n");
+    }
+    for (int i = 0; i < p->ncgroup; i++) {
+        fprintf(f, "group=%s\n", p->cgroup[i].name);
+        for (int k = 0; k < 128; k++) {
+            if (voice_same(&p->cgroup[i].v[k], &VOICE_PLACEHOLDER)) continue;
+            char t[300];
+            voice_to_text(&p->cgroup[i].v[k], t, sizeof(t));
+            fprintf(f, "g%d=%s\n", k, t);
+        }
+        fprintf(f, "end\n");
+    }
     for (int s = 0; s < 128; s++) {
         if (!p->voiceSet[s]) continue;
         char t[300];
@@ -352,7 +444,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
     if (strncmp(text, "MoemonMusicStudio ", 18)) { snprintf(err, errlen, "%s isn't a Moemon Music Studio project", path_base(path)); free(data); return 0; }
     Project np;
     project_init(&np);
-    int inMidi = 0, inCustom = 0, bad = 0, bound = 0;
+    int inMidi = 0, inCustom = 0, inGroup = 0, bad = 0, bound = 0;
     char *midiText = NULL;
     size_t midiTextLen = 0;
     char *custText = NULL;
@@ -367,6 +459,17 @@ int project_load(Project *p, const char *path, char *err, int errlen)
             midiText = realloc(midiText, midiTextLen + l + 1);
             memcpy(midiText + midiTextLen, line, l + 1);
             midiTextLen += l;
+            continue;
+        }
+        if (inGroup) {
+            if (!strcmp(line, "end")) { inGroup = 0; continue; }
+            char *e2 = strchr(line, '=');
+            int k = line[0] == 'g' ? atoi(line + 1) : -1;
+            if (e2 && k >= 0 && k < 128) {
+                if (!bound) { inst_custom_bind(np.custom, np.ncustom); bound = 1; }
+                inst_custom_groups_bind(np.cgroup, np.ncgroup, np.csplit, np.ncsplit);
+                if (!voice_from_text(e2 + 1, &np.cgroup[np.ncgroup - 1].v[k])) bad++;
+            }
             continue;
         }
         if (inCustom) {
@@ -416,6 +519,26 @@ int project_load(Project *p, const char *path, char *err, int errlen)
                 while (*q && *q != ',') q++;
                 if (*q) q++;
             }
+        } else if (!strcmp(k, "split")) {
+            CustomSplit *ns = realloc(np.csplit, sizeof(CustomSplit) * (size_t)(np.ncsplit + 1));
+            if (ns) {
+                np.csplit = ns;
+                CustomSplit *cs = &np.csplit[np.ncsplit++];
+                memset(cs, 0, sizeof(*cs));
+                const char *q = v;
+                int n = 0;
+                while (*q && *q != ',' && n < 39) cs->name[n++] = *q++;
+                for (int i = 0; i < 128 && *q == ','; i++) { q++; cs->t[i] = (uint8_t)atoi(q); while (*q && *q != ',') q++; }
+            }
+        } else if (!strcmp(k, "group")) {
+            CustomGroup *ng = realloc(np.cgroup, sizeof(CustomGroup) * (size_t)(np.ncgroup + 1));
+            if (ng) {
+                np.cgroup = ng;
+                CustomGroup *g = &np.cgroup[np.ncgroup++];
+                snprintf(g->name, sizeof(g->name), "%s", v);
+                for (int i = 0; i < 128; i++) g->v[i] = VOICE_PLACEHOLDER;
+                inGroup = 1;
+            }
         } else if (!strcmp(k, "custom")) {
             memset(&cur, 0, sizeof(cur));
             char nm[64] = {0};
@@ -428,6 +551,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
             } else bad++;
         } else if (!strncmp(k, "voice", 5) || !strncmp(k, "rip_orig", 8) || !strncmp(k, "rip_gm", 6)) {
             if (!bound) { inst_custom_bind(np.custom, np.ncustom); bound = 1; }
+            inst_custom_groups_bind(np.cgroup, np.ncgroup, np.csplit, np.ncsplit);
             int isOrig = !strncmp(k, "rip_orig", 8), isGm = !strncmp(k, "rip_gm", 6);
             int s = atoi(k + (isOrig ? 8 : isGm ? 6 : 5));
             if (s >= 0 && s < 128) {
@@ -445,11 +569,11 @@ int project_load(Project *p, const char *path, char *err, int errlen)
     }
     free(data);
     free(custText);
-    if (!midiText) { snprintf(err, errlen, "the project has no MIDI in it"); custom_list_free(&np.custom, &np.ncustom); project_bind(p); return 0; }
+    if (!midiText) { snprintf(err, errlen, "the project has no MIDI in it"); custom_list_free(&np.custom, &np.ncustom); free(np.cgroup); free(np.csplit); project_bind(p); return 0; }
     np.midiData = malloc(midiTextLen);
     np.midiLen = b64_read(midiText, np.midiData);
     free(midiText);
-    if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); custom_list_free(&np.custom, &np.ncustom); project_bind(p); return 0; }
+    if (!load_midi_bytes(&np, err, errlen)) { free(np.midiData); custom_list_free(&np.custom, &np.ncustom); free(np.cgroup); free(np.csplit); project_bind(p); return 0; }
     project_apply_mode(&np);
     if (np.masterVol < 0) np.masterVol = 0;
     if (np.masterVol > 127) np.masterVol = 127;
