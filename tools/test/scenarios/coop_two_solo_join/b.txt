@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp moves 0 57
+mp partyids
+waitfor online 6000
+mp trainerflag 273 605
+waitfor friendbattle 12000
+wait 120
+mp joinask 1
+waitlog 30000 join: we're in the battle
+pressuntil A action 8000
+wait 20
+rendershot b_double
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 6000
+wait 120
+mp trainerflag 273 605
+mp partyids
+wait 200
+quit
