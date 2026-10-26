@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp nick 1 Cloudy
+mp huemon 1
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press A 2
+waitfor pcstorage 600
+wait 60
+rendershot a_pc
+press B 2
+wait 30
+press B 2
+wait 60
+press B 2
+waitfor field 900
+wait 30
+mp wild 288:3
+pressuntil A action 4000
+wait 20
+rendershot a_battle
+quit

@@ -338,24 +338,41 @@ static u16 SkinMask(u16 species)
 // Turned palettes for the game's palette getters (compressed like the originals)
 
 #define LZ_RING 16
-static u32 sLzRing[LZ_RING][10];   // 4-byte header + 4 blocks of (flag byte + 8 literal bytes) = 40 bytes
+// A palette can hold several 16-color palettes: CASTFORM's has its four forms (128 bytes), the rest one (32 bytes)
+#define LZ_MAX_COLORS 64
+// 4-byte header + (flag byte + 8 literal bytes) per 8 bytes of colors
+static u32 sLzRing[LZ_RING][(4 + (LZ_MAX_COLORS * 2 / 8) * 9 + 3) / 4];
 static struct CompressedSpritePalette sStructRing[LZ_RING];
 static u8 sLzNext;
 
+// The size an LZ77 palette unpacks to (bytes), 0 if it isn't one this can turn
+static u32 LzPaletteSize(const u32 *lz)
+{
+    const u8 *b = (const u8 *)lz;
+    u32 size = b[1] | (b[2] << 8) | (b[3] << 16);
+    if (b[0] != 0x10 || size == 0 || size % 32 != 0 || size > LZ_MAX_COLORS * 2)
+        return 0;
+    return size;
+}
+
 static const u32 *MakeLz(const u32 *lz, u16 species, s16 hue, u8 *slotOut)
 {
-    u16 pal[16];
-    u8 *out, slot, i, k;
+    u16 pal[LZ_MAX_COLORS];
+    u32 size = LzPaletteSize(lz), i, k;
+    u8 *out, slot;
+    if (size == 0)
+        return lz;   // (not a palette this knows: as it is)
     LZ77UnCompWram(lz, pal);
-    MP_Hue_ShiftPalette(pal, SkinMask(species), hue);
+    for (i = 0; i < size / 32; i++)
+        MP_Hue_ShiftPalette(&pal[i * 16], SkinMask(species), hue);
     slot = sLzNext;
     sLzNext = (sLzNext + 1) % LZ_RING;
     out = (u8 *)sLzRing[slot];
     out[0] = 0x10;
-    out[1] = 32;
-    out[2] = 0;
+    out[1] = size & 0xFF;
+    out[2] = size >> 8;
     out[3] = 0;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < size / 8; i++)
     {
         out[4 + i * 9] = 0;   // eight literal bytes follow
         for (k = 0; k < 4; k++)
@@ -413,22 +430,25 @@ const struct CompressedSpritePalette *MP_Hue_LzStruct(const struct CompressedSpr
     u8 slot, loaded;
     if (pal == NULL || pal->data == NULL)
         return pal;
+    if (LzPaletteSize(pal->data) == 0)
+        return pal;
     loaded = IndexOfSpritePaletteTag(pal->tag);
     if (loaded != 0xFF)
     {
-        u16 colors[16];
+        u16 colors[LZ_MAX_COLORS];   // (the loaded palette is the first 16 of them)
         LZ77UnCompWram(pal->data, colors);
         MP_Hue_ShiftPalette(colors, SkinMask(species), hue);
-        if (memcmp(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], sizeof(colors)) != 0)
+        if (memcmp(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], PLTT_SIZE_4BPP) != 0)
         {
-            CpuCopy16(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], sizeof(colors));
+            CpuCopy16(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], PLTT_SIZE_4BPP);
             if (!gPaletteFade.active)
-                CpuCopy16(colors, &gPlttBufferFaded[OBJ_PLTT_ID(loaded)], sizeof(colors));
+                CpuCopy16(colors, &gPlttBufferFaded[OBJ_PLTT_ID(loaded)], PLTT_SIZE_4BPP);
         }
     }
     if (hue == 0)
         return pal;
-    MakeLz(pal->data, species, hue, &slot);
+    if (MakeLz(pal->data, species, hue, &slot) == pal->data)
+        return pal;
     sStructRing[slot].data = sLzRing[slot];
     sStructRing[slot].tag = pal->tag;
     return &sStructRing[slot];

@@ -26,6 +26,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
 | `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
 | `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |
+| `hue_castform` | a nicknamed CASTFORM (four form palettes) in the PC under the cursor and in battle, its hue on every form, no crash |
 | `coop_flash` | Granite Cave B2F (dark) at NA-JP lag: each sees the other's light, BOB's FLASH lights up around him on ALICE's screen; co-op notes show in the dark |
 | `coop_world` | NA-JP lag: a CUT tree is gone for a friend who walks onto the map later (list), a smashed rock vanishes live, a STRENGTH boulder moves on both games |
 | `coop_world2` | NA-JP lag: CUT grass is cut on the friend's game; Route 113's ash ALICE walks through clears for BOB, the soot is only hers |
