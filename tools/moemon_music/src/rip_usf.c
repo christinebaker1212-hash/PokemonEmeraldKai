@@ -1,19 +1,225 @@
 // Moemon Music Studio: USF (Nintendo 64) rips, played by lazyusf2 (third_party/lazyusf2).
+//
+// The N64 mixes its music on the RSP from a command list each audio frame. The capture hook in the
+// emulated microcode (rsp_hle/alist.c) hears each voice's commands: the ADPCM codebook it loads, the
+// decode (whose state address names the voice; its init flag starts a note), the resample (pitch) and
+// the envelope mixer (volume and pan). A sample is found from its codebook: the sound driver keeps a
+// wavetable (libultra's ALWaveTable, EAD's sample struct) that points at the book, and that gives
+// where the sample is in the ROM, how long it is and its loop. It is decoded from the ROM.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <stddef.h>
 #include "rip.h"
 #include "psflib.h"
 #include "usf/usf.h"
+#include "rsp_hle/hle_internal.h"
+#include "rsp_hle/alist.h"
 
 extern const psf_file_callbacks rip_psf_files;
+
+#define USF_VOICES 48
+
+typedef struct {
+    uint32_t state;          // its ADPCM decoder state address (0 = slot free)
+    int seenTask;            // last task it was in
+    int keyon;               // notes started since the last snapshot
+    uint32_t book;           // codebook address
+    uint32_t load;           // the sample data it read first (DRAM)
+    uint32_t pitch;          // Q16.16 at the output rate
+    float l, r;              // volume
+    int sample;              // RipSample (-1 = not found yet)
+    int twoBit;
+} UVoice;
 
 typedef struct {
     Rip *rip;
     void *state;
     int compare, fifo;
+    int task;
+    uint32_t book, load;
+    int cur;                 // the voice the last decode was for
+    UVoice v[USF_VOICES];
+    int debug;
+    uint32_t cacheBook[512];     // codebook -> sample, so the RAM is searched once per instrument
+    int cacheSample[512];
+    int ncache;
 } Usf;
+
+static Usf *g_usf;
+
+static uint32_t dram32(struct hle_t *hle, uint32_t a) { return *(uint32_t *)(hle->dram + (a & 0x7FFFFC)); }
+static uint8_t dram8(struct hle_t *hle, uint32_t a) { return hle->dram[(a & 0x7FFFFF) ^ 3]; }
+static const uint8_t *g_rom;
+static size_t g_romSize;
+static uint8_t rom8(void *s, uint32_t o) { (void)s; uint32_t x = o ^ 3; return x < g_romSize ? g_rom[x] : 0; }
+
+// VADPCM: 9-byte frames (scale / predictor, 16 4-bit samples), predicted from a codebook of
+// `order` x 8 coefficients per predictor.
+static int16_t *vadpcm_decode(const uint8_t *data, int frames, const int16_t *book, int order, int npred, int *outLen) {
+    int16_t *out = malloc(sizeof(int16_t) * (size_t)frames * 16 + 16);
+    if (!out) return NULL;
+    int16_t prev[16] = {0};   // the last 8 outputs (order 2 uses the last two)
+    int n = 0;
+    for (int f = 0; f < frames; f++) {
+        const uint8_t *fr = data + f * 9;
+        int scale = 1 << (fr[0] >> 4), pred = fr[0] & 15;
+        if (pred >= npred) pred = 0;
+        const int16_t *cb = book + pred * order * 8;
+        for (int half = 0; half < 2; half++) {
+            int ins[8];
+            for (int i = 0; i < 8; i++) {
+                int b = fr[1 + half * 4 + i / 2];
+                int nib = (i & 1) ? (b & 15) : (b >> 4);
+                if (nib >= 8) nib -= 16;
+                ins[i] = nib * scale;
+            }
+            int16_t o8[8];
+            for (int i = 0; i < 8; i++) {
+                int64_t acc = 0;
+                // the previous outputs, then the earlier inputs of this group
+                for (int k = 0; k < order; k++) acc += (int64_t)cb[k * 8 + i] * prev[8 - order + k];
+                for (int j = 0; j < i; j++) acc += (int64_t)cb[(order - 1) * 8 + i - 1 - j] * ins[j];
+                acc += (int64_t)ins[i] << 11;
+                int v = (int)(acc >> 11);
+                o8[i] = (int16_t)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
+            }
+            for (int i = 0; i < 8; i++) { prev[i] = o8[i]; out[n++] = o8[i]; }
+        }
+    }
+    *outLen = n;
+    return out;
+}
+
+// The driver's wavetable for a codebook: a word pointing at the book (KSEG0), in either
+// libultra's ALWaveTable {base, len, type, flags, loop*, book*} or EAD's {size bits, addr, loop*, book*}.
+static int find_sample_uncached(Usf *u, struct hle_t *hle, UVoice *v);
+
+static int find_sample(Usf *u, struct hle_t *hle, UVoice *v) {
+    for (int i = 0; i < u->ncache; i++) if (u->cacheBook[i] == v->book) return u->cacheSample[i];
+    int s = find_sample_uncached(u, hle, v);
+    if (u->ncache < 512) { u->cacheBook[u->ncache] = v->book; u->cacheSample[u->ncache++] = s; }
+    return s;
+}
+
+static int find_sample_uncached(Usf *u, struct hle_t *hle, UVoice *v) {
+    // the codebook load names the coefficients; the book struct {order, npredictors, coefficients} is 8 bytes before
+    uint32_t sb = (v->book - 8) & 0x7FFFFF;
+    uint32_t want = 0x80000000u | sb;
+    void *s = u->state;
+    g_rom = usf_tap_rom(s, &g_romSize);
+    uint32_t ram = 0x400000;
+    for (uint32_t a = 16; a + 4 <= ram; a += 4) {
+        if (dram32(hle, a) != want) continue;
+        int16_t book[256];
+        int order = 0, npred = 0;
+        uint32_t base = 0, len = 0, loopPtr = 0, inRam = 0;
+        // libultra: book ptr at +16 of ALWaveTable; the book is {order, npredictors, coefficients}
+        uint32_t lbase = dram32(hle, a - 16), llen = dram32(hle, a - 12), lloop = dram32(hle, a - 4);
+        uint32_t bo = dram32(hle, sb), bn = dram32(hle, sb + 4);
+        // EAD: {u32 bits (size in the low 24), sampleAddr, loop*, book*} with book ptr at +12
+        uint32_t ebits = dram32(hle, a - 12), eaddr = dram32(hle, a - 8), eloop = dram32(hle, a - 4);
+        if (bo >= 1 && bo <= 8 && bn >= 1 && bn <= 16 && llen > 0 && llen < 0x1000000 && (lloop == 0 || (lloop >> 24) == 0x80)) {
+            order = (int)bo; npred = (int)bn; base = lbase; len = llen; loopPtr = lloop;
+            for (int i = 0; i < order * npred * 8 && i < 256; i++) book[i] = (int16_t)(dram32(hle, sb + 8 + (i & ~1) * 2) >> ((i & 1) ? 0 : 16));
+        } else if (bo >= 1 && bo <= 8 && bn >= 1 && bn <= 16 && (ebits & 0xFFFFFF) > 0 && (eloop >> 24) == 0x80) {
+            order = (int)bo; npred = (int)bn; base = eaddr; len = ebits & 0xFFFFFF; loopPtr = eloop;
+            inRam = (eaddr >> 24) == 0x80;
+            for (int i = 0; i < order * npred * 8 && i < 256; i++) book[i] = (int16_t)(dram32(hle, sb + 8 + (i & ~1) * 2) >> ((i & 1) ? 0 : 16));
+        } else continue;
+        if ((base >> 24) == 0x80) inRam = 1;
+        int frames = (int)(len / 9);
+        if (frames <= 0 || frames > 200000) continue;
+        uint8_t *data = malloc((size_t)frames * 9);
+        if (!data) return -1;
+        for (int i = 0; i < frames * 9; i++)
+            data[i] = inRam ? dram8(hle, (base & 0x7FFFFF) + i) : rom8(s, (base & 0x0FFFFFFF) + i);
+        int n = 0;
+        int16_t *pcm = vadpcm_decode(data, frames, book, order, npred, &n);
+        uint32_t h = (uint32_t)rip_hash(data, frames * 9 < 4096 ? frames * 9 : 4096) ^ len;
+        free(data);
+        if (!pcm) return -1;
+        RipSample rs;
+        memset(&rs, 0, sizeof rs);
+        rs.kind = RIPS_PCM;
+        rs.pcm = pcm;
+        rs.len = n;
+        rs.rate = usf_tap_sample_rate(s) > 0 ? usf_tap_sample_rate(s) : 32000;
+        rs.id = base;
+        rs.hash = h;
+        if (loopPtr && (loopPtr >> 24) == 0x80) {
+            uint32_t ls = dram32(hle, loopPtr), le = dram32(hle, loopPtr + 4), cnt = dram32(hle, loopPtr + 8);
+            if (cnt && le > ls && le <= (uint32_t)n) { rs.loops = 1; rs.loopStart = (int)ls; rs.len = (int)le; }
+        }
+        int idx = rip_add_sample(u->rip, &rs);
+        free(pcm);
+        if (u->debug) fprintf(stderr, "usf: book %06x -> %s wavetable at %06x base %08x len %u loop %d@%d -> s%d\n", v->book,
+                              base == lbase ? "libultra" : "EAD", a, base, len, rs.loops, rs.loopStart, idx);
+        return idx;
+    }
+    if (u->debug) fprintf(stderr, "usf: no wavetable for book %06x\n", v->book);
+    return -1;
+}
+
+static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, int32_t d) {
+    Usf *u = g_usf;
+    if (!u) return;
+    switch (what) {
+    case ALIST_TAP_TASK:
+        u->task++;
+        u->cur = -1;
+        break;
+    case ALIST_TAP_BOOK: u->book = a & 0xFFFFFF; break;
+    case ALIST_TAP_LOAD: u->load = a & 0xFFFFFF; break;
+    case ALIST_TAP_ADPCM: {
+        uint32_t st = a & 0xFFFFFF;
+        int k = -1, freeSlot = -1;
+        for (int i = 0; i < USF_VOICES; i++) {
+            if (u->v[i].state == st) { k = i; break; }
+            if (freeSlot < 0 && (!u->v[i].state || u->v[i].seenTask < u->task - 600)) freeSlot = i;
+        }
+        if (k < 0) {
+            if (freeSlot < 0) { u->cur = -1; break; }
+            k = freeSlot;
+            memset(&u->v[k], 0, sizeof u->v[k]);
+            u->v[k].state = st;
+            u->v[k].sample = -1;
+        }
+        UVoice *v = &u->v[k];
+        u->cur = k;
+        int first = v->seenTask != u->task;
+        v->seenTask = u->task;
+        if (b && first) {          // a note starts
+            v->keyon++;
+            v->book = u->book;
+            v->load = u->load;
+            v->twoBit = d;
+            v->sample = find_sample(u, hle, v);
+        } else if (v->book != u->book && first) {
+            v->book = u->book;
+            v->sample = find_sample(u, hle, v);
+        }
+        break;
+    }
+    case ALIST_TAP_RESAMPLE:
+        if (u->cur >= 0) u->v[u->cur].pitch = (uint32_t)b;
+        break;
+    case ALIST_TAP_ENVMIX:
+        if (u->cur >= 0) {
+            int dry = (int16_t)((uint32_t)d >> 16);
+            u->v[u->cur].l = (float)abs((int16_t)b) / 32768.0f * (float)abs(dry) / 32768.0f;
+            u->v[u->cur].r = (float)abs((int16_t)c) / 32768.0f * (float)abs(dry) / 32768.0f;
+        }
+        break;
+    case ALIST_TAP_ENVMIX_NEAD:
+        if (u->cur >= 0) {
+            u->v[u->cur].l = (uint16_t)b / 65536.0f;
+            u->v[u->cur].r = (uint16_t)c / 65536.0f;
+        }
+        break;
+    }
+}
 
 static int usf_load(void *ctx, const uint8_t *exe, size_t en, const uint8_t *res, size_t rn) {
     Usf *u = ctx;
@@ -36,11 +242,30 @@ static int usf_render_cb(RipEmu *e, int16_t *buf, int n) {
     return 0;
 }
 
-static void usf_snapshot(RipEmu *e, RipVF *out) { (void)e; (void)out; }
+static void usf_snapshot(RipEmu *e, RipVF *out) {
+    Usf *u = e->ctx;
+    double rate = usf_tap_sample_rate(u->state) > 0 ? usf_tap_sample_rate(u->state) : 32000;
+    for (int i = 0; i < USF_VOICES; i++) {
+        UVoice *v = &u->v[i];
+        RipVF *x = &out[i];
+        memset(x, 0, sizeof *x);
+        x->sample = -1;
+        x->keyon = v->keyon > 0;
+        v->keyon = 0;
+        // in the last couple of audio frames (a voice that stopped isn't in the list any more)
+        if (!v->state || v->seenTask < u->task - 2 || v->sample < 0) continue;
+        x->sample = (int16_t)v->sample;
+        x->rate = (float)(v->pitch / 65536.0 * rate);
+        x->l = v->l;
+        x->r = v->r;
+    }
+}
 
 static void usf_close(RipEmu *e) {
     Usf *u = e->ctx;
     if (!u) return;
+    alist_tap = NULL;
+    if (g_usf == u) g_usf = NULL;
     usf_shutdown(u->state);
     free(u->state);
     free(u);
@@ -51,6 +276,7 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen) {
     Usf *u = calloc(1, sizeof *u);
     if (!u) return 0;
     u->rip = r;
+    u->debug = getenv("MMS_USF_DEBUG") != NULL;
     u->state = malloc(usf_get_state_size());
     if (!u->state) { free(u); return 0; }
     usf_clear(u->state);
@@ -63,12 +289,15 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen) {
     }
     usf_set_compare(u->state, u->compare);
     usf_set_fifo_full(u->state, u->fifo);
-    usf_set_hle_audio(u->state, 1);
+    usf_set_hle_audio(u->state, 1);     // the capture listens to the emulated audio microcode
+    for (int i = 0; i < USF_VOICES; i++) u->v[i].sample = -1;
+    g_usf = u;
+    alist_tap = tap;
     snprintf(r->console, sizeof r->console, "Nintendo 64");
     e->ctx = u;
     e->rip = r;
     e->rate = 44100;
-    e->nvoices = 0;
+    e->nvoices = USF_VOICES;
     e->render = usf_render_cb;
     e->snapshot = usf_snapshot;
     e->close = usf_close;

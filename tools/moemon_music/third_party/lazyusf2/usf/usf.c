@@ -484,3 +484,15 @@ void usf_log_stop(void * state)
   }
 }
 #endif
+
+/* Moemon Music Studio: what the capture needs from the state (its layout depends on the build's flags) */
+const unsigned char * usf_tap_rom(void * state, size_t * size)
+{
+    *size = (size_t) USF_STATE->g_rom_size;
+    return USF_STATE->g_rom;
+}
+
+int usf_tap_sample_rate(void * state)
+{
+    return (int) USF_STATE->SampleRate;
+}

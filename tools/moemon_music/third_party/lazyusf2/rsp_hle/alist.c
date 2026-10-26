@@ -31,6 +31,9 @@
 #include "audio.h"
 #include "hle_external.h"
 #include "hle_internal.h"
+
+/* Moemon Music Studio: capture hook (see alist.h) */
+void (*alist_tap)(struct hle_t* hle, int what, uint32_t a, int32_t b, int32_t c, int32_t d) = 0;
 #include "memory.h"
 
 struct ramp_t
@@ -107,6 +110,7 @@ void alist_process(struct hle_t* hle, const acmd_callback_t abi[], unsigned int 
     unsigned int acmd;
 
     const uint32_t *alist = dram_u32(hle, *dmem_u32(hle, TASK_DATA_PTR));
+    if (alist_tap) alist_tap(hle, ALIST_TAP_TASK, 0, 0, 0, 0);   /* Moemon Music Studio */
     const uint32_t *const alist_end = alist + (*dmem_u32(hle, TASK_DATA_SIZE) >> 2);
 
     while (alist != alist_end) {
@@ -163,6 +167,7 @@ void alist_clear(struct hle_t* hle, uint16_t dmem, uint16_t count)
 
 void alist_load(struct hle_t* hle, uint16_t dmem, uint32_t address, uint16_t count)
 {
+    if (alist_tap) alist_tap(hle, ALIST_TAP_LOAD, address, count, 0, 0);   /* Moemon Music Studio */
     /* enforce DMA alignment constraints */
     dmem    &= ~3;
     address &= ~7;
@@ -507,6 +512,8 @@ void alist_envmix_lin(
         alist_envmix_mix(4, buffers, gains, in[k^S]);
     }
 
+    if (alist_tap) alist_tap(hle, ALIST_TAP_ENVMIX, address, (int32_t)(ramps[0].value >> 16), (int32_t)(ramps[1].value >> 16),
+                             (int32_t)(((uint32_t)(uint16_t)dry << 16) | (uint16_t)wet));   /* Moemon Music Studio */
     *(int16_t *)(save_buffer +  0) = wet;            /* 0-1 */
     *(int16_t *)(save_buffer +  2) = dry;            /* 2-3 */
     *(int16_t *)(save_buffer +  4) = (int16_t)(ramps[0].target >> 16); /* 4-5 */
@@ -539,6 +546,7 @@ void alist_envmix_nead(
 
     /* make sure count is a multiple of 8 */
     count = align(count, 8);
+    if (alist_tap) alist_tap(hle, ALIST_TAP_ENVMIX_NEAD, 0, env_values[0], env_values[1], env_values[2]);   /* Moemon Music Studio */
 
     if (swap_wet_LR)
         swap(&wl, &wr);
@@ -671,6 +679,7 @@ void alist_resample(
         alist_resample_reset(hle, ipos, &pitch_accu);
     else
         alist_resample_load(hle, address, ipos, &pitch_accu);
+    if (alist_tap) alist_tap(hle, ALIST_TAP_RESAMPLE, address, (int32_t)pitch, init, 0);   /* Moemon Music Studio */
 
     while (count != 0) {
         const int16_t* lut = RESAMPLE_LUT + ((pitch_accu & 0xfc00) >> 8);
@@ -771,6 +780,7 @@ void alist_adpcm(
 
     assert((count & 0x1f) == 0);
 
+    if (alist_tap) alist_tap(hle, ALIST_TAP_ADPCM, last_frame_address, init, loop, two_bit_per_sample);   /* Moemon Music Studio */
     if (init)
         memset(last_frame, 0, 16*sizeof(last_frame[0]));
     else

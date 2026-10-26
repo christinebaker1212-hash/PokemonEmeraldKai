@@ -216,6 +216,7 @@ static void LOADADPCM(struct hle_t* hle, uint32_t w1, uint32_t w2)
     uint32_t address = get_address(hle, w2);
 
     dram_load_u16(hle, (uint16_t*)hle->alist_audio.table, address, align(count, 8) >> 1);
+    if (alist_tap) alist_tap(hle, ALIST_TAP_BOOK, address, (int32_t)(w1 & 0xffff), 0, 0);   /* Moemon Music Studio */
 }
 
 static void INTERLEAVE(struct hle_t* hle, uint32_t UNUSED(w1), uint32_t w2)

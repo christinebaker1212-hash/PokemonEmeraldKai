@@ -93,6 +93,10 @@ void usf_log_start(void * state);
 void usf_log_stop(void * state);
 #endif
 
+/* Moemon Music Studio: the ROM as loaded (32-bit words in host order) and the audio rate */
+const unsigned char * usf_tap_rom(void * state, size_t * size);
+int usf_tap_sample_rate(void * state);
+
 #ifdef __cplusplus
 }
 #endif
