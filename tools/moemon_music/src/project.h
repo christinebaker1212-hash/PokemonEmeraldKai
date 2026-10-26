@@ -48,6 +48,7 @@ typedef struct {
     float ripGmGain[128];     // a GM instrument's volume factor (its sample against the original's)
     struct Rip *rip;          // the recording (its sound plays as "original"); NULL when the file is gone
     float ripGain;            // the loudness match (studio_match_rip)
+    int ripGbaDrums;          // GBS: the MIDI plays the noise channels as the drum kits made for them (GB > GBA)
     float ripCgbNorm;         // GBS: the level of a slot left on its Game Boy channel once others are GBA instruments
     int8_t octave[128];       // each slot's notes moved by whole octaves (-4..4)
     int16_t trackLock[CONV_MAX_CAND];   // a track playing one slot all through (-1 = its own instrument changes)
@@ -79,6 +80,9 @@ void project_rip_instruments(Project *p, int useGm);
 int project_reload_rip(Project *p, const char *biosDir, char *err, int errlen);
 // Makes the MIDI again from the recording with a new loudness (instrument choices stay).
 int project_rip_regain(Project *p, float gain, char *err, int errlen);
+// GBS: makes the MIDI again when the noise channels' instruments (Game Boy noise or their GBA drum kits)
+// changed since it was made. Returns 1 when it did.
+int project_rip_sync_drums(Project *p);
 // Points the instrument layer at this project's custom samples (before converting or playing it).
 void project_bind(Project *p);
 int project_save(Project *p, const char *path, char *err, int errlen);

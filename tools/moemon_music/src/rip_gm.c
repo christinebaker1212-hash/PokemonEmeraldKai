@@ -519,6 +519,21 @@ static void noise_kit(const Rip *r, const RipSong *song, int slot, const SfVoice
     if (lused && lsum > 0 && lo > 0) out->gain[slot] = lo / (lsum / lused) * pan_fix(r, song, slot);
 }
 
+// a Game Boy noise channel whose hits were matched to the game's drums (rip_drums.c): that kit
+static void song_kit(const Rip *r, const RipSong *song, int slot, const SfVoice *kit, RipGm *out) {
+    CustomGroup *ng = realloc(out->groups, sizeof(CustomGroup) * (size_t)(out->ngroups + 1));
+    if (!ng) return;
+    out->groups = ng;
+    out->groups[out->ngroups] = *song->drumKit[slot];
+    SfVoice kv = *kit;
+    kv.sub = (int16_t)(INST_CUSTOM + out->ngroups);
+    out->ngroups++;
+    out->voice[slot] = kv;
+    out->prog[slot] = 128;
+    out->dist[slot] = 0;
+    out->gain[slot] = song->drumGain[slot] * pan_fix(r, song, slot);
+}
+
 // ------------------------------------------------------------------ matching
 void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
     memset(out, 0, sizeof *out);
@@ -530,6 +545,7 @@ void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
         int si = song->slotSample[slot];
         if (si < 0 || si >= r->nsamples) continue;
         const RipSample *rs = &r->samples[si];
+        if (rs->kind == RIPS_NOISE && song->drumKit[slot]) { song_kit(r, song, slot, kit, out); continue; }
         if (rs->kind == RIPS_NOISE) { noise_kit(r, song, slot, kit, out); continue; }
         if (rs->kind == RIPS_SQUARE || rs->kind == RIPS_WAVE) { gb_tone(r, rs, song, slot, out); continue; }
         if (rs->kind != RIPS_PCM || !rs->pcm || rs->len < 64) continue;

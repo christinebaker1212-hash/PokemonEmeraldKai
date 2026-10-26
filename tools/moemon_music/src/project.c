@@ -239,6 +239,19 @@ int project_reload_rip(Project *p, const char *biosDir, char *err, int errlen)
     return 1;
 }
 
+int project_rip_sync_drums(Project *p)
+{
+    if (!p->isRip || p->ripKind != RIP_GBS || !p->rip) return 0;
+    int want = 0;
+    for (int s = 0; s < 128; s++)
+        if (p->voiceSet[s] && (p->ripOrig[s].type & 7) == 4 && p->ripGm[s].type != 0xFF && voice_same(&p->voice[s], &p->ripGm[s])) want = 1;
+    if (want == p->ripGbaDrums) return 0;
+    p->ripGbaDrums = want;
+    char err[256];
+    if (!project_rip_regain(p, p->ripGain, err, sizeof(err))) { p->ripGbaDrums = !want; return 0; }
+    return 1;
+}
+
 void project_bind(Project *p)
 {
     inst_custom_bind(p->custom, p->ncustom);
@@ -250,7 +263,7 @@ int project_rip_regain(Project *p, float gain, char *err, int errlen)
     if (!p->rip) { snprintf(err, errlen, "the rip isn't loaded"); return 0; }
     if (p->ripKind == RIP_GSF) { snprintf(err, errlen, "GBA songs play at their own volume"); return 0; }
     RipSong song;
-    if (!rip_song_build(p->rip, &song, gain, err, errlen)) return 0;
+    if (!rip_song_build(p->rip, &song, gain, p->ripGbaDrums, err, errlen)) return 0;
     Midi m;
     if (!midi_parse(&m, song.mid, song.midLen, err, errlen)) { rip_song_free(&song); return 0; }
     midi_free(&p->midi);
@@ -346,7 +359,7 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
     if (!rip_load(r, path, biosDir, gbsTrack, 0, err, errlen)) { free(r); return 0; }
     if (r->kind == RIP_GSF) return load_gsf(p, r, path, err, errlen);
     RipSong song;
-    if (!rip_song_build(r, &song, 1.0f, err, errlen)) { rip_free(r); free(r); return 0; }
+    if (!rip_song_build(r, &song, 1.0f, 0, err, errlen)) { rip_free(r); free(r); return 0; }
     Project np;
     project_init(&np);
     np.midiData = song.mid;
@@ -461,6 +474,7 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         fprintf(f, "rip_gain=%.6f\n", p->ripGain);
         fprintf(f, "rip_use_gm=%d\n", p->ripUseGm);
         fprintf(f, "rip_cgbnorm=%.6f\n", p->ripCgbNorm);
+        fprintf(f, "rip_gba_drums=%d\n", p->ripGbaDrums);
     }
     for (int s = 0; s < 128; s++) if (p->octave[s]) fprintf(f, "octave%d=%d\n", s, p->octave[s]);
     for (int k = 0; k < CONV_MAX_CAND; k++) if (p->trackLock[k] >= 0) fprintf(f, "track_lock%d=%d\n", k, p->trackLock[k]);
@@ -650,6 +664,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "rip_info")) snprintf(np.ripInfo, sizeof(np.ripInfo), "%s", v);
         else if (!strcmp(k, "rip_gain")) np.ripGain = (float)atof(v);
         else if (!strcmp(k, "rip_cgbnorm")) np.ripCgbNorm = (float)atof(v);
+        else if (!strcmp(k, "rip_gba_drums")) np.ripGbaDrums = atoi(v);
         else if (!strncmp(k, "track_lock", 10)) {
             int c = atoi(k + 10), sl = atoi(v);
             if (c >= 0 && c < CONV_MAX_CAND && sl >= 0 && sl < 128) np.trackLock[c] = (int16_t)sl;

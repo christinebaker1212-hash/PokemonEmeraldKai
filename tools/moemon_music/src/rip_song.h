@@ -28,6 +28,10 @@ typedef struct {
     float slotDur[128];          // median note length (s)
     uint8_t slotNoise[128];      // played at one pitch all the time (a drum)
     float *keyDur;               // noise slots: [slot * 128 + key] median note length (s) at each key, -1 none
+    // Game Boy noise slots: the drum kit made for each (rip_drums.c), and how loud its loudest drum has to be
+    CustomGroup *drumKit[128];   // NULL = none
+    float drumGain[128];
+    int gbaDrums;                // the MIDI plays the noise slots as those kits (Convert GB > GBA)
     int hardwareLevels;          // only Game Boy channels: their volume is the hardware's (no loudness match)
     char prefix[24];             // custom sample names start with this
     CustomSample *custom;        // the original instruments (voices' refs are INST_CUSTOM + index)
@@ -36,7 +40,8 @@ typedef struct {
 
 // Builds the MIDI and the instruments. gain scales every note (1 = the chip's own level, as the
 // translation measures it; studio_match_rip finds the gain that matches the original's loudness).
-int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen);
+// gbaDrums: Game Boy noise notes go to the kits made for them (Convert GB > GBA), as drum hits.
+int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, int errlen);
 void rip_song_free(RipSong *s);
 
 // Analysis used by the build (and tests)

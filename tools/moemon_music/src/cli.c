@@ -7,6 +7,7 @@
 //   moemon_music_studio --dump-exact IN VOLUME            the same, converted like mid2agb -E -V VOLUME
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
 //   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
+//   moemon_music_studio --reference IN OUT.wav [SECONDS]  what the rip's capture says, mixed at full precision
 // IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF, GameCube); MMS_BIOS = the PlayStation BIOS folder.
 // MMS_DEFAULTS = a defaults file (the window's Defaults panel saves one) every opened song starts with.
 #include <stdio.h>
@@ -91,6 +92,11 @@ int cli_main(int argc, char **argv)
     if (!strcmp(mode, "--decomp") && argc >= 4) {
         if (!export_decomp(&s.p, &s.c, argv[3], err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         return 0;
+    }
+    if (!strcmp(mode, "--reference") && argc >= 4) {
+        int rip_render_reference(const Rip *r, const char *path, int seconds);
+        if (!s.p.rip) { fprintf(stderr, "%s isn't a rip (or its file is gone)\n", argv[2]); return 1; }
+        return rip_render_reference(s.p.rip, argv[3], argc >= 5 ? atoi(argv[4]) : 0) ? 0 : 1;
     }
     if (!strcmp(mode, "--original") && argc >= 4) {
         const Rip *r = s.p.rip;

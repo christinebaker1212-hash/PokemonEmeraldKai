@@ -89,6 +89,7 @@ float studio_match_rip(Studio *s)
 
 int studio_rebuild(Studio *s)
 {
+    project_rip_sync_drums(&s->p);       // Game Boy noise as drums or as the channel: the MIDI that goes with it
     project_bind(&s->p);
     if (s->haveConv) conv_free(&s->c);
     s->haveConv = 0;

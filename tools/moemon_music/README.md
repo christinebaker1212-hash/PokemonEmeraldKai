@@ -49,8 +49,14 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
 - **Game Boy / Convert GB > GBA** (SONG, Game Boy songs): the channels as the GBA's own Game Boy
   channels, or each one as the GBA instrument it sounds like. Squares (by duty) and the wave channel
   (its 32 steps) are built from their harmonics and matched like samples, with how the song holds
-  them and where they play (the wave channel is usually the bass); the noise channel becomes a drum
-  kit with, for each noise setting the song uses, the game drum of the same brightness and length.
+  them and where they play (the wave channel is usually the bass). The noise channel becomes a drum
+  kit: a Game Boy driver plays each drum as the same few frames of noise settings and volumes every
+  hit, so hits are grouped by how they start, each group's part is read the way an arranger hears it
+  (a short low rumble is a kick, a mid hiss a snare, a short bright fizz a closed hi-hat, a longer one
+  an open hi-hat, a long one a cymbal), and of the game's drums for that part the one that sounds
+  closest to the hit (made again from the noise generator) is picked. Hits play as drum hits: kicks,
+  snares, toms and cymbals ring out their sample, hi-hats stop at the next hit, each at the
+  original's level (matched over the 150 ms the ear takes a drum's loudness from).
   Levels are matched in the engine, panning included, then brought down together so none goes past
   a volume of 127 (Game Boy channels play louder than samples). Per channel: **Orig** / **GBA**.
 - Exports carry the original samples: `.kaisong` version 2 (`SMPL` / `WAVE` chunks), decomp WAVs.

@@ -19,6 +19,7 @@
 #include "rip_song.h"
 #include "inst.h"
 #include "engine.h"
+#include "rip_drums.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -514,6 +515,7 @@ void rip_song_free(RipSong *s) {
     custom_list_free(&s->custom, &s->ncustom);
     free(s->keyDur);
     s->keyDur = NULL;
+    for (int i = 0; i < 128; i++) { free(s->drumKit[i]); s->drumKit[i] = NULL; }
     free(s->mid);
     s->mid = NULL;
     s->midLen = 0;
@@ -670,7 +672,7 @@ static int stream_build(Rip *r, RipSong *out, float gain, char *err, int errlen)
     return 1;
 }
 
-int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
+int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, int errlen) {
     memset(out, 0, sizeof *out);
     if (r->streamPcm) {
         for (int i = 0; i < 128; i++) { out->slotSample[i] = -1; out->gm[i] = -1; out->orig[i] = VOICE_PLACEHOLDER; }
@@ -733,6 +735,21 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
     }
     if (!nn) { free(notes); snprintf(err, errlen, "no notes: the rip played nothing in %.0f s", nf / 60.0); return 0; }
 
+    if (getenv("MMS_DRUM_DEBUG")) {        // tests: each note's first frames (voice: key / volume)
+        int shown = 0;
+        for (int i = 0; i < nn && shown < 100000; i++) {
+            const RipSample *rs = &r->samples[notes[i].sample];
+            int len = notes[i].f1 - notes[i].f0;
+            fprintf(stderr, "v%d %s f%d len %d:", notes[i].voice, rs->kind == RIPS_NOISE ? "noise" : rs->kind == RIPS_WAVE ? "wave" : "sq",
+                    notes[i].f0, len);
+            for (int f = notes[i].f0; f < notes[i].f1 && f < notes[i].f0 + 14; f++) {
+                const RipVF *x = &r->vf[(size_t)f * nv + notes[i].voice];
+                fprintf(stderr, " %.1f/%.2f", x->sample == notes[i].sample ? semis_of(r, x) : -1.0f, amp_of(r, x) * 2);
+            }
+            fprintf(stderr, "\n");
+            shown++;
+        }
+    }
     if (getenv("MMS_ONSETS_DEBUG")) {      // tests: when each note starts (voice, frame)
         FILE *df = fopen(getenv("MMS_ONSETS_DEBUG"), "w");
         for (int i = 0; df && i < nn; i++) fprintf(df, "%d %d\n", notes[i].voice, notes[i].f0);
@@ -905,7 +922,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                 if (x->rate > 0) { sum += log(x->rate) * (notes[i].f1 - notes[i].f0); wsum += notes[i].f1 - notes[i].f0; }
             }
             double typ = wsum > 0 ? exp(sum / wsum) : s->rate;
-            double to = RIP_GBA_RATE * (double)s->rate / typ;
+            double to = getenv("MMS_FULL_RATE") ? 1e9 : RIP_GBA_RATE * (double)s->rate / typ;
             if (to > s->rate) to = s->rate;
             if (to < 2000) to = 2000;
             int16_t *rs = NULL;
@@ -980,6 +997,59 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
             mmeta(&tr[0], out->loopEnd, 0x06, "]", 1);
         }
     }
+    // Game Boy noise: the drums its hits are (always worked out, so the GBA kit is there to pick), and in
+    // GB > GBA the notes' kit key and level
+    int *drumKey = NULL, *drumVel = NULL, *drumHold = NULL;
+    if (r->kind == RIP_GBS) {
+        drumKey = malloc(sizeof(int) * (size_t)nn);
+        drumVel = malloc(sizeof(int) * (size_t)nn);
+        drumHold = calloc((size_t)nn, sizeof(int));
+        RipHit *hits = malloc(sizeof(RipHit) * (size_t)nn);
+        int *hitNote = malloc(sizeof(int) * (size_t)nn);
+        for (int i = 0; i < nn && drumKey; i++) drumKey[i] = -1;
+        for (int si = 0; si < nslots && drumKey && drumVel && drumHold && hits && hitNote; si++) {
+            const RipSample *rs = &r->samples[out->slotSample[si]];
+            if (rs->kind != RIPS_NOISE) continue;
+            int nh = 0;
+            for (int i = 0; i < nn; i++) {
+                if (notes[i].sample != out->slotSample[si]) continue;
+                RipHit *h = &hits[nh];
+                memset(h, 0, sizeof *h);
+                h->shortMode = rs->param & 1;
+                h->len = notes[i].f1 - notes[i].f0;
+                for (int f = 0; f < RIP_DRUM_FRAMES && f < h->len; f++) {
+                    const RipVF *x = &r->vf[(size_t)(notes[i].f0 + f) * nv + notes[i].voice];
+                    h->hz[f] = x->sample == notes[i].sample ? x->rate : 0;
+                    h->vol[f] = x->sample == notes[i].sample ? amp_of(r, x) * 2 : 0;
+                }
+                hitNote[nh++] = i;
+            }
+            CustomGroup *kit = calloc(1, sizeof(CustomGroup));
+            RipDrums dr;
+            if (!kit || !rip_drums_match(hits, nh, kit, &dr)) { free(kit); continue; }
+            snprintf(kit->name, sizeof kit->name, "%s_drums%d", out->prefix, si);
+            out->drumKit[si] = kit;
+            float gmax = 0;
+            for (int g = 0; g < dr.ngroups; g++) if (dr.gain[g] > gmax) gmax = dr.gain[g];
+            if (gmax <= 0) gmax = 1;
+            out->drumGain[si] = gmax;
+            for (int k = 0; k < nh; k++) {
+                int g = dr.groupOf[k], i = hitNote[k];
+                if (g < 0) continue;
+                drumKey[i] = dr.key[g];
+                drumHold[i] = dr.hold[g];
+                // the hit's level against the one its drum was matched on, the drums against each other
+                float rel = hits[k].vol[0] > 0 ? hits[k].vol[0] / dr.protoVol[g] : 1;
+                int vel = (int)lroundf(127.0f * rel * dr.gain[g] / gmax);
+                drumVel[i] = vel < 1 ? 1 : vel > 127 ? 127 : vel;
+            }
+            rip_drums_free(&dr);
+        }
+        free(hits);
+        free(hitNote);
+    }
+    out->gbaDrums = gbaDrums && drumKey;
+
     // tracks: each instrument gets lanes, a note going on the first of its instrument's lanes that's free
     int ntr = 0;
     {
@@ -1017,9 +1087,20 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         mev(t, 0, 0xB0 | ch, 7, 127);
         mev(t, 0, 0xC0 | ch, slot, 0);
         int lastExpr = -1, lastPan = -1, lastBend = -1, lastTune = -1, range = -1;
-        for (int i = first; i < nn; i++) {
+        int pOffKey[64], pOffT[64], npOff = 0;          // drum note-offs still to come
+        for (int i = first; i <= nn; i++) {
+            // the drum note-offs due by this note's start (or all of them after the last note)
+            int upto = i < nn ? notes[i].f0 + notes[i].shift : 0x7FFFFFFF;
+            if (i < nn && notes[i].track != lane) continue;
+            for (;;) {
+                int k = -1;
+                for (int q = 0; q < npOff; q++) if (pOffT[q] <= upto && (k < 0 || pOffT[q] < pOffT[k])) k = q;
+                if (k < 0) break;
+                mev(t, (uint32_t)pOffT[k], 0x80 | ch, pOffKey[k], 0);
+                pOffKey[k] = pOffKey[npOff - 1]; pOffT[k] = pOffT[npOff - 1]; npOff--;
+            }
+            if (i == nn) break;
             Note *n = &notes[i];
-            if (n->track != lane) continue;
             int v = n->voice, sh = n->shift;
             // the bend range this note needs (the game's bends go to 63/64 of it)
             float maxDev = 0;
@@ -1051,6 +1132,31 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                 mev(t, tk, 0xB0 | ch, 38, 0);
                 range = nr;
                 lastBend = -1;                   // the same bend value means another pitch now
+            }
+            if (out->gbaDrums && drumKey[i] >= 0) {
+                // a drum hit: its drum's key and level, the drum's own sound (no bends, no fades); the pan as it was
+                uint32_t tk = (uint32_t)(n->f0 + sh);
+                const RipVF *x = &r->vf[(size_t)n->f0 * nv + v];
+                int pan = x->l + x->r > 0 ? (int)lroundf(64.0f + 63.0f * (x->r - x->l) / (x->r + x->l)) : 64;
+                if (pan != lastPan) { mev(t, tk, 0xB0 | ch, 10, pan); lastPan = pan; }
+                if (lastExpr != 127) { mev(t, tk, 0xB0 | ch, 11, 127); lastExpr = 127; }
+                if (lastBend != 8192) { mev(t, tk, 0xE0 | ch, 0, 64); lastBend = 8192; }
+                if (lastTune != 64) { mev(t, tk, 0xB0 | ch, 24, 64); lastTune = 64; }
+                mev(t, tk, 0x90 | ch, drumKey[i], drumVel[i]);
+                // rings out (up to the next hit of the same drum on this track)
+                int end = n->f1 + sh;
+                if (n->f0 + sh + drumHold[i] > end) {
+                    end = n->f0 + sh + drumHold[i];
+                    for (int j = i + 1; j < nn; j++)
+                        if (notes[j].track == lane && drumKey[j] == drumKey[i]) {
+                            if (notes[j].f0 + notes[j].shift < end) end = notes[j].f0 + notes[j].shift;
+                            break;
+                        }
+                }
+                if (end <= n->f0 + sh) end = n->f0 + sh + 1;
+                // the note-off waits for its time (MIDI goes in time order; other hits may come first)
+                if (npOff < 64) { pOffKey[npOff] = drumKey[i]; pOffT[npOff] = end; npOff++; }
+                continue;
             }
             float velA = n->vel / 127.0f * aref / gain;
             lastBend = lastTune = -1;            // each note sends its pitch at its start (a loop can jump to it)
@@ -1090,6 +1196,9 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         }
     }
     free(notes);
+    free(drumKey);
+    free(drumVel);
+    free(drumHold);
 
     // the file
     MBuf mf = {0};
