@@ -18,6 +18,18 @@ enum
     POKEBALL_COUNT
 };
 
+// Moemon Co-op: the HEARTGOLD / SOULSILVER balls (tools/moemon_balls/hgss_balls.py): eleven 16x32 frames per ball
+#define BALL_FRAME_TILES   8                          // a 16x32 frame
+#define BALL_FRAME_COUNT   11
+#define BALL_SHEET_SIZE    (BALL_FRAME_COUNT * BALL_FRAME_TILES * TILE_SIZE_4BPP)
+enum {
+    BALL_FRAME_REST,       // closed
+    BALL_FRAME_OPEN,
+    BALL_FRAME_EMPTY,      // gone (the Moemon is out)
+    BALL_FRAME_SPIN,       // 3-10: spinning in the air
+};
+#define BALL_ANIM_SPIN 7   // sBallAnimSequences: the spin frames over and over (a ball in the air)
+
 enum {
     BALL_AFFINE_ANIM_0,
     BALL_ROTATE_RIGHT,
@@ -40,5 +52,6 @@ void StartHealthboxSlideIn(u8 battler);
 void DoHitAnimHealthboxEffect(u8 battler);
 void LoadBallGfx(u8 ballId);
 void FreeBallGfx(u8 ballId);
+bool8 StartBallSpin(struct Sprite *sprite);   // Moemon Co-op: FALSE = no spin frames (turn it instead)
 
 #endif // GUARD_POKEBALL_H
