@@ -11,6 +11,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stddef.h>
+#include <math.h>
 #include "rip.h"
 #include "psflib.h"
 #include "usf/usf.h"
@@ -268,6 +269,9 @@ static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, i
         UVoice *v = &u->v[k];
         u->cur = k;
         int first = v->seenTask != u->task;
+        if (u->debug && getenv("MMS_USF_VOICE") && k == atoi(getenv("MMS_USF_VOICE")))
+            fprintf(stderr, "task %d voice %d state %06x init %d first %d load %06x book %06x lastpitch %u\n", u->task, k, st, b, first,
+                    u->load, u->book, v->pitch);
         v->seenTask = u->task;
         if (b && first) {          // a note starts
             v->keyon++;
@@ -340,29 +344,53 @@ static void usf_finalize(RipEmu *e) {
         for (int j = i + 1; j < u->ntasks && j < i + 64; j++) if (u->tasks[j].play >= 0) { next = u->tasks[j].play; break; }
         u->tasks[i].play = next >= 0 ? (last + next) / 2 : last;
     }
+    if (u->debug) {
+        long d[8] = {0};
+        for (int i = 1; i < u->ntasks && i < 4000; i++) {
+            long g = u->tasks[i].play - u->tasks[i - 1].play;
+            fprintf(stderr, "%s%ld", i == 1 ? "usf: task spacing (samples at the AI rate):" : " ", g);
+            (void)d;
+            if (i == 60) break;
+        }
+        fprintf(stderr, "\nusf: %d tasks over %ld samples at %.0f Hz = %.2f tasks a second\n", u->ntasks, u->tasks[u->ntasks - 1].play,
+                rate, u->ntasks / (u->tasks[u->ntasks - 1].play / rate));
+    }
+    // Each frame: the voices at the frame's end, between the two tasks heard around it (the N64 updates
+    // about 58 times a second, the game 60: taking the last task would hold every 30th frame still), and
+    // the notes started by the tasks heard during the frame.
     int ti = 0;
-    const Task *cur = NULL;
     for (int f = 0; f < r->nframes; f++) {
-        long end = (long)((f + 1) * rate / fps);
+        double end = (f + 1) * rate / fps;
         uint8_t kon[USF_VOICES] = {0};
         while (ti < u->ntasks && u->tasks[ti].play < end) {
-            cur = &u->tasks[ti];
-            for (int i = 0; i < USF_VOICES; i++) if (cur->v[i].keyon) kon[i] = 1;
+            for (int i = 0; i < USF_VOICES; i++) if (u->tasks[ti].v[i].keyon) kon[i] = 1;
             ti++;
         }
+        const Task *a = ti > 0 ? &u->tasks[ti - 1] : NULL, *b = ti < u->ntasks ? &u->tasks[ti] : NULL;
+        double w = 0;
+        if (a && b && b->play > a->play) w = (end - a->play) / (double)(b->play - a->play);
+        if (w < 0) w = 0;
+        if (w > 1) w = 1;
         RipVF *row = r->vf + (size_t)f * r->nvoices;
         for (int i = 0; i < USF_VOICES; i++) {
             RipVF *x = &row[i];
             memset(x, 0, sizeof *x);
             x->sample = -1;
-            if (!cur) continue;
-            const TaskVoice *tv = &cur->v[i];
+            if (!a) continue;
+            const TaskVoice *tv = &a->v[i];
             x->keyon = kon[i];
             if (!tv->active || tv->sample < 0) continue;
             x->sample = tv->sample;
             x->rate = tv->rate;
             x->l = tv->l;
             x->r = tv->r;
+            // the same note going on in the next task: part of the way to it
+            const TaskVoice *nx = b ? &b->v[i] : NULL;
+            if (nx && nx->active && nx->sample == tv->sample && !nx->keyon && w > 0) {
+                if (tv->rate > 0 && nx->rate > 0) x->rate = (float)(tv->rate * pow(nx->rate / tv->rate, w));
+                x->l = (float)(tv->l + (nx->l - tv->l) * w);
+                x->r = (float)(tv->r + (nx->r - tv->r) * w);
+            }
         }
     }
 }

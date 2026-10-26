@@ -707,13 +707,6 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
             float a = x ? amp_of(r, x) : 0;
             int has = x && x->sample >= 0;
             int start = has && (x->keyon || (!in && a > SILENT) || (in && x->sample != cur.sample));
-            // the voice going straight on to another pitch (no new key-on): a new note, when the jump is a
-            // semitone or more at once and the new pitch holds (a slide moves on; a one-frame blip goes back)
-            if (has && in && !start && f > cur.f0 && f + 1 < nf) {
-                float p0 = semis_at(r, nv, v, f - 1, cur.sample), p1 = semis_at(r, nv, v, f, cur.sample),
-                      p2 = semis_at(r, nv, v, f + 1, cur.sample);
-                if (p0 > -999 && p1 > -999 && p2 > -999 && fabsf(p1 - p0) >= 0.75f && fabsf(p2 - p1) < 0.3f) start = 1;
-            }
             int stop = in && (!has || start || a <= SILENT || (cur.peak > 0 && a < cur.peak * 0.0005f));
             if (stop) {
                 cur.f1 = f;
@@ -1023,7 +1016,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         mmeta(t, 0, 0x03, name, (int)strlen(name));
         mev(t, 0, 0xB0 | ch, 7, 127);
         mev(t, 0, 0xC0 | ch, slot, 0);
-        int lastExpr = -1, lastPan = -1, lastBend = -1, range = -1;
+        int lastExpr = -1, lastPan = -1, lastBend = -1, lastTune = -1, range = -1;
         for (int i = first; i < nn; i++) {
             Note *n = &notes[i];
             if (n->track != lane) continue;
@@ -1047,7 +1040,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                     fprintf(stderr, "\n");
                 }
             }
-            int nr = (int)ceilf(maxDev * 64.0f / 63.0f + 0.02f);
+            int nr = (int)ceilf(maxDev * 64.0f / 63.0f + 0.02f);   // (fine tune does the rest exactly)
             if (nr < 1) nr = 1;
             if (nr > 48) nr = 48;
             if (nr != range) {
@@ -1060,6 +1053,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                 lastBend = -1;                   // the same bend value means another pitch now
             }
             float velA = n->vel / 127.0f * aref / gain;
+            lastBend = lastTune = -1;            // each note sends its pitch at its start (a loop can jump to it)
             for (int f = n->f0; f < n->f1; f++) {
                 const RipVF *x = &r->vf[(size_t)f * nv + v];
                 float a = x->sample == n->sample ? amp_of(r, x) : 0;
@@ -1070,19 +1064,26 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                 if (x->l + x->r > 0) pan = (int)lroundf(64.0f + 63.0f * (x->r - x->l) / (x->r + x->l));
                 if (pan < 0) pan = 0;
                 if (pan > 127) pan = 127;
-                int bend = lastBend < 0 ? 8192 : lastBend;
+                // the pitch in 64ths of a semitone: the bend's 7 bits (steps of range / 64) get close, the
+                // track's fine tune (TUNE, CC 24: 1/64 semitone, +-1 semitone) makes up the rest
+                int bend = lastBend < 0 ? 8192 : lastBend, tune = lastTune < 0 ? 64 : lastTune;
                 float pf = note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
                 if (pf > -999) {
-                    float dev = pf - n->key;
-                    bend = 8192 + (int)lroundf(dev / range * 8192.0f);
-                    if (bend < 0) bend = 0;
-                    if (bend > 16383) bend = 16383;
+                    int units = (int)lroundf((pf - n->key) * 64.0f);
+                    int bv = (int)lroundf((float)units / range);
+                    if (bv > 63) bv = 63;
+                    if (bv < -64) bv = -64;
+                    int tv = units - bv * range;
+                    if (tv > 63) tv = 63;
+                    if (tv < -64) tv = -64;
+                    bend = (bv + 64) << 7;
+                    tune = tv + 64;
                 }
                 uint32_t tick = (uint32_t)(f + sh);
                 if (expr != lastExpr) { mev(t, tick, 0xB0 | ch, 11, expr); lastExpr = expr; }
                 if (pan != lastPan) { mev(t, tick, 0xB0 | ch, 10, pan); lastPan = pan; }
-                // 7 bits of bend is what the game keeps; only send a change it will hear
-                if (lastBend < 0 || (bend >> 7) != (lastBend >> 7)) { mev(t, tick, 0xE0 | ch, bend & 0x7F, bend >> 7); lastBend = bend; }
+                if (tune != lastTune) { mev(t, tick, 0xB0 | ch, 24, tune); lastTune = tune; }
+                if (bend != lastBend) { mev(t, tick, 0xE0 | ch, bend & 0x7F, bend >> 7); lastBend = bend; }
                 if (f == n->f0) mev(t, tick, 0x90 | ch, n->key, n->vel);
             }
             mev(t, (uint32_t)(n->f1 + sh), 0x80 | ch, n->key, 0);
