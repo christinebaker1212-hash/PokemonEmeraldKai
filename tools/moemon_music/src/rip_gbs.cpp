@@ -132,6 +132,7 @@ extern "C" int rip_open_gbs(RipEmu *e, Rip *r, int track, char *err, int errlen)
     }
     Gbs *g = new Gbs();
     g->rip = r;
+    Classic_Emu::exact_steps = true;    // the chip read when it's heard (see gbs_snapshot)
     g->emu.set_sample_rate(44100);
     const char *e1 = g->emu.load_file(path.c_str());
     if (e1) { snprintf(err, errlen, "couldn't open %s: %s", path.c_str(), e1); delete g; return 0; }
@@ -170,6 +171,7 @@ extern "C" int rip_open_gbs(RipEmu *e, Rip *r, int track, char *err, int errlen)
     Gb_Apu::tap_trigger = tap_trigger;
     g->emu.ignore_silence(true);
     if (g->emu.start_track(track)) { snprintf(err, errlen, "couldn't start track %d", track); g_gbs = 0; delete g; return 0; }
+    if (getenv("MMS_GBS_MUTE")) g->emu.mute_voices((int)strtol(getenv("MMS_GBS_MUTE"), NULL, 0));   // tests: hear some channels
     snprintf(r->console, sizeof r->console, "Game Boy");
     e->ctx = g;
     e->rip = r;

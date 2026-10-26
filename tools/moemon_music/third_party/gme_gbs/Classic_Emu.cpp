@@ -101,6 +101,8 @@ blargg_err_t Classic_Emu::start_track_( int track )
 	return 0;
 }
 
+bool Classic_Emu::exact_steps = false;   // Moemon Music Studio
+
 blargg_err_t Classic_Emu::play_( long count, sample_t* out )
 {
 	long remain = count;
@@ -116,6 +118,14 @@ blargg_err_t Classic_Emu::play_( long count, sample_t* out )
 			}
 			int msec = buf->length();
 			blip_time_t clocks_emulated = (int32_t) msec * clock_rate_ / 1000;
+			// Moemon Music Studio: emulate only as far as the samples asked for, so what the chip
+			// does is read at the moment it's heard (not up to a buffer's length ahead)
+			if ( exact_steps )
+			{
+				long need = (long) ((double) remain * clock_rate_ / sample_rate()) + 1;
+				if ( need < clocks_emulated )
+					clocks_emulated = (blip_time_t) need;
+			}
 			RETURN_ERR( run_clocks( clocks_emulated, msec ) );
 			assert( clocks_emulated );
 			buf->end_frame( clocks_emulated );

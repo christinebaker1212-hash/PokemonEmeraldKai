@@ -10,6 +10,8 @@
 
 class Classic_Emu : public Music_Emu {
 public:
+	// Moemon Music Studio: emulate exactly the samples asked for (no buffer-length steps ahead)
+	static bool exact_steps;
 	Classic_Emu();
 	~Classic_Emu();
 	void set_buffer( Multi_Buffer* ) override;

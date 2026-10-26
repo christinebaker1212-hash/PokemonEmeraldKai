@@ -89,6 +89,11 @@ print('%.0f' % abs(st.median(v[-6:]) - st.median(v[2:8])))")
             echo "    drift over a minute $dr ms"
             python3 -c "import sys; sys.exit(0 if float('$dr') <= 10 else 1)" ;;
         esac
+        case "$f" in *.m3u|*.gbs)   # Game Boy: notes where the chip plays them (the emulator read as it's heard)
+            sp=$(python3 test/compare_timing.py "$T/rip_orig.wav" "$T/rip_kai.wav" 30 | tail -1 | sed 's/.*spread (mean |lag - median|) \([0-9.]*\).*/\1/')
+            echo "    timing spread $sp ms"
+            python3 -c "import sys; sys.exit(0 if float('$sp') <= 10 else 1)" ;;
+        esac
         case "$f" in *.m3u|*.gbs)   # Game Boy: Convert GB > GBA (other instruments, near the original's sound and level)
             printf 'gb_to_gba=1\n' > "$T/gb.ini"
             MMS_DEFAULTS="$T/gb.ini" "$B" --render "$f" "$T/rip_gba.wav" 30

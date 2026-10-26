@@ -8,9 +8,9 @@
 // the note's loudest moment as its velocity, and the instruments get a flat envelope: the original's
 // envelope is in the expression. Pitch is the key closest to the note plus bends for the rest
 // (vibrato, slides, detuning), with a bend range per note just wide enough for it (the game keeps 7 bits
-// of bend, so a narrow range keeps a note in tune). Consoles whose sequencer ticks on its own clock
-// (the N64's audio frames) put notes up to a frame off the beat; when the song has a steady grid, note
-// starts move onto it (steady_rhythm).
+// of bend, so a narrow range keeps a note in tune). The N64's sequencer ticks on its own audio frames,
+// which puts notes up to a frame off the beat; when such a song has a steady grid, note starts move onto
+// it (steady_rhythm).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -740,6 +740,12 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
     }
     if (!nn) { free(notes); snprintf(err, errlen, "no notes: the rip played nothing in %.0f s", nf / 60.0); return 0; }
 
+    if (getenv("MMS_ONSETS_DEBUG")) {      // tests: when each note starts (voice, frame)
+        FILE *df = fopen(getenv("MMS_ONSETS_DEBUG"), "w");
+        for (int i = 0; df && i < nn; i++) fprintf(df, "%d %d\n", notes[i].voice, notes[i].f0);
+        if (df) fclose(df);
+    }
+
     // which samples are used, how high they play: shift each sample's key by octaves into MIDI range
     float *lo = malloc(sizeof(float) * r->nsamples), *hi = malloc(sizeof(float) * r->nsamples);
     for (int i = 0; i < r->nsamples; i++) { lo[i] = 1e9f; hi[i] = -1e9f; }
@@ -869,7 +875,10 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
     }
 
     // on the beat, then in time order (as they will be played)
-    steady_rhythm(notes, nn);
+    // Only the N64's: its music runs on audio frames of its own rate, placed on game frames afterwards (up to
+    // a frame off). Game Boy, DS and PlayStation drivers tick on the console's frames, so their notes already
+    // sit where the original plays them (their own uneven tempo rounding included, which is the song's).
+    if (r->kind == RIP_USF && !getenv("MMS_NO_RHYTHM")) steady_rhythm(notes, nn);
     qsort(notes, nn, sizeof(Note), note_cmp);
 
     // the loop (on the moved notes)
