@@ -435,17 +435,6 @@ bool8 MP_Coop_TwoTrainers(void)
     return gMpCoopBattle && !gMpCoopWild && (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0;
 }
 
-// Two trainers: is the Pokémon that battler sends out (party slot partyIdx) the second trainer's? Their own side in a
-// double; in a Triple Battle against both (a friend joined) they share the field, and the slot says whose it is
-bool8 MP_Coop_SecondTrainersMon(u8 battler, u8 partyIdx)
-{
-    if (!MP_Coop_TwoTrainers() || !(battler & BIT_SIDE))
-        return FALSE;
-    if (IS_TRIPLE_BATTLE())
-        return partyIdx >= MULTI_PARTY_SIZE && partyIdx < PARTY_SIZE;
-    return GetBattlerPosition(battler) == B_POSITION_OPPONENT_RIGHT;
-}
-
 // The trainer picture of an opponent battler: two trainers, the right one is the second
 u16 MP_Coop_TrainerPicFor(u8 battler)
 {
@@ -1376,24 +1365,16 @@ static struct
     u8 mapGroup, mapNum, localId;
     u16 trainerId;
     bool8 joinable;   // their battle can take a friend now (mp_join.c)
-    u8 localId2;      // two trainers at once: the second (0 = one trainer)
-    u16 trainerId2;
 } sBattling[MP_MAX_PLAYERS];
 static u16 sBattlingTimer;
 static bool8 sBattlingSent;
 
 static void SendBattling(bool8 on)
 {
-    u16 trainer = gTrainerBattleOpponent_A, trainer2;
-    u8 localId, localId2;
-    MP_TrainerBattleLocalIds(&localId, &localId2);
-    trainer2 = localId2 != 0 ? gTrainerBattleOpponent_B : 0;
-    {
-        u8 buf[11] = {MPR_COOP_BATTLING, on, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
-                      localId, trainer & 0xFF, trainer >> 8, on && MP_Join_CanBeJoined(),
-                      localId2, trainer2 & 0xFF, trainer2 >> 8};
-        MP_SendRelay(0xFF, buf, sizeof(buf));
-    }
+    u16 trainer = gTrainerBattleOpponent_A;
+    u8 buf[8] = {MPR_COOP_BATTLING, on, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+                 MP_TrainerBattleLocalId(), trainer & 0xFF, trainer >> 8, on && MP_Join_CanBeJoined()};
+    MP_SendRelay(0xFF, buf, sizeof(buf));
     sBattlingSent = on;
 }
 
@@ -1427,7 +1408,7 @@ static void UpdateBattling(void)
 
 static void OnBattling(u8 from, const u8 *data, u16 len)
 {
-    if (from >= MP_MAX_PLAYERS || len < 11)
+    if (from >= MP_MAX_PLAYERS || len < 8)
         return;
     if (!data[1])
     {
@@ -1435,20 +1416,17 @@ static void OnBattling(u8 from, const u8 *data, u16 len)
         return;
     }
     if (!sBattling[from].ttl)
-        MPNet_Log("co-op: player %d is battling trainer %d (NPC %d)%s%s", from + 1, data[5] | (data[6] << 8), data[4],
-                  data[8] ? " and a second trainer" : "", data[7] ? "" : ", not joinable");
+        MPNet_Log("co-op: player %d is battling trainer %d (NPC %d)%s", from + 1, data[5] | (data[6] << 8), data[4],
+                  data[7] ? "" : ", not joinable");
     sBattling[from].ttl = BATTLING_TTL;
     sBattling[from].mapGroup = data[2];
     sBattling[from].mapNum = data[3];
     sBattling[from].localId = data[4];
     sBattling[from].trainerId = data[5] | (data[6] << 8);
     sBattling[from].joinable = data[7];
-    sBattling[from].localId2 = data[8];
-    sBattling[from].trainerId2 = data[9] | (data[10] << 8);
 }
 
 static const u8 sText_BattlingThem[] = _("{STR_VAR_1} is battling this trainer!\nJoin their battle, or battle alone?");
-static const u8 sText_BattlingBoth[] = _("{STR_VAR_1} is battling these trainers!\nJoin their battle, or battle alone?");
 static const u8 sText_ChoiceJoinBattle[] = _("JOIN BATTLE");
 static const u8 sText_ChoiceBattleAlone[] = _("BATTLE ALONE");
 static const struct MenuAction sInProgressChoices[] =
@@ -1521,33 +1499,21 @@ static void Task_OfferBattleInProgress(u8 taskId)
 // The trainer walking up to us is the one a friend is battling now, and they can take a friend in: ask
 static bool8 TryOfferBattleInProgress(void)
 {
-    struct ObjectEvent *trainer, *trainer2 = NULL;
+    struct ObjectEvent *trainer;
     u8 i, taskId;
-    if ((gNoOfApproachingTrainers != 1 && gNoOfApproachingTrainers != 2) || sCoop.role != ROLE_NONE || gMpCoopBattle
-     || sCoop.waitStage != WAIT_NONE || MP_Join_IsAsking() || !MP_IsConnected())
+    if (gNoOfApproachingTrainers != 1 || sCoop.role != ROLE_NONE || gMpCoopBattle || sCoop.waitStage != WAIT_NONE
+     || MP_Join_IsAsking() || !MP_IsConnected())
         return FALSE;
     trainer = &gObjectEvents[gApproachingTrainers[0].objectEventId];
-    if (gNoOfApproachingTrainers == 2)
-        trainer2 = &gObjectEvents[gApproachingTrainers[1].objectEventId];
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
-        bool8 first, second;
         if (!sBattling[i].ttl || !sBattling[i].joinable || !PlayerValid(i) || !(gMpPlayers[i].state.flags & MPF_IN_BATTLE))
             continue;
-        if (sBattling[i].mapGroup != gSaveBlock1Ptr->location.mapGroup || sBattling[i].mapNum != gSaveBlock1Ptr->location.mapNum)
-            continue;
-        // the trainer walking up is the one they battle, or one of the two (two trainers at once)
-        first = sBattling[i].localId == trainer->localId && sBattling[i].trainerId == gTrainerBattleOpponent_A;
-        second = sBattling[i].localId2 != 0 && sBattling[i].localId2 == trainer->localId
-              && sBattling[i].trainerId2 == gTrainerBattleOpponent_A;
-        if (!first && !second)
-            continue;
-        // both of them spotted us: both must be that battle's (the second one's id isn't set up yet: its object says)
-        if (trainer2 != NULL && (sBattling[i].localId2 == 0
-                                 || trainer2->localId != (first ? sBattling[i].localId2 : sBattling[i].localId)))
+        if (sBattling[i].mapGroup != gSaveBlock1Ptr->location.mapGroup || sBattling[i].mapNum != gSaveBlock1Ptr->location.mapNum
+         || sBattling[i].localId != trainer->localId || sBattling[i].trainerId != gTrainerBattleOpponent_A)
             continue;
         SetNameVar(i);
-        StringExpandPlaceholders(sText, sBattling[i].localId2 != 0 ? sText_BattlingBoth : sText_BattlingThem);
+        StringExpandPlaceholders(sText, sText_BattlingThem);
         HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
         MP_ShowFieldMessageFitted(sText);
         taskId = CreateTask(Task_OfferBattleInProgress, 80);
@@ -2289,15 +2255,7 @@ static void CB2_MpCoopFinish(void)
         // Our own trainer script was waiting on this trainer (it spotted us too): beaten here as after our own battle,
         // and the script goes on the same way (MP_Coop_TakeJoinedOther)
         if (sCoop.joinedOther)
-        {
             MP_EndJoinedTrainerBattle();
-            // two trainers: our script's trainer may have been either one, and both are beaten
-            if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
-            {
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
-            }
-        }
         // Ordinary trainers count as beaten for the partner too. Story battles
         // (gym leaders, rivals...) keep their own event scripts, so the partner
         // can still battle them on their own later.
@@ -4064,8 +4022,10 @@ u8 MP_Coop_Seat(void)
 
 // An ordinary trainer friends may join: not a gym leader, admin, rival, Team Aqua / Magma or other story battle.
 // (Route trainers who sign up for MATCH CALL after the battle use the continue-script mode too: they're fine.)
-static bool8 JoinTrainerIdOk(u16 trainer)
+bool8 MP_Coop_JoinTrainerOk(void)
 {
+    u16 trainer = gMpCoopBattle ? sCoop.trainerId : gTrainerBattleOpponent_A;
+    u8 mode = gMpCoopBattle ? sCoop.mode : GetTrainerBattleMode();
     if (trainer == 0 || trainer >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainer))
         return FALSE;
     switch (gTrainers[trainer].trainerClass)
@@ -4075,18 +4035,6 @@ static bool8 JoinTrainerIdOk(u16 trainer)
     case TRAINER_CLASS_TEAM_MAGMA:
         return FALSE;
     }
-    return TRUE;
-}
-
-bool8 MP_Coop_JoinTrainerOk(void)
-{
-    u16 trainer = gMpCoopBattle ? sCoop.trainerId : gTrainerBattleOpponent_A;
-    u8 mode = gMpCoopBattle ? sCoop.mode : GetTrainerBattleMode();
-    // two trainers at once: both must be ordinary ones
-    u16 trainerB = gMpCoopBattle ? (sCoop.twoTrainers ? sCoop.trainerIdB : 0)
-                                 : ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? gTrainerBattleOpponent_B : 0);
-    if (!JoinTrainerIdOk(trainer) || (trainerB != 0 && !JoinTrainerIdOk(trainerB)))
-        return FALSE;
     switch (mode)
     {
     case TRAINER_BATTLE_SINGLE:
@@ -4108,43 +4056,6 @@ const u8 *MP_Coop_JoinLoseText(void)
     return GetTrainerALoseText();
 }
 
-// The second trainer's (two trainers at once)
-const u8 *MP_Coop_JoinLoseTextB(void)
-{
-    if (gMpCoopWild || !(gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) || gTrainerBattleOpponent_B == 0)
-        return NULL;
-    return GetTrainerBLoseText();
-}
-
-// Two trainers, a Triple Battle: the third foe spot's Pokémon comes from the trainer with more left in reserve (the
-// first one on a tie), JOIN_UNUSED = neither has one
-static u8 JoinTwoTrainersNextFoe(void)
-{
-    u8 half, i, b, best = JOIN_UNUSED, bestCount = 0;
-    for (half = 0; half < 2; half++)
-    {
-        u8 n = 0, first = JOIN_UNUSED;
-        for (i = half * MULTI_PARTY_SIZE; i < (half + 1) * MULTI_PARTY_SIZE; i++)
-        {
-            bool8 out = FALSE;
-            for (b = 1; b < gBattlersCount; b += 2)
-                if (gBattlerPartyIndexes[b] == i && !(gAbsentBattlerFlags & (1 << b)))
-                    out = TRUE;
-            if (out || !IsUsableMon(&gEnemyParty[i]))
-                continue;
-            if (first == JOIN_UNUSED)
-                first = i;
-            n++;
-        }
-        if (n > bestCount)
-        {
-            bestCount = n;
-            best = first;
-        }
-    }
-    return best;
-}
-
 // Master: the conversion. joinMons[j] / joinCount[j] / joinLink[j] / joinBonus[j] for the new seats in order.
 void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (*joinMons)[MULTI_PARTY_SIZE],
                                const u8 *joinCount, const struct LinkPlayer *joinLink, const u16 *joinBonus,
@@ -4161,9 +4072,6 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     // a Double Battle the player started alone: their second Pokemon went back to its ball (mp_join.c
     // BattleScript_MpJoinRecall) and battler 2 becomes the first friend's
     bool8 soloDouble = !wasCoop && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE);
-    // two trainers at once: each one's team stays on its own slots (0-2 / 3-5), so a Pokémon's slot says whose it is
-    bool8 twoTrainers = (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0
-                     && (wasCoop ? (sCoop.twoTrainers && !gMpCoopWild) : (gBattleTypeFlags & BATTLE_TYPE_TRAINER) != 0);
     struct LinkPlayer lp[3];
 
     memset(plan, 0, sizeof(*plan));
@@ -4198,8 +4106,6 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
         gMain.savedCallback = CB2_MpCoopEndBattle;
         sCoop.wildDouble = FALSE;
         sCoop.wildExtra = 0;
-        sCoop.twoTrainers = twoTrainers;
-        sCoop.trainerIdB = twoTrainers ? gTrainerBattleOpponent_B : 0;
     }
     wild = sCoop.mode == MODE_WILD;
     for (s = 0; s < oldCount; s++)
@@ -4208,7 +4114,6 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
         plan->seatPlayer[oldCount + s] = joiner[s];
     plan->mode = sCoop.mode;
     plan->trainerId = sCoop.trainerId;
-    plan->trainerIdB = twoTrainers ? gTrainerBattleOpponent_B : 0;
 
     // --- the players' side ---
     ZeroPlayerPartyMons();
@@ -4413,12 +4318,6 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
             for (k = 0; k < PARTY_SIZE; k++)
                 slotOf[k] = JOIN_UNUSED;
         }
-        if (twoTrainers)
-        {
-            // two trainers: everything stays where it is (slots 0-2 the first trainer's, 3-5 the second's)
-            for (k = 0; k < PARTY_SIZE; k++)
-                order[k] = slotOf[k] = k;
-        }
         ZeroEnemyPartyMons();
         if (!wild)
         {
@@ -4487,9 +4386,7 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
                 // the trainer's next Pokémon for this battler, if it has one
                 s32 first, last;
                 u8 idx = JOIN_UNUSED;
-                if (twoTrainers)
-                    idx = JoinTwoTrainersNextFoe();
-                else if (count == 3)
+                if (count == 3)
                     first = 3, last = PARTY_SIZE, idx = b / 2;
                 else
                     first = 3, last = PARTY_SIZE, idx = 3;
@@ -4538,8 +4435,7 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     gMpCoopWild = wild;
     gIsTripleBattle = count == 3;
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK | BATTLE_TYPE_MULTI
-                     | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_IS_MASTER | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE)
-                     | (twoTrainers ? BATTLE_TYPE_TWO_OPPONENTS : 0);   // (each trainer's names, pictures, both prizes)
+                     | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_IS_MASTER | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE);
     gLinkType = LINKTYPE_BATTLE;
     sCoop.isMaster = TRUE;
     sCoop.seat = 0;
@@ -4603,14 +4499,11 @@ static void JoinSetSeats(const struct MpJoinPlan *plan, u8 seat)
     sCoop.partner = sCoop.seatPlayer[0];
     sCoop.mode = plan->mode;
     sCoop.trainerId = plan->trainerId;
-    sCoop.twoTrainers = plan->trainerIdB != 0;
-    sCoop.trainerIdB = plan->trainerIdB;
 }
 
 // The friend who joined: their real party is set aside (the battle's party is the master's snapshot) and their
 // picks are their seat's Pokémon
-void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText,
-                             const u8 *loseTextB)
+void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText)
 {
     u8 i;
     SavePlayerParty();   // LoadPlayerParty brings the real party back afterwards
@@ -4637,14 +4530,6 @@ void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *p
             sCoop.loseText[i] = loseText[i];
         sCoop.loseText[i] = EOS;
         sCoop.haveLoseText = i > 0;
-    }
-    sCoop.haveLoseTextB = FALSE;
-    if (loseTextB != NULL)
-    {
-        for (i = 0; i < LOSE_TEXT_MAX && loseTextB[i] != EOS; i++)
-            sCoop.loseTextB[i] = loseTextB[i];
-        sCoop.loseTextB[i] = EOS;
-        sCoop.haveLoseTextB = i > 0;
     }
     sCoop.afterBattle = NULL;
     sCoop.role = ROLE_NONE;

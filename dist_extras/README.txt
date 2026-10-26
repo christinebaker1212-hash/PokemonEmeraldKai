@@ -334,12 +334,10 @@ IN BATTLE and press A: "Would you like to spectate, bet, or join?"
 
 Which battles: a wild Moemon met in grass, caves or water, or an ordinary
 trainer (not a GYM LEADER, rival, TEAM AQUA / MAGMA or other story battle),
-two trainers who spotted your friend at once, and Double Battles with a
-friend. Two friends can join at once.
+and Double Battles with a friend. Two friends can join at once.
 
-A trainer who is already battling a friend can spot you too (either one of
-two trainers battling them, or both). When they walk up: "<friend> is
-battling this trainer!" (or "these trainers!") "Join their battle, or battle
+A trainer who is already battling a friend can spot you too. When they walk
+up: "<friend> is battling this trainer! Join their battle, or battle
 alone?" JOIN BATTLE asks your friend as JOIN does (if they say no, or can't,
 you battle the trainer yourself); BATTLE ALONE is your own battle with them.
 
@@ -351,8 +349,6 @@ you battle the trainer yourself); BATTLE ALONE is your own battle with them.
     learn their moves, after a win).
   - The trainer gets a spot for each new player and sends out its next
     Moemon there if it has one (TEAM PADDING: at most one extra Moemon).
-    Against two trainers, the new spot goes to whichever has more Moemon
-    left, and from then on the two send out each other's Moemon too.
   - A Double Battle you started alone: your second Moemon goes back to its
     Ball and your friend takes that spot.
   - If someone leaves the game during the battle, it's called off, as in
@@ -1019,9 +1015,6 @@ used with credit for this non-commercial project as the artist allows.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.
-
-The POKé BALLS thrown and sent out in battle (and on the summary) are the
-HEARTGOLD / SOULSILVER ones, ripped by Sunday-Doneko.
 
 
 SPRITE EDITOR

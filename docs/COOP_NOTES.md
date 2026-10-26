@@ -766,24 +766,6 @@ PC, not 1-3: BG palette 1 in battle is the OPTIONS window frame (LoadBattleMenuW
 stay up during other battlers' moves (doubles/triples) flashed white with every backdrop flash (Double-Edge,
 Take Down...). The backdrop itself is 2-4.
 
-## HGSS POKé BALLS (1.26: battle and summary balls)
-The thrown / sent-out / summary ball sprites are the HEARTGOLD / SOULSILVER sheet (docs/user_images/35.png, ripped by
-Sunday-Doneko, credited in dist_extras/README.txt; tools/moemon_balls/hgss_balls.py writes graphics/balls/<ball>.png).
-Each ball: eleven 16x32 frames (include/pokeball.h BALL_FRAME_*): 0 closed (the sheet's first row, the round ball, as in
-menus: docs/user_images/36.png; the sheet's squashed row 8 isn't used), 1 open (23 px tall, its base on the closed
-ball's), 2 empty, 3-10 spinning (the sheet's rows 0-7). The ball's middle is the sprite's (8, 16), so every caller's
-coordinates are as with the old 16x16 balls. OAM 16x32 affine double; anim tile offsets are BALL_FRAME(n) = n * 8;
-BALL_ANIM_SPIN (7) loops the spin frames (2 frames each). StartBallSpin (pokeball.c) starts it for a throw
-(battle_anim_throw.c SpriteCB_Ball_Throw), the player's send-out flight (instead of affine anim 4) and the BALL EFFECTS
-editor's drop; landing goes back to frame 0. GENESIS / EPOCH sheets have their 16x16 art in every frame
-(MP_BallStyle_SpriteHasSpin FALSE): those still turn with affine anim 4. Palettes: POKé BALL's reds are slots 1-3 (dark
-to light) and it uses no slot past 8: COLOR ramps go into 1-3 (ramp shades 1-3), decorations take 9-15. Decorations:
-the closed frame at (6, 11), and on each spinning frame where 40+ red pixels face the screen, at their middle, over red
-pixels only (DecorateSpinFrames). Special balls with art in the sheet (LOVE, FRIEND, FAST, LEVEL, LURE, HEAVY, MOON,
-HEAL, DUSK, QUICK) load their own sheet (tag TAG_MP_BALL_HGSS 0x57B0 + special) and palette (TAG_MP_BALL_SPECIAL +
-special); DREAM is the POKé BALL in its ramp. Test hgss_balls (shots by hand: send-out spin, MASTER BALL throw, blue
-POKé BALL with a STAR, GENESIS, the summary's ball).
-
 ## GENESIS / EPOCH BALLS (Pokémon Red's and Crystal's POKé BALLS)
 
 Items ITEM_GENESIS_BALL (ITEM_052) / ITEM_EPOCH_BALL (ITEM_057), special balls 12 / 13 (style `c000` / `d000`, kept
@@ -1300,18 +1282,7 @@ the master builds A at 0-2, B at 3-5 (CreateNPCTrainerParty(.., FALSE)), MP_Coop
 smaller team once, no interleave (MP_Coop_ArrangeEnemyParty). Names/pictures/send-outs per side
 (MP_Coop_TwoTrainers, MP_Coop_TrainerPicFor; battle_message.c), BattleScript_MpCoopTwoTrainersWon (both lose texts,
 both prizes). The intro asked the right trainer's picture twice (MULTI and TWO_OPPONENTS blocks): over the link
-the second request never completes, so it's skipped in co-op. Joining in progress (1.26, protocol 51): a third player
-makes it a Triple Battle against both (a solo battle against two trainers becomes a co-op double against both). The
-conversion keeps BATTLE_TYPE_TWO_OPPONENTS and the enemy party where it is (slots 0-2 trainer A, 3-5 trainer B: a
-slot says whose a Pokémon is); the new foe spot (battler 5) takes the next Pokémon of the trainer with more left
-(JoinTwoTrainersNextFoe), and the triple's foe pool is shared from then on (MP_TripleSwitchRange). MpJoinPlan
-trainerIdB and the snapshot's loseTextB carry the second trainer to the joiner (sCoop.twoTrainers / trainerIdB via
-JoinSetSeats, gTrainerBattleOpponent_B in MP_Join_ApplySnapshot). "B sent out X" picks the trainer by the Pokémon's
-slot in a triple (MP_Coop_SecondTrainersMon, from B_BUFF1's party index so every game agrees), by side in a double.
-A joiner who came from a trainer script flags both trainers. MPR_COOP_BATTLING bytes 8-10: the second trainer's
-object and id (MP_TrainerBattleLocalIds: both objects from gApproachingTrainers); TryOfferBattleInProgress matches
-the trainer walking up against either, and two walking up against both. Test coop_two_join3 (mp joinask N: JOIN's
-request from a script).
+the second request never completes, so it's skipped in co-op. Joining in progress refuses it (JOIN_CANT_KIND).
 MPR_COOP_WAIT: + u8 localId2 (second held NPC, 0 = none), u16 waitAge.
 Held trainer spots a free friend (trainer_see.c first pass, MP_Coop_CanJoinHeldTrainer / MP_Coop_NoteHeldSpotter):
 only that trainer approaches; EventScript_TrainerApproach calls MP_Coop_TryJoinHeldTrainer (REQUEST arg 1,
