@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include "global.h"
 #include "sprite.h"
 #include "mp_bigsprite.h"
@@ -937,12 +940,37 @@ void AnimateSprite(struct Sprite *sprite)
         sAffineAnimFuncs[sprite->affineAnimBeginning](sprite);
 }
 
+// Moemon Co-op test harness (MOEMON_ANIMCHECK): every animation table / number a sprite starts, once each, so
+// tools can check the number against the table's size (an out-of-range one crashed on Windows)
+static void MpAnimCheck(const struct Sprite *sprite)
+{
+    static s8 sOn = -1;
+    static uintptr_t sSeen[4096];
+    static u16 sSeenCount;
+    uintptr_t key;
+    u16 i;
+    if (sOn < 0)
+        sOn = getenv("MOEMON_ANIMCHECK") != NULL;
+    if (!sOn)
+        return;
+    key = (uintptr_t)sprite->anims ^ ((uintptr_t)sprite->animNum << 56);
+    for (i = 0; i < sSeenCount; i++)
+        if (sSeen[i] == key)
+            return;
+    if (sSeenCount < ARRAY_COUNT(sSeen))
+        sSeen[sSeenCount++] = key;
+    printf("[animcheck] anims %p num %u cb %p\n", (const void *)sprite->anims, sprite->animNum, (void *)sprite->callback);
+    fflush(stdout);
+}
+
 void BeginAnim(struct Sprite *sprite)
 {
     s16 imageValue;
     u8 duration;
     u8 hFlip;
     u8 vFlip;
+
+    MpAnimCheck(sprite);
 
     sprite->animCmdIndex = 0;
     sprite->animEnded = FALSE;

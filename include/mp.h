@@ -1113,7 +1113,8 @@ void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c
 void MP_StartNormalWildBattle(void);                 // battle_setup.c
 void MP_Coop_ArrangeEnemyParty(void);
 u16 MP_Coop_TrainerPic(void);
-u16 MP_Coop_TrainerPicFor(u8 battler);   // two trainers: the right opponent is the second one
+u16 MP_Coop_TrainerPicFor(u8 battler);
+bool8 MP_Coop_SecondTrainersMon(u8 battler, u8 partyIdx);   // two trainers: the right opponent is the second one
 bool8 MP_Coop_TwoTrainers(void);         // a co-op battle against two trainers at once
 u16 MP_Coop_PartnerBackPicOr(u16 defaultPic);
 bool8 MP_Coop_PartnerHidesBack(void);
@@ -1133,7 +1134,8 @@ u8 MP_Coop_TakeJoinedOther(void);        // specialvar: we were in a friend's ba
 bool8 MP_Coop_CanJoinHeldTrainer(void);  // trainer_see.c: a held trainer may spot us
 void MP_Coop_NoteHeldSpotter(void);      // trainer_see.c: it did (right after MP_Coop_IsNpcHeld)
 void MP_EndJoinedTrainerBattle(void);    // battle_setup.c: our trainer script's battle was a friend's, and won
-u8 MP_TrainerBattleLocalId(void);          // battle_setup.c: the trainer this battle is against (object local id, 0 none)
+u8 MP_TrainerBattleLocalId(void);
+void MP_TrainerBattleLocalIds(u8 *localIdA, u8 *localIdB);   // battle_setup.c: two trainers at once: both (B 0 = one)          // battle_setup.c: the trainer this battle is against (object local id, 0 none)
 void MP_Coop_JoinedFromTrainerScript(void); // mp_join.c: JOIN BATTLE from our trainer's script got us in
 void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 

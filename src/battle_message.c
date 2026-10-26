@@ -2374,9 +2374,12 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gMpCoopBattle && MP_Coop_TwoTrainers() && GetBattlerPosition(gBattleScripting.battler) == B_POSITION_OPPONENT_RIGHT)
+                // (B_BUFF1 is the Pokémon coming out: its party slot is in the buffer on every game)
+                if (gMpCoopBattle && MP_Coop_SecondTrainersMon(gBattleScripting.battler,
+                                                               gBattleTextBuff1[1] == B_BUFF_MON_NICK ? gBattleTextBuff1[3]
+                                                               : gBattlerPartyIndexes[gBattleScripting.battler]))
                 {
-                    stringPtr = sText_Trainer2SentOutPkmn;   // Moemon Co-op: the second trainer's side
+                    stringPtr = sText_Trainer2SentOutPkmn;   // Moemon Co-op: the second trainer's Pokémon
                 }
                 else if (gMpCoopBattle)
                 {
