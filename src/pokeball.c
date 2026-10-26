@@ -1460,29 +1460,14 @@ static void SpriteCB_HitAnimHealthoxEffect(struct Sprite *sprite)
 
 void LoadBallGfx(u8 ballId)
 {
-    u16 var;
-
     if (GetSpriteTileStartByTag(gBallSpriteSheets[ballId].tag) == 0xFFFF)
     {
         LoadCompressedSpriteSheetUsingHeap(&gBallSpriteSheets[ballId]);
         LoadCompressedSpritePaletteUsingHeap(&gBallSpritePalettes[ballId]);
     }
 
-    switch (ballId)
-    {
-    case BALL_DIVE:
-// BUGFIX: The thrown Timer Ball has a unique fully open sprite that is never used, as it was never included in this case
-#ifdef BUGFIX
-    case BALL_TIMER:
-#endif
-    case BALL_LUXURY:
-    case BALL_PREMIER:
-        break;
-    default:
-        var = GetSpriteTileStartByTag(gBallSpriteSheets[ballId].tag);
-        LZDecompressVram(gOpenPokeballGfx, (void *)(OBJ_VRAM0 + 0x100 + var * 32));
-        break;
-    }
+    // Moemon Co-op: the stock game copied its "fully open" ball over the sheet's third 16x16 frame here; the HGSS
+    // sheets have their own open frame there (BALL_FRAME_OPEN), so nothing is copied
 }
 
 void FreeBallGfx(u8 ballId)
