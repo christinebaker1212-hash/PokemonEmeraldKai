@@ -8,6 +8,10 @@
 //  - envelope: how much of a note is left half a second after its loudest moment in the song (struck
 //    and plucked sounds die away, bowed, blown and organ sounds hold);
 //  - register: bass instruments for low parts, and the other way round.
+// Game Boy channels (Convert GB > GBA) are compared the same way, from the sound they make: a square at
+// its duty or the wave channel's 32 steps, built from their harmonics; a noise channel becomes a drum kit
+// with the GM drum each of its noise settings sounds like (brightness from the noise generator at that
+// clock, length from the song's notes).
 // A sample with no pitch is a drum: it gets the game GM kit's sound for the closest GM drum (kick, snare,
 // hi-hat, cymbal, tom...) by its brightness and length. Anything too far from every GM instrument (a
 // choir of real voices, sound effects) keeps its original sample.
@@ -17,6 +21,7 @@
 #include <math.h>
 #include "rip_gm.h"
 #include "inst.h"
+#include "engine.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -117,6 +122,73 @@ static float get8(const void *c, long i) {
     if (i < p->len) return i >= 0 ? p->d[i] / 128.0f : 0;
     if (!p->loops || p->len <= p->loopStart) return 0;
     return p->d[p->loopStart + (i - p->len) % (p->len - p->loopStart)] / 128.0f;
+}
+
+// a sound made of harmonics (k = 1..n at f0)
+typedef struct { float a[64]; int n; double f0, rate; } Additive;
+static float get_add(const void *c, long i) {
+    const Additive *p = c;
+    double t = (double)i / p->rate, v = 0;
+    for (int k = 1; k <= p->n; k++) if (p->a[k - 1] != 0) v += p->a[k - 1] * sin(2 * M_PI * k * p->f0 * t);
+    return (float)v;
+}
+typedef struct { const float *b; long n; } PF;
+static float getf(const void *c, long i) { const PF *p = c; return i >= 0 && i < p->n ? p->b[i] : 0; }
+
+#define GB_RATE 42048.0
+#define GB_F0 261.63
+
+// a Game Boy square (duty 0-3 = 12.5 / 25 / 50 / 75%), band-limited
+static void gb_square(int duty, Additive *o) {
+    static const double d[4] = {0.125, 0.25, 0.5, 0.75};
+    memset(o, 0, sizeof *o);
+    o->f0 = GB_F0; o->rate = GB_RATE; o->n = 64;
+    for (int k = 1; k <= 64; k++) o->a[k - 1] = (float)fabs(2 * sin(M_PI * k * d[duty & 3]) / (M_PI * k));
+}
+// the wave channel's 32 4-bit steps, each held for 1/32 of the cycle
+static void gb_wave(const uint8_t *w, Additive *o) {
+    memset(o, 0, sizeof *o);
+    o->f0 = GB_F0; o->rate = GB_RATE; o->n = 64;
+    for (int k = 1; k <= 64; k++) {
+        double re = 0, im = 0;
+        for (int j = 0; j < 32; j++) {
+            double x = ((w[j] & 15) - 7.5) / 7.5;
+            re += x * cos(2 * M_PI * k * j / 32);
+            im -= x * sin(2 * M_PI * k * j / 32);
+        }
+        double hold = k % 32 ? sin(M_PI * k / 32.0) / (M_PI * k / 32.0) : 0;
+        o->a[k - 1] = (float)(2 * sqrt(re * re + im * im) / 32 * fabs(hold));
+    }
+}
+// The noise generator (15-bit, or 7-bit "short") clocked at hz, heard at GB_RATE (each output sample the
+// average of the bits clocked out during it).
+static void gb_noise(double hz, int shortMode, float *out, long n) {
+    unsigned lfsr = 0x7FFF;
+    double acc = 0, step = hz / GB_RATE;
+    float last = 1;
+    for (long i = 0; i < n; i++) {
+        acc += step;
+        double sum = 0;
+        int cnt = 0;
+        while (acc >= 1) {
+            acc -= 1;
+            unsigned b = (lfsr ^ (lfsr >> 1)) & 1;
+            lfsr = (lfsr >> 1) | (b << 14);
+            if (shortMode) lfsr = (lfsr & ~0x40u) | (b << 6);
+            last = (~lfsr & 1) ? 1.0f : -1.0f;
+            sum += last;
+            if (++cnt > 64) { acc = 0; break; }
+        }
+        out[i] = cnt ? (float)(sum / cnt) : last;
+    }
+}
+// the clock of the noise setting MP2K plays at a key (gNoiseTable, the inverse of rip_song.c's noise_key)
+static double noise_hz(int key) {
+    int i = key - 21;
+    if (i < 0) i = 0;
+    if (i > 59) i = 59;
+    int e = sf_gNoiseTable[i], sh = e >> 4, rr = e & 7;
+    return 524288.0 / (rr ? rr : 0.5) / (double)(2 << sh);
 }
 
 // ------------------------------------------------------------------ the game's GM instruments
@@ -255,9 +327,202 @@ static int drum_key_for(float centroid, float lenSec) {
     return best;
 }
 
+// ------------------------------------------------------------------ Game Boy channels
+// How loud a note is in the engine over its first `frames` game frames (the song's typical note length):
+// a plucked or struck sound counts as loud as it is while the song's notes last.
+static float note_level(const SfVoice *v, int key, int frames) {
+    static Engine e;
+    static EInst inst;
+    static float buf[ENG_FRAME_SAMPLES * 2];
+    eng_init(&e);
+    inst_make(v, &inst);
+    eng_preview_on(&e, &inst, key, 127);
+    double sum = 0;
+    long n = 0;
+    for (int f = 0; f < frames; f++) {
+        eng_frame(&e, buf);
+        for (int i = 0; i < ENG_FRAME_SAMPLES * 2; i++) sum += (double)buf[i] * buf[i];
+        n += ENG_FRAME_SAMPLES * 2;
+    }
+    eng_preview_off(&e);
+    return n ? (float)sqrt(sum / n) : 0;
+}
+static int note_frames(float sec) {
+    int f = (int)lroundf(sec * 60);
+    return f < 3 ? 3 : f > 30 ? 30 : f;
+}
+static float loud_ratio(const SfVoice *orig, const SfVoice *gm, int key, int frames) {
+    if (key < 24 || key > 108) key = 60;
+    float a = note_level(orig, key, frames), b = note_level(gm, key, frames);
+    return a > 0 && b > 0 ? a / b : 1;
+}
+
+// Panning: the engine plays a Game Boy channel panned to one side at the same level on that side (the
+// other is off), but a sample panned to one side twice as loud there (half on each side in the middle).
+// The level match is made in the middle; this brings it to how the song pans the slot (energy-weighted).
+static float pan_fix(const Rip *r, const RipSong *song, int slot) {
+    int si = song->slotSample[slot];
+    double num = 0, den = 0;
+    const double ds0 = 128.0 * 128 + 127.0 * 127, cgb0 = 2.0;
+    for (long k = 0; k < (long)r->nframes * r->nvoices; k++) {
+        const RipVF *x = &r->vf[k];
+        if (x->sample != si) continue;
+        float a = x->l > x->r ? x->l : x->r;
+        if (a <= 1e-6f) continue;
+        int pan = (int)lroundf(64.0f + 63.0f * (x->r - x->l) / (x->r + x->l));
+        int y = 2 * (pan - 64);
+        double rr = y + 128, ll = 127 - y;
+        double ds = rr * rr + ll * ll;
+        double cgb = (rr / 2 >= ll || ll / 2 >= rr) ? 1.0 : 2.0;
+        num += (double)a * a * (ds / ds0) / (cgb / cgb0);
+        den += (double)a * a;
+    }
+    return den > 0 && num > 0 ? (float)sqrt(den / num) : 1.0f;
+}
+
+// a square or the wave channel: the GM instrument closest to how it sounds, how it's played and where
+static void gb_tone(const Rip *r, const RipSample *rs, const RipSong *song, int slot, RipGm *out) {
+    Additive a;
+    if (rs->kind == RIPS_SQUARE) gb_square(rs->param & 3, &a);
+    else gb_wave(rs->wave, &a);
+    Feat f;
+    features(get_add, &a, 0, a.rate, a.f0, &f);
+    if (!f.ok) return;
+    float key = song->slotKey[slot];
+    if (key > 0 && rs->kind == RIPS_WAVE) key -= 12;     // the wave channel's notes are written an octave up
+    // the wave channel has no volume envelope (every note holds until it stops), so how it holds says
+    // nothing; where it plays says more (it's usually the bass)
+    float sus = rs->kind == RIPS_WAVE ? -1 : song->slotSustain[slot];
+    int best = -1;
+    float bd = 1e30f;
+    for (int c = 0; c < sNumCand; c++) {
+        float d = cand_dist(&f, sus, key, &sCand[c]);
+        if (key > 0) {
+            int lo, hi;
+            gm_range(sCand[c].prog, &lo, &hi);
+            d += 0.08f * fabsf(key - (lo + hi) * 0.5f);   // the middle of the instrument's range fits best
+        }
+        if (getenv("MMS_GM_DEBUG") && d < 9) fprintf(stderr, "   %5.1f %3d %s\n", d, sCand[c].prog, sf_gm_names[sCand[c].prog]);
+        if (d < bd) { bd = d; best = c; }
+    }
+    if (best < 0) return;
+    SfVoice gv = sCand[best].v;
+    gv.attack = 255; gv.decay = 0; gv.sustain = 255; gv.release = 0;   // the envelope is in the expression
+    out->voice[slot] = gv;
+    out->prog[slot] = sCand[best].prog;
+    out->dist[slot] = bd;
+    out->gain[slot] = loud_ratio(&song->orig[slot], &gv, (int)lroundf(song->slotKey[slot]), note_frames(song->slotDur[slot])) *
+                      pan_fix(r, song, slot);
+    if (getenv("MMS_GM_DEBUG"))
+        fprintf(stderr, "slot %d %s key %.0f sus %.2f -> %d %s (%.1f) gain %.2f\n", slot, rs->kind == RIPS_SQUARE ? "square" : "wave",
+                key, song->slotSustain[slot], sCand[best].prog, sf_gm_names[sCand[best].prog], bd, out->gain[slot]);
+}
+
+// The game kit's drums as they sound: brightness of the sample as the kit plays it, and how long it lasts
+// (a one-shot's length; a looping one held or dying away by its envelope).
+typedef struct { int key; float centroid, len; } KitDrum;
+static KitDrum sKit[16];
+static int sNumKit = -1;
+
+static void build_kit(const SfVoice *kit) {
+    static const int keys[] = {36, 38, 40, 39, 42, 46, 44, 45, 49, 51, 57, 52, 37};
+    sNumKit = 0;
+    const SfVoice *g = group_voices(kit->sub);
+    if (!g) return;
+    for (size_t i = 0; i < sizeof keys / sizeof keys[0] && sNumKit < 16; i++) {
+        int k = keys[i];
+        if (drum_resolve(kit, k) != k) continue;       // the kit has nothing of its own there
+        const SfVoice *v = &g[k];
+        if (v->type & 0xC7 || v->ref < 0 || v->ref >= SF_NUM_SAMPLES) continue;
+        const SfSample *ss = &sf_samples[v->ref];
+        int fixed = v->type & 0x08;
+        double rate = ss->freq / 1024.0 * pow(2.0, ((fixed ? v->key : k) - 60) / 12.0);
+        P8 q = {(const int8_t *)(sf_pcm + ss->offset), (int)ss->size, (int)ss->loopStart, (ss->flags & 0xC0000000u) != 0};
+        Feat f;
+        features(get8, &q, 0, rate, 100, &f);
+        float len = (float)(ss->size / rate);
+        if (q.loops) {
+            // held at its sustain, or dying away by its decay (to a hundredth)
+            if (v->sustain > 16) len = 1.5f;
+            else len = v->decay > 0 && v->decay < 255 ? (float)(log(0.01) / log(v->decay / 256.0) / 60.0) : 1.5f;
+        }
+        for (int j = 0; j < sNumKit; j++) if (sKit[j].centroid == f.centroid && sKit[j].len == len) len = -1;   // the same sound again
+        if (len < 0) continue;
+        sKit[sNumKit].key = k;
+        sKit[sNumKit].centroid = f.centroid;
+        sKit[sNumKit].len = len;
+        sNumKit++;
+    }
+}
+
+static int kit_drum_for(float centroid, float lenSec) {
+    int best = 38;
+    float bd = 1e30f;
+    for (int i = 0; i < sNumKit; i++) {
+        float d = fabsf(log2f((centroid + 50) / (sKit[i].centroid + 50))) * 2 +
+                  fabsf(log2f((lenSec + 0.03f) / (sKit[i].len + 0.03f)));
+        if (d < bd) { bd = d; best = sKit[i].key; }
+    }
+    return best;
+}
+
+// a noise channel: a kit with, at every key (noise setting), the GM drum that setting sounds like
+static void noise_kit(const Rip *r, const RipSong *song, int slot, const SfVoice *kit, RipGm *out) {
+    (void)r;
+    const SfVoice *g = group_voices(kit->sub);
+    if (!g) return;
+    const RipSample *rs = &r->samples[song->slotSample[slot]];
+    CustomGroup *ng = realloc(out->groups, sizeof(CustomGroup) * (size_t)(out->ngroups + 1));
+    if (!ng) return;
+    out->groups = ng;
+    CustomGroup *cg = &out->groups[out->ngroups];
+    memset(cg, 0, sizeof *cg);
+    snprintf(cg->name, sizeof cg->name, "%s_noise%d", song->prefix, out->ngroups);
+    float defLen = song->slotDur[slot] > 0 ? song->slotDur[slot] : 0.2f;
+    static float buf[FFT_N];
+    float cent[60];
+    for (int i = 0; i < 60; i++) {
+        gb_noise(noise_hz(21 + i), rs->param & 1, buf, FFT_N);
+        PF pf = {buf, FFT_N};
+        Feat f;
+        features(getf, &pf, 0, GB_RATE, 100, &f);
+        cent[i] = f.centroid;
+    }
+    float lsum = 0, lcache[128];
+    int lused = 0;
+    int nf = note_frames(defLen);
+    for (int k = 0; k < 128; k++) lcache[k] = -1;
+    for (int k = 0; k < 128; k++) {
+        int i = k < 21 ? 0 : k > 80 ? 59 : k - 21;
+        float kd = song->keyDur ? song->keyDur[slot * 128 + k] : -1;
+        if (sNumKit < 0) build_kit(kit);
+        int dk = drum_resolve(kit, kit_drum_for(cent[i], kd >= 0 ? kd : defLen));
+        SfVoice dv = g[dk];
+        if (dv.type & 0xC7) { cg->v[k] = VOICE_PLACEHOLDER; continue; }
+        dv.type |= 0x08;                                 // the kit's own pitch, whatever the key
+        dv.attack = 255; dv.decay = 0; dv.sustain = 255; dv.release = 0;
+        cg->v[k] = dv;
+        if (kd >= 0) {                                   // a key the song plays: counts for the volume
+            if (lcache[dk] < 0) lcache[dk] = note_level(&dv, 60, nf);
+            lsum += lcache[dk];
+            lused++;
+            if (getenv("MMS_GM_DEBUG")) fprintf(stderr, "slot %d noise key %d (%.0f Hz, bright %.0f, %.2f s) -> drum %d\n", slot, k, noise_hz(k), cent[i], kd, dk);
+        }
+    }
+    SfVoice kv = *kit;
+    kv.sub = (int16_t)(INST_CUSTOM + out->ngroups);
+    out->ngroups++;
+    out->voice[slot] = kv;
+    out->prog[slot] = 128;
+    out->dist[slot] = 0;
+    float lo = note_level(&song->orig[slot], (int)lroundf(song->slotKey[slot] > 0 ? song->slotKey[slot] : 60), nf);
+    if (lused && lsum > 0 && lo > 0) out->gain[slot] = lo / (lsum / lused) * pan_fix(r, song, slot);
+}
+
 // ------------------------------------------------------------------ matching
 void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
     memset(out, 0, sizeof *out);
+    out->cgbNorm = 1;
     for (int s = 0; s < 128; s++) { out->prog[s] = -1; out->voice[s].type = 0xFF; out->gain[s] = 1; }
     if (sNumCand < 0) build_candidates();
     const SfVoice *kit = &sf_presets[SF_GM_DRUM_PRESET].voice;
@@ -265,7 +530,9 @@ void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
         int si = song->slotSample[slot];
         if (si < 0 || si >= r->nsamples) continue;
         const RipSample *rs = &r->samples[si];
-        if (rs->kind != RIPS_PCM || !rs->pcm || rs->len < 64) continue;   // Game Boy voices are already the game's
+        if (rs->kind == RIPS_NOISE) { noise_kit(r, song, slot, kit, out); continue; }
+        if (rs->kind == RIPS_SQUARE || rs->kind == RIPS_WAVE) { gb_tone(r, rs, song, slot, out); continue; }
+        if (rs->kind != RIPS_PCM || !rs->pcm || rs->len < 64) continue;
         P16 p = {rs->pcm, rs->len, rs->loopStart, rs->loops};
         float origRms;
         {
@@ -345,5 +612,13 @@ void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
     for (int s = 0; s < 128; s++) {
         if (out->gain[s] < 0.25f) out->gain[s] = 0.25f;
         if (out->gain[s] > 4) out->gain[s] = 4;
+    }
+    // Game Boy songs play at the hardware's level, which a GBA instrument can need more than a volume of
+    // 127 to reach: everything comes down together instead
+    if (r->kind == RIP_GBS) {
+        float m = 1;
+        for (int s = 0; s < 128; s++) if (out->voice[s].type != 0xFF && out->gain[s] > m) m = out->gain[s];
+        out->cgbNorm = 1 / m;
+        for (int s = 0; s < 128; s++) if (out->voice[s].type != 0xFF) out->gain[s] /= m;
     }
 }

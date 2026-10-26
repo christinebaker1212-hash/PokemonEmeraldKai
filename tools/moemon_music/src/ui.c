@@ -50,7 +50,7 @@ static int sSelSlot = -1;
 static int sTrackScroll, sSlotScroll;
 
 enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY,
-       MODAL_GBS_TRACK };
+       MODAL_GBS_TRACK, MODAL_DEFAULTS };
 static int sModal;
 static int sInModal;              // drawing the modal (its widgets take input)
 static char sSearch[64];
@@ -214,6 +214,16 @@ static void voices_changed(void)
     eng_refresh_instruments(&E);
     unlock();
     S.p.dirty = 1;
+}
+
+// a key as the slot plays it (its Octave)
+static int slot_key(int slot, int key)
+{
+    if (slot < 0 || S.c.slotDrum[slot]) return key;
+    key += project_slot_transpose(&S.p, slot);
+    while (key > 127) key -= 12;
+    while (key < 0) key += 12;
+    return key;
 }
 
 static void audition(const SfVoice *v, int key, int hold)
@@ -398,6 +408,8 @@ static void after_open(const char *path)
         snprintf(m, sizeof(m), "Opened %s: read from the game's ROM with its own instruments (the same engine as Moemon). Original = the GBA's sound.", path_base(path));
     else if (S.p.isRip && S.p.ripKind == RIP_GCN)
         snprintf(m, sizeof(m), "Opened %s: a recording, not notes, so the song is the recording itself at the GBA's rate, looping where the game does.", path_base(path));
+    else if (S.p.isRip && S.p.ripKind == RIP_GBS)
+        snprintf(m, sizeof(m), "Opened %s: the Game Boy's channels, which the GBA has too. Convert GB > GBA (SONG) makes them GBA instruments.", path_base(path));
     else if (S.p.isRip)
         snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original to compare with the console.", path_base(path), S.p.ncustom);
     else if (S.p.target[0] && !S.p.gmFixes) snprintf(m, sizeof(m), "Opened %s: a game song, with the game's own instruments and settings.", path_base(path));
@@ -609,11 +621,12 @@ static void draw_top(void)
     x += 146;
     if (button(W - 44, 8, 32, 28, "?", 1)) sModal = MODAL_HELP;
     if (button(W - 84, 8, 36, 28, "Aa", 1)) sModal = MODAL_DISPLAY;
+    if (button(W - 180, 8, 90, 28, "Defaults", 1)) sModal = MODAL_DEFAULTS;
     char name[400];
     if (have_song())
         snprintf(name, sizeof(name), "%s%s", S.p.path[0] ? path_base(S.p.path) : S.p.midiName, S.p.dirty ? " *" : "");
     else name[0] = 0;
-    textfit(x + 4, 14, W - 92 - x - 8, name, C_DIM);
+    textfit(x + 4, 14, W - 188 - x - 8, name, C_DIM);
 }
 
 static void draw_transport(void)
@@ -757,6 +770,19 @@ static void open_instrument_picker(void)
     sPickJump = 1;
 }
 
+// the selected instrument's Octave: every note it plays moves by whole octaves (the export too)
+static void octave_stepper(int x, int y)
+{
+    int o = S.p.octave[sSelSlot];
+    char lab[16];
+    snprintf(lab, sizeof(lab), o > 0 ? "+%d" : "%d", o);
+    if (stepper(x, y, "Octave", &o, -4, 4, 1, lab)) {
+        S.p.octave[sSelSlot] = (int8_t)o;
+        S.p.dirty = 1;
+        rebuild();
+    }
+}
+
 static void draw_slots(void)
 {
     int x = 640, y = 104, w = 630, h = 456;
@@ -782,9 +808,11 @@ static void draw_slots(void)
         else if (S.p.isRip) snprintf(lab, sizeof(lab), "Instrument %d", s + 1);   // the original's, in order of use
         else snprintf(lab, sizeof(lab), "%s", sf_gm_names[S.c.slotGm[s] >= 0 ? S.c.slotGm[s] : s]);
         textfit(x + 48, ry + 3, 210, lab, C_TEXT);
-        char nm[160];
+        char nm[160], nm2[180];
         voice_name(&S.p.voice[s], nm, sizeof(nm));
-        textfit(x + 266, ry + 3, w - 290, nm, C_ACCENT);
+        if (S.p.octave[s]) snprintf(nm2, sizeof(nm2), "%s (%+d oct)", nm, S.p.octave[s]);
+        else snprintf(nm2, sizeof(nm2), "%s", nm);
+        textfit(x + 266, ry + 3, w - 290, nm2, C_ACCENT);
         if (clicked(x + 6, ry, w - 22, rowH - 2)) {
             sSelSlot = s;
             if (dblClick) open_instrument_picker();
@@ -821,7 +849,7 @@ static void draw_slots(void)
         // a rip's instrument: back to the original, or the closest GM instrument found for it
         int hasGm = S.p.ripGm[sSelSlot].type != 0xFF;
         if (button(x + 182, by, 58, 26, "Orig", 1)) { *v = S.p.ripOrig[sSelSlot]; voices_changed(); }
-        if (button(x + 244, by, 58, 26, "GM", hasGm)) { *v = S.p.ripGm[sSelSlot]; voices_changed(); }
+        if (button(x + 244, by, 58, 26, S.p.ripKind == RIP_GBS ? "GBA" : "GM", hasGm)) { *v = S.p.ripGm[sSelSlot]; voices_changed(); }
     } else if (button(x + 182, by, 120, 26, "GM match", 1)) {
         int preset = S.c.slotDrum[sSelSlot] ? SF_GM_DRUM_PRESET : sf_gm_preset[S.c.slotGm[sSelSlot] >= 0 ? S.c.slotGm[sSelSlot] : sSelSlot];
         *v = sf_presets[preset].voice;
@@ -833,7 +861,7 @@ static void draw_slots(void)
     fill(hx, by, hw, 26, sHolding ? C_SEL : ho ? C_BTNHOT : C_BTN);
     frame_rect(hx, by, hw, 26, ho ? C_ACCENT : C_LINE);
     text(hx + 12, by + 5, "Hold to hear", C_TEXT);
-    if (pressed(hx, by, hw, 26)) audition(v, S.c.slotDrum[sSelSlot] ? 38 : 60, 1);
+    if (pressed(hx, by, hw, 26)) audition(v, S.c.slotDrum[sSelSlot] ? 38 : slot_key(sSelSlot, 60), 1);
     if (sHolding && !mDown) audition_off();
     text(x + 446, by + 5, "or keys Z-M", C_DIM);
 
@@ -841,6 +869,7 @@ static void draw_slots(void)
     int ry = by + 36;
     if (voice_is_group(v)) {
         text(x + 16, ry + 2, "Drum kits and key-split instruments keep each piece's own sound.", C_DIM);
+        if (!(v->type & 0x80) && !S.c.slotDrum[sSelSlot]) octave_stepper(x + 12, ry + 26);
         return;
     }
     int cgb = voice_is_cgb(v);
@@ -866,6 +895,7 @@ static void draw_slots(void)
         int pe = v->ref & 1;
         if (stepper(x + 12, ry, "Noise", &pe, 0, 1, 1, pe ? "short" : "white")) { v->ref = (int16_t)pe; voices_changed(); }
     }
+    if (!S.c.slotDrum[sSelSlot]) octave_stepper(x + 306, ry);
 }
 
 static const char *LOOP_LABELS[] = {"from the MIDI", "none", "whole song", "custom"};
@@ -972,9 +1002,15 @@ static void draw_song(void)
         sModal = MODAL_SONG_VOICES; sSearch[0] = 0; sPickSel = -1; sPickScroll = 0;
     }
     if (p->isRip && p->ripKind != RIP_GSF) {
-        // rips: the original instruments, or the closest General MIDI instruments of the game
+        // rips: the original instruments, or the closest General MIDI instruments of the game. Game Boy
+        // songs: their channels as they are, or Convert GB > GBA (each channel the GBA instrument or drum it sounds like)
+        int gb = p->ripKind == RIP_GBS;
+        ly += 32;
+        text(lx, ly + 3, gb ? "Channels" : "Instruments", C_DIM);
         for (int g = 0; g < 2; g++) {
-            if (!button(lx + 360 + g * 136, ly, g ? 100 : 130, 24, g ? "All GM" : "All original", 1)) continue;
+            int bx = lx + 110 + g * 166, bw = 156;
+            if (p->ripUseGm == g) fill(bx - 2, ly - 2, bw + 4, 28, C_ACCENT);
+            if (!button(bx, ly, bw, 24, g ? (gb ? "Convert GB > GBA" : "All GM") : (gb ? "Game Boy" : "All original"), 1)) continue;
             stop_song();
             project_rip_instruments(p, g);
             busy("Matching the original's loudness...");
@@ -982,8 +1018,10 @@ static void draw_song(void)
             studio_match_rip(&S);
             update_mute_mask();
             sFrames = 0;
-            set_status("%s", g ? "Every instrument with a close General MIDI match now uses the game's GM instrument; the rest stay original."
-                               : "Every instrument is the original's sample again.");
+            if (gb) set_status("%s", g ? "GB > GBA: every square, wave and noise channel is now the GBA instrument or drum it sounds like."
+                                       : "Every channel is the Game Boy's again.");
+            else set_status("%s", g ? "Every instrument with a close General MIDI match now uses the game's GM instrument; the rest stay original."
+                                    : "Every instrument is the original's sample again.");
         }
     } else if (button(lx + 360, ly, 200, 24, "All to GM matches", 1)) {
         project_default_voices(p, &S.c, 1);
@@ -1243,7 +1281,7 @@ static void draw_confirm(void)
 
 static void draw_help(void)
 {
-    int x, y, w = 900, h = 560;
+    int x, y, w = 900, h = 590;
     modal_box(&x, &y, w, h, "MOEMON MUSIC STUDIO " STUDIO_VERSION);
     static const char *lines[] = {
         "Plays MIDI files with Moemon Emerald Kai's own instruments and sound engine, so a song",
@@ -1252,9 +1290,9 @@ static void draw_help(void)
         "",
         "1. Open... a MIDI (or drop it on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",
-        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF rip: it plays in its console's emulator once and",
+        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube rip: it plays in its console's emulator once and",
         "   comes in with its original instruments. Kai / Original compares; All GM swaps instruments.",
-        "2. Click an instrument and Change... it, or tune its envelope. Hold to hear / keys Z-M.",
+        "2. Click an instrument and Change... it, or tune its envelope and Octave. Hold to hear / keys Z-M.",
         "3. M leaves a track out of the song, S plays a track alone.",
         "4. SONG: pick the game song it replaces, its volume, reverb and loop.",
         "5. Save the project (.mmsproj keeps the MIDI inside), then Export:",
@@ -1265,7 +1303,8 @@ static void draw_help(void)
         "and convert exactly like the game build converts them.",
         "",
         "Space: play / pause.  Esc: close a window.  Mouse wheel: scroll lists and change numbers.",
-        "Aa (top right): the font (Pixel, Smooth, Bold) and the window size.",
+        "Aa (top right): the font (Pixel, Smooth, Bold) and the window size. Defaults: settings every",
+        "song you open starts with. Game Boy songs: Convert GB > GBA makes their channels GBA instruments.",
     };
     for (int i = 0; i < (int)(sizeof(lines) / sizeof(lines[0])); i++) text(x + 20, y + 44 + i * 22, lines[i], C_TEXT);
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
@@ -1281,7 +1320,7 @@ static void handle_piano(SDL_Keycode k, int down)
     const char *p = strchr(PIANO_KEYS, (int)k);
     if (!p || !k) return;
     int key = 60 + (int)(p - PIANO_KEYS);
-    if (down) audition(&S.p.voice[sSelSlot], key, 1);
+    if (down) audition(&S.p.voice[sSelSlot], slot_key(sSelSlot, key), 1);
     else audition_off();
 }
 
@@ -1341,6 +1380,20 @@ static void settings_load(void)
         }
     }
     fclose(f);
+}
+
+static void defaults_path(char *buf, int n)
+{
+    char *dir = SDL_GetPrefPath("Moemon", "MusicStudio");
+    snprintf(buf, n, "%sdefaults.ini", dir ? dir : "");
+    SDL_free(dir);
+}
+
+static void defaults_store(void)
+{
+    char path[1024];
+    defaults_path(path, sizeof(path));
+    defaults_save(&g_defaults, path);
 }
 
 static void settings_save(void)
@@ -1411,6 +1464,98 @@ static void draw_display(void)
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
 }
 
+// a row of buttons, one lit: returns 1 when another is picked
+static int choice(int x, int y, const char *label, int *v, const char *const *names, const int *vals, int n, int bw)
+{
+    text(x, y + 3, label, C_DIM);
+    int ch = 0;
+    for (int i = 0; i < n; i++) {
+        int bx = x + 170 + i * (bw + 8);
+        if (*v == vals[i]) fill(bx - 2, y - 2, bw + 4, 26, C_ACCENT);
+        if (button(bx, y, bw, 22, names[i], 1) && *v != vals[i]) { *v = vals[i]; ch = 1; }
+    }
+    return ch;
+}
+
+// a value that can also be "the song's" (-1)
+static int opt_stepper(int x, int y, const char *label, int *v, int lo, int hi, int step, const char *off)
+{
+    char buf[16];
+    if (*v < 0) snprintf(buf, sizeof(buf), "%s", off);
+    else snprintf(buf, sizeof(buf), "%d", *v);
+    int was = *v;
+    int ch = stepper(x, y, label, v, lo, hi, step, buf);
+    if (ch && was < 0 && *v > was && *v < 0 + step) *v = 0;      // from "the song's" to the first value
+    if (ch && was >= 0 && *v < 0) *v = -1;
+    return ch;
+}
+
+static void draw_defaults(void)
+{
+    int x, y, w = 900, h = 600;
+    modal_box(&x, &y, w, h, "DEFAULTS");
+    text(x + 120, y + 10, "every MIDI and rip you open starts with these (saved projects keep their own)", C_DIM);
+    StudioDefaults *d = &g_defaults;
+    int ch = 0, ry = y + 44;
+    static const char *const SOF[] = {"The song's", "Off", "On"};
+    static const int VSOF[] = {-1, 0, 1};
+    text(x + 20, ry, "SONG", C_ACCENT);
+    ry += 26;
+    ch |= choice(x + 20, ry, "GBA accurate", &d->gbaAccurate, SOF, VSOF, 3, 110);
+    ry += 32;
+    ch |= opt_stepper(x + 20, ry, "Volume          ", &d->volume, -1, 127, 1, "song's");
+    {
+        char rb[16];
+        if (d->reverb <= -2) snprintf(rb, sizeof(rb), "song's");
+        else if (d->reverb < 0) snprintf(rb, sizeof(rb), "off");
+        else snprintf(rb, sizeof(rb), "%d", d->reverb);
+        if (stepper(x + 330, ry, "Reverb", &d->reverb, -2, 127, d->reverb < 0 ? 1 : 5, rb)) { if (d->reverb > 127) d->reverb = 127; ch = 1; }
+    }
+    ry += 32;
+    ch |= choice(x + 20, ry, "Even out volumes", &d->balance, SOF, VSOF, 3, 110);
+    ry += 32;
+    ch |= choice(x + 20, ry, "Drums first", &d->drumsFirst, SOF, VSOF, 3, 110);
+    ry += 40;
+    text(x + 20, ry, "RIPS", C_ACCENT);
+    ry += 26;
+    static const char *const RG[] = {"Original", "All GM"};
+    static const char *const GB[] = {"Game Boy", "Convert GB > GBA"};
+    static const int V01[] = {0, 1};
+    ch |= choice(x + 20, ry, "Instruments", &d->ripGm, RG, V01, 2, 150);
+    ry += 32;
+    ch |= choice(x + 20, ry, "Game Boy songs", &d->gbToGba, GB, V01, 2, 150);
+    ry += 40;
+    text(x + 20, ry, "INSTRUMENTS", C_ACCENT);
+    text(x + 130, ry, "sample instruments' envelope (Game Boy channels and drum kits keep theirs)", C_DIM);
+    ry += 26;
+    ch |= opt_stepper(x + 20, ry, "Attack", &d->attack, -1, 255, 5, "song's");
+    ch |= opt_stepper(x + 230, ry, "Decay", &d->decay, -1, 255, 5, "song's");
+    ch |= opt_stepper(x + 430, ry, "Sustain", &d->sustain, -1, 255, 5, "song's");
+    ch |= opt_stepper(x + 646, ry, "Release", &d->release, -1, 255, 5, "song's");
+    ry += 32;
+    {
+        char lab[16];
+        snprintf(lab, sizeof(lab), d->octave > 0 ? "+%d" : "%d", d->octave);
+        ch |= stepper(x + 20, ry, "Octave", &d->octave, -4, 4, 1, lab);
+        text(x + 230, ry + 2, "every instrument but drums plays this many octaves up or down", C_DIM);
+    }
+    if (ch) defaults_store();
+    if (button(x + 20, y + h - 44, 200, 30, "Apply to this song", have_song())) {
+        stop_song();
+        busy("Applying the defaults...");
+        studio_defaults_settings(&S, d);
+        studio_rebuild(&S);
+        if (studio_defaults_voices(&S, d)) studio_rebuild(&S);
+        if (S.p.isRip) studio_match_rip(&S);
+        S.p.dirty = 1;
+        update_mute_mask();
+        sFrames = 0;
+        set_status("%s", "The defaults are applied to this song.");
+    }
+    if (button(x + 230, y + h - 44, 100, 30, "Reset", 1)) { defaults_reset(d); defaults_store(); }
+    if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
+}
+
 int ui_main(int argc, char **argv)
 {
     // Windows: draw at the screen's real pixels instead of letting display scaling stretch (and blur) the window
@@ -1421,6 +1566,12 @@ int ui_main(int argc, char **argv)
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     settings_load();
+    {
+        char dp[1024];
+        defaults_path(dp, sizeof(dp));
+        if (getenv("MMS_DEFAULTS")) snprintf(dp, sizeof(dp), "%s", getenv("MMS_DEFAULTS"));
+        defaults_load(&g_defaults, dp);
+    }
     sWin = SDL_CreateWindow("Moemon Music Studio", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
                             SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     sRen = SDL_CreateRenderer(sWin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -1539,6 +1690,7 @@ int ui_main(int argc, char **argv)
         case MODAL_HELP: draw_help(); break;
         case MODAL_DISPLAY: draw_display(); break;
         case MODAL_GBS_TRACK: draw_gbs_track(); break;
+        case MODAL_DEFAULTS: draw_defaults(); break;
         }
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit

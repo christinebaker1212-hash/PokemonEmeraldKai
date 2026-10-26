@@ -720,6 +720,26 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
             tr = g;
         }
 
+        // each instrument's Octave: its notes move (a track changing instrument changes how far)
+        {
+            int any = 0;
+            for (int i = 0; i < 128; i++) if (o->slotTranspose[i]) any = 1;
+            if (any) {
+                stable_sort(&tr);
+                int slot = gm && cd->drum && drumSlot[0] >= 0 ? drumSlot[0] : 0;
+                for (int i = 0; i < tr.n; i++) {
+                    Ev *e = &tr.v[i];
+                    if (e->type == EV_InstrumentChange) slot = e->param1 & 0x7F;
+                    else if (e->type == EV_Note && o->slotTranspose[slot]) {
+                        int k = e->note + o->slotTranspose[slot];
+                        while (k > 127) k -= 12;
+                        while (k < 0) k += 12;
+                        e->note = (uint8_t)k;
+                    }
+                }
+            }
+        }
+
         // which slots this track selects
         for (int i = 0; i < tr.n; i++) {
             if (tr.v[i].type == EV_InstrumentChange) {

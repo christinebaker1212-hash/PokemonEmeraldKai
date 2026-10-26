@@ -7,7 +7,8 @@
 //   moemon_music_studio --dump-exact IN VOLUME            the same, converted like mid2agb -E -V VOLUME
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
 //   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
-// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF); MMS_BIOS = the PlayStation BIOS folder.
+// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF, GameCube); MMS_BIOS = the PlayStation BIOS folder.
+// MMS_DEFAULTS = a defaults file (the window's Defaults panel saves one) every opened song starts with.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,10 @@ int studio_open_track(Studio *s, const char *path, int gbsTrack)
            : rip_kind_of(path) >= 0      ? project_load_rip(&s->p, path, g_biosDir, gbsTrack, err, sizeof(err))
                                          : project_load_midi(&s->p, path, err, sizeof(err));
     if (!ok) { snprintf(s->msg, sizeof(s->msg), "%s", err); return 0; }
+    int isProject = ends_with(path, ".mmsproj");
+    if (!isProject) studio_defaults_settings(s, &g_defaults);
     if (!studio_rebuild(s)) return 0;
+    if (!isProject && studio_defaults_voices(s, &g_defaults) && !studio_rebuild(s)) return 0;
     if (rip_kind_of(path) >= 0) studio_match_rip(s);
     if (err[0] && ends_with(path, ".mmsproj")) snprintf(s->msg, sizeof(s->msg), "%s", err);
     return 1;
@@ -55,6 +59,7 @@ int cli_main(int argc, char **argv)
     if (argc < 3) { fprintf(stderr, "usage: see the top of src/cli.c\n"); return 2; }
     inst_init();
     studio_init(&s);
+    if (getenv("MMS_DEFAULTS")) defaults_load(&g_defaults, getenv("MMS_DEFAULTS"));   // the settings panel's file
     if (!studio_open(&s, argv[2])) { fprintf(stderr, "%s\n", s.msg); return 1; }
     char err[512] = {0};
 

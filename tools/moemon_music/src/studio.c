@@ -4,6 +4,7 @@
 #include "studio.h"
 #include "inst.h"
 #include <math.h>
+#include "rip.h"
 
 char g_biosDir[1024];
 
@@ -106,12 +107,19 @@ int studio_rebuild(Studio *s)
             if (s->c.slotUsed[i]) s->gain[i] = voice_gm_gain(&s->p.voice[i]);
     // rips: a General MIDI instrument picked for an original one is brought to the original's loudness
     int ripGains = 0;
-    if (s->p.isRip && s->p.gmFixes)
+    if (s->p.isRip && s->p.gmFixes) {
         for (int i = 0; i < 128; i++)
             if (s->c.slotUsed[i] && s->p.ripGm[i].type != 0xFF && voice_same(&s->p.voice[i], &s->p.ripGm[i])) {
                 s->gain[i] = s->p.ripGmGain[i];
                 ripGains = 1;
             }
+        // Game Boy songs with some channels made GBA instruments: those came down to fit under a volume
+        // of 127, so the channels still on the Game Boy come down as much
+        if (ripGains && s->p.ripKind == RIP_GBS && s->p.ripCgbNorm < 1)
+            for (int i = 0; i < 128; i++)
+                if (s->c.slotUsed[i] && !voice_same(&s->p.voice[i], &s->p.ripGm[i]) && voice_is_cgb(&s->p.voice[i]))
+                    s->gain[i] = s->p.ripCgbNorm;
+    }
     o.slotGain = (s->p.gmFixes && s->p.balance) || ripGains ? s->gain : NULL;
     if (s->p.gmFixes || ripGains) {
         conv_free(&s->c);
@@ -131,4 +139,86 @@ int studio_rebuild(Studio *s)
     studio_measure(s);
     s->msg[0] = 0;
     return 1;
+}
+
+// ------------------------------------------------------------------ defaults
+
+StudioDefaults g_defaults = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0};
+
+void defaults_reset(StudioDefaults *d)
+{
+    StudioDefaults z = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0};
+    *d = z;
+}
+
+static const char *const DEF_KEYS[] = {"gba_accurate", "volume", "reverb", "balance", "drums_first", "rip_gm", "gb_to_gba",
+                                       "attack", "decay", "sustain", "release", "octave"};
+#define NUM_DEF_KEYS 12
+
+static int *def_field(StudioDefaults *d, int i)
+{
+    int *f[NUM_DEF_KEYS] = {&d->gbaAccurate, &d->volume, &d->reverb, &d->balance, &d->drumsFirst, &d->ripGm, &d->gbToGba,
+                            &d->attack, &d->decay, &d->sustain, &d->release, &d->octave};
+    return f[i];
+}
+
+int defaults_load(StudioDefaults *d, const char *path)
+{
+    FILE *f = fopen(path, "r");
+    if (!f) return 0;
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        char *eq = strchr(line, '=');
+        if (!eq) continue;
+        *eq = 0;
+        for (int i = 0; i < NUM_DEF_KEYS; i++)
+            if (!strcmp(line, DEF_KEYS[i])) *def_field(d, i) = atoi(eq + 1);
+    }
+    fclose(f);
+    if (d->octave < -4) d->octave = -4;
+    if (d->octave > 4) d->octave = 4;
+    return 1;
+}
+
+int defaults_save(const StudioDefaults *d, const char *path)
+{
+    FILE *f = fopen(path, "w");
+    if (!f) return 0;
+    StudioDefaults c = *d;
+    for (int i = 0; i < NUM_DEF_KEYS; i++) fprintf(f, "%s=%d\n", DEF_KEYS[i], *def_field(&c, i));
+    return fclose(f) == 0;
+}
+
+int studio_defaults_settings(Studio *s, const StudioDefaults *d)
+{
+    Project *p = &s->p;
+    int ch = 0;
+    if (d->gbaAccurate >= 0 && p->gbaAccurate != d->gbaAccurate) { p->gbaAccurate = d->gbaAccurate; project_apply_mode(p); ch = 1; }
+    if (d->volume >= 0 && p->masterVol != d->volume) { p->masterVol = d->volume; ch = 1; }
+    if (d->reverb >= -1 && p->reverb != d->reverb) { p->reverb = d->reverb; ch = 1; }
+    if (d->balance >= 0 && p->balance != d->balance) { p->balance = d->balance; ch = 1; }
+    if (d->drumsFirst >= 0 && p->drumsFirst != d->drumsFirst) { p->drumsFirst = d->drumsFirst; ch = 1; }
+    return ch;
+}
+
+int studio_defaults_voices(Studio *s, const StudioDefaults *d)
+{
+    Project *p = &s->p;
+    int ch = 0;
+    if (p->isRip && p->ripKind != RIP_GSF) {
+        int want = p->ripKind == RIP_GBS ? d->gbToGba : d->ripGm;
+        if (want != p->ripUseGm) { project_rip_instruments(p, want); ch = 1; }
+    }
+    for (int i = 0; i < 128; i++) {
+        if (!s->c.slotUsed[i] || s->c.slotDrum[i]) continue;
+        SfVoice *v = &p->voice[i];
+        if (v->type & 0x80) continue;                                  // drum kits
+        if (d->octave && p->octave[i] != d->octave) { p->octave[i] = (int8_t)d->octave; ch = 1; }
+        if (voice_is_group(v) || voice_is_cgb(v)) continue;
+        int e[4] = {d->attack, d->decay, d->sustain, d->release};
+        uint8_t *dst[4] = {&v->attack, &v->decay, &v->sustain, &v->release};
+        for (int k = 0; k < 4; k++)
+            if (e[k] >= 0 && *dst[k] != e[k]) { *dst[k] = (uint8_t)e[k]; p->voiceSet[i] = 1; ch = 1; }
+    }
+    return ch;
 }

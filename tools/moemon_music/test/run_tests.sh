@@ -39,6 +39,30 @@ python3 test/read_kaisong.py "$T/many10.kaisong" | grep -q "^version 1, 10 track
 "$B" --raw "$T/many.mmsproj" "$T/many.f32" 600
 test -s "$T/gm.wav"
 
+echo "== Defaults (what every opened song starts with) and Octave"
+printf 'octave=1\nvolume=90\nrelease=200\n' > "$T/def.ini"
+MMS_DEFAULTS="$T/def.ini" "$B" --save "$T/gm.mid" "$T/gm_def.mmsproj" mus_route104
+grep -q '^volume=90$' "$T/gm_def.mmsproj"
+grep -q '^octave0=1$' "$T/gm_def.mmsproj"
+MMS_DEFAULTS="$T/def.ini" "$B" --dump "$T/gm.mmsproj" | cmp - "$T/a.txt"       # projects keep their own settings
+mkdir -p "$T/d0" "$T/d1"
+"$B" --decomp "$T/gm.mmsproj" "$T/d0"
+"$B" --decomp "$T/gm_def.mmsproj" "$T/d1"
+# every note an octave up, but the drums
+python3 - "$T/d0/mus_route104.s" "$T/d1/mus_route104.s" <<'PY'
+import re, sys
+a, b = (open(p).read().split('\n') for p in sys.argv[1:3])
+assert len(a) == len(b), 'the song changed shape'
+up = same = 0
+for x, y in zip(a, b):
+    mx, my = re.search(r'\bN\d+\s*,\s*(\d+)', x), re.search(r'\bN\d+\s*,\s*(\d+)', y)
+    if not mx: continue
+    d = int(my.group(1)) - int(mx.group(1))
+    assert d in (0, 12), 'a note moved %d' % d
+    up += d == 12; same += d == 0
+assert up > 20 and same > 5, (up, same)    # melodic notes up, drum notes kept
+PY
+
 # Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
 # PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
 # band, export a .kaisong the reader accepts and come back the same from its project.
@@ -55,6 +79,32 @@ if [ -n "$MMS_RIPS" ]; then
             sp=$(python3 test/compare_timing.py "$T/rip_orig.wav" "$T/rip_kai.wav" 20 | tail -1 | sed 's/.*spread (mean |lag - median|) \([0-9.]*\).*/\1/')
             echo "    timing spread $sp ms"
             python3 -c "import sys; sys.exit(0 if float('$sp') <= 10 else 1)" ;;
+        esac
+        case "$f" in *.mini2sf|*.2sf)   # DS: the sound keeps time with the channels (no drift)
+            "$B" --render "$f" "$T/rip_kai60.wav" 60
+            dr=$(python3 test/compare_timing.py "$T/rip_orig.wav" "$T/rip_kai60.wav" 60 | grep '^lag ms' | python3 -c "
+import sys, statistics as st
+v = [float(x) for x in sys.stdin.read().split(':')[1].split()]
+print('%.0f' % abs(st.median(v[-6:]) - st.median(v[2:8])))")
+            echo "    drift over a minute $dr ms"
+            python3 -c "import sys; sys.exit(0 if float('$dr') <= 10 else 1)" ;;
+        esac
+        case "$f" in *.m3u|*.gbs)   # Game Boy: Convert GB > GBA (other instruments, near the original's sound and level)
+            printf 'gb_to_gba=1\n' > "$T/gb.ini"
+            MMS_DEFAULTS="$T/gb.ini" "$B" --render "$f" "$T/rip_gba.wav" 30
+            d=$(python3 test/compare_audio.py "$T/rip_orig.wav" "$T/rip_gba.wav" 30 10 | grep overall | awk '{print $2}')
+            l=$(python3 -c "
+import wave, numpy as np, sys
+def rms(p):
+    w = wave.open(p); a = np.frombuffer(w.readframes(min(w.getnframes(), 30 * w.getframerate())), dtype='<i2') / 32768.0
+    return 20 * np.log10(np.sqrt((a ** 2).mean()) + 1e-9)
+print('%.1f' % (rms('$T/rip_gba.wav') - rms('$T/rip_orig.wav')))")
+            echo "    GB > GBA: $d dB, level $l dB"
+            python3 -c "import sys; sys.exit(0 if float('$d') <= 6 and abs(float('$l')) <= 4 else 1)"
+            MMS_DEFAULTS="$T/gb.ini" "$B" --save "$f" "$T/rip_gba.mmsproj"
+            grep -q '^rip_use_gm=1$' "$T/rip_gba.mmsproj"
+            "$B" --render "$T/rip_gba.mmsproj" "$T/rip_gba2.wav" 30
+            cmp -s "$T/rip_gba.wav" "$T/rip_gba2.wav" ;;
         esac
         "$B" --save "$f" "$T/rip.mmsproj"
         "$B" --export "$T/rip.mmsproj" "$T/rip.kaisong"

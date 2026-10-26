@@ -27,6 +27,7 @@ typedef struct {
     float slotSustain[128];      // what's left of a note 0.5 s after its peak (median), -1 = notes too short
     float slotDur[128];          // median note length (s)
     uint8_t slotNoise[128];      // played at one pitch all the time (a drum)
+    float *keyDur;               // noise slots: [slot * 128 + key] median note length (s) at each key, -1 none
     int hardwareLevels;          // only Game Boy channels: their volume is the hardware's (no loudness match)
     char prefix[24];             // custom sample names start with this
     CustomSample *custom;        // the original instruments (voices' refs are INST_CUSTOM + index)

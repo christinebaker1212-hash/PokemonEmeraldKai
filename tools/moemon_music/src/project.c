@@ -36,6 +36,7 @@ void project_init(Project *p)
     memset(p, 0, sizeof(*p));
     for (int i = 0; i < 128; i++) { p->ripGm[i].type = 0xFF; p->ripGmGain[i] = 1; }
     p->ripGain = 1;
+    p->ripCgbNorm = 1;
     p->masterVol = 100;
     p->reverb = 50;
     p->priority = 0;
@@ -79,6 +80,18 @@ void project_conv_opts(const Project *p, ConvOpts *o)
     o->exclude = p->muted;
     o->voices = p->voice;
     o->drumsFirst = p->drumsFirst;
+    for (int s = 0; s < 128; s++) o->slotTranspose[s] = (int8_t)project_slot_transpose(p, s);
+}
+
+static int is_wave(const SfVoice *v) { return !(v->type & 0xC0) && (v->type & 7) == 3; }
+
+int project_slot_transpose(const Project *p, int s)
+{
+    const SfVoice *v = &p->voice[s];
+    if (v->type & 0x80) return 0;                      // a drum kit: the key picks the drum
+    int t = 12 * p->octave[s];
+    if (p->isRip && p->ripKind != RIP_GSF) t += 12 * (is_wave(v) - is_wave(&p->ripOrig[s]));
+    return t;
 }
 
 uint8_t project_reverb_byte(const Project *p)
@@ -325,9 +338,13 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
     }
     // the closest General MIDI instruments of the game (the "All GM" set)
     {
-        RipGm gm;
+        static RipGm gm;
+        inst_custom_bind(song.custom, song.ncustom);      // the original voices are measured against the GM ones
         rip_gm_match(r, &song, &gm);
         for (int s = 0; s < 128; s++) { np.ripGm[s] = gm.voice[s]; np.ripGmGain[s] = gm.gain[s]; }
+        np.cgroup = gm.groups;
+        np.ncgroup = gm.ngroups;
+        np.ripCgbNorm = gm.cgbNorm;
     }
     np.rip = r;
     np.custom = song.custom;
@@ -405,7 +422,9 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         fprintf(f, "rip_info=%s\n", p->ripInfo);
         fprintf(f, "rip_gain=%.6f\n", p->ripGain);
         fprintf(f, "rip_use_gm=%d\n", p->ripUseGm);
+        fprintf(f, "rip_cgbnorm=%.6f\n", p->ripCgbNorm);
     }
+    for (int s = 0; s < 128; s++) if (p->octave[s]) fprintf(f, "octave%d=%d\n", s, p->octave[s]);
     // custom samples before the voices that use them
     for (int i = 0; i < p->ncustom; i++) {
         const CustomSample *c = &p->custom[i];
@@ -589,6 +608,11 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "rip_track")) np.ripTrack = atoi(v);
         else if (!strcmp(k, "rip_info")) snprintf(np.ripInfo, sizeof(np.ripInfo), "%s", v);
         else if (!strcmp(k, "rip_gain")) np.ripGain = (float)atof(v);
+        else if (!strcmp(k, "rip_cgbnorm")) np.ripCgbNorm = (float)atof(v);
+        else if (!strncmp(k, "octave", 6)) {
+            int s = atoi(k + 6), o = atoi(v);
+            if (s >= 0 && s < 128 && o >= -4 && o <= 4) np.octave[s] = (int8_t)o;
+        }
         else if (!strcmp(k, "rip_use_gm")) np.ripUseGm = atoi(v); else if (!strcmp(k, "midi_name")) snprintf(np.midiName, sizeof(np.midiName), "%s", v);
         else if (!strcmp(k, "midi")) inMidi = 1;
     }

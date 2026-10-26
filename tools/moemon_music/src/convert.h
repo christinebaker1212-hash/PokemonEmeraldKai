@@ -25,6 +25,7 @@ typedef struct {
     int drumsFirst;          // GM fixes: drum-channel tracks get priority 1 (PRIO), so drum hits win a voice
     const float *slotGain;   // GM fixes: a volume factor per voice slot (evens out how loud the game's
                              // instruments are), applied to every VOL a track sends (NULL: none)
+    int8_t slotTranspose[128];   // semitones every note played on a slot moves (the instrument's Octave)
 } ConvOpts;
 
 typedef struct {

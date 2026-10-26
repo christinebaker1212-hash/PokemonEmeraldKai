@@ -130,8 +130,11 @@ int nds_render(RipEmu *e, int16_t *buf, int n) {
             got += k;
             continue;
         }
-        NDS_exec<false>();
+        // Each DS frame queues 547.06 samples and a pull takes at most 546: take what's queued first and
+        // run the DS only when it's empty, or the sound falls behind the channels (2 ms a second).
+        g_filled = g_used = 0;
         SPU_Emulate_user();
+        if (!g_filled) NDS_exec<false>();
     }
     return 0;
 }

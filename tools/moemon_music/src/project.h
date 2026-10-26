@@ -48,6 +48,8 @@ typedef struct {
     float ripGmGain[128];     // a GM instrument's volume factor (its sample against the original's)
     struct Rip *rip;          // the recording (its sound plays as "original"); NULL when the file is gone
     float ripGain;            // the loudness match (studio_match_rip)
+    float ripCgbNorm;         // GBS: the level of a slot left on its Game Boy channel once others are GBA instruments
+    int8_t octave[128];       // each slot's notes moved by whole octaves (-4..4)
     // samples the project brings (rips' original instruments); voices refer to them as INST_CUSTOM + i
     CustomSample *custom;
     int ncustom;
@@ -82,6 +84,9 @@ void project_default_voices(Project *p, const Conv *c, int force);
 // Sets every used slot to what a game song's voicegroup has there.
 void project_use_song_group(Project *p, const Conv *c, int group);
 void project_conv_opts(const Project *p, ConvOpts *o);
+// How far a slot's notes move (semitones): its Octave, and for rips the octave MP2K plays the Game Boy
+// wave channel lower than everything else (the rip's notes are written for the voice it started with).
+int project_slot_transpose(const Project *p, int slot);
 uint8_t project_reverb_byte(const Project *p);
 
 int read_file(const char *path, uint8_t **data, size_t *len);

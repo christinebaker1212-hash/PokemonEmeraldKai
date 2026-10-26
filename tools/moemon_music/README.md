@@ -41,6 +41,13 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
   of the game (compared by harmonic make-up, whether notes hold or die away, and the instrument's
   usual range; drums by brightness and length). Instruments with no close GM match keep the
   original sample. Per instrument: **Orig** / **GM**, or **Change...** as usual.
+- **Game Boy / Convert GB > GBA** (SONG, Game Boy songs): the channels as the GBA's own Game Boy
+  channels, or each one as the GBA instrument it sounds like. Squares (by duty) and the wave channel
+  (its 32 steps) are built from their harmonics and matched like samples, with how the song holds
+  them and where they play (the wave channel is usually the bass); the noise channel becomes a drum
+  kit with, for each noise setting the song uses, the game drum of the same brightness and length.
+  Levels are matched in the engine, panning included, then brought down together so none goes past
+  a volume of 127 (Game Boy channels play louder than samples). Per channel: **Orig** / **GBA**.
 - Exports carry the original samples: `.kaisong` version 2 (`SMPL` / `WAVE` chunks), decomp WAVs.
 
 - **Plays like the game.** `src/engine.c` is the game's MP2K engine (`src/music_player.c`,
@@ -86,7 +93,8 @@ game build does, and writes `build/gen/` (the program embeds it; nothing else sh
 Open a MIDI (or drop one on the window). TRACKS lists each MIDI channel: **M** leaves it out of
 the song, **S** plays it alone. INSTRUMENTS lists the voice slots the song uses: pick one, then
 **Change...** (every game instrument, by category, with search; click to hear), **GM match**,
-**Hold to hear** or keys Z-M, and its envelope. SONG sets the game song it replaces, volume,
+**Hold to hear** or keys Z-M, its envelope and its **Octave** (every note it plays moves by whole
+octaves, in the exports too). SONG sets the game song it replaces, volume,
 reverb, priority, the loop (MIDI markers, none, whole song, custom bars), and can take every
 instrument from a game song's voicegroup. **GBA accurate** (off unless turned on) plays and exports the way the game
 would: 10 tracks, 5 sample voices, the rest of a busy moment cut off. Off, the song plays and exports
@@ -95,6 +103,11 @@ can't play such songs until its music player gets more tracks and voices. **Drum
 gives drum tracks priority 1 so their hits win voices in GBA accurate mode. Then **Save** and **Export .kaisong** / **Export decomp**.
 **Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
 and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
+**Defaults** (top right): settings every MIDI and rip you open starts with: GBA accurate, volume,
+reverb, even out volumes, drums first, rips' original or GM instruments, Convert GB > GBA, sample
+instruments' attack / decay / sustain / release and an octave for every instrument but drums.
+Each can stay "the song's". Saved projects keep their own; **Apply to this song** uses them now.
+They live in `defaults.ini` in the settings folder (the command line reads one from `MMS_DEFAULTS`).
 
 Command line (also what the tests use):
 

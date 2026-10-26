@@ -324,6 +324,8 @@ static void make_prefix(const Rip *r, char *out, int n) {
 
 void rip_song_free(RipSong *s) {
     custom_list_free(&s->custom, &s->ncustom);
+    free(s->keyDur);
+    s->keyDur = NULL;
     free(s->mid);
     s->mid = NULL;
     s->midLen = 0;
@@ -650,6 +652,25 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         out->slotNoise[si] = cnt >= 4 && !distinct;
         (void)pitches;
         free(keys); free(sus); free(dur);
+    }
+
+    // noise channels: how long the notes at each noise setting (key) last, for drum matching
+    out->keyDur = malloc(sizeof(float) * 128 * (size_t)(nslots > 0 ? nslots : 1));
+    if (out->keyDur) {
+        for (int i = 0; i < 128 * (nslots > 0 ? nslots : 1); i++) out->keyDur[i] = -1;
+        float *d = malloc(sizeof(float) * (size_t)nn);
+        for (int si = 0; si < nslots && d; si++) {
+            if (r->samples[out->slotSample[si]].kind != RIPS_NOISE) continue;
+            for (int k = 0; k < 128; k++) {
+                int c = 0;
+                for (int i = 0; i < nn; i++)
+                    if (notes[i].sample == out->slotSample[si] && notes[i].key == k) d[c++] = (notes[i].f1 - notes[i].f0) / 60.0f;
+                if (!c) continue;
+                qsort(d, c, sizeof(float), cmp_float);
+                out->keyDur[si * 128 + k] = d[c / 2];
+            }
+        }
+        free(d);
     }
 
     // the loop
