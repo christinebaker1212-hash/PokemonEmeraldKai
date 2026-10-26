@@ -48,6 +48,7 @@ void project_init(Project *p)
     p->balance = 1;
     p->drumsFirst = 1;
     for (int i = 0; i < 128; i++) p->voice[i] = VOICE_PLACEHOLDER;
+    for (int i = 0; i < CONV_MAX_CAND; i++) p->trackLock[i] = -1;
 }
 
 void project_apply_mode(Project *p)
@@ -65,6 +66,7 @@ void project_free(Project *p)
     if (p->cgroup || p->csplit) inst_custom_groups_bind(NULL, 0, NULL, 0);
     free(p->cgroup);
     free(p->csplit);
+    free(p->changeSlot);
     project_init(p);
 }
 
@@ -80,10 +82,46 @@ void project_conv_opts(const Project *p, ConvOpts *o)
     o->exclude = p->muted;
     o->voices = p->voice;
     o->drumsFirst = p->drumsFirst;
+    o->candLock = p->trackLock;
+    o->changeSlot = p->changeSlot;
+    o->nchangeSlot = p->nchangeSlot;
     for (int s = 0; s < 128; s++) o->slotTranspose[s] = (int8_t)project_slot_transpose(p, s);
 }
 
 static int is_wave(const SfVoice *v) { return !(v->type & 0xC0) && (v->type & 7) == 3; }
+
+void project_set_change(Project *p, int cand, int index, int slot)
+{
+    for (int j = 0; j < p->nchangeSlot; j++)
+        if (p->changeSlot[j].cand == cand && p->changeSlot[j].index == index) {
+            if (slot < 0) p->changeSlot[j] = p->changeSlot[--p->nchangeSlot];
+            else p->changeSlot[j].slot = (int16_t)slot;
+            p->dirty = 1;
+            return;
+        }
+    if (slot < 0) return;
+    ConvChangeSet *n = realloc(p->changeSlot, sizeof(ConvChangeSet) * (size_t)(p->nchangeSlot + 1));
+    if (!n) return;
+    p->changeSlot = n;
+    ConvChangeSet c = {(int16_t)cand, (int16_t)index, (int16_t)slot};
+    p->changeSlot[p->nchangeSlot++] = c;
+    p->dirty = 1;
+}
+
+int project_free_slot(const Project *p, const Conv *c)
+{
+    for (int s = 1; s < 128; s++) {
+        if (c->slotUsed[s] || p->voiceSet[s]) continue;
+        int taken = 0;
+        for (int k = 0; k < c->ncand; k++) {
+            if (c->cand[k].program == s || p->trackLock[k] == s) taken = 1;
+            for (int j = 0; j < c->cand[k].nchanges; j++) if (c->cand[k].changes[j].from == s) taken = 1;
+        }
+        for (int j = 0; j < p->nchangeSlot; j++) if (p->changeSlot[j].slot == s) taken = 1;
+        if (!taken) return s;
+    }
+    return -1;
+}
 
 int project_slot_transpose(const Project *p, int s)
 {
@@ -425,6 +463,9 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         fprintf(f, "rip_cgbnorm=%.6f\n", p->ripCgbNorm);
     }
     for (int s = 0; s < 128; s++) if (p->octave[s]) fprintf(f, "octave%d=%d\n", s, p->octave[s]);
+    for (int k = 0; k < CONV_MAX_CAND; k++) if (p->trackLock[k] >= 0) fprintf(f, "track_lock%d=%d\n", k, p->trackLock[k]);
+    for (int j = 0; j < p->nchangeSlot; j++)
+        fprintf(f, "change=%d,%d,%d\n", p->changeSlot[j].cand, p->changeSlot[j].index, p->changeSlot[j].slot);
     // custom samples before the voices that use them
     for (int i = 0; i < p->ncustom; i++) {
         const CustomSample *c = &p->custom[i];
@@ -609,6 +650,14 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "rip_info")) snprintf(np.ripInfo, sizeof(np.ripInfo), "%s", v);
         else if (!strcmp(k, "rip_gain")) np.ripGain = (float)atof(v);
         else if (!strcmp(k, "rip_cgbnorm")) np.ripCgbNorm = (float)atof(v);
+        else if (!strncmp(k, "track_lock", 10)) {
+            int c = atoi(k + 10), sl = atoi(v);
+            if (c >= 0 && c < CONV_MAX_CAND && sl >= 0 && sl < 128) np.trackLock[c] = (int16_t)sl;
+        } else if (!strcmp(k, "change")) {
+            int c, ix, sl;
+            if (sscanf(v, "%d,%d,%d", &c, &ix, &sl) == 3 && c >= 0 && c < CONV_MAX_CAND && ix >= 0 && sl >= 0 && sl < 128)
+                project_set_change(&np, c, ix, sl);
+        }
         else if (!strncmp(k, "octave", 6)) {
             int s = atoi(k + 6), o = atoi(v);
             if (s >= 0 && s < 128 && o >= -4 && o <= 4) np.octave[s] = (int8_t)o;

@@ -464,6 +464,7 @@ static void pipeline(EvList *events, int division, int exact, int firstTrack, in
 void conv_free(Conv *c)
 {
     for (int i = 0; i < CONV_MAX_OUT; i++) { free(c->data[i]); free(c->reloc[i]); }
+    for (int i = 0; i < CONV_MAX_CAND; i++) free(c->cand[i].changes);
     memset(c, 0, sizeof(*c));
 }
 
@@ -686,6 +687,40 @@ int conv_build(Conv *c, const Midi *m, const ConvOpts *o, char *err, int errlen)
             push(&tr, pr);
             memmove(&tr.v[1], &tr.v[0], sizeof(Ev) * (tr.n - 1));
             tr.v[0] = pr;
+        }
+
+        // instrument changes as the user set them: one slot for the whole track, or single changes moved
+        {
+            int lock = o->candLock ? o->candLock[k] : -1;
+            int idx = 0, any = 0;
+            ConvCand *cw = &c->cand[k];
+            for (int i = 0; i < tr.n; i++) {
+                Ev *e = &tr.v[i];
+                if (e->type != EV_InstrumentChange) continue;
+                any = 1;
+                int from = e->param1 & 0x7F;
+                if (lock >= 0) e->param1 = (uint8_t)lock;
+                else
+                    for (int j = 0; j < o->nchangeSlot; j++)
+                        if (o->changeSlot[j].cand == k && o->changeSlot[j].index == idx) e->param1 = (uint8_t)o->changeSlot[j].slot;
+                ConvChange *nc = realloc(cw->changes, sizeof(ConvChange) * (size_t)(cw->nchanges + 1));
+                if (nc) {
+                    cw->changes = nc;
+                    cw->changes[cw->nchanges].tick = e->time;
+                    cw->changes[cw->nchanges].from = (int16_t)from;
+                    cw->changes[cw->nchanges].slot = (int16_t)(e->param1 & 0x7F);
+                    cw->nchanges++;
+                }
+                idx++;
+            }
+            cw->locked = lock >= 0;
+            if (lock >= 0 && !any) {     // a track that never picks an instrument: it starts on the one chosen
+                Ev pc = {0};
+                pc.time = 0; pc.type = EV_InstrumentChange; pc.param1 = (uint8_t)lock;
+                push(&tr, pc);
+                memmove(&tr.v[1], &tr.v[0], sizeof(Ev) * (tr.n - 1));
+                tr.v[0] = pc;
+            }
         }
 
         // GM fixes: each instrument's volume factor, on every VOL the track sends (VOL is sent again

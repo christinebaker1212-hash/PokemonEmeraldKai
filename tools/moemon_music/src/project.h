@@ -50,6 +50,9 @@ typedef struct {
     float ripGain;            // the loudness match (studio_match_rip)
     float ripCgbNorm;         // GBS: the level of a slot left on its Game Boy channel once others are GBA instruments
     int8_t octave[128];       // each slot's notes moved by whole octaves (-4..4)
+    int16_t trackLock[CONV_MAX_CAND];   // a track playing one slot all through (-1 = its own instrument changes)
+    ConvChangeSet *changeSlot;          // single instrument changes pointed at another slot
+    int nchangeSlot;
     // samples the project brings (rips' original instruments); voices refer to them as INST_CUSTOM + i
     CustomSample *custom;
     int ncustom;
@@ -87,6 +90,10 @@ void project_conv_opts(const Project *p, ConvOpts *o);
 // How far a slot's notes move (semitones): its Octave, and for rips the octave MP2K plays the Game Boy
 // wave channel lower than everything else (the rip's notes are written for the voice it started with).
 int project_slot_transpose(const Project *p, int slot);
+// A track's nth instrument change goes to slot (-1: back to what the MIDI says).
+void project_set_change(Project *p, int cand, int index, int slot);
+// A slot no track uses and no instrument is set for (-1 = none left).
+int project_free_slot(const Project *p, const Conv *c);
 uint8_t project_reverb_byte(const Project *p);
 
 int read_file(const char *path, uint8_t **data, size_t *len);

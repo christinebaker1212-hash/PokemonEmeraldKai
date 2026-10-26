@@ -26,4 +26,8 @@ for s in range(M, n - W - M, W):
     lags.append((int(np.argmax(c)) - M) * 5)
 lags = np.array(lags)
 print('lag ms per window:', ' '.join(str(int(x)) for x in lags))
-print('median %d ms, spread (mean |lag - median|) %.1f ms' % (np.median(lags), np.abs(lags - np.median(lags)).mean()))
+# a steady beat can line up a whole beat off (a window of repeating bars): those count apart, as outliers
+med = np.median(lags)
+inl = lags[np.abs(lags - med) <= 60]
+print('outliers (a beat or more off) %d of %d' % (len(lags) - len(inl), len(lags)))
+print('median %d ms, spread (mean |lag - median|) %.1f ms' % (med, np.abs(inl - med).mean()))

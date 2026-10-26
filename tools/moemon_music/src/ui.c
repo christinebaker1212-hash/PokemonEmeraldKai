@@ -50,7 +50,9 @@ static int sSelSlot = -1;
 static int sTrackScroll, sSlotScroll;
 
 enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY,
-       MODAL_GBS_TRACK, MODAL_DEFAULTS };
+       MODAL_GBS_TRACK, MODAL_DEFAULTS, MODAL_TRACK };
+static int sTrackCand;            // the track whose instrument changes are open
+static int sChangeScroll;
 static int sModal;
 static int sInModal;              // drawing the modal (its widgets take input)
 static char sSearch[64];
@@ -702,6 +704,16 @@ static const char *slot_label(int slot, char *buf, int n)
     return buf;
 }
 
+// A track's instrument changes, a change that asks for the same instrument again (the state sent again at
+// the loop start, a repeated program change) counting with the one before it.
+static int is_repeat(const ConvCand *cd, int i) { return i > 0 && cd->changes[i].from == cd->changes[i - 1].from; }
+static int distinct_changes(const ConvCand *cd)
+{
+    int n = 0;
+    for (int i = 0; i < cd->nchanges; i++) if (!is_repeat(cd, i)) n++;
+    return n;
+}
+
 static void draw_tracks(void)
 {
     int x = 10, y = 104, w = 620, h = 456;
@@ -747,11 +759,16 @@ static void draw_tracks(void)
         text(x + 58, ry + 3, lab, muted ? C_DIM : C_TEXT);
         snprintf(lab, sizeof(lab), "%s%sch %d", cd->name, cd->name[0] ? "  " : "", cd->chan + 1);
         textfit(x + 84, ry + 3, 200, lab, muted ? C_DIM : C_TEXT);
-        char nm[160];
+        char nm[160], nm2[200];
         slot_label(slot, nm, sizeof(nm));
-        if (over && !muted) snprintf(nm, sizeof(nm), S.p.moreTracks ? "over the 64-track limit" : "over 10 tracks (GBA accurate)");
-        textfit(x + 292, ry + 3, 260, nm, over && !muted ? C_WARN : muted ? C_DIM : C_TEXT);
-        if (slot >= 0 && clicked(x + 292, ry, 260, rowH)) sSelSlot = slot;
+        // a track changing instrument says how often; one locked to an instrument says so
+        if (cd->locked) snprintf(nm2, sizeof(nm2), "%s (only)", nm);
+        else if (distinct_changes(cd) > 1) snprintf(nm2, sizeof(nm2), "%s +%d", nm, distinct_changes(cd) - 1);
+        else snprintf(nm2, sizeof(nm2), "%s", nm);
+        if (over && !muted) snprintf(nm2, sizeof(nm2), S.p.moreTracks ? "over the 64-track limit" : "over 10 tracks (GBA accurate)");
+        textfit(x + 292, ry + 3, 222, nm2, over && !muted ? C_WARN : muted ? C_DIM : C_TEXT);
+        if (ot >= 0 && button(x + 518, ry + 1, 30, 18, "...", 1)) { sTrackCand = k; sChangeScroll = 0; sModal = MODAL_TRACK; }
+        if (slot >= 0 && clicked(x + 292, ry, 222, rowH)) sSelSlot = slot;
         // activity
         int lvl = (ot >= 0 && ot < ENG_MAX_TRACKS) ? E.trackLevel[ot] : 0;
         if (lvl > 7) fill(x + w - 56, ry + 6, 36 * lvl / 255, 9, C_ACCENT);
@@ -1556,6 +1573,113 @@ static void draw_defaults(void)
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
 }
 
+// a slot of its own for one track or change: a copy of `from`, to change on its own
+static int new_slot_from(int from)
+{
+    Project *p = &S.p;
+    int s = project_free_slot(p, &S.c);
+    if (s < 0) { set_status("%s", "Every one of the 128 instrument slots is taken."); return -1; }
+    p->voice[s] = p->voice[from];
+    p->voiceSet[s] = 1;
+    p->ripOrig[s] = p->ripOrig[from];
+    p->ripGm[s] = p->ripGm[from];
+    p->ripGmGain[s] = p->ripGmGain[from];
+    p->octave[s] = p->octave[from];
+    return s;
+}
+
+// the next / previous slot the song uses (or `cur` itself, if it's the only one)
+static int cycle_slot(int cur, int dir)
+{
+    for (int d = 1; d < 128; d++) {
+        int s = ((cur + dir * d) % 128 + 128) % 128;
+        if (S.c.slotUsed[s]) return s;
+    }
+    return cur;
+}
+
+// [<] Slot n: name [>] [New]; returns the slot picked, or -1 when nothing changed
+static int slot_picker(int x, int y, int w, int cur)
+{
+    int pick = -1;
+    if (button(x, y, 22, 22, "<", 1)) pick = cycle_slot(cur, -1);
+    char nm[160], lab[200];
+    voice_name(&S.p.voice[cur], nm, sizeof(nm));
+    snprintf(lab, sizeof(lab), "%d: %s", cur, nm);
+    fill(x + 26, y, w - 26 - 26 - 64, 22, C_ROW);
+    textfit(x + 32, y + 3, w - 26 - 26 - 64 - 12, lab, C_ACCENT);
+    if (button(x + w - 86, y, 22, 22, ">", 1)) pick = cycle_slot(cur, 1);
+    if (button(x + w - 60, y, 60, 22, "New", 1)) pick = new_slot_from(cur);
+    return pick;
+}
+
+static void draw_track_changes(void)
+{
+    int x, y, w = 900, h = 620;
+    if (sTrackCand < 0 || sTrackCand >= S.c.ncand) { sModal = MODAL_NONE; return; }
+    const ConvCand *cd = &S.c.cand[sTrackCand];
+    char title[160];
+    snprintf(title, sizeof(title), "TRACK: %s%sch %d", cd->name, cd->name[0] ? "  " : "", cd->chan + 1);
+    modal_box(&x, &y, w, h, title);
+    Project *p = &S.p;
+    int changed = 0, sel = -1;
+    int ry = y + 44;
+    text(x + 20, ry + 3, "One instrument all through", C_DIM);
+    int lock = p->trackLock[sTrackCand];
+    if (lock < 0) {
+        if (button(x + 260, ry, 220, 22, "Use one instrument", cd->nchanges > 0)) {
+            p->trackLock[sTrackCand] = (int16_t)(cd->slot >= 0 ? cd->slot : cd->changes[0].slot);
+            changed = 1;
+        }
+        text(x + 500, ry + 3, "(every change below goes to it)", C_DIM);
+    } else {
+        int pk = slot_picker(x + 260, ry, 470, lock);
+        if (pk >= 0 && pk != lock) { p->trackLock[sTrackCand] = (int16_t)pk; changed = 1; sel = pk; }
+        if (button(x + 740, ry, 140, 22, "Its own changes", 1)) { p->trackLock[sTrackCand] = -1; changed = 1; }
+    }
+    ry += 36;
+    text(x + 20, ry, lock >= 0 ? "Its instrument changes (all playing the one above):" : "Its instrument changes: point any of them at another instrument, or New for one of its own.", C_DIM);
+    ry += 24;
+    int list[512], n = 0;
+    for (int i = 0; i < cd->nchanges && n < 512; i++) if (!is_repeat(cd, i)) list[n++] = i;
+    int rowH = 26, rows = (y + h - 60 - ry) / rowH;
+    if (wheel && hot(x, ry, w, rows * rowH)) sChangeScroll -= wheel * 3;
+    if (sChangeScroll > n - rows) sChangeScroll = n - rows;
+    if (sChangeScroll < 0) sChangeScroll = 0;
+    int bar = S.p.midi.division * 4;
+    if (bar <= 0) bar = 1920;
+    for (int r = 0; r < rows && sChangeScroll + r < n; r++) {
+        int i = list[sChangeScroll + r];
+        const ConvChange *ch = &cd->changes[i];
+        int yy = ry + r * rowH;
+        fill(x + 14, yy - 2, w - 40, rowH - 2, C_ROW);
+        char at[64];
+        snprintf(at, sizeof(at), "bar %u beat %u", ch->tick / (uint32_t)bar + 1, ch->tick % (uint32_t)bar / (uint32_t)(bar / 4) + 1);
+        text(x + 22, yy + 2, at, C_TEXT);
+        char from[160], nm[140];
+        voice_name(&p->voice[ch->from], nm, sizeof(nm));
+        snprintf(from, sizeof(from), "asks for %d: %s", ch->from, nm);
+        textfit(x + 170, yy + 2, 250, from, C_DIM);
+        if (lock >= 0) continue;
+        int pk = slot_picker(x + 430, yy, 380, ch->slot);
+        int undo = ch->slot != ch->from && button(x + 818, yy, 52, 22, "Undo", 1);
+        if ((pk >= 0 && pk != ch->slot) || undo) {
+            int to = undo || pk == ch->from ? -1 : pk;
+            for (int j = i; j < cd->nchanges && (j == i || is_repeat(cd, j)); j++) project_set_change(p, sTrackCand, j, to);
+            changed = 1;
+            if (!undo) sel = pk;
+        }
+    }
+    scrollbar(x + w - 22, ry, rows * rowH, n, rows, &sChangeScroll);
+    if (changed) {
+        p->dirty = 1;
+        rebuild();
+        if (sel >= 0) sSelSlot = sel;
+    }
+    text(x + 20, y + h - 38, "New: a copy of the instrument in a free slot, to change on its own (INSTRUMENTS).", C_DIM);
+    if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
+}
+
 int ui_main(int argc, char **argv)
 {
     // Windows: draw at the screen's real pixels instead of letting display scaling stretch (and blur) the window
@@ -1603,6 +1727,7 @@ int ui_main(int argc, char **argv)
         sscanf(getenv("MMS_TEST_WINDOW"), "%dx%d", &ww, &wh);
         SDL_SetWindowSize(sWin, ww, wh);
     }
+    if (getenv("MMS_TEST_TRACK")) sTrackCand = atoi(getenv("MMS_TEST_TRACK"));   // tests: a track's instrument changes
     if (getenv("MMS_TEST_SLOT")) sSelSlot = atoi(getenv("MMS_TEST_SLOT"));   // tests: select an instrument
     if (getenv("MMS_TEST_PLAY") && have_song()) play_from(0);                // tests: start playing
     if (getenv("MMS_TEST_MODAL")) {   // tests: open a window for a screenshot
@@ -1691,6 +1816,7 @@ int ui_main(int argc, char **argv)
         case MODAL_DISPLAY: draw_display(); break;
         case MODAL_GBS_TRACK: draw_gbs_track(); break;
         case MODAL_DEFAULTS: draw_defaults(); break;
+        case MODAL_TRACK: draw_track_changes(); break;
         }
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit

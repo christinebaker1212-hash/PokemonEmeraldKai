@@ -1,12 +1,16 @@
 // Moemon Music Studio: turning what a sound chip did into a MIDI and instruments.
 //
-// Every chip voice becomes a MIDI track (MP2K tracks play any number of notes, but a chip voice plays
-// one at a time, so each note gets its own pitch bends and volume). A tick is one game frame (24 ticks
+// Notes go on tracks by instrument: a chip hands its voices to whatever instrument needs one next, so a
+// track per chip voice would change instrument all the time. Each instrument gets as many tracks as it
+// has notes at once, and every track keeps one instrument (each note still has its own bends and volume). A tick is one game frame (24 ticks
 // a beat at 150 BPM is what MP2K plays as one tick a frame), so the song keeps the original's timing to
 // the frame. Volume is the voice's own level each frame (envelope included) as expression (CC11), with
 // the note's loudest moment as its velocity, and the instruments get a flat envelope: the original's
 // envelope is in the expression. Pitch is the key closest to the note plus bends for the rest
-// (vibrato, slides, detuning), with a bend range per track wide enough for its slides.
+// (vibrato, slides, detuning), with a bend range per note just wide enough for it (the game keeps 7 bits
+// of bend, so a narrow range keeps a note in tune). Consoles whose sequencer ticks on its own clock
+// (the N64's audio frames) put notes up to a frame off the beat; when the song has a steady grid, note
+// starts move onto it (steady_rhythm).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -173,9 +177,11 @@ int rip_resample(const int16_t *in, int len, int fromRate, int loopStart, int lo
 
 // ------------------------------------------------------------------ notes
 typedef struct {
-    int voice, f0, f1, sample;
+    int voice, f0, f1, sample;     // f0 / f1: the frames the chip played it (its data is read from there)
     int key, vel;
     float peak;
+    int shift;                     // frames it moves to sit on the song's beat grid (steady_rhythm)
+    int track;                     // the MIDI track it goes on
 } Note;
 
 #define SILENT 1e-6f
@@ -211,6 +217,24 @@ static float semis_of(const Rip *r, const RipVF *x) {
     // MP2K plays the wave channel an octave below a square on the same key
     if (s->kind == RIPS_WAVE) k += 12.0f;
     return k;
+}
+
+// a voice's pitch in a frame (semitones), -1000 when it isn't playing `sample` at a known pitch
+static float semis_at(const Rip *r, int nv, int v, int f, int sample) {
+    if (f < 0 || f >= r->nframes) return -1000;
+    const RipVF *x = &r->vf[(size_t)f * nv + v];
+    if (x->sample != sample || x->rate <= 0) return -1000;
+    return semis_of(r, x);
+}
+
+// a note's pitch in a frame, a one-frame blip (away by a semitone or more and back) taken as the note's
+// pitch around it; -1000 = none
+static float note_semis(const Rip *r, int nv, int v, int f, int sample, int f0, int f1) {
+    float p = semis_at(r, nv, v, f, sample);
+    if (p < -999) return p;
+    float a = f > f0 ? semis_at(r, nv, v, f - 1, sample) : -1000, b = f + 1 < f1 ? semis_at(r, nv, v, f + 1, sample) : -1000;
+    if (a > -999 && b > -999 && fabsf(p - a) >= 0.75f && fabsf(p - b) >= 0.75f && fabsf(a - b) < 0.3f) return (a + b) * 0.5f;
+    return p;
 }
 
 static int cmp_float(const void *a, const void *b) {
@@ -305,6 +329,91 @@ static int find_loop(const Note *notes, int nn, int nframes, int *ls, int *le) {
     *le = bestS + bestP;
     if (*le > nframes) return 0;
     return 1;
+}
+
+// ------------------------------------------------------------------ steady rhythm
+static double grid_conc(const int *on, int n, double u) {
+    double c = 0, sn = 0;
+    for (int i = 0; i < n; i++) { double a = 2 * M_PI * on[i] / u; c += cos(a); sn += sin(a); }
+    return sqrt(c * c + sn * sn) / n;
+}
+
+static int cmp_int(const void *a, const void *b) { int x = *(const int *)a, y = *(const int *)b; return (x > y) - (x < y); }
+
+// The song's finest steady grid (a sixteenth or so: at least 4.5 frames), its phase followed through the
+// song; every note start within 1.25 frames of it moves onto it (rounded to a frame). Songs without a grid
+// most notes sit on (rubato, tempo changes) stay as they are. Returns the notes moved.
+static int steady_rhythm(Note *notes, int nn) {
+    int *on = malloc(sizeof(int) * (size_t)(nn > 0 ? nn : 1));
+    if (!on) return 0;
+    for (int i = 0; i < nn; i++) on[i] = notes[i].f0;
+    qsort(on, nn, sizeof(int), cmp_int);
+    int n = 0;
+    for (int i = 0; i < nn; i++) if (!n || on[i] != on[n - 1]) on[n++] = on[i];
+    if (n < 32) { free(on); return 0; }
+    // the grid: the strongest period, then the finest one nearly as strong
+    double bestC = 0, bestU = 0;
+    int nu = 0;
+    // searched on the first 1500 onsets, in steps fine enough that the grid can't slip a quarter of itself
+    // over them; then refined on all of them
+    int ns0 = n < 1500 ? n : 1500;
+    double span = on[ns0 - 1] - on[0] + 1;
+    static double cu[200000];
+    for (double u = 4.5; u <= 24.0 && nu < 200000; u += u * u / (4 * span), nu++) {
+        cu[nu] = u;
+    }
+    double *cc = malloc(sizeof(double) * (size_t)(nu > 0 ? nu : 1));
+    if (!cc) { free(on); return 0; }
+    for (int k = 0; k < nu; k++) {
+        cc[k] = grid_conc(on, ns0, cu[k]);
+        if (cc[k] > bestC) { bestC = cc[k]; bestU = cu[k]; }
+    }
+    for (int k = 1; k + 1 < nu; k++)
+        if (cc[k] >= 0.85 * bestC && cc[k] >= cc[k - 1] && cc[k] >= cc[k + 1]) { bestU = cu[k]; break; }
+    free(cc);
+    double u = bestU, c0 = 0;
+    double du = bestU * bestU / (4 * span), spanAll = on[n - 1] - on[0] + 1;
+    for (double x = bestU - du; x <= bestU + du; x += bestU * bestU / (40 * spanAll)) {
+        double c = grid_conc(on, n, x);
+        if (c > c0) { c0 = c; u = x; }
+    }
+    // the phase around each onset (a 10-second window), and how far the onset is from the grid
+    double *res = malloc(sizeof(double) * (size_t)n);
+    if (!res) { free(on); return 0; }
+    int lo = 0, hi = 0, near = 0;
+    double sc = 0, ss = 0;
+    for (int i = 0; i < n; i++) {
+        while (hi < n && on[hi] <= on[i] + 300) { double a = 2 * M_PI * on[hi] / u; sc += cos(a); ss += sin(a); hi++; }
+        while (on[lo] < on[i] - 300) { double a = 2 * M_PI * on[lo] / u; sc -= cos(a); ss -= sin(a); lo++; }
+        double ph = atan2(ss, sc) / (2 * M_PI);
+        double r = on[i] / u - ph;
+        r -= floor(r + 0.5);
+        res[i] = r * u;
+        if (fabs(res[i]) <= 1.25) near++;
+    }
+    int moved = 0;
+    if (near >= n * 0.55) {
+        for (int k = 0; k < nn; k++) {
+            int a = 0, b = n - 1;
+            while (a < b) { int m = (a + b) / 2; if (on[m] < notes[k].f0) a = m + 1; else b = m; }
+            if (fabs(res[a]) > 1.25) continue;
+            notes[k].shift = (int)lround(notes[k].f0 - res[a]) - notes[k].f0;
+            if (notes[k].f0 + notes[k].shift < 0) notes[k].shift = -notes[k].f0;
+            if (notes[k].shift) moved++;
+        }
+    }
+    if (getenv("MMS_RHYTHM_DEBUG"))
+        fprintf(stderr, "rhythm: grid %.4f frames, strength %.2f, %d of %d onsets near it, %d notes moved\n", u, c0, near, n, moved);
+    free(res);
+    free(on);
+    return moved;
+}
+
+static int note_cmp(const void *a, const void *b) {
+    const Note *x = a, *y = b;
+    int fx = x->f0 + x->shift, fy = y->f0 + y->shift;
+    if (fx != fy) return fx - fy;
+    return x->voice - y->voice;
 }
 
 // ------------------------------------------------------------------ the build
@@ -519,6 +628,13 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
             float a = x ? amp_of(r, x) : 0;
             int has = x && x->sample >= 0;
             int start = has && (x->keyon || (!in && a > SILENT) || (in && x->sample != cur.sample));
+            // the voice going straight on to another pitch (no new key-on): a new note, when the jump is a
+            // semitone or more at once and the new pitch holds (a slide moves on; a one-frame blip goes back)
+            if (has && in && !start && f > cur.f0 && f + 1 < nf) {
+                float p0 = semis_at(r, nv, v, f - 1, cur.sample), p1 = semis_at(r, nv, v, f, cur.sample),
+                      p2 = semis_at(r, nv, v, f + 1, cur.sample);
+                if (p0 > -999 && p1 > -999 && p2 > -999 && fabsf(p1 - p0) >= 0.75f && fabsf(p2 - p1) < 0.3f) start = 1;
+            }
             int stop = in && (!has || start || a <= SILENT || (cur.peak > 0 && a < cur.peak * 0.0005f));
             if (stop) {
                 cur.f1 = f;
@@ -599,7 +715,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         int k = 0;
         for (int f = n->f0; f < n->f1; f++) {
             const RipVF *x = &r->vf[(size_t)f * nv + n->voice];
-            if (x->sample == n->sample && x->rate > 0) tmp[k++] = semis_of(r, x);
+            if (x->sample == n->sample && x->rate > 0) tmp[k++] = note_semis(r, nv, n->voice, f, n->sample, n->f0, n->f1);
         }
         float med = 60;
         if (k) { qsort(tmp, k, sizeof(float), cmp_float); med = tmp[k / 2]; }
@@ -673,9 +789,20 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
         free(d);
     }
 
-    // the loop
+    // on the beat, then in time order (as they will be played)
+    steady_rhythm(notes, nn);
+    qsort(notes, nn, sizeof(Note), note_cmp);
+
+    // the loop (on the moved notes)
     int ls = 0, le = 0;
-    out->hasLoop = find_loop(notes, nn, nf, &ls, &le);
+    {
+        Note *moved = malloc(sizeof(Note) * (size_t)nn);
+        if (moved) {
+            for (int i = 0; i < nn; i++) { moved[i] = notes[i]; moved[i].f0 += notes[i].shift; moved[i].f1 += notes[i].shift; }
+            out->hasLoop = find_loop(moved, nn, nf + 2, &ls, &le);
+            free(moved);
+        }
+    }
     if (out->hasLoop) { out->loopStart = (uint32_t)ls; out->loopEnd = (uint32_t)le; }
 
     // the custom samples
@@ -772,43 +899,78 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
             mmeta(&tr[0], out->loopEnd, 0x06, "]", 1);
         }
     }
-    int chanOf = 0;
-    for (int v = 0; v < nv; v++) {
-        int first = -1;
-        float maxDev = 0;
-        for (int i = 0; i < nn; i++) {
-            if (notes[i].voice != v) continue;
-            if (first < 0) first = i;
-            for (int f = notes[i].f0; f < notes[i].f1; f++) {
-                const RipVF *x = &r->vf[(size_t)f * nv + v];
-                if (x->sample != notes[i].sample || x->rate <= 0) continue;
-                float d = fabsf(semis_of(r, x) - notes[i].key);
-                if (d > maxDev) maxDev = d;
-            }
+    // tracks: each instrument gets lanes, a note going on the first of its instrument's lanes that's free
+    int ntr = 0;
+    {
+        int *laneEnd = malloc(sizeof(int) * (size_t)nn), *laneSlot = malloc(sizeof(int) * (size_t)nn);
+        for (int i = 0; i < nn && laneEnd && laneSlot; i++) {
+            int slot = notes[i].sample < ns ? slotOf[notes[i].sample] : 127;
+            int f0 = notes[i].f0 + notes[i].shift, t = -1;
+            for (int k = 0; k < ntr; k++) if (laneSlot[k] == slot && laneEnd[k] <= f0) { t = k; break; }
+            if (t < 0) { t = ntr++; laneSlot[t] = slot; }
+            laneEnd[t] = notes[i].f1 + notes[i].shift;
+            notes[i].track = t;
         }
+        free(laneEnd);
+        free(laneSlot);
+    }
+    if (ntr > nv) { MTrk *nt = realloc(tr, sizeof(MTrk) * (size_t)(ntr + 1)); if (nt) { tr = nt; memset(tr + 1, 0, sizeof(MTrk) * (size_t)ntr); } }
+    int chanOf = 0;
+    for (int lane = 0; lane < ntr; lane++) {
+        int first = -1, nOfSlot = 0;
+        for (int i = 0; i < nn; i++) if (notes[i].track == lane) { first = i; break; }
         if (first < 0) continue;
+        int slot = notes[first].sample < ns ? slotOf[notes[first].sample] : 127;
+        if (slot < 0) slot = 127;
+        for (int k = 0; k < lane; k++) {
+            for (int i = 0; i < nn; i++) if (notes[i].track == k) { if ((notes[i].sample < ns ? slotOf[notes[i].sample] : 127) == slot) nOfSlot++; break; }
+        }
         out->voicesUsed++;
         MTrk *t = &tr[nTracks++];
         int ch = chanOf++ % 15;
         if (ch >= 9) ch++;                       // channel 10 is General MIDI's drums
-        char name[32];
-        snprintf(name, sizeof name, "Voice %d", v + 1);
+        char name[40];
+        if (nOfSlot) snprintf(name, sizeof name, "Instrument %d (%d)", slot + 1, nOfSlot + 1);
+        else snprintf(name, sizeof name, "Instrument %d", slot + 1);
         mmeta(t, 0, 0x03, name, (int)strlen(name));
-        int range = (int)ceilf(maxDev + 0.02f);
-        if (range < 2) range = 2;
-        if (range > 24) range = 24;
-        mev(t, 0, 0xB0 | ch, 101, 0);
-        mev(t, 0, 0xB0 | ch, 100, 0);
-        mev(t, 0, 0xB0 | ch, 6, range);
-        mev(t, 0, 0xB0 | ch, 38, 0);
         mev(t, 0, 0xB0 | ch, 7, 127);
-        int prog = -1, lastExpr = -1, lastPan = -1, lastBend = -1;
+        mev(t, 0, 0xC0 | ch, slot, 0);
+        int lastExpr = -1, lastPan = -1, lastBend = -1, range = -1;
         for (int i = first; i < nn; i++) {
             Note *n = &notes[i];
-            if (n->voice != v) continue;
-            int slot = n->sample < ns ? slotOf[n->sample] : 127;
-            if (slot < 0) slot = 127;
-            if (slot != prog) { mev(t, (uint32_t)n->f0, 0xC0 | ch, slot, 0); prog = slot; }
+            if (n->track != lane) continue;
+            int v = n->voice, sh = n->shift;
+            // the bend range this note needs (the game's bends go to 63/64 of it)
+            float maxDev = 0;
+            for (int f = n->f0; f < n->f1; f++) {
+                float p = note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
+                if (p < -999) continue;
+                float d = fabsf(p - n->key);
+                if (d > maxDev) maxDev = d;
+            }
+            if (getenv("MMS_BEND_DEBUG") && maxDev > 3) {
+                static int shown;
+                if (shown++ < 6) {
+                    fprintf(stderr, "lane %d note f%d key %d:", lane, n->f0, n->key);
+                    for (int f = n->f0; f < n->f1 && f < n->f0 + 40; f++) {
+                        const RipVF *x = &r->vf[(size_t)f * nv + v];
+                        fprintf(stderr, " %.1f", x->sample == n->sample && x->rate > 0 ? semis_of(r, x) : -1.0f);
+                    }
+                    fprintf(stderr, "\n");
+                }
+            }
+            int nr = (int)ceilf(maxDev * 64.0f / 63.0f + 0.02f);
+            if (nr < 1) nr = 1;
+            if (nr > 48) nr = 48;
+            if (nr != range) {
+                uint32_t tk = (uint32_t)(n->f0 + sh);
+                mev(t, tk, 0xB0 | ch, 101, 0);
+                mev(t, tk, 0xB0 | ch, 100, 0);
+                mev(t, tk, 0xB0 | ch, 6, nr);
+                mev(t, tk, 0xB0 | ch, 38, 0);
+                range = nr;
+                lastBend = -1;                   // the same bend value means another pitch now
+            }
             float velA = n->vel / 127.0f * aref / gain;
             for (int f = n->f0; f < n->f1; f++) {
                 const RipVF *x = &r->vf[(size_t)f * nv + v];
@@ -821,20 +983,21 @@ int rip_song_build(Rip *r, RipSong *out, float gain, char *err, int errlen) {
                 if (pan < 0) pan = 0;
                 if (pan > 127) pan = 127;
                 int bend = lastBend < 0 ? 8192 : lastBend;
-                if (x->sample == n->sample && x->rate > 0) {
-                    float dev = semis_of(r, x) - n->key;
+                float pf = note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
+                if (pf > -999) {
+                    float dev = pf - n->key;
                     bend = 8192 + (int)lroundf(dev / range * 8192.0f);
                     if (bend < 0) bend = 0;
                     if (bend > 16383) bend = 16383;
                 }
-                uint32_t tick = (uint32_t)f;
+                uint32_t tick = (uint32_t)(f + sh);
                 if (expr != lastExpr) { mev(t, tick, 0xB0 | ch, 11, expr); lastExpr = expr; }
-                if (abs(pan - (lastPan < 0 ? -99 : lastPan)) >= 1) { mev(t, tick, 0xB0 | ch, 10, pan); lastPan = pan; }
+                if (pan != lastPan) { mev(t, tick, 0xB0 | ch, 10, pan); lastPan = pan; }
                 // 7 bits of bend is what the game keeps; only send a change it will hear
                 if (lastBend < 0 || (bend >> 7) != (lastBend >> 7)) { mev(t, tick, 0xE0 | ch, bend & 0x7F, bend >> 7); lastBend = bend; }
                 if (f == n->f0) mev(t, tick, 0x90 | ch, n->key, n->vel);
             }
-            mev(t, (uint32_t)n->f1, 0x80 | ch, n->key, 0);
+            mev(t, (uint32_t)(n->f1 + sh), 0x80 | ch, n->key, 0);
         }
     }
     free(notes);

@@ -12,6 +12,11 @@
 
 enum { LOOP_MARKERS, LOOP_NONE, LOOP_WHOLE, LOOP_CUSTOM };
 
+// One instrument change a track makes: the nth (index) of candidate track cand goes to slot.
+typedef struct { int16_t cand, index, slot; } ConvChangeSet;
+// An instrument change as converted: when (MIDI ticks), the slot the MIDI asked for and the one it plays.
+typedef struct { uint32_t tick; int16_t from, slot; } ConvChange;
+
 typedef struct {
     int masterVol;           // mid2agb -V (0-127)
     int exactGate;           // mid2agb -E
@@ -26,6 +31,9 @@ typedef struct {
     const float *slotGain;   // GM fixes: a volume factor per voice slot (evens out how loud the game's
                              // instruments are), applied to every VOL a track sends (NULL: none)
     int8_t slotTranspose[128];   // semitones every note played on a slot moves (the instrument's Octave)
+    const int16_t *candLock;     // per candidate track: the one slot it plays all through (-1 = its own changes)
+    const ConvChangeSet *changeSlot;   // single instrument changes pointed at another slot
+    int nchangeSlot;
 } ConvOpts;
 
 typedef struct {
@@ -36,6 +44,9 @@ typedef struct {
     int drumMoved;           // drum notes moved to a sound the kit has
     int program;             // first program (-1 = none)
     int slot;                // first voice slot it selects (-1 = none / not converted)
+    ConvChange *changes;     // its instrument changes (converted tracks only)
+    int nchanges;
+    int locked;              // plays one slot all through (ConvOpts.candLock)
 } ConvCand;
 
 typedef struct {

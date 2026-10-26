@@ -27,9 +27,13 @@ PlayStation music needs a PlayStation 2 BIOS (4 MB, e.g. `scph39001.bin`, from y
 it each time (mkhebios); no BIOS is in this repository.
 
 Opening a rip plays it through its console's emulator once (a few seconds), writing down what the
-sound chip does every game frame. That becomes a MIDI (a track per chip voice, one tick per game frame
-so the timing is the original's to the frame, each note on the closest key with pitch bends for the
-rest, its volume each frame as expression, pan) and **the original instruments**: each sample, at
+sound chip does every game frame. That becomes a MIDI (tracks by instrument, each keeping one
+instrument: a chip hands its voices to whatever instrument needs one, so a track per chip voice would
+change instrument all the time; one tick per game frame, with note starts moved onto the song's own
+beat grid when it has a steady one, since a console sequencing on its own clock lands notes up to a
+frame off; each note on the closest key, a note that jumps to a new pitch without a new key-on split
+in two, and pitch bends for the rest with a bend range per note just wide enough, so notes stay in
+tune at the game's 7 bits of bend; its volume each frame as expression, pan) and **the original instruments**: each sample, at
 about the GBA's 13379 Hz as you hear it (a sample usually played low keeps more detail) and 8-bit like
 the game's, with its loop. The loop is found from where the key-ons start repeating. The whole song
 is then matched to the original's loudness (Game Boy channels keep the hardware's own levels).
@@ -91,7 +95,9 @@ game build does, and writes `build/gen/` (the program embeds it; nothing else sh
 ## Using it
 
 Open a MIDI (or drop one on the window). TRACKS lists each MIDI channel: **M** leaves it out of
-the song, **S** plays it alone. INSTRUMENTS lists the voice slots the song uses: pick one, then
+the song, **S** plays it alone, **...** shows its instrument changes ("+2" = two changes): lock the
+track to **one instrument** all through, or point any single change at another instrument, or **New**
+for a copy of it in a free slot to change on its own. Saved in the project and in the exports. INSTRUMENTS lists the voice slots the song uses: pick one, then
 **Change...** (every game instrument, by category, with search; click to hear), **GM match**,
 **Hold to hear** or keys Z-M, its envelope and its **Octave** (every note it plays moves by whole
 octaves, in the exports too). SONG sets the game song it replaces, volume,
