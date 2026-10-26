@@ -861,6 +861,10 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
     bool8 customForm;
 
     StartSpriteAnim(sprite, 1);
+    // Moemon Co-op: our side's ball lands at the bottom of the screen: it's gone once it opens there (the old 16x16
+    // ball never showed its open frames below the healthbox; the taller HGSS ball would)
+    if (GetBattlerSide(battler) == B_SIDE_PLAYER)
+        sprite->invisible = TRUE;
     ballId = ItemIdToBallId(GetBattlerPokeballItemId(battler));
     // Moemon Co-op: the Moemon's own entrance effect (the parts that aren't DEFAULT)
     MpBattlerBallFx(battler, &fx);
