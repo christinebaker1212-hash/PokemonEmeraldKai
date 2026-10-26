@@ -17,6 +17,12 @@ windows)
     mkdir -p "$out"
     cp pokeemerald-dev64.exe "$out/MoemonEmeraldKaiCoop.exe"
     cp "$SDL2_DIR/x86_64-w64-mingw32/bin/SDL2.dll" "$out/"
+    # POSIX-threaded MinGW builds also depend on this compiler runtime.
+    if x86_64-w64-mingw32-objdump -p "$out/MoemonEmeraldKaiCoop.exe" | grep 'DLL Name: libwinpthread-1.dll' >/dev/null; then
+        pthread_dll=$(x86_64-w64-mingw32-gcc -print-file-name=libwinpthread-1.dll)
+        [ -f "$pthread_dll" ] || { echo 'Required libwinpthread-1.dll was not found.' >&2; exit 1; }
+        cp "$pthread_dll" "$out/"
+    fi
     ;;
 *) echo 'Usage: dev/build.sh linux|windows [revision]' >&2; exit 1;;
 esac
