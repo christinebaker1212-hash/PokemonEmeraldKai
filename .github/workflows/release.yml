@@ -8,13 +8,27 @@ on:
   push:
     paths: ['include/mp_version.h']
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel (main also refreshes dev)'
+        type: choice
+        options: [main, dev]
+        default: main
+      dev_notes:
+        description: 'What is being tested (dev only)'
+        type: string
+        default: 'Current main game plus changes under testing.'
+
+concurrency:
+  group: moemon-release
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
   release:
-    if: github.ref_name == github.event.repository.default_branch
+    if: github.ref_name == github.event.repository.default_branch && inputs.channel != 'dev'
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -79,3 +93,58 @@ jobs:
           if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
           gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt \
             --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest
+
+  dev:
+    # A main release refreshes dev from the same sources. Explicit dev updates
+    # are opt-in workflow dispatches, never automatic for ordinary feature pushes.
+    needs: release
+    if: >-
+      always() && github.ref_name == github.event.repository.default_branch &&
+      (needs.release.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && inputs.channel == 'dev'))
+    runs-on: ubuntu-24.04
+    env:
+      CHANNEL: dev
+      DEV_BUILD: 1
+      DEV_REVISION: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
+      - name: SDL2 for Windows (checked)
+        run: |
+          curl --fail --location -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
+          echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
+          tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
+      - name: Build and package dev games
+        run: |
+          make linux DEV_BUILD=0 -j"$(nproc)"
+          make linux DEV_BUILD=1 DEV_REVISION="$DEV_REVISION" -j"$(nproc)"
+          tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
+          tools/release/package.sh linux dist
+          SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist
+          tools/release/manifest.sh dist
+      - name: Dev save protection and channel switching
+        run: |
+          NOBUILD=1 tools/test/dev_save_test.sh
+          NOBUILD=1 tools/test/dev_update_test.sh
+      - name: Publish dev prerelease and discovery manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEV_NOTES: ${{ inputs.dev_notes }}
+        run: |
+          . tools/release/channel.sh
+          # Immutable payloads first; discovery changes only after they exist.
+          printf 'Dev build %s. Saving and autosave are disabled.\n\n%s\n' "$VER" "${DEV_NOTES:-Current main game, refreshed from the main release.}" > "$RUNNER_TEMP/dev-notes.md"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt --target "$GITHUB_SHA" --prerelease --title "Dev $VER" --notes-file "$RUNNER_TEMP/dev-notes.md"
+          else
+            gh release download "$TAG" --pattern update.txt --dir "$RUNNER_TEMP/published-dev"
+            cp "$RUNNER_TEMP/published-dev/update.txt" dist/update.txt
+          fi
+          if ! gh release view dev-latest >/dev/null 2>&1; then
+            gh release create dev-latest --target "$GITHUB_SHA" --prerelease --title 'Dev channel' --notes 'Opt-in testing channel. Saving is disabled.'
+          fi
+          gh release upload dev-latest dist/update.txt --clobber

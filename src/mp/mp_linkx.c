@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: the game's own link features, online with friends.
 //
 //   * Record mixing: TV shows, Secret Bases, the Old Man's songs, Dewford's
@@ -479,6 +480,11 @@ static void UpdateDaycare(void)
     sDcLastMask = mask;
 }
 
+// Dev sessions can still receive an egg without persisting or consuming the
+// main game's pending-egg file.
+static struct Pokemon sDevPendingEgg;
+static bool8 sDevHasPendingEgg, sDevEggTaken;
+
 // The EGG made with a friend's POKéMON waits next to the save ("<save>.coopegg")
 static void EggPath(char *out, size_t size)
 {
@@ -491,7 +497,13 @@ void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId)
     u8 species[POKEMON_NAME_LENGTH + 1];
     FILE *f;
     EggPath(path, sizeof(path));
-    f = fopen(path, "wb");
+    if (MOEMON_DEV_BUILD)
+    {
+        sDevPendingEgg = *egg;
+        sDevHasPendingEgg = TRUE;
+        sDevEggTaken = FALSE;
+    }
+    f = MOEMON_DEV_BUILD ? NULL : fopen(path, "wb");
     if (f)
     {
         fwrite(egg, sizeof(*egg), 1, f);
@@ -512,13 +524,28 @@ bool8 MP_Linkx_TakePendingEgg(struct Pokemon *egg)
     char path[600];
     FILE *f;
     bool8 ok = FALSE;
+    if (MOEMON_DEV_BUILD)
+    {
+        if (sDevHasPendingEgg)
+        {
+            *egg = sDevPendingEgg;
+            sDevHasPendingEgg = FALSE;
+            sDevEggTaken = TRUE;
+            return TRUE;
+        }
+        if (sDevEggTaken)
+            return FALSE;
+    }
     EggPath(path, sizeof(path));
     f = fopen(path, "rb");
     if (!f)
         return FALSE;
     ok = fread(egg, sizeof(*egg), 1, f) == 1;
     fclose(f);
-    remove(path);
+    if (!MOEMON_DEV_BUILD)
+        remove(path);
+    else if (ok)
+        sDevEggTaken = TRUE;
     return ok;
 }
 
@@ -530,7 +557,7 @@ static void CheckPendingEggOnLoad(void)
     char path[600];
     struct Pokemon egg;
     FILE *f;
-    if (strcmp(sCheckedFor, gPlatformSavePath) == 0 || !MP_IsInOverworld())
+    if ((MOEMON_DEV_BUILD && sDevEggTaken) || strcmp(sCheckedFor, gPlatformSavePath) == 0 || !MP_IsInOverworld())
         return;
     snprintf(sCheckedFor, sizeof(sCheckedFor), "%s", gPlatformSavePath);
     if (gSaveBlock1Ptr->daycare.offspringPersonality != 0)

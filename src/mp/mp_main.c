@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
 #include <stdlib.h>
@@ -292,13 +293,19 @@ bool8 MP_ConfigAllowsTweaks(void)
         char *p = line, *eq;
         while (*p == ' ' || *p == '\t')
             p++;
-        if (strncasecmp(p, "AllowSmallTweaks", 16) != 0 || !(eq = strchr(p, '=')))
+        if (strncasecmp(p, "AllowSmallTweaks", 16) != 0)
             continue;
-        on = atoi(eq + 1) == 1;
+        eq = p + 16;
+        while (*eq == ' ' || *eq == '\t')
+            eq++;
+        if (*eq == '=')
+            on = atoi(eq + 1) == 1;
     }
     fclose(f);
     return on;
 }
+
+static int sMainAutosaveMinutes;
 
 static void LoadConfig(void)
 {
@@ -525,7 +532,7 @@ void MP_SaveConfig(void)
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
-        gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
+        gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, MOEMON_DEV_BUILD ? sMainAutosaveMinutes : gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling,
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
@@ -1884,6 +1891,9 @@ void MP_Init(void)
         return;
     sInitDone = TRUE;
     LoadConfig();
+    sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
+    if (MOEMON_DEV_BUILD)
+        gMpConfig.autosaveMinutes = 0;
     MPNet_Init();
     MP_Avatar_Init();
     snprintf(sStatus, sizeof(sStatus), "OFFLINE");

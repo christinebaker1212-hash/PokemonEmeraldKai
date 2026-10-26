@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: MOéMON GARDEN, the A-Life core (docs/POKEMON_GARDEN.md).
 //
 // The rules everything here follows:
@@ -1763,6 +1764,8 @@ void MP_Life_Reset(void)
 // Right after the save file was written (sdl2.c StoreSaveFile)
 void MP_Life_WriteSidecar(void)
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     char path[600], tmp[620];
     FILE *f;
     struct LifeHeader h;

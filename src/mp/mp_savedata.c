@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: small numbers kept next to the save file ("<save>.coop"),
 // for things that belong to this save but not to the game itself: daily
 // gifts sent, the play-together streak, rewards already claimed...
@@ -89,6 +90,8 @@ static void Load(void)
 
 static void Save(void)
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     FILE *f;
     char path[600];
     int i;

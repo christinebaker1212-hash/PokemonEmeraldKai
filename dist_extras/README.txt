@@ -1308,3 +1308,12 @@ KNOWN LIMITATIONS
   Oldale <-> Route 101), not through a building door.
 * Other players walk through you and NPCs, so nobody gets stuck.
 * Trading isn't networked.
+
+DEV UPDATES (OPTIONAL TESTING)
+Set AllowSmallTweaks = 1 in moemon_coop.ini and restart to follow the dev
+channel. DEV / SAVING DISABLED appears in the window title. Dev builds can
+read your progress, but saving and autosave are disabled and no progress is
+written. Settings, screenshots and logs can still be written.
+Set AllowSmallTweaks = 0 and restart with internet access to download the main
+update again, even if its version is lower. Your original save remains intact.
+AutoUpdate = 0 or --no-update prevents switching; turn updates back on to return.

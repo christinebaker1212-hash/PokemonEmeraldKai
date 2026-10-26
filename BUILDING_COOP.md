@@ -80,3 +80,50 @@ and publishes the release. Locally the same steps are `tools/release/build_windo
 
 Bump `MP_PROTOCOL_VERSION` in `src/mp/mp_net.h` whenever the network
 protocol or anything that affects link battles changes.
+
+## Dev update channel
+
+The dev channel is opt-in. In `moemon_coop.ini`, set `AllowSmallTweaks = 1`
+and restart a packaged game. It fetches the discovery manifest from the
+`dev-latest` GitHub prerelease, then downloads the platform zip from the
+immutable `dev-<main-version>.<revision>` prerelease named in that manifest.
+Main still uses GitHub's latest stable release. Set `AllowSmallTweaks = 0`
+and restart to reinstall main, even when main's version is lower. `AutoUpdate = 0`
+and `--no-update` still disable downloads; an offline dev executable remains
+read-only until it can return to main.
+
+Dev builds have a DEV / SAVING DISABLED window title. They read existing saves,
+but never create, overwrite or back up the player save or progress sidecars.
+Manual SAVE shows a notice; autosave is off and cannot be enabled in OPTIONS.
+The main game's configured autosave interval is preserved for the return to main.
+Settings, screenshots and logs may still be written. A dev host's shared storage
+is kept in memory; standalone servers retain their usual persistence.
+
+Build locally (no tracked version edits needed for a dev revision):
+
+```sh
+make linux DEV_BUILD=1 DEV_REVISION=1 -j"$(nproc)"
+DEV_BUILD=1 DEV_REVISION=1 tools/release/build_windows.sh /path/to/SDL2-2.30.9
+CHANNEL=dev DEV_REVISION=1 tools/release/package.sh linux /tmp/dev-release
+CHANNEL=dev DEV_REVISION=1 tools/release/manifest.sh /tmp/dev-release
+NOBUILD=1 DEV_REVISION=1 tools/test/dev_save_test.sh
+NOBUILD=1 DEV_REVISION=1 tools/test/dev_update_test.sh
+```
+
+The tests need both `pokeemerald64` (main) and `pokeemerald-dev64` (dev).
+Dev objects are separate by revision and OS, while generated assets are shared.
+The installed filename stays `MoemonEmeraldKaiCoop[.exe]` on both channels.
+
+To publish a dev update, use Actions > Release > Run workflow with `channel=dev`
+and describe what is being tested in `dev_notes`. CI uses its increasing run
+number as the revision, builds both platforms, tests save protection and channel
+switching, publishes immutable prerelease assets, then updates `dev-latest`'s
+manifest. Prereleases never become the latest stable release. To retry an already
+published run, start a new workflow run so it receives a new revision.
+
+A main release follows the existing version-bump workflow and then refreshes dev
+from the same commit, preserving parity. Keep experiments under
+`#if MOEMON_DEV_BUILD` until approved for main. Unless the user explicitly asks
+for a dev update, changes target main; do not publish an experimental dev release
+for an ordinary main change. The automatic dev refresh after a main release is
+part of keeping both channels current.

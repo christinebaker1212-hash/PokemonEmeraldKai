@@ -21,17 +21,19 @@ in-game; their CI runs weren't checked either.
 
 ## Open work
 
-### 0. NEXT PROJECT: Dev auto-updater (requested, not started)
-Spec from the user:
-- With `AllowSmallTweaks = 1` (moemon_coop.ini; see sdl2.c / mp_main.c), the auto-updater follows a **dev channel**,
-  so new updates can be tried out before they go live in the main game.
-- Dev updates are at parity with main updates: the same game, plus whatever is being tested.
-- In a dev build, autosave is turned off automatically and saving is disabled entirely (no save file is ever written).
-- Run again with `AllowSmallTweaks = 0`, the game redownloads the main update data (back to the live release).
-- Suggested approach (not decided): CI publishes dev builds as prereleases (tag `dev-<ver>`, `update.txt` of their
-  own); `src/platform/updater.c` picks the channel from AllowSmallTweaks; the in-game version carries a dev mark.
-- **Rule (also in CLAUDE.md):** unless the user asks for a new feature with "As a dev update..." or something like it,
-  treat it as a main update. Then don't test it as a dev update and don't push a dev update.
+### 0. Dev auto-updater (1.26.4)
+- Main bootstrap version: **1.26.4**, "A Safe Test Flight!".
+- `AllowSmallTweaks = 1` selects `dev-latest`; `0` returns to latest main even
+  when that means downgrading. Updates retain SHA-256 / ZIP CRC validation,
+  rollback and the player's settings.
+- Dev builds disable manual save, autosave and player-progress disk writes,
+  including sidecars; existing saves are read-only. DEV is shown in the title.
+- Main releases refresh dev from the same commit. Explicit experiments are
+  workflow dispatches with `channel=dev`; keep experimental code gated with
+  `MOEMON_DEV_BUILD` until promoted. Ordinary work remains main by default.
+- Build/release instructions: BUILDING_COOP.md, "Dev update channel".
+- Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the
+  existing tools/test/update_test.sh continues to exercise update integrity.
 
 ### 1. Joining a battle against two trainers (user's report; unfinished, backed out of the branch)
 Report: "if two players enter a battle that was started by the initial trainer being seen by two trainers, a third

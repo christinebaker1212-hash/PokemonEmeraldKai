@@ -70,6 +70,8 @@ void Display_Present(void);
 // stb_image's raw deflate decoder (compiled in mp_avatar.c)
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
 
+unsigned char MP_ConfigAllowsTweaks(void);
+static int sWantDev;
 static char sExeDir[1024];
 static char sExePath[1024];
 
@@ -338,6 +340,7 @@ static struct
     SDL_atomic_t cancel;
     SDL_atomic_t got;        // bytes downloaded
     long total;              // the zip's size from update.txt
+    char channel[16];
     char version[32];
     char tag[48];
     char zip[128];
@@ -586,6 +589,7 @@ static int ParseManifest(char *text)
     char *line = strtok(text, "\r\n");
     int haveFile = 0;
     U.version[0] = U.tag[0] = 0;
+    strcpy(U.channel, "main"); // older main manifests have no channel field
     for (; line; line = strtok(NULL, "\r\n"))
     {
         char key[32], a[128], b[32], c[80], d[128];
@@ -610,7 +614,9 @@ static int ParseManifest(char *text)
         }
         else if (sscanf(line, "%31s %127s", key, a) == 2)
         {
-            if (strcmp(key, "version") == 0)
+            if (strcmp(key, "channel") == 0)
+                snprintf(U.channel, sizeof(U.channel), "%s", a);
+            else if (strcmp(key, "version") == 0)
                 snprintf(U.version, sizeof(U.version), "%s", a);
             else if (strcmp(key, "tag") == 0 && ValidName(a))
                 snprintf(U.tag, sizeof(U.tag), "%s", a);
@@ -624,6 +630,8 @@ static void AssetUrl(char *out, size_t size, const char *name, int latest)
     const char *base = getenv("MOEMON_UPDATE_URL");
     if (base && base[0])
         snprintf(out, size, "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", name);
+    else if (latest && sWantDev)
+        snprintf(out, size, "https://github.com/%s/releases/download/dev-latest/%s", MOEMON_UPDATE_REPO, name);
     else if (latest)
         snprintf(out, size, "https://github.com/%s/releases/latest/download/%s", MOEMON_UPDATE_REPO, name);
     else
@@ -1033,13 +1041,29 @@ static int Worker(void *arg)
         return 0;
     }
     free(k.mem);
-    if (!VersionNewer(U.version, MOEMON_VERSION))
+    if (strcmp(U.channel, sWantDev ? "dev" : "main") != 0)
     {
-        Log("up to date (this is %s, the latest release is %s)", MOEMON_VERSION, U.version);
+        Log("refusing manifest for wrong channel: %s", U.channel);
         SDL_AtomicSet(&U.phase, PH_NONE);
         return 0;
     }
-    Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_VERSION, U.zip, U.total);
+    // Never move a current main player onto a dev build based on older main
+    // content if a dev refresh has not finished publishing yet.
+    if (sWantDev && VersionNewer(MOEMON_VERSION, U.version))
+    {
+        Log("dev update is based on an older main version; waiting for refresh");
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    // A channel change must install even a lower/equal version. Otherwise only
+    // move forward within the selected channel, comparing the dev revision too.
+    if (sWantDev == MOEMON_DEV_BUILD && !VersionNewer(U.version, MOEMON_BUILD_VERSION))
+    {
+        Log("up to date (this is %s, the latest release is %s)", MOEMON_BUILD_VERSION, U.version);
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_BUILD_VERSION, U.zip, U.total);
 
     // the zip, to a file next to the exe
     SDL_AtomicSet(&U.phase, PH_DOWNLOAD);
@@ -1406,7 +1430,7 @@ int Updater_Run(int argc, char **argv)
     if (!FindExe())
         return 0;
     if (getenv("MOEMON_JUST_UPDATED"))
-        Log("running version %s (just updated)", MOEMON_VERSION);
+        Log("running version %s (just updated)", MOEMON_BUILD_VERSION);
     CleanUpLastUpdate();
 #ifndef _WIN32
     if (!LoadCurl())
@@ -1421,6 +1445,8 @@ int Updater_Run(int argc, char **argv)
         FetchTest(getenv("MOEMON_UPDATE_FETCH"));
         return 1;
     }
+    sWantDev = MP_ConfigAllowsTweaks();
+    Log("selected %s channel (build: %s %s)", sWantDev ? "dev" : "main", MOEMON_BUILD_CHANNEL, MOEMON_BUILD_VERSION);
     if (TurnedOff(argc, argv))
         return 0;
     JoinPath(marker, sizeof(marker), sExeDir, RELEASE_MARKER);

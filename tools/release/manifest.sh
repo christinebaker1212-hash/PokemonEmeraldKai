@@ -5,11 +5,12 @@
 set -e
 cd "$(dirname "$0")/../.."
 OUT=${1:?usage: manifest.sh OUTDIR}
-VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
+. tools/release/channel.sh
 {
     echo "# Moemon Emerald Kai Co-op update information (src/platform/updater.c reads this)"
     echo "version $VER"
-    echo "tag v$VER"
+    echo "tag $TAG"
+    echo "channel $CHANNEL"
     for p in windows linux; do
         z="$OUT/MoemonEmeraldKaiCoop-$p.zip"
         [ -f "$z" ] || continue

@@ -1,3 +1,4 @@
+#include "mp_version.h"
 #ifdef PLATFORM_SDL2
 #include <assert.h>
 #include <stdbool.h>
@@ -16,6 +17,8 @@
 
 #include "global.h"
 #include "mp.h"
+u8 TrySavingData(u8 saveType);
+#include "mp_life.h"
 #include "platform.h"
 #include "rtc.h"
 #include "gba/defines.h"
@@ -136,7 +139,6 @@ int main(int argc, char **argv)
             printf("Could not open test script %s\n", getenv("MOEMON_TEST"));
     }
 
-    ReadSaveFile(gPlatformSavePath);
 
     Display_PreInit(); // loads moemon_display.ini, sets hints that must precede SDL_Init
 
@@ -146,7 +148,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (Display_Init("Moemon Emerald Kai Co-op") != 0)
+    if (Display_Init(MOEMON_BUILD_TITLE) != 0)
         return 1;
     {
         // Moemon Co-op: a newer release installs and starts in place of this one (updater.c)
@@ -159,6 +161,10 @@ int main(int argc, char **argv)
         if (!sTestMode)
             Gamepad_Init();
     }
+
+    // Do not even open/create a save until channel selection and relaunch finish.
+    ReadSaveFile(gPlatformSavePath);
+    printf("[build] %s (%s)\n", MOEMON_BUILD_VERSION, MOEMON_BUILD_CHANNEL);
 
     simTime = curGameTime = lastGameTime = SDL_GetPerformanceCounter();
 
@@ -361,6 +367,16 @@ int main(int argc, char **argv)
 
 static void ReadSaveFile(char *path)
 {
+    // Dev builds may read existing progress but must never create or modify it.
+    if (MOEMON_DEV_BUILD)
+    {
+        size_t n = 0;
+        sSaveFile = fopen(path, "rb");
+        if (sSaveFile)
+            n = fread(FLASH_BASE, 1, sizeof(FLASH_BASE), sSaveFile);
+        memset(FLASH_BASE + n, 0xFF, sizeof(FLASH_BASE) - n);
+        return;
+    }
     // Check whether the saveFile exists, and create it if not
     sSaveFile = fopen(path, "r+b");
     if (sSaveFile == NULL)
@@ -368,6 +384,11 @@ static void ReadSaveFile(char *path)
         sSaveFile = fopen(path, "w+b");
     }
 
+    if (!sSaveFile)
+    {
+        memset(FLASH_BASE, 0xFF, sizeof(FLASH_BASE));
+        return;
+    }
     fseek(sSaveFile, 0, SEEK_END);
     int fileSize = ftell(sSaveFile);
     fseek(sSaveFile, 0, SEEK_SET);
@@ -459,6 +480,8 @@ static void BackUpSaveFile(void)
 
 static void StoreSaveFile()
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     BackUpSaveFile();
     if (sSaveFile != NULL)
     {
@@ -484,7 +507,7 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
         if (sFlashDbg)
             DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
     }
-    FILE * savefile = fopen(gPlatformSavePath, "r+b");
+    FILE * savefile = fopen(gPlatformSavePath, "rb");
     if (savefile == NULL)
     {
         puts("Error opening save file.");
@@ -1034,6 +1057,16 @@ static void TestHarnessStep(void)
             sTestKeys = sMashKeys;
             sTestWait = sMashInterval;
             return;
+        }
+        else if (strcmp(cmd, "saveprobe") == 0)
+        {
+            int status = TrySavingData(0 /* SAVE_NORMAL */);
+            Platform_StoreSaveFile(); // Also exercise the low-level disk guard.
+            MP_Bag_WriteSidecar();
+            MP_Life_WriteSidecar();
+            MP_SaveData_Set("dev_save_probe", 123);
+            printf("[test] saveprobe status %d autosave %d dev %d\n",
+                   status, gMpConfig.autosaveMinutes, MOEMON_DEV_BUILD);
         }
         else if (strcmp(cmd, "shot") == 0)
         {

@@ -1,3 +1,6 @@
+#ifdef PORTABLE
+#include "mp_version.h"
+#endif
 // Moemon Co-op: storage the server keeps for each server/room, saved to disk.
 //
 //   * the shared PC: 14 boxes of 30 Pokémon and a list of items anyone in the
@@ -76,6 +79,9 @@ static void FileName(const uint8_t *key, char *out, size_t size)
 
 static void Save(struct Store *s)
 {
+#if defined(PORTABLE) && MOEMON_DEV_BUILD
+    return; // In-game dev hosts keep shared progress in memory only.
+#endif
     char path[512], tmp[520];
     FILE *f;
     FileName(s->key, path, sizeof(path));

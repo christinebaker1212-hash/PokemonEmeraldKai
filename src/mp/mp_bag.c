@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: a bigger BAG (PC only).
 //
 // The pockets hold more kinds of items than the GBA's save block has room for
@@ -101,6 +102,8 @@ static u32 SaveBlockPocketsSum(void)
 // After the save file was written (platform StoreSaveFile): the slots past the save block's
 void MP_Bag_WriteSidecar(void)
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     char path[600];
     FILE *f;
     u32 header[3];

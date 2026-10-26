@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // OPTIONS (START > OPTIONS, and the title screen's OPTION): the game's own options screen, with tabs.
 // Moemon Co-op: one place for every setting. GAME (the original options, type icons, name case, creatures), DISPLAY
 // (fullscreen, window scale, scaling, filter, vsync), CONTROLS (controller, buttons, stick run, rumble) and CO-OP
@@ -605,7 +606,7 @@ static void Change(u8 row, int dir)
         MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
         break;
     case OPT_SPECNEW:     gMpConfig.spectateScale = Wrap(gMpConfig.spectateScale - 1 + dir, 4) + 1; break;
-    case OPT_AUTOSAVE:    gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
+    case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
     case OPT_FOLLOWSPRITES:

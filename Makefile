@@ -6,6 +6,8 @@ REVISION    := 0
 MODERN      ?= 0
 KEEP_TEMPS  ?= 0
 PORTABLE    ?= 0
+DEV_BUILD   ?= 0
+DEV_REVISION ?= 0
 IS64BIT     ?= 1
 TARGET_PLATFORM ?= PLATFORM_SDL2
 TARGET_OS       ?= NONE
@@ -14,6 +16,11 @@ TILE_RENDERER   ?= RENDERER_EASY_DRAW
 # `File name`.gba ('_modern' will be appended to the modern builds)
 FILE_NAME := pokeemerald
 BUILD_DIR := build
+# Keep dev executables and objects separate, including when changing revision.
+ifeq ($(DEV_BUILD),1)
+  FILE_NAME := pokeemerald-dev
+endif
+
 
 # Builds the ROM using a modern compiler
 MODERN      ?= 0
@@ -181,6 +188,9 @@ MODERN_ROM_NAME := $(FILE_NAME)_modern.gba
 MODERN_OBJ_DIR_NAME := $(BUILD_DIR)/modern
 PORTABLE_ROM_NAME := $(FILE_NAME)$(BIT_WIDTH)$(BUILD_FEXTENSION)
 PORTABLE_OBJ_DIR_NAME := $(BUILD_DIR)/pc$(BIT_WIDTH)
+ifeq ($(DEV_BUILD),1)
+  PORTABLE_OBJ_DIR_NAME := $(BUILD_DIR)/pc$(BIT_WIDTH)-dev-$(DEV_REVISION)-$(TARGET_OS)
+endif
 PORTABLE_ROM_NAME_OTHER := $(FILE_NAME)$(OTHER_BIT_WIDTH)$(BUILD_FEXTENSION)
 PORTABLE_OBJ_DIR_NAME_OTHER := $(BUILD_DIR)/pc$(OTHER_BIT_WIDTH)
 ASSETS_DIR_NAME := $(BUILD_DIR)/assets
@@ -240,6 +250,8 @@ ifeq ($(MODERN),0)
   LIB := $(LIBPATH) -lgcc -lc -L../../libagbsyscall -lagbsyscall
 else ifeq ($(PORTABLE),1)
   CPPFLAGS += -D NONMATCHING -D PORTABLE -D $(TARGET_PLATFORM) -D $(TILE_RENDERER) -D UBFIX $(CPPFLAGS64) $(PLATFORM_INCLUDES) -I$(SDL_DIR)/include -L$(SDL_DIR)/lib
+  CPPFLAGS += -DMOEMON_DEV_BUILD=$(DEV_BUILD) -DMOEMON_DEV_REVISION=$(DEV_REVISION)
+  override CFLAGS += -DMOEMON_DEV_BUILD=$(DEV_BUILD) -DMOEMON_DEV_REVISION=$(DEV_REVISION)
   MODERNCC := $(PREFIX)gcc
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
   CC1 	:= $(shell $(PREFIX)gcc --print-prog-name=cc1) -quiet
