@@ -31,7 +31,8 @@ sound chip does every game frame. That becomes a MIDI (tracks by instrument, eac
 instrument: a chip hands its voices to whatever instrument needs one, so a track per chip voice would
 change instrument all the time; one tick per game frame, with note starts moved onto the song's own
 beat grid when it has a steady one, since a console sequencing on its own clock lands notes up to a
-frame off; each note on the closest key, a note that jumps to a new pitch without a new key-on split
+frame off: the main grid first, then triplets and halves the song really uses, down to a 1/64 note,
+so each note starts on the frame nearest its exact musical position; each note on the closest key, a note that jumps to a new pitch without a new key-on split
 in two, and pitch bends for the rest with a bend range per note just wide enough, so notes stay in
 tune at the game's 7 bits of bend; its volume each frame as expression, pan) and **the original instruments**: each sample, at
 about the GBA's 13379 Hz as you hear it (a sample usually played low keeps more detail) and 8-bit like

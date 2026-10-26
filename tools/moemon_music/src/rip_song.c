@@ -341,7 +341,9 @@ static double grid_conc(const int *on, int n, double u) {
 static int cmp_int(const void *a, const void *b) { int x = *(const int *)a, y = *(const int *)b; return (x > y) - (x < y); }
 
 // The song's finest steady grid (a sixteenth or so: at least 4.5 frames), its phase followed through the
-// song; every note start within 1.25 frames of it moves onto it (rounded to a frame). Songs without a grid
+// song; every note start within 1.25 frames of it moves onto it (rounded to a frame). Notes between its
+// points go to finer levels the song really uses, the coarsest that fits: triplets of the beat, then
+// halves down to a sixty-fourth note (each with a closer tolerance). Songs without a grid
 // most notes sit on (rubato, tempo changes) stay as they are. Returns the notes moved.
 static int steady_rhythm(Note *notes, int nn) {
     int *on = malloc(sizeof(int) * (size_t)(nn > 0 ? nn : 1));
@@ -378,32 +380,109 @@ static int steady_rhythm(Note *notes, int nn) {
         if (c > c0) { c0 = c; u = x; }
     }
     // the phase around each onset (a 10-second window), and how far the onset is from the grid
-    double *res = malloc(sizeof(double) * (size_t)n);
-    if (!res) { free(on); return 0; }
+    // where each onset is, in grid steps from the grid's local phase (followed through a 10-second window)
+    double *pos = malloc(sizeof(double) * (size_t)n), *res = malloc(sizeof(double) * (size_t)n);
+    if (!pos || !res) { free(pos); free(res); free(on); return 0; }
     int lo = 0, hi = 0, near = 0;
-    double sc = 0, ss = 0;
+    double sc = 0, ss = 0, tolU = u * 0.3 < 1.25 ? u * 0.3 : 1.25;
     for (int i = 0; i < n; i++) {
         while (hi < n && on[hi] <= on[i] + 300) { double a = 2 * M_PI * on[hi] / u; sc += cos(a); ss += sin(a); hi++; }
         while (on[lo] < on[i] - 300) { double a = 2 * M_PI * on[lo] / u; sc -= cos(a); ss -= sin(a); lo++; }
-        double ph = atan2(ss, sc) / (2 * M_PI);
-        double r = on[i] / u - ph;
-        r -= floor(r + 0.5);
-        res[i] = r * u;
-        if (fabs(res[i]) <= 1.25) near++;
+        pos[i] = on[i] / u - atan2(ss, sc) / (2 * M_PI);
+        res[i] = 1e9;
+        double r = (pos[i] - floor(pos[i] + 0.5)) * u;
+        if (fabs(r) <= tolU) { res[i] = r; near++; }
     }
     int moved = 0;
     if (near >= n * 0.55) {
+        // the beat: the grid doubled until it's a quarter note's length at 100-200 BPM (18-36 frames), starting
+        // where onsets crowd most
+        int m = 0;
+        while (u * (1 << m) < 18 && m < 4) m++;
+        double Q = u * (1 << m);
+        int per = 1 << m, cnt[16] = {0}, bo = 0;
+        for (int i = 0; i < n; i++) if (res[i] < 1e8) cnt[(((long)floor(pos[i] + 0.5)) % per + per) % per]++;
+        for (int k = 1; k < per; k++) if (cnt[k] > cnt[bo]) bo = k;
+        // finer levels, the coarser first: triplets of the beat (to a sixteenth triplet), halves of the grid
+        // (to a sixty-fourth note). Each only if far more onsets sit on it than would by chance.
+        typedef struct { double g; int trip; double tol; } Level;
+        Level lv[16];
+        int nl = 0;
+        double steps[16];
+        int nst = 0;
+        for (int t = 3; t <= 12; t *= 2) steps[nst++] = -t;                // triplets: Q / t (to a sixteenth triplet)
+        for (double g = u / 2; g >= Q / 16 * 0.99; g /= 2) steps[nst++] = g;
+        // in size order (biggest first)
+        for (int i = 0; i < nst; i++)
+            for (int j = i + 1; j < nst; j++) {
+                double gi = steps[i] < 0 ? Q / -steps[i] : steps[i], gj = steps[j] < 0 ? Q / -steps[j] : steps[j];
+                if (gj > gi) { double tmp = steps[i]; steps[i] = steps[j]; steps[j] = tmp; }
+            }
+        for (int i = 0; i < nst && nl < 16; i++) {
+            Level L;
+            L.trip = steps[i] < 0;
+            L.g = L.trip ? Q / -steps[i] : steps[i];
+            L.tol = L.g * (L.trip ? 0.25 : 0.3);
+            if (L.tol > 1.25) L.tol = 1.25;
+            lv[nl++] = L;
+        }
+        int used[16] = {0};
+        if (getenv("MMS_RHYTHM_DEBUG")) {
+            int h[40] = {0};
+            for (int i = 0; i < n; i++) if (res[i] > 1e8) {
+                double r = (pos[i] - floor(pos[i] + 0.5)) * u;    // frames from the nearest grid point
+                int b = (int)floor((r + u / 2) / u * 40);
+                if (b >= 0 && b < 40) h[b]++;
+            }
+            fprintf(stderr, "rhythm: leftover onsets across one grid step:");
+            for (int b = 0; b < 40; b++) fprintf(stderr, " %d", h[b]);
+            fprintf(stderr, "\n");
+        }
+        for (int l = 0; l < nl; l++) {
+            // the finest level (a sixty-fourth) takes every onset left, to its nearest point; the others only
+            // when onsets really crowd their points (more in the inner half of the tolerance than the outer)
+            int last = l == nl - 1 && !lv[l].trip;
+            int inner = 0, outer = 0;
+            for (int i = 0; i < n; i++) {
+                if (res[i] < 1e8) continue;
+                double x = lv[l].trip ? (pos[i] - bo) * u / lv[l].g : pos[i] * u / lv[l].g;
+                double r = fabs(x - floor(x + 0.5)) * lv[l].g;
+                if (r <= lv[l].tol * 0.5) inner++;
+                else if (r <= lv[l].tol) outer++;
+            }
+            int hits = inner + outer;
+            if (last) lv[l].tol = lv[l].g * 0.5 + 1e-6;
+            else if (hits < 8 || inner < 1.3 * outer) continue;
+            used[l] = hits;
+            for (int i = 0; i < n; i++) {
+                if (res[i] < 1e8) continue;
+                double x = lv[l].trip ? (pos[i] - bo) * u / lv[l].g : pos[i] * u / lv[l].g;
+                double r = (x - floor(x + 0.5)) * lv[l].g;
+                if (fabs(r) <= lv[l].tol) res[i] = r;
+            }
+        }
         for (int k = 0; k < nn; k++) {
             int a = 0, b = n - 1;
-            while (a < b) { int m = (a + b) / 2; if (on[m] < notes[k].f0) a = m + 1; else b = m; }
-            if (fabs(res[a]) > 1.25) continue;
+            while (a < b) { int mm = (a + b) / 2; if (on[mm] < notes[k].f0) a = mm + 1; else b = mm; }
+            if (res[a] > 1e8) continue;
             notes[k].shift = (int)lround(notes[k].f0 - res[a]) - notes[k].f0;
             if (notes[k].f0 + notes[k].shift < 0) notes[k].shift = -notes[k].f0;
             if (notes[k].shift) moved++;
         }
+        if (getenv("MMS_RHYTHM_DEBUG")) {
+            fprintf(stderr, "rhythm: beat %.3f frames (%.1f BPM), finer levels:", Q, 3600 / Q);
+            for (int l = 0; l < nl; l++)
+                fprintf(stderr, " %s%.0f=%d", lv[l].trip ? "3x" : "1/", lv[l].trip ? 4 * Q / lv[l].g / 3 * 2 : 4 * Q / lv[l].g, used[l]);
+            fprintf(stderr, "\n");
+        }
     }
-    if (getenv("MMS_RHYTHM_DEBUG"))
-        fprintf(stderr, "rhythm: grid %.4f frames, strength %.2f, %d of %d onsets near it, %d notes moved\n", u, c0, near, n, moved);
+    if (getenv("MMS_RHYTHM_DEBUG")) {
+        int on1 = 0;
+        for (int i = 0; i < n; i++) on1 += res[i] < 1e8;
+        fprintf(stderr, "rhythm: grid %.4f frames, strength %.2f, %d of %d onsets on it, %d on a grid in all, %d notes moved\n",
+                u, c0, near, n, on1, moved);
+    }
+    free(pos);
     free(res);
     free(on);
     return moved;
