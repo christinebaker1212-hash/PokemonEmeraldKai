@@ -62,6 +62,7 @@ static int sFront;                  /* index of the frame the game shows */
 static int sHaveFrame;
 static int sPresented;              /* the back frame has a new picture */
 static volatile unsigned int sFrameSerial;
+static int sMotifScreen;            /* a screenpack screen (select, VS, results): black beside the pack's 4:3 */
 
 static char sRoot[0x200];           /* "<mugen folder>/" */
 static int sSyncSteps;              /* MOEMON_FIGHT_SYNC: MfEngine_Step waits for the frame (tests) */
@@ -341,9 +342,6 @@ void MfHost_KeysLoaded(void)
 
 /* ------------------------------------------------------------------ the screenpack's place */
 
-int g_mfMotifOffsetX;
-int g_mfHudShift;
-
 /* The motif fits the picture whole (by height for 4:3 packs in 3:2), centred: nothing of it is cut off or
  * squished (docs/FIGHT_DECISIONS.md #5). */
 void MfHost_FitMotif(void)
@@ -356,6 +354,9 @@ void MfHost_FitMotif(void)
     g->motif_scale = s;
     g_mfMotifOffsetX = (int)floor((g->game_coord[0] - g->motif_coord[0] * s) / 2.0 + 0.5);
     g_mfHudShift = 0;
+    g_mfHudSideX[0] = -g_mfMotifOffsetX;   /* until MfFit_Hud measures the HUD */
+    g_mfHudSideX[1] = g_mfMotifOffsetX;
+    g_mfHudTopY = g_mfHudBottomY = 0;
 }
 
 /* ------------------------------------------------------------------ frames */
@@ -376,7 +377,23 @@ void MfHost_Present(const SDL_Surface *surface)
     for (y = 0; y < h; y++) {
         memcpy(dst + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
     }
+    if (sMotifScreen && g_mfMotifOffsetX > 0) {
+        /* the screenpack's screens keep to its own 4:3: what slides past its edges isn't shown */
+        int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
+        for (y = 0; y < MF_SCREEN_H; y++) {
+            memset(dst + y * MF_SCREEN_W, 0, (size_t)g_mfMotifOffsetX * 2);
+            if (right < MF_SCREEN_W) {
+                memset(dst + y * MF_SCREEN_W + right, 0, (size_t)(MF_SCREEN_W - right) * 2);
+            }
+        }
+    }
     sPresented = 1;
+}
+
+/* The fight is on screen (Fight_DrawHud): the picture's full width is the stage's */
+void MfHost_MatchShown(void)
+{
+    sMotifScreen = 0;
 }
 
 /* Key events for the buttons that changed (engine thread). */
@@ -437,12 +454,16 @@ static void Host_ApplyCabinet(const char *cabinet)
 {
     GameVars *g = g_game;
     Ini *ini = Ini_Open("cabinets.ini");
-    int v;
+    int v, hud_top = 8;
 
     if (ini == NULL) {
+        MfFit_Hud(hud_top);
         return;
     }
     if (Ini_SelectGroup(ini, cabinet) != -1) {
+        if (Ini_GetInt(ini, "hud.top", &v) && v >= -1 && v <= 80) {
+            hud_top = v;
+        }
         if (Ini_GetInt(ini, "rounds", &v) && v >= 1 && v <= 9) {
             g->fight.round.match_wins = v;
         }
@@ -460,6 +481,7 @@ static void Host_ApplyCabinet(const char *cabinet)
         }
     }
     Ini_Free(ini);
+    MfFit_Hud(hud_top);
 }
 
 static int Host_RunSession(const struct MfSession *s)
@@ -469,6 +491,7 @@ static int Host_RunSession(const struct MfSession *s)
     int result = MF_RESULT_CANCELLED;
 
     Host_ApplyCabinet(s->cabinet[0] != '\0' ? s->cabinet : "mauville_gc");
+    sMotifScreen = 0;
     g = g_game;
     g->game_mode = s->mode == MF_MODE_CPU ? GAME_MODE_ARCADE : GAME_MODE_VERSUS;
     g->game_mode_side = 0;
@@ -481,6 +504,7 @@ static int Host_RunSession(const struct MfSession *s)
             state = Gameflow_SetupMatch();
             break;
         case 7:
+            sMotifScreen = 1;
             state = Charsel_Run();
             if (state != 8) {
                 return MF_RESULT_CANCELLED;
@@ -497,7 +521,7 @@ static int Host_RunSession(const struct MfSession *s)
             }
             break;
         case 11:
-            state = Match_Run();
+            state = Match_Run();    /* the VS screen stays up while it loads: MfHost_MatchShown */
             g = g_game;
             if (state == 11) {
                 break;      /* the match is played again */
@@ -511,6 +535,7 @@ static int Host_RunSession(const struct MfSession *s)
             }
             break;
         case 12:
+            sMotifScreen = 1;
             Victory_Run();
             return result;
         default:

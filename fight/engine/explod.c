@@ -1274,7 +1274,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     int v;
 
     e->pos.x = old.x * scale + MF_MOTIF_X();    /* Moemon Fight: the motif's place in the picture */
-    e->pos.y = scale * old.y;
+    e->pos.y = scale * old.y + MF_MOTIF_Y();   /* Moemon Fight */
     vel = old;
     vel.x = e->vel.x * scale;
     vel.y = scale * e->vel.y;
@@ -1290,7 +1290,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     }
     v = e->window_y1;
     if (v != -1) {
-        e->window_y1 = Ex_Round((double)v * scale);
+        e->window_y1 = Ex_Round((double)v * scale) + MF_MOTIF_Y();
     }
     if (scale > 1.0f) {
         v = e->window_x2;
@@ -1299,7 +1299,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
         }
         v = e->window_y2;
         if (v != -1) {
-            e->window_y2 = Ex_Round((double)scale * (v + 1) - 1.0);
+            e->window_y2 = Ex_Round((double)scale * (v + 1) - 1.0) + MF_MOTIF_Y();
         }
     } else {
         v = e->window_x2;
@@ -1308,7 +1308,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
         }
         v = e->window_y2;
         if (v != -1) {
-            e->window_y2 = Ex_Round((double)scale * v);
+            e->window_y2 = Ex_Round((double)scale * v) + MF_MOTIF_Y();
         }
     }
 }
@@ -1403,7 +1403,11 @@ int SysElem_DrawFight(const SysElem *elem, int layer, float x, float y)
     idx = SysElem_Add(elem, g->sysexplods, g->fight.sff, g->fight.anim, (void **)g->fight.fonts, x, y);
     if (idx >= 0) {
         float s = (float)g_game->motif_scale;
+        int shift = g_mfHudShift;
+        MfFit_PlaceItem(&g->sysexplods->items[idx]);  /* Moemon Fight: the HUD's place (fight/host/mf_fit.c) */
         SysElem_SetScale(idx, s, 1.0f);
+        g_mfHudShift = shift;
+        g_mfHudShiftY = 0;
         idx = SysDraw_DrawItem(g_game->sysexplods, idx);
     }
     return idx;

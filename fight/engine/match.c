@@ -332,6 +332,8 @@ void Fight_DrawHud(int layer)
     int side, k, i, n;
 
     g_palFxCur = &g->palgroup_200_palfx;
+    g_mfHudVertical = 1;    /* Moemon Fight: the top and bottom parts' places (fight/host/mf_fit.c) */
+    MfHost_MatchShown();
     /* life bar backgrounds */
     for (k = 0; k < 3; k++) {
         for (side = 0; side < 2; side++) {
@@ -537,6 +539,7 @@ void Fight_DrawHud(int layer)
         }
     }
     MF_HUD_SIDE(-1);
+    g_mfHudVertical = 0;
     g_palFxCur = NULL;
 }
 

@@ -40,16 +40,32 @@ void MfHost_ConfigLoaded(void);
 void MfHost_KeysLoaded(void);
 
 /*
- * The screenpack's space in the picture (docs/FIGHT_DECISIONS.md #5): scaled to fit (by height for 4:3 packs in
- * the 3:2 picture) and centred, g_mfMotifOffsetX pixels from the left. The fight HUD's sides go to the real
- * edges: g_mfHudShift (MF_HUD_SIDE) moves what is drawn for side 0 left and side 1 right by the same amount.
+ * The screenpack's space in the picture (docs/FIGHT_DECISIONS.md #5, #7): scaled to fit (by height for 4:3 packs in
+ * the 3:2 picture) and centred, g_mfMotifOffsetX pixels from the left. The fight HUD is fitted by
+ * MfFit_Hud (fight/host/mf_fit.c): each side's part goes to its real edge (g_mfHudSideX, chosen by MF_HUD_SIDE),
+ * the top part to the cabinet's hud.top and anything past the safe margin back inside (g_mfHudTopY / BottomY,
+ * picked per element while g_mfHudVertical is set). A sprite across the middle of the screen is shared by both
+ * sides and keeps its centred place.
  */
+struct SysDrawItem;
 extern int g_mfMotifOffsetX;
 extern int g_mfHudShift;
-#define MF_HUD_SIDE(side) (g_mfHudShift = (side) < 0 ? 0 : (side) == 0 ? -g_mfMotifOffsetX : g_mfMotifOffsetX)
+extern int g_mfHudSideX[2];
+extern int g_mfHudShiftY;
+extern int g_mfHudTopY, g_mfHudBottomY;
+extern int g_mfHudVertical;
+#define MF_HUD_SIDE(side) (g_mfHudShift = (side) < 0 ? 0 : g_mfHudSideX[(side) & 1])
 #define MF_MOTIF_X() (g_mfMotifOffsetX + g_mfHudShift)
+#define MF_MOTIF_Y() (g_mfHudShiftY)
 /* GameVars.motif_scale and g_mfMotifOffsetX for the game resolution and the motif's localcoord */
 void MfHost_FitMotif(void);
+/* Fits the fight HUD (after fight.def and the cabinet's settings): top_px is where its top goes, -1 the pack's place */
+void MfFit_Hud(int top_px);
+/* An element about to be drawn (before SysElem_SetScale): picks its shifts */
+void MfFit_PlaceItem(const struct SysDrawItem *e);
+
+/* The fight is on screen (Fight_DrawHud) */
+void MfHost_MatchShown(void);
 
 /* The end of every frame of the screen loops (Screen_EndFrame). */
 void MfHost_FrameEnd(void);

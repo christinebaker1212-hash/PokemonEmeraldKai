@@ -107,14 +107,21 @@ data or Elecbyte files.
   480 / scale. A 320x240 stage gets about 20 more stage pixels on each side.
 - Screenpacks (motifs) are fitted by height too (`MfHost_FitMotif`: the smaller of the two scales)
   and centred (`g_mfMotifOffsetX`, `MF_MOTIF_X()` in the select, VS, fight HUD and explod code). The
-  fight HUD's two sides then move out to the real edges (`MF_HUD_SIDE`): P1's life bar, power bar,
-  face, name, wins and combo counter by the left edge, P2's by the right. The timer stays centred.
+  select, VS and results screens keep to the pack's 4:3: what slides past its edges isn't shown (black
+  beside it, until the fight itself is on screen).
+- The fight HUD is measured sprite by sprite when a session starts (`MfFit_Hud`,
+  fight/host/mf_fit.c), and what moved goes to `mugen/fightfit.log`:
+  - each player's part (life bar, power bar, face, name, win icons) moves out to its real edge, as far
+    as the pack had it from its own screen's edge, never past the 8px safe margin;
+  - the top part goes to `hud.top` in cabinets.ini (8: against the safe margin; -1: the pack's place,
+    moved inside the margin when past it). The owner found SFEX's bars hanging too low otherwise;
+  - the bottom part only moves when it is past the margin;
+  - a sprite across the middle of the screen belongs to both sides and keeps its centred place
+    (SFEX draws both players' round boxes as one strip under P2's bar; it went to the right with P2's
+    side at first).
 - The camera never shows past a stage's edge. When the bounds plus the wider view need more than
   the stage has, the outermost background layers repeat at the edges.
-- When system.def, select.def and fight.def load, every element's box is measured (sprite size
-  and axis, offset, scale, and font text width). Long names are measured at their full length.
-- Any box past the 8px safe margin is moved inside. Each move is written to `mugen/fightfit.log`
-  (element, file, how far). A debug key outlines the boxes.
+- Fonts aren't measured yet (names, counters): they move with their side and part.
 
 ### Rollback and determinism
 - All state a match changes lives in one arena: players, helpers, explods, projectiles, the
