@@ -132,6 +132,11 @@ size_t MfMem_Used(void)
     return used < sSize ? used : sSize;
 }
 
+void MfMem_SetUsed(size_t used)
+{
+    sHigh = used > 4096 ? used - 4096 : used;
+}
+
 size_t MfMem_Leaked(void)
 {
     return sLeaked;

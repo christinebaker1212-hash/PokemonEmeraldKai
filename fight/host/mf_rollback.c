@@ -61,6 +61,20 @@ static size_t Rb_GlobalsSize(void)
     return (size_t)(STATE_END - STATE_START);
 }
 
+/* Copies the globals' section whole: with AddressSanitizer (tests) it holds the guard zones between the
+ * globals too, so the copy mustn't be checked */
+#if defined(__SANITIZE_ADDRESS__)
+__attribute__((no_sanitize_address))
+#endif
+static void Rb_CopyGlobals(unsigned char *dst, const unsigned char *src)
+{
+    size_t n = Rb_GlobalsSize(), i;
+
+    for (i = 0; i < n; i++) {
+        dst[i] = src[i];
+    }
+}
+
 static int Rb_Grow(void **p, size_t *cap, size_t need, size_t elem)
 {
     size_t n = *cap ? *cap : 64;
@@ -212,7 +226,7 @@ int MfRollback_Begin(unsigned int frame, const void *host)
     sFirst = sLast = frame;
     sRing[frame % MF_RB_FRAMES].valid = 1;
     sRing[frame % MF_RB_FRAMES].frame = frame;
-    memcpy(sRing[frame % MF_RB_FRAMES].globals, STATE_START, gsize);
+    Rb_CopyGlobals(sRing[frame % MF_RB_FRAMES].globals, STATE_START);
     memcpy(sRing[frame % MF_RB_FRAMES].host, host, MF_RB_HOST_SIZE);
     return 1;
 }
@@ -279,7 +293,7 @@ int MfRollback_Save(unsigned int frame, const void *host)
         memcpy(sShadow + at, MfMem_Base() + at, PAGE);
         f->count++;
     }
-    memcpy(f->globals, STATE_START, Rb_GlobalsSize());
+    Rb_CopyGlobals(f->globals, STATE_START);
     memcpy(f->host, host, MF_RB_HOST_SIZE);
     sLast = frame;
     if (sLast - sFirst >= MF_RB_FRAMES) {
@@ -317,11 +331,59 @@ int MfRollback_Restore(unsigned int frame, void *host)
 #ifdef _WIN32
     ResetWriteWatch(MfMem_Base(), MfMem_Size());
 #endif
-    memcpy(STATE_START, sRing[frame % MF_RB_FRAMES].globals, Rb_GlobalsSize());
+    Rb_CopyGlobals(STATE_START, sRing[frame % MF_RB_FRAMES].globals);
     memcpy(host, sRing[frame % MF_RB_FRAMES].host, MF_RB_HOST_SIZE);
     sStats.rewinds++;
     sStats.frames_back += sLast - frame;
     sLast = frame;
+    return 1;
+}
+
+/* The engine as it was when it had started up, before any session (MfRollback_KeepStart): every session begins
+ * from it, so a session is the same whatever ran before it, on any PC */
+static unsigned char *sStart;
+static size_t sStartSize, sStartHigh;
+static unsigned char *sStartGlobals;
+static unsigned char sStartHost[MF_RB_HOST_SIZE];
+
+int MfRollback_KeepStart(const void *host)
+{
+    size_t used = MfMem_Used();
+
+    free(sStart);
+    free(sStartGlobals);
+    sStart = malloc(used);
+    sStartGlobals = malloc(Rb_GlobalsSize());
+    if (sStart == NULL || sStartGlobals == NULL) {
+        free(sStart);
+        free(sStartGlobals);
+        sStart = sStartGlobals = NULL;
+        return 0;
+    }
+    memcpy(sStart, MfMem_Base(), used);
+    Rb_CopyGlobals(sStartGlobals, STATE_START);
+    memcpy(sStartHost, host, MF_RB_HOST_SIZE);
+    sStartSize = used;
+    sStartHigh = used;
+    return 1;
+}
+
+int MfRollback_RestoreStart(void *host)
+{
+    size_t used = MfMem_Used();
+
+    if (sStart == NULL) {
+        return 0;
+    }
+    MfRollback_End();
+    memcpy(MfMem_Base(), sStart, sStartSize);
+    if (used > sStartSize) {
+        /* what sessions used past it, as it was: never written */
+        memset(MfMem_Base() + sStartSize, 0, used - sStartSize);
+    }
+    MfMem_SetUsed(sStartHigh);
+    Rb_CopyGlobals(STATE_START, sStartGlobals);
+    memcpy(host, sStartHost, MF_RB_HOST_SIZE);
     return 1;
 }
 

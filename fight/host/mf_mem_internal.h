@@ -14,6 +14,8 @@ unsigned char *MfMem_Base(void);
 size_t MfMem_Size(void);
 /* Bytes from the base that may have been written: the stack and the heap up to its top chunk */
 size_t MfMem_Used(void);
+/* Puts back what MfMem_Used said (the region restored to an earlier state) */
+void MfMem_SetUsed(size_t used);
 /* The engine's stack: from the base up to here */
 void *MfMem_StackTop(void);
 /* Frees from other threads that were left alone */

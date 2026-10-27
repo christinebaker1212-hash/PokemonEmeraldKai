@@ -72,6 +72,9 @@ static volatile unsigned int sFramesDone;
 static unsigned int sHash;          /* MfEngine_Hash of the last frame */
 static int sNewSession;             /* the first frame of a session is being run */
 static int sReplaying;              /* the frame running is one run again after going back (MfEngine_StepQuiet) */
+static int sAtReady;                /* the engine yielded between sessions (Host_Ready) */
+static int sStartKept;              /* the engine as it started up is kept (MfRollback_KeepStart) */
+static unsigned int sSessionsRun;
 
 static void *sExitJump[5];          /* __builtin_setjmp: no unwinding across the engine's own stack */
 static int sExitJumpReady;
@@ -818,17 +821,11 @@ static void Host_EngineMain(void)
         struct MfSession session;
         int result;
 
-        pthread_mutex_lock(&sLock);
-        sState = HOST_READY;
-        pthread_cond_broadcast(&sCond);
-        while (!sSessionPending) {
-            pthread_cond_wait(&sCond, &sLock);
-        }
-        sSessionPending = 0;
-        sState = HOST_RUNNING;
+        /* the engine thread waits for a session (Host_Ready), the engine as it started up put back */
+        sAtReady = 1;
+        MfCoro_Yield();
+        sAtReady = 0;
         session = sSession;
-        sNewSession = 1;
-        pthread_mutex_unlock(&sLock);
 
         MfSdl_ClearEvents();
         sHeld[0] = sHeld[1] = 0;
@@ -848,6 +845,34 @@ static void Host_EngineMain(void)
     }
 }
 
+/* Between sessions (engine thread, the engine stopped in Host_EngineMain): the first time, the engine as it
+ * started up is kept; then the next session, which begins from it (a session is the same whatever ran before,
+ * on any PC: online games start alike) */
+static void Host_Ready(void)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+
+    if (!sStartKept) {
+        Host_PackVars(vars);
+        sStartKept = MfRollback_KeepStart(vars);
+    }
+    pthread_mutex_lock(&sLock);
+    sState = HOST_READY;
+    sBusy = 1;
+    pthread_cond_broadcast(&sCond);
+    while (!sSessionPending) {
+        pthread_cond_wait(&sCond, &sLock);
+    }
+    sSessionPending = 0;
+    sState = HOST_RUNNING;
+    sNewSession = 1;
+    pthread_mutex_unlock(&sLock);
+    if (sStartKept && sSessionsRun > 0 && MfRollback_RestoreStart(vars)) {
+        Host_UnpackVars(vars);
+    }
+    sSessionsRun++;
+}
+
 static void *Host_Thread(void *arg)
 {
     sEngineThread = pthread_self();
@@ -864,7 +889,11 @@ static void *Host_Thread(void *arg)
     }
     sBusy = 1;
     while (MfCoro_Resume()) {
-        Host_FrameDone();
+        if (sAtReady) {
+            Host_Ready();
+        } else {
+            Host_FrameDone();
+        }
     }
     return NULL;
 }
