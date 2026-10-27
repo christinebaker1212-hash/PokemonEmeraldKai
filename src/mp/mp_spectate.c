@@ -42,6 +42,7 @@
 #include "platform/display.h"
 #include "mp_net.h"
 #include "mp_join.h"
+#include "tcg/integration.h"
 
 #define FRAME_W 240
 #define FRAME_H 160
@@ -245,7 +246,7 @@ static int PackTile(const u16 *frame, int t, u8 *out)
 
 static void SendToViewers(const u8 *data, u16 len)
 {
-    u8 i, to = sStream.viewers | sStream.panel, others = 0;
+    u8 i, to = (sStream.viewers | sStream.panel) & ~Tcg_HiddenFrom(), others = 0;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             others |= 1 << i;
@@ -377,7 +378,13 @@ static bool8 FindShift(const u16 *frame, int *outX, int *outY)
 static void StreamFrame(void)
 {
     const u16 *frame = Platform_GetFrame();
-    bool8 key = sStream.needKey || sStream.keyTimer == 0;
+    static unsigned sHidden;
+    unsigned hidden = Tcg_HiddenFrom();   // a card duel's opponent skips frames: whole pictures again after it
+    bool8 key;
+    if (sHidden & ~hidden)
+        sStream.needKey = TRUE;
+    sHidden = hidden;
+    key = sStream.needKey || sStream.keyTimer == 0;
     int t = 0, pos, count, ox = 0, oy = 0, bytes = 0;
     u8 flags = key ? FRAMEF_KEY : 0;
     static u8 sForced[NUM_TILES];

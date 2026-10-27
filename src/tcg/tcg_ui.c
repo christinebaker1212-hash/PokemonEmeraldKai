@@ -100,6 +100,11 @@ static void Screen(int screen)
 }
 int Tcg_IsActive(void) { return U.screen != UI_CLOSED; }
 int Tcg_OnlineWilling(void) { return U.screen == UI_ONLINE && Tcg_GetCollection()->optedIn; }
+unsigned Tcg_HiddenFrom(void)
+{
+    unsigned peer = Tcg_Online()->peer;
+    return U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
+}
 /* The local player is always player 0 on screen: the recipient of an
  * invitation sees the canonical duel with both sides swapped. */
 static void OnlineView(void)
@@ -161,7 +166,16 @@ void Tcg_OpenCase(void (*returnToGame)(void))
     }
     Screen(c->optedIn ? UI_CASE : UI_INVITE);
 }
-void Tcg_DestroyTextures(void) { G_Destroy(); }
+static SDL_Texture *sCanvas;
+static SDL_Renderer *sCanvasOwner;
+void Tcg_DestroyTextures(void)
+{
+    G_Destroy();
+    if (sCanvas)
+        SDL_DestroyTexture(sCanvas);
+    sCanvas = NULL;
+    sCanvasOwner = NULL;
+}
 
 /* ------------------------------------------------------------------ */
 /* Shared drawing for the menus                                         */
@@ -1449,10 +1463,10 @@ static void RevealScreen(void)
     else
         Footer("{A} NEXT CARD   {B} SHOW ALL");
 }
-void Tcg_Render(struct SDL_Renderer *r, int width, int height)
+static uint16_t sFrame[240 * 160];
+static int sFrameRead;
+SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
 {
-    static SDL_Texture *sCanvas;
-    static SDL_Renderer *sCanvasOwner;
     struct TcgCollection *c;
     SDL_Texture *previous;
     SDL_Rect oldViewport, oldClip;
@@ -1460,10 +1474,10 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
     float oldX, oldY;
     char line[160];
     unsigned i;
-    int scale;
     if (!Tcg_IsActive())
-        return;
+        return NULL;
     G_Begin(r);
+    G_SetGameBoyArt(gMpConfig.cardArt);
     if (sCanvas && sCanvasOwner != r)
         sCanvas = NULL;
     if (!sCanvas)
@@ -1471,8 +1485,8 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         sCanvas = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, 160);
         sCanvasOwner = r;
         if (!sCanvas)
-            return;
-        SDL_SetTextureBlendMode(sCanvas, SDL_BLENDMODE_BLEND);
+            return NULL;
+        SDL_SetTextureBlendMode(sCanvas, SDL_BLENDMODE_NONE);
         SDL_SetTextureScaleMode(sCanvas, SDL_ScaleModeNearest);
     }
     previous = SDL_GetRenderTarget(r);
@@ -1484,8 +1498,11 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
     SDL_RenderSetViewport(r, NULL);
     SDL_RenderSetClipRect(r, NULL);
     SDL_RenderSetScale(r, 1, 1);
-    SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
     SDL_RenderClear(r);
+    /* Screens that only cover part of it show the game behind. */
+    if (game)
+        SDL_RenderCopy(r, game, NULL, NULL);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     c = Tcg_GetCollection();
     switch (U.screen)
@@ -1609,15 +1626,25 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
     SDL_RenderSetViewport(r, &oldViewport);
     SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
     SDL_RenderSetScale(r, oldX, oldY);
-    scale = width / 240;
-    if (height / 160 < scale)
-        scale = height / 160;
-    if (scale < 1)
-        scale = 1;
+    sFrameRead = 0;
+    return sCanvas;
+}
+/* The last card screen as a game frame (15-bit, like the GBA picture). */
+const unsigned short *Tcg_Frame(void)
+{
+    SDL_Texture *previous;
+    if (!Tcg_IsActive() || !sCanvas || !sCanvasOwner)
+        return NULL;
+    if (!sFrameRead)
     {
-        SDL_Rect dest = {(width - 240 * scale) / 2, (height - 160 * scale) / 2, 240 * scale, 160 * scale};
-        SDL_RenderCopy(r, sCanvas, NULL, &dest);
+        previous = SDL_GetRenderTarget(sCanvasOwner);
+        SDL_SetRenderTarget(sCanvasOwner, sCanvas);
+        if (SDL_RenderReadPixels(sCanvasOwner, NULL, SDL_PIXELFORMAT_ABGR1555, sFrame, 240 * 2) != 0)
+            memset(sFrame, 0, sizeof(sFrame));
+        SDL_SetRenderTarget(sCanvasOwner, previous);
+        sFrameRead = 1;
     }
+    return sFrame;
 }
 
 void Tcg_Debug(const char *command)

@@ -29,29 +29,29 @@ enum
 /* ------------------------------------------------------------------ */
 /* Layout: the DS mat turned to the wide screen. You are at the bottom. */
 /* ------------------------------------------------------------------ */
-#define MAT 0x018242
-#define MAT_LINE 0x1bc55c
-#define MAT_LABEL 0x16a457
 #define BENCH_W 22
 #define BENCH_H 30
 #define ACT_W 30
 #define ACT_H 42
 #define ACT_X 105
 #define OPP_ACT_Y 33
-#define MY_ACT_Y 81
-#define OPP_BENCH_Y 1
-#define MY_BENCH_Y 123
+#define MY_ACT_Y 78
+#define OPP_BENCH_Y 2
+#define MY_BENCH_Y 122
+#define BENCH_X 34   /* the Bench row's frame: five 34-pixel spaces */
+#define BENCH_CELL 34
 #define PILE_W 18
 #define PILE_H 25
-#define PRIZE_W 12
-#define PRIZE_H 16
+#define PRIZE_W 16
+#define PRIZE_H 22
 #define HAND_W 30
 #define HAND_H 42
 #define CENTER_X 120
-#define CENTER_Y 78
+#define CENTER_Y 76
 #define BAR_CLOSED 152
 #define BAR_OPEN 118
 #define PAN 37
+#define LAYER_H 200 /* the mat is taller than the screen: it scrolls up with the hand */
 #define QUEUE 8
 #define FX_MAX 32
 
@@ -64,28 +64,41 @@ static struct Rect MakeRect(int x, int y, int w, int h)
     struct Rect r = {x, y, w, h};
     return r;
 }
+static struct Rect BenchCell(unsigned who, unsigned column)
+{
+    return MakeRect(BENCH_X + (int)column * BENCH_CELL, who ? 0 : MY_BENCH_Y - 2, BENCH_CELL, BENCH_H + 4);
+}
 static struct Rect SlotRect(unsigned who, unsigned slot)
 {
     unsigned column;
+    struct Rect cell;
     if (!slot)
         return MakeRect(ACT_X, who ? OPP_ACT_Y : MY_ACT_Y, ACT_W, ACT_H);
     /* The opponent's bench fills from their left: our right. */
     column = who ? 5 - slot : slot - 1;
-    return MakeRect(41 + (int)column * 34, who ? OPP_BENCH_Y : MY_BENCH_Y, BENCH_W, BENCH_H);
+    cell = BenchCell(who, column);
+    return MakeRect(cell.x + (BENCH_CELL - BENCH_W) / 2, who ? OPP_BENCH_Y : MY_BENCH_Y, BENCH_W, BENCH_H);
 }
-static struct Rect DeckRect(unsigned who) { return who ? MakeRect(7, 31, PILE_W, PILE_H) : MakeRect(215, 100, PILE_W, PILE_H); }
+/* The side columns: the opponent's discard and deck at the top left, their
+ * Prizes at the top right; yours mirrored at the bottom. */
+static struct Rect DeckRect(unsigned who) { return who ? MakeRect(7, 32, PILE_W, PILE_H) : MakeRect(215, 96, PILE_W, PILE_H); }
 static struct Rect DiscardRect(unsigned who)
 {
-    return who ? MakeRect(7, 3, PILE_W, PILE_H) : MakeRect(215, 128, PILE_W, PILE_H);
+    return who ? MakeRect(7, 3, PILE_W, PILE_H) : MakeRect(215, 125, PILE_W, PILE_H);
 }
+/* Prizes: three rows of two, the second card of a row tucked under the first
+ * (the DS layout). Your first Prize is the top left one. */
+static struct Rect PrizeArea(unsigned who) { return who ? MakeRect(209, 1, 30, 62) : MakeRect(1, 91, 30, 62); }
 static struct Rect PrizeRect(unsigned who, unsigned i)
 {
-    return who ? MakeRect(211 + (int)(i % 2) * 14, 3 + (int)(i / 2) * 18, PRIZE_W, PRIZE_H)
-               : MakeRect(3 + (int)(i % 2) * 14, 98 + (int)(i / 2) * 18, PRIZE_W, PRIZE_H);
+    struct Rect a = PrizeArea(who);
+    unsigned row = i / 2, col = i % 2;
+    if (who)
+        row = 2 - row, col ^= 1;
+    return MakeRect(a.x + 3 + (int)col * 8, a.y + 2 + (int)row * 18 + (int)col * 2, PRIZE_W, PRIZE_H);
 }
-static struct Rect PrizeArea(unsigned who) { return who ? MakeRect(210, 2, 28, 54) : MakeRect(2, 97, 28, 54); }
-static const struct Rect sEndButton = {184, 79, 52, 15};
-static const struct Rect sOppHand = {2, 62, 28, 30};
+static const struct Rect sEndButton = {184, 77, 52, 15};
+static const struct Rect sOppHand = {1, 61, 30, 27};
 
 /* ------------------------------------------------------------------ */
 /* State                                                                */
@@ -277,8 +290,13 @@ static struct
     int toastTime;
     char result[200];
     int resultShown, resultTime;
-    u16 music;
+    u16 music, duelMusic;
     int speed;
+    /* Showing what happened: the hand after OAK and the like, the Bench
+     * after a Knock Out, a Prize card held up before it joins the hand. */
+    int showHand, promoFocused;
+    int spotlight, spotTime, spotHold;
+    uint8_t prizeQueue[6], prizeCount, prizeNext;
 } B;
 
 static const struct Step sNoSteps[1] = {{0, 0, 0, 0, 0, NULL}};
@@ -435,6 +453,8 @@ static void Place(unsigned who, unsigned physical, int zone, int slot, int index
     s->face = face;
     s->layer = layer;
     s->visible = visible;
+    /* The opponent's cards face them. */
+    s->tangle = who ? 180.0f : 0.0f;
 }
 static void Layout(void)
 {
@@ -454,6 +474,12 @@ static void Layout(void)
         {
             struct Rect r = who ? MakeRect(105, -50, HAND_W, HAND_H) : HandRect(i, p->handSize);
             int layer = 10 + (int)i;
+            if (!who && B.spotlight == p->hand[i] && (B.spotHold || B.spotTime > 0))
+            {
+                /* A Prize card you took, held up in the middle first. */
+                Place(who, p->hand[i], Z_HAND, 0, i, MakeRect(CENTER_X - 22, CENTER_Y - 36, 44, 61), 1, 48, 1);
+                continue;
+            }
             if (!who && B.mode == M_TARGET && (int)i == B.heldHand)
             {
                 /* The picked card floats over the slot the cursor is on. */
@@ -474,7 +500,7 @@ static void Layout(void)
                 int top = j + 1 == f->stackSize;
                 Place(who, f->stack[j], top ? Z_FIELD : Z_UNDER, (int)s, j, r, !hidden, top ? 5 : 4, top);
                 if (top)
-                    B.sprite[who][f->stack[j]].tangle = (float)StatusAngle(who, s);
+                    B.sprite[who][f->stack[j]].tangle = (who ? 180.0f : 0.0f) + (float)StatusAngle(who, s);
             }
             for (j = 0; j < f->attachedSize; j++)
                 Place(who, f->attached[j], Z_ATTACHED, (int)s, j, r, 1, 3, 0);
@@ -679,6 +705,30 @@ static unsigned AttackSe(const char *anim, unsigned type, unsigned *color)
 }
 static const char *PlayerName(unsigned who) { return who ? B.opponent : "YOU"; }
 
+/* Trainer cards whose effect lands in your hand (or the opponent's that hit yours). */
+static int ChangesHand(unsigned card, unsigned who)
+{
+    switch (card)
+    {
+    case TCG_CARD_IMPOSTER_PROFESSOR_OAK:
+    case TCG_CARD_LASS:
+        return 1;
+    case TCG_CARD_PROFESSOR_OAK:
+    case TCG_CARD_BILL:
+    case TCG_CARD_GAMBLER:
+    case TCG_CARD_COMPUTER_SEARCH:
+    case TCG_CARD_ITEM_FINDER:
+    case TCG_CARD_ENERGY_RETRIEVAL:
+    case TCG_CARD_SUPER_ENERGY_RETRIEVAL:
+    case TCG_CARD_ENERGY_SEARCH:
+    case TCG_CARD_POKE_BALL:
+    case TCG_CARD_POKEMON_TRADER:
+    case TCG_CARD_MAINTENANCE:
+    case TCG_CARD_SCOOP_UP:
+        return who == 0;
+    }
+    return 0;
+}
 /* Starts one presented event; returns how many frames it holds the stage. */
 static int StartEvent(const struct TcgEvent *e, int post)
 {
@@ -825,10 +875,26 @@ static int StartEvent(const struct TcgEvent *e, int post)
         B.flash[who][slot] = 10;
         Banner(x, who ? y + 30 : y - 30, "KNOCKED OUT!", 0xb02828, fast ? 40 : 64);
         PlaySE(SE_FAINT);
+        if (!who)
+        {
+            /* Your Bench comes into view to choose who goes in next. */
+            B.trayWanted = 0;
+            B.promoFocused = 0;
+        }
         return fast ? 34 : 56;
     case TCG_EV_TRAINER:
     {
         struct Fx *f = AddFx(FX_SHOWCASE, CENTER_X, CENTER_Y, fast ? 42 : 72);
+        if (ChangesHand(e->card, who))
+        {
+            B.showHand = fast ? 50 : 80;
+            if (!who)
+            {
+                B.trayWanted = 1;
+                B.focusKind = T_HAND;
+                B.focusIndex = 0;
+            }
+        }
         if (f)
         {
             f->value = e->card;
@@ -859,6 +925,17 @@ static int StartEvent(const struct TcgEvent *e, int post)
         PlaySE(SE_BALL_TRAY_BALL);
         return fast ? 6 : 12;
     case TCG_EV_PRIZE:
+        printf("[tcg] prize taken by %u, shown %d\n", who, !who && B.spotlight >= 0);
+        if (!who && B.spotlight >= 0 && (B.spotHold || B.prizeNext < B.prizeCount))
+        {
+            /* Your Prize, face up in the middle, then into your hand. */
+            if (!B.spotHold)
+                B.spotlight = B.prizeQueue[B.prizeNext++];
+            B.spotHold = 0;
+            B.spotTime = fast ? 34 : 58;
+            PlaySE(SE_RG_CARD_FLIP);
+            return B.spotTime + 6;
+        }
         PlaySE(SE_RG_CARD_FLIPPING);
         return fast ? 8 : 16;
     case TCG_EV_RETREAT:
@@ -934,6 +1011,20 @@ static void Commit(const struct TcgDuel *next)
             before[who][i] = B.sprite[who][i].zone * 16 + B.sprite[who][i].slot;
     B.view = *next;
     ResetShown();
+    B.prizeCount = B.prizeNext = 0;
+    for (i = 0; i < B.view.players[0].handSize; i++)
+    {
+        unsigned physical = B.view.players[0].hand[i];
+        if (B.sprite[0][physical].zone == Z_PRIZE && B.prizeCount < 6)
+            B.prizeQueue[B.prizeCount++] = (uint8_t)physical;
+    }
+    if (B.prizeCount)
+    {
+        /* It flies from its spot to the middle and waits for its event. */
+        B.spotlight = B.prizeQueue[B.prizeNext++];
+        B.spotHold = 1;
+        B.spotTime = 0;
+    }
     Layout();
     for (who = 0; who < 2; who++)
         for (i = 0; i < TCG_DECK_SIZE; i++)
@@ -989,11 +1080,15 @@ static void Present(void)
 /* ------------------------------------------------------------------ */
 /* Begin / sync                                                         */
 /* ------------------------------------------------------------------ */
+static u16 sNextMusic;
+void TcgBoard_SetMusic(unsigned song) { sNextMusic = (u16)song; }
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online)
 {
     unsigned who, i;
     struct Fx *f;
     memset(&B, 0, sizeof(B));
+    B.duelMusic = sNextMusic;
+    sNextMusic = 0;
     B.active = 1;
     B.online = online;
     snprintf(B.opponent, sizeof(B.opponent), "%s", opponent ? opponent : "OPPONENT");
@@ -1010,13 +1105,15 @@ void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int onlin
             s->w = s->tw = (float)r.w;
             s->h = s->th = (float)r.h;
             s->zone = Z_DECK;
+            s->angle = s->tangle = who ? 180.0f : 0.0f;
             s->settled = 1;
         }
     B.focusKind = T_HAND;
     B.heldHand = -1;
+    B.spotlight = -1;
     B.mode = M_FREE;
     B.music = GetCurrentMapMusic();
-    PlayBGM(MUS_B_ARENA);
+    PlayBGM(B.duelMusic ? B.duelMusic : MUS_B_ARENA);
     /* Who goes first is decided before the deal, with a coin. */
     f = AddFx(FX_COIN, CENTER_X, CENTER_Y, 90);
     if (f)
@@ -2047,6 +2144,12 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         }
         else
             Present();
+        if (B.spotTime > 0 && --B.spotTime == 0)
+            B.spotlight = -1;   /* into the hand it goes */
+        if (B.showHand > 0 && B.phase == P_IDLE && !B.qCount)
+            B.showHand--;
+        if (!B.intro)
+            Layout();
         MoveSprites();
         for (k = 0; k < FX_MAX; k++)
             if (B.fx[k].duration && ++B.fx[k].t >= B.fx[k].duration)
@@ -2076,8 +2179,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         B.toastTime--;
     {
         /* The hand opens for browsing on your own turn, once the mat is still. */
-        float want = B.trayWanted && B.focusKind == T_HAND && (B.mode == M_FREE || B.mode == M_MENU) && MyTurn() &&
-                             B.phase == P_IDLE && !B.qCount && B.intro <= 0
+        float want = (B.trayWanted && B.focusKind == T_HAND && (B.mode == M_FREE || B.mode == M_MENU) && MyTurn() &&
+                      B.phase == P_IDLE && !B.qCount && B.intro <= 0) ||
+                             (B.showHand > 0 && B.intro <= 0 && B.mode != M_PICK && B.mode != M_RESULT)
                          ? 1.0f
                          : 0.0f;
         B.tray += (want - B.tray) * 0.3f;
@@ -2087,6 +2191,22 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     /* Hand positions follow the tray continuously. */
     if (!B.intro)
         Layout();
+    if (B.view.phase == TCG_PROMOTION && MyTurn() && TcgBoard_Idle() && B.mode == M_FREE && !B.promoFocused)
+    {
+        /* After a Knock Out: straight to the Bench, on the first Pokemon there. */
+        unsigned slot;
+        B.promoFocused = 1;
+        B.trayWanted = 0;
+        for (slot = 1; slot < TCG_FIELD_SIZE; slot++)
+            if (Field(0, slot))
+            {
+                B.focusKind = T_MINE;
+                B.focusIndex = (int)slot;
+                break;
+            }
+    }
+    else if (B.view.phase != TCG_PROMOTION)
+        B.promoFocused = 0;
     if (B.toast[0] && B.toastTime && pressed & (KEY_A | KEY_B))
     {
         B.toastTime = 0;
@@ -2308,6 +2428,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     }
     if (pressed & KEY_B)
     {
+        /* B leaves the hand; on the table it asks to end the turn. */
         if (B.focusKind == T_HAND)
         {
             B.focusKind = T_MINE;
@@ -2315,8 +2436,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             B.trayWanted = 0;
             PlaySE(SE_SELECT);
         }
-        else
-            Confirm(3, "Concede this duel? You won't lose any cards.");
+        else if (CanAct() && B.view.phase != TCG_PROMOTION)
+            EndTurn();
         return BOARD_NONE;
     }
     if (pressed & KEY_A)
@@ -2365,10 +2486,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             PlaySE(SE_SELECT);
             break;
         case T_END:
-            if (!CanAct() || B.view.phase == TCG_PROMOTION)
-                TcgBoard_Reject(MyTurn() ? "Wait a moment." : "It isn't your turn.");
-            else
-                EndTurn();
+            /* The button is CONCEDE; turns end with B or SELECT > DONE. */
+            Confirm(3, B.online ? "Concede this duel?" : "Concede this duel? You won't lose any cards.");
             break;
         default:
             PlaySE(SE_FAILURE);
@@ -2382,58 +2501,232 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
 /* Drawing                                                              */
 /* ------------------------------------------------------------------ */
 static SDL_Texture *sMat;
-static void BuildMat(void)
+static unsigned sMatTheme, sMatType;
+/* A cloth play mat per kind of opponent: base, shadow, zone lines, a motif. */
+static const struct
 {
-    struct GSurface s = G_SurfaceNew(240, 160);
-    int x;
-    if (!s.px)
+    unsigned base, dark, line, label;
+} sMats[TCG_MAT_COUNT] = {
+    [TCG_MAT_CLASSIC] = {0x1c7a44, 0x125a32, 0x3cc070, 0x2fa05c},
+    [TCG_MAT_BEACH] = {0xc8a868, 0xa88848, 0xf4e8c0, 0xe8d4a0},
+    [TCG_MAT_FOREST] = {0x2c5c2c, 0x1c401c, 0x78b858, 0x5c9c44},
+    [TCG_MAT_CAVE] = {0x6c5c4c, 0x4c4034, 0xb4a080, 0x988468},
+    [TCG_MAT_CITY] = {0x3c5070, 0x283850, 0x88a8d0, 0x6c8cb8},
+    [TCG_MAT_SKY] = {0x5c98d0, 0x4078b0, 0xe0f0ff, 0xc0dcf8},
+    [TCG_MAT_NIGHT] = {0x2c2c58, 0x1c1c3c, 0x8c84d8, 0x6c64b8},
+    [TCG_MAT_GYM] = {0, 0, 0, 0},
+    [TCG_MAT_LEAGUE] = {0x40285c, 0x2c1840, 0xe0c060, 0xc0a048},
+    [TCG_MAT_AQUA] = {0x18386c, 0x0c2448, 0x58b0e8, 0x4890c8},
+    [TCG_MAT_MAGMA] = {0x6c2418, 0x48160c, 0xf08848, 0xc86c38},
+    [TCG_MAT_FRONTIER] = {0x2c2c30, 0x1c1c20, 0xd8b058, 0xa88c48},
+    [TCG_MAT_ONLINE] = {0x186c6c, 0x0c4c4c, 0x58d8c8, 0x40b0a4},
+};
+static void MatColors(unsigned *base, unsigned *dark, unsigned *line, unsigned *label)
+{
+    if (sMatTheme == TCG_MAT_GYM)
+    {
+        /* The Gym's type, dimmed so the cards stand out. */
+        unsigned t = G_TypeColor(sMatType, 2);
+        *base = G_Mix(t, 0x202028, 0.35f);
+        *dark = G_Mix(t, 0x101018, 0.6f);
+        *line = G_Mix(G_TypeColor(sMatType, 1), 0xffffff, 0.2f);
+        *label = G_Mix(*line, *base, 0.3f);
         return;
-    S_Fill(&s, 0, 0, 240, 160, ARGB(MAT, 255));
-    /* Pokemon-ball circle in the middle of the mat. */
-    S_Ring(&s, CENTER_X, CENTER_Y, 37, 2.2f, ARGB(MAT_LINE, 255));
-    for (x = CENTER_X - 36; x <= CENTER_X + 36; x++)
-        if (abs(x - CENTER_X) > 9)
-        {
-            S_Px(&s, x, CENTER_Y - 1, ARGB(MAT_LINE, 255));
-            S_Px(&s, x, CENTER_Y, ARGB(MAT_LINE, 255));
-        }
-    S_Ring(&s, CENTER_X, CENTER_Y, 10, 2.2f, ARGB(MAT_LINE, 255));
-    S_Ring(&s, CENTER_X, CENTER_Y, 5.5f, 1.6f, ARGB(MAT_LINE, 255));
-    /* Zones. */
-    S_RoundFrame(&s, 34, 0, 172, 33, 3, ARGB(MAT_LINE, 255));
-    S_RoundFrame(&s, 34, 121, 172, 33, 3, ARGB(MAT_LINE, 255));
-    for (x = 1; x < 5; x++)
-    {
-        S_Fill(&s, 34 + x * 34, 3, 1, 27, ARGB(MAT_LINE, 110));
-        S_Fill(&s, 34 + x * 34, 124, 1, 27, ARGB(MAT_LINE, 110));
     }
-    S_RoundFrame(&s, 1, 1, 30, 58, 3, ARGB(MAT_LINE, 255));
-    S_RoundFrame(&s, 209, 1, 30, 58, 3, ARGB(MAT_LINE, 255));
-    S_RoundFrame(&s, 1, 96, 30, 57, 3, ARGB(MAT_LINE, 255));
-    S_RoundFrame(&s, 209, 96, 30, 57, 3, ARGB(MAT_LINE, 255));
-    S_RoundFrame(&s, 1, 61, 30, 33, 3, ARGB(MAT_LINE, 150));
-    /* Pile and prize outlines. */
+    *base = sMats[sMatTheme].base;
+    *dark = sMats[sMatTheme].dark;
+    *line = sMats[sMatTheme].line;
+    *label = sMats[sMatTheme].label;
+}
+static uint32_t MatRandom(uint32_t *state)
+{
+    *state = *state * 1103515245u + 12345u;
+    return *state >> 16;
+}
+/* The theme's pattern, faint under the zones. */
+static void MatMotif(struct GSurface *s, unsigned base, unsigned line)
+{
+    uint32_t seed = 0x5eed0000u + sMatTheme * 977u + sMatType;
+    int x, y, i;
+    unsigned soft = G_Mix(base, line, 0.16f), softer = G_Mix(base, line, 0.09f);
+    switch (sMatTheme)
     {
-        unsigned who, i;
-        for (who = 0; who < 2; who++)
-        {
-            struct Rect d = DeckRect(who), t = DiscardRect(who);
-            S_RoundFrame(&s, d.x, d.y, d.w, d.h, 1, ARGB(MAT_LINE, 120));
-            S_RoundFrame(&s, t.x, t.y, t.w, t.h, 1, ARGB(MAT_LINE, 120));
-            for (i = 0; i < 6; i++)
+    case TCG_MAT_BEACH:
+    case TCG_MAT_AQUA:
+        /* Rolling waves. */
+        for (y = 6; y < LAYER_H; y += 14)
+            for (x = 0; x < 240; x++)
             {
-                struct Rect p = PrizeRect(who, i);
-                S_RoundFrame(&s, p.x, p.y, p.w, p.h, 1, ARGB(MAT_LINE, 90));
+                int wy = y + (int)(sinf((x + y * 3) * 0.13f) * 2.5f);
+                S_Blend(s, x, wy, soft, 255);
+                if (sMatTheme == TCG_MAT_BEACH && (x + y) % 23 == 0)
+                    S_Fill(s, x, wy + 6, 2, 2, ARGB(G_Mix(base, 0xffffff, 0.25f), 255));
+            }
+        break;
+    case TCG_MAT_FOREST:
+        /* Scattered leaves. */
+        for (i = 0; i < 70; i++)
+        {
+            int lx = (int)(MatRandom(&seed) % 240), ly = (int)(MatRandom(&seed) % LAYER_H), k;
+            for (k = 0; k < 4; k++)
+            {
+                S_Blend(s, lx + k, ly - k / 2, soft, 255);
+                S_Blend(s, lx + k, ly + 1 - k / 2, softer, 255);
+            }
+            S_Blend(s, lx - 1, ly + 1, soft, 255);
+        }
+        break;
+    case TCG_MAT_CAVE:
+    case TCG_MAT_MAGMA:
+        /* Rock speckles and cracks (glowing for Team Magma). */
+        for (i = 0; i < 260; i++)
+            S_Blend(s, (int)(MatRandom(&seed) % 240), (int)(MatRandom(&seed) % LAYER_H), i & 1 ? soft : softer, 255);
+        for (i = 0; i < 9; i++)
+        {
+            int cx = (int)(MatRandom(&seed) % 240), cy = (int)(MatRandom(&seed) % LAYER_H), k;
+            for (k = 0; k < 18; k++)
+            {
+                cx += (int)(MatRandom(&seed) % 3) - 1;
+                cy += 1;
+                S_Blend(s, cx, cy, sMatTheme == TCG_MAT_MAGMA ? G_Mix(base, 0xf87830, 0.45f) : soft, 255);
             }
         }
+        break;
+    case TCG_MAT_CITY:
+    case TCG_MAT_ONLINE:
+        /* A city grid, or the link's hexagons. */
+        for (y = 0; y < LAYER_H; y++)
+            for (x = 0; x < 240; x++)
+            {
+                int on = sMatTheme == TCG_MAT_CITY ? (x % 12 == 0 || y % 12 == 0)
+                                                   : ((x + (y / 10 % 2) * 6) % 12 == 0 && y % 10 < 6) || (y % 10 == 0 && (x + (y / 10 % 2) * 6) % 12 > 6);
+                if (on)
+                    S_Blend(s, x, y, softer, 255);
+            }
+        break;
+    case TCG_MAT_SKY:
+        /* Soft clouds. */
+        for (i = 0; i < 14; i++)
+        {
+            float cx = (float)(MatRandom(&seed) % 240), cy = (float)(MatRandom(&seed) % LAYER_H);
+            S_Disc(s, cx, cy, 6, ARGB(G_Mix(base, 0xffffff, 0.12f), 255));
+            S_Disc(s, cx + 7, cy + 1, 5, ARGB(G_Mix(base, 0xffffff, 0.12f), 255));
+            S_Disc(s, cx - 6, cy + 2, 4, ARGB(G_Mix(base, 0xffffff, 0.12f), 255));
+        }
+        break;
+    case TCG_MAT_NIGHT:
+    case TCG_MAT_LEAGUE:
+    case TCG_MAT_FRONTIER:
+        /* Stars, and a gold sheen for the League and the Frontier. */
+        for (i = 0; i < 90; i++)
+        {
+            int sx = (int)(MatRandom(&seed) % 240), sy = (int)(MatRandom(&seed) % LAYER_H);
+            S_Blend(s, sx, sy, G_Mix(base, line, i % 7 ? 0.25f : 0.55f), 255);
+            if (i % 9 == 0)
+            {
+                S_Blend(s, sx - 1, sy, soft, 255);
+                S_Blend(s, sx + 1, sy, soft, 255);
+                S_Blend(s, sx, sy - 1, soft, 255);
+                S_Blend(s, sx, sy + 1, soft, 255);
+            }
+        }
+        if (sMatTheme != TCG_MAT_NIGHT)
+            for (y = 0; y < LAYER_H; y++)
+                for (x = 0; x < 240; x++)
+                    if ((x + y) % 46 < 2)
+                        S_Blend(s, x, y, softer, 255);
+        break;
+    case TCG_MAT_GYM:
+        /* Diagonal stripes in the Gym's colours. */
+        for (y = 0; y < LAYER_H; y++)
+            for (x = 0; x < 240; x++)
+                if ((x - y + 400) % 20 < 6)
+                    S_Blend(s, x, y, softer, 255);
+        break;
+    default:
+        /* Felt: a fine weave. */
+        for (y = 0; y < LAYER_H; y++)
+            for (x = (y & 1); x < 240; x += 2)
+                if ((x * 7 + y * 13) % 5 == 0)
+                    S_Blend(s, x, y, softer, 255);
+        break;
     }
+}
+static void CardSpot(struct GSurface *s, struct Rect r, unsigned line, unsigned alpha)
+{
+    S_RoundFrame(s, r.x - 1, r.y - 1, r.w + 2, r.h + 2, 2, ARGB(line, alpha));
+}
+static void BuildMat(void)
+{
+    struct GSurface s = G_SurfaceNew(240, LAYER_H);
+    unsigned base, dark, line, label, who, i;
+    int x, y;
+    if (!s.px)
+        return;
+    MatColors(&base, &dark, &line, &label);
+    /* Cloth: the colour darkens towards the edges. */
+    for (y = 0; y < LAYER_H; y++)
+        for (x = 0; x < 240; x++)
+        {
+            float dx = (x - 120) / 120.0f, dy = (y - CENTER_Y) / 90.0f, d = dx * dx + dy * dy;
+            S_Px(&s, x, y, ARGB(G_Mix(base, dark, d > 1 ? 0.6f : d * 0.6f), 255));
+        }
+    MatMotif(&s, base, line);
+    /* The POKe BALL between the Active Pokemon: a round ring (the layer is
+     * drawn 1:1, never stretched), its band and the button. */
+    S_Ring(&s, CENTER_X, CENTER_Y, 44, 2.4f, ARGB(line, 255));
+    for (x = CENTER_X - 43; x <= CENTER_X + 43; x++)
+        if (abs(x - CENTER_X) > 15)
+        {
+            S_Px(&s, x, CENTER_Y - 1, ARGB(line, 255));
+            S_Px(&s, x, CENTER_Y, ARGB(line, 255));
+        }
+    S_Ring(&s, CENTER_X, CENTER_Y, 15, 2.2f, ARGB(line, 255));
+    S_Ring(&s, CENTER_X, CENTER_Y, 8, 1.6f, ARGB(line, 200));
+    /* Benches: a frame around the row, a space per card. */
+    for (who = 0; who < 2; who++)
+    {
+        struct Rect first = BenchCell(who, 0);
+        S_RoundFrame(&s, first.x, first.y, BENCH_CELL * 5 + 1, first.h, 3, ARGB(line, 255));
+        for (i = 1; i < 6; i++)
+            CardSpot(&s, SlotRect(who, i), line, 110);
+        CardSpot(&s, SlotRect(who, 0), line, 150);
+        /* Side columns: a spot for each pile and each Prize. */
+        {
+            struct Rect d = DeckRect(who), t = DiscardRect(who), p = PrizeArea(who);
+            S_RoundFrame(&s, d.x - 4, d.y - 2, d.w + 8, d.h + 4, 3, ARGB(line, 255));
+            S_RoundFrame(&s, t.x - 4, t.y - 2, t.w + 8, t.h + 4, 3, ARGB(line, 255));
+            CardSpot(&s, d, line, 110);
+            CardSpot(&s, t, line, 110);
+            S_RoundFrame(&s, p.x, p.y, p.w, p.h, 3, ARGB(line, 255));
+            for (i = 0; i < 6; i++)
+                CardSpot(&s, PrizeRect(who, i), line, 70);
+        }
+    }
+    S_RoundFrame(&s, sOppHand.x, sOppHand.y, sOppHand.w, sOppHand.h, 3, ARGB(line, 150));
+    (void)label;
     sMat = G_SurfaceTexture(&s);
     G_SurfaceFree(&s);
 }
+void TcgBoard_SetMat(unsigned theme, unsigned type)
+{
+    if (theme >= TCG_MAT_COUNT)
+        theme = TCG_MAT_CLASSIC;
+    if (theme != sMatTheme || type != sMatType)
+    {
+        if (sMat)
+            SDL_DestroyTexture(sMat);
+        sMat = NULL;
+    }
+    sMatTheme = theme;
+    sMatType = type;
+}
 static void Labels(void)
 {
-    G_TextAlign(120, 8, TA_CENTER, MAT_LABEL, G_NO_SHADOW, "BENCH", TF_NARROW);
-    G_TextAlign(120, 130, TA_CENTER, MAT_LABEL, G_NO_SHADOW, "BENCH", TF_NARROW);
+    unsigned base, dark, line, label;
+    MatColors(&base, &dark, &line, &label);
+    (void)base, (void)dark, (void)line;
+    G_TextAlign(204, 110, TA_RIGHT, label, G_NO_SHADOW, "BENCH", TF_NARROW);
 }
 static void DrawPile(unsigned who, struct Rect r, unsigned count, int deck)
 {
@@ -2456,7 +2749,7 @@ static void DrawPile(unsigned who, struct Rect r, unsigned count, int deck)
     }
     (void)who;
 }
-static void Counters(struct Rect r, unsigned damage)
+static void Counters(struct Rect r, unsigned damage, int turned)
 {
     unsigned n10 = damage / 10, n50 = 0, i, k = 0;
     if (n10 > 12)
@@ -2468,6 +2761,8 @@ static void Counters(struct Rect r, unsigned damage)
     {
         int x = r.x + 3 + (int)(k % 4) * 6, y = r.y + 7 + (int)(k / 4) * 6;
         unsigned c = i < n50 ? 0xe87818 : 0xd82838;
+        if (turned)
+            x = r.x + r.w - 8 - (int)(k % 4) * 6, y = r.y + r.h - 12 - (int)(k / 4) * 6;
         G_Fill(x + 1, y, 3, 1, 0x501018);
         G_Fill(x, y + 1, 5, 3, 0x501018);
         G_Fill(x + 1, y + 4, 3, 1, 0x501018);
@@ -2565,7 +2860,7 @@ static void FieldInfo(unsigned who, unsigned slot)
         else
         {
             int right = 98, w;
-            plateX = right - G_HpPlateWidth(0), plateY = 82, orbY = 95, statusY = 104, nameY = 111;
+            plateX = right - G_HpPlateWidth(0), plateY = 79, orbY = 92, statusY = 101, nameY = 108;
             nameX = right - G_Measure(name, TF_NARROW);
             G_Text(nameX, nameY, G_WHITE, 0x104020, name, 0, TF_NARROW);
             w = (B.poison[who][slot] ? G_Measure("PSN", TF_NARROW) + 5 : 0) +
@@ -2600,9 +2895,9 @@ static void DrawSprite(unsigned who, unsigned i)
             alpha = 255 - B.ko[who][slot] * 4;
             y += B.ko[who][slot] / 8.0f;
         }
-        /* Cards under an evolution peek out by one pixel. */
-        if (B.view.players[who].field[slot].stackSize > 1 && s->settled && s->angle == 0)
-            G_RoundFill((int)x + 1, (int)y + 1, (int)w, (int)h, 0xe8e8e0, alpha);
+        /* Cards under an evolution peek out by one pixel (on the far side, turned). */
+        if (B.view.players[who].field[slot].stackSize > 1 && s->settled && s->angle == s->tangle && !B.cond[who][slot])
+            G_RoundFill((int)x + (who ? -1 : 1), (int)y + (who ? -1 : 1), (int)w, (int)h, 0xe8e8e0, alpha);
     }
     scale = cosf(s->flip * 3.14159f);
     if (scale < 0)
@@ -3107,7 +3402,7 @@ void TcgBoard_Render(void)
         sLayer = NULL, sMat = NULL;
     if (!sLayer)
     {
-        sLayer = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, 200);
+        sLayer = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, LAYER_H);
         sLayerOwner = renderer;
         if (sLayer)
         {
@@ -3124,7 +3419,10 @@ void TcgBoard_Render(void)
     if (!sMat)
         BuildMat();
     if (sMat)
-        SDL_RenderCopy(G_R(), sMat, NULL, NULL);
+    {
+        SDL_Rect whole = {0, 0, 240, LAYER_H};
+        SDL_RenderCopy(G_R(), sMat, NULL, &whole);
+    }
     Labels();
     /* Piles under everything that moves. */
     for (who = 0; who < 2; who++)
@@ -3152,20 +3450,17 @@ void TcgBoard_Render(void)
                 continue;
             if (!s && !B.ko[who][s] && B.sprite[who][p->field[s].stack[p->field[s].stackSize - 1]].settled &&
                 StatusAngle(who, s) == 0)
-                Counters(SlotRect(who, s), (unsigned)(B.shownDamage[who][s] + 0.5f));
+                Counters(SlotRect(who, s), (unsigned)(B.shownDamage[who][s] + 0.5f), who == 1);
             FieldInfo(who, s);
         }
     }
     DrawOppHand();
-    /* END TURN / READY. */
+    /* CONCEDE (B ends the turn). */
     {
-        int state = !CanAct() || B.view.phase == TCG_PROMOTION ? G_BUTTON_DISABLED
-                    : B.focusKind == T_END && B.mode == M_FREE     ? G_BUTTON_FOCUS
-                                                                   : G_BUTTON_NORMAL;
-        const char *label = B.view.phase == TCG_SETUP ? "READY" : MyTurn() ? "END TURN" : "WAIT...";
-        if (B.view.phase == TCG_FINISHED)
-            label = "END TURN";
-        G_Button(sEndButton.x, sEndButton.y, sEndButton.w, sEndButton.h, label, state);
+        int state = B.view.phase == TCG_FINISHED || B.intro > 0           ? G_BUTTON_DISABLED
+                    : B.focusKind == T_END && B.mode == M_FREE ? G_BUTTON_FOCUS
+                                                               : G_BUTTON_NORMAL;
+        G_Button(sEndButton.x, sEndButton.y, sEndButton.w, sEndButton.h, "CONCEDE", state);
     }
     if (B.mode == M_TARGET)
     {
@@ -3185,10 +3480,25 @@ void TcgBoard_Render(void)
         const struct TcgPlayer *me = &B.view.players[0];
         unsigned i;
         for (i = 0; i < me->handSize; i++)
-            if ((int)i != B.heldHand || B.mode != M_TARGET)
+            if (((int)i != B.heldHand || B.mode != M_TARGET) && (int)me->hand[i] != B.spotlight)
                 DrawSprite(0, me->hand[i]);
     }
     DrawSprites(1);
+    if (B.spotlight >= 0 && (B.spotHold || B.spotTime > 0))
+    {
+        /* The Prize card you took, up close with its name. */
+        const struct CardSprite *sp = &B.sprite[0][B.spotlight];
+        const struct TcgCard *c = Tcg_Card(CardOf(0, (unsigned)B.spotlight));
+        G_FillA(0, 0, 240, LAYER_H, 0x000000, 70);
+        DrawSprite(0, (unsigned)B.spotlight);
+        if (c && sp->settled)
+        {
+            int tw = G_Measure(c->name, TF_SMALL) + 16, y = (int)(sp->y + sp->h) + 2;
+            G_Window(120 - tw / 2, y, tw, 20);
+            G_TextAlign(120, y + 4, TA_CENTER, G_INK, G_INK_SHADOW, c->name, TF_SMALL);
+            G_Banner(120, (int)sp->y - 8, "PRIZE CARD", 0x8a6818, 1, 255);
+        }
+    }
     if (B.mode == M_TARGET && B.heldHand >= 0 && (unsigned)B.heldHand < B.view.players[0].handSize)
         DrawSprite(0, B.view.players[0].hand[B.heldHand]);
     DrawFx();
@@ -3204,7 +3514,7 @@ void TcgBoard_Render(void)
         DrawMenu();
     if (sLayer)
     {
-        SDL_Rect dst = {0, -(int)(Pan() + 0.5f), 240, 200};
+        SDL_Rect dst = {0, -(int)(Pan() + 0.5f), 240, LAYER_H};
         SDL_SetRenderTarget(renderer, canvas);
         SDL_RenderCopy(renderer, sLayer, NULL, &dst);
     }
@@ -3235,7 +3545,7 @@ void TcgBoard_Render(void)
                                         : "Choose a Benched Pokemon to be your new Active Pokemon. {A}",
                    0);
         else if (B.mode == M_FREE && B.view.phase == TCG_SETUP && MyTurn())
-            Prompt(B.view.players[0].field[0].stackSize ? "Add Benched Pokemon if you like, then READY."
+            Prompt(B.view.players[0].field[0].stackSize ? "Add Benched Pokemon if you like. {B} READY"
                                                         : "Choose a Basic Pokemon to be your Active Pokemon.",
                    1);
         else if (B.waiting)

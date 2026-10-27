@@ -924,6 +924,13 @@ void Platform_SaveScreenshot(const char *name)
 
 const u16 *Platform_GetFrame(void)
 {
+    // Moemon Kai: while a card screen is open, it is what the game shows (spectators, photos)
+    if (Tcg_IsActive())
+    {
+        const u16 *cards = Tcg_Frame();
+        if (cards)
+            return cards;
+    }
     return sFrameImage;
 }
 

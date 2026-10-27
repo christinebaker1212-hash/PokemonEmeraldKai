@@ -106,4 +106,5 @@ void G_Card(unsigned id, float x, float y, float w, float h, double angle, unsig
 /* A big face without small details: the caller prints text over it. */
 SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan);
 int G_HasScans(void);
+void G_SetGameBoyArt(int on);
 #endif

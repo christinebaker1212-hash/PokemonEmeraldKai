@@ -14,6 +14,26 @@ enum
     BOARD_INSPECT, /* open the card inspector for *card */
     BOARD_CONCEDE  /* the player confirmed conceding (action holds TCG_CONCEDE) */
 };
+/* Play mats, by the kind of opponent (TcgBoard_SetMat before TcgBoard_Begin). */
+enum
+{
+    TCG_MAT_CLASSIC,
+    TCG_MAT_BEACH,
+    TCG_MAT_FOREST,
+    TCG_MAT_CAVE,
+    TCG_MAT_CITY,
+    TCG_MAT_SKY,
+    TCG_MAT_NIGHT,
+    TCG_MAT_GYM, /* coloured by the Gym's type */
+    TCG_MAT_LEAGUE,
+    TCG_MAT_AQUA,
+    TCG_MAT_MAGMA,
+    TCG_MAT_FRONTIER,
+    TCG_MAT_ONLINE,
+    TCG_MAT_COUNT
+};
+void TcgBoard_SetMat(unsigned theme, unsigned type);
+void TcgBoard_SetMusic(unsigned song); /* the duel's song (0: the default) */
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online);
 /* Feed the current rules state each frame; new states queue up for display. */
 void TcgBoard_Sync(const struct TcgDuel *truth);

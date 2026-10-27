@@ -1222,10 +1222,15 @@ static void RenderToBackbuffer(void)
 {
     int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0;
     SDL_Rect dst;
+    SDL_Texture *gameTex;
     int panelH = 0;
     struct PanelLayout L;
 
     sFilterShown = 0;
+    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
+    gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
+    if (gameTex == NULL)
+        gameTex = sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
     if (sPanelCount > 0)
         SDL_SetRenderDrawColor(sRenderer, 17, 19, 26, 255);   // beside the game: the panel's slate, darker
@@ -1280,14 +1285,14 @@ static void RenderToBackbuffer(void)
 
     if (exact)
     {
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, &dst);
     }
     else if (sTargetsSupported && EnsureScaleTex(kx, ky) && SDL_SetRenderTarget(sRenderer, sScaleTex) == 0)
     {
         // Sharp-bilinear: whole-number nearest enlarge, then linear to the output rect.
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, NULL);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, NULL);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, NULL);
         SDL_SetRenderTarget(sRenderer, NULL);
@@ -1295,7 +1300,7 @@ static void RenderToBackbuffer(void)
     }
     else
     {
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
         filterOn = 0;
     }
     sFilterShown = filterOn;
@@ -1303,7 +1308,6 @@ static void RenderToBackbuffer(void)
     sLastPanelH = panelH;
     if (sPanelCount > 0)
         DrawPanel(&L, fullW, fullH);   // last: drawing to a render target above may not keep it
-    Tcg_Render(sRenderer, fullW, fullH);
 }
 
 static void ClearToBlack(void)

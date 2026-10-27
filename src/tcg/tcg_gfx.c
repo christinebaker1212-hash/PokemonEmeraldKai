@@ -1053,8 +1053,30 @@ static struct Source *Source(unsigned id, unsigned kind)
     s->age = ++sSourceAge;
     return s;
 }
+static int sGameBoyArt;
+static void ForgetFaces(void);
+/* OPTIONS > DISPLAY > CARD ART: the printed cards, or the Game Boy pictures. */
+void G_SetGameBoyArt(int on)
+{
+    if (!on == !sGameBoyArt)
+        return;
+    sGameBoyArt = on != 0;
+    ForgetFaces();
+}
+/* The printed card when the pack has it: the full scan, else its thumbnail. */
+static struct Source *Scan(unsigned id, int full)
+{
+    struct Source *s = NULL;
+    if (sGameBoyArt || !G_HasScans())
+        return NULL;
+    if (full)
+        s = Source(id, 2);
+    return s ? s : Source(id, 1);
+}
 int G_HasScans(void)
 {
+    if (sGameBoyArt)
+        return 0;
     if (sScanState < 0)
     {
         int w, h;
@@ -1274,7 +1296,7 @@ SDL_Texture *G_CardTexture(unsigned id, int w, int h)
         Back(&s);
     else
     {
-        struct Source *scan = G_HasScans() ? Source(id, w > 80 ? 2 : 1) : NULL;
+        struct Source *scan = Scan(id, w > 80);
         if (scan)
             ScanFace(&s, scan);
         else
@@ -1342,7 +1364,7 @@ SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan)
     if (sArt.texture)
         SDL_DestroyTexture(sArt.texture);
     memset(&sArt, 0, sizeof(sArt));
-    s = G_HasScans() ? Source(id, full ? 2 : 1) : NULL;
+    s = Scan(id, full);
     sArt.scan = s != NULL;
     if (!s)
         s = Source(id, 0);
@@ -1370,6 +1392,17 @@ done:
     return sArt.texture;
 }
 
+static void ForgetFaces(void)
+{
+    unsigned i;
+    for (i = 0; i < CARD_TEXTURES; i++)
+        if (sCards[i].texture)
+            SDL_DestroyTexture(sCards[i].texture);
+    memset(sCards, 0, sizeof(sCards));
+    if (sArt.texture)
+        SDL_DestroyTexture(sArt.texture);
+    memset(&sArt, 0, sizeof(sArt));
+}
 void G_Begin(SDL_Renderer *r)
 {
     if (sR && sR != r)

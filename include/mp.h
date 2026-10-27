@@ -240,6 +240,7 @@ struct MpConfig
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
+    u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: 0 the printed cards, 1 the Game Boy pictures (src/tcg)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
 };
 enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
