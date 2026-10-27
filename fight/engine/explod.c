@@ -1273,7 +1273,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     double ss;
     int v;
 
-    e->pos.x = old.x * scale;
+    e->pos.x = old.x * scale + MF_MOTIF_X();    /* Moemon Fight: the motif's place in the picture */
     e->pos.y = scale * old.y;
     vel = old;
     vel.x = e->vel.x * scale;
@@ -1286,7 +1286,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     e->offset_y = (float)Ex_Round((double)e->offset_y * scale);
     v = e->window_x1;
     if (v != -1) {
-        e->window_x1 = Ex_Round((double)v * scale);
+        e->window_x1 = Ex_Round((double)v * scale) + MF_MOTIF_X();
     }
     v = e->window_y1;
     if (v != -1) {
@@ -1295,7 +1295,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     if (scale > 1.0f) {
         v = e->window_x2;
         if (v != -1) {
-            e->window_x2 = Ex_Round((double)scale * (v + 1) - 1.0);
+            e->window_x2 = Ex_Round((double)scale * (v + 1) - 1.0) + MF_MOTIF_X();
         }
         v = e->window_y2;
         if (v != -1) {
@@ -1304,7 +1304,7 @@ void SysElem_SetScale(int index, float scale, float sprite_scale)
     } else {
         v = e->window_x2;
         if (v != -1) {
-            e->window_x2 = Ex_Round((double)scale * v);
+            e->window_x2 = Ex_Round((double)scale * v) + MF_MOTIF_X();
         }
         v = e->window_y2;
         if (v != -1) {

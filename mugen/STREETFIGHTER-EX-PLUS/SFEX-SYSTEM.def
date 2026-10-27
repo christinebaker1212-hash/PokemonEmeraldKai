@@ -153,9 +153,9 @@ _
 fadein.time = 20
 fadeout.time = 20
 rows = 3
-columns = 14
+columns = 12
 wrapping = 1             ;1 to let cursor wrap around
-pos = 28,346 ;Position to draw to
+pos = 70,346 ;Position to draw to (centred: 12 cells of 42)
 showemptyboxes = 0        ;1 to show empty boxes
 moveoveremptyboxes = 0    ;1 to allow cursor to move over empty boxes
 cell.size = 40,40       ;x,y size of each cell (in pixels)

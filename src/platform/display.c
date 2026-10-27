@@ -1229,11 +1229,8 @@ static void RenderToBackbuffer(void)
     struct PanelLayout L;
 
     sFilterShown = 0;
-    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c),
-    // Moemon Fight: so is a fight (src/platform/fight_platform.c)
-    gameTex = sGameTex ? Fight_Canvas(sRenderer) : NULL;
-    if (gameTex == NULL)
-        gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
+    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
+    gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
     if (gameTex == NULL)
         gameTex = sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
@@ -1265,6 +1262,20 @@ static void RenderToBackbuffer(void)
     ComputeDstRect(outW, outH, &dst);
     dst.x += gameX;
     dst.y += gameY;
+    // Moemon Fight: a fight is the game picture, scaled bicubic (src/platform/fight_platform.c)
+    {
+        SDL_Texture *fight = Fight_CanvasBicubic(sRenderer, dst.w, dst.h);
+        if (fight)
+        {
+            SDL_RenderCopy(sRenderer, fight, NULL, &dst);
+            sFilterShown = 0;
+            sLastGameRect = dst;
+            sLastPanelH = panelH;
+            if (sPanelCount > 0)
+                DrawPanel(&L, fullW, fullH);
+            return;
+        }
+    }
     kx = CeilDiv(dst.w, GBA_W);
     ky = CeilDiv(dst.h, GBA_H);
     exact = (dst.w == GBA_W * kx && dst.h == GBA_H * ky);

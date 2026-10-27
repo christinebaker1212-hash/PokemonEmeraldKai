@@ -135,9 +135,9 @@ void Lifebar_Draw(Player *p, FightBar *bar, int layer)
 
     Mt_SaveClip(&clip);
     s = (float)g_game->motif_scale;
-    x1 = Mt_Scale(bar->range[0] + bar->pos[0], s);
+    x1 = Mt_Scale(bar->range[0] + bar->pos[0], s) + MF_MOTIF_X();     /* Moemon Fight: the motif's place */
     y = Mt_Scale(bar->pos[1], s);
-    x2 = Mt_Scale(bar->range[1] + bar->pos[0], s);
+    x2 = Mt_Scale(bar->range[1] + bar->pos[0], s) + MF_MOTIF_X();
     if (x1 > x2) {
         int t = x1;
         x1 = x2;
@@ -222,8 +222,8 @@ void Powerbar_Draw(int team, Player *p, int x1, int x2, int layer)
 
     Mt_SaveClip(&clip);
     s = (float)g->motif_scale;
-    a = Mt_Scale(x1, s);
-    b = Mt_Scale(x2, s);
+    a = Mt_Scale(x1, s) + MF_MOTIF_X();     /* Moemon Fight: the motif's place */
+    b = Mt_Scale(x2, s) + MF_MOTIF_X();
     if (a > b) {
         int t = a;
         a = b;
@@ -335,6 +335,7 @@ void Fight_DrawHud(int layer)
     /* life bar backgrounds */
     for (k = 0; k < 3; k++) {
         for (side = 0; side < 2; side++) {
+            MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
             FightBar *bars = Mt_SideBars(side, &n);
             for (i = side; i < side + n; i += 2) {
                 FightBar *bar = &bars[i];
@@ -345,6 +346,7 @@ void Fight_DrawHud(int layer)
     }
     /* life bars */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightBar *bars = Mt_SideBars(side, &n);
         for (i = side; i < side + n; i += 2) {
             FightBar *bar = &bars[i];
@@ -355,16 +357,19 @@ void Fight_DrawHud(int layer)
     /* power bars */
     for (k = 0; k < 3; k++) {
         for (side = 0; side < 2; side++) {
+            MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
             FightBar *bar = &fd->powerbar[side];
             SysElem_DrawFight(&bar->bg[k], layer, (float)bar->pos[0], (float)bar->pos[1]);
         }
     }
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightBar *bar = &fd->powerbar[side];
         Powerbar_Draw(side + 1, g_game->players[1 + side], bar->pos[0] + bar->range[0], bar->pos[0] + bar->range[1],
                       layer);
     }
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightBar *bar = &fd->powerbar[side];
         SysElem *counter = &fd->powerbar_counter[side];
         _snprintf(counter->text, 0x40, "%i", g_game->players[1 + side]->powerbar_power / 1000);
@@ -373,6 +378,7 @@ void Fight_DrawHud(int layer)
     g = g_game;
     /* turns teammates: backgrounds */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightTeammate *mate = &fd->turns_teammate[side];
         int x, y;
         if (g->survival_side == 2 - side || g->teams[side].member_count < 2) {
@@ -392,6 +398,7 @@ void Fight_DrawHud(int layer)
     }
     /* face backgrounds */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightFace *faces = Mt_SideFaces(side, &n);
         for (i = side; i < side + n; i += 2) {
             for (k = 0; k < 3; k++) {
@@ -403,6 +410,7 @@ void Fight_DrawHud(int layer)
     }
     /* faces, last slot first */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightFace *faces = Mt_SideFaces(side, &n);
         for (i = n + side - 1; i >= 0; i -= 2) {
             Player *p = g->players[1 + i];
@@ -416,6 +424,7 @@ void Fight_DrawHud(int layer)
     }
     /* turns teammates: faces of the members waiting */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightTeammate *mate = &fd->turns_teammate[side];
         TeamSel *ts = &g->teams[side];
         int x, y;
@@ -441,6 +450,7 @@ void Fight_DrawHud(int layer)
     }
     /* turns teammates: KO marks of the members gone */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightTeammate *mate = &fd->turns_teammate[side];
         TeamSel *ts = &g->teams[side];
         int x, y;
@@ -458,6 +468,7 @@ void Fight_DrawHud(int layer)
     }
     /* name backgrounds, names */
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightName *names = Mt_SideNames(side, &n);
         for (i = side; i < side + n; i += 2) {
             SysElem_DrawFight(&names->bg[i], layer, (float)names->pos_x[i], (float)names->pos_y[i]);
@@ -465,6 +476,7 @@ void Fight_DrawHud(int layer)
         g = g_game;
     }
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         FightName *names = Mt_SideNames(side, &n);
         for (i = side; i < side + n; i += 2) {
             strncpy(names->name[i].text, g->players[1 + i]->data->displayname, 0x3F);
@@ -474,6 +486,7 @@ void Fight_DrawHud(int layer)
         }
     }
     /* the timer */
+    MF_HUD_SIDE(-1);
     SysElem_DrawFight(&tm->bg, layer, (float)tm->pos[0], (float)tm->pos[1]);
     if (g_game->round_time != -1) {
         _snprintf(tm->counter.text, 0x40, "%i", g_game->round_time / tm->frames_per_count);
@@ -484,6 +497,7 @@ void Fight_DrawHud(int layer)
     /* win icons */
     g = g_game;
     for (side = 0; side < 2; side++) {
+        MF_HUD_SIDE(side);    /* Moemon Fight: this side's edge */
         int x = wi->pos_x[side];
         int y = wi->pos_y[side];
         int upto = wi->useiconupto;
@@ -522,6 +536,7 @@ void Fight_DrawHud(int layer)
             }
         }
     }
+    MF_HUD_SIDE(-1);
     g_palFxCur = NULL;
 }
 

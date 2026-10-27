@@ -15,6 +15,8 @@ wait 10
 fpress A 2
 wait 600
 shot fight_start
+rendershotburst window_fight 1
+wait 2
 fpress RIGHT+X 3
 wait 20
 fpress X 3

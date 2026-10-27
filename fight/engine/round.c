@@ -1208,6 +1208,7 @@ void Combo_Draw(int team)
         return;
     }
     g_palFxCur = &g->palgroup_200_palfx;
+    MF_HUD_SIDE(team - 1);      /* Moemon Fight: this side's edge */
     x = c->x;
     _snprintf(text, 0x40, fc->text_fmt, n);
     fc->text.text[0] = '\0';
@@ -1237,6 +1238,7 @@ void Combo_Draw(int team)
             SysElem_DrawFight(&fc->counter, -1, (float)(x - Rd_ComboShake(fc, c, w, 0)), y);
         }
     }
+    MF_HUD_SIDE(-1);
     g_palFxCur = NULL;
 }
 

@@ -59,7 +59,7 @@ void FontSpec_DrawText(const FontSpec *spec, const char *text, int x, int y)
     }
     scale = (float)g->motif_scale;
     fy = (float)(y * g->motif_scale);
-    fx = (float)(x * g->motif_scale);
+    fx = (float)(x * g->motif_scale + MF_MOTIF_X());   /* Moemon Fight: the motif's place */
     Font_DrawTextScaled(text, fonts[spec->font], fx, fy, scale, scale, spec->align, spec->bank, spec->r, spec->g,
                         spec->b);
 }
@@ -115,7 +115,7 @@ int Game_SetResolution(int width, int height)
     g_gfxClear(0);
     g = g_game;
     g->render_target = g->screen;
-    g->motif_scale = g->game_coord[0] / g->motif_coord[0];
+    MfHost_FitMotif();    /* Moemon Fight: was game_coord[0] / motif_coord[0] (the width alone) */
     Log_Printf("OK\n");
     return 1;
 }

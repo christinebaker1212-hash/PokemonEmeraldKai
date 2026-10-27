@@ -226,7 +226,7 @@ int System_LoadMotif(void)
         g->motif_coord[1] = h;
         g->motif_coord[2] = (w - 1) / 2;
         g->motif_coord[3] = (h - 1) / 2;
-        g->motif_scale = g->game_coord[0] / g->motif_coord[0];
+        MfHost_FitMotif();    /* Moemon Fight: was game_coord[0] / motif_coord[0] (the width alone) */
     }
 
     /* [Files] */

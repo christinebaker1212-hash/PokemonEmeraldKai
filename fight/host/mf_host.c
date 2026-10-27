@@ -61,6 +61,7 @@ static unsigned short sFrames[2][MF_SCREEN_W * MF_SCREEN_H];
 static int sFront;                  /* index of the frame the game shows */
 static int sHaveFrame;
 static int sPresented;              /* the back frame has a new picture */
+static volatile unsigned int sFrameSerial;
 
 static char sRoot[0x200];           /* "<mugen folder>/" */
 static int sSyncSteps;              /* MOEMON_FIGHT_SYNC: MfEngine_Step waits for the frame (tests) */
@@ -338,6 +339,25 @@ void MfHost_KeysLoaded(void)
     }
 }
 
+/* ------------------------------------------------------------------ the screenpack's place */
+
+int g_mfMotifOffsetX;
+int g_mfHudShift;
+
+/* The motif fits the picture whole (by height for 4:3 packs in 3:2), centred: nothing of it is cut off or
+ * squished (docs/FIGHT_DECISIONS.md #5). */
+void MfHost_FitMotif(void)
+{
+    GameVars *g = g_game;
+    double sx = g->game_coord[0] / g->motif_coord[0];
+    double sy = g->game_coord[1] / g->motif_coord[1];
+    double s = sx < sy ? sx : sy;
+
+    g->motif_scale = s;
+    g_mfMotifOffsetX = (int)floor((g->game_coord[0] - g->motif_coord[0] * s) / 2.0 + 0.5);
+    g_mfHudShift = 0;
+}
+
 /* ------------------------------------------------------------------ frames */
 
 void MfHost_Present(const SDL_Surface *surface)
@@ -385,6 +405,7 @@ void MfHost_FrameEnd(void)
         sFront ^= 1;
         sHaveFrame = 1;
         sPresented = 0;
+        sFrameSerial++;
     }
     sDone++;
     pthread_cond_broadcast(&sCond);
@@ -658,6 +679,11 @@ void MfEngine_Step(const unsigned short buttons[2])
 const unsigned short *MfEngine_Frame(void)
 {
     return sHaveFrame ? sFrames[sFront] : NULL;
+}
+
+unsigned int MfEngine_FrameSerial(void)
+{
+    return sFrameSerial;
 }
 
 int MfEngine_Result(void)

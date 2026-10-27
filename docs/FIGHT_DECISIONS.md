@@ -23,7 +23,7 @@ data or Elecbyte files.
 | 3 | While waiting | Seated facing the cabinet, the bubble visible to everyone on the map; B stands up and removes it |
 | 4 | Stakes | None: wins and losses only counted (trainer card / achievements) |
 | 5 | 3:2 screen vs 4:3 packs | Widen the view: scale by height, the camera shows more stage at the sides, the HUD anchors to the real edges; stages too narrow get their edge layers extended |
-| 6 | Sharpness | 480x320, nearest-neighbor, then scaled with the rest of the game |
+| 6 | Sharpness | 480x320, shown with bicubic interpolation (the fight only; the rest of the game keeps its own filter). Changed from nearest-neighbor in the third round |
 | 7 | HUD off screen | Nudge each element back inside an 8px safe margin, keeping its size; a log says what moved |
 | 8 | Character select | The pack's own screenpack (system.def / select.def / VS screen), fitted by rule 7; both players pick at once |
 | 9 | Transport | Direct UDP between the two players (introduced by the room server, with the game's port mapping); the relay if UDP fails within 2 s |
@@ -57,8 +57,9 @@ data or Elecbyte files.
   - SFEX-SYSTEMEX.def and the 110-slot variant.
 
   The removed storyboards are switched off in SFEX-SYSTEM.def, along with demo mode and the
-  continue screen. The grid is the 14 x 3 cells that fit on its screen (it was 16 x 5, with
-  rows 4-5 and columns 15-16 off screen).
+  continue screen. The grid is 12 x 3 cells, centred (it was 16 x 5, with rows 4-5 and columns
+  15-16 off screen). There are no `empty` lines: characters fill the cells in order, so adding one is
+  a new line in SFEX-SELECT.def.
 - Test characters (SSF2X), in the SF2 select order: Ryu, Ken, Chun-Li, Dhalsim, Cammy,
   Fei Long, Dee Jay, T.Hawk, Vega, Gouki, with RANDOM at both ends of the row.
   - Other versions in their folders are not listed: Chun-Li 2, Dhalsim 2, Gouki (normal) /
@@ -70,6 +71,12 @@ data or Elecbyte files.
 - No new cabinet tiles: the slot machine tiles stay as they are.
 - Sitting down offers WAIT FOR 2P or FIGHT CPU. A second player who sits during a CPU fight
   cancels it, and the select screen opens for both.
+
+## Third round
+- The fight is shown with bicubic interpolation, only the fight (#6). `Fight_CanvasBicubic`
+  (src/platform/fight_platform.c) scales each new frame with Catmull-Rom on the CPU to the window's
+  size, at most 960x640, and the renderer's linear filter takes it the rest of the way. A window of
+  960 or wider is exactly 2x, which has its own quicker path.
 
 ## Plan
 
@@ -90,14 +97,18 @@ data or Elecbyte files.
 
   The whole session (select, VS, fight, results) runs in this deterministic loop, so the select
   screen is synced the same way as the fight.
-- `display.c` asks `Fight_Canvas()` first, next to `Tcg_Canvas()`: an SDL texture of 480x320
-  shown in the game's rect with the game's scale mode.
+- `display.c` asks `Fight_CanvasBicubic()` first: the picture already scaled to the game's rect
+  (third round).
 - `Platform_GetFrame` gives spectators a 240x160 reduction while a fight is on.
 
 ### Screen fitting
 - `mugen.cfg` sizes are forced to 480x320.
 - Packs keep their `localcoord`. The scale is 320 / localcoord height, and the camera width is
   480 / scale. A 320x240 stage gets about 20 more stage pixels on each side.
+- Screenpacks (motifs) are fitted by height too (`MfHost_FitMotif`: the smaller of the two scales)
+  and centred (`g_mfMotifOffsetX`, `MF_MOTIF_X()` in the select, VS, fight HUD and explod code). The
+  fight HUD's two sides then move out to the real edges (`MF_HUD_SIDE`): P1's life bar, power bar,
+  face, name, wins and combo counter by the left edge, P2's by the right. The timer stays centred.
 - The camera never shows past a stage's edge. When the bounds plus the wider view need more than
   the stage has, the outermost background layers repeat at the edges.
 - When system.def, select.def and fight.def load, every element's box is measured (sprite size

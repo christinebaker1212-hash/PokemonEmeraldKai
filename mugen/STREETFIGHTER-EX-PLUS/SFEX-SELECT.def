@@ -1,10 +1,8 @@
 Street Fighter EX Select
 
 [Characters]
-; 14 cells a row, 3 rows. Replace an "empty" to add a character:
+; 12 cells a row (columns in SFEX-SYSTEM.def), 3 rows. Add a character on a new line:
 ;   folder/file.def, stages/home.def, includestage=0
-; row 1
-empty
 randomselect
 ssf2x_ryu/ssf2x_ryu.def, stages/sf2-suzakucastle dusk.def, includestage=0
 ssf2x_ken/ssf2x_ken.def, stages/sf2-harbor.def, includestage=0
@@ -17,37 +15,6 @@ SSF2X_THAWK/SSF2X_THAWK.def, stages/sf2-mexico.def, includestage=0
 ssf2x_vega/vega-sf2x.def, stages/sf2-taverna.def, includestage=0
 ssf2x_gouki/ssf2x_gouki.def, stages/sf2-castle.def, includestage=0
 randomselect
-empty
-; row 2
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-; row 3
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
-empty
 
 [ExtraStages]
 ; every stage the cabinet can pick at random (mugen/cabinets.ini can list fewer)

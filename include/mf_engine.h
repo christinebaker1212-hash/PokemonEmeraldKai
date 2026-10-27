@@ -56,6 +56,8 @@ int MfEngine_IsActive(void);
 void MfEngine_Step(const unsigned short buttons[2]);
 // The last frame drawn: MF_SCREEN_W x MF_SCREEN_H RGB565 pixels, or NULL before the first one.
 const unsigned short *MfEngine_Frame(void);
+// Counts the frames drawn (a new picture when it changes)
+unsigned int MfEngine_FrameSerial(void);
 // MF_RESULT_* of the session that ended (MF_RESULT_NONE while one runs).
 int MfEngine_Result(void);
 // Ends the running session as soon as the engine can (MF_RESULT_CANCELLED).

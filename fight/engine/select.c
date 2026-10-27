@@ -1368,8 +1368,8 @@ int Charsel_Draw(ScreenLoop *screen, CharselState *st)
             y2 = info->cell_size[1] + y1 - 2;
             x2 = info->cell_size[0] + x1 - 2;
             g = g_game;
-            g_gfxFillRectColor((int)(x1 * g->motif_scale), (int)(y1 * g->motif_scale), (int)(x2 * g->motif_scale),
-                          (int)(y2 * g->motif_scale), color);
+            g_gfxFillRectColor((int)(x1 * g->motif_scale) + MF_MOTIF_X(), (int)(y1 * g->motif_scale),
+                          (int)(x2 * g->motif_scale) + MF_MOTIF_X(), (int)(y2 * g->motif_scale), color);   /* Moemon Fight */
         }
     }
 

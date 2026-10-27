@@ -2,6 +2,7 @@
 // (include/mf_engine.h; the engine itself is in fight/). While a fight runs its 480x320 picture is
 // the game picture (Fight_Canvas, like the card screens), the fight's sound replaces the game's
 // (Fight_MixAudio) and friends spectating see a 240x160 copy (Fight_Frame).
+#include <math.h>
 #include <string.h>
 #include <SDL2/SDL.h>
 #include "global.h"
@@ -118,8 +119,176 @@ SDL_Texture *Fight_Canvas(SDL_Renderer *r)
     return sCanvas;
 }
 
+// Bicubic (Catmull-Rom) scaling of the fight's picture, separable, with the taps and weights of each output
+// column and row worked out once per size (weights in 1/256: 32-bit sums, a shift at the end)
+#define BICUBIC_MAX_W (MF_SCREEN_W * 2)
+#define BICUBIC_MAX_H (MF_SCREEN_H * 2)
+#define BICUBIC_SHIFT 8
+#define BICUBIC_ONE (1 << BICUBIC_SHIFT)
+
+struct BicubicTaps
+{
+    s16 at[4];
+    s16 weight[4];
+};
+
+static SDL_Texture *sBicubic;
+static SDL_Renderer *sBicubicOwner;
+static int sBicubicW, sBicubicH;
+static unsigned int sBicubicSerial;
+static struct BicubicTaps sTapsX[BICUBIC_MAX_W], sTapsY[BICUBIC_MAX_H];
+static s32 sPlanes[3][MF_SCREEN_W * MF_SCREEN_H];   // the picture as 8-bit R, G, B
+static s32 sRows[3][BICUBIC_MAX_W * MF_SCREEN_H];    // after the horizontal pass (x BICUBIC_ONE)
+static u8 sOut[3][BICUBIC_MAX_W * BICUBIC_MAX_H];    // after the vertical pass
+
+static double CatmullRom(double t)
+{
+    t = t < 0 ? -t : t;
+    if (t < 1.0)
+        return 1.5 * t * t * t - 2.5 * t * t + 1.0;
+    if (t < 2.0)
+        return -0.5 * t * t * t + 2.5 * t * t - 4.0 * t + 2.0;
+    return 0.0;
+}
+
+static void BicubicTaps(struct BicubicTaps *taps, int out, int in)
+{
+    int i, k;
+
+    for (i = 0; i < out; i++)
+    {
+        double center = (i + 0.5) * in / out - 0.5;
+        int base = (int)floor(center);
+        int sum = 0;
+        for (k = 0; k < 4; k++)
+        {
+            int at = base - 1 + k;
+            taps[i].at[k] = (s16)(at < 0 ? 0 : at >= in ? in - 1 : at);
+            taps[i].weight[k] = (s16)lround(CatmullRom(center - (base - 1 + k)) * BICUBIC_ONE);
+            sum += taps[i].weight[k];
+        }
+        taps[i].weight[1] += BICUBIC_ONE - sum;   // the weights add up exactly
+    }
+}
+
+SDL_Texture *Fight_CanvasBicubic(SDL_Renderer *r, int w, int h)
+{
+    const unsigned short *frame;
+    unsigned int serial;
+    void *pixels;
+    int pitch, x, y, c;
+
+    if (!MfEngine_IsActive() || w <= 0 || h <= 0)
+        return NULL;
+    // at most twice the picture: the renderer's linear filter takes it the rest of the way
+    if (w > BICUBIC_MAX_W || h > BICUBIC_MAX_H)
+    {
+        w = BICUBIC_MAX_W;
+        h = BICUBIC_MAX_H;
+    }
+    if (sBicubic && (sBicubicOwner != r || sBicubicW != w || sBicubicH != h))
+    {
+        if (sBicubicOwner == r)
+            SDL_DestroyTexture(sBicubic);
+        sBicubic = NULL;
+    }
+    if (!sBicubic)
+    {
+        sBicubic = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+        if (!sBicubic)
+            return NULL;
+        sBicubicOwner = r;
+        sBicubicW = w;
+        sBicubicH = h;
+        sBicubicSerial = MfEngine_FrameSerial() - 1;
+        SDL_SetTextureBlendMode(sBicubic, SDL_BLENDMODE_NONE);
+        SDL_SetTextureScaleMode(sBicubic, SDL_ScaleModeLinear);
+        BicubicTaps(sTapsX, w, MF_SCREEN_W);
+        BicubicTaps(sTapsY, h, MF_SCREEN_H);
+    }
+    frame = MfEngine_Frame();
+    serial = MfEngine_FrameSerial();
+    if (!frame || serial == sBicubicSerial)
+        return sBicubic;   // nothing new (or still loading: what it showed)
+    sBicubicSerial = serial;
+
+    for (x = 0; x < MF_SCREEN_W * MF_SCREEN_H; x++)
+    {
+        unsigned short p = frame[x];
+        sPlanes[0][x] = ((p >> 11) << 3) | (p >> 13);
+        sPlanes[1][x] = (((p >> 5) & 63) << 2) | ((p >> 9) & 3);
+        sPlanes[2][x] = ((p & 31) << 3) | ((p >> 2) & 7);
+    }
+    for (c = 0; c < 3; c++)
+    {
+        for (y = 0; y < MF_SCREEN_H; y++)
+        {
+            const s32 *in = sPlanes[c] + y * MF_SCREEN_W;
+            s32 *out = sRows[c] + y * w;
+            int fastFrom = w, fastTo = w;
+            if (w == MF_SCREEN_W * 2)
+            {
+                // exactly twice as wide (any window of 960 or more): every even column has the same weights on
+                // pixels i-2..i+1, every odd one on i-1..i+2, so no lookups away from the edges (5x quicker)
+                const s16 *we = sTapsX[4].weight, *wo = sTapsX[5].weight;
+                s32 e0 = we[0], e1 = we[1], e2 = we[2], e3 = we[3], o0 = wo[0], o1 = wo[1], o2 = wo[2], o3 = wo[3];
+                int i;
+                fastFrom = 4;
+                fastTo = (MF_SCREEN_W - 2) * 2;
+                for (i = 2; i < MF_SCREEN_W - 2; i++)
+                {
+                    out[i * 2] = in[i - 2] * e0 + in[i - 1] * e1 + in[i] * e2 + in[i + 1] * e3;
+                    out[i * 2 + 1] = in[i - 1] * o0 + in[i] * o1 + in[i + 1] * o2 + in[i + 2] * o3;
+                }
+            }
+            for (x = 0; x < w; x++)
+            {
+                const struct BicubicTaps *t;
+                if (x == fastFrom)
+                    x = fastTo;
+                t = &sTapsX[x];
+                out[x] = in[t->at[0]] * t->weight[0] + in[t->at[1]] * t->weight[1]
+                       + in[t->at[2]] * t->weight[2] + in[t->at[3]] * t->weight[3];
+            }
+        }
+    }
+    // the vertical pass a channel at a time (contiguous rows: the compiler vectorizes it), then packed
+    for (c = 0; c < 3; c++)
+    {
+        for (y = 0; y < h; y++)
+        {
+            const struct BicubicTaps *t = &sTapsY[y];
+            const s32 *r0 = sRows[c] + t->at[0] * w, *r1 = sRows[c] + t->at[1] * w;
+            const s32 *r2 = sRows[c] + t->at[2] * w, *r3 = sRows[c] + t->at[3] * w;
+            s32 w0 = t->weight[0], w1 = t->weight[1], w2 = t->weight[2], w3 = t->weight[3];
+            u8 *out = sOut[c] + y * w;
+            for (x = 0; x < w; x++)
+            {
+                s32 v = (r0[x] * w0 + r1[x] * w1 + r2[x] * w2 + r3[x] * w3 + (1 << (2 * BICUBIC_SHIFT - 1)))
+                      >> (2 * BICUBIC_SHIFT);
+                out[x] = (u8)(v < 0 ? 0 : v > 255 ? 255 : v);
+            }
+        }
+    }
+    if (SDL_LockTexture(sBicubic, NULL, &pixels, &pitch) != 0)
+        return sBicubic;
+    for (y = 0; y < h; y++)
+    {
+        u32 *out = (u32 *)((u8 *)pixels + y * pitch);
+        const u8 *rr = sOut[0] + y * w, *gg = sOut[1] + y * w, *bb = sOut[2] + y * w;
+        for (x = 0; x < w; x++)
+            out[x] = 0xFF000000u | ((u32)rr[x] << 16) | ((u32)gg[x] << 8) | (u32)bb[x];
+    }
+    SDL_UnlockTexture(sBicubic);
+    return sBicubic;
+}
+
 void Fight_DestroyTextures(void)
 {
+    if (sBicubic)
+        SDL_DestroyTexture(sBicubic);
+    sBicubic = NULL;
+    sBicubicOwner = NULL;
     if (sCanvas)
         SDL_DestroyTexture(sCanvas);
     sCanvas = NULL;

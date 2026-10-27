@@ -39,6 +39,18 @@ void MfHost_ConfigLoaded(void);
 /* After the [P1 Keys] / [P2 Keys] of the options (Options_Load) */
 void MfHost_KeysLoaded(void);
 
+/*
+ * The screenpack's space in the picture (docs/FIGHT_DECISIONS.md #5): scaled to fit (by height for 4:3 packs in
+ * the 3:2 picture) and centred, g_mfMotifOffsetX pixels from the left. The fight HUD's sides go to the real
+ * edges: g_mfHudShift (MF_HUD_SIDE) moves what is drawn for side 0 left and side 1 right by the same amount.
+ */
+extern int g_mfMotifOffsetX;
+extern int g_mfHudShift;
+#define MF_HUD_SIDE(side) (g_mfHudShift = (side) < 0 ? 0 : (side) == 0 ? -g_mfMotifOffsetX : g_mfMotifOffsetX)
+#define MF_MOTIF_X() (g_mfMotifOffsetX + g_mfHudShift)
+/* GameVars.motif_scale and g_mfMotifOffsetX for the game resolution and the motif's localcoord */
+void MfHost_FitMotif(void);
+
 /* The end of every frame of the screen loops (Screen_EndFrame). */
 void MfHost_FrameEnd(void);
 
