@@ -964,6 +964,7 @@ int Screen_Run(ScreenLoop *screen)
                 if (screen->bg != NULL) {
                     Bg_SetScale(screen->bg, screen->scale, screen->scale);
                     Bg_Draw(screen->bg, 0);
+                    MfHost_KeepBackground();    /* Moemon Fight: the sides of 4:3 screens */
                 }
                 if (screen->cutscene != 0 && ((Cutscene *)(intptr_t)screen->cutscene)->type == CUTSCENE_STORYBOARD) {
                     Storyboard_Draw(((Cutscene *)(intptr_t)screen->cutscene)->storyboard);
@@ -980,6 +981,7 @@ int Screen_Run(ScreenLoop *screen)
                 Bg_SetScale(screen->bg, screen->scale, screen->scale);
                 Bg_Draw(screen->bg, 1);
             }
+            MfHost_FillSides();     /* Moemon Fight: before the fade, which covers them too */
             g = g_game;
             if (g->skip_draw == 0 && g->fade.type == FADE_BARS) {
                 Fade_DrawBars(&g->fade);

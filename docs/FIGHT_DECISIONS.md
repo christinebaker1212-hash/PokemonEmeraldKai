@@ -107,8 +107,14 @@ data or Elecbyte files.
   480 / scale. A 320x240 stage gets about 20 more stage pixels on each side.
 - Screenpacks (motifs) are fitted by height too (`MfHost_FitMotif`: the smaller of the two scales)
   and centred (`g_mfMotifOffsetX`, `MF_MOTIF_X()` in the select, VS, fight HUD and explod code). The
-  select, VS and results screens keep to the pack's 4:3: what slides past its edges isn't shown (black
-  beside it, until the fight itself is on screen).
+  select, VS and results screens keep to the pack's 4:3: what slides past its edges isn't shown. The
+  sides beside them show the screen's background (asked for in the fourth round, instead of black): it is
+  kept as drawn before anything else of the screen (`MfHost_KeepBackground`, gameloop.c) and put in the
+  sides once the screen is drawn and before the fade (`MfHost_FillSides`). Where the background really
+  reaches into a side (mostly lit) it stays as it is; else each row carries on the background's colour at
+  the edge (4 columns and 5 rows averaged, so text drawn as background doesn't streak), a fifth darker at
+  the picture's edge. Mirroring was tried and dropped: SFEX draws text and the grid as background layers,
+  which came out backwards.
 - The fight HUD is measured sprite by sprite when a session starts (`MfFit_Hud`,
   fight/host/mf_fit.c), and what moved goes to `mugen/fightfit.log`:
   - each player's part (life bar, power bar, face, name, win icons) moves out to its real edge, as far

@@ -411,6 +411,120 @@ void MfHost_FitMotif(void)
     g_mfHudTopY = g_mfHudBottomY = 0;
 }
 
+/* ------------------------------------------------------------------ the sides of 4:3 screens */
+
+/* The select, VS and results screens are the pack's 4:3 in the middle of the 3:2 picture. The sides show the
+ * screen's background: kept as it is drawn, before anything else of the screen (MfHost_KeepBackground), then
+ * put in the sides once the screen is drawn (MfHost_FillSides), over whatever slid past the 4:3 edges. Where the
+ * background reaches past its edges it goes on as it is; where it doesn't, it is mirrored from the edge. */
+static unsigned short sBack[MF_SCREEN_W * MF_SCREEN_H];
+static int sBackKept, sSidesDone;
+
+static SDL_Surface *Host_Target(void)
+{
+    const Sprite *spr;
+    SDL_Surface *surface;
+
+    if (g_renderTarget == NULL || g_renderTarget->sprites == NULL) {
+        return NULL;
+    }
+    spr = (const Sprite *)(g_renderTarget->sprites->data + g_renderTarget->sprites->elem_size * g_renderTargetSprite);
+    if (spr == NULL || spr->format != SPRITE_FORMAT_SURFACE || (surface = spr->pixels) == NULL
+        || surface->format->BytesPerPixel != 2) {
+        return NULL;
+    }
+    return surface;
+}
+
+static int Host_SidesWanted(void)
+{
+    return sMotifScreen && g_mfMotifOffsetX > 0 && !g_game->skip_draw;
+}
+
+void MfHost_KeepBackground(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int y, w, h;
+
+    if (surface == NULL) {
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    memset(sBack, 0, sizeof(sBack));
+    for (y = 0; y < h; y++) {
+        memcpy(sBack + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
+    }
+    sBackKept = 1;
+}
+
+static int Host_Bright(unsigned short c)
+{
+    return ((c >> 11) & 31) + ((c >> 5) & 63) / 2 + (c & 31) > 12;
+}
+
+/* One side of a row: x0..x1 (exclusive) of the picture. The background as it is where it really goes there
+ * (mostly lit); else its colour at the screen's edge (the inside columns e0..e1, rows y-2..y+2 averaged, so
+ * text at the edge doesn't streak) carried out to the picture's edge, a little darker towards it */
+static void Host_FillSide(unsigned short *row, int y, int h, int x0, int x1, int e0, int e1, int outer)
+{
+    const unsigned short *back = sBack + y * MF_SCREEN_W;
+    int x, lit = 0, r = 0, g = 0, b = 0, n = 0, yy;
+
+    for (x = x0; x < x1; x++) {
+        lit += Host_Bright(back[x]);
+    }
+    if (lit * 4 >= (x1 - x0) * 3) {
+        memcpy(row + x0, back + x0, (size_t)(x1 - x0) * 2);
+        return;
+    }
+    for (yy = y - 2; yy <= y + 2; yy++) {
+        const unsigned short *line = sBack + (yy < 0 ? 0 : yy >= h ? h - 1 : yy) * MF_SCREEN_W;
+        for (x = e0; x < e1; x++) {
+            r += line[x] >> 11;
+            g += (line[x] >> 5) & 63;
+            b += line[x] & 31;
+            n++;
+        }
+    }
+    for (x = x0; x < x1; x++) {
+        int d = x < outer ? outer - x : x - outer;        /* how far from the picture's edge */
+        int k = 208 + 48 * d / (x1 - x0 > 1 ? x1 - x0 : 1);    /* 4/5 brightness at the picture's edge */
+        k = k > 256 ? 256 : k;
+        row[x] = (unsigned short)(((r / n * k >> 8) << 11) | ((g / n * k >> 8) << 5) | (b / n * k >> 8));
+    }
+}
+
+void MfHost_FillSides(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int left = g_mfMotifOffsetX;
+    int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
+    int y, w, h;
+
+    if (surface == NULL) {
+        sBackKept = 0;
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    if (right > w) {
+        right = w;
+    }
+    for (y = 0; y < h; y++) {
+        unsigned short *row = (unsigned short *)((unsigned char *)surface->pixels + y * surface->pitch);
+        if (!sBackKept) {
+            memset(row, 0, (size_t)left * 2);
+            memset(row + right, 0, (size_t)(w - right) * 2);
+            continue;
+        }
+        Host_FillSide(row, y, h, 0, left, left, left + 4 < right ? left + 4 : right, 0);
+        Host_FillSide(row, y, h, right, w, right - 4 > left ? right - 4 : left, right, w - 1);
+    }
+    sBackKept = 0;
+    sSidesDone = 1;
+}
+
 /* ------------------------------------------------------------------ frames */
 
 void MfHost_Present(const SDL_Surface *surface)
@@ -432,8 +546,8 @@ void MfHost_Present(const SDL_Surface *surface)
     for (y = 0; y < h; y++) {
         memcpy(dst + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
     }
-    if (sMotifScreen && g_mfMotifOffsetX > 0) {
-        /* the screenpack's screens keep to its own 4:3: what slides past its edges isn't shown */
+    if (sMotifScreen && g_mfMotifOffsetX > 0 && !sSidesDone) {
+        /* a screen without a background (MfHost_FillSides): what slides past its 4:3 edges isn't shown */
         int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
         for (y = 0; y < MF_SCREEN_H; y++) {
             memset(dst + y * MF_SCREEN_W, 0, (size_t)g_mfMotifOffsetX * 2);
@@ -443,6 +557,7 @@ void MfHost_Present(const SDL_Surface *surface)
         }
     }
     sPresented = 1;
+    sSidesDone = 0;
 }
 
 /* The fight is on screen (Fight_DrawHud): the picture's full width is the stage's */

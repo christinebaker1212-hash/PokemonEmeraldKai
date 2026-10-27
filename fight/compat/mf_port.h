@@ -64,6 +64,9 @@ void MfFit_Hud(int top_px);
 /* An element about to be drawn (before SysElem_SetScale): picks its shifts */
 void MfFit_PlaceItem(const struct SysDrawItem *e);
 
+/* The 4:3 screens' sides in the 3:2 picture: the background as drawn, then the sides from it (gameloop.c) */
+void MfHost_KeepBackground(void);
+void MfHost_FillSides(void);
 /* The fight is on screen (Fight_DrawHud) */
 void MfHost_MatchShown(void);
 /* A character one of the online players lacks (greyed out, never picked at random) */
