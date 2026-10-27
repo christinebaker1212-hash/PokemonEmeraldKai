@@ -31,6 +31,7 @@
 #include "constants/songs.h"
 #include "field_player_avatar.h"
 #include "overworld.h"
+#include "tcg/integration.h"
 
 enum
 {
@@ -136,7 +137,8 @@ static const u8 sText_Scaling[] = _("SCALING");
 static const u8 sText_Filter[] = _("FILTER");
 static const u8 sText_VSync[] = _("VSYNC");
 static const u8 sText_CardArt[] = _("CARD ART");
-static const u8 sText_CardArtPrinted[] = _("PRINTED");
+static const u8 sText_CardArtFramed[] = _("PRINTED ART");
+static const u8 sText_CardArtPrinted[] = _("PRINTED CARD");
 static const u8 sText_CardArtGameBoy[] = _("GAME BOY");
 static const u8 sText_Controller[] = _("CONTROLLER");
 static const u8 sText_PadButtons[] = _("PAD BUTTONS");
@@ -409,8 +411,8 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = sText_CreaturesMoemon, names[1] = sText_CreaturesPokemon;
         return 2;
     case OPT_CARDART:
-        names[0] = sText_CardArtPrinted, names[1] = sText_CardArtGameBoy;
-        return 2;
+        names[0] = sText_CardArtFramed, names[1] = sText_CardArtPrinted, names[2] = sText_CardArtGameBoy;
+        return MP_CARDART_COUNT;
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
         return 3;
@@ -558,7 +560,7 @@ static u8 Current(u8 row)
     case OPT_SCALING:     return Display_GetScaleMode();
     case OPT_FILTER:      return Display_GetFilter();
     case OPT_VSYNC:       return Display_GetVSync() != 0;
-    case OPT_CARDART:     return gMpConfig.cardArt != 0;
+    case OPT_CARDART:     return gMpConfig.cardArt % MP_CARDART_COUNT;
     case OPT_ANALOGRUN:   return Gamepad_GetAnalogRun() != 0;
     case OPT_RUMBLE:      return Gamepad_GetRumble() != 0;
     case OPT_SPECPANEL:   return gMpConfig.spectatePanel != 0;
@@ -603,7 +605,7 @@ static void Change(u8 row, int dir)
     case OPT_SCALING:     Display_SetScaleMode(Wrap(Display_GetScaleMode() + dir, DISPLAY_SCALE_COUNT)); break;
     case OPT_FILTER:      Display_SetFilter(Wrap(Display_GetFilter() + dir, DISPLAY_FILTER_COUNT)); break;
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
-    case OPT_CARDART:     gMpConfig.cardArt = !gMpConfig.cardArt; break;
+    case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt + dir, MP_CARDART_COUNT); break;
     case OPT_PADSELECT:   Gamepad_CycleSelected(dir); break;
     case OPT_PADLAYOUT:   Gamepad_SetLayout(Gamepad_GetLayout() + dir); break;
     case OPT_ANALOGRUN:   Gamepad_SetAnalogRun(!Gamepad_GetAnalogRun()); break;
@@ -815,7 +817,10 @@ static void DrawHint(void)
     else if (opt == OPT_BIKEMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S OWN SONG ON A BIKE");
     else if (opt == OPT_CARDART)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardArt ? "CARDS SHOW THE GAME BOY PICTURES" : "CARDS SHOW THE REAL PRINTED CARDS");
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardArt == MP_CARDART_GAMEBOY ? "THE GAME BOY PICTURES IN THE FRAMES"
+                 : !Tcg_PrintedArtInstalled() ? "PRINTED PICTURES: NOT DOWNLOADED YET"
+                 : gMpConfig.cardArt == MP_CARDART_PRINTED ? "THE WHOLE PRINTED CARDS"
+                 : "THE PRINTED PICTURES IN THE FRAMES");
     else if (opt == OPT_FOLLOWSPRITES)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "PMD PICTURES EVERYWHERE"
                  : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "THE ORIGINAL SPRITES EVERYWHERE"

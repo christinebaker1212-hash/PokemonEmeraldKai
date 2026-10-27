@@ -7,7 +7,8 @@
 #   starts the game with MOEMON_UPDATE_URL pointing at the server. Cases: offline, up to date, damaged
 #   download, ESC during the download, a failure halfway through installing (rollback), a real update
 #   (install, keep the save and .ini, restart into the new files, which clears the old ones), another
-#   start, and a folder that isn't a release (no check at all).
+#   start, a folder that isn't a release (no check at all), and the card pictures (downloaded once when this
+#   version's are missing, also by the game an update restarts; another version's are left alone).
 # Exit code = number of failed checks.
 cd "$(dirname "$0")/../.." || exit 99
 REPO=$(pwd)
@@ -45,9 +46,20 @@ printf 'AutoUpdate = 1\n# the zip must never replace the player'"'"'s ini\n' > "
 printf 'Moemon Emerald Kai Co-op 9.9.9 (%s)\n' $PLAT > "$N/moemon_release.txt"
 (cd "$OUT/new" && zip -qrX "$OUT/srv/MoemonEmeraldKaiCoop-$PLAT.zip" MoemonEmeraldKaiCoop)
 Z="$OUT/srv/MoemonEmeraldKaiCoop-$PLAT.zip"
-manifest() {   # manifest VERSION SHA
+# the card pictures (a stand-in for the real pack: the updater only checks and unpacks it)
+ARTV=$(sed -n 's/^#define TCG_ART_VERSION "\(.*\)"/\1/p' include/tcg/art_pack.h)
+mkdir -p "$OUT/artsrc/tcg/art/$ARTV/thumbnails"
+echo '{"format":1}' > "$OUT/artsrc/tcg/art/$ARTV/manifest.json"
+echo 'not really a JPEG' > "$OUT/artsrc/tcg/art/$ARTV/thumbnails/058.jpg"
+(cd "$OUT/artsrc" && zip -qrX "$OUT/srv/moemon-tcg-art-$ARTV.zip" tcg)
+AZ="$OUT/srv/moemon-tcg-art-$ARTV.zip"
+manifest() {   # manifest VERSION SHA [ART_VERSION]: with an art line when ART_VERSION is given
     printf 'version %s\ntag v%s\n%s MoemonEmeraldKaiCoop-%s.zip %s %s %s\n' \
         "$1" "$1" $PLAT $PLAT "$(stat -c %s "$Z")" "$2" $EXE > "$OUT/srv/update.txt"
+    if [ -n "$3" ]; then
+        printf 'art %s v%s %s %s %s\n' "$3" "$1" "$(basename "$AZ")" "$(stat -c %s "$AZ")" \
+            "$(sha256sum "$AZ" | cut -d' ' -f1)" >> "$OUT/srv/update.txt"
+    fi
 }
 GOODSHA=$(sha256sum "$Z" | cut -d' ' -f1)
 
@@ -126,6 +138,7 @@ check "everything put back" unchanged before_5.txt
 check "no leftovers" test -z "$(find "$G" -name '*.upd_*')"
 
 echo "6. update"
+manifest 9.9.9 "$GOODSHA" "$ARTV"
 fresh 6; run 6 MOEMON_UPDATE_URL=http://127.0.0.1:$PORT/ MOEMON_UPDATE_TEST_SHOT="$(W "$OUT/update")"
 check "downloads it" has "$G/log.txt" "version 9.9.9 is out (this is $VER)"
 check "installs it" has "$G/log.txt" "installed version 9.9.9"
@@ -145,6 +158,8 @@ check "old files cleared or listed for the next start" bash -c "[ -z \"\$(find '
 check "download removed" test ! -e "$G/update_download.zip"
 check "no .upd_new left" test -z "$(find "$G" -name '*.upd_new')"
 check "result screen saved" test -s "$OUT/update_result.bmp"
+check "the restarted game gets the card pictures" has "$G/log.txt" "installed the card pictures $ARTV"
+check "card pictures in place" test -f "$G/tcg/art/$ARTV/thumbnails/058.jpg"
 
 echo "7. the next start finds nothing left over"
 run 7 MOEMON_NO_UPDATE=1
@@ -156,6 +171,28 @@ echo "8. not a release folder"
 fresh 8; rm "$G/moemon_release.txt"
 run 8 MOEMON_UPDATE_URL=http://127.0.0.1:$PORT/
 check "no check at all" bash -c "! grep -q 'update information\|is out\|up to date' '$G/log.txt'"
+check "starts the game" reached
+
+echo "9. up to date, without the card pictures"
+manifest "$VER" "$GOODSHA" "$ARTV"
+fresh 9; run 9 MOEMON_UPDATE_URL=http://127.0.0.1:$PORT/
+check "downloads them" has "$G/log.txt" "downloading the card pictures $ARTV"
+check "installs them" has "$G/log.txt" "installed the card pictures $ARTV"
+check "in the art folder" cmp -s "$G/tcg/art/$ARTV/manifest.json" "$OUT/artsrc/tcg/art/$ARTV/manifest.json"
+check "download removed" test ! -e "$G/update_card_art.zip"
+check "no .upd_new left" test -z "$(find "$G" -name '*.upd_new')"
+check "starts the game" reached
+
+echo "10. the next start has them"
+run 10 MOEMON_UPDATE_URL=http://127.0.0.1:$PORT/
+check "no second download" bash -c "! grep -q 'downloading the card pictures' '$G/log.txt'"
+check "starts the game" reached
+
+echo "11. another version's pictures"
+manifest "$VER" "$GOODSHA" 0123456789abcdef
+fresh 11; run 11 MOEMON_UPDATE_URL=http://127.0.0.1:$PORT/
+check "left alone" bash -c "! grep -q 'card pictures' '$G/log.txt'"
+check "nothing changed" unchanged before_11.txt
 check "starts the game" reached
 
 echo "$fails failed, logs in $OUT"

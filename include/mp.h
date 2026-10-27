@@ -241,7 +241,7 @@ struct MpConfig
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
-    u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: 0 the printed cards, 1 the Game Boy pictures (src/tcg)
+    u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARDART_* (src/tcg)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
 };
 enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
@@ -340,6 +340,8 @@ void MP_PcStorage_LogTags(void);
 
 // mp_textopts.c: OPTIONS > NAME CASE / CREATURES (this game's display only)
 enum { MP_NAMECASE_AS_TYPED, MP_NAMECASE_CAPS, MP_NAMECASE_MIXED, MP_NAMECASE_COUNT };
+// CARD ART: the printed illustration in the Game Boy-style frame, the whole printed card, the Game Boy picture
+enum { MP_CARDART_FRAMED, MP_CARDART_PRINTED, MP_CARDART_GAMEBOY, MP_CARDART_COUNT };
 u8 MP_NameCaseMode(void);
 bool8 MP_PokemonWording(void);   // CREATURES: POKéMON
 void MP_NameCase_Recase(u8 *s, u16 len, u8 mode);

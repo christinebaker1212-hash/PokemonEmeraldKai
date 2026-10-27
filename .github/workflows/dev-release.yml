@@ -80,12 +80,18 @@ jobs:
           echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
           tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
       - name: Build and package dev games
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           make linux DEV_BUILD=1 DEV_REVISION="$DEV_REVISION" -j"$(nproc)"
           tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
           tools/release/package.sh linux dist
           SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist
-          tools/release/manifest.sh dist
+          # the card pictures stay on the main release they came with: update.txt points there
+          VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
+          gh release download "v$VER" --repo "$GITHUB_REPOSITORY" --pattern 'moemon-tcg-art-*.zip' --dir "$RUNNER_TEMP/art" || true
+          cp "$RUNNER_TEMP"/art/moemon-tcg-art-*.zip dist/ 2>/dev/null || true
+          ART_TAG="v$VER" tools/release/manifest.sh dist
       - name: Dev save protection and channel switching
         run: |
           NOBUILD=1 tools/test/dev_save_test.sh

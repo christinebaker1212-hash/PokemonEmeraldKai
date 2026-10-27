@@ -134,7 +134,8 @@ Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine
 duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
 Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
 three POKéMON CENTERs, 24 special trainer decks (gen_special_decks.py), CARD POINTS counter, `<save>.cards` sidecar,
-friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION; everything in
+friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION; the printed card pictures are a
+release asset the updater downloads once (tools/release/art_pack.sh, update.txt "art" line, updater.c CardArt); everything in
 docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
 
 Gotchas worth knowing before touching battles:

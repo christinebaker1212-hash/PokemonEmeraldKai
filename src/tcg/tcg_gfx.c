@@ -1053,30 +1053,72 @@ static struct Source *Source(unsigned id, unsigned kind)
     s->age = ++sSourceAge;
     return s;
 }
-static int sGameBoyArt;
+static int sCardArt;   /* G_ART_* */
 static void ForgetFaces(void);
-/* OPTIONS > DISPLAY > CARD ART: the printed cards, or the Game Boy pictures. */
-void G_SetGameBoyArt(int on)
+/* OPTIONS > DISPLAY > CARD ART: the printed pictures in the frames, the whole printed cards, or
+ * the Game Boy pictures in the frames. */
+void G_SetCardArt(int mode)
 {
-    if (!on == !sGameBoyArt)
+    if (mode == sCardArt)
         return;
-    sGameBoyArt = on != 0;
+    sCardArt = mode;
     ForgetFaces();
 }
-/* The printed card when the pack has it: the full scan, else its thumbnail. */
-static struct Source *Scan(unsigned id, int full)
+static struct Source *AnyScan(unsigned id, int full)
 {
     struct Source *s = NULL;
-    if (sGameBoyArt || !G_HasScans())
+    if (!G_ScansInstalled())
         return NULL;
     if (full)
         s = Source(id, 2);
     return s ? s : Source(id, 1);
 }
+/* The whole printed card (CARD ART: PRINTED CARD) when the pack has it: the full scan, else its thumbnail. */
+static struct Source *Scan(unsigned id, int full)
+{
+    return sCardArt == G_ART_PRINTED ? AnyScan(id, full) : NULL;
+}
 int G_HasScans(void)
 {
-    if (sGameBoyArt)
-        return 0;
+    return sCardArt == G_ART_PRINTED && G_ScansInstalled();
+}
+/* The picture inside a card's frame and the part of it to show (r: x, y, w, h in its pixels):
+ * the illustration cut out of the printed card (4:3, as the Game Boy pictures), or the Game Boy picture. */
+static struct Source *Picture(const struct TcgCard *c, int full, float r[4])
+{
+    struct Source *s = sCardArt == G_ART_FRAMED ? AnyScan(c->id, full) : NULL;
+    float x0, y0, x1, y1, w, h;
+    if (!s)
+    {
+        s = Source(c->id, 0);
+        if (s)
+            r[0] = r[1] = 0, r[2] = (float)s->w, r[3] = (float)s->h;
+        return s;
+    }
+    /* Where the illustration sits on a printed card (Base Set to Fossil and the promos, 600x825):
+     * a Stage 1 / 2 Pokemon's evolution badge covers its top-left corner. */
+    if (c->kind == TCG_POKEMON)
+        x0 = c->stage ? 128 : 72, y0 = 104, x1 = 534, y1 = 425;
+    else if (c->kind == TCG_TRAINER)
+        x0 = 70, y0 = 194, x1 = 538, y1 = 458;
+    else if (c->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY)
+        x0 = 60, y0 = 280, x1 = 540, y1 = 640;
+    else
+        x0 = 60, y0 = 380, x1 = 540, y1 = 740;
+    w = x1 - x0;
+    h = y1 - y0;
+    if (w * 3 > h * 4)
+        x0 += (w - h * 4 / 3) / 2, w = h * 4 / 3;
+    else
+        y0 += (h - w * 3 / 4) / 2, h = w * 3 / 4;
+    r[0] = x0 * s->w / 600.0f;
+    r[1] = y0 * s->h / 825.0f;
+    r[2] = w * s->w / 600.0f;
+    r[3] = h * s->h / 825.0f;
+    return s;
+}
+int G_ScansInstalled(void)
+{
     if (sScanState < 0)
     {
         int w, h;
@@ -1161,7 +1203,8 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
     int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, i, artW, artH, artX, artY, textY;
     unsigned type = c->kind == TCG_TRAINER ? 7 : c->type, base = G_TypeColor(type, 0), light = G_TypeColor(type, 1),
              dark = G_TypeColor(type, 2);
-    struct Source *art = Source(c->id, 0);
+    float r[4];
+    struct Source *art = Picture(c, 0, r);
     int radius = w >= 26 ? 2 : 1;
     /* Yellow border, as printed. */
     S_RoundFill(s, 0, 0, w, h, radius, ARGB(0xf0c838, 255));
@@ -1181,7 +1224,7 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
         artX = b + 1;
         artY = (h - artH) / 2;
         if (art)
-            Resample(art, 0, 0, (float)art->w, (float)art->h, s, artX, artY, artW, artH);
+            Resample(art, r[0], r[1], r[2], r[3], s, artX, artY, artW, artH);
         S_Frame(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(dark, 255));
         S_Fill(s, b + 1, h - b - 3, w - 2 * b - 2, 1, ARGB(dark, 160));
         return;
@@ -1203,7 +1246,7 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
     if (w >= 26)
         S_Frame(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(0x585040, 255));
     if (art)
-        Resample(art, 0, 0, (float)art->w, (float)art->h, s, artX, artY, artW, artH);
+        Resample(art, r[0], r[1], r[2], r[3], s, artX, artY, artW, artH);
     /* Text box: cost dots and lines that read as attack text from afar. */
     textY = artY + artH + 2;
     if (textY < h - b - 2)
@@ -1366,22 +1409,48 @@ SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan)
     memset(&sArt, 0, sizeof(sArt));
     s = Scan(id, full);
     sArt.scan = s != NULL;
-    if (!s)
-        s = Source(id, 0);
-    if (!s)
-        return NULL;
-    surface.w = s->w;
-    surface.h = s->h;
-    surface.px = s->px;
-    sArt.texture = G_SurfaceTexture(&surface);
+    if (s)
+    {
+        surface.w = s->w;
+        surface.h = s->h;
+        surface.px = s->px;
+        sArt.texture = G_SurfaceTexture(&surface);
+        sArt.w = s->w;
+        sArt.h = s->h;
+    }
+    else if (Tcg_Card(id))
+    {
+        /* the picture as the frames show it: the printed illustration is cut out at its own size */
+        float r[4];
+        s = Picture(Tcg_Card(id), full, r);
+        if (!s)
+            return NULL;
+        if (s->kind == 0)
+        {
+            surface.w = s->w;
+            surface.h = s->h;
+            surface.px = s->px;
+            sArt.texture = G_SurfaceTexture(&surface);
+        }
+        else
+        {
+            surface = G_SurfaceNew((int)r[2], (int)r[3]);
+            if (!surface.px)
+                return NULL;
+            Resample(s, r[0], r[1], r[2], r[3], &surface, 0, 0, surface.w, surface.h);
+            sArt.texture = G_SurfaceTexture(&surface);
+            G_SurfaceFree(&surface);
+            sArt.scan = 1;   /* smooth, fitted to the screen */
+        }
+        sArt.w = surface.w;
+        sArt.h = surface.h;
+    }
     if (!sArt.texture)
         return NULL;
     if (sArt.scan)
         SDL_SetTextureScaleMode(sArt.texture, SDL_ScaleModeLinear);
     sArt.id = id;
     sArt.full = full;
-    sArt.w = s->w;
-    sArt.h = s->h;
 done:
     if (w)
         *w = sArt.w;

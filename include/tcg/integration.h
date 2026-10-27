@@ -18,6 +18,8 @@ unsigned Tcg_DuelingNow(void);
 unsigned Tcg_Today(void);
 /* Every card collected: a star on the TRAINER CARD. */
 int Tcg_CardMasterStar(void);
+/* The printed card pictures are next to the game (the updater downloads them once). */
+int Tcg_PrintedArtInstalled(void);
 struct TcgLink *Tcg_Online(void);
 void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len);
 void Tcg_OnlineTick(void);

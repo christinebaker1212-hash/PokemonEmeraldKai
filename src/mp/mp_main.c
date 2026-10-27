@@ -403,7 +403,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
-        else if (strcmp(key, "card_art") == 0) gMpConfig.cardArt = strcmp(val, "gameboy") == 0;
+        else if (strcmp(key, "card_art") == 0)   // "printed" (1.27-1.28.0, never shown) is the framed default
+            gMpConfig.cardArt = strcmp(val, "gameboy") == 0 ? MP_CARDART_GAMEBOY
+                              : strcmp(val, "card") == 0 ? MP_CARDART_PRINTED : MP_CARDART_FRAMED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
@@ -542,7 +544,8 @@ void MP_SaveConfig(void)
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
-        gMpConfig.cardArt ? "gameboy" : "printed", gMpConfig.lobby);
+        gMpConfig.cardArt == MP_CARDART_GAMEBOY ? "gameboy" : gMpConfig.cardArt == MP_CARDART_PRINTED ? "card" : "art",
+        gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)

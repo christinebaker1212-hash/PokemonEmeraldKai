@@ -207,8 +207,8 @@ the board prints `[tcg] show event ...` for KOs, coins, status, promotions and w
 
 - Remaining attack effects and all Pokemon Powers; player choice where the engine picks.
 - Trainer flows exist for all 34 Trainers but deserve play-testing per card.
-- Artwork pack: resolve remaining mappings, holo variants and GB-only cards;
-  installation/versioning/checksums. Without the pack the GB art frames are used.
+- Artwork pack: resolve remaining mappings (32 ambiguous, 31 Game Boy-only cards keep the
+  GB art frame) and holo variants.
 - Emerald attack animation adapter (not used: the board has its own card effects).
 - Windows: the mingw build compiles; not run on Windows.
 
@@ -226,6 +226,23 @@ python3 tools/tcg/build_art_pack.py
 Original full scans under `graphics/tcg/printed/` and the metadata download cache are
 ignored; the compressed content pack is in `dev/artwork/tcg-art/` (ID/hash in
 `tools/tcg/art_pack.json`). `MOEMON_TCG_ART_DIR` points the game at a pack.
+
+CARD ART (`G_SetCardArt`, MP_CARDART_* = G_ART_*; ini `card_art = art|card|gameboy`, the
+old `printed` reads as `art`): PRINTED ART cuts the illustration out of the scan (`Picture` in
+tcg_gfx.c: the art box per card kind at 600x825, a Stage 1/2 Pokemon's evolution badge left
+out, a 4:3 crop like the Game Boy pictures) into the procedural frame (`Face`), thumbnails for
+faces and the full scan for the big picture; PRINTED CARD shows the whole scan (`ScanFace`);
+GAME BOY the embedded pictures. Without the pack every mode uses the Game Boy pictures.
+
+How players get it (since 1.28.1): the Release workflow runs `tools/release/art_pack.sh`
+(fetch + build with Pillow 12.3.0, refused unless the content version equals
+`TCG_ART_VERSION`), attaches `moemon-tcg-art-<version>.zip` to the release and writes an
+`art <version> <tag> <zip> <bytes> <sha256>` line in update.txt (dev manifests point at the
+main release's tag). The updater (src/platform/updater.c `CardArt`) downloads it once when
+`tcg/art/<TCG_ART_VERSION>/manifest.json` is missing next to the exe, also in the game an
+update just restarted, and unpacks it without dropping the `tcg/` folder. A new pack = a new
+`TCG_ART_VERSION`, so it downloads again. Before 1.28.1 no release carried the pack: every
+player saw the Game Boy art. Tests: `tools/test/update_test.sh` cases 6 and 9-11.
 
 ## Layout references
 

@@ -1,6 +1,6 @@
 # Moemon Co-op: a new MOEMON_VERSION (include/mp_version.h) pushed to the default branch builds the Windows
 # and Linux games, tests the updater and publishes release v<version> (tag included), which the game's updater
-# reads (src/platform/updater.c): both zips and update.txt. Notes come from tools/release/notes/v<version>.md.
+# reads (src/platform/updater.c): both zips, the card art pack and update.txt. Notes come from tools/release/notes/v<version>.md.
 # Also runs by hand (Actions > Release > Run workflow). A version that already has a release is skipped.
 name: Release
 
@@ -16,7 +16,7 @@ jobs:
   release:
     if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
+          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3 python3-venv
 
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true'
@@ -46,6 +46,24 @@ jobs:
           curl -sSL -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
           echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
           tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
+
+      # The printed card pictures: built from the scans the same way every time (Pillow pinned: its own
+      # libjpeg); tools/release/art_pack.sh refuses a pack that isn't the one the game looks for.
+      - name: Card scans cache
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            graphics/tcg/printed
+            tools/tcg/metadata
+          key: tcg-scans-${{ hashFiles('tools/tcg/art_manifest.json') }}
+
+      - name: Card art pack
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0
+          PATH="$RUNNER_TEMP/venv/bin:$PATH" tools/release/art_pack.sh dist
 
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
@@ -79,4 +97,5 @@ jobs:
           TITLE=$(head -1 "$NOTES" | sed -n 's/^Moemon Emerald Kai Co-op [0-9.]* "\([^"]*\)":.*/\1/p')
           if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
           gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt \
+            dist/moemon-tcg-art-*.zip \
             --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest

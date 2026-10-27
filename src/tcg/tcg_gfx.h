@@ -106,5 +106,8 @@ void G_Card(unsigned id, float x, float y, float w, float h, double angle, unsig
 /* A big face without small details: the caller prints text over it. */
 SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan);
 int G_HasScans(void);
-void G_SetGameBoyArt(int on);
+int G_ScansInstalled(void); /* the pack is there, whichever CARD ART is chosen */
+/* CARD ART (MP_CARDART_* in mp.h): the printed pictures in the frames, the whole printed cards, the Game Boy pictures */
+enum { G_ART_FRAMED, G_ART_PRINTED, G_ART_GAMEBOY };
+void G_SetCardArt(int mode);
 #endif

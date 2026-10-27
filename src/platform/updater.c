@@ -12,6 +12,10 @@
 //    failure halfway puts everything back). Save files and .ini files that are
 //    already there are never replaced, and nothing that isn't in the zip is touched.
 // 4. Starts the new version and quits.
+// 5. Up to date but without the printed card pictures (tcg/art/<TCG_ART_VERSION>/, src/tcg/tcg_gfx.c):
+//    downloads the release's card art pack once (update.txt's "art" line), checked the same way,
+//    and unpacks it next to the exe (also right after an update, in the restarted game). ESC skips
+//    it until the next start.
 //
 // It only runs in a folder unpacked from a release (moemon_release.txt next to the
 // exe), never in a source checkout. AutoUpdate = 0 in moemon_coop.ini, --no-update or
@@ -47,6 +51,7 @@
 #endif
 
 #include "mp_version.h"
+#include "tcg/art_pack.h"
 
 #ifdef _WIN32
 #define UPDATE_PLATFORM "windows"
@@ -57,6 +62,7 @@
 #define RELEASE_MARKER "moemon_release.txt"
 #define CLEANUP_LIST "update_cleanup.txt"
 #define DOWNLOAD_FILE "update_download.zip"
+#define ART_DOWNLOAD_FILE "update_card_art.zip"
 #define MAX_MANIFEST 16384
 #define MAX_ZIP (512u * 1024u * 1024u)
 
@@ -72,6 +78,7 @@ char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen)
 
 unsigned char MP_ConfigAllowsTweaks(void);
 static int sWantDev;
+static int sArtOnly;   // just updated: only the card pictures, if this version's are missing
 static char sExeDir[1024];
 static char sExePath[1024];
 
@@ -347,6 +354,13 @@ static struct
     char sha[65];
     char exe[128];
     char error[96];
+    // the card art pack: art <version> <tag> <zip> <bytes> <sha256>
+    int art;                 // downloading it (the screen says so)
+    char artVersion[32];
+    char artTag[48];
+    char artZip[128];
+    long artTotal;
+    char artSha[65];
 } U;
 
 static void Fail(const char *fmt, ...)
@@ -592,10 +606,28 @@ static int ParseManifest(char *text)
     strcpy(U.channel, "main"); // older main manifests have no channel field
     for (; line; line = strtok(NULL, "\r\n"))
     {
-        char key[32], a[128], b[32], c[80], d[128];
+        char key[32], a[128], b[32], c[80], d[128], e[80];
         if (line[0] == '#')
             continue;
-        if (sscanf(line, "%31s %127s %31s %79s %127s", key, a, b, c, d) == 5 && strcmp(key, UPDATE_PLATFORM) == 0)
+        if (sscanf(line, "%31s %31s %47s %127s %31s %79s", key, a, b, c, d, e) == 6 && strcmp(key, "art") == 0)
+        {
+            char *end;
+            long size = strtol(d, &end, 10);
+            int i, hex = strlen(e) == 64;
+            for (i = 0; hex && i < 64; i++)
+                hex = isxdigit((unsigned char)e[i]);
+            if (*end || size <= 0 || (unsigned long)size > MAX_ZIP || !hex || !ValidName(a) || !ValidName(b) ||
+                !ValidName(c))
+                continue;   // a bad art line costs only the pictures
+            snprintf(U.artVersion, sizeof(U.artVersion), "%s", a);
+            snprintf(U.artTag, sizeof(U.artTag), "%s", b);
+            snprintf(U.artZip, sizeof(U.artZip), "%s", c);
+            U.artTotal = size;
+            for (i = 0; i < 64; i++)
+                U.artSha[i] = (char)tolower((unsigned char)e[i]);
+            U.artSha[64] = 0;
+        }
+        else if (sscanf(line, "%31s %127s %31s %79s %127s", key, a, b, c, d) == 5 && strcmp(key, UPDATE_PLATFORM) == 0)
         {
             char *end;
             long size = strtol(b, &end, 10);
@@ -635,7 +667,8 @@ static void AssetUrl(char *out, size_t size, const char *name, int latest)
     else if (latest)
         snprintf(out, size, "https://github.com/%s/releases/latest/download/%s", MOEMON_UPDATE_REPO, name);
     else
-        snprintf(out, size, "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO, U.tag, name);
+        snprintf(out, size, "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO,
+                 U.art && U.artTag[0] ? U.artTag : U.tag, name);
 }
 
 // ---------------------------------------------------------------------------
@@ -682,13 +715,13 @@ static int Protected(const char *name, const char *path)
     return 0;
 }
 
-static int ReadEntries(const uint8_t *z, long size, struct Entry **out, int *count)
+// strip: the release zip's one top folder is dropped (the art pack's paths are kept)
+static int ReadEntries(const uint8_t *z, long size, struct Entry **out, int *count, int strip)
 {
     long eocd = -1, i, off;
     uint32_t n, cdOff, k;
     struct Entry *e;
     char prefix[256] = "";
-    int strip = 1;
 
     for (i = size - 22; i >= 0 && i >= size - 22 - 65535; i--)
         if (Rd32(z + i) == 0x06054b50)
@@ -829,14 +862,14 @@ static int WriteFileAll(const char *path, const uint8_t *data, uint32_t n, int e
     return 1;
 }
 
-static int Install(const uint8_t *z, long size)
+static int Install(const uint8_t *z, long size, int strip)
 {
     struct Entry *e = NULL;
     int n = 0, i, ok = 0, swapped = 0, swaps = 0;
     char *oldNames = NULL;   // each file's .upd_old name, 1024 apiece
     FILE *list;
 
-    if (!ReadEntries(z, size, &e, &n))
+    if (!ReadEntries(z, size, &e, &n, strip))
     {
         Fail("THE DOWNLOAD IS NOT A GOOD ZIP");
         return 0;
@@ -1005,13 +1038,134 @@ static void CleanUpLastUpdate(void)
 // ---------------------------------------------------------------------------
 // The worker: check, download, verify, install
 
-static int Worker(void *arg)
+// Downloads one release asset next to the exe, checks its size and SHA-256 (also read back
+// from the disk) and returns it in memory. NULL: the phase says why (failed or skipped).
+static uint8_t *DownloadChecked(const char *name, long total, const char *sha, const char *file)
 {
     struct Sink k;
     char url[512], path[1024], hex[65];
     int status;
     uint8_t *zip;
     FILE *f;
+
+    SDL_AtomicSet(&U.got, 0);
+    SDL_AtomicSet(&U.phase, PH_DOWNLOAD);
+    JoinPath(path, sizeof(path), sExeDir, file);
+    memset(&k, 0, sizeof(k));
+    k.file = UOpen(path, "wb");
+    k.cap = total;
+    k.progress = 1;
+    ShaInit(&k.sha);
+    if (!k.file)
+    {
+        Fail("CANNOT WRITE IN THE GAME FOLDER");
+        return NULL;
+    }
+    AssetUrl(url, sizeof(url), name, 0);
+    if (!HttpGet(url, &k, &status))
+    {
+        fclose(k.file);
+        URemove(path);
+        if (SDL_AtomicGet(&U.cancel))
+        {
+            Log("skipped by the player");
+            SDL_AtomicSet(&U.phase, PH_SKIPPED);
+        }
+        else
+        {
+            Fail(status ? "DOWNLOAD FAILED (HTTP %d)" : "DOWNLOAD FAILED (NO CONNECTION)", status);
+        }
+        return NULL;
+    }
+    if (fclose(k.file) != 0)
+    {
+        URemove(path);
+        Fail("CANNOT WRITE IN THE GAME FOLDER");
+        return NULL;
+    }
+
+    // exactly the file update.txt describes
+    SDL_AtomicSet(&U.phase, PH_VERIFY);
+    ShaHex(&k.sha, hex);
+    if (k.len != total || strcmp(hex, sha) != 0)
+    {
+        URemove(path);
+        Fail("THE DOWNLOAD IS DAMAGED (CHECKSUM)");
+        Log("got %ld bytes, sha256 %s; expected %ld, %s", k.len, hex, total, sha);
+        return NULL;
+    }
+    zip = malloc(total);
+    f = UOpen(path, "rb");
+    if (!zip || !f || fread(zip, 1, total, f) != (size_t)total)
+    {
+        if (f)
+            fclose(f);
+        free(zip);
+        URemove(path);
+        Fail("COULD NOT READ THE DOWNLOAD");
+        return NULL;
+    }
+    fclose(f);
+    // read back from the disk: check it again
+    {
+        struct Sha256 s;
+        ShaInit(&s);
+        ShaUpdate(&s, zip, total);
+        ShaHex(&s, hex);
+        if (strcmp(hex, sha) != 0)
+        {
+            free(zip);
+            URemove(path);
+            Fail("THE DOWNLOAD IS DAMAGED (DISK)");
+            return NULL;
+        }
+    }
+    return zip;
+}
+
+// The printed card pictures, once: when this build's art pack isn't next to the exe yet
+static int CardArt(void)
+{
+    char path[1024];
+    uint8_t *zip;
+    if (!U.artZip[0] || strcmp(U.artVersion, TCG_ART_VERSION) != 0)
+    {
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    JoinPath(path, sizeof(path), sExeDir, "tcg/art/" TCG_ART_VERSION "/manifest.json");
+    if (UExists(path))
+    {
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    Log("downloading the card pictures %s: %s, %ld bytes", U.artVersion, U.artZip, U.artTotal);
+    U.art = 1;
+    U.total = U.artTotal;
+    zip = DownloadChecked(U.artZip, U.artTotal, U.artSha, ART_DOWNLOAD_FILE);
+    if (!zip)
+        return 0;
+    SDL_AtomicSet(&U.phase, PH_INSTALL);
+    JoinPath(path, sizeof(path), sExeDir, ART_DOWNLOAD_FILE);
+    if (!Install(zip, U.artTotal, 0))
+    {
+        free(zip);
+        URemove(path);
+        return 0;
+    }
+    free(zip);
+    URemove(path);
+    Log("installed the card pictures %s", U.artVersion);
+    SDL_AtomicSet(&U.phase, PH_NONE);
+    return 0;
+}
+
+static int Worker(void *arg)
+{
+    struct Sink k;
+    char url[512], path[1024];
+    int status;
+    uint8_t *zip;
     (void)arg;
 
     // update.txt from the latest release
@@ -1047,6 +1201,8 @@ static int Worker(void *arg)
         SDL_AtomicSet(&U.phase, PH_NONE);
         return 0;
     }
+    if (sArtOnly)
+        return CardArt();
     // Never move a current main player onto a dev build based on older main
     // content if a dev refresh has not finished publishing yet.
     if (sWantDev && VersionNewer(MOEMON_VERSION, U.version))
@@ -1060,86 +1216,16 @@ static int Worker(void *arg)
     if (sWantDev == MOEMON_DEV_BUILD && !VersionNewer(U.version, MOEMON_BUILD_VERSION))
     {
         Log("up to date (this is %s, the latest release is %s)", MOEMON_BUILD_VERSION, U.version);
-        SDL_AtomicSet(&U.phase, PH_NONE);
-        return 0;
+        return CardArt();
     }
     Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_BUILD_VERSION, U.zip, U.total);
-
-    // the zip, to a file next to the exe
-    SDL_AtomicSet(&U.phase, PH_DOWNLOAD);
+    zip = DownloadChecked(U.zip, U.total, U.sha, DOWNLOAD_FILE);
+    if (!zip)
+        return 0;   // DownloadChecked says why
     JoinPath(path, sizeof(path), sExeDir, DOWNLOAD_FILE);
-    memset(&k, 0, sizeof(k));
-    k.file = UOpen(path, "wb");
-    k.cap = U.total;
-    k.progress = 1;
-    ShaInit(&k.sha);
-    if (!k.file)
-    {
-        Fail("CANNOT WRITE IN THE GAME FOLDER");
-        return 0;
-    }
-    AssetUrl(url, sizeof(url), U.zip, 0);
-    if (!HttpGet(url, &k, &status))
-    {
-        fclose(k.file);
-        URemove(path);
-        if (SDL_AtomicGet(&U.cancel))
-        {
-            Log("skipped by the player");
-            SDL_AtomicSet(&U.phase, PH_SKIPPED);
-        }
-        else
-        {
-            Fail(status ? "DOWNLOAD FAILED (HTTP %d)" : "DOWNLOAD FAILED (NO CONNECTION)", status);
-        }
-        return 0;
-    }
-    if (fclose(k.file) != 0)
-    {
-        URemove(path);
-        Fail("CANNOT WRITE IN THE GAME FOLDER");
-        return 0;
-    }
-
-    // exactly the file update.txt describes
-    SDL_AtomicSet(&U.phase, PH_VERIFY);
-    ShaHex(&k.sha, hex);
-    if (k.len != U.total || strcmp(hex, U.sha) != 0)
-    {
-        URemove(path);
-        Fail("THE DOWNLOAD IS DAMAGED (CHECKSUM)");
-        Log("got %ld bytes, sha256 %s; expected %ld, %s", k.len, hex, U.total, U.sha);
-        return 0;
-    }
-    zip = malloc(U.total);
-    f = UOpen(path, "rb");
-    if (!zip || !f || fread(zip, 1, U.total, f) != (size_t)U.total)
-    {
-        if (f)
-            fclose(f);
-        free(zip);
-        URemove(path);
-        Fail("COULD NOT READ THE DOWNLOAD");
-        return 0;
-    }
-    fclose(f);
-    // read back from the disk: check it again
-    {
-        struct Sha256 s;
-        ShaInit(&s);
-        ShaUpdate(&s, zip, U.total);
-        ShaHex(&s, hex);
-        if (strcmp(hex, U.sha) != 0)
-        {
-            free(zip);
-            URemove(path);
-            Fail("THE DOWNLOAD IS DAMAGED (DISK)");
-            return 0;
-        }
-    }
 
     SDL_AtomicSet(&U.phase, PH_INSTALL);
-    if (!Install(zip, U.total))
+    if (!Install(zip, U.total, 1))
     {
         free(zip);
         URemove(path);
@@ -1256,7 +1342,10 @@ static void DrawScreen(int phase)
     {
         long got = SDL_AtomicGet(&U.got), total = U.total > 0 ? U.total : 1;
         int w = (int)((long long)got * 176 / total);
-        snprintf(line, sizeof(line), "UPDATING TO VERSION %s", U.version);
+        if (U.art)
+            snprintf(line, sizeof(line), "DOWNLOADING THE CARD PICTURES");
+        else
+            snprintf(line, sizeof(line), "UPDATING TO VERSION %s", U.version);
         TextCentered(66, line, C_TEXT);
         Fill(32, 80, 207, 87, C_EDGE);
         Fill(33, 81, 206, 86, C_BAR_BG);
@@ -1271,7 +1360,7 @@ static void DrawScreen(int phase)
             snprintf(line, sizeof(line), "%ld.%ld / %ld.%ld MB", got / 1048576, (got % 1048576) * 10 / 1048576,
                      total / 1048576, (total % 1048576) * 10 / 1048576);
             TextCentered(94, line, C_DIM);
-            TextCentered(106, "ESC: SKIP FOR NOW", C_DIM);
+            TextCentered(106, U.art ? "ONLY ONCE. ESC: SKIP FOR NOW" : "ESC: SKIP FOR NOW", C_DIM);
         }
         else
         {
@@ -1285,9 +1374,9 @@ static void DrawScreen(int phase)
         TextCentered(86, "STARTING THE GAME...", C_DIM);
         break;
     case PH_FAILED:
-        TextCentered(66, "THE UPDATE DID NOT WORK:", C_RED);
+        TextCentered(66, U.art ? "THE CARD PICTURES DID NOT DOWNLOAD:" : "THE UPDATE DID NOT WORK:", C_RED);
         TextCentered(78, U.error, C_TEXT);
-        TextCentered(96, "STARTING THIS VERSION.", C_DIM);
+        TextCentered(96, U.art ? "STARTING THE GAME." : "STARTING THIS VERSION.", C_DIM);
         TextCentered(106, "IT WILL TRY AGAIN NEXT TIME.", C_DIM);
         break;
     }
@@ -1306,7 +1395,7 @@ static int TurnedOff(int argc, char **argv)
     for (i = 1; i < argc; i++)
         if (strcmp(argv[i], "--no-update") == 0)
             return 1;
-    if (getenv("MOEMON_NO_UPDATE") || getenv("MOEMON_JUST_UPDATED"))
+    if (getenv("MOEMON_NO_UPDATE"))
         return 1;
     // headless tests never update unless they point it somewhere
     if (getenv("MOEMON_TEST") && !getenv("MOEMON_UPDATE_URL"))
@@ -1454,6 +1543,7 @@ int Updater_Run(int argc, char **argv)
         return 0;   // a source build, not a release folder
 
     memset(&U, 0, sizeof(U));
+    sArtOnly = getenv("MOEMON_JUST_UPDATED") != NULL;
     SDL_AtomicSet(&U.phase, PH_CHECK);
     thread = SDL_CreateThread(Worker, "updater", NULL);
     if (!thread)

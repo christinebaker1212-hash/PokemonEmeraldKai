@@ -2452,7 +2452,7 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     if (!Tcg_IsActive())
         return NULL;
     G_Begin(r);
-    G_SetGameBoyArt(gMpConfig.cardArt);
+    G_SetCardArt(gMpConfig.cardArt);
     if (sCanvas && sCanvasOwner != r)
         sCanvas = NULL;
     if (!sCanvas)

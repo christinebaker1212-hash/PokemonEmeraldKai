@@ -11,6 +11,7 @@
 #include "constants/items.h"
 #include "tcg/integration.h"
 #include "tcg/online.h"
+#include "tcg_gfx.h"
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
 static int sLoaded;
@@ -97,4 +98,8 @@ void Tcg_ResumeGame(void (*callback)(void))
 int Tcg_CardMasterStar(void)
 {
     return (Tcg_GetCollection()->flags & TCG_FLAG_GOLD_CASE) != 0;
+}
+int Tcg_PrintedArtInstalled(void)
+{
+    return G_ScansInstalled();
 }
