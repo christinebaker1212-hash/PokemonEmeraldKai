@@ -13,6 +13,7 @@
  * (BgmThread_Main and the commands it runs), the converters on whatever
  * thread drives the resampler.
  */
+#define MF_SYSTEM_HEAP  /* Moemon Fight: the music's memory is the music thread's, outside the fight's heap (mf_mem.h) */
 #include "mugen.h"
 
 /* ------------------------------------------------------------ converters */

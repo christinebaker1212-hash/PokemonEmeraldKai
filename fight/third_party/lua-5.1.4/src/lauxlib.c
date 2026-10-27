@@ -24,6 +24,7 @@
 
 #include "lauxlib.h"
 #include "mf_files.h"     /* Moemon Fight: Lua's files are under the mugen/ folder too */
+#include "mf_mem.h"       /* Moemon Fight: and its memory is the fight's heap (characters' constants live in Lua) */
 
 
 #define FREELIST_REF	0	/* free list of references */

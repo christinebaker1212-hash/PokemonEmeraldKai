@@ -5,6 +5,7 @@
  * formats; the host makes this the only plugin (MfHost_ConfigLoaded). The decoders hand out
  * 16-bit frames at the file's rate; the BGM thread resamples them to the mixer's 13379 Hz.
  */
+#define MF_SYSTEM_HEAP  /* Moemon Fight: the music thread's memory, outside the fight's heap (mf_mem.h) */
 #include "mugen.h"
 
 #define DR_MP3_IMPLEMENTATION

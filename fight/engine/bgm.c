@@ -9,6 +9,7 @@
  * settings and a few engine callbacks; a BGM file is played by the first
  * registered plugin whose extension list has the file's extension.
  */
+#define MF_SYSTEM_HEAP  /* Moemon Fight: the music's memory is the music thread's, outside the fight's heap (mf_mem.h) */
 #include <SDL.h>
 #define HAVE_STRUCT_TIMESPEC 1      /* the CRT's time.h already has it */
 #include <pthread.h>

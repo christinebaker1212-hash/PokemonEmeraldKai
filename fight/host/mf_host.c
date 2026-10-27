@@ -22,6 +22,9 @@
 
 #include "mugen.h"
 #include "mf_compat.h"
+#include "mf_mem_internal.h"
+#include "mf_coro.h"
+#include "mf_rollback.h"
 #include "../../include/mf_engine.h"
 
 /* the real C library calls, which mf_port.h redirects for the engine */
@@ -49,12 +52,28 @@ static int sActive;                 /* a session was asked for and hasn't ended 
 static struct MfSession sSession;
 static int sResult = MF_RESULT_NONE;
 static int sCancel;
-static unsigned long sGranted, sDone; /* frames the engine may complete / has completed */
-static unsigned short sButtons[2];
-static unsigned short sHeld[2];     /* the buttons the engine's keys are down for */
 static char sError[0x1000];
 
-static jmp_buf sExitJump;
+/* What the game asks of the engine thread between frames (MfEngine_Step, MfEngine_RollBack) */
+enum { CMD_NONE, CMD_STEP, CMD_REWIND };
+static int sCmd;                    /* posted, not taken yet */
+static unsigned short sCmdButtons[2];
+static int sCmdQuiet;
+static unsigned int sCmdFrame;
+static int sCmdOk;
+static int sBusy;                   /* the engine is running a frame (or loading, or between sessions) */
+static unsigned long sAnswered;     /* frames finished and rewinds done: what the game waits on */
+
+/* The frame the engine runs next (engine thread) */
+static unsigned short sStepButtons[2];
+static int sStepQuiet, sStepCancel;
+static unsigned int sFrame;         /* frames done in this session */
+static volatile unsigned int sFramesDone;
+static unsigned int sHash;          /* MfEngine_Hash of the last frame */
+static int sNewSession;             /* the first frame of a session is being run */
+static int sReplaying;              /* the frame running is one run again after going back (MfEngine_StepQuiet) */
+
+static void *sExitJump[5];          /* __builtin_setjmp: no unwinding across the engine's own stack */
 static int sExitJumpReady;
 
 static unsigned short sFrames[2][MF_SCREEN_W * MF_SCREEN_H];
@@ -62,7 +81,11 @@ static int sFront;                  /* index of the frame the game shows */
 static int sHaveFrame;
 static int sPresented;              /* the back frame has a new picture */
 static volatile unsigned int sFrameSerial;
+
+/* The host's values that belong to the fight's state (kept with each frame for rollback: HostVars) */
+static unsigned short sHeld[2];     /* the buttons the engine's keys are down for */
 static int sMotifScreen;            /* a screenpack screen (select, VS, results): black beside the pack's 4:3 */
+static int sZone;                   /* the match is on screen: frames are kept to go back to (online) */
 
 static char sRoot[0x200];           /* "<mugen folder>/" */
 static int sSyncSteps;              /* MOEMON_FIGHT_SYNC: MfEngine_Step waits for the frame (tests) */
@@ -249,8 +272,8 @@ void MfHost_ErrorDialog(const char *text, const char *title)
 
 void MfHost_Exit(int code)
 {
-    if (sExitJumpReady && pthread_equal(pthread_self(), sEngineThread)) {
-        longjmp(sExitJump, code != 0 ? code : 1);
+    if (sExitJumpReady && MfMem_InEngine && pthread_equal(pthread_self(), sEngineThread)) {
+        __builtin_longjmp(sExitJump, 1);
     }
     fprintf(stderr, "[fight] the engine exited (%d) outside its thread\n", code);
     abort();
@@ -394,6 +417,7 @@ void MfHost_Present(const SDL_Surface *surface)
 void MfHost_MatchShown(void)
 {
     sMotifScreen = 0;
+    sZone = 1;
 }
 
 /* Key events for the buttons that changed (engine thread). */
@@ -412,10 +436,112 @@ static void Host_PushButtons(const unsigned short buttons[2])
     }
 }
 
+/* The end of every frame: back to the engine thread's loop (Host_FrameDone), which resumes the engine for the
+ * next frame with its buttons */
 void MfHost_FrameEnd(void)
 {
-    unsigned short buttons[2];
-    int cancel;
+    MfCoro_Yield();
+
+    sClock += g_timerFrameTicks > 0 ? g_timerFrameTicks : HOST_CLOCK_FREQ / 60;
+    sReplaying = sStepQuiet;
+    if (sStepCancel) {
+        /* escape ends any screen; nothing else is held */
+        unsigned short none[2] = { 0, 0 };
+        Host_PushButtons(none);
+        MfSdl_PushKey(SDLK_ESCAPE, 1);
+        MfSdl_PushKey(SDLK_ESCAPE, 0);
+    } else {
+        Host_PushButtons(sStepButtons);
+    }
+    g_game->skip_draw = sStepQuiet;
+}
+
+int MfHost_Replaying(void)
+{
+    return sReplaying;
+}
+
+unsigned int MfHost_FrameRunning(void)
+{
+    return sFrame + 1;
+}
+
+/* ------------------------------------------------------------------ rollback */
+
+/* The host's part of the fight's state, kept with each frame */
+typedef struct HostVars {
+    long long clock;
+    unsigned short held[2];
+    int motif_screen;
+    int zone;
+} HostVars;
+
+static void Host_PackVars(void *out)
+{
+    HostVars v;
+
+    memset(out, 0, MF_RB_HOST_SIZE);
+    v.clock = sClock;
+    v.held[0] = sHeld[0];
+    v.held[1] = sHeld[1];
+    v.motif_screen = sMotifScreen;
+    v.zone = sZone;
+    memcpy(out, &v, sizeof(v));
+}
+
+static void Host_UnpackVars(const void *in)
+{
+    HostVars v;
+
+    memcpy(&v, in, sizeof(v));
+    sClock = v.clock;
+    sHeld[0] = v.held[0];
+    sHeld[1] = v.held[1];
+    sMotifScreen = v.motif_screen;
+    sZone = v.zone;
+}
+
+/* What the two players' games must agree on after a frame: every player and helper, the timer and the RNGs */
+static unsigned int Host_Hash(void)
+{
+    GameVars *g = g_game;
+    unsigned int h = 2166136261u;
+    int i;
+
+#define HASH(v) do { const unsigned char *b_ = (const unsigned char *)&(v); size_t n_; \
+        for (n_ = 0; n_ < sizeof(v); n_++) { h = (h ^ b_[n_]) * 16777619u; } } while (0)
+    if (g == NULL) {
+        return 0;
+    }
+    HASH(g->round_time);
+    HASH(g->match_rng);
+    HASH(g->session_rng);
+    for (i = 1; i < 65; i++) {
+        Player *p = g->players[i];
+        if (p == NULL) {
+            continue;
+        }
+        HASH(i);
+        HASH(p->id);
+        HASH(p->state_no);
+        HASH(p->ctrl);
+        HASH(p->life);
+        HASH(p->power);
+        HASH(p->facing);
+        HASH(p->pos.x);
+        HASH(p->pos.y);
+        HASH(p->vel.x);
+        HASH(p->vel.y);
+    }
+#undef HASH
+    return h;
+}
+
+/* After each frame (engine thread, the engine stopped in MfHost_FrameEnd): the picture, keeping the frame,
+ * then what the game asks next */
+static void Host_FrameDone(void)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
 
     pthread_mutex_lock(&sLock);
     if (sPresented) {
@@ -424,27 +550,62 @@ void MfHost_FrameEnd(void)
         sPresented = 0;
         sFrameSerial++;
     }
-    sDone++;
+    if (sNewSession) {
+        sNewSession = 0;
+        sFrame = 0;
+        MfRollback_End();
+    }
+    sFrame++;
+    if (sSession.rollback) {
+        Host_PackVars(vars);
+        if (!sZone) {
+            if (MfRollback_On()) {
+                MfRollback_End();
+            }
+        } else if (!MfRollback_On()) {
+            MfRollback_Begin(sFrame, vars);
+        } else {
+            MfRollback_Save(sFrame, vars);
+        }
+    }
+    sHash = Host_Hash();
+    sFramesDone = sFrame;
+    sBusy = 0;
+    sAnswered++;
     pthread_cond_broadcast(&sCond);
-    while (sDone >= sGranted && !sCancel) {
-        pthread_cond_wait(&sCond, &sLock);
+    for (;;) {
+        while (sCmd == CMD_NONE && !sCancel) {
+            pthread_cond_wait(&sCond, &sLock);
+        }
+        if (sCancel) {
+            sStepButtons[0] = sStepButtons[1] = 0;
+            sStepQuiet = 0;
+            sStepCancel = 1;
+            sCmd = CMD_NONE;
+            break;
+        }
+        if (sCmd == CMD_REWIND) {
+            sCmdOk = MfRollback_Restore(sCmdFrame, vars);
+            if (sCmdOk) {
+                Host_UnpackVars(vars);
+                sFrame = sCmdFrame;
+                sFramesDone = sFrame;
+                sHash = Host_Hash();
+            }
+            sCmd = CMD_NONE;
+            sAnswered++;
+            pthread_cond_broadcast(&sCond);
+            continue;
+        }
+        sStepButtons[0] = sCmdButtons[0];
+        sStepButtons[1] = sCmdButtons[1];
+        sStepQuiet = sCmdQuiet;
+        sStepCancel = 0;
+        sCmd = CMD_NONE;
+        break;
     }
-    buttons[0] = sButtons[0];
-    buttons[1] = sButtons[1];
-    cancel = sCancel;
+    sBusy = 1;
     pthread_mutex_unlock(&sLock);
-
-    sClock += g_timerFrameTicks > 0 ? g_timerFrameTicks : HOST_CLOCK_FREQ / 60;
-    if (cancel) {
-        /* escape ends any screen; nothing else is held */
-        buttons[0] = buttons[1] = 0;
-        Host_PushButtons(buttons);
-        MfSdl_PushKey(SDLK_ESCAPE, 1);
-        MfSdl_PushKey(SDLK_ESCAPE, 0);
-    } else {
-        Host_PushButtons(buttons);
-    }
-    g_game->skip_draw = 0;
 }
 
 /* ------------------------------------------------------------------ sessions */
@@ -580,6 +741,7 @@ static int Host_RunSession(const struct MfSession *s)
             break;
         case 11:
             state = Match_Run();    /* the VS screen stays up while it loads: MfHost_MatchShown */
+            sZone = 0;
             g = g_game;
             if (state == 11) {
                 break;      /* the match is played again */
@@ -612,7 +774,7 @@ static void Host_StartEngine(void)
     g_cmdline = calloc(1, sizeof(CmdLineArgs));
     if (g_cmdline == NULL) {
         MfHost_ErrorDialog("Out of memory", "M.U.G.E.N Error");
-        longjmp(sExitJump, 1);
+        __builtin_longjmp(sExitJump, 1);
     }
     Log_Init();
     CmdLine_Parse(1, argv);
@@ -626,10 +788,11 @@ static void Host_StartEngine(void)
     Select_Init();
 }
 
-static void *Host_Thread(void *arg)
+/* The engine itself, as a coroutine on the fight's heap region (fight/host/mf_coro.c): starts up, then runs
+ * the sessions it's given */
+static void Host_EngineMain(void)
 {
-    sEngineThread = pthread_self();
-    if (setjmp(sExitJump) != 0) {
+    if (__builtin_setjmp(sExitJump) != 0) {
         pthread_mutex_lock(&sLock);
         sState = HOST_DEAD;
         sActive = 0;
@@ -640,7 +803,7 @@ static void *Host_Thread(void *arg)
         }
         pthread_cond_broadcast(&sCond);
         pthread_mutex_unlock(&sLock);
-        return NULL;
+        return;
     }
     sExitJumpReady = 1;
     Host_StartEngine();
@@ -657,19 +820,44 @@ static void *Host_Thread(void *arg)
         sSessionPending = 0;
         sState = HOST_RUNNING;
         session = sSession;
+        sNewSession = 1;
         pthread_mutex_unlock(&sLock);
 
         MfSdl_ClearEvents();
         sHeld[0] = sHeld[1] = 0;
+        sZone = 0;
         result = Host_RunSession(&session);
         MfMix_Reset();
+        sZone = 0;
 
         pthread_mutex_lock(&sLock);
         sResult = sCancel ? MF_RESULT_CANCELLED : result;
         sActive = 0;
         sCancel = 0;
+        sCmd = CMD_NONE;
+        sAnswered++;
         pthread_cond_broadcast(&sCond);
         pthread_mutex_unlock(&sLock);
+    }
+}
+
+static void *Host_Thread(void *arg)
+{
+    sEngineThread = pthread_self();
+    if (!MfMem_Init() || !MfCoro_Create(Host_EngineMain)) {
+        pthread_mutex_lock(&sLock);
+        sState = HOST_DEAD;
+        sActive = 0;
+        sSessionPending = 0;
+        sResult = MF_RESULT_ERROR;
+        snprintf(sError, sizeof(sError), "Not enough memory for the fight engine.");
+        pthread_cond_broadcast(&sCond);
+        pthread_mutex_unlock(&sLock);
+        return NULL;
+    }
+    sBusy = 1;
+    while (MfCoro_Resume()) {
+        Host_FrameDone();
     }
     return NULL;
 }
@@ -688,7 +876,7 @@ int MfEngine_Begin(const struct MfSession *session)
         Host_InitRoot();
         sSyncSteps = getenv("MOEMON_FIGHT_SYNC") != NULL;
         pthread_attr_init(&attr);
-        pthread_attr_setstacksize(&attr, 16 << 20);
+        pthread_attr_setstacksize(&attr, 4 << 20);
         sState = HOST_LOADING;
         if (pthread_create(&sThread, &attr, Host_Thread, NULL) != 0) {
             sState = HOST_DEAD;
@@ -704,8 +892,8 @@ int MfEngine_Begin(const struct MfSession *session)
     sActive = 1;
     sCancel = 0;
     sResult = MF_RESULT_NONE;
-    sGranted = sDone;
-    sButtons[0] = sButtons[1] = 0;
+    sCmd = CMD_NONE;
+    sFramesDone = 0;
     sHaveFrame = 0;
     pthread_cond_broadcast(&sCond);
     pthread_mutex_unlock(&sLock);
@@ -717,46 +905,105 @@ int MfEngine_IsActive(void)
     return sActive;
 }
 
-void MfEngine_Step(const unsigned short buttons[2])
+/* Posts a command for the engine thread and waits for it: wait_ms -1 until done, else at most that long.
+ * 0 when the engine isn't taking commands (busy with the last one, or not in a session) */
+static int Host_Post(int cmd, const unsigned short buttons[2], int quiet, unsigned int frame, int wait_ms)
 {
+    unsigned long target;
     struct timespec until;
 
     pthread_mutex_lock(&sLock);
-    if (!sActive) {
-        pthread_mutex_unlock(&sLock);
-        return;
-    }
-    sButtons[0] = buttons[0];
-    sButtons[1] = buttons[1];
-    if (sGranted > sDone && !sSyncSteps) {
-        /* the engine is still busy with the last step (loading) */
-        pthread_mutex_unlock(&sLock);
-        return;
-    }
-    if (sGranted <= sDone) {
-        sGranted = sDone + 1;
-        pthread_cond_broadcast(&sCond);
-    }
-    if (sSyncSteps) {
-        /* tests: every step is a whole frame, however long the engine takes */
-        while (sActive && sDone < sGranted) {
+    if (wait_ms < 0) {
+        while (sActive && (sBusy || sCmd != CMD_NONE) && sState != HOST_DEAD) {
             pthread_cond_wait(&sCond, &sLock);
         }
+    }
+    if (!sActive || sBusy || sCmd != CMD_NONE) {
         pthread_mutex_unlock(&sLock);
-        return;
+        return 0;
     }
-    clock_gettime(CLOCK_REALTIME, &until);
-    until.tv_nsec += 100 * 1000000L;
-    if (until.tv_nsec >= 1000000000L) {
-        until.tv_sec++;
-        until.tv_nsec -= 1000000000L;
+    sCmd = cmd;
+    if (buttons != NULL) {
+        sCmdButtons[0] = buttons[0];
+        sCmdButtons[1] = buttons[1];
     }
-    while (sActive && sDone < sGranted) {
-        if (pthread_cond_timedwait(&sCond, &sLock, &until) == ETIMEDOUT) {
-            break;
+    sCmdQuiet = quiet;
+    sCmdFrame = frame;
+    sCmdOk = 0;
+    target = sAnswered + 1;
+    pthread_cond_broadcast(&sCond);
+    if (wait_ms < 0) {
+        while (sActive && sAnswered < target && sState != HOST_DEAD) {
+            pthread_cond_wait(&sCond, &sLock);
+        }
+    } else if (wait_ms > 0) {
+        clock_gettime(CLOCK_REALTIME, &until);
+        until.tv_nsec += wait_ms * 1000000L;
+        if (until.tv_nsec >= 1000000000L) {
+            until.tv_sec++;
+            until.tv_nsec -= 1000000000L;
+        }
+        while (sActive && sAnswered < target) {
+            if (pthread_cond_timedwait(&sCond, &sLock, &until) == ETIMEDOUT) {
+                break;
+            }
         }
     }
     pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_Step(const unsigned short buttons[2])
+{
+    /* tests wait for every frame, however long it takes; the game gives a frame 100 ms (loading takes longer:
+     * the steps meanwhile aren't taken) */
+    return Host_Post(CMD_STEP, buttons, 0, 0, sSyncSteps ? -1 : 100);
+}
+
+int MfEngine_Ready(void)
+{
+    return sActive && !sBusy && sCmd == CMD_NONE;
+}
+
+unsigned int MfEngine_FrameCount(void)
+{
+    return sFramesDone;
+}
+
+void MfEngine_StepQuiet(const unsigned short buttons[2])
+{
+    Host_Post(CMD_STEP, buttons, 1, 0, -1);
+}
+
+int MfEngine_RollBack(unsigned int frame)
+{
+    int ok;
+
+    if (!Host_Post(CMD_REWIND, NULL, 0, frame, -1)) {
+        return 0;
+    }
+    pthread_mutex_lock(&sLock);
+    ok = sCmdOk;
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_Kept(unsigned int *oldest)
+{
+    int on;
+
+    pthread_mutex_lock(&sLock);
+    on = sActive && !sBusy && MfRollback_On();
+    if (on && oldest != NULL) {
+        *oldest = MfRollback_Oldest();
+    }
+    pthread_mutex_unlock(&sLock);
+    return on;
+}
+
+unsigned int MfEngine_Hash(void)
+{
+    return sHash;
 }
 
 const unsigned short *MfEngine_Frame(void)
@@ -779,6 +1026,7 @@ void MfEngine_Cancel(void)
     pthread_mutex_lock(&sLock);
     if (sActive) {
         sCancel = 1;
+        sCmd = CMD_NONE;
         if (sSessionPending) {
             /* not started yet */
             sSessionPending = 0;

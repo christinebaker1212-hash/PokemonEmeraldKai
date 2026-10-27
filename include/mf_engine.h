@@ -46,14 +46,31 @@ struct MfSession
     int mode;            // MF_MODE_*
     unsigned int seed;   // the match RNG's seed (the same on both sides online)
     char cabinet[32];    // section of mugen/cabinets.ini with the rules
+    int rollback;        // keep the fight's frames to go back to (online: MfEngine_RollBack)
 };
 
 // Starts a session (loading the engine the first time). Returns 0 when the engine can't run.
 int MfEngine_Begin(const struct MfSession *session);
 // A session is running (select, versus, fight, victory).
 int MfEngine_IsActive(void);
-// Runs one frame with both players' MF_BTN_* buttons.
-void MfEngine_Step(const unsigned short buttons[2]);
+// Runs one frame with both players' MF_BTN_* buttons. 0 when the engine is still busy with the last one
+// (loading): the frame wasn't started, ask again.
+int MfEngine_Step(const unsigned short buttons[2]);
+// The engine can take a step now
+int MfEngine_Ready(void);
+// Frames done in this session (the frame numbers rollback uses)
+unsigned int MfEngine_FrameCount(void);
+
+// Rollback (sessions with rollback set). While the match is on screen every frame is kept, up to 9 back:
+// MfEngine_Kept says whether the last frame was (and the oldest one there is). MfEngine_RollBack puts the fight
+// back as it was after that frame; MfEngine_StepQuiet then runs frames again without drawing them, their
+// sounds and music only where the first run didn't have them. The select and VS screens aren't kept: steps
+// there have to wait for both players' buttons.
+int MfEngine_Kept(unsigned int *oldest);
+int MfEngine_RollBack(unsigned int frame);
+void MfEngine_StepQuiet(const unsigned short buttons[2]);
+// A hash of what both players' games must agree on after the last frame (players, timer, RNGs)
+unsigned int MfEngine_Hash(void);
 // The last frame drawn: MF_SCREEN_W x MF_SCREEN_H RGB565 pixels, or NULL before the first one.
 const unsigned short *MfEngine_Frame(void);
 // Counts the frames drawn (a new picture when it changes)

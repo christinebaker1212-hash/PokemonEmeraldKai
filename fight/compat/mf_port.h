@@ -67,6 +67,37 @@ void MfFit_PlaceItem(const struct SysDrawItem *e);
 /* The fight is on screen (Fight_DrawHud) */
 void MfHost_MatchShown(void);
 
+/*
+ * The engine's math is bundled (fight/third_party/musl_math, musl's): every player's build computes the same
+ * results, whatever the C library or the CPU (x87 fsin differs between makers), so online fights stay in step.
+ */
+#include <math.h>
+double mfm_sin(double x);
+double mfm_cos(double x);
+double mfm_tan(double x);
+double mfm_log(double x);
+double mfm_exp(double x);
+double mfm_pow(double x, double y);
+double mfm_atan(double x);
+double mfm_asin(double x);
+double mfm_acos(double x);
+#define sin mfm_sin
+#define cos mfm_cos
+#define tan mfm_tan
+#define log mfm_log
+#define exp mfm_exp
+#define pow mfm_pow
+#define atan mfm_atan
+#define asin mfm_asin
+#define acos mfm_acos
+
+/* The engine's memory: the fight's heap (mf_mem.h, fight/host/mf_mem.c) */
+#include "mf_mem.h"
+
+/* Rollback: a frame being run again (MfEngine_StepQuiet) plays only the sounds and music its first run didn't */
+int MfHost_Replaying(void);
+unsigned int MfHost_FrameRunning(void);
+
 /* The end of every frame of the screen loops (Screen_EndFrame). */
 void MfHost_FrameEnd(void);
 

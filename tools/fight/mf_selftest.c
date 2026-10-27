@@ -5,13 +5,22 @@
  * "shot NAME" (OUTDIR/NAME.ppm of the current frame), "wait_end MAX" (steps until the session ends),
  * "result" (prints MfEngine_Result), "audio NAME" (from now on the sound of every step goes to
  * OUTDIR/NAME.wav, 42048 Hz stereo like the game's), "shots PREFIX N" (a shot every frame for N steps).
+ * Rollback: "begin versus SEED rollback" keeps the fight's frames; "wait_kept MAX" steps until they're kept;
+ * "fight N BACK [SEED]" plays N frames with made-up buttons for both sides (the same for the same frame and
+ * SEED), printing MfEngine_Hash every 60 frames; with BACK > 0, every 7 frames it goes BACK frames back, runs
+ * them again with other buttons, goes back again and runs them with the right ones (a misprediction and its
+ * correction): the hashes must be those of BACK 0.
  * Run from the repository root (mugen/ is read from there).
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 #include "mf_engine.h"
+#include "../../fight/host/mf_rollback.h"
 
 static FILE *sWav;
 static long sWavFrames;
@@ -54,6 +63,26 @@ static void Audio_Step(void)
     MfEngine_MixAudio(buf, n, 42048);
     fwrite(buf, 4, (size_t)n, sWav);
     sWavFrames += n;
+}
+
+/* Made-up buttons for a frame: directions and attacks, never start */
+static void Fight_Buttons(unsigned int frame, unsigned int seed, unsigned short out[2])
+{
+    int p;
+
+    for (p = 0; p < 2; p++) {
+        unsigned int x = (frame / 4) * 2654435761u ^ (seed + (unsigned int)p) * 40503u;
+        x ^= x >> 13;
+        x *= 0x5bd1e995u;
+        x ^= x >> 15;
+        out[p] = (unsigned short)(x & 0x3FF);
+        if ((out[p] & 0x3) == 0x3) {
+            out[p] &= ~0x1;     /* not up and down together */
+        }
+        if ((out[p] & 0xC) == 0xC) {
+            out[p] &= ~0x4;
+        }
+    }
 }
 
 static void Shot(const char *dir, const char *name)
@@ -99,7 +128,12 @@ int main(int argc, char **argv)
         if (strcmp(cmd, "begin") == 0) {
             struct MfSession s;
             memset(&s, 0, sizeof(s));
-            sscanf(line, "%*s %63s %u", arg, &a);
+            arg[0] = '\0';
+            {
+                char opt[32] = "";
+                sscanf(line, "%*s %63s %u %31s", arg, &a, opt);
+                s.rollback = strcmp(opt, "rollback") == 0;
+            }
             s.mode = strcmp(arg, "cpu") == 0 ? MF_MODE_CPU : MF_MODE_VERSUS;
             s.seed = a;
             snprintf(s.cabinet, sizeof(s.cabinet), "mauville_gc");
@@ -146,6 +180,70 @@ int main(int argc, char **argv)
                 snprintf(name, sizeof(name), "%s%03ld", arg, i);
                 Shot(argv[2], name);
             }
+        } else if (strcmp(cmd, "mem") == 0) {
+#ifdef __GLIBC__
+            struct mallinfo2 mi = mallinfo2();
+            printf("mem: %zu KB in use, %zu KB mmapped\n", mi.uordblks / 1024, mi.hblkhd / 1024);
+#endif
+        } else if (strcmp(cmd, "wait_kept") == 0) {
+            unsigned short none[2] = { 0, 0 };
+            unsigned int oldest = 0;
+            sscanf(line, "%*s %ld", &n);
+            while (n-- > 0 && MfEngine_IsActive() && !MfEngine_Kept(&oldest)) {
+                MfEngine_Step(none);
+                frame++;
+            }
+            printf("wait_kept: kept=%d frame %u\n", MfEngine_Kept(&oldest), MfEngine_FrameCount());
+        } else if (strcmp(cmd, "fight") == 0) {
+            unsigned int back = 0, seed = 1, every = 60, i, k, start = MfEngine_FrameCount();
+            unsigned short buttons[2], wrong[2];
+            int failed = 0;
+            sscanf(line, "%*s %ld %u %u %u", &n, &back, &seed, &every);
+            for (i = 0; i < (unsigned int)n && MfEngine_IsActive(); i++) {
+                unsigned int f = MfEngine_FrameCount();   /* frames done: this step runs frame f + 1 */
+                Fight_Buttons(f + 1, seed, buttons);
+                MfEngine_Step(buttons);
+                frame++;
+                if (back > 0 && i % 7 == 6 && MfEngine_Kept(NULL)) {
+                    unsigned int now = MfEngine_FrameCount(), to = now - back;
+                    if (!MfEngine_RollBack(to)) {
+                        failed++;
+                        continue;
+                    }
+                    for (k = to + 1; k <= now; k++) {
+                        Fight_Buttons(k, seed + 99, wrong);
+                        MfEngine_StepQuiet(wrong);
+                    }
+                    if (!MfEngine_RollBack(to)) {
+                        failed++;
+                        continue;
+                    }
+                    for (k = to + 1; k <= now; k++) {
+                        Fight_Buttons(k, seed, buttons);
+                        MfEngine_StepQuiet(buttons);
+                    }
+                }
+                if (every > 0 && (MfEngine_FrameCount() - start) % every == 0) {
+                    printf("hash %u %08x\n", MfEngine_FrameCount(), MfEngine_Hash());
+                }
+            }
+            printf("fight: %ld frames, %d failed rollbacks, now frame %u\n", n, failed, MfEngine_FrameCount());
+        } else if (strcmp(cmd, "hash") == 0) {
+            printf("hash %u %08x\n", MfEngine_FrameCount(), MfEngine_Hash());
+        } else if (strcmp(cmd, "hashes") == 0) {
+            unsigned short none[2] = { 0, 0 };
+            sscanf(line, "%*s %ld", &n);
+            while (n-- > 0 && MfEngine_IsActive()) {
+                MfEngine_Step(none);
+                frame++;
+                printf("hash %u %08x\n", MfEngine_FrameCount(), MfEngine_Hash());
+            }
+        } else if (strcmp(cmd, "rbstats") == 0) {
+            MfRbStats st;
+            MfRollback_Stats(&st);
+            printf("rbstats: %lu frames kept, %.1f pages a frame (most %lu), %lu rewinds (%lu frames back), "
+                   "globals %zu bytes, heap copy %zu KB\n", st.frames, st.frames ? (double)st.pages / st.frames : 0.0,
+                   st.most_pages, st.rewinds, st.frames_back, st.globals, st.shadow / 1024);
         } else if (strcmp(cmd, "result") == 0) {
             printf("result %d error \"%s\"\n", MfEngine_Result(), MfEngine_Error());
         }

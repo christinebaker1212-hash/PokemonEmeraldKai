@@ -15,6 +15,7 @@
  * thread and changed under SDL_LockAudio, the ring's space and fill
  * counters with Interlocked operations, as in the original.
  */
+#define MF_SYSTEM_HEAP  /* Moemon Fight: the music's memory is the music thread's, outside the fight's heap (mf_mem.h) */
 #include <SDL.h>
 #include <SDL_mixer.h>
 #define HAVE_STRUCT_TIMESPEC 1      /* the CRT's time.h already has it */
@@ -334,6 +335,13 @@ int Bgm_QueueCommand(int time, const intptr_t *data, int cmd, int owns_data)
 {
     BgmCommand *c;
 
+    if (MfHost_Replaying()) {
+        /* Moemon Fight: a frame run again after going back (rollback): the music already did what it asks */
+        if (owns_data && data != NULL && data[0] != 0) {
+            free((void *)data[0]);
+        }
+        return 0;
+    }
     if (g_bgmQueueCount == BGM_QUEUE_SIZE) {
         MatchLog_Printf(3, "BGM command queue capacity exceeded at time %ld", time);
         return 1;

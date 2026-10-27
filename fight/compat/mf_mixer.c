@@ -262,12 +262,33 @@ void Mix_FreeChunk(Mix_Chunk *chunk)
     free(chunk);
 }
 
+/* Sounds started in the last frames, so a frame run again after going back (rollback) doesn't start them twice */
+#define PLAYED_LOG 256
+static struct {
+    unsigned int frame;
+    const Mix_Chunk *chunk;
+    int asked, got;
+} sPlayed[PLAYED_LOG];
+static int sPlayedNext;
+
+int MfHost_Replaying(void);
+unsigned int MfHost_FrameRunning(void);
+
 int Mix_PlayChannelTimed(int channel, Mix_Chunk *chunk, int loops, int ticks)
 {
+    unsigned int frame = MfHost_FrameRunning();
+    int asked = channel;
     int c;
 
     if (chunk == NULL) {
         return -1;
+    }
+    if (MfHost_Replaying()) {
+        for (c = 0; c < PLAYED_LOG; c++) {
+            if (sPlayed[c].frame == frame && sPlayed[c].chunk == chunk && sPlayed[c].asked == asked) {
+                return sPlayed[c].got;  /* already playing from the first run */
+            }
+        }
     }
     Mix_Lock();
     if (channel < 0) {
@@ -287,6 +308,11 @@ int Mix_PlayChannelTimed(int channel, Mix_Chunk *chunk, int loops, int ticks)
         channel = -1;
     }
     Mix_Unlock();
+    sPlayed[sPlayedNext].frame = frame;
+    sPlayed[sPlayedNext].chunk = chunk;
+    sPlayed[sPlayedNext].asked = asked;
+    sPlayed[sPlayedNext].got = channel;
+    sPlayedNext = (sPlayedNext + 1) % PLAYED_LOG;
     return channel;
 }
 

@@ -3,8 +3,6 @@
 
 #include "mugen.h"
 
-BgmSubsystem g_bgmSdlmixSubsystem = { Bgm_BuiltinVersion, Sdlmix_Extensions, Sdlmix_Init, Stub_ReturnZero, Sdlmix_Create, Sdlmix_Destroy, Sdlmix_IsPlaying, Sdlmix_Start, Sdlmix_Stop, Sdlmix_Rewind, Sdlmix_Seek, Sdlmix_Open, Sdlmix_Close, Sdlmix_GetVolume, Sdlmix_SetVolume, Sdlmix_GetLoopFlag, Sdlmix_SetLoopFlag, Sdlmix_GetLoopPoints, Sdlmix_SetLoopPoints, Sdlmix_SetEndCallback, Sdlmix_StrError, Sdlmix_Read, NULL, Sdlmix_Poll, Sdlmix_IsPaused, Sdlmix_Pause, Sdlmix_Resume, Sdlmix_SetMute, Sdlmix_GetMute, NULL }; /* 0x004f17a0 */
-BgmSubsystem g_bgmMpg123Subsystem = { Bgm_BuiltinVersion, Mpg123_Extensions, Mpg123_Init, Mpg123_Deinit, Mpg123_Create, Mpg123_Destroy, Mpg123_IsPlaying, Mpg123_Start, Mpg123_Stop, Mpg123_Rewind, Mpg123_Seek, Mpg123_Open, Mpg123_Close, Mpg123_GetVolume, Mpg123_SetVolume, Mpg123_GetLoopFlag, Mpg123_SetLoopFlag, Mpg123_GetLoopPoints, Mpg123_SetLoopPoints, Mpg123_SetEndCallback, Mpg123_StrError, Mpg123_Read, Mpg123_GetFormatOf, NULL, NULL, NULL, NULL, NULL, NULL, NULL }; /* 0x004f1818 */
 const ResamplerVtbl g_resamplerVtbl = { Resampler_Open, Resampler_Create, Resampler_Close, Resampler_InputNeeded, Resampler_State, Resampler_Write, Resampler_Read, Resampler_InFormat, Resampler_OutFormat, Resampler_Reset, Resampler_InBlock, Resampler_OutBlock }; /* 0x004f1890 */
 SpriteEncodeFn g_spriteEncoders[13] = { NULL, NULL, (SpriteEncodeFn)Rle8_Encode, (SpriteEncodeFn)Rle5_Encode, (SpriteEncodeFn)Lz5_Encode, NULL, NULL, NULL, NULL, NULL, (SpriteEncodeFn)Png_Encode8, (SpriteEncodeFn)Png_Encode24, (SpriteEncodeFn)Png_Encode32 }; /* 0x004f19e0 */
 SpriteDecodeFn g_spriteDecoders[13] = { NULL, NULL, (SpriteDecodeFn)Rle8_Decode, (SpriteDecodeFn)Rle5_Decode, (SpriteDecodeFn)Lz5_Decode, NULL, NULL, NULL, NULL, NULL, (SpriteDecodeFn)Png_Decode, (SpriteDecodeFn)Png_Decode, (SpriteDecodeFn)Png_Decode }; /* 0x004f1a14 */
@@ -16,7 +14,6 @@ TriggerConstInfo g_triggerConsts[88] = { { "data.life", 0, 0 }, { "data.power", 
 const KeybindName g_keybindNames[105] = { { "esc", 27 }, { "f1", 282 }, { "f2", 283 }, { "f3", 284 }, { "f4", 285 }, { "f5", 286 }, { "f6", 287 }, { "f7", 288 }, { "f8", 289 }, { "f9", 290 }, { "f10", 291 }, { "f11", 292 }, { "f12", 293 }, { "f13", 294 }, { "f14", 295 }, { "f15", 296 }, { "printscreen", 316 }, { "scrolllock", 302 }, { "pause", 19 }, { "tilde", 96 }, { "1", 49 }, { "2", 50 }, { "3", 51 }, { "4", 52 }, { "5", 53 }, { "6", 54 }, { "7", 55 }, { "8", 56 }, { "9", 57 }, { "0", 48 }, { "minus", 45 }, { "plus", 43 }, { "backspace", 8 }, { "tab", 9 }, { "q", 113 }, { "w", 119 }, { "e", 101 }, { "r", 114 }, { "t", 116 }, { "y", 121 }, { "u", 117 }, { "i", 105 }, { "o", 111 }, { "p", 112 }, { "openbrackets", 91 }, { "closebrackets", 93 }, { "backslash", 92 }, { "capslock", 301 }, { "a", 97 }, { "s", 115 }, { "d", 100 }, { "f", 102 }, { "g", 103 }, { "h", 104 }, { "j", 106 }, { "k", 107 }, { "l", 108 }, { "semicolon", 58 }, { "quotes", 39 }, { "enter", 13 }, { "leftshift", 304 }, { "z", 122 }, { "x", 120 }, { "c", 99 }, { "v", 118 }, { "b", 98 }, { "n", 110 }, { "m", 109 }, { "comma", 44 }, { "period", 46 }, { "question", 47 }, { "rightshift", 303 }, { "leftctrl", 306 }, { "leftalt", 308 }, { "space", 32 }, { "rightalt", 307 }, { "rightctrl", 305 }, { "insert", 277 }, { "home", 278 }, { "pageup", 280 }, { "delete", 127 }, { "end", 279 }, { "pagedown", 281 }, { "up", 273 }, { "left", 276 }, { "down", 274 }, { "right", 275 }, { "numlock", 300 }, { "divide", 267 }, { "multiple", 268 }, { "subtract", 269 }, { "numpad7", 263 }, { "numpad8", 264 }, { "numpad9", 265 }, { "add", 270 }, { "numpad4", 260 }, { "numpad5", 261 }, { "numpad6", 262 }, { "numpad1", 257 }, { "numpad2", 258 }, { "numpad3", 259 }, { "numpadenter", 271 }, { "numpad0", 256 }, { "numpadperiod", 266 }, { NULL, 0 } }; /* 0x004f24d0 */
 const char * g_glDetectVertexShader = "#version 120\nvoid main()\n{\n  gl_TexCoord[0] = gl_MultiTexCoord0;\n  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n}\n"; /* 0x00500050 */
 const char * g_sdlmixErrors[5] = { "OK", "Can't change looping while file is playing", "Can't change volume during fade", "No music file loaded!", "Error attempting to load the file." }; /* 0x0050005c */
-const char * g_mpg123Errors[7] = { "OK", "Out of memory", "mpg123 internal error", "bad output format request", "file not loaded or plugin not initiated", "I/O error", "libmpg123 library not found" }; /* 0x00500070 */
 float g_glOffsetX = 0.375f; /* 0x00500094 */
 float g_glOffsetY = 0.375f; /* 0x00500098 */
 float g_glPalOffset = 0.375f; /* 0x005000a0 */
@@ -90,17 +87,7 @@ int g_keyboardQueue[INPUT_RING_SIZE]; /* 0x00503470 */
 int g_keyboardQueueRead; /* 0x00503870 */
 int g_keyboardQueueWrite; /* 0x00503874 */
 int g_sndUnusedVolume; /* 0x00503878 */
-BgmHandleFn g_bgmGetHandle; /* 0x0050387c */
 AudioFormat g_sndFormat; /* 0x00503880 */
-int g_bgmInitialized; /* 0x00503890 */
-int g_bgmActive; /* 0x00503894 */
-double g_bgmVolume; /* 0x00503898 */
-AudioFormat g_bgmFormat; /* 0x005038a0 */
-int g_bgmChunk; /* 0x005038b0 */
-int g_bgmBackgroundMode; /* 0x005038b4 */
-Resampler * g_bgmResampler; /* 0x005038b8 */
-DynArray * g_bgmSubsystems; /* 0x005038bc */
-DynArray * g_bgmExtensions; /* 0x005038c0 */
 int g_padsChanged; /* 0x005038c4 */
 int g_padQueue[INPUT_RING_SIZE]; /* 0x005038c8 */
 int g_padQueueRead; /* 0x00503cc8 */
@@ -111,52 +98,6 @@ long long g_timerFrameTicks; /* 0x00503cd8 */
 long long g_timerStart; /* 0x00503ce0 */
 long long g_timerFpsStart; /* 0x00503ce8 */
 int g_timerFrameRate; /* 0x00503cf0 */
-int g_bgmQueueCount; /* 0x00503cf4 */
-unsigned int g_bgmChunkBytes; /* 0x00503cf8 */
-int g_bgmPlayedSeq; /* 0x00503cfc */
-BgmCommand g_bgmQueue[BGM_QUEUE_SIZE]; /* 0x00503d00 */
-pthread_mutex_t g_bgmMutex; /* 0x00503e80 (Moemon Fight: the real type; a pointer in pthreads-win32) */
-int g_bgmMuted; /* 0x00503e84 */
-BgmThreadId g_bgmThread; /* 0x00503e88 */
-int g_bgmThreadRunning; /* 0x00503e90 */
-BgmStream * g_bgmStream; /* 0x00503e94 */
-AudioFormat g_bgmThreadFormat; /* 0x00503e98 */
-void * g_bgmScratch; /* 0x00503ea8 */
-int g_bgmFillSeq; /* 0x00503eac */
-int g_bgmBackgroundChanged; /* 0x00503eb0 */
-BgmRing * g_bgmRing; /* 0x00503eb4 */
-unsigned int g_bgmPauseFlags; /* 0x00503eb8 */
-int g_bgmEventCount; /* 0x00503ebc */
-BgmEvent g_bgmEvents[BGM_EVENT_QUEUE_SIZE]; /* 0x00503ec0 */
-int g_bgmHooked; /* 0x00503f80 */
-Mpg123InfoFn g_mpg123_info; /* 0x00503f84 */
-Mpg123HandleIntFn g_mpg123_open_feed; /* 0x00503f88 */
-void * g_mpg123_current_decoder; /* 0x00503f8c */
-int g_mpg123Initialized; /* 0x00503f90 */
-void * g_mpg123_getvolume; /* 0x00503f94 */
-Mpg123FormatFn g_mpg123_format; /* 0x00503f98 */
-Mpg123HandleIntFn g_mpg123_format_none; /* 0x00503f9c */
-Mpg123ParamFn g_mpg123_param; /* 0x00503fa0 */
-HMODULE g_mpg123Lib; /* 0x00503fa4 */
-Mpg123ReadFn g_mpg123_read; /* 0x00503fa8 */
-Mpg123VolumeFn g_mpg123_volume; /* 0x00503fac */
-Mpg123NewFn g_mpg123_new; /* 0x00503fb0 */
-int g_mpg123Ntom; /* 0x00503fb4 */
-Mpg123PlainStrErrorFn g_mpg123_plain_strerror; /* 0x00503fb8 */
-Mpg123HandleFn g_mpg123_delete; /* 0x00503fbc */
-void * g_mpg123_getparam; /* 0x00503fc0 */
-Mpg123FeedSeekFn g_mpg123_feedseek; /* 0x00503fc4 */
-unsigned int g_mpg123ReadBufferSize; /* 0x00503fc8 */
-Mpg123HandleIntFn g_mpg123_close; /* 0x00503fcc */
-double g_mpg123Volume; /* 0x00503fd0 */
-Mpg123InitFn g_mpg123_init; /* 0x00503fd8 */
-Mpg123FeedFn g_mpg123_feed; /* 0x00503fdc */
-Mpg123GetFormatFn g_mpg123_getformat; /* 0x00503fe0 */
-Mpg123StrErrorFn g_mpg123_strerror; /* 0x00503fe4 */
-AudioFormat g_mpg123Format; /* 0x00503fe8 */
-Mpg123ExitFn g_mpg123_exit; /* 0x00503ff8 */
-void * g_mpg123_getstate; /* 0x00503ffc */
-char g_mpg123Decoder[0x40]; /* 0x00504000 */
 SdlmixInstance * g_sdlmixInstance; /* 0x00504040 */
 BgmHostCallbacks g_sdlmixHost; /* 0x00504044 */
 AudioFormat g_sdlmixFormat; /* 0x00504050 */
@@ -282,7 +223,6 @@ float g_glRgbaOffsetY; /* 0x00504af4 */
 int g_glIndexMode; /* 0x00504af8 */
 int g_glBoundFramebuffer; /* 0x00504afc */
 unsigned int g_glFramebuffer; /* 0x00504b00 */
-int g_mpg123Rva; /* 0x00504b04 */
 long long g_timerFrequency; /* 0x00504b28 */
 int g_frameRate; /* 0x00504b30 */
 int g_timerTicksPerSecond; /* 0x00504b34 */

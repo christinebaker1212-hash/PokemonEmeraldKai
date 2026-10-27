@@ -375,11 +375,16 @@ endif
 # game's preprocessing
 ifeq ($(PORTABLE),1)
   FIGHT_SRCS := $(wildcard fight/engine/*.c fight/compat/mf_*.c fight/host/*.c) \
-                $(wildcard fight/third_party/zlib/*.c) \
+                $(wildcard fight/third_party/zlib/*.c) $(wildcard fight/third_party/musl_math/*.c) \
+                fight/third_party/dlmalloc/mf_dlmalloc.c \
                 $(filter-out %/lua.c %/luac.c %/print.c,$(wildcard fight/third_party/lua-5.1.4/src/*.c)) \
                 fight/third_party/minizip-0.15/unzip.c \
                 $(filter-out %/pngtest.c %/pnggccrd.c %/pngvcrd.c,$(wildcard fight/third_party/libpng-1.2.38/png*.c))
   FIGHT_OBJS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(FIGHT_SRCS))
+  # The fight's state for rollback (fight/host/mf_rollback.c): the engine's globals (not the music's) and the SDL
+  # layer's key state and events, gathered into one section after compiling
+  FIGHT_STATE_OBJS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter-out fight/engine/bgm%,$(wildcard fight/engine/*.c)) \
+                      fight/compat/mf_sdl12.c)
   FIGHT_CFLAGS := -std=gnu11 -O2 -m$(BIT_WIDTH) -fno-strict-aliasing -ffp-contract=off -w -DPNG_SKIP_SETJMP_CHECK \
                   -include fight/compat/mf_rename.h -Ifight/engine -Ifight/compat -Ifight/compat/SDL \
                   -Ifight/third_party/minizip-0.15 -Ifight/third_party/libpng-1.2.38 \
@@ -387,7 +392,10 @@ ifeq ($(PORTABLE),1)
   ifeq ($(TARGET_OS),LINUX)
     FIGHT_CFLAGS += -Ifight/compat/linux
     OS_LFLAGS += -lpthread -lm
+    FIGHT_STATE_SECTIONS := --rename-section .data=mfstate --rename-section .data.rel=mfstate \
+                            --rename-section .data.rel.local=mfstate --rename-section .bss=mfstate,alloc,load,contents,data
   else
+    FIGHT_STATE_SECTIONS := --rename-section .data='.data$$mfB' --rename-section .bss='.data$$mfB2,alloc,load,contents,data'
     OS_LFLAGS += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
   endif
   OBJS += $(FIGHT_OBJS)
@@ -512,6 +520,7 @@ endif
 $(OBJ_DIR)/fight/%.o: fight/%.c
 	@echo "$(MODERNCC) <fight flags> -o $@ $<"
 	@$(MODERNCC) $(FIGHT_CFLAGS) -MMD -MP -c $< -o $@
+	$(if $(filter $@,$(FIGHT_STATE_OBJS)),@$(OBJCOPY) $(FIGHT_STATE_SECTIONS) $@)
 
 -include $(FIGHT_OBJS:.o=.d)
 
