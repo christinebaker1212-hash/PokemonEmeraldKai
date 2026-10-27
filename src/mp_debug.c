@@ -422,6 +422,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void CB2_ReturnToFieldContinueScript(void);
         ShowPlayerTrainerCard(CB2_ReturnToFieldContinueScript);
     }
+    else if (strcmp(cmd, "finder") == 0)
+    {
+        // finder STYLE: OPTIONS > CO-OP > FRIEND FINDER (0 both, 1 arrows, 2 radar)
+        gMpConfig.finderStyle = atoi(arg) % MP_FINDER_COUNT;
+        MPNet_Log("friend finder: style %d", gMpConfig.finderStyle);
+    }
     else if (strcmp(cmd, "townmap") == 0 || strcmp(cmd, "flymap") == 0)
     {
         extern void FieldInitRegionMap(MainCallback callback);

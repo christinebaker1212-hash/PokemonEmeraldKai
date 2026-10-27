@@ -609,12 +609,19 @@ TOGETHER          Stay within about a screen of a friend and the TOGETHER
                   +14%. Shown at the bottom of the CO-OP menu.
 CATCH-UP          Fewer badges than a friend online? +10% EXP per badge behind
                   (up to +30%).
-WHERE IS EVERYONE Colored arrows at the screen edge point to friends you can't
-                  see (red, blue, green, yellow by player), at their exact
-                  direction anywhere in Hoenn, with their name and how many
-                  steps away they are. A friend inside a building, a cave or
-                  a POKEMON CENTER is at its door. The Town Map shows each
-                  friend's own look, outlined in their color.
+WHERE IS EVERYONE The FRIEND FINDER: G (or right stick click) shows it, again
+                  hides it. Small colored arrows at the screen edge point to
+                  friends you can't see (red, blue, green, yellow by player),
+                  at their exact direction anywhere in Hoenn, with their name
+                  and how many steps away they are, and a radar in the top
+                  right corner has a dot for each friend. An arrow stands out
+                  for a moment when its friend goes away; a friend less than
+                  15 steps away gets none, and it all fades while you walk.
+                  OPTIONS > CO-OP > FRIEND FINDER: BOTH, ARROWS or RADAR. A
+                  friend's ping shows even with it hidden. A friend inside a
+                  building, a cave or a POKEMON CENTER is at its door. The
+                  Town Map shows each friend's own look, outlined in their
+                  color.
 BETTING           When you watch a friend's battle you can bet $500 on them to
                   win or lose. Right: double back. Leave early: bet lost.
 
@@ -1086,6 +1093,8 @@ CO-OP
   FLAG RANGE    how many tiles you see with the BATTLE FLAG planted (1-8)
   MOENAV CALLS  ALL, or BATTLES: trainers only call when they want a battle
                 (no chatting). Story calls always come.
+  FRIEND FINDER BOTH, ARROWS or RADAR: how G / the right stick click shows
+                where your friends are
 The window can also be resized freely. Settings are kept in
 moemon_display.ini, moemon_controls.ini and moemon_coop.ini.
 
@@ -1097,6 +1106,7 @@ CONTROLS (keyboard)
   C = CO-OP menu          1-8 = emotes and your phrases
   V = "look here!" ping   F = the extra registered key item (BAG > REGISTER);
                           in the PC boxes, TAG
+  G = show / hide the FRIEND FINDER (arrows / radar toward friends)
   Q (hold) = quick emotes   E (hold) = quick phrases
             (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
@@ -1118,7 +1128,8 @@ The other buttons change with what's on screen:
   Walking around    X/Square = the extra registered key item (BAG >
                     REGISTER), stick pushed all the way = run (with
                     STICK RUN on), Y/Triangle = CO-OP menu, left stick click =
-                    "look here!" ping on the tile in front of you
+                    "look here!" ping on the tile in front of you, right
+                    stick click = show / hide the FRIEND FINDER
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).

@@ -75,6 +75,7 @@ enum
     OPT_AUTOSAVE,
     OPT_FLAGRANGE,
     OPT_MOENAV,
+    OPT_FINDER,
     OPT_FR_SHOW,      // a friend's page
     OPT_FR_PLACE,
     OPT_FR_SIZE,
@@ -177,6 +178,10 @@ static const u8 sText_ScAuto[] = _("AUTO");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
+static const u8 sText_Finder[] = _("FRIEND FINDER");
+static const u8 sText_FinderBoth[] = _("BOTH");
+static const u8 sText_FinderArrows[] = _("ARROWS");
+static const u8 sText_FinderRadar[] = _("RADAR");
 static const u8 sText_Show[] = _("SHOW");
 static const u8 sText_Place[] = _("PLACE");
 static const u8 sText_Size[] = _("SIZE");
@@ -353,6 +358,7 @@ static void BuildRows(void)
         AddRow(OPT_AUTOSAVE, 0);
         AddRow(OPT_FLAGRANGE, 0);
         AddRow(OPT_MOENAV, 0);
+        AddRow(OPT_FINDER, 0);
         break;
     }
     AddRow(OPT_CLOSE, 0);
@@ -443,6 +449,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MOENAV:
         names[0] = sText_AllCalls, names[1] = sText_Battles;
         return 2;
+    case OPT_FINDER:
+        names[0] = sText_FinderBoth, names[1] = sText_FinderArrows, names[2] = sText_FinderRadar;
+        return 3;
     case OPT_FOLLOWSPRITES:
         names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
         return 3;
@@ -585,6 +594,7 @@ static u8 Current(u8 row)
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
+    case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     }
     return 0;
@@ -653,6 +663,10 @@ static void Change(u8 row, int dir)
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
         MPNet_Log("moenav calls: %s", gMpConfig.moenavCalls ? "battles" : "all");
+        break;
+    case OPT_FINDER:
+        gMpConfig.finderStyle = Wrap(gMpConfig.finderStyle + dir, MP_FINDER_COUNT);
+        MPNet_Log("friend finder: style %d", gMpConfig.finderStyle);
         break;
     case OPT_FR_SHOW:
         {
@@ -728,6 +742,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
     case OPT_MOENAV:      return sText_MoeNav;
+    case OPT_FINDER:      return sText_Finder;
     case OPT_FR_SHOW:     return sText_Show;
     case OPT_FR_PLACE:    return sText_Place;
     case OPT_FR_SIZE:     return sText_Size;
@@ -869,6 +884,8 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)
         snprintf(ascii, sizeof(ascii), "BATTLES: ONLY CALLS ASKING FOR A BATTLE");
+    else if (opt == OPT_FINDER)
+        snprintf(ascii, sizeof(ascii), "RIGHT STICK CLICK / G: SHOW OR HIDE IT");
     else if (opt == OPT_FR_PLACE)
         snprintf(ascii, sizeof(ascii), "%s", MP_Spectate_Friend(arg, FALSE)->popout ? "CLOSING ITS WINDOW HIDES IT" : "WHICH SIDE OF YOUR SCREEN");
     else if (opt == OPT_FR_SIZE)

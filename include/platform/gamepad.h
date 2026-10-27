@@ -39,6 +39,7 @@ enum {
     INPUT_ACTION_PING,                                         // left stick click / V: "look here!" on the tile ahead
     INPUT_ACTION_ITEM_X,                                       // west button / F: the extra registered key item
     INPUT_ACTION_PC_TAG,                                       // west button / F in the PC's boxes: TAG
+    INPUT_ACTION_FRIEND_FINDER,                                // right stick click / G: show / hide the FRIEND FINDER
 };
 #define INPUT_ACTION_EMOTE_KEY_COUNT 8
 

@@ -70,6 +70,9 @@ void Platform_ContextAction(int action)
     case INPUT_ACTION_PING:
         MP_Ping_Place();
         break;
+    case INPUT_ACTION_FRIEND_FINDER:
+        MP_Compass_Toggle();
+        break;
     case INPUT_ACTION_ITEM_X:
         gMpItemXPressed = 20;   // used by the field input (field_control_avatar.c)
         break;

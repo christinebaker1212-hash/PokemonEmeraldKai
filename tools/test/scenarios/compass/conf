@@ -1,9 +1,11 @@
-# Friends' arrows (mp_compass.c): ALICE in Oldale Town; BOB inside its POKéMON CENTER (the arrow points at its door,
-# with his name and steps), then on ROUTE 102 to the west, then in PETALBURG CITY (the world grid: exact angle, far);
-# the Town Map shows both looks' heads (ALICE as SERENA, BOB as STEVEN outlined in his blue)
+# The FRIEND FINDER (mp_compass.c): hidden until ALICE clicks the right stick (a_hidden). ALICE in Oldale Town; BOB
+# inside its POKéMON CENTER (the arrow points at its door, with his name and steps: standing out, then quiet), then
+# on ROUTE 102 to the west, then in PETALBURG CITY (the world grid: exact angle, far), with only the radar, then only
+# the arrows; walking dims it; another click hides it. The Town Map shows both looks' heads (ALICE as SERENA, BOB as
+# STEVEN outlined in his blue)
 MODE=2
 WARP=0,10,4,14
 WARP_B=2,2,7,6
-TMO=150
-EXPECT_A=("where map 0.10")
+TMO=170
+EXPECT_A=("where map 0.10" "friend finder: shown" "friend finder: style 2" "friend finder: style 1" "friend finder: hidden")
 EXPECT_B=("warp: 0,0 20,15")

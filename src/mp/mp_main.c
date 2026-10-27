@@ -412,6 +412,10 @@ static void LoadConfig(void)
         else if (strcmp(key, "card_back") == 0)
             gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
+        else if (strcmp(key, "friend_finder") == 0)
+            gMpConfig.finderStyle = strcmp(val, "arrows") == 0 ? MP_FINDER_ARROWS
+                                  : strcmp(val, "radar") == 0  ? MP_FINDER_RADAR : MP_FINDER_BOTH;
+        else if (strcmp(key, "friend_finder_shown") == 0) gMpConfig.finderOn = atoi(val) != 0;
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
@@ -534,6 +538,9 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
+        "; OPTIONS > CO-OP > FRIEND FINDER: both, arrows (at the edge of the screen) or radar (in the corner);\n"
+        "; shown = 1 while it's on (the right stick click / G)\n"
+        "friend_finder = %s\nfriend_finder_shown = %d\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
         "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
@@ -553,6 +560,8 @@ void MP_SaveConfig(void)
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
+        gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
+        gMpConfig.finderOn,
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",

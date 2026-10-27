@@ -131,7 +131,8 @@ moments, eggs and family, evolution; every activity visible: swimming in the pon
 water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
 
 Also 1.30.0's WHERE IS EVERYONE arrows (mp_compass.c: a world grid of Hoenn from the map connections, doors for indoor
-maps, drawn over the frame; test compass), Town Map heads of each look (MP_Avatar_HeadIcon), RARE CANDY counts, smart
+maps, drawn over the frame; test compass; the FRIEND FINDER: hidden until the right stick click / G, quiet arrows and a
+corner radar, OPTIONS > CO-OP > FRIEND FINDER: COOP_NOTES "The FRIEND FINDER"), Town Map heads of each look (MP_Avatar_HeadIcon), RARE CANDY counts, smart
 item targeting (mp_smartcursor.c), followers in their ball on bikes: COOP_NOTES "1.30.0".
 
 Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style

@@ -598,11 +598,13 @@ u16 Gamepad_Poll(int *fastForward)
                 Platform_ContextAction(INPUT_ACTION_COOP_MENU);
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_LEFTSTICK))
                 Platform_ContextAction(INPUT_ACTION_PING);
+            if (pressed & BTN(SDL_CONTROLLER_BUTTON_RIGHTSTICK))
+                Platform_ContextAction(INPUT_ACTION_FRIEND_FINDER);
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
                 run = 1;
             if (run)
                 keys |= B_BUTTON;
-            // Emotes only come from the LT / RT hold menu (no right stick click or flick)
+            // Emotes only come from the LT / RT hold menu (no right stick flick)
             break;
         case INPUT_CONTEXT_NAMING:
             if (buttons & west)  keys |= B_BUTTON;       // backspace

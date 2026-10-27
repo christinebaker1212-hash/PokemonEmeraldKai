@@ -1,7 +1,15 @@
 pressuntil A field 5000
 waitfor online 6000
+vpad
 wait 200
 mp where
+rendershot a_hidden
+vbtn rstick 1
+wait 2
+vbtn rstick 0
+wait 20
+rendershot a_pc_door_flash
+wait 120
 rendershot a_pc_door
 barrier route 2
 wait 200
@@ -9,6 +17,21 @@ rendershot a_route
 barrier petal 2
 wait 240
 rendershot a_petalburg
+mp finder 2
+wait 10
+rendershot a_radar
+mp finder 1
+wait 10
+rendershot a_arrows
+press DOWN 40
+rendershot a_walking
+wait 60
+vbtn rstick 1
+wait 2
+vbtn rstick 0
+wait 20
+rendershot a_hidden_again
+mp finder 0
 mp sprite kai_serena
 wait 30
 mp townmap
