@@ -13,9 +13,11 @@
 #include "mp.h"
 #include "event_data.h"
 #include "field_camera.h"
+#include "fieldmap.h"
 #include "main.h"
 #include "overworld.h"
 #include "palette.h"
+#include "constants/event_object_movement.h"
 #include "constants/maps.h"
 #include "constants/rgb.h"
 
@@ -156,11 +158,15 @@ static void MapPicLine(int line, u16 layers[4][DISPLAY_WIDTH])
     GetFieldCameraTileOffset(&tileX, &tileY);
     hoffs = REG_BG3HOFS;
     voffs = REG_BG3VOFS;
-    // A screen pixel's map pixel: the BG tilemap (256 pixels, wrapping) holds the map from the camera's tile
-    // (pos - 7) on at its tile offset
-    camX = (gSaveBlock1Ptr->pos.x - 7) * 16;
-    camY = (gSaveBlock1Ptr->pos.y - 7) * 16;
-    mapY = camY + ((line + voffs - tileY * 8) & 255);
+    // A screen pixel's map pixel: the BG tilemap holds the map from the camera's tile (pos - 7) on at its tile
+    // offset, and the scroll is a little way from there. Signed: when a step starts the tile offset (and pos) move a
+    // whole tile at once and the scroll follows over the step, so it is up to a tile behind (wrapping it at 256
+    // drew the far side of the picture down the screen's left edge, or its top, for that step)
+    hoffs = (s8)((hoffs - tileX * 8) & 255);
+    voffs = (s8)((voffs - tileY * 8) & 255);
+    camX = (gSaveBlock1Ptr->pos.x - 7) * 16 + hoffs;
+    camY = (gSaveBlock1Ptr->pos.y - 7) * 16 + voffs;
+    mapY = camY + line;
     for (i = 0; i < sShownCount; i++)
     {
         const struct MapPic *p = sShown[i].pic;
@@ -171,7 +177,7 @@ static void MapPicLine(int line, u16 layers[4][DISPLAY_WIDTH])
             continue;
         for (x = 0; x < DISPLAY_WIDTH; x++)
         {
-            s32 px = camX + ((x + hoffs - tileX * 8) & 255) - sShown[i].x;
+            s32 px = camX + x - sShown[i].x;
             bool8 in = rowIn && px >= 0 && px < p->w;
             u16 c = in ? p->pixels[py * p->w + px] : 0, o = in && p->over ? p->over[py * p->w + px] : 0;
             if (c & 0x8000)
@@ -193,6 +199,30 @@ void MP_MapPic_Update(void)
 {
     FindShown();
     gMpMapPicLine = sShownCount ? MapPicLine : NULL;
+}
+
+// Arriving on the GAME CENTER's stairs and the rooftop door, the player steps off them the way the picture's steps
+// go, not down (Task_ExitNonAnimDoor; below them is the stairs' rail or a wall)
+static const struct {u16 map; u8 x, y, dir;} sArrivalSteps[] = {
+    {MAP_RUSTBORO_CITY_GAME_CENTER_1F, 3, 2, DIR_EAST},
+    {MAP_RUSTBORO_CITY_GAME_CENTER_2F, 2, 2, DIR_EAST},
+    {MAP_RUSTBORO_CITY_GAME_CENTER_2F, 10, 2, DIR_WEST},
+    {MAP_RUSTBORO_CITY_GAME_CENTER_3F, 2, 2, DIR_EAST},
+    {MAP_RUSTBORO_CITY_GAME_CENTER_3F, 10, 2, DIR_WEST},
+    {MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP, 15, 5, DIR_WEST},
+};
+
+// The way to step off a door the player arrived on at map cell (X, Y), or DIR_NONE for the game's own (down)
+u8 MP_MapPic_ArrivalDir(s16 x, s16 y)
+{
+    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u32 i;
+    x -= MAP_OFFSET;
+    y -= MAP_OFFSET;
+    for (i = 0; i < ARRAY_COUNT(sArrivalSteps); i++)
+        if (sArrivalSteps[i].map == here && sArrivalSteps[i].x == x && sArrivalSteps[i].y == y)
+            return sArrivalSteps[i].dir;
+    return DIR_NONE;
 }
 
 // A map with a picture of its own (the GAME CENTER's floors: their tiles never show)

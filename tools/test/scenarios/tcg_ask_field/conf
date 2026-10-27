@@ -1,0 +1,9 @@
+# An online card duel asked the way players do: ALICE presses the registered CARD CASE facing BOB, BOB says YES on his
+# map (ALICE's B tap meanwhile only asks whether to stop waiting: NO by default), both pick their first deck and the duel starts on both games
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=170
+EXPECT_A=("asked player 1 for a card duel" "duel started vs BOB")
+EXPECT_B=("duel started vs ALICE")
+UNEXPECT_B=("stopped waiting")

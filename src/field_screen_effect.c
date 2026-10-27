@@ -30,6 +30,7 @@
 #include "text.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
+#include "mp.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
 #include "trainer_hill.h"
@@ -381,9 +382,10 @@ static void Task_ExitNonAnimDoor(u8 taskId)
         if (WaitForWeatherFadeIn())
         {
             u8 objEventId;
+            u8 dir = MP_MapPic_ArrivalDir(*x, *y);   // Moemon Co-op: the GAME CENTER's stairs step off sideways
             SetPlayerVisibility(TRUE);
             objEventId = GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0);
-            ObjectEventSetHeldMovement(&gObjectEvents[objEventId], GetWalkNormalMovementAction(GetPlayerFacingDirection()));
+            ObjectEventSetHeldMovement(&gObjectEvents[objEventId], GetWalkNormalMovementAction(dir != DIR_NONE ? dir : GetPlayerFacingDirection()));
             task->tState = 2;
         }
         break;

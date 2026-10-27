@@ -1,6 +1,6 @@
 # The GAME CENTER (mp_mappic.c full-color pictures): the tower in RUSTBORO's north-east trees, from the road and from
 # the road north; through its left door to 1F; each floor and the ROOFTOP, the clerks behind their counters; the
-# tower beside RUSTBORO on the Town Map
+# MOENAV map's zoom on RUSTBORO names it under the city (a_moenav)
 MODE=1
 WARP=0,3,28,10
 TMO=120

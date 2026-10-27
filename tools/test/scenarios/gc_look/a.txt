@@ -35,7 +35,20 @@ wait 60
 rendershot a_roof
 mp warp 0,3,28,12
 wait 90
-mp townmap
+mp setflag 2146
+press START 2
+wait 30
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press A 2
 wait 120
-rendershot a_townmap
+press A 2
+wait 150
+press A 2
+wait 90
+rendershot a_moenav
 quit

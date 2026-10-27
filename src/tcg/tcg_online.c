@@ -130,6 +130,27 @@ static void OpenTogether(void)
         Tcg_OpenOnlineTrade();
 }
 
+static void SayWaiting(void)
+{
+    char line[96], name[16];
+    Name(sSocial.peer, name, sizeof(name));
+    snprintf(line, sizeof(line), sSocial.kind == TCG_ASK_DUEL ? "You asked %s for a card duel...\nB: stop waiting"
+                                                              : "You asked %s for a card trade...\nB: stop waiting", name);
+    SayAscii(line);
+}
+
+static void Withdraw(u8 taskId, bool8 gaveUp)
+{
+    char line[96], name[16];
+    Send(WITHDRAW, NULL, 0);
+    Name(sSocial.peer, name, sizeof(name));
+    snprintf(line, sizeof(line), gaveUp ? "You stopped waiting." : "%s didn't answer. They may be busy.", name);
+    Reset();
+    PlaySE(SE_SELECT);
+    SayAscii(line);
+    gTasks[taskId].tState = 2;
+}
+
 static void Task_Ask(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -139,16 +160,16 @@ static void Task_Ask(u8 taskId)
     case 0:
         if (sSocial.answer == TCG_ANSWER_WAITING)
         {
-            if (JOY_NEW(B_BUTTON) || (s32)(SDL_GetTicks() - sSocial.deadline) >= 0 || !gMpPlayers[sSocial.peer].present)
+            if ((s32)(SDL_GetTicks() - sSocial.deadline) >= 0 || !gMpPlayers[sSocial.peer].present)
+                Withdraw(taskId, FALSE);
+            else if (JOY_NEW(B_BUTTON))
             {
-                bool8 gaveUp = JOY_NEW(B_BUTTON);
-                Send(WITHDRAW, NULL, 0);
+                // (B moves text along everywhere else: asked first, so a tap meant for the message doesn't call it off)
                 Name(sSocial.peer, name, sizeof(name));
-                snprintf(line, sizeof(line), gaveUp ? "You stopped waiting." : "%s didn't answer. They may be busy.", name);
-                Reset();
+                snprintf(line, sizeof(line), "Stop waiting for %s?", name);
                 PlaySE(SE_SELECT);
                 SayAscii(line);
-                tState = 2;
+                tState = 3;
             }
             break;
         }
@@ -184,12 +205,42 @@ static void Task_Ask(u8 taskId)
             Release(taskId);
         }
         break;
+    case 3:
+        // Stop waiting? (their answer may still come in meanwhile)
+        if (sSocial.answer != TCG_ANSWER_WAITING)
+            tState = 0;
+        else if (!IsTextPrinterActive(0))
+        {
+            DisplayYesNoMenuWithDefault(1);
+            tState = 4;
+        }
+        break;
+    case 4:
+    {
+        s8 answer;
+        if (sSocial.answer != TCG_ANSWER_WAITING || (s32)(SDL_GetTicks() - sSocial.deadline) >= 0)
+        {
+            EraseYesNoWindow();
+            tState = 0;
+            break;
+        }
+        answer = Menu_ProcessInputNoWrapClearOnChoose();
+        if (answer == MENU_NOTHING_CHOSEN)
+            break;
+        if (answer == 0)
+            Withdraw(taskId, TRUE);
+        else
+        {
+            SayWaiting();
+            tState = 0;
+        }
+        break;
+    }
     }
 }
 
 void Tcg_AskFriend(unsigned id, unsigned kind)
 {
-    char line[96], name[16];
     u8 body = (u8)kind, taskId;
     Reset();
     sSocial.role = TCG_SOCIAL_ASKING;
@@ -200,13 +251,10 @@ void Tcg_AskFriend(unsigned id, unsigned kind)
     sSocial.answer = TCG_ANSWER_WAITING;
     sSocial.deadline = SDL_GetTicks() + 30000;
     Send(REQUEST, &body, 1);
-    Name(id, name, sizeof(name));
-    snprintf(line, sizeof(line), kind == TCG_ASK_DUEL ? "You asked %s for a card duel...\nB: stop waiting"
-                                                      : "You asked %s for a card trade...\nB: stop waiting", name);
     if (!ArePlayerFieldControlsLocked())
         LockPlayerFieldControls();
     FreezeObjectEvents();
-    SayAscii(line);
+    SayWaiting();
     taskId = CreateTask(Task_Ask, 80);
     gTasks[taskId].tState = 0;
     printf("[tcg] asked player %u for a card %s\n", id, kind == TCG_ASK_DUEL ? "duel" : "trade");
@@ -348,6 +396,21 @@ void Tcg_SocialReceive(unsigned from, const u8 *p, unsigned len)
 {
     unsigned type = p[2];
     u32 session = p[3] | p[4] << 8 | p[5] << 16 | (u32)p[6] << 24;
+    if (type == REQUEST && len == 8 && sSocial.role == TCG_SOCIAL_ASKING && from == sSocial.peer
+     && sSocial.answer == TCG_ANSWER_WAITING && (p[7] ? TCG_ASK_TRADE : TCG_ASK_DUEL) == sSocial.kind)
+    {
+        // We asked each other at once: the request of the one first in the room stands, and the other says yes to it
+        if ((int)from < gMpLocalId)
+        {
+            u8 yes = TCG_ANSWER_YES;
+            sSocial.session = session;
+            sSocial.seat = 1;
+            Send(REPLY, &yes, 1);
+            sSocial.answer = TCG_ANSWER_YES;
+            printf("[tcg] asked each other: playing on %u's request\n", from);
+        }
+        return;
+    }
     if (type == REQUEST && len == 8)
     {
         u8 answer = 0xFF;

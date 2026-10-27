@@ -88,6 +88,7 @@ static int sBarrierCount, sBarrierFrames;
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
 static bool SpectateStep(void);
+static bool ScreenStep(void);
 void Platform_SaveScreenshot(const char *name);
 
 extern void AgbMain(void);
@@ -243,7 +244,7 @@ int main(int argc, char **argv)
             }
             TestHarnessStep();
             MP_FrameUpdate();
-            if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || SpectateStep())
+            if (ScreenStep())
             {
                 AudioUpdate();
                 sFrameCounter++;
@@ -330,7 +331,7 @@ int main(int argc, char **argv)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
-                if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || SpectateStep())
+                if (ScreenStep())
                     continue;
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
@@ -980,6 +981,18 @@ const u16 *Platform_GetFrame(void)
             return cards;
     }
     return sFrameImage;
+}
+
+// A frame the card screens, a VS fight or a battle we watch show instead of the game. VDraw doesn't run then, so the
+// SPECTATE panel's friends' screens are handed to the display here (they froze through a card duel)
+static bool ScreenStep(void)
+{
+    if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step())
+    {
+        MP_Spectate_PanelSync();
+        return true;
+    }
+    return SpectateStep();
 }
 
 // Moemon Co-op: while watching another player's battle the game is paused and

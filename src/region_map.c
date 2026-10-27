@@ -2114,14 +2114,6 @@ void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
 
 #define TAG_MP_FRIEND_ICON   0x5400   // + friend slot (tiles)
 #define TAG_MP_FRIEND_PAL    0x5410   // + gender
-#define TAG_MP_LANDMARK      0x5420   // the GAME CENTER's tower beside RUSTBORO CITY (tiles and palette)
-
-#include "data/mp_gamecenter_icon.h"
-static EWRAM_DATA u8 sMpLandmarkSprite = MAX_SPRITES;
-static const struct SpriteTemplate sMpLandmarkTmpl = {TAG_MP_LANDMARK, TAG_MP_LANDMARK, &sRegionMapPlayerIconOam,
-                                                      sRegionMapPlayerIconAnimTable, NULL, gDummySpriteAffineAnimTable,
-                                                      SpriteCallbackDummy};
-
 static EWRAM_DATA u8 sMpFriendSprite[MP_MAX_PLAYERS] = {0};
 static EWRAM_DATA u8 sMpFriendCount = 0;
 static EWRAM_DATA u8 sMpFriendIds[MP_MAX_PLAYERS] = {0};
@@ -2157,42 +2149,9 @@ static void LoadMpFriendPalette(u8 gender)
     LoadSpritePalette(&sp);
 }
 
-// The GAME CENTER: a major landmark, its tower just north-east of RUSTBORO CITY's square (where it stands in the
-// city), clear of the player's and friends' heads
-static void MpPlaceLandmarkIcon(void)
-{
-    struct Sprite *sprite;
-    const struct RegionMapLocation *loc = &gRegionMapEntries[MAPSEC_RUSTBORO_CITY];
-    s16 px = loc->x + loc->width + MAPCURSOR_X_MIN, py = loc->y + MAPCURSOR_Y_MIN;
-    if (sMpLandmarkSprite >= MAX_SPRITES || gSprites[sMpLandmarkSprite].template != &sMpLandmarkTmpl)
-        return;
-    sprite = &gSprites[sMpLandmarkSprite];
-    if (sRegionMap->playerIconSprite == NULL || sRegionMap->playerIconSprite->callback == SpriteCallbackDummy)
-    {
-        sprite->invisible = TRUE;
-        sprite->callback = SpriteCallbackDummy;
-        return;
-    }
-    if (sRegionMap->zoomed)
-    {
-        sprite->x = px * 16 - 0x30 + 12;
-        sprite->y = py * 16 - 0x42 - 8;
-        sprite->callback = SpriteCB_MpFriendZoomed;
-    }
-    else
-    {
-        sprite->x = px * 8 + 8;
-        sprite->y = py * 8 - 3;
-        sprite->x2 = sprite->y2 = 0;
-        sprite->callback = SpriteCallbackDummy;
-    }
-    sprite->invisible = FALSE;
-}
-
 static void MpPlaceFriendIcons(void)
 {
     u8 i, j;
-    MpPlaceLandmarkIcon();
     for (i = 0; i < sMpFriendCount; i++)
     {
         struct Sprite *sprite;
@@ -2239,14 +2198,6 @@ static void MpCreateFriendIcons(void)
 {
     u8 i;
     MpDestroyFriendIcons();
-    {
-        struct SpriteSheet sheet = {sMpGameCenterIconGfx, sizeof(sMpGameCenterIconGfx), TAG_MP_LANDMARK};
-        struct SpritePalette pal = {sMpGameCenterIconPal, TAG_MP_LANDMARK};
-        LoadSpriteSheet(&sheet);
-        LoadSpritePalette(&pal);
-        sMpLandmarkSprite = CreateSprite(&sMpLandmarkTmpl, 0, 0, 3);
-        MpPlaceLandmarkIcon();
-    }
     if (!MP_IsConnected())
         return;
     sMpFriendCount = MP_Friends_List(sMpFriendIds);
@@ -2281,12 +2232,6 @@ static void MpCreateFriendIcons(void)
 static void MpDestroyFriendIcons(void)
 {
     u8 i;
-    if (sMpLandmarkSprite < MAX_SPRITES && gSprites[sMpLandmarkSprite].inUse
-     && gSprites[sMpLandmarkSprite].template == &sMpLandmarkTmpl)
-        DestroySprite(&gSprites[sMpLandmarkSprite]);
-    sMpLandmarkSprite = MAX_SPRITES;
-    FreeSpriteTilesByTag(TAG_MP_LANDMARK);
-    FreeSpritePaletteByTag(TAG_MP_LANDMARK);
     for (i = 0; i < sMpFriendCount; i++)
     {
         if (sMpFriendSprite[i] < MAX_SPRITES && gSprites[sMpFriendSprite[i]].inUse

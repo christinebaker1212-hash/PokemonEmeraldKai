@@ -1,0 +1,31 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp cards starter 0
+mp additem 399 1
+mp face right
+wait 4
+barrier ready 2
+mp menu 3
+wait 40
+press A 2
+wait 40
+rendershot a_friend
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+rendershot a_friend2
+press A 2
+wait 60
+rendershot a_asked
+wait 400
+rendershot a_deck
+press A 2
+wait 300
+rendershot a_duel
+wait 60
+quit

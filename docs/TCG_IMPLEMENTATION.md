@@ -106,7 +106,11 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
 - **Friends** (`src/tcg/tcg_online.c`, include/tcg/online.h): CO-OP > FRIENDS > a friend >
   CARD DUEL / CARD TRADE, or the CARD CASE button in front of them. A request (social
   messages 0x10+ on extension 255) shows them YES / NO on the map; busy and no-case answers
-  are automatic; 30 seconds, B stops waiting. YES opens the deck pick on both sides (the
+  are automatic; 30 seconds; B asks "Stop waiting for NAME?" (NO first: B moves text along
+  everywhere else, and a tap that withdrew at once was what friends online kept seeing as
+  "NAME stopped waiting."). Two friends asking each other at once: the one later in the room
+  says yes to the other's request (Tcg_SocialReceive). Tests tcg_ask_field, tcg_ask_menu,
+  tcg_ask_both (regress.sh, also at WORST=1 lag). YES opens the deck pick on both sides (the
   winner gets a booster) or the trade screen (each offers a card, both confirm).
 - **Menus** (`src/tcg/tcg_ui.c`, rewritten in the BAG's style): home, decks, a grid deck
   builder (5x2 cards, the deck list on the right; A adds, SELECT takes one out, RIGHT past

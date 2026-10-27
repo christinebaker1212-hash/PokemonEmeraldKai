@@ -1,0 +1,9 @@
+# ALICE and BOB press their CARD CASE at each other on the same frame: instead of both being told the other is busy,
+# BOB (later in the room) says yes to ALICE's request and the duel starts on both games
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=170
+EXPECT_A=("asked player 1 for a card duel" "duel started vs BOB")
+EXPECT_B=("asked player 0 for a card duel" "asked each other: playing on 0's request" "duel started vs ALICE")
+UNEXPECT_A=("is busy")

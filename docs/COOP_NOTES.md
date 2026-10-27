@@ -160,7 +160,10 @@ Dailies (mp_events.c): 3 goals a day from 3 pools (everyone G_TRAINERS..G_STRONG
 G_GIFTS..G_CARD; PickGoalsFull, solo fallbacks), hooks call MP_Events_Did(MP_DID_*) (goal + achievement counter). Pair goals
 only count friends with 5+ minutes today ("h:NAME" minute counter). Pull caps: 5 daily pulls/week ("dailypulls:wN"),
 free pulls (mp_gatcha.c MP_Gatcha_GrantFree from MP_Events_Update and on opening: +1 free 10-pull
-"gatcha:free10" per week (STANDARD only), +1 free pull per banner "gatcha:free1bN" per day played, stocked; menu
+"gatcha:free10" per week (STANDARD only), +1 free pull per banner "gatcha:free1bN" per day played, stocked; only for
+a later day / week than the last given ("gatcha:free1day", "gatcha:freewk": a clock set back and forth gave them on
+every launch); each pull stirs gRngValue with the PC's timer (StirRandom: the RNG starts at 0 on every launch and steps
+once a frame, so the same inputs on the same frames pulled the same prizes); test tools/test/gatcha_fair.sh; menu
 FREE x10 / FREE x1 / TICKET), MOEGATCHA TICKETS ("gatcha:tickets": data/scripts/obtain_item.inc Std_ObtainItem ->
 special MP_GatchaTicketForItem for key items / HMs / gym leader TMs / EXP. SHARE, once per item "ticketitem:ID", item
 from scrcmd.c gMpLastScriptItem since VAR_0x8000 changes during the message; Mauville Game Corner doll clerk sells them,
@@ -1069,7 +1072,8 @@ pixel samples), ShiftFrame moves the picture on both ends and only the uncovered
 update goes to 0xFF when every friend watches (the server copies it); a send backlog over 24 KB skips pictures
 (MPNet_ClientQueued; a picture is a diff, so nothing is lost). ApplyUpdate decodes for the battle watcher and the
 panel alike; Panel_DrawLabel draws the card label (dot, name, location / red IN BATTLE pill) with the small font.
-MP_Spectate_PanelSync (sdl2.c VDraw, and SpectateStep while watching a battle) hands the cards to Display_SetPanel.
+MP_Spectate_PanelSync (sdl2.c VDraw, and ScreenStep for the card screens, a VS fight or a battle we watch: VDraw
+doesn't run then; the panel froze through card duels, test spec_tcg) hands the cards to Display_SetPanel.
 display.c: PanelSize = 2 pads + n cards (240s + 2s outline) + gaps, 160s + label 12s; RenderToBackbuffer reserves the
 bottom, PanelFitScale shrinks the cards until they fit with the game at 1x or more; FitWindowToPanel (window only) keeps
 the game's whole scale and shrinks it, then the cards, until the window fits the monitor's usable area, and restores the
@@ -1915,8 +1919,9 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
 - tools/moemon_gamecenter/gen_gamecenter.py: graphics/moemon/gamecenter/*.png (the user's pictures, docs/user_images
   38-42) to RGB555 .bin (bit 15 drawn) and *_over.bin (furniture rising into the walkable cell north of it, scanned
   up from that cell's bottom until its floor colors; OVER rects for the clerks' rows; NO_OVER), the floors' layouts
-  from the FLOORS grids on Building + Shop ('.' floor 0x001, '#' blocked, 'W' exit mat 0x006, 'S' stairs 0x250 with
-  floor below for the arrival step, 'C' counter 0x232), and the region map icon (src/data/mp_gamecenter_icon.h).
+  from the FLOORS grids on Building + Shop ('.' floor 0x001, '#' blocked, 'W' exit mat 0x006, 'S' stairs 0x250 (a
+  non-animated door: arriving, Task_ExitNonAnimDoor steps the player off the way MP_MapPic_ArrivalDir says, sideways
+  for the stairs and left out of the rooftop door, not down through the rail), 'C' counter 0x232).
 - Maps RustboroCity_GameCenter_1F/2F/3F/Rooftop (gMapGroup_IndoorRustboro 17-20, appended). The tower in RUSTBORO at
   pixel (407, -47), doors (28, 7) / (32, 7) = Rustboro warps 12 / 13 on metatile 0x35E (a copy of the plaza's 0x2BB
   with MB_NON_ANIMATED_DOOR, appended to the Rustboro tileset); the trees and fence around it reworked (grass, plaza
@@ -1929,7 +1934,11 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   script); on 2F townsfolk never decline (InGameCenterCardShop). The second seller only says he's unpacking.
 - 3F: flavor on every console, TV and cabinet; the COIN counter sells 50 COINS for 1000. Rooftop: flavor people, the
   Lilycove rooftop's vending machine script.
-- Region maps: region_map.c MpPlaceLandmarkIcon, a 16x16 tower beside RUSTBORO (Town Map, MOENAV, FLY).
+- MOENAV map: "GAME CENTER" is a landmark of RUSTBORO's two cells (landmark.c Landmarks_RustboroCity), printed under
+  the city's name when the cursor is on it as the routes' landmarks are; the city map moves down by its lines
+  (pokenav_region_map.c sCityMapRowsDown). No icon on any region map.
+- Pictures and the scroll: MapPicLine's scroll offset against the BG tile offset is signed (a step moves the tile
+  offset a whole tile at once; wrapping at 256 drew the picture's far side down the screen's left edge for a step).
 - Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
 

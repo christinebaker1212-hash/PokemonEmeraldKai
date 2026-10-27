@@ -1237,8 +1237,8 @@ its backups). A few attacks aren't in the game yet; they show as not ready.
 
 GAME CENTER
 -----------
-The tower in RUSTBORO CITY's north-east corner, by the road east (its tower
-is on the Town Map, the MOENAV map and the FLY map too). Admission at the
+The tower in RUSTBORO CITY's north-east corner, by the road east (the
+MOENAV map names it under RUSTBORO CITY). Admission at the
 1F reception is 500, good for every floor until you leave; the stairs and
 the elevator are behind her.
   2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS).
