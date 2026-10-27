@@ -1890,7 +1890,7 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   a variable (0-B) never take the player's own sprite (event_data.c VarGetObjectEventGraphicsId: a variable at 0
   made a copy of the player that took their palette), and the Lilycove Lady's POKeMON always has a POKeMON's look.
 
-## The FRIEND FINDER (1.30.1)
+## The FRIEND FINDER (1.31.1)
 - mp_compass.c over WHERE IS EVERYONE: hidden until INPUT_ACTION_FRIEND_FINDER (right stick click in gamepad.c's
   overworld context, G in sdl2.c) calls MP_Compass_Toggle (SE_PC_ON / SE_PC_OFF, log "friend finder: shown /
   hidden", saved at once: ini friend_finder_shown). OPTIONS > CO-OP > FRIEND FINDER = gMpConfig.finderStyle
