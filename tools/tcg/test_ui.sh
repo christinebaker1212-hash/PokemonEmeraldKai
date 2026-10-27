@@ -147,7 +147,8 @@ expect duel 'board asks: Concede this duel'
 test "$(grep -c 'screen 10 opted 1 phase 1' "$OUT/duel/log.txt")" -eq 2
 echo 'PASS B asks to end the turn and CONCEDE asks first (no duel ended)'
 
-# The deck builder: take a CHARMANDER out of the deck (the list), add it back (the cards).
+# The deck builder: take a CHARMANDER out of the deck (the list, then SELECT on the cards), add it back;
+# copy the deck, delete the one you duel with (the copy takes over).
 cat > "$OUT/builder.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 100
@@ -180,12 +181,37 @@ wait 4
 press A 2
 wait 4
 mp cards deck 0
+press SELECT 2
+wait 4
+mp cards deck 0
+rendershot builder_select
+press A 2
+wait 4
+mp cards deck 0
+press B 2
+wait 10
+press START 2
+wait 6
+press A 2
+wait 10
+mp cards deck 1
+press A 2
+wait 6
+press SELECT 2
+wait 6
+rendershot deck_delete
+press A 2
+wait 10
+rendershot deck_deleted
+mp cards deck 0
 quit
 SCRIPT
 run builder
-test "$(grep -c 'deck 0 count 60 valid 1' "$OUT/builder/log.txt")" -eq 2
-expect builder 'deck 0 count 59 valid 0'
-echo 'PASS the deck builder: out of the deck and back in'
+test "$(grep -c 'deck 0 count 60 valid 1' "$OUT/builder/log.txt")" -eq 3
+test "$(grep -c 'deck 0 count 59 valid 0' "$OUT/builder/log.txt")" -eq 2
+expect builder 'deck 1 count 60 valid 1'
+expect builder 'deck 0 count 0 valid 0 active 1'
+echo 'PASS the deck builder: out of the deck from the list and with SELECT, back in; deleting the deck you duel with'
 
 # The counter: spare cards traded in for CARD POINTS, a booster pack bought.
 cat > "$OUT/counter.txt" <<'SCRIPT'

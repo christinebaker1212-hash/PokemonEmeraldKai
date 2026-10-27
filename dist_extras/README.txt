@@ -1159,6 +1159,11 @@ you'd like one, and later run the CARD COUNTER.
                   RETREAT, DONE). B closes the hand, then asks whether to end
                   your turn; CONCEDE asks first. Hold A or B to hurry the
                   animations.
+  Decks           CARD CASE > DECKS: A builds or changes a deck (A adds the
+                  card, SELECT takes one out; or RIGHT over to the deck's list,
+                  where A takes out), START copies it, SELECT deletes it (the
+                  cards stay in your collection) and R makes it the deck you
+                  duel with.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck. Losing costs
                   nothing. Spare cards become CARD POINTS at the CARD COUNTER.

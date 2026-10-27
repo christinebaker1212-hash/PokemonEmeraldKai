@@ -980,7 +980,7 @@ static void DecksScreen(void)
         Strip(0, "The deck you duel with.");
     else
         Strip(0, DeckCount(U.cursor, 0) ? "{R} DUEL WITH THIS DECK" : "An empty slot: {A} builds a new deck.");
-    Hints("{A} EDIT  {START} COPY  {SELECT} EMPTY  {B} BACK");
+    Hints("{A} EDIT  {START} COPY  {SELECT} DELETE  {B} BACK");
 }
 
 /* The builder starts on the deck's main type (Pokemon first). */
@@ -1006,6 +1006,8 @@ static void BuilderScreen(void)
     Background();
     G_RoundFill(0, 0, 160, 17, 0x203040, 230);
     Tabs(2, 2, U.filter, 9);
+    /* (the hint line has no room for it: the type buttons beside the tabs) */
+    G_Hint(132, 3, 0xe0e0ff, G_NO_SHADOW, "{L}{R}", TF_NARROW, 1);
     /* The grid */
     start = U.cursor / page * page;
     for (i = 0; i < page && start + i < n; i++)
@@ -1069,7 +1071,7 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
-    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE" : "{A} ADD  {L}{R} TYPE  {START} LOOK  {B} DONE");
+    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE" : "{A} ADD  {SELECT} TAKE OUT  {START} LOOK  {B} DONE");
 }
 
 /* The binder: every card by type, owned or all. */
@@ -1737,11 +1739,27 @@ static void Act(int action)
         break;
     }
     case ACT_CLEAR:
+    {
+        char reason[160];
+        unsigned d, before = c->activeDeck;
         memset(c->decks[U.askArg].cards, 0, sizeof(c->decks[U.askArg].cards));
-        if (U.askArg != c->activeDeck)
+        if ((unsigned)U.askArg == c->activeDeck)
+        {
+            /* The deck you duel with: the next one that can be played takes over */
+            for (d = 0; d < TCG_SAVED_DECKS; d++)
+                if (d != c->activeDeck && DeckCount(d, 0) && Tcg_DeckValidate(c->decks[d].cards, c->owned, reason, sizeof(reason)))
+                {
+                    c->activeDeck = (uint8_t)d;
+                    break;
+                }
+        }
+        if ((unsigned)U.askArg != c->activeDeck)
             c->decks[U.askArg].name[0] = 0;
         PlaySE(SE_SELECT);
+        if (c->activeDeck != before)
+            Say(ACT_NONE, "You'll duel with %s now.", c->decks[c->activeDeck].name);
         break;
+    }
     case ACT_TRADE_IN:
     case ACT_TRADE_IN_ALL:
     {
@@ -2134,7 +2152,7 @@ int Tcg_Step(unsigned keys)
         else if (pressed & KEY_START && U.cursor < TCG_SAVED_DECKS && DeckCount(U.cursor, 0))
             Ask(ACT_COPY, U.cursor, "Copy %s into an empty slot?", c->decks[U.cursor].name);
         else if (pressed & KEY_SELECT && U.cursor < TCG_SAVED_DECKS && DeckCount(U.cursor, 0))
-            Ask(ACT_CLEAR, U.cursor, "Take every card out of %s?", c->decks[U.cursor].name);
+            Ask(ACT_CLEAR, U.cursor, "Delete %s? Its cards stay in your collection.", c->decks[U.cursor].name);
         break;
     case UI_BUILDER:
     {
@@ -2164,6 +2182,18 @@ int Tcg_Step(unsigned keys)
                 {
                     PlaySE(SE_FAILURE);
                     Say(ACT_NONE, "%s", reason);
+                }
+            }
+            /* SELECT takes one back out, without going over to the deck list */
+            if (pressed & KEY_SELECT && n)
+            {
+                unsigned id = ListCard(U.cursor);
+                if (Tcg_DeckRemove(c, U.deck, id))
+                    PlaySE(SE_RG_BAG_POCKET);
+                else
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "There's no %s in this deck.", Tcg_Card(id)->name);
                 }
             }
             if (pressed & KEY_START && n)
