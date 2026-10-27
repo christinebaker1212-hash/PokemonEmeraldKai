@@ -697,6 +697,13 @@ static void Host_ApplyCabinet(const char *cabinet)
         }
     }
     Ini_Free(ini);
+    /* tests: short fights */
+    if (getenv("MOEMON_FIGHT_ROUNDS") != NULL && atoi(getenv("MOEMON_FIGHT_ROUNDS")) >= 1) {
+        g->fight.round.match_wins = atoi(getenv("MOEMON_FIGHT_ROUNDS"));
+    }
+    if (getenv("MOEMON_FIGHT_TIME") != NULL && atoi(getenv("MOEMON_FIGHT_TIME")) >= 5) {
+        g->time = atoi(getenv("MOEMON_FIGHT_TIME"));
+    }
     MfFit_Hud(hud_top);
 }
 
