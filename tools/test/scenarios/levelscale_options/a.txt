@@ -12,6 +12,8 @@ press UP 2
 wait 10
 press UP 2
 wait 10
+press UP 2
+wait 10
 press A 2
 wait 30
 shot ls_page
