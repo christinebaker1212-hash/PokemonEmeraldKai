@@ -59,6 +59,7 @@ enum
                                         // u16 frames since it came, s8 frames ahead
     MPR_FIGHT_END,                      // u32 session, u8 result (MF_RESULT_*)
     MPR_FIGHT_UDP,                      // u32 session, u32 + u16 our address from outside, u32 + u16 on the local
+    MPR_FIGHT_RESYNC,                   // u8 RS_MSG_*, u32 session, ...: desync recovery (the host's state)
                                         // network (network order; 0: not known)
 };
 
@@ -77,6 +78,11 @@ enum { NET_OFF, NET_ASKING, NET_STARTING, NET_RUNNING };
 #define HASH_KEEP         8
 #define PUNCH_FRAMES      120     // a direct connection has this long to get through (else the relay carries on)
 #define UDP_QUIET         60      // the direct connection silent this long: back to the relay
+#define RESYNC_AHEAD      30      // a desync: both games stop this many frames ahead and the host's state is loaded
+#define RESYNC_GIVE_UP    (60 * 20)
+#define RESYNC_MAX_PAGES  2048    // more pages differ than this: no use (it goes on as it is)
+#define RESYNC_HEAP_PAGES 65536
+#define RESYNC_GLOBAL_PAGES 4096
 
 static const u8 sText_FightMe[] = _("Fight me!");
 static const u8 sText_Fighting[] = _("FIGHT!");
@@ -100,6 +106,28 @@ static u8 sResult;
 // The fight files (include/mf_engine.h MfEngine_PackSummary): ours, read when we sit down, and the friend's;
 // online, the answering player's cabinet rules
 static struct MfPack sMyPack, sPeerPack;
+
+// Desync recovery (docs/FIGHT_DECISIONS.md #12): both games stop at the same frame, the other player sends a hash
+// of each page of their game's state, the host (side 0, P1) sends back the pages that differ, and both go on
+enum { RS_MSG_INFO = 2, RS_MSG_HASHES, RS_MSG_PAGE, RS_MSG_END, RS_MSG_DONE };   // (the stop goes with the buttons)
+enum { RS_NONE, RS_HOLD, RS_SENT };
+static struct
+{
+    u8 stage;               // RS_*
+    u32 at;                 // the frame both games stop after
+    u16 timer;
+    u32 askFrame;           // the other game: a desync seen at this frame (or the stop came too late), 0 none
+    u32 lastAt;             // the other game: the last stop it went through (the host's packets still say it)
+    // the host: the other game's state, as it comes
+    struct MfStateInfo theirs;
+    bool8 haveInfo;
+    u32 got[MF_STATE_REGIONS];
+    // the other game: pages written
+    u32 pages;
+    bool8 begun;
+    u32 done;               // recoveries that went through
+} sRs;
+static u32 sRsHeap[RESYNC_HEAP_PAGES], sRsGlobals[RESYNC_GLOBAL_PAGES];
 static bool8 sHaveMyPack;
 static char sCabinetText[2048];
 static u16 sTestButtons;    // the test harness's buttons (MP_Fight_TestPress)
@@ -429,7 +457,7 @@ static void SendInput(void)
     if (sMuteAt > 0 && MfEngine_FrameCount() >= (u32)sMuteAt)
         return;
 
-    u8 p[1 + 4 + 4 + 1 + 2 * SEND_MAX + 4 + 4 + 4 + 4 + 7];
+    u8 p[1 + 4 + 4 + 1 + 2 * SEND_MAX + 4 + 4 + 4 + 4 + 7 + 8];
     s32 ahead = FramesAhead();
     u32 first, last, f;
     u8 n = 0, *q;
@@ -464,7 +492,10 @@ static void SendInput(void)
     q[20] = (u16)(sTick - sNet.echoAt);
     q[21] = (u16)(sTick - sNet.echoAt) >> 8;
     q[22] = (s8)(ahead > 100 ? 100 : ahead < -100 ? -100 : ahead);
-    q += 23;
+    // desync recovery, by the fastest way, every frame: the host's frame to stop after, the other game's request
+    Put32(q + 23, sNet.side == 0 && sRs.stage != RS_NONE ? sRs.at : 0);
+    Put32(q + 27, sNet.side != 0 ? sRs.askFrame : 0);
+    q += 31;
     if (sNet.udpUp)
     {
         u8 d[7 + sizeof(p)];
@@ -589,6 +620,8 @@ static void KeepHash(u32 frame)
     sNet.sentHash = sNet.hashVal[i];
 }
 
+static void RequestResync(void);
+
 static void CheckHash(u32 frame, u32 hash)
 {
     u8 i = (frame / HASH_EVERY) % HASH_KEEP;
@@ -599,12 +632,297 @@ static void CheckHash(u32 frame, u32 hash)
     {
         sNet.desyncs++;
         MPNet_Log("fight: desync at frame %u (%08x here, %08x there)", frame, sNet.hashVal[i], hash);
+        RequestResync();
     }
     else
     {
         sNet.checks++;
     }
     sNet.hashFrame[i] = 0;   // checked
+}
+
+// ---------------------------------------------------------------------------
+// Online: desync recovery
+
+#define RS_INFO_BYTES (28 + 64)
+#define RS_HASH_CHUNK 1800
+
+static void RsSend(u8 kind, const u8 *body, u16 len)
+{
+    static u8 p[6 + 7 + RS_HASH_CHUNK * 4 + MF_STATE_PAGE];
+
+    p[0] = MPR_FIGHT_RESYNC;
+    p[1] = kind;
+    Put32(p + 2, sNet.session);
+    if (len > 0)
+        memcpy(p + 6, body, len);
+    if (FriendValid(sNet.peer))
+        MP_SendRelay(sNet.peer, p, 6 + len);
+}
+
+static void PutInfo(u8 *p, const struct MfStateInfo *info)
+{
+    Put32(p, (u32)info->heapBase);
+    Put32(p + 4, (u32)(info->heapBase >> 32));
+    Put32(p + 8, info->heapUsed);
+    Put32(p + 12, info->globalsSize);
+    Put32(p + 16, info->layout);
+    Put32(p + 20, info->pages[MF_STATE_GLOBALS]);
+    Put32(p + 24, info->pages[MF_STATE_HEAP]);
+    memcpy(p + 28, info->host, 64);
+}
+
+static void GetInfo(const u8 *p, struct MfStateInfo *info)
+{
+    memset(info, 0, sizeof(*info));
+    info->heapBase = Get32(p) | ((unsigned long long)Get32(p + 4) << 32);
+    info->heapUsed = Get32(p + 8);
+    info->globalsSize = Get32(p + 12);
+    info->layout = Get32(p + 16);
+    info->pages[MF_STATE_GLOBALS] = Get32(p + 20);
+    info->pages[MF_STATE_HEAP] = Get32(p + 24);
+    memcpy(info->host, p + 28, 64);
+}
+
+static void RsForgetHashes(void)
+{
+    memset(sNet.hashFrame, 0, sizeof(sNet.hashFrame));
+}
+
+// The host: both games stop after frame `at` (from `from`: far enough ahead for the message to get there first)
+static void RsStart(u32 from)
+{
+    u32 at = from + RESYNC_AHEAD + sNet.rtt16 / 16 + sNet.delay;
+
+    sRs.stage = RS_HOLD;
+    sRs.at = at;
+    sRs.timer = 0;
+    sRs.haveInfo = FALSE;
+    sRs.got[0] = sRs.got[1] = 0;
+    MPNet_Log("fight: desync: both games stop after frame %u for the host's state", at);
+}
+
+static void RequestResync(void)
+{
+    u32 cur = MfEngine_FrameCount();
+
+    if (sRs.stage != RS_NONE || sNet.stage != NET_RUNNING || !MfEngine_Kept(NULL))
+        return;   // only during the match (its frames are kept)
+    if (sNet.side == 0)
+        RsStart(cur > sNet.peerFrame ? cur : sNet.peerFrame);
+    else if (sRs.askFrame == 0)
+        sRs.askFrame = cur;
+}
+
+// What the other game's button packets say about it
+static void RsOnInput(u32 at, u32 ask)
+{
+    u32 cur = MfEngine_FrameCount();
+
+    if (sNet.side == 0)
+    {
+        // the other game saw a desync, or our stop came too late for it
+        if (ask != 0 && (sRs.stage == RS_NONE || (sRs.stage == RS_HOLD && sRs.at < ask + 2)))
+            RsStart(cur > ask ? cur : ask);
+        return;
+    }
+    if (at == 0 || at == sRs.lastAt || (sRs.stage != RS_NONE && at == sRs.at))
+        return;
+    if (cur > at)
+    {
+        sRs.askFrame = cur;     // too late here: again, from here
+        return;
+    }
+    sRs.stage = RS_HOLD;
+    sRs.at = at;
+    sRs.timer = 0;
+    sRs.askFrame = 0;
+}
+
+// The other game, stopped after the frame: its state's info and a hash of each page
+static void RsSendState(void)
+{
+    static u8 body[7 + RS_HASH_CHUNK * 4];
+    static u32 hashes[RS_HASH_CHUNK];
+    struct MfStateInfo info;
+    u32 first, i;
+    int r;
+
+    if (!MfEngine_StateInfo(&info))
+        return;
+    Put32(body, sRs.at);
+    PutInfo(body + 4, &info);
+    RsSend(RS_MSG_INFO, body, 4 + RS_INFO_BYTES);
+    for (r = 0; r < MF_STATE_REGIONS; r++)
+    {
+        for (first = 0; first < info.pages[r]; first += RS_HASH_CHUNK)
+        {
+            u16 count = info.pages[r] - first < RS_HASH_CHUNK ? info.pages[r] - first : RS_HASH_CHUNK;
+            MfEngine_StateHashes(r, first, count, hashes);
+            body[0] = r;
+            Put32(body + 1, first);
+            body[5] = count;
+            body[6] = count >> 8;
+            for (i = 0; i < count; i++)
+                Put32(body + 7 + i * 4, hashes[i]);
+            RsSend(RS_MSG_HASHES, body, 7 + count * 4);
+        }
+    }
+    sRs.stage = RS_SENT;
+    sRs.begun = FALSE;
+    sRs.pages = 0;
+    MPNet_Log("fight: desync: state after frame %u sent to the host (%u + %u pages)", sRs.at,
+              info.pages[MF_STATE_GLOBALS], info.pages[MF_STATE_HEAP]);
+}
+
+// The host, stopped after the frame with the other game's hashes: the pages that differ, then the end
+static void RsServe(void)
+{
+    static u32 diff[RESYNC_MAX_PAGES];
+    static u32 mine[RS_HASH_CHUNK];
+    static u8 body[5 + MF_STATE_PAGE];
+    u8 end[4 + RS_INFO_BYTES];
+    struct MfStateInfo info;
+    u32 count = 0, i, first;
+    bool8 ok, globals;
+    int r;
+
+    if (!MfEngine_StateInfo(&info))
+        return;
+    ok = info.heapBase == sRs.theirs.heapBase;
+    globals = ok && info.layout == sRs.theirs.layout && info.globalsSize == sRs.theirs.globalsSize;
+    for (r = globals ? MF_STATE_GLOBALS : MF_STATE_HEAP; ok && r < MF_STATE_REGIONS; r++)
+    {
+        u32 *theirs = r == MF_STATE_HEAP ? sRsHeap : sRsGlobals;
+        u32 cap = r == MF_STATE_HEAP ? RESYNC_HEAP_PAGES : RESYNC_GLOBAL_PAGES;
+        for (first = 0; ok && first < info.pages[r]; first += RS_HASH_CHUNK)
+        {
+            u32 n = info.pages[r] - first < RS_HASH_CHUNK ? info.pages[r] - first : RS_HASH_CHUNK;
+            MfEngine_StateHashes(r, first, n, mine);
+            for (i = 0; i < n; i++)
+            {
+                u32 page = first + i;
+                if (page < sRs.theirs.pages[r] && page < cap && theirs[page] == mine[i])
+                    continue;
+                if (count == RESYNC_MAX_PAGES)
+                {
+                    ok = FALSE;
+                    break;
+                }
+                diff[count++] = page | ((u32)r << 31);
+            }
+        }
+    }
+    for (i = 0; ok && i < count; i++)
+    {
+        r = diff[i] >> 31;
+        body[0] = r;
+        Put32(body + 1, diff[i] & 0x7FFFFFFF);
+        MfEngine_StatePage(r, diff[i] & 0x7FFFFFFF, body + 5);
+        RsSend(RS_MSG_PAGE, body, 5 + MF_STATE_PAGE);
+    }
+    Put32(end, ok ? count : 0xFFFFFFFF);
+    PutInfo(end + 4, &info);
+    RsSend(RS_MSG_END, end, sizeof(end));
+    sRs.stage = RS_SENT;
+    MPNet_Log("fight: desync: %s after frame %u (%u pages%s)", ok ? "the state sent" : "no use going back",
+              sRs.at, count, globals ? "" : ", the heap only: another build");
+}
+
+static void OnResync(u8 from, const u8 *d, u16 len)
+{
+    u8 kind;
+
+    if (len < 6 || sNet.stage != NET_RUNNING || from != sNet.peer || Get32(d + 2) != sNet.session)
+        return;
+    sNet.heard = 0;
+    kind = d[1];
+    d += 6;
+    len -= 6;
+    switch (kind)
+    {
+    case RS_MSG_INFO:
+        if (sNet.side != 0 || sRs.stage == RS_NONE || len < 4 + RS_INFO_BYTES || Get32(d) != sRs.at)
+            break;
+        GetInfo(d + 4, &sRs.theirs);
+        sRs.haveInfo = TRUE;
+        sRs.got[0] = sRs.got[1] = 0;
+        break;
+    case RS_MSG_HASHES:
+        if (sNet.side != 0 || !sRs.haveInfo || len < 7 || d[0] >= MF_STATE_REGIONS)
+        {
+            break;
+        }
+        else
+        {
+            u32 *to = d[0] == MF_STATE_HEAP ? sRsHeap : sRsGlobals;
+            u32 cap = d[0] == MF_STATE_HEAP ? RESYNC_HEAP_PAGES : RESYNC_GLOBAL_PAGES;
+            u32 first = Get32(d + 1), i;
+            u16 count = d[5] | (d[6] << 8);
+            if (len < 7 + count * 4)
+                break;
+            for (i = 0; i < count; i++)
+                if (first + i < cap)
+                    to[first + i] = Get32(d + 7 + i * 4);
+            sRs.got[d[0]] += count;
+        }
+        break;
+    case RS_MSG_PAGE:
+        if (sNet.side == 0 || sRs.stage != RS_SENT || len < 5 + MF_STATE_PAGE)
+            break;
+        if (!sRs.begun)
+            sRs.begun = MfEngine_StateBegin();
+        if (MfEngine_StatePut(d[0], Get32(d + 1), d + 5))
+            sRs.pages++;
+        break;
+    case RS_MSG_END:
+        if (sNet.side == 0 || sRs.stage != RS_SENT || len < 4 + RS_INFO_BYTES)
+            break;
+        if (Get32(d) != 0xFFFFFFFF)
+        {
+            struct MfStateInfo info;
+            GetInfo(d + 4, &info);
+            if (!sRs.begun)
+                sRs.begun = MfEngine_StateBegin();
+            MfEngine_StateEnd(&info);
+            sRs.done++;
+            sRs.lastAt = sRs.at;
+            MPNet_Log("fight: desync: the host's state loaded after frame %u (%u pages)", sRs.at, sRs.pages);
+        }
+        RsSend(RS_MSG_DONE, NULL, 0);
+        RsForgetHashes();
+        sRs.stage = RS_NONE;
+        break;
+    case RS_MSG_DONE:
+        if (sNet.side != 0 || sRs.stage != RS_SENT)
+            break;
+        RsForgetHashes();
+        sRs.stage = RS_NONE;
+        sRs.done++;
+        MPNet_Log("fight: desync: both games go on from frame %u", sRs.at);
+        break;
+    }
+}
+
+// Every frame: stopped after the frame (its buttons all known, nothing to go back for), the state goes over
+static void RsStep(u32 cur)
+{
+    if (sRs.stage == RS_NONE)
+        return;
+    if (++sRs.timer >= RESYNC_GIVE_UP)
+    {
+        MPNet_Log("fight: desync: no state after %d s, going on as it is", RESYNC_GIVE_UP / 60);
+        sRs.stage = RS_NONE;
+        RsForgetHashes();
+        return;
+    }
+    if (sRs.stage != RS_HOLD || cur != sRs.at || sNet.remoteLast < sRs.at || sNet.rollbackFrom != 0 || !MfEngine_Ready())
+        return;
+    if (sNet.side != 0)
+        RsSendState();
+    else if (sRs.haveInfo && sRs.got[MF_STATE_GLOBALS] >= sRs.theirs.pages[MF_STATE_GLOBALS]
+             && sRs.got[MF_STATE_HEAP] >= sRs.theirs.pages[MF_STATE_HEAP])
+        RsServe();
 }
 
 static void ButtonsFor(u32 frame, u16 *buttons)
@@ -641,6 +959,7 @@ static void BeginOnline(void)
     sNet.rtt16 = 0;
     sNet.peerAhead = 0;
     sNet.rollbacks = sNet.framesBack = sNet.desyncs = sNet.checks = 0;
+    memset(&sRs, 0, sizeof(sRs));
     sNet.dropped = FALSE;
     sNet.peerEnded = FALSE;
     memset(sNet.udpIp, 0, sizeof(sNet.udpIp));
@@ -680,8 +999,9 @@ static void EndOnline(void)
     p[5] = engine;
     if (FriendValid(sNet.peer))
         MP_SendRelay(sNet.peer, p, sizeof(p));
-    MPNet_Log("fight: online result %d (engine %d, side %d), %u rollbacks (%u frames), %u checks agreed, %u not",
-              result, engine, sNet.side, sNet.rollbacks, sNet.framesBack, sNet.checks, sNet.desyncs);
+    MPNet_Log("fight: online result %d (engine %d, side %d), %u rollbacks (%u frames), %u checks agreed, %u not, "
+              "%u recovered", result, engine, sNet.side, sNet.rollbacks, sNet.framesBack, sNet.checks, sNet.desyncs,
+              sRs.done);
     if (sNet.peerEnded && sNet.peerResult != engine && !sNet.dropped)
         MPNet_Log("fight: the other game ended with %d", sNet.peerResult);
     Tally(result, TRUE);
@@ -735,6 +1055,27 @@ static void Overlay(void)
         snprintf(text, sizeof(text), "Waiting for %s... %u", name, (DROP_FRAMES - sNet.heard) / 60 + 1);
     }
     Fight_SetOverlay(text, sNet.badTimer > 0);
+}
+
+// Tests (MOEMON_FIGHT_TEST_DESYNC=N): N frames into the match, player 1's life changes in this game alone
+static void TestDesync(u32 cur)
+{
+    static u32 sPokeAt;
+    const char *env = getenv("MOEMON_FIGHT_TEST_DESYNC");
+
+    if (env == NULL || cur < 2)
+    {
+        sPokeAt = 0;
+        return;
+    }
+    if (sPokeAt == 0 && MfEngine_Kept(NULL))
+        sPokeAt = cur + atoi(env);
+    if (sPokeAt != 0 && cur == sPokeAt && MfEngine_Ready())
+    {
+        MfEngine_TestPoke(-7);
+        MPNet_Log("fight: test: player 1's life changed here alone at frame %u", cur);
+        sPokeAt = 0xFFFFFFFF;
+    }
 }
 
 static bool8 NetStep(void)
@@ -805,8 +1146,10 @@ static bool8 NetStep(void)
     else
         sNet.rollbackFrom = 0;
 
+    TestDesync(cur);
+    RsStep(cur);
     next = cur + 1;
-    if (MfEngine_Ready())
+    if (MfEngine_Ready() && (sRs.stage == RS_NONE || next <= sRs.at))
     {
         bool8 known = next <= sNet.remoteLast;
         bool8 guess = !known && next - sNet.remoteLast <= MAX_AHEAD && MfEngine_Kept(&oldest)
@@ -834,7 +1177,7 @@ static void OnInput(u8 from, const u8 *d, u16 len)
         return;
     last = Get32(d + 5);
     n = d[9];
-    if (n == 0 || n > SEND_MAX || len < 10 + 2 * n + 23)
+    if (n == 0 || n > SEND_MAX || len < 10 + 2 * n + 31)
         return;
     sNet.heard = 0;
     first = last - n + 1;
@@ -864,6 +1207,7 @@ static void OnInput(u8 from, const u8 *d, u16 len)
     sNet.echoTick = q[16] | (q[17] << 8);
     sNet.echoAt = sTick;
     sNet.peerAhead = (s8)q[22];
+    RsOnInput(Get32(q + 23), Get32(q + 27));
 }
 
 // ---------------------------------------------------------------------------
@@ -1017,6 +1361,9 @@ void MP_Fight_OnRelay(u8 from, const u8 *data, u16 len)
         break;
     case MPR_FIGHT_UDP:
         OnUdpInfo(from, data, len);
+        break;
+    case MPR_FIGHT_RESYNC:
+        OnResync(from, data, len);
         break;
     }
 }

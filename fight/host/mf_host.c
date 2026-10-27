@@ -1284,6 +1284,215 @@ unsigned int MfEngine_Hash(void)
     return sHash;
 }
 
+/* ------------------------------------------------------------------ desync recovery */
+
+static unsigned char *Host_Region(int region, size_t *size)
+{
+    size_t used;
+
+    if (region == MF_STATE_GLOBALS) {
+        return MfRollback_Globals(size);
+    }
+    used = MfMem_Used();
+    *size = MfMem_Base() != NULL && used > MF_MEM_STACK_SIZE ? used - MF_MEM_STACK_SIZE : 0;
+    return MfMem_Base() != NULL ? MfMem_Base() + MF_MEM_STACK_SIZE : NULL;   /* not the stack: each its own */
+}
+
+/* The engine waits between frames (sLock held) */
+static int Host_Idle(void)
+{
+    return sActive && !sBusy && sCmd == CMD_NONE && sState != HOST_DEAD;
+}
+
+static unsigned int Host_PageHash(const unsigned char *p, size_t n)
+{
+    unsigned long long h = 0x9E37;
+    size_t i;
+
+    for (i = 0; i + 8 <= n; i += 8) {
+        unsigned long long w;
+        memcpy(&w, p + i, 8);
+        h = (h ^ w) * 0x9E3779B97F4A7C15ULL;
+        h ^= h >> 29;
+    }
+    for (; i < n; i++) {
+        h = (h ^ p[i]) * 0x100000001B3ULL;
+    }
+    return (unsigned int)(h ^ (h >> 32)) | 1;   /* 0: no page */
+}
+
+/* The globals' layout in this build: their size and where a few of them are */
+static unsigned int Host_Layout(void)
+{
+    size_t size;
+    unsigned char *start = MfRollback_Globals(&size);
+    unsigned long long v[5];
+
+    v[0] = size;
+    v[1] = (unsigned long long)((unsigned char *)&g_game - start);
+    v[2] = (unsigned long long)((unsigned char *)&g_renderTarget - start);
+    v[3] = sizeof(GameVars);
+#ifdef _WIN32
+    v[4] = 1;
+#else
+    v[4] = 2;
+#endif
+    return Host_PageHash((const unsigned char *)v, sizeof(v));
+}
+
+int MfEngine_StateInfo(struct MfStateInfo *out)
+{
+    size_t size;
+    int ok;
+
+    memset(out, 0, sizeof(*out));
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && MfMem_Base() != NULL;
+    if (ok) {
+        out->heapBase = (unsigned long long)(uintptr_t)MfMem_Base();
+        out->heapUsed = (unsigned int)MfMem_Used();
+        Host_Region(MF_STATE_GLOBALS, &size);
+        out->globalsSize = (unsigned int)size;
+        out->layout = Host_Layout();
+        out->pages[MF_STATE_GLOBALS] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_Region(MF_STATE_HEAP, &size);
+        out->pages[MF_STATE_HEAP] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_PackVars(out->host);
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateHashes(int region, unsigned int first, unsigned int count, unsigned int *out)
+{
+    size_t size, at;
+    unsigned char *base;
+    unsigned int i;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    base = Host_Region(region, &size);
+    for (i = 0; i < count; i++) {
+        at = (size_t)(first + i) * MF_STATE_PAGE;
+        out[i] = base == NULL || at >= size ? 0
+               : Host_PageHash(base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StatePage(int region, unsigned int index, unsigned char *out)
+{
+    size_t size, at = (size_t)index * MF_STATE_PAGE;
+    unsigned char *base;
+    int ok;
+
+    memset(out, 0, MF_STATE_PAGE);
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && region >= 0 && region < MF_STATE_REGIONS;
+    if (ok) {
+        base = Host_Region(region, &size);
+        ok = base != NULL && at < size;
+        if (ok) {
+            memcpy(out, base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateBegin(void)
+{
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        MfRollback_End();       /* the frames kept no longer lead here */
+        MfMem_MapLocal();
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StatePut(int region, unsigned int index, const unsigned char *page)
+{
+    size_t at = (size_t)index * MF_STATE_PAGE, size, n, w;
+    unsigned char *base, *dst;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    if (region == MF_STATE_HEAP) {
+        /* the heap may reach further there: ours grows to it */
+        size_t end = MF_MEM_STACK_SIZE + at + MF_STATE_PAGE;
+        if (MfMem_Base() == NULL || end > MfMem_Size()) {
+            pthread_mutex_unlock(&sLock);
+            return 0;
+        }
+        if (end > MfMem_Used()) {
+            MfMem_SetUsed(end);
+        }
+    }
+    base = Host_Region(region, &size);
+    if (base == NULL || at >= size) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    dst = base + at;
+    n = size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE;
+    for (w = 0; w + 8 <= n; w += 8) {
+        unsigned long long mine, theirs;
+        memcpy(&mine, dst + w, 8);
+        memcpy(&theirs, page + w, 8);
+        if (mine != theirs && !MfMem_LocalPointer(mine)) {
+            memcpy(dst + w, &theirs, 8);
+        }
+    }
+    for (; w < n; w++) {
+        dst[w] = page[w];
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StateEnd(const struct MfStateInfo *from)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        Host_UnpackVars(from->host);
+        if (from->heapUsed > MfMem_Used()) {
+            MfMem_SetUsed(from->heapUsed);
+        }
+        sHash = Host_Hash();
+        if (sSession.rollback && sZone) {
+            Host_PackVars(vars);
+            MfRollback_Begin(sFrame, vars);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+void MfEngine_TestPoke(int delta)
+{
+    pthread_mutex_lock(&sLock);
+    if (Host_Idle() && g_game != NULL && g_game->players[1] != NULL) {
+        g_game->players[1]->life += delta;
+        sHash = Host_Hash();
+    }
+    pthread_mutex_unlock(&sLock);
+}
+
 const unsigned short *MfEngine_Frame(void)
 {
     return sHaveFrame ? sFrames[sFront] : NULL;

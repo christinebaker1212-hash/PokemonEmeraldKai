@@ -64,6 +64,13 @@ static size_t Rb_GlobalsSize(void)
     return (size_t)(STATE_END - STATE_START);
 }
 
+/* The engine's globals section (desync recovery reads and writes it page by page: mf_host.c) */
+unsigned char *MfRollback_Globals(size_t *size)
+{
+    *size = Rb_GlobalsSize();
+    return STATE_START;
+}
+
 /* Copies the globals' section whole: with AddressSanitizer (tests) it holds the guard zones between the
  * globals too, so the copy mustn't be checked */
 #if defined(__SANITIZE_ADDRESS__)

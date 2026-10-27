@@ -26,5 +26,7 @@ void MfRollback_ThreadInit(void);
 int MfRollback_KeepStart(const void *host);
 int MfRollback_RestoreStart(void *host);
 void MfRollback_Stats(MfRbStats *out);
+/* The engine's globals section */
+unsigned char *MfRollback_Globals(size_t *size);
 
 #endif

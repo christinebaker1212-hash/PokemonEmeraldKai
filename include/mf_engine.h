@@ -93,6 +93,33 @@ int MfEngine_RollBack(unsigned int frame);
 void MfEngine_StepQuiet(const unsigned short buttons[2]);
 // A hash of what both players' games must agree on after the last frame (players, timer, RNGs)
 unsigned int MfEngine_Hash(void);
+
+// Desync recovery: the fight's state (between frames, the engine waiting) in 4 KB pages of two regions, the
+// engine's globals (MF_STATE_GLOBALS: the same layout only in the same build) and its heap (MF_STATE_HEAP: the
+// same addresses on every PC). One player's pages that differ are written into the other's game, word by word:
+// a word holding a pointer into this PC's own memory outside the heap (code, the C library's heap) stays.
+#define MF_STATE_PAGE 4096
+enum { MF_STATE_GLOBALS, MF_STATE_HEAP, MF_STATE_REGIONS };
+struct MfStateInfo
+{
+    unsigned long long heapBase;
+    unsigned int heapUsed;            // bytes of the heap in use (its pages: from the stack's end to there)
+    unsigned int globalsSize;
+    unsigned int layout;              // the build's layout of the globals (only the same layout takes them)
+    unsigned int pages[MF_STATE_REGIONS];
+    unsigned char host[64];           // the host's own values (clock, buttons held...)
+};
+int MfEngine_StateInfo(struct MfStateInfo *out);
+// out: a hash of each page first..first+count-1 of region (0 when it isn't there)
+int MfEngine_StateHashes(int region, unsigned int first, unsigned int count, unsigned int *out);
+int MfEngine_StatePage(int region, unsigned int index, unsigned char *out);
+// Writing pages: StateBegin first (the frames kept are gone), then StatePut per page, then StateEnd with the
+// other game's info (its own values, how much heap it uses): frames are kept again from this one
+int MfEngine_StateBegin(void);
+int MfEngine_StatePut(int region, unsigned int index, const unsigned char *page);
+int MfEngine_StateEnd(const struct MfStateInfo *from);
+// Tests: changes player 1's life by delta (a desync)
+void MfEngine_TestPoke(int delta);
 // The last frame drawn: MF_SCREEN_W x MF_SCREEN_H RGB565 pixels, or NULL before the first one.
 const unsigned short *MfEngine_Frame(void);
 // Counts the frames drawn (a new picture when it changes)

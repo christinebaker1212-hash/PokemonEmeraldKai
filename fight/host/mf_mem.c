@@ -219,3 +219,57 @@ char *MfMem_Strdup(const char *s)
     }
     return copy;
 }
+
+/* ------------------------------------------------------------------ pointers of this process */
+
+#ifndef _WIN32
+static struct { unsigned long long from, to; } sMaps[512];
+static int sMapCount;
+#endif
+
+void MfMem_MapLocal(void)
+{
+#ifndef _WIN32
+    FILE *f = fopen("/proc/self/maps", "r");
+    char line[512];
+
+    sMapCount = 0;
+    while (f != NULL && fgets(line, sizeof(line), f) != NULL && sMapCount < 512) {
+        unsigned long long a, b;
+        if (sscanf(line, "%llx-%llx", &a, &b) == 2) {
+            sMaps[sMapCount].from = a;
+            sMaps[sMapCount].to = b;
+            sMapCount++;
+        }
+    }
+    if (f != NULL) {
+        fclose(f);
+    }
+#endif
+}
+
+int MfMem_LocalPointer(unsigned long long value)
+{
+    if (value < 0x10000 || (sBase != NULL && value >= (uintptr_t)sBase && value < (uintptr_t)sBase + sSize)) {
+        return 0;
+    }
+#ifdef _WIN32
+    {
+        MEMORY_BASIC_INFORMATION info;
+        if (value >= 0x800000000000ULL || VirtualQuery((void *)(uintptr_t)value, &info, sizeof(info)) == 0) {
+            return 0;
+        }
+        return info.State == MEM_COMMIT;
+    }
+#else
+    {
+        int i;
+        for (i = 0; i < sMapCount; i++) {
+            if (value >= sMaps[i].from && value < sMaps[i].to) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+#endif
+}

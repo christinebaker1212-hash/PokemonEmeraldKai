@@ -1,0 +1,13 @@
+# Moemon Fight online, desync recovery: as fight_online, but 120 frames into the match BOB's game alone takes 7
+# from player 1's life (a desync). The next check finds it, both games stop at the same frame, BOB's game sends a
+# hash of each page of its state and ALICE's (the host, P1) sends back the pages that differ; from then on both
+# agree again to the end (check.sh)
+MODE=2
+TMO=600
+WARP=10,3,6,9
+WARP_B=10,3,9,9
+ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
+ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_TEST_DESYNC=120"
+EXPECT_A=("fight: desync at" "fight: desync: both games stop after frame" "fight: desync: the state sent after frame" "fight: desync: both games go on" "fight: online result")
+EXPECT_B=("fight: test: player 1's life changed" "fight: desync: state after frame" "fight: desync: the host's state loaded" "fight: online result")
+CHECK="bash tools/test/scenarios/fight_resync/check.sh"

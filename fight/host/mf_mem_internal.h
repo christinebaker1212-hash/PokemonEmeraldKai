@@ -20,5 +20,9 @@ void MfMem_SetUsed(size_t used);
 void *MfMem_StackTop(void);
 /* Frees from other threads that were left alone */
 size_t MfMem_Leaked(void);
+/* Desync recovery: notes what this process has mapped (MfMem_MapLocal, before a series of checks), then whether a
+ * value is a pointer into it outside the region (code, the C library's heap: different on every PC) */
+void MfMem_MapLocal(void);
+int MfMem_LocalPointer(unsigned long long value);
 
 #endif
