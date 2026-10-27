@@ -20,6 +20,29 @@ void TcgDuel_Log(struct TcgDuel *g, const char *format, ...)
     vsnprintf(g->log[g->logCount++], TCG_LOG_WIDTH, format, ap);
     va_end(ap);
 }
+void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned slot, unsigned value, unsigned card,
+                   unsigned flags)
+{
+    struct TcgEvent *e = &g->events[g->eventSeq++ % TCG_EVENT_RING];
+    e->type = type;
+    e->player = player;
+    e->slot = slot;
+    e->value = value;
+    e->card = card;
+    e->flags = flags;
+}
+const struct TcgEvent *TcgDuel_GetEvent(const struct TcgDuel *g, uint32_t seq)
+{
+    if (seq >= g->eventSeq || g->eventSeq - seq > TCG_EVENT_RING)
+        return NULL;
+    return &g->events[seq % TCG_EVENT_RING];
+}
+unsigned TcgDuel_Coin(struct TcgDuel *g, unsigned player)
+{
+    unsigned heads = Tcg_RandomBelow(&g->rng, 2);
+    TcgDuel_Event(g, TCG_EV_COIN, player, 0, heads, 0, 0);
+    return heads;
+}
 uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index)
 {
     uint8_t card = pile[index];
@@ -75,6 +98,7 @@ static void StartTurn(struct TcgDuel *g)
     unsigned s;
     p->energyPlayed = 0;
     p->confusionRetreatFailed = 0;
+    p->retreated = 0;
     p->turnsTaken++;
     g->turn++;
     g->phase = TCG_TURN;
@@ -84,13 +108,16 @@ static void StartTurn(struct TcgDuel *g)
         p->field[s].powerUsed = 0;
         p->field[s].barrier = 0;
     }
+    TcgDuel_Event(g, TCG_EV_TURN, g->current, 0, g->turn, 0, 0);
     if (!TcgDuel_Draw(g, g->current, 1))
     {
         g->winner = g->current ^ 1;
         g->phase = TCG_FINISHED;
         TcgDuel_Log(g, "Player %u cannot draw a card.", g->current + 1);
+        TcgDuel_Event(g, TCG_EV_WIN, g->winner, 0, 2, 0, 0);
         return;
     }
+    TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, 1, 0, 0);
     TcgDuel_Log(g, "Player %u draws a card.", g->current + 1);
 }
 int TcgDuel_Init(struct TcgDuel *g, const uint16_t a[60], const uint16_t b[60], uint32_t seed, unsigned prizes)
@@ -208,9 +235,13 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
                 struct TcgPlayer *winner = &g->players[who ^ 1];
                 unsigned prize = !f->noPrize;
                 TcgDuel_Log(g, "%s is Knocked Out.", c->name);
+                TcgDuel_Event(g, TCG_EV_KO, who, s, 0, c->id, 0);
                 TcgDuel_DiscardField(g, who, s);
                 if (prize && winner->prizeSize)
+                {
                     winner->hand[winner->handSize++] = winner->prizes[--winner->prizeSize];
+                    TcgDuel_Event(g, TCG_EV_PRIZE, who ^ 1, 0, winner->prizeSize, 0, 0);
+                }
             }
         }
     for (who = 0; who < 2; who++)
@@ -218,10 +249,15 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
     if (win[0] && win[1])
     {
         uint16_t decks[2][60];
-        uint32_t rng = g->rng;
+        uint32_t rng = g->rng, seq = g->eventSeq;
+        struct TcgEvent events[TCG_EVENT_RING];
         memcpy(decks[0], g->players[0].cards, sizeof(decks[0]));
         memcpy(decks[1], g->players[1].cards, sizeof(decks[1]));
+        memcpy(events, g->events, sizeof(events));
         TcgDuel_Init(g, decks[0], decks[1], rng, 1);
+        memcpy(g->events, events, sizeof(events));
+        g->eventSeq = seq;
+        TcgDuel_Event(g, TCG_EV_SUDDEN_DEATH, 0, 0, 0, 0, 0);
         TcgDuel_Log(g, "Sudden death: play again with one Prize card.");
         return;
     }
@@ -230,6 +266,7 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
         g->winner = win[0] ? 0 : 1;
         g->phase = TCG_FINISHED;
         TcgDuel_Log(g, "Player %u wins the duel.", g->winner + 1);
+        TcgDuel_Event(g, TCG_EV_WIN, g->winner, 0, g->players[g->winner].prizeSize ? 1 : 0, 0, 0);
         return;
     }
     for (who = 0; who < 2; who++)
@@ -263,8 +300,11 @@ static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
-    if (p->field[0].condition == TCG_PARALYZED)
+    if (p->field[0].stackSize && p->field[0].condition == TCG_PARALYZED)
+    {
         p->field[0].condition = TCG_HEALTHY;
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, TCG_HEALTHY, 0, p->field[0].poison);
+    }
     for (s = 0; s < TCG_FIELD_SIZE; s++)
     {
         p->field[s].plusPower = 0;
@@ -277,9 +317,15 @@ static void EndTurn(struct TcgDuel *g)
         if (!f->stackSize)
             continue;
         if (f->poison)
+        {
             f->damage += f->poison;
-        if (f->condition == TCG_ASLEEP && Tcg_RandomBelow(&g->rng, 2))
+            TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, f->poison, 0, TCG_DMG_POISON);
+        }
+        if (f->condition == TCG_ASLEEP && TcgDuel_Coin(g, who))
+        {
             f->condition = TCG_HEALTHY;
+            TcgDuel_Event(g, TCG_EV_STATUS, who, 0, TCG_HEALTHY, 0, f->poison);
+        }
         if (f->defender)
             f->defender--;
     }
@@ -327,6 +373,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     {
         g->winner = g->current ^ 1;
         g->phase = TCG_FINISHED;
+        TcgDuel_Event(g, TCG_EV_WIN, g->winner, 0, 3, 0, 0);
         return TCG_OK;
     }
     if (g->phase == TCG_PROMOTION)
@@ -337,6 +384,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         g->players[who].field[0] = g->players[who].field[s];
         memset(&g->players[who].field[s], 0, sizeof(struct TcgFieldCard));
         ClearCondition(&g->players[who].field[0]);
+        TcgDuel_Event(g, TCG_EV_PROMOTE, who, s, 0, TcgDuel_Field(g, who, 0)->id, 0);
         g->phase = TCG_TURN;
         TcgDuel_ResolveKnockouts(g);
         if (g->phase == TCG_TURN && g->needsTurnStart)
@@ -348,6 +396,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (g->phase != TCG_SETUP || !p->field[0].stackSize)
             return Error(g, "Choose an Active Pokemon first.");
         p->setupDone = 1;
+        TcgDuel_Event(g, TCG_EV_SETUP_DONE, g->current, 0, 0, 0, 0);
         if (g->players[g->current ^ 1].setupDone)
         {
             g->current = g->first;
@@ -368,7 +417,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     {
         const struct TcgCard *attacker = TcgDuel_Field(g, g->current, 0), *target = TcgDuel_Field(g, g->current ^ 1, 0);
         const struct TcgAttack *attack;
-        unsigned damage;
+        unsigned damage, flags = 0, before[3], selfDamage;
         int result;
         f = &p->field[0];
         if (!attacker || !target || !TcgDuel_CanAttack(g, g->current, a->attack))
@@ -381,21 +430,38 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
-        if (f->condition == TCG_CONFUSED && !Tcg_RandomBelow(&g->rng, 2))
+        TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
+        if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
             f->damage += 20;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, 20, 0, TCG_DMG_SELF);
             TcgDuel_Log(g, "Confusion: %s does 20 damage to itself.", attacker->name);
-            EndTurn(g);
+            TcgDuel_ResolveKnockouts(g);
+            if (g->phase != TCG_FINISHED && g->phase != TCG_SETUP)
+                EndTurn(g);
             return TCG_OK;
+        }
+        {
+            struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
+            before[0] = foe->condition;
+            before[1] = foe->poison;
+            before[2] = f->barrier;
+            selfDamage = f->damage;
         }
         damage = attack->damage;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
             return result;
-        if (target->weakness == attacker->type)
+        if (damage && target->weakness == attacker->type)
+        {
             damage *= 2;
-        if (target->resistance == attacker->type)
+            flags |= TCG_DMG_WEAK;
+        }
+        if (damage && target->resistance == attacker->type)
+        {
             damage = damage > 30 ? damage - 30 : 0;
+            flags |= TCG_DMG_RESIST;
+        }
         if (damage)
             damage += 10 * AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
         {
@@ -403,12 +469,27 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             damage = damage > reduction ? damage - reduction : 0;
         }
         if (g->players[g->current ^ 1].field[0].barrier)
+        {
+            if (damage)
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
             damage = 0;
+        }
         TcgDuel_Damage(g, g->current ^ 1, 0, damage);
+        if (damage)
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current ^ 1, 0, damage, 0, flags);
         TcgDuel_Log(g, "%s uses %s for %u damage.", attacker->name, attack->name, damage);
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
         if (result != TCG_OK)
             return result;
+        /* Effects change conditions as they resolve; show them after the hit. */
+        {
+            struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
+            if (foe->stackSize && (foe->condition != before[0] || foe->poison != before[1]))
+                TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
+            if (f->damage < selfDamage)
+                TcgDuel_Event(g, TCG_EV_HEAL, g->current, 0, selfDamage - f->damage, 0, 0);
+            (void)before[2];
+        }
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
         TcgDuel_ResolveKnockouts(g);
@@ -424,6 +505,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f = &p->field[0];
         if (!c || s < 1 || s >= TCG_FIELD_SIZE || !p->field[s].stackSize)
             return Error(g, "Choose a Benched Pokemon.");
+        if (p->retreated)
+            return Error(g, "You can only retreat once each turn.");
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
             p->confusionRetreatFailed)
             return Error(g, "This Pokemon cannot retreat.");
@@ -443,9 +526,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         c = TcgDuel_Field(g, g->current, 0);
         if (n < c->retreat)
             return Error(g, "Not enough Energy selected for retreat.");
-        if (f->condition == TCG_CONFUSED && !Tcg_RandomBelow(&g->rng, 2))
+        p->retreated = 1;
+        if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
             p->confusionRetreatFailed = 1;
+            TcgDuel_Event(g, TCG_EV_RETREAT_FAIL, g->current, 0, 0, 0, 0);
             TcgDuel_Log(g, "Confusion: retreat failed after discarding Energy.");
             return TCG_OK;
         }
@@ -454,6 +539,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         p->field[s] = temp;
         ClearCondition(&p->field[s]);
         p->confusionRetreatFailed = 0;
+        TcgDuel_Event(g, TCG_EV_RETREAT, g->current, s, 0, 0, 0);
         return TCG_OK;
     }
     if (a->type == TCG_USE_POWER)
@@ -473,6 +559,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Choose a Basic Pokemon and an empty Bench slot.");
         f->stack[f->stackSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         f->enteredTurn = g->turn;
+        TcgDuel_Event(g, TCG_EV_PLAY, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, c->name);
         return TCG_OK;
     case TCG_EVOLVE:
@@ -484,6 +571,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f->stack[f->stackSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         f->enteredTurn = g->turn;
         ClearCondition(f);
+        TcgDuel_Event(g, TCG_EV_EVOLVE, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Evolved into %s.", c->name);
         return TCG_OK;
     case TCG_ATTACH:
@@ -491,6 +579,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Only one Energy card may be attached from your hand each turn.");
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
+        TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
         return TCG_OK;
     default:
         return Error(g, "That action is not available.");

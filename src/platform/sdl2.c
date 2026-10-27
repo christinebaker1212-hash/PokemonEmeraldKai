@@ -951,9 +951,10 @@ bool8 Platform_IsTestMode(void)
 }
 
 // shotburst PREFIX FRAMES [STEP]: a screenshot every STEP frames (default 1) for the next FRAMES frames, while the
-// script goes on (PREFIX_0000.bmp ...): to catch a glitch that lasts a few frames
+// script goes on (PREFIX_0000.bmp ...): to catch a glitch that lasts a few frames. rendershotburst: the same with
+// the real window output (overlays such as the card screens included)
 static char sBurstName[64];
-static int sBurstLeft, sBurstStep, sBurstIndex;
+static int sBurstLeft, sBurstStep, sBurstIndex, sBurstRender;
 
 static void TestHarnessStep(void)
 {
@@ -965,7 +966,16 @@ static void TestHarnessStep(void)
         {
             char name[96];
             snprintf(name, sizeof(name), "%s_%04d", sBurstName, sBurstIndex++);
-            Platform_SaveScreenshot(name);
+            if (sBurstRender)
+            {
+                // rendershotburst: the real window output, overlays included
+                char path[1024];
+                snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, name);
+                Display_UploadFrame(sFrameImage);
+                Display_SaveOutputBMP(path);
+            }
+            else
+                Platform_SaveScreenshot(name);
         }
     }
 
@@ -1083,13 +1093,14 @@ static void TestHarnessStep(void)
         {
             Platform_SaveScreenshot(arg);
         }
-        else if (strcmp(cmd, "shotburst") == 0)
+        else if (strcmp(cmd, "shotburst") == 0 || strcmp(cmd, "rendershotburst") == 0)
         {
             int frames = 0, step = 1;
             sscanf(line, "%*s %63s %d %d", sBurstName, &frames, &step);
             sBurstStep = step > 0 ? step : 1;
             sBurstLeft = frames;
             sBurstIndex = 0;
+            sBurstRender = cmd[0] == 'r';
         }
         else if (strcmp(cmd, "waitfor") == 0 || strcmp(cmd, "pressuntil") == 0)
         {

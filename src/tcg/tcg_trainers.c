@@ -49,28 +49,30 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         return Fail(g, "Choose a Trainer card.");
     /* The transactional caller restores all piles if any selection is invalid. */
     TcgPile_Remove(p->hand, &p->handSize, a->hand);
+    TcgDuel_Event(g, TCG_EV_TRAINER, g->current, a->slot, 0, id, 0);
     switch (id)
     {
     case TCG_CARD_PROFESSOR_OAK:
         while (p->handSize)
             p->discard[p->discardSize++] = p->hand[--p->handSize];
-        TcgDuel_Draw(g, g->current, 7);
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, 7), 0, 0);
         break;
     case TCG_CARD_IMPOSTER_PROFESSOR_OAK:
         while (op->handSize)
             op->deck[op->deckSize++] = op->hand[--op->handSize];
         TcgDuel_Shuffle(g, g->current ^ 1);
-        TcgDuel_Draw(g, g->current ^ 1, 7);
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current ^ 1, 0, TcgDuel_Draw(g, g->current ^ 1, 7), 0, 0);
         break;
     case TCG_CARD_BILL:
         if (!p->deckSize)
             return Fail(g, "Your deck is empty.");
-        TcgDuel_Draw(g, g->current, 2);
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, 2), 0, 0);
         break;
     case TCG_CARD_IMAKUNI_CARD:
         if (!p->field[0].stackSize)
             return TCG_INVALID;
         p->field[0].condition = TCG_CONFUSED;
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, TCG_CONFUSED, 0, p->field[0].poison);
         break;
     case TCG_CARD_LASS:
         for (who = 0; who < 2; who++)
@@ -97,12 +99,15 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, at);
         }
         n = id == TCG_CARD_POTION ? 20 : 40;
-        f->damage = f->damage > n ? f->damage - n : 0;
+        n = f->damage > n ? n : f->damage;
+        f->damage -= n;
+        TcgDuel_Event(g, TCG_EV_HEAL, g->current, a->slot, n, 0, 0);
         break;
     case TCG_CARD_FULL_HEAL:
         if (!p->field[0].condition && !p->field[0].poison)
             return Fail(g, "Your Active Pokemon has no special condition.");
         Cure(&p->field[0]);
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, TCG_HEALTHY, 0, 0);
         break;
     case TCG_CARD_POKEMON_CENTER:
         n = 0;
@@ -113,6 +118,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             {
                 unsigned j;
                 n++;
+                TcgDuel_Event(g, TCG_EV_HEAL, g->current, i, f->damage, 0, 0);
                 f->damage = 0;
                 for (j = f->attachedSize; j > 0; j--)
                     if (Tcg_Card(p->cards[f->attached[j - 1]])->kind == TCG_ENERGY)
@@ -134,6 +140,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         q->field[0] = q->field[s];
         q->field[s] = temp;
         Cure(&q->field[s]);
+        TcgDuel_Event(g, TCG_EV_SWITCH, q == p ? g->current : g->current ^ 1, s, 0, 0, 0);
         break;
     }
     case TCG_CARD_ENERGY_SEARCH:
@@ -148,7 +155,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         at = Index(p->deck, p->deckSize, a->selections[0]);
         if (at < 0)
             return TCG_INVALID;
-        if (id == TCG_CARD_ENERGY_SEARCH || Tcg_RandomBelow(&g->rng, 2))
+        if (id == TCG_CARD_ENERGY_SEARCH || TcgDuel_Coin(g, g->current))
             p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, at);
         TcgDuel_Shuffle(g, g->current);
         break;
@@ -221,18 +228,19 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             if (!Move(p->hand, &p->handSize, p->deck, &p->deckSize, a->selections[i]))
                 return TCG_INVALID;
         TcgDuel_Shuffle(g, g->current);
-        TcgDuel_Draw(g, g->current, 1);
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, 1), 0, 0);
         break;
     case TCG_CARD_GAMBLER:
         while (p->handSize)
             p->deck[p->deckSize++] = p->hand[--p->handSize];
         TcgDuel_Shuffle(g, g->current);
-        TcgDuel_Draw(g, g->current, Tcg_RandomBelow(&g->rng, 2) ? 8 : 1);
+        n = TcgDuel_Coin(g, g->current) ? 8 : 1;
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, n), 0, 0);
         break;
     case TCG_CARD_RECYCLE:
         if (a->selectionCount != 1 || Index(p->discard, p->discardSize, a->selections[0]) < 0)
             return Fail(g, "Select a card from your discard pile.");
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             Move(p->discard, &p->discardSize, p->deck, &p->deckSize, a->selections[0]);
         break;
     case TCG_CARD_PLUSPOWER:

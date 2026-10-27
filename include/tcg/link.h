@@ -12,7 +12,7 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 1
+#define TCG_LINK_VERSION 2
 struct TcgLink
 {
     struct TcgDuel game;

@@ -58,25 +58,25 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     switch (e->kind)
     {
     case FX_PARALYZE_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             foe->condition = TCG_PARALYZED;
         break;
     case FX_POISON:
         foe->poison = e->amount;
         break;
     case FX_POISON_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             foe->poison = e->amount;
         break;
     case FX_CONFUSE_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             foe->condition = TCG_CONFUSED;
         break;
     case FX_SLEEP:
         foe->condition = TCG_ASLEEP;
         break;
     case FX_SLEEP_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             foe->condition = TCG_ASLEEP;
         break;
     case FX_DRAIN:
@@ -84,11 +84,11 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
             self->damage = self->damage > e->amount ? self->damage - e->amount : 0;
         break;
     case FX_BARRIER_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             self->barrier = 1;
         break;
     case FX_BONUS_COIN:
-        if (Tcg_RandomBelow(&g->rng, 2))
+        if (TcgDuel_Coin(g, g->current))
             *damage += e->amount;
         break;
     case FX_RAGE:
@@ -115,7 +115,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     }
     case FX_MULTI_COIN:
         for (i = 0; i < e->amount; i++)
-            n += Tcg_RandomBelow(&g->rng, 2);
+            n += TcgDuel_Coin(g, g->current);
         *damage *= n;
         break;
     case FX_DO_THE_WAVE:

@@ -131,5 +131,46 @@ int main(void)
     assert(TcgDuel_Init(&before, cards, cards, 456, 6));
     assert(!memcmp(&g, &before, sizeof(g)));
     puts("PASS deterministic independent rules state");
+    /* Retreat is once per turn, and every action leaves presentation events. */
+    {
+        uint32_t seq;
+        unsigned found = 0, i;
+        assert(TcgDuel_Init(&g, cards, cards, 789, 6));
+        Setup(&g);
+        player = g.current;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_BASIC;
+        a.slot = 1;
+        a.hand = GiveFromDeck(&g, player, TCG_CARD_CHARMANDER);
+        assert(TcgDuel_Apply(&g, &a) == TCG_OK);
+        for (i = 0; i < 2; i++)
+        {
+            a.type = TCG_ATTACH;
+            a.slot = 0;
+            a.hand = GiveFromDeck(&g, player, TCG_CARD_FIRE_ENERGY);
+            g.players[player].energyPlayed = 0;
+            assert(TcgDuel_Apply(&g, &a) == TCG_OK);
+        }
+        seq = g.eventSeq;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_RETREAT;
+        a.slot = 1;
+        a.selections[0] = g.players[player].field[0].attached[0];
+        a.selectionCount = 1;
+        assert(TcgDuel_Apply(&g, &a) == TCG_OK);
+        assert(TcgDuel_GetEvent(&g, seq)->type == TCG_EV_RETREAT);
+        a.selections[0] = g.players[player].field[1].attached[0];
+        assert(TcgDuel_Apply(&g, &a) == TCG_INVALID);
+        assert(strstr(g.error, "once"));
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PASS;
+        seq = g.eventSeq;
+        assert(TcgDuel_Apply(&g, &a) == TCG_OK);
+        for (; seq < g.eventSeq; seq++)
+            found |= 1u << TcgDuel_GetEvent(&g, seq)->type;
+        assert(found & (1u << TCG_EV_TURN) && found & (1u << TCG_EV_DRAW));
+        assert(!g.players[g.current].retreated);
+    }
+    puts("PASS retreat once per turn and presentation events");
     return 0;
 }

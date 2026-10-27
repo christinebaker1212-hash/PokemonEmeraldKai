@@ -251,6 +251,25 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
     }
     return Legal(g, a);
 }
+/* Public information only: printed damage, the Defending Pokemon's
+ * Weakness/Resistance and remaining HP. A Knock Out is worth the most. */
+static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c, unsigned attack)
+{
+    const struct TcgCard *foe = TcgDuel_Field(g, g->current ^ 1, 0);
+    const struct TcgFieldCard *f = &g->players[g->current ^ 1].field[0];
+    unsigned damage = c->attacks[attack].damage, left;
+    if (!foe)
+        return damage;
+    if (damage && foe->weakness == c->type)
+        damage *= 2;
+    if (damage && foe->resistance == c->type)
+        damage = damage > 30 ? damage - 30 : 0;
+    left = (foe->kind == TCG_TRAINER ? 10 : foe->hp) - f->damage;
+    if (damage >= left)
+        return 1000 + damage;
+    /* Effects (status, coins) give a non-damaging attack some value. */
+    return damage * 4 + (strcmp(c->attacks[attack].effect, "NONE") ? 3 : 0) + 1;
+}
 int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgPlayer *p;
@@ -378,7 +397,7 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
         unsigned score;
         if (!c || !TcgDuel_CanAttack(g, g->current, attack) || !TcgDuel_EffectSupported(c->attacks[attack].effect))
             continue;
-        score = c->attacks[attack].damage;
+        score = ExpectedDamage(g, c, attack);
         if (bestAttack == TCG_NONE || score > bestScore)
         {
             bestAttack = attack;

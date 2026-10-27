@@ -60,7 +60,7 @@ int main(void)
         assert(l[0].game.phase == TCG_FINISHED && l[0].game.winner == l[1].game.winner);
     }
     {
-        uint8_t action[25] = {255, 1, 4};
+        uint8_t action[25] = {TCG_LINK_RELAY, TCG_LINK_VERSION, 4};
         struct TcgLink before = l[1];
         unsigned len;
         for (len = 0; len < 7; len++)
