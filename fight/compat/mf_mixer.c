@@ -114,7 +114,7 @@ static void Mix_Block(void)
         }
     }
     for (i = 0; i < MIX_BLOCK * 2; i++) {
-        int v = acc[i];
+        int v = acc[i] * 5 / 8;     /* about the game's own loudness, with room before clipping */
         sBlock[i] = (Sint16)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
     }
     sBlockPos = 0;

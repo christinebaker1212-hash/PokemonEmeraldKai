@@ -233,6 +233,8 @@ static int __cdecl MfBgm_Open(void *instance, const BgmPluginIo *io, BgmInfo *in
         b->rate = (int)b->mp3.sampleRate;
         b->channels = (int)b->mp3.channels;
     }
+    Log_Printf("BGM %s: %d Hz, %d channel(s), loop %d (%d-%d)\n", info->path, b->rate, b->channels, info->loop,
+               info->loop_start, info->loop_end);
     out->mode = BGM_MODE_DECODED;
     out->format.rate = (double)b->rate;
     out->format.format = AUDIO_FMT_S16;

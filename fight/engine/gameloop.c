@@ -774,6 +774,11 @@ int Screen_ReadInput(ScreenLoop *screen)
                 }
             }
         }
+        /* Moemon Fight: one press a frame; the others stay queued for the next frames (the original took
+         * only the last code, so two players pressing on the same frame lost the first one's press) */
+        if (code != 0 && !(code & INPUT_RELEASE)) {
+            break;
+        }
     }
     if (screen->key_count > 0) {
         long long r = Input_FindKey((int *const *)(intptr_t)screen->key_table, screen->key_count, screen->key_code);
