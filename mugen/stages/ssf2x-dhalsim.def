@@ -1,0 +1,188 @@
+[Info]
+;Name = "INDIA"
+Name = "DHALSIM STAGE"
+
+[Camera]
+StartX = 0
+StartY = 0
+BoundLeft = -256
+BoundRight = 256
+BoundHigh = -14
+BoundLow = 0
+VerticalFollow = .2
+FloorTension = 40
+Tension = 80
+
+[PlayerInfo]
+P1StartX = -90
+P1StartY = 0
+P1StartZ = 0
+P1Facing = 1
+P2StartX = 90
+P2StartY = 0
+P2StartZ = 0
+P2Facing = -1
+LeftBound  = -1000
+RightBound = 1000
+TopBound = 0
+BotBound = 0
+
+[Scaling]
+Topz = 0
+Botz = 50
+TopScale = 1
+BotScale = 1.2
+
+[Bound]
+ScreenLeft = 20
+ScreenRight = 20
+
+[StageInfo]
+ZOffSet = 200
+AutoTurn = 1
+ResetBG = 1
+
+[Shadow]
+Color = 191,189,143
+YScale = .1
+Reflect = 0
+
+[Music]
+BGMusic = sound/ssf2x-dhalsim.mp3;ã»ñºÅuMeditations of YogiÅv
+BGVolume = 0
+
+[BGdef]
+Spr = stages/ssf2x-dhalsim.sff
+DebugBg = 0
+
+[BG]
+Type = Anim
+ActionNo = 0
+Delta = .587, 1
+Mask = 1
+[Begin Action 0]
+0, 0, 0,0,-1, H
+[BG]
+Type = Normal
+SpriteNo = 0, 0
+Delta = .587, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 1, 0
+Delta = .587, 1
+Mask = 1
+
+[BG]
+Type = Anim
+ActionNo = 1
+Delta = .587, 1
+Mask = 1
+[Begin Action 1]
+2, 0, 0,0,330
+2, 1, 0,0,12
+2, 2, 0,0,40
+2, 1, 0,0,12
+2, 0, 0,0,520
+2, 1, 0,0,12
+2, 2, 0,0,40
+2, 1, 0,0,12
+[BG]
+Type = Anim
+ActionNo = 2
+Delta = .587, 1
+Mask = 1
+[Begin Action 2]
+2, 0, 0,0,270, H
+2, 1, 0,0,12, H
+2, 2, 0,0,40, H
+2, 1, 0,0,12, H
+2, 0, 0,0,520, H
+2, 1, 0,0,12, H
+2, 2, 0,0,40, H
+2, 1, 0,0,12, H
+2, 0, 0,0,60, H
+
+[BG]
+Type  = Normal
+SpriteNo = 5, 0
+Start = 90, 0
+Delta = 0, 1
+[BG]
+Type  = Parallax
+SpriteNo = 5, 0
+Start = 0, 0
+Delta = .587, 1
+XScale = 1, 2
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 5, 1
+Delta = 1.178, 1
+Tile = 1
+
+[BG]
+Type = Normal
+SpriteNo = 3, 0
+Delta = .794, 1
+Mask = 1
+[BG]
+Type = Anim
+ActionNo = 3
+Delta = .794, 1
+Mask = 1
+[Begin Action 3]
+3, 1, 0,0,740
+3, 2, 0,0,12
+3, 3, 0,0,40
+3, 2, 0,0,12
+3, 1, 0,0,240
+3, 2, 0,0,12
+3, 3, 0,0,40
+3, 2, 0,0,12
+[BG]
+Type = Anim
+ActionNo = 4
+Delta = .794, 1
+Mask = 1
+[Begin Action 4]
+3, 0, 0,0,-1, H
+[BG]
+Type = Anim
+ActionNo = 5
+Delta = .794, 1
+Mask = 1
+[Begin Action 5]
+3, 1, 0,0,870, H
+3, 2, 0,0,12, H
+3, 3, 0,0,40, H
+3, 2, 0,0,12, H
+3, 1, 0,0,660, H
+3, 2, 0,0,12, H
+3, 3, 0,0,40, H
+3, 2, 0,0,12, H
+3, 1, 0,0,140, H
+
+[BG]
+Type = Normal
+SpriteNo = 4, 0
+Delta = 1, 1
+Mask = 1
+[BG]
+Type = Anim
+ActionNo = 6
+Delta = 1, 1
+Mask = 1
+[Begin Action 6]
+4, 0, -2,0,-1, H
+
+[BG]
+Type = Normal
+SpriteNo = 6, 0
+Delta = .99, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 7, 0
+Delta = .99, 1
+Mask = 1

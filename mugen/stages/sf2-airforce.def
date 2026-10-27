@@ -1,0 +1,211 @@
+; Stage information :
+; -----------------
+; From the game: 	Street Fighter II - World Warriors
+; Name:			Guile's Stage (USA)
+; Version:		0.1
+
+; Original Information :	
+; Stage By:		Dark Saviour
+; From:			Win Kawaks 1.45
+; With:			MCM 1.5
+; Date:			03/12/2002
+; Email: 		darksaviour77@hotmail.com
+; Site:			http://www.ds-arena.fr.st
+
+; Super Jump Info :	
+; Additional Sprites:	Acey
+; Update Date:		05/11/2012
+; Email: 		admin@infinitymugenteam.com
+; Site:			http://www.infinitymugenteam.com
+
+;--------------------------------------------------------
+[Info]
+name = "SF2 Airforce Base - Guile Stage"
+
+;--------------------------------------------------------
+[Camera]
+startx = 0
+starty = 0
+boundleft = -224
+boundright = 224
+boundhigh = -200
+boundlow = 0
+verticalfollow = 1
+floortension = 0
+tension = 60
+
+;--------------------------------------------------------
+[PlayerInfo]
+p1startx = -80
+p1starty = 0
+p1startz = 0
+p1facing = 1
+p2startx = 80
+p2starty = 0
+p2startz = 0
+p2facing = -1
+leftbound = -1000
+rightbound = 1000
+topbound = 0
+botbound = 0
+
+;--------------------------------------------------------
+[Scaling]
+topz = 0       
+botz = 50      
+topscale = 1       
+botscale = 1.2     
+
+;--------------------------------------------------------
+[Bound]
+screenleft = 40
+screenright = 40
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 216
+autoturn = 1
+resetBG = 0
+
+;--------------------------------------------------------
+[Shadow]
+;color = 128, 128, 128
+yscale = -.15
+reflect = 0
+
+;--------------------------------------------------------
+[Music]
+bgmusic = sound/SF2 Airforce - Guile Theme.mp3
+bgvolume = 255
+
+;--------------------------------------------------------
+[BGdef]
+spr = sf2-airforce.sff
+debugbg = 0
+
+;--------------------------------------------------------
+;--------------------------------------------------------
+
+[BG Background]
+type = normal 
+spriteno = 0, 0
+start = 0, 0
+delta = .651785, 1
+mask = 0
+
+[BG Sky]
+type  = parallax
+spriteno = 1, 0
+start = 0, 0
+delta = 1.191964, 1
+xscale = 1, 0.674157
+mask = 0
+velocity = 1,0
+tile = 1, 0
+
+[BG Ground]
+type  = parallax
+spriteno = 2, 0
+start = 0, 192
+delta = .803571, 1
+xscale = 1, 1.483334
+mask = 0
+
+[BG Plane]
+type  = normal
+spriteno = 3, 0
+start = 0, 0
+delta = .785714, 1
+mask = 1
+
+[BG Crowd]
+type  = normal
+spriteno = 4, 0
+start = -369, 86
+delta = .933035, 1
+mask = 1
+
+[BG GirlfriendLeg]
+type  = anim
+actionno = 1
+start = -178, 166
+delta = .933035, 1
+mask = 1
+
+[BG BoyfriendArm]
+type  = anim
+actionno = 2
+start = -165, 106
+delta = .933035, 1
+mask = 1
+
+[BG Smoker]
+type  = anim
+actionno = 3
+start = -88, 127
+delta = .933035, 1
+mask = 1
+
+[BG ManLeg]
+type  = anim
+actionno = 4
+start = 12, 161
+delta = .933035, 1
+mask = 1
+
+[BG Couple]
+type  = anim
+actionno = 5
+start = 70, 125
+delta = .933035, 1
+mask = 1
+
+;--------------------------------------------------------
+[Begin Action 1] ; Girlfriend's Leg
+5,0, 0,0, 10
+5,1, 0,0, 8
+5,0, 0,0, 12
+5,1, 0,0, 11
+5,0, 0,0, 14
+5,1, 0,0, 9
+5,0, 0,0, 10
+5,1, 0,0, 12
+5,0, 0,0, 13
+5,1, 0,0, 11
+5,0, 0,0, 8
+5,1, 0,0, 6
+
+[Begin Action 2] ; Boyfriend's Arm
+6,0, 0,0, 10
+6,1, 0,0, 12
+6,2, 0,0, 13
+6,1, 0,0, 11
+6,0, 0,0, 8
+6,1, 0,0, 6
+6,2, 0,0, 10
+6,1, 0,0, 8
+6,2, 0,0, 12
+6,1, 0,0, 11
+6,2, 0,0, 14
+6,1, 0,0, 9
+
+[Begin Action 3] ; Smoker
+7,0, 0,0, 19
+7,1, 0,0, 10
+7,2, 0,0, 16
+7,0, 0,0, 10
+7,2, 0,0, 8
+7,1, 0,0, 11
+7,2, 0,0, 13
+
+[Begin Action 4] ; Man's Leg
+8,0, 0,0, 18
+8,1, 0,0, 9
+
+[Begin Action 5] ; Couple
+9,0, 0,0, 10
+9,1, 0,0, 11
+9,2, 0,0, 12
+9,1, 0,0, 14
+9,2, 0,0, 13
+9,1, 0,0, 10

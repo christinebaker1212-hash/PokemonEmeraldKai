@@ -1,0 +1,281 @@
+;---------------------------------------------------------------------------
+;Super Street Fighter 2X Vega(Gouki) stage
+;---------------------------------------------------------------------------
+;改変、素材利用については特に制限は設けません
+;背景の人々とか変えてみたら面白そうですなw
+;
+
+
+[Info]
+name = "SF2 Thailand 2 - M.Bison Stage"
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -227
+boundright = 227
+boundhigh = -15
+boundlow = 0
+verticalfollow = 0.3
+tension = 50
+floortension = 60
+
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -80
+p1starty = 0
+p1startz = 0
+p1facing = 1
+
+;--- Player 2 ---
+p2startx = 80
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+;--- Common ---
+leftbound  = -1000
+rightbound =  1000
+topbound  =  0
+botbound  =  0
+
+[Scaling]
+topz     = 0
+botz     = 50
+topscale = 1
+botscale = 1.2
+
+[Bound]
+screenleft = 15
+screenright = 15
+
+[StageInfo]
+zoffset = 215
+autoturn = 1
+resetBG = 1
+
+[Shadow]
+color = 106,90,90  ;96,112,80
+yscale = 0.16
+reflect = 0
+intensity = 32
+
+[Reflection]
+intensity = 0
+
+[Music]
+bgmusic = sound/SF2 Dictator - M.Bison Theme.mp3
+bgvolume = 210
+
+[BGdef]
+spr = sf2-thailand2.sff
+debugbg = 1
+
+;====================================================================
+
+[BG 00]
+type        = Normal
+spriteNo    = 0,0
+layerNo     = 0 
+start       = 0,0
+delta       = 0.4 ,0.4
+trans       = None
+mask        = 0
+;velocity    = -0.3,0 
+
+;====================================================================
+;上
+[BG 01]
+type        = Parallax
+spriteNo    = 0,1
+layerNo     = 0
+start       = 0,0     
+delta       = 1.06,1
+trans       = none
+mask        = 0
+xscale = 1,0.575
+;====================================================================
+;下
+[BG 02]
+type        = Parallax
+spriteNo    = 0,2
+layerNo     = 0
+start       = 0,0
+delta       = 0.686,1
+trans       = none
+mask        = 0
+xscale =  0.585,1 ;1, 1.75
+;yscalestart = 100
+;yscaledelta = 0.2
+;====================================================================
+;vell
+[BG 03]
+type        = normal
+spriteNo    = 1,0
+layerNo     = 0
+start    = 0,2
+delta    = 0.796,1
+trans       = none
+mask        = 1
+
+;====================================================================
+;人1(left side)
+[BG 03]
+type        = anim
+ActionNo    = 3
+layerNo     = 0
+start    = -258, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1  
+
+[Begin Action 3]
+2, 1, 0, 0, 6
+2, 0, 0, 0, 6
+
+;人2
+[BG 03]
+type        = anim
+ActionNo    = 4
+layerNo     = 0 
+start    = -258, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 4]
+2, 3, 0, 0, 43
+2, 2, 0, 0, 8
+
+;人3
+[BG 03]
+type        = anim
+ActionNo    = 5
+layerNo     = 0
+start    = -258, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 5]
+2, 4, 0, 0, 7
+2, 5, 0, 0, 9
+
+;人4
+[BG 03]
+type        = anim
+ActionNo    = 6
+layerNo     = 0
+start    = -258, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 6]
+2, 6, 0, 0, 8
+2, 7, 0, 0, 9
+
+;人5
+[BG 03]
+type        = anim
+ActionNo    = 7
+layerNo     = 0
+start    = -258, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 7]
+3, 0, 0, 0, 43
+3, 1, 0, 0, 4
+3, 2, 0, 0, 5
+3, 3, 0, 0, 5
+3, 4, 0, 0, 4
+
+;====================================================================
+;人1(right side)
+[BG 03]
+type        = anim
+ActionNo    = 8
+layerNo     = 0
+start    =  64, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1  
+
+[Begin Action 8]
+2, 8, 0, 0, 10
+2, 9, 0, 0, 7
+2, 10, 0, 0, 7
+2, 9, 0, 0, 6
+
+;人2
+[BG 03]
+type        = anim
+ActionNo    = 9
+layerNo     = 0
+start    =  64, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 9]
+2, 11, 0, 0, 7
+2, 12, 0, 0, 6
+
+;人3
+[BG 03]
+type        = anim
+ActionNo    = 10
+layerNo     = 0
+start    =  64, 101
+delta    = 0.796,1
+trans       = none
+mask        = 1 
+
+[Begin Action 10]
+4, 0, 0, 0, 43
+4, 1, 0, 0, 4
+4, 2, 0, 0, 5
+4, 3, 0, 0, 5
+4, 4, 0, 0, 4
+
+;hashira
+[BG 05]
+type        = normal
+spriteNo    = 1,2
+layerNo     = 0
+start    =  -290, 33
+delta    = 0.796,1
+trans       = none
+mask     = 1
+
+;hashira
+[BG 06]
+type        = normal
+spriteNo    = 1,2
+layerNo     = 0
+start    =  253, 33
+delta    = 0.796,1
+trans       = none
+mask     = 1
+
+zau
+[BG 07]
+type        = normal
+spriteNo    = 1,1
+layerNo     = 0
+start    =  -341, 24
+delta    = 0.945,1
+trans       = none
+mask     = 1
+
+;zau
+[BG 08]
+type        = normal
+spriteNo    = 1,1
+layerNo     = 0
+start    =  180, 24
+delta    = 0.945,1
+trans       = none
+mask     = 1

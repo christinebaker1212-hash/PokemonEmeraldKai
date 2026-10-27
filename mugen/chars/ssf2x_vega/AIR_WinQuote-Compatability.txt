@@ -1,0 +1,91 @@
+;===================================================================================
+
+Your Mugen characters can be compatible with Vega's SFII Win Quote system.
+All you need to do is apply ONE of the following [OPTION #] lines to your
+character's AIR file.
+
+;---------------------------
+; Portrait - Victory Winner
+[Begin Action 9000]
+9000,10, 0,0, -1
+
+; [OPTION #1]
+; Portrait - Opponent Defeated
+[Begin Action 9001]
+9000,11, 0,0, -1
+
+; [OPTION #2]
+; Portrait - Opponent Defeated (Get Hit Sprite)
+[Begin Action 9005]
+5062,0, 0,-10, -1
+
+; [OPTION #3] - MUGEN 1.0 Only
+; Portrait - Opponent Defeated High Resolution
+[Begin Action 9001]
+5062,0, 50,-50, -1
+
+;---------------------------
+
+NOTES:
+- [Action 9000] is used to display the portrait of the victory winner of the match.
+  It is NOT used by the defeated opponent. However, it is a standard animation action
+  for this Win quote system. It is only here for a future reference, and resources.
+
+- [Action 9001] is the ACTUAL defeated portrait. Use if you have an actual protrait.
+
+- [Action 9005] uses a "sprite" of one of the character's hit frames. This is used
+  mainly as an alternative for a defeated portrait. If you don't have a defeated
+  portrait for your character, you may use this action instead.
+
+- For [OPTION #2], the "sprite" of the character can be any sprite number,
+  as long as the second requirement below is met.
+  1. It must be a required sprite number, as documented by Mugen's standards.
+  2. The sprite offset of the character must be a head position.
+     - Examples include 5002, 5012, 5032. In this case, 5062 is used here.
+ 
+  When using [OPTION #2], be aware that the sprite of the defeated opponent
+  gets scaled up by 4 times it's original size to act as a display portrait.
+  So make sure that the character's hit sprite is not too big.
+
+- If the defeated opponent is using high resolution graphics scale, please
+  consider [OPTION #3]. An example of a high resoution character is KFM720.
+  [OPTION #3] uses a combination of [OPTION #1] and [OPTION #2]. Since high
+  resolution characters are already scaled, using either option besides #3
+  will result in the defeated portrait being too big to display properly.
+  * - THIS ONLY APPLIES TO MUGEN 1.0 USERS.
+
+- The second set of numbers (0,0) are the X & Y offset positions of the sprite
+  of the animation action. If the portrait of the defeated opponent is positioned
+  wrong, change these values so that the sprite offset is correct on screen.
+
+- If neither actions 9001 or 9005 exist in the defeated opponent, the win
+  quote system will not display after the match is over.
+ 
+- The win quote will NOT display if the character is not a regular
+  opponent. Examples of regular opponents include Kung Fu Man.
+  Characters that have hit override systems, always invincible, or can not
+  be thrown are examples of non-standard opponents.
+
+ANIMATION:
+- By default, the Win/Lose portraits have a time of -1. This means there is only
+  one frame to display indefinately. However, you may add more frames to your
+  lose portrait if you wish. See example below.
+; Portrait - Opponent Defeated
+[Begin Action 9001]
+9000,10, 0,0, 10
+9000,11, 0,0, 10
+9000,12, 0,0, 10
+9000,11, 0,0, 10
+
+;===================================================================================
+
+- If there are any Mugen characters that already use Actions 9000-9005 for other
+  reasons besides this, please let me know. I'll see if I can modify the script
+  to use alternative animation action numbers.
+
+Contacts
+--------
+Fell free to send comments and suggestions to N64Mario84
+(N64Mario84@hotmail.com). Thanks.
+-Website-
+http://gcnmario.free.fr

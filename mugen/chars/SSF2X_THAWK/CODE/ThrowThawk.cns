@@ -1,0 +1,1748 @@
+;---------------------------------------------------------------------
+;Throw Medium Punch
+[StateDef 1700]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M-
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 1701
+P2StateNo = 1702
+P1Facing = IFelse(Command="holdback", -1, 1)
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X>=47
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 210
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X<47
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 211
+
+[State 200]
+Type = ChangeState
+Triggerall = Time >=1
+Trigger1 = PrevStateno = [10,12]
+Value = 310
+
+;---------------------------------------------------------------------------
+;Throw Medium Punch Get
+[StateDef 1701]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1700
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 80,0
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(2) >= 0
+pos = 65,-45
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(3) >= 0
+pos = -35,-85
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(4) >= 0
+pos = 68,-55
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1704
+
+;---------------------------------------------------------------------------
+;Throw Medium Punch Get end
+[StateDef 1704]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1701
+VelSet = 0,0
+SprPriority = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = animelem = 1
+value = S100,2
+Volumescale = 100
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;P2 Throw Medium Punch Get
+[StateDef 1702]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1702
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1703
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Medium Punch End
+[StateDef 1703]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -224
+
+[State 200]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 200]
+type = ChangeAnim
+trigger1 = Time = 0
+value = 5050
+
+[State 200]
+type = Posadd
+trigger1 = AnimElem = 1
+x = -50
+y = 30
+
+[State 200]
+type = VelSet
+trigger1 = Time = 1
+x = -3
+y = -6
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 2
+y = .4
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100 ;Hit ground
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;-------------------------------------------------------------------------
+;Throw Strong Punch
+[StateDef 1500]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M-
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 1501
+P2StateNo = 1511
+P1Facing = IFelse(Command="holdback", -1, 1)
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X>=47
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 220
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X<47
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 221
+
+[State 200]
+Type = ChangeState
+Triggerall = Time >=1
+Trigger1 = PrevStateno = [10,12]
+Value = 320
+
+;---------------------------------------------------------------------------
+;Throw Strong Punch Get
+[StateDef 1501]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1501
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 24
+Value = 0
+
+[State 5050, 0]
+Type = Varset
+Trigger1 = 1
+V = 25
+Value = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1521) = 0
+Trigger1 = time = 1
+ID = 1521
+Anim = ifelse(facing = -1,1525,1521)
+Pos = 0,0
+PosType = P1
+SprPriority = -2
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 80,0
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1502
+
+;---------------------------------------------------------------------------
+;Throw Strong Punch Prepare
+[StateDef 1502]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1502
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 24
+Value = 10
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 25
+Value = 4
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = command = "Throw_Prolonge"
+V = 24
+Value = -5
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = enemynear,command = "x"
+Trigger2 = enemynear,command = "y"
+Trigger3 = enemynear,command = "z"
+Trigger4 = enemynear,command = "a"
+Trigger5 = enemynear,command = "b"
+Trigger6 = enemynear,command = "c"
+V = 24
+Value = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1522) = 0
+Trigger1 = 1
+ID = 1522
+Anim = 1522
+Pos = 0,0
+PosType = P1
+SprPriority = -2
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 29,-120
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = Var(24) < 80
+Trigger1 = Var(25) < 80
+Trigger1 = AnimTime = 0
+Trigger2 = time >2
+Trigger2 = command = "Throw_Prolonge"
+Value = 1503
+
+[State 200]
+Type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = Roundstate = 2
+Trigger1 = Var(24) >= 80
+Trigger2 = Var(25) >= 80
+Value = 1504
+
+[State 200]
+Type = ChangeState
+Trigger1 = 1
+Trigger1 = Roundstate != 2
+Value = 1504
+
+;---------------------------------------------------------------------------
+;Throw Strong Punch Hit
+[StateDef 1503]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1503
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 24
+Value = 10
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 25
+Value = 4
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = command = "Throw_Prolonge"
+V = 24
+Value = -5
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = enemynear,command = "x"
+Trigger2 = enemynear,command = "y"
+Trigger3 = enemynear,command = "z"
+Trigger4 = enemynear,command = "a"
+Trigger5 = enemynear,command = "b"
+Trigger6 = enemynear,command = "c"
+V = 24
+Value = 1
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1523) = 0
+Trigger1 = 1
+ID = 1523
+Anim = 1523
+Pos = 0,0
+PosType = P1
+SprPriority = -2
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 901]
+type = PlaySnd
+trigger1 = time = 0
+value = S100,2
+Volumescale = 100
+
+[State 901]
+type = PlaySnd
+trigger1 = time = 0
+value = S2,1
+Volumescale = 100
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 40,-125
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 44,-130
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = Var(24) < 80
+Trigger1 = Var(25) < 80
+Trigger1 = AnimTime = 0
+Trigger2 = time >12
+Trigger2 = command = "Throw_Prolonge"
+Value = 1502
+
+[State 200]
+Type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = Roundstate = 2
+Trigger1 = Var(24) >= 80
+Trigger2 = Var(25) >= 80
+Value = 1504
+
+[State 200]
+Type = ChangeState
+Trigger1 = 1
+Trigger1 = Roundstate != 2
+Value = 1504
+
+;---------------------------------------------------------------------------
+;Throw Strong Punch Throwing
+[StateDef 1504]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1504
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 24
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 25
+Value = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1524) = 0
+Trigger1 = 1
+ID = 1524
+Anim = 1524
+Pos = 0,0
+PosType = P1
+SprPriority = -2
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = -8,-120
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1505
+
+;---------------------------------------------------------------------------
+;Throw Strong Punch Finish
+[StateDef 1505]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1505
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;---------------------------------------------------------------------------
+;P2 Throw Strong Punch Get
+[StateDef 1511]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -182
+Kill = 0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1511
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1512
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Punch Prepare
+[StateDef 1512]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1512
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1503
+Value = 1513
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1504
+Value = 1514
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Punch Hited
+[StateDef 1513]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -28
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1513
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1502
+Value = 1512
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1504
+Value = 1514
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Punch Throwed
+[StateDef 1514]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1514
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1515
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Punch End
+[StateDef 1515]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State 200]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 200]
+type = ChangeAnim
+trigger1 = Time = 0
+value = 5050
+
+[State 200]
+type = ChangeAnim
+trigger1 = Time = 15
+value = ifelse(alive=1,5040,5050)
+
+[State 200]
+type = Posadd
+trigger1 = time = 0
+x = -80
+y = 80
+
+[State 200]
+type = VelSet
+trigger1 = Time = 1
+x = -2.4
+y = -6
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 2
+y = .33
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = ifelse(alive=1,51,5100)
+Ctrl = ifelse(alive=1,1,0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;-------------------------------------------------------------------------
+;Throw Strong Kick
+[StateDef 1600]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M-
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 1601
+P2StateNo = 1611
+P1Facing = IFelse(Command="holdback", -1, 1)
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X>=41
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 250
+
+[State 200]
+Type = ChangeState
+Triggerall = Statetype = S
+triggerall = P2Bodydist X<41
+Triggerall = PrevStateno != [10,12]
+Trigger1 = Time >=1
+Value = 251
+
+[State 200]
+Type = ChangeState
+Triggerall = Time >=1
+Trigger1 = PrevStateno = [10,12]
+Value = 350
+
+;---------------------------------------------------------------------------
+;Throw Strong Kick Get
+[StateDef 1601]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1601
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 26
+Value = 0
+
+[State 5050, 0]
+Type = Varset
+Trigger1 = 1
+V = 27
+Value = 0
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 80,0
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1602
+
+;---------------------------------------------------------------------------
+;Throw Strong Kick Prepare
+[StateDef 1602]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1602
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 26
+Value = 10
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 27
+Value = 4
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = command = "Throw_Prolonge"
+V = 26
+Value = -5
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = enemynear,command = "x"
+Trigger2 = enemynear,command = "y"
+Trigger3 = enemynear,command = "z"
+Trigger4 = enemynear,command = "a"
+Trigger5 = enemynear,command = "b"
+Trigger6 = enemynear,command = "c"
+V = 26
+Value = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 48,-66
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(2) >= 0
+pos = 46,-68
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = Var(26) < 60
+Trigger1 = Var(27) < 60
+Trigger1 = AnimTime = 0
+Trigger2 = time >2
+Trigger2 = command = "Throw_Prolonge"
+Value = 1603
+
+[State 200]
+Type = ChangeState
+Triggerall = AnimTime = 0
+Triggerall = Roundstate = 2
+Trigger1 = Var(26) >= 60
+Trigger2 = Var(27) >= 60
+Value = 1604
+
+[State 200]
+Type = ChangeState
+Trigger1 = 1
+Trigger1 = Roundstate != 2
+Value = 1604
+
+;---------------------------------------------------------------------------
+;Throw Strong Kick Hit
+[StateDef 1603]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1603
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 26
+Value = 10
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = time = 0
+V = 27
+Value = 4
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = command = "Throw_Prolonge"
+V = 26
+Value = -5
+
+[State 5050, 0]
+Type = Varadd
+Trigger1 = enemynear,command = "x"
+Trigger2 = enemynear,command = "y"
+Trigger3 = enemynear,command = "z"
+Trigger4 = enemynear,command = "a"
+Trigger5 = enemynear,command = "b"
+Trigger6 = enemynear,command = "c"
+V = 26
+Value = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = time = 0
+value = S2,1
+Volumescale = 100
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 65,-75
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 50,-65
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = Var(26) < 60
+Trigger1 = Var(27) < 60
+Trigger1 = AnimTime = 0
+Trigger2 = time >10
+Trigger2 = command = "Throw_Prolonge"
+Value = 1602
+
+[State 200]
+Type = ChangeState
+Triggerall = AnimTime = 0
+Triggerall = Roundstate = 2
+Trigger1 = Var(26) >= 60
+Trigger2 = Var(27) >= 60
+Value = 1604
+
+[State 200]
+Type = ChangeState
+Trigger1 = 1
+Trigger1 = Roundstate != 2
+Value = 1604
+;---------------------------------------------------------------------------
+;Throw Strong Kick Releasing
+[StateDef 1604]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1604
+VelSet = 0,0
+SprPriority = 2
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 26
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+Trigger1 = 1
+V = 27
+Value = 0
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelemtime(1) >= 0
+pos = 48,-66
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;---------------------------------------------------------------------------
+;P2 Throw Strong Kick Get
+[StateDef 1611]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -182
+kill = 0 
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1611
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1612
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Kick Prepare
+[StateDef 1612]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1612
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1603
+Value = 1613
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1604
+Value = 1614
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Kick Hited
+[StateDef 1613]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -28
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1613
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1602
+Value = 1612
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = p2stateno = 1604
+Value = 1614
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Kick Released
+[StateDef 1614]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0,0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 1614
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 1615
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;P2 Throw Strong Kick End
+[StateDef 1615]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State 200]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 200]
+type = ChangeAnim
+trigger1 = Time = 0
+value = 5050
+
+[State 200]
+type = ChangeAnim
+trigger1 = Time = 15
+value = ifelse(alive=1,5040,5050)
+
+[State 200]
+type = Posset
+trigger1 = time = 0
+y = -1
+
+[State 200]
+type = VelSet
+trigger1 = Time = 1
+x = -2.4
+y = -6
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 2
+y = .34
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = ifelse(alive=1,51,5100)
+Ctrl = ifelse(alive=1,1,0)

@@ -1,0 +1,115 @@
+; Definition file for Vega
+; Contains all the filenames needed for the character
+
+;------------------------------
+;[Player Information]
+;------------------------------
+[Info]
+name = "SF2'CE Vega"	   ;Name of character
+displayname = "Vega"	   ;Name of character to display
+versiondate = 04,01,2013   ;Version date of character
+mugenversion = 1.0	   ;Version of M.U.G.E.N character works on
+author = "N64Mario84"	   ;Character author name
+pal.defaults = 4,5,6,1,2,3 ;Default palettes in order of preference
+localcoord = 320,240       ;Local coordinate space width and height
+
+;------------------------------
+;[Common Files] 
+;------------------------------
+[Files]
+cmd	 = command.cmd	 ;Command set
+cns	 = vega-sf2ce.def;Constants
+stcommon = common1.cns	 ;Common states
+sprite	 = sprite.sff	 ;Sprite
+anim	 = animation.air ;Animation
+sound	 = sound.snd     ;Sound
+
+;------------------------------
+;[States] 
+;------------------------------
+st	 = common.cns	;Common
+st2      = states.cns	;States
+st3      = winquote.cns	;Win Quote System
+st4	 = override.cns	;Override States
+
+;------------------------------
+;[Palettes] (can have up to 12)
+;------------------------------
+pal1	 = palette/color-snes1.act
+pal2	 = palette/color-snes2.act
+pal3	 = palette/color-snes3.act
+pal4	 = palette/color1.act
+pal5	 = palette/color2.act
+pal6	 = palette/color3.act
+
+;---------------------------------------------------------------------------
+; Vega's constants.
+; Format (case insensitive):
+;  [groupname]
+;  constname = value
+;----------------------------------------
+[Data]
+life = 1000		;Amount of life to start with
+power = 1000		;Amount of maximum power
+attack = 100		;attack power (more is stronger)
+defence = 100		;defensive power (more is stronger)
+fall.defence_up = 0	;Percentage to increase defense everytime player is knocked down
+liedown.time = 20	;Time which player lies down for, before getting up
+airjuggle = 20		;Number of points for juggling
+sparkno = 2		;Default hit spark number for HitDefs
+guard.sparkno = 40	;Default guard spark number
+KO.echo = 0		;1 to enable echo on KO
+volume = 100		;Volume offset (negative for softer)
+IntPersistIndex = 50	;Variables with this index and above will not have their values
+FloatPersistIndex = 40  ;reset to 0 between rounds or matches. There are 60 int variables,
+  			;indexed from 0 to 59, and 40 float variables, indexed from 0 to 39.
+  			;If omitted, then it defaults to 60 and 40 for integer and float
+  			;variables repectively, meaning that none are persistent, i.e. all
+  			;are reset. If you want your variables to persist between matches,
+  			;you need to override state 5900 from common1.cns.
+
+[Size]
+xscale = 1		;Horizontal scaling factor.
+yscale = 1		;Vertical scaling factor.
+ground.back = 20	;Player width (back, ground)
+ground.front = 20	;Player width (front, ground)
+air.back = 15		;Player width (back, air)
+air.front = 15		;Player width (front, air)
+height = 80		;Height of player (for opponent to jump over)
+attack.dist = 160	;Default attack distance
+proj.attack.dist = 90	;Default attack distance for projectiles
+proj.doscale = 1	;Set to 1 to scale projectiles too   
+head.pos = 0, -90	;Approximate position of head
+mid.pos = 0, -60	;Approximate position of midsection
+shadowoffset = 0	;Number of pixels to vertically offset the shadow
+draw.offset = 0,0	;Player drawing offset in pixels (x, y)
+
+[Velocity]
+walk.fwd  = 3.5		;Walk forward
+walk.back = -3.5	;Walk backward
+run.fwd  = 6, 0		;Run forward (x, y)
+run.back = -6,-3	;Run backward (x, y)
+jump.neu = 0,-10	;Neutral jumping velocity (x, y)
+jump.back = -4		;Jump back Speed (x, y)
+jump.fwd = 4		;Jump forward Speed (x, y)
+runjump.back = -4,-8	;Running jump speeds (opt)
+runjump.fwd = 4,-8	;.
+airjump.neu = 0,-8	;.
+airjump.back = -3	;Air jump speeds (opt)
+airjump.fwd = 3		;.
+
+[Movement]
+airjump.num = 0		;Number of air jumps allowed (opt)
+airjump.height = 35	;Minimum distance from ground before you can air jump (opt)
+yaccel = .575		;Vertical acceleration
+stand.friction = .85	;Friction coefficient when standing
+crouch.friction = .82	;Friction coefficient when crouching
+
+[Quotes]
+; Up to 100 victory quotes can be specified per language (victory0 - victory99)
+;----- Street Fighter Victory Quotes -----
+victory1 = "Handsome fighters never lose battles."
+victory2 = "Handsome fighters never lose a battle."
+victory3 = "Thank you for a georgeous time."
+
+;---------------------------------------------------------------------------

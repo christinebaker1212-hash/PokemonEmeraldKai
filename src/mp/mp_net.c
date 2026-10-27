@@ -10,6 +10,8 @@
 #include "mp_net.h"
 
 static char sLastError[160];
+static uint32_t sServerV4;      // the lobby's IPv4 address (network order), 0 when not over IPv4
+static uint16_t sServerPort;
 
 // Test harness "waitlog": set gMpLogWatch, and gMpLogSeen turns 1 once a log line contains it
 char gMpLogWatch[96];
@@ -200,6 +202,11 @@ int MPNet_Connect(const char *host, int port)
         rc = connect(s, ai->ai_addr, (int)ai->ai_addrlen);
         if (rc == 0 || MP_WOULDBLOCK(mp_lasterr()))
         {
+            // the lobby's IPv4 address: its UDP answers what our address is (MPUdp_AskPublic)
+            sServerV4 = 0;
+            if (ai->ai_family == AF_INET)
+                sServerV4 = ((struct sockaddr_in *)ai->ai_addr)->sin_addr.s_addr;
+            sServerPort = (uint16_t)port;
             sClient.sock = s;
             sClient.connecting = (rc != 0);
             sClient.recvLen = 0;
@@ -633,4 +640,135 @@ void MPLan_StopSearch(void)
         mp_closesock(sLanSock);
     sLanSock = MP_BADSOCK;
     sLanCount = 0;
+}
+
+// ---------------------------------------------------------------------------
+// UDP between two players (the VS cabinet's buttons, src/mp/mp_fight.c): a socket of our own on any port, and the
+// address the internet sees it as, from the lobby's UDP ("MFWHO" -> "MFYOU", mp_server.c). Addresses and ports in
+// network order.
+
+static mp_sock sUdp = MP_BADSOCK;
+static uint32_t sUdpPublicIp, sUdpToken;
+static uint16_t sUdpPublicPort;
+
+int MPUdp_Open(void)
+{
+    struct sockaddr_in addr;
+
+    if (sUdp != MP_BADSOCK)
+        return 0;
+    MPNet_Init();
+    sUdp = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sUdp == MP_BADSOCK)
+        return -1;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = 0;
+    if (bind(sUdp, (struct sockaddr *)&addr, sizeof(addr)) != 0)
+    {
+        mp_closesock(sUdp);
+        sUdp = MP_BADSOCK;
+        return -1;
+    }
+    MPSock_SetNonBlocking(sUdp);
+    sUdpPublicIp = 0;
+    sUdpPublicPort = 0;
+    return 0;
+}
+
+void MPUdp_Close(void)
+{
+    if (sUdp != MP_BADSOCK)
+        mp_closesock(sUdp);
+    sUdp = MP_BADSOCK;
+}
+
+uint16_t MPUdp_Port(void)
+{
+    struct sockaddr_in addr;
+    mp_socklen len = sizeof(addr);
+
+    if (sUdp == MP_BADSOCK || getsockname(sUdp, (struct sockaddr *)&addr, &len) != 0)
+        return 0;
+    return addr.sin_port;
+}
+
+// Our address on the local network: the one our connection to the lobby goes out from
+uint32_t MPUdp_LocalIp(void)
+{
+    struct sockaddr_in addr;
+    mp_socklen len = sizeof(addr);
+
+    if (sClient.sock == MP_BADSOCK || getsockname(sClient.sock, (struct sockaddr *)&addr, &len) != 0
+        || addr.sin_family != AF_INET)
+        return 0;
+    return addr.sin_addr.s_addr;
+}
+
+void MPUdp_AskPublic(void)
+{
+    uint8_t p[9];
+    struct sockaddr_in to;
+
+    if (sUdp == MP_BADSOCK || sServerV4 == 0)
+        return;
+    sUdpToken = (uint32_t)rand() ^ ((uint32_t)rand() << 16);
+    memcpy(p, "MFWHO", 5);
+    memcpy(p + 5, &sUdpToken, 4);
+    memset(&to, 0, sizeof(to));
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = sServerV4;
+    to.sin_port = htons(sServerPort);
+    sendto(sUdp, (const char *)p, sizeof(p), 0, (struct sockaddr *)&to, sizeof(to));
+}
+
+int MPUdp_Public(uint32_t *ip, uint16_t *port)
+{
+    *ip = sUdpPublicIp;
+    *port = sUdpPublicPort;
+    return sUdpPublicIp != 0;
+}
+
+void MPUdp_SendTo(uint32_t ip, uint16_t port, const void *data, int len)
+{
+    struct sockaddr_in to;
+
+    if (sUdp == MP_BADSOCK || ip == 0 || port == 0)
+        return;
+    memset(&to, 0, sizeof(to));
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = ip;
+    to.sin_port = port;
+    sendto(sUdp, (const char *)data, len, 0, (struct sockaddr *)&to, sizeof(to));
+}
+
+// The next datagram (the lobby's answers are taken here): its length, 0 when there's none
+int MPUdp_Recv(void *buf, int max, uint32_t *ip, uint16_t *port)
+{
+    int guard;
+
+    if (sUdp == MP_BADSOCK)
+        return 0;
+    for (guard = 0; guard < 64; guard++)
+    {
+        struct sockaddr_in from;
+        mp_socklen fromLen = sizeof(from);
+        int n = (int)recvfrom(sUdp, (char *)buf, max, 0, (struct sockaddr *)&from, &fromLen);
+        if (n <= 0)
+            return 0;
+        if (n >= 15 && memcmp(buf, "MFYOU", 5) == 0)
+        {
+            if (memcmp((uint8_t *)buf + 5, &sUdpToken, 4) == 0 && from.sin_addr.s_addr == sServerV4)
+            {
+                memcpy(&sUdpPublicIp, (uint8_t *)buf + 9, 4);
+                memcpy(&sUdpPublicPort, (uint8_t *)buf + 13, 2);
+            }
+            continue;
+        }
+        *ip = from.sin_addr.s_addr;
+        *port = from.sin_port;
+        return n;
+    }
+    return 0;
 }

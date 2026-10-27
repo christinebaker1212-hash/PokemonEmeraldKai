@@ -1,0 +1,445 @@
+
+
+
+;---------------------------------------------------------------------------
+; Override common states (use same number to override) :
+;---------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------
+; States that are always executed (use statedef -2)
+;---------------------------------------------------------------------------
+[Statedef -2]
+
+[State -3,Display.de.Info]
+type = DisplayToClipboard
+trigger1 = 1
+text = "WWW.OMEGAPSYCHO.WEBS.COM"
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Trigger1 = stateno != [12301,12309]
+Time = 0
+
+[State -2, HELPER_TEXT]
+type = Helper
+trigger1 = Numhelper(10000) = 0
+trigger1 = 1
+helpertype = normal
+name = "HELPER_TEXT"
+id = 10000
+pos = 0,0
+sprpriority = 100
+postype = Back
+stateno = 10000
+KeyCtrl = 1
+ownpal = 1
+removetime = -1
+ignorehitpause = 0
+
+[State -2]
+type = helper
+triggerall = !NumHelper(10001)
+trigger1 = !numpartner
+trigger2 = numpartner
+trigger2 = ID < partner,ID
+trigger3 = numpartner
+trigger3 = ID > partner,ID
+trigger3 = !partner,name = "T.HAWK"
+helpertype = normal
+name = "SUPER_GAUGE"
+stateno = 10001
+ID = 10001
+pos = 0,10
+postype = P1
+keyctrl = 0
+pausemovetime = 99999999
+supermovetime = 99999999
+
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12002
+IgnoreHitPause = 1
+ID = 1204
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12003
+IgnoreHitPause = 1
+ID = 1208
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12102
+IgnoreHitPause = 1
+ID = 1214
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12103
+IgnoreHitPause = 1
+ID = 1218
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12202
+IgnoreHitPause = 1
+ID = 1224
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12203
+IgnoreHitPause = 1
+ID = 1228
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12302
+IgnoreHitPause = 1
+ID = 1234
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12303
+IgnoreHitPause = 1
+ID = 1238
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12305
+IgnoreHitPause = 1
+ID = 1244
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 12306
+IgnoreHitPause = 1
+ID = 1248
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 1501
+IgnoreHitPause = 1
+ID = 1521
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 1502
+IgnoreHitPause = 1
+ID = 1522
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 1503
+IgnoreHitPause = 1
+ID = 1523
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = stateno != 1504
+IgnoreHitPause = 1
+ID = 1524
+
+[State -2]
+Type = Explod
+Trigger1 = GetHitVar(AnimType) = 2 && (GetHitVar(GroundType)=[1,2]) && StateNo = 5000 && Time = 1 && NumExplod(1) = 0 && Random < 750
+IgnoreHitPause = 0
+Anim = IFelse(GetHitVar(GroundType)=1, 71, 73)+(Random<500) + (Var(12)=-1)*10
+ID = 1
+Pos = 0, 0
+PosType = P1
+BindTime = -1
+SprPriority = 1
+RemoveOnGetHit = 1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = RemoveExplod
+Trigger1 = NumExplod(1) = 1 && (MoveType!=H&&StateNo!=[5040,5041])
+IgnoreHitPause = 0
+ID = 1
+
+[State -2]
+Type = Explod
+Trigger1 = (StateNo = 151 || StateNo = 153 || StateNo = 5001 || StateNo = 5011) && Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 0, 0
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = StateNo = 5100
+Anim = 75 + (Var(12)=-1)*10
+Pos = Floor((-40 + Random/12.5)*Const(Size.XScale)), 0 - Random/50
+PosType = P1
+Velocity = 0, -3
+SprPriority = 10
+OwnPal = 1
+Scale = Const(Size.XScale), 1
+
+
+[State -2, Guarding]
+type = AssertSpecial
+trigger1 = 1
+flag = noairguard
+Ignorehitpause = 1
+
+
+[State -3, TOCA EL PISO]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = stateno = 52
+value = S4,0
+volumescale = 100
+
+[State -2]
+Type = ChangeState
+Trigger1 = !Var(21) && Time > 0 && BackEdgeDist < 2 && ((StateNo = [5030, 5050]) || StateNo = 5071 || StateNo = 4000)
+Value = 5042
+
+[State -2]
+Type = VarSet
+Trigger1 = Var(21) && MoveType != H && StateNo != [5040,5049]
+V = 21
+Value = 0
+
+[State -2]
+Type = VarSet
+Triggerall = 1
+Trigger1 = roundstate = 0
+Trigger2 = roundstate = 1
+V = 22
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+triggerall = 1
+triggerall = life <= 0
+Trigger1 = roundstate = 3
+Trigger2 = roundstate = 4
+V = 22
+Value = 1
+
+[State 5050, 0]
+Type = VarSet
+triggerall = 1
+Trigger1 = Stateno != [1500,1505]
+V = 24
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+triggerall = 1
+Trigger1 = Stateno != [1500,1505]
+V = 25
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+triggerall = 1
+Trigger1 = Stateno != [1600,1605]
+V = 26
+Value = 0
+
+[State 5050, 0]
+Type = VarSet
+triggerall = 1
+Trigger1 = Stateno != [1600,1605]
+V = 27
+Value = 0
+
+[State -2]
+Type = PowerSet
+Triggerall = 1
+Trigger1 = roundstate = 0
+Trigger2 = roundstate = 1
+Value = 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[State -2, 1]
+type = Explod
+trigger1 = var(50) = 0
+trigger1 = facing = 1
+trigger1 = NumExplod(50002) = 0
+trigger1 = 1
+anim = 50002
+ID = 50002
+pos = 8,231
+ontop = 1
+sprpriority = 50
+postype = Left
+bindtime = -1
+ignorehitpause = 1
+scale = 0.5,0.5
+ownpal = 1
+
+[State -2, 1]
+type = Explod
+trigger1 = var(50) = 0
+trigger1 = facing = -1
+trigger1 = NumExplod(50002) = 0
+trigger1 = 1
+anim = 50002
+ID = 50002
+pos = -67,231
+ontop = 1
+sprpriority = 50
+postype = right
+bindtime = -1
+ignorehitpause = 1
+scale = 0.5,0.5
+ownpal = 1
+
+[State 981]
+type = RemoveExplod
+trigger1 = roundstate = 0
+trigger2 = roundstate = 1
+trigger3 = roundstate = 3
+trigger4 = roundstate = 4
+trigger5 = var(50) = 1
+trigger6 = Numhelper(50000) >= 1
+ID = 50002
+
+[State -1, MOVE LIST]
+type = Helper
+triggerall = AIlevel = 0
+triggerall = var(50) = 0
+triggerall = Numhelper(50000) = 0
+triggerall = roundstate = 2
+trigger1 = stateno != [5000,5210]
+trigger1 = command = "start"
+trigger1 = movetype != H
+helpertype = normal
+name = "MOVE_LIST"
+id = 50000
+pos = 0,0
+sprpriority = 79
+postype = Left
+stateno = 50000
+KeyCtrl = 1
+ownpal = 1
+removetime = -1
+ignorehitpause = 0
+size.xscale = 1
+size.yscale = 1
+PauseMoveTime = 99999999999999999999999999999999999
+
+;-------------------------------------------------------------------------
+;-------------------------------------------------------------------------
+;-------------------------------------------------------------------------
+[Statedef -3]
+;-------------------------------------------------------------------------
+;Dizzy mode system
+;-------------------------------------------------------------------------
+; Var(7) for counting dizzy mode
+[State -3, 2.1]
+type = Varadd
+trigger1 = var(7) > 0
+var(7) = -1
+ignorehitpause = 1
+
+[State -3, 2.1]
+type = Varset
+trigger1 = life <100
+var(7) = 0
+ignorehitpause = 1
+
+[State -3, 2.2]
+type = Varadd
+triggerall = Life>100
+triggerall = Time = 1
+triggerall = UniqHitCount <= 1
+triggerall = GetHitVar(hitcount) <= 3
+trigger1 = stateno = 5001
+trigger1 = anim = 5000
+trigger2 = stateno = 5001
+trigger2 = anim = 5010
+trigger3 = stateno = 5011
+trigger3 = anim = 5020
+var(7) = 25
+ignorehitpause = 1
+
+[State -3, 2.3]
+type = Varadd
+triggerall = Life>100
+triggerall = Time = 1
+triggerall = UniqHitCount <= 1
+triggerall = GetHitVar(hitcount) <= 3
+trigger1 = stateno = 5001
+trigger1 = anim = 5001
+trigger2 = stateno = 5001
+trigger2 = anim = 5011
+trigger3 = stateno = 5011
+trigger3 = anim = 5021
+var(7) = 70
+ignorehitpause = 1
+
+[State -3, 2.4]
+type = Varadd
+triggerall = Life>100
+triggerall = Time = 1
+triggerall = UniqHitCount <= 1
+triggerall = GetHitVar(hitcount) <= 3
+trigger1 = stateno = 5001
+trigger1 = anim = 5002
+trigger2 = stateno = 5001
+trigger2 = anim = 5012
+trigger3 = stateno = 5011
+trigger3 = anim = 5022
+var(7) = 140
+ignorehitpause = 1
+
+[State -3, 2.5]
+type = ChangeState
+trigger1 = Life>100
+trigger1 = var(7) >= 500
+value = 5300
+ctrl = 0
+ignorehitpause = 1
+
+[State -3,angels]
+type = RemoveExplod
+trigger1 = stateno != [5300,5350]
+ID = 8400
+
+[State -3]
+Type = VarSet
+Trigger1 = 1
+Trigger1 = StateNo != [5300,5306]
+V = 0
+value = 0
+
+[State -3]
+Type = StopSnd
+Trigger1 = 1
+Trigger1 = StateNo != [5300,5306]
+Channel = 6
+
+[State -2]
+Type = RemoveExplod
+Trigger1 = 1
+Trigger1 = StateNo != [5300,5306]
+ID = 2

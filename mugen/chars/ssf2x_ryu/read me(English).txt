@@ -1,0 +1,70 @@
+---------------------------------------------------------------------------
+Ryu  by G.D.T  Ver 2.01  2010/3/3
+---------------------------------------------------------------------------
+From Super Street Fighter 2 Turbo(called "Super Street Fighter 2X" in Japan)
+and little arranged
+
+---------------------------------------------------------------------------
+[What's new]
+add power gauge
+
+---------------------------------------------------------------------------
+[Infor]
+You can choose Evil Ryu by holding start bottun and SP ,SK
+
+Evil Ryu is based on Akuma of Super Street Fighter 2 Turbo
+
+Opponent(in air) can't guard Shouryuu Ken
+
+About easy command of Super, I consider that
+player use controller, not arcade stick
+
+You should open option.txt
+(reduce damage or not,and...)
+
+---------------------------------------------------------------------------
+[Command]
+Evil   = Evil Ryu mode
+←     = B
+／     = DB
+↓     = D
+＼     = DF
+→     = F
+
+[Throw]
+Seoi Nage             　　　　                 → or ← + Y or Z(near opponent)
+Tomoe Nage             　　　　              　→ or ← + B or C(near opponent)
+
+[Normal]
+Sakotu Wari　　　　　　　                      → + Y
+Mizo-ochi Kudaki　　　　　　　                 → + Z
+
+[Special]
+Hadou Ken　　                                  ↓＼→ + X or Y or Z
+Fire Hadou Ken　　                             →＼↓／← + X or Y or Z
+Shouryuu Ken　　　                             →↓＼ + X or Y or Z
+Tatsumaki Zankuu Kyaku　                       ↓／← + A or B or C(air also)
+Ashura Senkuu(Evil only)                       (front) →↓＼ + 2P or 2K 
+　　　　　　　                                 (back)　←↓／ + 2P or 2K
+
+[Super]
+Shinkuu Hadou Ken(Normal)　 　                 ↓＼→↓＼→ + X or Y or Z
+                                               or  X+A or Y+B or Z+C
+
+Messatsu Gou Hadou(Evil only)　　　　　        ↓＼→↓＼→ + X or Y or Z(or Y+B)
+Messatsu Gou Shouryuu(Evil only)　　　　       ↓＼→↓＼→ + A or B or C(or X+A)
+Shun Goku Satsu(Evil only)　                   X, X, →, A, Z(or Z+C)
+
+---------------------------------------------------------------------------
+[Other]
+Free for using movie
+You can customize this charactor in case of private use
+Free for making AI
+
+---------------------------------------------------------------------------
+[Special thanks]
+JAM(hosted)
+CAPCOM
+
+and...you!!
+

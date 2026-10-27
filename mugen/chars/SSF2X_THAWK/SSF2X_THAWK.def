@@ -1,0 +1,46 @@
+;THUNDER HAWK from Super Street Fighter II Turbo/X by OMEGAPSYCHO
+;Copyright CAPCOM. 2013
+; E-mail: OMEGAPSYCHO@hotmail.com
+;versión 1.1 (100%) 
+
+[Info]
+Name         ="T.HAWK"
+DisplayName  ="T.HAWK"
+VersionDate  = 10,05,2013
+MugenVersion =1.1
+Author       ="OMEGAPSYCHO"
+Pal.Defaults = 4,5,6,1,2,3,7,8,9,10,11,12
+
+[Files]
+cmd  = CODE/commandThawk.cmd
+cns    = CODE/constantThawk.cns
+st       = CODE/commonThawk.cns
+st2     = CODE/statesThawk.cns
+st3     = CODE/-2Thawk.cns
+st4     = CODE/MOVESThawk.cns
+st5     = CODE/ThrowThawk.cns
+stcommon = CODE/commonThawk.cns
+sprite	= CODE/THAWK.sff
+anim	= CODE/animationThawk.air
+sound	= CODE/THAWK.snd  
+;------------------------------
+pal1 = act/THawk_PINK.act 
+pal2 = act/THawk_BROWN.act
+pal3 = act/THawk_BLACK.act
+pal4 = act/THawk_ORIGINAL.act ;<<< In SSF2X  is: THawk_MAROON.act
+pal5 = act/THawk_WHITE.act
+Pal6 = act/THawk_GREEN.act
+Pal7 = act/THawk_GOLD.act
+Pal8 = act/THawk_ORANGE.act
+Pal9=  act/THawk_TURQUESE.act
+;NEW COLORS
+Pal10=act/THawk_AMARELLA.act
+Pal11=act/THawk_PURPLE.act
+Pal12=act/THawk_NewGREEN.act
+
+;Extra Colors
+;Pal* = act/THawk_NewBLUE.act
+;Pal* = act/THawk_NewPURPLE.act
+;Pal* = act/THawk_NewRED.act
+;Pal* = act/THawk_MAROON.act  ;<<<Original Color From SSF2 X/Turbo
+

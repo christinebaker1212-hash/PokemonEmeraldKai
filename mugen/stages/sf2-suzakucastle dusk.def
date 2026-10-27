@@ -1,0 +1,141 @@
+;Ryu's stage from Street Fighter 2 World Warrior, by Phantom.of.the.Server
+
+[Info]
+name = "SF2 Suzaku Castle - Ryu Stage (Dusk)"
+author = "Phantom.of.the.Server"
+versiondate = 2022
+mugenversion = 1.0
+
+[Music]
+bgmusic = sound/SF2 Suzaku Castle - Ryu Theme.mp3
+bgmvolume = 100
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -224
+boundright = 224
+boundhigh = 0
+boundlow = 0
+verticalfollow = 0
+floortension = 72
+tension = 60
+overdrawhigh = 0
+overdrawlow = 0
+cuthigh = 44
+cutlow = 16
+startzoom = 1
+zoomout = 1
+zoomin = 1
+
+[PlayerInfo]
+p1startx = -70
+p1starty = 0
+p1facing = 1
+
+p2startx = 70
+p2starty = 0
+p2facing = -1
+
+p3startx = -115
+p3starty = 0
+p3facing = 1
+
+p4startx = 115
+p4starty = 0
+p4facing = -1
+
+leftbound = -1000
+rightbound = 1000
+
+[Bound]
+screenleft = 15
+screenright = 15
+
+[StageInfo]
+zoffset = 216
+autoturn = 1
+resetBG = 0
+localcoord = 320, 240
+xscale = 1
+yscale = 1
+
+[Shadow]
+intensity = 128
+color = 0, 0, 0
+yscale = 0.1
+fade.range = -216, 0
+
+
+;=====<MAIN BG DEFINITION>===== 
+[BGdef]
+spr = sf2-suzakucastle dusk.sff
+debugbg = 0
+
+[BG Sky]
+type = normal
+spriteno = 0, 5
+layerno = 0
+start = 190, 0
+delta = 0.167, 0
+tile = 1, 0
+tilespacing = 0, 0
+velocity = 0, 0
+mask = 1
+
+[BG Castle];531
+type = normal
+spriteno = 0, 4
+layerno = 0
+start = 0, 0
+delta = 0.4709821, 1
+mask = 1
+
+[BG Mid];560
+type = normal
+spriteno = 0, 3
+layerno = 0
+start = 0, 0
+delta = 0.5357143, 1
+mask = 1
+
+[BG Mid]
+type = normal
+spriteno = 0, 2
+layerno = 0
+start = 0, 0
+delta = 0.6741071, 1
+mask = 1
+
+[BG Floor]
+type = parallax
+spriteno = 0, 0
+layerno = 0
+start = 0, 0
+delta = 0.7946426, 1
+xscale = 1, 1.3876404
+mask = 1
+
+[BG Floor]
+type = normal
+spriteno = 0, 1
+layerno = 0
+start = 0, 0
+delta = 1.1026786, 1
+mask = 1
+
+[BG Furinkazan]
+type = normal
+spriteno = 0, 6
+layerno = 0
+start = -8, 0
+delta = 0.8973213, 1
+mask = 1
+
+[BG Furinkazan]
+type = normal
+spriteno = 0, 7
+layerno = 0
+start = 8, 0
+delta = 0.8973213, 1
+mask = 1

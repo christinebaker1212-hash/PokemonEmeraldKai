@@ -1,0 +1,36 @@
+[Info]
+Name         ="ryu"
+DisplayName  ="ryu"
+VersionDate  =09,23,2009
+MugenVersion =04,14,2002
+Author       ="G.D.T"
+Pal.Defaults =1,7
+
+[Files]
+Cmd     = ryu.cmd
+Cns     = ryu.cns
+St      = ryu.cns
+St1     = option.txt
+StCommon = common1.cns
+Sprite  = ryu.sff
+Anim    = ryu.air
+Sound   = ryu.snd
+
+
+pal1 = act/ryu_1.act
+pal2 = act/ryu_2.act
+pal3 = act/ryu_3.act
+pal4 = act/ryu_4.act
+pal5 = act/ryu_5.act
+Pal6 = act/ryu_6.act
+Pal7 = act/ryu_7.act
+Pal8 = act/ryu_7.act
+Pal9 = act/ryu_9.act
+Pal10= act/ryu_10.act
+Pal11= act/ryu_11.act
+Pal12= act/ryu_12.act
+
+
+[Arcade]
+Intro.Storyboard =
+Ending.Storyboard =

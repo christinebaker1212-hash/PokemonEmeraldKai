@@ -1,0 +1,64 @@
+---------------------------------------------------------------------------
+Ken  by G.D.T  Ver 1.01  2010/3/3
+---------------------------------------------------------------------------
+From Super Street Fighter 2 Turbo(called "Super Street Fighter 2X" in Japan)
+and little arranged
+
+---------------------------------------------------------------------------
+[What's new]
+add power gauge
+
+---------------------------------------------------------------------------
+[Infor]
+You can choose color 7~9 by holding start bottun
+
+Opponent(in air) can't guard Shouryu Ken
+
+About easy command of Super, I consider that
+player use controller, not arcade stick
+
+You should open option.txt
+(reduce damage or not, and reset power at the round start or not)
+
+---------------------------------------------------------------------------
+[Command]
+←     = B
+／     = DB
+↓     = D
+＼     = DF
+→     = F
+
+[Throw]
+Seoi Nage             　　　　                 → or ← + Y or Z(near opponent)
+Tukami hizageri             　　　　           → or ← + B(near opponent)(press any button consecutively)
+Jigoku Guruma         　　　　                 → or ← + C(near opponent)
+Jigoku Fusya                                   → or ← + B or C(near opponent in air)
+
+[Special]
+Hadou Ken　　                                  ↓＼→ + X or Y or Z
+Shouryuu Ken　　　                             →↓＼ + X or Y or Z
+Tatsumaki Zankuu Kyaku　                       ↓／← + A or B or C(air also)
+Kamabarai Geri                                 ↓＼→ + A or B or C
+→Inazuma Kakato Wari                          holding the bottun
+Nataotoshi Geri                                →＼↓ + A or B or C
+→Inazuma Kakato Wari                          holding the bottun
+Osoto Mawashigeri　　                          ← ／↓＼→ + A or B or C
+→Inazuma Kakato Wari                          holding the bottun
+
+[Super]
+Syouryu Reppa　 　                            ↓＼→↓＼→ + X or Y or Z
+                                               or  X+A or Y+B or Z+C
+
+---------------------------------------------------------------------------
+[Other]
+Free for using movie
+You can customize this charactor in case of private use
+Free for making AI
+
+---------------------------------------------------------------------------
+[Special thanks]
+JAM(hosted)
+CAPCOM
+
+and...you!!
+

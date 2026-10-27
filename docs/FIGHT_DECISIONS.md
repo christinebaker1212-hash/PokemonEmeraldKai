@@ -1,0 +1,215 @@
+# VS cabinet (MUGEN fights): decisions and plan
+
+Agreed with the project owner (October 2026). The engine is mugen-unleashed
+(https://github.com/christinebaker1212-hash/mugen-unleashed, inspected at
+`eea065966ab4c6557f811d707ec05221ba0f7ae9`): a C rebuild of M.U.G.E.N 1.1 Beta 1, with no game
+data or Elecbyte files.
+
+## Asked for directly
+- A playable fighting game in the game, with two players fighting online with rollback.
+- The game stays 240x160; the fight system alone may use double resolution (480x320).
+- For now, one Game Corner slot machine becomes a VS cabinet. One player sits on one side and a
+  "Fight me!" bubble appears. When another player sits on the other side, the character select
+  opens, a best-of-2 fight plays out, then both players are put back in the Game Corner.
+- Adding or removing characters, stages, music and screenpacks must be easy.
+- Nothing may be cut off, squished or off screen, automatically.
+- All music and sound effects are brought down to GBA sound.
+
+## Answers
+| # | Question | Answer |
+|---|---|---|
+| 1 | Which machines | The right block's bottom row: (7,9) and (8,9), back to back, nearest the door. The other 10 stay slot machines |
+| 2 | "Best of 2" | First to 2 round wins (up to 3 rounds, always a winner) |
+| 3 | While waiting | Seated facing the cabinet, the bubble visible to everyone on the map; B stands up and removes it |
+| 4 | Stakes | None: wins and losses only counted (trainer card / achievements) |
+| 5 | 3:2 screen vs 4:3 packs | Widen the view: scale by height, the camera shows more stage at the sides, the HUD anchors to the real edges; stages too narrow get their edge layers extended |
+| 6 | Sharpness | 480x320, shown with bicubic interpolation (the fight only; the rest of the game keeps its own filter). Changed from nearest-neighbor in the third round |
+| 7 | HUD off screen | Nudge each element back inside an 8px safe margin, keeping its size; a log says what moved |
+| 8 | Character select | The pack's own screenpack (system.def / select.def / VS screen), fitted by rule 7; both players pick at once |
+| 9 | Transport | Direct UDP between the two players (introduced by the room server, with the game's port mapping); the relay if UDP fails within 2 s |
+| 10 | Input delay | Automatic from the ping measured on the select screen: 1-3 frames delay, rollback covers up to 8 frames; a warning at 250 ms+ |
+| 11 | Net HUD | Nothing, unless rollbacks reach 5+ frames or packets are lost: a small signal icon in a corner |
+| 12 | Drop / desync | "Waiting for NAME... 10": play on if they come back, else no contest (nothing recorded). A desync silently loads the host's state |
+| 13 | Content folder | A plain MUGEN folder, `mugen/` next to the exe, standard layout; edit select.def to add or remove; picked up the next time someone sits down |
+| 14 | Shipping / differing packs | Releases ship the owner's pack; at select, characters and stages the other player lacks (by file hash) are greyed out |
+| 15 | Music formats | OGG, MP3, WAV, FLAC (no MIDI / tracker) |
+| 16 | GBA sound | Everything converted at load to 8-bit signed at 13379 Hz (sound effects mono, music stereo), played through the game's mixer |
+| 17 | Settings | Per cabinet in `mugen/cabinets.ini` (life, round time, speed, stage list...); online the host's file wins; no in-game menu |
+| 18 | Stage | Random from the cabinet's list, shown on the VS screen |
+| 19 | Spectating | The SPECTATE panel shows the fight (as for card duels); bystanders see both players seated with a crossed-swords bubble over the cabinet |
+| 20 | Sides | West seat (facing east) = P1 on the left |
+| 21 | Buttons | Arcade layout. Pad: X Y RB = x y z, A B RT = a b c, Start = start. Keys: U I O / J K L, Enter. Rebindable on a new OPTIONS > CONTROLS > FIGHT row |
+| 22 | Bubble | The game's own speech balloon and font, gently bobbing like a nametag; A at the empty seat asks "Fight NAME? YES / NO" |
+| 23 | Transition | The CRT turns on (fade to black, a line opens into the picture) into the select screen; it turns off after the results, and both players stand beside their seats facing the cabinet |
+
+## Second round (same day)
+- Every player is on Windows. Linux / Windows agreement doesn't matter (the Linux build only runs
+  the headless tests), but both players' Windows builds still have to agree.
+- Elecbyte's files are fine to use (a private build). Even so, the pack's Elecbyte characters,
+  stages and screenpacks are gone. What stays is the engine's own data: `common1.cns`,
+  `common.snd`, `fightfx.sff` / `.air`, and the `f-4x6` / `f-6x9` fonts the engine loads at
+  start-up.
+- The screenpack is Phantom Blood's STREET FIGHTER EX PLUS (640x480), in
+  `mugen/STREETFIGHTER-EX-PLUS/` (where its own paths expect it). Only what the select, VS, fight and victory screens read
+  is kept. Removed:
+  - the intro, intro EX (122 MB), title, ending, game over and winner storyboards and their
+    music;
+  - SFEX-SYSTEMEX.def and the 110-slot variant.
+
+  The removed storyboards are switched off in SFEX-SYSTEM.def, along with demo mode and the
+  continue screen. The grid is 12 x 3 cells, centred (it was 16 x 5, with rows 4-5 and columns
+  15-16 off screen). There are no `empty` lines: characters fill the cells in order, so adding one is
+  a new line in SFEX-SELECT.def.
+- Test characters (SSF2X), in the SF2 select order: Ryu, Ken, Chun-Li, Dhalsim, Cammy,
+  Fei Long, Dee Jay, T.Hawk, Vega, Gouki, with RANDOM at both ends of the row.
+  - Other versions in their folders are not listed: Chun-Li 2, Dhalsim 2, Gouki (normal) /
+    Shin / EX Shin, and SF2'CE Vega.
+  - Stages: the 18 SF2 stages, plus 6 that came inside character folders. Those 6 are now in
+    `stages/`: SSF2X Chun-Li and Dhalsim (with their songs), Gouki's, and Vega's three.
+- Stage music: the songs aren't fetched for the owner. `mugen/sound/README.txt` lists the 17 file
+  names the stages wait for.
+- No new cabinet tiles: the slot machine tiles stay as they are.
+- Sitting down offers WAIT FOR 2P or FIGHT CPU. A second player who sits during a CPU fight
+  cancels it, and the select screen opens for both.
+
+## Third round
+- The fight is shown with bicubic interpolation, only the fight (#6). `Fight_CanvasBicubic`
+  (src/platform/fight_platform.c) scales each new frame with Catmull-Rom on the CPU to the window's
+  size, at most 960x640, and the renderer's linear filter takes it the rest of the way. A window of
+  960 or wider is exactly 2x, which has its own quicker path.
+
+## Plan
+
+### The engine in the game
+- Vendor `src/mugen/` from mugen-unleashed (the commit above), keeping its file-per-module layout
+  and address comments. Additions are marked `Moemon Fight` like the other hooks.
+- Port it to 64-bit, SDL2, gcc and mingw:
+  - `MUGEN_ASSERT_SIZE` only checks on 32-bit MSVC (the layouts hold pointers);
+  - SDL 1.2 video, events, joystick and SDL_mixer are replaced by the game's own;
+  - no OpenGL or GLEW: the software renderer (`softrender.c` / `softblend.c`) draws into a
+    480x320 buffer;
+  - libpng comes from the game; Lua and minizip come with the engine;
+  - storyboards, the title screen and the options screen are never reached.
+- The engine runs as one stepped function, not its own loop. `src/mugen/mf_host.c` provides:
+  - `Fight_Begin(cabinet, seat, seed)`, then `Fight_Step(const u16 inputs[2])` once per frame;
+  - `Fight_Save` / `Fight_Load` / `Fight_Hash` for rollback;
+  - `Fight_IsActive()` and `Fight_Canvas()`.
+
+  The whole session (select, VS, fight, results) runs in this deterministic loop, so the select
+  screen is synced the same way as the fight.
+- `display.c` asks `Fight_CanvasBicubic()` first: the picture already scaled to the game's rect
+  (third round).
+- `Platform_GetFrame` gives spectators a 240x160 reduction while a fight is on.
+
+### Screen fitting
+- `mugen.cfg` sizes are forced to 480x320.
+- Packs keep their `localcoord`. The scale is 320 / localcoord height, and the camera width is
+  480 / scale. A 320x240 stage gets about 20 more stage pixels on each side.
+- Screenpacks (motifs) are fitted by height too (`MfHost_FitMotif`: the smaller of the two scales)
+  and centred (`g_mfMotifOffsetX`, `MF_MOTIF_X()` in the select, VS, fight HUD and explod code). The
+  select, VS and results screens keep to the pack's 4:3: what slides past its edges isn't shown (black
+  beside it, until the fight itself is on screen).
+- The fight HUD is measured sprite by sprite when a session starts (`MfFit_Hud`,
+  fight/host/mf_fit.c), and what moved goes to `mugen/fightfit.log`:
+  - each player's part (life bar, power bar, face, name, win icons) moves out to its real edge, as far
+    as the pack had it from its own screen's edge, never past the 8px safe margin;
+  - the top part goes to `hud.top` in cabinets.ini (8: against the safe margin; -1: the pack's place,
+    moved inside the margin when past it). The owner found SFEX's bars hanging too low otherwise;
+  - the bottom part only moves when it is past the margin;
+  - a sprite across the middle of the screen belongs to both sides and keeps its centred place
+    (SFEX draws both players' round boxes as one strip under P2's bar; it went to the right with P2's
+    side at first).
+- The camera never shows past a stage's edge. When the bounds plus the wider view need more than
+  the stage has, the outermost background layers repeat at the edges.
+- Fonts aren't measured yet (names, counters): they move with their side and part.
+
+### Rollback and determinism
+- All state a match changes lives in one arena: players, helpers, explods, projectiles, the
+  camera, background controllers, the round state, the match RNG, input and command buffers.
+- What's loaded (sprites, animations, states, sounds) is read-only after load and is not saved.
+- A ring of 9 snapshots holds the arena plus the engine's globals. The other player's missing
+  input is predicted as their last input. When the real input differs, the game loads the
+  snapshot and replays up to 8 frames.
+- Sounds are keyed by (frame, sound, channel), so a replayed frame never plays them twice. A sound
+  the corrected history no longer has is cut.
+- Both builds use the same floating point behavior (SSE2, `-ffp-contract=off`, no fast-math) and
+  the same trig / pow / exp / log code bundled in `src/mugen/` (fdlibm-style), so every player's
+  build gives the same results.
+- A hash of the arena is exchanged every 30 frames. On a mismatch the host sends its snapshot
+  (zlib), and the other player loads it.
+
+### Network
+- New room messages:
+  - a seat taken or freed: the bubble for everyone;
+  - the challenge and its answer;
+  - the UDP endpoint exchange (hole punching, the port mapping from `mp_portmap.c`);
+  - the session seed, the pack hashes, and the result.
+- `MP_PROTOCOL_VERSION` goes up. The wire state gets an "in a fight" bit for the cabinet bubble.
+- Inputs travel over UDP. Each packet holds the last 8 frames' buttons (16 bits a frame) and the
+  last frame received, so lost packets need no resend. That's about 30 bytes 60 times a second.
+- If no UDP packet gets through within 2 s, the same packets go over a new relay extension on the
+  existing TCP connection.
+- The delay is set by pings on the select screen: delay = clamp(ceil(RTT / 2 / 16.7 ms), 1, 3).
+- Time sync: the side that runs ahead skips a frame now and then, so both stay within the
+  rollback window. More than 8 frames apart, the game waits. With 10 s of silence comes the
+  "Waiting for NAME" countdown and then no contest.
+- Pack check: before select, each player sends the hashes of their characters and stages (every
+  file each one uses). Anything not identical on both sides is greyed out and excluded from
+  random.
+
+### Sound
+- Decoders (public-domain single files) live in `src/mugen/`: stb_vorbis, dr_mp3, dr_flac, and
+  MUGEN's own `wav.c`.
+- At load, every sound and song becomes 8-bit signed at 13379 Hz: sound effects mono, music
+  stereo. Loop points (`bgm.loopstart` / `loopend`) are kept.
+- A fight mixer adds them into the game's audio callback (42048 Hz out) while the game's music
+  waits.
+
+### Content and settings
+- `mugen/` next to the exe uses the standard layout: `data/` (system.def, select.def, fight.def,
+  mugen.cfg), `chars/`, `stages/`, `sound/` and `font/`.
+- Files are read again each time someone sits down.
+- `mugen/cabinets.ini` holds one section per cabinet (`[mauville_gc]`): motif, select.def, life,
+  round time, game speed, rounds to win (2) and the stage list. Online, the host's values are
+  used.
+- Releases ship the pack: `mugen/` in the repository is the folder as it goes next to the exe.
+  `.gitattributes` keeps it byte for byte.
+
+### Cabinet and flow
+- The map:
+  - the slot machine tiles at (7,9) and (8,9) stay as they are;
+  - their two `bg_event`s run `MauvilleCity_GameCorner_EventScript_VsCabinetWest / East`,
+    which call `MP_Fight_Sit(seat)` in `src/mp/mp_fight.c`.
+- Flow:
+  1. The player sits (the facing is locked) and chooses WAIT FOR 2P or FIGHT CPU. Waiting shows
+     the "Fight me!" balloon; FIGHT CPU opens the select screen against the CPU, with the
+     balloon still up.
+  2. B stands up (while waiting).
+  3. A at the free seat asks "Fight NAME? YES / NO".
+  4. Connect (2 s of UDP, then the relay). A CPU fight in progress is cancelled and both players
+     get the select screen.
+  5. The CRT turns on, then the pack's select screen, then the VS screen with the random stage.
+  6. The fight: first to 2 rounds.
+  7. The results with the win quote, then the CRT turns off.
+  8. Both players stand beside their seats facing the cabinet, and the W / L count is recorded.
+- Controls: a FIGHT row on OPTIONS > CONTROLS (the arcade layout above), saved with the game's
+  other bindings.
+
+### Tests (headless harness)
+- `fight_cabinet`: two clients sit, pick and fight with scripted inputs, and are put back.
+- `fight_rollback`: the same fight at lag (`tools/mp_server/lagproxy.py`, `WORST=1`), with
+  identical hashes on both sides.
+- `fight_determinism`: a recorded input file replayed twice, and under Wine, gives the same hash
+  every frame.
+- `fight_cpu_join`: one client fights the CPU, a second sits down, and both reach the select
+  screen.
+- `fight_fit`: a deliberately oversized screenpack is nudged inside, checked against the log.
+- `fight_sound`: decoded sounds come out at 8-bit, 13379 Hz.
+
+### Order of work
+1. Port the engine and make it a stepped function; offline fights on the canvas.
+2. Screen fitting and sound.
+3. Rollback state and determinism (local tests with simulated delay).
+4. Networking, the cabinet and the flow.
+5. Spectating, the controls row, and wins / losses.
+

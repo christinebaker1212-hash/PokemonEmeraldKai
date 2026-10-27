@@ -25,6 +25,7 @@
 
 #include "platform/display.h"
 #include "tcg/integration.h"
+#include "platform/fight.h"
 
 #ifdef PLATFORM_SDL2
 
@@ -457,6 +458,7 @@ static int CreateRenderer(void)
 static void RecreateRenderer(void)
 {
     Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyTextures();
     if (sRenderer)
         SDL_DestroyRenderer(sRenderer);
@@ -1260,6 +1262,20 @@ static void RenderToBackbuffer(void)
     ComputeDstRect(outW, outH, &dst);
     dst.x += gameX;
     dst.y += gameY;
+    // Moemon Fight: a fight is the game picture, scaled bicubic (src/platform/fight_platform.c)
+    {
+        SDL_Texture *fight = Fight_CanvasBicubic(sRenderer, dst.w, dst.h);
+        if (fight)
+        {
+            SDL_RenderCopy(sRenderer, fight, NULL, &dst);
+            sFilterShown = 0;
+            sLastGameRect = dst;
+            sLastPanelH = panelH;
+            if (sPanelCount > 0)
+                DrawPanel(&L, fullW, fullH);
+            return;
+        }
+    }
     kx = CeilDiv(dst.w, GBA_W);
     ky = CeilDiv(dst.h, GBA_H);
     exact = (dst.w == GBA_W * kx && dst.h == GBA_H * ky);
@@ -1418,6 +1434,7 @@ int Display_Init(const char *title)
 void Display_Shutdown(void)
 {
     Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyAllPopouts();
     DestroyTextures();
     if (sRenderer)

@@ -1,0 +1,44 @@
+Vega (Balrog)
+SSFIIX + SFII'CE
+-------------------
+Notes on Variables
+-------------------
+
+Character Variables
+-------------------
+var(0)	-	Randomizer: Used for various things.
+Var(1)	-	Sp/hyp Move + weak/strong/fierce checker.
+var(2)	-	Super Izuna Drop activater.
+var(3)	-	Attack Animation Checker.
+
+var(5)	-	Round Over indicator. Forces in to stand state.
+var(6)	-	Opponent checker. Checks if target animations exists.
+var(7)	-	Dizziness hit counter.
+var(8)	-	Hits requierd before dizziness.
+var(9)	-	Actually dizzy falling indicator.
+var(10) -	Fireball hit sound indicator.
+var(11) -	Fireball guard sound indicator.
+
+var(15) -	If Target's animation exists, activate Win Quote system.
+
+var(20) - 	Claw is Attached/Detached.
+var(21) - 	Random # of hits needed until claw is fallen off.
+var(22) - 	# of actual hits done until claw is fallen off.
+
+var(30) -	Random AI Checker.
+
+var(35) -	Amount of Power to save.
+
+var(40) -	Rounds existed/checked once a round is over.
+var(41) -	Win indicator.
+var(42) -	Lose indicator.
+
+var(50) -	Type of Sound Set to use.
+var(51) -	SSF2X/SF2'CE Mode option.
+var(52) -	Sets sound effects once depending on palette/color.
+
+var(55) -	Palette/Color Selector.
+var(56) -	KO Scream indicator.
+
+var(58) -	Stage interaction activated with stage.var code.
+var(59) -	Pause Menu can be activated only once.

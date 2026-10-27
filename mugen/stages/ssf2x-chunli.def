@@ -1,0 +1,308 @@
+[Info]
+;Name = "CHINA"
+Name = "CHUN LI STAGE"
+
+[Camera]
+StartX = 0
+StartY = 0
+BoundLeft = -255
+BoundRight = 256
+BoundHigh = -32
+BoundLow = 0
+VerticalFollow = .2
+FloorTension = 40
+Tension = 80
+
+[PlayerInfo]
+P1StartX = -90
+P1StartY = 0
+P1StartZ = 0
+P1Facing = 1
+P2StartX = 90
+P2StartY = 0
+P2StartZ = 0
+P2Facing = -1
+LeftBound  = -1000
+RightBound = 1000
+TopBound = 0
+BotBound = 0
+
+[Scaling]
+Topz = 0
+Botz = 50
+TopScale = 1
+BotScale = 1.2
+
+[Bound]
+ScreenLeft = 20
+ScreenRight = 20
+
+[StageInfo]
+ZOffSet = 200
+AutoTurn = 1
+ResetBG = 0
+
+[Shadow]
+Color = 143, 175, 239
+YScale = .1
+Reflect = 0
+
+[Music]
+BGMusic = sound/ssf2x-chunli.mp3;ã»ñºÅuTo Your Heart with PassionÅv
+BGVolume = 0
+
+[BGdef]
+Spr = stages/ssf2x-chunli.sff
+DebugBg = 0
+
+[BG]
+Type = Normal
+SpriteNo = 2, 1
+Delta = 0, 0
+Tile = 1, 1
+[BG]
+Type = Normal
+SpriteNo = 2, 0
+Delta = .59, 1
+Tile = 1
+[BG]
+Type = Normal
+SpriteNo = 0, 0
+Delta = .59, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 1, 0
+Delta = .59, 1
+Mask = 1
+[BG]
+Type  = Parallax
+SpriteNo = 3, 0
+Delta = .59, 1
+XScale = 1, 2
+[BG]
+Type = Normal
+SpriteNo = 3, 1
+Delta = 0, 1
+Tile = 1
+
+[BG]
+Type = Anim
+ActionNo = 1
+Delta = .59, 1
+[Begin Action 1]
+-1, 0, 0,0,62
+4, 0, 0,0,12
+4, 1, 0,0,12
+4, 0, 0,0,12
+[BG]
+Type = Anim
+ActionNo = 2
+Delta = .59, 1
+[Begin Action 2]
+5, 1, 0,0,88
+-1, 0, 0,0,10
+5, 0, 0,0,10
+-1, 0, 0,0,10
+5, 1, 0,0,10
+-1, 0, 0,0,10
+5, 0, 0,0,10
+-1, 0, 0,0,10
+[BG]
+Type = Anim
+ActionNo = 3
+Delta = .59, 1
+[Begin Action 3]
+-1, 0, 0,0,80
+6, 1, 0,0, 7
+6, 0, 0,0, 7
+6, 1, 0,0, 7
+-1, 0, 0,0, 7
+6, 1, 0,0, 7
+6, 0, 0,0, 7
+6, 1, 0,0, 7
+-1, 0, 0,0, 7
+6, 1, 0,0, 7
+6, 0, 0,0, 7
+6, 1, 0,0, 7
+-1, 0, 0,0, 7
+[BG]
+Type = Anim
+ActionNo = 4
+Delta = .59, 1
+[Begin Action 4]
+7, 0, 0,0,81
+7, 1, 0,0,13
+7, 2, 0,0,13
+7, 1, 0,0,13
+[BG]
+Type = Anim
+ActionNo = 5
+Delta = .59, 1
+[Begin Action 5]
+-1, 0, 0,0,12
+8, 0, 0,0,12
+[BG]
+Type = Anim
+ActionNo = 6
+Delta = .59, 1
+[Begin Action 6]
+-1, 0, 0,0, 8
+9, 0, 0,0, 8
+9, 1, 0,0, 8
+
+[BG]
+Type = Normal
+SpriteNo = 10, 0
+LayerNo = 1
+Delta = 1.1, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 10, 0
+LayerNo = 1
+Start = 470, 0
+Delta = 1.1, 1
+Mask = 1
+
+[BG];é©ì]é‘
+Type = Anim
+ActionNo = 10
+ID = 1
+Start = -379
+Delta = .8, 1
+Velocity = 2
+Tile = 1
+TileSpacing = 785
+[BG];äÁ
+Type = Anim
+ActionNo = 15
+ID = 2
+Start = -379
+Delta = .8, 1
+Velocity = 2
+Tile = 1
+TileSpacing = 785
+
+[Begin Action 10];é©ì]é‘ ê¬
+11, 0, 0,0, 8
+11, 1, 0,0, 8
+11, 2, 0,0, 8
+11, 3, 0,0, 8
+11, 4, 0,0, 8
+11, 5, 0,0, 8
+[Begin Action 11];é©ì]é‘ óŒ
+12, 0, 0,0, 8
+12, 1, 0,0, 8
+12, 2, 0,0, 8
+12, 3, 0,0, 8
+12, 4, 0,0, 8
+12, 5, 0,0, 8
+[Begin Action 12];é©ì]é‘ ê‘
+13, 0, 0,0, 8
+13, 1, 0,0, 8
+13, 2, 0,0, 8
+13, 3, 0,0, 8
+13, 4, 0,0, 8
+13, 5, 0,0, 8
+
+[Begin Action 15];äÁ ÉÅÉKÉl
+14, 0, 0,0,-1
+[Begin Action 16];äÁ é·é“
+14, 1, 0,0,-1
+[Begin Action 17];äÁ òVêl
+14, 2, 0,0,-1
+[Begin Action 18];äÁ èóê´
+14, 3, 0,0,-1
+[Begin Action 19];äÁ íÜîN
+14, 4, 0,0,-1
+[Begin Action 20];äÁ É{ÉTÉ{ÉT
+14, 5, 0,0,-1
+[Begin Action 21];äÁ â°å¸Ç´
+14, 6, 0,0,-1
+
+[BGCtrlDef]
+CtrlID = 1
+LoopTime = 2355
+[BGCtrl]
+Type = Anim
+Time = 2320
+CtrlID = 1
+Value = 10
+[BGCtrl]
+Type = Anim
+Time = 750
+CtrlID = 1
+Value = 11
+[BGCtrl]
+Type = Anim
+Time = 1535
+CtrlID = 1
+Value = 12
+
+[BGCtrlDef]
+CtrlID = 2
+LoopTime = 2747.5
+[BGCtrl]
+Type = Anim
+Time = 2712
+CtrlID = 2
+Value = 15
+[BGCtrl]
+Type = Anim
+Time = 357
+CtrlID = 2
+Value = 16
+[BGCtrl]
+Type = Anim
+Time = 750
+CtrlID = 2
+Value = 17
+[BGCtrl]
+Type = Anim
+Time = 1142
+CtrlID = 2
+Value = 18
+[BGCtrl]
+Type = Anim
+Time = 1535
+CtrlID = 2
+Value = 19
+[BGCtrl]
+Type = Anim
+Time = 1927
+CtrlID = 2
+Value = 20
+[BGCtrl]
+Type = Anim
+Time = 2320
+CtrlID = 2
+Value = 21
+
+[BG];é©ì]é‘
+Type = Anim
+ActionNo = 22
+Start = 558
+Delta = .8, 1
+Facing = -1
+Velocity = -2
+Tile = 1
+TileSpacing = 15700
+[BG];äÁ
+Type = Anim
+ActionNo = 23
+Start = 558
+Delta = .8, 1
+Velocity = -2
+Tile = 1
+TileSpacing = 15700
+
+[Begin Action 22];é©ì]é‘ îΩëŒ
+13, 0, 124,0, 8, H
+13, 1, 124,0, 8, H
+13, 2, 124,0, 8, H
+13, 3, 124,0, 8, H
+13, 4, 124,0, 8, H
+13, 5, 124,0, 8, H
+[Begin Action 23];äÁ îΩëŒ
+14, 2, 124,0,-1, H

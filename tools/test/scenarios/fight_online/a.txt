@@ -1,0 +1,160 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 30
+barrier seated 2
+watchlog fight: online with
+waitlog 1500
+wait 400
+fpress A 2
+wait 600
+fpress RIGHT 20
+wait 4
+fpress RIGHT+X 3
+wait 11
+fpress X 3
+wait 9
+fpress LEFT 10
+wait 7
+fpress DOWN+A 3
+wait 5
+fpress Y 3
+wait 12
+fpress RIGHT 8
+wait 10
+fpress UP+RIGHT 4
+wait 8
+fpress Z 3
+wait 6
+fpress C 3
+wait 4
+fpress LEFT+B 3
+wait 11
+fpress DOWN 6
+wait 9
+fpress DOWN+RIGHT+X 3
+wait 7
+fpress A 3
+wait 5
+fpress RIGHT 20
+wait 12
+fpress RIGHT+X 3
+wait 10
+fpress X 3
+wait 8
+fpress LEFT 10
+wait 6
+fpress DOWN+A 3
+wait 4
+fpress Y 3
+wait 11
+fpress RIGHT 8
+wait 9
+fpress UP+RIGHT 4
+wait 7
+fpress Z 3
+wait 5
+fpress C 3
+wait 12
+fpress LEFT+B 3
+wait 10
+fpress DOWN 6
+wait 8
+fpress DOWN+RIGHT+X 3
+wait 6
+fpress A 3
+wait 4
+fpress RIGHT 20
+wait 11
+fpress RIGHT+X 3
+wait 9
+fpress X 3
+wait 7
+fpress LEFT 10
+wait 5
+fpress DOWN+A 3
+wait 12
+fpress Y 3
+wait 10
+fpress RIGHT 8
+wait 8
+fpress UP+RIGHT 4
+wait 6
+fpress Z 3
+wait 4
+fpress C 3
+wait 11
+fpress LEFT+B 3
+wait 9
+fpress DOWN 6
+wait 7
+fpress DOWN+RIGHT+X 3
+wait 5
+fpress A 3
+wait 12
+fpress RIGHT 20
+wait 10
+fpress RIGHT+X 3
+wait 8
+fpress X 3
+wait 6
+fpress LEFT 10
+wait 4
+fpress DOWN+A 3
+wait 11
+fpress Y 3
+wait 9
+fpress RIGHT 8
+wait 7
+fpress UP+RIGHT 4
+wait 5
+fpress Z 3
+wait 12
+fpress C 3
+wait 10
+fpress LEFT+B 3
+wait 8
+fpress DOWN 6
+wait 6
+fpress DOWN+RIGHT+X 3
+wait 4
+fpress A 3
+wait 11
+fpress RIGHT 20
+wait 9
+fpress RIGHT+X 3
+wait 7
+fpress X 3
+wait 5
+fpress LEFT 10
+wait 12
+fpress DOWN+A 3
+wait 10
+fpress Y 3
+wait 8
+fpress RIGHT 8
+wait 6
+fpress UP+RIGHT 4
+wait 4
+fpress Z 3
+wait 11
+fpress C 3
+wait 9
+fpress LEFT+B 3
+wait 7
+fpress DOWN 6
+wait 5
+fpress DOWN+RIGHT+X 3
+wait 12
+fpress A 3
+wait 10
+watchlog fight: online result
+waitlog 6000
+wait 120
+shot after_a
+quit

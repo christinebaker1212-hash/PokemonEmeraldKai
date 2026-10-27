@@ -763,6 +763,14 @@ static const struct MenuAction MultichoiceList_FallarborTentRules[] =
     {gText_Exit},
 };
 
+// Moemon Fight: the VS cabinet (src/mp/mp_fight.c)
+static const struct MenuAction MultichoiceList_VsCabinet[] =
+{
+    {gText_MpFightWait2P},
+    {gText_MpFightCpu},
+    {gText_Cancel2},
+};
+
 static const struct MenuAction MultichoiceList_TagMatchType[] =
 {
     {gText_NormalTagMatch},
@@ -899,6 +907,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_SLATEPORT_TENT_RULES]       = MULTICHOICE(MultichoiceList_SlateportTentRules),
     [MULTI_FALLARBOR_TENT_RULES]       = MULTICHOICE(MultichoiceList_FallarborTentRules),
     [MULTI_TAG_MATCH_TYPE]             = MULTICHOICE(MultichoiceList_TagMatchType),
+    [MULTI_VS_CABINET]                 = MULTICHOICE(MultichoiceList_VsCabinet),
 };
 
 const u8 *const gStdStrings[] =

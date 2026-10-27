@@ -1,0 +1,1236 @@
+;---------------------------------------------------------------------------
+; Override common states (use same number to override) :
+;---------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------
+; States that are always executed (use statedef -2)
+;---------------------------------------------------------------------------
+[Statedef -2]
+
+;----- Cage Dropped -----
+[State -2, VarAdd]
+type = VarAdd
+triggerall = Var(58) < 100
+triggerall = StageVar(info.author) = "Dark Saviour"
+trigger1 = StageVar(info.name) = "[SSFIIX] Vega"
+trigger2 = StageVar(info.name) = "[SFII'CE] Vega" || StageVar(info.name) = "[SFII] Vega"
+trigger2 = Var(58) <= 0
+ignorehitpause = 1
+var(58) = 1
+
+[State -2, PlaySnd]
+type = PlaySnd
+triggerall = StageVar(info.name) = "[SSFIIX] Vega"
+triggerall = StageVar(info.author) = "Dark Saviour"
+trigger1 = Var(58) = 81
+ignorehitpause = 1
+value = 6, 2
+;-------------------------
+
+;----- Variable Reset -----
+[State -2, VarAdd]
+type = VarSet
+triggerall = Var(58) > 0
+triggerall = StageVar(info.author) != "Dark Saviour"
+trigger1 = StageVar(info.name) != "[SSFIIX] Vega"
+trigger1 = StageVar(info.name) != "[SFII'CE] Vega"
+trigger1 = StageVar(info.name) != "[SFII] Vega"
+ignorehitpause = 1
+var(58) = 0
+;-------------------------
+
+;----- Pause Menu -----
+[State -2, Pause]
+type = Helper
+triggerall = Var(59) <= 0
+triggerall = NumHelper(8500) <= 0
+triggerall = RoundState < 2
+trigger1 = Command = "start"
+helpertype = normal
+size.ground.back = 0
+size.ground.front = 0
+size.air.back = 0
+size.air.front = 0
+name = "Pause"
+id = 8500
+pos = 0, 0
+postype = P1
+stateno = 8500
+keyctrl = 1
+ownpal = 1
+
+[State 8500, VarSet]
+type = VarSet
+trigger1 = Var(55) <= 0
+ignorehitpause = 1
+var(55) = PalNo
+
+[State -2, RemapPal]
+type = RemapPal
+trigger1 = Var(55) > 0
+ignorehitpause = 1
+source = 1,1
+dest = 1,Var(55)
+
+[State 8500, VarSet]
+type = VarSet
+trigger1 = Var(59) <= 0
+trigger1 = NumHelper(8500) > 0
+ignorehitpause = 1
+var(59) = 1
+;-------------------------
+
+;----- II' Icon -----
+[State -2, PlaySnd]
+type = PlaySnd
+triggerall = Ctrl
+triggerall = Var(59) <= 0
+triggerall = AILevel <= 0
+triggerall = Name != "SF2'CE Vega"
+trigger1 = Command != "climb_s"
+trigger1 = Command != "roll_s"
+trigger1 = Command != "sid_s"
+trigger1 = Command = "start"
+ignorehitpause = 1
+value = 7, 0
+channel = 3
+
+[State -2, Explod]
+type = Explod
+triggerall = Name != "SF2'CE Vega"
+triggerall = NumExplod(7000) <= 0
+triggerall = NumHelper(8500) <= 0
+triggerall = Var(51) > 0
+trigger1 = TeamSide = 1
+pausemovetime = -1
+supermovetime = -1
+ignorehitpause = 1
+sprpriority = 50
+removetime = -1
+postype = left
+bindtime = -1
+anim = 7000
+id = 7000
+facing = 1
+pos = 5,220
+ownpal = 1
+ontop = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = Name != "SF2'CE Vega"
+triggerall = NumExplod(7000) <= 0
+triggerall = NumHelper(8500) <= 0
+triggerall = Var(51) > 0
+trigger1 = TeamSide = 2
+pausemovetime = -1
+supermovetime = -1
+ignorehitpause = 1
+sprpriority = 50
+removetime = -1
+postype = right
+bindtime = -1
+anim = 7000
+id = 7000
+facing = 1
+pos = -25,220
+ownpal = 1
+ontop = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+triggerall = NumExplod(7000) > 0
+trigger1 = Var(51) <= 0 
+ignorehitpause = 1
+id = 7000
+
+[State -2, ModifyExplod]
+type = ModifyExplod
+triggerall = NumExplod(7000) > 0
+trigger1 = StateNo >= 9000
+ignorehitpause = 1
+sprpriority = 0
+ontop = 0
+id = 7000
+;--------------------
+
+;====================
+;--------------------
+; Sound Options
+;--------------------
+; SF2'CE Sounds
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(52) <= 0
+trigger1 = PalNo >= 4
+trigger1 = PalNo < 7
+trigger2 = Name = "SF2'CE Vega"
+trigger2 = PalNo >= 10
+trigger2 = PalNo < 13
+ignorehitpause = 1
+var(50) = 10
+
+; SF2X Sounds
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(52) <= 0
+trigger1 = Name != "SF2'CE Vega"
+trigger1 = PalNo >= 1
+trigger1 = PalNo < 4
+ignorehitpause = 1
+var(50) = 0
+
+; SNES Sounds
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(52) <= 0
+trigger1 = Name != "SF2'CE Vega"
+trigger1 = PalNo >= 10
+trigger1 = PalNo < 13
+trigger2 = Name = "SF2'CE Vega"
+trigger2 = PalNo >= 1
+trigger2 = PalNo < 4
+trigger3 = Name = "SF2'CE Vega"
+trigger3 = PalNo >= 7
+trigger3 = PalNo < 10
+ignorehitpause = 1
+var(50) = 20
+
+; SF Alpha Sounds
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(52) <= 0
+trigger1 = Name != "SF2'CE Vega"
+trigger1 = PalNo >= 7
+trigger1 = PalNo < 10
+ignorehitpause = 1
+var(50) = 30
+
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(52) <= 0
+trigger1 = Var(50) >= 10
+trigger1 = Var(50) < 30 
+ignorehitpause = 1
+var(51) = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(52) <= 0
+ignorehitpause = 1
+var(52) = 1
+;====================
+
+;--------------------
+; Claw Attachment
+[State -2, Helper]
+type = Helper
+triggerall = NumHelper(10000) <= 0
+trigger1 = Var(20) <= 0
+helpertype = normal
+name = "Claw"
+pausemovetime = 1000000000
+supermovetime = 1000000000
+ignorehitpause = 1
+id = 10000
+pos = 0,0
+postype = p1
+stateno = 10000
+keyctrl = 0
+
+[State -2, VarRandom]
+type = VarRandom
+triggerall = NumHelper(10000) > 0
+trigger1 = Var(21) <= 0
+ignorehitpause = 1
+v = 21
+range = 25,50
+
+[State -2, VarAdd]
+type = VarAdd
+triggerall = Time <= 1
+triggerall = NumHelper(10000) > 0
+triggerall = Var(22) < Var(21)
+triggerall = HitShakeOver = 0
+trigger1 = MoveType = H
+ignorehitpause = 1
+var(22) = 1
+
+[State -2, VarSet]
+type = VarSet
+triggerall = NumHelper(10000) > 0
+triggerall = Var(22) >= Var(21)
+triggerall = HitShakeOver = 0
+trigger1 = MoveType = H
+ignorehitpause = 1
+var(20) = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(20) > 0
+ignorehitpause = 1
+var(22) = 0
+
+[State -2, PlaySnd]
+type = PlaySnd
+triggerall = Var(50) = 30
+triggerall = NumHelper(10000) > 0
+trigger1 = Var(20) <= -1
+ignorehitpause = 1
+value = 10, 13 + Helper(10000), Var(1)
+channel = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(20) <= 0
+ignorehitpause = 1
+var(20) = 0
+;--------------------
+
+;----- No Juggle Check -----
+[State -2, AssertSpecial]
+type = AssertSpecial
+triggerall = NumEnemy > 0
+trigger1 = EnemyNear, StateType != A
+trigger2 = EnemyNear, Pos Y = 0
+ignorehitpause = 1
+flag = NoJuggleCheck
+;--------------------------
+
+;----- Win/Lose Count -----
+[State -2, VarSet]
+type = VarSet
+trigger1 = RoundState <= 2
+trigger2 = RoundsExisted <= 0
+ignorehitpause = 1
+v = 40
+value = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = RoundsExisted <= 0
+ignorehitpause = 1
+v = 41
+value = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = RoundsExisted <= 0
+ignorehitpause = 1
+v = 42
+value = 0
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = RoundState > 3
+ignorehitpause = 1
+v = 40
+value = 1
+
+[State -2, Win]
+type = VarAdd
+triggerall = Win
+trigger1 = RoundState > 3
+trigger1 = Var(40) = 1
+ignorehitpause = 1
+v = 41
+value = 1
+
+[State -2, Lose]
+type = VarAdd
+triggerall = Lose
+trigger1 = RoundState > 3
+trigger1 = Var(40) = 1
+ignorehitpause = 1
+v = 42
+value = 1
+;--------------------------
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = MoveType = A
+ignorehitpause = 1
+v = 3
+value = Anim
+
+;----- Blood Sparks -----
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 200
+trigger1 = PrevStateNo < 210
+trigger2 = PrevStateNo >= 210
+trigger2 = PrevStateNo < 220
+trigger2 = Var(3) >= 215
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (80 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 210
+trigger1 = PrevStateNo < 220
+trigger1 = Var(3) < 215
+trigger2 = PrevStateNo >= 320
+trigger2 = PrevStateNo < 330
+trigger3 = PrevStateNo >= 600
+trigger3 = PrevStateNo < 620
+trigger4 = PrevStateNo >= 620
+trigger4 = PrevStateNo < 630
+trigger4 = Var(3) < 625
+trigger5 = PrevStateNo = 3000
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (60 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 220
+trigger1 = PrevStateNo < 230
+trigger2 = PrevStateNo >= 300
+trigger2 = PrevStateNo < 320
+trigger3 = PrevStateNo >= 420
+trigger3 = PrevStateNo < 430
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (70 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 400
+trigger1 = PrevStateNo < 420
+trigger2 = PrevStateNo >= 500
+trigger2 = PrevStateNo < 530
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (50 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 620
+trigger1 = PrevStateNo < 630
+trigger1 = Var(3) >= 625
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (40 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 1000
+trigger1 = PrevStateNo < 1005
+trigger1 = Var(3) != 1000
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (70 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 1110
+trigger1 = PrevStateNo < 1115
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (10 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (10 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo >= 1200
+trigger1 = PrevStateNo < 1205
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (55 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+
+[State -2, Explod]
+type = Explod
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+triggerall = NumEnemy > 0
+triggerall = Var(20) <= 0
+trigger1 = PrevStateNo = 3001
+ignorehitpause = 1
+anim = 6040
+sprpriority = 10
+pos = Enemy(0),const(size.ground.front) - (20 * ceil(const(size.xscale))), ceil(pos y-Enemy(0),pos y) - (120 * ceil(const(size.yscale)))
+postype = p2
+random = 10,10
+pausemovetime = -1
+supermovetime = -1
+facing = IfElse((Enemy(0),facing = facing), 1, -1)
+ownpal = 1
+;--------------------------
+
+;----- Attack Sound -----
+[State -2, Light-Punch-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 200
+trigger1 = PrevStateNo < 210
+trigger2 = PrevStateNo >= 300
+trigger2 = PrevStateNo < 310
+trigger3 = PrevStateNo >= 400
+trigger3 = PrevStateNo < 410
+trigger4 = PrevStateNo >= 500
+trigger4 = PrevStateNo < 510
+trigger5 = PrevStateNo >= 600
+trigger5 = PrevStateNo < 610
+ignorehitpause = 1
+value = 2, IfElse(Var(20) > 0, 1 + Var(50), 8 + Var(50))
+channel = 2
+
+[State -2, Medium-Punch-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 210
+trigger1 = PrevStateNo < 220
+trigger2 = PrevStateNo >= 310
+trigger2 = PrevStateNo < 320
+trigger3 = PrevStateNo >= 410
+trigger3 = PrevStateNo < 420
+trigger4 = PrevStateNo >= 510
+trigger4 = PrevStateNo < 520
+trigger5 = PrevStateNo >= 610
+trigger5 = PrevStateNo < 620
+ignorehitpause = 1
+value = 2, IfElse(Var(20) > 0, 2 + Var(50), 7 + Var(50))
+channel = 2
+
+[State -2, Strong-Punch-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 220
+trigger1 = PrevStateNo < 230
+trigger2 = PrevStateNo >= 320
+trigger2 = PrevStateNo < 330
+trigger3 = PrevStateNo >= 420
+trigger3 = PrevStateNo < 430
+trigger4 = PrevStateNo >= 520
+trigger4 = PrevStateNo < 530
+trigger5 = PrevStateNo >= 620
+trigger5 = PrevStateNo < 630
+trigger6 = PrevStateNo >= 1000
+trigger6 = PrevStateNo < 1010
+trigger7 = PrevStateNo >= 1110
+trigger7 = PrevStateNo < 1120
+trigger8 = PrevStateNo >= 1200
+trigger8 = PrevStateNo < 1210
+trigger9 = PrevStateNo >= 3000
+trigger9 = PrevStateNo < 3010
+ignorehitpause = 1
+value = 2, IfElse(Var(20) > 0, 3 + Var(50), 7 + Var(50))
+channel = 2
+
+[State -2, Strong-Punch-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 1000
+trigger1 = PrevStateNo < 1010
+trigger1 = Anim = 1000
+ignorehitpause = 1
+value = 2, 3 + Var(50)
+channel = 2
+
+[State -2, Light-Kick-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 230
+trigger1 = PrevStateNo < 240
+trigger2 = PrevStateNo >= 330
+trigger2 = PrevStateNo < 340
+trigger3 = PrevStateNo >= 430
+trigger3 = PrevStateNo < 440
+trigger4 = PrevStateNo >= 530
+trigger4 = PrevStateNo < 540
+trigger5 = PrevStateNo >= 630
+trigger5 = PrevStateNo < 640
+trigger6 = PrevStateNo >= 730
+trigger6 = PrevStateNo < 740
+ignorehitpause = 1
+value = 2, 4 + Var(50)
+channel = 2
+
+[State -2, Medium-Kick-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 240
+trigger1 = PrevStateNo < 250
+trigger2 = PrevStateNo >= 340
+trigger2 = PrevStateNo < 350
+trigger3 = PrevStateNo >= 440
+trigger3 = PrevStateNo < 450
+trigger4 = PrevStateNo >= 540
+trigger4 = PrevStateNo < 550
+trigger5 = PrevStateNo >= 640
+trigger5 = PrevStateNo < 650
+trigger6 = PrevStateNo >= 740
+trigger6 = PrevStateNo < 750
+ignorehitpause = 1
+value = 2, 5 + Var(50)
+channel = 2
+
+[State -2, Strong-Kick-Hit]
+type = PlaySnd
+triggerall = MoveHit
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 250
+trigger1 = PrevStateNo < 260
+trigger2 = PrevStateNo >= 350
+trigger2 = PrevStateNo < 360
+trigger3 = PrevStateNo >= 450
+trigger3 = PrevStateNo < 460
+trigger4 = PrevStateNo >= 550
+trigger4 = PrevStateNo < 560
+trigger5 = PrevStateNo >= 650
+trigger5 = PrevStateNo < 660
+trigger6 = PrevStateNo >= 750
+trigger6 = PrevStateNo < 760
+trigger7 = PrevStateNo >= 1500
+trigger7 = PrevStateNo < 1510
+trigger8 = PrevStateNo >= 3500
+trigger8 = PrevStateNo < 3510
+ignorehitpause = 1
+value = 2, 6 + Var(50)
+channel = 2
+
+[State -2, Guard]
+type = PlaySnd
+triggerall = MoveGuarded
+triggerall = MoveType = H
+triggerall = P2MoveType = H
+trigger1 = PrevStateNo >= 200
+trigger1 = PrevStateNo < 4000
+ignorehitpause = 1
+value = 2, 0 + Var(50)
+channel = 3
+;------------------------
+
+;----- Fireball Hit Sounds -----
+[State -2, Hit]
+type = PlaySnd
+trigger1 = Var(10) = 1
+ignorehitpause = 1
+value = 2, 3 + Var(50)
+channel = 2
+
+[State -2, Guard]
+type = PlaySnd
+trigger1 = Var(11) = 1
+ignorehitpause = 1
+value = 2, 0 + Var(50)
+channel = 3
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = Var(10) > 0
+ignorehitpause = 1
+v = 10
+value = 1
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = Var(11) > 0
+ignorehitpause = 1
+v = 11
+value = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(10) >= 2
+ignorehitpause = 1
+v = 10
+value = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(11) >= 2
+ignorehitpause = 1
+v = 11
+value = 0
+;------------------------------
+
+;===== Dizzy Counter =====
+;----- Start Max -----
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(8) <= 0
+trigger2 = RoundState < 2
+ignorhitpause = 1
+v = 8
+value = 20
+;-------------------------
+
+;----- Damage Hits -----
+[State -2, Light Hit]
+type = VarAdd
+triggerall = Alive
+triggerall = Time <= 0
+triggerall = NumEnemy > 0
+triggerall = MoveType = H
+triggerall = StateType != L
+triggerall = StateNo >= 5000
+triggerall = GetHitVar(animtype) <= 0
+trigger1 = EnemyNear, HitDefAttr = SCA, NA, NT, NP
+trigger2 = EnemyNear, HitDefAttr = SCA, SA, ST, SP
+trigger3 = GetHitVar(hitcount) < 5
+ignorhitpause = 1
+v = 7
+value = 2
+
+[State -2, Medium Hit]
+type = VarAdd
+triggerall = Alive
+triggerall = Time <= 0
+triggerall = NumEnemy > 0
+triggerall = MoveType = H
+triggerall = StateType != L
+triggerall = StateNo >= 5000
+triggerall = GetHitVar(animtype) = 1
+trigger1 = EnemyNear, HitDefAttr = SCA, NA, NT, NP
+trigger2 = EnemyNear, HitDefAttr = SCA, SA, ST, SP
+trigger3 = GetHitVar(hitcount) < 5
+ignorhitpause = 1
+v = 7
+value = 4
+
+[State -2, Heavy Hit]
+type = VarAdd
+triggerall = Alive
+triggerall = Time <= 0
+triggerall = NumEnemy > 0
+triggerall = MoveType = H
+triggerall = StateType != L
+triggerall = StateNo >= 5000
+triggerall = GetHitVar(animtype) = 2
+trigger1 = EnemyNear, HitDefAttr = SCA, NA, NT, NP
+trigger2 = EnemyNear, HitDefAttr = SCA, SA, ST, SP
+trigger3 = GetHitVar(hitcount) < 5
+ignorhitpause = 1
+v = 7
+value = 6
+
+[State -2, Falling Hit]
+type = VarAdd
+triggerall = Alive
+triggerall = Time <= 0
+triggerall = NumEnemy > 0
+triggerall = MoveType = H
+triggerall = StateType != L
+triggerall = StateNo >= 5000
+triggerall = GetHitVar(animtype) >= 3
+trigger1 = EnemyNear, HitDefAttr = SCA, NA, NT, NP
+trigger2 = EnemyNear, HitDefAttr = SCA, SA, ST, SP
+trigger3 = GetHitVar(hitcount) < 5
+ignorhitpause = 1
+v = 7
+value = 8
+
+[State -2, Thrown]
+type = VarAdd
+triggerall = Alive
+triggerall = Time <= 0
+triggerall = NumEnemy > 0
+triggerall = MoveType = H
+triggerall = StateType != L
+trigger1 = StateNo >= 160
+trigger1 = StateNo < 5000
+trigger1 = Anim < 800
+ignorhitpause = 1
+v = 7
+value = 5
+;-------------------------
+
+;----- Decrease Over Time -----
+[State -2, VarAdd]
+type = VarAdd
+triggerall = Alive
+triggerall = Var(7) > 0
+trigger1 = MoveType != H
+trigger1 = TimeMod = 50,25
+trigger1 = Time > 0
+v = 7
+value = -1
+;-------------------------
+
+;----- Reset Variables -----
+[State -2, VarSet]
+type = VarSet
+trigger1 = !Alive
+trigger1 = MoveType = H
+trigger2 = MoveType != H
+trigger2 = Var(7) >= Var(8)
+trigger3 = Var(7) < 0
+trigger4 = StateNo >= 5300
+trigger4 = StateNo < 5500
+trigger5 = Time <= 0
+trigger5 = MoveType = H
+trigger5 = NumEnemy > 0
+trigger5 = EnemyNear, HitDefAttr = SCA, HA, HT, HP
+trigger6 = Time > 0
+trigger6 = MoveType != H
+trigger6 = TimeMod = 200, 100
+trigger7 = StateNo >= 150
+trigger7 = StateNo < 160
+trigger7 = Var(7) > 0
+ignorehitpause = 1
+v = 7
+value = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = !Alive
+trigger1 = MoveType = H
+trigger2 = StateNo >= 5300
+trigger2 = StateNo < 5400
+trigger3 = MoveType != H
+trigger4 = Var(9) < 0
+v = 9
+value = 0
+;-------------------------
+
+;----- Actually Dizzy -----
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(7) >= Var(8)
+v = 7
+value = Var(8)
+
+[State -2, VarSet]
+type = VarSet
+triggerall = Alive
+trigger1 = Var(7) >= Var(8)
+v = 9
+value = 1
+
+[State -2, CtrlSet]
+type = CtrlSet
+trigger1 = Var(9) > 0
+trigger1 = StateNo >= 5000
+trigger1 = StateNo < 5300
+ignorehitpause = 1
+value = 0
+
+[State -2, NotHitBy]
+type = NotHitBy
+trigger1 = Var(9) > 0
+trigger1 = StateNo >= 5000
+trigger1 = StateNo <= 5110
+ignorehitpause = 1
+value = SCA
+time = 1
+
+[State -2, SelfState]
+type = SelfState
+triggerall = Alive
+triggerall = StateNo != 5400
+triggerall = !HitShakeOver
+triggerall = StateNo >= 5000
+triggerall = StateNo < 5080
+trigger1 = Var(9) > 0
+ignorehitpause = 1
+value = 5400
+ctrl = 0
+;-------------------------
+
+;----- Dizzy Stars/Birds -----
+[State -2, Dizzy]
+type = Helper
+triggerall = Alive
+triggerall = Var(9) > 0
+triggerall = NumHelper(6300) <= 0
+trigger1 = StateNo >= 5110
+trigger1 = StateNo <= 5300
+trigger1 = StateTime >= 10
+trigger2 = StateNo >= 5120
+trigger2 = StateNo < 5300
+helpertype = normal
+size.ground.back = 0
+size.ground.front = 0
+size.air.back = 0
+size.air.front = 0
+name = "Dizzy"
+id = 6300
+pos = 0, 0
+postype = P1
+stateno = 6300
+keyctrl = 1
+ownpal = 1
+;-------------------------
+;=========================
+
+[State -2, State]
+type = ChangeState
+triggerall = Ctrl
+triggerall = Pos Y != 0
+trigger1 = StateType != A
+trigger1 = MoveType = I
+value = 50
+
+[State -2, NoGuard]
+type = AssertSpecial
+trigger1 = 1
+ignorehitpause = 1
+flag = NoAirGuard
+
+;--------------------
+; KO Scream
+[State -2, VarSet]
+type = VarSet
+trigger1 = Alive
+trigger1 = Life > 0
+ignorehitpause = 1
+v = 56
+value = -1
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = Alive <= 0
+trigger1 = Life <= 0
+trigger1 = Var(56) <= 0
+ignorehitpause = 1
+v = 56
+value = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = Var(56) > 0
+ignorehitpause = 1
+v = 56
+value = 1
+
+[State -2, PlaySnd]
+Type = PlaySnd
+triggerall = Alive <= 0
+triggerall = Life <= 0
+trigger1 = Var(56) = 0
+value = 11, 1 + Var(50)
+;channel = 0
+;--------------------
+
+;----- Round Over -----
+[State -2, VarAdd]
+type = VarAdd
+triggerall = Alive
+triggerall = MoveType = I
+triggerall = RoundState = 3
+trigger1 = StateNo <= 0
+ignorehitpause = 1
+v = 5
+value = 1
+
+[State -2, CtrlSet]
+type = CtrlSet
+triggerall = Alive
+triggerall = MoveType = I
+triggerall = RoundState = 3
+trigger1 = Var(5) < 50
+ignorehitpause = 1
+value = 0
+
+[State -2, PosSet]
+type = PosSet
+triggerall = Alive
+triggerall = MoveType = I
+triggerall = RoundState = 3
+trigger1 = Var(5) < 50
+trigger1 = Pos Y >= 0
+y = 0
+
+[State -2, State]
+type = ChangeState
+triggerall = Alive
+triggerall = MoveType = I
+triggerall = RoundState = 3
+trigger1 = Var(5) < 50
+trigger1 = Pos Y >= 0
+value = 0
+
+[State -3, CtrlSet]
+type = CtrlSet
+triggerall = Alive
+triggerall = MoveType = I
+triggerall = RoundState = 3
+trigger1 = Var(5) > 50
+ignorehitpause = 1
+value = 1
+;-------------------------
+
+;----- Sprpriority -----
+[State -2, SprPriority]
+type = SprPriority
+triggerall = MoveType = H
+trigger1 = Anim >= 120 && Anim < 160
+trigger2 = Anim >= 5000
+ignorehitpause = 1
+value = -5
+
+[State -2, SprPriority]
+type = SprPriority
+trigger1 = MoveType = I
+ignorehitpause = 1
+value = 0
+
+[State -2, SprPriority]
+type = SprPriority
+triggerall = StateNo < 3000
+trigger1 = MoveType = A
+ignorehitpause = 1
+value = 2
+;-------------------------
+
+;----- Display -----
+[State -2, Variables]
+type = DisplayToClipboard
+trigger1 = 1
+text = "Hits: %d/%d \t Dizzy Falling: %d \nWin: %d \t Lose: %d"
+params = Var(7), Var(8), Var(9), Var(41), Var(42)
+;--------------------
+
+;-------------------------
+; Alternate Defeated Portrait
+[State -2, Portrait-Left]
+type = Explod
+triggerall = Var(51) > 0
+triggerall = TeamSide = 1
+triggerall = StateNo = 9110
+triggerall = StateTime >= 25
+triggerall = Name != "SF2'CE Vega"
+trigger1 = NumExplod(900010) <= 0
+trigger1 = AnimExist(90010)
+ignorehitpause = 1
+anim = 90010
+id = 900010
+pos = 0,150
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 10
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State -2, Portrait-Right]
+type = Explod
+triggerall = Var(51) > 0
+triggerall = TeamSide = 2
+triggerall = StateNo = 9110
+triggerall = StateTime >= 25
+triggerall = Name != "SF2'CE Vega"
+trigger1 = NumExplod(900010) <= 0
+trigger1 = AnimExist(90010)
+ignorehitpause = 1
+anim = 90010
+id = 900010
+pos = 0,150
+postype = Right
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 10
+facing = -1
+ownpal = 0
+ontop = 1
+;-------------------------
+
+;---------------------------------------------------------------------------
+; States that are executed when in self's state file (use statedef -3)
+;---------------------------------------------------------------------------
+[Statedef -3]
+
+;----- Opponent Check -----
+[State -3, VarSet]
+type = VarSet
+triggerall = Win
+triggerall = Alive
+triggerall = MatchOver
+triggerall = NumTarget > 0
+triggerall = RoundState > 2
+triggerall = Var(41) >= Var(42) - 1
+trigger1 = Target, AnimExist(9001) || Target, AnimExist(9005)
+ignorehitpause = 1
+v = 6
+value = 1
+
+[State -3, State]
+type = TargetState
+triggerall = Var(6) > 0
+triggerall = NumTarget > 0
+trigger1 = Target, StateType = L
+trigger1 = Target, StateNo >= 5110
+trigger1 = Target, StateNo < 5120
+ignorehitpause = 1
+value = 9111
+
+[State -3, VarSet]
+type = VarSet
+trigger1 = RoundState <= 2
+;trigger2 = RoundsExisted <= 0
+ignorehitpause = 1
+v = 15
+value = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = Win
+triggerall = Alive
+triggerall = MatchOver
+triggerall = RoundState > 2
+triggerall = Var(41) >= Var(42) - 1
+trigger1 = NumTarget > 0
+trigger1 = Target, AnimExist(9001) || Target, AnimExist(9005)
+trigger1 = Target, StateNo = 9111
+trigger2 = NumEnemy > 0
+trigger2 = EnemyNear, AnimExist(9001) || EnemyNear, AnimExist(9005)
+trigger2 = EnemyNear, StateNo = 9111
+ignorehitpause = 1
+v = 15
+value = 1234567890
+
+[State -3, Drop]
+type = TargetDrop
+triggerall = Var(6) > 0
+triggerall = NumTarget > 0
+trigger1 = Target, StateNo = 9111
+ignorehitpause = 1
+
+[State -3, Helper]
+type = Helper
+triggerall = Win
+triggerall = Alive
+triggerall = MatchOver
+triggerall = NumEnemy > 0
+triggerall = NumTarget <= 0
+triggerall = RoundState > 2
+triggerall = Var(41) >= Var(42) - 1
+trigger1 = EnemyNear, AnimExist(9001) || EnemyNear, AnimExist(9005)
+trigger1 = NumHelper(9100) <= 0
+helpertype = normal
+name = "Target Check"
+id = 9100
+pos = 0, 0
+stateno = 9100
+keyctrl = 0
+;-----------------------------
+
+[State -3, Helper]
+type = Helper
+trigger1 = NumHelper(6666) <= 0
+helpertype = normal
+name = "No Power"
+id = 6666
+pos = 1000, 1000
+stateno = 6666
+keyctrl = 0
+
+;---------------------------------------------------------------------------

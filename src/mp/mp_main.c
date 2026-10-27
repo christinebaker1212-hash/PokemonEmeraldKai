@@ -12,6 +12,7 @@
 #include "mp_join.h"
 #include "global.h"
 #include "mp.h"
+#include "mp_fight.h"
 #include "mp_pmd.h"
 #include "main.h"
 #include "overworld.h"
@@ -1257,6 +1258,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
     if (!len) return;
     if (data[0] == 255)
         Tcg_OnlineRelay(from, data, len);
+    else if (data[0] >= MPR_FIGHT_FIRST && data[0] < MPR_FIGHT_FIRST + 6)
+        MP_Fight_OnRelay(from, data, len);
     else if (data[0] == MPR_COOP_BATTLING)
         MP_Coop_OnRelay(from, data, len);
     else if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
@@ -1955,6 +1958,7 @@ void MP_FrameUpdate(void)
     int guard;
 
     Tcg_OnlineTick();
+    MP_Fight_Update();          // the VS cabinet's seats and bubbles (mp_fight.c)
     MP_Achieve_Update();        // achievements are personal: offline too
     MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes

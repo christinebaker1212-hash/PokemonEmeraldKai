@@ -1,0 +1,15 @@
+In the "data/select.def" put this lines:
+En el archivo "data/select.def" pon la siguientes lineas:
+
+
+SSF2X_THAWK,Random,Order = 1 ,includestage =0
+
+
+You can change "Random" for the stage what you want.
+Puedes cambiar "Random" por el escenario que quieras.
+
+You can change "order = 1" for the number what you need.
+Puedes cambiar "order = 1" por el numero que necesites.
+
+
+

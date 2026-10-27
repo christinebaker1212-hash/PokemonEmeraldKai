@@ -1,0 +1,61 @@
+---------------------------------------------------------------------------
+Fei Long  by G.D.T  Ver 1.02  2011/7/September
+---------------------------------------------------------------------------
+From Super Street Fighter 2 Turbo(called "Super Street Fighter 2X" in Japan)
+and little arranged
+
+---------------------------------------------------------------------------
+[What's new]
+fix Shien-kyaku
+
+
+---------------------------------------------------------------------------
+[Infor]
+
+Opponent(in air) can't guard Rekka-ken,Shien-kyaku
+
+About easy command of Super, I consider that
+player use controller, not arcade stick
+
+You should open option.txt
+(reduce damage or not, and reset power at the round start or not)
+
+---------------------------------------------------------------------------
+[Command]
+Å©     = B
+Å^     = DB(UF)
+Å´     = D
+Å_     = DF
+Å®     = F
+
+[Throw]
+Gankai-hou                    Å@Å@Å@           Å® or Å© + Y or Z(near opponent)
+Shu-shugai     Å@Å@    Å@Å@                    Å® or Å© + B or C(near opponent)
+Shu-shuraku                                    Å® or Å© + Y or Z(near opponent in air)
+
+[Normal]
+Cyokka-rakusho                                 Å® or Å© + B
+Engeki-syu                                     Å® + C
+
+[Special]
+Rekka-ken(input three times)Å@ Å@             Å´Å_Å® + X or Y or Z
+Shien-kyaku       Å@Å@Å@                      Å©Å´Å^ + A or B or C
+Rekku-kyaku                       Å@          Å©Å^Å´Å_Å®Å^ + A or B or C
+
+[Super]
+Rekka-shinken    Å@                           Å´Å_Å®Å´Å_Å® + A or B or C
+                                               or  X+A
+
+---------------------------------------------------------------------------
+[Other]
+Free for using movie
+You can customize this charactor in case of private use
+Free for making AI
+
+---------------------------------------------------------------------------
+[Special thanks]
+JAM(hosted)
+CAPCOM
+
+and...you!!
+

@@ -3,7 +3,7 @@
 #   windows: needs pokeemerald64.exe (make winwsl) and SDL2.dll (SDL2_DLL, default ./SDL2/x86_64-w64-mingw32/bin/SDL2.dll)
 #   linux:   needs pokeemerald64 (make linux)
 # Writes OUTDIR/MoemonEmeraldKaiCoop-<platform>.zip: one folder, MoemonEmeraldKaiCoop/, with the game, the
-# player docs, the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
+# player docs, the VS cabinet's mugen/ folder, the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
 set -e
 cd "$(dirname "$0")/../.."
 PLAT=${1:?usage: package.sh windows|linux OUTDIR}
@@ -34,6 +34,9 @@ linux)
 esac
 cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt "$P/"
 cp tools/mp_server/DEPLOY.md "$P/server/"
+# the VS cabinet's fighting game: its pack, as it goes next to the game (logs and screenshots left out)
+mkdir -p "$P/mugen"
+(cd mugen && tar cf - --exclude='*.log' --exclude='mugen*.png' .) | (cd "$P/mugen" && tar xf -)
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
 rm -f "$ZIP"

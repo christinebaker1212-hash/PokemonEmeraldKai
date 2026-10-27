@@ -565,3 +565,8 @@ gSpecials::
 	def_special Tcg_ClubCounter, waitstate=1
 	def_special Tcg_ClubGiftReady
 	def_special Tcg_ClubGiveGift
+	def_special MP_Fight_StartCpu, waitstate=1
+	def_special MP_Fight_Result
+	def_special MP_Fight_SeatCheck
+	def_special MP_Fight_Wait, waitstate=1
+	def_special MP_Fight_Challenge, waitstate=1
