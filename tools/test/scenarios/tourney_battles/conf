@@ -1,0 +1,10 @@
+# CO-OP > TOURNAMENT of BATTLES (the first choice of the kind menu): BOB is invited to battles, joins, ALICE begins,
+# both say READY and their friendly link battle starts
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("tournament: gathering for battles" "tournament: round 1, our match vs player 1" "starting PvP battle against player 2")
+EXPECT_B=("tournament: invited to battles" "starting PvP battle against player 1")

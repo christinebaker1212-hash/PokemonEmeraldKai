@@ -1,6 +1,7 @@
-// Moemon Co-op: CO-OP menu > TOURNAMENT. A quick battle tournament
-// between everyone online, using the PvP link battles (friendly: no money
-// changes hands and nobody blacks out).
+// Moemon Co-op: CO-OP menu > TOURNAMENT. A quick tournament between
+// everyone online: POKéMON BATTLES, using the PvP link battles (friendly: no
+// money changes hands and nobody blacks out), or CARD DUELS, the online card
+// duels (src/tcg/tcg_online.c Tcg_TourneyDuel: straight to the deck pick).
 //
 // It's a round robin: everyone battles everyone once, a few matches at a
 // time. With an odd number of players someone has a break each round, but
@@ -21,13 +22,15 @@
 #include "constants/battle.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "tcg/integration.h"
+#include "tcg/online.h"
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Gatcha_AddPulls(s32 n);
 void MP_Events_Consolation(const char *why);
 
 enum {
-    MPR_T_INVITE = MPR_TOURNEY_FIRST,   // u8 tid
+    MPR_T_INVITE = MPR_TOURNEY_FIRST,   // u8 tid, u8 kind (TK_*)
     MPR_T_ANSWER,                       // u8 tid, u8 yes
     MPR_T_BEGIN,                        // u8 tid, u8 n, ids[n]
     MPR_T_READY,                        // u8 tid, u8 round
@@ -41,7 +44,8 @@ enum {
 #define MAX_P   MP_MAX_PLAYERS
 #define BYE     0xFF
 
-enum { TS_NONE, TS_GATHERING, TS_INVITED, TS_RUNNING, TS_DONE };
+enum { TS_NONE, TS_CHOOSE, TS_GATHERING, TS_INVITED, TS_RUNNING, TS_DONE };
+enum { TK_BATTLES, TK_CARDS };   // what the matches are
 enum { ANS_WAIT, ANS_YES, ANS_NO };
 enum { ME_IDLE, ME_PROMPT, ME_WAITING, ME_BATTLING, ME_REPORTED };
 
@@ -51,6 +55,7 @@ static EWRAM_DATA struct
 {
     u8 state;
     u8 tid;               // tournament id, so old messages are ignored
+    u8 kind;              // TK_*
     u8 organizer;
     u8 n;
     u8 ids[MAX_P];        // participants
@@ -171,21 +176,50 @@ static u8 TeamStatus(char *out, int size)
     return able;
 }
 
+// Card duels: the CARD CASE and the deck in use ("Deck: EMBER FRIENDS. Ready!")
+static u8 DeckStatus(char *out, int size)
+{
+    const char *why = Tcg_TourneyNotReady();
+    const struct TcgCollection *c = Tcg_GetCollection();
+    if (why)
+    {
+        snprintf(out, size, "%s", why);
+        return 0;
+    }
+    snprintf(out, size, "Deck: %s. Ready!", c->decks[c->activeDeck].name);
+    return 1;
+}
+
+// What this tournament needs of us, by its kind
+static u8 Status(char *out, int size)
+{
+    return sT.kind == TK_CARDS ? DeckStatus(out, size) : TeamStatus(out, size);
+}
+
 static bool8 HasAbleMon(void)
 {
-    char tmp[64];
-    return TeamStatus(tmp, sizeof(tmp)) > 0;
+    char tmp[96];
+    return Status(tmp, sizeof(tmp)) > 0;
 }
 
 static void Draw(void)
 {
-    char line[80], name[16], team[64];
+    char line[80], name[16], team[96];
     u8 i;
     sT.dirty = FALSE;
     if (!MpUi_IsOpen())
         return;
     switch (sT.state)
     {
+    case TS_CHOOSE:
+        MpUi_Begin("TOURNAMENT: WHAT KIND?");
+        MpUi_RowAscii(0, sT.cursor == 0, "BATTLES", NULL);
+        MpUi_RowAscii(1, sT.cursor == 1, "CARD DUELS", NULL);
+        MpUi_RowAscii(2, sT.cursor == 2, "NOT NOW", NULL);
+        MpUi_End();
+        MpUi_HelpAscii(sT.note[0] ? sT.note : sT.cursor == 1 ? "Friendly card duels with your deck in use.  {A} SELECT"
+                                                             : "Friendly battles with your team.  {A} SELECT");
+        break;
     case TS_GATHERING:
         MpUi_Begin("TOURNAMENT: WHO'S PLAYING?");
         for (i = 0; i < MP_MAX_PLAYERS && i < MPUI_ROWS - 2; i++)
@@ -200,15 +234,18 @@ static void Draw(void)
         MpUi_RowAscii(MPUI_ROWS - 2, sT.cursor == 0, "BEGIN!", NULL);
         MpUi_RowAscii(MPUI_ROWS - 1, sT.cursor == 1, "CALL IT OFF", NULL);
         MpUi_End();
-        MpUi_HelpAscii(sT.note[0] ? sT.note : "Everyone battles everyone once.  {A} SELECT");
+        MpUi_HelpAscii(sT.note[0] ? sT.note : sT.kind == TK_CARDS ? "Everyone duels everyone once.  {A} SELECT"
+                                                                  : "Everyone battles everyone once.  {A} SELECT");
         break;
     case TS_INVITED:
         NameOf(sT.organizer, name);
-        MpUi_Begin("BATTLE TOURNAMENT");
-        snprintf(line, sizeof(line), "%s is starting a battle tournament!", name);
+        MpUi_Begin(sT.kind == TK_CARDS ? "CARD DUEL TOURNAMENT" : "BATTLE TOURNAMENT");
+        snprintf(line, sizeof(line), sT.kind == TK_CARDS ? "%s is starting a card duel tournament!"
+                                                         : "%s is starting a battle tournament!", name);
         MpUi_TextAscii(0, line);
-        MpUi_TextAscii(1, "Friendly battles: no money lost, no blacking out.");
-        TeamStatus(team, sizeof(team));
+        MpUi_TextAscii(1, sT.kind == TK_CARDS ? "Friendly duels: no cards are wagered."
+                                              : "Friendly battles: no money lost, no blacking out.");
+        Status(team, sizeof(team));
         MpUi_TextAscii(2, team);
         MpUi_RowAscii(3, sT.cursor == 0, "JOIN", NULL);
         MpUi_RowAscii(4, sT.cursor == 1, "NO THANKS", NULL);
@@ -258,7 +295,7 @@ static void Draw(void)
         else if (sT.state == TS_RUNNING)
             MpUi_TextAscii(MPUI_ROWS - 1, OpponentIn(sT.round, gMpLocalId) == BYE ? "You have a break this round." : "Waiting for the other matches...");
         MpUi_End();
-        TeamStatus(team, sizeof(team));
+        Status(team, sizeof(team));
         MpUi_HelpAscii(sT.note[0] ? sT.note : (sT.me == ME_PROMPT ? team : "{B} CLOSE (the tournament goes on)"));
         break;
     }
@@ -427,6 +464,7 @@ static void StartRound(void)
     else
     {
         sT.me = ME_PROMPT;
+        MPNet_Log("tournament: round %d, our match vs player %d", sT.round + 1, sT.myOpponent);
         NameOf(sT.myOpponent, name);
         snprintf(msg, sizeof(msg), "Tournament round %d:\nyour match vs %s!", sT.round + 1, name);
     }
@@ -456,8 +494,25 @@ static void TryStartMatch(void)
     if (!MP_IsLocalFree())
         return;  // tried again from MP_Tourney_Update once free
     sT.me = ME_BATTLING;
+    if (sT.kind == TK_CARDS)
+    {
+        // Both open the deck pick; the one first in the room invites (the same session on both: the round's)
+        u8 lo = gMpLocalId < sT.myOpponent ? gMpLocalId : sT.myOpponent, hi = gMpLocalId ^ sT.myOpponent ^ lo;
+        MPNet_Log("tournament: card match started");
+        Tcg_TourneyDuel(sT.myOpponent, gMpLocalId == lo ? 0 : 1,
+                        0x40000000u | (u32)sT.tid << 16 | (u32)sT.round << 8 | (u32)lo << 4 | hi);
+        return;
+    }
     gMpFriendlyBattle = TRUE;
     MP_Battle_Start(sT.myOpponent, gMpLocalId < sT.myOpponent, 0);
+}
+
+// From tcg_online.c when a tournament card duel ends (or is left: a loss for whoever left)
+void MP_Tourney_OnCardResult(int won)
+{
+    if (sT.state != TS_RUNNING || sT.me != ME_BATTLING || sT.kind != TK_CARDS)
+        return;
+    Report(won ? 1 : 0);
 }
 
 // From mp_battle.c when a friendly battle ends
@@ -483,6 +538,8 @@ static void GivePrizes(void)
             rank = i;
     if (rank == 0xFF)
         return;
+    MPNet_Log("tournament: final, %s place of %d (%s)", rank == 0 ? "1st" : rank == 1 ? "2nd" : "later", sT.n,
+              sT.kind == TK_CARDS ? "card duels" : "battles");
     // MOEGATCHA pulls only for the day's first real tournament: three or more
     // players and none of our matches forfeited
     {
@@ -526,6 +583,40 @@ static void Task_Tourney(u8 taskId)
     }
     switch (sT.state)
     {
+    case TS_CHOOSE:
+        if (MpUi_MoveCursor(&sT.cursor, 3))
+            sT.dirty = TRUE;
+        else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && sT.cursor == 2))
+        {
+            PlaySE(SE_SELECT);
+            EndTourney(NULL);
+            return;
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            u8 buf[3];
+            sT.kind = sT.cursor == 1 ? TK_CARDS : TK_BATTLES;
+            if (sT.kind == TK_CARDS && Tcg_TourneyNotReady())
+            {
+                PlaySE(SE_FAILURE);
+                snprintf(sT.note, sizeof(sT.note), "%s", Tcg_TourneyNotReady());
+                sT.dirty = TRUE;
+                break;
+            }
+            PlaySE(SE_SELECT);
+            memset(sT.answers, ANS_WAIT, sizeof(sT.answers));
+            sT.tid++;
+            sT.organizer = gMpLocalId;
+            sT.state = TS_GATHERING;
+            sT.cursor = 0;
+            buf[0] = MPR_T_INVITE;
+            buf[1] = sT.tid;
+            buf[2] = sT.kind;
+            SendAll(buf, 3);
+            sT.dirty = TRUE;
+            MPNet_Log("tournament: gathering for %s", sT.kind == TK_CARDS ? "card duels" : "battles");
+        }
+        break;
     case TS_GATHERING:
         if (MpUi_MoveCursor(&sT.cursor, 2))
             sT.dirty = TRUE;
@@ -584,8 +675,8 @@ static void Task_Tourney(u8 taskId)
                 sT.dirty = TRUE;
             else if (JOY_NEW(A_BUTTON) && sT.cursor == 0 && !HasAbleMon())
             {
-                // Ready check: nobody can battle
-                TeamStatus(sT.note, sizeof(sT.note));
+                // Ready check: nobody can battle (no CARD CASE or deck)
+                Status(sT.note, sizeof(sT.note));
                 PlaySE(SE_FAILURE);
                 sT.dirty = TRUE;
             }
@@ -643,7 +734,7 @@ void MP_Tourney_OpenMenu(void)
     InitIfNeeded();
     if (!MP_IsConnected() || gMpLocalId < 0)
     {
-        MP_ShowNotice("Go online (CO-OP menu: {COOP}) to hold a battle tournament.");
+        MP_ShowNotice("Go online (CO-OP menu: {COOP}) to hold a tournament.");
         return;
     }
     if (sT.state == TS_RUNNING || sT.state == TS_DONE)
@@ -660,16 +751,12 @@ void MP_Tourney_OpenMenu(void)
             MP_ShowNotice("A tournament needs at least two players online.");
             return;
         }
-        memset(sT.answers, ANS_WAIT, sizeof(sT.answers));
-        sT.tid++;
+        // First what kind: BATTLES or CARD DUELS (the invitations go out then)
+        (void)buf;
+        (void)i;
+        sT.state = TS_CHOOSE;
         sT.organizer = gMpLocalId;
-        sT.state = TS_GATHERING;
         sT.note[0] = 0;
-        buf[0] = MPR_T_INVITE;
-        buf[1] = sT.tid;
-        for (i = 0; i < MP_MAX_PLAYERS; i++)
-            (void)i;
-        SendAll(buf, 2);
         OpenUi();
     }
 }
@@ -685,6 +772,7 @@ void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len)
         if (sT.state == TS_NONE && sT.me == ME_IDLE)
         {
             sT.tid = data[1];
+            sT.kind = len >= 3 ? data[2] : TK_BATTLES;
             sT.organizer = from;
             sT.state = TS_INVITED;
             sT.cursor = 0;
@@ -695,6 +783,7 @@ void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len)
         if (sT.state == TS_GATHERING && data[1] == sT.tid && len >= 3)
         {
             sT.answers[from] = data[2] ? ANS_YES : ANS_NO;
+            MPNet_Log("tournament: player %d %s", from, data[2] ? "joined" : "said no");
             sT.dirty = TRUE;
             if (sT.taskId != TASK_NONE)
                 Draw();
@@ -813,6 +902,7 @@ void MP_Tourney_Update(void)
     if (sT.state == TS_INVITED)
     {
         PlaySE(SE_PIN);
+        MPNet_Log("tournament: invited to %s", sT.kind == TK_CARDS ? "card duels" : "battles");
         OpenUi();
     }
     else if (sT.state == TS_RUNNING && sT.me == ME_PROMPT)

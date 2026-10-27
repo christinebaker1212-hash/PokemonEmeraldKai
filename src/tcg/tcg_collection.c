@@ -342,6 +342,46 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
     return 1;
 }
 
+const struct TcgRecord *Tcg_Record(const struct TcgCollection *c, uint32_t key)
+{
+    unsigned i;
+    for (i = 0; i < TCG_RECORD_SLOTS; i++)
+        if (c->records[i].key == key && (c->records[i].wins || c->records[i].losses))
+            return &c->records[i];
+    return NULL;
+}
+void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned day)
+{
+    struct TcgRecord *r = (struct TcgRecord *)Tcg_Record(c, key);
+    unsigned i;
+    if (!r)
+    {
+        /* a free slot, or the one played longest ago */
+        r = &c->records[0];
+        for (i = 0; i < TCG_RECORD_SLOTS; i++)
+        {
+            if (!c->records[i].wins && !c->records[i].losses)
+            {
+                r = &c->records[i];
+                break;
+            }
+            if (c->records[i].lastSeen < r->lastSeen)
+                r = &c->records[i];
+        }
+        memset(r, 0, sizeof(*r));
+        r->key = key;
+    }
+    if (won)
+    {
+        if (r->wins < 0xFFFF)
+            r->wins++;
+        r->lastWin = (uint16_t)day;
+    }
+    else if (r->losses < 0xFFFF)
+        r->losses++;
+    r->lastSeen = (uint16_t)day;
+}
+
 /* Explicit little-endian encoding, independent of compiler padding and ABI. */
 #define PAYLOAD_SIZE                                                                                                   \
     (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
@@ -350,9 +390,11 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
 #define EXTRA_SIZE (TCG_DAILY_SLOTS * 6 + 7 * 4)
 #define EXTRA4_SIZE 4
 #define EXTRA5_SIZE TCG_PACK_TYPES
+/* 6: the GAME CENTER CARD SHOP's sales and the records against card players */
+#define EXTRA6_SIZE (1 + TCG_GC_SINGLE_BYTES + TCG_RECORD_SLOTS * 12)
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +                       \
-     ((format) >= 5 ? EXTRA5_SIZE : 0))
+     ((format) >= 5 ? EXTRA5_SIZE : 0) + ((format) >= 6 ? EXTRA6_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -385,7 +427,7 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + 1];
+    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
     unsigned i, j, format, size;
@@ -398,7 +440,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         return 0;
     p += 4;
     format = Get(&p, 4);
-    if (format < 2 || format > 5 || size != FILE_SIZE(format) ||
+    if (format < 2 || format > 6 || size != FILE_SIZE(format) ||
         Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
     Tcg_CollectionInit(&next, 1);
@@ -455,6 +497,20 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         if (format >= 5)
             for (i = 0; i < TCG_PACK_TYPES; i++)
                 next.drought[i] = Get(&p, 1);
+        if (format >= 6)
+        {
+            next.gcDecks = Get(&p, 1);
+            for (i = 0; i < TCG_GC_SINGLE_BYTES; i++)
+                next.gcSingles[i] = Get(&p, 1);
+            for (i = 0; i < TCG_RECORD_SLOTS; i++)
+            {
+                next.records[i].key = Get(&p, 4);
+                next.records[i].wins = Get(&p, 2);
+                next.records[i].losses = Get(&p, 2);
+                next.records[i].lastWin = Get(&p, 2);
+                next.records[i].lastSeen = Get(&p, 2);
+            }
+        }
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -468,7 +524,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[FILE_SIZE(5)], *p = data + 12;
+    unsigned char data[FILE_SIZE(6)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -510,11 +566,22 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->rated, 2);
     for (i = 0; i < TCG_PACK_TYPES; i++)
         Put(&p, c->drought[i], 1);
+    Put(&p, c->gcDecks, 1);
+    for (i = 0; i < TCG_GC_SINGLE_BYTES; i++)
+        Put(&p, c->gcSingles[i], 1);
+    for (i = 0; i < TCG_RECORD_SLOTS; i++)
+    {
+        Put(&p, c->records[i].key, 4);
+        Put(&p, c->records[i].wins, 2);
+        Put(&p, c->records[i].losses, 2);
+        Put(&p, c->records[i].lastWin, 2);
+        Put(&p, c->records[i].lastSeen, 2);
+    }
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 5, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE), 4);
+    Put(&p, 6, 4);
+    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

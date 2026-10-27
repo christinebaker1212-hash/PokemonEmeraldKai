@@ -1050,6 +1050,7 @@ void MP_Tourney_OpenMenu(void);
 void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Tourney_Update(void);
 void MP_Tourney_OnBattleResult(u8 outcome);
+void MP_Tourney_OnCardResult(int won);   // tcg_online.c: a card duel tournament match ended
 void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 

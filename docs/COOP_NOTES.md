@@ -246,6 +246,11 @@ result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11
 wild_encounter.c MP_RollExtraLandMon on the right (enemy slot 3); a catch with the other still out runs
 BattleScript_MpCoopBallCaughtGoOn (VARIOUS_MP_COOP_CAUGHT_ONE/REMOVE_CAUGHT). Only the link master runs battle scripts:
 visuals for both screens must go through controller emits (sprite invisibility value 2 = caught, link partner ball throw). Also gym rematches and tournaments.
+Tournaments (mp_tourney.c, CO-OP > TOURNAMENT): the organizer first picks the kind (TS_CHOOSE: BATTLES or CARD DUELS,
+TK_*; MPR_T_INVITE carries it, protocol 58), then the round robin as before. Card matches: Tcg_TourneyDuel (tcg_online.c)
+opens both games' deck pick with the round's session (0x40000000 | tid | round | ids), the lower id invites; the result
+comes back once through MP_Tourney_OnCardResult (a finished duel; leaving it: a loss for whoever left). The ready check
+is the CARD CASE and the deck in use (Tcg_TourneyNotReady). Debug `mp tourney`; tests tcg_tourney, tourney_battles.
 Level scaling (1.19.0, mp_levelscale.c; OPTIONS > GAME > LEVEL SCALING, gMpConfig.levelScaling / ini level_scaling,
 on by default; online the host's, MPR_RULES byte 3, re-sent by MP_SendRoomRules when the host changes it): the team's
 level = MP_LevelScale_Top3 (average of the 3 highest-level party Pokémon, eggs left out); in a co-op battle the average

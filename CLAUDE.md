@@ -144,7 +144,9 @@ Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine
 duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
 Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
 three POKéMON CENTERs, 24 special trainer decks (gen_special_decks.py), CARD POINTS counter, `<save>.cards` sidecar,
-friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION;
+friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION, card duel TOURNAMENTs
+(mp_tourney.c TK_CARDS); NPCs' Prize cards (2/3/4/6) and records (collection format 6, test tcg_record); the GAME CENTER
+CARD SHOP sells one of each (gcDecks / gcSingles) and runs the CARD CLUB's counter too;
 all 26 Pokemon Powers (tcg_powers.c, tests tools/tcg/test_powers.c + test_ui.sh "powers"); CARD SCALING (tcg_scale.c:
 Elo deck ratings from AI duels in the generated tcg_ratings.c, rerun tools/tcg/rate_decks.sh after any rules, AI or deck
 change; per-save skill; tcg_field.c Tcg_FitOpponent); CARD ART / CARD BACKS

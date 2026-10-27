@@ -109,6 +109,8 @@ static struct
     int revealComplete;   /* the pack finished its set */
     /* Duels */
     int vs, aiDelay, autoPlay, online, rewarded;
+    int concedeHeld;   /* online: a concession waiting for our last move's answer */
+    int counterHome;   /* the counter the CARD SHOP list goes back to: UI_COUNTER or UI_GCSHOP */
     struct TcgOpponent opp;
     struct TcgDuel duel;
     SDL_Texture *portrait;
@@ -211,6 +213,8 @@ static void Close(void)
     int script = U.fromScript;
     if (U.online)
         TcgLink_Cancel(Tcg_Online(), "Card session closed.");
+    /* a tournament match left unfinished: lost by whoever left it, won by the one left waiting */
+    Tcg_TourneyResult(Tcg_Social()->peerLeft);
     if (Tcg_Social()->role == TCG_SOCIAL_DECK || Tcg_Social()->role == TCG_SOCIAL_TRADE)
         Tcg_SocialLeave();
     if (U.screen == UI_DUEL || U.back == UI_DUEL)
@@ -274,6 +278,7 @@ void Tcg_OpenClubCounter(void)
 {
     U.returnToGame = NULL;
     U.tab = 0;
+    U.counterHome = UI_COUNTER;
     Open(UI_COUNTER);
     U.fromScript = 1;
 }
@@ -281,6 +286,7 @@ void Tcg_OpenGameCenterShop(void)
 {
     U.returnToGame = NULL;
     U.tab = 0;
+    U.counterHome = UI_GCSHOP;
     Open(UI_GCSHOP);
     U.fromScript = 1;
 }
@@ -472,6 +478,13 @@ static void Apply(const struct TcgAction *a)
 {
     if (U.online)
     {
+        struct TcgLink *l = Tcg_Online();
+        if (a->type == TCG_CONCEDE && l->state == TCG_LINK_PLAYING && l->pending && l->game.phase != TCG_FINISHED)
+        {
+            /* (one move at a time on the link: it goes as soon as the last one is answered) */
+            U.concedeHeld = 1;
+            return;
+        }
         if (!TcgLink_Submit(Tcg_Online(), a, SDL_GetTicks()))
             TcgBoard_Reject(Tcg_Online()->error[0] ? Tcg_Online()->error
                                                    : "Wait for your turn and the other player's answer.");
@@ -490,6 +503,7 @@ static void Apply(const struct TcgAction *a)
 static void BeginBoard(void)
 {
     U.rewarded = 0;
+    U.concedeHeld = 0;
     TcgBoard_SetMat(U.opp.mat, U.opp.matType);
     TcgBoard_SetMusic(U.opp.music);
     TcgBoard_Tutorial(U.vs == VS_LESSON);
@@ -497,11 +511,18 @@ static void BeginBoard(void)
     TcgBoard_Begin(&U.duel, U.opp.name, U.vs == VS_FRIEND);
     U.aiDelay = 20;
     printf("[tcg] duel started vs %s\n", U.opp.name);
+    if (U.vs == VS_FRIEND)
+        MPNet_Log("card duel: started online");
+}
+/* The Prize cards of this duel: what a card player likes (2, 3, 4 or 6), else the full 6 */
+static unsigned Prizes(void)
+{
+    return U.vs == VS_NPC && U.opp.prizes >= 1 && U.opp.prizes <= 6 ? U.opp.prizes : 6;
 }
 static int StartDuel(const uint16_t *mine, const uint16_t *theirs)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    if (!TcgDuel_Init(&U.duel, mine, theirs, Tcg_Random(&c->rng), 6))
+    if (!TcgDuel_Init(&U.duel, mine, theirs, Tcg_Random(&c->rng), Prizes()))
     {
         Say(ACT_NONE, "This duel couldn't be set up.");
         return 0;
@@ -601,6 +622,14 @@ static void DuelStep(unsigned pressed, unsigned keys)
     int r;
     if (U.online)
     {
+        if (U.concedeHeld && !Tcg_Online()->pending)
+        {
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_CONCEDE;
+            U.concedeHeld = 0;
+            if (Tcg_Online()->state == TCG_LINK_PLAYING && Tcg_Online()->game.phase != TCG_FINISHED)
+                Apply(&a);
+        }
         OnlineView();
         TcgBoard_SetWaiting(Tcg_Online()->pending);
     }
@@ -617,8 +646,18 @@ static void DuelStep(unsigned pressed, unsigned keys)
             printf("[tcg] scaling learned: %s vs %d with a deck of %d, skill now %d after %u\n",
                    U.duel.winner == 0 ? "won" : "lost", U.opp.rating, U.opp.deckRating, c->skill, c->rated);
         }
+        /* the record against this card player (a concession is a loss) */
+        if (U.vs == VS_NPC && U.opp.key)
+        {
+            Tcg_RecordResult(Tcg_GetCollection(), U.opp.key, U.duel.winner == 0, Tcg_Today());
+            printf("[tcg] record vs %s: %u-%u\n", U.opp.name, Tcg_Record(Tcg_GetCollection(), U.opp.key)->wins,
+                   Tcg_Record(Tcg_GetCollection(), U.opp.key)->losses);
+        }
         if (U.vs == VS_FRIEND)
+        {
+            Tcg_TourneyResult(U.duel.winner == 0);
             FriendRewards(U.duel.winner == 0);
+        }
         else if (U.vs == VS_NPC && U.duel.winner == 0)
             Rewards();
         else if (U.vs == VS_NPC)
@@ -671,6 +710,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
     else if (r == BOARD_LEAVE)
     {
         int won = U.duel.winner == 0;
+        printf("[tcg] left the duel (%s)\n", won ? "won" : "lost");
         if (U.online)
         {
             TcgLink_Cancel(Tcg_Online(), "Duel complete.");
@@ -899,6 +939,19 @@ static void ChallengeScreen(void)
     Portrait(28, 62);
     if (U.opp.deck)
         G_Card(Mascot(U.opp.deck), 58, 22, 30, 42, 0, 255, 0);
+    /* Against them so far: wins and losses, and a ribbon once beaten today */
+    if (U.vs == VS_NPC && U.opp.key)
+    {
+        const struct TcgRecord *r = Tcg_Record(c, U.opp.key);
+        if (r && r->lastWin && r->lastWin == Tcg_Today())
+        {
+            G_RoundFill(7, 21, G_Measure("WON TODAY", TF_NARROW) + 6, 10, 0xd8a020, 245);
+            G_Text(10, 20, G_WHITE, 0x805808, "WON TODAY", 0, TF_NARROW);
+        }
+        snprintf(line, sizeof(line), "%uW %uL", r ? r->wins : 0, r ? r->losses : 0);
+        G_RoundFill(7, 55, G_Measure(line, TF_NARROW) + 6, 10, 0x103020, 220);
+        G_Text(10, 54, r ? 0xf0f8e8 : 0x90a898, G_NO_SHADOW, line, 0, TF_NARROW);
+    }
     y = 68;
     if (U.opp.title[0])
     {
@@ -925,6 +978,11 @@ static void ChallengeScreen(void)
     /* Your decks */
     ListBox(LIST_X, 4, LIST_W, 104);
     G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, "DUEL WITH", 0, TF_NARROW);
+    if (U.vs == VS_NPC)
+    {
+        snprintf(line, sizeof(line), "%u PRIZES", Prizes());
+        G_TextAlign(LIST_X + LIST_W - 6, 5, TA_RIGHT, Prizes() == 6 ? 0x606878 : 0xb05818, G_NO_SHADOW, line, TF_NARROW);
+    }
     U.scroll = U.cursor < 2 ? 0 : U.cursor > TCG_SAVED_DECKS - 3 ? TCG_SAVED_DECKS - 4 : U.cursor - 2;
     for (i = 0; i < 5; i++)
     {
@@ -1037,8 +1095,9 @@ static void BuilderScreen(void)
             y -= 2;
         G_Card(card, (float)x, (float)y, 30, 42, 0, 255, 0);
         snprintf(line, sizeof(line), card <= 6 ? "%u" : "%u/%u", inDeck, c->owned[card]);
-        G_RoundFill(x + 1, y + 34, 28, 9, inDeck ? 0x2858a8 : 0x404850, 235);
-        G_Digits(x + 15 - G_DigitsWidth(line, 0, 1) / 2, y + 36, line, 0, 1, 0xf0f8ff, 255);
+        /* (over the picture's foot: the card's bottom row shows weakness, resistance and retreat) */
+        G_RoundFill(x + 1, y + 17, 28, 9, inDeck ? 0x2858a8 : 0x404850, 235);
+        G_Digits(x + 15 - G_DigitsWidth(line, 0, 1) / 2, y + 19, line, 0, 1, 0xf0f8ff, 255);
         if (on)
         {
             int o = (U.frame / 8) % 2;
@@ -1092,6 +1151,8 @@ static void BuilderScreen(void)
     Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE" : "{A} ADD  {SELECT} TAKE OUT  {START} LOOK  {B} DONE");
 }
 
+/* The GAME CENTER CARD SHOP sold its one copy of this single */
+static int GcSingleSold(unsigned id) { return id <= TCG_CARD_COUNT && (Tcg_GetCollection()->gcSingles[id / 8] >> (id % 8)) & 1; }
 /* The binder: every card by type, owned or all. */
 static void BinderScreen(void)
 {
@@ -1115,9 +1176,16 @@ static void BinderScreen(void)
         G_Card(card, (float)x, (float)y, 30, 42, 0, count || card <= 6 ? 255 : 80, 0);
         if (count && card > 6)
         {
+            /* (on the picture's corner: the bottom row shows weakness, resistance and retreat) */
             snprintf(line, sizeof(line), "x%u", count);
-            G_RoundFill(x + 14, y + 34, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
-            G_Digits(x + 16, y + 36, line, 0, 1, 0xe0f0ff, 255);
+            G_RoundFill(x + 14, y + 17, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
+            G_Digits(x + 16, y + 19, line, 0, 1, 0xe0f0ff, 255);
+        }
+        if (U.showAll == GC_BINDER && GcSingleSold(card))
+        {
+            /* the shop's one copy is gone */
+            G_RoundFill(x - 1, y - 1, 22, 10, 0xc82828, 240);
+            G_Text(x + 1, y - 2, G_WHITE, 0x701010, "SOLD", 0, TF_NARROW);
         }
         if (on)
         {
@@ -1129,8 +1197,11 @@ static void BinderScreen(void)
         G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
     if (U.showAll == GC_BINDER)
     {
-        snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Tcg_Card(id)->name : "",
-                 Tcg_ShopPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
+        if (id && GcSingleSold(id))
+            snprintf(line, sizeof(line), "%s: SOLD\nYou bought your copy. You own %u.", Tcg_Card(id)->name, c->owned[id]);
+        else
+            snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Tcg_Card(id)->name : "",
+                     Tcg_ShopPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
         Hints("{A} BUY  {L}{R} TYPE  {B} BACK");
         return;
@@ -1563,52 +1634,67 @@ static void ClaimPrize(unsigned row)
  * three structure decks. */
 #include "tcg_structure_decks.h"
 #define GC_DECK_PRICE 15000
-static const char *const sGcTabs[] = {"SINGLES", "DECKS"};
+static const char *const sGcTabs[] = {"SINGLES", "DECKS", "TRADE IN", "CARD SHOP", "PRIZES"};
+#define GC_TABS 5
 static void MoveCursor(unsigned pressed, int count, int step);
+static void CounterLists(int tab);
+static void ShopTabs(const char *const *names, int count, unsigned fill, unsigned edge, unsigned ink, const char *balance,
+                     const char *what, unsigned color);
+/* Sold: each structure deck once, one copy of each single */
+static int GcDeckSold(unsigned k) { return (Tcg_GetCollection()->gcDecks >> k) & 1; }
 static void GcShopScreen(void)
 {
+    struct TcgCollection *c = Tcg_GetCollection();
     char line[160], right[24];
     int i;
     Background();
     SidePanel("GAME CENTER", 0x8848b8);
-    for (i = 0; i < 2; i++)
+    if (U.tab < 2)
+        snprintf(line, sizeof(line), "\xa5%u", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+    else
+        snprintf(line, sizeof(line), "%u CP", c->dust);
+    ShopTabs(sGcTabs, GC_TABS, 0xc0a0e0, 0x603090, 0x402060, line, NULL, U.tab < 2 ? 0x603090 : 0x2858a8);
+    if (U.tab >= 2)
     {
-        int on = i == U.tab;
-        G_RoundFill(6, 22 + i * 17, 92, 15, on ? 0xf8f8f8 : 0xc0a0e0, 255);
-        G_RoundFrame(6, 22 + i * 17, 92, 15, on ? 0xe82820 : 0x603090, 255);
-        G_Text(12, 22 + i * 17, on ? G_INK : 0x402060, on ? G_INK_SHADOW : G_NO_SHADOW, sGcTabs[i], 0, TF_SMALL);
+        /* the CARD CLUB's counter, as every member runs it */
+        CounterLists(U.tab - 2);
+        Hints("{L}{R} COUNTER  {B} LEAVE");
+        return;
     }
-    snprintf(line, sizeof(line), "\xa5%u", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
-    G_TextAlign(52, 78, TA_CENTER, 0x603090, G_INK_SHADOW, line, TF_NORMAL);
-    G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, "MONEY", TF_NARROW);
     ListBox(LIST_X, 4, LIST_W, 104);
     if (U.tab == 0)
     {
         Row(LIST_X + 2, 8, LIST_W - 4, 1, 1, "SINGLES", "300-4000");
-        Strip(0, "Any card of the four sets, holos aside. Rares too: the CARD CLUB counters don't sell them.");
+        Strip(0, "Any card of the four sets, holos aside, one copy each. Rares too: the CARD CLUB counters don't sell "
+                 "them.");
     }
     else
     {
         for (i = 0; i < (int)ARRAY_COUNT(sStructureDecks); i++)
         {
-            snprintf(right, sizeof(right), "\xa5%u", GC_DECK_PRICE);
-            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == U.cursor, IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE),
-                sStructureDecks[i].name, right);
+            int sold = GcDeckSold((unsigned)i);
+            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GC_DECK_PRICE);
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == U.cursor,
+                !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE), sStructureDecks[i].name, right);
         }
-        snprintf(line, sizeof(line), "%s\nThe 1999 theme deck, all 60 cards.", sStructureDecks[U.cursor].blurb);
+        snprintf(line, sizeof(line), "%s\n%s", sStructureDecks[U.cursor].blurb,
+                 GcDeckSold((unsigned)U.cursor) ? "SOLD OUT: one of each deck." : "The 1999 theme deck, all 60 cards.");
         Strip(0, line);
     }
-    Hints("{A} CHOOSE  {L}{R} TAB  {B} BACK");
+    Hints("{A} CHOOSE  {L}{R} COUNTER  {B} LEAVE");
 }
+static void CounterStep(unsigned pressed, int tab);
 static void GcShopStep(unsigned pressed)
 {
     if (pressed & (KEY_L | KEY_R))
     {
-        U.tab = !U.tab;
+        U.tab = (U.tab + (pressed & KEY_R ? 1 : GC_TABS - 1)) % GC_TABS;
         U.cursor = 0;
         PlaySE(SE_RG_BAG_POCKET);
     }
-    if (U.tab == 0)
+    else if (U.tab >= 2)
+        CounterStep(pressed, U.tab - 2);
+    else if (U.tab == 0)
     {
         if (pressed & KEY_A)
         {
@@ -1623,7 +1709,13 @@ static void GcShopStep(unsigned pressed)
         MoveCursor(pressed, (int)ARRAY_COUNT(sStructureDecks), 1);
         if (pressed & KEY_A)
         {
-            if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+            if (GcDeckSold((unsigned)U.cursor))
+            {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "The %s deck is sold out. One of each deck per customer!", sStructureDecks[U.cursor].name);
+                printf("[tcg] game center: deck %d sold out\n", U.cursor);
+            }
+            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
             {
                 PlaySE(SE_FAILURE);
                 Say(ACT_NONE, "A structure deck is \xa5%u. You don't have enough money.", GC_DECK_PRICE);
@@ -1638,27 +1730,16 @@ static void GcShopStep(unsigned pressed)
         Close();
     }
 }
-static void CounterScreen(void)
+/* The counter's lists (TRADE IN, CARD SHOP, PRIZES): the CARD CLUB's, and the GAME CENTER CARD SHOP's last three tabs */
+static void CounterLists(int tab)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     char line[160], right[24];
     uint16_t list[TCG_CARD_COUNT];
     int i, n, rows = 6;
-    Background();
-    SidePanel("CARD CLUB", 0x3878c8);
-    for (i = 0; i < 3; i++)
-    {
-        int on = i == U.tab;
-        G_RoundFill(6, 22 + i * 17, 92, 15, on ? 0xf8f8f8 : 0x88a8d8, 255);
-        G_RoundFrame(6, 22 + i * 17, 92, 15, on ? 0xe82820 : 0x305088, 255);
-        G_Text(12, 22 + i * 17, on ? G_INK : 0x203860, on ? G_INK_SHADOW : G_NO_SHADOW, sCounterTabs[i], 0, TF_SMALL);
-    }
-    snprintf(line, sizeof(line), "%u CP", c->dust);
-    G_TextAlign(52, 78, TA_CENTER, 0x2858a8, G_INK_SHADOW, line, TF_NORMAL);
-    G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, "CARD POINTS", TF_NARROW);
     ListBox(LIST_X, 4, LIST_W, 104);
     U.scroll = U.cursor < 3 ? 0 : U.cursor - 3;
-    if (U.tab == 0)
+    if (tab == 0)
     {
         n = (int)SpareList(list);
         if (U.scroll > n - rows)
@@ -1682,7 +1763,7 @@ static void CounterScreen(void)
             Strip(id, line);
         }
     }
-    else if (U.tab == 1)
+    else if (tab == 1)
     {
         n = BUY_COUNT;
         if (U.scroll > n - rows)
@@ -1721,6 +1802,31 @@ static void CounterScreen(void)
         PrizeState(U.cursor, line, sizeof(line));
         Strip(0, line);
     }
+}
+/* The side panel's tabs (5 fit when short) and what you spend */
+static void ShopTabs(const char *const *names, int count, unsigned fill, unsigned edge, unsigned ink, const char *balance,
+                     const char *what, unsigned color)
+{
+    int i, h = count > 3 ? 13 : 15, step = h + 2;
+    for (i = 0; i < count; i++)
+    {
+        int on = i == U.tab;
+        G_RoundFill(6, 22 + i * step, 92, h, on ? 0xf8f8f8 : fill, 255);
+        G_RoundFrame(6, 22 + i * step, 92, h, on ? 0xe82820 : edge, 255);
+        G_Text(12, 22 + i * step - (h < 15), on ? G_INK : ink, on ? G_INK_SHADOW : G_NO_SHADOW, names[i], 0, TF_SMALL);
+    }
+    G_TextAlign(52, count > 3 ? 98 : 78, TA_CENTER, color, G_INK_SHADOW, balance, count > 3 ? TF_SMALL : TF_NORMAL);
+    if (count <= 3)
+        G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, what, TF_NARROW);
+}
+static void CounterScreen(void)
+{
+    char line[32];
+    Background();
+    SidePanel("CARD CLUB", 0x3878c8);
+    snprintf(line, sizeof(line), "%u CP", Tcg_GetCollection()->dust);
+    ShopTabs(sCounterTabs, 3, 0x88a8d8, 0x305088, 0x203860, line, "CARD POINTS", 0x2858a8);
+    CounterLists(U.tab);
     Hints("{L}{R} COUNTER  {B} LEAVE");
 }
 
@@ -1920,9 +2026,10 @@ static void Act(int action)
     case ACT_GC_CARD:
     {
         unsigned id = (unsigned)U.askArg, price = Tcg_ShopPrice(id);
-        if (price && IsEnoughMoney(&gSaveBlock1Ptr->money, price) && c->owned[id] < TCG_COLLECTION_MAX)
+        if (price && !GcSingleSold(id) && IsEnoughMoney(&gSaveBlock1Ptr->money, price) && c->owned[id] < TCG_COLLECTION_MAX)
         {
             RemoveMoney(&gSaveBlock1Ptr->money, price);
+            c->gcSingles[id / 8] |= 1 << (id % 8);
             AddCard(id);
             PlaySE(SE_SHOP);
             Say(ACT_NONE, "You got %s!", Tcg_Card(id)->name);
@@ -1933,9 +2040,10 @@ static void Act(int action)
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)U.askArg, i, slot;
-        if (k >= ARRAY_COUNT(sStructureDecks) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+        if (k >= ARRAY_COUNT(sStructureDecks) || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
             break;
         RemoveMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE);
+        c->gcDecks |= 1 << k;
         for (i = 0; i < TCG_DECK_SIZE; i++)
             if (sStructureDecks[k].cards[i] > 6)
                 AddCard(sStructureDecks[k].cards[i]);
@@ -2193,6 +2301,56 @@ static void TradeStep(unsigned pressed)
     }
 }
 
+/* The counter's keys on one of its lists (the CARD CLUB, the GAME CENTER CARD SHOP's last three tabs) */
+static void CounterStep(unsigned pressed, int tab)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (tab == 0)
+    {
+        uint16_t list[TCG_CARD_COUNT];
+        unsigned n = SpareList(list);
+        MoveCursor(pressed, (int)n, 1);
+        if (pressed & KEY_A && n)
+            Ask(ACT_TRADE_IN, list[U.cursor], "Trade in one %s for %u CP?", Tcg_Card(list[U.cursor])->name,
+                Tcg_PointValue(list[U.cursor]));
+        else if (pressed & KEY_SELECT && n)
+            Ask(ACT_TRADE_IN_ALL, list[U.cursor], "Trade in all %u spare %s for %u CP?", Tcg_Spare(c, list[U.cursor]),
+                Tcg_Card(list[U.cursor])->name, Tcg_Spare(c, list[U.cursor]) * Tcg_PointValue(list[U.cursor]));
+    }
+    else if (tab == 1)
+    {
+        MoveCursor(pressed, BUY_COUNT, 1);
+        if (pressed & KEY_A)
+        {
+            if (U.cursor == BUY_CARD)
+            {
+                Screen(UI_BINDER);
+                U.filter = 9;
+                U.showAll = SHOP_BINDER;
+            }
+            else if (c->dust < sBuyCost[U.cursor])
+            {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[U.cursor]);
+            }
+            else
+                Ask(ACT_BUY, U.cursor, "%s for %u CP?", sBuyNames[U.cursor], sBuyCost[U.cursor]);
+        }
+    }
+    else
+    {
+        char what[128];
+        MoveCursor(pressed, PRIZE_ROWS, 1);
+        if (pressed & KEY_A)
+        {
+            if (PrizeState((unsigned)U.cursor, what, sizeof(what)) == 1)
+                ClaimPrize((unsigned)U.cursor);
+            else
+                PlaySE(SE_FAILURE);
+        }
+    }
+}
+
 int Tcg_Step(unsigned keys)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -2441,7 +2599,13 @@ int Tcg_Step(unsigned keys)
             if (pressed & KEY_A && ListSize())
             {
                 unsigned id = ListCard(U.cursor), price = Tcg_ShopPrice(id);
-                if (!IsEnoughMoney(&gSaveBlock1Ptr->money, price))
+                if (GcSingleSold(id))
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "SOLD: one copy of each card per customer.");
+                    printf("[tcg] game center: card %u sold\n", id);
+                }
+                else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, price))
                 {
                     PlaySE(SE_FAILURE);
                     Say(ACT_NONE, "%s is \xa5%u. You don't have enough money.", Tcg_Card(id)->name, price);
@@ -2482,10 +2646,11 @@ int Tcg_Step(unsigned keys)
                 Inspect(ListCard(U.cursor), UI_BINDER);
             if (pressed & KEY_B)
             {
+                /* back to the counter it came from: the CARD CLUB's, or the GAME CENTER's fourth tab */
                 PlaySE(SE_SELECT);
                 U.showAll = 0;
-                Screen(UI_COUNTER);
-                U.tab = 1;
+                Screen(U.counterHome == UI_GCSHOP ? UI_GCSHOP : UI_COUNTER);
+                U.tab = U.counterHome == UI_GCSHOP ? 3 : 1;
                 U.cursor = BUY_CARD;
             }
             break;
@@ -2637,50 +2802,8 @@ int Tcg_Step(unsigned keys)
             U.cursor = 0;
             PlaySE(SE_RG_BAG_POCKET);
         }
-        if (U.tab == 0)
-        {
-            uint16_t list[TCG_CARD_COUNT];
-            unsigned n = SpareList(list);
-            MoveCursor(pressed, (int)n, 1);
-            if (pressed & KEY_A && n)
-                Ask(ACT_TRADE_IN, list[U.cursor], "Trade in one %s for %u CP?", Tcg_Card(list[U.cursor])->name,
-                    Tcg_PointValue(list[U.cursor]));
-            else if (pressed & KEY_SELECT && n)
-                Ask(ACT_TRADE_IN_ALL, list[U.cursor], "Trade in all %u spare %s for %u CP?", Tcg_Spare(c, list[U.cursor]),
-                    Tcg_Card(list[U.cursor])->name, Tcg_Spare(c, list[U.cursor]) * Tcg_PointValue(list[U.cursor]));
-        }
-        else if (U.tab == 1)
-        {
-            MoveCursor(pressed, BUY_COUNT, 1);
-            if (pressed & KEY_A)
-            {
-                if (U.cursor == BUY_CARD)
-                {
-                    Screen(UI_BINDER);
-                    U.filter = 9;
-                    U.showAll = SHOP_BINDER;
-                }
-                else if (c->dust < sBuyCost[U.cursor])
-                {
-                    PlaySE(SE_FAILURE);
-                    Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[U.cursor]);
-                }
-                else
-                    Ask(ACT_BUY, U.cursor, "%s for %u CP?", sBuyNames[U.cursor], sBuyCost[U.cursor]);
-            }
-        }
         else
-        {
-            char what[128];
-            MoveCursor(pressed, PRIZE_ROWS, 1);
-            if (pressed & KEY_A)
-            {
-                if (PrizeState((unsigned)U.cursor, what, sizeof(what)) == 1)
-                    ClaimPrize((unsigned)U.cursor);
-                else
-                    PlaySE(SE_FAILURE);
-            }
-        }
+            CounterStep(pressed, U.tab);
         if (pressed & KEY_B)
         {
             PlaySE(SE_SELECT);
@@ -2884,8 +3007,9 @@ void Tcg_Debug(const char *command)
         printf("[tcg] field challenge: %d\n", Tcg_FieldChallenge());
         return;
     }
-    if (!strcmp(command, "open"))
+    if (!strncmp(command, "open", 4) && (!command[4] || command[4] == ' '))
     {
+        /* open [PRIZES] */
         struct TcgOpponent o;
         const struct TcgDeckDefinition *d = DeckNamed("PracticePlayer");
         memset(&o, 0, sizeof(o));
@@ -2894,6 +3018,7 @@ void Tcg_Debug(const char *command)
         o.special = TCG_SPECIAL_NONE;
         o.pool = TCG_SCALE_POOL_NONE;
         o.key = 0x7e57;
+        o.prizes = command[4] ? (uint8_t)atoi(command + 5) : 0;
         Tcg_OpenNpcChallenge(&o);
         return;
     }
@@ -3011,6 +3136,17 @@ void Tcg_Debug(const char *command)
         U.side = 0;
         Screen(UI_BUILDER);
         U.filter = BuilderTab(U.deck);
+        return;
+    }
+    if (!strcmp(command, "concede"))
+    {
+        /* The board's CONCEDE, confirmed (online or not) */
+        struct TcgAction a = {0};
+        a.type = TCG_CONCEDE;
+        if (U.screen == UI_DUEL)
+            Apply(&a);
+        printf("[tcg] concede: screen %d online %d link %u pending %u held %d phase %u\n", U.screen, U.online,
+               Tcg_Online()->state, Tcg_Online()->pending, U.concedeHeld, U.duel.phase);
         return;
     }
     if (!strcmp(command, "netconcede"))

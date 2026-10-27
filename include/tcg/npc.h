@@ -45,6 +45,7 @@ struct TcgOpponent
     uint32_t key;          /* the daily reward's (map + person, or the special trainer) */
     uint16_t music, promo; /* promo: the card a first win hands over (0 none) */
     uint8_t mat, matType, special, pack, online;
+    uint8_t prizes;        /* the Prize cards they play with: 6 or 3 mostly, some 4 or 2 (0: 6) */
     /* CARD SCALING (Tcg_FitOpponent): the kind of deck they play (TCG_SCALE_POOL_*), a number
      * of their own for variety, their deck's rating, the player deck's (without the skill) */
     uint8_t pool;

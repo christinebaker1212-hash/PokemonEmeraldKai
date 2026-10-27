@@ -1,0 +1,15 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+barrier ready 2
+mp tourney
+wait 30
+press A 2
+waitlog 1200 tournament: player 1 joined
+wait 30
+pressuntillog A 600 tournament: round 1, our match
+wait 90
+pressuntillog A 1200 starting PvP battle
+wait 200
+quit

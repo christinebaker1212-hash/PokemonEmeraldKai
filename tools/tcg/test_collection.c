@@ -160,6 +160,13 @@ int main(int argc, char **argv)
 #else
     c.skill = -123; /* CARD SCALING's correction (format 4) goes both ways */
     c.rated = 17;
+    c.gcDecks = 5; /* format 6: the GAME CENTER's sales and the records */
+    c.gcSingles[3] = 0x41;
+    Tcg_RecordResult(&c, 0x01020301u, 1, 9000);
+    Tcg_RecordResult(&c, 0x01020301u, 0, 9001);
+    Tcg_RecordResult(&c, 0xFF000002u, 0, 9001);
+    assert(Tcg_Record(&c, 0x01020301u)->wins == 1 && Tcg_Record(&c, 0x01020301u)->losses == 1 &&
+           Tcg_Record(&c, 0x01020301u)->lastWin == 9000 && !Tcg_Record(&c, 0x0BADu));
     assert(Tcg_CollectionSave(&c, path));
     Tcg_CollectionInit(&other, 789);
     assert(Tcg_CollectionLoad(&other, path));
@@ -229,12 +236,12 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionLoad(&other, path));
         assert(other.optedIn && other.packs[2] == 3 && other.wins == 7 && other.owned[TCG_CARD_SQUIRTLE] == old.owned[TCG_CARD_SQUIRTLE]);
         assert(other.flags == (TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET) && !other.specialBeaten && !other.daily[0].key);
-        assert(!other.skill && !other.rated);
+        assert(!other.skill && !other.rated && !other.gcDecks && !Tcg_Record(&other, 0x01020301u));
         /* ... and saved again as the current format */
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 5");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 6");
     }
 #endif
     {

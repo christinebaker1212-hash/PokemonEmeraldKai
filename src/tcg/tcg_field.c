@@ -576,6 +576,7 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         o->pack = i % TCG_PACK_TYPES;
         o->pool = TCG_SCALE_POOL_SPECIAL;
         o->pick = h;
+        o->prizes = 6;   // (the full game: LEADERS and the like)
         Tcg_FitOpponent(o, NULL);
         *answer = ASK_DUEL;
         return s->accept;
@@ -625,6 +626,11 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
     o->pick = h;
     Tcg_FitOpponent(o, NULL);
     o->key = key;
+    // How many Prize cards they like: 6 and 3 are what most play, a few play 4 or 2
+    {
+        u32 r = (h >> 12) % 100;
+        o->prizes = r < 42 ? 6 : r < 84 ? 3 : r < 92 ? 4 : 2;
+    }
     o->mat = cat == CAT_TEAM ? (deck == DECK_WATER ? 9 : 10) : MatFor(deck);
     o->music = cat == CAT_TEAM ? MUS_VS_AQUA_MAGMA : MUS_VS_TRAINER;
     o->pack = deck == DECK_FIRE || deck == DECK_FIGHTING ? 0 : deck == DECK_GRASS || deck == DECK_WATER ? 1

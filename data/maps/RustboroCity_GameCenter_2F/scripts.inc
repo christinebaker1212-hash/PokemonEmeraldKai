@@ -16,6 +16,8 @@ RustboroCity_GameCenter_2F_EventScript_CardShop::
 	special Tcg_ClubChooseDeck
 	msgbox RustboroCity_GameCenter_2F_Text_HowTo, MSGBOX_DEFAULT
 RustboroCity_GameCenter_2F_EventScript_Shop::
+	special Tcg_ClubGiftReady
+	goto_if_eq VAR_RESULT, TRUE, EventScript_CardClub_Gift
 	msgbox RustboroCity_GameCenter_2F_Text_Welcome, MSGBOX_DEFAULT
 	closemessage
 	special Tcg_GameCenterShop

@@ -1,0 +1,12 @@
+# CO-OP > TOURNAMENT of CARD DUELS at NA-JP lag: ALICE picks CARD DUELS (t_choose), BOB joins (t_invited), ALICE
+# begins; both say READY, the deck pick opens on both games (ALICE invites, BOB accepts), the duel starts; ALICE
+# concedes, both leave the duel, and the final standings put BOB first (t_final)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=240
+EXPECT_A=("tournament: gathering for card duels" "[tcg] tournament match vs player 1, seat 0" "duel started vs BOB" "[tcg] tournament match lost" "tournament: final, 2nd place of 2 (card duels)")
+EXPECT_B=("tournament: invited to card duels" "[tcg] tournament match vs player 0, seat 1" "duel started vs ALICE" "[tcg] tournament match won" "tournament: final, 1st place of 2 (card duels)")
