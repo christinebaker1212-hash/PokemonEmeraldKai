@@ -25,6 +25,7 @@
 
 #include "platform/display.h"
 #include "tcg/integration.h"
+#include "platform/fight.h"
 
 #ifdef PLATFORM_SDL2
 
@@ -457,6 +458,7 @@ static int CreateRenderer(void)
 static void RecreateRenderer(void)
 {
     Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyTextures();
     if (sRenderer)
         SDL_DestroyRenderer(sRenderer);
@@ -1227,8 +1229,11 @@ static void RenderToBackbuffer(void)
     struct PanelLayout L;
 
     sFilterShown = 0;
-    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
-    gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
+    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c),
+    // Moemon Fight: so is a fight (src/platform/fight_platform.c)
+    gameTex = sGameTex ? Fight_Canvas(sRenderer) : NULL;
+    if (gameTex == NULL)
+        gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
     if (gameTex == NULL)
         gameTex = sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
@@ -1418,6 +1423,7 @@ int Display_Init(const char *title)
 void Display_Shutdown(void)
 {
     Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyAllPopouts();
     DestroyTextures();
     if (sRenderer)

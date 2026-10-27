@@ -32,6 +32,9 @@ u8 TrySavingData(u8 saveType);
 #include "platform/framedraw.h"
 #include "platform/system.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
+#include "mf_engine.h"
+#include "mp_fight.h"
 
 extern void (*const gIntrTable[])(void);
 
@@ -240,7 +243,7 @@ int main(int argc, char **argv)
             }
             TestHarnessStep();
             MP_FrameUpdate();
-            if (Tcg_Step(Platform_GetKeyInput()) || SpectateStep())
+            if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || SpectateStep())
             {
                 AudioUpdate();
                 sFrameCounter++;
@@ -327,7 +330,7 @@ int main(int argc, char **argv)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
-                if (Tcg_Step(Platform_GetKeyInput()) || SpectateStep())
+                if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || SpectateStep())
                     continue;
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
@@ -352,7 +355,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Tcg_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || MP_Fight_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
@@ -540,6 +543,8 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 
 void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
 {
+    // Moemon Fight: a fight's sound instead of the game's (samplesPerFrame counts bytes here)
+    Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
 }
 
@@ -890,6 +895,30 @@ void Platform_SetAlarm(u8 *alarmData)
     // TODO
 }
 
+// Moemon Fight: "fpress KEYS N" holds fight buttons (UP DOWN LEFT RIGHT A B C X Y Z START, joined by +)
+static bool sFightKeysHeld;
+void MP_Fight_TestPress(u16 buttons);
+static u16 ParseFightKeys(const char *s)
+{
+    static const struct { const char *name; u16 key; } names[] = {
+        {"UP", MF_BTN_UP}, {"DOWN", MF_BTN_DOWN}, {"LEFT", MF_BTN_LEFT}, {"RIGHT", MF_BTN_RIGHT},
+        {"A", MF_BTN_A}, {"B", MF_BTN_B}, {"C", MF_BTN_C}, {"X", MF_BTN_X}, {"Y", MF_BTN_Y}, {"Z", MF_BTN_Z},
+        {"START", MF_BTN_START},
+    };
+    u16 out = 0;
+    char buf[200];
+    char *tok;
+    snprintf(buf, sizeof(buf), "%s", s);
+    for (tok = strtok(buf, "+"); tok != NULL; tok = strtok(NULL, "+"))
+    {
+        int i;
+        for (i = 0; i < (int)(sizeof(names) / sizeof(names[0])); i++)
+            if (strcmp(tok, names[i].name) == 0)
+                out |= names[i].key;
+    }
+    return out;
+}
+
 static u16 ParseTestKeys(const char *s)
 {
     static const struct { const char *name; u16 key; } names[] = {
@@ -910,8 +939,14 @@ static u16 ParseTestKeys(const char *s)
 void Platform_SaveScreenshot(const char *name)
 {
     char path[1024];
-    SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(sFrameImage, DISPLAY_WIDTH, DISPLAY_HEIGHT, 16,
-                                                           DISPLAY_WIDTH * 2, SDL_PIXELFORMAT_ABGR1555);
+    SDL_Surface *surf;
+    // Moemon Fight: a fight's own 480x320 picture
+    if (MfEngine_IsActive() && MfEngine_Frame())
+        surf = SDL_CreateRGBSurfaceWithFormatFrom((void *)MfEngine_Frame(), MF_SCREEN_W, MF_SCREEN_H, 16,
+                                                  MF_SCREEN_W * 2, SDL_PIXELFORMAT_RGB565);
+    else
+        surf = SDL_CreateRGBSurfaceWithFormatFrom(sFrameImage, DISPLAY_WIDTH, DISPLAY_HEIGHT, 16,
+                                                  DISPLAY_WIDTH * 2, SDL_PIXELFORMAT_ABGR1555);
     snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, name);
     if (surf)
     {
@@ -924,6 +959,12 @@ void Platform_SaveScreenshot(const char *name)
 
 const u16 *Platform_GetFrame(void)
 {
+    // Moemon Fight: so is a fight (src/platform/fight_platform.c)
+    {
+        const u16 *fight = Fight_Frame();
+        if (fight)
+            return fight;
+    }
     // Moemon Kai: while a card screen is open, it is what the game shows (spectators, photos)
     if (Tcg_IsActive())
     {
@@ -1043,6 +1084,11 @@ static void TestHarnessStep(void)
             sTestKeys = 0;
         if (sTestWait == 0 && sMashCount == 0)
             sTestKeys = 0;
+        if (sTestWait == 0 && sFightKeysHeld)
+        {
+            MP_Fight_TestPress(0);
+            sFightKeysHeld = false;
+        }
         if (sTestWait > 0)
             return;
     }
@@ -1067,6 +1113,13 @@ static void TestHarnessStep(void)
         if (strcmp(cmd, "wait") == 0)
         {
             sTestWait = atoi(arg);
+            return;
+        }
+        else if (strcmp(cmd, "fpress") == 0)
+        {
+            MP_Fight_TestPress(ParseFightKeys(arg));
+            sFightKeysHeld = true;
+            sTestWait = n > 0 ? n : 1;
             return;
         }
         else if (strcmp(cmd, "press") == 0)

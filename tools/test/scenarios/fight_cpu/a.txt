@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 60
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+shot sit_menu
+press DOWN 2
+wait 10
+press A 2
+wait 300
+shot select
+fpress RIGHT 2
+wait 10
+fpress A 2
+wait 600
+shot fight_start
+fpress RIGHT+X 3
+wait 20
+fpress X 3
+wait 20
+fpress DOWN+A 3
+wait 20
+fpress RIGHT 30
+fpress Y 3
+wait 400
+shot fight_mid
+watchlog fight: result
+waitlog 12000
+wait 30
+shot after
+wait 200
+shot after_msg
+quit

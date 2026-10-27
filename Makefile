@@ -371,6 +371,28 @@ ifeq ($(TARGET_OS),WINDOWS)
   OBJS += $(OBJ_DIR)/res.o
 endif
 
+# Moemon Fight: the fight engine (fight/, include/mf_engine.h): plain C with its own flags, none of the
+# game's preprocessing
+ifeq ($(PORTABLE),1)
+  FIGHT_SRCS := $(wildcard fight/engine/*.c fight/compat/mf_*.c fight/host/*.c) \
+                $(wildcard fight/third_party/zlib/*.c) \
+                $(filter-out %/lua.c %/luac.c %/print.c,$(wildcard fight/third_party/lua-5.1.4/src/*.c)) \
+                fight/third_party/minizip-0.15/unzip.c \
+                $(filter-out %/pngtest.c %/pnggccrd.c %/pngvcrd.c,$(wildcard fight/third_party/libpng-1.2.38/png*.c))
+  FIGHT_OBJS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(FIGHT_SRCS))
+  FIGHT_CFLAGS := -std=gnu11 -O2 -m$(BIT_WIDTH) -fno-strict-aliasing -ffp-contract=off -w -DPNG_SKIP_SETJMP_CHECK \
+                  -include fight/compat/mf_rename.h -Ifight/engine -Ifight/compat -Ifight/compat/SDL \
+                  -Ifight/third_party/minizip-0.15 -Ifight/third_party/libpng-1.2.38 \
+                  -Ifight/third_party/lua-5.1.4/src -Ifight/third_party/zlib -Ifight/third_party/audio
+  ifeq ($(TARGET_OS),LINUX)
+    FIGHT_CFLAGS += -Ifight/compat/linux
+    OS_LFLAGS += -lpthread -lm
+  else
+    OS_LFLAGS += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
+  endif
+  OBJS += $(FIGHT_OBJS)
+endif
+
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -485,6 +507,13 @@ else
 	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
 	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
 endif
+
+# Moemon Fight: the fight engine's objects (FIGHT_OBJS)
+$(OBJ_DIR)/fight/%.o: fight/%.c
+	@echo "$(MODERNCC) <fight flags> -o $@ $<"
+	@$(MODERNCC) $(FIGHT_CFLAGS) -MMD -MP -c $< -o $@
+
+-include $(FIGHT_OBJS:.o=.d)
 
 $(C_BUILDDIR)/%.d: $(C_SUBDIR)/%.c
 	$(SCANINC) -M $@ -g $(ASSETS_DIR_NAME) $(INCLUDE_SCANINC_ARGS) -I tools/agbcc/include $<

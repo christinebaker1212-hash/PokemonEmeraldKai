@@ -1060,6 +1060,7 @@ Common_EventScript_LegendaryFlewAway::
 	.include "data/scripts/trainer_hill.inc"
 	.include "data/scripts/test_signpost.inc"
 	.include "data/scripts/card_club.inc"
+	.include "data/scripts/vs_cabinet.inc"
 	.include "data/text/frontier_brain.inc"
 	.include "data/text/save.inc"
 	.include "data/text/birch_speech.inc"
