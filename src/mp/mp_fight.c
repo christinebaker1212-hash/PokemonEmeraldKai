@@ -115,6 +115,7 @@ static struct
     u16 rtt16;              // frames there and back, x16 (smoothed)
     s8 peerAhead;           // how far ahead of us they think they are
     u32 rollbacks, framesBack, desyncs, checks;
+    u16 badTimer;           // frames the bad connection icon still shows
     bool8 dropped;
     bool8 peerEnded;
     u8 peerResult;
@@ -272,6 +273,7 @@ static u8 ResultFor(int result)
 
 static void Finish(u8 result)
 {
+    Fight_SetOverlay("", FALSE);
     sResult = result;
     sRunning = FALSE;
     sNet.stage = NET_OFF;
@@ -290,6 +292,13 @@ static s32 FramesAhead(void)
 
 static void SendInput(void)
 {
+    // tests: MOEMON_FIGHT_TEST_MUTE=FRAME goes quiet from that frame on (a friend whose game stalls)
+    static int sMuteAt = -1;
+    if (sMuteAt < 0)
+        sMuteAt = getenv("MOEMON_FIGHT_TEST_MUTE") != NULL ? atoi(getenv("MOEMON_FIGHT_TEST_MUTE")) : 0;
+    if (sMuteAt > 0 && MfEngine_FrameCount() >= (u32)sMuteAt)
+        return;
+
     u8 p[1 + 4 + 4 + 1 + 2 * SEND_MAX + 4 + 4 + 4 + 4 + 7];
     s32 ahead = FramesAhead();
     u32 first, last, f;
@@ -559,6 +568,8 @@ static void RollBack(void)
     }
     sNet.rollbacks++;
     sNet.framesBack += cur - to;
+    if (cur - to >= 5)
+        sNet.badTimer = 120;    // a deep correction: the connection is poor
     for (f = to + 1; f <= cur; f++)
     {
         ButtonsFor(f, buttons);
@@ -566,6 +577,29 @@ static void RollBack(void)
         if (f <= sNet.remoteLast && f % HASH_EVERY == 0)
             KeepHash(f);
     }
+}
+
+// "WAITING FOR NAME... 9" over the fight when they've been quiet a second, counting down to no contest; the bad
+// connection icon after a deep correction or while their messages are late
+static void Overlay(void)
+{
+    char text[48];
+
+    if (sNet.heard > 20)
+        sNet.badTimer = 120;
+    else if (sNet.badTimer > 0)
+        sNet.badTimer--;
+    text[0] = '\0';
+    if (sNet.heard >= 60)
+    {
+        char name[MP_NAME_LEN + 1];
+        if (FriendValid(sNet.peer))
+            MP_GameToAscii(name, gMpPlayers[sNet.peer].name, sizeof(name));
+        else
+            snprintf(name, sizeof(name), "your friend");
+        snprintf(text, sizeof(text), "Waiting for %s... %u", name, (DROP_FRAMES - sNet.heard) / 60 + 1);
+    }
+    Fight_SetOverlay(text, sNet.badTimer > 0);
 }
 
 static bool8 NetStep(void)
@@ -605,6 +639,7 @@ static bool8 NetStep(void)
     }
     if (sNet.dropped)
         return TRUE;
+    Overlay();
 
     PumpUdp();
     cur = MfEngine_FrameCount();

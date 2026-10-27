@@ -86,9 +86,163 @@ unsigned short Fight_PollButtons(void)
     return b;
 }
 
+
+// ---------------------------------------------------------------------------
+// The game's own messages over the fight (online: waiting for a friend who went quiet, a bad connection),
+// drawn over the engine's last picture (it draws nothing while it waits): a 5x7 font at twice its size, on a
+// darkened band; the bad connection as a signal icon in the bottom right corner
+
+static const struct { char c; unsigned char rows[7]; } sFont[] = {
+    { '!', { 0x04, 0x04, 0x04, 0x04, 0x04, 0x00, 0x04 } },
+    { '\'', { 0x0C, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00 } },
+    { '-', { 0x00, 0x00, 0x00, 0x1F, 0x00, 0x00, 0x00 } },
+    { '.', { 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C } },
+    { '0', { 0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E } },
+    { '1', { 0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E } },
+    { '2', { 0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F } },
+    { '3', { 0x1F, 0x02, 0x04, 0x02, 0x01, 0x11, 0x0E } },
+    { '4', { 0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02 } },
+    { '5', { 0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E } },
+    { '6', { 0x06, 0x08, 0x10, 0x1E, 0x11, 0x11, 0x0E } },
+    { '7', { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08 } },
+    { '8', { 0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E } },
+    { '9', { 0x0E, 0x11, 0x11, 0x0F, 0x01, 0x02, 0x0C } },
+    { ':', { 0x00, 0x0C, 0x0C, 0x00, 0x0C, 0x0C, 0x00 } },
+    { '?', { 0x0E, 0x11, 0x01, 0x02, 0x04, 0x00, 0x04 } },
+    { 'A', { 0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 } },
+    { 'B', { 0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E } },
+    { 'C', { 0x0E, 0x11, 0x10, 0x10, 0x10, 0x11, 0x0E } },
+    { 'D', { 0x1C, 0x12, 0x11, 0x11, 0x11, 0x12, 0x1C } },
+    { 'E', { 0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x1F } },
+    { 'F', { 0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10 } },
+    { 'G', { 0x0E, 0x11, 0x10, 0x17, 0x11, 0x11, 0x0F } },
+    { 'H', { 0x11, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 } },
+    { 'I', { 0x0E, 0x04, 0x04, 0x04, 0x04, 0x04, 0x0E } },
+    { 'J', { 0x07, 0x02, 0x02, 0x02, 0x02, 0x12, 0x0C } },
+    { 'K', { 0x11, 0x12, 0x14, 0x18, 0x14, 0x12, 0x11 } },
+    { 'L', { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F } },
+    { 'M', { 0x11, 0x1B, 0x15, 0x15, 0x11, 0x11, 0x11 } },
+    { 'N', { 0x11, 0x11, 0x19, 0x15, 0x13, 0x11, 0x11 } },
+    { 'O', { 0x0E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E } },
+    { 'P', { 0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10 } },
+    { 'Q', { 0x0E, 0x11, 0x11, 0x11, 0x15, 0x12, 0x0D } },
+    { 'R', { 0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11 } },
+    { 'S', { 0x0F, 0x10, 0x10, 0x0E, 0x01, 0x01, 0x1E } },
+    { 'T', { 0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04 } },
+    { 'U', { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E } },
+    { 'V', { 0x11, 0x11, 0x11, 0x11, 0x11, 0x0A, 0x04 } },
+    { 'W', { 0x11, 0x11, 0x11, 0x15, 0x15, 0x15, 0x0A } },
+    { 'X', { 0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11 } },
+    { 'Y', { 0x11, 0x11, 0x11, 0x0A, 0x04, 0x04, 0x04 } },
+    { 'Z', { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x1F } },
+};
+
+static char sOverlayText[64];
+static int sOverlaySignal;
+static unsigned int sOverlayVersion;
+static unsigned short sComposed[MF_SCREEN_W * MF_SCREEN_H];
+
+void Fight_SetOverlay(const char *text, int badSignal)
+{
+    char up[sizeof(sOverlayText)];
+    size_t i;
+
+    for (i = 0; text != NULL && text[i] != '\0' && i < sizeof(up) - 1; i++)
+        up[i] = (text[i] >= 'a' && text[i] <= 'z') ? (char)(text[i] - 32) : text[i];
+    up[i] = '\0';
+    badSignal = badSignal != 0;
+    if (strcmp(up, sOverlayText) != 0 || badSignal != sOverlaySignal)
+    {
+        strcpy(sOverlayText, up);
+        sOverlaySignal = badSignal;
+        sOverlayVersion++;
+    }
+}
+
+static const unsigned char *Glyph(char c)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(sFont) / sizeof(sFont[0]); i++)
+        if (sFont[i].c == c)
+            return sFont[i].rows;
+    return NULL;
+}
+
+static void Darken(int x0, int y0, int w, int h)
+{
+    int x, y;
+
+    for (y = y0; y < y0 + h; y++)
+    {
+        unsigned short *row = sComposed + y * MF_SCREEN_W;
+        if (y < 0 || y >= MF_SCREEN_H)
+            continue;
+        for (x = x0; x < x0 + w; x++)
+            if (x >= 0 && x < MF_SCREEN_W)
+                row[x] = (row[x] >> 2) & 0x39E7;    // a quarter as bright (RGB565)
+    }
+}
+
+static void Fill(int x0, int y0, int w, int h, unsigned short color)
+{
+    int x, y;
+
+    for (y = y0; y < y0 + h; y++)
+        for (x = x0; x < x0 + w; x++)
+            if (x >= 0 && x < MF_SCREEN_W && y >= 0 && y < MF_SCREEN_H)
+                sComposed[y * MF_SCREEN_W + x] = color;
+}
+
+static void DrawText(const char *text, int x, int y)
+{
+    for (; *text != '\0'; text++, x += 12)
+    {
+        const unsigned char *g = Glyph(*text);
+        int r, c;
+        if (g == NULL)
+            continue;
+        for (r = 0; r < 7; r++)
+            for (c = 0; c < 5; c++)
+                if (g[r] & (0x10 >> c))
+                {
+                    Fill(x + c * 2 + 2, y + r * 2 + 2, 2, 2, 0x0000);   // shadow
+                    Fill(x + c * 2, y + r * 2, 2, 2, 0xFFFF);
+                }
+    }
+}
+
+// The picture to show: the engine's, with the messages over it (*version changes when either does)
+static const unsigned short *Fight_Picture(unsigned int *version)
+{
+    const unsigned short *frame = MfEngine_Frame();
+
+    *version = MfEngine_FrameSerial() * 2654435761u ^ sOverlayVersion;
+    if (frame == NULL || (sOverlayText[0] == '\0' && !sOverlaySignal))
+        return frame;
+    memcpy(sComposed, frame, sizeof(sComposed));
+    if (sOverlayText[0] != '\0')
+    {
+        int w = (int)strlen(sOverlayText) * 12;
+        int x = (MF_SCREEN_W - w) / 2, y = MF_SCREEN_H / 2 - 8;
+        Darken(0, y - 10, MF_SCREEN_W, 36);
+        DrawText(sOverlayText, x, y);
+    }
+    if (sOverlaySignal)
+    {
+        // four bars, one lit (red): the connection is poor
+        int x = MF_SCREEN_W - 8 - 26, y = MF_SCREEN_H - 8 - 20, i;
+        Darken(x - 4, y - 4, 34, 28);
+        for (i = 0; i < 4; i++)
+            Fill(x + i * 7, y + 20 - (i + 1) * 5, 5, (i + 1) * 5, i == 0 ? 0xF800 : 0x52AA);
+    }
+    return sComposed;
+}
+
 SDL_Texture *Fight_Canvas(SDL_Renderer *r)
 {
     const unsigned short *frame;
+    unsigned int version;
 
     if (!MfEngine_IsActive())
         return NULL;
@@ -103,7 +257,7 @@ SDL_Texture *Fight_Canvas(SDL_Renderer *r)
         SDL_SetTextureBlendMode(sCanvas, SDL_BLENDMODE_NONE);
         SDL_SetTextureScaleMode(sCanvas, SDL_ScaleModeNearest);
     }
-    frame = MfEngine_Frame();
+    frame = Fight_Picture(&version);
     if (frame)
     {
         SDL_UpdateTexture(sCanvas, NULL, frame, MF_SCREEN_W * 2);
@@ -200,14 +354,13 @@ SDL_Texture *Fight_CanvasBicubic(SDL_Renderer *r, int w, int h)
         sBicubicOwner = r;
         sBicubicW = w;
         sBicubicH = h;
-        sBicubicSerial = MfEngine_FrameSerial() - 1;
+        sBicubicSerial = ~0u;
         SDL_SetTextureBlendMode(sBicubic, SDL_BLENDMODE_NONE);
         SDL_SetTextureScaleMode(sBicubic, SDL_ScaleModeLinear);
         BicubicTaps(sTapsX, w, MF_SCREEN_W);
         BicubicTaps(sTapsY, h, MF_SCREEN_H);
     }
-    frame = MfEngine_Frame();
-    serial = MfEngine_FrameSerial();
+    frame = Fight_Picture(&serial);
     if (!frame || serial == sBicubicSerial)
         return sBicubic;   // nothing new (or still loading: what it showed)
     sBicubicSerial = serial;

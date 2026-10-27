@@ -17,6 +17,8 @@ void Fight_DestroyTextures(void);
 const unsigned short *Fight_Frame(void);
 // Replaces the game's sound with the fight's while one runs
 void Fight_MixAudio(float *stereo, int frames, int rate);
+// The game's messages over the fight (text: "" none; badSignal: the bad connection icon)
+void Fight_SetOverlay(const char *text, int badSignal);
 // Milliseconds since the game started (the online fight's timing)
 unsigned int Fight_Ms(void);
 
