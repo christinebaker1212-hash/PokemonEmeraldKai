@@ -78,7 +78,49 @@ data or Elecbyte files.
   size, at most 960x640, and the renderer's linear filter takes it the rest of the way. A window of
   960 or wider is exactly 2x, which has its own quicker path.
 
-## Plan
+## Fourth round
+- The music played about 8 times too fast in the game (the mixer took a whole block from the music hook
+  each time it wanted a few samples). It now pulls whole blocks; `fight_music` checks the tempo with a
+  song of numbered tones.
+- No black bars: the 4:3 select, VS and results screens' sides carry on their background (Screen
+  fitting below).
+
+## As built (1.33.0)
+Where the plan below changed on the way:
+- The engine is in `fight/` (engine/, compat/, host/, third_party/), the game's side in
+  `src/platform/fight_platform.c` (picture, buttons, sound, the overlay and the CRT) and `src/mp/mp_fight.c`
+  (the cabinet, the netcode). The API is `include/mf_engine.h` (`MfEngine_Begin` / `Step` / `RollBack` /
+  `Hash`...). The engine runs on its own thread as a coroutine on a stack inside the fight's heap.
+- Rollback keeps the pages each frame changed (Windows: GetWriteWatch; Linux: write protection) of one
+  heap region at the same address on every PC, plus the engine's globals in one section; 10 frames. The
+  session starts from the same start-up image every time, so a CPU fight before an online one changes
+  nothing.
+- The hash every 30 frames covers the players, the timer and the RNGs. A desync (#12) loads the host's
+  state, not a whole snapshot: both games stop after the same frame (the frame goes with the button
+  packets), the other game sends a hash of each 4 KB page of its state, and the host (P1, the west seat)
+  sends the pages that differ; a word holding a pointer into the other PC's own memory (code, the C
+  library's heap) stays as it was there. The globals only go across between the same builds.
+- Button packets carry up to 12 frames, from the first the other game hasn't got. UDP gets through by
+  the room server's echo (`MFWHO` / `MFYOU`); otherwise the relay carries them.
+- The pack check (#14) hashes every file each character uses (its folder) and each stage (its .def,
+  sprites and music); the engine's data, the screenpack and the fonts have to match for a fight at all
+  ("NAME's fight files aren't the same as yours"). The answering player's cabinet rules go with the
+  answer, and both use them (#17).
+- The stage's name is on the VS screen where `vs.stage.offset` / `vs.stage.font` in cabinets.ini put
+  it; the stages got clean display names (`displayname` in each .def).
+- Wins and losses (#4): counted per save (against friends and against the CPU), five achievements
+  (INSERT COIN, ARCADE MODE, A NEW CHALLENGER, WORLD WARRIOR, GRAND MASTER) and a VS FIGHTS line on
+  the back of the TRAINER CARD.
+- Buttons (#21): OPTIONS > CONTROLS > FIGHT BUTTONS, a page with each fight button's key and pad button
+  (A, then the key or button; Esc / Back or 8 s keeps it). Kept in moemon_controls.ini (`fight_key_x`,
+  `fight_pad_x`...). The directions stay the arrows / WASD, the D-pad and the left stick.
+- On screen (#11, #12): the "Waiting for NAME... 10" countdown and a signal icon, drawn over the fight's
+  picture by the game (a 5x7 font).
+- Tests: `fight_cpu`, `fight_online`, `fight_online_lag`, `fight_cpu_join`, `fight_drop`, `fight_music`,
+  `fight_buttons`, `fight_packs`, `fight_packs_core`, `fight_resync` (tools/test/README.md), and the
+  engine's own `tools/fight/build_linux.sh` self test (`WIN=1`: under Wine).
+
+## Plan (as first agreed)
 
 ### The engine in the game
 - Vendor `src/mugen/` from mugen-unleashed (the commit above), keeping its file-per-module layout
