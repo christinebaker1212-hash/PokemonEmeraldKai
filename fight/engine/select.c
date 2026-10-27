@@ -1649,14 +1649,13 @@ void Charsel_SetupMode(CharselState *st, int mode, int side)
         g->arcade_side = side + 1;
         break;
     case GAME_MODE_VERSUS:
+        /* Moemon Fight: no stage step, the cabinet picks the stage (fight/host/mf_host.c) */
         Charsel_SetStep(p1, 1, CHARSEL_STEP_CHARS, 0, TEAM_SINGLE, 1);
-        p1->steps[2].type = CHARSEL_STEP_STAGE;
-        p1->steps[3].type = CHARSEL_STEP_DONE;
-        p1->count = 4;
+        p1->steps[2].type = CHARSEL_STEP_DONE;
+        p1->count = 3;
         Charsel_SetStep(p2, 4, CHARSEL_STEP_CHARS, 1, TEAM_SINGLE, 1);
-        p2->steps[5].type = CHARSEL_STEP_STAGE;
-        p2->steps[6].type = CHARSEL_STEP_DONE;
-        p2->count = 7;
+        p2->steps[5].type = CHARSEL_STEP_DONE;
+        p2->count = 6;
         break;
     case GAME_MODE_TEAM_ARCADE:
         Charsel_SetMenuStep(sc, 1, side, MENU_ALL, 1);

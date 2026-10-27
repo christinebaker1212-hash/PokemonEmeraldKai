@@ -450,12 +450,64 @@ void MfHost_FrameEnd(void)
 /* ------------------------------------------------------------------ sessions */
 
 /* The cabinet's rules from mugen/cabinets.ini (missing values keep the pack's). */
+/* The cabinet's stages (cabinets.ini "stages", empty: every stage of the select list) and whether a CPU fight
+ * is on the opponent's own stage (cpu.stage = home) */
+static char sStages[64][0x80];
+static int sStageCount;
+static int sCpuHomeStage;
+
+static void Host_ReadStages(const char *list)
+{
+    sStageCount = 0;
+    while (list != NULL && *list != '\0' && sStageCount < 64) {
+        const char *end = strchr(list, ',');
+        size_t n = end != NULL ? (size_t)(end - list) : strlen(list);
+        char name[0x80];
+        while (n > 0 && (*list == ' ' || *list == '\t')) {
+            list++;
+            n--;
+        }
+        while (n > 0 && (list[n - 1] == ' ' || list[n - 1] == '\t')) {
+            n--;
+        }
+        if (n > 0 && n < 0x60) {
+            memcpy(name, list, n);
+            name[n] = '\0';
+            /* "sf2-harbor" is stages/sf2-harbor.def */
+            snprintf(sStages[sStageCount++], 0x80, "%s%s%s", strchr(name, '/') || strchr(name, '\\') ? "" : "stages/",
+                     name, n > 4 && _stricmp(name + n - 4, ".def") == 0 ? "" : ".def");
+        }
+        list = end != NULL ? end + 1 : NULL;
+    }
+}
+
+/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list */
+static void Host_PickStage(void)
+{
+    GameVars *g = g_game;
+    const char *path;
+
+    if (sStageCount > 0) {
+        path = sStages[Random_Next() % sStageCount];
+    } else if (g->stage_count > 0) {
+        path = g->select_screen[Random_Next() % g->stage_count].path;
+    } else {
+        return;
+    }
+    g->select_stage[0] = '\0';
+    strncat(g->select_stage, path, sizeof(g->select_stage) - 1);
+    g->arcade_music[0] = '\0';     /* the stage's own music */
+}
+
 static void Host_ApplyCabinet(const char *cabinet)
 {
     GameVars *g = g_game;
     Ini *ini = Ini_Open("cabinets.ini");
     int v, hud_top = 8;
+    const char *text;
 
+    sStageCount = 0;
+    sCpuHomeStage = 0;
     if (ini == NULL) {
         MfFit_Hud(hud_top);
         return;
@@ -464,6 +516,9 @@ static void Host_ApplyCabinet(const char *cabinet)
         if (Ini_GetInt(ini, "hud.top", &v) && v >= -1 && v <= 80) {
             hud_top = v;
         }
+        Host_ReadStages(Ini_GetValue(ini, "stages"));
+        text = Ini_GetValue(ini, "cpu.stage");
+        sCpuHomeStage = text != NULL && _stricmp(text, "home") == 0;
         if (Ini_GetInt(ini, "rounds", &v) && v >= 1 && v <= 9) {
             g->fight.round.match_wins = v;
         }
@@ -512,6 +567,9 @@ static int Host_RunSession(const struct MfSession *s)
             break;
         case 8:
             Gameflow_PickStage();
+            if (s->mode != MF_MODE_CPU || !sCpuHomeStage) {
+                Host_PickStage();
+            }
             state = 10;
             break;
         case 10:
