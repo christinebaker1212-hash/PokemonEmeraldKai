@@ -262,6 +262,8 @@ static unsigned GameChar(const unsigned char **s)
         return CHAR_PLUS;
     case '%':
         return CHAR_PERCENT;
+    case 0xA5:   /* Latin-1 yen: the game's money sign (the GAME CENTER CARD SHOP) */
+        return CHAR_CURRENCY;
     case '&':
         return CHAR_AMPERSAND;
     case '=':

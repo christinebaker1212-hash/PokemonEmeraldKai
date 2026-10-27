@@ -1,0 +1,117 @@
+pressuntil A field 5000
+wait 60
+mp money 50000
+mp textspeed 2
+mp cards starter 0
+mp additem 399 1
+mp warp 11,17,6,5
+wait 90
+mp face up
+wait 4
+press UP 6
+wait 40
+mash A 8 20
+wait 80
+mp where
+mp warp 11,17,6,12
+wait 90
+mp face up
+wait 4
+mash A 14 30
+wait 120
+mp money
+mp warp 11,17,6,5
+wait 90
+mp face up
+wait 4
+press UP 6
+wait 40
+mp where
+mp warp 11,17,4,2
+wait 90
+mp face left
+wait 4
+press LEFT 6
+wait 120
+mp where
+mp warp 11,18,1,10
+wait 90
+mp face up
+wait 4
+pressuntillog A 900 game center: card shop open
+wait 60
+mp cards state
+press R 2
+wait 10
+press A 2
+wait 20
+press A 2
+wait 90
+rendershot a_deck
+press A 2
+wait 30
+press L 2
+wait 10
+press A 2
+wait 30
+press A 2
+wait 20
+press A 2
+wait 30
+press A 2
+wait 20
+press B 2
+wait 20
+press B 2
+wait 60
+press A 2
+wait 60
+mp money
+mp warp 11,18,6,9
+wait 90
+mp face right
+wait 4
+pressuntillog A 600 game center: duel asked
+wait 60
+press A 2
+wait 60
+rendershot a_duel
+press B 2
+wait 30
+mash B 6 20
+wait 90
+mp warp 11,18,6,2
+wait 90
+mp face up
+wait 4
+press A 2
+wait 90
+press A 2
+wait 40
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+mp where
+mp warp 11,19,3,2
+wait 90
+mp face left
+wait 4
+press LEFT 6
+wait 120
+mp where
+mp face up
+wait 4
+press UP 6
+wait 120
+mp where
+mp warp 11,17,2,14
+wait 90
+mp face down
+wait 4
+press DOWN 6
+wait 120
+mp where
+quit

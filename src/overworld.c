@@ -1524,6 +1524,7 @@ static void OverworldBasic(void)
     UpdateCameraPanning();
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
+    MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     BuildOamBuffer();

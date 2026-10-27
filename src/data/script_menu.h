@@ -771,6 +771,15 @@ static const struct MenuAction MultichoiceList_VsCabinet[] =
     {gText_Cancel2},
 };
 
+// Moemon Co-op: the GAME CENTER's elevator (RustboroCity_GameCenter_EventScript_Elevator)
+static const struct MenuAction MultichoiceList_GameCenterFloors[] =
+{
+    {gText_1F},
+    {gText_2F},
+    {gText_3F},
+    {gText_Exit},
+};
+
 static const struct MenuAction MultichoiceList_TagMatchType[] =
 {
     {gText_NormalTagMatch},
@@ -908,6 +917,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_FALLARBOR_TENT_RULES]       = MULTICHOICE(MultichoiceList_FallarborTentRules),
     [MULTI_TAG_MATCH_TYPE]             = MULTICHOICE(MultichoiceList_TagMatchType),
     [MULTI_VS_CABINET]                 = MULTICHOICE(MultichoiceList_VsCabinet),
+    [MULTI_GAME_CENTER_FLOORS]         = MULTICHOICE(MultichoiceList_GameCenterFloors),
 };
 
 const u8 *const gStdStrings[] =

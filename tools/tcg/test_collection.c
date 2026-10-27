@@ -82,9 +82,9 @@ int main(int argc, char **argv)
     assert(!Tcg_ExchangeDuplicates(&c, TCG_CARD_FIRE_ENERGY, 1));
     c.dust = 80;
     assert(!Tcg_CraftCard(&c, TCG_CARD_CHARIZARD));
-    assert(Tcg_CraftCard(&c, TCG_CARD_BEEDRILL));
-    assert(c.dust == 0);
     assert(!Tcg_CraftCard(&c, TCG_CARD_BEEDRILL));
+    c.dust = 15;
+    assert(Tcg_PointCost(TCG_CARD_CHARMELEON) <= 15 && Tcg_CraftCard(&c, TCG_CARD_CHARMELEON));
     {
         /* Holos one pack in TCG_HOLO_ODDS, and never TCG_HOLO_PITY packs without a new one */
         unsigned holos = 0, opened = 0, longest = 0, run = 0, set = 1, k, have, total;
@@ -264,7 +264,9 @@ int main(int argc, char **argv)
         /* A holo can't be picked; a plain rare costs 80 */
         assert(Tcg_IsHolo(TCG_CARD_CHARIZARD) && !Tcg_IsHolo(TCG_CARD_BEEDRILL));
         assert(Tcg_PointCost(TCG_CARD_CHARIZARD) == 0 && Tcg_PointValue(TCG_CARD_CHARIZARD) == 20);
-        assert(Tcg_PointCost(TCG_CARD_BEEDRILL) == 80 && Tcg_PointValue(TCG_CARD_BEEDRILL) == 6);
+        /* Rares aren't sold at the CARD CLUB; the GAME CENTER sells plain ones for money */
+        assert(Tcg_PointCost(TCG_CARD_BEEDRILL) == 0 && Tcg_PointValue(TCG_CARD_BEEDRILL) == 6);
+        assert(Tcg_ShopPrice(TCG_CARD_BEEDRILL) == 4000 && Tcg_ShopPrice(TCG_CARD_CHARIZARD) == 0);
         assert(Tcg_CraftCard(&c, TCG_CARD_CHARMELEON) == (Tcg_PointCost(TCG_CARD_CHARMELEON) <= 5));
         /* Set milestones: each reached once */
         have = Tcg_SetOwned(&c, 0, &total);

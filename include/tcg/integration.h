@@ -23,6 +23,7 @@ void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len);
 void Tcg_OnlineTick(void);
 int Tcg_OnlineWilling(void);
 void Tcg_OpenCase(void (*returnToGame)(void));
+void Tcg_OpenGameCenterShop(void);   /* the GAME CENTER CARD SHOP (tcg_ui.c UI_GCSHOP; a script waits) */
 int Tcg_IsActive(void);
 int Tcg_Step(unsigned keys);
 int Tcg_HandleEvent(const union SDL_Event *event);

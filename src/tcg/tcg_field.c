@@ -25,6 +25,7 @@
 #include "pokemon.h"
 #include "rtc.h"
 #include "script.h"
+#include "constants/maps.h"
 #include "sound.h"
 #include "sprite.h"
 #include "string_util.h"
@@ -527,6 +528,13 @@ void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
 // What happens when you ask them; NULL when they're not someone to ask
 enum { ASK_DUEL, ASK_NO };
 static struct TcgOpponent sOpponent;
+// The GAME CENTER's CARD SHOP (RUSTBORO CITY 2F): the people at its table always play
+static bool8 InGameCenterCardShop(void)
+{
+    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_2F)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_2F);
+}
+
 static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
 {
     u32 key = (u32)gSaveBlock1Ptr->location.mapGroup << 24 | (u32)gSaveBlock1Ptr->location.mapNum << 16
@@ -604,7 +612,7 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
             snprintf(o->name, sizeof(o->name), "%s %s", cls, who);
         }
     }
-    else if (h % 100 >= 65)   // townsfolk: most of them play
+    else if (h % 100 >= 65 && !InGameCenterCardShop())   // townsfolk: most of them play (the CARD SHOP's all do)
     {
         *answer = ASK_NO;
         return sDecline[cat][(h >> 8) % 2];
@@ -634,9 +642,15 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
 #define tAnswer  data[3]
 
 static const u8 *sLine;
+static bool8 sFromScript;   // Tcg_TalkChallenge: the script waits for the talk to end
 
 static void FinishTalk(u8 taskId)
 {
+    if (sFromScript)
+    {
+        sFromScript = FALSE;
+        ScriptContext_Enable();
+    }
     HideFieldMessageBox();
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
@@ -721,6 +735,25 @@ int Tcg_FieldChallenge(void)
 #undef tTimer
 #undef tObject
 #undef tAnswer
+
+// A script's speaker asked for a duel (the GAME CENTER's card players; the script waits for the talk to end)
+void Tcg_TalkChallenge(void)
+{
+    sFromScript = TRUE;
+    MPNet_Log("game center: duel asked");
+    if (!Tcg_FieldChallenge())
+    {
+        sFromScript = FALSE;
+        ScriptContext_Enable();
+    }
+}
+
+// The GAME CENTER CARD SHOP (the script waits for the card screens to close)
+void Tcg_GameCenterShop(void)
+{
+    MPNet_Log("game center: card shop open");
+    Tcg_OpenGameCenterShop();
+}
 
 // ---------------------------------------------------------------------------
 // The CARD CLUB member (OLDALE, MAUVILLE and LILYCOVE POKeMON CENTERs)

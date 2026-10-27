@@ -1199,12 +1199,18 @@ you'd like one, and later run the CARD COUNTER.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck (not a holo).
                   Losing costs nothing. Spare cards become CARD POINTS at the
-                  CARD COUNTER.
+                  CARD COUNTER, which sells commons and uncommons for them.
   Packs           5 commons, 3 uncommons, a rare and an Energy. One pack in
                   three has a HOLO rare instead of a plain one: holos only
                   come from packs and trades. After 20 packs of a set without
                   a holo you didn't have, the next pack brings one. Cards you
                   didn't have are marked NEW.
+  CARD SHOP       The GAME CENTER's 2F (RUSTBORO CITY): any card of the four
+                  sets but the holos, rares too, for money, and three
+                  structure decks (the 1999 theme decks OVERGROWTH, ZAP! and
+                  BRUSHFIRE, 60 cards each, put into an empty deck slot). Its
+                  owner gives a CARD CASE to anyone without one, and the
+                  players at its table duel you when you talk to them.
   Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE, or the
                   CARD CASE button in front of them.
   Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
@@ -1228,6 +1234,17 @@ you'd like one, and later run the CARD COUNTER.
                   OFF: decks get stronger with your badges instead.
 Your cards are saved with your game (the save file's .cards file, kept with
 its backups). A few attacks aren't in the game yet; they show as not ready.
+
+GAME CENTER
+-----------
+The tower in RUSTBORO CITY's north-east corner, by the road east (its tower
+is on the Town Map, the MOENAV map and the FLY map too). Admission at the
+1F reception is 500, good for every floor until you leave; the stairs and
+the elevator are behind her.
+  2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS).
+  3F GAMES        Consoles, TVs and arcade cabinets (coming soon) and a COIN
+                  counter: 50 COINS for 1000 (you'll need a COIN CASE).
+  ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.
 
 POKEDEX ENTRIES
 ---------------

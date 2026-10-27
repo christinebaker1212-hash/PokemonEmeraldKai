@@ -2106,6 +2106,24 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] warp: %d,%d %d,%d\n", g, n, x, y);
         }
     }
+    else if (strcmp(cmd, "textspeed") == 0)
+    {
+        // textspeed 0|1|2 - OPTIONS > TEXT SPEED (slow, mid, fast)
+        gSaveBlock2Ptr->optionsTextSpeed = atoi(arg) % 3;
+        printf("[test] text speed %d\n", gSaveBlock2Ptr->optionsTextSpeed);
+    }
+    else if (strcmp(cmd, "face") == 0)
+    {
+        // face up|down|left|right - turn the player in place
+        static const char *const sDirs[] = {"down", "up", "left", "right"};
+        int d;
+        for (d = 0; d < 4; d++)
+            if (strcmp(arg, sDirs[d]) == 0)
+            {
+                ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], DIR_SOUTH + d);
+                printf("[test] face: %s\n", sDirs[d]);
+            }
+    }
     else if (strcmp(cmd, "ballstyle") == 0)
     {
         // ballstyle SLOT HEX - a party Moemon's POKé BALL style (c000 GENESIS BALL, d000 EPOCH BALL)

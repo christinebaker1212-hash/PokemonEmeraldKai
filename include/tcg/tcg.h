@@ -126,7 +126,8 @@ uint32_t Tcg_TakeMilestones(struct TcgCollection *c);
 /* Spare copies a card can give up: beyond 4 and what the saved decks use. */
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card);
 unsigned Tcg_PointValue(unsigned card);
-unsigned Tcg_PointCost(unsigned card); /* 0: can't be bought (promos, energy) */
+unsigned Tcg_PointCost(unsigned card); /* at the CARD CLUB, commons and uncommons; 0: not sold there */
+unsigned Tcg_ShopPrice(unsigned card); /* money at the GAME CENTER CARD SHOP; 0: not sold (holos, promos, energy) */
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path);
 /* Dev sessions must never write a collection, even when explicitly requested. */
 int Tcg_CollectionSave(const struct TcgCollection *c, const char *path);

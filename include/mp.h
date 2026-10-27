@@ -769,6 +769,8 @@ u16 MP_Compass_PlayerColor(u8 player);   // a player's color (arrows, Town Map o
 bool8 MP_Avatar_HeadIcon(s8 id, u8 *tiles, u16 *pal, u16 outline);   // the look's head, 16x16 (-1: you)   // ... drawn over the finished frame (platform VDraw)
 bool8 MP_Compass_AnyShown(void);
 void MP_Compass_Toggle(void);     // the right stick click / G: show or hide the FRIEND FINDER
+void MP_MapPic_Update(void);      // mp_mappic.c: full-color pictures pinned to maps (the GAME CENTER)
+bool8 MP_MapPic_IsPictureMap(u8 group, u8 num);
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
 bool8 MP_Piggy_IsRiding(void);

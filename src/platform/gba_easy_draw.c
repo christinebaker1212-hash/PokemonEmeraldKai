@@ -30,6 +30,9 @@
 
 extern void (*const gIntrTable[])(void);
 
+// Moemon Co-op: mp_mappic.c draws map pictures into the field's BG lines (NULL when no picture is in view)
+void (*gMpMapPicLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+
 struct scanlineData {
     uint16_t layers[4][DISPLAY_WIDTH];
     uint16_t spriteLayers[4][DISPLAY_WIDTH];
@@ -830,6 +833,9 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                 RenderBGScanline(bgnum, scanline.bgcnts[bgnum], bghoffs, bgvoffs, vcount, scanline.layers[bgnum]);
             }
         }
+        // Moemon Co-op: full-color pictures pinned to the map (mp_mappic.c: the GAME CENTER), past the GBA's tiles
+        if (gMpMapPicLine)
+            gMpMapPicLine(vcount, scanline.layers);
         
         break;
     case 1:

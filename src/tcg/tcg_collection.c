@@ -186,9 +186,16 @@ unsigned Tcg_PointValue(unsigned card)
 unsigned Tcg_PointCost(unsigned card)
 {
     const struct TcgCard *def = Tcg_Card(card);
-    /* Promo cards come only from the trainers who hold them, holos only from packs and trades;
-     * Basic Energy is free. */
-    return def && card > 6 && def->set < 4 && !Tcg_IsHolo(card) ? sPointCost[def->rarity & 3] : 0;
+    /* The CARD CLUB counters: commons and uncommons (rares at the GAME CENTER, Tcg_ShopPrice). Promo cards
+     * come only from the trainers who hold them, holos only from packs and trades; Basic Energy is free. */
+    return def && card > 6 && def->set < 4 && def->rarity < 2 ? sPointCost[def->rarity & 3] : 0;
+}
+/* The GAME CENTER CARD SHOP's price in money: every card of the four sets but the holos */
+static const unsigned sShopPrice[] = {300, 800, 4000, 0};
+unsigned Tcg_ShopPrice(unsigned card)
+{
+    const struct TcgCard *def = Tcg_Card(card);
+    return def && card > 6 && def->set < 4 && !Tcg_IsHolo(card) ? sShopPrice[def->rarity & 3] : 0;
 }
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card)
 {

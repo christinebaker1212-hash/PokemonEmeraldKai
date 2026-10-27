@@ -11,6 +11,7 @@
 #include <string.h>
 #include "global.h"
 #include "item.h"
+#include "money.h"
 #include "mp.h"
 #include "script.h"
 #include "sound.h"
@@ -45,7 +46,8 @@ enum
     UI_COUNTER,
     UI_STARTER,
     UI_TRADE,
-    UI_WAIT
+    UI_WAIT,
+    UI_GCSHOP     /* the GAME CENTER CARD SHOP (RUSTBORO CITY): singles and structure decks for money */
 };
 enum
 {
@@ -80,7 +82,9 @@ enum
     ACT_CLEAR,
     ACT_TRADE_IN,
     ACT_TRADE_IN_ALL,
-    ACT_BUY
+    ACT_BUY,
+    ACT_GC_CARD,
+    ACT_GC_DECK
 };
 #define PANEL_W 104
 #define STRIP_Y 112
@@ -88,6 +92,7 @@ enum
 #define LIST_W 128
 #define ROW_H 16
 #define SHOP_BINDER 2 /* U.showAll: the binder is the CARD CLUB's "card you choose" list */
+#define GC_BINDER 3   /* ... the GAME CENTER CARD SHOP's singles, for money */
 
 static struct
 {
@@ -272,6 +277,13 @@ void Tcg_OpenClubCounter(void)
     Open(UI_COUNTER);
     U.fromScript = 1;
 }
+void Tcg_OpenGameCenterShop(void)
+{
+    U.returnToGame = NULL;
+    U.tab = 0;
+    Open(UI_GCSHOP);
+    U.fromScript = 1;
+}
 void Tcg_OpenOnlineDeck(void)
 {
     const struct TcgSocial *s = Tcg_Social();
@@ -383,6 +395,8 @@ static int Visible(unsigned id)
         return id > 6 && c->owned[id] > DeckCount(c->activeDeck, id);
     if (U.screen == UI_BINDER && U.showAll == SHOP_BINDER)
         return Tcg_PointCost(id) != 0;
+    if (U.screen == UI_BINDER && U.showAll == GC_BINDER)
+        return Tcg_ShopPrice(id) != 0;
     return U.showAll || c->owned[id];
 }
 static unsigned ListCard(unsigned index)
@@ -1113,6 +1127,14 @@ static void BinderScreen(void)
     }
     if (!n)
         G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
+    if (U.showAll == GC_BINDER)
+    {
+        snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Tcg_Card(id)->name : "",
+                 Tcg_ShopPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
+        Strip(0, line);
+        Hints("{A} BUY  {L}{R} TYPE  {B} BACK");
+        return;
+    }
     if (U.showAll == SHOP_BINDER)
     {
         unsigned cost = Tcg_PointCost(id);
@@ -1537,6 +1559,85 @@ static void ClaimPrize(unsigned row)
     }
     PlayFanfare(MUS_OBTAIN_ITEM);
 }
+/* The GAME CENTER CARD SHOP (RUSTBORO CITY): singles for money (the rares the CARD CLUB doesn't have) and the
+ * three structure decks. */
+#include "tcg_structure_decks.h"
+#define GC_DECK_PRICE 15000
+static const char *const sGcTabs[] = {"SINGLES", "DECKS"};
+static void MoveCursor(unsigned pressed, int count, int step);
+static void GcShopScreen(void)
+{
+    char line[160], right[24];
+    int i;
+    Background();
+    SidePanel("GAME CENTER", 0x8848b8);
+    for (i = 0; i < 2; i++)
+    {
+        int on = i == U.tab;
+        G_RoundFill(6, 22 + i * 17, 92, 15, on ? 0xf8f8f8 : 0xc0a0e0, 255);
+        G_RoundFrame(6, 22 + i * 17, 92, 15, on ? 0xe82820 : 0x603090, 255);
+        G_Text(12, 22 + i * 17, on ? G_INK : 0x402060, on ? G_INK_SHADOW : G_NO_SHADOW, sGcTabs[i], 0, TF_SMALL);
+    }
+    snprintf(line, sizeof(line), "\xa5%u", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+    G_TextAlign(52, 78, TA_CENTER, 0x603090, G_INK_SHADOW, line, TF_NORMAL);
+    G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, "MONEY", TF_NARROW);
+    ListBox(LIST_X, 4, LIST_W, 104);
+    if (U.tab == 0)
+    {
+        Row(LIST_X + 2, 8, LIST_W - 4, 1, 1, "SINGLES", "300-4000");
+        Strip(0, "Any card of the four sets, holos aside. Rares too: the CARD CLUB counters don't sell them.");
+    }
+    else
+    {
+        for (i = 0; i < (int)ARRAY_COUNT(sStructureDecks); i++)
+        {
+            snprintf(right, sizeof(right), "\xa5%u", GC_DECK_PRICE);
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == U.cursor, IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE),
+                sStructureDecks[i].name, right);
+        }
+        snprintf(line, sizeof(line), "%s\nThe 1999 theme deck, all 60 cards.", sStructureDecks[U.cursor].blurb);
+        Strip(0, line);
+    }
+    Hints("{A} CHOOSE  {L}{R} TAB  {B} BACK");
+}
+static void GcShopStep(unsigned pressed)
+{
+    if (pressed & (KEY_L | KEY_R))
+    {
+        U.tab = !U.tab;
+        U.cursor = 0;
+        PlaySE(SE_RG_BAG_POCKET);
+    }
+    if (U.tab == 0)
+    {
+        if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_BINDER);
+            U.filter = 9;
+            U.showAll = GC_BINDER;
+        }
+    }
+    else
+    {
+        MoveCursor(pressed, (int)ARRAY_COUNT(sStructureDecks), 1);
+        if (pressed & KEY_A)
+        {
+            if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+            {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "A structure deck is \xa5%u. You don't have enough money.", GC_DECK_PRICE);
+            }
+            else
+                Ask(ACT_GC_DECK, U.cursor, "The %s deck for \xa5%u?", sStructureDecks[U.cursor].name, GC_DECK_PRICE);
+        }
+    }
+    if (pressed & KEY_B)
+    {
+        PlaySE(SE_SELECT);
+        Close();
+    }
+}
 static void CounterScreen(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -1590,13 +1691,13 @@ static void CounterScreen(void)
         {
             int k = U.scroll + i;
             if (k == BUY_CARD)
-                snprintf(right, sizeof(right), "5-50");
+                snprintf(right, sizeof(right), "5-15");
             else
                 snprintf(right, sizeof(right), "%u", sBuyCost[k]);
             Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
                 sBuyNames[k], right);
         }
-        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets, 5 to 80 CP by rarity. No holos or promos."
+        Strip(0, U.cursor == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
                  : U.cursor < 4       ? "A booster pack of 10 cards from this set."
                  : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
                                           : "It goes into your BAG.");
@@ -1814,6 +1915,47 @@ static void Act(int action)
             PlaySE(SE_SHOP);
             Say(ACT_NONE, "Traded in %u x %s for %u CARD POINTS.", count, Tcg_Card(id)->name, c->dust - before);
         }
+        break;
+    }
+    case ACT_GC_CARD:
+    {
+        unsigned id = (unsigned)U.askArg, price = Tcg_ShopPrice(id);
+        if (price && IsEnoughMoney(&gSaveBlock1Ptr->money, price) && c->owned[id] < TCG_COLLECTION_MAX)
+        {
+            RemoveMoney(&gSaveBlock1Ptr->money, price);
+            AddCard(id);
+            PlaySE(SE_SHOP);
+            Say(ACT_NONE, "You got %s!", Tcg_Card(id)->name);
+            printf("[tcg] game center: bought card %u for %u\n", id, price);
+        }
+        break;
+    }
+    case ACT_GC_DECK:
+    {
+        unsigned k = (unsigned)U.askArg, i, slot;
+        if (k >= ARRAY_COUNT(sStructureDecks) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+            break;
+        RemoveMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE);
+        for (i = 0; i < TCG_DECK_SIZE; i++)
+            if (sStructureDecks[k].cards[i] > 6)
+                AddCard(sStructureDecks[k].cards[i]);
+        for (slot = 0; slot < TCG_SAVED_DECKS; slot++)
+            if (!DeckCount(slot, 0))
+                break;
+        PlaySE(SE_SHOP);
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        printf("[tcg] game center: bought deck %u, slot %u\n", k, slot);
+        if (slot < TCG_SAVED_DECKS)
+        {
+            memcpy(c->decks[slot].cards, sStructureDecks[k].cards, sizeof(c->decks[slot].cards));
+            snprintf(c->decks[slot].name, TCG_NAME_LEN, "%s", sStructureDecks[k].name);
+            Say(ACT_NONE, "You got the %s deck! It's in DECKS, slot %u, ready to play.", sStructureDecks[k].name,
+                slot + 1);
+        }
+        else
+            Say(ACT_NONE, "You got the %s deck! Its cards are in your collection (your deck slots are full).",
+                sStructureDecks[k].name);
+        CollectionChanged();
         break;
     }
     case ACT_BUY:
@@ -2294,6 +2436,35 @@ int Tcg_Step(unsigned keys)
     case UI_BINDER:
         FilterTab(pressed, 10);
         GridMove(pressed, (int)ListSize(), 7);
+        if (U.showAll == GC_BINDER)
+        {
+            if (pressed & KEY_A && ListSize())
+            {
+                unsigned id = ListCard(U.cursor), price = Tcg_ShopPrice(id);
+                if (!IsEnoughMoney(&gSaveBlock1Ptr->money, price))
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "%s is \xa5%u. You don't have enough money.", Tcg_Card(id)->name, price);
+                }
+                else if (c->owned[id] >= TCG_COLLECTION_MAX)
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "You can't carry more %s.", Tcg_Card(id)->name);
+                }
+                else
+                    Ask(ACT_GC_CARD, (int)id, "%s for \xa5%u?", Tcg_Card(id)->name, price);
+            }
+            if (pressed & KEY_START && ListSize())
+                Inspect(ListCard(U.cursor), UI_BINDER);
+            if (pressed & KEY_B)
+            {
+                PlaySE(SE_SELECT);
+                U.showAll = 0;
+                Screen(UI_GCSHOP);
+                U.tab = 0;
+            }
+            break;
+        }
         if (U.showAll == SHOP_BINDER)
         {
             if (pressed & KEY_A && ListSize())
@@ -2455,6 +2626,9 @@ int Tcg_Step(unsigned keys)
             Ask(ACT_TAKE_SPOIL, U.cursor, "Take %s?", Tcg_Card(U.spoils[U.cursor])->name);
         if (pressed & KEY_START && U.spoilCount)
             Inspect(U.spoils[U.cursor], UI_SPOILS);
+        break;
+    case UI_GCSHOP:
+        GcShopStep(pressed);
         break;
     case UI_COUNTER:
         if (pressed & (KEY_L | KEY_R))
@@ -2636,6 +2810,9 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
         break;
     case UI_COUNTER:
         CounterScreen();
+        break;
+    case UI_GCSHOP:
+        GcShopScreen();
         break;
     case UI_STARTER:
         StarterScreen();

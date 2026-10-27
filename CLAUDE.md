@@ -135,6 +135,11 @@ maps, drawn over the frame; test compass; the FRIEND FINDER: hidden until the ri
 corner radar, OPTIONS > CO-OP > FRIEND FINDER: COOP_NOTES "The FRIEND FINDER"), Town Map heads of each look (MP_Avatar_HeadIcon), RARE CANDY counts, smart
 item targeting (mp_smartcursor.c), followers in their ball on bikes: COOP_NOTES "1.30.0".
 
+Also the GAME CENTER (RUSTBORO's north-east tower, four floors drawn from the user's full-color pictures by mp_mappic.c:
+pictures pinned to maps under the sprites, an "over" layer for furniture tops, past the GBA's tiles; maps and masks from
+tools/moemon_gamecenter; the 2F CARD SHOP UI_GCSHOP with money singles and the 1999 theme decks; COOP_NOTES "The GAME
+CENTER"; tests gc_look, gc_visit). Card packs: holos one pack in three, a new one after 20 dry packs (tcg_collection.c,
+tools/tcg/pack_math.py).
 Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
 duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
 Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
