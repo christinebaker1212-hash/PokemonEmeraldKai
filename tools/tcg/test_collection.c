@@ -80,10 +80,53 @@ int main(int argc, char **argv)
     assert(!Tcg_ExchangeDuplicates(&c, TCG_CARD_CHARMANDER, 1));
     assert(!memcmp(&before, &c, sizeof(c)));
     assert(!Tcg_ExchangeDuplicates(&c, TCG_CARD_FIRE_ENERGY, 1));
-    c.dust = 50;
-    assert(Tcg_CraftCard(&c, TCG_CARD_CHARIZARD));
-    assert(c.dust == 0);
+    c.dust = 80;
     assert(!Tcg_CraftCard(&c, TCG_CARD_CHARIZARD));
+    assert(Tcg_CraftCard(&c, TCG_CARD_BEEDRILL));
+    assert(c.dust == 0);
+    assert(!Tcg_CraftCard(&c, TCG_CARD_BEEDRILL));
+    {
+        /* Holos one pack in TCG_HOLO_ODDS, and never TCG_HOLO_PITY packs without a new one */
+        unsigned holos = 0, opened = 0, longest = 0, run = 0, set = 1, k, have, total;
+        struct TcgCollection h;
+        Tcg_CollectionInit(&h, 77);
+        assert(Tcg_ChooseStarter(&h, 0));
+        while (opened < 3000)
+        {
+            unsigned newHolo = 0;
+            uint16_t r[10];
+            if (h.owned[1] > TCG_COLLECTION_MAX - 20)
+                for (k = 1; k <= TCG_CARD_COUNT; k++)
+                    if (h.owned[k] > 4)
+                        h.owned[k] = 4;   /* (traded in) */
+            {
+                unsigned missingBefore = 0;
+                for (k = 1; k <= TCG_CARD_COUNT; k++)
+                    missingBefore += Tcg_IsHolo(k) && Tcg_Card(k)->set == set && !h.owned[k];
+                assert(Tcg_AwardPack(&h, set) && Tcg_OpenPack(&h, set, r));
+                opened++;
+                holos += Tcg_IsHolo(r[8]);
+                for (k = 1; k <= TCG_CARD_COUNT; k++)
+                    newHolo += Tcg_IsHolo(k) && Tcg_Card(k)->set == set && !h.owned[k];
+                if (missingBefore)
+                {
+                    run = newHolo < missingBefore ? 0 : run + 1;
+                    if (run > longest)
+                        longest = run;
+                }
+            }
+            for (k = 0; k < 8; k++)
+                assert(!Tcg_IsHolo(r[k]));
+            if (opened == 400)
+            {
+                have = Tcg_SetOwned(&h, set, &total);
+                assert(have == total);   /* 400 packs finish a set */
+            }
+        }
+        assert(holos > 3000 / TCG_HOLO_ODDS - 120 && holos < 3000 / TCG_HOLO_ODDS + 120);
+        assert(longest < TCG_HOLO_PITY);
+        printf("PASS holos %u of %u packs, longest wait for a new one %u\n", holos, opened, longest);
+    }
     Tcg_CollectionInit(&c, 123);
     assert(Tcg_ChooseStarter(&c, 0));
     assert(Tcg_DeckCopy(&c, 0, 1));
@@ -191,7 +234,7 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 4");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 5");
     }
 #endif
     {
@@ -218,7 +261,10 @@ int main(int argc, char **argv)
         assert(Tcg_ExchangeDuplicates(&c, TCG_CARD_CHARMANDER, 5) && c.dust == 5 && c.owned[TCG_CARD_CHARMANDER] == 4);
         assert(!Tcg_ExchangeDuplicates(&c, TCG_CARD_CHARMANDER, 1));
         assert(Tcg_PointCost(TCG_CARD_MEW_LV8) == 0 && !Tcg_CraftCard(&c, TCG_CARD_MEW_LV8));
-        assert(Tcg_PointCost(TCG_CARD_CHARIZARD) == 50 && Tcg_PointValue(TCG_CARD_CHARIZARD) == 10);
+        /* A holo can't be picked; a plain rare costs 80 */
+        assert(Tcg_IsHolo(TCG_CARD_CHARIZARD) && !Tcg_IsHolo(TCG_CARD_BEEDRILL));
+        assert(Tcg_PointCost(TCG_CARD_CHARIZARD) == 0 && Tcg_PointValue(TCG_CARD_CHARIZARD) == 20);
+        assert(Tcg_PointCost(TCG_CARD_BEEDRILL) == 80 && Tcg_PointValue(TCG_CARD_BEEDRILL) == 6);
         assert(Tcg_CraftCard(&c, TCG_CARD_CHARMELEON) == (Tcg_PointCost(TCG_CARD_CHARMELEON) <= 5));
         /* Set milestones: each reached once */
         have = Tcg_SetOwned(&c, 0, &total);

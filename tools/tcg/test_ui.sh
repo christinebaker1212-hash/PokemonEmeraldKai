@@ -227,7 +227,7 @@ press A 2
 wait 10
 press A 2
 wait 4
-mp cards points 30
+mp cards points 50
 press R 2
 wait 4
 press A 2
@@ -240,7 +240,7 @@ mp cards state
 quit
 SCRIPT
 run counter
-expect counter 'screen 12 opted 1 .* points 18 packs 1000'
+expect counter 'screen 12 opted 1 .* points 10 packs 1000'
 echo 'PASS the counter: a spare card traded in, a booster pack bought'
 # A PRIZES fanfare at the counter, then the case closed before it ends: the Pokemon Center's
 # music plays again (it stayed paused, and a door then never finished), and the door works.
@@ -402,4 +402,31 @@ expect powers 'show power PEEK player 0 slot 2'
 expect powers 'show power CURSE player 0 slot 3'
 expect powers 'field 3 bench 31320'
 echo 'PASS Pokemon Powers on the duel table: Rain Dance, Energy Trans, Peek, Curse, Clairvoyance, a Clefairy Doll discarded'
+
+# A pack that brings the set's last card: every COLOSSEUM card but SCYTHER (a holo), and 19 packs
+# without a new holo, so this one has it: NEW, HOLO!, then COLOSSEUM COMPLETE!.
+cat > "$OUT/holo.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards giveall
+mp cards own 46 0
+mp cards drought 0 19
+mp cards packs
+wait 20
+press A 2
+wait 40
+press B 2
+wait 30
+rendershot holo_open
+press A 2
+wait 60
+rendershot holo_complete
+mp cards state
+quit
+SCRIPT
+run holo
+expect holo 'opened pack 0'
+expect holo 'set complete: 0'
+echo 'PASS a holo the set was missing: NEW, HOLO!, the set complete'
 echo "Screenshots and logs: $OUT"

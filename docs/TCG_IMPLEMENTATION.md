@@ -83,10 +83,21 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   -> `src/tcg/tcg_decks.c`): the 8 Gym Leaders (after their badge), the Elite Four (after
   beating them), WALLACE (Champion), STEVEN, the rival, WALLY, MAXIE, ARCHIE and the six
   Frontier Brains. 15 hand over a promo card on the first win (`gTcgSpecialPromos`).
+- **Packs** (1.32.0, `Tcg_OpenPack`): 5 commons, 3 uncommons, a rare and a Basic Energy. The
+  rare is a holo (`Tcg_IsHolo`: the rares WotC printed as holofoils, Base Set / Jungle 1-16,
+  Fossil 1-15, 45 cards) one pack in `TCG_HOLO_ODDS` (3), a plain rare otherwise; after
+  `TCG_HOLO_PITY` (20) packs of a set without a holo the player didn't have
+  (`TcgCollection.drought`, collection format 5) the next one brings one. Holos are never
+  picked with CARD POINTS or as a win's card. Simulated (tools/tcg/pack_math.py, one 16-rare set,
+  spares traded in): a set takes ~55 won packs (the old rules ~19 with CARD POINTS buying the
+  last cards, WotC's ~91), the last holo ~11 more packs and never more than 20 (WotC: ~22,
+  1 in 10 players 73+). The reveal marks NEW cards, HOLO! with a foil sweep, and
+  "SET COMPLETE!" with a fanfare.
 - **Rewards**: every win, a booster of the opponent's pack; once a day per opponent, one
-  card of their deck, your pick (`Tcg_DailyAvailable` / `Tcg_DailyTake`, 64 slots, the
-  oldest replaced). CARD POINTS for spare copies at the counter (`Tcg_PointValue` 1/3/10/20
-  by rarity; `Tcg_PointCost` 5/15/50, promos not sold), which sells boosters (12), cards,
+  card of their deck, your pick, holos aside (`Tcg_DailyAvailable` / `Tcg_DailyTake`, 64 slots,
+  the oldest replaced). CARD POINTS for spare copies at the counter (`Tcg_PointValue` 1/2/6
+  by rarity, a holo 20, a promo 20; `Tcg_PointCost` 5/15/80, holos and promos not sold), which
+  sells boosters (40), cards,
   RARE CANDY, PP UP and MOEGATCHA TICKETs. 75% of a set gives that set's milestone promo;
   the whole collection gives a PIKACHU Lv.25 (THUNDERBOLT, FLY, SURF, AGILITY, LIGHT BALL,
   PREMIER BALL, OT PROMO) at the CARD CLUB and a star on the Trainer Card.

@@ -64,10 +64,11 @@ override `TCG_IMPLEMENTATION.md`'s "Agreed scope" where they differ.
 | 27 | Prize shown | Flips over big in the middle, then slides into the hand |
 | 28 | Music | Matches the opponent (Gym Leader music for leaders, trainer music, a calm theme online) |
 | 29 | Full collection | A unique Moemon gift, a gold CARD CASE and a star on the TRAINER CARD |
-| 30 | Spare cards | Card Points at a counter: boosters, a chosen card, items or MoeGatcha tickets |
+| 30 | Spare cards | Card Points at a counter: boosters, a chosen card (no holos), items or MoeGatcha tickets |
 | 31 | Milestones | Small rewards at 25 / 50 / 75 % of each set |
 | 32 | Achievements | A CARDS tab: first win, 100 wins, every Gym Leader, every special trainer, a set, all 228, 50 packs, a win without giving up a Prize, a friend beaten, a card trade, a single-type deck win, a promo card |
 | 33 | Getting the case | A card club member in a POKeMON CENTER hands it over in dialogue, offers a teaching duel, then three decks flip over to pick from |
 | 34 | Teaching duel | Offered once, can be skipped |
 | 35 | Menu style | The game's own style in full colour (like the OPTIONS tabs and the BAG) |
 | 36 | Deck builder | A grid of card pictures with counts, type tabs on top, the deck down the side |
+| 37 | Pull rates (1.32.0) | Between the old ease and WotC's: a holo one pack in three, a new one at the latest after 20 packs of its set; holos only from packs and trades |

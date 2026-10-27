@@ -98,29 +98,71 @@ int Tcg_AwardPack(struct TcgCollection *c, unsigned pack)
     c->packs[pack]++;
     return 1;
 }
+/* The rares WotC printed as holofoils: numbers 1-16 of Base Set and Jungle, 1-15 of Fossil
+ * (tools/tcg/printed_art.json "printing"). */
+static const uint16_t sHolo[] = {
+    TCG_CARD_VENUSAUR_LV67, TCG_CARD_NIDOQUEEN, TCG_CARD_NIDOKING, TCG_CARD_VILEPLUME, TCG_CARD_VENOMOTH,
+    TCG_CARD_VICTREEBEL, TCG_CARD_MUK, TCG_CARD_SCYTHER, TCG_CARD_PINSIR, TCG_CARD_CHARIZARD,
+    TCG_CARD_NINETALES_LV32, TCG_CARD_FLAREON_LV28, TCG_CARD_MOLTRES_LV35, TCG_CARD_BLASTOISE, TCG_CARD_POLIWRATH,
+    TCG_CARD_GYARADOS, TCG_CARD_VAPOREON_LV42, TCG_CARD_ARTICUNO_LV35, TCG_CARD_RAICHU_LV40, TCG_CARD_RAICHU_LV45,
+    TCG_CARD_MAGNETON_LV28, TCG_CARD_MAGNETON_LV35, TCG_CARD_ELECTRODE_LV42, TCG_CARD_JOLTEON_LV29,
+    TCG_CARD_ZAPDOS_LV40, TCG_CARD_ZAPDOS_LV64, TCG_CARD_MACHAMP, TCG_CARD_HITMONLEE, TCG_CARD_HITMONCHAN,
+    TCG_CARD_KABUTOPS, TCG_CARD_AERODACTYL, TCG_CARD_ALAKAZAM, TCG_CARD_HAUNTER_LV17, TCG_CARD_GENGAR,
+    TCG_CARD_HYPNO, TCG_CARD_MR_MIME, TCG_CARD_MEWTWO_LV53, TCG_CARD_PIDGEOT_LV40, TCG_CARD_CLEFAIRY,
+    TCG_CARD_CLEFABLE, TCG_CARD_WIGGLYTUFF, TCG_CARD_CHANSEY, TCG_CARD_KANGASKHAN, TCG_CARD_SNORLAX,
+    TCG_CARD_DRAGONITE_LV45,
+};
+int Tcg_IsHolo(unsigned card)
+{
+    unsigned i;
+    for (i = 0; i < sizeof(sHolo) / sizeof(sHolo[0]); i++)
+        if (sHolo[i] == card)
+            return 1;
+    return 0;
+}
 int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
 {
     struct TcgCollection next;
-    uint16_t pools[3][TCG_CARD_COUNT];
-    unsigned sizes[3] = {0}, i;
+    /* commons, uncommons, plain rares, holos, holos the player doesn't have */
+    uint16_t pools[5][TCG_CARD_COUNT];
+    unsigned sizes[5] = {0}, i;
     if (!c->optedIn || pack >= TCG_PACK_TYPES || !c->packs[pack])
         return 0;
     for (i = 1; i <= TCG_CARD_COUNT; i++)
     {
         const struct TcgCard *card = &gTcgCards[i];
-        if (card->set == pack && card->kind != TCG_ENERGY && card->rarity < 3)
-            pools[card->rarity][sizes[card->rarity]++] = i;
+        unsigned pool = card->rarity;
+        if (card->set != pack || card->kind == TCG_ENERGY || card->rarity >= 3)
+            continue;
+        if (pool == 2 && Tcg_IsHolo(i))
+        {
+            pool = 3;
+            if (!c->owned[i])
+                pools[4][sizes[4]++] = i;
+        }
+        pools[pool][sizes[pool]++] = i;
     }
-    if (!sizes[0] || !sizes[1] || !sizes[2])
+    if (!sizes[0] || !sizes[1] || (!sizes[2] && !sizes[3]))
         return 0;
     next = *c;
+    if (next.drought[pack] < 255)
+        next.drought[pack]++;
     for (i = 0; i < 10; i++)
     {
-        unsigned rarity = i < 5 ? 0 : i < 8 ? 1 : 2;
-        unsigned id =
-            i == 9 ? 1 + Tcg_RandomBelow(&next.rng, 6) : pools[rarity][Tcg_RandomBelow(&next.rng, sizes[rarity])];
+        unsigned pool = i < 5 ? 0 : i < 8 ? 1 : 2, id;
+        if (i == 8)
+        {
+            /* The rare: a holo one pack in TCG_HOLO_ODDS (a new one after a long wait) */
+            if (sizes[4] && next.drought[pack] >= TCG_HOLO_PITY)
+                pool = 4;
+            else if (!sizes[2] || (sizes[3] && Tcg_RandomBelow(&next.rng, TCG_HOLO_ODDS) == 0))
+                pool = 3;
+        }
+        id = i == 9 ? 1 + Tcg_RandomBelow(&next.rng, 6) : pools[pool][Tcg_RandomBelow(&next.rng, sizes[pool])];
         if (next.owned[id] >= TCG_COLLECTION_MAX)
             return 0;
+        if (pool >= 3 && !next.owned[id])
+            next.drought[pack] = 0;
         result[i] = id;
         next.owned[id]++;
     }
@@ -129,18 +171,24 @@ int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
     *c = next;
     return 1;
 }
-static const unsigned sPointValue[] = {1, 3, 10, 20};
-static const unsigned sPointCost[] = {5, 15, 50, 0};
+/* CARD POINTS for a spare and the price of a card you pick, by rarity (a holo's: TCG_HOLO_POINTS;
+ * holos can't be picked) */
+static const unsigned sPointValue[] = {1, 2, 6, 20};
+static const unsigned sPointCost[] = {5, 15, 80, 0};
+#define TCG_HOLO_POINTS 20
 unsigned Tcg_PointValue(unsigned card)
 {
     const struct TcgCard *def = Tcg_Card(card);
+    if (def && card > 6 && Tcg_IsHolo(card))
+        return TCG_HOLO_POINTS;
     return def && card > 6 ? sPointValue[def->rarity & 3] : 0;
 }
 unsigned Tcg_PointCost(unsigned card)
 {
     const struct TcgCard *def = Tcg_Card(card);
-    /* Promo cards come only from the trainers who hold them; Basic Energy is free. */
-    return def && card > 6 && def->set < 4 ? sPointCost[def->rarity & 3] : 0;
+    /* Promo cards come only from the trainers who hold them, holos only from packs and trades;
+     * Basic Energy is free. */
+    return def && card > 6 && def->set < 4 && !Tcg_IsHolo(card) ? sPointCost[def->rarity & 3] : 0;
 }
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card)
 {
@@ -290,10 +338,14 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
 /* Explicit little-endian encoding, independent of compiler padding and ABI. */
 #define PAYLOAD_SIZE                                                                                                   \
     (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
-/* Format 3 adds daily rewards, special trainers, milestones and counters; 4 CARD SCALING. */
+/* Format 3 adds daily rewards, special trainers, milestones and counters; 4 CARD SCALING; 5 the
+ * packs since the last new holo. */
 #define EXTRA_SIZE (TCG_DAILY_SLOTS * 6 + 7 * 4)
 #define EXTRA4_SIZE 4
-#define FILE_SIZE(format) (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0))
+#define EXTRA5_SIZE TCG_PACK_TYPES
+#define FILE_SIZE(format)                                                                                              \
+    (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +                       \
+     ((format) >= 5 ? EXTRA5_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -326,7 +378,7 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + 1];
+    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
     unsigned i, j, format, size;
@@ -339,7 +391,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         return 0;
     p += 4;
     format = Get(&p, 4);
-    if (format < 2 || format > 4 || size != FILE_SIZE(format) ||
+    if (format < 2 || format > 5 || size != FILE_SIZE(format) ||
         Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
     Tcg_CollectionInit(&next, 1);
@@ -393,6 +445,9 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
             next.skill = (int16_t)(uint16_t)Get(&p, 2);
             next.rated = Get(&p, 2);
         }
+        if (format >= 5)
+            for (i = 0; i < TCG_PACK_TYPES; i++)
+                next.drought[i] = Get(&p, 1);
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -406,7 +461,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[FILE_SIZE(4)], *p = data + 12;
+    unsigned char data[FILE_SIZE(5)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -446,11 +501,13 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->flags, 4);
     Put(&p, (uint16_t)c->skill, 2);
     Put(&p, c->rated, 2);
+    for (i = 0; i < TCG_PACK_TYPES; i++)
+        Put(&p, c->drought[i], 1);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 4, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE), 4);
+    Put(&p, 5, 4);
+    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

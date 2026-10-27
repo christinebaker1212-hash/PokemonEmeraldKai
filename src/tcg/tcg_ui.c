@@ -100,6 +100,8 @@ static struct
     /* Packs */
     int pack, flipped;
     uint16_t revealed[10];
+    uint16_t revealNew;   /* bit per card: one the player didn't have before this pack */
+    int revealComplete;   /* the pack finished its set */
     /* Duels */
     int vs, aiDelay, autoPlay, online, rewarded;
     struct TcgOpponent opp;
@@ -551,8 +553,9 @@ static void Rewards(void)
             unsigned id = U.opp.deck[i];
             const struct TcgCard *card = Tcg_Card(id);
             int seen = 0;
-            /* Basic Energy is free; promo cards only from the trainer who holds them. */
-            if (!card || id <= 6 || (card->set == 4 && id != U.opp.promo))
+            /* Basic Energy is free; promo cards only from the trainer who holds them; holos only
+             * from packs and trades. */
+            if (!card || id <= 6 || (card->set == 4 && id != U.opp.promo) || Tcg_IsHolo(id))
                 continue;
             for (j = 0; j < (unsigned)U.spoilCount; j++)
                 seen |= U.spoils[j] == id;
@@ -1310,6 +1313,23 @@ static void PacksScreen(void)
     Hints("{LEFTRIGHT} CHOOSE  {A} OPEN  {B} BACK");
 }
 #define REVEAL_TEAR 34
+/* A color around the rainbow (t in 0..359) */
+static uint32_t Rainbow(int t)
+{
+    int h = ((t % 360) + 360) % 360, x = (h % 60) * 255 / 60, r, g, b;
+    switch (h / 60)
+    {
+    case 0: r = 255, g = x, b = 0; break;
+    case 1: r = 255 - x, g = 255, b = 0; break;
+    case 2: r = 0, g = 255, b = x; break;
+    case 3: r = 0, g = 255 - x, b = 255; break;
+    case 4: r = x, g = 0, b = 255; break;
+    default: r = 255, g = 0, b = 255 - x; break;
+    }
+    /* softened toward white */
+    r = (r + 255) / 2, g = (g + 255) / 2, b = (b + 255) / 2;
+    return (uint32_t)(r << 16 | g << 8 | b);
+}
 static void RevealScreen(void)
 {
     unsigned i;
@@ -1335,10 +1355,12 @@ static void RevealScreen(void)
         float sx = 105 + (x - 105) * in, sy = 40 + (y - 40) * in;
         const struct TcgCard *c = Tcg_Card(U.revealed[i]);
         int faceUp = (int)i < U.flipped, on = (int)i == U.cursor && U.flipped >= 10;
+        int holo = faceUp && c && c->rarity == 2 && Tcg_IsHolo(U.revealed[i]);
         if (faceUp && c && c->rarity >= 2)
         {
             int glow = (int)(fabsf(sinf(U.frame * 0.12f)) * 60);
-            G_RoundFill((int)sx - 3, (int)sy - 3, 36, 48, 0xf8e070, (unsigned)(90 + glow));
+            G_RoundFill((int)sx - 3, (int)sy - 3, 36, 48, holo ? Rainbow((int)U.frame * 4 + (int)i * 40) : 0xf8e070,
+                        (unsigned)(90 + glow));
         }
         G_Card(faceUp ? U.revealed[i] : 0, sx, sy - (on ? 3 : 0), 30, 42, 0, 255, 0);
         if (faceUp && c && c->rarity >= 2)
@@ -1346,7 +1368,23 @@ static void RevealScreen(void)
             int s = (int)((U.frame * 2) % 80) - 20;
             if (s > 0 && s < 30)
                 G_FillA((int)sx + s, (int)sy + 1, 2, 40, 0xffffff, 120);
-            G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, 0xf8e070, 0x403000, "RARE!", TF_NARROW);
+            if (holo)
+            {
+                /* the foil: a band of color sweeping across the picture */
+                int b = (int)((U.frame * 3) % 90) - 30;
+                if (b > -6 && b < 30)
+                    G_FillA((int)sx + (b < 0 ? 0 : b), (int)sy + 4, b < 0 ? 6 + b : 6, 18,
+                            Rainbow((int)U.frame * 6), 90);
+                G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, Rainbow((int)U.frame * 5), 0x302040, "HOLO!",
+                            TF_NARROW);
+            }
+            else
+                G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, 0xf8e070, 0x403000, "RARE!", TF_NARROW);
+        }
+        if (faceUp && (U.revealNew >> i) & 1)
+        {
+            G_RoundFill((int)sx - 2, (int)sy - 3 - (on ? 3 : 0), 17, 8, 0xe82820, 230);
+            G_Text((int)sx, (int)sy - 3 - (on ? 3 : 0), 0xffffff, 0x801010, "NEW", 17, TF_NARROW);
         }
         if (on)
         {
@@ -1357,7 +1395,13 @@ static void RevealScreen(void)
     if (U.flipped >= 10)
     {
         const struct TcgCard *c = Tcg_Card(U.revealed[U.cursor]);
-        Strip(0, c ? c->name : "");
+        static const char *const setNames[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
+        char line[64];
+        if (U.revealComplete && (U.age / 60) % 3 != 2)
+            snprintf(line, sizeof(line), "%s COMPLETE! Every card!", setNames[U.pack & 3]);
+        else
+            snprintf(line, sizeof(line), "%s%s", c ? c->name : "", c && Tcg_IsHolo(U.revealed[U.cursor]) ? " (holo)" : "");
+        Strip(0, line);
         Hints("{A} LOOK  {DPAD} CHOOSE  {B} DONE");
     }
     else
@@ -1411,7 +1455,7 @@ enum
 };
 static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PACK", "MYSTERY PACK", "LABORATORY PACK",
                                                  "A CARD YOU PICK", "RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
-static const unsigned sBuyCost[BUY_COUNT] = {12, 12, 12, 12, 0, 20, 25, 30};
+static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 0, 20, 25, 30};
 /* Cards with spare copies, for TRADE IN. */
 static unsigned SpareList(uint16_t *out)
 {
@@ -1552,7 +1596,7 @@ static void CounterScreen(void)
             Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
                 sBuyNames[k], right);
         }
-        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets, 5 to 50 CP by rarity. No promo cards."
+        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets, 5 to 80 CP by rarity. No holos or promos."
                  : U.cursor < 4       ? "A booster pack of 10 cards from this set."
                  : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
                                           : "It goes into your BAG.");
@@ -1906,11 +1950,15 @@ static void RevealStep(unsigned pressed)
         sNext = U.age;
     if (U.age >= sNext)
     {
+        int holo;
         c = Tcg_Card(U.revealed[U.flipped]);
+        holo = c && c->rarity == 2 && Tcg_IsHolo(U.revealed[U.flipped]);
         PlaySE(c && c->rarity >= 2 ? SE_SHINY : SE_RG_CARD_FLIP);
         U.flipped++;
         U.cursor = U.flipped - 1;
-        sNext = U.age + (Tcg_GetCollection()->fastAnimations ? 5 : c && c->rarity >= 2 ? 26 : 11);
+        sNext = U.age + (Tcg_GetCollection()->fastAnimations ? 5 : holo ? 40 : c && c->rarity >= 2 ? 26 : 11);
+        if (U.flipped >= 10 && U.revealComplete)
+            PlayFanfare(MUS_OBTAIN_ITEM);
     }
 }
 static void OnlineStep(void)
@@ -2343,10 +2391,27 @@ int Tcg_Step(unsigned keys)
         if (pressed & KEY_A)
         {
             U.pack = U.cursor;
+            unsigned total, before = Tcg_SetOwned(c, U.pack, &total);
             if (Tcg_OpenPack(c, U.pack, U.revealed))
             {
+                unsigned k, j;
                 Screen(UI_REVEAL);
                 U.flipped = 0;
+                /* NEW: the first copy of a card the player didn't have */
+                U.revealNew = 0;
+                for (k = 0; k < 10; k++)
+                {
+                    unsigned copies = 0, earlier = 0;
+                    for (j = 0; j < 10; j++)
+                        copies += U.revealed[j] == U.revealed[k];
+                    for (j = 0; j < k; j++)
+                        earlier |= U.revealed[j] == U.revealed[k];
+                    if (U.revealed[k] > 6 && !earlier && c->owned[U.revealed[k]] == copies)
+                        U.revealNew |= 1u << k;
+                }
+                U.revealComplete = before < total && Tcg_SetOwned(c, U.pack, &total) == total;
+                if (U.revealComplete)
+                    printf("[tcg] set complete: %d\n", U.pack);
                 PlaySE(SE_RG_CARD_OPEN);
                 MP_Achieve_Count("cardpack", 1);
                 CollectionChanged();
@@ -2713,6 +2778,11 @@ void Tcg_Debug(const char *command)
     if (sscanf(command, "points %u", &n) == 1)
     {
         c->dust = n;
+        return;
+    }
+    if (sscanf(command, "drought %u %u", &n, &m) == 2 && n < TCG_PACK_TYPES)
+    {
+        c->drought[n] = (uint8_t)m;   /* packs of set n since its last new holo */
         return;
     }
     if (!strcmp(command, "giveall"))

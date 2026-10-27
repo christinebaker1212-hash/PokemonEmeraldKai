@@ -97,10 +97,19 @@ struct TcgCollection
      * deck's rating says; include/tcg/scale.h) and how many duels it has learned from. */
     int16_t skill;
     uint16_t rated;
+    /* Format 5: packs of each set opened since the last holo the player didn't have (TCG_HOLO_PITY) */
+    uint8_t drought[TCG_PACK_TYPES];
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
+/* A pack: 5 commons, 3 uncommons, a rare (a holo one pack in TCG_HOLO_ODDS, a plain rare
+ * otherwise) and a Basic Energy. TCG_HOLO_PITY packs of a set without a holo the player didn't
+ * have bring one they don't have. */
+#define TCG_HOLO_ODDS 3
+#define TCG_HOLO_PITY 20
 int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10]);
+/* Printed as a holofoil: drawn one pack in three, never picked with CARD POINTS or as a reward. */
+int Tcg_IsHolo(unsigned card);
 int Tcg_AwardPack(struct TcgCollection *c, unsigned pack);
 int Tcg_ExchangeDuplicates(struct TcgCollection *c, unsigned card, unsigned count);
 int Tcg_CraftCard(struct TcgCollection *c, unsigned card);

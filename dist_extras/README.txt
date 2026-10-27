@@ -1197,8 +1197,14 @@ you'd like one, and later run the CARD COUNTER.
                   cards stay in your collection) and R makes it the deck you
                   duel with.
   Rewards         Every win gives a booster pack, and once a day each
-                  opponent lets you pick one card of their deck. Losing costs
-                  nothing. Spare cards become CARD POINTS at the CARD COUNTER.
+                  opponent lets you pick one card of their deck (not a holo).
+                  Losing costs nothing. Spare cards become CARD POINTS at the
+                  CARD COUNTER.
+  Packs           5 commons, 3 uncommons, a rare and an Energy. One pack in
+                  three has a HOLO rare instead of a plain one: holos only
+                  come from packs and trades. After 20 packs of a set without
+                  a holo you didn't have, the next pack brings one. Cards you
+                  didn't have are marked NEW.
   Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE, or the
                   CARD CASE button in front of them.
   Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
