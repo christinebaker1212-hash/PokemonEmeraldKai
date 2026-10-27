@@ -1141,26 +1141,34 @@ a friend asks you to team up.
 CARD DUELS
 ----------
 An optional card game, played with the original Pokemon Trading Card Game's
-228 cards on a table like the DS card game's. Some people around HOENN play
-cards: face one and press the CO-OP button (C key, Y/Triangle on a
-controller) to ask for a duel. Talking to them with A works as always.
-The first time, they offer you a CARD CASE (a key item) and one of three
-starter decks; say NO and nothing changes. Nobody asks you unprompted.
-Card players: OLDALE (the footprint man), PETALBURG, RUSTBORO, DEWFORD,
-MAUVILLE, VERDANTURF, FALLARBOR, FORTREE, LILYCOVE, MOSSDEEP, PACIFIDLOG.
-  The CARD CASE   CHALLENGE (the person you asked), COLLECTION, DECKS,
-                  BOOSTER PACKS, PRACTICE, ANIMATIONS (normal / fast),
-                  ONLINE CARDS. Use it from the BAG or register it.
-  On the table    The D-Pad moves over the table itself: your hand, your
-                  Pokemon, theirs, the piles and END TURN. A on a card shows
+228 cards on a table like the DS card game's. A CARD CLUB member waits in
+the POKEMON CENTERS of OLDALE, MAUVILLE and LILYCOVE: they hand you a CARD
+CASE (a key item), three starter decks to pick from and a teaching duel if
+you'd like one, and later run the CARD COUNTER.
+  Challenges      Register the CARD CASE to a button like any key item and
+                  press it in front of someone to ask for a duel (nobody
+                  there: the CARD CASE opens). Talking with A is unchanged.
+                  Trainers play once you've beaten them, and so do plenty of
+                  townsfolk; Gym Leaders (after their badge), the ELITE FOUR,
+                  the Champion, your rival, WALLY, MAXIE, ARCHIE, STEVEN and
+                  the FRONTIER BRAINS have decks of their own.
+  On the table    The D-Pad moves over the table itself. A on a card shows
                   what you can do with it; a card you play floats over the
                   spaces it can go. START looks at a card up close, SELECT
                   opens the classic menu (HAND, ATTACK, CHECK, PKMN POWER,
-                  RETREAT, DONE), B backs out (on the table: concede).
-                  Hold A or B to hurry the animations.
-  Rewards         Every win gives a booster pack. Losing costs nothing.
-  Online          Both open CARD CASE > ONLINE CARDS in the same room; one
-                  invites, the other accepts. Nothing is wagered.
+                  RETREAT, DONE). B closes the hand, then asks whether to end
+                  your turn; CONCEDE asks first. Hold A or B to hurry the
+                  animations.
+  Rewards         Every win gives a booster pack, and once a day each
+                  opponent lets you pick one card of their deck. Losing costs
+                  nothing. Spare cards become CARD POINTS at the CARD COUNTER.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE, or the
+                  CARD CASE button in front of them.
+  Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
+                  pictures in Game Boy card frames), GAME BOY (the Game Boy
+                  pictures) or FULL CARD (the whole printed cards). CARD
+                  BACKS: PRINTED or PIXEL. The few cards that were only ever
+                  in the Game Boy game keep their Game Boy picture.
 Your cards are saved with your game (the save file's .cards file, kept with
 its backups). A few attacks and every POKEMON POWER aren't in the game yet;
 they show as not ready.

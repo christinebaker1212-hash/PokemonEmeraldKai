@@ -17,7 +17,9 @@ mp cards ask 1 1
 pressuntil A cards 1500
 wait 30
 press A 2
-wait 120
+wait 60
+barrier offered 2
+wait 60
 rendershot trade-offers-a
 press START 2
 wait 120
@@ -38,6 +40,8 @@ wait 90
 pressuntil A cards 1500
 wait 60
 press A 2
+wait 60
+barrier offered 2
 wait 60
 press START 2
 wait 120

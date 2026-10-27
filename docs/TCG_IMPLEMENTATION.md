@@ -31,7 +31,7 @@ The user sent a DS duel screenshot (both DS screens) as "the full area" and chos
 |---|---|
 | Layout | DS arrangement kept: opponent on top, you at the bottom, a Bench row of 5 at each edge, Active cards on the Poke Ball circle, side columns for Prizes / deck / discard |
 | Resolution | native 240x160, Emerald fonts and windows |
-| Card faces | the printed scan when the art pack is installed, else a type-colored card frame around the GB illustration |
+| Card faces | the printed illustration in a type-colored Game Boy card frame; OPTIONS also offer the GB picture or the whole printed card (later request) |
 | Controls | a cursor on the board itself + the original 6-option menu on SELECT |
 | Hand | a strip peeking at the bottom that slides up (the mat scrolls up with it so your Bench stays visible), and drops while you pick a target |
 | Animation | card-game effects (lunge, shake, -40, HP plate counting down, WEAKNESS x2 / RESISTANCE -30 banners, KO, every card sliding between zones) |
@@ -59,8 +59,20 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   turn?" (it never concedes); the END TURN button is CONCEDE, with a confirm. A drawn
   Prize card is held up in the middle ("PRIZE CARD"); Trainers that change the hand
   (PROFESSOR OAK, BILL...) slide the hand up; after a Knock Out the cursor waits on the
-  Bench. Printed art or the Game Boy art: OPTIONS > DISPLAY > CARD ART (`card_art` in the
-  ini, `G_SetGameBoyArt`). Tips in the first duels (`TcgBoard_Tutorial`).
+  Bench. Tips in the first duels (`TcgBoard_Tutorial`).
+- **Card art** (`tcg_gfx.c`, `G_SetArtMode` / `G_SetBackMode`): OPTIONS > DISPLAY > CARD ART
+  (`card_art` in the ini) is PRINTED ART (the printed illustration in the Game Boy frame, the
+  default), GAME BOY (the Game Boy picture in it) or FULL CARD (the whole printed card); CARD
+  BACKS (`card_back`) is PRINTED or PIXEL. All of it is built into the exe: the Game Boy
+  pictures (`graphics/tcg/original.bin`) and 209 printed cards plus the back
+  (`graphics/tcg/printed.bin`, 360x495 JPEGs with each illustration's rectangle, ~9 MB). The
+  19 cards the Game Boy game invented have no printing and keep the Game Boy picture. The
+  illustration rectangles were measured per layout (Base / Jungle / Fossil / promo Pokemon,
+  Base / Jungle / Fossil Trainers, Energy): each layout's cards sit within a couple of pixels,
+  so one rectangle per layout (the inner edge of the window's bevel, found on the average of
+  its cards) with a 3-pixel inset; Energy frames the symbol. The frame's picture box is 4:3,
+  a printed Trainer's about 9:5 (its window is ~1.85:1). See `tools/tcg/build_printed_art.py`
+  and `tools/tcg/printed_art.json`; `tools/tcg/test_art.sh` draws every mode.
 - **Who plays** (`src/tcg/tcg_field.c`): people by look (`sPeople`: category, deck type,
   label), decks by type and badge tier (`sPools`, badges 0-1 / 2-3 / 4-6 / 7-8). Trainers
   play once beaten, townsfolk 65% of the time (a hash of map + person), CARD CLUB staff
@@ -189,6 +201,7 @@ NOBUILD=1 tools/tcg/test_ui.sh          # real keys: CARD CLUB, challenge with t
 NOBUILD=1 tools/tcg/test_online.sh [250]        # two clients, request + YES, raw link actions (+lag)
 NOBUILD=1 tools/tcg/test_online_board.sh [250]  # two clients, whole duel via both duel screens, booster
 NOBUILD=1 tools/tcg/test_trade.sh       # two clients trade a card
+NOBUILD=1 tools/tcg/test_art.sh         # CARD ART's three looks and CARD BACKS: PIXEL draw different cards
 NOBUILD=1 tools/tcg/test_save.sh        # main: saved with the game, a new Trainer ID starts empty
 NOBUILD=1 tools/test/dev_save_test.sh   # dev builds stay read-only
 ```
@@ -207,8 +220,6 @@ the board prints `[tcg] show event ...` for KOs, coins, status, promotions and w
 
 - Remaining attack effects and all Pokemon Powers; player choice where the engine picks.
 - Trainer flows exist for all 34 Trainers but deserve play-testing per card.
-- Artwork pack: resolve remaining mappings, holo variants and GB-only cards;
-  installation/versioning/checksums. Without the pack the GB art frames are used.
 - Emerald attack animation adapter (not used: the board has its own card effects).
 - Windows: the mingw build compiles; not run on Windows.
 
@@ -218,14 +229,16 @@ the board prints `[tcg] show event ...` for KOs, coins, status, promotions and w
 python3 tools/tcg/import_poketcg.py /tmp/moemon-poketcg-reference
 python3 tools/tcg/generate_catalog.py
 python3 tools/tcg/generate_effects.py
-python3 tools/tcg/fetch_art.py
-python3 tools/tcg/benchmark_art.py
-python3 tools/tcg/build_art_pack.py
+python3 tools/tcg/fetch_art.py           # match every card to its printing, download the scans and the back
+python3 tools/tcg/build_printed_art.py   # -> graphics/tcg/printed.bin (committed)
+python3 tools/tcg/build_original_art.py  # -> graphics/tcg/original.bin (committed)
 ```
 
-Original full scans under `graphics/tcg/printed/` and the metadata download cache are
-ignored; the compressed content pack is in `dev/artwork/tcg-art/` (ID/hash in
-`tools/tcg/art_pack.json`). `MOEMON_TCG_ART_DIR` points the game at a pack.
+The full scans (`graphics/tcg/printed/`, 600x825 PNGs from PokemonTCG/pokemon-tcg-data's
+links; the back from tcg.pokemon.com) and the metadata cache are ignored;
+`tools/tcg/art_manifest.json` records every match with its hash. Jungle / Fossil rares use
+the holo printing; a few levels the Game Boy game changed are matched by name, HP, attacks
+and Pokemon Powers.
 
 ## Layout references
 

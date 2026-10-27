@@ -4,6 +4,7 @@
     {
       "card_id": 1,
       "name": "Grass Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-99"
       ],
@@ -17,6 +18,7 @@
     {
       "card_id": 2,
       "name": "Fire Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-98"
       ],
@@ -30,6 +32,7 @@
     {
       "card_id": 3,
       "name": "Water Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-102"
       ],
@@ -43,6 +46,7 @@
     {
       "card_id": 4,
       "name": "Lightning Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-100"
       ],
@@ -56,6 +60,7 @@
     {
       "card_id": 5,
       "name": "Fighting Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-97"
       ],
@@ -69,6 +74,7 @@
     {
       "card_id": 6,
       "name": "Psychic Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-101"
       ],
@@ -82,6 +88,7 @@
     {
       "card_id": 7,
       "name": "Double Colorless Energy",
+      "kind": "energy",
       "source_candidates": [
         "base1-96"
       ],
@@ -95,6 +102,7 @@
     {
       "card_id": 8,
       "name": "Bulbasaur",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-44"
       ],
@@ -108,6 +116,7 @@
     {
       "card_id": 9,
       "name": "Ivysaur",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-30"
       ],
@@ -121,12 +130,21 @@
     {
       "card_id": 10,
       "name": "Venusaur",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "basep-13"
+      ],
+      "status": "matched",
+      "printing": "basep-13",
+      "url": "https://images.pokemontcg.io/basep/13_hires.png",
+      "path": "graphics/tcg/printed/010.png",
+      "sha256": "4bf524d05b15aff5fcc3f26b502e71e71db5a61d1ffe0b54de0b95b3e365de54",
+      "bytes": 854899
     },
     {
       "card_id": 11,
       "name": "Venusaur",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-15"
       ],
@@ -140,6 +158,7 @@
     {
       "card_id": 12,
       "name": "Caterpie",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-45"
       ],
@@ -153,6 +172,7 @@
     {
       "card_id": 13,
       "name": "Metapod",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-54"
       ],
@@ -166,6 +186,7 @@
     {
       "card_id": 14,
       "name": "Butterfree",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-33"
       ],
@@ -179,6 +200,7 @@
     {
       "card_id": 15,
       "name": "Weedle",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-69"
       ],
@@ -192,6 +214,7 @@
     {
       "card_id": 16,
       "name": "Kakuna",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-33"
       ],
@@ -205,6 +228,7 @@
     {
       "card_id": 17,
       "name": "Beedrill",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-17"
       ],
@@ -218,6 +242,7 @@
     {
       "card_id": 18,
       "name": "Ekans",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-46"
       ],
@@ -231,6 +256,7 @@
     {
       "card_id": 19,
       "name": "Arbok",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-31"
       ],
@@ -244,6 +270,7 @@
     {
       "card_id": 20,
       "name": "Nidoran F",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-57"
       ],
@@ -257,6 +284,7 @@
     {
       "card_id": 21,
       "name": "Nidorina",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-40"
       ],
@@ -270,15 +298,21 @@
     {
       "card_id": 22,
       "name": "Nidoqueen",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-7",
-        "base2-23"
+        "base2-7"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-7",
+      "url": "https://images.pokemontcg.io/base2/7_hires.png",
+      "path": "graphics/tcg/printed/022.png",
+      "sha256": "bb5c6a18922a56641c7d059d580afa4d050f8568df482ec209520dd739afed46",
+      "bytes": 828954
     },
     {
       "card_id": 23,
       "name": "Nidoran M",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-55"
       ],
@@ -292,6 +326,7 @@
     {
       "card_id": 24,
       "name": "Nidorino",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-37"
       ],
@@ -305,12 +340,21 @@
     {
       "card_id": 25,
       "name": "Nidoking",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base1-11"
+      ],
+      "status": "matched",
+      "printing": "base1-11",
+      "url": "https://images.pokemontcg.io/base1/11_hires.png",
+      "path": "graphics/tcg/printed/025.png",
+      "sha256": "3b6e35dfcba3b4dcc47814223b1ae51baa45dffb270106e5bc167c510ceaf225",
+      "bytes": 878106
     },
     {
       "card_id": 26,
       "name": "Zubat",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-57"
       ],
@@ -324,6 +368,7 @@
     {
       "card_id": 27,
       "name": "Golbat",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-34"
       ],
@@ -337,6 +382,7 @@
     {
       "card_id": 28,
       "name": "Oddish",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-58"
       ],
@@ -350,21 +396,35 @@
     {
       "card_id": 29,
       "name": "Gloom",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base2-37"
+      ],
+      "status": "matched",
+      "printing": "base2-37",
+      "url": "https://images.pokemontcg.io/base2/37_hires.png",
+      "path": "graphics/tcg/printed/029.png",
+      "sha256": "fbbe5b6f5f88543781dbb86a975aa204ee4278daaad063cc969166df9c99f79f",
+      "bytes": 805965
     },
     {
       "card_id": 30,
       "name": "Vileplume",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-15",
-        "base2-31"
+        "base2-15"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-15",
+      "url": "https://images.pokemontcg.io/base2/15_hires.png",
+      "path": "graphics/tcg/printed/030.png",
+      "sha256": "b1b8ef5b01845e094c578071b54046d7c8d8832bc7ecd705c6f9362d976da03d",
+      "bytes": 840134
     },
     {
       "card_id": 31,
       "name": "Paras",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-59"
       ],
@@ -378,6 +438,7 @@
     {
       "card_id": 32,
       "name": "Parasect",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-41"
       ],
@@ -391,6 +452,7 @@
     {
       "card_id": 33,
       "name": "Venonat",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-63"
       ],
@@ -404,15 +466,21 @@
     {
       "card_id": 34,
       "name": "Venomoth",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-13",
-        "base2-29"
+        "base2-13"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-13",
+      "url": "https://images.pokemontcg.io/base2/13_hires.png",
+      "path": "graphics/tcg/printed/034.png",
+      "sha256": "111c9fc8f2ca88885257f9ca94808811d081eabc7e692359603d8c61e64dc5f3",
+      "bytes": 854833
     },
     {
       "card_id": 35,
       "name": "Bellsprout",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-49"
       ],
@@ -426,6 +494,7 @@
     {
       "card_id": 36,
       "name": "Weepinbell",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-48"
       ],
@@ -439,15 +508,21 @@
     {
       "card_id": 37,
       "name": "Victreebel",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-14",
-        "base2-30"
+        "base2-14"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-14",
+      "url": "https://images.pokemontcg.io/base2/14_hires.png",
+      "path": "graphics/tcg/printed/037.png",
+      "sha256": "27c39ad6f6326d42f93854d9f99ce220ad820a1b09a3bc9888065e70b99b9562",
+      "bytes": 862873
     },
     {
       "card_id": 38,
       "name": "Grimer",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-48"
       ],
@@ -461,15 +536,21 @@
     {
       "card_id": 39,
       "name": "Muk",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-13",
-        "base3-28"
+        "base3-13"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-13",
+      "url": "https://images.pokemontcg.io/base3/13_hires.png",
+      "path": "graphics/tcg/printed/039.png",
+      "sha256": "58a36bf84fedbe6e9180d7cd165f70767f4dc9e83271a95d2509c1593360381e",
+      "bytes": 781315
     },
     {
       "card_id": 40,
       "name": "Exeggcute",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-52"
       ],
@@ -483,6 +564,7 @@
     {
       "card_id": 41,
       "name": "Exeggutor",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-35"
       ],
@@ -496,6 +578,7 @@
     {
       "card_id": 42,
       "name": "Koffing",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-51"
       ],
@@ -509,6 +592,7 @@
     {
       "card_id": 43,
       "name": "Weezing",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-45"
       ],
@@ -522,6 +606,7 @@
     {
       "card_id": 44,
       "name": "Tangela",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-66"
       ],
@@ -535,30 +620,42 @@
     {
       "card_id": 45,
       "name": "Tangela",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 46,
       "name": "Scyther",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-10",
-        "base2-26"
+        "base2-10"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-10",
+      "url": "https://images.pokemontcg.io/base2/10_hires.png",
+      "path": "graphics/tcg/printed/046.png",
+      "sha256": "d24bca492c3d01dd17c521b7d6fad861f3834a0f86a4ffbe374d199be2966270",
+      "bytes": 780582
     },
     {
       "card_id": 47,
       "name": "Pinsir",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-9",
-        "base2-25"
+        "base2-9"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-9",
+      "url": "https://images.pokemontcg.io/base2/9_hires.png",
+      "path": "graphics/tcg/printed/047.png",
+      "sha256": "281ed80750be0bb3df248f2367da27ba2b011e653a3e4cd843a618d3028ac340",
+      "bytes": 773213
     },
     {
       "card_id": 48,
       "name": "Charmander",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-46"
       ],
@@ -572,6 +669,7 @@
     {
       "card_id": 49,
       "name": "Charmeleon",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-24"
       ],
@@ -585,6 +683,7 @@
     {
       "card_id": 50,
       "name": "Charizard",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-4"
       ],
@@ -598,6 +697,7 @@
     {
       "card_id": 51,
       "name": "Vulpix",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-68"
       ],
@@ -611,18 +711,28 @@
     {
       "card_id": 52,
       "name": "Ninetails",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base1-12"
+      ],
+      "status": "matched",
+      "printing": "base1-12",
+      "url": "https://images.pokemontcg.io/base1/12_hires.png",
+      "path": "graphics/tcg/printed/052.png",
+      "sha256": "821933ff75cf0cfb0501614327db24f98cb2a4e52a8032e7b3203b55f2d156d1",
+      "bytes": 823275
     },
     {
       "card_id": 53,
       "name": "Ninetails",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 54,
       "name": "Growlithe",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-28"
       ],
@@ -636,6 +746,7 @@
     {
       "card_id": 55,
       "name": "Arcanine",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-6"
       ],
@@ -649,6 +760,7 @@
     {
       "card_id": 56,
       "name": "Arcanine",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-23"
       ],
@@ -662,6 +774,7 @@
     {
       "card_id": 57,
       "name": "Ponyta",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-60"
       ],
@@ -675,6 +788,7 @@
     {
       "card_id": 58,
       "name": "Rapidash",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-44"
       ],
@@ -688,6 +802,7 @@
     {
       "card_id": 59,
       "name": "Magmar",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-36"
       ],
@@ -701,6 +816,7 @@
     {
       "card_id": 60,
       "name": "Magmar",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-39"
       ],
@@ -714,36 +830,49 @@
     {
       "card_id": 61,
       "name": "Flareon",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 62,
       "name": "Flareon",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-3",
-        "base2-19"
+        "base2-3"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-3",
+      "url": "https://images.pokemontcg.io/base2/3_hires.png",
+      "path": "graphics/tcg/printed/062.png",
+      "sha256": "b58bb598fe95450e5e9eb4443008fc1b5c667d3213bbc4ecf9f496ba0a06cf9a",
+      "bytes": 808748
     },
     {
       "card_id": 63,
       "name": "Moltres",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-12",
-        "base3-27"
+        "base3-12"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-12",
+      "url": "https://images.pokemontcg.io/base3/12_hires.png",
+      "path": "graphics/tcg/printed/063.png",
+      "sha256": "63ab4eff76d8e81d7b9515d3e46b5369b1a8e46af2fc5ea29a33f538ec5fc3c7",
+      "bytes": 779868
     },
     {
       "card_id": 64,
       "name": "Moltres",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 65,
       "name": "Squirtle",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-63"
       ],
@@ -757,6 +886,7 @@
     {
       "card_id": 66,
       "name": "Wartortle",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-42"
       ],
@@ -770,6 +900,7 @@
     {
       "card_id": 67,
       "name": "Blastoise",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-2"
       ],
@@ -783,6 +914,7 @@
     {
       "card_id": 68,
       "name": "Psyduck",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-53"
       ],
@@ -796,6 +928,7 @@
     {
       "card_id": 69,
       "name": "Golduck",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-35"
       ],
@@ -809,6 +942,7 @@
     {
       "card_id": 70,
       "name": "Poliwag",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-59"
       ],
@@ -822,6 +956,7 @@
     {
       "card_id": 71,
       "name": "Poliwhirl",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-38"
       ],
@@ -835,6 +970,7 @@
     {
       "card_id": 72,
       "name": "Poliwrath",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-13"
       ],
@@ -848,6 +984,7 @@
     {
       "card_id": 73,
       "name": "Tentacool",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-56"
       ],
@@ -861,6 +998,7 @@
     {
       "card_id": 74,
       "name": "Tentacruel",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-44"
       ],
@@ -874,6 +1012,7 @@
     {
       "card_id": 75,
       "name": "Seel",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-41"
       ],
@@ -887,6 +1026,7 @@
     {
       "card_id": 76,
       "name": "Dewgong",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-25"
       ],
@@ -900,6 +1040,7 @@
     {
       "card_id": 77,
       "name": "Shellder",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-54"
       ],
@@ -913,6 +1054,7 @@
     {
       "card_id": 78,
       "name": "Cloyster",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-32"
       ],
@@ -926,6 +1068,7 @@
     {
       "card_id": 79,
       "name": "Krabby",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-51"
       ],
@@ -939,6 +1082,7 @@
     {
       "card_id": 80,
       "name": "Kingler",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-38"
       ],
@@ -952,6 +1096,7 @@
     {
       "card_id": 81,
       "name": "Horsea",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-49"
       ],
@@ -965,6 +1110,7 @@
     {
       "card_id": 82,
       "name": "Seadra",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-42"
       ],
@@ -978,6 +1124,7 @@
     {
       "card_id": 83,
       "name": "Goldeen",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-53"
       ],
@@ -991,6 +1138,7 @@
     {
       "card_id": 84,
       "name": "Seaking",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-46"
       ],
@@ -1004,6 +1152,7 @@
     {
       "card_id": 85,
       "name": "Staryu",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-65"
       ],
@@ -1017,6 +1166,7 @@
     {
       "card_id": 86,
       "name": "Starmie",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-64"
       ],
@@ -1030,6 +1180,7 @@
     {
       "card_id": 87,
       "name": "Magikarp",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-35"
       ],
@@ -1043,6 +1194,7 @@
     {
       "card_id": 88,
       "name": "Gyarados",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-6"
       ],
@@ -1056,6 +1208,7 @@
     {
       "card_id": 89,
       "name": "Lapras",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-25"
       ],
@@ -1069,21 +1222,28 @@
     {
       "card_id": 90,
       "name": "Vaporeon",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 91,
       "name": "Vaporeon",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-12",
-        "base2-28"
+        "base2-12"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-12",
+      "url": "https://images.pokemontcg.io/base2/12_hires.png",
+      "path": "graphics/tcg/printed/091.png",
+      "sha256": "1845d9e21b711bef362fa277c60c370fc6db066642555a46b1d85455a65bf338",
+      "bytes": 876350
     },
     {
       "card_id": 92,
       "name": "Omanyte",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-52"
       ],
@@ -1097,6 +1257,7 @@
     {
       "card_id": 93,
       "name": "Omastar",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-40"
       ],
@@ -1110,21 +1271,28 @@
     {
       "card_id": 94,
       "name": "Articuno",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-2",
-        "base3-17"
+        "base3-2"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-2",
+      "url": "https://images.pokemontcg.io/base3/2_hires.png",
+      "path": "graphics/tcg/printed/094.png",
+      "sha256": "018f0a50fafa0c5473f8b99ff282fd72cc2936f8b62aa03a86b9a05de43afa13",
+      "bytes": 899937
     },
     {
       "card_id": 95,
       "name": "Articuno",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 96,
       "name": "Pikachu",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-58"
       ],
@@ -1138,6 +1306,7 @@
     {
       "card_id": 97,
       "name": "Pikachu",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-60"
       ],
@@ -1151,6 +1320,7 @@
     {
       "card_id": 98,
       "name": "Pikachu",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-1"
       ],
@@ -1164,6 +1334,7 @@
     {
       "card_id": 99,
       "name": "Pikachu",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-1"
       ],
@@ -1177,6 +1348,7 @@
     {
       "card_id": 100,
       "name": "Flying Pikachu",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-25"
       ],
@@ -1190,18 +1362,35 @@
     {
       "card_id": 101,
       "name": "Surfing Pikachu",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "basep-28"
+      ],
+      "status": "matched",
+      "printing": "basep-28",
+      "url": "https://images.pokemontcg.io/basep/28_hires.png",
+      "path": "graphics/tcg/printed/101.png",
+      "sha256": "c6557464a025ecf0834167ea5840cb2f4ba482e0a056050f1173ad37fed95b7f",
+      "bytes": 689239
     },
     {
       "card_id": 102,
       "name": "Surfing Pikachu",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "basep-28"
+      ],
+      "status": "matched",
+      "printing": "basep-28",
+      "url": "https://images.pokemontcg.io/basep/28_hires.png",
+      "path": "graphics/tcg/printed/102.png",
+      "sha256": "c6557464a025ecf0834167ea5840cb2f4ba482e0a056050f1173ad37fed95b7f",
+      "bytes": 689239
     },
     {
       "card_id": 103,
       "name": "Raichu",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-14"
       ],
@@ -1215,15 +1404,21 @@
     {
       "card_id": 104,
       "name": "Raichu",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-14",
-        "base3-29"
+        "base3-14"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-14",
+      "url": "https://images.pokemontcg.io/base3/14_hires.png",
+      "path": "graphics/tcg/printed/104.png",
+      "sha256": "33333088a95a652d9dfec8097d1021789208da1063a337096dd1f876e0047336",
+      "bytes": 804316
     },
     {
       "card_id": 105,
       "name": "Magnemite",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-53"
       ],
@@ -1237,12 +1432,14 @@
     {
       "card_id": 106,
       "name": "Magnemite",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 107,
       "name": "Magneton",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-9"
       ],
@@ -1256,15 +1453,21 @@
     {
       "card_id": 108,
       "name": "Magneton",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-11",
-        "base3-26"
+        "base3-11"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-11",
+      "url": "https://images.pokemontcg.io/base3/11_hires.png",
+      "path": "graphics/tcg/printed/108.png",
+      "sha256": "bc7e9f92c60c266662116289544f6db43df05119837504d3d42cffcd89460cdc",
+      "bytes": 827007
     },
     {
       "card_id": 109,
       "name": "Voltorb",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-67"
       ],
@@ -1278,21 +1481,28 @@
     {
       "card_id": 110,
       "name": "Electrode",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 111,
       "name": "Electrode",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-2",
-        "base2-18"
+        "base2-2"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-2",
+      "url": "https://images.pokemontcg.io/base2/2_hires.png",
+      "path": "graphics/tcg/printed/111.png",
+      "sha256": "1a19e6b5d5fceb1c0d86ef678a433c7fa5b18e57814ee1e339d9344357ff554e",
+      "bytes": 772426
     },
     {
       "card_id": 112,
       "name": "Electabuzz",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-2"
       ],
@@ -1306,6 +1516,7 @@
     {
       "card_id": 113,
       "name": "Electabuzz",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-20"
       ],
@@ -1319,30 +1530,42 @@
     {
       "card_id": 114,
       "name": "Jolteon",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 115,
       "name": "Jolteon",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-4",
-        "base2-20"
+        "base2-4"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-4",
+      "url": "https://images.pokemontcg.io/base2/4_hires.png",
+      "path": "graphics/tcg/printed/115.png",
+      "sha256": "279665f3860587e95fe6433bd32e82b6fa0b4259fc401dd158207b4d7b09223f",
+      "bytes": 838406
     },
     {
       "card_id": 116,
       "name": "Zapdos",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-15",
-        "base3-30"
+        "base3-15"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-15",
+      "url": "https://images.pokemontcg.io/base3/15_hires.png",
+      "path": "graphics/tcg/printed/116.png",
+      "sha256": "a170f3f747d022e6832a7249c5835680b5a6d306f8a415b00787254b1b0fa3b7",
+      "bytes": 784064
     },
     {
       "card_id": 117,
       "name": "Zapdos",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-16"
       ],
@@ -1356,12 +1579,14 @@
     {
       "card_id": 118,
       "name": "Zapdos",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 119,
       "name": "Sandshrew",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-62"
       ],
@@ -1375,6 +1600,7 @@
     {
       "card_id": 120,
       "name": "Sandslash",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-41"
       ],
@@ -1388,6 +1614,7 @@
     {
       "card_id": 121,
       "name": "Diglett",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-47"
       ],
@@ -1401,6 +1628,7 @@
     {
       "card_id": 122,
       "name": "Dugtrio",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-19"
       ],
@@ -1414,6 +1642,7 @@
     {
       "card_id": 123,
       "name": "Mankey",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-55"
       ],
@@ -1427,12 +1656,21 @@
     {
       "card_id": 124,
       "name": "Primeape",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base2-43"
+      ],
+      "status": "matched",
+      "printing": "base2-43",
+      "url": "https://images.pokemontcg.io/base2/43_hires.png",
+      "path": "graphics/tcg/printed/124.png",
+      "sha256": "62a657c716ba16be12a53036ff5f0d0d7f000208b492edb12064f0a2abc1f266",
+      "bytes": 848018
     },
     {
       "card_id": 125,
       "name": "Machop",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-52"
       ],
@@ -1446,6 +1684,7 @@
     {
       "card_id": 126,
       "name": "Machoke",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-34"
       ],
@@ -1459,6 +1698,7 @@
     {
       "card_id": 127,
       "name": "Machamp",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-8"
       ],
@@ -1472,6 +1712,7 @@
     {
       "card_id": 128,
       "name": "Geodude",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-47"
       ],
@@ -1485,6 +1726,7 @@
     {
       "card_id": 129,
       "name": "Graveler",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-37"
       ],
@@ -1498,6 +1740,7 @@
     {
       "card_id": 130,
       "name": "Golem",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-36"
       ],
@@ -1511,6 +1754,7 @@
     {
       "card_id": 131,
       "name": "Onix",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-56"
       ],
@@ -1524,6 +1768,7 @@
     {
       "card_id": 132,
       "name": "Cubone",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-50"
       ],
@@ -1537,6 +1782,7 @@
     {
       "card_id": 133,
       "name": "Marowak",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-39"
       ],
@@ -1550,21 +1796,28 @@
     {
       "card_id": 134,
       "name": "Marowak",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 135,
       "name": "Hitmonlee",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-7",
-        "base3-22"
+        "base3-7"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-7",
+      "url": "https://images.pokemontcg.io/base3/7_hires.png",
+      "path": "graphics/tcg/printed/135.png",
+      "sha256": "ee40b8b46be27af47b51ca0d655ec76fe85ff197cdb962e09ccecc615834ec7c",
+      "bytes": 772667
     },
     {
       "card_id": 136,
       "name": "Hitmonchan",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-7"
       ],
@@ -1578,6 +1831,7 @@
     {
       "card_id": 137,
       "name": "Rhyhorn",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-61"
       ],
@@ -1591,6 +1845,7 @@
     {
       "card_id": 138,
       "name": "Rhydon",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-45"
       ],
@@ -1604,6 +1859,7 @@
     {
       "card_id": 139,
       "name": "Kabuto",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-50"
       ],
@@ -1617,24 +1873,35 @@
     {
       "card_id": 140,
       "name": "Kabutops",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-9",
-        "base3-24"
+        "base3-9"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-9",
+      "url": "https://images.pokemontcg.io/base3/9_hires.png",
+      "path": "graphics/tcg/printed/140.png",
+      "sha256": "4e5651ba322882e7dd3294b28d211060ae1c377d6553920b852f0e8d4f05b949",
+      "bytes": 816049
     },
     {
       "card_id": 141,
       "name": "Aerodactyl",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-1",
-        "base3-16"
+        "base3-1"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-1",
+      "url": "https://images.pokemontcg.io/base3/1_hires.png",
+      "path": "graphics/tcg/printed/141.png",
+      "sha256": "15fcd77ce3fbdd0e4cf2822eefcf22ab2199ab0863c65951d0d3f8ea7114b183",
+      "bytes": 797754
     },
     {
       "card_id": 142,
       "name": "Abra",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-43"
       ],
@@ -1648,6 +1915,7 @@
     {
       "card_id": 143,
       "name": "Kadabra",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-32"
       ],
@@ -1661,6 +1929,7 @@
     {
       "card_id": 144,
       "name": "Alakazam",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-1"
       ],
@@ -1674,12 +1943,14 @@
     {
       "card_id": 145,
       "name": "Slowpoke",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 146,
       "name": "Slowpoke",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-55"
       ],
@@ -1693,6 +1964,7 @@
     {
       "card_id": 147,
       "name": "Slowbro",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-43"
       ],
@@ -1706,6 +1978,7 @@
     {
       "card_id": 148,
       "name": "Gastly",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-50"
       ],
@@ -1719,6 +1992,7 @@
     {
       "card_id": 149,
       "name": "Gastly",
+      "kind": "pokemon",
       "source_candidates": [
         "base3-33"
       ],
@@ -1732,15 +2006,21 @@
     {
       "card_id": 150,
       "name": "Haunter",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-6",
-        "base3-21"
+        "base3-6"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-6",
+      "url": "https://images.pokemontcg.io/base3/6_hires.png",
+      "path": "graphics/tcg/printed/150.png",
+      "sha256": "ae045c612d526af41c25528bfb5090ca655e19ed29c31dbef6ae452139c150f5",
+      "bytes": 768922
     },
     {
       "card_id": 151,
       "name": "Haunter",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-29"
       ],
@@ -1754,39 +2034,63 @@
     {
       "card_id": 152,
       "name": "Gengar",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-5",
-        "base3-20"
+        "base3-5"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-5",
+      "url": "https://images.pokemontcg.io/base3/5_hires.png",
+      "path": "graphics/tcg/printed/152.png",
+      "sha256": "d9c2cfd6f6f08f4a39e2c1368c756b7b3eefa3582ed2ce37116045f2804f437a",
+      "bytes": 927326
     },
     {
       "card_id": 153,
       "name": "Drowzee",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base1-49"
+      ],
+      "status": "matched",
+      "printing": "base1-49",
+      "url": "https://images.pokemontcg.io/base1/49_hires.png",
+      "path": "graphics/tcg/printed/153.png",
+      "sha256": "53db064e667ecd16ae21ce732eac54433f46e43f0cb506c9eb1b33f1f78e4845",
+      "bytes": 907764
     },
     {
       "card_id": 154,
       "name": "Hypno",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-8",
-        "base3-23"
+        "base3-8"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-8",
+      "url": "https://images.pokemontcg.io/base3/8_hires.png",
+      "path": "graphics/tcg/printed/154.png",
+      "sha256": "cef6464ec48ccc29ee15b560f23651f49f11e38d9dd87f7186fbfbc14cae63bf",
+      "bytes": 910382
     },
     {
       "card_id": 155,
       "name": "Mr. Mime",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-6",
-        "base2-22"
+        "base2-6"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-6",
+      "url": "https://images.pokemontcg.io/base2/6_hires.png",
+      "path": "graphics/tcg/printed/155.png",
+      "sha256": "a4bc1e4c917a06b971a805d09db95133fb48344392d9f606b599bf41a894b996",
+      "bytes": 865954
     },
     {
       "card_id": 156,
       "name": "Jynx",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-31"
       ],
@@ -1800,6 +2104,7 @@
     {
       "card_id": 157,
       "name": "Mewtwo",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-10"
       ],
@@ -1813,24 +2118,35 @@
     {
       "card_id": 158,
       "name": "Mewtwo",
+      "kind": "pokemon",
       "source_candidates": [
-        "basep-3",
-        "basep-14"
+        "basep-3"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "basep-3",
+      "url": "https://images.pokemontcg.io/basep/3_hires.png",
+      "path": "graphics/tcg/printed/158.png",
+      "sha256": "8b84c08a550d761677f1676e657ae2ff872c00c63226023871094e28bc56db46",
+      "bytes": 845394
     },
     {
       "card_id": 159,
       "name": "Mewtwo",
+      "kind": "pokemon",
       "source_candidates": [
-        "basep-3",
         "basep-14"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "basep-14",
+      "url": "https://images.pokemontcg.io/basep/14_hires.png",
+      "path": "graphics/tcg/printed/159.png",
+      "sha256": "c5eca6a821d7ccc52f288da6c0dda601a5b79600826454592310447b0771e2f2",
+      "bytes": 976970
     },
     {
       "card_id": 160,
       "name": "Mew",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-47"
       ],
@@ -1844,12 +2160,14 @@
     {
       "card_id": 161,
       "name": "Mew",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 162,
       "name": "Mew",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-8"
       ],
@@ -1863,6 +2181,7 @@
     {
       "card_id": 163,
       "name": "Pidgey",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-57"
       ],
@@ -1876,6 +2195,7 @@
     {
       "card_id": 164,
       "name": "Pidgeotto",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-22"
       ],
@@ -1889,21 +2209,28 @@
     {
       "card_id": 165,
       "name": "Pidgeot",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 166,
       "name": "Pidgeot",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-8",
-        "base2-24"
+        "base2-8"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-8",
+      "url": "https://images.pokemontcg.io/base2/8_hires.png",
+      "path": "graphics/tcg/printed/166.png",
+      "sha256": "2b5216e1c2737904052395778c996a9118486fbf7a0c4974d77136f5e3fc5438",
+      "bytes": 803021
     },
     {
       "card_id": 167,
       "name": "Rattata",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-61"
       ],
@@ -1917,6 +2244,7 @@
     {
       "card_id": 168,
       "name": "Raticate",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-40"
       ],
@@ -1930,6 +2258,7 @@
     {
       "card_id": 169,
       "name": "Spearow",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-62"
       ],
@@ -1943,6 +2272,7 @@
     {
       "card_id": 170,
       "name": "Fearow",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-36"
       ],
@@ -1956,6 +2286,7 @@
     {
       "card_id": 171,
       "name": "Clefairy",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-5"
       ],
@@ -1969,15 +2300,21 @@
     {
       "card_id": 172,
       "name": "Clefable",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-1",
-        "base2-17"
+        "base2-1"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-1",
+      "url": "https://images.pokemontcg.io/base2/1_hires.png",
+      "path": "graphics/tcg/printed/172.png",
+      "sha256": "a685d26bf69235c11db1411497de0e51362cc4d82c0fbbe1bbc9fe095cd4611f",
+      "bytes": 840237
     },
     {
       "card_id": 173,
       "name": "Jigglypuff",
+      "kind": "pokemon",
       "source_candidates": [
         "basep-7"
       ],
@@ -1991,12 +2328,14 @@
     {
       "card_id": 174,
       "name": "Jigglypuff",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 175,
       "name": "Jigglypuff",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-54"
       ],
@@ -2010,21 +2349,35 @@
     {
       "card_id": 176,
       "name": "Wigglytuff",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-16",
-        "base2-32"
+        "base2-16"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-16",
+      "url": "https://images.pokemontcg.io/base2/16_hires.png",
+      "path": "graphics/tcg/printed/176.png",
+      "sha256": "448836b006afd733605461175ad1185d675da78feaf2a67d3e4e6f1b580c5f2f",
+      "bytes": 766162
     },
     {
       "card_id": 177,
       "name": "Meowth",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "basep-10"
+      ],
+      "status": "matched",
+      "printing": "basep-10",
+      "url": "https://images.pokemontcg.io/basep/10_hires.png",
+      "path": "graphics/tcg/printed/177.png",
+      "sha256": "2519d14d6a71666c0ccb419cba0305f828d3eaf429e93ff4959a6da4189e6328",
+      "bytes": 817248
     },
     {
       "card_id": 178,
       "name": "Meowth",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-56"
       ],
@@ -2038,6 +2391,7 @@
     {
       "card_id": 179,
       "name": "Persian",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-42"
       ],
@@ -2051,6 +2405,7 @@
     {
       "card_id": 180,
       "name": "Farfetch'd",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-27"
       ],
@@ -2064,6 +2419,7 @@
     {
       "card_id": 181,
       "name": "Doduo",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-48"
       ],
@@ -2077,6 +2433,7 @@
     {
       "card_id": 182,
       "name": "Dodrio",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-34"
       ],
@@ -2090,12 +2447,21 @@
     {
       "card_id": 183,
       "name": "Lickitung",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base2-38"
+      ],
+      "status": "matched",
+      "printing": "base2-38",
+      "url": "https://images.pokemontcg.io/base2/38_hires.png",
+      "path": "graphics/tcg/printed/183.png",
+      "sha256": "72818baf39eb98be099ec4e2751c03c60022a47016ebb220ab3bd2176d98290f",
+      "bytes": 1031233
     },
     {
       "card_id": 184,
       "name": "Chansey",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-3"
       ],
@@ -2109,27 +2475,42 @@
     {
       "card_id": 185,
       "name": "Kangaskhan",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-5",
-        "base2-21"
+        "base2-5"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-5",
+      "url": "https://images.pokemontcg.io/base2/5_hires.png",
+      "path": "graphics/tcg/printed/185.png",
+      "sha256": "6ead319a02c1e12508d165a0e585bade0c11e1d24a8d319261271bfed6c03fe1",
+      "bytes": 729325
     },
     {
       "card_id": 186,
       "name": "Tauros",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "pokemon",
+      "source_candidates": [
+        "base2-47"
+      ],
+      "status": "matched",
+      "printing": "base2-47",
+      "url": "https://images.pokemontcg.io/base2/47_hires.png",
+      "path": "graphics/tcg/printed/186.png",
+      "sha256": "c3fb81efe41a42683243b18711d189e606380aca7315141d24b66d16ad56f1d7",
+      "bytes": 855030
     },
     {
       "card_id": 187,
       "name": "Ditto",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 188,
       "name": "Eevee",
+      "kind": "pokemon",
       "source_candidates": [
         "base2-51"
       ],
@@ -2143,6 +2524,7 @@
     {
       "card_id": 189,
       "name": "Porygon",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-39"
       ],
@@ -2156,15 +2538,21 @@
     {
       "card_id": 190,
       "name": "Snorlax",
+      "kind": "pokemon",
       "source_candidates": [
-        "base2-11",
-        "base2-27"
+        "base2-11"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base2-11",
+      "url": "https://images.pokemontcg.io/base2/11_hires.png",
+      "path": "graphics/tcg/printed/190.png",
+      "sha256": "7ec59a7c3ecedc6a719f0569a32f3c5d57e89c407958fed2058398e4a0c2e80c",
+      "bytes": 776723
     },
     {
       "card_id": 191,
       "name": "Dratini",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-26"
       ],
@@ -2178,6 +2566,7 @@
     {
       "card_id": 192,
       "name": "Dragonair",
+      "kind": "pokemon",
       "source_candidates": [
         "base1-18"
       ],
@@ -2191,21 +2580,28 @@
     {
       "card_id": 193,
       "name": "Dragonite",
+      "kind": "pokemon",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 194,
       "name": "Dragonite",
+      "kind": "pokemon",
       "source_candidates": [
-        "base3-4",
-        "base3-19"
+        "base3-4"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base3-4",
+      "url": "https://images.pokemontcg.io/base3/4_hires.png",
+      "path": "graphics/tcg/printed/194.png",
+      "sha256": "8a86c9467956e0d74945177b4d30149912ba5d4d9848d3652ca5ebacfa86b306",
+      "bytes": 792652
     },
     {
       "card_id": 195,
       "name": "Professor Oak",
+      "kind": "trainer",
       "source_candidates": [
         "base1-88"
       ],
@@ -2219,12 +2615,21 @@
     {
       "card_id": 196,
       "name": "Imposter Professor Oak",
-      "source_candidates": [],
-      "status": "no_print_match"
+      "kind": "trainer",
+      "source_candidates": [
+        "base1-73"
+      ],
+      "status": "matched",
+      "printing": "base1-73",
+      "url": "https://images.pokemontcg.io/base1/73_hires.png",
+      "path": "graphics/tcg/printed/196.png",
+      "sha256": "aea2df13bd767851effbc12bb67003af8318ac8238496e913aa6b8182c226a0a",
+      "bytes": 742749
     },
     {
       "card_id": 197,
       "name": "Bill",
+      "kind": "trainer",
       "source_candidates": [
         "base1-91"
       ],
@@ -2238,6 +2643,7 @@
     {
       "card_id": 198,
       "name": "Mr.Fuji",
+      "kind": "trainer",
       "source_candidates": [
         "base3-58"
       ],
@@ -2251,6 +2657,7 @@
     {
       "card_id": 199,
       "name": "Lass",
+      "kind": "trainer",
       "source_candidates": [
         "base1-75"
       ],
@@ -2264,12 +2671,14 @@
     {
       "card_id": 200,
       "name": "Imakuni?",
+      "kind": "trainer",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 201,
       "name": "Pokemon Trader",
+      "kind": "trainer",
       "source_candidates": [
         "base1-77"
       ],
@@ -2283,6 +2692,7 @@
     {
       "card_id": 202,
       "name": "Pokemon Breeder",
+      "kind": "trainer",
       "source_candidates": [
         "base1-76"
       ],
@@ -2296,6 +2706,7 @@
     {
       "card_id": 203,
       "name": "Clefairy Doll",
+      "kind": "trainer",
       "source_candidates": [
         "base1-70"
       ],
@@ -2309,6 +2720,7 @@
     {
       "card_id": 204,
       "name": "Mysterious Fossil",
+      "kind": "trainer",
       "source_candidates": [
         "base3-62"
       ],
@@ -2322,6 +2734,7 @@
     {
       "card_id": 205,
       "name": "Energy Retrieval",
+      "kind": "trainer",
       "source_candidates": [
         "base1-81"
       ],
@@ -2335,12 +2748,14 @@
     {
       "card_id": 206,
       "name": "Super Energy Retrieval",
+      "kind": "trainer",
       "source_candidates": [],
-      "status": "no_print_match"
+      "status": "game_boy_only"
     },
     {
       "card_id": 207,
       "name": "Energy Search",
+      "kind": "trainer",
       "source_candidates": [
         "base3-59"
       ],
@@ -2354,6 +2769,7 @@
     {
       "card_id": 208,
       "name": "Energy Removal",
+      "kind": "trainer",
       "source_candidates": [
         "base1-92"
       ],
@@ -2367,6 +2783,7 @@
     {
       "card_id": 209,
       "name": "Super Energy Removal",
+      "kind": "trainer",
       "source_candidates": [
         "base1-79"
       ],
@@ -2380,6 +2797,7 @@
     {
       "card_id": 210,
       "name": "Switch",
+      "kind": "trainer",
       "source_candidates": [
         "base1-95"
       ],
@@ -2393,15 +2811,21 @@
     {
       "card_id": 211,
       "name": "Pokemon Center",
+      "kind": "trainer",
       "source_candidates": [
-        "base1-85",
-        "basep-40"
+        "base1-85"
       ],
-      "status": "needs_review"
+      "status": "matched",
+      "printing": "base1-85",
+      "url": "https://images.pokemontcg.io/base1/85_hires.png",
+      "path": "graphics/tcg/printed/211.png",
+      "sha256": "1641c786ba4c5a731dccd9c1439a0d0751f5f61d3e66c165689081729b0afaa6",
+      "bytes": 793610
     },
     {
       "card_id": 212,
       "name": "Poke Ball",
+      "kind": "trainer",
       "source_candidates": [
         "base2-64"
       ],
@@ -2415,6 +2839,7 @@
     {
       "card_id": 213,
       "name": "Scoop Up",
+      "kind": "trainer",
       "source_candidates": [
         "base1-78"
       ],
@@ -2428,6 +2853,7 @@
     {
       "card_id": 214,
       "name": "Computer Search",
+      "kind": "trainer",
       "source_candidates": [
         "base1-71"
       ],
@@ -2441,6 +2867,7 @@
     {
       "card_id": 215,
       "name": "Pokedex",
+      "kind": "trainer",
       "source_candidates": [
         "base1-87"
       ],
@@ -2454,6 +2881,7 @@
     {
       "card_id": 216,
       "name": "PlusPower",
+      "kind": "trainer",
       "source_candidates": [
         "base1-84"
       ],
@@ -2467,6 +2895,7 @@
     {
       "card_id": 217,
       "name": "Defender",
+      "kind": "trainer",
       "source_candidates": [
         "base1-80"
       ],
@@ -2480,6 +2909,7 @@
     {
       "card_id": 218,
       "name": "Item Finder",
+      "kind": "trainer",
       "source_candidates": [
         "base1-74"
       ],
@@ -2493,6 +2923,7 @@
     {
       "card_id": 219,
       "name": "Gust of Wind",
+      "kind": "trainer",
       "source_candidates": [
         "base1-93"
       ],
@@ -2506,6 +2937,7 @@
     {
       "card_id": 220,
       "name": "Devolution Spray",
+      "kind": "trainer",
       "source_candidates": [
         "base1-72"
       ],
@@ -2519,6 +2951,7 @@
     {
       "card_id": 221,
       "name": "Potion",
+      "kind": "trainer",
       "source_candidates": [
         "base1-94"
       ],
@@ -2532,6 +2965,7 @@
     {
       "card_id": 222,
       "name": "Super Potion",
+      "kind": "trainer",
       "source_candidates": [
         "base1-90"
       ],
@@ -2545,6 +2979,7 @@
     {
       "card_id": 223,
       "name": "Full Heal",
+      "kind": "trainer",
       "source_candidates": [
         "base1-82"
       ],
@@ -2558,6 +2993,7 @@
     {
       "card_id": 224,
       "name": "Revive",
+      "kind": "trainer",
       "source_candidates": [
         "base1-89"
       ],
@@ -2571,6 +3007,7 @@
     {
       "card_id": 225,
       "name": "Maintenance",
+      "kind": "trainer",
       "source_candidates": [
         "base1-83"
       ],
@@ -2584,6 +3021,7 @@
     {
       "card_id": 226,
       "name": "Pokemon Flute",
+      "kind": "trainer",
       "source_candidates": [
         "base1-86"
       ],
@@ -2597,6 +3035,7 @@
     {
       "card_id": 227,
       "name": "Gambler",
+      "kind": "trainer",
       "source_candidates": [
         "base3-60"
       ],
@@ -2610,6 +3049,7 @@
     {
       "card_id": 228,
       "name": "Recycle",
+      "kind": "trainer",
       "source_candidates": [
         "base3-61"
       ],
@@ -2620,5 +3060,11 @@
       "sha256": "bd54f7ef4daeb007270217244cf60950fe4cb9adf7a4dedd4decbe4377498555",
       "bytes": 739291
     }
-  ]
+  ],
+  "back": {
+    "url": "https://tcg.pokemon.com/assets/img/global/tcg-card-back-2x.jpg",
+    "path": "graphics/tcg/printed/back.jpg",
+    "sha256": "37a4df719ed9134a4652c639fea545f549c6cce40647ad5d82909be02a6afeb3",
+    "bytes": 62675
+  }
 }

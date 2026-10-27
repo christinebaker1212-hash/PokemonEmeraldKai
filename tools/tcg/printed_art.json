@@ -1,0 +1,2577 @@
+{
+ "stored": [
+  360,
+  495
+ ],
+ "scan": [
+  600,
+  825
+ ],
+ "inset": 3,
+ "layouts": {
+  "pokemon/base1": [
+   64,
+   98,
+   537,
+   427
+  ],
+  "pokemon/base2": [
+   64,
+   95,
+   537,
+   423
+  ],
+  "pokemon/base3": [
+   62,
+   93,
+   539,
+   423
+  ],
+  "pokemon/basep": [
+   65,
+   96,
+   536,
+   423
+  ],
+  "trainer/base1": [
+   62,
+   187,
+   553,
+   457
+  ],
+  "trainer/base2": [
+   54,
+   186,
+   555,
+   459
+  ],
+  "trainer/base3": [
+   54,
+   190,
+   557,
+   461
+  ],
+  "energy/basic": [
+   77,
+   402,
+   523,
+   738
+  ],
+  "energy/double": [
+   87,
+   247,
+   513,
+   568
+  ]
+ },
+ "cards": {
+  "1": {
+   "name": "Grass Energy",
+   "printing": "base1-99",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 27212
+  },
+  "2": {
+   "name": "Fire Energy",
+   "printing": "base1-98",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 29624
+  },
+  "3": {
+   "name": "Water Energy",
+   "printing": "base1-102",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 26758
+  },
+  "4": {
+   "name": "Lightning Energy",
+   "printing": "base1-100",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 22602
+  },
+  "5": {
+   "name": "Fighting Energy",
+   "printing": "base1-97",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 30581
+  },
+  "6": {
+   "name": "Psychic Energy",
+   "printing": "base1-101",
+   "layout": "energy/basic",
+   "illustration": [
+    48,
+    243,
+    264,
+    198
+   ],
+   "bytes": 29833
+  },
+  "7": {
+   "name": "Double Colorless Energy",
+   "printing": "base1-96",
+   "layout": "energy/double",
+   "illustration": [
+    54,
+    150,
+    252,
+    189
+   ],
+   "bytes": 32488
+  },
+  "8": {
+   "name": "Bulbasaur",
+   "printing": "base1-44",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 45024
+  },
+  "9": {
+   "name": "Ivysaur",
+   "printing": "base1-30",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 46895
+  },
+  "10": {
+   "name": "Venusaur",
+   "printing": "basep-13",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 51232
+  },
+  "11": {
+   "name": "Venusaur",
+   "printing": "base1-15",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47226
+  },
+  "12": {
+   "name": "Caterpie",
+   "printing": "base1-45",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42446
+  },
+  "13": {
+   "name": "Metapod",
+   "printing": "base1-54",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 51302
+  },
+  "14": {
+   "name": "Butterfree",
+   "printing": "base2-33",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 55394
+  },
+  "15": {
+   "name": "Weedle",
+   "printing": "base1-69",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 49349
+  },
+  "16": {
+   "name": "Kakuna",
+   "printing": "base1-33",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47708
+  },
+  "17": {
+   "name": "Beedrill",
+   "printing": "base1-17",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 55161
+  },
+  "18": {
+   "name": "Ekans",
+   "printing": "base3-46",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 41971
+  },
+  "19": {
+   "name": "Arbok",
+   "printing": "base3-31",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 48674
+  },
+  "20": {
+   "name": "Nidoran F",
+   "printing": "base2-57",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 52282
+  },
+  "21": {
+   "name": "Nidorina",
+   "printing": "base2-40",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 49354
+  },
+  "22": {
+   "name": "Nidoqueen",
+   "printing": "base2-7",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 48424
+  },
+  "23": {
+   "name": "Nidoran M",
+   "printing": "base1-55",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 41548
+  },
+  "24": {
+   "name": "Nidorino",
+   "printing": "base1-37",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47478
+  },
+  "25": {
+   "name": "Nidoking",
+   "printing": "base1-11",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 51863
+  },
+  "26": {
+   "name": "Zubat",
+   "printing": "base3-57",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46871
+  },
+  "27": {
+   "name": "Golbat",
+   "printing": "base3-34",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46545
+  },
+  "28": {
+   "name": "Oddish",
+   "printing": "base2-58",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41168
+  },
+  "29": {
+   "name": "Gloom",
+   "printing": "base2-37",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41658
+  },
+  "30": {
+   "name": "Vileplume",
+   "printing": "base2-15",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 49187
+  },
+  "31": {
+   "name": "Paras",
+   "printing": "base2-59",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 43842
+  },
+  "32": {
+   "name": "Parasect",
+   "printing": "base2-41",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45225
+  },
+  "33": {
+   "name": "Venonat",
+   "printing": "base2-63",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 42391
+  },
+  "34": {
+   "name": "Venomoth",
+   "printing": "base2-13",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 51323
+  },
+  "35": {
+   "name": "Bellsprout",
+   "printing": "base2-49",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41715
+  },
+  "36": {
+   "name": "Weepinbell",
+   "printing": "base2-48",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45472
+  },
+  "37": {
+   "name": "Victreebel",
+   "printing": "base2-14",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 47557
+  },
+  "38": {
+   "name": "Grimer",
+   "printing": "base3-48",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 42788
+  },
+  "39": {
+   "name": "Muk",
+   "printing": "base3-13",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 42702
+  },
+  "40": {
+   "name": "Exeggcute",
+   "printing": "base2-52",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 40043
+  },
+  "41": {
+   "name": "Exeggutor",
+   "printing": "base2-35",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45509
+  },
+  "42": {
+   "name": "Koffing",
+   "printing": "base1-51",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 43373
+  },
+  "43": {
+   "name": "Weezing",
+   "printing": "base3-45",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 47621
+  },
+  "44": {
+   "name": "Tangela",
+   "printing": "base1-66",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50901
+  },
+  "46": {
+   "name": "Scyther",
+   "printing": "base2-10",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 43365
+  },
+  "47": {
+   "name": "Pinsir",
+   "printing": "base2-9",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 42324
+  },
+  "48": {
+   "name": "Charmander",
+   "printing": "base1-46",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 43755
+  },
+  "49": {
+   "name": "Charmeleon",
+   "printing": "base1-24",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 44681
+  },
+  "50": {
+   "name": "Charizard",
+   "printing": "base1-4",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 48692
+  },
+  "51": {
+   "name": "Vulpix",
+   "printing": "base1-68",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 41798
+  },
+  "52": {
+   "name": "Ninetails",
+   "printing": "base1-12",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47924
+  },
+  "54": {
+   "name": "Growlithe",
+   "printing": "base1-28",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 40553
+  },
+  "55": {
+   "name": "Arcanine",
+   "printing": "basep-6",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 44289
+  },
+  "56": {
+   "name": "Arcanine",
+   "printing": "base1-23",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47879
+  },
+  "57": {
+   "name": "Ponyta",
+   "printing": "base1-60",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 40188
+  },
+  "58": {
+   "name": "Rapidash",
+   "printing": "base2-44",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41712
+  },
+  "59": {
+   "name": "Magmar",
+   "printing": "base1-36",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 46001
+  },
+  "60": {
+   "name": "Magmar",
+   "printing": "base3-39",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46656
+  },
+  "62": {
+   "name": "Flareon",
+   "printing": "base2-3",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45458
+  },
+  "63": {
+   "name": "Moltres",
+   "printing": "base3-12",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 43973
+  },
+  "65": {
+   "name": "Squirtle",
+   "printing": "base1-63",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 48251
+  },
+  "66": {
+   "name": "Wartortle",
+   "printing": "base1-42",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 49526
+  },
+  "67": {
+   "name": "Blastoise",
+   "printing": "base1-2",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 56242
+  },
+  "68": {
+   "name": "Psyduck",
+   "printing": "base3-53",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46941
+  },
+  "69": {
+   "name": "Golduck",
+   "printing": "base3-35",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 54242
+  },
+  "70": {
+   "name": "Poliwag",
+   "printing": "base1-59",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 45571
+  },
+  "71": {
+   "name": "Poliwhirl",
+   "printing": "base1-38",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 52124
+  },
+  "72": {
+   "name": "Poliwrath",
+   "printing": "base1-13",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 51318
+  },
+  "73": {
+   "name": "Tentacool",
+   "printing": "base3-56",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 47546
+  },
+  "74": {
+   "name": "Tentacruel",
+   "printing": "base3-44",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 54236
+  },
+  "75": {
+   "name": "Seel",
+   "printing": "base1-41",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42347
+  },
+  "76": {
+   "name": "Dewgong",
+   "printing": "base1-25",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47898
+  },
+  "77": {
+   "name": "Shellder",
+   "printing": "base3-54",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46263
+  },
+  "78": {
+   "name": "Cloyster",
+   "printing": "base3-32",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 50816
+  },
+  "79": {
+   "name": "Krabby",
+   "printing": "base3-51",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46194
+  },
+  "80": {
+   "name": "Kingler",
+   "printing": "base3-38",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 50634
+  },
+  "81": {
+   "name": "Horsea",
+   "printing": "base3-49",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 44814
+  },
+  "82": {
+   "name": "Seadra",
+   "printing": "base3-42",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 53854
+  },
+  "83": {
+   "name": "Goldeen",
+   "printing": "base2-53",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45002
+  },
+  "84": {
+   "name": "Seaking",
+   "printing": "base2-46",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 50623
+  },
+  "85": {
+   "name": "Staryu",
+   "printing": "base1-65",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 39265
+  },
+  "86": {
+   "name": "Starmie",
+   "printing": "base1-64",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 48258
+  },
+  "87": {
+   "name": "Magikarp",
+   "printing": "base1-35",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50711
+  },
+  "88": {
+   "name": "Gyarados",
+   "printing": "base1-6",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50114
+  },
+  "89": {
+   "name": "Lapras",
+   "printing": "base3-25",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 44908
+  },
+  "91": {
+   "name": "Vaporeon",
+   "printing": "base2-12",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 53229
+  },
+  "92": {
+   "name": "Omanyte",
+   "printing": "base3-52",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 51705
+  },
+  "93": {
+   "name": "Omastar",
+   "printing": "base3-40",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 55657
+  },
+  "94": {
+   "name": "Articuno",
+   "printing": "base3-2",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 52588
+  },
+  "96": {
+   "name": "Pikachu",
+   "printing": "base1-58",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 43733
+  },
+  "97": {
+   "name": "Pikachu",
+   "printing": "base2-60",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 48274
+  },
+  "98": {
+   "name": "Pikachu",
+   "printing": "basep-1",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 50897
+  },
+  "99": {
+   "name": "Pikachu",
+   "printing": "basep-1",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 50897
+  },
+  "100": {
+   "name": "Flying Pikachu",
+   "printing": "basep-25",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 48142
+  },
+  "101": {
+   "name": "Surfing Pikachu",
+   "printing": "basep-28",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 37447
+  },
+  "102": {
+   "name": "Surfing Pikachu",
+   "printing": "basep-28",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 37447
+  },
+  "103": {
+   "name": "Raichu",
+   "printing": "base1-14",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50141
+  },
+  "104": {
+   "name": "Raichu",
+   "printing": "base3-14",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46660
+  },
+  "105": {
+   "name": "Magnemite",
+   "printing": "base1-53",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 44634
+  },
+  "107": {
+   "name": "Magneton",
+   "printing": "base1-9",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 49759
+  },
+  "108": {
+   "name": "Magneton",
+   "printing": "base3-11",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 49811
+  },
+  "109": {
+   "name": "Voltorb",
+   "printing": "base1-67",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 37557
+  },
+  "111": {
+   "name": "Electrode",
+   "printing": "base2-2",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 44142
+  },
+  "112": {
+   "name": "Electabuzz",
+   "printing": "basep-2",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 52954
+  },
+  "113": {
+   "name": "Electabuzz",
+   "printing": "base1-20",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50205
+  },
+  "115": {
+   "name": "Jolteon",
+   "printing": "base2-4",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 50930
+  },
+  "116": {
+   "name": "Zapdos",
+   "printing": "base3-15",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 43888
+  },
+  "117": {
+   "name": "Zapdos",
+   "printing": "base1-16",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 46266
+  },
+  "119": {
+   "name": "Sandshrew",
+   "printing": "base1-62",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 45524
+  },
+  "120": {
+   "name": "Sandslash",
+   "printing": "base3-41",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 48581
+  },
+  "121": {
+   "name": "Diglett",
+   "printing": "base1-47",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 39496
+  },
+  "122": {
+   "name": "Dugtrio",
+   "printing": "base1-19",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42591
+  },
+  "123": {
+   "name": "Mankey",
+   "printing": "base2-55",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45709
+  },
+  "124": {
+   "name": "Primeape",
+   "printing": "base2-43",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45937
+  },
+  "125": {
+   "name": "Machop",
+   "printing": "base1-52",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 38114
+  },
+  "126": {
+   "name": "Machoke",
+   "printing": "base1-34",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 53029
+  },
+  "127": {
+   "name": "Machamp",
+   "printing": "base1-8",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50783
+  },
+  "128": {
+   "name": "Geodude",
+   "printing": "base3-47",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 44882
+  },
+  "129": {
+   "name": "Graveler",
+   "printing": "base3-37",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 53100
+  },
+  "130": {
+   "name": "Golem",
+   "printing": "base3-36",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46507
+  },
+  "131": {
+   "name": "Onix",
+   "printing": "base1-56",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 50740
+  },
+  "132": {
+   "name": "Cubone",
+   "printing": "base2-50",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 42005
+  },
+  "133": {
+   "name": "Marowak",
+   "printing": "base2-39",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 46794
+  },
+  "135": {
+   "name": "Hitmonlee",
+   "printing": "base3-7",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 43347
+  },
+  "136": {
+   "name": "Hitmonchan",
+   "printing": "base1-7",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 41421
+  },
+  "137": {
+   "name": "Rhyhorn",
+   "printing": "base2-61",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41739
+  },
+  "138": {
+   "name": "Rhydon",
+   "printing": "base2-45",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 47876
+  },
+  "139": {
+   "name": "Kabuto",
+   "printing": "base3-50",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 50435
+  },
+  "140": {
+   "name": "Kabutops",
+   "printing": "base3-9",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 47708
+  },
+  "141": {
+   "name": "Aerodactyl",
+   "printing": "base3-1",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 45038
+  },
+  "142": {
+   "name": "Abra",
+   "printing": "base1-43",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42429
+  },
+  "143": {
+   "name": "Kadabra",
+   "printing": "base1-32",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47867
+  },
+  "144": {
+   "name": "Alakazam",
+   "printing": "base1-1",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 49451
+  },
+  "146": {
+   "name": "Slowpoke",
+   "printing": "base3-55",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 38404
+  },
+  "147": {
+   "name": "Slowbro",
+   "printing": "base3-43",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 49139
+  },
+  "148": {
+   "name": "Gastly",
+   "printing": "base1-50",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42090
+  },
+  "149": {
+   "name": "Gastly",
+   "printing": "base3-33",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 41442
+  },
+  "150": {
+   "name": "Haunter",
+   "printing": "base3-6",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 41802
+  },
+  "151": {
+   "name": "Haunter",
+   "printing": "base1-29",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 42025
+  },
+  "152": {
+   "name": "Gengar",
+   "printing": "base3-5",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 49379
+  },
+  "153": {
+   "name": "Drowzee",
+   "printing": "base1-49",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 44873
+  },
+  "154": {
+   "name": "Hypno",
+   "printing": "base3-8",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 48234
+  },
+  "155": {
+   "name": "Mr. Mime",
+   "printing": "base2-6",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 48455
+  },
+  "156": {
+   "name": "Jynx",
+   "printing": "base1-31",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47664
+  },
+  "157": {
+   "name": "Mewtwo",
+   "printing": "base1-10",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 45878
+  },
+  "158": {
+   "name": "Mewtwo",
+   "printing": "basep-3",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 43955
+  },
+  "159": {
+   "name": "Mewtwo",
+   "printing": "basep-14",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 50818
+  },
+  "160": {
+   "name": "Mew",
+   "printing": "basep-47",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 47941
+  },
+  "162": {
+   "name": "Mew",
+   "printing": "basep-8",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 44355
+  },
+  "163": {
+   "name": "Pidgey",
+   "printing": "base1-57",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 44642
+  },
+  "164": {
+   "name": "Pidgeotto",
+   "printing": "base1-22",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 46203
+  },
+  "166": {
+   "name": "Pidgeot",
+   "printing": "base2-8",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 48820
+  },
+  "167": {
+   "name": "Rattata",
+   "printing": "base1-61",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 39025
+  },
+  "168": {
+   "name": "Raticate",
+   "printing": "base1-40",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 51907
+  },
+  "169": {
+   "name": "Spearow",
+   "printing": "base2-62",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45057
+  },
+  "170": {
+   "name": "Fearow",
+   "printing": "base2-36",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 46514
+  },
+  "171": {
+   "name": "Clefairy",
+   "printing": "base1-5",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 47673
+  },
+  "172": {
+   "name": "Clefable",
+   "printing": "base2-1",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 50736
+  },
+  "173": {
+   "name": "Jigglypuff",
+   "printing": "basep-7",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 41848
+  },
+  "175": {
+   "name": "Jigglypuff",
+   "printing": "base2-54",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 41318
+  },
+  "176": {
+   "name": "Wigglytuff",
+   "printing": "base2-16",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 45178
+  },
+  "177": {
+   "name": "Meowth",
+   "printing": "basep-10",
+   "layout": "pokemon/basep",
+   "illustration": [
+    41,
+    59,
+    279,
+    193
+   ],
+   "bytes": 49255
+  },
+  "178": {
+   "name": "Meowth",
+   "printing": "base2-56",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 42486
+  },
+  "179": {
+   "name": "Persian",
+   "printing": "base2-42",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 46571
+  },
+  "180": {
+   "name": "Farfetch'd",
+   "printing": "base1-27",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 43597
+  },
+  "181": {
+   "name": "Doduo",
+   "printing": "base1-48",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 39376
+  },
+  "182": {
+   "name": "Dodrio",
+   "printing": "base2-34",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 43151
+  },
+  "183": {
+   "name": "Lickitung",
+   "printing": "base2-38",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 48971
+  },
+  "184": {
+   "name": "Chansey",
+   "printing": "base1-3",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 45055
+  },
+  "185": {
+   "name": "Kangaskhan",
+   "printing": "base2-5",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 42349
+  },
+  "186": {
+   "name": "Tauros",
+   "printing": "base2-47",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 47450
+  },
+  "188": {
+   "name": "Eevee",
+   "printing": "base2-51",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 46719
+  },
+  "189": {
+   "name": "Porygon",
+   "printing": "base1-39",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 44191
+  },
+  "190": {
+   "name": "Snorlax",
+   "printing": "base2-11",
+   "layout": "pokemon/base2",
+   "illustration": [
+    40,
+    59,
+    280,
+    193
+   ],
+   "bytes": 46704
+  },
+  "191": {
+   "name": "Dratini",
+   "printing": "base1-26",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 36746
+  },
+  "192": {
+   "name": "Dragonair",
+   "printing": "base1-18",
+   "layout": "pokemon/base1",
+   "illustration": [
+    40,
+    61,
+    280,
+    193
+   ],
+   "bytes": 48757
+  },
+  "194": {
+   "name": "Dragonite",
+   "printing": "base3-4",
+   "layout": "pokemon/base3",
+   "illustration": [
+    39,
+    58,
+    283,
+    194
+   ],
+   "bytes": 46876
+  },
+  "195": {
+   "name": "Professor Oak",
+   "printing": "base1-88",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 35307
+  },
+  "196": {
+   "name": "Imposter Professor Oak",
+   "printing": "base1-73",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 37662
+  },
+  "197": {
+   "name": "Bill",
+   "printing": "base1-91",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 36585
+  },
+  "198": {
+   "name": "Mr.Fuji",
+   "printing": "base3-58",
+   "layout": "trainer/base3",
+   "illustration": [
+    34,
+    116,
+    298,
+    159
+   ],
+   "bytes": 35334
+  },
+  "199": {
+   "name": "Lass",
+   "printing": "base1-75",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 36685
+  },
+  "201": {
+   "name": "Pokemon Trader",
+   "printing": "base1-77",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 41564
+  },
+  "202": {
+   "name": "Pokemon Breeder",
+   "printing": "base1-76",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 40245
+  },
+  "203": {
+   "name": "Clefairy Doll",
+   "printing": "base1-70",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 43462
+  },
+  "204": {
+   "name": "Mysterious Fossil",
+   "printing": "base3-62",
+   "layout": "trainer/base3",
+   "illustration": [
+    34,
+    116,
+    298,
+    159
+   ],
+   "bytes": 44339
+  },
+  "205": {
+   "name": "Energy Retrieval",
+   "printing": "base1-81",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 34087
+  },
+  "207": {
+   "name": "Energy Search",
+   "printing": "base3-59",
+   "layout": "trainer/base3",
+   "illustration": [
+    34,
+    116,
+    298,
+    159
+   ],
+   "bytes": 34123
+  },
+  "208": {
+   "name": "Energy Removal",
+   "printing": "base1-92",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 32742
+  },
+  "209": {
+   "name": "Super Energy Removal",
+   "printing": "base1-79",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 41313
+  },
+  "210": {
+   "name": "Switch",
+   "printing": "base1-95",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 32883
+  },
+  "211": {
+   "name": "Pokemon Center",
+   "printing": "base1-85",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 42273
+  },
+  "212": {
+   "name": "Poke Ball",
+   "printing": "base2-64",
+   "layout": "trainer/base2",
+   "illustration": [
+    34,
+    113,
+    297,
+    161
+   ],
+   "bytes": 35322
+  },
+  "213": {
+   "name": "Scoop Up",
+   "printing": "base1-78",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 35028
+  },
+  "214": {
+   "name": "Computer Search",
+   "printing": "base1-71",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 39995
+  },
+  "215": {
+   "name": "Pokedex",
+   "printing": "base1-87",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 35853
+  },
+  "216": {
+   "name": "PlusPower",
+   "printing": "base1-84",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 38975
+  },
+  "217": {
+   "name": "Defender",
+   "printing": "base1-80",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 41553
+  },
+  "218": {
+   "name": "Item Finder",
+   "printing": "base1-74",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 34985
+  },
+  "219": {
+   "name": "Gust of Wind",
+   "printing": "base1-93",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 35476
+  },
+  "220": {
+   "name": "Devolution Spray",
+   "printing": "base1-72",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 39267
+  },
+  "221": {
+   "name": "Potion",
+   "printing": "base1-94",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 31403
+  },
+  "222": {
+   "name": "Super Potion",
+   "printing": "base1-90",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 36022
+  },
+  "223": {
+   "name": "Full Heal",
+   "printing": "base1-82",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 32564
+  },
+  "224": {
+   "name": "Revive",
+   "printing": "base1-89",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 38799
+  },
+  "225": {
+   "name": "Maintenance",
+   "printing": "base1-83",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 33684
+  },
+  "226": {
+   "name": "Pokemon Flute",
+   "printing": "base1-86",
+   "layout": "trainer/base1",
+   "illustration": [
+    39,
+    114,
+    291,
+    158
+   ],
+   "bytes": 37778
+  },
+  "227": {
+   "name": "Gambler",
+   "printing": "base3-60",
+   "layout": "trainer/base3",
+   "illustration": [
+    34,
+    116,
+    298,
+    159
+   ],
+   "bytes": 30427
+  },
+  "228": {
+   "name": "Recycle",
+   "printing": "base3-61",
+   "layout": "trainer/base3",
+   "illustration": [
+    34,
+    116,
+    298,
+    159
+   ],
+   "bytes": 31795
+  }
+ }
+}

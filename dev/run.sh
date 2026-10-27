@@ -10,6 +10,5 @@ fi
 export MOEMON_COOP_CONFIG="$out/moemon_coop.ini"
 export MOEMON_DISPLAY_CONFIG="$out/moemon_display.ini"
 export MOEMON_CONTROLS_CONFIG="$out/moemon_controls.ini"
-export MOEMON_TCG_ART_DIR="$root/dev/artwork/tcg-art"
 export MOEMON_NO_UPDATE=1
 exec "$out/MoemonEmeraldKaiCoop" "$@"

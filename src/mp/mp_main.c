@@ -403,7 +403,12 @@ static void LoadConfig(void)
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
-        else if (strcmp(key, "card_art") == 0) gMpConfig.cardArt = strcmp(val, "gameboy") == 0;
+        else if (strcmp(key, "card_art") == 0)   // (1.28's "printed" never had the pictures: it's the new default)
+            gMpConfig.cardArt = strcmp(val, "gameboy") == 0     ? MP_CARD_ART_GAME_BOY
+                              : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
+                                                              : MP_CARD_ART_PRINTED_ART;
+        else if (strcmp(key, "card_back") == 0)
+            gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
@@ -529,8 +534,11 @@ void MP_SaveConfig(void)
         "moenav_calls = %s\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
-        "; OPTIONS > DISPLAY > CARD ART: printed (the real cards) or gameboy (the Game Boy pictures)\n"
+        "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
+        "; pictures in it) or full_card (the whole printed cards)\n"
         "card_art = %s\n"
+        "; OPTIONS > DISPLAY > CARD BACKS: printed (the real card back) or pixel\n"
+        "card_back = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -542,7 +550,9 @@ void MP_SaveConfig(void)
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
-        gMpConfig.cardArt ? "gameboy" : "printed", gMpConfig.lobby);
+        gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
+                                                                                                         : "printed_art",
+        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)

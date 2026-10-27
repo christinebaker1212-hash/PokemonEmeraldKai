@@ -1217,11 +1217,12 @@ static void InspectScreen(void)
 static void ArtScreen(void)
 {
     int w, h, scan;
-    SDL_Texture *art = G_ArtTexture(U.card, 1, &w, &h, &scan);
+    SDL_Texture *art = G_ArtTexture(U.card, &w, &h, &scan);
     G_Fill(0, 0, 240, 160, 0x101418);
     if (art)
     {
-        float fit = scan ? 156.0f / h : (float)(w * 3 <= 228 ? 3 : 2);
+        /* A printed picture fits the screen; the Game Boy's grows by whole pixels. */
+        float fit = scan ? G_MinF(156.0f / h, 228.0f / w) : (float)(w * 3 <= 228 ? 3 : 2);
         SDL_FRect dst;
         if (U.zoom)
             fit *= scan ? 1.8f : 1.33f;
@@ -1905,12 +1906,8 @@ static void TradeStep(unsigned pressed)
     const struct TcgSocial *s = Tcg_Social();
     struct TcgCollection *c = Tcg_GetCollection();
     int n = (int)ListSize();
-    if (s->peerLeft)
-    {
-        Say(ACT_CLOSE, "%s left the trade.", PeerName(s->peer));
-        Tcg_SocialLeave();
-        return;
-    }
+    /* Both confirmed: the trade is done, even when the friend's leaving came in with their
+     * confirm (they leave the moment they see ours, and both arrive in one frame). */
     if (s->myConfirm && s->theirConfirm && s->myOffer && s->theirOffer)
     {
         unsigned mine = s->myOffer, theirs = s->theirOffer;
@@ -1925,6 +1922,12 @@ static void TradeStep(unsigned pressed)
         Tcg_SocialLeave();
         PlayFanfare(MUS_OBTAIN_ITEM);
         Say(ACT_CLOSE, "You traded your %s for %s!", Tcg_Card(mine)->name, Tcg_Card(theirs)->name);
+        return;
+    }
+    if (s->peerLeft)
+    {
+        Say(ACT_CLOSE, "%s left the trade.", PeerName(s->peer));
+        Tcg_SocialLeave();
         return;
     }
     FilterTab(pressed, 10);
@@ -2452,7 +2455,8 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     if (!Tcg_IsActive())
         return NULL;
     G_Begin(r);
-    G_SetGameBoyArt(gMpConfig.cardArt);
+    G_SetArtMode(gMpConfig.cardArt);
+    G_SetBackMode(gMpConfig.cardBack);
     if (sCanvas && sCanvasOwner != r)
         sCanvas = NULL;
     if (!sCanvas)

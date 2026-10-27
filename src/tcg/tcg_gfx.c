@@ -7,13 +7,11 @@
 #include "fonts.h"
 #include "text_window.h"
 #include "constants/characters.h"
-#include "tcg/art_pack.h"
 #include "tcg/card_ids.h"
 #include "tcg_gfx.h"
 
-unsigned char *stbi_load(const char *, int *, int *, int *, int);
 unsigned char *stbi_load_from_memory(const unsigned char *, int, int *, int *, int *, int);
-extern const unsigned char gTcgOriginalArt[], gTcgOriginalArtEnd[];
+extern const unsigned char gTcgOriginalArt[], gTcgOriginalArtEnd[], gTcgPrintedArt[], gTcgPrintedArtEnd[];
 void stbi_image_free(void *);
 
 static SDL_Renderer *sR;
@@ -955,11 +953,12 @@ struct Source
     unsigned id, kind, age;
     int w, h;
     uint32_t *px;
+    int artX, artY, artW, artH; /* where the illustration is (the whole picture for the Game Boy's) */
 };
 #define SOURCES 48
 static struct Source sSource[SOURCES];
 static unsigned sSourceAge;
-static int sScanState = -1;
+static unsigned sArtMode; /* G_ART_* */
 static uint32_t *ToArgb(unsigned char *pixels, int *w, int *h)
 {
     int i;
@@ -973,55 +972,58 @@ static uint32_t *ToArgb(unsigned char *pixels, int *w, int *h)
     stbi_image_free(pixels);
     return out;
 }
-static uint32_t *LoadPixels(const char *path, int *w, int *h)
+static unsigned U32(const unsigned char *b) { return b[0] | b[1] << 8 | b[2] << 16 | (unsigned)b[3] << 24; }
+/* A card's entry in a built-in archive: graphics/tcg/original.bin ("TCGA": offset, size) or
+ * graphics/tcg/printed.bin ("TCGP": offset, size, then the illustration's x, y, w, h as u16;
+ * then, for id 0, the card back: hasBack). */
+static const unsigned char *Entry(const unsigned char *start, const unsigned char *end, const char *magic,
+                                  unsigned stride, int hasBack, unsigned id, unsigned *offset, unsigned *size)
 {
+    unsigned total = (unsigned)(end - start), count, index;
+    const unsigned char *b;
+    if (total < 8 || memcmp(start, magic, 4))
+        return NULL;
+    count = U32(start + 4);
+    index = id ? id - 1 : count;
+    if (id > count || (!id && !hasBack) || 8 + stride * (index + 1) > total)
+        return NULL;
+    b = start + 8 + stride * index;
+    *offset = U32(b);
+    *size = U32(b + 4);
+    if (!*size || *offset > total || *size > total - *offset)
+        return NULL;
+    return b;
+}
+static const unsigned char *PrintedEntry(unsigned id, unsigned *offset, unsigned *size)
+{
+    return Entry(gTcgPrintedArt, gTcgPrintedArtEnd, "TCGP", 16, 1, id, offset, size);
+}
+/* Decodes the Game Boy illustration (kind 0) or the printed card (kind 1; id 0 = the back). */
+static int LoadSource(struct Source *s, unsigned id, unsigned kind)
+{
+    const unsigned char *start = kind ? gTcgPrintedArt : gTcgOriginalArt, *b;
+    unsigned offset, size;
     int channels;
-    return ToArgb(stbi_load(path, w, h, &channels, 4), w, h);
-}
-/* The built-in Game Boy illustration (graphics/tcg/original.bin). */
-static uint32_t *OriginalArt(unsigned id, int *w, int *h)
-{
-    const unsigned char *b = gTcgOriginalArt;
-    unsigned count, offset, size, total = (unsigned)(gTcgOriginalArtEnd - gTcgOriginalArt);
-    int channels;
-    if (total < 8 || memcmp(b, "TCGA", 4))
-        return NULL;
-    count = b[4] | b[5] << 8 | b[6] << 16 | (unsigned)b[7] << 24;
-    if (!id || id > count || 8 + 8 * id > total)
-        return NULL;
-    b += 8 + 8 * (id - 1);
-    offset = b[0] | b[1] << 8 | b[2] << 16 | (unsigned)b[3] << 24;
-    size = b[4] | b[5] << 8 | b[6] << 16 | (unsigned)b[7] << 24;
-    if (!size || offset > total || size > total - offset)
-        return NULL;
-    return ToArgb(stbi_load_from_memory(gTcgOriginalArt + offset, (int)size, w, h, &channels, 4), w, h);
-}
-static uint32_t *TryScan(unsigned id, int full, int *w, int *h)
-{
-    char path[1200];
-    const char *env = getenv("MOEMON_TCG_ART_DIR");
-    char *base = SDL_GetBasePath();
-    uint32_t *px = NULL;
-    if (env)
+    b = kind ? PrintedEntry(id, &offset, &size)
+             : Entry(gTcgOriginalArt, gTcgOriginalArtEnd, "TCGA", 8, 0, id, &offset, &size);
+    if (!b)
+        return 0;
+    s->px = ToArgb(stbi_load_from_memory(start + offset, (int)size, &s->w, &s->h, &channels, 4), &s->w, &s->h);
+    if (!s->px)
+        return 0;
+    s->artX = 0, s->artY = 0, s->artW = s->w, s->artH = s->h;
+    if (kind)
     {
-        snprintf(path, sizeof(path), "%s/%s/%03u.jpg", env, full ? "cards" : "thumbnails", id);
-        px = LoadPixels(path, w, h);
+        s->artX = b[8] | b[9] << 8;
+        s->artY = b[10] | b[11] << 8;
+        s->artW = b[12] | b[13] << 8;
+        s->artH = b[14] | b[15] << 8;
+        if (!s->artW || !s->artH || s->artX + s->artW > s->w || s->artY + s->artH > s->h)
+            s->artX = 0, s->artY = 0, s->artW = s->w, s->artH = s->h;
     }
-    if (!px)
-    {
-        snprintf(path, sizeof(path), "%stcg/art/%s/%s/%03u.jpg", base ? base : "", TCG_ART_VERSION,
-                 full ? "cards" : "thumbnails", id);
-        px = LoadPixels(path, w, h);
-    }
-    if (!px)
-    {
-        snprintf(path, sizeof(path), "dev/artwork/tcg-art/%s/%03u.jpg", full ? "cards" : "thumbnails", id);
-        px = LoadPixels(path, w, h);
-    }
-    SDL_free(base);
-    return px;
+    return 1;
 }
-/* kind: 0 = Game Boy illustration, 1 = scan thumbnail, 2 = full scan. */
+/* kind: 0 = Game Boy illustration, 1 = printed card. */
 static struct Source *Source(unsigned id, unsigned kind)
 {
     unsigned i, best = 0;
@@ -1042,49 +1044,49 @@ static struct Source *Source(unsigned id, unsigned kind)
     s = &sSource[best];
     free(s->px);
     memset(s, 0, sizeof(*s));
-    if (kind)
-        s->px = TryScan(id, kind == 2, &s->w, &s->h);
-    else
-        s->px = OriginalArt(id, &s->w, &s->h);
-    if (!s->px)
+    if (!LoadSource(s, id, kind))
+    {
+        free(s->px);
+        memset(s, 0, sizeof(*s));
         return NULL;
+    }
     s->id = id;
     s->kind = kind;
     s->age = ++sSourceAge;
     return s;
 }
-static int sGameBoyArt;
 static void ForgetFaces(void);
-/* OPTIONS > DISPLAY > CARD ART: the printed cards, or the Game Boy pictures. */
-void G_SetGameBoyArt(int on)
+/* OPTIONS > DISPLAY > CARD ART. */
+void G_SetArtMode(unsigned mode)
 {
-    if (!on == !sGameBoyArt)
+    if (mode >= G_ART_COUNT)
+        mode = G_ART_PRINTED_ART;
+    if (mode == sArtMode)
         return;
-    sGameBoyArt = on != 0;
+    sArtMode = mode;
     ForgetFaces();
 }
-/* The printed card when the pack has it: the full scan, else its thumbnail. */
-static struct Source *Scan(unsigned id, int full)
+static unsigned sBackMode; /* G_BACK_* */
+void G_SetBackMode(unsigned mode)
 {
-    struct Source *s = NULL;
-    if (sGameBoyArt || !G_HasScans())
-        return NULL;
-    if (full)
-        s = Source(id, 2);
-    return s ? s : Source(id, 1);
+    if (mode >= G_BACK_COUNT)
+        mode = G_BACK_PRINTED;
+    if (mode == sBackMode)
+        return;
+    sBackMode = mode;
+    ForgetFaces();
 }
-int G_HasScans(void)
+/* The printed card, unless CARD ART is GAME BOY or the card was only ever on the Game Boy. */
+static struct Source *Scan(unsigned id)
 {
-    if (sGameBoyArt)
-        return 0;
-    if (sScanState < 0)
-    {
-        int w, h;
-        uint32_t *px = TryScan(TCG_CARD_PIKACHU_LV12, 0, &w, &h);
-        sScanState = px != NULL;
-        free(px);
-    }
-    return sScanState;
+    if (sArtMode == G_ART_GAME_BOY || !G_HasPrinted(id))
+        return NULL;
+    return Source(id, 1);
+}
+int G_HasPrinted(unsigned id)
+{
+    unsigned offset, size;
+    return PrintedEntry(id, &offset, &size) != NULL;
 }
 /* Area-averaging resample of a source rectangle (premultiplied by alpha). */
 static void Resample(const struct Source *src, float sx, float sy, float sw, float sh, struct GSurface *dst, int dx,
@@ -1123,6 +1125,24 @@ static void Resample(const struct Source *src, float sx, float sy, float sw, flo
         }
 }
 
+/* A card's illustration into a box, cut to the box's shape around its middle. */
+static void ArtInto(const struct Source *art, struct GSurface *s, int x, int y, int w, int h)
+{
+    float sx = (float)art->artX, sy = (float)art->artY, sw = (float)art->artW, sh = (float)art->artH;
+    if (sw * h > sh * w)
+    {
+        float cut = sw - sh * w / h;
+        sx += cut / 2;
+        sw -= cut;
+    }
+    else
+    {
+        float cut = sh - sw * h / w;
+        sy += cut / 2;
+        sh -= cut;
+    }
+    Resample(art, sx, sy, sw, sh, s, x, y, w, h);
+}
 static void Back(struct GSurface *s)
 {
     int w = s->w, h = s->h, x, y;
@@ -1155,13 +1175,15 @@ static void Back(struct GSurface *s)
     }
     S_RoundFrame(s, 0, 0, w, h, w >= 20 ? 2 : 1, ARGB(0x0c1838, 255));
 }
-/* The type-colored face drawn around a Game Boy illustration. */
+/* The type-colored Game Boy frame, around the printed illustration (CARD ART: PRINTED ART) or the
+ * Game Boy picture. */
 static void Face(struct GSurface *s, const struct TcgCard *c)
 {
     int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, i, artW, artH, artX, artY, textY;
     unsigned type = c->kind == TCG_TRAINER ? 7 : c->type, base = G_TypeColor(type, 0), light = G_TypeColor(type, 1),
              dark = G_TypeColor(type, 2);
-    struct Source *art = Source(c->id, 0);
+    struct Source *printed = sArtMode == G_ART_PRINTED_ART ? Scan(c->id) : NULL;
+    struct Source *art = printed ? printed : Source(c->id, 0);
     int radius = w >= 26 ? 2 : 1;
     /* Yellow border, as printed. */
     S_RoundFill(s, 0, 0, w, h, radius, ARGB(0xf0c838, 255));
@@ -1181,7 +1203,7 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
         artX = b + 1;
         artY = (h - artH) / 2;
         if (art)
-            Resample(art, 0, 0, (float)art->w, (float)art->h, s, artX, artY, artW, artH);
+            ArtInto(art, s, artX, artY, artW, artH);
         S_Frame(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(dark, 255));
         S_Fill(s, b + 1, h - b - 3, w - 2 * b - 2, 1, ARGB(dark, 160));
         return;
@@ -1196,14 +1218,16 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
         S_Fill(s, w - b - 1 - (w >= 26 ? 5 : 3), b + 1, w >= 26 ? 4 : 2, 1, ARGB(0xd02020, 220));
     }
     artW = w - 2 * b - 2;
-    artH = (artW * 3 + 2) / 4;
+    /* The Game Boy pictures are 4:3. A printed Trainer's is much wider (about 1.85:1):
+     * its box is too, so the picture keeps its sides. */
+    artH = printed && c->kind == TCG_TRAINER ? (artW * 5 + 4) / 9 : (artW * 3 + 2) / 4;
     artX = b + 1;
     artY = textY + 1;
     S_Fill(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(c->kind == TCG_TRAINER ? 0x606878 : 0xc0b070, 255));
     if (w >= 26)
         S_Frame(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(0x585040, 255));
     if (art)
-        Resample(art, 0, 0, (float)art->w, (float)art->h, s, artX, artY, artW, artH);
+        ArtInto(art, s, artX, artY, artW, artH);
     /* Text box: cost dots and lines that read as attack text from afar. */
     textY = artY + artH + 2;
     if (textY < h - b - 2)
@@ -1293,10 +1317,16 @@ SDL_Texture *G_CardTexture(unsigned id, int w, int h)
     if (!s.px)
         return NULL;
     if (!id)
-        Back(&s);
+    {
+        struct Source *back = sBackMode == G_BACK_PRINTED ? Source(0, 1) : NULL;
+        if (back)
+            ScanFace(&s, back);
+        else
+            Back(&s);
+    }
     else
     {
-        struct Source *scan = Scan(id, w > 80);
+        struct Source *scan = sArtMode == G_ART_FULL_CARD ? Scan(id) : NULL;
         if (scan)
             ScanFace(&s, scan);
         else
@@ -1351,37 +1381,52 @@ void G_Card(unsigned id, float x, float y, float w, float h, double angle, unsig
 }
 static struct
 {
-    unsigned id, full;
+    unsigned id;
     int w, h, scan;
     SDL_Texture *texture;
 } sArt;
-SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan)
+/* The big picture: the whole printed card (FULL CARD), its illustration (PRINTED ART) or the
+ * Game Boy picture. */
+SDL_Texture *G_ArtTexture(unsigned id, int *w, int *h, int *scan)
 {
     struct Source *s;
     struct GSurface surface;
-    if (sArt.texture && sArt.id == id && sArt.full == (unsigned)full)
+    if (sArt.texture && sArt.id == id)
         goto done;
     if (sArt.texture)
         SDL_DestroyTexture(sArt.texture);
     memset(&sArt, 0, sizeof(sArt));
-    s = Scan(id, full);
+    s = Scan(id);
     sArt.scan = s != NULL;
     if (!s)
         s = Source(id, 0);
     if (!s)
         return NULL;
-    surface.w = s->w;
-    surface.h = s->h;
-    surface.px = s->px;
-    sArt.texture = G_SurfaceTexture(&surface);
+    if (sArt.scan && sArtMode == G_ART_PRINTED_ART)
+    {
+        int y;
+        surface = G_SurfaceNew(s->artW, s->artH);
+        if (!surface.px)
+            return NULL;
+        for (y = 0; y < s->artH; y++)
+            memcpy(surface.px + (size_t)y * s->artW, s->px + (size_t)(s->artY + y) * s->w + s->artX,
+                   (size_t)s->artW * 4);
+        sArt.texture = G_SurfaceTexture(&surface);
+        G_SurfaceFree(&surface);
+    }
+    else
+    {
+        surface.w = s->w;
+        surface.h = s->h;
+        surface.px = s->px;
+        sArt.texture = G_SurfaceTexture(&surface);
+    }
     if (!sArt.texture)
         return NULL;
     if (sArt.scan)
         SDL_SetTextureScaleMode(sArt.texture, SDL_ScaleModeLinear);
     sArt.id = id;
-    sArt.full = full;
-    sArt.w = s->w;
-    sArt.h = s->h;
+    SDL_QueryTexture(sArt.texture, NULL, NULL, &sArt.w, &sArt.h);
 done:
     if (w)
         *w = sArt.w;

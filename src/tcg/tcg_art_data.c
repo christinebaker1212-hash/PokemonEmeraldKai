@@ -1,6 +1,8 @@
-// Moemon Kai: the Game Boy card illustrations (graphics/tcg/original.bin, built by
-// tools/tcg/build_original_art.py), built in with the assembler's .incbin like mp_pmd_data.c.
-// json_data_rules.mk makes this file depend on original.bin.
+// Moemon Kai: the card pictures, built in with the assembler's .incbin like mp_pmd_data.c.
+//   graphics/tcg/original.bin  the Game Boy illustrations (tools/tcg/build_original_art.py)
+//   graphics/tcg/printed.bin   the printed cards and where each one's illustration sits
+//                              (tools/tcg/build_printed_art.py)
+// json_data_rules.mk makes this file depend on both.
 #include "global.h"
 
 #ifdef _WIN32
@@ -17,5 +19,12 @@ __asm__(
     ".incbin \"graphics/tcg/original.bin\"\n"
     ".global gTcgOriginalArtEnd\n"
     "gTcgOriginalArtEnd:\n"
+    ".byte 0\n"
+    ".balign 16\n"
+    ".global gTcgPrintedArt\n"
+    "gTcgPrintedArt:\n"
+    ".incbin \"graphics/tcg/printed.bin\"\n"
+    ".global gTcgPrintedArtEnd\n"
+    "gTcgPrintedArtEnd:\n"
     ".byte 0\n"
     ".text\n");

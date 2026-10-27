@@ -104,7 +104,24 @@ const char *G_TypeName(unsigned type);
 SDL_Texture *G_CardTexture(unsigned id, int w, int h);
 void G_Card(unsigned id, float x, float y, float w, float h, double angle, unsigned alpha, unsigned flash);
 /* A big face without small details: the caller prints text over it. */
-SDL_Texture *G_ArtTexture(unsigned id, int full, int *w, int *h, int *scan);
-int G_HasScans(void);
-void G_SetGameBoyArt(int on);
+SDL_Texture *G_ArtTexture(unsigned id, int *w, int *h, int *scan);
+/* OPTIONS > DISPLAY > CARD ART (gMpConfig.cardArt). Cards the game invented have no printing and
+ * always show the Game Boy picture. */
+enum
+{
+    G_ART_PRINTED_ART, /* the printed illustration in the Game Boy frame (the default) */
+    G_ART_GAME_BOY,    /* the Game Boy picture in the frame */
+    G_ART_FULL_CARD,   /* the whole printed card */
+    G_ART_COUNT
+};
+void G_SetArtMode(unsigned mode);
+int G_HasPrinted(unsigned id);
+/* OPTIONS > DISPLAY > CARD BACKS (gMpConfig.cardBack). */
+enum
+{
+    G_BACK_PRINTED, /* the printed card back (the default) */
+    G_BACK_PIXEL,   /* the pixel-art back */
+    G_BACK_COUNT
+};
+void G_SetBackMode(unsigned mode);
 #endif

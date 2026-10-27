@@ -20,6 +20,10 @@ override `TCG_IMPLEMENTATION.md`'s "Agreed scope" where they differ.
 - B never concedes: B asks "End turn?". CONCEDE replaces the END TURN button.
 - The opponent's cards face them.
 - Zoom uses the printed card art; an option switches to the Game Boy art (printed is the default).
+  Later (1.28.1): the printed cards come with the update (1.28.0 never shipped them), and CARD ART
+  has three settings: the full printed card, the printed illustration in the Game Boy frame (the
+  default), or the Game Boy picture in the frame, with the illustration's place measured on the
+  printed cards. The card backs can be the real printed back too (CARD BACKS).
 - Hand-changing cards (PROFESSOR OAK...) scroll down to the hand to show the effect.
 - After a Knock Out the screen moves to the Bench.
 - Challenges only with the CARD CASE registered to a button; that button challenges the NPC in
