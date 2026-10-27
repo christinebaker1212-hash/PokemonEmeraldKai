@@ -35,19 +35,19 @@ in-game; their CI runs weren't checked either.
 - Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the
   existing tools/test/update_test.sh continues to exercise update integrity.
 
-### Card system (active dev work)
-- Work only on `dev/pokemon-card-system`; do not merge/publish as main.
-- User explicitly expanded scope to online player-versus-player card duels.
-- Current code/status, remaining rule/UI work, interface references and verification:
-  `docs/TCG_IMPLEMENTATION.md`. Do not describe the whole 228-card system as finished.
-- Native 240x160 Emerald font/windows; reference original poketcg layout while using
-  Emerald's wider screen. Deck preview is a compact centered illustration-only
-  panel; full scans are in card inspection. Send actual WIP screenshots.
-- ONLINE CARDS is explicit opt-in on both clients; invites, deck validation,
-  deterministic action/ACK synchronization, hashes, cancel/timeout/disconnect.
-- Tests: `tools/tcg/test.sh`, `tools/tcg/test_ui.sh`, `tools/tcg/test_online.sh`
-  (optional `250` for each-way latency plus jitter). Two real clients completed
-  normal duels; dev profiles remain read-only. Main release workflow unchanged.
+### Card system (shipped in main 1.27.0)
+- Ungated and released as a main update. Status, design decisions, code map, rules fixes,
+  effect coverage, online protocol and every test: `docs/TCG_IMPLEMENTATION.md`.
+- The duel screen follows the user's DS screenshot (docs/user_images/37.webp) at native
+  240x160: board cursor + SELECT quick menu, hand strip that scrolls the mat, card
+  effects and sounds, controller button icons everywhere. Do not describe the whole
+  228-card system as finished (20 attacks and all Pokemon Powers are unported).
+- Online duels between players are a hard requirement: keep `tools/tcg/test_online.sh`
+  and `tools/tcg/test_online_board.sh` (both also with `250` lag) passing, and bump
+  `TCG_LINK_VERSION` (now 3) on any rules/catalogue/wire change.
+- Tests: `tools/tcg/test.sh`, `NOBUILD=1 tools/tcg/test_ui.sh`, the two online tests,
+  `NOBUILD=1 tools/tcg/test_save.sh` (main saves), `NOBUILD=1 tools/test/dev_save_test.sh`.
+  Send actual screenshots to the user.
 
 ### 1. Joining a battle against two trainers (user's report; unfinished, backed out of the branch)
 Report: "if two players enter a battle that was started by the initial trainer being seen by two trainers, a third

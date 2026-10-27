@@ -72,6 +72,7 @@ struct TcgCollection
     struct TcgSavedDeck decks[TCG_SAVED_DECKS];
     uint16_t packs[TCG_PACK_TYPES];
     uint32_t wins, dust, vouchers, rng;
+    uint32_t owner; /* the save it belongs to (its Trainer ID): a new game starts fresh */
     uint8_t optedIn, activeDeck, fastAnimations, quiet;
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);

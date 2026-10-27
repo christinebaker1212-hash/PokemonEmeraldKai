@@ -1,5 +1,5 @@
+#include <SDL2/SDL.h> // before global.h: its macros break the Windows intrinsics headers
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -170,7 +170,8 @@ enum
     FLOW_EVOLVE,
     FLOW_ATTACH,
     FLOW_TRAINER,
-    FLOW_RETREAT
+    FLOW_RETREAT,
+    FLOW_ATTACK
 };
 enum
 {
@@ -333,10 +334,12 @@ static int AttackReady(unsigned attack, char *reason, size_t size)
         return snprintf(reason, size, "No attack."), 0;
     if (c->attacks[attack].category == TCG_POKEMON_POWER)
         return snprintf(reason, size, "This is a Pokemon Power."), 0;
-    if (!TcgDuel_CanAttack(&B.view, 0, attack))
-        return snprintf(reason, size, "Not enough Energy attached."), 0;
     if (!TcgDuel_EffectSupported(c->attacks[attack].effect))
         return snprintf(reason, size, "This attack's effect isn't ready yet."), 0;
+    if (TcgDuel_EffectBlock(&B.view, 0, &c->attacks[attack]))
+        return snprintf(reason, size, "%s", TcgDuel_EffectBlock(&B.view, 0, &c->attacks[attack])), 0;
+    if (!TcgDuel_CanAttack(&B.view, 0, attack))
+        return snprintf(reason, size, "Not enough Energy attached."), 0;
     if (f->condition == TCG_ASLEEP)
         return snprintf(reason, size, "%s is Asleep.", c->name), 0;
     if (f->condition == TCG_PARALYZED)
@@ -683,6 +686,11 @@ static int StartEvent(const struct TcgEvent *e, int post)
     char line[64];
     unsigned who = e->player & 1, slot = e->slot < TCG_FIELD_SIZE ? e->slot : 0;
     const struct TcgCard *c = e->card ? Tcg_Card(e->card) : NULL;
+    /* For the test harness: the moments worth a screenshot. */
+    if (e->type == TCG_EV_KO || e->type == TCG_EV_WIN || e->type == TCG_EV_PROMOTE || e->type == TCG_EV_STATUS ||
+        e->type == TCG_EV_COIN)
+        printf("[tcg] show event %u player %u slot %u value %u frame %u\n", e->type, e->player, e->slot, e->value,
+               B.frame);
     switch (e->type)
     {
     case TCG_EV_TURN:
@@ -691,7 +699,18 @@ static int StartEvent(const struct TcgEvent *e, int post)
         if (f)
         {
             if (who)
-                snprintf(f->text, sizeof(f->text), "%s", B.online ? "YOUR FRIEND'S TURN" : "OPPONENT'S TURN");
+            {
+                if (B.online)
+                {
+                    unsigned k;
+                    snprintf(f->text, sizeof(f->text), "%s'S TURN", B.opponent);
+                    for (k = 0; f->text[k]; k++)
+                        if (f->text[k] >= 'a' && f->text[k] <= 'z')
+                            f->text[k] -= 32;
+                }
+                else
+                    snprintf(f->text, sizeof(f->text), "OPPONENT'S TURN");
+            }
             else
                 snprintf(f->text, sizeof(f->text), "YOUR TURN");
             f->color = who ? 0xe85050 : 0x3878f0;
@@ -797,7 +816,7 @@ static int StartEvent(const struct TcgEvent *e, int post)
     }
     case TCG_EV_NO_DAMAGE:
         CardCenter(who, slot, &x, &y);
-        Banner(x, who ? y + 30 : y - 30, "NO DAMAGE!", 0x2870a0, fast ? 36 : 54);
+        Banner(x, who ? y + 30 : y - 30, e->value ? "THE ATTACK MISSED!" : "NO DAMAGE!", 0x2870a0, fast ? 36 : 54);
         PlaySE(SE_M_BARRIER);
         return fast ? 26 : 40;
     case TCG_EV_KO:
@@ -1328,6 +1347,9 @@ static int TargetFilter(int *who)
         return F_ANY_POKEMON;
     case FLOW_RETREAT:
         return F_BENCH;
+    case FLOW_ATTACK:
+        *who = TcgDuel_AttackChoice(&Field(0, 0)->attacks[B.action.attack], NULL) == 1;
+        return F_BENCH;
     case FLOW_TRAINER:
         if (B.step < B.nsteps)
         {
@@ -1677,12 +1699,8 @@ static int HandPlayable(const struct TcgCard *c, char *reason, size_t size)
         }
         return snprintf(reason, size, "You have no %s in play.", c->evolvesFrom), 0;
     }
-    if (c->kind == TCG_TRAINER)
-    {
-        int n;
-        TrainerSteps(c->id, &n);
-        (void)n;
-    }
+    if (c->kind == TCG_TRAINER && p->noTrainers)
+        return snprintf(reason, size, "Headache: no Trainer cards this turn."), 0;
     return 1;
 }
 static void OpenHandMenu(void)
@@ -2168,10 +2186,25 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 TcgBoard_Reject(reason);
             else
             {
+                const struct TcgCard *c = Field(0, 0);
+                unsigned choice = TcgDuel_AttackChoice(&c->attacks[B.attackCursor], NULL), k, any = 0;
                 memset(&B.action, 0, sizeof(B.action));
                 B.action.type = TCG_ATTACK;
                 B.action.attack = (uint8_t)B.attackCursor;
-                Submit(out, &result);
+                for (k = 1; k < TCG_FIELD_SIZE && choice; k++)
+                    any |= Field(choice == 1, k) != NULL;
+                if (choice && any)
+                {
+                    /* Spark, Lure, Teleport...: pick the Benched Pokemon first. */
+                    B.flow = FLOW_ATTACK;
+                    B.heldHand = -1;
+                    B.mode = M_FREE;
+                    B.focusKind = choice == 1 ? T_THEIRS : T_MINE;
+                    B.focusIndex = 1;
+                    StartTarget();
+                }
+                else
+                    Submit(out, &result);
             }
         }
         return result;
@@ -2226,6 +2259,12 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 B.step++;
                 B.mode = M_FREE;
                 ContinueTrainer(out, &result);
+                return result;
+            }
+            if (B.flow == FLOW_ATTACK)
+            {
+                B.action.target = (uint8_t)B.focusIndex;
+                Submit(out, &result);
                 return result;
             }
             B.action.slot = (uint8_t)B.focusIndex;
@@ -2436,6 +2475,42 @@ static void Counters(struct Rect r, unsigned damage)
         G_Fill(x + 1, y + 1, 1, 1, G_Mix(c, 0xffffff, 0.6f));
     }
 }
+/* The original's substatus as small tags beside the conditions. Returns the
+ * width; right-aligned to x when right is set. */
+static int Substatus(int x, int y, const struct TcgFieldCard *f, int right, int draw)
+{
+    static const char *const guards[] = {"", "-10", "-20", "<40", "HALF"};
+    static const char *const weakens[] = {"", "ATK-10", "ATK-20", "BLIND"};
+    const char *labels[6];
+    unsigned colors[6], n = 0, i;
+    int w = 0;
+    if (f->barrier)
+        labels[n] = "SAFE", colors[n++] = 0x3070c8;
+    else if (f->guard && f->guard < 5)
+        labels[n] = guards[f->guard], colors[n++] = 0x3070c8;
+    if (f->weaken && f->weaken < 4)
+        labels[n] = weakens[f->weaken], colors[n++] = 0xc06020;
+    if (f->noAttack)
+        labels[n] = "NO ATK", colors[n++] = 0xc06020;
+    if (f->noRetreat)
+        labels[n] = "STUCK", colors[n++] = 0xc06020;
+    if (f->charged)
+        labels[n] = "x2", colors[n++] = 0xc89010;
+    for (i = 0; i < n; i++)
+        w += G_Measure(labels[i], TF_NARROW) + 5;
+    if (!draw)
+        return w;
+    if (right)
+        x -= w;
+    for (i = 0; i < n; i++)
+    {
+        int lw = G_Measure(labels[i], TF_NARROW) + 4;
+        G_RoundFill(x, y, lw, 9, colors[i], 255);
+        G_Text(x + 2, y - 1, G_WHITE, G_Mix(colors[i], 0, 0.5f), labels[i], 0, TF_NARROW);
+        x += lw + 1;
+    }
+    return w;
+}
 static void FieldInfo(unsigned who, unsigned slot)
 {
     const struct TcgCard *c = Field(who, slot);
@@ -2482,7 +2557,8 @@ static void FieldInfo(unsigned who, unsigned slot)
         {
             nameX = 144, nameY = 33, statusY = 46, orbY = 56, plateX = 144, plateY = 65;
             G_Text(nameX, nameY, G_WHITE, 0x104020, name, 0, TF_NARROW);
-            G_StatusBadges(nameX, statusY, B.cond[who][slot], B.poison[who][slot]);
+            x = nameX + G_StatusBadges(nameX, statusY, B.cond[who][slot], B.poison[who][slot]);
+            Substatus(x, statusY, f, 0, 1);
             for (i = 0; i < n && i < 8; i++)
                 G_EnergyOrb(plateX + i * 8, orbY, types[i], 1);
         }
@@ -2495,6 +2571,7 @@ static void FieldInfo(unsigned who, unsigned slot)
             w = (B.poison[who][slot] ? G_Measure("PSN", TF_NARROW) + 5 : 0) +
                 (B.cond[who][slot] ? G_Measure("SLP", TF_NARROW) + 5 : 0);
             G_StatusBadges(right - w, statusY, B.cond[who][slot], B.poison[who][slot]);
+            Substatus(right - w, statusY, f, 1, 1);
             x = right - (n < 8 ? n : 8) * 8 + 1;
             for (i = 0; i < n && i < 8; i++)
                 G_EnergyOrb(x + i * 8, orbY, types[i], 1);
@@ -2524,7 +2601,7 @@ static void DrawSprite(unsigned who, unsigned i)
             y += B.ko[who][slot] / 8.0f;
         }
         /* Cards under an evolution peek out by one pixel. */
-        if (B.view.players[who].field[slot].stackSize > 1 && s->settled)
+        if (B.view.players[who].field[slot].stackSize > 1 && s->settled && s->angle == 0)
             G_RoundFill((int)x + 1, (int)y + 1, (int)w, (int)h, 0xe8e8e0, alpha);
     }
     scale = cosf(s->flip * 3.14159f);
@@ -2572,7 +2649,7 @@ static void DrawHandBar(void)
     G_RoundFill(0, y, 26, 12, 0x303034, 255);
     G_FillA(1, y + 1, 24, 10, 0xa8a8ac, 255);
     G_FillA(1, y + 1, 24, 1, 0xe0e0e4, 255);
-    snprintf(n, sizeof(n), "%02u", me->handSize);
+    snprintf(n, sizeof(n), "%02u", B.intro > 0 ? 0 : me->handSize);
     G_FillA(5, y + 2, 16, 8, 0x5a6c88, 255);
     G_Digits(13 - G_DigitsWidth(n, 1, 1) / 2, y + 2, n, 1, 1, 0xe8f0ff, 255);
     G_RoundFill(214, y, 26, 12, 0x303034, 255);
@@ -2584,11 +2661,11 @@ static void DrawOppHand(void)
 {
     const struct TcgPlayer *p = &B.view.players[1];
     char n[8];
-    int i, shown = p->handSize > 3 ? 3 : p->handSize;
+    int i, shown = B.intro > 0 ? 0 : p->handSize > 3 ? 3 : p->handSize;
     G_TextAlign(16, 62, TA_CENTER, 0x9cf0b0, G_NO_SHADOW, "HAND", TF_NARROW);
     for (i = 0; i < shown; i++)
         G_Card(0, (float)(5 + i * 5), 73.0f - (i == 1), 10, 14, (i - 1) * 8.0, 255, 0);
-    snprintf(n, sizeof(n), "%u", p->handSize);
+    snprintf(n, sizeof(n), "%u", B.intro > 0 ? 0 : p->handSize);
     G_Digits(18 + (shown ? 4 : -6), 82, n, 0, 1, 0xf8f8f8, 255);
 }
 static void DrawFocus(struct Rect r, unsigned color)
@@ -2757,7 +2834,7 @@ static void DrawFx(void)
             G_Coin(f->x, f->y - (int)bounce, spin, heads, 255);
             if (t >= 0.62f)
             {
-                const char *text = f->player == 2 ? (heads ? "YOU GO FIRST!" : "THEY GO FIRST")
+                const char *text = f->player == 2 ? (heads ? "YOU GO FIRST!" : "OPPONENT GOES FIRST")
                                                   : heads ? "HEADS!" : "TAILS";
                 G_Banner(f->x, f->y + 24, text, heads ? 0x2858a8 : 0x704848, Ease((t - 0.62f) * 8), alpha);
             }
@@ -2994,15 +3071,18 @@ static void DrawResult(void)
     if (win && t < 80 && t % 3 == 0)
         Sparks(20 + rand() % 200, 40 + rand() % 40, rand() & 1 ? 0xf8e060 : 0x60c8f8, 3, 1.5f);
     {
-        int band = (int)(30 * open);
+        int band = (int)(34 * open);
         G_FillA(0, 48 - band / 2, 240, band, win ? 0x283868 : 0x402828, 230);
         G_FillA(0, 48 - band / 2, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
         G_FillA(0, 48 + band / 2 - 1, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
         if (open > 0.9f)
         {
             int w = G_Measure(title, TF_NORMAL);
+            char vs[64];
             (void)w;
-            G_TextAlign(120, 41, TA_CENTER, win ? 0xf8e060 : 0xe8c8c8, 0x302810, title, TF_NORMAL);
+            G_TextAlign(120, 36, TA_CENTER, win ? 0xf8e060 : 0xe8c8c8, 0x302810, title, TF_NORMAL);
+            snprintf(vs, sizeof(vs), "vs. %s", B.opponent);
+            G_TextAlign(120, 51, TA_CENTER, 0xc8d0e0, G_NO_SHADOW, vs, TF_NARROW);
         }
     }
     if (t > 20)
@@ -3140,6 +3220,9 @@ void TcgBoard_Render(void)
                                : B.flow == FLOW_EVOLVE  ? "Evolve which Pokemon?"
                                : B.flow == FLOW_ATTACH  ? "Attach the Energy to which Pokemon?"
                                : B.flow == FLOW_RETREAT ? "Switch in which Benched Pokemon?"
+                               : B.flow == FLOW_ATTACK  ? (TcgDuel_AttackChoice(&Field(0, 0)->attacks[B.action.attack], NULL) == 1
+                                                               ? "Aim at which of their Benched Pokemon?"
+                                                               : "Switch with which of your Benched Pokemon?")
                                : B.step < B.nsteps      ? B.steps[B.step].prompt
                                                         : "";
             char line[96];
@@ -3148,7 +3231,9 @@ void TcgBoard_Render(void)
             Prompt(line, !who);
         }
         else if (B.mode == M_FREE && B.view.phase == TCG_PROMOTION && MyTurn())
-            Prompt("Choose a Benched Pokemon to be your new Active Pokemon. {A}", 0);
+            Prompt(B.view.switchPending ? "Your Active Pokemon must switch out: choose who comes in. {A}"
+                                        : "Choose a Benched Pokemon to be your new Active Pokemon. {A}",
+                   0);
         else if (B.mode == M_FREE && B.view.phase == TCG_SETUP && MyTurn())
             Prompt(B.view.players[0].field[0].stackSize ? "Add Benched Pokemon if you like, then READY."
                                                         : "Choose a Basic Pokemon to be your Active Pokemon.",
@@ -3186,4 +3271,3 @@ void TcgBoard_Render(void)
         G_Text(120 - w / 2 + 8, 66, G_INK, G_INK_SHADOW, B.toast, w - 16, TF_SMALL);
     }
 }
-#endif

@@ -4840,7 +4840,6 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
     },
-#if MOEMON_DEV_BUILD
     [ITEM_CARD_CASE] =
     {
         .name = _("CARD CASE"),
@@ -4853,5 +4852,4 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_CardCase,
     },
-#endif
 };

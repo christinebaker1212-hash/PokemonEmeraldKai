@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD || defined(TCG_TEST)
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include <string.h>
@@ -407,11 +406,34 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
     if (bestAttack != TCG_NONE && p->field[0].condition != TCG_ASLEEP && p->field[0].condition != TCG_PARALYZED &&
         !p->field[0].noAttack)
     {
+        int required;
+        unsigned choice = TcgDuel_AttackChoice(&TcgDuel_Field(g, g->current, 0)->attacks[bestAttack], &required);
         a->type = TCG_ATTACK;
         a->attack = bestAttack;
-        return 1;
+        if (choice == 1)
+        {
+            /* Bench damage on the weakest; a Lure brings out the weakest. */
+            unsigned left = 0;
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+            {
+                const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, s);
+                unsigned hp;
+                if (!c)
+                    continue;
+                hp = c->hp > g->players[g->current ^ 1].field[s].damage ? c->hp - g->players[g->current ^ 1].field[s].damage : 0;
+                if (!a->target || hp < left)
+                {
+                    a->target = s;
+                    left = hp;
+                }
+            }
+        }
+        else if (choice == 2)
+            a->target = BestPokemon(g, g->current);
+        if (Legal(g, a))
+            return 1;
+        memset(a, 0, sizeof(*a));
     }
     a->type = TCG_PASS;
     return 1;
 }
-#endif

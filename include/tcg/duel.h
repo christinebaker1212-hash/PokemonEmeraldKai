@@ -13,6 +13,27 @@ struct TcgFieldCard
     uint16_t damage, enteredTurn;
     uint8_t condition, poison, noPrize, barrier, noRetreat, noAttack;
     uint8_t plusPower, defender, powerUsed;
+    /* Original substatus: guard (on itself, until its owner's next turn:
+     * TCG_GUARD_*), weaken (on a Defending Pokemon's next attacks:
+     * TCG_WEAKEN_*), charged (Swords Dance / Focus Energy: 1 set, 2 this
+     * turn doubles) and usedOnce (Leek Slap). barrier 1 stops damage,
+     * 2 every effect of attacks. */
+    uint8_t guard, weaken, charged, usedOnce;
+};
+enum
+{
+    TCG_GUARD_NONE,
+    TCG_GUARD_REDUCE_10,
+    TCG_GUARD_REDUCE_20,
+    TCG_GUARD_UNDER_40,
+    TCG_GUARD_HALVE
+};
+enum
+{
+    TCG_WEAKEN_NONE,
+    TCG_WEAKEN_10,
+    TCG_WEAKEN_20,
+    TCG_WEAKEN_SMOKESCREEN
 };
 enum TcgCondition
 {
@@ -54,7 +75,7 @@ struct TcgPlayer
     uint8_t deck[TCG_DECK_SIZE], hand[TCG_DECK_SIZE], discard[TCG_DECK_SIZE], prizes[6];
     uint8_t deckSize, handSize, discardSize, prizeSize;
     struct TcgFieldCard field[TCG_FIELD_SIZE];
-    uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated;
+    uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated, noTrainers;
     uint16_t turnsTaken;
     uint16_t attachmentExpires[TCG_DECK_SIZE];
 };
@@ -106,6 +127,13 @@ struct TcgDuel
     uint32_t rng;
     uint16_t turn;
     uint8_t current, first, phase, winner, prizeCount, promotePlayer, rewardClaimed, needsTurnStart;
+    /* An attack made the defender's owner pick a Benched Pokemon to switch
+     * in (Whirlwind): that choice is a TCG_PROMOTION with the Active kept. */
+    uint8_t switchPending, endAfterSwitch;
+    /* Within one attack only, always 0 between actions: Sonicboom ignores
+     * Weakness/Resistance, a failed coin cancels the rest, a coin flipped
+     * before the damage decides an effect after it. */
+    uint8_t noWeakRes, attackFailed, coinResult;
     char error[TCG_LOG_WIDTH];
     char log[TCG_LOG_LINES][TCG_LOG_WIDTH];
     unsigned logCount;
@@ -128,6 +156,15 @@ const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, un
 unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack);
 int TcgDuel_EffectSupported(const char *name);
+/* Why an attack's effect can't be used now (NULL = it can), e.g. Dream Eater. */
+const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack);
+/* 0: no choice. 1: the attacker picks one of the opponent's Benched Pokemon
+ * (action.target), 2: one of their own (action.target). */
+unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required);
+/* Damage from an effect to any Pokemon in play: no Weakness/Resistance;
+ * Defender, and for an Active Pokemon PlusPower and substatus, apply. */
+void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int amount, unsigned flags);
+void TcgDuel_SelfDamage(struct TcgDuel *g, int amount);
 int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *action);
 /* Internal, shared by the rules/effect modules. */
 void TcgDuel_Log(struct TcgDuel *g, const char *format, ...);

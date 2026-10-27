@@ -58,6 +58,35 @@ int main(void)
             assert(TcgDuel_Conserved(&l[0].game) && TcgDuel_Conserved(&l[1].game));
         }
         assert(l[0].game.phase == TCG_FINISHED && l[0].game.winner == l[1].game.winner);
+        /* A concession crossing the other player's move on the wire. */
+        head = tail = 0;
+        for (i = 0; i < 2; i++)
+            TcgLink_Init(&l[i], Send, NULL);
+        assert(TcgLink_Invite(&l[0], 1, seed + 100, deck, 0));
+        Flush(l);
+        assert(TcgLink_Accept(&l[1], deck, 0));
+        Flush(l);
+        for (steps = 0; steps < seed * 3 && l[0].game.phase != TCG_FINISHED; steps++)
+        {
+            unsigned who = l[0].game.phase == TCG_PROMOTION ? l[0].game.promotePlayer : l[0].game.current;
+            assert(TcgDuel_AiAction(&l[who].game, &a));
+            assert(TcgLink_Submit(&l[who], &a, 0));
+            Flush(l);
+        }
+        if (l[0].game.phase != TCG_FINISHED)
+        {
+            unsigned who = l[0].game.phase == TCG_PROMOTION ? l[0].game.promotePlayer : l[0].game.current;
+            struct TcgAction concede = {0};
+            concede.type = TCG_CONCEDE;
+            assert(TcgDuel_AiAction(&l[who].game, &a));
+            assert(TcgLink_Submit(&l[who], &a, 0));
+            assert(TcgLink_Submit(&l[who ^ 1], &concede, 0));
+            Flush(l);
+            assert(l[0].state == TCG_LINK_PLAYING && l[1].state == TCG_LINK_PLAYING);
+            assert(!l[0].pending && !l[1].pending);
+            assert(l[0].game.phase == TCG_FINISHED && l[0].game.winner == who);
+            assert(TcgLink_Hash(&l[0].game) == TcgLink_Hash(&l[1].game));
+        }
     }
     {
         uint8_t action[25] = {TCG_LINK_RELAY, TCG_LINK_VERSION, 4};
@@ -103,7 +132,7 @@ int main(void)
     Flush(l);
     assert(l[0].game.winner == (i ^ 1) && l[1].game.winner == (i ^ 1));
     assert(TcgLink_Hash(&l[0].game) == TcgLink_Hash(&l[1].game));
-    puts("PASS 20 synchronized online duels, turn ownership, acknowledgement gating, conservation, disconnect and "
+    puts("PASS 20 synchronized online duels, crossing concessions, turn ownership, acknowledgement gating, conservation, disconnect and "
          "timeout");
     return 0;
 }

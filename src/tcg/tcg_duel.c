@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD || defined(TCG_TEST)
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include <stdarg.h>
@@ -105,8 +104,11 @@ static void StartTurn(struct TcgDuel *g)
     g->needsTurnStart = 0;
     for (s = 0; s < TCG_FIELD_SIZE; s++)
     {
+        /* Protection from the last turn ends; Swords Dance takes effect. */
         p->field[s].powerUsed = 0;
         p->field[s].barrier = 0;
+        p->field[s].guard = 0;
+        p->field[s].charged = p->field[s].charged == 1 ? 2 : 0;
     }
     TcgDuel_Event(g, TCG_EV_TURN, g->current, 0, g->turn, 0, 0);
     if (!TcgDuel_Draw(g, g->current, 1))
@@ -173,7 +175,13 @@ unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot,
     }
     return n;
 }
+static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    return EnergyPaid(g, player, attack) && !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
+}
+static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Field(g, player, 0);
     const struct TcgAttack *a;
@@ -284,6 +292,9 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->barrier = 0;
     f->noRetreat = 0;
     f->noAttack = 0;
+    f->guard = 0;
+    f->weaken = 0;
+    f->charged = 0;
 }
 static unsigned AttachedTrainerCount(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned id)
 {
@@ -307,10 +318,15 @@ static void EndTurn(struct TcgDuel *g)
     }
     for (s = 0; s < TCG_FIELD_SIZE; s++)
     {
+        /* What the opponent's last attack did to this side lasts this turn. */
         p->field[s].plusPower = 0;
         p->field[s].noAttack = 0;
         p->field[s].noRetreat = 0;
+        p->field[s].weaken = 0;
+        if (p->field[s].charged == 2)
+            p->field[s].charged = 0;
     }
+    p->noTrainers = 0;
     for (who = 0; who < 2; who++)
     {
         struct TcgFieldCard *f = &g->players[who].field[0];
@@ -381,6 +397,23 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         unsigned who = g->promotePlayer;
         if (a->type != TCG_PROMOTE || s < 1 || s >= TCG_FIELD_SIZE || !g->players[who].field[s].stackSize)
             return Error(g, "Choose a Benched Pokemon to promote.");
+        if (g->switchPending)
+        {
+            /* Whirlwind and the like: the defender's owner picks who comes in. */
+            struct TcgFieldCard temp = g->players[who].field[0];
+            g->players[who].field[0] = g->players[who].field[s];
+            g->players[who].field[s] = temp;
+            ClearCondition(&g->players[who].field[s]);
+            TcgDuel_Event(g, TCG_EV_SWITCH, who, s, 0, 0, 0);
+            g->switchPending = 0;
+            g->phase = TCG_TURN;
+            if (g->endAfterSwitch)
+            {
+                g->endAfterSwitch = 0;
+                EndTurn(g);
+            }
+            return TCG_OK;
+        }
         g->players[who].field[0] = g->players[who].field[s];
         memset(&g->players[who].field[s], 0, sizeof(struct TcgFieldCard));
         ClearCondition(&g->players[who].field[0]);
@@ -417,63 +450,93 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     {
         const struct TcgCard *attacker = TcgDuel_Field(g, g->current, 0), *target = TcgDuel_Field(g, g->current ^ 1, 0);
         const struct TcgAttack *attack;
-        unsigned damage, flags = 0, before[3], selfDamage;
-        int result;
+        struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0], foeBefore;
+        unsigned damage, flags = 0, selfCondition;
+        const char *blocked;
+        int result, total;
         f = &p->field[0];
-        if (!attacker || !target || !TcgDuel_CanAttack(g, g->current, a->attack))
+        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack > 1 ||
+            !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
+        attack = &attacker->attacks[a->attack];
+        if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
+            return Error(g, blocked);
         if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noAttack)
             return Error(g, "This Pokemon cannot attack now.");
-        attack = &attacker->attacks[a->attack];
         if (!TcgDuel_EffectSupported(attack->effect))
         {
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
+        g->noWeakRes = g->attackFailed = g->coinResult = 0;
         TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
-            f->damage += 20;
-            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, 20, 0, TCG_DMG_SELF);
+            TcgDuel_SelfDamage(g, 20);
             TcgDuel_Log(g, "Confusion: %s does 20 damage to itself.", attacker->name);
             TcgDuel_ResolveKnockouts(g);
             if (g->phase != TCG_FINISHED && g->phase != TCG_SETUP)
                 EndTurn(g);
             return TCG_OK;
         }
+        if (f->weaken == TCG_WEAKEN_SMOKESCREEN && !TcgDuel_Coin(g, g->current))
         {
-            struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
-            before[0] = foe->condition;
-            before[1] = foe->poison;
-            before[2] = f->barrier;
-            selfDamage = f->damage;
+            /* Sand-attack / Smokescreen: tails, and the attack does nothing. */
+            TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current, 0, 1, 0, 0);
+            TcgDuel_Log(g, "%s's attack missed.", attacker->name);
+            EndTurn(g);
+            return TCG_OK;
         }
+        foeBefore = *foe;
+        selfCondition = f->condition;
         damage = attack->damage;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
             return result;
-        if (damage && target->weakness == attacker->type)
+        /* ApplyDamageModifiers_DamageToTarget: Swords Dance, Weakness,
+         * Resistance, PlusPower, Defender, then the substatus that reduce
+         * damage; nothing is added to an attack that does no damage. */
+        total = (int)damage;
+        if (total > 0)
         {
-            damage *= 2;
-            flags |= TCG_DMG_WEAK;
-        }
-        if (damage && target->resistance == attacker->type)
-        {
-            damage = damage > 30 ? damage - 30 : 0;
-            flags |= TCG_DMG_RESIST;
-        }
-        if (damage)
-            damage += 10 * AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
-        {
-            unsigned reduction = 20 * AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
-            damage = damage > reduction ? damage - reduction : 0;
-        }
-        if (g->players[g->current ^ 1].field[0].barrier)
-        {
-            if (damage)
+            if (f->charged == 2)
+                total *= 2;
+            if (!g->noWeakRes && target->weakness == attacker->type)
+            {
+                total *= 2;
+                flags |= TCG_DMG_WEAK;
+            }
+            if (!g->noWeakRes && target->resistance == attacker->type)
+            {
+                total -= 30;
+                flags |= TCG_DMG_RESIST;
+            }
+            total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
+            total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
+            if (foe->barrier)
+            {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
-            damage = 0;
+                total = 0;
+            }
+            else if (foe->guard == TCG_GUARD_REDUCE_10)
+                total -= 10;
+            else if (foe->guard == TCG_GUARD_REDUCE_20)
+                total -= 20;
+            else if (foe->guard == TCG_GUARD_UNDER_40 && total < 40)
+            {
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+            }
+            else if (foe->guard == TCG_GUARD_HALVE)
+                total = total / 2 / 10 * 10;
+            if (f->weaken == TCG_WEAKEN_10)
+                total -= 10;
+            else if (f->weaken == TCG_WEAKEN_20)
+                total -= 20;
+            if (total < 0)
+                total = 0;
         }
+        damage = (unsigned)total;
         TcgDuel_Damage(g, g->current ^ 1, 0, damage);
         if (damage)
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current ^ 1, 0, damage, 0, flags);
@@ -481,20 +544,42 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
         if (result != TCG_OK)
             return result;
-        /* Effects change conditions as they resolve; show them after the hit. */
+        if (foeBefore.barrier == 2)
         {
-            struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
-            if (foe->stackSize && (foe->condition != before[0] || foe->poison != before[1]))
-                TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
-            if (f->damage < selfDamage)
-                TcgDuel_Event(g, TCG_EV_HEAL, g->current, 0, selfDamage - f->damage, 0, 0);
-            (void)before[2];
+            /* Agility, Fly, Barrier: no effect of the attack reaches it. */
+            foe->condition = foeBefore.condition;
+            foe->poison = foeBefore.poison;
+            foe->noAttack = foeBefore.noAttack;
+            foe->noRetreat = foeBefore.noRetreat;
+            foe->weaken = foeBefore.weaken;
         }
+        /* Effects change conditions as they resolve; show them after the hit. */
+        if (foe->stackSize && (foe->condition != foeBefore.condition || foe->poison != foeBefore.poison))
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
+        if (f->stackSize && f->condition != selfCondition)
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
+        g->noWeakRes = g->attackFailed = g->coinResult = 0;
         TcgDuel_ResolveKnockouts(g);
-        if (g->phase != TCG_FINISHED && g->phase != TCG_SETUP)
-            EndTurn(g);
+        if (g->phase == TCG_FINISHED || g->phase == TCG_SETUP)
+            return TCG_OK;
+        if (g->switchPending)
+        {
+            /* Only if the Defending Pokemon is still there to be switched. */
+            unsigned who = g->current ^ 1, bench = 0, k;
+            for (k = 1; k < TCG_FIELD_SIZE; k++)
+                bench += g->players[who].field[k].stackSize != 0;
+            if (g->phase == TCG_TURN && g->players[who].field[0].stackSize && bench)
+            {
+                g->phase = TCG_PROMOTION;
+                g->promotePlayer = who;
+                g->endAfterSwitch = 1;
+                return TCG_OK;
+            }
+            g->switchPending = 0;
+        }
+        EndTurn(g);
         return TCG_OK;
     }
     if (a->type == TCG_RETREAT)
@@ -548,7 +633,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         return Error(g, "Choose a card in your hand.");
     c = Tcg_Card(p->cards[p->hand[a->hand]]);
     if (a->type == TCG_PLAY_TRAINER)
+    {
+        if (p->noTrainers)
+            return Error(g, "Headache: you can't play Trainer cards this turn.");
         return TcgDuel_Trainer(g, a);
+    }
     if (s >= TCG_FIELD_SIZE)
         return TCG_INVALID;
     f = &p->field[s];
@@ -647,4 +736,3 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
         snprintf(g->error, sizeof(g->error), "%s", next.error);
     return result;
 }
-#endif

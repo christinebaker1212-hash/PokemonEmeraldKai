@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,17 +13,38 @@
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
 static int sLoaded;
+static uint32_t sLoadedFor;
+/* The collection belongs to one save: "<save>.cards", next to it, written
+ * with it (Tcg_WriteSidecar) and only used by the game with that Trainer ID,
+ * so a new game on the same file starts without cards. */
+static uint32_t SaveOwner(void)
+{
+    const u8 *id = gSaveBlock2Ptr ? gSaveBlock2Ptr->playerTrainerId : NULL;
+    return id ? (uint32_t)id[0] | id[1] << 8 | id[2] << 16 | (uint32_t)id[3] << 24 : 0;
+}
 struct TcgCollection *Tcg_GetCollection(void)
 {
-    if (!sLoaded)
+    uint32_t owner = SaveOwner();
+    if (!sLoaded || sLoadedFor != owner)
     {
         char path[600];
         Tcg_CollectionInit(&sCollection, (uint32_t)SDL_GetPerformanceCounter());
         snprintf(path, sizeof(path), "%s.cards", gPlatformSavePath);
-        Tcg_CollectionLoad(&sCollection, path);
+        if (!Tcg_CollectionLoad(&sCollection, path) || sCollection.owner != owner)
+            Tcg_CollectionInit(&sCollection, (uint32_t)SDL_GetPerformanceCounter());
+        sCollection.owner = owner;
+        sLoadedFor = owner;
         sLoaded = 1;
     }
     return &sCollection;
+}
+void Tcg_WriteSidecar(void)
+{
+    char path[600];
+    if (!sLoaded || sLoadedFor != SaveOwner() || !sCollection.optedIn)
+        return;
+    snprintf(path, sizeof(path), "%s.cards", gPlatformSavePath);
+    Tcg_CollectionSave(&sCollection, path);
 }
 static struct TcgLink sOnline;
 static int sOnlineInit;
@@ -128,4 +148,3 @@ int Tcg_TryChallenge(void)
         }
     return 0;
 }
-#endif

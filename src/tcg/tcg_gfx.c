@@ -1,5 +1,5 @@
+#include <SDL2/SDL.h> // before global.h: its macros break the Windows intrinsics headers
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +12,8 @@
 #include "tcg_gfx.h"
 
 unsigned char *stbi_load(const char *, int *, int *, int *, int);
+unsigned char *stbi_load_from_memory(const unsigned char *, int, int *, int *, int *, int);
+extern const unsigned char gTcgOriginalArt[], gTcgOriginalArtEnd[];
 void stbi_image_free(void *);
 
 static SDL_Renderer *sR;
@@ -958,10 +960,9 @@ struct Source
 static struct Source sSource[SOURCES];
 static unsigned sSourceAge;
 static int sScanState = -1;
-static uint32_t *LoadPixels(const char *path, int *w, int *h)
+static uint32_t *ToArgb(unsigned char *pixels, int *w, int *h)
 {
-    int channels, i;
-    unsigned char *pixels = stbi_load(path, w, h, &channels, 4);
+    int i;
     uint32_t *out;
     if (!pixels)
         return NULL;
@@ -971,6 +972,29 @@ static uint32_t *LoadPixels(const char *path, int *w, int *h)
             out[i] = (uint32_t)pixels[i * 4 + 3] << 24 | pixels[i * 4] << 16 | pixels[i * 4 + 1] << 8 | pixels[i * 4 + 2];
     stbi_image_free(pixels);
     return out;
+}
+static uint32_t *LoadPixels(const char *path, int *w, int *h)
+{
+    int channels;
+    return ToArgb(stbi_load(path, w, h, &channels, 4), w, h);
+}
+/* The built-in Game Boy illustration (graphics/tcg/original.bin). */
+static uint32_t *OriginalArt(unsigned id, int *w, int *h)
+{
+    const unsigned char *b = gTcgOriginalArt;
+    unsigned count, offset, size, total = (unsigned)(gTcgOriginalArtEnd - gTcgOriginalArt);
+    int channels;
+    if (total < 8 || memcmp(b, "TCGA", 4))
+        return NULL;
+    count = b[4] | b[5] << 8 | b[6] << 16 | (unsigned)b[7] << 24;
+    if (!id || id > count || 8 + 8 * id > total)
+        return NULL;
+    b += 8 + 8 * (id - 1);
+    offset = b[0] | b[1] << 8 | b[2] << 16 | (unsigned)b[3] << 24;
+    size = b[4] | b[5] << 8 | b[6] << 16 | (unsigned)b[7] << 24;
+    if (!size || offset > total || size > total - offset)
+        return NULL;
+    return ToArgb(stbi_load_from_memory(gTcgOriginalArt + offset, (int)size, w, h, &channels, 4), w, h);
 }
 static uint32_t *TryScan(unsigned id, int full, int *w, int *h)
 {
@@ -1021,18 +1045,7 @@ static struct Source *Source(unsigned id, unsigned kind)
     if (kind)
         s->px = TryScan(id, kind == 2, &s->w, &s->h);
     else
-    {
-        char path[1200];
-        char *base = SDL_GetBasePath();
-        snprintf(path, sizeof(path), "%stcg/original/%03u.png", base ? base : "", id);
-        s->px = LoadPixels(path, &s->w, &s->h);
-        if (!s->px)
-        {
-            snprintf(path, sizeof(path), "graphics/tcg/original/%03u.png", id);
-            s->px = LoadPixels(path, &s->w, &s->h);
-        }
-        SDL_free(base);
-    }
+        s->px = OriginalArt(id, &s->w, &s->h);
     if (!s->px)
         return NULL;
     s->id = id;
@@ -1393,4 +1406,3 @@ void G_Destroy(void)
     sFontReady = 0;
     sR = NULL;
 }
-#endif

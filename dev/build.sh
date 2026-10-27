@@ -26,6 +26,4 @@ windows)
     ;;
 *) echo 'Usage: dev/build.sh linux|windows [revision]' >&2; exit 1;;
 esac
-mkdir -p "$out/tcg"
-cp -R graphics/tcg/original "$out/tcg/"
 echo "Dev build staged in $out"

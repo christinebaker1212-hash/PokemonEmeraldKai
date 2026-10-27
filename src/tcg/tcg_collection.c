@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD || defined(TCG_TEST)
 #include "tcg/card_ids.h"
 #include "tcg/tcg.h"
 #include <stdio.h>
@@ -219,7 +218,7 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
 
 /* Explicit little-endian encoding, independent of compiler padding and ABI. */
 #define PAYLOAD_SIZE                                                                                                   \
-    (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 20)
+    (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -268,7 +267,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
     if (memcmp(p, "MTCG", 4))
         return 0;
     p += 4;
-    if (Get(&p, 4) != 1 || Get(&p, 4) != Crc(data + 12, PAYLOAD_SIZE))
+    if (Get(&p, 4) != 2 || Get(&p, 4) != Crc(data + 12, PAYLOAD_SIZE))
         return 0;
     Tcg_CollectionInit(&next, 1);
     for (i = 1; i <= TCG_CARD_COUNT; i++)
@@ -299,6 +298,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
     next.activeDeck = Get(&p, 1);
     next.fastAnimations = Get(&p, 1);
     next.quiet = Get(&p, 1);
+    next.owner = Get(&p, 4);
     if (next.optedIn > 1 || next.activeDeck >= TCG_SAVED_DECKS || next.fastAnimations > 1 || next.quiet > 1)
         return 0;
     *c = next;
@@ -336,10 +336,11 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->activeDeck, 1);
     Put(&p, c->fastAnimations, 1);
     Put(&p, c->quiet, 1);
+    Put(&p, c->owner, 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 1, 4);
+    Put(&p, 2, 4);
     Put(&p, Crc(data + 12, PAYLOAD_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
@@ -348,7 +349,13 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     i = fwrite(data, 1, sizeof(data), f) == sizeof(data);
     if (fclose(f))
         i = 0;
-    if (!i || rename(tmp, path))
+    if (!i)
+    {
+        remove(tmp);
+        return 0;
+    }
+    remove(path); /* Windows' rename never replaces a file */
+    if (rename(tmp, path))
     {
         remove(tmp);
         return 0;
@@ -356,4 +363,3 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     return 1;
 #endif
 }
-#endif

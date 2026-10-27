@@ -709,7 +709,6 @@ void ItemUseOutOfBattle_CandyJar(u8 taskId)
     }
 }
 
-#if MOEMON_DEV_BUILD
 static void CB2_OpenCardCaseFromBag(void)
 {
     Tcg_OpenCase(CB2_ReturnToBagMenuPocket);
@@ -739,7 +738,6 @@ void ItemUseOutOfBattle_CardCase(u8 taskId)
         gTasks[taskId].func = Task_OpenRegisteredCardCase;
     }
 }
-#endif
 
 void ItemUseOutOfBattle_CoinCase(u8 taskId)
 {

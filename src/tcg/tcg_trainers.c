@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD || defined(TCG_TEST)
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include <stdio.h>
@@ -386,4 +385,3 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, Tcg_Card(id)->name);
     return TCG_OK;
 }
-#endif

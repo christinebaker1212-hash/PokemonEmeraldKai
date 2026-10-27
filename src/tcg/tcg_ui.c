@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD
 #include <SDL2/SDL.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -72,6 +71,17 @@ static float Ease(float t)
     if (t >= 1)
         return 1;
     return 1 - (1 - t) * (1 - t) * (1 - t);
+}
+/* Co-op names are game text; the card screens print ASCII. */
+static const char *PeerName(unsigned id)
+{
+    static char name[4][MP_NAME_LEN * 2 + 2];
+    static unsigned next;
+    char *out = name[next++ % 4];
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return "---";
+    MP_GameToAscii(out, gMpPlayers[id].name, MP_NAME_LEN * 2 + 1);
+    return out;
 }
 static void Message(const char *format, ...)
 {
@@ -400,6 +410,18 @@ static void DuelStep(unsigned pressed, unsigned keys)
             }
         }
     }
+    if (U.online && U.autoPlay && U.duel.phase != TCG_FINISHED && TcgBoard_Idle() && !Tcg_Online()->pending &&
+        (U.duel.phase == TCG_PROMOTION ? U.duel.promotePlayer : U.duel.current) == 0)
+    {
+        /* Harness: the AI plays your seat through the board's own path. */
+        if (U.aiDelay)
+            U.aiDelay--;
+        else if (TcgDuel_AiAction(&U.duel, &a))
+        {
+            Apply(&a);
+            U.aiDelay = 6;
+        }
+    }
     r = TcgBoard_Step(pressed, keys, &a, &card);
     if (r == BOARD_ACTION || r == BOARD_CONCEDE)
         Apply(&a);
@@ -694,7 +716,7 @@ int Tcg_Step(unsigned keys)
         {
             OnlineView();
             Screen(UI_DUEL);
-            TcgBoard_Begin(&U.duel, l->peer < MP_MAX_PLAYERS ? (const char *)gMpPlayers[l->peer].name : "FRIEND", 1);
+            TcgBoard_Begin(&U.duel, l->peer < MP_MAX_PLAYERS ? PeerName(l->peer) : "FRIEND", 1);
         }
         if (U.online && l->state == TCG_LINK_ENDED)
         {
@@ -742,9 +764,12 @@ int Tcg_Step(unsigned keys)
             break;
         case UI_EDIT:
         case UI_COPY_DECK:
+        {
+            int from = U.screen;
             Screen(UI_DECK_ACTIONS);
-            U.cursor = U.screen == UI_COPY_DECK ? 2 : 1;
+            U.cursor = from == UI_COPY_DECK ? 2 : 1;
             break;
+        }
         case UI_COPY_CONFIRM:
             Screen(UI_COPY_DECK);
             break;
@@ -1530,7 +1555,7 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         for (i = 0; i < MP_MAX_PLAYERS; i++)
         {
             snprintf(line, sizeof(line), "%s%s", i == (unsigned)gMpLocalId ? "YOU: " : "",
-                     gMpPlayers[i].present ? (const char *)gMpPlayers[i].name : "---");
+                     PeerName(i));
             Option(i, 20, 30 + i * 20, line, gMpPlayers[i].present && i != (unsigned)gMpLocalId);
         }
         G_Text(8, 114, 0x707070, G_NO_SHADOW, "Your friend must open ONLINE CARDS too.\nNo cards or money are wagered.", 224,
@@ -1541,7 +1566,7 @@ void Tcg_Render(struct SDL_Renderer *r, int width, int height)
         Backdrop();
         Header("CARD DUEL INVITATION", NULL);
         G_Window(0, 22, 240, 124);
-        snprintf(line, sizeof(line), "%s would like a card duel!", gMpPlayers[Tcg_Online()->peer].name);
+        snprintf(line, sizeof(line), "%s would like a card duel!", PeerName(Tcg_Online()->peer));
         G_Text(8, 30, G_INK, G_INK_SHADOW, line, 224, TF_SMALL);
         G_Text(8, 46, 0x707070, G_NO_SHADOW, "No cards or money are wagered.", 224, TF_SMALL);
         Option(0, 20, 76, "ACCEPT", 1);
@@ -1657,6 +1682,13 @@ void Tcg_Debug(const char *command)
         TcgLink_Submit(Tcg_Online(), &a, SDL_GetTicks());
         return;
     }
+    if (!strcmp(command, "netstate"))
+    {
+        struct TcgLink *l = Tcg_Online();
+        printf("[tcg-net] state %u seq %u phase %u hash %08x winner %u\n", l->state, l->sequence, l->game.phase,
+               TcgLink_Hash(&l->game), l->game.winner);
+        return;
+    }
     if (!strcmp(command, "netstep"))
     {
         struct TcgAction a;
@@ -1759,10 +1791,11 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "state"))
     {
         struct TcgPlayer *p = &U.duel.players[0];
-        printf("[tcg] screen %d opted %u phase %u current %u wins %u hand %u field %u bench %u%u%u%u%u idle %d\n",
+        printf("[tcg] screen %d opted %u phase %u current %u wins %u hand %u field %u bench %u%u%u%u%u idle %d "
+               "energy %u discard %u\n",
                U.screen, c->optedIn, U.duel.phase, U.duel.current, c->wins, p->handSize, p->field[0].stackSize,
                p->field[1].stackSize, p->field[2].stackSize, p->field[3].stackSize, p->field[4].stackSize,
-               p->field[5].stackSize, U.screen == UI_DUEL ? TcgBoard_Idle() : -1);
+               p->field[5].stackSize, U.screen == UI_DUEL ? TcgBoard_Idle() : -1,
+               TcgDuel_Energy(&U.duel, 0, 0, TCG_NONE), p->discardSize);
     }
 }
-#endif

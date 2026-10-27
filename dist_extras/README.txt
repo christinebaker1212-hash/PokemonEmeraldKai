@@ -1138,6 +1138,33 @@ Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
 
+CARD DUELS
+----------
+An optional card game, played with the original Pokemon Trading Card Game's
+228 cards on a table like the DS card game's. Some people around HOENN play
+cards: face one and press the CO-OP button (C key, Y/Triangle on a
+controller) to ask for a duel. Talking to them with A works as always.
+The first time, they offer you a CARD CASE (a key item) and one of three
+starter decks; say NO and nothing changes. Nobody asks you unprompted.
+Card players: OLDALE (the footprint man), PETALBURG, RUSTBORO, DEWFORD,
+MAUVILLE, VERDANTURF, FALLARBOR, FORTREE, LILYCOVE, MOSSDEEP, PACIFIDLOG.
+  The CARD CASE   CHALLENGE (the person you asked), COLLECTION, DECKS,
+                  BOOSTER PACKS, PRACTICE, ANIMATIONS (normal / fast),
+                  ONLINE CARDS. Use it from the BAG or register it.
+  On the table    The D-Pad moves over the table itself: your hand, your
+                  Pokemon, theirs, the piles and END TURN. A on a card shows
+                  what you can do with it; a card you play floats over the
+                  spaces it can go. START looks at a card up close, SELECT
+                  opens the classic menu (HAND, ATTACK, CHECK, PKMN POWER,
+                  RETREAT, DONE), B backs out (on the table: concede).
+                  Hold A or B to hurry the animations.
+  Rewards         Every win gives a booster pack. Losing costs nothing.
+  Online          Both open CARD CASE > ONLINE CARDS in the same room; one
+                  invites, the other accepts. Nothing is wagered.
+Your cards are saved with your game (the save file's .cards file, kept with
+its backups). A few attacks and every POKEMON POWER aren't in the game yet;
+they show as not ready.
+
 POKEDEX ENTRIES
 ---------------
 A MOEMON's page in the POKEDEX tells you everything RUBY, SAPPHIRE,

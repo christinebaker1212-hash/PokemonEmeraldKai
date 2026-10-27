@@ -90,6 +90,15 @@ void MP_DebugQuickStartNewGame(void)
     char buf[256];
     int slot = 0;
 
+    // MOEMON_DEBUG_TID: another Trainer ID (things kept per save, e.g. the card collection)
+    if (getenv("MOEMON_DEBUG_TID"))
+    {
+        u32 tid = (u32)strtoul(getenv("MOEMON_DEBUG_TID"), NULL, 0);
+        gSaveBlock2Ptr->playerTrainerId[0] = tid;
+        gSaveBlock2Ptr->playerTrainerId[1] = tid >> 8;
+        gSaveBlock2Ptr->playerTrainerId[2] = tid >> 16;
+        gSaveBlock2Ptr->playerTrainerId[3] = tid >> 24;
+    }
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKEDEX_GET);
     FlagSet(FLAG_SYS_B_DASH);
@@ -310,13 +319,11 @@ int MP_TestCondition(const char *name)
 void MP_OnFileDropped(const char *path);
 void MP_TestCommand(const char *cmd, const char *arg)
 {
-#if MOEMON_DEV_BUILD
     if (strcmp(cmd, "cards") == 0)
     {
         Tcg_Debug(arg);
         return;
     }
-#endif
     if (strcmp(cmd, "export") == 0)
     {
         char path[200];

@@ -1,5 +1,4 @@
 #include "mp_version.h"
-#if MOEMON_DEV_BUILD || defined(TCG_TEST)
 #include "tcg/link.h"
 #include <stdio.h>
 #include <string.h>
@@ -80,6 +79,8 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
     H(g->prizeCount);
     H(g->promotePlayer);
     H(g->needsTurnStart);
+    H(g->switchPending);
+    H(g->endAfterSwitch);
     for (i = 0; i < 2; i++)
     {
         const struct TcgPlayer *p = &g->players[i];
@@ -91,6 +92,7 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
         H(p->confusionRetreatFailed);
         H(p->setupDone);
         H(p->retreated);
+        H(p->noTrainers);
         H(p->turnsTaken);
         for (j = 0; j < 60; j++)
         {
@@ -121,6 +123,10 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
             H(f->plusPower);
             H(f->defender);
             H(f->powerUsed);
+            H(f->guard);
+            H(f->weaken);
+            H(f->charged);
+            H(f->usedOnce);
             for (k = 0; k < f->stackSize; k++)
                 H(f->stack[k]);
             for (k = 0; k < f->attachedSize; k++)
@@ -182,6 +188,8 @@ int TcgLink_Submit(struct TcgLink *l, const struct TcgAction *a, uint32_t now)
         a->selectionCount > 60 || l->game.phase == TCG_FINISHED)
         return 0;
     before = TcgLink_Hash(&l->game);
+    l->beforePending = l->game;
+    l->sequenceBefore = l->sequence;
     if (a->type == TCG_CONCEDE)
     {
         l->game.winner = l->seat ^ 1;
@@ -275,6 +283,19 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
         struct TcgAction a = {0};
         uint8_t ack[15];
         struct TcgDuel next;
+        if (p[19] == TCG_CONCEDE && l->pending)
+        {
+            /* A concession crossed our own action: ours never reached the
+             * other side, so drop it (both seats then hold the same duel).
+             * Two concessions crossing: seat 0's stands. */
+            if (l->game.phase == TCG_FINISHED && l->game.winner == (l->seat ^ 1) && l->seat == 0)
+                return;
+            l->game = l->beforePending;
+            l->sequence = l->sequenceBefore;
+            l->pending = 0;
+        }
+        else if (l->pending && l->game.phase == TCG_FINISHED && l->game.winner == (l->seat ^ 1))
+            return; /* we conceded first: the other side rolls this action back */
         if (l->pending || Read(p + 7) != l->sequence || Read(p + 11) != TcgLink_Hash(&l->game) ||
             (Actor(&l->game) == l->seat && p[19] != TCG_CONCEDE) || p[24] > 60 || len != 25u + p[24])
         {
@@ -319,4 +340,3 @@ void TcgLink_Tick(struct TcgLink *l, int connected, uint32_t now)
     else if ((l->state != TCG_LINK_PLAYING || l->pending) && (int32_t)(now - l->deadline) >= 0)
         TcgLink_Cancel(l, "Card session timed out.");
 }
-#endif

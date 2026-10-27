@@ -12,10 +12,14 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 2
+#define TCG_LINK_VERSION 3
 struct TcgLink
 {
     struct TcgDuel game;
+    /* The state before our unacknowledged action: a concession from the
+     * other player that crossed it on the wire is applied to this instead. */
+    struct TcgDuel beforePending;
+    uint32_t sequenceBefore;
     uint16_t decks[2][60];
     uint32_t session, sequence, deadline;
     unsigned state, peer, seat, pending;

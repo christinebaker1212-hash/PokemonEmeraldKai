@@ -415,7 +415,7 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
-    static const char *const sSidecars[] = {"bag", "life"};   // Moemon Co-op: files that belong with the save
+    static const char *const sSidecars[] = {"bag", "life", "cards"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;
@@ -442,7 +442,7 @@ static void BackUpSaveFile(void)
         remove(to);
         rename(from, to);
         // the sidecars go with their save (mp_bag.c, mp_life.c find theirs by the save's counter)
-        for (k = 0; k < 2; k++)
+        for (k = 0; k < (int)ARRAY_COUNT(sSidecars); k++)
         {
             snprintf(from, sizeof(from), "%s.bak%d.%s", gPlatformSavePath, i - 1, sSidecars[k]);
             snprintf(to, sizeof(to), "%s.bak%d.%s", gPlatformSavePath, i, sSidecars[k]);
@@ -459,7 +459,7 @@ static void BackUpSaveFile(void)
         fclose(out);
     }
     fclose(in);
-    for (k = 0; k < 2; k++)
+    for (k = 0; k < (int)ARRAY_COUNT(sSidecars); k++)
     {
         snprintf(from, sizeof(from), "%s.%s", gPlatformSavePath, sSidecars[k]);
         snprintf(to, sizeof(to), "%s.bak1.%s", gPlatformSavePath, sSidecars[k]);
@@ -491,6 +491,7 @@ static void StoreSaveFile()
     }
     MP_Bag_WriteSidecar();   // Moemon Co-op: the pockets' slots past the save block's (mp_bag.c)
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
+    Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
 }
 
 void Platform_StoreSaveFile(void)
@@ -1085,6 +1086,7 @@ static void TestHarnessStep(void)
             Platform_StoreSaveFile(); // Also exercise the low-level disk guard.
             MP_Bag_WriteSidecar();
             MP_Life_WriteSidecar();
+            Tcg_WriteSidecar();
             MP_SaveData_Set("dev_save_probe", 123);
             printf("[test] saveprobe status %d autosave %d dev %d\n",
                    status, gMpConfig.autosaveMinutes, MOEMON_DEV_BUILD);

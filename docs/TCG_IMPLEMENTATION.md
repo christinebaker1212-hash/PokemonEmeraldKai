@@ -1,8 +1,8 @@
-# Optional card system — implementation status
+# Optional card system: implementation status
 
-Feature branch: `dev/pokemon-card-system`. This is work in progress, **not a complete
-or publishable first pass**. Main release workflow and main-game behavior must stay
-unchanged. No card feature may appear in main builds until explicitly promoted.
+Shipped in main 1.27.0 ("Let's Duel!"), no longer gated by `MOEMON_DEV_BUILD`. Main
+builds save the collection in a `<save>.cards` sidecar (owner = the save's Trainer ID, kept
+with the save's backups); dev builds still never write it. Not yet complete: see the end.
 
 ## Agreed scope
 
@@ -14,73 +14,149 @@ unchanged. No card feature may appear in main builds until explicitly promoted.
   earns a booster, no loss penalties or rematch cooldown.
 - Collection, multiple decks, deck legality, inspection, unopened packs, practice,
   duplicate exchange and dedicated optional card rewards/banner.
-- Smooth card movement and a safe adapter for Emerald's existing attack animations.
-- Printed card images where appropriate, explicitly custom presentation for GB-only
-  cards. High-resolution inspection, keyboard/controller navigation.
-- Separate **one-time versioned artwork pack**, confirmed by the user. Keep routine
-  updates small. Compress aggressively without sacrificing text readability.
-- Dev collection changes are temporary; no writes to any real save or card profile.
-- Online card duels are now explicitly requested by the user and implemented as
-  a dev-only extension. Player trading remains outside this pass.
+- Smooth card movement; printed card images where appropriate, explicitly custom
+  presentation for GB-only cards; keyboard/controller navigation.
+- Separate **one-time versioned artwork pack**, confirmed by the user.
+- Main builds save the collection with the game (`<save>.cards`, written only when the
+  player opted in, never by dev builds). A new game with another Trainer ID starts empty.
+- Online card duels between players (explicitly requested; must keep working).
 
-## Completed and tested
+## The duel screen (user's design, docs/user_images/37.webp)
 
-- Imported stable IDs, all 228 card definitions, 51 complete original decks, text,
-  318 effect-command lists and original low-resolution artwork from pret/poketcg
-  commit `2d81ec3cbff4ebb2fd3f1f770ba245227a702ead`.
-- Native immutable catalogue, collection/deck storage, three original starter decks,
-  four-copy-by-name validation, free Basic Energy, deterministic boosters,
-  protected duplicate exchange, crafting, explicit versioned/CRC-protected profile
-  encoding and read-only dev enforcement.
-- Rules foundation: setup, independent RNG, piles containing physical card indices,
-  Energy attachment/costs, evolution restrictions, damage/weakness/resistance,
-  core conditions, Knock Outs, prizes, promotions, deck-out and sudden death.
-- Explicit (incomplete) effect dispatch; unported effects fail closed rather than
-  silently acting as basic damage. `tools/tcg/effect_coverage.json` records coverage.
-- Emerald font glyphs and selected window-frame assets render the UI at native
-  240x160; only the explicit close-up view uses high-resolution artwork.
-- Dev Card Case item, opt-in starter flow, collection, deck editor/copy and NPC
-  challenge integration are present. Runtime tests cover decline without opting in,
-  Oldale field challenge, deck edits/copy and no save/profile writes.
-- Collection and rules tests run under AddressSanitizer and UndefinedBehaviorSanitizer.
-  A complete basic Scratch duel executes to a winner with card-conservation checks.
-- Image host and GitHub API now work after network setting updates. The saved
-  configuration still uses restricted access with the two required domains allowed;
-  do not overwrite the user's network settings to make assumptions about full access.
-- 165 confidently matched scans downloaded; other prints require review/fallbacks.
-- Compressed prototype artwork pack: 139,219,277 source bytes -> 28,876,084 bytes
-  including 160x220 thumbnails and per-file hashes (79.3% reduction). Adaptive
-  progressive JPEG 4:4:4 uses the existing stb decoder and preserves source dimensions;
-  per-image whole-scan and text-region PSNR threshold >=47 dB. This is the current
-  partial matched-art pack, not a claim of all 228 scans being ready.
+The user sent a DS duel screenshot (both DS screens) as "the full area" and chose:
 
-## Still required before the full first-pass dev release
+| Question | Answer |
+|---|---|
+| Layout | DS arrangement kept: opponent on top, you at the bottom, a Bench row of 5 at each edge, Active cards on the Poke Ball circle, side columns for Prizes / deck / discard |
+| Resolution | native 240x160, Emerald fonts and windows |
+| Card faces | the printed scan when the art pack is installed, else a type-colored card frame around the GB illustration |
+| Controls | a cursor on the board itself + the original 6-option menu on SELECT |
+| Hand | a strip peeking at the bottom that slides up (the mat scrolls up with it so your Bench stays visible), and drops while you pick a target |
+| Animation | card-game effects (lunge, shake, -40, HP plate counting down, WEAKNESS x2 / RESISTANCE -30 banners, KO, every card sliding between zones) |
+| Sound | Emerald sound effects + duel music (MUS_B_ARENA), victory music |
+| Labels | the original GB TCG words: BENCH, PRIZES, DECK, DISCARD, END TURN, WEAKNESS x2 |
+| Also polished | booster opening, card inspector, Card Case and deck builder, coin flips and turn banners |
+| Rules bugs | fixed and listed (below) |
 
-- Complete and validate every original attack, trainer and power effect; the current
-  118-entry attack command coverage is incomplete. All 34 Trainer handlers have
-  selection/conservation tests, but their player-facing selection flows are unfinished.
-  Several current formulae/edge cases still need source-by-source verification.
-- Test special-condition timing, prevention, status immunity, energy conversion,
-  trainer attachment expiration/stacking, simultaneous effects and card choices.
-- Full original-deck opponent behavior and selection handling; no hidden-information
-  cheating. A simple complete-duel test is not proof that every card works.
-- Resolve remaining artwork mappings, distinguish holo variants/reprints, GB-only
-  cards and original/metadata spelling or level differences. Never substitute an
-  unrelated scan while claiming an exact print match.
-- Content-pack installation/versioning/checksum verification and cache support.
-- Finish the native 240x160 interface, Trainer selection flows, tutorial and duel
-  inspection. Deck building follows the original type filters, in-deck/owned counts
-  and left/right remove/add controls, using the wider Emerald screen for a
-  compact, centered illustration-only preview. Full-card art remains in the inspector.
-  The existing basic deck editor, opt-in/decline and real Oldale challenge have
-  controller-input smoke coverage. Rename and more complete deck tools remain.
-- Emerald animation adapter, NPC definitions, victory rewards and card-only MoeGatcha.
-- Full functional/UI checks, Linux and Windows dev builds, opt-out and save protection
-  regressions, build-time verification. Never add dependency/build work to Claude's
-  main release workflow.
-- Publish only a complete, verified dev build through Dev Release. The current
-  workflow's manual branch guard must be adjusted deliberately for this feature
-  branch if publishing from it; do not push experimental features as main.
+Also asked: controller button icons everywhere (the game's own icons for the pad used
+last, GBA keys on a keyboard), and online duels between players must keep working.
+
+## Code map
+
+- `src/tcg/tcg_duel.c`, `tcg_effects.c`, `tcg_trainers.c`, `tcg_ai.c`: rules engine
+  (pure, deterministic, transactional `TcgDuel_Apply`). Every action also records
+  **presentation events** (`struct TcgEvent` ring in `TcgDuel`: coin, damage with
+  Weakness/Resistance/poison/self flags, heal, status, KO, prize, Trainer, attach,
+  evolve, switch, turn, win...). Events never name a hidden card; they are not hashed.
+- `src/tcg/tcg_board.c`: the duel screen. It keeps a *shown* copy of the duel and a
+  queue of newer states; for each state it plays the events that need the old board
+  (attack, coin, damage, KO, Trainer showcase), commits (every physical card's sprite
+  slides to its new zone: deck, hand, field, discard, prizes), then plays the rest
+  (turn banner, evolve sparkle, win). The AI waits for `TcgBoard_Idle`. Board cursor
+  (geometric navigation), context menus, attack panel, target choice with the held
+  card floating over the space, Trainer choice flows (`TrainerSteps`: Bench/Active
+  targets and card pickers for hand, searched deck, discard, attached Energy, Pokedex
+  order), retreat Energy choice, promotion and Whirlwind-style switch choice, SELECT
+  quick menu, concede confirm, results.
+- `src/tcg/tcg_gfx.c`: 240x160 primitives, the Emerald fonts (normal/small/narrow)
+  and window frames, card faces (scan box-filtered down, or the procedural frame
+  around the GB art), card backs, LCD-style HP plates, energy orbs, status tags,
+  buttons, banners, coin, controller button icons (`G_Hint` draws `{A}`, `{START}`,
+  `{L}{R}`... inline from mp_buttons.c's art).
+- `src/tcg/tcg_ui.c`: the other screens (invite, starter, Card Case, collection
+  binder with type tabs, deck builder in the original GB style, deck slots, booster
+  packs with tear/flip/rare shine, inspector, big art) and `Tcg_Debug` harness hooks.
+- `src/tcg/tcg_link.c`: online duels (see below).
+- `src/tcg/tcg_integration.c` / `tcg_collection.c`: the game hooks (CARD CASE item 399,
+  CO-OP button challenges) and the collection file (format 2 with an owner).
+- `src/tcg/tcg_art_data.c`: the GB illustrations embedded from `graphics/tcg/original.bin`
+  (`tools/tcg/build_original_art.py`; `tools/tcg/test.sh` checks it is up to date).
+
+## Rules fixes in this pass (audit of the first pass)
+
+- Retreat only once per turn (was unlimited).
+- Damage order follows the original `ApplyDamageModifiers_DamageToTarget`: double-
+  damage substatus, Weakness x2, Resistance -30, PlusPower, Defender, then the
+  defender's protection and the attacker's weakening; PlusPower still counts when
+  Resistance brought damage to 0 (it used to be skipped), never adds to a 0-damage
+  attack. Confusion damage to itself uses the attacker's own Weakness/Resistance.
+- Agility (Fearow, Raichu, Rapidash, Seadra) now prevents every effect of attacks,
+  not only damage; Hide in Shell and Exeggcute's Leech Seed are mapped.
+- Opponent AI: picks attacks by damage after Weakness/Resistance and Knock Outs, picks
+  targets for attacks that need them, checks every attack is legal before using it.
+- Online: a concession crossing the other player's move on the wire used to end the
+  session as "out of order" (the old 250 ms lag test passed only by timing); the
+  receiver now drops its own unacknowledged move first so both clients agree.
+
+## Attack effects
+
+`tools/tcg/generate_effects.py` maps reviewed original effect functions (single-
+function lists) and, new in this pass, whole command lists ported by hand from
+`effect_functions.asm` (pret/poketcg 2d81ec3): Ember / Flamethrower / Fire Blast /
+Fire Spin / Thunderbolt / Flames of Rage (Energy discards), Recover, Mewtwo's Barrier,
+recoil (Take Down, Submission, Double-edge, Thunder Jolt, Thunder, Thrash,
+Thunderpunch), coin-or-nothing (Horn Hazard, Dive Bomb, Leek Slap once per duel,
+Clamp, Fly), Fetch / Pay Day, First Aid / Spacing Out, Mega Drain / Absorb / Leech Life
+(damage done), Foul Odor, Petal Dance, Foul Gas, Venom Powder, Tantrum, Rampage, Flail,
+Big Eggsplosion, Stone Barrage, Boyfriends, Dancing Embers, Sonicboom, Dream Eater,
+Selfdestruct, Earthquake, Blizzard, Thunderstorm, Chain Lightning, Cat Punch / Slicing
+Wind / Ice Breath / Big Thunder (random targets), Spark / Dark Mind / Stretch Kick
+(chosen Bench target), Gigashock, Lure, Teleport, Whirlwind / Terror Strike / Ram (the
+defender's owner chooses), Minimize / Harden / Light Screen / Expand, Growl / Pounce /
+Snivel / Smokescreen / Sand-attack, Leer / Tail Wag / Bone Attack, Acid, Headache,
+Swords Dance / Focus Energy, Call for Family / Sprout / Call for Friend, Friendship
+Song, Energy Conversion / Absorption / Spike, Hyper Beam / Whirlpool.
+
+Coverage: 229 command lists (was 118). Of 319 attacks, 20 remain unported (was 131):
+Metronome, Mirror Move, Amnesia, Conversion 1/2, Morph, Mystery Attack, Wail, Prophecy,
+Mix-Up, Magnetic Storm, Wildfire, Hurricane, Gale, Devolution Beam, Destiny Bond and
+Scavenge; they show as "not ready" in the attack panel. Simplifications to revisit: where the
+original asks the *attacker* to pick cards (Fire Spin's 2 Energy, Hyper Beam's Energy,
+Gigashock's 3 targets, Call for Friend's card, Energy Spike's Energy and Pokemon,
+Energy Conversion / Absorption's cards) the engine picks (documented in
+tcg_effects.c). Pokemon Powers are still unported (POWER shows "not ready").
+
+## Online card duels
+
+Both players open CARD CASE > ONLINE CARDS in the same co-op room; one invites, the
+other accepts. Each uses their active validated deck; nothing is wagered or awarded.
+Relay extension 255, card protocol **3** (bump `TCG_LINK_VERSION` on any rules,
+catalogue or wire change: protocol 2 added retreat-once, 3 the substatus fields).
+The inviter is canonical player 0; the duel screen always shows the local player at
+the bottom (`OnlineView` swaps both sides and every event). Both peers validate decks
+and every action, with sequence numbers, before/after rules hashes and an ACK before
+the next local action. Timeout/disconnect returns to the Card Case with no result.
+This is deterministic peer replication (both processes hold the whole duel): the
+interface never reveals hidden cards, but modified clients could.
+
+## Tests
+
+```
+tools/tcg/test.sh                       # rules, effects, Trainers, AI, link (ASan/UBSan)
+NOBUILD=1 tools/tcg/test_ui.sh          # real keys: opt-in, deck builder, field challenge,
+                                        # board setup/inspect/discard/quick menu/attach
+NOBUILD=1 tools/tcg/test_online.sh [250]        # two clients, raw link actions (+lag)
+NOBUILD=1 tools/tcg/test_online_board.sh [250]  # two clients, whole duel via both duel screens
+NOBUILD=1 tools/tcg/test_save.sh        # main: saved with the game, a new Trainer ID starts empty
+NOBUILD=1 tools/test/dev_save_test.sh   # dev builds stay read-only
+```
+
+Harness hooks (`mp cards ...`): `open`, `starter N`, `ready`, `fast`, `auto` (the AI
+plays your seat through the board, online too), `mine`, `give ID [SLOT]`, `focus KIND
+INDEX` (0 hand, 1 yours, 2 theirs, 4 your discard, 10 END TURN; index 99 = last hand
+card), `state`, `snapshot`, `netstate`, `netstep`, `netconcede`. `rendershotburst
+PREFIX FRAMES STEP` captures the window output (overlays included) every STEP frames;
+the board prints `[tcg] show event ...` for KOs, coins, status, promotions and wins.
+
+## Still to do
+
+- Remaining attack effects and all Pokemon Powers; player choice where the engine picks.
+- Trainer flows exist for all 34 Trainers but deserve play-testing per card.
+- NPC definitions across Hoenn, victory rewards and card-only MoeGatcha, tutorial.
+- Artwork pack: resolve remaining mappings, holo variants and GB-only cards;
+  installation/versioning/checksums. Without the pack the GB art frames are used.
+- Emerald attack animation adapter (not used: the board has its own card effects).
+- Windows: the mingw build compiles; not run on Windows.
 
 ## Commands and local assets
 
@@ -88,85 +164,19 @@ unchanged. No card feature may appear in main builds until explicitly promoted.
 python3 tools/tcg/import_poketcg.py /tmp/moemon-poketcg-reference
 python3 tools/tcg/generate_catalog.py
 python3 tools/tcg/generate_effects.py
-tools/tcg/test.sh
-NOBUILD=1 tools/tcg/test_ui.sh
-NOBUILD=1 tools/test/dev_save_test.sh
 python3 tools/tcg/fetch_art.py
 python3 tools/tcg/benchmark_art.py
 python3 tools/tcg/build_art_pack.py
 ```
 
-Original full scans under `graphics/tcg/printed/` and metadata download cache are
-ignored. Keep them out of routine source/release commits. The compressed content
-pack is in `dev/artwork/tcg-art/`; its immutable ID/hash is in `tools/tcg/art_pack.json`.
-Do not recreate it in routine CI jobs. Publish it as a separately versioned asset
-when artwork mapping is complete. Pillow/clang-format used for authoring are local
-workspace tools, not new main-game runtime or release dependencies.
+Original full scans under `graphics/tcg/printed/` and the metadata download cache are
+ignored; the compressed content pack is in `dev/artwork/tcg-art/` (ID/hash in
+`tools/tcg/art_pack.json`). `MOEMON_TCG_ART_DIR` points the game at a pack.
 
 ## Layout references
 
-Use the pinned pret/poketcg source as the interface reference, adapting its
-160x144 arrangement to Emerald's native 240x160 (3:2) canvas:
-
-- `src/engine/menus/deck_configuration.asm`: `HandleDeckBuildScreen`,
-  `HandleDeckCardSelectionList`, `PrintDeckBuildingCardList` and type counts.
-  Keep type filters, count/owned columns, left/right remove/add, A for details
-  and START for checking the completed deck. Extra width fits a side preview.
-- `src/engine/duel/core.asm`: `DuelMenuData`, `DuelMenuFunctionTable` and Check
-  shortcuts. The original six actions are Hand / Attack / Check / PKMN Power /
-  Retreat / Done. The native duel menu now uses the same three-column/two-row
-  arrangement. Check opens public play-area/discard views and the player's hand;
-  an opponent's hidden hand/deck is never listed. The original glossary and
-  advanced viewing shortcuts remain to be implemented.
-- `src/constants/duel_interface_constants.asm`: public play-area positions and
-  card/attack detail pages. Do not expose an opponent's hidden hand/deck.
-
-Milestone verification: rules/collection/Trainer/AI sanitizer suites passed;
-Linux and Windows dev targets compiled; controller-input UI smoke tests and
-main/dev save-protection regression passed. Inspecting both play areas/discards
-was also checked against an unchanged rules-state snapshot. Windows runtime is not exercised
-in this Linux environment. No full card-system release has been published.
-
-## Online card duels
-
-The Card Case now has ONLINE CARDS. Join the same co-op room, both explicitly
-open that screen, choose a connected friend and invite them. Accepting uses each
-player's active validated deck. Invites never appear during ordinary Emerald play.
-B cancels an invitation; B in a duel opens the existing concede confirmation.
-Card duels wager no cards or money and do not grant farmable online win rewards.
-
-`tcg_link.c` uses the existing TCP relay with extension ID 255 and card protocol
-version 1. Existing main clients and the relay's base protocol are unchanged;
-main clients ignore this optional message. Bump the card protocol version when
-rules/catalogue or wire compatibility changes. This extension needs both clients
-on a compatible dev build; ordinary main clients cannot accept card invitations.
-
-The inviter is canonical player 0 and the recipient player 1. The presentation
-swaps the recipient's view so their own hand is always on their side. Both peers
-validate the decks and every action. Messages carry a session nonce, ordered
-sequence and portable before/after rules hashes. Each action needs acknowledgment
-before another local action. Invalid, stale or divergent actions stop the session.
-Timeout/disconnect returns to the Card Case without a result or progression loss.
-Do not serialize native C structs or send save/profile data.
-
-This is deterministic peer replication, like a local link emulator: both client
-processes contain the canonical duel, including hidden piles. The interface does
-not reveal the opponent's hand/deck, but modified clients could inspect them.
-It is not an authoritative competitive server or an anti-cheat implementation.
-
-Verification: 20 deterministic paired-client engine duels under sanitizers;
-real relay clients completing normal duels with matching winner/state hashes;
-250 ms each-way latency plus 80 ms jitter with live actions and concession;
-real peer disconnect leaving winner unset; malformed/foreign/stale packets;
-turn ownership, consent, ACK gating, timeout and card conservation. Existing
-native UI and dev save-protection tests also pass. The card rules/effects and
-Trainer choice UI limitations listed above still apply; this does not claim a
-complete 228-card release.
-
-```
-NOBUILD=1 tools/tcg/test_online.sh
-NOBUILD=1 OUT="$PWD/dev/test-results/online-lag" tools/tcg/test_online.sh 250
-```
-
-Both native dev binaries are staged under `dev/builds/` by the normal dev helper.
-Routine main release jobs and workflows have no added card-system build steps.
+pret/poketcg (pinned revision): `src/engine/menus/deck_configuration.asm` for the deck
+builder (type filters, in-deck/owned counts, LEFT/RIGHT remove/add, START checks the
+deck), `src/engine/duel/core.asm` DuelMenuData for the SELECT quick menu (Hand /
+Attack / Check / PKMN Power / Retreat / Done), `effect_functions.asm`, `duel.asm` and
+`substatus.asm` for effect semantics and the damage order.

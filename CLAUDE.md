@@ -33,7 +33,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 ## Headless testing
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
 (commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, shotburst PREFIX FRAMES [STEP] = a shot every
-frame while the script goes on, for glitches that last a few frames, barrier NAME COUNT = wait until COUNT clients
+frame while the script goes on, for glitches that last a few frames (rendershotburst: the window output, overlays too), barrier NAME COUNT = wait until COUNT clients
 sharing the result folder get there, so they act on the same frame, quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
@@ -129,6 +129,10 @@ tools/moemon_garden/gen_garden.py: original pieces joined by the original maps' 
 per badge (growth table), pathfinding to them; the escalator kept at its fldeff_escalator.c ids; test garden_places); G6 pursuits, rare
 moments, eggs and family, evolution; every activity visible: swimming in the pond, climbing trees, digging, cut off at the
 water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
+
+Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
+duel board tcg_board.c at 240x160, CARD CASE item 399, `<save>.cards` sidecar, online duels on relay extension 255 with
+TCG_LINK_VERSION; everything in docs/TCG_IMPLEMENTATION.md; tests tools/tcg/test*.sh).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
