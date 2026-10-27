@@ -1086,6 +1086,12 @@ CONTROLS
   BUTTON ICONS  the button pictures in help lines: AUTO (the keyboard or
                 controller you used last), or always KEYBOARD, XBOX,
                 PLAYSTATION or NINTENDO
+  FIGHT BUTTONS the VS cabinet's buttons (see VS CABINET): ARCADE when
+                they're the usual ones. A opens a page with each punch and
+                kick; A on one, then press the key or controller button
+                you want for it (one already used by another punch or kick
+                swaps with it). Esc or Back keeps it as it was. DEFAULTS
+                puts them all back.
 CO-OP
   FRIENDS' SCREENS and a row for each friend online: see FRIENDS' SCREENS.
   NEW FRIENDS   the screen size for friends you haven't set up yet
@@ -1246,6 +1252,43 @@ the elevator are behind her.
                   counter: 50 COINS for 1000 (you'll need a COIN CASE).
   ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.
 
+VS CABINET
+----------
+MAUVILLE CITY's GAME CORNER has a fighting game: the two slot machines at
+the right end of the bottom row, back to back, are a VS cabinet (a STREET
+FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
+  Sit down        A at a seat: WAIT FOR 2P (a "Fight me!" balloon goes up
+                  over you; B stands up) or FIGHT CPU.
+  Challenge       A at the other seat while a friend waits: "Fight NAME?"
+                  A friend who sits down during your CPU fight ends it, and
+                  you both go to the character select.
+  The fight       Both pick at once; the stage is picked for you and named
+                  on the VS screen. First to win 2 rounds. Afterwards you
+                  stand up beside the cabinet.
+  Buttons         Light / medium / heavy punch and kick, arcade style:
+                  keyboard U I O (punches) and J K L (kicks), ENTER = start,
+                  arrows or WASD to move. Controller: X Y RB (punches),
+                  A B RT (kicks), START, D-Pad or left stick. Change them in
+                  OPTIONS > CONTROLS > FIGHT BUTTONS.
+  Online          The fight runs on both PCs and fixes up small delays as
+                  it goes (rollback), so it stays smooth. A signal icon in
+                  the corner means the connection is struggling; if your
+                  friend's game goes quiet, "Waiting for NAME... 10" counts
+                  down and the fight ends with no contest. Friends see the
+                  fight in their SPECTATE panel.
+  Different files Fighters or stages that aren't the same on both PCs are
+                  greyed out (and never picked at random). If the fight
+                  game itself differs, you're told so and no fight starts.
+  Wins            Wins and losses show on the back of your TRAINER CARD
+                  (VS FIGHTS), and there are achievements for them.
+  Your own        The fighters, stages and screen are in the mugen folder
+                  next to the game, a standard MUGEN layout: add a fighter
+                  to chars and a line to STREETFIGHTER-EX-PLUS\SFEX-SELECT.def.
+                  Stage songs go in mugen\sound (its README.txt lists the
+                  names). mugen\cabinets.ini has the rules: rounds, life,
+                  round time, speed, which stages. Online, the rules of the
+                  player who was challenged are used.
+
 POKEDEX ENTRIES
 ---------------
 A MOEMON's page in the POKEDEX tells you everything RUBY, SAPPHIRE,
@@ -1401,6 +1444,9 @@ FILES
                              AllowSmallTweaks = 1 also opens a log window
                              next to the game, handy when reporting bugs)
   moemon_display.ini         display settings (written by the game)
+  moemon_controls.ini        controller and fight button settings
+  mugen\                     the VS cabinet's fighting game (characters,
+                             stages, screen, cabinets.ini)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md

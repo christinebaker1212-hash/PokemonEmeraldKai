@@ -1942,3 +1942,25 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
 - Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
 
+## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
+Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
+- `fight/`: the engine (mugen-unleashed, a C rebuild of MUGEN 1.1b1) with `compat/` (SDL 1.2 / SDL_mixer on
+  the game's side, math, heap redirects), `host/` (mf_host.c: the engine thread and coroutine, sessions,
+  frames, the 4:3 screens' sides, the state pages for desync recovery; mf_rollback.c; mf_mem.c: the heap
+  region at a fixed address; mf_fit.c: the HUD fitting; mf_pack.c: the fight files' hashes) and the
+  third-party code. API: include/mf_engine.h. Hooks in engine files are marked `Moemon Fight`.
+- `src/platform/fight_platform.c`: the picture (bicubic), buttons and their bindings (saved by gamepad.c in
+  moemon_controls.ini), the sound mix, the overlay (countdown, signal icon) and the CRT.
+- `src/mp/mp_fight.c`: the cabinet (seats, bubbles, the specials in data/scripts/vs_cabinet.inc), the
+  challenge (relay 25-31, protocol 57: the pack summary and the answering player's cabinet rules), the
+  netcode (button packets over UDP or the relay, rollback, a hash every 30 frames, desync recovery), the
+  results (wins / losses: `fightwin` / `fightloss` / `fightcpu` / `fightcpuloss` counters, achievements,
+  the TRAINER CARD's VS FIGHTS line).
+- Engine globals that are fight state go into one section (the Makefile renames the engine objects' data
+  sections); anything allocated by the engine thread lands in the heap region. The BGM thread's files
+  (`bgm*.c`) are `MF_SYSTEM_HEAP`: they use the C library's heap and aren't state.
+- Desync recovery merges word by word: a word that is a pointer into this PC's own memory (outside the
+  region) stays, so code and C-heap pointers survive; the globals only cross between the same build.
+- Tests: tools/test/README.md (`fight_*`), and tools/fight/build_linux.sh's self test (`step` waits for a
+  loading engine; `WIN=1` builds it for Wine, `SAN=1` with AddressSanitizer).
+

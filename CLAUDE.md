@@ -152,6 +152,11 @@ from the built-in graphics/tcg/printed.bin (tools/tcg/fetch_art.py + build_print
 illustration's measured rectangle; test_art.sh); everything in
 docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
 
+Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
+include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
+region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
+BUTTONS; content in mugen/ (shipped as is); docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*.
+
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
   ResetBlockReceivedFlag; the receive task stops after a B_COMM_TO_CONTROLLER message; link tasks never run twice a frame.

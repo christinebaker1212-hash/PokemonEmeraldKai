@@ -1,8 +1,8 @@
 # Moemon Fight: the VS cabinet in MAUVILLE's GAME CORNER: sit at the west seat, FIGHT CPU, pick a
-# character, fight until the match ends, back in the GAME CORNER with the result
+# character, fight until the match ends, back in the GAME CORNER with the result, counted on the TRAINER CARD (card_back)
 MODE=1
 TMO=600
 WARP=10,3,6,9
 ENV_A="MOEMON_FIGHT_SYNC=1"
-EXPECT_A=("fight: result")
+EXPECT_A=("fight: result" "fight: fightcpu")
 UNEXPECT_A=("fight: result 5" "fight: result 0")

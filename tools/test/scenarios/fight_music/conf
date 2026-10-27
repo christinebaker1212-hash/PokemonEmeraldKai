@@ -1,0 +1,9 @@
+# Moemon Fight: the fight's music plays at its own speed in the game. A copy of the pack whose stage plays a song of
+# numbered tones; the sound the game sends to the device is kept and checked (tones.py: it once ran 8 times too fast)
+MODE=1
+TMO=600
+WARP=10,3,6,9
+python3 "$REPO/tools/test/scenarios/fight_music/tones.py" pack /tmp/moemon_tests/fight_music_pack
+ENV_A="MOEMON_FIGHT_SYNC=1 MOEMON_AUDIO_DUMP=/tmp/moemon_tests/fight_music/audio.raw MOEMON_MUGEN_DIR=/tmp/moemon_tests/fight_music_pack"
+EXPECT_A=("fight: result")
+CHECK="tools/test/scenarios/fight_music/tones.py"

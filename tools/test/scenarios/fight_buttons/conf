@@ -1,0 +1,6 @@
+# OPTIONS > CONTROLS > FIGHT BUTTONS with a controller: LIGHT PUNCH gets LB; HEAVY PUNCH gets A, so LIGHT KICK takes
+# HEAVY PUNCH's old RB; MEDIUM KICK is left as it was after 8 seconds of nothing (the game's own A press that opened it
+# doesn't count). The row reads CUSTOM; a_controls.ini keeps them (check.sh). Shots f_*.png.
+MODE=1
+EXPECT_A=("fight button 0: U / LB" "fight button 2: O / A" "fight button 4: K / B (kept)")
+CHECK="bash tools/test/scenarios/fight_buttons/check.sh"

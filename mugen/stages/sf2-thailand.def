@@ -1,6 +1,7 @@
 [Info]
 ;Name = "THAILAND"
 Name = "SF2 Thailand - Sagat Stage"
+displayname = "THAILAND - SAGAT"
 
 [Camera]
 StartX = 0

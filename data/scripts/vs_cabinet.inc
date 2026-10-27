@@ -68,6 +68,7 @@ EventScript_VsCabinet_Results::
 	case 5, EventScript_VsCabinet_Broken
 	case 6, EventScript_VsCabinet_Refused
 	case 7, EventScript_VsCabinet_NoContest
+	case 9, EventScript_VsCabinet_Packs
 	releaseall
 	end
 
@@ -105,6 +106,11 @@ EventScript_VsCabinet_NoContest::
 	releaseall
 	end
 
+EventScript_VsCabinet_Packs::
+	msgbox VsCabinet_Text_Packs, MSGBOX_DEFAULT
+	releaseall
+	end
+
 VsCabinet_Text_Sit:
 	.string "It's a VS cabinet!\n"
 	.string "Fight a friend, or the CPU?$"
@@ -122,6 +128,10 @@ VsCabinet_Text_Taken:
 VsCabinet_Text_InUse:
 	.string "{STR_VAR_1} is in the middle\n"
 	.string "of a fight!$"
+
+VsCabinet_Text_Packs:
+	.string "{STR_VAR_1}'s fight files aren't\n"
+	.string "the same as yours. No fight…$"
 
 VsCabinet_Text_Won:
 	.string "YOU WIN!$"

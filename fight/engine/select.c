@@ -824,6 +824,25 @@ int Charsel_End(ScreenLoop *screen, CharselState *st)
 }
 
 /* Sound of the motif, at full volume. */
+/* Moemon Fight: characters one of the online players lacks (MfHost_CharOff) are drawn grey and dark */
+static PalFx sMfGreyFx = { 0, { 0, 0, 0 }, { 0x80, 0x80, 0x80 }, 0, 0, 0x7FFF0001u };
+static int sMfGrey;
+
+static int Select_MfOff(const SelectCell *cell)
+{
+    return cell != NULL && cell->char_index >= 0 && MfHost_CharOff(cell->char_index);
+}
+
+/* Moemon Fight: random never lands on a greyed-out character (unless every one is) */
+static int Select_MfSkipOff(int ci)
+{
+    int n = g_game->char_count, k;
+    for (k = 0; k < n && MfHost_CharOff(ci); k++) {
+        ci = (ci + 1) % n;
+    }
+    return ci;
+}
+
 static void Select_PlaySnd(const int *group, const int *number, int channel)
 {
     Sound_PlaySystem(g_game->motif_snd, *group, channel, *number, 100.0);
@@ -997,13 +1016,13 @@ int Charsel_Update(ScreenLoop *screen, CharselState *st)
                             int ci = g_selectCells[cur->sel_row * g_selectColumns + cur->sel_col].char_index;
                             int t = info->cell_random_switchtime;
                             if (ci < 0) {
-                                ci = Random_Next() % g2->char_count;
+                                ci = Select_MfSkipOff(Random_Next() % g2->char_count);
                                 Select_FindCell(ci, &cur->sel_col, &cur->sel_row);
                             }
                             if (screen->ticks % t == t / 2 * side) {
                                 if (g2->char_count != 1) {
                                     int n = g2->char_count;
-                                    ci = (Random_Next() % (n - 1) + ci + 1) % n;
+                                    ci = Select_MfSkipOff((Random_Next() % (n - 1) + ci + 1) % n);
                                 }
                                 Select_FindCell(ci, &cur->sel_col, &cur->sel_row);
                                 Select_PlaySnd(&info->random_move_snd[0][side], &info->random_move_snd[1][side],
@@ -1028,8 +1047,8 @@ int Charsel_Update(ScreenLoop *screen, CharselState *st)
                 box->sel_row = cur->sel_row;
                 box->state = CHARSEL_BOX_ACTIVE;
                 box->side = swap ? 1 - side : side;
-                if (sel == -1 || cell == NULL || cell->char_index == SELECT_CELL_EMPTY) {
-                    goto stay;
+                if (sel == -1 || cell == NULL || cell->char_index == SELECT_CELL_EMPTY || Select_MfOff(cell)) {
+                    goto stay;      /* Moemon Fight: a greyed-out character can't be picked */
                 }
                 Select_PlaySnd(&info->cursor_done_snd[0][side], &info->cursor_done_snd[1][side], -1);
                 st->boxes[team][cur->slot].state = CHARSEL_BOX_DONE;
@@ -1219,7 +1238,12 @@ static void Select_DrawElem(const SysElem *elem, SpriteSet *sprites, Anim *anims
         SysDraw_Start(list, idx);
     }
     if (g_game->skip_draw == 0) {
+        PalFx *fx = item->palfx;
+        if (sMfGrey) {
+            item->palfx = &sMfGreyFx;
+        }
         SysDraw_Update(item);
+        item->palfx = fx;
     }
     item->drawn = 1;
     if (item->time <= 1 && item->time != -1) {
@@ -1312,7 +1336,9 @@ int Charsel_Draw(ScreenLoop *screen, CharselState *st)
             if (cell->sprites == NULL || KeyedArray_Find(cell->sprites->sprites, 9000, 1) == -1) {
                 continue;
             }
+            sMfGrey = Select_MfOff(cell);
             Select_DrawElem(&info->faces[t].face, cell->sprites, NULL, NULL, 0.0f, 0.0f, cell->scale);
+            sMfGrey = 0;
         }
     }
 
@@ -1331,7 +1357,9 @@ int Charsel_Draw(ScreenLoop *screen, CharselState *st)
                 Select_DrawMotifElem(&info->cell_random, rx, ry);
             }
             if (g_game->skip_draw == 0 && cell->sprites != NULL) {
+                sMfGrey = Select_MfOff(cell);
                 Select_DrawElem(&info->portrait, cell->sprites, NULL, NULL, (float)x, (float)y, cell->scale);
+                sMfGrey = 0;
             }
             x += info->cell_spacing + info->cell_size[0];
         }

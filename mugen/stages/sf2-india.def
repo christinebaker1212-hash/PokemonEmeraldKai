@@ -1,6 +1,7 @@
 [Info]
 ;Name = "INDIA"
 Name = "SF2 India - Dhalsim Stage"
+displayname = "INDIA - DHALSIM"
 
 [Camera]
 StartX = 0

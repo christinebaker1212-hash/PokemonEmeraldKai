@@ -39,6 +39,10 @@ static void (*sMusicHook)(void *udata, Uint8 *stream, int len);
 static void *sMusicArg;
 static void (*sMusicFinished)(void);
 static int sMusicVolume = MIX_MAX_VOLUME;
+/* The music hook hands over one whole block of the engine's music ring per call, the chunk size the mixer was
+ * opened with (as SDL_mixer asks it): taken a block at a time, played out MIX_BLOCK frames at a time */
+static Sint16 *sMusicBuf;
+static int sMusicFrames, sMusicPos;
 
 /* MfMix_Render's state: the current 13379 Hz frame and the block it comes from */
 static Sint16 sBlock[MIX_BLOCK * 2];
@@ -79,9 +83,29 @@ static void Mix_Block(void)
 
     memset(acc, 0, sizeof(acc));
     if (sMusicHook != NULL) {
-        memset(music, 0, sizeof(music));
-        sMusicHook(sMusicArg, (Uint8 *)music, (int)sizeof(music));
-        for (i = 0; i < MIX_BLOCK * 2; i++) {
+        int have = 0;
+        while (have < MIX_BLOCK) {
+            int n;
+            if (sMusicPos >= sMusicFrames) {
+                Sint16 *buf = realloc(sMusicBuf, (size_t)sChunkSize * 2 * sizeof(Sint16));
+                if (buf == NULL) {
+                    break;
+                }
+                sMusicBuf = buf;
+                memset(sMusicBuf, 0, (size_t)sChunkSize * 2 * sizeof(Sint16));
+                sMusicHook(sMusicArg, (Uint8 *)sMusicBuf, sChunkSize * 2 * (int)sizeof(Sint16));
+                sMusicFrames = sChunkSize;
+                sMusicPos = 0;
+            }
+            n = sMusicFrames - sMusicPos;
+            if (n > MIX_BLOCK - have) {
+                n = MIX_BLOCK - have;
+            }
+            memcpy(music + have * 2, sMusicBuf + sMusicPos * 2, (size_t)n * 2 * sizeof(Sint16));
+            have += n;
+            sMusicPos += n;
+        }
+        for (i = 0; i < have * 2; i++) {
             acc[i] += Gba8(music[i]) * sMusicVolume / MIX_MAX_VOLUME;
         }
     }
@@ -387,6 +411,7 @@ void Mix_HookMusic(void (*mix_func)(void *udata, Uint8 *stream, int len), void *
     Mix_Lock();
     sMusicHook = mix_func;
     sMusicArg = arg;
+    sMusicFrames = sMusicPos = 0;   /* the next block is the new music's */
     Mix_Unlock();
 }
 

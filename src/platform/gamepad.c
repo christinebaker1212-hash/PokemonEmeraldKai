@@ -30,6 +30,7 @@
 #include <string.h>
 #include "global.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
 
 #define MAX_PADS 4
 #define STICK_DEAD   0.45f   // walking
@@ -103,6 +104,8 @@ static void LoadSettings(void)
         }
         else if (strcmp(key, "controller") == 0 && strcmp(val, "all") != 0)
             snprintf(sSelectedGuid, sizeof(sSelectedGuid), "%s", val);
+        else
+            Fight_BindSetting(key, val);
     }
     fclose(f);
 }
@@ -121,6 +124,7 @@ void Gamepad_SaveSettings(void)
                "; button_icons = auto (the device used last), keyboard, xbox, playstation or nintendo\n"
                "button_icons = %s\n", names[sLayout], sAnalogRun, sRumble, sSelectedGuid[0] ? sSelectedGuid : "all",
                sIconSetNames[sIconSet]);
+    Fight_BindWrite(f);
     fclose(f);
 }
 

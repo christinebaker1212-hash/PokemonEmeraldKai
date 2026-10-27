@@ -14,10 +14,10 @@
 #include <pthread.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/stat.h>
 #ifndef _WIN32
 #include <dirent.h>
 #include <strings.h>
-#include <sys/stat.h>
 #endif
 
 #include "mugen.h"
@@ -88,6 +88,8 @@ static volatile unsigned int sFrameSerial;
 /* The host's values that belong to the fight's state (kept with each frame for rollback: HostVars) */
 static unsigned short sHeld[2];     /* the buttons the engine's keys are down for */
 static int sMotifScreen;            /* a screenpack screen (select, VS, results): black beside the pack's 4:3 */
+static int sLastScreen;             /* the session's last screen: its fade out isn't shown (the game's CRT turns
+                                       the last bright picture off instead) */
 static int sZone;                   /* the match is on screen: frames are kept to go back to (online) */
 
 static char sRoot[0x200];           /* "<mugen folder>/" */
@@ -189,6 +191,30 @@ static void Path_Full(const char *path, char *out, size_t size)
 #else
     (void)p;
 #endif
+}
+
+/* The real path of an engine path (mf_pack.c), in any letter case on Linux; 0 when there's nothing there */
+int MfHost_RealPath(const char *path, char *out, size_t size)
+{
+    struct stat st;
+
+    if (sRoot[0] == '\0') {
+        Host_InitRoot();
+    }
+    Path_Full(path, out, size);
+    if (stat(out, &st) == 0) {
+        return 1;
+    }
+#ifndef _WIN32
+    {
+        char real[0x400];
+        if (Path_ResolveCase(out, real, sizeof(real)) && stat(real, &st) == 0) {
+            snprintf(out, size, "%s", real);
+            return 1;
+        }
+    }
+#endif
+    return 0;
 }
 
 FILE *MfFile_Open(const char *path, const char *mode)
@@ -385,6 +411,120 @@ void MfHost_FitMotif(void)
     g_mfHudTopY = g_mfHudBottomY = 0;
 }
 
+/* ------------------------------------------------------------------ the sides of 4:3 screens */
+
+/* The select, VS and results screens are the pack's 4:3 in the middle of the 3:2 picture. The sides show the
+ * screen's background: kept as it is drawn, before anything else of the screen (MfHost_KeepBackground), then
+ * put in the sides once the screen is drawn (MfHost_FillSides), over whatever slid past the 4:3 edges. Where the
+ * background reaches past its edges it goes on as it is; where it doesn't, it is mirrored from the edge. */
+static unsigned short sBack[MF_SCREEN_W * MF_SCREEN_H];
+static int sBackKept, sSidesDone;
+
+static SDL_Surface *Host_Target(void)
+{
+    const Sprite *spr;
+    SDL_Surface *surface;
+
+    if (g_renderTarget == NULL || g_renderTarget->sprites == NULL) {
+        return NULL;
+    }
+    spr = (const Sprite *)(g_renderTarget->sprites->data + g_renderTarget->sprites->elem_size * g_renderTargetSprite);
+    if (spr == NULL || spr->format != SPRITE_FORMAT_SURFACE || (surface = spr->pixels) == NULL
+        || surface->format->BytesPerPixel != 2) {
+        return NULL;
+    }
+    return surface;
+}
+
+static int Host_SidesWanted(void)
+{
+    return sMotifScreen && g_mfMotifOffsetX > 0 && !g_game->skip_draw;
+}
+
+void MfHost_KeepBackground(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int y, w, h;
+
+    if (surface == NULL) {
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    memset(sBack, 0, sizeof(sBack));
+    for (y = 0; y < h; y++) {
+        memcpy(sBack + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
+    }
+    sBackKept = 1;
+}
+
+static int Host_Bright(unsigned short c)
+{
+    return ((c >> 11) & 31) + ((c >> 5) & 63) / 2 + (c & 31) > 12;
+}
+
+/* One side of a row: x0..x1 (exclusive) of the picture. The background as it is where it really goes there
+ * (mostly lit); else its colour at the screen's edge (the inside columns e0..e1, rows y-2..y+2 averaged, so
+ * text at the edge doesn't streak) carried out to the picture's edge, a little darker towards it */
+static void Host_FillSide(unsigned short *row, int y, int h, int x0, int x1, int e0, int e1, int outer)
+{
+    const unsigned short *back = sBack + y * MF_SCREEN_W;
+    int x, lit = 0, r = 0, g = 0, b = 0, n = 0, yy;
+
+    for (x = x0; x < x1; x++) {
+        lit += Host_Bright(back[x]);
+    }
+    if (lit * 4 >= (x1 - x0) * 3) {
+        memcpy(row + x0, back + x0, (size_t)(x1 - x0) * 2);
+        return;
+    }
+    for (yy = y - 2; yy <= y + 2; yy++) {
+        const unsigned short *line = sBack + (yy < 0 ? 0 : yy >= h ? h - 1 : yy) * MF_SCREEN_W;
+        for (x = e0; x < e1; x++) {
+            r += line[x] >> 11;
+            g += (line[x] >> 5) & 63;
+            b += line[x] & 31;
+            n++;
+        }
+    }
+    for (x = x0; x < x1; x++) {
+        int d = x < outer ? outer - x : x - outer;        /* how far from the picture's edge */
+        int k = 208 + 48 * d / (x1 - x0 > 1 ? x1 - x0 : 1);    /* 4/5 brightness at the picture's edge */
+        k = k > 256 ? 256 : k;
+        row[x] = (unsigned short)(((r / n * k >> 8) << 11) | ((g / n * k >> 8) << 5) | (b / n * k >> 8));
+    }
+}
+
+void MfHost_FillSides(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int left = g_mfMotifOffsetX;
+    int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
+    int y, w, h;
+
+    if (surface == NULL) {
+        sBackKept = 0;
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    if (right > w) {
+        right = w;
+    }
+    for (y = 0; y < h; y++) {
+        unsigned short *row = (unsigned short *)((unsigned char *)surface->pixels + y * surface->pitch);
+        if (!sBackKept) {
+            memset(row, 0, (size_t)left * 2);
+            memset(row + right, 0, (size_t)(w - right) * 2);
+            continue;
+        }
+        Host_FillSide(row, y, h, 0, left, left, left + 4 < right ? left + 4 : right, 0);
+        Host_FillSide(row, y, h, right, w, right - 4 > left ? right - 4 : left, right, w - 1);
+    }
+    sBackKept = 0;
+    sSidesDone = 1;
+}
+
 /* ------------------------------------------------------------------ frames */
 
 void MfHost_Present(const SDL_Surface *surface)
@@ -395,6 +535,9 @@ void MfHost_Present(const SDL_Surface *surface)
     if (surface == NULL || surface->format->BytesPerPixel != 2) {
         return;
     }
+    if (sLastScreen && g_game->fade.type != 0 && g_game->fade.out) {
+        return;
+    }
     w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
     h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
     if (w < MF_SCREEN_W || h < MF_SCREEN_H) {
@@ -403,8 +546,8 @@ void MfHost_Present(const SDL_Surface *surface)
     for (y = 0; y < h; y++) {
         memcpy(dst + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
     }
-    if (sMotifScreen && g_mfMotifOffsetX > 0) {
-        /* the screenpack's screens keep to its own 4:3: what slides past its edges isn't shown */
+    if (sMotifScreen && g_mfMotifOffsetX > 0 && !sSidesDone) {
+        /* a screen without a background (MfHost_FillSides): what slides past its 4:3 edges isn't shown */
         int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
         for (y = 0; y < MF_SCREEN_H; y++) {
             memset(dst + y * MF_SCREEN_W, 0, (size_t)g_mfMotifOffsetX * 2);
@@ -414,6 +557,7 @@ void MfHost_Present(const SDL_Surface *surface)
         }
     }
     sPresented = 1;
+    sSidesDone = 0;
 }
 
 /* The fight is on screen (Fight_DrawHud): the picture's full width is the stage's */
@@ -650,13 +794,39 @@ static void Host_ReadStages(const char *list)
     }
 }
 
-/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list */
+int MfPack_StageIndex(const char *path);
+
+/* A stage one of the online players lacks (mf_pack.c) */
+static int Host_StageOff(const char *path)
+{
+    int i = MfPack_StageIndex(path);
+    return i >= 0 && i < MF_PACK_MAX && sSession.stageOff[i];
+}
+
+/* A character one of the online players lacks: greyed out on the select screen (select.c) */
+int MfHost_CharOff(int char_index)
+{
+    return char_index >= 0 && char_index < MF_PACK_MAX && sSession.charOff[char_index];
+}
+
+/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list,
+ * without the stages one of the players lacks (unless that's all of them) */
 static void Host_PickStage(void)
 {
     GameVars *g = g_game;
     const char *path;
+    const char *ok[64];
+    int i, n = 0, total = sStageCount > 0 ? sStageCount : g->stage_count;
 
-    if (sStageCount > 0) {
+    for (i = 0; i < total && n < 64; i++) {
+        const char *p = sStageCount > 0 ? sStages[i] : g->select_screen[i].path;
+        if (!Host_StageOff(p)) {
+            ok[n++] = p;
+        }
+    }
+    if (n > 0) {
+        path = ok[Random_Next() % n];
+    } else if (sStageCount > 0) {
         path = sStages[Random_Next() % sStageCount];
     } else if (g->stage_count > 0) {
         path = g->select_screen[Random_Next() % g->stage_count].path;
@@ -668,15 +838,71 @@ static void Host_PickStage(void)
     g->arcade_music[0] = '\0';     /* the stage's own music */
 }
 
+/* The VS screen names the stage (the cabinet picks it: nobody chose it) */
+static char sStageName[0x50];
+static int sStagePos[2], sStageFont[3];
+
+const char *MfHost_VsStage(int pos[2], int font[3])
+{
+    pos[0] = sStagePos[0];
+    pos[1] = sStagePos[1];
+    font[0] = sStageFont[0];
+    font[1] = sStageFont[1];
+    font[2] = sStageFont[2];
+    return sStageName;
+}
+
+static void Host_NameStage(void)
+{
+    Ini *def = g_game->select_stage[0] != '\0' ? Ini_Open(g_game->select_stage) : NULL;
+    const char *name = NULL;
+
+    sStageName[0] = '\0';
+    if (def == NULL) {
+        return;
+    }
+    if (Ini_SelectGroup(def, "Info") != -1) {
+        name = Ini_GetValue(def, "displayname");
+        if (name == NULL) {
+            name = Ini_GetValue(def, "name");
+        }
+    }
+    if (name != NULL) {
+        size_t n;
+        while (*name == '"' || *name == ' ') {
+            name++;
+        }
+        snprintf(sStageName, sizeof(sStageName), "%s", name);
+        n = strlen(sStageName);
+        while (n > 0 && (sStageName[n - 1] == '"' || sStageName[n - 1] == ' ')) {
+            sStageName[--n] = '\0';
+        }
+    }
+    Ini_Free(def);
+}
+
 static void Host_ApplyCabinet(const char *cabinet)
 {
     GameVars *g = g_game;
-    Ini *ini = Ini_Open("cabinets.ini");
+    Ini *ini = NULL;
     int v, hud_top = 8;
     const char *text;
 
     sStageCount = 0;
     sCpuHomeStage = 0;
+    sStagePos[0] = sStagePos[1] = -1;
+    sStageFont[0] = -1;
+    sStageFont[1] = sStageFont[2] = 0;
+    if (sSession.cabinetText[0] != '\0') {
+        /* online: the answering player's rules */
+        Stream *st = Stream_OpenMemory(sSession.cabinetText, (int)strnlen(sSession.cabinetText, sizeof(sSession.cabinetText)));
+        if (st != NULL) {
+            ini = Ini_Parse(st, INI_MODE_READ);
+            Stream_Close(st);
+        }
+    } else {
+        ini = Ini_Open("cabinets.ini");
+    }
     if (ini == NULL) {
         MfFit_Hud(hud_top);
         return;
@@ -686,6 +912,12 @@ static void Host_ApplyCabinet(const char *cabinet)
             hud_top = v;
         }
         Host_ReadStages(Ini_GetValue(ini, "stages"));
+        if (Ini_Scanf(ini, "vs.stage.offset", "%i,%i", &sStagePos[0], &sStagePos[1]) < 2) {
+            sStagePos[0] = sStagePos[1] = -1;
+        }
+        if (Ini_Scanf(ini, "vs.stage.font", "%i,%i,%i", &sStageFont[0], &sStageFont[1], &sStageFont[2]) < 1) {
+            sStageFont[0] = -1;
+        }
         text = Ini_GetValue(ini, "cpu.stage");
         sCpuHomeStage = text != NULL && _stricmp(text, "home") == 0;
         if (Ini_GetInt(ini, "rounds", &v) && v >= 1 && v <= 9) {
@@ -723,6 +955,7 @@ static int Host_RunSession(const struct MfSession *s)
 
     Host_ApplyCabinet(s->cabinet[0] != '\0' ? s->cabinet : "mauville_gc");
     sMotifScreen = 0;
+    sLastScreen = 0;
     g = g_game;
     g->game_mode = s->mode == MF_MODE_CPU ? GAME_MODE_ARCADE : GAME_MODE_VERSUS;
     g->game_mode_side = 0;
@@ -746,6 +979,7 @@ static int Host_RunSession(const struct MfSession *s)
             if (s->mode != MF_MODE_CPU || !sCpuHomeStage) {
                 Host_PickStage();
             }
+            Host_NameStage();
             state = 10;
             break;
         case 10:
@@ -755,6 +989,7 @@ static int Host_RunSession(const struct MfSession *s)
             }
             break;
         case 11:
+            sLastScreen = s->mode == MF_MODE_CPU;   /* one match against the CPU, no results screen */
             state = Match_Run();    /* the VS screen stays up while it loads: MfHost_MatchShown */
             sZone = 0;
             g = g_game;
@@ -771,6 +1006,7 @@ static int Host_RunSession(const struct MfSession *s)
             break;
         case 12:
             sMotifScreen = 1;
+            sLastScreen = 1;
             Victory_Run();
             return result;
         default:
@@ -1046,6 +1282,215 @@ int MfEngine_Kept(unsigned int *oldest)
 unsigned int MfEngine_Hash(void)
 {
     return sHash;
+}
+
+/* ------------------------------------------------------------------ desync recovery */
+
+static unsigned char *Host_Region(int region, size_t *size)
+{
+    size_t used;
+
+    if (region == MF_STATE_GLOBALS) {
+        return MfRollback_Globals(size);
+    }
+    used = MfMem_Used();
+    *size = MfMem_Base() != NULL && used > MF_MEM_STACK_SIZE ? used - MF_MEM_STACK_SIZE : 0;
+    return MfMem_Base() != NULL ? MfMem_Base() + MF_MEM_STACK_SIZE : NULL;   /* not the stack: each its own */
+}
+
+/* The engine waits between frames (sLock held) */
+static int Host_Idle(void)
+{
+    return sActive && !sBusy && sCmd == CMD_NONE && sState != HOST_DEAD;
+}
+
+static unsigned int Host_PageHash(const unsigned char *p, size_t n)
+{
+    unsigned long long h = 0x9E37;
+    size_t i;
+
+    for (i = 0; i + 8 <= n; i += 8) {
+        unsigned long long w;
+        memcpy(&w, p + i, 8);
+        h = (h ^ w) * 0x9E3779B97F4A7C15ULL;
+        h ^= h >> 29;
+    }
+    for (; i < n; i++) {
+        h = (h ^ p[i]) * 0x100000001B3ULL;
+    }
+    return (unsigned int)(h ^ (h >> 32)) | 1;   /* 0: no page */
+}
+
+/* The globals' layout in this build: their size and where a few of them are */
+static unsigned int Host_Layout(void)
+{
+    size_t size;
+    unsigned char *start = MfRollback_Globals(&size);
+    unsigned long long v[5];
+
+    v[0] = size;
+    v[1] = (unsigned long long)((unsigned char *)&g_game - start);
+    v[2] = (unsigned long long)((unsigned char *)&g_renderTarget - start);
+    v[3] = sizeof(GameVars);
+#ifdef _WIN32
+    v[4] = 1;
+#else
+    v[4] = 2;
+#endif
+    return Host_PageHash((const unsigned char *)v, sizeof(v));
+}
+
+int MfEngine_StateInfo(struct MfStateInfo *out)
+{
+    size_t size;
+    int ok;
+
+    memset(out, 0, sizeof(*out));
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && MfMem_Base() != NULL;
+    if (ok) {
+        out->heapBase = (unsigned long long)(uintptr_t)MfMem_Base();
+        out->heapUsed = (unsigned int)MfMem_Used();
+        Host_Region(MF_STATE_GLOBALS, &size);
+        out->globalsSize = (unsigned int)size;
+        out->layout = Host_Layout();
+        out->pages[MF_STATE_GLOBALS] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_Region(MF_STATE_HEAP, &size);
+        out->pages[MF_STATE_HEAP] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_PackVars(out->host);
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateHashes(int region, unsigned int first, unsigned int count, unsigned int *out)
+{
+    size_t size, at;
+    unsigned char *base;
+    unsigned int i;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    base = Host_Region(region, &size);
+    for (i = 0; i < count; i++) {
+        at = (size_t)(first + i) * MF_STATE_PAGE;
+        out[i] = base == NULL || at >= size ? 0
+               : Host_PageHash(base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StatePage(int region, unsigned int index, unsigned char *out)
+{
+    size_t size, at = (size_t)index * MF_STATE_PAGE;
+    unsigned char *base;
+    int ok;
+
+    memset(out, 0, MF_STATE_PAGE);
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && region >= 0 && region < MF_STATE_REGIONS;
+    if (ok) {
+        base = Host_Region(region, &size);
+        ok = base != NULL && at < size;
+        if (ok) {
+            memcpy(out, base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateBegin(void)
+{
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        MfRollback_End();       /* the frames kept no longer lead here */
+        MfMem_MapLocal();
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StatePut(int region, unsigned int index, const unsigned char *page)
+{
+    size_t at = (size_t)index * MF_STATE_PAGE, size, n, w;
+    unsigned char *base, *dst;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    if (region == MF_STATE_HEAP) {
+        /* the heap may reach further there: ours grows to it */
+        size_t end = MF_MEM_STACK_SIZE + at + MF_STATE_PAGE;
+        if (MfMem_Base() == NULL || end > MfMem_Size()) {
+            pthread_mutex_unlock(&sLock);
+            return 0;
+        }
+        if (end > MfMem_Used()) {
+            MfMem_SetUsed(end);
+        }
+    }
+    base = Host_Region(region, &size);
+    if (base == NULL || at >= size) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    dst = base + at;
+    n = size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE;
+    for (w = 0; w + 8 <= n; w += 8) {
+        unsigned long long mine, theirs;
+        memcpy(&mine, dst + w, 8);
+        memcpy(&theirs, page + w, 8);
+        if (mine != theirs && !MfMem_LocalPointer(mine)) {
+            memcpy(dst + w, &theirs, 8);
+        }
+    }
+    for (; w < n; w++) {
+        dst[w] = page[w];
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StateEnd(const struct MfStateInfo *from)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        Host_UnpackVars(from->host);
+        if (from->heapUsed > MfMem_Used()) {
+            MfMem_SetUsed(from->heapUsed);
+        }
+        sHash = Host_Hash();
+        if (sSession.rollback && sZone) {
+            Host_PackVars(vars);
+            MfRollback_Begin(sFrame, vars);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+void MfEngine_TestPoke(int delta)
+{
+    pthread_mutex_lock(&sLock);
+    if (Host_Idle() && g_game != NULL && g_game->players[1] != NULL) {
+        g_game->players[1]->life += delta;
+        sHash = Host_Hash();
+    }
+    pthread_mutex_unlock(&sLock);
 }
 
 const unsigned short *MfEngine_Frame(void)

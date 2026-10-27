@@ -547,6 +547,19 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
     // Moemon Fight: a fight's sound instead of the game's (samplesPerFrame counts bytes here)
     Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
+    {
+        // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
+        static FILE *sDump;
+        static int sDumpTried;
+        if (!sDumpTried)
+        {
+            sDumpTried = 1;
+            if (getenv("MOEMON_AUDIO_DUMP") != NULL)
+                sDump = fopen(getenv("MOEMON_AUDIO_DUMP"), "wb");
+        }
+        if (sDump != NULL)
+            fwrite(audioBuffer, 1, samplesPerFrame, sDump);
+    }
 }
 
 

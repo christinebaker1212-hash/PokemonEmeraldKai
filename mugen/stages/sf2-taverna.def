@@ -4,6 +4,7 @@
 [Info]
  ;Name of the stage.
 name = "SF2 Meson de la Taberna - Vega Stage"
+displayname = "MESON DE LA TABERNA - VEGA"
 
 ;--------------------------------------------------------
 [Camera]

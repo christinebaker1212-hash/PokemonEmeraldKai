@@ -1,6 +1,7 @@
 [Info]
 ;Name = "CHINA"
 Name = "CHUN LI STAGE"
+displayname = "CHINA - CHUN-LI, SUPER SF2 X"
 
 [Camera]
 StartX = 0

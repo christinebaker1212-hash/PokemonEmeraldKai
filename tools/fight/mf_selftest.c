@@ -13,6 +13,7 @@
  * Run from the repository root (mugen/ is read from there).
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #ifdef __GLIBC__
@@ -144,7 +145,9 @@ int main(int argc, char **argv)
             buttons[0] = (unsigned short)a;
             buttons[1] = (unsigned short)b;
             while (n-- > 0) {
-                MfEngine_Step(buttons);
+                while (!MfEngine_Step(buttons)) {
+                    usleep(1000);   /* still loading: the buttons are for the next frame it runs */
+                }
                 Audio_Step();
                 frame++;
             }
