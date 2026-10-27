@@ -50,7 +50,7 @@ data or Elecbyte files.
   `common.snd`, `fightfx.sff` / `.air`, and the `f-4x6` / `f-6x9` fonts the engine loads at
   start-up.
 - The screenpack is Phantom Blood's STREET FIGHTER EX PLUS (640x480), in
-  `mugen/data/STREETFIGHTER-EX-PLUS/`. Only what the select, VS, fight and victory screens read
+  `mugen/STREETFIGHTER-EX-PLUS/` (where its own paths expect it). Only what the select, VS, fight and victory screens read
   is kept. Removed:
   - the intro, intro EX (122 MB), title, ending, game over and winner storyboards and their
     music;
