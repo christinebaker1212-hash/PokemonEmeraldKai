@@ -1,9 +1,9 @@
 # The GAME CENTER's floors at work: 1F's stairs closed until the admission is paid (pushed back), paid at the
 # reception; the stairs to 2F; the CARD SHOP (a structure deck into an empty deck slot, a single, for money); a duel
-# asked at the table by talking; the elevator to 3F; the stairs up to the ROOFTOP and its door back down; out
+# asked at the table by talking; the elevator to 3F; the stairs up to the ROOFTOP and its door back down (each arrival steps off sideways); out
 # through 1F's doormat onto RUSTBORO's road
 MODE=1
 WARP=11,17,6,6
 TMO=240
-EXPECT_A=("where map 11.17 xy 6,5" "money 49500" "money 34200" "where map 11.17 xy 6,4" "where map 11.18 xy 2,3" "game center: bought deck 0, slot" "game center: bought card" "asked BOY: duel" "where map 11.19 xy 6,2" "where map 11.20 xy 15,6" "where map 11.19 xy 2,3" "where map 0.3 xy 28,8")
+EXPECT_A=("where map 11.17 xy 6,5" "money 49500" "money 34200" "where map 11.17 xy 6,4" "where map 11.18 xy 3,2" "game center: bought deck 0, slot" "game center: bought card" "asked BOY: duel" "where map 11.19 xy 6,2" "where map 11.20 xy 14,5" "where map 11.19 xy 3,2" "where map 0.3 xy 28,8")
 UNEXPECT_A=("[crash]")

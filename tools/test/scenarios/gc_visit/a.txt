@@ -102,9 +102,9 @@ wait 4
 press LEFT 6
 wait 120
 mp where
-mp face up
+mp face right
 wait 4
-press UP 6
+press RIGHT 6
 wait 120
 mp where
 mp warp 11,17,2,14
