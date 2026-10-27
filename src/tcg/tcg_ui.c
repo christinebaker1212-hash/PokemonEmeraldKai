@@ -219,6 +219,7 @@ static void Close(void)
     if (U.portrait)
         SDL_DestroyTexture(U.portrait);
     U.portrait = NULL;
+    MP_Sound_EndFanfare(); /* (the music goes on: see sound.c) */
     Tcg_ResumeGame(callback);
     if (script)
         ScriptContext_Enable(); /* the CARD CLUB's script goes on */
@@ -2009,6 +2010,7 @@ int Tcg_Step(unsigned keys)
     U.previousKeys = keys;
     if (!Tcg_IsActive())
         return 0;
+    MP_Sound_TickFanfare(); /* (the game's tasks don't run while the cards are open) */
     U.age++;
     U.frame++;
     /* Key repeat for long lists. */

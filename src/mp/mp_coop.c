@@ -3671,7 +3671,7 @@ static bool8 ResolveMine(u8 slot, s8 player)
 // Sends each player their part and starts ours
 void MP_Coop_ResolveStart(void)
 {
-    u8 buf[4 + PARTY_SIZE * 13 + MAX_RESOLVE_LEARN * 15];
+    u8 buf[4 + PARTY_SIZE * 25 + MAX_RESOLVE_LEARN * 15];
     u8 boxSlot[PARTY_SIZE], learnSlot[MAX_RESOLVE_LEARN], nb, nl, i, k;
     u16 before[PARTY_SIZE][NUM_STATS], learnMove[MAX_RESOLVE_LEARN];
     s8 p;
@@ -3694,6 +3694,16 @@ void MP_Coop_ResolveStart(void)
                 buf[len++] = sResolve.before[i][k] & 0xFF;
                 buf[len++] = sResolve.before[i][k] >> 8;
             }
+            // its moves and PP as we have them now: the moves it learned without forgetting one are
+            // already in (the owner's own copy gets them now, not after the battle)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = GetMonData(&gPlayerParty[sResolve.boxSlot[i]], MON_DATA_MOVE1 + k);
+                buf[len++] = m & 0xFF;
+                buf[len++] = m >> 8;
+            }
+            for (k = 0; k < MAX_MON_MOVES; k++)
+                buf[len++] = GetMonData(&gPlayerParty[sResolve.boxSlot[i]], MON_DATA_PP1 + k);
             nb++;
         }
         for (i = 0; i < sResolve.nLearn; i++)
@@ -3831,13 +3841,23 @@ static void OnResolve(const u8 *data, u32 len)
         return;
     nb = data[1];
     nl = data[2];
-    if (nb > PARTY_SIZE || nl > MAX_RESOLVE_LEARN || len < 3u + nb * 13 + nl * 15)
+    if (nb > PARTY_SIZE || nl > MAX_RESOLVE_LEARN || len < 3u + nb * 25 + nl * 15)
         return;
     for (i = 0; i < nb; i++)
     {
         boxSlot[i] = data[pos++];
         for (k = 0; k < NUM_STATS; k++, pos += 2)
             before[i][k] = data[pos] | (data[pos + 1] << 8);
+        // its moves as the master has them (with the ones it learned without forgetting one)
+        if (boxSlot[i] < PARTY_SIZE)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = data[pos + k * 2] | (data[pos + k * 2 + 1] << 8);
+                u8 pp = data[pos + MAX_MON_MOVES * 2 + k];
+                SetMonData(&gPlayerParty[boxSlot[i]], MON_DATA_MOVE1 + k, &m);
+                SetMonData(&gPlayerParty[boxSlot[i]], MON_DATA_PP1 + k, &pp);
+            }
+        pos += MAX_MON_MOVES * 3;
     }
     for (i = 0; i < nl; i++)
     {

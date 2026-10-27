@@ -1,0 +1,5 @@
+# Safari Zone battle: the player's back picture is the look's (SERENA), as in other battles (shot safari)
+MODE=1
+TMO=90
+EXPECT_A=("battler 0 hp")
+UNEXPECT_A=("[crash]")

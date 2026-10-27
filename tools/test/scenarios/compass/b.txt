@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+mp sprite steven
+wait 200
+barrier route 2
+mp warp 0,17,12,10
+wait 200
+barrier petal 2
+mp warp 0,0,20,15
+wait 240
+barrier done 2
+quit

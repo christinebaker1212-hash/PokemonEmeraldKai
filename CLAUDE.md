@@ -130,6 +130,10 @@ per badge (growth table), pathfinding to them; the escalator kept at its fldeff_
 moments, eggs and family, evolution; every activity visible: swimming in the pond, climbing trees, digging, cut off at the
 water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
 
+Also 1.30.0's WHERE IS EVERYONE arrows (mp_compass.c: a world grid of Hoenn from the map connections, doors for indoor
+maps, drawn over the frame; test compass), Town Map heads of each look (MP_Avatar_HeadIcon), RARE CANDY counts, smart
+item targeting (mp_smartcursor.c), followers in their ball on bikes: COOP_NOTES "1.30.0".
+
 Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
 duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
 Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in

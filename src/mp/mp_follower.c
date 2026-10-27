@@ -84,6 +84,8 @@ struct FollowerSlot
     u8 pendingTimeout;
     bool8 fxHide;         // hidden by the effect (the ball still flying, or called back)
     bool8 recalling;
+    bool8 biking;         // in its ball while its owner rides a bike (BikeBall)
+    u8 bikeFrames;
     u32 fx;               // MP_BallFx_Pack
     u8 fxSound;
     struct SpriteFrameImage frames[8];
@@ -996,6 +998,45 @@ bool8 MP_Follower_LocalTile(s16 *x, s16 *y)
     return TRUE;
 }
 
+// Moemon Co-op: on a bike the follower rides in its ball. Called back (its recall, toward its
+// owner) as they get on, sent out again (the ball tossed, its entrance) as they get off. Returns
+// whether it's hidden for it; *leaving: play its recall now.
+static bool8 BikeBall(struct FollowerSlot *s, bool8 bike, bool8 *leaving)
+{
+    if (bike && !s->biking)
+    {
+        s->biking = TRUE;
+        s->bikeFrames = 0;
+    }
+    else if (!bike && s->biking)
+    {
+        s->biking = FALSE;
+        s->recalling = FALSE;
+        s->fxHide = TRUE;            // (hidden until its ball has landed)
+        s->pendingIn = TRUE;
+        s->pendingTimeout = 120;
+        s->popTimer = 0;
+    }
+    if (!s->biking)
+        return FALSE;
+    if (s->bikeFrames < 255)
+        s->bikeFrames++;
+    *leaving = TRUE;
+    // shown while its recall plays (or for the frame it starts in), hidden after
+    return s->recalling ? FALSE : s->bikeFrames > 2;
+}
+
+static bool8 LocalBiking(void)
+{
+    return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE)) != 0;
+}
+
+static bool8 RemoteBiking(u8 id)
+{
+    u8 mode = gMpPlayers[id].state.avatarMode;
+    return mode == MP_AVATAR_MACH_BIKE || mode == MP_AVATAR_ACRO_BIKE;
+}
+
 static bool8 LocalHidden(void)
 {
     return (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER)) != 0 || MP_Piggy_IsRiding()
@@ -1189,11 +1230,14 @@ void MP_Follower_Update(void)
 
     dex = MP_Follower_LocalDex(&female);
     SetSlotPokemon(&sSlots[0], dex, female, dex && MP_Follower_LocalShiny(), dex ? MP_Follower_LocalHue() : 0);
-    UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden());
     {
+        bool8 bikeLeaving = FALSE;
+        bool8 bikeHidden = BikeBall(&sSlots[0], LocalBiking(), &bikeLeaving);
         u8 sound;
-        u32 fx = MP_Follower_LocalFx(&sound);
-        SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2, fx, sound & 7, gPlayerAvatar.objectEventId);
+        u32 fx;
+        UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden() || bikeHidden);
+        fx = MP_Follower_LocalFx(&sound);
+        SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2 || bikeLeaving, fx, sound & 7, gPlayerAvatar.objectEventId);
         UpdateLeaving();
     }
 
@@ -1214,11 +1258,15 @@ void MP_Follower_Update(void)
         }
         if (obj != OBJECT_EVENTS_COUNT)
             DriveRemoteAuto(s, obj, i, &gMpPlayers[i].state);   // MOéMON GARDEN: on its own, as its Trainer's game says
-        UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) : TRUE);
-        if (obj != OBJECT_EVENTS_COUNT)
         {
-            u8 fl = gMpPlayers[i].state.followerFlags;
-            SlotEffects(s, (fl >> 4) & 3, (fl & 0x40) != 0, gMpPlayers[i].state.followerFx, (fl >> 1) & 7, obj);
+            bool8 bikeLeaving = FALSE;
+            bool8 bikeHidden = obj != OBJECT_EVENTS_COUNT && BikeBall(s, RemoteBiking(i), &bikeLeaving);
+            UpdateSlot(s, obj, i < MP_MAX_PLAYERS && gMpPlayers[i].present ? RemoteHidden(i) || bikeHidden : TRUE);
+            if (obj != OBJECT_EVENTS_COUNT)
+            {
+                u8 fl = gMpPlayers[i].state.followerFlags;
+                SlotEffects(s, (fl >> 4) & 3, (fl & 0x40) != 0 || bikeLeaving, gMpPlayers[i].state.followerFx, (fl >> 1) & 7, obj);
+            }
         }
     }
     MP_LifeInteract_Update();

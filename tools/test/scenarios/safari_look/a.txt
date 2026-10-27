@@ -1,0 +1,10 @@
+pressuntil A field 5000
+wait 60
+mp sprite kai_serena
+wait 30
+mp safari
+mp wild 290:3
+wait 200
+rendershot safari
+mp bhp
+quit

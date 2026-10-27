@@ -2717,6 +2717,12 @@ static void CreateEventMon(struct Pokemon *mon, u16 species, u8 level, u8 fixedI
 // If FALSE, should load this game's Deoxys form. If TRUE, should load normal Deoxys form
 bool8 ShouldIgnoreDeoxysForm(u8 caseId, u8 battler)
 {
+    // Moemon Co-op: everyone in an online battle plays this game, so a friend's DEOXYS (a co-op
+    // partner's, a PvP foe's) shows the same form as on its owner's screen; only a wild or
+    // trainer one on the other side keeps the Normal Forme
+    if (gNetLinkActive && gMain.inBattle && (caseId == 1 || caseId == 3
+                                             || (caseId == 5 && (GetBattlerSide(battler) == B_SIDE_PLAYER || !gMpCoopBattle))))
+        return FALSE;
     switch (caseId)
     {
     case 0:

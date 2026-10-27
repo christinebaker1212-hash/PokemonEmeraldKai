@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
@@ -45,6 +46,7 @@ static void FaintFromFieldPoison(u8 partyIdx)
     u32 status = STATUS1_NONE;
 
     AdjustFriendship(pokemon, FRIENDSHIP_EVENT_FAINT_FIELD_PSN);
+    MP_NoteFaint(GetMonData(pokemon, MON_DATA_PERSONALITY));   // Moemon Co-op: REVIVE's cursor
     SetMonData(pokemon, MON_DATA_STATUS, &status);
     GetMonData(pokemon, MON_DATA_NICKNAME, gStringVar1);
     StringGet_Nickname(gStringVar1);

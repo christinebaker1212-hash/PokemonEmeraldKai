@@ -1,5 +1,7 @@
 #include "global.h"
 #include "event_data.h"
+#include "mp.h"
+#include "constants/event_objects.h"
 #include "pokedex.h"
 
 #define SPECIAL_FLAGS_SIZE  (NUM_SPECIAL_FLAGS / 8)  // 8 flags per byte
@@ -190,7 +192,13 @@ bool8 VarSet(u16 id, u16 value)
 
 u8 VarGetObjectEventGraphicsId(u8 id)
 {
-    return VarGet(VAR_OBJ_GFX_ID_0 + id);
+    u8 gfx = VarGet(VAR_OBJ_GFX_ID_0 + id);
+    // Moemon Co-op: a map person (variables 0-B; C-F are link players and the Battle Tower's
+    // stand-ins for you) never takes the player's own sprite, which wears your look and palette:
+    // a variable left at 0 (= Brendan) made a copy of the player that broke the player's colors
+    if (id < 0xC && MP_Avatar_LocalStateInfo(gfx) != NULL)
+        gfx = gfx == OBJ_EVENT_GFX_MAY_NORMAL ? OBJ_EVENT_GFX_RIVAL_MAY_NORMAL : OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL;
+    return gfx;
 }
 
 u8 *GetFlagPointer(u16 id)

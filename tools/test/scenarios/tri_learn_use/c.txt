@@ -1,0 +1,26 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 500
+mp wilddouble 0
+mp wild 290:40 81 0 0 0
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 30
+mp bstatus 1 0 1
+mp bstatus 3 0 1
+mp bstatus 5 0 1
+mp bhp
+wait 10
+press A 2
+wait 20
+press A 2
+wait 20
+press A 2
+wait 120
+pressuntillog A 8000 co-op levels: slot 4 forgot
+wait 120
+pressuntil A action 4000
+wait 60
+mp bmons
+wait 400
+quit

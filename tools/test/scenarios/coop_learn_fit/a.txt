@@ -1,0 +1,28 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+mp wilddouble 100
+mp wild 290:40 81 0 0 0
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 30
+mp bhp
+mp bstatus 1 3 1
+mp bstatus 3 3 1
+mp bhp
+barrier pick 2
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press A 2
+wait 20
+press A 2
+pressuntillog A 8000 co-op levels: player 2 is done
+wait 120
+pressuntil A action 4000
+wait 60
+mp bmons
+wait 400
+quit

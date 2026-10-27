@@ -18,6 +18,8 @@ bool8 WaitFanfare(bool8 stop);
 void StopFanfareByFanfareNum(u8 fanfareNum);
 void PlayFanfare(u16 songNum);
 bool8 IsFanfareTaskInactive(void);
+void MP_Sound_TickFanfare(void);
+void MP_Sound_EndFanfare(void);
 void FadeInNewBGM(u16 songNum, u8 speed);
 void FadeOutBGMTemporarily(u8 speed);
 bool8 IsBGMPausedOrStopped(void);

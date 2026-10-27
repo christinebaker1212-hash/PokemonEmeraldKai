@@ -1854,3 +1854,38 @@ in a tree!" / "is digging in the dirt." (MP_GardenLife_Doing) except for pursuit
 their own lines (the SWIM pursuit: "is swimming laps in the pond."). Logs "garden: N swims in the pond at", "out of
 the pond", "climbs a tree at", "digs at"; `mp life garden actors` prints sink / up / water; `mp life garden pursuit
 ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
+
+## 1.30.0: friends' arrows, items, battles, fixes
+- WHERE IS EVERYONE (mp_compass.c, rewritten): drawn over the frame by MP_Compass_Composite (VDraw), no sprites or
+  palettes. A world grid of Hoenn's outdoor maps (BuildWorld: breadth first over the map connections from Littleroot,
+  each map's (0, 0) in world tiles, the first one found kept); an indoor map resolves to its door out (WorldPos: the
+  fewest warps to a placed map, that warp's destination tile; cached). The same / a connected map still uses
+  MP_GetRemoteMapPos; nowhere on the grid (underwater, islands) falls back to the Town Map areas. Arrows at the exact
+  angle (a triangle by signed edge distances, soft outline), the label (small font, name + Manhattan steps) beside
+  it on the inner side; a door in view = no arrow (its friend tag shows). Pings (MP_Compass_PointAt) are the same
+  arrows, smaller, blinking, inset. Log "compass: player N at dx,dy (S steps)". Test compass.
+- Town Map heads (region_map.c, mp_avatar.c MP_Avatar_HeadIcon): the look's standing front frame, the top 16x16 of
+  what's drawn, centered, outlined (an unused palette index) in the player's color (MP_Compass_PlayerColor), white
+  for yours; Brendan's / May's head only if it can't be built.
+- RARE CANDY by the handful (party_menu.c sMpCandy, ItemUseCB_RareCandy): a count window (sMpCandyCountWindowTemplate)
+  up to the candies held; Task_MpCandyNext applies one candy per level, a level that teaches a move shows its line and
+  goes through the usual move tasks (PartyMenuTryEvolution comes back to Task_MpCandyNext while active), then one
+  stats window from the first level to the last and evolution. Unused candies never leave the BAG ("N RARE CANDIES
+  went back in the BAG."). Test candy_many.
+- Smart targeting (mp_smartcursor.c MP_SmartItemSlot): status cures (item effect byte 3) and revives (byte 4
+  ITEM4_REVIVE); in battle the battler choosing (gBattlerInMenuId), then other actives, then the rest; faints noted by
+  MP_NoteFaint (Cmd_tryfaintmon, field poison, `mp hp SLOT 0`). Log "smart cursor: item I -> slot S". Test smart_cursor.
+- PP beside moves (ShowMoveSelectWindow, the window 14 tiles wide). Test pp_shown. Held HMs back to the BAG on
+  SetPlacedMonData into a box (test hm_deposit).
+- Co-op levels: MPR_COOP_RESOLVE boxes carry the Pokemon's moves and PP (25 bytes): the moves learned without
+  forgetting one (state 14) reach the owner's own copy in the battle (they were only in the master's). Tests
+  coop_learn_fit, coop_learn_use, tri_learn_use, double_learn (`mp bmons`).
+- Followers ride in their ball on a bike (mp_follower.c BikeBall: the recall as their owner gets on, the toss and
+  entrance as they get off; friends' too, from their avatarMode). Test bike_follower.
+- Fixes: the card screens tick the fanfare and finish it on close (sound.c MP_Sound_TickFanfare / EndFanfare: a
+  CARD COUNTER prize left the BGM paused and a door's fade waiting for ever; test_ui.sh fanfare); contests get a
+  stand-in DisableStruct for FURY CUTTER / ROLLOUT (battle_anim.c; test contest_furycutter); the Safari Zone's back
+  picture is the look's (battle_controller_safari.c; test safari_look); a friend's DEOXYS shows this game's form in
+  co-op and PvP (ShouldIgnoreDeoxysForm, BattleLoadOpponentMonSpriteGfx; test coop_deoxys); map people whose look is
+  a variable (0-B) never take the player's own sprite (event_data.c VarGetObjectEventGraphicsId: a variable at 0
+  made a copy of the player that took their palette), and the Lilycove Lady's POKeMON always has a POKeMON's look.

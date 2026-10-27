@@ -242,6 +242,49 @@ SCRIPT
 run counter
 expect counter 'screen 12 opted 1 .* points 18 packs 1000'
 echo 'PASS the counter: a spare card traded in, a booster pack bought'
+# A PRIZES fanfare at the counter, then the case closed before it ends: the Pokemon Center's
+# music plays again (it stayed paused, and a door then never finished), and the door works.
+cat > "$OUT/fanfare.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards giveall
+mp cards club
+wait 20
+press A 2
+wait 4
+press A 2
+wait 10
+press A 2
+wait 4
+press R 2
+wait 4
+press R 2
+wait 4
+press A 2
+wait 10
+mp music
+press A 2
+wait 6
+press B 2
+wait 6
+press B 2
+wait 6
+press B 2
+waitfor field 600
+wait 30
+mp music
+press DOWN 40
+wait 300
+mp where
+quit
+SCRIPT
+run fanfare 2,2,7,6
+expect fanfare 'music 400 saved 0 status 8.* fanfare 1'
+expect fanfare 'music 400 saved 0 status 0.* fanfare 0'
+expect fanfare 'where map 0.10'
+echo 'PASS a counter prize fanfare cut short: the music plays again and the door works'
+
 # Pokemon Powers on the duel table: RAIN DANCE, ENERGY TRANS, PEEK, CURSE, CLAIRVOYANCE's
 # look at their hand and a Clefairy Doll discarded, on a staged board.
 cat > "$OUT/powers.txt" <<'SCRIPT'

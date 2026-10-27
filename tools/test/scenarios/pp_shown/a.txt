@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 100
+mp item 34 1
+mp pp 0 0 3
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 10
+press A 2
+wait 20
+press A 2
+waitfor partymenu 300
+wait 30
+press A 2
+wait 40
+shot ether_moves
+press A 2
+wait 120
+shot ether_done
+press A 2
+wait 60
+press B 2
+wait 120
+mp pp 0
+quit
