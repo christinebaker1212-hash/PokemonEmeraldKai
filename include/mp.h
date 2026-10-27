@@ -761,6 +761,9 @@ void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text);
 // mp_social.c
 void MP_Social_Open(void);
 void MP_Compass_Update(void);   // mp_compass.c
+void MP_Compass_Composite(u16 *frame);
+u16 MP_Compass_PlayerColor(u8 player);   // a player's color (arrows, Town Map outlines)
+bool8 MP_Avatar_HeadIcon(s8 id, u8 *tiles, u16 *pal, u16 outline);   // the look's head, 16x16 (-1: you)   // ... drawn over the finished frame (platform VDraw)
 bool8 MP_Compass_AnyShown(void);
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
@@ -991,6 +994,8 @@ enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT
 void MP_Events_Did(u8 what);
 void MP_Events_UpdateToasts(void);
 u8 MP_RareCandyCap(void);   // party_menu.c: no RARE CANDY past the next gym ace
+void MP_NoteFaint(u32 personality);   // mp_smartcursor.c: a player's Pokemon fainted (for REVIVE's cursor)
+s8 MP_SmartItemSlot(u16 item);        // the party slot an item is for (status cure, REVIVE), or -1
 extern u8 gMpEnemyLevelBonus;                     // battle_main.c CreateNPCTrainerParty adds it (co-op team-ups)
 void MP_Coop_PrepareTrainerParty(u16 trainerId);
 void MP_Coop_FinishTrainerParty(u16 trainerId);

@@ -209,6 +209,17 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
 {
     s32 i;
 
+    // Moemon Co-op: contests have no battle to read FURY CUTTER's / ROLLOUT's counters from
+    // (the GBA read address 0 and carried on; here it crashed): a stand-in, their first hit
+    if (gAnimDisableStructPtr == NULL)
+    {
+        static struct DisableStruct sNoBattle;
+        memset(&sNoBattle, 0, sizeof(sNoBattle));
+        sNoBattle.rolloutTimerStartValue = 5;
+        sNoBattle.rolloutTimer = 4;
+        gAnimDisableStructPtr = &sNoBattle;
+    }
+
     if (!IsContest())
     {
         InitPrioritiesForVisibleBattlers();

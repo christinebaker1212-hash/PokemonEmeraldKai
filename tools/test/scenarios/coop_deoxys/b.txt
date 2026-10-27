@@ -1,0 +1,8 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+pressuntil A action 4000
+wait 60
+rendershot b_deoxys
+wait 200
+quit

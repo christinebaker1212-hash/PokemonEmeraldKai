@@ -1,0 +1,9 @@
+# Solo NORMAL CONTEST at the Lilycove CONTEST HALL with a SCEPTILE whose first move is FURY CUTTER, used every turn
+# (it crashed the game): mash A to the end and back to the field
+MODE=1
+WARP=13,4,14,4
+TMO=600
+FPS=300
+ENV_A="MOEMON_DEBUG_PARTY=279:40"
+EXPECT_A=("where map 13.4" "contest")
+UNEXPECT_A=("[crash]")

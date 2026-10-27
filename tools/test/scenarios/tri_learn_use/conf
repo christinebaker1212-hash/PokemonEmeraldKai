@@ -1,0 +1,14 @@
+# Co-op wild Triple Battle, all three leads one EXP short of Lv16 (four moves): every foe at 1 HP, CARL knocks one out,
+# ALICE and BOB GROWL, so the battle goes on. All three forget SCRATCH for PECK in the battle; on the next turn PECK
+# is in the battle's moves for all three (bmon 0, 2 and 4 on the leader) and on ALICE's and BOB's move lists
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+,283:5"
+ENV_C="MOEMON_DEBUG_PARTY=280:15+,283:5"
+EXPECT_C=("co-op levels: slot 0 forgot move slot 0 for 64" "co-op levels: slot 2 forgot move slot 0 for 64"
+          "co-op levels: slot 4 forgot move slot 0 for 64" "bmon 0: species 280 moves 64" "bmon 2: species 280 moves 64"
+          "bmon 4: species 280 moves 64")

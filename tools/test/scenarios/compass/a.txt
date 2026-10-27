@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp where
+rendershot a_pc_door
+barrier route 2
+wait 200
+rendershot a_route
+barrier petal 2
+wait 240
+rendershot a_petalburg
+mp sprite kai_serena
+wait 30
+mp townmap
+wait 120
+rendershot a_townmap
+barrier done 2
+quit

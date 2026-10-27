@@ -774,6 +774,7 @@ void VDraw(void)
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
+    MP_Compass_Composite(image);    // ... arrows toward friends off screen
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)

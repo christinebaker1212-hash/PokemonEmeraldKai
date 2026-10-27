@@ -6570,6 +6570,9 @@ static void SetPlacedMonData(u8 boxId, u8 position)
     }
     else
     {
+        // Moemon Kai: a held HM goes back to the BAG (deposited, or moved into a box), as it
+        // does on release: HMs never leave the player (mp_heldhm.c)
+        MP_ReturnHeldHm(&sStorage->movingMon);
         BoxMonRestorePP(&sStorage->movingMon.box);
         SetBoxMonAt(boxId, position, &sStorage->movingMon.box);
     }

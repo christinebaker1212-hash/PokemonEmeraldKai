@@ -1,0 +1,6 @@
+# Smart targeting from the BAG: a BURN HEAL's cursor starts on the burned Moemon (slot 2, not the poisoned slot 1),
+# A uses it there; a REVIVE's on the one that fainted last (slot 1 after slot 2)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:10,263:6,265:6"
+EXPECT_A=("smart cursor: item 15 -> slot 2" "partyhp 1: hp 22 status 8" "partyhp 2: hp 23 status 0" "smart cursor: item 24 -> slot 1" "partyhp 1: hp 11 status 0" "partyhp 2: hp 0 status 0")

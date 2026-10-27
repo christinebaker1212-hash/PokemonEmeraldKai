@@ -1,0 +1,13 @@
+pressuntil A field 5000
+mp double 290:2 290:50
+pressuntil A action 3000
+wait 30
+mp bstatus 3 3 -1
+mp bmons
+mash A 8 20
+wait 200
+pressuntil A action 6000
+wait 30
+shot after_learn
+mp bmons
+quit

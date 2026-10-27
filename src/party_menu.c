@@ -4640,6 +4640,9 @@ void CB2_ShowPartyMenuForItemUse(void)
             msgId = PARTY_MSG_USE_ON_WHICH_MON;
 
         task = Task_HandleChooseMonInput;
+        // Moemon Co-op: the cursor starts on the Pokemon the item is for (mp_smartcursor.c)
+        if (MP_SmartItemSlot(gSpecialVar_ItemId) >= 0)
+            gPartyMenu.slotId = MP_SmartItemSlot(gSpecialVar_ItemId);
     }
 
     InitPartyMenu(menuType, partyLayout, PARTY_ACTION_USE_ITEM, TRUE, msgId, task, callback);
@@ -4987,7 +4990,18 @@ static void ShowMoveSelectWindow(u8 slot)
         move = GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i);
         AddTextPrinterParameterized(windowId, fontId, gMoveNames[move], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
         if (move != MOVE_NONE)
+        {
+            // Moemon Co-op: the PP left, beside the move (ETHER, PP UP... in the field and in battle)
+            u8 *end, pp = GetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i);
+            u8 maxPP = CalculatePPWithBonus(move, GetMonData(&gPlayerParty[slot], MON_DATA_PP_BONUSES), i);
+            end = ConvertIntToDecimalStringN(gStringVar4, pp, STR_CONV_MODE_LEFT_ALIGN, 2);
+            *end++ = CHAR_SLASH;
+            ConvertIntToDecimalStringN(end, maxPP, STR_CONV_MODE_LEFT_ALIGN, 2);
+            AddTextPrinterParameterized(windowId, FONT_NARROW, gStringVar4,
+                                        14 * 8 - 4 - GetStringWidth(FONT_NARROW, gStringVar4, 0), (i * 16) + 1,
+                                        TEXT_SKIP_DRAW, NULL);
             moveCount++;
+        }
     }
     InitMenuInUpperLeftCornerNormal(windowId, moveCount, 0);
     ScheduleBgCopyTilemapToVram(2);
@@ -5357,7 +5371,246 @@ static void Task_TryLearningNextMoveAfterText(u8 taskId)
         Task_TryLearningNextMove(taskId);
 }
 
+// Moemon Co-op: RARE CANDIES by the handful. With more than one level to go, the player picks how
+// many (UP / DOWN 1, LEFT / RIGHT 10, up to the candies held; any past the cap or Lv. 100 are
+// handed back). The levels come one candy at a time; only a level that teaches a move stops to say so,
+// then one stats window covers the whole climb and evolution comes last. A candy only leaves the BAG
+// when it raises a level: the rest stay there.
+static EWRAM_DATA struct
+{
+    bool8 active;
+    u8 window, left, used, startLevel;
+    u16 count, max, learnResult;
+    TaskFunc task;
+} sMpCandy = {0};
+static const struct WindowTemplate sMpCandyCountWindowTemplate =
+{
+    .bg = 2,
+    .tilemapLeft = 23,
+    .tilemapTop = 11,
+    .width = 6,
+    .height = 2,
+    .paletteNum = 14,
+    .baseBlock = 0x2E9,
+};
+static void Task_MpCandyCount(u8 taskId);
+static void Task_MpCandyNext(u8 taskId);
+static void ItemUseCB_RareCandyOne(u8 taskId, TaskFunc task);
+
+static u16 MpCandyLevelsLeft(struct Pokemon *mon)
+{
+    u8 level = GetMonData(mon, MON_DATA_LEVEL), cap = MP_RareCandyCap();
+    if (cap > MAX_LEVEL)
+        cap = MAX_LEVEL;
+    return level < cap ? cap - level : 0;
+}
+
+static void MpCandyPrintCount(void)
+{
+    ConvertIntToDecimalStringN(gStringVar1, sMpCandy.count, STR_CONV_MODE_LEADING_ZEROS, sMpCandy.max >= 10 ? 2 : 1);
+    StringExpandPlaceholders(gStringVar4, gText_xVar1);
+    FillWindowPixelBuffer(sMpCandy.window, PIXEL_FILL(1));
+    AddTextPrinterParameterized(sMpCandy.window, FONT_NORMAL, gStringVar4, 10, 1, TEXT_SKIP_DRAW, NULL);
+    CopyWindowToVram(sMpCandy.window, COPYWIN_FULL);
+}
+
 void ItemUseCB_RareCandy(u8 taskId, TaskFunc task)
+{
+    static const u8 sText_HowMany[] = _("Use how many RARE CANDIES?");
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    u16 held = CountTotalItemQuantityInBag(ITEM_RARE_CANDY), levels = MpCandyLevelsLeft(mon);
+
+    sMpCandy.active = FALSE;
+    if (gSpecialVar_ItemId != ITEM_RARE_CANDY || held < 2 || levels < 2)
+    {
+        ItemUseCB_RareCandyOne(taskId, task);
+        return;
+    }
+    sMpCandy.task = task;
+    // (as many as are held: any the Pokemon can't take go back in the BAG)
+    sMpCandy.max = held;
+    if (sMpCandy.max > 99)
+        sMpCandy.max = 99;
+    sMpCandy.count = 1;
+    PlaySE(SE_SELECT);
+    DisplayPartyMenuMessage(sText_HowMany, FALSE);
+    sMpCandy.window = AddWindow(&sMpCandyCountWindowTemplate);
+    DrawStdFrameWithCustomTileAndPalette(sMpCandy.window, FALSE, 0x4F, 13);
+    MpCandyPrintCount();
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = Task_MpCandyCount;
+}
+
+static void Task_MpCandyCount(u8 taskId)
+{
+    s16 count = sMpCandy.count;
+    if (JOY_REPEAT(DPAD_UP))
+        count = count >= sMpCandy.max ? 1 : count + 1;
+    else if (JOY_REPEAT(DPAD_DOWN))
+        count = count <= 1 ? sMpCandy.max : count - 1;
+    else if (JOY_REPEAT(DPAD_RIGHT))
+        count = count + 10 > sMpCandy.max ? sMpCandy.max : count + 10;
+    else if (JOY_REPEAT(DPAD_LEFT))
+        count = count - 10 < 1 ? 1 : count - 10;
+    if (count != sMpCandy.count)
+    {
+        PlaySE(SE_SELECT);
+        sMpCandy.count = count;
+        MpCandyPrintCount();
+        return;
+    }
+    // (the arrows work while the question prints; A and B once it's there)
+    if (JOY_NEW(A_BUTTON | B_BUTTON) && IsPartyMenuTextPrinterActive() != TRUE)
+    {
+        PlaySE(SE_SELECT);
+        ClearStdWindowAndFrameToTransparent(sMpCandy.window, FALSE);
+        ClearWindowTilemap(sMpCandy.window);
+        RemoveWindow(sMpCandy.window);
+        ScheduleBgCopyTilemapToVram(2);
+        if (JOY_NEW(B_BUTTON))
+        {
+            gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+            return;
+        }
+        if (sMpCandy.count == 1)
+        {
+            ItemUseCB_RareCandyOne(taskId, sMpCandy.task);
+            return;
+        }
+        ClearStdWindowAndFrameToTransparent(WIN_MSG, FALSE);
+        ClearWindowTilemap(WIN_MSG);
+        sMpCandy.active = TRUE;
+        sMpCandy.left = sMpCandy.count;
+        sMpCandy.used = 0;
+        sMpCandy.startLevel = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_LEVEL);
+        BufferMonStatsToTaskData(&gPlayerParty[gPartyMenu.slotId], sPartyMenuInternal->data);
+        gPartyMenu.data[1] = 1;
+        gTasks[taskId].func = Task_MpCandyNext;
+    }
+}
+
+static void Task_MpCandyFinish(u8 taskId);
+static void Task_MpCandyLearnAfterText(u8 taskId)
+{
+    if (!WaitFanfare(FALSE) || IsPartyMenuTextPrinterActive() == TRUE)
+        return;
+    switch (sMpCandy.learnResult)
+    {
+    case MON_HAS_MAX_MOVES:
+        DisplayMonNeedsToReplaceMove(taskId);
+        break;
+    case MON_ALREADY_KNOWS_MOVE:
+        gTasks[taskId].func = Task_TryLearningNextMove;
+        break;
+    default:
+        DisplayMonLearnedMove(taskId, sMpCandy.learnResult);
+        break;
+    }
+}
+
+// The next candy, or the end of the climb (back here from PartyMenuTryEvolution after a level's moves)
+static void Task_MpCandyNext(u8 taskId)
+{
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    if (IsPartyMenuTextPrinterActive() == TRUE)
+        return;
+    while (sMpCandy.left && MpCandyLevelsLeft(mon))
+    {
+        u16 learn;
+        if (ExecuteTableBasedItemEffect_(gPartyMenu.slotId, ITEM_RARE_CANDY, 0))
+            break;
+        RemoveBagItem(ITEM_RARE_CANDY, 1);
+        sMpCandy.left--;
+        sMpCandy.used++;
+        learn = MonTryLearningNewMove(mon, TRUE);
+        if (learn != 0)
+        {
+            // This level teaches something: say the level first, then the move
+            static const u8 sText_Level[] = _("{STR_VAR_1} was elevated to\nLv. {STR_VAR_2}.{PAUSE_UNTIL_PRESS}");
+            sMpCandy.learnResult = learn;
+            PlayFanfareByFanfareNum(FANFARE_LEVEL_UP);
+            UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
+            GetMonNickname(mon, gStringVar1);
+            ConvertIntToDecimalStringN(gStringVar2, GetMonData(mon, MON_DATA_LEVEL), STR_CONV_MODE_LEFT_ALIGN, 3);
+            StringExpandPlaceholders(gStringVar4, sText_Level);
+            DisplayPartyMenuMessage(gStringVar4, TRUE);
+            ScheduleBgCopyTilemapToVram(2);
+            gTasks[taskId].func = Task_MpCandyLearnAfterText;
+            return;
+        }
+    }
+    Task_MpCandyFinish(taskId);
+}
+
+static void Task_MpCandyStatsPg2(u8 taskId);
+static void Task_MpCandyStatsPg1(u8 taskId)
+{
+    if (WaitFanfare(FALSE) && IsPartyMenuTextPrinterActive() != TRUE && (JOY_NEW(A_BUTTON) || JOY_NEW(B_BUTTON)))
+    {
+        PlaySE(SE_SELECT);
+        DisplayLevelUpStatsPg1(taskId);
+        gTasks[taskId].func = Task_MpCandyStatsPg2;
+    }
+}
+
+static void Task_MpCandyStatsDone(u8 taskId)
+{
+    if (JOY_NEW(A_BUTTON) || JOY_NEW(B_BUTTON))
+    {
+        RemoveLevelUpStatsWindow();
+        sMpCandy.active = FALSE;
+        PartyMenuTryEvolution(taskId);
+    }
+}
+
+static void Task_MpCandyStatsPg2(u8 taskId)
+{
+    if (JOY_NEW(A_BUTTON) || JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        DisplayLevelUpStatsPg2(taskId);
+        gTasks[taskId].func = Task_MpCandyStatsDone;
+    }
+}
+
+static void Task_MpCandyFinish(u8 taskId)
+{
+    static const u8 sText_Returned[] = _("{STR_VAR_3} RARE CANDY went back\nin the BAG.");
+    static const u8 sText_ReturnedMany[] = _("{STR_VAR_3} RARE CANDIES went\nback in the BAG.");
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    u8 *end;
+    if (!sMpCandy.used)
+    {
+        // (nothing could be used after all)
+        sMpCandy.active = FALSE;
+        gPartyMenuUseExitCallback = FALSE;
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = sMpCandy.task;
+        return;
+    }
+    gPartyMenuUseExitCallback = TRUE;
+    BufferMonStatsToTaskData(mon, &sPartyMenuInternal->data[NUM_STATS]);
+    PlayFanfareByFanfareNum(FANFARE_LEVEL_UP);
+    UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
+    GetMonNickname(mon, gStringVar1);
+    ConvertIntToDecimalStringN(gStringVar2, GetMonData(mon, MON_DATA_LEVEL), STR_CONV_MODE_LEFT_ALIGN, 3);
+    end = StringExpandPlaceholders(gStringVar4, gText_PkmnElevatedToLvVar2);
+    if (sMpCandy.left)
+    {
+        u8 line[64];
+        ConvertIntToDecimalStringN(gStringVar3, sMpCandy.left, STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringExpandPlaceholders(line, sMpCandy.left == 1 ? sText_Returned : sText_ReturnedMany);
+        // (a page of its own after the level)
+        *end++ = CHAR_PROMPT_CLEAR;
+        StringCopy(end, line);
+    }
+    DisplayPartyMenuMessage(gStringVar4, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = Task_MpCandyStatsPg1;
+}
+
+static void ItemUseCB_RareCandyOne(u8 taskId, TaskFunc task)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
     struct PartyMenuInternal *ptr = sPartyMenuInternal;
@@ -5513,7 +5766,15 @@ static void Task_TryLearningNextMove(u8 taskId)
 static void PartyMenuTryEvolution(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
-    u16 targetSpecies = GetEvolutionTargetSpecies(mon, EVO_MODE_NORMAL, ITEM_NONE);
+    u16 targetSpecies;
+
+    // Moemon Co-op: RARE CANDIES by the handful: a level's moves are done, on to the next candy
+    if (sMpCandy.active)
+    {
+        gTasks[taskId].func = Task_MpCandyNext;
+        return;
+    }
+    targetSpecies = GetEvolutionTargetSpecies(mon, EVO_MODE_NORMAL, ITEM_NONE);
 
     if (targetSpecies != SPECIES_NONE)
     {
@@ -6205,6 +6466,9 @@ void ChooseMonForInBattleItem(void)
     InitPartyMenu(PARTY_MENU_TYPE_IN_BATTLE, GetPartyLayoutFromBattleType(), PARTY_ACTION_USE_ITEM, FALSE, PARTY_MSG_USE_ON_WHICH_MON, Task_HandleChooseMonInput, CB2_ReturnToBagMenu);
     ReshowBattleScreenDummy();
     UpdatePartyToBattleOrder();
+    // Moemon Co-op: the cursor starts on the Pokemon the item is for (the party is in battle order now)
+    if (MP_SmartItemSlot(gSpecialVar_ItemId) >= 0)
+        gPartyMenu.slotId = MP_SmartItemSlot(gSpecialVar_ItemId);
 }
 
 static u8 GetPartyMenuActionsTypeInBattle(struct Pokemon *mon)

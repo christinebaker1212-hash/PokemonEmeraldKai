@@ -147,7 +147,8 @@ expect duel 'board asks: Concede this duel'
 test "$(grep -c 'screen 10 opted 1 phase 1' "$OUT/duel/log.txt")" -eq 2
 echo 'PASS B asks to end the turn and CONCEDE asks first (no duel ended)'
 
-# The deck builder: take a CHARMANDER out of the deck (the list), add it back (the cards).
+# The deck builder: take a CHARMANDER out of the deck (the list, then SELECT on the cards), add it back;
+# copy the deck, delete the one you duel with (the copy takes over).
 cat > "$OUT/builder.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 100
@@ -180,12 +181,37 @@ wait 4
 press A 2
 wait 4
 mp cards deck 0
+press SELECT 2
+wait 4
+mp cards deck 0
+rendershot builder_select
+press A 2
+wait 4
+mp cards deck 0
+press B 2
+wait 10
+press START 2
+wait 6
+press A 2
+wait 10
+mp cards deck 1
+press A 2
+wait 6
+press SELECT 2
+wait 6
+rendershot deck_delete
+press A 2
+wait 10
+rendershot deck_deleted
+mp cards deck 0
 quit
 SCRIPT
 run builder
-test "$(grep -c 'deck 0 count 60 valid 1' "$OUT/builder/log.txt")" -eq 2
-expect builder 'deck 0 count 59 valid 0'
-echo 'PASS the deck builder: out of the deck and back in'
+test "$(grep -c 'deck 0 count 60 valid 1' "$OUT/builder/log.txt")" -eq 3
+test "$(grep -c 'deck 0 count 59 valid 0' "$OUT/builder/log.txt")" -eq 2
+expect builder 'deck 1 count 60 valid 1'
+expect builder 'deck 0 count 0 valid 0 active 1'
+echo 'PASS the deck builder: out of the deck from the list and with SELECT, back in; deleting the deck you duel with'
 
 # The counter: spare cards traded in for CARD POINTS, a booster pack bought.
 cat > "$OUT/counter.txt" <<'SCRIPT'
@@ -216,6 +242,49 @@ SCRIPT
 run counter
 expect counter 'screen 12 opted 1 .* points 18 packs 1000'
 echo 'PASS the counter: a spare card traded in, a booster pack bought'
+# A PRIZES fanfare at the counter, then the case closed before it ends: the Pokemon Center's
+# music plays again (it stayed paused, and a door then never finished), and the door works.
+cat > "$OUT/fanfare.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards giveall
+mp cards club
+wait 20
+press A 2
+wait 4
+press A 2
+wait 10
+press A 2
+wait 4
+press R 2
+wait 4
+press R 2
+wait 4
+press A 2
+wait 10
+mp music
+press A 2
+wait 6
+press B 2
+wait 6
+press B 2
+wait 6
+press B 2
+waitfor field 600
+wait 30
+mp music
+press DOWN 40
+wait 300
+mp where
+quit
+SCRIPT
+run fanfare 2,2,7,6
+expect fanfare 'music 400 saved 0 status 8.* fanfare 1'
+expect fanfare 'music 400 saved 0 status 0.* fanfare 0'
+expect fanfare 'where map 0.10'
+echo 'PASS a counter prize fanfare cut short: the music plays again and the door works'
+
 # Pokemon Powers on the duel table: RAIN DANCE, ENERGY TRANS, PEEK, CURSE, CLAIRVOYANCE's
 # look at their hand and a Clefairy Doll discarded, on a staged board.
 cat > "$OUT/powers.txt" <<'SCRIPT'

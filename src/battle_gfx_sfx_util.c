@@ -631,6 +631,12 @@ void BattleLoadOpponentMonSpriteGfx(struct Pokemon *mon, u8 battler)
 
     otId = GetMonData(mon, MON_DATA_OT_ID);
     position = GetBattlerPosition(battler);
+    // Moemon Co-op: a PvP foe is a player of this game: their DEOXYS shows this game's form
+    // (a wild or trainer one keeps the Normal Forme it always had)
+    if (gNetLinkActive && !gMpCoopBattle && gBattleSpritesDataPtr->battlerData[battler].transformSpecies == SPECIES_NONE)
+        HandleLoadSpecialPokePic(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites.ptr[position],
+                                 species, currentPersonality);
+    else
     HandleLoadSpecialPokePic_DontHandleDeoxys(&gMonFrontPicTable[species],
                                               gMonSpritesGfxPtr->sprites.ptr[position],
                                               species, currentPersonality);

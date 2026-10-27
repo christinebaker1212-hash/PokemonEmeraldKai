@@ -554,12 +554,13 @@ static const struct WindowTemplate sMailReadTakeWindowTemplate =
     .baseBlock = 0x39D,
 };
 
+// Moemon Co-op: wider, for each move's PP beside its name (ShowMoveSelectWindow)
 static const struct WindowTemplate sMoveSelectWindowTemplate =
 {
     .bg = 2,
-    .tilemapLeft = 19,
+    .tilemapLeft = 15,
     .tilemapTop = 11,
-    .width = 10,
+    .width = 14,
     .height = 8,
     .paletteNum = 14,
     .baseBlock = 0x2E9,

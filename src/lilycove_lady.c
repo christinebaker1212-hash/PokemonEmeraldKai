@@ -45,7 +45,10 @@ void SetLilycoveLadyGfx(void)
 {
     LilycoveLady *lilycoveLady;
 
-    VarSet(VAR_OBJ_GFX_ID_0, sLilycoveLadyGfxId[GetLilycoveLadyId()]);
+    VarSet(VAR_OBJ_GFX_ID_0, sLilycoveLadyGfxId[GetLilycoveLadyId() < ARRAY_COUNT(sLilycoveLadyGfxId) ? GetLilycoveLadyId() : 0]);
+    // Moemon Co-op: the Contest Lady's Pokemon always has a Pokemon's look, shown or not: left
+    // at 0 it was a copy of the player (graphics 0) whenever its hide flag was off
+    VarSet(VAR_OBJ_GFX_ID_1, sContestLadyMonGfxId[0]);
     if (GetLilycoveLadyId() == LILYCOVE_LADY_CONTEST)
     {
         lilycoveLady = &gSaveBlock1Ptr->lilycoveLady;

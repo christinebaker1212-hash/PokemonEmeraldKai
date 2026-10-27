@@ -1,0 +1,46 @@
+pressuntil A field 5000
+wait 100
+mp item 68 12
+mp bagqty 68
+mp party
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 10
+press A 2
+wait 20
+press A 2
+waitfor partymenu 300
+wait 30
+press A 2
+wait 40
+shot count
+press UP 2
+wait 6
+shot count2
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 6
+shot countmax
+press A 2
+wait 60
+shot level
+mash A 12 40
+shot after
+mash A 3 40
+shot returned
+mash A 8 40
+wait 200
+shot end
+mp bagqty 68
+mp party
+quit

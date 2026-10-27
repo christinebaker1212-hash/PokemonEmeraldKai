@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 100
+mp item 266 1
+mp teach 0 210
+press UP 4
+wait 20
+press UP 4
+wait 20
+shot counter
+mash A 1500 5
+shot mid
+mash A 1500 5
+mash A 1500 5
+mash A 1500 5
+mash A 1500 5
+waitfor field 6000
+wait 100
+mp where
+quit

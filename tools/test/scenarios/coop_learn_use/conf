@@ -1,0 +1,11 @@
+# Co-op wild Double Battle, both leads one EXP short of Lv16 (four moves): ALICE knocks out a 1 HP foe, BOB GROWLs,
+# so the other foe stays. Both forget SCRATCH for PECK in the battle, and on the next turn PECK is in the battle's
+# moves (bmon 0 and 2 on the leader) and on BOB's own move list (shot b_moves)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15+"
+ENV_B="MOEMON_DEBUG_PARTY=280:15+"
+EXPECT_A=("co-op levels: slot 0 forgot move slot 0 for 64" "co-op levels: slot 3 forgot move slot 0 for 64"
+          "bmon 0: species 280 moves 64" "bmon 2: species 280 moves 64")

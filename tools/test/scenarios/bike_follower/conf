@@ -1,0 +1,9 @@
+# On a bike the follower goes back into its ball (its recall) and comes out again (the ball tossed, its entrance)
+# when ALICE gets off; BOB, next to her, sees the same (shots a_* and b_*)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,12
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+ENV_B="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("where map 0.16")

@@ -98,8 +98,10 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   are automatic; 30 seconds, B stops waiting. YES opens the deck pick on both sides (the
   winner gets a booster) or the trade screen (each offers a card, both confirm).
 - **Menus** (`src/tcg/tcg_ui.c`, rewritten in the BAG's style): home, decks, a grid deck
-  builder (5x2 cards, the deck list on the right; LEFT from the list returns to the card it
-  points at), binder, inspector, packs, the challenge window, spoils, the counter, the
+  builder (5x2 cards, the deck list on the right; A adds, SELECT takes one out, RIGHT past
+  the last column goes to the list, A there takes out, LEFT returns to the card it points
+  at; the decks screen's SELECT deletes a deck, and deleting the one in use hands over to
+  the next playable deck), binder, inspector, packs, the challenge window, spoils, the counter, the
   three-deck reveal, trades.
 
 ## Code map

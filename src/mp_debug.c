@@ -41,6 +41,7 @@
 #include "coins.h"
 #include "overworld.h"
 #include "sound.h"
+#include "m4a.h"
 #include "platform/gamepad.h"
 #include "money.h"
 #include "item.h"
@@ -1006,6 +1007,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "lend") == 0)
         MP_Lend_Debug();
+    else if (strcmp(cmd, "pp") == 0)
+    {
+        // pp SLOT MOVEINDEX VALUE - a party Moemon's PP for one move; prints all four back
+        int slot = 0, m = 0, v = 0, i;
+        if (sscanf(arg, "%d %d %d", &slot, &m, &v) == 3 && slot >= 0 && slot < PARTY_SIZE && m >= 0 && m < MAX_MON_MOVES)
+        {
+            u8 pp = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + m, &pp);
+        }
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            printf("[test] pp slot %d:", slot);
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                printf(" %u", (unsigned)GetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i));
+            printf("\n");
+        }
+    }
     else if (strcmp(cmd, "teach") == 0)
     {
         // mp teach SLOT MOVE: replaces the first move
@@ -1048,7 +1066,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "hp") == 0)
     {
-        // mp hp SLOT VALUE
+        // mp hp SLOT VALUE (0: it fainted now, for REVIVE's cursor); mp partyhp: every slot's HP and status
         int slot = atoi(arg), v = 0;
         const char *sp = strchr(arg, ' ');
         if (sp)
@@ -1057,8 +1075,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             u16 hp = v;
             SetMonData(&gPlayerParty[slot], MON_DATA_HP, &hp);
+            if (hp == 0)   // (a faint, as far as REVIVE's cursor knows)
+                MP_NoteFaint(GetMonData(&gPlayerParty[slot], MON_DATA_PERSONALITY));
             printf("[test] hp: slot %d = %d\n", slot, v);
         }
+    }
+    else if (strcmp(cmd, "partyhp") == 0)
+    {
+        int i;
+        for (i = 0; i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES); i++)
+            printf("[test] partyhp %d: hp %u status %u\n", i, (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_HP),
+                   (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_STATUS));
     }
     else if (strcmp(cmd, "givebadges") == 0)
     {
@@ -1131,6 +1158,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // typeicons [0|1] - OPTIONS > TYPE ICONS
         gSaveBlock2Ptr->optionsTypeIcons = arg[0] ? atoi(arg) != 0 : 1;
+    }
+    else if (strcmp(cmd, "safari") == 0)
+    {
+        // safari - Safari Zone mode on (balls and steps), so the next wild battle is a Safari battle
+        void EnterSafariMode(void);
+        EnterSafariMode();
+    }
+    else if (strcmp(cmd, "bmons") == 0)
+    {
+        // bmons - every battler's species and moves as the battle has them (not the party's)
+        int b;
+        for (b = 0; b < gBattlersCount; b++)
+            printf("[test] bmon %d: species %u moves %u %u %u %u\n", b, gBattleMons[b].species, gBattleMons[b].moves[0],
+                   gBattleMons[b].moves[1], gBattleMons[b].moves[2], gBattleMons[b].moves[3]);
     }
     else if (strcmp(cmd, "wilddouble") == 0)
     {
@@ -1298,7 +1339,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // music - the song playing now (and the saved bike song); music play: the map's song again, as on arrival
         if (strcmp(arg, "play") == 0)
             Overworld_PlaySpecialMapMusic();
-        printf("[test] music %u saved %u\n", (unsigned)GetCurrentMapMusic(), (unsigned)gSaveBlock1Ptr->savedMusic);
+        printf("[test] music %u saved %u status %08x fanfare %d\n", (unsigned)GetCurrentMapMusic(),
+               (unsigned)gSaveBlock1Ptr->savedMusic, (unsigned)gMPlayInfo_BGM.status, !IsFanfareTaskInactive());
     }
     else if (strcmp(cmd, "bikemode") == 0)
     {

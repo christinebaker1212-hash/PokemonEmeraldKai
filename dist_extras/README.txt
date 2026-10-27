@@ -610,7 +610,11 @@ TOGETHER          Stay within about a screen of a friend and the TOGETHER
 CATCH-UP          Fewer badges than a friend online? +10% EXP per badge behind
                   (up to +30%).
 WHERE IS EVERYONE Colored arrows at the screen edge point to friends you can't
-                  see (red, blue, green, yellow by player).
+                  see (red, blue, green, yellow by player), at their exact
+                  direction anywhere in Hoenn, with their name and how many
+                  steps away they are. A friend inside a building, a cave or
+                  a POKEMON CENTER is at its door. The Town Map shows each
+                  friend's own look, outlined in their color.
 BETTING           When you watch a friend's battle you can bet $500 on them to
                   win or lose. Right: double back. Leave early: bet lost.
 
@@ -897,7 +901,8 @@ colors (and female ones their own look where the collab drew one), and a
 nickname's POKeMON STADIUM colors go on top. The artists are listed in
 PMD_CREDITS.txt next to the game. Talk to it (A) and it's happy to see you. Other players see
 your follower walking behind you too. It hides while you surf or dive and
-comes back when you land. It walks the ground as you do: tall grass shakes
+comes back when you land, and goes back into its ball while you ride a bike
+(out again when you get off). It walks the ground as you do: tall grass shakes
 around it, it leaves footprints in sand, splashes through puddles and
 shallow water, sinks into hot springs, and shows in ponds and on ice. The choice is remembered in moemon_coop.ini.
 Walking together makes it happier: choosing it gives a little friendship
@@ -1138,6 +1143,22 @@ Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
 
+ITEMS AND YOUR PARTY
+--------------------
+  RARE CANDY      With more than one, the game asks how many (UP / DOWN 1,
+                  LEFT / RIGHT 10). The levels come one after another: a
+                  level that teaches a move stops to say so, then one stats
+                  window shows the whole climb. Any it can't take (Lv. 100,
+                  or the level cap before your next badge) stay in the BAG.
+  The right one   A status cure starts with the cursor on a MOEMON it cures
+                  (in battle the one choosing first), a REVIVE on the one
+                  that fainted last. Nothing is used until you press A.
+  PP              ETHER, MAX ETHER and PP UP show each move's PP left.
+  Held HMs        A MOEMON holding an HM puts it back in the BAG when it goes
+                  into a PC box, as when it's released.
+  New moves       A move learned in a Double or Triple Battle is ready on the
+                  next turn, and on the summary right away, for every player.
+
 CARD DUELS
 ----------
 An optional card game, played with the original Pokemon Trading Card Game's
@@ -1159,6 +1180,11 @@ you'd like one, and later run the CARD COUNTER.
                   RETREAT, DONE). B closes the hand, then asks whether to end
                   your turn; CONCEDE asks first. Hold A or B to hurry the
                   animations.
+  Decks           CARD CASE > DECKS: A builds or changes a deck (A adds the
+                  card, SELECT takes one out; or RIGHT over to the deck's list,
+                  where A takes out), START copies it, SELECT deletes it (the
+                  cards stay in your collection) and R makes it the deck you
+                  duel with.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck. Losing costs
                   nothing. Spare cards become CARD POINTS at the CARD COUNTER.

@@ -1,0 +1,24 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+pressuntil A action 4000
+wait 60
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press A 2
+wait 20
+press A 2
+wait 120
+pressuntillog A 6000 co-op levels: done
+wait 120
+pressuntil A action 4000
+wait 60
+press A 2
+wait 30
+shot b_moves
+mp monmoves 0
+mp monmoves 3
+mp bmons
+quit

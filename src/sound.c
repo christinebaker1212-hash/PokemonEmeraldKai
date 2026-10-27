@@ -249,6 +249,26 @@ static void Task_Fanfare(u8 taskId)
     }
 }
 
+// Moemon Co-op: screens that run outside the main loop (the card game) tick the fanfare
+// themselves, and finish it when they close: the field they return to resets the tasks,
+// which would leave the music paused for good (and a warp waiting on it).
+void MP_Sound_TickFanfare(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_Fanfare);
+    if (taskId != TASK_NONE)
+        Task_Fanfare(taskId);
+}
+
+void MP_Sound_EndFanfare(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_Fanfare);
+    if (taskId != TASK_NONE)
+    {
+        sFanfareCounter = 0;
+        Task_Fanfare(taskId);
+    }
+}
+
 static void CreateFanfareTask(void)
 {
     if (FuncIsActiveTask(Task_Fanfare) != TRUE)
