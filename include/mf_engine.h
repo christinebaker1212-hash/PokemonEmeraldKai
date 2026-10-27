@@ -41,13 +41,35 @@ enum
     MF_RESULT_ERROR,    // the engine stopped on an error: MfEngine_Error says why
 };
 
+#define MF_PACK_MAX 64
+
 struct MfSession
 {
     int mode;            // MF_MODE_*
     unsigned int seed;   // the match RNG's seed (the same on both sides online)
     char cabinet[32];    // section of mugen/cabinets.ini with the rules
     int rollback;        // keep the fight's frames to go back to (online: MfEngine_RollBack)
+    // Online: the characters (select list order) and stages (struct MfPack order) one of the players lacks:
+    // greyed out on the select screen, never picked at random
+    unsigned char charOff[MF_PACK_MAX];
+    unsigned char stageOff[MF_PACK_MAX];
+    char cabinetText[2048];   // the cabinet's rules as text (MfEngine_CabinetText: online, the answering player's), "" the file
 };
+
+// What a player's fight files are, to compare before an online fight: hashes of every file each part uses.
+// core: the engine's data, the screenpack (with its select list) and the fonts, which have to match for a fight
+// at all; chars in the select list's order; stages in the order the cabinet could pick them (its list, or
+// [ExtraStages] and then each character's own). Reads the whole pack (~80 MB): a fraction of a second.
+struct MfPack
+{
+    unsigned int core;
+    unsigned char chars, stages;
+    unsigned int charHash[MF_PACK_MAX];
+    unsigned int stageHash[MF_PACK_MAX];
+};
+int MfEngine_PackSummary(const char *cabinet, struct MfPack *out);
+// The cabinet's section of mugen/cabinets.ini as text, with its [name] line; 0 when there's none
+int MfEngine_CabinetText(const char *cabinet, char *out, int size);
 
 // Starts a session (loading the engine the first time). Returns 0 when the engine can't run.
 int MfEngine_Begin(const struct MfSession *session);

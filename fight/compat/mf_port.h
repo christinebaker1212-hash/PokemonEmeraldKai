@@ -66,6 +66,11 @@ void MfFit_PlaceItem(const struct SysDrawItem *e);
 
 /* The fight is on screen (Fight_DrawHud) */
 void MfHost_MatchShown(void);
+/* A character one of the online players lacks (greyed out, never picked at random) */
+int MfHost_CharOff(int char_index);
+/* The stage's name for the VS screen ("" none), where (motif coordinates) and in which font (font, bank, align;
+ * font -1: the pack's first name font) */
+const char *MfHost_VsStage(int pos[2], int font[3]);
 
 /*
  * The engine's math is bundled (fight/third_party/musl_math, musl's): every player's build computes the same

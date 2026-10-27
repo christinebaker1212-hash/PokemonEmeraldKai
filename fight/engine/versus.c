@@ -395,6 +395,24 @@ int Versus_Draw(ScreenLoop *screen, void *state_)
             }
         }
     }
+    /* Moemon Fight: the stage the cabinet picked (cabinets.ini vs.stage.*; by default centred at the bottom in
+     * the first name font) */
+    {
+        int pos[2], font[3];
+        const char *stage = MfHost_VsStage(pos, font);
+        if (stage[0] != '\0') {
+            FontSpec spec = vs->sides[0].name_font;
+            spec.align = 0;
+            if (font[0] >= 0) {
+                spec.font = font[0] < 10 ? font[0] : -1;
+                spec.bank = font[1];
+                spec.align = font[2];
+                spec.r = spec.g = spec.b = 0x100;
+            }
+            FontSpec_DrawText(&spec, stage, pos[0] >= 0 ? pos[0] : (int)(g->motif_coord[0] / 2),
+                              pos[1] >= 0 ? pos[1] : (int)(g->motif_coord[1] - 8));
+        }
+    }
     if (g_game->arcade_side != 0) {
         char text[0x100];
         SysDrawList *list;

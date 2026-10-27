@@ -21,6 +21,7 @@
 ;--------------------------------------------------------
 [Info]
 name = "SF2 Airforce Base - Guile Stage"
+displayname = "AIR FORCE BASE - GUILE"
 
 ;--------------------------------------------------------
 [Camera]

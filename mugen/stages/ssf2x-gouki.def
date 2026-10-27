@@ -3,6 +3,7 @@
 ;---------------------------------------------------------------------------
 [Info]
 name = "ssf2x_vega"
+displayname = "GOUKI'S ISLAND"
 
 [Camera]
 startx = 0

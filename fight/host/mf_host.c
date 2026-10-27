@@ -14,10 +14,10 @@
 #include <pthread.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/stat.h>
 #ifndef _WIN32
 #include <dirent.h>
 #include <strings.h>
-#include <sys/stat.h>
 #endif
 
 #include "mugen.h"
@@ -191,6 +191,30 @@ static void Path_Full(const char *path, char *out, size_t size)
 #else
     (void)p;
 #endif
+}
+
+/* The real path of an engine path (mf_pack.c), in any letter case on Linux; 0 when there's nothing there */
+int MfHost_RealPath(const char *path, char *out, size_t size)
+{
+    struct stat st;
+
+    if (sRoot[0] == '\0') {
+        Host_InitRoot();
+    }
+    Path_Full(path, out, size);
+    if (stat(out, &st) == 0) {
+        return 1;
+    }
+#ifndef _WIN32
+    {
+        char real[0x400];
+        if (Path_ResolveCase(out, real, sizeof(real)) && stat(real, &st) == 0) {
+            snprintf(out, size, "%s", real);
+            return 1;
+        }
+    }
+#endif
+    return 0;
 }
 
 FILE *MfFile_Open(const char *path, const char *mode)
@@ -655,13 +679,39 @@ static void Host_ReadStages(const char *list)
     }
 }
 
-/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list */
+int MfPack_StageIndex(const char *path);
+
+/* A stage one of the online players lacks (mf_pack.c) */
+static int Host_StageOff(const char *path)
+{
+    int i = MfPack_StageIndex(path);
+    return i >= 0 && i < MF_PACK_MAX && sSession.stageOff[i];
+}
+
+/* A character one of the online players lacks: greyed out on the select screen (select.c) */
+int MfHost_CharOff(int char_index)
+{
+    return char_index >= 0 && char_index < MF_PACK_MAX && sSession.charOff[char_index];
+}
+
+/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list,
+ * without the stages one of the players lacks (unless that's all of them) */
 static void Host_PickStage(void)
 {
     GameVars *g = g_game;
     const char *path;
+    const char *ok[64];
+    int i, n = 0, total = sStageCount > 0 ? sStageCount : g->stage_count;
 
-    if (sStageCount > 0) {
+    for (i = 0; i < total && n < 64; i++) {
+        const char *p = sStageCount > 0 ? sStages[i] : g->select_screen[i].path;
+        if (!Host_StageOff(p)) {
+            ok[n++] = p;
+        }
+    }
+    if (n > 0) {
+        path = ok[Random_Next() % n];
+    } else if (sStageCount > 0) {
         path = sStages[Random_Next() % sStageCount];
     } else if (g->stage_count > 0) {
         path = g->select_screen[Random_Next() % g->stage_count].path;
@@ -673,15 +723,71 @@ static void Host_PickStage(void)
     g->arcade_music[0] = '\0';     /* the stage's own music */
 }
 
+/* The VS screen names the stage (the cabinet picks it: nobody chose it) */
+static char sStageName[0x50];
+static int sStagePos[2], sStageFont[3];
+
+const char *MfHost_VsStage(int pos[2], int font[3])
+{
+    pos[0] = sStagePos[0];
+    pos[1] = sStagePos[1];
+    font[0] = sStageFont[0];
+    font[1] = sStageFont[1];
+    font[2] = sStageFont[2];
+    return sStageName;
+}
+
+static void Host_NameStage(void)
+{
+    Ini *def = g_game->select_stage[0] != '\0' ? Ini_Open(g_game->select_stage) : NULL;
+    const char *name = NULL;
+
+    sStageName[0] = '\0';
+    if (def == NULL) {
+        return;
+    }
+    if (Ini_SelectGroup(def, "Info") != -1) {
+        name = Ini_GetValue(def, "displayname");
+        if (name == NULL) {
+            name = Ini_GetValue(def, "name");
+        }
+    }
+    if (name != NULL) {
+        size_t n;
+        while (*name == '"' || *name == ' ') {
+            name++;
+        }
+        snprintf(sStageName, sizeof(sStageName), "%s", name);
+        n = strlen(sStageName);
+        while (n > 0 && (sStageName[n - 1] == '"' || sStageName[n - 1] == ' ')) {
+            sStageName[--n] = '\0';
+        }
+    }
+    Ini_Free(def);
+}
+
 static void Host_ApplyCabinet(const char *cabinet)
 {
     GameVars *g = g_game;
-    Ini *ini = Ini_Open("cabinets.ini");
+    Ini *ini = NULL;
     int v, hud_top = 8;
     const char *text;
 
     sStageCount = 0;
     sCpuHomeStage = 0;
+    sStagePos[0] = sStagePos[1] = -1;
+    sStageFont[0] = -1;
+    sStageFont[1] = sStageFont[2] = 0;
+    if (sSession.cabinetText[0] != '\0') {
+        /* online: the answering player's rules */
+        Stream *st = Stream_OpenMemory(sSession.cabinetText, (int)strnlen(sSession.cabinetText, sizeof(sSession.cabinetText)));
+        if (st != NULL) {
+            ini = Ini_Parse(st, INI_MODE_READ);
+            Stream_Close(st);
+        }
+    } else {
+        ini = Ini_Open("cabinets.ini");
+    }
     if (ini == NULL) {
         MfFit_Hud(hud_top);
         return;
@@ -691,6 +797,12 @@ static void Host_ApplyCabinet(const char *cabinet)
             hud_top = v;
         }
         Host_ReadStages(Ini_GetValue(ini, "stages"));
+        if (Ini_Scanf(ini, "vs.stage.offset", "%i,%i", &sStagePos[0], &sStagePos[1]) < 2) {
+            sStagePos[0] = sStagePos[1] = -1;
+        }
+        if (Ini_Scanf(ini, "vs.stage.font", "%i,%i,%i", &sStageFont[0], &sStageFont[1], &sStageFont[2]) < 1) {
+            sStageFont[0] = -1;
+        }
         text = Ini_GetValue(ini, "cpu.stage");
         sCpuHomeStage = text != NULL && _stricmp(text, "home") == 0;
         if (Ini_GetInt(ini, "rounds", &v) && v >= 1 && v <= 9) {
@@ -752,6 +864,7 @@ static int Host_RunSession(const struct MfSession *s)
             if (s->mode != MF_MODE_CPU || !sCpuHomeStage) {
                 Host_PickStage();
             }
+            Host_NameStage();
             state = 10;
             break;
         case 10:

@@ -1,0 +1,11 @@
+# Moemon Fight online with different fight files: BOB's SSF2X Ken has one more file. Both games grey Ken out
+# on the select screen (select_a / select_b) and ALICE can't pick him (ken_a: still choosing)
+MODE=2
+TMO=400
+WARP=10,3,6,9
+WARP_B=10,3,9,9
+python3 "$REPO/tools/test/scenarios/fight_packs/mkpack.py" /tmp/moemon_tests/fight_packs_pack char
+ENV_B="MOEMON_MUGEN_DIR=/tmp/moemon_tests/fight_packs_pack"
+EXPECT_A=("fight: online with player 1" "fight: 1 characters greyed out")
+EXPECT_B=("fight: online with player 0" "fight: 1 characters greyed out")
+UNEXPECT_A=("Selected char 1 ")

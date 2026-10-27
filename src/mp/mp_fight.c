@@ -44,13 +44,15 @@ enum
     FIGHT_RESULT_REFUSED,     // the friend couldn't fight (busy, gone, no answer)
     FIGHT_RESULT_NO_CONTEST,  // the friend dropped out of the fight
     FIGHT_RESULT_STOOD_UP,    // stopped waiting
+    FIGHT_RESULT_PACKS,       // the friend's fight files aren't the same (engine, screenpack or select list)
 };
 
 enum
 {
     MPR_FIGHT_SEAT = MPR_FIGHT_FIRST,   // u8 cabinet, seat, state (SEAT_*), mapGroup, mapNum
-    MPR_FIGHT_ASK,                      // u32 session, u8 cabinet, seat (the asker's), u16 the asker's frame
-    MPR_FIGHT_ANSWER,                   // u32 session, u8 yes, u32 seed, u16 the ping stamp back
+    MPR_FIGHT_ASK,                      // u32 session, u8 cabinet, seat (the asker's), u16 the asker's frame, pack
+    MPR_FIGHT_ANSWER,                   // u32 session, u8 yes (2: the packs differ), u32 seed, u16 the ping stamp
+                                        // back, pack, u16 length + the cabinet's rules (cabinets.ini text)
     MPR_FIGHT_INPUT,                    // u32 session, u32 last frame, u8 count (up to 12: the first frames they don't
                                         // have), u16 buttons * count, u32 ack,
                                         // u32 frame, u32 hash frame, u32 hash, u16 tick, u16 their tick back,
@@ -95,6 +97,11 @@ static u8 sSeat;            // the side we play: 0 left (P1), 1 right (the CPU f
 static u8 sSeatState;       // SEAT_*: ours
 static u16 sSeatTimer;
 static u8 sResult;
+// The fight files (include/mf_engine.h MfEngine_PackSummary): ours, read when we sit down, and the friend's;
+// online, the answering player's cabinet rules
+static struct MfPack sMyPack, sPeerPack;
+static bool8 sHaveMyPack;
+static char sCabinetText[2048];
 static u16 sTestButtons;    // the test harness's buttons (MP_Fight_TestPress)
 static u32 sTick;
 
@@ -280,6 +287,71 @@ static u8 ResultFor(int result)
     default:
         return FIGHT_RESULT_CANCELLED;
     }
+}
+
+// ---------------------------------------------------------------------------
+// The fight files
+
+#define CABINET_NAME "mauville_gc"
+
+static void ReadMyPack(bool8 again)
+{
+    if (sHaveMyPack && !again)
+        return;
+    MfEngine_PackSummary(CABINET_NAME, &sMyPack);
+    sHaveMyPack = TRUE;
+    MPNet_Log("fight: pack %08x, %d characters, %d stages", sMyPack.core, sMyPack.chars, sMyPack.stages);
+}
+
+// core u32, chars u8, stages u8, the hashes; returns the bytes written
+static u16 PutPack(u8 *p, const struct MfPack *pack)
+{
+    u16 n = 6;
+    u8 i;
+
+    Put32(p, pack->core);
+    p[4] = pack->chars;
+    p[5] = pack->stages;
+    for (i = 0; i < pack->chars; i++, n += 4)
+        Put32(p + n, pack->charHash[i]);
+    for (i = 0; i < pack->stages; i++, n += 4)
+        Put32(p + n, pack->stageHash[i]);
+    return n;
+}
+
+// Reads a pack at d (len bytes there); returns the bytes read, 0 when it doesn't fit
+static u16 GetPack(const u8 *d, u16 len, struct MfPack *pack)
+{
+    u16 n = 6;
+    u8 i;
+
+    memset(pack, 0, sizeof(*pack));
+    if (len < 6 || d[4] > MF_PACK_MAX || d[5] > MF_PACK_MAX || len < 6 + (d[4] + d[5]) * 4)
+        return 0;
+    pack->core = Get32(d);
+    pack->chars = d[4];
+    pack->stages = d[5];
+    for (i = 0; i < pack->chars; i++, n += 4)
+        pack->charHash[i] = Get32(d + n);
+    for (i = 0; i < pack->stages; i++, n += 4)
+        pack->stageHash[i] = Get32(d + n);
+    return n;
+}
+
+// What one of us lacks: greyed out and never picked at random (the same lists on both sides)
+static void PackOffLists(struct MfSession *session)
+{
+    u8 i, off = 0;
+
+    for (i = 0; i < MF_PACK_MAX; i++)
+    {
+        session->charOff[i] = i >= sMyPack.chars || i >= sPeerPack.chars || sMyPack.charHash[i] != sPeerPack.charHash[i];
+        session->stageOff[i] = i >= sMyPack.stages || i >= sPeerPack.stages || sMyPack.stageHash[i] != sPeerPack.stageHash[i];
+        if (i < sMyPack.chars)
+            off += session->charOff[i];
+    }
+    if (off)
+        MPNet_Log("fight: %d characters greyed out (not the same as player %d's)", off, sNet.peer);
 }
 
 // Wins and losses for the achievements and the trainer card: against friends, and against the CPU
@@ -552,7 +624,10 @@ static void BeginOnline(void)
     session.mode = MF_MODE_VERSUS;
     session.seed = sNet.seed;
     session.rollback = TRUE;
-    strcpy(session.cabinet, "mauville_gc");
+    strcpy(session.cabinet, CABINET_NAME);
+    PackOffLists(&session);
+    memcpy(session.cabinetText, sCabinetText, sizeof(session.cabinetText));
+    session.cabinetText[sizeof(session.cabinetText) - 1] = 0;
     memset(sNet.local, 0, sizeof(sNet.local));
     memset(sNet.remote, 0, sizeof(sNet.remote));
     memset(sNet.used, 0, sizeof(sNet.used));
@@ -794,9 +869,11 @@ static void OnInput(u8 from, const u8 *d, u16 len)
 // ---------------------------------------------------------------------------
 // Online: asking and answering
 
-static void SendAnswer(u8 to, u32 session, bool8 yes, u32 seed, u16 stamp)
+// yes: 0 no, 1 yes (with our pack and the cabinet's rules), 2 the packs differ
+static void SendAnswer(u8 to, u32 session, u8 yes, u32 seed, u16 stamp)
 {
-    u8 p[12];
+    static u8 p[12 + 6 + MF_PACK_MAX * 8 + 2 + sizeof(sCabinetText)];
+    u16 n = 12, text;
 
     p[0] = MPR_FIGHT_ANSWER;
     Put32(p + 1, session);
@@ -804,7 +881,16 @@ static void SendAnswer(u8 to, u32 session, bool8 yes, u32 seed, u16 stamp)
     Put32(p + 6, seed);
     p[10] = stamp;
     p[11] = stamp >> 8;
-    MP_SendRelay(to, p, sizeof(p));
+    if (yes == 1)
+    {
+        n += PutPack(p + n, &sMyPack);
+        text = strlen(sCabinetText);
+        p[n] = text;
+        p[n + 1] = text >> 8;
+        memcpy(p + n + 2, sCabinetText, text);
+        n += 2 + text;
+    }
+    MP_SendRelay(to, p, n);
 }
 
 static void OnAsk(u8 from, const u8 *d, u16 len)
@@ -819,15 +905,25 @@ static void OnAsk(u8 from, const u8 *d, u16 len)
     if (d[5] != CABINET_ID || seat == sSitAt || (sSeatState != SEAT_WAITING && sSeatState != SEAT_CPU)
         || sNet.stage != NET_OFF)
     {
-        SendAnswer(from, session, FALSE, 0, d[7] | (d[8] << 8));
+        SendAnswer(from, session, 0, 0, d[7] | (d[8] << 8));
         return;
     }
+    ReadMyPack(FALSE);
+    if (!GetPack(d + 9, len - 9, &sPeerPack) || sPeerPack.core != sMyPack.core)
+    {
+        MPNet_Log("fight: player %d's fight files aren't ours (%08x, ours %08x)", from, sPeerPack.core, sMyPack.core);
+        SendAnswer(from, session, 2, 0, d[7] | (d[8] << 8));
+        return;
+    }
+    // our rules for both of us
+    if (!MfEngine_CabinetText(CABINET_NAME, sCabinetText, sizeof(sCabinetText)))
+        sCabinetText[0] = 0;
     sNet.peer = from;
     sNet.session = session;
     sNet.seed = ((u32)rand() << 16) ^ (u32)rand() ^ sTick;
     sNet.side = sSitAt;
     sNet.delay = 1;
-    SendAnswer(from, session, TRUE, sNet.seed, d[7] | (d[8] << 8));
+    SendAnswer(from, session, 1, sNet.seed, d[7] | (d[8] << 8));
     PlaySE(SE_SUCCESS);
     if (sSeatState == SEAT_CPU && MfEngine_IsActive())
     {
@@ -849,13 +945,28 @@ static void OnAnswer(u8 from, const u8 *d, u16 len)
 
     if (len < 12 || sNet.stage != NET_ASKING || from != sNet.peer || Get32(d + 1) != sNet.session)
         return;
-    if (!d[5])
+    if (d[5] != 1)
     {
-        MPNet_Log("fight: player %d can't fight now", from);
+        MPNet_Log("fight: player %d can't fight now%s", from, d[5] == 2 ? " (their fight files aren't ours)" : "");
         sNet.stage = NET_OFF;
         if (!sNet.fromWait)
-            Finish(FIGHT_RESULT_REFUSED);
+            Finish(d[5] == 2 ? FIGHT_RESULT_PACKS : FIGHT_RESULT_REFUSED);
         return;
+    }
+    {
+        u16 n = 12, got = GetPack(d + 12, len - 12, &sPeerPack), text;
+        n += got;
+        text = got && len >= n + 2 ? d[n] | (d[n + 1] << 8) : 0;
+        if (!got || len < n + 2 + text || text >= sizeof(sCabinetText))
+        {
+            MPNet_Log("fight: player %d's answer is cut short", from);
+            sNet.stage = NET_OFF;
+            if (!sNet.fromWait)
+                Finish(FIGHT_RESULT_REFUSED);
+            return;
+        }
+        memcpy(sCabinetText, d + n + 2, text);
+        sCabinetText[text] = 0;
     }
     // the input delay starts at 1 frame; the ping raises it (NetStep)
     rtt = (u16)((u16)sTick - (d[10] | (d[11] << 8)));
@@ -912,7 +1023,7 @@ void MP_Fight_OnRelay(u8 from, const u8 *data, u16 len)
 
 static void Ask(s8 peer, bool8 fromWait)
 {
-    u8 p[9];
+    static u8 p[9 + 6 + MF_PACK_MAX * 8];
     u16 stamp = sTick;
 
     sNet.peer = peer;
@@ -927,7 +1038,8 @@ static void Ask(s8 peer, bool8 fromWait)
     p[6] = sSitAt;
     p[7] = stamp;
     p[8] = stamp >> 8;
-    MP_SendRelay(peer, p, sizeof(p));
+    ReadMyPack(FALSE);
+    MP_SendRelay(peer, p, 9 + PutPack(p + 9, &sMyPack));
     MPNet_Log("fight: asking player %d", peer);
 }
 
@@ -1011,6 +1123,7 @@ void MP_Fight_SeatCheck(void)
     gSpecialVar_Result = 0;
     if (!MP_IsConnected())
         return;
+    ReadMyPack(TRUE);   // the files are read again each time someone sits down
     here = FriendInSeat(seat, FALSE);
     other = FriendInSeat(seat ^ 1, FALSE);
     if (here >= 0)
@@ -1139,6 +1252,6 @@ void MP_Fight_Challenge(void)
 void MP_Fight_Result(void)
 {
     gSpecialVar_Result = sResult;
-    if (sResult == FIGHT_RESULT_NO_CONTEST || sResult == FIGHT_RESULT_REFUSED)
+    if (sResult == FIGHT_RESULT_NO_CONTEST || sResult == FIGHT_RESULT_REFUSED || sResult == FIGHT_RESULT_PACKS)
         SetNameVar(sNet.peer);
 }

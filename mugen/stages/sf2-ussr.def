@@ -1,6 +1,7 @@
 [Info]
 ;Name = "U.S.S.R"
 Name = "SF2 USSR - Zangief Stage"
+displayname = "USSR - ZANGIEF"
 
 [Camera]
 StartX = 0

@@ -1,0 +1,23 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 30
+barrier seated 2
+watchlog fight: online with
+waitlog 1500
+wait 600
+rendershot select_a
+fpress RIGHT 2
+wait 10
+fpress RIGHT 2
+wait 10
+fpress A 2
+wait 60
+rendershot ken_a
+barrier done 2
+quit
