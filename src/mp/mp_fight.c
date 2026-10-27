@@ -282,6 +282,17 @@ static u8 ResultFor(int result)
     }
 }
 
+// Wins and losses for the achievements and the trainer card: against friends, and against the CPU
+static void Tally(u8 result, bool8 online)
+{
+    const char *name = result == FIGHT_RESULT_WON ? (online ? "fightwin" : "fightcpu")
+                     : result == FIGHT_RESULT_LOST ? (online ? "fightloss" : "fightcpuloss") : NULL;
+    if (name == NULL)
+        return;
+    MP_Achieve_Count(name, 1);
+    MPNet_Log("fight: %s now %d", name, (int)MP_Achieve_GetCount(name));
+}
+
 // A fight begins: the game fades to black for its picture
 static void ShowFight(void)
 {
@@ -598,6 +609,7 @@ static void EndOnline(void)
               result, engine, sNet.side, sNet.rollbacks, sNet.framesBack, sNet.checks, sNet.desyncs);
     if (sNet.peerEnded && sNet.peerResult != engine && !sNet.dropped)
         MPNet_Log("fight: the other game ended with %d", sNet.peerResult);
+    Tally(result, TRUE);
     Finish(result);
 }
 
@@ -976,6 +988,7 @@ static bool8 Step(void)
         MPNet_Log("fight: result %d (engine %d, seat %d)", result, MfEngine_Result(), sSeat);
         if (result == FIGHT_RESULT_BROKEN)
             MPNet_Log("fight: %s", MfEngine_Error());
+        Tally(result, FALSE);
         Finish(result);
         return FALSE;
     }

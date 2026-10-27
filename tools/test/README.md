@@ -37,6 +37,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_abort_catch` / `coop_abort_catch2` | a catch, then the other player disconnects: the catcher keeps it (master / non-master) |
 | `pvp_battle` | BATTLE FLAG: BOB (no CHALLENGE phrase: no phrase box) spots ALICE, link battle to the end, the winner gets a tenth of the loser's money |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
+| `fight_buttons` | OPTIONS > CONTROLS > FIGHT BUTTONS with a virtual pad: a button bound, one taken from another fight button (they swap), one left alone after 8 s; saved in the controls file |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |

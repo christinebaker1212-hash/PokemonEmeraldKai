@@ -314,6 +314,12 @@ static const struct Achievement sAch[] = {
     {"ballstyle", "BALL STYLIST", "Change a POK~MON's POK~ BALL look.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"follower", "WALKING BUDDY", "Have a POK~MON follow you.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"newlook", "NEW LOOK", "Change your look in LOOK or CREATE.", AK_EVENT, 0, 1, 0, C_EXTRAS},
+    // VS cabinet fights (mp_fight.c): counted when a fight ends
+    {"fightcpu1", "INSERT COIN", "Beat the CPU at a VS cabinet.", AK_COUNT, 0, 1, 0, C_EXTRAS},
+    {"fightcpu25", "ARCADE MODE", "Beat the CPU 25 times at VS cabinets.", AK_COUNT, 0, 25, 1, C_EXTRAS},
+    {"fightwin1", "A NEW CHALLENGER", "Win a fight against a friend at a VS cabinet.", AK_COUNT, 0, 1, 0, C_TOGETHER},
+    {"fightwin10", "WORLD WARRIOR", "Win 10 fights against friends at VS cabinets.", AK_COUNT, 0, 10, 1, C_TOGETHER},
+    {"fightwin50", "GRAND MASTER", "Win 50 fights against friends at VS cabinets.", AK_COUNT, 0, 50, 2, C_TOGETHER},
     // Card duels (src/tcg): counted and unlocked by the card screens
     {"cardwin1", "FIRST DRAW", "Win your first card duel.", AK_COUNT, 0, 1, 0, C_CARDS},
     {"cardwin100", "CARD SHARK", "Win 100 card duels.", AK_COUNT, 0, 100, 2, C_CARDS},
@@ -580,6 +586,13 @@ void MP_Achieve_Count(const char *name, s32 n)
     char key[48];
     CountKey(key, name);
     MP_SaveData_Add(key, n);
+}
+
+s32 MP_Achieve_GetCount(const char *name)
+{
+    char key[48];
+    CountKey(key, name);
+    return MP_SaveData_Get(key);
 }
 
 // A feat (AK_EVENT achievements: "flawless", "shiny"...)

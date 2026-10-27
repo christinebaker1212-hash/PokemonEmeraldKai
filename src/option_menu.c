@@ -1,7 +1,7 @@
 #include "mp_version.h"
 // OPTIONS (START > OPTIONS, and the title screen's OPTION): the game's own options screen, with tabs.
 // Moemon Co-op: one place for every setting. GAME (the original options, type icons, name case, creatures), DISPLAY
-// (fullscreen, window scale, scaling, filter, vsync), CONTROLS (controller, buttons, stick run, rumble) and CO-OP
+// (fullscreen, window scale, scaling, filter, vsync), CONTROLS (controller, buttons, stick run, rumble, the fight buttons) and CO-OP
 // (friends' screens with a page per friend online, new friends' size, autosave, the BATTLE FLAG's range).
 // L / R switch tabs. Values change live with Left / Right (or A); B or CLOSE saves and leaves.
 #include "global.h"
@@ -26,6 +26,7 @@
 #include "gba/m4a_internal.h"
 #include "platform/display.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
 #include "constants/characters.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -69,6 +70,7 @@ enum
     OPT_ANALOGRUN,
     OPT_RUMBLE,
     OPT_BUTTONICONS,
+    OPT_FIGHTKEYS,    // A opens the FIGHT BUTTONS page
     OPT_SPECPANEL,
     OPT_SPECFRIEND,   // a friend online: A opens their page
     OPT_SPECNEW,
@@ -87,6 +89,9 @@ enum
     OPT_SC_CAPS,
     OPT_SC_PAST8,
     OPT_SC_BACK,
+    OPT_FB_BIND,      // the FIGHT BUTTONS page: a fight button (arg: FIGHT_BIND_*)
+    OPT_FB_DEFAULTS,
+    OPT_FB_BACK,
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -99,6 +104,8 @@ static EWRAM_DATA u8 sSel = 0;
 static EWRAM_DATA u16 sTop = 0;
 static EWRAM_DATA u8 sFriendPage = 0;      // 0: the CO-OP tab, 1 + player id: that friend's page
 static EWRAM_DATA bool8 sScalePage = 0;    // GAME > LEVEL SCALING's page
+static EWRAM_DATA bool8 sFightPage = 0;    // CONTROLS > FIGHT BUTTONS' page
+static EWRAM_DATA u8 sFightQuiet = 0;      // frames of no input after a fight button was chosen
 static EWRAM_DATA u8 sCoopCursor = 0;      // where the CO-OP tab's cursor was before a friend's page
 static EWRAM_DATA u8 sArrowTask = 0;
 static EWRAM_DATA u8 sStartCreatures = 0;
@@ -177,6 +184,22 @@ static const u8 sText_ScCapped[] = _("CAPPED");
 static const u8 sText_ScAuto[] = _("AUTO");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
+static const u8 sText_FightKeys[] = _("FIGHT BUTTONS");
+static const u8 sText_FbDefaults[] = _("DEFAULTS");
+static const u8 sText_Arcade[] = _("ARCADE");
+static const u8 sText_Custom[] = _("CUSTOM");
+static const u8 sText_PressAKey[] = _("PRESS A KEY");
+static const u8 sText_FbLightPunch[] = _("LIGHT PUNCH");
+static const u8 sText_FbMediumPunch[] = _("MEDIUM PUNCH");
+static const u8 sText_FbHeavyPunch[] = _("HEAVY PUNCH");
+static const u8 sText_FbLightKick[] = _("LIGHT KICK");
+static const u8 sText_FbMediumKick[] = _("MEDIUM KICK");
+static const u8 sText_FbHeavyKick[] = _("HEAVY KICK");
+static const u8 sText_FbStart[] = _("START");
+static const u8 *const sFightButtonNames[FIGHT_BIND_COUNT] = {
+    sText_FbLightPunch, sText_FbMediumPunch, sText_FbHeavyPunch, sText_FbLightKick, sText_FbMediumKick, sText_FbHeavyKick,
+    sText_FbStart,
+};
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
 static const u8 sText_Finder[] = _("FRIEND FINDER");
 static const u8 sText_FinderBoth[] = _("BOTH");
@@ -307,6 +330,14 @@ static void BuildRows(void)
             AddRow(i, 0);
         return;
     }
+    if (sFightPage)
+    {
+        for (i = 0; i < FIGHT_BIND_COUNT; i++)
+            AddRow(OPT_FB_BIND, i);
+        AddRow(OPT_FB_DEFAULTS, 0);
+        AddRow(OPT_FB_BACK, 0);
+        return;
+    }
     if (sFriendPage)
     {
         AddRow(OPT_FR_SHOW, sFriendPage - 1);
@@ -348,6 +379,7 @@ static void BuildRows(void)
         AddRow(OPT_ANALOGRUN, 0);
         AddRow(OPT_RUMBLE, 0);
         AddRow(OPT_BUTTONICONS, 0);
+        AddRow(OPT_FIGHTKEYS, 0);
         break;
     case TAB_COOP:
         AddRow(OPT_SPECPANEL, 0);
@@ -487,6 +519,19 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         break;
     case OPT_LEVELSCALE:
         StringCopy(buf, MP_LevelScaleRule(MP_SCALE_ON) ? sText_On : sText_Off);
+        break;
+    case OPT_FIGHTKEYS:
+        StringCopy(buf, Fight_BindIsDefault() ? sText_Arcade : sText_Custom);
+        break;
+    case OPT_FB_BIND:
+        if (Fight_BindListening() == arg + 1)
+            StringCopy(buf, sText_PressAKey);
+        else
+        {
+            char ascii[40];
+            snprintf(ascii, sizeof(ascii), "%.16s / %s", Fight_BindKeyName(arg), Fight_BindPadName(arg));
+            MP_AsciiToGame(buf, ascii, 36);
+        }
         break;
     case OPT_SC_BOSS:
         {
@@ -741,6 +786,10 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
+    case OPT_FIGHTKEYS:   return sText_FightKeys;
+    case OPT_FB_BIND:     return sFightButtonNames[sRows[row].arg % FIGHT_BIND_COUNT];
+    case OPT_FB_DEFAULTS: return sText_FbDefaults;
+    case OPT_FB_BACK:     return sText_Back;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FINDER:      return sText_Finder;
     case OPT_FR_SHOW:     return sText_Show;
@@ -827,6 +876,14 @@ static void DrawHint(void)
 
     if (Gamepad_IsSelecting())
         snprintf(ascii, sizeof(ascii), "PRESS ANY BUTTON ON THE CONTROLLER TO USE");
+    else if (Fight_BindListening())
+        snprintf(ascii, sizeof(ascii), "A KEY OR PAD BUTTON FOR IT. ESC / BACK: STOP");
+    else if (opt == OPT_FIGHTKEYS)
+        snprintf(ascii, sizeof(ascii), "A: THE KEYS AND PAD BUTTONS FOR FIGHTS");
+    else if (opt == OPT_FB_BIND)
+        snprintf(ascii, sizeof(ascii), "A: CHANGE ITS KEY OR PAD BUTTON");
+    else if (opt == OPT_FB_DEFAULTS)
+        snprintf(ascii, sizeof(ascii), "ARROWS / WASD / D-PAD / STICK MOVE");
     else if (opt == OPT_FILTER && Display_GetFilter() != DISPLAY_FILTER_OFF && !Display_IsFilterShown())
         snprintf(ascii, sizeof(ascii), "WINDOW TOO SMALL FOR THE FILTER");
     else if (opt == OPT_PADSELECT)
@@ -909,7 +966,17 @@ static void DrawHeader(void)
 {
     int i, x = 8;
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    if (sScalePage)
+    if (sFightPage)
+    {
+        u8 buf[40];
+        u8 *p = StringCopy(buf, sTabNames[TAB_CONTROLS]);
+        *p++ = CHAR_SPACE;
+        *p++ = CHAR_GREATER_THAN;
+        *p++ = CHAR_SPACE;
+        StringCopy(p, sText_FightKeys);
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
+    }
+    else if (sScalePage)
     {
         u8 buf[40];
         u8 *p = StringCopy(buf, sTabNames[TAB_GAME]);
@@ -964,7 +1031,8 @@ static void HighlightRow(void)
 // A number for everything the rows show, to redraw when something changes elsewhere (F11, a controller, a friend)
 static u32 ShownKey(void)
 {
-    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting();
+    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting()
+            + sFightPage * 53 + Fight_BindListening() * 3001;
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
@@ -1113,6 +1181,7 @@ void CB2_InitOptionMenu(void)
         if (gSaveBlock2Ptr->optionsWindowFrameType >= WINDOW_FRAMES_COUNT)
             gSaveBlock2Ptr->optionsWindowFrameType = 0;
         sScalePage = FALSE;
+        sFightPage = FALSE;
         GoTo(TAB_GAME, 0, 0);
         gMain.state++;
         break;
@@ -1141,7 +1210,20 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 {
     u8 opt = sRows[sSel].opt;
 
-    if (Gamepad_IsSelecting())
+    if (Fight_BindListening())
+    {
+        // waiting for a fight button's key or pad button (the game's own buttons are left alone meanwhile)
+        int which = Fight_BindListening() - 1, r = Fight_BindPoll();
+        if (r != 0)
+        {
+            PlaySE(SE_SELECT);
+            sFightQuiet = 2;
+            MPNet_Log("fight button %d: %s / %s%s", which, Fight_BindKeyName(which), Fight_BindPadName(which), r < 0 ? " (kept)" : "");
+        }
+    }
+    else if (sFightQuiet)
+        sFightQuiet--;
+    else if (Gamepad_IsSelecting())
     {
         // waiting for a controller button; the keyboard can cancel
         if (JOY_NEW(B_BUTTON | START_BUTTON))
@@ -1155,7 +1237,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_COOP, 0, 0);   // that friend left
         return;
     }
-    else if (!sFriendPage && !sScalePage && JOY_NEW(L_BUTTON | R_BUTTON))
+    else if (!sFriendPage && !sScalePage && !sFightPage && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         GoTo(Wrap(sTab + (JOY_NEW(R_BUTTON) ? 1 : -1), TAB_COUNT), 0, 0);
@@ -1179,6 +1261,35 @@ static void Task_OptionMenuProcessInput(u8 taskId)
                 sSel = i;
         RedrawAll();
         return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FIGHTKEYS)
+    {
+        PlaySE(SE_SELECT);
+        sFightPage = TRUE;
+        GoTo(TAB_CONTROLS, 0, 0);
+        return;
+    }
+    else if (sFightPage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_FB_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sFightPage = FALSE;
+        GoTo(TAB_CONTROLS, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_FIGHTKEYS)
+                sSel = i;
+        RedrawAll();
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FB_BIND)
+    {
+        PlaySE(SE_SELECT);
+        Fight_BindListen(sRows[sSel].arg);
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FB_DEFAULTS)
+    {
+        PlaySE(SE_SELECT);
+        Fight_BindDefaults();
     }
     else if (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && (opt == OPT_CLOSE || opt == OPT_FR_BACK)))
     {
@@ -1212,7 +1323,8 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         Gamepad_StartSelect();
         PlaySE(SE_SELECT);
     }
-    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND)
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND && opt != OPT_FIGHTKEYS && opt != OPT_FB_BIND
+          && opt != OPT_FB_DEFAULTS)
     {
         Change(sSel, JOY_NEW(DPAD_LEFT) ? -1 : 1);
         if (opt == OPT_TEXTSPEED || opt == OPT_BUTTONMODE || opt == OPT_FRAME || opt == OPT_NAMECASE || opt == OPT_BATTLESCENE

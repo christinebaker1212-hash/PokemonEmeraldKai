@@ -980,6 +980,7 @@ bool8 MP_InDungeon(void);
 struct Pokemon;
 // Achievements (mp_achieve.c) and things done with friends (mp_events.c MP_Events_Did)
 void MP_Achieve_Count(const char *name, s32 n);
+s32 MP_Achieve_GetCount(const char *name);
 void MP_Achieve_Unlock(const char *id);
 void MP_Achieve_Update(void);
 void MP_Achieve_OnTrainerWin(u16 trainerId);
