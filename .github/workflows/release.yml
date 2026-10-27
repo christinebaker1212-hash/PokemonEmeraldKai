@@ -34,11 +34,23 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # This step has hung for 15 minutes on some runners (normally it takes 40 seconds): each try
+      # gets 4 minutes, skips the man-db index rebuild and asks nothing, and a hung try starts over.
       - name: Tools
         if: steps.ver.outputs.skip != 'true'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
+          sudo rm -f /var/lib/man-db/auto-update
+          export DEBIAN_FRONTEND=noninteractive
+          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o DPkg::Lock::Timeout=60"
+          for try in 1 2 3; do
+            if timeout 240 sudo -E apt-get $APT update &&
+               timeout 240 sudo -E apt-get $APT install -y \
+                 build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3; then
+              exit 0
+            fi
+            echo "try $try failed or hung"
+          done
+          exit 1
 
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true'
