@@ -1,0 +1,58 @@
+---------------------------------------------------------------------------
+Cammy  by G.D.T  Ver 1.00  2011/1/Mar.
+---------------------------------------------------------------------------
+From Super Street Fighter 2 Turbo(called "Super Street Fighter 2X" in Japan)
+and little arranged
+
+---------------------------------------------------------------------------
+[Infor]
+
+Opponent(in air) can't guard Cannon Spike
+
+About easy command of Super, I consider that
+player use controller, not arcade stick
+
+You should open option.txt
+(reduce damage or not, and reset power at the round start or not)
+
+---------------------------------------------------------------------------
+[Command]
+←     = B
+／     = DB(UF)
+↓     = D
+＼     = DF
+→     = F
+
+[Throw]
+Hooligan Suplex             　　　　           → or ← + Y or Z(near opponent)
+Frankensteiner     　　　　                    → or ← + B or C(near opponent)
+Flying Neck Hunt                               → or ← + Y or Z(near opponent in air)
+Air Frankensteiner                             → or ← + B or C(near opponent in air)
+
+[Special]
+Spiral Arrow　　                               ↓＼→ + A or B or C
+Cannon Spike　　　                             →↓＼ + A or B or C
+Axle Spin Knuckle                              ←／→ + X or Y or Z
+Hooligan Combination 　　                   　 ↓＼→／ + X or Y or Z
+|→Fatal Leg Twister                     　　　→ or ← + K(near opponent)
+|→Cross Scissor Pressure　　                  → or ← + K(near opponent's midsection),(also in air)
+|→Razor Edge Slicer                  　　　　 do nothing
+|→Cancel                                      K
+
+[Super]
+Spin Drive Smasher　                           ↓＼→↓＼ + A or B or C
+                                               or  X+A
+
+---------------------------------------------------------------------------
+[Other]
+Free for using movie
+You can customize this charactor in case of private use
+Free for making AI
+
+---------------------------------------------------------------------------
+[Special thanks]
+JAM(hosted)
+CAPCOM
+
+and...you!!
+

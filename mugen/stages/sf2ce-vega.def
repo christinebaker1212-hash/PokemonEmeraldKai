@@ -1,0 +1,317 @@
+; Stage information :
+; -----------------
+; From the game: 	Street Fighter II - Champion Edition
+; Name:			Vega's Stage (Spain)
+; Version:		0.1
+;
+; Updated to Mugen 1.0 by N-Mario/N6Mario84 to work with Vega SFII.
+
+; Rip information :
+; ---------------
+; By:			Dark Saviour
+; From:			Win Kawaks 1.45
+; With:			MCM 1.5
+; Date:			04/04/2004
+
+; Contacts :
+; --------
+; Email: 		darksaviour77@hotmail.com
+; site:			http://www.ds-arena.fr.st
+
+; Please don't link these files ;)
+
+;--------------------------------------------------------
+[Info]
+name = "[SFII'CE] Vega"
+displayname = "Spain: Vega SFII'CE" ;Name to display
+versiondate = 01,30,2013	    ;Version date of stage (MM,DD,YYYY or X.XX)
+mugenversion = 1.0		     ;Version of M.U.G.E.N stage works on (X.XX)
+author = "Dark Saviour"		     ;Stage author name
+
+;--------------------------------------------------------
+[Camera]
+startx = 0
+starty = 0
+boundleft = -224
+boundright = 224
+boundhigh = 0
+boundlow = 0
+verticalfollow = 0
+floortension = 0
+tension = 60
+
+;--------------------------------------------------------
+[PlayerInfo]
+p1startx = -80
+p1starty = 0
+p1startz = 0
+p1facing = 1
+p2startx = 80
+p2starty = 0
+p2startz = 0
+p2facing = -1
+leftbound = -1000
+rightbound = 1000
+topbound = 0
+botbound = 0
+
+;--------------------------------------------------------
+[Scaling]
+topz = 0       
+botz = 50      
+topscale = 1       
+botscale = 1.2     
+
+;--------------------------------------------------------
+[Bound]
+screenleft = 40
+screenright = 40
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 216
+autoturn = 1
+resetBG = 0
+
+;--------------------------------------------------------
+[Shadow]
+;color = 128, 128, 128
+yscale = .15
+reflect = 0
+
+;--------------------------------------------------------
+[Music]
+bgmusic = sound/SF2 Taverna - Vega Theme.mp3
+bgvolume = 255
+
+;--------------------------------------------------------
+[BGdef]
+spr = stages/sf2ce-vega.sff
+debugbg = 0
+
+;--------------------------------------------------------
+;--------------------------------------------------------
+
+[BG Background]
+type = normal 
+spriteno = 0, 0
+start = 0, 0
+delta = .604910, 1
+
+[BG LeftUpBgAnim]
+type = anim 
+actionno = 100
+start = -296, 0
+delta = .604910, 1
+
+[BG LeftDownBgAnim]
+type = anim 
+actionno = 200
+start = -296, 78
+delta = .604910, 1
+
+[BG MesonTaberna]
+type = anim 
+actionno = 3
+start = -90, 35
+delta = .604910, 1
+
+[BG RightUpBgAnim]
+type = anim 
+actionno = 101
+start = 294, 0
+delta = .604910, 1
+
+[BG RightDownBgAnim]
+type = anim 
+actionno = 201
+start = 294, 78
+delta = .604910, 1
+
+[BG Stairs]
+type = normal 
+spriteno = 10, 0
+start = 0, 140
+delta = .866071, 1
+
+[BG LeftWhiteApplause]
+type = anim 
+actionno = 400
+start = -318, 64
+delta = .734345, 1
+
+[BG LeftTable]
+type = anim 
+actionno = 5
+start = -254, 64 
+delta = .734345, 1
+
+[BG LeftRedApplause]
+type = anim 
+actionno = 600
+start = -126, 64
+delta = .734345, 1
+
+[BG LeftGuitarist]
+type = anim 
+actionno = 7
+start = -92, 85
+delta = .734345, 1
+
+[BG Dancers]
+type = anim 
+actionno = 8
+start = -32, 64
+delta = .734345, 1
+
+[BG RightGuitarist]
+type = anim 
+actionno = 7
+start = 36, 85
+delta = .734345, 1
+
+[BG RightTable]
+type = anim 
+actionno = 5
+start = 129, 64 
+delta = .734345, 1
+
+[BG RightRedApplause]
+type = anim 
+actionno = 601
+start = 285, 64
+delta = .734345, 1
+
+[BG RightWhiteApplause]
+type = anim 
+actionno = 401
+start = 317, 64
+delta = .734345, 1
+
+[BG Dancefloor]
+type = anim 
+actionno = 9
+start = -96, 135
+delta = .734345, 1
+
+[BG Ground]
+type = parallax
+spriteno = 11, 0
+start = 0, 201
+delta = .866071, 1
+xscale = 1, 1.373712
+
+[BG Grid]
+type = normal
+spriteno = 12, 0
+start = 0, 0
+delta = .966517, 1
+mask = 1
+
+;_________________________________
+
+[Begin Action 100] ; Left Up Background Anim
+1,0, 0,0, 10
+1,1, 0,0, 10
+1,2, 0,0, 10
+
+[Begin Action 200] ; Left Down Background Anim
+2,0, 0,0, 12
+2,1, 0,0, 12
+
+[Begin Action 3] ; Meson de la Taberna
+3,0, 0,0, 16
+3,1, 0,0, 16
+3,2, 0,0, 16
+3,3, 0,0, 16
+3,4, 0,0, 16
+3,3, 0,0, 16
+3,4, 0,0, 16
+3,3, 0,0, 16
+3,4, 0,0, 48
+
+[Begin Action 201] ; Right Down Background Anim
+2,0, 0,0, 12, H
+2,1, 0,0, 12, H
+
+[Begin Action 101] ; Right Up Background Anim
+1,0, 0,0, 10, H
+1,1, 0,0, 10, H
+1,2, 0,0, 10, H
+
+[Begin Action 400] ; Left White Applause
+4,0, 0,0, 15
+4,1, 0,0, 16
+4,2, 0,0, 15
+4,3, 0,0, 16
+4,0, 0,0, 14
+4,1, 0,0, 14
+4,3, 0,0, 14
+
+[Begin Action 401] ; Right White Applause
+4,0, 0,0, 15, H
+4,1, 0,0, 16, H
+4,2, 0,0, 15, H
+4,3, 0,0, 16, H
+4,0, 0,0, 14, H
+4,1, 0,0, 14, H
+4,3, 0,0, 14, H
+
+[Begin Action 5] ; Left table
+5,0, 0,0, 16
+5,1, 0,0, 16
+5,2, 0,0, 16
+5,3, 0,0, 16
+5,4, 0,0, 16
+5,1, 0,0, 16
+5,2, 0,0, 16
+5,5, 0,0, 16
+
+[Begin Action 600] ; Left Red Applause
+6,0, 0,0, 15
+6,1, 0,0, 16
+6,2, 0,0, 15
+6,3, 0,0, 16
+6,0, 0,0, 14
+6,1, 0,0, 14
+6,3, 0,0, 14
+
+[Begin Action 601] ; Right Red Applause
+6,0, 0,0, 15, H
+6,1, 0,0, 16, H
+6,2, 0,0, 15, H
+6,3, 0,0, 16, H
+6,0, 0,0, 14, H
+6,1, 0,0, 14, H
+6,3, 0,0, 14, H
+
+[Begin Action 7] ; Left & Right Guitarist
+7,0, 0,0, 45
+7,1, 0,0, 10
+7,0, 0,0, 10
+7,1, 0,0, 8
+7,2, 0,0, 15
+7,3, 0,0, 27
+7,0, 0,0, 13
+7,1, 0,0, 14
+7,2, 0,0, 26
+7,3, 0,0, 18
+7,2, 0,0, 12
+7,3, 0,0, 10
+7,2, 0,0, 11
+7,3, 0,0, 24
+
+[Begin Action 8] ; Dancers
+8,0, 0,0, 16
+8,1, 0,0, 16
+8,2, 0,0, 16
+8,1, 0,0, 16
+8,3, 0,0, 16
+8,4, 0,0, 16
+8,5, 0,0, 16
+8,4, 0,0, 16
+
+[Begin Action 9] ; Dancerfloor
+9,0, 0,0, 9
+9,1, 0,0, 9
+9,2, 0,0, 9

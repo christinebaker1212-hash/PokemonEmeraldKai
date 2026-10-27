@@ -1,0 +1,91 @@
+[Info]
+;Name = "THAILAND"
+Name = "SF2 Thailand - Sagat Stage"
+
+[Camera]
+StartX = 0
+StartY = 0
+BoundLeft = -256
+BoundRight = 256
+BoundHigh = -11
+BoundLow = 0
+VerticalFollow = .2
+FloorTension = 40
+Tension = 80
+
+[PlayerInfo]
+P1StartX = -90
+P1StartY = 0
+P1StartZ = 0
+P1Facing = 1
+P2StartX = 90
+P2StartY = 0
+P2StartZ = 0
+P2Facing = -1
+LeftBound  = -1000
+RightBound = 1000
+TopBound = 0
+BotBound = 0
+
+[Scaling]
+Topz = 0
+Botz = 50
+TopScale = 1
+BotScale = 1.2
+
+[Bound]
+ScreenLeft = 20
+ScreenRight = 20
+
+[StageInfo]
+ZOffSet = 205
+AutoTurn = 1
+ResetBG = 1
+
+[Shadow]
+Color = 175, 159, 175
+YScale = .1
+Reflect = 0
+
+[Music]
+BGMusic = sound/SF2 Thailand - Sagat Theme.mp3
+BGVolume = 255
+
+[BGdef]
+Spr = stages/sf2-thailand.sff
+DebugBg = 0
+
+[BG]
+Type = Normal
+SpriteNo = 0, 0
+Delta = .5, 1
+Tile = 1
+[BG]
+Type = Normal
+SpriteNo = 1, 0
+Delta = .7, 1
+Mask = 1
+[BG]
+Type  = Noemal
+SpriteNo = 2, 0
+Start = 200
+Delta = 0, 1
+[BG]
+Type  = Parallax
+SpriteNo = 2, 0
+Delta = .7, 1
+XScale = 1, 2
+Mask = 1
+
+[BG]
+Type = Normal
+SpriteNo = 3, 0
+Delta = .7, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 3, 0
+Start = -325, 47
+Delta = 1.18, 1
+Mask = 1
+LayerNo = 1

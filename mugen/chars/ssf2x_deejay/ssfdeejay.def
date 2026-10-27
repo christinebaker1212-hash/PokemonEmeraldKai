@@ -1,0 +1,37 @@
+; Definition file for Kung Fu Man
+; Contains all the filenames needed for the character
+
+; Player information
+[Info]
+name = "SSFDeejay by Qkrtkf!"        ;Name of character
+displayname = "SSFDeejay" ;of character to display
+versiondate = 04,14,2001    ;Version date of character
+mugenversion = 04,14,2001   ;Version of M.U.G.E.N character works on
+author = "Qkrtkf!"         ;Character author name
+pal.defaults =       ;Default palettes in order of preference
+
+; Files for the player
+[Files]
+cmd     = ssfdeejay.cmd   ;Command set
+cns     = ssfdeejay.cns   ;Constants
+st      = ssfdeejay.cns   ;States
+stcommon = common1.cns ;Common states
+sprite  = ssfdeejay.sff;kfm.sff   ;Sprite
+anim    = ssfdeejay.air   ;Animation
+sound   = sound.snd
+pal1    = deejay.act 
+pal2    = deejay.act
+pal3    = deejay.act
+pal4    = deejay.act
+pal5    = deejay.act
+pal6    = deejay.act
+pal7    = deejay2.act; 
+pal8    = deejay2.act; 
+pal9    = deejay2.act; 
+pal10    = deejay2.act; 
+pal11    = deejay2.act; 
+pal12    = deejay2.act; 
+; Arcade mode
+[Arcade]
+intro.storyboard = 
+ending.storyboard = 

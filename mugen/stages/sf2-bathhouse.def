@@ -1,0 +1,1187 @@
+; Japan
+; Edmond Honda Stage
+; Super Street Fighter 2 - The New Challengers
+; from CPS2
+; by VIB
+; www.vibhp.cjb.net
+; 
+;
+;
+; o que falta:
+; - música não repete corretamente
+; - animação do fundo não tem relação com vitória, só por limite de tempo
+;
+; meu stage é seu stage .. faça o que quiser com ele 
+; se vc for hospedar esses arquivos, lembre de colocar um link para
+; o meu site, para que possam procurar por atualizações ..
+;
+; 
+; ENGLISH:
+;
+; missing:
+; - music won't loop correctly
+; - background animation has no relation with victory, except time over
+;
+; my stage is your stage .. feel free to do what you want with it
+; if you host these files, remember to put a link to my site, so that
+; users can check for updates ..
+;
+;
+
+;--------------------------------------------------------
+[Info]
+name = "SF2 Bath house - Honda stage"
+
+;--------------------------------------------------------
+[Camera]
+startx = 0
+starty = 0
+boundleft = -223
+boundright = 224
+boundhigh = 0;-260
+boundlow = 0
+verticalfollow = .8
+floortension = 60
+tension = 100
+
+;--------------------------------------------------------
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -70          ;Starting x coordinates
+p1starty = 0            ;Starting y coordinates
+p1startz = 0            ;Starting z coordinates
+p1facing = 1            ;Direction player faces: 1=right, -1=left
+
+;--- Player 2 ---
+p2startx = 70
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+;--- Common ---
+leftbound  = -1000 ;Left bound (x-movement)
+rightbound =  1000 ;Right bound
+topbound  =  0     ;Top bound (z-movement)
+botbound  =  0     ;Bottom bound
+
+;--------------------------------------------------------
+[Scaling]
+topz     = 0       ;Top z-coordinate for scaling
+botz     = 50      ;Bottom z-coordinate for scaling
+topscale = 1       ;Scale to use at top
+botscale = 1.2     ;Scale to use at bottom
+
+;--------------------------------------------------------
+[Bound]
+screenleft = 10
+screenright = 10
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 217
+
+autoturn = 1
+resetBG = 1
+
+;--------------------------------------------------------
+[Shadow]
+color = 52,52,52
+yscale = -.1
+reflect = 0
+
+;--------------------------------------------------------
+[Music]
+bgmusic = sound/SF2 Bathhouse - Honda Theme.mp3
+bgvolume = 255
+
+;========================================================
+;--------------------------------------------------------
+; Background definition
+;-------------------------------------
+; [BG x]
+; type = ?       "Normal"/"Parallax"/"Height"  (def: "normal")
+; spriteno = ?, ? Sprite group and number: groupno, imgno  (req'd)
+; start = ?, ?   Starting location (integer)  (def: 0, 0)
+; delta = ?, ?   Change in location per camera unit moved (float)  (def: 1,1)
+; trans = ?      Transparency settings: "none"/"add"/"sub"/"avg" (def: "none")
+; mask = ?       Masking (int): 0 - off, 1 - on  (def: 0)
+; velocity = ?, ? Velocity: x, y (float): speed background moves (def: 0, 0)
+; tile = ?, ?    Tiling: xtile, ytile (int): 0 - off, 1 - infinite,
+;                        >1 - tile that number of times  (def: 0, 0)
+; tilespacing = ?, ? Tiling: x, y (int) : space between tiles (def: 0, 0)
+;  Parallax-only:
+; xscale = ?, ?    Top xscale, bottom xscale (float) (if used, then no tiling)
+; width = ?, ?     Top width, bottom width (int)  (if used, then tiles;
+;                             use either this or above, but not both)
+; yscalestart = ?  Starting y-scale (float, in percent)  (def: 100)
+; yscaledelta = ?  Change in y-scale per unit (float, in percent)  (def: 0)
+;-------------------------------------
+
+;-------------------------------------
+; Main background definition
+[BGdef]
+spr = stages/sf2-bathhouse.sff
+debugbg = 0
+
+;----------
+[BG chao] ; floor
+type  = parallax
+spriteno = 2, 0
+start = 0,176
+delta = .672,1
+mask  = 1
+xscale = 1,1.769
+; x = ((1-d)*B/A+1)/d
+; x = ((1-.672)*23/40+1)/.672 = 1.769
+; bottom delta is .672*1.769 = 1.189
+
+;----------
+[BG fundo] ; background
+type  = normal
+spriteno = 0, 0
+start = 0,175
+delta = .672,1
+mask  = 1
+
+;----------
+[BG teto] ; ceiling
+type  = parallax
+spriteno = 6, 0
+start = 8,47
+delta = 1.05,1
+mask  = 1
+xscale = 1,.640
+; bottom*x = top .. x = top / bottom
+; x = .672/1.05 = .640
+; top delta is 1.05
+; bottom delta is .672 (floor top)
+
+;;;;;;;;;;;;;;;;; OBJETOS
+;----------
+[BG balao] ; baloon
+type  = anim
+actionno = 10
+start = 290, 21
+delta = .971,1
+[Begin Action 10]
+10,0, 0,0, 5940
+loopstart
+10,1, 0,0, 9
+10,0, 0,0, 9
+10,2, 0,0, 9
+10,0, 0,0, 9
+; b is Bottom delta, t is Top delta (ceiling sprite)
+; x delta is:
+; d = (t - b)*A/h + b
+; d = (1.05 - .672)*38/48 + .672 = .971
+
+;----------
+[BG poster esq] ; poster left
+type  = anim
+actionno = 12
+start = -132, 56
+delta = .672,1
+[Begin Action 12]
+-1,0, 0,0, 5940
+loopstart
+12,0, 0,0, 5
+12,1, 0,0, 5
+
+;----------
+[BG poster dir] ; poster right
+type  = anim
+actionno = 13
+start = 92, 56
+delta = .672,1
+[Begin Action 13]
+-1,0, 0,0, 6000
+loopstart
+13,0, 0,0, 12
+13,1, 0,0, 12
+
+;----------
+[BG balde] ; basket
+type  = normal
+spriteno = 3, 0
+start = -208,174
+delta = .793,1
+mask  = 1
+; b is Bottom delta, t is Top delta (floor sprite)
+; x delta is:
+; d = (b - t)*B/h + t
+; d = (1.189 - .672)*15/64 + .672 = .793
+
+;----------
+[BG pano] ; cloth
+type  = normal
+spriteno = 3, 1
+start = -195,188
+delta = .833,1
+mask  = 1
+; b is Bottom delta, t is Top delta (floor sprite)
+; x delta is:
+; d = (b - t)*B/h + t
+; d = (1.189 - .672)*20/64 + .672 = .833
+
+;;;;;;;;;;;;;;------- PISCINA .. pool
+;----------
+[BG piscina parede]
+type  = normal
+spriteno = 1, 0
+start = 34,191
+delta = .8,1
+mask  = 1
+; d = (b - t)*B/h + t
+; d = (1.189 - .672)*16/64 + .672 = .8
+
+;----------
+[BG gota 1]
+type  = anim
+actionno = 20
+start = -94,166
+delta = .8,1
+id = 101
+
+[BG gota 2]
+type  = anim
+actionno = 20
+start = -58,164
+delta = .8,1
+id = 102
+
+[BG gota 3]
+type  = anim
+actionno = 20
+start = -44,167
+delta = .8,1
+id = 103
+
+[BG gota 4]
+type  = anim
+actionno = 20
+start = -32,168
+delta = .8,1
+id = 104
+
+[BG gota 5]
+type  = anim
+actionno = 20
+start = -3,164
+delta = .8,1
+id = 105
+
+[BG gota 6]
+type  = anim
+actionno = 20
+start = 32,167
+delta = .8,1
+id = 106
+
+[BG gota 7]
+type  = anim
+actionno = 20
+start = 86,164
+delta = .8,1
+id = 107
+
+[BG gota 8]
+type  = anim
+actionno = 20
+start = 100,167
+delta = .8,1
+id = 108
+
+[BG gota 9]
+type  = anim
+actionno = 20
+start = 112,168
+delta = .8,1
+id = 109
+
+[BG gota 10]
+type  = anim
+actionno = 20
+start = 160,166
+delta = .8,1
+id = 110
+
+;----------
+[BG cai agua]
+type  = anim
+actionno = 11
+start = -100,160
+delta = .8,1
+id = 11
+[Begin Action 11]
+-1,0, 0,0, 8
+11,1, 0,0, 8
+11,0, 0,0, 10
+11,1, 0,0, 5
+-1,0, 0,0, 5
+-1,0, 0,0, 300
+
+;----------
+[BG quina]
+type  = anim
+actionno = 6
+start = 34,156
+delta = .8,1
+id = 5
+[Begin Action 5]
+5,1, 0,0, 8
+5,2, 0,0, 8
+5,3, 0,0, 10
+5,2, 0,0, 5
+5,1, 0,0, 5
+5,0, 0,0, 300
+[Begin Action 6]
+5,0, 0,0, -1
+
+;----------
+[BG mar 0]
+type  = parallax
+spriteno = 4,0
+start = 30,140 ;35,140
+delta = .7,1
+xscale = 1,1.142
+mask = 1
+id = 40
+
+;----------
+[BG mar 1]
+type  = parallax
+spriteno = 4,1
+start = 30,140
+delta = .7,1
+xscale = 1,1.142
+mask = 1
+id = 41
+
+;----------
+[BG mar 2]
+type  = parallax
+spriteno = 4,2
+start = 30,140
+delta = .7,1
+xscale = 1,1.142
+mask = 1
+id = 42
+
+;;;;;;;;;; GOTAS teto
+;----------
+[BG gota t1]
+type  = anim
+actionno = 20
+start = -84,48
+delta = .672,1
+id = 201
+
+[BG gota t2]
+type  = anim
+actionno = 20
+start = -20,48
+delta = .672,1
+id = 202
+
+[BG gota t3]
+type  = anim
+actionno = 20
+start = 76,48
+delta = .672,1
+id = 203
+
+;----------
+[BG gota g1]
+type  = anim
+actionno = 30
+start = -254,28
+delta = .821,1
+id = 301
+
+[BG gota g1b]
+type  = anim
+actionno = 30
+start = -254,28
+delta = .821,1
+layerno = 1
+id = 311
+; b is Bottom delta, t is Top delta (ceiling sprite)
+; x delta is:
+; d = (t - b)*A/h + b
+; d = (1.05 - .672)*19/48 + .672 = .821
+; 4s20t pra cair
+; 1s10t pra chegar na linha do segundo azulejo
+
+[BG gota g2]
+type  = anim
+actionno = 30
+start = -20,28
+delta = .821,1
+id = 302
+
+[BG gota g2b]
+type  = anim
+actionno = 30
+start = -20,28
+delta = .821,1
+layerno = 1
+id = 312
+; 5s50t pra cair
+; 1s10t pra chegar na linha do segundo azulejo
+
+[BG gota g3]
+type  = anim
+actionno = 30
+start = 149,28
+delta = .821,1
+id = 303
+
+[BG gota g3b]
+type  = anim
+actionno = 30
+start = 149,28
+delta = .821,1
+layerno = 1
+id = 313
+; 3s pra cair
+; 1s10t pra chegar na linha do segundo azulejo
+
+;;;;;;;;;;;;;;;;;;;; CONTROLES
+;;;;;;;;;;;;;;;;------------- Gotas grandes
+;large drops from ceiling
+;---------------- gotag 1
+[BGCtrlDef gotag1]
+looptime = 350
+ctrlID = 311
+
+[BGCtrl gotag1]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotag1]
+type = Enable
+time = 0
+value = 1
+ctrlID = 301
+
+[BGCtrl gotag1]
+type = Enable
+time = 0
+value = 0
+
+[BGCtrl gotag1]
+type = Enable
+time = 260
+value = 0
+ctrlID = 301
+
+[BGCtrl gotag1]
+type = Enable
+time = 260
+value = 1
+
+[BGCtrl gotag1]
+type = Anim
+time = 260
+value = 31
+
+[BGCtrl gotag1]
+type = VelAdd
+time = 265,335
+y = .078
+
+[BGCtrl gotag1]
+type = VelSet
+time = 335
+y = 0
+
+[BGCtrl gotag1]
+type = Anim
+time = 335
+value = 23
+
+;---------------- gotag 2
+[BGCtrlDef gotag2]
+looptime = 440
+ctrlID = 312
+
+[BGCtrl gotag2]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotag2]
+type = Enable
+time = 0
+value = 1
+ctrlID = 302
+
+[BGCtrl gotag2]
+type = Enable
+time = 0
+value = 0
+
+[BGCtrl gotag2]
+type = Enable
+time = 350
+value = 0
+ctrlID = 302
+
+[BGCtrl gotag2]
+type = Enable
+time = 350
+value = 1
+
+[BGCtrl gotag2]
+type = Anim
+time = 350
+value = 31
+
+[BGCtrl gotag2]
+type = VelAdd
+time = 355,425
+y = .078
+
+[BGCtrl gotag2]
+type = VelSet
+time = 425
+y = 0
+
+[BGCtrl gotag2]
+type = Anim
+time = 425
+value = 23
+
+;---------------- gotag 3
+[BGCtrlDef gotag3]
+looptime = 270
+ctrlID = 313
+
+[BGCtrl gotag3]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotag3]
+type = Enable
+time = 0
+value = 1
+ctrlID = 303
+
+[BGCtrl gotag3]
+type = Enable
+time = 0
+value = 0
+
+[BGCtrl gotag3]
+type = Enable
+time = 180
+value = 0
+ctrlID = 303
+
+[BGCtrl gotag3]
+type = Enable
+time = 180
+value = 1
+
+[BGCtrl gotag3]
+type = Anim
+time = 180
+value = 31
+
+[BGCtrl gotag3]
+type = VelAdd
+time = 185,255
+y = .078
+
+[BGCtrl gotag3]
+type = VelSet
+time = 255
+y = 0
+
+[BGCtrl gotag3]
+type = Anim
+time = 255
+value = 23
+
+
+;;;;;;;;;;;;;;;;------------- Gotas Teto
+;small drops from ceiling
+;---------------- gota 1
+[BGCtrlDef gotat1]
+looptime = 435
+ctrlID = 201
+
+[BGCtrl gotat1]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotat1]
+type = Anim
+time = 0
+value = 20
+
+[BGCtrl gotat1]
+type = Anim
+time = 365
+value = 21
+
+[BGCtrl gotat1]
+type = VelAdd
+time = 370,420
+y = .08
+
+[BGCtrl gotat1]
+type = VelSet
+time = 420
+y = 0
+
+[BGCtrl gotat1]
+type = Anim
+time = 420
+value = 23
+
+;---------------- gota 2
+[BGCtrlDef gotat2]
+looptime = 246
+ctrlID = 202
+
+[BGCtrl gotat2]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotat2]
+type = Anim
+time = 0
+value = 20
+
+[BGCtrl gotat2]
+type = Anim
+time = 180
+value = 21
+
+[BGCtrl gotat2]
+type = VelAdd
+time = 185,231
+y = .088
+
+[BGCtrl gotat2]
+type = VelSet
+time = 231
+y = 0
+
+[BGCtrl gotat2]
+type = Anim
+time = 231
+value = 23
+
+;---------------- gota 3
+[BGCtrlDef gotat3]
+looptime = 140
+ctrlID = 203
+
+[BGCtrl gotat3]
+type = PosSet
+time = 0
+y = 0
+
+[BGCtrl gotat3]
+type = Anim
+time = 0
+value = 20
+
+[BGCtrl gotat3]
+type = Anim
+time = 70
+value = 21
+
+[BGCtrl gotat3]
+type = VelAdd
+time = 75,125
+y = .08
+
+[BGCtrl gotat3]
+type = VelSet
+time = 125
+y = 0
+
+[BGCtrl gotat3]
+type = Anim
+time = 125
+value = 23
+
+;;;;;;;;;;;;;;;;;------------- Gotas piscina
+;drop from pool
+[BGCtrlDef gota]
+looptime = 336
+
+[BGCtrl gotas 1]
+type = PosSet
+time = 0
+y = 0
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+[BGCtrl gotas 1]
+type = VelSet
+time = 0
+y = 0
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+[BGCtrl gotas 1]
+type = Enable
+time = 0
+value = 0
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+[BGCtrl gotas 1]
+type = Enable
+time = 0
+value = 0
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+[BGCtrl gotas 1] ;enable for each loop
+type = Enable
+time = 16
+value = 1
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+;disabling some drops will make it look random
+[BGCtrl gotas 1] ;disable on 1 for each 2 loops
+type = Enable
+time = 16,16,672
+value = 0
+ctrlID = 102,106
+
+[BGCtrl gotas 1] ;disable on 1 for each 3 loops
+type = Enable
+time = 16,16,1008
+value = 0
+ctrlID = 101,104,110
+
+[BGCtrl gotas 1] ;disable on 3 for each 3 loops
+type = Enable
+time = 668,668,1008
+value = 0
+ctrlID = 109,110
+
+[BGCtrl gotas 1] ;disable on 1 for each 4 loops
+type = Enable
+time = 16,16,1344
+value = 0
+ctrlID = 107
+
+[BGCtrl gotas 1] ;disable on 3 for each 4 loops
+type = Enable
+time = 688,688,1344
+value = 0
+ctrlID = 105,107,108
+
+[BGCtrl gotas 1] ;disable on 4 for each 4 loops
+type = Enable
+time = 1024,1024,1008
+value = 0
+ctrlID = 101,105,107,109
+
+[BGCtrl gotas 1] ;disable on 1 for each 7 loops
+type = Enable
+time = 16,16,2352
+value = 0
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+[BGCtrl gotas 1]
+type = Anim
+time = 16
+value = 25
+ctrlID = 101,102,103,104,105,106,107,108,109,110
+
+;-------------
+;below goes each drop particular movement and timing
+[BGCtrl gota01]
+type = VelSet
+time = 26
+y = .6
+ctrlID = 101
+
+[BGCtrl gota01]
+type = VelAdd
+time = 26,46
+y = .05
+ctrlID = 101
+
+[BGCtrl gota01]
+type = VelSet
+time = 46
+y = 0
+ctrlID = 101
+
+[BGCtrl gota01]
+type = Anim
+time = 46
+value = 23
+ctrlID = 101
+
+[BGCtrl gota02]
+type = VelSet
+time = 26
+y = .4
+ctrlID = 102
+
+[BGCtrl gota02]
+type = VelAdd
+time = 26,42
+y = .13
+ctrlID = 102
+
+[BGCtrl gota02]
+type = VelSet
+time = 42
+y = 0
+ctrlID = 102
+
+[BGCtrl gota02]
+type = Anim
+time = 42
+value = 23
+ctrlID = 102
+
+[BGCtrl gota03]
+type = VelSet
+time = 26
+y = .3
+ctrlID = 103
+
+[BGCtrl gota03]
+type = VelAdd
+time = 26,43
+y = .12
+ctrlID = 103
+
+[BGCtrl gota03]
+type = VelSet
+time = 43
+y = 0
+ctrlID = 103
+
+[BGCtrl gota03]
+type = Anim
+time = 43
+value = 23
+ctrlID = 103
+
+[BGCtrl gota04]
+type = VelSet
+time = 26
+y = .5
+ctrlID = 104
+
+[BGCtrl gota04]
+type = VelAdd
+time = 26,42
+y = .11
+ctrlID = 104
+
+[BGCtrl gota04]
+type = VelSet
+time = 42
+y = 0
+ctrlID = 104
+
+[BGCtrl gota04]
+type = Anim
+time = 42
+value = 23
+ctrlID = 104
+
+[BGCtrl gota05]
+type = VelSet
+time = 26
+y = .3
+ctrlID = 105
+
+[BGCtrl gota05]
+type = VelAdd
+time = 26,44
+y = .12
+ctrlID = 105
+
+[BGCtrl gota05]
+type = VelSet
+time = 44
+y = 0
+ctrlID = 105
+
+[BGCtrl gota05]
+type = Anim
+time = 44
+value = 23
+ctrlID = 105
+
+[BGCtrl gota06]
+type = VelSet
+time = 26
+y = .5
+ctrlID = 106
+
+[BGCtrl gota06]
+type = VelAdd
+time = 26,43
+y = .10
+ctrlID = 106
+
+[BGCtrl gota06]
+type = VelSet
+time = 43
+y = 0
+ctrlID = 106
+
+[BGCtrl gota06]
+type = Anim
+time = 43
+value = 23
+ctrlID = 106
+
+[BGCtrl gota07]
+type = VelSet
+time = 26
+y = .3
+ctrlID = 107
+
+[BGCtrl gota07]
+type = VelAdd
+time = 26,43
+y = .14
+ctrlID = 107
+
+[BGCtrl gota07]
+type = VelSet
+time = 43
+y = 0
+ctrlID = 107
+
+[BGCtrl gota07]
+type = Anim
+time = 43
+value = 23
+ctrlID = 107
+
+[BGCtrl gota08]
+type = VelSet
+time = 26
+y = .5
+ctrlID = 108
+
+[BGCtrl gota08]
+type = VelAdd
+time = 26,41
+y = .125
+ctrlID = 108
+
+[BGCtrl gota08]
+type = VelSet
+time = 41
+y = 0
+ctrlID = 108
+
+[BGCtrl gota08]
+type = Anim
+time = 41
+value = 23
+ctrlID = 108
+
+[BGCtrl gota09]
+type = VelSet
+time = 26
+y = .2
+ctrlID = 109
+
+[BGCtrl gota09]
+type = VelAdd
+time = 26,42
+y = .12
+ctrlID = 109
+
+[BGCtrl gota09]
+type = VelSet
+time = 42
+y = 0
+ctrlID = 109
+
+[BGCtrl gota09]
+type = Anim
+time = 42
+value = 23
+ctrlID = 109
+
+[BGCtrl gota10]
+type = VelSet
+time = 26
+y = .7
+ctrlID = 110
+
+[BGCtrl gota10]
+type = VelAdd
+time = 26,44
+y = .06
+ctrlID = 110
+
+[BGCtrl gota10]
+type = VelSet
+time = 44
+y = 0
+ctrlID = 110
+
+[BGCtrl gota10]
+type = Anim
+time = 44
+value = 23
+ctrlID = 110
+
+;;;;;;;;;;;;;;;;------------- MAR
+;animated pool parallax
+[BGCtrlDef mar]
+looptime = 336
+
+[BGCtrl mar]
+type = Enable
+time = 0
+value = 0
+ctrlID = 41
+
+[BGCtrl mar]
+type = Enable
+time = 0
+value = 0
+ctrlID = 42
+
+;------------
+[BGCtrl mar]
+type = Enable
+time = 0
+value = 1
+ctrlID = 41
+
+;------------
+[BGCtrl mar]
+type = Enable
+time = 8
+value = 0
+ctrlID = 41
+
+[BGCtrl mar]
+type = Enable
+time = 8
+value = 1
+ctrlID = 42
+
+;------------
+[BGCtrl mar]
+type = Enable
+time = 26
+value = 1
+ctrlID = 41
+
+[BGCtrl mar]
+type = Enable
+time = 26
+value = 0
+ctrlID = 42
+
+;------------
+[BGCtrl mar]
+type = Enable
+time = 36
+value = 0
+ctrlID = 41
+
+;------------ COMEÇO
+[BGCtrlDef tudo]
+looptime = -1
+
+[BGCtrl ini] ;disable at start
+type = Enable
+time = 0,336
+value = 0
+ctrlID = 11,41,42,50,51
+
+[BGCtrl ini] ;stop anim
+type = Anim
+time = 0
+value = 6
+ctrlID = 5
+
+[BGCtrl ini] ;start anim
+type = Anim
+time = 336
+value = 5
+ctrlID = 5
+
+[BGCtrl ini] ;enable after 1st loop
+type = Enable
+time = 336
+value = 1
+ctrlID = 11
+
+;;;;;;;;;;;;;;; ANIMS
+[Begin Action 20] ;gota pqn nasce
+20,0, 0,0, 8
+20,1, 0,0, 8
+20,2, 0,0, -1
+
+[Begin Action 21] ;gota pqn cai
+20,3, 0,0, 5
+20,4, 0,0, -1
+
+[Begin Action 22] ;gota pqn caindo
+20,4, 0,0, -1
+
+[Begin Action 23] ;gota espatifa-se do alto
+22,0, 0,0, 5
+22,10, 0,3, 5
+20,0, 0,3, 5
+-1,0, 0,0,-1
+
+[Begin Action 24] ;gota espatifa-se do baixo
+22,0, 0,0, 5
+20,0, 0,3, 5
+22,10, 0,3, 5
+-1,0, 0,0,-1
+
+[Begin Action 25] ;gota parede cai
+20,0, 0,0, 5
+20,3, 0,0, 5
+20,4, 0,0, -1
+
+[Begin Action 30] ;gota grd nasce
+20,0, 0,0, 8
+20,1, 0,0, 8
+21,0, 0,0, -1
+
+[Begin Action 31] ;gota grd cai
+21,1, 0,0, 5
+21,2, 0,0, -1
+
+[Begin Action 32] ;gota grd caindo
+21,2, 0,0, -1
+
+
+
+
+
+
+
+
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

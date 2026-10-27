@@ -1,0 +1,98 @@
+;THUNDER HAWK from Super Street Fighter II Turbo/X by OMEGAPSYCHO
+;Copyright CAPCOM. 2013
+;E-mail: OMEGAPSYCHO@hotmail.com
+;versión 1.0 (100%)
+;----------------------------------------
+[Data]
+life = 1120			;Amount of life to start with
+power = 3000		;Amount of maximum power
+attack = 100		;attack power (more is stronger)
+defence = 100		;defensive power (more is stronger)
+fall.defence_up = 50	;Percentage to increase defense everytime player is knocked down
+liedown.time = 23		;Time which player lies down for, before getting up
+airjuggle = 15		;Number of points for juggling
+sparkno = -1			;Default hit spark number for HitDefs
+guard.sparkno = -1	;Default guard spark number
+KO.echo = 0			;1 to enable echo on KO
+volumescale = 100		;Volume offset (negative for softer)
+IntPersistIndex = 0	;Variables with this index and above will not have their values
+FloatPersistIndex = 0  ;reset to 0 between rounds or matches. There are 60 int variables,
+  				;indexed from 0 to 59, and 40 float variables, indexed from 0 to 39.
+  				;If omitted, then it defaults to 60 and 40 for integer and float
+  				;variables repectively, meaning that none are persistent, i.e. all
+  				;are reset. If you want your variables to persist between matches,
+  				;you need to override state 5900 from common1.cns.
+
+[Size]
+xscale = 1			;Horizontal scaling factor.
+yscale = 1			;Vertical scaling factor.
+ground.back = 10		;Player width (back, ground)
+ground.front = 30		;Player width (front, ground)
+air.back = 16		        ;Player width (back, air)
+air.front = 16	         	;Player width (front, air)
+height = 40			;Height of player (for opponent to jump over)
+attack.dist = 100		;Default attack distance
+proj.attack.dist = 50    	;Default attack distance for projectiles
+proj.doscale = 1		;Set to 1 to scale projectiles too   
+head.pos = -10, -102		;Approximate position of head
+mid.pos = 0, -66		;Approximate position of midsection
+shadowoffset = -4		;Number of pixels to vertically offset the shadow
+draw.offset = 5,0		;Player drawing offset in pixels (x, y)
+
+[Velocity]
+walk.fwd  = 2.4	
+walk.back = -1.9	
+run.fwd  = 5, 0	
+run.back = -5,-4
+jump.neu = 0,-8
+jump.back = -2.5
+jump.fwd = 2.1
+runjump.back = 0,0
+runjump.fwd = 0,0
+airjump.neu = 0,0
+airjump.back = 0	
+airjump.fwd = 0	
+
+[Movement]
+airjump.num = 0	
+airjump.height = 200	
+yaccel = .4	
+stand.friction = .85
+crouch.friction = .82
+
+;------------------------------------------------------------------------------
+[Quotes]
+victory1 = "Your scream sounds like a pathetic war cry!"
+victory2 = "My totem is too great for your desperate fighting techniques!"
+victory3 = "If you listen, you can hear the sounds of victory..."
+victory4 = "I'll accomplish my mission for the pride of my tribe!"
+victory5 = "Look to the heavens for unlimited power!"
+victory6 = "Look up to the sky to heal the wounds of your soul."
+victory7 = "My sacred land, Thunderfoot, stay with me, always..."
+victory8 = "Never defy the elements of nature!"
+victory9 = "Peace is something that can be wished for and fought for."
+victory10 = "Sacred blood and Mother Earth lead me to the battlefield!"
+victory11 = "You can't stop my Hawk Dive!"
+victory12 = "Do not lament over your loss, for the spirits will heal and rejuvenate you."
+victory13 = "I do not fear death. But do not confuse this for resignation."
+victory14 = "I will not stop until I have found my beloved and hold her in my arms!"
+victory15 = "Let us depart."
+victory16 = "Let us go to the ends of the earth!"
+victory17 = "My power is bestowed upon me by the spirits. You have no such power!"
+victory18 = "Spirits and men are both engaged in a constant journey."
+victory19 = "The wind speaks to us."
+victory20 = "These fists fight for life. They are protected by benevolent spirits."
+victory21 = "True warriors know no fear. This is not pride, but merely confidence."
+victory22 = "You cannot defeat me if you fight only for yourself."
+victory23 = "I sympathize in your quest to uncover your roots. I wish I could help."
+victory24 = "The spirits will not aid you if you seek power for selfish reasons."
+victory25 = "You and I and all of mankind were born of the benevolence of the spirits."
+victory26 = "Anger and regret are human emotions. They mean nothing to nature."
+victory27 = "You can flee to the ends of the earth, but you can never escape from yourself."
+victory28 = "It is difficult to win with humility and lose with dignity."
+victory29 = "It takes more than just strength to win!"
+victory30 = "You possess great power. Do show some gratitude for your good fortune, friend"
+victory31 = "Something is amiss in this world. I sense it as well as you do."
+victory32 = "You have a unique fighting style. The spirits must be with you."
+victory33 = "Fighting honors the spirits around us."
+victory34 = "I sense a power within you not so different from my own."

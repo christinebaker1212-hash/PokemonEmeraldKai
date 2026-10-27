@@ -1,0 +1,500 @@
+; Win Quote System
+;---------------------------------------------------------------------------
+; Match Over
+[Statedef 9000]
+type = S
+velset = 0,0
+ctrl = 0
+
+[State 9000, Special]
+type = AssertSpecial
+trigger1 = Time <= 300
+flag = RoundNotOver
+
+[State 9000, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 9000, VarRandom]
+type = VarRandom
+trigger1 = Time <= 0
+ignorehitpause = 1
+persistent = 0
+v = 0
+range = 0,1
+
+;----- Fade to Black -----
+[State 9000, Fader]
+type = Explod
+trigger1 = Time <= 0
+trigger1 = NumExplod(8010) <= 0
+anim = 8010
+id = 8010
+pos = 0,0
+postype = left
+bindtime = -1
+persistent = 0
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 50
+scale = 10000,10000
+facing = 1
+ownpal = 0
+ontop = 1
+
+;----- Win Quote -----
+[State 9000, Black]	; Text Area
+type = Explod
+trigger1 = Time = 20
+trigger1 = NumExplod(8000) <= 0
+anim = 8000
+id = 8000
+pos = 0,151
+postype = left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+scale = 10000,10000
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9000, Black]	; Left Side Divider
+type = Explod
+trigger1 = Time = 20
+trigger1 = TeamSide = 1
+trigger1 = NumExplod(8001) <= 0
+anim = 8000
+id = 8001
+pos = 0,0
+postype = left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+scale = 190,10000
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9000, Portrait-Left]
+type = Explod
+trigger1 = Time = 20
+trigger1 = TeamSide = 1
+trigger1 = NumExplod(9000) <= 0
+anim = IfElse(Name != "SF2'CE Vega" && Var(51) > 0, 90000, 9000)
+id = 9000
+pos = 0,150
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9000, Black]	; Right Side Divider
+type = Explod
+trigger1 = Time = 20
+trigger1 = TeamSide = 2
+trigger1 = NumExplod(8001) <= 0
+anim = 8000
+id = 8001
+pos = 130,0
+postype = left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+scale = 200,10000
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9000, Portrait-Right]
+type = Explod
+trigger1 = Time = 20
+trigger1 = TeamSide = 2
+trigger1 = NumExplod(9000) <= 0
+anim = IfElse(Name != "SF2'CE Vega" && Var(51) > 0, 90000, 9000)
+id = 9000
+pos = 0,150
+postype = Right
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+facing = -1
+ownpal = 0
+ontop = 1
+
+[State 9000, Win-Quote]
+type = Explod
+trigger1 = Time = 20
+trigger1 = NumExplod(90100) <= 0
+anim = 90100 + Var(0)
+id = 90100
+pos = 10,170
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 45
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9000, Fader]
+type = Explod
+trigger1 = Time = 20
+trigger1 = NumExplod(8011) <= 0
+anim = 8011
+id = 8011
+pos = 0,0
+postype = left
+bindtime = -1
+persistent = 0
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 50
+scale = 10000,10000
+facing = 1
+ownpal = 0
+ontop = 1
+;--------------------
+
+[State 9000, Envcolor]
+type = Envcolor
+trigger1 = Time >= 20
+value = 0,0,0
+pausebg = 1
+;under = 1
+time = 2
+
+[State 9000, Special]
+type = AssertSpecial
+trigger1 = Time >= 20
+flag = NoBG
+flag2 = NoFG
+flag3 = NoMusic
+
+[State 9000, Special]
+type = AssertSpecial
+trigger1 = Time >= 20
+flag = Invisible
+flag2 = NoBarDisplay
+flag3 = NoShadow
+
+[State 250, PosSet]
+type = PosSet
+trigger1 = Time >= 20
+x = 0
+y = 100000
+
+[State 9000, PlaySnd]
+type = PlaySnd
+trigger1 = Time = 25
+value = 20, 0 + Var(50)
+channel = 1
+
+;---------------------------------------------------------------------------
+; Opponent Checker
+[Statedef 9100]
+movetype = A
+velset = 0,0
+anim = 9100
+ctrl = 0
+
+[State 9100, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = NoShadow
+flag2 = Invisible
+
+[State 9100, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 9100, Turn]
+type = Turn
+trigger1 = Facing != Root, Facing
+
+[State 9100, PosSet]
+type = PosSet
+trigger1 = 1
+x = 0
+y = 0
+
+[State 9100, Destroy]
+type = DestroySelf
+trigger1 = RoundState <= 2
+
+[State 9100, HitDef]
+type = HitDef
+triggerall = MatchOver
+triggerall = RoundState > 2
+trigger1 = NumTarget <= 0
+trigger1 = EnemyNear, StateType = S
+persistent = 0
+attr = S, NA
+hitflag = M
+guard.sparkno = -1
+sparkno = -1
+sparkxy = 0,0
+p2stateno = 9111
+numhits = 0
+
+[State 9100, HitDef]
+type = HitDef
+triggerall = MatchOver
+triggerall = RoundState > 2
+trigger1 = NumTarget <= 0
+trigger1 = EnemyNear, StateType = L
+trigger1 = P2StateNo >= 5110
+trigger1 = P2StateNo < 5120
+persistent = 0
+attr = S, NA
+hitflag = FD
+guard.sparkno = -1
+sparkno = -1
+sparkxy = 0,0
+p2stateno = 9111
+numhits = 0
+
+[State 9100, Destroy]
+type = DestroySelf
+trigger1 = Root, StateNo = 9000
+trigger2 = RoundState >= 4
+
+;---------------------------------------------------------------------------
+; Opponent Match Over
+[Statedef 9110]
+type = U
+movetype = I
+physics = N
+velset = 0,0
+
+[State 9110, Anim]
+type = ChangeAnim
+trigger1 = Anim = 0
+value = Anim
+
+[State 9110, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 9110, Special]
+type = AssertSpecial
+trigger1 = Time >= 20
+flag = Invisible
+flag2 = NoBarDisplay
+flag3 = NoShadow
+
+[State 9110, PosSet]
+type = PosSet
+trigger1 = Time >= 20
+x = 0
+y = 1000000
+
+[State 9110, Portrait-Left]
+type = Explod
+triggerall = TeamSide = 1
+triggerall = Name = "M.Bison"
+triggerall = AuthorName = "N64Mario84"
+triggerall = Var(50) <= 0
+triggerall = PalNo < 4
+triggerall = NumExplod(900010) <= 0
+triggerall = AnimExist(900010)
+trigger1 = Time = 25
+anim = 900010
+id = 900010
+pos = 0,150
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9110, Portrait-Right]
+type = Explod
+triggerall = TeamSide = 2
+triggerall = Name = "M.Bison"
+triggerall = AuthorName = "N64Mario84"
+triggerall = Var(50) <= 0
+triggerall = PalNo < 4
+triggerall = NumExplod(900010) <= 0
+triggerall = AnimExist(900010)
+trigger1 = Time = 25
+anim = 900010
+id = 900010
+pos = 0,150
+postype = Right
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+facing = -1
+ownpal = 0
+ontop = 1
+
+[State 9110, Portrait-Left]
+type = Explod
+triggerall = TeamSide = 1
+triggerall = NumExplod(9001) <= 0
+triggerall = AnimExist(9001)
+trigger1 = Time = 25
+anim = 9001
+id = 9001
+pos = 0,150
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9110, Portrait-Right]
+type = Explod
+triggerall = TeamSide = 2
+triggerall = NumExplod(9001) <= 0
+triggerall = AnimExist(9001)
+trigger1 = Time = 25
+anim = 9001
+id = 9001
+pos = 0,150
+postype = Right
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+facing = -1
+ownpal = 0
+ontop = 1
+
+[State 9110, Portrait-Left]
+type = Explod
+triggerall = TeamSide = 1
+triggerall = NumExplod(9005) <= 0
+triggerall = !AnimExist(9001)
+trigger1 = Time = 25
+anim = 9005
+id = 9005
+pos = 60,115
+postype = Left
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+scale = 4,4
+facing = 1
+ownpal = 0
+ontop = 1
+
+[State 9110, Portrait-Right]
+type = Explod
+triggerall = TeamSide = 2
+triggerall = NumExplod(9005) <= 0
+triggerall = !AnimExist(9001)
+trigger1 = Time = 25
+anim = 9005
+id = 9005
+pos = -60,115
+postype = Right
+bindtime = -1
+persistent = 0
+removetime = -1
+pausemovetime = 1000000
+supermovetime = 1000000
+sprpriority = 40
+scale = 4,4
+facing = -1
+ownpal = 0
+ontop = 1
+
+[State 9110, RemoveExplod]
+type = RemoveExplod
+triggerall = NumExplod(900010) > 0
+trigger1 = NumExplod(9001) > 0
+id = 9001
+
+[State 9110, RemoveExplod]
+type = RemoveExplod
+triggerall = NumExplod(900010) > 0
+trigger1 = NumExplod(9005) > 0
+id = 9005
+
+;---------------------------------------------------------------------------
+; Opponent Hit
+[Statedef 9111]
+type = U
+movetype = U
+physics = N
+
+[State 9110, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+
+[State 9110, PosSet]
+type = PosSet
+trigger1 = 1
+y = 0
+
+[State 9110, State]
+type = ChangeState
+trigger1 = Alive
+trigger1 = StateType != L
+trigger1 = Time > 0
+value = 0
+ctrl = 1
+
+[State 9110, State]
+type = ChangeState
+trigger1 = Alive
+trigger1 = StateType = L
+trigger1 = Time > 0
+value = 5110
+
+[State 9110, State]
+type = ChangeState
+trigger1 = Alive = 0
+trigger1 = Time > 0
+value = 5150
+
+;---------------------------------------------------------------------------

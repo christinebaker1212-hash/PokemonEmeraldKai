@@ -24,3 +24,6 @@ Makefile text eol=lf
 
 *.h linguist-language=C
 *.inc linguist-language=Assembly
+
+# Moemon Fight: the MUGEN pack stays byte for byte as made (CRLF .def / .cns, Shift-JIS)
+mugen/** -text

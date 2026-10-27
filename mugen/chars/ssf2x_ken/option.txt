@@ -1,0 +1,430 @@
+;===========================================================================
+; 常時監視ステート（－２）
+;===========================================================================
+[Statedef -2]
+
+;---------------------------------------------------------------------------
+;Option
+;---------------------------------------------------------------------------
+
+[State 300]
+type = VarSet
+trigger1 = 1
+var(52) = 3      ;damage  3...the original(原作通り)  2...reduce damage(2/3)
+
+
+[State 300]
+type = VarSet
+trigger1 = 1
+var(10) = 1      ;reset power at the round start
+　　　　　　　   ;0...No(ﾘｾｯﾄしない)  1...Yes(ﾘｾｯﾄする)
+
+
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;残像消去
+[State -2]
+type = AfterImageTime
+trigger1 = MoveType = H
+trigger2 = StateNo = [0,89]
+trigger3 = StateNo = [100,155]
+trigger4 = StateNo = [200,999]
+trigger5 = (StateNo != [1600,1605]) && (StateNo = [1000,1999])
+time = 0
+
+;パワーゲージ
+[State -2]
+type = helper
+triggerall = !NumHelper(8900)
+trigger1 = !numpartner
+trigger2 = numpartner
+trigger2 = ID < partner,ID
+trigger3 = numpartner
+trigger3 = ID > partner,ID
+trigger3 = !partner,authorname = "G.D.T"
+helpertype = normal
+name = "gauge"
+stateno = 8900
+ID = 8900
+pos = 0,10
+postype = P1
+keyctrl = 0
+pausemovetime = 99999999
+supermovetime = 99999999
+
+;hit用
+[State -2]
+type = VarSet
+trigger1 = movehit
+trigger2 = projHit = 1
+var(3) = ifelse(movehit,1,3)
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+trigger1 = moveguarded
+trigger2 = projGuarded = 1
+var(3) = ifelse(moveguarded,2,4)
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = Time = 1
+trigger1 = stateno != 1005
+trigger1 = stateno != 1025
+trigger1 = stateno != 1105
+trigger1 = stateno != 1125
+trigger1 = stateno != 1505
+trigger1 = stateno != 1525
+trigger1 = stateno != 1706
+trigger1 = stateno != 1716
+trigger1 = stateno != 3105
+trigger1 = stateno != 3125
+var(3) = 0
+ignorehitpause = 1
+
+;振り向き
+[State -2]
+type = Turn
+triggerall = RoundState = 2
+triggerall = P2Dist X < 0
+triggerall = time = 1
+trigger1 = prevstateno = 52 || prevstateno = 100 || prevstateno = 620
+trigger2 = prevstateno = 1105 || prevstateno = 1125
+ignorehitpause = 1
+
+;灼熱相手
+[State -2]
+type = TargetState
+triggerall = stateno = 1000
+triggerall = var(6) = 2
+triggerall = var(3) = 1
+triggerall = AnimElemTime(4) < 0
+triggerall = numenemy = 1
+triggerall = target,stateno != [2000,2021]
+trigger1 = numtarget
+trigger1 = target,movetype = H
+value = ifelse(P2statetype=S,2000,ifelse(P2statetype=C,2010,2020))
+ignorehitpause = 1
+
+[State -2]
+type = helper
+triggerall = !NumHelper(7200)
+triggerall = stateno = 1000
+triggerall = var(6) = 2
+triggerall = var(3) = 1
+triggerall = AnimElemTime(4) < 0
+trigger1 = numenemy = 1
+helpertype = normal
+name = "burn"
+stateno = 7200
+ID = 7200
+pos = 0,0
+postype = P2
+keyctrl = 0
+ignorehitpause = 1
+pausemovetime = 99999999
+supermovetime = 99999999
+
+[State -2]
+type = null;helper
+triggerall = !NumHelper(7220)
+triggerall = numenemy = 1
+triggerall = stateno = 1000
+triggerall = var(6) = 2
+triggerall = var(3) = 1
+triggerall = AnimElemTime(4) < 0
+trigger1 = P2statetype = A
+helpertype = normal
+name = "burn"
+stateno = 7220
+ID = 7220
+pos = 0,0
+postype = P2
+keyctrl = 0
+ignorehitpause = 1
+pausemovetime = 99999999
+supermovetime = 99999999
+
+;エフェクト除去
+[State -2]
+type = RemoveExplod
+trigger1 = movetype = H
+trigger2 = stateno != 1000
+ID = 7300
+
+;
+[State -2]
+type = VarSet
+trigger1 = stateno != 3000
+trigger1 = stateno != [1300,1550]
+trigger1 = stateno != [650,651]
+trigger1 = stateno != [910,919]
+var(9) = 0
+ignorehitpause = 1
+
+;
+[State -2]
+type = VarSet
+trigger1 = var(1) = 91
+var(1) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+trigger1 = roundstate >= 2
+trigger1 = stateno = 3000
+trigger1 = time = 2
+var(1) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+trigger1 = var(1)
+var(1) = 1
+ignorehitpause = 0
+
+;KO演出
+[State -2]
+type = Helper
+triggerall = roundstate >= 2
+triggerall = !Numhelper(8011)
+triggerall = WinKo
+triggerall = var(4) = [0,1]
+trigger1 = stateno = 3000 && var(3) = [1,2]
+ID = 8011
+stateno = 8011
+postype = left
+pos = 0,0
+pausemovetime = 999999
+supermovetime = 999999
+ignorehitpause = 1
+ownpal = 1
+
+[State -2]
+type = pause
+triggerall = roundstate >= 2
+triggerall = WinKo
+triggerall = var(4) >= 2
+trigger1 = (stateno = [3000,3005]) || var(1)
+time = ifelse(var(4)<30,2,1)
+pausebg = 0
+ignorehitpause = 1
+
+;roundstate3time
+[State -2]
+type = VarSet
+trigger1 = roundstate = 2
+trigger1 = var(4)
+trigger2 = roundstate = 0
+trigger3 = roundstate = 4
+var(4) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+trigger1 = roundstate = 3
+var(4) = 1
+ignorehitpause = 1
+
+;YOUWIN表示
+[State -2]
+Type = Helper
+Triggerall = !NumHelper(8030)
+Triggerall = win
+Triggerall = RoundState >= 3
+Triggerall = time = 1
+Triggerall = (StateNo = [180,183]) || StateNo = 3204
+Triggerall = time = 1
+Trigger1 = !NumPartner
+Trigger2 = NumPartner
+Trigger2 = Partner,Authorname = "G.D.T"
+Trigger2 = ID = [32,33]
+ID = 8030
+stateno = 8030
+postype = left
+pos = 0,0
+pausemovetime = 999999
+supermovetime = 999999
+ignorehitpause = 1
+ownpal = 1
+
+;コンボ制限1
+[State -2]
+type = VarSet
+trigger1 = P2MoveType != H
+trigger2 = numtarget
+trigger2 = target,statetype = S
+trigger3 = numtarget
+trigger3 = target,statetype = C
+var(7) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+triggerall = movehit
+triggerall = numtarget
+triggerall = stateno != 420
+trigger1 = P2MoveType = H && P2stateType = A
+trigger1 = movehit < 2
+trigger2 = target,gethitvar(yvel) && target,stateType != A
+trigger2 = movehit < 2
+trigger3 = target,gethitvar(fall)
+trigger3 = movehit < 2
+ignorehitpause = 0
+var(7) = 1
+
+[State -2]
+type = assertspecial
+triggerall = P2MoveType = H && P2stateType = A
+triggerall = var(53)
+triggerall = var(7)
+trigger1 = stateno = 1020 && var(7) < 3
+trigger2 = stateno = 1120 && var(7) < 3
+trigger3 = stateno = 1520 && var(7) < 3
+ignorehitpause = 1
+flag = nojugglecheck
+
+;コンボ制限2
+[State -2]
+type = VarSet
+trigger1 = P2MoveType != H
+trigger2 = numtarget
+trigger2 = target,statetype = S
+trigger3 = numtarget
+trigger3 = target,statetype = C
+var(8) = -1
+
+[State -2]
+type = VarSet
+triggerall = var(8) = -1
+triggerall = numtarget
+triggerall = movehit || projhit = 1
+trigger1 = target,gethitvar(yvel)
+trigger1 = movehit < 2
+trigger2 = target,gethitvar(fall)
+trigger2 = movehit < 2
+var(8) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(8) = 1
+trigger1 = stateno = 1000 && var(7) >= 1
+trigger2 = (stateno = [1300,1550]) && var(7) >= 1
+trigger3 = (stateno = [200,500]) && var(7)
+trigger4 = stateno = 1200 && time = 1
+trigger5 = stateno = 1100 && var(7) >= 1
+trigger6 = stateno = 1600 && var(7) >= 1
+var(8) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+trigger1 = stateno = 3000 && var(3) = [1,2]
+trigger1 = roundstate >= 3
+trigger1 = winko
+var(8) = 0
+ignorehitpause = 1
+pausemovetime = 999999
+supermovetime = 999999
+
+;空中復帰誘導
+[State -2]
+type = VarSet
+triggerall = movetype != H
+trigger1 = !NumTarget
+trigger2 = P2MoveType != H
+trigger3 = movehit
+trigger4 = projhit = 1
+trigger5 = numtarget
+trigger5 = !target,gethitvar(fall)
+var(2) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(2) != 2
+triggerall = (stateno = [200,499])
+trigger1 = stateno != 330
+var(2) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(2) = 1
+trigger1 = movehit
+var(2) = 2
+ignorehitpause = 1
+
+[State -2]
+type = TargetState
+triggerall = Numtarget
+triggerall = var(2) = 2
+trigger1 = target,stateno = 5050 && target,alive
+value = 2050
+ignorehitpause = 1
+
+;効果音
+[State 1000]
+type = StopSnd
+trigger1 = numhelper(8011)
+channel = 1
+
+[State -2]
+type = PlaySnd
+trigger1 = projhittime(1100) = 1
+trigger2 = !numhelper(8011) || var(4) = [1,3]
+trigger2 = projhittime(1500) = 1
+trigger3 = projhittime(1101) = 1
+value = 1, 2
+channel = 5
+
+[State -2]
+type = PlaySnd
+trigger1 = ProjGuardedTime(1100) = 1
+trigger2 = !numhelper(8011) || var(4) = [1,3]
+trigger2 = ProjGuardedTime(1500) = 1
+trigger3 = ProjGuardedTime(1101) = 1
+value = 3, 0
+channel = 5
+
+[State -2]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = StateNo = 5100 || StateNo = 5110
+value = 4,5
+channel = 20
+
+;---------------------------------------------------------------------------
+[State -2, クリップボード]
+type = DisplayToClipboard
+trigger1 = 1
+text = "Body-Distance X=%d,Y=%d  Velocity X=%f,Y=%f \n" ;Cancel=%d, Throw=%d, Button=%d, 
+params = floor(P2BodyDist X),floor(P2bodyDist Y),(Vel X),(Vel Y)
+
+[State -2, クリップボード]
+type = null;DisplayToClipboard
+trigger1 = 1
+text = "var(20)=%d,var(21)=%d var(22)=%d,var(23)=%d var(24)=%d \n"  
+params = var(20),var(21),var(22),var(23),var(24)
+
+[State -2, クリップボード（追加専用）]
+type = AppendToClipboard
+trigger1 = 1
+text = "Command = %d Command =  %d var(9)= %d var(12) = %d RecoverTime = %d  \n"
+params = Command = "x",Command = "y",var(9),var(12),(enemynear,GetHitVar(RecoverTime))
+
+[State -2, クリップボード（追加専用）]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "Position138 X=%d,Y=%d, Velocity X=%f,Y=%f, Hit=%d \n"
+params = floor(Pos X),floor(Pos Y),(Vel X),(Vel Y),(MoveHit)
+
+;===========================================================================
+; 常時監視ステート（－３）
+;===========================================================================
+;[Statedef -3]
+
+

@@ -42,6 +42,35 @@ data or Elecbyte files.
 | 22 | Bubble | The game's own speech balloon and font, gently bobbing like a nametag; A at the empty seat asks "Fight NAME? YES / NO" |
 | 23 | Transition | The CRT turns on (fade to black, a line opens into the picture) into the select screen; it turns off after the results, and both players stand beside their seats facing the cabinet |
 
+## Second round (same day)
+- Every player is on Windows. Linux / Windows agreement doesn't matter (the Linux build only runs
+  the headless tests), but both players' Windows builds still have to agree.
+- Elecbyte's files are fine to use (a private build). Even so, the pack's Elecbyte characters,
+  stages and screenpacks are gone. What stays is the engine's own data: `common1.cns`,
+  `common.snd`, `fightfx.sff` / `.air`, and the `f-4x6` / `f-6x9` fonts the engine loads at
+  start-up.
+- The screenpack is Phantom Blood's STREET FIGHTER EX PLUS (640x480), in
+  `mugen/data/STREETFIGHTER-EX-PLUS/`. Only what the select, VS, fight and victory screens read
+  is kept. Removed:
+  - the intro, intro EX (122 MB), title, ending, game over and winner storyboards and their
+    music;
+  - SFEX-SYSTEMEX.def and the 110-slot variant.
+
+  The removed storyboards are switched off in SFEX-SYSTEM.def, along with demo mode and the
+  continue screen. The grid is the 14 x 3 cells that fit on its screen (it was 16 x 5, with
+  rows 4-5 and columns 15-16 off screen).
+- Test characters (SSF2X), in the SF2 select order: Ryu, Ken, Chun-Li, Dhalsim, Cammy,
+  Fei Long, Dee Jay, T.Hawk, Vega, Gouki, with RANDOM at both ends of the row.
+  - Other versions in their folders are not listed: Chun-Li 2, Dhalsim 2, Gouki (normal) /
+    Shin / EX Shin, and SF2'CE Vega.
+  - Stages: the 18 SF2 stages, plus 6 that came inside character folders. Those 6 are now in
+    `stages/`: SSF2X Chun-Li and Dhalsim (with their songs), Gouki's, and Vega's three.
+- Stage music: the songs aren't fetched for the owner. `mugen/sound/README.txt` lists the 17 file
+  names the stages wait for.
+- No new cabinet tiles: the slot machine tiles stay as they are.
+- Sitting down offers WAIT FOR 2P or FIGHT CPU. A second player who sits during a CPU fight
+  cancels it, and the select screen opens for both.
+
 ## Plan
 
 ### The engine in the game
@@ -86,8 +115,8 @@ data or Elecbyte files.
 - Sounds are keyed by (frame, sound, channel), so a replayed frame never plays them twice. A sound
   the corrected history no longer has is cut.
 - Both builds use the same floating point behavior (SSE2, `-ffp-contract=off`, no fast-math) and
-  the same trig / pow / exp / log code bundled in `src/mugen/` (fdlibm-style). That way Linux and
-  Windows (mingw) builds give the same results.
+  the same trig / pow / exp / log code bundled in `src/mugen/` (fdlibm-style), so every player's
+  build gives the same results.
 - A hash of the arena is exchanged every 30 frames. On a mismatch the host sends its snapshot
   (zlib), and the other player loads it.
 
@@ -125,19 +154,22 @@ data or Elecbyte files.
 - `mugen/cabinets.ini` holds one section per cabinet (`[mauville_gc]`): motif, select.def, life,
   round time, game speed, rounds to win (2) and the stage list. Online, the host's values are
   used.
-- Releases ship the owner's pack. The repository holds none: Elecbyte's files (KFM, the default
-  screenpack) are not ours to ship, so the pack has to be content the owner may distribute.
+- Releases ship the pack: `mugen/` in the repository is the folder as it goes next to the exe.
+  `.gitattributes` keeps it byte for byte.
 
 ### Cabinet and flow
 - The map:
-  - the metatiles at (7,9) and (8,9) become a VS cabinet (new tile art);
+  - the slot machine tiles at (7,9) and (8,9) stay as they are;
   - their two `bg_event`s run `MauvilleCity_GameCorner_EventScript_VsCabinetWest / East`,
     which call `MP_Fight_Sit(seat)` in `src/mp/mp_fight.c`.
 - Flow:
-  1. The player sits (the facing is locked) and the "Fight me!" balloon appears.
-  2. B stands up.
+  1. The player sits (the facing is locked) and chooses WAIT FOR 2P or FIGHT CPU. Waiting shows
+     the "Fight me!" balloon; FIGHT CPU opens the select screen against the CPU, with the
+     balloon still up.
+  2. B stands up (while waiting).
   3. A at the free seat asks "Fight NAME? YES / NO".
-  4. Connect (2 s of UDP, then the relay).
+  4. Connect (2 s of UDP, then the relay). A CPU fight in progress is cancelled and both players
+     get the select screen.
   5. The CRT turns on, then the pack's select screen, then the VS screen with the random stage.
   6. The fight: first to 2 rounds.
   7. The results with the win quote, then the CRT turns off.
@@ -149,8 +181,10 @@ data or Elecbyte files.
 - `fight_cabinet`: two clients sit, pick and fight with scripted inputs, and are put back.
 - `fight_rollback`: the same fight at lag (`tools/mp_server/lagproxy.py`, `WORST=1`), with
   identical hashes on both sides.
-- `fight_determinism`: a recorded input file replayed on Linux and under Wine gives the same hash
+- `fight_determinism`: a recorded input file replayed twice, and under Wine, gives the same hash
   every frame.
+- `fight_cpu_join`: one client fights the CPU, a second sits down, and both reach the select
+  screen.
 - `fight_fit`: a deliberately oversized screenpack is nudged inside, checked against the log.
 - `fight_sound`: decoded sounds come out at 8-bit, 13379 Hz.
 
@@ -161,7 +195,3 @@ data or Elecbyte files.
 4. Networking, the cabinet and the flow.
 5. Spectating, the controls row, and wins / losses.
 
-## Still open
-- The cabinet's tile art (a mock-up or pixel art from the owner, or drawn in the Game Corner's
-  style).
-- Sitting at the cabinet when playing alone or offline (CPU fights, or "Nobody to fight").

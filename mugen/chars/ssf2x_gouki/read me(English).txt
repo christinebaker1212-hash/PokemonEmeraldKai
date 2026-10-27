@@ -1,0 +1,114 @@
+---------------------------------------------------------------------------
+Akuma(Gouki)  by G.D.T  Ver 4.07  2010.27.June
+---------------------------------------------------------------------------
+From Super Street Fighter 2 Turbo(called "Super Street Fighter 2X" in Japan)
+and little arranged
+
+---------------------------------------------------------------------------
+[What's new]
+Edit AI system
+
+---------------------------------------------------------------------------
+[Infor]
+You can choose normal Akuma by not holding start bottun
+and Shin Akuma by holding start bottun and LP ,MP ,LK ,MK
+and...Extra Shin Akuma by holding start bottun and SP ,SK
+or open select.def and add this
+
+ssf2x_gouki/ssf2x_ex shin gouki
+ssf2x_gouki/ssf2x_gouki(normal)
+ssf2x_gouki/ssf2x_shin gouki
+
+Extra Shin Akuma is based on Shin Akuma of Street Fighter Alpha 2
+
+You can choose difficulty of AI
+Open AI.txt and set value of var(59) optionally
+
+Opponent(in air) can't guard normal or Shin Akuma's Gou Shouryuu Ken
+
+About easy command of Shin Akuma's Super, I consider that
+player use controller, not arcade stick
+
+You should open option.txt
+(reduce damage or not,and...)
+
+---------------------------------------------------------------------------
+[Command]
+normal = normal Akuma mode
+Shin   = Shin Akuma mode
+EX     = Extra Shin Akuma mode
+←     = B
+／     = DB
+↓     = D
+＼     = DF
+→     = F
+
+[System]
+Front Step(EX only)　　　　　　　　            →→
+Back Step(EX only)　　　　　　  　             ←←
+Parry(EX only)　　　　　　　                   Quickly while opponent is attacking
+　　　　　　　　　　　　　　　　　             →(Project or opponent is Standing or in Air)
+                                               ↓(opponent is Crouching)
+Rolling(only EX)　　　　　　　　　             → +  X+A
+Hit_Fall recover(still falling,EX only)　      X+A
+Hit_Fall recover(on the ground,EX only)　　　  X+A
+Zenpou Tenshin(EX only)         　　　　       ↓／← + X or Y or Z
+Guard Clash Front Step(EX only)　              →→(While guarding and power >= 1000)
+Alpha Counter(EX only)　　　　　　             Z+C(While guarding and power >= 1000)
+Power Charge(EX only)                          Z+C(hold)
+
+[Throw]
+Seoi Nage(normal,Shin)　　　　                 → or ← + Y or Z(near opponent)
+Tomoe Nage(normal,Shin)　　　　              　→ or ← + B or C(near opponent)
+
+Seoi Nage(EX)　　　　　                        → or ← + 2P(near opponent)
+Tomoe Nage(EX)　　　　　　　                   → or ← + 2K(near opponent)
+
+Jigoku Guruma(EX only)　　　　                 → or ← + A or B or C(near opponent in air)
+
+[Normal]
+Tenma Kuujin Kyaku(EX only)　　　　　　　      ↓ + B(while jumping forward)
+Senpuu Kyaku(EX only)　　　　　　　            → + B
+
+[Special]
+Gou Hadou Ken　　                              ↓＼→ + X or Y or Z
+Zankuu Hadou Ken　　                           ↓＼→ + X or Y or Z(in air)
+Shakunetsu Hadou Ken　　                       →＼↓／← + X or Y or Z
+Gou Shouryuu Ken　　　                         →↓＼ + X or Y or Z
+Tatsumaki Zankuu Kyaku　                       ↓／← + A or B or C(air also)
+Ashura Senkuu　                                (front) →↓＼ + 2P or 2K 
+　　　　　　　                                 (back)　←↓／ + 2P or 2K 
+Hyakki Shuu(EX only)　　　　　　　　　         →↓＼ + A or B or C
+→Hyakki Gou Shou　　　　　　　　　            X or Y or Z
+→Hyakki Gou Jin　　　　　　　　             　A or B
+→Hyakki Gou Sen　　　　　　　      　         C
+→Hyakki Gou Sai(near opponent(on the ground)) → or ← + X or Y or Z
+→Hyakki Gou Sai(near opponent(in air))        → or ← + X or Y or Z
+→Hyakki Gou Zan　　　　　　　　               do nothing
+
+[Super]
+EX(power >= 1000)
+Messatsu Gou Hadou　　　　　                   ↓＼→↓＼→ + X or Y or Z
+Messatsu Gou Shouryuu　　　　　　              ↓＼→↓＼→ + A or B or C
+Tenma Gou Zankuu                               ↓＼→↓＼→ + X or Y or Z(in air)
+Shun Goku Satsu(power >= 3000)                 X, X, →, A, Z
+
+Shin(power >= 3000)
+Messatsu Gou Hadou　　　　　　                 ↓＼→↓＼→ + X or Y or Z(or Y+B)
+Messatsu Gou Shouryuu　　　　　　　            ↓＼→↓＼→ + A or B or C(or X+A)
+Shun Goku Satsu　                              X, X, →, A, Z(or Z+C)
+
+---------------------------------------------------------------------------
+[Other]
+Free for using movie
+You can customize this charactor in case of private use
+
+---------------------------------------------------------------------------
+[Special thanks]
+JAM(hosted)
+CAPCOM
+
+and...you!!
+
+
+
