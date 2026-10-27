@@ -45,8 +45,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
@@ -314,6 +314,19 @@ static const struct Achievement sAch[] = {
     {"ballstyle", "BALL STYLIST", "Change a POK~MON's POK~ BALL look.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"follower", "WALKING BUDDY", "Have a POK~MON follow you.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"newlook", "NEW LOOK", "Change your look in LOOK or CREATE.", AK_EVENT, 0, 1, 0, C_EXTRAS},
+    // Card duels (src/tcg): counted and unlocked by the card screens
+    {"cardwin1", "FIRST DRAW", "Win your first card duel.", AK_COUNT, 0, 1, 0, C_CARDS},
+    {"cardwin100", "CARD SHARK", "Win 100 card duels.", AK_COUNT, 0, 100, 2, C_CARDS},
+    {"cardgyms8", "GYM CARD MASTER", "Beat every GYM LEADER's card deck.", AK_COUNT, 0, 8, 1, C_CARDS},
+    {"cardspecial15", "LEGENDS OF THE TABLE", "Beat 15 special trainers' card decks.", AK_COUNT, 0, 15, 2, C_CARDS},
+    {"cardset", "SET COMPLETE", "Own every card of a booster set.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardall", "CARD MASTER", "Own all 228 cards.", AK_EVENT, 0, 1, 2, C_CARDS},
+    {"cardpack50", "PACK RAT", "Open 50 booster packs.", AK_COUNT, 0, 50, 1, C_CARDS},
+    {"cardflawless", "CLEAN SWEEP", "Win a card duel without giving up a Prize.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardfriend1", "TABLE TALK", "Win a card duel against a friend.", AK_COUNT, 0, 1, 0, C_CARDS},
+    {"cardtrade", "CARD SWAP", "Trade a card with a friend.", AK_EVENT, 0, 1, 0, C_CARDS},
+    {"cardmono", "PURE ENERGY", "Win a card duel with a deck of one type.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardpromo", "PROMO HUNTER", "Win a special trainer's promo card.", AK_EVENT, 0, 1, 1, C_CARDS},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)

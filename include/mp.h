@@ -166,6 +166,7 @@ struct MpState
                        // into the next state still shows)
     u8 lifeFace;       // bits 0-1 its facing (0 down, 1 up, 2 left, 3 right), bits 2-4 its pace (pixels a frame)
     u8 top3;           // the average level of their 3 highest-level Pokémon (level scaling, mp_levelscale.c)
+    u8 cardDuel;       // in a card duel (src/tcg): "CARD DUEL" over their name (wire: bit 7 of the light byte)
 };
 #define MP_LIFE_NO_AUTO 127
 

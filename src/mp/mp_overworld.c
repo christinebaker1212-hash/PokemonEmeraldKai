@@ -229,11 +229,13 @@ static bool8 IsRemoteInBattle(u8 id)
 }
 
 // The line over a player's name: IN BATTLE, IN MENU or none
-enum { TAG_STATUS_NONE, TAG_STATUS_BATTLE, TAG_STATUS_MENU };
+enum { TAG_STATUS_NONE, TAG_STATUS_BATTLE, TAG_STATUS_MENU, TAG_STATUS_CARDS };
 static u8 RemoteTagStatus(u8 id)
 {
     if (IsRemoteInBattle(id))
         return TAG_STATUS_BATTLE;
+    if (gMpPlayers[id].hasState && gMpPlayers[id].state.cardDuel)
+        return TAG_STATUS_CARDS;
     if (gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_MENU))
         return TAG_STATUS_MENU;
     return TAG_STATUS_NONE;
@@ -288,7 +290,8 @@ static void BuildNametag(u8 id, const u16 *pal)
     {
         // Two lines: "IN BATTLE" / "IN MENU" above the name (the tag is drawn 12px higher)
         u8 battle[16];
-        MP_AsciiToGame(battle, RemoteTagStatus(id) == TAG_STATUS_BATTLE ? "IN BATTLE" : "IN MENU", 12);
+        MP_AsciiToGame(battle, RemoteTagStatus(id) == TAG_STATUS_BATTLE ? "IN BATTLE"
+                             : RemoteTagStatus(id) == TAG_STATUS_CARDS ? "CARD DUEL" : "IN MENU", 12);
         DrawTextLine(battle, StringLength(battle), 1, fg, outline);
         DrawTextLine(text, n, 13, fg, outline);
     }

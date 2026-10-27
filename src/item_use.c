@@ -731,6 +731,11 @@ void ItemUseOutOfBattle_CardCase(u8 taskId)
         gBagMenu->newScreenCallback = CB2_OpenCardCaseFromBag;
         Task_FadeAndCloseBagMenu(taskId);
     }
+    else if (Tcg_FieldChallenge())
+    {
+        // Moemon Kai: the button in front of someone asks them for a card duel (src/tcg/tcg_field.c)
+        DestroyTask(taskId);
+    }
     else
     {
         gFieldCallback = FieldCB_ReturnToFieldNoScript;

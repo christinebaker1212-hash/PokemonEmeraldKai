@@ -34,6 +34,7 @@ enum
 };
 void TcgBoard_SetMat(unsigned theme, unsigned type);
 void TcgBoard_SetMusic(unsigned song); /* the duel's song (0: the default) */
+void TcgBoard_Tutorial(int on);        /* the CARD CLUB's lesson: tips along the way */
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online);
 /* Feed the current rules state each frame; new states queue up for display. */
 void TcgBoard_Sync(const struct TcgDuel *truth);

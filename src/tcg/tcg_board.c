@@ -295,6 +295,8 @@ static struct
     /* Showing what happened: the hand after OAK and the like, the Bench
      * after a Knock Out, a Prize card held up before it joins the hand. */
     int showHand, promoFocused;
+    /* The CARD CLUB's lesson: a tip at each first time (TIP_* bits shown) */
+    int tutorial, tipsShown;
     int spotlight, spotTime, spotHold;
     uint8_t prizeQueue[6], prizeCount, prizeNext;
 } B;
@@ -1081,7 +1083,9 @@ static void Present(void)
 /* Begin / sync                                                         */
 /* ------------------------------------------------------------------ */
 static u16 sNextMusic;
+static int sNextTutorial;
 void TcgBoard_SetMusic(unsigned song) { sNextMusic = (u16)song; }
+void TcgBoard_Tutorial(int on) { sNextTutorial = on; }
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online)
 {
     unsigned who, i;
@@ -1089,6 +1093,8 @@ void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int onlin
     memset(&B, 0, sizeof(B));
     B.duelMusic = sNextMusic;
     sNextMusic = 0;
+    B.tutorial = sNextTutorial;
+    sNextTutorial = 0;
     B.active = 1;
     B.online = online;
     snprintf(B.opponent, sizeof(B.opponent), "%s", opponent ? opponent : "OPPONENT");
@@ -2105,6 +2111,40 @@ static void StepPick(unsigned pressed, struct TcgAction *out, int *result, unsig
     }
 }
 
+/* The lesson's tips, each shown once when its moment first comes. */
+static void Tip(void)
+{
+    static const char *const tips[] = {
+        "Pick a Basic Pokemon from your hand for your Active space. You can add up to 5 more to your Bench.",
+        "Your turn! Attach one Energy card from your hand to a Pokemon each turn.",
+        "Your Active Pokemon has the Energy it needs: choose it and ATTACK!",
+        "Knock out a Pokemon and you take one of your 6 Prize cards. Take them all to win!",
+        "Your Pokemon was Knocked Out. Choose a Benched Pokemon to go in.",
+        "Done for this turn? Press B to end your turn.",
+    };
+    const struct TcgPlayer *me = &B.view.players[0];
+    int tip = -1;
+    if (!MyTurn())
+        return;
+    if (B.view.phase == TCG_SETUP)
+        tip = 0;
+    else if (B.view.phase == TCG_PROMOTION)
+        tip = 4;
+    else if (B.view.phase == TCG_TURN && !me->energyPlayed)
+        tip = 1;
+    else if (B.view.phase == TCG_TURN && Field(0, 0) && (TcgDuel_CanAttack(&B.view, 0, 0) || TcgDuel_CanAttack(&B.view, 0, 1)))
+        tip = 2;
+    else if (B.view.phase == TCG_TURN && me->prizeSize < B.view.prizeCount)
+        tip = 3;
+    else if (B.view.phase == TCG_TURN && me->energyPlayed)
+        tip = 5;
+    if (tip < 0 || (B.tipsShown & (1 << tip)))
+        return;
+    B.tipsShown |= 1 << tip;
+    Toast("%s", tips[tip]);
+    B.toastTime = 400;
+}
+
 /* ------------------------------------------------------------------ */
 /* Input                                                                */
 /* ------------------------------------------------------------------ */
@@ -2207,6 +2247,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     }
     else if (B.view.phase != TCG_PROMOTION)
         B.promoFocused = 0;
+    if (B.tutorial && TcgBoard_Idle() && B.mode == M_FREE && !B.toastTime)
+        Tip();
     if (B.toast[0] && B.toastTime && pressed & (KEY_A | KEY_B))
     {
         B.toastTime = 0;

@@ -6,7 +6,18 @@ struct SDL_Renderer;
 struct SDL_Texture;
 union SDL_Event;
 struct TcgCollection *Tcg_GetCollection(void);
-int Tcg_TryChallenge(void);
+/* The CARD CASE's button on the map: ask the person (or friend) in front for a
+ * card duel; 0 when nobody's there (the case opens instead). */
+int Tcg_FieldChallenge(void);
+int Tcg_FieldAskFriend(void);
+/* Card duels and trades with a friend (tcg_online.c): why not, or NULL; then ask. */
+const char *Tcg_CanAskFriend(unsigned id);
+void Tcg_AskFriend(unsigned id, unsigned kind); /* kind 0 duel, 1 trade */
+/* Shown over this player's name to friends: 0 none, 1 a card duel. */
+unsigned Tcg_DuelingNow(void);
+unsigned Tcg_Today(void);
+/* Every card collected: a star on the TRAINER CARD. */
+int Tcg_CardMasterStar(void);
 struct TcgLink *Tcg_Online(void);
 void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len);
 void Tcg_OnlineTick(void);

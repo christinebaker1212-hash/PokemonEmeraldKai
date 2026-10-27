@@ -49,8 +49,6 @@ void Platform_ContextAction(int action)
     switch (action)
     {
     case INPUT_ACTION_COOP_MENU:
-        if (Tcg_TryChallenge())
-            break;
         PlaySE(SE_WIN_OPEN);
         MP_OpenMenu();
         break;

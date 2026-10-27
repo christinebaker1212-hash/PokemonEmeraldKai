@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "tcg/integration.h"
 #include "mp.h"
 #include "mp_garden.h"
 #include "daycare.h"
@@ -866,7 +867,7 @@ void MP_Linkx_Update(void)
 // CO-OP > BERRY GAMES: BERRY BLENDER, BERRY CRUSH
 
 enum { SC_FRIEND, SC_BERRY, SC_WAIT };
-enum { FR_GOTO, FR_CARD, FR_BASE, FR_BACK, FR_COUNT };
+enum { FR_GOTO, FR_CARD, FR_BASE, FR_CARD_DUEL, FR_CARD_TRADE, FR_BACK, FR_COUNT };
 enum { BG_BLENDER, BG_CRUSH, BG_BACK, BG_COUNT };
 
 static EWRAM_DATA struct
@@ -899,6 +900,8 @@ static void Draw(void)
             "Fly to the town nearest to them (towns you've been to).",
             "Look at their TRAINER CARD.",
             "Walk into their SECRET BASE, wherever you are.",
+            "Ask them for a card duel. Both of you pick a deck.",
+            "Swap a card with them from your CARD CASES.",
             "Back to the list of friends.",
         };
         u16 dest = MP_Friends_Destination(sUi.friend);
@@ -916,6 +919,8 @@ static void Draw(void)
         MpUi_RowAscii(FR_GOTO, sUi.cursor == FR_GOTO, "GO TO", dest < MAPSEC_NONE ? right : "-");
         MpUi_RowAscii(FR_CARD, sUi.cursor == FR_CARD, "TRAINER CARD", NULL);
         MpUi_RowAscii(FR_BASE, sUi.cursor == FR_BASE, "VISIT SECRET BASE", NULL);
+        MpUi_RowAscii(FR_CARD_DUEL, sUi.cursor == FR_CARD_DUEL, "CARD DUEL", NULL);
+        MpUi_RowAscii(FR_CARD_TRADE, sUi.cursor == FR_CARD_TRADE, "CARD TRADE", NULL);
         MpUi_RowAscii(FR_BACK, sUi.cursor == FR_BACK, "BACK", NULL);
         MpUi_End();
         MpUi_HelpAscii(sUi.note[0] ? sUi.note : sHelp[sUi.cursor]);
@@ -1151,6 +1156,24 @@ static void Task_LinkxUi(u8 taskId)
         }
         CloseUi(taskId);
         MP_Friends_GoTo(who);
+        return;
+    }
+    case FR_CARD_DUEL:
+    case FR_CARD_TRADE:
+    {
+        // Moemon Kai: card duels and trades between friends (src/tcg/tcg_online.c)
+        const char *why = Tcg_CanAskFriend(sUi.friend);
+        if (why)
+        {
+            PlaySE(SE_FAILURE);
+            snprintf(sUi.note, sizeof(sUi.note), "%s", why);
+            break;
+        }
+        {
+            u8 who = sUi.friend, kind = sUi.cursor == FR_CARD_DUEL ? 0 : 1;
+            CloseUi(taskId);
+            Tcg_AskFriend(who, kind);
+        }
         return;
     }
     case FR_CARD:

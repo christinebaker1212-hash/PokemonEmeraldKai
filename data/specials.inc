@@ -559,3 +559,9 @@ gSpecials::
 	def_special MP_Garden_ShowDecorationMenu
 	def_special MP_Farm_AskPlant
 	def_special MP_Farm_AskPick
+	def_special Tcg_ClubState
+	def_special Tcg_ClubChooseDeck, waitstate=1
+	def_special Tcg_ClubTeachingDuel, waitstate=1
+	def_special Tcg_ClubCounter, waitstate=1
+	def_special Tcg_ClubGiftReady
+	def_special Tcg_ClubGiveGift

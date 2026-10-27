@@ -1,3 +1,8 @@
+/* The card screens: the CARD CASE (decks, the deck builder, the binder,
+ * booster packs), a challenge's window, the card you take after a win, the
+ * CARD CLUB's counter and starter decks, and friends' duels and trades. Drawn
+ * like the game's own BAG and OPTIONS: a coloured side panel, a white list
+ * with a red row frame, a description strip along the bottom. */
 #include "mp_version.h"
 #include <SDL2/SDL.h>
 #include <stdarg.h>
@@ -5,37 +10,41 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "item.h"
 #include "mp.h"
+#include "script.h"
 #include "sound.h"
+#include "constants/items.h"
 #include "constants/songs.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include "tcg/integration.h"
+#include "tcg/npc.h"
+#include "tcg/online.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
 int Tcg_GrantCase(void);
 void Tcg_ResumeGame(void (*callback)(void));
+void MP_Gatcha_AddTickets(s32 n);
 
 enum
 {
     UI_CLOSED,
-    UI_INVITE,
-    UI_STARTER,
-    UI_CASE,
-    UI_COLLECTION,
-    UI_INSPECT,
+    UI_HOME,
     UI_DECKS,
-    UI_EDIT,
+    UI_BUILDER,
+    UI_BINDER,
+    UI_INSPECT,
+    UI_ART,
     UI_PACKS,
     UI_REVEAL,
+    UI_CHALLENGE,
     UI_DUEL,
-    UI_ART,
-    UI_DECK_ACTIONS,
-    UI_COPY_DECK,
-    UI_COPY_CONFIRM,
-    UI_ONLINE,
-    UI_ONLINE_INVITE,
-    UI_ONLINE_WAIT
+    UI_SPOILS,
+    UI_COUNTER,
+    UI_STARTER,
+    UI_TRADE,
+    UI_WAIT
 };
 enum
 {
@@ -50,18 +59,65 @@ enum
     KEY_R = 256,
     KEY_L = 512
 };
+/* What a duel is: a card player on the map, practice, the CARD CLUB's lesson, a friend. */
+enum
+{
+    VS_NPC,
+    VS_PRACTICE,
+    VS_LESSON,
+    VS_FRIEND
+};
+/* What a YES (or a dismissed message) does next. */
+enum
+{
+    ACT_NONE,
+    ACT_CLOSE,
+    ACT_HOME,
+    ACT_TAKE_SPOIL,
+    ACT_STARTER,
+    ACT_COPY,
+    ACT_CLEAR,
+    ACT_TRADE_IN,
+    ACT_TRADE_IN_ALL,
+    ACT_BUY
+};
+#define PANEL_W 104
+#define STRIP_Y 112
+#define LIST_X 108
+#define LIST_W 128
+#define ROW_H 16
+#define SHOP_BINDER 2 /* U.showAll: the binder is the CARD CLUB's "card you choose" list */
+
 static struct
 {
-    int screen, back, cursor, scroll, card, deck, pack, editing, showAll, frame;
-    int inspectScroll, inspectMax, zoom, panX, panY, copyTarget, filter, online;
-    unsigned previousKeys, age, aiDelay, held, repeat;
-    const char *opponent, *opponentDeck;
-    unsigned rewardPack;
-    void (*returnToGame)(void);
-    struct TcgDuel duel;
+    int screen, back, cursor, scroll, frame, age;
+    unsigned previousKeys, held;
+    /* The card inspector */
+    int card, inspectScroll, inspectMax, zoom, panX, panY;
+    /* Decks and the builder */
+    int deck, filter, showAll, side, deckCursor, deckScroll;
+    /* Packs */
+    int pack, flipped;
     uint16_t revealed[10];
-    int flipped, revealCursor, autoPlay;
+    /* Duels */
+    int vs, aiDelay, autoPlay, online;
+    struct TcgOpponent opp;
+    struct TcgDuel duel;
+    SDL_Texture *portrait;
+    /* After a win: their deck's cards to choose from */
+    uint16_t spoils[TCG_DECK_SIZE];
+    int spoilCount;
+    /* The counter */
+    int tab;
+    /* The starter decks */
+    int starterPhase, starterChoice;
+    /* Online */
+    int onlineDeckChosen, onlineDeck;
+    /* Messages and questions */
     char message[256];
+    int messageThen, asking, askYes, askAction, askArg;
+    int fromScript;
+    void (*returnToGame)(void);
 } U;
 
 static float Ease(float t)
@@ -72,23 +128,36 @@ static float Ease(float t)
         return 1;
     return 1 - (1 - t) * (1 - t) * (1 - t);
 }
-/* Co-op names are game text; the card screens print ASCII. */
 static const char *PeerName(unsigned id)
 {
     static char name[4][MP_NAME_LEN * 2 + 2];
     static unsigned next;
     char *out = name[next++ % 4];
     if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
-        return "---";
+        return "FRIEND";
     MP_GameToAscii(out, gMpPlayers[id].name, MP_NAME_LEN * 2 + 1);
     return out;
 }
-static void Message(const char *format, ...)
+static void Say(int then, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
     vsnprintf(U.message, sizeof(U.message), format, ap);
     va_end(ap);
+    U.messageThen = then;
+    U.asking = 0;
+}
+static void Ask(int action, int arg, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(U.message, sizeof(U.message), format, ap);
+    va_end(ap);
+    U.asking = 1;
+    U.askYes = 1;
+    U.askAction = action;
+    U.askArg = arg;
+    U.messageThen = ACT_NONE;
 }
 static void Screen(int screen)
 {
@@ -96,17 +165,18 @@ static void Screen(int screen)
     U.cursor = 0;
     U.scroll = 0;
     U.age = 0;
-    U.message[0] = 0;
 }
 int Tcg_IsActive(void) { return U.screen != UI_CLOSED; }
-int Tcg_OnlineWilling(void) { return U.screen == UI_ONLINE && Tcg_GetCollection()->optedIn; }
+int Tcg_OnlineWilling(void) { return 0; }
 unsigned Tcg_HiddenFrom(void)
 {
     unsigned peer = Tcg_Online()->peer;
     return U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
 }
-/* The local player is always player 0 on screen: the recipient of an
- * invitation sees the canonical duel with both sides swapped. */
+unsigned Tcg_DuelingNow(void) { return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL); }
+
+/* The local player is always player 0 on screen: the friend who accepted
+ * sees the canonical duel with both sides swapped. */
 static void OnlineView(void)
 {
     struct TcgLink *l = Tcg_Online();
@@ -130,100 +200,103 @@ static void OnlineView(void)
 static void Close(void)
 {
     void (*callback)(void) = U.returnToGame;
+    int script = U.fromScript;
     if (U.online)
         TcgLink_Cancel(Tcg_Online(), "Card session closed.");
+    if (Tcg_Social()->role == TCG_SOCIAL_DECK || Tcg_Social()->role == TCG_SOCIAL_TRADE)
+        Tcg_SocialLeave();
     if (U.screen == UI_DUEL || U.back == UI_DUEL)
         TcgBoard_End();
     U.online = 0;
+    U.message[0] = 0;
+    U.asking = 0;
+    U.showAll = 0;
     Screen(UI_CLOSED);
     U.returnToGame = NULL;
+    U.fromScript = 0;
     G_Destroy();
+    if (U.portrait)
+        SDL_DestroyTexture(U.portrait);
+    U.portrait = NULL;
     Tcg_ResumeGame(callback);
+    if (script)
+        ScriptContext_Enable(); /* the CARD CLUB's script goes on */
 }
-void Tcg_OpenChallenge(const char *name, const char *deck, unsigned pack)
+static void Open(int screen)
 {
-    struct TcgCollection *c = Tcg_GetCollection();
-    U.opponent = name;
-    U.opponentDeck = deck;
-    U.rewardPack = pack;
-    U.returnToGame = NULL;
-    Screen(c->optedIn ? UI_CASE : UI_INVITE);
+    U.message[0] = 0;
+    U.asking = 0;
+    U.online = 0;
+    U.showAll = 0;
+    if (U.portrait)
+        SDL_DestroyTexture(U.portrait);
+    U.portrait = NULL;
+    Screen(screen);
     PlaySE(SE_WIN_OPEN);
-    printf("[tcg] explicit challenge: %s (%s), opted in %u\n", name, deck, c->optedIn);
 }
 void Tcg_OpenCase(void (*returnToGame)(void))
 {
-    struct TcgCollection *c = Tcg_GetCollection();
     U.returnToGame = returnToGame;
-    U.opponent = NULL;
-    U.opponentDeck = NULL;
-    U.rewardPack = 0;
-    if (!c->optedIn)
-    {
-        U.opponent = "Practice Collector";
-        U.opponentDeck = "PracticePlayer";
-        U.rewardPack = 0;
-    }
-    Screen(c->optedIn ? UI_CASE : UI_INVITE);
+    U.fromScript = 0;
+    Open(UI_HOME);
+    if (!Tcg_GetCollection()->optedIn)
+        Say(ACT_CLOSE, "The CARD CASE is empty. Visit the CARD CLUB in a POKeMON CENTER to get your first deck!");
 }
-static SDL_Texture *sCanvas;
-static SDL_Renderer *sCanvasOwner;
-void Tcg_DestroyTextures(void)
+void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent)
 {
-    G_Destroy();
-    if (sCanvas)
-        SDL_DestroyTexture(sCanvas);
-    sCanvas = NULL;
-    sCanvasOwner = NULL;
+    struct TcgCollection *c = Tcg_GetCollection();
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    U.opp = *opponent;
+    U.vs = VS_NPC;
+    Open(UI_CHALLENGE);
+    U.cursor = c->activeDeck;
+    printf("[tcg] challenge: %s, special %u\n", U.opp.name, U.opp.special);
+}
+void Tcg_OpenStarterReveal(void)
+{
+    U.returnToGame = NULL;
+    U.starterPhase = 0;
+    U.starterChoice = 1;
+    Open(UI_STARTER);
+    U.fromScript = 1;
+}
+void Tcg_OpenClubCounter(void)
+{
+    U.returnToGame = NULL;
+    U.tab = 0;
+    Open(UI_COUNTER);
+    U.fromScript = 1;
+}
+void Tcg_OpenOnlineDeck(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    struct TcgCollection *c = Tcg_GetCollection();
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    memset(&U.opp, 0, sizeof(U.opp) - sizeof(U.opp.portrait));
+    snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(s->peer));
+    U.opp.special = TCG_SPECIAL_NONE;
+    U.opp.online = 1;
+    U.opp.mat = TCG_MAT_ONLINE;
+    U.opp.music = MUS_RG_UNION_ROOM;
+    U.vs = VS_FRIEND;
+    U.onlineDeckChosen = 0;
+    Open(UI_CHALLENGE);
+    U.cursor = c->activeDeck;
+}
+void Tcg_OpenOnlineTrade(void)
+{
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    U.vs = VS_FRIEND;
+    Open(UI_TRADE);
+    U.filter = 9;
 }
 
 /* ------------------------------------------------------------------ */
-/* Shared drawing for the menus                                         */
+/* Collection helpers                                                   */
 /* ------------------------------------------------------------------ */
-static void Backdrop(void)
-{
-    int x, y;
-    G_Fill(0, 0, 240, 160, 0x017a3e);
-    for (y = 0; y < 160; y += 16)
-        for (x = (y / 16) % 2 * 16; x < 240; x += 32)
-            G_FillA(x, y, 16, 16, 0x05904a, 255);
-    G_FillA(0, 0, 240, 160, 0x002010, 40);
-}
-/* A DS-style title bar: a pale gradient with the title on it. */
-static void Header(const char *title, const char *right)
-{
-    int i;
-    for (i = 0; i < 18; i++)
-        G_FillA(0, i, 240, 1, G_Mix(0xf0f0f0, 0xa8a8b0, i / 17.0f), 255);
-    G_FillA(0, 18, 240, 1, 0x505058, 255);
-    G_FillA(0, 19, 240, 1, 0x003818, 120);
-    G_Text(8, 1, 0x303038, 0xf8f8f8, title, 170, TF_NORMAL);
-    if (right)
-        G_TextAlign(232, 4, TA_RIGHT, 0x5c6878, G_NO_SHADOW, right, TF_SMALL);
-}
-static void Footer(const char *text)
-{
-    G_FillA(0, 148, 240, 12, 0x081c10, 210);
-    G_FillA(0, 148, 240, 1, 0x1bc55c, 255);
-    G_Hint(6, 148, 0xd0f0d8, G_NO_SHADOW, text, TF_NARROW, 1);
-}
-static void Option(int index, int x, int y, const char *text, int enabled)
-{
-    if (index == U.cursor)
-        G_Cursor(x - 8, y + 4);
-    G_Text(x, y, enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, text, 160, TF_NORMAL);
-}
-static void SmallOption(int index, int x, int y, const char *text, int enabled)
-{
-    if (index == U.cursor)
-        G_Cursor(x - 8, y + 3);
-    G_Text(x, y, enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, text, 0, TF_SMALL);
-}
-static void BigCard(unsigned id, int x, int y, int bob)
-{
-    G_FillA(x + 2, y + 3, 44, 61, 0x002010, 110);
-    G_Card(id, (float)x, (float)(y - bob), 44, 61, 0, 255, 0);
-}
 static unsigned DeckCount(unsigned deck, unsigned card)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -232,17 +305,50 @@ static unsigned DeckCount(unsigned deck, unsigned card)
         n += card ? c->decks[deck].cards[i] == card : c->decks[deck].cards[i] != 0;
     return n;
 }
-static unsigned DeckMascot(unsigned deck)
+static unsigned Mascot(const uint16_t *cards)
 {
-    struct TcgCollection *c = Tcg_GetCollection();
-    unsigned i, best = 0, hp = 0;
+    unsigned i, best = 0, score = 0;
     for (i = 0; i < TCG_DECK_SIZE; i++)
     {
-        const struct TcgCard *card = Tcg_Card(c->decks[deck].cards[i]);
-        if (card && card->kind == TCG_POKEMON && (card->hp > hp || !best))
-            best = card->id, hp = card->hp;
+        const struct TcgCard *card = Tcg_Card(cards[i]);
+        unsigned s;
+        if (!card || card->kind != TCG_POKEMON)
+            continue;
+        /* The most evolved, then the rarest, then the strongest. */
+        s = card->stage * 1000 + card->rarity * 300 + card->hp;
+        if (s > score)
+            best = card->id, score = s;
     }
     return best;
+}
+/* The deck's types, most first (up to 3; TCG_NONE ends). */
+static void DeckTypes(const uint16_t *cards, unsigned out[3])
+{
+    unsigned n[TCG_TYPES] = {0}, i, k;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(cards[i]);
+        if (c && c->kind == TCG_ENERGY && c->id <= 6)
+            n[c->type] += 2;
+        else if (c && c->kind == TCG_POKEMON)
+            n[c->type]++;
+    }
+    for (k = 0; k < 3; k++)
+    {
+        unsigned best = TCG_NONE, most = 0;
+        for (i = 0; i < TCG_TYPES; i++)
+            if (n[i] > most)
+                best = i, most = n[i];
+        out[k] = best;
+        if (best != TCG_NONE)
+            n[best] = 0;
+    }
+}
+static int DeckValid(unsigned deck)
+{
+    char reason[8];
+    struct TcgCollection *c = Tcg_GetCollection();
+    return Tcg_DeckValidate(c->decks[deck].cards, c->owned, reason, sizeof(reason));
 }
 /* deck_configuration.asm groups Pokemon by type, then Trainers and Energy. */
 static const unsigned sFilterTypes[] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
@@ -258,61 +364,41 @@ static int CardFilter(unsigned id, unsigned filter)
         return 1;
     return card->kind == (filter == 7 ? TCG_TRAINER : TCG_ENERGY);
 }
-static void FilterTabs(int y, int selected, int countDeck, int all)
-{
-    unsigned i;
-    struct TcgCollection *c = Tcg_GetCollection();
-    for (i = 0; i < (all ? 10u : 9u); i++)
-    {
-        int x = 4 + (int)i * (all ? 23 : 26), w = all ? 21 : 24;
-        unsigned count = 0, j;
-        char n[8];
-        int on = (int)i == selected;
-        G_RoundFill(x, y + (on ? 0 : 2), w, on ? 16 : 14, on ? 0xf8f8f0 : 0x2a6040, 255);
-        G_RoundFrame(x, y + (on ? 0 : 2), w, on ? 16 : 14, on ? 0x404040 : 0x1bc55c, 255);
-        if (i < 7)
-            G_EnergyOrb(x + 2, y + 4, sFilterTypes[i], 1);
-        else if (i == 7)
-            G_Text(x + 2, y + 1, on ? 0x383838 : 0xd8f0e0, G_NO_SHADOW, "T", 0, TF_NARROW);
-        else if (i == 8)
-            G_Text(x + 2, y + 1, on ? 0x383838 : 0xd8f0e0, G_NO_SHADOW, "E", 0, TF_NARROW);
-        else
-            G_Text(x + 2, y + 1, on ? 0x383838 : 0xd8f0e0, G_NO_SHADOW, "*", 0, TF_NARROW);
-        if (countDeck)
-        {
-            for (j = 0; j < TCG_DECK_SIZE; j++)
-                count += CardFilter(c->decks[U.deck].cards[j], i);
-            snprintf(n, sizeof(n), "%u", count);
-            G_Digits(x + w - 2 - G_DigitsWidth(n, 0, 1), y + 6, n, 0, 1, on ? 0x385068 : 0xc0e8d0, 255);
-        }
-    }
-}
-
-/* ------------------------------------------------------------------ */
-/* Collection lists                                                     */
-/* ------------------------------------------------------------------ */
-static int VisibleCard(unsigned id)
+static int Visible(unsigned id)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    if (U.screen == UI_EDIT)
-        return CardFilter(id, U.filter) && (U.editing ? DeckCount(U.deck, id) != 0 : id <= 6 || c->owned[id] != 0);
     if (!CardFilter(id, U.filter))
         return 0;
+    if (U.screen == UI_BUILDER)
+        return id <= 6 || c->owned[id] != 0;
+    if (U.screen == UI_TRADE)
+        return id > 6 && c->owned[id] > DeckCount(c->activeDeck, id);
+    if (U.screen == UI_BINDER && U.showAll == SHOP_BINDER)
+        return Tcg_PointCost(id) != 0;
     return U.showAll || c->owned[id];
 }
-static unsigned CollectionCard(unsigned index)
+static unsigned ListCard(unsigned index)
 {
     unsigned id;
     for (id = 1; id <= TCG_CARD_COUNT; id++)
-        if (VisibleCard(id) && !index--)
+        if (Visible(id) && !index--)
             return id;
     return 0;
 }
-static unsigned CollectionSize(void)
+static unsigned ListSize(void)
 {
     unsigned id, n = 0;
     for (id = 1; id <= TCG_CARD_COUNT; id++)
-        n += VisibleCard(id);
+        n += Visible(id);
+    return n;
+}
+/* Distinct cards in a deck, catalogue order (the builder's right column). */
+static unsigned DeckList(unsigned deck, uint16_t *out)
+{
+    unsigned id, n = 0;
+    for (id = 1; id <= TCG_CARD_COUNT; id++)
+        if (DeckCount(deck, id))
+            out[n++] = (uint16_t)id;
     return n;
 }
 static void Inspect(unsigned id, int back)
@@ -326,54 +412,163 @@ static void Inspect(unsigned id, int back)
     U.age = 0;
     PlaySE(SE_RG_CARD_OPEN);
 }
+/* After cards come in: whole sets, the whole collection. */
+static void CollectionChanged(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned set, total;
+    for (set = 0; set < TCG_SET_COUNT; set++)
+        if (Tcg_SetOwned(c, set, &total) == total)
+            MP_Achieve_Unlock("cardset");
+    if (Tcg_SetOwned(c, TCG_SET_COUNT, &total) == total && !(c->flags & TCG_FLAG_GOLD_CASE))
+    {
+        c->flags |= TCG_FLAG_GOLD_CASE;
+        MP_Achieve_Unlock("cardall");
+        MP_Events_QueueToast("Every card collected! The CARD CASE shines gold. Visit the CARD CLUB!");
+    }
+}
+static void AddCard(unsigned id)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (id && id <= TCG_CARD_COUNT && c->owned[id] < TCG_COLLECTION_MAX)
+        c->owned[id]++;
+    CollectionChanged();
+}
 
 /* ------------------------------------------------------------------ */
 /* Duels                                                                */
 /* ------------------------------------------------------------------ */
+static const struct TcgDeckDefinition *DeckNamed(const char *name)
+{
+    unsigned i;
+    for (i = 0; i < gTcgDeckDefinitionCount; i++)
+        if (!strcmp(gTcgDeckDefinitions[i].name, name))
+            return &gTcgDeckDefinitions[i];
+    return NULL;
+}
 static void Apply(const struct TcgAction *a)
 {
     if (U.online)
     {
         if (!TcgLink_Submit(Tcg_Online(), a, SDL_GetTicks()))
             TcgBoard_Reject(Tcg_Online()->error[0] ? Tcg_Online()->error
-                                                   : "Wait for your turn and the other player's acknowledgement.");
+                                                   : "Wait for your turn and the other player's answer.");
         else
             OnlineView();
         return;
     }
+    /* (the rules count a concession for whoever's turn it is: here it's always yours,
+     * even on the opponent's turn) */
+    if (a->type == TCG_CONCEDE)
+        U.duel.current = 0;
     if (TcgDuel_Apply(&U.duel, a) != TCG_OK)
         TcgBoard_Reject(U.duel.error[0] ? U.duel.error : "Choose the required cards and targets.");
     U.aiDelay = 12;
 }
-static void StartDuel(int practice)
+static void BeginBoard(void)
+{
+    TcgBoard_SetMat(U.opp.mat, U.opp.matType);
+    TcgBoard_SetMusic(U.opp.music);
+    TcgBoard_Tutorial(U.vs == VS_LESSON);
+    Screen(UI_DUEL);
+    TcgBoard_Begin(&U.duel, U.opp.name, U.vs == VS_FRIEND);
+    U.aiDelay = 20;
+    printf("[tcg] duel started vs %s\n", U.opp.name);
+}
+static int StartDuel(const uint16_t *mine, const uint16_t *theirs)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    unsigned i;
-    char reason[160];
-    const char *name = practice ? "PracticePlayer" : U.opponentDeck;
-    if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
+    if (!TcgDuel_Init(&U.duel, mine, theirs, Tcg_Random(&c->rng), 6))
     {
-        Message("%s", reason);
+        Say(ACT_NONE, "This duel couldn't be set up.");
+        return 0;
+    }
+    BeginBoard();
+    return 1;
+}
+static int SingleType(const uint16_t *cards)
+{
+    unsigned i, type = TCG_NONE;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(cards[i]);
+        if (!c || c->kind != TCG_POKEMON)
+            continue;
+        if (type != TCG_NONE && c->type != type)
+            return 0;
+        type = c->type;
+    }
+    return type != TCG_NONE;
+}
+/* What a win over a card player is worth. */
+static void Rewards(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    char line[200] = "";
+    int n = 0;
+    c->wins++;
+    MP_Achieve_Count("cardwin", 1);
+    if (U.duel.players[1].prizeSize == U.duel.prizeCount)
+        MP_Achieve_Unlock("cardflawless");
+    if (SingleType(U.duel.players[0].cards))
+        MP_Achieve_Unlock("cardmono");
+    Tcg_AwardPack(c, U.opp.pack);
+    n += snprintf(line + n, sizeof(line) - n, "A booster pack went into your CARD CASE.");
+    if (U.opp.special < TCG_SPECIAL_COUNT)
+    {
+        uint32_t bit = 1u << U.opp.special;
+        if (!(c->specialBeaten & bit))
+        {
+            c->specialBeaten |= bit;
+            MP_Achieve_Count("cardspecial", 1);
+            if (U.opp.special < TCG_GYM_LEADERS)
+                MP_Achieve_Count("cardgyms", 1);
+        }
+        if (U.opp.promo && !(c->promoGiven & bit))
+        {
+            c->promoGiven |= bit;
+            AddCard(U.opp.promo);
+            MP_Achieve_Unlock("cardpromo");
+            snprintf(line + n, sizeof(line) - n, "\n%s handed you their promo card: %s!", U.opp.name,
+                     Tcg_Card(U.opp.promo)->name);
+        }
+    }
+    TcgBoard_Result(line);
+    /* Today's full reward: one card of their deck, your pick */
+    U.spoilCount = 0;
+    if (Tcg_DailyAvailable(c, U.opp.key, Tcg_Today()))
+    {
+        unsigned i, j;
+        for (i = 0; i < TCG_DECK_SIZE; i++)
+        {
+            unsigned id = U.opp.deck[i];
+            const struct TcgCard *card = Tcg_Card(id);
+            int seen = 0;
+            /* Basic Energy is free; promo cards only from the trainer who holds them. */
+            if (!card || id <= 6 || (card->set == 4 && id != U.opp.promo))
+                continue;
+            for (j = 0; j < (unsigned)U.spoilCount; j++)
+                seen |= U.spoils[j] == id;
+            if (!seen)
+                U.spoils[U.spoilCount++] = (uint16_t)id;
+        }
+    }
+    printf("[tcg] victory vs %s: pack %u, %d cards to choose from\n", U.opp.name, U.opp.pack, U.spoilCount);
+}
+static void FriendRewards(int won)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (!won)
+    {
+        TcgBoard_Result("Good game! Nothing was lost.");
         return;
     }
-    for (i = 0; i < gTcgDeckDefinitionCount; i++)
-        if (name && !strcmp(name, gTcgDeckDefinitions[i].name))
-            break;
-    if (i == gTcgDeckDefinitionCount)
-    {
-        Message("The opponent's deck is unavailable.");
-        return;
-    }
-    if (!TcgDuel_Init(&U.duel, c->decks[c->activeDeck].cards, gTcgDeckDefinitions[i].cards, Tcg_Random(&c->rng), 6))
-    {
-        Message("Unable to set up this duel.");
-        return;
-    }
-    if (practice)
-        U.opponent = "Practice Collector";
-    Screen(UI_DUEL);
-    TcgBoard_Begin(&U.duel, U.opponent, 0);
-    U.aiDelay = 20;
+    c->wins++;
+    c->onlineWins++;
+    MP_Achieve_Count("cardwin", 1);
+    MP_Achieve_Count("cardfriend", 1);
+    Tcg_AwardPack(c, Tcg_RandomBelow(&c->rng, TCG_PACK_TYPES));
+    TcgBoard_Result("A booster pack went into your CARD CASE.");
 }
 static void DuelStep(unsigned pressed, unsigned keys)
 {
@@ -386,20 +581,19 @@ static void DuelStep(unsigned pressed, unsigned keys)
         TcgBoard_SetWaiting(Tcg_Online()->pending);
     }
     TcgBoard_Sync(&U.duel);
-    if (!U.online && U.duel.phase == TCG_FINISHED && !U.duel.rewardClaimed)
+    if (U.duel.phase == TCG_FINISHED && !U.duel.rewardClaimed)
     {
         U.duel.rewardClaimed = 1;
-        if (U.duel.winner == 0)
-        {
-            Tcg_AwardPack(Tcg_GetCollection(), U.rewardPack);
-            printf("[tcg] victory: one booster awarded\n");
-            TcgBoard_Result("A booster pack was added to your Card Case!");
-        }
-        else
+        if (U.vs == VS_FRIEND)
+            FriendRewards(U.duel.winner == 0);
+        else if (U.vs == VS_NPC && U.duel.winner == 0)
+            Rewards();
+        else if (U.vs == VS_NPC)
             TcgBoard_Result("No cards, money or progress were lost.");
+        else if (U.vs == VS_LESSON)
+            TcgBoard_Result(U.duel.winner == 0 ? "That's the game! You're ready for real duels."
+                                               : "Close one! You'll get the hang of it.");
     }
-    if (U.online && U.duel.phase == TCG_FINISHED)
-        TcgBoard_Result("Online duels don't wager or award cards.");
     if (!U.online && U.duel.phase != TCG_FINISHED &&
         ((U.duel.phase == TCG_PROMOTION ? U.duel.promotePlayer : U.duel.current) == 1 || U.autoPlay) &&
         TcgBoard_Idle())
@@ -443,568 +637,444 @@ static void DuelStep(unsigned pressed, unsigned keys)
         Inspect(card, UI_DUEL);
     else if (r == BOARD_LEAVE)
     {
+        int won = U.duel.winner == 0;
         if (U.online)
         {
             TcgLink_Cancel(Tcg_Online(), "Duel complete.");
             U.online = 0;
         }
         TcgBoard_End();
-        Screen(UI_CASE);
+        if (U.vs == VS_NPC && won && U.spoilCount)
+        {
+            Screen(UI_SPOILS);
+            Say(ACT_NONE, "As the winner, you may take one card from %s's deck!", U.opp.name);
+        }
+        else if (U.vs == VS_PRACTICE)
+        {
+            Screen(UI_HOME);
+            U.cursor = 3;
+        }
+        else
+            Close();
     }
 }
 
 /* ------------------------------------------------------------------ */
-/* Menus                                                                */
+/* Drawing: the game's BAG and OPTIONS look, in full colour              */
 /* ------------------------------------------------------------------ */
-static int MenuSize(void)
+/* The CARD CASE's colours: red like a POKe BALL, gold once every card is in. */
+static unsigned Theme(void)
 {
-    switch (U.screen)
-    {
-    case UI_INVITE:
-        return 2;
-    case UI_STARTER:
-        return 3;
-    case UI_CASE:
-        return 9;
-    case UI_ONLINE:
-        return MP_MAX_PLAYERS;
-    case UI_ONLINE_INVITE:
-        return 2;
-    case UI_COLLECTION:
-    case UI_EDIT:
-        return CollectionSize();
-    case UI_DECK_ACTIONS:
-        return 3;
-    case UI_COPY_CONFIRM:
-        return 2;
-    case UI_DECKS:
-    case UI_COPY_DECK:
-        return TCG_SAVED_DECKS;
-    case UI_PACKS:
-        return 4;
-    case UI_REVEAL:
-        return 10;
-    default:
-        return 1;
-    }
+    return Tcg_GetCollection()->flags & TCG_FLAG_GOLD_CASE ? 0xd8a830 : 0xe85048;
 }
-static void Choose(void)
+static void Background(void)
 {
-    struct TcgCollection *c = Tcg_GetCollection();
-    unsigned id;
-    char reason[160];
-    switch (U.screen)
-    {
-    case UI_INVITE:
-        if (U.cursor)
-            Close();
-        else
-            Screen(UI_STARTER);
-        break;
-    case UI_STARTER:
-        if (!Tcg_GrantCase())
-            Message("Your Key Items pocket needs space for the Card Case.");
-        else if (Tcg_ChooseStarter(c, U.cursor))
-        {
-            PlaySE(SE_RG_CARD_OPEN);
-            Screen(UI_CASE);
-            Message("You got a CARD CASE and the %s deck!", c->decks[0].name);
-        }
-        break;
-    case UI_CASE:
-        switch (U.cursor)
-        {
-        case 0:
-            if (U.opponentDeck && U.opponent && strcmp(U.opponent, "Practice Collector"))
-                StartDuel(0);
-            else
-                Message("Talk to a card player and press the challenge button to ask for a duel.");
-            break;
-        case 1:
-            U.filter = 9;
-            Screen(UI_COLLECTION);
-            break;
-        case 2:
-            Screen(UI_DECKS);
-            U.cursor = c->activeDeck;
-            break;
-        case 3:
-            Screen(UI_PACKS);
-            break;
-        case 4:
-            StartDuel(1);
-            break;
-        case 5:
-            U.showAll = !U.showAll;
-            break;
-        case 6:
-            c->fastAnimations = !c->fastAnimations;
-            break;
-        case 7:
-            Screen(UI_ONLINE);
-            break;
-        case 8:
-            Close();
-            break;
-        }
-        break;
-    case UI_ONLINE:
-    {
-        struct TcgLink *l = Tcg_Online();
-        if (!MP_IsConnected() || U.cursor == (int)gMpLocalId || !gMpPlayers[U.cursor].present)
-            Message("Choose a connected friend. Both players must open ONLINE CARDS.");
-        else if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
-            Message("%s", reason);
-        else if (TcgLink_Invite(l, U.cursor, Tcg_Random(&c->rng), c->decks[c->activeDeck].cards, SDL_GetTicks()))
-        {
-            U.online = 1;
-            Screen(UI_ONLINE_WAIT);
-        }
-        break;
-    }
-    case UI_ONLINE_INVITE:
-        if (U.cursor)
-        {
-            TcgLink_Cancel(Tcg_Online(), "Invitation declined.");
-            U.online = 0;
-            Screen(UI_ONLINE);
-        }
-        else if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
-            Message("%s", reason);
-        else if (TcgLink_Accept(Tcg_Online(), c->decks[c->activeDeck].cards, SDL_GetTicks()))
-        {
-            U.online = 1;
-            Screen(UI_ONLINE_WAIT);
-        }
-        break;
-    case UI_INSPECT:
-        U.screen = UI_ART;
-        U.zoom = U.panX = U.panY = 0;
-        break;
-    case UI_ART:
-        U.zoom = !U.zoom;
-        U.panX = U.panY = 0;
-        break;
-    case UI_COLLECTION:
-        Inspect(CollectionCard(U.cursor), UI_COLLECTION);
-        break;
-    case UI_DECKS:
-        U.deck = U.cursor;
-        Screen(UI_DECK_ACTIONS);
-        break;
-    case UI_DECK_ACTIONS:
-        if (U.cursor == 0)
-        {
-            if (Tcg_DeckValidate(c->decks[U.deck].cards, c->owned, reason, sizeof(reason)))
-            {
-                c->activeDeck = U.deck;
-                PlaySE(SE_SUCCESS);
-                Message("%s is now your active deck.", c->decks[U.deck].name);
-            }
-            else
-                Message("%s", reason);
-        }
-        else if (U.cursor == 1)
-        {
-            if (!c->decks[U.deck].name[0])
-                snprintf(c->decks[U.deck].name, TCG_NAME_LEN, "Deck %d", U.deck + 1);
-            U.editing = 0;
-            U.filter = 1;
-            Screen(UI_EDIT);
-        }
-        else
-            Screen(UI_COPY_DECK);
-        break;
-    case UI_COPY_DECK:
-        if (U.cursor == U.deck)
-            Message("Choose a different deck slot.");
-        else
-        {
-            U.copyTarget = U.cursor;
-            if (DeckCount(U.copyTarget, 0))
-                Screen(UI_COPY_CONFIRM);
-            else
-            {
-                Tcg_DeckCopy(c, U.deck, U.copyTarget);
-                Screen(UI_DECK_ACTIONS);
-                Message("Deck copied to slot %u.", U.copyTarget + 1);
-            }
-        }
-        break;
-    case UI_COPY_CONFIRM:
-        if (U.cursor == 1)
-        {
-            Tcg_DeckCopy(c, U.deck, U.copyTarget);
-            Screen(UI_DECK_ACTIONS);
-            Message("Deck copied to slot %u.", U.copyTarget + 1);
-        }
-        else
-            Screen(UI_COPY_DECK);
-        break;
-    case UI_EDIT:
-        id = CollectionCard(U.cursor);
-        if (id)
-            Inspect(id, UI_EDIT);
-        break;
-    case UI_PACKS:
-        U.pack = U.cursor;
-        if (Tcg_OpenPack(c, U.pack, U.revealed))
-        {
-            Screen(UI_REVEAL);
-            U.flipped = 0;
-            U.revealCursor = 0;
-            PlaySE(SE_RG_CARD_OPEN);
-            printf("[tcg] opened pack %d\n", U.pack);
-        }
-        else
-            Message("You have no unopened packs of this kind.");
-        break;
-    case UI_REVEAL:
-        if (U.flipped < 10)
-            U.flipped = 10;
-        else
-            Inspect(U.revealed[U.cursor], UI_REVEAL);
-        break;
-    default:
-        break;
-    }
+    int y;
+    for (y = 0; y < 160; y++)
+        G_FillA(0, y, 240, 1, G_Mix(0x90d0a8, 0x58a078, y / 160.0f), 255);
+    for (y = 0; y < 160; y += 4)
+        G_FillA(0, y, 240, 1, 0xffffff, 18);
 }
-
-/* Pack opening: the wrapper tears, then each card flips in turn. */
-#define REVEAL_TEAR 34
-static void RevealStep(unsigned pressed)
+/* The coloured panel on the left, with the screen's name on its tab. */
+static void SidePanel(const char *title, unsigned color)
 {
-    const struct TcgCard *c;
-    if (U.age < REVEAL_TEAR)
-    {
-        if (U.age == 14)
-            PlaySE(SE_RG_CARD_FLIPPING);
-        if (pressed & KEY_A)
-            U.age = REVEAL_TEAR;
-        return;
-    }
-    if (U.flipped < 10)
-    {
-        /* Each card turns over on its own; A hurries the next one. */
-        static unsigned sNext;
-        if (U.age == REVEAL_TEAR)
-            sNext = U.age + 8;
-        if (pressed & KEY_A)
-            sNext = U.age;
-        if (U.age >= sNext)
-        {
-            c = Tcg_Card(U.revealed[U.flipped]);
-            PlaySE(c && c->rarity >= 2 ? SE_SHINY : SE_RG_CARD_FLIP);
-            U.flipped++;
-            U.cursor = U.flipped - 1;
-            sNext = U.age + (Tcg_GetCollection()->fastAnimations ? 5 : c && c->rarity >= 2 ? 26 : 11);
-        }
-        return;
-    }
+    unsigned light = G_Mix(color, 0xffffff, 0.45f), dark = G_Mix(color, 0x000000, 0.35f);
+    int w = G_Measure(title, TF_NORMAL) + 16;
+    G_RoundFill(0, 0, PANEL_W, STRIP_Y - 2, light, 255);
+    G_RoundFrame(0, 0, PANEL_W, STRIP_Y - 2, dark, 255);
+    G_FillA(1, 1, PANEL_W - 2, 1, 0xffffff, 120);
+    G_RoundFill(2, 2, w, 15, color, 255);
+    G_RoundFrame(2, 2, w, 15, dark, 255);
+    G_FillA(3, 3, w - 2, 1, G_Mix(color, 0xffffff, 0.5f), 255);
+    G_Text(10, 2, G_WHITE, dark, title, 0, TF_NORMAL);
 }
-int Tcg_Step(unsigned keys)
+/* The white list on the right. */
+static void ListBox(int x, int y, int w, int h)
 {
-    unsigned pressed = keys & ~U.previousKeys;
-    U.previousKeys = keys;
-    if (!Tcg_IsActive())
-        return 0;
-    U.age++;
-    U.frame++;
-    /* Key repeat for long lists. */
-    if (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
+    G_RoundFill(x + 1, y + 2, w, h, 0x000000, 50);
+    G_RoundFill(x, y, w, h, 0xf8f8f8, 255);
+    G_RoundFrame(x, y, w, h, 0x707880, 255);
+    G_FillA(x + 2, y + 2, w - 4, 2, 0xd8e0e8, 255);
+}
+/* One row: red frame when chosen (as in the BAG), grey when it can't be used. */
+static void Row(int x, int y, int w, int on, int enabled, const char *label, const char *right)
+{
+    if (on)
     {
-        if (++U.held > 18 && U.held % 4 == 0 && U.screen != UI_DUEL)
-            pressed |= keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+        int pulse = (U.frame / 16) % 2;
+        G_RoundFrame(x, y, w, ROW_H - 1, 0xe82820, 255);
+        G_RoundFrame(x + 1, y + 1, w - 2, ROW_H - 3, pulse ? 0xf86850 : 0xe82820, 255);
+    }
+    G_Text(x + 6, y + 1, enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, label, w - 8, TF_NORMAL);
+    if (right)
+        G_TextAlign(x + w - 5, y + 2, TA_RIGHT, enabled ? 0x506070 : 0xb0b0b0, G_NO_SHADOW, right, TF_SMALL);
+}
+/* The strip along the bottom: what the chosen thing is or does. */
+static void Strip(unsigned card, const char *text)
+{
+    G_FillA(0, STRIP_Y, 240, 160 - STRIP_Y, 0x5848c8, 255);
+    G_FillA(0, STRIP_Y, 240, 1, 0x9888f8, 255);
+    G_FillA(0, STRIP_Y + 1, 240, 1, 0x7060e0, 255);
+    if (card)
+    {
+        G_RoundFill(3, STRIP_Y + 3, 34, 44, 0xf8f8f8, 255);
+        G_Card(card, 5, STRIP_Y + 4, 30, 42, 0, 255, 0);
+        G_Text(42, STRIP_Y + 4, G_WHITE, 0x302878, text, 194, TF_NORMAL);
     }
     else
-        U.held = 0;
-    {
-        struct TcgLink *l = Tcg_Online();
-        if (U.screen == UI_ONLINE && l->state == TCG_LINK_INVITED)
-        {
-            U.online = 1;
-            Screen(UI_ONLINE_INVITE);
-            PlaySE(SE_POKENAV_CALL);
-        }
-        if (U.online && l->state == TCG_LINK_PLAYING && U.screen == UI_ONLINE_WAIT)
-        {
-            OnlineView();
-            Screen(UI_DUEL);
-            TcgBoard_Begin(&U.duel, l->peer < MP_MAX_PLAYERS ? PeerName(l->peer) : "FRIEND", 1);
-        }
-        if (U.online && l->state == TCG_LINK_ENDED)
-        {
-            U.online = 0;
-            if (U.screen == UI_DUEL || U.back == UI_DUEL)
-                TcgBoard_End();
-            Screen(UI_CASE);
-            Message("%s", l->error);
-        }
-    }
-    if (U.screen == UI_DUEL)
-    {
-        DuelStep(pressed, keys);
-        return 1;
-    }
-    if (U.message[0] && (pressed & (KEY_A | KEY_B)))
-    {
-        U.message[0] = 0;
-        PlaySE(SE_SELECT);
-        return 1;
-    }
-    if (U.screen == UI_REVEAL && U.flipped < 10)
-    {
-        RevealStep(pressed);
-        if (pressed & KEY_B)
-            U.flipped = 10;
-        return 1;
-    }
-    if (pressed & KEY_B)
-    {
-        PlaySE(SE_SELECT);
-        switch (U.screen)
-        {
-        case UI_INVITE:
-        case UI_STARTER:
-        case UI_CASE:
-            Close();
-            break;
-        case UI_ART:
-            U.screen = UI_INSPECT;
-            break;
-        case UI_INSPECT:
-            U.screen = U.back;
-            U.age = 0;
-            break;
-        case UI_EDIT:
-        case UI_COPY_DECK:
-        {
-            int from = U.screen;
-            Screen(UI_DECK_ACTIONS);
-            U.cursor = from == UI_COPY_DECK ? 2 : 1;
-            break;
-        }
-        case UI_COPY_CONFIRM:
-            Screen(UI_COPY_DECK);
-            break;
-        case UI_DECK_ACTIONS:
-            Screen(UI_DECKS);
-            U.cursor = U.deck;
-            break;
-        case UI_ONLINE_WAIT:
-        case UI_ONLINE_INVITE:
-            TcgLink_Cancel(Tcg_Online(), "Card session cancelled.");
-            U.online = 0;
-            Screen(UI_ONLINE);
-            break;
-        default:
-            Screen(UI_CASE);
-            break;
-        }
-        return 1;
-    }
-    if (U.screen == UI_INSPECT)
-    {
-        if (pressed & KEY_UP)
-            U.inspectScroll -= 12;
-        if (pressed & KEY_DOWN)
-            U.inspectScroll += 12;
-        if (U.inspectScroll < 0)
-            U.inspectScroll = 0;
-        if (U.inspectScroll > U.inspectMax)
-            U.inspectScroll = U.inspectMax;
-        if (pressed & KEY_A)
-        {
-            PlaySE(SE_SELECT);
-            Choose();
-        }
-        return 1;
-    }
-    if (U.screen == UI_ART)
-    {
-        if (keys & KEY_UP)
-            U.panY -= 2;
-        if (keys & KEY_DOWN)
-            U.panY += 2;
-        if (keys & KEY_LEFT)
-            U.panX -= 2;
-        if (keys & KEY_RIGHT)
-            U.panX += 2;
-        if (U.panY < -60)
-            U.panY = -60;
-        if (U.panY > 80)
-            U.panY = 80;
-        if (U.panX < -60)
-            U.panX = -60;
-        if (U.panX > 60)
-            U.panX = 60;
-        if (pressed & KEY_A)
-        {
-            PlaySE(SE_SELECT);
-            Choose();
-        }
-        return 1;
-    }
-    if (U.screen == UI_EDIT)
-    {
-        char reason[160];
-        unsigned id;
-        if (pressed & KEY_SELECT)
-        {
-            U.editing = !U.editing;
-            U.cursor = 0;
-            U.message[0] = 0;
-            PlaySE(SE_SELECT);
-        }
-        if (pressed & (KEY_L | KEY_R))
-        {
-            U.filter = (U.filter + (pressed & KEY_R ? 1 : 8)) % 9;
-            U.cursor = 0;
-            U.message[0] = 0;
-            PlaySE(SE_RG_BAG_POCKET);
-        }
-        if (pressed & KEY_START)
-        {
-            if (Tcg_DeckValidate(Tcg_GetCollection()->decks[U.deck].cards, Tcg_GetCollection()->owned, reason,
-                                 sizeof(reason)))
-            {
-                PlaySE(SE_SUCCESS);
-                Message("This deck is ready to play.");
-            }
-            else
-                Message("%s", reason);
-        }
-        if (pressed & KEY_UP && U.cursor > 0)
-            U.cursor--, PlaySE(SE_RG_BAG_CURSOR);
-        if (pressed & KEY_DOWN && U.cursor + 1 < (int)CollectionSize())
-            U.cursor++, PlaySE(SE_RG_BAG_CURSOR);
-        id = CollectionCard(U.cursor);
-        if (id && (pressed & KEY_LEFT))
-        {
-            if (Tcg_DeckRemove(Tcg_GetCollection(), U.deck, id))
-                PlaySE(SE_RG_BAG_POCKET);
-        }
-        if (id && (pressed & KEY_RIGHT))
-        {
-            if (!Tcg_DeckAdd(Tcg_GetCollection(), U.deck, id, reason, sizeof(reason)))
-                Message("%s", reason);
-            else
-                PlaySE(SE_RG_CARD_FLIP);
-        }
-        if (U.cursor >= (int)CollectionSize() && U.cursor)
-            U.cursor--;
-        if (pressed & KEY_A)
-            Choose();
-        return 1;
-    }
-    if (U.screen == UI_COLLECTION)
-    {
-        int n = (int)CollectionSize(), old = U.cursor;
-        if (pressed & (KEY_L | KEY_R))
-        {
-            U.filter = (U.filter + (pressed & KEY_R ? 1 : 9)) % 10;
-            U.cursor = 0;
-            PlaySE(SE_RG_BAG_POCKET);
-        }
-        if (pressed & KEY_LEFT)
-            U.cursor--;
-        if (pressed & KEY_RIGHT)
-            U.cursor++;
-        if (pressed & KEY_UP)
-            U.cursor -= 7;
-        if (pressed & KEY_DOWN)
-            U.cursor += 7;
-        if (U.cursor < 0)
-            U.cursor = 0;
-        if (U.cursor >= n)
-            U.cursor = n ? n - 1 : 0;
-        if (old != U.cursor)
-            PlaySE(SE_RG_BAG_CURSOR);
-        if (pressed & (KEY_A | KEY_START) && n)
-            Inspect(CollectionCard(U.cursor), UI_COLLECTION);
-        if (pressed & KEY_SELECT)
-            U.showAll = !U.showAll, U.cursor = 0, PlaySE(SE_SELECT);
-        return 1;
-    }
-    {
-        int old = U.cursor, horizontal = U.screen == UI_STARTER || U.screen == UI_REVEAL;
-        if (pressed & KEY_UP)
-            U.cursor -= U.screen == UI_REVEAL ? 5 : 1;
-        if (pressed & KEY_DOWN)
-            U.cursor += U.screen == UI_REVEAL ? 5 : 1;
-        if (horizontal && pressed & KEY_LEFT)
-            U.cursor--;
-        if (horizontal && pressed & KEY_RIGHT)
-            U.cursor++;
-        {
-            int count = MenuSize();
-            if (count > 0)
-            {
-                while (U.cursor < 0)
-                    U.cursor += count;
-                U.cursor %= count;
-            }
-            else
-                U.cursor = 0;
-        }
-        if (old != U.cursor)
-            PlaySE(SE_RG_BAG_CURSOR);
-    }
-    if (pressed & (KEY_SELECT | KEY_START) && U.screen == UI_REVEAL)
-        Inspect(U.revealed[U.cursor], UI_REVEAL);
-    if (pressed & KEY_A)
-    {
-        PlaySE(SE_SELECT);
-        Choose();
-    }
-    return 1;
+        G_Text(8, STRIP_Y + 4, G_WHITE, 0x302878, text, 226, TF_NORMAL);
 }
-int Tcg_HandleEvent(const union SDL_Event *event)
+static void Hints(const char *hint)
 {
-    (void)event;
-    return 0;
+    int w = G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0);
+    G_RoundFill(236 - w - 6, 160 - 13, w + 6, 12, 0x302878, 220);
+    G_Hint(236 - w - 3, 160 - 13, 0xe0e0ff, G_NO_SHADOW, hint, TF_NARROW, 1);
+}
+static void BigCard(unsigned id, int x, int y, int bob)
+{
+    G_FillA(x + 2, y + 3, 44, 61, 0x000000, 70);
+    G_Card(id, (float)x, (float)(y - bob), 44, 61, 0, 255, 0);
+}
+static void TypeOrbs(int x, int y, const uint16_t *cards)
+{
+    unsigned t[3], i;
+    DeckTypes(cards, t);
+    for (i = 0; i < 3 && t[i] != TCG_NONE; i++)
+        G_EnergyOrb(x + (int)i * 9, y, t[i], 1);
+}
+static void Tabs(int x, int y, int selected, int count)
+{
+    int i;
+    for (i = 0; i < count; i++)
+    {
+        int tx = x + i * 14, on = i == selected;
+        G_RoundFill(tx, y + (on ? 0 : 1), 13, on ? 13 : 12, on ? 0xf8f8f8 : 0x405060, 255);
+        G_RoundFrame(tx, y + (on ? 0 : 1), 13, on ? 13 : 12, on ? 0xe82820 : 0x202830, 255);
+        if (i < 7)
+            G_EnergyOrb(tx + 3, y + 3, sFilterTypes[i], 1);
+        else
+            G_TextAlign(tx + 7, y, TA_CENTER, on ? G_INK : 0xe0e8f0, G_NO_SHADOW, i == 7 ? "T" : i == 8 ? "E" : "*",
+                        TF_NARROW);
+    }
+}
+static void MessageBox(void)
+{
+    if (!U.message[0])
+        return;
+    G_Window(0, 112, 240, 48);
+    G_Text(8, 116, G_INK, G_INK_SHADOW, U.message, U.asking ? 168 : 214, TF_NORMAL);
+    if (U.asking)
+    {
+        G_Window(184, 74, 56, 36);
+        G_Cursor(192, 82 + (U.askYes ? 0 : 14));
+        G_Text(200, 78, G_INK, G_INK_SHADOW, "YES", 0, TF_NORMAL);
+        G_Text(200, 92, G_INK, G_INK_SHADOW, "NO", 0, TF_NORMAL);
+    }
+    else if ((U.frame / 20) % 2)
+        G_ButtonIcon(226, 152, 0);
 }
 
 /* ------------------------------------------------------------------ */
 /* Screens                                                              */
 /* ------------------------------------------------------------------ */
-static void DeckIllustration(unsigned id)
+static const char *const sHomeRows[] = {"DECKS", "BINDER", "BOOSTER PACKS", "PRACTICE DUEL", "DUEL SPEED", "CLOSE CASE"};
+static const char *const sHomeHelp[] = {
+    "Build decks and pick the one you duel with.", "Every card you own, by type.", "Open the packs you won.",
+    "Against a practice deck. Nothing is won or lost.", "How quickly the cards move on the table.",
+    "Put the CARD CASE away."};
+#define HOME_ROWS 6
+static void HomeScreen(void)
 {
-    int w, h, scan;
-    SDL_Texture *art = G_ArtTexture(id, 1, &w, &h, &scan);
-    const struct TcgCard *card = Tcg_Card(id);
-    SDL_Rect src, dst;
-    int width = 56, height, contentH, panelY;
-    if (!art || !card)
-        return;
-    src.x = src.y = 0;
-    src.w = w;
-    src.h = h;
-    if (scan)
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned i, packs = 0, total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
+    unsigned mascot = Mascot(c->decks[c->activeDeck].cards);
+    char line[128];
+    int bob = (int)(sinf(U.frame * 0.06f) * 1.5f);
+    for (i = 0; i < TCG_PACK_TYPES; i++)
+        packs += c->packs[i];
+    Background();
+    SidePanel("CARD CASE", Theme());
+    if (mascot)
+        BigCard(mascot, 30, 22, bob);
+    G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW,
+                c->decks[c->activeDeck].name[0] ? c->decks[c->activeDeck].name : "No deck", TF_SMALL);
+    TypeOrbs(38, 99, c->decks[c->activeDeck].cards);
+    ListBox(LIST_X, 4, LIST_W, 104);
+    for (i = 0; i < HOME_ROWS; i++)
     {
-        /* Illustration window of the 600x825 printed card. */
-        int x = 64, y = 99, cw = 474, ch = 328;
-        if (card->kind == TCG_TRAINER)
-            x = 64, y = 199, cw = 480, ch = 255;
-        else if (card->kind == TCG_ENERGY)
-            x = 136, y = 410, cw = ch = 330;
-        src.x = x * w / 600;
-        src.y = y * h / 825;
-        src.w = cw * w / 600;
-        src.h = ch * h / 825;
+        const char *right = NULL;
+        if (i == 2)
+            snprintf(line, sizeof(line), "%u", packs), right = line;
+        if (i == 4)
+            right = c->fastAnimations ? "FAST" : "NORMAL";
+        Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)i, i != 2 || packs, sHomeRows[i], right);
+    }
+    snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[U.cursor], have, total, c->dust);
+    Strip(0, line);
+}
+
+/* A challenge: who it is, what they play, what's in it for you, your deck. */
+static void Portrait(int x, int y)
+{
+    SDL_Rect dst;
+    if (!U.opp.portraitW)
+        return;
+    if (!U.portrait)
+    {
+        struct GSurface s;
+        s.w = U.opp.portraitW;
+        s.h = U.opp.portraitH;
+        s.px = U.opp.portrait;
+        U.portrait = G_SurfaceTexture(&s);
+    }
+    if (!U.portrait)
+        return;
+    dst.x = x - U.opp.portraitW;
+    dst.y = y - U.opp.portraitH * 2;
+    dst.w = U.opp.portraitW * 2;
+    dst.h = U.opp.portraitH * 2;
+    SDL_RenderCopy(G_R(), U.portrait, NULL, &dst);
+}
+static void ChallengeScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    char line[160];
+    unsigned i;
+    int y, n;
+    Background();
+    SidePanel(U.vs == VS_FRIEND ? "CARD DUEL" : "CHALLENGE", U.opp.special < TCG_SPECIAL_COUNT ? 0x7058c0 : Theme());
+    /* Them: their sprite, their best card, what they play */
+    G_RoundFill(6, 20, 92, 46, 0x2c5c40, 255);
+    G_RoundFrame(6, 20, 92, 46, 0x103020, 255);
+    Portrait(28, 62);
+    if (U.opp.deck)
+        G_Card(Mascot(U.opp.deck), 58, 22, 30, 42, 0, 255, 0);
+    y = 68;
+    if (U.opp.title[0])
+    {
+        G_Text(6, y, 0x505868, G_NO_SHADOW, U.opp.title, 96, TF_NARROW);
+        y += 9;
+    }
+    G_Text(6, y, G_INK, G_INK_SHADOW, U.opp.name, 96, TF_SMALL);
+    y += 12;
+    if (U.opp.deck)
+    {
+        G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "PLAYS", 0, TF_NARROW);
+        TypeOrbs(34, y + 2, U.opp.deck);
+    }
+    /* Your decks */
+    ListBox(LIST_X, 4, LIST_W, 104);
+    G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, "DUEL WITH", 0, TF_NARROW);
+    U.scroll = U.cursor < 2 ? 0 : U.cursor > TCG_SAVED_DECKS - 3 ? TCG_SAVED_DECKS - 4 : U.cursor - 2;
+    for (i = 0; i < 5; i++)
+    {
+        unsigned d = U.scroll + i;
+        if (d > TCG_SAVED_DECKS)
+            break;
+        if (d == TCG_SAVED_DECKS)
+        {
+            Row(LIST_X + 2, 18 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)d, 1, U.vs == VS_FRIEND ? "LEAVE" : "NOT NOW",
+                NULL);
+            continue;
+        }
+        snprintf(line, sizeof(line), "%s", c->decks[d].name[0] ? c->decks[d].name : "---");
+        Row(LIST_X + 2, 18 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)d, DeckValid(d), line,
+            d == c->activeDeck ? "IN USE" : NULL);
+    }
+    /* What winning gets you */
+    if (U.vs == VS_FRIEND)
+    {
+        snprintf(line, sizeof(line), "Nothing is wagered. The winner gets a booster pack.");
+        Strip(0, line);
+        return;
+    }
+    n = snprintf(line, sizeof(line), "WIN: a booster pack");
+    if (Tcg_DailyAvailable(c, U.opp.key, Tcg_Today()))
+        n += snprintf(line + n, sizeof(line) - n, " and one card from their deck, your pick.");
+    else
+        n += snprintf(line + n, sizeof(line) - n, ". (Their card again tomorrow.)");
+    if (U.opp.promo && U.opp.special < TCG_SPECIAL_COUNT && !(c->promoGiven & (1u << U.opp.special)))
+    {
+        snprintf(line + n, sizeof(line) - n, "\nFirst win: their promo card!");
+        Strip(U.opp.promo, line);
     }
     else
-        width = 64;
-    height = (width * src.h + src.w / 2) / src.w;
-    contentH = (height + 7) / 8 * 8;
-    panelY = 90 - (contentH + 16) / 2;
-    G_Window(166, panelY, width + 16, contentH + 16);
-    dst.x = 174;
-    dst.y = panelY + 8 + (contentH - height) / 2;
-    dst.w = width;
-    dst.h = height;
-    SDL_RenderCopy(G_R(), art, &src, &dst);
+        Strip(0, line);
 }
+
+static void DecksScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned i, n, d = U.cursor < TCG_SAVED_DECKS ? (unsigned)U.cursor : c->activeDeck, mascot;
+    char line[96];
+    Background();
+    SidePanel("DECKS", Theme());
+    mascot = Mascot(c->decks[d].cards);
+    if (mascot)
+        BigCard(mascot, 30, 22, 0);
+    n = DeckCount(d, 0);
+    snprintf(line, sizeof(line), "%u/60 CARDS", n);
+    G_TextAlign(52, 86, TA_CENTER, n == 60 && DeckValid(d) ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
+    TypeOrbs(38, 99, c->decks[d].cards);
+    ListBox(LIST_X, 4, LIST_W, 104);
+    U.scroll = U.cursor < 3 ? 0 : U.cursor > TCG_SAVED_DECKS - 3 ? TCG_SAVED_DECKS - 5 : U.cursor - 3;
+    for (i = 0; i < 6; i++)
+    {
+        unsigned k = U.scroll + i;
+        if (k > TCG_SAVED_DECKS)
+            break;
+        if (k == TCG_SAVED_DECKS)
+        {
+            Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)k, 1, "BACK", NULL);
+            continue;
+        }
+        snprintf(line, sizeof(line), "%s", c->decks[k].name[0] ? c->decks[k].name : "EMPTY SLOT");
+        Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)k, c->decks[k].name[0] != 0, line,
+            k == c->activeDeck ? "IN USE" : NULL);
+    }
+    if (U.cursor == TCG_SAVED_DECKS)
+        Strip(0, "Back to the CARD CASE.");
+    else if ((unsigned)U.cursor == c->activeDeck)
+        Strip(0, "The deck you duel with.");
+    else
+        Strip(0, DeckCount(U.cursor, 0) ? "{R}: duel with this deck." : "An empty slot: {A} builds a new deck.");
+    Hints("{A} EDIT  {START} COPY  {SELECT} EMPTY  {B} BACK");
+}
+
+/* The deck builder: your cards as pictures, the deck down the right. */
+#define GRID_COLS 5
+#define GRID_ROWS 2
+static void BuilderScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    int n = (int)ListSize(), i, page = GRID_COLS * GRID_ROWS, start;
+    uint16_t list[TCG_CARD_COUNT];
+    unsigned listed = DeckList(U.deck, list), total = DeckCount(U.deck, 0), id;
+    char line[64];
+    Background();
+    G_RoundFill(0, 0, 160, 17, 0x203040, 230);
+    Tabs(2, 2, U.filter, 9);
+    /* The grid */
+    start = U.cursor / page * page;
+    for (i = 0; i < page && start + i < n; i++)
+    {
+        unsigned card = ListCard(start + i);
+        int x = 4 + (i % GRID_COLS) * 31, y = 20 + (i / GRID_COLS) * 46, on = U.side == 0 && start + i == U.cursor;
+        unsigned inDeck = DeckCount(U.deck, card);
+        if (on)
+            y -= 2;
+        G_Card(card, (float)x, (float)y, 30, 42, 0, 255, 0);
+        snprintf(line, sizeof(line), card <= 6 ? "%u" : "%u/%u", inDeck, c->owned[card]);
+        G_RoundFill(x + 1, y + 34, 28, 9, inDeck ? 0x2858a8 : 0x404850, 235);
+        G_Digits(x + 15 - G_DigitsWidth(line, 0, 1) / 2, y + 36, line, 0, 1, 0xf0f8ff, 255);
+        if (on)
+        {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (!n)
+        G_TextAlign(80, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind.", TF_SMALL);
+    if (n > page)
+    {
+        snprintf(line, sizeof(line), "%d/%d", start / page + 1, (n + page - 1) / page);
+        G_TextAlign(156, 100, TA_RIGHT, G_WHITE, 0x204030, line, TF_NARROW);
+    }
+    /* The deck */
+    ListBox(162, 0, 78, 110);
+    snprintf(line, sizeof(line), "%u/60", total);
+    G_Text(166, 1, total == 60 ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, 0, TF_SMALL);
+    if (total == 60 && DeckValid(U.deck))
+        G_Text(198, 2, 0x2858a8, G_NO_SHADOW, "READY", 0, TF_NARROW);
+    {
+        int rows = 9, top = U.deckCursor < 4 ? 0 : U.deckCursor - 4;
+        if (top > (int)listed - rows)
+            top = (int)listed > rows ? (int)listed - rows : 0;
+        U.deckScroll = top;
+        for (i = 0; i < rows && top + i < (int)listed; i++)
+        {
+            const struct TcgCard *card = Tcg_Card(list[top + i]);
+            int y = 14 + i * 10, on = U.side == 1 && top + i == U.deckCursor;
+            if (on)
+                G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
+            snprintf(line, sizeof(line), "%u", DeckCount(U.deck, card->id));
+            G_Digits(167, y + 2, line, 0, 1, 0x2858a8, 255);
+            G_Text(175, y - 1, G_INK, G_NO_SHADOW, card->name, 62, TF_NARROW);
+        }
+    }
+    id = U.side ? (listed ? list[U.deckCursor < (int)listed ? U.deckCursor : 0] : 0) : ListCard(U.cursor);
+    line[0] = 0;
+    if (id)
+    {
+        const struct TcgCard *card = Tcg_Card(id);
+        if (card->kind == TCG_POKEMON)
+            snprintf(line, sizeof(line), "%s  HP%u  %s", card->name, card->hp,
+                     card->stage == 0 ? "BASIC" : card->stage == 1 ? "STAGE 1" : "STAGE 2");
+        else
+            snprintf(line, sizeof(line), "%s", card->name);
+    }
+    Strip(0, line);
+    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE" : "{A} ADD  {L}{R} TYPE  {START} LOOK  {B} DONE");
+}
+
+/* The binder: every card by type, owned or all. */
+static void BinderScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    int n = (int)ListSize(), i, cols = 7, page = 14, start;
+    unsigned id = ListCard(U.cursor), total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
+    char line[96];
+    Background();
+    G_RoundFill(0, 0, 240, 17, 0x203040, 230);
+    Tabs(2, 2, U.filter, 10);
+    snprintf(line, sizeof(line), "%u/%u", have, total);
+    G_TextAlign(236, 2, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_SMALL);
+    start = U.cursor / page * page;
+    for (i = 0; i < page && start + i < n; i++)
+    {
+        unsigned card = ListCard(start + i);
+        int x = 8 + (i % cols) * 33, y = 21 + (i / cols) * 45, on = start + i == U.cursor;
+        unsigned count = c->owned[card];
+        if (on)
+            y -= 2;
+        G_Card(card, (float)x, (float)y, 30, 42, 0, count || card <= 6 ? 255 : 80, 0);
+        if (count && card > 6)
+        {
+            snprintf(line, sizeof(line), "x%u", count);
+            G_RoundFill(x + 14, y + 34, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
+            G_Digits(x + 16, y + 36, line, 0, 1, 0xe0f0ff, 255);
+        }
+        if (on)
+        {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (!n)
+        G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
+    if (U.showAll == SHOP_BINDER)
+    {
+        unsigned cost = Tcg_PointCost(id);
+        snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Tcg_Card(id)->name : "", cost,
+                 c->dust, id ? c->owned[id] : 0);
+        Strip(0, line);
+        Hints("{A} BUY  {L}{R} TYPE  {B} BACK");
+        return;
+    }
+    line[0] = 0;
+    if (id)
+    {
+        const struct TcgCard *card = Tcg_Card(id);
+        if (card->kind == TCG_POKEMON)
+            snprintf(line, sizeof(line), "%s  Lv%u  HP%u\n%s", card->name, card->level, card->hp,
+                     c->owned[id] ? "" : "Not in your collection yet.");
+        else
+            snprintf(line, sizeof(line), "%s\n%s", card->name, c->owned[id] || id <= 6 ? "" : "Not in your collection yet.");
+    }
+    Strip(0, line);
+    Hints(U.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {B} BACK");
+}
+
 static void InspectScreen(void)
 {
     const struct TcgCard *card = Tcg_Card(U.card);
@@ -1017,12 +1087,12 @@ static void InspectScreen(void)
         G_FillA(0, 0, 240, 160, 0x000000, 150);
     }
     else
-        Backdrop();
+        Background();
     if (!card)
         return;
     G_FillA(10, 34 - bob, 72, 100, 0x000000, 90);
     G_Card(card->id, 8, (float)(30 - bob), 72, 100, 0, 255, 0);
-    G_Window(86, 4, 152, 140);
+    ListBox(86, 4, 152, 140);
     {
         SDL_Rect clip = {90, 8, 144, 132};
         SDL_RenderSetClipRect(G_R(), &clip);
@@ -1035,7 +1105,7 @@ static void InspectScreen(void)
         snprintf(line, sizeof(line), "%s  Lv%u  %s", card->stage == 0 ? "BASIC" : card->stage == 1 ? "STAGE 1" : "STAGE 2",
                  card->level, G_TypeName(card->type));
         G_Text(94, y, 0x586878, G_NO_SHADOW, line, 136, TF_NARROW);
-        G_HpPlate(196, y - 12 + U.inspectScroll * 0, (int)card->hp, card->hp, 0, 255);
+        G_HpPlate(196, y - 12, (int)card->hp, card->hp, 0, 255);
         y += 11;
         if (card->stage)
         {
@@ -1107,7 +1177,7 @@ static void InspectScreen(void)
         if (U.inspectScroll < U.inspectMax)
             G_Arrow(226, 136, 1, 0x707070);
     }
-    Footer(U.inspectMax ? "{A} BIG PICTURE   {UPDOWN} SCROLL   {B} BACK" : "{A} BIG PICTURE   {B} BACK");
+    Hints(U.inspectMax ? "{A} BIG PICTURE  {UPDOWN} SCROLL  {B} BACK" : "{A} BIG PICTURE  {B} BACK");
 }
 static void ArtScreen(void)
 {
@@ -1116,234 +1186,20 @@ static void ArtScreen(void)
     G_Fill(0, 0, 240, 160, 0x101418);
     if (art)
     {
-        float fit = scan ? 146.0f / h : (float)(w * 3 <= 228 ? 3 : 2);
+        float fit = scan ? 156.0f / h : (float)(w * 3 <= 228 ? 3 : 2);
         SDL_FRect dst;
         if (U.zoom)
             fit *= scan ? 1.8f : 1.33f;
         dst.w = w * fit;
         dst.h = h * fit;
         dst.x = 120 - dst.w / 2 - U.panX;
-        dst.y = (scan ? 74 - (U.zoom ? dst.h / 2 : dst.h / 2) : 74 - dst.h / 2) - U.panY;
+        dst.y = 80 - dst.h / 2 - U.panY;
         SDL_RenderCopyF(G_R(), art, NULL, &dst);
     }
-    Footer(U.zoom ? "{A} FIT   {DPAD} MOVE   {B} BACK" : "{A} ZOOM   {DPAD} MOVE   {B} BACK");
+    Hints(U.zoom ? "{A} FIT  {DPAD} MOVE  {B} BACK" : "{A} ZOOM  {DPAD} MOVE  {B} BACK");
 }
-static void CaseScreen(void)
-{
-    static const char *const names[] = {"CHALLENGE",       "COLLECTION",  "DECKS",
-                                        "BOOSTER PACKS",   "PRACTICE",    "SHOW: OWNED",
-                                        "ANIMATIONS: NORMAL", "ONLINE CARDS", "PUT CASE AWAY"};
-    struct TcgCollection *c = Tcg_GetCollection();
-    unsigned i, packs = 0, mascot = DeckMascot(c->activeDeck), owned = 0;
-    char line[80];
-    int bob = (int)(sinf(U.frame * 0.06f) * 1.5f);
-    for (i = 0; i < TCG_PACK_TYPES; i++)
-        packs += c->packs[i];
-    for (i = 7; i <= TCG_CARD_COUNT; i++)
-        owned += c->owned[i] != 0;
-    Backdrop();
-    Header("CARD CASE", "DEV");
-    G_Window(0, 22, 136, 124);
-    U.scroll = U.cursor < 3 ? 0 : U.cursor > 5 ? 3 : U.cursor - 2;
-    if (U.scroll > 2)
-        U.scroll = 3;
-    for (i = 0; i < 6 && U.scroll + (int)i < 9; i++)
-    {
-        unsigned at = U.scroll + i;
-        const char *label = names[at];
-        int enabled = at != 0 || (U.opponent && strcmp(U.opponent, "Practice Collector"));
-        if (at == 5)
-            label = U.showAll ? "SHOW: ALL CARDS" : "SHOW: OWNED";
-        if (at == 6)
-            label = c->fastAnimations ? "ANIMATIONS: FAST" : "ANIMATIONS: NORMAL";
-        if (at == 3 && packs)
-            snprintf(line, sizeof(line), "BOOSTER PACKS (%u)", packs), label = line;
-        Option(at, 16, 28 + 19 * i, label, enabled);
-    }
-    if (U.scroll > 0)
-        G_Arrow(122, 27, 0, 0x707070);
-    if (U.scroll + 6 < 9)
-        G_Arrow(122, 138, 1, 0x707070);
-    /* Your deck, on the right. */
-    G_Window(136, 22, 104, 124);
-    if (mascot)
-        BigCard(mascot, 166, 32, bob);
-    snprintf(line, sizeof(line), "%s", c->decks[c->activeDeck].name[0] ? c->decks[c->activeDeck].name : "No deck");
-    G_TextAlign(188, 98, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_SMALL);
-    snprintf(line, sizeof(line), "WINS %u   CARDS %u", c->wins, owned);
-    G_TextAlign(188, 112, TA_CENTER, 0x586878, G_NO_SHADOW, line, TF_NARROW);
-    if (U.opponent && U.opponentDeck && strcmp(U.opponent, "Practice Collector"))
-    {
-        snprintf(line, sizeof(line), "vs %s", U.opponent);
-        G_Text(144, 124, 0xb04030, G_NO_SHADOW, line, 92, TF_NARROW);
-    }
-    Footer("{A} SELECT   {B} CLOSE");
-}
-static void StarterScreen(void)
-{
-    static const unsigned ids[] = {TCG_CARD_CHARMANDER, TCG_CARD_SQUIRTLE, TCG_CARD_BULBASAUR};
-    static const char *const names[] = {"EMBER FRIENDS", "TIDAL FRIENDS", "GARDEN FRIENDS"};
-    static const char *const notes[] = {"Charmander leads a hot,\nhard-hitting Fire deck.",
-                                        "Squirtle and friends wear\nfoes down with Water.",
-                                        "Bulbasaur's Grass deck\npoisons and outlasts."};
-    unsigned i;
-    Backdrop();
-    Header("CHOOSE A STARTER DECK", NULL);
-    for (i = 0; i < 3; i++)
-    {
-        int x = 8 + i * 78, on = (int)i == U.cursor;
-        int bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 4) : 0;
-        if (on)
-            G_RoundFill(x - 2, 26, 72, 80, 0xf8f8a0, 70);
-        BigCard(ids[i], x + 12, 34, bob);
-        G_TextAlign(x + 34, 98, TA_CENTER, on ? G_WHITE : 0xa8d8b8, on ? 0x104020 : G_NO_SHADOW, names[i], TF_SMALL);
-    }
-    G_Window(0, 112, 240, 36);
-    G_Text(8, 116, G_INK, G_INK_SHADOW, notes[U.cursor], 224, TF_SMALL);
-    Footer("{LEFTRIGHT} CHOOSE   {A} TAKE THIS DECK   {B} NOT NOW");
-}
-static void CollectionScreen(void)
-{
-    struct TcgCollection *c = Tcg_GetCollection();
-    int n = (int)CollectionSize(), i, cols = 7, rows = 2, page = cols * rows;
-    unsigned id = CollectionCard(U.cursor);
-    char line[80];
-    Backdrop();
-    snprintf(line, sizeof(line), "%u", n);
-    Header("COLLECTION", U.showAll ? "ALL CARDS" : "OWNED");
-    FilterTabs(21, U.filter, 0, 1);
-    U.scroll = U.cursor / page * page;
-    for (i = 0; i < page && U.scroll + i < n; i++)
-    {
-        unsigned card = CollectionCard(U.scroll + i);
-        int x = 8 + (i % cols) * 33, y = 40 + (i / cols) * 51, on = U.scroll + i == U.cursor;
-        unsigned count = c->owned[card];
-        if (on)
-            y -= 2;
-        G_Card(card, (float)x, (float)y, 30, 42, 0, count || card <= 6 ? 255 : 90, 0);
-        if (count && card > 6)
-        {
-            snprintf(line, sizeof(line), "x%u", count);
-            G_RoundFill(x + 14, y + 36, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
-            G_Digits(x + 16, y + 38, line, 0, 1, 0xe0f0ff, 255);
-        }
-        if (on)
-        {
-            int o = (U.frame / 8) % 2;
-            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, G_WHITE, 255);
-        }
-    }
-    if (!n)
-        G_TextAlign(120, 80, TA_CENTER, 0xc8f0d8, G_NO_SHADOW, "No cards of this kind yet.", TF_SMALL);
-    G_FillA(0, 136, 240, 12, 0x081c10, 160);
-    if (id)
-    {
-        const struct TcgCard *card = Tcg_Card(id);
-        if (card->kind == TCG_POKEMON)
-            snprintf(line, sizeof(line), "%s  Lv%u  HP%u", card->name, card->level, card->hp);
-        else
-            snprintf(line, sizeof(line), "%s", card->name);
-        G_Text(6, 136, G_WHITE, 0x104020, line, 170, TF_NARROW);
-        snprintf(line, sizeof(line), "%d/%d", U.cursor + 1, n);
-        G_TextAlign(234, 136, TA_RIGHT, 0xa8d8b8, G_NO_SHADOW, line, TF_NARROW);
-    }
-    Footer("{A} LOOK   {L}{R} KIND   {SELECT} OWNED/ALL   {B} BACK");
-}
-static void EditScreen(void)
-{
-    struct TcgCollection *c = Tcg_GetCollection();
-    char line[80];
-    unsigned i, id, total = DeckCount(U.deck, 0);
-    Backdrop();
-    snprintf(line, sizeof(line), "%s", U.editing ? "CARDS IN DECK" : "BUILD DECK");
-    {
-        char right[16];
-        snprintf(right, sizeof(right), "%u/60", total);
-        Header(line, right);
-    }
-    FilterTabs(21, U.filter, 1, 0);
-    G_Window(0, 38, 166, 110);
-    U.scroll = U.cursor < 3 ? 0 : U.cursor - 3;
-    {
-        int size = (int)CollectionSize();
-        if (U.scroll > size - 7)
-            U.scroll = size > 7 ? size - 7 : 0;
-    }
-    for (i = 0; i < 7; i++)
-    {
-        const struct TcgCard *card;
-        int y = 43 + (int)i * 14;
-        id = CollectionCard(U.scroll + i);
-        if (!id)
-            break;
-        card = Tcg_Card(id);
-        if ((int)(U.scroll + i) == U.cursor)
-        {
-            G_FillA(6, y, 154, 13, 0xc8e0f8, 255);
-            G_Cursor(8, y + 3);
-        }
-        if (card->kind == TCG_POKEMON)
-            snprintf(line, sizeof(line), "%s", card->name);
-        else
-            snprintf(line, sizeof(line), "%s", card->name);
-        G_Text(16, y, G_INK, G_INK_SHADOW, line, 100, TF_SMALL);
-        if (card->kind == TCG_POKEMON)
-        {
-            snprintf(line, sizeof(line), "Lv%u", card->level);
-            G_Text(104, y + 1, 0x607080, G_NO_SHADOW, line, 0, TF_NARROW);
-        }
-        if (id <= 6)
-            snprintf(line, sizeof(line), "%u/--", DeckCount(U.deck, id));
-        else
-            snprintf(line, sizeof(line), "%u/%u", DeckCount(U.deck, id), c->owned[id]);
-        G_TextAlign(156, y + 1, TA_RIGHT, DeckCount(U.deck, id) ? 0x2050a0 : 0x707070, G_NO_SHADOW, line, TF_NARROW);
-    }
-    id = CollectionCard(U.cursor);
-    if (id)
-        DeckIllustration(id);
-    else
-        G_Text(16, 50, 0x707070, G_NO_SHADOW, "No cards in this category.", 145, TF_SMALL);
-    Footer(U.editing ? "{LEFT}-  {RIGHT}+   {L}{R} KIND   {SELECT} ALL CARDS   {START} CHECK"
-                     : "{LEFT}-  {RIGHT}+   {L}{R} KIND   {SELECT} THIS DECK   {START} CHECK");
-}
-static void DecksScreen(void)
-{
-    struct TcgCollection *c = Tcg_GetCollection();
-    unsigned i;
-    char line[80];
-    Backdrop();
-    Header(U.screen == UI_COPY_DECK ? "COPY TO WHICH SLOT?" : "SAVED DECKS", NULL);
-    G_Window(0, 22, 148, 124);
-    U.scroll = U.cursor < 3 ? 0 : U.cursor > TCG_SAVED_DECKS - 4 ? TCG_SAVED_DECKS - 6 : U.cursor - 2;
-    for (i = 0; i < 6 && U.scroll + (int)i < TCG_SAVED_DECKS; i++)
-    {
-        unsigned d = U.scroll + i, n = DeckCount(d, 0);
-        char reason[8];
-        int valid = n == 60 && Tcg_DeckValidate(c->decks[d].cards, c->owned, reason, sizeof(reason));
-        int y = 28 + 19 * (int)i;
-        snprintf(line, sizeof(line), "%s", c->decks[d].name[0] ? c->decks[d].name : "EMPTY SLOT");
-        SmallOption(d, 22, y + 2, line, c->decks[d].name[0] != 0);
-        if (d == c->activeDeck)
-            G_EnergyOrb(10, y + 4, TCG_FIRE, 1);
-        if (n)
-        {
-            snprintf(line, sizeof(line), "%u", n);
-            G_TextAlign(140, y + 3, TA_RIGHT, valid ? 0x2050a0 : 0xc04040, G_NO_SHADOW, line, TF_NARROW);
-        }
-    }
-    G_Window(148, 22, 92, 124);
-    {
-        unsigned mascot = DeckMascot(U.cursor);
-        if (mascot)
-            BigCard(mascot, 172, 32, 0);
-        snprintf(line, sizeof(line), "%u/60 CARDS", DeckCount(U.cursor, 0));
-        G_TextAlign(194, 100, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_NARROW);
-        if (U.cursor == (int)c->activeDeck)
-            G_TextAlign(194, 112, TA_CENTER, 0xb04030, G_NO_SHADOW, "ACTIVE DECK", TF_NARROW);
-    }
-    Footer("{A} SELECT   {B} BACK");
-}
-static void PackArt(int x, int y, unsigned pack, float tear, int focus)
+
+static void PackArt(int x, int y, unsigned pack, int focus)
 {
     static const unsigned colors[][2] = {{0xd04838, 0x801818}, {0x38a048, 0x185820}, {0x6048c0, 0x302070},
                                          {0x3078c8, 0x183870}};
@@ -1351,10 +1207,9 @@ static void PackArt(int x, int y, unsigned pack, float tear, int focus)
     static const unsigned mascots[] = {TCG_CARD_CHARIZARD, TCG_CARD_VENUSAUR_LV67, TCG_CARD_MEWTWO_LV60,
                                        TCG_CARD_ZAPDOS_LV64};
     int w = 44, h = 58, i;
-    G_FillA(x + 2, y + 3, w, h, 0x002010, 110);
+    G_FillA(x + 2, y + 3, w, h, 0x000000, 80);
     for (i = 0; i < h; i++)
         G_FillA(x, y + i, w, 1, G_Mix(colors[pack][0], colors[pack][1], i / (float)h), 255);
-    /* Crimped foil ends. */
     for (i = 0; i < w; i += 2)
     {
         G_FillA(x + i, y, 1, 3, 0xd8d8e0, 255);
@@ -1369,38 +1224,38 @@ static void PackArt(int x, int y, unsigned pack, float tear, int focus)
         if (s >= 0 && s < w + 8)
             G_FillA(x + s - 8, y + 3, 3, h - 6, 0xffffff, 70);
     }
-    if (tear > 0)
-        G_FillA(x, y, w, 6, 0x000000, 0);
+}
+static void TopBar(const char *title)
+{
+    G_RoundFill(0, 0, 240, 17, 0x203040, 230);
+    G_Text(8, 1, G_WHITE, 0x101820, title, 228, TF_NORMAL);
 }
 static void PacksScreen(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned i;
-    char line[16];
-    Backdrop();
-    Header("BOOSTER PACKS", NULL);
+    char line[96];
+    Background();
+    TopBar("BOOSTER PACKS");
     for (i = 0; i < 4; i++)
     {
         int x = 10 + i * 57, on = (int)i == U.cursor;
         int bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
-        PackArt(x, 34 - bob, i, 0, on);
+        PackArt(x, 26 - bob, i, on);
         snprintf(line, sizeof(line), "x%u", c->packs[i]);
-        G_TextAlign(x + 22, 96, TA_CENTER, c->packs[i] ? G_WHITE : 0x70a080, c->packs[i] ? 0x104020 : G_NO_SHADOW,
-                    line, TF_SMALL);
+        G_TextAlign(x + 22, 88, TA_CENTER, c->packs[i] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
         if (on)
-            G_Arrow(x + 19, 110, 0, 0xf8f8f8);
+            G_Frame(x - 3, 26 - bob - 3, 50, 64, 0xe82820, 255);
     }
-    G_Window(0, 118, 240, 28);
-    G_Text(8, 122, G_INK, G_INK_SHADOW,
-           c->packs[U.cursor] ? "Open this pack!" : "Win card duels to earn booster packs.", 224, TF_SMALL);
-    Footer("{LEFTRIGHT} CHOOSE   {A} OPEN   {B} BACK");
+    Strip(0, c->packs[U.cursor] ? "Open this pack!" : "Win card duels to earn booster packs.");
+    Hints("{LEFTRIGHT} CHOOSE  {A} OPEN  {B} BACK");
 }
+#define REVEAL_TEAR 34
 static void RevealScreen(void)
 {
     unsigned i;
     int t = (int)U.age;
-    Backdrop();
-    Header("NEW CARDS", NULL);
+    Background();
     if (t < REVEAL_TEAR)
     {
         /* The pack shakes, its top tears off, the stack slides out. */
@@ -1408,19 +1263,15 @@ static void RevealScreen(void)
         float tear = t < 14 ? 0 : Ease((t - 14) / 12.0f);
         if (tear > 0)
             G_Card(0, 105, 52 - tear * 22, 30, 42, 0, 255, 0);
-        PackArt(98 + shake, 50 + (int)(tear * 30), (unsigned)U.pack, 0, 0);
+        PackArt(98 + shake, 50 + (int)(tear * 30), (unsigned)U.pack, 0);
         if (tear > 0)
-        {
-            /* The torn strip flies off. */
-            G_FillA(98, 50 + (int)(tear * 30), 44, 5, 0x017a3e, 0);
             G_FillA(98 + (int)(tear * 40), 46 - (int)(tear * 24), 44, 5, 0xd8d8e0, (unsigned)(255 * (1 - tear)));
-        }
-        Footer("{A} OPEN");
+        Hints("{A} OPEN");
         return;
     }
     for (i = 0; i < 10; i++)
     {
-        int x = 12 + (int)(i % 5) * 46, y = 27 + (int)(i / 5) * 54;
+        int x = 12 + (int)(i % 5) * 46, y = 8 + (int)(i / 5) * 52;
         float in = Ease((float)(t - REVEAL_TEAR - (int)i * 2) / 10.0f);
         float sx = 105 + (x - 105) * in, sy = 40 + (y - 40) * in;
         const struct TcgCard *c = Tcg_Card(U.revealed[i]);
@@ -1438,42 +1289,1124 @@ static void RevealScreen(void)
                 G_FillA((int)sx + s, (int)sy + 1, 2, 40, 0xffffff, 120);
             G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, 0xf8e070, 0x403000, "RARE!", TF_NARROW);
         }
-        else if (faceUp && c && c->rarity == 1)
-        {
-            /* A small silver diamond marks an uncommon. */
-            int cx = (int)sx + 15, cy = (int)sy + 47;
-            G_Fill(cx - 1, cy - 2, 2, 1, 0xe0f0f8);
-            G_Fill(cx - 2, cy - 1, 4, 2, 0xb0c8d8);
-            G_Fill(cx - 1, cy + 1, 2, 1, 0x8098a8);
-        }
         if (on)
         {
             int o = (U.frame / 8) % 2;
-            G_Frame((int)sx - 2 - o, (int)sy - 5 - o, 34 + 2 * o, 46 + 2 * o, G_WHITE, 255);
+            G_Frame((int)sx - 2 - o, (int)sy - 5 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
     if (U.flipped >= 10)
     {
         const struct TcgCard *c = Tcg_Card(U.revealed[U.cursor]);
-        G_FillA(0, 136, 240, 12, 0x081c10, 160);
-        if (c)
-            G_Text(6, 136, G_WHITE, 0x104020, c->name, 228, TF_NARROW);
-        Footer("{A} LOOK   {DPAD} CHOOSE   {B} CARD CASE");
+        Strip(0, c ? c->name : "");
+        Hints("{A} LOOK  {DPAD} CHOOSE  {B} DONE");
     }
     else
-        Footer("{A} NEXT CARD   {B} SHOW ALL");
+        Hints("{A} NEXT CARD  {B} SHOW ALL");
 }
+
+/* After a win over a card player: one card of their deck, face up, your pick. */
+static void SpoilsScreen(void)
+{
+    int i, cols = 7, page = 14, start = U.cursor / page * page;
+    char line[96];
+    Background();
+    snprintf(line, sizeof(line), "%s'S DECK", U.opp.name);
+    TopBar(line);
+    for (i = 0; i < page && start + i < U.spoilCount; i++)
+    {
+        int x = 8 + (i % cols) * 33, y = 21 + (i / cols) * 45, on = start + i == U.cursor;
+        const struct TcgCard *c = Tcg_Card(U.spoils[start + i]);
+        if (on)
+            y -= 2;
+        if (c && c->rarity >= 2)
+            G_RoundFill(x - 2, y - 2, 34, 46, 0xf8e070, (unsigned)(80 + fabsf(sinf(U.frame * 0.1f)) * 60));
+        G_Card(U.spoils[start + i], (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (on)
+        {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    {
+        const struct TcgCard *c = Tcg_Card(U.spoils[U.cursor]);
+        snprintf(line, sizeof(line), "%s\nYou own %u.", c ? c->name : "", c ? Tcg_GetCollection()->owned[c->id] : 0);
+        Strip(0, line);
+    }
+    Hints("{A} TAKE  {START} LOOK");
+}
+
+/* The CARD CLUB's counter: TRADE IN spare cards for CARD POINTS, spend them, prizes. */
+static const char *const sCounterTabs[] = {"TRADE IN", "CARD SHOP", "PRIZES"};
+enum
+{
+    BUY_PACK0,
+    BUY_PACK1,
+    BUY_PACK2,
+    BUY_PACK3,
+    BUY_CARD,
+    BUY_RARE_CANDY,
+    BUY_PP_UP,
+    BUY_TICKET,
+    BUY_COUNT
+};
+static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PACK", "MYSTERY PACK", "LABORATORY PACK",
+                                                 "A CARD YOU PICK", "RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
+static const unsigned sBuyCost[BUY_COUNT] = {12, 12, 12, 12, 0, 20, 25, 30};
+/* Cards with spare copies, for TRADE IN. */
+static unsigned SpareList(uint16_t *out)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned id, n = 0;
+    for (id = 7; id <= TCG_CARD_COUNT; id++)
+        if (Tcg_Spare(c, id))
+            out[n++] = (uint16_t)id;
+    return n;
+}
+/* Prizes: 25 / 50 / 75 % of each set, and every Gym Leader's deck beaten. */
+#define PRIZE_ROWS (TCG_SET_COUNT * 3 + 2)
+static const char *const sSetNames[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
+static const unsigned sSetPromos[] = {TCG_CARD_MOLTRES_LV37, TCG_CARD_ZAPDOS_LV68, TCG_CARD_SLOWPOKE_LV9,
+                                      TCG_CARD_IMAKUNI_CARD};
+#define GYM_SWEEP_BIT (1u << 30)
+/* 0 not yet, 1 ready to claim, 2 done */
+static int PrizeState(unsigned row, char *what, size_t size)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (row < TCG_SET_COUNT * 3)
+    {
+        unsigned set = row / 3, step = row % 3, total, have = Tcg_SetOwned(c, set, &total);
+        if (step == 2)
+            snprintf(what, size, "%s 75%% (%u/%u): the promo card %s", sSetNames[set], have, total,
+                     Tcg_Card(sSetPromos[set])->name);
+        else
+            snprintf(what, size, "%s %u%% (%u/%u): %s", sSetNames[set], 25 * (step + 1), have, total,
+                     step ? "3 booster packs + 30 CP" : "2 booster packs");
+        if (c->milestones & (1u << row))
+            return 2;
+        return have * 4 >= total * (step + 1);
+    }
+    if (row == TCG_SET_COUNT * 3)
+    {
+        unsigned i, beaten = 0;
+        for (i = 0; i < TCG_GYM_LEADERS; i++)
+            beaten += (c->specialBeaten >> i) & 1;
+        snprintf(what, size, "Beat all 8 GYM LEADERS' decks (%u/8): a promo card", beaten);
+        if (c->milestones & GYM_SWEEP_BIT)
+            return 2;
+        return beaten == TCG_GYM_LEADERS;
+    }
+    {
+        unsigned total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
+        snprintf(what, size, "Every card (%u/%u): a gift from the CARD CLUB", have, total);
+        return c->flags & TCG_FLAG_FULL_GIFT ? 2 : 0;
+    }
+}
+static void ClaimPrize(unsigned row)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (row < TCG_SET_COUNT * 3)
+    {
+        unsigned set = row / 3, step = row % 3;
+        c->milestones |= 1u << row;
+        if (step == 0)
+        {
+            c->packs[set] += 2;
+            Say(ACT_NONE, "You received 2 %s booster packs!", sSetNames[set]);
+        }
+        else if (step == 1)
+        {
+            c->packs[set] += 3;
+            c->dust += 30;
+            Say(ACT_NONE, "You received 3 %s booster packs and 30 CARD POINTS!", sSetNames[set]);
+        }
+        else
+        {
+            AddCard(sSetPromos[set]);
+            Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(sSetPromos[set])->name);
+        }
+    }
+    else if (row == TCG_SET_COUNT * 3)
+    {
+        c->milestones |= GYM_SWEEP_BIT;
+        AddCard(TCG_CARD_SURFING_PIKACHU_ALT_LV13);
+        Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(TCG_CARD_SURFING_PIKACHU_ALT_LV13)->name);
+    }
+    PlayFanfare(MUS_OBTAIN_ITEM);
+}
+static void CounterScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    char line[160], right[24];
+    uint16_t list[TCG_CARD_COUNT];
+    int i, n, rows = 6;
+    Background();
+    SidePanel("CARD CLUB", 0x3878c8);
+    for (i = 0; i < 3; i++)
+    {
+        int on = i == U.tab;
+        G_RoundFill(6, 22 + i * 17, 92, 15, on ? 0xf8f8f8 : 0x88a8d8, 255);
+        G_RoundFrame(6, 22 + i * 17, 92, 15, on ? 0xe82820 : 0x305088, 255);
+        G_Text(12, 22 + i * 17, on ? G_INK : 0x203860, on ? G_INK_SHADOW : G_NO_SHADOW, sCounterTabs[i], 0, TF_SMALL);
+    }
+    snprintf(line, sizeof(line), "%u CP", c->dust);
+    G_TextAlign(52, 78, TA_CENTER, 0x2858a8, G_INK_SHADOW, line, TF_NORMAL);
+    G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, "CARD POINTS", TF_NARROW);
+    ListBox(LIST_X, 4, LIST_W, 104);
+    U.scroll = U.cursor < 3 ? 0 : U.cursor - 3;
+    if (U.tab == 0)
+    {
+        n = (int)SpareList(list);
+        if (U.scroll > n - rows)
+            U.scroll = n > rows ? n - rows : 0;
+        for (i = 0; i < rows && U.scroll + i < n; i++)
+        {
+            unsigned id = list[U.scroll + i];
+            snprintf(right, sizeof(right), "x%u", Tcg_Spare(c, id));
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, 1, Tcg_Card(id)->name, right);
+        }
+        if (!n)
+        {
+            G_Text(LIST_X + 8, 12, 0x707070, G_NO_SHADOW, "No spare cards yet.", LIST_W - 14, TF_SMALL);
+            Strip(0, "Cards beyond four of a kind (and beyond what your decks use) trade for CARD POINTS.");
+        }
+        else
+        {
+            unsigned id = list[U.cursor < n ? U.cursor : 0];
+            snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{SELECT}: trade in all of them.", Tcg_Card(id)->name,
+                     Tcg_PointValue(id), Tcg_Spare(c, id));
+            Strip(id, line);
+        }
+    }
+    else if (U.tab == 1)
+    {
+        n = BUY_COUNT;
+        if (U.scroll > n - rows)
+            U.scroll = n - rows;
+        for (i = 0; i < rows && U.scroll + i < n; i++)
+        {
+            int k = U.scroll + i;
+            if (k == BUY_CARD)
+                snprintf(right, sizeof(right), "5-50");
+            else
+                snprintf(right, sizeof(right), "%u", sBuyCost[k]);
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
+                sBuyNames[k], right);
+        }
+        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets: 5, 15 or 50 CP by rarity. Promo cards can't be bought."
+                 : U.cursor < 4       ? "A booster pack of 10 cards from this set."
+                 : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
+                                          : "It goes into your BAG.");
+    }
+    else
+    {
+        n = PRIZE_ROWS;
+        if (U.scroll > n - rows)
+            U.scroll = n - rows;
+        for (i = 0; i < rows && U.scroll + i < n; i++)
+        {
+            int k = U.scroll + i, state = PrizeState(k, line, sizeof(line));
+            char label[24];
+            snprintf(label, sizeof(label), "%s", k < TCG_SET_COUNT * 3 ? sSetNames[k / 3]
+                                                 : k == TCG_SET_COUNT * 3 ? "GYM DECKS" : "EVERY CARD");
+            snprintf(right, sizeof(right), "%s", state == 2 ? "DONE" : state == 1 ? "READY!"
+                                                 : k < TCG_SET_COUNT * 3 ? (k % 3 == 0 ? "25%" : k % 3 == 1 ? "50%" : "75%")
+                                                                         : "");
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, state != 0, label, right);
+        }
+        PrizeState(U.cursor, line, sizeof(line));
+        Strip(0, line);
+    }
+    Hints("{L}{R} COUNTER  {B} LEAVE");
+}
+
+/* The first deck: three face-down decks on the table, turned over one by one. */
+static const unsigned sStarterIds[] = {TCG_CARD_CHARMANDER, TCG_CARD_SQUIRTLE, TCG_CARD_BULBASAUR};
+static const char *const sStarterNames[] = {"EMBER FRIENDS", "TIDAL FRIENDS", "GARDEN FRIENDS"};
+static const char *const sStarterNotes[] = {"CHARMANDER leads a hot, hard-hitting FIRE deck.",
+                                            "SQUIRTLE and friends wear foes down with WATER.",
+                                            "BULBASAUR's GRASS deck poisons and outlasts."};
+#define STARTER_READY 76
+static void StarterScreen(void)
+{
+    unsigned i;
+    int t = U.age;
+    G_Fill(0, 0, 240, 160, 0x1c7a44);
+    for (i = 0; i < 160; i += 2)
+        G_FillA(0, (int)i, 240, 1, 0x000000, 16);
+    for (i = 0; i < 12; i++)
+    {
+        /* sparkles drifting over the table */
+        int sx = (int)((i * 53 + U.frame / 2) % 240), sy = (int)((i * 37 + U.frame / 3) % 112);
+        G_FillA(sx, sy, 1, 1, 0xf8f0a0, 120 + (i % 3) * 40);
+    }
+    TopBar("CHOOSE YOUR FIRST DECK");
+    for (i = 0; i < 3; i++)
+    {
+        int x = 22 + (int)i * 72, on = (int)i == U.starterChoice && t >= STARTER_READY;
+        float in = Ease((t - (int)i * 8) / 18.0f), flip = Ease((t - 40 - (int)i * 10) / 10.0f);
+        int y = 26 + (int)((1 - in) * -90), bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 4) : 0;
+        float w = 44 * fabsf(1 - 2 * flip);
+        unsigned face = flip >= 0.5f ? sStarterIds[i] : 0;
+        G_Card(0, (float)x + 3, (float)y + 3, 44, 61, 0, 200, 0);
+        G_Card(0, (float)x + 1.5f, (float)y + 1.5f, 44, 61, 0, 230, 0);
+        if (on)
+            G_RoundFill(x - 4, y - 4 - bob, 52, 69, 0xf8e070, (unsigned)(90 + fabsf(sinf(U.frame * 0.1f)) * 80));
+        G_Card(face, x + (44 - w) / 2, (float)(y - bob), w, 61, 0, 255, flip > 0.9f && t < 62 + (int)i * 10 ? 160 : 0);
+        if (flip >= 1)
+            G_TextAlign(x + 22, y + 66, TA_CENTER, on ? 0xf8e070 : G_WHITE, 0x103020, sStarterNames[i], TF_SMALL);
+        if (t == 40 + (int)i * 10)
+            PlaySE(SE_RG_CARD_FLIP);
+        if (t == 52 + (int)i * 10)
+            PlaySE(SE_SHINY);
+    }
+    if (t >= STARTER_READY)
+    {
+        Strip(sStarterIds[U.starterChoice], sStarterNotes[U.starterChoice]);
+        Hints("{LEFTRIGHT} CHOOSE  {A} TAKE THIS DECK");
+    }
+}
+
+/* Trading a card with a friend: each offers one, both confirm. */
+static void TradeScreen(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    int n = (int)ListSize(), i, page = 7, start;
+    char line[160];
+    Background();
+    snprintf(line, sizeof(line), "CARD TRADE WITH %s", PeerName(s->peer));
+    TopBar(line);
+    ListBox(4, 20, 112, 62);
+    ListBox(124, 20, 112, 62);
+    G_Text(10, 22, 0x606878, G_NO_SHADOW, "YOU OFFER", 0, TF_NARROW);
+    G_Text(130, 22, 0x606878, G_NO_SHADOW, "THEY OFFER", 0, TF_NARROW);
+    if (s->myOffer)
+    {
+        G_Card(s->myOffer, 10, 33, 30, 42, 0, 255, 0);
+        G_Text(44, 38, G_INK, G_INK_SHADOW, Tcg_Card(s->myOffer)->name, 70, TF_SMALL);
+        if (s->myConfirm)
+            G_Text(44, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    if (s->theirOffer)
+    {
+        G_Card(s->theirOffer, 130, 33, 30, 42, 0, 255, 0);
+        G_Text(164, 38, G_INK, G_INK_SHADOW, Tcg_Card(s->theirOffer)->name, 70, TF_SMALL);
+        if (s->theirConfirm)
+            G_Text(164, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    else
+        G_Text(164, 46, 0x909090, G_NO_SHADOW, "Choosing...", 0, TF_SMALL);
+    G_RoundFill(0, 84, 240, 15, 0x203040, 230);
+    Tabs(4, 85, U.filter, 10);
+    start = U.cursor / page * page;
+    for (i = 0; i < page && start + i < n; i++)
+    {
+        unsigned card = ListCard(start + i);
+        int x = 8 + i * 33, on = start + i == U.cursor;
+        G_Card(card, (float)x, (float)(103 - (on ? 2 : 0)), 30, 42, 0, 255, 0);
+        if (on)
+            G_Frame(x - 2, 99, 34, 46, 0xe82820, 255);
+    }
+    if (!n)
+        G_Text(10, 108, G_WHITE, 0x204030, "No cards of this kind to offer.", 0, TF_SMALL);
+    Hints(s->myOffer && s->theirOffer ? (s->myConfirm ? "WAITING FOR THEM  {B} LEAVE" : "{A} OFFER  {START} TRADE!  {B} LEAVE")
+                                      : "{A} OFFER  {L}{R} TYPE  {B} LEAVE");
+}
+
+static void WaitScreen(void)
+{
+    char line[96];
+    int dots = (U.frame / 20) % 4;
+    Background();
+    SidePanel("CARD DUEL", Theme());
+    ListBox(LIST_X, 4, LIST_W, 104);
+    snprintf(line, sizeof(line), "Waiting for %s%.*s", U.opp.name, dots, "...");
+    G_Text(LIST_X + 8, 20, G_INK, G_INK_SHADOW, line, LIST_W - 14, TF_SMALL);
+    G_Coin(LIST_X + LIST_W / 2, 70, (U.frame % 60) / 60.0f, 1, 255);
+    Strip(0, "They're choosing their deck.");
+    Hints("{B} LEAVE");
+}
+
+/* ------------------------------------------------------------------ */
+/* Input                                                                */
+/* ------------------------------------------------------------------ */
+static void Act(int action)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    switch (action)
+    {
+    case ACT_CLOSE:
+        Close();
+        break;
+    case ACT_HOME:
+        Screen(UI_HOME);
+        break;
+    case ACT_TAKE_SPOIL:
+    {
+        unsigned id = U.spoils[U.askArg];
+        AddCard(id);
+        Tcg_DailyTake(c, U.opp.key, Tcg_Today());
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        printf("[tcg] took card %u from %s\n", id, U.opp.name);
+        Say(ACT_CLOSE, "You took %s's %s!", U.opp.name, Tcg_Card(id)->name);
+        break;
+    }
+    case ACT_STARTER:
+        if (!Tcg_GrantCase())
+        {
+            Say(ACT_CLOSE, "There's no room for the CARD CASE in your KEY ITEMS.");
+            break;
+        }
+        Tcg_ChooseStarter(c, (unsigned)U.starterChoice);
+        c->flags |= TCG_FLAG_CLUB_MET;
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        printf("[tcg] starter deck %d\n", U.starterChoice);
+        Say(ACT_CLOSE, "You got the %s deck! It's in your CARD CASE.", sStarterNames[U.starterChoice]);
+        break;
+    case ACT_COPY:
+    {
+        unsigned to;
+        for (to = 0; to < TCG_SAVED_DECKS; to++)
+            if (!DeckCount(to, 0) && to != (unsigned)U.askArg)
+                break;
+        if (to == TCG_SAVED_DECKS)
+            Say(ACT_NONE, "There's no empty slot to copy into.");
+        else
+        {
+            Tcg_DeckCopy(c, (unsigned)U.askArg, to);
+            snprintf(c->decks[to].name, TCG_NAME_LEN, "Deck %u", to + 1);
+            Say(ACT_NONE, "Copied into slot %u.", to + 1);
+        }
+        break;
+    }
+    case ACT_CLEAR:
+        memset(c->decks[U.askArg].cards, 0, sizeof(c->decks[U.askArg].cards));
+        if (U.askArg != c->activeDeck)
+            c->decks[U.askArg].name[0] = 0;
+        PlaySE(SE_SELECT);
+        break;
+    case ACT_TRADE_IN:
+    case ACT_TRADE_IN_ALL:
+    {
+        unsigned id = (unsigned)U.askArg, count = action == ACT_TRADE_IN ? 1 : Tcg_Spare(c, id), before = c->dust;
+        if (Tcg_ExchangeDuplicates(c, id, count))
+        {
+            PlaySE(SE_SHOP);
+            Say(ACT_NONE, "Traded in %u x %s for %u CARD POINTS.", count, Tcg_Card(id)->name, c->dust - before);
+        }
+        break;
+    }
+    case ACT_BUY:
+    {
+        int k = U.askArg;
+        if (k >= 1000)
+        {
+            if (Tcg_CraftCard(c, (unsigned)(k - 1000)))
+            {
+                PlaySE(SE_SHOP);
+                CollectionChanged();
+                Say(ACT_NONE, "You got %s!", Tcg_Card(k - 1000)->name);
+            }
+            break;
+        }
+        if (c->dust < sBuyCost[k])
+            break;
+        if (k == BUY_RARE_CANDY || k == BUY_PP_UP)
+        {
+            if (!AddBagItem(k == BUY_RARE_CANDY ? ITEM_RARE_CANDY : ITEM_PP_UP, 1))
+            {
+                Say(ACT_NONE, "Your BAG is full.");
+                break;
+            }
+        }
+        else if (k == BUY_TICKET)
+            MP_Gatcha_AddTickets(1);
+        else
+            c->packs[k]++;
+        c->dust -= sBuyCost[k];
+        PlaySE(SE_SHOP);
+        Say(ACT_NONE, "You got the %s!", sBuyNames[k]);
+        break;
+    }
+    }
+}
+/* The challenge (an NPC's or a friend's) once a deck is picked. */
+static void ChooseDeck(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    char reason[160];
+    if (U.cursor == TCG_SAVED_DECKS)
+    {
+        Close();
+        return;
+    }
+    if (!Tcg_DeckValidate(c->decks[U.cursor].cards, c->owned, reason, sizeof(reason)))
+    {
+        PlaySE(SE_FAILURE);
+        Say(ACT_NONE, "%s", reason);
+        return;
+    }
+    c->activeDeck = (uint8_t)U.cursor;
+    if (U.vs == VS_FRIEND)
+    {
+        const struct TcgSocial *s = Tcg_Social();
+        U.onlineDeck = U.cursor;
+        U.onlineDeckChosen = 1;
+        if (s->seat == 0 && !TcgLink_Invite(Tcg_Online(), s->peer, s->session, c->decks[U.cursor].cards, SDL_GetTicks()))
+        {
+            Say(ACT_CLOSE, "The duel couldn't start.");
+            return;
+        }
+        U.online = 1;
+        Screen(UI_WAIT);
+        return;
+    }
+    StartDuel(c->decks[U.cursor].cards, U.opp.deck);
+}
+static void MoveCursor(unsigned pressed, int count, int step)
+{
+    int old = U.cursor;
+    if (pressed & KEY_UP)
+        U.cursor -= step;
+    if (pressed & KEY_DOWN)
+        U.cursor += step;
+    if (count > 0)
+    {
+        while (U.cursor < 0)
+            U.cursor += count;
+        U.cursor %= count;
+    }
+    else
+        U.cursor = 0;
+    if (old != U.cursor)
+        PlaySE(SE_SELECT);
+}
+static void GridMove(unsigned pressed, int count, int cols)
+{
+    int old = U.cursor;
+    if (pressed & KEY_LEFT)
+        U.cursor--;
+    if (pressed & KEY_RIGHT)
+        U.cursor++;
+    if (pressed & KEY_UP)
+        U.cursor -= cols;
+    if (pressed & KEY_DOWN)
+        U.cursor += cols;
+    if (U.cursor < 0)
+        U.cursor = 0;
+    if (U.cursor >= count)
+        U.cursor = count ? count - 1 : 0;
+    if (old != U.cursor)
+        PlaySE(SE_SELECT);
+}
+static void FilterTab(unsigned pressed, int tabs)
+{
+    if (pressed & (KEY_L | KEY_R))
+    {
+        U.filter = (U.filter + (pressed & KEY_R ? 1 : tabs - 1)) % tabs;
+        U.cursor = 0;
+        PlaySE(SE_RG_BAG_POCKET);
+    }
+}
+/* Pack opening: the wrapper tears, then each card flips in turn. */
+static void RevealStep(unsigned pressed)
+{
+    static int sNext;
+    const struct TcgCard *c;
+    if (U.age < REVEAL_TEAR)
+    {
+        if (U.age == 14)
+            PlaySE(SE_RG_CARD_FLIPPING);
+        if (pressed & KEY_A)
+            U.age = REVEAL_TEAR;
+        return;
+    }
+    if (U.age == REVEAL_TEAR)
+        sNext = U.age + 8;
+    if (pressed & KEY_A)
+        sNext = U.age;
+    if (U.age >= sNext)
+    {
+        c = Tcg_Card(U.revealed[U.flipped]);
+        PlaySE(c && c->rarity >= 2 ? SE_SHINY : SE_RG_CARD_FLIP);
+        U.flipped++;
+        U.cursor = U.flipped - 1;
+        sNext = U.age + (Tcg_GetCollection()->fastAnimations ? 5 : c && c->rarity >= 2 ? 26 : 11);
+    }
+}
+static void OnlineStep(void)
+{
+    struct TcgLink *l = Tcg_Online();
+    const struct TcgSocial *s = Tcg_Social();
+    struct TcgCollection *c = Tcg_GetCollection();
+    if (U.vs != VS_FRIEND || U.screen == UI_TRADE)
+        return;
+    if (s->peerLeft && U.screen != UI_DUEL && !U.message[0])
+    {
+        Say(ACT_CLOSE, "%s left. Nothing was lost.", U.opp.name);
+        return;
+    }
+    /* The friend who said yes accepts the asker's invite with the deck they picked */
+    if (s->seat == 1 && U.onlineDeckChosen && l->state == TCG_LINK_INVITED)
+        TcgLink_Accept(l, c->decks[U.onlineDeck].cards, SDL_GetTicks());
+    if (U.screen == UI_WAIT && l->state == TCG_LINK_PLAYING)
+    {
+        U.online = 1;
+        OnlineView();
+        BeginBoard();
+    }
+    if (U.online && l->state == TCG_LINK_ENDED && U.duel.phase != TCG_FINISHED && !U.message[0])
+    {
+        U.online = 0;
+        if (U.screen == UI_DUEL)
+            TcgBoard_End();
+        U.screen = UI_WAIT;
+        Say(ACT_CLOSE, "%s", l->error[0] ? l->error : "The card session ended.");
+    }
+}
+static void TradeStep(unsigned pressed)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    struct TcgCollection *c = Tcg_GetCollection();
+    int n = (int)ListSize();
+    if (s->peerLeft)
+    {
+        Say(ACT_CLOSE, "%s left the trade.", PeerName(s->peer));
+        Tcg_SocialLeave();
+        return;
+    }
+    if (s->myConfirm && s->theirConfirm && s->myOffer && s->theirOffer)
+    {
+        unsigned mine = s->myOffer, theirs = s->theirOffer;
+        if (c->owned[mine])
+            c->owned[mine]--;
+        AddCard(theirs);
+        c->trades++;
+        MP_Achieve_Unlock("cardtrade");
+        printf("[tcg] traded card %u for %u\n", mine, theirs);
+        Tcg_SocialLeave();
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        Say(ACT_CLOSE, "You traded your %s for %s!", Tcg_Card(mine)->name, Tcg_Card(theirs)->name);
+        return;
+    }
+    FilterTab(pressed, 10);
+    {
+        int old = U.cursor;
+        if (pressed & KEY_LEFT)
+            U.cursor--;
+        if (pressed & KEY_RIGHT)
+            U.cursor++;
+        if (U.cursor < 0)
+            U.cursor = 0;
+        if (U.cursor >= n)
+            U.cursor = n ? n - 1 : 0;
+        if (old != U.cursor)
+            PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_A && n)
+    {
+        Tcg_SocialOffer(ListCard(U.cursor));
+        PlaySE(SE_RG_CARD_FLIP);
+    }
+    if (pressed & KEY_START && s->myOffer && s->theirOffer && !s->myConfirm)
+    {
+        Tcg_SocialConfirm();
+        PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_B)
+    {
+        PlaySE(SE_SELECT);
+        Close();
+    }
+}
+
+int Tcg_Step(unsigned keys)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned pressed = keys & ~U.previousKeys;
+    U.previousKeys = keys;
+    if (!Tcg_IsActive())
+        return 0;
+    U.age++;
+    U.frame++;
+    /* Key repeat for long lists. */
+    if (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
+    {
+        if (++U.held > 18 && U.held % 4 == 0 && U.screen != UI_DUEL)
+            pressed |= keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+    }
+    else
+        U.held = 0;
+    OnlineStep();
+    if (U.screen == UI_DUEL && !U.message[0])
+    {
+        DuelStep(pressed, keys);
+        return 1;
+    }
+    /* A message or a question first */
+    if (U.message[0])
+    {
+        if (U.asking)
+        {
+            if (pressed & (KEY_UP | KEY_DOWN))
+                U.askYes ^= 1, PlaySE(SE_SELECT);
+            if (pressed & (KEY_A | KEY_B))
+            {
+                int yes = (pressed & KEY_A) && U.askYes;
+                U.message[0] = 0;
+                U.asking = 0;
+                PlaySE(SE_SELECT);
+                if (yes)
+                    Act(U.askAction);
+            }
+        }
+        else if (pressed & (KEY_A | KEY_B))
+        {
+            int then = U.messageThen;
+            U.message[0] = 0;
+            PlaySE(SE_SELECT);
+            Act(then);
+        }
+        return 1;
+    }
+    switch (U.screen)
+    {
+    case UI_HOME:
+        MoveCursor(pressed, HOME_ROWS, 1);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        else if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            switch (U.cursor)
+            {
+            case 0:
+                Screen(UI_DECKS);
+                U.cursor = c->activeDeck;
+                break;
+            case 1:
+                U.filter = 9;
+                U.showAll = 0;
+                Screen(UI_BINDER);
+                break;
+            case 2:
+                Screen(UI_PACKS);
+                break;
+            case 3:
+            {
+                const struct TcgDeckDefinition *practice = DeckNamed("PracticePlayer");
+                char reason[160];
+                if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, reason, sizeof(reason)))
+                {
+                    Say(ACT_NONE, "%s", reason);
+                    break;
+                }
+                memset(&U.opp, 0, sizeof(U.opp) - sizeof(U.opp.portrait));
+                snprintf(U.opp.name, sizeof(U.opp.name), "PRACTICE DECK");
+                U.opp.deck = practice->cards;
+                U.opp.special = TCG_SPECIAL_NONE;
+                U.vs = VS_PRACTICE;
+                StartDuel(c->decks[c->activeDeck].cards, practice->cards);
+                break;
+            }
+            case 4:
+                c->fastAnimations = !c->fastAnimations;
+                break;
+            case 5:
+                Close();
+                break;
+            }
+        }
+        break;
+    case UI_CHALLENGE:
+        MoveCursor(pressed, TCG_SAVED_DECKS + 1, 1);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        else if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            ChooseDeck();
+        }
+        break;
+    case UI_DECKS:
+        MoveCursor(pressed, TCG_SAVED_DECKS + 1, 1);
+        if (pressed & KEY_B || (pressed & KEY_A && U.cursor == TCG_SAVED_DECKS))
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_HOME);
+        }
+        else if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            U.deck = U.cursor;
+            if (!c->decks[U.deck].name[0])
+                snprintf(c->decks[U.deck].name, TCG_NAME_LEN, "Deck %d", U.deck + 1);
+            U.side = 0;
+            U.deckCursor = 0;
+            Screen(UI_BUILDER);
+            U.filter = 0;
+        }
+        else if (pressed & KEY_R && U.cursor < TCG_SAVED_DECKS && (unsigned)U.cursor != c->activeDeck &&
+                 DeckCount(U.cursor, 0))
+        {
+            char reason[160];
+            if (Tcg_DeckValidate(c->decks[U.cursor].cards, c->owned, reason, sizeof(reason)))
+            {
+                c->activeDeck = (uint8_t)U.cursor;
+                PlaySE(SE_SUCCESS);
+            }
+            else
+            {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "%s", reason);
+            }
+        }
+        else if (pressed & KEY_START && U.cursor < TCG_SAVED_DECKS && DeckCount(U.cursor, 0))
+            Ask(ACT_COPY, U.cursor, "Copy %s into an empty slot?", c->decks[U.cursor].name);
+        else if (pressed & KEY_SELECT && U.cursor < TCG_SAVED_DECKS && DeckCount(U.cursor, 0))
+            Ask(ACT_CLEAR, U.cursor, "Take every card out of %s?", c->decks[U.cursor].name);
+        break;
+    case UI_BUILDER:
+    {
+        uint16_t list[TCG_CARD_COUNT];
+        unsigned listed = DeckList(U.deck, list);
+        char reason[160];
+        int n = (int)ListSize();
+        FilterTab(pressed, 9);
+        if (U.side == 0)
+        {
+            int col = U.cursor % GRID_COLS;
+            if (pressed & KEY_RIGHT && (col == GRID_COLS - 1 || U.cursor + 1 >= n) && listed)
+            {
+                U.side = 1;
+                if (U.deckCursor >= (int)listed)
+                    U.deckCursor = (int)listed - 1;
+                PlaySE(SE_SELECT);
+            }
+            else
+                GridMove(pressed, n, GRID_COLS);
+            if (pressed & KEY_A && n)
+            {
+                unsigned id = ListCard(U.cursor);
+                if (Tcg_DeckAdd(c, U.deck, id, reason, sizeof(reason)))
+                    PlaySE(SE_RG_CARD_FLIP);
+                else
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "%s", reason);
+                }
+            }
+            if (pressed & KEY_START && n)
+                Inspect(ListCard(U.cursor), UI_BUILDER);
+        }
+        else
+        {
+            int old = U.deckCursor;
+            if (pressed & KEY_UP)
+                U.deckCursor--;
+            if (pressed & KEY_DOWN)
+                U.deckCursor++;
+            if (U.deckCursor < 0)
+                U.deckCursor = 0;
+            if (U.deckCursor >= (int)listed)
+                U.deckCursor = listed ? (int)listed - 1 : 0;
+            if (old != U.deckCursor)
+                PlaySE(SE_SELECT);
+            if (pressed & KEY_LEFT || !listed)
+            {
+                U.side = 0;
+                PlaySE(SE_SELECT);
+            }
+            else if (pressed & KEY_A)
+            {
+                Tcg_DeckRemove(c, U.deck, list[U.deckCursor]);
+                PlaySE(SE_RG_BAG_POCKET);
+                if (DeckList(U.deck, list) <= (unsigned)U.deckCursor && U.deckCursor)
+                    U.deckCursor--;
+            }
+            else if (pressed & KEY_START)
+                Inspect(list[U.deckCursor], UI_BUILDER);
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_DECKS);
+            U.cursor = U.deck;
+            if (DeckCount(U.deck, 0) && !Tcg_DeckValidate(c->decks[U.deck].cards, c->owned, reason, sizeof(reason)))
+                Say(ACT_NONE, "This deck can't be played yet: %s", reason);
+        }
+        break;
+    }
+    case UI_BINDER:
+        FilterTab(pressed, 10);
+        GridMove(pressed, (int)ListSize(), 7);
+        if (U.showAll == SHOP_BINDER)
+        {
+            if (pressed & KEY_A && ListSize())
+            {
+                unsigned id = ListCard(U.cursor), cost = Tcg_PointCost(id);
+                if (c->dust < cost)
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "%s costs %u CP. You have %u.", Tcg_Card(id)->name, cost, c->dust);
+                }
+                else
+                    Ask(ACT_BUY, 1000 + (int)id, "%s for %u CP?", Tcg_Card(id)->name, cost);
+            }
+            if (pressed & KEY_START && ListSize())
+                Inspect(ListCard(U.cursor), UI_BINDER);
+            if (pressed & KEY_B)
+            {
+                PlaySE(SE_SELECT);
+                U.showAll = 0;
+                Screen(UI_COUNTER);
+                U.tab = 1;
+                U.cursor = BUY_CARD;
+            }
+            break;
+        }
+        if (pressed & KEY_SELECT)
+        {
+            U.showAll = !U.showAll;
+            U.cursor = 0;
+            PlaySE(SE_SELECT);
+        }
+        if (pressed & (KEY_A | KEY_START) && ListSize())
+            Inspect(ListCard(U.cursor), UI_BINDER);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_HOME);
+            U.cursor = 1;
+        }
+        break;
+    case UI_INSPECT:
+        if (pressed & KEY_UP)
+            U.inspectScroll -= 12;
+        if (pressed & KEY_DOWN)
+            U.inspectScroll += 12;
+        if (U.inspectScroll < 0)
+            U.inspectScroll = 0;
+        if (U.inspectScroll > U.inspectMax)
+            U.inspectScroll = U.inspectMax;
+        if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            U.screen = UI_ART;
+            U.zoom = U.panX = U.panY = 0;
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            U.screen = U.back;
+            U.age = 100;
+        }
+        break;
+    case UI_ART:
+        if (keys & KEY_UP)
+            U.panY -= 2;
+        if (keys & KEY_DOWN)
+            U.panY += 2;
+        if (keys & KEY_LEFT)
+            U.panX -= 2;
+        if (keys & KEY_RIGHT)
+            U.panX += 2;
+        U.panY = U.panY < -80 ? -80 : U.panY > 80 ? 80 : U.panY;
+        U.panX = U.panX < -60 ? -60 : U.panX > 60 ? 60 : U.panX;
+        if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            U.zoom = !U.zoom;
+            U.panX = U.panY = 0;
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            U.screen = UI_INSPECT;
+        }
+        break;
+    case UI_PACKS:
+    {
+        int old = U.cursor;
+        if (pressed & KEY_LEFT)
+            U.cursor = (U.cursor + 3) % 4;
+        if (pressed & KEY_RIGHT)
+            U.cursor = (U.cursor + 1) % 4;
+        if (old != U.cursor)
+            PlaySE(SE_SELECT);
+        if (pressed & KEY_A)
+        {
+            U.pack = U.cursor;
+            if (Tcg_OpenPack(c, U.pack, U.revealed))
+            {
+                Screen(UI_REVEAL);
+                U.flipped = 0;
+                PlaySE(SE_RG_CARD_OPEN);
+                MP_Achieve_Count("cardpack", 1);
+                CollectionChanged();
+                printf("[tcg] opened pack %d\n", U.pack);
+            }
+            else
+            {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "You have no unopened packs of this kind.");
+            }
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_HOME);
+            U.cursor = 2;
+        }
+        break;
+    }
+    case UI_REVEAL:
+        if (U.flipped < 10)
+        {
+            RevealStep(pressed);
+            if (pressed & KEY_B)
+                U.flipped = 10;
+            break;
+        }
+        GridMove(pressed, 10, 5);
+        if (pressed & (KEY_A | KEY_START))
+            Inspect(U.revealed[U.cursor], UI_REVEAL);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_PACKS);
+            U.cursor = U.pack;
+        }
+        break;
+    case UI_SPOILS:
+        GridMove(pressed, U.spoilCount, 7);
+        if (pressed & KEY_A && U.spoilCount)
+            Ask(ACT_TAKE_SPOIL, U.cursor, "Take %s?", Tcg_Card(U.spoils[U.cursor])->name);
+        if (pressed & KEY_START && U.spoilCount)
+            Inspect(U.spoils[U.cursor], UI_SPOILS);
+        break;
+    case UI_COUNTER:
+        if (pressed & (KEY_L | KEY_R))
+        {
+            U.tab = (U.tab + (pressed & KEY_R ? 1 : 2)) % 3;
+            U.cursor = 0;
+            PlaySE(SE_RG_BAG_POCKET);
+        }
+        if (U.tab == 0)
+        {
+            uint16_t list[TCG_CARD_COUNT];
+            unsigned n = SpareList(list);
+            MoveCursor(pressed, (int)n, 1);
+            if (pressed & KEY_A && n)
+                Ask(ACT_TRADE_IN, list[U.cursor], "Trade in one %s for %u CP?", Tcg_Card(list[U.cursor])->name,
+                    Tcg_PointValue(list[U.cursor]));
+            else if (pressed & KEY_SELECT && n)
+                Ask(ACT_TRADE_IN_ALL, list[U.cursor], "Trade in all %u spare %s for %u CP?", Tcg_Spare(c, list[U.cursor]),
+                    Tcg_Card(list[U.cursor])->name, Tcg_Spare(c, list[U.cursor]) * Tcg_PointValue(list[U.cursor]));
+        }
+        else if (U.tab == 1)
+        {
+            MoveCursor(pressed, BUY_COUNT, 1);
+            if (pressed & KEY_A)
+            {
+                if (U.cursor == BUY_CARD)
+                {
+                    Screen(UI_BINDER);
+                    U.filter = 9;
+                    U.showAll = SHOP_BINDER;
+                }
+                else if (c->dust < sBuyCost[U.cursor])
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[U.cursor]);
+                }
+                else
+                    Ask(ACT_BUY, U.cursor, "%s for %u CP?", sBuyNames[U.cursor], sBuyCost[U.cursor]);
+            }
+        }
+        else
+        {
+            char what[128];
+            MoveCursor(pressed, PRIZE_ROWS, 1);
+            if (pressed & KEY_A)
+            {
+                if (PrizeState((unsigned)U.cursor, what, sizeof(what)) == 1)
+                    ClaimPrize((unsigned)U.cursor);
+                else
+                    PlaySE(SE_FAILURE);
+            }
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        break;
+    case UI_STARTER:
+        if (U.age >= STARTER_READY)
+        {
+            int old = U.starterChoice;
+            if (pressed & KEY_LEFT)
+                U.starterChoice = (U.starterChoice + 2) % 3;
+            if (pressed & KEY_RIGHT)
+                U.starterChoice = (U.starterChoice + 1) % 3;
+            if (old != U.starterChoice)
+                PlaySE(SE_SELECT);
+            if (pressed & KEY_A)
+                Ask(ACT_STARTER, U.starterChoice, "Take the %s deck?", sStarterNames[U.starterChoice]);
+        }
+        else if (pressed & KEY_A && U.age > 30)
+            U.age = STARTER_READY;
+        break;
+    case UI_TRADE:
+        TradeStep(pressed);
+        break;
+    case UI_WAIT:
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        break;
+    }
+    return 1;
+}
+int Tcg_HandleEvent(const union SDL_Event *event)
+{
+    (void)event;
+    return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* The canvas                                                           */
+/* ------------------------------------------------------------------ */
+static SDL_Texture *sCanvas;
+static SDL_Renderer *sCanvasOwner;
 static uint16_t sFrame[240 * 160];
 static int sFrameRead;
+void Tcg_DestroyTextures(void)
+{
+    G_Destroy();
+    if (sCanvas)
+        SDL_DestroyTexture(sCanvas);
+    sCanvas = NULL;
+    sCanvasOwner = NULL;
+    if (U.portrait)
+        SDL_DestroyTexture(U.portrait);
+    U.portrait = NULL;
+}
 SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
 {
-    struct TcgCollection *c;
     SDL_Texture *previous;
     SDL_Rect oldViewport, oldClip;
     SDL_bool clipped;
     float oldX, oldY;
-    char line[160];
-    unsigned i;
     if (!Tcg_IsActive())
         return NULL;
     G_Begin(r);
@@ -1500,36 +2433,25 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     SDL_RenderSetScale(r, 1, 1);
     SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
     SDL_RenderClear(r);
-    /* Screens that only cover part of it show the game behind. */
     if (game)
         SDL_RenderCopy(r, game, NULL, NULL);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
-    c = Tcg_GetCollection();
     switch (U.screen)
     {
-    case UI_INVITE:
-        G_FillA(0, 0, 240, 160, 0x000000, 80);
-        G_Window(176, 56, 64, 46);
-        SmallOption(0, 194, 64, "YES", 1);
-        SmallOption(1, 194, 80, "NO", 1);
-        G_Window(0, 104, 240, 56);
-        G_Text(8, 110, G_INK, G_INK_SHADOW,
-               U.opponent && strcmp(U.opponent, "Practice Collector")
-                   ? "This person plays Pokemon cards! Would you\nlike a CARD CASE and a free starter deck?\nCard duels are entirely optional."
-                   : "Would you like a CARD CASE and a free\nstarter deck? Card duels are an entirely\noptional pastime.",
-               224, TF_SMALL);
+    case UI_HOME:
+        HomeScreen();
         break;
-    case UI_STARTER:
-        StarterScreen();
+    case UI_CHALLENGE:
+        ChallengeScreen();
         break;
-    case UI_CASE:
-        CaseScreen();
+    case UI_DECKS:
+        DecksScreen();
         break;
-    case UI_COLLECTION:
-        CollectionScreen();
+    case UI_BUILDER:
+        BuilderScreen();
         break;
-    case UI_EDIT:
-        EditScreen();
+    case UI_BINDER:
+        BinderScreen();
         break;
     case UI_INSPECT:
         InspectScreen();
@@ -1537,77 +2459,26 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     case UI_ART:
         ArtScreen();
         break;
-    case UI_DECKS:
-    case UI_COPY_DECK:
-        DecksScreen();
-        break;
-    case UI_DECK_ACTIONS:
-        Backdrop();
-        Header(c->decks[U.deck].name[0] ? c->decks[U.deck].name : "EMPTY SLOT", NULL);
-        G_Window(0, 22, 148, 124);
-        Option(0, 20, 32, U.deck == (int)c->activeDeck ? "ACTIVE DECK" : "SET ACTIVE", U.deck != (int)c->activeDeck);
-        Option(1, 20, 55, "EDIT CARDS", 1);
-        Option(2, 20, 78, "COPY DECK", 1);
-        G_Window(148, 22, 92, 124);
-        if (DeckMascot(U.deck))
-            BigCard(DeckMascot(U.deck), 172, 32, 0);
-        snprintf(line, sizeof(line), "%u/60 CARDS", DeckCount(U.deck, 0));
-        G_TextAlign(194, 100, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_NARROW);
-        Footer("{A} SELECT   {B} BACK");
-        break;
-    case UI_COPY_CONFIRM:
-        Backdrop();
-        Header("REPLACE DECK?", NULL);
-        G_Window(0, 22, 240, 124);
-        G_Text(8, 30, G_INK, G_INK_SHADOW, "Replace this saved deck list?\nYour owned cards stay available.", 224,
-               TF_SMALL);
-        Option(0, 20, 74, "CANCEL", 1);
-        Option(1, 20, 97, "REPLACE", 1);
-        Footer("{A} SELECT   {B} CANCEL");
-        break;
-    case UI_ONLINE:
-        Backdrop();
-        Header("ONLINE CARDS", NULL);
-        G_Window(0, 22, 240, 124);
-        for (i = 0; i < MP_MAX_PLAYERS; i++)
-        {
-            snprintf(line, sizeof(line), "%s%s", i == (unsigned)gMpLocalId ? "YOU: " : "",
-                     PeerName(i));
-            Option(i, 20, 30 + i * 20, line, gMpPlayers[i].present && i != (unsigned)gMpLocalId);
-        }
-        G_Text(8, 114, 0x707070, G_NO_SHADOW, "Your friend must open ONLINE CARDS too.\nNo cards or money are wagered.", 224,
-               TF_NARROW);
-        Footer("{A} INVITE   {B} BACK");
-        break;
-    case UI_ONLINE_INVITE:
-        Backdrop();
-        Header("CARD DUEL INVITATION", NULL);
-        G_Window(0, 22, 240, 124);
-        snprintf(line, sizeof(line), "%s would like a card duel!", PeerName(Tcg_Online()->peer));
-        G_Text(8, 30, G_INK, G_INK_SHADOW, line, 224, TF_SMALL);
-        G_Text(8, 46, 0x707070, G_NO_SHADOW, "No cards or money are wagered.", 224, TF_SMALL);
-        Option(0, 20, 76, "ACCEPT", 1);
-        Option(1, 20, 97, "DECLINE", 1);
-        Footer("{A} SELECT   {B} DECLINE");
-        break;
-    case UI_ONLINE_WAIT:
-    {
-        int dots = (U.frame / 20) % 4;
-        Backdrop();
-        Header("ONLINE CARDS", NULL);
-        G_Window(0, 40, 240, 70);
-        snprintf(line, sizeof(line), "Waiting for the other player%.*s", dots, "...");
-        G_Text(8, 48, G_INK, G_INK_SHADOW, line, 224, TF_SMALL);
-        G_Text(8, 66, 0x707070, G_NO_SHADOW, "Both players need this dev build and\nONLINE CARDS open.", 224, TF_SMALL);
-        G_Coin(210, 84, (U.frame % 60) / 60.0f, 1, 255);
-        Footer("{B} CANCEL");
-        break;
-    }
     case UI_PACKS:
         PacksScreen();
         break;
     case UI_REVEAL:
         RevealScreen();
+        break;
+    case UI_SPOILS:
+        SpoilsScreen();
+        break;
+    case UI_COUNTER:
+        CounterScreen();
+        break;
+    case UI_STARTER:
+        StarterScreen();
+        break;
+    case UI_TRADE:
+        TradeScreen();
+        break;
+    case UI_WAIT:
+        WaitScreen();
         break;
     case UI_DUEL:
         TcgBoard_Render();
@@ -1615,13 +2486,7 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     default:
         break;
     }
-    if (U.message[0] && U.screen != UI_DUEL)
-    {
-        G_Window(0, 112, 240, 48);
-        G_Text(8, 118, G_INK, G_INK_SHADOW, U.message, 210, TF_SMALL);
-        if ((U.frame / 20) % 2)
-            G_ButtonIcon(222, 148, 0);
-    }
+    MessageBox();
     SDL_SetRenderTarget(r, previous);
     SDL_RenderSetViewport(r, &oldViewport);
     SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
@@ -1647,18 +2512,57 @@ const unsigned short *Tcg_Frame(void)
     return sFrame;
 }
 
+/* The CARD CLUB's lesson: a loaner deck against CARD CLUB SAM, with tips. */
+void Tcg_OpenTeachingDuel(void)
+{
+    const struct TcgDeckDefinition *mine = DeckNamed("PracticePlayer"), *theirs = DeckNamed("SamsPractice");
+    U.returnToGame = NULL;
+    memset(&U.opp, 0, sizeof(U.opp) - sizeof(U.opp.portrait));
+    snprintf(U.opp.name, sizeof(U.opp.name), "CARD CLUB SAM");
+    U.opp.deck = theirs->cards;
+    U.opp.special = TCG_SPECIAL_NONE;
+    U.opp.mat = TCG_MAT_CLASSIC;
+    U.vs = VS_LESSON;
+    Open(UI_DUEL);
+    U.fromScript = 1;
+    StartDuel(mine->cards, theirs->cards);
+}
+
+/* ------------------------------------------------------------------ */
+/* The test harness (mp cards ...)                                      */
+/* ------------------------------------------------------------------ */
 void Tcg_Debug(const char *command)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned n = 0, m = 0;
     if (!strcmp(command, "challenge"))
     {
-        printf("[tcg] field challenge accepted: %d\n", Tcg_TryChallenge());
+        printf("[tcg] field challenge: %d\n", Tcg_FieldChallenge());
         return;
     }
     if (!strcmp(command, "open"))
     {
-        Tcg_OpenChallenge("Development Collector", "PracticePlayer", 0);
+        struct TcgOpponent o;
+        const struct TcgDeckDefinition *d = DeckNamed("PracticePlayer");
+        memset(&o, 0, sizeof(o));
+        snprintf(o.name, sizeof(o.name), "TEST COLLECTOR");
+        o.deck = d->cards;
+        o.special = TCG_SPECIAL_NONE;
+        o.key = 0x7e57;
+        Tcg_OpenNpcChallenge(&o);
+        return;
+    }
+    if (sscanf(command, "special %u", &n) == 1 && n < TCG_SPECIAL_COUNT)
+    {
+        struct TcgOpponent o;
+        memset(&o, 0, sizeof(o));
+        snprintf(o.name, sizeof(o.name), "%s", gTcgSpecialDecks[n].name);
+        o.deck = gTcgSpecialDecks[n].cards;
+        o.special = n;
+        o.key = 0xFF000000u | n;
+        o.promo = Tcg_SpecialPromo(n);
+        o.mat = n < TCG_GYM_LEADERS ? TCG_MAT_GYM : TCG_MAT_LEAGUE;
+        Tcg_OpenNpcChallenge(&o);
         return;
     }
     if (sscanf(command, "starter %u", &n) == 1)
@@ -1667,18 +2571,62 @@ void Tcg_Debug(const char *command)
         Tcg_GrantCase();
         return;
     }
+    if (!strcmp(command, "case"))
+    {
+        Tcg_OpenCase(NULL);
+        return;
+    }
+    if (!strcmp(command, "reveal"))
+    {
+        Tcg_OpenStarterReveal();
+        U.fromScript = 0;
+        return;
+    }
+    if (!strcmp(command, "club"))
+    {
+        Tcg_OpenClubCounter();
+        U.fromScript = 0;
+        return;
+    }
+    if (!strcmp(command, "lesson"))
+    {
+        Tcg_OpenTeachingDuel();
+        U.fromScript = 0;
+        return;
+    }
+    if (sscanf(command, "points %u", &n) == 1)
+    {
+        c->dust = n;
+        return;
+    }
+    if (!strcmp(command, "giveall"))
+    {
+        unsigned id;
+        for (id = 1; id <= TCG_CARD_COUNT; id++)
+            if (!c->owned[id])
+                c->owned[id] = 1;
+        CollectionChanged();
+        return;
+    }
+    if (sscanf(command, "own %u %u", &n, &m) == 2 && n && n <= TCG_CARD_COUNT)
+    {
+        c->owned[n] = (uint16_t)m;
+        return;
+    }
     if (sscanf(command, "inspect %u", &n) == 1)
     {
         if (U.screen == UI_CLOSED)
-            Screen(UI_CASE);
-        Inspect(n, U.screen == UI_INSPECT ? UI_CASE : U.screen);
+            Open(UI_HOME);
+        Inspect(n, U.screen == UI_INSPECT ? UI_HOME : U.screen);
         return;
     }
     if (!strcmp(command, "collection"))
     {
+        if (U.screen == UI_CLOSED)
+            Open(UI_HOME);
+        Screen(UI_BINDER);
         U.showAll = 1;
         U.filter = 9;
-        Screen(UI_COLLECTION);
         return;
     }
     if (!strcmp(command, "packs"))
@@ -1686,20 +2634,20 @@ void Tcg_Debug(const char *command)
         if (c->optedIn)
         {
             Tcg_AwardPack(c, 0);
+            if (U.screen == UI_CLOSED)
+                Open(UI_HOME);
             Screen(UI_PACKS);
         }
         return;
     }
-    if (!strcmp(command, "online"))
+    if (!strcmp(command, "builder"))
     {
-        Screen(UI_ONLINE);
-        return;
-    }
-    if (sscanf(command, "invite %u", &n) == 1)
-    {
-        Screen(UI_ONLINE);
-        U.cursor = n % MP_MAX_PLAYERS;
-        Choose();
+        if (U.screen == UI_CLOSED)
+            Open(UI_HOME);
+        U.deck = c->activeDeck;
+        U.side = 0;
+        Screen(UI_BUILDER);
+        U.filter = 0;
         return;
     }
     if (!strcmp(command, "netconcede"))
@@ -1712,8 +2660,8 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "netstate"))
     {
         struct TcgLink *l = Tcg_Online();
-        printf("[tcg-net] state %u seq %u phase %u hash %08x winner %u\n", l->state, l->sequence, l->game.phase,
-               TcgLink_Hash(&l->game), l->game.winner);
+        printf("[tcg-net] state %u seq %u phase %u hash %08x winner %u social %u\n", l->state, l->sequence, l->game.phase,
+               TcgLink_Hash(&l->game), l->game.winner, Tcg_Social()->role);
         return;
     }
     if (!strcmp(command, "netstep"))
@@ -1724,6 +2672,21 @@ void Tcg_Debug(const char *command)
             TcgLink_Submit(l, &a, SDL_GetTicks());
         printf("[tcg-net] state %u seq %u phase %u hash %08x winner %u\n", l->state, l->sequence, l->game.phase,
                TcgLink_Hash(&l->game), l->game.winner);
+        return;
+    }
+    if (sscanf(command, "ask %u %u", &n, &m) == 2)
+    {
+        Tcg_AskFriend(n, m);
+        return;
+    }
+    if (sscanf(command, "offer %u", &n) == 1)
+    {
+        Tcg_SocialOffer(n);
+        return;
+    }
+    if (!strcmp(command, "confirm"))
+    {
+        Tcg_SocialConfirm();
         return;
     }
     if (!strcmp(command, "ready"))
@@ -1797,6 +2760,16 @@ void Tcg_Debug(const char *command)
         printf("[tcg] mine phase %u current %u\n", U.duel.phase, U.duel.current);
         return;
     }
+    if (!strcmp(command, "win"))
+    {
+        /* Harness helper: the opponent concedes (a win without playing it out). */
+        struct TcgAction a = {0};
+        a.type = TCG_CONCEDE;
+        U.duel.current = 1;
+        TcgDuel_Apply(&U.duel, &a);
+        printf("[tcg] opponent conceded\n");
+        return;
+    }
     if (!strcmp(command, "auto"))
     {
         /* Harness helper: the AI plays your side too, shown normally. */
@@ -1818,11 +2791,13 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "state"))
     {
         struct TcgPlayer *p = &U.duel.players[0];
+        unsigned total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
         printf("[tcg] screen %d opted %u phase %u current %u wins %u hand %u field %u bench %u%u%u%u%u idle %d "
-               "energy %u discard %u\n",
+               "energy %u discard %u owned %u points %u packs %u%u%u%u flags %x special %x message %d\n",
                U.screen, c->optedIn, U.duel.phase, U.duel.current, c->wins, p->handSize, p->field[0].stackSize,
                p->field[1].stackSize, p->field[2].stackSize, p->field[3].stackSize, p->field[4].stackSize,
                p->field[5].stackSize, U.screen == UI_DUEL ? TcgBoard_Idle() : -1,
-               TcgDuel_Energy(&U.duel, 0, 0, TCG_NONE), p->discardSize);
+               TcgDuel_Energy(&U.duel, 0, 0, TCG_NONE), p->discardSize, have, c->dust, c->packs[0], c->packs[1],
+               c->packs[2], c->packs[3], c->flags, c->specialBeaten, U.message[0] != 0);
     }
 }

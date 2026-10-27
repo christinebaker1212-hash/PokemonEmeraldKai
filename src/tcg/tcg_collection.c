@@ -96,7 +96,6 @@ int Tcg_AwardPack(struct TcgCollection *c, unsigned pack)
     if (!c->optedIn || pack >= TCG_PACK_TYPES || c->packs[pack] == 65535)
         return 0;
     c->packs[pack]++;
-    c->wins++;
     return 1;
 }
 int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
@@ -126,15 +125,27 @@ int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
         next.owned[id]++;
     }
     next.packs[pack]--;
+    next.packsOpened++;
     *c = next;
     return 1;
 }
-int Tcg_ExchangeDuplicates(struct TcgCollection *c, unsigned card, unsigned count)
+static const unsigned sPointValue[] = {1, 3, 10, 20};
+static const unsigned sPointCost[] = {5, 15, 50, 0};
+unsigned Tcg_PointValue(unsigned card)
 {
-    static const unsigned value[] = {1, 3, 10, 20};
-    unsigned d, i, keep = 4;
     const struct TcgCard *def = Tcg_Card(card);
-    if (!c->optedIn || !def || card <= 6 || !count)
+    return def && card > 6 ? sPointValue[def->rarity & 3] : 0;
+}
+unsigned Tcg_PointCost(unsigned card)
+{
+    const struct TcgCard *def = Tcg_Card(card);
+    /* Promo cards come only from the trainers who hold them; Basic Energy is free. */
+    return def && card > 6 && def->set < 4 ? sPointCost[def->rarity & 3] : 0;
+}
+unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card)
+{
+    unsigned d, i, keep = 4;
+    if (!Tcg_Card(card) || card <= 6)
         return 0;
     for (d = 0; d < TCG_SAVED_DECKS; d++)
     {
@@ -144,21 +155,80 @@ int Tcg_ExchangeDuplicates(struct TcgCollection *c, unsigned card, unsigned coun
         if (needed > keep)
             keep = needed;
     }
-    if (c->owned[card] < keep || count > c->owned[card] - keep || count > (UINT32_MAX - c->dust) / value[def->rarity])
+    return c->owned[card] > keep ? c->owned[card] - keep : 0;
+}
+int Tcg_ExchangeDuplicates(struct TcgCollection *c, unsigned card, unsigned count)
+{
+    unsigned value = Tcg_PointValue(card);
+    if (!c->optedIn || !value || !count || count > Tcg_Spare(c, card) || count > (UINT32_MAX - c->dust) / value)
         return 0;
     c->owned[card] -= count;
-    c->dust += count * value[def->rarity];
+    c->dust += count * value;
     return 1;
 }
 int Tcg_CraftCard(struct TcgCollection *c, unsigned card)
 {
-    static const unsigned cost[] = {5, 15, 50, 100};
-    const struct TcgCard *def = Tcg_Card(card);
-    if (!c->optedIn || !def || card <= 6 || c->owned[card] >= TCG_COLLECTION_MAX || c->dust < cost[def->rarity])
+    unsigned cost = Tcg_PointCost(card);
+    if (!c->optedIn || !cost || c->owned[card] >= TCG_COLLECTION_MAX || c->dust < cost)
         return 0;
-    c->dust -= cost[def->rarity];
+    c->dust -= cost;
     c->owned[card]++;
     return 1;
+}
+int Tcg_DailyAvailable(const struct TcgCollection *c, uint32_t key, unsigned day)
+{
+    unsigned i;
+    for (i = 0; i < TCG_DAILY_SLOTS; i++)
+        if (c->daily[i].key == key && key)
+            return c->daily[i].day != (uint16_t)day;
+    return 1;
+}
+void Tcg_DailyTake(struct TcgCollection *c, uint32_t key, unsigned day)
+{
+    unsigned i, slot = 0;
+    for (i = 0; i < TCG_DAILY_SLOTS; i++)
+    {
+        if (c->daily[i].key == key)
+        {
+            slot = i;
+            break;
+        }
+        /* Otherwise the slot whose day is furthest from today (or empty). */
+        if (!c->daily[i].key || (uint16_t)(day - c->daily[i].day) > (uint16_t)(day - c->daily[slot].day))
+            slot = i;
+        if (!c->daily[i].key)
+            break;
+    }
+    c->daily[slot].key = key;
+    c->daily[slot].day = (uint16_t)day;
+}
+unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *total)
+{
+    unsigned id, have = 0, all = 0;
+    for (id = 1; id <= TCG_CARD_COUNT; id++)
+    {
+        if (set < TCG_SET_COUNT && gTcgCards[id].set != set)
+            continue;
+        all++;
+        have += c->owned[id] != 0;
+    }
+    if (total)
+        *total = all;
+    return have;
+}
+uint32_t Tcg_TakeMilestones(struct TcgCollection *c)
+{
+    uint32_t got = 0;
+    unsigned set, n;
+    for (set = 0; set < TCG_SET_COUNT; set++)
+    {
+        unsigned total, have = Tcg_SetOwned(c, set, &total);
+        for (n = 0; n < 3; n++)
+            if (have * 4 >= total * (n + 1) && !(c->milestones & (1u << (set * 3 + n))))
+                got |= 1u << (set * 3 + n);
+    }
+    c->milestones |= got;
+    return got;
 }
 int Tcg_DeckAdd(struct TcgCollection *c, unsigned deck, unsigned card, char *reason, size_t size)
 {
@@ -219,6 +289,9 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
 /* Explicit little-endian encoding, independent of compiler padding and ABI. */
 #define PAYLOAD_SIZE                                                                                                   \
     (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
+/* Format 3 adds daily rewards, special trainers, milestones and counters. */
+#define EXTRA_SIZE (TCG_DAILY_SLOTS * 6 + 7 * 4)
+#define FILE_SIZE(format) (12 + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -251,23 +324,21 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[PAYLOAD_SIZE + 12], extra;
+    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
-    unsigned i, j;
+    unsigned i, j, format, size;
     FILE *f = fopen(path, "rb");
     if (!f)
         return 0;
-    if (fread(data, 1, sizeof(data), f) != sizeof(data) || fread(&extra, 1, 1, f))
-    {
-        fclose(f);
-        return 0;
-    }
+    size = (unsigned)fread(data, 1, sizeof(data), f);
     fclose(f);
-    if (memcmp(p, "MTCG", 4))
+    if (size < 12 || memcmp(p, "MTCG", 4))
         return 0;
     p += 4;
-    if (Get(&p, 4) != 2 || Get(&p, 4) != Crc(data + 12, PAYLOAD_SIZE))
+    format = Get(&p, 4);
+    if ((format != 2 && format != 3) || size != FILE_SIZE(format) ||
+        Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
     Tcg_CollectionInit(&next, 1);
     for (i = 1; i <= TCG_CARD_COUNT; i++)
@@ -301,6 +372,23 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
     next.owner = Get(&p, 4);
     if (next.optedIn > 1 || next.activeDeck >= TCG_SAVED_DECKS || next.fastAnimations > 1 || next.quiet > 1)
         return 0;
+    if (format >= 3)
+    {
+        for (i = 0; i < TCG_DAILY_SLOTS; i++)
+        {
+            next.daily[i].key = Get(&p, 4);
+            next.daily[i].day = Get(&p, 2);
+        }
+        next.specialBeaten = Get(&p, 4);
+        next.promoGiven = Get(&p, 4);
+        next.milestones = Get(&p, 4);
+        next.packsOpened = Get(&p, 4);
+        next.onlineWins = Get(&p, 4);
+        next.trades = Get(&p, 4);
+        next.flags = Get(&p, 4);
+    }
+    else if (next.optedIn)
+        next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
     *c = next;
     return 1;
 }
@@ -311,7 +399,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[PAYLOAD_SIZE + 12], *p = data + 12;
+    unsigned char data[FILE_SIZE(3)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -337,11 +425,23 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->fastAnimations, 1);
     Put(&p, c->quiet, 1);
     Put(&p, c->owner, 4);
+    for (i = 0; i < TCG_DAILY_SLOTS; i++)
+    {
+        Put(&p, c->daily[i].key, 4);
+        Put(&p, c->daily[i].day, 2);
+    }
+    Put(&p, c->specialBeaten, 4);
+    Put(&p, c->promoGiven, 4);
+    Put(&p, c->milestones, 4);
+    Put(&p, c->packsOpened, 4);
+    Put(&p, c->onlineWins, 4);
+    Put(&p, c->trades, 4);
+    Put(&p, c->flags, 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 2, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE), 4);
+    Put(&p, 3, 4);
+    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

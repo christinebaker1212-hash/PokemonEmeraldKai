@@ -1,4 +1,5 @@
 #include "global.h"
+#include "tcg/integration.h"
 #include "mp.h"
 #include "scanline_effect.h"
 #include "palette.h"
@@ -773,6 +774,9 @@ static void TrainerCard_GenerateCardForPlayer(struct TrainerCard *trainerCard)
     trainerCard->frontierBP = gSaveBlock2Ptr->frontier.cardBattlePoints;
     if (trainerCard->hasAllFrontierSymbols)
         trainerCard->stars++;
+    // Moemon Kai: every card of the card game collected (src/tcg) is a star too
+    if (Tcg_CardMasterStar() && trainerCard->stars < 4)
+        trainerCard->stars++;
 
     if (trainerCard->gender == FEMALE)
         trainerCard->unionRoomClass = gUnionRoomFacilityClasses[(trainerCard->trainerId % NUM_UNION_ROOM_CLASSES) + NUM_UNION_ROOM_CLASSES];
@@ -788,6 +792,8 @@ void TrainerCard_GenerateCardForLinkPlayer(struct TrainerCard *trainerCard)
     trainerCard->linkHasAllFrontierSymbols = HasAllFrontierSymbols();
     *((u16 *)&trainerCard->linkPoints.frontier) = gSaveBlock2Ptr->frontier.cardBattlePoints;
     if (trainerCard->linkHasAllFrontierSymbols)
+        trainerCard->stars++;
+    if (Tcg_CardMasterStar() && trainerCard->stars < 4)
         trainerCard->stars++;
 
     if (trainerCard->gender == FEMALE)

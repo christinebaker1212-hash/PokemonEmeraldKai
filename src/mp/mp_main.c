@@ -667,7 +667,7 @@ static void PackState(const struct MpState *s, u8 *p)
     PutU16(p + 14, s->seq);
     PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
     PutU16(p + 20, s->followerFx & 0xFFFF);
-    p[22] = s->light;
+    p[22] = (s->light & 0x7F) | (s->cardDuel ? 0x80 : 0);
     p[23] = s->followerFx >> 16;
     PutU16(p + 24, (u16)s->followerHue);
     PutU32(p + 26, s->followerKey);
@@ -686,7 +686,8 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
     s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
-    s->light = p[22];
+    s->light = p[22] & 0x7F;
+    s->cardDuel = p[22] >> 7;
     s->followerHue = (s16)GetU16(p + 24);
     s->followerKey = GetU32(p + 26);
     s->lifeAct = p[30]; s->lifePose = p[31]; s->lifeDx = (s8)p[32]; s->lifeDy = (s8)p[33];
@@ -892,6 +893,8 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
+    // Moemon Kai: in a card duel (the game is paused behind the card screens: they stay put)
+    s->cardDuel = Tcg_DuelingNow() != 0;
     // From the moment the battle transition starts, so others see it right away
     if (MP_Battle_IsActive() || gMain.inBattle || MP_IsBattleTransitionRunning())
         s->flags |= MPF_IN_BATTLE;
@@ -902,6 +905,9 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsInOverworld() ? (MP_IsStartMenuOpen() || MP_IsScriptMenuOpen() || MP_IsShopMenuOpen()
                                   || MP_Menu_IsCoopMenuOpen() || MpUi_IsOpen())
                                : !MP_IsFieldLoadCallback())
+            s->flags |= MPF_IN_MENU;
+        // (the card screens other than a duel count as a menu)
+        if (Tcg_IsActive() && !s->cardDuel)
             s->flags |= MPF_IN_MENU;
     }
     if (MP_Coop_IsChallenged())
@@ -942,7 +948,8 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
         || a->followerFx != b->followerFx || a->followerHue != b->followerHue
         || a->badges != b->badges || a->followerKey != b->followerKey || a->lifeAct != b->lifeAct
         || a->lifePose != b->lifePose || a->lifeDx != b->lifeDx || a->lifeDy != b->lifeDy || a->lifeEmoteSeq != b->lifeEmoteSeq
-        || a->lifePx != b->lifePx || a->lifePy != b->lifePy || a->lifeFace != b->lifeFace || a->top3 != b->top3;
+        || a->lifePx != b->lifePx || a->lifePy != b->lifePy || a->lifeFace != b->lifeFace || a->top3 != b->top3
+        || a->cardDuel != b->cardDuel;
 }
 
 static void SendLocalState(bool8 force)
