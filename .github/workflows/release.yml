@@ -16,7 +16,7 @@ jobs:
   release:
     if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,23 +34,29 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # This step has hung for 15 minutes on some runners (normally it takes 40 seconds): each try
-      # gets 4 minutes, skips the man-db index rebuild and asks nothing, and a hung try starts over.
+      # The runner's Ubuntu mirror sometimes stalls in the middle of a download (normally this takes under a
+      # minute). The .debs are kept between runs, and tools/release/ci_tools.sh stops a stalled try and goes on
+      # from another mirror; it says how.
+      - name: Package cache
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 1
+        with:
+          path: ${{ runner.temp }}/debs
+          key: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-${{ github.run_id }}
+          restore-keys: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-
+
       - name: Tools
         if: steps.ver.outputs.skip != 'true'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          export DEBIAN_FRONTEND=noninteractive
-          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o DPkg::Lock::Timeout=60"
-          for try in 1 2 3; do
-            if timeout 240 sudo -E apt-get $APT update &&
-               timeout 240 sudo -E apt-get $APT install -y \
-                 build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3; then
-              exit 0
-            fi
-            echo "try $try failed or hung"
-          done
-          exit 1
+        run: tools/release/ci_tools.sh "$RUNNER_TEMP/debs"
+
+      - name: Keep the packages
+        if: always() && steps.ver.outputs.skip != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/debs
+          key: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-${{ github.run_id }}
 
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true'
