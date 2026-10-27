@@ -741,7 +741,10 @@ static void Strip(unsigned card, const char *text)
         }
         return;
     }
-    G_Text(card ? 42 : 8, STRIP_Y + 4, G_WHITE, 0x302878, text, card ? 194 : 226, TF_NORMAL);
+    /* Two lines fit: longer text in the small font (words wrap, so leave some slack) */
+    int width = card ? 194 : 226;
+    G_Text(card ? 42 : 8, STRIP_Y + 4, G_WHITE, 0x302878, text, width,
+           G_Measure(text, TF_NORMAL) > width * 2 - 40 ? TF_SMALL : TF_NORMAL);
 }
 static void Hints(const char *hint)
 {
@@ -1500,7 +1503,7 @@ static void CounterScreen(void)
         if (!n)
         {
             G_Text(LIST_X + 8, 12, 0x707070, G_NO_SHADOW, "No spare cards yet.", LIST_W - 14, TF_SMALL);
-            Strip(0, "Cards beyond four of a kind (and beyond what your decks use) trade for CARD POINTS.");
+            Strip(0, "Copies past four (and past what your decks use) trade for CARD POINTS.");
         }
         else
         {
@@ -1525,7 +1528,7 @@ static void CounterScreen(void)
             Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
                 sBuyNames[k], right);
         }
-        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets: 5, 15 or 50 CP by rarity. Promo cards can't be bought."
+        Strip(0, U.cursor == BUY_CARD ? "Any card from the four sets, 5 to 50 CP by rarity. No promo cards."
                  : U.cursor < 4       ? "A booster pack of 10 cards from this set."
                  : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
                                           : "It goes into your BAG.");
