@@ -130,7 +130,104 @@ int main(int argc, char **argv)
     assert(!Tcg_CollectionLoad(&other, path));
     assert(!memcmp(&before, &other, sizeof(other)));
     puts("PASS collection round-trip and corrupt-file rejection");
+    {
+        /* A 1.27 file (format 2): read, with the new parts empty and the CARD CLUB met. */
+        unsigned char v2[12 + TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24];
+        unsigned char *q = v2 + 12;
+        uint32_t crc = ~0u;
+        unsigned k, b, d;
+        FILE *f;
+        struct TcgCollection old;
+        Tcg_CollectionInit(&old, 5);
+        assert(Tcg_ChooseStarter(&old, 1));
+        old.packs[2] = 3;
+        old.wins = 7;
+#define PUT(v, n) do { uint32_t x_ = (v); unsigned i_; for (i_ = 0; i_ < (n); i_++) { *q++ = (unsigned char)x_; x_ >>= 8; } } while (0)
+        for (k = 1; k <= TCG_CARD_COUNT; k++)
+            PUT(old.owned[k], 2);
+        for (d = 0; d < TCG_SAVED_DECKS; d++)
+        {
+            memcpy(q, old.decks[d].name, TCG_NAME_LEN);
+            q += TCG_NAME_LEN;
+            for (k = 0; k < TCG_DECK_SIZE; k++)
+                PUT(old.decks[d].cards[k], 2);
+        }
+        for (k = 0; k < TCG_PACK_TYPES; k++)
+            PUT(old.packs[k], 2);
+        PUT(old.wins, 4);
+        PUT(old.dust, 4);
+        PUT(old.vouchers, 4);
+        PUT(old.rng, 4);
+        PUT(old.optedIn, 1);
+        PUT(old.activeDeck, 1);
+        PUT(old.fastAnimations, 1);
+        PUT(old.quiet, 1);
+        PUT(old.owner, 4);
+        assert(q == v2 + sizeof(v2));
+        for (k = 12; k < sizeof(v2); k++)
+        {
+            crc ^= v2[k];
+            for (b = 0; b < 8; b++)
+                crc = (crc >> 1) ^ ((crc & 1) ? 0xedb88320u : 0);
+        }
+        crc = ~crc;
+        q = v2;
+        memcpy(q, "MTCG", 4);
+        q += 4;
+        PUT(2, 4);
+        PUT(crc, 4);
+#undef PUT
+        f = fopen(path, "wb");
+        assert(f && fwrite(v2, 1, sizeof(v2), f) == sizeof(v2));
+        fclose(f);
+        Tcg_CollectionInit(&other, 9);
+        assert(Tcg_CollectionLoad(&other, path));
+        assert(other.optedIn && other.packs[2] == 3 && other.wins == 7 && other.owned[TCG_CARD_SQUIRTLE] == old.owned[TCG_CARD_SQUIRTLE]);
+        assert(other.flags == (TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET) && !other.specialBeaten && !other.daily[0].key);
+        /* ... and saved again as format 3 */
+        assert(Tcg_CollectionSave(&other, path));
+        Tcg_CollectionInit(&before, 3);
+        assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 3");
+    }
 #endif
+    {
+        /* Daily rewards: once a day per opponent, the oldest day makes room */
+        unsigned k;
+        Tcg_CollectionInit(&c, 1);
+        assert(Tcg_DailyAvailable(&c, 0x1234, 100));
+        Tcg_DailyTake(&c, 0x1234, 100);
+        assert(!Tcg_DailyAvailable(&c, 0x1234, 100) && Tcg_DailyAvailable(&c, 0x1234, 101));
+        for (k = 0; k < TCG_DAILY_SLOTS; k++)
+            Tcg_DailyTake(&c, 0x5000 + k, 102 + k % 3);
+        assert(Tcg_DailyAvailable(&c, 0x1234, 100)); /* pushed out: its day was the oldest */
+        assert(!Tcg_DailyAvailable(&c, 0x5000 + TCG_DAILY_SLOTS - 1, 102 + (TCG_DAILY_SLOTS - 1) % 3));
+        puts("PASS daily rewards");
+    }
+    {
+        /* Spare cards, CARD POINTS and the card shop (no promo cards for points) */
+        unsigned total, have;
+        Tcg_CollectionInit(&c, 2);
+        assert(Tcg_ChooseStarter(&c, 0));
+        c.owned[TCG_CARD_CHARMANDER] = 9;
+        assert(Tcg_Spare(&c, TCG_CARD_CHARMANDER) == 5);
+        assert(Tcg_Spare(&c, TCG_CARD_FIRE_ENERGY) == 0);
+        assert(Tcg_ExchangeDuplicates(&c, TCG_CARD_CHARMANDER, 5) && c.dust == 5 && c.owned[TCG_CARD_CHARMANDER] == 4);
+        assert(!Tcg_ExchangeDuplicates(&c, TCG_CARD_CHARMANDER, 1));
+        assert(Tcg_PointCost(TCG_CARD_MEW_LV8) == 0 && !Tcg_CraftCard(&c, TCG_CARD_MEW_LV8));
+        assert(Tcg_PointCost(TCG_CARD_CHARIZARD) == 50 && Tcg_PointValue(TCG_CARD_CHARIZARD) == 10);
+        assert(Tcg_CraftCard(&c, TCG_CARD_CHARMELEON) == (Tcg_PointCost(TCG_CARD_CHARMELEON) <= 5));
+        /* Set milestones: each reached once */
+        have = Tcg_SetOwned(&c, 0, &total);
+        assert(total > 0 && have <= total);
+        for (have = 1; have <= TCG_CARD_COUNT; have++)
+            if (gTcgCards[have].set == 0)
+                c.owned[have] = 1;
+        assert(Tcg_TakeMilestones(&c) == 7u);
+        assert(Tcg_TakeMilestones(&c) == 0);
+        assert(Tcg_SetOwned(&c, 0, &total) == total);
+        puts("PASS spare cards, CARD POINTS, the card shop and set milestones");
+    }
     puts("PASS catalogue, starters, deck limits, deterministic packs, duplicate protection and crafting");
     return 0;
 }

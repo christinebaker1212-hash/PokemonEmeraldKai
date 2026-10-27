@@ -43,3 +43,12 @@ gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     tools/tcg/test_link.c src/tcg/tcg_link.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/link"
 "$OUT/link"
+
+# The special trainers' decks: up to date with the generator, legal, playable
+python3 tools/tcg/gen_special_decks.py > /dev/null
+git diff --quiet -- src/tcg/tcg_decks.c || { echo 'src/tcg/tcg_decks.c is out of date'; exit 1; }
+gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
+    -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
+    tools/tcg/test_special.c src/tcg/tcg_decks.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/special"
+"$OUT/special"

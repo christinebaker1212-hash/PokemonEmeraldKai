@@ -1868,6 +1868,7 @@ static void Confirm(int kind, const char *text)
 {
     B.confirmKind = kind;
     snprintf(B.confirmText, sizeof(B.confirmText), "%s", text);
+    printf("[tcg] board asks: %s\n", text);
     B.menuCursor = 0;
     B.mode = M_CONFIRM;
     PlaySE(SE_SELECT);

@@ -3,6 +3,7 @@
 #ifndef MOEMON_TCG_NPC_H
 #define MOEMON_TCG_NPC_H
 #include <stdint.h>
+#include "tcg/tcg.h"
 
 /* Trainers with decks of their own (tools/tcg/gen_special_decks.py, in this order). */
 enum
@@ -49,6 +50,7 @@ struct TcgOpponent
 };
 extern const struct TcgDeckDefinition gTcgSpecialDecks[];
 extern const unsigned gTcgSpecialDeckCount;
+extern const uint16_t gTcgSpecialPromos[];
 
 /* The card screens' side of a challenge (tcg_ui.c). */
 void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent);
@@ -58,4 +60,5 @@ void Tcg_OpenTeachingDuel(void);
 void Tcg_OpenClubCounter(void);
 /* Rewards waiting at the CARD CLUB (tcg_field.c reads them, tcg_ui.c grants cards). */
 unsigned Tcg_SpecialPromo(unsigned special);
+void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o);
 #endif

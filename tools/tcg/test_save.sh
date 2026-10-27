@@ -17,12 +17,8 @@ run() {
         MOEMON_CONTROLS_CONFIG="$OUT/controls.ini" MOEMON_SAVE="${OUT_SAVE:-$OUT/player.sav}" \
         timeout -k 5 90 "$BIN" > "$OUT/$name.log" 2>&1
 }
-keys() { for k in "$@"; do printf 'press %s 2\nwait 4\n' "$k"; done; }
 {
-    printf 'pressuntil A field 5000\nwait 300\nmp cards open\n'
-    keys A A A
-    printf 'mp cards packs\nwait 10\n'
-    keys B B
+    printf 'pressuntil A field 5000\nwait 300\nmp cards starter 0\nmp cards points 30\nmp cards own 50 4\n'
     printf 'wait 30\nmp cards state\nsaveprobe\nwait 60\nquit\n'
 } > "$OUT/first.txt"
 run first MOEMON_DEBUG_QUICKSTART=1
@@ -30,7 +26,7 @@ grep -q 'saveprobe status 1' "$OUT/first.log"
 test -s "$OUT/player.sav.cards"
 printf 'pressuntil A field 6000\nwait 120\nmp cards state\nmp cards deck 0\nquit\n' > "$OUT/continue.txt"
 run continue
-grep -q 'screen 0 opted 1 .* wins 1' "$OUT/continue.log"
+grep -q 'screen 0 opted 1 .* points 30 ' "$OUT/continue.log"
 grep -q 'deck 0 count 60 valid 1' "$OUT/continue.log"
 echo 'PASS the collection is saved with the game and back on Continue'
 # A new game (another Trainer ID) next to that collection file.

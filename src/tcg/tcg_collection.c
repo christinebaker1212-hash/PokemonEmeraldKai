@@ -193,8 +193,9 @@ void Tcg_DailyTake(struct TcgCollection *c, uint32_t key, unsigned day)
             slot = i;
             break;
         }
-        /* Otherwise the slot whose day is furthest from today (or empty). */
-        if (!c->daily[i].key || (uint16_t)(day - c->daily[i].day) > (uint16_t)(day - c->daily[slot].day))
+        /* Otherwise an empty slot, or the one taken longest ago (a clock set back
+         * can make a day look like the future: that's the newest, not the oldest). */
+        if (!c->daily[i].key || (int16_t)(day - c->daily[i].day) > (int16_t)(day - c->daily[slot].day))
             slot = i;
         if (!c->daily[i].key)
             break;

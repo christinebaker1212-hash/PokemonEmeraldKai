@@ -27,3 +27,5 @@ const struct TcgDeckDefinition gTcgSpecialDecks[] = {
     {"LUCY", {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,15,15,15,16,16,17,18,18,18,18,19,19,19,23,23,23,23,24,24,24,25,25,42,42,42,43,43,195,196,196,202,221,221,223,223,227}}, /* LUCY from Poison */
 };
 const unsigned gTcgSpecialDeckCount = sizeof(gTcgSpecialDecks) / sizeof(gTcgSpecialDecks[0]);
+/* The promo card a first win over each hands over (0: none). */
+const uint16_t gTcgSpecialPromos[] = {206, 112, 98, 55, 173, 100, 160, 101, 158, 161, 95, 193, 0, 159, 10, 99, 0, 0, 0, 0, 0, 0, 0, 0};

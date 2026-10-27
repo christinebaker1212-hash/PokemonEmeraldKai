@@ -1,17 +1,19 @@
 # Optional card system: implementation status
 
-Shipped in main 1.27.0 ("Let's Duel!"), no longer gated by `MOEMON_DEV_BUILD`. Main
-builds save the collection in a `<save>.cards` sidecar (owner = the save's Trainer ID, kept
-with the save's backups); dev builds still never write it. Not yet complete: see the end.
+Shipped in main 1.27.0 ("Let's Duel!"), reworked in 1.28.0 from the user's feedback list
+(every decision: `docs/TCG_DECISIONS.md`). Main builds save the collection in a
+`<save>.cards` sidecar (owner = the save's Trainer ID, kept with the save's backups);
+dev builds still never write it. Not yet complete: see the end.
 
 ## Agreed scope
 
-- Optional FF8-style challenge of participating NPCs with Triangle / configurable
-  equivalent. Normal interaction unchanged; no floating icons or unsolicited prompts.
-- First valid challenge offers opt-in, Card Case, starter choice and optional tutorial.
-  Declining leaves the system inactive and never removes an ordinary reward.
+- Optional FF8-style challenges: with the CARD CASE registered to a button, that button
+  in front of someone asks them for a duel (1.28.0; the CO-OP button no longer does).
+  Normal interaction unchanged; no floating icons or unsolicited prompts.
+- The CARD CLUB member in the POKeMON CENTERs of OLDALE, MAUVILLE and LILYCOVE hands over
+  the CARD CASE in dialogue, the first deck, an optional teaching duel and the counter.
 - Full original 228-card rules/AI reference, NPC challenges across Hoenn, every win
-  earns a booster, no loss penalties or rematch cooldown.
+  earns a booster, no loss penalties or rematch cooldown. No cards from MoeGatcha.
 - Collection, multiple decks, deck legality, inspection, unopened packs, practice,
   duplicate exchange and dedicated optional card rewards/banner.
 - Smooth card movement; printed card images where appropriate, explicitly custom
@@ -41,6 +43,52 @@ The user sent a DS duel screenshot (both DS screens) as "the full area" and chos
 Also asked: controller button icons everywhere (the game's own icons for the pad used
 last, GBA keys on a keyboard), and online duels between players must keep working.
 
+## 1.28.0: the rework
+
+- **The card screen is the game picture.** Every card screen draws into a 240x160 canvas
+  that display.c shows in place of the GBA picture (`Tcg_Canvas`: same rect, scale mode and
+  filter), so it fills the window with the game's own scaling, and `Tcg_Frame` hands it to
+  `Platform_GetFrame` so SPECTATE panels and photos show the duel. The online opponent is
+  left out of the stream (`Tcg_HiddenFrom`: they'd see your hand). Friends see a
+  "CARD DUEL" line on the nametag (MpState.cardDuel, bit 7 of the light byte; protocol 52).
+- **Board**: the mat is drawn at the layer's 240x200 (it was stretched from 240x160: the
+  oval Poke Ball and the zones off their cards), a round ring, card spots under every zone,
+  one BENCH label, Prizes as overlapping 2x3 stacks. Mats per opponent: `TCG_MAT_*` themes
+  (classic, trainer kinds, gym by type, Elite Four, Team Magma / Aqua, Frontier, online).
+  The opponent's cards are turned toward them. B leaves the hand, then asks "End your
+  turn?" (it never concedes); the END TURN button is CONCEDE, with a confirm. A drawn
+  Prize card is held up in the middle ("PRIZE CARD"); Trainers that change the hand
+  (PROFESSOR OAK, BILL...) slide the hand up; after a Knock Out the cursor waits on the
+  Bench. Printed art or the Game Boy art: OPTIONS > DISPLAY > CARD ART (`card_art` in the
+  ini, `G_SetGameBoyArt`). Tips in the first duels (`TcgBoard_Tutorial`).
+- **Who plays** (`src/tcg/tcg_field.c`): people by look (`sPeople`: category, deck type,
+  label), decks by type and badge tier (`sPools`, badges 0-1 / 2-3 / 4-6 / 7-8). Trainers
+  play once beaten, townsfolk 65% of the time (a hash of map + person), CARD CLUB staff
+  always. 38 lines in the challengers' words (7 kinds x 3 yes + 2 no, staff, "battle me
+  first"). Their sprite becomes the challenge window's portrait (`CapturePortrait`).
+- **Special decks**: 24 trainers with decks of their own (`tools/tcg/gen_special_decks.py`
+  -> `src/tcg/tcg_decks.c`): the 8 Gym Leaders (after their badge), the Elite Four (after
+  beating them), WALLACE (Champion), STEVEN, the rival, WALLY, MAXIE, ARCHIE and the six
+  Frontier Brains. 15 hand over a promo card on the first win (`gTcgSpecialPromos`).
+- **Rewards**: every win, a booster of the opponent's pack; once a day per opponent, one
+  card of their deck, your pick (`Tcg_DailyAvailable` / `Tcg_DailyTake`, 64 slots, the
+  oldest replaced). CARD POINTS for spare copies at the counter (`Tcg_PointValue` 1/3/10/20
+  by rarity; `Tcg_PointCost` 5/15/50, promos not sold), which sells boosters (12), cards,
+  RARE CANDY, PP UP and MOEGATCHA TICKETs. 75% of a set gives that set's milestone promo;
+  the whole collection gives a PIKACHU Lv.25 (THUNDERBOLT, FLY, SURF, AGILITY, LIGHT BALL,
+  PREMIER BALL, OT PROMO) at the CARD CLUB and a star on the Trainer Card.
+  Achievements: the CARDS tab (`mp_achieve.c`, `card*`). Collection file format 3
+  (format 2 still loads).
+- **Friends** (`src/tcg/tcg_online.c`, include/tcg/online.h): CO-OP > FRIENDS > a friend >
+  CARD DUEL / CARD TRADE, or the CARD CASE button in front of them. A request (social
+  messages 0x10+ on extension 255) shows them YES / NO on the map; busy and no-case answers
+  are automatic; 30 seconds, B stops waiting. YES opens the deck pick on both sides (the
+  winner gets a booster) or the trade screen (each offers a card, both confirm).
+- **Menus** (`src/tcg/tcg_ui.c`, rewritten in the BAG's style): home, decks, a grid deck
+  builder (5x2 cards, the deck list on the right; LEFT from the list returns to the card it
+  points at), binder, inspector, packs, the challenge window, spoils, the counter, the
+  three-deck reveal, trades.
+
 ## Code map
 
 - `src/tcg/tcg_duel.c`, `tcg_effects.c`, `tcg_trainers.c`, `tcg_ai.c`: rules engine
@@ -68,7 +116,9 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   packs with tear/flip/rare shine, inspector, big art) and `Tcg_Debug` harness hooks.
 - `src/tcg/tcg_link.c`: online duels (see below).
 - `src/tcg/tcg_integration.c` / `tcg_collection.c`: the game hooks (CARD CASE item 399,
-  CO-OP button challenges) and the collection file (format 2 with an owner).
+  the canvas, spectate, relay dispatch) and the collection file (format 3 with an owner).
+- `src/tcg/tcg_field.c`: challenges on the map, special trainers, CARD CLUB specials
+  (data/scripts/card_club.inc). `src/tcg/tcg_online.c`: friends' requests and trades.
 - `src/tcg/tcg_art_data.c`: the GB illustrations embedded from `graphics/tcg/original.bin`
   (`tools/tcg/build_original_art.py`; `tools/tcg/test.sh` checks it is up to date).
 
@@ -118,10 +168,11 @@ tcg_effects.c). Pokemon Powers are still unported (POWER shows "not ready").
 
 ## Online card duels
 
-Both players open CARD CASE > ONLINE CARDS in the same co-op room; one invites, the
-other accepts. Each uses their active validated deck; nothing is wagered or awarded.
-Relay extension 255, card protocol **3** (bump `TCG_LINK_VERSION` on any rules,
-catalogue or wire change: protocol 2 added retreat-once, 3 the substatus fields).
+One player asks a friend in the same co-op room (CO-OP > FRIENDS or the CARD CASE
+button in front of them); YES opens the deck pick on both sides. Nothing is wagered; the
+winner gets a booster. Relay extension 255, card protocol **4** (bump `TCG_LINK_VERSION`
+on any rules, catalogue or wire change: protocol 2 added retreat-once, 3 the substatus
+fields, 4 the social layer: request, reply, withdraw, trade offer / confirm / cancel).
 The inviter is canonical player 0; the duel screen always shows the local player at
 the bottom (`OnlineView` swaps both sides and every event). Both peers validate decks
 and every action, with sequence numbers, before/after rules hashes and an ACK before
@@ -133,18 +184,22 @@ interface never reveals hidden cards, but modified clients could.
 
 ```
 tools/tcg/test.sh                       # rules, effects, Trainers, AI, link (ASan/UBSan)
-NOBUILD=1 tools/tcg/test_ui.sh          # real keys: opt-in, deck builder, field challenge,
-                                        # board setup/inspect/discard/quick menu/attach
-NOBUILD=1 tools/tcg/test_online.sh [250]        # two clients, raw link actions (+lag)
-NOBUILD=1 tools/tcg/test_online_board.sh [250]  # two clients, whole duel via both duel screens
+NOBUILD=1 tools/tcg/test_ui.sh          # real keys: CARD CLUB, challenge with the registered
+                                        # CARD CASE, end turn / concede, deck builder, counter
+NOBUILD=1 tools/tcg/test_online.sh [250]        # two clients, request + YES, raw link actions (+lag)
+NOBUILD=1 tools/tcg/test_online_board.sh [250]  # two clients, whole duel via both duel screens, booster
+NOBUILD=1 tools/tcg/test_trade.sh       # two clients trade a card
 NOBUILD=1 tools/tcg/test_save.sh        # main: saved with the game, a new Trainer ID starts empty
 NOBUILD=1 tools/test/dev_save_test.sh   # dev builds stay read-only
 ```
 
 Harness hooks (`mp cards ...`): `open`, `starter N`, `ready`, `fast`, `auto` (the AI
 plays your seat through the board, online too), `mine`, `give ID [SLOT]`, `focus KIND
-INDEX` (0 hand, 1 yours, 2 theirs, 4 your discard, 10 END TURN; index 99 = last hand
-card), `state`, `snapshot`, `netstate`, `netstep`, `netconcede`. `rendershotburst
+INDEX` (0 hand, 1 yours, 2 theirs, 4 your discard, 10 CONCEDE; index 99 = last hand
+card), `state`, `snapshot`, `netstate`, `netstep`, `netconcede`, `challenge` (the person
+in front), `special N`, `case`, `reveal`, `club`, `lesson`, `builder`, `deck N`, `points N`,
+`own ID N`, `giveall`, `win` (the opponent concedes), `ask PLAYER 0|1` (duel / trade),
+`offer ID`, `confirm`. `mp register ITEM` registers a key item to SELECT. `rendershotburst
 PREFIX FRAMES STEP` captures the window output (overlays included) every STEP frames;
 the board prints `[tcg] show event ...` for KOs, coins, status, promotions and wins.
 
@@ -152,7 +207,6 @@ the board prints `[tcg] show event ...` for KOs, coins, status, promotions and w
 
 - Remaining attack effects and all Pokemon Powers; player choice where the engine picks.
 - Trainer flows exist for all 34 Trainers but deserve play-testing per card.
-- NPC definitions across Hoenn, victory rewards and card-only MoeGatcha, tutorial.
 - Artwork pack: resolve remaining mappings, holo variants and GB-only cards;
   installation/versioning/checksums. Without the pack the GB art frames are used.
 - Emerald attack animation adapter (not used: the board has its own card effects).

@@ -202,7 +202,9 @@ def main():
         out.append('    {"%s", {%s}}, /* %s from %s */' % (enum, ','.join(map(str, cards)), title, base))
         if promo:
             assert counts[BY_SYMBOL[promo]] == 1
-    out += ['};', 'const unsigned gTcgSpecialDeckCount = sizeof(gTcgSpecialDecks) / sizeof(gTcgSpecialDecks[0]);', '']
+    out += ['};', 'const unsigned gTcgSpecialDeckCount = sizeof(gTcgSpecialDecks) / sizeof(gTcgSpecialDecks[0]);',
+            '/* The promo card a first win over each hands over (0: none). */',
+            'const uint16_t gTcgSpecialPromos[] = {' + ', '.join(str(BY_SYMBOL[p]) if p else '0' for _, _, _, _, p in SPECIAL) + '};', '']
     (ROOT / 'src/tcg/tcg_decks.c').write_text('\n'.join(out))
     print('Generated %d special decks' % len(SPECIAL))
 

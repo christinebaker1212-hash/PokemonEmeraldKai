@@ -100,7 +100,7 @@ static struct
     int pack, flipped;
     uint16_t revealed[10];
     /* Duels */
-    int vs, aiDelay, autoPlay, online;
+    int vs, aiDelay, autoPlay, online, rewarded;
     struct TcgOpponent opp;
     struct TcgDuel duel;
     SDL_Texture *portrait;
@@ -276,6 +276,7 @@ void Tcg_OpenOnlineDeck(void)
     U.fromScript = 0;
     memset(&U.opp, 0, sizeof(U.opp) - sizeof(U.opp.portrait));
     snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(s->peer));
+    Tcg_PortraitOfPlayer(s->peer, &U.opp);
     U.opp.special = TCG_SPECIAL_NONE;
     U.opp.online = 1;
     U.opp.mat = TCG_MAT_ONLINE;
@@ -290,6 +291,8 @@ void Tcg_OpenOnlineTrade(void)
     U.returnToGame = NULL;
     U.fromScript = 0;
     U.vs = VS_FRIEND;
+    snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(Tcg_Social()->peer));
+    U.spoils[0] = U.spoils[1] = 0;
     Open(UI_TRADE);
     U.filter = 9;
 }
@@ -467,6 +470,7 @@ static void Apply(const struct TcgAction *a)
 }
 static void BeginBoard(void)
 {
+    U.rewarded = 0;
     TcgBoard_SetMat(U.opp.mat, U.opp.matType);
     TcgBoard_SetMusic(U.opp.music);
     TcgBoard_Tutorial(U.vs == VS_LESSON);
@@ -581,9 +585,10 @@ static void DuelStep(unsigned pressed, unsigned keys)
         TcgBoard_SetWaiting(Tcg_Online()->pending);
     }
     TcgBoard_Sync(&U.duel);
-    if (U.duel.phase == TCG_FINISHED && !U.duel.rewardClaimed)
+    /* (online, the duel is copied from the link every frame: the flag lives here) */
+    if (U.duel.phase == TCG_FINISHED && !U.rewarded)
     {
-        U.duel.rewardClaimed = 1;
+        U.rewarded = 1;
         if (U.vs == VS_FRIEND)
             FriendRewards(U.duel.winner == 0);
         else if (U.vs == VS_NPC && U.duel.winner == 0)
@@ -719,10 +724,24 @@ static void Strip(unsigned card, const char *text)
     {
         G_RoundFill(3, STRIP_Y + 3, 34, 44, 0xf8f8f8, 255);
         G_Card(card, 5, STRIP_Y + 4, 30, 42, 0, 255, 0);
-        G_Text(42, STRIP_Y + 4, G_WHITE, 0x302878, text, 194, TF_NORMAL);
     }
-    else
-        G_Text(8, STRIP_Y + 4, G_WHITE, 0x302878, text, 226, TF_NORMAL);
+    if (strchr(text, '{'))
+    {
+        /* With button icons: one line at a time (no wrapping) */
+        char line[128];
+        const char *p = text;
+        int y = STRIP_Y + 4;
+        while (*p)
+        {
+            size_t n = strcspn(p, "\n");
+            snprintf(line, sizeof(line), "%.*s", (int)n, p);
+            G_Hint(card ? 42 : 8, y, G_WHITE, 0x302878, line, TF_NORMAL, 1);
+            y += 16;
+            p += n + (p[n] == '\n');
+        }
+        return;
+    }
+    G_Text(card ? 42 : 8, STRIP_Y + 4, G_WHITE, 0x302878, text, card ? 194 : 226, TF_NORMAL);
 }
 static void Hints(const char *hint)
 {
@@ -937,10 +956,20 @@ static void DecksScreen(void)
     else if ((unsigned)U.cursor == c->activeDeck)
         Strip(0, "The deck you duel with.");
     else
-        Strip(0, DeckCount(U.cursor, 0) ? "{R}: duel with this deck." : "An empty slot: {A} builds a new deck.");
+        Strip(0, DeckCount(U.cursor, 0) ? "{R} DUEL WITH THIS DECK" : "An empty slot: {A} builds a new deck.");
     Hints("{A} EDIT  {START} COPY  {SELECT} EMPTY  {B} BACK");
 }
 
+/* The builder starts on the deck's main type (Pokemon first). */
+static int BuilderTab(unsigned deck)
+{
+    unsigned t[3], i;
+    DeckTypes(Tcg_GetCollection()->decks[deck].cards, t);
+    for (i = 0; i < 7; i++)
+        if (t[0] != TCG_NONE && sFilterTypes[i] == t[0])
+            return (int)i;
+    return 1; /* FIRE */
+}
 /* The deck builder: your cards as pictures, the deck down the right. */
 #define GRID_COLS 5
 #define GRID_ROWS 2
@@ -997,9 +1026,12 @@ static void BuilderScreen(void)
             int y = 14 + i * 10, on = U.side == 1 && top + i == U.deckCursor;
             if (on)
                 G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
-            snprintf(line, sizeof(line), "%u", DeckCount(U.deck, card->id));
-            G_Digits(167, y + 2, line, 0, 1, 0x2858a8, 255);
-            G_Text(175, y - 1, G_INK, G_NO_SHADOW, card->name, 62, TF_NARROW);
+            snprintf(line, sizeof(line), "%s", card->name);
+            while (G_Measure(line, TF_NARROW) > 52 && strlen(line) > 3)
+                line[strlen(line) - 1] = 0;
+            G_Text(167, y - 1, G_INK, G_NO_SHADOW, line, 0, TF_NARROW);
+            snprintf(line, sizeof(line), "x%u", DeckCount(U.deck, card->id));
+            G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, 0x2858a8, 255);
         }
     }
     id = U.side ? (listed ? list[U.deckCursor < (int)listed ? U.deckCursor : 0] : 0) : ListCard(U.cursor);
@@ -1473,7 +1505,7 @@ static void CounterScreen(void)
         else
         {
             unsigned id = list[U.cursor < n ? U.cursor : 0];
-            snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{SELECT}: trade in all of them.", Tcg_Card(id)->name,
+            snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{A} ONE  {SELECT} ALL SPARE", Tcg_Card(id)->name,
                      Tcg_PointValue(id), Tcg_Spare(c, id));
             Strip(id, line);
         }
@@ -1574,23 +1606,24 @@ static void TradeScreen(void)
     int n = (int)ListSize(), i, page = 7, start;
     char line[160];
     Background();
-    snprintf(line, sizeof(line), "CARD TRADE WITH %s", PeerName(s->peer));
+    unsigned mine = s->myOffer ? s->myOffer : U.spoils[0], theirs = s->theirOffer ? s->theirOffer : U.spoils[1];
+    snprintf(line, sizeof(line), "CARD TRADE WITH %s", U.opp.name);
     TopBar(line);
     ListBox(4, 20, 112, 62);
     ListBox(124, 20, 112, 62);
     G_Text(10, 22, 0x606878, G_NO_SHADOW, "YOU OFFER", 0, TF_NARROW);
     G_Text(130, 22, 0x606878, G_NO_SHADOW, "THEY OFFER", 0, TF_NARROW);
-    if (s->myOffer)
+    if (mine)
     {
-        G_Card(s->myOffer, 10, 33, 30, 42, 0, 255, 0);
-        G_Text(44, 38, G_INK, G_INK_SHADOW, Tcg_Card(s->myOffer)->name, 70, TF_SMALL);
+        G_Card(mine, 10, 33, 30, 42, 0, 255, 0);
+        G_Text(44, 38, G_INK, G_INK_SHADOW, Tcg_Card(mine)->name, 70, TF_SMALL);
         if (s->myConfirm)
             G_Text(44, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
     }
-    if (s->theirOffer)
+    if (theirs)
     {
-        G_Card(s->theirOffer, 130, 33, 30, 42, 0, 255, 0);
-        G_Text(164, 38, G_INK, G_INK_SHADOW, Tcg_Card(s->theirOffer)->name, 70, TF_SMALL);
+        G_Card(theirs, 130, 33, 30, 42, 0, 255, 0);
+        G_Text(164, 38, G_INK, G_INK_SHADOW, Tcg_Card(theirs)->name, 70, TF_SMALL);
         if (s->theirConfirm)
             G_Text(164, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
     }
@@ -1884,6 +1917,8 @@ static void TradeStep(unsigned pressed)
         c->trades++;
         MP_Achieve_Unlock("cardtrade");
         printf("[tcg] traded card %u for %u\n", mine, theirs);
+        U.spoils[0] = (uint16_t)mine;
+        U.spoils[1] = (uint16_t)theirs;
         Tcg_SocialLeave();
         PlayFanfare(MUS_OBTAIN_ITEM);
         Say(ACT_CLOSE, "You traded your %s for %s!", Tcg_Card(mine)->name, Tcg_Card(theirs)->name);
@@ -2050,7 +2085,7 @@ int Tcg_Step(unsigned keys)
             U.side = 0;
             U.deckCursor = 0;
             Screen(UI_BUILDER);
-            U.filter = 0;
+            U.filter = BuilderTab(U.deck);
         }
         else if (pressed & KEY_R && U.cursor < TCG_SAVED_DECKS && (unsigned)U.cursor != c->activeDeck &&
                  DeckCount(U.cursor, 0))
@@ -2120,6 +2155,10 @@ int Tcg_Step(unsigned keys)
                 PlaySE(SE_SELECT);
             if (pressed & KEY_LEFT || !listed)
             {
+                /* Back on the card the list points at, when this tab shows it. */
+                for (int k = 0; listed && k < n; k++)
+                    if (ListCard(k) == list[U.deckCursor])
+                        U.cursor = k;
                 U.side = 0;
                 PlaySE(SE_SELECT);
             }
@@ -2647,7 +2686,7 @@ void Tcg_Debug(const char *command)
         U.deck = c->activeDeck;
         U.side = 0;
         Screen(UI_BUILDER);
-        U.filter = 0;
+        U.filter = BuilderTab(U.deck);
         return;
     }
     if (!strcmp(command, "netconcede"))

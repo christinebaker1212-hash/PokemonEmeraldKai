@@ -158,7 +158,7 @@ struct Special
     u16 reqArg;
     const char *name, *title;
     u8 mat, matType;
-    u16 music, promo;
+    u16 music;
     const u8 *accept, *refuse;
 };
 static const u8 sText_RoxanneYes[] = _("Oh! You play cards? I have studied\nthe rules thoroughly. Let us begin!");
@@ -197,35 +197,35 @@ static const u8 sText_NolandYes[] = _("A card duel? Sure, let's see\nwhat you kn
 static const u8 sText_LucyYes[] = _("...Cards. Fine.");
 
 static const struct Special sSpecials[TCG_SPECIAL_COUNT] = {
-    [TCG_SPECIAL_ROXANNE] = {OBJ_EVENT_GFX_ROXANNE, 0, REQ_BADGE, 0, "ROXANNE", "LEADER", 7, 4, MUS_VS_GYM_LEADER, TCG_CARD_SUPER_ENERGY_RETRIEVAL, sText_RoxanneYes, sText_RoxanneNo},
-    [TCG_SPECIAL_BRAWLY] = {OBJ_EVENT_GFX_BRAWLY, 0, REQ_BADGE, 1, "BRAWLY", "LEADER", 7, 4, MUS_VS_GYM_LEADER, TCG_CARD_ELECTABUZZ_LV20, sText_BrawlyYes, sText_BrawlyNo},
-    [TCG_SPECIAL_WATTSON] = {OBJ_EVENT_GFX_WATTSON, 0, REQ_BADGE, 2, "WATTSON", "LEADER", 7, 2, MUS_VS_GYM_LEADER, TCG_CARD_PIKACHU_LV16, sText_WattsonYes, sText_WattsonNo},
-    [TCG_SPECIAL_FLANNERY] = {OBJ_EVENT_GFX_FLANNERY, 0, REQ_BADGE, 3, "FLANNERY", "LEADER", 7, 0, MUS_VS_GYM_LEADER, TCG_CARD_ARCANINE_LV34, sText_FlanneryYes, sText_FlanneryNo},
-    [TCG_SPECIAL_NORMAN] = {OBJ_EVENT_GFX_NORMAN, 0, REQ_BADGE, 4, "NORMAN", "LEADER", 7, 6, MUS_VS_GYM_LEADER, TCG_CARD_JIGGLYPUFF_LV12, sText_NormanYes, sText_NormanNo},
-    [TCG_SPECIAL_WINONA] = {OBJ_EVENT_GFX_WINONA, 0, REQ_BADGE, 5, "WINONA", "LEADER", 7, 6, MUS_VS_GYM_LEADER, TCG_CARD_FLYING_PIKACHU, sText_WinonaYes, sText_WinonaNo},
-    [TCG_SPECIAL_TATE_LIZA] = {OBJ_EVENT_GFX_TATE, OBJ_EVENT_GFX_LIZA, REQ_BADGE, 6, "TATE & LIZA", "LEADERS", 7, 5, MUS_VS_GYM_LEADER, TCG_CARD_MEW_LV8, sText_TateLizaYes, sText_TateLizaNo},
-    [TCG_SPECIAL_JUAN] = {OBJ_EVENT_GFX_JUAN, 0, REQ_BADGE, 7, "JUAN", "LEADER", 7, 3, MUS_VS_GYM_LEADER, TCG_CARD_SURFING_PIKACHU_LV13, sText_JuanYes, sText_JuanNo},
-    [TCG_SPECIAL_SIDNEY] = {OBJ_EVENT_GFX_SIDNEY, 0, REQ_TRAINER, TRAINER_SIDNEY, "SIDNEY", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, TCG_CARD_MEWTWO_LV60, sText_SidneyYes, sText_EliteNo},
-    [TCG_SPECIAL_PHOEBE] = {OBJ_EVENT_GFX_PHOEBE, 0, REQ_TRAINER, TRAINER_PHOEBE, "PHOEBE", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, TCG_CARD_MEW_LV15, sText_PhoebeYes, sText_EliteNo},
-    [TCG_SPECIAL_GLACIA] = {OBJ_EVENT_GFX_GLACIA, 0, REQ_TRAINER, TRAINER_GLACIA, "GLACIA", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, TCG_CARD_ARTICUNO_LV37, sText_GlaciaYes, sText_EliteNo},
-    [TCG_SPECIAL_DRAKE] = {OBJ_EVENT_GFX_DRAKE, 0, REQ_TRAINER, TRAINER_DRAKE, "DRAKE", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, TCG_CARD_DRAGONITE_LV41, sText_DrakeYes, sText_EliteNo},
-    [TCG_SPECIAL_WALLACE] = {OBJ_EVENT_GFX_WALLACE, 0, REQ_CHAMPION, 0, "WALLACE", "CHAMPION", 8, 0, MUS_VS_CHAMPION, 0, sText_WallaceYes, sText_WallaceNo},
-    [TCG_SPECIAL_STEVEN] = {OBJ_EVENT_GFX_STEVEN, 0, REQ_NONE, 0, "STEVEN", "", 8, 0, MUS_VS_CHAMPION, TCG_CARD_MEWTWO_ALT_LV60, sText_StevenYes, NULL},
-    [TCG_SPECIAL_RIVAL] = {OBJ_EVENT_GFX_RIVAL_MAY_NORMAL, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL, REQ_NONE, 0, NULL, "", 0, 0, MUS_VS_RIVAL, TCG_CARD_VENUSAUR_LV64, sText_RivalYes, NULL},
-    [TCG_SPECIAL_WALLY] = {OBJ_EVENT_GFX_WALLY, 0, REQ_NONE, 0, "WALLY", "", 0, 0, MUS_VS_RIVAL, TCG_CARD_PIKACHU_ALT_LV16, sText_WallyYes, NULL},
-    [TCG_SPECIAL_MAXIE] = {OBJ_EVENT_GFX_MAXIE, 0, REQ_NONE, 0, "MAXIE", "MAGMA LEADER", 10, 0, MUS_VS_AQUA_MAGMA_LEADER, 0, sText_MaxieYes, NULL},
-    [TCG_SPECIAL_ARCHIE] = {OBJ_EVENT_GFX_ARCHIE, 0, REQ_NONE, 0, "ARCHIE", "AQUA LEADER", 9, 0, MUS_VS_AQUA_MAGMA_LEADER, 0, sText_ArchieYes, NULL},
-    [TCG_SPECIAL_ANABEL] = {OBJ_EVENT_GFX_ANABEL, 0, REQ_NONE, 0, "ANABEL", "SALON MAIDEN", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_AnabelYes, NULL},
-    [TCG_SPECIAL_TUCKER] = {OBJ_EVENT_GFX_TUCKER, 0, REQ_NONE, 0, "TUCKER", "DOME ACE", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_TuckerYes, NULL},
-    [TCG_SPECIAL_SPENSER] = {OBJ_EVENT_GFX_SPENSER, 0, REQ_NONE, 0, "SPENSER", "PALACE MAVEN", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_SpenserYes, NULL},
-    [TCG_SPECIAL_GRETA] = {OBJ_EVENT_GFX_GRETA, 0, REQ_NONE, 0, "GRETA", "ARENA TYCOON", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_GretaYes, NULL},
-    [TCG_SPECIAL_NOLAND] = {OBJ_EVENT_GFX_NOLAND, 0, REQ_NONE, 0, "NOLAND", "FACTORY HEAD", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_NolandYes, NULL},
-    [TCG_SPECIAL_LUCY] = {OBJ_EVENT_GFX_LUCY, 0, REQ_NONE, 0, "LUCY", "PIKE QUEEN", 11, 0, MUS_VS_FRONTIER_BRAIN, 0, sText_LucyYes, NULL},
+    [TCG_SPECIAL_ROXANNE] = {OBJ_EVENT_GFX_ROXANNE, 0, REQ_BADGE, 0, "ROXANNE", "LEADER", 7, 4, MUS_VS_GYM_LEADER, sText_RoxanneYes, sText_RoxanneNo},
+    [TCG_SPECIAL_BRAWLY] = {OBJ_EVENT_GFX_BRAWLY, 0, REQ_BADGE, 1, "BRAWLY", "LEADER", 7, 4, MUS_VS_GYM_LEADER, sText_BrawlyYes, sText_BrawlyNo},
+    [TCG_SPECIAL_WATTSON] = {OBJ_EVENT_GFX_WATTSON, 0, REQ_BADGE, 2, "WATTSON", "LEADER", 7, 2, MUS_VS_GYM_LEADER, sText_WattsonYes, sText_WattsonNo},
+    [TCG_SPECIAL_FLANNERY] = {OBJ_EVENT_GFX_FLANNERY, 0, REQ_BADGE, 3, "FLANNERY", "LEADER", 7, 0, MUS_VS_GYM_LEADER, sText_FlanneryYes, sText_FlanneryNo},
+    [TCG_SPECIAL_NORMAN] = {OBJ_EVENT_GFX_NORMAN, 0, REQ_BADGE, 4, "NORMAN", "LEADER", 7, 6, MUS_VS_GYM_LEADER, sText_NormanYes, sText_NormanNo},
+    [TCG_SPECIAL_WINONA] = {OBJ_EVENT_GFX_WINONA, 0, REQ_BADGE, 5, "WINONA", "LEADER", 7, 6, MUS_VS_GYM_LEADER, sText_WinonaYes, sText_WinonaNo},
+    [TCG_SPECIAL_TATE_LIZA] = {OBJ_EVENT_GFX_TATE, OBJ_EVENT_GFX_LIZA, REQ_BADGE, 6, "TATE & LIZA", "LEADERS", 7, 5, MUS_VS_GYM_LEADER, sText_TateLizaYes, sText_TateLizaNo},
+    [TCG_SPECIAL_JUAN] = {OBJ_EVENT_GFX_JUAN, 0, REQ_BADGE, 7, "JUAN", "LEADER", 7, 3, MUS_VS_GYM_LEADER, sText_JuanYes, sText_JuanNo},
+    [TCG_SPECIAL_SIDNEY] = {OBJ_EVENT_GFX_SIDNEY, 0, REQ_TRAINER, TRAINER_SIDNEY, "SIDNEY", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, sText_SidneyYes, sText_EliteNo},
+    [TCG_SPECIAL_PHOEBE] = {OBJ_EVENT_GFX_PHOEBE, 0, REQ_TRAINER, TRAINER_PHOEBE, "PHOEBE", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, sText_PhoebeYes, sText_EliteNo},
+    [TCG_SPECIAL_GLACIA] = {OBJ_EVENT_GFX_GLACIA, 0, REQ_TRAINER, TRAINER_GLACIA, "GLACIA", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, sText_GlaciaYes, sText_EliteNo},
+    [TCG_SPECIAL_DRAKE] = {OBJ_EVENT_GFX_DRAKE, 0, REQ_TRAINER, TRAINER_DRAKE, "DRAKE", "ELITE FOUR", 8, 0, MUS_VS_ELITE_FOUR, sText_DrakeYes, sText_EliteNo},
+    [TCG_SPECIAL_WALLACE] = {OBJ_EVENT_GFX_WALLACE, 0, REQ_CHAMPION, 0, "WALLACE", "CHAMPION", 8, 0, MUS_VS_CHAMPION, sText_WallaceYes, sText_WallaceNo},
+    [TCG_SPECIAL_STEVEN] = {OBJ_EVENT_GFX_STEVEN, 0, REQ_NONE, 0, "STEVEN", "", 8, 0, MUS_VS_CHAMPION, sText_StevenYes, NULL},
+    [TCG_SPECIAL_RIVAL] = {OBJ_EVENT_GFX_RIVAL_MAY_NORMAL, OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL, REQ_NONE, 0, NULL, "", 0, 0, MUS_VS_RIVAL, sText_RivalYes, NULL},
+    [TCG_SPECIAL_WALLY] = {OBJ_EVENT_GFX_WALLY, 0, REQ_NONE, 0, "WALLY", "", 0, 0, MUS_VS_RIVAL, sText_WallyYes, NULL},
+    [TCG_SPECIAL_MAXIE] = {OBJ_EVENT_GFX_MAXIE, 0, REQ_NONE, 0, "MAXIE", "MAGMA LEADER", 10, 0, MUS_VS_AQUA_MAGMA_LEADER, sText_MaxieYes, NULL},
+    [TCG_SPECIAL_ARCHIE] = {OBJ_EVENT_GFX_ARCHIE, 0, REQ_NONE, 0, "ARCHIE", "AQUA LEADER", 9, 0, MUS_VS_AQUA_MAGMA_LEADER, sText_ArchieYes, NULL},
+    [TCG_SPECIAL_ANABEL] = {OBJ_EVENT_GFX_ANABEL, 0, REQ_NONE, 0, "ANABEL", "SALON MAIDEN", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_AnabelYes, NULL},
+    [TCG_SPECIAL_TUCKER] = {OBJ_EVENT_GFX_TUCKER, 0, REQ_NONE, 0, "TUCKER", "DOME ACE", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_TuckerYes, NULL},
+    [TCG_SPECIAL_SPENSER] = {OBJ_EVENT_GFX_SPENSER, 0, REQ_NONE, 0, "SPENSER", "PALACE MAVEN", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_SpenserYes, NULL},
+    [TCG_SPECIAL_GRETA] = {OBJ_EVENT_GFX_GRETA, 0, REQ_NONE, 0, "GRETA", "ARENA TYCOON", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_GretaYes, NULL},
+    [TCG_SPECIAL_NOLAND] = {OBJ_EVENT_GFX_NOLAND, 0, REQ_NONE, 0, "NOLAND", "FACTORY HEAD", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_NolandYes, NULL},
+    [TCG_SPECIAL_LUCY] = {OBJ_EVENT_GFX_LUCY, 0, REQ_NONE, 0, "LUCY", "PIKE QUEEN", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_LucyYes, NULL},
 };
 
 unsigned Tcg_SpecialPromo(unsigned special)
 {
-    return special < TCG_SPECIAL_COUNT ? sSpecials[special].promo : 0;
+    return special < TCG_SPECIAL_COUNT ? gTcgSpecialPromos[special] : 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -386,6 +386,15 @@ static void CapturePortrait(struct TcgOpponent *o, struct ObjectEvent *npc)
     o->portraitH = h;
 }
 
+// A friend's portrait: their avatar on the map, if it's on screen
+void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
+{
+    u8 objectId = MP_GetRemoteObjectEventId(id);
+    o->portraitW = o->portraitH = 0;
+    if (objectId < OBJECT_EVENTS_COUNT && gObjectEvents[objectId].active)
+        CapturePortrait(o, &gObjectEvents[objectId]);
+}
+
 // What happens when you ask them; NULL when they're not someone to ask
 enum { ASK_DUEL, ASK_NO };
 static struct TcgOpponent sOpponent;
@@ -427,7 +436,7 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         o->mat = s->mat;
         o->matType = s->matType;
         o->music = s->music;
-        o->promo = s->promo;
+        o->promo = gTcgSpecialPromos[i];
         o->pack = i % TCG_PACK_TYPES;
         *answer = ASK_DUEL;
         return s->accept;

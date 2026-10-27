@@ -35,17 +35,19 @@ in-game; their CI runs weren't checked either.
 - Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the
   existing tools/test/update_test.sh continues to exercise update integrity.
 
-### Card system (shipped in main 1.27.0)
+### Card system (shipped in main 1.27.0, reworked in 1.28.0)
 - Ungated and released as a main update. Status, design decisions, code map, rules fixes,
-  effect coverage, online protocol and every test: `docs/TCG_IMPLEMENTATION.md`.
+  effect coverage, online protocol and every test: `docs/TCG_IMPLEMENTATION.md`; the
+  user's answers for the 1.28.0 rework: `docs/TCG_DECISIONS.md`.
 - The duel screen follows the user's DS screenshot (docs/user_images/37.webp) at native
   240x160: board cursor + SELECT quick menu, hand strip that scrolls the mat, card
   effects and sounds, controller button icons everywhere. Do not describe the whole
   228-card system as finished (20 attacks and all Pokemon Powers are unported).
 - Online duels between players are a hard requirement: keep `tools/tcg/test_online.sh`
   and `tools/tcg/test_online_board.sh` (both also with `250` lag) passing, and bump
-  `TCG_LINK_VERSION` (now 3) on any rules/catalogue/wire change.
+  `TCG_LINK_VERSION` (now 4) on any rules/catalogue/wire change.
 - Tests: `tools/tcg/test.sh`, `NOBUILD=1 tools/tcg/test_ui.sh`, the two online tests,
+  `NOBUILD=1 tools/tcg/test_trade.sh`,
   `NOBUILD=1 tools/tcg/test_save.sh` (main saves), `NOBUILD=1 tools/test/dev_save_test.sh`.
   Send actual screenshots to the user.
 

@@ -131,8 +131,11 @@ moments, eggs and family, evolution; every activity visible: swimming in the pon
 water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
 
 Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
-duel board tcg_board.c at 240x160, CARD CASE item 399, `<save>.cards` sidecar, online duels on relay extension 255 with
-TCG_LINK_VERSION; everything in docs/TCG_IMPLEMENTATION.md; tests tools/tcg/test*.sh).
+duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
+Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
+three POKéMON CENTERs, 24 special trainer decks (gen_special_decks.py), CARD POINTS counter, `<save>.cards` sidecar,
+friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION; everything in
+docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
