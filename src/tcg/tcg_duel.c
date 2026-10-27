@@ -170,10 +170,22 @@ unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot,
     for (i = 0; i < f->attachedSize; i++)
     {
         const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
-        if (c->kind == TCG_ENERGY && (type == TCG_NONE || type == c->type))
+        /* (Charizard's Energy Burn: all of it is Fire Energy this turn) */
+        unsigned kind = f->burn ? TCG_FIRE : c->type;
+        if (c->kind == TCG_ENERGY && (type == TCG_NONE || type == kind))
             n += c->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1;
     }
     return n;
+}
+int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgFieldCard *f = &g->players[player].field[slot], *them = &g->players[player ^ 1].field[0];
+    return f->effectBy && them->stackSize && them->stack[them->stackSize - 1] == f->effectBy - 1;
+}
+int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
+{
+    const struct TcgFieldCard *f = &g->players[player].field[0];
+    return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0));
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
@@ -295,6 +307,8 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->guard = 0;
     f->weaken = 0;
     f->charged = 0;
+    f->effectBy = 0;
+    f->burn = f->shift = 0;
 }
 static unsigned AttachedTrainerCount(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned id)
 {
@@ -323,6 +337,9 @@ static void EndTurn(struct TcgDuel *g)
         p->field[s].noAttack = 0;
         p->field[s].noRetreat = 0;
         p->field[s].weaken = 0;
+        p->field[s].effectBy = 0;
+        /* Energy Burn and Shift last the rest of the turn */
+        p->field[s].burn = p->field[s].shift = 0;
         if (p->field[s].charged == 2)
             p->field[s].charged = 0;
     }
@@ -451,7 +468,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         const struct TcgCard *attacker = TcgDuel_Field(g, g->current, 0), *target = TcgDuel_Field(g, g->current ^ 1, 0);
         const struct TcgAttack *attack;
         struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0], foeBefore;
-        unsigned damage, flags = 0, selfCondition;
+        unsigned damage, flags = 0, selfCondition, type, k;
+        uint16_t struck[TCG_FIELD_SIZE];
         const char *blocked;
         int result, total;
         f = &p->field[0];
@@ -461,7 +479,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         attack = &attacker->attacks[a->attack];
         if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
             return Error(g, blocked);
-        if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noAttack)
+        if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, g->current))
             return Error(g, "This Pokemon cannot attack now.");
         if (!TcgDuel_EffectSupported(attack->effect))
         {
@@ -489,6 +507,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         }
         foeBefore = *foe;
         selfCondition = f->condition;
+        type = TcgDuel_Type(g, g->current, 0); /* (Venomoth's Shift) */
+        for (k = 0; k < TCG_FIELD_SIZE; k++)
+            struck[k] = g->players[g->current ^ 1].field[k].damage; /* (Machamp's Strikes Back) */
+        /* Nothing it does reaches the Defending Pokemon: Agility and the like, Mew's
+         * Neutralizing Shield, heads for Haunter's Transparency (flipped when the attack does
+         * something to it; one that may or may not, like Ice Breath, decides as it hits) */
+        g->foeImmune = TCG_IMMUNE_UNDECIDED;
+        if (foe->barrier == 2)
+            g->foeImmune = TCG_IMMUNE_YES;
+        else if (attack->damage || TcgDuel_EffectTouchesDefender(attack))
+            g->foeImmune = TcgPower_Immune(g, g->current ^ 1, 0) ? TCG_IMMUNE_YES : TCG_IMMUNE_NO;
         damage = attack->damage;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
@@ -501,19 +530,19 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         {
             if (f->charged == 2)
                 total *= 2;
-            if (!g->noWeakRes && target->weakness == attacker->type)
+            if (!g->noWeakRes && target->weakness == type)
             {
                 total *= 2;
                 flags |= TCG_DMG_WEAK;
             }
-            if (!g->noWeakRes && target->resistance == attacker->type)
+            if (!g->noWeakRes && target->resistance == type)
             {
                 total -= 30;
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
             total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
-            if (foe->barrier)
+            if (foe->barrier || g->foeImmune == TCG_IMMUNE_YES)
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
@@ -529,10 +558,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             else if (foe->guard == TCG_GUARD_HALVE)
                 total = total / 2 / 10 * 10;
-            if (f->weaken == TCG_WEAKEN_10)
+            /* (Growl and the like: only against the Pokemon that used it) */
+            if (f->weaken == TCG_WEAKEN_10 && TcgDuel_BoundEffect(g, g->current, 0))
                 total -= 10;
-            else if (f->weaken == TCG_WEAKEN_20)
+            else if (f->weaken == TCG_WEAKEN_20 && TcgDuel_BoundEffect(g, g->current, 0))
                 total -= 20;
+            /* Mr. Mime's Invisible Wall, Kabuto Armor */
+            total = TcgPower_AttackDamage(g, g->current ^ 1, 0, total, 1);
             if (total < 0)
                 total = 0;
         }
@@ -544,15 +576,18 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
         if (result != TCG_OK)
             return result;
-        if (foeBefore.barrier == 2)
+        if (foeBefore.barrier == 2 || g->foeImmune == TCG_IMMUNE_YES)
         {
-            /* Agility, Fly, Barrier: no effect of the attack reaches it. */
+            /* Agility, Fly, Barrier (and the powers above): no effect of the attack reaches it. */
             foe->condition = foeBefore.condition;
             foe->poison = foeBefore.poison;
             foe->noAttack = foeBefore.noAttack;
             foe->noRetreat = foeBefore.noRetreat;
             foe->weaken = foeBefore.weaken;
+            foe->effectBy = foeBefore.effectBy;
         }
+        TcgPower_Sanitize(g); /* (Snorlax, Clefairy Doll, Mysterious Fossil) */
+        TcgPower_StrikesBack(g, struck, foeBefore.condition);
         /* Effects change conditions as they resolve; show them after the hit. */
         if (foe->stackSize && (foe->condition != foeBefore.condition || foe->poison != foeBefore.poison))
             TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
@@ -560,17 +595,16 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
-        g->noWeakRes = g->attackFailed = g->coinResult = 0;
-        TcgDuel_ResolveKnockouts(g);
-        if (g->phase == TCG_FINISHED || g->phase == TCG_SETUP)
-            return TCG_OK;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = 0;
         if (g->switchPending)
         {
-            /* Only if the Defending Pokemon is still there to be switched. */
-            unsigned who = g->current ^ 1, bench = 0, k;
+            /* Only if the Defending Pokemon is still there to be switched. It comes before any
+             * Knock Out: Ram switches "even if Rhydon is Knocked Out" (the end of the turn,
+             * after the switch, takes care of that). */
+            unsigned who = g->current ^ 1, bench = 0, k, hp = target->kind == TCG_TRAINER ? 10 : target->hp;
             for (k = 1; k < TCG_FIELD_SIZE; k++)
                 bench += g->players[who].field[k].stackSize != 0;
-            if (g->phase == TCG_TURN && g->players[who].field[0].stackSize && bench)
+            if (g->players[who].field[0].stackSize && g->players[who].field[0].damage < hp && bench)
             {
                 g->phase = TCG_PROMOTION;
                 g->promotePlayer = who;
@@ -579,6 +613,9 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             g->switchPending = 0;
         }
+        TcgDuel_ResolveKnockouts(g);
+        if (g->phase == TCG_FINISHED || g->phase == TCG_SETUP)
+            return TCG_OK;
         EndTurn(g);
         return TCG_OK;
     }
@@ -609,7 +646,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, j);
         }
         c = TcgDuel_Field(g, g->current, 0);
-        if (n < c->retreat)
+        /* (each Dodrio on the Bench: Retreat Aid, one Colorless less) */
+        if (n + TcgPower_RetreatAid(g, g->current) < c->retreat)
             return Error(g, "Not enough Energy selected for retreat.");
         p->retreated = 1;
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
@@ -629,6 +667,23 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     }
     if (a->type == TCG_USE_POWER)
         return TcgDuel_Power(g, a);
+    if (a->type == TCG_DISCARD_DOLL)
+    {
+        /* Clefairy Doll / Mysterious Fossil: "At any time during your turn before your attack,
+         * you may discard it from play" (it isn't a Knock Out: no Prize) */
+        unsigned k, others = 0;
+        c = s < TCG_FIELD_SIZE ? TcgDuel_Field(g, g->current, s) : NULL;
+        if (g->phase != TCG_TURN || !c || c->kind != TCG_TRAINER)
+            return Error(g, "Choose a Clefairy Doll or Mysterious Fossil in play.");
+        for (k = 0; k < TCG_FIELD_SIZE; k++)
+            others += k != s && p->field[k].stackSize;
+        if (!others)
+            return Error(g, "It's your only Pokemon in play.");
+        TcgDuel_Event(g, TCG_EV_TRAINER, g->current, s, 0, c->id, 0);
+        TcgDuel_DiscardField(g, g->current, s);
+        TcgDuel_ResolveKnockouts(g); /* (from the Active spot: promote a Benched Pokemon) */
+        return TCG_OK;
+    }
     if (a->hand >= p->handSize)
         return Error(g, "Choose a card in your hand.");
     c = Tcg_Card(p->cards[p->hand[a->hand]]);
@@ -650,6 +705,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f->enteredTurn = g->turn;
         TcgDuel_Event(g, TCG_EV_PLAY, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, c->name);
+        /* (Firegiver, Quickfreeze, Peal of Thunder: not during set-up) */
+        if (g->phase != TCG_SETUP)
+        {
+            TcgPower_OnPlay(g, g->current, s);
+            TcgPower_Sanitize(g);
+            TcgDuel_ResolveKnockouts(g);
+        }
         return TCG_OK;
     case TCG_EVOLVE:
         if (c->kind != TCG_POKEMON || !c->stage || !f->stackSize || f->stackSize == 4 ||
@@ -657,11 +719,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "This Pokemon does not evolve from that card.");
         if (p->turnsTaken < 2 || f->enteredTurn == g->turn)
             return Error(g, "A Pokemon cannot evolve on its first turn in play.");
+        if (TcgPower_InPlay(g, 2, TCG_POWER_PREHISTORIC))
+            return Error(g, "Aerodactyl's Prehistoric Power: no Evolution cards can be played.");
         f->stack[f->stackSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         f->enteredTurn = g->turn;
         ClearCondition(f);
         TcgDuel_Event(g, TCG_EV_EVOLVE, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Evolved into %s.", c->name);
+        TcgPower_OnPlay(g, g->current, s); /* (Healing Wind) */
         return TCG_OK;
     case TCG_ATTACH:
         if (c->kind != TCG_ENERGY || !f->stackSize || p->energyPlayed)

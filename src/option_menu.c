@@ -56,6 +56,7 @@ enum
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
+    OPT_CARDSCALE,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
@@ -141,6 +142,7 @@ static const u8 sText_CardArtPrinted[] = _("PRINTED ART");
 static const u8 sText_CardArtGameBoy[] = _("GAME BOY");
 static const u8 sText_CardArtFull[] = _("FULL CARD");
 static const u8 sText_CardBacks[] = _("CARD BACKS");
+static const u8 sText_CardScaling[] = _("CARD SCALING");
 static const u8 sText_CardBackPrinted[] = _("PRINTED");
 static const u8 sText_CardBackPixel[] = _("PIXEL");
 static const u8 sText_Controller[] = _("CONTROLLER");
@@ -324,6 +326,7 @@ static void BuildRows(void)
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_LEVELSCALE, 0);
+        AddRow(OPT_CARDSCALE, 0);
         break;
     case TAB_DISPLAY:
         AddRow(OPT_FULLSCREEN, 0);
@@ -405,7 +408,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -569,6 +572,7 @@ static u8 Current(u8 row)
     case OPT_VSYNC:       return Display_GetVSync() != 0;
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
     case OPT_CARDBACK:    return gMpConfig.cardBack != 0;
+    case OPT_CARDSCALE:   return gMpConfig.cardScaling != 0;
     case OPT_ANALOGRUN:   return Gamepad_GetAnalogRun() != 0;
     case OPT_RUMBLE:      return Gamepad_GetRumble() != 0;
     case OPT_SPECPANEL:   return gMpConfig.spectatePanel != 0;
@@ -615,6 +619,7 @@ static void Change(u8 row, int dir)
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
     case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
     case OPT_CARDBACK:    gMpConfig.cardBack = !gMpConfig.cardBack; break;
+    case OPT_CARDSCALE:   gMpConfig.cardScaling = !gMpConfig.cardScaling; break;
     case OPT_PADSELECT:   Gamepad_CycleSelected(dir); break;
     case OPT_PADLAYOUT:   Gamepad_SetLayout(Gamepad_GetLayout() + dir); break;
     case OPT_ANALOGRUN:   Gamepad_SetAnalogRun(!Gamepad_GetAnalogRun()); break;
@@ -701,6 +706,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_VSYNC:       return sText_VSync;
     case OPT_CARDART:     return sText_CardArt;
     case OPT_CARDBACK:    return sText_CardBacks;
+    case OPT_CARDSCALE:   return sText_CardScaling;
     case OPT_PADSELECT:   return sText_Controller;
     case OPT_PADLAYOUT:   return sText_PadButtons;
     case OPT_ANALOGRUN:   return sText_StickRun;
@@ -830,6 +836,8 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "THE GAME BOY PICTURES IN THE FRAME"
                  : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "THE WHOLE PRINTED CARDS"
                  : "THE PRINTED PICTURES IN THE FRAME");
+    else if (opt == OPT_CARDSCALE)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardScaling ? "CARD PLAYERS' DECKS FIT YOURS" : "CARD PLAYERS' DECKS GO BY BADGES");
     else if (opt == OPT_CARDBACK)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardBack ? "A PIXEL-ART CARD BACK" : "THE REAL CARD BACK");
     else if (opt == OPT_FOLLOWSPRITES)

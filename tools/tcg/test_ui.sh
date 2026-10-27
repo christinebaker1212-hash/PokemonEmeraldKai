@@ -216,4 +216,121 @@ SCRIPT
 run counter
 expect counter 'screen 12 opted 1 .* points 18 packs 1000'
 echo 'PASS the counter: a spare card traded in, a booster pack bought'
+# Pokemon Powers on the duel table: RAIN DANCE, ENERGY TRANS, PEEK, CURSE, CLAIRVOYANCE's
+# look at their hand and a Clefairy Doll discarded, on a staged board.
+cat > "$OUT/powers.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards fast
+mp cards open
+wait 20
+press A 2
+wait 200
+mp cards ready
+wait 200
+mp cards clear
+mp cards put 0 0 65
+mp cards put 0 0 66
+mp cards put 0 0 67
+mp cards put 0 1 8
+mp cards put 0 1 9
+mp cards put 0 1 11
+mp cards attach 0 1 1 2
+mp cards put 0 2 123
+mp cards put 0 3 148
+mp cards put 0 3 151
+mp cards put 0 3 152
+mp cards put 0 4 204
+mp cards put 0 4 92
+mp cards put 0 5 203
+mp cards hand 3
+mp cards put 1 0 167
+mp cards put 1 1 167
+mp cards damage 1 0 10
+wait 120
+rendershot staged
+mp cards focus 1 0
+wait 4
+press A 2
+wait 6
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+rendershot raindance_menu
+press A 2
+wait 6
+rendershot raindance_target
+press A 2
+wait 8
+rendershot raindance_banner
+wait 120
+mp cards state
+mp cards focus 1 1
+wait 4
+press A 2
+wait 6
+press A 2
+wait 6
+rendershot trans_from
+press A 2
+wait 6
+rendershot trans_to
+press A 2
+wait 120
+mp cards state
+mp cards focus 1 2
+wait 4
+press A 2
+wait 6
+press A 2
+wait 6
+rendershot peek_menu
+press DOWN 2
+wait 4
+press A 2
+wait 52
+rendershot peek_card
+wait 100
+mp cards focus 1 3
+wait 4
+press A 2
+wait 6
+press A 2
+wait 6
+rendershot curse_from
+press A 2
+wait 6
+rendershot curse_to
+press A 2
+wait 150
+rendershot cursed
+mp cards focus 9 0
+wait 4
+press A 2
+wait 10
+rendershot clairvoyance
+press B 2
+wait 6
+mp cards focus 1 5
+wait 4
+press A 2
+wait 6
+rendershot doll_menu
+press A 2
+wait 150
+rendershot doll_gone
+mp cards state
+mp cards snapshot
+quit
+SCRIPT
+run powers
+expect powers 'conserved 1'
+expect powers 'show power RAIN DANCE player 0 slot 0'
+expect powers 'show power ENERGY TRANS player 0 slot 1'
+expect powers 'show power PEEK player 0 slot 2'
+expect powers 'show power CURSE player 0 slot 3'
+expect powers 'field 3 bench 31320'
+echo 'PASS Pokemon Powers on the duel table: Rain Dance, Energy Trans, Peek, Curse, Clairvoyance, a Clefairy Doll discarded'
 echo "Screenshots and logs: $OUT"

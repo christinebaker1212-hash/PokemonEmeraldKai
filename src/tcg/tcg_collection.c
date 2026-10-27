@@ -290,9 +290,10 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
 /* Explicit little-endian encoding, independent of compiler padding and ABI. */
 #define PAYLOAD_SIZE                                                                                                   \
     (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
-/* Format 3 adds daily rewards, special trainers, milestones and counters. */
+/* Format 3 adds daily rewards, special trainers, milestones and counters; 4 CARD SCALING. */
 #define EXTRA_SIZE (TCG_DAILY_SLOTS * 6 + 7 * 4)
-#define FILE_SIZE(format) (12 + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0))
+#define EXTRA4_SIZE 4
+#define FILE_SIZE(format) (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -325,7 +326,7 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + 1];
+    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
     unsigned i, j, format, size;
@@ -338,7 +339,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         return 0;
     p += 4;
     format = Get(&p, 4);
-    if ((format != 2 && format != 3) || size != FILE_SIZE(format) ||
+    if (format < 2 || format > 4 || size != FILE_SIZE(format) ||
         Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
     Tcg_CollectionInit(&next, 1);
@@ -387,6 +388,11 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         next.onlineWins = Get(&p, 4);
         next.trades = Get(&p, 4);
         next.flags = Get(&p, 4);
+        if (format >= 4)
+        {
+            next.skill = (int16_t)(uint16_t)Get(&p, 2);
+            next.rated = Get(&p, 2);
+        }
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -400,7 +406,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[FILE_SIZE(3)], *p = data + 12;
+    unsigned char data[FILE_SIZE(4)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -438,11 +444,13 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->onlineWins, 4);
     Put(&p, c->trades, 4);
     Put(&p, c->flags, 4);
+    Put(&p, (uint16_t)c->skill, 2);
+    Put(&p, c->rated, 2);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 3, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE), 4);
+    Put(&p, 4, 4);
+    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

@@ -269,6 +269,140 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
     /* Effects (status, coins) give a non-damaging attack some value. */
     return damage * 4 + (strcmp(c->attacks[attack].effect, "NONE") ? 3 : 0) + 1;
 }
+/* HP left on one of a player's Pokemon */
+static unsigned Left(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, who, slot);
+    unsigned hp = !c ? 0 : c->kind == TCG_TRAINER ? 10 : c->hp, damage = g->players[who].field[slot].damage;
+    return hp > damage ? hp - damage : 0;
+}
+/* The most a Pokemon's attacks ask for, of one type (TCG_NONE: in all) */
+static unsigned NeedMost(const struct TcgCard *c, unsigned type)
+{
+    unsigned i, t, most = 0;
+    for (i = 0; c && i < 2; i++)
+    {
+        const struct TcgAttack *m = &c->attacks[i];
+        unsigned need = 0;
+        if (!m->name[0] || m->category == TCG_POKEMON_POWER)
+            continue;
+        for (t = 0; t < TCG_TYPES; t++)
+            need += type == TCG_NONE || t == type ? m->cost[t] : 0;
+        if (need > most)
+            most = need;
+    }
+    return most;
+}
+/* A Pokemon Power worth using now: one action at a time, each a plain gain (Shift, Peek
+ * and Cowardice are left to people). */
+static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
+{
+    const struct TcgPlayer *p = &g->players[g->current];
+    unsigned me = g->current, s, t, best;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+    {
+        unsigned power = TcgPower_Id(TcgDuel_Field(g, me, s));
+        if (power < TCG_POWER_FIRST_USED || TcgPower_Block(g, me, s))
+            continue;
+        memset(a, 0, sizeof(*a));
+        a->type = TCG_USE_POWER;
+        a->slot = (uint8_t)s;
+        switch (power)
+        {
+        case TCG_POWER_SOLAR_POWER:
+            if (p->field[0].condition || p->field[0].poison)
+                return Legal(g, a);
+            break;
+        case TCG_POWER_HEAL:
+            for (t = 0, best = TCG_NONE; t < TCG_FIELD_SIZE; t++)
+                if (p->field[t].damage && (best == TCG_NONE || p->field[t].damage > p->field[best].damage))
+                    best = t;
+            a->target = (uint8_t)best;
+            return best != TCG_NONE && Legal(g, a);
+        case TCG_POWER_RAIN_DANCE:
+            for (t = 0; t < p->handSize && p->cards[p->hand[t]] != TCG_CARD_WATER_ENERGY; t++)
+                ;
+            a->hand = (uint8_t)t;
+            /* The Active first, then a Benched Water Pokemon still short of Energy */
+            for (t = 0; t < TCG_FIELD_SIZE; t++)
+            {
+                const struct TcgCard *c = TcgDuel_Field(g, me, t);
+                if (c && c->kind == TCG_POKEMON && TcgDuel_Type(g, me, t) == TCG_WATER &&
+                    TcgDuel_Energy(g, me, t, TCG_NONE) < NeedMost(c, TCG_NONE) + (t ? 0 : 1))
+                {
+                    a->target = (uint8_t)t;
+                    if (Legal(g, a))
+                        return 1;
+                }
+            }
+            break;
+        case TCG_POWER_ENERGY_TRANS:
+        {
+            const struct TcgCard *active = TcgDuel_Field(g, me, 0);
+            if (!active || TcgDuel_Energy(g, me, 0, TCG_GRASS) >= NeedMost(active, TCG_GRASS))
+                break;
+            a->attack = 0;
+            for (t = 1; t < TCG_FIELD_SIZE; t++)
+            {
+                a->target = (uint8_t)t;
+                if (Legal(g, a))
+                    return 1;
+            }
+            break;
+        }
+        case TCG_POWER_DAMAGE_SWAP:
+            /* An Active about to be Knocked Out hands its damage to the Bench */
+            if (!p->field[0].damage || Left(g, me, 0) > 20)
+                break;
+            for (t = 1, best = TCG_NONE; t < TCG_FIELD_SIZE; t++)
+                if (p->field[t].stackSize && Left(g, me, t) > 20 && (best == TCG_NONE || Left(g, me, t) > Left(g, me, best)))
+                    best = t;
+            a->target = 0;
+            a->attack = (uint8_t)best;
+            return best != TCG_NONE && Legal(g, a);
+        case TCG_POWER_STRANGE_BEHAVIOR:
+            if (!s || !p->field[0].damage || Left(g, me, s) <= 20 || Left(g, me, 0) > 30)
+                break;
+            a->target = 0;
+            return Legal(g, a);
+        case TCG_POWER_CURSE:
+        {
+            /* One damage counter that Knocks Out one of theirs */
+            const struct TcgPlayer *op = &g->players[me ^ 1];
+            unsigned from;
+            for (t = 0; t < TCG_FIELD_SIZE; t++)
+                if (op->field[t].stackSize && Left(g, me ^ 1, t) == 10)
+                    for (from = 0; from < TCG_FIELD_SIZE; from++)
+                        if (from != t && op->field[from].damage)
+                        {
+                            a->target = (uint8_t)from;
+                            a->attack = (uint8_t)t;
+                            if (Legal(g, a))
+                                return 1;
+                        }
+            break;
+        }
+        case TCG_POWER_ENERGY_BURN:
+        {
+            /* Only when it lets Charizard attack */
+            struct TcgDuel next = *g;
+            unsigned k;
+            if (s || TcgDuel_CanAttack(g, me, 0) || TcgDuel_CanAttack(g, me, 1) || TcgDuel_Apply(&next, a) != TCG_OK)
+                break;
+            for (k = 0; k < 2; k++)
+                if (TcgDuel_CanAttack(&next, me, k))
+                    return 1;
+            break;
+        }
+        case TCG_POWER_STEP_IN:
+            if (s && Left(g, me, 0) <= 30 && Left(g, me, s) > Left(g, me, 0) + 30)
+                return Legal(g, a);
+            break;
+        }
+    }
+    memset(a, 0, sizeof(*a));
+    return 0;
+}
 int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgPlayer *p;
@@ -390,6 +524,8 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
     for (i = 0; i < p->handSize; i++)
         if (Tcg_Card(p->cards[p->hand[i]])->kind == TCG_TRAINER && TrainerAction(g, i, a))
             return 1;
+    if (g->phase == TCG_TURN && PowerAction(g, a))
+        return 1;
     for (attack = 0; attack < 2; attack++)
     {
         const struct TcgCard *c = TcgDuel_Field(g, g->current, 0);
@@ -404,7 +540,7 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
         }
     }
     if (bestAttack != TCG_NONE && p->field[0].condition != TCG_ASLEEP && p->field[0].condition != TCG_PARALYZED &&
-        !p->field[0].noAttack)
+        !TcgDuel_NoAttack(g, g->current))
     {
         int required;
         unsigned choice = TcgDuel_AttackChoice(&TcgDuel_Field(g, g->current, 0)->attacks[bestAttack], &required);

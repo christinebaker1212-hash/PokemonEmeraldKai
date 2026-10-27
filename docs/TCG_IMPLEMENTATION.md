@@ -74,7 +74,8 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   a printed Trainer's about 9:5 (its window is ~1.85:1). See `tools/tcg/build_printed_art.py`
   and `tools/tcg/printed_art.json`; `tools/tcg/test_art.sh` draws every mode.
 - **Who plays** (`src/tcg/tcg_field.c`): people by look (`sPeople`: category, deck type,
-  label), decks by type and badge tier (`sPools`, badges 0-1 / 2-3 / 4-6 / 7-8). Trainers
+  label), decks by type (`sPools`; with CARD SCALING off, by badge tier: badges 0-1 / 2-3 /
+  4-6 / 7-8; see CARD SCALING below). Trainers
   play once beaten, townsfolk 65% of the time (a hash of map + person), CARD CLUB staff
   always. 38 lines in the challengers' words (7 kinds x 3 yes + 2 no, staff, "battle me
   first"). Their sprite becomes the challenge window's portrait (`CapturePortrait`).
@@ -176,7 +177,61 @@ Scavenge; they show as "not ready" in the attack panel. Simplifications to revis
 original asks the *attacker* to pick cards (Fire Spin's 2 Energy, Hyper Beam's Energy,
 Gigashock's 3 targets, Call for Friend's card, Energy Spike's Energy and Pokemon,
 Energy Conversion / Absorption's cards) the engine picks (documented in
-tcg_effects.c). Pokemon Powers are still unported (POWER shows "not ready").
+tcg_effects.c).
+
+## The effects audit (1.29.0)
+
+Every attack effect and Trainer was read against the card text and the original rulings.
+Fixed: Kangaskhan's Fetch looked like both players drew (the next turn's draw slid in with
+it: the board now shows a new turn as a step of its own, banner then draw); Zubat / Golbat's
+Leech Life heals the damage done, not 10; Fury Attack is 2 coins; Psywave / Psychic count
+Energy *cards* (a Double Colorless is one); Water Gun / Hydro Pump count only the Water not
+needed for the cost (Colorless paid with other Energy first, +20 at most); Big Thunder picks
+evenly among every Pokemon but Zapdos; Growl, Pounce, Snivel, Leer and Tail Wag are bound to
+the Pokemon that used them (`effectBy`: they end if it leaves the Active spot); Ram switches
+even when Rhydon is Knocked Out (and not when the Defender is); Full Heal only cures
+conditions (Withdraw, Barrier, Agility stay; Cure-like effects still clear them); Energy
+Retrieval / Super Energy Retrieval retrieve first and can't pay with the retrieved cards;
+Devolution Spray no longer makes the Pokemon "new" (it can evolve again this turn); Clefairy
+Doll / Mysterious Fossil can be discarded from play (DISCARD on its menu, no Prize). Self
+damage (confusion, recoil) still applies the attacker's own Weakness / Resistance, as the
+Game Boy game and the 1999 rules did. Tests: `tools/tcg/test_powers.c` (staged boards).
+
+## Pokemon Powers (src/tcg/tcg_powers.c)
+
+All 26, by their card text: `TcgPower_Working` (none while Muk's Toxic Gas is in play, Muk's
+own excepted, or while its Pokemon is the Active and Asleep / Confused / Paralyzed).
+Always on: Toxic Gas, Clairvoyance (the opponent's hand face up: A on their hand), Strikes
+Back, Kabuto Armor, Prehistoric Power (no evolving, Breeder included), Transparency,
+Invisible Wall, Neutralizing Shield, Retreat Aid (the retreat menus count it), Thick
+Skinned. Into play (`TcgPower_OnPlay`, the owner's turn, not during setup): Firegiver,
+Quickfreeze, Peal of Thunder, Healing Wind; the board shows them after the card lands.
+Used (`TCG_USE_POWER`, slot = the Pokemon; target / attack = its choices, see
+`TcgDuel_Power`): Solar Power, Energy Trans, Heal, Shift, Energy Burn, Rain Dance,
+Cowardice, Peek, Damage Swap, Strange Behavior, Curse, Step In; once a turn where the card
+says so (`powerUsed`). `TcgPower_Block` gives the reason one can't be used (the menu's
+grey line). On the table: PKMN POWER on the Pokemon's menu (or SELECT > PKMN POWER, the
+first usable one), the choices as target steps (`PowerSteps`) or menus (SHIFT's types,
+PEEK's five places); `TCG_EV_POWER` puts the name over the card, `TCG_EV_PEEK` shows the
+card to its player only. The AI uses Solar Power, Heal, Rain Dance, Energy Trans, Damage
+Swap, Strange Behavior, Curse (for a Knock Out), Energy Burn (when it enables an attack)
+and Step In (`PowerAction`).
+
+## CARD SCALING (src/tcg/tcg_scale.c, include/tcg/scale.h)
+
+Deck strength is an Elo rating measured by AI-vs-AI duels: `tools/tcg/rate_decks.sh`
+(about a minute; `tools/tcg/test.sh` checks it's current) plays every Game Boy and
+special deck round robin, fits Bradley-Terry ratings (mean 1500) and rates each special
+variant against the field, into `src/tcg/tcg_ratings.c`. In game, the player's deck is
+rated against 12 reference decks x 6 games (`TcgScale_RateDeck`, cached by deck hash),
+plus a skill correction learned from every duel against a card player (`skill`, saved
+in the .cards file, format 4: K 48 for the first 20 duels, then 24, within +-300).
+Regular card players take the deck of their type pool closest to the player + 25 (capped
+by badges, `sBadgeCap`); special trainers their own deck or one of their variants (their
+signature lines and promo on the other same-type Game Boy decks), closest to the player +
+75. The challenge window's MATCH line: EASY / EVEN / TOUGH / VERY TOUGH from the expected
+score. OPTIONS > GAME > CARD SCALING OFF goes back to the badge tiers. The log line
+`[tcg] scaling on: you N (deck D, skill S), target T, ...` shows each choice.
 
 ## Online card duels
 
@@ -184,7 +239,8 @@ One player asks a friend in the same co-op room (CO-OP > FRIENDS or the CARD CAS
 button in front of them); YES opens the deck pick on both sides. Nothing is wagered; the
 winner gets a booster. Relay extension 255, card protocol **4** (bump `TCG_LINK_VERSION`
 on any rules, catalogue or wire change: protocol 2 added retreat-once, 3 the substatus
-fields, 4 the social layer: request, reply, withdraw, trade offer / confirm / cancel).
+fields, 4 the social layer: request, reply, withdraw, trade offer / confirm / cancel,
+5 the effects audit and Pokemon Powers).
 The inviter is canonical player 0; the duel screen always shows the local player at
 the bottom (`OnlineView` swaps both sides and every event). Both peers validate decks
 and every action, with sequence numbers, before/after rules hashes and an ACK before
@@ -195,9 +251,11 @@ interface never reveals hidden cards, but modified clients could.
 ## Tests
 
 ```
-tools/tcg/test.sh                       # rules, effects, Trainers, AI, link (ASan/UBSan)
+tools/tcg/test.sh                       # rules, effects, Trainers, Powers, AI, link (ASan/UBSan),
+                                        # generated decks and ratings up to date
 NOBUILD=1 tools/tcg/test_ui.sh          # real keys: CARD CLUB, challenge with the registered
-                                        # CARD CASE, end turn / concede, deck builder, counter
+                                        # CARD CASE, end turn / concede, deck builder, counter,
+                                        # Pokemon Powers on a staged board
 NOBUILD=1 tools/tcg/test_online.sh [250]        # two clients, request + YES, raw link actions (+lag)
 NOBUILD=1 tools/tcg/test_online_board.sh [250]  # two clients, whole duel via both duel screens, booster
 NOBUILD=1 tools/tcg/test_trade.sh       # two clients trade a card
@@ -211,14 +269,17 @@ plays your seat through the board, online too), `mine`, `give ID [SLOT]`, `focus
 INDEX` (0 hand, 1 yours, 2 theirs, 4 your discard, 10 CONCEDE; index 99 = last hand
 card), `state`, `snapshot`, `netstate`, `netstep`, `netconcede`, `challenge` (the person
 in front), `special N`, `case`, `reveal`, `club`, `lesson`, `builder`, `deck N`, `points N`,
-`own ID N`, `giveall`, `win` (the opponent concedes), `ask PLAYER 0|1` (duel / trade),
+`own ID N`, `giveall`, `win` (the opponent concedes), staging a board: `clear` (every
+Pokemon in play back into its deck), `put WHO SLOT ID`, `attach WHO SLOT ID N`, `hand ID`
+(a basic Energy card in the deck becomes the card if none is left), `damage WHO SLOT N`;
+`skill N` / `rate` (CARD SCALING), `ask PLAYER 0|1` (duel / trade),
 `offer ID`, `confirm`. `mp register ITEM` registers a key item to SELECT. `rendershotburst
 PREFIX FRAMES STEP` captures the window output (overlays included) every STEP frames;
 the board prints `[tcg] show event ...` for KOs, coins, status, promotions and wins.
 
 ## Still to do
 
-- Remaining attack effects and all Pokemon Powers; player choice where the engine picks.
+- The 20 remaining attack effects; player choice where the engine picks.
 - Trainer flows exist for all 34 Trainers but deserve play-testing per card.
 - Emerald attack animation adapter (not used: the board has its own card effects).
 - Windows: the mingw build compiles; not run on Windows.

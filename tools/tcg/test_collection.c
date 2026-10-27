@@ -115,6 +115,8 @@ int main(int argc, char **argv)
     }
     puts("PASS dev collection writes are refused");
 #else
+    c.skill = -123; /* CARD SCALING's correction (format 4) goes both ways */
+    c.rated = 17;
     assert(Tcg_CollectionSave(&c, path));
     Tcg_CollectionInit(&other, 789);
     assert(Tcg_CollectionLoad(&other, path));
@@ -184,11 +186,12 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionLoad(&other, path));
         assert(other.optedIn && other.packs[2] == 3 && other.wins == 7 && other.owned[TCG_CARD_SQUIRTLE] == old.owned[TCG_CARD_SQUIRTLE]);
         assert(other.flags == (TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET) && !other.specialBeaten && !other.daily[0].key);
-        /* ... and saved again as format 3 */
+        assert(!other.skill && !other.rated);
+        /* ... and saved again as the current format */
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 3");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 4");
     }
 #endif
     {

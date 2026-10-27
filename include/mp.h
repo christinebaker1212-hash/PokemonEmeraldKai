@@ -244,6 +244,7 @@ struct MpConfig
     u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARD_ART_* (src/tcg/tcg_gfx.h G_ART_*)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
     u8 cardBack;              // OPTIONS > DISPLAY > CARD BACKS: MP_CARD_BACK_* (src/tcg/tcg_gfx.h G_BACK_*)
+    u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
 };
 // CARD ART: the printed illustration in the Game Boy frame (the default), the Game Boy picture in it, or the whole printed card
 enum { MP_CARD_ART_PRINTED_ART, MP_CARD_ART_GAME_BOY, MP_CARD_ART_FULL_CARD, MP_CARD_ART_COUNT };

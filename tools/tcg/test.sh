@@ -17,31 +17,37 @@ done
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_duel.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/duel"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/duel"
 "$OUT/duel"
 
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_effects.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/effects"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/effects"
 "$OUT/effects"
 
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_trainers.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/trainers"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/trainers"
 "$OUT/trainers"
 
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
+    tools/tcg/test_powers.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/powers"
+"$OUT/powers"
+
+gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
+    -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_ai.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/ai"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/ai"
 "$OUT/ai"
 
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_link.c src/tcg/tcg_link.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/link"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/link"
 "$OUT/link"
 
 # The special trainers' decks: up to date with the generator, legal, playable
@@ -50,5 +56,9 @@ git diff --quiet -- src/tcg/tcg_decks.c || { echo 'src/tcg/tcg_decks.c is out of
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_special.c src/tcg/tcg_decks.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
-    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c -o "$OUT/special"
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/special"
 "$OUT/special"
+
+# CARD SCALING's deck ratings: up to date with the rules, the AI and the decks (about a minute)
+tools/tcg/rate_decks.sh > /dev/null
+git diff --quiet -- src/tcg/tcg_ratings.c || { echo 'src/tcg/tcg_ratings.c is out of date (tools/tcg/rate_decks.sh)'; exit 1; }

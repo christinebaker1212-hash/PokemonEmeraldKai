@@ -127,6 +127,9 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
             H(f->weaken);
             H(f->charged);
             H(f->usedOnce);
+            H(f->effectBy);
+            H(f->burn);
+            H(f->shift);
             for (k = 0; k < f->stackSize; k++)
                 H(f->stack[k]);
             for (k = 0; k < f->attachedSize; k++)

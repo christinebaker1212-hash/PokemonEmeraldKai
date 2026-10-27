@@ -37,7 +37,7 @@ override `TCG_IMPLEMENTATION.md`'s "Agreed scope" where they differ.
 |---|---|---|
 | 1 | Who can be challenged | Most people: every Trainer-class NPC and many townsfolk; some say no |
 | 2 | Unbeaten Trainers | Only after beating them in a Pokemon battle |
-| 3 | Deck strength | Themed by trainer class, stronger with each badge |
+| 3 | Deck strength | Themed by trainer class; CARD SCALING (on at first) fits the opponent's deck to the player's deck and results, special trainers a little above; off: stronger with each badge |
 | 4 | FF8 card-taking | The winner takes one card from the loser's deck; the player never loses cards |
 | 5 | Which card | You choose, face up (FF8 "One") |
 | 6 | Rematches | Unlimited; the full reward once a day per NPC, later wins that day a booster |

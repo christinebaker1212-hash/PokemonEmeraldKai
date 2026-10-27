@@ -161,6 +161,8 @@ static void Switch(struct TcgDuel *g, unsigned who, unsigned slot)
     p->field[slot].guard = 0;
     p->field[slot].weaken = 0;
     p->field[slot].charged = 0;
+    p->field[slot].effectBy = 0;
+    p->field[slot].burn = p->field[slot].shift = 0;
     TcgDuel_Event(g, TCG_EV_SWITCH, who, slot, 0, 0, 0);
 }
 static void ToBench(struct TcgDuel *g, unsigned who, unsigned physical)
@@ -179,10 +181,19 @@ static void ToBench(struct TcgDuel *g, unsigned who, unsigned physical)
             f->stack[f->stackSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
             f->enteredTurn = g->turn;
             TcgDuel_Event(g, TCG_EV_PLAY, who, s, 0, p->cards[physical], 0);
+            TcgPower_OnPlay(g, who, s);
             return;
         }
 }
 static int SameName(const struct TcgCard *c, const char *name) { return c && !strcmp(c->name, name); }
+static unsigned EnergyCards(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgFieldCard *f = &g->players[who].field[slot];
+    unsigned i, n = 0;
+    for (i = 0; i < f->attachedSize; i++)
+        n += CardAt(g, who, f->attached[i])->kind == TCG_ENERGY;
+    return n;
+}
 static void SetStatus(struct TcgFieldCard *f, unsigned condition) { f->condition = condition; }
 
 /* Damage from an effect: no Weakness/Resistance; Defender everywhere; for an
@@ -195,6 +206,17 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     unsigned i;
     if (!f->stackSize || amount <= 0)
         return;
+    /* (the Defending Pokemon's protection was settled as the attack began; Mew's
+     * Neutralizing Shield and Haunter's Transparency cover the Bench too) */
+    if (!slot && player != g->current)
+    {
+        if (g->foeImmune == TCG_IMMUNE_UNDECIDED)
+            g->foeImmune = TcgPower_Immune(g, player, slot) ? TCG_IMMUNE_YES : TCG_IMMUNE_NO;
+        if (g->foeImmune == TCG_IMMUNE_YES)
+            return;
+    }
+    else if (TcgPower_Immune(g, player, slot))
+        return;
     if (!slot && player != g->current)
     {
         if (f->barrier)
@@ -205,6 +227,7 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     }
     for (i = 0; i < f->attachedSize; i++)
         amount -= 20 * (p->cards[f->attached[i]] == TCG_CARD_DEFENDER);
+    amount = TcgPower_AttackDamage(g, player, slot, amount, 0);
     if (amount <= 0)
         return;
     f->damage += (unsigned)amount;
@@ -216,12 +239,14 @@ void TcgDuel_SelfDamage(struct TcgDuel *g, int amount)
 {
     const struct TcgCard *c = TcgDuel_Field(g, g->current, 0);
     struct TcgFieldCard *f = &g->players[g->current].field[0];
+    unsigned type = TcgDuel_Type(g, g->current, 0);
     if (!c || amount <= 0)
         return;
-    if (c->weakness == c->type)
+    if (c->weakness == type)
         amount *= 2;
-    if (c->resistance == c->type)
+    if (c->resistance == type)
         amount -= 30;
+    amount = TcgPower_AttackDamage(g, g->current, 0, amount, 0);
     if (amount <= 0)
         return;
     f->damage += (unsigned)amount;
@@ -412,11 +437,12 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_MEDITATE:
         *damage += foe->damage;
         break;
+    /* "for each Energy card attached": a Double Colorless is one card */
     case FX_PSYWAVE:
-        *damage = 10 * TcgDuel_Energy(g, g->current ^ 1, 0, TCG_NONE);
+        *damage = 10 * EnergyCards(g, g->current ^ 1, 0);
         break;
     case FX_PSYCHIC:
-        *damage += 10 * TcgDuel_Energy(g, g->current ^ 1, 0, TCG_NONE);
+        *damage += 10 * EnergyCards(g, g->current ^ 1, 0);
         break;
     case FX_KARATE_CHOP:
         *damage = *damage > self->damage ? *damage - self->damage : 0;
@@ -438,13 +464,19 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
                 *damage += 10;
         break;
     case FX_WATER_EXTRA:
-        n = TcgDuel_Energy(g, g->current, 0, TCG_WATER);
-        if (n > e->amount)
+    {
+        /* Water Energy not used to pay the cost: the Water part takes Water, the
+         * Colorless part takes the other Energy first. At most 20 more. */
+        unsigned water = TcgDuel_Energy(g, g->current, 0, TCG_WATER), other, need;
+        other = TcgDuel_Energy(g, g->current, 0, TCG_NONE) - water;
+        need = a->cost[TCG_WATER] + (a->cost[TCG_COLORLESS] > other ? a->cost[TCG_COLORLESS] - other : 0);
+        if (water > need)
         {
-            n -= e->amount;
+            n = water - need;
             *damage += 10 * (n > 2 ? 2 : n);
         }
         break;
+    }
 
     /* Costs paid in Energy cards, before the damage. */
     case FX_DISCARD_TYPED:
@@ -667,16 +699,13 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         if (after)
         {
             const struct TcgCard *target = TcgDuel_Field(g, g->current ^ 1, 0);
-            unsigned who;
-            if (!target || target->type == TCG_COLORLESS)
+            unsigned who, type = TcgDuel_Type(g, g->current ^ 1, 0);
+            if (!target || type == TCG_COLORLESS)
                 break;
             for (who = 0; who < 2; who++)
                 for (s = 1; s < TCG_FIELD_SIZE; s++)
-                {
-                    const struct TcgCard *c = TcgDuel_Field(g, who, s);
-                    if (c && c->type == target->type)
+                    if (TcgDuel_Field(g, who, s) && TcgDuel_Type(g, who, s) == type)
                         TcgDuel_EffectDamage(g, who, s, (int)e->amount, 0);
-                }
         }
         break;
     case FX_RANDOM_OPP:
@@ -688,16 +717,17 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_BIG_THUNDER:
         if (after)
         {
-            /* Either play area at random, never Zapdos itself. */
-            unsigned who = g->current ^ Tcg_RandomBelow(&g->rng, 2);
-            s = RandomSlot(g, who, who == g->current);
-            if (s == TCG_NONE)
+            /* Any Pokemon in play but Zapdos itself, each as likely. */
+            unsigned who, pool[2 * TCG_FIELD_SIZE];
+            for (who = 0; who < 2; who++)
+                for (s = who == g->current ? 1 : 0; s < TCG_FIELD_SIZE; s++)
+                    if (g->players[who].field[s].stackSize)
+                        pool[n++] = who * TCG_FIELD_SIZE + s;
+            if (n)
             {
-                who ^= 1;
-                s = RandomSlot(g, who, who == g->current);
+                s = pool[Tcg_RandomBelow(&g->rng, n)];
+                TcgDuel_EffectDamage(g, s / TCG_FIELD_SIZE, s % TCG_FIELD_SIZE, (int)e->amount, 0);
             }
-            if (s != TCG_NONE)
-                TcgDuel_EffectDamage(g, who, s, (int)e->amount, 0);
         }
         break;
     case FX_CHOSEN_BENCH:
@@ -730,7 +760,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         }
         break;
     case FX_LURE:
-        if (after && foe->barrier != 2)
+        if (after && g->foeImmune != TCG_IMMUNE_YES)
         {
             if (action->target < 1 || action->target >= TCG_FIELD_SIZE || !op->field[action->target].stackSize)
                 return TCG_INVALID;
@@ -751,7 +781,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         if (after)
         {
             TcgDuel_SelfDamage(g, (int)e->amount);
-            if ((!e->extra || g->coinResult) && BenchCount(g, g->current ^ 1) && foe->barrier != 2)
+            if ((!e->extra || g->coinResult) && BenchCount(g, g->current ^ 1) && g->foeImmune != TCG_IMMUNE_YES)
                 g->switchPending = 1;
         }
         break;
@@ -763,11 +793,21 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         break;
     case FX_WEAKEN:
         if (after)
+        {
             foe->weaken = (uint8_t)e->amount;
+            /* Growl, Pounce, Snivel: only attacks on this Pokemon (TcgDuel_BoundEffect) */
+            if (e->amount != TCG_WEAKEN_SMOKESCREEN)
+                foe->effectBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+        }
         break;
     case FX_NO_ATTACK_COIN:
         if (!after && TcgDuel_Coin(g, g->current))
-            foe->noAttack = 1;
+        {
+            /* Leer, Tail Wag: it can't attack this Pokemon; Bone Attack: it can't attack */
+            foe->noAttack = e->extra ? 2 : 1;
+            if (e->extra)
+                foe->effectBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+        }
         break;
     case FX_NO_RETREAT_COIN:
         if (!after && TcgDuel_Coin(g, g->current))
@@ -844,7 +884,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         }
         break;
     case FX_HYPER_BEAM:
-        if (after && foe->stackSize && foe->barrier != 2)
+        if (after && foe->stackSize && g->foeImmune != TCG_IMMUNE_YES)
         {
             /* The attacker picks; Double Colorless costs the most to lose. */
             int pick = -1;
@@ -861,18 +901,24 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     default:
         return TCG_UNSUPPORTED;
     }
-    /* Fossil and Doll are immune to special conditions. */
-    if (TcgDuel_Field(g, g->current ^ 1, 0) && TcgDuel_Field(g, g->current ^ 1, 0)->kind == TCG_TRAINER)
-    {
-        foe->condition = TCG_HEALTHY;
-        foe->poison = 0;
-    }
+    /* (what can't be Asleep, Confused, Paralyzed or Poisoned) */
+    TcgPower_Sanitize(g);
     return TCG_OK;
 }
-/* Powers and card-specific trainer choices are ported separately. */
-int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
+/* Does the attack do anything to the Defending Pokemon beyond its damage? (Haunter's
+ * Transparency flips for every attack that does something to it.) */
+int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack)
 {
-    (void)a;
-    snprintf(g->error, sizeof(g->error), "This Pokemon Power has not been ported yet.");
-    return TCG_UNSUPPORTED;
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    if (!e)
+        return 0;
+    switch (e->kind)
+    {
+    case FX_PARALYZE_COIN: case FX_POISON: case FX_POISON_COIN: case FX_CONFUSE_COIN: case FX_SLEEP:
+    case FX_SLEEP_COIN: case FX_CONFUSE_BOTH: case FX_FOUL_GAS: case FX_VENOM_POWDER: case FX_CLAMP:
+    case FX_LURE: case FX_OPP_SWITCH: case FX_WEAKEN: case FX_NO_ATTACK_COIN: case FX_NO_RETREAT_COIN:
+    case FX_HYPER_BEAM: case FX_PSYWAVE: case FX_SUPER_FANG:
+        return 1;
+    }
+    return 0;
 }

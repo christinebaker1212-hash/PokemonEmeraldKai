@@ -5,6 +5,7 @@
 // front: the CARD CASE opens. Also the CARD CLUB member in the POKeMON CENTERs
 // (the case, the first deck, the teaching duel and the counter).
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "malloc.h"
@@ -40,6 +41,7 @@
 #include "tcg/integration.h"
 #include "tcg/npc.h"
 #include "tcg/card_ids.h"
+#include "tcg/scale.h"
 
 // ---------------------------------------------------------------------------
 // Who they are
@@ -326,6 +328,133 @@ static const struct TcgDeckDefinition *DeckNamed(const char *name)
     return NULL;
 }
 
+// ---------------------------------------------------------------------------
+// CARD SCALING: who brings which deck (include/tcg/scale.h)
+
+// Ordinary card players bring a deck a touch stronger than yours, special trainers a real
+// test; badges cap the ordinary ones (a strong deck early on still meets the early decks)
+#define SCALE_EDGE 25
+#define SCALE_BOSS_EDGE 75
+static const s16 sBadgeCap[NUM_BADGES + 1] = {1460, 1490, 1530, 1570, 1610, 1650, 1690, 1730, 2000};
+
+static int PlayerRating(const uint16_t *mine, int *deckRating)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    char reason[64];
+    if (!mine)
+        mine = c->decks[c->activeDeck].cards;
+    // (no legal deck yet: as strong as a starter)
+    *deckRating = Tcg_DeckValidate(mine, NULL, reason, sizeof(reason)) ? TcgScale_RateDeck(mine)
+                                                                         : gTcgDeckRating[DeckNamed("CharmanderAndFriends") - gTcgDeckDefinitions];
+    return *deckRating + c->skill;
+}
+
+// The candidate closest to the target; among those nearly as close, the person's own pick
+struct Candidate
+{
+    const uint16_t *deck;
+    int rating;
+};
+static const struct Candidate *Closest(const struct Candidate *list, unsigned count, int target, u32 pick)
+{
+    unsigned i, near = 0, best = 0xFFFF;
+    const struct Candidate *chosen = NULL;
+    for (i = 0; i < count; i++)
+    {
+        unsigned d = (unsigned)abs(list[i].rating - target);
+        if (d < best)
+            best = d;
+    }
+    for (i = 0; i < count; i++)
+        near += (unsigned)abs(list[i].rating - target) <= best + 30;
+    pick %= near ? near : 1;
+    for (i = 0; i < count; i++)
+        if ((unsigned)abs(list[i].rating - target) <= best + 30 && !pick--)
+            chosen = &list[i];
+    return chosen;
+}
+
+void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
+{
+    struct Candidate list[32];
+    const struct Candidate *chosen;
+    unsigned n = 0, i, t, k;
+    int you, deckRating, target;
+    if (o->pool == TCG_SCALE_POOL_NONE)
+        return;
+    you = PlayerRating(mine, &deckRating);
+    o->deckRating = (s16)deckRating;
+    if (o->pool == TCG_SCALE_POOL_SPECIAL)
+    {
+        list[n].deck = gTcgSpecialDecks[o->special].cards;
+        list[n++].rating = gTcgSpecialRating[o->special];
+        // (off: their own deck, as it always was)
+        for (i = 0; gMpConfig.cardScaling && i < gTcgSpecialVariantCount && n < ARRAY_COUNT(list); i++)
+            if (gTcgSpecialVariantOwner[i] == o->special)
+            {
+                list[n].deck = gTcgSpecialVariants[i].cards;
+                list[n++].rating = gTcgVariantRating[i];
+            }
+        target = you + SCALE_BOSS_EDGE;
+    }
+    else if (gMpConfig.cardScaling)
+    {
+        // Every deck of their kind, any badge tier, up to what the badges allow
+        int cap = sBadgeCap[Badges()];
+        for (t = 0; t < 4; t++)
+            for (k = 0; k < 3; k++)
+            {
+                const struct TcgDeckDefinition *def = sPools[o->pool][t][k] ? DeckNamed(sPools[o->pool][t][k]) : NULL;
+                bool8 seen = FALSE;
+                if (!def)
+                    continue;
+                for (i = 0; i < n; i++)
+                    seen |= list[i].deck == def->cards;
+                if (!seen && n < ARRAY_COUNT(list))
+                {
+                    list[n].deck = def->cards;
+                    list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
+                }
+            }
+        target = you + SCALE_EDGE;
+        if (target > cap)
+            target = cap;
+    }
+    else
+    {
+        // By badges (CARD SCALING off): their tier's decks
+        u8 tier = Badges();
+        tier = tier >= 7 ? 3 : tier >= 4 ? 2 : tier >= 2 ? 1 : 0;
+        for (k = 0; k < 3; k++)
+        {
+            const struct TcgDeckDefinition *def = sPools[o->pool][tier][k] ? DeckNamed(sPools[o->pool][tier][k]) : NULL;
+            if (def)
+            {
+                list[n].deck = def->cards;
+                list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
+            }
+        }
+        target = 0;
+    }
+    if (!n)
+    {
+        const struct TcgDeckDefinition *def = DeckNamed("CharmanderAndFriends");
+        list[n].deck = def->cards;
+        list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
+    }
+    if (o->pool == TCG_SCALE_POOL_SPECIAL && !gMpConfig.cardScaling)
+        chosen = &list[0];
+    else if (gMpConfig.cardScaling)
+        chosen = Closest(list, n, target, o->pick);
+    else
+        chosen = &list[(o->pick >> 12) % n];
+    o->deck = chosen->deck;
+    o->rating = (s16)chosen->rating;
+    printf("[tcg] scaling %s: you %d (deck %d, skill %d), target %d, %s %d of %u decks\n",
+           gMpConfig.cardScaling ? "on" : "off", you, deckRating, Tcg_GetCollection()->skill, target, o->name,
+           o->rating, n);
+}
+
 // Which mat a kind of deck is played on
 static u8 MatFor(u8 deck)
 {
@@ -403,9 +532,8 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
     u32 key = (u32)gSaveBlock1Ptr->location.mapGroup << 24 | (u32)gSaveBlock1Ptr->location.mapNum << 16
             | (u32)npc->localId << 8 | 1;
     u32 h = Hash(key);
-    u8 i, cat = CAT_NONE, deck = DECK_MIXED, tier;
+    u8 i, cat = CAT_NONE, deck = DECK_MIXED;
     const char *label = NULL;
-    const struct TcgDeckDefinition *def = NULL;
     struct TcgOpponent *o = &sOpponent;
 
     memset(o, 0, sizeof(*o) - sizeof(o->portrait));
@@ -438,6 +566,9 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         o->music = s->music;
         o->promo = gTcgSpecialPromos[i];
         o->pack = i % TCG_PACK_TYPES;
+        o->pool = TCG_SCALE_POOL_SPECIAL;
+        o->pick = h;
+        Tcg_FitOpponent(o, NULL);
         *answer = ASK_DUEL;
         return s->accept;
     }
@@ -482,19 +613,9 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         snprintf(o->name, sizeof(o->name), "%s", label);
     if (deck == DECK_MIXED)
         deck = (h >> 4) % DECK_MIXED;
-    tier = Badges();
-    tier = tier >= 7 ? 3 : tier >= 4 ? 2 : tier >= 2 ? 1 : 0;
-    for (i = 0; i < 3 && !def; i++)
-    {
-        const char *name = sPools[deck][tier][(h >> 12) % 3];
-        if (!name)
-            name = sPools[deck][tier][(h >> 12) % 2];
-        def = DeckNamed(name);
-        h = Hash(h);
-    }
-    if (!def)
-        def = DeckNamed("CharmanderAndFriends");
-    o->deck = def->cards;
+    o->pool = deck;
+    o->pick = h;
+    Tcg_FitOpponent(o, NULL);
     o->key = key;
     o->mat = cat == CAT_TEAM ? (deck == DECK_WATER ? 9 : 10) : MatFor(deck);
     o->music = cat == CAT_TEAM ? MUS_VS_AQUA_MAGMA : MUS_VS_TRAINER;

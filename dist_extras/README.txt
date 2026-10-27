@@ -1169,9 +1169,22 @@ you'd like one, and later run the CARD COUNTER.
                   pictures) or FULL CARD (the whole printed cards). CARD
                   BACKS: PRINTED or PIXEL. The few cards that were only ever
                   in the Game Boy game keep their Game Boy picture.
+  POKEMON POWERS  All of them work as their cards say. A Pokemon with one
+                  you use has PKMN POWER on its menu (the grey line says why
+                  not, when it can't be used); the others work on their own.
+                  With OMANYTE in play, A on your opponent's hand shows it.
+                  A CLEFAIRY DOLL or MYSTERIOUS FOSSIL in play can be
+                  discarded from its menu.
+  Card scaling    OPTIONS > GAME > CARD SCALING (ON at first): card players
+                  pick the deck of theirs that best fits yours, and learn
+                  from how your duels go, so a starter deck meets starter
+                  sized decks and a strong deck meets strong ones. Gym
+                  Leaders and other special trainers play a little above
+                  you, with their own deck or a version of it. The challenge
+                  says how the MATCH looks (EASY, EVEN, TOUGH, VERY TOUGH).
+                  OFF: decks get stronger with your badges instead.
 Your cards are saved with your game (the save file's .cards file, kept with
-its backups). A few attacks and every POKEMON POWER aren't in the game yet;
-they show as not ready.
+its backups). A few attacks aren't in the game yet; they show as not ready.
 
 POKEDEX ENTRIES
 ---------------

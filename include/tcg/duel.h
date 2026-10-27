@@ -17,8 +17,16 @@ struct TcgFieldCard
      * TCG_GUARD_*), weaken (on a Defending Pokemon's next attacks:
      * TCG_WEAKEN_*), charged (Swords Dance / Focus Energy: 1 set, 2 this
      * turn doubles) and usedOnce (Leek Slap). barrier 1 stops damage,
-     * 2 every effect of attacks. */
-    uint8_t guard, weaken, charged, usedOnce;
+     * 2 every effect of attacks. noAttack 1: it can't attack (Bone Attack);
+     * 2: it can't attack the Pokemon that did it (Leer, Tail Wag). For that and
+     * for weaken 10 / 20 (Growl, Pounce, Snivel), effectBy is the card that
+     * did it (physical + 1, the top of its stack): "benching or evolving
+     * either Pokemon ends this effect", so it only counts while that card is
+     * the opponent's Active. */
+    uint8_t guard, weaken, charged, usedOnce, effectBy;
+    /* Pokemon Powers for the rest of the turn: burn (Charizard's Energy Burn: all its
+     * Energy is Fire) and shift (Venomoth's Shift: its type + 1, 0 = its own). */
+    uint8_t burn, shift;
 };
 enum
 {
@@ -61,7 +69,54 @@ enum TcgActionType
     TCG_PASS,
     TCG_PROMOTE,
     TCG_FINISH_SETUP,
-    TCG_CONCEDE
+    TCG_CONCEDE,
+    TCG_DISCARD_DOLL /* Clefairy Doll / Mysterious Fossil in slot leaves play (their text) */
+};
+/* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
+enum TcgPowerId
+{
+    TCG_POWER_NONE,
+    /* Always on */
+    TCG_POWER_TOXIC_GAS,
+    TCG_POWER_CLAIRVOYANCE,
+    TCG_POWER_STRIKES_BACK,
+    TCG_POWER_KABUTO_ARMOR,
+    TCG_POWER_PREHISTORIC,
+    TCG_POWER_TRANSPARENCY,
+    TCG_POWER_INVISIBLE_WALL,
+    TCG_POWER_NEUTRALIZING_SHIELD,
+    TCG_POWER_RETREAT_AID,
+    TCG_POWER_THICK_SKINNED,
+    /* When it's put into play */
+    TCG_POWER_FIREGIVER,
+    TCG_POWER_QUICKFREEZE,
+    TCG_POWER_PEAL_OF_THUNDER,
+    TCG_POWER_HEALING_WIND,
+    /* Used during your turn (TCG_USE_POWER) */
+    TCG_POWER_SOLAR_POWER,
+    TCG_POWER_ENERGY_TRANS,
+    TCG_POWER_HEAL,
+    TCG_POWER_SHIFT,
+    TCG_POWER_ENERGY_BURN,
+    TCG_POWER_RAIN_DANCE,
+    TCG_POWER_COWARDICE,
+    TCG_POWER_PEEK,
+    TCG_POWER_DAMAGE_SWAP,
+    TCG_POWER_STRANGE_BEHAVIOR,
+    TCG_POWER_CURSE,
+    TCG_POWER_STEP_IN,
+    TCG_POWER_COUNT
+};
+#define TCG_POWER_FIRST_USED TCG_POWER_SOLAR_POWER
+enum { TCG_IMMUNE_NO, TCG_IMMUNE_YES, TCG_IMMUNE_UNDECIDED };
+/* Peek: what to look at (TcgAction.target) */
+enum
+{
+    TCG_PEEK_MY_DECK,
+    TCG_PEEK_THEIR_DECK,
+    TCG_PEEK_THEIR_HAND,
+    TCG_PEEK_MY_PRIZE,
+    TCG_PEEK_THEIR_PRIZE
 };
 enum TcgResult
 {
@@ -106,7 +161,10 @@ enum TcgEventType
     TCG_EV_SETUP_DONE,   /* player has placed their Pokemon */
     TCG_EV_SUDDEN_DEATH, /* the duel restarts with one Prize */
     TCG_EV_WIN,          /* player wins; value: 0 prizes, 1 no Pokemon, 2 deck out, 3 concede */
-    TCG_EV_RETREAT_FAIL  /* player's confused Active failed to retreat */
+    TCG_EV_RETREAT_FAIL, /* player's confused Active failed to retreat */
+    TCG_EV_POWER,        /* player's slot (card) uses or triggers its Pokemon Power: value TCG_POWER_* */
+    TCG_EV_PEEK          /* player looked at card with Peek: value TCG_PEEK_* (the one event naming a
+                          * hidden card: the duel screen shows it to that player alone) */
 };
 enum
 {
@@ -134,6 +192,9 @@ struct TcgDuel
      * Weakness/Resistance, a failed coin cancels the rest, a coin flipped
      * before the damage decides an effect after it. */
     uint8_t noWeakRes, attackFailed, coinResult;
+    /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
+     * the like, Neutralizing Shield, a heads for Transparency */
+    uint8_t foeImmune; /* TCG_IMMUNE_* */
     char error[TCG_LOG_WIDTH];
     char log[TCG_LOG_LINES][TCG_LOG_WIDTH];
     unsigned logCount;
@@ -155,7 +216,12 @@ int TcgDuel_Conserved(const struct TcgDuel *g);
 const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, unsigned slot);
 unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack);
+/* Is the effect on this Pokemon tied to its opponent's Active (effectBy) still in force? */
+int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* Leer / Tail Wag / Bone Attack: the Active Pokemon can't attack now. */
+int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player);
 int TcgDuel_EffectSupported(const char *name);
+int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack);
 /* Why an attack's effect can't be used now (NULL = it can), e.g. Dream Eater. */
 const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack);
 /* 0: no choice. 1: the attacker picks one of the opponent's Benched Pokemon
@@ -181,6 +247,32 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g);
 int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *action);
 int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *attack, const struct TcgAction *action,
                          unsigned *damage, int after);
+/* Pokemon Powers (tcg_powers.c). TCG_USE_POWER: slot = the Pokemon using it; target / attack
+ * = the Pokemon it moves from / to (Damage Swap, Energy Trans, Curse: target then attack),
+ * the one it heals or attaches to (Heal, Rain Dance: hand = the Water Energy), the type
+ * (Shift), what to look at (Peek, TCG_PEEK_*). */
 int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *action);
+unsigned TcgPower_Id(const struct TcgCard *c);
+const char *TcgPower_Name(unsigned power);
+/* The power of the Pokemon in that slot, if it works now (Toxic Gas, Asleep / Confused /
+ * Paralyzed), else TCG_POWER_NONE. */
+unsigned TcgPower_Working(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* A working power of this kind anywhere on that player's side (or either side: player 2). */
+int TcgPower_InPlay(const struct TcgDuel *g, unsigned player, unsigned power);
+/* Why the power in that slot can't be used now (NULL: it can), for player. */
+const char *TcgPower_Block(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* The Pokemon's type now (Venomoth's Shift) */
+unsigned TcgDuel_Type(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* Hooks: a Pokemon put into play during its owner's turn; damage an attack does to a
+ * Pokemon (Kabuto Armor, Invisible Wall, Neutralizing Shield; Transparency flips);
+ * conditions it can't have (Thick Skinned, Clefairy Doll, Mysterious Fossil). */
+void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot);
+int TcgPower_AttackDamage(struct TcgDuel *g, unsigned player, unsigned slot, int amount, int defending);
+int TcgPower_Immune(struct TcgDuel *g, unsigned player, unsigned slot);
+void TcgPower_Sanitize(struct TcgDuel *g);
+/* After an attack: Machamp's Strikes Back for each that took damage (before: the damage
+ * and conditions as the attack began). */
+void TcgPower_StrikesBack(struct TcgDuel *g, const uint16_t before[TCG_FIELD_SIZE], unsigned activeCondition);
+unsigned TcgPower_RetreatAid(const struct TcgDuel *g, unsigned player);
 uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index);
 #endif

@@ -19,6 +19,7 @@ static int Move(uint8_t *from, uint8_t *count, uint8_t *to, uint8_t *toCount, un
     to[(*toCount)++] = TcgPile_Remove(from, count, (unsigned)at);
     return 1;
 }
+/* Benched or evolved: no longer anything attacks or powers did to it */
 static void Cure(struct TcgFieldCard *f)
 {
     f->condition = TCG_HEALTHY;
@@ -26,6 +27,8 @@ static void Cure(struct TcgFieldCard *f)
     f->barrier = 0;
     f->noRetreat = 0;
     f->noAttack = 0;
+    f->effectBy = 0;
+    f->guard = f->weaken = f->charged = f->burn = f->shift = 0;
 }
 static int Fail(struct TcgDuel *g, const char *message)
 {
@@ -105,7 +108,10 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     case TCG_CARD_FULL_HEAL:
         if (!p->field[0].condition && !p->field[0].poison)
             return Fail(g, "Your Active Pokemon has no special condition.");
-        Cure(&p->field[0]);
+        /* Only "Asleep, Confused, Paralyzed, or Poisoned": not what other attacks left on it
+         * (Withdraw's protection, Acid's "can't retreat") */
+        p->field[0].condition = TCG_HEALTHY;
+        p->field[0].poison = 0;
         TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, TCG_HEALTHY, 0, 0);
         break;
     case TCG_CARD_POKEMON_CENTER:
@@ -185,13 +191,21 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         n = id == TCG_CARD_ENERGY_RETRIEVAL ? 1 : 2;
         if (a->selectionCount <= n || a->selectionCount > n + (n == 1 ? 2 : 4))
             return Fail(g, "Select discard costs and up to the allowed basic Energy cards.");
-        for (i = 0; i < n; i++)
-            if (!Move(p->hand, &p->handSize, p->discard, &p->discardSize, a->selections[i]))
-                return TCG_INVALID;
+        /* A trade: the Energy comes from what was already in the discard pile, not the
+         * card just given up for it */
         for (i = n; i < a->selectionCount; i++)
             if (a->selections[i] >= 60 || p->cards[a->selections[i]] > 6 ||
                 !Move(p->discard, &p->discardSize, p->hand, &p->handSize, a->selections[i]))
                 return TCG_INVALID;
+        for (i = 0; i < n; i++)
+        {
+            unsigned k;
+            for (k = n; k < a->selectionCount; k++)
+                if (a->selections[k] == a->selections[i])
+                    return TCG_INVALID;
+            if (!Move(p->hand, &p->handSize, p->discard, &p->discardSize, a->selections[i]))
+                return TCG_INVALID;
+        }
         break;
     case TCG_CARD_ENERGY_REMOVAL:
     case TCG_CARD_SUPER_ENERGY_REMOVAL:
@@ -281,6 +295,8 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         if (card->kind != TCG_POKEMON || card->stage != 2 || TcgDuel_Field(g, g->current, a->slot)->stage != 0 ||
             p->turnsTaken < 2 || f->enteredTurn == g->turn)
             return TCG_INVALID;
+        if (TcgPower_InPlay(g, 2, TCG_POWER_PREHISTORIC))
+            return Fail(g, "Aerodactyl's Prehistoric Power: no Evolution cards can be played.");
         n = 0;
         for (i = 1; i <= TCG_CARD_COUNT; i++)
             if (gTcgCards[i].kind == TCG_POKEMON && gTcgCards[i].stage == 1 &&
@@ -293,6 +309,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         f->stack[f->stackSize++] = TcgPile_Remove(p->hand, &p->handSize, at);
         f->enteredTurn = g->turn;
         Cure(f);
+        TcgPower_OnPlay(g, g->current, a->slot); /* (Healing Wind) */
         break;
     case TCG_CARD_REVIVE:
     case TCG_CARD_POKEMON_FLUTE:
@@ -312,7 +329,10 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         f->stack[f->stackSize++] = TcgPile_Remove(q->discard, &q->discardSize, at);
         f->enteredTurn = g->turn;
         if (id == TCG_CARD_REVIVE)
+        {
             f->damage = (card->hp / 20) * 10;
+            TcgPower_OnPlay(g, g->current, slot); /* (put into play during your turn) */
+        }
         break;
     }
     case TCG_CARD_MR_FUJI:
@@ -357,8 +377,8 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             p->discard[p->discardSize++] = f->stack[--f->stackSize];
         if (n == f->stackSize)
             return TCG_INVALID;
+        /* (as if it had evolved; it can evolve again this turn unless it already did) */
         Cure(f);
-        f->enteredTurn = g->turn;
         break;
     case TCG_CARD_POKEDEX:
         n = p->deckSize < 5 ? p->deckSize : 5;
@@ -381,6 +401,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         return TCG_UNSUPPORTED;
     }
     p->discard[p->discardSize++] = played;
+    TcgPower_Sanitize(g); /* (Imakuni? on Snorlax) */
     TcgDuel_ResolveKnockouts(g);
     TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, Tcg_Card(id)->name);
     return TCG_OK;

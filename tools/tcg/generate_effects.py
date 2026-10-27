@@ -17,7 +17,7 @@ functions={
  'CuboneRage_DamageBoostEffect':('RAGE',0),'DodrioRage_DamageBoostEffect':('RAGE',0),'FlareonRage_DamageBoostEffect':('RAGE',0),
  'MrMimeMeditate_DamageBoostEffect':('MEDITATE',0),'JynxMeditate_DamageBoostEffect':('MEDITATE',0),'PsywaveEffect':('PSYWAVE',0),'Psychic_DamageBoostEffect':('PSYCHIC',0),
  'KarateChop_DamageSubtractionEffect':('KARATE_CHOP',0),'SuperFang_HalfHPEffect':('SUPER_FANG',0),
- 'FuryAttack_MultiplierEffect':('MULTI_COIN',3),'CometPunch_MultiplierEffect':('MULTI_COIN',4),'Twineedle_MultiplierEffect':('MULTI_COIN',2),'PinMissile_MultiplierEffect':('MULTI_COIN',4),'NidoranFFurySwipes_MultiplierEffect':('MULTI_COIN',3),'PrimeapeFurySwipes_MultiplierEffect':('MULTI_COIN',3),'PsyduckFurySwipes_MultiplierEffect':('MULTI_COIN',3),'SandslashFurySwipes_MultiplierEffect':('MULTI_COIN',3),'DragonairSlam_MultiplierEffect':('MULTI_COIN',2),'DragoniteLv41Slam_MultiplierEffect':('MULTI_COIN',2),'DragoniteLv45Slam_MultiplierEffect':('MULTI_COIN',2),'NidorinaDoubleKick_MultiplierEffect':('MULTI_COIN',2),'NidorinoDoubleKick_MultiplierEffect':('MULTI_COIN',2),'JolteonDoubleKick_MultiplierEffect':('MULTI_COIN',2),'JynxDoubleslap_MultiplierEffect':('MULTI_COIN',2),'PoliwhirlDoubleslap_MultiplierEffect':('MULTI_COIN',2),'Bonemerang_MultiplierEffect':('MULTI_COIN',2),'OmastarSpikeCannon_MultiplierEffect':('MULTI_COIN',2),'CloysterSpikeCannon_MultiplierEffect':('MULTI_COIN',2),
+ 'FuryAttack_MultiplierEffect':('MULTI_COIN',2),'CometPunch_MultiplierEffect':('MULTI_COIN',4),'Twineedle_MultiplierEffect':('MULTI_COIN',2),'PinMissile_MultiplierEffect':('MULTI_COIN',4),'NidoranFFurySwipes_MultiplierEffect':('MULTI_COIN',3),'PrimeapeFurySwipes_MultiplierEffect':('MULTI_COIN',3),'PsyduckFurySwipes_MultiplierEffect':('MULTI_COIN',3),'SandslashFurySwipes_MultiplierEffect':('MULTI_COIN',3),'DragonairSlam_MultiplierEffect':('MULTI_COIN',2),'DragoniteLv41Slam_MultiplierEffect':('MULTI_COIN',2),'DragoniteLv45Slam_MultiplierEffect':('MULTI_COIN',2),'NidorinaDoubleKick_MultiplierEffect':('MULTI_COIN',2),'NidorinoDoubleKick_MultiplierEffect':('MULTI_COIN',2),'JolteonDoubleKick_MultiplierEffect':('MULTI_COIN',2),'JynxDoubleslap_MultiplierEffect':('MULTI_COIN',2),'PoliwhirlDoubleslap_MultiplierEffect':('MULTI_COIN',2),'Bonemerang_MultiplierEffect':('MULTI_COIN',2),'OmastarSpikeCannon_MultiplierEffect':('MULTI_COIN',2),'CloysterSpikeCannon_MultiplierEffect':('MULTI_COIN',2),
  'DoTheWaveEffect':('DO_THE_WAVE',0),'PoliwagWaterGunEffect':('WATER_EXTRA',1),'LaprasWaterGunEffect':('WATER_EXTRA',1),'OmanyteWaterGunEffect':('WATER_EXTRA',1),'OmastarWaterGunEffect':('WATER_EXTRA',2),'SeadraWaterGunEffect':('WATER_EXTRA',1),'VaporeonWaterGunEffect':('WATER_EXTRA',2),'PoliwrathWaterGunEffect':('WATER_EXTRA',2),'HydroPumpEffect':('WATER_EXTRA',3),
 }
 # Whole command lists ported by hand from effect_functions.asm (checked
@@ -44,6 +44,9 @@ lists={
  'JigglypuffFirstAidEffectCommands':('HEAL_SELF',10,0),'SlowpokeSpacingOutEffectCommands':('HEAL_SELF',10,1),
  'VenusaurMegaDrainEffectCommands':('DRAIN_DONE',2,0),'ButterfreeMegaDrainEffectCommands':('DRAIN_DONE',2,0),
  'KabutopsAbsorbEffectCommands':('DRAIN_DONE',2,0),'VenonatLeechLifeEffectCommands':('DRAIN_DONE',1,0),
+ # Leech Life heals the damage done (after Weakness and Resistance), not a fixed amount
+ 'ZubatLeechLifeEffectCommands':('DRAIN_DONE',1,0),'GolbatLeechLifeEffectCommands':('DRAIN_DONE',1,0),
+
  'GloomFoulOdorEffectCommands':('CONFUSE_BOTH',0,0),'VileplumePetalDanceEffectCommands':('PETAL_DANCE',3,40),
  'KoffingFoulGasEffectCommands':('FOUL_GAS',0,0),'VenomothVenomPowderEffectCommands':('VENOM_POWDER',0,0),
  'PrimeapeTantrumEffectCommands':('TANTRUM',0,0),'TaurosRampageEffectCommands':('RAMPAGE',0,0),
@@ -74,7 +77,8 @@ lists={
  'PersianPounceEffectCommands':('WEAKEN',1,0),'CuboneSnivelEffectCommands':('WEAKEN',2,0),
  'HorseaSmokescreenEffectCommands':('WEAKEN',3,0),'MagmarSmokescreenEffectCommands':('WEAKEN',3,0),
  'SandshrewSandAttackEffectCommands':('WEAKEN',3,0),
- 'RhyhornLeerEffectCommands':('NO_ATTACK_COIN',0,0),'EeveeTailWagEffectCommands':('NO_ATTACK_COIN',0,0),
+ # (extra 1: it can't attack the Pokemon that did it: "benching or evolving either Pokemon ends this effect")
+ 'RhyhornLeerEffectCommands':('NO_ATTACK_COIN',0,1),'EeveeTailWagEffectCommands':('NO_ATTACK_COIN',0,1),
  'MarowakBoneAttackEffectCommands':('NO_ATTACK_COIN',0,0),'VictreebelAcidEffectCommands':('NO_RETREAT_COIN',0,0),
  'PsyduckHeadacheEffectCommands':('HEADACHE',0,0),
  'ScytherSwordsDanceEffectCommands':('CHARGE',0,0),'VaporeonFocusEnergyEffectCommands':('CHARGE',0,0),
@@ -90,10 +94,10 @@ lists={
 covered=[];pending=[]
 for name,commands in x['effects'].items():
  meaningful=[p for p in commands if p['phase'] not in ['EFFECTCMDTYPE_AI','EFFECTCMDTYPE_AI_SELECTION','EFFECTCMDTYPE_AI_SWITCH_DEFENDING_PKMN']]
- if len(meaningful)==1 and meaningful[0]['function'] in functions:
-  op,param=functions[meaningful[0]['function']];covered.append((name,op,param,int(meaningful[0]['phase']=='EFFECTCMDTYPE_AFTER_DAMAGE'),0))
- elif name in lists:
+ if name in lists:   # (a hand-ported list also corrects a single function's mapping)
   op,param,extra=lists[name];covered.append((name,op,param,2,extra))
+ elif len(meaningful)==1 and meaningful[0]['function'] in functions:
+  op,param=functions[meaningful[0]['function']];covered.append((name,op,param,int(meaningful[0]['phase']=='EFFECTCMDTYPE_AFTER_DAMAGE'),0))
  else:pending.append(name)
 out=['/* Generated explicit original effect coverage. */']
 for name,op,param,after,extra in covered:out.append('{"'+name+'", FX_'+op+','+str(param)+','+str(after)+','+str(extra)+'},')

@@ -319,7 +319,8 @@ static void LoadConfig(void)
     gMpConfig.autosaveMinutes = 5;
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.levelScaling = TRUE;
-    gMpConfig.scale[MP_SCALE_WILD - 1] = 2;       // MEDIUM: halfway between the area's level and the team's
+    gMpConfig.cardScaling = TRUE;
+    gMpConfig.scale[MP_SCALE_WILD - 1] = 2;      // MEDIUM: halfway between the area's level and the team's
     gMpConfig.scale[MP_SCALE_TRAINERS - 1] = 2;   // EVEN
     gMpConfig.scale[MP_SCALE_BOSS - 1] = 0;       // AUTO
     gMpConfig.scale[MP_SCALE_CAPS - 1] = 1;
@@ -407,6 +408,7 @@ static void LoadConfig(void)
             gMpConfig.cardArt = strcmp(val, "gameboy") == 0     ? MP_CARD_ART_GAME_BOY
                               : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
                                                               : MP_CARD_ART_PRINTED_ART;
+        else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
         else if (strcmp(key, "card_back") == 0)
             gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
@@ -539,6 +541,8 @@ void MP_SaveConfig(void)
         "card_art = %s\n"
         "; OPTIONS > DISPLAY > CARD BACKS: printed (the real card back) or pixel\n"
         "card_back = %s\n"
+        "; OPTIONS > GAME > CARD SCALING: 1 = card players' decks fit yours and how you play, 0 = by badges\n"
+        "card_scaling = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -552,7 +556,7 @@ void MP_SaveConfig(void)
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
-        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.lobby);
+        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)

@@ -93,6 +93,10 @@ struct TcgCollection
     uint32_t specialBeaten, promoGiven; /* bits by special trainer (TCG_SPECIAL_*) */
     uint32_t milestones;                /* bit set * 3 + n: 25 / 50 / 75 % of a set rewarded */
     uint32_t packsOpened, onlineWins, trades, flags;
+    /* Format 4: CARD SCALING's correction (Elo points the player does better than their
+     * deck's rating says; include/tcg/scale.h) and how many duels it has learned from. */
+    int16_t skill;
+    uint16_t rated;
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);

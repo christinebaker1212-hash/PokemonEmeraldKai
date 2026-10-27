@@ -21,6 +21,7 @@
 #include "tcg/integration.h"
 #include "tcg/npc.h"
 #include "tcg/online.h"
+#include "tcg/scale.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
 int Tcg_GrantCase(void);
@@ -278,6 +279,7 @@ void Tcg_OpenOnlineDeck(void)
     snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(s->peer));
     Tcg_PortraitOfPlayer(s->peer, &U.opp);
     U.opp.special = TCG_SPECIAL_NONE;
+    U.opp.pool = TCG_SCALE_POOL_NONE;
     U.opp.online = 1;
     U.opp.mat = TCG_MAT_ONLINE;
     U.opp.music = MUS_RG_UNION_ROOM;
@@ -589,6 +591,14 @@ static void DuelStep(unsigned pressed, unsigned keys)
     if (U.duel.phase == TCG_FINISHED && !U.rewarded)
     {
         U.rewarded = 1;
+        /* CARD SCALING learns from every duel against a card player, won or lost */
+        if (U.vs == VS_NPC && U.opp.pool != TCG_SCALE_POOL_NONE && U.opp.rating)
+        {
+            struct TcgCollection *c = Tcg_GetCollection();
+            TcgScale_Result(c, U.opp.deckRating, U.opp.rating, U.duel.winner == 0);
+            printf("[tcg] scaling learned: %s vs %d with a deck of %d, skill now %d after %u\n",
+                   U.duel.winner == 0 ? "won" : "lost", U.opp.rating, U.opp.deckRating, c->skill, c->rated);
+        }
         if (U.vs == VS_FRIEND)
             FriendRewards(U.duel.winner == 0);
         else if (U.vs == VS_NPC && U.duel.winner == 0)
@@ -883,6 +893,16 @@ static void ChallengeScreen(void)
     {
         G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "PLAYS", 0, TF_NARROW);
         TypeOrbs(34, y + 2, U.opp.deck);
+    }
+    /* CARD SCALING: how the duel looks for the deck in use and how you've been doing */
+    if (U.vs == VS_NPC && U.opp.rating)
+    {
+        unsigned e = TcgScale_Expected(U.opp.deckRating + c->skill, U.opp.rating);
+        static const char *const words[] = {"VERY TOUGH", "TOUGH", "EVEN", "EASY"};
+        static const unsigned colors[] = {0xc03028, 0xc07020, 0x387848, 0x3060b8};
+        unsigned w = e >= 600 ? 3 : e >= 420 ? 2 : e >= 280 ? 1 : 0;
+        G_Text(6, y + 12, 0x505868, G_NO_SHADOW, "MATCH", 0, TF_NARROW);
+        G_Text(34, y + 12, colors[w], G_NO_SHADOW, words[w], 0, TF_NARROW);
     }
     /* Your decks */
     ListBox(LIST_X, 4, LIST_W, 104);
@@ -1798,6 +1818,9 @@ static void ChooseDeck(void)
         Screen(UI_WAIT);
         return;
     }
+    /* CARD SCALING: the deck they bring fits the one you picked */
+    if (U.vs == VS_NPC)
+        Tcg_FitOpponent(&U.opp, c->decks[U.cursor].cards);
     StartDuel(c->decks[U.cursor].cards, U.opp.deck);
 }
 static void MoveCursor(unsigned pressed, int count, int step)
@@ -2581,6 +2604,7 @@ void Tcg_Debug(const char *command)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned n = 0, m = 0;
+    int skill;
     if (!strcmp(command, "challenge"))
     {
         printf("[tcg] field challenge: %d\n", Tcg_FieldChallenge());
@@ -2594,8 +2618,20 @@ void Tcg_Debug(const char *command)
         snprintf(o.name, sizeof(o.name), "TEST COLLECTOR");
         o.deck = d->cards;
         o.special = TCG_SPECIAL_NONE;
+        o.pool = TCG_SCALE_POOL_NONE;
         o.key = 0x7e57;
         Tcg_OpenNpcChallenge(&o);
+        return;
+    }
+    if (sscanf(command, "skill %d", &skill) == 1)
+    {
+        c->skill = (int16_t)skill;
+        return;
+    }
+    if (!strcmp(command, "rate"))
+    {
+        printf("[tcg] deck %u rated %d, skill %d after %u duels\n", c->activeDeck,
+               TcgScale_RateDeck(c->decks[c->activeDeck].cards), c->skill, c->rated);
         return;
     }
     if (sscanf(command, "special %u", &n) == 1 && n < TCG_SPECIAL_COUNT)
@@ -2608,6 +2644,8 @@ void Tcg_Debug(const char *command)
         o.key = 0xFF000000u | n;
         o.promo = Tcg_SpecialPromo(n);
         o.mat = n < TCG_GYM_LEADERS ? TCG_MAT_GYM : TCG_MAT_LEAGUE;
+        o.pool = TCG_SCALE_POOL_SPECIAL;
+        Tcg_FitOpponent(&o, NULL);
         Tcg_OpenNpcChallenge(&o);
         return;
     }
@@ -2766,6 +2804,74 @@ void Tcg_Debug(const char *command)
             }
         printf("[tcg] give %u -> %u conserved %d\n", n, m, TcgDuel_Conserved(&U.duel));
         return;
+    }
+    if (!strcmp(command, "clear"))
+    {
+        /* Harness helper: every Pokemon in play back into its deck, for staging a board
+         * with put / attach / damage */
+        unsigned who, s, i;
+        for (who = 0; who < 2; who++)
+        {
+            struct TcgPlayer *p = &U.duel.players[who];
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+            {
+                struct TcgFieldCard *f = &p->field[s];
+                for (i = 0; i < f->stackSize; i++)
+                    p->deck[p->deckSize++] = f->stack[i];
+                for (i = 0; i < f->attachedSize; i++)
+                    p->deck[p->deckSize++] = f->attached[i];
+                memset(f, 0, sizeof(*f));
+            }
+        }
+        return;
+    }
+    {
+        unsigned who, slot, id, count;
+        int put = sscanf(command, "put %u %u %u", &who, &slot, &id) == 3;
+        int attach = sscanf(command, "attach %u %u %u %u", &who, &slot, &id, &count) == 4;
+        int hand = sscanf(command, "hand %u", &id) == 1;
+        if (hand)
+            who = 0, slot = 0, count = 1;
+        if (put)
+            count = 1;
+        if ((put || attach || hand) && who < 2 && slot < TCG_FIELD_SIZE && id && id <= TCG_CARD_COUNT)
+        {
+            /* Harness helper: a card of this kind from the deck (a basic Energy card there
+             * becomes one if none is left) on top of a Pokemon in play, attached, or in the hand */
+            struct TcgPlayer *p = &U.duel.players[who];
+            struct TcgFieldCard *f = &p->field[slot];
+            while (count--)
+            {
+                unsigned i, k = p->deckSize;
+                uint8_t card;
+                for (i = 0; i < p->deckSize && k == p->deckSize; i++)
+                    if (p->cards[p->deck[i]] == id)
+                        k = i;
+                for (i = 0; i < p->deckSize && k == p->deckSize; i++)
+                    if (p->cards[p->deck[i]] <= 6 && p->cards[p->deck[i]] != id)
+                        k = i, p->cards[p->deck[i]] = (uint16_t)id;
+                if (k == p->deckSize)
+                    break;
+                card = TcgPile_Remove(p->deck, &p->deckSize, k);
+                if (hand)
+                    p->hand[p->handSize++] = card;
+                else if (put)
+                {
+                    f->stack[f->stackSize++] = card;
+                    f->enteredTurn = 1;
+                }
+                else
+                    f->attached[f->attachedSize++] = card;
+            }
+            printf("[tcg] staged %s %u %u card %u conserved %d hand %u deck %u\n", hand ? "hand" : put ? "put" : "attach", who,
+                   slot, id, TcgDuel_Conserved(&U.duel), p->handSize, p->deckSize);
+            return;
+        }
+        if (sscanf(command, "damage %u %u %u", &who, &slot, &count) == 3 && who < 2 && slot < TCG_FIELD_SIZE)
+        {
+            U.duel.players[who].field[slot].damage = (uint16_t)count;
+            return;
+        }
     }
     if (sscanf(command, "hurt %u %u", &n, &m) == 2)
     {

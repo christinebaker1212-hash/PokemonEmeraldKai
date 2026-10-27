@@ -45,12 +45,28 @@ struct TcgOpponent
     uint32_t key;          /* the daily reward's (map + person, or the special trainer) */
     uint16_t music, promo; /* promo: the card a first win hands over (0 none) */
     uint8_t mat, matType, special, pack, online;
+    /* CARD SCALING (Tcg_FitOpponent): the kind of deck they play (TCG_SCALE_POOL_*), a number
+     * of their own for variety, their deck's rating, the player deck's (without the skill) */
+    uint8_t pool;
+    uint32_t pick;
+    int16_t rating, deckRating;
     uint8_t portraitW, portraitH;
     uint32_t portrait[32 * 32]; /* their sprite as they faced you, ARGB */
 };
 extern const struct TcgDeckDefinition gTcgSpecialDecks[];
 extern const unsigned gTcgSpecialDeckCount;
 extern const uint16_t gTcgSpecialPromos[];
+/* Each special trainer's Pokemon and promo on the other Game Boy decks of their type, and whose. */
+extern const struct TcgDeckDefinition gTcgSpecialVariants[];
+extern const unsigned gTcgSpecialVariantCount;
+extern const uint8_t gTcgSpecialVariantOwner[];
+
+#define TCG_SCALE_POOL_NONE 0xFF    /* a fixed deck: the teaching duel, practice, a friend */
+#define TCG_SCALE_POOL_SPECIAL 0xFE /* a special trainer: their own deck or one of its variants */
+/* CARD SCALING (tcg_field.c): the deck an opponent brings against `mine` (NULL: the active
+ * deck): OPTIONS > GAME > CARD SCALING on, the one whose rating fits the player's; off, by
+ * badges. Sets deck, rating and deckRating. */
+void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine);
 
 /* The card screens' side of a challenge (tcg_ui.c). */
 void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent);
