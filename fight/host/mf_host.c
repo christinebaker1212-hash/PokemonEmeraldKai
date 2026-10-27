@@ -88,6 +88,8 @@ static volatile unsigned int sFrameSerial;
 /* The host's values that belong to the fight's state (kept with each frame for rollback: HostVars) */
 static unsigned short sHeld[2];     /* the buttons the engine's keys are down for */
 static int sMotifScreen;            /* a screenpack screen (select, VS, results): black beside the pack's 4:3 */
+static int sLastScreen;             /* the session's last screen: its fade out isn't shown (the game's CRT turns
+                                       the last bright picture off instead) */
 static int sZone;                   /* the match is on screen: frames are kept to go back to (online) */
 
 static char sRoot[0x200];           /* "<mugen folder>/" */
@@ -393,6 +395,9 @@ void MfHost_Present(const SDL_Surface *surface)
     int w, h, y;
 
     if (surface == NULL || surface->format->BytesPerPixel != 2) {
+        return;
+    }
+    if (sLastScreen && g_game->fade.type != 0 && g_game->fade.out) {
         return;
     }
     w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
@@ -723,6 +728,7 @@ static int Host_RunSession(const struct MfSession *s)
 
     Host_ApplyCabinet(s->cabinet[0] != '\0' ? s->cabinet : "mauville_gc");
     sMotifScreen = 0;
+    sLastScreen = 0;
     g = g_game;
     g->game_mode = s->mode == MF_MODE_CPU ? GAME_MODE_ARCADE : GAME_MODE_VERSUS;
     g->game_mode_side = 0;
@@ -755,6 +761,7 @@ static int Host_RunSession(const struct MfSession *s)
             }
             break;
         case 11:
+            sLastScreen = s->mode == MF_MODE_CPU;   /* one match against the CPU, no results screen */
             state = Match_Run();    /* the VS screen stays up while it loads: MfHost_MatchShown */
             sZone = 0;
             g = g_game;
@@ -771,6 +778,7 @@ static int Host_RunSession(const struct MfSession *s)
             break;
         case 12:
             sMotifScreen = 1;
+            sLastScreen = 1;
             Victory_Run();
             return result;
         default:

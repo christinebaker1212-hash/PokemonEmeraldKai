@@ -8,6 +8,7 @@ shot sit_menu
 press DOWN 2
 wait 10
 press A 2
+rendershotburst crt_on 90 6
 wait 300
 shot select
 fpress RIGHT 2
@@ -28,6 +29,7 @@ fpress Y 3
 wait 400
 shot fight_mid
 watchlog fight: result
+rendershotburst crt_off 12000 6
 waitlog 12000
 wait 30
 shot after

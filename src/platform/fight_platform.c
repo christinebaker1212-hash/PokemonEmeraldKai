@@ -212,14 +212,121 @@ static void DrawText(const char *text, int x, int y)
     }
 }
 
-// The picture to show: the engine's, with the messages over it (*version changes when either does)
+// ---------------------------------------------------------------------------
+// The fight's picture as a CRT turning on (a white line widens, then opens into the picture) and off (the picture
+// collapses into a line that shrinks to a point), and the last picture held while it turns off
+
+static int sShow;                   // the fight is the game picture (the game faded to black for it)
+static int sCrtPhase, sCrtTime, sCrtLen;
+static int sHold;
+static unsigned short sHeld[MF_SCREEN_W * MF_SCREEN_H];
+static unsigned short sCrt[MF_SCREEN_W * MF_SCREEN_H];
+
+void Fight_Show(int on)
+{
+    sShow = on;
+}
+
+void Fight_Crt(int phase, int time, int length)
+{
+    sCrtPhase = phase;
+    sCrtTime = time;
+    sCrtLen = length > 0 ? length : 1;
+}
+
+static const unsigned short *Fight_Picture(unsigned int *version);
+
+void Fight_Hold(int on)
+{
+    if (on && !sHold)
+    {
+        unsigned int version;
+        const unsigned short *p = Fight_Picture(&version);
+        if (p != NULL)
+            memcpy(sHeld, p, sizeof(sHeld));
+        else
+            memset(sHeld, 0, sizeof(sHeld));
+    }
+    sHold = on;
+}
+
+// The picture is shown (Fight_Canvas): the engine is running or its last picture is held
+static int Fight_Showing(void)
+{
+    return sShow && (MfEngine_IsActive() || sHold);
+}
+
+static unsigned short Brighten(unsigned short c, int amount)   // amount 0..256 towards white
+{
+    int r = c >> 11, g = (c >> 5) & 63, b = c & 31;
+    r += (31 - r) * amount >> 8;
+    g += (63 - g) * amount >> 8;
+    b += (31 - b) * amount >> 8;
+    return (unsigned short)(r << 11 | g << 5 | b);
+}
+
+static const unsigned short *ApplyCrt(const unsigned short *src)
+{
+    double p = (double)sCrtTime / sCrtLen, v, h;
+    int cy = MF_SCREEN_H / 2, cx = MF_SCREEN_W / 2, x, y;
+
+    if (p > 1.0)
+        p = 1.0;
+    if (sCrtPhase == 1)
+    {
+        // on: the line widens (the first 30%), then the picture opens from it
+        h = p < 0.3 ? p / 0.3 : 1.0;
+        v = p < 0.3 ? 0.0 : (p - 0.3) / 0.7;
+    }
+    else
+    {
+        // off: the picture collapses into the line (60%), the line shrinks to a point
+        v = p < 0.6 ? 1.0 - p / 0.6 : 0.0;
+        h = p < 0.6 ? 1.0 : 1.0 - (p - 0.6) / 0.4;
+    }
+    memset(sCrt, 0, sizeof(sCrt));
+    if (v * MF_SCREEN_H < 2.0)
+    {
+        int half = (int)(h * MF_SCREEN_W / 2);
+        for (y = cy - 1; y <= cy; y++)
+            for (x = cx - half; x < cx + half; x++)
+                sCrt[y * MF_SCREEN_W + x] = 0xFFFF;
+        return sCrt;
+    }
+    {
+        int half = (int)(v * MF_SCREEN_H / 2), boost = (int)((1.0 - v) * (1.0 - v) * 180);
+        for (y = cy - half; y < cy + half; y++)
+        {
+            int sy = cy + (int)((y - cy) / v);
+            const unsigned short *row;
+            if (y < 0 || y >= MF_SCREEN_H)
+                continue;
+            sy = sy < 0 ? 0 : sy >= MF_SCREEN_H ? MF_SCREEN_H - 1 : sy;
+            row = src + sy * MF_SCREEN_W;
+            for (x = 0; x < MF_SCREEN_W; x++)
+                sCrt[y * MF_SCREEN_W + x] = boost > 0 ? Brighten(row[x], boost) : row[x];
+        }
+    }
+    return sCrt;
+}
+
+// The picture to show: the engine's (or the one held), with the messages over it and the CRT effect
+// (*version changes when any of it does)
 static const unsigned short *Fight_Picture(unsigned int *version)
 {
-    const unsigned short *frame = MfEngine_Frame();
+    const unsigned short *frame = sHold && !MfEngine_IsActive() ? sHeld : MfEngine_Frame();
 
-    *version = MfEngine_FrameSerial() * 2654435761u ^ sOverlayVersion;
-    if (frame == NULL || (sOverlayText[0] == '\0' && !sOverlaySignal))
-        return frame;
+    *version = MfEngine_FrameSerial() * 2654435761u ^ sOverlayVersion ^ (unsigned int)sHold << 30
+               ^ (unsigned int)(sCrtPhase * 1000 + sCrtTime) * 40503u;
+    if (frame == NULL)
+    {
+        static const unsigned short sBlack[MF_SCREEN_W * MF_SCREEN_H];
+        if (sCrtPhase == 0)
+            return NULL;
+        frame = sBlack;
+    }
+    if (frame == sHeld || (sOverlayText[0] == '\0' && !sOverlaySignal))
+        return sCrtPhase != 0 ? ApplyCrt(frame) : frame;
     memcpy(sComposed, frame, sizeof(sComposed));
     if (sOverlayText[0] != '\0')
     {
@@ -236,7 +343,7 @@ static const unsigned short *Fight_Picture(unsigned int *version)
         for (i = 0; i < 4; i++)
             Fill(x + i * 7, y + 20 - (i + 1) * 5, 5, (i + 1) * 5, i == 0 ? 0xF800 : 0x52AA);
     }
-    return sComposed;
+    return sCrtPhase != 0 ? ApplyCrt(sComposed) : sComposed;
 }
 
 SDL_Texture *Fight_Canvas(SDL_Renderer *r)
@@ -244,7 +351,7 @@ SDL_Texture *Fight_Canvas(SDL_Renderer *r)
     const unsigned short *frame;
     unsigned int version;
 
-    if (!MfEngine_IsActive())
+    if (!Fight_Showing())
         return NULL;
     if (sCanvas && sCanvasOwner != r)
         sCanvas = NULL;
@@ -332,7 +439,7 @@ SDL_Texture *Fight_CanvasBicubic(SDL_Renderer *r, int w, int h)
     void *pixels;
     int pitch, x, y, c;
 
-    if (!MfEngine_IsActive() || w <= 0 || h <= 0)
+    if (!Fight_Showing() || w <= 0 || h <= 0)
         return NULL;
     // at most twice the picture: the renderer's linear filter takes it the rest of the way
     if (w > BICUBIC_MAX_W || h > BICUBIC_MAX_H)

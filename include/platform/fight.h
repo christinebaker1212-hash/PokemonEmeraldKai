@@ -19,6 +19,12 @@ const unsigned short *Fight_Frame(void);
 void Fight_MixAudio(float *stereo, int frames, int rate);
 // The game's messages over the fight (text: "" none; badSignal: the bad connection icon)
 void Fight_SetOverlay(const char *text, int badSignal);
+// The fight is the game picture (else the game's own, fading to black for it)
+void Fight_Show(int on);
+// The CRT effect: phase 0 none, 1 turning on, 2 turning off; time of length frames
+void Fight_Crt(int phase, int time, int length);
+// Keeps showing the last picture once the engine has stopped (while the CRT turns off)
+void Fight_Hold(int on);
 // Milliseconds since the game started (the online fight's timing)
 unsigned int Fight_Ms(void);
 

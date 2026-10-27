@@ -20,11 +20,13 @@
 #include "mp_net.h"
 #include "event_data.h"
 #include "main.h"
+#include "palette.h"
 #include "script.h"
 #include "sound.h"
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mf_engine.h"
 #include "platform/fight.h"
@@ -79,6 +81,15 @@ static const u8 sText_Fighting[] = _("FIGHT!");
 static const u8 sText_YourFriend[] = _("Your friend");
 
 static bool8 sRunning;      // a fight is the game picture; the cabinet's script waits for it
+// The fight's picture comes and goes like a CRT (docs/FIGHT_DECISIONS.md #23): the game fades to black, then the
+// picture opens from a line; after the result it collapses into a line and a point, and the game fades back in
+enum { CRT_NONE, CRT_ON, CRT_OFF };
+#define CRT_ON_FRAMES   24
+#define CRT_OFF_FRAMES  24
+static bool8 sShown;        // the game faded to black for the fight (sHoldGame: still fading)
+static bool8 sHoldGame;
+static u8 sCrt, sCrtTime;
+static u8 sPendingResult;   // the result while the CRT turns off
 static u8 sSitAt;           // the seat we sit at: 0 west, 1 east
 static u8 sSeat;            // the side we play: 0 left (P1), 1 right (the CPU fight is always the left)
 static u8 sSeatState;       // SEAT_*: ours
@@ -271,14 +282,50 @@ static u8 ResultFor(int result)
     }
 }
 
+// A fight begins: the game fades to black for its picture
+static void ShowFight(void)
+{
+    if (sShown)
+        return;
+    sShown = TRUE;
+    sHoldGame = TRUE;
+    sCrt = CRT_ON;
+    sCrtTime = 0;
+    Fight_Crt(CRT_ON, 0, CRT_ON_FRAMES);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+}
+
+// Back to the GAME CORNER: the script goes on with the result
+static void EndNow(u8 result)
+{
+    Fight_Hold(FALSE);
+    Fight_Crt(CRT_NONE, 0, 1);
+    Fight_Show(FALSE);
+    sCrt = CRT_NONE;
+    if (sShown)
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+    sShown = sHoldGame = FALSE;
+    sResult = result;
+    sRunning = FALSE;
+    ScriptContext_Enable();
+}
+
 static void Finish(u8 result)
 {
     Fight_SetOverlay("", FALSE);
-    sResult = result;
-    sRunning = FALSE;
     sNet.stage = NET_OFF;
     SetSeatState(SEAT_EMPTY);
-    ScriptContext_Enable();
+    if (sShown && !sHoldGame)
+    {
+        // the picture turns off first (MP_Fight_Step), then the game comes back
+        Fight_Hold(TRUE);
+        sCrt = CRT_OFF;
+        sCrtTime = 0;
+        sPendingResult = result;
+        sRunning = TRUE;
+        return;
+    }
+    EndNow(result);
 }
 
 // ---------------------------------------------------------------------------
@@ -533,6 +580,7 @@ static void BeginOnline(void)
     }
     sNet.stage = NET_RUNNING;
     sRunning = TRUE;
+    ShowFight();
 }
 
 static void EndOnline(void)
@@ -874,7 +922,46 @@ static void Ask(s8 peer, bool8 fromWait)
 // ---------------------------------------------------------------------------
 // The game's frame
 
+static bool8 Step(void);
+
 bool8 MP_Fight_Step(void)
+{
+    bool8 on;
+
+    if (sCrt == CRT_OFF)
+    {
+        Fight_Crt(CRT_OFF, sCrtTime, CRT_OFF_FRAMES);
+        if (++sCrtTime > CRT_OFF_FRAMES)
+        {
+            EndNow(sPendingResult);
+            return FALSE;
+        }
+        return TRUE;
+    }
+    on = Step();
+    if (!on || sCrt == CRT_OFF)
+        return on;
+    if (sHoldGame)
+    {
+        // the game's picture fades to black first (the engine runs meanwhile)
+        if (gPaletteFade.active)
+            return FALSE;
+        sHoldGame = FALSE;
+        Fight_Show(TRUE);
+    }
+    if (sCrt == CRT_ON && MfEngine_Frame() != NULL)
+    {
+        Fight_Crt(CRT_ON, sCrtTime, CRT_ON_FRAMES);
+        if (++sCrtTime > CRT_ON_FRAMES)
+        {
+            sCrt = CRT_NONE;
+            Fight_Crt(CRT_NONE, 0, 1);
+        }
+    }
+    return TRUE;
+}
+
+static bool8 Step(void)
 {
     unsigned short buttons[2] = {0, 0};
 
@@ -947,6 +1034,7 @@ void MP_Fight_StartCpu(void)
     sSitAt = gSpecialVar_0x8004 & 1;
     SetSeatState(SEAT_CPU);
     sRunning = TRUE;
+    ShowFight();
 }
 
 #define tTimer data[0]
