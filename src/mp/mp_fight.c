@@ -17,6 +17,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_fight.h"
+#include "mp_net.h"
 #include "event_data.h"
 #include "main.h"
 #include "script.h"
@@ -48,10 +49,13 @@ enum
     MPR_FIGHT_SEAT = MPR_FIGHT_FIRST,   // u8 cabinet, seat, state (SEAT_*), mapGroup, mapNum
     MPR_FIGHT_ASK,                      // u32 session, u8 cabinet, seat (the asker's), u16 the asker's frame
     MPR_FIGHT_ANSWER,                   // u32 session, u8 yes, u32 seed, u16 the ping stamp back
-    MPR_FIGHT_INPUT,                    // u32 session, u32 last frame, u8 count, u16 buttons * count, u32 ack,
+    MPR_FIGHT_INPUT,                    // u32 session, u32 last frame, u8 count (up to 12: the first frames they don't
+                                        // have), u16 buttons * count, u32 ack,
                                         // u32 frame, u32 hash frame, u32 hash, u16 tick, u16 their tick back,
                                         // u16 frames since it came, s8 frames ahead
     MPR_FIGHT_END,                      // u32 session, u8 result (MF_RESULT_*)
+    MPR_FIGHT_UDP,                      // u32 session, u32 + u16 our address from outside, u32 + u16 on the local
+                                        // network (network order; 0: not known)
 };
 
 enum { SEAT_EMPTY, SEAT_WAITING, SEAT_CPU, SEAT_FIGHTING };
@@ -64,8 +68,11 @@ enum { NET_OFF, NET_ASKING, NET_STARTING, NET_RUNNING };
 #define DROP_FRAMES       (60 * 10)
 #define HIST              256     // frames of buttons kept (a ring)
 #define MAX_AHEAD         8       // frames run on guesses past the other player's last buttons
+#define SEND_MAX          12      // frames of our buttons in a message: from the first they don't have
 #define HASH_EVERY        30      // frames between the checks that both games agree
 #define HASH_KEEP         8
+#define PUNCH_FRAMES      120     // a direct connection has this long to get through (else the relay carries on)
+#define UDP_QUIET         60      // the direct connection silent this long: back to the relay
 
 static const u8 sText_FightMe[] = _("Fight me!");
 static const u8 sText_Fighting[] = _("FIGHT!");
@@ -111,6 +118,14 @@ static struct
     bool8 dropped;
     bool8 peerEnded;
     u8 peerResult;
+    // the direct connection (UDP): their addresses, the one that answered, whether it's up
+    u32 udpIp[2];
+    u16 udpPort[2];
+    u32 udpPeerIp;
+    u16 udpPeerPort;
+    bool8 udpOff;           // no direct connection (tests through the lag proxy, or no socket)
+    bool8 udpUp, udpSentPublic;
+    u16 udpTimer, udpQuiet;
 } sNet;
 
 static bool8 FriendValid(s8 id)
@@ -275,21 +290,23 @@ static s32 FramesAhead(void)
 
 static void SendInput(void)
 {
-    u8 p[1 + 4 + 4 + 1 + 2 * 8 + 4 + 4 + 4 + 4 + 7];
+    u8 p[1 + 4 + 4 + 1 + 2 * SEND_MAX + 4 + 4 + 4 + 4 + 7];
     s32 ahead = FramesAhead();
-    u32 first, f;
+    u32 first, last, f;
     u8 n = 0, *q;
 
+    // from the first frame they don't have (a message that didn't arrive is in the next one); at least the last
     first = sNet.peerAck + 1;
-    if (first + 8 <= sNet.localLast)
-        first = sNet.localLast - 7;
     if (first > sNet.localLast)
         first = sNet.localLast;
+    last = first + SEND_MAX - 1;
+    if (last > sNet.localLast)
+        last = sNet.localLast;
     p[0] = MPR_FIGHT_INPUT;
     Put32(p + 1, sNet.session);
-    Put32(p + 5, sNet.localLast);
+    Put32(p + 5, last);
     q = p + 10;
-    for (f = first; f <= sNet.localLast; f++)
+    for (f = first; f <= last; f++)
     {
         q[0] = sNet.local[f % HIST];
         q[1] = sNet.local[f % HIST] >> 8;
@@ -309,7 +326,118 @@ static void SendInput(void)
     q[21] = (u16)(sTick - sNet.echoAt) >> 8;
     q[22] = (s8)(ahead > 100 ? 100 : ahead < -100 ? -100 : ahead);
     q += 23;
-    MP_SendRelay(sNet.peer, p, q - p);
+    if (sNet.udpUp)
+    {
+        u8 d[7 + sizeof(p)];
+        d[0] = 'M';
+        d[1] = 'F';
+        d[2] = 'I';
+        Put32(d + 3, sNet.session);
+        memcpy(d + 7, p, q - p);
+        MPUdp_SendTo(sNet.udpPeerIp, sNet.udpPeerPort, d, 7 + (q - p));
+    }
+    else
+    {
+        MP_SendRelay(sNet.peer, p, q - p);
+    }
+}
+
+static void SendUdpInfo(void)
+{
+    u8 p[17];
+    u32 ip = 0, lan = MPUdp_LocalIp();
+    u16 port = 0, lanPort = MPUdp_Port();
+
+    MPUdp_Public(&ip, &port);
+    p[0] = MPR_FIGHT_UDP;
+    Put32(p + 1, sNet.session);
+    memcpy(p + 5, &ip, 4);
+    memcpy(p + 9, &port, 2);
+    memcpy(p + 11, &lan, 4);
+    memcpy(p + 15, &lanPort, 2);
+    MP_SendRelay(sNet.peer, p, sizeof(p));
+    sNet.udpSentPublic = ip != 0;
+}
+
+static void OnUdpInfo(u8 from, const u8 *d, u16 len)
+{
+    if (len < 17 || from != sNet.peer || Get32(d + 1) != sNet.session)
+        return;
+    memcpy(&sNet.udpIp[0], d + 5, 4);
+    memcpy(&sNet.udpPort[0], d + 9, 2);
+    memcpy(&sNet.udpIp[1], d + 11, 4);
+    memcpy(&sNet.udpPort[1], d + 15, 2);
+}
+
+static void OnInput(u8 from, const u8 *d, u16 len);
+
+// The direct connection: its messages in (from whichever of their addresses answers), knocking on their
+// addresses (both sides do: the routers then let the answers through), the relay meanwhile; back to the relay
+// when it goes quiet, and back to it if it answers again
+static void Knock(void)
+{
+    u8 p[7];
+    u8 i;
+
+    p[0] = 'M';
+    p[1] = 'F';
+    p[2] = 'P';
+    Put32(p + 3, sNet.session);
+    for (i = 0; i < 2; i++)
+        MPUdp_SendTo(sNet.udpIp[i], sNet.udpPort[i], p, sizeof(p));
+    if (sNet.udpPeerIp != 0)
+        MPUdp_SendTo(sNet.udpPeerIp, sNet.udpPeerPort, p, sizeof(p));
+}
+
+static void PumpUdp(void)
+{
+    u8 buf[128];
+    u32 ip;
+    u16 port;
+    int n;
+
+    if (sNet.udpOff)
+        return;
+    while ((n = MPUdp_Recv(buf, sizeof(buf), &ip, &port)) > 0)
+    {
+        if (n < 7 || buf[0] != 'M' || buf[1] != 'F' || Get32(buf + 3) != sNet.session)
+            continue;
+        if (!sNet.udpUp)
+            MPNet_Log("fight: direct connection to player %d", sNet.peer);
+        sNet.udpUp = TRUE;
+        sNet.udpQuiet = 0;
+        sNet.udpPeerIp = ip;
+        sNet.udpPeerPort = port;
+        if (buf[2] == 'I')
+            OnInput(sNet.peer, buf + 7, n - 7);
+    }
+    if (!sNet.udpSentPublic)
+    {
+        u32 pub;
+        u16 pubPort;
+        if (MPUdp_Public(&pub, &pubPort))
+            SendUdpInfo();
+        else if (sNet.udpTimer % 30 == 0)
+            MPUdp_AskPublic();
+    }
+    sNet.udpTimer++;
+    if (sNet.udpUp)
+    {
+        if (++sNet.udpQuiet >= UDP_QUIET)
+        {
+            MPNet_Log("fight: the direct connection went quiet: through the relay");
+            sNet.udpUp = FALSE;
+        }
+        else if (sNet.udpTimer % 30 == 0)
+        {
+            Knock();    // they hear from us even when we have nothing new to send
+        }
+        return;
+    }
+    if (sNet.udpTimer == PUNCH_FRAMES && sNet.udpPeerIp == 0)
+        MPNet_Log("fight: no direct connection yet: through the relay");
+    if (sNet.udpTimer % (sNet.udpTimer < PUNCH_FRAMES ? 6 : 30) == 0)
+        Knock();
 }
 
 static void KeepHash(u32 frame)
@@ -373,6 +501,18 @@ static void BeginOnline(void)
     sNet.rollbacks = sNet.framesBack = sNet.desyncs = sNet.checks = 0;
     sNet.dropped = FALSE;
     sNet.peerEnded = FALSE;
+    memset(sNet.udpIp, 0, sizeof(sNet.udpIp));
+    memset(sNet.udpPort, 0, sizeof(sNet.udpPort));
+    sNet.udpUp = sNet.udpSentPublic = FALSE;
+    sNet.udpTimer = sNet.udpQuiet = 0;
+    sNet.udpPeerIp = 0;
+    sNet.udpPeerPort = 0;
+    sNet.udpOff = getenv("MOEMON_FIGHT_NO_UDP") != NULL || MPUdp_Open() != 0;   // tests through the lag proxy
+    if (!sNet.udpOff)
+    {
+        MPUdp_AskPublic();
+        SendUdpInfo();
+    }
     sSeat = sNet.side;
     SetSeatState(SEAT_FIGHTING);
     MPNet_Log("fight: online with player %d, side %d, seed %u, input delay %d", sNet.peer, sNet.side, sNet.seed,
@@ -432,6 +572,13 @@ static bool8 NetStep(void)
 {
     u32 cur, next, oldest = 0;
     u16 buttons[2];
+    static u32 sLastMs;
+    u32 ms = Fight_Ms();
+
+    if (sLastMs != 0 && ms - sLastMs > 250)
+        MPNet_Log("fight: %u ms since the last frame (frame %u, ready %d)", ms - sLastMs, MfEngine_FrameCount(),
+                  MfEngine_Ready());
+    sLastMs = ms;
 
     if (sNet.stage == NET_STARTING)
     {
@@ -445,6 +592,10 @@ static bool8 NetStep(void)
         EndOnline();
         return FALSE;
     }
+    if (sNet.heard == 120)
+        MPNet_Log("fight: nothing from player %d for 2 s (frame %u, theirs to %u, ours to %u, ready %d, udp %d, "
+                  "%d bytes queued)", sNet.peer, MfEngine_FrameCount(), sNet.remoteLast, sNet.localLast,
+                  MfEngine_Ready(), sNet.udpUp, MPNet_ClientQueued());
     if (!sNet.dropped && (++sNet.heard >= DROP_FRAMES || !FriendValid(sNet.peer)))
     {
         // they're gone: no contest
@@ -455,6 +606,7 @@ static bool8 NetStep(void)
     if (sNet.dropped)
         return TRUE;
 
+    PumpUdp();
     cur = MfEngine_FrameCount();
     if (sTick % 600 == 0)
         MPNet_Log("fight: frame %u, theirs to %u (their frame %u), ours to %u, %u rollbacks, %u frames there and back,"
@@ -512,7 +664,7 @@ static void OnInput(u8 from, const u8 *d, u16 len)
         return;
     last = Get32(d + 5);
     n = d[9];
-    if (n == 0 || n > 8 || len < 10 + 2 * n + 23)
+    if (n == 0 || n > SEND_MAX || len < 10 + 2 * n + 23)
         return;
     sNet.heard = 0;
     first = last - n + 1;
@@ -656,6 +808,9 @@ void MP_Fight_OnRelay(u8 from, const u8 *data, u16 len)
         break;
     case MPR_FIGHT_END:
         OnEnd(from, data, len);
+        break;
+    case MPR_FIGHT_UDP:
+        OnUdpInfo(from, data, len);
         break;
     }
 }

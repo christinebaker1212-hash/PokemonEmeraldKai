@@ -212,6 +212,16 @@ void MPStore_Handle(const uint8_t *roomKey, int player, const uint8_t *data, uin
 // A player left the room: their hand goes back into free slots (BOX_DATA to the room)
 void MPStore_PlayerLeft(const uint8_t *roomKey, int player, MPStoreSendFunc send, void *ctx);
 
+// UDP between two players (the VS cabinet's buttons). Addresses and ports in network order.
+int MPUdp_Open(void);               // a socket on any port (once): 0 when open
+void MPUdp_Close(void);
+uint16_t MPUdp_Port(void);
+uint32_t MPUdp_LocalIp(void);       // our address on the local network
+void MPUdp_AskPublic(void);         // asks the lobby what our address is from outside (MPUdp_Public when it answers)
+int MPUdp_Public(uint32_t *ip, uint16_t *port);
+void MPUdp_SendTo(uint32_t ip, uint16_t port, const void *data, int len);
+int MPUdp_Recv(void *buf, int max, uint32_t *ip, uint16_t *port);   // length, 0 none
+
 // Logging hook (printf style). Defaults to stdout.
 void MPNet_Log(const char *fmt, ...);
 

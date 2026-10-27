@@ -105,7 +105,9 @@ void Log_VWrite(Log *log, va_list ap, int level, const char *fmt)
     if (log->autoflush) {
         fflush(log->fp);
     }
-    if (log->mirror != NULL) {
+    if (log->mirror != NULL && MfHost_OnEngine()) {
+        /* Moemon Fight: the mirror is the fight's state (rollback): only the engine's own thread writes it, not
+         * the music's */
         TextRing_Append(log->mirror, buf);
     }
 }

@@ -464,6 +464,11 @@ int MfHost_Replaying(void)
     return sReplaying;
 }
 
+int MfHost_OnEngine(void)
+{
+    return MfMem_InEngine;
+}
+
 unsigned int MfHost_FrameRunning(void)
 {
     return sFrame + 1;
@@ -876,6 +881,7 @@ static void Host_Ready(void)
 static void *Host_Thread(void *arg)
 {
     sEngineThread = pthread_self();
+    MfRollback_ThreadInit();
     if (!MfMem_Init() || !MfCoro_Create(Host_EngineMain)) {
         pthread_mutex_lock(&sLock);
         sState = HOST_DEAD;

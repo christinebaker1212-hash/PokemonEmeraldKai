@@ -15,6 +15,9 @@
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <signal.h>
+#include <sys/mman.h>
 #endif
 
 #include "mf_mem_internal.h"
@@ -140,8 +143,111 @@ static int Rb_ShadowReach(size_t used, int copy)
     return 1;
 }
 
-/* Finds the pages changed since the last call (in sDirty), up to the shadow's reach */
-static size_t Rb_FindDirty(void)
+#ifndef _WIN32
+/*
+ * Linux (the test builds): the pages a frame writes are found by write-protecting the region and noting each page
+ * the first time it's written (the fault handler lets it be written from then on). Without it (AddressSanitizer has
+ * the handler), every page is compared with the shadow, which costs a lot more.
+ */
+static int sProtect = -1;               /* -1 not set up yet, 0 compare instead, 1 protect */
+static unsigned char *sProtLo;
+static volatile size_t sProtLen;
+static uint32_t *sTrap;                 /* pages written since the last look */
+static size_t sTrapCap;
+static volatile size_t sTrapCount;
+static volatile int sTrapOverflow;
+static struct sigaction sOldSegv;
+
+static void Rb_OnSegv(int sig, siginfo_t *si, void *ctx)
+{
+    unsigned char *a = si->si_addr;
+
+    if (sProtLen != 0 && a >= sProtLo && a < sProtLo + sProtLen) {
+        unsigned char *page = (unsigned char *)((uintptr_t)a & ~(uintptr_t)(PAGE - 1));
+        mprotect(page, PAGE, PROT_READ | PROT_WRITE);
+        if (sTrapCount < sTrapCap) {
+            sTrap[sTrapCount++] = (uint32_t)((size_t)(page - sProtLo) / PAGE);
+        } else {
+            sTrapOverflow = 1;
+        }
+        return;
+    }
+    /* not ours */
+    if (sOldSegv.sa_flags & SA_SIGINFO) {
+        sOldSegv.sa_sigaction(sig, si, ctx);
+    } else if (sOldSegv.sa_handler != SIG_DFL && sOldSegv.sa_handler != SIG_IGN) {
+        sOldSegv.sa_handler(sig);
+    } else {
+        signal(SIGSEGV, SIG_DFL);
+        raise(SIGSEGV);
+    }
+}
+
+static int Rb_ProtectSetUp(void)
+{
+    struct sigaction sa;
+
+    if (sProtect >= 0) {
+        return sProtect;
+    }
+    sProtect = 0;
+#if defined(__SANITIZE_ADDRESS__)
+    return 0;
+#endif
+    if (getenv("MOEMON_FIGHT_RB_COMPARE") != NULL) {
+        return 0;
+    }
+    sTrapCap = MfMem_Size() / PAGE;
+    sTrap = malloc(sTrapCap * sizeof(uint32_t));
+    if (sTrap == NULL) {
+        return 0;
+    }
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = Rb_OnSegv;
+    sa.sa_flags = SA_SIGINFO | SA_ONSTACK | SA_NODEFER;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGSEGV, &sa, &sOldSegv) != 0) {
+        return 0;
+    }
+    sProtect = 1;
+    return 1;
+}
+
+/* Write-protects pages (or lets them be written) */
+static void Rb_Protect(size_t from, size_t to, int on)
+{
+    if (to > from) {
+        mprotect(MfMem_Base() + from, to - from, on ? PROT_READ : PROT_READ | PROT_WRITE);
+    }
+}
+
+static void Rb_Unprotect(void)
+{
+    if (sProtect == 1 && sProtLen != 0) {
+        size_t len = sProtLen;
+        sProtLen = 0;
+        Rb_Protect(0, len, 0);
+    }
+}
+#endif
+
+/* The engine thread runs the engine on the region's stack: a fault there needs a stack of its own (Linux) */
+void MfRollback_ThreadInit(void)
+{
+#ifndef _WIN32
+    static unsigned char altstack[64 * 1024];
+    stack_t ss;
+
+    memset(&ss, 0, sizeof(ss));
+    ss.ss_sp = altstack;
+    ss.ss_size = sizeof(altstack);
+    sigaltstack(&ss, NULL);
+#endif
+}
+
+/* Finds the pages changed since the last call (in sDirty), up to the shadow's reach (reach_before: how far the
+ * last call's reach went: past it, pages are taken into use now) */
+static size_t Rb_FindDirty(size_t reach_before)
 {
     unsigned char *base = MfMem_Base();
     size_t pages = sShadowSize / PAGE, n = 0, i;
@@ -172,6 +278,34 @@ static size_t Rb_FindDirty(void)
     if (!Rb_Grow((void **)&sDirty, &sDirtyCap, pages + 1, sizeof(uint32_t))) {
         return (size_t)-1;
     }
+    if (sProtect == 1 && sProtLen != 0 && !sTrapOverflow) {
+        /* the pages written, then the pages newly taken into use (compared: they were never protected) */
+        size_t trapped = sTrapCount;
+        for (i = 0; i < trapped; i++) {
+            sDirty[n++] = sTrap[i];
+            Rb_Protect((size_t)sTrap[i] * PAGE, (size_t)sTrap[i] * PAGE + PAGE, 1);
+        }
+        sTrapCount = 0;
+        for (i = reach_before / PAGE; i < pages; i++) {
+            const uint64_t *a = (const uint64_t *)(base + i * PAGE), *b = (const uint64_t *)(sShadow + i * PAGE);
+            size_t k;
+            for (k = 0; k < PAGE / 8; k++) {
+                if (a[k] != b[k]) {
+                    sDirty[n++] = (uint32_t)i;
+                    break;
+                }
+            }
+        }
+        Rb_Protect(reach_before, sShadowSize, 1);
+        sProtLen = sShadowSize;
+        return n;
+    }
+    if (sProtect == 1 && sProtLen != 0) {
+        /* too many pages to note: compare them all this time */
+        Rb_Unprotect();
+        sTrapCount = 0;
+        sTrapOverflow = 0;
+    }
     for (i = 0; i < pages; i++) {
         const uint64_t *a = (const uint64_t *)(base + i * PAGE), *b = (const uint64_t *)(sShadow + i * PAGE);
         size_t k;
@@ -182,6 +316,10 @@ static size_t Rb_FindDirty(void)
                 break;
             }
         }
+    }
+    if (sProtect == 1) {
+        Rb_Protect(0, sShadowSize, 1);
+        sProtLen = sShadowSize;
     }
 #endif
     return n;
@@ -221,6 +359,14 @@ int MfRollback_Begin(unsigned int frame, const void *host)
     }
 #ifdef _WIN32
     ResetWriteWatch(MfMem_Base(), MfMem_Size());
+#else
+    if (Rb_ProtectSetUp()) {
+        sProtLo = MfMem_Base();
+        sTrapCount = 0;
+        sTrapOverflow = 0;
+        Rb_Protect(0, sShadowSize, 1);
+        sProtLen = sShadowSize;
+    }
 #endif
     sOn = 1;
     sFirst = sLast = frame;
@@ -235,6 +381,11 @@ void MfRollback_End(void)
 {
     sOn = 0;
     Rb_Clear();
+#ifndef _WIN32
+    Rb_Unprotect();
+    sTrapCount = 0;
+    sTrapOverflow = 0;
+#endif
 }
 
 int MfRollback_On(void)
@@ -260,11 +411,14 @@ int MfRollback_Save(unsigned int frame, const void *host)
         return 0;
     }
     /* the pages the frame changed, including any it took into use */
-    if (!Rb_ShadowReach(MfMem_Used(), 0)) {
-        MfRollback_End();
-        return 0;
+    {
+        size_t reach = sShadowSize;
+        if (!Rb_ShadowReach(MfMem_Used(), 0)) {
+            MfRollback_End();
+            return 0;
+        }
+        n = Rb_FindDirty(reach);
     }
-    n = Rb_FindDirty();
     if (n == (size_t)-1) {
         MfRollback_End();
         return 0;
@@ -323,13 +477,34 @@ int MfRollback_Restore(unsigned int frame, void *host)
         }
         for (i = f->count; i-- > 0;) {
             size_t at = (size_t)f->pages[i] * PAGE;
+#ifndef _WIN32
+            if (sProtect == 1 && sProtLen != 0) {
+                Rb_Protect(at, at + PAGE, 0);
+            }
+#endif
             memcpy(MfMem_Base() + at, f->old + i * PAGE, PAGE);
             memcpy(sShadow + at, f->old + i * PAGE, PAGE);
+#ifndef _WIN32
+            if (sProtect == 1 && sProtLen != 0) {
+                Rb_Protect(at, at + PAGE, 1);
+            }
+#endif
         }
         f->valid = 0;
     }
 #ifdef _WIN32
     ResetWriteWatch(MfMem_Base(), MfMem_Size());
+#else
+    if (sProtect == 1 && sProtLen != 0) {
+        /* pages written since the last frame was kept, now as they were: watched again */
+        size_t k;
+        for (k = 0; k < sTrapCount; k++) {
+            size_t at = (size_t)sTrap[k] * PAGE;
+            memcpy(MfMem_Base() + at, sShadow + at, PAGE);
+            Rb_Protect(at, at + PAGE, 1);
+        }
+        sTrapCount = 0;
+    }
 #endif
     Rb_CopyGlobals(STATE_START, sRing[frame % MF_RB_FRAMES].globals);
     memcpy(host, sRing[frame % MF_RB_FRAMES].host, MF_RB_HOST_SIZE);

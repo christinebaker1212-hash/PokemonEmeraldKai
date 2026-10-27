@@ -1249,7 +1249,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
     if (!len) return;
     if (data[0] == 255)
         Tcg_OnlineRelay(from, data, len);
-    else if (data[0] >= MPR_FIGHT_FIRST && data[0] < MPR_FIGHT_FIRST + 5)
+    else if (data[0] >= MPR_FIGHT_FIRST && data[0] < MPR_FIGHT_FIRST + 6)
         MP_Fight_OnRelay(from, data, len);
     else if (data[0] == MPR_COOP_BATTLING)
         MP_Coop_OnRelay(from, data, len);

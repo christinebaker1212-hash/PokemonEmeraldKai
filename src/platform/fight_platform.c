@@ -341,3 +341,8 @@ void Fight_MixAudio(float *stereo, int frames, int rate)
         frames -= n;
     }
 }
+
+unsigned int Fight_Ms(void)
+{
+    return SDL_GetTicks();
+}

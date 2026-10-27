@@ -97,6 +97,8 @@ double mfm_acos(double x);
 /* Rollback: a frame being run again (MfEngine_StepQuiet) plays only the sounds and music its first run didn't */
 int MfHost_Replaying(void);
 unsigned int MfHost_FrameRunning(void);
+/* The caller is the engine (its coroutine), not another thread such as the music's */
+int MfHost_OnEngine(void);
 
 /* The end of every frame of the screen loops (Screen_EndFrame). */
 void MfHost_FrameEnd(void);

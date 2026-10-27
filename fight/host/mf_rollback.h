@@ -20,6 +20,8 @@ int MfRollback_Save(unsigned int frame, const void *host);
 /* Puts everything back as it was after `frame` (kept, not older than MfRollback_Oldest): 1 when done */
 int MfRollback_Restore(unsigned int frame, void *host);
 unsigned int MfRollback_Oldest(void);
+/* On the engine thread, before it runs the engine (Linux: a stack for the page-write fault handler) */
+void MfRollback_ThreadInit(void);
 /* The engine as it is now (started up, between sessions), and putting it back so (0: none kept) */
 int MfRollback_KeepStart(const void *host);
 int MfRollback_RestoreStart(void *host);

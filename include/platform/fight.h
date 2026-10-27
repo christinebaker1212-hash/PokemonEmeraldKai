@@ -17,5 +17,7 @@ void Fight_DestroyTextures(void);
 const unsigned short *Fight_Frame(void);
 // Replaces the game's sound with the fight's while one runs
 void Fight_MixAudio(float *stereo, int frames, int rate);
+// Milliseconds since the game started (the online fight's timing)
+unsigned int Fight_Ms(void);
 
 #endif // GUARD_PLATFORM_FIGHT_H

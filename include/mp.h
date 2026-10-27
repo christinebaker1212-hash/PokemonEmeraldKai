@@ -1172,7 +1172,7 @@ enum {
     MPR_LINK_SYNC,         // standby / close barrier
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
     MPR_BATTLE_MONEMOTE,   // our Pokémon's battle emote, for the others' screens: u8 battler, icon, happy (mp_life_battle.c)
-    MPR_FIGHT_FIRST = 25,  // the VS cabinet: 25 a seat, 26 a challenge, 27 its answer, 28 buttons, 29 the end (mp_fight.c)
+    MPR_FIGHT_FIRST = 25,  // the VS cabinet: 25 a seat, 26 a challenge, 27 its answer, 28 buttons, 29 the end, 30 addresses (mp_fight.c)
     MPR_COOP_BATTLING = 39,    // battling a trainer met on the field: u8 on, mapGroup, mapNum, localId, u16 trainer, u8 joinable (mp_coop.c)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)

@@ -8,8 +8,8 @@ JIT=15
 TMO=600
 WARP=10,3,6,9
 WARP_B=10,3,9,9
-ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
-ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
+ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1"
+ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1"
 EXPECT_A=("fight: online with player 1, side 0" "fight: online result")
 EXPECT_B=("fight: player 0 said yes" "fight: online with player 0, side 1" "fight: online result")
 UNEXPECT_A=("desync at" "couldn't go back" "dropped out" ", 0 checks agreed")
