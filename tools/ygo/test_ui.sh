@@ -155,8 +155,9 @@ mp ygo packs 0 3
 mp ygo pack 0
 wait 30
 rendershot pack
-mash A 12 8
-wait 30
+wait 150
+rendershot revealing
+wait 250
 rendershot reveal
 mp ygo inspect 1
 wait 30

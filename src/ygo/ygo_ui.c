@@ -77,11 +77,13 @@ enum
     ACT_TAKE_SPOIL,
     ACT_STARTER,
     ACT_CLEAR,
-    ACT_TRADE_IN,
-    ACT_TRADE_IN_ALL,
+    ACT_TRADE_IN,        /* one copy */
+    ACT_TRADE_IN_CARD,   /* every spare copy of one card */
+    ACT_TRADE_IN_ALL,    /* every spare card */
     ACT_BUY_PACK,
     ACT_BUY_CARD,
     ACT_GC_CARD,
+    ACT_COPY,
     ACT_LOAN,
     ACT_GC_DECK,
     ACT_LESSON
@@ -1061,8 +1063,8 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
-    TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} READ  {B} DONE"
-                       : "{A} ADD  {SELECT} TAKE OUT  {START} READ  {B} DONE");
+    TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE"
+                       : "{A} ADD  {SELECT} TAKE OUT  {START} LOOK  {B} DONE");
 }
 
 static void BinderScreen(void)
@@ -1112,7 +1114,7 @@ static void BinderScreen(void)
         snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Ygo_Card(id)->name : "",
                  Ygo_PointCost(id), Points(), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} KIND  {START} READ  {B} BACK");
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {START} LOOK  {B} BACK");
         return;
     }
     if (Y.showAll == GC_BINDER)
@@ -1124,7 +1126,7 @@ static void BinderScreen(void)
             snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Ygo_Card(id)->name : "",
                      Ygo_MoneyPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} KIND  {START} READ  {B} BACK");
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {START} LOOK  {B} BACK");
         return;
     }
     line[0] = 0;
@@ -1135,7 +1137,7 @@ static void BinderScreen(void)
                  c->owned[id] && !Ygo_CardReady(id) ? " (not playable yet)" : "");
     }
     Strip(0, line);
-    TcgUi_Hints(Y.showAll ? "{A} READ  {L}{R} KIND  {SELECT} OWNED  {B} BACK" : "{A} READ  {L}{R} KIND  {SELECT} ALL  {B} BACK");
+    TcgUi_Hints(Y.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {B} BACK");
 }
 
 static void InspectScreen(void)
@@ -1402,7 +1404,7 @@ static void RevealScreen(void)
                      (Y.revealNew >> Y.cursor) & 1 ? "  NEW!" : "");
             G_Text(8, STRIP_Y + 20, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
         }
-        TcgUi_Hints("{A} READ  {DPAD} CHOOSE  {B} DONE");
+        TcgUi_Hints("{A} LOOK  {DPAD} CHOOSE  {B} DONE");
     }
     else
         TcgUi_Hints("{A} NEXT CARD  {B} SHOW ALL");
@@ -1434,7 +1436,7 @@ static void SpoilsScreen(void)
         snprintf(line, sizeof(line), "%s\nYou own %u.", c ? c->name : "", c ? C()->owned[c->id] : 0);
         Strip(0, line);
     }
-    TcgUi_Hints("{A} TAKE  {START} READ");
+    TcgUi_Hints("{A} TAKE  {START} LOOK");
 }
 
 /* The CARD CLUB duelist's counter: TRADE IN spares for CARD POINTS (shared with the Pokemon cards), the CARD SHOP */
@@ -1461,30 +1463,16 @@ static unsigned ShopRows(uint8_t *sets)
 static void CounterScreen(void)
 {
     char line[128];
-    int i, x = 4;
+    int i;
+    /* (the Pokemon counters' look: the tabs down the side panel, what you spend under them) */
     TcgUi_Background();
     TcgUi_SidePanel(Y.gc ? "GAME CENTER" : "CARD CLUB", YGO_THEME);
-    for (i = 0; i < CounterTabs(); i++)
-    {
-        const char *name = sCounterTabs[Y.gc ? i : i + 2];
-        int w = G_Measure(name, TF_NARROW) + 8, on = i == Y.counterTab;
-        if (Y.gc && i == 2)
-            x = 4;   /* two rows of two */
-        G_RoundFill(x, Y.gc && i >= 2 ? 34 : 20, w, 12, on ? 0xf8f8f8 : 0x504070, 255);
-        G_Text(x + 4, Y.gc && i >= 2 ? 34 : 20, on ? G_INK : 0xe0e0f0, G_NO_SHADOW, name, 0, TF_NARROW);
-        x += w + 2;
-    }
     if (CounterKind() < 2)
-    {
         snprintf(line, sizeof(line), "\xa5%u", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
-        G_Text(8, Y.gc ? 54 : 40, 0x505868, G_NO_SHADOW, "MONEY", 0, TF_NARROW);
-    }
     else
-    {
-        snprintf(line, sizeof(line), "%u", Points());
-        G_Text(8, Y.gc ? 54 : 40, 0x505868, G_NO_SHADOW, "CARD POINTS", 0, TF_NARROW);
-    }
-    G_Text(8, Y.gc ? 64 : 50, G_INK, G_INK_SHADOW, line, 0, TF_NORMAL);
+        snprintf(line, sizeof(line), "%u CP", Points());
+    TcgUi_ShopTabs(sCounterTabs + (Y.gc ? 0 : 2), CounterTabs(), Y.counterTab, 0xb8a8e8, 0x483090, 0x302060, line,
+                   CounterKind() < 2 ? NULL : "CARD POINTS", CounterKind() < 2 ? 0x483090 : 0x2858a8);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
     if (CounterKind() == 0)
     {
@@ -1511,7 +1499,7 @@ static void CounterScreen(void)
         unsigned n = SpareList(list), k;
         int top = Y.cursor < 3 ? 0 : Y.cursor - 3;
         if (!n)
-            G_Text(LIST_X + 6, 10, 0x707878, G_NO_SHADOW, "No spare cards.", LIST_W - 10, TF_SMALL);
+            G_Text(LIST_X + 8, 12, 0x707070, G_NO_SHADOW, "No spare cards yet.", LIST_W - 14, TF_SMALL);
         for (k = 0; k < 6 && top + (int)k <= (int)n; k++)
         {
             int row = top + (int)k;
@@ -1521,11 +1509,19 @@ static void CounterScreen(void)
                     TcgUi_Row(LIST_X + 2, 8 + (int)k * ROW_H, LIST_W - 4, Y.cursor == row, 1, "ALL SPARES", NULL);
                 continue;
             }
-            snprintf(line, sizeof(line), "x%u +%u", Ygo_Spare(C(), list[row]), Ygo_PointValue(list[row]));
+            snprintf(line, sizeof(line), "x%u", Ygo_Spare(C(), list[row]));
             TcgUi_Row(LIST_X + 2, 8 + (int)k * ROW_H, LIST_W - 4, Y.cursor == row, 1, Ygo_Card(list[row])->name, line);
         }
-        Strip(Y.cursor < (int)n ? list[Y.cursor] : 0,
-              n ? "Cards past 3 copies and past what your decks use, traded for CARD POINTS." : "Nothing to trade in.");
+        if (!n)
+            Strip(0, "Copies past three (and past what your decks use) trade for CARD POINTS.");
+        else if (Y.cursor >= (int)n)
+            Strip(0, "Every spare card at once: copies past three and past what your decks use.");
+        else
+        {
+            snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{A} ONE  {SELECT} ALL SPARE",
+                     Ygo_Card(list[Y.cursor])->name, Ygo_PointValue(list[Y.cursor]), Ygo_Spare(C(), list[Y.cursor]));
+            Strip(list[Y.cursor], line);
+        }
     }
     else
     {
@@ -1537,7 +1533,7 @@ static void CounterScreen(void)
             int row = top + (int)k;
             if (row == (int)n)
             {
-                TcgUi_Row(LIST_X + 2, 8 + (int)k * ROW_H, LIST_W - 4, Y.cursor == row, 1, "A CARD YOU PICK", NULL);
+                TcgUi_Row(LIST_X + 2, 8 + (int)k * ROW_H, LIST_W - 4, Y.cursor == row, 1, "A CARD YOU PICK", "5-150");
                 continue;
             }
             snprintf(line, sizeof(line), "%u", YGO_PACK_COST);
@@ -1550,9 +1546,9 @@ static void CounterScreen(void)
             Strip(0, line);
         }
         else
-            Strip(0, "Any card that can be played, for its CARD POINTS (by rarity).");
+            Strip(0, "Any card that can be played, 5-150 CP by rarity.");
     }
-    TcgUi_Hints("{L}{R} TAB  {A} OK  {B} LEAVE");
+    TcgUi_Hints(CounterKind() < 2 ? "{A} CHOOSE  {L}{R} COUNTER  {B} LEAVE" : "{L}{R} COUNTER  {B} LEAVE");
 }
 static void StarterScreen(void)
 {
@@ -1706,7 +1702,7 @@ static void TradeScreen(void)
     if (!n)
         G_Text(10, 108, G_WHITE, 0x204030, "No cards of this kind to offer.", 0, TF_SMALL);
     TcgUi_Hints(s->myOffer && s->theirOffer ? (s->myConfirm ? "WAITING FOR THEM  {B} LEAVE" : "{A} OFFER  {START} TRADE!  {B} LEAVE")
-                                            : "{A} OFFER  {L}{R} KIND  {B} LEAVE");
+                                            : "{A} OFFER  {L}{R} TYPE  {B} LEAVE");
 }
 static void TradeStep(unsigned pressed)
 {
@@ -1875,6 +1871,32 @@ static void ChooseDeck(void)
     }
     StartDuel(Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra, Y.opp.main, Y.opp.extra);
 }
+/* The pack tears open on its own, then the cards turn over one by one (A: the next one now), rares slower */
+static void RevealStep(unsigned pressed)
+{
+    static int sNext;
+    unsigned rarity;
+    if (Y.age < REVEAL_TEAR)
+    {
+        if (Y.age == 14)
+            PlaySE(SE_RG_CARD_FLIPPING);
+        if (pressed & KEY_A)
+            Y.age = REVEAL_TEAR;
+        return;
+    }
+    if (Y.age == REVEAL_TEAR)
+        sNext = Y.age + 8;
+    if (pressed & KEY_A)
+        sNext = Y.age;
+    if (Y.age >= sNext)
+    {
+        rarity = Y.revealRarity[Y.flipped];
+        PlaySE(rarity >= YGO_SUPER_RARE ? SE_SHINY : rarity >= YGO_RARE ? SE_SHINY : SE_RG_CARD_FLIP);
+        Y.flipped++;
+        Y.cursor = Y.flipped - 1;
+        sNext = Y.age + (Tcg_GetCollection()->fastAnimations ? 5 : rarity >= YGO_SUPER_RARE ? 40 : rarity >= YGO_RARE ? 26 : 11);
+    }
+}
 static void OpenPackNow(unsigned set)
 {
     struct YgoCollection *c = C();
@@ -1897,7 +1919,7 @@ static void OpenPackNow(unsigned set)
     Y.pack = (int)set;
     Y.flipped = 0;
     Screen(Y_REVEAL);
-    PlaySE(SE_RG_CARD_FLIP);
+    PlaySE(SE_RG_CARD_OPEN);
     MP_Achieve_Count("ygopack", 1);
     if (Y.revealRarity[YGO_PACK_SIZE - 1] == YGO_SECRET_RARE)
         MP_Achieve_Unlock("ygosecret");
@@ -1969,6 +1991,22 @@ static void Act(int action)
             StartDuel(Y.loanMain, Y.loanExtra, Y.opp.main, Y.opp.extra);
         break;
     }
+    case ACT_COPY:
+    {
+        unsigned d;
+        for (d = 0; d < YGO_SAVED_DECKS; d++)
+            if (!Deck(d)->name[0] && !MainCount(d) && !ExtraCount(d) && d != (unsigned)Y.askArg)
+                break;
+        if (d == YGO_SAVED_DECKS)
+            Say(ACT_NONE, "There's no empty slot to copy into.");
+        else
+        {
+            *Deck(d) = *Deck((unsigned)Y.askArg);
+            snprintf(Deck(d)->name, YGO_NAME_LEN, "%.18s copy", Deck((unsigned)Y.askArg)->name);
+            Say(ACT_NONE, "Copied into slot %u.", d + 1);
+        }
+        break;
+    }
     case ACT_CLEAR:
         memset(Deck((unsigned)Y.askArg), 0, sizeof(struct YgoSavedDeck));
         if (c->activeDeck == Y.askArg)
@@ -1983,27 +2021,32 @@ static void Act(int action)
         }
         break;
     case ACT_TRADE_IN:
+    case ACT_TRADE_IN_CARD:
     {
-        unsigned id = (unsigned)Y.askArg, n = Ygo_Spare(c, id);
+        unsigned id = (unsigned)Y.askArg, spare = Ygo_Spare(c, id), n = action == ACT_TRADE_IN ? 1 : spare;
+        if (!spare || n > spare)
+            break;
         c->owned[id] -= n;
         AddPoints(n * Ygo_PointValue(id));
-        PlaySE(SE_RG_SHOP);
+        PlaySE(SE_SHOP);
+        Say(ACT_NONE, "Traded in %u x %s for %u CARD POINTS.", n, Ygo_Card(id)->name, n * Ygo_PointValue(id));
         break;
     }
     case ACT_TRADE_IN_ALL:
     {
         uint16_t list[YGO_CARD_COUNT];
-        unsigned n = SpareList(list), i, points = 0;
+        unsigned n = SpareList(list), i, points = 0, count = 0;
         for (i = 0; i < n; i++)
         {
             unsigned k = Ygo_Spare(c, list[i]);
             c->owned[list[i]] -= k;
             points += k * Ygo_PointValue(list[i]);
+            count += k;
         }
         AddPoints(points);
         Y.cursor = 0;
-        PlaySE(SE_RG_SHOP);
-        Say(ACT_NONE, "Traded in for %u CARD POINTS.", points);
+        PlaySE(SE_SHOP);
+        Say(ACT_NONE, "Traded in %u spare cards for %u CARD POINTS.", count, points);
         break;
     }
     case ACT_BUY_PACK:
@@ -2220,40 +2263,34 @@ int YgoUi_Step(unsigned keys)
                                  sizeof(reason)))
             {
                 c->activeDeck = (uint8_t)Y.cursor;
-                PlaySE(SE_SELECT);
+                PlaySE(SE_SUCCESS);
             }
             else
+            {
+                PlaySE(SE_FAILURE);
                 Say(ACT_NONE, "%s", reason);
+            }
         }
         else if (pressed & KEY_START && Y.cursor < YGO_SAVED_DECKS && MainCount((unsigned)Y.cursor))
-        {
-            unsigned d;
-            for (d = 0; d < YGO_SAVED_DECKS; d++)
-                if (!Deck(d)->name[0] && !MainCount(d))
-                {
-                    *Deck(d) = *Deck((unsigned)Y.cursor);
-                    snprintf(Deck(d)->name, YGO_NAME_LEN, "%.18s copy", Deck((unsigned)Y.cursor)->name);
-                    Say(ACT_NONE, "Copied to slot %u.", d + 1);
-                    break;
-                }
-            if (d == YGO_SAVED_DECKS)
-                Say(ACT_NONE, "No empty slot to copy into.");
-        }
+            Ask(ACT_COPY, Y.cursor, "Copy %s into an empty slot?", Deck((unsigned)Y.cursor)->name);
         else if (pressed & KEY_SELECT && Y.cursor < YGO_SAVED_DECKS && Deck((unsigned)Y.cursor)->name[0])
-            Ask(ACT_CLEAR, Y.cursor, "Delete %s?", Deck((unsigned)Y.cursor)->name);
+            Ask(ACT_CLEAR, Y.cursor, "Delete %s? Its cards stay in your collection.", Deck((unsigned)Y.cursor)->name);
         break;
     case Y_BUILDER:
     {
         uint16_t list[YGO_DECK_MAX + YGO_FUSION_MAX];
         unsigned listed = DeckList((unsigned)Y.deck, list);
         char reason[160];
+        int n = (int)ListSize();
+        FilterTab(pressed);
+        n = (int)ListSize();
         if (Y.side == 0)
         {
-            int n = (int)ListSize();
-            FilterTab(pressed);
-            if (pressed & KEY_RIGHT && (Y.cursor % GRID_COLS == GRID_COLS - 1 || Y.cursor == n - 1) && listed)
+            if (pressed & KEY_RIGHT && (Y.cursor % GRID_COLS == GRID_COLS - 1 || Y.cursor + 1 >= n) && listed)
             {
                 Y.side = 1;
+                if (Y.deckCursor >= (int)listed)
+                    Y.deckCursor = (int)listed - 1;
                 PlaySE(SE_SELECT);
                 break;
             }
@@ -2261,15 +2298,25 @@ int YgoUi_Step(unsigned keys)
             if (pressed & KEY_A && n)
             {
                 if (Ygo_DeckAdd(c, (unsigned)Y.deck, ListCard(Y.cursor), reason, sizeof(reason)))
-                    PlaySE(SE_SELECT);
+                    PlaySE(SE_RG_CARD_FLIP);
                 else
                 {
                     PlaySE(SE_FAILURE);
                     Say(ACT_NONE, "%s", reason);
                 }
             }
-            if (pressed & KEY_SELECT && n && Ygo_DeckRemove(c, (unsigned)Y.deck, ListCard(Y.cursor)))
-                PlaySE(SE_SELECT);
+            /* SELECT takes one back out, without going over to the deck list */
+            if (pressed & KEY_SELECT && n)
+            {
+                unsigned id = ListCard(Y.cursor);
+                if (Ygo_DeckRemove(c, (unsigned)Y.deck, id))
+                    PlaySE(SE_RG_BAG_POCKET);
+                else
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "There's no %s in this deck.", Ygo_Card(id)->name);
+                }
+            }
             if (pressed & KEY_START && n)
                 Inspect(ListCard(Y.cursor), Y_BUILDER);
         }
@@ -2280,11 +2327,19 @@ int YgoUi_Step(unsigned keys)
             if (pressed & KEY_DOWN && Y.deckCursor < (int)listed - 1)
                 Y.deckCursor++, PlaySE(SE_SELECT);
             if (pressed & KEY_LEFT || !listed)
+            {
+                /* back on the card the list points at, when this tab shows it */
+                int k;
+                for (k = 0; listed && k < n; k++)
+                    if (ListCard(k) == list[Y.deckCursor < (int)listed ? Y.deckCursor : 0])
+                        Y.cursor = k;
                 Y.side = 0;
-            if (pressed & KEY_A && listed)
+                PlaySE(SE_SELECT);
+            }
+            else if (pressed & KEY_A && listed)
             {
                 Ygo_DeckRemove(c, (unsigned)Y.deck, list[Y.deckCursor]);
-                PlaySE(SE_SELECT);
+                PlaySE(SE_RG_BAG_POCKET);
                 listed = DeckList((unsigned)Y.deck, list);
                 if (Y.deckCursor >= (int)listed)
                     Y.deckCursor = listed ? (int)listed - 1 : 0;
@@ -2303,7 +2358,7 @@ int YgoUi_Step(unsigned keys)
             {
                 Ygo_DeckValidate(Deck((unsigned)Y.deck)->main, Deck((unsigned)Y.deck)->extra, c->owned, reason,
                                  sizeof(reason));
-                Say(ACT_NONE, "Saved, but it can't duel yet: %s", reason);
+                Say(ACT_NONE, "This deck can't be played yet: %s", reason);
             }
         }
         break;
@@ -2340,10 +2395,18 @@ int YgoUi_Step(unsigned keys)
                 if (GcSingleSold(id))
                 {
                     PlaySE(SE_FAILURE);
-                    Say(ACT_NONE, "That one's sold. One copy of each card per customer!");
+                    Say(ACT_NONE, "SOLD: one copy of each card per customer.");
                 }
                 else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, price))
+                {
+                    PlaySE(SE_FAILURE);
                     Say(ACT_NONE, "%s is \xa5%u. You don't have enough money.", Ygo_Card(id)->name, price);
+                }
+                else if (c->owned[id] >= YGO_COLLECTION_MAX)
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "You can't carry more %s.", Ygo_Card(id)->name);
+                }
                 else
                     Ask(ACT_GC_CARD, (int)id, "%s for \xa5%u?", Ygo_Card(id)->name, price);
             }
@@ -2351,9 +2414,12 @@ int YgoUi_Step(unsigned keys)
             {
                 unsigned cost = Ygo_PointCost(id);
                 if (Points() >= cost)
-                    Ask(ACT_BUY_CARD, (int)id, "%s for %u CARD POINTS?", Ygo_Card(id)->name, cost);
+                    Ask(ACT_BUY_CARD, (int)id, "%s for %u CP?", Ygo_Card(id)->name, cost);
                 else
-                    Say(ACT_NONE, "That takes %u CARD POINTS. You have %u.", cost, Points());
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "%s costs %u CP. You have %u.", Ygo_Card(id)->name, cost, Points());
+                }
             }
             else
                 Inspect(id, Y_BINDER);
@@ -2363,10 +2429,12 @@ int YgoUi_Step(unsigned keys)
         break;
     }
     case Y_INSPECT:
-        if (pressed & KEY_UP && Y.inspectScroll > 0)
-            Y.inspectScroll -= 8;
-        if (pressed & KEY_DOWN && Y.inspectScroll < Y.inspectMax)
-            Y.inspectScroll += 8;
+        if (pressed & KEY_UP)
+            Y.inspectScroll -= 12;
+        if (pressed & KEY_DOWN)
+            Y.inspectScroll += 12;
+        if (Y.inspectScroll > Y.inspectMax)
+            Y.inspectScroll = Y.inspectMax;
         if (Y.inspectScroll < 0)
             Y.inspectScroll = 0;
         if (pressed & KEY_A)
@@ -2393,6 +2461,8 @@ int YgoUi_Step(unsigned keys)
             Y.panY -= 2;
         if (keys & KEY_DOWN)
             Y.panY += 2;
+        Y.panY = Y.panY < -80 ? -80 : Y.panY > 80 ? 80 : Y.panY;
+        Y.panX = Y.panX < -60 ? -60 : Y.panX > 60 ? 60 : Y.panX;
         if (pressed & KEY_B)
         {
             Y.screen = Y_INSPECT;
@@ -2417,27 +2487,17 @@ int YgoUi_Step(unsigned keys)
             if (c->packs[set])
                 OpenPackNow(set);
             else
+            {
                 PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "You have no unopened packs of this kind.");
+            }
         }
         break;
     }
     case Y_REVEAL:
-        if (Y.age < REVEAL_TEAR + 14)
-        {
-            if (pressed & KEY_B)
-                Y.age = REVEAL_TEAR + 14;
-            break;
-        }
         if (Y.flipped < YGO_PACK_SIZE)
         {
-            if (pressed & KEY_A)
-            {
-                Y.flipped++;
-                PlaySE(Y.flipped == YGO_PACK_SIZE && Y.revealRarity[YGO_PACK_SIZE - 1] >= YGO_SUPER_RARE ? SE_SHINY
-                                                                                                          : SE_RG_CARD_FLIP);
-                if (Y.flipped == YGO_PACK_SIZE)
-                    Y.cursor = YGO_PACK_SIZE - 1;
-            }
+            RevealStep(pressed);
             if (pressed & KEY_B)
             {
                 Y.flipped = YGO_PACK_SIZE;
@@ -2453,7 +2513,7 @@ int YgoUi_Step(unsigned keys)
             Y.cursor -= 5, PlaySE(SE_SELECT);
         if (pressed & KEY_DOWN && Y.cursor < 4)
             Y.cursor += 5, PlaySE(SE_SELECT);
-        if (pressed & KEY_A)
+        if (pressed & (KEY_A | KEY_START))
             Inspect(Y.revealed[Y.cursor], Y_REVEAL);
         else if (pressed & KEY_B)
         {
@@ -2480,7 +2540,7 @@ int YgoUi_Step(unsigned keys)
         {
             Y.counterTab = (Y.counterTab + (pressed & KEY_R ? 1 : CounterTabs() - 1)) % CounterTabs();
             Y.cursor = 0;
-            PlaySE(SE_SELECT);
+            PlaySE(SE_RG_BAG_POCKET);
             break;
         }
         if (pressed & KEY_B)
@@ -2526,14 +2586,21 @@ int YgoUi_Step(unsigned keys)
             uint16_t list[YGO_CARD_COUNT];
             unsigned n = SpareList(list);
             MoveCursor(pressed, n ? (int)n + 1 : 0, 1);
-            if (pressed & KEY_A && n)
+            if (pressed & KEY_A && n && Y.cursor == (int)n)
             {
-                if (Y.cursor == (int)n)
-                    Ask(ACT_TRADE_IN_ALL, 0, "Trade in every spare card?");
-                else
-                    Ask(ACT_TRADE_IN, list[Y.cursor], "Trade in %u %s for %u CARD POINTS?", Ygo_Spare(c, list[Y.cursor]),
-                        Ygo_Card(list[Y.cursor])->name, Ygo_Spare(c, list[Y.cursor]) * Ygo_PointValue(list[Y.cursor]));
+                unsigned i, points = 0;
+                for (i = 0; i < n; i++)
+                    points += Ygo_Spare(c, list[i]) * Ygo_PointValue(list[i]);
+                Ask(ACT_TRADE_IN_ALL, 0, "Trade in every spare card for %u CP?", points);
             }
+            else if (Y.cursor == (int)n)
+                ;
+            else if (pressed & KEY_A && n)
+                Ask(ACT_TRADE_IN, list[Y.cursor], "Trade in one %s for %u CP?", Ygo_Card(list[Y.cursor])->name,
+                    Ygo_PointValue(list[Y.cursor]));
+            else if (pressed & KEY_SELECT && n)
+                Ask(ACT_TRADE_IN_CARD, list[Y.cursor], "Trade in all %u spare %s for %u CP?", Ygo_Spare(c, list[Y.cursor]),
+                    Ygo_Card(list[Y.cursor])->name, Ygo_Spare(c, list[Y.cursor]) * Ygo_PointValue(list[Y.cursor]));
         }
         else
         {

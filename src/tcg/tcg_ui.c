@@ -86,6 +86,7 @@ enum
     ACT_CLEAR,
     ACT_TRADE_IN,
     ACT_TRADE_IN_ALL,
+    ACT_TRADE_IN_EVERY,   /* every spare card (the list's last row, as on the Yu-Gi-Oh! counter) */
     ACT_BUY,
     ACT_GC_CARD,
     ACT_GC_DECK
@@ -1844,9 +1845,18 @@ static void CounterLists(int tab)
         n = (int)SpareList(list);
         if (U.scroll > n - rows)
             U.scroll = n > rows ? n - rows : 0;
-        for (i = 0; i < rows && U.scroll + i < n; i++)
+        if (n && U.scroll > n + 1 - rows)
+            U.scroll = n + 1 > rows ? n + 1 - rows : 0;
+        for (i = 0; i < rows && U.scroll + i <= n; i++)
         {
-            unsigned id = list[U.scroll + i];
+            unsigned id;
+            if (U.scroll + i == n)
+            {
+                if (n)
+                    Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, 1, "ALL SPARES", NULL);
+                continue;
+            }
+            id = list[U.scroll + i];
             snprintf(right, sizeof(right), "x%u", Tcg_Spare(c, id));
             Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, 1, Tcg_Card(id)->name, right);
         }
@@ -1855,9 +1865,11 @@ static void CounterLists(int tab)
             G_Text(LIST_X + 8, 12, 0x707070, G_NO_SHADOW, "No spare cards yet.", LIST_W - 14, TF_SMALL);
             Strip(0, "Copies past four (and past what your decks use) trade for CARD POINTS.");
         }
+        else if (U.cursor >= n)
+            Strip(0, "Every spare card at once: copies past four and past what your decks use.");
         else
         {
-            unsigned id = list[U.cursor < n ? U.cursor : 0];
+            unsigned id = list[U.cursor];
             snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{A} ONE  {SELECT} ALL SPARE", Tcg_Card(id)->name,
                      Tcg_PointValue(id), Tcg_Spare(c, id));
             Strip(id, line);
@@ -1904,13 +1916,13 @@ static void CounterLists(int tab)
     }
 }
 /* The side panel's tabs (5 fit when short) and what you spend */
-static void ShopTabs(const char *const *names, int count, unsigned fill, unsigned edge, unsigned ink, const char *balance,
-                     const char *what, unsigned color)
+void TcgUi_ShopTabs(const char *const *names, int count, int tab, unsigned fill, unsigned edge, unsigned ink,
+                    const char *balance, const char *what, unsigned color)
 {
     int i, h = count > 3 ? 13 : 15, step = h + 2;
     for (i = 0; i < count; i++)
     {
-        int on = i == U.tab;
+        int on = i == tab;
         G_RoundFill(6, 22 + i * step, 92, h, on ? 0xf8f8f8 : fill, 255);
         G_RoundFrame(6, 22 + i * step, 92, h, on ? 0xe82820 : edge, 255);
         G_Text(12, 22 + i * step - (h < 15), on ? G_INK : ink, on ? G_INK_SHADOW : G_NO_SHADOW, names[i], 0, TF_SMALL);
@@ -1918,6 +1930,11 @@ static void ShopTabs(const char *const *names, int count, unsigned fill, unsigne
     G_TextAlign(52, count > 3 ? 98 : 78, TA_CENTER, color, G_INK_SHADOW, balance, count > 3 ? TF_SMALL : TF_NORMAL);
     if (count <= 3)
         G_TextAlign(52, 93, TA_CENTER, 0x506078, G_NO_SHADOW, what, TF_NARROW);
+}
+static void ShopTabs(const char *const *names, int count, unsigned fill, unsigned edge, unsigned ink, const char *balance,
+                     const char *what, unsigned color)
+{
+    TcgUi_ShopTabs(names, count, U.tab, fill, edge, ink, balance, what, color);
 }
 static void CounterScreen(void)
 {
@@ -1973,7 +1990,7 @@ static void StarterScreen(void)
     if (t >= STARTER_READY)
     {
         Strip(sStarterIds[U.starterChoice], sStarterNotes[U.starterChoice]);
-        Hints("{LEFTRIGHT} CHOOSE  {A} TAKE THIS DECK");
+        Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {START} LOOK");
     }
 }
 
@@ -2085,7 +2102,7 @@ static void Act(int action)
         else
         {
             Tcg_DeckCopy(c, (unsigned)U.askArg, to);
-            snprintf(c->decks[to].name, TCG_NAME_LEN, "Deck %u", to + 1);
+            snprintf(c->decks[to].name, TCG_NAME_LEN, "%.18s copy", c->decks[U.askArg].name);
             Say(ACT_NONE, "Copied into slot %u.", to + 1);
         }
         break;
@@ -2120,6 +2137,24 @@ static void Act(int action)
         {
             PlaySE(SE_SHOP);
             Say(ACT_NONE, "Traded in %u x %s for %u CARD POINTS.", count, Tcg_Card(id)->name, c->dust - before);
+        }
+        break;
+    }
+    case ACT_TRADE_IN_EVERY:
+    {
+        uint16_t list[TCG_CARD_COUNT];
+        unsigned n = SpareList(list), i, count = 0, before = c->dust;
+        for (i = 0; i < n; i++)
+        {
+            unsigned spare = Tcg_Spare(c, list[i]);
+            if (Tcg_ExchangeDuplicates(c, list[i], spare))
+                count += spare;
+        }
+        U.cursor = 0;
+        if (count)
+        {
+            PlaySE(SE_SHOP);
+            Say(ACT_NONE, "Traded in %u spare cards for %u CARD POINTS.", count, c->dust - before);
         }
         break;
     }
@@ -2409,8 +2444,17 @@ static void CounterStep(unsigned pressed, int tab)
     {
         uint16_t list[TCG_CARD_COUNT];
         unsigned n = SpareList(list);
-        MoveCursor(pressed, (int)n, 1);
-        if (pressed & KEY_A && n)
+        MoveCursor(pressed, n ? (int)n + 1 : 0, 1);
+        if (pressed & KEY_A && n && U.cursor == (int)n)
+        {
+            unsigned i, points = 0;
+            for (i = 0; i < n; i++)
+                points += Tcg_Spare(c, list[i]) * Tcg_PointValue(list[i]);
+            Ask(ACT_TRADE_IN_EVERY, 0, "Trade in every spare card for %u CP?", points);
+        }
+        else if (U.cursor == (int)n)
+            ;
+        else if (pressed & KEY_A && n)
             Ask(ACT_TRADE_IN, list[U.cursor], "Trade in one %s for %u CP?", Tcg_Card(list[U.cursor])->name,
                 Tcg_PointValue(list[U.cursor]));
         else if (pressed & KEY_SELECT && n)
@@ -2796,8 +2840,9 @@ int Tcg_Step(unsigned keys)
             U.screen = UI_ART;
             U.zoom = U.panX = U.panY = 0;
         }
-        if (pressed & KEY_B)
+        else if (pressed & (KEY_B | KEY_START | KEY_R))
         {
+            /* (START or R, which opened it, close it too: as on the Yu-Gi-Oh! side) */
             PlaySE(SE_SELECT);
             U.screen = U.back;
             U.age = 100;
@@ -2933,6 +2978,8 @@ int Tcg_Step(unsigned keys)
                 PlaySE(SE_SELECT);
             if (pressed & KEY_A)
                 Ask(ACT_STARTER, U.starterChoice, "Take the %s deck?", sStarterNames[U.starterChoice]);
+            else if (pressed & KEY_START)
+                Inspect(sStarterIds[U.starterChoice], UI_STARTER);
         }
         else if (pressed & KEY_A && U.age > 30)
             U.age = STARTER_READY;

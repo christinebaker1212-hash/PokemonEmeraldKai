@@ -26,6 +26,9 @@ void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsi
                  const char *text);
 void TcgUi_Hints(const char *hint);
 void TcgUi_TopBar(const char *title);
+/* A counter's tabs down the side panel (5 fit when short), tab selected, and what you spend (balance, what) */
+void TcgUi_ShopTabs(const char *const *names, int count, int tab, unsigned fill, unsigned edge, unsigned ink,
+                    const char *balance, const char *what, unsigned color);
 void TcgUi_MessageBox(const char *message, int asking, int yes);
 /* The CARD CASE on its POKeMON side again (from the YU-GI-OH! side's tabs) */
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript);

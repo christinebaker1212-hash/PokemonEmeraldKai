@@ -1196,13 +1196,15 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   as a loss) and WON TODAY once you've beaten them today; Gym Leaders (after their badge), the ELITE FOUR,
                   the Champion, your rival, WALLY, MAXIE, ARCHIE, STEVEN and
                   the FRONTIER BRAINS have decks of their own.
-  On the table    The D-Pad moves over the table itself. A on a card shows
-                  what you can do with it; a card you play floats over the
-                  spaces it can go. START looks at a card up close, SELECT
-                  opens the classic menu (HAND, ATTACK, CHECK, PKMN POWER,
-                  RETREAT, DONE). B closes the hand, then asks whether to end
-                  your turn; CONCEDE asks first and ends the duel at once (a
-                  loss, online too). Hold A or B to hurry the animations.
+  On the table    The same buttons as the Yu-Gi-Oh! table. The D-Pad moves
+                  over the table itself. A on a card shows what you can do
+                  with it (ATTACK, RETREAT and PKMN POWER on your Pokemon); a
+                  card you play floats over the spaces it can go. R looks at
+                  a card up close. B closes the hand, then opens the turn
+                  menu (START and SELECT open it too): END TURN (READY while
+                  setting up) and CONCEDE, which asks first and ends the duel
+                  at once (a loss, online too). START or SELECT finishes
+                  picking several cards.
   Card faces      The bottom row of a POKEMON card shows, as printed, its
                   weakness (left), resistance (middle) and retreat cost
                   (right, a dot for each Energy) in the same dots as the
@@ -1215,7 +1217,10 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck (not a holo).
                   Losing costs nothing. Spare cards become CARD POINTS at the
-                  CARD COUNTER, which sells commons and uncommons for them.
+                  CARD COUNTER (TRADE IN: A one copy, SELECT every spare copy
+                  of that card, ALL SPARES at the end of the list all of
+                  them; the same on the Yu-Gi-Oh! counter), which sells
+                  commons and uncommons for them.
   Packs           5 commons, 3 uncommons, a rare and an Energy. One pack in
                   three has a HOLO rare instead of a plain one: holos only
                   come from packs and trades. After 20 packs of a set without
@@ -1278,9 +1283,11 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
                   BRAINS have decks of their own, each with a signature card
                   they hand over the first time you beat them. Decks get
                   stronger with your badges.
-  On the table    The D-Pad moves over the table; A on a card shows what it
-                  can do (SUMMON, SET, ACTIVATE, ATTACK...), R reads a card,
-                  START moves to the next phase or ends your turn. When you
+  On the table    The same buttons as the POKEMON table: the D-Pad moves over
+                  the table; A on a card shows what it can do (SUMMON, SET,
+                  ACTIVATE, ATTACK...), R looks at a card up close, and B,
+                  START or SELECT opens the turn menu (the next phase, END
+                  TURN, CONCEDE) with END TURN chosen. When you
                   can answer with a Trap or Quick-Play Spell, the game asks
                   "Activate a card?" (B passes). It asks when something
                   happens (a summon, an attack, a card activated); hold L
