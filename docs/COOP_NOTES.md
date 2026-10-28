@@ -2014,3 +2014,26 @@ the work left in docs/YGO_HANDOFF.md.
 - Tests: tools/ygo/test.sh (engine, card scenarios, random duels, AI, collection; sanitizers) and
   tools/ygo/test_ui.sh (the club, a challenge, the case's screens, a practice duel mashed with random keys).
   Debug: `mp ygo ...` (ygo_ui.c Ygo_Debug).
+
+## Deck menus, recipes, ACE CARD, zones (1.38.0)
+- Both card games' DECKS: A on a slot opens TcgUi_PopMenu (EDIT / RENAME / ACE CARD / DUEL WITH IT / COPY / DELETE;
+  an empty slot BUILD A DECK / FROM A RECIPE); START / SELECT / R keep their shortcuts. Rows: the 8 slots, DECK
+  RECIPES, BACK (DECK_ROWS).
+- RENAME: TcgUi_Name* in tcg_ui.c (shared, tcg_ui_kit.h): a 13x4 keyboard + CASE / SPACE / DEL / OK, typing through
+  Platform_SetTextInput; 16 letters and the width of a deck row. Tests type with the harness's `type` command.
+- ACE CARD: TcgCollection.ace[] (cards format 7), YgoCollection.ace[] (.ygo format 3); Tcg_DeckAce / Ygo_DeckAce fall
+  back to the old pick (Tcg_DeckMascot / Ygo_DeckMascot) when unset or no longer in the deck. COPY copies it, DELETE
+  and a recipe clear it.
+- DECK RECIPES: Tcg_DeckFromRecipe / Ygo_DeckFromRecipe build a recipe from owned cards (copies other decks use
+  still count, as in the builder); the Pokemon recipes are the three starters and tcg_structure_decks.h, the
+  Yu-Gi-Oh! ones the four Starter Decks (StarterDeckOf).
+- Yu-Gi-Oh! zones: YgoAnswer.zone (seq + 1) on a Main Phase answer that puts a card down from the hand; Idle()
+  keeps it in YgoState.zoneWish, TakeZone() uses it when the card lands (else the first empty zone), and the next
+  Main / Battle question drops it. The board's M_ZONE mode (ZoneChoice: no Tribute Summons, no Field Spells) shows
+  the free zones and the card faint in the chosen one. Sent online (ygo_net.c ANSWER_LEN 22, TCG_LINK_VERSION 7).
+- Yu-Gi-Oh! turn menu (OpenPhaseMenu): ChoicesAfter plays the move on a copy of the duel, passing chain windows, to
+  see whether an attack or a play from the hand follows. PreferredPick starts attack targets / Tributes on the
+  best / weakest. Animations: FX_ATTACK (AttackReach: wind-up, dash, home; Attackers() draws it over the band),
+  FX_IMPACT (+ Shake via the render viewport), FX_RETICLE (Brackets, MarchingLine), FX_SHARDS, FX_RISE.
+- Pokemon table: Refocus() after our own action's state is shown (B.refocus, set in Submit).
+- Text fitting: TcgUi_WrapLines / TcgUi_FitText; tcg_board.c Prompt() splits a long prompt in two lines.

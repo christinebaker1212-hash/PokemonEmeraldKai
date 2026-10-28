@@ -1209,11 +1209,16 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   weakness (left), resistance (middle) and retreat cost
                   (right, a dot for each Energy) in the same dots as the
                   attack costs above it; a dash means none.
-  Decks           CARD CASE > DECKS: A builds or changes a deck (A adds the
-                  card, SELECT takes one out; or RIGHT over to the deck's list,
-                  where A takes out), START copies it, SELECT deletes it (the
-                  cards stay in your collection) and R makes it the deck you
-                  duel with.
+  Decks           CARD CASE > DECKS: A on a deck opens its menu: EDIT (A adds
+                  the card, SELECT takes one out; or RIGHT over to the deck's
+                  list, where A takes out), RENAME (the keys on screen or your
+                  keyboard), ACE CARD (the card shown for the deck), DUEL WITH
+                  IT, COPY and DELETE (the cards stay in your collection).
+                  START copies, SELECT deletes and R picks the deck you duel
+                  with straight from the list. Both card games work the same.
+  Recipes         DECKS > DECK RECIPES (or FROM A RECIPE on an empty slot):
+                  the starter and structure decks rebuilt from your cards; the
+                  list says what you're missing.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck (not a holo).
                   Losing costs nothing. Spare cards become CARD POINTS at the
@@ -1292,6 +1297,8 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
                   "Activate a card?" (B passes). It asks when something
                   happens (a summon, an attack, a card activated); hold L
                   to be asked at every chance, phase changes too.
+  Zones           Summoning, Setting or activating a card from your hand
+                  asks which zone it goes to (LEFT / RIGHT, A).
   Decks           CARD CASE > DECKS: 40 to 60 cards and up to 15 Fusion
                   Monsters, at most 3 of a card (fewer for the cards
                   Stairway to the Destined Duel limits; the builder shows the
