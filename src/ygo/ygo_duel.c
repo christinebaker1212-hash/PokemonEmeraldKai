@@ -1572,6 +1572,14 @@ static void Chain(struct YgoState *s)
             f->step = 2;
         return;
     case 2:
+        if (!s->chainCount)
+        {
+#ifdef YGO_TRACE
+            fprintf(stderr, "[ygo] empty chain at resolution (turn %u phase %u window %u)\n", s->turn, s->phase, s->window);
+#endif
+            f->step = 3;
+            return;
+        }
         ResolveTop(s);
         if (!s->chainCount)
             f->step = 3;
@@ -1816,6 +1824,15 @@ static void Summon(struct YgoState *s, unsigned o, int set)
     }
     s->objs[o].summonType = need ? YGO_SUMMON_TRIBUTE : YGO_SUMMON_NORMAL;
     s->players[player].summonedTurn = s->turn;
+    if (s->resolving)
+    {
+        /* during a chain's resolution (Ultimate Offering): no window to answer it; its triggers wait for the chain */
+        Ygo_Event(s, YGO_EV_SUMMON, player, o, NO_OBJ, s->objs[o].summonType, 0);
+        Raise(s, YEV_NORMAL_SUMMONED, o, NO_OBJ);
+        Raise(s, YEV_ANY_SUMMONED, NO_OBJ, o);
+        Raise(s, YEV_ANY_NORMAL_SUMMONED, NO_OBJ, o);
+        return;
+    }
     Push(s, PR_SUMMON, o, s->objs[o].summonType);
 }
 
