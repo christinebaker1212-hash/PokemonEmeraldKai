@@ -1,0 +1,26 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp cards starter 0
+mp cards fast
+mp additem 399 1
+mp face right
+barrier ready 2
+mp cards ask 1 0
+wait 200
+press A 2
+wait 400
+mp cards auto
+wait 900
+rendershot a_board
+mp cards auto
+mp cards concede
+wait 240
+rendershot a_result
+press A 2
+wait 120
+press A 2
+wait 120
+mp where
+quit

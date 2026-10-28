@@ -5,5 +5,5 @@
 MODE=1
 WARP=11,17,6,6
 TMO=240
-EXPECT_A=("where map 11.17 xy 6,5" "money 49500" "money 34200" "where map 11.17 xy 6,4" "where map 11.18 xy 3,2" "game center: bought deck 0, slot" "game center: bought card" "asked BOY: duel" "where map 11.19 xy 6,2" "where map 11.20 xy 14,5" "where map 11.19 xy 3,2" "where map 0.3 xy 28,8")
+EXPECT_A=("where map 11.17 xy 6,5" "money 49500" "money 34200" "where map 11.17 xy 6,4" "where map 11.18 xy 3,2" "game center: bought deck 0, slot" "game center: bought card" "game center: deck 0 sold out" "game center: card" "asked BOY: duel" "where map 11.19 xy 6,2" "where map 11.20 xy 14,5" "where map 11.19 xy 3,2" "where map 0.3 xy 28,8")
 UNEXPECT_A=("[crash]")

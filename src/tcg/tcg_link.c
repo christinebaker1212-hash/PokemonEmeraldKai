@@ -195,8 +195,10 @@ int TcgLink_Submit(struct TcgLink *l, const struct TcgAction *a, uint32_t now)
     l->sequenceBefore = l->sequence;
     if (a->type == TCG_CONCEDE)
     {
+        /* (the win event as offline: without it the duel screen never showed the result and took no input) */
         l->game.winner = l->seat ^ 1;
         l->game.phase = TCG_FINISHED;
+        TcgDuel_Event(&l->game, TCG_EV_WIN, l->game.winner, 0, 3, 0, 0);
     }
     else if (TcgDuel_Apply(&l->game, a) != TCG_OK)
     {
@@ -291,9 +293,14 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
             /* A concession crossed our own action: ours never reached the
              * other side, so drop it (both seats then hold the same duel).
              * Two concessions crossing: seat 0's stands. */
+            uint32_t shown = l->game.eventSeq;
             if (l->game.phase == TCG_FINISHED && l->game.winner == (l->seat ^ 1) && l->seat == 0)
                 return;
             l->game = l->beforePending;
+            /* (events go on from what the duel screen already showed: the concession's win event numbered below
+             * it was taken as shown, and the board never ended. Not part of the hash.) */
+            if (shown > l->game.eventSeq)
+                l->game.eventSeq = shown;
             l->sequence = l->sequenceBefore;
             l->pending = 0;
         }
@@ -318,6 +325,7 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
         {
             next.winner = l->seat;
             next.phase = TCG_FINISHED;
+            TcgDuel_Event(&next, TCG_EV_WIN, next.winner, 0, 3, 0, 0);
         }
         else
             result = TcgDuel_Apply(&next, &a);

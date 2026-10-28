@@ -507,3 +507,37 @@ void Tcg_SocialInit(void)
 {
     Reset();
 }
+
+// ---------------------------------------------------------------------------
+// Tournament matches (CO-OP > TOURNAMENT, card duels: mp_tourney.c)
+
+void Tcg_TourneyDuel(unsigned peer, unsigned seat, uint32_t session)
+{
+    Reset();
+    sSocial.kind = TCG_ASK_DUEL;
+    sSocial.peer = peer;
+    sSocial.seat = seat;
+    sSocial.session = session;
+    sSocial.tourney = 1;
+    printf("[tcg] tournament match vs player %u, seat %u\n", peer, seat);
+    OpenTogether();
+}
+
+void Tcg_TourneyResult(int won)
+{
+    if (!sSocial.tourney)
+        return;
+    sSocial.tourney = 0;
+    printf("[tcg] tournament match %s\n", won ? "won" : "lost");
+    MP_Tourney_OnCardResult(won);
+}
+
+const char *Tcg_TourneyNotReady(void)
+{
+    const struct TcgCollection *c = Tcg_GetCollection();
+    if (!HasCase())
+        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON CENTER.";
+    if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, NULL, 0))
+        return "Your deck in use isn't ready: finish it in the CARD CASE.";
+    return NULL;
+}

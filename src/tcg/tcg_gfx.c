@@ -1262,6 +1262,26 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
             if (x < w - b - 3)
                 S_Fill(s, x, y, w - b - 2 - x - (c->kind == TCG_POKEMON ? 3 : 0), 1, ARGB(0x707070, 200));
         }
+        /* The bottom row as printed, in the attacks' dots: weakness (left), resistance (middle), retreat cost
+         * (right, a dot per Energy); a dash where there's none. Readable without zooming in. */
+        if (c->kind == TCG_POKEMON && w >= 18)
+        {
+            int big = w >= 26, dot = w >= 40 ? 3 : big ? 2 : 1, gap = dot + 1, y = h - b - (w >= 40 ? 5 : big ? 3 : 2), k;
+            int slots[3] = {b + 2, w / 2 - dot, 0};
+            unsigned types[2] = {c->weakness, c->resistance};
+            S_Fill(s, b + 1, y - (big ? 2 : 1), w - 2 * b - 2, 1, ARGB(dark, 90));
+            for (k = 0; k < 2; k++)
+            {
+                if (types[k] < TCG_TYPES)
+                    S_Fill(s, slots[k], y, dot, dot, ARGB(G_TypeColor(types[k], 2), 255));
+                else
+                    S_Fill(s, slots[k], y + dot / 2, big ? 3 : 2, 1, ARGB(0x707070, 160));
+            }
+            if (!c->retreat)
+                S_Fill(s, w - b - 2 - (big ? 3 : 2), y + dot / 2, big ? 3 : 2, 1, ARGB(0x707070, 160));
+            for (k = 0; k < c->retreat && k < 4; k++)
+                S_Fill(s, w - b - 2 - dot - k * gap, y, dot, dot, ARGB(G_TypeColor(TCG_COLORLESS, 2), 255));
+        }
     }
     (void)i;
 }

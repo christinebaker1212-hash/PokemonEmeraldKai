@@ -50,6 +50,11 @@ wait 90
 rendershot a_deck
 press A 2
 wait 30
+press A 2
+wait 30
+rendershot a_soldout
+press A 2
+wait 30
 press L 2
 wait 10
 press A 2
@@ -60,8 +65,26 @@ press A 2
 wait 30
 press A 2
 wait 20
+press A 2
+wait 30
+rendershot a_sold
+press A 2
+wait 30
 press B 2
 wait 20
+press R 2
+wait 10
+press R 2
+wait 10
+rendershot a_tradein
+press R 2
+wait 10
+rendershot a_cpshop
+press R 2
+wait 10
+press R 2
+wait 10
+rendershot a_singles
 press B 2
 wait 60
 press A 2

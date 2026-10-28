@@ -990,6 +990,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             UpdateHealthboxAttribute(gHealthboxSpriteIds[b], mon, HEALTHBOX_ALL);
         }
     }
+    else if (strcmp(cmd, "tourney") == 0)
+    {
+        // tourney - CO-OP > TOURNAMENT
+        MP_Tourney_OpenMenu();
+    }
     else if (strcmp(cmd, "register") == 0)
     {
         // mp register ITEM: adds it and registers it to SELECT

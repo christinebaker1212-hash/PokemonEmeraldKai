@@ -307,10 +307,12 @@ to you and facing you. Both of you get a reward for winning.
 
 TOURNAMENT (CO-OP menu > TOURNAMENT)
 ---------------------------------------
-A quick battle tournament between everyone online. Everyone battles everyone
-once, a few matches at a time; with an odd number of players someone sits out
-each round, but everyone plays the same number of matches. These are friendly
-battles: no money changes hands and nobody blacks out. The champion and
+A quick tournament between everyone online: pick BATTLES or CARD DUELS.
+Everyone plays everyone once, a few matches at a time; with an odd number of
+players someone sits out each round, but everyone plays the same number of
+matches. Battles are friendly: no money changes hands and nobody blacks out.
+Card duels need a CARD CASE and a finished deck in use; nothing is wagered,
+and leaving a duel loses that match. The champion and
 second place get prize money; in the day's first tournament with three or
 more players and no forfeits they also get MOEGATCHA pulls (2 and 1).
 Everyone else gets a consolation prize.
@@ -1187,7 +1189,10 @@ you'd like one, and later run the CARD COUNTER.
                   press it in front of someone to ask for a duel (nobody
                   there: the CARD CASE opens). Talking with A is unchanged.
                   Trainers play once you've beaten them, and so do plenty of
-                  townsfolk; Gym Leaders (after their badge), the ELITE FOUR,
+                  townsfolk. Most play with 6 or 3 Prize cards, some with 4
+                  or 2 (the challenge says how many), and it shows your
+                  record against them (wins and losses, a concession counts
+                  as a loss) and WON TODAY once you've beaten them today; Gym Leaders (after their badge), the ELITE FOUR,
                   the Champion, your rival, WALLY, MAXIE, ARCHIE, STEVEN and
                   the FRONTIER BRAINS have decks of their own.
   On the table    The D-Pad moves over the table itself. A on a card shows
@@ -1195,8 +1200,12 @@ you'd like one, and later run the CARD COUNTER.
                   spaces it can go. START looks at a card up close, SELECT
                   opens the classic menu (HAND, ATTACK, CHECK, PKMN POWER,
                   RETREAT, DONE). B closes the hand, then asks whether to end
-                  your turn; CONCEDE asks first. Hold A or B to hurry the
-                  animations.
+                  your turn; CONCEDE asks first and ends the duel at once (a
+                  loss, online too). Hold A or B to hurry the animations.
+  Card faces      The bottom row of a POKEMON card shows, as printed, its
+                  weakness (left), resistance (middle) and retreat cost
+                  (right, a dot for each Energy) in the same dots as the
+                  attack costs above it; a dash means none.
   Decks           CARD CASE > DECKS: A builds or changes a deck (A adds the
                   card, SELECT takes one out; or RIGHT over to the deck's list,
                   where A takes out), START copies it, SELECT deletes it (the
@@ -1211,11 +1220,13 @@ you'd like one, and later run the CARD COUNTER.
                   come from packs and trades. After 20 packs of a set without
                   a holo you didn't have, the next pack brings one. Cards you
                   didn't have are marked NEW.
-  CARD SHOP       The GAME CENTER's 2F (RUSTBORO CITY): any card of the four
-                  sets but the holos, rares too, for money, and three
-                  structure decks (the 1999 theme decks OVERGROWTH, ZAP! and
-                  BRUSHFIRE, 60 cards each, put into an empty deck slot). Its
-                  owner gives a CARD CASE to anyone without one, and the
+  CARD SHOP       The GAME CENTER's 2F (RUSTBORO CITY): one copy of any card
+                  of the four sets but the holos, rares too, for money (SOLD
+                  once bought), and three structure decks, one of each (the
+                  1999 theme decks OVERGROWTH, ZAP! and BRUSHFIRE, 60 cards
+                  each, put into an empty deck slot). Its owner also runs a
+                  CARD COUNTER like the CARD CLUB's (TRADE IN, CARD SHOP,
+                  PRIZES), gives a CARD CASE to anyone without one, and the
                   players at its table duel you when you talk to them.
   Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE, or the
                   CARD CASE button in front of them.

@@ -1,0 +1,11 @@
+# Conceding an online card duel in the middle of play (both sides moving on their own, so a move of ALICE's may
+# still be on its way): the concession goes as soon as that move is answered, both boards show the result
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=260
+EXPECT_A=("duel started vs BOB" "show event 20" "[tcg] left the duel")
+EXPECT_B=("duel started vs ALICE" "show event 20" "[tcg] left the duel")

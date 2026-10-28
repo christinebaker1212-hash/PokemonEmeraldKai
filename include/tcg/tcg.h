@@ -80,6 +80,16 @@ struct TcgDaily
     uint32_t key;  /* the opponent (TcgNpc key) */
     uint16_t day;  /* the day its full reward was taken */
 };
+/* The record against one card player (an NPC's TcgOpponent key) */
+struct TcgRecord
+{
+    uint32_t key;
+    uint16_t wins, losses; /* a concession is a loss */
+    uint16_t lastWin;      /* the day of the last win (Tcg_Today), 0 never */
+    uint16_t lastSeen;     /* the day of the last duel: the oldest record makes room */
+};
+#define TCG_RECORD_SLOTS 128
+#define TCG_GC_SINGLE_BYTES ((TCG_CARD_COUNT + 8) / 8)
 struct TcgCollection
 {
     uint16_t owned[TCG_CARD_COUNT + 1];
@@ -99,6 +109,11 @@ struct TcgCollection
     uint16_t rated;
     /* Format 5: packs of each set opened since the last holo the player didn't have (TCG_HOLO_PITY) */
     uint8_t drought[TCG_PACK_TYPES];
+    /* Format 6: what the GAME CENTER CARD SHOP sold (each structure deck once, one copy of each single: bits)
+     * and the records against card players */
+    uint8_t gcDecks;
+    uint8_t gcSingles[TCG_GC_SINGLE_BYTES];
+    struct TcgRecord records[TCG_RECORD_SLOTS];
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
@@ -128,6 +143,9 @@ unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card);
 unsigned Tcg_PointValue(unsigned card);
 unsigned Tcg_PointCost(unsigned card); /* at the CARD CLUB, commons and uncommons; 0: not sold there */
 unsigned Tcg_ShopPrice(unsigned card); /* money at the GAME CENTER CARD SHOP; 0: not sold (holos, promos, energy) */
+/* Records against card players: NULL when never played */
+const struct TcgRecord *Tcg_Record(const struct TcgCollection *c, uint32_t key);
+void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned day);
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path);
 /* Dev sessions must never write a collection, even when explicitly requested. */
 int Tcg_CollectionSave(const struct TcgCollection *c, const char *path);

@@ -101,8 +101,20 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   RARE CANDY, PP UP and MOEGATCHA TICKETs. 75% of a set gives that set's milestone promo;
   the whole collection gives a PIKACHU Lv.25 (THUNDERBOLT, FLY, SURF, AGILITY, LIGHT BALL,
   PREMIER BALL, OT PROMO) at the CARD CLUB and a star on the Trainer Card.
-  Achievements: the CARDS tab (`mp_achieve.c`, `card*`). Collection file format 3
-  (format 2 still loads).
+  Achievements: the CARDS tab (`mp_achieve.c`, `card*`). Collection file format 6
+  (2-5 still load): 6 adds the GAME CENTER CARD SHOP's sales (`gcDecks` bits, `gcSingles` bits:
+  each structure deck once, one copy of each single, SOLD / SOLD OUT) and the records against
+  card players (`TcgRecord`, 128 slots by `TcgOpponent.key`, the longest unplayed replaced:
+  wins, losses, the day of the last win; `Tcg_RecordResult` when an NPC duel ends, a concession
+  being a loss). The challenge shows them (wins / losses, WON TODAY) and the Prize cards.
+- **Prize cards**: NPCs play with `TcgOpponent.prizes` (tcg_field.c Ask, by the person's hash:
+  6 42%, 3 42%, 4 8%, 2 8%; special trainers 6); tcg_ui.c `Prizes()` into `TcgDuel_Init`.
+  Friends, tournaments, lessons and practice: 6. Test tcg_record (`mp cards open N` = N Prizes).
+- **GAME CENTER CARD SHOP** (UI_GCSHOP): SINGLES, DECKS and the CARD CLUB's counter as its last
+  three tabs (`CounterLists` / `CounterStep` shared with UI_COUNTER; `U.counterHome` takes the CP
+  card list back to the right counter); the club's complete-collection gift from its owner too.
+- **Card faces** (tcg_gfx.c `Face`): a POKEMON's bottom row in the attack rows' dots: weakness
+  (left), resistance (middle), retreat cost (right); count badges sit on the picture's foot.
 - **Friends** (`src/tcg/tcg_online.c`, include/tcg/online.h): CO-OP > FRIENDS > a friend >
   CARD DUEL / CARD TRADE, or the CARD CASE button in front of them. A request (social
   messages 0x10+ on extension 255) shows them YES / NO on the map; busy and no-case answers
@@ -110,7 +122,13 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   everywhere else, and a tap that withdrew at once was what friends online kept seeing as
   "NAME stopped waiting."). Two friends asking each other at once: the one later in the room
   says yes to the other's request (Tcg_SocialReceive). Tests tcg_ask_field, tcg_ask_menu,
-  tcg_ask_both (regress.sh, also at WORST=1 lag). YES opens the deck pick on both sides (the
+  tcg_ask_both (regress.sh, also at WORST=1 lag). Conceding online posts the win event as
+  offline (`TcgLink_Submit` / `TcgLink_Receive`: without it the board never showed the result and
+  took no input); one held while our last move awaits its answer goes right after
+  (`U.concedeHeld`). Tests tcg_concede_online, tcg_concede_midgame. Tournament matches
+  (CO-OP > TOURNAMENT > CARD DUELS, mp_tourney.c): `Tcg_TourneyDuel` opens the deck pick with the
+  round's session (the one first in the room invites); `Tcg_TourneyResult` reports once (a
+  finished duel, or leaving: a loss for whoever left); test tcg_tourney. YES opens the deck pick on both sides (the
   winner gets a booster) or the trade screen (each offers a card, both confirm).
 - **Menus** (`src/tcg/tcg_ui.c`, rewritten in the BAG's style): home, decks, a grid deck
   builder (5x2 cards, the deck list on the right; A adds, SELECT takes one out, RIGHT past
