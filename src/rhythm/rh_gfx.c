@@ -128,6 +128,8 @@ void RhGfx_Pic(const struct RhPic *pic, int frame, int x, int y, int rot, int al
 
 void RhGfx_PicPart(const struct RhPic *pic, int frame, int x, int y, int sy, int sh, int rot, int alpha)
 {
+    if (sh <= 0)
+        return;   // (DrawPic takes 0 as the whole picture)
     DrawPic(pic, frame, x, y, sy, sh, rot, alpha, 0);
 }
 
