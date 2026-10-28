@@ -1,0 +1,43 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+press UP 4
+wait 20
+press A 2
+wait 60
+press DOWN 2
+wait 10
+press A 2
+wait 30
+shot a_waiting
+barrier waiting 2
+watchlog dance: a credit
+waitlog 1500
+wait 60
+press A 2
+wait 40
+shot a_style
+press A 2
+wait 40
+press A 2
+wait 60
+barrier difficulty 2
+wait 60
+shot a_music
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 60
+press A 2
+wait 60
+press START 2
+wait 30
+watchlog points, grade
+waitlog 20000
+wait 30
+shot a_results
+press A 2
+wait 300
+shot a_gameover_or_next
+barrier done 2
+wait 60

@@ -13,7 +13,7 @@ OUT=$(mkdir -p "${2:?usage: package.sh windows|linux OUTDIR}" && cd "$2" && pwd)
 STAGE=$(mktemp -d)
 P="$STAGE/MoemonEmeraldKaiCoop"
 mkdir -p "$P/server"
-SRV="tools/mp_server/main.c src/mp/mp_net.c src/mp/mp_server.c src/mp/mp_portmap.c src/mp/mp_store.c"
+SRV="tools/mp_server/main.c src/mp/mp_net.c src/mp/mp_server.c src/mp/mp_portmap.c src/mp/mp_store.c src/mp/mp_scores.c"
 case "$PLAT" in
 windows)
     DLL=${SDL2_DLL:-SDL2/x86_64-w64-mingw32/bin/SDL2.dll}

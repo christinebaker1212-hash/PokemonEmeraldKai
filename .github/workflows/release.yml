@@ -16,7 +16,7 @@ jobs:
   release:
     if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45   # (the DANCE machine's songs zip, when they change)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,6 +73,32 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
 
+      # The DANCE machine's songs (docs/RHYTHM_DECISIONS.md #10): their own zip, which the game downloads when the
+      # machine is first used. When the songs are the same as the last release's, its line is kept and nothing is
+      # uploaded again (the zip stays on the release that has it).
+      - name: The DANCE machine's songs
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=${{ steps.ver.outputs.tag }}
+          mkdir -p dist
+          tools/release/package_songs.sh "$RUNNER_TEMP/songs"
+          ID=$(cat "$RUNNER_TEMP/songs/songs_id.txt")
+          PREV=""
+          if gh release download --pattern update.txt --dir "$RUNNER_TEMP/prev" > /dev/null 2>&1; then
+            PREV=$(grep '^songs ' "$RUNNER_TEMP/prev/update.txt" || true)
+          fi
+          if [ -n "$PREV" ] && [ "$(echo "$PREV" | awk '{print $6}')" = "$ID" ]; then
+            echo "the songs are the same as on $(echo "$PREV" | awk '{print $2}'): not uploaded again"
+            echo "$PREV" > dist/songs.txt
+          else
+            Z="$RUNNER_TEMP/songs/MoemonDanceSongs.zip"
+            mv "$Z" dist/
+            echo "songs $TAG MoemonDanceSongs.zip $(stat -c %s dist/MoemonDanceSongs.zip) $(sha256sum dist/MoemonDanceSongs.zip | cut -d' ' -f1) $ID" > dist/songs.txt
+          fi
+          cat dist/songs.txt
+
       - name: Packages and update.txt
         if: steps.ver.outputs.skip != 'true'
         run: |
@@ -96,5 +122,7 @@ jobs:
           NAME="Moemon Emerald Kai Co-op $TAG"
           TITLE=$(head -1 "$NOTES" | sed -n 's/^Moemon Emerald Kai Co-op [0-9.]* "\([^"]*\)":.*/\1/p')
           if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
-          gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt \
+          SONGS=""
+          [ -f dist/MoemonDanceSongs.zip ] && SONGS=dist/MoemonDanceSongs.zip
+          gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt $SONGS \
             --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest

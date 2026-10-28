@@ -1058,6 +1058,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);
+    MP_Rhythm_OnPlayerLeft(id);
     MP_Linkx_OnPlayerLeft(id);
     MP_Minigame_OnPlayerLeft(id);
     MP_Group_OnPlayerLeft(id);
@@ -1260,6 +1261,8 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         Tcg_OnlineRelay(from, data, len);
     else if (data[0] >= MPR_FIGHT_FIRST && data[0] < MPR_FIGHT_FIRST + 7)
         MP_Fight_OnRelay(from, data, len);
+    else if (data[0] >= MPR_RHYTHM_FIRST && data[0] < MPR_RHYTHM_FIRST + 4)
+        MP_Rhythm_OnRelay(from, data, len);
     else if (data[0] == MPR_COOP_BATTLING)
         MP_Coop_OnRelay(from, data, len);
     else if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
@@ -1959,6 +1962,7 @@ void MP_FrameUpdate(void)
 
     Tcg_OnlineTick();
     MP_Fight_Update();          // the VS cabinet's seats and bubbles (mp_fight.c)
+    MP_Rhythm_Update();         // the DANCE machine's pads and bubbles (mp_rhythm.c)
     MP_Achieve_Update();        // achievements are personal: offline too
     MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes

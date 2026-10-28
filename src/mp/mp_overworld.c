@@ -707,6 +707,7 @@ static void UpdateRemote(u8 id)
     }
 
     StepObject(id, obj);
+    MP_Rhythm_AvatarPose(id, obj);   // Moemon Rhythm: up on the DANCE machine's pad (mp_rhythm.c)
     UpdateBlob(id, obj);
 
     if (p->state.emote != r->lastEmote)

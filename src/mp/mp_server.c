@@ -584,7 +584,10 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
         if (r && sc->helloDone)
         {
             struct StoreCtx sx = {c, sc->room};
-            MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
+            if (len >= 1 && data[0] >= MP_ST_RH_SUBMIT && data[0] <= MP_ST_RH_TOP)
+                MPScores_Handle(data, len, StoreSend, &sx);   // Moemon Rhythm: records for the whole server
+            else
+                MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
         }
         break;
     }

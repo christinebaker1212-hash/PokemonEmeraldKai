@@ -7,7 +7,7 @@ ver=$(sed -n 's/^#define MP_PROTOCOL_VERSION \([0-9]*\).*/\1/p' "$REPO/src/mp/mp
 srv="$TOOLS/.bin/moemon_server_next"
 mkdir -p "$TOOLS/.bin"
 gcc -O2 -pthread -DMP_PROTOCOL_VERSION=$((ver + 1)) -o "$srv" "$REPO/tools/mp_server/main.c" "$REPO/src/mp/mp_net.c" \
-    "$REPO/src/mp/mp_server.c" "$REPO/src/mp/mp_portmap.c" "$REPO/src/mp/mp_store.c" || exit 1
+    "$REPO/src/mp/mp_server.c" "$REPO/src/mp/mp_portmap.c" "$REPO/src/mp/mp_store.c" "$REPO/src/mp/mp_scores.c" || exit 1
 port=$(free_port)
 "$srv" --port "$port" --no-router > "$d/server.log" 2>&1 & sp=$!
 sleep 1

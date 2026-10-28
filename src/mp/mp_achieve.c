@@ -45,8 +45,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_DANCE, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "DANCE"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
@@ -343,6 +343,34 @@ static const struct Achievement sAch[] = {
     {"ygosecret", "SECRET RARE", "Pull a Secret Rare from a booster pack.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoflawless", "UNTOUCHED", "Win a Yu-Gi-Oh! duel without losing any Life Points.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoexodia", "OBLITERATE!", "Win a duel with all five pieces of Exodia.", AK_EVENT, 0, 1, 2, C_YUGIOH},
+    // The DANCE machine (mp_rhythm.c MP_Rhythm_StageDone): made for players who know their DDR
+    {"ddrclear1", "FIRST STEPS", "Clear a song on the DANCE machine.", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrclear100", "DANCE MANIA", "Clear 100 songs on the DANCE machine.", AK_COUNT, 0, 100, 1, C_DANCE},
+    {"ddrclear1000", "BEMANI LIFER", "Clear 1000 songs on the DANCE machine.", AK_COUNT, 0, 1000, 2, C_DANCE},
+    {"ddrsongs50", "SONG HUNTER", "Clear 50 different songs.", AK_COUNT, 0, 50, 1, C_DANCE},
+    {"ddrsongs240", "THE WHOLE EXTREME", "Clear every one of the 240 EXTREME songs.", AK_COUNT, 0, 240, 2, C_DANCE},
+    {"ddrchallenge", "CHALLENGER", "Clear a CHALLENGE chart.", AK_EVENT, 0, 1, 0, C_DANCE},
+    {"ddrfc1", "FULL COMBO", "Full combo a song (GREAT or better).", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrfc100", "COMBO KING", "Full combo 100 songs.", AK_COUNT, 0, 100, 2, C_DANCE},
+    {"ddrpfc1", "PERFECT FULL COMBO", "Full combo a song with PERFECT or better.", AK_COUNT, 0, 1, 1, C_DANCE},
+    {"ddrpfc50", "CRYSTAL CLEAR", "PERFECT full combo 50 songs.", AK_COUNT, 0, 50, 2, C_DANCE},
+    {"ddrmfc", "MARVELOUS!", "MARVELOUS full combo a song (MARVELOUS on).", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrmfcten", "BEYOND HUMAN", "MARVELOUS full combo a 10-foot chart.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddraaanine", "NINE LIVES", "Get an AAA on a 9-foot chart.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddraaaten", "PERFECT TEN", "Get an AAA on a 10-foot chart.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrmaxthreehundred", "MAX 300", "Clear MAX 300 on HEAVY or CHALLENGE.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrmaxaa", "MAXIMUM AA", "AA or better on MAX 300, HEAVY or harder.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrsurvivor", "SURVIVOR", "Clear PARANOiA survivor MAX, HEAVY or harder.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrboss10", "BOSS RUSH", "Clear all 10 bosses on HEAVY or CHALLENGE.", AK_COUNT, 0, 10, 2, C_DANCE},
+    {"ddrcombo", "1000 COMBO", "Reach a 1000 combo in one song.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrfourfc", "FOUR FOR FOUR", "Full combo all four stages of a credit.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrfouraaa", "FLAWLESS CREDIT", "Get AAA on all four stages of a credit.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrstealth", "BLIND FAITH", "Clear a 9-foot chart or harder on STEALTH.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrspeed", "LUDICROUS SPEED", "Clear a song at x8.", AK_EVENT, 0, 1, 0, C_DANCE},
+    {"ddrrecord", "MACHINE RECORD", "Set the server's best score on a chart.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrvs1", "DANCE BATTLE", "Beat a friend in VERSUS.", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrvs25", "DANCE FLOOR LEGEND", "Beat friends in VERSUS 25 times.", AK_COUNT, 0, 25, 2, C_DANCE},
+    {"ddrcredit50", "REGULAR", "Play 50 credits on the DANCE machine.", AK_COUNT, 0, 50, 1, C_DANCE},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)

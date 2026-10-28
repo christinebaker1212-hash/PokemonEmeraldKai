@@ -54,7 +54,7 @@ online lobby address (players can also use `lobby.txt` or `lobby =` in the ini).
 Linux and Windows builds share `build/pc64`; clean it (or move it aside) when
 switching between them.
 
-Server: `cd tools/mp_server && gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c ../../src/mp/mp_store.c`
+Server: `cd tools/mp_server && gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c ../../src/mp/mp_store.c ../../src/mp/mp_scores.c`
 (Windows: `x86_64-w64-mingw32-gcc ... -lws2_32 -liphlpapi -static`). Deploying it:
 `tools/mp_server/DEPLOY.md`.
 

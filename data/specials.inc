@@ -578,3 +578,8 @@ gSpecials::
 	def_special MP_Fight_SeatCheck
 	def_special MP_Fight_Wait, waitstate=1
 	def_special MP_Fight_Challenge, waitstate=1
+	def_special MP_Rhythm_StepUp
+	def_special MP_Rhythm_PlayAlone, waitstate=1
+	def_special MP_Rhythm_Wait, waitstate=1
+	def_special MP_Rhythm_Join, waitstate=1
+	def_special MP_Rhythm_Result

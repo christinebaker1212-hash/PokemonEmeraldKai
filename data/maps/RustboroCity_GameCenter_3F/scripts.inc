@@ -57,10 +57,6 @@ RustboroCity_GameCenter_3F_EventScript_Arcade::
 	msgbox RustboroCity_GameCenter_3F_Text_Arcade, MSGBOX_SIGN
 	end
 
-RustboroCity_GameCenter_3F_EventScript_Poster::
-	msgbox RustboroCity_GameCenter_3F_Text_Poster, MSGBOX_SIGN
-	end
-
 RustboroCity_GameCenter_3F_EventScript_FloorGuide::
 	msgbox RustboroCity_GameCenter_3F_Text_FloorGuide, MSGBOX_SIGN
 	end
@@ -120,11 +116,6 @@ RustboroCity_GameCenter_3F_Text_Arcade:
 	.string "An arcade cabinet. Bright lights,\n"
 	.string "loud music... COMING SOON!$"
 
-RustboroCity_GameCenter_3F_Text_Poster:
-	.string "A poster: THE GAME CENTER'S FIRST\n"
-	.string "HIGH SCORE TOURNAMENT. Date to be\l"
-	.string "announced!$"
-
 RustboroCity_GameCenter_3F_Text_FloorGuide:
 	.string "3F: GAMES\n"
 	.string "Played with COINS from your COIN CASE.$"
@@ -142,5 +133,5 @@ RustboroCity_GameCenter_3F_Text_ArcadeFan:
 	.string "these cabinets soon. I can't wait!$"
 
 RustboroCity_GameCenter_3F_Text_Girl:
-	.string "The music up here makes me want\n"
-	.string "to dance!$"
+	.string "That DANCE machine has every song\n"
+	.string "from EXTREME! Step up and try it!$"

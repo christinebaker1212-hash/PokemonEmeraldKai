@@ -44,3 +44,5 @@ $(C_BUILDDIR)/mp/mp_pmd_data.o: graphics/moemon/pmd/pmd.bin
 # Moemon Kai: the card game's Game Boy illustrations, the same way
 $(C_BUILDDIR)/tcg/tcg_art_data.o: graphics/tcg/original.bin graphics/tcg/printed.bin
 $(C_BUILDDIR)/ygo/ygo_art_data.o: graphics/ygo/printed.bin graphics/ygo/sdd_art.bin
+# Moemon Rhythm: the DANCE machine's art and sounds
+$(C_BUILDDIR)/rhythm/rh_assets.o: graphics/rhythm/rhythm.bin

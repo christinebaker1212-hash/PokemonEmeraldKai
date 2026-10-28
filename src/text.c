@@ -1933,6 +1933,31 @@ u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor)
     return gCurGlyph.width;
 }
 
+// Moemon Rhythm: the same for the normal, narrow and small narrow fonts (FONT_*); other fonts: the small one
+u8 MP_RenderFontGlyph(u8 fontId, u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor)
+{
+    u8 fg, bg, shadow;
+    SaveTextColors(&fg, &bg, &shadow);
+    GenerateFontHalfRowLookupTable(fgColor, bgColor, shadowColor);
+    switch (fontId)
+    {
+    case FONT_NORMAL:
+        DecompressGlyph_Normal(glyphId, FALSE);
+        break;
+    case FONT_NARROW:
+        DecompressGlyph_Narrow(glyphId, FALSE);
+        break;
+    case FONT_SMALL_NARROW:
+        DecompressGlyph_SmallNarrow(glyphId, FALSE);
+        break;
+    default:
+        DecompressGlyph_Small(glyphId, FALSE);
+        break;
+    }
+    RestoreTextColors(&fg, &bg, &shadow);
+    return gCurGlyph.width;
+}
+
 // Moemon Co-op QoL: is this window's printer still putting characters down
 // (not waiting for a button, not done)?
 bool8 MP_TextPrinterIsPrintingChars(u8 windowId)

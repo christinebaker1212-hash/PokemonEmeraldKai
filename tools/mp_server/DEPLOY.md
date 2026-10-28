@@ -45,7 +45,7 @@ Any provider's free tier works. Oracle Cloud "Always Free" and Google Cloud's
    ```sh
    sudo apt-get update && sudo apt-get install -y gcc git
    git clone <this repository> moemon && cd moemon/tools/mp_server
-   gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c ../../src/mp/mp_store.c
+   gcc -O2 -pthread -o moemon_server main.c ../../src/mp/mp_net.c ../../src/mp/mp_server.c ../../src/mp/mp_portmap.c ../../src/mp/mp_store.c ../../src/mp/mp_scores.c
    sudo cp moemon_server /usr/local/bin/
    ```
 

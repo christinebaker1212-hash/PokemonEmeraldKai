@@ -174,6 +174,13 @@ include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online w
 region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
 BUTTONS; content in mugen/ (shipped as is); docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*.
 
+Also the DANCE machine on the GAME CENTER's 3F (a DDR EXTREME rhythm game: src/rhythm/, include/rhythm.h, src/mp/mp_rhythm.c;
+StepMania's .sm / .ssc read by rh_chart.c, judged by Beware's EXTREME rules in rh_play.c; drawn into the GBA picture by
+sdl2.c ScreenStep, mixed by Platform_QueueAudio; art and announcer graphics/rhythm/rhythm.bin from tools/rhythm/gen_assets.py;
+the 240 songs in stepmania/Songs, shipped as their own release zip the machine downloads (updater.c Updater_Songs*,
+tools/release/package_songs.sh); VERSUS online by RN_* messages, records server-wide in mp_scores.c, DANCE achievements;
+docs/RHYTHM_DECISIONS.md, COOP_NOTES "The DANCE machine"; tests dance_*, tools/test/dance_songs_test.sh, tools/rhythm/test.sh).
+
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
   ResetBlockReceivedFlag; the receive task stops after a B_COMM_TO_CONTROLLER message; link tasks never run twice a frame.

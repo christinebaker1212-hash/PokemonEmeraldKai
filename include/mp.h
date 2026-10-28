@@ -1166,6 +1166,13 @@ void MP_SharedPc_FromLabel(u8 *from, const u8 *by);      // mp_sharedpc.c: "from
 void MP_Dex_CaughtByText(u8 *text, const u8 *by);        // pokedex.c: "CAUGHT BY NAME" (40 bytes)
 void MP_Notice_Update(void);
 void MP_OnFileDropped(const char *path);
+// mp_rhythm.c: the DANCE machine on the GAME CENTER's 3F
+void MP_Rhythm_Update(void);
+void MP_Rhythm_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Rhythm_OnPlayerLeft(u8 id);
+void MP_Rhythm_OnStore(const u8 *data, u16 len);
+struct ObjectEvent;
+void MP_Rhythm_AvatarPose(u8 id, struct ObjectEvent *obj);
 
 // relay message ids (first byte of peer payloads)
 enum {
@@ -1182,6 +1189,7 @@ enum {
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
     MPR_BATTLE_MONEMOTE,   // our Pokémon's battle emote, for the others' screens: u8 battler, icon, happy (mp_life_battle.c)
     MPR_FIGHT_FIRST = 25,  // the VS cabinet: 25 a seat, 26 a challenge, 27 its answer, 28 buttons, 29 the end, 30 addresses, 31 desync recovery (mp_fight.c)
+    MPR_RHYTHM_FIRST = 32,     // the DANCE machine: 32 a pad, 33 an ask, 34 its answer, 35 the machine's own (mp_rhythm.c)
     MPR_COOP_BATTLING = 39,    // battling a trainer met on the field: u8 on, mapGroup, mapNum, localId, u16 trainer, u8 joinable (mp_coop.c)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)

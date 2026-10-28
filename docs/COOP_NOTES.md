@@ -2037,3 +2037,35 @@ the work left in docs/YGO_HANDOFF.md.
   FX_IMPACT (+ Shake via the render viewport), FX_RETICLE (Brackets, MarchingLine), FX_SHARDS, FX_RISE.
 - Pokemon table: Refocus() after our own action's state is shown (B.refocus, set in Submit).
 - Text fitting: TcgUi_WrapLines / TcgUi_FitText; tcg_board.c Prompt() splits a long prompt in two lines.
+
+## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
+Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
+drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to
+walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinets is floor now).
+- The game: rh_chart.c (StepMania .sm / .ssc: header, BPMs, stops, the dance-single charts; tools/rhythm/test_charts),
+  rh_play.c (Beware's EXTREME build's rules: windows, rows, combo, freezes judged by row pairs, MAX2 score, dance
+  points, LifeMeterBar; tools/rhythm/test_play runs every chart perfect / 50 ms late / unplayed), rh_field.c (a
+  field), rh_screen.c (the credit, the screens, online sync RN_*), rh_gfx.c (a 24-bit 240x160 picture, the game's
+  fonts through text.c MP_RenderFontGlyph), rh_audio.c (songs streamed and resampled into the game's 42048 Hz mix;
+  the clock: samples mixed + what's queued + the device buffer, smoothed against the PC clock), rh_songs.c (the
+  song list), rh_assets.c (graphics/rhythm/rhythm.bin from tools/rhythm/gen_assets.py: the theme's and note skins'
+  art cut down, the announcer's 207 lines and the theme's sounds as Ogg files).
+- In the game: sdl2.c ScreenStep draws Rhythm_Step into sFrameImage (the GBA picture: scaling, filters, SPECTATE and
+  shots carry on), Platform_QueueAudio mixes Rhythm_MixAudio instead of the GBA's, ProcessEvents hands every event to
+  Rhythm_OnEvent (steps timed by SDL's event time). Headless tests step on the harness's D-pad at the frame, or
+  MOEMON_DANCE_AUTOPLAY=1 steps on every arrow.
+- The map side (mp_rhythm.c): pads by where the player stands (row 7, x 0-2); MPR_RH_PAD (32) repeated each second
+  (side, state, arrows held) for the bubbles and the sprites drawn up on the pads (x2 / y2, mp_overworld.c
+  MP_Rhythm_AvatarPose); MPR_RH_ASK / ANSWER (33-34) to join a waiting friend; MPR_RH_SESSION (35) carries rh_screen's
+  RN_* messages. Specials MP_Rhythm_StepUp / PlayAlone / Wait / Join / Result (data/scripts/dance_machine.inc).
+- Records: the server's (mp_scores.c, store ops MP_ST_RH_* 40-42, rhythm_scores.dat in MOEMON_STORE_DIR or where it
+  runs; top 10 a chart, one per name), cached in mp_rhythm.c; the player's bests, cleared songs and options in
+  "<save>.dance" (bests made offline are sent when next at the machine online). Achievements (category DANCE)
+  from MP_Rhythm_StageDone, counted when the RESULTS are left (the friend's final score is in by then).
+- The songs: stepmania/Songs in the repository (Beware's 240, simfiles, .ogg, banners, title cards). Not in the
+  game's zip: the release workflow makes MoemonDanceSongs.zip (tools/release/package_songs.sh) and an update.txt
+  line "songs <tag> <zip> <bytes> <sha256> <id>", keeping the last release's line when the id (a hash of every file)
+  is the same; updater.c Updater_Songs* downloads and unpacks it a file at a time into stepmania/ next to the exe
+  (stepmania/songs_version.txt = the id). RhSongs_Root: MOEMON_STEPMANIA_DIR, else that folder, else ./stepmania.
+- Tests: dance_solo, dance_versus (tools/test/README.md), tools/test/dance_songs_test.sh (the download against a
+  local server), tools/rhythm/test.sh (every chart).

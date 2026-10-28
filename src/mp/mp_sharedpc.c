@@ -1105,6 +1105,9 @@ void MP_Store_OnMessage(const u8 *data, u16 len)
     case MP_ST_CTR_END:
         sCounterVersion++;
         break;
+    case MP_ST_RH_TOP:
+        MP_Rhythm_OnStore(data, len);   // Moemon Rhythm: a chart's records (mp_rhythm.c)
+        break;
     case MP_ST_BOX_DATA:
     case MP_ST_TXN_RESULT:
         MP_SharedBox_OnMessage(data, len);

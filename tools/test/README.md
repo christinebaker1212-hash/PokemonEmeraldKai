@@ -41,6 +41,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `fight_packs` | online, BOB's SSF2X Ken has one more file: Ken greyed out on both select screens, ALICE can't pick him |
 | `fight_packs_core` | online, BOB's engine data differs: ALICE says no, BOB is told the fight files aren't the same |
 | `fight_buttons` | OPTIONS > CONTROLS > FIGHT BUTTONS with a virtual pad: a button bound, one taken from another fight button (they swap), one left alone after 8 s; saved in the controls file |
+| `dance_solo` | the DANCE machine (GAME CENTER 3F): step up, PLAY ALONE, every screen to a song played by `MOEMON_DANCE_AUTOPLAY` (MARVELOUS full combo, feet x 10,000,000), RESULTS, the next song given up (START held): FAILED, GAME OVER, back on the map |
+| `dance_versus` | ALICE waits on the left pad, BOB steps up to the right one and joins: VERSUS, ALICE picks, both play their own field and see the other's, the records reach the server (`rhythm_scores.dat`); a tie is no win |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |

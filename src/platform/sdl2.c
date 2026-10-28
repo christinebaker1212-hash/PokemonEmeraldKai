@@ -1,3 +1,4 @@
+#include "rhythm.h"
 #include "mp_version.h"
 #include "tcg/integration.h"
 #ifdef PLATFORM_SDL2
@@ -356,7 +357,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Tcg_IsActive() || MP_Fight_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
@@ -546,6 +547,8 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
 {
     // Moemon Fight: a fight's sound instead of the game's (samplesPerFrame counts bytes here)
     Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
+    // Moemon Rhythm: the DANCE machine's songs and voices instead of the game's sound
+    Rhythm_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)));
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
@@ -601,6 +604,7 @@ void ProcessEvents(void)
 
     while (SDL_PollEvent(&event))
     {
+        Rhythm_OnEvent(&event);   // Moemon Rhythm: steps timed by when they happened
         if (Display_HandleEvent(&event)) // F11 / Alt+Enter fullscreen, resizes
             continue;
         if (Gamepad_HandleEvent(&event)) // controllers plugged in / out
@@ -1003,6 +1007,15 @@ static bool ScreenStep(void)
     if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step())
     {
         MP_Spectate_PanelSync();
+        return true;
+    }
+    // Moemon Rhythm: the DANCE machine draws the game's own picture (src/rhythm/rh_screen.c), so the window's
+    // scaling, filters and spectating carry on as for the game
+    if (Rhythm_Step(sFrameImage, Platform_GetKeyInput()))
+    {
+        MP_Spectate_PanelSync();
+        if (!sTestMode)
+            Display_UploadFrame(sFrameImage);
         return true;
     }
     return SpectateStep();

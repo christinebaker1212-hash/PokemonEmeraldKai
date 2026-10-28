@@ -64,8 +64,8 @@ FLOORS = {
         '##S.......S##',
         '##.........##',
         '###.......###',
-        '..........###',
-        '..........###',
+        '###.......###',
+        '###..........',
         '...##........',
         '...##...##C##',
         '...##...#####',
@@ -136,6 +136,11 @@ def picture(name, size=None):
     open(os.path.join(GFX, name + '.bin'), 'wb').write(out)
     return w, h
 
+# The user's marks on a copy of a floor's picture (docs/user_images 44 for 3F): blue = drawn over the sprites as
+# well, red = walkable where it isn't obvious (only checked here: the FLOORS grid says what is walkable)
+MARKS = {'3F': '3f_marks'}
+MARK_OVER, MARK_WALK = (72, 0, 255), (255, 0, 0)
+
 WALL_ROWS = {'1F': 5, '2F': 5, '3F': 5, 'Rooftop': 3}   # the back walls: rows above this are never furniture
 NO_OVER = {'Rooftop': {(x, 7) for x in range(1, 15)}}
 
@@ -182,6 +187,14 @@ def over(name, floor, size):
         for y in range(y0, y1):
             for x in range(x0, x1):
                 mask[y][x] = mask[y][x] or px[x, y] not in near
+    if floor in MARKS:
+        marks = Image.open(os.path.join(GFX, MARKS[floor] + '.png')).convert('RGB').load()
+        for y in range(min(h, im.height)):
+            for x in range(min(w, im.width)):
+                if marks[x, y] == MARK_OVER and px[x, y] != MARK_OVER:
+                    mask[y][x] = True
+                elif marks[x, y] == MARK_WALK and px[x, y] != MARK_WALK and y % 16 == 8 and x % 16 == 8:
+                    assert walk(x // 16, y // 16), '%s: the marks say (%d, %d) is walkable' % (floor, x // 16, y // 16)
     out = bytearray()
     for y in range(h):
         for x in range(w):

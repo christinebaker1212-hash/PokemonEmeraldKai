@@ -1337,8 +1337,9 @@ MOENAV map names it under RUSTBORO CITY). Admission at the
 the elevator are behind her.
   2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS),
                   and a Yu-Gi-Oh! clerk (see YU-GI-OH!).
-  3F GAMES        Consoles, TVs and arcade cabinets (coming soon) and a COIN
-                  counter: 50 COINS for 1000 (you'll need a COIN CASE).
+  3F GAMES        A DANCE machine (see DANCE MACHINE), consoles, TVs, arcade
+                  cabinets (coming soon) and a COIN counter: 50 COINS for
+                  1000 (you'll need a COIN CASE).
   ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.
 
 VS CABINET
@@ -1377,6 +1378,61 @@ FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
                   names). mugen\cabinets.ini has the rules: rounds, life,
                   round time, speed, which stages. Online, the rules of the
                   player who was challenged are used.
+
+DANCE MACHINE
+-------------
+The GAME CENTER's 3F (RUSTBORO CITY) has a DANCE DANCE REVOLUTION EXTREME
+machine at the top left: all 240 of EXTREME's songs, its screens and its
+announcer. Stand on the floor in front of it and press A facing it: the
+left side is the 1P pad, the right side the 2P pad.
+  The songs       The first time you step up, the machine offers to
+                  download its songs (about 400 MB, once: they stay in the
+                  stepmania folder next to the game). New songs are offered
+                  the same way when there are some.
+  PLAY ALONE      A credit to yourself.
+  WAIT FOR 2P     "Let's dance!" goes up over you. A friend who steps up to
+                  the other pad is asked "Dance with NAME?"; YES starts a
+                  VERSUS credit for you both. Friends on the map see you up
+                  on the pads, turning with your steps.
+  A credit        Four songs (the 4th is the FINAL STAGE). Failing a song
+                  (the life bar runs out) ends the credit after its results.
+                  Free play.
+  Screens         SELECT STYLE, SELECT DIFFICULTY (BEGINNER, LIGHT,
+                  STANDARD, HEAVY, CHALLENGE), then SELECT MUSIC: LEFT /
+                  RIGHT turn the wheel (A on a series opens or closes it),
+                  UP / DOWN change your difficulty, R or SELECT changes the
+                  sort (SERIES, ABC, BPM). A picks the song, then OPTIONS.
+  Steps           The D-Pad and the face buttons are both the arrows: on a
+                  controller, the D-Pad (or left stick) and X = LEFT,
+                  A = DOWN, Y = UP, B = RIGHT (by where they sit). Keyboard:
+                  the arrows, WASD or IJKL. Hold START for a moment and a
+                  half to give up a song.
+  OPTIONS         SPEED (x0.5 to x8), BOOST, APPEARANCE (HIDDEN, SUDDEN,
+                  STEALTH), TURN (MIRROR, LEFT, RIGHT, SHUFFLE), DARK,
+                  REVERSE, LITTLE, FREEZE ARROW, ARROW (VIVID, NOTE, FLAT,
+                  SOLO), JUDGMENT and TIMING. They're kept for next time.
+  JUDGMENT        ARCADE judges like the EXTREME arcade: MARVELOUS steps
+                  count but show as PERFECT. MARVELOUS shows them (and the
+                  score counts them as the courses do).
+  TIMING          If your steps come out early or late on your PC (the
+                  RESULTS screen shows your average and how many were FAST
+                  or SLOW), move it in 5 ms steps: + judges your steps
+                  later, for sound that comes out late.
+  Two players     Each game plays its own steps, so a slow connection never
+                  makes the arrows stutter; you see your friend's field next
+                  to yours as they step. 1P picks the songs; each of you
+                  picks your own difficulty and options. If your friend
+                  leaves, you carry on alone.
+  Records         Every song's best scores are kept by the server for
+                  everyone on it (whatever the room): SELECT MUSIC shows the
+                  best, RESULTS says NEW RECORD. Scores made offline are sent
+                  the next time you're at the machine online.
+  Achievements    A DANCE page of them, from your first clear to MARVELOUS
+                  full combos on 10-footers, MAX 300 and PARANOiA survivor
+                  MAX, every boss, four-stage full combos and all 240 songs.
+  Your own        Any StepMania song folder (.sm or .ssc, with its .ogg or
+                  .mp3) dropped into stepmania\Songs\<series>\ shows up on the
+                  wheel the next time you step up.
 
 POKEDEX ENTRIES
 ---------------
@@ -1536,6 +1592,8 @@ FILES
   moemon_controls.ini        controller and fight button settings
   mugen\                     the VS cabinet's fighting game (characters,
                              stages, screen, cabinets.ini)
+  stepmania\                 the DANCE machine's songs (downloaded by the
+                             machine the first time; add your own in Songs)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md

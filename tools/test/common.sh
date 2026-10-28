@@ -10,7 +10,7 @@ export MOEMON_LEVEL_SCALING="${MOEMON_LEVEL_SCALING:-0}"
 
 # The relay server, rebuilt when its sources change
 build_server() {
-    local srcs="$REPO/tools/mp_server/main.c $REPO/src/mp/mp_net.c $REPO/src/mp/mp_server.c $REPO/src/mp/mp_portmap.c $REPO/src/mp/mp_store.c"
+    local srcs="$REPO/tools/mp_server/main.c $REPO/src/mp/mp_net.c $REPO/src/mp/mp_server.c $REPO/src/mp/mp_portmap.c $REPO/src/mp/mp_store.c $REPO/src/mp/mp_scores.c"
     local stale=0 f
     [ -x "$SERVER" ] || stale=1
     for f in $srcs $REPO/src/mp/mp_net.h; do [ "$f" -nt "$SERVER" ] && stale=1; done
