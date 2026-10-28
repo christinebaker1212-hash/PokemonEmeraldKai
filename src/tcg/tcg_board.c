@@ -97,7 +97,6 @@ static struct Rect PrizeRect(unsigned who, unsigned i)
         row = 2 - row, col ^= 1;
     return MakeRect(a.x + 3 + (int)col * 8, a.y + 2 + (int)row * 18 + (int)col * 2, PRIZE_W, PRIZE_H);
 }
-static const struct Rect sEndButton = {184, 77, 52, 15};
 static const struct Rect sOppHand = {1, 61, 30, 27};
 
 /* ------------------------------------------------------------------ */
@@ -153,7 +152,6 @@ enum
     M_PICK,
     M_ATTACK,
     M_CONFIRM,
-    M_QUICK,
     M_VIEW,
     M_RESULT
 };
@@ -168,8 +166,7 @@ enum
     T_OPP_DISCARD,
     T_MY_PRIZES,
     T_OPP_PRIZES,
-    T_OPP_HAND,
-    T_END
+    T_OPP_HAND
 };
 struct Target
 {
@@ -249,6 +246,7 @@ enum
     MENU_NO,
     MENU_HAND,
     MENU_DONE,
+    MENU_CONCEDE,
     MENU_STAGE1,
     MENU_STAGE2,
     MENU_DISCARD,
@@ -1299,7 +1297,6 @@ static int Targets(struct Target *out)
     ADD(T_MY_PRIZES, 0, PrizeArea(0));
     ADD(T_OPP_PRIZES, 0, PrizeArea(1));
     ADD(T_OPP_HAND, 0, sOppHand);
-    ADD(T_END, 0, sEndButton);
 #undef ADD
     return n;
 }
@@ -2112,21 +2109,23 @@ static void OpenFieldMenu(void)
     AddMenu("CHECK", MENU_CHECK, 1, NULL);
     Menu(r.x + r.w + 4 > 170 ? r.x - 74 : r.x + r.w + 4, r.y > 100 ? 92 : r.y);
 }
-static void OpenQuickMenu(void)
+/* The turn menu (B, START or SELECT on the table, as on the Yu-Gi-Oh! table): END TURN (READY while setting up)
+ * and CONCEDE, at the bottom right. Everything else is done on the cards themselves. */
+static void OpenTurnMenu(void)
 {
-    char reason[80];
-    const struct TcgCard *c = Field(0, 0);
     B.menuCount = 0;
-    AddMenu("HAND", MENU_HAND, 1, NULL);
-    AddMenu("ATTACK", MENU_ATTACK, CanAct() && c && B.view.phase == TCG_TURN, "You can't attack now.");
-    AddMenu("CHECK", MENU_LOOK, 1, NULL);
-    AddMenu("PKMN POWER", MENU_POWER, CanAct() && UsablePower() >= 0,
-            CanAct() ? "None of your Pokemon Powers can be used now." : "It isn't your turn.");
-    AddMenu("RETREAT", MENU_RETREAT, CanAct() && B.view.phase == TCG_TURN && CanRetreat(reason, sizeof(reason)), reason);
-    AddMenu("DONE", MENU_DONE, CanAct() && B.view.phase == TCG_TURN, "It isn't your turn.");
-    B.mode = M_QUICK;
+    if (B.view.phase == TCG_SETUP)
+        AddMenu("READY", MENU_DONE, MyTurn() && B.view.players[0].field[0].stackSize,
+                MyTurn() ? "Choose your Active Pokemon first." : "Waiting for your opponent.");
+    else
+        AddMenu("END TURN", MENU_DONE, CanAct() && B.view.phase == TCG_TURN, "It isn't your turn.");
+    AddMenu("CONCEDE", MENU_CONCEDE, B.view.phase != TCG_FINISHED, NULL);
+    B.menuX = 238;
+    B.menuY = 158;
+    B.mode = M_MENU;
     B.menuCursor = 0;
     PlaySE(SE_SELECT);
+    printf("[tcg] turn menu: %s, CONCEDE\n", B.menu[0].label);
 }
 static void Confirm(int kind, const char *text)
 {
@@ -2137,7 +2136,9 @@ static void Confirm(int kind, const char *text)
     B.mode = M_CONFIRM;
     PlaySE(SE_SELECT);
 }
-static void EndTurn(void)
+/* END TURN (READY) from the turn menu: done at once, as on the Yu-Gi-Oh! table; only a turn ending without the
+ * Energy attachment that's still possible asks first */
+static void EndTurn(struct TcgAction *out, int *result)
 {
     if (B.view.phase == TCG_SETUP)
     {
@@ -2146,7 +2147,9 @@ static void EndTurn(void)
             TcgBoard_Reject("Choose your Active Pokemon first.");
             return;
         }
-        Confirm(1, "Ready to start the duel?");
+        memset(&B.action, 0, sizeof(B.action));
+        B.action.type = TCG_FINISH_SETUP;
+        Submit(out, result);
         return;
     }
     if (!B.view.players[0].energyPlayed)
@@ -2160,7 +2163,9 @@ static void EndTurn(void)
                 return;
             }
     }
-    Confirm(2, "End your turn?");
+    memset(&B.action, 0, sizeof(B.action));
+    B.action.type = TCG_PASS;
+    Submit(out, result);
 }
 static void Choose(struct TcgAction *out, int *result, unsigned *card)
 {
@@ -2250,15 +2255,13 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         B.focusIndex = 0;
         B.trayWanted = 1;
         break;
-    case MENU_LOOK:
-        B.mode = M_FREE;
-        B.focusKind = T_THEIRS;
-        B.focusIndex = 0;
-        Toast("Move over any face-up card. START shows it up close.");
-        break;
     case MENU_DONE:
         B.mode = M_FREE;
-        EndTurn();
+        EndTurn(out, result);
+        break;
+    case MENU_CONCEDE:
+        B.mode = M_FREE;
+        Confirm(3, B.online ? "Concede this duel?" : "Concede this duel? You won't lose any cards.");
         break;
     case MENU_STAGE1:
     case MENU_STAGE2:
@@ -2268,15 +2271,6 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         ContinueTrainer(out, result);
         break;
     case MENU_POWER:
-        if (B.mode == M_QUICK)
-        {
-            /* From SELECT: to the first Pokemon whose power can be used, and its menu */
-            B.mode = M_FREE;
-            B.focusKind = T_MINE;
-            B.focusIndex = UsablePower();
-            OpenFieldMenu();
-            break;
-        }
         BeginPower((unsigned)B.focusIndex, out, result);
         break;
     case MENU_DISCARD:
@@ -2330,7 +2324,7 @@ static void StepPick(unsigned pressed, struct TcgAction *out, int *result, unsig
             B.pickCursor = d == 1 ? 0 : n - 1;
         PlaySE(SE_RG_BAG_CURSOR);
     }
-    if (pressed & KEY_START && n)
+    if (pressed & KEY_R && n)
     {
         *card = CardOf(B.pickOwner, B.pickCards[B.pickCursor]);
         *result = BOARD_INSPECT;
@@ -2391,7 +2385,7 @@ static void StepPick(unsigned pressed, struct TcgAction *out, int *result, unsig
         }
         return;
     }
-    if (pressed & KEY_SELECT)
+    if (pressed & (KEY_START | KEY_SELECT))
     {
         if (PickDone())
             FinishPick(out, result);
@@ -2411,7 +2405,7 @@ static void Tip(void)
         "Your Active Pokemon has the Energy it needs: choose it and ATTACK!",
         "Knock out a Pokemon and you take one of your 6 Prize cards. Take them all to win!",
         "Your Pokemon was Knocked Out. Choose a Benched Pokemon to go in.",
-        "Done for this turn? Press B to end your turn.",
+        "Done for this turn? Press B, then END TURN.",
     };
     const struct TcgPlayer *me = &B.view.players[0];
     int tip = -1;
@@ -2443,7 +2437,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
 {
     int result = BOARD_NONE, i, steps;
     B.frame++;
-    B.speed = held & (KEY_A | KEY_B) && !TcgBoard_Idle() ? 3 : 1;
+    (void)held;
+    B.speed = 1;   /* (no hurrying by holding a button: both games' tables play every animation the same way) */
     steps = B.speed;
     for (i = 0; i < steps; i++)
     {
@@ -2560,18 +2555,13 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     switch (B.mode)
     {
     case M_MENU:
-    case M_QUICK:
     {
-        int cols = B.mode == M_QUICK ? 3 : 1, n = B.menuCount;
+        int n = B.menuCount;
         if (pressed & KEY_UP)
-            B.menuCursor = cols == 1 ? (B.menuCursor + n - 1) % n : B.menuCursor ^ 1;
+            B.menuCursor = (B.menuCursor + n - 1) % n;
         if (pressed & KEY_DOWN)
-            B.menuCursor = cols == 1 ? (B.menuCursor + 1) % n : B.menuCursor ^ 1;
-        if (cols > 1 && pressed & KEY_LEFT)
-            B.menuCursor = (B.menuCursor + n - 2) % n;
-        if (cols > 1 && pressed & KEY_RIGHT)
-            B.menuCursor = (B.menuCursor + 2) % n;
-        if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
+            B.menuCursor = (B.menuCursor + 1) % n;
+        if (pressed & (KEY_UP | KEY_DOWN))
             PlaySE(SE_RG_BAG_CURSOR);
         if (pressed & KEY_B)
         {
@@ -2623,7 +2613,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             B.mode = M_FREE;
             PlaySE(SE_SELECT);
         }
-        else if (pressed & KEY_START)
+        else if (pressed & KEY_R)
         {
             const struct TcgCard *c = Field(0, 0);
             if (c)
@@ -2743,7 +2733,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         }
         return BOARD_NONE;
     }
-    if (pressed & KEY_START)
+    /* R: the card under the cursor up close (as on the Yu-Gi-Oh! table) */
+    if (pressed & KEY_R)
     {
         unsigned id = 0;
         if (B.focusKind == T_HAND && (unsigned)B.focusIndex < B.view.players[0].handSize)
@@ -2765,14 +2756,14 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             return BOARD_INSPECT;
         }
     }
-    if (pressed & KEY_SELECT)
+    /* START / SELECT: the turn menu; B leaves the hand, then opens it too (the cursor on END TURN) */
+    if (pressed & (KEY_START | KEY_SELECT))
     {
-        OpenQuickMenu();
+        OpenTurnMenu();
         return BOARD_NONE;
     }
     if (pressed & KEY_B)
     {
-        /* B leaves the hand; on the table it asks to end the turn. */
         if (B.focusKind == T_HAND)
         {
             B.focusKind = T_MINE;
@@ -2780,8 +2771,8 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             B.trayWanted = 0;
             PlaySE(SE_SELECT);
         }
-        else if (CanAct() && B.view.phase != TCG_PROMOTION)
-            EndTurn();
+        else if (B.view.phase != TCG_PROMOTION)
+            OpenTurnMenu();
         return BOARD_NONE;
     }
     if (pressed & KEY_A)
@@ -2837,10 +2828,6 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             }
             else
                 PlaySE(SE_FAILURE);
-            break;
-        case T_END:
-            /* The button is CONCEDE; turns end with B or SELECT > DONE. */
-            Confirm(3, B.online ? "Concede this duel?" : "Concede this duel? You won't lose any cards.");
             break;
         default:
             PlaySE(SE_FAILURE);
@@ -3566,19 +3553,6 @@ static void DrawMenu(void)
     else if (B.flow == FLOW_POWER && B.step < B.nsteps)
         Prompt(B.steps[B.step].prompt, y > 60);
 }
-static void DrawQuick(void)
-{
-    int i;
-    G_Window(0, 116, 240, 44);
-    for (i = 0; i < B.menuCount; i++)
-    {
-        int x = 16 + (i / 2) * 76, y = 122 + (i % 2) * 16;
-        unsigned color = B.menu[i].enabled ? G_INK : 0xa8a8a8;
-        if (i == B.menuCursor)
-            G_Cursor(x - 8, y + 3);
-        G_Text(x, y, color, B.menu[i].enabled ? G_INK_SHADOW : G_NO_SHADOW, B.menu[i].label, 0, TF_SMALL);
-    }
-}
 static void DrawAttacks(void)
 {
     const struct TcgCard *c = Field(0, 0);
@@ -3697,8 +3671,8 @@ static void DrawPick(void)
         }
         {
             const char *hint = B.mode == M_VIEW                         ? "{A} LOOK  {B} BACK"
-                               : B.pickMin != B.pickMax && !B.pickRetreat ? "{A} CHOOSE  {SELECT} DONE  {START} LOOK"
-                                                                          : "{A} CHOOSE  {START} LOOK  {B} BACK";
+                               : B.pickMin != B.pickMax && !B.pickRetreat ? "{A} CHOOSE  {START} DONE  {R} LOOK"
+                                                                          : "{A} CHOOSE  {R} LOOK  {B} BACK";
             int w = G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0);
             G_Hint(232 - w, 145, 0x707070, G_NO_SHADOW, hint, TF_NARROW, 1);
         }
@@ -3822,13 +3796,6 @@ void TcgBoard_Render(void)
         }
     }
     DrawOppHand();
-    /* CONCEDE (B ends the turn). */
-    {
-        int state = B.view.phase == TCG_FINISHED || B.intro > 0           ? G_BUTTON_DISABLED
-                    : B.focusKind == T_END && B.mode == M_FREE ? G_BUTTON_FOCUS
-                                                               : G_BUTTON_NORMAL;
-        G_Button(sEndButton.x, sEndButton.y, sEndButton.w, sEndButton.h, "CONCEDE", state);
-    }
     if (B.mode == M_TARGET)
     {
         /* Highlight every space the held card or choice can go. */
@@ -3869,7 +3836,7 @@ void TcgBoard_Render(void)
     if (B.mode == M_TARGET && B.heldHand >= 0 && (unsigned)B.heldHand < B.view.players[0].handSize)
         DrawSprite(0, B.view.players[0].hand[B.heldHand]);
     DrawFx();
-    if (TcgBoard_Idle() && B.mode != M_PICK && B.mode != M_VIEW && B.mode != M_RESULT && B.mode != M_QUICK)
+    if (TcgBoard_Idle() && B.mode != M_PICK && B.mode != M_VIEW && B.mode != M_RESULT)
     {
         r = FocusRect();
         if (B.mode != M_ATTACK)
@@ -3920,12 +3887,9 @@ void TcgBoard_Render(void)
     }
     switch (B.mode)
     {
-    case M_QUICK:
-        DrawQuick();
-        break;
     case M_ATTACK:
         DrawAttacks();
-        Prompt("{A} ATTACK   {UPDOWN} CHOOSE   {START} CARD   {B} BACK", 1);
+        Prompt("{A} ATTACK   {UPDOWN} CHOOSE   {R} LOOK   {B} BACK", 1);
         break;
     case M_PICK:
     case M_VIEW:

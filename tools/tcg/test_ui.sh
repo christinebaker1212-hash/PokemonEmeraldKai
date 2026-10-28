@@ -22,6 +22,7 @@ run() {
         timeout -k 5 150 "$BIN" > "$OUT/$name/log.txt" 2>&1
 }
 expect() { grep -q -- "$2" "$OUT/$1/log.txt" || { echo "FAIL $1: no '$2'"; exit 1; }; }
+refuse() { if grep -q -- "$2" "$OUT/$1/log.txt"; then echo "FAIL $1: '$2'"; exit 1; fi; }
 
 # The CARD CLUB member (OLDALE POKeMON MART, behind the counter): the case in dialogue, three decks, the lesson.
 cat > "$OUT/club.txt" <<'SCRIPT'
@@ -123,15 +124,18 @@ press A 2
 wait 200
 mp cards ready
 wait 300
+mp cards state
 press B 2
 wait 6
 press B 2
 wait 6
-rendershot endturn
+rendershot turnmenu
 press B 2
 wait 6
 mp cards state
-mp cards focus 10 0
+press B 2
+wait 6
+press DOWN 2
 wait 4
 press A 2
 wait 6
@@ -139,13 +143,23 @@ rendershot concede
 press B 2
 wait 6
 mp cards state
+press B 2
+wait 6
+press A 2
+wait 6
+press A 2
+wait 3
+mp cards state
 quit
 SCRIPT
 run duel
-expect duel 'board asks: End your turn'
+expect duel 'turn menu: END TURN, CONCEDE'
 expect duel 'board asks: Concede this duel'
-test "$(grep -c 'screen 10 opted 1 phase 1' "$OUT/duel/log.txt")" -eq 2
-echo 'PASS B asks to end the turn and CONCEDE asks first (no duel ended)'
+refuse duel 'board asks: End your turn?'
+expect duel 'board asks: End your turn without attaching Energy'
+test "$(grep -c 'screen 10 opted 1 phase 1 current 0' "$OUT/duel/log.txt")" -ge 3
+expect duel 'screen 10 opted 1 phase 1 current 1'
+echo 'PASS the turn menu: B opens it on END TURN, CONCEDE asks first, END TURN ends the turn (only the Energy reminder asks)'
 
 # The deck builder: take a CHARMANDER out of the deck (the list, then SELECT on the cards), add it back;
 # copy the deck, delete the one you duel with (the copy takes over).

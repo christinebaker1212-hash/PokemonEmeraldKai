@@ -849,10 +849,11 @@ static void NewQuestion(void)
         B.mode = M_FREE;
         B.toActionable = 1;
         if (q->type == YGO_Q_BATTLE)
-            Tip("Your Battle Phase: choose one of your monsters with {A} to attack. {START} moves on to Main Phase 2.");
+            Tip("Your Battle Phase: choose one of your monsters with {A} to attack. {B} opens the menu: Main Phase 2 "
+                "or END TURN.");
         else
-            Tip("Your Main Phase: choose a card with {A} to Summon, Set or activate it. {R} reads a card. {START} "
-                "moves on to the Battle Phase or ends your turn.");
+            Tip("Your Main Phase: choose a card with {A} to Summon, Set or activate it. {R} looks at a card. {B} opens "
+                "the menu: the Battle Phase or END TURN.");
         break;
     case YGO_Q_CARDS:
         for (i = 0; i < q->count; i++)
@@ -1240,7 +1241,11 @@ static int OpenPhaseMenu(void)
             if (q->items[i].obj == NONE)
                 B.menuItems[B.menuCount++] = (int)i;
     B.menuItems[B.menuCount++] = -2;   /* CONCEDE */
+    /* the cursor on END TURN (B, END TURN: as on the Pokemon table) */
     B.menuCursor = 0;
+    for (i = 0; i + 1 < (unsigned)B.menuCount; i++)
+        if (q->items[B.menuItems[i]].kind == YGO_ACT_END_TURN)
+            B.menuCursor = (int)i;
     B.mode = M_PHASE;
     return 1;
 }
@@ -1432,7 +1437,8 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
                 return YB_INSPECT;
             }
         }
-        if (pressed & KEY_START)
+        /* START / SELECT / B: the turn menu (as on the Pokemon table) */
+        if (pressed & (KEY_START | KEY_SELECT | KEY_B))
         {
             PlaySE(SE_SELECT);
             OpenPhaseMenu();
@@ -1494,7 +1500,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.menuCursor = (B.menuCursor + B.menuCount - 1) % B.menuCount, PlaySE(SE_SELECT);
         if (pressed & KEY_DOWN)
             B.menuCursor = (B.menuCursor + 1) % B.menuCount, PlaySE(SE_SELECT);
-        if (pressed & (KEY_B | KEY_START))
+        if (pressed & (KEY_B | KEY_START | KEY_SELECT))
         {
             B.mode = MyQuestion() && (q->type == YGO_Q_IDLE || q->type == YGO_Q_BATTLE) ? M_FREE : M_WATCH;
             PlaySE(SE_SELECT);
@@ -1549,7 +1555,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             }
             return YB_NONE;
         }
-        if (pressed & KEY_START && q->max > 1 && ConfirmPicks(answer))
+        if (pressed & (KEY_START | KEY_SELECT) && q->max > 1 && ConfirmPicks(answer))
         {
             B.mode = M_WATCH;
             return YB_ANSWER;
@@ -1613,7 +1619,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             }
             return YB_NONE;
         }
-        if (pressed & KEY_START && q->max > 1 && ConfirmPicks(answer))
+        if (pressed & (KEY_START | KEY_SELECT) && q->max > 1 && ConfirmPicks(answer))
         {
             B.mode = M_WATCH;
             return YB_ANSWER;
@@ -1982,20 +1988,20 @@ static void Gap(void)
         switch (B.mode)
         {
         case M_FREE:
-            hint = "{A}ACT {R}READ {START}MENU";
+            hint = "{A}ACT {R}LOOK {B}MENU";
             break;
         case M_WATCH:
-            hint = B.waiting ? "Waiting..." : "{R}READ {START}MENU";
+            hint = B.waiting ? "Waiting..." : "{R}LOOK {B}MENU";
             break;
         case M_PICK_FIELD:
         case M_PICK_GRID:
-            hint = q->max > 1 ? "{A}PICK {START}OK" : q->min ? "{A}CHOOSE {R}READ" : "{A}CHOOSE {B}NONE";
+            hint = q->max > 1 ? "{A}PICK {START}DONE" : q->min ? "{A}CHOOSE {R}LOOK" : "{A}CHOOSE {B}NONE";
             break;
         case M_PILE:
-            hint = "{A}READ {B}BACK";
+            hint = "{A}LOOK {B}BACK";
             break;
         default:
-            hint = "{A}OK {R}READ";
+            hint = "{A}OK {R}LOOK";
             break;
         }
         G_Hint(238 - G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW, hint, TF_NARROW, 1);
@@ -2314,10 +2320,10 @@ static void Grid(void)
                 snprintf(line, sizeof(line), "%s", c->frame == YGO_SPELL ? "SPELL CARD" : "TRAP CARD");
             G_Text(8, 129, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
             G_Hint(8, 152, 0xe0e0ff, G_NO_SHADOW,
-                   B.mode == M_PILE ? "{A} READ  {B} BACK"
-                   : q->max > 1     ? "{A} PICK  {START} OK  {R} READ"
-                   : q->min         ? "{A} CHOOSE  {R} READ"
-                                    : "{A} CHOOSE  {B} NONE  {R} READ",
+                   B.mode == M_PILE ? "{A} LOOK  {B} BACK"
+                   : q->max > 1     ? "{A} PICK  {START} DONE  {R} LOOK"
+                   : q->min         ? "{A} CHOOSE  {R} LOOK"
+                                    : "{A} CHOOSE  {B} NONE  {R} LOOK",
                    TF_NARROW, 1);
         }
     }
