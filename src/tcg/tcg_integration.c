@@ -11,6 +11,7 @@
 #include "constants/items.h"
 #include "tcg/integration.h"
 #include "tcg/online.h"
+#include "ygo/integration.h"
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
 static int sLoaded;
@@ -42,6 +43,7 @@ struct TcgCollection *Tcg_GetCollection(void)
 void Tcg_WriteSidecar(void)
 {
     char path[600];
+    Ygo_WriteSidecar();   /* the Yu-Gi-Oh! cards: "<save>.ygo" */
     if (!sLoaded || sLoadedFor != SaveOwner() || !sCollection.optedIn)
         return;
     snprintf(path, sizeof(path), "%s.cards", gPlatformSavePath);

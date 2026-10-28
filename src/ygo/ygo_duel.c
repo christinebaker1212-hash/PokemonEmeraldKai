@@ -132,14 +132,15 @@ int Ygo_AskYesNo(struct YgoState *s, unsigned player, unsigned prompt, uint16_t 
     return a.picks[0] == 1;
 }
 
-unsigned Ygo_AskOption(struct YgoState *s, unsigned player, uint16_t card, const uint8_t *options, unsigned count)
+unsigned Ygo_AskOption(struct YgoState *s, unsigned player, unsigned prompt, uint16_t card, const uint8_t *options,
+                       unsigned count)
 {
     struct YgoQuery q;
     struct YgoAnswer a;
     unsigned i;
     if (count <= 1)
         return count ? options[0] : 0;
-    QueryInit(&q, YGO_Q_OPTION, player, YGO_P_ANY, card);
+    QueryInit(&q, YGO_Q_OPTION, player, prompt, card);
     for (i = 0; i < count; i++)
         QueryAdd(&q, 0, NO_OBJ, options[i], 0);
     Ask(s, &q, &a);

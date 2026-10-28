@@ -3,7 +3,7 @@
 
 usage: tools/ygo/gen_catalog.py
 
-Text is written for the game's font: the bullet becomes the font's own (Latin-1 0xB7), "α" is spelled out, and
+Text is written for the game's font: the bullet becomes the font's own (Latin-1 0xB7), "α" is spelled out, "#" (not in the font) is "No.", and
 line breaks become spaces (the card screens wrap text themselves).
 """
 import json
@@ -30,7 +30,7 @@ def race(r):
 
 def text(s):
     s = s.replace('\r\n', '\n').replace('\r', '\n')
-    s = re.sub(r'\s*\n\s*', ' ', s).replace('●', '\xb7').replace('α', 'Alpha').strip()
+    s = re.sub(r'\s*\n\s*', ' ', s).replace('●', '\xb7').replace('α', 'Alpha').replace('#', 'No.').strip()
     return s
 
 
@@ -50,7 +50,7 @@ def cstr(s):
 
 
 def symbol(name, used):
-    s = re.sub('[^A-Z0-9]+', '_', text(name).replace('\xb7', '').upper()).strip('_')
+    s = re.sub('[^A-Z0-9]+', '_', text(name.replace('#', '')).replace('\xb7', '').upper()).strip('_')
     base, n = s, 2
     while s in used:
         s = '%s_%d' % (base, n)

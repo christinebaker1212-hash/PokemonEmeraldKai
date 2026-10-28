@@ -144,7 +144,7 @@ static void Op_Offering(struct YgoCtx *c)
         options[k++] = 0;
     if (Ygo_CanNormalSummonNow(S, ME, pick, 1))
         options[k++] = 1;
-    Ygo_ExtraNormalSummon(S, ME, pick, Ygo_AskOption(S, ME, S->objs[pick].card, options, k));
+    Ygo_ExtraNormalSummon(S, ME, pick, Ygo_AskOption(S, ME, YGO_P_SUMMON_OR_SET, S->objs[pick].card, options, k));
 }
 
 /* ---- Robbin' Goblin: each time a monster you control inflicts battle damage, the opponent discards 1 at random */

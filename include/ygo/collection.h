@@ -27,6 +27,7 @@ enum
 {
     YGO_FLAG_TUTORIAL = 1,   /* the teaching duel was offered */
     YGO_FLAG_CLUB_MET = 2,   /* the CARD CLUB's duelist introduced themselves */
+    YGO_FLAG_CASE_SIDE = 4,  /* the CARD CASE was last on its YU-GI-OH! side */
 };
 struct YgoDaily
 {

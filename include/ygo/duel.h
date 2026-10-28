@@ -160,7 +160,8 @@ enum YgoPrompt
     YGO_P_EFFECT_YESNO,  /* use an optional effect? (card) */
     YGO_P_CHAIN,
     YGO_P_ORDER,         /* which trigger goes first in the chain */
-    YGO_P_COIN_CALL,
+    YGO_P_COIN_CALL,     /* OPTION: 1 heads, 0 tails */
+    YGO_P_SUMMON_OR_SET, /* OPTION: 0 Summon face-up, 1 Set */
     YGO_P_ANY
 };
 struct YgoQuery

@@ -17,6 +17,7 @@
 #include "sound.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "constants/characters.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include "tcg/integration.h"
@@ -25,6 +26,9 @@
 #include "tcg/scale.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
+#include "tcg_ui_kit.h"
+#include "ygo/integration.h"
+#include "../ygo/ygo_gfx.h"
 int Tcg_GrantCase(void);
 void Tcg_ResumeGame(void (*callback)(void));
 void MP_Gatcha_AddTickets(s32 n);
@@ -176,14 +180,17 @@ static void Screen(int screen)
     U.scroll = 0;
     U.age = 0;
 }
-int Tcg_IsActive(void) { return U.screen != UI_CLOSED; }
+int Tcg_IsActive(void) { return U.screen != UI_CLOSED || YgoUi_Active(); }
 int Tcg_OnlineWilling(void) { return 0; }
 unsigned Tcg_HiddenFrom(void)
 {
     unsigned peer = Tcg_Online()->peer;
     return U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
 }
-unsigned Tcg_DuelingNow(void) { return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL); }
+unsigned Tcg_DuelingNow(void)
+{
+    return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL) || YgoUi_DuelingNow();
+}
 
 /* The local player is always player 0 on screen: the friend who accepted
  * sees the canonical duel with both sides swapped. */
@@ -249,11 +256,44 @@ static void Open(int screen)
 }
 void Tcg_OpenCase(void (*returnToGame)(void))
 {
+    struct YgoCollection *y = Ygo_GetCollection();
+    /* The side used last (Yu-Gi-Oh!'s when that's the only game with a deck) */
+    if (y->optedIn && (y->flags & YGO_FLAG_CASE_SIDE || !Tcg_GetCollection()->optedIn))
+    {
+        YgoUi_OpenCase(returnToGame, 0);
+        return;
+    }
     U.returnToGame = returnToGame;
     U.fromScript = 0;
     Open(UI_HOME);
     if (!Tcg_GetCollection()->optedIn)
-        Say(ACT_CLOSE, "The CARD CASE is empty. Visit the CARD CLUB in a POKeMON CENTER to get your first deck!");
+        Say(ACT_CLOSE, "The CARD CASE is empty. Visit the CARD CLUB in a POKeMON MART to get your first deck!");
+}
+void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript)
+{
+    Ygo_GetCollection()->flags &= ~YGO_FLAG_CASE_SIDE;
+    U.returnToGame = returnToGame;
+    Open(UI_HOME);
+    U.fromScript = fromScript;
+}
+void Tcg_CloseScreens(void (*returnToGame)(void), int fromScript)
+{
+    U.returnToGame = returnToGame;
+    U.fromScript = fromScript;
+    Close();
+}
+/* The CARD CASE's YU-GI-OH! side */
+static void ToYugioh(void)
+{
+    void (*callback)(void) = U.returnToGame;
+    int script = U.fromScript;
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    U.message[0] = 0;
+    U.asking = 0;
+    Screen(UI_CLOSED);
+    Ygo_GetCollection()->flags |= YGO_FLAG_CASE_SIDE;
+    YgoUi_OpenCase(callback, script);
 }
 void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent)
 {
@@ -783,7 +823,8 @@ static void Row(int x, int y, int w, int on, int enabled, const char *label, con
         G_TextAlign(x + w - 5, y + 2, TA_RIGHT, enabled ? 0x506070 : 0xb0b0b0, G_NO_SHADOW, right, TF_SMALL);
 }
 /* The strip along the bottom: what the chosen thing is or does. */
-static void Strip(unsigned card, const char *text)
+static void StripWith(void (*draw)(unsigned, float, float, float, float, double, unsigned, unsigned), unsigned card,
+                      const char *text)
 {
     G_FillA(0, STRIP_Y, 240, 160 - STRIP_Y, 0x5848c8, 255);
     G_FillA(0, STRIP_Y, 240, 1, 0x9888f8, 255);
@@ -791,7 +832,7 @@ static void Strip(unsigned card, const char *text)
     if (card)
     {
         G_RoundFill(3, STRIP_Y + 3, 34, 44, 0xf8f8f8, 255);
-        G_Card(card, 5, STRIP_Y + 4, 30, 42, 0, 255, 0);
+        draw(card, 5, STRIP_Y + 4, 30, 42, 0, 255, 0);
     }
     if (strchr(text, '{'))
     {
@@ -814,6 +855,7 @@ static void Strip(unsigned card, const char *text)
     G_Text(card ? 42 : 8, STRIP_Y + 4, G_WHITE, 0x302878, text, width,
            G_Measure(text, TF_NORMAL) > width * 2 - 40 ? TF_SMALL : TF_NORMAL);
 }
+static void Strip(unsigned card, const char *text) { StripWith(G_Card, card, text); }
 static void Hints(const char *hint)
 {
     int w = G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0);
@@ -847,21 +889,65 @@ static void Tabs(int x, int y, int selected, int count)
                         TF_NARROW);
     }
 }
-static void MessageBox(void)
+void TcgUi_MessageBox(const char *message, int asking, int yes)
 {
-    if (!U.message[0])
+    if (!message[0])
         return;
     G_Window(0, 112, 240, 48);
-    G_Text(8, 116, G_INK, G_INK_SHADOW, U.message, U.asking ? 168 : 214, TF_NORMAL);
-    if (U.asking)
+    G_Text(8, 116, G_INK, G_INK_SHADOW, message, asking ? 168 : 214, TF_NORMAL);
+    if (asking)
     {
         G_Window(184, 74, 56, 36);
-        G_Cursor(192, 82 + (U.askYes ? 0 : 14));
+        G_Cursor(192, 82 + (yes ? 0 : 14));
         G_Text(200, 78, G_INK, G_INK_SHADOW, "YES", 0, TF_NORMAL);
         G_Text(200, 92, G_INK, G_INK_SHADOW, "NO", 0, TF_NORMAL);
     }
     else if ((U.frame / 20) % 2)
         G_ButtonIcon(226, 152, 0);
+}
+static void MessageBox(void) { TcgUi_MessageBox(U.message, U.asking, U.askYes); }
+
+/* The look, for the Yu-Gi-Oh! screens (tcg_ui_kit.h) */
+unsigned TcgUi_Frame(void) { return (unsigned)U.frame; }
+unsigned TcgUi_Theme(void) { return Theme(); }
+void TcgUi_Background(void) { Background(); }
+void TcgUi_SidePanel(const char *title, unsigned color) { SidePanel(title, color); }
+void TcgUi_ListBox(int x, int y, int w, int h) { ListBox(x, y, w, h); }
+void TcgUi_Row(int x, int y, int w, int on, int enabled, const char *label, const char *right)
+{
+    Row(x, y, w, on, enabled, label, right);
+}
+void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsigned, unsigned), unsigned card,
+                 const char *text)
+{
+    StripWith(draw, card, text);
+}
+void TcgUi_Hints(const char *hint) { Hints(hint); }
+void TcgUi_CaseTabs(unsigned game, unsigned color)
+{
+    static const char *const names[] = {"POKeMON", "YU-GI-OH!"};
+    unsigned light = G_Mix(color, 0xffffff, 0.45f), dark = G_Mix(color, 0x000000, 0.35f);
+    int x = 2, i;
+    G_RoundFill(0, 0, PANEL_W, STRIP_Y - 2, light, 255);
+    G_RoundFrame(0, 0, PANEL_W, STRIP_Y - 2, dark, 255);
+    G_FillA(1, 1, PANEL_W - 2, 1, 0xffffff, 120);
+    for (i = 0; i < 2; i++)
+    {
+        int on = (unsigned)i == game, w = (PANEL_W - 5) / 2;
+        unsigned fill = on ? color : G_Mix(light, 0x808890, 0.35f);
+        G_RoundFill(x, on ? 2 : 4, w, on ? 15 : 12, fill, 255);
+        G_RoundFrame(x, on ? 2 : 4, w, on ? 15 : 12, on ? dark : G_Mix(light, 0x404850, 0.5f), 255);
+        if (on)
+            G_FillA(x + 1, 3, w - 2, 1, G_Mix(color, 0xffffff, 0.5f), 255);
+        G_TextAlign(x + w / 2, on ? 3 : 4, TA_CENTER, on ? G_WHITE : 0x505860, on ? dark : G_NO_SHADOW, names[i],
+                    TF_NARROW);
+        x += w + 1;
+    }
+}
+void TcgUi_TopBar(const char *title)
+{
+    G_RoundFill(0, 0, 240, 17, 0x203040, 230);
+    G_Text(8, 1, G_WHITE, 0x101820, title, 228, TF_NORMAL);
 }
 
 /* ------------------------------------------------------------------ */
@@ -883,7 +969,7 @@ static void HomeScreen(void)
     for (i = 0; i < TCG_PACK_TYPES; i++)
         packs += c->packs[i];
     Background();
-    SidePanel("CARD CASE", Theme());
+    TcgUi_CaseTabs(KIT_GAME_POKEMON, Theme());
     if (mascot)
         BigCard(mascot, 30, 22, bob);
     G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW,
@@ -901,6 +987,7 @@ static void HomeScreen(void)
     }
     snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[U.cursor], have, total, c->dust);
     Strip(0, line);
+    Hints("{L}{R} YU-GI-OH!");
 }
 
 /* A challenge: who it is, what they play, what's in it for you, your deck. */
@@ -2356,6 +2443,12 @@ int Tcg_Step(unsigned keys)
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned pressed = keys & ~U.previousKeys;
     U.previousKeys = keys;
+    if (YgoUi_Active())
+    {
+        U.frame++;
+        MP_Sound_TickFanfare();
+        return YgoUi_Step(keys);
+    }
     if (!Tcg_IsActive())
         return 0;
     MP_Sound_TickFanfare(); /* (the game's tasks don't run while the cards are open) */
@@ -2405,7 +2498,12 @@ int Tcg_Step(unsigned keys)
     {
     case UI_HOME:
         MoveCursor(pressed, HOME_ROWS, 1);
-        if (pressed & KEY_B)
+        if (pressed & (KEY_L | KEY_R))
+        {
+            PlaySE(SE_SELECT);
+            ToYugioh();
+        }
+        else if (pressed & KEY_B)
         {
             PlaySE(SE_SELECT);
             Close();
@@ -2854,6 +2952,7 @@ static uint16_t sFrame[240 * 160];
 static int sFrameRead;
 void Tcg_DestroyTextures(void)
 {
+    Ygo_ForgetTextures();
     G_Destroy();
     if (sCanvas)
         SDL_DestroyTexture(sCanvas);
@@ -2950,6 +3049,8 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
         TcgBoard_Render();
         break;
     default:
+        if (YgoUi_Active())
+            YgoUi_Draw();
         break;
     }
     MessageBox();

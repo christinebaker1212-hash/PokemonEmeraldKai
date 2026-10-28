@@ -177,7 +177,8 @@ unsigned Ygo_AskCards(struct YgoState *s, unsigned player, unsigned prompt, uint
 unsigned Ygo_AskOne(struct YgoState *s, unsigned asker, unsigned prompt, uint16_t card, unsigned player, unsigned locations,
                     int (*filter)(const struct YgoState *, unsigned), int optional);
 int Ygo_AskYesNo(struct YgoState *s, unsigned player, unsigned prompt, uint16_t card);
-unsigned Ygo_AskOption(struct YgoState *s, unsigned player, uint16_t card, const uint8_t *options, unsigned count);
+unsigned Ygo_AskOption(struct YgoState *s, unsigned player, unsigned prompt, uint16_t card, const uint8_t *options,
+                       unsigned count);   /* prompt: what the options are (YGO_P_COIN_CALL: 1 heads 0 tails...) */
 unsigned Ygo_AskPosition(struct YgoState *s, unsigned player, uint16_t card, unsigned allowed /* bit per item */);
 /* locations for Ygo_AskOne / filters: bits */
 enum { YL_HAND = 1, YL_MZONE = 2, YL_SZONE = 4, YL_GRAVE = 8, YL_DECK = 16, YL_BANISHED = 32, YL_EXTRA = 64 };

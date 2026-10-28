@@ -458,7 +458,7 @@ static int Can_OppMonster(struct YgoCtx *c) { return Ygo_MonsterCount(S, OPP) > 
 static void Op_TimeWizard(struct YgoCtx *c)
 {
     static const uint8_t calls[2] = {1, 0};   /* heads, tails */
-    unsigned call = Ygo_AskOption(S, ME, CARD, calls, 2), heads = Ygo_Coin(S, ME);
+    unsigned call = Ygo_AskOption(S, ME, YGO_P_COIN_CALL, CARD, calls, 2), heads = Ygo_Coin(S, ME);
     if (call == heads)
         Fx_DestroyAll(S, OPP, YL_MZONE, NULL, YGO_REASON_EFFECT);
     else
@@ -564,7 +564,7 @@ static void Op_Aile(struct YgoCtx *c)
 static void Op_JiraiGumo(struct YgoCtx *c)
 {
     static const uint8_t calls[2] = {1, 0};
-    unsigned call = Ygo_AskOption(S, ME, CARD, calls, 2);
+    unsigned call = Ygo_AskOption(S, ME, YGO_P_COIN_CALL, CARD, calls, 2);
     if (call != Ygo_Coin(S, ME))
         Ygo_Damage(S, ME, S->players[ME].lp / 2, 0);
 }
