@@ -813,13 +813,33 @@ static void ListBox(int x, int y, int w, int h)
 /* One row: red frame when chosen (as in the BAG), grey when it can't be used. */
 static void Row(int x, int y, int w, int on, int enabled, const char *label, const char *right)
 {
+    /* One line, always (a wrapped label ran onto the next row): what's left of the right-hand text, the narrow font
+     * when the label doesn't fit, then cut at a word with "..." */
+    char fit[96];
+    int room = w - 10 - (right ? G_Measure(right, TF_SMALL) + 6 : 0), font = TF_NORMAL;
+    snprintf(fit, sizeof(fit), "%s", label);
+    if (G_Measure(fit, font) > room)
+        font = TF_NARROW;
+    while (G_Measure(fit, font) > room && strlen(fit) > 4)
+    {
+        char *cut = strrchr(fit, ' ');
+        size_t n = strlen(fit);
+        if (n >= 3 && !strcmp(fit + n - 3, "..."))
+            fit[n - 3] = 0, cut = strrchr(fit, ' ');
+        if (cut && cut > fit)
+            *cut = 0;
+        else
+            fit[strlen(fit) - 1] = 0;
+        snprintf(fit + strlen(fit), sizeof(fit) - strlen(fit), "...");
+    }
     if (on)
     {
         int pulse = (U.frame / 16) % 2;
         G_RoundFrame(x, y, w, ROW_H - 1, 0xe82820, 255);
         G_RoundFrame(x + 1, y + 1, w - 2, ROW_H - 3, pulse ? 0xf86850 : 0xe82820, 255);
     }
-    G_Text(x + 6, y + 1, enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, label, w - 8, TF_NORMAL);
+    G_Text(x + 6, y + 1 + (font == TF_NARROW), enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, fit, 0,
+           font);
     if (right)
         G_TextAlign(x + w - 5, y + 2, TA_RIGHT, enabled ? 0x506070 : 0xb0b0b0, G_NO_SHADOW, right, TF_SMALL);
 }
@@ -2506,6 +2526,9 @@ int Tcg_Step(unsigned keys)
         MP_Sound_TickFanfare();
         return YgoUi_Step(keys);
     }
+    /* (closed, the Yu-Gi-Oh! screens only note the buttons held: one still down from the message that opened them
+     * isn't a new press, as here) */
+    YgoUi_Step(keys);
     if (!Tcg_IsActive())
         return 0;
     MP_Sound_TickFanfare(); /* (the game's tasks don't run while the cards are open) */

@@ -352,3 +352,51 @@ expect resolve_loan 'victory vs CARD CLUB'
 expect resolve_loan 'deck 0+0 .* wins 1 '
 echo 'PASS no Yu-Gi-Oh! deck: a Starter Deck to keep (POKEMON cards only) or to borrow (no deck ready), then the duel'
 fi
+
+# A held as long as a person holds it (10 frames) to close the message that opens a Yu-Gi-Oh! screen: the screen
+# opens and that A does nothing in it (it used to pick the first row: the clerk's SINGLES, a Starter Deck).
+if only held; then
+cat > "$OUT/held_counter.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 0
+press LEFT 2
+wait 10
+press A 2
+wait 300
+press A 10
+wait 20
+mp ygo state
+rendershot counter
+quit
+SCRIPT
+run held_counter 11,18,2,6
+expect held_counter '\[ygo\] screen 12 opted 1 .* message 0'
+cat > "$OUT/held_starter.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp textspeed 2
+mp additem 399 1
+press UP 2
+wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+rendershot lastpage
+press A 10
+wait 20
+mp ygo state
+rendershot starter
+quit
+SCRIPT
+run held_starter 2,4,7,3
+expect held_starter '\[ygo\] screen 13 opted 0 .* message 0'
+echo 'PASS an A held to close a message opens the Yu-Gi-Oh! screen without choosing anything in it'
+fi
