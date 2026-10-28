@@ -17,6 +17,7 @@
 #define YGO_SUPER_ODDS 6
 #define YGO_ULTRA_ODDS 12
 #define YGO_SECRET_ODDS 24
+#define YGO_GC_SINGLE_BYTES ((YGO_CARD_COUNT + 8) / 8)
 
 struct YgoSavedDeck
 {
@@ -43,6 +44,9 @@ struct YgoCollection
     uint32_t specialBeaten, promoGiven;
     uint8_t optedIn, activeDeck, starter;   /* starter: the Starter Deck chosen (YGO_SET_*) + 1 */
     struct YgoDaily daily[YGO_DAILY_SLOTS];
+    /* the GAME CENTER clerk sells one copy of each single (a bit per card id) and one of each Starter Deck */
+    uint8_t gcSingles[YGO_GC_SINGLE_BYTES];
+    uint8_t gcDecks;
 };
 
 void Ygo_CollectionInit(struct YgoCollection *c, uint32_t seed);
@@ -71,6 +75,8 @@ unsigned Ygo_Spare(const struct YgoCollection *c, unsigned card);
 unsigned Ygo_PointValue(unsigned card);
 unsigned Ygo_PointCost(unsigned card);   /* 0: not sold */
 #define YGO_PACK_COST 12
+/* The GAME CENTER clerk's price in money for a single (0: not sold), by the same rarity as the CARD POINTS */
+unsigned Ygo_MoneyPrice(unsigned card);
 /* Distinct cards owned of a set (YGO_SET_COUNT: the whole pool) */
 unsigned Ygo_SetOwned(const struct YgoCollection *c, unsigned set, unsigned *total);
 int Ygo_DailyAvailable(const struct YgoCollection *c, uint32_t key, unsigned day);

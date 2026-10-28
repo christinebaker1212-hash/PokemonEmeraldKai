@@ -30,8 +30,30 @@ RustboroCity_GameCenter_2F_EventScript_NoRoom::
 	release
 	end
 
+@ The Yu-Gi-Oh! clerk: a CARD CASE and a Starter Deck for anyone without, then singles and Starter Decks for money
+@ and the CARD CLUB duelist's counter (src/ygo/ygo_ui.c, the GAME CENTER counter)
 RustboroCity_GameCenter_2F_EventScript_SecondSeller::
-	msgbox RustboroCity_GameCenter_2F_Text_Unpacking, MSGBOX_NPC
+	lock
+	faceplayer
+	special Ygo_ClubState
+	goto_if_eq VAR_RESULT, TRUE, RustboroCity_GameCenter_2F_EventScript_YgoShop
+	msgbox RustboroCity_GameCenter_2F_Text_YgoIntro, MSGBOX_DEFAULT
+	special Ygo_ClubHasCase
+	goto_if_eq VAR_RESULT, TRUE, RustboroCity_GameCenter_2F_EventScript_YgoHasCase
+	msgbox RustboroCity_GameCenter_2F_Text_YgoCase, MSGBOX_DEFAULT
+	giveitem ITEM_CARD_CASE
+	goto_if_eq VAR_RESULT, FALSE, RustboroCity_GameCenter_2F_EventScript_NoRoom
+RustboroCity_GameCenter_2F_EventScript_YgoHasCase::
+	msgbox RustboroCity_GameCenter_2F_Text_YgoChooseDeck, MSGBOX_DEFAULT
+	closemessage
+	special Ygo_ClubChooseDeck
+	msgbox RustboroCity_GameCenter_2F_Text_YgoHowTo, MSGBOX_DEFAULT
+RustboroCity_GameCenter_2F_EventScript_YgoShop::
+	msgbox RustboroCity_GameCenter_2F_Text_YgoWelcome, MSGBOX_DEFAULT
+	closemessage
+	special Ygo_GameCenterShop
+	msgbox RustboroCity_GameCenter_2F_Text_Bye, MSGBOX_DEFAULT
+	release
 	end
 
 @ The card players at the table: talking to them asks for a duel (they always play)
@@ -91,10 +113,29 @@ RustboroCity_GameCenter_2F_Text_NoRoom:
 	.string "Oh, your BAG is full...\n"
 	.string "Come back when you have room!$"
 
-RustboroCity_GameCenter_2F_Text_Unpacking:
-	.string "Sorry! I'm still unpacking my\n"
-	.string "supplies.\p"
-	.string "I should be ready soon!$"
+RustboroCity_GameCenter_2F_Text_YgoIntro:
+	.string "All unpacked! Welcome to the\n"
+	.string "Yu-Gi-Oh! counter!\p"
+	.string "Hm? You don't duel yet?\n"
+	.string "Let's fix that!$"
+
+RustboroCity_GameCenter_2F_Text_YgoCase:
+	.string "First, somewhere to keep your cards.\n"
+	.string "Here, take this!$"
+
+RustboroCity_GameCenter_2F_Text_YgoChooseDeck:
+	.string "And every duelist needs a deck.\n"
+	.string "Pick a Starter Deck!$"
+
+RustboroCity_GameCenter_2F_Text_YgoHowTo:
+	.string "Your CARD CASE holds both games.\n"
+	.string "Switch sides with L and R.\p"
+	.string "I sell singles and Starter Decks,\n"
+	.string "one of each per customer!$"
+
+RustboroCity_GameCenter_2F_Text_YgoWelcome:
+	.string "Welcome to the Yu-Gi-Oh! counter!\n"
+	.string "Singles, Starter Decks and more!$"
 
 RustboroCity_GameCenter_2F_Text_PlayerNoCase:
 	.string "You want to play? You'll need a\n"

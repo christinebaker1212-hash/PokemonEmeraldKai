@@ -25,6 +25,7 @@ void YgoUi_OpenChallenge(const struct YgoOpponent *opponent);
 void YgoUi_OpenStarter(void);
 void YgoUi_OpenLesson(void);
 void YgoUi_OpenCounter(void);
+void YgoUi_OpenGameCenter(void);   /* the GAME CENTER clerk: SINGLES and DECKS for money, then the counter */
 
 /* Who plays what (src/ygo/ygo_field.c): 0 the Pokemon cards (or nothing), YGO_PLAYS_YGO Yu-Gi-Oh! (*line: what they
  * say; *refused: not now), YGO_PLAYS_BOTH they ask which (opponent filled for Yu-Gi-Oh!). clubStaff: the CARD CLUB's */

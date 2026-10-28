@@ -609,6 +609,11 @@ void Ygo_ClubCounter(void)
 {
     YgoUi_OpenCounter();
 }
+// The GAME CENTER CARD SHOP's Yu-Gi-Oh! clerk (RUSTBORO CITY, 2F)
+void Ygo_GameCenterShop(void)
+{
+    YgoUi_OpenGameCenter();
+}
 // Test harness: build a theme's deck and print it (mp ygo deck THEME TIER)
 void Ygo_FieldDebugDeck(unsigned theme, unsigned tier)
 {

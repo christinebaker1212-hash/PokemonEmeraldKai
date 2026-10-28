@@ -572,6 +572,7 @@ gSpecials::
 	def_special Ygo_ClubChooseDeck, waitstate=1
 	def_special Ygo_ClubTeachingDuel, waitstate=1
 	def_special Ygo_ClubCounter, waitstate=1
+	def_special Ygo_GameCenterShop, waitstate=1
 	def_special MP_Fight_StartCpu, waitstate=1
 	def_special MP_Fight_Result
 	def_special MP_Fight_SeatCheck

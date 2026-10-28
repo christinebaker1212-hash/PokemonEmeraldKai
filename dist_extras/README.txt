@@ -1291,6 +1291,10 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck. Losing
                   costs nothing.
+  GAME CENTER     The 2F CARD SHOP's Yu-Gi-Oh! clerk sells one copy of any
+                  card that can be played (300-4000) and the four Starter
+                  Decks (10000, one of each), sets up anyone without a deck,
+                  and runs the same TRADE IN and CARD SHOP as the CARD CLUB.
   Packs           9 cards, the last a Rare or better: a Super Rare about one
                   pack in six, an Ultra Rare one in twelve, a Secret Rare one
                   in twenty-four, as in 2002-2003. Rarities show on the cards:
@@ -1310,7 +1314,8 @@ The tower in RUSTBORO CITY's north-east corner, by the road east (the
 MOENAV map names it under RUSTBORO CITY). Admission at the
 1F reception is 500, good for every floor until you leave; the stairs and
 the elevator are behind her.
-  2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS).
+  2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS),
+                  and a Yu-Gi-Oh! clerk (see YU-GI-OH!).
   3F GAMES        Consoles, TVs and arcade cabinets (coming soon) and a COIN
                   counter: 50 COINS for 1000 (you'll need a COIN CASE).
   ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.

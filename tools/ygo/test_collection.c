@@ -83,6 +83,37 @@ int main(void)
     CHECK(!memcmp(back.owned, c.owned, sizeof(c.owned)) && !memcmp(&back.decks, &c.decks, sizeof(c.decks)));
     CHECK(back.packs[YGO_SET_MRD] == 4 && back.wins == 12 && back.owner == 0x12345678 && back.starter == c.starter);
     CHECK(!Ygo_DailyAvailable(&back, 99, 300) && Ygo_DailyAvailable(&back, 99, 301));
+    /* format 2: the GAME CENTER clerk's sold singles and decks */
+    c.gcSingles[YGO_CARD_RAIGEKI / 8] |= 1 << (YGO_CARD_RAIGEKI % 8);
+    c.gcDecks = 5;
+    CHECK(Ygo_CollectionSave(&c, "/tmp/ygo-test.ygo"));
+    CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo"));
+    CHECK(!memcmp(back.gcSingles, c.gcSingles, sizeof(c.gcSingles)) && back.gcDecks == 5);
+    /* a format 1 file (1.35.0) still loads, nothing sold */
+    {
+        static unsigned char data[1 << 20];
+        FILE *f = fopen("/tmp/ygo-test.ygo", "rb");
+        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1, i;
+        uint32_t crc = 0xFFFFFFFFu;
+        unsigned k;
+        fclose(f);
+        for (i = 0; i < size; i++)
+        {
+            crc ^= data[12 + i];
+            for (k = 0; k < 8; k++)
+                crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1)));
+        }
+        crc = ~crc;
+        data[4] = 1, data[5] = data[6] = data[7] = 0;
+        for (k = 0; k < 4; k++)
+            data[8 + k] = (unsigned char)(crc >> (8 * k));
+        f = fopen("/tmp/ygo-test.ygo", "wb");
+        fwrite(data, 1, 12 + size, f);
+        fclose(f);
+        CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo"));
+        CHECK(back.wins == 12 && back.gcDecks == 0 && !back.gcSingles[YGO_CARD_RAIGEKI / 8]);
+    }
+    CHECK(Ygo_MoneyPrice(YGO_CARD_RAIGEKI) >= 300 && Ygo_MoneyPrice(YGO_CARD_RAIGEKI) <= 4000);
     remove("/tmp/ygo-test.ygo");
     printf("PASS pull rates, the Starter Decks, deck rules and the save file\n");
     return 0;

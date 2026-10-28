@@ -318,6 +318,21 @@ unsigned Ygo_PointCost(unsigned card)
     return costs[BestRarity(card)];
 }
 
+unsigned Ygo_MoneyPrice(unsigned card)
+{
+    switch (Ygo_PointCost(card))
+    {
+    case 0: return 0;
+    case 5: return 300;
+    case 8: return 400;
+    case 12: return 500;
+    case 15: return 800;
+    case 50: return 2000;
+    case 100: return 3000;
+    default: return 4000;
+    }
+}
+
 unsigned Ygo_SetOwned(const struct YgoCollection *c, unsigned set, unsigned *total)
 {
     unsigned i, n = 0, t = 0;
@@ -374,7 +389,7 @@ void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day)
 }
 
 /* ---- the file: "MYGO", u32 format, u32 crc of the rest, then the fields, little-endian */
-#define YGO_FILE_FORMAT 1
+#define YGO_FILE_FORMAT 2   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 1 still loads */
 static void Put(unsigned char **p, uint32_t v, unsigned n)
 {
     unsigned i;
@@ -402,9 +417,10 @@ static uint32_t Crc(const unsigned char *p, size_t n)
     }
     return ~c;
 }
-#define PAYLOAD_SIZE                                                                                          \
+#define PAYLOAD_SIZE_1                                                                                        \
     (2 * (YGO_CARD_COUNT + 1) + YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) +       \
      2 * YGO_SET_COUNT + 4 * 10 + 3 + 6 * YGO_DAILY_SLOTS)
+#define PAYLOAD_SIZE (PAYLOAD_SIZE_1 + YGO_GC_SINGLE_BYTES + 1)
 
 int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
 {
@@ -451,6 +467,9 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
         Put(&p, c->daily[i].key, 4);
         Put(&p, c->daily[i].day, 2);
     }
+    for (i = 0; i < YGO_GC_SINGLE_BYTES; i++)
+        Put(&p, c->gcSingles[i], 1);
+    Put(&p, c->gcDecks, 1);
     p = data;
     memcpy(p, "MYGO", 4);
     p += 4;
@@ -483,13 +502,16 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     static unsigned char data[12 + PAYLOAD_SIZE];
     const unsigned char *p = data + 4;
     FILE *f = fopen(path, "rb");
-    unsigned i, j, n;
+    unsigned i, j, n, format, size;
     if (!f)
         return 0;
     n = (unsigned)fread(data, 1, sizeof(data), f);
     fclose(f);
-    if (n != sizeof(data) || memcmp(data, "MYGO", 4) || Get(&p, 4) != YGO_FILE_FORMAT ||
-        Get(&p, 4) != Crc(data + 12, PAYLOAD_SIZE))
+    if (n < 12 || memcmp(data, "MYGO", 4))
+        return 0;
+    format = Get(&p, 4);
+    size = format == 1 ? PAYLOAD_SIZE_1 : PAYLOAD_SIZE;
+    if ((format != 1 && format != YGO_FILE_FORMAT) || n != 12 + size || Get(&p, 4) != Crc(data + 12, size))
         return 0;
     memset(c, 0, sizeof(*c));
     for (i = 0; i <= YGO_CARD_COUNT; i++)
@@ -523,6 +545,12 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     {
         c->daily[i].key = Get(&p, 4);
         c->daily[i].day = (uint16_t)Get(&p, 2);
+    }
+    if (format >= 2)
+    {
+        for (i = 0; i < YGO_GC_SINGLE_BYTES; i++)
+            c->gcSingles[i] = (uint8_t)Get(&p, 1);
+        c->gcDecks = (uint8_t)Get(&p, 1);
     }
     /* sanity: ids in range */
     for (i = 0; i < YGO_SAVED_DECKS; i++)

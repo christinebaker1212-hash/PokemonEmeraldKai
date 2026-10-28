@@ -217,3 +217,65 @@ n=$(grep -c 'answer refused' "$OUT/monkey/log.txt" || true)
 [ "$n" -lt 20 ] || { echo "FAIL monkey: $n refused answers"; exit 1; }
 echo "PASS a practice duel mashed with random keys, then played out ($n refused answers)"
 fi
+
+# The GAME CENTER's Yu-Gi-Oh! clerk (RUSTBORO CITY 2F): a CARD CASE and a Starter Deck for a new duelist, then a
+# single and a Starter Deck for money (one each: the second time they're SOLD).
+if only gcshop; then
+cat > "$OUT/gcshop.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+press LEFT 2
+wait 10
+pressuntil A cards 4000
+wait 30
+press A 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+pressuntil A cards 4000
+wait 40
+rendershot singles
+press A 2
+wait 20
+press A 2
+wait 10
+rendershot buy
+press A 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+rendershot sold
+press B 2
+wait 10
+press B 2
+wait 10
+press R 2
+wait 10
+rendershot decks
+press DOWN 2
+wait 4
+press A 2
+wait 10
+press A 2
+wait 60
+rendershot bought-deck
+press A 2
+wait 10
+press A 2
+wait 10
+rendershot deck-sold
+press A 2
+wait 10
+mp ygo state
+quit
+SCRIPT
+MOEMON_DEBUG_MONEY=50000 run gcshop 11,18,2,6
+expect gcshop 'game center: bought card'
+expect gcshop 'game center: bought deck 1'
+refuse gcshop 'game center: bought deck 1, .*game center: bought deck 1'
+echo 'PASS the GAME CENTER Yu-Gi-Oh! clerk: a new duelist set up, a single and a Starter Deck for money, one each'
+fi

@@ -10,6 +10,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "money.h"
 #include "script.h"
 #include "sound.h"
 #include "constants/songs.h"
@@ -73,6 +74,8 @@ enum
     ACT_TRADE_IN_ALL,
     ACT_BUY_PACK,
     ACT_BUY_CARD,
+    ACT_GC_CARD,
+    ACT_GC_DECK,
     ACT_LESSON
 };
 #define PANEL_W KIT_PANEL_W
@@ -81,6 +84,8 @@ enum
 #define LIST_W KIT_LIST_W
 #define ROW_H KIT_ROW_H
 #define SHOP_BINDER 2   /* Y.showAll: the binder is the counter's "card you choose" list */
+#define GC_BINDER 3     /* Y.showAll: the binder is the GAME CENTER clerk's singles, for money */
+#define GC_DECK_PRICE 10000
 #define FILTERS 7
 static const char *const sFilterNames[FILTERS] = {"ALL", "NORMAL", "EFFECT", "FUSION", "RITUAL", "SPELL", "TRAP"};
 #define YGO_THEME 0x6848b8   /* the case's YU-GI-OH! side: a deep violet */
@@ -103,7 +108,7 @@ static struct
     SDL_Texture *portrait;
     uint16_t spoils[YGO_DECK_MAX + YGO_FUSION_MAX];
     int spoilCount;
-    int tab, counterTab;
+    int tab, counterTab, gc;   /* gc: the counter is the GAME CENTER clerk's (SINGLES and DECKS first) */
     char message[256];
     int messageThen, asking, askYes, askAction, askArg;
     int fromScript;
@@ -217,6 +222,15 @@ void YgoUi_OpenCounter(void)
 {
     Y.returnToGame = NULL;
     Y.counterTab = 0;
+    Y.gc = 0;
+    Open(Y_COUNTER);
+    Y.fromScript = 1;
+}
+void YgoUi_OpenGameCenter(void)
+{
+    Y.returnToGame = NULL;
+    Y.counterTab = 0;
+    Y.gc = 1;
     Open(Y_COUNTER);
     Y.fromScript = 1;
 }
@@ -273,6 +287,8 @@ static int Listed(unsigned id)
         return C()->owned[id] && Ygo_CardReady(id);
     if (Y.showAll == SHOP_BINDER)
         return Ygo_PointCost(id) != 0;
+    if (Y.showAll == GC_BINDER)
+        return Ygo_MoneyPrice(id) != 0;
     return Y.showAll ? Ygo_CardReady(id) || C()->owned[id] : C()->owned[id] > 0;
 }
 static unsigned ListSize(void)
@@ -323,6 +339,9 @@ static void AddCard(unsigned id)
     if (id && id <= YGO_CARD_COUNT && C()->owned[id] < YGO_COLLECTION_MAX)
         C()->owned[id]++;
 }
+/* The GAME CENTER clerk sold their one copy of this single / this Starter Deck */
+static int GcSingleSold(unsigned id) { return id && id <= YGO_CARD_COUNT && (C()->gcSingles[id / 8] >> (id % 8)) & 1; }
+static int GcDeckSold(unsigned k) { return (C()->gcDecks >> k) & 1; }
 /* The rarity a card came out of a set's pack at */
 static unsigned RarityIn(unsigned set, unsigned card)
 {
@@ -897,6 +916,12 @@ static void BinderScreen(void)
             G_RoundFill(x + 14, y + 33, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
             G_Digits(x + 16, y + 35, line, 0, 1, 0xe0f0ff, 255);
         }
+        if (Y.showAll == GC_BINDER && GcSingleSold(card))
+        {
+            /* the clerk's one copy is gone */
+            G_RoundFill(x - 1, y - 1, 22, 10, 0xc82828, 240);
+            G_Text(x + 1, y - 2, G_WHITE, 0x701010, "SOLD", 0, TF_NARROW);
+        }
         if (on)
         {
             int o = (Y.frame / 8) % 2;
@@ -909,6 +934,18 @@ static void BinderScreen(void)
     {
         snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Ygo_Card(id)->name : "",
                  Ygo_PointCost(id), Points(), id ? c->owned[id] : 0);
+        Strip(0, line);
+        TcgUi_Hints("{A} BUY  {L}{R} KIND  {START} READ  {B} BACK");
+        return;
+    }
+    if (Y.showAll == GC_BINDER)
+    {
+        if (id && GcSingleSold(id))
+            snprintf(line, sizeof(line), "%s: SOLD\nOne per customer. You own %u.", Ygo_Card(id)->name,
+                     c->owned[id]);
+        else
+            snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Ygo_Card(id)->name : "",
+                     Ygo_MoneyPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
         TcgUi_Hints("{A} BUY  {L}{R} KIND  {START} READ  {B} BACK");
         return;
@@ -1224,7 +1261,10 @@ static void SpoilsScreen(void)
 }
 
 /* The CARD CLUB duelist's counter: TRADE IN spares for CARD POINTS (shared with the Pokemon cards), the CARD SHOP */
-static const char *const sCounterTabs[] = {"TRADE IN", "CARD SHOP"};
+static const char *const sCounterTabs[] = {"SINGLES", "DECKS", "TRADE IN", "CARD SHOP"};
+/* The counter's tabs: the CARD CLUB's TRADE IN and CARD SHOP; the GAME CENTER clerk's SINGLES and DECKS first */
+static int CounterTabs(void) { return Y.gc ? 4 : 2; }
+static int CounterKind(void) { return Y.gc ? Y.counterTab : Y.counterTab + 2; }
 static unsigned SpareList(uint16_t *out)
 {
     unsigned id, n = 0;
@@ -1246,19 +1286,49 @@ static void CounterScreen(void)
     char line[128];
     int i, x = 4;
     TcgUi_Background();
-    TcgUi_SidePanel("CARD CLUB", YGO_THEME);
-    for (i = 0; i < 2; i++)
+    TcgUi_SidePanel(Y.gc ? "GAME CENTER" : "CARD CLUB", YGO_THEME);
+    for (i = 0; i < CounterTabs(); i++)
     {
-        int w = G_Measure(sCounterTabs[i], TF_NARROW) + 8, on = i == Y.counterTab;
-        G_RoundFill(x, 20, w, 12, on ? 0xf8f8f8 : 0x504070, 255);
-        G_Text(x + 4, 20, on ? G_INK : 0xe0e0f0, G_NO_SHADOW, sCounterTabs[i], 0, TF_NARROW);
+        const char *name = sCounterTabs[Y.gc ? i : i + 2];
+        int w = G_Measure(name, TF_NARROW) + 8, on = i == Y.counterTab;
+        if (Y.gc && i == 2)
+            x = 4;   /* two rows of two */
+        G_RoundFill(x, Y.gc && i >= 2 ? 34 : 20, w, 12, on ? 0xf8f8f8 : 0x504070, 255);
+        G_Text(x + 4, Y.gc && i >= 2 ? 34 : 20, on ? G_INK : 0xe0e0f0, G_NO_SHADOW, name, 0, TF_NARROW);
         x += w + 2;
     }
-    snprintf(line, sizeof(line), "%u", Points());
-    G_Text(8, 40, 0x505868, G_NO_SHADOW, "CARD POINTS", 0, TF_NARROW);
-    G_Text(8, 50, G_INK, G_INK_SHADOW, line, 0, TF_NORMAL);
+    if (CounterKind() < 2)
+    {
+        snprintf(line, sizeof(line), "\xa5%u", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+        G_Text(8, Y.gc ? 54 : 40, 0x505868, G_NO_SHADOW, "MONEY", 0, TF_NARROW);
+    }
+    else
+    {
+        snprintf(line, sizeof(line), "%u", Points());
+        G_Text(8, Y.gc ? 54 : 40, 0x505868, G_NO_SHADOW, "CARD POINTS", 0, TF_NARROW);
+    }
+    G_Text(8, Y.gc ? 64 : 50, G_INK, G_INK_SHADOW, line, 0, TF_NORMAL);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    if (Y.counterTab == 0)
+    if (CounterKind() == 0)
+    {
+        TcgUi_Row(LIST_X + 2, 8, LIST_W - 4, 1, 1, "SINGLES", "300-4000");
+        Strip(0, "Any card that can be played, one copy each, for money. Rares too!");
+    }
+    else if (CounterKind() == 1)
+    {
+        for (i = 0; i < YGO_STARTERS; i++)
+        {
+            int sold = GcDeckSold((unsigned)i);
+            char right[24];
+            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GC_DECK_PRICE);
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == Y.cursor,
+                      !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE), SetName(sStarters[i]), right);
+        }
+        snprintf(line, sizeof(line), "%s\n%s", gYgoSets[sStarters[Y.cursor]].name,
+                 GcDeckSold((unsigned)Y.cursor) ? "SOLD OUT: one of each deck per customer." : "Ready to duel in an empty deck slot.");
+        Strip(0, line);
+    }
+    else if (CounterKind() == 2)
     {
         uint16_t list[YGO_CARD_COUNT];
         unsigned n = SpareList(list), k;
@@ -1531,6 +1601,51 @@ static void Act(int action)
             Say(ACT_NONE, "A %s booster went into your CARD CASE.", gYgoSets[Y.askArg].code);
         }
         break;
+    case ACT_GC_CARD:
+    {
+        unsigned id = (unsigned)Y.askArg, price = Ygo_MoneyPrice(id);
+        if (price && !GcSingleSold(id) && IsEnoughMoney(&gSaveBlock1Ptr->money, price))
+        {
+            RemoveMoney(&gSaveBlock1Ptr->money, price);
+            c->gcSingles[id / 8] |= 1 << (id % 8);
+            AddCard(id);
+            PlaySE(SE_RG_SHOP);
+            Say(ACT_NONE, "%s went into your CARD CASE.", Ygo_Card(id)->name);
+            printf("[ygo] game center: bought card %u for %u\n", id, price);
+        }
+        break;
+    }
+    case ACT_GC_DECK:
+    {
+        unsigned k = (unsigned)Y.askArg, i, slot;
+        uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+        if (k >= YGO_STARTERS || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+            break;
+        RemoveMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE);
+        c->gcDecks |= 1 << k;
+        StarterDeckOf(sStarters[k], main, extra);
+        for (i = 0; i < YGO_DECK_MAX && main[i]; i++)
+            AddCard(main[i]);
+        for (i = 0; i < YGO_FUSION_MAX && extra[i]; i++)
+            AddCard(extra[i]);
+        for (slot = 0; slot < YGO_SAVED_DECKS; slot++)
+            if (!MainCount(slot) && !ExtraCount(slot))
+                break;
+        PlaySE(SE_RG_SHOP);
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        printf("[ygo] game center: bought deck %u, slot %u\n", k, slot);
+        if (slot < YGO_SAVED_DECKS)
+        {
+            memcpy(Deck(slot)->main, main, sizeof(main));
+            memcpy(Deck(slot)->extra, extra, sizeof(extra));
+            snprintf(Deck(slot)->name, YGO_NAME_LEN, "%s", SetName(sStarters[k]));
+            Say(ACT_NONE, "You got the %s! It's in DECKS, slot %u, ready to duel.", gYgoSets[sStarters[k]].name, slot + 1);
+        }
+        else
+            Say(ACT_NONE, "You got the %s! Its cards are in your CARD CASE (every deck slot is in use).",
+                gYgoSets[sStarters[k]].name);
+        break;
+    }
     case ACT_BUY_CARD:
     {
         unsigned id = (unsigned)Y.askArg, cost = Ygo_PointCost(id);
@@ -1784,7 +1899,7 @@ int YgoUi_Step(unsigned keys)
         int n = (int)ListSize();
         FilterTab(pressed);
         GridMove(pressed, n, 7);
-        if (pressed & KEY_SELECT && Y.showAll != SHOP_BINDER)
+        if (pressed & KEY_SELECT && Y.showAll != SHOP_BINDER && Y.showAll != GC_BINDER)
         {
             Y.showAll = !Y.showAll;
             Y.cursor = 0;
@@ -1793,11 +1908,11 @@ int YgoUi_Step(unsigned keys)
         if (pressed & KEY_B)
         {
             PlaySE(SE_SELECT);
-            if (Y.showAll == SHOP_BINDER)
+            if (Y.showAll == SHOP_BINDER || Y.showAll == GC_BINDER)
             {
+                Y.counterTab = Y.showAll == GC_BINDER ? 0 : Y.gc ? 3 : 1;
                 Y.showAll = 0;
                 Screen(Y_COUNTER);
-                Y.counterTab = 1;
             }
             else
                 Screen(Y_HOME), Y.cursor = 1;
@@ -1805,7 +1920,20 @@ int YgoUi_Step(unsigned keys)
         else if (pressed & KEY_A && n)
         {
             unsigned id = ListCard(Y.cursor);
-            if (Y.showAll == SHOP_BINDER)
+            if (Y.showAll == GC_BINDER)
+            {
+                unsigned price = Ygo_MoneyPrice(id);
+                if (GcSingleSold(id))
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "That one's sold. One copy of each card per customer!");
+                }
+                else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, price))
+                    Say(ACT_NONE, "%s is \xa5%u. You don't have enough money.", Ygo_Card(id)->name, price);
+                else
+                    Ask(ACT_GC_CARD, (int)id, "%s for \xa5%u?", Ygo_Card(id)->name, price);
+            }
+            else if (Y.showAll == SHOP_BINDER)
             {
                 unsigned cost = Ygo_PointCost(id);
                 if (Points() >= cost)
@@ -1936,7 +2064,7 @@ int YgoUi_Step(unsigned keys)
     case Y_COUNTER:
         if (pressed & (KEY_L | KEY_R))
         {
-            Y.counterTab ^= 1;
+            Y.counterTab = (Y.counterTab + (pressed & KEY_R ? 1 : CounterTabs() - 1)) % CounterTabs();
             Y.cursor = 0;
             PlaySE(SE_SELECT);
             break;
@@ -1947,7 +2075,39 @@ int YgoUi_Step(unsigned keys)
             Close();
             break;
         }
-        if (Y.counterTab == 0)
+        if (CounterKind() == 0)
+        {
+            if (pressed & KEY_A)
+            {
+                PlaySE(SE_SELECT);
+                Y.filter = 0;
+                Screen(Y_BINDER);
+                Y.showAll = GC_BINDER;
+            }
+        }
+        else if (CounterKind() == 1)
+        {
+            MoveCursor(pressed, YGO_STARTERS, 1);
+            if (pressed & KEY_A)
+            {
+                if (GcDeckSold((unsigned)Y.cursor))
+                {
+                    PlaySE(SE_FAILURE);
+                    Say(ACT_NONE, "The %s is sold out. One of each deck per customer!", gYgoSets[sStarters[Y.cursor]].name);
+                }
+                else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+                    Say(ACT_NONE, "A Starter Deck is \xa5%u. You don't have enough money.", GC_DECK_PRICE);
+                else
+                    Ask(ACT_GC_DECK, Y.cursor, "The %s for \xa5%u?", gYgoSets[sStarters[Y.cursor]].name, GC_DECK_PRICE);
+            }
+            else if (pressed & KEY_START)
+            {
+                uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+                StarterDeckOf(sStarters[Y.cursor], main, extra);
+                Inspect(Mascot(main, YGO_DECK_MAX), Y_COUNTER);
+            }
+        }
+        else if (CounterKind() == 2)
         {
             uint16_t list[YGO_CARD_COUNT];
             unsigned n = SpareList(list);
@@ -1973,7 +2133,7 @@ int YgoUi_Step(unsigned keys)
                     Y.filter = 0;
                     Screen(Y_BINDER);
                     Y.showAll = SHOP_BINDER;
-                }
+                }   /* (B there comes back to this tab) */
                 else if (Points() >= YGO_PACK_COST)
                     Ask(ACT_BUY_PACK, sets[Y.cursor], "A %s booster for %u CARD POINTS?", gYgoSets[sets[Y.cursor]].code,
                         YGO_PACK_COST);
