@@ -4,7 +4,7 @@ Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
-card duels, branch claude/stoic-knuth-rh14w7).
+card duels).
 
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
@@ -156,6 +156,15 @@ change; per-save skill; tcg_field.c Tcg_FitOpponent); CARD ART / CARD BACKS
 from the built-in graphics/tcg/printed.bin (tools/tcg/fetch_art.py + build_printed_art.py: scans, the back and each
 illustration's measured rectangle; test_art.sh); everything in
 docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
+
+Also YU-GI-OH! duels (src/ygo/, include/ygo/: the CARD CASE's second side, L/R switches; SDD's card list and
+Forbidden/Limited list plus the English boosters to the end of 2003 (tools/ygo, catalog in ygo_catalog.c / card_ids.h;
+the ROM is never committed); rules engine ygo_duel.c asked as it goes (YgoQuery / YgoAnswer, deterministic from seed +
+answers), effects by stage in ygo_fx_s1_*.c (Ygo_CardReady gates packs, shops and decks), AI ygo_ai.c, the table
+ygo_board.c, screens ygo_ui.c, who plays which game and the special duelists ygo_field.c + tcg_field.c's which-game menu,
+the CARD CLUB duelist in the POKéMON MARTS (data/scripts/ygo_club.inc), "<save>.ygo"; quiet chain windows are passed by
+the board unless L is held (YgoDuel_QuietChance, YF_PHASE); printed art and the real back in graphics/ygo/printed.bin;
+decisions docs/YGO_DECISIONS.md, COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh).
 
 Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap

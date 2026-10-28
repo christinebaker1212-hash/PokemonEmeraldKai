@@ -1,8 +1,8 @@
 # Yu-Gi-Oh! card duels: handoff
 
 Trigger: when the user says **"Continue Yugioh"**, read this file and pick up at "Next steps".
-Branch: `claude/stoic-knuth-rh14w7` (everything below is committed and pushed there; nothing is on the default
-branch yet, nothing released).
+Branch: stage 1 started on `claude/stoic-knuth-rh14w7` and continues on `claude/dreamy-archimedes-az1gbz` (merged
+with the default branch at 1.34.0); nothing is on the default branch yet, nothing released.
 
 ## What the user asked for
 Reuse the Pokemon TCG system (src/tcg) for a Yu-Gi-Oh! version. Modern rules over EDS-style cloning.
@@ -87,11 +87,9 @@ The user's answers to the 30 design questions (keep to them):
    a game flag; the duel link only needs to exchange YgoAnswers (engine is deterministic from seed + answers;
    YgoDuel_Hash to check). The board already supports seat `me` = 1. Bump MP_PROTOCOL_VERSION / TCG_LINK_VERSION.
    Nametag/spectate already work (Tcg_IsActive/Tcg_DuelingNow include YGO). Could be stage 2 if usage is short.
-4. Docs: CLAUDE.md feature note (one paragraph like CARD DUELS), docs/COOP_NOTES.md "Yu-Gi-Oh!" section,
-   docs/YGO_DECISIONS.md (the 30 answers above + choices: pull rates SR 1/6, UR 1/12, ScR 1/24, short prints half
-   / super short prints quarter weight; 160x233 art; MAN_5 duelist; promo hand-over), dist_extras/README.txt.
-5. Windows build check: `tools/release/build_windows.sh SDL2_DIR` (watch helper names clashing with Win32 in files
-   that include windows.h; ygo files don't).
+4. (done) Docs: CLAUDE.md feature paragraph, docs/COOP_NOTES.md "Yu-Gi-Oh! card duels", docs/YGO_DECISIONS.md,
+   dist_extras/README.txt YU-GI-OH! (and the CARD CLUB's new place).
+5. (done) Windows build: tools/release/build_windows.sh builds cleanly (mingw-w64 + SDL2-devel-2.30.9-mingw).
 6. Release (ASK THE USER FIRST: pushing to the default branch publishes): bump MOEMON_VERSION in
    include/mp_version.h (default branch is 1.34.0 -> 1.35.0), add tools/release/notes/v1.35.0.md starting
    `Moemon Emerald Kai Co-op 1.35.0 "<Catchy Title!>": <one-line note>` with player-facing notes (CARD CASE's

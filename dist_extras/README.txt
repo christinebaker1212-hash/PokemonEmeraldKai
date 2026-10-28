@@ -1182,9 +1182,10 @@ CARD DUELS
 ----------
 An optional card game, played with the original Pokemon Trading Card Game's
 228 cards on a table like the DS card game's. A CARD CLUB member waits in
-the POKEMON CENTERS of OLDALE, MAUVILLE and LILYCOVE: they hand you a CARD
-CASE (a key item), three starter decks to pick from and a teaching duel if
-you'd like one, and later run the CARD COUNTER.
+the POKEMON MARTS of OLDALE and MAUVILLE and LILYCOVE's DEPARTMENT STORE:
+they hand you a CARD CASE (a key item), three starter decks to pick from and
+a teaching duel if you'd like one, and later run the CARD COUNTER. Beside
+them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
   Challenges      Register the CARD CASE to a button like any key item and
                   press it in front of someone to ask for a duel (nobody
                   there: the CARD CASE opens). Talking with A is unchanged.
@@ -1251,6 +1252,57 @@ you'd like one, and later run the CARD COUNTER.
                   OFF: decks get stronger with your badges instead.
 Your cards are saved with your game (the save file's .cards file, kept with
 its backups). A few attacks aren't in the game yet; they show as not ready.
+
+YU-GI-OH!
+---------
+The CARD CASE has a second side: L and R switch between POKEMON and
+YU-GI-OH!. Duels follow today's rules (8000 Life Points, the first player
+doesn't draw or attack on their first turn) on today's table, with the cards
+of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
+  Getting started The CARD CLUB's Yu-Gi-Oh! duelist (beside the CARD CLUB
+                  member) gives you a CARD CASE if you have none, one of the
+                  four Starter Decks (YUGI, KAIBA, JOEY or PEGASUS; START
+                  looks at its cards first) and a teaching duel if you'd like
+                  one. After that they run a counter: TRADE IN (spare cards
+                  for CARD POINTS, the same points as the POKEMON cards) and
+                  CARD SHOP (boosters, or any card you pick).
+  Who duels       PSYCHICS, HEX MANIACS, NINJA BOYS, BLACK BELTS, BATTLE
+                  GIRLS, COOLTRAINERS, RUIN MANIACS, KINDLERS, COLLECTORS,
+                  EXPERTS, TEAM AQUA and MAGMA grunts and most young
+                  townsfolk play Yu-Gi-Oh!; kids, BUG CATCHERS, SWIMMERS,
+                  HIKERS, LASSES and the older townsfolk play POKEMON cards.
+                  The CARD CLUB, your rival, WALLY and STEVEN ask which game.
+                  The ELITE FOUR (SIDNEY's Fiends, PHOEBE's Zombies, GLACIA's
+                  Aqua, DRAKE's Dragons), MAXIE, ARCHIE and the FRONTIER
+                  BRAINS have decks of their own, each with a signature card
+                  they hand over the first time you beat them. Decks get
+                  stronger with your badges.
+  On the table    The D-Pad moves over the table; A on a card shows what it
+                  can do (SUMMON, SET, ACTIVATE, ATTACK...), R reads a card,
+                  START moves to the next phase or ends your turn. When you
+                  can answer with a Trap or Quick-Play Spell, the game asks
+                  "Activate a card?" (B passes). It asks when something
+                  happens (a summon, an attack, a card activated); hold L
+                  to be asked at every chance, phase changes too.
+  Decks           CARD CASE > DECKS: 40 to 60 cards and up to 15 Fusion
+                  Monsters, at most 3 of a card (fewer for the cards
+                  Stairway to the Destined Duel limits; the builder shows the
+                  number on the card).
+  Rewards         Every win gives a booster pack, and once a day each
+                  opponent lets you pick one card of their deck. Losing
+                  costs nothing.
+  Packs           9 cards, the last a Rare or better: a Super Rare about one
+                  pack in six, an Ultra Rare one in twelve, a Secret Rare one
+                  in twenty-four, as in 2002-2003. Rarities show on the cards:
+                  a silver name for Rare, shiny art for Super, gold for Ultra,
+                  a rainbow for Secret.
+  Card art        CARD ART and CARD BACKS (OPTIONS > DISPLAY) work for these
+                  cards too: GAME BOY shows Stairway to the Destined Duel's
+                  pictures, and CARD BACKS: PRINTED the real card back.
+  Achievements    A YU-GI-OH! tab of their own.
+The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
+Not yet: Yu-Gi-Oh! with friends online, and the cards of the sets after
+Metal Raiders.
 
 GAME CENTER
 -----------

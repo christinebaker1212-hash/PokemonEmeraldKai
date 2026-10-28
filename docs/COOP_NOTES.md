@@ -1969,3 +1969,31 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
 - Tests: tools/test/README.md (`fight_*`), and tools/fight/build_linux.sh's self test (`step` waits for a
   loading engine; `WIN=1` builds it for Wine, `SAN=1` with AddressSanitizer).
 
+## Yu-Gi-Oh! card duels (src/ygo/, include/ygo/)
+
+The CARD CASE's second side. Decisions (the user's 30 answers and the choices made) are in docs/YGO_DECISIONS.md,
+the work left in docs/YGO_HANDOFF.md.
+
+- Data: tools/ygo/import_sdd.py reads Stairway to the Destined Duel's card list, Forbidden/Limited list and pictures
+  from the player's ROM (never committed) into tools/ygo/sdd.json and graphics/ygo/sdd_art.bin; build_catalog.py +
+  gen_catalog.py add the English sets to the end of 2003 and write src/ygo/ygo_catalog.c, include/ygo/card_ids.h and
+  src/ygo/ygo_fusions.c. fetch_art.py + build_printed.py: graphics/ygo/printed.bin (160x233 JPEGs, then the real
+  back; `--keep-cards` rebuilds only the back).
+- Engine (ygo_duel.c): one YgoQuery at a time, answered with a YgoAnswer; the whole duel follows from the seed and the
+  answers (YgoDuel_Hash), so online only has to exchange answers. Chains, SEGOC, missing the timing, the Damage Step,
+  summon negation windows, lasting effects. Card effects by stage (ygo_fx_s1_*.c with ygo_fx_lib.c); a card without
+  rules isn't in packs, shops or decks (Ygo_CardReady).
+- The table (ygo_board.c): plays the engine's events one by one, then asks. A chance to chain while a phase changes
+  (YgoDuel_QuietChance: no chain, summon, attack or Damage Step) is passed for the player unless L is held; effects
+  made for such a moment carry YF_PHASE and are still asked. This is the screen's choice, never the engine's.
+- Screens (ygo_ui.c) share the Pokemon case's look (src/tcg/tcg_ui_kit.h); tcg_ui.c hands Step / Draw / IsActive to
+  them while the YU-GI-OH! side is open. CARD ART and CARD BACKS (gMpConfig) apply to both games.
+- World (ygo_field.c): who plays which game by trainer class / townsfolk sprite, themed decks by badge tier, special
+  duelists with signature cards; tcg_field.c's Task_CardChallenge asks "MOéMON CARDS or YU-GI-OH!" for the CARD CLUB,
+  the rival, WALLY and STEVEN. Both CARD CLUB NPCs stand in OLDALE's and MAUVILLE's POKéMON MARTS and LILYCOVE's
+  DEPARTMENT STORE (data/scripts/ygo_club.inc, card_club.inc).
+- Save: "<save>.ygo" beside the save (Ygo collection, written with the Pokemon cards' sidecar, backed up with the
+  save). CARD POINTS are shared with the Pokemon cards.
+- Tests: tools/ygo/test.sh (engine, card scenarios, random duels, AI, collection; sanitizers) and
+  tools/ygo/test_ui.sh (the club, a challenge, the case's screens, a practice duel mashed with random keys).
+  Debug: `mp ygo ...` (ygo_ui.c Ygo_Debug).
