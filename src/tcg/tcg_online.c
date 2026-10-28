@@ -27,6 +27,9 @@
 #include "tcg/integration.h"
 #include "tcg/online.h"
 #include "ygo/integration.h"
+#include "tt/collection.h"
+#include "tt/integration.h"
+#include "tt/net.h"
 
 enum
 {
@@ -87,11 +90,13 @@ static bool8 HasCaseFor(unsigned kind)
 {
     if (TCG_ASK_IS_YGO(kind))
         return (Ygo_GetCollection()->optedIn || Tcg_GetCollection()->optedIn) && CheckBagHasItem(ITEM_CARD_CASE, 1);
+    if (TCG_ASK_IS_TT(kind))
+        return Tt_GetCollection()->optedIn && CheckBagHasItem(ITEM_CARD_CASE, 1);
     return HasCase();
 }
 static const char *GameWord(unsigned kind)
 {
-    return TCG_ASK_IS_YGO(kind) ? "Yu-Gi-Oh!" : "card";
+    return TCG_ASK_IS_YGO(kind) ? "Yu-Gi-Oh!" : TCG_ASK_IS_TT(kind) ? "TRIPLE TRIAD" : "card";
 }
 
 const char *Tcg_CanAskFriend(unsigned id, unsigned kind)
@@ -99,7 +104,8 @@ const char *Tcg_CanAskFriend(unsigned id, unsigned kind)
     if (!MP_IsConnected() || id >= MP_MAX_PLAYERS || !gMpPlayers[id].present || (int)id == gMpLocalId)
         return "They aren't online right now.";
     if (!HasCaseFor(kind))
-        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON MART.";
+        return TCG_ASK_IS_TT(kind) ? "You need TRIPLE TRIAD cards first: a seller in a POKeMON CENTER has a hand."
+                                   : "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON MART.";
     if (gMain.callback2 != CB2_Overworld)
         return "Head outside first.";
     if (sSocial.role != TCG_SOCIAL_NONE)
@@ -141,6 +147,10 @@ static void OpenTogether(void)
         YgoUi_OpenOnlineDeck();
     else if (sSocial.kind == TCG_ASK_YGO_TRADE)
         YgoUi_OpenOnlineTrade();
+    else if (sSocial.kind == TCG_ASK_TT_DUEL)
+        TtUi_OpenOnlineDeck();
+    else if (sSocial.kind == TCG_ASK_TT_TRADE)
+        TtUi_OpenOnlineTrade();
     else if (sSocial.kind == TCG_ASK_DUEL)
         Tcg_OpenOnlineDeck();
     else
@@ -151,7 +161,8 @@ static void SayWaiting(void)
 {
     char line[96], name[16];
     Name(sSocial.peer, name, sizeof(name));
-    snprintf(line, sizeof(line), TCG_ASK_IS_DUEL(sSocial.kind) ? "You asked %s for a %s duel...\nB: stop waiting"
+    snprintf(line, sizeof(line), sSocial.kind == TCG_ASK_TT_DUEL ? "You asked %s for a game of %s...\nB: stop waiting"
+                                 : TCG_ASK_IS_DUEL(sSocial.kind) ? "You asked %s for a %s duel...\nB: stop waiting"
                                                                : "You asked %s for a %s trade...\nB: stop waiting",
              name, GameWord(sSocial.kind));
     SayAscii(line);
@@ -203,6 +214,8 @@ static void Task_Ask(u8 taskId)
         snprintf(line, sizeof(line), sSocial.answer == TCG_ANSWER_BUSY   ? "%s is busy right now. Try again in a moment."
                                      : sSocial.answer == TCG_ANSWER_NOCASE ? (TCG_ASK_IS_YGO(sSocial.kind)
                                                                               ? "%s doesn't have a Yu-Gi-Oh! deck yet."
+                                                                              : TCG_ASK_IS_TT(sSocial.kind)
+                                                                              ? "%s has no TRIPLE TRIAD cards yet."
                                                                               : "%s doesn't have a CARD CASE yet.")
                                                                            : "%s said no this time.", name);
         Reset();
@@ -277,7 +290,7 @@ void Tcg_AskFriend(unsigned id, unsigned kind)
     SayWaiting();
     taskId = CreateTask(Task_Ask, 80);
     gTasks[taskId].tState = 0;
-    printf("[tcg] asked player %u for a %s %s\n", id, TCG_ASK_IS_YGO(kind) ? "yu-gi-oh" : "card",
+    printf("[tcg] asked player %u for a %s %s\n", id, TCG_ASK_IS_YGO(kind) ? "yu-gi-oh" : TCG_ASK_IS_TT(kind) ? "triple triad" : "card",
            TCG_ASK_IS_DUEL(kind) ? "duel" : "trade");
 }
 
@@ -296,8 +309,11 @@ int Tcg_FieldAskFriend(void)
             // The game: the one we have cards for, or the side the CARD CASE was on last when we have both
             unsigned kind = TCG_ASK_DUEL;
             const struct YgoCollection *y = Ygo_GetCollection();
+            const struct TtCollection *t = Tt_GetCollection();
             if (y->optedIn && (!Tcg_GetCollection()->optedIn || (y->flags & YGO_FLAG_CASE_SIDE)))
                 kind = TCG_ASK_YGO_DUEL;
+            if (t->optedIn && ((t->flags & TT_FLAG_CASE_SIDE) || (!Tcg_GetCollection()->optedIn && !y->optedIn)))
+                kind = TCG_ASK_TT_DUEL;
             why = Tcg_CanAskFriend(i, kind);
             if (why)
             {
@@ -328,6 +344,8 @@ static void Task_Asked(u8 taskId)
         snprintf(line, sizeof(line), sSocial.kind == TCG_ASK_DUEL       ? "%s wants to have a card duel!\nWill you play?"
                                      : sSocial.kind == TCG_ASK_YGO_DUEL ? "%s wants to have a Yu-Gi-Oh! duel!\nWill you duel?"
                                      : sSocial.kind == TCG_ASK_YGO_TRADE ? "%s wants to trade a Yu-Gi-Oh! card!\nWill you trade?"
+                                     : sSocial.kind == TCG_ASK_TT_DUEL ? "%s wants a game of TRIPLE TRIAD!\nWill you play?"
+                                     : sSocial.kind == TCG_ASK_TT_TRADE ? "%s wants a TRIPLE TRIAD trade!\nWill you trade?"
                                                                         : "%s wants to trade a card!\nWill you trade?",
                  name);
         PlaySE(SE_POKENAV_CALL);
@@ -515,6 +533,10 @@ int Tcg_SocialExpectsInvite(unsigned from)
 int Tcg_SocialExpectsYgoInvite(unsigned from)
 {
     return sSocial.role == TCG_SOCIAL_DECK && sSocial.kind == TCG_ASK_YGO_DUEL && sSocial.seat == 1 && from == sSocial.peer;
+}
+int Tcg_SocialExpectsTtInvite(unsigned from)
+{
+    return sSocial.role == TCG_SOCIAL_DECK && sSocial.kind == TCG_ASK_TT_DUEL && sSocial.seat == 1 && from == sSocial.peer;
 }
 
 // Trades

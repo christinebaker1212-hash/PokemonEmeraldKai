@@ -177,6 +177,7 @@ carried from the last region played in spread or abolish (Tt_MixRules), the CARD
 only the player ever takes cards (trade rules ONE / DIFF / DIRECT / ALL); XIV decks of five; sellers in seven POKeMON
 CENTERS + the GAME CENTER 2F (shelves under 15% of the cards, BRONZE / SILVER / GOLD packs, MYTHRIL / IMPERIAL never
 sold); who plays which game tt_field.c Tt_FieldPick before tcg_field.c's own; "<save>.tt"; decisions
+games and trades with friends (tt_net.c over relay type 14, request kinds 4-5; scenarios tt_online, tt_trade);
 docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/tt/test_ui.sh).
 
 Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,

@@ -2082,8 +2082,21 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
 - Tests: tools/tt/test.sh (rules scenarios from real cards, 2000 random games replayed, the collection file, the
   spread odds, every card winnable), tools/tt/test_ui.sh (seller, case, practice, gamecenter, which, queen).
   Debug: `mp tt ...` (tt_ui.c Tt_Debug): starter, giveall, give ID N, packs P N, first N, auto, rules R HEX,
-  trade R T, carry R, queen R, favor, practice, case, shop R, queenmenu, focus N, win, state.
-- Not done: games and trades with friends online, tournaments.
+  trade R T, carry R, queen R, favor, practice, case, shop R, queenmenu, focus N, win, state, net, concede.
+- With friends (1.41.0, protocol 62, relay extension 255 version 8): asked like the other card games
+  (tcg_online.c request kinds TCG_ASK_TT_DUEL 4 / TCG_ASK_TT_TRADE 5; CO-OP > FRIENDS > CARD DUEL / TRADE with
+  TRIAD picked, or the CARD CASE button in front of them while the case is on its TRIPLE TRIAD side). A game:
+  tt_net.c (struct TtNet, type 14, the kind in byte 7) carries the asker's rules (their region's) and hand in the
+  INVITE, the other's hand in the ACCEPT (RANDOM: each deals their own from their collection), then each move with
+  the game's hash before and after; the next move waits for the ACK. Who starts comes from the session
+  (TtNet_First). A concession crossing a move on the wire takes the move back (the table gets 254, then 255); two
+  crossing: the asker's stands. tt_ui.c VS_FRIEND: the CHALLENGE screen picks the hand (the one asked sees "THEIR
+  RULES" once the invite is in), T_WAIT, the table with me = our seat, their moves replayed into U.duel while the
+  table is still (FriendStep). No cards change hands, no rules spread, no region played in; a win counts
+  onlineWins, ttwin and TABLE TALK. Trades: T_TRADE, cards beyond the deck in use, by stars (L / R), through
+  Tcg_SocialOffer / Confirm. Tests: tools/tt/test_net.c (in test.sh: 2000 linked games, the crossings, a tampered
+  move, the timeout), scenarios tt_online (+ tools/test/check_tt_online.sh: the same game on both) and tt_trade.
+- Not done: tournaments.
 
 ## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
 Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's

@@ -17,9 +17,12 @@
 #include "sound.h"
 #include "constants/songs.h"
 #include "tcg/integration.h"
+#include "tcg/npc.h"
+#include "tcg/online.h"
 #include "tt/collection.h"
 #include "tt/duel.h"
 #include "tt/integration.h"
+#include "tt/net.h"
 #include "tt/npc.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
@@ -43,6 +46,8 @@ enum
     T_SHOP,
     T_STARTER,
     T_QUEEN,
+    T_WAIT,       /* a friend's game: waiting for their hand */
+    T_TRADE,      /* a card trade with a friend */
     T_TRAVEL    /* the CARD QUEEN: where she goes next */
 };
 enum
@@ -50,7 +55,7 @@ enum
     KEY_A = 1, KEY_B = 2, KEY_SELECT = 4, KEY_START = 8, KEY_RIGHT = 16, KEY_LEFT = 32, KEY_UP = 64, KEY_DOWN = 128,
     KEY_R = 256, KEY_L = 512
 };
-enum { VS_NPC, VS_PRACTICE };
+enum { VS_NPC, VS_PRACTICE, VS_FRIEND };
 enum
 {
     ACT_NONE,
@@ -107,6 +112,8 @@ static struct
     int fromScript;
     void (*returnToGame)(void);
     int menuOn, menuCursor;
+    /* with a friend (tt_net.c) */
+    int online, concedeHeld, onlineDeckChosen;
 } U;
 
 static struct TtCollection *C(void) { return Tt_GetCollection(); }
@@ -143,13 +150,32 @@ static void Screen(int screen)
     U.age = 0;
 }
 int TtUi_Active(void) { return U.screen != T_CLOSED; }
-unsigned TtUi_HiddenFrom(void) { return 0; }
+unsigned TtUi_HiddenFrom(void)
+{
+    unsigned peer = Tt_Online()->peer;
+    return U.online && U.screen != T_CLOSED && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
+}
+static const char *PeerName(unsigned id)
+{
+    static char name[MP_NAME_LEN * 2 + 2];
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return "FRIEND";
+    MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN * 2 + 1);
+    return name;
+}
 unsigned TtUi_DuelingNow(void) { return U.screen == T_DUEL; }
 
 static void Close(void)
 {
     void (*callback)(void) = U.returnToGame;
     int script = U.fromScript;
+    if (U.online)
+        TtNet_Cancel(Tt_Online(), "The game was closed.");
+    U.online = 0;
+    U.concedeHeld = 0;
+    if (U.vs == VS_FRIEND && (Tcg_Social()->role == TCG_SOCIAL_DECK || Tcg_Social()->role == TCG_SOCIAL_TRADE))
+        Tcg_SocialLeave();
+    U.vs = VS_NPC;
     if (U.screen == T_DUEL || U.back == T_DUEL)
         TtBoard_End();
     U.message[0] = 0;
@@ -306,6 +332,7 @@ static void Numbers(char *out, size_t size, unsigned id)
     snprintf(out, size, "%c-%c-%c-%c", digits[c->side[TT_UP]], digits[c->side[TT_RIGHT]], digits[c->side[TT_DOWN]],
              digits[c->side[TT_LEFT]]);
 }
+#define NO_TRADE 0xFF   /* a friend's game */
 static void RulesLine(char *out, size_t size, uint32_t rules, unsigned trade)
 {
     unsigned r;
@@ -316,7 +343,10 @@ static void RulesLine(char *out, size_t size, uint32_t rules, unsigned trade)
             n += snprintf(out + n, size - (size_t)n, "%s%s", n ? ", " : "", Tt_RuleName(r));
     if (!n)
         n += snprintf(out, size, "No special rules");
-    snprintf(out + n, size - (size_t)n, "\nTRADE RULE: %s", Tt_TradeName(trade));
+    if (trade != NO_TRADE)
+        snprintf(out + n, size - (size_t)n, "\nTRADE RULE: %s", Tt_TradeName(trade));
+    else
+        snprintf(out + n, size - (size_t)n, "\nBetween friends no cards change hands.");
 }
 static void Portrait(int x, int y)
 {
@@ -396,7 +426,7 @@ static void Inspect(unsigned id, int back)
 /* ------------------------------------------------------------------ */
 /* Games                                                                */
 /* ------------------------------------------------------------------ */
-static unsigned Me(void) { return 0; }
+static unsigned Me(void) { return U.online ? Tt_Online()->seat : 0; }
 static const char *MyName(void)
 {
     static char name[16];
@@ -470,7 +500,24 @@ static void Results(void)
     int n = 0;
     U.rewarded = 1;
     for (i = 0; i < TT_HAND; i++)
-        Tt_See(c, U.duel.hand[1][i]);
+        Tt_See(c, U.dealt[1][i]);
+    if (U.vs == VS_FRIEND)
+    {
+        /* between friends: the records, never cards */
+        if (w == Me())
+        {
+            c->onlineWins++;
+            MP_Achieve_Count("ttwin", 1);
+            MP_Achieve_Count("cardfriend", 1);   /* TABLE TALK counts every card game */
+        }
+        else if (w == 2)
+            c->draws++;
+        TtBoard_Result(w == Me() ? "You won! Games between friends trade no cards."
+                       : w == 2  ? "A draw! Games between friends trade no cards."
+                                 : "Games between friends trade no cards.");
+        printf("[tt] friend's game %s\n", w == Me() ? "won" : w == 2 ? "drawn" : "lost");
+        return;
+    }
     if (U.vs == VS_PRACTICE)
     {
         TtBoard_Result(w == Me() ? "A fine game! Practice games trade no cards." : "Practice games trade no cards.");
@@ -557,31 +604,76 @@ static void Move(unsigned slot, unsigned cell)
         CountRules();
     TtBoard_Show(&U.duel);
 }
+/* The game ends without a move (a concession): the table shows the end */
+static void ShowEnd(void)
+{
+    U.duel.evCount = 1;
+    memset(&U.duel.ev[0], 0, sizeof(U.duel.ev[0]));
+    U.duel.ev[0].kind = TTE_END;
+    U.duel.ev[0].cell = 0xFF;
+    TtBoard_Show(&U.duel);
+}
+/* A friend's game: their moves as they come in, one at a time while the table is still (0: nothing to do) */
+static int FriendStep(void)
+{
+    struct TtNet *l = Tt_Online();
+    unsigned slot, cell;
+    if (U.concedeHeld && !U.duel.over && TtNet_Concede(l, SDL_GetTicks()))
+    {
+        U.concedeHeld = 0;
+        TtDuel_Concede(&U.duel, Me());
+        ShowEnd();
+        return 1;
+    }
+    if (U.duel.over || !TtBoard_Idle() || !TtNet_Take(l, &slot, &cell))
+        return 0;
+    if (slot == 254)
+        return 1;   /* our own move, taken back: their concession crossed it (the end below shows the game as agreed) */
+    if (slot == 255)
+    {
+        U.duel = l->game;
+        U.duel.noEvents = 0;
+        ShowEnd();
+        return 1;
+    }
+    Move(slot, cell);
+    return 1;
+}
 static void DuelStep(unsigned pressed, unsigned keys)
 {
     unsigned slot, cell;
     int r = TtBoard_Step(pressed, keys, &slot, &cell);
     if (r == TB_MOVE)
     {
+        if (U.online && !TtNet_Move(Tt_Online(), slot, cell, SDL_GetTicks()))
+        {
+            printf("[tt] move refused: %s\n", Tt_Online()->error);
+            return;
+        }
         Move(slot, cell);
         return;
     }
     if (r == TB_CONCEDE)
     {
-        /* giving up: a loss, nothing taken */
-        U.duel.over = 1;
-        U.duel.winner = Me() ^ 1;
-        U.duel.evCount = 1;
-        memset(&U.duel.ev[0], 0, sizeof(U.duel.ev[0]));
-        U.duel.ev[0].kind = TTE_END;
-        U.duel.ev[0].cell = 0xFF;
-        TtBoard_Show(&U.duel);
+        /* giving up: a loss, nothing taken (online, once our last move is acknowledged) */
+        if (U.online && !TtNet_Concede(Tt_Online(), SDL_GetTicks()))
+        {
+            U.concedeHeld = 1;
+            return;
+        }
+        TtDuel_Concede(&U.duel, Me());
+        ShowEnd();
         return;
     }
     if (r == TB_DONE)
     {
         printf("[tt] left the table (%s %u-%u)\n", U.duel.winner == Me() ? "won" : U.duel.winner == 2 ? "draw" : "lost",
                TtDuel_Score(&U.duel, Me()), TtDuel_Score(&U.duel, Me() ^ 1));
+        if (U.online)
+        {
+            TtNet_Cancel(Tt_Online(), "Game complete.");
+            U.online = 0;
+        }
         TtBoard_End();
         if (U.vs == VS_NPC && U.duel.winner == Me() && U.spoilAllowed)
         {
@@ -594,6 +686,20 @@ static void DuelStep(unsigned pressed, unsigned keys)
     }
     if (U.duel.over && !U.rewarded)
         Results();
+    if (U.online)
+    {
+        if (!FriendStep() && !U.duel.over)
+            TtBoard_SetWaiting(U.duel.toMove != Me() || Tt_Online()->pending);
+        if (sAutoPlay && !U.duel.over && TtBoard_Idle() && U.duel.toMove == Me() && !Tt_Online()->pending &&
+            ++U.aiDelay > 10)
+        {
+            TtAi_Choose(&U.duel, 3, U.frame, &slot, &cell);
+            U.aiDelay = 0;
+            if (TtNet_Move(Tt_Online(), slot, cell, SDL_GetTicks()))
+                Move(slot, cell);
+        }
+        return;
+    }
     if (U.duel.over || !TtBoard_Idle())
         return;
     if (U.duel.toMove != Me() || sAutoPlay)
@@ -1111,9 +1217,13 @@ static void ChallengeScreen(void)
     struct TtCollection *c = C();
     char line[200];
     unsigned i;
-    int y, random = (U.rules & TT_RULE_BIT(TT_RULE_RANDOM)) != 0;
+    int y, random = (U.rules & TT_RULE_BIT(TT_RULE_RANDOM)) != 0, friend = U.vs == VS_FRIEND;
+    /* a friend's rules: the asker's region's; the one asked sees them when the asker's hand comes in */
+    int rulesKnown = !friend || Tcg_Social()->seat == 0 || Tt_Online()->state >= TT_NET_INVITED;
+    if (friend)
+        random = 0;   /* (a friend's game: always the deck pick; RANDOM deals from the whole collection after) */
     TcgUi_Background();
-    TcgUi_SidePanel("CHALLENGE", U.opp.special != TT_SPECIAL_NONE ? 0x9a6a20 : TT_THEME);
+    TcgUi_SidePanel(friend ? "GAME" : "CHALLENGE", U.opp.special != TT_SPECIAL_NONE ? 0x9a6a20 : TT_THEME);
     G_RoundFill(6, 20, 92, 46, 0x1c3c4c, 255);
     G_RoundFrame(6, 20, 92, 46, 0x0c1820, 255);
     Portrait(28, 62);
@@ -1123,8 +1233,8 @@ static void ChallengeScreen(void)
         struct TtFace face;
         memset(&face, 0, sizeof(face));
         face.seat = TT_SEAT_RED;
-        face.back = !(U.rules & TT_RULE_BIT(TT_RULE_OPEN));
-        Tt_DrawCard(U.opp.hand[i], 50 + i * 8, 24 + (i % 2) * 3, 26, 32, 1, 1, 255, &face);
+        face.back = friend || !(U.rules & TT_RULE_BIT(TT_RULE_OPEN));
+        Tt_DrawCard(friend ? 1 : U.opp.hand[i], 50 + i * 8, 24 + (i % 2) * 3, 26, 32, 1, 1, 255, &face);
     }
     y = 68;
     if (U.opp.title[0])
@@ -1134,7 +1244,10 @@ static void ChallengeScreen(void)
     }
     G_Text(6, y, G_INK, G_INK_SHADOW, U.opp.name, 96, TF_SMALL);
     y += 12;
-    snprintf(line, sizeof(line), "%s RULES", Tt_RegionName(U.region));
+    if (friend && Tcg_Social()->seat == 1)
+        snprintf(line, sizeof(line), "THEIR RULES");
+    else
+        snprintf(line, sizeof(line), "%s RULES", Tt_RegionName(U.region));
     G_Text(6, y + 1, 0x505868, G_NO_SHADOW, line, 96, TF_NARROW);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
     G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, random ? "RANDOM: A HAND IS DEALT" : "PLAY WITH", 0, TF_NARROW);
@@ -1148,15 +1261,19 @@ static void ChallengeScreen(void)
         {
             if (i == TT_DECKS)
             {
-                TcgUi_Row(LIST_X + 2, 16 + (int)i * 13, LIST_W - 4, U.cursor == (int)i, 1, "NOT NOW", NULL);
+                TcgUi_Row(LIST_X + 2, 16 + (int)i * 13, LIST_W - 4, U.cursor == (int)i, 1, friend ? "LEAVE" : "NOT NOW",
+                          NULL);
                 continue;
             }
             TcgUi_Row(LIST_X + 2, 16 + (int)i * 13, LIST_W - 4, U.cursor == (int)i, DeckOk(i), Deck(i)->name,
                       i == c->activeDeck ? "IN USE" : NULL);
         }
-    RulesLine(line, sizeof(line), U.rules, U.trade);
+    if (!rulesKnown)
+        snprintf(line, sizeof(line), "%s plays by the rules where they are: they come with their hand.", U.opp.name);
+    else
+        RulesLine(line, sizeof(line), U.rules, friend ? NO_TRADE : U.trade);
     Strip(0, line);
-    TcgUi_Hints("{A} PLAY  {B} NOT NOW");
+    TcgUi_Hints(friend ? "{A} PLAY  {B} LEAVE" : "{A} PLAY  {B} NOT NOW");
 }
 
 static void SpoilsScreen(void)
@@ -1359,6 +1476,274 @@ static void QueenScreen(void)
     }
 }
 
+/* ------------------------------------------------------------------ */
+/* With a friend                                                        */
+/* ------------------------------------------------------------------ */
+/* The hand we bring: the deck in use, or under RANDOM five dealt from the whole collection */
+static int FriendHand(uint16_t *hand)
+{
+    struct TtCollection *c = C();
+    memcpy(hand, Deck(c->activeDeck)->cards, sizeof(uint16_t) * TT_HAND);
+    if (U.rules & TT_RULE_BIT(TT_RULE_RANDOM))
+        return Tt_DealRandom(c->owned, Tt_Rand(&c->rng), hand);
+    return 1;
+}
+static void StartFriendGame(void)
+{
+    struct TtNet *l = Tt_Online();
+    struct TtCollection *c = C();
+    unsigned me = l->seat, i;
+    U.online = 1;
+    U.duel = l->game;
+    U.duel.noEvents = 0;
+    U.duel.evCount = 0;
+    U.rules = l->rules;
+    memcpy(U.dealt[0], l->hand[me], sizeof(U.dealt[0]));
+    memcpy(U.dealt[1], l->hand[me ^ 1], sizeof(U.dealt[1]));
+    memcpy(U.opp.hand, l->hand[me ^ 1], sizeof(U.opp.hand));
+    for (i = 0; i < TT_HAND; i++)
+        Tt_See(c, U.dealt[1][i]);
+    U.rewarded = 0;
+    U.outcome = -1;
+    U.aiDelay = 0;
+    U.concedeHeld = 0;
+    TtBoard_SetFast(Tcg_GetCollection()->fastAnimations);
+    TtBoard_Lesson(0);
+    Screen(T_DUEL);
+    TtBoard_Begin(&U.duel, me, MyName(), U.opp.name, U.opp.music, 1);
+    printf("[tt] game vs %s (online, seat %u, rules %x)\n", U.opp.name, me, U.rules);
+}
+static void OnlineStep(void)
+{
+    struct TtNet *l = Tt_Online();
+    const struct TcgSocial *s = Tcg_Social();
+    if (U.vs != VS_FRIEND || U.screen == T_TRADE || U.screen == T_CLOSED)
+        return;
+    if (s->peerLeft && U.screen != T_DUEL && !U.message[0])
+    {
+        Say(ACT_CLOSE, "%s left. Nothing was lost.", U.opp.name);
+        return;
+    }
+    /* The friend who said yes: the asker's rules come with their hand, and ours goes back once a deck is picked */
+    if (s->seat == 1 && l->state == TT_NET_INVITED && l->peer == s->peer && l->session == s->session)
+    {
+        U.rules = l->rules;
+        if (U.onlineDeckChosen)
+        {
+            uint16_t hand[TT_HAND];
+            if (!FriendHand(hand))
+            {
+                TtNet_Cancel(l, "RANDOM couldn't deal a hand.");
+                Say(ACT_CLOSE, "RANDOM deals five of your own cards, and you own fewer than five.");
+                return;
+            }
+            TtNet_Accept(l, hand, SDL_GetTicks());
+        }
+    }
+    if (U.screen == T_WAIT && l->state == TT_NET_PLAYING)
+        StartFriendGame();
+    if (U.online && l->state == TT_NET_ENDED && !l->game.over && !U.message[0])
+    {
+        U.online = 0;
+        if (U.screen == T_DUEL)
+            TtBoard_End();
+        Screen(T_WAIT);
+        Say(ACT_CLOSE, "%s", l->error[0] ? l->error : "The game ended.");
+        printf("[tt] online game ended: %s\n", l->error);
+    }
+}
+static void PickFriendDeck(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    struct TtCollection *c = C();
+    if (!DeckOk((unsigned)U.cursor))
+    {
+        Say(ACT_NONE, "That deck isn't ready.");
+        return;
+    }
+    c->activeDeck = (uint8_t)U.cursor;
+    U.onlineDeckChosen = 1;
+    if (s->seat == 0)
+    {
+        uint16_t hand[TT_HAND];
+        if (!FriendHand(hand))
+        {
+            Say(ACT_NONE, "RANDOM deals five of your own cards, and you own fewer than five.");
+            return;
+        }
+        if (!TtNet_Invite(Tt_Online(), s->peer, s->session, U.rules, hand, SDL_GetTicks()))
+        {
+            Say(ACT_CLOSE, "The game couldn't start.");
+            return;
+        }
+    }
+    U.online = 1;
+    Screen(T_WAIT);
+}
+static void WaitScreen(void)
+{
+    char line[96];
+    int dots = (U.frame / 20) % 4;
+    struct TtFace face;
+    TcgUi_Background();
+    TcgUi_SidePanel("GAME", TT_THEME);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    snprintf(line, sizeof(line), "Waiting for %s%.*s", U.opp.name, dots, "...");
+    G_Text(LIST_X + 8, 20, G_INK, G_INK_SHADOW, line, LIST_W - 14, TF_SMALL);
+    memset(&face, 0, sizeof(face));
+    face.seat = TT_SEAT_RED;
+    face.back = 1;
+    /* a card turning over and over */
+    {
+        float turn = (float)((U.frame % 90) / 90.0 * 6.2831853);
+        float w = 30.0f * (float)SDL_fabs(SDL_cos(turn));
+        Tt_DrawCard(1, LIST_X + LIST_W / 2 - w / 2, 44.0f, w < 1 ? 1 : w, 37, 1, 1, 255, &face);
+    }
+    Strip(0, "They're choosing their hand.");
+    TcgUi_Hints("{B} LEAVE");
+}
+/* Trading: copies past the one the deck in use needs */
+static int Tradable(unsigned id)
+{
+    const struct TtDeck *d = Deck(C()->activeDeck);
+    unsigned i, inDeck = 0;
+    if (!Tt_Card(id) || Tt_Card(id)->stars != (unsigned)U.stars)
+        return 0;
+    for (i = 0; i < TT_HAND; i++)
+        inDeck |= d->cards[i] == id;
+    return Owned(id) > inDeck;
+}
+static unsigned TradeList(uint16_t *out)
+{
+    uint16_t all[TT_CARD_MAX + 1];
+    unsigned n = StarList((unsigned)U.stars, all, 1), i, k = 0;
+    for (i = 0; i < n; i++)
+        if (Tradable(all[i]))
+            out[k++] = all[i];
+    return k;
+}
+static void TradeScreen(void)
+{
+    static uint16_t list[TT_CARD_MAX + 1];
+    const struct TcgSocial *s = Tcg_Social();
+    unsigned mine = s->myOffer, theirs = Tt_Card(s->theirOffer) ? s->theirOffer : 0;
+    int n = (int)TradeList(list), i, page = 7, start;
+    char line[160];
+    TcgUi_Background();
+    snprintf(line, sizeof(line), "TRIPLE TRIAD TRADE WITH %s", U.opp.name);
+    TcgUi_TopBar(line);
+    TcgUi_ListBox(4, 20, 112, 62);
+    TcgUi_ListBox(124, 20, 112, 62);
+    G_Text(10, 22, 0x606878, G_NO_SHADOW, "YOU OFFER", 0, TF_NARROW);
+    G_Text(130, 22, 0x606878, G_NO_SHADOW, "THEY OFFER", 0, TF_NARROW);
+    if (mine)
+    {
+        Card(mine, 10, 32, 36, 45, TT_SEAT_BLUE, 255);
+        G_Text(50, 36, G_INK, G_INK_SHADOW, Tt_Card(mine)->name, 64, TF_SMALL);
+        Tt_DrawStars(Tt_Card(mine)->stars, 50, 50, 9, 255);
+        if (s->myConfirm)
+            G_Text(50, 64, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    if (theirs)
+    {
+        Card(theirs, 130, 32, 36, 45, TT_SEAT_RED, 255);
+        G_Text(170, 36, G_INK, G_INK_SHADOW, Tt_Card(theirs)->name, 64, TF_SMALL);
+        Tt_DrawStars(Tt_Card(theirs)->stars, 170, 50, 9, 255);
+        if (s->theirConfirm)
+            G_Text(170, 64, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    else
+        G_Text(170, 46, 0x909090, G_NO_SHADOW, "Choosing...", 0, TF_SMALL);
+    G_RoundFill(0, 84, 240, 15, 0x203040, 230);
+    StarTabs(4, 85, U.stars);
+    start = U.cursor / page * page;
+    for (i = 0; i < page && start + i < n; i++)
+    {
+        int x = 8 + i * 33, on = start + i == U.cursor;
+        Card(list[start + i], (float)x, (float)(103 - (on ? 2 : 0)), 30, 37, TT_SEAT_BLUE, 255);
+        if (on)
+            G_Frame(x - 2, 99, 34, 41, 0xe82820, 255);
+    }
+    if (!n)
+        G_Text(10, 108, G_WHITE, 0x204030, "No spare cards of these stars to offer.", 0, TF_SMALL);
+    TcgUi_Hints(s->myOffer && s->theirOffer ? (s->myConfirm ? "WAITING FOR THEM  {B} LEAVE" : "{A} OFFER  {START} TRADE!  {B} LEAVE")
+                                            : "{A} OFFER  {L}{R} STARS  {B} LEAVE");
+}
+static void TradeStep(unsigned pressed)
+{
+    static uint16_t list[TT_CARD_MAX + 1];
+    const struct TcgSocial *s = Tcg_Social();
+    struct TtCollection *c = C();
+    int n = (int)TradeList(list);
+    /* Both confirmed: the trade is done, even when the friend's leaving came in with their confirm */
+    if (s->myConfirm && s->theirConfirm && s->myOffer && s->theirOffer)
+    {
+        unsigned mine = s->myOffer, theirs = s->theirOffer;
+        int fresh;
+        if (!Tt_Card(theirs) || mine > TT_CARD_MAX || !c->owned[mine])
+        {
+            Tcg_SocialLeave();
+            Say(ACT_CLOSE, "That trade couldn't be made.");
+            return;
+        }
+        c->owned[mine]--;
+        fresh = Tt_Give(c, theirs);
+        c->trades++;
+        MP_Achieve_Unlock("cardtrade");
+        if (Tt_Card(theirs)->stars == 5)
+            MP_Achieve_Unlock("tt5star");
+        if (Tt_OwnedCount(c, 0, NULL) >= TT_CARD_COUNT)
+            MP_Achieve_Unlock("ttall");
+        printf("[tt] traded card %u for %u\n", mine, theirs);
+        Tcg_SocialLeave();
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        Say(ACT_CLOSE, "You traded your %s for %s!%s", Tt_Card(mine)->name, Tt_Card(theirs)->name,
+            fresh ? " New to your collection!" : "");
+        return;
+    }
+    if (s->peerLeft)
+    {
+        Say(ACT_CLOSE, "%s left the trade.", U.opp.name);
+        Tcg_SocialLeave();
+        return;
+    }
+    if (pressed & (KEY_L | KEY_R))
+    {
+        U.stars = (U.stars + (pressed & KEY_R ? 0 : TT_MAX_STARS - 2)) % TT_MAX_STARS + 1;
+        U.cursor = 0;
+        PlaySE(SE_SELECT);
+        return;
+    }
+    {
+        int old = U.cursor;
+        if (pressed & KEY_LEFT)
+            U.cursor--;
+        if (pressed & KEY_RIGHT)
+            U.cursor++;
+        if (U.cursor < 0)
+            U.cursor = 0;
+        if (U.cursor >= n)
+            U.cursor = n ? n - 1 : 0;
+        if (old != U.cursor)
+            PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_A && n)
+    {
+        Tcg_SocialOffer(list[U.cursor]);
+        PlaySE(SE_RG_CARD_FLIPPING);
+    }
+    else if (pressed & KEY_START && s->myOffer && s->theirOffer && !s->myConfirm)
+    {
+        Tcg_SocialConfirm();
+        PlaySE(SE_SELECT);
+    }
+    else if (pressed & KEY_B)
+    {
+        PlaySE(SE_SELECT);
+        Close();
+    }
+}
+
 void TtUi_Draw(void)
 {
     switch (U.screen)
@@ -1377,6 +1762,8 @@ void TtUi_Draw(void)
     case T_SHOP: ShopScreen(); break;
     case T_STARTER: StarterScreen(); break;
     case T_QUEEN: QueenScreen(); break;
+    case T_WAIT: WaitScreen(); break;
+    case T_TRADE: TradeScreen(); break;
     default: break;
     }
     TcgUi_MessageBox(U.message, U.asking, U.askYes);
@@ -1428,6 +1815,45 @@ void TtUi_OpenChallenge(const struct TtOpponent *opponent)
     }
     printf("[tt] challenge: %s in %s, rules %x trade %u, mix %u %u\n", U.opp.name, Tt_RegionName(U.region), U.rules,
            U.trade, mix.kind, mix.rule);
+}
+/* A friend said yes to a game: both pick a hand (the asker's invite carries their rules and theirs, tt_net.c) */
+void TtUi_OpenOnlineDeck(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    static struct TcgOpponent face;
+    unsigned region = Tt_CurrentRegion();
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    memset(&U.opp, 0, sizeof(U.opp));
+    snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(s->peer));
+    memset(&face, 0, sizeof(face));
+    Tcg_PortraitOfPlayer(s->peer, &face);
+    U.opp.portraitW = face.portraitW;
+    U.opp.portraitH = face.portraitH;
+    memcpy(U.opp.portrait, face.portrait, sizeof(U.opp.portrait));
+    U.opp.special = TT_SPECIAL_NONE;
+    U.opp.online = 1;
+    U.opp.music = MUS_RG_UNION_ROOM;
+    U.region = region < TT_REGIONS ? region : TT_REGION_PETALBURG;
+    U.rules = s->seat == 0 ? C()->regionRules[U.region] : 0;
+    U.trade = TT_TRADE_ONE;
+    Open(T_CHALLENGE);
+    U.vs = VS_FRIEND;
+    U.online = 0;
+    U.onlineDeckChosen = 0;
+    U.cursor = C()->activeDeck;
+    printf("[tt] friend's game: %s, seat %u\n", U.opp.name, s->seat);
+}
+void TtUi_OpenOnlineTrade(void)
+{
+    U.returnToGame = NULL;
+    U.fromScript = 0;
+    memset(&U.opp, 0, sizeof(U.opp));
+    snprintf(U.opp.name, sizeof(U.opp.name), "%s", PeerName(Tcg_Social()->peer));
+    Open(T_TRADE);
+    U.vs = VS_FRIEND;
+    U.stars = 1;
+    printf("[tt] trade with %s\n", U.opp.name);
 }
 void TtUi_OpenSeller(unsigned region)
 {
@@ -1619,6 +2045,7 @@ int TtUi_Step(unsigned keys)
     }
     else
         U.held = 0;
+    OnlineStep();
     if (U.screen == T_DUEL && !U.message[0])
     {
         DuelStep(pressed, keys);
@@ -1925,7 +2352,8 @@ int TtUi_Step(unsigned keys)
         break;
     case T_CHALLENGE:
     {
-        int random = (U.rules & TT_RULE_BIT(TT_RULE_RANDOM)) != 0, rows = random ? 2 : TT_DECKS + 1;
+        int random = (U.rules & TT_RULE_BIT(TT_RULE_RANDOM)) != 0 && U.vs != VS_FRIEND,
+            rows = random ? 2 : TT_DECKS + 1;
         MoveCursor(pressed, rows, 1);
         if (pressed & KEY_B || (pressed & KEY_A && U.cursor == rows - 1))
         {
@@ -1935,7 +2363,9 @@ int TtUi_Step(unsigned keys)
         else if (pressed & KEY_A)
         {
             PlaySE(SE_SELECT);
-            if (random)
+            if (U.vs == VS_FRIEND)
+                PickFriendDeck();
+            else if (random)
             {
                 uint16_t none[TT_HAND] = {0};
                 StartGame(DeckOk(c->activeDeck) ? Deck(c->activeDeck)->cards : none);
@@ -1950,6 +2380,16 @@ int TtUi_Step(unsigned keys)
         }
         break;
     }
+    case T_WAIT:
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        break;
+    case T_TRADE:
+        TradeStep(pressed);
+        break;
     case T_SPOILS:
         if (pressed & KEY_LEFT && U.cursor > 0)
             U.cursor--, PlaySE(SE_SELECT);
@@ -2188,6 +2628,24 @@ void Tt_Debug(const char *command)
         U.duel.ev[0].cell = 0xFF;
         TtBoard_Show(&U.duel);
         printf("[tt] won by the harness (table %d)\n", TtBoard_DebugPhase());
+    }
+    else if (!strcmp(command, "net"))
+    {
+        struct TtNet *l = Tt_Online();
+        printf("[tt-net] state %u seat %u seq %u pending %u hash %08x local %08x over %u winner %u score %u-%u\n",
+               l->state, l->seat, l->sequence, l->pending, (unsigned)TtDuel_Hash(&l->game), (unsigned)TtDuel_Hash(&U.duel),
+               l->game.over, l->game.winner, TtDuel_Score(&l->game, 0), TtDuel_Score(&l->game, 1));
+    }
+    else if (!strcmp(command, "concede") && U.screen == T_DUEL && !U.duel.over)
+    {
+        if (U.online && !TtNet_Concede(Tt_Online(), SDL_GetTicks()))
+            U.concedeHeld = 1;
+        else
+        {
+            TtDuel_Concede(&U.duel, Me());
+            ShowEnd();
+        }
+        printf("[tt] conceded by the harness\n");
     }
     else if (!strcmp(command, "state"))
         printf("[tt] screen %d cards %u decks ready %d region %s rules %x trade %u carried %x from %u queen %s wins %u "

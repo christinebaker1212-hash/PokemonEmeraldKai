@@ -85,5 +85,8 @@ The user's request (the third card game), how each part was read, and the choice
   pack's, the strip's) the same at 7x10, shrunk once at build time; the board's 40x49 cards keep the 5x7 pixel font,
   its pixels whole screen pixels. Faces between the board's size and full size are averaged down on the CPU
   (tt_gfx.c Shrunk), not left to the renderer's two-sample scaling, which made them jagged.
+- Friends: a game between friends trades no cards whatever the TRADE RULE (only the player ever takes cards, and
+  between two players neither would be "the player"), and spreads no rules (the regions are each save's own). The
+  one who asks brings the rules of the region they're in. Trades: any card beyond the deck in use, one for one.
 - The computer player: negamax with alpha-beta (FF8's searchBestMoveStack does a depth search too), to the end of
   the game when six squares or fewer are left; four levels.

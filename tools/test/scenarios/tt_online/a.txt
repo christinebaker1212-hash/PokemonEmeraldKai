@@ -1,0 +1,27 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp tt starter
+mp tt rules 0 7
+mp tt auto
+barrier ready 2
+mp cards ask 1 4
+wait 200
+rendershot a_deck
+press A 2
+wait 300
+rendershot a_table
+wait 600
+rendershot a_play
+mp tt net
+wait 2400
+mp tt net
+rendershot a_end
+barrier over 2
+mp tt net
+press A 2
+wait 120
+press A 2
+wait 120
+quit

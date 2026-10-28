@@ -1,0 +1,8 @@
+# A TRIPLE TRIAD card trade with a friend: ALICE asks BOB (kind 5), both offer a spare card, both confirm; each gets
+# the other's
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=200
+EXPECT_A=("asked player 1 for a triple triad trade" "trade with BOB" "traded card 10 for 13")
+EXPECT_B=("trade with ALICE" "traded card 13 for 10")

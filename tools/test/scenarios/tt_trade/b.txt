@@ -1,0 +1,21 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp tt starter
+mp tt give 13 2
+barrier ready 2
+wait 150
+press A 2
+wait 150
+mp cards offer 13
+barrier offered 2
+wait 120
+rendershot b_trade
+press START 2
+wait 120
+rendershot b_done
+mp tt state
+press A 2
+wait 60
+quit

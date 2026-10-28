@@ -7,6 +7,7 @@
 #include "global.h"
 #include "mp.h"
 #include "tt/integration.h"
+#include "tt/net.h"
 extern char gPlatformSavePath[512];
 static struct TtCollection sCollection;
 static int sLoaded;
@@ -40,4 +41,32 @@ void Tt_WriteSidecar(void)
         return;
     snprintf(path, sizeof(path), "%s.tt", gPlatformSavePath);
     Tt_CollectionSave(&sCollection, path);
+}
+
+/* ---- games with friends (tt_net.c) */
+static struct TtNet sOnline;
+static int sOnlineInit;
+static void OnlineSend(void *context, unsigned to, const uint8_t *data, unsigned len)
+{
+    (void)context;
+    MP_SendRelay((u8)to, data, (u16)len);
+}
+struct TtNet *Tt_Online(void)
+{
+    if (!sOnlineInit)
+    {
+        TtNet_Init(&sOnline, OnlineSend, NULL);
+        sOnlineInit = 1;
+    }
+    return &sOnline;
+}
+void Tt_OnlineReceive(unsigned from, const unsigned char *data, unsigned len, int willing)
+{
+    TtNet_Receive(Tt_Online(), from, data, len, willing, SDL_GetTicks());
+}
+void Tt_OnlineTick(void)
+{
+    if (sOnlineInit)
+        TtNet_Tick(&sOnline, MP_IsConnected() && sOnline.peer < MP_MAX_PLAYERS && gMpPlayers[sOnline.peer].present,
+                   SDL_GetTicks());
 }

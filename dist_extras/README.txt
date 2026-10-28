@@ -1240,8 +1240,9 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   PRIZES), gives a CARD CASE to anyone without one, and the
                   players at its table duel you when you talk to them.
   Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE (LEFT /
-                  RIGHT picks MOEMON or YU-GI-OH!), or the CARD CASE button
-                  in front of them (the game whose side the case was on).
+                  RIGHT picks MOEMON, YU-GI-OH! or TRIAD), or the CARD CASE
+                  button in front of them (the game whose side the case was
+                  on).
   Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
                   pictures in Game Boy card frames), GAME BOY (the Game Boy
                   pictures) or FULL CARD (the whole printed cards). CARD
@@ -1384,6 +1385,11 @@ FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
                   never more than a few dozen cards), BRONZE, SILVER and GOLD
                   packs (three cards of one, two or three stars), and buys
                   spare copies. MYTHRIL and IMPERIAL packs are never sold.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE with
+                  TRIAD picked (LEFT / RIGHT), or the CARD CASE button in
+                  front of them while the case is on its TRIPLE TRIAD side.
+                  The one who asks brings the rules of where they are; each
+                  picks a hand. Games between friends trade no cards.
   Achievements    A TRIPLE TRIAD tab of their own.
 The Triple Triad cards are saved with your game (the save file's .tt file).
 FINAL FANTASY XIV and FINAL FANTASY VIII are Square Enix's: the card pictures

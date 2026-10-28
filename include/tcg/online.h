@@ -19,10 +19,13 @@ enum
     TCG_ASK_TRADE,
     TCG_ASK_YGO_DUEL,    /* Yu-Gi-Oh! (src/ygo/ygo_net.c, ygo_ui.c) */
     TCG_ASK_YGO_TRADE,
+    TCG_ASK_TT_DUEL,     /* Triple Triad (src/tt/tt_net.c, tt_ui.c) */
+    TCG_ASK_TT_TRADE,
     TCG_ASK_KINDS
 };
-#define TCG_ASK_IS_YGO(kind) ((kind) >= TCG_ASK_YGO_DUEL)
-#define TCG_ASK_IS_DUEL(kind) ((kind) == TCG_ASK_DUEL || (kind) == TCG_ASK_YGO_DUEL)
+#define TCG_ASK_IS_YGO(kind) ((kind) == TCG_ASK_YGO_DUEL || (kind) == TCG_ASK_YGO_TRADE)
+#define TCG_ASK_IS_TT(kind) ((kind) == TCG_ASK_TT_DUEL || (kind) == TCG_ASK_TT_TRADE)
+#define TCG_ASK_IS_DUEL(kind) ((kind) == TCG_ASK_DUEL || (kind) == TCG_ASK_YGO_DUEL || (kind) == TCG_ASK_TT_DUEL)
 enum
 {
     TCG_ANSWER_NO,
@@ -44,6 +47,7 @@ void Tcg_SocialTick(void);
 void Tcg_SocialReceive(unsigned from, const unsigned char *data, unsigned len);
 int Tcg_SocialExpectsInvite(unsigned from);
 int Tcg_SocialExpectsYgoInvite(unsigned from);
+int Tcg_SocialExpectsTtInvite(unsigned from);
 void Tcg_SocialOffer(unsigned card);
 void Tcg_SocialConfirm(void);
 void Tcg_SocialLeave(void);
