@@ -2,7 +2,7 @@
 """Packs the Triple Triad pictures (tools/tt/metadata/, from tools/tt/fetch_cards.py) into graphics/tt/cards.bin:
 each card's face at full size (104x128), at the board's size (TT_BOARD_W x TT_BOARD_H, scaled down here with
 Lanczos so it stays sharp) and its 40x40 icon; then the extras: the card back at both sizes, the card's backing (the
-grey plate that shows the owner's color) at both sizes, the star and the four type icons.
+grey plate that shows the owner's color) at both sizes, the star, the four type icons and the large numbers (0-9 and FF8's A).
 
 File: "TTCA", u32 highest id, u32 extras; per id from 1: 3 x (u32 offset, u32 size); per extra (u32, u32); PNGs."""
 import io, json, os, struct
@@ -18,37 +18,48 @@ STAR = (2, 258, 28, 285)
 TYPES = [(79, 258, 117, 298), (124, 258, 160, 298), (168, 258, 204, 298), (34, 258, 73, 298)]   # PRIMAL, SCION, SOCIETY, GARLEAN
 
 def card_back():
-    """The card back: XIV's own is only a placeholder, so a back of our own, drawn at four times the size and scaled
-    down: a deep blue card in the card frame's shape, a gold border, a lattice and three interlocked rings."""
-    import math
-    from PIL import ImageDraw
-    S = 4
-    W, H = 104 * S, 128 * S
-    frame = Image.open(os.path.join(META, 'frame.png')).convert('RGBA').crop(BACKING).resize((W, H), Image.LANCZOS)
-    mask = frame.split()[3]
-    im = Image.new('RGBA', (W, H))
-    d = ImageDraw.Draw(im)
-    for y in range(H):   # a gradient, lighter at the top
-        t = y / H
-        d.line([(0, y), (W, y)], fill=(int(28 + 20 * (1 - t)), int(40 + 30 * (1 - t)), int(92 + 50 * (1 - t)), 255))
-    step = 14 * S   # the lattice
-    for k in range(-H, W + H, step):
-        d.line([(k, 0), (k + H, H)], fill=(70, 96, 170, 255), width=S)
-        d.line([(k, H), (k + H, 0)], fill=(70, 96, 170, 255), width=S)
-    m = 7 * S   # the gold borders
-    d.rounded_rectangle([m, m, W - m, H - m], radius=6 * S, outline=(216, 176, 96, 255), width=3 * S)
-    d.rounded_rectangle([m + 5 * S, m + 5 * S, W - m - 5 * S, H - m - 5 * S], radius=4 * S,
-                        outline=(150, 112, 50, 255), width=S)
-    cx, cy, r = W / 2, H / 2, 26 * S   # three interlocked rings in the middle
-    d.ellipse([cx - r - 6 * S, cy - r - 6 * S, cx + r + 6 * S, cy + r + 6 * S], fill=(20, 28, 70, 255),
-              outline=(216, 176, 96, 255), width=2 * S)
-    for k in range(3):
-        a = math.radians(90 + k * 120)
-        rx, ry, rr = cx + math.cos(a) * r * 0.36, cy - math.sin(a) * r * 0.36, r * 0.52
-        d.ellipse([rx - rr, ry - rr, rx + rr, ry + rr], outline=(232, 196, 104, 255), width=3 * S)
-    d.ellipse([cx - 3 * S, cy - 3 * S, cx + 3 * S, cy + 3 * S], fill=(255, 236, 170, 255))
-    im.putalpha(mask)
-    return im.resize((104, 128), Image.LANCZOS)
+    """The card back: the user's picture (graphics/tt/back.png, docs/user_images/46), at the card's 104x128."""
+    return Image.open(os.path.join(ROOT, 'graphics', 'tt', 'back.png')).convert('RGBA').resize((104, 128), Image.LANCZOS)
+
+DIGIT_W, DIGIT_H = 10, 14
+def big_digits():
+    """The large numbers 0-9 (graphics/tt/numbers.png, docs/user_images/47: grey on a blue key) and an A drawn in
+    their style: an atlas of 11 cells of 10x14, transparent around them."""
+    src = Image.open(os.path.join(ROOT, 'graphics', 'tt', 'numbers.png')).convert('RGB')
+    key = src.getpixel((0, 0))
+    out = Image.new('RGBA', (DIGIT_W * 11, DIGIT_H))
+    x, k = 0, 0
+    while x < src.width and k < 10:   # each digit: a run of columns that aren't all the key
+        if all(src.getpixel((x, y)) == key for y in range(src.height)):
+            x += 1
+            continue
+        x0 = x
+        while x < src.width and not all(src.getpixel((x, y)) == key for y in range(src.height)):
+            x += 1
+        top = min(y for y in range(src.height) if any(src.getpixel((i, y)) != key for i in range(x0, x)))
+        for i in range(x0, x):
+            for y in range(top, min(top + DIGIT_H, src.height)):
+                c = src.getpixel((i, y))
+                if c != key:
+                    out.putpixel((k * DIGIT_W + (DIGIT_W - (x - x0)) // 2 + i - x0, y - top), c + (255,))
+        k += 1
+    assert k == 10, k
+    # The A: Final Fantasy VIII's own, from its menu sheet (graphics/tt/ff8_menu.png, docs/user_images/48)
+    sheet = Image.open(os.path.join(ROOT, 'graphics', 'tt', 'ff8_menu.png')).convert('RGB')
+    for y in range(DIGIT_H):
+        for x in range(DIGIT_W):
+            c = sheet.getpixel((178 + x, 84 + y))
+            if c != key:
+                out.putpixel((10 * DIGIT_W + x, y), c + (255,))
+    return out
+
+def mid_digits():
+    """The large numbers at 7x10 for the mid-sized cards (a pack's cards, the spoils): each cell shrunk alone"""
+    big = big_digits()
+    out = Image.new('RGBA', (7 * 11, 10))
+    for k in range(11):
+        out.paste(big.crop((k * DIGIT_W, 0, (k + 1) * DIGIT_W, DIGIT_H)).resize((7, 10), Image.LANCZOS), (k * 7, 0))
+    return out
 
 def png(im):
     b = io.BytesIO()
@@ -62,7 +73,7 @@ def main():
     back = card_back()
     backing = frame.crop(BACKING).resize((104, 128), Image.LANCZOS)
     extras = [back, back.resize(BOARD, Image.LANCZOS), backing, backing.resize(BOARD, Image.LANCZOS),
-              frame.crop(STAR)] + [frame.crop(t) for t in TYPES]
+              frame.crop(STAR)] + [frame.crop(t) for t in TYPES] + [big_digits(), mid_digits()]
     blobs, index = [], {}
     for c in cards:
         big = Image.open(os.path.join(META, 'big_%d.png' % c['id'])).convert('RGBA')

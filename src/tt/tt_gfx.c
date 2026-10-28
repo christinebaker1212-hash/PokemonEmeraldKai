@@ -14,7 +14,9 @@ void stbi_image_free(void *);
 extern const unsigned char gTtCardArt[], gTtCardArtEnd[];
 
 enum { PIC_BIG, PIC_BOARD, PIC_ICON };
-enum { EX_BACK_BIG, EX_BACK_BOARD, EX_PLATE_BIG, EX_PLATE_BOARD, EX_STAR, EX_TYPES };
+enum { EX_BACK_BIG, EX_BACK_BOARD, EX_PLATE_BIG, EX_PLATE_BOARD, EX_STAR, EX_TYPES, EX_DIGITS = EX_TYPES + 4, EX_DIGITS_MID };
+#define DIGIT_W 10   /* the large numbers (tools/tt/build_art.py big_digits): 0-9 and A, 10x14 each */
+#define DIGIT_H 14
 
 static uint32_t Rd32(const unsigned char *p) { return p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24; }
 
@@ -96,7 +98,7 @@ struct Pic
 #define PICS 96
 static struct Pic sPics[PICS];
 static unsigned sAge;
-static SDL_Texture *sExtra[EX_TYPES + 4];
+static SDL_Texture *sExtra[EX_DIGITS_MID + 1];
 static SDL_Texture *sPlate[2][3];   // [big][seat]
 static SDL_Texture *sGlyph[2];      // the numbers: fill (white) and edge
 static SDL_Renderer *sOwner;
@@ -130,6 +132,60 @@ static void Check(void)
     sOwner = G_R();
 }
 
+// A face at an in-between size (a revealed pack, a flip near full size): the full picture averaged down on the CPU,
+// which the renderer's own scaling (two samples a pixel) can't do without jagged edges
+#define PIC_SIZED 3
+static SDL_Texture *Shrunk(const unsigned char *png, unsigned size, int tw, int th)
+{
+    SDL_Renderer *r = G_R();
+    SDL_Texture *t;
+    unsigned char *rgba;
+    static unsigned char out[TT_BIG_W * TT_BIG_H * 4];
+    int w, h, channels, x, y;
+    if (!r || !png || tw < 1 || th < 1 || tw > TT_BIG_W || th > TT_BIG_H)
+        return NULL;
+    rgba = stbi_load_from_memory(png, (int)size, &w, &h, &channels, 4);
+    if (!rgba)
+        return NULL;
+    for (y = 0; y < th; y++)
+        for (x = 0; x < tw; x++)
+        {
+            // the source rectangle under this pixel, with partial pixels weighted; colors weighted by alpha
+            float x0 = (float)x * w / tw, x1 = (float)(x + 1) * w / tw, y0 = (float)y * h / th, y1 = (float)(y + 1) * h / th;
+            float acc[4] = {0, 0, 0, 0}, total = 0;
+            int sx, sy;
+            for (sy = (int)y0; sy < h && sy < y1; sy++)
+                for (sx = (int)x0; sx < w && sx < x1; sx++)
+                {
+                    float fx = G_MinF((float)sx + 1, x1) - G_MaxF((float)sx, x0);
+                    float fy = G_MinF((float)sy + 1, y1) - G_MaxF((float)sy, y0), f = fx * fy;
+                    const unsigned char *p = rgba + (sy * w + sx) * 4;
+                    float a = p[3] * f;
+                    acc[0] += p[0] * a;
+                    acc[1] += p[1] * a;
+                    acc[2] += p[2] * a;
+                    acc[3] += a;
+                    total += f;
+                }
+            {
+                unsigned char *o = out + (y * tw + x) * 4;
+                int k;
+                for (k = 0; k < 3; k++)
+                    o[k] = (unsigned char)(acc[3] > 0 ? acc[k] / acc[3] + 0.5f : 0);
+                o[3] = (unsigned char)(total > 0 ? acc[3] / total + 0.5f : 0);
+            }
+        }
+    stbi_image_free(rgba);
+    t = SDL_CreateTexture(r, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, tw, th);
+    if (t)
+    {
+        SDL_UpdateTexture(t, NULL, out, tw * 4);
+        SDL_SetTextureBlendMode(t, SDL_BLENDMODE_BLEND);
+        SDL_SetTextureScaleMode(t, SDL_ScaleModeLinear);
+    }
+    return t;
+}
+
 static SDL_Texture *Picture(unsigned id, unsigned kind)
 {
     unsigned i, oldest = 0, size;
@@ -154,8 +210,16 @@ static SDL_Texture *Picture(unsigned id, unsigned kind)
     if (sPics[oldest].t)
         SDL_DestroyTexture(sPics[oldest].t);
     {
-        const unsigned char *png = Blob(id, kind, &size);   /* (before size is read) */
-        sPics[oldest].t = png ? Decode(png, size, 0, kind != PIC_BOARD, &w, &h) : NULL;
+        if (kind >= PIC_SIZED)
+        {
+            const unsigned char *png = Blob(id, PIC_BIG, &size);
+            sPics[oldest].t = png ? Shrunk(png, size, (int)(kind >> 8 & 0xFF), (int)(kind >> 16 & 0xFF)) : NULL;
+        }
+        else
+        {
+            const unsigned char *png = Blob(id, kind, &size);   /* (before size is read) */
+            sPics[oldest].t = png ? Decode(png, size, 0, 1, &w, &h) : NULL;
+        }
     }
     sPics[oldest].id = id;
     sPics[oldest].kind = kind;
@@ -361,7 +425,13 @@ void Tt_DrawCard(unsigned id, float x, float y, float w, float h, float scaleX, 
         return;
     }
     Copy(Plate(big, face->seat), px, py, dw, dh, alpha);
-    art = Picture(id, big ? PIC_BIG : PIC_BOARD);
+    {
+        // the board's picture near its size, the full one near full size, one shrunk to fit in between
+        int iw = (int)(w + 0.5f), ih = (int)(h + 0.5f);
+        unsigned kind = iw <= TT_BOARD_W + 4 ? PIC_BOARD : iw >= TT_BIG_W - 8 || ih > TT_BIG_H ? PIC_BIG
+                      : PIC_SIZED | (unsigned)iw << 8 | (unsigned)ih << 16;
+        art = Picture(id, kind);
+    }
     Copy(art, px, py, dw, dh, alpha);
     if (face->glow && art)
     {
@@ -376,12 +446,22 @@ void Tt_DrawCard(unsigned id, float x, float y, float w, float h, float scaleX, 
                         alpha);
     if (!face->noNumbers)
     {
-        // the numbers in their diamond, centered near the bottom
-        float s = w / TT_BOARD_W, gx = s * scaleX, gy = s * scaleY;
-        float ncx = cx, nby = cy + dh / 2 - 3 * gy;
-        float colW = 5 * gx, rowH = 7 * gy;
-        int side;
+        // the numbers in their diamond, centered near the bottom: the large numbers on large cards, else the pixel
+        // font, its pixels a whole number of screen pixels (no uneven pixels)
+        // (the large ones at 7x10 on the mid-sized cards; the board's cards keep the pixel font)
+        int bigDigits = w >= 80 ? 2 : w >= TT_BOARD_W + 8 ? 1 : 0, side;
+        int dw = bigDigits == 2 ? DIGIT_W : 7, dhh = bigDigits == 2 ? DIGIT_H : 10;
+        float unit = bigDigits == 2 ? w / TT_BIG_W : bigDigits ? 1 : (float)(int)(w / TT_BOARD_W + 0.5f);
+        float gx, gy, ncx = cx, nby, colW, rowH, gap;
         unsigned starSize = (unsigned)(w * 0.2f);
+        if (unit < 1)
+            unit = 1;
+        gx = unit * scaleX;
+        gy = unit * scaleY;
+        colW = (bigDigits ? dw : 5) * gx;
+        rowH = (bigDigits ? dhh : 7) * gy;
+        gap = bigDigits ? 1 : 1;
+        nby = cy + dh / 2 - (bigDigits == 2 ? 5 : 3) * gy;
         if (c->stars && starSize >= 5 && k > 0.6f)
             for (side = 0; side < c->stars; side++)
                 Tt_DrawStar(px + w * 0.04f * k + side * (starSize - 2) * k, py + h * 0.03f, starSize * k, alpha);
@@ -396,10 +476,29 @@ void Tt_DrawCard(unsigned id, float x, float y, float w, float h, float scaleX, 
                 v = TT_RANK_A;
             switch (side)
             {
-            case TT_UP: gxp = ncx - colW / 2; gyp = nby - rowH * 2 - 2 * gy; break;
+            case TT_UP: gxp = ncx - colW / 2; gyp = nby - rowH * 2 - 2 * gap * gy; break;
             case TT_DOWN: gxp = ncx - colW / 2; gyp = nby - rowH; break;
-            case TT_LEFT: gxp = ncx - colW / 2 - colW - 1 * gx; gyp = nby - rowH * 1.5f - 1 * gy; break;
-            default: gxp = ncx + colW / 2 + 1 * gx; gyp = nby - rowH * 1.5f - 1 * gy; break;
+            case TT_LEFT: gxp = ncx - colW / 2 - colW - gap * gx; gyp = nby - rowH * 1.5f - gap * gy; break;
+            default: gxp = ncx + colW / 2 + gap * gx; gyp = nby - rowH * 1.5f - gap * gy; break;
+            }
+            if (scaleX == 1 && scaleY == 1)
+            {
+                gxp = (float)(int)(gxp + 0.5f);   // (whole pixels at rest: crisp)
+                gyp = (float)(int)(gyp + 0.5f);
+            }
+            if (bigDigits)
+            {
+                SDL_Texture *t = Extra(bigDigits == 2 ? EX_DIGITS : EX_DIGITS_MID);
+                SDL_Rect src = {(v == TT_RANK_A ? 10 : v) * dw, 0, dw, dhh};
+                SDL_FRect dst = {gxp, gyp, colW, rowH};
+                if (t)
+                {
+                    // the grey numbers tinted for a bonus (green) or a penalty (red)
+                    SDL_SetTextureColorMod(t, (fill >> 16) & 255, (fill >> 8) & 255, fill & 255);
+                    SDL_SetTextureAlphaMod(t, (Uint8)alpha);
+                    SDL_RenderCopyF(G_R(), t, &src, &dst);
+                }
+                continue;
             }
             Glyph(gxp, gyp, v, gx, gy, fill, 0x101010, alpha);
         }

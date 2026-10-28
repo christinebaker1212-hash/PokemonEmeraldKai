@@ -40,3 +40,6 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 43 | GAME CENTER 3F with a new machine at the top left (a DDR cabinet: the screen and two red dance pads) replacing the posters | GAME CENTER 3F picture, the DANCE machine (graphics/moemon/gamecenter/3f.png; docs/RHYTHM_DECISIONS.md) |
 | 44 | 43 marked up: blue = drawn over the player (stair rails, the consoles' tops, the COIN counter's rim, the plants), red = walkable where it isn't obvious (in front of the arcade cabinets). "Red does not show all walkable surfaces, only exceptions" | 3f_marks.png, read by tools/moemon_gamecenter/gen_gamecenter.py |
 | 45 | 3F with two cells marked red above the console row: walkable, so the DANCE machine isn't a walk around the consoles | 3F FLOORS row 7 (1.39.0) |
+| 46 | The TRIPLE TRIAD card back (105x128): carved bronze filigree, a silver star-shaped diamond in the middle | the card back (graphics/tt/back.png, tools/tt/build_art.py) |
+| 47 | Large card numbers 0-9 (160x18 strip on blue): grey serif digits with a dark outline | the numbers on large cards (graphics/tt/numbers.png; the A drawn to match) |
+| 48 | Final Fantasy VIII's menu and battle font sheet (391x350, "ripped by Ultimecia"): digits, letters, icons; the large A at (178,84) | the large numbers' A (graphics/tt/ff8_menu.png, tools/tt/build_art.py) |

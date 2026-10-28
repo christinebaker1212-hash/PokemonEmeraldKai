@@ -80,6 +80,10 @@ The user's request (the third card game), how each part was read, and the choice
   a light running between the names to pick who starts, cards arcing down with dust and a shake, flips about the
   side they were taken from with sparks in the new color, SAME / PLUS / COMBO bands sweeping across, ASCENSION's
   +1s floating up, YOU WIN with letters bouncing in and confetti.
-- The card back is our own (XIV's icon is a placeholder): deep blue, gold, three interlocked rings.
+- The card back is the user's (docs/user_images/46: XIV's own icon is a placeholder). Large cards (80 wide and up)
+  show the user's large numbers (docs/user_images/47) with FF8's own A from its menu sheet (48); mid-sized cards (a
+  pack's, the strip's) the same at 7x10, shrunk once at build time; the board's 40x49 cards keep the 5x7 pixel font,
+  its pixels whole screen pixels. Faces between the board's size and full size are averaged down on the CPU
+  (tt_gfx.c Shrunk), not left to the renderer's two-sample scaling, which made them jagged.
 - The computer player: negamax with alpha-beta (FF8's searchBestMoveStack does a depth search too), to the end of
   the game when six squares or fewer are left; four levels.

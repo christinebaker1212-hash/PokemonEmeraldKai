@@ -2045,7 +2045,8 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
   icons, 087xxx 104x128 faces) plus the card frame (ui/uld/CardTripleTriad_hr1: the grey plate, the star, the type
   icons) into the gitignored tools/tt/metadata/. gen_catalog.py writes src/tt/tt_catalog.c and include/tt/card_ids.h
   (ids are XIV's and never move); build_art.py packs graphics/tt/cards.bin (each face at full size, at the board's
-  40x49 by Lanczos, the icon; the back we draw, the plate at both sizes, star and type icons; .incbin'd by
+  40x49 by Lanczos, the icon; the back (graphics/tt/back.png), the plate at both sizes, star and type icons, the large
+  numbers (graphics/tt/numbers.png + the A of graphics/tt/ff8_menu.png) at 10x14 and 7x10; .incbin'd by
   tt_art_data.c). gen_pools.py writes src/tt/tt_pools.c: each region's cards, each seller's shelf (checked under
   15%), each special player's five-star cards (every one belongs to someone).
 - Rules (tt_duel.c): FF8's capture code as the decomp reads it (Same, Plus, Plain, the COMBO loop), XIV's rules
