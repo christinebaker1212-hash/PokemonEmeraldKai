@@ -3,6 +3,9 @@
 Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
+**Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
+card duels, branch claude/stoic-knuth-rh14w7).
+
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
