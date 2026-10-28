@@ -17,4 +17,13 @@ void YgoUi_OpenCase(void (*returnToGame)(void), int fromScript);
 /* Shown over this player's name to friends: a Yu-Gi-Oh! duel now */
 unsigned YgoUi_DuelingNow(void);
 void Ygo_Debug(const char *command);
+
+/* Duels with friends (src/ygo/ygo_net.c through the card games' relay: tcg_integration.c routes types 8-13 here) */
+struct YgoNet *Ygo_Online(void);
+void Ygo_OnlineReceive(unsigned from, const unsigned char *data, unsigned len, int willing);
+void Ygo_OnlineTick(void);
+/* The screens' side of asking a friend (tcg_online.c, like Tcg_OpenOnlineDeck / Trade) */
+void YgoUi_OpenOnlineDeck(void);
+void YgoUi_OpenOnlineTrade(void);
+unsigned YgoUi_HiddenFrom(void);   /* online: the friend we duel doesn't see our screen in SPECTATE */
 #endif

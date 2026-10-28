@@ -1182,8 +1182,8 @@ CARD DUELS
 ----------
 An optional card game, played with the original Pokemon Trading Card Game's
 228 cards on a table like the DS card game's. A CARD CLUB member waits in
-the POKEMON MARTS of OLDALE and MAUVILLE and LILYCOVE's DEPARTMENT STORE:
-they hand you a CARD CASE (a key item), three starter decks to pick from and
+the POKEMON MARTS of OLDALE and MAUVILLE (behind the counter, beside the
+shopkeeper) and LILYCOVE's DEPARTMENT STORE: they hand you a CARD CASE (a key item), three starter decks to pick from and
 a teaching duel if you'd like one, and later run the CARD COUNTER. Beside
 them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
   Challenges      Register the CARD CASE to a button like any key item and
@@ -1229,8 +1229,9 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   CARD COUNTER like the CARD CLUB's (TRADE IN, CARD SHOP,
                   PRIZES), gives a CARD CASE to anyone without one, and the
                   players at its table duel you when you talk to them.
-  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE, or the
-                  CARD CASE button in front of them.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE (LEFT /
+                  RIGHT picks MOEMON or YU-GI-OH!), or the CARD CASE button
+                  in front of them (the game whose side the case was on).
   Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
                   pictures in Game Boy card frames), GAME BOY (the Game Boy
                   pictures) or FULL CARD (the whole printed cards). CARD
@@ -1303,10 +1304,16 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
   Card art        CARD ART and CARD BACKS (OPTIONS > DISPLAY) work for these
                   cards too: GAME BOY shows Stairway to the Destined Duel's
                   pictures, and CARD BACKS: PRINTED the real card back.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE with
+                  YU-GI-OH! picked (LEFT / RIGHT), or the CARD CASE button in
+                  front of them while the case is on its YU-GI-OH! side. The
+                  winner of a duel gets a booster; nothing is lost.
+  No deck yet     Asked for a Yu-Gi-Oh! duel or trade with only POKEMON
+                  cards, you pick a Starter Deck to keep first. With
+                  Yu-Gi-Oh! cards but no deck ready to duel, you borrow a
+                  Starter Deck for that duel.
   Achievements    A YU-GI-OH! tab of their own.
 The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
-Not yet: Yu-Gi-Oh! with friends online, and the cards of the sets after
-Metal Raiders.
 
 GAME CENTER
 -----------

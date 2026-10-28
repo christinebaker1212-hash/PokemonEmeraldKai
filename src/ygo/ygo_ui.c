@@ -15,10 +15,13 @@
 #include "sound.h"
 #include "constants/songs.h"
 #include "tcg/integration.h"
+#include "tcg/npc.h"
+#include "tcg/online.h"
 #include "tcg/tcg.h"
 #include "ygo/card_ids.h"
 #include "ygo/duel.h"
 #include "ygo/integration.h"
+#include "ygo/net.h"
 #include "ygo/npc.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
@@ -40,7 +43,9 @@ enum
     Y_DUEL,
     Y_SPOILS,
     Y_COUNTER,
-    Y_STARTER
+    Y_STARTER,
+    Y_WAIT,    /* a friend's duel: waiting for them to pick a deck */
+    Y_TRADE    /* a card trade with a friend */
 };
 enum
 {
@@ -62,6 +67,8 @@ enum
     VS_LESSON,
     VS_FRIEND
 };
+enum { RESOLVE_NONE, RESOLVE_GIFT, RESOLVE_LOAN };
+static void ResolveNoDeck(int trade);
 enum
 {
     ACT_NONE,
@@ -75,6 +82,7 @@ enum
     ACT_BUY_PACK,
     ACT_BUY_CARD,
     ACT_GC_CARD,
+    ACT_LOAN,
     ACT_GC_DECK,
     ACT_LESSON
 };
@@ -113,6 +121,11 @@ static struct
     int messageThen, asking, askYes, askAction, askArg;
     int fromScript;
     void (*returnToGame)(void);
+    int online, onlineDeck, onlineDeckChosen, concedeHeld;   /* a duel with a friend (ygo_net.c); onlineDeck -1: loaned */
+    /* No Yu-Gi-Oh! deck to duel with (the Pokemon cards only): the Starter Deck screen first, then back to the
+     * challenge (RESOLVE_GIFT: a deck to keep; RESOLVE_LOAN: one for this duel) or the trade */
+    int resolve, resolveBack;
+    uint16_t loanMain[YGO_DECK_MAX], loanExtra[YGO_FUSION_MAX];
 } Y;
 
 static struct YgoCollection *C(void) { return Ygo_GetCollection(); }
@@ -150,12 +163,33 @@ static void Screen(int screen)
     Y.age = 0;
 }
 int YgoUi_Active(void) { return Y.screen != Y_CLOSED; }
+unsigned YgoUi_HiddenFrom(void)
+{
+    unsigned peer = Ygo_Online()->peer;
+    return Y.online && Y.screen != Y_CLOSED && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
+}
+static const char *PeerName(unsigned id)
+{
+    static char name[MP_NAME_LEN * 2 + 2];
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return "FRIEND";
+    MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN * 2 + 1);
+    return name;
+}
 unsigned YgoUi_DuelingNow(void) { return Y.screen == Y_DUEL || (Y.screen == Y_INSPECT && Y.back == Y_DUEL); }
 
 static void Close(void)
 {
     void (*callback)(void) = Y.returnToGame;
     int script = Y.fromScript;
+    if (Y.online)
+        YgoNet_Cancel(Ygo_Online(), "The duel was closed.");
+    Y.online = 0;
+    Y.concedeHeld = 0;
+    if (Y.vs == VS_FRIEND && (Tcg_Social()->role == TCG_SOCIAL_DECK || Tcg_Social()->role == TCG_SOCIAL_TRADE))
+        Tcg_SocialLeave();
+    Y.vs = VS_NPC;
+    Y.resolve = RESOLVE_NONE;
     if (Y.screen == Y_DUEL || Y.back == Y_DUEL)
         YgoBoard_End();
     Y.message[0] = 0;
@@ -211,6 +245,44 @@ void YgoUi_OpenChallenge(const struct YgoOpponent *opponent)
     Open(Y_CHALLENGE);
     Y.cursor = C()->activeDeck;
     printf("[ygo] challenge: %s, special %u\n", Y.opp.name, Y.opp.special);
+    ResolveNoDeck(0);
+}
+/* A friend said yes to a duel: both pick a deck (the asker's invite carries theirs, ygo_net.c) */
+void YgoUi_OpenOnlineDeck(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    static struct TcgOpponent face;
+    Y.returnToGame = NULL;
+    Y.fromScript = 0;
+    memset(&Y.opp, 0, sizeof(Y.opp));
+    snprintf(Y.opp.name, sizeof(Y.opp.name), "%s", PeerName(s->peer));
+    memset(&face, 0, sizeof(face));
+    Tcg_PortraitOfPlayer(s->peer, &face);
+    Y.opp.portraitW = face.portraitW;
+    Y.opp.portraitH = face.portraitH;
+    memcpy(Y.opp.portrait, face.portrait, sizeof(Y.opp.portrait));
+    Y.opp.special = YGO_SPECIAL_NONE;
+    Y.opp.set = YGO_SET_COUNT;
+    Y.opp.online = 1;
+    Y.opp.music = MUS_RG_UNION_ROOM;
+    Open(Y_CHALLENGE);
+    Y.vs = VS_FRIEND;
+    Y.onlineDeckChosen = 0;
+    Y.cursor = C()->activeDeck;
+    printf("[ygo] friend's duel: %s, seat %u\n", Y.opp.name, s->seat);
+    ResolveNoDeck(0);
+}
+void YgoUi_OpenOnlineTrade(void)
+{
+    Y.returnToGame = NULL;
+    Y.fromScript = 0;
+    memset(&Y.opp, 0, sizeof(Y.opp));
+    snprintf(Y.opp.name, sizeof(Y.opp.name), "%s", PeerName(Tcg_Social()->peer));
+    Open(Y_TRADE);
+    Y.vs = VS_FRIEND;
+    Y.filter = 0;
+    printf("[ygo] trade with %s\n", Y.opp.name);
+    ResolveNoDeck(1);
 }
 void YgoUi_OpenStarter(void)
 {
@@ -254,6 +326,26 @@ static unsigned ExtraCount(unsigned d) { return Ygo_DeckCount(Deck(d)->extra, YG
 static int DeckValid(unsigned d)
 {
     return Ygo_DeckValidate(Deck(d)->main, Deck(d)->extra, C()->owned, NULL, 0);
+}
+/* Someone wants a Yu-Gi-Oh! duel (or trade) with a player who has no deck for it: no Yu-Gi-Oh! cards at all gets a
+ * Starter Deck to keep (what the CARD CLUB's duelist would give), cards but no deck ready one to borrow for this duel */
+static void ResolveNoDeck(int trade)
+{
+    unsigned d;
+    struct YgoCollection *c = C();
+    if (c->optedIn && trade)
+        return;
+    for (d = 0; d < YGO_SAVED_DECKS && c->optedIn; d++)
+        if (DeckValid(d))
+            return;
+    Y.resolveBack = Y.screen;
+    Y.resolve = c->optedIn ? RESOLVE_LOAN : RESOLVE_GIFT;
+    Screen(Y_STARTER);
+    if (Y.resolve == RESOLVE_GIFT)
+        Say(ACT_NONE, "You don't have a Yu-Gi-Oh! deck yet! Pick a Starter Deck: it's yours to keep.");
+    else
+        Say(ACT_NONE, "None of your decks is ready to duel. Borrow a Starter Deck for this duel!");
+    printf("[ygo] no deck: %s\n", Y.resolve == RESOLVE_GIFT ? "a Starter Deck to keep" : "a Starter Deck to borrow");
 }
 /* A deck's face: its strongest monster */
 static unsigned Mascot(const uint16_t *main, unsigned count)
@@ -540,16 +632,53 @@ static void Rewards(void)
     }
     printf("[ygo] victory vs %s: %s booster, %d cards to choose from\n", Y.opp.name, gYgoSets[set].code, Y.spoilCount);
 }
+/* A duel with a friend: a booster for the winner, nothing lost */
+static void FriendRewards(int won)
+{
+    struct YgoCollection *c = C();
+    unsigned set;
+    if (!won)
+    {
+        YgoBoard_Result("Good game! Nothing was lost.");
+        return;
+    }
+    set = Ygo_RandomSet(&c->rng);
+    c->wins++;
+    c->onlineWins++;
+    MP_Achieve_Count("ygowin", 1);
+    MP_Achieve_Count("cardfriend", 1);
+    Ygo_AwardPack(c, set);
+    {
+        char line[96];
+        snprintf(line, sizeof(line), "A %s booster went into your CARD CASE.", gYgoSets[set].code);
+        YgoBoard_Result(line);
+    }
+}
+/* Our seat: online, the friend who accepted sits in seat 1 */
+static unsigned Me(void) { return Y.online ? Ygo_Online()->seat : 0; }
 static void DuelStep(unsigned pressed, unsigned keys)
 {
     struct YgoAnswer a;
     unsigned card = 0;
     int r;
+    if (Y.online)
+    {
+        struct YgoNet *l = Ygo_Online();
+        if (Y.concedeHeld && !l->pending)
+        {
+            Y.concedeHeld = 0;
+            YgoNet_Concede(l, SDL_GetTicks());
+        }
+        Y.duel = l->game;
+        YgoBoard_SetWaiting(l->pending);
+    }
     YgoBoard_Sync(&Y.duel);
     if (Y.duel.s.over && !Y.rewarded && YgoBoard_Idle())
     {
-        int won = Y.duel.s.winner == 0;
+        int won = Y.duel.s.winner == Me();
         Y.rewarded = 1;
+        if (Y.vs == VS_FRIEND)
+            FriendRewards(won);
         if (Y.vs == VS_NPC && !won)
             C()->losses++;
         if (Y.vs == VS_NPC && won)
@@ -561,11 +690,31 @@ static void DuelStep(unsigned pressed, unsigned keys)
             C()->flags |= YGO_FLAG_TUTORIAL;
             YgoBoard_Result(won ? "That's the game! You're ready to duel anyone." : "Close one! You'll get the hang of it.");
         }
-        else
+        else if (Y.vs != VS_FRIEND)
             YgoBoard_Result(won ? "Nothing was wagered: a practice win!" : "Nothing was wagered.");
     }
+    /* online, the harness's autoplay answers for you through the link */
+    if (Y.online && Y.autoPlay && !Y.duel.s.over && Y.duel.query.type != YGO_Q_NONE && Y.duel.query.player == Me() &&
+        YgoBoard_Idle() && !Ygo_Online()->pending)
+    {
+        if (Y.aiDelay > 0)
+            Y.aiDelay--;
+        else
+        {
+            YgoDuel_AiAnswer(&Y.duel, &a);
+            if (!YgoNet_Submit(Ygo_Online(), &a, SDL_GetTicks()))
+            {
+                memset(&a, 0, sizeof(a));
+                if (!YgoNet_Submit(Ygo_Online(), &a, SDL_GetTicks()))
+                    YgoNet_Concede(Ygo_Online(), SDL_GetTicks());
+            }
+            Y.duel = Ygo_Online()->game;
+            YgoBoard_SetWaiting(Ygo_Online()->pending);
+            Y.aiDelay = 4;
+        }
+    }
     /* the opponent (and the harness's autoplay for you) */
-    if (!Y.duel.s.over && Y.duel.query.type != YGO_Q_NONE && YgoBoard_Idle() &&
+    if (!Y.online && !Y.duel.s.over && Y.duel.query.type != YGO_Q_NONE && YgoBoard_Idle() &&
         (Y.duel.query.player == 1 || Y.autoPlay))
     {
         if (Y.aiDelay > 0)
@@ -586,7 +735,19 @@ static void DuelStep(unsigned pressed, unsigned keys)
         }
     }
     r = YgoBoard_Step(pressed, keys, &a, &card);
-    if (r == YB_ANSWER)
+    if (r == YB_ANSWER && Y.online)
+    {
+        if (Ygo_Online()->pending)
+            ;   /* (an answer is already on its way: the table asks again once it's acknowledged) */
+        else if (!YgoNet_Submit(Ygo_Online(), &a, SDL_GetTicks()))
+        {
+            printf("[ygo] answer refused: %s\n", Ygo_Online()->error);
+            PlaySE(SE_FAILURE);
+        }
+        Y.duel = Ygo_Online()->game;
+        YgoBoard_SetWaiting(Ygo_Online()->pending);
+    }
+    else if (r == YB_ANSWER)
     {
         if (!YgoDuel_Answer(&Y.duel, &a))
         {
@@ -595,14 +756,25 @@ static void DuelStep(unsigned pressed, unsigned keys)
         }
         Y.aiDelay = Tcg_GetCollection()->fastAnimations ? 6 : 16;
     }
+    else if (r == YB_CONCEDE && Y.online)
+    {
+        /* (one answer at a time on the link: the concession goes as soon as the last one is acknowledged) */
+        if (!YgoNet_Concede(Ygo_Online(), SDL_GetTicks()))
+            Y.concedeHeld = 1;
+    }
     else if (r == YB_CONCEDE)
         YgoDuel_Concede(&Y.duel, 0);
     else if (r == YB_INSPECT)
         Inspect(card, Y_DUEL);
     else if (r == YB_LEAVE)
     {
-        int won = Y.duel.s.winner == 0;
+        int won = Y.duel.s.winner == Me();
         printf("[ygo] left the duel (%s)\n", won ? "won" : "lost");
+        if (Y.online)
+        {
+            YgoNet_Cancel(Ygo_Online(), "Duel complete.");
+            Y.online = 0;
+        }
         YgoBoard_End();
         if (Y.vs == VS_NPC && won && Y.spoilCount)
         {
@@ -751,6 +923,11 @@ static void ChallengeScreen(void)
         snprintf(line, sizeof(line), "%s", Deck(d)->name[0] ? Deck(d)->name : "---");
         TcgUi_Row(LIST_X + 2, 18 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)d, DeckValid(d), line,
                   d == c->activeDeck ? "IN USE" : NULL);
+    }
+    if (Y.vs == VS_FRIEND)
+    {
+        Strip(0, "A duel between friends: the winner gets a booster. Nothing is lost.");
+        return;
     }
     n = snprintf(line, sizeof(line), "WIN: a booster");
     if (Ygo_DailyAvailable(c, Y.opp.key, Tcg_Today()))
@@ -1410,6 +1587,190 @@ static void StarterScreen(void)
 }
 
 /* ------------------------------------------------------------------ */
+/* With a friend                                                        */
+/* ------------------------------------------------------------------ */
+static void FilterTab(unsigned pressed);
+static void OnlineStep(void)
+{
+    struct YgoNet *l = Ygo_Online();
+    const struct TcgSocial *s = Tcg_Social();
+    if (Y.vs != VS_FRIEND || Y.screen == Y_TRADE || Y.screen == Y_CLOSED)
+        return;
+    if (s->peerLeft && Y.screen != Y_DUEL && !Y.message[0])
+    {
+        Say(ACT_CLOSE, "%s left. Nothing was lost.", Y.opp.name);
+        return;
+    }
+    /* The friend who said yes accepts the asker's invite with the deck they picked */
+    if (s->seat == 1 && Y.onlineDeckChosen && l->state == YGO_NET_INVITED)
+        YgoNet_Accept(l, Y.onlineDeck < 0 ? Y.loanMain : Deck((unsigned)Y.onlineDeck)->main,
+                      Y.onlineDeck < 0 ? Y.loanExtra : Deck((unsigned)Y.onlineDeck)->extra, SDL_GetTicks());
+    if (Y.screen == Y_WAIT && l->state == YGO_NET_PLAYING)
+    {
+        Y.online = 1;
+        Y.duel = l->game;
+        Y.rewarded = 0;
+        Y.concedeHeld = 0;
+        Y.aiDelay = 30;
+        YgoBoard_SetFast(Tcg_GetCollection()->fastAnimations);
+        YgoBoard_SetMusic(Y.opp.music);
+        YgoBoard_Tutorial(0);
+        Screen(Y_DUEL);
+        YgoBoard_Begin(&Y.duel, l->seat, Y.opp.name, 1);
+        printf("[ygo] duel started vs %s (online, seat %u)\n", Y.opp.name, l->seat);
+    }
+    if (Y.online && l->state == YGO_NET_ENDED && !l->game.s.over && !Y.message[0])
+    {
+        Y.online = 0;
+        if (Y.screen == Y_DUEL || Y.back == Y_DUEL)
+            YgoBoard_End();
+        Y.screen = Y_WAIT;
+        Say(ACT_CLOSE, "%s", l->error[0] ? l->error : "The duel ended.");
+        printf("[ygo] online duel ended: %s\n", l->error);
+    }
+}
+static void WaitScreen(void)
+{
+    char line[96];
+    int dots = (Y.frame / 20) % 4;
+    TcgUi_Background();
+    TcgUi_SidePanel("DUEL", YGO_THEME);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    snprintf(line, sizeof(line), "Waiting for %s%.*s", Y.opp.name, dots, "...");
+    G_Text(LIST_X + 8, 20, G_INK, G_INK_SHADOW, line, LIST_W - 14, TF_SMALL);
+    Ygo_DrawCard(0, (float)(LIST_X + LIST_W / 2 - 15), 44.0f, 30, 42, (Y.frame % 120) * 3.0, 255, 0);
+    Strip(0, "They're choosing their deck.");
+    TcgUi_Hints("{B} LEAVE");
+}
+/* Trading: cards past what the deck in use needs */
+static int Tradable(unsigned id)
+{
+    const struct YgoCard *card = Ygo_Card(id);
+    return card && card->frame != YGO_TOKEN && Filter(id, Y.filter) && C()->owned[id] > InDeck(C()->activeDeck, id);
+}
+static unsigned TradeCount(void)
+{
+    unsigned id, n = 0;
+    for (id = 1; id <= YGO_CARD_COUNT; id++)
+        n += Tradable(id);
+    return n;
+}
+static unsigned TradeCard(int index)
+{
+    unsigned id;
+    for (id = 1; id <= YGO_CARD_COUNT; id++)
+        if (Tradable(id) && !index--)
+            return id;
+    return 0;
+}
+static void TradeScreen(void)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    unsigned mine = s->myOffer, theirs = s->theirOffer <= YGO_CARD_COUNT ? s->theirOffer : 0;
+    int n = (int)TradeCount(), i, page = 7, start;
+    char line[160];
+    TcgUi_Background();
+    snprintf(line, sizeof(line), "YU-GI-OH! TRADE WITH %s", Y.opp.name);
+    TcgUi_TopBar(line);
+    TcgUi_ListBox(4, 20, 112, 62);
+    TcgUi_ListBox(124, 20, 112, 62);
+    G_Text(10, 22, 0x606878, G_NO_SHADOW, "YOU OFFER", 0, TF_NARROW);
+    G_Text(130, 22, 0x606878, G_NO_SHADOW, "THEY OFFER", 0, TF_NARROW);
+    if (mine)
+    {
+        Ygo_DrawCard(mine, 10, 33, 30, 42, 0, 255, 0);
+        G_Text(44, 38, G_INK, G_INK_SHADOW, Ygo_Card(mine)->name, 70, TF_SMALL);
+        if (s->myConfirm)
+            G_Text(44, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    if (theirs)
+    {
+        Ygo_DrawCard(theirs, 130, 33, 30, 42, 0, 255, 0);
+        G_Text(164, 38, G_INK, G_INK_SHADOW, Ygo_Card(theirs)->name, 70, TF_SMALL);
+        if (s->theirConfirm)
+            G_Text(164, 62, 0x2858a8, G_NO_SHADOW, "READY!", 0, TF_SMALL);
+    }
+    else
+        G_Text(164, 46, 0x909090, G_NO_SHADOW, "Choosing...", 0, TF_SMALL);
+    G_RoundFill(0, 84, 240, 15, 0x203040, 230);
+    Tabs(4, 85, Y.filter);
+    start = Y.cursor / page * page;
+    for (i = 0; i < page && start + i < n; i++)
+    {
+        unsigned card = TradeCard(start + i);
+        int x = 8 + i * 33, on = start + i == Y.cursor;
+        Ygo_DrawCard(card, (float)x, (float)(103 - (on ? 2 : 0)), 30, 42, 0, 255, 0);
+        if (on)
+            G_Frame(x - 2, 99, 34, 46, 0xe82820, 255);
+    }
+    if (!n)
+        G_Text(10, 108, G_WHITE, 0x204030, "No cards of this kind to offer.", 0, TF_SMALL);
+    TcgUi_Hints(s->myOffer && s->theirOffer ? (s->myConfirm ? "WAITING FOR THEM  {B} LEAVE" : "{A} OFFER  {START} TRADE!  {B} LEAVE")
+                                            : "{A} OFFER  {L}{R} KIND  {B} LEAVE");
+}
+static void TradeStep(unsigned pressed)
+{
+    const struct TcgSocial *s = Tcg_Social();
+    struct YgoCollection *c = C();
+    int n = (int)TradeCount();
+    /* Both confirmed: the trade is done, even when the friend's leaving came in with their confirm */
+    if (s->myConfirm && s->theirConfirm && s->myOffer && s->theirOffer)
+    {
+        unsigned mine = s->myOffer, theirs = s->theirOffer;
+        if (theirs > YGO_CARD_COUNT || Ygo_Card(theirs)->frame == YGO_TOKEN || !c->owned[mine])
+        {
+            Tcg_SocialLeave();
+            Say(ACT_CLOSE, "That trade couldn't be made.");
+            return;
+        }
+        c->owned[mine]--;
+        AddCard(theirs);
+        c->trades++;
+        MP_Achieve_Unlock("cardtrade");
+        printf("[ygo] traded card %u for %u\n", mine, theirs);
+        Tcg_SocialLeave();
+        PlayFanfare(MUS_OBTAIN_ITEM);
+        Say(ACT_CLOSE, "You traded your %s for %s!", Ygo_Card(mine)->name, Ygo_Card(theirs)->name);
+        return;
+    }
+    if (s->peerLeft)
+    {
+        Say(ACT_CLOSE, "%s left the trade.", Y.opp.name);
+        Tcg_SocialLeave();
+        return;
+    }
+    FilterTab(pressed);
+    {
+        int old = Y.cursor;
+        if (pressed & KEY_LEFT)
+            Y.cursor--;
+        if (pressed & KEY_RIGHT)
+            Y.cursor++;
+        if (Y.cursor < 0)
+            Y.cursor = 0;
+        if (Y.cursor >= n)
+            Y.cursor = n ? n - 1 : 0;
+        if (old != Y.cursor)
+            PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_A && n)
+    {
+        Tcg_SocialOffer(TradeCard(Y.cursor));
+        PlaySE(SE_RG_CARD_FLIP);
+    }
+    if (pressed & KEY_START && s->myOffer && s->theirOffer && !s->myConfirm)
+    {
+        Tcg_SocialConfirm();
+        PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_B)
+    {
+        PlaySE(SE_SELECT);
+        Close();
+    }
+}
+
+/* ------------------------------------------------------------------ */
 /* Input                                                                */
 /* ------------------------------------------------------------------ */
 static void MoveCursor(unsigned pressed, int count, int step)
@@ -1496,6 +1857,22 @@ static void ChooseDeck(void)
         return;
     }
     c->activeDeck = (uint8_t)Y.cursor;
+    if (Y.vs == VS_FRIEND)
+    {
+        const struct TcgSocial *s = Tcg_Social();
+        Y.onlineDeck = Y.cursor;
+        Y.onlineDeckChosen = 1;
+        if (s->seat == 0 &&
+            !YgoNet_Invite(Ygo_Online(), s->peer, s->session, Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra,
+                           SDL_GetTicks()))
+        {
+            Say(ACT_CLOSE, "The duel couldn't start.");
+            return;
+        }
+        Y.online = 1;
+        Screen(Y_WAIT);
+        return;
+    }
     StartDuel(Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra, Y.opp.main, Y.opp.extra);
 }
 static void OpenPackNow(unsigned set)
@@ -1552,8 +1929,44 @@ static void Act(int action)
         if (Ygo_ChooseStarter(c, set))
         {
             MP_Achieve_Unlock("ygostart");
-            Say(ACT_CLOSE, "You got the %s! It's in your CARD CASE, on its YU-GI-OH! side.", gYgoSets[set].name);
+            if (Y.resolve)
+            {
+                /* back to the duel (the new deck is the one in use) or the trade */
+                int back = Y.resolveBack;
+                Y.resolve = RESOLVE_NONE;
+                Screen(back);
+                Y.cursor = c->activeDeck;
+                Say(ACT_NONE, "You got the %s! It's yours to keep, on the CARD CASE's YU-GI-OH! side.",
+                    gYgoSets[set].name);
+                printf("[ygo] no deck: took the %s\n", gYgoSets[set].code);
+            }
+            else
+                Say(ACT_CLOSE, "You got the %s! It's in your CARD CASE, on its YU-GI-OH! side.", gYgoSets[set].name);
         }
+        break;
+    }
+    case ACT_LOAN:
+    {
+        unsigned set = sStarters[Y.askArg];
+        Y.resolve = RESOLVE_NONE;
+        StarterDeckOf(set, Y.loanMain, Y.loanExtra);
+        Screen(Y.resolveBack);
+        printf("[ygo] no deck: borrowed the %s\n", gYgoSets[set].code);
+        if (Y.vs == VS_FRIEND)
+        {
+            const struct TcgSocial *s = Tcg_Social();
+            Y.onlineDeck = -1;
+            Y.onlineDeckChosen = 1;
+            if (s->seat == 0 && !YgoNet_Invite(Ygo_Online(), s->peer, s->session, Y.loanMain, Y.loanExtra, SDL_GetTicks()))
+            {
+                Say(ACT_CLOSE, "The duel couldn't start.");
+                break;
+            }
+            Y.online = 1;
+            Screen(Y_WAIT);
+        }
+        else
+            StartDuel(Y.loanMain, Y.loanExtra, Y.opp.main, Y.opp.extra);
         break;
     }
     case ACT_CLEAR:
@@ -1679,6 +2092,7 @@ int YgoUi_Step(unsigned keys)
     }
     else
         Y.held = 0;
+    OnlineStep();
     if (Y.screen == Y_DUEL && !Y.message[0])
     {
         DuelStep(pressed, keys);
@@ -2142,12 +2556,25 @@ int YgoUi_Step(unsigned keys)
             }
         }
         break;
+    case Y_WAIT:
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Close();
+        }
+        break;
+    case Y_TRADE:
+        TradeStep(pressed);
+        break;
     case Y_STARTER:
         MoveCursor(pressed, YGO_STARTERS, 0);
         if (pressed & KEY_A)
         {
             PlaySE(SE_SELECT);
-            Ask(ACT_STARTER, Y.cursor, "Take the %s?", gYgoSets[sStarters[Y.cursor]].name);
+            if (Y.resolve == RESOLVE_LOAN)
+                Ask(ACT_LOAN, Y.cursor, "Borrow the %s for this duel?", gYgoSets[sStarters[Y.cursor]].name);
+            else
+                Ask(ACT_STARTER, Y.cursor, "Take the %s?", gYgoSets[sStarters[Y.cursor]].name);
         }
         else if (pressed & KEY_START)
         {
@@ -2155,7 +2582,7 @@ int YgoUi_Step(unsigned keys)
             StarterDeckOf(sStarters[Y.cursor], main, extra);
             Inspect(Mascot(main, YGO_DECK_MAX), Y_STARTER);
         }
-        else if (pressed & KEY_B && c->starter)
+        else if (pressed & KEY_B && (c->starter || Y.resolve))
             Close();
         break;
     default:
@@ -2205,6 +2632,12 @@ void YgoUi_Draw(void)
         break;
     case Y_STARTER:
         StarterScreen();
+        break;
+    case Y_WAIT:
+        WaitScreen();
+        break;
+    case Y_TRADE:
+        TradeScreen();
         break;
     case Y_DUEL:
         YgoBoard_Render();
@@ -2349,6 +2782,22 @@ void Ygo_Debug(const char *command)
         YgoBoard_SetFast(1);
         return;
     }
+    if (!strcmp(command, "nodecks"))
+    {
+        /* every saved deck emptied (the cards stay): the "no deck ready" case */
+        memset(c->decks, 0, sizeof(c->decks));
+        return;
+    }
+    if (!strcmp(command, "concede"))
+    {
+        /* (online through the link, as the table's CONCEDE) */
+        if (Y.online && !YgoNet_Concede(Ygo_Online(), SDL_GetTicks()))
+            Y.concedeHeld = 1;
+        else if (!Y.online)
+            YgoDuel_Concede(&Y.duel, 0);
+        printf("[ygo] conceded\n");
+        return;
+    }
     if (!strcmp(command, "win"))
     {
         YgoDuel_Concede(&Y.duel, 1);
@@ -2378,12 +2827,13 @@ void Ygo_Debug(const char *command)
         unsigned total, have = Ygo_SetOwned(c, YGO_SET_COUNT, &total);
         printf("[ygo] screen %d opted %u starter %u deck %u+%u valid %d owned %u/%u points %u packs %u wins %u "
                "duel: turn %u phase %u current %u query %u player %u lp %d/%d hands %u/%u over %u winner %u idle %d "
-               "message %d conserved %d\n",
+               "message %d conserved %d online %d hash %08x\n",
                Y.screen, c->optedIn, c->starter, MainCount(c->activeDeck), ExtraCount(c->activeDeck),
                DeckValid(c->activeDeck), have, total, Points(), PacksHeld(), c->wins, s->turn, s->phase, s->current,
                Y.duel.query.type, Y.duel.query.player, s->players[0].lp, s->players[1].lp, s->players[0].handCount,
                s->players[1].handCount, s->over, s->winner, Y.screen == Y_DUEL ? YgoBoard_Idle() : -1,
-               Y.message[0] != 0, Y.screen == Y_DUEL ? YgoDuel_Conserved(&Y.duel) : -1);
+               Y.message[0] != 0, Y.screen == Y_DUEL ? YgoDuel_Conserved(&Y.duel) : -1, Y.online,
+               (unsigned)YgoNet_Hash(&Y.duel));
         return;
     }
 }

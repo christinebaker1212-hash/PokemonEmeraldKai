@@ -279,3 +279,75 @@ expect gcshop 'game center: bought deck 1'
 refuse gcshop 'game center: bought deck 1, .*game center: bought deck 1'
 echo 'PASS the GAME CENTER Yu-Gi-Oh! clerk: a new duelist set up, a single and a Starter Deck for money, one each'
 fi
+
+# Asked for a Yu-Gi-Oh! duel with only the POKEMON cards: a Starter Deck to keep first, then the duel. With
+# Yu-Gi-Oh! cards but no deck ready: a Starter Deck to borrow for this duel.
+if only resolve; then
+for mode in keep loan; do
+{
+    echo 'pressuntil A field 5000'
+    echo 'wait 100'
+    echo 'mp cards starter 0'
+    [ $mode = loan ] && { echo 'mp ygo starter 2'; echo 'mp ygo nodecks'; }
+    cat <<'SCRIPT'
+mp register 399
+wait 10
+press UP 2
+wait 10
+press SELECT 2
+wait 400
+press A 2
+wait 30
+press DOWN 2
+wait 6
+press A 2
+wait 10
+pressuntil A cards 600
+wait 20
+rendershot resolve
+press A 2
+wait 10
+press RIGHT 2
+wait 6
+press A 2
+wait 10
+rendershot ask
+press A 2
+wait 20
+rendershot after
+press A 2
+wait 20
+press A 2
+wait 60
+mp ygo state
+mp ygo fast
+mp ygo win
+wait 200
+press A 2
+wait 30
+press A 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 30
+press A 2
+waitfor field 600
+mp ygo state
+quit
+SCRIPT
+} > "$OUT/resolve_$mode.txt"
+run resolve_$mode 2,4,7,3
+done
+expect resolve_keep 'no deck: a Starter Deck to keep'
+expect resolve_keep 'no deck: took the SD'
+expect resolve_keep 'duel started vs CARD CLUB'
+expect resolve_keep 'victory vs CARD CLUB'
+expect resolve_keep 'opted 1 starter [0-9]* .* wins 1 '
+expect resolve_loan 'no deck: a Starter Deck to borrow'
+expect resolve_loan 'no deck: borrowed the SD'
+expect resolve_loan 'duel started vs CARD CLUB'
+expect resolve_loan 'victory vs CARD CLUB'
+expect resolve_loan 'deck 0+0 .* wins 1 '
+echo 'PASS no Yu-Gi-Oh! deck: a Starter Deck to keep (POKEMON cards only) or to borrow (no deck ready), then the duel'
+fi

@@ -164,7 +164,9 @@ answers), effects by stage in ygo_fx_s1_*.c (Ygo_CardReady gates packs, shops an
 ygo_board.c, screens ygo_ui.c, who plays which game and the special duelists ygo_field.c + tcg_field.c's which-game menu,
 the CARD CLUB duelist in the POKéMON MARTS (data/scripts/ygo_club.inc), "<save>.ygo"; quiet chain windows are passed by
 the board unless L is held (YgoDuel_QuietChance, YF_PHASE); printed art and the real back in graphics/ygo/printed.bin;
-decisions docs/YGO_DECISIONS.md, COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh).
+duels / trades with friends by answers over relay types 8-13 (ygo_net.c, struct YgoNet), a Starter Deck to keep or
+borrow for anyone asked without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md,
+COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh, scenarios ygo_*).
 
 Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap

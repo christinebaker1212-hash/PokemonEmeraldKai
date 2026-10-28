@@ -1,0 +1,36 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp cards starter 0
+mp additem 399 1
+barrier ready 2
+wait 150
+rendershot b_asked
+press A 2
+wait 120
+rendershot b_resolve
+press A 2
+wait 20
+press A 2
+wait 20
+press A 2
+wait 30
+rendershot b_got
+press A 2
+wait 30
+rendershot b_challenge
+press A 2
+wait 300
+rendershot b_duel
+mp ygo fast
+mp ygo auto
+wait 3000
+mp ygo state
+wait 3000
+mp ygo state
+wait 3000
+mp ygo state
+barrier over 2
+mp ygo state
+quit

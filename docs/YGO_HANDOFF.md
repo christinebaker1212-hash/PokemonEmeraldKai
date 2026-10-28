@@ -83,10 +83,9 @@ The user's answers to the 30 design questions (keep to them):
 1. (done: test_ui.sh)
 2. Still worth a look at real speed: chain badges, FX_BIGCARD timing, tribute / target / grid picks with real keys
    (the look so far: action menu, END TURN / CONCEDE, chain prompts, monkey shots all fine).
-3. **Online YGO duels and trades** (answer 27): reuse src/tcg/tcg_online.c's request/deck/trade social layer with
-   a game flag; the duel link only needs to exchange YgoAnswers (engine is deterministic from seed + answers;
-   YgoDuel_Hash to check). The board already supports seat `me` = 1. Bump MP_PROTOCOL_VERSION / TCG_LINK_VERSION.
-   Nametag/spectate already work (Tcg_IsActive/Tcg_DuelingNow include YGO). Could be stage 2 if usage is short.
+3. (done) Online Yu-Gi-Oh! duels and trades (ygo_net.c), the no-deck resolver, the GAME CENTER clerk, the CARD
+   CLUB behind the Mart counter: see COOP_NOTES "Yu-Gi-Oh! card duels". Not done: Yu-Gi-Oh! card duel TOURNAMENTs
+   (mp_tourney.c TK_CARDS is the Pokemon cards only).
 4. (done) Docs: CLAUDE.md feature paragraph, docs/COOP_NOTES.md "Yu-Gi-Oh! card duels", docs/YGO_DECISIONS.md,
    dist_extras/README.txt YU-GI-OH! (and the CARD CLUB's new place).
 5. (done) Windows build: tools/release/build_windows.sh builds cleanly (mingw-w64 + SDL2-devel-2.30.9-mingw).

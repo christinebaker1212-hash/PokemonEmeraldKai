@@ -12,6 +12,7 @@
 #include "tcg/integration.h"
 #include "tcg/online.h"
 #include "ygo/integration.h"
+#include "ygo/net.h"
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
 static int sLoaded;
@@ -71,15 +72,18 @@ void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len)
         return;
     if (len < 7 || data[0] != TCG_LINK_RELAY || data[1] != TCG_LINK_VERSION)
         return;
-    /* Questions, answers and trades (tcg_online.c); the duel itself (tcg_link.c) */
+    /* Questions, answers and trades (tcg_online.c); the duel itself (tcg_link.c, Yu-Gi-Oh!'s ygo_net.c) */
     if (data[2] >= 0x10)
         Tcg_SocialReceive(from, data, len);
+    else if (data[2] >= YGO_NET_FIRST_TYPE && data[2] <= YGO_NET_LAST_TYPE)
+        Ygo_OnlineReceive(from, data, len, Tcg_SocialExpectsYgoInvite(from));
     else
         TcgLink_Receive(Tcg_Online(), from, data, len, Tcg_SocialExpectsInvite(from), SDL_GetTicks());
 }
 void Tcg_OnlineTick(void)
 {
     Tcg_SocialTick();
+    Ygo_OnlineTick();
     if (sOnlineInit)
         TcgLink_Tick(&sOnline, MP_IsConnected() && sOnline.peer < MP_MAX_PLAYERS && gMpPlayers[sOnline.peer].present,
                      SDL_GetTicks());

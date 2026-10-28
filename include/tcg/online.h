@@ -16,8 +16,13 @@ enum
 enum
 {
     TCG_ASK_DUEL,
-    TCG_ASK_TRADE
+    TCG_ASK_TRADE,
+    TCG_ASK_YGO_DUEL,    /* Yu-Gi-Oh! (src/ygo/ygo_net.c, ygo_ui.c) */
+    TCG_ASK_YGO_TRADE,
+    TCG_ASK_KINDS
 };
+#define TCG_ASK_IS_YGO(kind) ((kind) >= TCG_ASK_YGO_DUEL)
+#define TCG_ASK_IS_DUEL(kind) ((kind) == TCG_ASK_DUEL || (kind) == TCG_ASK_YGO_DUEL)
 enum
 {
     TCG_ANSWER_NO,
@@ -38,6 +43,7 @@ const struct TcgSocial *Tcg_Social(void);
 void Tcg_SocialTick(void);
 void Tcg_SocialReceive(unsigned from, const unsigned char *data, unsigned len);
 int Tcg_SocialExpectsInvite(unsigned from);
+int Tcg_SocialExpectsYgoInvite(unsigned from);
 void Tcg_SocialOffer(unsigned card);
 void Tcg_SocialConfirm(void);
 void Tcg_SocialLeave(void);

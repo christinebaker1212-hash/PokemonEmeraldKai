@@ -1,0 +1,7 @@
+# A Yu-Gi-Oh! card trade with a friend: ALICE asks BOB (kind 3), both offer a card, both confirm; each gets the other's
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=200
+EXPECT_A=("asked player 1 for a yu-gi-oh trade" "trade with BOB" "traded card")
+EXPECT_B=("trade with ALICE" "traded card")

@@ -1992,6 +1992,23 @@ the work left in docs/YGO_HANDOFF.md.
   duelists with signature cards; tcg_field.c's Task_CardChallenge asks "MOéMON CARDS or YU-GI-OH!" for the CARD CLUB,
   the rival, WALLY and STEVEN. Both CARD CLUB NPCs stand in OLDALE's and MAUVILLE's POKéMON MARTS and LILYCOVE's
   DEPARTMENT STORE (data/scripts/ygo_club.inc, card_club.inc).
+- Friends (1.36.0): src/ygo/ygo_net.c (include/ygo/net.h, struct YgoNet: the chain link's struct is YgoLink) on the
+  card games' relay extension 255 (TCG_LINK_VERSION 6, message types 8-13; tcg_integration.c routes them). The
+  invite / accept carry the decks (main + Fusion), then only answers go over, each with the duel's hash before and
+  after (YgoNet_Hash: YgoDuel_Hash plus the answers inside the current step) and an ACK before the next; a
+  concession crossing an answer rolls the answer back (as tcg_link.c). Who goes first comes from the session. The
+  asking is tcg_online.c's with request kinds TCG_ASK_YGO_DUEL / TRADE (2-3); CO-OP > FRIENDS' CARD DUEL / TRADE pick
+  the game with LEFT / RIGHT (mp_linkx.c), the CARD CASE button uses the case's last side. ygo_ui.c: Y_WAIT,
+  Y_TRADE, the board at seat 1 for the friend who accepted, FriendRewards. Tests tools/ygo/test_net.c (two engines
+  through a queue), scenarios ygo_online, ygo_online_nodeck, ygo_trade.
+- No Yu-Gi-Oh! deck (ygo_ui.c ResolveNoDeck): a challenge, a friend's duel or trade opened for a player without a
+  deck goes to the Starter Deck screen first: no Yu-Gi-Oh! cards = a Starter Deck to keep (RESOLVE_GIFT), cards but
+  no deck ready = one to borrow for this duel (RESOLVE_LOAN, Y.loanMain; online onlineDeck -1). A CARD CASE is all
+  a friend needs to be asked (tcg_online.c HasCaseFor).
+- GAME CENTER 2F clerk (1.36.0): the counter with Y.gc set: SINGLES (GC_BINDER, Ygo_MoneyPrice, one copy each in
+  gcSingles) and DECKS (the four Starter Decks, gcDecks) before TRADE IN and CARD SHOP; .ygo format 2.
+- The CARD CLUB member stands behind the POKéMON MART counter (1,2) beside the shopkeeper (the Mart layout has room
+  for one); in LILYCOVE's DEPARTMENT STORE both card NPCs are behind the counter (7,2) and (9,2).
 - Save: "<save>.ygo" beside the save (Ygo collection, written with the Pokemon cards' sidecar, backed up with the
   save). CARD POINTS are shared with the Pokemon cards.
 - Tests: tools/ygo/test.sh (engine, card scenarios, random duels, AI, collection; sanitizers) and

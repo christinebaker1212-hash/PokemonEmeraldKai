@@ -185,7 +185,7 @@ int Tcg_OnlineWilling(void) { return 0; }
 unsigned Tcg_HiddenFrom(void)
 {
     unsigned peer = Tcg_Online()->peer;
-    return U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0;
+    return (U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0) | YgoUi_HiddenFrom();
 }
 unsigned Tcg_DuelingNow(void)
 {

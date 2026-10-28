@@ -45,6 +45,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
 | `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |
+| `ygo_online` | a Yu-Gi-Oh! duel between friends (ygo_net.c): asked, both pick a deck, the AI plays both seats to the end; both games hold the same duel |
+| `ygo_online_nodeck` | the same with BOB holding only POKEMON cards: he's asked anyway, takes a Starter Deck to keep, and they duel |
+| `ygo_trade` | a Yu-Gi-Oh! card trade between friends: both offer, both confirm, each gets the other's card |
 | `spectate` | A on a friend in a battle: watch it, B to stop |
 | `rescue` | BOB loses, ALICE gets HELP? and revives his lead |
 | `lend` | BOB cuts a tree with ALICE's Moemon's CUT |

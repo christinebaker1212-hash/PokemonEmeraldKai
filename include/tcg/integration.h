@@ -11,7 +11,7 @@ struct TcgCollection *Tcg_GetCollection(void);
 int Tcg_FieldChallenge(void);
 int Tcg_FieldAskFriend(void);
 /* Card duels and trades with a friend (tcg_online.c): why not, or NULL; then ask. */
-const char *Tcg_CanAskFriend(unsigned id);
+const char *Tcg_CanAskFriend(unsigned id, unsigned kind);   /* kind: TCG_ASK_* (tcg/online.h) */
 void Tcg_AskFriend(unsigned id, unsigned kind); /* kind 0 duel, 1 trade */
 /* Shown over this player's name to friends: 0 none, 1 a card duel. */
 unsigned Tcg_DuelingNow(void);

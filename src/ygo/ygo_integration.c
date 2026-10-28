@@ -4,7 +4,9 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include "global.h"
+#include "mp.h"
 #include "ygo/integration.h"
+#include "ygo/net.h"
 extern char gPlatformSavePath[512];
 static struct YgoCollection sCollection;
 static int sLoaded;
@@ -38,4 +40,32 @@ void Ygo_WriteSidecar(void)
         return;
     snprintf(path, sizeof(path), "%s.ygo", gPlatformSavePath);
     Ygo_CollectionSave(&sCollection, path);
+}
+
+/* ---- duels with friends */
+static struct YgoNet sOnline;
+static int sOnlineInit;
+static void OnlineSend(void *context, unsigned to, const uint8_t *data, unsigned len)
+{
+    (void)context;
+    MP_SendRelay((u8)to, data, (u16)len);
+}
+struct YgoNet *Ygo_Online(void)
+{
+    if (!sOnlineInit)
+    {
+        YgoNet_Init(&sOnline, OnlineSend, NULL);
+        sOnlineInit = 1;
+    }
+    return &sOnline;
+}
+void Ygo_OnlineReceive(unsigned from, const unsigned char *data, unsigned len, int willing)
+{
+    YgoNet_Receive(Ygo_Online(), from, data, len, willing, SDL_GetTicks());
+}
+void Ygo_OnlineTick(void)
+{
+    if (sOnlineInit)
+        YgoNet_Tick(&sOnline, MP_IsConnected() && sOnline.peer < MP_MAX_PLAYERS && gMpPlayers[sOnline.peer].present,
+                    SDL_GetTicks());
 }
