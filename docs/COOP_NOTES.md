@@ -2038,6 +2038,52 @@ the work left in docs/YGO_HANDOFF.md.
 - Pokemon table: Refocus() after our own action's state is shown (B.refocus, set in Submit).
 - Text fitting: TcgUi_WrapLines / TcgUi_FitText; tcg_board.c Prompt() splits a long prompt in two lines.
 
+## Triple Triad (src/tt/, include/tt/; 1.40.0)
+The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
+- Data: tools/tt/fetch_cards.py reads every Final Fantasy XIV card from xivapi (TripleTriadCard + Resident: names,
+  the four numbers, stars, type, sale value, XIV's order) into tools/tt/cards.json, and both pictures (088xxx 40x40
+  icons, 087xxx 104x128 faces) plus the card frame (ui/uld/CardTripleTriad_hr1: the grey plate, the star, the type
+  icons) into the gitignored tools/tt/metadata/. gen_catalog.py writes src/tt/tt_catalog.c and include/tt/card_ids.h
+  (ids are XIV's and never move); build_art.py packs graphics/tt/cards.bin (each face at full size, at the board's
+  40x49 by Lanczos, the icon; the back we draw, the plate at both sizes, star and type icons; .incbin'd by
+  tt_art_data.c). gen_pools.py writes src/tt/tt_pools.c: each region's cards, each seller's shelf (checked under
+  15%), each special player's five-star cards (every one belongs to someone).
+- Rules (tt_duel.c): FF8's capture code as the decomp reads it (Same, Plus, Plain, the COMBO loop), XIV's rules
+  beside them; deterministic from seed + moves (TtDuel_Hash). Events (TTE_PLACE / RULE / FLIP / SHIFT / ROUND /
+  END) drive the table. AI tt_ai.c (negamax, alpha-beta, endgame search from six empty squares). Hands
+  (tt_hands.c): a region's players rotate through its cards a hand a day, stars by badges; specials one of their
+  five-star cards a day. Deck limits in tt_common.c (Tt_DeckFits).
+- Collection and the regions (tt_collection.c): "<save>.tt" (tagged records "MTTR", unknown tags skipped), owned
+  copies, seen, the shelves' sold singles, six decks, packs, each region's rules / trade rule / games, the rules
+  carried and from where, the CARD QUEEN's region and day, records. Tt_MixRules (spread 30 / abolish 20, 50 / 40
+  where the queen is), Tt_PlayedIn, Tt_QueenMoves. Written with the save (Tcg_WriteSidecar), backed up with it
+  (sdl2.c sSidecars).
+- Screens (tt_ui.c, the kit of tcg_ui_kit.h): HOME, DECKS (EDIT / RENAME / PLAY WITH IT / COPY / DELETE), the
+  builder and the CARD LIST tabbed by stars (L / R), INSPECT, PACKS and the reveal, RULES OF HOENN, CHALLENGE
+  (where the rules mix, announced), the table, SPOILS (the trade rule's picks), a seller's counter (SINGLES /
+  PACKS / SELL), the CARD QUEEN's menu. tcg_ui.c routes Step / Draw / IsActive here like the Yu-Gi-Oh! side;
+  Tcg_OpenCaseGame opens any side; L / R go round POKeMON, YU-GI-OH!, TRIPLE TRIAD (TcgUi_CaseTabs: the chosen
+  side's tab full width). The last side: TT_FLAG_CASE_SIDE.
+- The table (tt_board.c): XIV's layout, hands stacked bottom-up so every card's numbers show; phases DEAL, RULES,
+  SPIN (who starts), PLAY, EVENTS, END. Pictures and numbers: tt_gfx.c (the plate tinted per seat once; a 5x7 pixel
+  font of our own for numbers and banners, Tt_Char / Tt_Text).
+- Who plays (tt_field.c Tt_FieldPick, asked first by tcg_field.c Ask): TT_PLAYS_ONLY / TT_PLAYS_ALSO by trainer
+  class or sprite; specials by sprite (and map for MR. STONE / MR. BRINEY); sellers and the queen by their script
+  (EventScript_TtSeller / EventScript_TtQueen). tcg_field.c's which-game menu holds up to three games (sGames);
+  Tt_WhichLine gives each kind of player its own "which?" line.
+- Map side: data/scripts/tt_seller.inc (EventScript_TtSeller, EventScript_TtQueen, EventScript_TtPlayer,
+  EventScript_TtMapSetup called from each seller's POKeMON CENTER's ON_TRANSITION); specials Tt_SellerState
+  (gStringVar1-3: region, rules, trade rule), Tt_SellerStarter, Tt_SellerShop, Tt_MapSetup, Tt_QueenTalk /
+  Here / FirstMeeting. FLAG_TT_QUEEN_AWAY (FLAG_UNUSED_0x022) hides the queen outside her region; the region is
+  the map section's (Tt_CurrentRegion; buildings of no town keep the last region).
+- Achievements: the TRIPLE TRIAD tab (counters ttwin, ttsame, ttplus, ttcombo, ttspread, ttabolish, ttspecial,
+  ttcards, ttpack). LEGENDS OF THE TABLE counts Triple Triad specials too.
+- Tests: tools/tt/test.sh (rules scenarios from real cards, 2000 random games replayed, the collection file, the
+  spread odds, every card winnable), tools/tt/test_ui.sh (seller, case, practice, gamecenter, which, queen).
+  Debug: `mp tt ...` (tt_ui.c Tt_Debug): starter, giveall, give ID N, packs P N, first N, auto, rules R HEX,
+  trade R T, carry R, queen R, favor, practice, case, shop R, queenmenu, focus N, win, state.
+- Not done: games and trades with friends online, tournaments.
+
 ## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
 Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
 drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to

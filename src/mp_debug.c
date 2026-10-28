@@ -23,6 +23,7 @@
 #include "mp.h"
 #include "tcg/integration.h"
 #include "ygo/integration.h"
+#include "tt/integration.h"
 #include "map_name_popup.h"
 #include "mp_farm.h"
 #include "battle.h"
@@ -329,6 +330,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     if (strcmp(cmd, "ygo") == 0)
     {
         Ygo_Debug(arg);
+        return;
+    }
+    if (strcmp(cmd, "tt") == 0)
+    {
+        Tt_Debug(arg);
         return;
     }
     if (strcmp(cmd, "export") == 0)

@@ -47,6 +47,7 @@
 #define FLAG_UNUSED_0x021    0x21 // Unused Flag
 #define FLAG_MP_SKIP_TRUCK   FLAG_UNUSED_0x021 // Moemon Co-op: SKIP THE INTRO, the truck still drops you off
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
+#define FLAG_TT_QUEEN_AWAY  FLAG_UNUSED_0x022 // Moemon Kai: set while the CARD QUEEN is in another region (tt_field.c Tt_MapSetup)
 #define FLAG_UNUSED_0x023    0x23 // Unused Flag
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag
 #define FLAG_UNUSED_0x025    0x25 // Unused Flag

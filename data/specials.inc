@@ -573,6 +573,14 @@ gSpecials::
 	def_special Ygo_ClubTeachingDuel, waitstate=1
 	def_special Ygo_ClubCounter, waitstate=1
 	def_special Ygo_GameCenterShop, waitstate=1
+	def_special Tt_SellerState
+	def_special Tt_SellerHasCase
+	def_special Tt_SellerStarter, waitstate=1
+	def_special Tt_SellerShop, waitstate=1
+	def_special Tt_MapSetup
+	def_special Tt_QueenHere
+	def_special Tt_QueenTalk, waitstate=1
+	def_special Tt_QueenFirstMeeting
 	def_special MP_Fight_StartCpu, waitstate=1
 	def_special MP_Fight_Result
 	def_special MP_Fight_SeatCheck

@@ -30,6 +30,7 @@
 #include "platform_text.h"
 #include "tcg_structure_decks.h"
 #include "ygo/integration.h"
+#include "tt/integration.h"
 #include "../ygo/ygo_gfx.h"
 int Tcg_GrantCase(void);
 void Tcg_ResumeGame(void (*callback)(void));
@@ -188,16 +189,16 @@ static void Screen(int screen)
     U.scroll = 0;
     U.age = 0;
 }
-int Tcg_IsActive(void) { return U.screen != UI_CLOSED || YgoUi_Active(); }
+int Tcg_IsActive(void) { return U.screen != UI_CLOSED || YgoUi_Active() || TtUi_Active(); }
 int Tcg_OnlineWilling(void) { return 0; }
 unsigned Tcg_HiddenFrom(void)
 {
     unsigned peer = Tcg_Online()->peer;
-    return (U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0) | YgoUi_HiddenFrom();
+    return (U.online && Tcg_IsActive() && peer < MP_MAX_PLAYERS ? 1u << peer : 0) | YgoUi_HiddenFrom() | TtUi_HiddenFrom();
 }
 unsigned Tcg_DuelingNow(void)
 {
-    return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL) || YgoUi_DuelingNow();
+    return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL) || YgoUi_DuelingNow() || TtUi_DuelingNow();
 }
 
 /* The local player is always player 0 on screen: the friend who accepted
@@ -265,7 +266,13 @@ static void Open(int screen)
 void Tcg_OpenCase(void (*returnToGame)(void))
 {
     struct YgoCollection *y = Ygo_GetCollection();
-    /* The side used last (Yu-Gi-Oh!'s when that's the only game with a deck) */
+    struct TtCollection *t = Tt_GetCollection();
+    /* The side used last (another game's when it's the only one with cards) */
+    if (t->optedIn && (t->flags & TT_FLAG_CASE_SIDE || (!Tcg_GetCollection()->optedIn && !y->optedIn)))
+    {
+        TtUi_OpenCase(returnToGame, 0);
+        return;
+    }
     if (y->optedIn && (y->flags & YGO_FLAG_CASE_SIDE || !Tcg_GetCollection()->optedIn))
     {
         YgoUi_OpenCase(returnToGame, 0);
@@ -277,9 +284,28 @@ void Tcg_OpenCase(void (*returnToGame)(void))
     if (!Tcg_GetCollection()->optedIn)
         Say(ACT_CLOSE, "The CARD CASE is empty. Visit the CARD CLUB in a POKeMON MART to get your first deck!");
 }
+void Tcg_OpenCaseGame(unsigned game, void (*returnToGame)(void), int fromScript)
+{
+    Ygo_GetCollection()->flags &= ~YGO_FLAG_CASE_SIDE;
+    Tt_GetCollection()->flags &= ~TT_FLAG_CASE_SIDE;
+    if (game == KIT_GAME_YUGIOH)
+    {
+        Ygo_GetCollection()->flags |= YGO_FLAG_CASE_SIDE;
+        YgoUi_OpenCase(returnToGame, fromScript);
+        return;
+    }
+    if (game == KIT_GAME_TRIAD)
+    {
+        Tt_GetCollection()->flags |= TT_FLAG_CASE_SIDE;
+        TtUi_OpenCase(returnToGame, fromScript);
+        return;
+    }
+    Tcg_OpenCaseSide(returnToGame, fromScript);
+}
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript)
 {
     Ygo_GetCollection()->flags &= ~YGO_FLAG_CASE_SIDE;
+    Tt_GetCollection()->flags &= ~TT_FLAG_CASE_SIDE;
     U.returnToGame = returnToGame;
     Open(UI_HOME);
     U.fromScript = fromScript;
@@ -290,8 +316,8 @@ void Tcg_CloseScreens(void (*returnToGame)(void), int fromScript)
     U.fromScript = fromScript;
     Close();
 }
-/* The CARD CASE's YU-GI-OH! side */
-static void ToYugioh(void)
+/* The CARD CASE's other sides: R the YU-GI-OH! side, L the TRIPLE TRIAD side */
+static void ToSide(unsigned game)
 {
     void (*callback)(void) = U.returnToGame;
     int script = U.fromScript;
@@ -300,8 +326,7 @@ static void ToYugioh(void)
     U.message[0] = 0;
     U.asking = 0;
     Screen(UI_CLOSED);
-    Ygo_GetCollection()->flags |= YGO_FLAG_CASE_SIDE;
-    YgoUi_OpenCase(callback, script);
+    Tcg_OpenCaseGame(game, callback, script);
 }
 void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent)
 {
@@ -1001,22 +1026,24 @@ void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsi
 void TcgUi_Hints(const char *hint) { Hints(hint); }
 void TcgUi_CaseTabs(unsigned game, unsigned color)
 {
-    static const char *const names[] = {"POKeMON", "YU-GI-OH!"};
+    /* the chosen side's tab is wide enough for its whole name; the others show a short one */
+    static const char *const names[] = {"POKeMON", "YU-GI-OH!", "TRIAD"};
+    static const char *const shortNames[] = {"POKe", "YGO", "TRIAD"};
     unsigned light = G_Mix(color, 0xffffff, 0.45f), dark = G_Mix(color, 0x000000, 0.35f);
     int x = 2, i;
     G_RoundFill(0, 0, PANEL_W, STRIP_Y - 2, light, 255);
     G_RoundFrame(0, 0, PANEL_W, STRIP_Y - 2, dark, 255);
     G_FillA(1, 1, PANEL_W - 2, 1, 0xffffff, 120);
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < 3; i++)
     {
-        int on = (unsigned)i == game, w = (PANEL_W - 5) / 2;
+        int on = (unsigned)i == game, w = on ? PANEL_W - 6 - 2 * 27 : 27;
         unsigned fill = on ? color : G_Mix(light, 0x808890, 0.35f);
         G_RoundFill(x, on ? 2 : 4, w, on ? 15 : 12, fill, 255);
         G_RoundFrame(x, on ? 2 : 4, w, on ? 15 : 12, on ? dark : G_Mix(light, 0x404850, 0.5f), 255);
         if (on)
             G_FillA(x + 1, 3, w - 2, 1, G_Mix(color, 0xffffff, 0.5f), 255);
-        G_TextAlign(x + w / 2, on ? 3 : 4, TA_CENTER, on ? G_WHITE : 0x505860, on ? dark : G_NO_SHADOW, names[i],
-                    TF_NARROW);
+        G_TextAlign(x + w / 2, on ? 3 : 4, TA_CENTER, on ? G_WHITE : 0x505860, on ? dark : G_NO_SHADOW,
+                    on ? names[i] : shortNames[i], TF_NARROW);
         x += w + 1;
     }
 }
@@ -1293,7 +1320,7 @@ static void HomeScreen(void)
     }
     snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[U.cursor], have, total, c->dust);
     Strip(0, line);
-    Hints("{L}{R} YU-GI-OH!");
+    Hints("{L}{R} OTHER GAMES");
 }
 
 /* A challenge: who it is, what they play, what's in it for you, your deck. */
@@ -3025,11 +3052,20 @@ int Tcg_Step(unsigned keys)
     {
         U.frame++;
         MP_Sound_TickFanfare();
+        TtUi_Step(keys);
         return YgoUi_Step(keys);
     }
-    /* (closed, the Yu-Gi-Oh! screens only note the buttons held: one still down from the message that opened them
-     * isn't a new press, as here) */
+    if (TtUi_Active())
+    {
+        U.frame++;
+        MP_Sound_TickFanfare();
+        YgoUi_Step(keys);
+        return TtUi_Step(keys);
+    }
+    /* (closed, the other games' screens only note the buttons held: one still down from the message that opened
+     * them isn't a new press, as here) */
     YgoUi_Step(keys);
+    TtUi_Step(keys);
     if (!Tcg_IsActive())
         return 0;
     MP_Sound_TickFanfare(); /* (the game's tasks don't run while the cards are open) */
@@ -3082,7 +3118,7 @@ int Tcg_Step(unsigned keys)
         if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
-            ToYugioh();
+            ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : KIT_GAME_TRIAD);
         }
         else if (pressed & KEY_B)
         {
@@ -3753,6 +3789,8 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     default:
         if (YgoUi_Active())
             YgoUi_Draw();
+        else if (TtUi_Active())
+            TtUi_Draw();
         break;
     }
     MessageBox();

@@ -5,6 +5,7 @@ FallarborTown_PokemonCenter_1F_MapScripts::
 
 FallarborTown_PokemonCenter_1F_OnTransition:
 	setrespawn HEAL_LOCATION_FALLARBOR_TOWN
+	call EventScript_TtMapSetup
 	call Common_EventScript_UpdateBrineyLocation
 	end
 

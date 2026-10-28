@@ -68,3 +68,4 @@ pokeemerald-dev64
 # Moemon Fight: what the fight engine writes into the pack while it runs
 mugen/*.log
 mugen/mugen*.png
+/tools/tt/metadata/

@@ -45,8 +45,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_DANCE, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "DANCE"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
@@ -343,6 +343,25 @@ static const struct Achievement sAch[] = {
     {"ygosecret", "SECRET RARE", "Pull a Secret Rare from a booster pack.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoflawless", "UNTOUCHED", "Win a Yu-Gi-Oh! duel without losing any Life Points.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoexodia", "OBLITERATE!", "Win a duel with all five pieces of Exodia.", AK_EVENT, 0, 1, 2, C_YUGIOH},
+    // Triple Triad (src/tt): counted and unlocked by the card screens
+    {"ttstart", "FIRST HAND", "Get your first TRIPLE TRIAD cards.", AK_EVENT, 0, 1, 0, C_TRIAD},
+    {"ttwin1", "OPEN RULES", "Win a game of TRIPLE TRIAD.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttwin50", "SHUFFLE OR BOOGIE", "Win 50 games of TRIPLE TRIAD.", AK_COUNT, 0, 50, 1, C_TRIAD},
+    {"ttwin200", "MASTER OF THE TABLE", "Win 200 games of TRIPLE TRIAD.", AK_COUNT, 0, 200, 2, C_TRIAD},
+    {"ttperfect", "PERFECT HAND", "Win a game holding nine of the ten cards.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttsame10", "SAME AS IT EVER WAS", "Take cards with SAME 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttplus10", "PLUS ONE", "Take cards with PLUS 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttcombo1", "COMBO!", "Start a COMBO.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttcombo25", "CHAIN REACTION", "Start 25 COMBOs.", AK_COUNT, 0, 25, 2, C_TRIAD},
+    {"ttspread1", "RULES ON THE MOVE", "Carry a rule to a region that didn't play it.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttspread10", "TRENDSETTER", "Spread rules to other regions 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttabolish1", "ABOLISHED!", "See a region's rule abolished.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttqueen", "BY ROYAL DECREE", "Beat the CARD QUEEN.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttspecial10", "TRIAD LEGENDS", "Beat 10 special players at TRIPLE TRIAD.", AK_COUNT, 0, 10, 2, C_TRIAD},
+    {"ttcards100", "CARD CARRIER", "Win 100 cards at the table.", AK_COUNT, 0, 100, 1, C_TRIAD},
+    {"tt5star", "FIVE STARS", "Win a five-star card.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttpack25", "PACK OPENER", "Open 25 TRIPLE TRIAD packs.", AK_COUNT, 0, 25, 1, C_TRIAD},
+    {"ttall", "TRIPLE TRIAD MASTER", "Own every TRIPLE TRIAD card.", AK_EVENT, 0, 1, 2, C_TRIAD},
     // The DANCE machine (mp_rhythm.c MP_Rhythm_StageDone): made for players who know their DDR
     {"ddrclear1", "FIRST STEPS", "Clear a song on the DANCE machine.", AK_COUNT, 0, 1, 0, C_DANCE},
     {"ddrclear100", "DANCE MANIA", "Clear 100 songs on the DANCE machine.", AK_COUNT, 0, 100, 1, C_DANCE},

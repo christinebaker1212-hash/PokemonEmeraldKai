@@ -5,6 +5,7 @@ MossdeepCity_PokemonCenter_1F_MapScripts::
 
 MossdeepCity_PokemonCenter_1F_OnTransition:
 	setrespawn HEAL_LOCATION_MOSSDEEP_CITY
+	call EventScript_TtMapSetup
 	end
 
 MossdeepCity_PokemonCenter_1F_EventScript_Nurse::

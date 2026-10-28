@@ -11,13 +11,14 @@
 enum
 {
     KIT_GAME_POKEMON,
-    KIT_GAME_YUGIOH
+    KIT_GAME_YUGIOH,
+    KIT_GAME_TRIAD
 };
 unsigned TcgUi_Frame(void);   /* counts up while the card screens are open (the row frame's pulse) */
 unsigned TcgUi_Theme(void);
 void TcgUi_Background(void);
 void TcgUi_SidePanel(const char *title, unsigned color);
-/* The CARD CASE's two sides on the side panel's tab: POKeMON | YU-GI-OH! */
+/* The CARD CASE's three sides on the side panel's tabs: POKeMON | YU-GI-OH! | TRIPLE TRIAD */
 void TcgUi_CaseTabs(unsigned game, unsigned color);
 void TcgUi_ListBox(int x, int y, int w, int h);
 void TcgUi_Row(int x, int y, int w, int on, int enabled, const char *label, const char *right);
@@ -44,6 +45,8 @@ const char *TcgUi_NameText(void);
 void TcgUi_NameDraw(unsigned color);
 /* The CARD CASE on its POKeMON side again (from the YU-GI-OH! side's tabs) */
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript);
+/* The CARD CASE on any side (KIT_GAME_*): L and R on a side's first screen go round them */
+void Tcg_OpenCaseGame(unsigned game, void (*returnToGame)(void), int fromScript);
 /* The Pokemon promo card of a special trainer who duels with Yu-Gi-Oh! cards now (the ELITE FOUR), once */
 unsigned Tcg_GivePromoOf(unsigned special);
 /* Back to the map (or the script that opened the screens) */

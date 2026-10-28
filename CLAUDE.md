@@ -169,6 +169,16 @@ goes to, YgoAnswer.zone), deck menus with RENAME / ACE CARD / DECK RECIPES on bo
 borrow for anyone asked without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md,
 COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh, scenarios ygo_*).
 
+Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
+XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->
+tt_pools.c; ids are XIV's); FF8's capture rules from the ff8-decomp (SAME, PLUS, SAME WALL, ELEMENTAL with XIV's types,
+COMBO) and XIV's rules, tt_duel.c deterministic, AI tt_ai.c; HOENN's eight regions with their own rules, the rules
+carried from the last region played in spread or abolish (Tt_MixRules), the CARD QUEEN (favors, paid journeys);
+only the player ever takes cards (trade rules ONE / DIFF / DIRECT / ALL); XIV decks of five; sellers in seven POKeMON
+CENTERS + the GAME CENTER 2F (shelves under 15% of the cards, BRONZE / SILVER / GOLD packs, MYTHRIL / IMPERIAL never
+sold); who plays which game tt_field.c Tt_FieldPick before tcg_field.c's own; "<save>.tt"; decisions
+docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/tt/test_ui.sh).
+
 Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
 region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT

@@ -35,6 +35,8 @@ const unsigned short *Tcg_Frame(void);
 unsigned Tcg_HiddenFrom(void);
 void Tcg_DestroyTextures(void);
 void Tcg_OpenChallenge(const char *name, const char *deck, unsigned pack);
+/* Someone on the map as the card screens show them (their sprite, up to 32x32 ARGB) */
+void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h);
 void Tcg_Debug(const char *command);
 /* Right after the game was saved: the collection goes in "<save>.cards". */
 void Tcg_WriteSidecar(void);

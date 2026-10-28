@@ -420,7 +420,7 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
-    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo"};   // Moemon Co-op: files that belong with the save
+    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;

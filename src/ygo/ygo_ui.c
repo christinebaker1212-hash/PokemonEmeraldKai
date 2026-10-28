@@ -231,8 +231,8 @@ void YgoUi_OpenCase(void (*returnToGame)(void), int fromScript)
     Screen(Y_HOME);
     Y.fromScript = fromScript;
 }
-/* Back to the Pokemon side of the case */
-static void ToPokemon(void)
+/* To the case's other sides: L the POKeMON side, R the TRIPLE TRIAD side */
+static void ToSide(unsigned game)
 {
     void (*callback)(void) = Y.returnToGame;
     int script = Y.fromScript;
@@ -241,7 +241,7 @@ static void ToPokemon(void)
     Y.message[0] = 0;
     Screen(Y_CLOSED);
     Ygo_ForgetTextures();
-    Tcg_OpenCaseSide(callback, script);
+    Tcg_OpenCaseGame(game, callback, script);
 }
 void YgoUi_OpenChallenge(const struct YgoOpponent *opponent)
 {
@@ -856,7 +856,7 @@ static void HomeScreen(void)
         snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[Y.cursor], have, total, Points());
         Strip(0, line);
     }
-    TcgUi_Hints("{L}{R} POKeMON");
+    TcgUi_Hints("{L}{R} OTHER GAMES");
 }
 
 static void Portrait(int x, int y)
@@ -2358,7 +2358,7 @@ int YgoUi_Step(unsigned keys)
         if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
-            ToPokemon();
+            ToSide(pressed & KEY_R ? KIT_GAME_TRIAD : KIT_GAME_POKEMON);
         }
         else if (pressed & KEY_B)
         {

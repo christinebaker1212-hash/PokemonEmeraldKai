@@ -12,6 +12,7 @@
 #include "tcg/integration.h"
 #include "tcg/online.h"
 #include "ygo/integration.h"
+#include "tt/integration.h"
 #include "ygo/net.h"
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
@@ -45,6 +46,7 @@ void Tcg_WriteSidecar(void)
 {
     char path[600];
     Ygo_WriteSidecar();   /* the Yu-Gi-Oh! cards: "<save>.ygo" */
+    Tt_WriteSidecar();    /* the Triple Triad cards: "<save>.tt" */
     if (!sLoaded || sLoadedFor != SaveOwner() || !sCollection.optedIn)
         return;
     snprintf(path, sizeof(path), "%s.cards", gPlatformSavePath);

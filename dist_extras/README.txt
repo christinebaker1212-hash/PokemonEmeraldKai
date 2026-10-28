@@ -1266,8 +1266,8 @@ its backups). A few attacks aren't in the game yet; they show as not ready.
 
 YU-GI-OH!
 ---------
-The CARD CASE has a second side: L and R switch between POKEMON and
-YU-GI-OH!. Duels follow today's rules (8000 Life Points, the first player
+The CARD CASE has a second side: L and R switch between POKEMON,
+YU-GI-OH! and TRIPLE TRIAD. Duels follow today's rules (8000 Life Points, the first player
 doesn't draw or attack on their first turn) on today's table, with the cards
 of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
   Getting started The CARD CLUB's Yu-Gi-Oh! duelist (beside the CARD CLUB
@@ -1282,7 +1282,8 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
                   EXPERTS, TEAM AQUA and MAGMA grunts and most young
                   townsfolk play Yu-Gi-Oh!; kids, BUG CATCHERS, SWIMMERS,
                   HIKERS, LASSES and the older townsfolk play POKEMON cards.
-                  The CARD CLUB, your rival, WALLY and STEVEN ask which game.
+                  The CARD CLUB, your rival, WALLY and STEVEN ask which game
+                  (some play TRIPLE TRIAD too: see TRIPLE TRIAD).
                   The ELITE FOUR (SIDNEY's Fiends, PHOEBE's Zombies, GLACIA's
                   Aqua, DRAKE's Dragons), MAXIE, ARCHIE and the FRONTIER
                   BRAINS have decks of their own, each with a signature card
@@ -1329,6 +1330,65 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
   Achievements    A YU-GI-OH! tab of their own.
 The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
 
+TRIPLE TRIAD
+------------
+The CARD CASE's third side (L and R go round POKEMON, YU-GI-OH! and TRIPLE
+TRIAD). Five cards a hand, a 3x3 board, and a card's number takes the
+neighbor's number it faces when it's higher. The cards are all of FINAL
+FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
+  Getting started A TRIPLE TRIAD seller stands in the POKEMON CENTERS of
+                  PETALBURG, SLATEPORT, MAUVILLE, FALLARBOR, LILYCOVE,
+                  MOSSDEEP and EVER GRANDE, and in the GAME CENTER's 2F CARD
+                  SHOP (RUSTBORO's). The first gives you a CARD CASE if you
+                  have none and five cards to start with.
+  Who plays       GENTLEMEN, LADIES, PARASOL LADIES, BIRD KEEPERS, DRAGON
+                  TAMERS, RANGERS, BREEDERS, couples and INTERVIEWERS play
+                  TRIPLE TRIAD. SAILORS, TRIATHLETES, SCHOOL KIDS, RICH BOYS,
+                  BEAUTIES, POKEMON FANS and scientists play it besides POKEMON
+                  cards; COLLECTORS, COOLTRAINERS, RUIN MANIACS and EXPERTS
+                  besides Yu-Gi-Oh!, and they ask which. The CARD CLUB, your
+                  rival, WALLY and STEVEN play all three. Special players
+                  (WALLACE, JUAN, WINONA, NORMAN, ROXANNE, TATE & LIZA, MR.
+                  STONE, MR. BRINEY, SCOTT, PROF. BIRCH, your MOM and the CARD
+                  QUEEN) bring five-star cards. Hands get stronger with your
+                  badges, and change from day to day.
+  On the table    Your hand on the left, theirs on the right. UP / DOWN picks
+                  a card, A (or RIGHT) takes it to the board, the D-Pad picks
+                  a square and A plays it; B goes back. R looks at a card up
+                  close (theirs too, when you can see it). B on your hand,
+                  START or SELECT opens the turn menu (RULES, CONCEDE).
+  Rules           OPEN, SAME, PLUS, SAME WALL, RANDOM, SUDDEN DEATH and
+                  ELEMENTAL (some squares carry a card type: +1 for that
+                  type, -1 for any other), and COMBO after SAME or PLUS, as in
+                  FINAL FANTASY VIII. From farther away: THREE OPEN, REVERSE,
+                  FALLEN ACE, ASCENSION, DESCENSION, ORDER, CHAOS and SWAP.
+  Regions         HOENN has eight regions, each with its own rules and TRADE
+                  RULE (CARD CASE > RULES OF HOENN). You carry the rules of
+                  the region where you last played. Challenge someone in
+                  another region and one of your rules may spread there, or
+                  one of theirs you don't carry may be abolished.
+  CARD QUEEN      She travels between the regions' POKEMON CENTERS. Where
+                  she is, rules spread and fall away more easily. Beat her
+                  and she changes the TRADE RULE there or abolishes a rule
+                  for you; pay her way and she goes where you like, sometimes
+                  bringing a rule from afar.
+  Winning cards   Only you take cards: losing never costs one. Win, and the
+                  TRADE RULE says what you take: ONE (a card of your choice),
+                  DIFF (as many as you won by), DIRECT (every card of theirs
+                  you turned blue) or ALL (their whole hand). Every card can
+                  be won from someone.
+  Decks           CARD CASE > DECKS: six decks of five different cards, at
+                  most two of four stars or more and one of five stars. The
+                  card list and the builder sort the cards by stars (L / R).
+  Sellers         Each seller has a small shelf of its own (one copy of each,
+                  never more than a few dozen cards), BRONZE, SILVER and GOLD
+                  packs (three cards of one, two or three stars), and buys
+                  spare copies. MYTHRIL and IMPERIAL packs are never sold.
+  Achievements    A TRIPLE TRIAD tab of their own.
+The Triple Triad cards are saved with your game (the save file's .tt file).
+FINAL FANTASY XIV and FINAL FANTASY VIII are Square Enix's: the card pictures
+and numbers come from XIV's own data.
+
 GAME CENTER
 -----------
 The tower in RUSTBORO CITY's north-east corner, by the road east (the
@@ -1336,7 +1396,8 @@ MOENAV map names it under RUSTBORO CITY). Admission at the
 1F reception is 500, good for every floor until you leave; the stairs and
 the elevator are behind her.
   2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS),
-                  and a Yu-Gi-Oh! clerk (see YU-GI-OH!).
+                  a Yu-Gi-Oh! clerk (see YU-GI-OH!) and a TRIPLE TRIAD
+                  seller with two players beside him (see TRIPLE TRIAD).
   3F GAMES        A DANCE machine (see DANCE MACHINE), consoles, TVs, arcade
                   cabinets (coming soon) and a COIN counter: 50 COINS for
                   1000 (you'll need a COIN CASE).

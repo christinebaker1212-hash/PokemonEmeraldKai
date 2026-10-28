@@ -44,6 +44,8 @@
 #include "tcg/card_ids.h"
 #include "tcg/scale.h"
 #include "ygo/integration.h"
+#include "tt/integration.h"
+#include "tt/npc.h"
 #include "ygo/npc.h"
 #include "menu.h"
 #include "window.h"
@@ -522,6 +524,20 @@ static void CapturePortrait(struct TcgOpponent *o, struct ObjectEvent *npc)
     o->portraitH = h;
 }
 
+// The portrait of someone on the map, for the other card games' screens (Triple Triad's CARD QUEEN)
+void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h)
+{
+    static struct TcgOpponent sFace;
+    struct TcgOpponent *o = &sFace;
+    *w = *h = 0;
+    if (objectId >= OBJECT_EVENTS_COUNT || !gObjectEvents[objectId].active)
+        return;
+    CapturePortrait(o, &gObjectEvents[objectId]);
+    *w = o->portraitW;
+    *h = o->portraitH;
+    memcpy(pixels, o->portrait, sizeof(o->portrait));
+}
+
 // A friend's portrait: their avatar on the map, if it's on screen
 void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
 {
@@ -532,8 +548,11 @@ void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
 }
 
 // What happens when you ask them; NULL when they're not someone to ask
-enum { ASK_DUEL, ASK_NO, ASK_YGO, ASK_WHICH };
+enum { ASK_DUEL, ASK_NO, ASK_YGO, ASK_WHICH, ASK_TT };
+enum { GAME_PKMN = 1, GAME_YGO = 2, GAME_TT = 4 };
 static struct TcgOpponent sOpponent;
+static struct TtOpponent sTt;     // the same person's Triple Triad side
+static u8 sGames;                 // ASK_WHICH: the games they offer (GAME_*)
 static struct YgoOpponent sYgo;   // the same person's Yu-Gi-Oh! side
 static const u8 *sYgoLine;        // and what they say when they play both
 static const u8 sText_Which[] = _("Want a card duel? MOéMON cards or\nYu-Gi-Oh!? I'm up for either!");
@@ -544,11 +563,47 @@ static bool8 InGameCenterCardShop(void)
         && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_2F);
 }
 
+static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer, u32 key, u32 h);
+// Who plays what: Triple Triad first (src/tt/tt_field.c: theirs only, or besides another game), then the others
 static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
 {
     u32 key = (u32)gSaveBlock1Ptr->location.mapGroup << 24 | (u32)gSaveBlock1Ptr->location.mapNum << 16
             | (u32)npc->localId << 8 | 1;
     u32 h = Hash(key);
+    const u8 *ttLine, *line;
+    int ttRefused, staff = script == EventScript_CardClub || script == EventScript_YgoClub, ttOk;
+    int tt = Tt_FieldPick(npc, script, h, key, staff, &sTt, &ttLine, &ttRefused);
+    if (tt == TT_PLAYS_ONLY)
+    {
+        *answer = ttRefused ? ASK_NO : ASK_TT;
+        return ttLine;
+    }
+    ttOk = tt == TT_PLAYS_ALSO && !ttRefused;
+    line = AskCards(npc, script, answer, key, h);
+    if (!ttOk)
+        return line ? line : (tt && ttRefused) ? (*answer = ASK_NO, ttLine) : NULL;
+    // They play Triple Triad too
+    switch (line ? *answer : ASK_NO)
+    {
+    case ASK_DUEL: sGames = GAME_PKMN | GAME_TT; break;
+    case ASK_YGO: sGames = GAME_YGO | GAME_TT; break;
+    case ASK_WHICH: sGames = sGames | GAME_TT; break;
+    default:
+        *answer = ASK_TT;   // (the other game said no: Triple Triad it is)
+        return ttLine ? ttLine : line;
+    }
+    *answer = ASK_WHICH;
+    // a special player's own words; anyone else asks the way their kind does
+    if (sTt.special != TT_SPECIAL_NONE && ttLine)
+        return ttLine;
+    {
+        const u8 *which = Tt_WhichLine(sGames, h);
+        return which ? which : line;
+    }
+}
+
+static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer, u32 key, u32 h)
+{
     u8 i, cat = CAT_NONE, deck = DECK_MIXED;
     const char *label = NULL;
     struct TcgOpponent *o = &sOpponent;
@@ -579,6 +634,7 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
                 o->mat = 0;
                 o->music = MUS_VS_TRAINER;
                 *answer = ASK_WHICH;
+                sGames = GAME_PKMN | GAME_YGO;
                 return sText_Which;
             }
             sYgoLine = line;
@@ -620,6 +676,7 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         o->prizes = 6;   // (the full game: LEADERS and the like)
         Tcg_FitOpponent(o, NULL);
         *answer = sYgoLine ? ASK_WHICH : ASK_DUEL;
+        sGames = sYgoLine ? GAME_PKMN | GAME_YGO : GAME_PKMN;
         return sYgoLine ? sYgoLine : s->accept;
     }
     o->special = TCG_SPECIAL_NONE;
@@ -693,7 +750,37 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
 static const u8 *sLine;
 static const u8 sText_ChoicePokemon[] = _("MOéMON CARDS");
 static const u8 sText_ChoiceYgo[] = _("YU-GI-OH!");
-static const struct MenuAction sGameChoices[] = {{sText_ChoicePokemon, {NULL}}, {sText_ChoiceYgo, {NULL}}};
+static const u8 sText_ChoiceTt[] = _("TRIPLE TRIAD");
+static struct MenuAction sGameChoices[3];
+static u8 sGameOf[3];   // the menu's rows: GAME_*
+static u8 GameChoices(void)
+{
+    u8 n = 0;
+    if (sGames & GAME_PKMN)
+        sGameChoices[n].text = sText_ChoicePokemon, sGameOf[n++] = GAME_PKMN;
+    if (sGames & GAME_YGO)
+        sGameChoices[n].text = sText_ChoiceYgo, sGameOf[n++] = GAME_YGO;
+    if (sGames & GAME_TT)
+        sGameChoices[n].text = sText_ChoiceTt, sGameOf[n++] = GAME_TT;
+    return n;
+}
+// The row the case was last open on
+static u8 LastSideRow(u8 n)
+{
+    u8 want = Tt_GetCollection()->flags & TT_FLAG_CASE_SIDE ? GAME_TT
+            : Ygo_GetCollection()->flags & YGO_FLAG_CASE_SIDE ? GAME_YGO : GAME_PKMN, i;
+    for (i = 0; i < n; i++)
+        if (sGameOf[i] == want)
+            return i;
+    return 0;
+}
+static void OpenTtChallenge(void)
+{
+    sTt.portraitW = sOpponent.portraitW;
+    sTt.portraitH = sOpponent.portraitH;
+    memcpy(sTt.portrait, sOpponent.portrait, sizeof(sTt.portrait));
+    TtUi_OpenChallenge(&sTt);
+}
 static void OpenYgoChallenge(void)
 {
     sYgo.portraitW = sOpponent.portraitW;
@@ -744,16 +831,17 @@ static void Task_CardChallenge(u8 taskId)
         PlaySE(SE_SELECT);
         if (tAnswer == ASK_WHICH)
         {
-            // which game: a two-line choice beside the message
-            tWindow = CreateWindowFromRect(17, 7, 12, 4);
+            // which game: a choice beside the message, a line for each game they play
+            u8 n = GameChoices();
+            tWindow = CreateWindowFromRect(17, 11 - 2 * n, 12, 2 * n);
             SetStandardWindowBorderStyle(tWindow, FALSE);
-            PrintMenuTable(tWindow, ARRAY_COUNT(sGameChoices), sGameChoices);
-            InitMenuInUpperLeftCornerNormal(tWindow, ARRAY_COUNT(sGameChoices), Ygo_GetCollection()->flags & YGO_FLAG_CASE_SIDE ? 1 : 0);
+            PrintMenuTable(tWindow, n, sGameChoices);
+            InitMenuInUpperLeftCornerNormal(tWindow, n, LastSideRow(n));
             ScheduleBgCopyTilemapToVram(0);
             tState = 4;
             break;
         }
-        if (tAnswer != ASK_DUEL && tAnswer != ASK_YGO)
+        if (tAnswer != ASK_DUEL && tAnswer != ASK_YGO && tAnswer != ASK_TT)
         {
             FinishTalk(taskId);
             break;
@@ -761,6 +849,8 @@ static void Task_CardChallenge(u8 taskId)
         HideFieldMessageBox();
         if (tAnswer == ASK_YGO)
             OpenYgoChallenge();
+        else if (tAnswer == ASK_TT)
+            OpenTtChallenge();
         else
             Tcg_OpenNpcChallenge(&sOpponent);
         tState++;
@@ -777,8 +867,10 @@ static void Task_CardChallenge(u8 taskId)
             break;
         }
         HideFieldMessageBox();
-        if (tChoice == 1)
+        if (sGameOf[tChoice] == GAME_YGO)
             OpenYgoChallenge();
+        else if (sGameOf[tChoice] == GAME_TT)
+            OpenTtChallenge();
         else
             Tcg_OpenNpcChallenge(&sOpponent);
         tState = 3;
@@ -815,8 +907,10 @@ int Tcg_FieldChallenge(void)
     if (!line)
         return 0;
     sLine = line;
-    printf("[tcg] asked %s: %s\n", answer == ASK_YGO ? sYgo.name : sOpponent.name[0] ? sOpponent.name : "someone",
-           answer == ASK_DUEL ? "duel" : answer == ASK_YGO ? "yu-gi-oh" : answer == ASK_WHICH ? "which game" : "no");
+    printf("[tcg] asked %s: %s\n", answer == ASK_YGO ? sYgo.name : answer == ASK_TT ? sTt.name
+                                  : sOpponent.name[0] ? sOpponent.name : "someone",
+           answer == ASK_DUEL ? "duel" : answer == ASK_YGO ? "yu-gi-oh" : answer == ASK_TT ? "triple triad"
+                               : answer == ASK_WHICH ? "which game" : "no");
     taskId = CreateTask(Task_CardChallenge, 80);
     gTasks[taskId].tObject = objectId;
     gTasks[taskId].tAnswer = answer;
