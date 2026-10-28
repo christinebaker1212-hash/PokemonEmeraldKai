@@ -339,7 +339,79 @@ int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to)
     memcpy(c->decks[to].cards, c->decks[from].cards, sizeof(c->decks[to].cards));
     if (!c->decks[to].name[0])
         snprintf(c->decks[to].name, TCG_NAME_LEN, "Deck %u", to + 1);
+    c->ace[to] = c->ace[from];
     return 1;
+}
+
+unsigned Tcg_DeckMascot(const uint16_t cards[TCG_DECK_SIZE])
+{
+    unsigned i, best = 0, score = 0;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        const struct TcgCard *card = Tcg_Card(cards[i]);
+        unsigned s;
+        if (!card || card->kind != TCG_POKEMON)
+            continue;
+        /* The most evolved, then the rarest, then the strongest. */
+        s = card->stage * 1000 + card->rarity * 300 + card->hp;
+        if (s > score)
+            best = card->id, score = s;
+    }
+    return best;
+}
+
+unsigned Tcg_DeckAce(const struct TcgCollection *c, unsigned deck)
+{
+    unsigned i;
+    if (deck >= TCG_SAVED_DECKS)
+        return 0;
+    if (c->ace[deck])
+        for (i = 0; i < TCG_DECK_SIZE; i++)
+            if (c->decks[deck].cards[i] == c->ace[deck])
+                return c->ace[deck];
+    return Tcg_DeckMascot(c->decks[deck].cards);
+}
+
+unsigned Tcg_RecipeOwned(const struct TcgCollection *c, const uint16_t recipe[TCG_DECK_SIZE])
+{
+    unsigned used[TCG_CARD_COUNT + 1] = {0}, i, n = 0;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        unsigned id = recipe[i];
+        if (!Tcg_Card(id))
+            continue;
+        if (id <= 6 || used[id] < c->owned[id])
+            n++;
+        used[id]++;
+    }
+    return n;
+}
+
+unsigned Tcg_DeckFromRecipe(struct TcgCollection *c, unsigned deck, const uint16_t recipe[TCG_DECK_SIZE],
+                            const char *name, unsigned *missing)
+{
+    unsigned used[TCG_CARD_COUNT + 1] = {0}, i, n = 0, lost = 0;
+    if (!c->optedIn || deck >= TCG_SAVED_DECKS)
+        return 0;
+    memset(c->decks[deck].cards, 0, sizeof(c->decks[deck].cards));
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        unsigned id = recipe[i];
+        if (!Tcg_Card(id))
+            continue;
+        if (id > 6 && used[id] >= c->owned[id])
+        {
+            lost++;
+            continue;
+        }
+        used[id]++;
+        c->decks[deck].cards[n++] = (uint16_t)id;
+    }
+    snprintf(c->decks[deck].name, TCG_NAME_LEN, "%s", name);
+    c->ace[deck] = 0;
+    if (missing)
+        *missing = lost;
+    return n;
 }
 
 const struct TcgRecord *Tcg_Record(const struct TcgCollection *c, uint32_t key)
@@ -392,9 +464,11 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define EXTRA5_SIZE TCG_PACK_TYPES
 /* 6: the GAME CENTER CARD SHOP's sales and the records against card players */
 #define EXTRA6_SIZE (1 + TCG_GC_SINGLE_BYTES + TCG_RECORD_SLOTS * 12)
+/* 7: each deck's ACE CARD */
+#define EXTRA7_SIZE (TCG_SAVED_DECKS * 2)
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +                       \
-     ((format) >= 5 ? EXTRA5_SIZE : 0) + ((format) >= 6 ? EXTRA6_SIZE : 0))
+     ((format) >= 5 ? EXTRA5_SIZE : 0) + ((format) >= 6 ? EXTRA6_SIZE : 0) + ((format) >= 7 ? EXTRA7_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -427,7 +501,7 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + 1];
+    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + EXTRA7_SIZE + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
     unsigned i, j, format, size;
@@ -440,7 +514,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         return 0;
     p += 4;
     format = Get(&p, 4);
-    if (format < 2 || format > 6 || size != FILE_SIZE(format) ||
+    if (format < 2 || format > 7 || size != FILE_SIZE(format) ||
         Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
     Tcg_CollectionInit(&next, 1);
@@ -511,6 +585,13 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
                 next.records[i].lastSeen = Get(&p, 2);
             }
         }
+        if (format >= 7)
+            for (i = 0; i < TCG_SAVED_DECKS; i++)
+            {
+                next.ace[i] = Get(&p, 2);
+                if (next.ace[i] > TCG_CARD_COUNT)
+                    next.ace[i] = 0;
+            }
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -524,7 +605,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[FILE_SIZE(6)], *p = data + 12;
+    unsigned char data[FILE_SIZE(7)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -577,11 +658,13 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
         Put(&p, c->records[i].lastWin, 2);
         Put(&p, c->records[i].lastSeen, 2);
     }
+    for (i = 0; i < TCG_SAVED_DECKS; i++)
+        Put(&p, c->ace[i], 2);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 6, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE), 4);
+    Put(&p, 7, 4);
+    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + EXTRA7_SIZE), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

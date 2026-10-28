@@ -48,7 +48,7 @@ static const u16 sGameCenter3FOver[] = INCBIN_U16("graphics/moemon/gamecenter/3f
 // The tower stands in the trees north of RUSTBORO's road east, its two doors on cells (28, 7) and (32, 7) with the
 // tunnel sign between them; its top rises past the map's edge (seen from the road north, ROUTE 115)
 static const struct MapPic sPics[] = {
-    {MAP_RUSTBORO_CITY, 407, -47, 155, 179, sGameCenterBuilding, 0, NULL},
+    {MAP_RUSTBORO_CITY, 411, -47, 155, 179, sGameCenterBuilding, 0, NULL},
     {MAP_RUSTBORO_CITY_GAME_CENTER_1F, 0, 0, 208, 272, sGameCenter1F, BLACK, sGameCenter1FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0, 0, 208, 272, sGameCenter2F, BLACK, sGameCenter2FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_3F, 0, 0, 208, 272, sGameCenter3F, BLACK, sGameCenter3FOver},

@@ -149,6 +149,26 @@ int main(int argc, char **argv)
     assert(Tcg_DeckAdd(&c, 2, TCG_CARD_FIRE_ENERGY, reason, sizeof(reason)));
     assert(!Tcg_DeckAdd(&c, 2, TCG_CARD_MEW_LV8, reason, sizeof(reason)));
     puts("PASS deck editing, independent saved lists, print/name limits and free Basic Energy");
+    {
+        /* DECK RECIPES: built from what's owned, the rest counted missing; the ACE CARD stands for the deck while
+         * it's in it */
+        uint16_t recipe[TCG_DECK_SIZE] = {0};
+        unsigned k, missing = 99, placed;
+        struct TcgCollection r = c;
+        for (k = 0; k < TCG_DECK_SIZE; k++)
+            recipe[k] = k < 4 ? TCG_CARD_SQUIRTLE : k < 8 ? TCG_CARD_MEW_LV8 : 3;
+        r.owned[TCG_CARD_SQUIRTLE] = 2;
+        r.owned[TCG_CARD_MEW_LV8] = 0;
+        assert(Tcg_RecipeOwned(&r, recipe) == 2 + 52);
+        placed = Tcg_DeckFromRecipe(&r, 5, recipe, "Recipe", &missing);
+        assert(placed == 54 && missing == 6 && !strcmp(r.decks[5].name, "Recipe"));
+        assert(Tcg_DeckAce(&r, 5) == TCG_CARD_SQUIRTLE);
+        r.ace[5] = TCG_CARD_MEW_LV8; /* not in the deck: the deck's best Pokemon instead */
+        assert(Tcg_DeckAce(&r, 5) == TCG_CARD_SQUIRTLE);
+        r.ace[5] = 3;
+        assert(Tcg_DeckAce(&r, 5) == 3);
+        puts("PASS deck recipes from owned cards and the ACE CARD");
+    }
     snprintf(path, sizeof(path), "%s/profile.cards", argv[1]);
 #if MOEMON_DEV_BUILD
     assert(!Tcg_CollectionSave(&c, path));
@@ -162,6 +182,7 @@ int main(int argc, char **argv)
     c.rated = 17;
     c.gcDecks = 5; /* format 6: the GAME CENTER's sales and the records */
     c.gcSingles[3] = 0x41;
+    c.ace[0] = TCG_CARD_SQUIRTLE; /* format 7: a deck's ACE CARD */
     Tcg_RecordResult(&c, 0x01020301u, 1, 9000);
     Tcg_RecordResult(&c, 0x01020301u, 0, 9001);
     Tcg_RecordResult(&c, 0xFF000002u, 0, 9001);
@@ -241,7 +262,7 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 6");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 7");
     }
 #endif
     {

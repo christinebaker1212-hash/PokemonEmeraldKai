@@ -30,6 +30,15 @@ void TcgUi_TopBar(const char *title);
 void TcgUi_ShopTabs(const char *const *names, int count, int tab, unsigned fill, unsigned edge, unsigned ink,
                     const char *balance, const char *what, unsigned color);
 void TcgUi_MessageBox(const char *message, int asking, int yes);
+/* A small menu (the game's window and arrow) at x, y; rows whose bit is set in disabled are grey */
+void TcgUi_PopMenu(int x, int y, int w, const char *const *items, int count, int cursor, unsigned disabled);
+int TcgUi_PopMenuMove(unsigned pressed, int cursor, int count, unsigned disabled);
+/* The name editor (RENAME): a keyboard on the screen, the real one too. NameStep: 0 typing, 1 done, -1 left */
+void TcgUi_NameOpen(const char *title, const char *name);
+int TcgUi_NameActive(void);
+int TcgUi_NameStep(unsigned pressed);
+const char *TcgUi_NameText(void);
+void TcgUi_NameDraw(unsigned color);
 /* The CARD CASE on its POKeMON side again (from the YU-GI-OH! side's tabs) */
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript);
 /* The Pokemon promo card of a special trainer who duels with Yu-Gi-Oh! cards now (the ELITE FOUR), once */

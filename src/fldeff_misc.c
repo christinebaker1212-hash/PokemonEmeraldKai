@@ -1265,7 +1265,8 @@ static void Task_WateringBerryTreeAnim_Continue(u8 taskId)
         s16 value = gTasks[taskId].data[1]++;
 
         // Continue holding watering action 10 times, then end
-        if (value < 10)
+        // Moemon Co-op: 6 times (7 steps of the pail, not 11): watering is 50% quicker
+        if (value < 6)
             ObjectEventSetHeldMovement(playerObjEvent, GetWalkInPlaceNormalMovementAction(GetPlayerFacingDirection()));
         else
             gTasks[taskId].func = Task_WateringBerryTreeAnim_End;

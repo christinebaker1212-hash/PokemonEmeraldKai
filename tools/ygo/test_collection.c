@@ -86,14 +86,28 @@ int main(void)
     /* format 2: the GAME CENTER clerk's sold singles and decks */
     c.gcSingles[YGO_CARD_RAIGEKI / 8] |= 1 << (YGO_CARD_RAIGEKI % 8);
     c.gcDecks = 5;
+    c.ace[0] = c.decks[0].main[3];   /* format 3: a deck's ACE CARD */
     CHECK(Ygo_CollectionSave(&c, "/tmp/ygo-test.ygo"));
     CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo"));
     CHECK(!memcmp(back.gcSingles, c.gcSingles, sizeof(c.gcSingles)) && back.gcDecks == 5);
+    CHECK(back.ace[0] == c.ace[0] && Ygo_DeckAce(&back, 0) == c.ace[0]);
+    {
+        /* DECK RECIPES: built again from the cards owned, the rest counted missing */
+        static struct YgoCollection r;
+        unsigned missing = 99, total, have, placed;
+        r = c;
+        r.owned[c.decks[0].main[0]] = 0;
+        have = Ygo_RecipeOwned(&r, c.decks[0].main, c.decks[0].extra, &total);
+        placed = Ygo_DeckFromRecipe(&r, 4, c.decks[0].main, c.decks[0].extra, "Again", &missing);
+        CHECK(total == Ygo_DeckCount(c.decks[0].main, YGO_DECK_MAX) + Ygo_DeckCount(c.decks[0].extra, YGO_FUSION_MAX));
+        CHECK(placed == have && missing == total - have && missing >= 1 && !strcmp(r.decks[4].name, "Again"));
+        CHECK(Ygo_DeckAce(&r, 4) != 0);
+    }
     /* a format 1 file (1.35.0) still loads, nothing sold */
     {
         static unsigned char data[1 << 20];
         FILE *f = fopen("/tmp/ygo-test.ygo", "rb");
-        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1, i;
+        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS, i;
         uint32_t crc = 0xFFFFFFFFu;
         unsigned k;
         fclose(f);

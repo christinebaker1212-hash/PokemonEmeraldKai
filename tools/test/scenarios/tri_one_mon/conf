@@ -1,0 +1,14 @@
+# TEAM PADDING on: Josh has one Moemon. A third player is never turned away: BOB joins ALICE, CARL walks up while
+# they wait, and the Triple Battle has Josh padded up to three (1 -> 3)
+MODE=3
+WARP=11,3,4,13
+WARP_B=11,3,4,14
+WARP_C=11,3,3,12
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("asking whether to wait for a third player" "(and another: triple)" "party 1 -> 3" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1")
+UNEXPECT_A=("no triple with this trainer")

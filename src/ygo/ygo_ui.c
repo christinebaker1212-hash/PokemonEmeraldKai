@@ -45,7 +45,9 @@ enum
     Y_COUNTER,
     Y_STARTER,
     Y_WAIT,    /* a friend's duel: waiting for them to pick a deck */
-    Y_TRADE    /* a card trade with a friend */
+    Y_TRADE,   /* a card trade with a friend */
+    Y_RECIPES, /* DECK RECIPES: a Starter Deck built again from the cards owned */
+    Y_ACE      /* a deck's ACE CARD */
 };
 enum
 {
@@ -86,7 +88,8 @@ enum
     ACT_COPY,
     ACT_LOAN,
     ACT_GC_DECK,
-    ACT_LESSON
+    ACT_LESSON,
+    ACT_RECIPE   /* build DECK RECIPE askArg into slot Y.recipeSlot */
 };
 #define PANEL_W KIT_PANEL_W
 #define STRIP_Y KIT_STRIP_Y
@@ -128,6 +131,8 @@ static struct
      * challenge (RESOLVE_GIFT: a deck to keep; RESOLVE_LOAN: one for this duel) or the trade */
     int resolve, resolveBack;
     uint16_t loanMain[YGO_DECK_MAX], loanExtra[YGO_FUSION_MAX];
+    /* DECKS: a slot's menu (EDIT, RENAME...), the recipes' target slot */
+    int menuOn, menuCursor, recipeSlot;
 } Y;
 
 static struct YgoCollection *C(void) { return Ygo_GetCollection(); }
@@ -350,19 +355,7 @@ static void ResolveNoDeck(int trade)
     printf("[ygo] no deck: %s\n", Y.resolve == RESOLVE_GIFT ? "a Starter Deck to keep" : "a Starter Deck to borrow");
 }
 /* A deck's face: its strongest monster */
-static unsigned Mascot(const uint16_t *main, unsigned count)
-{
-    unsigned i, best = 0;
-    int bestAtk = -1;
-    for (i = 0; i < count && main[i]; i++)
-    {
-        const struct YgoCard *c = Ygo_Card(main[i]);
-        int atk = c && Ygo_IsMonster(c) && c->atk != YGO_STAT_UNKNOWN ? c->atk : -1;
-        if (atk > bestAtk)
-            bestAtk = atk, best = main[i];
-    }
-    return best;
-}
+static unsigned Mascot(const uint16_t *main, unsigned count) { return Ygo_DeckMascot(main, count); }
 static int Filter(unsigned id, int filter)
 {
     const struct YgoCard *c = Ygo_Card(id);
@@ -835,7 +828,7 @@ static void HomeScreen(void)
 {
     struct YgoCollection *c = C();
     unsigned i, packs = PacksHeld(), total, have = Ygo_SetOwned(c, YGO_SET_COUNT, &total);
-    unsigned mascot = c->optedIn ? Mascot(Deck(c->activeDeck)->main, YGO_DECK_MAX) : 0;
+    unsigned mascot = c->optedIn ? Ygo_DeckAce(c, c->activeDeck) : 0;
     char line[128];
     int bob = (int)(sinf(Y.frame * 0.06f) * 1.5f);
     TcgUi_Background();
@@ -945,6 +938,30 @@ static void ChallengeScreen(void)
         Strip(0, line);
 }
 
+/* DECK RECIPES: the Starter Decks, card for card, built again from the cards owned */
+#define RECIPE_COUNT YGO_STARTERS
+static void RecipeCards(int k, uint16_t *main, uint16_t *extra) { StarterDeckOf(sStarters[k], main, extra); }
+static unsigned EmptySlot(void)
+{
+    unsigned d;
+    for (d = 0; d < YGO_SAVED_DECKS; d++)
+        if (!MainCount(d) && !ExtraCount(d))
+            return d;
+    return YGO_SAVED_DECKS;
+}
+/* A slot's menu (A on it), as on the Pokemon side */
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
+enum { EM_NEW, EM_RECIPE, EM_COUNT };
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
+static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
+static int SlotEmpty(unsigned d) { return !MainCount(d) && !ExtraCount(d); }
+static unsigned DeckMenuOff(unsigned d)
+{
+    return d == C()->activeDeck || !DeckValid(d) ? 1u << DM_USE : 0;
+}
+#define DECK_ROWS (YGO_SAVED_DECKS + 2)   /* the slots, DECK RECIPES, BACK */
+#define DECK_ROW_RECIPES YGO_SAVED_DECKS
+#define DECK_ROW_BACK (YGO_SAVED_DECKS + 1)
 static void DecksScreen(void)
 {
     struct YgoCollection *c = C();
@@ -952,34 +969,178 @@ static void DecksScreen(void)
     char line[96];
     TcgUi_Background();
     TcgUi_SidePanel("DECKS", YGO_THEME);
-    mascot = Mascot(Deck(d)->main, YGO_DECK_MAX);
+    mascot = Ygo_DeckAce(c, d);
     if (mascot)
         BigCard(mascot, 30, 22, 0);
     snprintf(line, sizeof(line), "%u CARDS  +%u", MainCount(d), ExtraCount(d));
     G_TextAlign(52, 86, TA_CENTER, DeckValid(d) ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    Y.scroll = Y.cursor < 3 ? 0 : Y.cursor > YGO_SAVED_DECKS - 3 ? YGO_SAVED_DECKS - 5 : Y.cursor - 3;
+    Y.scroll = Y.cursor - 3 < 0 ? 0 : Y.cursor - 3 > DECK_ROWS - 6 ? DECK_ROWS - 6 : Y.cursor - 3;
     for (i = 0; i < 6; i++)
     {
         unsigned k = (unsigned)Y.scroll + i;
-        if (k > YGO_SAVED_DECKS)
+        if (k >= DECK_ROWS)
             break;
-        if (k == YGO_SAVED_DECKS)
+        if (k == DECK_ROW_BACK || k == DECK_ROW_RECIPES)
         {
-            TcgUi_Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)k, 1, "BACK", NULL);
+            TcgUi_Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)k, 1,
+                      k == DECK_ROW_BACK ? "BACK" : "DECK RECIPES", NULL);
             continue;
         }
         snprintf(line, sizeof(line), "%s", Deck(k)->name[0] ? Deck(k)->name : "EMPTY SLOT");
         TcgUi_Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)k, Deck(k)->name[0] != 0, line,
                   k == c->activeDeck ? "IN USE" : NULL);
     }
-    if (Y.cursor == YGO_SAVED_DECKS)
+    if (Y.cursor == DECK_ROW_BACK)
         Strip(0, "Back to the CARD CASE.");
+    else if (Y.cursor == DECK_ROW_RECIPES)
+        Strip(0, "The Starter Decks, built again from the cards you have.");
     else if ((unsigned)Y.cursor == c->activeDeck)
         Strip(0, "The deck you duel with. A Main Deck holds 40 to 60 cards, the Fusion Deck up to 15.");
     else
-        Strip(0, MainCount((unsigned)Y.cursor) ? "{R} DUEL WITH THIS DECK" : "An empty slot: {A} builds a new deck.");
-    TcgUi_Hints("{A} EDIT  {START} COPY  {SELECT} DELETE  {B} BACK");
+        Strip(0, MainCount((unsigned)Y.cursor) ? "{R} DUEL WITH THIS DECK" : "An empty slot: build a deck, or one from a recipe.");
+    if (Y.menuOn && Y.cursor < YGO_SAVED_DECKS)
+    {
+        if (SlotEmpty((unsigned)Y.cursor))
+            TcgUi_PopMenu(118, 40, 114, sEmptyMenu, EM_COUNT, Y.menuCursor, 0);
+        else
+            TcgUi_PopMenu(134, 20, 98, sDeckMenu, DM_COUNT, Y.menuCursor, DeckMenuOff((unsigned)Y.cursor));
+        TcgUi_Hints("{A} CHOOSE  {B} BACK");
+    }
+    else
+        TcgUi_Hints("{A} MENU  {START} COPY  {SELECT} DELETE  {B} BACK");
+    TcgUi_NameDraw(YGO_THEME);
+}
+static void RecipeMissing(const uint16_t *main, const uint16_t *extra, char *out, size_t size, unsigned *lost)
+{
+    static uint16_t used[YGO_CARD_COUNT + 1], missing[YGO_CARD_COUNT + 1];
+    struct YgoCollection *c = C();
+    unsigned i, n = 0;
+    size_t len;
+    memset(used, 0, sizeof(used));
+    memset(missing, 0, sizeof(missing));
+    for (i = 0; i < YGO_DECK_MAX + YGO_FUSION_MAX; i++)
+    {
+        unsigned id = i < YGO_DECK_MAX ? main[i] : extra[i - YGO_DECK_MAX];
+        if (!id || id > YGO_CARD_COUNT)
+            continue;
+        if (used[id]++ >= c->owned[id])
+            missing[id]++, n++;
+    }
+    /* (as many as fit the strip's two lines, then how many more) */
+    snprintf(out, size, "Missing:");
+    for (i = 1; i <= YGO_CARD_COUNT; i++)
+    {
+        char more[48];
+        unsigned left = 0, j;
+        if (!missing[i])
+            continue;
+        for (j = i + 1; j <= YGO_CARD_COUNT; j++)
+            left += missing[j] != 0;
+        len = strlen(out);
+        snprintf(out + len, size - len, "%s %u %s", len > 8 ? "," : "", missing[i], Ygo_Card(i)->name);
+        snprintf(more, sizeof(more), " and %u more", left);
+        if (G_Measure(out, TF_SMALL) + (left ? G_Measure(more, TF_SMALL) : 0) > 226 * 2 - 70 || strlen(out) + 40 > size)
+        {
+            out[len] = 0;
+            snprintf(out + len, size - len, " and %u more", left + 1);
+            break;
+        }
+    }
+    *lost = n;
+}
+static void RecipesScreen(void)
+{
+    uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    unsigned have, total, lost;
+    int i;
+    char line[200];
+    TcgUi_Background();
+    TcgUi_SidePanel("RECIPES", YGO_THEME);
+    RecipeCards(Y.cursor, main, extra);
+    have = Ygo_RecipeOwned(C(), main, extra, &total);
+    BigCard(SetMascot(sStarters[Y.cursor]), 30, 22, 0);
+    snprintf(line, sizeof(line), "%u/%u OWNED", have, total);
+    G_TextAlign(52, 86, TA_CENTER, have == total ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    for (i = 0; i < RECIPE_COUNT && i < 6; i++)
+    {
+        uint16_t m[YGO_DECK_MAX], e[YGO_FUSION_MAX];
+        unsigned h, t;
+        char right[16];
+        RecipeCards(i, m, e);
+        h = Ygo_RecipeOwned(C(), m, e, &t);
+        snprintf(right, sizeof(right), "%u/%u", h, t);
+        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, Y.cursor == i, 1, SetName(sStarters[i]), right);
+    }
+    RecipeMissing(main, extra, line, sizeof(line), &lost);
+    if (!lost)
+        snprintf(line, sizeof(line), "The %s. You have every card.", gYgoSets[sStarters[Y.cursor]].name);
+    Strip(0, line);
+    TcgUi_Hints("{A} BUILD  {B} BACK");
+}
+/* The cards a deck holds, once each, monsters first: the ACE CARD grid */
+static unsigned AceList(unsigned deck, uint16_t *out)
+{
+    unsigned i, j, n = 0, pass;
+    for (pass = 0; pass < 2; pass++)
+        for (i = 0; i < YGO_DECK_MAX + YGO_FUSION_MAX; i++)
+        {
+            unsigned id = i < YGO_DECK_MAX ? Deck(deck)->main[i] : Deck(deck)->extra[i - YGO_DECK_MAX];
+            const struct YgoCard *k = id ? Ygo_Card(id) : NULL;
+            if (!k || (Ygo_IsMonster(k) != 0) != (pass == 0))
+                continue;
+            for (j = 0; j < n && out[j] != id; j++)
+                ;
+            if (j == n)
+                out[n++] = (uint16_t)id;
+        }
+    return n;
+}
+#define ACE_COLS 4
+#define ACE_ROWS 2
+static void AceScreen(void)
+{
+    struct YgoCollection *c = C();
+    uint16_t list[YGO_DECK_MAX + YGO_FUSION_MAX];
+    unsigned n = AceList((unsigned)Y.deck, list), ace = Ygo_DeckAce(c, (unsigned)Y.deck);
+    int page = ACE_COLS * ACE_ROWS, start = Y.cursor / page * page, i;
+    char line[96];
+    TcgUi_Background();
+    TcgUi_SidePanel("ACE CARD", YGO_THEME);
+    if (n)
+        BigCard(list[Y.cursor], 30, 22, (int)(sinf(TcgUi_Frame() * 0.06f) * 1.5f));
+    G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW, Deck((unsigned)Y.deck)->name, TF_SMALL);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    for (i = 0; i < page && start + i < (int)n; i++)
+    {
+        int on = start + i == Y.cursor, x = LIST_X + 4 + (i % ACE_COLS) * 31, y = 10 + (i / ACE_COLS) * 48 - on * 2;
+        Ygo_DrawCard(list[start + i], (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (list[start + i] == ace)
+        {
+            G_RoundFill(x + 3, y + 32, 24, 9, 0xe8a020, 240);
+            G_TextAlign(x + 15, y + 31, TA_CENTER, G_WHITE, G_NO_SHADOW, "ACE", TF_NARROW);
+        }
+        if (on)
+        {
+            int o = (TcgUi_Frame() / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if ((int)n > page)
+    {
+        snprintf(line, sizeof(line), "%d/%d", start / page + 1, ((int)n + page - 1) / page);
+        G_TextAlign(LIST_X + LIST_W - 5, 95, TA_RIGHT, G_INK, G_NO_SHADOW, line, TF_NARROW);
+    }
+    if (n)
+    {
+        snprintf(line, sizeof(line), "%s%s", Ygo_Card(list[Y.cursor])->name,
+                 list[Y.cursor] == ace ? ": this deck's ACE CARD." : "");
+        Strip(0, line);
+    }
+    else
+        Strip(0, "This deck has no cards to choose from.");
+    TcgUi_Hints("{A} MAKE IT THE ACE  {R} LOOK  {B} BACK");
 }
 
 #define GRID_COLS 5
@@ -2002,6 +2163,7 @@ static void Act(int action)
         else
         {
             *Deck(d) = *Deck((unsigned)Y.askArg);
+            c->ace[d] = c->ace[Y.askArg];
             snprintf(Deck(d)->name, YGO_NAME_LEN, "%.18s copy", Deck((unsigned)Y.askArg)->name);
             Say(ACT_NONE, "Copied into slot %u.", d + 1);
         }
@@ -2009,6 +2171,7 @@ static void Act(int action)
     }
     case ACT_CLEAR:
         memset(Deck((unsigned)Y.askArg), 0, sizeof(struct YgoSavedDeck));
+        c->ace[Y.askArg] = 0;
         if (c->activeDeck == Y.askArg)
         {
             unsigned d;
@@ -2071,6 +2234,24 @@ static void Act(int action)
         }
         break;
     }
+    case ACT_RECIPE:
+    {
+        uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+        unsigned slot = Y.recipeSlot >= 0 ? (unsigned)Y.recipeSlot : EmptySlot(), lost = 0;
+        if (Y.askArg < 0 || Y.askArg >= RECIPE_COUNT || slot >= YGO_SAVED_DECKS)
+            break;
+        RecipeCards(Y.askArg, main, extra);
+        Ygo_DeckFromRecipe(c, slot, main, extra, SetName(sStarters[Y.askArg]), &lost);
+        printf("[ygo] recipe %d into slot %u, %u missing\n", Y.askArg, slot, lost);
+        Screen(Y_DECKS);
+        Y.cursor = (int)slot;
+        if (lost)
+            Say(ACT_NONE, "%s is in slot %u. %u of its cards are missing: add them when you have them.",
+                gYgoSets[sStarters[Y.askArg]].name, slot + 1, lost);
+        else
+            Say(ACT_NONE, "%s is in slot %u, ready to duel.", gYgoSets[sStarters[Y.askArg]].name, slot + 1);
+        break;
+    }
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)Y.askArg, i, slot;
@@ -2095,6 +2276,7 @@ static void Act(int action)
             memcpy(Deck(slot)->main, main, sizeof(main));
             memcpy(Deck(slot)->extra, extra, sizeof(extra));
             snprintf(Deck(slot)->name, YGO_NAME_LEN, "%s", SetName(sStarters[k]));
+            c->ace[slot] = 0;
             Say(ACT_NONE, "You got the %s! It's in DECKS, slot %u, ready to duel.", gYgoSets[sStarters[k]].name, slot + 1);
         }
         else
@@ -2238,22 +2420,86 @@ int YgoUi_Step(unsigned keys)
         }
         break;
     case Y_DECKS:
-        MoveCursor(pressed, YGO_SAVED_DECKS + 1, 1);
-        if (pressed & KEY_B || (pressed & KEY_A && Y.cursor == YGO_SAVED_DECKS))
+        if (TcgUi_NameActive())
+        {
+            if (TcgUi_NameStep(pressed) == 1 && Y.cursor < YGO_SAVED_DECKS)
+            {
+                snprintf(Deck((unsigned)Y.cursor)->name, YGO_NAME_LEN, "%s", TcgUi_NameText());
+                printf("[ygo] deck %d renamed %s\n", Y.cursor, Deck((unsigned)Y.cursor)->name);
+            }
+            break;
+        }
+        if (Y.menuOn)
+        {
+            int empty = SlotEmpty((unsigned)Y.cursor), count = empty ? EM_COUNT : DM_COUNT;
+            unsigned off = empty ? 0 : DeckMenuOff((unsigned)Y.cursor);
+            Y.menuCursor = TcgUi_PopMenuMove(pressed, Y.menuCursor, count, off);
+            if (pressed & KEY_B)
+            {
+                PlaySE(SE_SELECT);
+                Y.menuOn = 0;
+            }
+            else if (pressed & KEY_A && !((off >> Y.menuCursor) & 1))
+            {
+                int slot = Y.cursor;
+                PlaySE(SE_SELECT);
+                Y.menuOn = 0;
+                if (empty && Y.menuCursor == EM_RECIPE)
+                {
+                    Screen(Y_RECIPES);
+                    Y.recipeSlot = slot;
+                }
+                else if (empty || Y.menuCursor == DM_EDIT)
+                {
+                    Y.deck = slot;
+                    if (!Deck((unsigned)Y.deck)->name[0])
+                        snprintf(Deck((unsigned)Y.deck)->name, YGO_NAME_LEN, "Deck %d", Y.deck + 1);
+                    Y.side = 0;
+                    Y.deckCursor = 0;
+                    Y.filter = 0;
+                    Screen(Y_BUILDER);
+                }
+                else if (Y.menuCursor == DM_RENAME)
+                    TcgUi_NameOpen("RENAME DECK", Deck((unsigned)slot)->name);
+                else if (Y.menuCursor == DM_ACE)
+                {
+                    uint16_t list[YGO_DECK_MAX + YGO_FUSION_MAX];
+                    unsigned n = AceList((unsigned)slot, list), ace = Ygo_DeckAce(c, (unsigned)slot), k;
+                    Y.deck = slot;
+                    Screen(Y_ACE);
+                    for (k = 0; k < n; k++)
+                        if (list[k] == ace)
+                            Y.cursor = (int)k;
+                }
+                else if (Y.menuCursor == DM_USE)
+                {
+                    c->activeDeck = (uint8_t)slot;
+                    PlaySE(SE_SUCCESS);
+                }
+                else if (Y.menuCursor == DM_COPY)
+                    Ask(ACT_COPY, slot, "Copy %s into an empty slot?", Deck((unsigned)slot)->name);
+                else if (Y.menuCursor == DM_DELETE)
+                    Ask(ACT_CLEAR, slot, "Delete %s? Its cards stay in your collection.", Deck((unsigned)slot)->name);
+            }
+            break;
+        }
+        MoveCursor(pressed, DECK_ROWS, 1);
+        if (pressed & KEY_B || (pressed & KEY_A && Y.cursor == DECK_ROW_BACK))
         {
             PlaySE(SE_SELECT);
             Screen(Y_HOME);
         }
+        else if (pressed & KEY_A && Y.cursor == DECK_ROW_RECIPES)
+        {
+            PlaySE(SE_SELECT);
+            Screen(Y_RECIPES);
+            Y.recipeSlot = -1;
+        }
         else if (pressed & KEY_A)
         {
             PlaySE(SE_SELECT);
-            Y.deck = Y.cursor;
-            if (!Deck((unsigned)Y.deck)->name[0])
-                snprintf(Deck((unsigned)Y.deck)->name, YGO_NAME_LEN, "Deck %d", Y.deck + 1);
-            Y.side = 0;
-            Y.deckCursor = 0;
-            Y.filter = 0;
-            Screen(Y_BUILDER);
+            Y.menuOn = 1;
+            Y.menuCursor = 0;
         }
         else if (pressed & KEY_R && Y.cursor < YGO_SAVED_DECKS && (unsigned)Y.cursor != c->activeDeck &&
                  MainCount((unsigned)Y.cursor))
@@ -2276,6 +2522,55 @@ int YgoUi_Step(unsigned keys)
         else if (pressed & KEY_SELECT && Y.cursor < YGO_SAVED_DECKS && Deck((unsigned)Y.cursor)->name[0])
             Ask(ACT_CLEAR, Y.cursor, "Delete %s? Its cards stay in your collection.", Deck((unsigned)Y.cursor)->name);
         break;
+    case Y_RECIPES:
+        MoveCursor(pressed, RECIPE_COUNT, 1);
+        if (pressed & KEY_B)
+        {
+            int back = Y.recipeSlot >= 0 ? Y.recipeSlot : DECK_ROW_RECIPES;
+            PlaySE(SE_SELECT);
+            Screen(Y_DECKS);
+            Y.cursor = back;
+        }
+        else if (pressed & KEY_A)
+        {
+            uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+            unsigned slot = Y.recipeSlot >= 0 ? (unsigned)Y.recipeSlot : EmptySlot(), total, lost;
+            RecipeCards(Y.cursor, main, extra);
+            lost = Ygo_RecipeOwned(c, main, extra, &total);
+            lost = total - lost;
+            PlaySE(SE_SELECT);
+            if (slot >= YGO_SAVED_DECKS)
+                Say(ACT_NONE, "There's no empty deck slot. Delete a deck first.");
+            else if (lost)
+                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u? %u of its cards are missing.", gYgoSets[sStarters[Y.cursor]].name,
+                    slot + 1, lost);
+            else
+                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u?", gYgoSets[sStarters[Y.cursor]].name, slot + 1);
+        }
+        break;
+    case Y_ACE:
+    {
+        uint16_t list[YGO_DECK_MAX + YGO_FUSION_MAX];
+        unsigned n = AceList((unsigned)Y.deck, list);
+        GridMove(pressed, (int)n, ACE_COLS);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(Y_DECKS);
+            Y.cursor = Y.deck;
+        }
+        else if (pressed & KEY_R && n)
+            Inspect(list[Y.cursor], Y_ACE);
+        else if (pressed & KEY_A && n)
+        {
+            c->ace[Y.deck] = list[Y.cursor];
+            PlaySE(SE_SUCCESS);
+            printf("[ygo] deck %d ace %u\n", Y.deck, c->ace[Y.deck]);
+            Screen(Y_DECKS);
+            Y.cursor = Y.deck;
+        }
+        break;
+    }
     case Y_BUILDER:
     {
         uint16_t list[YGO_DECK_MAX + YGO_FUSION_MAX];
@@ -2672,6 +2967,12 @@ void YgoUi_Draw(void)
         break;
     case Y_DECKS:
         DecksScreen();
+        break;
+    case Y_RECIPES:
+        RecipesScreen();
+        break;
+    case Y_ACE:
+        AceScreen();
         break;
     case Y_BUILDER:
         BuilderScreen();

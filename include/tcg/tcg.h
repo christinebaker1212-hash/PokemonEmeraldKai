@@ -114,6 +114,8 @@ struct TcgCollection
     uint8_t gcDecks;
     uint8_t gcSingles[TCG_GC_SINGLE_BYTES];
     struct TcgRecord records[TCG_RECORD_SLOTS];
+    /* Format 7: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */
+    uint16_t ace[TCG_SAVED_DECKS];
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
@@ -131,6 +133,17 @@ int Tcg_CraftCard(struct TcgCollection *c, unsigned card);
 int Tcg_DeckAdd(struct TcgCollection *c, unsigned deck, unsigned card, char *reason, size_t size);
 int Tcg_DeckRemove(struct TcgCollection *c, unsigned deck, unsigned card);
 int Tcg_DeckCopy(struct TcgCollection *c, unsigned from, unsigned to);
+/* The card that stands for a saved deck: its ACE CARD while the deck holds it, else the most evolved, rarest,
+ * strongest Pokemon (0: no Pokemon) */
+unsigned Tcg_DeckAce(const struct TcgCollection *c, unsigned deck);
+unsigned Tcg_DeckMascot(const uint16_t cards[TCG_DECK_SIZE]);
+/* A DECK RECIPE (a starter or structure deck, card for card) built into deck slot `deck` from the cards owned
+ * (copies other saved decks use count: they're shared, as in the builder). Returns the cards placed; *missing
+ * gets how many of the recipe's cards couldn't be. */
+unsigned Tcg_DeckFromRecipe(struct TcgCollection *c, unsigned deck, const uint16_t recipe[TCG_DECK_SIZE],
+                            const char *name, unsigned *missing);
+/* How many of the recipe's cards the collection holds (up to the recipe's count of each) */
+unsigned Tcg_RecipeOwned(const struct TcgCollection *c, const uint16_t recipe[TCG_DECK_SIZE]);
 /* Today's full reward from an opponent (FF8: one card of their deck): once a day each. */
 int Tcg_DailyAvailable(const struct TcgCollection *c, uint32_t key, unsigned day);
 void Tcg_DailyTake(struct TcgCollection *c, uint32_t key, unsigned day);

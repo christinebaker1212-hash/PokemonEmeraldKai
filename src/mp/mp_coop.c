@@ -616,13 +616,19 @@ static u8 CoopTrainerTeamSize(u16 trainerId)
 static void OnResolve(const u8 *data, u32 len);
 static void OnResolveDone(s8 from, const u8 *data, u32 len);
 
+// With TEAM PADDING on, a third player is never turned away from one trainer: the trainer is padded up to three
+// Moemon for the Triple Battle (MP_Coop_FinishTrainerParty), whatever kind of battle it was (Twins too).
 static bool8 TripleEligible(void)
 {
-    return !sCoop.twoTrainers   // two trainers: 2 players vs both of them
-        && CoopTrainerTeamSize(sCoop.trainerId) >= 3
-        && (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
-            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
-            || sCoop.mode == TRAINER_BATTLE_REMATCH);
+    bool8 single = sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
+                || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
+                || sCoop.mode == TRAINER_BATTLE_REMATCH;
+    if (sCoop.twoTrainers)
+        return FALSE;   // two trainers: 2 players vs both of them
+    if (MP_TrainerPadding())
+        return single || sCoop.mode == TRAINER_BATTLE_DOUBLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE
+            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_REMATCH_DOUBLE;
+    return single && CoopTrainerTeamSize(sCoop.trainerId) >= 3;
 }
 
 // Someone besides `except` who could still come and join: anyone online, anywhere,
@@ -1789,7 +1795,7 @@ void MP_Coop_FinishTwoTrainerParty(u16 trainerA, u16 trainerB)
 
 void MP_Coop_FinishTrainerParty(u16 trainerId)
 {
-    u8 n;
+    u8 n, start;
     gMpEnemyLevelBonus = 0;
     n = CountEnemyMons(0, PARTY_SIZE);
     if (!MP_TrainerPadding() || n == 0 || n >= PARTY_SIZE)
@@ -1797,8 +1803,12 @@ void MP_Coop_FinishTrainerParty(u16 trainerId)
         MPNet_Log("coop: trainer %d party %d, no padding", trainerId, n);
         return;
     }
-    PadTrainer(trainerId, 0, n);
-    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, n + 1,
+    start = n;
+    PadTrainer(trainerId, 0, n++);
+    // a Triple Battle with TEAM PADDING: never fewer than three (one per player), so a third player is never refused
+    while (sCoop.count == 3 && n < 3)
+        PadTrainer(trainerId, 0, n++);
+    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, start, n,
               GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));
@@ -4040,21 +4050,33 @@ u8 MP_Coop_Seat(void)
     return gMpCoopBattle ? sCoop.seat : 0;
 }
 
-// An ordinary trainer friends may join: not a gym leader, admin, rival, Team Aqua / Magma or other story battle.
-// (Route trainers who sign up for MATCH CALL after the battle use the continue-script mode too: they're fine.)
+// A trainer friends may join: not a gym leader, admin, boss, rival or other story battle. Team Aqua / Magma grunts
+// who just spot you (an ordinary trainerbattle, no script of their own after it) are fine; the ones whose battle goes
+// on into the story (a script after it, or no intro: they're talked into it) are not. A route trainer's rematch is
+// fine too. (Route trainers who sign up for MATCH CALL after the battle use the continue-script mode: they're fine.)
 bool8 MP_Coop_JoinTrainerOk(void)
 {
     u16 trainer = gMpCoopBattle ? sCoop.trainerId : gTrainerBattleOpponent_A;
     u8 mode = gMpCoopBattle ? sCoop.mode : GetTrainerBattleMode();
-    if (trainer == 0 || trainer >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainer))
+    if (trainer == 0 || trainer >= TRAINERS_COUNT)
         return FALSE;
     switch (gTrainers[trainer].trainerClass)
     {
+    case TRAINER_CLASS_LEADER:
+    case TRAINER_CLASS_AQUA_ADMIN:
+    case TRAINER_CLASS_AQUA_LEADER:
+    case TRAINER_CLASS_MAGMA_ADMIN:
+    case TRAINER_CLASS_MAGMA_LEADER:
+    case TRAINER_CLASS_ELITE_FOUR:
+    case TRAINER_CLASS_CHAMPION:
     case TRAINER_CLASS_RIVAL:       // MAY / BRENDAN, WALLY, STEVEN
+        return FALSE;
     case TRAINER_CLASS_TEAM_AQUA:
     case TRAINER_CLASS_TEAM_MAGMA:
-        return FALSE;
+        return mode == TRAINER_BATTLE_SINGLE || mode == TRAINER_BATTLE_DOUBLE;
     }
+    if (GymBadgeFlag(trainer) != 0)
+        return FALSE;
     switch (mode)
     {
     case TRAINER_BATTLE_SINGLE:

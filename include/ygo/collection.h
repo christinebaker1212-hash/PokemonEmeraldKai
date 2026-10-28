@@ -47,6 +47,8 @@ struct YgoCollection
     /* the GAME CENTER clerk sells one copy of each single (a bit per card id) and one of each Starter Deck */
     uint8_t gcSingles[YGO_GC_SINGLE_BYTES];
     uint8_t gcDecks;
+    /* format 3: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */
+    uint16_t ace[YGO_SAVED_DECKS];
 };
 
 void Ygo_CollectionInit(struct YgoCollection *c, uint32_t seed);
@@ -70,6 +72,15 @@ int Ygo_DeckValidate(const uint16_t *main, const uint16_t *extra, const uint16_t
 unsigned Ygo_DeckCount(const uint16_t *cards, unsigned max);
 int Ygo_DeckAdd(struct YgoCollection *c, unsigned deck, unsigned card, char *reason, size_t size);
 int Ygo_DeckRemove(struct YgoCollection *c, unsigned deck, unsigned card);
+/* The card that stands for a saved deck: its ACE CARD while the deck holds it, else the strongest monster */
+unsigned Ygo_DeckAce(const struct YgoCollection *c, unsigned deck);
+unsigned Ygo_DeckMascot(const uint16_t *main, unsigned count);
+/* A DECK RECIPE (a Starter Deck, card for card) built into deck slot `deck` from the cards owned; returns the
+ * cards placed, *missing how many of the recipe's couldn't be */
+unsigned Ygo_DeckFromRecipe(struct YgoCollection *c, unsigned deck, const uint16_t *main, const uint16_t *extra,
+                            const char *name, unsigned *missing);
+/* How many of the recipe's cards (main and Fusion) are owned, and how many it has */
+unsigned Ygo_RecipeOwned(const struct YgoCollection *c, const uint16_t *main, const uint16_t *extra, unsigned *total);
 /* Spares (past 3 and what the saved decks use) and what they're worth in CARD POINTS; the shop's prices */
 unsigned Ygo_Spare(const struct YgoCollection *c, unsigned card);
 unsigned Ygo_PointValue(unsigned card);

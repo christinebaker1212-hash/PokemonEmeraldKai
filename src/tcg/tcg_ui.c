@@ -27,6 +27,8 @@
 #include "tcg_board.h"
 #include "tcg_gfx.h"
 #include "tcg_ui_kit.h"
+#include "platform_text.h"
+#include "tcg_structure_decks.h"
 #include "ygo/integration.h"
 #include "../ygo/ygo_gfx.h"
 int Tcg_GrantCase(void);
@@ -51,7 +53,9 @@ enum
     UI_STARTER,
     UI_TRADE,
     UI_WAIT,
-    UI_GCSHOP     /* the GAME CENTER CARD SHOP (RUSTBORO CITY): singles and structure decks for money */
+    UI_GCSHOP,    /* the GAME CENTER CARD SHOP (RUSTBORO CITY): singles and structure decks for money */
+    UI_RECIPES,   /* DECK RECIPES: a starter or structure deck built again from the cards owned */
+    UI_ACE        /* a deck's ACE CARD: the card that stands for it */
 };
 enum
 {
@@ -89,7 +93,8 @@ enum
     ACT_TRADE_IN_EVERY,   /* every spare card (the list's last row, as on the Yu-Gi-Oh! counter) */
     ACT_BUY,
     ACT_GC_CARD,
-    ACT_GC_DECK
+    ACT_GC_DECK,
+    ACT_RECIPE      /* build DECK RECIPE askArg into slot U.recipeSlot */
 };
 #define PANEL_W 104
 #define STRIP_Y 112
@@ -128,6 +133,8 @@ static struct
     int starterPhase, starterChoice;
     /* Online */
     int onlineDeckChosen, onlineDeck;
+    /* DECKS: a slot's menu (EDIT, RENAME...: menuOn), the recipes' target slot, the ACE CARD grid */
+    int menuOn, menuCursor, recipeSlot, recipeCursor, aceCursor;
     /* Messages and questions */
     char message[256];
     int messageThen, asking, askYes, askAction, askArg;
@@ -372,22 +379,7 @@ static unsigned DeckCount(unsigned deck, unsigned card)
         n += card ? c->decks[deck].cards[i] == card : c->decks[deck].cards[i] != 0;
     return n;
 }
-static unsigned Mascot(const uint16_t *cards)
-{
-    unsigned i, best = 0, score = 0;
-    for (i = 0; i < TCG_DECK_SIZE; i++)
-    {
-        const struct TcgCard *card = Tcg_Card(cards[i]);
-        unsigned s;
-        if (!card || card->kind != TCG_POKEMON)
-            continue;
-        /* The most evolved, then the rarest, then the strongest. */
-        s = card->stage * 1000 + card->rarity * 300 + card->hp;
-        if (s > score)
-            best = card->id, score = s;
-    }
-    return best;
-}
+static unsigned Mascot(const uint16_t *cards) { return Tcg_DeckMascot(cards); }
 /* The deck's types, most first (up to 3; TCG_NONE ends). */
 static void DeckTypes(const uint16_t *cards, unsigned out[3])
 {
@@ -984,6 +976,236 @@ void TcgUi_TopBar(const char *title)
     G_Text(8, 1, G_WHITE, 0x101820, title, 228, TF_NORMAL);
 }
 
+/* A small menu over a screen (a deck's EDIT / RENAME / ACE CARD...): the game's window, the cursor arrow */
+void TcgUi_PopMenu(int x, int y, int w, const char *const *items, int count, int cursor, unsigned disabled)
+{
+    int i, h = count * 14 + 8;
+    if (y + h > 158)
+        y = 158 - h;
+    G_FillA(x + 2, y + 3, w, h, 0x000000, 70);
+    G_Window(x, y, w, h);
+    for (i = 0; i < count; i++)
+    {
+        int off = (disabled >> i) & 1;
+        if (i == cursor)
+            G_Cursor(x + 7, y + 8 + i * 14);
+        G_Text(x + 15, y + 4 + i * 14, off ? 0xa8a8a8 : G_INK, off ? G_NO_SHADOW : G_INK_SHADOW, items[i], 0,
+               G_Measure(items[i], TF_NORMAL) > w - 20 ? TF_NARROW : TF_NORMAL);
+    }
+}
+/* Up / down through a pop-up menu's rows, past the ones that can't be used; returns the new cursor */
+int TcgUi_PopMenuMove(unsigned pressed, int cursor, int count, unsigned disabled)
+{
+    int step = pressed & 64 ? -1 : pressed & 128 ? 1 : 0, i;
+    if (!step)
+        return cursor;
+    for (i = 0; i < count; i++)
+    {
+        cursor = (cursor + step + count) % count;
+        if (!((disabled >> cursor) & 1))
+            break;
+    }
+    PlaySE(SE_SELECT);
+    return cursor;
+}
+
+/* The name editor: a deck's new name, typed on a keyboard on the screen (the D-pad and A) or on the real one.
+ * B takes the last letter back (with none left, it leaves the name as it was), START or OK keeps it. */
+#define NAME_COLS 13
+#define NAME_KEY_ROWS 4
+#define NAME_ROWS (NAME_KEY_ROWS + 1)   /* and the row of wide keys: CASE, SPACE, DEL, OK */
+static const char *const sNameKeys[NAME_KEY_ROWS] = {"ABCDEFGHIJKLM", "NOPQRSTUVWXYZ", "0123456789.,-", "'!?&/:()+%=;\""};
+static const char *const sNameWide[4] = {"a/A", "SPACE", "DEL", "OK"};
+static struct
+{
+    int on, row, col, lower;
+    char text[TCG_NAME_LEN];
+    int max;          /* letters that fit (and the room on a deck's row) */
+    char title[32];
+} sName;
+static int NameFits(const char *text)
+{
+    return (int)strlen(text) < sName.max && G_Measure(text, TF_NORMAL) <= 96;
+}
+static void NameType(char c)
+{
+    size_t n = strlen(sName.text);
+    char next[TCG_NAME_LEN + 1];
+    if (c == ' ' && (n == 0 || sName.text[n - 1] == ' '))
+        return;   /* no leading or double spaces */
+    snprintf(next, sizeof(next), "%s%c", sName.text, c);
+    if (!NameFits(next))
+    {
+        PlaySE(SE_FAILURE);
+        return;
+    }
+    memcpy(sName.text, next, sizeof(sName.text));
+    sName.text[sizeof(sName.text) - 1] = 0;
+    PlaySE(SE_SELECT);
+}
+static int NameTypable(int c)
+{
+    int r;
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')
+        return 1;
+    for (r = 0; r < NAME_KEY_ROWS; r++)
+        if (strchr(sNameKeys[r], c))
+            return 1;
+    return 0;
+}
+void TcgUi_NameOpen(const char *title, const char *name)
+{
+    memset(&sName, 0, sizeof(sName));
+    sName.on = 1;
+    sName.max = 16;
+    snprintf(sName.title, sizeof(sName.title), "%s", title);
+    snprintf(sName.text, sizeof(sName.text), "%.16s", name);
+    sName.lower = 1;
+    sName.row = NAME_ROWS - 1;
+    sName.col = 3;   /* on OK: the name as it is is one A away */
+    Platform_SetTextInput(1);
+}
+int TcgUi_NameActive(void) { return sName.on; }
+const char *TcgUi_NameText(void) { return sName.text; }
+static int NameFinish(int keep)
+{
+    size_t n = strlen(sName.text);
+    while (n && sName.text[n - 1] == ' ')
+        sName.text[--n] = 0;
+    sName.on = 0;
+    Platform_SetTextInput(0);
+    if (keep && !n)
+        return -1;   /* (an empty name keeps the old one) */
+    return keep ? 1 : -1;
+}
+/* 0: still typing; 1: done (TcgUi_NameText); -1: left as it was */
+int TcgUi_NameStep(unsigned pressed)
+{
+    int c, cols = sName.row == NAME_ROWS - 1 ? 4 : NAME_COLS;
+    if (!sName.on)
+        return -1;
+    while ((c = Platform_PopTypedChar()) != 0)
+    {
+        if (c == TYPED_ENTER)
+        {
+            PlaySE(SE_SUCCESS);
+            return NameFinish(1);
+        }
+        if (c == TYPED_BACKSPACE)
+        {
+            if (sName.text[0])
+                sName.text[strlen(sName.text) - 1] = 0, PlaySE(SE_SELECT);
+        }
+        else if (NameTypable(c))
+            NameType((char)c);
+    }
+    if (pressed & KEY_UP)
+        sName.row = (sName.row + NAME_ROWS - 1) % NAME_ROWS, PlaySE(SE_SELECT);
+    if (pressed & KEY_DOWN)
+        sName.row = (sName.row + 1) % NAME_ROWS, PlaySE(SE_SELECT);
+    if (pressed & (KEY_UP | KEY_DOWN))
+    {
+        /* the wide keys sit under three or four letters each */
+        int to = sName.row == NAME_ROWS - 1 ? 4 : NAME_COLS;
+        if (cols != to)
+            sName.col = to == 4 ? (sName.col * 4) / NAME_COLS : sName.col * NAME_COLS / 4 + 1;
+        cols = to;
+        if (sName.col >= cols)
+            sName.col = cols - 1;
+    }
+    if (pressed & KEY_LEFT)
+        sName.col = (sName.col + cols - 1) % cols, PlaySE(SE_SELECT);
+    if (pressed & KEY_RIGHT)
+        sName.col = (sName.col + 1) % cols, PlaySE(SE_SELECT);
+    if (pressed & KEY_SELECT)
+        sName.lower ^= 1, PlaySE(SE_SELECT);
+    if (pressed & KEY_START)
+    {
+        PlaySE(SE_SUCCESS);
+        return NameFinish(1);
+    }
+    if (pressed & KEY_B)
+    {
+        if (!sName.text[0])
+        {
+            PlaySE(SE_SELECT);
+            return NameFinish(0);
+        }
+        sName.text[strlen(sName.text) - 1] = 0;
+        PlaySE(SE_SELECT);
+    }
+    if (pressed & KEY_A)
+    {
+        if (sName.row < NAME_KEY_ROWS)
+        {
+            char k = sNameKeys[sName.row][sName.col];
+            if (k >= 'A' && k <= 'Z' && sName.lower)
+                k = (char)(k - 'A' + 'a');
+            NameType(k);
+        }
+        else if (sName.col == 0)
+            sName.lower ^= 1, PlaySE(SE_SELECT);
+        else if (sName.col == 1)
+            NameType(' ');
+        else if (sName.col == 2)
+        {
+            if (sName.text[0])
+                sName.text[strlen(sName.text) - 1] = 0;
+            PlaySE(SE_SELECT);
+        }
+        else
+        {
+            PlaySE(SE_SUCCESS);
+            return NameFinish(1);
+        }
+    }
+    return 0;
+}
+void TcgUi_NameDraw(unsigned color)
+{
+    int r, k, x0 = 16, y0 = 50, kw = 16, kh = 13;
+    char line[40];
+    if (!sName.on)
+        return;
+    G_FillA(0, 0, 240, 160, 0x101820, 215);
+    TcgUi_TopBar(sName.title);
+    /* the name, with a blinking place for the next letter */
+    G_RoundFill(40, 22, 160, 20, 0xf8f8f8, 255);
+    G_RoundFrame(40, 22, 160, 20, color, 255);
+    G_TextAlign(120, 24, TA_CENTER, G_INK, G_INK_SHADOW, sName.text, TF_NORMAL);
+    if ((U.frame / 16) % 2)
+    {
+        int w = G_Measure(sName.text, TF_NORMAL);
+        G_Fill(120 + w / 2 + 1, 37, 6, 2, color);
+    }
+    snprintf(line, sizeof(line), "%d/%d", (int)strlen(sName.text), sName.max);
+    G_Digits(204, 30, line, 0, 1, 0xa0b0c0, 255);
+    G_RoundFill(x0 - 4, y0 - 4, NAME_COLS * kw + 8, NAME_ROWS * kh + 9, 0xf0f0f8, 245);
+    G_RoundFrame(x0 - 4, y0 - 4, NAME_COLS * kw + 8, NAME_ROWS * kh + 9, 0x707880, 255);
+    for (r = 0; r < NAME_KEY_ROWS; r++)
+        for (k = 0; k < NAME_COLS; k++)
+        {
+            char key[2] = {sNameKeys[r][k], 0};
+            int x = x0 + k * kw, y = y0 + r * kh, on = sName.row == r && sName.col == k;
+            if (key[0] >= 'A' && key[0] <= 'Z' && sName.lower)
+                key[0] = (char)(key[0] - 'A' + 'a');
+            if (on)
+                G_RoundFill(x, y, kw - 1, kh, color, 255);
+            G_TextAlign(x + kw / 2, y - 1, TA_CENTER, on ? G_WHITE : G_INK, on ? G_NO_SHADOW : G_INK_SHADOW, key,
+                        TF_NORMAL);
+        }
+    for (k = 0; k < 4; k++)
+    {
+        int w = NAME_COLS * kw / 4, x = x0 + k * w, y = y0 + NAME_KEY_ROWS * kh + 2;
+        int on = sName.row == NAME_ROWS - 1 && sName.col == k;
+        G_RoundFill(x + 1, y, w - 2, kh, on ? color : 0xd0d8e0, 255);
+        G_TextAlign(x + w / 2, y, TA_CENTER, on ? G_WHITE : G_INK, G_NO_SHADOW,
+                    k == 0 ? (sName.lower ? "ABC" : "abc") : sNameWide[k], TF_NARROW);
+    }
+    G_TextAlign(120, 124, TA_CENTER, 0xd0d8f0, G_NO_SHADOW, "Use the keys here, or type on your keyboard.", TF_SMALL);
+    Hints("{A} TYPE  {B} DELETE  {SELECT} ABC/abc  {START} OK");
+}
+
 /* ------------------------------------------------------------------ */
 /* Screens                                                              */
 /* ------------------------------------------------------------------ */
@@ -997,7 +1219,7 @@ static void HomeScreen(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned i, packs = 0, total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
-    unsigned mascot = Mascot(c->decks[c->activeDeck].cards);
+    unsigned mascot = Tcg_DeckAce(c, c->activeDeck);
     char line[128];
     int bob = (int)(sinf(U.frame * 0.06f) * 1.5f);
     for (i = 0; i < TCG_PACK_TYPES; i++)
@@ -1141,6 +1363,60 @@ static void ChallengeScreen(void)
         Strip(0, line);
 }
 
+/* DECK RECIPES: the decks the game hands out, card for card (the starters, the GAME CENTER's structure decks) */
+struct TcgRecipe
+{
+    const char *name, *blurb;
+    const uint16_t *cards;
+};
+#define RECIPE_COUNT (3 + (int)ARRAY_COUNT(sStructureDecks))
+static int Recipe(int k, struct TcgRecipe *r)
+{
+    static const char *const names[3] = {"Ember Friends", "Tidal Friends", "Garden Friends"};
+    static const char *const defs[3] = {"CharmanderAndFriends", "SquirtleAndFriends", "BulbasaurAndFriends"};
+    static const char *const blurbs[3] = {"The CHARMANDER starter deck.", "The SQUIRTLE starter deck.",
+                                          "The BULBASAUR starter deck."};
+    const struct TcgDeckDefinition *def;
+    if (k < 0 || k >= RECIPE_COUNT)
+        return 0;
+    if (k >= 3)
+    {
+        r->name = sStructureDecks[k - 3].name;
+        r->blurb = sStructureDecks[k - 3].blurb;
+        r->cards = sStructureDecks[k - 3].cards;
+        return 1;
+    }
+    def = DeckNamed(defs[k]);
+    if (!def)
+        return 0;
+    r->name = names[k];
+    r->blurb = blurbs[k];
+    r->cards = def->cards;
+    return 1;
+}
+/* The first empty slot, or TCG_SAVED_DECKS */
+static unsigned EmptySlot(void)
+{
+    unsigned d;
+    for (d = 0; d < TCG_SAVED_DECKS; d++)
+        if (!DeckCount(d, 0))
+            return d;
+    return TCG_SAVED_DECKS;
+}
+/* A slot's menu (A on it) */
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
+enum { EM_NEW, EM_RECIPE, EM_COUNT };
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
+static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
+static int SlotEmpty(unsigned d) { return !DeckCount(d, 0); }
+static unsigned DeckMenuOff(unsigned d)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    return d == c->activeDeck || !DeckValid(d) ? 1u << DM_USE : 0;
+}
+#define DECK_ROWS (TCG_SAVED_DECKS + 2)   /* the slots, DECK RECIPES, BACK */
+#define DECK_ROW_RECIPES TCG_SAVED_DECKS
+#define DECK_ROW_BACK (TCG_SAVED_DECKS + 1)
 static void DecksScreen(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -1148,7 +1424,7 @@ static void DecksScreen(void)
     char line[96];
     Background();
     SidePanel("DECKS", Theme());
-    mascot = Mascot(c->decks[d].cards);
+    mascot = Tcg_DeckAce(c, d);
     if (mascot)
         BigCard(mascot, 30, 22, 0);
     n = DeckCount(d, 0);
@@ -1156,28 +1432,181 @@ static void DecksScreen(void)
     G_TextAlign(52, 86, TA_CENTER, n == 60 && DeckValid(d) ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
     TypeOrbs(38, 99, c->decks[d].cards);
     ListBox(LIST_X, 4, LIST_W, 104);
-    U.scroll = U.cursor < 3 ? 0 : U.cursor > TCG_SAVED_DECKS - 3 ? TCG_SAVED_DECKS - 5 : U.cursor - 3;
+    U.scroll = U.cursor - 3 < 0 ? 0 : U.cursor - 3 > DECK_ROWS - 6 ? DECK_ROWS - 6 : U.cursor - 3;
     for (i = 0; i < 6; i++)
     {
         unsigned k = U.scroll + i;
-        if (k > TCG_SAVED_DECKS)
+        if (k >= DECK_ROWS)
             break;
-        if (k == TCG_SAVED_DECKS)
+        if (k == DECK_ROW_BACK || k == DECK_ROW_RECIPES)
         {
-            Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)k, 1, "BACK", NULL);
+            Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)k, 1,
+                k == DECK_ROW_BACK ? "BACK" : "DECK RECIPES", NULL);
             continue;
         }
         snprintf(line, sizeof(line), "%s", c->decks[k].name[0] ? c->decks[k].name : "EMPTY SLOT");
         Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, U.cursor == (int)k, c->decks[k].name[0] != 0, line,
             k == c->activeDeck ? "IN USE" : NULL);
     }
-    if (U.cursor == TCG_SAVED_DECKS)
+    if (U.cursor == DECK_ROW_BACK)
         Strip(0, "Back to the CARD CASE.");
+    else if (U.cursor == DECK_ROW_RECIPES)
+        Strip(0, "The starter and structure decks, built again from the cards you have.");
     else if ((unsigned)U.cursor == c->activeDeck)
         Strip(0, "The deck you duel with.");
     else
-        Strip(0, DeckCount(U.cursor, 0) ? "{R} DUEL WITH THIS DECK" : "An empty slot: {A} builds a new deck.");
-    Hints("{A} EDIT  {START} COPY  {SELECT} DELETE  {B} BACK");
+        Strip(0, DeckCount(U.cursor, 0) ? "{R} DUEL WITH THIS DECK" : "An empty slot: build a deck, or one from a recipe.");
+    if (U.menuOn && U.cursor < TCG_SAVED_DECKS)
+    {
+        if (SlotEmpty((unsigned)U.cursor))
+            TcgUi_PopMenu(118, 40, 114, sEmptyMenu, EM_COUNT, U.menuCursor, 0);
+        else
+            TcgUi_PopMenu(134, 20, 98, sDeckMenu, DM_COUNT, U.menuCursor, DeckMenuOff((unsigned)U.cursor));
+        Hints("{A} CHOOSE  {B} BACK");
+    }
+    else
+        Hints("{A} MENU  {START} COPY  {SELECT} DELETE  {B} BACK");
+    TcgUi_NameDraw(Theme());
+}
+/* What a recipe lacks, by name ("Missing: 2 Charmander, 1 Potion"); the count in *lost */
+static void RecipeMissing(const uint16_t *cards, char *out, size_t size, unsigned *lost)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned used[TCG_CARD_COUNT + 1] = {0}, missing[TCG_CARD_COUNT + 1] = {0}, k, n = 0;
+    size_t len;
+    for (k = 0; k < TCG_DECK_SIZE; k++)
+    {
+        unsigned id = cards[k];
+        if (!Tcg_Card(id))
+            continue;
+        if (id > 6 && used[id] >= c->owned[id])
+            missing[id]++, n++;
+        used[id]++;
+    }
+    /* (as many as fit the strip's two lines, then how many more) */
+    snprintf(out, size, "Missing:");
+    for (k = 1; k <= TCG_CARD_COUNT; k++)
+    {
+        char more[48];
+        unsigned left = 0, j;
+        if (!missing[k])
+            continue;
+        for (j = k + 1; j <= TCG_CARD_COUNT; j++)
+            left += missing[j] != 0;
+        len = strlen(out);
+        snprintf(out + len, size - len, "%s %u %s", len > 8 ? "," : "", missing[k], Tcg_Card(k)->name);
+        snprintf(more, sizeof(more), " and %u more", left);
+        if (G_Measure(out, TF_SMALL) + (left ? G_Measure(more, TF_SMALL) : 0) > 226 * 2 - 70)
+        {
+            out[len] = 0;
+            snprintf(out + len, size - len, " and %u more", left + 1);
+            break;
+        }
+    }
+    *lost = n;
+}
+static void RecipesScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    struct TcgRecipe r;
+    int i, top;
+    char line[200];
+    Background();
+    SidePanel("RECIPES", Theme());
+    if (Recipe(U.cursor, &r))
+    {
+        unsigned have = Tcg_RecipeOwned(c, r.cards), mascot = Mascot(r.cards);
+        if (mascot)
+            BigCard(mascot, 30, 22, 0);
+        snprintf(line, sizeof(line), "%u/60 OWNED", have);
+        G_TextAlign(52, 86, TA_CENTER, have == 60 ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
+        TypeOrbs(38, 99, r.cards);
+    }
+    ListBox(LIST_X, 4, LIST_W, 104);
+    top = U.cursor - 3 > RECIPE_COUNT - 6 ? RECIPE_COUNT - 6 : U.cursor - 3;
+    if (top < 0)
+        top = 0;
+    for (i = 0; i < 6 && top + i < RECIPE_COUNT; i++)
+    {
+        struct TcgRecipe row;
+        char right[16];
+        if (!Recipe(top + i, &row))
+            continue;
+        snprintf(right, sizeof(right), "%u/60", Tcg_RecipeOwned(c, row.cards));
+        Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == top + i, 1, row.name, right);
+    }
+    if (Recipe(U.cursor, &r))
+    {
+        unsigned lost;
+        RecipeMissing(r.cards, line, sizeof(line), &lost);
+        if (!lost)
+            snprintf(line, sizeof(line), "%s You have every card.", r.blurb);
+        Strip(0, line);
+    }
+    Hints("{A} BUILD  {B} BACK");
+}
+/* The cards a deck holds, once each, Pokemon first (no Basic Energy): the ACE CARD grid */
+static unsigned AceList(unsigned deck, uint16_t *out)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned i, j, n = 0, pass;
+    for (pass = 0; pass < 2; pass++)
+        for (i = 0; i < TCG_DECK_SIZE; i++)
+        {
+            unsigned id = c->decks[deck].cards[i];
+            if (id <= 6 || (Tcg_Card(id)->kind == TCG_POKEMON) != (pass == 0))
+                continue;
+            for (j = 0; j < n && out[j] != id; j++)
+                ;
+            if (j == n)
+                out[n++] = (uint16_t)id;
+        }
+    return n;
+}
+#define ACE_COLS 4
+#define ACE_ROWS 2
+static void AceScreen(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    uint16_t list[TCG_DECK_SIZE];
+    unsigned n = AceList((unsigned)U.deck, list), ace = Tcg_DeckAce(c, (unsigned)U.deck);
+    int page = ACE_COLS * ACE_ROWS, start = U.cursor / page * page, i;
+    char line[96];
+    Background();
+    SidePanel("ACE CARD", Theme());
+    if (n)
+        BigCard(list[U.cursor], 30, 22, (int)(sinf(U.frame * 0.06f) * 1.5f));
+    G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW, c->decks[U.deck].name, TF_SMALL);
+    ListBox(LIST_X, 4, LIST_W, 104);
+    for (i = 0; i < page && start + i < (int)n; i++)
+    {
+        int on = start + i == U.cursor, x = LIST_X + 4 + (i % ACE_COLS) * 31, y = 10 + (i / ACE_COLS) * 48 - on * 2;
+        G_Card(list[start + i], (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (list[start + i] == ace)
+        {
+            G_RoundFill(x + 3, y + 32, 24, 9, 0xe8a020, 240);
+            G_TextAlign(x + 15, y + 31, TA_CENTER, G_WHITE, G_NO_SHADOW, "ACE", TF_NARROW);
+        }
+        if (on)
+        {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if ((int)n > page)
+    {
+        snprintf(line, sizeof(line), "%d/%d", start / page + 1, ((int)n + page - 1) / page);
+        G_TextAlign(LIST_X + LIST_W - 5, 95, TA_RIGHT, G_INK, G_NO_SHADOW, line, TF_NARROW);
+    }
+    if (n)
+    {
+        snprintf(line, sizeof(line), "%s%s", Tcg_Card(list[U.cursor])->name,
+                 list[U.cursor] == ace ? ": this deck's ACE CARD." : "");
+        Strip(0, line);
+    }
+    else
+        Strip(0, "This deck has no cards to choose from.");
+    Hints("{A} MAKE IT THE ACE  {R} LOOK  {B} BACK");
 }
 
 /* The builder starts on the deck's main type (Pokemon first). */
@@ -1753,7 +2182,6 @@ static void ClaimPrize(unsigned row)
 }
 /* The GAME CENTER CARD SHOP (RUSTBORO CITY): singles for money (the rares the CARD CLUB doesn't have) and the
  * three structure decks. */
-#include "tcg_structure_decks.h"
 #define GC_DECK_PRICE 15000
 static const char *const sGcTabs[] = {"SINGLES", "DECKS", "TRADE IN", "CARD SHOP", "PRIZES"};
 #define GC_TABS 5
@@ -2132,6 +2560,7 @@ static void Act(int action)
         char reason[160];
         unsigned d, before = c->activeDeck;
         memset(c->decks[U.askArg].cards, 0, sizeof(c->decks[U.askArg].cards));
+        c->ace[U.askArg] = 0;
         if ((unsigned)U.askArg == c->activeDeck)
         {
             /* The deck you duel with: the next one that can be played takes over */
@@ -2192,6 +2621,23 @@ static void Act(int action)
         }
         break;
     }
+    case ACT_RECIPE:
+    {
+        struct TcgRecipe r;
+        unsigned slot = U.recipeSlot >= 0 ? (unsigned)U.recipeSlot : EmptySlot(), lost = 0;
+        if (!Recipe(U.askArg, &r) || slot >= TCG_SAVED_DECKS)
+            break;
+        Tcg_DeckFromRecipe(c, slot, r.cards, r.name, &lost);
+        printf("[tcg] recipe %d into slot %u, %u missing\n", U.askArg, slot, lost);
+        Screen(UI_DECKS);
+        U.cursor = (int)slot;
+        if (lost)
+            Say(ACT_NONE, "%s is in slot %u. %u of its cards are missing: add them when you have them.", r.name,
+                slot + 1, lost);
+        else
+            Say(ACT_NONE, "%s is in slot %u, ready to play.", r.name, slot + 1);
+        break;
+    }
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)U.askArg, i, slot;
@@ -2212,6 +2658,7 @@ static void Act(int action)
         {
             memcpy(c->decks[slot].cards, sStructureDecks[k].cards, sizeof(c->decks[slot].cards));
             snprintf(c->decks[slot].name, TCG_NAME_LEN, "%s", sStructureDecks[k].name);
+            c->ace[slot] = 0;
             Say(ACT_NONE, "You got the %s deck! It's in DECKS, slot %u, ready to play.", sStructureDecks[k].name,
                 slot + 1);
         }
@@ -2645,22 +3092,86 @@ int Tcg_Step(unsigned keys)
         }
         break;
     case UI_DECKS:
-        MoveCursor(pressed, TCG_SAVED_DECKS + 1, 1);
-        if (pressed & KEY_B || (pressed & KEY_A && U.cursor == TCG_SAVED_DECKS))
+        if (TcgUi_NameActive())
+        {
+            if (TcgUi_NameStep(pressed) == 1 && U.cursor < TCG_SAVED_DECKS)
+            {
+                snprintf(c->decks[U.cursor].name, TCG_NAME_LEN, "%s", TcgUi_NameText());
+                printf("[tcg] deck %d renamed %s\n", U.cursor, c->decks[U.cursor].name);
+            }
+            break;
+        }
+        if (U.menuOn)
+        {
+            int empty = SlotEmpty((unsigned)U.cursor), count = empty ? EM_COUNT : DM_COUNT;
+            unsigned off = empty ? 0 : DeckMenuOff((unsigned)U.cursor);
+            U.menuCursor = TcgUi_PopMenuMove(pressed, U.menuCursor, count, off);
+            if (pressed & KEY_B)
+            {
+                PlaySE(SE_SELECT);
+                U.menuOn = 0;
+            }
+            else if (pressed & KEY_A && !((off >> U.menuCursor) & 1))
+            {
+                int slot = U.cursor;
+                PlaySE(SE_SELECT);
+                U.menuOn = 0;
+                if (empty && U.menuCursor == EM_RECIPE)
+                {
+                    Screen(UI_RECIPES);
+                    U.recipeSlot = slot;
+                }
+                else if (empty || U.menuCursor == DM_EDIT)
+                {
+                    U.deck = slot;
+                    if (!c->decks[U.deck].name[0])
+                        snprintf(c->decks[U.deck].name, TCG_NAME_LEN, "Deck %d", U.deck + 1);
+                    U.side = 0;
+                    U.deckCursor = 0;
+                    Screen(UI_BUILDER);
+                    U.filter = BuilderTab(U.deck);
+                }
+                else if (U.menuCursor == DM_RENAME)
+                    TcgUi_NameOpen("RENAME DECK", c->decks[slot].name);
+                else if (U.menuCursor == DM_ACE)
+                {
+                    uint16_t list[TCG_DECK_SIZE];
+                    unsigned n = AceList((unsigned)slot, list), ace = Tcg_DeckAce(c, (unsigned)slot), k;
+                    U.deck = slot;
+                    Screen(UI_ACE);
+                    for (k = 0; k < n; k++)
+                        if (list[k] == ace)
+                            U.cursor = (int)k;
+                }
+                else if (U.menuCursor == DM_USE)
+                {
+                    c->activeDeck = (uint8_t)slot;
+                    PlaySE(SE_SUCCESS);
+                }
+                else if (U.menuCursor == DM_COPY)
+                    Ask(ACT_COPY, slot, "Copy %s into an empty slot?", c->decks[slot].name);
+                else if (U.menuCursor == DM_DELETE)
+                    Ask(ACT_CLEAR, slot, "Delete %s? Its cards stay in your collection.", c->decks[slot].name);
+            }
+            break;
+        }
+        MoveCursor(pressed, DECK_ROWS, 1);
+        if (pressed & KEY_B || (pressed & KEY_A && U.cursor == DECK_ROW_BACK))
         {
             PlaySE(SE_SELECT);
             Screen(UI_HOME);
         }
+        else if (pressed & KEY_A && U.cursor == DECK_ROW_RECIPES)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_RECIPES);
+            U.recipeSlot = -1;
+        }
         else if (pressed & KEY_A)
         {
             PlaySE(SE_SELECT);
-            U.deck = U.cursor;
-            if (!c->decks[U.deck].name[0])
-                snprintf(c->decks[U.deck].name, TCG_NAME_LEN, "Deck %d", U.deck + 1);
-            U.side = 0;
-            U.deckCursor = 0;
-            Screen(UI_BUILDER);
-            U.filter = BuilderTab(U.deck);
+            U.menuOn = 1;
+            U.menuCursor = 0;
         }
         else if (pressed & KEY_R && U.cursor < TCG_SAVED_DECKS && (unsigned)U.cursor != c->activeDeck &&
                  DeckCount(U.cursor, 0))
@@ -2682,6 +3193,54 @@ int Tcg_Step(unsigned keys)
         else if (pressed & KEY_SELECT && U.cursor < TCG_SAVED_DECKS && DeckCount(U.cursor, 0))
             Ask(ACT_CLEAR, U.cursor, "Delete %s? Its cards stay in your collection.", c->decks[U.cursor].name);
         break;
+    case UI_RECIPES:
+    {
+        struct TcgRecipe r;
+        MoveCursor(pressed, RECIPE_COUNT, 1);
+        if (pressed & KEY_B)
+        {
+            int back = U.recipeSlot >= 0 ? U.recipeSlot : DECK_ROW_RECIPES;
+            PlaySE(SE_SELECT);
+            Screen(UI_DECKS);
+            U.cursor = back;
+        }
+        else if (pressed & KEY_A && Recipe(U.cursor, &r))
+        {
+            unsigned slot = U.recipeSlot >= 0 ? (unsigned)U.recipeSlot : EmptySlot();
+            unsigned lost = TCG_DECK_SIZE - Tcg_RecipeOwned(c, r.cards);
+            PlaySE(SE_SELECT);
+            if (slot >= TCG_SAVED_DECKS)
+                Say(ACT_NONE, "There's no empty deck slot. Delete a deck first.");
+            else if (lost)
+                Ask(ACT_RECIPE, U.cursor, "Build %s in slot %u? %u of its cards are missing.", r.name, slot + 1, lost);
+            else
+                Ask(ACT_RECIPE, U.cursor, "Build %s in slot %u?", r.name, slot + 1);
+        }
+        break;
+    }
+    case UI_ACE:
+    {
+        uint16_t list[TCG_DECK_SIZE];
+        unsigned n = AceList((unsigned)U.deck, list);
+        GridMove(pressed, (int)n, ACE_COLS);
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            Screen(UI_DECKS);
+            U.cursor = U.deck;
+        }
+        else if (pressed & KEY_R && n)
+            Inspect(list[U.cursor], UI_ACE);
+        else if (pressed & KEY_A && n)
+        {
+            c->ace[U.deck] = list[U.cursor];
+            PlaySE(SE_SUCCESS);
+            printf("[tcg] deck %d ace %u\n", U.deck, c->ace[U.deck]);
+            Screen(UI_DECKS);
+            U.cursor = U.deck;
+        }
+        break;
+    }
     case UI_BUILDER:
     {
         uint16_t list[TCG_CARD_COUNT];
@@ -3091,6 +3650,12 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
         break;
     case UI_DECKS:
         DecksScreen();
+        break;
+    case UI_RECIPES:
+        RecipesScreen();
+        break;
+    case UI_ACE:
+        AceScreen();
         break;
     case UI_BUILDER:
         BuilderScreen();
