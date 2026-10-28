@@ -27,3 +27,6 @@ Makefile text eol=lf
 
 # Moemon Fight: the MUGEN pack stays byte for byte as made (CRLF .def / .cns, Shift-JIS)
 mugen/** -text
+
+# Moemon Rhythm: the DANCE machine's songs stay byte for byte
+stepmania/** -text

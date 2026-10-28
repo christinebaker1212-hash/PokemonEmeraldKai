@@ -1,0 +1,25 @@
+01 ddr 1st
+02 ddr 2ndmix
+03 ddr 3rdmix
+04 ddr 4thmix
+05 ddr 5thmix
+06 ddrmax
+07 ddrmax2
+
+08 ddr extreme
+
+09 ddr solo
+10 ddr club version
+11 home ddr
+
+12 beatmania
+13 beatmania iidx
+14 beatmania iii
+15 pop 'n music
+16 gf/dm
+17 dance maniax
+18 keyboard mania
+19 para para paradise
+20 mamba a gogo
+
+21 new songs
