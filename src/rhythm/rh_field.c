@@ -205,9 +205,13 @@ static void DrawHold(const struct RhField *f, int i, double beat, int x, int ry,
     for (y = y0 + ARROW / 2; y < y1 + ARROW / 2; y += body->h)
     {
         int h = (int)(y1 + ARROW / 2 - y);
-        int sy = dir > 0 ? ry + (int)y : ry + ARROW - (int)y - (h < body->h ? h : body->h);
+        int sy;
+        // (less than a pixel left: nothing; a height of 0 would draw the whole tile, a flash of tail past the end)
+        if (h <= 0)
+            break;
         if (h > body->h)
             h = body->h;
+        sy = dir > 0 ? ry + (int)y : ry + ARROW - (int)y - h;
         if ((dir > 0 && sy > RH_H) || (dir < 0 && sy + h < 0))
             break;
         RhGfx_PicPart(body, 0, x, sy, 0, h, dir > 0 ? RH_ROT_0 : RH_ROT_180, alpha * Alpha(f, y) >> 8);
