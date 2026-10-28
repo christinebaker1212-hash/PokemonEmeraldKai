@@ -293,9 +293,14 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
             /* A concession crossed our own action: ours never reached the
              * other side, so drop it (both seats then hold the same duel).
              * Two concessions crossing: seat 0's stands. */
+            uint32_t shown = l->game.eventSeq;
             if (l->game.phase == TCG_FINISHED && l->game.winner == (l->seat ^ 1) && l->seat == 0)
                 return;
             l->game = l->beforePending;
+            /* (events go on from what the duel screen already showed: the concession's win event numbered below
+             * it was taken as shown, and the board never ended. Not part of the hash.) */
+            if (shown > l->game.eventSeq)
+                l->game.eventSeq = shown;
             l->sequence = l->sequenceBefore;
             l->pending = 0;
         }

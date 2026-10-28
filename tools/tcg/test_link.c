@@ -78,14 +78,23 @@ int main(void)
             unsigned who = l[0].game.phase == TCG_PROMOTION ? l[0].game.promotePlayer : l[0].game.current;
             struct TcgAction concede = {0};
             concede.type = TCG_CONCEDE;
+            uint32_t shown;
             assert(TcgDuel_AiAction(&l[who].game, &a));
             assert(TcgLink_Submit(&l[who], &a, 0));
+            shown = l[who].game.eventSeq; /* what the mover's duel screen has seen */
             assert(TcgLink_Submit(&l[who ^ 1], &concede, 0));
             Flush(l);
             assert(l[0].state == TCG_LINK_PLAYING && l[1].state == TCG_LINK_PLAYING);
             assert(!l[0].pending && !l[1].pending);
             assert(l[0].game.phase == TCG_FINISHED && l[0].game.winner == who);
             assert(TcgLink_Hash(&l[0].game) == TcgLink_Hash(&l[1].game));
+            /* Both screens get the win event, the mover's after everything it had shown */
+            for (i = 0; i < 2; i++)
+            {
+                const struct TcgEvent *e = TcgDuel_GetEvent(&l[i].game, l[i].game.eventSeq - 1);
+                assert(e && e->type == TCG_EV_WIN && e->value == 3 && e->player == who);
+            }
+            assert(l[who].game.eventSeq > shown);
         }
     }
     {
