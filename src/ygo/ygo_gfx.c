@@ -15,7 +15,7 @@ extern const unsigned char gYgoSddArt[], gYgoSddArtEnd[];
 #define SDD_ART_BYTES 0x10E0
 #define SDD_PAL_BYTES 0x80
 
-static unsigned sMode;
+static unsigned sMode, sBackMode;
 
 /* ---- names and colors */
 static const struct
@@ -83,12 +83,13 @@ static int DecodePrinted(unsigned id, struct Pic *p)
     if (total < 8 || memcmp(b, "YGOP", 4))
         return 0;
     count = Rd32(b + 4);
-    if (!id || id > count || 8 + 16 * id > total)
+    /* id count + 1: the card back, stored after the cards */
+    if (!id || id > count + 1 || 8 + 16 * id > total)
         return 0;
     e = b + 8 + 16 * (id - 1);
     offset = Rd32(e);
     size = Rd32(e + 4);
-    if (!size || offset + size > total)
+    if (!size || offset + size > total || offset < 8 + 16 * id)
         return 0;
     rgba = stbi_load_from_memory(b + offset, (int)size, &w, &h, &channels, 4);
     if (!rgba)
@@ -241,9 +242,31 @@ static void ArtInto(const struct Pic *p, struct GSurface *s, int x, int y, int w
     Resample(p, sx, sy, sw, sh, s, x, y, w, h);
 }
 
+/* The printed card back (CARD BACKS: PRINTED), decoded once */
+static struct Pic *PrintedBack(void)
+{
+    static struct Pic back;
+    static int tried;
+    if (!tried)
+    {
+        tried = 1;
+        if (gYgoPrintedArtEnd - gYgoPrintedArt >= 8 && !memcmp(gYgoPrintedArt, "YGOP", 4) &&
+            !DecodePrinted(Rd32(gYgoPrintedArt + 4) + 1, &back))
+            memset(&back, 0, sizeof(back));
+    }
+    return back.px ? &back : NULL;
+}
+
 /* ---- the face in the game's own frame */
+static void FullCard(struct GSurface *s, const struct Pic *p);
 static void Back(struct GSurface *s)
 {
+    struct Pic *printed = sBackMode == G_BACK_PRINTED ? PrintedBack() : NULL;
+    if (printed)
+    {
+        FullCard(s, printed);
+        return;
+    }
     int w = s->w, h = s->h, x, y;
     float cx = w / 2.0f, cy = h / 2.0f;
     S_RoundFill(s, 0, 0, w, h, w >= 26 ? 2 : 1, ARGB(0x1a1008, 255));
@@ -353,6 +376,16 @@ void Ygo_SetArtMode(unsigned mode)
     if (mode == sMode)
         return;
     sMode = mode;
+    Ygo_ForgetTextures();
+}
+
+void Ygo_SetBackMode(unsigned mode)
+{
+    if (mode >= G_BACK_COUNT)
+        mode = G_BACK_PRINTED;
+    if (mode == sBackMode)
+        return;
+    sBackMode = mode;
     Ygo_ForgetTextures();
 }
 

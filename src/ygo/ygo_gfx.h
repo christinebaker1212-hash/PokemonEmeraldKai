@@ -1,6 +1,7 @@
 /* Yu-Gi-Oh! card faces (src/ygo/ygo_gfx.c): drawn the Pokemon cards' way (tcg_gfx.c), in a frame colored by the
  * card's kind. CARD ART (gMpConfig.cardArt, G_ART_*): the printed illustration in the frame, Stairway to the
- * Destined Duel's own picture in the frame, or the whole printed card. */
+ * Destined Duel's own picture in the frame, or the whole printed card. CARD BACKS (gMpConfig.cardBack): the printed
+ * back or a pixel-art one. */
 #ifndef MOEMON_YGO_GFX_H
 #define MOEMON_YGO_GFX_H
 #include <SDL2/SDL.h>
@@ -18,5 +19,7 @@ const char *Ygo_AttributeName(unsigned attribute);
 const char *Ygo_RaceName(unsigned race);
 const char *Ygo_RarityName(unsigned rarity);
 void Ygo_SetArtMode(unsigned mode);
+/* CARD BACKS (gMpConfig.cardBack, G_BACK_*): the printed back or the pixel-art one */
+void Ygo_SetBackMode(unsigned mode);
 void Ygo_ForgetTextures(void);
 #endif

@@ -826,7 +826,7 @@ static void BuilderScreen(void)
     if (n > page)
     {
         snprintf(line, sizeof(line), "%d/%d", start / page + 1, (n + page - 1) / page);
-        G_TextAlign(156, 100, TA_RIGHT, G_WHITE, 0x204030, line, TF_NARROW);
+        G_TextAlign(157, 3, TA_RIGHT, G_WHITE, 0x101820, line, TF_NARROW);
     }
     TcgUi_ListBox(162, 0, 78, 110);
     snprintf(line, sizeof(line), "%u", mainN);
@@ -866,7 +866,7 @@ static void BuilderScreen(void)
     }
     Strip(0, line);
     TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} READ  {B} DONE"
-                       : "{A} ADD  {SELECT} TAKE OUT  {L}{R} KIND  {START} READ  {B} DONE");
+                       : "{A} ADD  {SELECT} TAKE OUT  {START} READ  {B} DONE");
 }
 
 static void BinderScreen(void)
@@ -1326,14 +1326,14 @@ static void StarterScreen(void)
     }
     {
         static const char *const blurbs[YGO_STARTERS] = {
-            "Dark Magician and friends: a steady deck of Spellcasters and Warriors.",
-            "Blue-Eyes White Dragon: big monsters and the power to Summon them.",
+            "Dark Magician and friends: Spellcasters and Warriors.",
+            "Blue-Eyes White Dragon: big monsters, and ways to Summon them.",
             "Red-Eyes B. Dragon: luck, Warriors and the Flame Swordsman.",
             "Toons and tricks: Pegasus's deck of illusions."};
         uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
         StarterDeckOf(sStarters[Y.cursor], main, extra);
-        snprintf(line, sizeof(line), "%s: %u cards\n%s", gYgoSets[sStarters[Y.cursor]].name,
-                 Ygo_DeckCount(main, YGO_DECK_MAX) + Ygo_DeckCount(extra, YGO_FUSION_MAX), blurbs[Y.cursor]);
+        snprintf(line, sizeof(line), "%u cards. %s", Ygo_DeckCount(main, YGO_DECK_MAX) + Ygo_DeckCount(extra, YGO_FUSION_MAX),
+                 blurbs[Y.cursor]);
         Strip(0, line);
     }
     TcgUi_Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {START} LOOK");
@@ -2007,6 +2007,7 @@ int YgoUi_Step(unsigned keys)
 void YgoUi_Draw(void)
 {
     Ygo_SetArtMode(gMpConfig.cardArt);
+    Ygo_SetBackMode(gMpConfig.cardBack);
     switch (Y.screen)
     {
     case Y_HOME:

@@ -878,7 +878,8 @@ static void NewQuestion(void)
         for (i = 0; i < q->count; i++)
             B.windowItems[B.windowCount++] = (int)i;
         B.windowItems[B.windowCount++] = -1;   /* pass */
-        Tip("You can respond! A Trap or Quick-Play Spell can be activated now, in a chain. Or pass with {B}.");
+        Tip("You can respond! A Trap or Quick-Play Spell can be activated now, in a chain. Or pass with {B}. "
+            "You're asked when something happens: hold {L} to be asked at every chance.");
         break;
     default:
         B.mode = M_WINDOW;
@@ -1331,7 +1332,6 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
 {
     const struct YgoQuery *q;
     int cur;
-    (void)held;
     if (!B.active || !B.d)
         return YB_NONE;
     B.frame++;
@@ -1365,6 +1365,12 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             return YB_LEAVE;
         }
         return YB_NONE;
+    }
+    /* A chance to chain at a quiet moment (a phase changing): passed for you, unless L is held */
+    if (MyQuestion() && q->type == YGO_Q_CHAIN && !(held & KEY_L) && YgoDuel_QuietChance(B.d))
+    {
+        memset(answer, 0, sizeof(*answer));
+        return YB_ANSWER;
     }
     /* A new question of ours: the input starts over */
     if (MyQuestion())
@@ -1903,7 +1909,7 @@ static void Gap(void)
     int i, x = 152, cur = CurrentSpot();
     unsigned id = 0;
     /* the phases */
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < 6 && B.mode != M_OVER; i++)
     {
         int on = i == B.phase;
         unsigned c = on ? (B.turnPlayer == B.me ? 0x60a0ff : 0xff7070) : 0x606878;
@@ -1912,7 +1918,9 @@ static void Gap(void)
         G_Text(x + 1, GAP_Y, on ? G_WHITE : c, G_NO_SHADOW, phases[i], 0, TF_NARROW);
         x += 14;
     }
-    /* line 1: the question, what just happened, or the card under the cursor; line 2: about that card */
+    /* line 1: the question, what just happened, or the card under the cursor; line 2: about that card
+       (nothing once the duel is over: the result's banner is there) */
+    if (B.mode != M_OVER)
     {
         const char *first = NULL;
         unsigned firstColor = 0xf8e070;

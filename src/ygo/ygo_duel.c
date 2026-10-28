@@ -2441,6 +2441,29 @@ uint32_t YgoDuel_Hash(const struct YgoDuel *d)
     return h;
 }
 
+int YgoDuel_QuietChance(const struct YgoDuel *d)
+{
+    const struct YgoState *s = &d->s;
+    const struct YgoQuery *q = &d->query;
+    unsigned i, n;
+    if (q->type != YGO_Q_CHAIN || s->chainCount || s->damageStep)
+        return 0;
+    if (s->window != YW_OPEN && s->window != YW_DRAW && s->window != YW_STANDBY && s->window != YW_BATTLE_START &&
+        s->window != YW_END)
+        return 0;
+    for (i = 0; i < q->count; i++)
+    {
+        const struct YgoChoice *c = &q->items[i];
+        const struct YgoEffect *e;
+        if (c->kind != YGO_ACT_ACTIVATE || c->obj >= s->objCount)
+            return 0;
+        e = Ygo_Effects(s->objs[c->obj].card, &n);
+        if (!e || c->value >= n || (e[c->value].flags & YF_PHASE))
+            return 0;
+    }
+    return 1;
+}
+
 int YgoDuel_Conserved(const struct YgoDuel *d)
 {
     const struct YgoState *s = &d->s;

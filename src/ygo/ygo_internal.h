@@ -28,7 +28,8 @@ enum
     YF_FROM_HAND = 64,       /* a monster effect activated from the hand (Kuriboh) */
     YF_IN_GRAVE = 128,       /* a trigger that works from the Graveyard (Sangan's "sent to the GY" works by default) */
     YF_STAYS = 256,          /* a Normal Spell / Trap that stays on the field after resolving (Swords of Revealing Light) */
-    YF_HARD_ONCE = 512       /* only once while face up (Sanga of the Thunder): kept in the object's data bit 31 */
+    YF_HARD_ONCE = 512,      /* only once while face up (Sanga of the Thunder): kept in the object's data bit 31 */
+    YF_PHASE = 1024          /* made for a quiet moment (a phase: Blast Juggler's Standby Phase): asked then too */
 };
 /* Trigger events (YgoEffect.events): about the effect's own card unless marked ANY */
 enum

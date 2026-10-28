@@ -929,7 +929,7 @@ const struct YgoEffect gYgoFxS1Monsters[] = {
        Op_Sanga),
     FX(YGO_CARD_KURIBOH, YE_QUICK, 2, YF_DAMAGE_STEP | YF_FROM_HAND, 0, Can_Kuriboh, Cost_DiscardSelf, NULL,
        Op_Kuriboh),
-    FX(YGO_CARD_BLAST_JUGGLER, YE_QUICK, 2, YF_TARGETS, 0, Can_BlastJuggler, Cost_TributeSelf, Tg_BlastJuggler,
+    FX(YGO_CARD_BLAST_JUGGLER, YE_QUICK, 2, YF_TARGETS | YF_PHASE, 0, Can_BlastJuggler, Cost_TributeSelf, Tg_BlastJuggler,
        Op_DestroyAllTargets),
     FX(YGO_CARD_TIME_WIZARD, YE_IGNITION, 1, YF_ONCE_PER_TURN, 0, Can_OppMonster, NULL, NULL, Op_TimeWizard),
     FX(YGO_CARD_CATAPULT_TURTLE, YE_IGNITION, 1, YF_ONCE_PER_TURN, 0, Can_TributeAny, Cost_Tribute, NULL, Op_Catapult),

@@ -300,6 +300,9 @@ int YgoDuel_Refresh(struct YgoDuel *d);
 uint32_t YgoDuel_Hash(const struct YgoDuel *d);
 /* Counts every physical card exactly once (tests) */
 int YgoDuel_Conserved(const struct YgoDuel *d);
+/* The question is a chance to chain at a moment nothing is happening (a phase changing: no chain, summon, attack
+ * or damage) and no card offered is made for that moment: a screen can pass for its player */
+int YgoDuel_QuietChance(const struct YgoDuel *d);
 /* Values now, with every lasting and continuous effect */
 int YgoDuel_Atk(const struct YgoState *s, unsigned obj);
 int YgoDuel_Def(const struct YgoState *s, unsigned obj);

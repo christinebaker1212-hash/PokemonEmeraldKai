@@ -62,17 +62,27 @@ The user's answers to the 30 design questions (keep to them):
   at warp 2,4,4,3 facing UP now). Verified by hand in headless runs: club flow, which-game menu, a YGO challenge
   win with booster + spoils, practice duels, screens.
 
+## Done (second session)
+- The default branch (1.34.0) merged in.
+- **tools/ygo/test_ui.sh** (headless; `ONLY="club challenge screens monkey"` runs some; `SEED=` for the monkey):
+  the CARD CLUB duelist (case, Starter Deck, lesson, counter), a challenge with the registered CARD CASE (the
+  which-game menu opens on the first A after ~400 frames of slow text), the case's screens, and a practice duel
+  mashed with random keys then played out by `mp ygo auto` (seeds 1-4 and 7 pass).
+- Rough edges fixed: the Starter Deck blurb fits two lines; the deck builder's hints fit (the tabs show L/R) and
+  its page counter moved into the top bar; the result banner no longer covers the info line / phases.
+- Quiet chain windows: a chance to chain while a phase changes (no chain, summon, attack or Damage Step:
+  YgoDuel_QuietChance) is passed by the board for the player unless L is held; effects made for such a moment
+  carry YF_PHASE (Blast Juggler, Ultimate Offering's quick effect) and are still asked. Engine unchanged (online
+  answers stay the same on both sides). The lesson's chain tip says so.
+- Real card backs: CARD BACKS (the Pokemon cards' option, gMpConfig.cardBack) also picks the Yu-Gi-Oh! back:
+  PRINTED = the English back (Yugipedia's Back-EN.png scan, fetch_art.py -> tools/ygo/metadata/back.png),
+  stored after the cards in printed.bin (build_printed.py; `--keep-cards` rebuilds only the back); PIXEL = the
+  drawn swirl. Ygo_SetBackMode in ygo_gfx.c.
+
 ## Next steps (in order)
-1. **tools/ygo/test_ui.sh** (headless, pattern of tools/tcg/test_ui.sh; `run NAME WARP`, `expect`):
-   - club: warp 2,4,7,3, `press UP 2`, talk (text is slow: use waits / pressuntil A cards), pick a Starter Deck
-     (A, then YES), lesson YES, `mp ygo fast`, `mp ygo win`, leave; talk again -> counter (`[ygo] screen 12`).
-   - challenge: `mp cards starter 0`, `mp ygo starter 0`, `mp register 399`, warp 2,4,7,3, UP, SELECT, wait 200,
-     A, A (the which menu appears), DOWN, A -> `[ygo] challenge: CARD CLUB`; A to duel, `mp ygo win`, take a card.
-   - screens: binder / builder / pack 0 / inspect, rendershots.
-   - monkey: practice duel with `mp ygo first 0`, a long generated sequence of random presses (A B START R L
-     d-pad), then `mp ygo auto`; expect `conserved 1`, the duel ends, no "answer refused" flood, no crash.
-2. Look over the duel table at real speed for rough edges: info line widths, menu placement over the hand,
-   opponent hand corner, chain badges, FX_BIGCARD timing; tribute / target / grid picks with real keys.
+1. (done: test_ui.sh)
+2. Still worth a look at real speed: chain badges, FX_BIGCARD timing, tribute / target / grid picks with real keys
+   (the look so far: action menu, END TURN / CONCEDE, chain prompts, monkey shots all fine).
 3. **Online YGO duels and trades** (answer 27): reuse src/tcg/tcg_online.c's request/deck/trade social layer with
    a game flag; the duel link only needs to exchange YgoAnswers (engine is deterministic from seed + answers;
    YgoDuel_Hash to check). The board already supports seat `me` = 1. Bump MP_PROTOCOL_VERSION / TCG_LINK_VERSION.
