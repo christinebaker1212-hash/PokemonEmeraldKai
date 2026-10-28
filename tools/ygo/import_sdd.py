@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stairway to the Destined Duel's card list and Forbidden & Limited list, read from the player's ROM.
 
-usage: tools/ygo/import_sdd.py ROM.gba [OUT.json]   (default tools/ygo/sdd.json)
+usage: tools/ygo/import_sdd.py ROM.gba [OUT.json [ART.bin]]   (defaults tools/ygo/sdd.json, graphics/ygo/sdd_art.bin)
 
 Needs the USA release (Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel, game code AYWE). The ROM is never
 copied into the repository: only the facts this writes (names, numbers, stats, passwords, limits).
@@ -14,12 +14,20 @@ data/card-table.md and special-card-lists.md):
   card numbers     0x833C80  u16 per ID: Konami's card number (0 = Blue-Eyes White Dragon, 2000+ = alternate art)
   passwords        0x834500  4 BCD bytes per ID (FF FF FF FF: none)
   ban list         0x23F6F4  50 {u16 card number, u16 limit} pairs
+  card pictures    0x3964E4  72x80, 9x10 tiles of 8x8 row-major, 6 bits per pixel as a little-endian bit stream
+                             (8 pixels in 6 bytes), 0x10E0 bytes per ID
+  their palettes   0x810C04  64 BGR555 colors (0x80 bytes) per ID
+
+ART.bin (src/ygo/ygo_gfx.c reads it): "YGOA", u32 count (1086), then per Stairway card 1..count its 0x10E0 bytes of
+pixels as stored in the ROM and its 0x80-byte palette.
 """
 import json
+import os
 import struct
 import sys
 
 NAMES, STATS, NUMBERS, PASSWORDS, BANLIST = 0x3854A4 + 2 * 64, 0x832B84, 0x833C80, 0x834500, 0x23F6F4
+ART, PALETTES, ART_SIZE, PAL_SIZE = 0x3964E4, 0x810C04, 0x10E0, 0x80
 COUNT, NUMBERED, BANNED = 1087, 1084, 50
 TYPES = ['', 'Dragon', 'Zombie', 'Fiend', 'Pyro', 'Sea Serpent', 'Rock', 'Machine', 'Fish', 'Dinosaur', 'Insect',
          'Beast', 'Beast-Warrior', 'Plant', 'Aqua', 'Warrior', 'Winged Beast', 'Fairy', 'Spellcaster', 'Thunder',
@@ -32,6 +40,7 @@ SUBTYPES = ['Normal', 'Counter', 'Field', 'Equip', 'Continuous', 'Quick-Play', '
 def main():
     rom = open(sys.argv[1], 'rb').read()
     out = sys.argv[2] if len(sys.argv) > 2 else 'tools/ygo/sdd.json'
+    art = sys.argv[3] if len(sys.argv) > 3 else 'graphics/ygo/sdd_art.bin'
     if rom[0xAC:0xB0] != b'AYWE':
         sys.exit('not the USA Stairway to the Destined Duel (game code %r, want AYWE)' % rom[0xAC:0xB0])
     cards = []
@@ -56,7 +65,12 @@ def main():
         limits.append({'number': number, 'limit': limit, 'name': bynum.get(number)})
     json.dump({'source': 'Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel (USA, AYWE)',
                'cards': cards, 'limits': limits}, open(out, 'w'), indent=1, ensure_ascii=False)
-    print('%d cards, %d limits -> %s' % (len(cards), len(limits), out))
+    blob = bytearray(b'YGOA' + struct.pack('<I', COUNT - 1))
+    for cid in range(1, COUNT):
+        blob += rom[ART + cid * ART_SIZE:ART + (cid + 1) * ART_SIZE] + rom[PALETTES + cid * PAL_SIZE:PALETTES + (cid + 1) * PAL_SIZE]
+    os.makedirs(os.path.dirname(art), exist_ok=True)
+    open(art, 'wb').write(blob)
+    print('%d cards, %d limits -> %s; pictures -> %s' % (len(cards), len(limits), out, art))
 
 
 if __name__ == '__main__':
