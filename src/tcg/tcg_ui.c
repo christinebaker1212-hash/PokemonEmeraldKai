@@ -902,12 +902,62 @@ static void Tabs(int x, int y, int selected, int count)
                         TF_NARROW);
     }
 }
+/* Lines text takes word-wrapped to width in font (as G_Text wraps it) */
+int TcgUi_WrapLines(const char *text, int width, int font)
+{
+    char line[256];
+    int lines = 1, n = 0;
+    const char *p = text;
+    line[0] = 0;
+    while (*p)
+    {
+        size_t w = strcspn(p, " \n");
+        char next[256];
+        snprintf(next, sizeof(next), "%s%s%.*s", line, n ? " " : "", (int)w, p);
+        if (n && G_Measure(next, font) > width)
+        {
+            lines++;
+            snprintf(line, sizeof(line), "%.*s", (int)w, p);
+        }
+        else
+            snprintf(line, sizeof(line), "%s", next);
+        n = 1;
+        p += w;
+        if (*p == '\n')
+            lines++, line[0] = 0, n = 0;
+        if (*p)
+            p++;
+    }
+    return lines;
+}
+/* Cuts text to width in font, a "." showing it was cut */
+void TcgUi_FitText(char *text, int width, int font)
+{
+    size_t n = strlen(text);
+    if (G_Measure(text, font) <= width)
+        return;
+    while (n > 2)
+    {
+        text[--n] = 0;
+        while (n > 1 && text[n - 1] == ' ')
+            text[--n] = 0;
+        text[n] = '.';
+        text[n + 1] = 0;
+        if (G_Measure(text, font) <= width)
+            return;
+        text[n] = 0;
+    }
+}
 void TcgUi_MessageBox(const char *message, int asking, int yes)
 {
+    int width;
     if (!message[0])
         return;
     G_Window(0, 112, 240, 48);
-    G_Text(8, 116, G_INK, G_INK_SHADOW, message, asking ? 168 : 214, TF_NORMAL);
+    width = asking ? 168 : 214;
+    /* three lines don't fit the window: the small font */
+    G_Text(8, 116, G_INK, G_INK_SHADOW, message, width,
+           TcgUi_WrapLines(message, width, TF_NORMAL) > 2 ? TF_SMALL : TF_NORMAL);
     if (asking)
     {
         G_Window(184, 74, 56, 36);
@@ -1679,8 +1729,7 @@ static void BuilderScreen(void)
             if (on)
                 G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
             snprintf(line, sizeof(line), "%s", card->name);
-            while (G_Measure(line, TF_NARROW) > 52 && strlen(line) > 3)
-                line[strlen(line) - 1] = 0;
+            TcgUi_FitText(line, 52, TF_NARROW);
             G_Text(167, y - 1, G_INK, G_NO_SHADOW, line, 0, TF_NARROW);
             snprintf(line, sizeof(line), "x%u", DeckCount(U.deck, card->id));
             G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, 0x2858a8, 255);
@@ -2018,11 +2067,16 @@ static void RevealScreen(void)
                 if (b > -6 && b < 30)
                     G_FillA((int)sx + (b < 0 ? 0 : b), (int)sy + 4, b < 0 ? 6 + b : 6, 18,
                             Rainbow((int)U.frame * 6), 90);
-                G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, Rainbow((int)U.frame * 5), 0x302040, "HOLO!",
-                            TF_NARROW);
+                /* (on the card's foot, over a dark band: below it the second row ran into the strip) */
+                G_RoundFill((int)sx + 2, (int)sy + 33 - (on ? 3 : 0), 26, 9, 0x101828, 210);
+                G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, Rainbow((int)U.frame * 5), 0x302040,
+                            "HOLO!", TF_NARROW);
             }
             else
-                G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, 0xf8e070, 0x403000, "RARE!", TF_NARROW);
+            {
+                G_RoundFill((int)sx + 2, (int)sy + 33 - (on ? 3 : 0), 26, 9, 0x101828, 210);
+                G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, 0xf8e070, 0x403000, "RARE!", TF_NARROW);
+            }
         }
         if (faceUp && (U.revealNew >> i) & 1)
         {

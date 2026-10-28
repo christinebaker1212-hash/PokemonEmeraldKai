@@ -38,6 +38,7 @@ static void RandomAnswer(const struct YgoDuel *d, struct YgoAnswer *a)
                 continue;
             a->count = 1;
             a->picks[0] = k;
+            a->zone = (uint8_t)Rnd(YGO_ZONES + 1);   /* (a zone chosen for what it puts down, or the first empty) */
             return;
         }
         a->count = 1;

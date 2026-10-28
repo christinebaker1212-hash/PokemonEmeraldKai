@@ -30,6 +30,9 @@ void TcgUi_TopBar(const char *title);
 void TcgUi_ShopTabs(const char *const *names, int count, int tab, unsigned fill, unsigned edge, unsigned ink,
                     const char *balance, const char *what, unsigned color);
 void TcgUi_MessageBox(const char *message, int asking, int yes);
+/* How many lines text wraps to at width in font; text cut to fit width with a "." */
+int TcgUi_WrapLines(const char *text, int width, int font);
+void TcgUi_FitText(char *text, int width, int font);
 /* A small menu (the game's window and arrow) at x, y; rows whose bit is set in disabled are grey */
 void TcgUi_PopMenu(int x, int y, int w, const char *const *items, int count, int cursor, unsigned disabled);
 int TcgUi_PopMenuMove(unsigned pressed, int cursor, int count, unsigned disabled);

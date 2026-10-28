@@ -31,9 +31,9 @@ static void Send(void *context, unsigned to, const uint8_t *data, unsigned len)
     m->to = to;
     m->len = len;
     memcpy(m->data, data, len);
-    if (sTamper && data[2] == 11 && len > 21)
+    if (sTamper && data[2] == 11 && len > 22)
     {
-        m->data[21] ^= 1;   /* a pick changed on the way */
+        m->data[22] ^= 1;   /* a pick changed on the way (after the header, its count and its zone) */
         sTamper = 0;
     }
 }

@@ -174,6 +174,8 @@ struct YgoAnswer
 {
     uint8_t count;
     uint8_t picks[YGO_QUERY_MAX / 2];   /* item indices */
+    uint8_t zone;   /* a Main Phase answer that puts a card from the hand on the field: the zone it goes to + 1
+                     * (0: the first empty one). Ignored for the rest. */
 };
 /* A chain link, and a trigger waiting to join the next chain */
 struct YgoLink
@@ -260,6 +262,9 @@ struct YgoState
     uint32_t rng;
     uint16_t turn, serial;          /* serial: game events so far (missing the timing) */
     uint8_t current, first, phase, winner, winReason, over;
+    /* The zone the player chose for the card their Main Phase action puts down (YgoAnswer.zone: seq + 1, bit 7
+     * a Spell & Trap Zone; 0 none): taken by the placement, dropped at the next Main / Battle Phase question */
+    uint8_t zoneWish, zoneWishPlayer;
     /* Battle */
     uint8_t attacker, attackTarget; /* object + 1 */
     uint8_t battleStep, damageStep, directAttack, attackNegated, flippedByBattle, endBattle;

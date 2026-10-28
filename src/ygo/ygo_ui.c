@@ -1206,8 +1206,7 @@ static void BuilderScreen(void)
                 G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
             G_FillA(165, y + 2, 2, 6, Ygo_FrameColor(card->id, 0), 255);
             snprintf(line, sizeof(line), "%s", card->name);
-            while (G_Measure(line, TF_NARROW) > 52 && strlen(line) > 3)
-                line[strlen(line) - 1] = 0;
+            TcgUi_FitText(line, 52, TF_NARROW);
             G_Text(169, y - 1, G_INK, G_NO_SHADOW, line, 0, TF_NARROW);
             snprintf(line, sizeof(line), "x%u", InDeck((unsigned)Y.deck, card->id));
             G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, 0x2858a8, 255);
@@ -1537,9 +1536,13 @@ static void RevealScreen(void)
         if (faceUp)
             Foil(rarity, (int)sx, (int)sy - (on ? 3 : 0), 30, 42, Y.frame + (int)i * 17);
         if (faceUp && rarity >= YGO_RARE)
-            G_TextAlign((int)sx + 15, (int)sy + 42, TA_CENTER, RarityInk(rarity, Y.frame), 0x302040,
+        {
+            /* (on the card's foot, as on the Pokemon side) */
+            G_RoundFill((int)sx + 1, (int)sy + 33 - (on ? 3 : 0), 28, 9, 0x101828, 210);
+            G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, RarityInk(rarity, Y.frame), 0x302040,
                         rarity == YGO_SECRET_RARE ? "SECRET!" : rarity == YGO_ULTRA_RARE ? "ULTRA!" : rarity == YGO_SUPER_RARE ? "SUPER!" : "RARE!",
                         TF_NARROW);
+        }
         if (faceUp && (Y.revealNew >> i) & 1)
         {
             G_RoundFill((int)sx - 2, (int)sy - 3 - (on ? 3 : 0), 17, 8, 0xe82820, 230);
@@ -3137,6 +3140,12 @@ void Ygo_Debug(const char *command)
     if (sscanf(command, "first %d", (int *)&n) == 1)
     {
         sForceFirst = (int)n;
+        return;
+    }
+    if (sscanf(command, "seed %u", &n) == 1)
+    {
+        /* the next duels' shuffles from a known seed (tests: the same duel every run) */
+        C()->rng = n ? n : 1;
         return;
     }
     if (!strcmp(command, "auto"))

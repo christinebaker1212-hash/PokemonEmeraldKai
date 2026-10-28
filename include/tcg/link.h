@@ -12,7 +12,8 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 6   /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3) */
+#define TCG_LINK_VERSION 7   /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
+                               * 7: a Yu-Gi-Oh! answer carries the zone a card goes to (YgoAnswer.zone) */
 struct TcgLink
 {
     struct TcgDuel game;

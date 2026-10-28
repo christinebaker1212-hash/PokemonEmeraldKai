@@ -280,6 +280,8 @@ static struct
     int intro;
     /* Interface */
     int mode, focusKind, focusIndex, lastHand, trayWanted;
+    int refocus, refocusHand;   /* the action of ours a commit is waiting for (+1) and the hand card it played:
+                                   where the cursor goes next (Refocus) */
     float tray, focusPulse;
     struct MenuItem menu[8];
     int menuCount, menuCursor, menuX, menuY;
@@ -1065,6 +1067,55 @@ static void BeginState(const struct TcgDuel *next)
     B.index = 0;
     B.wait = 0;
 }
+static void OpenTurnMenu(void);
+/* After an action of ours, the cursor goes where the next one is most likely: a Basic Pokemon played (setting up
+ * or not), an evolution or a Trainer card go back to the hand (setting up: on the next Basic Pokemon while the
+ * Bench has room, or the turn menu with READY when nothing else can be put down); Energy attached that lets the
+ * Active Pokemon attack goes to it, else back to the hand. */
+static void Refocus(void)
+{
+    const struct TcgPlayer *p = &B.view.players[0];
+    int type = B.refocus - 1, i, benched = 0;
+    unsigned h;
+    B.refocus = 0;
+    if (B.mode != M_FREE || !MyTurn() || type < 0)
+        return;
+    for (i = 0; i < TCG_FIELD_SIZE; i++)
+        benched += p->field[i].stackSize != 0;
+    if (B.view.phase == TCG_SETUP && type == TCG_PLAY_BASIC)
+    {
+        for (h = 0; h < p->handSize && benched < TCG_FIELD_SIZE; h++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->hand[h]]);
+            if (c->kind == TCG_POKEMON && !c->stage)
+            {
+                B.focusKind = T_HAND;
+                B.focusIndex = (int)h;
+                B.trayWanted = 1;
+                printf("[tcg] refocus: the next Basic Pokemon, hand %u\n", h);
+                return;
+            }
+        }
+        printf("[tcg] refocus: no Basic Pokemon left to put down (%d in play)\n", benched);
+        OpenTurnMenu();   /* nothing else to put down: READY is one A away */
+        return;
+    }
+    if (B.view.phase != TCG_TURN)
+        return;
+    if (type == TCG_ATTACH && p->field[0].stackSize &&
+        (TcgDuel_CanAttack(&B.view, 0, 0) || TcgDuel_CanAttack(&B.view, 0, 1)))
+    {
+        B.focusKind = T_MINE;
+        B.focusIndex = 0;
+        return;
+    }
+    if ((type == TCG_PLAY_BASIC || type == TCG_EVOLVE || type == TCG_PLAY_TRAINER || type == TCG_ATTACH) && p->handSize)
+    {
+        B.focusKind = T_HAND;
+        B.focusIndex = B.refocusHand < (int)p->handSize ? B.refocusHand : (int)p->handSize - 1;
+        B.trayWanted = 1;
+    }
+}
 static void Commit(const struct TcgDuel *next)
 {
     unsigned i, moved = 0, who;
@@ -1074,6 +1125,8 @@ static void Commit(const struct TcgDuel *next)
             before[who][i] = B.sprite[who][i].zone * 16 + B.sprite[who][i].slot;
     B.view = *next;
     printf("[tcg] commit hands %u %u\n", B.view.players[0].handSize, B.view.players[1].handSize);
+    if (B.refocus && B.qCount <= 1)   /* (the state being shown is the last one queued) */
+        Refocus();
     ResetShown();
     for (i = 0; i < (unsigned)B.npost; i++)
     {
@@ -1622,6 +1675,8 @@ static void CancelFlow(void)
 }
 static void Submit(struct TcgAction *out, int *result)
 {
+    B.refocus = B.action.type + 1;
+    B.refocusHand = B.action.hand;
     *out = B.action;
     *result = BOARD_ACTION;
     B.flow = FLOW_NONE;
@@ -3410,7 +3465,29 @@ static void Prompt(const char *text, int top)
 {
     int w = G_Hint(0, 0, 0, 0, text, TF_NARROW, 0) + 12, x = 120 - w / 2, y = top ? 1 : 140;
     if (w > 236)
-        w = 236, x = 2;
+    {
+        /* too long for one line: two, split at the space nearest the middle */
+        char a[160], b[160];
+        size_t n = strlen(text), i, best = 0;
+        int wa, wb;
+        for (i = 1; i < n; i++)
+            if (text[i] == ' ' && (best == 0 || (i > n / 2 ? i - n / 2 : n / 2 - i) < (best > n / 2 ? best - n / 2 : n / 2 - best)))
+                best = i;
+        snprintf(a, sizeof(a), "%.*s", (int)best, text);
+        snprintf(b, sizeof(b), "%s", text + best + 1);
+        wa = G_Hint(0, 0, 0, 0, a, TF_NARROW, 0);
+        wb = G_Hint(0, 0, 0, 0, b, TF_NARROW, 0);
+        w = (wa > wb ? wa : wb) + 12;
+        if (w > 236)
+            w = 236;
+        x = 120 - w / 2;
+        y = top ? 1 : 128;
+        G_RoundFill(x, y, w, 25, 0x081830, 225);
+        G_RoundFrame(x, y, w, 25, 0xf8e070, 255);
+        G_Hint(120 - wa / 2, y + 1, 0xf8f0c0, G_NO_SHADOW, a, TF_NARROW, 1);
+        G_Hint(120 - wb / 2, y + 12, 0xf8f0c0, G_NO_SHADOW, b, TF_NARROW, 1);
+        return;
+    }
     G_RoundFill(x, y, w, 13, 0x081830, 225);
     G_RoundFrame(x, y, w, 13, 0xf8e070, 255);
     G_Hint(x + 6, y + 1, 0xf8f0c0, G_NO_SHADOW, text, TF_NARROW, 1);

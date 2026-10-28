@@ -28,6 +28,11 @@ static int ValidAnswer(const struct YgoQuery *q, const struct YgoAnswer *a, char
         snprintf(why, size, "pick %u to %u", q->min, q->max);
         return 0;
     }
+    if (a->zone > YGO_ZONES)
+    {
+        snprintf(why, size, "no zone %u", a->zone);
+        return 0;
+    }
     for (i = 0; i < a->count; i++)
     {
         if (a->picks[i] >= q->count)
@@ -747,10 +752,25 @@ static int FreeZone(const struct YgoState *s, unsigned player, int spells)
     return -1;
 }
 
+/* The zone a card the player puts down goes to: the one they chose for it (zoneWish), while it's empty, else the
+ * first empty one */
+static int TakeZone(struct YgoState *s, unsigned player, int spells)
+{
+    unsigned wish = s->zoneWish & 0x7F;
+    if (s->zoneWish && s->zoneWishPlayer == player && !(s->zoneWish & 0x80) == !spells && wish >= 1 && wish <= YGO_ZONES)
+    {
+        unsigned seq = wish - 1;
+        s->zoneWish = 0;
+        if (!(spells ? s->players[player].spells[seq] : s->players[player].monsters[seq]))
+            return (int)seq;
+    }
+    return FreeZone(s, player, spells);
+}
+
 /* Puts o in a Monster Zone of player: 0 face-up ATK, 1 face-up DEF, 2 face-down DEF */
 static int PlaceMonster(struct YgoState *s, unsigned o, unsigned player, unsigned pos)
 {
-    int zone = FreeZone(s, player, 0);
+    int zone = TakeZone(s, player, 0);
     struct YgoObj *b = &s->objs[o];
     if (zone < 0)
         return 0;
@@ -1249,7 +1269,7 @@ static void Activate(struct YgoState *s, unsigned player, unsigned o, unsigned k
         if (b->location == YGO_LOC_HAND)
         {
             /* onto the field, face up */
-            int zone = c->property == YGO_PROP_FIELD ? YGO_FIELD_ZONE : FreeZone(s, player, 1);
+            int zone = c->property == YGO_PROP_FIELD ? YGO_FIELD_ZONE : TakeZone(s, player, 1);
             if (c->property == YGO_PROP_FIELD && s->players[player].spells[YGO_FIELD_ZONE])
                 Ygo_SendToGrave(s, s->players[player].spells[YGO_FIELD_ZONE] - 1, YGO_REASON_RULE);
             if (zone < 0)
@@ -1872,8 +1892,17 @@ static void Idle(struct YgoState *s)
         return;
     }
     IdleChoices(s, &q);
+    s->zoneWish = 0;
     Ask(s, &q, &a);
     c = &q.items[a.picks[0]];
+    if (a.zone && c->obj < s->objCount && s->objs[c->obj].location == YGO_LOC_HAND &&
+        (c->kind == YGO_ACT_SUMMON || c->kind == YGO_ACT_SET_MONSTER || c->kind == YGO_ACT_SPECIAL ||
+         c->kind == YGO_ACT_SET_SPELL || c->kind == YGO_ACT_ACTIVATE))
+    {
+        int spell = c->kind == YGO_ACT_SET_SPELL || c->kind == YGO_ACT_ACTIVATE;
+        s->zoneWish = (uint8_t)(a.zone | (spell ? 0x80 : 0));
+        s->zoneWishPlayer = (uint8_t)player;
+    }
     switch (c->kind)
     {
     case YGO_ACT_SUMMON:
@@ -1901,7 +1930,7 @@ static void Idle(struct YgoState *s)
         return;
     case YGO_ACT_SET_SPELL:
     {
-        int zone = FreeZone(s, player, 1);
+        int zone = TakeZone(s, player, 1);
         struct YgoObj *b = &s->objs[c->obj];
         if (zone < 0)
             return;
@@ -2042,6 +2071,7 @@ static void Battle(struct YgoState *s)
         struct YgoChoice acts[YGO_QUERY_MAX];
         unsigned i, n;
         s->window = YW_OPEN;
+        s->zoneWish = 0;
         if (s->pendingCount)
         {
             Push(s, PR_CHAIN, 0, 0xFF);

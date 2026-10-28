@@ -19,8 +19,10 @@
 #include "global.h"
 #include "sound.h"
 #include "constants/songs.h"
+void MPNet_Log(const char *fmt, ...);
 #include "../tcg/tcg_gfx.h"
 #include "ygo_board.h"
+#include "../tcg/tcg_ui_kit.h"
 #include "ygo_gfx.h"
 
 enum
@@ -129,7 +131,10 @@ enum
     FX_DICE,
     FX_RETICLE,
     FX_NEGATE,
-    FX_SHUFFLE
+    FX_SHUFFLE,
+    FX_IMPACT,   /* an attack landing: a burst and the table shaking (value: frames before it lands) */
+    FX_SHARDS,   /* a card destroyed: it breaks apart */
+    FX_RISE      /* a monster Summoned: a ring of light and a beam */
 };
 struct Fx
 {
@@ -143,6 +148,7 @@ enum
     M_WATCH,       /* not our question: look around */
     M_FREE,        /* Main / Battle Phase: pick a card to act with */
     M_MENU,        /* what to do with the card */
+    M_ZONE,        /* which zone it goes to (a card put down from the hand: as a Pokemon goes to its Bench spot) */
     M_PHASE,       /* START: move on, concede */
     M_PICK_FIELD,  /* cards (or zones) on the table */
     M_PICK_GRID,   /* cards elsewhere, laid out over the table */
@@ -187,6 +193,8 @@ static struct
     struct Spot spots[SPOTS];
     int spotCount;
     int menuItems[16], menuCount, menuCursor, menuObj;
+    int zoneItem, zoneSpell;   /* M_ZONE: the menu's choice, and Spell & Trap Zones (1) or Monster Zones (0) */
+    int pickPrefer;            /* a pick on the table: the item the cursor starts on (PreferredPick) */
     int windowItems[YGO_QUERY_MAX + 1], windowCount, windowCursor;
     uint8_t picked[YGO_QUERY_MAX];
     int pickedCount;
@@ -546,6 +554,12 @@ static int Present(const struct YgoEvent *e)
             return Frames(36);
         }
         Flash(o, 0xffffff, Frames(16));
+        if (ObjCenter(o, &x, &y))
+        {
+            struct Fx *f = AddFx(FX_RISE, x, y, Frames(26));
+            if (f)
+                f->color = e->player == B.me ? 0x80c8ff : 0xff9080;
+        }
         return Frames(22);
     case YGO_EV_SET:
         if (o >= B.objCount)
@@ -604,24 +618,31 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_ATTACK:
         if (o < B.objCount && ObjCenter(o, &x, &y))
         {
-            struct Fx *f = AddFx(FX_ATTACK, x, y, Frames(28));
+            /* the attacker draws back, dashes at its target and comes home; the blow lands as it gets there */
+            struct Fx *f = AddFx(FX_ATTACK, x, y, Frames(40));
             int tx, ty;
             if (f)
             {
                 struct Rect lp = LpRect(SideOf(e->player ^ 1));
+                struct Fx *hit;
                 f->obj = (uint8_t)o;
+                f->side = (uint8_t)SideOf(e->player);
                 if (t < B.objCount && ObjCenter(t, &tx, &ty))
                     f->x2 = tx, f->y2 = ty;
                 else
-                    f->x2 = 120, f->y2 = SideOf(e->player) ? 150 : lp.y + lp.h / 2 - 20;
+                    f->x2 = lp.x + lp.w / 2, f->y2 = lp.y + lp.h / 2;   /* a direct attack: at their Life Points */
+                hit = AddFx(FX_IMPACT, f->x2, f->y2, Frames(40));
+                if (hit)
+                    hit->value = Frames(40) * 45 / 100, hit->side = f->side, hit->obj = t < B.objCount ? (uint8_t)t : NONE;
             }
         }
         PlaySE(SE_M_MEGA_KICK);
+        MPNet_Log("ygo board: attack by %u on %u", o, t);
         if (t < B.objCount)
             Log("%s attacks %s!", c ? c->name : "A monster", NameOf(t));
         else
             Log("%s attacks directly!", c ? c->name : "A monster");
-        return Frames(30);
+        return Frames(40);
     case YGO_EV_BATTLE:
         PlaySE(SE_EFFECTIVE);
         return Frames(16);
@@ -629,6 +650,12 @@ static int Present(const struct YgoEvent *e)
         if (o >= B.objCount)
             return 0;
         Flash(o, 0xff5030, Frames(18));
+        if (ObjCenter(o, &x, &y))
+        {
+            struct Fx *f = AddFx(FX_SHARDS, x, y, Frames(30));
+            if (f)
+                f->obj = (uint8_t)o, f->value = (int)(o * 2654435761u >> 8);
+        }
         PlaySE(SE_FAINT);
         Log("%s was destroyed.", NameOf(o));
         return Frames(20);
@@ -729,11 +756,19 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_TARGET:
         if (t < B.objCount)
         {
-            struct Fx *f = AddFx(FX_RETICLE, 0, 0, Frames(18));
+            /* brackets close in on the target and lock, along a line from the card that targets it */
+            struct Fx *f = AddFx(FX_RETICLE, 0, 0, Frames(26));
             if (f)
+            {
                 f->obj = (uint8_t)t;
+                f->x = f->y = -1;
+                if (o < B.objCount && o != t && ObjCenter(o, &x, &y))
+                    f->x = x, f->y = y;
+            }
+            PlaySE(SE_M_LOCK_ON);
+            MPNet_Log("ygo board: %u targets %u", o, t);
         }
-        return Frames(16);
+        return Frames(22);
     case YGO_EV_CONTROL:
         if (o >= B.objCount)
             return 0;
@@ -830,6 +865,40 @@ static int ItemOnField(const struct YgoChoice *c)
     return l == YGO_LOC_MZONE || l == YGO_LOC_SZONE;
 }
 
+/* The pick the cursor starts on: an attack's best target (a direct attack, else a monster this one destroys, the
+ * strongest first, else a face-down one), a Tribute's weakest monster; else the first */
+static int PreferredPick(const struct YgoQuery *q)
+{
+    const struct YgoState *s = T();
+    int best = 0, bestScore = -2147483647;
+    unsigned i;
+    if (q->prompt != YGO_P_ATTACK_TARGET && q->prompt != YGO_P_TRIBUTE)
+        return 0;
+    for (i = 0; i < q->count; i++)
+    {
+        unsigned o = q->items[i].obj;
+        int score;
+        if (o == NONE || o >= s->objCount)
+            score = q->prompt == YGO_P_ATTACK_TARGET ? 1000000 : -1000000;
+        else if (q->prompt == YGO_P_TRIBUTE)
+            score = -(s->objs[o].faceUp ? YgoDuel_Atk(s, o) : 1000);
+        else
+        {
+            int atk = s->attacker ? YgoDuel_Atk(s, s->attacker - 1) : 0;
+            const struct YgoObj *t = &s->objs[o];
+            if (!t->faceUp)
+                score = 100000;
+            else
+            {
+                int stat = t->attackPos ? YgoDuel_Atk(s, o) : YgoDuel_Def(s, o);
+                score = atk > stat ? 200000 + stat : -stat;
+            }
+        }
+        if (score > bestScore)
+            bestScore = score, best = (int)i;
+    }
+    return best;
+}
 static void Tip(const char *text);
 /* A new question: the input starts over */
 static void NewQuestion(void)
@@ -859,11 +928,14 @@ static void NewQuestion(void)
         for (i = 0; i < q->count; i++)
             field &= ItemOnField(&q->items[i]);
         B.mode = field ? M_PICK_FIELD : M_PICK_GRID;
+        B.pickPrefer = PreferredPick(q);
         if (field && q->count)
         {
-            /* the cursor on the first choice */
+            /* the cursor on the preferred choice */
             B.cursorKind = -1;
         }
+        else
+            B.gridCursor = B.pickPrefer;
         if (q->prompt == YGO_P_TRIBUTE)
             Tip("To Normal Summon a Level 5 or 6 monster, Tribute 1 monster you control; Level 7 or higher takes 2.");
         else if (q->prompt == YGO_P_ATTACK_TARGET)
@@ -873,6 +945,7 @@ static void NewQuestion(void)
     case YGO_Q_ZONE:
         B.mode = M_PICK_FIELD;
         B.cursorKind = -1;
+        B.pickPrefer = 0;
         break;
     case YGO_Q_CHAIN:
         B.mode = M_WINDOW;
@@ -942,6 +1015,14 @@ static void BuildSpots(void)
     const struct YgoQuery *q = &B.d->query;
     unsigned o, side, p, i;
     B.spotCount = 0;
+    if (B.mode == M_ZONE)
+    {
+        const struct YgoPlayer *pl = &T()->players[B.me];
+        for (i = 0; i < YGO_ZONES; i++)
+            if (!(B.zoneSpell ? pl->spells[i] : pl->monsters[i]))
+                AddSpot(B.zoneSpell ? SP_SZONE : SP_MZONE, 0, i, NONE, B.zoneItem, ZoneRect(0, B.zoneSpell, i));
+        return;
+    }
     if (B.mode == M_PICK_FIELD)
     {
         if (q->type == YGO_Q_ZONE)
@@ -1215,15 +1296,62 @@ static unsigned Answer1(struct YgoAnswer *a, int item)
     }
     return YB_ANSWER;
 }
+/* A choice that puts a card from the hand in a zone the player can choose: Summon or Set a monster that needs no
+ * Tribute, Special Summon it, Set a Spell / Trap or activate one (not a Field Spell). *spell: the kind of zone.
+ * Returns how many zones of that kind are empty (0: the choice puts nothing down). */
+static unsigned ZoneChoice(const struct YgoChoice *c, int *spell)
+{
+    const struct YgoState *s = T();
+    const struct YgoCard *card;
+    unsigned i, n = 0;
+    if (c->obj >= B.objCount || s->objs[c->obj].location != YGO_LOC_HAND || !(card = ObjCard(c->obj)))
+        return 0;
+    switch (c->kind)
+    {
+    case YGO_ACT_SUMMON:
+    case YGO_ACT_SET_MONSTER:
+        if (card->level >= 5)
+            return 0;   /* (Tributes free zones of their own: the first empty one) */
+        /* fall through */
+    case YGO_ACT_SPECIAL:
+        *spell = 0;
+        break;
+    case YGO_ACT_SET_SPELL:
+        *spell = 1;
+        break;
+    case YGO_ACT_ACTIVATE:
+        if (Ygo_IsMonster(card) || card->property == YGO_PROP_FIELD)
+            return 0;
+        *spell = 1;
+        break;
+    default:
+        return 0;
+    }
+    for (i = 0; i < YGO_ZONES; i++)
+        n += !(*spell ? s->players[B.me].spells[i] : s->players[B.me].monsters[i]);
+    return n;
+}
 /* The menu for a card in the Main / Battle Phase: the query's items for it */
 static int OpenMenu(unsigned obj)
 {
     const struct YgoQuery *q = &B.d->query;
     unsigned i;
+    static const uint8_t sOrder[] = {YGO_ACT_ATTACK, YGO_ACT_SUMMON, YGO_ACT_SPECIAL, YGO_ACT_FLIP_SUMMON,
+                                     YGO_ACT_ACTIVATE, YGO_ACT_SET_MONSTER, YGO_ACT_SET_SPELL, YGO_ACT_POSITION};
+    unsigned k;
     B.menuCount = 0;
-    for (i = 0; i < q->count && B.menuCount < 16; i++)
-        if (q->items[i].obj == obj)
-            B.menuItems[B.menuCount++] = (int)i;
+    /* what the card is mostly played for first: a Spell is activated before it's Set, a monster Summoned */
+    for (k = 0; k <= sizeof(sOrder); k++)
+        for (i = 0; i < q->count && B.menuCount < 16; i++)
+        {
+            unsigned kind = q->items[i].kind, j, listed = 0;
+            if (q->items[i].obj != obj)
+                continue;
+            for (j = 0; j < sizeof(sOrder); j++)
+                listed |= kind == sOrder[j];
+            if (k < sizeof(sOrder) ? kind == sOrder[k] : !listed)
+                B.menuItems[B.menuCount++] = (int)i;
+        }
     if (!B.menuCount)
         return 0;
     B.menuCursor = 0;
@@ -1231,21 +1359,79 @@ static int OpenMenu(unsigned obj)
     B.mode = M_MENU;
     return 1;
 }
+/* What moving on with item would leave us: played on a copy of the duel, the other side passing, up to our next
+ * Main / Battle Phase question. Returns how many of its choices are attacks (kind YGO_ACT_ATTACK) or plays from the
+ * hand (any other kind); -1 when there is no such question this turn. */
+static int ChoicesAfter(int item, unsigned kind)
+{
+    static struct YgoDuel sim;
+    struct YgoAnswer a;
+    unsigned i, steps = 0;
+    int n = 0;
+    sim = *B.d;
+    Answer1(&a, item);
+    if (!YgoDuel_Answer(&sim, &a))
+    {
+        printf("[ygo] turn menu: %s\n", sim.error);
+        return -1;
+    }
+    while (sim.query.type != YGO_Q_NONE && steps++ < 60 && sim.s.turn == B.d->s.turn)
+    {
+        if (sim.query.player == B.me && (sim.query.type == YGO_Q_IDLE || sim.query.type == YGO_Q_BATTLE))
+        {
+            for (i = 0; i < sim.query.count; i++)
+            {
+                unsigned o = sim.query.items[i].obj;
+                n += kind == YGO_ACT_ATTACK ? sim.query.items[i].kind == YGO_ACT_ATTACK
+                                            : o < sim.s.objCount && sim.s.objs[o].location == YGO_LOC_HAND;
+            }
+            return n;
+        }
+        if (sim.query.type != YGO_Q_CHAIN || sim.query.min)
+        {
+            printf("[ygo] turn menu: a question %u (player %u) on the way\n", sim.query.type, sim.query.player);
+            return -1;   /* something else would be asked: don't guess */
+        }
+        Answer1(&a, -1);   /* (pass) */
+        if (!YgoDuel_Answer(&sim, &a))
+            return -1;
+    }
+    return -1;
+}
 static int OpenPhaseMenu(void)
 {
     const struct YgoQuery *q = &B.d->query;
     unsigned i;
+    int toBattle = -1, toMain2 = -1, endTurn = -1, attacks = 0;
     B.menuCount = 0;
     if (q->player == B.me && (q->type == YGO_Q_IDLE || q->type == YGO_Q_BATTLE))
         for (i = 0; i < q->count && B.menuCount < 15; i++)
             if (q->items[i].obj == NONE)
                 B.menuItems[B.menuCount++] = (int)i;
     B.menuItems[B.menuCount++] = -2;   /* CONCEDE */
-    /* the cursor on END TURN (B, END TURN: as on the Pokemon table) */
+    /* The cursor where the turn most likely goes: the Battle Phase when a monster can attack in it; from the Battle
+     * Phase with every attack made, MAIN PHASE 2 when a card in the hand can be played there; else END TURN */
     B.menuCursor = 0;
     for (i = 0; i + 1 < (unsigned)B.menuCount; i++)
-        if (q->items[B.menuItems[i]].kind == YGO_ACT_END_TURN)
-            B.menuCursor = (int)i;
+    {
+        unsigned kind = q->items[B.menuItems[i]].kind;
+        if (kind == YGO_ACT_END_TURN)
+            endTurn = (int)i;
+        else if (kind == YGO_ACT_TO_BATTLE)
+            toBattle = (int)i;
+        else if (kind == YGO_ACT_TO_MAIN2)
+            toMain2 = (int)i;
+    }
+    for (i = 0; i < q->count; i++)
+        attacks += q->items[i].kind == YGO_ACT_ATTACK;
+    if (endTurn >= 0)
+        B.menuCursor = endTurn;
+    if (toBattle >= 0 && ChoicesAfter(B.menuItems[toBattle], YGO_ACT_ATTACK) > 0)
+        B.menuCursor = toBattle;
+    else if (toMain2 >= 0 && !attacks && ChoicesAfter(B.menuItems[toMain2], YGO_ACT_SUMMON) > 0)
+        B.menuCursor = toMain2;
+    printf("[ygo] turn menu: cursor on %s\n", B.menuItems[B.menuCursor] == -2 ? "CONCEDE"
+                                                : KindLabel(&q->items[B.menuItems[B.menuCursor]]));
     B.mode = M_PHASE;
     return 1;
 }
@@ -1419,7 +1605,14 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
     }
     cur = CurrentSpot();
     if (cur >= 0 && B.mode == M_PICK_FIELD && B.cursorKind < 0)
-        cur = 0, SetCursor(0);
+    {
+        int k;
+        cur = 0;
+        for (k = 0; k < B.spotCount; k++)
+            if (B.spots[k].item == B.pickPrefer)
+                cur = k;
+        SetCursor(cur);
+    }
     switch (B.mode)
     {
     case M_WATCH:
@@ -1490,9 +1683,51 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         }
         if (pressed & KEY_A)
         {
+            int item = B.menuItems[B.menuCursor], spell = 0, k;
             PlaySE(SE_SELECT);
+            if (item >= 0 && ZoneChoice(&q->items[item], &spell) > 1)
+            {
+                /* which zone: the cursor on the first empty one (where it would go anyway) */
+                B.mode = M_ZONE;
+                B.zoneItem = item;
+                B.zoneSpell = spell;
+                BuildSpots();
+                for (k = 0; k < B.spotCount; k++)
+                    if (B.spots[k].kind == (spell ? SP_SZONE : SP_MZONE))
+                    {
+                        SetCursor(k);
+                        break;
+                    }
+                return YB_NONE;
+            }
             B.mode = M_WATCH;
-            return Answer1(answer, B.menuItems[B.menuCursor]);
+            return Answer1(answer, item);
+        }
+        return YB_NONE;
+    case M_ZONE:
+        if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
+            MoveCursor(pressed);
+        cur = CurrentSpot();
+        if (pressed & KEY_B)
+        {
+            /* back to the card's menu */
+            B.mode = M_MENU;
+            PlaySE(SE_SELECT);
+            return YB_NONE;
+        }
+        if (pressed & KEY_R && B.menuObj < (int)B.objCount)
+        {
+            *card = T()->objs[B.menuObj].card;
+            return YB_INSPECT;
+        }
+        if (pressed & KEY_A && cur >= 0)
+        {
+            unsigned r = Answer1(answer, B.zoneItem);
+            answer->zone = (uint8_t)(B.spots[cur].index + 1);
+            PlaySE(SE_RG_CARD_FLIP);
+            printf("[ygo] board: zone %u for item %d\n", answer->zone, B.zoneItem);
+            B.mode = M_WATCH;
+            return r;
         }
         return YB_NONE;
     case M_PHASE:
@@ -1802,6 +2037,90 @@ static unsigned FlashOf(unsigned o)
         }
     return best;
 }
+/* How far along the way to its target an attacking card is at t (0..1 of its animation): draws back a little,
+ * dashes most of the way, lands (t = 0.45) and eases home */
+static float AttackReach(float t)
+{
+    if (t < 0.2f)
+        return -0.08f * SDL_sinf(t / 0.2f * 1.5708f);
+    if (t < 0.45f)
+    {
+        float k = (t - 0.2f) / 0.25f;
+        return -0.08f + 0.78f * k * k;
+    }
+    if (t < 0.55f)
+        return 0.7f;
+    {
+        float k = (t - 0.55f) / 0.45f;
+        return 0.7f * (1 - k) * (1 - k);
+    }
+}
+static void Circle(int cx, int cy, float r, unsigned color, unsigned alpha)
+{
+    int i;
+    for (i = 0; i < 20; i++)
+    {
+        float a0 = i * 0.31416f, a1 = (i + 1) * 0.31416f;
+        G_Line(cx + (int)(SDL_cosf(a0) * r), cy + (int)(SDL_sinf(a0) * r), cx + (int)(SDL_cosf(a1) * r),
+               cy + (int)(SDL_sinf(a1) * r), color, alpha);
+    }
+}
+/* Four corner brackets round a box, turned by angle (radians) about its middle */
+static void Brackets(float cx, float cy, float hw, float hh, float angle, int len, unsigned color, unsigned alpha)
+{
+    int k;
+    float c = SDL_cosf(angle), sn = SDL_sinf(angle);
+    for (k = 0; k < 4; k++)
+    {
+        float sx = k & 1 ? 1.0f : -1.0f, sy = k & 2 ? 1.0f : -1.0f;
+        float px = sx * hw, py = sy * hh, ax = px - sx * len, by = py - sy * len;
+        int x0 = (int)(cx + px * c - py * sn), y0 = (int)(cy + px * sn + py * c);
+        G_Line(x0, y0, (int)(cx + ax * c - py * sn), (int)(cy + ax * sn + py * c), color, alpha);
+        G_Line(x0, y0, (int)(cx + px * c - by * sn), (int)(cy + px * sn + by * c), color, alpha);
+    }
+}
+/* A dashed line whose dashes march from (x0, y0) to (x1, y1) */
+static void MarchingLine(int x0, int y0, int x1, int y1, int phase, unsigned color, unsigned alpha)
+{
+    float dx = (float)(x1 - x0), dy = (float)(y1 - y0), len = SDL_sqrtf(dx * dx + dy * dy), d;
+    if (len < 1)
+        return;
+    for (d = (float)(phase % 8); d < len; d += 8)
+    {
+        float a = d / len, b = (d + 4 < len ? d + 4 : len) / len;
+        G_Line(x0 + (int)(dx * a), y0 + (int)(dy * a), x0 + (int)(dx * b), y0 + (int)(dy * b), color, alpha);
+    }
+}
+/* The table shakes for a moment as an attack lands */
+static void Shake(int *dx, int *dy)
+{
+    unsigned i;
+    *dx = *dy = 0;
+    for (i = 0; i < FX_MAX; i++)
+        if (B.fx[i].life && B.fx[i].kind == FX_IMPACT && B.fx[i].t >= B.fx[i].value && B.fx[i].t < B.fx[i].value + 9)
+        {
+            int k = B.fx[i].t - B.fx[i].value, amp = k < 3 ? 2 : 1;
+            *dx = (k & 1 ? amp : -amp);
+            *dy = (k & 2 ? 1 : -1) * (amp - 1);
+        }
+}
+/* An attacking card goes over everything on its way (the middle band too) */
+static void Attackers(void)
+{
+    unsigned i;
+    for (i = 0; i < FX_MAX; i++)
+        if (B.fx[i].life && B.fx[i].kind == FX_ATTACK && B.fx[i].obj < B.objCount)
+        {
+            const struct Fx *f = &B.fx[i];
+            const struct CardSprite *sp = &B.spr[f->obj];
+            float t = (float)f->t / f->life, k = AttackReach(t);
+            float x = sp->x + (f->x2 - f->x) * k, y = sp->y + (f->y2 - f->y) * k;
+            if (k <= 0.05f)
+                continue;   /* (at home: drawn with the table) */
+            G_FillA((int)x + 2, (int)y + 3, (int)sp->w, (int)sp->h, 0x000000, 90);
+            DrawObj(f->obj, x, y, sp->w, sp->h, sp->angle, 255, FlashOf(f->obj));
+        }
+}
 static void Cards(void)
 {
     unsigned o, pass;
@@ -1825,13 +2144,22 @@ static void Cards(void)
             for (i = 0; i < FX_MAX; i++)
                 if (B.fx[i].life && B.fx[i].kind == FX_ATTACK && B.fx[i].obj == o)
                 {
-                    float t = (float)B.fx[i].t / B.fx[i].life, k = t < 0.5f ? t * 2 : (1 - t) * 2;
-                    x += (B.fx[i].x2 - B.fx[i].x) * 0.35f * k;
-                    y += (B.fx[i].y2 - B.fx[i].y) * 0.35f * k;
+                    float t = (float)B.fx[i].t / B.fx[i].life, k = AttackReach(t), g;
+                    float dx = (float)(B.fx[i].x2 - B.fx[i].x), dy = (float)(B.fx[i].y2 - B.fx[i].y);
+                    /* the speed trail: fainter copies behind it while it dashes */
+                    if (t > 0.2f && t < 0.5f)
+                        for (g = 0.12f; g < 0.4f; g += 0.12f)
+                        {
+                            float kb = AttackReach(t - g * 0.25f);
+                            DrawObj(o, x + dx * kb, y + dy * kb, sp->w, sp->h, sp->angle, (unsigned)(110 * (1 - g * 2)),
+                                    0);
+                        }
+                    x += dx * k;
+                    y += dy * k;
                     attackLunge = 1;
                 }
             if (moving || attackLunge)
-                G_FillA((int)x + 2, (int)y + 3, (int)sp->w, (int)sp->h, 0x000000, 70);
+                G_FillA((int)x + 2, (int)y + 3, (int)sp->w, (int)sp->h, 0x000000, attackLunge ? 90 : 70);
             DrawObj(o, x, y, sp->w, sp->h, sp->angle, 255, FlashOf(o));
             if (field && !moving)
             {
@@ -1932,6 +2260,8 @@ static void Gap(void)
         unsigned firstColor = 0xf8e070;
         if (B.mode == M_PICK_FIELD || B.mode == M_PICK_GRID)
             first = PromptText(q, prompt, sizeof(prompt));
+        else if (B.mode == M_ZONE)
+            first = B.zoneSpell ? "Which Spell & Trap Zone?" : "Which Monster Zone?";
         else if (B.mode == M_WATCH && !MyQuestion() && B.log[0])
             first = B.log, firstColor = 0xb8c0d0;
         if (B.mode == M_PICK_GRID || B.mode == M_PILE)
@@ -1939,7 +2269,7 @@ static void Gap(void)
             unsigned o = B.mode == M_PILE ? B.pileList[B.gridCursor] : q->items[B.gridCursor].obj;
             id = o < B.objCount ? T()->objs[o].card : 0;
         }
-        else if (B.mode == M_MENU && B.menuObj < (int)B.objCount)
+        else if ((B.mode == M_MENU || B.mode == M_ZONE) && B.menuObj < (int)B.objCount)
             id = T()->objs[B.menuObj].card;
         else
             id = SpotCard(cur);
@@ -2000,6 +2330,9 @@ static void Gap(void)
         case M_PILE:
             hint = "{A}LOOK {B}BACK";
             break;
+        case M_ZONE:
+            hint = "{A}PUT IT HERE {B}BACK";
+            break;
         default:
             hint = "{A}OK {R}LOOK";
             break;
@@ -2011,12 +2344,45 @@ static void Highlights(void)
 {
     int i, cur = CurrentSpot();
     unsigned pulse = (unsigned)(B.frame / 8) % 2;
+    /* the zones a card can go to, and the card itself, faint, where the cursor is */
+    if (B.mode == M_ZONE)
+        for (i = 0; i < B.spotCount; i++)
+        {
+            const struct Spot *s = &B.spots[i];
+            if (i == cur && B.menuObj < (int)B.objCount)
+            {
+                /* (a Set card face down, a Set monster sideways as it will lie) */
+                unsigned kind = B.d->query.items[B.zoneItem].kind;
+                int set = kind == YGO_ACT_SET_MONSTER || kind == YGO_ACT_SET_SPELL;
+                Ygo_DrawCard(set ? 0 : T()->objs[B.menuObj].card, (float)s->r.x, (float)s->r.y, (float)s->r.w,
+                             (float)s->r.h, kind == YGO_ACT_SET_MONSTER ? 90 : 0, 150 + 60 * pulse, 0);
+                G_Frame(s->r.x - 2, s->r.y - 2, s->r.w + 4, s->r.h + 4, 0xf86850, 255);
+            }
+            else
+                G_Frame(s->r.x - 1, s->r.y - 1, s->r.w + 2, s->r.h + 2, 0xf0d040, 140 + 80 * pulse);
+        }
+    /* an attack being aimed: a line from the attacker to the card under the cursor */
+    if (B.mode == M_PICK_FIELD && B.d->query.prompt == YGO_P_ATTACK_TARGET && cur >= 0 && T()->attacker)
+    {
+        int ax, ay;
+        const struct Spot *s = &B.spots[cur];
+        if (ObjCenter(T()->attacker - 1, &ax, &ay))
+        {
+            int tx = s->r.x + s->r.w / 2, ty = s->r.y + s->r.h / 2;
+            MarchingLine(ax, ay, tx, ty, B.frame / 2, 0xffd040, 220);
+            Brackets((float)ax, (float)ay, 12, 15, 0, 3, 0x60b0ff, 200);
+        }
+    }
     /* what can be chosen, glowing; picks numbered */
     if (B.mode == M_PICK_FIELD)
         for (i = 0; i < B.spotCount; i++)
         {
             const struct Spot *s = &B.spots[i];
             int k = s->item >= 0 ? Picked(s->item) : 0;
+            float breathe = 1.5f + 1.5f * SDL_sinf(B.frame * 0.15f + i);
+            if (i == cur || k)
+                Brackets(s->r.x + s->r.w / 2.0f, s->r.y + s->r.h / 2.0f, s->r.w / 2.0f + 2 + breathe,
+                         s->r.h / 2.0f + 2 + breathe, 0, 4, k ? 0x40a0ff : 0xff5040, 255);
             G_Frame(s->r.x - 1, s->r.y - 1, s->r.w + 2, s->r.h + 2, k ? 0x40a0ff : 0xf0d040, 200);
             if (k)
             {
@@ -2093,9 +2459,73 @@ static void Fxs(void)
         }
         case FX_ATTACK:
         {
+            /* the attack's path, lit while it winds up, fading once it's thrown */
+            unsigned color = f->side ? 0xff6040 : 0x60b0ff;
+            if (t < 0.45f)
+            {
+                unsigned a = (unsigned)(t < 0.2f ? 180 * t / 0.2f : 180);
+                MarchingLine(f->x, f->y, f->x2, f->y2, f->t, color, a);
+                Brackets((float)f->x2, (float)f->y2, 11, 14, 0, 4, color, a);
+            }
+            break;
+        }
+        case FX_IMPACT:
+        {
+            float k;
+            int i2;
+            if (f->t < f->value)
+                break;
+            k = (float)(f->t - f->value) / (float)(f->life - f->value > 0 ? f->life - f->value : 1);
+            /* a white flash, a ring going out, sparks */
+            if (k < 0.25f)
+            {
+                unsigned a = (unsigned)(230 * (1 - k / 0.25f));
+                G_RoundFill(f->x - 9, f->y - 9, 18, 18, 0xffffff, a);
+                G_FillA(0, 0, 240, 160, 0xffffff, a / 5);
+            }
+            Circle(f->x, f->y, 6 + 26 * k, f->side ? 0xffa060 : 0xa0d0ff, (unsigned)(230 * (1 - k)));
+            Circle(f->x, f->y, 4 + 18 * k, 0xffffff, (unsigned)(160 * (1 - k)));
+            for (i2 = 0; i2 < 10; i2++)
+            {
+                float a = i2 * 0.6283f + 0.3f, r0 = 5 + 20 * k, r1 = r0 + 7 * (1 - k);
+                G_Line(f->x + (int)(SDL_cosf(a) * r0), f->y + (int)(SDL_sinf(a) * r0), f->x + (int)(SDL_cosf(a) * r1),
+                       f->y + (int)(SDL_sinf(a) * r1), 0xffe060, (unsigned)(255 * (1 - k)));
+            }
+            break;
+        }
+        case FX_SHARDS:
+        {
+            /* the card in pieces, flung out and falling */
+            int i2;
+            uint32_t seed = (uint32_t)f->value;
+            for (i2 = 0; i2 < 12; i2++)
+            {
+                float vx, vy, px, py;
+                seed = seed * 1103515245u + 12345u;
+                vx = ((int)(seed >> 16 & 0xff) - 128) / 128.0f * 22;
+                seed = seed * 1103515245u + 12345u;
+                vy = -((int)(seed >> 16 & 0xff)) / 255.0f * 18 - 4;
+                px = f->x + vx * t;
+                py = f->y + vy * t + 30 * t * t;
+                G_FillA((int)px - 1, (int)py - 1, 3 + (i2 & 1), 3, i2 % 3 ? 0xc89050 : 0xf0e0c0, (unsigned)(255 * (1 - t)));
+            }
+            if (t < 0.3f)
+                Circle(f->x, f->y, 4 + 30 * t, 0xff5030, (unsigned)(220 * (1 - t / 0.3f)));
+            break;
+        }
+        case FX_RISE:
+        {
+            /* a ring opening on the zone, a beam of light going up */
             unsigned a = (unsigned)(200 * (1 - t));
-            G_Line(f->x, f->y, f->x2, f->y2, 0xffd040, a);
-            G_Line(f->x + 1, f->y, f->x2 + 1, f->y2, 0xff8020, a);
+            Circle(f->x, f->y, 4 + 18 * t, f->color, a);
+            Circle(f->x, f->y, 2 + 11 * t, 0xffffff, a / 2);
+            if (t < 0.6f)
+            {
+                int bw = (int)(14 * (1 - t / 0.6f)) + 2;
+                G_FillA(f->x - bw / 2, f->y - 26 - (int)(10 * t), bw, 40, f->color, (unsigned)(90 * (1 - t / 0.6f)));
+                G_FillA(f->x - bw / 4, f->y - 26 - (int)(10 * t), bw / 2 > 1 ? bw / 2 : 1, 40, 0xffffff,
+                        (unsigned)(110 * (1 - t / 0.6f)));
+            }
             break;
         }
         case FX_COIN:
@@ -2123,10 +2553,22 @@ static void Fxs(void)
                 break;
             if (f->kind == FX_RETICLE)
             {
-                int r = 14 - (int)(t * 6);
-                G_Frame(x - r, y - r, 2 * r, 2 * r, 0xff4040, 230);
-                G_Line(x - r - 3, y, x - r + 4, y, 0xff4040, 230);
-                G_Line(x + r - 4, y, x + r + 3, y, 0xff4040, 230);
+                /* brackets turn and close in (the first half), lock with a flash and hold */
+                float k = t < 0.5f ? t / 0.5f : 1, ease = 1 - (1 - k) * (1 - k);
+                float hw = 11 + 14 * (1 - ease), hh = 14 + 14 * (1 - ease);
+                unsigned a = (unsigned)(t > 0.85f ? 255 * (1 - t) / 0.15f : 255);
+                if (f->x >= 0 && t < 0.6f)
+                    MarchingLine(f->x, f->y, x, y, f->t, 0xff5050, a * 2 / 3);
+                Brackets((float)x, (float)y, hw, hh, (1 - ease) * 1.5708f, 5, 0xff4040, a);
+                if (t >= 0.5f)
+                {
+                    unsigned flash = t < 0.6f ? (unsigned)(200 * (0.6f - t) / 0.1f) : 0;
+                    Brackets((float)x, (float)y, hw + 1, hh + 1, 0, 5, 0xffd0d0, a / 2);
+                    G_Line(x - 4, y, x + 4, y, 0xff4040, a);
+                    G_Line(x, y - 4, x, y + 4, 0xff4040, a);
+                    if (flash)
+                        G_FillA(x - 11, y - 14, 22, 28, 0xffffff, flash / 2);
+                }
             }
             else
             {
@@ -2330,22 +2772,35 @@ static void Grid(void)
 }
 void YgoBoard_Render(void)
 {
+    int shakeX, shakeY;
     if (!B.active || !B.d)
         return;
+    Shake(&shakeX, &shakeY);
+    if (shakeX || shakeY)
+    {
+        SDL_Rect vp = {shakeX, shakeY, 240, 160};
+        SDL_SetRenderDrawColor(G_R(), 0, 0, 0, 255);
+        SDL_RenderClear(G_R());
+        SDL_RenderSetViewport(G_R(), &vp);
+    }
     Mat();
     Piles();
     Cards();
     Chain();
     Lp();
     Gap();
+    Attackers();
     Highlights();
     Fxs();
+    if (shakeX || shakeY)
+        SDL_RenderSetViewport(G_R(), NULL);
     Menus();
     Grid();
     if (B.result[0] && (B.tipShown || B.mode == M_OVER))
     {
         G_Window(0, 112, 240, 48);
-        G_Text(8, 116, G_INK, G_INK_SHADOW, B.result, 214, TF_NORMAL);
+        G_Text(8, 116, G_INK, G_INK_SHADOW, B.result, 214,
+               TcgUi_WrapLines(B.result, 214, TF_NORMAL) > 2 ? TF_SMALL : TF_NORMAL);
         if ((B.frame / 20) % 2)
             G_ButtonIcon(226, 152, 0);
     }

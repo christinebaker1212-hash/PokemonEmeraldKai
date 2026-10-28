@@ -16,7 +16,7 @@ enum
 };
 #define DECK_BYTES (2 * (YGO_DECK_MAX + YGO_FUSION_MAX))
 #define DECK_LEN (7 + DECK_BYTES)
-#define ANSWER_LEN 21   /* + the picks */
+#define ANSWER_LEN 22   /* + the picks */
 #define FLAG_CONCEDE 1
 
 static uint32_t Read(const uint8_t *p) { return p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24; }
@@ -81,6 +81,7 @@ uint32_t YgoNet_Hash(const struct YgoDuel *d)
     for (i = 0; i < d->answerCount; i++)
     {
         h = (h ^ d->answers[i].count) * 16777619u;
+        h = (h ^ d->answers[i].zone) * 16777619u;
         for (k = 0; k < d->answers[i].count && k < (unsigned)sizeof(d->answers[i].picks); k++)
             h = (h ^ d->answers[i].picks[k]) * 16777619u;
     }
@@ -155,6 +156,7 @@ static void SendAnswer(struct YgoNet *l, uint32_t beforeHash, const struct YgoAn
     Write(p + 15, YgoNet_Hash(&l->game));
     p[19] = (uint8_t)flags;
     p[20] = (uint8_t)count;
+    p[21] = flags & FLAG_CONCEDE ? 0 : a->zone;
     if (count)
         memcpy(p + ANSWER_LEN, a->picks, count);
     l->pending = 1;
@@ -282,6 +284,7 @@ void YgoNet_Receive(struct YgoNet *l, unsigned from, const uint8_t *p, unsigned 
         }
         memset(&a, 0, sizeof(a));
         a.count = p[20];
+        a.zone = p[21];
         memcpy(a.picks, p + ANSWER_LEN, a.count);
         next = l->game;
         ok = concede ? (next.s.over || YgoDuel_Concede(&next, theirs)) : YgoDuel_Answer(&next, &a);
