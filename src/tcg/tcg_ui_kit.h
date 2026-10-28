@@ -29,6 +29,8 @@ void TcgUi_TopBar(const char *title);
 void TcgUi_MessageBox(const char *message, int asking, int yes);
 /* The CARD CASE on its POKeMON side again (from the YU-GI-OH! side's tabs) */
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript);
+/* The Pokemon promo card of a special trainer who duels with Yu-Gi-Oh! cards now (the ELITE FOUR), once */
+unsigned Tcg_GivePromoOf(unsigned special);
 /* Back to the map (or the script that opened the screens) */
 void Tcg_CloseScreens(void (*returnToGame)(void), int fromScript);
 #endif

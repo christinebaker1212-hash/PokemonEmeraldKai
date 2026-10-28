@@ -2,7 +2,7 @@
 // button (SELECT / L / R / the extra button), that button in front of someone
 // asks them for a card duel (FF8's Triple Triad: most people play): they answer
 // in their own words and, if they play, the challenge window opens. Nobody in
-// front: the CARD CASE opens. Also the CARD CLUB member in the POKeMON CENTERs
+// front: the CARD CASE opens. Also the CARD CLUB member in the POKeMON MARTS
 // (the case, the first deck, the teaching duel and the counter).
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +43,12 @@
 #include "tcg/npc.h"
 #include "tcg/card_ids.h"
 #include "tcg/scale.h"
+#include "ygo/integration.h"
+#include "ygo/npc.h"
+#include "menu.h"
+#include "window.h"
+#include "script_menu.h"
+extern const u8 EventScript_CardClub[], EventScript_YgoClub[];
 
 // ---------------------------------------------------------------------------
 // Who they are
@@ -526,8 +532,11 @@ void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
 }
 
 // What happens when you ask them; NULL when they're not someone to ask
-enum { ASK_DUEL, ASK_NO };
+enum { ASK_DUEL, ASK_NO, ASK_YGO, ASK_WHICH };
 static struct TcgOpponent sOpponent;
+static struct YgoOpponent sYgo;   // the same person's Yu-Gi-Oh! side
+static const u8 *sYgoLine;        // and what they say when they play both
+static const u8 sText_Which[] = _("Want a card duel? MOéMON cards or\nYu-Gi-Oh!? I'm up for either!");
 // The GAME CENTER's CARD SHOP (RUSTBORO CITY 2F): the people at its table always play
 static bool8 InGameCenterCardShop(void)
 {
@@ -545,6 +554,38 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
     struct TcgOpponent *o = &sOpponent;
 
     memset(o, 0, sizeof(*o) - sizeof(o->portrait));
+    // Yu-Gi-Oh! duelists (src/ygo/ygo_field.c): theirs only, or both games
+    {
+        const u8 *line;
+        int refused, staff = script == EventScript_CardClub || script == EventScript_YgoClub;
+        int play = Ygo_FieldPick(npc, script, h, key, staff, &sYgo, &line, &refused);
+        if (play == YGO_PLAYS_YGO)
+        {
+            *answer = refused ? ASK_NO : ASK_YGO;
+            return line;
+        }
+        if (play == YGO_PLAYS_BOTH)
+        {
+            if (staff)
+            {
+                // the Pokemon side of the CARD CLUB staff: a deck of any kind
+                snprintf(o->name, sizeof(o->name), "CARD CLUB");
+                o->special = TCG_SPECIAL_NONE;
+                o->pool = (h >> 4) % DECK_MIXED;
+                o->pick = h;
+                Tcg_FitOpponent(o, NULL);
+                o->key = key;
+                o->prizes = 6;
+                o->mat = 0;
+                o->music = MUS_VS_TRAINER;
+                *answer = ASK_WHICH;
+                return sText_Which;
+            }
+            sYgoLine = line;
+        }
+        else
+            sYgoLine = NULL;
+    }
     // Someone with a deck of their own
     for (i = 0; i < TCG_SPECIAL_COUNT; i++)
     {
@@ -578,8 +619,8 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
         o->pick = h;
         o->prizes = 6;   // (the full game: LEADERS and the like)
         Tcg_FitOpponent(o, NULL);
-        *answer = ASK_DUEL;
-        return s->accept;
+        *answer = sYgoLine ? ASK_WHICH : ASK_DUEL;
+        return sYgoLine ? sYgoLine : s->accept;
     }
     o->special = TCG_SPECIAL_NONE;
     for (i = 0; i < ARRAY_COUNT(sPeople); i++)
@@ -646,8 +687,20 @@ static const u8 *Ask(struct ObjectEvent *npc, const u8 *script, u8 *answer)
 #define tTimer   data[1]
 #define tObject  data[2]
 #define tAnswer  data[3]
+#define tWindow  data[4]
+#define tChoice  data[5]
 
 static const u8 *sLine;
+static const u8 sText_ChoicePokemon[] = _("MOéMON CARDS");
+static const u8 sText_ChoiceYgo[] = _("YU-GI-OH!");
+static const struct MenuAction sGameChoices[] = {{sText_ChoicePokemon, {NULL}}, {sText_ChoiceYgo, {NULL}}};
+static void OpenYgoChallenge(void)
+{
+    sYgo.portraitW = sOpponent.portraitW;
+    sYgo.portraitH = sOpponent.portraitH;
+    memcpy(sYgo.portrait, sOpponent.portrait, sizeof(sYgo.portrait));
+    YgoUi_OpenChallenge(&sYgo);
+}
 static bool8 sFromScript;   // Tcg_TalkChallenge: the script waits for the talk to end
 
 static void FinishTalk(u8 taskId)
@@ -689,14 +742,46 @@ static void Task_CardChallenge(u8 taskId)
         if (IsTextPrinterActive(0) || !JOY_NEW(A_BUTTON | B_BUTTON))
             break;
         PlaySE(SE_SELECT);
-        if (tAnswer != ASK_DUEL)
+        if (tAnswer == ASK_WHICH)
+        {
+            // which game: a two-line choice beside the message
+            tWindow = CreateWindowFromRect(17, 7, 12, 4);
+            SetStandardWindowBorderStyle(tWindow, FALSE);
+            PrintMenuTable(tWindow, ARRAY_COUNT(sGameChoices), sGameChoices);
+            InitMenuInUpperLeftCornerNormal(tWindow, ARRAY_COUNT(sGameChoices), Ygo_GetCollection()->flags & YGO_FLAG_CASE_SIDE ? 1 : 0);
+            ScheduleBgCopyTilemapToVram(0);
+            tState = 4;
+            break;
+        }
+        if (tAnswer != ASK_DUEL && tAnswer != ASK_YGO)
         {
             FinishTalk(taskId);
             break;
         }
         HideFieldMessageBox();
-        Tcg_OpenNpcChallenge(&sOpponent);
+        if (tAnswer == ASK_YGO)
+            OpenYgoChallenge();
+        else
+            Tcg_OpenNpcChallenge(&sOpponent);
         tState++;
+        break;
+    case 4:
+        tChoice = Menu_ProcessInputNoWrap();
+        if (tChoice == MENU_NOTHING_CHOSEN)
+            break;
+        ClearStdWindowAndFrameToTransparent(tWindow, TRUE);
+        RemoveWindow(tWindow);
+        if (tChoice == MENU_B_PRESSED)
+        {
+            FinishTalk(taskId);
+            break;
+        }
+        HideFieldMessageBox();
+        if (tChoice == 1)
+            OpenYgoChallenge();
+        else
+            Tcg_OpenNpcChallenge(&sOpponent);
+        tState = 3;
         break;
     case 3:
         // (the card screens run instead of the game until they close)
@@ -730,7 +815,8 @@ int Tcg_FieldChallenge(void)
     if (!line)
         return 0;
     sLine = line;
-    printf("[tcg] asked %s: %s\n", sOpponent.name[0] ? sOpponent.name : "someone", answer == ASK_DUEL ? "duel" : "no");
+    printf("[tcg] asked %s: %s\n", answer == ASK_YGO ? sYgo.name : sOpponent.name[0] ? sOpponent.name : "someone",
+           answer == ASK_DUEL ? "duel" : answer == ASK_YGO ? "yu-gi-oh" : answer == ASK_WHICH ? "which game" : "no");
     taskId = CreateTask(Task_CardChallenge, 80);
     gTasks[taskId].tObject = objectId;
     gTasks[taskId].tAnswer = answer;
@@ -741,6 +827,8 @@ int Tcg_FieldChallenge(void)
 #undef tTimer
 #undef tObject
 #undef tAnswer
+#undef tWindow
+#undef tChoice
 
 // A script's speaker asked for a duel (the GAME CENTER's card players; the script waits for the talk to end)
 void Tcg_TalkChallenge(void)
@@ -762,7 +850,7 @@ void Tcg_GameCenterShop(void)
 }
 
 // ---------------------------------------------------------------------------
-// The CARD CLUB member (OLDALE, MAUVILLE and LILYCOVE POKeMON CENTERs)
+// The CARD CLUB member (OLDALE and MAUVILLE POKeMON MARTS, LILYCOVE DEPARTMENT STORE)
 
 // VAR_RESULT: 0 hasn't got a CARD CASE, 1 has one
 void Tcg_ClubState(void)

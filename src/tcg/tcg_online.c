@@ -86,7 +86,7 @@ const char *Tcg_CanAskFriend(unsigned id)
     if (!MP_IsConnected() || id >= MP_MAX_PLAYERS || !gMpPlayers[id].present || (int)id == gMpLocalId)
         return "They aren't online right now.";
     if (!HasCase())
-        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON CENTER.";
+        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON MART.";
     if (gMain.callback2 != CB2_Overworld)
         return "Head outside first.";
     if (sSocial.role != TCG_SOCIAL_NONE)
@@ -536,7 +536,7 @@ const char *Tcg_TourneyNotReady(void)
 {
     const struct TcgCollection *c = Tcg_GetCollection();
     if (!HasCase())
-        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON CENTER.";
+        return "You need a CARD CASE first: ask at the CARD CLUB in a POKeMON MART.";
     if (!Tcg_DeckValidate(c->decks[c->activeDeck].cards, c->owned, NULL, 0))
         return "Your deck in use isn't ready: finish it in the CARD CASE.";
     return NULL;

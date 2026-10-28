@@ -23,11 +23,11 @@ run() {
 }
 expect() { grep -q -- "$2" "$OUT/$1/log.txt" || { echo "FAIL $1: no '$2'"; exit 1; }; }
 
-# The CARD CLUB member (OLDALE POKeMON CENTER): the case in dialogue, three decks, the lesson.
+# The CARD CLUB member (OLDALE POKeMON MART): the case in dialogue, three decks, the lesson.
 cat > "$OUT/club.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 100
-press RIGHT 2
+press UP 2
 wait 10
 pressuntil A cards 3000
 wait 100
@@ -59,7 +59,7 @@ rendershot counter
 mp cards state
 quit
 SCRIPT
-run club 2,2,11,4
+run club 2,4,4,3
 expect club '\[tcg\] starter deck 2'
 expect club 'duel started vs CARD CLUB SAM'
 expect club 'screen 0 opted 1 .* flags 9 '

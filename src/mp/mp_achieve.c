@@ -45,8 +45,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
@@ -324,7 +324,7 @@ static const struct Achievement sAch[] = {
     {"cardwin1", "FIRST DRAW", "Win your first card duel.", AK_COUNT, 0, 1, 0, C_CARDS},
     {"cardwin100", "CARD SHARK", "Win 100 card duels.", AK_COUNT, 0, 100, 2, C_CARDS},
     {"cardgyms8", "GYM CARD MASTER", "Beat every GYM LEADER's card deck.", AK_COUNT, 0, 8, 1, C_CARDS},
-    {"cardspecial15", "LEGENDS OF THE TABLE", "Beat 15 special trainers' card decks.", AK_COUNT, 0, 15, 2, C_CARDS},
+    {"cardspecial15", "LEGENDS OF THE TABLE", "Beat 15 special trainers at cards (either game).", AK_COUNT, 0, 15, 2, C_CARDS},
     {"cardset", "SET COMPLETE", "Own every card of a booster set.", AK_EVENT, 0, 1, 1, C_CARDS},
     {"cardall", "CARD MASTER", "Own all 228 cards.", AK_EVENT, 0, 1, 2, C_CARDS},
     {"cardpack50", "PACK RAT", "Open 50 booster packs.", AK_COUNT, 0, 50, 1, C_CARDS},
@@ -333,6 +333,16 @@ static const struct Achievement sAch[] = {
     {"cardtrade", "CARD SWAP", "Trade a card with a friend.", AK_EVENT, 0, 1, 0, C_CARDS},
     {"cardmono", "PURE ENERGY", "Win a card duel with a deck of one type.", AK_EVENT, 0, 1, 1, C_CARDS},
     {"cardpromo", "PROMO HUNTER", "Win a special trainer's promo card.", AK_EVENT, 0, 1, 1, C_CARDS},
+    // Yu-Gi-Oh! duels (src/ygo): counted and unlocked by the card screens
+    {"ygostart", "IT'S TIME TO DUEL", "Get a Yu-Gi-Oh! Starter Deck.", AK_EVENT, 0, 1, 0, C_YUGIOH},
+    {"ygowin1", "FIRST DUEL", "Win your first Yu-Gi-Oh! duel.", AK_COUNT, 0, 1, 0, C_YUGIOH},
+    {"ygowin100", "KING OF GAMES", "Win 100 Yu-Gi-Oh! duels.", AK_COUNT, 0, 100, 2, C_YUGIOH},
+    {"ygospecial12", "DUELIST KINGDOM", "Beat 12 special duelists at Yu-Gi-Oh!.", AK_COUNT, 0, 12, 2, C_YUGIOH},
+    {"ygosignature", "SIGNATURE MOVE", "Win a special duelist's signature card.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygopack50", "BOOSTER BOX", "Open 50 Yu-Gi-Oh! booster packs.", AK_COUNT, 0, 50, 1, C_YUGIOH},
+    {"ygosecret", "SECRET RARE", "Pull a Secret Rare from a booster pack.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygoflawless", "UNTOUCHED", "Win a Yu-Gi-Oh! duel without losing any Life Points.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygoexodia", "OBLITERATE!", "Win a duel with all five pieces of Exodia.", AK_EVENT, 0, 1, 2, C_YUGIOH},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)

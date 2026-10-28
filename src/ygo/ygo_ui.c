@@ -484,6 +484,7 @@ static void Rewards(void)
         {
             c->specialBeaten |= bit;
             MP_Achieve_Count("ygospecial", 1);
+            MP_Achieve_Count("cardspecial", 1);   /* LEGENDS OF THE TABLE counts both games */
         }
         if (Y.opp.signature && !(c->promoGiven & bit))
         {
@@ -493,6 +494,12 @@ static void Rewards(void)
             snprintf(line + n, sizeof(line) - n, "\n%s handed you their signature card: %s!", Y.opp.name,
                      Ygo_Card(Y.opp.signature)->name);
         }
+    }
+    if (Y.opp.tcgSpecial != 0xFF)
+    {
+        unsigned promo = Tcg_GivePromoOf(Y.opp.tcgSpecial);
+        if (promo)
+            snprintf(line + strlen(line), sizeof(line) - strlen(line), "\nAnd their MOeMON card: %s!", Tcg_Card(promo)->name);
     }
     YgoBoard_Result(line);
     /* Today's full reward: one card of their deck, your pick */
@@ -2050,6 +2057,7 @@ void YgoUi_Draw(void)
 /* ------------------------------------------------------------------ */
 /* The test harness (mp ygo ...)                                        */
 /* ------------------------------------------------------------------ */
+void Ygo_FieldDebugDeck(unsigned theme, unsigned tier);
 void Ygo_Debug(const char *command)
 {
     struct YgoCollection *c = C();
@@ -2157,6 +2165,11 @@ void Ygo_Debug(const char *command)
         if (!c->packs[n])
             c->packs[n] = 1;
         OpenPackNow(n);
+        return;
+    }
+    if (sscanf(command, "deck %u %u", &n, &m) == 2)
+    {
+        Ygo_FieldDebugDeck(n, m);
         return;
     }
     if (sscanf(command, "first %d", (int *)&n) == 1)

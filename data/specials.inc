@@ -567,6 +567,11 @@ gSpecials::
 	def_special Tcg_ClubGiveGift
 	def_special Tcg_TalkChallenge, waitstate=1
 	def_special Tcg_GameCenterShop, waitstate=1
+	def_special Ygo_ClubState
+	def_special Ygo_ClubHasCase
+	def_special Ygo_ClubChooseDeck, waitstate=1
+	def_special Ygo_ClubTeachingDuel, waitstate=1
+	def_special Ygo_ClubCounter, waitstate=1
 	def_special MP_Fight_StartCpu, waitstate=1
 	def_special MP_Fight_Result
 	def_special MP_Fight_SeatCheck

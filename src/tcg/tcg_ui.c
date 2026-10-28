@@ -907,6 +907,19 @@ void TcgUi_MessageBox(const char *message, int asking, int yes)
 }
 static void MessageBox(void) { TcgUi_MessageBox(U.message, U.asking, U.askYes); }
 
+/* A Yu-Gi-Oh! win over someone who used to play the Pokemon cards (the ELITE FOUR): their promo card, once,
+ * for a player with a Pokemon deck; the card's id, or 0 */
+unsigned Tcg_GivePromoOf(unsigned special)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned card = Tcg_SpecialPromo(special);
+    if (!card || !c->optedIn || special >= 32 || (c->promoGiven & (1u << special)))
+        return 0;
+    c->promoGiven |= 1u << special;
+    AddCard(card);
+    return card;
+}
+
 /* The look, for the Yu-Gi-Oh! screens (tcg_ui_kit.h) */
 unsigned TcgUi_Frame(void) { return (unsigned)U.frame; }
 unsigned TcgUi_Theme(void) { return Theme(); }

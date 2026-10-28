@@ -1,4 +1,4 @@
-@ Moemon Kai: the CARD CLUB member (OLDALE, MAUVILLE and LILYCOVE POKéMON CENTERs). Hands over
+@ Moemon Kai: the CARD CLUB member (OLDALE and MAUVILLE POKéMON MARTS, LILYCOVE DEPARTMENT STORE). Hands over
 @ the CARD CASE and a first deck (src/tcg/tcg_ui.c: the three decks turned over on the table),
 @ offers a teaching duel, then runs the counter: TRADE IN, CARD SHOP, PRIZES. The gift for
 @ every card collected comes from here too (src/tcg/tcg_field.c).

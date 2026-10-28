@@ -13,6 +13,7 @@ struct YgoOpponent
     uint32_t key;           /* the daily reward's (map + person, or the special duelist) */
     uint16_t music, signature;   /* signature: the card a first win hands over (0 none) */
     uint8_t special, set, online, lesson;   /* set: the booster a win gives (YGO_SET_COUNT: any) */
+    uint8_t tcgSpecial;     /* the ELITE FOUR: their old Pokemon card deck (TCG_SPECIAL_*), whose promo a win hands over */
     uint8_t portraitW, portraitH;
     uint32_t portrait[32 * 32];  /* their sprite as they faced you, ARGB */
 };
@@ -24,4 +25,12 @@ void YgoUi_OpenChallenge(const struct YgoOpponent *opponent);
 void YgoUi_OpenStarter(void);
 void YgoUi_OpenLesson(void);
 void YgoUi_OpenCounter(void);
+
+/* Who plays what (src/ygo/ygo_field.c): 0 the Pokemon cards (or nothing), YGO_PLAYS_YGO Yu-Gi-Oh! (*line: what they
+ * say; *refused: not now), YGO_PLAYS_BOTH they ask which (opponent filled for Yu-Gi-Oh!). clubStaff: the CARD CLUB's */
+#define YGO_PLAYS_YGO 1
+#define YGO_PLAYS_BOTH 2
+struct ObjectEvent;
+int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t hash, uint32_t key, int clubStaff,
+                  struct YgoOpponent *opponent, const uint8_t **line, int *refused);
 #endif
