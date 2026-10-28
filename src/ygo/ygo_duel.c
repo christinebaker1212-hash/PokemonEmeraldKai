@@ -310,11 +310,40 @@ int Ygo_EffectsApply(const struct YgoState *s, unsigned o)
     return 1;
 }
 
-/* Every continuous hook in force: face-up cards on the field (both sides) */
+static int LastingMatches(const struct YgoState *s, const struct YgoLasting *l, unsigned a)
+{
+    switch (l->scope)
+    {
+    case YGO_SCOPE_PLAYER:
+        return a == l->player || l->player == 2;
+    case YGO_SCOPE_OBJ:
+        return a == l->obj;
+    case YGO_SCOPE_MONSTERS:
+        return a < s->objCount && s->objs[a].location == YGO_LOC_MZONE &&
+               (l->player == 2 || s->objs[a].controller == l->player);
+    }
+    return 0;
+}
+
+/* Rules whose hooks add up (how many more attacks, how much LP an attack costs, what is destroyed instead) */
+static int Additive(unsigned rule)
+{
+    return rule == YR_EXTRA_ATTACK || rule == YR_ATTACK_COST || rule == YR_BATTLE_SUBSTITUTE;
+}
+
+/* Every continuous hook in force: face-up cards on the field (both sides), and lasting effects */
 int Ygo_Rule(const struct YgoState *s, unsigned rule, unsigned a, unsigned b)
 {
     unsigned p, i, k, n;
     int total = 0;
+    for (i = 0; i < s->lastingCount; i++)
+        if (s->lasting[i].kind == rule && LastingMatches(s, &s->lasting[i], a))
+        {
+            if (Additive(rule))
+                total += s->lasting[i].value;
+            else
+                return 1;
+        }
     for (p = 0; p < 2; p++)
         for (i = 0; i < YGO_ZONES * 2 + 1; i++)
         {
@@ -329,13 +358,13 @@ int Ygo_Rule(const struct YgoState *s, unsigned rule, unsigned a, unsigned b)
                 if (e[k].rule)
                 {
                     int r = e[k].rule(s, slot - 1, rule, a, b);
-                    if (rule == YR_EXTRA_ATTACK)
+                    if (Additive(rule))
                         total += r;
                     else if (r)
                         return 1;
                 }
         }
-    return rule == YR_EXTRA_ATTACK ? total : 0;
+    return Additive(rule) ? total : 0;
 }
 
 int Ygo_CanTarget(const struct YgoState *s, unsigned o, unsigned player)
@@ -351,12 +380,18 @@ static int Stat(const struct YgoState *s, unsigned o, int which)
     int v;
     if (!c)
         return 0;
+    int base, reverse = 0;
     if (which == YS_LEVEL)
-        v = c->level;
+        v = base = c->level;
     else
     {
-        unsigned base = which == YS_ATK ? c->atk : c->def;
-        v = base == YGO_STAT_UNKNOWN ? 0 : (int)base;
+        unsigned raw;
+        int swap = b->location == YGO_LOC_MZONE && Ygo_Rule(s, YR_SWAP_STATS, o, 0);
+        raw = (which == YS_ATK) != swap ? c->atk : c->def;
+        v = base = raw == YGO_STAT_UNKNOWN ? 0 : (int)raw;
+        if (b->location == YGO_LOC_MZONE && which == YS_ATK && Ygo_Rule(s, YR_ATK_ZERO, o, 0))
+            return 0;
+        reverse = b->location == YGO_LOC_MZONE && Ygo_Rule(s, YR_REVERSE_STATS, o, 0);
         v += which == YS_ATK ? b->atkMod + b->atkTurn : b->defMod + b->defTurn;
     }
     if (b->location != YGO_LOC_MZONE)
@@ -374,6 +409,8 @@ static int Stat(const struct YgoState *s, unsigned o, int which)
                 if (e[k].stat)
                     v = e[k].stat(s, slot - 1, o, which, v);
         }
+    if (reverse)
+        v = base - (v - base);   /* Reverse Trap: every addition a subtraction, and back */
     return v < 0 ? 0 : v;
 }
 int YgoDuel_Atk(const struct YgoState *s, unsigned o) { return Stat(s, o, YS_ATK); }
@@ -403,6 +440,7 @@ static void Lift(struct YgoState *s, unsigned o)
     struct YgoPlayer *p = &s->players[b->controller];
     uint8_t *count, *pile;
     unsigned i;
+    b->moves++;
     switch (b->location)
     {
     case YGO_LOC_MZONE:
@@ -464,6 +502,8 @@ static void PutInPile(struct YgoState *s, unsigned o, unsigned location, int top
     }
     b->location = location;
     b->seq = 0;
+    if (location == YGO_LOC_HAND || location == YGO_LOC_DECK || location == YGO_LOC_EXTRA)
+        b->properly = 0;
     b->faceUp = location == YGO_LOC_GRAVE || location == YGO_LOC_BANISHED;
     b->attackPos = 0;
     b->enteredTurn = s->turn;
@@ -512,13 +552,13 @@ static void Raise(struct YgoState *s, uint32_t event, unsigned o, unsigned other
                 continue;
             if (e[k].type == YE_FLIP && !self)
                 continue;
-            if (ev & (YEV_ANY_SUMMONED | YEV_ANY_DESTROYED))
+            if (ev & (YEV_ANY_SUMMONED | YEV_ANY_DESTROYED | YEV_ANY_NORMAL_SUMMONED))
             {
                 /* about any card: works from the field */
                 if (!Ygo_OnField(s, i) || !Ygo_EffectsApply(s, i))
                     continue;
             }
-            else if (ev & (YEV_STANDBY_OWN | YEV_STANDBY_ANY | YEV_END_OWN | YEV_DRAW_OWN))
+            else if (ev & (YEV_STANDBY_OWN | YEV_STANDBY_ANY | YEV_END_OWN | YEV_END_ANY | YEV_DRAW_OWN))
             {
                 if ((ev & (YEV_STANDBY_OWN | YEV_END_OWN | YEV_DRAW_OWN)) && b->controller != s->current)
                     continue;
@@ -606,10 +646,13 @@ void Ygo_SendToGrave(struct YgoState *s, unsigned o, unsigned reason)
         Ygo_Event(s, YGO_EV_TO_GRAVE, b->owner, o, NO_OBJ, 0, reason);
         return;
     }
+    if (fromField && from == YGO_LOC_MZONE && b->controller == b->owner)
+        s->players[b->owner].monsterToGraveTurn = s->turn;
     PutInPile(s, o, YGO_LOC_GRAVE, 1);
     b->reason = reason;
     Ygo_Event(s, YGO_EV_TO_GRAVE, b->owner, o, NO_OBJ, from, reason);
-    Raise(s, YEV_TO_GRAVE | (fromField ? YEV_FROM_FIELD_TO_GRAVE : 0) | ((reason & YGO_REASON_DISCARD) ? YEV_DISCARDED : 0),
+    Raise(s, YEV_TO_GRAVE | (fromField ? YEV_FROM_FIELD_TO_GRAVE | YEV_SENT_FROM_FIELD : 0) |
+                 ((reason & YGO_REASON_DISCARD) ? YEV_DISCARDED : 0),
           o, NO_OBJ);
 }
 
@@ -617,8 +660,7 @@ int Ygo_Destroy(struct YgoState *s, unsigned o, unsigned reason)
 {
     if (!Ygo_OnField(s, o))
         return 0;
-    if ((reason & YGO_REASON_EFFECT) && s->objs[o].location == YGO_LOC_MZONE &&
-        Ygo_Rule(s, YR_INDESTRUCTIBLE_EFFECT, o, 0))
+    if ((reason & YGO_REASON_EFFECT) && Ygo_Rule(s, YR_INDESTRUCTIBLE_EFFECT, o, 0))
         return 0;
     Ygo_Event(s, YGO_EV_DESTROY, s->objs[o].controller, o, NO_OBJ, 0, reason);
     Ygo_SendToGrave(s, o, reason | YGO_REASON_DESTROY);
@@ -727,18 +769,41 @@ static int PlaceMonster(struct YgoState *s, unsigned o, unsigned player, unsigne
     return 1;
 }
 
+int Ygo_NeedsProper(unsigned card)
+{
+    const struct YgoCard *c = Ygo_Card(card);
+    unsigned n, k;
+    const struct YgoEffect *e;
+    if (!c)
+        return 0;
+    if (c->frame == YGO_FUSION || c->frame == YGO_RITUAL)
+        return 1;
+    e = Ygo_Effects(card, &n);
+    for (k = 0; k < n; k++)
+        if (e[k].type == YE_SUMMON_RULE)
+            return 1;
+    return 0;
+}
+
 int Ygo_CanSpecialSummon(const struct YgoState *s, unsigned o, unsigned player)
 {
-    (void)o;
-    return Ygo_FreeZones(s, player, 0) > 0 && !Ygo_Rule(s, YR_CANNOT_SPECIAL_SUMMON, player, 0);
+    if (Ygo_FreeZones(s, player, 0) == 0 || Ygo_Rule(s, YR_CANNOT_SPECIAL_SUMMON, player, 0) ||
+        Ygo_Rule(s, YR_NO_SUMMON, player, 0))
+        return 0;
+    /* a Fusion / Ritual / own-rule monster must have been Summoned properly first, unless this is that */
+    return !Ygo_NeedsProper(s->objs[o].card) || s->objs[o].properly || s->objs[o].location == YGO_LOC_EXTRA ||
+           s->objs[o].location == YGO_LOC_HAND;
 }
 
 int Ygo_SpecialSummon(struct YgoState *s, unsigned o, unsigned player, unsigned pos, unsigned type)
 {
-    if (!Ygo_CanSpecialSummon(s, o, player))
+    if (type != YGO_SUMMON_FUSION && type != YGO_SUMMON_RITUAL && !Ygo_CanSpecialSummon(s, o, player))
         return 0;
     if (!PlaceMonster(s, o, player, pos))
         return 0;
+    if (type == YGO_SUMMON_FUSION || type == YGO_SUMMON_RITUAL)
+        s->objs[o].properly = 1;
+    s->players[player].summonedTurn = s->turn;
     s->objs[o].summonType = type ? type : YGO_SUMMON_SPECIAL;
     Ygo_Event(s, YGO_EV_SUMMON, player, o, NO_OBJ, s->objs[o].summonType, pos);
     Raise(s, YEV_SPECIAL_SUMMONED, o, NO_OBJ);
@@ -766,12 +831,16 @@ unsigned Ygo_MakeToken(struct YgoState *s, unsigned card, unsigned player, unsig
 void Ygo_ChangePosition(struct YgoState *s, unsigned o, unsigned pos)
 {
     struct YgoObj *b = &s->objs[o];
-    int wasDown = !b->faceUp;
+    int wasDown = !b->faceUp, wasAttack = b->faceUp && b->attackPos;
     if (b->location != YGO_LOC_MZONE)
         return;
     b->faceUp = pos != 2;
     b->attackPos = pos == 0;
     Ygo_Event(s, YGO_EV_POSITION, b->controller, o, NO_OBJ, pos, 0);
+    if (wasAttack && pos == 1)
+        Raise(s, YEV_TO_DEFENSE, o, NO_OBJ);
+    if (!wasAttack && pos == 0)
+        Raise(s, YEV_TO_ATTACK, o, NO_OBJ);
     if (wasDown && b->faceUp)
     {
         b->turnFlags |= YGO_TF_FLIPPED;
@@ -805,7 +874,7 @@ void Ygo_TakeControl(struct YgoState *s, unsigned o, unsigned player)
     b->controller = player;
     b->seq = zone;
     s->players[player].monsters[zone] = o + 1;
-    Ygo_Event(s, YGO_EV_POSITION, player, o, NO_OBJ, b->faceUp ? !b->attackPos : 2, 1);
+    Ygo_Event(s, YGO_EV_CONTROL, player, o, NO_OBJ, 0, 0);
 }
 
 void Ygo_AddStat(struct YgoState *s, unsigned o, int atk, int def, int untilEndOfTurn)
@@ -832,19 +901,77 @@ void Ygo_Equip(struct YgoState *s, unsigned equip, unsigned monster)
         return;
     s->objs[equip].equipTo = monster + 1;
     Ygo_Event(s, YGO_EV_EQUIP, s->objs[equip].controller, equip, monster, 0, 0);
+    Raise(s, YEV_EQUIPPED, monster, equip);
+    if (Ygo_Rule(s, YR_NO_EQUIP, monster, 0))
+        Ygo_Destroy(s, equip, YGO_REASON_EFFECT);
 }
 
-void Ygo_AddLasting(struct YgoState *s, unsigned kind, unsigned player, unsigned obj, unsigned turns, int value)
+void Ygo_AddLasting(struct YgoState *s, unsigned kind, unsigned scope, unsigned player, unsigned obj, unsigned turns,
+                    int value)
 {
     struct YgoLasting *l;
     if (s->lastingCount >= YGO_LASTING_MAX)
         return;
     l = &s->lasting[s->lastingCount++];
     l->kind = kind;
+    l->scope = scope;
     l->player = player;
     l->obj = obj;
-    l->until = turns == 0xFFFF ? 0xFFFF : s->turn + turns;
+    l->until = turns >= YGO_UNTIL_CHAIN ? turns : s->turn + turns;
     l->value = value;
+}
+
+int Ygo_LastingValue(const struct YgoState *s, unsigned kind, unsigned player, int value)
+{
+    unsigned i;
+    for (i = 0; i < s->lastingCount; i++)
+        if (s->lasting[i].kind == kind && s->lasting[i].value == value && (player == 2 || s->lasting[i].player == player))
+            return 1;
+    return 0;
+}
+
+static void ExpireLasting(struct YgoState *s, unsigned until)
+{
+    unsigned i, k = 0;
+    struct YgoLasting ended[YGO_LASTING_MAX];
+    unsigned endedCount = 0;
+    for (i = 0; i < s->lastingCount; i++)
+    {
+        int ends = until < YGO_UNTIL_CHAIN ? s->lasting[i].until <= until : s->lasting[i].until == until;
+        if (ends)
+            ended[endedCount++] = s->lasting[i];
+        else
+            s->lasting[k++] = s->lasting[i];
+    }
+    s->lastingCount = k;
+    for (i = 0; i < endedCount; i++)
+    {
+        unsigned o = ended[i].obj;
+        if (ended[i].kind == YL_RETURN_CONTROL && s->objs[o].location == YGO_LOC_MZONE &&
+            s->objs[o].controller != s->objs[o].owner)
+            Ygo_TakeControl(s, o, s->objs[o].owner);
+        if (ended[i].kind == YL_DESTROY_AT && Ygo_OnField(s, o) && s->objs[o].moves == (uint8_t)ended[i].value)
+            Ygo_Destroy(s, o, YGO_REASON_EFFECT);
+    }
+}
+
+void Ygo_Reveal(struct YgoState *s, unsigned o)
+{
+    Ygo_Event(s, YGO_EV_REVEAL, s->objs[o].controller, o, NO_OBJ, 0, 0);
+}
+
+void Ygo_Look(struct YgoState *s, unsigned player, unsigned o)
+{
+    Ygo_Event(s, YGO_EV_LOOK, player, o, NO_OBJ, 0, 0);
+}
+
+void Ygo_NegateSummon(struct YgoState *s, unsigned o)
+{
+    if (s->objs[o].location != YGO_LOC_MZONE)
+        return;
+    Ygo_Event(s, YGO_EV_NEGATE, s->objs[o].controller, o, NO_OBJ, 0, 1);
+    Ygo_Event(s, YGO_EV_DESTROY, s->objs[o].controller, o, NO_OBJ, 0, YGO_REASON_EFFECT);
+    Ygo_SendToGrave(s, o, YGO_REASON_EFFECT | YGO_REASON_DESTROY);
 }
 
 int Ygo_Lasting(const struct YgoState *s, unsigned kind, unsigned player)
@@ -965,6 +1092,8 @@ static int CanActivate(struct YgoState *s, unsigned player, unsigned o, unsigned
         return 0;
     if ((e->flags & YF_ONCE_PER_TURN) && (b->usedTurn & (1u << k)))
         return 0;
+    if (s->lastingCount && Ygo_LastingValue(s, YL_NO_ACTIVATE_NAME, player, b->card))
+        return 0;
     speed = e->speed ? e->speed : 1;
     switch (e->type)
     {
@@ -1008,21 +1137,19 @@ static int CanActivate(struct YgoState *s, unsigned player, unsigned o, unsigned
             return 0;
         break;
     case YE_IGNITION:
-        if (!Ygo_FaceUpMonster(s, o) && !(e->flags & YF_FROM_HAND && b->location == YGO_LOC_HAND))
-            return 0;
-        if (!Ygo_EffectsApply(s, o))
-            return 0;
-        speed = 1;
-        break;
     case YE_QUICK:
         if (e->flags & YF_FROM_HAND)
         {
             if (b->location != YGO_LOC_HAND)
                 return 0;
         }
-        else if (!Ygo_FaceUpMonster(s, o) || !Ygo_EffectsApply(s, o))
+        else if (!Ygo_OnField(s, o) || !b->faceUp || !Ygo_EffectsApply(s, o))
             return 0;
-        if (speed < 2)
+        if ((e->flags & YF_HARD_ONCE) && (b->data & 0x80000000u))
+            return 0;
+        if (e->type == YE_IGNITION)
+            speed = 1;
+        else if (speed < 2)
             speed = 2;
         break;
     default:
@@ -1137,6 +1264,8 @@ static void Activate(struct YgoState *s, unsigned player, unsigned o, unsigned k
     }
     if (e->flags & YF_ONCE_PER_TURN)
         b->usedTurn |= 1u << k;
+    if (e->flags & YF_HARD_ONCE)
+        b->data |= 0x80000000u;
     s->chainCount++;
     ctx.s = s;
     ctx.e = e;
@@ -1186,7 +1315,7 @@ static void ResolveTop(struct YgoState *s)
     if (l.activation && c && Ygo_OnField(s, l.obj) && b->card == l.card)
     {
         int stays = c->property == YGO_PROP_CONTINUOUS || c->property == YGO_PROP_FIELD ||
-                    (c->property == YGO_PROP_EQUIP && b->equipTo);
+                    (c->property == YGO_PROP_EQUIP && b->equipTo) || (e && (e->flags & YF_STAYS));
         if (l.negated || !stays)
             Ygo_SendToGrave(s, l.obj, l.negated == 2 ? YGO_REASON_DESTROY | YGO_REASON_EFFECT : YGO_REASON_RULE);
     }
@@ -1213,14 +1342,36 @@ static unsigned TributesNeeded(const struct YgoCard *c)
     return c->level >= 7 ? 2 : c->level >= 5 ? 1 : 0;
 }
 
-static int CanNormalSummon(const struct YgoState *s, unsigned player, unsigned o)
+unsigned Ygo_Tributes(const struct YgoState *s, unsigned player, uint8_t *out)
+{
+    unsigned i, n = 0, p;
+    for (p = 0; p < 2; p++)
+        for (i = 0; i < YGO_ZONES; i++)
+        {
+            unsigned m = s->players[p].monsters[i];
+            if (!m)
+                continue;
+            if (p != player && !Ygo_Rule(s, YR_EXTRA_TRIBUTE, m - 1, player))
+                continue;
+            if (Ygo_Rule(s, YR_NOT_TRIBUTE, m - 1, 0))
+                continue;
+            out[n++] = m - 1;
+        }
+    return n;
+}
+
+/* set: a Normal Set (still allowed when Summons aren't) */
+static int CanNormalSummon(const struct YgoState *s, unsigned player, unsigned o, int set)
 {
     unsigned need;
+    uint8_t list[YGO_ZONES * 2];
     if (s->players[player].normalSummoned || !CanNormalSummonCard(s, o))
+        return 0;
+    if (!set && Ygo_Rule(s, YR_NO_SUMMON, player, 0))
         return 0;
     need = TributesNeeded(Ygo_ObjCard(s, o));
     if (need)
-        return Ygo_MonsterCount(s, player) >= need;
+        return Ygo_Tributes(s, player, list) >= need;
     return Ygo_FreeZones(s, player, 0) > 0;
 }
 
@@ -1433,6 +1584,7 @@ static void Chain(struct YgoState *s)
             if (!(s->pending[i].optional && s->pending[i].when && s->pending[i].serial != s->serial))
                 s->pending[k++] = s->pending[i];
         s->pendingCount = k;
+        ExpireLasting(s, YGO_UNTIL_CHAIN);
         if (s->pendingCount)
         {
             f->step = 0;
@@ -1483,6 +1635,8 @@ static void SummonSuccess(struct YgoState *s)
         else
             Raise(s, YEV_SPECIAL_SUMMONED, o, NO_OBJ);
         Raise(s, YEV_ANY_SUMMONED, NO_OBJ, o);
+        if (f->b <= YGO_SUMMON_FLIP)
+            Raise(s, YEV_ANY_NORMAL_SUMMONED, NO_OBJ, o);
         OpenWindow(s, f->b >= YGO_SUMMON_SPECIAL ? YW_SPECIAL_SUMMONED : YW_SUMMONED, o, s->objs[o].controller);
         return;
     case 2:
@@ -1560,7 +1714,7 @@ static void Turn(struct YgoState *s)
     case TS_END:
         s->phase = YGO_PHASE_END;
         Ygo_Event(s, YGO_EV_PHASE, s->current, NO_OBJ, NO_OBJ, s->phase, 0);
-        Raise(s, YEV_END_OWN, NO_OBJ, NO_OBJ);
+        Raise(s, YEV_END_OWN | YEV_END_ANY, NO_OBJ, NO_OBJ);
         f->step = TS_CLEANUP;
         OpenWindow(s, YW_END, NO_OBJ, s->current);
         return;
@@ -1580,13 +1734,7 @@ static void Turn(struct YgoState *s)
         }
         for (i = 0; i < s->objCount; i++)
             s->objs[i].atkTurn = s->objs[i].defTurn = 0;
-        {
-            unsigned k = 0;
-            for (i = 0; i < s->lastingCount; i++)
-                if (s->lasting[i].until == 0xFFFF || s->lasting[i].until > s->turn)
-                    s->lasting[k++] = s->lasting[i];
-            s->lastingCount = k;
-        }
+        ExpireLasting(s, s->turn);
         f->step = TS_START;
         return;
     }
@@ -1606,13 +1754,13 @@ static unsigned IdleChoices(struct YgoState *s, struct YgoQuery *q)
         const struct YgoCard *c = Ygo_ObjCard(s, o);
         unsigned count, k;
         const struct YgoEffect *e = Ygo_Effects(c->id, &count);
-        if (CanNormalSummon(s, player, o))
-        {
+        if (CanNormalSummon(s, player, o, 0))
             QueryAdd(q, YGO_ACT_SUMMON, o, 0, 0);
+        if (CanNormalSummon(s, player, o, 1))
             QueryAdd(q, YGO_ACT_SET_MONSTER, o, 0, 0);
-        }
         for (k = 0; k < count; k++)
-            if (e[k].type == YE_SUMMON_RULE && Ygo_FreeZones(s, player, 0))
+            if (e[k].type == YE_SUMMON_RULE && !Ygo_Rule(s, YR_NO_SUMMON, player, 0) &&
+                !Ygo_Rule(s, YR_CANNOT_SPECIAL_SUMMON, player, 0))
             {
                 struct YgoCtx ctx = {s, e + k, (uint8_t)o, (uint8_t)player, NO_OBJ, NULL};
                 if (!e[k].can || e[k].can(&ctx))
@@ -1633,7 +1781,7 @@ static unsigned IdleChoices(struct YgoState *s, struct YgoQuery *q)
             continue;
         if (b->enteredTurn == s->turn)
             continue;
-        if (!b->faceUp)
+        if (!b->faceUp && !Ygo_Rule(s, YR_NO_SUMMON, player, 0))
             QueryAdd(q, YGO_ACT_FLIP_SUMMON, m - 1, 0, 0);
         else if (!Ygo_Rule(s, YR_CANNOT_CHANGE_POSITION, m - 1, 0))
             QueryAdd(q, YGO_ACT_POSITION, m - 1, 0, 0);
@@ -1641,7 +1789,7 @@ static unsigned IdleChoices(struct YgoState *s, struct YgoQuery *q)
     n = Activations(s, player, 1, acts, YGO_QUERY_MAX);
     for (i = 0; i < n; i++)
         QueryAdd(q, acts[i].kind, acts[i].obj, acts[i].value, 0);
-    if (s->phase == YGO_PHASE_MAIN1 && s->turn > 1)
+    if (s->phase == YGO_PHASE_MAIN1 && s->turn > 1 && !Ygo_Rule(s, YR_NO_BATTLE_PHASE, player, 0))
         QueryAdd(q, YGO_ACT_TO_BATTLE, NO_OBJ, 0, 0);
     QueryAdd(q, YGO_ACT_END_TURN, NO_OBJ, 0, 0);
     return q->count;
@@ -1650,10 +1798,10 @@ static unsigned IdleChoices(struct YgoState *s, struct YgoQuery *q)
 static void Summon(struct YgoState *s, unsigned o, int set)
 {
     unsigned player = s->current, need = TributesNeeded(Ygo_ObjCard(s, o)), i;
-    uint8_t list[YGO_ZONES], picks[YGO_ZONES];
+    uint8_t list[YGO_ZONES * 2], picks[YGO_ZONES * 2];
     if (need)
     {
-        unsigned n = Ygo_List(s, player, YGO_LOC_MZONE, list);
+        unsigned n = Ygo_Tributes(s, player, list);
         Ygo_AskCards(s, player, YGO_P_TRIBUTE, s->objs[o].card, list, n, need, need, picks);
         for (i = 0; i < need; i++)
             Ygo_SendToGrave(s, picks[i], YGO_REASON_TRIBUTE);
@@ -1667,7 +1815,31 @@ static void Summon(struct YgoState *s, unsigned o, int set)
         return;
     }
     s->objs[o].summonType = need ? YGO_SUMMON_TRIBUTE : YGO_SUMMON_NORMAL;
+    s->players[player].summonedTurn = s->turn;
     Push(s, PR_SUMMON, o, s->objs[o].summonType);
+}
+
+int Ygo_CanNormalSummonNow(const struct YgoState *s, unsigned player, unsigned o, int set)
+{
+    uint8_t list[YGO_ZONES * 2];
+    unsigned need;
+    if (s->objs[o].location != YGO_LOC_HAND || s->objs[o].owner != player || !CanNormalSummonCard(s, o))
+        return 0;
+    if (!set && Ygo_Rule(s, YR_NO_SUMMON, player, 0))
+        return 0;
+    need = TributesNeeded(Ygo_ObjCard(s, o));
+    return need ? Ygo_Tributes(s, player, list) >= need : Ygo_FreeZones(s, player, 0) > 0;
+}
+
+void Ygo_ExtraNormalSummon(struct YgoState *s, unsigned player, unsigned o, int set)
+{
+    unsigned keep = s->players[player].normalSummoned, current = s->current;
+    /* Summon() works for the turn player and uses up their Normal Summon: borrow both */
+    s->current = player;
+    s->players[player].normalSummoned = 0;
+    Summon(s, o, set);
+    s->current = current;
+    s->players[player].normalSummoned = keep;
 }
 
 static void Idle(struct YgoState *s)
@@ -1697,6 +1869,7 @@ static void Idle(struct YgoState *s)
         s->objs[c->obj].attackPos = 1;
         s->objs[c->obj].turnFlags |= YGO_TF_POS_CHANGED | YGO_TF_FLIPPED;
         s->objs[c->obj].summonType = YGO_SUMMON_FLIP;
+        s->players[player].summonedTurn = s->turn;
         Ygo_Event(s, YGO_EV_FLIP, player, c->obj, NO_OBJ, 0, 0);
         Push(s, PR_SUMMON, c->obj, YGO_SUMMON_FLIP);
         return;
@@ -1734,6 +1907,8 @@ static void Idle(struct YgoState *s)
             e->cost(&ctx);
         PlaceMonster(s, c->obj, player, 0);
         s->objs[c->obj].summonType = YGO_SUMMON_SPECIAL;
+        s->objs[c->obj].properly = 1;
+        s->players[player].summonedTurn = s->turn;
         Push(s, PR_SUMMON, c->obj, YGO_SUMMON_SPECIAL);
         return;
     }
@@ -1757,13 +1932,28 @@ static int CanAttackWith(const struct YgoState *s, unsigned o)
         return 0;
     if (Ygo_Rule(s, YR_CANNOT_ATTACK, o, 0) || Ygo_Rule(s, YR_NO_ATTACKS, s->current, 0))
         return 0;
+    {
+        int cost = Ygo_Rule(s, YR_ATTACK_COST, o, 0);
+        if (cost && s->players[s->current].lp < cost)
+            return 0;
+    }
     return 1;
 }
 
 /* Who it can attack: the opponent's monsters (and NO_OBJ for directly) */
 static unsigned AttackTargets(const struct YgoState *s, unsigned o, uint8_t *out)
 {
-    unsigned n = Ygo_List(s, s->current ^ 1, YGO_LOC_MZONE, out);
+    unsigned n = Ygo_List(s, s->current ^ 1, YGO_LOC_MZONE, out), i, k = 0, forced = 0;
+    /* Ring of Magnetism and the like: only those, if any */
+    for (i = 0; i < n; i++)
+        forced += Ygo_Rule(s, YR_ATTACK_ONLY, out[i], 0) != 0;
+    if (forced)
+    {
+        for (i = 0; i < n; i++)
+            if (Ygo_Rule(s, YR_ATTACK_ONLY, out[i], 0))
+                out[k++] = out[i];
+        return k;
+    }
     if ((n == 0 && !Ygo_Rule(s, YR_CANNOT_ATTACK_DIRECT, o, 0)) || Ygo_Rule(s, YR_DIRECT_ATTACK, o, 0))
         out[n++] = NO_OBJ;
     return n;
@@ -1799,10 +1989,18 @@ static void DeclareAttack(struct YgoState *s, unsigned o, int replay)
     s->directAttack = target == NO_OBJ;
     if (!replay)
     {
+        int cost = Ygo_Rule(s, YR_ATTACK_COST, o, 0);
         s->objs[o].attacks++;
         s->objs[o].turnFlags |= YGO_TF_ATTACKED;
+        if (cost)
+        {
+            s->players[s->current].lp -= cost;
+            Ygo_Event(s, YGO_EV_DAMAGE, s->current, NO_OBJ, NO_OBJ, cost, 2);
+        }
     }
     Ygo_Event(s, YGO_EV_ATTACK, s->current, o, target, replay, 0);
+    if (!replay)
+        Raise(s, YEV_DECLARED_ATTACK, o, target);
     if (target != NO_OBJ)
         Raise(s, YEV_ATTACKED, target, o);
 }
@@ -1813,6 +2011,7 @@ static void Battle(struct YgoState *s)
     switch (f->step)
     {
     case 0:
+        s->endBattle = 0;
         s->phase = YGO_PHASE_BATTLE;
         Ygo_Event(s, YGO_EV_PHASE, s->current, NO_OBJ, NO_OBJ, s->phase, 0);
         f->step = 1;
@@ -1828,6 +2027,13 @@ static void Battle(struct YgoState *s)
         if (s->pendingCount)
         {
             Push(s, PR_CHAIN, 0, 0xFF);
+            return;
+        }
+        if (s->endBattle)
+        {
+            s->endBattle = 0;
+            s->attacker = s->attackTarget = 0;
+            Pop(s);
             return;
         }
         QueryInit(&q, YGO_Q_BATTLE, s->current, YGO_P_NONE, 0);
@@ -1928,7 +2134,10 @@ static void Damage(struct YgoState *s)
                 damage = 0;
             Ygo_Event(s, YGO_EV_BATTLE, s->current, a, NO_OBJ, damage, hurt);
             if (damage)
+            {
                 Raise(s, YEV_BATTLE_DAMAGE, a, NO_OBJ);
+                Raise(s, YEV_ANY_BATTLE_DAMAGE, NO_OBJ, a);
+            }
         }
         else if (s->objs[t].attackPos)
         {
@@ -1959,7 +2168,10 @@ static void Damage(struct YgoState *s)
             Ygo_Damage(s, hurt, damage, 1);
             Ygo_Event(s, YGO_EV_BATTLE, s->current, a, t, damage, hurt);
             if (damage)
+            {
                 Raise(s, YEV_BATTLE_DAMAGE, hurt == s->current ? t : a, NO_OBJ);
+                Raise(s, YEV_ANY_BATTLE_DAMAGE, NO_OBJ, hurt == s->current ? t : a);
+            }
         }
         else
         {
@@ -1984,7 +2196,17 @@ static void Damage(struct YgoState *s)
             Ygo_Damage(s, hurt, damage, 1);
             Ygo_Event(s, YGO_EV_BATTLE, s->current, a, t, damage, hurt);
             if (damage && hurt != s->current)
+            {
                 Raise(s, YEV_BATTLE_DAMAGE, a, NO_OBJ);
+                Raise(s, YEV_ANY_BATTLE_DAMAGE, NO_OBJ, a);
+            }
+        }
+        /* Relinquished: battle damage its controller takes hits the opponent as well */
+        if (damage && t != NO_OBJ)
+        {
+            unsigned mine = hurt == s->current ? a : t;
+            if (Ygo_Rule(s, YR_MIRROR_DAMAGE, mine, 0))
+                Ygo_Damage(s, hurt ^ 1, damage, 0);
         }
         if (t != NO_OBJ)
         {
@@ -2005,6 +2227,13 @@ static void Damage(struct YgoState *s)
             unsigned d = s->battleDestroyed[k];
             if (d && s->objs[d - 1].location == YGO_LOC_MZONE)
             {
+                int sub = Ygo_Rule(s, YR_BATTLE_SUBSTITUTE, d - 1, 0);
+                if (sub > 0 && Ygo_OnField(s, sub - 1))
+                {
+                    /* something else is destroyed instead */
+                    Ygo_Destroy(s, sub - 1, YGO_REASON_EFFECT);
+                    continue;
+                }
                 unsigned winner = k == 0 ? t : a;
                 Ygo_Event(s, YGO_EV_DESTROY, s->objs[d - 1].controller, d - 1, winner, 0, YGO_REASON_BATTLE);
                 Ygo_SendToGrave(s, d - 1, YGO_REASON_BATTLE | YGO_REASON_DESTROY);
@@ -2021,6 +2250,7 @@ static void Damage(struct YgoState *s)
     case 3:
         s->window = YW_OPEN;
         s->damageStep = 0;
+        ExpireLasting(s, YGO_UNTIL_BATTLE);
         s->attacker = s->attackTarget = 0;
         s->directAttack = 0;
         s->battleDestroyed[0] = s->battleDestroyed[1] = 0;
@@ -2162,6 +2392,13 @@ int YgoDuel_Answer(struct YgoDuel *d, const struct YgoAnswer *answer)
         return 0;
     }
     d->answers[d->answerCount++] = *answer;
+    d->error[0] = 0;
+    return Run(d);
+}
+
+int YgoDuel_Refresh(struct YgoDuel *d)
+{
+    d->answerCount = 0;
     d->error[0] = 0;
     return Run(d);
 }

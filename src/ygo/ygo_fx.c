@@ -3,15 +3,17 @@
 #include "ygo_internal.h"
 
 /* Each file's table; a card's effects sit together in one table */
-extern const struct YgoEffect gYgoFxBasic[];
-extern const unsigned gYgoFxBasicCount;
+extern const struct YgoEffect gYgoFxS1Spells[], gYgoFxS1Traps[], gYgoFxS1Monsters[];
+extern const unsigned gYgoFxS1SpellsCount, gYgoFxS1TrapsCount, gYgoFxS1MonstersCount;
 
 static const struct
 {
     const struct YgoEffect *list;
     const unsigned *count;
 } sTables[] = {
-    {gYgoFxBasic, &gYgoFxBasicCount},
+    {gYgoFxS1Spells, &gYgoFxS1SpellsCount},
+    {gYgoFxS1Traps, &gYgoFxS1TrapsCount},
+    {gYgoFxS1Monsters, &gYgoFxS1MonstersCount},
 };
 
 static uint16_t sFirst[YGO_CARD_COUNT + 1], sCount[YGO_CARD_COUNT + 1];
@@ -63,5 +65,8 @@ int Ygo_CardReady(unsigned card)
         return 0;
     if (c->frame == YGO_NORMAL)
         return 1;
+    /* a Fusion Monster with no effect of its own: its materials are all it needs */
+    if (c->frame == YGO_FUSION && !Ygo_CardHasRules(card))
+        return Ygo_FusionOf(card) != NULL && strstr(c->text, "\"") == c->text && !strstr(c->text, ". ");
     return Ygo_CardHasRules(card);
 }

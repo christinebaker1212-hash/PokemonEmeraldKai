@@ -92,6 +92,8 @@ struct YgoObj
     int16_t atkTurn, defTurn;   /* until the end of this turn */
     uint16_t enteredTurn;       /* the turn it reached its location */
     uint32_t data;              /* card-specific memory (targets, choices), cleared when it moves */
+    uint8_t moves;              /* times it changed location: a card that moved is a new card to what targeted it */
+    uint8_t properly;           /* it was once Summoned properly (Fusion, Ritual, its own rule): it can be revived */
 };
 struct YgoPlayer
 {
@@ -101,6 +103,8 @@ struct YgoPlayer
     uint8_t monsters[YGO_ZONES];        /* object + 1, 0 empty */
     uint8_t spells[YGO_ZONES + 1];
     uint8_t normalSummoned, drewNothing, turns;
+    uint16_t monsterToGraveTurn;   /* the last turn a monster of theirs went from their field to their Graveyard */
+    uint16_t summonedTurn;         /* the last turn they Summoned a monster (Scapegoat) */
 };
 /* What the engine is asking (YgoDuel.query) */
 enum YgoQueryType
@@ -174,7 +178,7 @@ struct YgoAnswer
 struct YgoLink
 {
     uint8_t obj, effect, player, targetCount;
-    uint8_t targets[8];
+    uint8_t targets[8], targetMoves[8];
     uint8_t negated, activation;   /* activation: a Spell/Trap card's activation (not only an effect) */
     uint8_t eventObj;              /* triggers: the card that set it off (0xFF none) */
     int16_t value;                 /* chosen at activation (a number, an option) */
@@ -186,11 +190,16 @@ struct YgoPending
     uint8_t optional, when;        /* when: "When... you can" (it misses the timing) */
     uint16_t serial;               /* the event that set it off */
 };
-/* Lasting effects that aren't any one card's (Swords of Revealing Light-style locks, "this turn" rules) */
+/* Lasting effects that outlive the effect that made them (Waboku's "this turn", Kuriboh's "that battle"): each
+ * works as a rule (YR_* in ygo_internal.h, kind) for player, an object or that player's monsters (scope YGO_SCOPE_*) */
+enum { YGO_SCOPE_PLAYER, YGO_SCOPE_OBJ, YGO_SCOPE_MONSTERS };
+#define YGO_UNTIL_REMOVED 0xFFFF
+#define YGO_UNTIL_BATTLE 0xFFFE    /* the end of this battle's Damage Step */
+#define YGO_UNTIL_CHAIN 0xFFFD     /* the end of the chain resolving now */
 struct YgoLasting
 {
-    uint8_t kind, player, obj;
-    uint16_t until;                /* the turn it ends at the end of (0xFFFF: until removed) */
+    uint8_t kind, player, obj, scope;
+    uint16_t until;                /* the turn it ends at the end of, or YGO_UNTIL_* */
     int16_t value;
 };
 /* Engine flow frames (internal) */
@@ -230,6 +239,8 @@ enum YgoEventType
     YGO_EV_SHUFFLE,
     YGO_EV_REVEAL,        /* obj shown to the opponent */
     YGO_EV_TARGET,        /* obj targets target */
+    YGO_EV_CONTROL,       /* player takes control of obj */
+    YGO_EV_LOOK,          /* player looks at obj (only player's screen shows it) */
     YGO_EV_WIN            /* player wins: value YGO_WIN_* */
 };
 enum { YGO_WIN_LP, YGO_WIN_DECK_OUT, YGO_WIN_EXODIA, YGO_WIN_CONCEDE, YGO_WIN_EFFECT };
@@ -250,7 +261,7 @@ struct YgoState
     uint8_t current, first, phase, winner, winReason, over;
     /* Battle */
     uint8_t attacker, attackTarget; /* object + 1 */
-    uint8_t battleStep, damageStep, directAttack, attackNegated, flippedByBattle;
+    uint8_t battleStep, damageStep, directAttack, attackNegated, flippedByBattle, endBattle;
     uint8_t battleDestroyed[2];     /* object + 1: destroyed by this battle, sent to the Graveyard at its end */
     /* The response window open now (YW_* in ygo_internal.h): what "When..." cards answer */
     uint8_t window, windowObj, windowPlayer;
@@ -283,6 +294,8 @@ int YgoDuel_Init(struct YgoDuel *d, const uint16_t main0[YGO_DECK_MAX], const ui
 /* Answer the current question. 1 done (the next question is in d->query), 0 refused (d->error says why). */
 int YgoDuel_Answer(struct YgoDuel *d, const struct YgoAnswer *answer);
 int YgoDuel_Concede(struct YgoDuel *d, unsigned player);
+/* After d->s was changed from outside (tests, debug commands): ask the question again */
+int YgoDuel_Refresh(struct YgoDuel *d);
 uint32_t YgoDuel_Hash(const struct YgoDuel *d);
 /* Counts every physical card exactly once (tests) */
 int YgoDuel_Conserved(const struct YgoDuel *d);
