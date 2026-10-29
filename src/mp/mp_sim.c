@@ -452,6 +452,7 @@ static void CB2_EndSimBattle(void)
     memcpy(gPlayerParty, sSim.saved, sizeof(gPlayerParty));
     CalculatePlayerPartyCount();
     gMpSimBattle = FALSE;
+    MP_MUSIC_SCENE_RELEASE();
     gSpecialVar_Result = won;
     MPNet_Log("sim: battle %d %s (our lead back at Lv%d)", sSim.streak + 1, won ? "won" : "lost",
               (int)GetMonData(&gPlayerParty[0], MON_DATA_LEVEL));
@@ -497,6 +498,8 @@ void MP_Sim_Battle(void)
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_EREADER_TRAINER;
     gTrainerBattleOpponent_A = 0;
     CreateTask(Task_StartSimBattle, 1);
+    // custom music: the battle's songs (the game's trainer battle and victory songs) are this scene's until it ends
+    MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
     PlayMapChosenOrBattleBGM(0);
     BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_E_READER));
 }

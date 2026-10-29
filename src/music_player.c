@@ -371,7 +371,7 @@ void MP2KPlayerMain(void *voidPtrPlayer) {
     
     player->tempoCounter += player->tempoInterval;
     while (player->tempoCounter >= 150) {
-        u16 trackBits = 0;
+        u64 trackBits = 0; // Moemon Kai: 64 tracks (.kaisong); status keeps a nonzero summary in its 16 track bits
         
         for (u32 i = 0; i < player->trackCount; i++) {
             struct MP2KTrack *currentTrack = player->tracks + i;
@@ -379,7 +379,7 @@ void MP2KPlayerMain(void *voidPtrPlayer) {
             if ((currentTrack->status & MPT_FLG_EXIST) == 0) {
                 continue;
             }
-            trackBits |= (1 << i);
+            trackBits |= (u64)1 << i;
             
             chan = currentTrack->chan;
             while (chan != NULL) {
@@ -467,7 +467,7 @@ void MP2KPlayerMain(void *voidPtrPlayer) {
             player->status = MUSICPLAYER_STATUS_PAUSE;
             goto returnEarly;
         }
-        player->status = trackBits;
+        player->status = (u16)(trackBits | (trackBits >> 16) | (trackBits >> 32) | (trackBits >> 48));
         player->tempoCounter -= 150;
     }
     

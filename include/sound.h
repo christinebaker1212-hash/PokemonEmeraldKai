@@ -48,4 +48,16 @@ bool8 IsSEPlaying(void);
 bool8 IsBGMPlaying(void);
 bool8 IsSpecialSEPlaying(void);
 
+// Moemon Kai: songs remember which scene asked for them (custom music: include/mp_kaisong_scene.h)
+#include "mp_kaisong_scene.h"
+#ifndef MP_KAISONG_NO_SCENE
+#define PlayBGM(n) MP_KAISONG_WRAP(PlayBGM(n))
+#define PlayNewMapMusic(n) MP_KAISONG_WRAP(PlayNewMapMusic(n))
+#define FadeOutAndPlayNewMapMusic(n, s) MP_KAISONG_WRAP(FadeOutAndPlayNewMapMusic(n, s))
+#define FadeOutAndFadeInNewMapMusic(n, o, i) MP_KAISONG_WRAP(FadeOutAndFadeInNewMapMusic(n, o, i))
+#define FadeInNewBGM(n, s) MP_KAISONG_WRAP(FadeInNewBGM(n, s))
+#define PlayFanfare(n) MP_KAISONG_WRAP(PlayFanfare(n))
+#define PlayFanfareByFanfareNum(n) MP_KAISONG_WRAP(PlayFanfareByFanfareNum(n))
+#endif
+
 #endif // GUARD_SOUND_H

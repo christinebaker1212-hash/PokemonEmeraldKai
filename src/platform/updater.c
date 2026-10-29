@@ -1558,6 +1558,16 @@ static int SongsReady(void)
     return 1;
 }
 
+// Moemon Kai: a file or folder next to the game (music/ for custom songs)
+const char *Updater_ExeFile(const char *name)
+{
+    static char path[1100];
+    if (!sExeDir[0] && !FindExe())
+        return name;
+    JoinPath(path, sizeof(path), sExeDir, name);
+    return path;
+}
+
 const char *Updater_SongsRoot(void)
 {
     static char root[1100];

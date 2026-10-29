@@ -375,7 +375,7 @@ void TtBoard_Begin(const struct TtDuel *truth, unsigned me, const char *myName, 
 void TtBoard_End(void)
 {
     if (B.active && B.mapMusic)
-        PlayBGM(B.mapMusic);
+        MP_MUSIC_TO_MAP(PlayBGM(B.mapMusic));   // the map's own song again (custom music: the map's, not the game's)
     B.active = 0;
     B.phase = PH_OFF;
 }

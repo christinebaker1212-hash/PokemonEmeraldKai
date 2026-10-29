@@ -77,9 +77,10 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
   the game's piano and the factor goes into the track's VOL commands (*Even out instrument volumes*).
 - **Projects.** `.mmsproj` is a text file holding every setting and instrument choice, with the
   MIDI inside, so it opens anywhere.
-- **Exports.** `.kaisong` (one file: song, voicegroup, sample names; layout and loader plan in
+- **Exports.** `.kaisong` (one file: song, voicegroup, sample names; layout and how the game loads it in
   `docs/KAISONG_FORMAT.md`) and decomp sources (`<song>.s` + voicegroup `.inc` in the game's own
-  format). The game doesn't load `.kaisong` files yet.
+  format). The game plays `.kaisong` files from its `music` folder, exactly as the studio plays them (both checked
+  sample for sample by `tools/test/kaisong_test.sh`), with each file's own settings: tracks, voices, reverb, priority.
 
 The game's own MIDIs (`sound/songs/midi/mus_*.mid`) open with their real voicegroup, volume,
 reverb and priority from `midi.cfg`.
@@ -107,13 +108,19 @@ track to **one instrument** all through, or point any single change at another i
 for a copy of it in a free slot to change on its own. Saved in the project and in the exports. INSTRUMENTS lists the voice slots the song uses: pick one, then
 **Change...** (every game instrument, by category, with search; click to hear), **GM match**,
 **Hold to hear** or keys Z-M, its envelope and its **Octave** (every note it plays moves by whole
-octaves, in the exports too). SONG sets the game song it replaces, volume,
+octaves, in the exports too). SONG sets the game song it replaces and where (**Replaces**: every song the game plays as music, the places
+each plays in, from `tools/kaisong/gen.py`; search finds songs by name or place; pick **Everywhere** or one place;
+**None** for no game song; scenes like the card games and the BATTLE SIMULATOR are places too), volume,
 reverb, priority, the loop (MIDI markers, none, whole song, custom bars), and can take every
 instrument from a game song's voicegroup. **GBA accurate** (off unless turned on) plays and exports the way the game
 would: 10 tracks, 5 sample voices, the rest of a busy moment cut off. Off, the song plays and exports
 as it is: up to 64 tracks and 64 sample voices, so nothing is cut (the 4 Game Boy channels still play one note each); the game
-can't play such songs until its music player gets more tracks and voices. **Drums first** (a GM fix)
-gives drum tracks priority 1 so their hits win voices in GBA accurate mode. Then **Save** and **Export .kaisong** / **Export decomp**.
+plays those in full too. **Drums first** (a GM fix)
+gives drum tracks priority 1 so their hits win voices in GBA accurate mode. Then **Save** and **Export .kaisong** / **Export decomp**. A `.kaisong` export is named for where it plays
+(`mus_route101.kaisong` everywhere, `mus_route101@route103.kaisong` only there; no game song picked: the title) and
+writes `SONG_TABLE.md` in its folder again: every song, the places it plays and the `.kaisong` files there (the same
+page as the game's `docs/SONG_TABLE.md`, which the release makes for the game's `music` folder). Export into the
+game's `music` folder (in the repository: committed songs reach every player in the next update).
 **Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
 and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
 **Defaults** (top right): settings every MIDI and rip you open starts with: GBA accurate, volume,
@@ -128,7 +135,8 @@ Command line (also what the tests use):
 moemon_music_studio [FILE]                          the window (FILE: .mid, .mmsproj or a rip)
 moemon_music_studio --original RIP OUT.wav           the rip's own sound (its emulator); MMS_BIOS = BIOS folder
 moemon_music_studio --render IN OUT.wav [SECONDS]   to the loop end, or SECONDS
-moemon_music_studio --export IN OUT.kaisong
+moemon_music_studio --export IN OUT.kaisong [SONG[@PLACE]]   OUT a folder: named for SONG@PLACE, and its SONG_TABLE.md
+moemon_music_studio --song-table DIR                 DIR/SONG_TABLE.md for the .kaisong files in DIR
 moemon_music_studio --decomp IN DIR
 moemon_music_studio --save IN OUT.mmsproj [SONG]
 moemon_music_studio --dump IN                       song bytecode, a track a line

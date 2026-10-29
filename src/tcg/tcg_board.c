@@ -1258,7 +1258,7 @@ void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int onlin
 void TcgBoard_End(void)
 {
     if (B.active && B.music)
-        PlayBGM(B.music);
+        MP_MUSIC_TO_MAP(PlayBGM(B.music));   // the map's own song again (custom music: the map's, not the duel's)
     B.active = 0;
 }
 static void Enqueue(const struct TcgDuel *state)

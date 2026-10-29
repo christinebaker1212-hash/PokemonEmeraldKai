@@ -497,19 +497,20 @@ static void do_save(const char *path)
     else set_status("Couldn't save: %s", err);
 }
 
+static void open_place_picker(void);
+
 static void default_name(char *buf, int n, const char *ext)
 {
     const char *stem = S.p.target[0] ? S.p.target : S.p.title[0] ? S.p.title : "song";
     snprintf(buf, n, "%s%s", stem, ext);
 }
 
-static int export_blocked(void)
+static int export_blocked(int needSong)
 {
     if (!have_song()) { set_status("%s", "Open a MIDI first."); return 1; }
-    if (!S.p.target[0]) {
-        set_status("%s", "Pick which game song this replaces first (SONG > Replaces).");
-        sModal = MODAL_SONG_TARGET;
-        sSearch[0] = 0; sPickSel = -1; sPickScroll = 0;
+    if (needSong && !S.p.target[0]) {
+        set_status("%s", "Decomp files are named after the game song they replace: pick it first (SONG > Replaces).");
+        open_place_picker();
         return 1;
     }
     return 0;
@@ -520,8 +521,17 @@ static void do_export_kaisong(const char *path)
     char err[512], p[1100], warn[400];
     snprintf(p, sizeof(p), "%s%s", path, ends_with(path, ".kaisong") ? "" : ".kaisong");
     export_warnings(&S.p, &S.c, warn, sizeof(warn));
-    if (export_kaisong(&S.p, &S.c, p, err, sizeof(err)))
-        snprintf(sStatus, sizeof(sStatus), "Exported %s. %s", path_base(p), warn);
+    if (export_kaisong(&S.p, &S.c, p, err, sizeof(err))) {
+        // the folder's song table again: every song, where it plays and the custom ones there (the release makes the
+        // same page for the game's music folder)
+        char dir[1100];
+        snprintf(dir, sizeof(dir), "%s", p);
+        char *a = strrchr(dir, '/'), *b = strrchr(dir, '\\');
+        if (b > a) a = b;
+        if (a) *a = 0; else snprintf(dir, sizeof(dir), ".");
+        int table = export_song_table(dir, err, sizeof(err));
+        snprintf(sStatus, sizeof(sStatus), "Exported %s%s. %s", path_base(p), table ? " and its folder's SONG_TABLE.md" : "", warn);
+    }
     else set_status("Couldn't export: %s", err);
 }
 
@@ -562,16 +572,16 @@ static void run_action(int act)
         break;
     }
     case ACT_EXPORT_KAISONG: {
-        if (export_blocked()) break;
+        if (export_blocked(0)) break;
         char def[300];
-        default_name(def, sizeof(def), ".kaisong");
+        export_default_name(&S.p, def, sizeof(def), ".kaisong");
         r = dlg_save(path, sizeof(path), "Export the song for Moemon Emerald Kai", "Kai songs", "*.kaisong", def);
         if (r > 0) do_export_kaisong(path);
         else if (r < 0) ask_path(act, def);
         break;
     }
     case ACT_EXPORT_DECOMP:
-        if (export_blocked()) break;
+        if (export_blocked(1)) break;
         r = dlg_folder(path, sizeof(path), "Folder for the song's .s and voicegroup .inc");
         if (r > 0) do_export_decomp(path);
         else if (r < 0) ask_path(act, ".");
@@ -926,9 +936,11 @@ static void draw_song(void)
     int col1 = x + 16, row = y + 30;
 
     text(col1, row + 2, "Replaces", C_DIM);
-    if (button(col1 + 80, row, 220, 22, p->target[0] ? p->target : "(pick a game song)", 1)) {
-        sModal = MODAL_SONG_TARGET; sSearch[0] = 0; sPickSel = song_by_name(p->target); sPickScroll = 0;
-    }
+    char rep[140];
+    if (p->target[0] && p->place[0]) snprintf(rep, sizeof(rep), "%s @ %s", p->target, p->place);
+    else snprintf(rep, sizeof(rep), "%s", p->target[0] ? p->target : "(none: pick where it plays)");
+    if (button(col1 + 80, row, 220, 22, "", 1)) open_place_picker();
+    textfit(col1 + 86, row + 3, 208, rep, C_TEXT);
     text(col1 + 310, row + 2, "Title", C_DIM);
     textfit(col1 + 360, row + 2, 230, p->title, C_TEXT);
     if (p->isRip) {
@@ -1207,6 +1219,144 @@ static void draw_instrument_picker(void)
         char nm[160];
         voice_name(&S.p.voice[sSelSlot], nm, sizeof(nm));
         snprintf(sStatus, sizeof(sStatus), "Slot %d is now %s.", sSelSlot, nm);
+        sModal = MODAL_NONE;
+    }
+}
+
+// ------------------------------------------------------------------ SONG > Replaces: which game song, and where
+
+static int sPlaceSel = -1, sPlaceScroll;   // sf_places index of the place picked (-1 = everywhere)
+
+static void open_place_picker(void)
+{
+    sModal = MODAL_SONG_TARGET;
+    sSearch[0] = 0;
+    sPickSel = song_by_name(S.p.target);
+    sPickScroll = sPickSel > 5 ? sPickSel - 5 : 0;
+    sPlaceSel = -1;
+    sPlaceScroll = 0;
+    for (int i = 0; i < SF_NUM_PLACES && S.p.place[0]; i++)
+        if (sf_places[i].song == sPickSel && !strcmp(sf_places[i].place, S.p.place)) { sPlaceSel = i; break; }
+}
+
+// labels are UTF-8 (POKéMON); the window's fonts are ASCII
+static const char *ascii(const char *s)
+{
+    static char buf[256];
+    size_t n = 0;
+    for (; *s && n < sizeof(buf) - 1; s++) {
+        unsigned char c = (unsigned char)*s;
+        if (c < 0x80) buf[n++] = (char)c;
+        else if (c == 0xC3 && (unsigned char)s[1] == 0xA9) { buf[n++] = 'e'; s++; }
+        else if (c >= 0xC0) buf[n++] = '?';
+    }
+    buf[n] = 0;
+    return buf;
+}
+
+static int song_matches(int song)
+{
+    if (str_has(sf_songs[song].name, sSearch)) return 1;
+    for (int i = 0; i < SF_NUM_PLACES; i++)
+        if (sf_places[i].song == song && (str_has(sf_places[i].label, sSearch) || str_has(sf_places[i].place, sSearch))) return 1;
+    return 0;
+}
+
+static void draw_place_picker(void)
+{
+    int x, y, w = 1000, h = 660;
+    modal_box(&x, &y, w, h, "WHERE DOES THIS SONG PLAY IN THE GAME?");
+    text(x + 14, y + 30, "Pick the game song it replaces, then everywhere, one map or one scene (the export is named for it).", C_DIM);
+    search_field(x + 14, y + 54, 300);
+    text(x + 324, y + 58, "song names and places", C_DIM);
+    int top = y + 88, rowH = 22, rows = (h - 88 - 60) / rowH;
+
+    // songs
+    int lw = 330, list[SF_NUM_SONGS], n = 0;
+    int selShown = 0;
+    for (int i = 0; i < SF_NUM_SONGS; i++)
+        if (song_matches(i)) { selShown |= i == sPickSel; list[n++] = i; }
+    if (n && !selShown) { sPickSel = list[0]; sPlaceSel = -1; sPlaceScroll = 0; }   // the search hid it: its first match
+    if (wheel && hot(x + 14, top, lw, rows * rowH)) sPickScroll -= wheel * 3;
+    if (sPickScroll > n - rows) sPickScroll = n - rows;
+    if (sPickScroll < 0) sPickScroll = 0;
+    int use = 0;
+    for (int r = 0; r < rows && sPickScroll + r < n; r++) {
+        int i = list[sPickScroll + r], ry = top + r * rowH, cnt = 0;
+        for (int k = 0; k < SF_NUM_PLACES; k++) cnt += sf_places[k].song == i;
+        int ho = hot(x + 14, ry, lw - 18, rowH - 2);
+        fill(x + 14, ry, lw - 18, rowH - 2, i == sPickSel ? C_SEL : ho ? C_HOT : C_ROW);
+        textfit(x + 20, ry + 3, 210, sf_songs[i].name, C_TEXT);
+        char c[24];
+        snprintf(c, sizeof(c), cnt == 1 ? "1 place" : cnt ? "%d places" : "unused", cnt);
+        text(x + lw - 18 - textw(c) - 6, ry + 3, c, C_DIM);
+        if (clicked(x + 14, ry, lw - 18, rowH - 2)) {
+            if (i != sPickSel) { sPickSel = i; sPlaceSel = -1; sPlaceScroll = 0; }
+            else if (dblClick) use = 1;
+        }
+    }
+    scrollbar(x + 14 + lw - 16, top, rows * rowH, n, rows, &sPickScroll);
+
+    // where it plays: everywhere, then each place (a place without a map key is shown but can't be picked)
+    int px = x + 14 + lw + 10, pw = w - lw - 48;
+    if (sPickSel >= 0) {
+        int item[SF_NUM_PLACES + 16], kindHead[SF_NUM_PLACES + 16], ni = 0;
+        item[ni] = -1; kindHead[ni++] = -1;                 // everywhere
+        for (int k = 0; k < SF_NUM_KINDS; k++) {
+            int head = 0;
+            for (int i = 0; i < SF_NUM_PLACES; i++) {
+                if (sf_places[i].song != sPickSel || sf_places[i].kind != k) continue;
+                if (!head) { item[ni] = -2; kindHead[ni++] = k; head = 1; }
+                item[ni] = i; kindHead[ni++] = -1;
+            }
+        }
+        if (wheel && hot(px, top, pw, rows * rowH)) sPlaceScroll -= wheel * 3;
+        if (sPlaceScroll > ni - rows) sPlaceScroll = ni - rows;
+        if (sPlaceScroll < 0) sPlaceScroll = 0;
+        const char *selKey = sPlaceSel >= 0 ? sf_places[sPlaceSel].place : "";
+        for (int r = 0; r < rows && sPlaceScroll + r < ni; r++) {
+            int it = item[sPlaceScroll + r], ry = top + r * rowH;
+            if (it == -2) { text(px + 4, ry + 4, sf_kind_names[kindHead[sPlaceScroll + r]], C_ACCENT); continue; }
+            const char *key = it >= 0 ? sf_places[it].place : "";
+            int pickable = it < 0 || key[0];
+            int on = it < 0 ? sPlaceSel < 0 : key[0] && !strcmp(key, selKey);
+            int ho = pickable && hot(px, ry, pw - 18, rowH - 2);
+            fill(px, ry, pw - 18, rowH - 2, on ? C_SEL : ho ? C_HOT : C_ROW);
+            if (it < 0) text(px + 8, ry + 3, "Everywhere: every place it plays", C_TEXT);
+            else {
+                char line[300];
+                snprintf(line, sizeof(line), "%s", ascii(sf_places[it].label));
+                textfit(px + 8, ry + 3, pw - 260, line, pickable ? C_TEXT : C_DIM);
+                if (key[0]) { snprintf(line, sizeof(line), "@%s", key); textfit(px + pw - 246, ry + 3, 224, line, C_DIM); }
+                else text(px + pw - 246, ry + 3, "(not one map)", C_DIM);
+            }
+            if (pickable && clicked(px, ry, pw - 18, rowH - 2)) {
+                if (on && dblClick) use = 1;
+                sPlaceSel = it;
+            }
+        }
+        scrollbar(px + pw - 16, top, rows * rowH, ni, rows, &sPlaceScroll);
+    } else text(px + 8, top + 4, "Pick a song on the left.", C_DIM);
+
+    char what[200] = "";
+    if (sPickSel >= 0)
+        snprintf(what, sizeof(what), "File: %s%s%s.kaisong", sf_songs[sPickSel].name, sPlaceSel >= 0 ? "@" : "",
+                 sPlaceSel >= 0 ? sf_places[sPlaceSel].place : "");
+    textfit(x + 14, y + h - 38, w - 400, what, C_DIM);
+    if (button(x + w - 360, y + h - 44, 110, 30, "None", 1)) {
+        S.p.target[0] = S.p.place[0] = 0;
+        S.p.dirty = 1;
+        set_status("%s", "It replaces no game song now (the export is named after the title).");
+        sModal = MODAL_NONE;
+    }
+    if (button(x + w - 240, y + h - 44, 110, 30, "Use", sPickSel >= 0) || (kEnter && sPickSel >= 0)) use = 1;
+    if (button(x + w - 120, y + h - 44, 104, 30, "Cancel", 1) || kEsc) sModal = MODAL_NONE;
+    if (use && sPickSel >= 0) {
+        snprintf(S.p.target, sizeof(S.p.target), "%s", sf_songs[sPickSel].name);
+        snprintf(S.p.place, sizeof(S.p.place), "%s", sPlaceSel >= 0 ? sf_places[sPlaceSel].place : "");
+        S.p.dirty = 1;
+        if (S.p.place[0]) snprintf(sStatus, sizeof(sStatus), "The export will play instead of %s at %s only.", S.p.target, S.p.place);
+        else set_status("The export will play instead of %s everywhere.", S.p.target);
         sModal = MODAL_NONE;
     }
 }
@@ -1739,6 +1889,8 @@ int ui_main(int argc, char **argv)
     if (getenv("MMS_TEST_MODAL")) {   // tests: open a window for a screenshot
         sModal = atoi(getenv("MMS_TEST_MODAL"));
         if (sModal == MODAL_INSTRUMENT && sSelSlot >= 0) open_instrument_picker();
+        if (sModal == MODAL_SONG_TARGET) open_place_picker();
+        if (getenv("MMS_TEST_SEARCH")) snprintf(sSearch, sizeof(sSearch), "%s", getenv("MMS_TEST_SEARCH"));
     }
 
     while (!sQuit) {
@@ -1814,7 +1966,7 @@ int ui_main(int argc, char **argv)
         sInModal = 1;
         switch (sModal) {
         case MODAL_INSTRUMENT: draw_instrument_picker(); break;
-        case MODAL_SONG_TARGET: draw_song_picker(0); break;
+        case MODAL_SONG_TARGET: draw_place_picker(); break;
         case MODAL_SONG_VOICES: draw_song_picker(1); break;
         case MODAL_PATH: draw_path_prompt(); break;
         case MODAL_CONFIRM: draw_confirm(); break;

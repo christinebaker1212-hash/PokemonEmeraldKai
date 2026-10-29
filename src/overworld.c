@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_kaisong.h"
 #include "mp.h"
 #include "overworld.h"
 #include "battle_pyramid.h"
@@ -1185,7 +1186,7 @@ void Overworld_PlaySpecialMapMusic(void)
         music = MpRideMusic(music);
     }
 
-    if (music != GetCurrentMapMusic())
+    if (music != GetCurrentMapMusic() || MP_Kaisong_Differs(music, NULL)) // Moemon Kai: this map has its own version
         PlayNewMapMusic(music);
 }
 
@@ -1217,7 +1218,7 @@ static void TransitionMapMusic(void)
             else if (newMusic == MUS_UNDERWATER && currentMusic != MUS_NONE && currentMusic != MUS_DUMMY)
                 newMusic = currentMusic;   // Moemon Co-op: SURF MUSIC off: diving keeps the sea's song
         }
-        if (newMusic != currentMusic)
+        if (newMusic != currentMusic || MP_Kaisong_Differs(newMusic, &sWarpDestination)) // Moemon Kai: a place's own version
         {
             if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
                 FadeOutAndFadeInNewMapMusic(newMusic, 4, 4);
@@ -1262,7 +1263,8 @@ void TryFadeOutOldMapMusic(void)
     }
     if (warpMusic != MUS_UNDERWATER)
         sMpSeaSong = 0;
-    if (FlagGet(FLAG_DONT_TRANSITION_MUSIC) != TRUE && warpMusic != GetCurrentMapMusic())
+    if (FlagGet(FLAG_DONT_TRANSITION_MUSIC) != TRUE
+     && (warpMusic != GetCurrentMapMusic() || MP_Kaisong_Differs(warpMusic, &sWarpDestination))) // Moemon Kai
     {
         if (currentMusic == MUS_SURF
             && VarGet(VAR_SKY_PILLAR_STATE) == 2

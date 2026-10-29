@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_kaisong.h"
 #include "mp.h"
 #include "money.h"
 #include "battle.h"
@@ -136,15 +137,14 @@ bool8 MP_Spectate_IsStreaming(void)
 // ---------------------------------------------------------------------------
 // Encoding
 
+// The song number, and in bits 10-15 which place's custom version plays (music/*.kaisong; 0 = the song's own)
 static u16 CurrentSong(void)
 {
-    u16 i;
+    u16 song;
     if (gMPlayInfo_BGM.songHeader == NULL || (gMPlayInfo_BGM.status & MUSICPLAYER_STATUS_PAUSE))
         return 0;
-    for (i = 0; i < LAST_SONG; i++)
-        if (gSongTable[i].header == gMPlayInfo_BGM.songHeader)
-            return i;
-    return 0;
+    song = MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader);
+    return song ? song | (MP_Kaisong_VariantOf(gMPlayInfo_BGM.songHeader) << 10) : 0;
 }
 
 static bool8 TileChanged(const u16 *frame, int t)
@@ -756,10 +756,10 @@ static void ApplyFrame(const u8 *data, u16 len)
     if (!ApplyUpdate(sWatch.frame, &sWatch.gotFrame, data, len) || !sWatch.gotFrame)
         return;
     song = data[4] | (data[5] << 8);
-    if (song && song != sWatch.song && song < LAST_SONG)
+    if (song && song != sWatch.song && (song & 0x3FF) < LAST_SONG)
     {
         sWatch.song = song;
-        m4aSongNumStart(song);
+        MP_Kaisong_StartVariant(song & 0x3FF, song >> 10);
     }
 }
 

@@ -19,6 +19,7 @@ typedef struct {
     Midi midi;
     char title[64];
     char target[64];          // game song it replaces, e.g. "mus_route101" ("" = not chosen)
+    char place[64];           // only on this map (a place key from docs/SONG_TABLE.md, "" = everywhere)
     int masterVol;            // 0-127 (mid2agb -V)
     int reverb;               // -1 = off, else 0-127 (mid2agb -R)
     int priority;             // 0-255 (mid2agb -P)

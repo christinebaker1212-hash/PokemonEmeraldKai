@@ -3,7 +3,7 @@
 #   windows: needs pokeemerald64.exe (make winwsl) and SDL2.dll (SDL2_DLL, default ./SDL2/x86_64-w64-mingw32/bin/SDL2.dll)
 #   linux:   needs pokeemerald64 (make linux)
 # Writes OUTDIR/MoemonEmeraldKaiCoop-<platform>.zip: one folder, MoemonEmeraldKaiCoop/, with the game, the
-# player docs, the VS cabinet's mugen/ folder, the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
+# player docs, the VS cabinet's mugen/ folder, custom music (music/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
 set -e
 cd "$(dirname "$0")/../.."
 PLAT=${1:?usage: package.sh windows|linux OUTDIR}
@@ -37,6 +37,10 @@ cp tools/mp_server/DEPLOY.md "$P/server/"
 # the VS cabinet's fighting game: its pack, as it goes next to the game (logs and screenshots left out)
 mkdir -p "$P/mugen"
 (cd mugen && tar cf - --exclude='*.log' --exclude='mugen*.png' .) | (cd "$P/mugen" && tar xf -)
+# custom music (.kaisong songs that play instead of the game's, src/mp/mp_kaisong.c) and the page of every song and place
+mkdir -p "$P/music"
+cp music/*.kaisong "$P/music/" 2>/dev/null || true
+cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
 rm -f "$ZIP"

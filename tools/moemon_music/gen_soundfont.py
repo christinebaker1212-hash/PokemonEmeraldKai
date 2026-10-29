@@ -515,12 +515,36 @@ def main():
 
     # Songs the game can play as music, with what midi.cfg built them with.
     cfg = midi_cfg()
-    bgm = [n for n, player in song_table() if player == 'MUSIC_PLAYER_BGM' and n != 'mus_dummy']
+    bgm = [n for n, player in song_table() if player == 'MUSIC_PLAYER_BGM' and n not in ('mus_dummy', 'dummy_song_header')]
     w('#define SF_NUM_SONGS %d' % len(bgm))
     w('static const SfSong sf_songs[SF_NUM_SONGS] = {')
     for n in bgm:
         c = cfg.get(n, dict(group='dummy', vol=127, rev=-1, pri=0, exact=1))
         w('  {%s, %s, %d, %d, %d, %d},' % (cstr(n), cstr(c['group']), c['vol'], c['rev'], c['pri'], c['exact']))
+    w('};')
+    # Where each song plays (tools/kaisong/gen.py: the SONG > Replaces picker and the SONG_TABLE.md written next to exports)
+    sys.path.insert(0, os.path.join(ROOT, 'tools', 'kaisong'))
+    import gen as kaigen
+    rows = kaigen.places()
+    blocks = kaigen.song_blocks(rows)
+    assert [b[0] for b in blocks] == bgm, 'tools/kaisong/gen.py and sf_songs list different songs'
+    kinds = [k for k, _ in kaigen.KIND_TITLES]
+    w('#define SF_NUM_KINDS %d' % len(kinds))
+    w('static const char *const sf_kind_names[SF_NUM_KINDS] = {%s};' % ', '.join(cstr(t.upper()) for _, t in kaigen.KIND_TITLES))
+    w('#define SF_NUM_PLACES %d' % len(rows))
+    w('static const SfPlace sf_places[SF_NUM_PLACES] = {')
+    for r in rows:
+        w('  {%d, %d, %s, %s},' % (bgm.index(r[0]), kinds.index(r[1]), cstr(r[2]), cstr(r[3])))
+    w('};')
+    mapnames = kaigen.map_names()
+    w('#define SF_NUM_MAPS %d' % len(mapnames))
+    w('static const SfMap sf_maps[SF_NUM_MAPS] = {%s};' % ', '.join('{%s, %s}' % (cstr(k), cstr(n)) for k, n in mapnames))
+    cnl = lambda t: cstr(t).replace('\n', '\\n')   # a C string with its line breaks as \n
+    w('static const char sf_table_intro[] = %s;' % cnl('\n'.join(kaigen.MD_INTRO) + '\n'))
+    w('static const short sf_song_num[SF_NUM_SONGS] = {%s};' % ','.join(str(b[1]) for b in blocks))
+    w('static const char *const sf_song_md[SF_NUM_SONGS] = {')
+    for b in blocks:
+        w('  %s,' % cnl(''.join(l + '\n' for l in b[2])))
     w('};')
     # Every song voicegroup, so a game MIDI can be heard with the exact instruments it ships with.
     w('#define SF_NUM_SONG_GROUPS %d' % len(song_groups))

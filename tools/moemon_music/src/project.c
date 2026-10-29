@@ -453,6 +453,7 @@ int project_save(Project *p, const char *path, char *err, int errlen)
     fprintf(f, "# Moemon Music Studio project. Text lines are settings; the MIDI is kept at the end.\n");
     fprintf(f, "title=%s\n", p->title);
     fprintf(f, "song=%s\n", p->target);
+    fprintf(f, "place=%s\n", p->place);
     fprintf(f, "volume=%d\n", p->masterVol);
     fprintf(f, "reverb=%d\n", p->reverb);
     fprintf(f, "priority=%d\n", p->priority);
@@ -636,6 +637,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         const char *k = line, *v = eq + 1;
         if (!strcmp(k, "title")) snprintf(np.title, sizeof(np.title), "%s", v);
         else if (!strcmp(k, "song")) snprintf(np.target, sizeof(np.target), "%s", v);
+        else if (!strcmp(k, "place")) snprintf(np.place, sizeof(np.place), "%s", v);
         else if (!strcmp(k, "volume")) np.masterVol = atoi(v);
         else if (!strcmp(k, "reverb")) np.reverb = atoi(v);
         else if (!strcmp(k, "priority")) np.priority = atoi(v);

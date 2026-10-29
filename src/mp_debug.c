@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_kaisong.h"
+#include "gba/m4a_internal.h"
 #include "data.h"
 #include "platform.h"
 #include "siirtc.h"
@@ -875,6 +877,42 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // setflag N - an event flag (include/constants/flags.h)
         FlagSet(atoi(arg));
+    }
+    else if (strcmp(cmd, "kaisong") == 0)
+    {
+        // kaisong - list music/*.kaisong (custom songs) in the log
+        MP_Kaisong_Log();
+    }
+    else if (strcmp(cmd, "playsong") == 0)
+    {
+        // playsong N - song N from a clean sound state (no reverb, no voices left), for audio checks against the studio
+        int i;
+        m4aMPlayAllStop();
+        for (i = 0; i < MAX_DIRECTSOUND_CHANNELS; i++)
+            gSoundInfo.chans[i].statusFlags = 0;
+        for (i = 0; i < 4; i++)
+            gCgbChans[i].statusFlags = 0;
+        m4aSoundMode(SOUND_MODE_REVERB_SET);
+        memset(gSoundInfo.pcmBuffer, 0, sizeof(gSoundInfo.pcmBuffer));
+        {
+            // the Game Boy channels' phase and frame clock carry on from earlier sounds in the game; the studio starts at 0
+            extern u32 apuFrame, sampleRate;
+            extern u8 apuCycle;
+            void cgb_audio_init(u32 rate);
+            cgb_audio_init(sampleRate);
+            apuFrame = 0;
+            apuCycle = 0;
+            REG_NR13 = REG_NR14 = REG_NR23 = REG_NR24 = REG_NR33 = REG_NR34 = 0;
+        }
+        m4aSongNumStart(atoi(arg));
+        printf("[test] playsong %d\n", atoi(arg));
+    }
+    else if (strcmp(cmd, "bgm") == 0)
+    {
+        // bgm - which song the music player plays now, and how many tracks / voices it has
+        printf("[test] bgm song %d tracks %d voices %d status %x\n", MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader),
+               gMPlayInfo_BGM.songHeader ? gMPlayInfo_BGM.songHeader->trackCount : 0, SOUND_INFO_PTR->maxChans,
+               (unsigned)gMPlayInfo_BGM.status);
     }
     else if (strcmp(cmd, "getflag") == 0)
     {

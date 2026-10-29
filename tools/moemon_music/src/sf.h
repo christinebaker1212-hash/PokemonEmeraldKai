@@ -41,6 +41,16 @@ typedef struct {
     int vol, reverb, priority, exact;
 } SfSong;
 
+// Where a song plays (tools/kaisong/gen.py): kind = an index into sf_kind_names (map music, scenes, events, battles...)
+typedef struct {
+    short song;              // sf_songs index
+    unsigned char kind;
+    const char *place;       // map key (mus_x@<place>.kaisong), "" = not one map
+    const char *label;
+} SfPlace;
+
+typedef struct { const char *key, *name; } SfMap;
+
 #include "sf_counts.h"
 
 extern const unsigned char sf_pcm[];
@@ -55,6 +65,12 @@ extern const SfPreset sf_presets[SF_NUM_PRESETS];
 extern const char *const sf_gm_names[128];
 extern const short sf_gm_preset[128];
 extern const SfSong sf_songs[SF_NUM_SONGS];
+extern const SfPlace sf_places[SF_NUM_PLACES];
+extern const char *const sf_kind_names[SF_NUM_KINDS];   // SfPlace.kind's group names, in picker order
+extern const SfMap sf_maps[SF_NUM_MAPS];
+extern const char sf_table_intro[];
+extern const short sf_song_num[SF_NUM_SONGS];        // the game's song number
+extern const char *const sf_song_md[SF_NUM_SONGS];   // SONG_TABLE.md: the lines under the song's heading
 extern const char *const sf_song_group_names[SF_NUM_SONG_GROUPS];
 extern const SfVoice sf_song_groups[SF_NUM_SONG_GROUPS][128];
 extern const unsigned char sf_gScaleTable[180];

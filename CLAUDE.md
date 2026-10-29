@@ -7,7 +7,11 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL
 card duels).
 
 Moemon Music Studio work (`tools/moemon_music/`): don't use agents (subagents / the Agent tool): do the work yourself
-(the rule from the studio's own branch).
+(the rule from the studio's own branch). The game plays its `.kaisong` exports: music/ (shipped; `<song>@<place>`),
+src/mp/mp_kaisong.c, tools/kaisong/gen.py (docs/SONG_TABLE.md, the studio's place picker data; the release runs it),
+scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by gen.py; new music-playing code needs no
+list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64
+voices; COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
 
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).

@@ -1,3 +1,5 @@
+// Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
+#define MP_KAISONG_NO_SCENE
 #include "global.h"
 #include "gba/m4a_internal.h"
 #include "sound.h"

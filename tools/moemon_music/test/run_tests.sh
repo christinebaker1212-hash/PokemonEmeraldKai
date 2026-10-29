@@ -66,6 +66,16 @@ PY
 # Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
 # PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
 # band, export a .kaisong the reader accepts and come back the same from its project.
+echo "song table: exports by place, and the SONG_TABLE.md written next to them is the release's page (tools/kaisong/gen.py)"
+mkdir -p "$T/music"
+"$B" --export ../../sound/songs/midi/mus_route101.mid "$T/music"
+"$B" --export ../../sound/songs/midi/mus_petalburg.mid "$T/music" mus_vs_gym_leader@rustboro_city_gym
+test -f "$T/music/mus_route101.kaisong" && test -f "$T/music/mus_vs_gym_leader@rustboro_city_gym.kaisong"
+grep -q "place=rustboro_city_gym" "$T/music/mus_vs_gym_leader@rustboro_city_gym.kaisong"
+python3 ../kaisong/gen.py --music "$T/music" --md "$T/py_table.md"
+cmp "$T/music/SONG_TABLE.md" "$T/py_table.md"
+grep -q '| `mus_vs_gym_leader@rustboro_city_gym.kaisong` | mus_vs_gym_leader | Rustboro City Gym |' "$T/music/SONG_TABLE.md"
+
 if [ -n "$MMS_RIPS" ]; then
     echo "== rips in $MMS_RIPS"
     find "$MMS_RIPS" -maxdepth 2 \( -iname '*.minipsf' -o -iname '*.psf' -o -iname '*.minipsf2' -o -iname '*.miniusf' \

@@ -1,5 +1,9 @@
 	.equiv TRACK_SIZE, 0x50
+.ifdef PORTABLE
+	.equiv NUM_TRACKS_BGM, 64 @ Moemon Kai: .kaisong songs without the track limit (m4a.c gMPlayTrack_BGM)
+.else
 	.equiv NUM_TRACKS_BGM, 10
+.endif
 	.equiv NUM_TRACKS_SE1, 3
 	.equiv NUM_TRACKS_SE2, 9
 	.equiv NUM_TRACKS_SE3, 1

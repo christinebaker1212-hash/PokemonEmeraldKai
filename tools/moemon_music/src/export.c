@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <dirent.h>
 #include "export.h"
 #include "inst.h"
 #include "engine.h"
@@ -13,7 +14,7 @@ void export_warnings(const Project *p, const Conv *c, char *buf, int n)
 {
     buf[0] = 0;
     if (!p->target[0])
-        snprintf(buf + strlen(buf), n - strlen(buf), "Pick the game song it replaces. ");
+        snprintf(buf + strlen(buf), n - strlen(buf), "It replaces no game song yet (SONG > Replaces, or name the file after one). ");
     if (c->ntracks > track_limit(p))
         snprintf(buf + strlen(buf), n - strlen(buf), "Only %d tracks fit: %d will be left out (mute some). ",
                  track_limit(p), c->ntracks - track_limit(p));
@@ -198,6 +199,10 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
              p->target, p->title, p->midiName, p->masterVol, p->reverb, p->priority, c->hasLoop ? "yes" : "no", p->voices,
              STUDIO_VERSION, when);
     bput(&info, line, strlen(line));
+    if (p->place[0]) {
+        snprintf(line, sizeof(line), "place=%s\n", p->place);
+        bput(&info, line, strlen(line));
+    }
     if (p->isRip) {
         snprintf(line, sizeof(line), "source=%s\n", p->ripInfo);
         bput(&info, line, strlen(line));
@@ -493,4 +498,120 @@ int export_decomp(const Project *p, const Conv *c, const char *dir, char *err, i
     if (fclose(f) != 0) ok = 0;
     if (!ok) { snprintf(err, errlen, "couldn't finish writing the files in %s", dir); return 0; }
     return export_decomp_samples(p, c, dir, label, err, errlen);
+}
+
+// ------------------------------------------------------------------ the song table (SONG_TABLE.md)
+
+void export_default_name(const Project *p, char *buf, int n, const char *ext)
+{
+    if (p->target[0] && p->place[0]) snprintf(buf, n, "%s@%s%s", p->target, p->place, ext);
+    else snprintf(buf, n, "%s%s", p->target[0] ? p->target : p->title[0] ? p->title : "song", ext);
+}
+
+typedef struct { char file[256], song[128], place[128], title[256]; } TableSong;
+
+static int cmp_table_song(const void *a, const void *b) { return strcmp(((const TableSong *)a)->file, ((const TableSong *)b)->file); }
+
+static void trim(char *s)
+{
+    size_t n = strlen(s), a = 0;
+    while (n && (s[n - 1] == ' ' || s[n - 1] == '\t' || s[n - 1] == '\r' || s[n - 1] == '\n')) s[--n] = 0;
+    while (s[a] == ' ' || s[a] == '\t') a++;
+    memmove(s, s + a, n - a + 1);
+}
+
+// INFO title= of a .kaisong ("" if none)
+static void kaisong_title(const char *path, char *title, int n)
+{
+    title[0] = 0;
+    FILE *f = fopen(path, "rb");
+    if (!f) return;
+    uint8_t h[32];
+    if (fread(h, 1, 32, f) == 32 && !memcmp(h, "KAISONG", 8)) {
+        unsigned off = h[10] | (h[11] << 8);
+        uint8_t ch[8];
+        if (fseek(f, off, SEEK_SET) == 0 && fread(ch, 1, 8, f) == 8 && !memcmp(ch, "INFO", 4)) {
+            uint32_t len = ch[4] | (ch[5] << 8) | (ch[6] << 16) | ((uint32_t)ch[7] << 24);
+            char *txt = len < (1u << 20) ? malloc(len + 1) : NULL;
+            if (txt && fread(txt, 1, len, f) == len) {
+                txt[len] = 0;
+                for (char *line = txt, *next; line; line = next) {
+                    next = strchr(line, '\n');
+                    if (next) *next++ = 0;
+                    char *eq = strchr(line, '=');
+                    if (!eq) continue;
+                    *eq = 0;
+                    char k[128], v[512];
+                    snprintf(k, sizeof(k), "%s", line);
+                    snprintf(v, sizeof(v), "%s", eq + 1);
+                    trim(k); trim(v);
+                    if (!strcmp(k, "title")) snprintf(title, n, "%s", v);   // the last one wins, as in gen.py's dict
+                }
+            }
+            free(txt);
+        }
+    }
+    fclose(f);
+}
+
+int export_song_table(const char *dir, char *err, int errlen)
+{
+    TableSong *ts = NULL;
+    int nts = 0;
+    DIR *d = opendir(dir);
+    if (d) {
+        struct dirent *e;
+        while ((e = readdir(d)) != NULL) {
+            size_t l = strlen(e->d_name);
+            if (l <= 8 || strcmp(e->d_name + l - 8, ".kaisong") != 0 || l >= sizeof(ts[0].file)) continue;
+            ts = realloc(ts, (nts + 1) * sizeof(*ts));
+            TableSong *t = &ts[nts++];
+            memset(t, 0, sizeof(*t));
+            snprintf(t->file, sizeof(t->file), "%s", e->d_name);
+            char stem[256];
+            snprintf(stem, sizeof(stem), "%.*s", (int)(l - 8), e->d_name);
+            char *at = strchr(stem, '@');
+            if (at) { *at = 0; snprintf(t->place, sizeof(t->place), "%s", at + 1); }
+            snprintf(t->song, sizeof(t->song), "%s", stem);
+            char path[2048];
+            snprintf(path, sizeof(path), "%s/%s", dir, e->d_name);
+            kaisong_title(path, t->title, sizeof(t->title));
+            for (char *q = t->title; *q; q++) if (*q == '|') *q = '/';
+        }
+        closedir(d);
+    }
+    if (nts) qsort(ts, nts, sizeof(*ts), cmp_table_song);
+
+    char path[2048];
+    snprintf(path, sizeof(path), "%s/SONG_TABLE.md", dir);
+    FILE *f = fopen(path, "wb");
+    if (!f) { snprintf(err, errlen, "can't write %s", path); free(ts); return 0; }
+    // the same lines as tools/kaisong/gen.py table_md()
+    fputs(sf_table_intro, f);
+    fputs("## Custom music in this version\n\n", f);
+    if (nts) {
+        fputs("| file | replaces | where | title |\n|---|---|---|---|\n", f);
+        for (int i = 0; i < nts; i++) {
+            const char *where = ts[i].place[0] ? ts[i].place : "everywhere";
+            for (int m = 0; m < SF_NUM_MAPS && ts[i].place[0]; m++)
+                if (!strcmp(sf_maps[m].key, ts[i].place)) where = sf_maps[m].name;
+            fprintf(f, "| `%s` | %s | %s | %s |\n", ts[i].file, ts[i].song, where, ts[i].title);
+        }
+    } else fputs("None yet.\n", f);
+    fputs("\n## Songs\n\n", f);
+    for (int s = 0; s < SF_NUM_SONGS; s++) {
+        fprintf(f, "### %s (%d)\n", sf_songs[s].name, sf_song_num[s]);
+        int first = 1;
+        for (int i = 0; i < nts; i++) {
+            if (strcmp(ts[i].song, sf_songs[s].name)) continue;
+            fprintf(f, "%s`%s`", first ? "Custom: " : ", ", ts[i].file);
+            first = 0;
+        }
+        if (!first) fputc('\n', f);
+        fputs(sf_song_md[s], f);
+        if (s + 1 < SF_NUM_SONGS) fputc('\n', f);
+    }
+    free(ts);
+    if (fclose(f) != 0) { snprintf(err, errlen, "couldn't finish writing %s", path); return 0; }
+    return 1;
 }

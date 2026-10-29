@@ -2225,3 +2225,44 @@ at the end of the record so older .life files load; counted in mp_life_battle.c 
   put back after (CB2_EndSimBattle). Each opponent once before repeats; a loss ends the streak; prize money 500 + 250 a
   win (5000 at most); a new best at 3/5/7/10/15/20: RARE CANDY, PP UP, NUGGET, PP MAX, LUCKY EGG, MASTER BALL.
 Tests: sim_tent (two players, a win at level 50, levels back), sim_nodata.
+
+## Custom music: .kaisong songs (mp_kaisong.c; 1.44.0)
+
+Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMAT.md) play in place of the game's songs.
+- **Files.** `music/` next to the exe (`Updater_ExeFile("music")`, `MOEMON_MUSIC_DIR` for tests). `<song>.kaisong` =
+  everywhere, `<song>@<place>.kaisong` = only on that map (place = `MAP_` id without `MAP_`, lower case). A place's file
+  beats the everywhere one. Song names: `sound/song_table.inc` (`src/data/mp_kaisong_names.h`); only BGM-player songs.
+  The repository's `music/` ships in every zip (package.sh), so a committed song reaches every player in the update.
+- **Generated tables** (`python3 tools/kaisong/gen.py`, `--check` to verify; the release workflow runs it):
+  `src/data/mp_kaisong_samples.h` (every DirectSoundWaveData_* / ProgrammableWaveData_*: referencing them also keeps
+  them all in the binary), `src/data/mp_kaisong_names.h` (song names, map keys), `docs/SONG_TABLE.md` (every song and
+  where it plays: map music from map.json, script playbgm / playfanfare / savebgm per map and shared scripts, trainer
+  battles by class from GetBattleBGM and encounter music by trainer, on the maps those trainers stand on, legendary
+  battles from battle_setup.c, C screens; plus the custom songs). The studio imports gen.py at build time
+  (gen_soundfont.py: sf_places, sf_maps, sf_song_md) for its SONG > Replaces picker and writes the same page next to its
+  exports (export.c export_song_table; its make test checks the two are byte for byte the same).
+- **Scenes** (`<song>@<scene>.kaisong`). include/mp_kaisong_scene.h wraps every call that starts a song (sound.h,
+  m4a.h, pokemon.h; files that define them say `MP_KAISONG_NO_SCENE`) to record the asking file (`MP_Kaisong_Request`,
+  nested calls keep the outer one). gen.py: a scene is a source file that names songs (`src/mp/mp_x.c` = `x`, `src/x.c` =
+  `x`, a folder `src/tcg` / `ygo` / `tt` / `rhythm` = one scene), unless it is the world's (WORLD: field, scripts,
+  battles, co-op battle code: their songs are the map's places); its songs are the MUS_ constants it names (not ones it
+  only compares with); the label is SCREENS / SUBDIR_SCENES or a `// MUSIC SCENE: Name` comment in the file. The game
+  gets the scenes, their songs and files in mp_kaisong_names.h (sKaisongScenes / sKaisongSceneFiles, looked up by
+  `__FILE__`). Rule: a song the asking scene names plays `@scene`, else everywhere, never a map's file; any other song
+  (a scene handing back the map's song) is the map's. A scene using the game's battle code holds the music
+  (`MP_MUSIC_SCENE_HOLD(MUS_...)` / `RELEASE`, mp_sim.c: the songs named are what the picker lists for it). Card boards
+  hand the map's song back with `MP_MUSIC_TO_MAP(...)`. `MOEMON_MUSIC_LOG=1` logs each song's scene.
+  tools/kaisong/test_scenes.py adds scene files and checks they are picked up.
+- **Hooks.** m4a.c `SONG_HEADER(n, song)` in every m4aSongNum* function; MPlayStart on the BGM player calls
+  `MP_Kaisong_Started` (sample channels = the file's INFO voices, 5 for the game's songs; dropping channels clears the
+  ones past the count). overworld.c: `MP_Kaisong_Differs` in Overworld_PlaySpecialMapMusic, TransitionMapMusic and
+  TryFadeOutOldMapMusic (the same song number, another file on the next map: fade over like a new song).
+  mp_spectate.c: the song number + the place variant in bits 10-15 (protocol 64).
+- **Engine widening.** `gMPlayTrack_BGM[64]` / `NUM_TRACKS_BGM` 64 (PORTABLE), MP2KPlayerMain's track bits are u64 and
+  `status` keeps a nonzero 16-bit summary (title_screen.c's `status & 0xFFFF` still works), `TRACKS_ALL` reaches every
+  track in m4aMPlay*Control, `MAX_DIRECTSOUND_CHANNELS` = `MAX_SAMPLE_CHANNELS` = 64 (the mixer only runs maxChans of
+  them). ply_memacc's not-taken branch skips a whole pointer.
+- **Tests.** tools/test/kaisong_test.sh (studio + game, audio sample for sample). Debug: `mp kaisong` (files),
+  `mp bgm` (song, tracks, voices), `mp playsong N` (a clean sound state first: Game Boy channel phase, frame clock and
+  frequency registers carry over from earlier sounds in the game, so only a clean start matches the studio's render).
+

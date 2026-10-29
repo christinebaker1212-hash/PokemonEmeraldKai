@@ -1,3 +1,5 @@
+// Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
+#define MP_KAISONG_NO_SCENE
 #include "global.h"
 #include "gba/m4a_internal.h"
 
@@ -39,7 +41,7 @@ struct MusicPlayerInfo gMPlayInfo_BGM;
 struct MusicPlayerInfo gMPlayInfo_SE1;
 struct MusicPlayerInfo gMPlayInfo_SE2;
 struct MusicPlayerInfo gMPlayInfo_SE3;
-struct MusicPlayerTrack gMPlayTrack_BGM[10];
+struct MusicPlayerTrack gMPlayTrack_BGM[64]; // Moemon Kai: 64 for .kaisong songs made without the track limit (NUM_TRACKS_BGM)
 struct MusicPlayerTrack gMPlayTrack_SE1[3];
 struct MusicPlayerTrack gMPlayTrack_SE2[9];
 struct MusicPlayerTrack gMPlayTrack_SE3[1];
@@ -181,14 +183,23 @@ void m4aSoundMain(void)
 #endif
 }
 
+#ifdef PORTABLE
+#include "mp_kaisong.h"
+// Moemon Kai: a custom song (music/*.kaisong) for this song number here, else the game's own
+#define SONG_HEADER(n, song) MP_Kaisong_Header((n), (song)->header)
+#else
+#define SONG_HEADER(n, song) ((song)->header)
+#endif
+
 void m4aSongNumStart(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    MPlayStart(mplay->info, song->header);
+    MPlayStart(mplay->info, header);
 }
 
 void m4aSongNumStartOrChange(u16 n)
@@ -197,17 +208,18 @@ void m4aSongNumStartOrChange(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader != song->header)
+    if (mplay->info->songHeader != header)
     {
-        MPlayStart(mplay->info, song->header);
+        MPlayStart(mplay->info, header);
     }
     else
     {
         if ((mplay->info->status & MUSICPLAYER_STATUS_TRACK) == 0
          || (mplay->info->status & MUSICPLAYER_STATUS_PAUSE))
         {
-            MPlayStart(mplay->info, song->header);
+            MPlayStart(mplay->info, header);
         }
     }
 }
@@ -218,11 +230,12 @@ static void UNUSED m4aSongNumStartOrContinue(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader != song->header)
-        MPlayStart(mplay->info, song->header);
+    if (mplay->info->songHeader != header)
+        MPlayStart(mplay->info, header);
     else if ((mplay->info->status & MUSICPLAYER_STATUS_TRACK) == 0)
-        MPlayStart(mplay->info, song->header);
+        MPlayStart(mplay->info, header);
     else if (mplay->info->status & MUSICPLAYER_STATUS_PAUSE)
         MPlayContinue(mplay->info);
 }
@@ -233,8 +246,9 @@ void m4aSongNumStop(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader == song->header)
+    if (mplay->info->songHeader == header)
         m4aMPlayStop(mplay->info);
 }
 
@@ -244,8 +258,9 @@ static void UNUSED m4aSongNumContinue(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader == song->header)
+    if (mplay->info->songHeader == header)
         MPlayContinue(mplay->info);
 }
 
@@ -781,6 +796,8 @@ void MPlayStart(struct MusicPlayerInfo *mplayInfo, struct SongHeader *songHeader
         mplayInfo->ident = ID_NUMBER;
     #ifdef PORTABLE
         mplayInfo->hasBeenRanOnce = FALSE;
+        if (mplayInfo == &gMPlayInfo_BGM)
+            MP_Kaisong_Started(songHeader); // Moemon Kai: the song's own voice count
     #endif
     }
 }
@@ -1397,7 +1414,7 @@ void m4aMPlayVolumeControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u16
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1431,7 +1448,7 @@ void m4aMPlayPitchControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, s16 
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1466,7 +1483,7 @@ void m4aMPlayPanpotControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, s8 
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1511,7 +1528,7 @@ void m4aMPlayModDepthSet(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u8 mo
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1547,7 +1564,7 @@ void m4aMPlayLFOSpeedSet(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u8 lf
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1655,7 +1672,11 @@ cond_true:
     }
 
 cond_false:
+#ifdef PORTABLE
+    track->cmdPtr += sizeof(u8 *); // Moemon Kai: the jump target is a whole pointer (8 bytes on 64-bit)
+#else
     track->cmdPtr += 4;
+#endif
 }
 
 void ply_xcmd(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track)

@@ -65,6 +65,10 @@ jobs:
           echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
           tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
 
+      - name: Song table (custom music in music/, every song and where it plays)
+        if: steps.ver.outputs.skip != 'true'
+        run: python3 tools/kaisong/gen.py
+
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"

@@ -42,7 +42,8 @@ all: linux
 linux: build/linux/moemon_music_studio
 windows: build/windows/MoemonMusicStudio.exe
 
-$(GEN)/stamp: gen_soundfont.py $(wildcard $(ROOT)/sound/voicegroups/*.inc) $(ROOT)/sound/voice_groups.inc
+$(GEN)/stamp: gen_soundfont.py $(ROOT)/tools/kaisong/gen.py $(wildcard $(ROOT)/sound/voicegroups/*.inc) $(ROOT)/sound/voice_groups.inc \
+               $(ROOT)/data/maps/map_groups.json $(ROOT)/sound/song_table.inc
 	$(PY) gen_soundfont.py $(GEN)
 	touch $@
 $(GEN)/sf_data.c $(GEN)/sf_counts.h $(GEN)/sf_pcm.bin: $(GEN)/stamp

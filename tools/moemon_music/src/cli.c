@@ -1,7 +1,9 @@
 // Moemon Music Studio: command-line jobs (also what the tests use).
 //   moemon_music_studio --render IN OUT.wav [SECONDS]     IN = .mid or .mmsproj
 //   moemon_music_studio --raw IN OUT.f32 FRAMES          float samples, like the game's audio buffer
-//   moemon_music_studio --export IN OUT.kaisong
+//   moemon_music_studio --export IN OUT.kaisong [SONG[@PLACE]]   (OUT a folder: named like the window names it; the
+//                                                       folder's SONG_TABLE.md is written again, as the window does)
+//   moemon_music_studio --song-table DIR                 DIR/SONG_TABLE.md for the .kaisong files in DIR
 //   moemon_music_studio --decomp IN DIR
 //   moemon_music_studio --dump IN                         the song bytecode, one track a line
 //   moemon_music_studio --dump-exact IN VOLUME            the same, converted like mid2agb -E -V VOLUME
@@ -58,11 +60,15 @@ int cli_main(int argc, char **argv)
     static Engine e;
     const char *mode = argv[1];
     if (argc < 3) { fprintf(stderr, "usage: see the top of src/cli.c\n"); return 2; }
+    char err[512] = {0};
+    if (!strcmp(mode, "--song-table")) {
+        if (!export_song_table(argv[2], err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
+        return 0;
+    }
     inst_init();
     studio_init(&s);
     if (getenv("MMS_DEFAULTS")) defaults_load(&g_defaults, getenv("MMS_DEFAULTS"));   // the settings panel's file
     if (!studio_open(&s, argv[2])) { fprintf(stderr, "%s\n", s.msg); return 1; }
-    char err[512] = {0};
 
     if (!strcmp(mode, "--dump-exact")) {
         s.p.gmFixes = 0;
@@ -81,7 +87,24 @@ int cli_main(int argc, char **argv)
         return 0;
     }
     if (!strcmp(mode, "--export") && argc >= 4) {
-        if (!export_kaisong(&s.p, &s.c, argv[3], err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
+        if (argc >= 5) {
+            char t[128], *at;
+            snprintf(t, sizeof(t), "%s", argv[4]);
+            if ((at = strchr(t, '@')) != NULL) *at++ = 0;
+            snprintf(s.p.target, sizeof(s.p.target), "%s", t);
+            snprintf(s.p.place, sizeof(s.p.place), "%s", at ? at : "");
+        }
+        char path[2048], dir[2048];
+        snprintf(path, sizeof(path), "%s", argv[3]);
+        int folder = !(strlen(path) > 8 && !strcmp(path + strlen(path) - 8, ".kaisong"));
+        if (folder) {
+            char name[300];
+            export_default_name(&s.p, name, sizeof(name), ".kaisong");
+            snprintf(dir, sizeof(dir), "%s", argv[3]);
+            snprintf(path, sizeof(path), "%s/%s", argv[3], name);
+        }
+        if (!export_kaisong(&s.p, &s.c, path, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
+        if (folder && !export_song_table(dir, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         return 0;
     }
     if (!strcmp(mode, "--save") && argc >= 4) {

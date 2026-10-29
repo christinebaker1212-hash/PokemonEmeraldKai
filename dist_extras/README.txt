@@ -1479,6 +1479,27 @@ their six Moemon that have been in the most battles.
     battles and when you close the game. Play online with others first:
     a game that never has has no battle data yet.
 
+CUSTOM MUSIC
+------------
+The game can play new songs in place of its own: .kaisong files in the
+music folder next to the game. Updates bring the ones made for everyone;
+your own work too.
+  * <song>.kaisong plays instead of that song everywhere, for example
+    mus_route101.kaisong for ROUTES 101 to 103.
+  * <song>@<place>.kaisong only in one place, for example
+    mus_vs_gym_leader@rustboro_city_gym.kaisong for ROXANNE's battle, or
+    one scene: mus_vs_trainer@sim.kaisong for the BATTLE SIMULATOR,
+    @tcg, @ygo and @tt for the three card games, @title_screen...
+    A song changed for one place or scene stays the same everywhere else.
+  * music\SONG_TABLE.md lists every song, the places it plays (the place
+    names are in brackets) and the custom songs that came with the game.
+  * Make them with Moemon Music Studio: SONG > Replaces picks the song and
+    the place, and the export is named for it. Songs made with GBA accurate
+    off play with all their tracks and voices.
+  * Online, music is your own: each player hears their own music folder.
+    A friend watching you over SPECTATE hears your place's song.
+  * A file the game can't play is skipped and the usual song plays.
+
 DANCE MACHINE
 -------------
 The GAME CENTER's 3F (RUSTBORO CITY) has a DANCE DANCE REVOLUTION EXTREME

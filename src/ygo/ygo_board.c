@@ -1176,7 +1176,7 @@ void YgoBoard_Begin(const struct YgoDuel *truth, unsigned me, const char *oppone
 void YgoBoard_End(void)
 {
     if (B.active && B.music)
-        PlayBGM(B.music);
+        MP_MUSIC_TO_MAP(PlayBGM(B.music));   // the map's own song again (custom music: the map's, not the duel's)
     B.active = 0;
 }
 void YgoBoard_Sync(const struct YgoDuel *truth)

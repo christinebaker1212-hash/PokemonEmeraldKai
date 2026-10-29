@@ -160,6 +160,8 @@ The Windows build under Wine (`apt install wine64`), from the unzipped package:
 REJOIN through a friend's own server (three sessions of one joiner, a host on a local server):
 
     tools/test/rejoin_smoke.sh [OUT]     # invite code + password once, then REJOIN and the remembered code (no typing)
+    tools/test/kaisong_test.sh           # custom songs: the studio's exports play in the game sample for sample like
+                                         # the studio (15 tracks / 64 voices too), by place, broken files skipped
 
 Lower level, for trying things out (results and logs land in DIR):
 
