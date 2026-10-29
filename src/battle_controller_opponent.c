@@ -38,6 +38,10 @@
 #include "constants/trainers.h"
 #include "trainer_hill.h"
 
+// Moemon Co-op: the BATTLE SIMULATOR (mp_sim.c)
+extern bool8 gMpSimBattle;
+u16 MP_Sim_TrainerPic(void);
+
 static void OpponentHandleGetMonData(void);
 static void OpponentHandleGetRawMonData(void);
 static void OpponentHandleSetMonData(void);
@@ -1284,7 +1288,8 @@ static void OpponentHandleDrawTrainerPic(void)
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
     {
-        trainerPicId = GetEreaderTrainerFrontSpriteId();
+        // Moemon Co-op: the BATTLE SIMULATOR's digital trainer: a player's look as a hologram (mp_sim.c)
+        trainerPicId = gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
     {
@@ -1375,7 +1380,8 @@ static void OpponentHandleTrainerSlide(void)
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
     {
-        trainerPicId = GetEreaderTrainerFrontSpriteId();
+        // Moemon Co-op: the BATTLE SIMULATOR's digital trainer: a player's look as a hologram (mp_sim.c)
+        trainerPicId = gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
     {

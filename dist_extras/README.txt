@@ -270,6 +270,10 @@ TRIPLE BATTLES (THREE PLAYERS)
   Double Battles. When a
   friend joins and another is online but the trainer can't do a Triple
   Battle, you're told so and it's a Double Battle.
+* With TEAM PADDING ON nobody is ever turned away: a friend who asks once
+  there's no seat left (two trainers at once, or the battle just starting)
+  is told "You'll join it in a moment!" and joins as soon as the battle
+  begins, making it a Triple Battle.
 * Each player brings two Moemon: the first two of your CO-OP TEAM (or your
   first two healthy ones). One is out, the other waits on the bench and comes
   in when the first faints or when you switch.
@@ -334,12 +338,16 @@ IN BATTLE and press A: "Would you like to spectate, bet, or join?"
             again in that battle). YES: your trainer slides into their battle
             ("<your name> has come to help!") and sends out your first Moemon.
 
-Which battles: a wild Moemon met in grass, caves or water, or an ordinary
-trainer (not a GYM LEADER, rival, TEAM AQUA / MAGMA or other story battle),
-and Double Battles with a friend. Two friends can join at once.
+Which battles: a wild Moemon met in grass, caves or water, or any trainer
+except the ELITE FOUR and the CHAMPION: GYM LEADERS, your rival, TEAM AQUA
+and MAGMA and every other story battle too, two trainers who spotted your
+friend at once, and Double Battles with a friend. Two friends can join at
+once. Your friend's story goes on after the battle as it would have alone;
+if it was a GYM LEADER, you get the badge too.
 
-A trainer who is already battling a friend can spot you too. When they walk
-up: "<friend> is battling this trainer! Join their battle, or battle
+A trainer who is already battling a friend can spot you too (either one of
+two trainers battling them, or both). When they walk up: "<friend> is
+battling this trainer!" (or "these trainers!") "Join their battle, or battle
 alone?" JOIN BATTLE asks your friend as JOIN does (if they say no, or can't,
 you battle the trainer yourself); BATTLE ALONE is your own battle with them.
 
@@ -351,6 +359,8 @@ you battle the trainer yourself); BATTLE ALONE is your own battle with them.
     learn their moves, after a win).
   - The trainer gets a spot for each new player and sends out its next
     Moemon there if it has one (TEAM PADDING: at most one extra Moemon).
+    Against two trainers, the new spot goes to whichever has more Moemon
+    left, and from then on the two send out each other's Moemon too.
   - A Double Battle you started alone: your second Moemon goes back to its
     Ball and your friend takes that spot.
   - If someone leaves the game during the battle, it's called off, as in
@@ -1076,6 +1086,12 @@ DISPLAY
                 STRETCH (fills the screen exactly)
   FILTER        OFF, SCANLINES, LCD GRID
   VSYNC         on/off
+  BATTLE ANIMS  CLASSIC (the original animations) or MODERN (the same
+                animations with glowing effects, trails, shockwaves and
+                bursts of each type's colors when a move hits). Only your
+                screen changes: friends on either setting stay in step, and
+                every animation lasts exactly as long either way. Contests
+                use it too.
 CONTROLS
   CONTROLLER    which controller plays. Press A on this row, then press
                 any button on the controller you want; that one is used
@@ -1445,6 +1461,23 @@ FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
                   names). mugen\cabinets.ini has the rules: rounds, life,
                   round time, speed, which stages. Online, the rules of the
                   player who was challenged are used.
+
+BATTLE SIMULATOR
+----------------
+Each BATTLE TENT (SLATEPORT, VERDANTURF, FALLARBOR) has a BATTLE SIMULATOR
+counter. Its opponents are digital copies of the players you've met online
+(on the last server you played on): their look, shown as a hologram, and
+their six Moemon that have been in the most battles.
+
+  * Everyone battles at level 50, your Moemon too. They come back exactly
+    as they were: no EXP, nothing used up, no money lost.
+  * Win and the next simulation loads. One loss ends your streak.
+  * Every win pays prize money. A new best streak of 3, 5, 7, 10, 15 or 20
+    also gets you an item.
+  * The opponents battle like the BATTLE FRONTIER's best and switch Moemon.
+  * Your own copy reaches the server whenever you go online, after your
+    battles and when you close the game. Play online with others first:
+    a game that never has has no battle data yet.
 
 DANCE MACHINE
 -------------

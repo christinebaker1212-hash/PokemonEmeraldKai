@@ -1,0 +1,26 @@
+pressuntil A field 5000
+mp teach 0 61
+waitfor online 6000
+waitlog 6000 sim: a record arrived
+wait 60
+press RIGHT 2
+wait 20
+press A 2
+wait 120
+rendershot a_welcome
+pressuntil A battle 3000
+wait 200
+rendershot a_intro
+pressuntil A action 3000
+rendershot a_battle
+pressuntillog A 20000 sim: streak 1
+pressuntil B yesno 3000
+wait 10
+rendershot a_more
+press DOWN 2
+wait 10
+press A 2
+wait 60
+mash A 8 20
+wait 60
+quit

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+mp teach 0 55
+waitfor online 6000
+mp trainerflag 273 605
+waitlog 20000 is waiting for a partner
+barrier asked 2
+wait 20
+mp coopask 1
+waitlog 30000 join: we're in the battle
+wait 60
+rendershot c_in
+pressuntil A action 8000
+wait 20
+rendershot c_triple
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 6000
+wait 120
+mp trainerflag 273 605
+wait 200
+quit

@@ -65,6 +65,7 @@ enum
     OPT_VSYNC,
     OPT_CARDART,
     OPT_CARDBACK,
+    OPT_BATTLEANIMS,
     OPT_PADSELECT,
     OPT_PADLAYOUT,
     OPT_ANALOGRUN,
@@ -153,6 +154,9 @@ static const u8 sText_CardBacks[] = _("CARD BACKS");
 static const u8 sText_CardScaling[] = _("CARD SCALING");
 static const u8 sText_CardBackPrinted[] = _("PRINTED");
 static const u8 sText_CardBackPixel[] = _("PIXEL");
+static const u8 sText_BattleAnims[] = _("BATTLE ANIMS");
+static const u8 sText_AnimsClassic[] = _("CLASSIC");
+static const u8 sText_AnimsModern[] = _("MODERN");
 static const u8 sText_Controller[] = _("CONTROLLER");
 static const u8 sText_PadButtons[] = _("PAD BUTTONS");
 static const u8 sText_StickRun[] = _("STICK RUN");
@@ -370,6 +374,7 @@ static void BuildRows(void)
         AddRow(OPT_SCALING, 0);
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_VSYNC, 0);
+        AddRow(OPT_BATTLEANIMS, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         break;
@@ -460,6 +465,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_CARDBACK:
         names[0] = sText_CardBackPrinted, names[1] = sText_CardBackPixel;
+        return 2;
+    case OPT_BATTLEANIMS:
+        names[0] = sText_AnimsClassic, names[1] = sText_AnimsModern;
         return 2;
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
@@ -626,6 +634,7 @@ static u8 Current(u8 row)
     case OPT_VSYNC:       return Display_GetVSync() != 0;
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
     case OPT_CARDBACK:    return gMpConfig.cardBack != 0;
+    case OPT_BATTLEANIMS: return gMpConfig.battleAnims != 0;
     case OPT_CARDSCALE:   return gMpConfig.cardScaling != 0;
     case OPT_ANALOGRUN:   return Gamepad_GetAnalogRun() != 0;
     case OPT_RUMBLE:      return Gamepad_GetRumble() != 0;
@@ -674,6 +683,7 @@ static void Change(u8 row, int dir)
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
     case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
     case OPT_CARDBACK:    gMpConfig.cardBack = !gMpConfig.cardBack; break;
+    case OPT_BATTLEANIMS: gMpConfig.battleAnims = !gMpConfig.battleAnims; break;
     case OPT_CARDSCALE:   gMpConfig.cardScaling = !gMpConfig.cardScaling; break;
     case OPT_PADSELECT:   Gamepad_CycleSelected(dir); break;
     case OPT_PADLAYOUT:   Gamepad_SetLayout(Gamepad_GetLayout() + dir); break;
@@ -765,6 +775,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_VSYNC:       return sText_VSync;
     case OPT_CARDART:     return sText_CardArt;
     case OPT_CARDBACK:    return sText_CardBacks;
+    case OPT_BATTLEANIMS: return sText_BattleAnims;
     case OPT_CARDSCALE:   return sText_CardScaling;
     case OPT_PADSELECT:   return sText_Controller;
     case OPT_PADLAYOUT:   return sText_PadButtons;
@@ -912,6 +923,8 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardScaling ? "CARD PLAYERS' DECKS FIT YOURS" : "CARD PLAYERS' DECKS GO BY BADGES");
     else if (opt == OPT_CARDBACK)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardBack ? "A PIXEL-ART CARD BACK" : "THE REAL CARD BACK");
+    else if (opt == OPT_BATTLEANIMS)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.battleAnims ? "GLOWS, TRAILS AND BIG IMPACTS" : "THE ORIGINAL ANIMATIONS");
     else if (opt == OPT_FOLLOWSPRITES)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "PMD PICTURES EVERYWHERE"
                  : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "THE ORIGINAL SPRITES EVERYWHERE"

@@ -1426,6 +1426,24 @@ u8 MP_TrainerBattleLocalId(void)
     return gObjectEvents[obj].trainerType != TRAINER_TYPE_NONE ? localId : LOCALID_NONE;
 }
 
+// Moemon Co-op: both trainers' objects (local ids) in a battle against two at once (they spotted us: the approach
+// left them in gApproachingTrainers), else the one trainer's and 0
+void MP_TrainerBattleLocalIds(u8 *localIdA, u8 *localIdB)
+{
+    *localIdA = MP_TrainerBattleLocalId();
+    *localIdB = LOCALID_NONE;
+    if ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0)
+    {
+        u8 a = gApproachingTrainers[0].objectEventId, b = gApproachingTrainers[1].objectEventId;
+        if (a < OBJECT_EVENTS_COUNT && b < OBJECT_EVENTS_COUNT && gObjectEvents[a].active && gObjectEvents[b].active
+         && gObjectEvents[a].trainerType != TRAINER_TYPE_NONE && gObjectEvents[b].trainerType != TRAINER_TYPE_NONE)
+        {
+            *localIdA = gObjectEvents[a].localId;
+            *localIdB = gObjectEvents[b].localId;
+        }
+    }
+}
+
 void MP_EndJoinedTrainerBattle(void)
 {
     sNoOfPossibleTrainerRetScripts = gNoOfApproachingTrainers;
@@ -2013,9 +2031,22 @@ u16 CountBattledRematchTeams(u16 trainerId)
 // leader's "you won the badge" script), found in the trainer's object script on
 // the current map. NULL if there isn't one.
 #define MP_SCR_OP_TRAINERBATTLE 0x5C
+static const u8 *FindTrainerEndScriptIn(const struct MapEvents *ev, u16 trainerId);
+
 const u8 *MP_FindTrainerEndScript(u16 trainerId)
 {
-    const struct MapEvents *ev = gMapHeader.events;
+    return FindTrainerEndScriptIn(gMapHeader.events, trainerId);
+}
+
+// Moemon Co-op: the same, on another map (a friend who joined a gym leader's battle from somewhere else)
+const u8 *MP_FindTrainerEndScriptOnMap(u16 trainerId, u16 mapGroup, u16 mapNum)
+{
+    const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(mapGroup, mapNum);
+    return header != NULL ? FindTrainerEndScriptIn(header->events, trainerId) : NULL;
+}
+
+static const u8 *FindTrainerEndScriptIn(const struct MapEvents *ev, u16 trainerId)
+{
     u8 i;
     if (!ev)
         return NULL;

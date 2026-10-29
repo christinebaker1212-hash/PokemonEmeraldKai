@@ -1,0 +1,9 @@
+# The low HP beep in a PvP single battle (a link battle): three beeps, then silence; both start in the red
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+EXPECT_A=("starting PvP battle against player 2" "song 90 stops after 99 frames, 99 ticks")
+EXPECT_B=("starting PvP battle against player 1" "song 90 stops after 99 frames, 99 ticks")
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_SE_TRACE=90"
+ENV_B="MOEMON_DEBUG_PARTY=280:30 MOEMON_SE_TRACE=90"

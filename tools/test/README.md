@@ -23,6 +23,9 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_icons_flash` | co-op 2-on-2 at NA-JP lag with TYPE ICONS on: THUNDER's screen flashes leave the icons and the window frame alone (screenshots) |
 | `coop_weather` | co-op 2-on-2 at NA-JP lag: SANDSTORM hits all four at once (one line, then quiet turns), win on both |
 | `coop_fieldweather` / `coop_fieldweather2` | NA-JP lag, field weather differs between the games (`mp fieldweather`): every screen shows the battle's weather (the leader's field), RAIN DANCE's rain reaches the friend's screen |
+| `coop_two_join3` | NA-JP lag, three players: two trainers spot ALICE, BOB teams up, CARL joins once it started (`mp joinask 2`, sent on to ALICE): a Triple Battle against both trainers, the third foe spot from the trainer with more left, both trainers beaten on every game |
+| `coop_merge_join3` / `coop_held_join3` | three players: two players grouped on one trainer (waiting merge / held trainer spots the second), then a third one spotted by that trainer joins (JOIN BATTLE) |
+| `hgss_balls` | shots only (looked at by hand): the HGSS balls' send-out spin, a thrown MASTER BALL, a blue POKé BALL with a STAR, a GENESIS BALL, the summary's ball |
 | `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
 | `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
 | `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |
@@ -44,6 +47,15 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `dance_solo` | the DANCE machine (GAME CENTER 3F): step up, PLAY ALONE, every screen to a song played by `MOEMON_DANCE_AUTOPLAY` (MARVELOUS full combo, feet x 10,000,000), RESULTS, the next song given up (START held): FAILED, GAME OVER, back on the map |
 | `dance_versus` | ALICE waits on the left pad, BOB steps up to the right one and joins: VERSUS, ALICE picks, both play their own field and see the other's, the records reach the server (`rhythm_scores.dat`); a tie is no win |
 | `dance_hop` | ALICE plays alone: hops up (BOB, beside her, sees the arc and every double hop's facing, never south), one stage, gives up the next; the screen turns off like an old TV, she hops down and says a line from her grades |
+| `lowhp_beep` | a single battle starting in the red, a move animation during the beep at ANIM SPEED 30: the beep stops after 100 ticks (three "doo duh"s; `MOEMON_SE_TRACE=90`) |
+| `lowhp_pvp` | the same in a PvP single battle (a link battle), on both screens |
+| `join_gym` | ALICE challenges ROXANNE, BOB joins from another town: story battles can be joined; both get the STONE BADGE (BOB through the leader's own "you won" script from the gym's map) |
+| `coop_two_wait3` | TEAM PADDING never turns a third away: two trainers spot ALICE, BOB teams up, CARL asks too and is told he'll join; his game JOINs by itself once it starts: a Triple Battle against both |
+| `coop_two_solo_join` | two trainers spot ALICE alone; BOB joins the battle in progress: a co-op battle against both, both trainers beaten on both games (their continue-script mode too) |
+| `sim_tent` | the BATTLE SIMULATOR: BOB's record reaches ALICE, she beats his digital copy at level 50 in SLATEPORT's tent, gets her prize, stops at 1, her party back at its own levels |
+| `sim_nodata` | the BATTLE SIMULATOR on a save that never played online: no battle data, said politely |
+| `anim_classic` | every move animation on BATTLE ANIMS > CLASSIC, each one's length logged (`MOEMON_ANIM_FRAMES`), shots of a few |
+| `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
@@ -158,3 +170,7 @@ Lower level, for trying things out (results and logs land in DIR):
 Harness commands and conditions: see CLAUDE.md ("Headless testing") and `MP_TestCondition` in `src/mp/`.
 Anything network related should pass `coop_wild_lag`-style settings: at 250 ms an ask-and-answer
 through the relay takes over a second.
+
+Move animations: `mp animall FIRST LAST ATK TGT [TURN]` plays every move animation from FIRST to LAST in a row (in a
+battle, at the action menu); with `MOEMON_ANIMCHECK=1` the log lists every sprite animation table and number started,
+to check against the tables' sizes (HYPER BEAM read past its 7-entry orb table).

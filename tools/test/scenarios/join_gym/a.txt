@@ -1,0 +1,21 @@
+pressuntil A field 5000
+mp moves 0 45
+waitfor online 6000
+wait 200
+mp getflag 2151
+press UP 2
+wait 20
+pressuntil A battle 6000
+pressuntil A joinprompt 40000
+wait 20
+press A 2
+waitlog 8000 join: everyone is in
+wait 80
+rendershot a_joined
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 9000
+mash A 40 20
+wait 120
+mp getflag 2151
+wait 200
+quit

@@ -2067,9 +2067,11 @@ static void MpBattleTurbo(void)
     if (gAnimScriptActive && MP_BattleAnimSpeed() != 0 && !MP_SpecialAnimRunning())
     {
         u16 tempo = 256 * (100 + MP_BattleAnimSpeed()) / 100;
+        bool8 MP_LowHpBeepPlaying(void);   // battle_gfx_sfx_util.c: the beep keeps its own tempo
         MpSetSoundTempo(&gMPlayInfo_SE1, tempo);
         MpSetSoundTempo(&gMPlayInfo_SE2, tempo);
-        MpSetSoundTempo(&gMPlayInfo_SE3, tempo);
+        if (!MP_LowHpBeepPlaying())
+            MpSetSoundTempo(&gMPlayInfo_SE3, tempo);
     }
     if (rate == 0)
         return;

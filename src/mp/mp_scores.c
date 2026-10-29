@@ -189,9 +189,146 @@ static int Submit(const uint8_t *d, uint16_t len)
     return 1;
 }
 
+// ---------------------------------------------------------------------------
+// The BATTLE SIMULATOR (mp_sim.c): every player's record (their look and top 6, at most MP_SIM_REC_MAX bytes, opaque
+// here), keyed by name and Trainer ID, the latest one each; "sim_players.dat" beside the scores
+
+#define SIM_FILE "sim_players.dat"
+#define SIM_MAGIC 0x314D4953   // "SIM1"
+
+struct SimRec
+{
+    uint32_t when;
+    uint16_t len;
+    uint8_t data[MP_SIM_REC_MAX];
+};
+
+static struct SimRec *sSim;
+static int sSimCount, sSimLoaded;
+
+static void SimPath(char *out, size_t size, const char *suffix)
+{
+    const char *dir = getenv("MOEMON_STORE_DIR");
+    snprintf(out, size, "%s%s%s%s", dir ? dir : "", dir ? "/" : "", SIM_FILE, suffix);
+}
+
+static void SimLoad(void)
+{
+    char path[600];
+    FILE *f;
+    uint32_t magic = 0, n = 0;
+    if (sSimLoaded)
+        return;
+    sSimLoaded = 1;
+    sSim = calloc(MP_SIM_PLAYERS, sizeof(*sSim));
+    SimPath(path, sizeof(path), "");
+    if (!sSim || !(f = fopen(path, "rb")))
+        return;
+    if (fread(&magic, 4, 1, f) == 1 && magic == SIM_MAGIC && fread(&n, 4, 1, f) == 1 && n <= MP_SIM_PLAYERS)
+        sSimCount = (int)fread(sSim, sizeof(*sSim), n, f);
+    fclose(f);
+}
+
+static void SimSave(void)
+{
+    char tmp[600], path[600];
+    FILE *f;
+    uint32_t magic = SIM_MAGIC, n = (uint32_t)sSimCount;
+    SimPath(tmp, sizeof(tmp), ".tmp");
+    SimPath(path, sizeof(path), "");
+    if (!(f = fopen(tmp, "wb")))
+        return;
+    fwrite(&magic, 4, 1, f);
+    fwrite(&n, 4, 1, f);
+    fwrite(sSim, sizeof(*sSim), n, f);
+    fclose(f);
+    remove(path);
+    rename(tmp, path);
+}
+
+static int SimPut(const uint8_t *rec, uint16_t len)
+{
+    int i, at = -1;
+    if (!sSim || len < MP_SIM_KEY || len > MP_SIM_REC_MAX || !rec[0])
+        return 0;
+    for (i = 0; i < sSimCount; i++)
+        if (!memcmp(sSim[i].data, rec, MP_SIM_KEY))
+            at = i;
+    if (at < 0 && sSimCount < MP_SIM_PLAYERS)
+        at = sSimCount++;
+    if (at < 0)
+    {
+        // full: the one heard from longest ago makes room
+        at = 0;
+        for (i = 1; i < sSimCount; i++)
+            if (sSim[i].when < sSim[at].when)
+                at = i;
+    }
+    memset(&sSim[at], 0, sizeof(sSim[at]));
+    sSim[at].when = (uint32_t)time(NULL);
+    sSim[at].len = len;
+    memcpy(sSim[at].data, rec, len);
+    SimSave();
+    return 1;
+}
+
+// The roster in parts that fit a message (each: u8 op, u8 part, u8 parts, u8 count, (u16 len, record)*)
+static void SimRoster(MPStoreSendFunc send, void *ctx)
+{
+    static uint8_t out[MP_MAX_MSG - 16];
+    int i = 0, part = 0, parts = 0, size = 0, k;
+    // how many parts: pack greedily
+    for (k = 0, size = 4; k < sSimCount; k++)
+    {
+        if (size + 2 + sSim[k].len > (int)sizeof(out))
+            parts++, size = 4;
+        size += 2 + sSim[k].len;
+    }
+    parts++;
+    do
+    {
+        uint16_t n = 4;
+        uint8_t count = 0;
+        while (i < sSimCount && n + 2 + sSim[i].len <= sizeof(out) && count < 255)
+        {
+            out[n] = (uint8_t)sSim[i].len;
+            out[n + 1] = (uint8_t)(sSim[i].len >> 8);
+            memcpy(out + n + 2, sSim[i].data, sSim[i].len);
+            n += 2 + sSim[i].len;
+            count++;
+            i++;
+        }
+        out[0] = MP_ST_SIM_ROSTER;
+        out[1] = (uint8_t)part++;
+        out[2] = (uint8_t)parts;
+        out[3] = count;
+        send(ctx, 0, out, n);
+    } while (i < sSimCount && part < parts);
+}
+
 void MPScores_Handle(const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx)
 {
     static uint8_t reply[8 + MP_RH_TOP * (MP_RH_NAME + 8)];
+    if (len >= 1 && (data[0] == MP_ST_SIM_PUT || data[0] == MP_ST_SIM_GET))
+    {
+        SimLoad();
+        if (data[0] == MP_ST_SIM_PUT)
+        {
+            // kept, and passed on at once to the others in the room (part 0xFF: one record to merge into theirs)
+            static uint8_t one[6 + MP_SIM_REC_MAX];
+            uint16_t l = (uint16_t)(len - 1);
+            if (SimPut(data + 1, l))
+            {
+                one[0] = MP_ST_SIM_ROSTER, one[1] = 0xFF, one[2] = 1, one[3] = 1;
+                one[4] = (uint8_t)l, one[5] = (uint8_t)(l >> 8);
+                memcpy(one + 6, data + 1, l);
+                send(ctx, 2, one, (uint16_t)(6 + l));
+            }
+        }
+        else
+            SimRoster(send, ctx);
+        return;
+    }
     Load();
     if (len < 5)
         return;

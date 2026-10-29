@@ -120,8 +120,11 @@ Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vani
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
 enemy attack, MID text, no presses) 684 -> 476 frames.
-Low HP beep (battle_gfx_sfx_util.c PlayLowHpBeep): SE_LOW_HEALTH loops every 36 frames; Task_StopLowHpBeep stops it after
-100 (three "doo duh"s); it plays again when a Moemon newly drops into the red.
+Low HP beep (battle_gfx_sfx_util.c PlayLowHpBeep): SE_LOW_HEALTH loops every 36 ticks; Task_StopLowHpBeep stops it once
+its player's clock reaches 100 ticks (three "doo duh"s), not by task steps, so the solo battle turbo can't cut it short,
+and MpBattleTurbo leaves SE3's tempo alone while it plays (MP_LowHpBeepPlaying): the same in singles, doubles, triples
+and link battles. It plays again when a Moemon newly drops into the red. MOEMON_SE_TRACE=90 logs it (m4a.c TraceSong);
+tests lowhp_beep, lowhp_pvp.
 Co-op partner status (mp_coop.c MP_Coop_SetBattleStatus, MPR_COOP_BSTATUS): the player controller reports MP_BST_ACTION/
 MOVE/BAG/PARTY/DONE; PrintLinkStandbyMsg shows "<partner> is selecting a move to use…" etc. (MP_Coop_ShowStandby) and
 redraws on change until another B_WIN_MSG text replaces it (BattlePutTextOnWindow -> MP_Coop_OnBattleMessage). PvP keeps
@@ -774,6 +777,24 @@ PC, not 1-3: BG palette 1 in battle is the OPTIONS window frame (LoadBattleMenuW
 stay up during other battlers' moves (doubles/triples) flashed white with every backdrop flash (Double-Edge,
 Take Down...). The backdrop itself is 2-4.
 
+## HGSS POKé BALLS (1.26: battle and summary balls)
+The thrown / sent-out / summary ball sprites are the HEARTGOLD / SOULSILVER sheet (docs/user_images/35.png, ripped by
+Sunday-Doneko, credited in dist_extras/README.txt; tools/moemon_balls/hgss_balls.py writes graphics/balls/<ball>.png).
+Each ball: eleven 16x32 frames (include/pokeball.h BALL_FRAME_*): 0 closed (the sheet's first row, the round ball, as in
+menus: docs/user_images/36.png; the sheet's squashed row 8 isn't used), 1 open (23 px tall, its base on the closed
+ball's), 2 empty, 3-10 spinning (the sheet's rows 0-7). The ball's middle is the sprite's (8, 16), so every caller's
+coordinates are as with the old 16x16 balls. OAM 16x32 affine double; anim tile offsets are BALL_FRAME(n) = n * 8;
+BALL_ANIM_SPIN (7) loops the spin frames (2 frames each). StartBallSpin (pokeball.c) starts it for a throw
+(battle_anim_throw.c SpriteCB_Ball_Throw), the player's send-out flight (instead of affine anim 4) and the BALL EFFECTS
+editor's drop; landing goes back to frame 0. GENESIS / EPOCH sheets have their 16x16 art in every frame
+(MP_BallStyle_SpriteHasSpin FALSE): those still turn with affine anim 4. Palettes: POKé BALL's reds are slots 1-3 (dark
+to light) and it uses no slot past 8: COLOR ramps go into 1-3 (ramp shades 1-3), decorations take 9-15. Decorations:
+the closed frame at (6, 11), and on each spinning frame where 40+ red pixels face the screen, at their middle, over red
+pixels only (DecorateSpinFrames). Special balls with art in the sheet (LOVE, FRIEND, FAST, LEVEL, LURE, HEAVY, MOON,
+HEAL, DUSK, QUICK) load their own sheet (tag TAG_MP_BALL_HGSS 0x57B0 + special) and palette (TAG_MP_BALL_SPECIAL +
+special); DREAM is the POKé BALL in its ramp. Test hgss_balls (shots by hand: send-out spin, MASTER BALL throw, blue
+POKé BALL with a STAR, GENESIS, the summary's ball).
+
 ## GENESIS / EPOCH BALLS (Pokémon Red's and Crystal's POKé BALLS)
 
 Items ITEM_GENESIS_BALL (ITEM_052) / ITEM_EPOCH_BALL (ITEM_057), special balls 12 / 13 (style `c000` / `d000`, kept
@@ -1184,9 +1205,21 @@ directly while ReshowBattleScreenAfterMenu runs (bufferTransferDisabled doesn't 
 battle (green stripes, bits of sprites, an empty box) showed between the transition and the fade-in. gMpReshowDark
 (reshow_battle_screen.c, set by CB2_MpJoinBattle) re-applies BLDCNT darken / BLDY 16 after every rebuild step (step 0
 resets the blend registers); the closing BeginHardwarePaletteFade(0xFF, 0, 16, 0) fades in from that same darkness.
-Joinable: solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON) or one trainer, single or
-double (CB2_EndTrainerBattle, modes SINGLE / CONTINUE_SCRIPT / REMATCH and the double ones; not bosses, RIVAL,
-TEAM AQUA / MAGMA), or a co-op double of that kind. Not: triples, two trainers, PvP, frontier, safari, legendaries.
+Joinable (1.43.0): solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON), one trainer or two
+who spotted the player at once (CB2_EndTrainerBattle, every trainerbattle mode 0-8), or a co-op battle of that kind:
+any trainer but the Elite Four and the Champion (MP_Coop_JoinTrainerOk: gym leaders, rivals, admins, bosses, story
+grunts too). The master's own script goes on after the battle as it would have alone; a joiner who beat a gym leader
+gets the badge (GymLeaderEndScript: the leader's "you won" script, from the gym's map when the joiner was elsewhere,
+checked before the rematch branch: a leader's first battle is in the rematch table too); route trainers in a
+continue-script mode (MATCH CALL sign-ups) count as beaten for the joiner (OrdinaryTrainer); other story trainers keep
+their own events. A story trainer has no trainer-type object, so MPR_COOP_BATTLING goes out with localId 0 (JOIN works,
+nothing spots). Not: triples (full), PvP, frontier, safari, legendaries.
+Two trainers (589afed3, reapplied in 1.43.0): a third player makes a Triple Battle against both (MpJoinPlan
+trainerIdB, the snapshot's second lose text). TEAM PADDING on: a friend who asks to team up but can't have a seat when
+the battle starts (two trainers, or a moment too late) gets DECLINE_JOIN_AFTER instead of a no, and their game asks to
+JOIN by itself once the battle reports itself joinable (sCoop.joinAfter, UpdateJoinAfter; 30 s at most). A friend a
+held trainer brought in waits up to a minute while the leader answers "wait for another?" (Task_JoinHeld).
+Tests: join_gym (ROXANNE, the badge on both games), coop_two_join3, coop_two_solo_join, coop_two_wait3, coop_held_join3.
 Tests (MODE 2/3, WORST): join_no, join_wild, join_trainer, join_double, join_triple (double -> triple + redirect),
 join_two (two at once), join_cancel, join_leave; `mp partyids` + join_wild/check.py check every party's identities.
 Harness conditions: watchmenu, joinprompt, joinpendingN, friendbattleN.
@@ -1291,7 +1324,18 @@ the master builds A at 0-2, B at 3-5 (CreateNPCTrainerParty(.., FALSE)), MP_Coop
 smaller team once, no interleave (MP_Coop_ArrangeEnemyParty). Names/pictures/send-outs per side
 (MP_Coop_TwoTrainers, MP_Coop_TrainerPicFor; battle_message.c), BattleScript_MpCoopTwoTrainersWon (both lose texts,
 both prizes). The intro asked the right trainer's picture twice (MULTI and TWO_OPPONENTS blocks): over the link
-the second request never completes, so it's skipped in co-op. Joining in progress refuses it (JOIN_CANT_KIND).
+the second request never completes, so it's skipped in co-op. Joining in progress (1.26, protocol 51): a third player
+makes it a Triple Battle against both (a solo battle against two trainers becomes a co-op double against both). The
+conversion keeps BATTLE_TYPE_TWO_OPPONENTS and the enemy party where it is (slots 0-2 trainer A, 3-5 trainer B: a
+slot says whose a Pokémon is); the new foe spot (battler 5) takes the next Pokémon of the trainer with more left
+(JoinTwoTrainersNextFoe), and the triple's foe pool is shared from then on (MP_TripleSwitchRange). MpJoinPlan
+trainerIdB and the snapshot's loseTextB carry the second trainer to the joiner (sCoop.twoTrainers / trainerIdB via
+JoinSetSeats, gTrainerBattleOpponent_B in MP_Join_ApplySnapshot). "B sent out X" picks the trainer by the Pokémon's
+slot in a triple (MP_Coop_SecondTrainersMon, from B_BUFF1's party index so every game agrees), by side in a double.
+A joiner who came from a trainer script flags both trainers. MPR_COOP_BATTLING bytes 8-10: the second trainer's
+object and id (MP_TrainerBattleLocalIds: both objects from gApproachingTrainers); TryOfferBattleInProgress matches
+the trainer walking up against either, and two walking up against both. Test coop_two_join3 (mp joinask N: JOIN's
+request from a script).
 MPR_COOP_WAIT: + u8 localId2 (second held NPC, 0 = none), u16 waitAge.
 Held trainer spots a free friend (trainer_see.c first pass, MP_Coop_CanJoinHeldTrainer / MP_Coop_NoteHeldSpotter):
 only that trainer approaches; EventScript_TrainerApproach calls MP_Coop_TryJoinHeldTrainer (REQUEST arg 1,
@@ -2140,3 +2184,44 @@ walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinet
   (stepmania/songs_version.txt = the id). RhSongs_Root: MOEMON_STEPMANIA_DIR, else that folder, else ./stepmania.
 - Tests: dance_solo, dance_versus, dance_hop (tools/test/README.md), tools/test/dance_songs_test.sh (the download against a
   local server), tools/rhythm/test.sh (every chart).
+
+## BATTLE ANIMS > MODERN (mp_modernanim.c; 1.43.0)
+OPTIONS > DISPLAY > BATTLE ANIMS: CLASSIC / MODERN (gMpConfig.battleAnims, ini battle_anims; MOEMON_BATTLE_ANIMS for
+tests). This game only: the Classic animation script always runs (same sprites, tasks, sounds, frame count), MODERN
+draws over the finished picture (sdl2.c VDraw after the battle weather), so friends on either setting stay in step.
+Every animation through LaunchBattleAnimation: moves, general (stat changes, weather, Leech Seed...), status; battles
+and contests. Special ones (ball throws, switches) are left to mp_ballfx.c.
+- Effect sprites (template tileTag in the ANIM_TAG range): sprite.c AddSpritesToOamBuffer flags their OAM entries
+  (gMpOamFx), gba_easy_draw.c PutObjPixel writes their pixels into gMpFxLayer while MODERN draws; GlowAndTrails turns
+  them into a blurred halo of their own color pulled toward the move type's, plus fading afterimages (mixed in, not
+  added: halos show on the pale battle fields as well as in caves).
+- Hits: battle_anim.c Cmd_createsprite (hit splat tags), Cmd_createvisualtask (ShakeMon / ShakeMon2 / ShakeMonInPlace /
+  ShakeAndSinkMon / ShakeTargetBasedOnMovePowerOrDmg / ShakeTargetInPattern on the target; HorizontalShake = a quake at
+  the target's feet), Cmd_playsewithpan (a sound panned to the target: a softer burst). A burst: core light, shockwave
+  ring (white inner line), sparks, the type's particles (sTypeParticles: embers rise, drops and rocks fall, leaves
+  sway, bolts, shards, ringlets, wisps, stars, feathers, bubbles), a 1-2 pixel shake for strong hits. Charging: motes
+  and a ring closing on the user; stat changes: chevrons up (warm) or down (cool).
+- Gentle on the eyes: no whole-screen flash, local light fading over 6-7 frames, shake at most 2 px.
+- Nothing outlives the Classic animation (gAnimScriptActive false: cleared).
+Tests: anim_classic then anim_modern (every move both ways with MOEMON_ANIM_FRAMES: tools/test/check_anim_frames.sh
+checks all 716 lengths match; shots of TACKLE, EMBER, WATER GUN, THUNDERBOLT, EARTHQUAKE, ICE BEAM, SHADOW BALL, SWORDS
+DANCE).
+
+## The BATTLE SIMULATOR (mp_sim.c; 1.43.0, protocol 63)
+A counter NPC (OBJ_EVENT_GFX_SCIENTIST_2 at 12,5) in each BATTLE TENT lobby, data/scripts/battle_sim.inc. Opponents
+are digital copies of other players from the last server: their look (MP_Avatar_DigitalFrontPic: the opponent pic
+slot, palette turned to hologram cyan by brightness) and their top 6 by battles taken part in (MpLifeRec.battles, added
+at the end of the record so older .life files load; counted in mp_life_battle.c Finish for every ally sent out).
+- The record (struct SimRecord: name, Trainer ID, packed look, 6 BattleTowerPokemon) goes to the server on connecting
+  (MP_Sim_OnConnected after WELCOME), back on the field after a battle (MP_Sim_BattleOver -> MP_Sim_Update) and on
+  closing (sdl2.c -> MP_Sim_OnClose, flushed). During a simulator battle the record is of the real party (sSim.saved).
+- Server: mp_scores.c MP_ST_SIM_PUT (latest per name + Trainer ID, 256 players, "sim_players.dat") / GET -> ROSTER
+  parts; a PUT is also passed to the room at once (part 0xFF: merge). Client cache "<save>.sim" (server name: the
+  friend's server address or "online lobby", best streak, records), so it works offline; a save that never played
+  online has none ("no battle data, play with others").
+- The battle: BATTLE_TYPE_TRAINER | BATTLE_TYPE_EREADER_TRAINER (Frontier-level AI flags, no EXP, no whiteout, trainers
+  switch as usual), gMpSimBattle for the picture (battle_controller_opponent.c), class "DIGITAL", name and lines
+  (battle_message.c). Everyone at level 50 (SetLevel50: EXP of level 50, stats, healed); the party is saved before and
+  put back after (CB2_EndSimBattle). Each opponent once before repeats; a loss ends the streak; prize money 500 + 250 a
+  win (5000 at most); a new best at 3/5/7/10/15/20: RARE CANDY, PP UP, NUGGET, PP MAX, LUCKY EGG, MASTER BALL.
+Tests: sim_tent (two players, a win at level 50, levels back), sim_nodata.

@@ -862,6 +862,10 @@ static void Finish(void)
     if (sB.kind == LB_SKIP)
         return;
     MPNet_Log("life battle: end (won %d lost %d)", won, lost);
+    {
+        void MP_Sim_BattleOver(void);
+        MP_Sim_BattleOver();   // the BATTLE SIMULATOR's record changes (battles counted below): sent back on the field
+    }
     for (i = 0; i < PARTY_SIZE; i++)
     {
         struct LbSlot *s = &sB.ally[i];
@@ -869,6 +873,8 @@ static void Finish(void)
         bool8 standout = FALSE;
         if (rec == NULL)
             continue;
+        if (s->seen && rec->battles < 0xFFFF)
+            rec->battles++;   // (one more battle it took part in: mp_sim.c's top 6)
         if (s->fainted)
         {
             MP_Life_Remember(rec, MEM_FAINTED, (sB.kind == LB_WILD ? 85 : 85 + imp), TIER_PART, 0, 0);

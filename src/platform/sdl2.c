@@ -100,6 +100,8 @@ extern void DoSoftReset(void);
 
 int DoMain(void *param);
 void ProcessEvents(void);
+void MP_ModernAnim_Composite(u16 *frame);   // mp_modernanim.c
+
 void VDraw(void);
 
 static void ReadSaveFile(char *path);
@@ -363,6 +365,10 @@ int main(int argc, char **argv)
             SDL_Delay(1);
     }
 
+    {
+        void MP_Sim_OnClose(void);
+        MP_Sim_OnClose();   // Moemon Co-op: the BATTLE SIMULATOR record, as the game closes (mp_sim.c)
+    }
     CloseSaveFile();
 
     Display_SaveSettings();
@@ -795,6 +801,7 @@ void VDraw(void)
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
+    MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)

@@ -410,6 +410,7 @@ static void LoadConfig(void)
                               : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
                                                               : MP_CARD_ART_PRINTED_ART;
         else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
+        else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
         else if (strcmp(key, "card_back") == 0)
             gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
@@ -551,6 +552,8 @@ void MP_SaveConfig(void)
         "card_back = %s\n"
         "; OPTIONS > GAME > CARD SCALING: 1 = card players' decks fit yours and how you play, 0 = by badges\n"
         "card_scaling = %d\n"
+        "; OPTIONS > DISPLAY > BATTLE ANIMS: classic or modern (glows, trails and impacts over the same animations)\n"
+        "battle_anims = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -566,7 +569,8 @@ void MP_SaveConfig(void)
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
-        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling, gMpConfig.lobby);
+        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
+        gMpConfig.battleAnims ? "modern" : "classic", gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -735,6 +739,12 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     MP_Created_Pack(&a->recipe, p + 13);   // MP_CREATED_BYTES (14): bytes 13-26, FIELD HAIR last
     p[27] = a->bike;
 }
+
+static void UnpackAppearance(const u8 *p, struct MpAppearance *a);
+
+// A look as the wire carries it (APPEARANCE_SIZE bytes: the BATTLE SIMULATOR's records, mp_sim.c)
+void MP_PackAppearance(const struct MpAppearance *a, u8 *p) { PackAppearance(a, p); }
+void MP_UnpackAppearance(const u8 *p, struct MpAppearance *a) { UnpackAppearance(p, a); }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
 {
@@ -1168,6 +1178,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         snprintf(sStatus, sizeof(sStatus), "ONLINE (PLAYER %d)", gMpLocalId + 1);
         MPNet_Log("joined \"%s\" as player %d", sLobby.room, gMpLocalId + 1);
         SendLocalBlobs();
+        {
+            void MP_Sim_OnConnected(void);
+            MP_Sim_OnConnected();   // the BATTLE SIMULATOR: our record up, everyone's back (mp_sim.c)
+        }
         SendLocalState(TRUE);
         break;
     case MPMSG_S_REJECT:
@@ -1992,6 +2006,10 @@ void MP_FrameUpdate(void)
     if (gMain.inBattle)
         MP_Emote_BattleUpdate();   // battle emote bubbles (solo battles too)
     MP_LifeBattle_Update();        // MOéMON GARDEN in battle: moments, bonds, Pokémon emotes, rare lines
+    {
+        void MP_Sim_Update(void);
+        MP_Sim_Update();           // the BATTLE SIMULATOR: our record to the server after a battle (mp_sim.c)
+    }
     if (!(MPNet_ClientStatus() == MPNET_CONNECTED && gMpLocalId >= 0))
         MP_Events_Update();        // daily goals alone (online: below)
 

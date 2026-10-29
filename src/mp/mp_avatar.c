@@ -2520,6 +2520,38 @@ u16 MP_Avatar_LocalFrontPic(void)
     return FrontPicId(&app, MP_CR_CACHE_LOCAL, LocalPack(), 0);
 }
 
+// This game's look as others see it (the BATTLE SIMULATOR's record, mp_sim.c)
+struct MpAppearance MP_Avatar_LocalAppearance(void)
+{
+    return GetLocalAppearance();
+}
+
+// The BATTLE SIMULATOR (mp_sim.c): a stored look as the opponent's front picture, as a hologram: its shades kept, in
+// the simulator's cyan light
+u16 MP_Avatar_DigitalFrontPic(const struct MpAppearance *appIn)
+{
+    struct MpAppearance app = Resolved(appIn);
+    u16 pal[16];
+    bool8 canRecolor;
+    int i;
+    if (!BuildFront(&app, MP_CR_CACHE_LOCAL, NULL, sPicBuf, pal, TRUE))
+    {
+        int c = FrontChoice(&app);
+        if (c < 0 || !FrontChoiceTiles(c, sPicBuf, pal, &canRecolor))
+            FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, sPicBuf, pal, &canRecolor);
+    }
+    for (i = 1; i < 16; i++)
+    {
+        int r = (pal[i] & 31), g = (pal[i] >> 5) & 31, b = (pal[i] >> 10) & 31;
+        int l = (r * 3 + g * 6 + b) / 10;              // its brightness
+        int nr = l * 5 / 8 + r / 8, ng = l * 7 / 8 + 4 + g / 8, nb = l * 7 / 8 + 7 + b / 8;
+        pal[i] = (nr > 31 ? 31 : nr) | (ng > 31 ? 31 : ng) << 5 | (nb > 31 ? 31 : nb) << 10;
+    }
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[1], sPicBuf, TRAINER_PIC_SIZE);
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[1], pal, 32);
+    return TRAINER_PIC_MP_OPPONENT;
+}
+
 u16 MP_Avatar_RemoteFrontPic(u8 id)
 {
     struct MpPack buf;

@@ -584,8 +584,8 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
         if (r && sc->helloDone)
         {
             struct StoreCtx sx = {c, sc->room};
-            if (len >= 1 && data[0] >= MP_ST_RH_SUBMIT && data[0] <= MP_ST_RH_TOP)
-                MPScores_Handle(data, len, StoreSend, &sx);   // Moemon Rhythm: records for the whole server
+            if (len >= 1 && data[0] >= MP_ST_RH_SUBMIT && data[0] <= MP_ST_SIM_ROSTER)
+                MPScores_Handle(data, len, StoreSend, &sx);   // DANCE records, BATTLE SIMULATOR trainers: the whole server
             else
                 MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
         }

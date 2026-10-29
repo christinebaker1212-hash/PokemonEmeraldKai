@@ -1,0 +1,18 @@
+# TEAM PADDING never turns a third player away: two trainers spot ALICE at once (ROUTE 116: JANICE + JERRY), she waits
+# for a partner, BOB teams up, and CARL asks to team up too (mp coopask: as walking up to her does). Against two
+# trainers there's no third seat at the start, so CARL is told he'll join once it starts, and his game asks to JOIN
+# by itself as soon as the battle is on: a Triple Battle against both. CARL's WATER GUN wins it.
+MODE=3
+WARP=0,31,30,6
+WARP_B=0,31,30,7
+WARP_C=0,10,10,10
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=283:46,286:40 MOEMON_TRAINER_PADDING=1"
+ENV_B="MOEMON_DEBUG_PARTY=280:46 MOEMON_TRAINER_PADDING=1"
+ENV_C="MOEMON_DEBUG_PARTY=283:46 MOEMON_TRAINER_PADDING=1"
+EXPECT_A=("co-op: two trainers (" "join: our player said yes" "join: battle now 3 seats (was 2)" "join: everyone is in" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
+EXPECT_B=("join: the battle grows to 3 players" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
+EXPECT_C=("co-op: joining player 1's battle once it starts" "co-op: player 1's battle is on: asking to join it" "join: we're in the battle (seat 2 of 3)" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG")
+UNEXPECT_C=("crash" "BAD EGG" "Couldn't join" "can't be joined" "never came to join")

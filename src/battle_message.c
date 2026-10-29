@@ -54,6 +54,13 @@ EWRAM_DATA struct BattleMsgData *gBattleMsgDataPtr = NULL;
 
 // todo: make some of those names less vague: attacker/target vs pkmn, etc.
 
+// Moemon Co-op: the BATTLE SIMULATOR (mp_sim.c)
+extern bool8 gMpSimBattle;
+const u8 *MP_Sim_ClassName(void);
+void MP_Sim_TrainerName(u8 *out);
+const u8 *MP_Sim_LoseText(void);
+const u8 *MP_Sim_WinText(void);
+
 static const u8 sText_Trainer1LoseText[] = _("{B_TRAINER1_LOSE_TEXT}");
 static const u8 sText_PkmnGainedEXP[] = _("{B_BUFF1} gained{B_BUFF2}\n{B_BUFF3} EXP. Points!\p");
 static const u8 sText_EmptyString4[] = _("");
@@ -2374,9 +2381,12 @@ void BufferStringBattle(u16 stringID)
         {
             if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
             {
-                if (gMpCoopBattle && MP_Coop_TwoTrainers() && GetBattlerPosition(gBattleScripting.battler) == B_POSITION_OPPONENT_RIGHT)
+                // (B_BUFF1 is the Pokémon coming out: its party slot is in the buffer on every game)
+                if (gMpCoopBattle && MP_Coop_SecondTrainersMon(gBattleScripting.battler,
+                                                               gBattleTextBuff1[1] == B_BUFF_MON_NICK ? gBattleTextBuff1[3]
+                                                               : gBattlerPartyIndexes[gBattleScripting.battler]))
                 {
-                    stringPtr = sText_Trainer2SentOutPkmn;   // Moemon Co-op: the second trainer's side
+                    stringPtr = sText_Trainer2SentOutPkmn;   // Moemon Co-op: the second trainer's Pokémon
                 }
                 else if (gMpCoopBattle)
                 {
@@ -2881,6 +2891,8 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gTrainerClassNames[GetFrontierOpponentClass(gTrainerBattleOpponent_A)];
                 else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
                     toCpy = gTrainerClassNames[GetTrainerHillOpponentClass(gTrainerBattleOpponent_A)];
+                else if (gMpSimBattle)   // Moemon Co-op: the BATTLE SIMULATOR's digital trainers (mp_sim.c)
+                    toCpy = MP_Sim_ClassName();
                 else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
                     toCpy = gTrainerClassNames[GetEreaderTrainerClassId()];
                 else
@@ -2912,6 +2924,11 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
                 {
                     GetTrainerHillTrainerName(text, gTrainerBattleOpponent_A);
+                    toCpy = text;
+                }
+                else if (gMpSimBattle)   // Moemon Co-op: a digital copy of a player (mp_sim.c)
+                {
+                    MP_Sim_TrainerName(text);
                     toCpy = text;
                 }
                 else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
@@ -2946,7 +2963,9 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gSaveBlock2Ptr->playerName;
                 break;
             case B_TXT_TRAINER1_LOSE_TEXT: // trainerA lose text
-                if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
+                if (gMpSimBattle)
+                    toCpy = MP_Sim_LoseText();   // Moemon Co-op: the BATTLE SIMULATOR
+                else if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
                 {
                     CopyFrontierTrainerText(FRONTIER_PLAYER_WON_TEXT, gTrainerBattleOpponent_A);
                     toCpy = gStringVar4;
@@ -2962,7 +2981,9 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 }
                 break;
             case B_TXT_TRAINER1_WIN_TEXT: // trainerA win text
-                if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
+                if (gMpSimBattle)
+                    toCpy = MP_Sim_WinText();   // Moemon Co-op: the BATTLE SIMULATOR
+                else if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
                 {
                     CopyFrontierTrainerText(FRONTIER_PLAYER_LOST_TEXT, gTrainerBattleOpponent_A);
                     toCpy = gStringVar4;

@@ -62,6 +62,54 @@ bool8 MP_DebugQuickStartEnabled(void)
     return getenv("MOEMON_DEBUG_QUICKSTART") != NULL;
 }
 
+// animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
+// at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
+#include "task.h"
+extern const u8 *const gBattleAnims_Moves[];
+static void Task_MpAnimAll(u8 taskId)
+{
+    static struct DisableStruct sDisable;
+    s16 *d = gTasks[taskId].data;   // 0 move, 1 last, 2 atk, 3 tgt, 4 turn, 5 phase, 6 timer
+    if (d[5] == 0)
+    {
+        if (gAnimScriptActive)
+            return;
+        if (d[0] > d[1])
+        {
+            printf("[test] animall done\n");
+            MPNet_Log("animall done");   // (what the harness's waitlog sees)
+            fflush(stdout);
+            DestroyTask(taskId);
+            return;
+        }
+        gBattleAnimAttacker = d[2];
+        gBattleAnimTarget = d[3];
+        gAnimMoveTurn = d[4];
+        gAnimMovePower = 60;
+        gAnimMoveDmg = 30;
+        gAnimFriendship = 255;
+        gWeatherMoveAnim = 0;
+        memset(&sDisable, 0, sizeof(sDisable));
+        gAnimDisableStructPtr = &sDisable;
+        LaunchBattleAnimation(gBattleAnims_Moves, d[0], TRUE);
+        d[5] = 1;
+        d[6] = 0;
+        return;
+    }
+    gAnimScriptCallback();
+    if (!gAnimScriptActive || ++d[6] > 1500)
+    {
+        if (d[6] > 1500)
+            printf("[test] animall: move %d didn't end\n", d[0]);
+        else if (getenv("MOEMON_ANIM_FRAMES"))   // each animation's length (BATTLE ANIMS: CLASSIC and MODERN match)
+            printf("[test] animall: move %d took %d frames\n", d[0], d[6]);
+        gSprites[gBattlerSpriteIds[d[2]]].invisible = FALSE;
+        gSprites[gBattlerSpriteIds[d[3]]].invisible = FALSE;
+        d[0]++;
+        d[5] = 0;
+    }
+}
+
 static void SetAsciiName(u8 *dst, const char *src, int maxLen)
 {
     int i;
@@ -555,6 +603,35 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", gSaveBlock1Ptr->secretBases[n].secretBaseId);
         printf(" tv0kind %d\n", gSaveBlock1Ptr->tvShows[5].common.kind);
     }
+    else if (strcmp(cmd, "coopask") == 0)   // coopask N - ask player N (1-based) to team up (as walking up to them does)
+    {
+        void MP_Coop_DebugAsk(u8 i);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        if (n >= 1)
+            MP_Coop_DebugAsk(n - 1);
+    }
+    else if (strcmp(cmd, "joinask") == 0)   // joinask N - ask player N (1-based) to let us join their battle (as JOIN does)
+    {
+        void MP_Join_Ask(u8 target);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        if (n >= 1)
+            MP_Join_Ask(n - 1);
+    }
+    else if (strcmp(cmd, "animall") == 0)
+    {
+        int first = 1, last = MOVES_COUNT - 1, atk = 1, tgt = 0, turn = 0;
+        u8 t;
+        sscanf(arg, "%d %d %d %d %d", &first, &last, &atk, &tgt, &turn);
+        t = CreateTask(Task_MpAnimAll, 1);
+        gTasks[t].data[0] = first;
+        gTasks[t].data[1] = last;
+        gTasks[t].data[2] = atk;
+        gTasks[t].data[3] = tgt;
+        gTasks[t].data[4] = turn;
+        printf("[test] animall %d-%d, %d -> %d, turn %d\n", first, last, atk, tgt, turn);
+    }
     else if (strcmp(cmd, "fieldweather") == 0)   // fieldweather N - this game's field weather now (WEATHER_*), not the map's
     {
         void SetCurrentAndNextWeatherNoDelay(u8 weather);
@@ -798,6 +875,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // setflag N - an event flag (include/constants/flags.h)
         FlagSet(atoi(arg));
+    }
+    else if (strcmp(cmd, "getflag") == 0)
+    {
+        // getflag N - whether an event flag is set (2151 = FLAG_BADGE01_GET)
+        printf("[test] flag %d = %d\n", atoi(arg), FlagGet(atoi(arg)) ? 1 : 0);
     }
     else if (strcmp(cmd, "clearflag") == 0)
     {

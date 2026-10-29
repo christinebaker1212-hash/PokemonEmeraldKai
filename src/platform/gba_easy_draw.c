@@ -472,6 +472,12 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
         return (xpos >= left && xpos < right);
 }
 
+// Moemon Co-op: BATTLE ANIMS > MODERN (mp_modernanim.c): which OAM entries are a battle animation's effect sprites, and
+// where their pixels go
+extern u8 gMpOamFx[256];
+extern u16 *gMpFxLayer;
+static bool sFxSprite;
+
 // One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,
 // then the sprite layer (ordinary sprites and Moemon PC's big sprites share it)
 static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct OamData *oam, uint16_t color, int global_x,
@@ -524,6 +530,9 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
         
         //write pixel to pixel framebuffer
         pixels[global_x] = color | (1 << 15);
+        // Moemon Co-op: BATTLE ANIMS > MODERN marks the effect sprites' pixels (mp_modernanim.c)
+        if (gMpFxLayer != NULL)
+            gMpFxLayer[vcount * DISPLAY_WIDTH + global_x] = sFxSprite ? (color | 0x8000) : 0;
     }
 }
 
@@ -641,6 +650,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
 
         if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
             continue;
+        sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
             DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);

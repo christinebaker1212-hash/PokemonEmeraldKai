@@ -1,0 +1,6 @@
+# BATTLE ANIMS > CLASSIC: every move animation, for anim_modern to compare its lengths with (same script)
+MODE=1
+TMO=900
+ENV_A="MOEMON_BATTLE_ANIMS=classic MOEMON_ANIM_FRAMES=1 MOEMON_DEBUG_PARTY=283:40"
+EXPECT_A=("animall: move 33 took" "animall: move 354 took" "anim test done")
+UNEXPECT_A=("didn't end" "crash")

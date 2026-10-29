@@ -1,0 +1,13 @@
+pressuntil A field 5000
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+press A 2
+wait 60
+rendershot a_nodata1
+press A 2
+wait 80
+rendershot a_nodata2
+mash A 6 20
+quit

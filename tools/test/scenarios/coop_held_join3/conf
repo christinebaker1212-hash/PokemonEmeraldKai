@@ -1,6 +1,7 @@
 # ROUTE 116: JERRY spots ALICE, who waits for a partner; JERRY then spots BOB and he teams up with her (as in
 # coop_held_spot). CARL comes after the battle starts and steps into JERRY's sight: JOIN BATTLE, ALICE (the battle's
-# leader) is asked at the next turn and lets him in: a Triple Battle.
+# leader) is asked at the next turn and lets him in: a Triple Battle. ALICE and BOB only know GROWL (the battle lasts until
+# CARL is in); his WATER GUN wins it.
 MODE=3
 WARP=0,31,29,4
 WARP_B=0,31,26,7

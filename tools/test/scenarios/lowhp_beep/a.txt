@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp hp 0 6
+mp teach 0 61
+mp wild 288:20 45 45 45 45
+pressuntil A action 3000
+mash A 6 8
+wait 300
+mash A 200 20
+log solo battle done
+quit

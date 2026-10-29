@@ -591,3 +591,9 @@ gSpecials::
 	def_special MP_Rhythm_Wait, waitstate=1
 	def_special MP_Rhythm_Join, waitstate=1
 	def_special MP_Rhythm_Result
+	def_special MP_Sim_Intro
+	def_special MP_Sim_CanEnter
+	def_special MP_Sim_Next
+	def_special MP_Sim_Battle, waitstate=1
+	def_special MP_Sim_Won
+	def_special MP_Sim_End

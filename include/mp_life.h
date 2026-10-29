@@ -274,6 +274,8 @@ struct MpLifeRec
     struct MpLifeTrait trait[LIFE_TRAITS];
     struct MpLifeMemory mem[LIFE_MEMORIES];
     struct MpLifePlace place[LIFE_PLACES];
+    u16 battles;            // battles it was sent out in (the BATTLE SIMULATOR's top 6, mp_sim.c); last: older files load
+    u16 battlesPad;
 };
 
 #define LIFE_REC_RAISED_BEFORE (1 << 0)   // owned before the Garden existed (Friendship gave its bond a head start)

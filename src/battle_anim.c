@@ -205,6 +205,12 @@ void DoMoveAnim(u16 move)
     LaunchBattleAnimation(gBattleAnims_Moves, move, TRUE);
 }
 
+// Moemon Co-op: BATTLE ANIMS > MODERN (mp_modernanim.c): told when an animation starts and when its blows land
+void MP_ModernAnim_Begin(const u8 *const table[], u16 id);
+void MP_ModernAnim_OnSprite(const struct SpriteTemplate *template);
+void MP_ModernAnim_OnTask(TaskFunc func);
+void MP_ModernAnim_OnSound(s8 pan);
+
 void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMoveAnim)
 {
     s32 i;
@@ -250,6 +256,7 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     sMonAnimTaskIdArray[1] = TASK_NONE;
     sBattleAnimScriptPtr = animsTable[tableId];
     gAnimScriptActive = TRUE;
+    MP_ModernAnim_Begin(animsTable, tableId);   // Moemon Co-op: BATTLE ANIMS > MODERN draws over it
     sAnimFramesToWait = 0;
     gAnimScriptCallback = RunAnimScriptCommand;
 
@@ -423,6 +430,7 @@ static void Cmd_createsprite(void)
         GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X_2),
         GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y_PIC_OFFSET),
         subpriority);
+    MP_ModernAnim_OnSprite(template);   // Moemon Co-op: a hit splat is a hit (BATTLE ANIMS > MODERN)
     gAnimVisualTaskCount++;
 }
 
@@ -451,6 +459,7 @@ static void Cmd_createvisualtask(void)
         sBattleAnimScriptPtr += 2;
     }
 
+    MP_ModernAnim_OnTask(taskFunc);   // Moemon Co-op: the target shaken is a hit (BATTLE ANIMS > MODERN)
     taskId = CreateTask(taskFunc, taskPriority);
     taskFunc(taskId);
     gAnimVisualTaskCount++;
@@ -1369,6 +1378,7 @@ static void Cmd_playsewithpan(void)
     songId = T1_READ_16(sBattleAnimScriptPtr);
     pan = sBattleAnimScriptPtr[2];
     PlaySE12WithPanning(songId, BattleAnimAdjustPanning(pan));
+    MP_ModernAnim_OnSound(pan);   // Moemon Co-op: BATTLE ANIMS > MODERN
     sBattleAnimScriptPtr += 3;
 }
 

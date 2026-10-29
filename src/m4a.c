@@ -137,11 +137,46 @@ void m4aSoundInit(void)
 #endif
 }
 
+#ifdef PORTABLE
+char *getenv(const char *);
+int atoi(const char *);
+// Moemon Co-op: MOEMON_SE_TRACE=<song> logs when that song starts and stops playing (tests count the low HP beeps)
+static void TraceSong(void)
+{
+    static int song = -1, playing, frame, since, ticks;
+    const struct Song *s;
+    const struct MusicPlayer *mp;
+    int now;
+    void MPNet_Log(const char *fmt, ...);
+    if (song < 0)
+        song = getenv("MOEMON_SE_TRACE") ? atoi(getenv("MOEMON_SE_TRACE")) : 0;
+    if (song <= 0)
+        return;
+    frame++;
+    s = &gSongTable[song];
+    mp = &gMPlayTable[s->ms];
+    now = mp->info->songHeader == s->header && (mp->info->status & MUSICPLAYER_STATUS_TRACK)
+       && !(mp->info->status & MUSICPLAYER_STATUS_PAUSE);
+    if (now)
+        ticks = mp->info->clock;
+    if (now != playing)
+    {
+        if (now)
+            MPNet_Log("se trace: song %d starts (frame %d)", song, frame);
+        else
+            MPNet_Log("se trace: song %d stops after %d frames, %d ticks", song, frame - since, ticks);
+        playing = now;
+        since = frame;
+    }
+}
+#endif
+
 void m4aSoundMain(void)
 {
 #ifndef PORTABLE
     SoundMain();
 #else
+    TraceSong();
     RunMixerFrame();
 #endif
 }
