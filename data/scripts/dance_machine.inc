@@ -70,7 +70,7 @@ EventScript_DanceMachine_Results::
 	end
 
 EventScript_DanceMachine_Played::
-	msgbox DanceMachine_Text_Played, MSGBOX_DEFAULT
+	msgbox gStringVar4, MSGBOX_DEFAULT
 	releaseall
 	end
 
@@ -100,9 +100,6 @@ DanceMachine_Text_InUse:
 DanceMachine_Text_SoloInUse:
 	.string "{STR_VAR_1} is dancing alone.\n"
 	.string "Wait for the next credit!$"
-
-DanceMachine_Text_Played:
-	.string "Phew! What a workout!$"
 
 DanceMachine_Text_Refused:
 	.string "{STR_VAR_1} can't dance\n"

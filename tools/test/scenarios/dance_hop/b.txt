@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+barrier stepup 2
+rendershotburst b_hopon 40 2
+wait 60
+rendershot b_onpad
+barrier playing 2
+wait 900
+rendershotburst b_dance 360 3
+barrier done 2
+wait 30
+rendershot b_after
+wait 60

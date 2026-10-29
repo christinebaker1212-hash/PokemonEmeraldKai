@@ -2118,6 +2118,17 @@ walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinet
   (side, state, arrows held) for the bubbles and the sprites drawn up on the pads (x2 / y2, mp_overworld.c
   MP_Rhythm_AvatarPose); MPR_RH_ASK / ANSWER (33-34) to join a waiting friend; MPR_RH_SESSION (35) carries rh_screen's
   RN_* messages. Specials MP_Rhythm_StepUp / PlayAlone / Wait / Join / Result (data/scripts/dance_machine.inc).
+- Hops (mp_rhythm.c struct PadHop, mine and each friend's): the player hops up onto the pad (an arc 10 px high,
+  SE_LEDGE) when starting alone, waiting (WAIT FOR 2P) or accepting a friend; the credit starts once they're up
+  (Task_StartWhenUp). On the pad: two or more arrows at once make a small double hop facing by the arrows (LEFT+RIGHT
+  alternates west / east, LEFT combos west, RIGHT combos east, three or more north); single LEFT / RIGHT / UP turn
+  that way, DOWN keeps the facing: never south. After the credit (or giving up waiting) the player hops down and the
+  script waits until they're down (Task_EnableWhenDown). The rails in front of the pads are drawn over a player up
+  on them (3f_marks.png blue, docs/user_images 50). MOEMON_DANCE_TRACE=1 logs each hop's facing.
+- The screen turns on and off like an old TV (src/platform/crt_effect.c Crt_Apply, shared with the VS cabinet:
+  24 frames each way; rh_screen.c ST_CLOSING holds the last picture while it collapses, then MP_Rhythm_Ended).
+- The closing line (MP_Rhythm_Result into gStringVar4): from the stages' average grade (a failed stage counts as E),
+  whether one failed and the hardest meter played (CreditMessage: "That was easy!" ... "My legs feel like jelly...").
 - Records: the server's (mp_scores.c, store ops MP_ST_RH_* 40-42, rhythm_scores.dat in MOEMON_STORE_DIR or where it
   runs; top 10 a chart, one per name), cached in mp_rhythm.c; the player's bests, cleared songs and options in
   "<save>.dance" (bests made offline are sent when next at the machine online). Achievements (category DANCE)
@@ -2127,5 +2138,5 @@ walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinet
   line "songs <tag> <zip> <bytes> <sha256> <id>", keeping the last release's line when the id (a hash of every file)
   is the same; updater.c Updater_Songs* downloads and unpacks it a file at a time into stepmania/ next to the exe
   (stepmania/songs_version.txt = the id). RhSongs_Root: MOEMON_STEPMANIA_DIR, else that folder, else ./stepmania.
-- Tests: dance_solo, dance_versus (tools/test/README.md), tools/test/dance_songs_test.sh (the download against a
+- Tests: dance_solo, dance_versus, dance_hop (tools/test/README.md), tools/test/dance_songs_test.sh (the download against a
   local server), tools/rhythm/test.sh (every chart).

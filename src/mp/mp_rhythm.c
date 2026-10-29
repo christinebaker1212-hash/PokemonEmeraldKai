@@ -35,6 +35,7 @@
 #include "constants/songs.h"
 #include "mp_version.h"
 #include "rhythm.h"
+#include "rhythm/play.h"
 
 void MPNet_Log(const char *fmt, ...);
 void MP_Achieve_Count(const char *name, s32 n);
@@ -64,12 +65,29 @@ static const u8 sText_LetsDance[] = _("Let's dance!");
 static const u8 sText_Dancing[] = _("Dancing!");
 static const u8 sText_YourFriend[] = _("Your friend");
 
+// A sprite hopping on and off its pad, and hopping on double notes (ours and each friend's)
+#define HOP_FRAMES   16         // a hop on or off: a ledge's small jump
+#define HOP_HEIGHT   10
+#define DOUBLE_HOP_FRAMES 10    // two arrows at once
+#define DOUBLE_HOP_HEIGHT 5
+struct PadHop
+{
+    u8 at;                      // 0 on the floor .. HOP_FRAMES up on the pad
+    bool8 target;               // going up (TRUE) or down
+    u8 side;
+    u8 arrows;                  // the last arrows seen
+    u8 doubleT;                 // a double note's hop (frames left)
+    bool8 leftNext;             // LEFT+RIGHT jumps turn each way in turn
+    u8 face;                    // DIR_* while on the pad (never DIR_SOUTH while dancing)
+    bool8 drawn;                // our offsets are on the sprite
+};
+
 static struct
 {
     u8 side, state, arrows, arrowsSent;
     u16 timer;
     u8 result;
-    bool8 onPad;                // our sprite is drawn on the pad
+    struct PadHop hop;          // our sprite on the pad
     // asking / answering
     u32 session;
     s8 peer;
@@ -81,8 +99,14 @@ static struct
 {
     u8 side, state, mapGroup, mapNum, arrows;
     u16 ttl;
-    bool8 posed;
+    struct PadHop hop;
 } sFriends[MP_MAX_PLAYERS];
+
+// The credit's grades (the message after it): stages played, their grades added up, a stage failed
+static struct
+{
+    u8 stages, gradeSum, failed, meterMax;
+} sCredit;
 
 static bool8 OnMachineMap(u8 mapGroup, u8 mapNum)
 {
@@ -168,62 +192,149 @@ static void PadOffset(u8 side, s16 cellX, s16 *dx, s16 *dy)
     *dy = PAD_FEET_Y - (MACHINE_ROW * 16 + 16);
 }
 
-static u8 FacingFor(u8 arrows)
+// Which way a dancer faces for the arrows held: LEFT west, RIGHT east, UP north; DOWN keeps the way they face (never
+// toward the screen). Two at once is a hop: LEFT+RIGHT turns each way in turn, UP+DOWN north, LEFT or RIGHT with UP
+// or DOWN that side; three or four (hands) north.
+static void HopArrows(struct PadHop *h, u8 arrows)
 {
-    if (arrows & 1)
-        return DIR_WEST;
-    if (arrows & 8)
-        return DIR_EAST;
-    if (arrows & 2)
-        return DIR_SOUTH;
-    return DIR_NORTH;
+    u8 pressed = arrows & ~h->arrows, count = 0, b;
+    for (b = 0; b < 4; b++)
+        count += (arrows >> b) & 1;
+    if (count >= 2 && (pressed & (pressed - 1)))   // two or more arrows came down together
+    {
+        h->doubleT = DOUBLE_HOP_FRAMES;
+        if (count > 2)
+            h->face = DIR_NORTH;
+        else if ((arrows & 9) == 9)
+        {
+            h->face = h->leftNext ? DIR_WEST : DIR_EAST;
+            h->leftNext ^= 1;
+        }
+        else if (arrows & 1)
+            h->face = DIR_WEST;
+        else if (arrows & 8)
+            h->face = DIR_EAST;
+        else
+            h->face = DIR_NORTH;
+    }
+    else if (pressed & 1)
+        h->face = DIR_WEST;
+    else if (pressed & 8)
+        h->face = DIR_EAST;
+    else if (pressed & 4)
+        h->face = DIR_NORTH;
+    if (h->face == 0 || h->face == DIR_SOUTH)
+        h->face = DIR_NORTH;
+    if (getenv("MOEMON_DANCE_TRACE") && (arrows != h->arrows))
+        MPNet_Log("dance trace: arrows %x face %d%s", arrows, h->face, h->doubleT == DOUBLE_HOP_FRAMES ? " hop" : "");
+    h->arrows = arrows;
 }
 
-// A friend's sprite (mp_overworld.c, each frame): up on their pad while they're there
+// A frame of a hop: TRUE while the sprite is anywhere but the floor (sound: a hop starting)
+static bool8 StepHop(struct PadHop *h, bool8 up, u8 side, bool8 sound)
+{
+    if (up && h->at == 0)
+    {
+        h->side = side;
+        h->face = DIR_NORTH;
+        h->doubleT = 0;
+        h->arrows = 0;
+        if (sound)
+            PlaySE(SE_LEDGE);
+    }
+    else if (!up && h->at == HOP_FRAMES && h->target && sound)
+        PlaySE(SE_LEDGE);
+    h->target = up;
+    if (up && h->at < HOP_FRAMES)
+        h->at++;
+    else if (!up && h->at > 0)
+        h->at--;
+    if (h->doubleT)
+        h->doubleT--;
+    return h->at > 0;
+}
+
+// The sprite's offsets from its floor cell for a hop's frame
+static void HopOffset(const struct PadHop *h, s16 cellX, s16 *x2, s16 *y2)
+{
+    s16 dx, dy;
+    s32 f = h->at, arc;
+    PadOffset(h->side, cellX, &dx, &dy);
+    // on the way up and down: a parabola over the straight line between floor and pad
+    arc = (f > 0 && f < HOP_FRAMES) ? HOP_HEIGHT * 4 * f * (HOP_FRAMES - f) / (HOP_FRAMES * HOP_FRAMES) : 0;
+    *x2 = dx * f / HOP_FRAMES;
+    *y2 = dy * f / HOP_FRAMES - arc;
+    if (h->doubleT && h->at == HOP_FRAMES)
+    {
+        s32 t = DOUBLE_HOP_FRAMES - h->doubleT;
+        *y2 -= DOUBLE_HOP_HEIGHT * 4 * t * (DOUBLE_HOP_FRAMES - t) / (DOUBLE_HOP_FRAMES * DOUBLE_HOP_FRAMES);
+    }
+}
+
+// A friend's sprite (mp_overworld.c, each frame): it hops up on their pad while they're there, and back down
 void MP_Rhythm_AvatarPose(u8 id, struct ObjectEvent *obj)
 {
     struct Sprite *sprite;
+    struct PadHop *h;
+    bool8 up, here;
     if (id >= MP_MAX_PLAYERS || obj == NULL || obj->spriteId >= MAX_SPRITES)
         return;
     sprite = &gSprites[obj->spriteId];
-    if (sFriends[id].ttl && sFriends[id].state != PAD_EMPTY && OnMachineMap(sFriends[id].mapGroup, sFriends[id].mapNum)
-        && obj->currentCoords.y - MAP_OFFSET == MACHINE_ROW && obj->currentCoords.x - MAP_OFFSET <= 2)
+    h = &sFriends[id].hop;
+    here = OnMachineMap(sFriends[id].mapGroup, sFriends[id].mapNum) && HereNow()
+        && obj->currentCoords.y - MAP_OFFSET == MACHINE_ROW && obj->currentCoords.x - MAP_OFFSET <= 2;
+    up = here && sFriends[id].ttl && sFriends[id].state != PAD_EMPTY;
+    if (!here)
+        h->at = 0;
+    if (StepHop(h, up, sFriends[id].side, here))
     {
-        s16 dx, dy;
-        u8 dir = FacingFor(sFriends[id].arrows);
-        PadOffset(sFriends[id].side, obj->currentCoords.x - MAP_OFFSET, &dx, &dy);
-        sprite->x2 = dx;
-        sprite->y2 = dy - (sFriends[id].arrows ? 1 : 0);
-        if (obj->facingDirection != dir)
-            ObjectEventTurn(obj, dir);
-        sFriends[id].posed = TRUE;
+        s16 x2, y2;
+        if (up)
+            HopArrows(h, sFriends[id].arrows);
+        HopOffset(h, obj->currentCoords.x - MAP_OFFSET, &x2, &y2);
+        sprite->x2 = x2;
+        sprite->y2 = y2;
+        // up: the machine's way, then the arrows'; down: off toward the room
+        if (obj->facingDirection != (up ? h->face : DIR_SOUTH))
+            ObjectEventTurn(obj, up ? h->face : DIR_SOUTH);
+        h->drawn = TRUE;
     }
-    else if (sFriends[id].posed)
+    else if (h->drawn)
     {
         sprite->x2 = 0;
         sprite->y2 = 0;
-        sFriends[id].posed = FALSE;
+        h->drawn = FALSE;
     }
 }
 
+// Our sprite: up on the pad while it's ours (waiting, dancing), hopping on and off
 static void PoseMe(bool8 on)
 {
     struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
     struct Sprite *sprite = &gSprites[gPlayerAvatar.spriteId];
-    if (on)
+    struct PadHop *h = &sMe.hop;
+    if (StepHop(h, on, sMe.side, TRUE))
     {
-        s16 dx, dy;
-        PadOffset(sMe.side, me->currentCoords.x - MAP_OFFSET, &dx, &dy);
-        sprite->x2 = dx;
-        sprite->y2 = dy;
-        sMe.onPad = TRUE;
+        s16 x2, y2;
+        HopOffset(h, me->currentCoords.x - MAP_OFFSET, &x2, &y2);
+        sprite->x2 = x2;
+        sprite->y2 = y2;
+        if (me->facingDirection != (on ? DIR_NORTH : DIR_SOUTH))
+            ObjectEventTurn(me, on ? DIR_NORTH : DIR_SOUTH);
+        h->drawn = TRUE;
     }
-    else if (sMe.onPad)
+    else if (h->drawn)
     {
         sprite->x2 = 0;
         sprite->y2 = 0;
-        sMe.onPad = FALSE;
+        h->drawn = FALSE;
     }
+}
+
+// Our sprite has finished hopping (up there, or back on the floor)
+static bool8 HopDone(void)
+{
+    return sMe.hop.at == (sMe.hop.target ? HOP_FRAMES : 0);
 }
 
 // Every frame (mp_main.c): our pad repeated, friends' pads aging, the bubbles, our sprite on the pad
@@ -281,6 +392,7 @@ static void BeginCredit(s8 peer, bool8 picker)
     if (peer >= 0)
         MP_GameToAscii(b.peerName, gMpPlayers[peer].name, MP_NAME_LEN);
     SetPad(peer >= 0 ? PAD_VERSUS : PAD_SOLO);
+    memset(&sCredit, 0, sizeof(sCredit));
     sMe.result = RESULT_PLAYED;
     PlaySE(SE_SUCCESS);
     Rhythm_Begin(&b);
@@ -296,11 +408,60 @@ void MP_Rhythm_Send(int8_t to, const uint8_t *data, uint16_t len)
     MP_SendRelay((u8)to, p, len + 1);
 }
 
+#define tTimer data[0]
+#define tPeer  data[1]
+#define tPicker data[2]
+
+// The script goes on once our sprite is back on the floor
+static void Task_EnableWhenDown(u8 taskId)
+{
+    if (!MP_IsInOverworld() || sMe.hop.at == 0 || ++gTasks[taskId].tTimer > HOP_FRAMES * 3)
+    {
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+    }
+}
+
+static void EnableWhenDown(void)
+{
+    u8 taskId = CreateTask(Task_EnableWhenDown, 80);
+    gTasks[taskId].tTimer = 0;
+}
+
+// The credit starts once our sprite has hopped up on the pad (and a friend joining has had the time to hop up too)
+static void Task_StartWhenUp(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    // alone: as soon as we're up (or soon, if our sprite isn't being drawn); with a friend: the time for both hops
+    tTimer++;
+    if (tPeer < 0 ? (sMe.hop.at < HOP_FRAMES && tTimer < HOP_FRAMES * 3) : tTimer < HOP_FRAMES + 8)
+        return;
+    DestroyTask(taskId);
+    if (tPeer >= 0 && !FriendValid(tPeer))
+    {
+        sMe.result = RESULT_REFUSED;
+        SetPad(PAD_EMPTY);
+        EnableWhenDown();
+        return;
+    }
+    BeginCredit(tPeer, tPicker);
+}
+
+static void StartWhenUp(s8 peer, bool8 picker)
+{
+    u8 taskId;
+    SetPad(peer >= 0 ? PAD_VERSUS : PAD_SOLO);   // (friends see us hop up)
+    taskId = CreateTask(Task_StartWhenUp, 80);
+    gTasks[taskId].tTimer = 0;
+    gTasks[taskId].tPeer = peer;
+    gTasks[taskId].tPicker = picker;
+}
+
 void MP_Rhythm_Ended(void)
 {
     sMe.arrows = 0;
     SetPad(PAD_EMPTY);
-    ScriptContext_Enable();
+    EnableWhenDown();   // both of us hop off the machine, then the message
 }
 
 void MP_Rhythm_Dancing(uint8_t arrows)
@@ -581,6 +742,15 @@ void MP_Rhythm_StageDone(const struct RhythmStage *s)
     struct Best *b;
     bool8 firstClear;
     int i;
+    // how the credit went, for what we say after it (a failed stage counts as an E)
+    if (sCredit.stages < 255)
+    {
+        sCredit.stages++;
+        sCredit.gradeSum += s->cleared ? (s->grade > RH_GRADE_E ? RH_GRADE_E : s->grade) : RH_GRADE_E;
+        sCredit.failed |= !s->cleared;
+        if (s->meter > sCredit.meterMax)
+            sCredit.meterMax = s->meter;
+    }
     if (!s->cleared)
         return;
     LoadBests();
@@ -693,7 +863,7 @@ void MP_Rhythm_OnRelay(u8 from, const u8 *data, u16 len)
             }
             Answer(from, session, 1);
             MPNet_Log("dance: player %d joins us", from);
-            BeginCredit(from, TRUE);
+            StartWhenUp(from, TRUE);   // (they hop up on their pad first)
         }
         break;
     case MPR_RH_ANSWER:
@@ -760,17 +930,16 @@ void MP_Rhythm_StepUp(void)
 
 void MP_Rhythm_PlayAlone(void)
 {
-    BeginCredit(-1, TRUE);
+    sMe.side = SideHere();
+    StartWhenUp(-1, TRUE);
 }
-
-#define tTimer data[0]
 
 static void Task_Wait(u8 taskId)
 {
     s8 other;
-    if (Rhythm_IsActive())
+    if (Rhythm_IsActive() || FuncIsActiveTask(Task_StartWhenUp))
     {
-        DestroyTask(taskId);   // a friend joined: the machine is the picture now
+        DestroyTask(taskId);   // a friend joined: the machine is (about to be) the picture now
         return;
     }
     // two waiting at both pads: the one who joined the room first asks
@@ -811,7 +980,7 @@ static void Task_Wait(u8 taskId)
         sMe.result = RESULT_NONE;
         SetPad(PAD_EMPTY);
         DestroyTask(taskId);
-        ScriptContext_Enable();
+        EnableWhenDown();   // hopping back off first
     }
 }
 
@@ -832,7 +1001,7 @@ static void Task_Join(u8 taskId)
         sMe.asking = FALSE;
         if (sMe.answerYes && FriendValid(sMe.peer))
         {
-            BeginCredit(sMe.peer, FALSE);
+            StartWhenUp(sMe.peer, FALSE);   // we hop up on our pad, then dance
             return;
         }
         sMe.result = RESULT_REFUSED;
@@ -874,9 +1043,44 @@ void MP_Rhythm_Join(void)
     CreateTask(Task_Join, 80);
 }
 
-// VAR_RESULT: 0 nothing to say, 1 played, 2 the friend couldn't (STR_VAR_1)
+// What the player says after a credit (gStringVar4), from how it went: the grades' average, a failed stage, the
+// hardest chart played
+static const u8 sText_DanceNotInMood[] = _("Maybe next time!");
+static const u8 sText_DanceLegsGave[] = _("Ouch… my legs gave out!\nI'll get it next time!");
+static const u8 sText_DanceTooEasy[] = _("That was easy!\n…Okay, maybe not THAT easy.");
+static const u8 sText_DanceEasy[] = _("That was easy!");
+static const u8 sText_DanceRush[] = _("Nailed it!\nWhat a rush!");
+static const u8 sText_DanceGood[] = _("That was a good workout!");
+static const u8 sText_DanceWorkout[] = _("Phew! What a workout!");
+static const u8 sText_DancePuff[] = _("Huff… puff…\nThat was a workout!");
+static const u8 sText_DanceJelly[] = _("My legs feel like jelly…");
+
+static const u8 *CreditMessage(void)
+{
+    u8 avg;
+    if (sCredit.stages == 0)
+        return sText_DanceNotInMood;
+    if (sCredit.failed && sCredit.stages == 1)
+        return sText_DanceLegsGave;
+    avg = (sCredit.gradeSum + sCredit.stages / 2) / sCredit.stages;
+    if (avg <= RH_GRADE_AAA)
+        return sCredit.meterMax >= 9 ? sText_DanceTooEasy : sText_DanceEasy;
+    if (avg == RH_GRADE_AA)
+        return sText_DanceRush;
+    if (avg == RH_GRADE_A)
+        return sText_DanceGood;
+    if (avg == RH_GRADE_B && !sCredit.failed)
+        return sText_DanceWorkout;
+    if (avg <= RH_GRADE_C)
+        return sText_DancePuff;
+    return sText_DanceJelly;
+}
+
+// VAR_RESULT: 0 nothing to say, 1 played (gStringVar4: what we say), 2 the friend couldn't (STR_VAR_1)
 void MP_Rhythm_Result(void)
 {
+    if (sMe.result == RESULT_PLAYED)
+        StringCopy(gStringVar4, CreditMessage());
     gSpecialVar_Result = sMe.result;
     if (sMe.result == RESULT_REFUSED)
         SetNameVar(sMe.peer);

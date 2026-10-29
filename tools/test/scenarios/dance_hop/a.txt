@@ -1,0 +1,49 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+press UP 4
+wait 20
+press A 2
+wait 60
+barrier stepup 2
+rendershotburst a_hopon 60 3
+press A 2
+wait 70
+rendershot a_caution
+press A 2
+wait 40
+press A 2
+wait 40
+press RIGHT 2
+wait 10
+press A 2
+wait 60
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 60
+press A 2
+wait 30
+press START 2
+barrier playing 2
+watchlog points, grade
+waitlog 20000
+wait 200
+press A 2
+wait 120
+press RIGHT 2
+wait 60
+press A 2
+wait 30
+press START 2
+wait 300
+press START 120
+wait 200
+watchlog dance: the credit is over
+press A 2
+waitlog 3000
+rendershotburst a_crtoff 70 2
+wait 100
+rendershot a_message
+barrier done 2
+wait 60

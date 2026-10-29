@@ -17,6 +17,7 @@
 #include <SDL2/SDL.h>
 #include "global.h"
 #include "rhythm.h"
+#include "platform/crt.h"
 #include "rh.h"
 #include "rh_songs.h"
 
@@ -44,7 +45,13 @@ enum
     ST_RESULTS,
     ST_GAMEOVER,
     ST_NOSONGS,
+    ST_CLOSING,     // the credit is over: the screen turns off like a CRT, then the map is back
 };
+
+// The machine's screen turns on and off like a CRT (the VS cabinet's effect: src/platform/crt_effect.c)
+#define CRT_ON_FRAMES  24
+#define CRT_OFF_FRAMES 24
+static uint16_t sLastFrame[RH_W * RH_H], sCrtFrame[RH_W * RH_H];
 
 // relay messages of a session (after mp_rhythm.c's own type byte)
 enum
@@ -137,6 +144,7 @@ static struct
     int newRecord;
     int stagesPlayed, allFullCombo, allAaa;
     int haveSongs;              // ST_NOSONGS: the songs are there (offering new ones) or not
+    int crtOn, crtOff;          // frames of the CRT turning on / off so far
     struct RhythmStage pendingStage;    // counted when the results are left (the friend's final score is in by then)
     int stagePending;
     int lastCleared;
@@ -716,14 +724,16 @@ static void EndCredit(void)
     free(R.wheel);
     R.wheel = NULL;
     RhSongs_Free();
-    R.state = ST_OFF;
+    // the screen turns off (Rhythm_Step), then the map side hears the credit is over
+    R.state = ST_CLOSING;
+    R.crtOff = 0;
+    MPNet_Log("dance: the credit is over, the screen turns off");
     MP_Rhythm_Dancing(0);
-    MP_Rhythm_Ended();
 }
 
 void Rhythm_PeerGone(uint8_t id)
 {
-    if (R.state == ST_OFF || !R.versus || id != (uint8_t)R.b.peer || R.peerGone)
+    if (R.state == ST_OFF || R.state == ST_CLOSING || !R.versus || id != (uint8_t)R.b.peer || R.peerGone)
         return;
     R.peerGone = 1;
     R.b.picker = 1;
@@ -863,7 +873,7 @@ static void StartStage(int song);
 void Rhythm_OnNet(uint8_t from, const uint8_t *d, uint16_t len)
 {
     struct RhField *other;
-    if (R.state == ST_OFF || !R.versus || R.peerGone || (int8_t)from != R.b.peer || len < 1)
+    if (R.state == ST_OFF || R.state == ST_CLOSING || !R.versus || R.peerGone || (int8_t)from != R.b.peer || len < 1)
         return;
     R.peerHeard = RhAudio_Now();
     other = &R.field[Other()];
@@ -2103,6 +2113,17 @@ int Rhythm_Step(uint16_t *frame, uint16_t gbaKeys)
     float dt = Platform_IsTestMode() ? 1 / 60.0f : (float)(now - R.last);
     if (R.state == ST_OFF)
         return 0;
+    if (R.state == ST_CLOSING)
+    {
+        // the last picture collapses into a line, the line into a point; then the map is the picture again
+        Crt_Apply(sLastFrame, frame, RH_W, RH_H, CRT_PHASE_OFF, (double)++R.crtOff / CRT_OFF_FRAMES, CRT_FMT_BGR555);
+        if (R.crtOff >= CRT_OFF_FRAMES)
+        {
+            R.state = ST_OFF;
+            MP_Rhythm_Ended();
+        }
+        return 1;
+    }
     if (dt > 0.1f)
         dt = 0.1f;
     if (dt < 0)
@@ -2126,7 +2147,8 @@ int Rhythm_Step(uint16_t *frame, uint16_t gbaKeys)
     case ST_NOSONGS: StateNoSongs(); break;
     }
     // a friend on the other pad gone quiet (not while playing: StatePlay looks)
-    if (R.state != ST_OFF && R.versus && !R.peerGone && R.state != ST_PLAY && RhAudio_Now() - R.peerHeard > 60)
+    if (R.state != ST_OFF && R.state != ST_CLOSING && R.versus && !R.peerGone && R.state != ST_PLAY
+        && RhAudio_Now() - R.peerHeard > 60)
     {
         MPNet_Log("dance: nothing from the friend for a minute");
         Rhythm_PeerGone((uint8_t)R.b.peer);
@@ -2149,6 +2171,13 @@ int Rhythm_Step(uint16_t *frame, uint16_t gbaKeys)
         }
     }
     RhGfx_ToGba(frame);
+    memcpy(sLastFrame, frame, sizeof(sLastFrame));
+    if (R.crtOn < CRT_ON_FRAMES)
+    {
+        // the screen comes on: a white line widens, then the picture opens from it
+        memcpy(sCrtFrame, frame, sizeof(sCrtFrame));
+        Crt_Apply(sCrtFrame, frame, RH_W, RH_H, CRT_PHASE_ON, (double)++R.crtOn / CRT_ON_FRAMES, CRT_FMT_BGR555);
+    }
     return 1;
 }
 

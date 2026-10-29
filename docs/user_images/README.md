@@ -43,3 +43,6 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 46 | The TRIPLE TRIAD card back (105x128): carved bronze filigree, a silver star-shaped diamond in the middle | the card back (graphics/tt/back.png, tools/tt/build_art.py) |
 | 47 | Large card numbers 0-9 (160x18 strip on blue): grey serif digits with a dark outline | the numbers on large cards (graphics/tt/numbers.png; the A drawn to match) |
 | 48 | Final Fantasy VIII's menu and battle font sheet (391x350, "ripped by Ultimecia"): digits, letters, icons; the large A at (178,84) | the large numbers' A (graphics/tt/ff8_menu.png, tools/tt/build_art.py) |
+| 49 | GAME CENTER 3F as it is (224x268 crop): the DANCE machine at the left wall, the card tables, the console row | reference for 50 |
+| 50 | The same 3F with the DANCE machine's front bars (the pink rail in front of the pads) painted magenta: those draw over the player | the DANCE machine's bar overlay (1.42.0) |
+| 51 | TRIPLE TRIAD CHALLENGE screen (TRIAD SELLER, RUSTBORO RULES): the opponent's five-card hand spills past the dark box's right edge | the hand preview fits its box (5.1) |

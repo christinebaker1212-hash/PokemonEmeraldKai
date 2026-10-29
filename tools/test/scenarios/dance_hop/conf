@@ -1,0 +1,14 @@
+# The DANCE machine's map side: ALICE steps up and picks PLAY ALONE; she hops up on the left pad (BOB, beside the
+# machine, sees it), the screen comes on like a CRT, she dances a song (MOEMON_DANCE_AUTOPLAY: BOB sees her turn and
+# hop on double notes, never facing the screen, under the pad's rails), gives up the second stage, the screen turns
+# off like a CRT, she hops off, and says how it went. Shots are looked at by hand.
+MODE=2
+TMO=500
+WARP=11,19,1,7
+WARP_B=11,19,5,7
+ENV_A="MOEMON_DANCE_AUTOPLAY=1"
+ENV_B="MOEMON_DANCE_TRACE=1"
+EXPECT_A=("dance: a credit, pad 0, alone" "points, grade")
+UNEXPECT_A=("[crash]")
+EXPECT_B=(" hop")
+UNEXPECT_B=("[crash]" "face 1")

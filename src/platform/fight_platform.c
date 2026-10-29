@@ -2,6 +2,7 @@
 // (include/mf_engine.h; the engine itself is in fight/). While a fight runs its 480x320 picture is
 // the game picture (Fight_Canvas, like the card screens), the fight's sound replaces the game's
 // (Fight_MixAudio) and friends spectating see a 240x160 copy (Fight_Frame).
+#include "platform/crt.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -483,57 +484,11 @@ static int Fight_Showing(void)
     return sShow && (MfEngine_IsActive() || sHold);
 }
 
-static unsigned short Brighten(unsigned short c, int amount)   // amount 0..256 towards white
-{
-    int r = c >> 11, g = (c >> 5) & 63, b = c & 31;
-    r += (31 - r) * amount >> 8;
-    g += (63 - g) * amount >> 8;
-    b += (31 - b) * amount >> 8;
-    return (unsigned short)(r << 11 | g << 5 | b);
-}
-
+// (the effect itself: src/platform/crt_effect.c, shared with the DANCE machine)
 static const unsigned short *ApplyCrt(const unsigned short *src)
 {
-    double p = (double)sCrtTime / sCrtLen, v, h;
-    int cy = MF_SCREEN_H / 2, cx = MF_SCREEN_W / 2, x, y;
-
-    if (p > 1.0)
-        p = 1.0;
-    if (sCrtPhase == 1)
-    {
-        // on: the line widens (the first 30%), then the picture opens from it
-        h = p < 0.3 ? p / 0.3 : 1.0;
-        v = p < 0.3 ? 0.0 : (p - 0.3) / 0.7;
-    }
-    else
-    {
-        // off: the picture collapses into the line (60%), the line shrinks to a point
-        v = p < 0.6 ? 1.0 - p / 0.6 : 0.0;
-        h = p < 0.6 ? 1.0 : 1.0 - (p - 0.6) / 0.4;
-    }
-    memset(sCrt, 0, sizeof(sCrt));
-    if (v * MF_SCREEN_H < 2.0)
-    {
-        int half = (int)(h * MF_SCREEN_W / 2);
-        for (y = cy - 1; y <= cy; y++)
-            for (x = cx - half; x < cx + half; x++)
-                sCrt[y * MF_SCREEN_W + x] = 0xFFFF;
-        return sCrt;
-    }
-    {
-        int half = (int)(v * MF_SCREEN_H / 2), boost = (int)((1.0 - v) * (1.0 - v) * 180);
-        for (y = cy - half; y < cy + half; y++)
-        {
-            int sy = cy + (int)((y - cy) / v);
-            const unsigned short *row;
-            if (y < 0 || y >= MF_SCREEN_H)
-                continue;
-            sy = sy < 0 ? 0 : sy >= MF_SCREEN_H ? MF_SCREEN_H - 1 : sy;
-            row = src + sy * MF_SCREEN_W;
-            for (x = 0; x < MF_SCREEN_W; x++)
-                sCrt[y * MF_SCREEN_W + x] = boost > 0 ? Brighten(row[x], boost) : row[x];
-        }
-    }
+    Crt_Apply(src, sCrt, MF_SCREEN_W, MF_SCREEN_H, sCrtPhase == 1 ? CRT_PHASE_ON : CRT_PHASE_OFF,
+              (double)sCrtTime / sCrtLen, CRT_FMT_RGB565);
     return sCrt;
 }
 

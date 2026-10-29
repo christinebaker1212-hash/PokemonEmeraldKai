@@ -43,6 +43,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `fight_buttons` | OPTIONS > CONTROLS > FIGHT BUTTONS with a virtual pad: a button bound, one taken from another fight button (they swap), one left alone after 8 s; saved in the controls file |
 | `dance_solo` | the DANCE machine (GAME CENTER 3F): step up, PLAY ALONE, every screen to a song played by `MOEMON_DANCE_AUTOPLAY` (MARVELOUS full combo, feet x 10,000,000), RESULTS, the next song given up (START held): FAILED, GAME OVER, back on the map |
 | `dance_versus` | ALICE waits on the left pad, BOB steps up to the right one and joins: VERSUS, ALICE picks, both play their own field and see the other's, the records reach the server (`rhythm_scores.dat`); a tie is no win |
+| `dance_hop` | ALICE plays alone: hops up (BOB, beside her, sees the arc and every double hop's facing, never south), one stage, gives up the next; the screen turns off like an old TV, she hops down and says a line from her grades |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
