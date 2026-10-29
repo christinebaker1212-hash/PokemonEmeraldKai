@@ -299,7 +299,10 @@ static int load1(void *ctx, const uint8_t *exe, size_t n, const uint8_t *res, si
 
 static int g_heInit;
 
+extern int spucore_tap_dry;
+
 int rip_open_psf(RipEmu *e, Rip *r, const char *biosDir, char *err, int errlen) {
+    spucore_tap_dry = getenv("MMS_PSF_DRY") != NULL;   // tests: the original without its reverb
     if (!find_bios(biosDir, r->path)) {
         snprintf(err, errlen, "PlayStation music needs a PlayStation 2 BIOS (a 4 MB file such as scph39001.bin). "
                  "Choose the folder that has it under Display > BIOS folder, or put it next to the music.");

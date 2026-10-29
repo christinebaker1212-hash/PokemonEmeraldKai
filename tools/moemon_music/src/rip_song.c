@@ -525,8 +525,24 @@ void rip_song_free(RipSong *s) {
 // The recording itself: per stereo side an intro sample and a loop sample, played by one note each.
 // The loop is stretched by a hair (well under 0.1%) so it lasts a whole number of game frames: then the
 // song can loop forever, jumping back on a frame like any other song, without the jump drifting.
+// a sample brought to the full 16-bit range (its loudest point at full scale), like the 8-bit copies
+// (peak > 0: scaled by that peak instead, so pieces of one recording keep their levels to each other)
+static int16_t *make_hi(const int16_t *pcm, int n, int peak) {
+    if (!pcm || n <= 0) return NULL;
+    int pk = 1;
+    for (int k = 0; k < n; k++) if (abs(pcm[k]) > pk) pk = abs(pcm[k]);
+    if (peak > 0) pk = peak;
+    int16_t *o = malloc(sizeof(int16_t) * (size_t)n);
+    if (!o) return NULL;
+    for (int k = 0; k < n; k++) {
+        long v = lround(pcm[k] * 32767.0 / pk);
+        o[k] = (int16_t)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
+    }
+    return o;
+}
+
 static int add_stream_sample(RipSong *out, const char *name, const int16_t *pcm, long n, int stride, int rate,
-                             double speed, int loops, float *peakOut) {
+                             double speed, int loops, int pkAll, float *peakOut) {
     int16_t *mono = malloc(sizeof(int16_t) * (size_t)(n > 0 ? n : 1));
     if (!mono) return -1;
     for (long i = 0; i < n; i++) mono[i] = pcm[i * stride];
@@ -537,8 +553,8 @@ static int add_stream_sample(RipSong *out, const char *name, const int16_t *pcm,
     int rl = rip_resample(mono, (int)n, rate, 0, 0, to, &rs, &rloop);
     free(mono);
     if (!rs || rl <= 0) { free(rs); return -1; }
-    int pk = 1;
-    for (int k = 0; k < rl; k++) if (abs(rs[k]) > pk) pk = abs(rs[k]);
+    // the whole recording's peak: its pieces (intro, loop, each side) keep their levels to each other
+    int pk = pkAll > 0 ? pkAll : 1;
     int8_t *d8 = malloc((size_t)rl + 1);
     if (!d8) { free(rs); return -1; }
     for (int k = 0; k < rl; k++) {
@@ -554,7 +570,13 @@ static int add_stream_sample(RipSong *out, const char *name, const int16_t *pcm,
     cs.loops = loops;
     cs.loopStart = 0;
     cs.freq = (uint32_t)llround(to * speed * 1024.0 * MIX_FIX);   // key 60 plays it at its own pitch (sped up by `speed`)
+    int16_t *mono16 = malloc(sizeof(int16_t) * (size_t)(n > 0 ? n : 1));
+    if (mono16) for (long i = 0; i < n; i++) mono16[i] = pcm[i * stride];
+    int16_t *hi = make_hi(mono16, (int)n, pk);
+    free(mono16);
+    if (hi) { cs.hi = hi; cs.hiSize = (uint32_t)n; cs.hiLoopStart = 0; cs.hiFreq = (uint32_t)llround(rate * speed * 1024.0 * MIX_FIX); }
     int ref = custom_list_add(&out->custom, &out->ncustom, &cs);
+    free(hi);
     free(d8);
     *peakOut = pk / 32768.0f;
     return ref;
@@ -580,6 +602,8 @@ static int stream_build(Rip *r, RipSong *out, float gain, char *err, int errlen)
     }
     int sides = r->streamStereo ? 2 : 1;
     int introRef[2] = {-1, -1}, loopRef[2] = {-1, -1};
+    int pkAll = 1;
+    for (long i = 0; i < n * 2; i++) if (abs(r->streamPcm[i]) > pkAll) pkAll = abs(r->streamPcm[i]);
     float peak = 0, pk;
     for (int c = 0; c < sides; c++) {
         char nm[40];
@@ -594,13 +618,13 @@ static int stream_build(Rip *r, RipSong *out, float gain, char *err, int errlen)
             for (long i = 0; i < introLen; i++) tmp[(pad + i) * 2] = r->streamPcm[i * 2 + c];
             snprintf(nm, sizeof nm, "%s_%s", out->prefix, loops ? (c ? "intro_r" : "intro_l") : (c ? "r" : "l"));
             if (sides == 1) snprintf(nm, sizeof nm, "%s_%s", out->prefix, loops ? "intro" : "song");
-            introRef[c] = add_stream_sample(out, nm, tmp, introLen + pad, 2, r->streamRate, speed, 0, &pk);
+            introRef[c] = add_stream_sample(out, nm, tmp, introLen + pad, 2, r->streamRate, speed, 0, pkAll, &pk);
             free(tmp);
             if (pk > peak) peak = pk;
         }
         if (loops) {
             snprintf(nm, sizeof nm, "%s_%s", out->prefix, sides == 1 ? "loop" : c ? "loop_r" : "loop_l");
-            loopRef[c] = add_stream_sample(out, nm, r->streamPcm + ls * 2 + c, le - ls, 2, r->streamRate, speed, 1, &pk);
+            loopRef[c] = add_stream_sample(out, nm, r->streamPcm + ls * 2 + c, le - ls, 2, r->streamRate, speed, 1, pkAll, &pk);
             if (pk > peak) peak = pk;
         }
     }
@@ -955,7 +979,16 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
             cs.loopStart = (uint32_t)rloop;
             cs.loops = s->loops;
             cs.freq = (uint32_t)llround(to * 1024.0 * pow(2.0, (60.0 - s->rootKey) / 12.0) * MIX_FIX);
+            // Hi-Fi: the original itself, 16 bits at its own rate, filling the range as the 8-bit one does
+            int16_t *hi = make_hi(s->pcm, s->len, 0);
+            if (hi) {
+                cs.hi = hi;
+                cs.hiSize = (uint32_t)s->len;
+                cs.hiLoopStart = (uint32_t)s->loopStart;
+                cs.hiFreq = (uint32_t)llround(s->rate * 1024.0 * pow(2.0, (60.0 - s->rootKey) / 12.0) * MIX_FIX);
+            }
             int ref = custom_list_add(&out->custom, &out->ncustom, &cs);
+            free(hi);
             free(d8);
             if (ref < 0) continue;
             v.type = 0;

@@ -12,8 +12,13 @@ import sys, wave, numpy as np
 def load(p, secs, rate=32000):
     w = wave.open(p); r = w.getframerate(); n = w.getnframes() if secs <= 0 else min(w.getnframes(), int(secs * r))
     a = np.frombuffer(w.readframes(n), dtype='<i2').astype(np.float64).reshape(-1, w.getnchannels()).mean(1) / 32768
-    t = np.arange(int(len(a) * rate / r)) * (r / rate)
-    return np.interp(t, np.arange(len(a)), a)
+    # a band-limited rate change (by the spectrum: exact, no aliasing on either side)
+    n2 = int(round(len(a) * rate / r))
+    X = np.fft.rfft(a)
+    Y = np.zeros(n2 // 2 + 1, dtype=complex)
+    m = min(len(X), len(Y))
+    Y[:m] = X[:m]
+    return np.fft.irfft(Y, n2) * (n2 / len(a))
 
 def mel_fb(n_fft, rate, nb=64, lo=40, hi=15000):
     m = lambda f: 2595 * np.log10(1 + f / 700); im = lambda x: 700 * (10 ** (x / 2595) - 1)

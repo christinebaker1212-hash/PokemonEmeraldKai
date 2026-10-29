@@ -30,6 +30,10 @@ void inst_custom_bind(CustomSample *list, int n)
         w->size = list[i].size;
         w->loops = list[i].loops;
         w->data = list[i].data;
+        w->hi = list[i].hi;
+        w->hiFreq = list[i].hiFreq;
+        w->hiLoopStart = list[i].hiLoopStart;
+        w->hiSize = list[i].hiSize;
     }
 }
 
@@ -52,6 +56,12 @@ int custom_list_add(CustomSample **list, int *n, const CustomSample *s)
     d->data = calloc((size_t)len + 20, 1);
     if (!d->data) return -1;
     if (s->data) memcpy(d->data, s->data, len);
+    d->hi = NULL;
+    if (s->hi && s->hiSize) {
+        d->hi = calloc((size_t)s->hiSize + 8, sizeof(int16_t));     // zeros past the end (the mixer reads ahead)
+        if (d->hi) memcpy(d->hi, s->hi, sizeof(int16_t) * s->hiSize);
+        else d->hiSize = 0;
+    }
     if (s->isWave) { d->size = 16; d->freq = 0; d->loops = 0; d->loopStart = 0; }
     if (d->loopStart > d->size) d->loopStart = 0;
     return INST_CUSTOM + (*n)++;
@@ -60,7 +70,7 @@ int custom_list_add(CustomSample **list, int *n, const CustomSample *s)
 void custom_list_free(CustomSample **list, int *n)
 {
     if (*list == sCustom) inst_custom_bind(NULL, 0);
-    for (int i = 0; i < *n; i++) free((*list)[i].data);
+    for (int i = 0; i < *n; i++) { free((*list)[i].data); free((*list)[i].hi); }
     free(*list);
     *list = NULL;
     *n = 0;

@@ -374,6 +374,8 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
     snprintf(np.ripPath, sizeof(np.ripPath), "%s", path);
     snprintf(np.ripInfo, sizeof(np.ripInfo), "%s%s%s%s%s", r->game, r->game[0] && r->artist[0] ? " - " : "", r->artist,
              (r->game[0] || r->artist[0]) ? " - " : "", r->console);
+    np.hifi = 1;               // the originals in 16 bits (GBA accurate turns it off)
+    np.ripNativeRate = r->nativeRate > 0 ? r->nativeRate : r->rate;
     np.gmFixes = 1;            // expression, bend range, notes clipped at the loop end
     np.exactGate = 1;
     np.balance = 0;
@@ -458,6 +460,7 @@ int project_save(Project *p, const char *path, char *err, int errlen)
     fprintf(f, "gm_fixes=%d\n", p->gmFixes);
     fprintf(f, "loop=%s\n", LOOP_NAMES[p->loopMode]);
     fprintf(f, "gba_accurate=%d\n", p->gbaAccurate);
+    fprintf(f, "hifi=%d\n", p->hifi);
     fprintf(f, "balance=%d\n", p->balance);
     fprintf(f, "drums_first=%d\n", p->drumsFirst);
     fprintf(f, "loop_start=%u\n", p->loopStart);
@@ -475,6 +478,7 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         fprintf(f, "rip_use_gm=%d\n", p->ripUseGm);
         fprintf(f, "rip_cgbnorm=%.6f\n", p->ripCgbNorm);
         fprintf(f, "rip_gba_drums=%d\n", p->ripGbaDrums);
+        fprintf(f, "rip_native_rate=%d\n", p->ripNativeRate);
     }
     for (int s = 0; s < 128; s++) if (p->octave[s]) fprintf(f, "octave%d=%d\n", s, p->octave[s]);
     for (int k = 0; k < CONV_MAX_CAND; k++) if (p->trackLock[k] >= 0) fprintf(f, "track_lock%d=%d\n", k, p->trackLock[k]);
@@ -486,6 +490,17 @@ int project_save(Project *p, const char *path, char *err, int errlen)
         fprintf(f, "custom=%s,%u,%u,%d,%d,%u\n", c->name, c->freq, c->loopStart, c->loops, c->isWave, c->size);
         b64_write(f, (const uint8_t *)c->data, c->isWave ? 16 : c->size);
         fprintf(f, "end\n");
+        if (c->hi && c->hiSize) {
+            // the Hi-Fi copy: 16-bit little-endian
+            fprintf(f, "customhi=%u,%u,%u\n", c->hiFreq, c->hiLoopStart, c->hiSize);
+            uint8_t *le = malloc((size_t)c->hiSize * 2);
+            if (le) {
+                for (uint32_t i = 0; i < c->hiSize; i++) { le[i * 2] = (uint8_t)(c->hi[i] & 0xFF); le[i * 2 + 1] = (uint8_t)((uint16_t)c->hi[i] >> 8); }
+                b64_write(f, le, (size_t)c->hiSize * 2);
+                free(le);
+            }
+            fprintf(f, "end\n");
+        }
     }
     for (int i = 0; i < p->ncsplit; i++) {
         fprintf(f, "split=%s", p->csplit[i].name);
@@ -540,7 +555,8 @@ int project_load(Project *p, const char *path, char *err, int errlen)
     if (strncmp(text, "MoemonMusicStudio ", 18)) { snprintf(err, errlen, "%s isn't a Moemon Music Studio project", path_base(path)); free(data); return 0; }
     Project np;
     project_init(&np);
-    int inMidi = 0, inCustom = 0, inGroup = 0, bad = 0, bound = 0;
+    int inMidi = 0, inCustom = 0, inGroup = 0, inHi = 0, bad = 0, bound = 0;
+    uint32_t hiFreq = 0, hiLoop = 0, hiSize = 0;
     char *midiText = NULL;
     size_t midiTextLen = 0;
     char *custText = NULL;
@@ -566,6 +582,31 @@ int project_load(Project *p, const char *path, char *err, int errlen)
                 inst_custom_groups_bind(np.cgroup, np.ncgroup, np.csplit, np.ncsplit);
                 if (!voice_from_text(e2 + 1, &np.cgroup[np.ncgroup - 1].v[k])) bad++;
             }
+            continue;
+        }
+        if (inHi) {
+            if (strcmp(line, "end")) {
+                custText = realloc(custText, custTextLen + l + 1);
+                memcpy(custText + custTextLen, line, l + 1);
+                custTextLen += l;
+                continue;
+            }
+            inHi = 0;
+            uint8_t *d = calloc((size_t)hiSize * 2 + custTextLen + 4, 1);
+            size_t got = custText && d ? b64_read(custText, d) : 0;
+            if (np.ncustom > 0 && d && got >= (size_t)hiSize * 2) {
+                CustomSample *c = &np.custom[np.ncustom - 1];
+                free(c->hi);
+                c->hi = calloc((size_t)hiSize + 8, sizeof(int16_t));
+                if (c->hi) {
+                    for (uint32_t i = 0; i < hiSize; i++) c->hi[i] = (int16_t)(d[i * 2] | d[i * 2 + 1] << 8);
+                    c->hiSize = hiSize; c->hiLoopStart = hiLoop; c->hiFreq = hiFreq;
+                }
+            }
+            free(d);
+            free(custText);
+            custText = NULL;
+            custTextLen = 0;
             continue;
         }
         if (inCustom) {
@@ -602,6 +643,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "gm_fixes")) np.gmFixes = atoi(v);
         else if (!strcmp(k, "loop")) { for (int i = 0; i < 4; i++) if (!strcmp(v, LOOP_NAMES[i])) np.loopMode = i; }
         else if (!strcmp(k, "gba_accurate")) np.gbaAccurate = atoi(v) != 0;
+        else if (!strcmp(k, "hifi")) np.hifi = atoi(v) != 0;
         else if (!strcmp(k, "more_tracks")) { if (atoi(v)) np.gbaAccurate = 0; }   // projects from before GBA accurate
         else if (!strcmp(k, "balance")) np.balance = atoi(v);
         else if (!strcmp(k, "drums_first")) np.drumsFirst = atoi(v);
@@ -645,6 +687,8 @@ int project_load(Project *p, const char *path, char *err, int errlen)
                 cur.freq = fr; cur.loopStart = ls; cur.loops = lp; cur.isWave = wv; cur.size = sz;
                 inCustom = 1;
             } else bad++;
+        } else if (!strcmp(k, "customhi")) {
+            if (sscanf(v, "%u,%u,%u", &hiFreq, &hiLoop, &hiSize) == 3 && hiSize > 0 && hiSize < 0x8000000) inHi = 1;
         } else if (!strncmp(k, "rip_gmgain", 10)) {
             int s = atoi(k + 10);
             if (s >= 0 && s < 128) np.ripGmGain[s] = (float)atof(v);
@@ -665,6 +709,7 @@ int project_load(Project *p, const char *path, char *err, int errlen)
         else if (!strcmp(k, "rip_gain")) np.ripGain = (float)atof(v);
         else if (!strcmp(k, "rip_cgbnorm")) np.ripCgbNorm = (float)atof(v);
         else if (!strcmp(k, "rip_gba_drums")) np.ripGbaDrums = atoi(v);
+        else if (!strcmp(k, "rip_native_rate")) np.ripNativeRate = atoi(v);
         else if (!strncmp(k, "track_lock", 10)) {
             int c = atoi(k + 10), sl = atoi(v);
             if (c >= 0 && c < CONV_MAX_CAND && sl >= 0 && sl < 128) np.trackLock[c] = (int16_t)sl;

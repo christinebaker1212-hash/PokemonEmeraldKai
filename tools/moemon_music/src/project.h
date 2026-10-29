@@ -27,6 +27,7 @@ typedef struct {
     int loopMode;
     int gbaAccurate;          // off by default; on: play and export like the game (10 tracks, 5 sample voices), off: 64 / 64
     int moreTracks;           // derived from gbaAccurate (project_apply_mode)
+    int hifi;                 // Hi-Fi (beyond the GBA, off when GBA accurate): rips' samples play their 16-bit originals
     int voices;               // derived: sample voices mixed at once
     int drumsFirst;           // GM fixes: drum tracks win voices over melodic ones
     int balance;              // GM fixes: even out instrument volumes (the game's piano as the reference)
@@ -48,6 +49,7 @@ typedef struct {
     float ripGmGain[128];     // a GM instrument's volume factor (its sample against the original's)
     struct Rip *rip;          // the recording (its sound plays as "original"); NULL when the file is gone
     float ripGain;            // the loudness match (studio_match_rip)
+    int ripNativeRate;        // the console's own output rate (Hi-Fi mixes at it)
     int ripGbaDrums;          // GBS: the MIDI plays the noise channels as the drum kits made for them (GB > GBA)
     float ripCgbNorm;         // GBS: the level of a slot left on its Game Boy channel once others are GBA instruments
     int8_t octave[128];       // each slot's notes moved by whole octaves (-4..4)

@@ -957,6 +957,12 @@ static void draw_song(void)
     row += 30;
     if (checkbox(col1, row, "Exact note lengths (-E)", &p->exactGate)) { p->dirty = 1; rebuild(); }
     if (checkbox(col1 + 250, row, "GM MIDI fixes", &p->gmFixes)) { p->dirty = 1; rebuild(); }
+    if (p->isRip && p->ripKind != RIP_GSF && !p->gbaAccurate && checkbox(col1 + 560, row, "Hi-Fi", &p->hifi)) {
+        p->dirty = 1;
+        rebuild();
+        set_status("%s", p->hifi ? "Hi-Fi: the original samples in 16 bits, gliding pitch and volume, the console's own interpolation (the studio plays it; the game plays the 8-bit samples)."
+                                 : "Hi-Fi off: the samples as the GBA plays them (8 bits, about 13 kHz).");
+    }
     if (checkbox(col1 + 410, row, "GBA accurate", &p->gbaAccurate)) {
         project_apply_mode(p);
         p->dirty = 1;

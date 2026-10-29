@@ -40,6 +40,10 @@ typedef struct {
     uint32_t size, loopStart, freq;   // freq: 22.10 fixed point, the rate at key 60 (WaveData.freq)
     int loops;
     int isWave;              // a Game Boy programmable wave: 16 bytes (32 4-bit steps), no rate
+    // Hi-Fi: the same sound in 16 bits at its own rate (NULL = none), for the engine's Hi-Fi mixing; the
+    // 8-bit one above is what the GBA plays
+    int16_t *hi;
+    uint32_t hiSize, hiLoopStart, hiFreq;   // hiFreq like freq: the rate key 60 plays it at, 22.10
 } CustomSample;
 // The open project's custom samples (the project owns the list; this only points at it).
 void inst_custom_bind(CustomSample *list, int n);

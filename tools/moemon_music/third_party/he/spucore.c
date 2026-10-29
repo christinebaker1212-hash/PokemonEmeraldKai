@@ -1842,8 +1842,10 @@ static void EMU_CALL render(struct SPUCORE_STATE *state, uint16 *ram, sint16 *bu
 /*
 ** Externally-accessible renderer
 */
+int spucore_tap_dry = 0;   /* Moemon Music Studio: 1 = leave the reverb out (measuring) */
 void EMU_CALL spucore_render(void *state, uint16 *ram, sint16 *buf, sint16 *extinput, uint32 samples, uint8 mainout, uint8 effectout) {
   if(spucore_tap_render) spucore_tap_render(state, ram);   /* Moemon Music Studio */
+  if(spucore_tap_dry) effectout = 0;
   while(samples > RENDERMAX) {
     samples -= RENDERMAX;
     render(SPUCORESTATE, ram, buf, extinput, RENDERMAX, mainout, effectout);

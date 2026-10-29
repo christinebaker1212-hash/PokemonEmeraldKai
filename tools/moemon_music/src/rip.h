@@ -55,6 +55,7 @@ typedef struct Rip {
     int track;                       // GBS: the track number played
     // the original sound (stereo int16 at `rate`), for the original-instruments player
     int rate;
+    int nativeRate;                  // the console's own output rate (N64: its audio interface's), 0 = rate
     int16_t *pcm;
     int pcmFrames;                   // stereo frames
     // what the chip did, one row per game frame

@@ -19,6 +19,9 @@ typedef struct {
     uint32_t freq, loopStart, size;
     int loops;
     const int8_t *data;
+    // Hi-Fi (beyond the GBA): the same sound in 16 bits at its own rate; NULL = none
+    const int16_t *hi;
+    uint32_t hiFreq, hiLoopStart, hiSize;
 } EWave;
 
 // A voicegroup entry as the engine reads it (struct MP2KInstrument).
@@ -40,7 +43,14 @@ typedef struct {
     int dsVoices;                    // sample channels: ENG_DS_CHANNELS like the game (0 = that), up to ENG_DS_MAX
     uint8_t priority, reverb;        // reverb: 0x80 | level, or 0 (keep)
     const EInst *voices;             // 128
+    uint8_t hifi;                    // Hi-Fi (beyond the GBA): samples with a 16-bit copy play it (ENG_INTERP_*)
+    uint8_t interp;                  // how Hi-Fi samples are read between their points
+    float nativeRate;                // Hi-Fi: the console's own output rate, which its samples are mixed at (0 = the game's)
 } ESong;
+
+// How Hi-Fi samples are read between their points: cubic, or as a console's sound chip does it
+enum { ENG_INTERP_CUBIC, ENG_INTERP_PS, ENG_INTERP_LINEAR, ENG_INTERP_N64 };
+extern const int16_t eng_interp_ps[256 * 4], eng_interp_n64[64 * 4];
 
 struct ETrack;
 
@@ -56,6 +66,10 @@ typedef struct EChan {
     uint32_t freq;
     const EWave *wav;
     int32_t cur;
+    // Hi-Fi: where in the 16-bit copy, and last frame's step and levels (they glide to this frame's)
+    double hpos, hstep;
+    float hgL, hgR;
+    uint8_t hon;
     // CGB
     uint8_t sustainGoal, n4, pan, panMask, modify, length, sweep;
     uintptr_t wavePointer, currentPointer;
@@ -100,6 +114,11 @@ typedef struct {
     int numChans;                     // sample channels in use (soundInfo->maxChans)
     EChan cgb[4];
     uint8_t reverb;
+    uint8_t hifi, interp;             // the song's (ESong)
+    // Hi-Fi at the console's own rate: its mix, then converted to the game's rate (windowed sinc)
+    double nativeRate, nAcc, rpos;    // native samples a frame (fraction carried), the read point (native samples)
+    long nWritten;
+    float nRing[8192 * 2];            // ENG_NRING stereo native samples
     float ring[7][ENG_FRAME_SAMPLES * 2];
     int ringPos;
     uint8_t c15;
@@ -123,6 +142,7 @@ typedef struct {
     uint8_t trackLevel[ENG_MAX_TRACKS + 1];   // a short flash when a track plays a note
 } Engine;
 
+#define ENG_NRING 8192
 void eng_init(Engine *e);
 void eng_start(Engine *e, const ESong *song);
 void eng_stop(Engine *e);

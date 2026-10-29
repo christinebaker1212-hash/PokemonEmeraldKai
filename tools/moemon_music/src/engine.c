@@ -2,6 +2,7 @@
 // keep them in step with the game's code (src/music_player.c, src/sound_mixer.c, src/m4a.c,
 // src/platform/cgb_audio.c) so what plays here is what the game plays.
 #include <string.h>
+#include <math.h>
 #include "engine.h"
 #include "sf.h"
 
@@ -937,6 +938,8 @@ static int TickEnvelope(EChan *c)
         c->cur = 0;
         c->ct = (int32_t)c->wav->size;
         c->fw = 0;
+        c->hpos = 0;
+        c->hon = 0;
         c->envelopeVol = 0;
         if (c->wav->loops) c->status |= 0x10;
         goto attack;
@@ -1013,6 +1016,129 @@ static void GenerateAudio(EChan *c, float *out, int n)
     }
 }
 
+// Hi-Fi (beyond the GBA): the sample's 16-bit copy at its own rate, read between its points (cubic, or the
+// console's own way), its level in full precision, and pitch and level gliding from last frame's to this
+// frame's across the frame (the GBA's mixer steps them once a frame). The ADSR is the game's.
+static float hi_at(const EWave *w, int loops, double pos, int interp)
+{
+    long i = (long)floor(pos);
+    double t = pos - (double)i;
+    float y[4];
+    long len = (long)w->hiSize, ls = (long)w->hiLoopStart;
+    for (int k = 0; k < 4; k++) {
+        long j = i - 1 + k;
+        if (j >= len) {
+            if (!loops || len <= ls) { y[k] = 0; continue; }
+            j = ls + (j - len) % (len - ls);
+        }
+        y[k] = j < 0 ? 0 : (float)w->hi[j];
+    }
+    if (interp == ENG_INTERP_LINEAR) return (float)(y[1] + (y[2] - y[1]) * t);
+    if (interp == ENG_INTERP_PS || interp == ENG_INTERP_N64) {
+        // the console's own 4-tap table, by the fraction (PlayStation: 256 phases, N64: 64)
+        int phases = interp == ENG_INTERP_PS ? 256 : 64;
+        const int16_t *w4 = (interp == ENG_INTERP_PS ? eng_interp_ps : eng_interp_n64) + 4 * (int)(t * phases);
+        return (float)((y[0] * w4[0] + y[1] * w4[1] + y[2] * w4[2] + y[3] * w4[3]) / 32768.0);
+    }
+    double a = -0.5 * y[0] + 1.5 * y[1] - 1.5 * y[2] + 0.5 * y[3];
+    double b = y[0] - 2.5 * y[1] + 2 * y[2] - 0.5 * y[3];
+    double c = -0.5 * y[0] + 0.5 * y[2];
+    return (float)(((a * t + b) * t + c) * t + y[1]);
+}
+
+static void GenerateHiFi(EChan *c, float *out, int n, int interp, double stepScale)
+{
+    const EWave *w = c->wav;
+    int loops = (c->status & 0x10) != 0;
+    double ratio = w->freq ? (double)w->hiFreq / (double)w->freq : 1.0;
+    // per output sample at the game's rate (with its mixer's 42060 / 42048), then per sample at the mix's rate
+    double step = ((c->type & 8) ? ratio : c->freq * ratio / (60.0 * ENG_FRAME_SAMPLES)) * stepScale;
+    float v = c->envelopeVol * (ENG_MASTER_VOL + 1) / 16.0f;
+    float gR = c->rightVol * v / (256.0f * 256.0f * 32768.0f), gL = c->leftVol * v / (256.0f * 256.0f * 32768.0f);
+    double s0 = c->hon ? c->hstep : step;
+    float r0 = c->hon ? c->hgR : gR, l0 = c->hon ? c->hgL : gL;
+    double pos = c->hpos;
+    for (int i = 0; i < n; i++, out += 2) {
+        float t = (i + 1.0f) / n;
+        if (!loops && pos >= (double)w->hiSize) { c->status = 0; return; }
+        float y = hi_at(w, loops, pos, interp);
+        out[1] += y * (r0 + (gR - r0) * t);
+        out[0] += y * (l0 + (gL - l0) * t);
+        pos += s0 + (step - s0) * t;
+        if (loops && w->hiSize > w->hiLoopStart)
+            while (pos >= (double)w->hiSize) pos -= (double)(w->hiSize - w->hiLoopStart);
+    }
+    c->hpos = pos;
+    c->hstep = step;
+    c->hgR = gR;
+    c->hgL = gL;
+    c->hon = 1;
+}
+
+// The console-rate mix at the game's rate: a windowed sinc (32 taps, 512 phases) a little under the lower
+// of the two rates' halves; the output runs 20 native samples behind what's been mixed.
+#define SINC_TAPS 32
+#define SINC_PHASES 512
+static void native_to_out(Engine *e, float *out, int n)
+{
+    static float table[SINC_PHASES + 1][SINC_TAPS];
+    static double tableFor = -1;
+    double ratio = e->nativeRate / ENG_RATE;               // native samples per output sample
+    if (tableFor != ratio) {
+        tableFor = ratio;
+        double fc = 0.5 * (ratio > 1 ? 1 / ratio : 1) * 0.94;   // of the native rate
+        for (int p = 0; p <= SINC_PHASES; p++) {
+            double frac = (double)p / SINC_PHASES, sum = 0;
+            for (int k = 0; k < SINC_TAPS; k++) {
+                double x = k - (SINC_TAPS / 2 - 1) - frac;
+                double sx = fabs(x) < 1e-9 ? 1 : sin(2 * 3.14159265358979 * fc * x) / (2 * 3.14159265358979 * fc * x);
+                double wn = 0.42 + 0.5 * cos(3.14159265358979 * x / (SINC_TAPS / 2)) + 0.08 * cos(2 * 3.14159265358979 * x / (SINC_TAPS / 2));
+                if (fabs(x) >= SINC_TAPS / 2) wn = 0;
+                table[p][k] = (float)(2 * fc * sx * wn);
+                sum += table[p][k];
+            }
+            for (int k = 0; k < SINC_TAPS; k++) table[p][k] = (float)(table[p][k] / sum);
+        }
+    }
+    if (e->interp == ENG_INTERP_N64) {
+        // the N64 player's own output conversion: the same 4-tap table its microcode resamples with
+        for (int i = 0; i < n; i++) {
+            double t = e->rpos - 20;
+            long base = (long)floor(t);
+            const int16_t *w4 = eng_interp_n64 + 4 * (int)((t - (double)base) * 64);
+            float l = 0, r = 0;
+            for (int k = 0; k < 4; k++) {
+                long j = base - 1 + k;
+                if (j < 0 || j >= e->nWritten || e->nWritten - j > ENG_NRING) continue;
+                long w = j % ENG_NRING;
+                l += w4[k] * e->nRing[w * 2] / 32768.0f;
+                r += w4[k] * e->nRing[w * 2 + 1] / 32768.0f;
+            }
+            out[i * 2] += l;
+            out[i * 2 + 1] += r;
+            e->rpos += ratio;
+        }
+        return;
+    }
+    for (int i = 0; i < n; i++) {
+        double t = e->rpos - 20;                           // behind the newest native sample
+        long base = (long)floor(t);
+        double frac = t - (double)base;
+        const float *h = table[(int)(frac * SINC_PHASES + 0.5)];
+        float l = 0, r = 0;
+        for (int k = 0; k < SINC_TAPS; k++) {
+            long j = base - (SINC_TAPS / 2 - 1) + k;
+            if (j < 0 || j >= e->nWritten || e->nWritten - j > ENG_NRING) continue;
+            long w = j % ENG_NRING;
+            l += h[k] * e->nRing[w * 2];
+            r += h[k] * e->nRing[w * 2 + 1];
+        }
+        out[i * 2] += l;
+        out[i * 2 + 1] += r;
+        e->rpos += ratio;
+    }
+}
+
 static void SampleMixer(Engine *e, float *out)
 {
     int n = ENG_FRAME_SAMPLES;
@@ -1027,12 +1153,35 @@ static void SampleMixer(Engine *e, float *out)
     } else {
         memset(buf, 0, sizeof(float) * n * 2);
     }
+    // Hi-Fi at the console's rate: this frame's share of native samples
+    static float nbuf[4096 * 2];
+    int nN = 0;
+    if (e->nativeRate) {
+        e->nAcc += e->nativeRate * ENG_FRAME_SAMPLES / (double)ENG_RATE;
+        nN = (int)e->nAcc;
+        if (nN > 4096) nN = 4096;
+        e->nAcc -= nN;
+        memset(nbuf, 0, sizeof(float) * (size_t)nN * 2);
+    }
     for (int i = 0; i < e->numChans; i++) {
         EChan *c = &e->chans[i];
-        if (TickEnvelope(c))
-            GenerateAudio(c, buf, n);
+        if (TickEnvelope(c)) {
+            if (e->hifi && c->wav && c->wav->hi && c->wav->hiSize) {
+                if (e->nativeRate) GenerateHiFi(c, nbuf, nN, e->interp, ENG_RATE / e->nativeRate);
+                else GenerateHiFi(c, buf, n, e->interp, 1.0);
+            } else GenerateAudio(c, buf, n);
+        }
     }
     memcpy(out, buf, sizeof(float) * n * 2);
+    if (e->nativeRate) {
+        for (int i = 0; i < nN; i++) {
+            long w = (e->nWritten + i) % ENG_NRING;
+            e->nRing[w * 2] = nbuf[i * 2];
+            e->nRing[w * 2 + 1] = nbuf[i * 2 + 1];
+        }
+        e->nWritten += nN;
+        native_to_out(e, out, n);
+    }
     e->ringPos = (e->ringPos + 1) % 7;
 }
 
@@ -1105,6 +1254,14 @@ void eng_start(Engine *e, const ESong *song)   // MPlayStart
     }
     if (song->reverb & 0x80)
         e->reverb = song->reverb & 0x7F;
+    e->hifi = song->hifi;
+    e->interp = song->interp;
+    // Hi-Fi at the console's own rate
+    e->nativeRate = song->hifi && song->nativeRate > 1000 ? song->nativeRate : 0;
+    e->nAcc = 0;
+    e->rpos = 0;
+    e->nWritten = 0;
+    memset(e->nRing, 0, sizeof(e->nRing));
     e->playing = 1;
 }
 

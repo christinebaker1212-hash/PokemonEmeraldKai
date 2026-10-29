@@ -136,6 +136,14 @@ int studio_rebuild(Studio *s)
     s->song.dsVoices = s->p.voices;
     s->song.priority = (uint8_t)s->p.priority;
     s->song.reverb = project_reverb_byte(&s->p);
+    // Hi-Fi: the originals in 16 bits, read between their points the way their console did
+    s->song.hifi = (uint8_t)(s->p.hifi && !s->p.gbaAccurate);
+    int k = s->p.isRip ? s->p.ripKind : -1;
+    s->song.interp = (uint8_t)(k == RIP_PSF1 || k == RIP_PSF2 ? ENG_INTERP_PS : k == RIP_USF ? ENG_INTERP_N64 : k == RIP_2SF ? ENG_INTERP_LINEAR
+                               : ENG_INTERP_CUBIC);
+    // mixed at the console's own output rate (its samples and its interpolation behave as they did there)
+    s->song.nativeRate = 0;
+    if (s->p.isRip && k != RIP_GBS && k != RIP_GSF && s->p.ripNativeRate > 0) s->song.nativeRate = (float)s->p.ripNativeRate;
     s->song.voices = s->voices;
     studio_measure(s);
     s->msg[0] = 0;

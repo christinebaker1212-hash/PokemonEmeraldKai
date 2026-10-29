@@ -335,6 +335,7 @@ static void usf_finalize(RipEmu *e) {
     Rip *r = e->rip;
     if (u->task > 0) end_task(u);
     double rate = usf_tap_sample_rate(u->state) > 0 ? usf_tap_sample_rate(u->state) : 32000;
+    r->nativeRate = (int)rate;
     double fps = 42048.0 / 701.0;
     // tasks never matched to a buffer: halfway between their neighbours
     long last = 0;
