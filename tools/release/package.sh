@@ -32,7 +32,7 @@ linux)
     ;;
 *) echo "platform: windows or linux"; exit 1 ;;
 esac
-cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt "$P/"
+cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt dist_extras/EDOPRO_CREDITS.txt "$P/"
 cp tools/mp_server/DEPLOY.md "$P/server/"
 # the VS cabinet's fighting game: its pack, as it goes next to the game (logs and screenshots left out)
 mkdir -p "$P/mugen"

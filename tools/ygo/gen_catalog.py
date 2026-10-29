@@ -103,7 +103,7 @@ def main():
         out.append('    [YGO_SET_%s] = {%s, %s, %d, %d, sSet%s},' % (s['code'], cstr(s['code']), cstr(s['name']),
                                                                   s['kind'] == 'starter', len(s['cards']), s['code']))
     out += ['};', '', 'const struct YgoCard *Ygo_Card(unsigned id)', '{',
-            '    return id >= 1 && id <= YGO_CARD_COUNT ? &gYgoCards[id] : NULL;', '}', '']
+            '    return id >= 1 && id <= YGO_CARD_COUNT ? &gYgoCards[id] : Ygo_EdoCard(id);', '}', '']
     (ROOT / 'src/ygo/ygo_catalog.c').write_text('\n'.join(out))
     # Fusion materials: every 2003 Fusion Monster names its materials ("A" + "B" [+ "C"])
     byname = {c['name']: c['id'] for c in cards}

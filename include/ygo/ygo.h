@@ -80,7 +80,10 @@ struct YgoSet
 };
 extern const struct YgoCard gYgoCards[YGO_CARD_COUNT + 1];
 extern const struct YgoSet gYgoSets[YGO_SET_COUNT];
+/* Ids past YGO_CARD_COUNT are cards outside the catalog that a duel can bring in (tokens, cards an effect creates):
+ * made from EDOPro's database (src/ygo/ygo_edo_data.c) */
 const struct YgoCard *Ygo_Card(unsigned id);
+const struct YgoCard *Ygo_EdoCard(unsigned id);
 static inline int Ygo_IsMonster(const struct YgoCard *c) { return c && c->frame <= YGO_RITUAL; }
 static inline int Ygo_IsExtra(const struct YgoCard *c) { return c && c->frame == YGO_FUSION; }
 #endif

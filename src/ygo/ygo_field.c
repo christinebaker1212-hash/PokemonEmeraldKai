@@ -132,7 +132,7 @@ static int InTheme(const struct YgoCard *c, unsigned theme)
 }
 static int Playable(const struct YgoCard *c)
 {
-    return c && c->frame != YGO_TOKEN && Ygo_CardReady(c->id) && Ygo_CopyLimit(c->id);
+    return c && c->frame != YGO_TOKEN && Ygo_CardReady(c->id) && Ygo_GameLimit(c->id);
 }
 // What a tier allows: Level 4 or lower up to this ATK, this many tribute monsters, this many of Level 7 or higher
 static const u16 sLowAtk[4] = {1400, 1600, 1800, 2100};
@@ -157,7 +157,7 @@ static unsigned Add(struct Build *b, unsigned id, unsigned copies)
     unsigned n = 0, limit;
     if (!Playable(c) || c->frame == YGO_FUSION)
         return 0;
-    limit = Ygo_CopyLimit(id);
+    limit = Ygo_GameLimit(id);
     if (Ygo_IsMonster(c))
     {
         if (c->frame == YGO_RITUAL)
@@ -264,7 +264,7 @@ static void BuildDeck(struct YgoOpponent *o, unsigned theme, unsigned tier, u32 
         const struct YgoCard *c = Ygo_Card(id);
         const struct YgoFusion *f;
         int ok = 1;
-        if (c->frame != YGO_FUSION || !Ygo_CardReady(id) || !Ygo_CopyLimit(id) || !(f = Ygo_FusionOf(id)))
+        if (c->frame != YGO_FUSION || !Ygo_CardReady(id) || !Ygo_GameLimit(id) || !(f = Ygo_FusionOf(id)))
             continue;
         for (i = 0; i < 5 && f->materials[i]; i++)
             ok &= !(f->materials[i] & (YGO_MAT_ANY | YGO_MAT_ATTR)) && Copies(&b, f->materials[i]) > 0;
@@ -444,13 +444,65 @@ static const u8 *const sDuelLines[] = {sText_Duel1, sText_Duel2, sText_Duel3};
 
 static u8 ThemeAt(u8 theme, u8 alt, u32 h) { return (h >> 9) % 3 == 0 ? alt : theme; }
 
+// One of the Game Boy Advance games' opponents' decks (ygo_npc_decks.c, weakest first): from the quarter of them that
+// matches tier (0-3); 0 when there's none
+static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
+{
+    unsigned n = gYgoNpcDeckCount, lo, hi, i, m = 0, x = 0;
+    const struct YgoNpcDeck *d;
+    if (n < 4 || tier > 3)
+        return 0;
+    lo = n * tier / 4;
+    hi = n * (tier + 1) / 4;
+    d = &gYgoNpcDecks[lo + seed % (hi - lo)];
+    memset(o->main, 0, sizeof(o->main));
+    memset(o->extra, 0, sizeof(o->extra));
+    for (i = 0; i < d->count; i++)
+    {
+        unsigned id = d->cards[i], k, have = 0;
+        const struct YgoCard *c = Ygo_Card(id);
+        if (!c || !Ygo_CardReady(id))
+            continue;
+        for (k = 0; k < m; k++)
+            have += o->main[k] == id;
+        for (k = 0; k < x; k++)
+            have += o->extra[k] == id;
+        if (have >= Ygo_GameLimit(id))
+            continue;   // (the game's own list)
+        if (c->frame == YGO_FUSION && x < YGO_FUSION_MAX)
+            o->extra[x++] = (u16)id;
+        else if (c->frame != YGO_FUSION && m < YGO_DECK_MAX)
+            o->main[m++] = (u16)id;
+    }
+    // the game's list took some out: more copies of the deck's own cards it allows (Monsters first)
+    for (unsigned pass = 0; pass < 2 && m < YGO_DECK_MIN; pass++)
+        for (i = 0; i < d->count && m < YGO_DECK_MIN; i++)
+        {
+            unsigned id = d->cards[i], k, have = 0;
+            const struct YgoCard *c = Ygo_Card(id);
+            if (!c || !Ygo_CardReady(id) || c->frame == YGO_FUSION || (pass == 0) != Ygo_IsMonster(c))
+                continue;
+            for (k = 0; k < m; k++)
+                have += o->main[k] == id;
+            if (have < Ygo_GameLimit(id))
+                o->main[m++] = (u16)id;
+        }
+    if (m < YGO_DECK_MIN)
+        return 0;
+    printf("[ygo] %s plays %s's deck from %s (rating %u)\n", o->name, d->name, d->gameName, d->rating);
+    return 1;
+}
+static int sThemedOnly;   // (the special duelists: their own type always)
 static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier, u32 key,
                  u32 seed)
 {
     memset(o, 0, sizeof(*o) - sizeof(o->portrait));
     snprintf(o->name, sizeof(o->name), "%s", name);
     snprintf(o->title, sizeof(o->title), "%s", title ? title : "");
-    BuildDeck(o, theme, tier, seed);
+    // most duelists bring a deck from the Game Boy Advance games (by how far the player has come); the rest a deck of
+    // their own type; the special duelists (tier past 3) always their own
+    if (sThemedOnly || (seed >> 13) % 5 >= 3 || !GameDeck(o, tier, seed >> 3))
+        BuildDeck(o, theme, tier, seed);
     o->key = key;
     o->special = YGO_SPECIAL_NONE;
     o->set = YGO_SET_COUNT;
@@ -504,8 +556,10 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
             return PLAY_YGO;
         }
         tier = s->play == PLAY_BOTH ? TierOfBadges() + 1 : 3;
+        sThemedOnly = 1;
         Fill(o, s->name ? s->name : npc->graphicsId == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN", s->title,
              s->theme, tier, 0xFE000000u | i, h ^ (Tcg_Today() * 0x9e3779b9u));
+        sThemedOnly = 0;
         o->special = (u8)i;
         o->signature = (u16)Signature(s->theme);
         o->music = s->music;
@@ -625,7 +679,7 @@ void Ygo_FieldDebugDeck(unsigned theme, unsigned tier)
         free(o);
         return;
     }
-    Fill(o, "TEST", NULL, theme, tier, 1, 12345);
+    Fill(o, "TEST", NULL, theme, tier, 1, 12345 + theme * 7919u);
     n = Ygo_DeckCount(o->main, YGO_DECK_MAX);
     printf("[ygo] theme %u tier %u: %u cards + %u, valid %d, signature %s\n", theme, tier, n,
            Ygo_DeckCount(o->extra, YGO_FUSION_MAX), Ygo_DeckValidate(o->main, o->extra, NULL, reason, sizeof(reason)),

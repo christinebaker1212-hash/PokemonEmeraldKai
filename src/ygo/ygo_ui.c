@@ -27,6 +27,7 @@
 #include "../tcg/tcg_ui_kit.h"
 #include "ygo_board.h"
 #include "ygo_gfx.h"
+#include "platform_text.h"
 
 enum
 {
@@ -47,7 +48,8 @@ enum
     Y_WAIT,    /* a friend's duel: waiting for them to pick a deck */
     Y_TRADE,   /* a card trade with a friend */
     Y_RECIPES, /* DECK RECIPES: a Starter Deck built again from the cards owned */
-    Y_ACE      /* a deck's ACE CARD */
+    Y_ACE,     /* a deck's ACE CARD */
+    Y_CODE     /* FROM CODE: a deck from a YDKE code */
 };
 enum
 {
@@ -119,6 +121,7 @@ static struct
     int vs, aiDelay, autoPlay, rewarded;
     struct YgoOpponent opp;
     struct YgoDuel duel;
+    uint8_t duelShown;   /* duel is a view of the online duel's (Ygo_Online()->game): never freed from here */
     SDL_Texture *portrait;
     uint16_t spoils[YGO_DECK_MAX + YGO_FUSION_MAX];
     int spoilCount;
@@ -134,7 +137,14 @@ static struct
     uint16_t loanMain[YGO_DECK_MAX], loanExtra[YGO_FUSION_MAX];
     /* DECKS: a slot's menu (EDIT, RENAME...), the recipes' target slot */
     int menuOn, menuCursor, recipeSlot;
+    /* FROM CODE: the code typed or pasted (the clipboard's is taken as it comes) and the slot it goes to */
+    char code[4096];
+    char clipSeen[4096];
+    int codeSlot;
 } Y;
+int Platform_HasFileDialog(void);
+int Platform_FileDialog(int save, const char *title, const char *filter, const char *defExt, char *path, int size);
+void Platform_SetClipboardText(const char *text);
 
 static struct YgoCollection *C(void) { return Ygo_GetCollection(); }
 /* The table's background for a duel against this deck: its monsters' most common Attribute */
@@ -155,6 +165,7 @@ static unsigned ThemeOf(const uint16_t *main)
     return byAttr[best];
 }
 static int sForceFirst = -1;   /* test harness: who goes first (-1: a coin) */
+static int sMineUntil = -1;    /* test harness: answer for the player until this question (YGO_Q_*) */
 static unsigned Points(void) { return Tcg_GetCollection()->dust; }
 static void SpendPoints(unsigned n) { Tcg_GetCollection()->dust -= n; }
 static void AddPoints(unsigned n) { Tcg_GetCollection()->dust += n; }
@@ -348,6 +359,13 @@ static unsigned InDeck(unsigned d, unsigned card)
 }
 static unsigned MainCount(unsigned d) { return Ygo_DeckCount(Deck(d)->main, YGO_DECK_MAX); }
 static unsigned ExtraCount(unsigned d) { return Ygo_DeckCount(Deck(d)->extra, YGO_FUSION_MAX); }
+static unsigned MainCountOf(const uint16_t *cards)
+{
+    unsigned n = 0;
+    while (n < YGO_DECK_MAX && cards[n])
+        n++;
+    return n;
+}
 static int DeckValid(unsigned d)
 {
     return Ygo_DeckValidate(Deck(d)->main, Deck(d)->extra, C()->owned, NULL, 0);
@@ -550,9 +568,20 @@ static const char *RarityLabel(unsigned rarity)
 /* ------------------------------------------------------------------ */
 /* Duels                                                                */
 /* ------------------------------------------------------------------ */
+/* The online duel shown: a view of the link's duel (its engine stays the link's) */
+static void ShowOnline(void)
+{
+    if (!Y.duelShown)
+        YgoDuel_Free(&Y.duel);   /* (an offline duel held before) */
+    Y.duel = Ygo_Online()->game;
+    Y.duelShown = 1;
+}
 static int StartDuel(const uint16_t *main, const uint16_t *extra, const uint16_t *theirMain, const uint16_t *theirExtra)
 {
     uint32_t seed = Tcg_Random(&C()->rng);
+    if (Y.duelShown)
+        Y.duel.edo = NULL;   /* (the online duel's own engine) */
+    Y.duelShown = 0;
     if (!YgoDuel_Init(&Y.duel, main, extra, theirMain, theirExtra, seed,
                       sForceFirst >= 0 ? (unsigned)sForceFirst : Tcg_RandomBelow(&C()->rng, 2)))
     {
@@ -683,10 +712,33 @@ static void DuelStep(unsigned pressed, unsigned keys)
             Y.concedeHeld = 0;
             YgoNet_Concede(l, SDL_GetTicks());
         }
-        Y.duel = l->game;
+        ShowOnline();
         YgoBoard_SetWaiting(l->pending);
     }
     YgoBoard_Sync(&Y.duel);
+    if (sMineUntil >= 0 && !Y.online && !Y.duel.s.over && Y.duel.query.player == 0 &&
+        Y.duel.query.type != YGO_Q_NONE && YgoBoard_Idle())
+    {
+        if (Y.duel.query.type == (unsigned)sMineUntil)
+        {
+            MPNet_Log("ygo mine reached %d on turn %u", sMineUntil, Y.duel.s.turn);
+            sMineUntil = -1;
+        }
+        else
+        {
+            unsigned i;
+            YgoDuel_AiAnswer(&Y.duel, &a);
+            if (sMineUntil == YGO_Q_BATTLE && Y.duel.query.type == YGO_Q_IDLE)
+                for (i = 0; i < Y.duel.query.count; i++)
+                    if (Y.duel.query.items[i].kind == YGO_ACT_TO_BATTLE)
+                    {
+                        memset(&a, 0, sizeof(a));
+                        a.count = 1;
+                        a.picks[0] = (uint8_t)i;
+                    }
+            YgoDuel_Answer(&Y.duel, &a);
+        }
+    }
     if (Y.duel.s.over && !Y.rewarded && YgoBoard_Idle())
     {
         int won = Y.duel.s.winner == Me();
@@ -722,7 +774,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
                 if (!YgoNet_Submit(Ygo_Online(), &a, SDL_GetTicks()))
                     YgoNet_Concede(Ygo_Online(), SDL_GetTicks());
             }
-            Y.duel = Ygo_Online()->game;
+            ShowOnline();
             YgoBoard_SetWaiting(Ygo_Online()->pending);
             Y.aiDelay = 4;
         }
@@ -758,7 +810,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
             printf("[ygo] answer refused: %s\n", Ygo_Online()->error);
             PlaySE(SE_FAILURE);
         }
-        Y.duel = Ygo_Online()->game;
+        ShowOnline();
         YgoBoard_SetWaiting(Ygo_Online()->pending);
     }
     else if (r == YB_ANSWER)
@@ -974,18 +1026,178 @@ static unsigned EmptySlot(void)
     return YGO_SAVED_DECKS;
 }
 /* A slot's menu (A on it), as on the Pokemon side */
-enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
-enum { EM_NEW, EM_RECIPE, EM_COUNT };
-static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
-static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_CODE, DM_DELETE, DM_EXPORT, DM_COUNT };
+enum { EM_NEW, EM_RECIPE, EM_CODE, EM_FILE, EM_COUNT };
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DECK CODE",
+                                                "DELETE", "EXPORT .YDK"};
+static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM RECIPE", "FROM CODE", "FROM .YDK FILE"};
+/* (.ydk files through the system's file windows: Windows only) */
+static int DeckMenuCount(void) { return Platform_HasFileDialog() ? DM_COUNT : DM_COUNT - 1; }
+static int EmptyMenuCount(void) { return Platform_HasFileDialog() ? EM_COUNT : EM_COUNT - 1; }
 static int SlotEmpty(unsigned d) { return !MainCount(d) && !ExtraCount(d); }
 static unsigned DeckMenuOff(unsigned d)
 {
     return d == C()->activeDeck || !DeckValid(d) ? 1u << DM_USE : 0;
 }
-#define DECK_ROWS (YGO_SAVED_DECKS + 2)   /* the slots, DECK RECIPES, BACK */
-#define DECK_ROW_RECIPES YGO_SAVED_DECKS
-#define DECK_ROW_BACK (YGO_SAVED_DECKS + 1)
+#define DECK_ROWS (YGO_SAVED_DECKS + 3)   /* the slots, the Forbidden & Limited list, DECK RECIPES, BACK */
+#define DECK_ROW_LIST YGO_SAVED_DECKS
+#define DECK_ROW_RECIPES (YGO_SAVED_DECKS + 1)
+#define DECK_ROW_BACK (YGO_SAVED_DECKS + 2)
+/* A deck from a code or a .ydk file into slot: made of the game's cards (a card it hasn't got: refused), cards not
+ * owned yet in it too (the deck is ready once they are) */
+static int DeckFromCards(int slot, const uint16_t *main, const uint16_t *extra, unsigned notHere, int ok, const char *from)
+{
+    struct YgoSavedDeck *d;
+    unsigned missing, total = MainCountOf(main) + MainCountOf(extra);
+    if (!ok || slot < 0 || slot >= YGO_SAVED_DECKS)
+    {
+        PlaySE(SE_FAILURE);
+        Say(ACT_NONE, "That isn't a deck code. A YDKE code starts with ydke://");
+        return 0;
+    }
+    if (notHere)
+    {
+        PlaySE(SE_FAILURE);
+        printf("[ygo] deck %s: %u cards not in the game\n", from, notHere);
+        Say(ACT_NONE, "This deck contains cards that are not currently implemented. Please try another code.");
+        return 0;
+    }
+    d = Deck((unsigned)slot);
+    memcpy(d->main, main, sizeof(d->main));
+    memcpy(d->extra, extra, sizeof(d->extra));
+    snprintf(d->name, YGO_NAME_LEN, "%s %d", from, slot + 1);
+    C()->ace[slot] = 0;
+    missing = Ygo_DeckMissing(C(), d->main, d->extra);
+    printf("[ygo] deck %s into slot %d: %u cards, %u missing\n", from, slot, total, missing);
+    PlaySE(SE_SUCCESS);
+    Screen(Y_DECKS);
+    Y.cursor = slot;
+    if (missing)
+        Say(ACT_NONE, "The deck is in slot %d. You have %u of its %u cards: the rest are shown gray, and the deck is "
+            "ready once you have them all.", slot + 1, total - missing, total);
+    else
+        Say(ACT_NONE, "The deck is in slot %d, ready to duel.", slot + 1);
+    return 1;
+}
+static void TakeClipboardCode(void)
+{
+    char *clip = SDL_HasClipboardText() ? SDL_GetClipboardText() : NULL;
+    if (clip && strstr(clip, "ydke://") && strcmp(clip, Y.clipSeen))
+    {
+        snprintf(Y.clipSeen, sizeof(Y.clipSeen), "%s", clip);
+        snprintf(Y.code, sizeof(Y.code), "%s", strstr(clip, "ydke://"));
+        Y.code[strcspn(Y.code, "\r\n \t")] = 0;
+        PlaySE(SE_SELECT);
+        printf("[ygo] code: pasted %u characters\n", (unsigned)strlen(Y.code));
+    }
+    if (clip)
+        SDL_free(clip);
+}
+static void OpenCode(int slot)
+{
+    Screen(Y_CODE);
+    Y.codeSlot = slot;
+    Y.code[0] = 0;
+    Y.clipSeen[0] = 0;
+    TakeClipboardCode();
+    Platform_SetTextInput(1);
+}
+static void CloseCode(void)
+{
+    Platform_SetTextInput(0);
+    Screen(Y_DECKS);
+    Y.cursor = Y.codeSlot;
+}
+static void UseCode(void)
+{
+    uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    unsigned notHere = 0;
+    int ok = Ygo_ReadYdke(Y.code, main, extra, &notHere);
+    if (DeckFromCards(Y.codeSlot, main, extra, notHere, ok, "CODE DECK"))
+        Platform_SetTextInput(0);
+}
+static void CodeScreen(void)
+{
+    char line[64];
+    size_t len = strlen(Y.code), at;
+    int row;
+    TcgUi_Background();
+    TcgUi_SidePanel("DECK CODE", YGO_THEME);
+    BigCard(0, 30, 22, 0);
+    snprintf(line, sizeof(line), "%u CHARACTERS", (unsigned)len);
+    G_TextAlign(52, 86, TA_CENTER, len ? 0x2858a8 : 0xa0a0a0, G_NO_SHADOW, line, TF_SMALL);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    if (!len)
+        G_TextAlign(LIST_X + LIST_W / 2, 46, TA_CENTER, 0x8090a0, G_NO_SHADOW, "Copy a YDKE code: it shows here.",
+                    TF_SMALL);
+    /* the code, broken into lines; its end when it's long */
+    at = len > 24 * 7 ? len - 24 * 7 : 0;
+    for (row = 0; row < 7 && at < len; row++, at += 24)
+    {
+        snprintf(line, sizeof(line), "%.24s", Y.code + at);
+        G_Text(LIST_X + 6, 7 + row * 14, G_INK, G_NO_SHADOW, line, LIST_W - 10, TF_NARROW);
+    }
+    Strip(0, "Paste a YDKE code (ydke://...). A code you copy shows up here by itself.");
+    TcgUi_Hints("{A} MAKE THE DECK  {SELECT} CLEAR  {B} BACK");
+}
+/* .ydk files (Windows: the system's file windows) */
+static void ImportYdk(int slot)
+{
+    static char path[1024];
+    uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    unsigned notHere = 0;
+    FILE *f;
+    char *text;
+    long size;
+    int ok = 0;
+    path[0] = 0;
+    if (!Platform_FileDialog(0, "Open a deck", "YGOPro deck (*.ydk)\0*.ydk\0All files\0*.*\0\0", "ydk", path,
+                             (int)sizeof(path)))
+        return;
+    if (!(f = fopen(path, "rb")))
+    {
+        Say(ACT_NONE, "That file couldn't be opened.");
+        return;
+    }
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    text = size > 0 && size < 1000000 ? malloc((size_t)size + 1) : NULL;
+    if (text && fread(text, 1, (size_t)size, f) == (size_t)size)
+    {
+        text[size] = 0;
+        ok = Ygo_ReadYdk(text, main, extra, &notHere);
+    }
+    fclose(f);
+    free(text);
+    if (!ok)
+    {
+        PlaySE(SE_FAILURE);
+        Say(ACT_NONE, "That file isn't a deck (.ydk).");
+        return;
+    }
+    DeckFromCards(slot, main, extra, notHere, 1, "YDK DECK");
+}
+static void ExportYdk(int slot)
+{
+    static char path[1024], text[8192];
+    FILE *f;
+    int ok;
+    const struct YgoSavedDeck *d = Deck((unsigned)slot);
+    if (!Ygo_WriteYdk(d->main, d->extra, d->name, text, sizeof(text)))
+        return;
+    snprintf(path, sizeof(path), "%s.ydk", d->name);
+    if (!Platform_FileDialog(1, "Save the deck", "YGOPro deck (*.ydk)\0*.ydk\0\0", "ydk", path, (int)sizeof(path)))
+        return;
+    f = fopen(path, "wb");
+    ok = f && fwrite(text, 1, strlen(text), f) == strlen(text);
+    if (f && fclose(f))
+        ok = 0;
+    if (ok)
+        Say(ACT_NONE, "%s was saved as a .ydk file.", d->name);
+    else
+        Say(ACT_NONE, "The deck couldn't be saved there.");
+}
 static void DecksScreen(void)
 {
     struct YgoCollection *c = C();
@@ -1011,12 +1223,21 @@ static void DecksScreen(void)
                       k == DECK_ROW_BACK ? "BACK" : "DECK RECIPES", NULL);
             continue;
         }
+        if (k == DECK_ROW_LIST)
+        {
+            snprintf(line, sizeof(line), "LIST: %s", Ygo_BanlistName(Ygo_Banlist()));
+            TcgUi_FitText(line, LIST_W - 12, TF_NORMAL);
+            TcgUi_Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)k, 1, line, NULL);
+            continue;
+        }
         snprintf(line, sizeof(line), "%s", Deck(k)->name[0] ? Deck(k)->name : "EMPTY SLOT");
         TcgUi_Row(LIST_X + 2, 8 + (int)i * ROW_H, LIST_W - 4, Y.cursor == (int)k, Deck(k)->name[0] != 0, line,
                   k == c->activeDeck ? "IN USE" : NULL);
     }
     if (Y.cursor == DECK_ROW_BACK)
         Strip(0, "Back to the CARD CASE.");
+    else if (Y.cursor == DECK_ROW_LIST)
+        Strip(0, "The Forbidden & Limited list for your decks. {LEFT} {RIGHT} changes it.");
     else if (Y.cursor == DECK_ROW_RECIPES)
         Strip(0, "The Starter Decks, built again from the cards you have.");
     else if ((unsigned)Y.cursor == c->activeDeck)
@@ -1026,9 +1247,9 @@ static void DecksScreen(void)
     if (Y.menuOn && Y.cursor < YGO_SAVED_DECKS)
     {
         if (SlotEmpty((unsigned)Y.cursor))
-            TcgUi_PopMenu(118, 40, 114, sEmptyMenu, EM_COUNT, Y.menuCursor, 0);
+            TcgUi_PopMenu(118, 30, 114, sEmptyMenu, EmptyMenuCount(), Y.menuCursor, 0);
         else
-            TcgUi_PopMenu(134, 20, 98, sDeckMenu, DM_COUNT, Y.menuCursor, DeckMenuOff((unsigned)Y.cursor));
+            TcgUi_PopMenu(134, 6, 98, sDeckMenu, DeckMenuCount(), Y.menuCursor, DeckMenuOff((unsigned)Y.cursor));
         TcgUi_Hints("{A} CHOOSE  {B} BACK");
     }
     else
@@ -1218,6 +1439,11 @@ static void BuilderScreen(void)
     G_Text(184, 2, 0x7048a0, G_NO_SHADOW, line, 0, TF_NARROW);
     if (DeckValid((unsigned)Y.deck))
         G_Text(206, 2, 0x2858a8, G_NO_SHADOW, "READY", 0, TF_NARROW);
+    else if (Ygo_DeckMissing(c, Deck((unsigned)Y.deck)->main, Deck((unsigned)Y.deck)->extra))
+    {
+        snprintf(line, sizeof(line), "-%u", Ygo_DeckMissing(c, Deck((unsigned)Y.deck)->main, Deck((unsigned)Y.deck)->extra));
+        G_Text(206, 2, 0xa0a0a0, G_NO_SHADOW, line, 0, TF_NARROW);
+    }
     {
         int rows = 9, top = Y.deckCursor < 4 ? 0 : Y.deckCursor - 4;
         if (top > (int)listed - rows)
@@ -1229,11 +1455,13 @@ static void BuilderScreen(void)
             if (on)
                 G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
             G_FillA(165, y + 2, 2, 6, Ygo_FrameColor(card->id, 0), 255);
+            /* (gray: more in the deck than are owned, a deck made from a code) */
+            int short_ = InDeck((unsigned)Y.deck, card->id) > c->owned[card->id];
             snprintf(line, sizeof(line), "%s", card->name);
             TcgUi_FitText(line, 52, TF_NARROW);
-            G_Text(169, y - 1, G_INK, G_NO_SHADOW, line, 0, TF_NARROW);
+            G_Text(169, y - 1, short_ ? 0xa0a0a0 : G_INK, G_NO_SHADOW, line, 0, TF_NARROW);
             snprintf(line, sizeof(line), "x%u", InDeck((unsigned)Y.deck, card->id));
-            G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, 0x2858a8, 255);
+            G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, short_ ? 0xa0a0a0 : 0x2858a8, 255);
         }
     }
     id = Y.side ? (listed ? list[Y.deckCursor < (int)listed ? Y.deckCursor : 0] : 0) : ListCard(Y.cursor);
@@ -1792,7 +2020,7 @@ static void OnlineStep(void)
     if (Y.screen == Y_WAIT && l->state == YGO_NET_PLAYING)
     {
         Y.online = 1;
-        Y.duel = l->game;
+        ShowOnline();
         Y.rewarded = 0;
         Y.concedeHeld = 0;
         Y.aiDelay = 30;
@@ -2458,7 +2686,7 @@ int YgoUi_Step(unsigned keys)
         }
         if (Y.menuOn)
         {
-            int empty = SlotEmpty((unsigned)Y.cursor), count = empty ? EM_COUNT : DM_COUNT;
+            int empty = SlotEmpty((unsigned)Y.cursor), count = empty ? EmptyMenuCount() : DeckMenuCount();
             unsigned off = empty ? 0 : DeckMenuOff((unsigned)Y.cursor);
             Y.menuCursor = TcgUi_PopMenuMove(pressed, Y.menuCursor, count, off);
             if (pressed & KEY_B)
@@ -2476,6 +2704,23 @@ int YgoUi_Step(unsigned keys)
                     Screen(Y_RECIPES);
                     Y.recipeSlot = slot;
                 }
+                else if (empty && Y.menuCursor == EM_CODE)
+                    OpenCode(slot);
+                else if (empty && Y.menuCursor == EM_FILE)
+                    ImportYdk(slot);
+                else if (!empty && Y.menuCursor == DM_CODE)
+                {
+                    char code[2048];
+                    if (Ygo_WriteYdke(Deck((unsigned)slot)->main, Deck((unsigned)slot)->extra, code, sizeof(code)))
+                    {
+                        Platform_SetClipboardText(code);
+                        printf("[ygo] deck code copied: %s\n", code);
+                        Say(ACT_NONE, "%s's deck code was copied: paste it anywhere (a YDKE code).",
+                            Deck((unsigned)slot)->name);
+                    }
+                }
+                else if (!empty && Y.menuCursor == DM_EXPORT)
+                    ExportYdk(slot);
                 else if (empty || Y.menuCursor == DM_EDIT)
                 {
                     Y.deck = slot;
@@ -2511,7 +2756,17 @@ int YgoUi_Step(unsigned keys)
             break;
         }
         MoveCursor(pressed, DECK_ROWS, 1);
-        if (pressed & KEY_B || (pressed & KEY_A && Y.cursor == DECK_ROW_BACK))
+        if (Y.cursor == DECK_ROW_LIST && pressed & (KEY_LEFT | KEY_RIGHT | KEY_A))
+        {
+            /* the next (or the last) Forbidden & Limited list */
+            unsigned n = Ygo_BanlistCount(), now = Ygo_Banlist();
+            now = (pressed & KEY_LEFT ? now + n - 1 : now + 1) % n;
+            snprintf(c->banlist, sizeof(c->banlist), "%s", now ? Ygo_BanlistName(now) : "");
+            Ygo_UseBanlist(c->banlist);
+            printf("[ygo] list: %s\n", Ygo_BanlistName(Ygo_Banlist()));
+            PlaySE(SE_SELECT);
+        }
+        else if (pressed & KEY_B || (pressed & KEY_A && Y.cursor == DECK_ROW_BACK))
         {
             PlaySE(SE_SELECT);
             Screen(Y_HOME);
@@ -2549,6 +2804,37 @@ int YgoUi_Step(unsigned keys)
         else if (pressed & KEY_SELECT && Y.cursor < YGO_SAVED_DECKS && Deck((unsigned)Y.cursor)->name[0])
             Ask(ACT_CLEAR, Y.cursor, "Delete %s? Its cards stay in your collection.", Deck((unsigned)Y.cursor)->name);
         break;
+    case Y_CODE:
+    {
+        int ch;
+        TakeClipboardCode();
+        while ((ch = Platform_PopTypedChar()) != 0)
+        {
+            size_t n = strlen(Y.code);
+            if (ch == TYPED_ENTER)
+                pressed |= KEY_A;
+            else if (ch == TYPED_BACKSPACE)
+            {
+                if (n)
+                    Y.code[n - 1] = 0;
+            }
+            else if (ch > ' ' && ch < 127 && n + 1 < sizeof(Y.code))
+                Y.code[n] = (char)ch, Y.code[n + 1] = 0;
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            CloseCode();
+        }
+        else if (pressed & KEY_SELECT)
+        {
+            Y.code[0] = 0;
+            PlaySE(SE_SELECT);
+        }
+        else if (pressed & (KEY_A | KEY_START))
+            UseCode();
+        break;
+    }
     case Y_RECIPES:
         MoveCursor(pressed, RECIPE_COUNT, 1);
         if (pressed & KEY_B)
@@ -2998,6 +3284,9 @@ void YgoUi_Draw(void)
     case Y_RECIPES:
         RecipesScreen();
         break;
+    case Y_CODE:
+        CodeScreen();
+        break;
     case Y_ACE:
         AceScreen();
         break;
@@ -3208,6 +3497,22 @@ void Ygo_Debug(const char *command)
     {
         YgoDuel_Concede(&Y.duel, 1);
         printf("[ygo] opponent conceded\n");
+        return;
+    }
+    if (!strncmp(command, "code ", 5))
+    {
+        /* FROM CODE on the first empty slot, with this code as if pasted */
+        if (Y.screen == Y_CLOSED)
+            YgoUi_OpenCase(NULL, 0);
+        OpenCode((int)EmptySlot());
+        snprintf(Y.code, sizeof(Y.code), "%s", command + 5);
+        return;
+    }
+    if (sscanf(command, "mineuntil %u", &n) == 1)
+    {
+        /* your questions answered for you (the AI's answers; the Battle Phase taken when it's offered) until one of
+         * type n (YGO_Q_*) is asked: then "[mp] ygo mine reached" */
+        sMineUntil = (int)n;
         return;
     }
     if (!strcmp(command, "mine"))

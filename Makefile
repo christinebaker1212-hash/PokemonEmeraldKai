@@ -131,7 +131,7 @@ ifeq ($(PORTABLE),1)
 
   ifeq ($(TARGET_OS),WINDOWS)
     OS_CFLAGS :=
-    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi -lwinhttp
+    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi -lwinhttp -lcomdlg32
     BUILD_FEXTENSION := .exe
   else
     OS_CFLAGS :=
@@ -401,6 +401,27 @@ ifeq ($(PORTABLE),1)
   OBJS += $(FIGHT_OBJS)
 endif
 
+# Moemon Co-op: EDOPro's duel engine for the Yu-Gi-Oh! duels (edopro/ocgcore: edo9300's ygopro-core, AGPL-3.0, with
+# its Lua 5.4 built as C++ like EDOPro does, so none of its symbols meet the fight engine's Lua 5.1)
+ifeq ($(PORTABLE),1)
+  EDO_LUA_SKIP := lbitlib lcorolib ldblib linit loadlib loslib ltests lua luac lutf8lib onelua
+  EDO_SRCS := $(wildcard edopro/ocgcore/*.cpp) \
+              $(filter-out $(EDO_LUA_SKIP:%=edopro/ocgcore/lua/src/%.c),$(wildcard edopro/ocgcore/lua/src/*.c))
+  EDO_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(EDO_SRCS))
+  EDO_CXX := $(PREFIX)g++
+  # (Lua's few global tables renamed: C++ doesn't mangle a variable's name and the fight engine's Lua has them too)
+  EDO_CXXFLAGS := -std=c++17 -O2 -m$(BIT_WIDTH) -fno-rtti -w -Iedopro/ocgcore/lua/src \
+                  -include edopro/ocgcore/lua/luaconf-customize.h -DluaP_opmodes=edo_luaP_opmodes \
+                  -Dlua_ident=edo_lua_ident -DluaT_typenames_=edo_luaT_typenames_ -Dluai_ctype_=edo_luai_ctype_
+  ifeq ($(TARGET_OS),WINDOWS)
+    EDO_CXXFLAGS += -DWIN32 -D_WIN32 -DNOMINMAX
+    OS_LFLAGS += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+  else
+    OS_LFLAGS += -lstdc++
+  endif
+  OBJS += $(EDO_OBJS)
+endif
+
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -523,6 +544,16 @@ $(OBJ_DIR)/fight/%.o: fight/%.c
 	$(if $(filter $@,$(FIGHT_STATE_OBJS)),@$(OBJCOPY) $(FIGHT_STATE_SECTIONS) $@)
 
 -include $(FIGHT_OBJS:.o=.d)
+
+# Moemon Co-op: the EDOPro engine's objects (EDO_OBJS): C++, Lua's .c files too
+$(OBJ_DIR)/edopro/%.cpp.o: edopro/%.cpp
+	@echo "$(EDO_CXX) <edopro flags> -o $@ $<"
+	@$(EDO_CXX) $(EDO_CXXFLAGS) -MMD -MP -c $< -o $@
+$(OBJ_DIR)/edopro/%.c.o: edopro/%.c
+	@echo "$(EDO_CXX) <edopro flags> -x c++ -o $@ $<"
+	@$(EDO_CXX) $(EDO_CXXFLAGS) -x c++ -MMD -MP -c $< -o $@
+
+-include $(EDO_OBJS:.o=.d)
 
 $(C_BUILDDIR)/%.d: $(C_SUBDIR)/%.c
 	$(SCANINC) -M $@ -g $(ASSETS_DIR_NAME) $(INCLUDE_SCANINC_ARGS) -I tools/agbcc/include $<

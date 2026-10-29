@@ -30,6 +30,7 @@ struct YgoCollection *Ygo_GetCollection(void)
         sCollection.owner = owner;
         sLoadedFor = owner;
         sLoaded = 1;
+        Ygo_UseBanlist(sCollection.banlist);
     }
     return &sCollection;
 }

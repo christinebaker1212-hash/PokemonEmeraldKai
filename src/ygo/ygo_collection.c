@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "mp_version.h"
+#include <stdlib.h>
 #include "ygo/collection.h"
 #include "ygo/duel.h"
+#include "ygo_edo.h"
 
 static uint32_t Rand(uint32_t *s)
 {
@@ -29,12 +31,35 @@ unsigned Ygo_DeckCount(const uint16_t *cards, unsigned max)
     return n;
 }
 
-unsigned Ygo_CopyLimit(unsigned card)
+unsigned Ygo_GameLimit(unsigned card)
 {
     const struct YgoCard *c = Ygo_Card(card);
     if (!c)
         return 0;
     return c->limit < YGO_COPIES ? c->limit : YGO_COPIES;
+}
+static unsigned sBanlist;   /* 0 the game's own, else EDOPro's list sBanlist - 1 */
+unsigned Ygo_BanlistCount(void) { return 1 + YgoEdo_ListCount(); }
+const char *Ygo_BanlistName(unsigned list) { return list ? YgoEdo_ListName(list - 1) : "MOEMON (STAIRWAY)"; }
+unsigned Ygo_UseBanlist(const char *name)
+{
+    unsigned i, n = Ygo_BanlistCount();
+    sBanlist = 0;
+    for (i = 1; name && name[0] && i < n; i++)
+        if (!strcmp(Ygo_BanlistName(i), name))
+            sBanlist = i;
+    return sBanlist;
+}
+unsigned Ygo_Banlist(void) { return sBanlist; }
+unsigned Ygo_CopyLimit(unsigned card)
+{
+    unsigned n;
+    if (!sBanlist)
+        return Ygo_GameLimit(card);
+    if (!Ygo_Card(card))
+        return 0;
+    n = YgoEdo_ListLimit(sBanlist - 1, YgoEdo_CodeOfId(card));
+    return n < YGO_COPIES ? n : YGO_COPIES;
 }
 
 static unsigned Copies(const uint16_t *main, const uint16_t *extra, unsigned card)
@@ -468,8 +493,8 @@ void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day)
 }
 
 /* ---- the file: "MYGO", u32 format, u32 crc of the rest, then the fields, little-endian */
-#define YGO_FILE_FORMAT 3   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
-                                   ACE CARD; 1 and 2 still load */
+#define YGO_FILE_FORMAT 4   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
+                                   ACE CARD; 4 (1.48.0): the Forbidden & Limited list; 1-3 still load */
 static void Put(unsigned char **p, uint32_t v, unsigned n)
 {
     unsigned i;
@@ -501,7 +526,8 @@ static uint32_t Crc(const unsigned char *p, size_t n)
     (2 * (YGO_CARD_COUNT + 1) + YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) +       \
      2 * YGO_SET_COUNT + 4 * 10 + 3 + 6 * YGO_DAILY_SLOTS)
 #define PAYLOAD_SIZE_2 (PAYLOAD_SIZE_1 + YGO_GC_SINGLE_BYTES + 1)
-#define PAYLOAD_SIZE (PAYLOAD_SIZE_2 + 2 * YGO_SAVED_DECKS)
+#define PAYLOAD_SIZE_3 (PAYLOAD_SIZE_2 + 2 * YGO_SAVED_DECKS)
+#define PAYLOAD_SIZE (PAYLOAD_SIZE_3 + 32)
 
 int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
 {
@@ -553,6 +579,8 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     Put(&p, c->gcDecks, 1);
     for (i = 0; i < YGO_SAVED_DECKS; i++)
         Put(&p, c->ace[i], 2);
+    memcpy(p, c->banlist, 32);
+    p += 32;
     p = data;
     memcpy(p, "MYGO", 4);
     p += 4;
@@ -593,7 +621,7 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     if (n < 12 || memcmp(data, "MYGO", 4))
         return 0;
     format = Get(&p, 4);
-    size = format == 1 ? PAYLOAD_SIZE_1 : format == 2 ? PAYLOAD_SIZE_2 : PAYLOAD_SIZE;
+    size = format == 1 ? PAYLOAD_SIZE_1 : format == 2 ? PAYLOAD_SIZE_2 : format == 3 ? PAYLOAD_SIZE_3 : PAYLOAD_SIZE;
     if (format < 1 || format > YGO_FILE_FORMAT || n != 12 + size || Get(&p, 4) != Crc(data + 12, size))
         return 0;
     memset(c, 0, sizeof(*c));
@@ -642,6 +670,12 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
             if (c->ace[i] > YGO_CARD_COUNT)
                 c->ace[i] = 0;
         }
+    if (format >= 4)
+    {
+        memcpy(c->banlist, p, 32);
+        c->banlist[31] = 0;
+        p += 32;
+    }
     /* sanity: ids in range */
     for (i = 0; i < YGO_SAVED_DECKS; i++)
     {
@@ -655,4 +689,204 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     if (c->activeDeck >= YGO_SAVED_DECKS)
         c->activeDeck = 0;
     return 1;
+}
+
+/* ---- deck codes */
+static const char sB64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static int B64(int c)
+{
+    const char *p = c ? strchr(sB64, c) : NULL;
+    if (c == '-')
+        return 62;   /* (the URL-safe spelling) */
+    if (c == '_')
+        return 63;
+    return p ? (int)(p - sB64) : -1;
+}
+/* One part (up to '!'): passwords, 4 bytes each, into the deck; returns the characters read, -1 not base64 */
+static int ReadPart(const char *s, uint32_t *codes, unsigned max, unsigned *count)
+{
+    uint8_t bytes[4];
+    unsigned nb = 0, acc = 0, bits = 0;
+    int i;
+    *count = 0;
+    for (i = 0; s[i] && s[i] != '!'; i++)
+    {
+        int v;
+        if (s[i] == '=' || s[i] == ' ' || s[i] == '\r' || s[i] == '\n' || s[i] == '\t')
+            continue;
+        if ((v = B64((unsigned char)s[i])) < 0)
+            return -1;
+        acc = (acc << 6) | (unsigned)v;
+        bits += 6;
+        if (bits >= 8)
+        {
+            bits -= 8;
+            bytes[nb++] = (uint8_t)(acc >> bits);
+            acc &= (1u << bits) - 1;
+            if (nb == 4)
+            {
+                if (*count < max)
+                    codes[(*count)++] = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
+                nb = 0;
+            }
+        }
+    }
+    return i;
+}
+static void Place(const uint32_t *codes, unsigned n, uint16_t *mainOut, uint16_t *extraOut, unsigned *mains,
+                  unsigned *extras, unsigned *notHere, int extraPart)
+{
+    unsigned i;
+    for (i = 0; i < n; i++)
+    {
+        unsigned id = YgoEdo_CatalogOf(codes[i]);
+        const struct YgoCard *c = id ? Ygo_Card(id) : NULL;
+        if (!c || !Ygo_CardReady(id) || c->frame == YGO_TOKEN)
+        {
+            (*notHere)++;
+            continue;
+        }
+        if (c->frame == YGO_FUSION || extraPart)
+        {
+            if (c->frame == YGO_FUSION && *extras < YGO_FUSION_MAX)
+                extraOut[(*extras)++] = (uint16_t)id;
+            else if (c->frame != YGO_FUSION && *mains < YGO_DECK_MAX)
+                mainOut[(*mains)++] = (uint16_t)id;
+        }
+        else if (*mains < YGO_DECK_MAX)
+            mainOut[(*mains)++] = (uint16_t)id;
+    }
+}
+int Ygo_ReadYdke(const char *text, uint16_t main[YGO_DECK_MAX], uint16_t extra[YGO_FUSION_MAX], unsigned *notHere)
+{
+    static uint32_t codes[200];
+    const char *s = text ? strstr(text, "ydke://") : NULL;
+    unsigned n, mains = 0, extras = 0, part;
+    int used;
+    memset(main, 0, sizeof(uint16_t) * YGO_DECK_MAX);
+    memset(extra, 0, sizeof(uint16_t) * YGO_FUSION_MAX);
+    *notHere = 0;
+    if (!s)
+        return 0;
+    s += 7;
+    for (part = 0; part < 2; part++)
+    {
+        if ((used = ReadPart(s, codes, 200, &n)) < 0 || s[used] != '!')
+            return 0;
+        Place(codes, n, main, extra, &mains, &extras, notHere, part == 1);
+        s += used + 1;
+    }
+    return mains + extras + *notHere > 0;
+}
+int Ygo_ReadYdk(const char *text, uint16_t main[YGO_DECK_MAX], uint16_t extra[YGO_FUSION_MAX], unsigned *notHere)
+{
+    static uint32_t codes[200];
+    unsigned n = 0, mains = 0, extras = 0, section = 0, any = 0;
+    const char *line = text;
+    memset(main, 0, sizeof(uint16_t) * YGO_DECK_MAX);
+    memset(extra, 0, sizeof(uint16_t) * YGO_FUSION_MAX);
+    *notHere = 0;
+    while (line && *line)
+    {
+        const char *end = line + strcspn(line, "\r\n");
+        if (!strncmp(line, "#main", 5) || !strncmp(line, "#extra", 6) || !strncmp(line, "!side", 5))
+        {
+            Place(codes, n, main, extra, &mains, &extras, notHere, section == 1);
+            n = 0;
+            section = line[1] == 'm' ? 0 : line[1] == 'e' ? 1 : 2;
+            any = 1;
+        }
+        else if (*line >= '0' && *line <= '9' && section < 2 && n < 200)
+            codes[n++] = (uint32_t)strtoul(line, NULL, 10);
+        line = *end ? end + 1 + (end[0] == '\r' && end[1] == '\n') : end;
+    }
+    if (section < 2)
+        Place(codes, n, main, extra, &mains, &extras, notHere, section == 1);
+    return any && mains + extras + *notHere > 0;
+}
+static int WritePart(const uint16_t *ids, unsigned max, char *buf, size_t size, size_t *len)
+{
+    uint8_t bytes[4 * (YGO_DECK_MAX + YGO_FUSION_MAX)];
+    unsigned n = 0, i;
+    for (i = 0; i < max && ids[i]; i++)
+    {
+        uint32_t code = YgoEdo_CodeOfId(ids[i]);
+        bytes[n++] = (uint8_t)code;
+        bytes[n++] = (uint8_t)(code >> 8);
+        bytes[n++] = (uint8_t)(code >> 16);
+        bytes[n++] = (uint8_t)(code >> 24);
+    }
+    for (i = 0; i < n; i += 3)
+    {
+        uint32_t v = (uint32_t)bytes[i] << 16 | (i + 1 < n ? (uint32_t)bytes[i + 1] << 8 : 0) | (i + 2 < n ? bytes[i + 2] : 0);
+        if (*len + 5 > size)
+            return 0;
+        buf[(*len)++] = sB64[v >> 18 & 63];
+        buf[(*len)++] = sB64[v >> 12 & 63];
+        buf[(*len)++] = i + 1 < n ? sB64[v >> 6 & 63] : '=';
+        buf[(*len)++] = i + 2 < n ? sB64[v & 63] : '=';
+    }
+    if (*len + 2 > size)
+        return 0;
+    buf[(*len)++] = '!';
+    buf[*len] = 0;
+    return 1;
+}
+int Ygo_WriteYdke(const uint16_t *main, const uint16_t *extra, char *buf, size_t size)
+{
+    size_t len;
+    if (size < 16)
+        return 0;
+    memcpy(buf, "ydke://", 7);
+    len = 7;
+    if (!WritePart(main, YGO_DECK_MAX, buf, size, &len) || !WritePart(extra, YGO_FUSION_MAX, buf, size, &len))
+        return 0;
+    if (len + 2 > size)
+        return 0;
+    buf[len++] = '!';   /* (no Side Deck) */
+    buf[len] = 0;
+    return 1;
+}
+int Ygo_WriteYdk(const uint16_t *main, const uint16_t *extra, const char *name, char *buf, size_t size)
+{
+    size_t len = 0;
+    unsigned i;
+    int n = snprintf(buf, size, "#created by Moemon Emerald Kai Co-op: %s\n#main\n", name ? name : "");
+    if (n < 0 || (size_t)n >= size)
+        return 0;
+    len = (size_t)n;
+    for (i = 0; i < YGO_DECK_MAX + YGO_FUSION_MAX + 1; i++)
+    {
+        unsigned id = i < YGO_DECK_MAX ? main[i] : i < YGO_DECK_MAX + YGO_FUSION_MAX ? extra[i - YGO_DECK_MAX] : 0;
+        if (i == YGO_DECK_MAX)
+            n = snprintf(buf + len, size - len, "#extra\n");
+        else if (i == YGO_DECK_MAX + YGO_FUSION_MAX)
+            n = snprintf(buf + len, size - len, "!side\n");
+        else
+            n = 0;
+        if (n < 0 || len + (size_t)n >= size)
+            return 0;
+        len += (size_t)n;
+        if (id)
+        {
+            n = snprintf(buf + len, size - len, "%u\n", (unsigned)YgoEdo_CodeOfId(id));
+            if (n < 0 || len + (size_t)n >= size)
+                return 0;
+            len += (size_t)n;
+        }
+    }
+    return 1;
+}
+unsigned Ygo_DeckMissing(const struct YgoCollection *c, const uint16_t *main, const uint16_t *extra)
+{
+    static uint16_t used[YGO_CARD_COUNT + 1];
+    unsigned i, n = 0;
+    memset(used, 0, sizeof(used));
+    for (i = 0; i < YGO_DECK_MAX + YGO_FUSION_MAX; i++)
+    {
+        unsigned id = i < YGO_DECK_MAX ? main[i] : extra[i - YGO_DECK_MAX];
+        if (id && id <= YGO_CARD_COUNT && used[id]++ >= c->owned[id])
+            n++;
+    }
+    return n;
 }

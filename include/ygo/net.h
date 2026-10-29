@@ -23,9 +23,9 @@ enum
 struct YgoNet
 {
     struct YgoDuel game;
-    /* The duel before our unacknowledged answer: a concession from the other player that crossed it on the wire is
-     * applied to this instead */
-    struct YgoDuel beforePending;
+    /* The answers given before our unacknowledged one: a concession from the other player that crossed it on the
+     * wire is applied to the duel rewound to there instead (YgoDuel_Rewind) */
+    unsigned answersBefore;
     uint32_t sequenceBefore;
     uint16_t main[2][YGO_DECK_MAX], extra[2][YGO_FUSION_MAX];
     uint32_t session, sequence, deadline;

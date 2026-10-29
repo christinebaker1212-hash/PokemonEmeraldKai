@@ -49,6 +49,8 @@ struct YgoCollection
     uint8_t gcDecks;
     /* format 3: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */
     uint16_t ace[YGO_SAVED_DECKS];
+    /* format 4: the Forbidden & Limited list the player's decks follow, by name ("": the game's own) */
+    char banlist[32];
 };
 
 void Ygo_CollectionInit(struct YgoCollection *c, uint32_t seed);
@@ -64,8 +66,16 @@ int Ygo_OpenPack(struct YgoCollection *c, unsigned set, uint16_t result[YGO_PACK
 int Ygo_AwardPack(struct YgoCollection *c, unsigned set);
 /* A random booster set that's available (rewards) */
 unsigned Ygo_RandomSet(uint32_t *rng);
-/* Copies allowed in a deck (Stairway's list and the 3-copy rule) */
+/* Copies allowed in a deck by the list in use (Ygo_UseBanlist) and the 3-copy rule */
 unsigned Ygo_CopyLimit(unsigned card);
+/* ... by the game's own list (Stairway's): the opponents' decks */
+unsigned Ygo_GameLimit(unsigned card);
+/* The Forbidden & Limited lists: 0 the game's own, then each of EDOPro's (YGO_EDO_LISTS_MAX at most) */
+unsigned Ygo_BanlistCount(void);
+const char *Ygo_BanlistName(unsigned list);
+/* The list the player's decks follow from now (by name; "" or an unknown name: the game's own); returns its index */
+unsigned Ygo_UseBanlist(const char *name);
+unsigned Ygo_Banlist(void);
 /* A deck that can be played: 40-60 main, Fusion Deck of 15 or less (Fusion Monsters only), the copy limits,
  * owned cards (owned NULL: don't check), every card working */
 int Ygo_DeckValidate(const uint16_t *main, const uint16_t *extra, const uint16_t *owned, char *reason, size_t size);
@@ -90,6 +100,16 @@ unsigned Ygo_PointCost(unsigned card);   /* 0: not sold */
 unsigned Ygo_MoneyPrice(unsigned card);
 /* Distinct cards owned of a set (YGO_SET_COUNT: the whole pool) */
 unsigned Ygo_SetOwned(const struct YgoCollection *c, unsigned set, unsigned *total);
+/* Deck codes: YDKE ("ydke://" and each part's passwords in base64) and .ydk files (#main / #extra / !side, one
+ * password a line). Reading: the main and Extra Deck as card ids (0-terminated), *notHere how many of its cards the
+ * game hasn't got (not in the catalog or not playable: such a deck can't be made); 0 when it isn't a deck code at
+ * all. The Side Deck is left out. Writing: buf filled, 0 when it doesn't fit. */
+int Ygo_ReadYdke(const char *text, uint16_t main[YGO_DECK_MAX], uint16_t extra[YGO_FUSION_MAX], unsigned *notHere);
+int Ygo_ReadYdk(const char *text, uint16_t main[YGO_DECK_MAX], uint16_t extra[YGO_FUSION_MAX], unsigned *notHere);
+int Ygo_WriteYdke(const uint16_t *main, const uint16_t *extra, char *buf, size_t size);
+int Ygo_WriteYdk(const uint16_t *main, const uint16_t *extra, const char *name, char *buf, size_t size);
+/* Cards of a deck the collection doesn't have (counting copies) */
+unsigned Ygo_DeckMissing(const struct YgoCollection *c, const uint16_t *main, const uint16_t *extra);
 int Ygo_DailyAvailable(const struct YgoCollection *c, uint32_t key, unsigned day);
 void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day);
 #endif

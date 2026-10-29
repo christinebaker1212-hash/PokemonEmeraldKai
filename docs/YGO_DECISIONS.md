@@ -55,3 +55,17 @@ The user's answers to the 30 design questions (keep to them), then the choices m
   option covers both games.
 - Stage 1 = the Starter Decks, LOB and MRD (their effects written); later sets join as their effects are written
   (Ygo_SetAvailable needs 90% of a set ready).
+- 1.48.0, EDOPro (the user: "Replace the card-interaction engine with EDOPro", Lua and AGPL fine, "every card"):
+  the game's own engine and its written effects gave way to edo9300's ygopro-core and Project Ignis' CardScripts.
+  Every card EDOPro has is in the engine; the catalog stays what players collect and see. Master Rule 5 without the
+  Extra Monster Zones, since the table has five zones a side and no catalog card needs them. The stage gating above
+  is gone: every catalog card has a script (or needs none) and is playable.
+- The AI no longer plays out each choice on a copy of the duel (an EDOPro duel can only be rebuilt from its answers,
+  ~25 ms each time); it reads the table instead and never what it couldn't see.
+- Lists: the game's own Forbidden & Limited list stays the default; every EDOPro list can be picked on the DECKS screen
+  for the player's decks. Opponents' decks always follow the game's own.
+- Deck codes: YDKE on every platform (FROM CODE, DECK CODE); .ydk files only on Windows, through its own Open / Save
+  As windows (the user: no need on Linux). A code whose cards the game hasn't got is refused with the user's message;
+  cards not owned are kept, gray, and the deck waits for them.
+- Opponents' decks: the opponents of the Game Boy Advance games (2002-2004) from Yugipedia, never tournament lists;
+  rated by AI duels so a duelist's deck matches how far the player has come.

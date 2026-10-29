@@ -69,3 +69,4 @@ pokeemerald-dev64
 mugen/*.log
 mugen/mugen*.png
 /tools/tt/metadata/
+/tools/ygo/.cache/

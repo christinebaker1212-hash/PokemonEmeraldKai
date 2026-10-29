@@ -2766,5 +2766,5 @@ const struct YgoSet gYgoSets[YGO_SET_COUNT] = {
 
 const struct YgoCard *Ygo_Card(unsigned id)
 {
-    return id >= 1 && id <= YGO_CARD_COUNT ? &gYgoCards[id] : NULL;
+    return id >= 1 && id <= YGO_CARD_COUNT ? &gYgoCards[id] : Ygo_EdoCard(id);
 }

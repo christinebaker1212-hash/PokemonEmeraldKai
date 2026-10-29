@@ -178,6 +178,49 @@ refuse screens 'heap\] out of memory'
 echo 'PASS the case: home, binder, builder, a booster opened, a card inspected'
 fi
 
+# Deck codes: FROM CODE with a YDKE code (owned cards and missing ones, shown gray), a code with a card the game hasn't
+# got (refused), and the Forbidden & Limited list changed on the DECKS screen
+if only codes; then
+cat > "$OUT/codes.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 1
+mp ygo code ydke://ryPeAIDfbgU=!!!
+wait 20
+rendershot code-bad
+press A 2
+wait 20
+rendershot code-refused
+press A 2
+wait 10
+mp ygo code ydke://rvTMAoDfbgWA324F!!!
+wait 20
+rendershot code
+press A 2
+wait 30
+rendershot code-made
+press A 2
+wait 10
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press RIGHT 2
+wait 10
+rendershot list
+quit
+SCRIPT
+run codes
+expect codes 'cards not in the game'
+expect codes 'deck CODE DECK into slot 1: 3 cards'
+expect codes 'list: 2026.10 TCG'
+echo 'PASS deck codes: a YDKE code made into a deck (cards not owned yet included), one with a card the game lacks refused, the list changed'
+fi
+
 # A practice duel mashed with random keys for a while, then played out by the AI: the cards are
 # all still there, the duel ends, no flood of refused answers, no crash.
 if only monkey; then
@@ -291,6 +334,7 @@ for mode in keep loan; do
     echo 'mp cards starter 0'
     [ $mode = loan ] && { echo 'mp ygo starter 2'; echo 'mp ygo nodecks'; }
     cat <<'SCRIPT'
+mp ygo first 1
 mp register 399
 wait 10
 press UP 2
@@ -416,44 +460,18 @@ mp ygo open
 wait 20
 press A 2
 wait 300
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-mp ygo mine
-wait 40
-wait 60
+mp ygo mineuntil 2
+waitlog 6000 ygo mine reached
+wait 30
 press B 2
 wait 20
 rendershot battle_menu
 press DOWN 2
 wait 6
 press A 2
-wait 120
+wait 60
+mp ygo mineuntil 1
+waitlog 6000 ygo mine reached
 mp ygo state
 mp ygo fieldbg 52
 wait 20
@@ -464,7 +482,9 @@ quit
 SCRIPT
 run table
 expect table 'turn menu: cursor on MAIN PHASE 2'
-expect table 'duel: turn 5 phase 2 current 0'
+expect table 'ygo board: chose END TURN'
+expect table 'duel: turn [0-9]* phase 2 current 0'
+refuse table 'phase 4'
 expect table 'field background: Yami'
 echo 'PASS the Battle Phase menu (MAIN PHASE 2 chosen, END TURN skips it) and a Field Spell background'
 fi

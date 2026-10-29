@@ -156,6 +156,7 @@ enum
     M_WINDOW,      /* yes / no, an option, a position, chain or pass */
     M_PILE,        /* looking through a pile */
     M_CONFIRM,     /* conceding? */
+    M_NAMES,       /* declare a card name: a list of names */
     M_OVER
 };
 enum
@@ -351,7 +352,20 @@ static struct Rect OppHandRect(unsigned i, unsigned n)
     return R(OUTR + 1 + (int)(i % 2) * 12, ROW_OPP_ST + 1 + (int)(i / 2) * step, 12, 16);
 }
 /* Where an object's sprite belongs now (from the shown state) */
+/* Where an object rests and its turn in degrees: the other side's cards face them (upside down to us), a monster in
+ * Defense Position lies across */
+static struct Rect HomeFacing(unsigned o, float *angle);
 static struct Rect Home(unsigned o, float *angle)
+{
+    struct Rect r = HomeFacing(o, angle);
+    unsigned side = B.shown[o].loc == YGO_LOC_HAND || B.shown[o].loc == YGO_LOC_MZONE || B.shown[o].loc == YGO_LOC_SZONE ||
+                    B.shown[o].loc == YGO_LOC_NONE ? SideOf(B.shown[o].controller) : SideOf(T()->objs[o].owner);
+    if (side)
+        *angle += 180;
+    return r;
+}
+static int Across(float angle) { return ((int)(angle + 0.5f) % 180) == 90; }
+static struct Rect HomeFacing(unsigned o, float *angle)
 {
     const struct Shown *sh = &B.shown[o];
     unsigned side = SideOf(sh->controller);
@@ -843,9 +857,32 @@ static const char *PromptText(const struct YgoQuery *q, char *buf, size_t size)
         [YGO_P_MATERIAL] = "Fusion Materials",
         [YGO_P_FUSION] = "Fusion Summon",
         [YGO_P_RITUAL] = "Ritual Summon",
-        [YGO_P_ORDER] = "Chain first",
+        [YGO_P_ORDER] = "In order",
+        [YGO_P_TO_DECK] = "Return to the Deck",
+        [YGO_P_TO_HAND] = "Return to the hand",
+        [YGO_P_POSITION] = "Change position",
+        [YGO_P_CONTROL] = "Take control",
+        [YGO_P_DECLARE] = "Declare",
     };
     const char *verb = q->prompt < sizeof(verbs) / sizeof(verbs[0]) && verbs[q->prompt] ? verbs[q->prompt] : "Choose";
+    char said[96];
+    /* the card's own words when the engine has them and the prompt has none */
+    if (q->prompt == YGO_P_NONE && q->type != YGO_Q_ZONE && *YgoDuel_QueryText(B.d, said, sizeof(said)))
+    {
+        const char *t = YgoDuel_QueryText(B.d, said, sizeof(said));
+        if (!strncmp(t, "Select ", 7))
+            t += 7;
+        snprintf(buf, size, "%c%.40s%s", t[0] >= 'a' && t[0] <= 'z' ? t[0] - 'a' + 'A' : t[0], t + 1,
+                 q->max > 1 ? "" : (q->min ? "" : " (or none)"));
+        if (q->max > 1)
+            snprintf(buf + strlen(buf), size - strlen(buf), " (%d/%d)", B.pickedCount, q->max);
+        return buf;
+    }
+    if (q->type == YGO_Q_SUM)
+    {
+        snprintf(buf, size, "%s: total %u%s", verb, (unsigned)q->sum, q->sumMode == YGO_SUM_AT_LEAST ? " or more" : "");
+        return buf;
+    }
     if (q->type == YGO_Q_ZONE)
         snprintf(buf, size, "Choose a zone");
     else if (q->prompt == YGO_P_ATTACK_TARGET)
@@ -862,7 +899,7 @@ static int ItemOnField(const struct YgoChoice *c)
 {
     unsigned l;
     if (c->obj == NONE)
-        return 1;   /* a direct attack: the opponent's side */
+        return B.d->query.prompt == YGO_P_ATTACK_TARGET;   /* a direct attack: the opponent's side */
     if (c->obj >= B.objCount)
         return 0;
     l = T()->objs[c->obj].location;
@@ -928,9 +965,19 @@ static void NewQuestion(void)
             Tip("Your Main Phase: choose a card with {A} to Summon, Set or activate it. {INSPECT} looks at a card. {B} opens "
                 "the menu: the Battle Phase or END TURN.");
         break;
+    case YGO_Q_NAME:
+        B.mode = M_NAMES;
+        B.gridCursor = 0;
+        break;
     case YGO_Q_CARDS:
+    case YGO_Q_SUM:
+    case YGO_Q_SORT:
         for (i = 0; i < q->count; i++)
             field &= ItemOnField(&q->items[i]);
+        if (q->type == YGO_Q_SORT)
+            Tip("Choose the cards in order: the first you pick goes first.");
+        else if (q->type == YGO_Q_SUM)
+            Tip("Choose cards whose Levels add up to what the card asks.");
         B.mode = field ? M_PICK_FIELD : M_PICK_GRID;
         B.pickPrefer = PreferredPick(q);
         if (field && q->count)
@@ -991,7 +1038,7 @@ static int ObjSpot(unsigned o, int item)
     unsigned side = SideOf(sh->controller);
     float a;
     struct Rect r = Home(o, &a);
-    if (a == 90)
+    if (Across(a))
         r = R(r.x - 3, r.y + 3, r.h, r.w);
     switch (sh->loc)
     {
@@ -1368,44 +1415,16 @@ static int OpenMenu(unsigned obj)
     B.mode = M_MENU;
     return 1;
 }
-/* What moving on with item would leave us: played on a copy of the duel, the other side passing, up to our next
- * Main / Battle Phase question. Returns how many of its choices are attacks (kind YGO_ACT_ATTACK) or plays from the
- * hand (any other kind); -1 when there is no such question this turn. */
-static int ChoicesAfter(int item, unsigned kind)
+/* Can a monster of ours attack in the Battle Phase: one in Attack Position that hasn't attacked */
+static int CanAttackSoon(void)
 {
-    static struct YgoDuel sim;
-    struct YgoAnswer a;
-    unsigned i, steps = 0;
-    int n = 0;
-    sim = *B.d;
-    Answer1(&a, item);
-    if (!YgoDuel_Answer(&sim, &a))
-    {
-        printf("[ygo] turn menu: %s\n", sim.error);
-        return -1;
-    }
-    while (sim.query.type != YGO_Q_NONE && steps++ < 60 && sim.s.turn == B.d->s.turn)
-    {
-        if (sim.query.player == B.me && (sim.query.type == YGO_Q_IDLE || sim.query.type == YGO_Q_BATTLE))
-        {
-            for (i = 0; i < sim.query.count; i++)
-            {
-                unsigned o = sim.query.items[i].obj;
-                n += kind == YGO_ACT_ATTACK ? sim.query.items[i].kind == YGO_ACT_ATTACK
-                                            : o < sim.s.objCount && sim.s.objs[o].location == YGO_LOC_HAND;
-            }
-            return n;
-        }
-        if (sim.query.type != YGO_Q_CHAIN || sim.query.min)
-        {
-            printf("[ygo] turn menu: a question %u (player %u) on the way\n", sim.query.type, sim.query.player);
-            return -1;   /* something else would be asked: don't guess */
-        }
-        Answer1(&a, -1);   /* (pass) */
-        if (!YgoDuel_Answer(&sim, &a))
-            return -1;
-    }
-    return -1;
+    const struct YgoState *s = T();
+    const struct YgoPlayer *pl = &s->players[B.me];
+    unsigned i;
+    for (i = 0; i < YGO_ZONES; i++)
+        if (pl->monsters[i] && s->objs[pl->monsters[i] - 1].attackPos && !s->objs[pl->monsters[i] - 1].attacked)
+            return 1;
+    return 0;
 }
 static int OpenPhaseMenu(void)
 {
@@ -1435,7 +1454,7 @@ static int OpenPhaseMenu(void)
     }
     if (endTurn >= 0)
         B.menuCursor = endTurn;
-    if (toBattle >= 0 && ChoicesAfter(B.menuItems[toBattle], YGO_ACT_ATTACK) > 0)
+    if (toBattle >= 0 && CanAttackSoon())
         B.menuCursor = toBattle;
     else if (toMain2 >= 0)
         B.menuCursor = toMain2; /* (from the Battle Phase: MAIN PHASE 2 first, END TURN beside it) */
@@ -1457,10 +1476,15 @@ static int TogglePick(int item, struct YgoAnswer *a)
 {
     const struct YgoQuery *q = &B.d->query;
     int k = Picked(item);
-    if (q->max <= 1)
+    if (q->max <= 1 && q->type != YGO_Q_SUM && q->type != YGO_Q_SORT)
     {
         Answer1(a, item);
         return 1;
+    }
+    if (q->type == YGO_Q_SUM && (q->items[item].flags & YGO_IF_MUST))
+    {
+        PlaySE(SE_FAILURE);   /* (it counts already) */
+        return 0;
     }
     if (k)
     {
@@ -1476,12 +1500,18 @@ static int TogglePick(int item, struct YgoAnswer *a)
     }
     B.picked[B.pickedCount++] = (uint8_t)item;
     PlaySE(SE_SELECT);
+    memset(a, 0, sizeof(*a));
+    a->count = (uint8_t)B.pickedCount;
+    memcpy(a->picks, B.picked, (size_t)B.pickedCount);
+    /* done as soon as the picks add up (a sum), or when as many as asked are picked */
+    if (q->type == YGO_Q_SUM)
+        return YgoDuel_Check(B.d, a);
     if (q->min == q->max && B.pickedCount == q->max)
     {
-        memset(a, 0, sizeof(*a));
-        a->count = (uint8_t)B.pickedCount;
-        memcpy(a->picks, B.picked, (size_t)B.pickedCount);
-        return 1;
+        if (YgoDuel_Check(B.d, a))
+            return 1;
+        PlaySE(SE_FAILURE);
+        B.pickedCount--;
     }
     return 0;
 }
@@ -1496,6 +1526,12 @@ static int ConfirmPicks(struct YgoAnswer *a)
     memset(a, 0, sizeof(*a));
     a->count = (uint8_t)B.pickedCount;
     memcpy(a->picks, B.picked, (size_t)B.pickedCount);
+    if (!YgoDuel_Check(B.d, a))
+    {
+        printf("[ygo] picks refused: %s\n", B.d->error);
+        PlaySE(SE_FAILURE);
+        return 0;
+    }
     return 1;
 }
 static unsigned SpotCard(int i)
@@ -1572,10 +1608,16 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         memset(answer, 0, sizeof(*answer));
         return YB_ANSWER;
     }
+    /* Counters to remove from several cards: taken in order (the rare question with nothing to weigh) */
+    if (MyQuestion() && q->type == YGO_Q_COUNTER)
+    {
+        YgoDuel_AiAnswer(B.d, answer);
+        return YB_ANSWER;
+    }
     /* A new question of ours: the input starts over */
     if (MyQuestion())
     {
-        uint32_t stamp = B.d->s.eventSeq * 131u + B.d->answerCount * 7u + q->type + q->count * 3u + q->prompt;
+        uint32_t stamp = B.d->s.eventSeq * 131u + YgoDuel_AnswerCount(B.d) * 7u + q->type + q->count * 3u + q->prompt;
         if (B.mode == M_WATCH || stamp != B.askedStamp)
         {
             B.askedStamp = stamp;
@@ -1774,6 +1816,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             if (!MyQuestion())
                 return YB_NONE;
             B.mode = M_WATCH;
+            MPNet_Log("ygo board: chose %s", KindLabel(&q->items[item]));
             return Answer1(answer, item);
         }
         return YB_NONE;
@@ -1815,7 +1858,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.mode = M_WATCH;
             return YB_ANSWER;
         }
-        if (pressed & KEY_B && q->min == 0 && q->type == YGO_Q_CARDS)
+        if (pressed & KEY_B && (q->min == 0 || q->cancelable) && q->type == YGO_Q_CARDS)
         {
             PlaySE(SE_SELECT);
             B.mode = M_WATCH;
@@ -1879,13 +1922,44 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.mode = M_WATCH;
             return YB_ANSWER;
         }
-        if (pressed & KEY_B && q->min == 0)
+        if (pressed & KEY_B && (q->min == 0 || (q->cancelable && q->type == YGO_Q_CARDS)))
         {
             PlaySE(SE_SELECT);
             B.mode = M_WATCH;
             if (q->max > 1 && B.pickedCount)
                 return ConfirmPicks(answer) ? YB_ANSWER : YB_NONE;
             return Answer1(answer, -1);
+        }
+        return YB_NONE;
+    }
+    case M_NAMES:
+    {
+        /* a card name to declare: UP / DOWN one, LEFT / RIGHT a page, A declares it, INSPECT looks at it */
+        int n = B.d->nameCount;
+        if (n <= 0)
+            return YB_NONE;
+        if (pressed & KEY_UP)
+            B.gridCursor = (B.gridCursor + n - 1) % n, PlaySE(SE_SELECT);
+        if (pressed & KEY_DOWN)
+            B.gridCursor = (B.gridCursor + 1) % n, PlaySE(SE_SELECT);
+        if (pressed & KEY_LEFT)
+            B.gridCursor = B.gridCursor >= 8 ? B.gridCursor - 8 : 0, PlaySE(SE_SELECT);
+        if (pressed & KEY_RIGHT)
+            B.gridCursor = B.gridCursor + 8 < n ? B.gridCursor + 8 : n - 1, PlaySE(SE_SELECT);
+        if (pressed & KEY_INSPECT)
+        {
+            *card = B.d->names[B.gridCursor];
+            return YB_INSPECT;
+        }
+        if (pressed & KEY_A)
+        {
+            PlaySE(SE_SELECT);
+            B.mode = M_WATCH;
+            memset(answer, 0, sizeof(*answer));
+            answer->count = 2;
+            answer->picks[0] = (uint8_t)(B.gridCursor & 0xff);
+            answer->picks[1] = (uint8_t)(B.gridCursor >> 8);
+            return YB_ANSWER;
         }
         return YB_NONE;
     }
@@ -1918,6 +1992,16 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             PlaySE(SE_SELECT);
             B.mode = M_WATCH;
             return Answer1(answer, 0);
+        }
+        if (pressed & KEY_A && q->type == YGO_Q_OPTION && q->max > 1)
+        {
+            /* several to declare (Types, Attributes): each A marks one; done when there are enough */
+            if (TogglePick(B.windowItems[B.windowCursor], answer))
+            {
+                B.mode = M_WATCH;
+                return YB_ANSWER;
+            }
+            return YB_NONE;
         }
         if (pressed & KEY_A)
         {
@@ -2157,7 +2241,7 @@ static void Piles(void)
                 {
                     unsigned o = list[i];
                     Ygo_DrawCard(p == PILE_DECK || !SeesFace(o) ? 0 : T()->objs[o].card, (float)r.x, (float)r.y,
-                                 (float)r.w, (float)r.h, 0, 255, 0);
+                                 (float)r.w, (float)r.h, side ? 180 : 0, 255, 0);
                     break;
                 }
             snprintf(line, sizeof(line), "%u", n);
@@ -2324,7 +2408,7 @@ static void Cards(void)
             {
                 float a;
                 struct Rect r = Home(o, &a);
-                if (a == 90)
+                if (Across(a))
                     r = R(r.x - 3, r.y + 3, r.h, r.w);
                 Stats(o, r);
             }
@@ -2813,7 +2897,26 @@ static void Menus(void)
     {
         int w, x, y, cur = CurrentSpot();
         for (i = 0; i < B.menuCount; i++)
-            rows[i] = B.menuItems[i] == -2 ? "CONCEDE" : KindLabel(&q->items[B.menuItems[i]]);
+        {
+            int item = B.menuItems[i], k, same = 0;
+            rows[i] = item == -2 ? "CONCEDE" : KindLabel(&q->items[item]);
+            if (item < 0 || q->items[item].kind != YGO_ACT_ACTIVATE)
+                continue;
+            /* a card with more than one effect to use: each by its own words */
+            for (k = 0; k < B.menuCount; k++)
+                same += B.menuItems[k] >= 0 && q->items[B.menuItems[k]].kind == YGO_ACT_ACTIVATE &&
+                        q->items[B.menuItems[k]].obj == q->items[item].obj;
+            if (same > 1)
+            {
+                char text[96];
+                const char *t = YgoDuel_ItemText(B.d, (unsigned)item, text, sizeof(text));
+                if (*t)
+                {
+                    snprintf(names[i], sizeof(names[i]), "%.30s", t);
+                    rows[i] = names[i];
+                }
+            }
+        }
         w = RowsWidth(rows, B.menuCount, 96);
         x = 140;
         y = 160 - (B.menuCount * 14 + 8) - 34;
@@ -2842,6 +2945,25 @@ static void Menus(void)
         WindowBox(184, 74, 56, NULL, yesNo, 2, B.windowCursor, NULL);
         break;
     }
+    case M_NAMES:
+    {
+        int n = B.d->nameCount, start = B.gridCursor / 8 * 8;
+        G_Window(40, 4, 160, 22 + 8 * 13);
+        G_Text(48, 6, 0x506070, G_NO_SHADOW, "Declare a card name:", 150, TF_SMALL);
+        for (i = 0; i < 8 && start + i < n; i++)
+        {
+            const struct YgoCard *c = Ygo_Card(B.d->names[start + i]);
+            if (start + i == B.gridCursor)
+                G_Cursor(46, 24 + i * 13);
+            G_Text(54, 20 + i * 13, G_INK, G_INK_SHADOW, c ? c->name : "?", 140, TF_NORMAL);
+        }
+        {
+            char page[24];
+            snprintf(page, sizeof(page), "%d / %d", B.gridCursor + 1, n);
+            G_TextAlign(196, 6, TA_RIGHT, 0x506070, G_NO_SHADOW, page, TF_SMALL);
+        }
+        break;
+    }
     case M_WINDOW:
     {
         char title[64];
@@ -2855,24 +2977,50 @@ static void Menus(void)
                 snprintf(names[i], sizeof(names[i]), "PASS");
             else if (q->type == YGO_Q_CHAIN)
             {
-                const struct YgoCard *c = ObjCard(q->items[item].obj);
-                snprintf(names[i], sizeof(names[i]), "%s", c ? c->name : "?");
+                /* the card; which of its effects when it offers more than one */
+                const struct YgoCard *c = Ygo_Card(q->items[item].card);
+                char text[96];
+                unsigned k, same = 0;
+                for (k = 0; k < q->count; k++)
+                    same += q->items[k].obj == q->items[item].obj;
+                if (same > 1 && *YgoDuel_ItemText(B.d, (unsigned)item, text, sizeof(text)))
+                    snprintf(names[i], sizeof(names[i]), "%.38s", YgoDuel_ItemText(B.d, (unsigned)item, text, sizeof(text)));
+                else
+                    snprintf(names[i], sizeof(names[i]), "%s", c ? c->name : "?");
             }
             else if (q->type == YGO_Q_YESNO)
                 snprintf(names[i], sizeof(names[i]), "%s", item ? "YES" : "NO");
             else if (q->type == YGO_Q_POSITION)
                 snprintf(names[i], sizeof(names[i]), "%s",
-                         q->items[item].value == 0 ? "ATTACK POSITION" : q->items[item].value == 1 ? "DEFENSE POSITION"
-                                                                                                   : "SET (FACE-DOWN)");
-            else if (q->prompt == YGO_P_COIN_CALL)
-                snprintf(names[i], sizeof(names[i]), "%s", q->items[item].value ? "HEADS" : "TAILS");
-            else if (q->prompt == YGO_P_SUMMON_OR_SET)
-                snprintf(names[i], sizeof(names[i]), "%s", q->items[item].value ? "SET" : "SUMMON");
+                         q->items[item].value == YGO_POS_ATTACK ? "ATTACK POSITION"
+                         : q->items[item].value == YGO_POS_DEFENSE ? "DEFENSE POSITION"
+                         : q->items[item].value == YGO_POS_FACEDOWN_DEFENSE ? "SET (FACE-DOWN)" : "FACE-DOWN ATTACK");
             else
-                snprintf(names[i], sizeof(names[i]), "%u", q->items[item].value);
+            {
+                char text[96];
+                const char *t = YgoDuel_ItemText(B.d, (unsigned)item, text, sizeof(text));
+                if (*t)
+                    snprintf(names[i], sizeof(names[i]), "%s%.36s", Picked(item) ? "* " : "", t);
+                else
+                    snprintf(names[i], sizeof(names[i]), "%u", q->items[item].value);
+                /* (capitals, like the game's other menus, for short labels) */
+                if (strlen(names[i]) <= 14)
+                {
+                    char *c;
+                    for (c = names[i]; *c; c++)
+                        if (*c >= 'a' && *c <= 'z')
+                            *c = (char)(*c - 'a' + 'A');
+                }
+            }
         }
         if (q->type == YGO_Q_CHAIN)
             snprintf(title, sizeof(title), "Activate a card?");
+        else if (*YgoDuel_QueryText(B.d, title, sizeof(title)))
+        {
+            char text[96];
+            snprintf(title, sizeof(title), "%.63s", YgoDuel_QueryText(B.d, text, sizeof(text)));
+            w = 200;
+        }
         else if (q->type == YGO_Q_YESNO)
             snprintf(title, sizeof(title), "Use %s?", asking ? asking->name : "the effect");
         else if (q->type == YGO_Q_POSITION)
@@ -2921,6 +3069,10 @@ static void Grid(void)
             y -= 2;
         if (o < B.objCount)
             Ygo_DrawCard(SeesFace(o) || B.mode == M_PICK_GRID ? T()->objs[o].card : 0, (float)x, (float)y, 30, 42, 0, 255, 0);
+        else if (B.mode == M_PICK_GRID && q->items[k].card)
+            Ygo_DrawCard(q->items[k].card, (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (B.mode == M_PICK_GRID && (q->items[k].flags & (YGO_IF_PICKED | YGO_IF_MUST)))
+            G_Frame(x - 1, y - 1, 32, 44, 0xf0c040, 255);
         if (mark)
         {
             G_Frame(x - 1, y - 1, 32, 44, 0x40a0ff, 255);

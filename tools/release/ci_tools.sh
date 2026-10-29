@@ -11,7 +11,7 @@
 set -u
 shopt -s nullglob
 DEBS=${1:?usage: ci_tools.sh DEB_DIR}
-PKGS="build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64-win32 zip unzip python3"
+PKGS="build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64-win32 g++-mingw-w64-x86-64-win32 zip unzip python3"
 MIRRORS="http://azure.archive.ubuntu.com/ubuntu http://archive.ubuntu.com/ubuntu http://mirrors.edge.kernel.org/ubuntu http://us.archive.ubuntu.com/ubuntu"
 . /etc/os-release
 export DEBIAN_FRONTEND=noninteractive

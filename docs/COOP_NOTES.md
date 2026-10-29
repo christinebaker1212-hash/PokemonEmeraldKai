@@ -2023,17 +2023,16 @@ the work left in docs/YGO_HANDOFF.md.
   gen_catalog.py add the English sets to the end of 2003 and write src/ygo/ygo_catalog.c, include/ygo/card_ids.h and
   src/ygo/ygo_fusions.c. fetch_art.py + build_printed.py: graphics/ygo/printed.bin (160x233 JPEGs, then the real
   back; `--keep-cards` rebuilds only the back).
-- Engine (ygo_duel.c): one YgoQuery at a time, answered with a YgoAnswer; the whole duel follows from the seed and the
-  answers (YgoDuel_Hash), so online only has to exchange answers. Chains, SEGOC, missing the timing, the Damage Step,
-  summon negation windows, lasting effects. Card effects by stage (ygo_fx_s1_*.c with ygo_fx_lib.c); a card without
-  rules isn't in packs, shops or decks (Ygo_CardReady).
+- Engine: EDOPro's since 1.48.0 (see "Yu-Gi-Oh! on EDOPro" below; the game's own engine, ygo_duel.c and the
+  ygo_fx_*.c effects, is in the history before that). One YgoQuery at a time, answered with a YgoAnswer; the whole duel
+  follows from the seed and the answers (YgoDuel_Hash), so online only has to exchange answers.
 - The table (ygo_board.c): plays the engine's events one by one, then asks. A chance to chain while a phase changes
   (YgoDuel_QuietChance: no chain, summon, attack or Damage Step) is passed for the player unless L is held; effects
   made for such a moment carry YF_PHASE and are still asked. This is the screen's choice, never the engine's.
 - Screens (ygo_ui.c) share the Pokemon case's look (src/tcg/tcg_ui_kit.h); tcg_ui.c hands Step / Draw / IsActive to
   them while the YU-GI-OH! side is open. CARD ART and CARD BACKS (gMpConfig) apply to both games.
-- World (ygo_field.c): who plays which game by trainer class / townsfolk sprite, themed decks by badge tier, special
-  duelists with signature cards; tcg_field.c's Task_CardChallenge asks "MOéMON CARDS or YU-GI-OH!" for the CARD CLUB,
+- World (ygo_field.c): who plays which game by trainer class / townsfolk sprite; three in five bring a deck from the
+  GBA games' opponents by badge tier (GameDeck), the rest themed decks; special duelists with signature cards; tcg_field.c's Task_CardChallenge asks "MOéMON CARDS or YU-GI-OH!" for the CARD CLUB,
   the rival, WALLY and STEVEN. Both CARD CLUB NPCs stand in OLDALE's and MAUVILLE's POKéMON MARTS and LILYCOVE's
   DEPARTMENT STORE (data/scripts/ygo_club.inc, card_club.inc).
 - Friends (1.36.0): src/ygo/ygo_net.c (include/ygo/net.h, struct YgoNet: the chain link's struct is YgoLink) on the
@@ -2055,7 +2054,8 @@ the work left in docs/YGO_HANDOFF.md.
   for one); in LILYCOVE's DEPARTMENT STORE both card NPCs are behind the counter (7,2) and (9,2).
 - Save: "<save>.ygo" beside the save (Ygo collection, written with the Pokemon cards' sidecar, backed up with the
   save). CARD POINTS are shared with the Pokemon cards.
-- Tests: tools/ygo/test.sh (engine, card scenarios, random duels, AI, collection; sanitizers) and
+- Tests: tools/ygo/test.sh (EDOPro bridge, card scenarios, random duels, collection, deck codes, the link;
+  sanitizers) and
   tools/ygo/test_ui.sh (the club, a challenge, the case's screens, a practice duel mashed with random keys).
   Debug: `mp ygo ...` (ygo_ui.c Ygo_Debug).
 
@@ -2318,3 +2318,55 @@ Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMA
   `mp bgm` (song, tracks, voices), `mp playsong N` (a clean sound state first: Game Boy channel phase, frame clock and
   frequency registers carry over from earlier sounds in the game, so only a clean start matches the studio's render).
 
+
+## Yu-Gi-Oh! on EDOPro (1.48.0)
+
+The rules engine is EDOPro's: every card with every effect, today's rules. The catalog (ygo_catalog.c) stays the cards
+players can collect and see; anything else a duel brings in (tokens, a card an effect creates) gets an id past
+YGO_CARD_COUNT made from EDOPro's database (Ygo_EdoCard).
+
+- Code: edopro/ocgcore (edo9300's ygopro-core, commit in dist_extras/EDOPRO_CREDITS.txt) with its Lua 5.4 compiled as
+  C++ (Makefile EDO_SRCS / EDO_CXXFLAGS; Lua's four global tables renamed edo_* so the fight engine's Lua 5.1 can
+  link beside it; libstdc++ static on Windows; CI needs g++-mingw-w64). Duel flags: Master Rule 5 without the Extra
+  Monster Zones (five zones a side, as the table draws).
+- Data: graphics/ygo/edo.pak, built in (ygo_edo_pak.c .incbin), from tools/ygo/edo/build_pack.py: cards.bin (every
+  card of BabelCdb's cards.cdb with name, text and effect strings), the root and official/ CardScripts, the LFLists,
+  strings.conf. Files are grouped in ~256 KB raw-deflate chunks (stb's zlib decoder); a few chunks are cached.
+  build_pack.py also writes src/ygo/ygo_edo_codes.c (each catalog card's code: its password, else by name).
+- The bridge (src/ygo/ygo_edo.c): runs OCG_DuelProcess to a question; each message becomes events and moves objects in
+  lists mirroring the engine's (Deck, hand, GY, banished, Extra Deck in order; zones by sequence; MSG_MOVE removes
+  then inserts like the engine). When the engine stops, every location is read back (OCG_DuelQueryLocation): codes,
+  positions, ATK/DEF, counters, equips; if the objects disagree with the engine it rebuilds them (gYgoEdoRebuilds,
+  tests require 0). The engine's player 0 always goes first: GP() swaps when the game's player 1 starts.
+- Questions: IDLECMD / BATTLECMD / CHAIN / EFFECTYN / YESNO / OPTION / CARD / TRIBUTE / UNSELECT_CARD / SUM /
+  POSITION / PLACE / COUNTER / SORT / ANNOUNCE_* / ROCK_PAPER_SCISSORS map to YgoQuery types (YGO_Q_SUM, SORT,
+  COUNTER, NAME are new; OPTION can take several picks). Answered here without asking, always from the duel and its
+  answers: a chain window with nothing to chain, SORT_CHAIN (default order), the zone of a Main Phase answer
+  (YgoAnswer.zone, also "first empty"), and "Attack directly?" turned into one attack-target pick (the opponent's
+  monsters or their LP; the following SELECT_CARD answered with the pick). Labels: YgoDuel_QueryText / ItemText from
+  the card's effect strings and the system strings.
+- Copies: a YgoDuel owns its engine (d->edo); never assign one. YgoDuel_Copy and YgoDuel_Rewind rebuild from the seed and
+  the answers (about 25 ms to start a duel); ygo_net.c rewinds when a concession crosses an answer; ygo_ui.c's online
+  Y.duel is a view of the link's duel (ShowOnline, duelShown: never freed from there).
+- AI (ygo_ai.c): rule-based on the questions (no lookahead: the engine can't be copied cheaply), never reading hidden
+  cards (Seen()).
+- Deck codes: Ygo_ReadYdke / WriteYdke / ReadYdk / WriteYdk (ygo_collection.c); a code's card the catalog hasn't got
+  (YgoEdo_CatalogOf also matches other printings) refuses the deck with "This deck contains cards that are not
+  currently implemented. Please try another code."; cards not owned stay in the deck, gray in the builder (the deck
+  is ready once they're owned). FROM CODE takes a code from the clipboard as it's copied (and typing / Ctrl+V);
+  DECK CODE copies one. .ydk files through src/platform/file_dialog.c (Windows' Open / Save As; not offered elsewhere).
+- Lists: Ygo_BanlistCount / Name / UseBanlist: 0 the game's own (Stairway's), then each EDOPro list (whitelists like
+  GOAT allow only what they name). The player's choice is YgoCollection.banlist (.ygo format 4); opponents' decks
+  follow the game's own (Ygo_GameLimit).
+- Opponents' decks: tools/ygo/scrape_npc_decks.py reads Yugipedia's pages for the opponents of Stairway to the
+  Destined Duel, The Eternal Duelist Soul, World Championship 2004, Reshef of Destruction and The Sacred Cards (three
+  page layouts; names matched through EDOPro's database too), keeps decks the catalog nearly covers (two a character),
+  fills short ones to 40 with Normal Monsters of the deck's own Attribute/Type; tools/ygo/rate_npc_decks.sh rates
+  them by AI-against-AI duels (Elo) into src/ygo/ygo_npc_decks.c, weakest first; ygo_field.c GameDeck picks from the
+  quarter matching the badge tier.
+- The table turns the other side's cards to face them (Home: +180 degrees; piles too).
+- Tests: tools/ygo/test_edo.c (determinism, AI / random duels, Copy / Rewind, no rebuilds, no answer the engine
+  refuses), test_edo_cards.c (Decks unshuffled with gYgoEdoNoShuffle: Summons, Tribute, Dark Hole, Monster Reborn,
+  Polymerization, a Ritual's sum, Mirror Force, Change of Heart, Scapegoat's tokens, Time Wizard's coin, Prohibition's
+  declared name), test_collection.c (deck codes, lists); test_ui.sh "codes" and "table" (`mp ygo mineuntil Q`,
+  `mp ygo code TEXT`).

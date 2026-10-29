@@ -107,7 +107,7 @@ int main(void)
     {
         static unsigned char data[1 << 20];
         FILE *f = fopen("/tmp/ygo-test.ygo", "rb");
-        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS, i;
+        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS - 32, i;
         uint32_t crc = 0xFFFFFFFFu;
         unsigned k;
         fclose(f);
@@ -129,6 +129,34 @@ int main(void)
     }
     CHECK(Ygo_MoneyPrice(YGO_CARD_RAIGEKI) >= 300 && Ygo_MoneyPrice(YGO_CARD_RAIGEKI) <= 4000);
     remove("/tmp/ygo-test.ygo");
-    printf("PASS pull rates, the Starter Decks, deck rules and the save file\n");
+    /* deck codes: YDKE and .ydk round trips, a card the game hasn't got, a real code's alternate artwork */
+    {
+        static struct YgoCollection k;
+        uint16_t m[YGO_DECK_MAX], x[YGO_FUSION_MAX];
+        char code[2048], ydk[4096];
+        unsigned bad, i;
+        Ygo_CollectionInit(&k, 9);
+        CHECK(Ygo_ChooseStarter(&k, YGO_SET_SDJ));
+        CHECK(Ygo_WriteYdke(k.decks[0].main, k.decks[0].extra, code, sizeof(code)));
+        CHECK(!strncmp(code, "ydke://", 7));
+        CHECK(Ygo_ReadYdke(code, m, x, &bad) && !bad);
+        CHECK(!memcmp(m, k.decks[0].main, sizeof(m)) && !memcmp(x, k.decks[0].extra, sizeof(x)));
+        CHECK(Ygo_WriteYdk(k.decks[0].main, k.decks[0].extra, "TEST", ydk, sizeof(ydk)));
+        CHECK(Ygo_ReadYdk(ydk, m, x, &bad) && !bad);
+        CHECK(!memcmp(m, k.decks[0].main, sizeof(m)) && !memcmp(x, k.decks[0].extra, sizeof(x)));
+        CHECK(Ygo_DeckMissing(&k, m, x) == 0);
+        /* "Ash Blossom & Joyous Spring" (14558127): not in the game */
+        CHECK(Ygo_ReadYdk("#main\n14558127\n46986414\n#extra\n!side\n", m, x, &bad) && bad == 1 && m[0] && !m[1]);
+        CHECK(!strcmp(Ygo_Card(m[0])->name, "Dark Magician"));   /* (46986414: the catalog has another printing) */
+        CHECK(!Ygo_ReadYdke("hello", m, x, &bad));
+        CHECK(Ygo_ReadYdke("ydke://r9H3AA==!!!", m, x, &bad) && bad == 1);   /* (14608815... any unknown) */
+        for (i = 0; i < Ygo_BanlistCount(); i++)
+            printf("  list %u: %s\n", i, Ygo_BanlistName(i));
+        CHECK(Ygo_BanlistCount() >= 6);
+        CHECK(Ygo_UseBanlist("2005.4 GOAT") > 0 && Ygo_CopyLimit(YGO_CARD_RAIGEKI) == 0 + (Ygo_CopyLimit(YGO_CARD_RAIGEKI) > 0));
+        Ygo_UseBanlist("");
+        CHECK(Ygo_Banlist() == 0);
+    }
+    printf("PASS pull rates, the Starter Decks, deck rules, the save file, deck codes and the lists\n");
     return 0;
 }

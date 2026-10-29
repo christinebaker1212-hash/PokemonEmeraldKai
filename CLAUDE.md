@@ -172,15 +172,22 @@ docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/
 
 Also YU-GI-OH! duels (src/ygo/, include/ygo/: the CARD CASE's second side, L/R switches; SDD's card list and
 Forbidden/Limited list plus the English boosters to the end of 2003 (tools/ygo, catalog in ygo_catalog.c / card_ids.h;
-the ROM is never committed); rules engine ygo_duel.c asked as it goes (YgoQuery / YgoAnswer, deterministic from seed +
-answers), effects by stage in ygo_fx_s1_*.c (Ygo_CardReady gates packs, shops and decks), AI ygo_ai.c, the table
-ygo_board.c, screens ygo_ui.c, who plays which game and the special duelists ygo_field.c + tcg_field.c's which-game menu,
-the CARD CLUB duelist in the POKéMON MARTS (data/scripts/ygo_club.inc), "<save>.ygo"; quiet chain windows are passed by
-the board unless L is held (YgoDuel_QuietChance, YF_PHASE); printed art and the real back in graphics/ygo/printed.bin;
-duels / trades with friends by answers over relay types 8-13 (ygo_net.c, struct YgoNet; an answer carries the zone a card
-goes to, YgoAnswer.zone), deck menus with RENAME / ACE CARD / DECK RECIPES on both card games (COOP_NOTES "Deck menus"), a Starter Deck to keep or
-borrow for anyone asked without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md,
-COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh, scenarios ygo_*).
+the ROM is never committed): the cards that can be collected and seen. The rules are EDOPro's: edopro/ocgcore
+(ygopro-core + Lua 5.4, C++ built by the Makefile's EDO_* rules, AGPL: dist_extras/EDOPRO_CREDITS.txt) with every card
+and script in graphics/ygo/edo.pak (tools/ygo/edo/build_pack.py from BabelCdb, CardScripts, LFLists, strings.conf;
+ygo_edo_data.c). src/ygo/ygo_edo.c bridges it to the game's API (include/ygo/duel.h: YgoQuery / YgoAnswer, events,
+YgoState as objects that keep their number): never copy a YgoDuel by value (YgoDuel_Copy / Rewind rebuild from the
+answers); cards outside the catalog (tokens) get ids past YGO_CARD_COUNT. AI ygo_ai.c (reads only what it may see), the
+table ygo_board.c (the opponent's cards turned to face them), screens ygo_ui.c (FROM CODE: YDKE codes, DECK CODE,
+.ydk import/export on Windows only via src/platform/file_dialog.c; the LIST row: every EDOPro Forbidden & Limited list,
+YgoCollection.banlist), who plays which game and the special duelists ygo_field.c + tcg_field.c's which-game menu
+(most duelists bring a deck from the GBA games' opponents: ygo_npc_decks.c from tools/ygo/scrape_npc_decks.py +
+rate_npc_decks.sh), the CARD CLUB duelist in the POKéMON MARTS (data/scripts/ygo_club.inc), "<save>.ygo"; quiet chain
+windows are passed by the board unless L is held; printed art and the real back in graphics/ygo/printed.bin;
+duels / trades with friends by answers over relay types 8-13 (ygo_net.c, struct YgoNet), deck menus with RENAME / ACE
+CARD / DECK RECIPES on both card games (COOP_NOTES "Deck menus"), a Starter Deck to keep or borrow for anyone asked
+without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md, COOP_NOTES "Yu-Gi-Oh!" and
+"Yu-Gi-Oh! on EDOPro"; tests tools/ygo/test.sh (test_edo, test_edo_cards: scenarios with unshuffled Decks), tools/ygo/test_ui.sh, scenarios ygo_*).
 
 The three card games share INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
 and challenge screens with the opponent's battle picture (tcg_field.c CaptureChallengePic): COOP_NOTES "The three card

@@ -76,15 +76,7 @@ static int ReadDeck(const uint8_t *p, uint16_t *main, uint16_t *extra)
 uint32_t YgoNet_Hash(const struct YgoDuel *d)
 {
     uint32_t h = YgoDuel_Hash(d);
-    unsigned i, k;
-    h = (h ^ d->answerCount) * 16777619u;
-    for (i = 0; i < d->answerCount; i++)
-    {
-        h = (h ^ d->answers[i].count) * 16777619u;
-        h = (h ^ d->answers[i].zone) * 16777619u;
-        for (k = 0; k < d->answers[i].count && k < (unsigned)sizeof(d->answers[i].picks); k++)
-            h = (h ^ d->answers[i].picks[k]) * 16777619u;
-    }
+    h = (h ^ YgoDuel_AnswerCount(d)) * 16777619u;
     h = (h ^ d->query.type) * 16777619u;
     h = (h ^ d->query.player) * 16777619u;
     return h;
@@ -93,6 +85,7 @@ unsigned YgoNet_First(uint32_t session) { return (session >> 7) & 1; }
 
 void YgoNet_Init(struct YgoNet *l, void (*send)(void *, unsigned, const uint8_t *, unsigned), void *context)
 {
+    YgoDuel_Free(&l->game);   /* (a duel held before: its engine) */
     memset(l, 0, sizeof(*l));
     l->send = send;
     l->context = context;
@@ -171,12 +164,17 @@ int YgoNet_Submit(struct YgoNet *l, const struct YgoAnswer *a, uint32_t now)
         l->game.query.player != l->seat || a->count > sizeof(a->picks))
         return 0;
     before = YgoNet_Hash(&l->game);
-    l->beforePending = l->game;
+    if (!YgoDuel_Check(&l->game, a))
+    {
+        snprintf(l->error, sizeof(l->error), "%s", l->game.error);
+        return 0;
+    }
+    l->answersBefore = YgoDuel_AnswerCount(&l->game);
     l->sequenceBefore = l->sequence;
     if (!YgoDuel_Answer(&l->game, a))
     {
         snprintf(l->error, sizeof(l->error), "%s", l->game.error);
-        l->game = l->beforePending;
+        YgoNet_Cancel(l, "The duel couldn't go on.");
         return 0;
     }
     SendAnswer(l, before, a, 0, now);
@@ -190,7 +188,7 @@ int YgoNet_Concede(struct YgoNet *l, uint32_t now)
         return 0;
     memset(&none, 0, sizeof(none));
     before = YgoNet_Hash(&l->game);
-    l->beforePending = l->game;
+    l->answersBefore = YgoDuel_AnswerCount(&l->game);
     l->sequenceBefore = l->sequence;
     YgoDuel_Concede(&l->game, l->seat);
     SendAnswer(l, before, &none, FLAG_CONCEDE, now);
@@ -256,7 +254,6 @@ void YgoNet_Receive(struct YgoNet *l, unsigned from, const uint8_t *p, unsigned 
     if (type == ANSWER && len >= ANSWER_LEN && l->state == YGO_NET_PLAYING)
     {
         struct YgoAnswer a;
-        struct YgoDuel next;
         uint8_t ack[15];
         unsigned concede = p[19] & FLAG_CONCEDE, theirs = l->seat ^ 1;
         int ok;
@@ -264,13 +261,14 @@ void YgoNet_Receive(struct YgoNet *l, unsigned from, const uint8_t *p, unsigned 
         {
             /* A concession crossed our own answer: ours never counted on the other side, so drop it (both seats then
              * hold the same duel). Two concessions crossing: seat 0's stands. */
-            uint32_t shown = l->game.s.eventSeq;
             if (l->game.s.over && l->game.s.winner == theirs && l->seat == 0)
                 return;
-            l->game = l->beforePending;
             /* (events go on from what the table already showed; not part of the hash) */
-            if (shown > l->game.s.eventSeq)
-                l->game.s.eventSeq = shown;
+            if (!YgoDuel_Rewind(&l->game, l->answersBefore))
+            {
+                YgoNet_Cancel(l, "The duel couldn't go on.");
+                return;
+            }
             l->sequence = l->sequenceBefore;
             l->pending = 0;
         }
@@ -286,14 +284,17 @@ void YgoNet_Receive(struct YgoNet *l, unsigned from, const uint8_t *p, unsigned 
         a.count = p[20];
         a.zone = p[21];
         memcpy(a.picks, p + ANSWER_LEN, a.count);
-        next = l->game;
-        ok = concede ? (next.s.over || YgoDuel_Concede(&next, theirs)) : YgoDuel_Answer(&next, &a);
-        if (!ok || !YgoDuel_Conserved(&next) || YgoNet_Hash(&next) != Read(p + 15))
+        if (!concede && !YgoDuel_Check(&l->game, &a))
         {
             YgoNet_Cancel(l, "The two games disagree about the duel.");
             return;
         }
-        l->game = next;
+        ok = concede ? (l->game.s.over || YgoDuel_Concede(&l->game, theirs)) : YgoDuel_Answer(&l->game, &a);
+        if (!ok || !YgoDuel_Conserved(&l->game) || YgoNet_Hash(&l->game) != Read(p + 15))
+        {
+            YgoNet_Cancel(l, "The two games disagree about the duel.");
+            return;
+        }
         l->sequence++;
         Header(l, ack, ACK);
         Write(ack + 7, l->sequence);

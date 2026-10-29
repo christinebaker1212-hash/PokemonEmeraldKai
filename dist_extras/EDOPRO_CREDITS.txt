@@ -1,0 +1,17 @@
+Yu-Gi-Oh! duels in Moemon Emerald Kai Co-op are played by EDOPro's duel engine and card scripts.
+
+  ygopro-core (the duel engine)   Copyright (C) 2010-2015 Argon Sun (Fluorohydride),
+                                  2017-2026 Edoardo Lolletti (edo9300) and contributors
+                                  https://github.com/edo9300/ygopro-core  (commit 6864373c24d7313c8e451df17877c12c4f713c46)
+  Lua 5.4                         Copyright (C) 1994-2025 Lua.org, PUC-Rio (MIT license)  https://www.lua.org
+  CardScripts (card effects)      Project Ignis  https://github.com/ProjectIgnis/CardScripts  (commit 6a8f512ef953df5342b56a77732afb07302da96a)
+  BabelCdb (card database)        Project Ignis  https://github.com/ProjectIgnis/BabelCdb  (commit 2e6f985a5537d9b16ec7396787b5279d94af419d)
+  LFLists (Forbidden & Limited)   Project Ignis  https://github.com/ProjectIgnis/LFLists  (commit 481fec58eb5ef6237466559a0f9939f31daed9aa)
+  strings.conf (system strings)   Project Ignis  https://github.com/ProjectIgnis/Distribution
+
+ygopro-core and CardScripts are free software under the GNU Affero General Public License, version 3 or later.
+The game's own source, with these parts in edopro/ and graphics/ygo/edo.pak (built by tools/ygo/edo/build_pack.py),
+is published at https://github.com/christinebaker1212-hash/PokemonEmeraldKai under the same terms for these parts.
+A copy of the license: https://www.gnu.org/licenses/agpl-3.0.txt (also edopro/ocgcore/COPYING in the source).
+
+Yu-Gi-Oh! is a trademark of Konami / Kazuki Takahashi. This is a fan project, not affiliated with or endorsed by them.

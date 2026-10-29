@@ -1287,8 +1287,9 @@ YU-GI-OH!
 ---------
 The CARD CASE has a second side: L and R switch between POKEMON,
 YU-GI-OH! and TRIPLE TRIAD. Duels follow today's rules (8000 Life Points, the first player
-doesn't draw or attack on their first turn) on today's table, with the cards
-of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
+doesn't draw or attack on their first turn) on today's table, played by EDOPro's
+duel engine: every card does everything its text says. The cards to collect are
+those of the Starter Decks and the English boosters up to the end of 2003.
   Getting started The CARD CLUB's Yu-Gi-Oh! duelist (beside the CARD CLUB
                   member) gives you a CARD CASE if you have none, one of the
                   four Starter Decks (YUGI, KAIBA, JOEY or PEGASUS; START
@@ -1306,8 +1307,10 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
                   The ELITE FOUR (SIDNEY's Fiends, PHOEBE's Zombies, GLACIA's
                   Aqua, DRAKE's Dragons), MAXIE, ARCHIE and the FRONTIER
                   BRAINS have decks of their own, each with a signature card
-                  they hand over the first time you beat them. Decks get
-                  stronger with your badges.
+                  they hand over the first time you beat them. Most other
+                  duelists bring a deck of an opponent from the Game Boy
+                  Advance Yu-Gi-Oh! games. Decks get stronger with your
+                  badges.
   On the table    The same buttons as the POKEMON table: the D-Pad moves over
                   the table; A on a card shows what it can do (SUMMON, SET,
                   ACTIVATE, ATTACK...), R2 (D on the keyboard) looks at a
@@ -1321,9 +1324,18 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
   Zones           Summoning, Setting or activating a card from your hand
                   asks which zone it goes to (LEFT / RIGHT, A).
   Decks           CARD CASE > DECKS: 40 to 60 cards and up to 15 Fusion
-                  Monsters, at most 3 of a card (fewer for the cards
-                  Stairway to the Destined Duel limits; the builder shows the
-                  number on the card).
+                  Monsters, at most 3 of a card (fewer for the cards the
+                  Forbidden & Limited list limits; the builder shows the
+                  number on the card). The LIST row picks the list: the
+                  game's own (Stairway to the Destined Duel's) or any of
+                  EDOPro's (TCG, OCG, GOAT...).
+  Deck codes      An empty slot offers BUILD A DECK, FROM RECIPE and FROM
+                  CODE: copy a YDKE code (ydke://...) and it shows up there;
+                  A makes the deck from your cards. Cards you don't have yet
+                  show gray and the deck is ready once you have them; a code
+                  with cards the game doesn't have is refused. A deck's menu
+                  has DECK CODE (copies its code). On Windows, FROM .YDK FILE
+                  and EXPORT .YDK open and save EDOPro / YGOPro deck files.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck. Losing
                   costs nothing.
