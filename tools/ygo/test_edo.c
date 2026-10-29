@@ -131,6 +131,38 @@ int main(void)
     uint16_t m0[YGO_DECK_MAX], m1[YGO_DECK_MAX], x[YGO_FUSION_MAX];
     CHECK(YgoEdo_DataInit());
     CHECK(YgoEdo_ListCount() >= 5);
+    /* the Decks are shuffled: different seeds deal different opening hands, the same seed the same */
+    {
+        uint16_t m[YGO_DECK_MAX], xx[YGO_FUSION_MAX];
+        unsigned s, o, distinct = 0, k;
+        uint32_t hands[8];
+        memset(m, 0, sizeof(m));
+        memset(xx, 0, sizeof(xx));
+        for (i = 0; i < 40; i++)
+            m[i] = (uint16_t)(100 + i);
+        for (s = 0; s < 8; s++)
+        {
+            uint32_t h = 0;
+            CHECK(YgoDuel_Init(&a, m, xx, m, xx, 1000 + s * 7919u, 0));
+            for (o = 0; o < a.s.objCount; o++)
+                if (a.s.objs[o].location == YGO_LOC_HAND && a.s.objs[o].controller == 0)
+                    h = h * 131 + a.s.objs[o].card;
+            hands[s] = h;
+            for (k = 0; k < s && hands[k] != h; k++)
+                ;
+            distinct += k == s;
+        }
+        CHECK(distinct >= 7);
+        CHECK(YgoDuel_Init(&b, m, xx, m, xx, 1000, 0));
+        {
+            uint32_t h = 0;
+            for (o = 0; o < b.s.objCount; o++)
+                if (b.s.objs[o].location == YGO_LOC_HAND && b.s.objs[o].controller == 0)
+                    h = h * 131 + b.s.objs[o].card;
+            CHECK(h == hands[0]);
+        }
+        printf("edo: 8 seeds, %u different opening hands\n", distinct);
+    }
     /* the catalog's cards are all in EDOPro, and its Normal Monsters and scripted cards are playable */
     {
         unsigned ready = 0;

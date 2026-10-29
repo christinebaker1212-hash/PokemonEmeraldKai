@@ -2273,14 +2273,36 @@ static int Start(struct YgoDuel *d)
     }
     if (!ScriptReader(NULL, e->duel, "constant.lua") || !ScriptReader(NULL, e->duel, "utility.lua"))
         return 0;
-    /* the objects, as the engine gets the cards */
+    /* the objects, as the engine gets the cards. The engine never shuffles a Deck itself (EDOPro's program does it
+     * before handing the cards over): each Deck is shuffled here, from the seed, so both games of a duel online deal
+     * alike (the tests' unshuffled Decks keep their order) */
     for (t = 0; t < 2; t++)
     {
         unsigned gp = t ^ e->swap, nm = DeckLen(e->decks[gp], YGO_DECK_MAX), nx = DeckLen(e->extras[gp], YGO_FUSION_MAX);
+        uint16_t deck[YGO_DECK_MAX];
+        memcpy(deck, e->decks[gp], sizeof(deck));
+        if (!gYgoEdoNoShuffle)
+        {
+            uint64_t x = (uint64_t)e->seed * 0x9E3779B97F4A7C15ULL + 0xD1B54A32D192ED03ULL * (gp + 1);
+            for (i = nm; i > 1; i--)
+            {
+                unsigned j;
+                uint16_t k;
+                x ^= x >> 30;
+                x *= 0xBF58476D1CE4E5B9ULL;
+                x ^= x >> 27;
+                x *= 0x94D049BB133111EBULL;
+                x ^= x >> 31;
+                j = (unsigned)(x % i);
+                k = deck[i - 1];
+                deck[i - 1] = deck[j];
+                deck[j] = k;
+            }
+        }
         for (i = 0; i < nm + nx; i++)
         {
             OCG_NewCardInfo c;
-            unsigned id = i < nm ? e->decks[gp][i] : e->extras[gp][i - nm];
+            unsigned id = i < nm ? deck[i] : e->extras[gp][i - nm];
             struct Loc l;
             int ob;
             memset(&c, 0, sizeof(c));
