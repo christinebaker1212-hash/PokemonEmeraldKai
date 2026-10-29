@@ -205,6 +205,39 @@ int main(void)
     CHECK(D.s.players[1].lp == 8000 - 1400);
     printf("ok   %s\n", sScenario);
 
+    /* A Spell / Trap Set into the zone chosen on the table: no second zone question, the card where it was put;
+     * a monster likewise */
+    sScenario = "zone chosen";
+    Start(LIST("Celtic Guardian", "Waboku", "Pot of Greed"), LIST("Waboku"), NULL);
+    Until(0, YGO_Q_IDLE);
+    {
+        struct YgoAnswer a;
+        unsigned i, o;
+        memset(&a, 0, sizeof(a));
+        for (i = 0; i < D.query.count; i++)
+            if (D.query.items[i].kind == YGO_ACT_SET_SPELL && !strcmp(ItemName(i), "Waboku"))
+                a.picks[a.count++] = (uint8_t)i;
+        CHECK(a.count == 1);
+        a.zone = 0x80 | 4;   /* the fourth Spell & Trap Zone */
+        Answer(&a);
+        CHECK(D.query.type == YGO_Q_IDLE && D.query.player == 0);
+        o = D.s.players[0].spells[3];
+        CHECK(o && !strcmp(Ygo_Card(D.s.objs[o - 1].card)->name, "Waboku") && !D.s.objs[o - 1].faceUp);
+        memset(&a, 0, sizeof(a));
+        for (i = 0; i < D.query.count; i++)
+            if (D.query.items[i].kind == YGO_ACT_SUMMON && !strcmp(ItemName(i), "Celtic Guardian"))
+                a.picks[a.count++] = (uint8_t)i;
+        CHECK(a.count == 1);
+        a.zone = 2;   /* the second Monster Zone */
+        Answer(&a);
+        while (D.query.type == YGO_Q_CHAIN && !D.query.min)
+            Pass();
+        CHECK(D.query.type == YGO_Q_IDLE && D.query.player == 0);
+        o = D.s.players[0].monsters[1];
+        CHECK(o && !strcmp(Ygo_Card(D.s.objs[o - 1].card)->name, "Celtic Guardian"));
+    }
+    printf("ok   %s\n", sScenario);
+
     /* A Tribute Summon: Summoned Skull for a monster */
     sScenario = "tribute summon";
     Start(LIST("Celtic Guardian", "Summoned Skull"), LIST("Waboku"), NULL);

@@ -24,6 +24,7 @@
 #include "tt/integration.h"
 #include "tt/net.h"
 #include "tt/npc.h"
+#include "tt/rating.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "tt_board.h"
@@ -96,6 +97,7 @@ static struct
     uint8_t revealNew;
     int vs, aiDelay, rewarded, outcome;
     struct TtOpponent opp;
+    uint8_t oppLevel;          /* (how well they play before a fit raises it) */
     struct TtDuel duel;
     uint16_t dealt[2][TT_HAND];
     unsigned region;
@@ -439,20 +441,63 @@ static const char *MyName(void)
     MP_GameToAscii(name, gSaveBlock2Ptr->playerName, sizeof(name));
     return name;
 }
+/* CARD SCALING: the hand they bring against deck d (fitted when they may be; under OPEN the hand shown stays) */
+static int Fits(void) { return gMpConfig.cardScaling && U.opp.fit && U.vs == VS_NPC; }
+static void TheirHandLevel(unsigned d, uint16_t *hand, unsigned *level)
+{
+    struct TtOpponent o = U.opp;
+    if (Fits() && !(U.rules & TT_RULE_BIT(TT_RULE_OPEN)) && DeckOk(d))
+    {
+        o.level = U.oppLevel;   /* (as they first were: the fit may raise it) */
+        Tt_FitOpponentHand(&o, Tt_HandPower(Deck(d)->cards) + C()->skill, U.rules, Tcg_Today(), hand);
+    }
+    else
+        memcpy(hand, U.opp.hand, sizeof(U.opp.hand));
+    if (level)
+        *level = o.level;
+}
+static void TheirHandFor(unsigned d, uint16_t *hand)
+{
+    TheirHandLevel(d, hand, NULL);
+}
+/* How the game looks with deck d: the chance and their cards' edge */
+static unsigned MatchFor(unsigned d, int *cards, unsigned *shownLevel)
+{
+    uint16_t theirs[TT_HAND];
+    unsigned lv;
+    int level;
+    if (U.rules & TT_RULE_BIT(TT_RULE_RANDOM))
+    {
+        *cards = 0;   /* (dealt fair) */
+        *shownLevel = U.opp.level;
+        return Tt_Chance(Tt_OpponentFavor(&U.opp) + C()->skill, 0);
+    }
+    TheirHandLevel(d, theirs, &lv);
+    *shownLevel = lv;
+    level = Tt_LevelRating(lv, U.rules);
+    *cards = Tt_HandPower(theirs) - Tt_HandPower(Deck(d)->cards);
+    return Tt_Chance(Tt_HandPower(Deck(d)->cards) + C()->skill + Tt_PlayerRating(U.rules), Tt_HandPower(theirs) + level);
+}
 static int StartGame(const uint16_t *mine)
 {
     struct TtCollection *c = C();
     uint16_t hand[TT_HAND];
-    uint32_t seed = Tt_Rand(&c->rng);
+    uint32_t seed = Tcg_DuelSeed(&c->rng);
     unsigned first = sForceFirst >= 0 ? (unsigned)sForceFirst : Tt_Rand(&c->rng) & 1, i;
     memcpy(hand, mine, sizeof(hand));
     if (U.rules & TT_RULE_BIT(TT_RULE_RANDOM))
     {
-        if (!Tt_DealRandom(c->owned, seed ^ 0x5eed, hand))
+        /* dealt fair to both: yours as close as a few deals come to their usual hand (a touch in your favor), then
+         * theirs from their region's cards as close to yours */
+        int level = Tt_LevelRating(U.opp.level, U.rules) - Tt_PlayerRating(U.rules), favor = Tt_OpponentFavor(&U.opp);
+        if (!Tt_DealFair(c->owned, seed ^ 0x5eed, Tt_HandPower(U.opp.hand) + level + favor - c->skill, hand))
         {
             Say(ACT_NONE, "RANDOM deals five of your own cards, and you own fewer than five.");
             return 0;
         }
+        Tt_DealRegion(U.opp.region, seed ^ 0xdea1, Tt_HandPower(hand) + c->skill - favor - level, U.opp.hand);
+        printf("[tt] RANDOM dealt: yours %d, theirs %d (level %u)\n", Tt_HandPower(hand), Tt_HandPower(U.opp.hand),
+               U.opp.level);
     }
     memcpy(U.dealt[0], hand, sizeof(hand));
     memcpy(U.dealt[1], U.opp.hand, sizeof(hand));
@@ -530,6 +575,9 @@ static void Results(void)
         return;
     }
     Tt_PlayedIn(c, U.region);
+    Tt_SkillResult(c, Tt_HandPower(U.dealt[0]) + Tt_PlayerRating(U.rules),
+                   Tt_HandPower(U.dealt[1]) + Tt_LevelRating(U.opp.level, U.rules),
+                   w == Me() ? 0 : w == 2 ? 2 : 1);
     if (w == Me())
     {
         c->wins++;
@@ -1256,11 +1304,23 @@ static void ChallengeScreen(void)
     }
     G_Text(6, y, G_INK, G_INK_SHADOW, U.opp.name, 96, TF_SMALL);
     y += 12;
-    if (friend && Tcg_Social()->seat == 1)
-        snprintf(line, sizeof(line), "THEIR RULES");
+    /* how the game looks with the deck under the cursor (the region's name goes with its rules in the strip) */
+    if (U.vs == VS_NPC && c->optedIn &&
+        (random || DeckOk(random || U.cursor >= TT_DECKS || !DeckOk((unsigned)U.cursor) ? c->activeDeck : (unsigned)U.cursor)))
+    {
+        unsigned d = random || U.cursor >= TT_DECKS || !DeckOk((unsigned)U.cursor) ? c->activeDeck : (unsigned)U.cursor;
+        int cards;
+        unsigned lv, chance = MatchFor(d, &cards, &lv);
+        TcgUi_Match(6, y + 1, 92, chance, cards, (int)lv, 2);
+    }
     else
-        snprintf(line, sizeof(line), "%s RULES", Tt_RegionName(U.region));
-    G_Text(6, y + 1, 0x505868, G_NO_SHADOW, line, 96, TF_NARROW);
+    {
+        if (friend && Tcg_Social()->seat == 1)
+            snprintf(line, sizeof(line), "THEIR RULES");
+        else
+            snprintf(line, sizeof(line), "%s RULES", Tt_RegionName(U.region));
+        G_Text(6, y + 1, 0x505868, G_NO_SHADOW, line, 96, TF_NARROW);
+    }
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
     G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, random ? "RANDOM: A HAND IS DEALT" : "PLAY WITH", 0, TF_NARROW);
     if (random)
@@ -1283,7 +1343,10 @@ static void ChallengeScreen(void)
     if (!rulesKnown)
         snprintf(line, sizeof(line), "%s plays by the rules where they are: they come with their hand.", U.opp.name);
     else
-        RulesLine(line, sizeof(line), U.rules, friend ? NO_TRADE : U.trade);
+    {
+        int n = friend ? 0 : snprintf(line, sizeof(line), "%s: ", Tt_RegionName(U.region));
+        RulesLine(line + n, sizeof(line) - (size_t)n, U.rules, friend ? NO_TRADE : U.trade);
+    }
     Strip(0, line);
     TcgUi_Hints(friend ? "{A} PLAY  {B} LEAVE" : "{A} PLAY  {B} NOT NOW");
 }
@@ -1809,6 +1872,15 @@ void TtUi_OpenChallenge(const struct TtOpponent *opponent)
     mix = Tt_MixRules(c, U.region, Tt_Rand(&c->rng));
     U.rules = c->regionRules[U.region];
     U.trade = c->regionTrade[U.region];
+    /* CARD SCALING: the hand they bring fits the deck in use (refitted to the deck picked, unless OPEN shows it) */
+    U.oppLevel = U.opp.level;
+    if (Fits() && DeckOk(c->activeDeck))
+    {
+        Tt_FitOpponentHand(&U.opp, Tt_HandPower(Deck(c->activeDeck)->cards) + c->skill, U.rules, Tcg_Today(),
+                           U.opp.hand);
+        printf("[tt] %s fits a hand of power %d to yours %d (skill %d)\n", U.opp.name, Tt_HandPower(U.opp.hand),
+               Tt_HandPower(Deck(c->activeDeck)->cards), c->skill);
+    }
     if (U.rules & TT_RULE_BIT(TT_RULE_RANDOM))
         U.cursor = 0;
     if (mix.kind == TT_MIX_SPREAD)
@@ -2386,7 +2458,10 @@ int TtUi_Step(unsigned keys)
                 Say(ACT_NONE, "That deck isn't ready.");
             else
             {
+                unsigned lv;
                 c->activeDeck = (uint8_t)U.cursor;
+                TheirHandLevel((unsigned)U.cursor, U.opp.hand, &lv);
+                U.opp.level = (uint8_t)lv;
                 StartGame(Deck((unsigned)U.cursor)->cards);
             }
         }

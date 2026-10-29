@@ -578,7 +578,7 @@ static void ShowOnline(void)
 }
 static int StartDuel(const uint16_t *main, const uint16_t *extra, const uint16_t *theirMain, const uint16_t *theirExtra)
 {
-    uint32_t seed = Tcg_Random(&C()->rng);
+    uint32_t seed = Tcg_DuelSeed(&C()->rng);
     if (Y.duelShown)
         Y.duel.edo = NULL;   /* (the online duel's own engine) */
     Y.duelShown = 0;

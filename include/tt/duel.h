@@ -72,6 +72,8 @@ unsigned TtDuel_DirectMask(const struct TtDuel *d, unsigned winner, const uint16
 int Tt_DealRandom(const uint8_t *owned, uint32_t seed, uint16_t *hand);
 uint32_t Tt_Rand(uint32_t *state);
 
-/* The computer player (src/tt/tt_ai.c): level 0 (a beginner) to 3 (the best); seat to move */
+/* The computer player (src/tt/tt_ai.c): level 0 (a beginner) to 3 (the best); seat to move. It never reads the
+ * other side's hidden cards: TtAi_View is the game as seat may know it (unknown cards as stand-ins). */
+void TtAi_View(const struct TtDuel *d, unsigned seat, struct TtDuel *view);
 void TtAi_Choose(const struct TtDuel *d, unsigned level, uint32_t salt, unsigned *slot, unsigned *cell);
 #endif

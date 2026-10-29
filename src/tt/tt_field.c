@@ -295,6 +295,9 @@ static void Fill(struct TtOpponent *o, const char *name, const char *title, unsi
     snprintf(o->name, sizeof(o->name), "%s", name);
     snprintf(o->title, sizeof(o->title), "%s", title ? title : "");
     o->region = (uint8_t)region;
+    o->hash = h;
+    o->tier = (uint8_t)tier;
+    o->fit = 1;
     Tt_RegionHand(region, h, tier, Tcg_Today(), o->hand);
     o->level = (uint8_t)(tier >= 2 ? 2 : 1);
     if ((h >> 13) % 4 == 0 && o->level > 0)
@@ -311,6 +314,7 @@ static void FillSpecial(struct TtOpponent *o, unsigned i, const char *name)
     snprintf(o->title, sizeof(o->title), "%s", s->title);
     o->region = (uint8_t)Tt_CurrentRegion();
     Tt_SpecialHand(i, Tcg_Today(), o->hand);
+    o->fit = 1;
     o->level = 3;
     o->key = 0xFD000000u | i;
     o->special = (uint8_t)i;

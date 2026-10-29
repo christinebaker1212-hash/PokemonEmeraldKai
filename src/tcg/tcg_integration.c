@@ -15,6 +15,8 @@
 #include "tt/integration.h"
 #include "ygo/net.h"
 #include "tt/net.h"
+#include <stdlib.h>
+#include <time.h>
 extern char gPlatformSavePath[512];
 static struct TcgCollection sCollection;
 static int sLoaded;
@@ -110,4 +112,16 @@ void Tcg_ResumeGame(void (*callback)(void))
 int Tcg_CardMasterStar(void)
 {
     return (Tcg_GetCollection()->flags & TCG_FLAG_GOLD_CASE) != 0;
+}
+
+uint32_t Tcg_DuelSeed(uint32_t *rng)
+{
+    static int sTest = -1;
+    if (sTest < 0)
+        sTest = getenv("MOEMON_TEST") != NULL;
+    if (!sTest)
+        *rng ^= (uint32_t)SDL_GetPerformanceCounter() * 2654435761u ^ (uint32_t)time(NULL) * 40503u;
+    if (!*rng)
+        *rng = 1;
+    return Tcg_Random(rng);
 }

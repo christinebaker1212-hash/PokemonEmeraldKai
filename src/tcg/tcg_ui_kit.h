@@ -26,6 +26,10 @@ void TcgUi_Row(int x, int y, int w, int on, int enabled, const char *label, cons
 void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsigned, unsigned), unsigned card,
                  const char *text);
 void TcgUi_Hints(const char *hint);
+/* How a match looks for the player (chance in 1/1000): a word and six pips; with rows 2 also, by turns, how their cards
+ * compare (cards: their edge in rating points) and how they play (level 0 beginner - 3 expert, -1 unknown) */
+void TcgUi_Match(int x, int y, int w, unsigned chance, int cards, int level, int rows);
+const char *TcgUi_MatchWord(unsigned chance);
 void TcgUi_TopBar(const char *title);
 /* A counter's tabs down the side panel (5 fit when short), tab selected, and what you spend (balance, what) */
 void TcgUi_ShopTabs(const char *const *names, int count, int tab, unsigned fill, unsigned edge, unsigned ink,

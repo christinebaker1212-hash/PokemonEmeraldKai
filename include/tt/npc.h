@@ -39,6 +39,8 @@ struct TtOpponent
     uint32_t key;              /* (map + person, or the special player) */
     uint16_t music;
     uint8_t special, level, region, online, lesson;
+    uint8_t fit, tier;         /* fit: their hand may be fitted to the player's (tier: the badges' cap) */
+    uint32_t hash;             /* (who they are: their hands come from it) */
     uint8_t portraitW, portraitH;
     uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };
@@ -47,6 +49,15 @@ struct TtOpponent
 void Tt_RegionHand(unsigned region, uint32_t h, unsigned tier, unsigned day, uint16_t hand[TT_HAND]);
 /* A special player's hand today: one of their five-star cards, one four-star, three three-star */
 void Tt_SpecialHand(unsigned special, unsigned day, uint16_t hand[TT_HAND]);
+/* Fitting (CARD SCALING): the hand they bring against a player `mine` strong (deck power plus skill; the player
+ * counted as playing like the SKILLED level, Tt_PlayerRating): a touch
+ * weaker than the player's for everyone, a real test from the special players and more from the CARD QUEEN, counting
+ * how well they play (an ordinary player whose cards fall well short plays a level better: o->level). Returns the hand's
+ * power. */
+int Tt_FitOpponentHand(struct TtOpponent *o, int mine, uint32_t rules, unsigned day, uint16_t hand[TT_HAND]);
+/* How the player is favored in rating points (the chance it gives: Tt_Chance(favor, 0)) */
+int Tt_OpponentFavor(const struct TtOpponent *o);
+
 /* The card screens' side (tt_ui.c) */
 void TtUi_OpenChallenge(const struct TtOpponent *opponent);
 void TtUi_OpenSeller(unsigned region);   /* a seller's counter (a script waits) */

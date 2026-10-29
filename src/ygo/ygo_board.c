@@ -1078,9 +1078,14 @@ static void BuildSpots(void)
     {
         if (q->type == YGO_Q_ZONE)
         {
+            /* each zone where it is: a Monster or a Spell & Trap Zone, theirs or the other side's */
             for (i = 0; i < q->count; i++)
-                AddSpot(SP_MZONE, 0, q->items[i].value, NONE, (int)i,
-                        ZoneRect(SideOf(q->player), q->prompt == YGO_P_SUMMON ? 0 : 1, q->items[i].value));
+            {
+                unsigned spell = (q->items[i].flags & YGO_ZF_SPELL) != 0,
+                         side = SideOf(q->items[i].flags & YGO_ZF_OPPONENT ? q->player ^ 1 : q->player);
+                AddSpot(spell ? SP_SZONE : SP_MZONE, side, q->items[i].value, NONE, (int)i,
+                        ZoneRect(side, spell, q->items[i].value));
+            }
             return;
         }
         for (i = 0; i < q->count; i++)
@@ -1785,7 +1790,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         if (pressed & KEY_A && cur >= 0)
         {
             unsigned r = Answer1(answer, B.zoneItem);
-            answer->zone = (uint8_t)(B.spots[cur].index + 1);
+            answer->zone = (uint8_t)((B.spots[cur].index + 1) | (B.zoneSpell ? 0x80 : 0));
             PlaySE(SE_RG_CARD_FLIP);
             printf("[ygo] board: zone %u for item %d\n", answer->zone, B.zoneItem);
             B.mode = M_WATCH;

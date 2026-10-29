@@ -581,7 +581,7 @@ static unsigned Prizes(void)
 static int StartDuel(const uint16_t *mine, const uint16_t *theirs)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    if (!TcgDuel_Init(&U.duel, mine, theirs, Tcg_Random(&c->rng), Prizes()))
+    if (!TcgDuel_Init(&U.duel, mine, theirs, Tcg_DuelSeed(&c->rng), Prizes()))
     {
         Say(ACT_NONE, "This duel couldn't be set up.");
         return 0;
@@ -1025,6 +1025,36 @@ void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsi
     StripWith(draw, card, text);
 }
 void TcgUi_Hints(const char *hint) { Hints(hint); }
+
+/* How a match looks (all three card games): the player's chance in 1/1000 as a word and six pips (more lit: harder);
+ * under it, taking turns, how their cards compare (cards: their edge in rating points) and how they play (level 0-3,
+ * -1 unknown). Never a number. */
+static unsigned MatchStep(unsigned chance)
+{
+    return chance >= 760 ? 0 : chance >= 600 ? 1 : chance >= 440 ? 2 : chance >= 300 ? 3 : chance >= 180 ? 4 : 5;
+}
+const char *TcgUi_MatchWord(unsigned chance)
+{
+    static const char *const words[] = {"VERY EASY", "EASY", "EVEN", "TOUGH", "VERY TOUGH", "FEARSOME"};
+    return words[MatchStep(chance)];
+}
+void TcgUi_Match(int x, int y, int w, unsigned chance, int cards, int level, int rows)
+{
+    static const unsigned colors[] = {0x2860c8, 0x3070b0, 0x387848, 0xc07020, 0xc03028, 0x901858};
+    static const char *const plays[] = {"PLAYS LIKE A BEGINNER", "PLAYS CASUALLY", "PLAYS WELL", "PLAYS LIKE AN EXPERT"};
+    unsigned step = MatchStep(chance), i;
+    const char *detail;
+    G_Text(x, y, colors[step], G_NO_SHADOW, TcgUi_MatchWord(chance), 0, TF_NARROW);
+    for (i = 0; i < 6; i++)
+        G_RoundFill(x + w - 6 * 5 + (int)i * 5, y + 3, 4, 5, i <= step ? colors[step] : 0xb8bcc8, 255);
+    if (rows < 2)
+        return;
+    detail = cards > 150 ? "THEIR CARDS FAR BETTER" : cards > 50 ? "THEIR CARDS BETTER" : cards >= -50 ? "CARDS ABOUT EVEN"
+           : cards >= -150 ? "THEIR CARDS WEAKER" : "THEIR CARDS FAR WEAKER";
+    if (level >= 0 && level <= 3 && (U.frame / 120) % 2)
+        detail = plays[level];
+    G_Text(x, y + 8, 0x505868, G_NO_SHADOW, detail, w, TF_NARROW);
+}
 void TcgUi_CaseTabs(unsigned game, unsigned color)
 {
     /* the chosen side's tab is wide enough for its whole name; the others show a short one */

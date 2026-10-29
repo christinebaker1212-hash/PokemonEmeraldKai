@@ -64,7 +64,10 @@ struct TtCollection
     uint32_t specialBeaten;                  /* a bit per special player (tt/npc.h) */
     uint32_t perfects;                       /* games won 9-1 / with every square */
     uint16_t lastDaily;                      /* the day of the last daily reward */
+    int16_t skill;                           /* how the player does against the computer, past what the cards say */
+    uint16_t rated;                          /* games that taught it */
 };
+#define TT_SKILL_MAX 300
 
 void Tt_CollectionInit(struct TtCollection *c, uint32_t seed);
 int Tt_CollectionLoad(struct TtCollection *c, const char *path);
@@ -83,6 +86,9 @@ void Tt_GiveStarter(struct TtCollection *c);
 int Tt_DeckReady(const struct TtCollection *c, unsigned deck);
 /* A pack of `pack` (TT_PACK_*: its stars are pack + 1): TT_PACK_SIZE cards of those stars */
 int Tt_OpenPack(struct TtCollection *c, unsigned pack, uint16_t out[TT_PACK_SIZE]);
+
+/* After a game against the computer (mine, theirs: the powers with the level; result 0 won, 1 lost, 2 a draw) */
+void Tt_SkillResult(struct TtCollection *c, int mine, int theirs, unsigned result);
 
 /* The rules spreading. Challenging someone in `region`: one of the carried rules the region lacks may spread to
  * it, or one of its rules the player doesn't carry may be abolished (more often where the CARD QUEEN is). */

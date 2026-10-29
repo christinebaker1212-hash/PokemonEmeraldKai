@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "tt/collection.h"
+#include "tt/rating.h"
 #include "tt/duel.h"
 
 #define R(x) TT_RULE_BIT(TT_RULE_##x)
@@ -241,6 +242,7 @@ enum
     TAG_PACKS,
     TAG_REGIONS,      /* rules, trade, games per region; carried, carriedFrom, queen */
     TAG_RECORDS,
+    TAG_SKILL,        /* the skill correction (rating points) and the games it learned from */
 };
 static void Put(unsigned char **p, uint32_t v, unsigned n)
 {
@@ -347,6 +349,10 @@ static size_t Write(const struct TtCollection *c, unsigned char *data)
     Put(&p, c->specialBeaten, 4);
     Put(&p, c->perfects, 4);
     Put(&p, c->lastDaily, 2);
+    End(&p, s);
+    s = Begin(&p, TAG_SKILL);
+    Put(&p, (uint16_t)c->skill, 2);
+    Put(&p, c->rated, 2);
     End(&p, s);
     {
         size_t n = (size_t)(p - data);
@@ -494,10 +500,30 @@ int Tt_CollectionLoad(struct TtCollection *c, const char *path)
                 c->lastDaily = (uint16_t)Get(&q, 2);
             break;
         }
+        case TAG_SKILL:
+            if (q + 4 <= stop)
+            {
+                int skill = (int16_t)Get(&q, 2);
+                c->skill = (int16_t)(skill > TT_SKILL_MAX ? TT_SKILL_MAX : skill < -TT_SKILL_MAX ? -TT_SKILL_MAX : skill);
+                c->rated = (uint16_t)Get(&q, 2);
+            }
+            break;
         default:
             break;   // (a newer version's record)
         }
         p = stop;
     }
     return 1;
+}
+
+/* After a game against the computer: the skill correction moves toward what the result says (draws count half) */
+void Tt_SkillResult(struct TtCollection *c, int mine, int theirs, unsigned result)
+{
+    int k = c->rated < 20 ? 40 : 20, skill;
+    int e = (int)Tt_Chance(mine + c->skill, theirs);
+    int s = result == 0 ? 1000 : result == 2 ? 500 : 0;   /* 0 won, 1 lost, 2 a draw */
+    skill = c->skill + (k * (s - e) + (s >= e ? 500 : -500)) / 1000;
+    c->skill = (int16_t)(skill > TT_SKILL_MAX ? TT_SKILL_MAX : skill < -TT_SKILL_MAX ? -TT_SKILL_MAX : skill);
+    if (c->rated < 0xFFFF)
+        c->rated++;
 }
