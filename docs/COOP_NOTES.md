@@ -2420,3 +2420,15 @@ never shown.
     (`TcgScale_RateDeck`, live for the hovered deck: about 30 ms, cached).
 - **Shuffling**: every card game's duel seed is stirred with the clock (`Tcg_DuelSeed`; scripted tests keep theirs).
   EDOPro never shuffles a Deck itself: ygo_edo.c `Start` shuffles each from the seed (1.48.2).
+
+## Triple Triad: HOENN's rules from the room host (1.49.2)
+
+Online in a room someone else made, HOENN's Triple Triad rules are the host's: every region's rules and TRADE RULE,
+where the CARD QUEEN is and since when (tt_integration.c, type 15 on the card games' relay, TCG_LINK_VERSION 14). The
+host sends them to everyone whenever they change, every five seconds and at once to someone new (the collection is
+loaded for it even if the case was never opened). A friend's collection holds the host's HOENN while in the room; its
+own is kept aside and written to the save instead (`WorldForSave`), and comes back when the room or the host is gone.
+What changes in a friend's game (a rule spread or abolished on a challenge, a CARD QUEEN favor, a paid journey) is
+found by comparing with the host's last word and sent to the host, who takes it and passes it on. The CARD QUEEN only
+moves by herself in the host's game (tt_field.c QueenDrift). Carried rules and GAMES PLAYED HERE stay each player's.
+`mp tt world` prints HOENN as the game sees it; test tt_world.

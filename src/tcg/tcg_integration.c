@@ -85,6 +85,8 @@ void Tcg_OnlineRelay(unsigned from, const unsigned char *data, unsigned len)
         Ygo_OnlineReceive(from, data, len, Tcg_SocialExpectsYgoInvite(from));
     else if (data[2] == TT_NET_TYPE)
         Tt_OnlineReceive(from, data, len, Tcg_SocialExpectsTtInvite(from));
+    else if (data[2] == TT_WORLD_TYPE)
+        Tt_WorldReceive(from, data, len);
     else
         TcgLink_Receive(Tcg_Online(), from, data, len, Tcg_SocialExpectsInvite(from), SDL_GetTicks());
 }

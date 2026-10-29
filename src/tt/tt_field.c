@@ -471,6 +471,8 @@ static void QueenDrift(void)
 {
     struct TtCollection *c = Tt_GetCollection();
     unsigned today = Tcg_Today();
+    if (Tt_WorldFromHost())
+        return;   /* (in a friend's room she goes where the host's HOENN says) */
     if (!c->queenDay)
         c->queenDay = (uint16_t)today;
     if (today >= (unsigned)c->queenDay + 3)

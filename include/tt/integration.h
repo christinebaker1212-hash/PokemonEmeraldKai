@@ -20,5 +20,10 @@ struct TtNet *Tt_Online(void);
 void Tt_OnlineReceive(unsigned from, const unsigned char *data, unsigned len, int willing);
 void Tt_OnlineTick(void);
 void TtUi_OpenOnlineDeck(void);
+/* HOENN's rules online (tt_integration.c): in a room someone else made, every region's rules and TRADE RULE and where
+ * the CARD QUEEN is are the room host's (the collection holds them while there; the save keeps the player's own). */
+#define TT_WORLD_TYPE 15   /* on the card games' relay: kind 0 the host's HOENN, 1 a friend's change to it */
+void Tt_WorldReceive(unsigned from, const unsigned char *data, unsigned len);
+int Tt_WorldFromHost(void);
 void TtUi_OpenOnlineTrade(void);
 #endif

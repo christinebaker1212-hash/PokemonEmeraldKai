@@ -1280,6 +1280,11 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   than you; Gym Leaders and other special players are a real
                   test, the CARD QUEEN more so. OFF: decks get stronger with
                   your badges instead.
+  Triple Triad    Online, HOENN's TRIPLE TRIAD rules are the host's: every
+  online          region's rules, its TRADE RULE and where the CARD QUEEN is.
+                  Rules that spread or fall away in your games, and her
+                  favors, change the host's HOENN for everyone. Your own HOENN
+                  waits in your save for when you play alone.
   How it looks    The challenge screen shows how the game looks with the
                   deck under the cursor, from VERY EASY to FEARSOME, with six
                   pips, and below it, taking turns, how their cards compare
