@@ -2,9 +2,62 @@
  * engine (EDOPro) offers only what's legal; the AI weighs those choices: removal and draws first, the strongest
  * monster it can Summon (Set when it would lose a battle), Traps Set, attacks that win their battle or go direct,
  * Traps sprung when the opponent acts. It never looks at cards it couldn't see: the opponent's hand, face-down cards
- * and Decks are unknown to it (only how many there are). */
+ * and Decks are unknown to it (only how many there are). It plays at a level (0 a beginner .. 3 the best): every
+ * choice is weighed by how much worse it looks than the best one, e^(-loss / T), T smaller the better the level, so
+ * near misses are common and blunders rare; lower levels also miss a Trap's moment, pick the second-best target or
+ * the wrong battle position now and then. Its dice come from what both players can see, so a duel replays alike. */
 #include <string.h>
 #include "ygo_internal.h"
+
+static unsigned sLevel = 3;
+static uint32_t sRoll;
+static uint32_t Next(void)
+{
+    sRoll ^= sRoll << 13;
+    sRoll ^= sRoll >> 17;
+    sRoll ^= sRoll << 5;
+    return sRoll;
+}
+static void Seed(const struct YgoDuel *d)
+{
+    const struct YgoState *s = &d->s;
+    uint32_t h = 2166136261u ^ sLevel * 0x9E3779B1u;
+    h = (h ^ YgoDuel_AnswerCount(d)) * 16777619u;
+    h = (h ^ (s->turn | s->phase << 16)) * 16777619u;
+    h = (h ^ (uint32_t)s->players[0].lp) * 16777619u;
+    h = (h ^ (uint32_t)s->players[1].lp) * 16777619u;
+    h = (h ^ (d->query.type | d->query.count << 8 | d->query.player << 16)) * 16777619u;
+    sRoll = h ? h : 1;
+    Next();
+}
+/* percent chance, by level */
+static int Chance(const uint8_t *byLevel) { return Next() % 100 < byLevel[sLevel]; }
+/* e^-x in 1/65536 for x = num / den (no libm in the game) */
+static uint32_t ExpNeg(uint32_t num, uint32_t den)
+{
+    uint32_t x = (uint32_t)((uint64_t)num * 94548 / den), whole = x >> 16;
+    uint64_t f = x & 0xFFFF;
+    if (whole >= 16)
+        return 0;
+    return (uint32_t)((65536 - f / 2 + (f * f >> 19)) >> whole);
+}
+/* One of n scored choices, weighed by how far each is below the best */
+static unsigned Weigh(const int *score, unsigned n)
+{
+    static const uint16_t sTemper[4] = {480, 300, 150, 35};
+    uint32_t w[YGO_QUERY_MAX + 2];
+    uint64_t total = 0, r;
+    int top = score[0];
+    unsigned i;
+    for (i = 1; i < n; i++)
+        top = score[i] > top ? score[i] : top;
+    for (i = 0; i < n; i++)
+        total += w[i] = ExpNeg((uint32_t)(top - score[i]), sTemper[sLevel]) + 1;
+    r = ((uint64_t)Next() << 16 ^ Next()) % total;
+    for (i = 0; i + 1 < n && r >= w[i]; i++)
+        r -= w[i];
+    return i;
+}
 
 static const struct YgoCard *Card(const struct YgoState *s, unsigned o)
 {
@@ -154,7 +207,8 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
     const struct YgoState *s = &d->s;
     unsigned me = q->player, i;
     int theirMonsters, theirBest = TheirBest(s, me, &theirMonsters), myBest = MyBest(s, me);
-    int best = -1, bestScore = 0, moveOn = -1, toBattle = -1;
+    int best = -1, bestScore = 0, moveOn = -1, toBattle = -1, scores[YGO_QUERY_MAX + 1], items[YGO_QUERY_MAX + 1];
+    unsigned n = 0;
     for (i = 0; i < q->count; i++)
     {
         const struct YgoChoice *c = &q->items[i];
@@ -222,15 +276,23 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
         default:
             break;
         }
+        if (score > 0 && n < YGO_QUERY_MAX)
+            scores[n] = score, items[n++] = (int)i;
         if (score > bestScore)
             bestScore = score, best = (int)i;
     }
     if (best >= 0)
     {
-        if (q->items[best].kind == YGO_ACT_ACTIVATE)
-            UsedOften(s, &q->items[best], 1);
-        Pick(out, (unsigned)best);
-        return;
+        // the plays it sees, and moving on (a card held back: a plausible slip), weighed
+        unsigned k;
+        scores[n] = 150;
+        items[n] = -1;
+        k = Weigh(scores, n + 1);
+        if (items[k] >= 0)
+        {
+            Pick(out, (unsigned)items[k]);
+            return;
+        }
     }
     /* nothing to play: battle when a monster can do something there */
     if (toBattle >= 0)
@@ -251,21 +313,34 @@ static void Battle(const struct YgoDuel *d, struct YgoAnswer *out)
     const struct YgoQuery *q = &d->query;
     const struct YgoState *s = &d->s;
     unsigned me = q->player, i;
-    int best = -1, bestAtk = -1, moveOn = -1;
+    static const uint8_t sRash[4] = {40, 20, 6, 0};   /* an attack into a monster it can't beat */
+    int scores[YGO_QUERY_MAX + 1], items[YGO_QUERY_MAX + 1], moveOn = -1;
+    unsigned n = 0, k;
     for (i = 0; i < q->count; i++)
     {
         const struct YgoChoice *c = &q->items[i];
-        if (c->kind == YGO_ACT_ATTACK && c->obj < s->objCount)
+        if (c->kind == YGO_ACT_ATTACK && c->obj < s->objCount && n < YGO_QUERY_MAX)
         {
-            if (BestTarget(s, me, c->obj, c->flags & 1) == -1)
+            if (BestTarget(s, me, c->obj, c->flags & 1) == -1 && !Chance(sRash))
                 continue;
-            if (Atk(s, c->obj) > bestAtk)
-                bestAtk = Atk(s, c->obj), best = (int)i;
+            scores[n] = 400 + Atk(s, c->obj) / 10;
+            items[n++] = (int)i;
         }
         else if (c->kind == YGO_ACT_TO_MAIN2 || (c->kind == YGO_ACT_END_TURN && moveOn < 0))
             moveOn = (int)i;
     }
-    Pick(out, best >= 0 ? (unsigned)best : moveOn >= 0 ? (unsigned)moveOn : q->count - 1);
+    if (n)
+    {
+        scores[n] = 150;   /* (holding back) */
+        items[n] = -1;
+        k = Weigh(scores, n + 1);
+        if (items[k] >= 0)
+        {
+            Pick(out, (unsigned)items[k]);
+            return;
+        }
+    }
+    Pick(out, moveOn >= 0 ? (unsigned)moveOn : q->count - 1);
 }
 /* Should it chain now? When the opponent is acting: an effect in the chain, an attack on it, a Summon */
 static int Pressure(const struct YgoDuel *d, unsigned me)
@@ -305,7 +380,11 @@ static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
         const struct YgoCard *card = Card(s, c->obj);
         if (UsedOften(s, c, 0))
             continue;
-        /* monsters' effects and Spells / Traps that answer the opponent; never a chain to itself */
+        /* monsters' effects and Spells / Traps that answer the opponent; never a chain to itself (lower levels miss
+         * the moment now and then) */
+        static const uint8_t sMiss[4] = {60, 38, 16, 3};
+        if (Chance(sMiss))
+            continue;
         if (Pressure(d, me) || (card && card->frame != YGO_TRAP && card->property != YGO_PROP_QUICK &&
                                 s->chainCount == 0 && !YgoDuel_QuietChance(d)))
         {
@@ -325,7 +404,13 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
     memset(out, 0, sizeof(*out));
     if (q->prompt == YGO_P_ATTACK_TARGET && s->attacker)
     {
+        static const uint8_t sOther[4] = {45, 25, 8, 0};
         int t = BestTarget(s, me, s->attacker - 1, 1);
+        if (Chance(sOther) && n > 1)
+        {
+            Pick(out, Next() % n);
+            return;
+        }
         for (i = 0; i < n; i++)
             if (q->items[i].obj == (t < 0 ? NO_OBJ : (unsigned)t))
             {
@@ -372,6 +457,16 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
                 order[i] = order[j];
                 order[j] = t;
             }
+    /* now and then the second best first (a target misjudged) */
+    {
+        static const uint8_t sSwap[4] = {50, 32, 15, 5};
+        if (n >= 2 && value[order[1]] > -50000 && Chance(sSwap))
+        {
+            uint8_t t = order[0];
+            order[0] = order[1];
+            order[1] = t;
+        }
+    }
     /* as many as the engine wants (a question it can be backed out of comes from a choice the AI made: go on) */
     k = q->cancelable ? q->sum : q->min;
     if (!k && q->max && n && value[order[0]] > 0 && !(q->items[order[0]].flags & YGO_IF_PICKED) && !q->cancelable)
@@ -425,12 +520,15 @@ static void Sum(const struct YgoDuel *d, struct YgoAnswer *out)
             out->picks[out->count++] = (uint8_t)picks[i];
 }
 
-void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *out)
+void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *out) { YgoDuel_AiAnswerLevel(d, 3, out); }
+void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAnswer *out)
 {
     const struct YgoQuery *q = &d->query;
     const struct YgoState *s = &d->s;
     unsigned i;
     memset(out, 0, sizeof(*out));
+    sLevel = level > 3 ? 3 : level;
+    Seed(d);
     switch (q->type)
     {
     case YGO_Q_IDLE:
@@ -455,8 +553,11 @@ void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *out)
     {
         const struct YgoCard *c = Ygo_Card(q->card);
         int theirBest = TheirBest(s, q->player, NULL);
+        static const uint8_t sWrong[4] = {30, 15, 5, 0};
         unsigned want = c && c->atk != YGO_STAT_UNKNOWN && (c->atk >= theirBest || c->atk >= c->def) ? YGO_POS_ATTACK
                                                                                                       : YGO_POS_DEFENSE;
+        if (Chance(sWrong))
+            want = want == YGO_POS_ATTACK ? YGO_POS_DEFENSE : YGO_POS_ATTACK;
         for (i = 0; i < q->count; i++)
             if (q->items[i].value == want)
             {

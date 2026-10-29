@@ -447,6 +447,42 @@ fi
 
 # The table: from the Battle Phase, MAIN PHASE 2 (chosen) or END TURN, which skips it; a Field Spell's picture as the
 # background (Yami, from its artwork); the opponent's main Attribute as the table's theme
+if only zone; then
+# The engine's zone question for a Summon lights the Monster Zones (the Decks unshuffled: Summoned Skull in the opening
+# hand; the AI plays your turns until the engine asks where it goes)
+cat > "$OUT/zone.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 1
+mp ygo giveall 3
+mp ygo code ydke://9slUAvbJVAL2yVQCo6lXBaOpVwWjqVcFdHyKBHR8igR0fIoEOnjsATp47AE6eOwBtPTMArT0zAK09MwCJithACYrYQAmK2EA+21PBfttTwX7bU8FixJoAosSaAKLEmgCYr1iBWK9YgVivWIFAsWLAALFiwACxYsAwY2jBMGNowTBjaMEIP5rBSD+awWA324FfAg4BNIw7wH7mncCtEblAA==!!!
+wait 20
+press A 2
+wait 30
+press A 2
+wait 10
+mp ygo stack
+mp ygo fast
+mp ygo seed 7
+mp ygo first 0
+mp ygo open
+wait 20
+press DOWN 2
+wait 6
+press A 2
+wait 300
+mp ygo mineuntil 8
+waitlog 9000 ygo mine reached
+wait 40
+rendershot tribute_zone
+mp ygo state
+quit
+SCRIPT
+run zone
+expect zone 'ygo mine reached 8'
+echo 'PASS the engine asks where a Summoned monster goes: the Monster Zones light up (screenshot tribute_zone)'
+fi
+
 if only table; then
 cat > "$OUT/table.txt" <<'SCRIPT'
 pressuntil A field 5000

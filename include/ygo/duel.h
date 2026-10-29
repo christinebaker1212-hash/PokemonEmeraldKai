@@ -294,8 +294,9 @@ const char *YgoDuel_QueryText(const struct YgoDuel *d, char *buf, unsigned size)
 const char *YgoDuel_ItemText(const struct YgoDuel *d, unsigned item, char *buf, unsigned size);
 /* Answers given so far (tests, logs) */
 unsigned YgoDuel_AnswerCount(const struct YgoDuel *d);
-/* The AI's answer to d->query for its player (src/ygo/ygo_ai.c) */
+/* The AI's answer to d->query for its player (src/ygo/ygo_ai.c): at its best, or at a level (0 a beginner .. 3) */
 void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *answer);
+void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAnswer *answer);
 /* Can the card be played: EDOPro has it whole (src/ygo/ygo_edo_data.c)? Cards that can't don't show up in packs,
  * shops or decks. */
 int Ygo_CardReady(unsigned card);

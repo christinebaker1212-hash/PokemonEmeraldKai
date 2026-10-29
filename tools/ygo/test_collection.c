@@ -107,7 +107,7 @@ int main(void)
     {
         static unsigned char data[1 << 20];
         FILE *f = fopen("/tmp/ygo-test.ygo", "rb");
-        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS - 32, i;
+        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS - 32 - 4, i;
         uint32_t crc = 0xFFFFFFFFu;
         unsigned k;
         fclose(f);

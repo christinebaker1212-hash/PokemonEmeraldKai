@@ -493,8 +493,9 @@ void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day)
 }
 
 /* ---- the file: "MYGO", u32 format, u32 crc of the rest, then the fields, little-endian */
-#define YGO_FILE_FORMAT 4   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
-                                   ACE CARD; 4 (1.48.0): the Forbidden & Limited list; 1-3 still load */
+#define YGO_FILE_FORMAT 5   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
+                                   ACE CARD; 4 (1.48.0): the Forbidden & Limited list; 5 (1.49.0): the skill
+                                   correction; 1-4 still load */
 static void Put(unsigned char **p, uint32_t v, unsigned n)
 {
     unsigned i;
@@ -527,7 +528,8 @@ static uint32_t Crc(const unsigned char *p, size_t n)
      2 * YGO_SET_COUNT + 4 * 10 + 3 + 6 * YGO_DAILY_SLOTS)
 #define PAYLOAD_SIZE_2 (PAYLOAD_SIZE_1 + YGO_GC_SINGLE_BYTES + 1)
 #define PAYLOAD_SIZE_3 (PAYLOAD_SIZE_2 + 2 * YGO_SAVED_DECKS)
-#define PAYLOAD_SIZE (PAYLOAD_SIZE_3 + 32)
+#define PAYLOAD_SIZE_4 (PAYLOAD_SIZE_3 + 32)
+#define PAYLOAD_SIZE (PAYLOAD_SIZE_4 + 4)
 
 int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
 {
@@ -581,6 +583,8 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
         Put(&p, c->ace[i], 2);
     memcpy(p, c->banlist, 32);
     p += 32;
+    Put(&p, (uint16_t)c->skill, 2);
+    Put(&p, c->rated, 2);
     p = data;
     memcpy(p, "MYGO", 4);
     p += 4;
@@ -621,7 +625,8 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     if (n < 12 || memcmp(data, "MYGO", 4))
         return 0;
     format = Get(&p, 4);
-    size = format == 1 ? PAYLOAD_SIZE_1 : format == 2 ? PAYLOAD_SIZE_2 : format == 3 ? PAYLOAD_SIZE_3 : PAYLOAD_SIZE;
+    size = format == 1 ? PAYLOAD_SIZE_1 : format == 2 ? PAYLOAD_SIZE_2 : format == 3 ? PAYLOAD_SIZE_3
+         : format == 4 ? PAYLOAD_SIZE_4 : PAYLOAD_SIZE;
     if (format < 1 || format > YGO_FILE_FORMAT || n != 12 + size || Get(&p, 4) != Crc(data + 12, size))
         return 0;
     memset(c, 0, sizeof(*c));
@@ -675,6 +680,12 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
         memcpy(c->banlist, p, 32);
         c->banlist[31] = 0;
         p += 32;
+    }
+    if (format >= 5)
+    {
+        int skill = (int16_t)Get(&p, 2);
+        c->skill = (int16_t)(skill > YGO_SKILL_MAX ? YGO_SKILL_MAX : skill < -YGO_SKILL_MAX ? -YGO_SKILL_MAX : skill);
+        c->rated = (uint16_t)Get(&p, 2);
     }
     /* sanity: ids in range */
     for (i = 0; i < YGO_SAVED_DECKS; i++)

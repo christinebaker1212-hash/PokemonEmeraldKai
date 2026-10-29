@@ -444,17 +444,14 @@ static const u8 *const sDuelLines[] = {sText_Duel1, sText_Duel2, sText_Duel3};
 
 static u8 ThemeAt(u8 theme, u8 alt, u32 h) { return (h >> 9) % 3 == 0 ? alt : theme; }
 
-// One of the Game Boy Advance games' opponents' decks (ygo_npc_decks.c, weakest first): from the quarter of them that
-// matches tier (0-3); 0 when there's none
-static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
+// One of the Game Boy Advance games' opponents' decks (ygo_npc_decks.c, weakest first) into o; 0 when it can't make one
+static int GameDeckAt(struct YgoOpponent *o, unsigned index)
 {
-    unsigned n = gYgoNpcDeckCount, lo, hi, i, m = 0, x = 0;
+    unsigned i, m = 0, x = 0;
     const struct YgoNpcDeck *d;
-    if (n < 4 || tier > 3)
+    if (index >= gYgoNpcDeckCount)
         return 0;
-    lo = n * tier / 4;
-    hi = n * (tier + 1) / 4;
-    d = &gYgoNpcDecks[lo + seed % (hi - lo)];
+    d = &gYgoNpcDecks[index];
     memset(o->main, 0, sizeof(o->main));
     memset(o->extra, 0, sizeof(o->extra));
     for (i = 0; i < d->count; i++)
@@ -492,6 +489,16 @@ static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
     printf("[ygo] %s plays %s's deck from %s (rating %u)\n", o->name, d->name, d->gameName, d->rating);
     return 1;
 }
+// ... from the quarter of them that matches tier (0-3); 0 when there's none
+static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
+{
+    unsigned n = gYgoNpcDeckCount, lo, hi;
+    if (n < 4 || tier > 3)
+        return 0;
+    lo = n * tier / 4;
+    hi = n * (tier + 1) / 4;
+    return GameDeckAt(o, lo + seed % (hi - lo));
+}
 static int sThemedOnly;   // (the special duelists: their own type always)
 static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier, u32 key,
                  u32 seed)
@@ -501,8 +508,20 @@ static void Fill(struct YgoOpponent *o, const char *name, const char *title, uns
     snprintf(o->title, sizeof(o->title), "%s", title ? title : "");
     // most duelists bring a deck from the Game Boy Advance games (by how far the player has come); the rest a deck of
     // their own type; the special duelists (tier past 3) always their own
-    if (sThemedOnly || (seed >> 13) % 5 >= 3 || !GameDeck(o, tier, seed >> 3))
+    o->gba = 0;
+    if (!sThemedOnly && (seed >> 13) % 5 < 3 && GameDeck(o, tier, seed >> 3))
+        o->gba = 1;
+    else
         BuildDeck(o, theme, tier, seed);
+    o->theme = (u8)theme;
+    o->tier = (u8)tier;
+    o->seed = seed;
+    o->fit = 1;
+    o->rating = (s16)Ygo_DeckRating(o->main);
+    // how well they play: by the badges, some more loosely (the special duelists play their best: set after)
+    o->level = (u8)(tier >= 2 ? 2 : 1);
+    if ((seed >> 17) % 4 == 0 && o->level)
+        o->level--;
     o->key = key;
     o->special = YGO_SPECIAL_NONE;
     o->set = YGO_SET_COUNT;
@@ -538,6 +557,8 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
             }
         o->key = 0xFE000000u | YGO_SPECIAL_CLUB;
         o->special = YGO_SPECIAL_NONE;
+        o->level = 1;   /* (a friendly club duelist with the day's Starter Deck: not fitted) */
+        o->rating = (s16)Ygo_DeckRating(o->main);
         o->set = YGO_SET_COUNT;
         o->music = MUS_VS_TRAINER;
         o->tcgSpecial = 0xFF;
@@ -561,6 +582,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
              s->theme, tier, 0xFE000000u | i, h ^ (Tcg_Today() * 0x9e3779b9u));
         sThemedOnly = 0;
         o->special = (u8)i;
+        o->level = 3;
         o->signature = (u16)Signature(s->theme);
         o->music = s->music;
         // the ELITE FOUR played the Pokemon cards before: their promo cards come with a win (tcg/npc.h order)
@@ -687,4 +709,65 @@ void Ygo_FieldDebugDeck(unsigned theme, unsigned tier)
     for (i = 0; i < n; i++)
         printf("[ygo]   %s\n", Ygo_Card(o->main[i])->name);
     free(o);
+}
+
+// ---------------------------------------------------------------------------
+// CARD SCALING (include/ygo/npc.h)
+int Ygo_OpponentFavor(const struct YgoOpponent *o)
+{
+    // ordinary duelists about 55% for the player, the special ones 45%
+    return o->special != YGO_SPECIAL_NONE ? -35 : 35;
+}
+static unsigned Off(int a, int b) { return (unsigned)(a > b ? a - b : b - a); }
+static void FitOnce(struct YgoOpponent *o, int target)
+{
+    unsigned cap = o->tier > 3 ? 3 : o->tier, i, best = ~0u, near = 0, pick;
+    if (o->gba && gYgoNpcDeckCount >= 4)
+    {
+        // the Game Boy decks up to the badges' quarter (weakest first), the closest; among those nearly as close,
+        // their own pick
+        unsigned hi = gYgoNpcDeckCount * (cap + 1) / 4;
+        for (i = 0; i < hi; i++)
+            best = Off(gYgoNpcDecks[i].rating, target) < best ? Off(gYgoNpcDecks[i].rating, target) : best;
+        for (i = 0; i < hi; i++)
+            near += Off(gYgoNpcDecks[i].rating, target) <= best + 25;
+        pick = (o->seed >> 3) % (near ? near : 1);
+        for (i = 0; i < hi; i++)
+            if (Off(gYgoNpcDecks[i].rating, target) <= best + 25 && !pick--)
+                break;
+        if (i < hi && GameDeckAt(o, i))
+        {
+            o->rating = (s16)Ygo_DeckRating(o->main);
+            return;
+        }
+    }
+    {
+        // their own type's deck, at the tier that comes closest
+        unsigned t, bestTier = 0;
+        static struct YgoOpponent sTry;
+        for (t = 0; t <= cap; t++)
+        {
+            unsigned off;
+            BuildDeck(&sTry, o->theme, t, o->seed);
+            off = Off(Ygo_DeckRating(sTry.main), target);
+            if (off < best || t == 0)
+                best = off, bestTier = t;
+        }
+        BuildDeck(o, o->theme, bestTier, o->seed);
+        o->rating = (s16)Ygo_DeckRating(o->main);
+    }
+}
+void Ygo_FitOpponent(struct YgoOpponent *o, int mine)
+{
+    if (!gMpConfig.cardScaling || !o->fit)
+        return;
+    for (;;)
+    {
+        int target = mine + Ygo_PlayerRating() - Ygo_OpponentFavor(o) - Ygo_LevelRating(o->level);
+        FitOnce(o, target);
+        // the decks they may bring this early fall well short: they play more carefully instead (SKILLED at most)
+        if (o->special != YGO_SPECIAL_NONE || o->level >= 2 || target - o->rating <= 50)
+            break;
+        o->level++;
+    }
 }

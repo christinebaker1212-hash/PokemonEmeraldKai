@@ -1,0 +1,253 @@
+Yu-Gi-Oh! power audit (tools/ygo/rate_cards.sh)
+
+AI levels against the best (Game Boy decks, both seats): beginner -94, casual -71, skilled -33
+1483 cards measured; ratings blend 65% measured worth with 35% list history (Stairway 2003, GOAT 2005 first)
+deck rating from its cards, against the 163 Game Boy decks' measured ratings: r = 0.78, typical error 97
+
+The era's staples: rank of 1489, rating
+   192   1803  Raigeki                          measured   +70  lists   +0
+   350   1727  Pot of Greed                     measured   +12  lists  +75
+    73   1976  Monster Reborn                   measured   +83  lists  +50
+   361   1704  Change of Heart                  measured   +47  lists   +0
+  1280   1296  Dark Hole                        measured   -47  lists   +0
+    87   1968  Mirror Force                     measured  +108  lists   +0
+     5   2373  Graceful Charity                 measured  +161  lists  +75
+   108   1920  Harpie's Feather Duster          measured   +70  lists  +50
+   968   1465  Sangan                           measured   -35  lists  +50
+   185   1833  Witch of the Black Forest        measured   +23  lists +100
+   198   1803  Summoned Skull                   measured   +70  lists   +0
+   675   1552  Blue-Eyes White Dragon           measured   +12  lists   +0
+   355   1704  Trap Hole                        measured   +47  lists   +0
+   814   1500  Man-Eater Bug                    measured    -0  lists   +0
+   280   1751  Kuriboh                          measured   +58  lists   +0
+    42   2081  Mystical Elf                     measured  +134  lists   +0
+   573   1600  Celtic Guardian                  measured   +23  lists   +0
+
+Strongest 40:
+   3025  The Rock Spirit                          measured  +352  lists   +0
+   3025  Zombyra the Dark                         measured  +352  lists   +0
+   2627  The Fiend Megacyber                      measured  +260  lists   +0
+   2627  Beta The Magnet Warrior                  measured  +260  lists   +0
+   2373  Graceful Charity                         measured  +161  lists  +75
+   2328  Girochin Kuwagata                        measured  +191  lists   +0
+   2328  Cyber Harpie Lady                        measured  +191  lists   +0
+   2263  Rogue Doll                               measured  +176  lists   +0
+   2263  Jirai Gumo                               measured  +176  lists   +0
+   2263  Gemini Elf                               measured  +176  lists   +0
+   2263  Sonic Duck                               measured  +176  lists   +0
+   2263  Archfiend Soldier                        measured  +176  lists   +0
+   2263  Seiyaryu                                 measured  +176  lists   +0
+   2198  Guardian of the Throne Room              measured  +161  lists   +0
+   2198  High Tide Gyojin                         measured  +161  lists   +0
+   2198  Vampiric Orchis                          measured  +161  lists   +0
+   2198  Luster Dragon                            measured  +161  lists   +0
+   2198  Sakuretsu Armor                          measured  +161  lists   +0
+   2198  Beautiful Beast Trainer                  measured  +161  lists   +0
+   2198  Dunames Dark Witch                       measured  +161  lists   +0
+   2198  Mabarrel                                 measured  +161  lists   +0
+   2145  Reflect Bounder                          measured   +95  lists +100
+   2137  Hyosube                                  measured  +147  lists   +0
+   2137  Baby Dragon                              measured  +147  lists   +0
+   2137  Dark Elf                                 measured  +147  lists   +0
+   2137  Skull Mariner                            measured  +147  lists   +0
+   2137  Beast of Talwar                          measured  +147  lists   +0
+   2137  Shining Abyss                            measured  +147  lists   +0
+   2137  Mask of the Accursed                     measured  +147  lists   +0
+   2137  Dancing Fairy                            measured  +147  lists   +0
+   2137  Bazoo the Soul-Eater                     measured  +147  lists   +0
+   2137  Bottomless Trap Hole                     measured  +147  lists   +0
+   2137  Master Kyonshee                          measured  +147  lists   +0
+   2137  X-Head Cannon                            measured  +147  lists   +0
+   2137  Dark Blade                               measured  +147  lists   +0
+   2137  Skilled Dark Magician                    measured  +147  lists   +0
+   2137  Axe Raider                               measured  +147  lists   +0
+   2137  Machine King                             measured  +147  lists   +0
+   2137  Widespread Ruin                          measured  +147  lists   +0
+   2093  Breaker the Magical Warrior              measured   +83  lists +100
+
+Weakest 20:
+   1032  Boar Soldier                             measured  -108  lists   +0
+   1032  Mage Power                               measured  -108  lists   +0
+   1032  Ryu-Kishin Clown                         measured  -108  lists   +0
+    980  Spear Cretin                             measured  -120  lists   +0
+    980  Messenger of Peace                       measured  -120  lists   +0
+    980  Thunder of Ruler                         measured  -120  lists   +0
+    980  Precious Cards from Beyond               measured  -120  lists   +0
+    980  Altar for Tribute                        measured  -120  lists   +0
+    980  Gorgon Egg                               measured  -120  lists   +0
+    980  Moon Envoy                               measured  -120  lists   +0
+    980  Corroding Shark                          measured  -120  lists   +0
+    919  Wall of Illusion                         measured  -134  lists   +0
+    919  Petit Moth                               measured  -134  lists   +0
+    919  Lady Panther                             measured  -134  lists   +0
+    919  Deal of Phantom                          measured  -134  lists   +0
+    919  Blind Destruction                        measured  -134  lists   +0
+    919  Ryu Senshi                               measured  -134  lists   +0
+    919  Reversal Quiz                            measured  -134  lists   +0
+    919  Giant Scorpion of the Tundra             measured  -134  lists   +0
+    802  Hino-Kagu-Tsuchi                         measured  -161  lists   +0
+
+Game Boy decks: measured, from cards
+   1177  1234  ROD  Duel Computer
+   1184  1207  ROD  Tristan Taylor
+   1190  1272  TSC  Pier generic Duelists
+   1219  1361  ROD  Clock Tower Square
+   1222  1369  ROD  Mokuba Kaiba
+   1226  1258  TSC  Generic Duelists
+   1230  1361  ROD  Clock Tower Square generic Duelists
+   1249  1340  ROD  Mai Valentine
+   1256  1288  ROD  Ishizu Ishtar
+   1259  1392  ROD  Rare Hunter
+   1262  1270  ROD  Lint Greendale
+   1264  1382  ROD  Roland
+   1275  1418  WC4  Tristan Taylor
+   1276  1392  ROD  Mako Tsunami
+   1286  1441  ROD  Feng Long
+   1287  1501  ROD  Monkey robots
+   1291  1330  ROD  Archaeological team
+   1291  1280  ROD  Arkana
+   1291  1399  TSC  Bridge generic Duelists
+   1304  1355  ROD  Clock Tower Square
+   1305  1417  ROD  Damien Draco
+   1309  1365  ROD  Mako Tsunami
+   1309  1401  TSC  New card shop manager
+   1316  1523  ROD  Neo Ghouls
+   1324  1464  ROD  Jean-Claude Magnum
+   1329  1365  TSC  Aquarium generic Duelists
+   1334  1431  ROD  Duke Devlin
+   1334  1419  ROD  Weevil Underwood
+   1335  1427  ROD  Millennium Guardians
+   1335  1280  ROD  Tristan Taylor
+   1336  1516  TSC  Building generic Duelists
+   1338  1348  ROD  Dox
+   1338  1440  ROD  Mokuba Kaiba
+   1347  1503  ROD  Monkey robots
+   1350  1349  ROD  Espa's brothers
+   1351  1376  ROD  Mimic of Doom
+   1365  1393  TSC  Weevil's followers
+   1366  1380  ROD  Rex Raptor
+   1368  1416  ROD  Joey Wheeler
+   1370  1375  ROD  Duel Computer
+   1371  1425  ROD  Strings
+   1378  1436  TSC  Park generic Duelists
+   1384  1583  EDS  Rare Hunter
+   1384  1391  ROD  Stringer
+   1385  1476  WC4  Espa Roba
+   1387  1417  ROD  Umbra
+   1394  1442  EDS  Tristan Taylor
+   1394  1463  ROD  Espa Roba
+   1394  1341  ROD  Upper-class daughter
+   1396  1388  ROD  Yugi Muto
+   1402  1371  ROD  Jean-Claude Magnum
+   1405  1503  ROD  Johnny Steps
+   1407  1368  ROD  Stringer
+   1413  1339  ROD  Millennium Guardians
+   1414  1439  ROD  Para
+   1417  1492  ROD  Chevaliers
+   1427  1514  ROD  Rex Raptor
+   1431  1491  ROD  Lint Greendale
+   1434  1365  WC4  Tea Gardner
+   1435  1457  EDS  Yugi Muto
+   1436  1352  ROD  Bonz
+   1440  1452  ROD  Lumis
+   1443  1355  TSC  Bonz's followers
+   1444  1508  ROD  Umbra
+   1449  1504  ROD  Lumis
+   1449  1466  ROD  Odion
+   1450  1619  WC4  Rare Hunter
+   1450  1470  ROD  Rebecca Hawkins
+   1455  1426  ROD  Duke Devlin
+   1459  1401  WC4  Ryou Bakura
+   1463  1448  ROD  Bonz
+   1475  1473  ROD  Clock Tower Square generic Duelists
+   1476  1535  ROD  Maximillion Pegasus
+   1479  1550  ROD  Espa Roba
+   1479  1345  ROD  Joey Wheeler
+   1481  1456  ROD  Upper-class father
+   1489  1680  ROD  Maximillion Pegasus
+   1493  1458  ROD  Mai Valentine
+   1498  1464  ROD  Neo Ghouls
+   1499  1518  WC4  Rex Raptor
+   1507  1571  WC4  Odion
+   1510  1571  ROD  Rare Hunter
+   1516  1535  SDD  Rare Hunter
+   1526  1514  EDS  Tea Gardner
+   1535  1742  SDD  Rex Raptor
+   1541  1624  ROD  Archaeological team
+   1545  1457  SDD  Duke Devlin
+   1545  1384  ROD  Arkana
+   1547  1524  WC4  Trusdale
+   1553  1547  ROD  Yugi Muto
+   1554  1531  SDD  Tea Gardner
+   1554  1644  ROD  Shadi
+   1554  1562  ROD  Weevil Underwood
+   1559  1420  WC4  Bonz
+   1559  1539  ROD  Para
+   1560  1475  WC4  Marik Ishtar
+   1563  1508  SDD  Marik Ishtar
+   1563  1435  EDS  Shadi
+   1565  1667  ROD  Yami Marik
+   1566  1501  EDS  Bakura Ryou
+   1568  1480  ROD  Bandit Keith
+   1571  1875  ROD  Paradox
+   1572  1557  EDS  Simon
+   1572  1517  TSC  Seto Kaiba
+   1573  1699  SDD  Kaiba Mokuba
+   1576  1516  EDS  Espa Roba
+   1576  1555  ROD  Mimic of Doom
+   1580  1499  ROD  Strings
+   1581  1538  ROD  Bandit Keith
+   1584  1617  SDD  Odion
+   1584  1545  EDS  Ishizu Ishtar
+   1587  1579  ROD  Dox
+   1588  1565  EDS  Maximillion Pegasus
+   1593  1479  SDD  Tea Gardner
+   1600  1529  WC4  Mai Valentine
+   1602  1559  WC4  Arkana
+   1606  1670  ROD  Chevaliers
+   1607  1557  SDD  Mai Valentine
+   1610  1597  EDS  Joey Wheeler
+   1616  1641  SDD  Ishizu Ishtar
+   1616  1609  SDD  Strings
+   1619  1637  TSC  Minor Ghouls
+   1623  1577  EDS  Arkana
+   1625  1596  SDD  Weevil Underwood
+   1636  1503  EDS  Duel Computer
+   1638  1580  EDS  Mai Valentine
+   1642  1450  SDD  Bakura Ryou
+   1644  1506  WC4  Yugi Muto
+   1647  1558  WC4  Mako Tsunami
+   1649  1591  SDD  Espa Roba
+   1649  1523  SDD  Maximillion Pegasus
+   1650  1663  ROD  Yami Bakura
+   1650  1608  TSC  Seto Kaiba
+   1653  1745  EDS  Trusdale
+   1654  1667  ROD  Noah Kaiba
+   1663  1489  EDS  Mako Tsunami
+   1665  1523  SDD  Mako Tsunami
+   1676  1556  EDS  Rex Raptor
+   1681  1464  SDD  Marik Ishtar
+   1682  1555  SDD  Umbra & Lumis
+   1682  1618  WC4  Strings
+   1683  1590  EDS  Kaiba Seto
+   1687  1669  EDS  Yami Yugi
+   1697  1651  WC4  Simon
+   1698  1550  SDD  Bandit Keith
+   1699  1562  WC4  Weevil Underwood
+   1707  1623  EDS  Weevil Underwood
+   1713  1657  SDD  Yugi Muto
+   1714  1666  ROD  Marik Ishtar
+   1717  1652  ROD  Paradox
+   1723  1600  WC4  Duel Computer
+   1725  1596  EDS  Umbra & Lumis
+   1733  1679  ROD  Reshef the Dark Being
+   1734  1730  SDD  Arkana
+   1740  1495  EDS  Marik Ishtar
+   1741  1650  SDD  Trusdale
+   1744  1721  ROD  Yami Marik
+   1748  1526  WC4  Shadi
+   1757  1595  EDS  Yami Bakura
+   1762  1569  EDS  Strings
+   1762  1723  ROD  Yami Yugi
+   1773  1596  SDD  Kaiba Seto
+   1776  1839  SDD  Joey Wheeler

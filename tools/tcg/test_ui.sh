@@ -166,13 +166,14 @@ test "$(grep -c 'screen 10 opted 1 phase 1 current 0' "$OUT/duel/log.txt")" -ge 
 expect duel 'screen 10 opted 1 phase 1 current 1'
 echo 'PASS the turn menu: B opens it on END TURN, A on the deck has CONCEDE (it asks first), END TURN ends the turn (only the Energy reminder asks)'
 
-# Nothing left to play from the hand: the cursor goes to your Active Pokemon. A hand of only a POTION (nothing
+# Nothing left to play from the hand: the cursor goes to your Active Pokemon (seed 2: you go first, nothing damaged). A hand of only a POTION (nothing
 # damaged) is done; with a Fire Energy still to attach it isn't.
 cat > "$OUT/done.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 100
 mp cards starter 0
 mp cards fast
+mp cards seed 2
 mp cards open
 wait 20
 press A 2

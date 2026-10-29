@@ -26,4 +26,18 @@ struct YgoNpcDeck
 };
 extern const struct YgoNpcDeck gYgoNpcDecks[];
 extern const unsigned gYgoNpcDeckCount;
+
+/* Power ratings (src/ygo/ygo_card_ratings.c, made by tools/ygo/rate_cards.sh; never shown as numbers) and what they
+ * say (src/ygo/ygo_rating.c): a deck's rating from its main deck's cards, the chance one side beats another, what
+ * each AI level gives away (the player counted as playing like the SKILLED level until their record says more) */
+extern const int16_t gYgoCardRating[YGO_CARD_COUNT + 1];
+extern const int16_t gYgoLevelRating[4];
+extern const int32_t gYgoDeckFitA, gYgoDeckFitB;
+int Ygo_DeckRating(const uint16_t *main);
+unsigned Ygo_Chance(int mine, int theirs);
+#define Ygo_LevelRating(level) gYgoLevelRating[(level) > 3 ? 3 : (level)]
+#define Ygo_PlayerRating() gYgoLevelRating[2]
+/* After a duel against the computer (mine, theirs: ratings with level / skill counted): the skill moves */
+struct YgoCollection;
+void Ygo_SkillResult(struct YgoCollection *c, int mine, int theirs, int won);
 #endif

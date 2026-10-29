@@ -1,0 +1,229 @@
+Pokemon TCG power audit (tools/tcg/rate_cards.sh)
+
+AI levels against the best (Game Boy decks, both seats, 2000 duels a level): beginner -164, casual -96, skilled -35
+cards: 120 duels each in the median deck of their type; ratings blend 65% measured worth with 35% the era's tournament staples
+deck rating from its cards, against the 50 Game Boy decks' measured ratings: r = 0.68, typical error 78
+
+Every card, strongest first: rating, measured worth (Elo of three copies), the era's standing
+   2945  Magmar                      60  measured  +168  era +100
+   2945  Articuno                    94  measured  +168  era +100
+   2675  Moltres                     64  measured  +127  era +100
+   2580  Gengar                     152  measured   +85  era +150
+   2562  Hitmonchan                 136  measured   +83  era +150
+   2549  Mew                        160  measured  +108  era +100
+   2508  Mewtwo                     158  measured  +101  era +100
+   2500  Machamp                    127  measured     -  era +100
+   2500  Hitmonlee                  135  measured  +127  era  +50
+   2500  Arcanine                    56  measured     -  era +100
+   2500  Arcanine                    55  measured     -  era +100
+   2500  Raichu                     103  measured     -  era +100
+   2500  Raichu                     104  measured     -  era +100
+   2500  Pidgeot                    165  measured     -  era +100
+   2500  Pidgeot                    166  measured     -  era +100
+   2483  Kangaskhan                 185  measured   +70  era +150
+   2412  Lickitung                  183  measured  +140  era   +0
+   2405  Haunter                    151  measured   +85  era +100
+   2405  Energy Removal             208  measured   +58  era +150
+   2343  Haunter                    150  measured   +76  era +100
+   2269  Articuno                    95  measured   +64  era +100
+   2269  Mewtwo                     159  measured   +64  era +100
+   2252  Mr. Mime                   155  measured   +35  era +150
+   2252  Chansey                    184  measured   +35  era +150
+   2252  Flareon                     62  measured   +89  era  +50
+   2252  Venusaur                    11  measured   +35  era +150
+   2230  Energy Retrieval           205  measured   +58  era +100
+   2214  Lapras                      89  measured   +29  era +150
+   2195  Bill                       197  measured   +26  era +150
+   2191  Snorlax                    190  measured   +53  era +100
+   2176  Dragonite                  193  measured   +23  era +150
+   2176  Zapdos                     117  measured   +23  era +150
+   2176  Zapdos                     118  measured   +23  era +150
+   2176  Scyther                     46  measured   +23  era +150
+   2153  Rapidash                    58  measured   +47  era +100
+   2138  Double Colorless Energy      7  measured   +17  era +150
+   2138  Dragonite                  194  measured   +17  era +150
+   2138  Imposter Professor Oak     196  measured   +17  era +150
+   2100  Zapdos                     116  measured   +12  era +150
+   2100  Wigglytuff                 176  measured   +12  era +150
+   2077  Ninetails                   53  measured   +35  era +100
+   2063  Professor Oak              195  measured    +6  era +150
+   2039  Jynx                       156  measured   +29  era +100
+   2039  Dugtrio                    122  measured   +29  era +100
+   2020  Lass                       199  measured   +26  era +100
+   2001  Kabutops                   140  measured   +23  era +100
+   1997  Arbok                       19  measured   +76  era   +0
+   1997  Seaking                     84  measured   +76  era   +0
+   1993  Machop                     125  measured   +76  era   +0
+   1963  Electrode                  111  measured   +17  era +100
+   1958  Fearow                     170  measured   +70  era   +0
+   1925  Gyarados                    88  measured   +12  era +100
+   1919  Pinsir                      47  measured   +64  era   +0
+   1912  Pokemon Breeder            202  measured   -17  era +150
+   1902  Super Energy Retrieval     206  measured   +35  era  +50
+   1902  Flareon                     61  measured   +35  era  +50
+   1888  Nidoking                    25  measured    +6  era +100
+   1888  Electrode                  110  measured    +6  era +100
+   1888  Super Potion               222  measured    +6  era +100
+   1874  Item Finder                218  measured   -23  era +150
+   1874  Super Energy Removal       209  measured   -23  era +150
+   1850  Magmar                      59  measured    -0  era +100
+   1841  Bellsprout                  35  measured   +53  era   +0
+   1836  Electabuzz                 112  measured   -29  era +150
+   1836  Electabuzz                 113  measured   -29  era +150
+   1826  Venomoth                    34  measured   +23  era  +50
+   1826  Tauros                     186  measured   +23  era  +50
+   1812  Mew                        161  measured    -6  era +100
+   1803  Metapod                     13  measured   +47  era   +0
+   1798  Muk                         39  measured   -35  era +150
+   1798  PlusPower                  216  measured   -35  era +150
+   1788  Wartortle                   66  measured   +17  era  +50
+   1788  Pokemon Flute              226  measured   +17  era  +50
+   1785  Gastly                     148  measured   +44  era   +0
+   1775  Starmie                     86  measured   -12  era +100
+   1775  Switch                     210  measured   -12  era +100
+   1765  Butterfree                  14  measured   +41  era   +0
+   1760  Blastoise                   67  measured   -41  era +150
+   1760  Gust of Wind               219  measured   -41  era +150
+   1760  Potion                     221  measured   +13  era  +50
+   1760  Pokemon Trader             201  measured   -41  era +150
+   1760  Venusaur                    10  measured   -41  era +150
+   1750  Vaporeon                    91  measured   +12  era  +50
+   1737  Ninetails                   52  measured   -17  era +100
+   1737  Mewtwo                     157  measured   -17  era +100
+   1727  Poliwrath                   72  measured   +35  era   +0
+   1727  Growlithe                   54  measured   +35  era   +0
+   1722  Aerodactyl                 141  measured   -47  era +150
+   1722  Scoop Up                   213  measured   -47  era +150
+   1699  Charizard                   50  measured   -23  era +100
+   1699  Mysterious Fossil          204  measured   -23  era +100
+   1689  Surfing Pikachu            101  measured   +29  era   +0
+   1689  Poke Ball                  212  measured   +29  era   +0
+   1689  Meowth                     178  measured   +29  era   +0
+   1684  Alakazam                   144  measured   -53  era +150
+   1675  Jolteon                    115  measured    -0  era  +50
+   1670  Grimer                      38  measured   +26  era   +0
+   1670  Gastly                     149  measured   +26  era   +0
+   1661  Pokedex                    215  measured   -29  era +100
+   1651  Squirtle                    65  measured   +23  era   +0
+   1651  Krabby                      79  measured   +23  era   +0
+   1651  Weedle                      15  measured   +23  era   +0
+   1651  Omanyte                     92  measured   +23  era   +0
+   1651  Victreebel                  37  measured   +23  era   +0
+   1641  Spearow                    169  measured   +22  era   +0
+   1623  Hypno                      154  measured   -35  era +100
+   1623  Ditto                      187  measured   -35  era +100
+   1613  Cubone                     132  measured   +17  era   +0
+   1613  Tangela                     45  measured   +17  era   +0
+   1613  Goldeen                     83  measured   +17  era   +0
+   1613  Charmander                  48  measured   +17  era   +0
+   1613  Nidoran F                   20  measured   +17  era   +0
+   1613  Onix                       131  measured   +17  era   +0
+   1600  Vileplume                   30  measured   -12  era  +50
+   1600  Maintenance                225  measured   -12  era  +50
+   1600  Energy Search              207  measured   -12  era  +50
+   1575  Beedrill                    17  measured   +12  era   +0
+   1575  Eevee                      188  measured   +12  era   +0
+   1575  Exeggcute                   40  measured   +12  era   +0
+   1575  Exeggutor                   41  measured   +12  era   +0
+   1575  Charmeleon                  49  measured   +12  era   +0
+   1575  Psyduck                     68  measured   +12  era   +0
+   1575  Parasect                    32  measured   +12  era   +0
+   1567  Computer Search            214  measured   -70  era +150
+   1562  Vaporeon                    90  measured   -17  era  +50
+   1562  Dewgong                     76  measured   -17  era  +50
+   1547  Kadabra                    143  measured   -47  era +100
+   1538  Kabuto                     139  measured    +6  era   +0
+   1538  Voltorb                    109  measured    +6  era   +0
+   1538  Doduo                      181  measured    +6  era   +0
+   1538  Golbat                      27  measured    +6  era   +0
+   1538  Venonat                     33  measured    +6  era   +0
+   1538  Rattata                    167  measured    +6  era   +0
+   1538  Weepinbell                  36  measured    +6  era   +0
+   1538  Drowzee                    153  measured    +6  era   +0
+   1538  Jigglypuff                 175  measured    +6  era   +0
+   1528  Pokemon Center             211  measured   -76  era +150
+   1524  Magneton                   107  measured   -23  era  +50
+   1509  Clefairy Doll              203  measured   -53  era +100
+   1509  Defender                   217  measured   -53  era +100
+   1500  Jigglypuff                 173  measured    -0  era   +0
+   1500  Machoke                    126  measured    -0  era   +0
+   1500  Oddish                      28  measured    -0  era   +0
+   1500  Meowth                     177  measured    -0  era   +0
+   1500  Nidorina                    21  measured    -0  era   +0
+   1500  Primeape                   124  measured    -0  era   +0
+   1500  Tentacool                   73  measured    -0  era   +0
+   1486  Clefable                   172  measured   -29  era  +50
+   1486  Jolteon                    114  measured   -29  era  +50
+   1486  Full Heal                  223  measured   -29  era  +50
+   1486  Omastar                     93  measured   -29  era  +50
+   1486  Devolution Spray           220  measured   -29  era  +50
+   1470  Dodrio                     182  measured   -58  era +100
+   1470  Mr.Fuji                    198  measured   -58  era +100
+   1462  Persian                    179  measured    -6  era   +0
+   1462  Nidorino                    24  measured    -6  era   +0
+   1462  Bulbasaur                    8  measured    -6  era   +0
+   1462  Kakuna                      16  measured    -6  era   +0
+   1462  Caterpie                    12  measured    -6  era   +0
+   1462  Gloom                       29  measured    -6  era   +0
+   1448  Slowbro                    147  measured   -35  era  +50
+   1431  Recycle                    228  measured   -64  era +100
+   1425  Sandslash                  120  measured   -12  era   +0
+   1425  Magnemite                  106  measured   -12  era   +0
+   1425  Tangela                     44  measured   -12  era   +0
+   1425  Tentacruel                  74  measured   -12  era   +0
+   1410  Magneton                   108  measured   -41  era  +50
+   1387  Marowak                    133  measured   -17  era   +0
+   1387  Imakuni?                   200  measured   -17  era   +0
+   1387  Kingler                     80  measured   -17  era   +0
+   1387  Flying Pikachu             100  measured   -17  era   +0
+   1387  Rhydon                     138  measured   -17  era   +0
+   1387  Mankey                     123  measured   -17  era   +0
+   1387  Dratini                    191  measured   -17  era   +0
+   1349  Dragonair                  192  measured   -23  era   +0
+   1349  Raticate                   168  measured   -23  era   +0
+   1349  Horsea                      81  measured   -23  era   +0
+   1349  Seadra                      82  measured   -23  era   +0
+   1349  Poliwhirl                   71  measured   -23  era   +0
+   1330  Staryu                      85  measured   -26  era   +0
+   1311  Magnemite                  105  measured   -29  era   +0
+   1311  Ponyta                      57  measured   -29  era   +0
+   1311  Farfetch'd                 180  measured   -29  era   +0
+   1311  Rhyhorn                    137  measured   -29  era   +0
+   1311  Ekans                       18  measured   -29  era   +0
+   1311  Surfing Pikachu            102  measured   -29  era   +0
+   1311  Paras                       31  measured   -29  era   +0
+   1311  Magikarp                    87  measured   -29  era   +0
+   1274  Seel                        75  measured   -35  era   +0
+   1273  Mew                        162  measured   -89  era +100
+   1273  Vulpix                      51  measured   -35  era   +0
+   1273  Cloyster                    78  measured   -35  era   +0
+   1273  Zubat                       26  measured   -35  era   +0
+   1256  Golduck                     69  measured   -64  era  +50
+   1235  Abra                       142  measured   -41  era   +0
+   1235  Marowak                    134  measured   -41  era   +0
+   1235  Gambler                    227  measured   -41  era   +0
+   1235  Nidoran M                   23  measured   -41  era   +0
+   1215  Koffing                     42  measured   -44  era   +0
+   1197  Shellder                    77  measured   -47  era   +0
+   1197  Clefairy                   171  measured   -47  era   +0
+   1178  Golem                      130  measured   -76  era  +50
+   1160  Poliwag                     70  measured   -52  era   +0
+   1159  Nidoqueen                   22  measured   -53  era   +0
+   1159  Diglett                    121  measured   -53  era   +0
+   1120  Porygon                    189  measured   -58  era   +0
+   1120  Revive                     224  measured   -58  era   +0
+   1120  Weezing                     43  measured   -58  era   +0
+   1081  Pidgeotto                  164  measured   -64  era   +0
+   1081  Pikachu                     99  measured   -64  era   +0
+   1042  Sandshrew                  119  measured   -70  era   +0
+   1042  Geodude                    128  measured   -70  era   +0
+   1042  Graveler                   129  measured   -70  era   +0
+   1042  Slowpoke                   145  measured   -70  era   +0
+   1037  Pidgey                     163  measured   -71  era   +0
+   1003  Slowpoke                   146  measured   -76  era   +0
+    963  Pikachu                     98  measured   -83  era   +0
+    963  Pikachu                     96  measured   -83  era   +0
+    963  Jigglypuff                 174  measured   -83  era   +0
+    923  Pikachu                     97  measured   -89  era   +0
+    923  Ivysaur                      9  measured   -89  era   +0
+    848  Moltres                     63  measured  -154  era +100

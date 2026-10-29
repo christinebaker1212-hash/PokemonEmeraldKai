@@ -51,6 +51,7 @@ struct TcgOpponent
     uint8_t pool;
     uint32_t pick;
     int16_t rating, deckRating;
+    uint8_t level;          /* how the AI plays (0 a beginner .. 3 its best; the fit may raise it) */
     uint8_t portraitW, portraitH;
     uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };

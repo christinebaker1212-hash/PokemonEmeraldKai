@@ -342,10 +342,11 @@ static const struct TcgDeckDefinition *DeckNamed(const char *name)
 // ---------------------------------------------------------------------------
 // CARD SCALING: who brings which deck (include/tcg/scale.h)
 
-// Ordinary card players bring a deck a touch stronger than yours, special trainers a real
-// test; badges cap the ordinary ones (a strong deck early on still meets the early decks)
-#define SCALE_EDGE 25
-#define SCALE_BOSS_EDGE 75
+// A touch weaker than the player for ordinary card players (about 55% for the player), a real test from the special
+// trainers (about 45%), counting how they play; badges cap the ordinary ones (a strong deck early on still meets the
+// early decks, and then they play more carefully)
+#define SCALE_FAVOR 35
+#define SCALE_BOSS_FAVOR (-35)
 static const s16 sBadgeCap[NUM_BADGES + 1] = {1460, 1490, 1530, 1570, 1610, 1650, 1690, 1730, 2000};
 
 static int PlayerRating(const uint16_t *mine, int *deckRating)
@@ -393,8 +394,13 @@ void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
     int you, deckRating, target;
     if (o->pool == TCG_SCALE_POOL_NONE)
         return;
-    you = PlayerRating(mine, &deckRating);
+    you = PlayerRating(mine, &deckRating) + TcgScale_LevelRating(2);   /* (the player as the SKILLED level) */
     o->deckRating = (s16)deckRating;
+    // how they play: their best for the special trainers, by the badges for the rest (some more loosely)
+    o->level = o->pool == TCG_SCALE_POOL_SPECIAL ? 3 : Badges() >= 4 ? 2 : 1;
+    if (o->pool != TCG_SCALE_POOL_SPECIAL && (o->pick >> 17) % 4 == 0)
+        o->level--;
+again:
     if (o->pool == TCG_SCALE_POOL_SPECIAL)
     {
         list[n].deck = gTcgSpecialDecks[o->special].cards;
@@ -406,7 +412,7 @@ void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
                 list[n].deck = gTcgSpecialVariants[i].cards;
                 list[n++].rating = gTcgVariantRating[i];
             }
-        target = you + SCALE_BOSS_EDGE;
+        target = you - SCALE_BOSS_FAVOR - TcgScale_LevelRating(o->level);
     }
     else if (gMpConfig.cardScaling)
     {
@@ -427,9 +433,18 @@ void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
                     list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
                 }
             }
-        target = you + SCALE_EDGE;
+        target = you - SCALE_FAVOR - TcgScale_LevelRating(o->level);
         if (target > cap)
+        {
+            // the decks they may bring this early fall well short: they play more carefully instead (SKILLED at most)
+            if (target - cap > 50 && o->level < 2)
+            {
+                o->level++;
+                n = 0;
+                goto again;
+            }
             target = cap;
+        }
     }
     else
     {
@@ -461,9 +476,9 @@ void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
         chosen = &list[(o->pick >> 12) % n];
     o->deck = chosen->deck;
     o->rating = (s16)chosen->rating;
-    printf("[tcg] scaling %s: you %d (deck %d, skill %d), target %d, %s %d of %u decks\n",
+    printf("[tcg] scaling %s: you %d (deck %d, skill %d), target %d, %s %d of %u decks, level %u\n",
            gMpConfig.cardScaling ? "on" : "off", you, deckRating, Tcg_GetCollection()->skill, target, o->name,
-           o->rating, n);
+           o->rating, n, o->level);
 }
 
 // Which mat a kind of deck is played on

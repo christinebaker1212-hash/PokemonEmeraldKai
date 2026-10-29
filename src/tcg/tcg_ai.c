@@ -4,7 +4,40 @@
 #include <string.h>
 /* Decisions use public opposing cards/counts and the AI's own cards only.
  * Never score the outcome of a simulated coin flip or inspect the opponent's
- * hidden hand/deck/prizes when choosing an action. */
+ * hidden hand/deck/prizes when choosing an action.
+ * Levels (TcgDuel_AiActionLevel): 3 plays as it always did; below that it slips the way people do (an Evolution or
+ * a Trainer held for later, the Energy on the second-best Pokemon, the weaker attack, an odd Pokemon sent out), more
+ * often the lower the level. Its dice come from what both players can see. */
+static unsigned sLevel = 3;
+static uint32_t sRoll;
+static uint32_t Next(void)
+{
+    sRoll ^= sRoll << 13;
+    sRoll ^= sRoll >> 17;
+    sRoll ^= sRoll << 5;
+    return sRoll;
+}
+static void Seed(const struct TcgDuel *g)
+{
+    uint32_t h = 2166136261u ^ sLevel * 0x9E3779B1u;
+    unsigned p, s;
+    h = (h ^ (g->turn | g->current << 16 | g->phase << 24)) * 16777619u;
+    h = (h ^ g->eventSeq) * 16777619u;
+    for (p = 0; p < 2; p++)
+    {
+        const struct TcgPlayer *pl = &g->players[p];
+        h = (h ^ (pl->handSize | pl->deckSize << 8 | pl->prizeSize << 16)) * 16777619u;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            h = (h ^ (pl->field[s].stackSize | pl->field[s].attachedSize << 8 | (uint32_t)pl->field[s].damage << 16)) *
+                16777619u;
+    }
+    sRoll = h ? h : 1;
+    Next();
+}
+/* a slip by level (percent; never at the best level) */
+static int Slip(const uint8_t *byLevel) { return sLevel < 3 && Next() % 100 < byLevel[sLevel]; }
+static const uint8_t sPromoteOdd[3] = {50, 30, 16}, sHoldEvolve[3] = {45, 30, 16}, sHoldBench[3] = {35, 20, 9},
+                     sEnergyOff[3] = {55, 36, 20}, sHoldTrainer[3] = {45, 30, 16}, sWeakAttack[3] = {45, 28, 14};
 static int Legal(const struct TcgDuel *g, const struct TcgAction *a)
 {
     struct TcgDuel next = *g;
@@ -403,7 +436,15 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
     memset(a, 0, sizeof(*a));
     return 0;
 }
-int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
+static int Act(const struct TcgDuel *g, struct TcgAction *a);
+int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a) { return TcgDuel_AiActionLevel(g, 3, a); }
+int TcgDuel_AiActionLevel(const struct TcgDuel *g, unsigned level, struct TcgAction *a)
+{
+    sLevel = level > 3 ? 3 : level;
+    Seed(g);
+    return Act(g, a);
+}
+static int Act(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgPlayer *p;
     unsigned i, s, attack, bestAttack = TCG_NONE, bestScore = 0;
@@ -414,6 +455,20 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
     {
         a->type = TCG_PROMOTE;
         a->slot = BestPokemon(g, g->promotePlayer);
+        if (a->slot != TCG_NONE && Slip(sPromoteOdd))
+        {
+            /* (another one of the Bench) */
+            unsigned n = 0, s, pick;
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                n += TcgDuel_Field(g, g->promotePlayer, s) != NULL;
+            pick = n ? Next() % n : 0;
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, g->promotePlayer, s) && !pick--)
+                {
+                    a->slot = (uint8_t)s;
+                    break;
+                }
+        }
         return a->slot != TCG_NONE;
     }
     p = &g->players[g->current];
@@ -441,7 +496,7 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
     }
     /* Evolution precedes Energy attachment, so attachment choices use the final
      * attack costs. No random outcomes are examined when testing legality. */
-    if (g->phase == TCG_TURN)
+    if (g->phase == TCG_TURN && !Slip(sHoldEvolve))
         for (i = 0; i < p->handSize; i++)
         {
             const struct TcgCard *c = Tcg_Card(p->cards[p->hand[i]]);
@@ -456,7 +511,7 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
                     return 1;
             }
         }
-    for (i = 0; i < p->handSize; i++)
+    for (i = 0; i < p->handSize && (g->phase == TCG_SETUP || !Slip(sHoldBench)); i++)
     {
         const struct TcgCard *c = Tcg_Card(p->cards[p->hand[i]]);
         if (c->kind != TCG_POKEMON || c->stage)
@@ -477,8 +532,8 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
     }
     if (!p->energyPlayed)
     {
-        int bestHand = -1;
-        unsigned bestSlot = 0;
+        int bestHand = -1, nextHand = -1, nextScore = -100000;
+        unsigned bestSlot = 0, nextSlot = 0;
         int energyScore = -100000;
         for (i = 0; i < p->handSize; i++)
         {
@@ -507,12 +562,18 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
                 score -= 10 * TcgDuel_Energy(g, g->current, s, TCG_NONE);
                 if (bestHand < 0 || score > energyScore)
                 {
+                    if (bestHand >= 0 && bestSlot != s)
+                        nextHand = bestHand, nextSlot = bestSlot, nextScore = energyScore;
                     bestHand = i;
                     bestSlot = s;
                     energyScore = score;
                 }
+                else if (s != bestSlot && score > nextScore)
+                    nextHand = (int)i, nextSlot = s, nextScore = score;
             }
         }
+        if (nextHand >= 0 && Slip(sEnergyOff))
+            bestHand = nextHand, bestSlot = nextSlot;   /* (the second-best Pokemon) */
         if (bestHand >= 0)
         {
             a->type = TCG_ATTACH;
@@ -521,7 +582,7 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
             return 1;
         }
     }
-    for (i = 0; i < p->handSize; i++)
+    for (i = 0; i < p->handSize && !Slip(sHoldTrainer); i++)
         if (Tcg_Card(p->cards[p->hand[i]])->kind == TCG_TRAINER && TrainerAction(g, i, a))
             return 1;
     if (g->phase == TCG_TURN && PowerAction(g, a))
@@ -539,6 +600,9 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
             bestScore = score;
         }
     }
+    if (bestAttack != TCG_NONE && TcgDuel_CanAttack(g, g->current, bestAttack ^ 1) &&
+        TcgDuel_EffectSupported(TcgDuel_Field(g, g->current, 0)->attacks[bestAttack ^ 1].effect) && Slip(sWeakAttack))
+        bestAttack ^= 1;   /* (the other attack) */
     if (bestAttack != TCG_NONE && p->field[0].condition != TCG_ASLEEP && p->field[0].condition != TCG_PARALYZED &&
         !TcgDuel_NoAttack(g, g->current))
     {

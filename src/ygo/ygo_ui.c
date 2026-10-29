@@ -26,6 +26,7 @@
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "ygo_board.h"
+#include "ygo_internal.h"
 #include "ygo_gfx.h"
 #include "platform_text.h"
 
@@ -120,6 +121,11 @@ static struct
     uint16_t revealNew;
     int vs, aiDelay, autoPlay, rewarded;
     struct YgoOpponent opp;
+    uint8_t oppLevel;            /* (how well they play before a fit raises it) */
+    int8_t matchFor;             /* CARD SCALING: the deck the match below was worked out for (-1 none) */
+    uint16_t matchChance;
+    int16_t matchCards;
+    uint8_t matchLevel;
     struct YgoDuel duel;
     uint8_t duelShown;   /* duel is a view of the online duel's (Ygo_Online()->game): never freed from here */
     SDL_Texture *portrait;
@@ -272,6 +278,8 @@ static void ToSide(unsigned game)
     Ygo_ForgetTextures();
     Tcg_OpenCaseGame(game, callback, script);
 }
+static int DeckValid(unsigned d);
+static int MyRating(unsigned d);
 void YgoUi_OpenChallenge(const struct YgoOpponent *opponent)
 {
     Y.returnToGame = NULL;
@@ -280,6 +288,15 @@ void YgoUi_OpenChallenge(const struct YgoOpponent *opponent)
     Y.vs = opponent->online ? VS_FRIEND : VS_NPC;
     Open(Y_CHALLENGE);
     Y.cursor = C()->activeDeck;
+    Y.oppLevel = Y.opp.level;
+    Y.matchFor = -1;
+    /* CARD SCALING: the deck they bring fits the one in use (again for the one picked) */
+    if (Y.vs == VS_NPC && DeckValid(C()->activeDeck))
+    {
+        Ygo_FitOpponent(&Y.opp, MyRating(C()->activeDeck));
+        printf("[ygo] %s fits a deck rated %d (level %u) to yours %d\n", Y.opp.name, Y.opp.rating, Y.opp.level,
+               MyRating(C()->activeDeck));
+    }
     printf("[ygo] challenge: %s, special %u\n", Y.opp.name, Y.opp.special);
     ResolveNoDeck(0);
 }
@@ -369,6 +386,31 @@ static unsigned MainCountOf(const uint16_t *cards)
 static int DeckValid(unsigned d)
 {
     return Ygo_DeckValidate(Deck(d)->main, Deck(d)->extra, C()->owned, NULL, 0);
+}
+/* CARD SCALING: the player's strength with deck d (its rating, their record, counted as the SKILLED level) */
+static int MyRating(unsigned d) { return Ygo_DeckRating(Deck(d)->main) + C()->skill; }
+/* The opponent fitted to deck d (from how they first were) into o */
+static void FitFor(unsigned d, struct YgoOpponent *o)
+{
+    *o = Y.opp;
+    o->level = Y.oppLevel;
+    Ygo_FitOpponent(o, MyRating(d));
+}
+/* How the duel looks with deck d (worked out once per deck under the cursor: building a deck takes a moment) */
+static unsigned MatchFor(unsigned d, int *cards, unsigned *level)
+{
+    if (Y.matchFor != (int)d)
+    {
+        static struct YgoOpponent o;
+        FitFor(d, &o);
+        Y.matchFor = (int8_t)d;
+        Y.matchChance = (uint16_t)Ygo_Chance(MyRating(d) + Ygo_PlayerRating(), o.rating + Ygo_LevelRating(o.level));
+        Y.matchCards = (int16_t)(o.rating - Ygo_DeckRating(Deck(d)->main));
+        Y.matchLevel = o.level;
+    }
+    *cards = Y.matchCards;
+    *level = Y.matchLevel;
+    return Y.matchChance;
 }
 /* Someone wants a Yu-Gi-Oh! duel (or trade) with a player who has no deck for it: no Yu-Gi-Oh! cards at all gets a
  * Starter Deck to keep (what the CARD CLUB's duelist would give), cards but no deck ready one to borrow for this duel */
@@ -747,6 +789,12 @@ static void DuelStep(unsigned pressed, unsigned keys)
             FriendRewards(won);
         if (Y.vs == VS_NPC && !won)
             C()->losses++;
+        if (Y.vs == VS_NPC)
+        {
+            int mine = Ygo_DeckRating(Deck(C()->activeDeck)->main) + Ygo_PlayerRating();
+            Ygo_SkillResult(C(), mine, Y.opp.rating + Ygo_LevelRating(Y.opp.level), won);
+            printf("[ygo] skill %d after %u duels\n", C()->skill, C()->rated);
+        }
         if (Y.vs == VS_NPC && won)
             Rewards();
         else if (Y.vs == VS_NPC)
@@ -787,7 +835,11 @@ static void DuelStep(unsigned pressed, unsigned keys)
             Y.aiDelay--;
         else
         {
-            YgoDuel_AiAnswer(&Y.duel, &a);
+            /* the opponent at their level; the harness's autoplay for you at its best */
+            if (Y.duel.query.player == 1)
+                YgoDuel_AiAnswerLevel(&Y.duel, Y.opp.level, &a);
+            else
+                YgoDuel_AiAnswer(&Y.duel, &a);
             if (!YgoDuel_Answer(&Y.duel, &a))
             {
                 printf("[ygo] AI answer refused: %s\n", Y.duel.error);
@@ -977,7 +1029,16 @@ static void ChallengeScreen(void)
     }
     G_Text(6, y, G_INK, G_INK_SHADOW, Y.opp.name, 96, TF_SMALL);
     y += 12;
-    G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "YU-GI-OH!  8000 LP", 96, TF_NARROW);
+    /* how the duel looks with the deck under the cursor (CARD SCALING fits theirs to it) */
+    if (Y.vs == VS_NPC && Y.cursor < YGO_SAVED_DECKS && (DeckValid((unsigned)Y.cursor) || DeckValid(c->activeDeck)))
+    {
+        unsigned d = DeckValid((unsigned)Y.cursor) ? (unsigned)Y.cursor : c->activeDeck, lv;
+        int cards;
+        unsigned chance = MatchFor(d, &cards, &lv);
+        TcgUi_Match(6, y + 1, 92, chance, cards, (int)lv, 2);
+    }
+    else
+        G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "YU-GI-OH!  8000 LP", 96, TF_NARROW);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
     G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, "DUEL WITH", 0, TF_NARROW);
     Y.scroll = Y.cursor < 2 ? 0 : Y.cursor > YGO_SAVED_DECKS - 3 ? YGO_SAVED_DECKS - 4 : Y.cursor - 2;
@@ -2235,6 +2296,7 @@ static void Practice(void)
         StarterDeckOf(sStarters[pick], Y.opp.main, Y.opp.extra);
     }
     Y.opp.special = YGO_SPECIAL_NONE;
+    Y.opp.level = 1;   /* (a casual partner) */
     Y.vs = VS_PRACTICE;
     StartDuel(Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra, Y.opp.main, Y.opp.extra);
 }
@@ -2284,6 +2346,16 @@ static void ChooseDeck(void)
         Y.online = 1;
         Screen(Y_WAIT);
         return;
+    }
+    if (Y.vs == VS_NPC)
+    {
+        struct YgoOpponent *o = &Y.opp;
+        static struct YgoOpponent fitted;
+        FitFor(c->activeDeck, &fitted);
+        memcpy(o->main, fitted.main, sizeof(o->main));
+        memcpy(o->extra, fitted.extra, sizeof(o->extra));
+        o->rating = fitted.rating;
+        o->level = fitted.level;
     }
     StartDuel(Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra, Y.opp.main, Y.opp.extra);
 }
@@ -3369,6 +3441,13 @@ void Ygo_Debug(const char *command)
         Y.fromScript = 0;
         return;
     }
+    if (!strcmp(command, "stack"))
+    {
+        /* the next duels' Decks unshuffled: the last cards of the list are drawn first (tests) */
+        extern int gYgoEdoNoShuffle;
+        gYgoEdoNoShuffle = 1;
+        return;
+    }
     if (!strcmp(command, "practice"))
     {
         if (Y.screen == Y_CLOSED)
@@ -3403,12 +3482,13 @@ void Ygo_Debug(const char *command)
         c->owned[n] = (uint16_t)m;
         return;
     }
-    if (!strcmp(command, "giveall"))
+    if (!strcmp(command, "giveall") || sscanf(command, "giveall %u", &n) == 1)
     {
-        unsigned id;
+        /* every card (giveall N: at least N copies of each) */
+        unsigned id, want = strcmp(command, "giveall") ? n : 1;
         for (id = 1; id <= YGO_CARD_COUNT; id++)
-            if (!c->owned[id] && Ygo_CardReady(id))
-                c->owned[id] = 1;
+            if (c->owned[id] < want && Ygo_CardReady(id))
+                c->owned[id] = (uint16_t)want;
         return;
     }
     if (sscanf(command, "inspect %u", &n) == 1)

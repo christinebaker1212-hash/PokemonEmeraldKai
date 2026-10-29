@@ -124,6 +124,10 @@ static struct
     int concedeHeld;   /* online: a concession waiting for our last move's answer */
     int counterHome;   /* the counter the CARD SHOP list goes back to: UI_COUNTER or UI_GCSHOP */
     struct TcgOpponent opp;
+    int matchFor;             /* CARD SCALING: the deck the match on the challenge screen was worked out for (-1 none) */
+    uint16_t matchChance;
+    int16_t matchCards;
+    uint8_t matchLevel;
     struct TcgDuel duel;
     SDL_Texture *portrait;
     /* After a win: their deck's cards to choose from */
@@ -338,6 +342,7 @@ void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent)
     U.vs = VS_NPC;
     Open(UI_CHALLENGE);
     U.cursor = c->activeDeck;
+    U.matchFor = -1;
     printf("[tcg] challenge: %s, special %u\n", U.opp.name, U.opp.special);
 }
 void Tcg_OpenStarterReveal(void)
@@ -701,7 +706,8 @@ static void DuelStep(unsigned pressed, unsigned keys)
         if (U.vs == VS_NPC && U.opp.pool != TCG_SCALE_POOL_NONE && U.opp.rating)
         {
             struct TcgCollection *c = Tcg_GetCollection();
-            TcgScale_Result(c, U.opp.deckRating, U.opp.rating, U.duel.winner == 0);
+            TcgScale_Result(c, U.opp.deckRating + TcgScale_LevelRating(2), U.opp.rating + TcgScale_LevelRating(U.opp.level),
+                            U.duel.winner == 0);
             printf("[tcg] scaling learned: %s vs %d with a deck of %d, skill now %d after %u\n",
                    U.duel.winner == 0 ? "won" : "lost", U.opp.rating, U.opp.deckRating, c->skill, c->rated);
         }
@@ -733,7 +739,11 @@ static void DuelStep(unsigned pressed, unsigned keys)
             U.aiDelay--;
         else
         {
-            if (TcgDuel_AiAction(&U.duel, &a) && TcgDuel_Apply(&U.duel, &a) == TCG_OK)
+            /* the card player at their level; the harness's autoplay for you at its best */
+            unsigned who = U.duel.phase == TCG_PROMOTION ? U.duel.promotePlayer : U.duel.current;
+            unsigned level = who != 1 ? 3 : U.vs == VS_LESSON ? 0 : U.vs == VS_NPC && U.opp.pool != TCG_SCALE_POOL_NONE ? U.opp.level : 3;
+            if (TcgDuel_AiActionLevel(&U.duel, level, &a) &&
+                TcgDuel_Apply(&U.duel, &a) == TCG_OK)
                 U.aiDelay = Tcg_GetCollection()->fastAnimations ? 4 : 14;
             else
             {
@@ -1027,8 +1037,8 @@ void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsi
 void TcgUi_Hints(const char *hint) { Hints(hint); }
 
 /* How a match looks (all three card games): the player's chance in 1/1000 as a word and six pips (more lit: harder);
- * under it, taking turns, how their cards compare (cards: their edge in rating points) and how they play (level 0-3,
- * -1 unknown). Never a number. */
+ * under it, taking turns, how their cards compare with yours (cards: their edge in rating points) and how they play
+ * (level 0-3, -1 unknown). Never a number. */
 static unsigned MatchStep(unsigned chance)
 {
     return chance >= 760 ? 0 : chance >= 600 ? 1 : chance >= 440 ? 2 : chance >= 300 ? 3 : chance >= 180 ? 4 : 5;
@@ -1041,7 +1051,7 @@ const char *TcgUi_MatchWord(unsigned chance)
 void TcgUi_Match(int x, int y, int w, unsigned chance, int cards, int level, int rows)
 {
     static const unsigned colors[] = {0x2860c8, 0x3070b0, 0x387848, 0xc07020, 0xc03028, 0x901858};
-    static const char *const plays[] = {"PLAYS LIKE A BEGINNER", "PLAYS CASUALLY", "PLAYS WELL", "PLAYS LIKE AN EXPERT"};
+    static const char *const plays[] = {"PLAYS: BEGINNER", "PLAYS: CASUAL", "PLAYS: SKILLED", "PLAYS: EXPERT"};
     unsigned step = MatchStep(chance), i;
     const char *detail;
     G_Text(x, y, colors[step], G_NO_SHADOW, TcgUi_MatchWord(chance), 0, TF_NARROW);
@@ -1049,11 +1059,16 @@ void TcgUi_Match(int x, int y, int w, unsigned chance, int cards, int level, int
         G_RoundFill(x + w - 6 * 5 + (int)i * 5, y + 3, 4, 5, i <= step ? colors[step] : 0xb8bcc8, 255);
     if (rows < 2)
         return;
-    detail = cards > 150 ? "THEIR CARDS FAR BETTER" : cards > 50 ? "THEIR CARDS BETTER" : cards >= -50 ? "CARDS ABOUT EVEN"
-           : cards >= -150 ? "THEIR CARDS WEAKER" : "THEIR CARDS FAR WEAKER";
+    detail = cards > 150 ? "CARDS: FAR STRONGER" : cards > 50 ? "CARDS: STRONGER" : cards >= -50 ? "CARDS: EVEN"
+           : cards >= -150 ? "CARDS: WEAKER" : "CARDS: FAR WEAKER";
     if (level >= 0 && level <= 3 && (U.frame / 120) % 2)
         detail = plays[level];
-    G_Text(x, y + 8, 0x505868, G_NO_SHADOW, detail, w, TF_NARROW);
+    {
+        char cut[40];
+        snprintf(cut, sizeof(cut), "%s", detail);
+        TcgUi_FitText(cut, w, TF_NARROW);
+        G_Text(x, y + 8, 0x505868, G_NO_SHADOW, cut, 0, TF_NARROW);
+    }
 }
 void TcgUi_CaseTabs(unsigned game, unsigned color)
 {
@@ -1421,15 +1436,23 @@ static void ChallengeScreen(void)
         G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "PLAYS", 0, TF_NARROW);
         TypeOrbs(34, y + 2, U.opp.deck);
     }
-    /* CARD SCALING: how the duel looks for the deck in use and how you've been doing */
+    /* CARD SCALING: how the duel looks with the deck under the cursor (theirs fitted to it), and how you've been
+     * doing */
     if (U.vs == VS_NPC && U.opp.rating)
     {
-        unsigned e = TcgScale_Expected(U.opp.deckRating + c->skill, U.opp.rating);
-        static const char *const words[] = {"VERY TOUGH", "TOUGH", "EVEN", "EASY"};
-        static const unsigned colors[] = {0xc03028, 0xc07020, 0x387848, 0x3060b8};
-        unsigned w = e >= 600 ? 3 : e >= 420 ? 2 : e >= 280 ? 1 : 0;
-        G_Text(6, y + 12, 0x505868, G_NO_SHADOW, "MATCH", 0, TF_NARROW);
-        G_Text(34, y + 12, colors[w], G_NO_SHADOW, words[w], 0, TF_NARROW);
+        unsigned d = U.cursor < TCG_SAVED_DECKS && DeckValid((unsigned)U.cursor) ? (unsigned)U.cursor : c->activeDeck;
+        if (U.matchFor != (int)d)
+        {
+            static struct TcgOpponent o;
+            o = U.opp;
+            Tcg_FitOpponent(&o, DeckValid(d) ? c->decks[d].cards : NULL);
+            U.matchFor = (int)d;
+            U.matchChance = (uint16_t)TcgScale_Expected(o.deckRating + c->skill + TcgScale_LevelRating(2),
+                                                        o.rating + TcgScale_LevelRating(o.level));
+            U.matchCards = (int16_t)(o.rating - o.deckRating);
+            U.matchLevel = o.level;
+        }
+        TcgUi_Match(6, y + 10, 92, U.matchChance, U.matchCards, U.matchLevel, y + 10 + 15 <= 106 ? 2 : 1);
     }
     /* Your decks */
     ListBox(LIST_X, 4, LIST_W, 104);
@@ -4221,6 +4244,12 @@ void Tcg_Debug(const char *command)
         while (p->handSize)
             p->discard[p->discardSize++] = p->hand[--p->handSize];
         TcgBoard_Sync(&U.duel);
+        return;
+    }
+    if (sscanf(command, "seed %u", &n) == 1)
+    {
+        /* Harness helper: the collection's generator (the next duel's shuffle and coin come from it) */
+        c->rng = n ? n : 1;
         return;
     }
     if (!strcmp(command, "checkdone"))

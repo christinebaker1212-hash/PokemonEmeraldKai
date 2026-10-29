@@ -51,7 +51,11 @@ struct YgoCollection
     uint16_t ace[YGO_SAVED_DECKS];
     /* format 4: the Forbidden & Limited list the player's decks follow, by name ("": the game's own) */
     char banlist[32];
+    /* format 5: how the player does against the computer past what the decks say (rating points), games it learned from */
+    int16_t skill;
+    uint16_t rated;
 };
+#define YGO_SKILL_MAX 300
 
 void Ygo_CollectionInit(struct YgoCollection *c, uint32_t seed);
 int Ygo_CollectionLoad(struct YgoCollection *c, const char *path);

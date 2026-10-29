@@ -191,7 +191,11 @@ without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DEC
 
 The three card games share INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
 and challenge screens with the opponent's battle picture (tcg_field.c CaptureChallengePic): COOP_NOTES "The three card
-games together".
+games together". They also share AI levels 0-3 that slip like people (weighed by how much worse a choice looks; dice
+only from what both can see), hidden power ratings from AI duels blended with the cards' tournament history
+(tools/tt/rate_cards.sh, tools/ygo/rate_cards.sh, tools/tcg/rate_cards.sh: audits in docs/audit_*.txt; rerun after
+rules / AI / card changes), CARD SCALING fits with a slight player edge, and the challenge screen's live difficulty
+for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power ratings and how a match looks".
 
 Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
 XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->

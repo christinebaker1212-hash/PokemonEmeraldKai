@@ -275,6 +275,8 @@ unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned s
 void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int amount, unsigned flags);
 void TcgDuel_SelfDamage(struct TcgDuel *g, int amount);
 int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *action);
+/* ... at a level: 0 a beginner .. 3 its best (the same as TcgDuel_AiAction) */
+int TcgDuel_AiActionLevel(const struct TcgDuel *g, unsigned level, struct TcgAction *action);
 /* Internal, shared by the rules/effect modules. */
 void TcgDuel_Log(struct TcgDuel *g, const char *format, ...);
 void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned slot, unsigned value, unsigned card,

@@ -25,6 +25,11 @@ extern TCG_RATING_CONST int16_t gTcgVariantRating[];
 extern TCG_RATING_CONST uint8_t gTcgRatingReferences[];
 extern TCG_RATING_CONST unsigned gTcgRatingReferenceCount;
 
+/* What each AI level gives away against the best (tcg_levels.c, tools/tcg/rate_cards.sh), and the player counted
+ * as the SKILLED level until their record says more */
+extern const int16_t gTcgLevelRating[4];
+#define TcgScale_LevelRating(level) gTcgLevelRating[(level) > 3 ? 3 : (level)]
+
 /* One whole AI-against-AI duel: the winner (0 a, 1 b) or -1 when it never ended. */
 int TcgScale_Play(const uint16_t a[TCG_DECK_SIZE], const uint16_t b[TCG_DECK_SIZE], uint32_t seed);
 /* The chance a deck rated `rating` beats one rated `other`, in 1/1000. */

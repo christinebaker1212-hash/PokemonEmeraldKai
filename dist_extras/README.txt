@@ -1273,13 +1273,20 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   A CLEFAIRY DOLL or MYSTERIOUS FOSSIL in play can be
                   discarded from its menu.
   Card scaling    OPTIONS > GAME > CARD SCALING (ON at first): card players
-                  pick the deck of theirs that best fits yours, and learn
-                  from how your duels go, so a starter deck meets starter
-                  sized decks and a strong deck meets strong ones. Gym
-                  Leaders and other special trainers play a little above
-                  you, with their own deck or a version of it. The challenge
-                  says how the MATCH looks (EASY, EVEN, TOUGH, VERY TOUGH).
-                  OFF: decks get stronger with your badges instead.
+                  in all three card games bring a deck (or hand) that fits
+                  the one you pick, and learn from how your games go, so a
+                  starter deck meets starter sized decks and a strong deck
+                  meets strong ones. Most players come out a touch weaker
+                  than you; Gym Leaders and other special players are a real
+                  test, the CARD QUEEN more so. OFF: decks get stronger with
+                  your badges instead.
+  How it looks    The challenge screen shows how the game looks with the
+                  deck under the cursor, from VERY EASY to FEARSOME, with six
+                  pips, and below it, taking turns, how their cards compare
+                  with yours and how they play (BEGINNER, CASUAL, SKILLED,
+                  EXPERT). The computer never looks at your hidden cards and
+                  makes the kind of mistakes people do: the less skilled the
+                  player, the more often.
 Your cards are saved with your game (the save file's .cards file, kept with
 its backups). A few attacks aren't in the game yet; they show as not ready.
 
