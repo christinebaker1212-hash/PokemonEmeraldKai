@@ -1234,7 +1234,8 @@ static void ChallengeScreen(void)
         memset(&face, 0, sizeof(face));
         face.seat = TT_SEAT_RED;
         face.back = friend || !(U.rules & TT_RULE_BIT(TT_RULE_OPEN));
-        Tt_DrawCard(friend ? 1 : U.opp.hand[i], 50 + i * 8, 24 + (i % 2) * 3, 26, 32, 1, 1, 255, &face);
+        /* five 22x27 cards 6 apart: x 50-96, inside the box (6-98) */
+        Tt_DrawCard(friend ? 1 : U.opp.hand[i], 50 + i * 6, 27 + (i % 2) * 3, 22, 27, 1, 1, 255, &face);
     }
     y = 68;
     if (U.opp.title[0])

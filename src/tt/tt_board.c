@@ -1055,44 +1055,61 @@ static void DrawCells(void)
                     TT_BOARD_H * (1 + lift / 40), sx, sy, 255, &face);
     }
 }
+// Is hand card k of this side the one being looked at (drawn last, on top of the others)?
+static int HandPicked(int side, int k)
+{
+    if (B.phase != PH_PLAY)
+        return 0;
+    if (side == 0)
+        return (B.mode == M_HAND || B.mode == M_CELL) && k == B.slot && B.d->toMove == B.me;
+    return B.mode == M_THEIRS && k == B.theirSlot;
+}
+static void DrawHandCard(int side, unsigned seat, int k)
+{
+    struct TtFace face;
+    float x = HandX(side, k), y = HandY(k);
+    int up = B.faceUp[seat] >> k & 1, picked = HandPicked(side, k);
+    CardFace(&face, B.hand[seat][k], seat, -1);
+    face.back = !up;
+    if (picked && side == 0)
+    {
+        float pulse = 0.5f + 0.5f * sinf((float)B.frame * 0.2f);
+        Light(x + 20, y + 24, 34, Tt_SeatColor(0, 1), (unsigned)(90 + 80 * pulse), 1);
+    }
+    // ORDER / CHAOS: the card that must be played wears a gold edge
+    if (B.phase == PH_PLAY && B.d->forced < TT_HAND && seat == B.d->toMove && k == B.d->forced)
+        G_RoundFrame((int)x - 2, (int)y - 2, TT_BOARD_W + 4, TT_BOARD_H + 4, 0xf8d048,
+                     150 + (unsigned)(100 * sinf((float)B.frame * 0.2f)));
+    G_FillA((int)x + 2, (int)y + 3, TT_BOARD_W, TT_BOARD_H - 2, 0x000000, picked ? 110 : 70);
+    Tt_DrawCard(B.hand[seat][k], x, y, TT_BOARD_W, TT_BOARD_H, 1, 1, 255, &face);
+    if (picked && side == 1)
+        G_RoundFrame((int)x - 1, (int)y - 1, TT_BOARD_W + 2, TT_BOARD_H + 2, 0xffffff,
+                     150 + (unsigned)(100 * sinf((float)B.frame * 0.25f)));
+}
 static void DrawHands(void)
 {
     int side, k;
     for (side = 0; side < 2; side++)
     {
         unsigned seat = SeatOf(side);
+        int top = -1;
         // from the bottom of the column up: each card covers the top of the one below it, whose numbers (along
-        // its bottom edge, as in XIV) stay in sight
+        // its bottom edge, as in XIV) stay in sight; the card being looked at goes last, over its neighbours
         for (k = TT_HAND - 1; k >= 0; k--)
         {
-            struct TtFace face;
-            float x, y;
-            int up = B.faceUp[seat] >> k & 1, chosen;
             if (B.played[seat] >> k & 1 || !B.hand[seat][k])
                 continue;
             if (B.flying && B.flySeat == (int)seat && B.flySlot == k)
                 continue;
-            x = HandX(side, k);
-            y = HandY(k);
-            chosen = side == 0 && B.phase == PH_PLAY && (B.mode == M_HAND || B.mode == M_CELL) && k == B.slot &&
-                     B.d->toMove == B.me;
-            CardFace(&face, B.hand[seat][k], seat, -1);
-            face.back = !up;
-            if (chosen)
+            if (HandPicked(side, k))
             {
-                float pulse = 0.5f + 0.5f * sinf((float)B.frame * 0.2f);
-                Light(x + 20, y + 24, 34, Tt_SeatColor(0, 1), (unsigned)(90 + 80 * pulse), 1);
+                top = k;
+                continue;
             }
-            // ORDER / CHAOS: the card that must be played wears a gold edge
-            if (B.phase == PH_PLAY && B.d->forced < TT_HAND && seat == B.d->toMove && k == B.d->forced)
-                G_RoundFrame((int)x - 2, (int)y - 2, TT_BOARD_W + 4, TT_BOARD_H + 4, 0xf8d048,
-                             150 + (unsigned)(100 * sinf((float)B.frame * 0.2f)));
-            G_FillA((int)x + 2, (int)y + 3, TT_BOARD_W, TT_BOARD_H - 2, 0x000000, 70);
-            Tt_DrawCard(B.hand[seat][k], x, y, TT_BOARD_W, TT_BOARD_H, 1, 1, 255, &face);
-            if (side == 1 && B.mode == M_THEIRS && k == B.theirSlot && B.phase == PH_PLAY)
-                G_RoundFrame((int)x - 1, (int)y - 1, TT_BOARD_W + 2, TT_BOARD_H + 2, 0xffffff,
-                             150 + (unsigned)(100 * sinf((float)B.frame * 0.25f)));
+            DrawHandCard(side, seat, k);
         }
+        if (top >= 0)
+            DrawHandCard(side, seat, top);
     }
 }
 static void DrawFlying(void)
