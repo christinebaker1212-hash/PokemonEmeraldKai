@@ -13,6 +13,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
 - `include/mp.h`: shared co-op API. `src/mp/mp_net.h` holds the protocol (bump `MP_PROTOCOL_VERSION` on changes)
 - `tools/mp_server/`: standalone relay server
+- Moemon Music Studio (MIDI / rip player and song exporter) is on branch `claude/moemon-emerald-midi-player-sv25iy`,
+  not merged here yet: read `docs/MUSIC_STUDIO_BRANCH.md` before touching `tools/moemon_music/`
 - `src/platform/updater.c` + `tools/release/`: the auto-updater and releases. Publishing a version = bump
   `MOEMON_VERSION` (include/mp_version.h), add `tools/release/notes/v<ver>.md`, push to the default branch
   (.github/workflows/release.yml builds, tags and publishes; BUILDING_COOP.md). Sessions can't push tags.
