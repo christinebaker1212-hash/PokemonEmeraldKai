@@ -1697,6 +1697,13 @@ static void draw_defaults(void)
     ch |= choice(x + 20, ry, "Instruments", &d->ripGm, RG, V01, 2, 150);
     ry += 32;
     ch |= choice(x + 20, ry, "Game Boy songs", &d->gbToGba, GB, V01, 2, 150);
+    ry += 32;
+    {
+        static const char *const HF[] = {"On", "Off"};
+        static const int VHF[] = {1, 0};
+        ch |= choice(x + 20, ry, "Hi-Fi", &d->hifi, HF, VHF, 2, 150);
+        text(x + 512, ry + 2, "the 16-bit originals (off: the GBA's 8 bits)", C_DIM);
+    }
     ry += 40;
     text(x + 20, ry, "INSTRUMENTS", C_ACCENT);
     text(x + 130, ry, "sample instruments' envelope (Game Boy channels and drum kits keep theirs)", C_DIM);
@@ -1859,6 +1866,8 @@ int ui_main(int argc, char **argv)
     SDL_RenderSetLogicalSize(sRen, W, H);
     make_fonts();
     if (!getenv("MMS_SHOT")) apply_window_size();
+    if (getenv("MMS_SHOT_MODAL") && !strcmp(getenv("MMS_SHOT_MODAL"), "defaults"))
+        sModal = MODAL_DEFAULTS;   // (tests: the screenshot of the DEFAULTS panel)
 
     inst_init();
     studio_init(&S);

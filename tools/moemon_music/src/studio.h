@@ -44,6 +44,7 @@ typedef struct {
     int gbToGba;              // Game Boy rips: 1 = Convert GB > GBA
     int attack, decay, sustain, release;   // -1 or 0-255, for sample instruments (Game Boy ones keep theirs)
     int octave;               // every instrument but drum kits moves this many octaves (-4..4)
+    int hifi;                 // rips: 1 Hi-Fi (the originals in 16 bits), 0 the GBA's 8 bits
 } StudioDefaults;
 
 extern StudioDefaults g_defaults;

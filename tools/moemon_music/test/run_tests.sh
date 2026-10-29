@@ -63,6 +63,14 @@ for x, y in zip(a, b):
 assert up > 20 and same > 5, (up, same)    # melodic notes up, drum notes kept
 PY
 
+echo "== Defaults: Hi-Fi for rips (a tiny Game Boy song made here)"
+python3 test/make_test_gbs.py "$T/tiny.gbs"
+"$B" --save "$T/tiny.gbs" "$T/tiny.mmsproj"
+grep -q '^hifi=1$' "$T/tiny.mmsproj"                       # on unless the defaults say otherwise
+printf 'hifi=0\n' > "$T/hifi.ini"
+MMS_DEFAULTS="$T/hifi.ini" "$B" --save "$T/tiny.gbs" "$T/tiny_lofi.mmsproj"
+grep -q '^hifi=0$' "$T/tiny_lofi.mmsproj"
+
 # Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
 # PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
 # band, export a .kaisong the reader accepts and come back the same from its project.

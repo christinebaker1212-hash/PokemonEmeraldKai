@@ -152,22 +152,22 @@ int studio_rebuild(Studio *s)
 
 // ------------------------------------------------------------------ defaults
 
-StudioDefaults g_defaults = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0};
+StudioDefaults g_defaults = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0, 1};
 
 void defaults_reset(StudioDefaults *d)
 {
-    StudioDefaults z = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0};
+    StudioDefaults z = {-1, -1, -2, -1, -1, 0, 0, -1, -1, -1, -1, 0, 1};
     *d = z;
 }
 
 static const char *const DEF_KEYS[] = {"gba_accurate", "volume", "reverb", "balance", "drums_first", "rip_gm", "gb_to_gba",
-                                       "attack", "decay", "sustain", "release", "octave"};
-#define NUM_DEF_KEYS 12
+                                       "attack", "decay", "sustain", "release", "octave", "hifi"};
+#define NUM_DEF_KEYS 13
 
 static int *def_field(StudioDefaults *d, int i)
 {
     int *f[NUM_DEF_KEYS] = {&d->gbaAccurate, &d->volume, &d->reverb, &d->balance, &d->drumsFirst, &d->ripGm, &d->gbToGba,
-                            &d->attack, &d->decay, &d->sustain, &d->release, &d->octave};
+                            &d->attack, &d->decay, &d->sustain, &d->release, &d->octave, &d->hifi};
     return f[i];
 }
 
@@ -186,6 +186,7 @@ int defaults_load(StudioDefaults *d, const char *path)
     fclose(f);
     if (d->octave < -4) d->octave = -4;
     if (d->octave > 4) d->octave = 4;
+    d->hifi = d->hifi != 0;
     return 1;
 }
 
@@ -207,6 +208,8 @@ int studio_defaults_settings(Studio *s, const StudioDefaults *d)
     if (d->reverb >= -1 && p->reverb != d->reverb) { p->reverb = d->reverb; ch = 1; }
     if (d->balance >= 0 && p->balance != d->balance) { p->balance = d->balance; ch = 1; }
     if (d->drumsFirst >= 0 && p->drumsFirst != d->drumsFirst) { p->drumsFirst = d->drumsFirst; ch = 1; }
+    // rips: Hi-Fi or the GBA's own samples (GBA songs ripped from their ROM have nothing finer)
+    if (p->isRip && p->ripKind != RIP_GSF && p->hifi != d->hifi) { p->hifi = d->hifi; ch = 1; }
     return ch;
 }
 

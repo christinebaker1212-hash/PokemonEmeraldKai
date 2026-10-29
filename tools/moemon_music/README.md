@@ -124,8 +124,9 @@ game's `music` folder (in the repository: committed songs reach every player in 
 **Aa** (top right) picks the font (Pixel, or Smooth / Bold, which stay sharp at any window size)
 and the window size (fit the screen, 100-200%); both are remembered in the user's settings folder.
 **Defaults** (top right): settings every MIDI and rip you open starts with: GBA accurate, volume,
-reverb, even out volumes, drums first, rips' original or GM instruments, Convert GB > GBA, sample
-instruments' attack / decay / sustain / release and an octave for every instrument but drums.
+reverb, even out volumes, drums first, rips' original or GM instruments, Convert GB > GBA, rips' Hi-Fi
+(on at first: the 16-bit originals; off: the GBA's 8 bits), sample instruments' attack / decay /
+sustain / release and an octave for every instrument but drums.
 Each can stay "the song's". Saved projects keep their own; **Apply to this song** uses them now.
 They live in `defaults.ini` in the settings folder (the command line reads one from `MMS_DEFAULTS`).
 
