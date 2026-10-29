@@ -39,6 +39,8 @@
 #include "constants/songs.h"
 #include "constants/species.h"
 #include "constants/trainer_types.h"
+#include "gba/syscall.h"
+#include "constants/trainers.h"
 #include "tcg/integration.h"
 #include "tcg/npc.h"
 #include "tcg/card_ids.h"
@@ -524,6 +526,105 @@ static void CapturePortrait(struct TcgOpponent *o, struct ObjectEvent *npc)
     o->portraitH = h;
 }
 
+// The challenge screens show the opponent's trainer battle picture, cut to the window. Townsfolk without one
+// get the battle picture of the trainer they look most like.
+#define PIC(gfx, pic) [OBJ_EVENT_GFX_##gfx] = TRAINER_PIC_##pic + 1
+static const u8 sPicOfGfx[] = {
+    PIC(BRENDAN_NORMAL, BRENDAN), PIC(BRENDAN_MACH_BIKE, BRENDAN), PIC(BRENDAN_ACRO_BIKE, BRENDAN),
+    PIC(BRENDAN_SURFING, BRENDAN), PIC(BRENDAN_FIELD_MOVE, BRENDAN), PIC(RIVAL_BRENDAN_NORMAL, BRENDAN),
+    PIC(RIVAL_BRENDAN_MACH_BIKE, BRENDAN), PIC(RIVAL_BRENDAN_ACRO_BIKE, BRENDAN), PIC(LINK_BRENDAN, BRENDAN),
+    PIC(MAY_NORMAL, MAY), PIC(MAY_MACH_BIKE, MAY), PIC(MAY_ACRO_BIKE, MAY), PIC(MAY_SURFING, MAY),
+    PIC(MAY_FIELD_MOVE, MAY), PIC(RIVAL_MAY_NORMAL, MAY), PIC(RIVAL_MAY_MACH_BIKE, MAY),
+    PIC(RIVAL_MAY_ACRO_BIKE, MAY), PIC(LINK_MAY, MAY), PIC(LINK_RS_BRENDAN, RS_BRENDAN), PIC(LINK_RS_MAY, RS_MAY),
+    PIC(NINJA_BOY, NINJA_BOY), PIC(TWIN, TWINS), PIC(RICH_BOY, RICH_BOY), PIC(POKEFAN_F, POKEFAN_F),
+    PIC(POKEFAN_M, POKEFAN_M), PIC(EXPERT_M, EXPERT_M), PIC(EXPERT_F, EXPERT_F), PIC(CAMPER, CAMPER),
+    PIC(PICNICKER, PICNICKER), PIC(YOUNGSTER, YOUNGSTER), PIC(BUG_CATCHER, BUG_CATCHER), PIC(PSYCHIC_M, PSYCHIC_M),
+    PIC(SCHOOL_KID_M, SCHOOL_KID_M), PIC(MANIAC, POKEMANIAC), PIC(HEX_MANIAC, HEX_MANIAC), PIC(SWIMMER_M, SWIMMER_M),
+    PIC(SWIMMER_F, SWIMMER_F), PIC(BLACK_BELT, BLACK_BELT), PIC(BEAUTY, BEAUTY), PIC(LASS, LASS),
+    PIC(GENTLEMAN, GENTLEMAN), PIC(SAILOR, SAILOR), PIC(FISHERMAN, FISHERMAN),
+    PIC(RUNNING_TRIATHLETE_M, RUNNING_TRIATHLETE_M), PIC(RUNNING_TRIATHLETE_F, RUNNING_TRIATHLETE_F),
+    PIC(CYCLING_TRIATHLETE_M, CYCLING_TRIATHLETE_M), PIC(CYCLING_TRIATHLETE_F, CYCLING_TRIATHLETE_F),
+    PIC(TUBER_F, TUBER_F), PIC(TUBER_M, TUBER_M), PIC(TUBER_M_SWIMMING, TUBER_M), PIC(HIKER, HIKER),
+    PIC(AQUA_MEMBER_M, AQUA_GRUNT_M), PIC(AQUA_MEMBER_F, AQUA_GRUNT_F), PIC(MAGMA_MEMBER_M, MAGMA_GRUNT_M),
+    PIC(MAGMA_MEMBER_F, MAGMA_GRUNT_F), PIC(ARCHIE, AQUA_LEADER_ARCHIE), PIC(MAXIE, MAGMA_LEADER_MAXIE),
+    PIC(SIDNEY, ELITE_FOUR_SIDNEY), PIC(PHOEBE, ELITE_FOUR_PHOEBE), PIC(GLACIA, ELITE_FOUR_GLACIA),
+    PIC(DRAKE, ELITE_FOUR_DRAKE), PIC(ROXANNE, LEADER_ROXANNE), PIC(BRAWLY, LEADER_BRAWLY),
+    PIC(WATTSON, LEADER_WATTSON), PIC(FLANNERY, LEADER_FLANNERY), PIC(NORMAN, LEADER_NORMAN),
+    PIC(WINONA, LEADER_WINONA), PIC(LIZA, LEADER_TATE_AND_LIZA), PIC(TATE, LEADER_TATE_AND_LIZA),
+    PIC(JUAN, LEADER_JUAN), PIC(WALLACE, CHAMPION_WALLACE), PIC(STEVEN, STEVEN), PIC(WALLY, WALLY),
+    PIC(ANABEL, SALON_MAIDEN_ANABEL), PIC(TUCKER, DOME_ACE_TUCKER), PIC(GRETA, ARENA_TYCOON_GRETA),
+    PIC(SPENSER, PALACE_MAVEN_SPENSER), PIC(NOLAND, FACTORY_HEAD_NOLAND), PIC(LUCY, PIKE_QUEEN_LUCY),
+    PIC(BRANDON, PYRAMID_KING_BRANDON), PIC(RED, RED), PIC(LEAF, LEAF),
+    // the closest look-alikes
+    PIC(BOY_1, YOUNGSTER), PIC(BOY_2, SCHOOL_KID_M), PIC(BOY_3, CAMPER), PIC(GIRL_1, LASS), PIC(GIRL_2, PICNICKER),
+    PIC(GIRL_3, SCHOOL_KID_F), PIC(LITTLE_BOY, TUBER_M), PIC(LITTLE_BOY_3, TUBER_M), PIC(LITTLE_GIRL, TUBER_F),
+    PIC(GAMEBOY_KID, YOUNGSTER), PIC(QUINTY_PLUMP, POKEMANIAC), PIC(FAT_MAN, POKEFAN_M), PIC(WOMAN_1, LADY),
+    PIC(WOMAN_2, COOLTRAINER_F), PIC(WOMAN_3, AROMA_LADY), PIC(WOMAN_4, PARASOL_LADY), PIC(WOMAN_5, POKEMON_BREEDER_F),
+    PIC(MAN_1, COOLTRAINER_M), PIC(MAN_2, GUITARIST), PIC(MAN_3, POKEMON_BREEDER_M), PIC(MAN_4, GENTLEMAN),
+    PIC(MAN_5, BIRD_KEEPER), PIC(OLD_MAN, EXPERT_M), PIC(OLD_WOMAN, EXPERT_F), PIC(HOT_SPRINGS_OLD_WOMAN, EXPERT_F),
+    PIC(COOK, GENTLEMAN), PIC(BARD, GUITARIST), PIC(ARTIST, GENTLEMAN), PIC(REPORTER_M, INTERVIEWER),
+    PIC(REPORTER_F, INTERVIEWER), PIC(CAMERAMAN, INTERVIEWER), PIC(SCIENTIST_1, COLLECTOR), PIC(SCIENTIST_2, COLLECTOR),
+    PIC(DEVON_EMPLOYEE, COOLTRAINER_M), PIC(PROF_BIRCH, GENTLEMAN), PIC(MOM, POKEFAN_F), PIC(SCOTT, GENTLEMAN),
+    PIC(MYSTERY_GIFT_MAN, GENTLEMAN), PIC(CONTEST_JUDGE, GENTLEMAN), PIC(TEALA, LADY), PIC(ROOFTOP_SALE_WOMAN, LADY),
+    PIC(NURSE, LADY), PIC(UNION_ROOM_NURSE, LADY), PIC(MART_EMPLOYEE, COOLTRAINER_M),
+    PIC(LINK_RECEPTIONIST, LADY),
+};
+#undef PIC
+
+static const u8 *NpcScript(const struct ObjectEvent *npc)
+{
+    u8 i;
+    if (!gMapHeader.events)
+        return NULL;
+    for (i = 0; i < gMapHeader.events->objectEventCount; i++)
+        if (gMapHeader.events->objectEvents[i].localId == npc->localId)
+            return gMapHeader.events->objectEvents[i].script;
+    return NULL;
+}
+
+// A battle picture (TRAINER_PIC_*, the co-op slots too) as 64x64 ARGB
+static bool8 DecodeTrainerPic(struct TcgOpponent *o, u16 pic)
+{
+    static u8 tiles[TRAINER_PIC_SIZE];
+    u16 pal[16];
+    int x, y;
+    if (pic > TRAINER_PIC_MP_OPPONENT || !gTrainerFrontPicTable[pic].data || !gTrainerFrontPicPaletteTable[pic].data)
+        return FALSE;
+    LZ77UnCompWram(gTrainerFrontPicTable[pic].data, tiles);
+    LZ77UnCompWram(gTrainerFrontPicPaletteTable[pic].data, pal);
+    for (y = 0; y < 64; y++)
+        for (x = 0; x < 64; x++)
+        {
+            u8 c = tiles[((y / 8) * 8 + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+            u16 rgb;
+            c = (x & 1) ? c >> 4 : c & 15;
+            rgb = pal[c];
+            o->portrait[y * 64 + x] = !c ? 0 : 0xFF000000u | (u32)((rgb & 31) * 255 / 31) << 16
+                                    | (u32)(((rgb >> 5) & 31) * 255 / 31) << 8 | (u32)(((rgb >> 10) & 31) * 255 / 31);
+        }
+    o->portraitW = o->portraitH = 64;
+    return TRUE;
+}
+
+// The challenge screen's picture of someone on the map: their battle picture, else their sprite
+static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
+{
+    const u8 *script = NpcScript(npc);
+    u16 pic = 0xFFFF;
+    if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle
+    {
+        u16 id = script[2] | script[3] << 8;
+        if (id < TRAINERS_COUNT)
+            pic = gTrainers[id].trainerPic;
+    }
+    if (pic == 0xFFFF && npc->graphicsId < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[npc->graphicsId])
+        pic = sPicOfGfx[npc->graphicsId] - 1;
+    printf("[tcg] challenge picture: graphics %u, trainer picture %d\n", npc->graphicsId, pic == 0xFFFF ? -1 : pic);
+    if (pic != 0xFFFF && DecodeTrainerPic(o, pic))
+        return;
+    CapturePortrait(o, npc);
+}
+
 // The portrait of someone on the map, for the other card games' screens (Triple Triad's CARD QUEEN)
 void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h)
 {
@@ -538,11 +639,14 @@ void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8
     memcpy(pixels, o->portrait, sizeof(o->portrait));
 }
 
-// A friend's portrait: their avatar on the map, if it's on screen
+// A friend's portrait: their look's battle picture, else their avatar on the map if it's on screen
 void Tcg_PortraitOfPlayer(unsigned id, struct TcgOpponent *o)
 {
     u8 objectId = MP_GetRemoteObjectEventId(id);
+    u16 pic = MP_Avatar_RemoteFrontPic((u8)id);
     o->portraitW = o->portraitH = 0;
+    if (pic != 0xFFFF && DecodeTrainerPic(o, pic))
+        return;
     if (objectId < OBJECT_EVENTS_COUNT && gObjectEvents[objectId].active)
         CapturePortrait(o, &gObjectEvents[objectId]);
 }
@@ -820,7 +924,7 @@ static void Task_CardChallenge(u8 taskId)
             break;
         ObjectEventClearHeldMovementIfFinished(npc);
         FreezeObjectEvent(npc);
-        CapturePortrait(&sOpponent, npc);
+        CaptureChallengePic(&sOpponent, npc);
         HideMapNamePopUpWindow();
         MP_ShowFieldMessageFitted(sLine);
         tState++;

@@ -1,7 +1,7 @@
 #!/bin/bash
 # The card screens with real keys on the normal build: the CARD CLUB (the case, a first
 # deck, the teaching duel), a challenge with the registered CARD CASE (win, take a card of
-# their deck), the duel's B and CONCEDE, the deck builder and the counter.
+# their deck), the duel's B and CONCEDE on the deck, the deck builder and the counter.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 REPO=$PWD
@@ -107,12 +107,13 @@ quit
 SCRIPT
 run challenge
 expect challenge 'asked MANIAC: duel'
+expect challenge 'challenge picture: graphics [0-9]*, trainer picture [0-9]'   # their battle picture, cut to the window
 expect challenge 'victory vs MANIAC: pack 3'
 expect challenge 'took card'
 expect challenge 'screen 0 opted 1 .* wins 1 .* packs 0001'
 echo 'PASS a challenge with the registered CARD CASE: a win, a booster and one card of their deck'
 
-# The duel: B asks to end the turn (never concedes), CONCEDE asks first.
+# The duel: B opens the turn menu (END TURN only: never concedes); A on your deck has CONCEDE, which asks first.
 cat > "$OUT/duel.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 100
@@ -133,10 +134,12 @@ rendershot turnmenu
 press B 2
 wait 6
 mp cards state
-press B 2
+mp cards focus 3 0
 wait 6
-press DOWN 2
-wait 4
+rendershot deckhover
+press A 2
+wait 6
+rendershot deckmenu
 press A 2
 wait 6
 rendershot concede
@@ -153,13 +156,15 @@ mp cards state
 quit
 SCRIPT
 run duel
-expect duel 'turn menu: END TURN, CONCEDE'
+expect duel 'turn menu: END TURN'
+expect duel 'deck menu: CONCEDE'
+refuse duel 'turn menu: END TURN, CONCEDE'
 expect duel 'board asks: Concede this duel'
 refuse duel 'board asks: End your turn?'
 expect duel 'board asks: End your turn without attaching Energy'
 test "$(grep -c 'screen 10 opted 1 phase 1 current 0' "$OUT/duel/log.txt")" -ge 3
 expect duel 'screen 10 opted 1 phase 1 current 1'
-echo 'PASS the turn menu: B opens it on END TURN, CONCEDE asks first, END TURN ends the turn (only the Energy reminder asks)'
+echo 'PASS the turn menu: B opens it on END TURN, A on the deck has CONCEDE (it asks first), END TURN ends the turn (only the Energy reminder asks)'
 
 # The deck builder: take a CHARMANDER out of the deck (the list, then SELECT on the cards), add it back;
 # copy the deck, delete the one you duel with (the copy takes over).

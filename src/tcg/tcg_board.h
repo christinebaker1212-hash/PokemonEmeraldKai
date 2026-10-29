@@ -41,6 +41,7 @@ void TcgBoard_Sync(const struct TcgDuel *truth);
 int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *action, unsigned *card);
 /* True once everything that happened has been shown: the AI waits for it. */
 int TcgBoard_Idle(void);
+void TcgBoard_TestFx(unsigned kind);
 void TcgBoard_SetWaiting(int waiting);
 void TcgBoard_Reject(const char *message);
 void TcgBoard_Result(const char *message);

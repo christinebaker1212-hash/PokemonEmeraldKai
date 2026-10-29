@@ -31,6 +31,7 @@
 #include "global.h"
 #include "platform/gamepad.h"
 #include "platform/fight.h"
+#include "tcg/integration.h"
 
 #define MAX_PADS 4
 #define STICK_DEAD   0.45f   // walking
@@ -627,6 +628,14 @@ u16 Gamepad_Poll(int *fastForward)
         default:
             if (buttons & west)  keys |= B_BUTTON;
             if (buttons & north) keys |= SELECT_BUTTON;
+            // The card games: RT is INSPECT, and LT's tapping A stays off (it would play cards on its own)
+            if (Tcg_IsActive())
+            {
+                if (rt > TRIGGER_ON)
+                    keys |= PLATFORM_KEY_INSPECT;
+                sTurbo = 0;
+                break;
+            }
             // LT held: tap A over and over to get through text (not while it holds a quick pick open)
             if (lt > TRIGGER_ON && sQuickTrigger != 0)
             {

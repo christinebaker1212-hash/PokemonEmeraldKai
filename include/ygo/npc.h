@@ -15,7 +15,7 @@ struct YgoOpponent
     uint8_t special, set, online, lesson;   /* set: the booster a win gives (YGO_SET_COUNT: any) */
     uint8_t tcgSpecial;     /* the ELITE FOUR: their old Pokemon card deck (TCG_SPECIAL_*), whose promo a win hands over */
     uint8_t portraitW, portraitH;
-    uint32_t portrait[32 * 32];  /* their sprite as they faced you, ARGB */
+    uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };
 #define YGO_SPECIAL_NONE 0xFF
 

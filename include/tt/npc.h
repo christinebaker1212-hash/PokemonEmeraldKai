@@ -40,7 +40,7 @@ struct TtOpponent
     uint16_t music;
     uint8_t special, level, region, online, lesson;
     uint8_t portraitW, portraitH;
-    uint32_t portrait[32 * 32];
+    uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };
 
 /* Today's hand for a player of `region` (h: who they are) at a strength (0-3, from the badges) */

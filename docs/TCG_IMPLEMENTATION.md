@@ -56,7 +56,8 @@ last, GBA keys on a keyboard), and online duels between players must keep workin
   one BENCH label, Prizes as overlapping 2x3 stacks. Mats per opponent: `TCG_MAT_*` themes
   (classic, trainer kinds, gym by type, Elite Four, Team Magma / Aqua, Frontier, online).
   The opponent's cards are turned toward them. B leaves the hand, then asks "End your
-  turn?" (it never concedes); the END TURN button is CONCEDE, with a confirm. A drawn
+  turn?" (it never concedes); CONCEDE is only on your own deck (A there opens it, with a confirm), in the
+Yu-Gi-Oh! table too (5.2). A drawn
   Prize card is held up in the middle ("PRIZE CARD"); Trainers that change the hand
   (PROFESSOR OAK, BILL...) slide the hand up; after a Knock Out the cursor waits on the
   Bench. Tips in the first duels (`TcgBoard_Tutorial`).

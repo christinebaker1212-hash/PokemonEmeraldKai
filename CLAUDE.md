@@ -33,7 +33,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
   through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments
   and engine (ported from src/music_player.c etc.; check engine changes against it), exports `.kaisong` songs
-  (docs/KAISONG_FORMAT.md: format and the plan for loading them, not in the game yet) and decomp sources. `make test` there
+  (docs/KAISONG_FORMAT.md; the game plays them: src/mp/mp_kaisong.c) and decomp sources. `make test` there
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
@@ -180,6 +180,10 @@ duels / trades with friends by answers over relay types 8-13 (ygo_net.c, struct 
 goes to, YgoAnswer.zone), deck menus with RENAME / ACE CARD / DECK RECIPES on both card games (COOP_NOTES "Deck menus"), a Starter Deck to keep or
 borrow for anyone asked without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md,
 COOP_NOTES "Yu-Gi-Oh!"; tests tools/ygo/test.sh, tools/ygo/test_ui.sh, scenarios ygo_*).
+
+The three card games share INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
+and challenge screens with the opponent's battle picture (tcg_field.c CaptureChallengePic): COOP_NOTES "The three card
+games together".
 
 Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
 XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->

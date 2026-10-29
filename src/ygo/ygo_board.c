@@ -36,7 +36,8 @@ enum
     KEY_UP = 64,
     KEY_DOWN = 128,
     KEY_R = 256,
-    KEY_L = 512
+    KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 #define NONE 0xFF
 
@@ -193,6 +194,7 @@ static struct
     struct Spot spots[SPOTS];
     int spotCount;
     int menuItems[16], menuCount, menuCursor, menuObj;
+    uint8_t deckMenu;   /* the phase menu opened on your deck: only CONCEDE, beside the deck */
     int zoneItem, zoneSpell;   /* M_ZONE: the menu's choice, and Spell & Trap Zones (1) or Monster Zones (0) */
     int pickPrefer;            /* a pick on the table: the item the cursor starts on (PreferredPick) */
     int windowItems[YGO_QUERY_MAX + 1], windowCount, windowCursor;
@@ -921,7 +923,7 @@ static void NewQuestion(void)
             Tip("Your Battle Phase: choose one of your monsters with {A} to attack. {B} opens the menu: Main Phase 2 "
                 "or END TURN.");
         else
-            Tip("Your Main Phase: choose a card with {A} to Summon, Set or activate it. {R} looks at a card. {B} opens "
+            Tip("Your Main Phase: choose a card with {A} to Summon, Set or activate it. {INSPECT} looks at a card. {B} opens "
                 "the menu: the Battle Phase or END TURN.");
         break;
     case YGO_Q_CARDS:
@@ -1408,11 +1410,13 @@ static int OpenPhaseMenu(void)
         for (i = 0; i < q->count && B.menuCount < 15; i++)
             if (q->items[i].obj == NONE)
                 B.menuItems[B.menuCount++] = (int)i;
-    B.menuItems[B.menuCount++] = -2;   /* CONCEDE */
+    B.deckMenu = 0;
+    if (!B.menuCount)
+        return 0;   /* (not your move: nothing to choose; CONCEDE is A on your deck) */
     /* The cursor where the turn most likely goes: the Battle Phase when a monster can attack in it; from the Battle
      * Phase with every attack made, MAIN PHASE 2 when a card in the hand can be played there; else END TURN */
     B.menuCursor = 0;
-    for (i = 0; i + 1 < (unsigned)B.menuCount; i++)
+    for (i = 0; i < (unsigned)B.menuCount; i++)
     {
         unsigned kind = q->items[B.menuItems[i]].kind;
         if (kind == YGO_ACT_END_TURN)
@@ -1620,7 +1624,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
             MoveCursor(pressed);
         cur = CurrentSpot();
-        if (pressed & KEY_R)
+        if (pressed & KEY_INSPECT)
         {
             unsigned id = SpotCard(cur);
             if (id)
@@ -1633,13 +1637,24 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         /* START / SELECT / B: the turn menu (as on the Pokemon table) */
         if (pressed & (KEY_START | KEY_SELECT | KEY_B))
         {
-            PlaySE(SE_SELECT);
-            OpenPhaseMenu();
+            PlaySE(OpenPhaseMenu() ? SE_SELECT : SE_FAILURE);
             return YB_NONE;
         }
         if (pressed & KEY_A && cur >= 0)
         {
             const struct Spot *s = &B.spots[cur];
+            if (s->kind == SP_PILE && s->index == PILE_DECK && !s->side)
+            {
+                /* your deck: CONCEDE (asks first) */
+                B.menuCount = 1;
+                B.menuItems[0] = -2;
+                B.menuCursor = 0;
+                B.deckMenu = 1;
+                B.mode = M_PHASE;
+                PlaySE(SE_SELECT);
+                printf("[ygo] deck menu: CONCEDE\n");
+                return YB_NONE;
+            }
             if (s->kind == SP_PILE)
             {
                 uint8_t list[YGO_OBJS];
@@ -1676,7 +1691,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             PlaySE(SE_SELECT);
             return YB_NONE;
         }
-        if (pressed & KEY_R && B.menuObj < (int)B.objCount)
+        if (pressed & KEY_INSPECT && B.menuObj < (int)B.objCount)
         {
             *card = T()->objs[B.menuObj].card;
             return YB_INSPECT;
@@ -1715,7 +1730,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             PlaySE(SE_SELECT);
             return YB_NONE;
         }
-        if (pressed & KEY_R && B.menuObj < (int)B.objCount)
+        if (pressed & KEY_INSPECT && B.menuObj < (int)B.objCount)
         {
             *card = T()->objs[B.menuObj].card;
             return YB_INSPECT;
@@ -1776,7 +1791,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
             MoveCursor(pressed);
         cur = CurrentSpot();
-        if (pressed & KEY_R && SpotCard(cur))
+        if (pressed & KEY_INSPECT && SpotCard(cur))
         {
             *card = SpotCard(cur);
             return YB_INSPECT;
@@ -1824,7 +1839,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.gridCursor += cols, PlaySE(SE_SELECT);
         if (B.mode == M_PILE)
         {
-            if (pressed & (KEY_A | KEY_R))
+            if (pressed & (KEY_A | KEY_INSPECT))
             {
                 *card = T()->objs[B.pileList[B.gridCursor]].card;
                 return YB_INSPECT;
@@ -1836,7 +1851,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             }
             return YB_NONE;
         }
-        if (pressed & KEY_R)
+        if (pressed & KEY_INSPECT)
         {
             unsigned o = q->items[B.gridCursor].obj;
             if (o < B.objCount)
@@ -1876,7 +1891,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.windowCursor = (B.windowCursor + B.windowCount - 1) % B.windowCount, PlaySE(SE_SELECT);
         if (pressed & KEY_DOWN)
             B.windowCursor = (B.windowCursor + 1) % B.windowCount, PlaySE(SE_SELECT);
-        if (pressed & KEY_R)
+        if (pressed & KEY_INSPECT)
         {
             int item = B.windowItems[B.windowCursor];
             unsigned o = item >= 0 ? q->items[item].obj : NONE;
@@ -2055,16 +2070,7 @@ static float AttackReach(float t)
         return 0.7f * (1 - k) * (1 - k);
     }
 }
-static void Circle(int cx, int cy, float r, unsigned color, unsigned alpha)
-{
-    int i;
-    for (i = 0; i < 20; i++)
-    {
-        float a0 = i * 0.31416f, a1 = (i + 1) * 0.31416f;
-        G_Line(cx + (int)(SDL_cosf(a0) * r), cy + (int)(SDL_sinf(a0) * r), cx + (int)(SDL_cosf(a1) * r),
-               cy + (int)(SDL_sinf(a1) * r), color, alpha);
-    }
-}
+#define Circle G_Circle
 /* Four corner brackets round a box, turned by angle (radians) about its middle */
 static void Brackets(float cx, float cy, float hw, float hh, float angle, int len, unsigned color, unsigned alpha)
 {
@@ -2318,14 +2324,21 @@ static void Gap(void)
         switch (B.mode)
         {
         case M_FREE:
-            hint = "{A}ACT {R}LOOK {B}MENU";
-            break;
         case M_WATCH:
-            hint = B.waiting ? "Waiting..." : "{R}LOOK {B}MENU";
+        {
+            int cur = CurrentSpot(), onDeck = cur >= 0 && B.spots[cur].kind == SP_PILE && B.spots[cur].index == PILE_DECK &&
+                                              !B.spots[cur].side;
+            if (B.mode == M_WATCH && B.waiting)
+                hint = "Waiting...";
+            else if (onDeck)
+                hint = "{A}CONCEDE {B}MENU";
+            else
+                hint = B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {B}MENU" : "{INSPECT}LOOK {B}MENU";
             break;
+        }
         case M_PICK_FIELD:
         case M_PICK_GRID:
-            hint = q->max > 1 ? "{A}PICK {START}DONE" : q->min ? "{A}CHOOSE {R}LOOK" : "{A}CHOOSE {B}NONE";
+            hint = q->max > 1 ? "{A}PICK {START}DONE" : q->min ? "{A}CHOOSE {INSPECT}LOOK" : "{A}CHOOSE {B}NONE";
             break;
         case M_PILE:
             hint = "{A}LOOK {B}BACK";
@@ -2334,11 +2347,20 @@ static void Gap(void)
             hint = "{A}PUT IT HERE {B}BACK";
             break;
         default:
-            hint = "{A}OK {R}LOOK";
+            hint = "{A}OK {INSPECT}LOOK";
             break;
         }
         G_Hint(238 - G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW, hint, TF_NARROW, 1);
     }
+}
+/* a pick's number, as the Pokemon card table draws it */
+static void PickBadge(int x, int y, int n)
+{
+    char num[4];
+    snprintf(num, sizeof(num), "%d", n);
+    G_RoundFill(x, y, 11, 11, 0x184890, 255);
+    G_RoundFrame(x, y, 11, 11, 0xf8f8f8, 255);
+    G_Digits(x + 4, y + 3, num, 0, 1, G_WHITE, 255);
 }
 static void Highlights(void)
 {
@@ -2356,7 +2378,7 @@ static void Highlights(void)
                 int set = kind == YGO_ACT_SET_MONSTER || kind == YGO_ACT_SET_SPELL;
                 Ygo_DrawCard(set ? 0 : T()->objs[B.menuObj].card, (float)s->r.x, (float)s->r.y, (float)s->r.w,
                              (float)s->r.h, kind == YGO_ACT_SET_MONSTER ? 90 : 0, 150 + 60 * pulse, 0);
-                G_Frame(s->r.x - 2, s->r.y - 2, s->r.w + 4, s->r.h + 4, 0xf86850, 255);
+                G_Focus(s->r.x, s->r.y, s->r.w, s->r.h, G_FOCUS_TARGET, B.frame);
             }
             else
                 G_Frame(s->r.x - 1, s->r.y - 1, s->r.w + 2, s->r.h + 2, 0xf0d040, 140 + 80 * pulse);
@@ -2380,17 +2402,12 @@ static void Highlights(void)
             const struct Spot *s = &B.spots[i];
             int k = s->item >= 0 ? Picked(s->item) : 0;
             float breathe = 1.5f + 1.5f * SDL_sinf(B.frame * 0.15f + i);
-            if (i == cur || k)
+            if (k)
                 Brackets(s->r.x + s->r.w / 2.0f, s->r.y + s->r.h / 2.0f, s->r.w / 2.0f + 2 + breathe,
-                         s->r.h / 2.0f + 2 + breathe, 0, 4, k ? 0x40a0ff : 0xff5040, 255);
+                         s->r.h / 2.0f + 2 + breathe, 0, 4, 0x40a0ff, 255);
             G_Frame(s->r.x - 1, s->r.y - 1, s->r.w + 2, s->r.h + 2, k ? 0x40a0ff : 0xf0d040, 200);
             if (k)
-            {
-                char line[4];
-                snprintf(line, sizeof(line), "%d", k);
-                G_RoundFill(s->r.x - 2, s->r.y - 2, 8, 9, 0x2060c0, 255);
-                G_Digits(s->r.x, s->r.y, line, 0, 1, 0xffffff, 255);
-            }
+                PickBadge(s->r.x + s->r.w - 9, s->r.y - 3, k);
         }
     if (B.mode == M_FREE && MyQuestion())
     {
@@ -2414,8 +2431,9 @@ static void Highlights(void)
     if (cur >= 0 && (B.mode == M_FREE || B.mode == M_WATCH || B.mode == M_PICK_FIELD || B.mode == M_MENU))
     {
         const struct Spot *s = &B.spots[cur];
-        int y = s->r.y - (s->kind == SP_HAND ? 4 : 0), o = (int)pulse;
-        G_Frame(s->r.x - 2 - o, y - 2 - o, s->r.w + 4 + 2 * o, s->r.h + 4 + 2 * o, 0xe82820, 255);
+        int y = s->r.y - (s->kind == SP_HAND ? 4 : 0);
+        /* the card tables' one cursor (G_Focus), yellow while choosing */
+        G_Focus(s->r.x, y, s->r.w, s->r.h, B.mode == M_PICK_FIELD ? G_FOCUS_TARGET : G_WHITE, B.frame);
     }
 }
 static void Fxs(void)
@@ -2623,7 +2641,7 @@ static void Menus(void)
             rows[i] = B.menuItems[i] == -2 ? "CONCEDE" : KindLabel(&q->items[B.menuItems[i]]);
         x = 140;
         y = 160 - (B.menuCount * 14 + 8) - 34;
-        if (B.mode == M_MENU && cur >= 0)
+        if ((B.mode == M_MENU || B.deckMenu) && cur >= 0)
         {
             const struct Spot *s = &B.spots[cur];
             x = s->r.x + s->r.w + 4;
@@ -2729,17 +2747,11 @@ static void Grid(void)
             Ygo_DrawCard(SeesFace(o) || B.mode == M_PICK_GRID ? T()->objs[o].card : 0, (float)x, (float)y, 30, 42, 0, 255, 0);
         if (mark)
         {
-            char line[4];
-            snprintf(line, sizeof(line), "%d", mark);
             G_Frame(x - 1, y - 1, 32, 44, 0x40a0ff, 255);
-            G_RoundFill(x - 2, y - 2, 9, 10, 0x2060c0, 255);
-            G_Digits(x, y, line, 0, 1, 0xffffff, 255);
+            PickBadge(x + 30 - 9, y - 3, mark);
         }
         if (on)
-        {
-            int p = (B.frame / 8) % 2;
-            G_Frame(x - 2 - p, y - 2 - p, 34 + 2 * p, 46 + 2 * p, 0xe82820, 255);
-        }
+            G_Focus(x, y, 30, 42, B.mode == M_PICK_GRID ? G_FOCUS_TARGET : G_WHITE, B.frame);
     }
     if (count > page)
     {
@@ -2763,9 +2775,9 @@ static void Grid(void)
             G_Text(8, 129, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
             G_Hint(8, 152, 0xe0e0ff, G_NO_SHADOW,
                    B.mode == M_PILE ? "{A} LOOK  {B} BACK"
-                   : q->max > 1     ? "{A} PICK  {START} DONE  {R} LOOK"
-                   : q->min         ? "{A} CHOOSE  {R} LOOK"
-                                    : "{A} CHOOSE  {B} NONE  {R} LOOK",
+                   : q->max > 1     ? "{A} PICK  {START} DONE  {INSPECT} LOOK"
+                   : q->min         ? "{A} CHOOSE  {INSPECT} LOOK"
+                                    : "{A} CHOOSE  {B} NONE  {INSPECT} LOOK",
                    TF_NARROW, 1);
         }
     }

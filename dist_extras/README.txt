@@ -1215,12 +1215,14 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
   On the table    The same buttons as the Yu-Gi-Oh! table. The D-Pad moves
                   over the table itself. A on a card shows what you can do
                   with it (ATTACK, RETREAT and PKMN POWER on your Pokemon); a
-                  card you play floats over the spaces it can go. R looks at
-                  a card up close. B closes the hand, then opens the turn
-                  menu (START and SELECT open it too): END TURN (READY while
-                  setting up) and CONCEDE, which asks first and ends the duel
-                  at once (a loss, online too). START or SELECT finishes
-                  picking several cards.
+                  card you play floats over the spaces it can go. R2 (the
+                  right trigger; D on the keyboard) looks at a card up close,
+                  in every card game's screens. B closes the hand, then opens
+                  the turn menu (START and SELECT open it too): END TURN
+                  (READY while setting up). To give up, A on your own deck:
+                  CONCEDE asks first and ends the duel at once (a loss,
+                  online too). START or SELECT finishes picking several
+                  cards.
   Card faces      The bottom row of a POKEMON card shows, as printed, its
                   weakness (left), resistance (middle) and retreat cost
                   (right, a dot for each Energy) in the same dots as the
@@ -1308,9 +1310,10 @@ of the Starter Decks, Legend of Blue Eyes White Dragon and Metal Raiders.
                   stronger with your badges.
   On the table    The same buttons as the POKEMON table: the D-Pad moves over
                   the table; A on a card shows what it can do (SUMMON, SET,
-                  ACTIVATE, ATTACK...), R looks at a card up close, and B,
-                  START or SELECT opens the turn menu (the next phase, END
-                  TURN, CONCEDE) with END TURN chosen. When you
+                  ACTIVATE, ATTACK...), R2 (D on the keyboard) looks at a
+                  card up close, and B, START or SELECT opens the turn menu
+                  (the next phase, END TURN) with END TURN chosen. A on
+                  your own deck offers CONCEDE. When you
                   can answer with a Trap or Quick-Play Spell, the game asks
                   "Activate a card?" (B passes). It asks when something
                   happens (a summon, an attack, a card activated); hold L
@@ -1371,8 +1374,9 @@ FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
                   badges, and change from day to day.
   On the table    Your hand on the left, theirs on the right. UP / DOWN picks
                   a card, A (or RIGHT) takes it to the board, the D-Pad picks
-                  a square and A plays it; B goes back. R looks at a card up
-                  close (theirs too, when you can see it). B on your hand,
+                  a square and A plays it; B goes back. R2 (D on the
+                  keyboard) looks at a card up close (theirs too, when you
+                  can see it). B on your hand,
                   START or SELECT opens the turn menu (RULES, CONCEDE).
   Rules           OPEN, SAME, PLUS, SAME WALL, RANDOM, SUDDEN DEATH and
                   ELEMENTAL (some squares carry a card type: +1 for that

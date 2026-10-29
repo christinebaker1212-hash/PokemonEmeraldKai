@@ -3,7 +3,7 @@
 MODE=1
 TMO=600
 WARP=10,3,6,9
-python3 "$REPO/tools/test/scenarios/fight_music/tones.py" pack /tmp/moemon_tests/fight_music_pack
-ENV_A="MOEMON_FIGHT_SYNC=1 MOEMON_AUDIO_DUMP=/tmp/moemon_tests/fight_music/audio.raw MOEMON_MUGEN_DIR=/tmp/moemon_tests/fight_music_pack"
+python3 "$REPO/tools/test/scenarios/fight_music/tones.py" pack $OUT/fight_music_pack
+ENV_A="MOEMON_FIGHT_SYNC=1 MOEMON_AUDIO_DUMP=$OUT/fight_music/audio.raw MOEMON_MUGEN_DIR=$OUT/fight_music_pack"
 EXPECT_A=("fight: result")
 CHECK="tools/test/scenarios/fight_music/tones.py"

@@ -274,7 +274,7 @@ static void ReadKeys(void)
 #ifndef PORTABLE
     u16 keyInput = REG_KEYINPUT ^ KEYS_MASK;
 #else
-    u16 keyInput = Platform_GetKeyInput();
+    u16 keyInput = Platform_GetKeyInput() & KEYS_MASK;   // Moemon Kai: (the card games' INSPECT bit is theirs)
 #endif
     // Moemon Co-op: the BACKWARDS CONTROLS prank swaps the D-pad for a while
     if (MP_Prank_BackwardsActive())

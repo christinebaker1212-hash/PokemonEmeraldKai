@@ -22,7 +22,8 @@ u16 GetCurrentMapMusic(void);
 enum
 {
     KEY_A = 1, KEY_B = 2, KEY_SELECT = 4, KEY_START = 8, KEY_RIGHT = 16, KEY_LEFT = 32, KEY_UP = 64, KEY_DOWN = 128,
-    KEY_R = 256, KEY_L = 512
+    KEY_R = 256, KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 enum { PH_OFF, PH_DEAL, PH_RULES, PH_SPIN, PH_PLAY, PH_EVENTS, PH_END };
 enum { M_HAND, M_CELL, M_THEIRS };
@@ -670,7 +671,7 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
         B.bannerT = 0;
     if (B.inspect)
     {
-        if (pressed & (KEY_A | KEY_B | KEY_R))
+        if (pressed & (KEY_A | KEY_B | KEY_INSPECT))
         {
             B.inspect = 0;
             PlaySE(SE_SELECT);
@@ -816,7 +817,7 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
         PlaySE(SE_WIN_OPEN);
         return TB_NONE;
     }
-    if (pressed & KEY_R)
+    if (pressed & KEY_INSPECT)
     {
         if (B.mode == M_CELL && B.cell[B.cellCursor].card)
             OpenInspect(B.cell[B.cellCursor].card, B.cell[B.cellCursor].owner);

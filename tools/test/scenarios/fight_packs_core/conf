@@ -4,8 +4,8 @@ MODE=2
 TMO=300
 WARP=10,3,6,9
 WARP_B=10,3,9,9
-python3 "$REPO/tools/test/scenarios/fight_packs/mkpack.py" /tmp/moemon_tests/fight_packs_core_pack core
-ENV_B="MOEMON_MUGEN_DIR=/tmp/moemon_tests/fight_packs_core_pack"
+python3 "$REPO/tools/test/scenarios/fight_packs/mkpack.py" $OUT/fight_packs_core_pack core
+ENV_B="MOEMON_MUGEN_DIR=$OUT/fight_packs_core_pack"
 EXPECT_A=("fight: player 1's fight files aren't ours")
 EXPECT_B=("fight: player 0 can't fight now (their fight files aren't ours)")
 UNEXPECT_A=("fight: online with")

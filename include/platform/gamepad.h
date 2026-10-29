@@ -68,6 +68,10 @@ int Gamepad_Count(void);
 int Gamepad_TriggerHeld(int right);        // LT/Q (0) or RT/E (1) held: a controller trigger or the keyboard key
 void Gamepad_SetKeyHold(int which, int held);
 // Which button icons to show: the last used controller's, or the keyboard's (the GBA buttons)
+// Moemon Kai: the card games' INSPECT button (a card up close): the right trigger (RT / R2 / ZR), or D on the
+// keyboard. A bit past the GBA's ten keys in Platform_GetKeyInput; the game itself never sees it (main.c ReadKeys).
+#define PLATFORM_KEY_INSPECT 0x0800
+
 enum { GAMEPAD_ICONS_KEYBOARD, GAMEPAD_ICONS_NINTENDO, GAMEPAD_ICONS_PLAYSTATION, GAMEPAD_ICONS_XBOX };
 // OPTIONS > CONTROLS > BUTTON ICONS: AUTO (the device used last) or always one set
 enum { GAMEPAD_ICONSET_AUTO, GAMEPAD_ICONSET_KEYBOARD, GAMEPAD_ICONSET_XBOX, GAMEPAD_ICONSET_PLAYSTATION, GAMEPAD_ICONSET_NINTENDO,

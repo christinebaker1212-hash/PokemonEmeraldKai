@@ -78,6 +78,10 @@ int G_Text(int x, int y, unsigned color, unsigned shadow, const char *text, int 
 void G_TextAlign(int x, int y, int align, unsigned color, unsigned shadow, const char *text, int font);
 void G_Window(int x, int y, int w, int h);
 void G_Cursor(int x, int y);
+void G_Circle(int cx, int cy, float r, unsigned color, unsigned alpha);
+void G_PicCut(SDL_Texture *tex, const uint32_t *px, int x, int y, int w, int h);
+#define G_FOCUS_TARGET 0xf8f070
+void G_Focus(int x, int y, int w, int h, unsigned color, unsigned frame);
 void G_Arrow(int x, int y, int dir, unsigned rgb); /* 0 up 1 down 2 left 3 right, 7x4 */
 /* Pixel digits: size 0 = 3x5, 1 = 5x7. Characters 0-9, H P x + - / %. */
 int G_DigitsWidth(const char *s, int size, int scale);

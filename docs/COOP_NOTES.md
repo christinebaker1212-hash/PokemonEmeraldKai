@@ -2142,6 +2142,29 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
   move, the timeout), scenarios tt_online (+ tools/test/check_tt_online.sh: the same game on both) and tt_trade.
 - Not done: tournaments.
 
+## The three card games together (1.45.0)
+What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like one game.
+- INSPECT: PLATFORM_KEY_INSPECT (0x800, past the GBA's ten keys; main.c masks gMain keys to KEYS_MASK so the game
+  never sees it). The right trigger sets it while a card screen is up (gamepad.c, Tcg_IsActive; the trigger's turbo
+  is off then), D on the keyboard (sdl2.c), INSPECT in test scripts. The card files read it as KEY_INSPECT (2048);
+  R and START stay what they were (pages, menus). Hints write {INSPECT}: the RT/R2/ZR icon on a controller, a drawn
+  "D" keycap on the keyboard (tcg_gfx.c G_BUTTON_INSPECT).
+- CONCEDE lives on your own deck in the POKéMON and Yu-Gi-Oh! duels (tcg_board.c OpenDeckMenu, ygo_board.c deckMenu;
+  logs "deck menu: CONCEDE"); the B / START turn menu no longer has it. The deck's tooltip shows the counts and
+  "{A} CONCEDE". Triple Triad keeps it in its turn menu.
+- One cursor: G_Focus (tcg_gfx.c), the POKéMON table's corner brackets stepping out every 8 frames, white, yellow
+  (G_FOCUS_TARGET) while choosing. The Yu-Gi-Oh! table and its card lists use it; picks carry the POKéMON table's
+  numbered badge. Menus share TcgUi_Row and the red G_Frame card cursor; Triple Triad's game table keeps its own.
+- Challenge pictures: tcg_field.c CaptureChallengePic: a trainer's TRAINER_PIC (from its trainerbattle script),
+  else sPicOfGfx (the overworld graphics' own or look-alike picture), else the map sprite as before; a friend gets
+  MP_Avatar_RemoteFrontPic. Stored 64x64 in the opponents' portrait (portraitW 64 = a battle picture) and drawn by
+  G_PicCut: 1x, cut to the window, framed on the top of the figure. Logs "challenge picture: graphics G, trainer
+  picture P". The CARD QUEEN's own screen keeps her map sprite.
+- The deck card on the CARD CASE's first screen floats the same in all three (whole pixels over a still shadow).
+- Effects shared by the tables: G_Circle; the POKéMON table got the Yu-Gi-Oh! table's FX_IMPACT (an attack's damage),
+  FX_SHARDS (a Knock Out) and FX_RISE (a Basic put into play), run beside the existing waits, none longer.
+  `mp cards fx 0/1/2` plays one on their Active.
+
 ## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
 Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
 drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to

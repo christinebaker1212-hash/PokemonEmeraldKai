@@ -114,7 +114,8 @@ void S_RoundFrame(struct GSurface *s, int x, int y, int w, int h, int radius, ui
     for (j = 0; j < h; j++)
         for (i = 0; i < w; i++)
             if (Corner(i, j, w, h, radius, &edge) && edge)
-                S_Px(s, x + i, y + j, argb);
+                S_Blend(s, x + i, y + j, argb & 0xffffff, argb >> 24);   /* (blended: a see-through line never
+                                                                            punches a hole in what's under it) */
 }
 void S_RoundFill(struct GSurface *s, int x, int y, int w, int h, int radius, uint32_t argb)
 {
@@ -475,6 +476,82 @@ void G_Window(int x, int y, int w, int h)
             SDL_RenderCopy(sR, sWindowFrame, &src, &dst);
         }
 }
+/* The card tables' cursor, shared by the three games: corner brackets with a shadow that step out and back
+   every 8 frames. White, or yellow (G_FOCUS_TARGET) while picking a target. */
+void G_Focus(int x, int y, int w, int h, unsigned color, unsigned frame)
+{
+    int o = (frame / 8) % 2 + 1, len = 4, x0 = x - o - 1, y0 = y - o - 1, x1 = x + w + o, y1 = y + h + o;
+    unsigned shadow = 0x102010;
+    G_Fill(x0 + 1, y0 + 1, len, 1, shadow);
+    G_Fill(x0 + 1, y0 + 1, 1, len, shadow);
+    G_Fill(x1 - len + 1, y0 + 1, len, 1, shadow);
+    G_Fill(x1 + 1, y0 + 1, 1, len, shadow);
+    G_Fill(x0 + 1, y1 + 1, len, 1, shadow);
+    G_Fill(x0 + 1, y1 - len + 2, 1, len, shadow);
+    G_Fill(x1 - len + 1, y1 + 1, len + 1, 1, shadow);
+    G_Fill(x1 + 1, y1 - len + 2, 1, len, shadow);
+    G_Fill(x0, y0, len, 1, color);
+    G_Fill(x0, y0, 1, len, color);
+    G_Fill(x1 - len + 1, y0, len, 1, color);
+    G_Fill(x1, y0, 1, len, color);
+    G_Fill(x0, y1, len, 1, color);
+    G_Fill(x0, y1 - len + 1, 1, len, color);
+    G_Fill(x1 - len + 1, y1, len, 1, color);
+    G_Fill(x1, y1 - len + 1, 1, len, color);
+}
+/* A 64x64 battle picture cut to a window: the face and shoulders, centred on the figure's top */
+void G_PicCut(SDL_Texture *tex, const uint32_t *px, int x, int y, int w, int h)
+{
+    SDL_Rect src, dst;
+    int top = 64, left = 64, right = -1, i, j;
+    for (j = 0; j < 64 && top == 64; j++)
+        for (i = 0; i < 64; i++)
+            if (px[j * 64 + i] >> 24)
+            {
+                top = j;
+                break;
+            }
+    if (top == 64)
+        return;
+    for (j = top; j < top + 28 && j < 64; j++)
+        for (i = 0; i < 64; i++)
+            if (px[j * 64 + i] >> 24)
+            {
+                if (i < left)
+                    left = i;
+                if (i > right)
+                    right = i;
+            }
+    if (w > 64)
+        w = 64;
+    if (h > 64)
+        h = 64;
+    src.w = dst.w = w;
+    src.h = dst.h = h;
+    src.x = (left + right + 1) / 2 - w / 2;
+    src.y = top - 3;
+    if (src.x < 0)
+        src.x = 0;
+    if (src.x > 64 - w)
+        src.x = 64 - w;
+    if (src.y < 0)
+        src.y = 0;
+    if (src.y > 64 - h)
+        src.y = 64 - h;
+    dst.x = x;
+    dst.y = y;
+    SDL_RenderCopy(sR, tex, &src, &dst);
+}
+void G_Circle(int cx, int cy, float r, unsigned color, unsigned alpha)
+{
+    int i;
+    for (i = 0; i < 20; i++)
+    {
+        float a0 = i * 0.31416f, a1 = (i + 1) * 0.31416f;
+        G_Line(cx + (int)(SDL_cosf(a0) * r), cy + (int)(SDL_sinf(a0) * r), cx + (int)(SDL_cosf(a1) * r),
+               cy + (int)(SDL_sinf(a1) * r), color, alpha);
+    }
+}
 void G_Cursor(int x, int y)
 {
     int row;
@@ -789,6 +866,9 @@ struct ButtonTex
     SDL_Texture *texture;
 };
 static struct ButtonTex sButtons[24];
+/* {INSPECT}: the card games' look-closer button. A controller's right trigger (RT / R2 / ZR); on the keyboard, D. */
+#define G_BUTTON_INSPECT 0xFE
+static const u8 sKeyD[7] = {0x1E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1E};   /* 5x7 "D", top row first, bit 4 = left */
 static int ButtonKey(unsigned id, int light)
 {
     return (int)id | Gamepad_IconFamily() << 8 | Gamepad_EffectiveNintendoLayout() << 12 | light << 13;
@@ -820,8 +900,24 @@ static struct ButtonTex *Button(unsigned id, int light)
     s = G_SurfaceNew(32, 16);
     if (!s.px)
         return NULL;
-    w = MP_ButtonIcon_ToPixels((u8)id, buf, 32, 0, 0, sButtonClass, 1, 2);
-    if (w)
+    if (id == G_BUTTON_INSPECT && Gamepad_IconFamily() == 0 /* GAMEPAD_ICONS_KEYBOARD */)
+    {
+        /* a key cap with a D on it, the size of the GBA's A / B buttons' neighbours */
+        w = 11;
+        for (y = 0; y < 11; y++)
+            for (x = 0; x < w; x++)
+            {
+                int corner = (x == 0 || x == w - 1) && (y == 0 || y == 10);
+                int edge = x == 0 || x == w - 1 || y == 0 || y == 10;
+                int letter = x >= 3 && x < 8 && y >= 2 && y < 9 && (sKeyD[y - 2] >> (7 - x) & 1);
+                if (corner)
+                    continue;
+                S_Px(&s, x, y + 1, ARGB(letter ? mark : edge ? (light ? 0x9090a0 : 0x505058) : body, 255));
+            }
+        top = 1;
+        bottom = 11;
+    }
+    else if ((w = MP_ButtonIcon_ToPixels((u8)(id == G_BUTTON_INSPECT ? CHAR_MP_RT : id), buf, 32, 0, 0, sButtonClass, 1, 2)) != 0)
     {
         for (y = 0; y < 16; y++)
             for (x = 0; x < 32; x++)
@@ -903,7 +999,7 @@ static int HintToken(const char *s, unsigned *id)
                   {"{UP}", CHAR_DPAD_UP},           {"{DOWN}", CHAR_DPAD_DOWN},
                   {"{LEFT}", CHAR_DPAD_LEFT},       {"{RIGHT}", CHAR_DPAD_RIGHT},
                   {"{UPDOWN}", CHAR_DPAD_UPDOWN},   {"{LEFTRIGHT}", CHAR_DPAD_LEFTRIGHT},
-                  {"{DPAD}", CHAR_DPAD_NONE}};
+                  {"{DPAD}", CHAR_DPAD_NONE},       {"{INSPECT}", G_BUTTON_INSPECT}};
     unsigned i;
     for (i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++)
         if (!strncmp(s, tokens[i].name, strlen(tokens[i].name)))

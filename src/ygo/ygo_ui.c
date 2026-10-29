@@ -60,7 +60,8 @@ enum
     KEY_UP = 64,
     KEY_DOWN = 128,
     KEY_R = 256,
-    KEY_L = 512
+    KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 enum
 {
@@ -874,6 +875,11 @@ static void Portrait(int x, int y)
     }
     if (!Y.portrait)
         return;
+    if (Y.opp.portraitW == 64)   /* their battle picture, cut to the window beside their card */
+    {
+        G_PicCut(Y.portrait, Y.opp.portrait, 8, 22, 48, 42);
+        return;
+    }
     dst.x = x - Y.opp.portraitW;
     dst.y = y - Y.opp.portraitH * 2;
     dst.w = Y.opp.portraitW * 2;
@@ -1140,7 +1146,7 @@ static void AceScreen(void)
     }
     else
         Strip(0, "This deck has no cards to choose from.");
-    TcgUi_Hints("{A} MAKE IT THE ACE  {R} LOOK  {B} BACK");
+    TcgUi_Hints("{A} MAKE IT THE ACE  {INSPECT} LOOK  {B} BACK");
 }
 
 #define GRID_COLS 5
@@ -1223,8 +1229,8 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
-    TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE"
-                       : "{A} ADD  {SELECT} TAKE OUT  {START} LOOK  {B} DONE");
+    TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE"
+                       : "{A} ADD  {SELECT} TAKE OUT  {INSPECT} LOOK  {B} DONE");
 }
 
 static void BinderScreen(void)
@@ -1274,7 +1280,7 @@ static void BinderScreen(void)
         snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Ygo_Card(id)->name : "",
                  Ygo_PointCost(id), Points(), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {START} LOOK  {B} BACK");
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {B} BACK");
         return;
     }
     if (Y.showAll == GC_BINDER)
@@ -1286,7 +1292,7 @@ static void BinderScreen(void)
             snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Ygo_Card(id)->name : "",
                      Ygo_MoneyPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {START} LOOK  {B} BACK");
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {B} BACK");
         return;
     }
     line[0] = 0;
@@ -1600,7 +1606,7 @@ static void SpoilsScreen(void)
         snprintf(line, sizeof(line), "%s\nYou own %u.", c ? c->name : "", c ? C()->owned[c->id] : 0);
         Strip(0, line);
     }
-    TcgUi_Hints("{A} TAKE  {START} LOOK");
+    TcgUi_Hints("{A} TAKE  {INSPECT} LOOK");
 }
 
 /* The CARD CLUB duelist's counter: TRADE IN spares for CARD POINTS (shared with the Pokemon cards), the CARD SHOP */
@@ -1743,7 +1749,7 @@ static void StarterScreen(void)
                  blurbs[Y.cursor]);
         Strip(0, line);
     }
-    TcgUi_Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {START} LOOK");
+    TcgUi_Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {INSPECT} LOOK");
 }
 
 /* ------------------------------------------------------------------ */
@@ -2562,7 +2568,7 @@ int YgoUi_Step(unsigned keys)
             Screen(Y_DECKS);
             Y.cursor = Y.deck;
         }
-        else if (pressed & KEY_R && n)
+        else if (pressed & KEY_INSPECT && n)
             Inspect(list[Y.cursor], Y_ACE);
         else if (pressed & KEY_A && n)
         {
@@ -2615,7 +2621,7 @@ int YgoUi_Step(unsigned keys)
                     Say(ACT_NONE, "There's no %s in this deck.", Ygo_Card(id)->name);
                 }
             }
-            if (pressed & KEY_START && n)
+            if (pressed & (KEY_START | KEY_INSPECT) && n)
                 Inspect(ListCard(Y.cursor), Y_BUILDER);
         }
         else
@@ -2642,7 +2648,7 @@ int YgoUi_Step(unsigned keys)
                 if (Y.deckCursor >= (int)listed)
                     Y.deckCursor = listed ? (int)listed - 1 : 0;
             }
-            if (pressed & KEY_START && listed)
+            if (pressed & (KEY_START | KEY_INSPECT) && listed)
                 Inspect(list[Y.deckCursor], Y_BUILDER);
         }
         if (pressed & KEY_B)
@@ -2722,7 +2728,7 @@ int YgoUi_Step(unsigned keys)
             else
                 Inspect(id, Y_BINDER);
         }
-        else if (pressed & KEY_START && n)
+        else if (pressed & (KEY_START | KEY_INSPECT) && n)
             Inspect(ListCard(Y.cursor), Y_BINDER);
         break;
     }
@@ -2740,7 +2746,7 @@ int YgoUi_Step(unsigned keys)
             Y.screen = Y_ART;
             PlaySE(SE_SELECT);
         }
-        else if (pressed & (KEY_B | KEY_START | KEY_R))
+        else if (pressed & (KEY_B | KEY_START | KEY_INSPECT))
         {
             int cursor = Y.cursor;
             PlaySE(SE_SELECT);

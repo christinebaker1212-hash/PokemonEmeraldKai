@@ -69,7 +69,8 @@ enum
     KEY_UP = 64,
     KEY_DOWN = 128,
     KEY_R = 256,
-    KEY_L = 512
+    KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 /* What a duel is: a card player on the map, practice, the CARD CLUB's lesson, a friend. */
 enum
@@ -1339,6 +1340,11 @@ static void Portrait(int x, int y)
     }
     if (!U.portrait)
         return;
+    if (U.opp.portraitW == 64)   /* their battle picture, cut to the window beside their card */
+    {
+        G_PicCut(U.portrait, U.opp.portrait, 8, 22, 48, 42);
+        return;
+    }
     dst.x = x - U.opp.portraitW;
     dst.y = y - U.opp.portraitH * 2;
     dst.w = U.opp.portraitW * 2;
@@ -1683,7 +1689,7 @@ static void AceScreen(void)
     }
     else
         Strip(0, "This deck has no cards to choose from.");
-    Hints("{A} MAKE IT THE ACE  {R} LOOK  {B} BACK");
+    Hints("{A} MAKE IT THE ACE  {INSPECT} LOOK  {B} BACK");
 }
 
 /* The builder starts on the deck's main type (Pokemon first). */
@@ -1774,7 +1780,7 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
-    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {START} LOOK  {B} DONE" : "{A} ADD  {SELECT} TAKE OUT  {START} LOOK  {B} DONE");
+    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE" : "{A} ADD  {SELECT} TAKE OUT  {INSPECT} LOOK  {B} DONE");
 }
 
 /* The GAME CENTER CARD SHOP sold its one copy of this single */
@@ -2160,7 +2166,7 @@ static void SpoilsScreen(void)
         snprintf(line, sizeof(line), "%s\nYou own %u.", c ? c->name : "", c ? Tcg_GetCollection()->owned[c->id] : 0);
         Strip(0, line);
     }
-    Hints("{A} TAKE  {START} LOOK");
+    Hints("{A} TAKE  {INSPECT} LOOK");
 }
 
 /* The CARD CLUB's counter: TRADE IN spare cards for CARD POINTS, spend them, prizes. */
@@ -2519,7 +2525,7 @@ static void StarterScreen(void)
     if (t >= STARTER_READY)
     {
         Strip(sStarterIds[U.starterChoice], sStarterNotes[U.starterChoice]);
-        Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {START} LOOK");
+        Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {INSPECT} LOOK");
     }
 }
 
@@ -3319,7 +3325,7 @@ int Tcg_Step(unsigned keys)
             Screen(UI_DECKS);
             U.cursor = U.deck;
         }
-        else if (pressed & KEY_R && n)
+        else if (pressed & KEY_INSPECT && n)
             Inspect(list[U.cursor], UI_ACE);
         else if (pressed & KEY_A && n)
         {
@@ -3373,7 +3379,7 @@ int Tcg_Step(unsigned keys)
                     Say(ACT_NONE, "There's no %s in this deck.", Tcg_Card(id)->name);
                 }
             }
-            if (pressed & KEY_START && n)
+            if (pressed & (KEY_START | KEY_INSPECT) && n)
                 Inspect(ListCard(U.cursor), UI_BUILDER);
         }
         else
@@ -3405,7 +3411,7 @@ int Tcg_Step(unsigned keys)
                 if (DeckList(U.deck, list) <= (unsigned)U.deckCursor && U.deckCursor)
                     U.deckCursor--;
             }
-            else if (pressed & KEY_START)
+            else if (pressed & (KEY_START | KEY_INSPECT))
                 Inspect(list[U.deckCursor], UI_BUILDER);
         }
         if (pressed & KEY_B)
@@ -3445,7 +3451,7 @@ int Tcg_Step(unsigned keys)
                 else
                     Ask(ACT_GC_CARD, (int)id, "%s for \xa5%u?", Tcg_Card(id)->name, price);
             }
-            if (pressed & KEY_START && ListSize())
+            if (pressed & (KEY_START | KEY_INSPECT) && ListSize())
                 Inspect(ListCard(U.cursor), UI_BINDER);
             if (pressed & KEY_B)
             {
@@ -3469,7 +3475,7 @@ int Tcg_Step(unsigned keys)
                 else
                     Ask(ACT_BUY, 1000 + (int)id, "%s for %u CP?", Tcg_Card(id)->name, cost);
             }
-            if (pressed & KEY_START && ListSize())
+            if (pressed & (KEY_START | KEY_INSPECT) && ListSize())
                 Inspect(ListCard(U.cursor), UI_BINDER);
             if (pressed & KEY_B)
             {
@@ -3488,7 +3494,7 @@ int Tcg_Step(unsigned keys)
             U.cursor = 0;
             PlaySE(SE_SELECT);
         }
-        if (pressed & (KEY_A | KEY_START) && ListSize())
+        if (pressed & (KEY_A | KEY_START | KEY_INSPECT) && ListSize())
             Inspect(ListCard(U.cursor), UI_BINDER);
         if (pressed & KEY_B)
         {
@@ -3512,7 +3518,7 @@ int Tcg_Step(unsigned keys)
             U.screen = UI_ART;
             U.zoom = U.panX = U.panY = 0;
         }
-        else if (pressed & (KEY_B | KEY_START | KEY_R))
+        else if (pressed & (KEY_B | KEY_START | KEY_INSPECT))
         {
             /* (START or R, which opened it, close it too: as on the Yu-Gi-Oh! side) */
             PlaySE(SE_SELECT);
@@ -4176,6 +4182,11 @@ void Tcg_Debug(const char *command)
         U.duel.current = 1;
         TcgDuel_Apply(&U.duel, &a);
         printf("[tcg] opponent conceded\n");
+        return;
+    }
+    if (sscanf(command, "fx %u", &n) == 1)
+    {
+        TcgBoard_TestFx(n);
         return;
     }
     if (!strcmp(command, "auto"))

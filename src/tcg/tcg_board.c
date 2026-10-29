@@ -23,7 +23,8 @@ enum
     KEY_UP = 64,
     KEY_DOWN = 128,
     KEY_R = 256,
-    KEY_L = 512
+    KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 
 /* ------------------------------------------------------------------ */
@@ -128,7 +129,10 @@ enum
     FX_SWEEP,   /* YOUR TURN band across the mat */
     FX_COIN,    /* spinning coin */
     FX_SPARK,   /* particle */
-    FX_SHOWCASE /* a played Trainer card held up in the middle */
+    FX_SHOWCASE, /* a played Trainer card held up in the middle */
+    FX_IMPACT,  /* an attack landing: a flash, a ring going out, rays (as the Yu-Gi-Oh! table's) */
+    FX_SHARDS,  /* a Pokemon knocked out: the card breaks apart */
+    FX_RISE     /* a Pokemon put into play: a ring opening and a beam */
 };
 struct Fx
 {
@@ -848,6 +852,12 @@ static int StartEvent(const struct TcgEvent *e, int post)
         PlaySE(e->flags & TCG_DMG_POISON ? SE_FIELD_POISON : strong ? SE_SUPER_EFFECTIVE : weak ? SE_NOT_EFFECTIVE
                                                                                                     : SE_EFFECTIVE);
         Sparks(x, y, 0xf8f8f8, strong ? 14 : 8, strong ? 2.2f : 1.5f);
+        if (!(e->flags & (TCG_DMG_POISON | TCG_DMG_SELF)))
+        {
+            f = AddFx(FX_IMPACT, x, y, fast ? 16 : 24);
+            if (f)
+                f->player = who;
+        }
         return fast ? 30 : strong ? 64 : 48;
     }
     case TCG_EV_HEAL:
@@ -895,6 +905,11 @@ static int StartEvent(const struct TcgEvent *e, int post)
         CardCenter(who, slot, &x, &y);
         B.ko[who][slot] = 1;
         B.flash[who][slot] = 10;
+        {
+            struct Fx *f = AddFx(FX_SHARDS, x, y, fast ? 24 : 32);
+            if (f)
+                f->value = (int)((unsigned)(who * 7 + slot + 1) * 2654435761u >> 8);
+        }
         Banner(x, who ? y + 30 : y - 30, "KNOCKED OUT!", 0xb02828, fast ? 40 : 64);
         PlaySE(SE_FAINT);
         if (!who)
@@ -969,7 +984,17 @@ static int StartEvent(const struct TcgEvent *e, int post)
     case TCG_EV_PLAY:
     case TCG_EV_PROMOTE:
         if (post)
+        {
             PlaySE(SE_RG_CARD_FLIP);
+            if (e->type == TCG_EV_PLAY)
+            {
+                struct Fx *f;
+                CardCenter(who, slot, &x, &y);
+                f = AddFx(FX_RISE, x, y, fast ? 14 : 20);
+                if (f)
+                    f->color = c ? G_TypeColor(c->type, 0) : 0xf8f0a0;
+            }
+        }
         return 4;
     case TCG_EV_EVOLVE:
         CardCenter(who, slot, &x, &y);
@@ -1210,6 +1235,17 @@ static void Present(void)
 static u16 sNextMusic;
 static int sNextTutorial;
 void TcgBoard_SetMusic(unsigned song) { sNextMusic = (u16)song; }
+/* Harness helper (mp cards fx N): an attack landing (0), a knock out (1) or a Pokemon put into play (2) on
+   their Active, the effect alone */
+void TcgBoard_TestFx(unsigned kind)
+{
+    int x, y;
+    struct Fx *f;
+    CardCenter(1, 0, &x, &y);
+    f = AddFx(kind == 0 ? FX_IMPACT : kind == 1 ? FX_SHARDS : FX_RISE, x, y, kind == 2 ? 20 : kind ? 32 : 24);
+    if (f)
+        f->color = 0xf8f0a0, f->value = 12345, f->player = 1;
+}
 void TcgBoard_Tutorial(int on) { sNextTutorial = on; }
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online)
 {
@@ -2164,8 +2200,8 @@ static void OpenFieldMenu(void)
     AddMenu("CHECK", MENU_CHECK, 1, NULL);
     Menu(r.x + r.w + 4 > 170 ? r.x - 74 : r.x + r.w + 4, r.y > 100 ? 92 : r.y);
 }
-/* The turn menu (B, START or SELECT on the table, as on the Yu-Gi-Oh! table): END TURN (READY while setting up)
- * and CONCEDE, at the bottom right. Everything else is done on the cards themselves. */
+/* The turn menu (B, START or SELECT on the table, as on the Yu-Gi-Oh! table): END TURN (READY while setting up), at
+ * the bottom right. Everything else is done on the cards themselves; CONCEDE is A on your own deck. */
 static void OpenTurnMenu(void)
 {
     B.menuCount = 0;
@@ -2174,13 +2210,21 @@ static void OpenTurnMenu(void)
                 MyTurn() ? "Choose your Active Pokemon first." : "Waiting for your opponent.");
     else
         AddMenu("END TURN", MENU_DONE, CanAct() && B.view.phase == TCG_TURN, "It isn't your turn.");
-    AddMenu("CONCEDE", MENU_CONCEDE, B.view.phase != TCG_FINISHED, NULL);
     B.menuX = 238;
     B.menuY = 158;
     B.mode = M_MENU;
     B.menuCursor = 0;
     PlaySE(SE_SELECT);
-    printf("[tcg] turn menu: %s, CONCEDE\n", B.menu[0].label);
+    printf("[tcg] turn menu: %s\n", B.menu[0].label);
+}
+/* A on your own deck: CONCEDE (as on the Yu-Gi-Oh! table), beside the deck */
+static void OpenDeckMenu(void)
+{
+    struct Rect r = DeckRect(0);
+    B.menuCount = 0;
+    AddMenu("CONCEDE", MENU_CONCEDE, B.view.phase != TCG_FINISHED, "The duel is over.");
+    Menu(r.x - 76, r.y);
+    printf("[tcg] deck menu: CONCEDE\n");
 }
 static void Confirm(int kind, const char *text)
 {
@@ -2379,7 +2423,7 @@ static void StepPick(unsigned pressed, struct TcgAction *out, int *result, unsig
             B.pickCursor = d == 1 ? 0 : n - 1;
         PlaySE(SE_RG_BAG_CURSOR);
     }
-    if (pressed & KEY_R && n)
+    if (pressed & KEY_INSPECT && n)
     {
         *card = CardOf(B.pickOwner, B.pickCards[B.pickCursor]);
         *result = BOARD_INSPECT;
@@ -2668,7 +2712,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             B.mode = M_FREE;
             PlaySE(SE_SELECT);
         }
-        else if (pressed & KEY_R)
+        else if (pressed & KEY_INSPECT)
         {
             const struct TcgCard *c = Field(0, 0);
             if (c)
@@ -2789,7 +2833,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         return BOARD_NONE;
     }
     /* R: the card under the cursor up close (as on the Yu-Gi-Oh! table) */
-    if (pressed & KEY_R)
+    if (pressed & KEY_INSPECT)
     {
         unsigned id = 0;
         if (B.focusKind == T_HAND && (unsigned)B.focusIndex < B.view.players[0].handSize)
@@ -2874,6 +2918,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         case T_OPP_DISCARD:
             OpenViewer(B.focusKind == T_OPP_DISCARD);
             PlaySE(SE_SELECT);
+            break;
+        case T_MY_DECK:
+            OpenDeckMenu();
             break;
         case T_OPP_HAND:
             if (Clairvoyant() && B.view.players[1].handSize)
@@ -3047,8 +3094,10 @@ static void MatMotif(struct GSurface *s, unsigned base, unsigned line)
         break;
     }
 }
+/* A place for a card: a soft hollow in the cloth and a clean line round it */
 static void CardSpot(struct GSurface *s, struct Rect r, unsigned line, unsigned alpha)
 {
+    S_RoundFill(s, r.x, r.y, r.w, r.h, 1, ARGB(0x000000, alpha / 4));
     S_RoundFrame(s, r.x - 1, r.y - 1, r.w + 2, r.h + 2, 2, ARGB(line, alpha));
 }
 static void BuildMat(void)
@@ -3363,24 +3412,7 @@ static void DrawOppHand(void)
 }
 static void DrawFocus(struct Rect r, unsigned color)
 {
-    int o = (B.frame / 8) % 2 + 1, len = 4, x0 = r.x - o - 1, y0 = r.y - o - 1, x1 = r.x + r.w + o, y1 = r.y + r.h + o;
-    unsigned shadow = 0x102010;
-    G_Fill(x0 + 1, y0 + 1, len, 1, shadow);
-    G_Fill(x0 + 1, y0 + 1, 1, len, shadow);
-    G_Fill(x1 - len + 1, y0 + 1, len, 1, shadow);
-    G_Fill(x1 + 1, y0 + 1, 1, len, shadow);
-    G_Fill(x0 + 1, y1 + 1, len, 1, shadow);
-    G_Fill(x0 + 1, y1 - len + 2, 1, len, shadow);
-    G_Fill(x1 - len + 1, y1 + 1, len + 1, 1, shadow);
-    G_Fill(x1 + 1, y1 - len + 2, 1, len, shadow);
-    G_Fill(x0, y0, len, 1, color);
-    G_Fill(x0, y0, 1, len, color);
-    G_Fill(x1 - len + 1, y0, len, 1, color);
-    G_Fill(x1, y0, 1, len, color);
-    G_Fill(x0, y1, len, 1, color);
-    G_Fill(x0, y1 - len + 1, 1, len, color);
-    G_Fill(x1 - len + 1, y1, len, 1, color);
-    G_Fill(x1, y1 - len + 1, 1, len, color);
+    G_Focus(r.x, r.y, r.w, r.h, color, B.frame);
 }
 static void Tooltip(void)
 {
@@ -3417,9 +3449,12 @@ static void Tooltip(void)
     }
     case T_MY_DECK:
     case T_OPP_DECK:
-        snprintf(line, sizeof(line), "%s DECK: %u cards", B.focusKind == T_MY_DECK ? "YOUR" : "THEIR",
-                 B.view.players[B.focusKind == T_OPP_DECK].deckSize);
+    {
+        const struct TcgPlayer *p = &B.view.players[B.focusKind == T_OPP_DECK];
+        snprintf(line, sizeof(line), "%s DECK %u  HAND %u  DISCARD %u%s", B.focusKind == T_MY_DECK ? "YOUR" : "THEIR",
+                 p->deckSize, p->handSize, p->discardSize, B.focusKind == T_MY_DECK ? "  {A} CONCEDE" : "");
         break;
+    }
     case T_MY_DISCARD:
     case T_OPP_DISCARD:
         snprintf(line, sizeof(line), "%s DISCARD: %u  {A} LOOK", B.focusKind == T_MY_DISCARD ? "YOUR" : "THEIR",
@@ -3553,6 +3588,59 @@ static void DrawFx(void)
                 const char *text = f->player == 2 ? (heads ? "YOU GO FIRST!" : "OPPONENT GOES FIRST")
                                                   : heads ? "HEADS!" : "TAILS";
                 G_Banner(f->x, f->y + 24, text, heads ? 0x2858a8 : 0x704848, Ease((t - 0.62f) * 8), alpha);
+            }
+            break;
+        }
+        case FX_IMPACT:
+        {
+            /* a white flash, a ring going out, rays */
+            int i2;
+            if (t < 0.25f)
+            {
+                unsigned a = (unsigned)(230 * (1 - t / 0.25f));
+                G_RoundFill(f->x - 9, f->y - 9, 18, 18, 0xffffff, a);
+                G_FillA(0, 0, 240, 160, 0xffffff, a / 5);
+            }
+            G_Circle(f->x, f->y, 6 + 26 * t, f->player ? 0xa0d0ff : 0xffa060, (unsigned)(230 * (1 - t)));
+            G_Circle(f->x, f->y, 4 + 18 * t, 0xffffff, (unsigned)(160 * (1 - t)));
+            for (i2 = 0; i2 < 10; i2++)
+            {
+                float a = i2 * 0.6283f + 0.3f, r0 = 5 + 20 * t, r1 = r0 + 7 * (1 - t);
+                G_Line(f->x + (int)(cosf(a) * r0), f->y + (int)(sinf(a) * r0), f->x + (int)(cosf(a) * r1),
+                       f->y + (int)(sinf(a) * r1), 0xffe060, (unsigned)(255 * (1 - t)));
+            }
+            break;
+        }
+        case FX_SHARDS:
+        {
+            /* the card in pieces, flung out and falling */
+            int i2;
+            uint32_t seed = (uint32_t)f->value;
+            for (i2 = 0; i2 < 12; i2++)
+            {
+                float vx, vy, px, py;
+                seed = seed * 1103515245u + 12345u;
+                vx = ((int)(seed >> 16 & 0xff) - 128) / 128.0f * 22;
+                seed = seed * 1103515245u + 12345u;
+                vy = -((int)(seed >> 16 & 0xff)) / 255.0f * 18 - 4;
+                px = f->x + vx * t;
+                py = f->y + vy * t + 30 * t * t;
+                G_FillA((int)px - 1, (int)py - 1, 3 + (i2 & 1), 3, i2 % 3 ? 0xc8a050 : 0xf8f0c8, (unsigned)(255 * (1 - t)));
+            }
+            if (t < 0.3f)
+                G_Circle(f->x, f->y, 4 + 30 * t, 0xff5030, (unsigned)(220 * (1 - t / 0.3f)));
+            break;
+        }
+        case FX_RISE:
+        {
+            /* a ring opening on the spot, a beam of light going up */
+            unsigned a = (unsigned)(200 * (1 - t));
+            G_Circle(f->x, f->y, 4 + 18 * t, f->color, a);
+            G_Circle(f->x, f->y, 2 + 11 * t, 0xffffff, a / 2);
+            if (t < 0.6f)
+            {
+                int bw = (int)(14 * (1 - t / 0.6f)) + 2;
+                G_FillA(f->x - bw / 2, f->y - 26 - (int)(10 * t), bw, 40, f->color, (unsigned)(90 * (1 - t / 0.6f)));
             }
             break;
         }
@@ -3748,8 +3836,8 @@ static void DrawPick(void)
         }
         {
             const char *hint = B.mode == M_VIEW                         ? "{A} LOOK  {B} BACK"
-                               : B.pickMin != B.pickMax && !B.pickRetreat ? "{A} CHOOSE  {START} DONE  {R} LOOK"
-                                                                          : "{A} CHOOSE  {R} LOOK  {B} BACK";
+                               : B.pickMin != B.pickMax && !B.pickRetreat ? "{A} CHOOSE  {START} DONE  {INSPECT} LOOK"
+                                                                          : "{A} CHOOSE  {INSPECT} LOOK  {B} BACK";
             int w = G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0);
             G_Hint(232 - w, 145, 0x707070, G_NO_SHADOW, hint, TF_NARROW, 1);
         }
@@ -3966,7 +4054,7 @@ void TcgBoard_Render(void)
     {
     case M_ATTACK:
         DrawAttacks();
-        Prompt("{A} ATTACK   {UPDOWN} CHOOSE   {R} LOOK   {B} BACK", 1);
+        Prompt("{A} ATTACK   {UPDOWN} CHOOSE   {INSPECT} LOOK   {B} BACK", 1);
         break;
     case M_PICK:
     case M_VIEW:

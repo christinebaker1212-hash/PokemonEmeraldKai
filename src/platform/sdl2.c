@@ -633,6 +633,9 @@ void ProcessEvents(void)
             HANDLE_KEYUP(DPAD_DOWN)
             HANDLE_KEYUP(DPAD_LEFT)
             HANDLE_KEYUP(DPAD_RIGHT)
+            case SDLK_d:
+                keys &= ~PLATFORM_KEY_INSPECT;
+                break;
             }
             break;
         case SDL_TEXTINPUT:
@@ -695,6 +698,11 @@ void ProcessEvents(void)
                 else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
                  && Platform_InputContext() == INPUT_CONTEXT_PC_STORAGE)
                     Platform_ContextAction(INPUT_ACTION_PC_TAG);
+                break;
+            case SDLK_d:
+                // Moemon Kai: the card games' INSPECT (the right trigger on a controller); let go in SDL_KEYUP
+                if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)))
+                    keys |= PLATFORM_KEY_INSPECT;
                 break;
             case SDLK_v:
                 // Moemon Co-op: ping the tile ahead (left stick click on a controller)
@@ -956,7 +964,7 @@ static u16 ParseTestKeys(const char *s)
     static const struct { const char *name; u16 key; } names[] = {
         {"A", A_BUTTON}, {"B", B_BUTTON}, {"START", START_BUTTON}, {"SELECT", SELECT_BUTTON},
         {"L", L_BUTTON}, {"R", R_BUTTON}, {"UP", DPAD_UP}, {"DOWN", DPAD_DOWN},
-        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"NONE", 0},
+        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"INSPECT", PLATFORM_KEY_INSPECT}, {"NONE", 0},
     };
     u16 keysOut = 0;
     char buf[64];

@@ -53,7 +53,8 @@ enum
 enum
 {
     KEY_A = 1, KEY_B = 2, KEY_SELECT = 4, KEY_START = 8, KEY_RIGHT = 16, KEY_LEFT = 32, KEY_UP = 64, KEY_DOWN = 128,
-    KEY_R = 256, KEY_L = 512
+    KEY_R = 256, KEY_L = 512,
+    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
 };
 enum { VS_NPC, VS_PRACTICE, VS_FRIEND };
 enum
@@ -363,6 +364,11 @@ static void Portrait(int x, int y)
     }
     if (!U.portrait)
         return;
+    if (U.opp.portraitW == 64)   /* their battle picture, cut to the window beside their card */
+    {
+        G_PicCut(U.portrait, U.opp.portrait, 8, 22, 41, 42);   /* (their hand starts at 50) */
+        return;
+    }
     dst.x = x - U.opp.portraitW;
     dst.y = y - U.opp.portraitH * 2;
     dst.w = U.opp.portraitW * 2;
@@ -741,11 +747,15 @@ static void HomeScreen(void)
     struct TtCollection *c = C();
     unsigned i, packs = PacksHeld(), total, have = Tt_OwnedCount(c, 0, &total), face = c->optedIn ? DeckFace(c->activeDeck) : 0;
     char line[160];
-    float bob = sinf(U.frame * 0.06f) * 1.5f;
+    /* the deck's card floats as the other two games' do: whole pixels over a still shadow */
+    int bob = (int)(sinf(U.frame * 0.06f) * 1.5f);
     TcgUi_Background();
     TcgUi_CaseTabs(KIT_GAME_TRIAD, TT_THEME);
     if (face)
-        Card(face, 31, 22 - bob, TT_BOARD_W + 2, TT_BOARD_H + 2, TT_SEAT_BLUE, 255);
+    {
+        G_FillA(31 + 2, 22 + 3, TT_BOARD_W + 2, TT_BOARD_H + 2, 0x000000, 70);
+        Card(face, 31, (float)(22 - bob), TT_BOARD_W + 2, TT_BOARD_H + 2, TT_SEAT_BLUE, 255);
+    }
     G_TextAlign(52, 76, TA_CENTER, G_INK, G_INK_SHADOW, c->optedIn ? Deck(c->activeDeck)->name : "No cards", TF_SMALL);
     if (c->optedIn)
     {
@@ -867,7 +877,7 @@ static void BuilderScreen(void)
         if (on || target)
         {
             int o = (U.frame / 8) % 2;
-            G_Frame((int)x - 1 - o, (int)y - 1 - o - (on ? 2 : 0), 28 + 2 * o, 34 + 2 * o, on ? 0xe82820 : 0xf8d048, 255);
+            G_Frame((int)x - 2 - o, (int)y - 2 - o - (on ? 2 : 0), 30 + 2 * o, 36 + 2 * o, on ? 0xe82820 : 0xf8d048, 255);
         }
     }
     /* how the deck stands against the star limits */
@@ -910,7 +920,8 @@ static void BuilderScreen(void)
     }
     else
         Strip(0, U.inDeckRow ? "An empty slot: pick a card below." : "");
-    TcgUi_Hints(U.inDeckRow ? "{A} TAKE OUT  {DOWN} CARDS  {START} DONE" : "{A} PUT IN  {UP} DECK  {L}{R} STARS  {START} DONE");
+    TcgUi_Hints(U.inDeckRow ? "{A} TAKE OUT  {INSPECT} LOOK  {DOWN} CARDS  {START} DONE"
+                            : "{A} PUT IN  {INSPECT} LOOK  {L}{R} STARS  {START} DONE");
 }
 
 static void ListScreen(void)
@@ -1315,7 +1326,7 @@ static void SpoilsScreen(void)
                      Owned(id), Tt_Card(id) ? Tt_Card(id)->name : "", nums);
         Strip(0, line);
     }
-    TcgUi_Hints(U.spoilFixed ? "{A} TAKE THEM  {R} LOOK" : "{A} PICK  {START} TAKE  {R} LOOK");
+    TcgUi_Hints(U.spoilFixed ? "{A} TAKE THEM  {INSPECT} LOOK" : "{A} PICK  {START} TAKE  {INSPECT} LOOK");
 }
 
 /* A seller's counter: SINGLES (a curated few, one copy each), PACKS by stars (the highest never sold), SELL spares */
@@ -1407,7 +1418,7 @@ static void ShopScreen(void)
     }
     else
         Strip(0, U.shopTab == 2 ? "No spare copies to sell. (Your first copy of a card is never sold.)" : "");
-    TcgUi_Hints(U.shopTab == 0 ? "{A} BUY  {R} LOOK  {L}{R} COUNTER" : "{A} SELL ONE  {R} LOOK  {L}{R} COUNTER");
+    TcgUi_Hints(U.shopTab == 0 ? "{A} BUY  {INSPECT} LOOK  {L}{R} COUNTER" : "{A} SELL ONE  {INSPECT} LOOK  {L}{R} COUNTER");
 }
 
 static void StarterScreen(void)
@@ -2218,7 +2229,7 @@ int TtUi_Step(unsigned keys)
                 d->cards[U.deckSlot] = 0;
                 PlaySE(SE_RG_CARD_FLIPPING);
             }
-            else if (pressed & KEY_R && d->cards[U.deckSlot])
+            else if (pressed & KEY_INSPECT && d->cards[U.deckSlot])
                 Inspect(d->cards[U.deckSlot], T_BUILDER);
         }
         else
@@ -2255,7 +2266,7 @@ int TtUi_Step(unsigned keys)
                         U.deckSlot = (U.deckSlot + 1) % TT_HAND;
                 }
             }
-            else if (pressed & KEY_R && n)
+            else if (pressed & KEY_INSPECT && n)
                 Inspect(list[U.cursor], T_BUILDER);
         }
         if (pressed & (KEY_START | KEY_B))
@@ -2285,7 +2296,7 @@ int TtUi_Step(unsigned keys)
             Screen(T_HOME);
             U.cursor = 1;
         }
-        else if (pressed & (KEY_A | KEY_R) && n && (Owned(list[U.cursor]) || Tt_Seen(c, list[U.cursor])))
+        else if (pressed & (KEY_A | KEY_INSPECT) && n && (Owned(list[U.cursor]) || Tt_Seen(c, list[U.cursor])))
             Inspect(list[U.cursor], T_LIST);
         break;
     }
@@ -2294,7 +2305,7 @@ int TtUi_Step(unsigned keys)
             U.textScroll++, PlaySE(SE_SELECT);
         if (pressed & KEY_UP && U.textScroll > 0)
             U.textScroll--, PlaySE(SE_SELECT);
-        if (pressed & (KEY_A | KEY_B | KEY_R))
+        if (pressed & (KEY_A | KEY_B | KEY_INSPECT))
         {
             int keep = U.cursor;
             PlaySE(SE_SELECT);
@@ -2396,7 +2407,7 @@ int TtUi_Step(unsigned keys)
             U.cursor--, PlaySE(SE_SELECT);
         if (pressed & KEY_RIGHT && U.cursor < TT_HAND - 1)
             U.cursor++, PlaySE(SE_SELECT);
-        if (pressed & KEY_R)
+        if (pressed & KEY_INSPECT)
             Inspect(U.dealt[1][U.cursor], T_SPOILS);
         else if (U.spoilFixed && pressed & (KEY_A | KEY_START))
             Ask(ACT_TAKE, 0, "Take them?");
@@ -2467,7 +2478,7 @@ int TtUi_Step(unsigned keys)
             else
                 Ask(ACT_SELL, (int)id, "Sell a spare %s for \xa5%u?", Tt_Card(id)->name, Tt_Card(id)->sale);
         }
-        else if (pressed & KEY_R && n && U.shopTab != 1)
+        else if (pressed & KEY_INSPECT && n && U.shopTab != 1)
             Inspect(list[U.cursor], T_SHOP);
         break;
     }
