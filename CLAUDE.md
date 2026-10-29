@@ -6,6 +6,9 @@ Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
 
+Moemon Music Studio work (`tools/moemon_music/`): don't use agents (subagents / the Agent tool): do the work yourself
+(the rule from the studio's own branch).
+
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
@@ -13,8 +16,6 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
 - `include/mp.h`: shared co-op API. `src/mp/mp_net.h` holds the protocol (bump `MP_PROTOCOL_VERSION` on changes)
 - `tools/mp_server/`: standalone relay server
-- Moemon Music Studio (MIDI / rip player and song exporter) is on branch `claude/moemon-emerald-midi-player-sv25iy`,
-  not merged here yet: read `docs/MUSIC_STUDIO_BRANCH.md` before touching `tools/moemon_music/`
 - `src/platform/updater.c` + `tools/release/`: the auto-updater and releases. Publishing a version = bump
   `MOEMON_VERSION` (include/mp_version.h), add `tools/release/notes/v<ver>.md`, push to the default branch
   (.github/workflows/release.yml builds, tags and publishes; BUILDING_COOP.md). Sessions can't push tags.
@@ -25,6 +26,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
   it is a main update: don't test it as a dev update and don't push a dev update.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
+- `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
+  through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments
+  and engine (ported from src/music_player.c etc.; check engine changes against it), exports `.kaisong` songs
+  (docs/KAISONG_FORMAT.md: format and the plan for loading them, not in the game yet) and decomp sources. `make test` there
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there

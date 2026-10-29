@@ -1,6 +1,8 @@
 # Moemon Music Studio lives on its own branch
 
-**Branch:** `claude/moemon-emerald-midi-player-sv25iy`. It isn't merged into this (default) branch yet.
+**Branch:** `claude/moemon-emerald-midi-player-sv25iy`. Merged into this (default) branch for 1.44.0 (the game now plays
+`.kaisong` files and the studio exports by place): work on the studio here from now on, and merge this branch into
+that one first if you go back to it.
 
 Moemon Music Studio is a separate SDL2 program in `tools/moemon_music/`. It is not part of the game build.
 It plays MIDIs and ripped game music with the game's own instruments and sound engine, and exports songs
