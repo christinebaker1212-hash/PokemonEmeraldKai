@@ -98,7 +98,7 @@ int main(void)
         }
     }
     {
-        uint8_t action[25] = {TCG_LINK_RELAY, TCG_LINK_VERSION, 4};
+        uint8_t action[27] = {TCG_LINK_RELAY, TCG_LINK_VERSION, 4};
         struct TcgLink before = l[1];
         unsigned len;
         for (len = 0; len < 7; len++)

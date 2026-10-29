@@ -4184,6 +4184,20 @@ void Tcg_Debug(const char *command)
         printf("[tcg] opponent conceded\n");
         return;
     }
+    if (!strcmp(command, "discardhand"))
+    {
+        /* Harness helper: your whole hand into your discard pile, for staging a hand */
+        struct TcgPlayer *p = &U.duel.players[0];
+        while (p->handSize)
+            p->discard[p->discardSize++] = p->hand[--p->handSize];
+        TcgBoard_Sync(&U.duel);
+        return;
+    }
+    if (!strcmp(command, "checkdone"))
+    {
+        TcgBoard_CheckDone();
+        return;
+    }
     if (sscanf(command, "fx %u", &n) == 1)
     {
         TcgBoard_TestFx(n);

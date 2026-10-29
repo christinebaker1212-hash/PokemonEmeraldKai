@@ -194,7 +194,8 @@ enum
     ST_OPP_SLOT,
     ST_PICK,
     ST_STAGE,
-    ST_CHOICE /* a Pokemon Power's menu: SHIFT's types, PEEK's places */
+    ST_CHOICE,       /* a Pokemon Power's menu: SHIFT's types, PEEK's places */
+    ST_ATTACK_OPTION /* an attack's menu (TcgDuel_AttackOptions): Amnesia, Metronome, Wildfire, Conversion... */
 };
 enum
 {
@@ -204,7 +205,9 @@ enum
     SRC_OPP_DISCARD,
     SRC_MY_ATTACHED,
     SRC_OPP_ATTACHED,
-    SRC_TOP5
+    SRC_TOP5,
+    SRC_TOP3_MINE,  /* Prophecy: the top 3 of a deck, to put in order */
+    SRC_TOP3_THEIRS
 };
 enum
 {
@@ -284,6 +287,7 @@ static struct
     int intro;
     /* Interface */
     int mode, focusKind, focusIndex, lastHand, trayWanted;
+    int checkDone;              /* look once the table is idle: anything left to play from the hand? */
     int refocus, refocusHand;   /* the action of ours a commit is waiting for (+1) and the hand card it played:
                                    where the cursor goes next (Refocus) */
     float tray, focusPulse;
@@ -797,6 +801,7 @@ static int StartEvent(const struct TcgEvent *e, int post)
             B.focusKind = T_HAND;
             B.focusIndex = B.view.players[0].handSize ? B.view.players[0].handSize - 1 : 0;
             B.trayWanted = 1;
+            B.checkDone = 1;
         }
         return fast ? 26 : 40;
     }
@@ -1055,6 +1060,42 @@ static int StartEvent(const struct TcgEvent *e, int post)
                                                             : e->value == 1 ? "You have no Pokemon left in play."
                                                                             : "Your opponent took all their Prizes.");
         return 30;
+    case TCG_EV_DEVOLVE:
+        CardCenter(who, slot, &x, &y);
+        Text(x, y - 26, "DEVOLVED!", 0xe0c8ff, fast ? 30 : 46);
+        Sparks(x, y, 0xc0a0f8, 12, 1.6f);
+        B.flash[who][slot] = 8;
+        PlaySE(SE_M_TELEPORT);
+        return fast ? 24 : 40;
+    case TCG_EV_TO_HAND:
+        CardCenter(who, 0, &x, &y);
+        Banner(x, who ? y + 30 : y - 30, "BACK TO THE HAND!", 0x2870a0, fast ? 36 : 54);
+        PlaySE(SE_M_GUST);
+        return fast ? 26 : 40;
+    case TCG_EV_MORPH:
+    {
+        struct Fx *f;
+        CardCenter(who, slot, &x, &y);
+        snprintf(line, sizeof(line), "%s!", c ? c->name : "MORPH");
+        Text(x, y - 26, line, 0xf8f0a0, fast ? 32 : 50);
+        Sparks(x, y, 0xf0c8f8, 16, 1.8f);
+        f = AddFx(FX_RISE, x, y, fast ? 14 : 20);
+        if (f)
+            f->color = 0xd890e8;
+        PlaySE(SE_SHINY);
+        return fast ? 24 : 40;
+    }
+    case TCG_EV_DECK_CHANGED:
+    {
+        struct Rect d = DeckRect(who);
+        if (e->value)
+            snprintf(line, sizeof(line), "-%u", e->value);
+        else
+            snprintf(line, sizeof(line), "%s", "SHUFFLED");
+        Text(d.x + d.w / 2, d.y - 6, line, 0xf8d0c0, fast ? 30 : 46);
+        PlaySE(e->value ? SE_M_FLAME_WHEEL : SE_RG_CARD_FLIPPING);
+        return fast ? 18 : 30;
+    }
     default:
         return 0;
     }
@@ -1151,7 +1192,10 @@ static void Commit(const struct TcgDuel *next)
     B.view = *next;
     printf("[tcg] commit hands %u %u\n", B.view.players[0].handSize, B.view.players[1].handSize);
     if (B.refocus && B.qCount <= 1)   /* (the state being shown is the last one queued) */
+    {
         Refocus();
+        B.checkDone = 1;
+    }
     ResetShown();
     for (i = 0; i < (unsigned)B.npost; i++)
     {
@@ -1340,6 +1384,11 @@ void TcgBoard_Sync(const struct TcgDuel *truth)
 }
 int TcgBoard_Idle(void) { return B.intro <= 0 && B.phase == P_IDLE && !B.qCount && SpritesSettled(); }
 void TcgBoard_SetWaiting(int waiting) { B.waiting = waiting; }
+/* Test harness: look again whether anything is left to play from the hand (FocusActiveIfDone) */
+void TcgBoard_CheckDone(void)
+{
+    B.checkDone = 1;
+}
 /* Test harness: put the cursor on a target (0 hand, 1 yours, 2 theirs, 10 END). */
 void TcgBoard_DebugFocus(int kind, int index)
 {
@@ -1680,8 +1729,6 @@ static int TargetFilter(int *who)
     case FLOW_RETREAT:
         return F_BENCH;
     case FLOW_ATTACK:
-        *who = TcgDuel_AttackChoice(&Field(0, 0)->attacks[B.action.attack], NULL) == 1;
-        return F_BENCH;
     case FLOW_TRAINER:
     case FLOW_POWER:
         if (B.step < B.nsteps)
@@ -1738,6 +1785,95 @@ static int FocusFirstValid(void)
 static void OpenPick(int source, int filter, int min, int max, const char *title);
 static void ContinueTrainer(struct TcgAction *out, int *result);
 static void PowerChoices(void);
+static void AttackOptionMenu(void);
+static void Menu(int x, int y);
+static void AddMenu(const char *label, int id, int enabled, const char *reason);
+
+/* An attack's choices as steps (the Trainers' machinery): its menu first (TcgDuel_AttackOptions), then what
+   that menu decides (AttackStepsAfterOption) */
+static struct Step sAttackSteps[4];
+static char sAttackPrompt[64];
+static int BenchOn(unsigned who)
+{
+    unsigned s;
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        if (Field(who, s))
+            return 1;
+    return 0;
+}
+static void AttackStepsAfterOption(const struct TcgAttack *a)
+{
+    unsigned choice = a ? TcgDuel_AttackChoice(a, NULL) : 0, ask = TcgDuel_AttackAsk(a);
+    int n = 0;
+    if ((choice == 1 && BenchOn(1)) || (choice == 2 && BenchOn(0)))
+    {
+        struct Step st = {choice == 1 ? ST_OPP_SLOT : ST_MY_SLOT, F_BENCH, 0, 0, 0,
+                          choice == 1 ? "Aim at which of their Benched Pokemon?" : "Switch with which of your Benched Pokemon?"};
+        sAttackSteps[n++] = st;
+    }
+    if (ask == TCG_ASK_DISCARD_TRAINER)
+    {
+        struct Step st = {ST_PICK, F_TRAINER, SRC_MY_DISCARD, 1, 1, "Put which Trainer into your hand?"};
+        sAttackSteps[n++] = st;
+    }
+    else if (ask == TCG_ASK_ORDER_TOP3)
+    {
+        struct Step st = {ST_PICK, F_ANY, B.action.option ? SRC_TOP3_THEIRS : SRC_TOP3_MINE, 0, 3,
+                          "Put them back in order: the first chosen goes on top."};
+        sAttackSteps[n++] = st;
+    }
+    else if (ask == TCG_ASK_EVOLVED)
+    {
+        struct Step st = {B.action.option ? ST_OPP_SLOT : ST_MY_SLOT, F_EVOLVED, 0, 0, 0, "Devolve which Pokemon?"};
+        sAttackSteps[n++] = st;
+    }
+    B.steps = sAttackSteps;
+    B.nsteps = n;
+}
+static void AttackSteps(const struct TcgAttack *a)
+{
+    const char *labels[TCG_MAX_OPTIONS];
+    uint8_t ok[TCG_MAX_OPTIONS];
+    if (a && TcgDuel_AttackOptions(&B.view, 0, a, labels, ok))
+    {
+        struct Step st = {ST_ATTACK_OPTION, 0, 0, 0, 0, sAttackPrompt};
+        static const char *const prompts[][2] = {
+            {"Metronome", "Copy which of their attacks?"},
+            {"Amnesia", "Which attack can't they use next turn?"},
+            {"Mirror Move", "Which attack can't they use next turn?"},
+            {"Wildfire", "Discard how many Fire Energy?"},
+            {"Conversion 1", "Change their Weakness to which type?"},
+            {"Conversion 2", "Change its Resistance to which type?"},
+            {"Prophecy", "Look at the top of which deck?"},
+            {"Devolution Beam", "Devolve whose Pokemon?"},
+        };
+        unsigned k;
+        snprintf(sAttackPrompt, sizeof(sAttackPrompt), "%s", "Choose for the attack.");
+        for (k = 0; k < sizeof(prompts) / sizeof(prompts[0]); k++)
+            if (!strcmp(a->name, prompts[k][0]))
+                snprintf(sAttackPrompt, sizeof(sAttackPrompt), "%s", prompts[k][1]);
+        sAttackSteps[0] = st;
+        B.steps = sAttackSteps;
+        B.nsteps = 1;
+        return;
+    }
+    AttackStepsAfterOption(a);
+}
+static void AttackOptionMenu(void)
+{
+    const struct TcgAttack *a = &Field(0, 0)->attacks[B.action.attack];
+    const char *labels[TCG_MAX_OPTIONS];
+    uint8_t ok[TCG_MAX_OPTIONS];
+    unsigned n, i;
+    if (TcgDuel_IsMetronome(a) && B.action.copy)
+        a = TcgDuel_MetronomeAttack(&B.view, 0, B.action.copy);
+    n = a ? TcgDuel_AttackOptions(&B.view, 0, a, labels, ok) : 0;
+    B.menuCount = 0;
+    for (i = 0; i < n; i++)
+        AddMenu(labels[i], MENU_CHOICE + (int)i, ok[i], "That can't be chosen.");
+    printf("[tcg] attack menu: %u choices\n", n);
+    Menu(150, 60);
+}
 static void StartTarget(void)
 {
     B.mode = M_TARGET;
@@ -1764,10 +1900,20 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
     }
     if (st->kind == ST_PICK)
     {
-        int n = st->max;
+        int n = st->max, all = st->source == SRC_TOP5 || st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS;
         if (st->source == SRC_TOP5)
             n = B.view.players[0].deckSize < 5 ? B.view.players[0].deckSize : 5;
-        OpenPick(st->source, st->filter, st->source == SRC_TOP5 ? n : st->min, n, st->prompt);
+        if (st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS)
+        {
+            n = B.view.players[st->source == SRC_TOP3_THEIRS].deckSize;
+            n = n < 3 ? n : 3;
+        }
+        OpenPick(st->source, st->filter, all ? n : st->min, n, st->prompt);
+        return;
+    }
+    if (st->kind == ST_ATTACK_OPTION)
+    {
+        AttackOptionMenu();
         return;
     }
     if (st->kind == ST_STAGE)
@@ -1801,7 +1947,7 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
 static void OpenPick(int source, int filter, int min, int max, const char *title)
 {
     const struct TcgPlayer *p;
-    unsigned owner = source == SRC_OPP_DISCARD || source == SRC_OPP_ATTACHED, i, n = 0;
+    unsigned owner = source == SRC_OPP_DISCARD || source == SRC_OPP_ATTACHED || source == SRC_TOP3_THEIRS, i, n = 0;
     const uint8_t *pile = NULL;
     unsigned count = 0;
     uint8_t sorted[TCG_DECK_SIZE];
@@ -1830,6 +1976,8 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         count = p->field[B.action.target].attachedSize;
         break;
     case SRC_TOP5:
+    case SRC_TOP3_MINE:
+    case SRC_TOP3_THEIRS:
         for (i = 0; i < (unsigned)max; i++)
             sorted[i] = p->deck[p->deckSize - 1 - i];
         pile = sorted;
@@ -2056,6 +2204,115 @@ static int HandPlayable(const struct TcgCard *c, char *reason, size_t size)
     if (c->kind == TCG_TRAINER && p->noTrainers)
         return snprintf(reason, size, "Headache: no Trainer cards this turn."), 0;
     return 1;
+}
+/* Would this Trainer do anything now? Only the plain cases say no (nothing to heal, nothing to switch to, an empty
+   deck...); anything unsure counts as playable. */
+static int Has(unsigned who, int (*test)(const struct TcgFieldCard *f, unsigned who), int benchOnly)
+{
+    unsigned s;
+    for (s = benchOnly ? 1 : 0; s < TCG_FIELD_SIZE; s++)
+        if (B.view.players[who].field[s].stackSize && test(&B.view.players[who].field[s], who))
+            return 1;
+    return 0;
+}
+static int AnyCard(const struct TcgFieldCard *f, unsigned who) { (void)f, (void)who; return 1; }
+static int Damaged(const struct TcgFieldCard *f, unsigned who) { (void)who; return f->damage > 0; }
+static int Evolved(const struct TcgFieldCard *f, unsigned who) { (void)who; return f->stackSize > 1; }
+static int WithEnergy(const struct TcgFieldCard *f, unsigned who)
+{
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+        if (Tcg_Card(B.view.players[who].cards[f->attached[i]])->kind == TCG_ENERGY)
+            return 1;
+    return 0;
+}
+static int DamagedWithEnergy(const struct TcgFieldCard *f, unsigned who) { return f->damage && WithEnergy(f, who); }
+static int InDiscard(int kind, int basicOnly)
+{
+    const struct TcgPlayer *p = &B.view.players[0];
+    unsigned i;
+    for (i = 0; i < p->discardSize; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[p->discard[i]]);
+        if (c->kind == kind && (!basicOnly || (kind == TCG_POKEMON ? !c->stage : p->cards[p->discard[i]] <= 6)))
+            return 1;
+    }
+    return 0;
+}
+static int TrainerHasUse(unsigned id)
+{
+    const struct TcgPlayer *p = &B.view.players[0];
+    int bench = 0;
+    unsigned s;
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        bench += !p->field[s].stackSize;
+    switch (id)
+    {
+    case TCG_CARD_POTION:
+    case TCG_CARD_POKEMON_CENTER:
+        return Has(0, Damaged, 0);
+    case TCG_CARD_SUPER_POTION:
+        return Has(0, DamagedWithEnergy, 0);
+    case TCG_CARD_FULL_HEAL:
+        return p->field[0].stackSize && (p->field[0].condition || p->field[0].poison);
+    case TCG_CARD_SWITCH:
+        return Has(0, AnyCard, 1);
+    case TCG_CARD_GUST_OF_WIND:
+        return Has(1, AnyCard, 1);
+    case TCG_CARD_ENERGY_REMOVAL:
+        return Has(1, WithEnergy, 0);
+    case TCG_CARD_SUPER_ENERGY_REMOVAL:
+        return Has(1, WithEnergy, 0) && Has(0, WithEnergy, 0);
+    case TCG_CARD_DEVOLUTION_SPRAY:
+        return Has(0, Evolved, 0);
+    case TCG_CARD_CLEFAIRY_DOLL:
+    case TCG_CARD_MYSTERIOUS_FOSSIL:
+        return bench > 0;
+    case TCG_CARD_REVIVE:
+        return bench > 0 && InDiscard(TCG_POKEMON, 1);
+    case TCG_CARD_BILL:
+    case TCG_CARD_POKEDEX:
+    case TCG_CARD_POKE_BALL:
+    case TCG_CARD_ENERGY_SEARCH:
+        return p->deckSize > 0;
+    case TCG_CARD_COMPUTER_SEARCH:
+        return p->deckSize > 0 && p->handSize >= 3;
+    case TCG_CARD_ITEM_FINDER:
+        return p->handSize >= 3 && InDiscard(TCG_TRAINER, 0);
+    case TCG_CARD_ENERGY_RETRIEVAL:
+        return p->handSize >= 2 && InDiscard(TCG_ENERGY, 1);
+    case TCG_CARD_SUPER_ENERGY_RETRIEVAL:
+        return p->handSize >= 3 && InDiscard(TCG_ENERGY, 1);
+    case TCG_CARD_MAINTENANCE:
+        return p->handSize >= 3;
+    }
+    return 1;
+}
+static int HandPlayable(const struct TcgCard *c, char *reason, size_t size);
+/* Is there still a card in your hand to play this turn? (a Basic with room for it, an evolution, Energy not yet
+   attached, a Trainer with something to do) */
+static int HandHasMove(void)
+{
+    const struct TcgPlayer *p = &B.view.players[0];
+    unsigned h;
+    char reason[80];
+    for (h = 0; h < p->handSize; h++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[p->hand[h]]);
+        if (HandPlayable(c, reason, sizeof(reason)) && (c->kind != TCG_TRAINER || TrainerHasUse(c->id)))
+            return 1;
+    }
+    return 0;
+}
+/* Nothing left to play from the hand: the cursor goes to your Active Pokemon, where the attack is */
+static void FocusActiveIfDone(void)
+{
+    if (B.mode != M_FREE || !MyTurn() || B.view.phase != TCG_TURN || !B.view.players[0].field[0].stackSize || HandHasMove())
+        return;
+    printf("[tcg] refocus: nothing left to play, your Active\n");
+    B.focusKind = T_MINE;
+    B.focusIndex = 0;
+    B.trayWanted = 0;
 }
 static void OpenHandMenu(void)
 {
@@ -2387,6 +2644,28 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
             ContinueTrainer(out, result);
             break;
         }
+        if (id >= MENU_CHOICE && B.flow == FLOW_ATTACK)
+        {
+            /* The pick decides what comes next (Metronome's copied attack, Prophecy's deck, the side to devolve) */
+            const struct TcgAttack *a = &Field(0, 0)->attacks[B.action.attack];
+            if (TcgDuel_IsMetronome(a) && !B.action.copy)
+            {
+                B.action.copy = (uint8_t)(id - MENU_CHOICE + 1);
+                a = TcgDuel_MetronomeAttack(&B.view, 0, B.action.copy);
+                printf("[tcg] metronome copies %s\n", a ? a->name : "?");
+                AttackSteps(a);
+            }
+            else
+            {
+                B.action.option = (uint8_t)(id - MENU_CHOICE);
+                printf("[tcg] attack option %u\n", B.action.option);
+                AttackStepsAfterOption(TcgDuel_IsMetronome(a) ? TcgDuel_MetronomeAttack(&B.view, 0, B.action.copy) : a);
+            }
+            B.step = 0;
+            B.mode = M_FREE;
+            ContinueTrainer(out, result);
+            break;
+        }
         B.mode = M_FREE;
         break;
     }
@@ -2575,6 +2854,11 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             B.showHand--;
         if (!B.intro)
             Layout();
+        if (B.checkDone && TcgBoard_Idle() && !B.showHand && B.spotlight < 0)
+        {
+            B.checkDone = 0;
+            FocusActiveIfDone();
+        }
         MoveSprites();
         for (k = 0; k < FX_MAX; k++)
             if (B.fx[k].duration && ++B.fx[k].t >= B.fx[k].duration)
@@ -2729,21 +3013,23 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             else
             {
                 const struct TcgCard *c = Field(0, 0);
-                unsigned choice = TcgDuel_AttackChoice(&c->attacks[B.attackCursor], NULL), k, any = 0;
                 memset(&B.action, 0, sizeof(B.action));
                 B.action.type = TCG_ATTACK;
                 B.action.attack = (uint8_t)B.attackCursor;
-                for (k = 1; k < TCG_FIELD_SIZE && choice; k++)
-                    any |= Field(choice == 1, k) != NULL;
-                if (choice && any)
+                AttackSteps(&c->attacks[B.attackCursor]);
+                if (B.nsteps)
                 {
-                    /* Spark, Lure, Teleport...: pick the Benched Pokemon first. */
+                    /* Spark, Lure, Teleport, Amnesia, Metronome...: the attack's choices first */
                     B.flow = FLOW_ATTACK;
                     B.heldHand = -1;
                     B.mode = M_FREE;
-                    B.focusKind = choice == 1 ? T_THEIRS : T_MINE;
-                    B.focusIndex = 1;
-                    StartTarget();
+                    B.step = 0;
+                    if (B.steps[0].kind == ST_MY_SLOT || B.steps[0].kind == ST_OPP_SLOT)
+                    {
+                        B.focusKind = B.steps[0].kind == ST_OPP_SLOT ? T_THEIRS : T_MINE;
+                        B.focusIndex = 1;
+                    }
+                    ContinueTrainer(out, &result);
                 }
                 else
                     Submit(out, &result);
@@ -2817,7 +3103,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             if (B.flow == FLOW_ATTACK)
             {
                 B.action.target = (uint8_t)B.focusIndex;
-                Submit(out, &result);
+                B.step++;
+                B.mode = M_FREE;
+                ContinueTrainer(out, &result);
                 return result;
             }
             B.action.slot = (uint8_t)B.focusIndex;
@@ -3715,7 +4003,7 @@ static void DrawMenu(void)
     }
     if (!B.menu[B.menuCursor].enabled && B.menu[B.menuCursor].reason[0])
         Prompt(B.menu[B.menuCursor].reason, y > 60);
-    else if (B.flow == FLOW_POWER && B.step < B.nsteps)
+    else if ((B.flow == FLOW_POWER || B.flow == FLOW_ATTACK) && B.step < B.nsteps)
         Prompt(B.steps[B.step].prompt, y > 60);
 }
 static void DrawAttacks(void)
@@ -4029,9 +4317,6 @@ void TcgBoard_Render(void)
                                : B.flow == FLOW_EVOLVE  ? "Evolve which Pokemon?"
                                : B.flow == FLOW_ATTACH  ? "Attach the Energy to which Pokemon?"
                                : B.flow == FLOW_RETREAT ? "Switch in which Benched Pokemon?"
-                               : B.flow == FLOW_ATTACK  ? (TcgDuel_AttackChoice(&Field(0, 0)->attacks[B.action.attack], NULL) == 1
-                                                               ? "Aim at which of their Benched Pokemon?"
-                                                               : "Switch with which of your Benched Pokemon?")
                                : B.step < B.nsteps      ? B.steps[B.step].prompt
                                                         : "";
             char line[96];

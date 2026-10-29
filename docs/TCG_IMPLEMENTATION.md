@@ -344,3 +344,7 @@ builder (type filters, in-deck/owned counts, LEFT/RIGHT remove/add, START checks
 deck), `src/engine/duel/core.asm` DuelMenuData for the SELECT quick menu (Hand /
 Attack / Check / PKMN Power / Retreat / Done), `effect_functions.asm`, `duel.asm` and
 `substatus.asm` for effect semantics and the damage order.
+
+## Every attack (1.46.0)
+All 319 attacks of the 228 cards have their effect: the last 20 (Metronome, Mirror Move, Amnesia, Prophecy...)
+and their choices are in docs/COOP_NOTES.md "Every POKeMON card attack"; tests tools/tcg/test_attacks.c.

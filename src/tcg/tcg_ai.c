@@ -566,6 +566,19 @@ int TcgDuel_AiAction(const struct TcgDuel *g, struct TcgAction *a)
         }
         else if (choice == 2)
             a->target = BestPokemon(g, g->current);
+        TcgDuel_AiAttackChoices(g, a); /* (Amnesia, Metronome, Conversion...) */
+        if (TcgDuel_IsMetronome(&TcgDuel_Field(g, g->current, 0)->attacks[bestAttack]) && a->copy)
+        {
+            /* the copied attack's own Bench pick */
+            const struct TcgAttack *copy = TcgDuel_MetronomeAttack(g, g->current, a->copy);
+            unsigned c2 = TcgDuel_AttackChoice(copy, NULL);
+            if (c2 == 1)
+                for (s = 1; s < TCG_FIELD_SIZE; s++)
+                    if (TcgDuel_Field(g, g->current ^ 1, s))
+                        a->target = (uint8_t)s;
+            if (c2 == 2)
+                a->target = BestPokemon(g, g->current);
+        }
         if (Legal(g, a))
             return 1;
         memset(a, 0, sizeof(*a));

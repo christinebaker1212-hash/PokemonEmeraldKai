@@ -90,6 +90,18 @@ lists={
  'ElectrodeEnergySpikeEffectCommands':('ENERGY_SPIKE',0,0),
  'DragonairHyperBeamEffectCommands':('HYPER_BEAM',0,0),'GolduckHyperBeamEffectCommands':('HYPER_BEAM',0,0),
  'PoliwrathWhirlpoolEffectCommands':('HYPER_BEAM',0,0),
+ # The last twenty (1.46.0): their choices travel in TcgAction.option / copy / selections / target
+ 'NinetalesMixUpEffectCommands':('MIX_UP',0,0),'MoltresWildfireEffectCommands':('WILDFIRE',0,0),
+ 'PoliwhirlAmnesiaEffectCommands':('AMNESIA',0,0),'SlowpokeAmnesiaEffectCommands':('AMNESIA',0,0),
+ 'MagnemiteMagneticStormEffectCommands':('MAGNETIC_STORM',0,0),'MarowakWailEffectCommands':('WAIL',0,0),
+ 'SlowpokeScavengeEffectCommands':('SCAVENGE',0,0),'GastlyDestinyBondEffectCommands':('DESTINY_BOND',0,0),
+ 'HypnoProphecyEffectCommands':('PROPHECY',0,0),'MewMysteryAttackEffectCommands':('MYSTERY_ATTACK',0,0),
+ 'MewDevolutionBeamEffectCommands':('DEVOLUTION_BEAM',0,0),
+ 'PidgeottoMirrorMoveEffectCommands':('MIRROR_MOVE',0,0),'SpearowMirrorMoveEffectCommands':('MIRROR_MOVE',0,0),
+ 'PidgeotGaleEffectCommands':('GALE',0,0),'PidgeotHurricaneEffectCommands':('HURRICANE',0,0),
+ 'ClefairyMetronomeEffectCommands':('METRONOME',0,0),'ClefableMetronomeEffectCommands':('METRONOME',0,0),
+ 'DittoMorphEffectCommands':('MORPH',0,0),
+ 'PorygonConversion1EffectCommands':('CONVERSION_1',0,0),'PorygonConversion2EffectCommands':('CONVERSION_2',0,0),
 }
 covered=[];pending=[]
 for name,commands in x['effects'].items():

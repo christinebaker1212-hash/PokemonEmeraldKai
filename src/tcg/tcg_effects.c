@@ -72,7 +72,25 @@ enum
     FX_ENERGY_CONVERSION,
     FX_ENERGY_ABSORPTION,
     FX_ENERGY_SPIKE,
-    FX_HYPER_BEAM
+    FX_HYPER_BEAM,
+    /* (1.46.0: the last twenty attacks, from effect_functions.asm) */
+    FX_MIX_UP,
+    FX_WILDFIRE,
+    FX_AMNESIA,
+    FX_MAGNETIC_STORM,
+    FX_WAIL,
+    FX_SCAVENGE,
+    FX_DESTINY_BOND,
+    FX_PROPHECY,
+    FX_MYSTERY_ATTACK,
+    FX_DEVOLUTION_BEAM,
+    FX_MIRROR_MOVE,
+    FX_GALE,
+    FX_HURRICANE,
+    FX_METRONOME,
+    FX_MORPH,
+    FX_CONVERSION_1,
+    FX_CONVERSION_2
 };
 #define BOTH_PHASES 2
 #define ANY_TYPE 7
@@ -163,6 +181,11 @@ static void Switch(struct TcgDuel *g, unsigned who, unsigned slot)
     p->field[slot].charged = 0;
     p->field[slot].effectBy = 0;
     p->field[slot].burn = p->field[slot].shift = 0;
+    p->field[slot].disabled = p->field[slot].destinyBond = p->field[slot].weakAs = p->field[slot].resistAs = 0;
+    p->field[slot].mirrorDamage = 0;
+    p->field[slot].mirrorCondition = p->field[slot].mirrorPoison = p->field[slot].mirrorWeaken = 0;
+    p->field[slot].mirrorNoAttack = p->field[slot].mirrorNoRetreat = p->field[slot].mirrorEffect = 0;
+    p->field[slot].mirrorArg = p->field[slot].mirrorWeak = 0;
     TcgDuel_Event(g, TCG_EV_SWITCH, who, slot, 0, 0, 0);
 }
 static void ToBench(struct TcgDuel *g, unsigned who, unsigned physical)
@@ -242,9 +265,9 @@ void TcgDuel_SelfDamage(struct TcgDuel *g, int amount)
     unsigned type = TcgDuel_Type(g, g->current, 0);
     if (!c || amount <= 0)
         return;
-    if (c->weakness == type)
+    if (TcgDuel_Weakness(g, g->current, 0) == type)
         amount *= 2;
-    if (c->resistance == type)
+    if (TcgDuel_Resistance(g, g->current, 0) == type)
         amount -= 30;
     amount = TcgPower_AttackDamage(g, g->current, 0, amount, 0);
     if (amount <= 0)
@@ -279,6 +302,210 @@ unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required)
         return 2;
     }
     return 0;
+}
+int TcgDuel_IsMetronome(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    return e && e->kind == FX_METRONOME;
+}
+unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    if (!e)
+        return TCG_ASK_NONE;
+    switch (e->kind)
+    {
+    case FX_SCAVENGE:
+        return TCG_ASK_DISCARD_TRAINER;
+    case FX_PROPHECY:
+        return TCG_ASK_ORDER_TOP3;
+    case FX_DEVOLUTION_BEAM:
+        return TCG_ASK_EVOLVED;
+    }
+    return TCG_ASK_NONE;
+}
+static int RealAttack(const struct TcgAttack *a) { return a && a->name[0] && a->category != TCG_POKEMON_POWER; }
+const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy)
+{
+    const struct TcgCard *foe = TcgDuel_Field(g, player ^ 1, 0);
+    const struct TcgAttack *a;
+    if (!foe || foe->kind != TCG_POKEMON || copy < 1 || copy > 2)
+        return NULL;
+    a = &foe->attacks[copy - 1];
+    /* (never Metronome with Metronome) */
+    if (!RealAttack(a) || TcgDuel_IsMetronome(a) || !TcgDuel_EffectSupported(a->effect))
+        return NULL;
+    return a;
+}
+static unsigned FireEnergyCards(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgFieldCard *f = &g->players[who].field[slot];
+    unsigned i, n = 0;
+    for (i = 0; i < f->attachedSize; i++)
+        n += g->players[who].cards[f->attached[i]] == TCG_CARD_FIRE_ENERGY;
+    return n;
+}
+static int HasEvolved(const struct TcgDuel *g, unsigned who)
+{
+    unsigned s;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (g->players[who].field[s].stackSize > 1)
+            return 1;
+    return 0;
+}
+static const char *const sTypeLabels[TCG_COLORLESS] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC"};
+unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack,
+                               const char *labels[TCG_MAX_OPTIONS], uint8_t ok[TCG_MAX_OPTIONS])
+{
+    static const char *const sCounts[TCG_MAX_OPTIONS] = {"NONE", "1", "2", "3", "4", "5", "6", "7"};
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    const struct TcgCard *foe = TcgDuel_Field(g, player ^ 1, 0);
+    unsigned i, n = 0;
+    if (!e)
+        return 0;
+    switch (e->kind)
+    {
+    case FX_AMNESIA:
+    case FX_METRONOME:
+        /* the Defending Pokemon's attacks */
+        if (!foe || foe->kind != TCG_POKEMON)
+            return 0;
+        for (i = 0; i < 2; i++)
+        {
+            labels[i] = foe->attacks[i].name[0] ? foe->attacks[i].name : "---";
+            ok[i] = e->kind == FX_AMNESIA ? RealAttack(&foe->attacks[i])
+                                         : TcgDuel_MetronomeAttack(g, player, i + 1) != NULL;
+        }
+        return 2;
+    case FX_MIRROR_MOVE:
+        /* Amnesia used on it: which of the Defending Pokemon's attacks to give it back to */
+        if (g->players[player].field[0].mirrorEffect != TCG_MIRROR_AMNESIA || !foe || foe->kind != TCG_POKEMON)
+            return 0;
+        for (i = 0; i < 2; i++)
+        {
+            labels[i] = foe->attacks[i].name[0] ? foe->attacks[i].name : "---";
+            ok[i] = RealAttack(&foe->attacks[i]);
+        }
+        return 2;
+    case FX_WILDFIRE:
+        n = FireEnergyCards(g, player, 0);
+        for (i = 0; i <= n && i < TCG_MAX_OPTIONS; i++)
+            labels[i] = sCounts[i], ok[i] = 1;
+        return i;
+    case FX_CONVERSION_1:
+    case FX_CONVERSION_2:
+        for (i = 0; i < TCG_COLORLESS; i++)
+            labels[i] = sTypeLabels[i], ok[i] = 1;
+        return TCG_COLORLESS;
+    case FX_PROPHECY:
+        labels[0] = "YOUR DECK", ok[0] = g->players[player].deckSize != 0;
+        labels[1] = "THEIR DECK", ok[1] = g->players[player ^ 1].deckSize != 0;
+        return 2;
+    case FX_DEVOLUTION_BEAM:
+        labels[0] = "YOUR POKEMON", ok[0] = (uint8_t)HasEvolved(g, player);
+        labels[1] = "THEIR POKEMON", ok[1] = (uint8_t)HasEvolved(g, player ^ 1);
+        return 2;
+    }
+    return 0;
+}
+unsigned TcgDuel_Weakness(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, player, slot);
+    const struct TcgFieldCard *f = &g->players[player].field[slot];
+    if (!c)
+        return TCG_NONE;
+    return f->weakAs && c->weakness != TCG_NONE ? f->weakAs - 1u : c->weakness;
+}
+unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, player, slot);
+    const struct TcgFieldCard *f = &g->players[player].field[slot];
+    if (!c)
+        return TCG_NONE;
+    return f->resistAs && c->resistance != TCG_NONE ? f->resistAs - 1u : c->resistance;
+}
+/* The AI's choices. The original's AI never picks Prophecy or Metronome's attack ("does nothing for AI"); it
+ * is given sensible ones here so its Clefairy can still attack. */
+void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
+{
+    const struct TcgCard *self = TcgDuel_Field(g, g->current, 0), *foe = TcgDuel_Field(g, g->current ^ 1, 0);
+    const struct TcgAttack *attack = self ? &self->attacks[a->attack & 1] : NULL;
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    const struct TcgPlayer *p = &g->players[g->current];
+    unsigned i, s;
+    if (!e)
+        return;
+    switch (e->kind)
+    {
+    case FX_METRONOME:
+    {
+        unsigned best = 0, bestDamage = 0;
+        for (i = 1; i <= 2; i++)
+        {
+            const struct TcgAttack *c = TcgDuel_MetronomeAttack(g, g->current, i);
+            if (c && (!best || c->damage > bestDamage))
+                best = i, bestDamage = c->damage;
+        }
+        a->copy = (uint8_t)best;
+        break;
+    }
+    case FX_AMNESIA:
+    case FX_MIRROR_MOVE:
+        /* AIPickAttackForAmnesia: the second attack if it has the Energy for it, else the first real one */
+        if (foe)
+            a->option = (uint8_t)(RealAttack(&foe->attacks[1]) && TcgDuel_CanAttack(g, g->current ^ 1, 1) ? 1
+                                  : RealAttack(&foe->attacks[0])                                       ? 0
+                                                                                                        : 1);
+        break;
+    case FX_WILDFIRE:
+        a->option = 0; /* (the original's AI always discards none) */
+        break;
+    case FX_CONVERSION_1:
+        /* its own Pokemon's type, so the Defending Pokemon becomes weak to them */
+        a->option = TCG_FIRE;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            unsigned t = TcgDuel_Field(g, g->current, s) ? TcgDuel_Type(g, g->current, s) : TCG_COLORLESS;
+            if (t < TCG_COLORLESS)
+            {
+                a->option = (uint8_t)t;
+                break;
+            }
+        }
+        break;
+    case FX_CONVERSION_2:
+        /* the Defending Pokemon's type unless it's Colorless */
+        a->option = foe && TcgDuel_Type(g, g->current ^ 1, 0) < TCG_COLORLESS ? (uint8_t)TcgDuel_Type(g, g->current ^ 1, 0)
+                                                                              : TCG_FIRE;
+        break;
+    case FX_PROPHECY:
+        a->option = 0;
+        a->selectionCount = 0; /* (looks, changes nothing) */
+        break;
+    case FX_DEVOLUTION_BEAM:
+        /* theirs first, else its own */
+        for (i = 0; i < 2; i++)
+        {
+            unsigned who = g->current ^ (i == 0);
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (g->players[who].field[s].stackSize > 1)
+                {
+                    a->option = (uint8_t)(i == 0);
+                    a->target = (uint8_t)s;
+                    return;
+                }
+        }
+        break;
+    case FX_SCAVENGE:
+        for (i = 0; i < p->discardSize; i++)
+            if (CardAt(g, g->current, p->discard[i])->kind == TCG_TRAINER)
+            {
+                a->selections[0] = p->discard[i];
+                a->selectionCount = 1;
+                break;
+            }
+        break;
+    }
 }
 static const char *const sFamily[][3] = {
     /* Call for Family: the names searched for, by command list. */
@@ -336,7 +563,53 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
         return "There are no Energy cards in your discard pile.";
     case FX_ENERGY_SPIKE:
         return p->deckSize ? NULL : "Your deck is empty.";
+    case FX_AMNESIA:
+    {
+        const struct TcgCard *c = TcgDuel_Field(g, player ^ 1, 0);
+        return c && c->kind == TCG_POKEMON && (RealAttack(&c->attacks[0]) || RealAttack(&c->attacks[1]))
+                   ? NULL
+                   : "The Defending Pokemon has no attacks to choose.";
     }
+    case FX_METRONOME:
+        return TcgDuel_MetronomeAttack(g, player, 1) || TcgDuel_MetronomeAttack(g, player, 2)
+                   ? NULL
+                   : "There's no attack Metronome can copy.";
+    case FX_WILDFIRE:
+        return FireEnergyCards(g, player, 0) ? NULL : "Not enough Fire Energy.";
+    case FX_WAIL:
+        return BenchCount(g, player) < TCG_FIELD_SIZE - 1 || BenchCount(g, player ^ 1) < TCG_FIELD_SIZE - 1
+                   ? NULL
+                   : "There's no space on either Bench.";
+    case FX_SCAVENGE:
+        if (!TcgDuel_Energy(g, player, 0, TCG_PSYCHIC))
+            return "Not enough Psychic Energy.";
+        for (i = 0; i < p->discardSize; i++)
+            if (CardAt(g, player, p->discard[i])->kind == TCG_TRAINER)
+                return NULL;
+        return "There are no Trainer cards in your discard pile.";
+    case FX_DESTINY_BOND:
+        return TcgDuel_Energy(g, player, 0, TCG_PSYCHIC) ? NULL : "Not enough Psychic Energy.";
+    case FX_PROPHECY:
+        return p->deckSize || g->players[player ^ 1].deckSize ? NULL : "There are no cards left in either deck.";
+    case FX_DEVOLUTION_BEAM:
+        return HasEvolved(g, player) || HasEvolved(g, player ^ 1) ? NULL : "There are no evolved Pokemon in play.";
+    case FX_MIRROR_MOVE:
+        return self->mirrorDamage || self->mirrorCondition || self->mirrorPoison || self->mirrorWeaken ||
+                       self->mirrorNoAttack || self->mirrorNoRetreat || self->mirrorEffect || self->mirrorWeak
+                   ? NULL
+                   : "It wasn't attacked last turn.";
+    case FX_CONVERSION_1:
+    {
+        const struct TcgCard *c = TcgDuel_Field(g, player ^ 1, 0);
+        return c && c->weakness != TCG_NONE ? NULL : "The Defending Pokemon has no Weakness.";
+    }
+    case FX_CONVERSION_2:
+    {
+        const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+        return c && c->resistance != TCG_NONE ? NULL : "It has no Resistance.";
+    }
+    }
+    (void)foe;
     return NULL;
 }
 
@@ -379,6 +652,76 @@ static int TakeEnergyFromDiscard(struct TcgDuel *g, unsigned max, int attach)
             n++;
         }
     return (int)n;
+}
+static void ShuffleList(struct TcgDuel *g, uint8_t *list, unsigned n)
+{
+    unsigned i;
+    for (i = n; i > 1; i--)
+    {
+        unsigned j = Tcg_RandomBelow(&g->rng, i);
+        uint8_t t = list[i - 1];
+        list[i - 1] = list[j];
+        list[j] = t;
+    }
+}
+/* Wail: Basic Pokemon at random from the deck until the Bench is full (Wail_FillBenchEffect .FillBench) */
+static void FillBench(struct TcgDuel *g, unsigned who)
+{
+    struct TcgPlayer *p = &g->players[who];
+    uint8_t list[TCG_DECK_SIZE];
+    unsigned n = p->deckSize, i, s;
+    memcpy(list, p->deck, n);
+    ShuffleList(g, list, n);
+    for (i = 0; i < n && BenchCount(g, who) < TCG_FIELD_SIZE - 1; i++)
+    {
+        const struct TcgCard *c = CardAt(g, who, list[i]);
+        int at = -1;
+        if (c->kind != TCG_POKEMON || c->stage)
+            continue;
+        for (s = 0; s < p->deckSize; s++)
+            if (p->deck[s] == list[i])
+                at = (int)s;
+        for (s = 1; s < TCG_FIELD_SIZE && at >= 0; s++)
+            if (!p->field[s].stackSize)
+            {
+                struct TcgFieldCard *f = &p->field[s];
+                memset(f, 0, sizeof(*f));
+                f->stack[f->stackSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+                f->enteredTurn = g->turn;
+                TcgDuel_Event(g, TCG_EV_PLAY, who, s, 0, c->id, 0);
+                /* (put into play during its owner's turn: Firegiver and the like) */
+                if (who == g->current)
+                    TcgPower_OnPlay(g, who, s);
+                break;
+            }
+    }
+    TcgDuel_Shuffle(g, who);
+}
+/* Devolution Beam: the top card back to the hand; its damage stays (a Knock Out if it's too much now) */
+static void Devolve(struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[slot];
+    if (f->stackSize < 2)
+        return;
+    p->hand[p->handSize++] = f->stack[--f->stackSize];
+    f->condition = TCG_HEALTHY;
+    f->poison = 0;
+    f->noAttack = f->noRetreat = f->weaken = f->guard = f->charged = f->effectBy = 0;
+    f->disabled = f->weakAs = f->resistAs = 0;
+    f->burn = f->shift = 0;
+    TcgDuel_Event(g, TCG_EV_DEVOLVE, who, slot, 0, p->cards[f->stack[f->stackSize - 1]], 0);
+    TcgDuel_Log(g, "%s devolved.", CardAt(g, who, f->stack[f->stackSize - 1])->name);
+}
+/* Amnesia on the Defending Pokemon (ApplyAmnesiaToAttack) */
+static void Amnesia(struct TcgDuel *g, unsigned attack)
+{
+    struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
+    const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+    if (!c || attack > 1 || g->foeImmune == TCG_IMMUNE_YES)
+        return;
+    foe->disabled = (uint8_t)(attack + 1);
+    TcgDuel_Log(g, "%s can't use %s next turn.", c->name, c->attacks[attack].name);
 }
 int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const struct TcgAction *action, unsigned *damage,
                          int after)
@@ -898,6 +1241,327 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
                 op->discard[op->discardSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, (unsigned)pick);
         }
         break;
+
+    /* (1.46.0) */
+    case FX_MIX_UP:
+        if (after)
+        {
+            /* Their Pokemon cards in hand go into their deck; as many Pokemon cards from the top of it go back */
+            unsigned back = 0;
+            for (i = op->handSize; i > 0; i--)
+                if (CardAt(g, g->current ^ 1, op->hand[i - 1])->kind == TCG_POKEMON)
+                {
+                    op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, i - 1);
+                    back++;
+                }
+            TcgDuel_Shuffle(g, g->current ^ 1);
+            for (i = op->deckSize; i > 0 && n < back; i--)
+                if (CardAt(g, g->current ^ 1, op->deck[i - 1])->kind == TCG_POKEMON)
+                {
+                    op->hand[op->handSize++] = TcgPile_Remove(op->deck, &op->deckSize, i - 1);
+                    n++;
+                }
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ 1, 0, 0, 0, 0);
+            TcgDuel_Log(g, "Mix-Up: %u Pokemon cards shuffled away and drawn again.", back);
+        }
+        break;
+    case FX_WILDFIRE:
+        if (!after)
+        {
+            /* Discard that many Fire Energy cards from it first */
+            if (action->option > FireEnergyCards(g, g->current, 0))
+                return TCG_INVALID;
+            if (action->option && !DiscardEnergy(g, g->current, 0, TCG_FIRE, action->option))
+                return TCG_INVALID;
+        }
+        else
+        {
+            for (i = 0; i < action->option && op->deckSize; i++)
+                op->discard[op->discardSize++] = op->deck[--op->deckSize];
+            if (i)
+            {
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ 1, 0, i, 0, 0);
+                TcgDuel_Log(g, "Wildfire: %u cards from the top of their deck discarded.", i);
+            }
+        }
+        break;
+    case FX_AMNESIA:
+        if (!after)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+            if (!c || action->option > 1 || !RealAttack(&c->attacks[action->option]))
+                return TCG_INVALID;
+            Amnesia(g, action->option);
+        }
+        break;
+    case FX_MAGNETIC_STORM:
+        if (after)
+        {
+            /* Every Energy card on its side, shuffled, dealt out evenly; the rest to Pokemon chosen at random */
+            uint8_t energy[TCG_DECK_SIZE], slots[TCG_FIELD_SIZE];
+            unsigned count = 0, mons = 0, each, k;
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+            {
+                struct TcgFieldCard *f = &p->field[s];
+                if (!f->stackSize)
+                    continue;
+                slots[mons++] = (uint8_t)s;
+                for (i = f->attachedSize; i > 0; i--)
+                    if (CardAt(g, g->current, f->attached[i - 1])->kind == TCG_ENERGY)
+                        energy[count++] = TcgPile_Remove(f->attached, &f->attachedSize, i - 1);
+            }
+            if (!mons)
+                break;
+            ShuffleList(g, energy, count);
+            each = count / mons;
+            for (k = 0, i = 0; k < mons; k++)
+                for (s = 0; s < each; s++, i++)
+                    p->field[slots[k]].attached[p->field[slots[k]].attachedSize++] = energy[i];
+            ShuffleList(g, slots, mons);
+            for (k = 0; i < count; i++, k++)
+                p->field[slots[k]].attached[p->field[slots[k]].attachedSize++] = energy[i];
+            for (k = 0; k < mons; k++)
+                TcgDuel_Event(g, TCG_EV_ATTACH, g->current, slots[k], 0, 0, 0);
+            TcgDuel_Log(g, "Magnetic Storm: %u Energy cards dealt out again.", count);
+        }
+        break;
+    case FX_WAIL:
+        if (after)
+        {
+            FillBench(g, g->current ^ 1);
+            FillBench(g, g->current);
+        }
+        break;
+    case FX_SCAVENGE:
+        if (!after)
+        {
+            if (!DiscardEnergy(g, g->current, 0, TCG_PSYCHIC, 1))
+                return TCG_INVALID;
+        }
+        else
+        {
+            int at = -1;
+            for (i = 0; i < p->discardSize; i++)
+                if (CardAt(g, g->current, p->discard[i])->kind == TCG_TRAINER &&
+                    (action->selectionCount ? p->discard[i] == action->selections[0] : at < 0))
+                    at = (int)i;
+            if (at < 0)
+                return TCG_INVALID;
+            p->hand[p->handSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, 1, 0, 0);
+            TcgDuel_Log(g, "Scavenge: %s back to the hand.", CardAt(g, g->current, p->hand[p->handSize - 1])->name);
+        }
+        break;
+    case FX_DESTINY_BOND:
+        if (!after)
+        {
+            if (!DiscardEnergy(g, g->current, 0, TCG_PSYCHIC, 1))
+                return TCG_INVALID;
+            self->destinyBond = 1;
+        }
+        break;
+    case FX_PROPHECY:
+        if (after)
+        {
+            /* The top cards of that deck (up to 3) in the order chosen, the first on top */
+            struct TcgPlayer *d = &g->players[g->current ^ (action->option ? 1 : 0)];
+            unsigned top = d->deckSize < 3 ? d->deckSize : 3, k;
+            if (action->option > 1)
+                return TCG_INVALID;
+            if (!action->selectionCount)
+            {
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ (action->option ? 1 : 0), 0, 0, 0, 0);
+                break;
+            }
+            if (action->selectionCount != top)
+                return TCG_INVALID;
+            for (i = 0; i < top; i++)
+            {
+                for (k = 0; k < top && d->deck[d->deckSize - 1 - k] != action->selections[i]; k++)
+                    ;
+                if (k == top)
+                    return TCG_INVALID;
+                for (k = 0; k < i; k++)
+                    if (action->selections[k] == action->selections[i])
+                        return TCG_INVALID;
+            }
+            for (i = 0; i < top; i++)
+                d->deck[d->deckSize - 1 - i] = action->selections[i];
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ (action->option ? 1 : 0), 0, 0, 0, 0);
+            TcgDuel_Log(g, "Prophecy: the top of a deck rearranged.");
+        }
+        break;
+    case FX_MYSTERY_ATTACK:
+        if (!after)
+        {
+            /* 10 damage and one of eight things at random (MysteryAttack_RandomEffect) */
+            g->coinResult = (uint8_t)Tcg_RandomBelow(&g->rng, 8);
+            *damage = 10;
+            switch (g->coinResult)
+            {
+            case 0: foe->condition = TCG_PARALYZED; break;
+            case 1: foe->poison = 10; break;
+            case 2: foe->condition = TCG_ASLEEP; break;
+            case 3: foe->condition = TCG_CONFUSED; break;
+            case 6: *damage = 20; break;
+            case 7: *damage = 0; break;
+            }
+        }
+        else if (g->coinResult == 4)
+            Heal(g, g->current, 0, 10);
+        break;
+    case FX_DEVOLUTION_BEAM:
+        if (after)
+        {
+            unsigned who = g->current ^ (action->option ? 1 : 0);
+            if (action->option > 1 || action->target >= TCG_FIELD_SIZE || g->players[who].field[action->target].stackSize < 2)
+                return TCG_INVALID;
+            /* (the opponent's: not through Neutralizing Shield, Transparency, Agility...) */
+            if (who != g->current &&
+                (action->target ? TcgPower_Immune(g, who, action->target) : g->foeImmune == TCG_IMMUNE_YES))
+                break;
+            Devolve(g, who, action->target);
+        }
+        break;
+    case FX_MIRROR_MOVE:
+        if (!after)
+        {
+            /* What their last attack did to it, done back (MirrorMove_BeforeDamage) */
+            if (self->mirrorEffect == TCG_MIRROR_AMNESIA)
+            {
+                const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+                if (!c || action->option > 1 || !RealAttack(&c->attacks[action->option]))
+                    return TCG_INVALID;
+                *damage = 0;
+                Amnesia(g, action->option);
+                break;
+            }
+            *damage = self->mirrorDamage;
+            if (self->mirrorPoison)
+                foe->poison = self->mirrorPoison;
+            if (self->mirrorCondition)
+                foe->condition = self->mirrorCondition;
+            if (self->mirrorWeaken)
+            {
+                foe->weaken = self->mirrorWeaken;
+                if (self->mirrorWeaken != TCG_WEAKEN_SMOKESCREEN)
+                    foe->effectBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+            }
+            if (self->mirrorNoAttack)
+            {
+                foe->noAttack = self->mirrorNoAttack;
+                if (self->mirrorNoAttack == 2)
+                    foe->effectBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+            }
+            if (self->mirrorNoRetreat)
+                foe->noRetreat = self->mirrorNoRetreat;
+        }
+        else if (foe->stackSize && g->foeImmune != TCG_IMMUNE_YES)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+            if (self->mirrorEffect == TCG_MIRROR_DISCARD_ENERGY)
+            {
+                int pick = -1;
+                for (i = 0; i < foe->attachedSize; i++)
+                {
+                    const struct TcgCard *en = CardAt(g, g->current ^ 1, foe->attached[i]);
+                    if (en->kind == TCG_ENERGY && (pick < 0 || en->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY))
+                        pick = (int)i;
+                }
+                if (pick >= 0)
+                    op->discard[op->discardSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, (unsigned)pick);
+            }
+            if (self->mirrorWeak && c && c->weakness != TCG_NONE)
+                foe->weakAs = self->mirrorWeak;
+        }
+        break;
+    case FX_GALE:
+        if (after)
+        {
+            /* The Defending Pokemon with one of their Benched at random, then it with one of its own */
+            if (g->foeImmune != TCG_IMMUNE_YES && foe->stackSize && BenchCount(g, g->current ^ 1) &&
+                (s = RandomSlot(g, g->current ^ 1, 1)) != TCG_NONE)
+                Switch(g, g->current ^ 1, s);
+            if (BenchCount(g, g->current) && (s = RandomSlot(g, g->current, 1)) != TCG_NONE)
+                Switch(g, g->current, s);
+        }
+        break;
+    case FX_HURRICANE:
+        if (after && foe->stackSize && g->foeImmune != TCG_IMMUNE_YES && HpLeft(g, g->current ^ 1, 0))
+        {
+            /* Unless it's Knocked Out: it and every card on it back to their hand */
+            const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+            TcgDuel_Log(g, "Hurricane: %s returned to the hand.", c->name);
+            for (i = 0; i < foe->stackSize; i++)
+                op->hand[op->handSize++] = foe->stack[i];
+            for (i = 0; i < foe->attachedSize; i++)
+                op->hand[op->handSize++] = foe->attached[i];
+            memset(foe, 0, sizeof(*foe));
+            TcgDuel_Event(g, TCG_EV_TO_HAND, g->current ^ 1, 0, 0, c->id, 0);
+        }
+        break;
+    case FX_METRONOME:
+        break; /* (tcg_duel.c uses the copied attack in its place) */
+    case FX_MORPH:
+        if (after)
+        {
+            /* A copy of a Basic Pokemon (not Ditto) at random from the deck; the card itself stays there */
+            uint8_t picks[TCG_DECK_SIZE];
+            unsigned top;
+            for (i = 0; i < p->deckSize; i++)
+            {
+                const struct TcgCard *c = CardAt(g, g->current, p->deck[i]);
+                if (c->kind == TCG_POKEMON && !c->stage && c->id != TCG_CARD_DITTO)
+                    picks[n++] = p->deck[i];
+            }
+            if (!n || !self->stackSize)
+            {
+                TcgDuel_Log(g, "Morph: there's no Basic Pokemon in the deck.");
+                break;
+            }
+            /* (Clefable's Metronome copying it: the cards under it go to the discard pile) */
+            while (self->stackSize > 1)
+            {
+                p->discard[p->discardSize++] = self->stack[0];
+                memmove(self->stack, self->stack + 1, --self->stackSize);
+            }
+            top = self->stack[0];
+            p->cards[top] = p->cards[picks[Tcg_RandomBelow(&g->rng, n)]];
+            self->damage = 0;
+            self->condition = TCG_HEALTHY;
+            self->poison = 0;
+            self->noAttack = self->noRetreat = self->weaken = self->guard = self->charged = self->effectBy = 0;
+            self->disabled = self->weakAs = self->resistAs = self->burn = self->shift = 0;
+            TcgDuel_Event(g, TCG_EV_MORPH, g->current, 0, 0, p->cards[top], 0);
+            TcgDuel_Log(g, "Ditto morphed into %s.", CardAt(g, g->current, top)->name);
+        }
+        break;
+    case FX_CONVERSION_1:
+        if (after)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
+            if (action->option >= TCG_COLORLESS)
+                return TCG_INVALID;
+            if (c && c->weakness != TCG_NONE && g->foeImmune != TCG_IMMUNE_YES)
+            {
+                foe->weakAs = (uint8_t)(action->option + 1);
+                TcgDuel_Log(g, "%s's Weakness is now %s.", c->name, sTypeLabels[action->option]);
+            }
+        }
+        break;
+    case FX_CONVERSION_2:
+        if (after)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, g->current, 0);
+            if (action->option >= TCG_COLORLESS)
+                return TCG_INVALID;
+            if (c && c->resistance != TCG_NONE)
+            {
+                self->resistAs = (uint8_t)(action->option + 1);
+                TcgDuel_Log(g, "%s's Resistance is now %s.", c->name, sTypeLabels[action->option]);
+            }
+        }
+        break;
     default:
         return TCG_UNSUPPORTED;
     }
@@ -917,7 +1581,8 @@ int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack)
     case FX_PARALYZE_COIN: case FX_POISON: case FX_POISON_COIN: case FX_CONFUSE_COIN: case FX_SLEEP:
     case FX_SLEEP_COIN: case FX_CONFUSE_BOTH: case FX_FOUL_GAS: case FX_VENOM_POWDER: case FX_CLAMP:
     case FX_LURE: case FX_OPP_SWITCH: case FX_WEAKEN: case FX_NO_ATTACK_COIN: case FX_NO_RETREAT_COIN:
-    case FX_HYPER_BEAM: case FX_PSYWAVE: case FX_SUPER_FANG:
+    case FX_HYPER_BEAM: case FX_PSYWAVE: case FX_SUPER_FANG: case FX_AMNESIA: case FX_MYSTERY_ATTACK:
+    case FX_MIRROR_MOVE: case FX_GALE: case FX_HURRICANE: case FX_CONVERSION_1: case FX_DEVOLUTION_BEAM:
         return 1;
     }
     return 0;

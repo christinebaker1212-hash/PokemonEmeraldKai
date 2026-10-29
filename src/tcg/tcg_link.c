@@ -128,6 +128,13 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
             H(f->charged);
             H(f->usedOnce);
             H(f->effectBy);
+            H(f->disabled);
+            H(f->destinyBond);
+            H(f->weakAs);
+            H(f->resistAs);
+            H(f->mirrorDamage);
+            H(f->mirrorCondition | f->mirrorPoison << 8 | f->mirrorWeaken << 16 | (uint32_t)f->mirrorNoAttack << 24);
+            H(f->mirrorNoRetreat | f->mirrorEffect << 8 | f->mirrorArg << 16 | (uint32_t)f->mirrorWeak << 24);
             H(f->burn);
             H(f->shift);
             for (k = 0; k < f->stackSize; k++)
@@ -184,7 +191,7 @@ int TcgLink_Accept(struct TcgLink *l, const uint16_t *deck, uint32_t now)
 static unsigned Actor(const struct TcgDuel *g) { return g->phase == TCG_PROMOTION ? g->promotePlayer : g->current; }
 int TcgLink_Submit(struct TcgLink *l, const struct TcgAction *a, uint32_t now)
 {
-    uint8_t p[85];
+    uint8_t p[27 + TCG_DECK_SIZE];
     uint32_t before;
     unsigned i;
     if (l->state != TCG_LINK_PLAYING || l->pending || (Actor(&l->game) != l->seat && a->type != TCG_CONCEDE) ||
@@ -215,12 +222,14 @@ int TcgLink_Submit(struct TcgLink *l, const struct TcgAction *a, uint32_t now)
     p[22] = a->attack;
     p[23] = a->target;
     p[24] = a->selectionCount;
+    p[25] = a->option;
+    p[26] = a->copy;
     for (i = 0; i < a->selectionCount; i++)
-        p[25 + i] = a->selections[i];
+        p[27 + i] = a->selections[i];
     l->pending = 1;
     l->deadline = now + 30000;
     l->error[0] = 0;
-    l->send(l->context, l->peer, p, 25 + a->selectionCount);
+    l->send(l->context, l->peer, p, 27 + a->selectionCount);
     return 1;
 }
 void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigned len, int willing, uint32_t now)
@@ -307,7 +316,7 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
         else if (l->pending && l->game.phase == TCG_FINISHED && l->game.winner == (l->seat ^ 1))
             return; /* we conceded first: the other side rolls this action back */
         if (l->pending || Read(p + 7) != l->sequence || Read(p + 11) != TcgLink_Hash(&l->game) ||
-            (Actor(&l->game) == l->seat && p[19] != TCG_CONCEDE) || p[24] > 60 || len != 25u + p[24])
+            (Actor(&l->game) == l->seat && p[19] != TCG_CONCEDE) || p[24] > 60 || len != 27u + p[24])
         {
             TcgLink_Cancel(l, "Invalid or out-of-order card action.");
             return;
@@ -318,7 +327,9 @@ void TcgLink_Receive(struct TcgLink *l, unsigned from, const uint8_t *p, unsigne
         a.attack = p[22];
         a.target = p[23];
         a.selectionCount = p[24];
-        memcpy(a.selections, p + 25, a.selectionCount);
+        a.option = p[25];
+        a.copy = p[26];
+        memcpy(a.selections, p + 27, a.selectionCount);
         next = l->game;
         int result = TCG_OK;
         if (a.type == TCG_CONCEDE && next.phase != TCG_FINISHED)

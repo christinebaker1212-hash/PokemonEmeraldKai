@@ -162,7 +162,8 @@ three POKéMON CENTERs, 24 special trainer decks (gen_special_decks.py), CARD PO
 friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION, card duel TOURNAMENTs
 (mp_tourney.c TK_CARDS); NPCs' Prize cards (2/3/4/6) and records (collection format 6, test tcg_record); the GAME CENTER
 CARD SHOP sells one of each (gcDecks / gcSingles) and runs the CARD CLUB's counter too;
-all 26 Pokemon Powers (tcg_powers.c, tests tools/tcg/test_powers.c + test_ui.sh "powers"); CARD SCALING (tcg_scale.c:
+all 26 Pokemon Powers (tcg_powers.c, tests tools/tcg/test_powers.c + test_ui.sh "powers"); every attack of the 228 cards (the last 20 and
+their menus: COOP_NOTES "Every POKéMON card attack", test_attacks.c); CARD SCALING (tcg_scale.c:
 Elo deck ratings from AI duels in the generated tcg_ratings.c, rerun tools/tcg/rate_decks.sh after any rules, AI or deck
 change; per-save skill; tcg_field.c Tcg_FitOpponent); CARD ART / CARD BACKS
 from the built-in graphics/tcg/printed.bin (tools/tcg/fetch_art.py + build_printed_art.py: scans, the back and each

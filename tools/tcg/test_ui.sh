@@ -166,6 +166,80 @@ test "$(grep -c 'screen 10 opted 1 phase 1 current 0' "$OUT/duel/log.txt")" -ge 
 expect duel 'screen 10 opted 1 phase 1 current 1'
 echo 'PASS the turn menu: B opens it on END TURN, A on the deck has CONCEDE (it asks first), END TURN ends the turn (only the Energy reminder asks)'
 
+# Nothing left to play from the hand: the cursor goes to your Active Pokemon. A hand of only a POTION (nothing
+# damaged) is done; with a Fire Energy still to attach it isn't.
+cat > "$OUT/done.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards fast
+mp cards open
+wait 20
+press A 2
+wait 200
+mp cards ready
+wait 300
+mp cards state
+mp cards discardhand
+mp cards hand 2
+mp cards focus 0 0
+wait 20
+mp cards checkdone
+wait 20
+mp cards state
+mp cards discardhand
+mp cards hand 221
+mp cards focus 0 0
+wait 20
+mp cards checkdone
+wait 20
+rendershot done
+quit
+SCRIPT
+run done
+test "$(grep -c 'refocus: nothing left to play, your Active' "$OUT/done/log.txt")" = 1 || { echo "FAIL done: the cursor didn't go to the Active once (only after the POTION)"; exit 1; }
+echo 'PASS nothing left to play: the cursor goes to your Active Pokemon (not while Energy can still be attached)'
+
+# An attack with a choice from a menu: Clefairy's Metronome copies Machop's Low Kick (ATTACK, Metronome, Low Kick)
+cat > "$OUT/metronome.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards fast
+mp cards open
+wait 20
+press A 2
+wait 200
+mp cards ready
+wait 300
+mp cards clear
+mp cards put 0 0 171
+mp cards attach 0 0 3 3
+mp cards put 1 0 125
+mp cards attach 1 0 5 2
+wait 30
+mp cards focus 1 0
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+press DOWN 2
+wait 6
+press A 2
+wait 10
+rendershot metronome
+press A 2
+wait 120
+mp cards state
+quit
+SCRIPT
+run metronome
+expect metronome 'attack menu: 2 choices'
+expect metronome 'metronome copies Low Kick'
+expect metronome 'screen 10 opted 1 phase 1 current 1'
+echo "PASS an attack's menu: Metronome copies the Defending Pokemon's attack"
+
 # The deck builder: take a CHARMANDER out of the deck (the list, then SELECT on the cards), add it back;
 # copy the deck, delete the one you duel with (the copy takes over).
 cat > "$OUT/builder.txt" <<'SCRIPT'

@@ -27,6 +27,20 @@ struct TcgFieldCard
     /* Pokemon Powers for the rest of the turn: burn (Charizard's Energy Burn: all its
      * Energy is Fire) and shift (Venomoth's Shift: its type + 1, 0 = its own). */
     uint8_t burn, shift;
+    /* Amnesia (disabled: the attack it can't use next turn, + 1), Destiny Bond (until its owner's next turn),
+     * Conversion 1 / 2 (weakAs / resistAs: the type + 1 its Weakness / Resistance became, until it leaves the
+     * Active spot), and what the opponent's last attack did to it, for Mirror Move (mirror*, kept through its
+     * owner's next turn; mirrorEffect TCG_MIRROR_*, mirrorWeak a Weakness type + 1) */
+    uint8_t disabled, destinyBond, weakAs, resistAs;
+    uint16_t mirrorDamage;
+    uint8_t mirrorCondition, mirrorPoison, mirrorWeaken, mirrorNoAttack, mirrorNoRetreat, mirrorEffect, mirrorArg,
+        mirrorWeak;
+};
+enum
+{
+    TCG_MIRROR_NONE,
+    TCG_MIRROR_AMNESIA,       /* mirrorArg: the attack it was used on */
+    TCG_MIRROR_DISCARD_ENERGY /* Hyper Beam and the like */
 };
 enum
 {
@@ -163,8 +177,12 @@ enum TcgEventType
     TCG_EV_WIN,          /* player wins; value: 0 prizes, 1 no Pokemon, 2 deck out, 3 concede */
     TCG_EV_RETREAT_FAIL, /* player's confused Active failed to retreat */
     TCG_EV_POWER,        /* player's slot (card) uses or triggers its Pokemon Power: value TCG_POWER_* */
-    TCG_EV_PEEK          /* player looked at card with Peek: value TCG_PEEK_* (the one event naming a
+    TCG_EV_PEEK,         /* player looked at card with Peek: value TCG_PEEK_* (the one event naming a
                           * hidden card: the duel screen shows it to that player alone) */
+    TCG_EV_DEVOLVE,      /* player/slot devolved (Devolution Beam): the top card went to the hand */
+    TCG_EV_TO_HAND,      /* player's Active and its cards went back to the hand (Hurricane) */
+    TCG_EV_MORPH,        /* player/slot became card (Ditto's Morph) */
+    TCG_EV_DECK_CHANGED  /* player's deck: value cards discarded from it (Wildfire), or 0 shuffled / looked at */
 };
 enum
 {
@@ -206,6 +224,9 @@ struct TcgDuel
 struct TcgAction
 {
     uint8_t type, hand, slot, attack, target;
+    /* An attack's choice from a list (TcgDuel_AttackOptions): Amnesia's attack, Wildfire's count, Conversion's
+     * type, Prophecy's and Devolution Beam's side (0 yours, 1 theirs); copy: Metronome's attack + 1 */
+    uint8_t option, copy;
     /* Caller-selected physical cards used for discards/search/retrieval.
      * Selections are validated; no hidden target is silently chosen for a player. */
     uint8_t selections[TCG_DECK_SIZE], selectionCount;
@@ -227,6 +248,28 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
 /* 0: no choice. 1: the attacker picks one of the opponent's Benched Pokemon
  * (action.target), 2: one of their own (action.target). */
 unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required);
+/* Attacks that ask for a choice from a list (TcgAction.option): the labels and which can be picked, and how many
+ * (0: none). Metronome lists the Defending Pokemon's attacks for TcgAction.copy instead (TcgDuel_IsMetronome). */
+#define TCG_MAX_OPTIONS 8
+unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack,
+                               const char *labels[TCG_MAX_OPTIONS], uint8_t ok[TCG_MAX_OPTIONS]);
+/* What else an attack asks for after its option (TCG_ASK_*) */
+enum
+{
+    TCG_ASK_NONE,
+    TCG_ASK_DISCARD_TRAINER, /* Scavenge: selections[0], a Trainer in your discard pile */
+    TCG_ASK_ORDER_TOP3,      /* Prophecy: selections, the top cards of that deck in their new order (first on top) */
+    TCG_ASK_EVOLVED          /* Devolution Beam: target, an evolved Pokemon on the option's side */
+};
+unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack);
+int TcgDuel_IsMetronome(const struct TcgAttack *attack);
+/* The attack Metronome copies (copy = the Defending Pokemon's attack + 1), NULL if it can't */
+const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy);
+/* The AI's picks for those choices (option, copy, selections, target) */
+void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a);
+/* Weakness / Resistance now (Conversion 1 / 2), TCG_NONE for none */
+unsigned TcgDuel_Weakness(const struct TcgDuel *g, unsigned player, unsigned slot);
+unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* Damage from an effect to any Pokemon in play: no Weakness/Resistance;
  * Defender, and for an Active Pokemon PlusPower and substatus, apply. */
 void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int amount, unsigned flags);

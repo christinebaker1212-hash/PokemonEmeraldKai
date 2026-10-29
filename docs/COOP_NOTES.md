@@ -2165,6 +2165,25 @@ What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like o
   FX_SHARDS (a Knock Out) and FX_RISE (a Basic put into play), run beside the existing waits, none longer.
   `mp cards fx 0/1/2` plays one on their Active.
 
+## Every POKéMON card attack (1.46.0)
+- The last 20 command lists from the original's effect_functions.asm (pret/poketcg), as FX_* kinds in
+  tcg_effects.c (generate_effects.py "lists"): Mix-Up, Wildfire, Amnesia, Magnetic Storm, Wail, Scavenge, Destiny
+  Bond, Prophecy, Mystery Attack, Devolution Beam, Mirror Move, Gale, Hurricane, Metronome, Morph, Conversion 1 / 2.
+  Every attack of the 228 cards has an effect now (no "Effect not yet implemented").
+- Choices: TcgAction.option (TcgDuel_AttackOptions: the menu's labels and which can be picked) and .copy (Metronome:
+  the Defending Pokemon's attack + 1; tcg_duel.c uses that attack in Metronome's place, its own type kept), then
+  TcgDuel_AttackAsk (Scavenge's Trainer, Prophecy's order, Devolution Beam's Pokemon). The table builds them as
+  steps (tcg_board.c AttackSteps / AttackStepsAfterOption, ST_ATTACK_OPTION, SRC_TOP3_*), logs "attack menu: N
+  choices", "metronome copies NAME", "attack option N". The AI: TcgDuel_AiAttackChoices.
+- New per-Pokemon state (TcgFieldCard): disabled (Amnesia, until its owner's turn ends), destinyBond (until its
+  owner's next turn), weakAs / resistAs (Conversion, until it leaves the Active spot; TcgDuel_Weakness /
+  TcgDuel_Resistance), mirror* (what the opponent's last attack did to it, recorded after every attack, cleared at
+  the end of its owner's turn). New events TCG_EV_DEVOLVE / TO_HAND / MORPH / DECK_CHANGED.
+- TCG_LINK_VERSION 9: an action carries option and copy (bytes 25-26, selections from 27).
+- When the hand has nothing left to play (tcg_board.c HandHasMove: HandPlayable plus TrainerHasUse for the plain
+  cases), the cursor goes to the Active ("refocus: nothing left to play, your Active"; `mp cards checkdone`,
+  `mp cards discardhand` stage it). Tests: tools/tcg/test_attacks.c, test_ui.sh "done" and "metronome".
+
 ## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
 Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
 drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to

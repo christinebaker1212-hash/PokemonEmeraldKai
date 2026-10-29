@@ -109,6 +109,7 @@ static void StartTurn(struct TcgDuel *g)
         p->field[s].barrier = 0;
         p->field[s].guard = 0;
         p->field[s].charged = p->field[s].charged == 1 ? 2 : 0;
+        p->field[s].destinyBond = 0; /* (Destiny Bond lasted the opponent's turn) */
     }
     TcgDuel_Event(g, TCG_EV_TURN, g->current, 0, g->turn, 0, 0);
     if (!TcgDuel_Draw(g, g->current, 1))
@@ -191,7 +192,9 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Field(g, player, 0);
-    return EnergyPaid(g, player, attack) && !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
+    /* (Amnesia: not the attack chosen, this turn) */
+    return EnergyPaid(g, player, attack) && g->players[player].field[0].disabled != attack + 1 &&
+           !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -309,6 +312,14 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->charged = 0;
     f->effectBy = 0;
     f->burn = f->shift = 0;
+    f->disabled = f->destinyBond = f->weakAs = f->resistAs = 0;
+}
+/* What the opponent's last attack did to it (Mirror Move) */
+static void ClearMirror(struct TcgFieldCard *f)
+{
+    f->mirrorDamage = 0;
+    f->mirrorCondition = f->mirrorPoison = f->mirrorWeaken = f->mirrorNoAttack = f->mirrorNoRetreat = 0;
+    f->mirrorEffect = f->mirrorArg = f->mirrorWeak = 0;
 }
 static unsigned AttachedTrainerCount(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned id)
 {
@@ -340,6 +351,9 @@ static void EndTurn(struct TcgDuel *g)
         p->field[s].effectBy = 0;
         /* Energy Burn and Shift last the rest of the turn */
         p->field[s].burn = p->field[s].shift = 0;
+        /* Amnesia lasted this turn; what was done to it last turn can't be Mirror Moved any more */
+        p->field[s].disabled = 0;
+        ClearMirror(&p->field[s]);
         if (p->field[s].charged == 2)
             p->field[s].charged = 0;
     }
@@ -477,8 +491,19 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
         attack = &attacker->attacks[a->attack];
+        if (f->disabled == a->attack + 1)
+            return Error(g, "Amnesia: that attack can't be used this turn.");
         if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
             return Error(g, blocked);
+        if (TcgDuel_IsMetronome(attack))
+        {
+            /* Metronome: one of the Defending Pokemon's attacks, without its Energy cost (its type stays its own) */
+            if (!(attack = TcgDuel_MetronomeAttack(g, g->current, a->copy)))
+                return Error(g, "Choose one of the Defending Pokemon's attacks to copy.");
+            if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
+                return Error(g, blocked);
+            TcgDuel_Log(g, "Metronome copies %s.", attack->name);
+        }
         if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, g->current))
             return Error(g, "This Pokemon cannot attack now.");
         if (!TcgDuel_EffectSupported(attack->effect))
@@ -530,12 +555,12 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         {
             if (f->charged == 2)
                 total *= 2;
-            if (!g->noWeakRes && target->weakness == type)
+            if (!g->noWeakRes && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
                 total *= 2;
                 flags |= TCG_DMG_WEAK;
             }
-            if (!g->noWeakRes && target->resistance == type)
+            if (!g->noWeakRes && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
             {
                 total -= 30;
                 flags |= TCG_DMG_RESIST;
@@ -572,6 +597,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Damage(g, g->current ^ 1, 0, damage);
         if (damage)
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current ^ 1, 0, damage, 0, flags);
+        if (damage && foe->destinyBond && foe->damage >= (target->kind == TCG_TRAINER ? 10u : target->hp) &&
+            f->damage < attacker->hp)
+        {
+            /* Destiny Bond: the Pokemon that Knocks it Out is Knocked Out too */
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, attacker->hp - f->damage, 0, TCG_DMG_SELF);
+            f->damage = attacker->hp;
+            TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
+        }
         TcgDuel_Log(g, "%s uses %s for %u damage.", attacker->name, attack->name, damage);
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
         if (result != TCG_OK)
@@ -587,6 +620,22 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             foe->effectBy = foeBefore.effectBy;
         }
         TcgPower_Sanitize(g); /* (Snorlax, Clefairy Doll, Mysterious Fossil) */
+        if (foe->stackSize && foe->stack[0] == foeBefore.stack[0])
+        {
+            /* What this attack did to the Defending Pokemon, for its Mirror Move next turn */
+            ClearMirror(foe);
+            foe->mirrorDamage = (uint16_t)damage;
+            foe->mirrorCondition = foe->condition != foeBefore.condition ? foe->condition : 0;
+            foe->mirrorPoison = foe->poison != foeBefore.poison ? foe->poison : 0;
+            foe->mirrorWeaken = foe->weaken != foeBefore.weaken ? foe->weaken : 0;
+            foe->mirrorNoAttack = foe->noAttack != foeBefore.noAttack ? foe->noAttack : 0;
+            foe->mirrorNoRetreat = foe->noRetreat != foeBefore.noRetreat ? foe->noRetreat : 0;
+            foe->mirrorWeak = foe->weakAs != foeBefore.weakAs ? foe->weakAs : 0;
+            if (foe->disabled && foe->disabled != foeBefore.disabled)
+                foe->mirrorEffect = TCG_MIRROR_AMNESIA, foe->mirrorArg = foe->disabled - 1;
+            else if (foe->attachedSize < foeBefore.attachedSize)
+                foe->mirrorEffect = TCG_MIRROR_DISCARD_ENERGY;
+        }
         TcgPower_StrikesBack(g, struck, foeBefore.condition);
         /* Effects change conditions as they resolve; show them after the hit. */
         if (foe->stackSize && (foe->condition != foeBefore.condition || foe->poison != foeBefore.poison))
@@ -661,6 +710,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         *f = p->field[s];
         p->field[s] = temp;
         ClearCondition(&p->field[s]);
+        ClearMirror(&p->field[s]);
         p->confusionRetreatFailed = 0;
         TcgDuel_Event(g, TCG_EV_RETREAT, g->current, s, 0, 0, 0);
         return TCG_OK;

@@ -5,265 +5,265 @@
 /* By gTcgDeckDefinitions index */
 const int16_t gTcgDeckRating[] = {
     1500, /* Unnamed */
-    1442, /* PracticePlayer */
-    1487, /* SamsPractice */
+    1441, /* PracticePlayer */
+    1489, /* SamsPractice */
     1340, /* CharmanderAndFriends */
     1390, /* CharmanderExtra */
-    1357, /* SquirtleAndFriends */
-    1407, /* SquirtleExtra */
-    1383, /* BulbasaurAndFriends */
+    1359, /* SquirtleAndFriends */
+    1406, /* SquirtleExtra */
+    1386, /* BulbasaurAndFriends */
     1235, /* BulbasaurExtra */
-    1455, /* LightningAndFire */
-    1507, /* WaterAndFighting */
-    1608, /* LegendaryMoltres */
-    1604, /* LegendaryZapdos */
-    1570, /* LegendaryArticuno */
-    1590, /* LegendaryDragonite */
-    1626, /* FirstStrike */
-    1440, /* RockCrusher */
-    1653, /* GoGoRainDance */
-    1571, /* ZappingSelfdestruct */
-    1587, /* FlowerPower */
-    1433, /* StrangePsyshock */
-    1473, /* WondersofScience */
-    1553, /* FireCharge */
-    1467, /* ImRonald */
-    1709, /* PowerfulRonald */
-    1652, /* InvincibleRonald */
-    1681, /* LegendaryRonald */
-    1671, /* MusclesforBrains */
-    1605, /* HeatedBattle */
-    1550, /* LovetoBattle */
-    1464, /* Excavation */
-    1426, /* BlisteringPokemon */
-    1380, /* HardPokemon */
+    1452, /* LightningAndFire */
+    1510, /* WaterAndFighting */
+    1602, /* LegendaryMoltres */
+    1605, /* LegendaryZapdos */
+    1575, /* LegendaryArticuno */
+    1589, /* LegendaryDragonite */
+    1628, /* FirstStrike */
+    1445, /* RockCrusher */
+    1654, /* GoGoRainDance */
+    1569, /* ZappingSelfdestruct */
+    1588, /* FlowerPower */
+    1435, /* StrangePsyshock */
+    1476, /* WondersofScience */
+    1555, /* FireCharge */
+    1468, /* ImRonald */
+    1710, /* PowerfulRonald */
+    1650, /* InvincibleRonald */
+    1679, /* LegendaryRonald */
+    1668, /* MusclesforBrains */
+    1607, /* HeatedBattle */
+    1552, /* LovetoBattle */
+    1462, /* Excavation */
+    1427, /* BlisteringPokemon */
+    1379, /* HardPokemon */
     1436, /* WaterfrontPokemon */
-    1531, /* LonelyFriends */
-    1476, /* SoundoftheWaves */
-    1412, /* Pikachu */
-    1273, /* BoomBoomSelfdestruct */
-    1439, /* PowerGenerator */
+    1530, /* LonelyFriends */
+    1474, /* SoundoftheWaves */
+    1410, /* Pikachu */
+    1271, /* BoomBoomSelfdestruct */
+    1441, /* PowerGenerator */
     1377, /* Etcetera */
-    1551, /* FlowerGarden */
-    1343, /* Kaleidoscope */
-    1446, /* Ghost */
+    1552, /* FlowerGarden */
+    1355, /* Kaleidoscope */
+    1441, /* Ghost */
     1440, /* NapTime */
-    1616, /* StrangePower */
-    1499, /* FlyinPokemon */
+    1613, /* StrangePower */
+    1485, /* FlyinPokemon */
     1497, /* LovelyNidoran */
-    1508, /* Poison */
+    1509, /* Poison */
     1572, /* Anger */
-    1604, /* Flamethrower */
-    1485, /* Imakuni */
+    1605, /* Flamethrower */
+    1481, /* Imakuni */
 };
 /* Each special trainer's own deck */
 const int16_t gTcgSpecialRating[] = {
-    1448, /* ROXANNE */
-    1601, /* BRAWLY */
-    1555, /* WATTSON */
-    1533, /* FLANNERY */
-    1472, /* NORMAN */
-    1464, /* WINONA */
-    1391, /* TATE_LIZA */
-    1550, /* JUAN */
-    1560, /* SIDNEY */
-    1408, /* PHOEBE */
-    1572, /* GLACIA */
+    1449, /* ROXANNE */
+    1600, /* BRAWLY */
+    1553, /* WATTSON */
+    1534, /* FLANNERY */
+    1473, /* NORMAN */
+    1441, /* WINONA */
+    1390, /* TATE_LIZA */
+    1551, /* JUAN */
+    1559, /* SIDNEY */
+    1416, /* PHOEBE */
+    1574, /* GLACIA */
     1509, /* DRAKE */
-    1528, /* WALLACE */
-    1551, /* STEVEN */
-    1338, /* RIVAL */
+    1530, /* WALLACE */
+    1549, /* STEVEN */
+    1339, /* RIVAL */
     1406, /* WALLY */
-    1604, /* MAXIE */
-    1363, /* ARCHIE */
+    1597, /* MAXIE */
+    1373, /* ARCHIE */
     1561, /* ANABEL */
-    1617, /* TUCKER */
+    1618, /* TUCKER */
     1591, /* SPENSER */
-    1657, /* GRETA */
-    1365, /* NOLAND */
-    1534, /* LUCY */
+    1659, /* GRETA */
+    1374, /* NOLAND */
+    1535, /* LUCY */
 };
 /* Their variants (gTcgSpecialVariants), each against all of the above 6 times */
 const int16_t gTcgVariantRating[] = {
-    1430, /* ROXANNE/BlisteringPokemon */
-    1458, /* ROXANNE/Excavation */
-    1561, /* ROXANNE/FirstStrike */
-    1372, /* ROXANNE/HardPokemon */
+    1439, /* ROXANNE/BlisteringPokemon */
+    1452, /* ROXANNE/Excavation */
+    1560, /* ROXANNE/FirstStrike */
+    1370, /* ROXANNE/HardPokemon */
     1519, /* ROXANNE/HeatedBattle */
-    1498, /* ROXANNE/LovetoBattle */
-    1591, /* ROXANNE/MusclesforBrains */
-    1602, /* ROXANNE/PowerfulRonald */
+    1500, /* ROXANNE/LovetoBattle */
+    1588, /* ROXANNE/MusclesforBrains */
+    1604, /* ROXANNE/PowerfulRonald */
     1405, /* BRAWLY/BlisteringPokemon */
-    1423, /* BRAWLY/Excavation */
-    1466, /* BRAWLY/HardPokemon */
-    1480, /* BRAWLY/HeatedBattle */
-    1609, /* BRAWLY/LovetoBattle */
-    1667, /* BRAWLY/MusclesforBrains */
+    1421, /* BRAWLY/Excavation */
+    1471, /* BRAWLY/HardPokemon */
+    1478, /* BRAWLY/HeatedBattle */
+    1611, /* BRAWLY/LovetoBattle */
+    1666, /* BRAWLY/MusclesforBrains */
     1593, /* BRAWLY/PowerfulRonald */
     1454, /* BRAWLY/RockCrusher */
-    1314, /* WATTSON/BoomBoomSelfdestruct */
-    1468, /* WATTSON/LegendaryZapdos */
-    1376, /* WATTSON/Pikachu */
-    1392, /* WATTSON/PowerGenerator */
-    1598, /* FLANNERY/Anger */
-    1357, /* FLANNERY/CharmanderAndFriends */
-    1563, /* FLANNERY/Flamethrower */
+    1319, /* WATTSON/BoomBoomSelfdestruct */
+    1469, /* WATTSON/LegendaryZapdos */
+    1374, /* WATTSON/Pikachu */
+    1387, /* WATTSON/PowerGenerator */
+    1595, /* FLANNERY/Anger */
+    1361, /* FLANNERY/CharmanderAndFriends */
+    1565, /* FLANNERY/Flamethrower */
     1532, /* FLANNERY/LegendaryMoltres */
     1539, /* FLANNERY/LegendaryRonald */
     1469, /* FLANNERY/LightningAndFire */
-    1292, /* NORMAN/CharmanderAndFriends */
-    1568, /* NORMAN/FireCharge */
-    1551, /* NORMAN/Flamethrower */
-    1481, /* NORMAN/LegendaryMoltres */
+    1290, /* NORMAN/CharmanderAndFriends */
+    1565, /* NORMAN/FireCharge */
+    1553, /* NORMAN/Flamethrower */
+    1493, /* NORMAN/LegendaryMoltres */
     1520, /* NORMAN/LegendaryRonald */
-    1498, /* NORMAN/LightningAndFire */
-    1339, /* WINONA/BulbasaurAndFriends */
-    1407, /* WINONA/BulbasaurExtra */
-    1405, /* WINONA/CharmanderExtra */
-    1357, /* WINONA/Etcetera */
-    1433, /* WINONA/FlowerGarden */
-    1480, /* WINONA/FlowerPower */
-    1558, /* WINONA/InvincibleRonald */
-    1321, /* WINONA/Kaleidoscope */
-    1440, /* WINONA/LovelyNidoran */
-    1444, /* WINONA/Poison */
-    1410, /* WINONA/SquirtleExtra */
-    1444, /* WINONA/WondersofScience */
-    1391, /* TATE_LIZA/Ghost */
-    1447, /* TATE_LIZA/Imakuni */
-    1421, /* TATE_LIZA/NapTime */
-    1598, /* TATE_LIZA/StrangePower */
-    1364, /* JUAN/ImRonald */
-    1532, /* JUAN/LegendaryArticuno */
-    1498, /* JUAN/LegendaryDragonite */
-    1478, /* JUAN/LonelyFriends */
-    1442, /* JUAN/SoundoftheWaves */
+    1497, /* NORMAN/LightningAndFire */
+    1335, /* WINONA/BulbasaurAndFriends */
+    1402, /* WINONA/BulbasaurExtra */
+    1392, /* WINONA/CharmanderExtra */
+    1337, /* WINONA/Etcetera */
+    1437, /* WINONA/FlowerGarden */
+    1451, /* WINONA/FlowerPower */
+    1530, /* WINONA/InvincibleRonald */
+    1297, /* WINONA/Kaleidoscope */
+    1425, /* WINONA/LovelyNidoran */
+    1432, /* WINONA/Poison */
+    1416, /* WINONA/SquirtleExtra */
+    1428, /* WINONA/WondersofScience */
+    1387, /* TATE_LIZA/Ghost */
+    1452, /* TATE_LIZA/Imakuni */
+    1416, /* TATE_LIZA/NapTime */
+    1596, /* TATE_LIZA/StrangePower */
+    1359, /* JUAN/ImRonald */
+    1536, /* JUAN/LegendaryArticuno */
+    1497, /* JUAN/LegendaryDragonite */
+    1481, /* JUAN/LonelyFriends */
+    1437, /* JUAN/SoundoftheWaves */
     1250, /* JUAN/SquirtleAndFriends */
     1490, /* JUAN/WaterAndFighting */
-    1378, /* JUAN/WaterfrontPokemon */
-    1469, /* SIDNEY/Ghost */
-    1398, /* SIDNEY/Imakuni */
-    1481, /* SIDNEY/NapTime */
-    1403, /* SIDNEY/StrangePsyshock */
-    1394, /* PHOEBE/Imakuni */
-    1469, /* PHOEBE/NapTime */
-    1572, /* PHOEBE/StrangePower */
-    1407, /* PHOEBE/StrangePsyshock */
-    1565, /* GLACIA/GoGoRainDance */
-    1379, /* GLACIA/ImRonald */
+    1385, /* JUAN/WaterfrontPokemon */
+    1466, /* SIDNEY/Ghost */
+    1400, /* SIDNEY/Imakuni */
+    1480, /* SIDNEY/NapTime */
+    1402, /* SIDNEY/StrangePsyshock */
+    1391, /* PHOEBE/Imakuni */
+    1478, /* PHOEBE/NapTime */
+    1568, /* PHOEBE/StrangePower */
+    1409, /* PHOEBE/StrangePsyshock */
+    1561, /* GLACIA/GoGoRainDance */
+    1380, /* GLACIA/ImRonald */
     1558, /* GLACIA/LegendaryDragonite */
-    1524, /* GLACIA/LonelyFriends */
+    1527, /* GLACIA/LonelyFriends */
     1539, /* GLACIA/SoundoftheWaves */
-    1297, /* GLACIA/SquirtleAndFriends */
-    1466, /* GLACIA/WaterAndFighting */
+    1295, /* GLACIA/SquirtleAndFriends */
+    1468, /* GLACIA/WaterAndFighting */
     1423, /* GLACIA/WaterfrontPokemon */
-    1544, /* DRAKE/GoGoRainDance */
-    1381, /* DRAKE/ImRonald */
-    1561, /* DRAKE/LegendaryArticuno */
-    1536, /* DRAKE/LonelyFriends */
-    1459, /* DRAKE/SoundoftheWaves */
-    1306, /* DRAKE/SquirtleAndFriends */
-    1445, /* DRAKE/WaterAndFighting */
-    1401, /* DRAKE/WaterfrontPokemon */
-    1647, /* WALLACE/GoGoRainDance */
-    1359, /* WALLACE/ImRonald */
-    1561, /* WALLACE/LegendaryArticuno */
-    1515, /* WALLACE/LegendaryDragonite */
-    1530, /* WALLACE/LonelyFriends */
+    1542, /* DRAKE/GoGoRainDance */
+    1383, /* DRAKE/ImRonald */
+    1566, /* DRAKE/LegendaryArticuno */
+    1534, /* DRAKE/LonelyFriends */
+    1464, /* DRAKE/SoundoftheWaves */
+    1304, /* DRAKE/SquirtleAndFriends */
+    1444, /* DRAKE/WaterAndFighting */
+    1419, /* DRAKE/WaterfrontPokemon */
+    1649, /* WALLACE/GoGoRainDance */
+    1361, /* WALLACE/ImRonald */
+    1563, /* WALLACE/LegendaryArticuno */
+    1517, /* WALLACE/LegendaryDragonite */
+    1532, /* WALLACE/LonelyFriends */
     1333, /* WALLACE/SquirtleAndFriends */
-    1525, /* WALLACE/WaterAndFighting */
-    1475, /* WALLACE/WaterfrontPokemon */
+    1524, /* WALLACE/WaterAndFighting */
+    1485, /* WALLACE/WaterfrontPokemon */
     1343, /* STEVEN/BlisteringPokemon */
     1337, /* STEVEN/Excavation */
     1468, /* STEVEN/FirstStrike */
     1374, /* STEVEN/HardPokemon */
-    1419, /* STEVEN/HeatedBattle */
-    1437, /* STEVEN/LovetoBattle */
+    1418, /* STEVEN/HeatedBattle */
+    1442, /* STEVEN/LovetoBattle */
     1520, /* STEVEN/MusclesforBrains */
-    1381, /* STEVEN/RockCrusher */
+    1380, /* STEVEN/RockCrusher */
     1366, /* RIVAL/BulbasaurExtra */
     1421, /* RIVAL/CharmanderExtra */
     1333, /* RIVAL/Etcetera */
-    1567, /* RIVAL/FlowerGarden */
-    1584, /* RIVAL/FlowerPower */
-    1433, /* RIVAL/FlyinPokemon */
-    1600, /* RIVAL/InvincibleRonald */
-    1272, /* RIVAL/Kaleidoscope */
-    1432, /* RIVAL/LovelyNidoran */
-    1445, /* RIVAL/Poison */
-    1461, /* RIVAL/SquirtleExtra */
+    1570, /* RIVAL/FlowerGarden */
+    1588, /* RIVAL/FlowerPower */
+    1423, /* RIVAL/FlyinPokemon */
+    1598, /* RIVAL/InvincibleRonald */
+    1293, /* RIVAL/Kaleidoscope */
+    1435, /* RIVAL/LovelyNidoran */
+    1446, /* RIVAL/Poison */
+    1459, /* RIVAL/SquirtleExtra */
     1459, /* RIVAL/WondersofScience */
-    1212, /* WALLY/BoomBoomSelfdestruct */
-    1522, /* WALLY/LegendaryZapdos */
+    1218, /* WALLY/BoomBoomSelfdestruct */
+    1524, /* WALLY/LegendaryZapdos */
     1364, /* WALLY/PowerGenerator */
     1488, /* WALLY/ZappingSelfdestruct */
-    1500, /* MAXIE/Anger */
-    1257, /* MAXIE/CharmanderAndFriends */
-    1529, /* MAXIE/FireCharge */
-    1579, /* MAXIE/Flamethrower */
-    1497, /* MAXIE/LegendaryRonald */
-    1463, /* MAXIE/LightningAndFire */
-    1541, /* ARCHIE/GoGoRainDance */
-    1359, /* ARCHIE/ImRonald */
-    1493, /* ARCHIE/LegendaryArticuno */
-    1520, /* ARCHIE/LegendaryDragonite */
+    1497, /* MAXIE/Anger */
+    1253, /* MAXIE/CharmanderAndFriends */
+    1534, /* MAXIE/FireCharge */
+    1580, /* MAXIE/Flamethrower */
+    1485, /* MAXIE/LegendaryRonald */
+    1458, /* MAXIE/LightningAndFire */
+    1542, /* ARCHIE/GoGoRainDance */
+    1361, /* ARCHIE/ImRonald */
+    1497, /* ARCHIE/LegendaryArticuno */
+    1522, /* ARCHIE/LegendaryDragonite */
     1520, /* ARCHIE/LonelyFriends */
-    1464, /* ARCHIE/SoundoftheWaves */
-    1301, /* ARCHIE/SquirtleAndFriends */
-    1456, /* ARCHIE/WaterAndFighting */
-    1339, /* ANABEL/Ghost */
-    1400, /* ANABEL/Imakuni */
-    1374, /* ANABEL/NapTime */
+    1469, /* ARCHIE/SoundoftheWaves */
+    1297, /* ARCHIE/SquirtleAndFriends */
+    1461, /* ARCHIE/WaterAndFighting */
+    1345, /* ANABEL/Ghost */
+    1391, /* ANABEL/Imakuni */
+    1378, /* ANABEL/NapTime */
     1432, /* ANABEL/StrangePsyshock */
-    1379, /* TUCKER/BoomBoomSelfdestruct */
-    1475, /* TUCKER/Pikachu */
-    1464, /* TUCKER/PowerGenerator */
-    1572, /* TUCKER/ZappingSelfdestruct */
-    1323, /* SPENSER/BulbasaurAndFriends */
-    1401, /* SPENSER/BulbasaurExtra */
+    1376, /* TUCKER/BoomBoomSelfdestruct */
+    1476, /* TUCKER/Pikachu */
+    1463, /* TUCKER/PowerGenerator */
+    1573, /* TUCKER/ZappingSelfdestruct */
+    1327, /* SPENSER/BulbasaurAndFriends */
+    1402, /* SPENSER/BulbasaurExtra */
     1442, /* SPENSER/CharmanderExtra */
     1381, /* SPENSER/Etcetera */
-    1500, /* SPENSER/FlowerGarden */
-    1459, /* SPENSER/FlyinPokemon */
+    1503, /* SPENSER/FlowerGarden */
+    1449, /* SPENSER/FlyinPokemon */
     1604, /* SPENSER/InvincibleRonald */
-    1329, /* SPENSER/Kaleidoscope */
-    1464, /* SPENSER/LovelyNidoran */
-    1459, /* SPENSER/Poison */
+    1333, /* SPENSER/Kaleidoscope */
+    1468, /* SPENSER/LovelyNidoran */
+    1461, /* SPENSER/Poison */
     1463, /* SPENSER/SquirtleExtra */
-    1500, /* SPENSER/WondersofScience */
-    1385, /* GRETA/BlisteringPokemon */
-    1464, /* GRETA/Excavation */
-    1602, /* GRETA/FirstStrike */
-    1475, /* GRETA/HardPokemon */
-    1635, /* GRETA/HeatedBattle */
-    1649, /* GRETA/LovetoBattle */
-    1681, /* GRETA/PowerfulRonald */
-    1426, /* GRETA/RockCrusher */
-    1314, /* NOLAND/BulbasaurAndFriends */
+    1502, /* SPENSER/WondersofScience */
+    1389, /* GRETA/BlisteringPokemon */
+    1469, /* GRETA/Excavation */
+    1607, /* GRETA/FirstStrike */
+    1480, /* GRETA/HardPokemon */
+    1639, /* GRETA/HeatedBattle */
+    1651, /* GRETA/LovetoBattle */
+    1673, /* GRETA/PowerfulRonald */
+    1425, /* GRETA/RockCrusher */
+    1321, /* NOLAND/BulbasaurAndFriends */
     1314, /* NOLAND/BulbasaurExtra */
-    1381, /* NOLAND/CharmanderExtra */
-    1364, /* NOLAND/Etcetera */
-    1542, /* NOLAND/FlowerGarden */
-    1512, /* NOLAND/FlowerPower */
-    1400, /* NOLAND/FlyinPokemon */
-    1542, /* NOLAND/InvincibleRonald */
-    1464, /* NOLAND/LovelyNidoran */
-    1428, /* NOLAND/Poison */
-    1403, /* NOLAND/SquirtleExtra */
+    1364, /* NOLAND/CharmanderExtra */
+    1368, /* NOLAND/Etcetera */
+    1549, /* NOLAND/FlowerGarden */
+    1515, /* NOLAND/FlowerPower */
+    1372, /* NOLAND/FlyinPokemon */
+    1541, /* NOLAND/InvincibleRonald */
+    1469, /* NOLAND/LovelyNidoran */
+    1432, /* NOLAND/Poison */
+    1405, /* NOLAND/SquirtleExtra */
     1466, /* NOLAND/WondersofScience */
-    1361, /* LUCY/BulbasaurAndFriends */
-    1401, /* LUCY/BulbasaurExtra */
-    1445, /* LUCY/CharmanderExtra */
-    1335, /* LUCY/Etcetera */
-    1497, /* LUCY/FlowerGarden */
-    1480, /* LUCY/FlowerPower */
-    1445, /* LUCY/FlyinPokemon */
-    1607, /* LUCY/InvincibleRonald */
-    1329, /* LUCY/Kaleidoscope */
-    1412, /* LUCY/LovelyNidoran */
-    1459, /* LUCY/SquirtleExtra */
-    1445, /* LUCY/WondersofScience */
+    1353, /* LUCY/BulbasaurAndFriends */
+    1403, /* LUCY/BulbasaurExtra */
+    1446, /* LUCY/CharmanderExtra */
+    1337, /* LUCY/Etcetera */
+    1498, /* LUCY/FlowerGarden */
+    1483, /* LUCY/FlowerPower */
+    1421, /* LUCY/FlyinPokemon */
+    1605, /* LUCY/InvincibleRonald */
+    1337, /* LUCY/Kaleidoscope */
+    1409, /* LUCY/LovelyNidoran */
+    1463, /* LUCY/SquirtleExtra */
+    1447, /* LUCY/WondersofScience */
 };
 /* The decks a player's deck is measured against in the game */
-const uint8_t gTcgRatingReferences[] = {8, 5, 4, 33, 1, 21, 46, 29, 18, 12, 15, 24};
+const uint8_t gTcgRatingReferences[] = {8, 5, 4, 33, 1, 35, 2, 40, 48, 49, 15, 24};
 const unsigned gTcgRatingReferenceCount = 12;
