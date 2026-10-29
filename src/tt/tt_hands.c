@@ -139,7 +139,8 @@ void Tt_FitRegionHand(unsigned region, uint32_t h, unsigned tierCap, unsigned da
 
 void Tt_FitSpecialHand(unsigned special, unsigned day, int target, uint16_t hand[TT_HAND])
 {
-    // the five-star card stays theirs; the other four go from a four-star and three-stars down to one-stars
+    // the five-star card stays theirs (unless that can't come close); the other four go from a four-star and three-stars
+    // down to one-stars
     static const uint8_t sShapes[][4] = {{4, 3, 3, 3}, {3, 3, 3, 3}, {3, 3, 3, 2}, {3, 3, 2, 2}, {3, 2, 2, 2},
                                          {2, 2, 2, 2}, {2, 2, 2, 1}, {2, 2, 1, 1}, {2, 1, 1, 1}, {1, 1, 1, 1}};
     static uint16_t list[TT_MAX_STARS + 1][TT_CARD_MAX + 1];
@@ -157,21 +158,31 @@ void Tt_FitSpecialHand(unsigned special, unsigned day, int target, uint16_t hand
         if (count[s] < 4)
             count[s] = AllOf(s, s, list[s], TT_CARD_MAX);
     }
-    for (shape = 0; shape < sizeof(sShapes) / sizeof(sShapes[0]); shape++)
+    // (their five-star card stays unless even their gentlest hand with it is well above the player: then a four-star
+    // of theirs leads instead, counted a little further off)
+    for (shape = 0; shape < 2 * sizeof(sShapes) / sizeof(sShapes[0]); shape++)
         for (k = 0; k < 3; k++)
         {
-            unsigned have = 1, off;
+            unsigned have = 1, off, lead = shape >= sizeof(sShapes) / sizeof(sShapes[0]);
             memset(cand, 0, sizeof(cand));
             cand[0] = base[0];
+            if (lead)
+            {
+                if (!count[4])
+                    continue;
+                cand[0] = list[4][(special * 5 + day + k) % count[4]];
+            }
             for (j = 0; j < 4; j++)
             {
-                s = sShapes[shape][j];
+                s = sShapes[shape % (sizeof(sShapes) / sizeof(sShapes[0]))][j];
+                if (lead && s == 4)
+                    s = 3;   /* (the four-star lead stays their only big card) */
                 if (count[s])
                     have = Take(list[s], count[s], special * 13 + day * 3 + k * 7 + j, 1, cand, have);
             }
             if (have < TT_HAND)
                 continue;
-            off = Off(Tt_HandPower(cand), target);
+            off = Off(Tt_HandPower(cand), target) + (lead ? 60 : 0);
             if (off < best)
                 best = off, memcpy(hand, cand, sizeof(cand));
         }
@@ -219,8 +230,8 @@ void Tt_DealRegion(unsigned region, uint32_t seed, int target, uint16_t hand[TT_
 
 int Tt_OpponentFavor(const struct TtOpponent *o)
 {
-    // ordinary players about 55% for the player, the special ones 45%, the CARD QUEEN 40%
-    return o->special == TT_SPECIAL_QUEEN ? -70 : o->special != TT_SPECIAL_NONE ? -35 : 35;
+    // ordinary players about 55% for the player, the special ones about 47%, the CARD QUEEN about 45%
+    return o->special == TT_SPECIAL_QUEEN ? -35 : o->special != TT_SPECIAL_NONE ? -20 : 35;
 }
 
 int Tt_FitOpponentHand(struct TtOpponent *o, int mine, uint32_t rules, unsigned day, uint16_t hand[TT_HAND])

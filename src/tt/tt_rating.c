@@ -15,7 +15,7 @@ int Tt_HandPower(const uint16_t *hand)
 int Tt_LevelRating(unsigned level, uint32_t rules)
 {
     level = level > 3 ? 3 : level;
-    return rules & TT_RULE_BIT(TT_RULE_OPEN) ? gTtLevelRatingOpen[level] : gTtLevelRating[level];
+    return gTtLevelRating[((rules & TT_RULE_BIT(TT_RULE_OPEN)) ? 1 : 0) + (Tt_SamePlus(rules) ? 2 : 0)][level];
 }
 
 /* 10^(d/400) */

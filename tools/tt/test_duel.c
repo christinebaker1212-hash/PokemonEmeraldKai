@@ -152,6 +152,46 @@ static void TestPlus(void)
             }
     CHECK(found > 0 && combos > 0, "plus %u combos %u", found, combos);
     printf("plus (%u), combo (%u): ok\n", found, combos);
+    // Only what PLUS took combos: the placed card's own plain capture (right, 5) never goes on to the corner (2)
+    {
+        unsigned r, f, plainOnly = 0;
+        for (a = 1; a <= TT_CARD_MAX && !plainOnly; a++)
+            for (b = 1; b <= 120 && !plainOnly; b++)
+                for (c = 1; c <= 120 && !plainOnly; c++)
+                {
+                    unsigned sum;
+                    if (!Tt_Card(a) || !Tt_Card(b) || !Tt_Card(c) || a == b || b == c || a == c)
+                        continue;
+                    sum = S(c, TT_UP) + S(a, TT_DOWN);
+                    if (sum != S(c, TT_LEFT) + S(b, TT_RIGHT))
+                        continue;
+                    for (r = 1; r <= 200 && !plainOnly; r++)
+                    {
+                        if (!Tt_Card(r) || r == a || r == b || r == c || S(c, TT_RIGHT) <= S(r, TT_LEFT) ||
+                            S(c, TT_RIGHT) + S(r, TT_LEFT) == sum)
+                            continue;
+                        for (f = 1; f <= 200 && !plainOnly; f++)
+                        {
+                            if (!Tt_Card(f) || f == a || f == b || f == c || f == r)
+                                continue;
+                            if (S(r, TT_UP) <= S(f, TT_DOWN) || S(a, TT_RIGHT) > S(f, TT_LEFT))
+                                continue;   /* (r would beat it; the PLUS-taken top card wouldn't) */
+                            Fresh(&d, TT_RULE_BIT(TT_RULE_PLUS), c);
+                            Put(&d, 1, a, 1);
+                            Put(&d, 3, b, 1);
+                            Put(&d, 5, r, 1);
+                            Put(&d, 2, f, 1);
+                            TtDuel_Play(&d, 0, 4);
+                            CHECK(d.cell[1].owner == 0 && d.cell[3].owner == 0 && d.cell[5].owner == 0,
+                                  "plus and plain %u", c);
+                            CHECK(d.cell[2].owner == 1, "a plain capture combos (%u took %u, on to %u)", c, r, f);
+                            plainOnly = 1;
+                        }
+                    }
+                }
+        CHECK(plainOnly, "no board for the plain-capture combo check");
+        printf("combo only from SAME / PLUS: ok\n");
+    }
 }
 
 static void TestElementalAndAscension(void)

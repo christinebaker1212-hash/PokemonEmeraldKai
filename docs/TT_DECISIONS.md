@@ -24,8 +24,10 @@ The user's request (the third card game), how each part was read, and the choice
   stars (XIV's limits). Six deck slots. No DECK RECIPES on this side; the card list and the builder are tabbed by
   stars.
 - FF8's rules from the decomp, as its code does them: SAME (with SAME WALL: an A against the edge), PLUS, the plain
-  capture, ELEMENTAL's +1 / -1 (plain capture only), and the COMBO: when SAME or PLUS took a card, every card taken
-  in that play captures from where it lies, again while anything is taken (applyCardRules and its loop). OPEN,
+  capture, ELEMENTAL's +1 / -1 (plain capture only), and the COMBO. 1.49.1: the COMBO starts only from the cards SAME
+  or PLUS took, then from each card the COMBO took (how FF8's COMBO is played and described). The first reading of
+  applyCardRules' loop let every card taken in that play combo, the placed card's own plain captures too: one PLUS
+  flipped most of the board, and against the CARD QUEEN that was a loss every time. OPEN,
   RANDOM, SUDDEN DEATH as FF8. FF8 elements don't exist on XIV cards: ELEMENTAL uses XIV's four card types
   (PRIMAL, SCION, SOCIETY, GARLEAN), 30% of squares carry one (resetTriadBoard's odds).
 - XIV's own rules are in too (THREE OPEN, REVERSE, FALLEN ACE, ASCENSION, DESCENSION, ORDER, CHAOS, SWAP). The

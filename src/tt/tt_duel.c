@@ -1,8 +1,8 @@
 // Moemon Kai: Triple Triad's rules. The capture rules follow Final Fantasy VIII's own code (its tripletriad overlay,
 // as the ff8-decomp project reads it: resetTriadBoard, placeCard, applySameRule, applyPlusRule, applyBasicCapture
 // and applyCardRules): SAME (with SAME WALL) and PLUS look first, then the plain capture; ELEMENTAL's +1 / -1 counts
-// for the plain capture only; when SAME or PLUS took a card, every card taken in that play starts a COMBO, a plain
-// capture from each, again and again while any card is taken. XIV's rules sit beside them: REVERSE and FALLEN ACE
+// for the plain capture only; the cards SAME or PLUS took start a COMBO: a plain capture from each of them, then from
+// each card that took, again and again while any card is taken (the placed card's own plain captures never combo). XIV's rules sit beside them: REVERSE and FALLEN ACE
 // for the plain capture, ASCENSION and DESCENSION for every rule, ORDER, CHAOS, SWAP and THREE OPEN.
 // Deterministic: the same seed and moves always play out the same (friends' games send only the moves).
 #include <string.h>
@@ -373,14 +373,25 @@ int TtDuel_Play(struct TtDuel *d, unsigned slot, unsigned cell)
         combo += Same(d, cell);
     if (Has(d, TT_RULE_PLUS))
         combo += Plus(d, cell);
-    Plain(d, TT_BY_PLAIN, 0);
-    // The COMBO: every card taken in this play takes from where it lies, while anything is taken
+    {
+        uint8_t ruled[TT_CELLS];
+        for (i = 0; i < TT_CELLS; i++)
+        {
+            ruled[i] = d->cell[i].flags & CF_TAKEN;   /* (what SAME / PLUS took: the COMBO starts there) */
+            d->cell[i].flags &= (uint8_t)~CF_TAKEN;
+        }
+        Plain(d, TT_BY_PLAIN, 0);
+        for (i = 0; i < TT_CELLS; i++)
+            d->cell[i].flags = (uint8_t)((d->cell[i].flags & ~CF_TAKEN) | ruled[i]);
+    }
+    // The COMBO: each card taken by SAME or PLUS takes from where it lies, then each card that took, while anything
+    // is taken
     for (wave = 1; combo; wave++)
     {
         unsigned any = 0;
         for (i = 0; i < TT_CELLS; i++)
         {
-            d->cell[i].flags = d->cell[i].flags & CF_TAKEN ? CF_JUST : 0;
+            d->cell[i].flags = d->cell[i].flags & CF_TAKEN ? CF_JUST : 0;   /* (only the last wave's cards) */
             any |= d->cell[i].flags;
         }
         if (!any)

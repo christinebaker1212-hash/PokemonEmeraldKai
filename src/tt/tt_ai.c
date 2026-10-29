@@ -2,7 +2,8 @@
 // VIII's searchBestMoveStack did the same with its own depth), to the end of the game once few squares are left,
 // scored by the cards held and how safe each card's open sides are. Fair: the other side's cards it can't see (no
 // OPEN, not among THREE OPEN's, not yet played) are guessed, never read; and it slips like a person (ExpNeg below:
-// near misses often, blunders rarely; beginners look one move ahead and slip more).
+// near misses often, blunders rarely; beginners look one move ahead and slip more; SAME and PLUS are sometimes not on
+// its mind, sSeesRules).
 #include <limits.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -150,6 +151,10 @@ void TtAi_View(const struct TtDuel *d, unsigned seat, struct TtDuel *view)
  * nearly as good is often taken, a real blunder hardly ever; the better the player, the smaller T (and the further it
  * looks ahead). One card held is 100. (tools/tt/rate_cards.sh measures what each level gives away.) */
 static const uint16_t sTemper[4] = {170, 100, 70, 30};
+/* How often a level has SAME and PLUS in mind for a move, in percent: people miss the sums and the pairs on the board
+ * (theirs and the other side's), so the computer plays some moves without them in its head, the less skilled the more
+ * often. The rules still apply to whatever it plays. */
+static const uint8_t sSeesRules[4] = {15, 35, 55, 75};
 /* e^-x in 1/65536, x = num / den (no libm in the game) */
 static uint32_t ExpNeg(uint32_t num, uint32_t den)
 {
@@ -180,6 +185,8 @@ void TtAi_Choose(const struct TtDuel *d, unsigned level, uint32_t salt, unsigned
     if (level > 3)
         level = 3;
     TtAi_View(d, seat, &view);
+    if ((view.rules & (TT_RULE_BIT(TT_RULE_SAME) | TT_RULE_BIT(TT_RULE_PLUS))) && Tt_Rand(&rng) % 100 >= sSeesRules[level])
+        view.rules &= ~(TT_RULE_BIT(TT_RULE_SAME) | TT_RULE_BIT(TT_RULE_PLUS) | TT_RULE_BIT(TT_RULE_SAME_WALL));
     for (c = 0; c < TT_CELLS; c++)
         empty += !d->cell[c].card;
     depth = empty <= (unsigned)sEndgame[level] ? (int)empty : sDepth[level];
