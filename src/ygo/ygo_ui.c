@@ -137,6 +137,23 @@ static struct
 } Y;
 
 static struct YgoCollection *C(void) { return Ygo_GetCollection(); }
+/* The table's background for a duel against this deck: its monsters' most common Attribute */
+static unsigned ThemeOf(const uint16_t *main)
+{
+    static const uint8_t byAttr[] = {YGO_BG_PLAIN, YGO_BG_LIGHT, YGO_BG_DARK, YGO_BG_WATER, YGO_BG_FIRE, YGO_BG_EARTH,
+                                     YGO_BG_WIND, YGO_BG_LIGHT};
+    unsigned count[8] = {0}, i, best = 0;
+    for (i = 0; i < YGO_DECK_MAX && main[i]; i++)
+    {
+        const struct YgoCard *c = Ygo_Card(main[i]);
+        if (c && c->attribute < 8 && c->attribute != YGO_ATTR_NONE)
+            count[c->attribute]++;
+    }
+    for (i = 1; i < 8; i++)
+        if (count[i] > count[best])
+            best = i;
+    return byAttr[best];
+}
 static int sForceFirst = -1;   /* test harness: who goes first (-1: a coin) */
 static unsigned Points(void) { return Tcg_GetCollection()->dust; }
 static void SpendPoints(unsigned n) { Tcg_GetCollection()->dust -= n; }
@@ -547,6 +564,7 @@ static int StartDuel(const uint16_t *main, const uint16_t *extra, const uint16_t
     YgoBoard_SetFast(Tcg_GetCollection()->fastAnimations);
     YgoBoard_SetMusic(Y.opp.music);
     YgoBoard_Tutorial(Y.vs == VS_LESSON);
+    YgoBoard_SetTheme(ThemeOf(Y.opp.main));
     Screen(Y_DUEL);
     YgoBoard_Begin(&Y.duel, 0, Y.opp.name, 0);
     printf("[ygo] duel started vs %s\n", Y.opp.name);
@@ -3146,6 +3164,11 @@ void Ygo_Debug(const char *command)
     if (sscanf(command, "first %d", (int *)&n) == 1)
     {
         sForceFirst = (int)n;
+        return;
+    }
+    if (sscanf(command, "fieldbg %u", &n) == 1)
+    {
+        YgoBoard_TestFieldBg(n);
         return;
     }
     if (sscanf(command, "seed %u", &n) == 1)

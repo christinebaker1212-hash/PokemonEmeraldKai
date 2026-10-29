@@ -191,7 +191,12 @@ void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *out)
         if (moveOn == q->count - 1u)
             for (i = 0; i < q->count; i++)
                 if (q->items[i].kind == YGO_ACT_END_TURN || q->items[i].kind == YGO_ACT_TO_MAIN2)
+                {
+                    /* (out of the Battle Phase: MAIN PHASE 2, where it can still play cards) */
                     moveOn = i;
+                    if (q->items[i].kind == YGO_ACT_TO_MAIN2)
+                        break;
+                }
         Single(out, moveOn);
         base = q->items[moveOn].kind == YGO_ACT_TO_BATTLE ? Eval(&d->s, me) : Simulate(d, out, me);
         best = base;

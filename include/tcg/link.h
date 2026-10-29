@@ -12,10 +12,11 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 9   /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
+#define TCG_LINK_VERSION 10  /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
                                * 7: a Yu-Gi-Oh! answer carries the zone a card goes to (YgoAnswer.zone);
                                * 8: Triple Triad games and trades (type 14: src/tt/tt_net.c; request kinds 4-5);
-                               * 9: an action carries an attack's option and Metronome's copy (the last 20 attacks) */
+                               * 9: an action carries an attack's option and Metronome's copy (the last 20 attacks);
+                               * 10: Yu-Gi-Oh!'s Battle Phase offers END TURN */
 struct TcgLink
 {
     struct TcgDuel game;

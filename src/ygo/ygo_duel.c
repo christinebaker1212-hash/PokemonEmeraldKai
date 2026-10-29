@@ -1735,6 +1735,12 @@ static void Turn(struct YgoState *s)
         f->step = TS_END;
         return;
     case TS_BATTLE_DONE:
+        if (f->b == MAIN_END)
+        {
+            f->b = 0;
+            f->step = TS_END;
+            return;
+        }
         s->phase = YGO_PHASE_MAIN2;
         Ygo_Event(s, YGO_EV_PHASE, s->current, NO_OBJ, NO_OBJ, s->phase, 0);
         f->step = TS_END;
@@ -2096,6 +2102,7 @@ static void Battle(struct YgoState *s)
         for (i = 0; i < n; i++)
             QueryAdd(&q, acts[i].kind, acts[i].obj, acts[i].value, 0);
         QueryAdd(&q, YGO_ACT_TO_MAIN2, NO_OBJ, 0, 0);
+        QueryAdd(&q, YGO_ACT_END_TURN, NO_OBJ, 0, 0); /* (straight to the End Phase, no Main Phase 2) */
         Ask(s, &q, &a);
         switch (q.items[a.picks[0]].kind)
         {
@@ -2110,6 +2117,11 @@ static void Battle(struct YgoState *s)
         case YGO_ACT_ACTIVATE:
             Activate(s, s->current, q.items[a.picks[0]].obj, q.items[a.picks[0]].value, NO_OBJ, 0);
             Push(s, PR_CHAIN, 0, s->current ^ 1);
+            return;
+        case YGO_ACT_END_TURN:
+            s->frames[s->frameCount - 2].b = MAIN_END;
+            s->attacker = s->attackTarget = 0;
+            Pop(s);
             return;
         default:
             s->attacker = s->attackTarget = 0;

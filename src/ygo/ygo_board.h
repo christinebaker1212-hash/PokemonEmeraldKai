@@ -22,6 +22,11 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
 /* Everything that happened has been shown: the opponent waits for it */
 int YgoBoard_Idle(void);
 void YgoBoard_SetFast(int fast);
+/* The table's background for the next duel */
+enum { YGO_BG_PLAIN, YGO_BG_LIGHT, YGO_BG_DARK, YGO_BG_WATER, YGO_BG_FIRE, YGO_BG_EARTH, YGO_BG_WIND, YGO_BG_ONLINE,
+       YGO_BG_COUNT };
+void YgoBoard_SetTheme(unsigned theme);
+void YgoBoard_TestFieldBg(unsigned id);
 void YgoBoard_SetWaiting(int waiting);   /* online: our answer is on its way */
 void YgoBoard_SetMusic(unsigned song);
 void YgoBoard_Tutorial(int on);          /* the lesson: a tip for each new kind of question */

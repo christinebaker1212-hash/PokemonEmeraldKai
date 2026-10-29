@@ -2184,6 +2184,16 @@ What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like o
   cases), the cursor goes to the Active ("refocus: nothing left to play, your Active"; `mp cards checkdone`,
   `mp cards discardhand` stage it). Tests: tools/tcg/test_attacks.c, test_ui.sh "done" and "metronome".
 
+## Yu-Gi-Oh! table: backgrounds, END TURN, menu widths (1.47.0)
+- Backgrounds: YgoBoard_SetTheme (ygo_ui.c ThemeOf: the opponent's main deck's most common Attribute; online
+  YGO_BG_ONLINE), built once per theme as a 240x160 texture (ygo_board.c BuildTheme). A face-up Field Spell on either
+  side (FieldSpellCard) covers it with Ygo_ArtTexture of that card, cropped to the table and darkened, so any Field
+  Spell, new ones too, gets its own; logs "field background: NAME". `mp ygo fieldbg ID` shows one for tests. (The
+  board isn't redrawn every frame when nothing moves: nothing here is timed by draws.)
+- The Battle Phase query also offers YGO_ACT_END_TURN: the turn frame's b = MAIN_END, TS_BATTLE_DONE skips Main
+  Phase 2. The phase menu's cursor starts on MAIN PHASE 2; the AI still prefers Main Phase 2. TCG_LINK_VERSION 10.
+- Menus: WindowBox grows to its longest row (RowsWidth) and stays on screen.
+
 ## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
 Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
 drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to

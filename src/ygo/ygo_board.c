@@ -195,6 +195,8 @@ static struct
     int spotCount;
     int menuItems[16], menuCount, menuCursor, menuObj;
     uint8_t deckMenu;   /* the phase menu opened on your deck: only CONCEDE, beside the deck */
+    uint8_t theme;      /* the background (YGO_BG_*) */
+    uint16_t fieldCard; /* the Field Spell whose picture is the background now (0 none) */
     int zoneItem, zoneSpell;   /* M_ZONE: the menu's choice, and Spell & Trap Zones (1) or Monster Zones (0) */
     int pickPrefer;            /* a pick on the table: the item the cursor starts on (PreferredPick) */
     int windowItems[YGO_QUERY_MAX + 1], windowCount, windowCursor;
@@ -1139,6 +1141,9 @@ static void MoveCursor(unsigned pressed)
 void YgoBoard_SetMusic(unsigned song) { sNextMusic = (u16)song; }
 void YgoBoard_Tutorial(int on) { sNextTutorial = on; }
 void YgoBoard_SetFast(int fast) { B.fast = fast; }
+/* The table's background for the next duel (YGO_BG_*: the opponent's main Attribute) */
+static unsigned sNextTheme;
+void YgoBoard_SetTheme(unsigned theme) { sNextTheme = theme; }
 void YgoBoard_SetWaiting(int waiting) { B.waiting = waiting; }
 void YgoBoard_Begin(const struct YgoDuel *truth, unsigned me, const char *opponent, int online)
 {
@@ -1148,6 +1153,8 @@ void YgoBoard_Begin(const struct YgoDuel *truth, unsigned me, const char *oppone
     B.fast = fast;
     B.active = 1;
     B.online = online;
+    B.theme = (uint8_t)(online ? YGO_BG_ONLINE : sNextTheme);
+    sNextTheme = YGO_BG_PLAIN;
     B.me = me;
     B.d = truth;
     B.tutorial = sNextTutorial;
@@ -1404,7 +1411,7 @@ static int OpenPhaseMenu(void)
 {
     const struct YgoQuery *q = &B.d->query;
     unsigned i;
-    int toBattle = -1, toMain2 = -1, endTurn = -1, attacks = 0;
+    int toBattle = -1, toMain2 = -1, endTurn = -1;
     B.menuCount = 0;
     if (q->player == B.me && (q->type == YGO_Q_IDLE || q->type == YGO_Q_BATTLE))
         for (i = 0; i < q->count && B.menuCount < 15; i++)
@@ -1426,14 +1433,12 @@ static int OpenPhaseMenu(void)
         else if (kind == YGO_ACT_TO_MAIN2)
             toMain2 = (int)i;
     }
-    for (i = 0; i < q->count; i++)
-        attacks += q->items[i].kind == YGO_ACT_ATTACK;
     if (endTurn >= 0)
         B.menuCursor = endTurn;
     if (toBattle >= 0 && ChoicesAfter(B.menuItems[toBattle], YGO_ACT_ATTACK) > 0)
         B.menuCursor = toBattle;
-    else if (toMain2 >= 0 && !attacks && ChoicesAfter(B.menuItems[toMain2], YGO_ACT_SUMMON) > 0)
-        B.menuCursor = toMain2;
+    else if (toMain2 >= 0)
+        B.menuCursor = toMain2; /* (from the Battle Phase: MAIN PHASE 2 first, END TURN beside it) */
     printf("[ygo] turn menu: cursor on %s\n", B.menuItems[B.menuCursor] == -2 ? "CONCEDE"
                                                 : KindLabel(&q->items[B.menuItems[B.menuCursor]]));
     B.mode = M_PHASE;
@@ -1929,15 +1934,163 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
 /* ------------------------------------------------------------------ */
 /* Drawing                                                              */
 /* ------------------------------------------------------------------ */
-static void Mat(void)
+/* The backgrounds: one per theme (the opponent's main Attribute), built once; a face-up Field Spell's own
+   picture over it while it's in play (any Field Spell, from its artwork) */
+static SDL_Texture *sThemeTex;
+static unsigned sThemeBuilt = 0xFF;
+static uint32_t BgRandom(uint32_t *r)
 {
-    int y, side, i;
+    *r = *r * 1103515245u + 12345u;
+    return *r >> 8;
+}
+static void BuildTheme(unsigned theme)
+{
+    static const unsigned colors[YGO_BG_COUNT][3] = {
+        {0x2a1c30, 0x1c2434, 0x18283c}, /* the table as it was */
+        {0x3a3418, 0x2c2c2a, 0x1c2434}, /* LIGHT: a pale gold glow */
+        {0x200c2c, 0x160c24, 0x0c0814}, /* DARK: night and mist */
+        {0x0c2440, 0x0c1c38, 0x08142c}, /* WATER: the deep */
+        {0x3c1408, 0x2a1010, 0x180c10}, /* FIRE: embers */
+        {0x2c2414, 0x241e16, 0x1a1810}, /* EARTH: stone */
+        {0x14303a, 0x162a34, 0x10202c}, /* WIND: sky */
+        {0x101c30, 0x0c1426, 0x080e1c}, /* ONLINE: a duel arena's grid */
+    };
+    struct GSurface g = G_SurfaceNew(240, 160);
+    uint32_t r = 0x9e3779b9u + theme;
+    int x, y, i;
+    if (!g.px)
+        return;
+    if (theme >= YGO_BG_COUNT)
+        theme = 0;
     for (y = 0; y < 160; y++)
     {
-        unsigned top = 0x2a1c30, mid = 0x1c2434, bottom = 0x18283c;
-        unsigned c = y < 66 ? G_Mix(top, mid, y / 66.0f) : G_Mix(mid, bottom, (y - 66) / 94.0f);
-        G_FillA(0, y, 240, 1, c, 255);
+        unsigned c = y < 66 ? G_Mix(colors[theme][0], colors[theme][1], y / 66.0f)
+                            : G_Mix(colors[theme][1], colors[theme][2], (y - 66) / 94.0f);
+        for (x = 0; x < 240; x++)
+            g.px[y * 240 + x] = 0xFF000000u | c;
     }
+    switch (theme)
+    {
+    case YGO_BG_LIGHT:
+        for (i = 0; i < 9; i++)
+        {
+            int x0 = 20 + i * 26;
+            for (y = 0; y < 160; y++)
+                for (x = 0; x < 6; x++)
+                    S_Blend(&g, x0 + x + y / 3, y, 0xfff0b0, (unsigned)(18 - y / 10));
+        }
+        break;
+    case YGO_BG_DARK:
+        for (i = 0; i < 70; i++)
+            S_Blend(&g, (int)(BgRandom(&r) % 240), (int)(BgRandom(&r) % 160), 0xd0b0ff, 60 + BgRandom(&r) % 120);
+        for (y = 0; y < 160; y++)
+            for (x = 0; x < 240; x++)
+            {
+                float f = 0.5f + 0.5f * SDL_sinf(x * 0.05f + SDL_sinf(y * 0.07f) * 2) * SDL_cosf(y * 0.09f);
+                S_Blend(&g, x, y, 0x6a3a8a, (unsigned)(f * 26));
+            }
+        break;
+    case YGO_BG_WATER:
+        for (i = 0; i < 12; i++)
+            for (x = 0; x < 240; x++)
+                S_Blend(&g, x, 8 + i * 13 + (int)(SDL_sinf(x * 0.06f + i) * 3), 0x60a8e0, 46);
+        break;
+    case YGO_BG_FIRE:
+        for (i = 0; i < 90; i++)
+        {
+            int ex = (int)(BgRandom(&r) % 240), ey = 40 + (int)(BgRandom(&r) % 120);
+            S_Blend(&g, ex, ey, 0xffa040, 50 + (unsigned)ey);
+            S_Blend(&g, ex, ey - 1, 0xff6020, 40);
+        }
+        break;
+    case YGO_BG_EARTH:
+        for (y = 0; y < 160; y += 16)
+            for (x = 0; x < 240; x++)
+                S_Blend(&g, x, y, 0x000000, 70);
+        for (y = 0; y < 160; y++)
+            for (x = ((y / 16) % 2) * 12; x < 240; x += 24)
+                S_Blend(&g, x, y, 0x000000, 60);
+        for (i = 0; i < 400; i++)
+            S_Blend(&g, (int)(BgRandom(&r) % 240), (int)(BgRandom(&r) % 160), 0xa08860, 30);
+        break;
+    case YGO_BG_WIND:
+        for (i = 0; i < 16; i++)
+        {
+            int cy = (int)(BgRandom(&r) % 160), cx = (int)(BgRandom(&r) % 240), len = 30 + (int)(BgRandom(&r) % 60);
+            for (x = 0; x < len; x++)
+                S_Blend(&g, cx + x - len / 2, cy, 0xe0f4ff, (unsigned)(40 * SDL_sinf(3.14159f * x / len)));
+        }
+        break;
+    case YGO_BG_ONLINE:
+        for (y = 0; y < 160; y += 10)
+            for (x = 0; x < 240; x++)
+                S_Blend(&g, x, y, 0x3a70c0, 40);
+        for (x = 0; x < 240; x += 10)
+            for (y = 0; y < 160; y++)
+                S_Blend(&g, x, y, 0x3a70c0, 40);
+        break;
+    }
+    if (sThemeTex)
+        SDL_DestroyTexture(sThemeTex);
+    sThemeTex = G_SurfaceTexture(&g);
+    G_SurfaceFree(&g);
+    sThemeBuilt = theme;
+}
+/* The Field Spell face-up on the field, if any (the newest one wins: only one can be out at a time) */
+static unsigned FieldSpellCard(void)
+{
+    unsigned side, o;
+    for (side = 0; side < 2; side++)
+    {
+        o = T()->players[side].spells[YGO_FIELD_ZONE];
+        if (o && T()->objs[o - 1].faceUp)
+            return T()->objs[o - 1].card;
+    }
+    return 0;
+}
+static unsigned sTestField;
+/* Harness helper (mp ygo fieldbg ID): that Field Spell's background as if it were in play */
+void YgoBoard_TestFieldBg(unsigned id) { sTestField = id; }
+static void Background(void)
+{
+    unsigned field = FieldSpellCard() ? FieldSpellCard() : sTestField;
+    if (sThemeBuilt != B.theme || !sThemeTex)
+        BuildTheme(B.theme);
+    if (sThemeTex)
+        SDL_RenderCopy(G_R(), sThemeTex, NULL, NULL);
+    if (field != B.fieldCard)
+    {
+        B.fieldCard = field;
+        if (field)
+            printf("[ygo] field background: %s\n", Ygo_Card(field) ? Ygo_Card(field)->name : "?");
+    }
+    if (B.fieldCard)
+    {
+        /* The Field Spell's artwork covering the table, darkened so the cards stay clear */
+        int w, h, smooth;
+        SDL_Texture *art = Ygo_ArtTexture(B.fieldCard, &w, &h, &smooth);
+        if (art && w > 0 && h > 0)
+        {
+            SDL_BlendMode mode;
+            SDL_Rect src = {0, 0, w, h}, dst = {0, 0, 240, 160};
+            /* (cover: crop the picture to the table's shape) */
+            if (w * 160 > h * 240)
+                src.w = h * 240 / 160, src.x = (w - src.w) / 2;
+            else
+                src.h = w * 160 / 240, src.y = (h - src.h) / 2;
+            /* (the art's pixels carry no alpha: drawn opaque) */
+            SDL_GetTextureBlendMode(art, &mode);
+            SDL_SetTextureBlendMode(art, SDL_BLENDMODE_NONE);
+            SDL_RenderCopy(G_R(), art, &src, &dst);
+            SDL_SetTextureBlendMode(art, mode);
+            G_FillA(0, 0, 240, 160, 0x080c14, 150);
+        }
+    }
+}
+static void Mat(void)
+{
+    int side, i;
+    Background();
     G_FillA(0, GAP_Y, 240, 22, 0x0c1018, 150);
     G_FillA(0, GAP_Y, 240, 1, 0x6070a0, 120);
     G_FillA(0, GAP_Y + 21, 240, 1, 0x6070a0, 120);
@@ -2608,10 +2761,32 @@ static void Fxs(void)
         }
     }
 }
+/* How wide a box must be for its rows to stay on one line each (never past the screen) */
+static int RowsWidth(const char *const *rows, int count, int min)
+{
+    int i, w = min;
+    for (i = 0; i < count; i++)
+    {
+        int need = G_Measure(rows[i], TF_NORMAL) + 22;
+        if (need > w)
+            w = need;
+    }
+    return w > 236 ? 236 : w;
+}
 static void WindowBox(int x, int y, int w, const char *title, const char *const *rows, int count, int cursor,
                       const unsigned *gray)
 {
-    int h = count * 14 + (title ? 14 : 0) + 8, i, ty = y + 4;
+    int h = count * 14 + (title ? 14 : 0) + 8, i, ty = y + 4, wide = RowsWidth(rows, count, w);
+    if (wide > w)
+    {
+        /* (a row longer than the box: the box grows, keeping its right edge where it can) */
+        x -= wide - w;
+        w = wide;
+        if (x < 2)
+            x = 2;
+        if (x + w > 238)
+            x = 238 - w;
+    }
     G_Window(x, y, w, h);
     if (title)
     {
@@ -2636,9 +2811,10 @@ static void Menus(void)
     case M_MENU:
     case M_PHASE:
     {
-        int w = 96, x, y, cur = CurrentSpot();
+        int w, x, y, cur = CurrentSpot();
         for (i = 0; i < B.menuCount; i++)
             rows[i] = B.menuItems[i] == -2 ? "CONCEDE" : KindLabel(&q->items[B.menuItems[i]]);
+        w = RowsWidth(rows, B.menuCount, 96);
         x = 140;
         y = 160 - (B.menuCount * 14 + 8) - 34;
         if ((B.mode == M_MENU || B.deckMenu) && cur >= 0)

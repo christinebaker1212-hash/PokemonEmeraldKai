@@ -400,3 +400,71 @@ run held_starter 2,4,7,3
 expect held_starter '\[ygo\] screen 13 opted 0 .* message 0'
 echo 'PASS an A held to close a message opens the Yu-Gi-Oh! screen without choosing anything in it'
 fi
+
+# The table: from the Battle Phase, MAIN PHASE 2 (chosen) or END TURN, which skips it; a Field Spell's picture as the
+# background (Yami, from its artwork); the opponent's main Attribute as the table's theme
+if only table; then
+cat > "$OUT/table.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp ygo starter 0
+mp ygo fast
+mp ygo seed 7
+mp ygo first 0
+mp ygo open
+wait 20
+press A 2
+wait 300
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+mp ygo mine
+wait 40
+wait 60
+press B 2
+wait 20
+rendershot battle_menu
+press DOWN 2
+wait 6
+press A 2
+wait 120
+mp ygo state
+mp ygo fieldbg 52
+wait 20
+press RIGHT 2
+wait 20
+rendershot field_bg
+quit
+SCRIPT
+run table
+expect table 'turn menu: cursor on MAIN PHASE 2'
+expect table 'duel: turn 5 phase 2 current 0'
+expect table 'field background: Yami'
+echo 'PASS the Battle Phase menu (MAIN PHASE 2 chosen, END TURN skips it) and a Field Spell background'
+fi
