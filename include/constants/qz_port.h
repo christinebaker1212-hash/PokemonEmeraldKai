@@ -2018,9 +2018,9 @@
 #define TRAINER_QZ_4553                          1019
 #define TRAINER_QZ_4554                          1020
 #define TRAINER_QZ_4558                          1021
-#define TRAINER_QZ_4563                          1022
-#define TRAINER_QZ_4564                          1023
-#define TRAINER_QZ_4566                          1024
+#define TRAINER_QZ_4563                          1658
+#define TRAINER_QZ_4564                          1659
+#define TRAINER_QZ_4566                          1660
 #define TRAINER_QZ_4569                          1025
 #define TRAINER_QZ_4571                          1026
 #define TRAINER_QZ_4572                          1027

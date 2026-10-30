@@ -440,17 +440,21 @@ u16 QzStartMarowakGhostBattle(void) { return gSpecialVar_Result = QzStartMarowak
 // After a gift (givemon's VAR_RESULT: 0 party, 1 PC): VAR_0x8004 = its party slot, or 6 in the PC; its name in STR_VAR_1
 static u16 QzBufferLastReceivedMonForNickname_(void)
 {
+    // where the last gift really went (GiveMonToPlayer): scripts call this long after it, VAR_RESULT is long gone
+    extern u8 gMpLastGivenMonPlace, gMpLastGivenMonSlot;
     u16 species;
-    if (gSpecialVar_Result == MON_GIVEN_TO_PC)
+    if (gMpLastGivenMonPlace == MON_GIVEN_TO_PC)
     {
         gSpecialVar_0x8004 = PARTY_SIZE;
         species = GetBoxMonDataAt(gSpecialVar_MonBoxId, gSpecialVar_MonBoxPos, MON_DATA_SPECIES);
     }
     else
     {
-        gSpecialVar_0x8004 = CalculatePlayerPartyCount() - 1;
+        gSpecialVar_0x8004 = gMpLastGivenMonPlace == MON_GIVEN_TO_PARTY ? gMpLastGivenMonSlot : CalculatePlayerPartyCount() - 1;
         species = GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES);
     }
+    if (species == SPECIES_NONE)
+        return FALSE;   // (nothing to name: the script skips the question)
     GetSpeciesName(gStringVar1, species);
     return TRUE;
 }
@@ -810,6 +814,12 @@ static u16 TravelingEvent(const u16 *towns, u8 count, u16 flag, u16 salt)
 {
     u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     u32 day;
+    // a challenge for champions (a Lv. 50 battle): not before the region's League is beaten
+    if (!MP_Region_Cleared(MP_Region_Current()))
+    {
+        FlagSet(flag);
+        return FALSE;
+    }
     RtcCalcLocalTime();
     day = (u32)gLocalTime.days * 2654435761u + salt;
     if (towns[(day >> 16) % count] == here)

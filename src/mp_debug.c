@@ -255,6 +255,11 @@ int MP_TestCondition(const char *name)
         bool8 NamingScreen_IsActive(void);
         return NamingScreen_IsActive() && !gPaletteFade.active;
     }
+    if (strcmp(name, "regionmenu") == 0)
+    {
+        bool8 MP_IntroRegionMenu_Active(void);
+        return MP_IntroRegionMenu_Active();
+    }
     if (strcmp(name, "introlook") == 0)
     {
         bool8 MP_IntroLook_Active(void);
@@ -412,6 +417,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
             for (i = 0; i < MAX_MON_MOVES; i++)
                 SetMonMoveSlot(&gEnemyParty[0], m[i], i);
         BattleSetup_StartWildBattle();
+    }
+    else if (strcmp(cmd, "battlestyle") == 0)
+    {
+        // battlestyle 0|1 - OPTIONS > BATTLE STYLE (0 SHIFT, 1 SET)
+        gSaveBlock2Ptr->optionsBattleStyle = atoi(arg) ? OPTIONS_BATTLE_STYLE_SET : OPTIONS_BATTLE_STYLE_SHIFT;
+    }
+    else if (strcmp(cmd, "trainer") == 0)
+    {
+        // trainer ID - a battle against that trainer right now (tests: tools/test/trainer_sweep.sh)
+        void MP_Debug_TrainerBattle(u16 id);
+        printf("[test] trainer battle %d\n", atoi(arg));
+        MP_Debug_TrainerBattle(atoi(arg));
     }
     else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
     {

@@ -1454,6 +1454,19 @@ void MP_EndJoinedTrainerBattle(void)
     SetBattledTrainersFlags();
 }
 
+// Moemon Kai (tests only: mp trainer, tools/test/trainer_sweep.sh): a battle against trainer ID right now, as its
+// script would start it
+void MP_Debug_TrainerBattle(u16 id)
+{
+    sTrainerBattleMode = TRAINER_BATTLE_SINGLE;
+    gTrainerBattleOpponent_A = id;
+    gTrainerBattleOpponent_B = 0;
+    sTrainerObjectEventLocalId = LOCALID_NONE;
+    sTrainerBattleEndScript = NULL;
+    gNoOfApproachingTrainers = 0;
+    BattleSetup_StartTrainerBattle();
+}
+
 static void CB2_EndTrainerBattle(void)
 {
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)

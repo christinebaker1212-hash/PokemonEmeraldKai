@@ -121,6 +121,12 @@ void MP_Region_GoToStartHouse(u8 region)
     }
 }
 
+// The region picked on PROF. BIRCH's question (before the new game starts)
+u8 MP_Region_StartChoice(void)
+{
+    return sStartRegion;
+}
+
 // End of NewGameInitData: JOHTO starts in NEW BARK's house, KANTO in PALLET's (their own opening scripts run there)
 void MP_Region_StartNewGame(void)
 {
@@ -291,7 +297,17 @@ void MP_Region_LoadFromSave(void)
             snprintf(path, sizeof(path), "%s.bak%d.region", gPlatformSavePath, i);
         if (LoadFrom(path))
         {
+            // three Johto / Kanto trainers had Emerald's special numbers 1022-1024 in 1.60 (gen_trainers.py): their
+            // "beaten" flags move to their new numbers
+            static const u16 sMoved[][2] = {{1022, TRAINER_QZ_4563}, {1023, TRAINER_QZ_4564}, {1024, TRAINER_QZ_4566}};
+            int k;
             MPNet_Log("region: loaded%s", i ? " (from a backup)" : "");
+            for (k = 0; k < (int)ARRAY_COUNT(sMoved); k++)
+                if (FlagGet(TRAINER_FLAG(sMoved[k][0])))
+                {
+                    FlagSet(TRAINER_FLAG(sMoved[k][1]));
+                    FlagClear(TRAINER_FLAG(sMoved[k][0]));
+                }
             MP_SaveFix_Migrate(sSaveFormat);
             return;
         }

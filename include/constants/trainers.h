@@ -360,7 +360,7 @@
 
 // Moemon Kai: Johto / Kanto (tools/quetzal_port/gen_trainers.py)
 #define FIRST_QZ_TRAINER 864
-#define QZ_TRAINERS_COUNT 794
+#define QZ_TRAINERS_COUNT 797
 #define TRAINER_CLASS_QZ_BURGLAR 66
 #define TRAINER_CLASS_QZ_FIREBREATHER 67
 #define TRAINER_CLASS_QZ_JUGGLER 68

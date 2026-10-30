@@ -2750,3 +2750,18 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   a crash, a hang or a full heap fails (the end of regress.sh runs groups 0-39). It found TRAINER TOWER's placeholder
   (Quetzal_EventScript_84736F6, from the rip) opening a message box in an ON_RESUME script, which hangs: the tower is
   closed now (receptionist and gate say so, the rest ends quietly; test region_closed_tower).
+
+## Crash hunts and the region openings (1.60.2)
+- tools/test/trainer_sweep.sh [IDS]: every trainer battle (HOENN 1-854, JOHTO / KANTO 864-1660), two Lv. 100 MEWTWO
+  with BITE against the trainer's team at 1 HP and 1 max HP (MOEMON_TEST_FOE_HP1, test-only, battle_main.c); `mp trainer
+  ID` starts one (battle_setup.c MP_Debug_TrainerBattle), `mp battlestyle 1` = SET. A Lv. 100 team that still wins
+  leaves the harness in the party screen: a timeout there is the test, not the game.
+- Trainer numbers 1022-1024 are Emerald's TRAINER_FRONTIER_BRAIN / PLAYER / SECRET_BASE: gen_trainers.py puts the
+  Johto / Kanto trainers that landed there past the end (1658-1660); MP_Region_LoadFromSave moves their beaten flags.
+- New games in JOHTO / KANTO: CB2_NewGame fades in (no ExecuteTruckSequence, which drew the truck's door into the
+  house), BIRCH's farewell per region (main_menu.c, MP_Region_StartChoice), harness condition `regionmenu`.
+- Quetzal's travelling visitors (JESSIE and JAMES, qz_specials.c TravelingEvent) wait for the region's League.
+- tools/quetzal_port/fix_warp_tiles.py (run by import.py): FireRed door mats warp on both halves.
+- Script numbers the import can't translate (a number set into a var, then additem VAR): check with a scan of
+  `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
+- QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.

@@ -4605,6 +4605,7 @@ void CopyMon(void *dest, void *src, size_t size)
     memcpy(dest, src, size);
 }
 
+extern u8 gMpLastGivenMonPlace, gMpLastGivenMonSlot;
 u8 GiveMonToPlayer(struct Pokemon *mon)
 {
     s32 i;
@@ -4624,12 +4625,18 @@ u8 GiveMonToPlayer(struct Pokemon *mon)
     }
 
     if (i >= PARTY_SIZE)
-        return CopyMonToPC(mon);
+        return (gMpLastGivenMonPlace = CopyMonToPC(mon));   // (Moemon Kai: CopyMonToPC sets gSpecialVar_MonBoxId / Pos)
 
     CopyMon(&gPlayerParty[i], mon, sizeof(*mon));
     gPlayerPartyCount = i + 1;
+    gMpLastGivenMonPlace = MON_GIVEN_TO_PARTY;
+    gMpLastGivenMonSlot = i;
     return MON_GIVEN_TO_PARTY;
 }
+
+// Moemon Kai: where the last given POKéMON went, for scripts that offer a nickname later (qz_specials.c)
+u8 gMpLastGivenMonPlace = MON_CANT_GIVE;
+u8 gMpLastGivenMonSlot;
 
 static u8 CopyMonToPC(struct Pokemon *mon)
 {

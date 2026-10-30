@@ -33,6 +33,7 @@ u8 MP_Region_BadgeCount(u8 region);
 bool8 MP_Region_Cleared(u8 region);
 void MP_Region_SetCleared(u8 region);
 bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)
+u8 MP_Region_StartChoice(void);       // PROF. BIRCH's region question, until the new game starts
 u8 MP_Region_Current(void);          // the region of the map the player is on
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);

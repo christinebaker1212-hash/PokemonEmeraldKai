@@ -103,8 +103,15 @@ def main():
 
     # trainers and parties
     parties, entries, ids = '', '', ''
+    # Emerald's special trainer numbers (TRAINER_FRONTIER_BRAIN 1022, TRAINER_PLAYER 1023, TRAINER_SECRET_BASE 1024)
+    # are skipped: a trainer there got a Secret Base's (empty) team. Theirs go past the end (MP_Region_LoadFromSave
+    # moves their "beaten" flags from 1.60)
+    reserved = (1022, 1023, 1024)
+    past = FIRST_ID + len(trainers)
     for n, t in enumerate(trainers):
         tid = FIRST_ID + n
+        if tid in reserved:
+            tid = past + reserved.index(tid)
         ids += '#define %-40s %d\n' % (t['const'], tid)
         kind = t['party_type']
         name = 'sParty_Qz%d' % t['id']
@@ -138,7 +145,7 @@ def main():
     open(os.path.join(REPO, 'src/data/trainers_qz.h'), 'w', encoding='utf-8').write(head + entries)
 
     # constants
-    block = '#define FIRST_QZ_TRAINER %d\n#define QZ_TRAINERS_COUNT %d\n' % (FIRST_ID, len(trainers))
+    block = '#define FIRST_QZ_TRAINER %d\n#define QZ_TRAINERS_COUNT %d\n' % (FIRST_ID, len(trainers) + len(reserved))
     block += ''.join('#define TRAINER_CLASS_QZ_%s %d\n' % (v, k) for k, v in CLASSES.items())
     block += '#define TRAINER_CLASS_QZ_LAST %d\n' % max(CLASSES)
     block += '#define TRAINER_ENCOUNTER_MUSIC_QZ_FIRST 14   // 14-23: Johto\'s encounter themes\n'

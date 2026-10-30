@@ -1895,6 +1895,12 @@ static void Task_NewGameBirchSpeech_ProcessRegionMenu(u8 taskId)
     }
 }
 
+// (tests: harness condition "regionmenu")
+bool8 MP_IntroRegionMenu_Active(void)
+{
+    return FuncIsActiveTask(Task_NewGameBirchSpeech_ProcessRegionMenu);
+}
+
 static void Task_NewGameBirchSpeech_WaitAskRegion(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
@@ -1935,6 +1941,9 @@ static void Task_NewGameBirchSpeech_AfterSkip(u8 taskId)
     gTasks[taskId].func = Task_NewGameBirchSpeech_ShrinkPlayer;
 }
 
+static const u8 sText_Birch_AreYouReadyJohto[] = _("All right, are you ready?\pYour very own adventure is about\nto unfold.\pTake courage, and leap into the\nworld of MOéMON where dreams,\ladventure, and friendships await!\pPROF. ELM is expecting you in\nNEW BARK TOWN. Off you go!\p");
+static const u8 sText_Birch_AreYouReadyKanto[] = _("All right, are you ready?\pYour very own adventure is about\nto unfold.\pTake courage, and leap into the\nworld of MOéMON where dreams,\ladventure, and friendships await!\pPROF. OAK is expecting you in\nPALLET TOWN. Off you go!\p");
+
 static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
 {
     u8 spriteId;
@@ -1959,7 +1968,19 @@ static void Task_NewGameBirchSpeech_AreYouReady(u8 taskId)
         gTasks[taskId].tPlayerSpriteId = spriteId;
         NewGameBirchSpeech_StartFadeInTarget1OutTarget2(taskId, 2);
         NewGameBirchSpeech_StartFadePlatformOut(taskId, 1);
-        StringExpandPlaceholders(gStringVar4, gText_Birch_AreYouReady);
+        NewGameBirchSpeech_ClearWindow(0);   // Moemon Kai: (the region question was still in it)
+        switch (MP_Region_StartChoice())   // Moemon Kai: BIRCH's lab is HOENN's; the other regions' professors wait there
+        {
+        case REGION_JOHTO:
+            StringExpandPlaceholders(gStringVar4, sText_Birch_AreYouReadyJohto);
+            break;
+        case REGION_KANTO:
+            StringExpandPlaceholders(gStringVar4, sText_Birch_AreYouReadyKanto);
+            break;
+        default:
+            StringExpandPlaceholders(gStringVar4, gText_Birch_AreYouReady);
+            break;
+        }
         AddTextPrinterForMessage(TRUE);
         gTasks[taskId].func = Task_NewGameBirchSpeech_ShrinkPlayer;
     }

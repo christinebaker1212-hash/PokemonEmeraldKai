@@ -2332,6 +2332,17 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         }
 
         gBattleTypeFlags |= (*trainer).doubleBattle;
+        extern char *getenv(const char *name);
+        if (getenv("MOEMON_TEST_FOE_HP1"))   // Moemon Kai (tests only: tools/test/trainer_sweep.sh): foes at 1 HP
+        {
+            u16 one = 1;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&party[i], MON_DATA_SPECIES))
+                {
+                    SetMonData(&party[i], MON_DATA_HP, &one);
+                    SetMonData(&party[i], MON_DATA_MAX_HP, &one);   // (a FULL RESTORE heals it to 1)
+                }
+        }
     }
 
     return (*trainer).partySize;
