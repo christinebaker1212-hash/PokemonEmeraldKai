@@ -36,6 +36,8 @@ mp regioninfo
 mp regionreload
 mp regioninfo
 mp regionclear 1
+mp warp 35,12,8,16
+wait 120
 press DOWN 3
 wait 10
 pressuntil A multichoice 2000

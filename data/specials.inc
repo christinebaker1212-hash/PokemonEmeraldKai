@@ -602,4 +602,5 @@ gSpecials::
 	def_special MP_ShowGlobalPC, waitstate=1
 	def_special MP_GlobalPcLinked
 	def_special MP_RegionPartyCount
+	def_special MP_RegionFirstVisit
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

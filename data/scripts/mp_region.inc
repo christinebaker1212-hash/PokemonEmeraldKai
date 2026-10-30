@@ -2,6 +2,8 @@
 @ the others wait in the GLOBAL PC. Called by the ports right before QzTravelToRegion (VAR_0x8004 = the region):
 @ VAR_0x8005 = the party slot of the one who comes. B / cancel ends the script.
 EventScript_RegionCustoms::
+	specialvar VAR_RESULT, MP_RegionFirstVisit
+	call_if_eq VAR_RESULT, TRUE, EventScript_RegionFirstVisit
 	setvar VAR_0x8005, 0
 	specialvar VAR_RESULT, MP_RegionPartyCount
 	goto_if_le VAR_RESULT, 1, EventScript_RegionCustoms_Done
@@ -13,6 +15,10 @@ EventScript_RegionCustoms::
 	goto_if_eq VAR_0x8005, PARTY_NOTHING_CHOSEN, EventScript_RegionCustoms_Cancel
 	msgbox gText_RegionCustomsSent, MSGBOX_DEFAULT
 EventScript_RegionCustoms_Done::
+	return
+
+EventScript_RegionFirstVisit::
+	msgbox gStringVar4, MSGBOX_DEFAULT
 	return
 
 EventScript_RegionCustoms_Cancel::

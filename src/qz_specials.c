@@ -875,6 +875,7 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
 static u16 QzTravelToRegion_(void)
 {
     u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
+    bool8 first;
     if (to >= REGION_COUNT || to == from || !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
     if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
@@ -889,9 +890,13 @@ static u16 QzTravelToRegion_(void)
         ZeroMonData(&gPlayerParty[i]);
     }
     CompactPartySlots();
+    first = !(gRegionState.started & (1 << to)) && to != REGION_HOENN;
     MP_Region_Travel(from, to);
     HealPlayerParty();
-    SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
+    if (first)
+        MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
+    else
+        SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
     DoWarp();
     ResetInitialPlayerAvatarState();
     return 1;

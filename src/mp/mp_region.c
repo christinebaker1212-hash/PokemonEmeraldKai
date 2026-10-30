@@ -104,6 +104,22 @@ void MP_Region_SetStartRegion(u8 region)
     sStartRegion = region < REGION_COUNT ? region : REGION_HOENN;
 }
 
+// The house JOHTO's / KANTO's story starts in (NEW BARK, PALLET): a new game there, or the first boat trip (the
+// player's room while they stay); sets the warp
+void MP_Region_GoToStartHouse(u8 region)
+{
+    if (region == REGION_JOHTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_JOHTO_PLAYERS_HOUSE2F), MAP_NUM(MAP_JOHTO_PLAYERS_HOUSE2F), WARP_ID_NONE, 4, 4);
+        SetLastHealLocationWarp(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+    }
+    else if (region == REGION_KANTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), MAP_NUM(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), WARP_ID_NONE, 6, 6);
+        SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
+    }
+}
+
 // End of NewGameInitData: JOHTO starts in NEW BARK's house, KANTO in PALLET's (their own opening scripts run there)
 void MP_Region_StartNewGame(void)
 {
@@ -112,19 +128,24 @@ void MP_Region_StartNewGame(void)
         sStartRegion = atoi(env) % REGION_COUNT;
     gRegionState.current = sStartRegion;
     gRegionState.started = 1 << sStartRegion;
-    if (sStartRegion == REGION_JOHTO)
+    if (sStartRegion != REGION_HOENN)
     {
-        SetWarpDestination(MAP_GROUP(MAP_JOHTO_PLAYERS_HOUSE2F), MAP_NUM(MAP_JOHTO_PLAYERS_HOUSE2F), WARP_ID_NONE, 4, 4);
-        SetLastHealLocationWarp(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
-        WarpIntoMap();
-    }
-    else if (sStartRegion == REGION_KANTO)
-    {
-        SetWarpDestination(MAP_GROUP(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), MAP_NUM(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), WARP_ID_NONE, 6, 6);
-        SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
+        MP_Region_GoToStartHouse(sStartRegion);
         WarpIntoMap();
     }
     sStartRegion = REGION_HOENN;
+}
+
+// The ports' customs: TRUE when the trip to VAR_0x8004 is the player's first there (gStringVar4: what happens)
+u16 MP_RegionFirstVisit(void)
+{
+    static const u8 sJohto[] = _("It's your first voyage to JOHTO!\pA guide will meet you at OLIVINE and\ntake you to NEW BARK TOWN, home of\lPROF. ELM's POKéMON LAB.\pYou'll have a room there while you\nstay in JOHTO.$");
+    static const u8 sKanto[] = _("It's your first voyage to KANTO!\pA guide will meet you at VERMILION\nand take you to PALLET TOWN, home of\lPROF. OAK's POKéMON LAB.\pYou'll have a room there while you\nstay in KANTO.$");
+    u8 to = gSpecialVar_0x8004;
+    if (to == REGION_HOENN || to >= REGION_COUNT || (gRegionState.started & (1 << to)))
+        return gSpecialVar_Result = FALSE;
+    StringCopy(gStringVar4, to == REGION_JOHTO ? sJohto : sKanto);
+    return gSpecialVar_Result = TRUE;
 }
 
 // What ties the side file to the save it was written with
