@@ -176,5 +176,59 @@ int main(void)
         }
     }
     printf("PASS %u Pokemon Card GB2 attacks used %u times, then %u AI actions after them\n", used, ok, steps);
+    /* Every used Pokemon Power: from the Active spot and from the Bench, some choice of target / card works
+     * whenever its block says it can be used */
+    used = ok = 0;
+    for (id = 229; id <= TCG_CARD_COUNT; id++)
+    {
+        unsigned power = TcgPower_Id(&gTcgCards[id]), where;
+        if (power < TCG_POWER_FIRST_USED)
+            continue;
+        used++;
+        for (where = 0; where < 2; where++)
+            for (seed = 1; seed <= 12; seed++)
+            {
+                struct TcgAction a;
+                unsigned slot = where ? 1 : 0, target, pick, done = 0;
+                Stage(&g, id, 0, seed);
+                g.players[0].field[0].condition = TCG_HEALTHY;
+                if (where)
+                {
+                    struct TcgFieldCard t = g.players[0].field[0];
+                    g.players[0].field[0] = g.players[0].field[1];
+                    g.players[0].field[1] = t;
+                }
+                g.players[1].field[1].damage = 10;
+                if (TcgPower_Block(&g, 0, slot))
+                    continue;
+                for (target = 0; target < TCG_FIELD_SIZE && !done; target++)
+                    for (pick = 0; pick < 70 && !done; pick++)
+                    {
+                        struct TcgDuel copy = g;
+                        memset(&a, 0, sizeof(a));
+                        a.type = TCG_USE_POWER;
+                        a.slot = (uint8_t)slot;
+                        a.target = (uint8_t)target;
+                        a.attack = (uint8_t)((target + 1) % TCG_FIELD_SIZE);
+                        if (pick)
+                        {
+                            a.selections[0] = (uint8_t)(pick - 1);
+                            a.selectionCount = 1;
+                        }
+                        if (TcgDuel_Apply(&copy, &a) == TCG_OK)
+                        {
+                            assert(TcgDuel_Conserved(&copy));
+                            done = 1;
+                            ok++;
+                        }
+                    }
+                if (!done)
+                {
+                    printf("FAIL %s's %s: never usable (%s)\n", gTcgCards[id].name, TcgPower_Name(power), g.error);
+                    return 1;
+                }
+            }
+    }
+    printf("PASS %u Pokemon Card GB2 used Pokemon Powers, %u times\n", used, ok);
     return 0;
 }

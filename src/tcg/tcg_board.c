@@ -366,7 +366,7 @@ static int HasEnergy(unsigned who, unsigned slot)
 }
 static int AttackReady(unsigned attack, char *reason, size_t size)
 {
-    const struct TcgCard *c = Field(0, 0);
+    const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0), *active = Field(0, 0);
     const struct TcgFieldCard *f = &B.view.players[0].field[0];
     if (!c || c->kind != TCG_POKEMON || !c->attacks[attack].name[0])
         return snprintf(reason, size, "No attack."), 0;
@@ -378,23 +378,18 @@ static int AttackReady(unsigned attack, char *reason, size_t size)
         return snprintf(reason, size, "%s", TcgDuel_EffectBlock(&B.view, 0, &c->attacks[attack])), 0;
     if (!TcgDuel_CanAttack(&B.view, 0, attack))
         return snprintf(reason, size, "Not enough Energy attached."), 0;
-    if (f->condition == TCG_ASLEEP)
-        return snprintf(reason, size, "%s is Asleep.", c->name), 0;
+    if (f->condition == TCG_ASLEEP && !TcgDuel_SleepAttack(&c->attacks[attack]))
+        return snprintf(reason, size, "%s is Asleep.", active->name), 0;
     if (f->condition == TCG_PARALYZED)
-        return snprintf(reason, size, "%s is Paralyzed.", c->name), 0;
-    if (TcgDuel_NoAttack(&B.view, 0))
-        return snprintf(reason, size, "%s can't attack this turn.", c->name), 0;
+        return snprintf(reason, size, "%s is Paralyzed.", active->name), 0;
+    if (!TcgDuel_CanAttackNow(&B.view, 0, attack))
+        return snprintf(reason, size, "%s can't use that attack this turn.", active->name), 0;
     if (!Field(1, 0))
         return snprintf(reason, size, "There is no Defending Pokemon."), 0;
     return 1;
 }
 /* The Active Pokemon's Retreat Cost, less a Colorless for each Dodrio on the Bench */
-static unsigned RetreatCostNow(void)
-{
-    const struct TcgCard *c = Field(0, 0);
-    unsigned aid = TcgPower_RetreatAid(&B.view, 0);
-    return !c ? 0 : c->retreat > aid ? c->retreat - aid : 0;
-}
+static unsigned RetreatCostNow(void) { return TcgDuel_RetreatCost(&B.view, 0); }
 static int CanRetreat(char *reason, size_t size)
 {
     const struct TcgCard *c = Field(0, 0);
@@ -413,6 +408,10 @@ static int CanRetreat(char *reason, size_t size)
         return snprintf(reason, size, "%s can't retreat.", c->name), 0;
     if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED)
         return snprintf(reason, size, "%s is %s.", c->name, f->condition == TCG_ASLEEP ? "Asleep" : "Paralyzed"), 0;
+    if (f->lockTurn == B.view.turn && f->lockAttack == 3)
+        return snprintf(reason, size, "%s can't retreat this turn.", c->name), 0;
+    if (TcgPower_RetreatBlock(&B.view, 0))
+        return snprintf(reason, size, "%s", TcgPower_RetreatBlock(&B.view, 0)), 0;
     if (TcgDuel_Energy(&B.view, 0, 0, TCG_NONE) < RetreatCostNow())
         return snprintf(reason, size, "Retreating costs %u Energy.", RetreatCostNow()), 0;
     return 1;
@@ -1878,7 +1877,7 @@ static void AttackSteps(const struct TcgAttack *a)
 }
 static void AttackOptionMenu(void)
 {
-    const struct TcgAttack *a = &Field(0, 0)->attacks[B.action.attack];
+    const struct TcgAttack *a = &TcgDuel_Attacker(&B.view, 0)->attacks[B.action.attack];
     const char *labels[TCG_MAX_OPTIONS];
     uint8_t ok[TCG_MAX_OPTIONS];
     unsigned n, i;
@@ -2664,7 +2663,7 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         if (id >= MENU_CHOICE && B.flow == FLOW_ATTACK)
         {
             /* The pick decides what comes next (Metronome's copied attack, Prophecy's deck, the side to devolve) */
-            const struct TcgAttack *a = &Field(0, 0)->attacks[B.action.attack];
+            const struct TcgAttack *a = &TcgDuel_Attacker(&B.view, 0)->attacks[B.action.attack];
             if (TcgDuel_IsMetronome(a) && !B.action.copy)
             {
                 B.action.copy = (uint8_t)(id - MENU_CHOICE + 1);
@@ -3006,7 +3005,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     case M_ATTACK:
         if (pressed & (KEY_UP | KEY_DOWN))
         {
-            const struct TcgCard *c = Field(0, 0);
+            const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
             if (c && c->attacks[B.attackCursor ^ 1].name[0])
             {
                 B.attackCursor ^= 1;
@@ -3034,7 +3033,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 TcgBoard_Reject(reason);
             else
             {
-                const struct TcgCard *c = Field(0, 0);
+                const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
                 memset(&B.action, 0, sizeof(B.action));
                 B.action.type = TCG_ATTACK;
                 B.action.attack = (uint8_t)B.attackCursor;
@@ -4030,7 +4029,7 @@ static void DrawMenu(void)
 }
 static void DrawAttacks(void)
 {
-    const struct TcgCard *c = Field(0, 0);
+    const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
     int i;
     if (!c)
         return;

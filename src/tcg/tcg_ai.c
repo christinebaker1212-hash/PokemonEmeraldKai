@@ -589,9 +589,9 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         return 1;
     for (attack = 0; attack < 2; attack++)
     {
-        const struct TcgCard *c = TcgDuel_Field(g, g->current, 0);
+        const struct TcgCard *c = TcgDuel_Attacker(g, g->current);
         unsigned score;
-        if (!c || !TcgDuel_CanAttack(g, g->current, attack) || !TcgDuel_EffectSupported(c->attacks[attack].effect))
+        if (!c || !TcgDuel_CanAttack(g, g->current, attack) || !TcgDuel_CanAttackNow(g, g->current, attack) || !TcgDuel_EffectSupported(c->attacks[attack].effect))
             continue;
         score = ExpectedDamage(g, c, attack);
         if (bestAttack == TCG_NONE || score > bestScore)
@@ -601,13 +601,13 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         }
     }
     if (bestAttack != TCG_NONE && TcgDuel_CanAttack(g, g->current, bestAttack ^ 1) &&
-        TcgDuel_EffectSupported(TcgDuel_Field(g, g->current, 0)->attacks[bestAttack ^ 1].effect) && Slip(sWeakAttack))
+        TcgDuel_CanAttackNow(g, g->current, bestAttack ^ 1) &&
+        TcgDuel_EffectSupported(TcgDuel_Attacker(g, g->current)->attacks[bestAttack ^ 1].effect) && Slip(sWeakAttack))
         bestAttack ^= 1;   /* (the other attack) */
-    if (bestAttack != TCG_NONE && p->field[0].condition != TCG_ASLEEP && p->field[0].condition != TCG_PARALYZED &&
-        !TcgDuel_NoAttack(g, g->current))
+    if (bestAttack != TCG_NONE && TcgDuel_CanAttackNow(g, g->current, bestAttack))
     {
         int required;
-        unsigned choice = TcgDuel_AttackChoice(&TcgDuel_Field(g, g->current, 0)->attacks[bestAttack], &required);
+        unsigned choice = TcgDuel_AttackChoice(&TcgDuel_Attacker(g, g->current)->attacks[bestAttack], &required);
         a->type = TCG_ATTACK;
         a->attack = bestAttack;
         if (choice == 1)
@@ -631,7 +631,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         else if (choice == 2)
             a->target = BestPokemon(g, g->current);
         TcgDuel_AiAttackChoices(g, a); /* (Amnesia, Metronome, Conversion...) */
-        if (TcgDuel_IsMetronome(&TcgDuel_Field(g, g->current, 0)->attacks[bestAttack]) && a->copy)
+        if (TcgDuel_IsMetronome(&TcgDuel_Attacker(g, g->current)->attacks[bestAttack]) && a->copy)
         {
             /* the copied attack's own Bench pick */
             const struct TcgAttack *copy = TcgDuel_MetronomeAttack(g, g->current, a->copy);

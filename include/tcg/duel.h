@@ -113,11 +113,31 @@ enum TcgPowerId
     TCG_POWER_NEUTRALIZING_SHIELD,
     TCG_POWER_RETREAT_AID,
     TCG_POWER_THICK_SKINNED,
+    /* (GB2's) */
+    TCG_POWER_GREEN_SHIELD,
+    TCG_POWER_HAY_FEVER,
+    TCG_POWER_STICKY_GOO,
+    TCG_POWER_FINAL_BEAM,
+    TCG_POWER_AURORA_VEIL,
+    TCG_POWER_GO_UNDERGROUND,
+    TCG_POWER_SINKHOLE,
+    TCG_POWER_FRENZY,
+    TCG_POWER_PUPPET_MASTER,
+    TCG_POWER_DAMPENING_SHIELD,
+    TCG_POWER_DARK_WAVE,
+    TCG_POWER_DARKNESS_VEIL,
+    TCG_POWER_SNORLAX_GUARD,
+    TCG_POWER_VINE_PULL,
     /* When it's put into play */
     TCG_POWER_FIREGIVER,
     TCG_POWER_QUICKFREEZE,
     TCG_POWER_PEAL_OF_THUNDER,
     TCG_POWER_HEALING_WIND,
+    /* (GB2's: played from the hand) */
+    TCG_POWER_SNEAK_ATTACK,
+    TCG_POWER_REEL_IN,
+    TCG_POWER_POWER_OF_DARKNESS,
+    TCG_POWER_SUMMON_MINIONS,
     /* Used during your turn (TCG_USE_POWER) */
     TCG_POWER_SOLAR_POWER,
     TCG_POWER_ENERGY_TRANS,
@@ -131,6 +151,24 @@ enum TcgPowerId
     TCG_POWER_STRANGE_BEHAVIOR,
     TCG_POWER_CURSE,
     TCG_POWER_STEP_IN,
+    /* (GB2's) target: Gather Fire's Pokemon with the Fire Energy, Fossilize's Pokemon; selections[0]: Matter
+     * Exchange's card from the hand, Evolutionary Light's from the deck, Special Delivery's card put back
+     * (none: the card drawn) */
+    TCG_POWER_STIFFEN,
+    TCG_POWER_POLLEN_STENCH,
+    TCG_POWER_POISON_MIST,
+    TCG_POWER_GATHER_FIRE,
+    TCG_POWER_REBIRTH,
+    TCG_POWER_PREHISTORIC_DREAM,
+    TCG_POWER_FOSSIL_GUIDANCE,
+    TCG_POWER_FOSSILIZE,
+    TCG_POWER_MATTER_EXCHANGE,
+    TCG_POWER_PLAY_TRICKS,
+    TCG_POWER_LONG_DISTANCE_HYPNOSIS,
+    TCG_POWER_TRICKERY,
+    TCG_POWER_HELPING_HAND,
+    TCG_POWER_EVOLUTIONARY_LIGHT,
+    TCG_POWER_SPECIAL_DELIVERY,
     TCG_POWER_COUNT
 };
 #define TCG_POWER_FIRST_USED TCG_POWER_SOLAR_POWER
@@ -234,8 +272,10 @@ struct TcgDuel
     /* (GB2's, within one attack: Swift, untouched by any effect on the Defending Pokemon; a Pokemon Power's
      * bonus to it, Dark Wave and Prehistoric Dream) */
     uint8_t swift, bonus;
-    /* GB2's: Goop Gas Attack, every Pokemon Power off until the end of this turn (TcgDuel.turn) */
+    /* GB2's: Goop Gas Attack, every Pokemon Power off until the end of this turn (TcgDuel.turn); fromHand: the
+     * Pokemon being put into play comes from the hand (Sneak Attack, Reel In...) */
     uint16_t goopGasUntil;
+    uint8_t fromHand;
     char error[TCG_LOG_WIDTH];
     char log[TCG_LOG_LINES][TCG_LOG_WIDTH];
     unsigned logCount;
@@ -279,6 +319,8 @@ int TcgDuel_SleepAttack(const struct TcgAttack *attack);
 int TcgDuel_MetronomeHeads(const struct TcgAttack *attack);
 /* Can the Active Pokemon attack at all now (its conditions, Leer, Slashing Strike...)? */
 int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned attack);
+/* The card whose attacks the Active Pokemon uses (its own; Hypno's for a Clefairy Doll: Puppet Master) */
+const struct TcgCard *TcgDuel_Attacker(const struct TcgDuel *g, unsigned player);
 /* Attacks that ask for a choice from a list (TcgAction.option): the labels and which can be picked, and how many
  * (0: none). Metronome lists the Defending Pokemon's attacks for TcgAction.copy instead (TcgDuel_IsMetronome). */
 #define TCG_MAX_OPTIONS 8
@@ -351,5 +393,20 @@ void TcgPower_Sanitize(struct TcgDuel *g);
  * and conditions as the attack began). */
 void TcgPower_StrikesBack(struct TcgDuel *g, const uint16_t before[TCG_FIELD_SIZE], unsigned activeCondition);
 unsigned TcgPower_RetreatAid(const struct TcgDuel *g, unsigned player);
+/* GB2's hooks: no Weakness (Green Shield, Dampening Shield) / Resistance (Dampening Shield) for that Pokemon;
+ * the retreat cost now (Sticky Goo, Retreat Aid) and whether it can retreat at all (Snorlax's Guard); after a
+ * retreat (Sinkhole, Vine Pull); an attack's damage (Frenzy, Dark Wave, Prehistoric Dream); a Knock Out by an
+ * attack (Final Beam); Trainers (Hay Fever) */
+int TcgPower_NoWeakness(const struct TcgDuel *g, unsigned player, unsigned slot);
+int TcgPower_NoResistance(const struct TcgDuel *g);
+unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player);
+const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
+void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
+int TcgPower_AttackBonus(struct TcgDuel *g, int amount);
+int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player);
+void TcgPower_KnockedOut(struct TcgDuel *g, unsigned player, unsigned slot);
+int TcgPower_NoTrainers(const struct TcgDuel *g);
+/* Hypno's Puppet Master: the Pokemon whose attacks that player's Active Clefairy Doll uses (TCG_NONE: none) */
+unsigned TcgPower_PuppetSlot(const struct TcgDuel *g, unsigned player);
 uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index);
 #endif

@@ -198,6 +198,16 @@ int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
     return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0));
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
+/* (Hypno's Puppet Master: a Clefairy Doll uses Hypno's attacks, paid with Hypno's Energy) */
+static unsigned EnergySlot(const struct TcgDuel *g, unsigned player)
+{
+    unsigned s = TcgPower_PuppetSlot(g, player);
+    return s == TCG_NONE ? 0 : s;
+}
+const struct TcgCard *TcgDuel_Attacker(const struct TcgDuel *g, unsigned player)
+{
+    return TcgDuel_Field(g, player, EnergySlot(g, player));
+}
 /* Slashing Strike, Drill Dive and the like: that attack (lockAttack 3: any) can't be used this turn */
 static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -206,14 +216,14 @@ static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
 }
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
-    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    const struct TcgCard *c = TcgDuel_Attacker(g, player);
     /* (Amnesia: not the attack chosen, this turn) */
     return EnergyPaid(g, player, attack) && g->players[player].field[0].disabled != attack + 1 &&
            !Locked(g, player, attack) && !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
 }
 int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
-    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    const struct TcgCard *c = TcgDuel_Attacker(g, player);
     const struct TcgFieldCard *f = &g->players[player].field[0];
     if (!c || attack > 1 || c->kind != TCG_POKEMON || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) ||
         Locked(g, player, attack))
@@ -223,9 +233,9 @@ int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned atta
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
-    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    const struct TcgCard *c = TcgDuel_Attacker(g, player);
     const struct TcgAttack *a;
-    unsigned t, total = 0, typed = 0;
+    unsigned t, total = 0, typed = 0, from = EnergySlot(g, player);
     if (!c || attack > 1 || c->kind != TCG_POKEMON)
         return 0;
     a = &c->attacks[attack];
@@ -236,13 +246,13 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
         total += a->cost[t];
         if (t != TCG_COLORLESS)
         {
-            if (TcgDuel_Energy(g, player, 0, t) < a->cost[t])
+            if (TcgDuel_Energy(g, player, from, t) < a->cost[t])
                 return 0;
             typed += a->cost[t];
         }
     }
     (void)typed;
-    return TcgDuel_Energy(g, player, 0, TCG_NONE) >= total;
+    return TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
 }
 void TcgDuel_DiscardField(struct TcgDuel *g, unsigned player, unsigned slot)
 {
@@ -392,8 +402,11 @@ static void EndTurn(struct TcgDuel *g)
             continue;
         if (f->poison)
         {
-            f->damage += f->poison;
-            TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, f->poison, 0, TCG_DMG_POISON);
+            /* (Weezing's Poison Mist: 20 instead of 10) */
+            unsigned amount = f->poison == 10 && (g->players[0].poisonMistUntil >= g->turn ||
+                                                  g->players[1].poisonMistUntil >= g->turn) ? 20u : f->poison;
+            f->damage += amount;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, amount, 0, TCG_DMG_POISON);
         }
         if (f->condition == TCG_ASLEEP && TcgDuel_Coin(g, who))
         {
@@ -515,7 +528,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     }
     if (a->type == TCG_ATTACK)
     {
-        const struct TcgCard *attacker = TcgDuel_Field(g, g->current, 0), *target = TcgDuel_Field(g, g->current ^ 1, 0);
+        const struct TcgCard *attacker = TcgDuel_Attacker(g, g->current), *target = TcgDuel_Field(g, g->current ^ 1, 0);
         const struct TcgAttack *attack;
         struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0], foeBefore;
         unsigned damage, flags = 0, selfCondition, type, k;
@@ -551,8 +564,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
-            TcgDuel_SelfDamage(g, 20);
-            TcgDuel_Log(g, "Confusion: %s does 20 damage to itself.", attacker->name);
+            TcgDuel_SelfDamage(g, TcgPower_Frenzy(g, g->current) ? 50 : 20); /* (Dark Primeape's Frenzy: 30 more) */
+            TcgDuel_Log(g, "Confusion: %s does damage to itself.", attacker->name);
             TcgDuel_ResolveKnockouts(g);
             if (g->phase != TCG_FINISHED && g->phase != TCG_SETUP)
                 EndTurn(g);
@@ -606,7 +619,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         {
             if (f->charged == 2)
                 total *= f->charge3 ? 3 : 2;
-            total += g->bonus; /* (Dark Wave, Prehistoric Dream) */
+            total += g->bonus + TcgPower_AttackBonus(g, total); /* (Frenzy, Dark Wave, Prehistoric Dream) */
             if (!g->noWeakRes && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
                 total *= 2;
@@ -676,6 +689,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             f->damage = attacker->hp;
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
         }
+        if (damage && foe->damage >= (target->kind == TCG_TRAINER ? 10u : target->hp))
+            TcgPower_KnockedOut(g, g->current ^ 1, 0); /* (Dark Gyarados's Final Beam) */
         if (damage && foe->mirrorShell && f->stackSize)
         {
             /* Dark Wartortle's Mirror Shell: as much back at the attacker */
@@ -759,6 +774,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
             p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == 3))
             return Error(g, "This Pokemon cannot retreat.");
+        {
+            const char *why = TcgPower_RetreatBlock(g, g->current);
+            if (why)
+                return Error(g, why);
+        }
         for (i = 0; i < a->selectionCount; i++)
         {
             unsigned j;
@@ -773,8 +793,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, j);
         }
         c = TcgDuel_Field(g, g->current, 0);
-        /* (each Dodrio on the Bench: Retreat Aid, one Colorless less) */
-        if (n + TcgPower_RetreatAid(g, g->current) < c->retreat)
+        /* (each Dodrio on the Bench: Retreat Aid, one Colorless less; Dark Muk's Sticky Goo, 2 more) */
+        if (n < TcgDuel_RetreatCost(g, g->current))
             return Error(g, "Not enough Energy selected for retreat.");
         p->retreated = 1;
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
@@ -791,6 +811,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         ClearMirror(&p->field[s]);
         p->confusionRetreatFailed = 0;
         TcgDuel_Event(g, TCG_EV_RETREAT, g->current, s, 0, 0, 0);
+        TcgPower_AfterRetreat(g, g->current, s); /* (Sinkhole, Vine Pull) */
+        TcgDuel_ResolveKnockouts(g);
         return TCG_OK;
     }
     if (a->type == TCG_USE_POWER)
@@ -819,6 +841,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     {
         if (p->noTrainers)
             return Error(g, "Headache: you can't play Trainer cards this turn.");
+        if (TcgPower_NoTrainers(g))
+            return Error(g, "Dark Vileplume's Hay Fever: no Trainer cards can be played.");
         return TcgDuel_Trainer(g, a);
     }
     if (s >= TCG_FIELD_SIZE)
@@ -836,7 +860,9 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         /* (Firegiver, Quickfreeze, Peal of Thunder: not during set-up) */
         if (g->phase != TCG_SETUP)
         {
+            g->fromHand = 1;
             TcgPower_OnPlay(g, g->current, s);
+            g->fromHand = 0;
             TcgPower_Sanitize(g);
             TcgDuel_ResolveKnockouts(g);
         }
@@ -854,7 +880,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         ClearCondition(f);
         TcgDuel_Event(g, TCG_EV_EVOLVE, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Evolved into %s.", c->name);
+        g->fromHand = 1;
         TcgPower_OnPlay(g, g->current, s); /* (Healing Wind) */
+        g->fromHand = 0;
+        TcgPower_Sanitize(g);
+        TcgDuel_ResolveKnockouts(g);
         return TCG_OK;
     case TCG_ATTACH:
         if (c->kind != TCG_ENERGY || !f->stackSize || p->energyPlayed)

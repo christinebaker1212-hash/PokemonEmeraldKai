@@ -676,13 +676,15 @@ unsigned TcgDuel_Weakness(const struct TcgDuel *g, unsigned player, unsigned slo
     /* Staryu's Strange Beam: that side's damaged Water Pokemon have no Weakness this turn */
     if (g->players[player].strangeBeamUntil == g->turn && f->damage && c->type == TCG_WATER)
         return TCG_NONE;
+    if (c->weakness != TCG_NONE && TcgPower_NoWeakness(g, player, slot)) /* (Green Shield, Dampening Shield) */
+        return TCG_NONE;
     return f->weakAs && c->weakness != TCG_NONE ? f->weakAs - 1u : c->weakness;
 }
 unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned slot)
 {
     const struct TcgCard *c = TcgDuel_Field(g, player, slot);
     const struct TcgFieldCard *f = &g->players[player].field[slot];
-    if (!c)
+    if (!c || (c->resistance != TCG_NONE && TcgPower_NoResistance(g))) /* (Dampening Shield) */
         return TCG_NONE;
     return f->resistAs && c->resistance != TCG_NONE ? f->resistAs - 1u : c->resistance;
 }
@@ -690,7 +692,7 @@ unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned s
  * is given sensible ones here so its Clefairy can still attack. */
 void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
 {
-    const struct TcgCard *self = TcgDuel_Field(g, g->current, 0), *foe = TcgDuel_Field(g, g->current ^ 1, 0);
+    const struct TcgCard *self = TcgDuel_Attacker(g, g->current), *foe = TcgDuel_Field(g, g->current ^ 1, 0);
     const struct TcgAttack *attack = self ? &self->attacks[a->attack & 1] : NULL;
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
     const struct TcgPlayer *p = &g->players[g->current];
