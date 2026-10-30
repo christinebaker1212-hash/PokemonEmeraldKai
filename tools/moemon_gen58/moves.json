@@ -1131,7 +1131,7 @@
   "const": "MOVE_INCINERATE",
   "id": 510,
   "name": "Incinerate",
-  "description": "Burns up certain items,\\nBurns up Berries,\\nmaking them unusable.",
+  "description": "Burns up Berries,\\n",
   "effect": "EFFECT_HIT",
   "power": 60,
   "type": "TYPE_FIRE",
@@ -1906,7 +1906,7 @@
   "name": "Night Daze",
   "description": "Looses a pitch-black shock\\nwave. May lower accuracy.",
   "effect": "EFFECT_HIT",
-  "power": 85,
+  "power": 90,
   "type": "TYPE_DARK",
   "accuracy": 95,
   "pp": 10,
@@ -2036,9 +2036,9 @@
   "name": "Gear Grind",
   "description": "Throws two steel gears\\nthat strike twice.",
   "effect": "EFFECT_HIT",
-  "power": 50,
+  "power": 60,
   "type": "TYPE_STEEL",
-  "accuracy": 85,
+  "accuracy": 90,
   "pp": 15,
   "target": "TARGET_SELECTED",
   "priority": 0,
@@ -2620,7 +2620,7 @@
   "const": "MOVE_FELL_STINGER",
   "id": 565,
   "name": "Fell Stinger",
-  "description": "If the foe is KO'd, Attack\\nis drastically raised.is sharply raised.",
+  "description": "is sharply raised.",
   "effect": "EFFECT_FELL_STINGER",
   "power": 50,
   "type": "TYPE_BUG",
@@ -3160,7 +3160,7 @@
    {
     "moveEffect": "MOVE_EFFECT_STAT_MINUS",
     "spAtk": "1",
-    "chance": "30"
+    "chance": "10"
    }
   ],
   "contestComboMoves": []
@@ -3216,12 +3216,12 @@
   "const": "MOVE_KINGS_SHIELD",
   "id": 588,
   "name": "King's Shield",
-  "description": "Evades damage and\\nEvades damage and harshly\\nlowers Attack on contact.",
+  "description": "Evades damage and harshly\\n",
   "effect": "EFFECT_PROTECT",
   "power": 0,
   "type": "TYPE_STEEL",
   "accuracy": 0,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_USER",
   "priority": 4,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -3455,7 +3455,7 @@
   "power": 0,
   "type": "TYPE_GRASS",
   "accuracy": 0,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_USER",
   "priority": 4,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -4183,7 +4183,7 @@
   "power": 0,
   "type": "TYPE_GROUND",
   "accuracy": 0,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_USER",
   "priority": 0,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -4208,7 +4208,7 @@
   "name": "First Impression",
   "description": "Hits hard and first.\\nOnly works first turn.",
   "effect": "EFFECT_FIRST_TURN_ONLY",
-  "power": 90,
+  "power": 100,
   "type": "TYPE_BUG",
   "accuracy": 100,
   "pp": 10,
@@ -4235,7 +4235,7 @@
   "power": 0,
   "type": "TYPE_POISON",
   "accuracy": 0,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_USER",
   "priority": 4,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -4260,7 +4260,7 @@
   "name": "Spirit Shackle",
   "description": "After being hit, a foe can\\nno longer escape.",
   "effect": "EFFECT_HIT",
-  "power": 80,
+  "power": 90,
   "type": "TYPE_GHOST",
   "accuracy": 100,
   "pp": 10,
@@ -4425,7 +4425,7 @@
   "power": 0,
   "type": "TYPE_GRASS",
   "accuracy": 100,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_SELECTED",
   "priority": 0,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -4545,7 +4545,7 @@
   "additionalEffects": [
    {
     "moveEffect": "STAT_CHANGE_EFFECT_MINUS",
-    "speed": "1"
+    "speed": "2"
    }
   ],
   "contestComboMoves": [
@@ -4666,7 +4666,7 @@
   "name": "Anchor Shot",
   "description": "Strangles the foe with a\\nchain. The foe can't escape.",
   "effect": "EFFECT_HIT",
-  "power": 80,
+  "power": 90,
   "type": "TYPE_STEEL",
   "accuracy": 100,
   "pp": 20,
@@ -4749,7 +4749,7 @@
   "name": "Fire Lash",
   "description": "Whips the foe with fire\\nlowering its Defense.",
   "effect": "EFFECT_HIT",
-  "power": 80,
+  "power": 90,
   "type": "TYPE_FIRE",
   "accuracy": 100,
   "pp": 15,
@@ -4883,7 +4883,7 @@
   "power": 0,
   "type": "TYPE_POISON",
   "accuracy": 0,
-  "pp": 20,
+  "pp": 5,
   "target": "TARGET_SELECTED",
   "priority": 0,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -4905,7 +4905,7 @@
   "name": "Revelation Dance",
   "description": "Dances with mystical power.\\nMatches user's first type.",
   "effect": "EFFECT_REVELATION_DANCE",
-  "power": 90,
+  "power": 100,
   "type": "TYPE_NORMAL",
   "accuracy": 100,
   "pp": 15,
@@ -4953,7 +4953,7 @@
   "name": "Trop Kick",
   "description": "An intense kick from the\\ntropics. Lowers Attack.",
   "effect": "EFFECT_HIT",
-  "power": 70,
+  "power": 85,
   "type": "TYPE_GRASS",
   "accuracy": 100,
   "pp": 15,
@@ -5008,10 +5008,10 @@
   "name": "Beak Blast",
   "description": "Heats beak to attack last.\\nBurns foe on contact.",
   "effect": "EFFECT_BEAK_BLAST",
-  "power": 100,
+  "power": 120,
   "type": "TYPE_FLYING",
   "accuracy": 100,
-  "pp": 15,
+  "pp": 5,
   "target": "TARGET_SELECTED",
   "priority": -3,
   "category": "DAMAGE_CATEGORY_PHYSICAL",
@@ -5067,7 +5067,7 @@
   "name": "Dragon Hammer",
   "description": "Swings its whole body\\nlike a hammer to damage.",
   "effect": "EFFECT_HIT",
-  "power": 90,
+  "power": 100,
   "type": "TYPE_DRAGON",
   "accuracy": 100,
   "pp": 15,
@@ -5117,7 +5117,7 @@
   "const": "MOVE_AURORA_VEIL",
   "id": 657,
   "name": "Aurora Veil",
-  "description": "Weakens all attacks, but\\nonly usable with snow.Weakens all attacks if\\nused in hail or snow.Weakens all attacks, but\\nonly usable with hail.",
+  "description": "Weakens all attacks, but\\nonly usable with hail.",
   "effect": "EFFECT_AURORA_VEIL",
   "power": 0,
   "type": "TYPE_ICE",
@@ -5149,7 +5149,7 @@
   "power": 150,
   "type": "TYPE_FIRE",
   "accuracy": 100,
-  "pp": 5,
+  "pp": 10,
   "target": "TARGET_BOTH",
   "priority": -3,
   "category": "DAMAGE_CATEGORY_SPECIAL",
@@ -5625,7 +5625,7 @@
   "const": "MOVE_ZIPPY_ZAP",
   "id": 676,
   "name": "Zippy Zap",
-  "description": "Electric bursts always go\\nfirst and raise evasion.Electric bursts always go\\nfirst and land a critical hit.",
+  "description": "Electric bursts always go\\nfirst and land a critical hit.",
   "effect": "EFFECT_HIT",
   "power": 80,
   "type": "TYPE_ELECTRIC",
@@ -5725,7 +5725,7 @@
   "const": "MOVE_BOUNCY_BUBBLE",
   "id": 680,
   "name": "Bouncy Bubble",
-  "description": "Shoots bubbles that absorb\\nall the damage inflicted.half the damage inflicted.",
+  "description": "half the damage inflicted.",
   "effect": "EFFECT_HIT",
   "power": 60,
   "type": "TYPE_WATER",
@@ -6008,7 +6008,7 @@
   "name": "Snipe Shot",
   "description": "The user ignores effects\\nthat draw in moves.",
   "effect": "EFFECT_SNIPE_SHOT",
-  "power": 80,
+  "power": 85,
   "type": "TYPE_WATER",
   "accuracy": 100,
   "pp": 15,
@@ -6245,7 +6245,7 @@
   "name": "Bolt Beak",
   "description": "Power is doubled if the\\nuser moves before the foe.",
   "effect": "EFFECT_BOLT_BEAK",
-  "power": 85,
+  "power": 80,
   "type": "TYPE_ELECTRIC",
   "accuracy": 100,
   "pp": 10,
@@ -6268,7 +6268,7 @@
   "name": "Fishious Rend",
   "description": "Power is doubled if the\\nuser moves before the foe.",
   "effect": "EFFECT_BOLT_BEAK",
-  "power": 85,
+  "power": 80,
   "type": "TYPE_WATER",
   "accuracy": 100,
   "pp": 10,
@@ -6317,7 +6317,7 @@
   "effect": "EFFECT_CLANGOROUS_SOUL",
   "power": 0,
   "type": "TYPE_DRAGON",
-  "accuracy": 100,
+  "accuracy": 0,
   "pp": 5,
   "target": "TARGET_USER",
   "priority": 0,
@@ -6437,7 +6437,7 @@
   "description": "Snares the target in a snap\\ntrap for four to five turns.",
   "effect": "EFFECT_HIT",
   "power": 35,
-  "type": "TYPE_GRASS",
+  "type": "TYPE_STEEL",
   "accuracy": 100,
   "pp": 15,
   "target": "TARGET_SELECTED",
@@ -6656,7 +6656,7 @@
   "name": "Apple Acid",
   "description": "Attacks with tart apple acid\\nto lower the foe's Sp. Def.",
   "effect": "EFFECT_HIT",
-  "power": 80,
+  "power": 90,
   "type": "TYPE_GRASS",
   "accuracy": 100,
   "pp": 10,
@@ -6685,7 +6685,7 @@
   "name": "Grav Apple",
   "description": "Drops an apple from above.\\nLowers the foe's Defense.",
   "effect": "EFFECT_GRAV_APPLE",
-  "power": 80,
+  "power": 90,
   "type": "TYPE_GRASS",
   "accuracy": 100,
   "pp": 10,
@@ -6803,7 +6803,7 @@
   "power": 0,
   "type": "TYPE_DARK",
   "accuracy": 100,
-  "pp": 10,
+  "pp": 5,
   "target": "TARGET_USER",
   "priority": 4,
   "category": "DAMAGE_CATEGORY_STATUS",
@@ -6851,7 +6851,7 @@
   "name": "Meteor Assault",
   "description": "Attacks with a thick leek.\\nThe user must then rest.",
   "effect": "EFFECT_HIT",
-  "power": 150,
+  "power": 170,
   "type": "TYPE_FIGHTING",
   "accuracy": 100,
   "pp": 5,
@@ -7085,7 +7085,7 @@
   "name": "Grassy Glide",
   "description": "Gliding on ground, hits. Goes\\nfirst on Grassy Terrain.",
   "effect": "EFFECT_GRASSY_GLIDE",
-  "power": 70,
+  "power": 55,
   "type": "TYPE_GRASS",
   "accuracy": 100,
   "pp": 20,
@@ -7446,7 +7446,7 @@
   "name": "Wicked Blow",
   "description": "Mastering the Dark style,\\nstrikes with a critical hit.",
   "effect": "EFFECT_HIT",
-  "power": 80,
+  "power": 75,
   "type": "TYPE_DARK",
   "accuracy": 100,
   "pp": 5,
@@ -7550,7 +7550,7 @@
   "const": "MOVE_FREEZING_GLARE",
   "id": 749,
   "name": "Freezing Glare",
-  "description": "Shoots psychic power from\\nthe eyes. May frostbite.the eyes. May freeze the foe.",
+  "description": "the eyes. May freeze the foe.",
   "effect": "EFFECT_HIT",
   "power": 90,
   "type": "TYPE_PSYCHIC",
@@ -7638,7 +7638,7 @@
   "name": "Glacial Lance",
   "description": "Hurls a blizzard-cloaked\\nicicle lance at foes.",
   "effect": "EFFECT_HIT",
-  "power": 130,
+  "power": 120,
   "type": "TYPE_ICE",
   "accuracy": 100,
   "pp": 5,
@@ -7661,7 +7661,7 @@
   "name": "Astral Barrage",
   "description": "Sends a frightful amount\\nof small ghosts at foes.",
   "effect": "EFFECT_HIT",
-  "power": 120,
+  "power": 110,
   "type": "TYPE_GHOST",
   "accuracy": 100,
   "pp": 5,
@@ -7702,6 +7702,2310 @@
    {
     "moveEffect": "MOVE_EFFECT_EERIE_SPELL",
     "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_DIRE_CLAW",
+  "id": 755,
+  "name": "Dire Claw",
+  "description": "High critical-hit ratio. May\\nparalyze, poison or sleep.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_POISON",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_DireClaw",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_PSYSHIELD_BASH",
+  "id": 756,
+  "name": "Psyshield Bash",
+  "description": "Hits a foe with psychic\\nenergy. May raise Defense.",
+  "effect": "EFFECT_HIT",
+  "power": 90,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_PsyshieldBash",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "defense": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_POWER_SHIFT",
+  "id": 757,
+  "name": "Stone Axe",
+  "description": "Leaves stones under the foe.",
+  "effect": "EFFECT_STONE_AXE",
+  "power": 65,
+  "type": "TYPE_ROCK",
+  "accuracy": 90,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_StoneAxe",
+  "flags": [
+   "ignoresProtect",
+   "makesContact",
+   "metronomeBanned",
+   "mirrorMoveBanned",
+   "slicingMove",
+   "snatchAffected"
+  ],
+  "additionalEffects": [
+   {
+    "sheerForceOverride": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_STONE_AXE",
+  "id": 758,
+  "name": "Stone Axe",
+  "description": "Leaves stones under the foe.",
+  "effect": "EFFECT_STONE_AXE",
+  "power": 65,
+  "type": "TYPE_ROCK",
+  "accuracy": 90,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_StoneAxe",
+  "flags": [
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [
+   {
+    "sheerForceOverride": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SPRINGTIDE_STORM",
+  "id": 759,
+  "name": "Springtide Storm",
+  "description": "Wraps a foe in fierce winds.\\nVaries with the user's form.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_FAIRY",
+  "accuracy": 80,
+  "pp": 5,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_SpringtideStorm",
+  "flags": [
+   "metronomeBanned",
+   "windMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "attack": "1",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MYSTICAL_POWER",
+  "id": 760,
+  "name": "Mystical Power",
+  "description": "A mysterious power strikes,\\nraising the user's Sp. Atk.",
+  "effect": "EFFECT_HIT",
+  "power": 70,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_MysticalPower",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "spAtk": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_RAGING_FURY",
+  "id": 761,
+  "name": "Raging Fury",
+  "description": "A rampage of 2 to 3 turns\\nthat confuses the user.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_RANDOM",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_RagingFury",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_THRASH",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_WAVE_CRASH",
+  "id": 762,
+  "name": "Wave Crash",
+  "description": "A slam shrouded in water.\\nIt also hurts the user.",
+  "effect": "EFFECT_RECOIL",
+  "power": 120,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "argument": "{ .recoilPercentage = 33 }",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_WaveCrash",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_CHLOROBLAST",
+  "id": 763,
+  "name": "Chloroblast",
+  "description": "A user-hurting blast of\\namassed chlorophyll.",
+  "effect": "EFFECT_CHLOROBLAST",
+  "power": 150,
+  "type": "TYPE_GRASS",
+  "accuracy": 95,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_Chloroblast",
+  "flags": [],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MOUNTAIN_GALE",
+  "id": 764,
+  "name": "Mountain Gale",
+  "description": "Giant chunks of ice damage\\nthe foe. It may flinch.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_ICE",
+  "accuracy": 85,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_MountainGale",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_FLINCH",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_VICTORY_DANCE",
+  "id": 765,
+  "name": "Victory Dance",
+  "description": "Dances to raise Attack,\\nDefense and Speed.",
+  "effect": "EFFECT_STAT_CHANGE",
+  "power": 0,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 0,
+  "pp": 20,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "contestEffect": "CONTEST_EFFECT_IMPROVE_CONDITION_PREVENT_NERVOUSNESS",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_VictoryDance",
+  "flags": [
+   "danceMove",
+   "ignoresProtect",
+   "mirrorMoveBanned",
+   "snatchAffected"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "attack": "1",
+    "defense": "1",
+    "speed": "1"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_HEADLONG_RUSH",
+  "id": 766,
+  "name": "Headlong Rush",
+  "description": "A full-body tackle. Lowers\\nthe user's defensive stats.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_GROUND",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_HeadlongRush",
+  "flags": [
+   "makesContact",
+   "punchingMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "defense": "1",
+    "spDef": "1",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BARB_BARRAGE",
+  "id": 767,
+  "name": "Barb Barrage",
+  "description": "Can poison on impact. Powers\\nup against a poisoned foe.",
+  "effect": "EFFECT_DOUBLE_POWER_ON_ARG_STATUS",
+  "power": 60,
+  "type": "TYPE_POISON",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "argument": "{ .status = STATUS1_PSN_ANY }",
+  "battleAnimScript": "gBattleAnimMove_BarbBarrage",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_POISON",
+    "chance": "50"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ESPER_WING",
+  "id": 768,
+  "name": "Esper Wing",
+  "description": "High critical-hit ratio.\\nRaises the user's Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "criticalHitStage": "1",
+  "battleAnimScript": "gBattleAnimMove_EsperWing",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "speed": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BITTER_MALICE",
+  "id": 769,
+  "name": "Bitter Malice",
+  "description": "A spine-chilling resentment.\\nLowers the foe's Attack.",
+  "effect": "EFFECT_HIT",
+  "power": 75,
+  "type": "TYPE_GHOST",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_BitterMalice",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "attack": "1",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SHELTER",
+  "id": 770,
+  "name": "Shelter",
+  "description": "The user hardens their skin,\\nsharply raising its Defense.",
+  "effect": "EFFECT_STAT_CHANGE",
+  "power": 0,
+  "type": "TYPE_STEEL",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_Shelter",
+  "flags": [
+   "ignoresProtect",
+   "mirrorMoveBanned",
+   "snatchAffected"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "defense": "2"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TRIPLE_ARROWS",
+  "id": 771,
+  "name": "Triple Arrows",
+  "description": "High critical-hit ratio.\\nMay lower Defense or flinch.",
+  "effect": "EFFECT_HIT",
+  "power": 90,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "criticalHitStage": "1",
+  "battleAnimScript": "gBattleAnimMove_TripleArrows",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "defense": "1",
+    "chance": "50"
+   },
+   {
+    "moveEffect": "MOVE_EFFECT_FLINCH",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_INFERNAL_PARADE",
+  "id": 772,
+  "name": "Infernal Parade",
+  "description": "Hurts a foe harder if it has\\nan ailment. May leave a burn.",
+  "effect": "EFFECT_DOUBLE_POWER_ON_ARG_STATUS",
+  "power": 65,
+  "type": "TYPE_GHOST",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "argument": "{ .status = STATUS1_ANY }",
+  "battleAnimScript": "gBattleAnimMove_InfernalParade",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_BURN",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_CEASELESS_EDGE",
+  "id": 773,
+  "name": "Ceaseless Edge",
+  "description": "Leaves spikes under the foe.",
+  "effect": "EFFECT_CEASELESS_EDGE",
+  "power": 65,
+  "type": "TYPE_DARK",
+  "accuracy": 90,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_CeaselessEdge",
+  "flags": [
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [
+   {
+    "sheerForceOverride": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BLEAKWIND_STORM",
+  "id": 774,
+  "name": "Bleakwind Storm",
+  "description": "Hits with brutal, cold winds.\\nMay lower foes' Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_FLYING",
+  "accuracy": 80,
+  "pp": 10,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_BleakwindStorm",
+  "flags": [
+   "alwaysHitsInRain",
+   "windMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "speed": "1",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_WILDBOLT_STORM",
+  "id": 775,
+  "name": "Wildbolt Storm",
+  "description": "Hits with a brutal tempest.\\nMay inflict paralysis.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 80,
+  "pp": 10,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_WildboltStorm",
+  "flags": [
+   "alwaysHitsInRain",
+   "windMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_PARALYSIS",
+    "chance": "20"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SANDSEAR_STORM",
+  "id": 776,
+  "name": "Sandsear Storm",
+  "description": "Hits with brutally hot sand.\\nMay inflict a burn.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_GROUND",
+  "accuracy": 80,
+  "pp": 10,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_SandsearStorm",
+  "flags": [
+   "alwaysHitsInRain",
+   "windMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_BURN",
+    "chance": "20"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_LUNAR_BLESSING",
+  "id": 777,
+  "name": "Lunar Blessing",
+  "description": "The user heals and cures\\nitself and its ally.",
+  "effect": "EFFECT_JUNGLE_HEALING",
+  "power": 0,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 0,
+  "pp": 5,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_LunarBlessing",
+  "flags": [
+   "healingMove",
+   "ignoresProtect",
+   "mirrorMoveBanned",
+   "snatchAffected"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TAKE_HEART",
+  "id": 778,
+  "name": "Take Heart",
+  "description": "Cures status problems and\\nraises offensive stats.",
+  "effect": "EFFECT_TAKE_HEART",
+  "power": 0,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 0,
+  "pp": 15,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_TakeHeart",
+  "flags": [
+   "ignoresProtect",
+   "mirrorMoveBanned",
+   "snatchAffected"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "spAtk": "1",
+    "spDef": "1"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TERA_BLAST",
+  "id": 779,
+  "name": "Tera Blast",
+  "description": "If the user's Terastallized,\\nit hits with its Tera type.",
+  "effect": "EFFECT_TERA_BLAST",
+  "power": 80,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_TeraBlast",
+  "flags": [
+   "forcePressure"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_TERA_BLAST",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SILK_TRAP",
+  "id": 780,
+  "name": "Silk Trap",
+  "description": "Protects itself, lowering\\nSpeed on contact.",
+  "effect": "EFFECT_PROTECT",
+  "power": 0,
+  "type": "TYPE_BUG",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 4,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "argument": "{ .protectMethod = PROTECT_SILK_TRAP }",
+  "battleAnimScript": "gBattleAnimMove_SilkTrap",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_AXE_KICK",
+  "id": 781,
+  "name": "Axe Kick",
+  "description": "May miss and hurt the kicker.\\nMay cause confusion.",
+  "effect": "EFFECT_RECOIL_IF_MISS",
+  "power": 120,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_AxeKick",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_CONFUSION",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_LAST_RESPECTS",
+  "id": 782,
+  "name": "Last Respects",
+  "description": "This move deals more damage\\nfor each defeated ally.",
+  "effect": "EFFECT_LAST_RESPECTS",
+  "power": 50,
+  "type": "TYPE_GHOST",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_LastRespects",
+  "flags": [],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_LUMINA_CRASH",
+  "id": 783,
+  "name": "Lumina Crash",
+  "description": "A mind-affecting light\\nharshly lowers Sp. Def.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_LuminaCrash",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "spDef": "2",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ORDER_UP",
+  "id": 784,
+  "name": "Order Up",
+  "description": "Raises the user's stats\\ndepending on Tatsugiri.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_DRAGON",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_OrderUp",
+  "flags": [
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_ORDER_UP",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_JET_PUNCH",
+  "id": 785,
+  "name": "Jet Punch",
+  "description": "A punch is thrown at blinding\\nspeed to strike first.",
+  "effect": "EFFECT_HIT",
+  "power": 60,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 1,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "contestEffect": "CONTEST_EFFECT_NEXT_APPEAL_EARLIER",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_JetPunch",
+  "flags": [
+   "makesContact",
+   "metronomeBanned",
+   "punchingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SPICY_EXTRACT",
+  "id": 786,
+  "name": "Spicy Extract",
+  "description": "Sharply ups target's Attack,\\nharshly lowers its Defense.",
+  "effect": "EFFECT_STAT_CHANGE",
+  "power": 0,
+  "type": "TYPE_GRASS",
+  "accuracy": 0,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_SpicyExtract",
+  "flags": [
+   "magicCoatAffected",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "attack": "2"
+   },
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_MINUS",
+    "defense": "2"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SPIN_OUT",
+  "id": 787,
+  "name": "Spin Out",
+  "description": "Furiously strains its legs.\\nHarshly lowers user's Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_STEEL",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_SpinOut",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "speed": "2",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_POPULATION_BOMB",
+  "id": 788,
+  "name": "Population Bomb",
+  "description": "The user's fellows hit one\\nto ten times in a row.",
+  "effect": "EFFECT_POPULATION_BOMB",
+  "power": 20,
+  "type": "TYPE_NORMAL",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "strikeCount": "10",
+  "battleAnimScript": "gBattleAnimMove_PopulationBomb",
+  "flags": [
+   "makesContact",
+   "metronomeBanned",
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ICE_SPINNER",
+  "id": 789,
+  "name": "Ice Spinner",
+  "description": "Ice-covered feet hit a foe\\nand destroy the terrain.",
+  "effect": "EFFECT_ICE_SPINNER",
+  "power": 80,
+  "type": "TYPE_ICE",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_IceSpinner",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_GLAIVE_RUSH",
+  "id": 790,
+  "name": "Glaive Rush",
+  "description": "Foe attacks next turn can't\\nmiss and do double damage.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_DRAGON",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_GlaiveRush",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_GLAIVE_RUSH",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_REVIVAL_BLESSING",
+  "id": 791,
+  "name": "Revival Blessing",
+  "description": "Revives a fainted party\\nmember and heals half its HP.",
+  "effect": "EFFECT_REVIVAL_BLESSING",
+  "power": 0,
+  "type": "TYPE_NORMAL",
+  "accuracy": 0,
+  "pp": 1,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_RevivalBlessing",
+  "flags": [
+   "healingMove",
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SALT_CURE",
+  "id": 792,
+  "name": "Salt Cure",
+  "description": "Hurts foe every turn. Double\\ndamage to Steel and Water.",
+  "effect": "EFFECT_HIT",
+  "power": 40,
+  "type": "TYPE_ROCK",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_SaltCure",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_SALT_CURE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TRIPLE_DIVE",
+  "id": 793,
+  "name": "Triple Dive",
+  "description": "Hits target with splashes\\nof water 3 times in a row.",
+  "effect": "EFFECT_HIT",
+  "power": 35,
+  "type": "TYPE_WATER",
+  "accuracy": 95,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "strikeCount": "3",
+  "battleAnimScript": "gBattleAnimMove_TripleDive",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MORTAL_SPIN",
+  "id": 794,
+  "name": "Mortal Spin",
+  "description": "Erases trap moves and Leech\\nSeed. Poisons all foes.",
+  "effect": "EFFECT_RAPID_SPIN",
+  "power": 30,
+  "type": "TYPE_POISON",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_MortalSpin",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_POISON",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_DOODLE",
+  "id": 795,
+  "name": "Doodle",
+  "description": "Changes user's and ally's\\nAbility into the target's.",
+  "effect": "EFFECT_DOODLE",
+  "power": 0,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_Doodle",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_FILLET_AWAY",
+  "id": 796,
+  "name": "Fillet Away",
+  "description": "Sharply raises offenses and\\nSpeed by using its own HP.",
+  "effect": "EFFECT_STAT_CHANGE_HALF_HP",
+  "power": 0,
+  "type": "TYPE_NORMAL",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_FilletAway",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned",
+   "snatchAffected"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "attack": "2",
+    "spAtk": "2",
+    "speed": "2"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_KOWTOW_CLEAVE",
+  "id": 797,
+  "name": "Kowtow Cleave",
+  "description": "User slashes the foe after\\nkowtowing. It never misses.",
+  "effect": "EFFECT_HIT",
+  "power": 85,
+  "type": "TYPE_DARK",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_KowtowCleave",
+  "flags": [
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_FLOWER_TRICK",
+  "id": 798,
+  "name": "Flower Trick",
+  "description": "Rigged bouquet. Always gets\\na critical hit, never missing.",
+  "effect": "EFFECT_HIT",
+  "power": 70,
+  "type": "TYPE_GRASS",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_FlowerTrick",
+  "alwaysCriticalHit": "TRUE",
+  "flags": [
+   "alwaysCriticalHit"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TORCH_SONG",
+  "id": 799,
+  "name": "Torch Song",
+  "description": "Flames scorch the target.\\nRaises the user's Sp. Atk.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_TorchSong",
+  "flags": [
+   "soundMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "spAtk": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_AQUA_STEP",
+  "id": 800,
+  "name": "Aqua Step",
+  "description": "Hits with light, fluid dance\\nsteps. Ups the user's Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_AquaStep",
+  "flags": [
+   "danceMove",
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "speed": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_RAGING_BULL",
+  "id": 801,
+  "name": "Raging Bull",
+  "description": "Tackle that breaks barriers.\\nUser's form determines type.",
+  "effect": "EFFECT_RAGING_BULL",
+  "power": 90,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_RagingBull",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_BREAK_SCREEN",
+    "preAttackEffect": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MAKE_IT_RAIN",
+  "id": 802,
+  "name": "Make It Rain",
+  "description": "Lowers the user's Sp. Atk.\\nMoney is recovered after.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_STEEL",
+  "accuracy": 95,
+  "pp": 5,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_MakeItRain",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_PAYDAY"
+   },
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "spAtk": "2",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_RUINATION",
+  "id": 803,
+  "name": "Ruination",
+  "description": "Summons a ruinous disaster\\nand cuts half the foe's HP.",
+  "effect": "EFFECT_FIXED_PERCENT_DAMAGE",
+  "power": 1,
+  "type": "TYPE_DARK",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "argument": "{ .damagePercentage = 50 }",
+  "contestEffect": "CONTEST_EFFECT_BADLY_STARTLE_MONS_WITH_GOOD_APPEALS",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_Ruination",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_COLLISION_COURSE",
+  "id": 804,
+  "name": "Collision Course",
+  "description": "Prehistoric explosion that's\\nstronger if super effective.",
+  "effect": "EFFECT_COLLISION_COURSE",
+  "power": 100,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_CollisionCourse",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ELECTRO_DRIFT",
+  "id": 805,
+  "name": "Electro Drift",
+  "description": "Futuristic electricity. It's\\nstronger if super effective.",
+  "effect": "EFFECT_COLLISION_COURSE",
+  "power": 100,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_ElectroDrift",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SHED_TAIL",
+  "id": 806,
+  "name": "Shed Tail",
+  "description": "Creates a Substitute for\\nitself before switching out.",
+  "effect": "EFFECT_SHED_TAIL",
+  "power": 0,
+  "type": "TYPE_NORMAL",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_ShedTail",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_CHILLY_RECEPTION",
+  "id": 807,
+  "name": "Chilly Reception",
+  "description": "Bad joke summons snowstorm.\\nThe user also switches out.",
+  "effect": "EFFECT_WEATHER_AND_SWITCH",
+  "power": 0,
+  "type": "TYPE_ICE",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_FIELD",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "argument": "{ .weatherType = (B_PREFERRED_ICE_WEATHER == B_ICE_WEATHER_HAIL) ? BATTLE_WEATHER_HAIL : BATTLE_WEATHER_SNOW }",
+  "battleAnimScript": "gBattleAnimMove_ChillyReception",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TIDY_UP",
+  "id": 808,
+  "name": "Tidy Up",
+  "description": "User tidies up hazards and\\nraises its Attack and Speed.",
+  "effect": "EFFECT_TIDY_UP",
+  "power": 0,
+  "type": "TYPE_NORMAL",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_TidyUp",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "STAT_CHANGE_EFFECT_PLUS",
+    "attack": "1",
+    "speed": "1"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SNOWSCAPE",
+  "id": 809,
+  "name": "Snowscape",
+  "description": "Boosts the Defense of Ice-\\ntype Pokémon for 5 turns.",
+  "effect": "EFFECT_WEATHER",
+  "power": 0,
+  "type": "TYPE_ICE",
+  "accuracy": 0,
+  "pp": 5,
+  "target": "TARGET_FIELD",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "argument": "{ .weatherType = (B_PREFERRED_ICE_WEATHER == B_ICE_WEATHER_HAIL) ? BATTLE_WEATHER_HAIL : BATTLE_WEATHER_SNOW }",
+  "contestEffect": "CONTEST_EFFECT_BADLY_STARTLE_MONS_WITH_GOOD_APPEALS",
+  "contestCategory": "CONTEST_CATEGORY_BEAUTY",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "B_PREFERRED_ICE_WEATHER == B_ICE_WEATHER_HAIL) ? gBattleAnimMove_Hail : gBattleAnimMove_Snowscape",
+  "flags": [
+   "ignoresProtect",
+   "metronomeBanned",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_POUNCE",
+  "id": 810,
+  "name": "Pounce",
+  "description": "The user pounces on the foe,\\nlowering its Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 50,
+  "type": "TYPE_BUG",
+  "accuracy": 100,
+  "pp": 20,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_Pounce",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "speed": "1",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TRAILBLAZE",
+  "id": 811,
+  "name": "Trailblaze",
+  "description": "The user attacks suddenly,\\nraising its Speed.",
+  "effect": "EFFECT_HIT",
+  "power": 50,
+  "type": "TYPE_GRASS",
+  "accuracy": 100,
+  "pp": 20,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "contestEffect": "CONTEST_EFFECT_BETTER_WITH_GOOD_CONDITION",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_Trailblaze",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "speed": "1",
+    "self": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_CHILLING_WATER",
+  "id": 812,
+  "name": "Chilling Water",
+  "description": "A shower with ice-cold water\\nlowers the target's Attack.",
+  "effect": "EFFECT_HIT",
+  "power": 50,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 20,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_LAST",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_ChillingWater",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "attack": "1",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_HYPER_DRILL",
+  "id": 813,
+  "name": "Hyper Drill",
+  "description": "A spinning pointed part\\nbypasses a foe's Protect.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_HyperDrill",
+  "flags": [
+   "ignoresProtect",
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TWIN_BEAM",
+  "id": 814,
+  "name": "Twin Beam",
+  "description": "Mystical eye-beams that hit\\nthe target twice in a row.",
+  "effect": "EFFECT_HIT",
+  "power": 40,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "strikeCount": "2",
+  "battleAnimScript": "gBattleAnimMove_TwinBeam",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_RAGE_FIST",
+  "id": 815,
+  "name": "Rage Fist",
+  "description": "The more the user has been\\nhit, the stronger the move.",
+  "effect": "EFFECT_RAGE_FIST",
+  "power": 50,
+  "type": "TYPE_GHOST",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_RageFist",
+  "flags": [
+   "makesContact",
+   "metronomeBanned",
+   "punchingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ARMOR_CANNON",
+  "id": 816,
+  "name": "Armor Cannon",
+  "description": "Shoots armor. This lowers\\nthe user's defensive stats.",
+  "effect": "EFFECT_HIT",
+  "power": 120,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_ArmorCannon",
+  "flags": [
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_MINUS",
+    "defense": "1",
+    "spDef": "1",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BITTER_BLADE",
+  "id": 817,
+  "name": "Bitter Blade",
+  "description": "A slash that absorbs\\nhalf the damage inflicted.",
+  "effect": "EFFECT_HIT",
+  "power": 90,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_BitterBlade",
+  "flags": [
+   "healingMove",
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_ABSORB",
+    "absorbPercentage": "50"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_DOUBLE_SHOCK",
+  "id": 818,
+  "name": "Double Shock",
+  "description": "Discharges all electricity,\\nlosing the Electric type.",
+  "effect": "EFFECT_FAIL_IF_NOT_ARG_TYPE",
+  "power": 120,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "argument": "{ .type = TYPE_ELECTRIC }",
+  "battleAnimScript": "gBattleAnimMove_DoubleShock",
+  "flags": [
+   "makesContact",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_REMOVE_ARG_TYPE",
+    "self": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_GIGATON_HAMMER",
+  "id": 819,
+  "name": "Gigaton Hammer",
+  "description": "Swings a huge hammer. Can't\\nbe used twice in a row.",
+  "effect": "EFFECT_HIT",
+  "power": 160,
+  "type": "TYPE_STEEL",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_GigatonHammer",
+  "flags": [
+   "cantUseTwice"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_COMEUPPANCE",
+  "id": 820,
+  "name": "Comeuppance",
+  "description": "Retaliates against the foe\\nthat last damaged the user.",
+  "effect": "EFFECT_REFLECT_DAMAGE",
+  "power": 1,
+  "type": "TYPE_DARK",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_DEPENDS",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "argument": "{\n            .reflectDamage.damagePercent = 150,\n            .reflectDamage.damageCategories = 1u << DAMAGE_CATEGORY_PHYSICAL | 1u << DAMAGE_CATEGORY_SPECIAL,\n        }",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_LAST",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_Comeuppance",
+  "flags": [
+   "makesContact",
+   "meFirstBanned",
+   "metronomeBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_AQUA_CUTTER",
+  "id": 821,
+  "name": "Aqua Cutter",
+  "description": "Pressurized water cut with a\\nhigh critical-hit ratio.",
+  "effect": "EFFECT_HIT",
+  "power": 70,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 20,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "criticalHitStage": "1",
+  "battleAnimScript": "gBattleAnimMove_AquaCutter",
+  "flags": [
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BLAZING_TORQUE",
+  "id": 822,
+  "name": "Blazing Torque",
+  "description": "---",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_BlazingTorque",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "encoreBanned",
+   "instructBanned",
+   "meFirstBanned",
+   "metronomeBanned",
+   "mimicBanned",
+   "mirrorMoveBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_BURN",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_WICKED_TORQUE",
+  "id": 823,
+  "name": "Wicked Torque",
+  "description": "---",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_DARK",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_WickedTorque",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "encoreBanned",
+   "instructBanned",
+   "meFirstBanned",
+   "metronomeBanned",
+   "mimicBanned",
+   "mirrorMoveBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_SLEEP",
+    "chance": "10"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_NOXIOUS_TORQUE",
+  "id": 824,
+  "name": "Noxious Torque",
+  "description": "---",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_POISON",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_NoxiousTorque",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "encoreBanned",
+   "instructBanned",
+   "meFirstBanned",
+   "metronomeBanned",
+   "mimicBanned",
+   "mirrorMoveBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_POISON",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_COMBAT_TORQUE",
+  "id": 825,
+  "name": "Combat Torque",
+  "description": "---",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_CombatTorque",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "encoreBanned",
+   "instructBanned",
+   "meFirstBanned",
+   "metronomeBanned",
+   "mimicBanned",
+   "mirrorMoveBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_PARALYSIS",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MAGICAL_TORQUE",
+  "id": 826,
+  "name": "Magical Torque",
+  "description": "---",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_FAIRY",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_MagicalTorque",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "encoreBanned",
+   "instructBanned",
+   "meFirstBanned",
+   "metronomeBanned",
+   "mimicBanned",
+   "mirrorMoveBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_CONFUSION",
+    "chance": "30"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_PSYBLADE",
+  "id": 827,
+  "name": "Psyblade",
+  "description": "This move's power increases\\nwhen on Electric Terrain.",
+  "effect": "EFFECT_TERRAIN_BOOST",
+  "power": 80,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_Psyblade",
+  "flags": [
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_HYDRO_STEAM",
+  "id": 828,
+  "name": "Hydro Steam",
+  "description": "This move's power increases\\nunder harsh sunlight.",
+  "effect": "EFFECT_HYDRO_STEAM",
+  "power": 80,
+  "type": "TYPE_WATER",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_HydroSteam",
+  "flags": [
+   "thawsUser"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BLOOD_MOON",
+  "id": 829,
+  "name": "Blood Moon",
+  "description": "Unleashes the blood moon.\\nCan't be used twice in a row.",
+  "effect": "EFFECT_HIT",
+  "power": 130,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_BloodMoon",
+  "flags": [
+   "cantUseTwice"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MATCHA_GOTCHA",
+  "id": 830,
+  "name": "Matcha Gotcha",
+  "description": "Absorbs half the damage\\ninflicted. May cause a burn.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_GRASS",
+  "accuracy": 90,
+  "pp": 15,
+  "target": "TARGET_BOTH",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_MatchaGotcha",
+  "flags": [
+   "healingMove",
+   "thawsUser"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_ABSORB",
+    "absorbPercentage": "50"
+   },
+   {
+    "moveEffect": "MOVE_EFFECT_BURN",
+    "chance": "20"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SYRUP_BOMB",
+  "id": 831,
+  "name": "Syrup Bomb",
+  "description": "Lowers the foe's Speed\\neach turn for 3 turns.",
+  "effect": "EFFECT_HIT",
+  "power": 60,
+  "type": "TYPE_GRASS",
+  "accuracy": 90,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_SyrupBomb",
+  "flags": [
+   "ballisticMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_SYRUP_BOMB",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_IVY_CUDGEL",
+  "id": 832,
+  "name": "Ivy Cudgel",
+  "description": "Type changes with held mask.\\nHigh critical-hit ratio.",
+  "effect": "EFFECT_IVY_CUDGEL",
+  "power": 100,
+  "type": "TYPE_GRASS",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "criticalHitStage": "1",
+  "battleAnimScript": "gBattleAnimMove_IvyCudgel",
+  "flags": [],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ELECTRO_SHOT",
+  "id": 833,
+  "name": "Electro Shot",
+  "description": "Gathers electricity, then\\nfires a high-voltage shot.",
+  "effect": "EFFECT_TWO_TURNS_ATTACK",
+  "power": 130,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_ElectroShot",
+  "flags": [
+   "instructBanned",
+   "sleepTalkBanned"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_STAT_PLUS",
+    "spAtk": "1",
+    "self": "TRUE",
+    "onChargeTurnOnly": "TRUE",
+    "sheerForceOverride": "TRUE"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TERA_STARSTORM",
+  "id": 834,
+  "name": "Tera Starstorm",
+  "description": "In Terapagos's Stellar\\nForm, it hits all foes.",
+  "effect": "EFFECT_TERA_STARSTORM",
+  "power": 120,
+  "type": "TYPE_NORMAL",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_TeraStarstorm",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "mimicBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_FICKLE_BEAM",
+  "id": 835,
+  "name": "Fickle Beam",
+  "description": "Shoots a beam of light.\\nSometimes twice as strong.",
+  "effect": "EFFECT_FICKLE_BEAM",
+  "power": 80,
+  "type": "TYPE_DRAGON",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_FickleBeam",
+  "flags": [],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_BURNING_BULWARK",
+  "id": 836,
+  "name": "Burning Bulwark",
+  "description": "Evades attack, and burns\\nthe foe if struck.",
+  "effect": "EFFECT_PROTECT",
+  "power": 0,
+  "type": "TYPE_FIRE",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_USER",
+  "priority": 4,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "argument": "{ .protectMethod = PROTECT_BURNING_BULWARK }",
+  "battleAnimScript": "gBattleAnimMove_BurningBulwark",
+  "flags": [
+   "assistBanned",
+   "copycatBanned",
+   "ignoresProtect",
+   "mirrorMoveBanned"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_THUNDERCLAP",
+  "id": 837,
+  "name": "Thunderclap",
+  "description": "Attacks first if the foe\\nis readying an attack.",
+  "effect": "EFFECT_SUCKER_PUNCH",
+  "power": 70,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 1,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "contestEffect": "CONTEST_EFFECT_BETTER_IF_FIRST",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_Thunderclap",
+  "flags": [],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MIGHTY_CLEAVE",
+  "id": 838,
+  "name": "Mighty Cleave",
+  "description": "Wields light to cleave the\\nfoe. Ignores protection.",
+  "effect": "EFFECT_HIT",
+  "power": 95,
+  "type": "TYPE_ROCK",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_MightyCleave",
+  "flags": [
+   "ignoresProtect",
+   "makesContact",
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TACHYON_CUTTER",
+  "id": 839,
+  "name": "Tachyon Cutter",
+  "description": "Launches particle blades at\\nthe target. Strikes twice.",
+  "effect": "EFFECT_HIT",
+  "power": 50,
+  "type": "TYPE_STEEL",
+  "accuracy": 0,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "strikeCount": "2",
+  "battleAnimScript": "gBattleAnimMove_TachyonCutter",
+  "flags": [
+   "slicingMove"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_HARD_PRESS",
+  "id": 840,
+  "name": "Hard Press",
+  "description": "The more HP the foe has,\\nthe greater the power.",
+  "effect": "EFFECT_POWER_BASED_ON_TARGET_HP",
+  "power": 100,
+  "type": "TYPE_STEEL",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_HardPress",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_DRAGON_CHEER",
+  "id": 841,
+  "name": "Dragon Cheer",
+  "description": "Raises allies' critical-hit\\nratio, sharply if Dragons.",
+  "effect": "EFFECT_DRAGON_CHEER",
+  "power": 0,
+  "type": "TYPE_DRAGON",
+  "accuracy": 0,
+  "pp": 15,
+  "target": "TARGET_ALLY",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_STATUS",
+  "battleAnimScript": "gBattleAnimMove_DragonCheer",
+  "flags": [
+   "ignoresSubstitute"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_ALLURING_VOICE",
+  "id": 842,
+  "name": "Alluring Voice",
+  "description": "Confuses foe if its stats\\nwere raised this turn.",
+  "effect": "EFFECT_HIT",
+  "power": 80,
+  "type": "TYPE_FAIRY",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_AlluringVoice",
+  "flags": [
+   "soundMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_CONFUSION",
+    "onlyIfTargetRaisedStats": "TRUE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_TEMPER_FLARE",
+  "id": 843,
+  "name": "Temper Flare",
+  "description": "Power is doubled if the\\nuser's previous move failed.",
+  "effect": "EFFECT_STOMPING_TANTRUM",
+  "power": 75,
+  "type": "TYPE_FIRE",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_TemperFlare",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_SUPERCELL_SLAM",
+  "id": 844,
+  "name": "Supercell Slam",
+  "description": "An electrified slam. If it\\nmisses, the user is hurt.",
+  "effect": "EFFECT_RECOIL_IF_MISS",
+  "power": 100,
+  "type": "TYPE_ELECTRIC",
+  "accuracy": 95,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "contestEffect": "CONTEST_EFFECT_USER_MORE_EASILY_STARTLED",
+  "contestComboStarterId": "0",
+  "battleAnimScript": "gBattleAnimMove_SupercellSlam",
+  "flags": [
+   "makesContact",
+   "minimizeDoubleDamage"
+  ],
+  "additionalEffects": [],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_PSYCHIC_NOISE",
+  "id": 845,
+  "name": "Psychic Noise",
+  "description": "Sound waves that damage and\\nprevent healing for 2 turns.",
+  "effect": "EFFECT_HIT",
+  "power": 75,
+  "type": "TYPE_PSYCHIC",
+  "accuracy": 100,
+  "pp": 10,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_PsychicNoise",
+  "flags": [
+   "soundMove"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_PSYCHIC_NOISE",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_UPPER_HAND",
+  "id": 846,
+  "name": "Upper Hand",
+  "description": "Makes the target flinch if\\nreadying a priority move.",
+  "effect": "EFFECT_UPPER_HAND",
+  "power": 65,
+  "type": "TYPE_FIGHTING",
+  "accuracy": 100,
+  "pp": 15,
+  "target": "TARGET_SELECTED",
+  "priority": 3,
+  "category": "DAMAGE_CATEGORY_PHYSICAL",
+  "battleAnimScript": "gBattleAnimMove_UpperHand",
+  "flags": [
+   "makesContact"
+  ],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_FLINCH",
+    "chance": "100"
+   }
+  ],
+  "contestComboMoves": []
+ },
+ {
+  "const": "MOVE_MALIGNANT_CHAIN",
+  "id": 847,
+  "name": "Malignant Chain",
+  "description": "A corrosive chain attack\\nthat may badly poison.",
+  "effect": "EFFECT_HIT",
+  "power": 100,
+  "type": "TYPE_POISON",
+  "accuracy": 100,
+  "pp": 5,
+  "target": "TARGET_SELECTED",
+  "priority": 0,
+  "category": "DAMAGE_CATEGORY_SPECIAL",
+  "battleAnimScript": "gBattleAnimMove_MalignantChain",
+  "flags": [],
+  "additionalEffects": [
+   {
+    "moveEffect": "MOVE_EFFECT_TOXIC",
+    "chance": "50"
    }
   ],
   "contestComboMoves": []

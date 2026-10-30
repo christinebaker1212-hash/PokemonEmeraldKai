@@ -29,7 +29,7 @@ def main():
             continue
         new = [(lv, kai_by_id[pmove[m]]) for lv, m in s['learnset']['level'] if pmove[m] >= 355]
         sym = ptrs[s['const']]
-        m = re.search(r'static const u16 %s\[\] = \{\n(.*?)    LEVEL_UP_END\n\};' % sym, ls, re.S)
+        m = re.search(r'static const u(?:16|32) %s\[\] = \{\n(.*?)    LEVEL_UP_END\n\};' % sym, ls, re.S)
         if new and m:
             lines = m.group(1).splitlines(keepends=True)
             for lv, mv in new:
@@ -43,7 +43,7 @@ def main():
                         break
                 lines.insert(pos, '    LEVEL_UP_MOVE(%2d, %s),  // Gen 4\n' % (lv, mv))
                 added_lv += 1
-            ls = ls.replace(m.group(0), 'static const u16 %s[] = {\n%s    LEVEL_UP_END\n};' % (sym, ''.join(lines)), 1)
+            ls = ls.replace(m.group(0), 'static const u32 %s[] = {\n%s    LEVEL_UP_END\n};' % (sym, ''.join(lines)), 1)
         eggs = [kai_by_id[pmove[x]] for x in s['learnset']['egg'] if pmove[x] >= 355]
         if eggs:
             name = s['const'][8:]

@@ -1,0 +1,1124 @@
+[
+ {
+  "const": "ABILITY_PICKPOCKET",
+  "expansion_id": 124,
+  "name": "Pickpocket",
+  "description": "Steals foe's item if hit."
+ },
+ {
+  "const": "ABILITY_SHEER_FORCE",
+  "expansion_id": 125,
+  "name": "Sheer Force",
+  "description": "Trades effects for power."
+ },
+ {
+  "const": "ABILITY_CONTRARY",
+  "expansion_id": 126,
+  "name": "Contrary",
+  "description": "Reverses stat changes."
+ },
+ {
+  "const": "ABILITY_UNNERVE",
+  "expansion_id": 127,
+  "name": "Unnerve",
+  "description": "Foes can't eat Berries."
+ },
+ {
+  "const": "ABILITY_DEFIANT",
+  "expansion_id": 128,
+  "name": "Defiant",
+  "description": "Stat-lowering ups Attack."
+ },
+ {
+  "const": "ABILITY_DEFEATIST",
+  "expansion_id": 129,
+  "name": "Defeatist",
+  "description": "Halves offenses at half HP."
+ },
+ {
+  "const": "ABILITY_CURSED_BODY",
+  "expansion_id": 130,
+  "name": "Cursed Body",
+  "description": "Contact may disable move."
+ },
+ {
+  "const": "ABILITY_HEALER",
+  "expansion_id": 131,
+  "name": "Healer",
+  "description": "May cure ally's status."
+ },
+ {
+  "const": "ABILITY_FRIEND_GUARD",
+  "expansion_id": 132,
+  "name": "Friend Guard",
+  "description": "Reduces damage to allies."
+ },
+ {
+  "const": "ABILITY_WEAK_ARMOR",
+  "expansion_id": 133,
+  "name": "Weak Armor",
+  "description": "Hits change Def and Speed."
+ },
+ {
+  "const": "ABILITY_HEAVY_METAL",
+  "expansion_id": 134,
+  "name": "Heavy Metal",
+  "description": "Doubles weight."
+ },
+ {
+  "const": "ABILITY_LIGHT_METAL",
+  "expansion_id": 135,
+  "name": "Light Metal",
+  "description": "Halves weight."
+ },
+ {
+  "const": "ABILITY_MULTISCALE",
+  "expansion_id": 136,
+  "name": "Multiscale",
+  "description": "Reduces damage at full HP."
+ },
+ {
+  "const": "ABILITY_TOXIC_BOOST",
+  "expansion_id": 137,
+  "name": "Toxic Boost",
+  "description": "Boosts Attack if poisoned."
+ },
+ {
+  "const": "ABILITY_FLARE_BOOST",
+  "expansion_id": 138,
+  "name": "Flare Boost",
+  "description": "Boosts Sp. Atk if burned."
+ },
+ {
+  "const": "ABILITY_HARVEST",
+  "expansion_id": 139,
+  "name": "Harvest",
+  "description": "May create another Berry."
+ },
+ {
+  "const": "ABILITY_TELEPATHY",
+  "expansion_id": 140,
+  "name": "Telepathy",
+  "description": "Dodges ally's attacks."
+ },
+ {
+  "const": "ABILITY_MOODY",
+  "expansion_id": 141,
+  "name": "Moody",
+  "description": "Stats change every turn."
+ },
+ {
+  "const": "ABILITY_OVERCOAT",
+  "expansion_id": 142,
+  "name": "Overcoat",
+  "description": "Blocks weather and powder."
+ },
+ {
+  "const": "ABILITY_POISON_TOUCH",
+  "expansion_id": 143,
+  "name": "Poison Touch",
+  "description": "Contact moves may poison."
+ },
+ {
+  "const": "ABILITY_REGENERATOR",
+  "expansion_id": 144,
+  "name": "Regenerator",
+  "description": "Restores HP upon switch."
+ },
+ {
+  "const": "ABILITY_BIG_PECKS",
+  "expansion_id": 145,
+  "name": "Big Pecks",
+  "description": "Defense can't be lowered."
+ },
+ {
+  "const": "ABILITY_SAND_RUSH",
+  "expansion_id": 146,
+  "name": "Sand Rush",
+  "description": "Ups Speed in a sandstorm."
+ },
+ {
+  "const": "ABILITY_WONDER_SKIN",
+  "expansion_id": 147,
+  "name": "Wonder Skin",
+  "description": "May avoid status moves."
+ },
+ {
+  "const": "ABILITY_ANALYTIC",
+  "expansion_id": 148,
+  "name": "Analytic",
+  "description": "Boosts power if last to act."
+ },
+ {
+  "const": "ABILITY_ILLUSION",
+  "expansion_id": 149,
+  "name": "Illusion",
+  "description": "Disguises as a partner."
+ },
+ {
+  "const": "ABILITY_IMPOSTER",
+  "expansion_id": 150,
+  "name": "Imposter",
+  "description": "Transforms into the foe."
+ },
+ {
+  "const": "ABILITY_INFILTRATOR",
+  "expansion_id": 151,
+  "name": "Infiltrator",
+  "description": "Passes through barriers."
+ },
+ {
+  "const": "ABILITY_MUMMY",
+  "expansion_id": 152,
+  "name": "Mummy",
+  "description": "Ability spreads on contact."
+ },
+ {
+  "const": "ABILITY_MOXIE",
+  "expansion_id": 153,
+  "name": "Moxie",
+  "description": "Raises Attack after KOs."
+ },
+ {
+  "const": "ABILITY_JUSTIFIED",
+  "expansion_id": 154,
+  "name": "Justified",
+  "description": "Ups Attack if hit by Dark."
+ },
+ {
+  "const": "ABILITY_RATTLED",
+  "expansion_id": 155,
+  "name": "Rattled",
+  "description": "Raises Speed when scared."
+ },
+ {
+  "const": "ABILITY_MAGIC_BOUNCE",
+  "expansion_id": 156,
+  "name": "Magic Bounce",
+  "description": "Reflects status moves."
+ },
+ {
+  "const": "ABILITY_SAP_SIPPER",
+  "expansion_id": 157,
+  "name": "Sap Sipper",
+  "description": "Ups Attack if hit by Grass."
+ },
+ {
+  "const": "ABILITY_PRANKSTER",
+  "expansion_id": 158,
+  "name": "Prankster",
+  "description": "Status moves have priority."
+ },
+ {
+  "const": "ABILITY_SAND_FORCE",
+  "expansion_id": 159,
+  "name": "Sand Force",
+  "description": "Powers up in a sandstorm."
+ },
+ {
+  "const": "ABILITY_IRON_BARBS",
+  "expansion_id": 160,
+  "name": "Iron Barbs",
+  "description": "Damages foe on contact."
+ },
+ {
+  "const": "ABILITY_ZEN_MODE",
+  "expansion_id": 161,
+  "name": "Zen Mode",
+  "description": "Changes shape at half HP."
+ },
+ {
+  "const": "ABILITY_VICTORY_STAR",
+  "expansion_id": 162,
+  "name": "Victory Star",
+  "description": "Boosts allies' accuracy."
+ },
+ {
+  "const": "ABILITY_TURBOBLAZE",
+  "expansion_id": 163,
+  "name": "Turboblaze",
+  "description": "Moves ignore Abilities."
+ },
+ {
+  "const": "ABILITY_TERAVOLT",
+  "expansion_id": 164,
+  "name": "Teravolt",
+  "description": "Moves ignore Abilities."
+ },
+ {
+  "const": "ABILITY_AROMA_VEIL",
+  "expansion_id": 165,
+  "name": "Aroma Veil",
+  "description": "Allies can't be move-bound."
+ },
+ {
+  "const": "ABILITY_FLOWER_VEIL",
+  "expansion_id": 166,
+  "name": "Flower Veil",
+  "description": "Mist for Grass-type allies."
+ },
+ {
+  "const": "ABILITY_CHEEK_POUCH",
+  "expansion_id": 167,
+  "name": "Cheek Pouch",
+  "description": "Eating a Berry restores HP."
+ },
+ {
+  "const": "ABILITY_PROTEAN",
+  "expansion_id": 168,
+  "name": "Protean",
+  "description": "Changes type to used move."
+ },
+ {
+  "const": "ABILITY_FUR_COAT",
+  "expansion_id": 169,
+  "name": "Fur Coat",
+  "description": "Halves physical damage."
+ },
+ {
+  "const": "ABILITY_MAGICIAN",
+  "expansion_id": 170,
+  "name": "Magician",
+  "description": "Steals the foe's held item."
+ },
+ {
+  "const": "ABILITY_BULLETPROOF",
+  "expansion_id": 171,
+  "name": "Bulletproof",
+  "description": "Blocks ball and bomb moves."
+ },
+ {
+  "const": "ABILITY_COMPETITIVE",
+  "expansion_id": 172,
+  "name": "Competitive",
+  "description": "Stat-lowering ups Sp. Atk."
+ },
+ {
+  "const": "ABILITY_STRONG_JAW",
+  "expansion_id": 173,
+  "name": "Strong Jaw",
+  "description": "Boosts biting moves."
+ },
+ {
+  "const": "ABILITY_REFRIGERATE",
+  "expansion_id": 174,
+  "name": "Refrigerate",
+  "description": "Normal moves become Ice."
+ },
+ {
+  "const": "ABILITY_SWEET_VEIL",
+  "expansion_id": 175,
+  "name": "Sweet Veil",
+  "description": "Protects allies from sleep."
+ },
+ {
+  "const": "ABILITY_STANCE_CHANGE",
+  "expansion_id": 176,
+  "name": "Stance Change",
+  "description": "Swaps Forme as it battles."
+ },
+ {
+  "const": "ABILITY_GALE_WINGS",
+  "expansion_id": 177,
+  "name": "Gale Wings",
+  "description": "Flying moves have priority."
+ },
+ {
+  "const": "ABILITY_MEGA_LAUNCHER",
+  "expansion_id": 178,
+  "name": "Mega Launcher",
+  "description": "Powers up pulse moves."
+ },
+ {
+  "const": "ABILITY_GRASS_PELT",
+  "expansion_id": 179,
+  "name": "Grass Pelt",
+  "description": "Grassy Terrain ups Defense."
+ },
+ {
+  "const": "ABILITY_SYMBIOSIS",
+  "expansion_id": 180,
+  "name": "Symbiosis",
+  "description": "Passes held item to ally."
+ },
+ {
+  "const": "ABILITY_TOUGH_CLAWS",
+  "expansion_id": 181,
+  "name": "Tough Claws",
+  "description": "Powers up contact moves."
+ },
+ {
+  "const": "ABILITY_PIXILATE",
+  "expansion_id": 182,
+  "name": "Pixilate",
+  "description": "Normal moves become Fairy."
+ },
+ {
+  "const": "ABILITY_GOOEY",
+  "expansion_id": 183,
+  "name": "Gooey",
+  "description": "Contact lowers foe's Speed."
+ },
+ {
+  "const": "ABILITY_AERILATE",
+  "expansion_id": 184,
+  "name": "Aerilate",
+  "description": "Normal moves become Flying."
+ },
+ {
+  "const": "ABILITY_PARENTAL_BOND",
+  "expansion_id": 185,
+  "name": "Parental Bond",
+  "description": "Parent & child each attack."
+ },
+ {
+  "const": "ABILITY_DARK_AURA",
+  "expansion_id": 186,
+  "name": "Dark Aura",
+  "description": "Ups all Dark-type moves."
+ },
+ {
+  "const": "ABILITY_FAIRY_AURA",
+  "expansion_id": 187,
+  "name": "Fairy Aura",
+  "description": "Ups all Fairy-type moves."
+ },
+ {
+  "const": "ABILITY_AURA_BREAK",
+  "expansion_id": 188,
+  "name": "Aura Break",
+  "description": "Reverses Aura Abilities."
+ },
+ {
+  "const": "ABILITY_PRIMORDIAL_SEA",
+  "expansion_id": 189,
+  "name": "Primordial Sea",
+  "description": "Summons heavy rain."
+ },
+ {
+  "const": "ABILITY_DESOLATE_LAND",
+  "expansion_id": 190,
+  "name": "Desolate Land",
+  "description": "Summons extreme sunlight."
+ },
+ {
+  "const": "ABILITY_DELTA_STREAM",
+  "expansion_id": 191,
+  "name": "Delta Stream",
+  "description": "Summons strong winds."
+ },
+ {
+  "const": "ABILITY_STAMINA",
+  "expansion_id": 192,
+  "name": "Stamina",
+  "description": "Raises Defense when hit."
+ },
+ {
+  "const": "ABILITY_WIMP_OUT",
+  "expansion_id": 193,
+  "name": "Wimp Out",
+  "description": "Switches out at half HP."
+ },
+ {
+  "const": "ABILITY_EMERGENCY_EXIT",
+  "expansion_id": 194,
+  "name": "Emergency Exit",
+  "description": "Switches out at half HP."
+ },
+ {
+  "const": "ABILITY_WATER_COMPACTION",
+  "expansion_id": 195,
+  "name": "Water Compaction",
+  "description": "Ups Defense if hit by Water."
+ },
+ {
+  "const": "ABILITY_MERCILESS",
+  "expansion_id": 196,
+  "name": "Merciless",
+  "description": "Critical hits poisoned foes."
+ },
+ {
+  "const": "ABILITY_SHIELDS_DOWN",
+  "expansion_id": 197,
+  "name": "Shields Down",
+  "description": "Shell breaks at half HP."
+ },
+ {
+  "const": "ABILITY_STAKEOUT",
+  "expansion_id": 198,
+  "name": "Stakeout",
+  "description": "Stronger on foe's switch in."
+ },
+ {
+  "const": "ABILITY_WATER_BUBBLE",
+  "expansion_id": 199,
+  "name": "Water Bubble",
+  "description": "Guards from Fire and burns."
+ },
+ {
+  "const": "ABILITY_STEELWORKER",
+  "expansion_id": 200,
+  "name": "Steelworker",
+  "description": "Ups Steel-type moves."
+ },
+ {
+  "const": "ABILITY_BERSERK",
+  "expansion_id": 201,
+  "name": "Berserk",
+  "description": "Boosts Sp. Atk at half HP."
+ },
+ {
+  "const": "ABILITY_SLUSH_RUSH",
+  "expansion_id": 202,
+  "name": "Slush Rush",
+  "description": "Boosts Speed in hail."
+ },
+ {
+  "const": "ABILITY_LONG_REACH",
+  "expansion_id": 203,
+  "name": "Long Reach",
+  "description": "Moves don't make contact."
+ },
+ {
+  "const": "ABILITY_LIQUID_VOICE",
+  "expansion_id": 204,
+  "name": "Liquid Voice",
+  "description": "Sound moves become Water."
+ },
+ {
+  "const": "ABILITY_TRIAGE",
+  "expansion_id": 205,
+  "name": "Triage",
+  "description": "Healing moves have priority."
+ },
+ {
+  "const": "ABILITY_GALVANIZE",
+  "expansion_id": 206,
+  "name": "Galvanize",
+  "description": "Normal moves turn Electric."
+ },
+ {
+  "const": "ABILITY_SURGE_SURFER",
+  "expansion_id": 207,
+  "name": "Surge Surfer",
+  "description": "Electric Terrain ups Speed."
+ },
+ {
+  "const": "ABILITY_SCHOOLING",
+  "expansion_id": 208,
+  "name": "Schooling",
+  "description": "Forms a school at high HP."
+ },
+ {
+  "const": "ABILITY_DISGUISE",
+  "expansion_id": 209,
+  "name": "Disguise",
+  "description": "Shroud protects once."
+ },
+ {
+  "const": "ABILITY_BATTLE_BOND",
+  "expansion_id": 210,
+  "name": "Battle Bond",
+  "description": "Changes form after a KO."
+ },
+ {
+  "const": "ABILITY_POWER_CONSTRUCT",
+  "expansion_id": 211,
+  "name": "Power Construct",
+  "description": "Changes Forme at half HP."
+ },
+ {
+  "const": "ABILITY_CORROSION",
+  "expansion_id": 212,
+  "name": "Corrosion",
+  "description": "Can poison Steel & Poison."
+ },
+ {
+  "const": "ABILITY_COMATOSE",
+  "expansion_id": 213,
+  "name": "Comatose",
+  "description": "Always drowsing."
+ },
+ {
+  "const": "ABILITY_QUEENLY_MAJESTY",
+  "expansion_id": 214,
+  "name": "Queenly Majesty",
+  "description": "Allies block priority moves."
+ },
+ {
+  "const": "ABILITY_INNARDS_OUT",
+  "expansion_id": 215,
+  "name": "Innards Out",
+  "description": "Damages the foe if KO'd."
+ },
+ {
+  "const": "ABILITY_DANCER",
+  "expansion_id": 216,
+  "name": "Dancer",
+  "description": "Dances along with others."
+ },
+ {
+  "const": "ABILITY_BATTERY",
+  "expansion_id": 217,
+  "name": "Battery",
+  "description": "Boosts ally's Sp. Atk."
+ },
+ {
+  "const": "ABILITY_FLUFFY",
+  "expansion_id": 218,
+  "name": "Fluffy",
+  "description": "Halves contact, heat hurts."
+ },
+ {
+  "const": "ABILITY_DAZZLING",
+  "expansion_id": 219,
+  "name": "Dazzling",
+  "description": "Allies block priority moves."
+ },
+ {
+  "const": "ABILITY_SOUL_HEART",
+  "expansion_id": 220,
+  "name": "Soul-Heart",
+  "description": "Others fainting ups Sp. Atk."
+ },
+ {
+  "const": "ABILITY_TANGLING_HAIR",
+  "expansion_id": 221,
+  "name": "Tangling Hair",
+  "description": "Contact lowers foe's Speed."
+ },
+ {
+  "const": "ABILITY_RECEIVER",
+  "expansion_id": 222,
+  "name": "Receiver",
+  "description": "Copies fainted ally Ability."
+ },
+ {
+  "const": "ABILITY_POWER_OF_ALCHEMY",
+  "expansion_id": 223,
+  "name": "Power Of Alchemy",
+  "description": "Copies fainted ally Ability."
+ },
+ {
+  "const": "ABILITY_BEAST_BOOST",
+  "expansion_id": 224,
+  "name": "Beast Boost",
+  "description": "Raises best stat after KOs."
+ },
+ {
+  "const": "ABILITY_RKS_SYSTEM",
+  "expansion_id": 225,
+  "name": "RKS System",
+  "description": "Matches held memory's type."
+ },
+ {
+  "const": "ABILITY_ELECTRIC_SURGE",
+  "expansion_id": 226,
+  "name": "Electric Surge",
+  "description": "Makes the field electrified."
+ },
+ {
+  "const": "ABILITY_PSYCHIC_SURGE",
+  "expansion_id": 227,
+  "name": "Psychic Surge",
+  "description": "Makes the field weird."
+ },
+ {
+  "const": "ABILITY_MISTY_SURGE",
+  "expansion_id": 228,
+  "name": "Misty Surge",
+  "description": "Makes the field misty."
+ },
+ {
+  "const": "ABILITY_GRASSY_SURGE",
+  "expansion_id": 229,
+  "name": "Grassy Surge",
+  "description": "Makes the field grassy."
+ },
+ {
+  "const": "ABILITY_FULL_METAL_BODY",
+  "expansion_id": 230,
+  "name": "Full Metal Body",
+  "description": "Stats can't be lowered."
+ },
+ {
+  "const": "ABILITY_SHADOW_SHIELD",
+  "expansion_id": 231,
+  "name": "Shadow Shield",
+  "description": "Reduces damage at full HP."
+ },
+ {
+  "const": "ABILITY_PRISM_ARMOR",
+  "expansion_id": 232,
+  "name": "Prism Armor",
+  "description": "Weakens “supereffective”."
+ },
+ {
+  "const": "ABILITY_NEUROFORCE",
+  "expansion_id": 233,
+  "name": "Neuroforce",
+  "description": "Ups “supereffective” hits."
+ },
+ {
+  "const": "ABILITY_INTREPID_SWORD",
+  "expansion_id": 234,
+  "name": "Intrepid Sword",
+  "description": "Ups Attack on entry once."
+ },
+ {
+  "const": "ABILITY_DAUNTLESS_SHIELD",
+  "expansion_id": 235,
+  "name": "Dauntless Shield",
+  "description": "Ups Defense on entry once."
+ },
+ {
+  "const": "ABILITY_LIBERO",
+  "expansion_id": 236,
+  "name": "Libero",
+  "description": ""
+ },
+ {
+  "const": "ABILITY_BALL_FETCH",
+  "expansion_id": 237,
+  "name": "Ball Fetch",
+  "description": "Fetches first failed Ball."
+ },
+ {
+  "const": "ABILITY_COTTON_DOWN",
+  "expansion_id": 238,
+  "name": "Cotton Down",
+  "description": "Lowers others' Speed if hit."
+ },
+ {
+  "const": "ABILITY_PROPELLER_TAIL",
+  "expansion_id": 239,
+  "name": "Propeller Tail",
+  "description": "Ignores foes' move-drawing."
+ },
+ {
+  "const": "ABILITY_MIRROR_ARMOR",
+  "expansion_id": 240,
+  "name": "Mirror Armor",
+  "description": "Bounces stat-lowering."
+ },
+ {
+  "const": "ABILITY_GULP_MISSILE",
+  "expansion_id": 241,
+  "name": "Gulp Missile",
+  "description": "Spits when hit after Dive."
+ },
+ {
+  "const": "ABILITY_STALWART",
+  "expansion_id": 242,
+  "name": "Stalwart",
+  "description": "Ignores foes' move-drawing."
+ },
+ {
+  "const": "ABILITY_STEAM_ENGINE",
+  "expansion_id": 243,
+  "name": "Steam Engine",
+  "description": "Fire & Water hits up Speed."
+ },
+ {
+  "const": "ABILITY_PUNK_ROCK",
+  "expansion_id": 244,
+  "name": "Punk Rock",
+  "description": "Boosts and resists sound."
+ },
+ {
+  "const": "ABILITY_SAND_SPIT",
+  "expansion_id": 245,
+  "name": "Sand Spit",
+  "description": "Summons a sandstorm if hit."
+ },
+ {
+  "const": "ABILITY_ICE_SCALES",
+  "expansion_id": 246,
+  "name": "Ice Scales",
+  "description": "Halves special damage."
+ },
+ {
+  "const": "ABILITY_RIPEN",
+  "expansion_id": 247,
+  "name": "Ripen",
+  "description": "Doubles Berry effects."
+ },
+ {
+  "const": "ABILITY_ICE_FACE",
+  "expansion_id": 248,
+  "name": "Ice Face",
+  "description": "Hail renews one free hit."
+ },
+ {
+  "const": "ABILITY_POWER_SPOT",
+  "expansion_id": 249,
+  "name": "Power Spot",
+  "description": "Powers up ally's moves."
+ },
+ {
+  "const": "ABILITY_MIMICRY",
+  "expansion_id": 250,
+  "name": "Mimicry",
+  "description": "Changes type on terrain."
+ },
+ {
+  "const": "ABILITY_SCREEN_CLEANER",
+  "expansion_id": 251,
+  "name": "Screen Cleaner",
+  "description": "Nullifies barriers on entry."
+ },
+ {
+  "const": "ABILITY_STEELY_SPIRIT",
+  "expansion_id": 252,
+  "name": "Steely Spirit",
+  "description": "Ups allies' Steel moves."
+ },
+ {
+  "const": "ABILITY_PERISH_BODY",
+  "expansion_id": 253,
+  "name": "Perish Body",
+  "description": "Foe faints in 3 turns if hit."
+ },
+ {
+  "const": "ABILITY_WANDERING_SPIRIT",
+  "expansion_id": 254,
+  "name": "Wandering Spirit",
+  "description": "Swaps Abilities on contact."
+ },
+ {
+  "const": "ABILITY_GORILLA_TACTICS",
+  "expansion_id": 255,
+  "name": "Gorilla Tactics",
+  "description": "Ups Attack and locks move."
+ },
+ {
+  "const": "ABILITY_NEUTRALIZING_GAS",
+  "expansion_id": 256,
+  "name": "Neutralizing Gas",
+  "description": "Nullifies others' Abilities."
+ },
+ {
+  "const": "ABILITY_PASTEL_VEIL",
+  "expansion_id": 257,
+  "name": "Pastel Veil",
+  "description": "Allies can't be poisoned."
+ },
+ {
+  "const": "ABILITY_HUNGER_SWITCH",
+  "expansion_id": 258,
+  "name": "Hunger Switch",
+  "description": "Changes form every turn."
+ },
+ {
+  "const": "ABILITY_QUICK_DRAW",
+  "expansion_id": 259,
+  "name": "Quick Draw",
+  "description": "Occasionally moves first."
+ },
+ {
+  "const": "ABILITY_UNSEEN_FIST",
+  "expansion_id": 260,
+  "name": "Unseen Fist",
+  "description": "Contact evades protection."
+ },
+ {
+  "const": "ABILITY_CURIOUS_MEDICINE",
+  "expansion_id": 261,
+  "name": "Curious Medicine",
+  "description": "Removes ally stat changes."
+ },
+ {
+  "const": "ABILITY_TRANSISTOR",
+  "expansion_id": 262,
+  "name": "Transistor",
+  "description": "Ups Electric-type moves."
+ },
+ {
+  "const": "ABILITY_DRAGONS_MAW",
+  "expansion_id": 263,
+  "name": "Dragon's Maw",
+  "description": "Ups Dragon-type moves."
+ },
+ {
+  "const": "ABILITY_CHILLING_NEIGH",
+  "expansion_id": 264,
+  "name": "Chilling Neigh",
+  "description": "Raises Attack after KOs."
+ },
+ {
+  "const": "ABILITY_GRIM_NEIGH",
+  "expansion_id": 265,
+  "name": "Grim Neigh",
+  "description": "Raises Sp. Atk after KOs."
+ },
+ {
+  "const": "ABILITY_AS_ONE_ICE_RIDER",
+  "expansion_id": 266,
+  "name": "As One",
+  "description": "Unnerve and Chilling Neigh."
+ },
+ {
+  "const": "ABILITY_AS_ONE_SHADOW_RIDER",
+  "expansion_id": 267,
+  "name": "As One",
+  "description": "Unnerve and Grim Neigh."
+ },
+ {
+  "const": "ABILITY_LINGERING_AROMA",
+  "expansion_id": 268,
+  "name": "Lingering Aroma",
+  "description": "Ability spreads on contact."
+ },
+ {
+  "const": "ABILITY_SEED_SOWER",
+  "expansion_id": 269,
+  "name": "Seed Sower",
+  "description": "Makes field grassy if hit."
+ },
+ {
+  "const": "ABILITY_THERMAL_EXCHANGE",
+  "expansion_id": 270,
+  "name": "Thermal Exchange",
+  "description": "Ups Attack if hit by Fire."
+ },
+ {
+  "const": "ABILITY_ANGER_SHELL",
+  "expansion_id": 271,
+  "name": "Anger Shell",
+  "description": "Changes stats at half HP."
+ },
+ {
+  "const": "ABILITY_PURIFYING_SALT",
+  "expansion_id": 272,
+  "name": "Purifying Salt",
+  "description": "Guards from status & Ghost."
+ },
+ {
+  "const": "ABILITY_WELL_BAKED_BODY",
+  "expansion_id": 273,
+  "name": "Well-Baked Body",
+  "description": "Ups Defense if hit by Fire."
+ },
+ {
+  "const": "ABILITY_WIND_RIDER",
+  "expansion_id": 274,
+  "name": "Wind Rider",
+  "description": "Wind moves raise Attack."
+ },
+ {
+  "const": "ABILITY_GUARD_DOG",
+  "expansion_id": 275,
+  "name": "Guard Dog",
+  "description": "Raises Atk if intimidated."
+ },
+ {
+  "const": "ABILITY_ROCKY_PAYLOAD",
+  "expansion_id": 276,
+  "name": "Rocky Payload",
+  "description": "Powers up Rock-type moves."
+ },
+ {
+  "const": "ABILITY_WIND_POWER",
+  "expansion_id": 277,
+  "name": "Wind Power",
+  "description": "Gets charged if hit by wind."
+ },
+ {
+  "const": "ABILITY_ZERO_TO_HERO",
+  "expansion_id": 278,
+  "name": "Zero to Hero",
+  "description": "Changes form upon switch."
+ },
+ {
+  "const": "ABILITY_COMMANDER",
+  "expansion_id": 279,
+  "name": "Commander",
+  "description": "Commands from ally Dondozo."
+ },
+ {
+  "const": "ABILITY_ELECTROMORPHOSIS",
+  "expansion_id": 280,
+  "name": "Electromorphosis",
+  "description": "Becomes charged when hit."
+ },
+ {
+  "const": "ABILITY_PROTOSYNTHESIS",
+  "expansion_id": 281,
+  "name": "Protosynthesis",
+  "description": "Sunlight boosts best stat."
+ },
+ {
+  "const": "ABILITY_QUARK_DRIVE",
+  "expansion_id": 282,
+  "name": "Quark Drive",
+  "description": "Electr. field ups best stat."
+ },
+ {
+  "const": "ABILITY_GOOD_AS_GOLD",
+  "expansion_id": 283,
+  "name": "Good as Gold",
+  "description": "Immunity to status moves."
+ },
+ {
+  "const": "ABILITY_VESSEL_OF_RUIN",
+  "expansion_id": 284,
+  "name": "Vessel of Ruin",
+  "description": "Reduces others' Sp. Atk."
+ },
+ {
+  "const": "ABILITY_SWORD_OF_RUIN",
+  "expansion_id": 285,
+  "name": "Sword of Ruin",
+  "description": "Reduces others' Defense."
+ },
+ {
+  "const": "ABILITY_TABLETS_OF_RUIN",
+  "expansion_id": 286,
+  "name": "Tablets of Ruin",
+  "description": "Reduces others' Attack."
+ },
+ {
+  "const": "ABILITY_BEADS_OF_RUIN",
+  "expansion_id": 287,
+  "name": "Beads of Ruin",
+  "description": "Reduces others' Sp. Def."
+ },
+ {
+  "const": "ABILITY_ORICHALCUM_PULSE",
+  "expansion_id": 288,
+  "name": "Orichalcum Pulse",
+  "description": "Summons sun and ups Atk."
+ },
+ {
+  "const": "ABILITY_HADRON_ENGINE",
+  "expansion_id": 289,
+  "name": "Hadron Engine",
+  "description": "Electr. Surge & ups Sp. Atk."
+ },
+ {
+  "const": "ABILITY_OPPORTUNIST",
+  "expansion_id": 290,
+  "name": "Opportunist",
+  "description": "Copies a foe's stat boost."
+ },
+ {
+  "const": "ABILITY_CUD_CHEW",
+  "expansion_id": 291,
+  "name": "Cud Chew",
+  "description": "Eats Berry again next turn."
+ },
+ {
+  "const": "ABILITY_SHARPNESS",
+  "expansion_id": 292,
+  "name": "Sharpness",
+  "description": "Powers up slicing moves."
+ },
+ {
+  "const": "ABILITY_SUPREME_OVERLORD",
+  "expansion_id": 293,
+  "name": "Supreme Overlord",
+  "description": "Fainted partners up power."
+ },
+ {
+  "const": "ABILITY_COSTAR",
+  "expansion_id": 294,
+  "name": "Costar",
+  "description": "Copies ally's stat changes."
+ },
+ {
+  "const": "ABILITY_TOXIC_DEBRIS",
+  "expansion_id": 295,
+  "name": "Toxic Debris",
+  "description": "Lays poison spikes if hit."
+ },
+ {
+  "const": "ABILITY_ARMOR_TAIL",
+  "expansion_id": 296,
+  "name": "Armor Tail",
+  "description": "Allies block priority moves."
+ },
+ {
+  "const": "ABILITY_EARTH_EATER",
+  "expansion_id": 297,
+  "name": "Earth Eater",
+  "description": "Restores if hit by Ground."
+ },
+ {
+  "const": "ABILITY_MYCELIUM_MIGHT",
+  "expansion_id": 298,
+  "name": "Mycelium Might",
+  "description": "Status moves can't fail."
+ },
+ {
+  "const": "ABILITY_HOSPITALITY",
+  "expansion_id": 299,
+  "name": "Hospitality",
+  "description": "Restores ally's HP on entry."
+ },
+ {
+  "const": "ABILITY_MINDS_EYE",
+  "expansion_id": 300,
+  "name": "Mind's Eye",
+  "description": "Grants Foresight."
+ },
+ {
+  "const": "ABILITY_EMBODY_ASPECT_TEAL_MASK",
+  "expansion_id": 301,
+  "name": "Embody Aspect",
+  "description": "Terastal raises Speed."
+ },
+ {
+  "const": "ABILITY_EMBODY_ASPECT_HEARTHFLAME_MASK",
+  "expansion_id": 302,
+  "name": "Embody Aspect",
+  "description": "Terastal raises Attack."
+ },
+ {
+  "const": "ABILITY_EMBODY_ASPECT_WELLSPRING_MASK",
+  "expansion_id": 303,
+  "name": "Embody Aspect",
+  "description": "Terastal raises Sp. Def."
+ },
+ {
+  "const": "ABILITY_EMBODY_ASPECT_CORNERSTONE_MASK",
+  "expansion_id": 304,
+  "name": "Embody Aspect",
+  "description": "Terastal raises Defense."
+ },
+ {
+  "const": "ABILITY_TOXIC_CHAIN",
+  "expansion_id": 305,
+  "name": "Toxic Chain",
+  "description": "Attacks may badly poison."
+ },
+ {
+  "const": "ABILITY_SUPERSWEET_SYRUP",
+  "expansion_id": 306,
+  "name": "Supersweet Syrup",
+  "description": "Lowers foes' evasion once."
+ },
+ {
+  "const": "ABILITY_TERA_SHIFT",
+  "expansion_id": 307,
+  "name": "Tera Shift",
+  "description": "Changes form on entry."
+ },
+ {
+  "const": "ABILITY_TERA_SHELL",
+  "expansion_id": 308,
+  "name": "Tera Shell",
+  "description": "Resists all types at full HP."
+ },
+ {
+  "const": "ABILITY_TERAFORM_ZERO",
+  "expansion_id": 309,
+  "name": "Teraform Zero",
+  "description": "Zeroes weather and terrain."
+ },
+ {
+  "const": "ABILITY_POISON_PUPPETEER",
+  "expansion_id": 310,
+  "name": "Poison Puppeteer",
+  "description": "Poisoning also confuses."
+ }
+]

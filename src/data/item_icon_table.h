@@ -430,5 +430,6 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     ITEM_ICONS_GEN4
     ITEM_ICONS_GEN4_BERRIES
     ITEM_ICONS_QZ
+    ITEM_ICONS_GEN59
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},
 };

@@ -656,7 +656,7 @@ void ClearBattlerMoveHistory(u8 battler)
         BATTLE_HISTORY->usedMoves[battler].moves[i] = MOVE_NONE;
 }
 
-void RecordAbilityBattle(u8 battler, u8 abilityId)
+void RecordAbilityBattle(u8 battler, u16 abilityId)
 {
     BATTLE_HISTORY->abilities[battler] = abilityId;
 }
@@ -1443,7 +1443,7 @@ static void Cmd_check_ability(void)
         {
             if (gSpeciesInfo[gBattleMons[battler].species].abilities[1] != ABILITY_NONE)
             {
-                u8 abilityDummyVariable = ability; // Needed to match.
+                u16 abilityDummyVariable = ability; // Needed to match.
                 if (gSpeciesInfo[gBattleMons[battler].species].abilities[0] != abilityDummyVariable
                 && gSpeciesInfo[gBattleMons[battler].species].abilities[1] != abilityDummyVariable)
                 {

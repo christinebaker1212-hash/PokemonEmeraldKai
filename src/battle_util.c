@@ -2716,7 +2716,7 @@ u8 CastformDataTypeChange(u8 battler)
     return formChange;
 }
 
-u8 AbilityBattleEffects(u8 caseID, u8 battler, u8 ability, u8 special, u16 moveArg)
+u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 moveArg)
 {
     u8 effect = 0;
     struct Pokemon *pokeAtk;
@@ -4149,7 +4149,7 @@ u8 GetRandomFoe(u8 battler)
 }
 
 // The first battler on side with ability (fallback: fallback)
-u8 FindAbilityOnSide(u8 side, u8 ability, u8 fallback)
+u8 FindAbilityOnSide(u8 side, u16 ability, u8 fallback)
 {
     u8 b;
     for (b = 0; b < gBattlersCount; b++)

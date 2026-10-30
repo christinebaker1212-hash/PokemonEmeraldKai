@@ -1,4 +1,5 @@
 #include "gen4_tables.h"   // Moemon Kai: Gen 4
+#include "gen59_tables.h"   // Moemon Kai: Gen 5-9
 // All Pokémon pics are 64x64, but this data table defines where in this 64x64 frame
 // the sprite's non-transparent pixels actually are.
 // .size is the dimensions of this drawn pixel area.
@@ -446,4 +447,5 @@ const struct MonCoords gMonFrontPicCoords_Moe[] =
     [SPECIES_UNOWN_EMARK] = { .size = 0x45, .y_offset = 0 },
     [SPECIES_UNOWN_QMARK] = { .size = 0x45, .y_offset = 0 },
     GEN4_FCOORD   // Moemon Kai: Gen 4
+    GEN59_FCOORD   // Moemon Kai: Gen 5-9
 };

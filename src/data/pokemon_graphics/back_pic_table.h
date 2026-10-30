@@ -1,4 +1,5 @@
 #include "gen4_tables.h"   // Moemon Kai: Gen 4
+#include "gen59_tables.h"   // Moemon Kai: Gen 5-9
 const struct CompressedSpriteSheet gMonBackPicTable_Moe[] =
 {
     SPECIES_SPRITE(NONE, gMonBackPic_CircledQuestionMark),
@@ -442,4 +443,5 @@ const struct CompressedSpriteSheet gMonBackPicTable_Moe[] =
     SPECIES_SPRITE(UNOWN_EMARK, gMonBackPic_UnownExclamationMark),
     SPECIES_SPRITE(UNOWN_QMARK, gMonBackPic_UnownQuestionMark),
     GEN4_BACK   // Moemon Kai: Gen 4
+    GEN59_BACK   // Moemon Kai: Gen 5-9
 };

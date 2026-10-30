@@ -1,5 +1,6 @@
 #include "global.h"
 #include "data/pokemon_graphics/gen4_tables.h"   // Moemon Kai: Gen 4
+#include "data/pokemon_graphics/gen59_tables.h"   // Moemon Kai: Gen 5-9
 #include "graphics.h"
 #include "mp.h"
 #include "mail.h"
@@ -466,6 +467,7 @@ const u8 *const gMonIconTable[] =
     [SPECIES_UNOWN_EMARK] = gMonIcon_UnownExclamationMark,
     [SPECIES_UNOWN_QMARK] = gMonIcon_UnownQuestionMark,
     GEN4_ICON   // Moemon Kai: Gen 4
+    GEN59_ICON   // Moemon Kai: Gen 5-9
 };
 
 const u8 gMonIconPaletteIndices[] =
@@ -911,6 +913,7 @@ const u8 gMonIconPaletteIndices[] =
     [SPECIES_UNOWN_EMARK] = 0,
     [SPECIES_UNOWN_QMARK] = 0,
     GEN4_ICONPAL   // Moemon Kai: Gen 4
+    GEN59_ICONPAL   // Moemon Kai: Gen 5-9
 };
 
 const struct SpritePalette gMonIconPaletteTable[] =

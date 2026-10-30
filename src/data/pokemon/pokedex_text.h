@@ -2321,3 +2321,4 @@ const u8 gDeoxysPokedexText[] = _(
     "agility and speed.");
 
 #include "pokedex_text_gen4.h"   // Moemon Kai: Gen 4
+#include "pokedex_text_gen59.h"   // Moemon Kai: Gen 5-9

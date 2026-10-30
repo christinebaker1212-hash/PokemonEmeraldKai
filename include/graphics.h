@@ -5198,5 +5198,6 @@ extern const u8 gMonMarkingsMenu_Gfx[];
 extern const u16 gMonMarkingsMenu_Pal[];
 
 #include "graphics_gen4.h"   // Moemon Kai: Gen 4
+#include "graphics_gen59.h"   // Moemon Kai: Gen 5-9
 
 #endif //GUARD_GRAPHICS_H

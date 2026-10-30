@@ -92,7 +92,7 @@ void TryClearRageStatuses(void);
 u8 AtkCanceler_UnableToUseMove(void);
 bool8 HasNoMonsToSwitch(u8 battler, u8 partyIdBattlerOn1, u8 partyIdBattlerOn2);
 u8 CastformDataTypeChange(u8 battler);
-u8 AbilityBattleEffects(u8 caseID, u8 battler, u8 ability, u8 special, u16 moveArg);
+u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 moveArg);
 void BattleScriptExecute(const u8 *BS_ptr);
 void BattleScriptPushCursorAndCallback(const u8 *BS_ptr);
 u8 ItemBattleEffects(u8 caseID, u8 battler, bool8 moveTurn);
@@ -100,7 +100,7 @@ void ClearFuryCutterDestinyBondGrudge(u8 battler);
 void HandleAction_RunBattleScript(void);
 u8 GetMoveTarget(u16 move, u8 setTarget);
 u8 GetRandomFoe(u8 battler);                          // Moemon Co-op
-u8 FindAbilityOnSide(u8 side, u8 ability, u8 fallback);  // Moemon Co-op
+u8 FindAbilityOnSide(u8 side, u16 ability, u8 fallback);  // Moemon Co-op
 bool8 MP_IsPartyIdOnSide(u8 battler, u8 partyId);        // Moemon Co-op: triples
 void MP_TripleSwitchRange(u8 battler, s32 *first, s32 *last);
 u8 MP_TripleCountReplacements(u8 battler);                 // Moemon Co-op: triples

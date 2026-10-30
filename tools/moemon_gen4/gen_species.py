@@ -288,7 +288,7 @@ def main():
     for s in species:
         sym = 's%sLevelUpLearnset' % camel(s['const'])
         lines = ['    LEVEL_UP_MOVE(%2d, %s),' % (l, kmove(m)) for l, m in s['learnset']['level']]
-        lv.append('static const u16 %s[] = {\n%s\n    LEVEL_UP_END\n};\n\n' % (sym, '\n'.join(lines)))
+        lv.append('static const u32 %s[] = {\n%s\n    LEVEL_UP_END\n};\n\n' % (sym, '\n'.join(lines)))
         ptr.append('    [%s] = %s,\n' % (s['const'], sym))
     write('src/data/pokemon/level_up_learnsets_gen4.h', ''.join(lv))
     write('src/data/pokemon/level_up_learnset_pointers_gen4.h', ''.join(ptr))

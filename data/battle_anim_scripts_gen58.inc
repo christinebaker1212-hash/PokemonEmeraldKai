@@ -2990,3 +2990,282 @@ G58_WaterBubblesEffectLong:
 	playsewithpan SE_M_BUBBLE3, SOUND_PAN_TARGET
 	return
 
+
+Move_DIRE_CLAW:
+	goto Move_SLUDGE_BOMB
+
+Move_PSYSHIELD_BASH:
+	goto Move_PSYCHIC
+
+Move_POWER_SHIFT:
+	goto Move_ROCK_SLIDE
+
+Move_STONE_AXE:
+	goto Move_ROCK_SLIDE
+
+Move_SPRINGTIDE_STORM:
+	goto Move_SWEET_KISS
+
+Move_MYSTICAL_POWER:
+	goto Move_PSYCHIC
+
+Move_RAGING_FURY:
+	goto Move_FLAMETHROWER
+
+Move_WAVE_CRASH:
+	goto Move_SURF
+
+Move_CHLOROBLAST:
+	goto Move_RAZOR_LEAF
+
+Move_MOUNTAIN_GALE:
+	goto Move_ICE_BEAM
+
+Move_VICTORY_DANCE:
+	goto Move_BULK_UP
+
+Move_HEADLONG_RUSH:
+	goto Move_EARTHQUAKE
+
+Move_BARB_BARRAGE:
+	goto Move_SLUDGE_BOMB
+
+Move_ESPER_WING:
+	goto Move_PSYCHIC
+
+Move_BITTER_MALICE:
+	goto Move_SHADOW_BALL
+
+Move_SHELTER:
+	goto Move_IRON_DEFENSE
+
+Move_TRIPLE_ARROWS:
+	goto Move_KARATE_CHOP
+
+Move_INFERNAL_PARADE:
+	goto Move_SHADOW_BALL
+
+Move_CEASELESS_EDGE:
+	goto Move_CRUNCH
+
+Move_BLEAKWIND_STORM:
+	goto Move_WING_ATTACK
+
+Move_WILDBOLT_STORM:
+	goto Move_THUNDERBOLT
+
+Move_SANDSEAR_STORM:
+	goto Move_EARTHQUAKE
+
+Move_LUNAR_BLESSING:
+	goto Move_CALM_MIND
+
+Move_TAKE_HEART:
+	goto Move_CALM_MIND
+
+Move_TERA_BLAST:
+	goto Move_TAKE_DOWN
+
+Move_SILK_TRAP:
+	goto Move_SPIDER_WEB
+
+Move_AXE_KICK:
+	goto Move_KARATE_CHOP
+
+Move_LAST_RESPECTS:
+	goto Move_SHADOW_BALL
+
+Move_LUMINA_CRASH:
+	goto Move_PSYCHIC
+
+Move_ORDER_UP:
+	goto Move_DRAGON_CLAW
+
+Move_JET_PUNCH:
+	goto Move_SURF
+
+Move_SPICY_EXTRACT:
+	goto Move_INGRAIN
+
+Move_SPIN_OUT:
+	goto Move_IRON_TAIL
+
+Move_POPULATION_BOMB:
+	goto Move_TAKE_DOWN
+
+Move_ICE_SPINNER:
+	goto Move_ICE_BEAM
+
+Move_GLAIVE_RUSH:
+	goto Move_DRAGON_CLAW
+
+Move_REVIVAL_BLESSING:
+	goto Move_GROWL
+
+Move_SALT_CURE:
+	goto Move_ROCK_SLIDE
+
+Move_TRIPLE_DIVE:
+	goto Move_SURF
+
+Move_MORTAL_SPIN:
+	goto Move_SLUDGE_BOMB
+
+Move_DOODLE:
+	goto Move_GROWL
+
+Move_FILLET_AWAY:
+	goto Move_GROWL
+
+Move_KOWTOW_CLEAVE:
+	goto Move_CRUNCH
+
+Move_FLOWER_TRICK:
+	goto Move_RAZOR_LEAF
+
+Move_TORCH_SONG:
+	goto Move_FLAMETHROWER
+
+Move_AQUA_STEP:
+	goto Move_SURF
+
+Move_RAGING_BULL:
+	goto Move_TAKE_DOWN
+
+Move_MAKE_IT_RAIN:
+	goto Move_IRON_TAIL
+
+Move_RUINATION:
+	goto Move_CRUNCH
+
+Move_COLLISION_COURSE:
+	goto Move_KARATE_CHOP
+
+Move_ELECTRO_DRIFT:
+	goto Move_THUNDERBOLT
+
+Move_SHED_TAIL:
+	goto Move_GROWL
+
+Move_CHILLY_RECEPTION:
+	goto Move_HAIL
+
+Move_TIDY_UP:
+	goto Move_GROWL
+
+Move_SNOWSCAPE:
+	goto Move_HAIL
+
+Move_POUNCE:
+	goto Move_SIGNAL_BEAM
+
+Move_TRAILBLAZE:
+	goto Move_RAZOR_LEAF
+
+Move_CHILLING_WATER:
+	goto Move_SURF
+
+Move_HYPER_DRILL:
+	goto Move_TAKE_DOWN
+
+Move_TWIN_BEAM:
+	goto Move_PSYCHIC
+
+Move_RAGE_FIST:
+	goto Move_SHADOW_BALL
+
+Move_ARMOR_CANNON:
+	goto Move_FLAMETHROWER
+
+Move_BITTER_BLADE:
+	goto Move_FLAMETHROWER
+
+Move_DOUBLE_SHOCK:
+	goto Move_THUNDERBOLT
+
+Move_GIGATON_HAMMER:
+	goto Move_IRON_TAIL
+
+Move_COMEUPPANCE:
+	goto Move_CRUNCH
+
+Move_AQUA_CUTTER:
+	goto Move_SURF
+
+Move_BLAZING_TORQUE:
+	goto Move_FLAMETHROWER
+
+Move_WICKED_TORQUE:
+	goto Move_CRUNCH
+
+Move_NOXIOUS_TORQUE:
+	goto Move_SLUDGE_BOMB
+
+Move_COMBAT_TORQUE:
+	goto Move_KARATE_CHOP
+
+Move_MAGICAL_TORQUE:
+	goto Move_SWEET_KISS
+
+Move_PSYBLADE:
+	goto Move_PSYCHIC
+
+Move_HYDRO_STEAM:
+	goto Move_SURF
+
+Move_BLOOD_MOON:
+	goto Move_TAKE_DOWN
+
+Move_MATCHA_GOTCHA:
+	goto Move_RAZOR_LEAF
+
+Move_SYRUP_BOMB:
+	goto Move_RAZOR_LEAF
+
+Move_IVY_CUDGEL:
+	goto Move_RAZOR_LEAF
+
+Move_ELECTRO_SHOT:
+	goto Move_THUNDERBOLT
+
+Move_TERA_STARSTORM:
+	goto Move_TAKE_DOWN
+
+Move_FICKLE_BEAM:
+	goto Move_DRAGON_CLAW
+
+Move_BURNING_BULWARK:
+	goto Move_WILL_O_WISP
+
+Move_THUNDERCLAP:
+	goto Move_THUNDERBOLT
+
+Move_MIGHTY_CLEAVE:
+	goto Move_ROCK_SLIDE
+
+Move_TACHYON_CUTTER:
+	goto Move_IRON_TAIL
+
+Move_HARD_PRESS:
+	goto Move_IRON_TAIL
+
+Move_DRAGON_CHEER:
+	goto Move_DRAGON_DANCE
+
+Move_ALLURING_VOICE:
+	goto Move_SWEET_KISS
+
+Move_TEMPER_FLARE:
+	goto Move_FLAMETHROWER
+
+Move_SUPERCELL_SLAM:
+	goto Move_THUNDERBOLT
+
+Move_PSYCHIC_NOISE:
+	goto Move_PSYCHIC
+
+Move_UPPER_HAND:
+	goto Move_KARATE_CHOP
+
+Move_MALIGNANT_CHAIN:
+	goto Move_SLUDGE_BOMB

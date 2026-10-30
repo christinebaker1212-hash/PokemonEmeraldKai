@@ -1,4 +1,4 @@
-const u16 *const gLevelUpLearnsets[NUM_SPECIES] =
+const u32 *const gLevelUpLearnsets[NUM_SPECIES] =
 {
     [SPECIES_NONE] = sBulbasaurLevelUpLearnset,
     [SPECIES_BULBASAUR] = sBulbasaurLevelUpLearnset,
@@ -413,4 +413,5 @@ const u16 *const gLevelUpLearnsets[NUM_SPECIES] =
     [SPECIES_DEOXYS] = sDeoxysLevelUpLearnset,
     [SPECIES_CHIMECHO] = sChimechoLevelUpLearnset,
 #include "level_up_learnset_pointers_gen4.h"   // Moemon Kai: Gen 4
+#include "level_up_learnset_pointers_gen59.h"   // Moemon Kai: Gen 5-9
 };

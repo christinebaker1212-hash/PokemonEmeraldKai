@@ -99,8 +99,9 @@
 {                                                                           \
     textVar[0] = B_BUFF_PLACEHOLDER_BEGIN;                                  \
     textVar[1] = B_BUFF_ABILITY;                                            \
-    textVar[2] = abilityId;                                                 \
-    textVar[3] = B_BUFF_EOS;                                                \
+    textVar[2] = (abilityId) & 0xFF;   /* Moemon Kai: two bytes */          \
+    textVar[3] = ((abilityId) >> 8) & 0xFF;                                 \
+    textVar[4] = B_BUFF_EOS;                                                \
 }
 
 #define PREPARE_TYPE_BUFFER(textVar, typeId)                                \
@@ -204,13 +205,13 @@ struct BattleMsgData
     u16 currentMove;
     u16 originallyUsedMove;
     u16 lastItem;
-    u8 lastAbility;
+    u16 lastAbility;
     u8 scrActive;
     u8 bakScriptPartyIdx;
     u8 hpScale;
     u8 itemEffectBattler;
     u8 moveType;
-    u8 abilities[MAX_BATTLERS_COUNT];
+    u16 abilities[MAX_BATTLERS_COUNT];
     u8 textBuffs[3][TEXT_BUFF_ARRAY_COUNT];
 };
 

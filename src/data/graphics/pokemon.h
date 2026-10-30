@@ -2824,3 +2824,4 @@ const u32 gMonBackPic_UnownQuestionMark[] = INCBIN_U32("graphics/moemon/gMonBack
 const u8 gMonIcon_UnownQuestionMark[] = INCGFX_U8("graphics/pokemon/unown/question_mark/icon.png", ".4bpp");
 
 #include "pokemon_gen4.h"   // Moemon Kai: Gen 4
+#include "pokemon_gen59.h"   // Moemon Kai: Gen 5-9

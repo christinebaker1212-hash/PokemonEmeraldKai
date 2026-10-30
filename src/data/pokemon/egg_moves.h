@@ -1503,5 +1503,6 @@ const u16 gEggMoves[] = {
               MOVE_DREAM_EATER),
 
 #include "egg_moves_gen4.h"   // Moemon Kai: Gen 4
+#include "egg_moves_gen59.h"   // Moemon Kai: Gen 5-9
     EGG_MOVES_TERMINATOR
 };

@@ -691,7 +691,7 @@ static void UpdateWorld(void)
 // ---------------------------------------------------------------------------
 // Hall of Fame together
 
-#define HOF_TEAM_BYTES 120   // PARTY_SIZE x 20 (struct HallofFameMon)
+#define HOF_TEAM_BYTES 126   // PARTY_SIZE x 20 (struct HallofFameMon), then PARTY_SIZE high species bytes
 #define HOF_FRIENDS 3
 
 static struct

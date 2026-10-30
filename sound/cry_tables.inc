@@ -389,6 +389,7 @@ gCryTable::
 	cry Cry_Deoxys
 	cry Cry_Chimecho
 	.include "sound/cry_tables_gen4.inc"   @ Moemon Kai: Gen 4
+	.include "sound/cry_tables_gen59.inc"   @ Moemon Kai: Gen 5-9
 
 	.align 2
 gCryTable_Reverse::
@@ -781,3 +782,4 @@ gCryTable_Reverse::
 	cry_reverse Cry_Deoxys
 	cry_reverse Cry_Chimecho
 	.include "sound/cry_tables_reverse_gen4.inc"   @ Moemon Kai: Gen 4
+	.include "sound/cry_tables_reverse_gen59.inc"   @ Moemon Kai: Gen 5-9

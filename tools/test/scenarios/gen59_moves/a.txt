@@ -1,0 +1,25 @@
+pressuntil A field 5000
+mp teach 0 483
+mp setmove 0 1 488
+mp wild 288:5
+pressuntil A action 4000
+wait 20
+press A 2
+wait 20
+press A 2
+waitlog 1500 SPEED rose
+shot quiver
+wait 120
+press B 2
+wait 20
+pressuntil B action 3000
+wait 20
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press A 2
+wait 300
+shot flame
+pressuntil A field 4000
+quit

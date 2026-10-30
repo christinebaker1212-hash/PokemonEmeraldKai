@@ -412,4 +412,5 @@ const u8 gSpeciesNames[][POKEMON_NAME_LENGTH + 1] = {
     [SPECIES_DEOXYS] = _("DEOXYS"),
     [SPECIES_CHIMECHO] = _("CHIMECHO"),
 #include "species_names_gen4.h"   // Moemon Kai: Gen 4
+#include "species_names_gen59.h"   // Moemon Kai: Gen 5-9
 };

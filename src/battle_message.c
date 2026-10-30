@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "global.h"
 #include "mp.h"
 #include "battle.h"
@@ -49,7 +50,7 @@ static void ChooseMoveUsedParticle(u8 *textPtr);
 static void ChooseTypeOfMoveUsedString(u8 *dst);
 static void ExpandBattleTextBuffPlaceholders(const u8 *src, u8 *dst);
 
-static EWRAM_DATA u8 sBattlerAbilities[MAX_BATTLERS_COUNT] = {0};
+static EWRAM_DATA u16 sBattlerAbilities[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA struct BattleMsgData *gBattleMsgDataPtr = NULL;
 
 // todo: make some of those names less vague: attacker/target vs pkmn, etc.
@@ -2190,6 +2191,8 @@ static bool8 MpTripleCenterFoeOut(void)
 }
 
 #include "data/text/battle_gen4_strings.h"   // Moemon Kai: Gen 4
+#include "constants/battle_gen59_strings.h"   // Moemon Kai: Gen 5-9 (texts in battle_gen59.c)
+extern const u8 *const gGen59BattleTexts[];
 
 void BufferStringBattle(u16 stringID)
 {
@@ -2598,6 +2601,11 @@ void BufferStringBattle(u16 stringID)
         if (stringID >= STRINGID_G4_FIRST && stringID < STRINGID_G4_FIRST + STRINGID_G4_COUNT)   // Moemon Kai: Gen 4
         {
             stringPtr = sGen4BattleTexts[stringID - STRINGID_G4_FIRST];
+            break;
+        }
+        if (stringID >= STRINGID_G59_FIRST && stringID < STRINGID_G59_FIRST + STRINGID_G59_COUNT)   // Moemon Kai: Gen 5-9
+        {
+            stringPtr = gGen59BattleTexts[stringID - STRINGID_G59_FIRST];
             break;
         }
         if (stringID >= BATTLESTRINGS_COUNT)
@@ -3218,9 +3226,9 @@ static void ExpandBattleTextBuffPlaceholders(const u8 *src, u8 *dst)
             StringAppend(dst, gPokeblockWasTooXStringTable[src[srcID + 1]]);
             srcID += 2;
             break;
-        case B_BUFF_ABILITY: // ability names
-            StringAppend(dst, gAbilityNames[src[srcID + 1]]);
-            srcID += 2;
+        case B_BUFF_ABILITY: // ability names (Moemon Kai: two bytes)
+            StringAppend(dst, gAbilityNames[T1_READ_16(&src[srcID + 1])]);
+            srcID += 3;
             break;
         case B_BUFF_ITEM: // item name
             hword = T1_READ_16(&src[srcID + 1]);
@@ -3337,6 +3345,22 @@ void BattlePutTextOnWindow(const u8 *text, u8 windowId)
 {
     if (windowId == B_WIN_MSG)
         MP_Coop_OnBattleMessage();   // Moemon Co-op: the partner status line was replaced
+    if (windowId == B_WIN_MSG)
+    {
+        static s8 sLogText = -1;   // MOEMON_BATTLETEXT=1: every battle message in the log (tests)
+        if (sLogText < 0)
+            sLogText = getenv("MOEMON_BATTLETEXT") != NULL;
+        if (sLogText)
+        {
+            char buf[160];
+            char *c;
+            MP_GameToAscii(buf, text, sizeof(buf));
+            for (c = buf; *c; c++)
+                if (*c == '\n')
+                    *c = ' ';
+            MPNet_Log("btext: %s", buf);
+        }
+    }
     const struct BattleWindowText *textInfo = sBattleTextOnWindowsInfo[gBattleScripting.windowsType];
     bool32 copyToVram;
     struct TextPrinterTemplate printerTemplate;

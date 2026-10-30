@@ -49,4 +49,21 @@
 #define G4_RERUN_MOVE         45   // leaves the charging turn's call and runs the move's script again (POWER HERB)
 #define G4_ARRIVE_SYNC        44   // HEALING WISH / LUNAR DANCE: sends the healed status and PP (jumps back to itself between them)
 
+// Moemon Kai: Gen 5-9 modes of the same command (src/battle_gen59.c MP_Gen59_Command)
+#define G59_FIRST             100
+#define G59_STATS_CANT        100  // jumps if none of the move's stat changes can happen (status moves)
+#define G59_STATS_SELF        101  // starts on the user's stat changes (a hit rolls their chance)
+#define G59_STATS_TARGET      102  // starts on the target's (a hit rolls their chance; none if it missed or fainted)
+#define G59_STATS_NEXT        103  // sets up the next stat change; jumps when there are no more
+#define G59_STAT_WAS_DOWN     104  // jumps if that change lowers the stat
+#define G59_ROLL_STATUS       105  // the move's secondary status, if its chance comes up, for seteffectwithchance
+#define G59_BEFORE_HIT        106  // jumps if the move fails before it hits (SYNCHRONOISE, BELCH, POLTERGEIST...)
+#define G59_AFTER_HIT         107  // the move's own effect after the hit (jumps if there's nothing to say)
+#define G59_STATUS_MOVE       108  // the status move's own effect (jumps on failure)
+#define G59_PAY_HP            109  // CLANGOROUS SOUL / FILLET AWAY: jumps if the user can't pay the HP
+#define G59_HALF_RECOIL       110  // MIND BLOWN, STEEL BEAM, CHLOROBLAST: half the user's max HP as damage to it
+#define G59_CAN_DRAG          111  // CIRCLE THROW / DRAGON TAIL: jumps if the target can't be dragged out
+#define G59_GAMBIT            112  // FINAL GAMBIT: the user's HP as damage (jumps if it can't hit)
+#define G59_GAMBIT_SELF       113  // ...then all of it from the user
+
 #endif // GUARD_CONSTANTS_BATTLE_GEN4_H

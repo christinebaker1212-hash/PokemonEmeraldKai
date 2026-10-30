@@ -136,4 +136,5 @@ const u16 gSpeciesIdToCryId[] =
     [SPECIES_DEOXYS - 277] = 386,
     [SPECIES_CHIMECHO - 277] = 387,
 #include "cry_ids_gen4.h"   // Moemon Kai: Gen 4
+#include "cry_ids_gen59.h"   // Moemon Kai: Gen 5-9
 };

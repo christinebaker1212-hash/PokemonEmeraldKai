@@ -1,4 +1,5 @@
 #include "gen4_tables.h"   // Moemon Kai: Gen 4
+#include "gen59_tables.h"   // Moemon Kai: Gen 5-9
 static const union AnimCmd sAnim_None_1[] =
 {
     ANIMCMD_FRAME(0, 30),
@@ -5704,4 +5705,5 @@ const union AnimCmd *const *const gMonFrontAnimsPtrTable_Moe[] =
     [SPECIES_UNOWN_EMARK] = sAnims_MoemonStatic,
     [SPECIES_UNOWN_QMARK] = sAnims_MoemonStatic,
     GEN4_ANIMS   // Moemon Kai: Gen 4
+    GEN59_ANIMS   // Moemon Kai: Gen 5-9
 };

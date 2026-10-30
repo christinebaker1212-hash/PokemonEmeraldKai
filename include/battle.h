@@ -202,7 +202,7 @@ struct UsedMoves
 struct BattleHistory
 {
     struct UsedMoves usedMoves[MAX_BATTLERS_COUNT];
-    u8 abilities[MAX_BATTLERS_COUNT];
+    u16 abilities[MAX_BATTLERS_COUNT];
     u8 itemEffects[MAX_BATTLERS_COUNT];
     u16 trainerItems[MAX_BATTLERS_COUNT];
     u8 itemsNo;
@@ -413,7 +413,7 @@ struct BattleStruct
     u8 lastTakenMove[MAX_BATTLERS_COUNT * 2 * 2]; // Last move that a battler was hit with. This field seems to erroneously take 16 bytes instead of 8.
     u16 hpOnSwitchout[NUM_BATTLE_SIDES];
     u32 savedBattleTypeFlags;
-    u8 abilityPreventingSwitchout;
+    u16 abilityPreventingSwitchout;
     u8 hpScale;
     u8 synchronizeMoveEffect;
     bool8 anyMonHasTransformed;
@@ -661,7 +661,7 @@ extern s32 gBattleMoveDamage;
 extern s32 gHpDealt;
 extern s32 gBideDmg[MAX_BATTLERS_COUNT];
 extern u16 gLastUsedItem;
-extern u8 gLastUsedAbility;
+extern u16 gLastUsedAbility;
 extern u8 gBattlerAttacker;
 extern u8 gBattlerTarget;
 extern u8 gBattlerFainted;

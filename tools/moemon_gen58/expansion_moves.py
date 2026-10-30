@@ -14,19 +14,19 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FIRST, LAST = 468, 754
+FIRST, LAST = 468, 847
 GENS = {'GEN_%d' % g: g for g in range(1, 10)}
 GENS.update({'GEN_LATEST': 9})
 
 
 def pick(expr):
-    """Resolve `X >= GEN_n ? a : b` chains as of Gen 8."""
+    """Resolve `X >= GEN_n ? a : b` chains as of Gen 9."""
     expr = expr.strip()
     m = re.match(r'^\(?\s*(\w+)\s*(>=|<=|==|<|>)\s*(GEN_\w+)\s*\)?\s*\?\s*(.*?)\s*:\s*(.*)$', expr, re.S)
     if not m:
         return expr.strip('() ')
     g = GENS.get(m.group(3), 9)
-    ok = {'>=': 8 >= g, '<=': 8 <= g, '==': 8 == g, '<': 8 < g, '>': 8 > g}[m.group(2)]
+    ok = {'>=': 9 >= g, '<=': 9 <= g, '==': 9 == g, '<': 9 < g, '>': 9 > g}[m.group(2)]
     return pick(m.group(4) if ok else m.group(5))
 
 
@@ -82,7 +82,12 @@ def main():
             continue
         m = re.search(r'\n    \[%s\] =\n    \{(.*?)\n    \},' % const, src, re.S)
         f = fields(m.group(1))
-        mv = {'const': const, 'id': n, 'name': strings(f['name']), 'description': strings(f.get('description', ''))}
+        name, desc = f['name'], f.get('description', '')
+        if '.description' in name:   # (an indented .description: Snowscape)
+            name, desc = name.split('.description', 1)
+        if '#else' in desc:          # a config #if: the #else branch (Gen 9's snow)
+            desc = desc.split('#else', 1)[1].split('#endif', 1)[0]
+        mv = {'const': const, 'id': n, 'name': strings(name), 'description': strings(desc)}
         for k in ('effect', 'power', 'type', 'accuracy', 'pp', 'target', 'priority', 'category', 'strikeCount',
                   'criticalHitStage', 'argument', 'recoil', 'contestEffect', 'contestCategory', 'contestComboStarterId',
                   'battleAnimScript', 'multiHit', 'alwaysCriticalHit'):

@@ -3,6 +3,7 @@
 #include "global.h"
 #include "battle.h"
 #include "battle_gen4.h"
+#include "battle_gen59.h"
 #include "battle_main.h"
 #include "battle_anim.h"
 #include "util.h"
@@ -85,6 +86,7 @@ void MP_Gen4_BattleStart(void)
     memset(gGen4Battlers, 0, sizeof(gGen4Battlers));
     memset(gGen4Sides, 0, sizeof(gGen4Sides));
     memset(&gGen4Field, 0, sizeof(gGen4Field));
+    MP_Gen59_BattleStart();   // Moemon Kai: Gen 5-9
 }
 
 void MP_Gen4_SwitchIn(u8 battler, bool8 batonPass)
@@ -103,6 +105,7 @@ void MP_Gen4_SwitchIn(u8 battler, bool8 batonPass)
     }
     if (gBattleMons[battler].ability == ABILITY_SLOW_START)
         b->slowStart = 5;
+    MP_Gen59_SwitchIn(battler);
 }
 
 void MP_Gen4_TurnEnd(void)
@@ -114,6 +117,7 @@ void MP_Gen4_TurnEnd(void)
         gGen4Battlers[i].hitThisTurn = FALSE;
         gGen4Battlers[i].movedThisTurn = FALSE;
     }
+    MP_Gen59_TurnEnd();
 }
 
 // ---------------------------------------------------------------------------------------------- basics
@@ -124,6 +128,12 @@ bool8 MP_IsPhysicalMove(u16 move, u8 type)
         return IS_TYPE_PHYSICAL(type);
     if (move >= MOVES_COUNT)
         return IS_TYPE_PHYSICAL(type);
+    if (IS_GEN59_MOVE(move) && gBattlerAttacker < gBattlersCount)
+    {
+        s8 physical = MP_Gen59_IsPhysical(move, gBattlerAttacker);   // PHOTON GEYSER, SHELL SIDE ARM
+        if (physical >= 0)
+            return physical;
+    }
     return gMoveCategories[move] == MOVE_CATEGORY_PHYSICAL;
 }
 
@@ -188,6 +198,7 @@ u8 MP_Gen4_MoveType(u16 move, u8 battler)
     u8 type = gBattleMoves[move].type;
     if (gBattleMoves[move].effect == EFFECT_JUDGMENT && !gGen4Battlers[battler].embargo && gBattleMons[battler].ability != ABILITY_KLUTZ)
         type = MP_Gen4_PlateType(gBattleMons[battler].item);
+    type = MP_Gen59_MoveType(move, battler, type);   // TERRAIN PULSE, ION DELUGE...
     if (gBattleMons[battler].ability == ABILITY_NORMALIZE && move != MOVE_STRUGGLE)
         type = TYPE_NORMAL;
     return type;
@@ -264,6 +275,8 @@ u16 MP_Gen4_MovePower(u16 move, u8 attacker, u8 target, u16 power)
         break;
     }
 
+    p = MP_Gen59_MovePower(move, attacker, target, p);   // Gen 5-9 moves, terrain, abilities
+
     // abilities
     if (gBattleMons[attacker].ability == ABILITY_TECHNICIAN && p <= 60)
         p = p * 15 / 10;
@@ -324,6 +337,7 @@ void MP_Gen4_AttackStats(u16 move, u8 type, u8 attacker, u8 target, u16 *attack,
     // Gen 4: a SANDSTORM raises ROCK types' SP. DEF
     if (MP_MoveSplit() && WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_SANDSTORM) && MP_Gen4_HasType(target, TYPE_ROCK))
         *spDefense = *spDefense * 15 / 10;
+    MP_Gen59_AttackStats(move, attacker, target, attack, spAttack, defense, spDefense);
 }
 
 // after STAB and type effectiveness
@@ -353,6 +367,7 @@ s32 MP_Gen4_FinalDamage(s32 damage, u16 move, u8 type, u8 attacker, u8 target, u
         u32 n = gGen4Battlers[attacker].metronomeCount > 10 ? 10 : gGen4Battlers[attacker].metronomeCount;
         damage = damage * (10 + n) / 10;
     }
+    damage = MP_Gen59_FinalDamage(damage, move, type, attacker, target, resultFlags);
     return damage ? damage : 1;
 }
 
@@ -477,6 +492,7 @@ void MP_Gen4_OnDamaged(u8 battler, u8 attacker, s32 damage)
         gGen4Battlers[battler].lastDamage = damage > 0xFFFF ? 0xFFFF : damage;
         gGen4Battlers[battler].lastAttacker = attacker;
     }
+    MP_Gen59_OnDamaged(battler, attacker, damage);
 }
 
 // ---------------------------------------------------------------------------------------------- the "gen4" command
@@ -526,6 +542,8 @@ static void SwapStages(u8 a, u8 b, u8 stat)
 u8 MP_Gen4_Command(u8 mode)
 {
     u8 atk = gBattlerAttacker, def = gBattlerTarget;
+    if (mode >= G59_FIRST)
+        return MP_Gen59_Command(mode);
     struct Gen4Side *defSide = &gGen4Sides[GetBattlerSide(def)], *atkSide = &gGen4Sides[GetBattlerSide(atk)];
     u32 i;
 
@@ -879,6 +897,7 @@ u8 MP_Gen4_Command(u8 mode)
 #define G4_ARRIVE_WISH   (1 << 0)
 #define G4_ARRIVE_ROCK   (1 << 1)
 #define G4_ARRIVE_TSPIKE (1 << 2)
+#define G4_ARRIVE_WEB    (1 << 3)
 
 // how many 16ths of 1x STEALTH ROCK (ROCK) does to this battler's types
 static u32 RockEffectiveness16(u8 battler)
@@ -955,6 +974,11 @@ const u8 *MP_Gen4_ArrivalEffect(u8 battler, u8 bsArg)
                 return side->toxicSpikes >= 2 ? BattleScript_G4ToxicSpikesBadlyPoisoned : BattleScript_G4ToxicSpikesPoisoned;
             }
         }
+    }
+    if (!(b->switchInDone & G4_ARRIVE_WEB))
+    {
+        b->switchInDone |= G4_ARRIVE_WEB;
+        return MP_Gen59_ArrivalEffect(battler);   // STICKY WEB
     }
     return NULL;
 }
@@ -1232,7 +1256,7 @@ const u8 *MP_Gen4_FieldEndTurn(void)
         }
     }
     gGen4Field.endStep = 0;
-    return NULL;
+    return MP_Gen59_FieldEndTurn();   // Gen 5-9: terrain, rooms, AURORA VEIL, SALT CURE (NULL when done)
 }
 
 // ------------------------------------------------------------------------------------- arrival abilities
@@ -1464,7 +1488,10 @@ const u8 *MP_Gen4_MoveEnd(void)
     u8 *done = &gGen4Field.moveEndDone;
 
     if (*done == 0)
+    {
         gGen4Battlers[atk].micle = FALSE;   // MICLE BERRY: this move had the boost
+        MP_Gen59_MoveDone(atk, gCurrentMove, gMoveResultFlags);
+    }
     if (!(*done & G4M_RESIST))
     {
         *done |= G4M_RESIST;

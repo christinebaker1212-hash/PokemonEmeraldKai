@@ -2175,6 +2175,7 @@ DirectSoundWaveData_sd90_enhanced_delay_shaku::
 	.incbin "sound/direct_sound_samples/sd90_enhanced_delay_shaku.bin"
 
 	.include "sound/direct_sound_data_gen4.inc"   @ Moemon Kai: Gen 4
+	.include "sound/direct_sound_data_gen59.inc"   @ Moemon Kai: Gen 5-9
 
 @ Moemon Kai: Johto music (tools/quetzal_port/gen_music.py)
 

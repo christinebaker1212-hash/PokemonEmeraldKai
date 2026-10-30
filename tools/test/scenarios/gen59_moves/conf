@@ -1,0 +1,6 @@
+# Gen 5-9 moves on a Gen 5 POKéMON: VICTINI (Lv50) uses QUIVER DANCE (three stats up from the move's data, one
+# message each), then FLAME CHARGE knocks out a wild ZIGZAGOON and raises its SPEED (a hit's own stat change)
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=519:50 MOEMON_BATTLETEXT=1"
+EXPECT_A=("btext: VICTINI used QUIVER DANCE" "SP. ATK rose" "SP. DEF rose" "SPEED rose" "btext: VICTINI used FLAME CHARGE")

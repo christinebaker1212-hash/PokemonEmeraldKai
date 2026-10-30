@@ -10181,4 +10181,5 @@ const union {
     } },
 
 #include "tmhm_learnsets_gen4.h"   // Moemon Kai: Gen 4
+#include "tmhm_learnsets_gen59.h"   // Moemon Kai: Gen 5-9
 };

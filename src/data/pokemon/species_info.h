@@ -11666,4 +11666,5 @@ const struct SpeciesInfo gSpeciesInfo[] =
         .noFlip = FALSE,
     },
 #include "species_info_gen4.h"   // Moemon Kai: Gen 4
+#include "species_info_gen59.h"   // Moemon Kai: Gen 5-9
 };

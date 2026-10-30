@@ -55,6 +55,48 @@ struct HallofFameTeam
 
 STATIC_ASSERT(sizeof(struct HallofFameTeam) * HALL_OF_FAME_MAX_TEAMS <= SECTOR_DATA_SIZE * NUM_HOF_SECTORS, HallOfFameFreeSpace);
 
+// Moemon Kai: species past 511 (Gen 4 on, and the EGG) don't fit the 9 bits above. Their high bits sit in a byte per
+// Pokemon after the teams: in the save's free space after all 50 (zero in old saves, so nothing changes for them),
+// and after a single team (the one being shown, and friends' teams sent over co-op: HOF_TEAM_BYTES in mp_linkx.c).
+#define HOF_HI_OFFSET (sizeof(struct HallofFameTeam) * HALL_OF_FAME_MAX_TEAMS)
+STATIC_ASSERT(HOF_HI_OFFSET + HALL_OF_FAME_MAX_TEAMS * PARTY_SIZE <= SECTOR_DATA_SIZE * NUM_HOF_SECTORS, HallOfFameHiSpace);
+STATIC_ASSERT(sizeof(struct HallofFameTeam) == 120, HallOfFameTeamSize);
+
+static EWRAM_DATA struct HallofFameMon *sHofHiBase = NULL;
+static EWRAM_DATA u8 *sHofHi = NULL;
+static EWRAM_DATA u16 sHofHiCount = 0;
+
+// The high bits of the Pokemon from `first` on (count of them) are at `hi`
+static void HofHi_Use(struct HallofFameMon *first, u16 count, u8 *hi)
+{
+    sHofHiBase = first;
+    sHofHiCount = count;
+    sHofHi = hi;
+}
+
+static u16 HofSpecies(const struct HallofFameMon *mon)
+{
+    u16 species = mon->species;
+    if (sHofHi != NULL && mon >= sHofHiBase && mon < sHofHiBase + sHofHiCount)
+        species |= sHofHi[mon - sHofHiBase] << 9;
+    return species;
+}
+
+static void HofSetSpecies(struct HallofFameMon *mon, u16 species)
+{
+    mon->species = species & 0x1FF;
+    if (sHofHi != NULL && mon >= sHofHiBase && mon < sHofHiBase + sHofHiCount)
+        sHofHi[mon - sHofHiBase] = species >> 9;
+}
+
+// The team being shown: a HallofFameTeam and its PARTY_SIZE high bytes
+static struct HallofFameTeam *HofAllocShownTeam(void)
+{
+    struct HallofFameTeam *team = AllocZeroed(sizeof(struct HallofFameTeam) + PARTY_SIZE);
+    HofHi_Use(team->mon, PARTY_SIZE, (u8 *)(team + 1));
+    return team;
+}
+
 struct HofGfx
 {
     u16 state;
@@ -427,7 +469,7 @@ void CB2_DoHallOfFameScreen(void)
     {
         u8 taskId = CreateTask(Task_Hof_InitMonData, 0);
         gTasks[taskId].tDontSaveData = FALSE;
-        sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+        sHofMonPtr = HofAllocShownTeam();
         MP_Linkx_HofBegin();   // Moemon Co-op: friends online send their teams
     }
 }
@@ -438,7 +480,7 @@ void CB2_DoHallOfFameScreenDontSaveData(void)
     {
         u8 taskId = CreateTask(Task_Hof_InitMonData, 0);
         gTasks[taskId].tDontSaveData = TRUE;
-        sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+        sHofMonPtr = HofAllocShownTeam();
     }
 }
 
@@ -453,7 +495,7 @@ static void Task_Hof_InitMonData(u8 taskId)
         u8 nickname[POKEMON_NAME_LENGTH + 1];
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
         {
-            sHofMonPtr->mon[i].species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+            HofSetSpecies(&sHofMonPtr->mon[i], GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG));
             sHofMonPtr->mon[i].tid = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
             sHofMonPtr->mon[i].personality = GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY);
             sHofMonPtr->mon[i].lvl = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
@@ -464,7 +506,7 @@ static void Task_Hof_InitMonData(u8 taskId)
         }
         else
         {
-            sHofMonPtr->mon[i].species = SPECIES_NONE;
+            HofSetSpecies(&sHofMonPtr->mon[i], SPECIES_NONE);
             sHofMonPtr->mon[i].tid = 0;
             sHofMonPtr->mon[i].personality = 0;
             sHofMonPtr->mon[i].lvl = 0;
@@ -504,11 +546,14 @@ static void Task_Hof_InitTeamSaveData(u8 taskId)
 
     for (i = 0; i < HALL_OF_FAME_MAX_TEAMS; i++, lastSavedTeam++)
     {
-        if (lastSavedTeam->mon[0].species == SPECIES_NONE)
+        if (lastSavedTeam->mon[0].species == SPECIES_NONE && gDecompressionBuffer[HOF_HI_OFFSET + i * PARTY_SIZE] == 0)
             break;
     }
     if (i >= HALL_OF_FAME_MAX_TEAMS)
     {
+        // Moemon Kai: the high bytes move along with their teams
+        memmove(&gDecompressionBuffer[HOF_HI_OFFSET], &gDecompressionBuffer[HOF_HI_OFFSET + PARTY_SIZE], (HALL_OF_FAME_MAX_TEAMS - 1) * PARTY_SIZE);
+        i = HALL_OF_FAME_MAX_TEAMS - 1;
         struct HallofFameTeam *afterTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
         struct HallofFameTeam *beforeTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
         afterTeam++;
@@ -519,6 +564,7 @@ static void Task_Hof_InitTeamSaveData(u8 taskId)
         lastSavedTeam--;
     }
     *lastSavedTeam = *sHofMonPtr;
+    memcpy(&gDecompressionBuffer[HOF_HI_OFFSET + i * PARTY_SIZE], sHofMonPtr + 1, PARTY_SIZE);   // Moemon Kai
 
     DrawDialogueFrame(0, FALSE);
     AddTextPrinterParameterized2(0, FONT_NORMAL, gText_SavingDontTurnOffPower, 0, NULL, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY);
@@ -588,14 +634,14 @@ static void Task_Hof_DisplayMon(u8 taskId)
         destY = sHallOfFame_MonHalfTeamPositions[currMonId][3];
     }
 
-    if (currMon->species == SPECIES_EGG)
+    if (HofSpecies(currMon) == SPECIES_EGG)
         destY += 10;
 
-    spriteId = CreateMonPicSprite_Affine(currMon->species, currMon->tid, currMon->personality, MON_PIC_AFFINE_FRONT, startX, startY, currMonId, TAG_NONE);
+    spriteId = CreateMonPicSprite_Affine(HofSpecies(currMon), currMon->tid, currMon->personality, MON_PIC_AFFINE_FRONT, startX, startY, currMonId, TAG_NONE);
     gSprites[spriteId].tDestinationX = destX;
     gSprites[spriteId].tDestinationY = destY;
     gSprites[spriteId].data[0] = 0;
-    gSprites[spriteId].tSpecies = currMon->species;
+    gSprites[spriteId].tSpecies = HofSpecies(currMon);
     gSprites[spriteId].callback = SpriteCB_GetOnScreenAndAnimate;
     gTasks[taskId].tMonSpriteId(currMonId) = spriteId;
     ClearDialogWindowAndFrame(0, TRUE);
@@ -629,7 +675,7 @@ static void Task_Hof_TryDisplayAnotherMon(u8 taskId)
     else
     {
         sHofFadePalettes |= (0x10000 << gSprites[gTasks[taskId].tMonSpriteId(currPokeID)].oam.paletteNum);
-        if (gTasks[taskId].tDisplayedMonId < PARTY_SIZE - 1 && currMon[1].species != SPECIES_NONE) // there is another Pokémon to display
+        if (gTasks[taskId].tDisplayedMonId < PARTY_SIZE - 1 && HofSpecies(&currMon[1]) != SPECIES_NONE) // there is another Pokémon to display
         {
             gTasks[taskId].tDisplayedMonId++;
             BeginNormalPaletteFade(sHofFadePalettes, 0, 12, 12, RGB(16, 29, 24));
@@ -675,7 +721,7 @@ static void Task_Hof_MpNextTeam(u8 taskId)
     sHofFadePalettes = 0;
     gTasks[taskId].tMonNumber = 0;
     for (i = 0; i < PARTY_SIZE; i++)
-        if (sHofMonPtr->mon[i].species != SPECIES_NONE)
+        if (HofSpecies(&sHofMonPtr->mon[i]) != SPECIES_NONE)
             gTasks[taskId].tMonNumber++;
     gTasks[taskId].tDisplayedMonId = 0;
     // "Together with BOB!"
@@ -952,10 +998,11 @@ static void Task_HofPC_CopySaveData(u8 taskId)
         struct HallofFameTeam *savedTeams;
 
         CpuCopy16(gDecompressionBuffer, sHofMonPtr, SECTOR_SIZE * NUM_HOF_SECTORS);
+        HofHi_Use(sHofMonPtr->mon, HALL_OF_FAME_MAX_TEAMS * PARTY_SIZE, (u8 *)sHofMonPtr + HOF_HI_OFFSET);   // Moemon Kai
         savedTeams = sHofMonPtr;
         for (i = 0; i < HALL_OF_FAME_MAX_TEAMS; i++, savedTeams++)
         {
-            if (savedTeams->mon[0].species == SPECIES_NONE)
+            if (HofSpecies(&savedTeams->mon[0]) == SPECIES_NONE)
                 break;
         }
 
@@ -986,7 +1033,7 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
 
     for (i = 0; i < PARTY_SIZE; i++, currMon++)
     {
-        if (currMon->species != 0)
+        if (HofSpecies(currMon) != 0)
             gTasks[taskId].tMonNo++;
     }
 
@@ -994,7 +1041,7 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
 
     for (i = 0; i < PARTY_SIZE; i++, currMon++)
     {
-        if (currMon->species != 0)
+        if (HofSpecies(currMon) != 0)
         {
             u16 spriteId;
             s16 posX, posY;
@@ -1010,10 +1057,10 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
                 posY = sHallOfFame_MonHalfTeamPositions[i][3];
             }
 
-            if (currMon->species == SPECIES_EGG)
+            if (HofSpecies(currMon) == SPECIES_EGG)
                 posY += 10;
 
-            spriteId = CreateMonPicSprite_HandleDeoxys(currMon->species, currMon->tid, currMon->personality, TRUE, posX, posY, i, TAG_NONE);
+            spriteId = CreateMonPicSprite_HandleDeoxys(HofSpecies(currMon), currMon->tid, currMon->personality, TRUE, posX, posY, i, TAG_NONE);
             gSprites[spriteId].oam.priority = 1;
             gTasks[taskId].tMonSpriteId(i) = spriteId;
         }
@@ -1059,10 +1106,10 @@ static void Task_HofPC_PrintMonInfo(u8 taskId)
     BlendPalettesUnfaded(sHofFadePalettes, 0xC, RGB(16, 29, 24));
 
     currMon = &savedTeams->mon[gTasks[taskId].tCurrMonId];
-    if (currMon->species != SPECIES_EGG)
+    if (HofSpecies(currMon) != SPECIES_EGG)
     {
         StopCryAndClearCrySongs();
-        PlayCry_Normal(currMon->species, 0);
+        PlayCry_Normal(HofSpecies(currMon), 0);
     }
     HallOfFame_PrintMonInfo(currMon, 0, 14);
 
@@ -1206,10 +1253,10 @@ static void HallOfFame_PrintMonInfo(struct HallofFameMon *currMon, u8 unused1, u
     PutWindowTilemap(0);
 
     // dex number
-    if (currMon->species != SPECIES_EGG)
+    if (HofSpecies(currMon) != SPECIES_EGG)
     {
         stringPtr = StringCopy(text, gText_Number);
-        dexNumber = SpeciesToPokedexNum(currMon->species);
+        dexNumber = SpeciesToPokedexNum(HofSpecies(currMon));
         if (dexNumber != 0xFFFF)
         {
             stringPtr[0] = (dexNumber / 100) + CHAR_0;
@@ -1233,7 +1280,7 @@ static void HallOfFame_PrintMonInfo(struct HallofFameMon *currMon, u8 unused1, u
     // nickname, species names, gender and level
     memcpy(text, currMon->nickname, POKEMON_NAME_LENGTH);
     text[POKEMON_NAME_LENGTH] = EOS;
-    if (currMon->species == SPECIES_EGG)
+    if (HofSpecies(currMon) == SPECIES_EGG)
     {
         width = GetStringCenterAlignXOffset(FONT_NORMAL, text, 0xD0);
         AddTextPrinterParameterized3(0, FONT_NORMAL, width, 1, sMonInfoTextColors, TEXT_SKIP_DRAW, text);
@@ -1245,11 +1292,11 @@ static void HallOfFame_PrintMonInfo(struct HallofFameMon *currMon, u8 unused1, u
         AddTextPrinterParameterized3(0, FONT_NORMAL, width, 1, sMonInfoTextColors, TEXT_SKIP_DRAW, text);
 
         text[0] = CHAR_SLASH;
-        stringPtr = StringCopy(text + 1, gSpeciesNames[currMon->species]);
+        stringPtr = StringCopy(text + 1, gSpeciesNames[HofSpecies(currMon)]);
 
-        if (currMon->species != SPECIES_NIDORAN_M && currMon->species != SPECIES_NIDORAN_F)
+        if (HofSpecies(currMon) != SPECIES_NIDORAN_M && HofSpecies(currMon) != SPECIES_NIDORAN_F)
         {
-            switch (GetGenderFromSpeciesAndPersonality(currMon->species, currMon->personality))
+            switch (GetGenderFromSpeciesAndPersonality(HofSpecies(currMon), currMon->personality))
             {
             case MON_MALE:
                 stringPtr[0] = CHAR_MALE;
@@ -1596,18 +1643,22 @@ static void Task_DoDomeConfetti(u8 taskId)
 }
 
 // Moemon Co-op: your team as the Hall of Fame shows it, for friends' ceremonies
-// (PARTY_SIZE entries of struct HallofFameMon, 20 bytes each)
+// (PARTY_SIZE entries of struct HallofFameMon, 20 bytes each, then a byte per Pokemon: its species >> 9)
 u16 MP_Hof_BuildTeam(u8 *out)
 {
     struct HallofFameTeam *team = (struct HallofFameTeam *)out;
     u16 i, j;
-    memset(team, 0, sizeof(*team));
+    memset(team, 0, sizeof(*team) + PARTY_SIZE);
     for (i = 0; i < PARTY_SIZE; i++)
     {
         u8 nickname[POKEMON_NAME_LENGTH + 1];
         if (!GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
             continue;
-        team->mon[i].species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+        {
+            u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+            team->mon[i].species = species & 0x1FF;
+            out[sizeof(*team) + i] = species >> 9;   // Moemon Kai: the high bits after the team
+        }
         team->mon[i].tid = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
         team->mon[i].personality = GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY);
         team->mon[i].lvl = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
@@ -1615,5 +1666,5 @@ u16 MP_Hof_BuildTeam(u8 *out)
         for (j = 0; j < POKEMON_NAME_LENGTH; j++)
             team->mon[i].nickname[j] = nickname[j];
     }
-    return sizeof(*team);
+    return sizeof(*team) + PARTY_SIZE;
 }

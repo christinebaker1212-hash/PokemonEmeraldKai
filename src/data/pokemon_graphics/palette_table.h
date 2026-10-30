@@ -1,4 +1,5 @@
 #include "gen4_tables.h"   // Moemon Kai: Gen 4
+#include "gen59_tables.h"   // Moemon Kai: Gen 5-9
 const struct CompressedSpritePalette gMonPaletteTable_Moe[] =
 {
     SPECIES_PAL(NONE, gMonPalette_CircledQuestionMark),
@@ -442,4 +443,5 @@ const struct CompressedSpritePalette gMonPaletteTable_Moe[] =
     SPECIES_PAL(UNOWN_EMARK, gMonPalette_Unown),
     SPECIES_PAL(UNOWN_QMARK, gMonPalette_Unown),
     GEN4_PAL   // Moemon Kai: Gen 4
+    GEN59_PAL   // Moemon Kai: Gen 5-9
 };

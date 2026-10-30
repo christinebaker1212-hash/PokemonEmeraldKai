@@ -202,4 +202,5 @@ const struct Evolution gEvolutionTable[NUM_SPECIES][EVOS_PER_MON] =
     [SPECIES_BELDUM]     = {{EVO_LEVEL, 20, SPECIES_METANG}},
     [SPECIES_METANG]     = {{EVO_LEVEL, 45, SPECIES_METAGROSS}},
 #include "evolution_gen4.h"   // Moemon Kai: Gen 4
+#include "evolution_gen59.h"   // Moemon Kai: Gen 5-9
 };

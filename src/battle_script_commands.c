@@ -1,5 +1,6 @@
 #include "global.h"
-#include "battle_gen4.h"   // Moemon Kai: Gen 4
+#include "battle_gen4.h"
+#include "battle_gen59.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -1313,7 +1314,7 @@ static void Cmd_critcalc(void)
      && !(gStatuses3[gBattlerAttacker] & STATUS3_CANT_SCORE_A_CRIT)
      && !gGen4Sides[GetBattlerSide(gBattlerTarget)].luckyChant   // Moemon Kai: LUCKY CHANT
      && !(gBattleTypeFlags & (BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE))
-     && !(Random() % sCriticalHitChance[critChance]))
+     && (MP_Gen59_AlwaysCrit(gCurrentMove, gBattlerAttacker) || !(Random() % sCriticalHitChance[critChance])))   // Moemon Kai: STORM THROW...
         gCritMultiplier = MP_Gen4_CritMultiplier(gBattlerAttacker);   // Moemon Kai: SNIPER
     else
         gCritMultiplier = 1;
@@ -1647,7 +1648,7 @@ u8 TypeCalc(u16 move, u8 attacker, u8 defender)
     return flags;
 }
 
-u8 AI_TypeCalc(u16 move, u16 targetSpecies, u8 targetAbility)
+u8 AI_TypeCalc(u16 move, u16 targetSpecies, u16 targetAbility)
 {
     s32 i = 0;
     u8 flags = 0;
@@ -9164,7 +9165,7 @@ static void Cmd_healpartystatus(void)
 
             if (species != SPECIES_NONE && species != SPECIES_EGG)
             {
-                u8 ability;
+                u16 ability;
 
                 if (gBattlerPartyIndexes[gBattlerAttacker] == i)
                     ability = gBattleMons[gBattlerAttacker].ability;
@@ -10182,7 +10183,7 @@ static void Cmd_tryswapabilities(void)
      }
     else
     {
-        u8 abilityAtk = gBattleMons[gBattlerAttacker].ability;
+        u16 abilityAtk = gBattleMons[gBattlerAttacker].ability;
         gBattleMons[gBattlerAttacker].ability = gBattleMons[gBattlerTarget].ability;
         gBattleMons[gBattlerTarget].ability = abilityAtk;
 
@@ -10436,7 +10437,7 @@ static void Cmd_pickup(void)
 {
     s32 i;
     u16 species, heldItem;
-    u8 ability;
+    u16 ability;
 
     if (InBattlePike())
     {

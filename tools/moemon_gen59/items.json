@@ -1,0 +1,407 @@
+{
+ "ITEM_ICE_STONE": {
+  "name": "Ice Stone",
+  "price": 0,
+  "description": "Makes certain\\nspecies of Pokémon\\nevolve.",
+  "iconPic": "gItemIcon_IceStone",
+  "iconPalette": "gItemIconPalette_IceStone",
+  "icon_png": "graphics/items/icons/ice_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/ice_stone.pal"
+ },
+ "ITEM_SWEET_APPLE": {
+  "name": "Sweet Apple",
+  "price": 2200,
+  "description": "A peculiar apple\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_SweetApple",
+  "iconPalette": "gItemIconPalette_SweetApple",
+  "icon_png": "graphics/items/icons/sweet_apple.png",
+  "icon_pal": "graphics/items/icon_palettes/sweet_apple.pal"
+ },
+ "ITEM_TART_APPLE": {
+  "name": "Tart Apple",
+  "price": 2200,
+  "description": "A peculiar apple\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_TartApple",
+  "iconPalette": "gItemIconPalette_TartApple",
+  "icon_png": "graphics/items/icons/tart_apple.png",
+  "icon_pal": "graphics/items/icon_palettes/tart_apple.pal"
+ },
+ "ITEM_SYRUPY_APPLE": {
+  "name": "Syrupy Apple",
+  "price": 2200,
+  "description": "A peculiar apple\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_SyrupyApple",
+  "iconPalette": "gItemIconPalette_SyrupyApple",
+  "icon_png": "graphics/items/icons/syrupy_apple.png",
+  "icon_pal": "graphics/items/icon_palettes/syrupy_apple.pal"
+ },
+ "ITEM_CRACKED_POT": {
+  "name": "Cracked Pot",
+  "price": 1600,
+  "description": "A peculiar teapot\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_CrackedPot",
+  "iconPalette": "gItemIconPalette_Pot",
+  "icon_png": "graphics/items/icons/cracked_pot.png",
+  "icon_pal": "graphics/items/icon_palettes/pot.pal"
+ },
+ "ITEM_CHIPPED_POT": {
+  "name": "Chipped Pot",
+  "price": 38000,
+  "description": "A peculiar teapot\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_ChippedPot",
+  "iconPalette": "gItemIconPalette_Pot",
+  "icon_png": "graphics/items/icons/chipped_pot.png",
+  "icon_pal": "graphics/items/icon_palettes/pot.pal"
+ },
+ "ITEM_UNREMARKABLE_TEACUP": {
+  "name": "Unremarkable Teacup",
+  "price": 1600,
+  "description": "A peculiar teacup\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_UnremarkableTeacup",
+  "iconPalette": "gItemIconPalette_UnremarkableTeacup",
+  "icon_png": "graphics/items/icons/unremarkable_teacup.png",
+  "icon_pal": "graphics/items/icon_palettes/unremarkable_teacup.pal"
+ },
+ "ITEM_MASTERPIECE_TEACUP": {
+  "name": "Masterpiece Teacup",
+  "price": 38000,
+  "description": "A peculiar teacup\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_MasterpieceTeacup",
+  "iconPalette": "gItemIconPalette_MasterpieceTeacup",
+  "icon_png": "graphics/items/icons/masterpiece_teacup.png",
+  "icon_pal": "graphics/items/icon_palettes/masterpiece_teacup.pal"
+ },
+ "ITEM_METAL_ALLOY": {
+  "name": "Metal Alloy",
+  "price": 6000,
+  "description": "A peculiar metal\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_MetalAlloy",
+  "iconPalette": "gItemIconPalette_MetalAlloy",
+  "icon_png": "graphics/items/icons/metal_alloy.png",
+  "icon_pal": "graphics/items/icon_palettes/metal_alloy.pal"
+ },
+ "ITEM_SCROLL_OF_DARKNESS": {
+  "name": "Scroll of Darkness",
+  "price": 0,
+  "description": "A peculiar scroll\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_ScrollOfDarkness",
+  "iconPalette": "gItemIconPalette_ScrollOfDarkness",
+  "icon_png": "graphics/items/icons/scroll_of_darkness.png",
+  "icon_pal": "graphics/items/icon_palettes/scroll_of_darkness.pal"
+ },
+ "ITEM_SCROLL_OF_WATERS": {
+  "name": "Scroll of Waters",
+  "price": 0,
+  "description": "A peculiar scroll\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_ScrollOfWaters",
+  "iconPalette": "gItemIconPalette_ScrollOfWaters",
+  "icon_png": "graphics/items/icons/scroll_of_waters.png",
+  "icon_pal": "graphics/items/icon_palettes/scroll_of_waters.pal"
+ },
+ "ITEM_AUSPICIOUS_ARMOR": {
+  "name": "Auspicious Armor",
+  "price": 3000,
+  "description": "A set of armor\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_AuspiciousArmor",
+  "iconPalette": "gItemIconPalette_AuspiciousArmor",
+  "icon_png": "graphics/items/icons/auspicious_armor.png",
+  "icon_pal": "graphics/items/icon_palettes/auspicious_armor.pal"
+ },
+ "ITEM_MALICIOUS_ARMOR": {
+  "name": "Malicious Armor",
+  "price": 3000,
+  "description": "A set of armor\\nthat makes certain\\nPokémon evolve.",
+  "iconPic": "gItemIcon_MaliciousArmor",
+  "iconPalette": "gItemIconPalette_MaliciousArmor",
+  "icon_png": "graphics/items/icons/malicious_armor.png",
+  "icon_pal": "graphics/items/icon_palettes/malicious_armor.pal"
+ },
+ "ITEM_WHIPPED_DREAM": {
+  "name": "Whipped Dream",
+  "price": 0,
+  "description": "A soft and sweet\\ntreat loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_WhippedDream",
+  "iconPalette": "gItemIconPalette_WhippedDream",
+  "icon_png": "graphics/items/icons/whipped_dream.png",
+  "icon_pal": "graphics/items/icon_palettes/whipped_dream.pal"
+ },
+ "ITEM_SACHET": {
+  "name": "Sachet",
+  "price": 0,
+  "description": "A sachet with\\nperfumes loved by\\na certain Pokémon.",
+  "iconPic": "gItemIcon_Sachet",
+  "iconPalette": "gItemIconPalette_Sachet",
+  "icon_png": "graphics/items/icons/sachet.png",
+  "icon_pal": "graphics/items/icon_palettes/sachet.pal"
+ },
+ "ITEM_LINKING_CORD": {
+  "name": "Linking Cord",
+  "price": 8000,
+  "description": "A string exuding\\nenergy loved by\\ncertain Pokémon.",
+  "iconPic": "gItemIcon_LinkingCord",
+  "iconPalette": "gItemIconPalette_LinkingCord",
+  "icon_png": "graphics/items/icons/linking_cord.png",
+  "icon_pal": "graphics/items/icon_palettes/linking_cord.pal"
+ },
+ "ITEM_STRAWBERRY_SWEET": {
+  "name": "Strawberry Sweet",
+  "price": 500,
+  "description": "Strawberry-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_StrawberrySweet",
+  "iconPalette": "gItemIconPalette_StrawberrySweet",
+  "icon_png": "graphics/items/icons/strawberry_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/strawberry_sweet.pal"
+ },
+ "ITEM_LOVE_SWEET": {
+  "name": "Love Sweet",
+  "price": 500,
+  "description": "A heart-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_LoveSweet",
+  "iconPalette": "gItemIconPalette_LoveSweet",
+  "icon_png": "graphics/items/icons/love_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/love_sweet.pal"
+ },
+ "ITEM_BERRY_SWEET": {
+  "name": "Berry Sweet",
+  "price": 500,
+  "description": "A berry-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_BerrySweet",
+  "iconPalette": "gItemIconPalette_BerrySweet",
+  "icon_png": "graphics/items/icons/berry_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/berry_sweet.pal"
+ },
+ "ITEM_CLOVER_SWEET": {
+  "name": "Clover Sweet",
+  "price": 500,
+  "description": "A clover-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_CloverSweet",
+  "iconPalette": "gItemIconPalette_CloverSweet",
+  "icon_png": "graphics/items/icons/clover_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/clover_sweet.pal"
+ },
+ "ITEM_FLOWER_SWEET": {
+  "name": "Flower Sweet",
+  "price": 500,
+  "description": "A flower-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_FlowerSweet",
+  "iconPalette": "gItemIconPalette_FlowerSweet",
+  "icon_png": "graphics/items/icons/flower_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/flower_sweet.pal"
+ },
+ "ITEM_STAR_SWEET": {
+  "name": "Star Sweet",
+  "price": 500,
+  "description": "A star-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_StarSweet",
+  "iconPalette": "gItemIconPalette_StarSweet",
+  "icon_png": "graphics/items/icons/star_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/star_sweet.pal"
+ },
+ "ITEM_RIBBON_SWEET": {
+  "name": "Ribbon Sweet",
+  "price": 500,
+  "description": "A ribbon-shaped\\nsweet. When held by\\nMilcery, it's happy.",
+  "iconPic": "gItemIcon_RibbonSweet",
+  "iconPalette": "gItemIconPalette_RibbonSweet",
+  "icon_png": "graphics/items/icons/ribbon_sweet.png",
+  "icon_pal": "graphics/items/icon_palettes/ribbon_sweet.pal"
+ },
+ "ITEM_FLOAT_STONE": {
+  "name": "Float Stone",
+  "price": 10000,
+  "description": "A light stone that\\nreduces the weight\\nof the holder.",
+  "iconPic": "gItemIcon_FloatStone",
+  "iconPalette": "gItemIconPalette_FloatStone",
+  "icon_png": "graphics/items/icons/float_stone.png",
+  "icon_pal": "graphics/items/icon_palettes/float_stone.pal"
+ },
+ "ITEM_ABSORB_BULB": {
+  "name": "Absorb Bulb",
+  "price": 5000,
+  "description": "Ups Sp. Atk if the\\nholder is hurt by\\na Water-type move.",
+  "iconPic": "gItemIcon_AbsorbBulb",
+  "iconPalette": "gItemIconPalette_AbsorbBulb",
+  "icon_png": "graphics/items/icons/absorb_bulb.png",
+  "icon_pal": "graphics/items/icon_palettes/absorb_bulb.pal"
+ },
+ "ITEM_CELL_BATTERY": {
+  "name": "Cell Battery",
+  "price": 5000,
+  "description": "Ups Attack if the\\nholder is hurt by\\nan Electric move.",
+  "iconPic": "gItemIcon_CellBattery",
+  "iconPalette": "gItemIconPalette_CellBattery",
+  "icon_png": "graphics/items/icons/cell_battery.png",
+  "icon_pal": "graphics/items/icon_palettes/cell_battery.pal"
+ },
+ "ITEM_SNOWBALL": {
+  "name": "Snowball",
+  "price": 5000,
+  "description": "Ups Attack if the\\nholder is hurt by\\nan Ice-type move.",
+  "iconPic": "gItemIcon_Snowball",
+  "iconPalette": "gItemIconPalette_Snowball",
+  "icon_png": "graphics/items/icons/snowball.png",
+  "icon_pal": "graphics/items/icon_palettes/snowball.pal"
+ },
+ "ITEM_ELECTRIC_SEED": {
+  "name": "Electric Seed",
+  "price": 0,
+  "description": "Raises Defense on\\nElectric Terrain,\\nbut only once.",
+  "iconPic": "gItemIcon_TerrainSeed",
+  "iconPalette": "gItemIconPalette_ElectricSeed",
+  "icon_png": "graphics/items/icons/terrain_seed.png",
+  "icon_pal": "graphics/items/icon_palettes/electric_seed.pal"
+ },
+ "ITEM_PSYCHIC_SEED": {
+  "name": "Psychic Seed",
+  "price": 0,
+  "description": "Raises Sp. Def on\\nPsychic Terrain,\\nbut only once.",
+  "iconPic": "gItemIcon_TerrainSeed",
+  "iconPalette": "gItemIconPalette_PsychicSeed",
+  "icon_png": "graphics/items/icons/terrain_seed.png",
+  "icon_pal": "graphics/items/icon_palettes/psychic_seed.pal"
+ },
+ "ITEM_MISTY_SEED": {
+  "name": "Misty Seed",
+  "price": 0,
+  "description": "Raises Sp. Def on\\nMisty Terrain,\\nbut only once.",
+  "iconPic": "gItemIcon_TerrainSeed",
+  "iconPalette": "gItemIconPalette_MistySeed",
+  "icon_png": "graphics/items/icons/terrain_seed.png",
+  "icon_pal": "graphics/items/icon_palettes/misty_seed.pal"
+ },
+ "ITEM_GRASSY_SEED": {
+  "name": "Grassy Seed",
+  "price": 0,
+  "description": "Raises Defense on\\nGrassy Terrain,\\nbut only once.",
+  "iconPic": "gItemIcon_TerrainSeed",
+  "iconPalette": "gItemIconPalette_GrassySeed",
+  "icon_png": "graphics/items/icons/terrain_seed.png",
+  "icon_pal": "graphics/items/icon_palettes/grassy_seed.pal"
+ },
+ "ITEM_BOOSTER_ENERGY": {
+  "name": "Booster Energy",
+  "price": 0,
+  "description": "Ups the strength\\nof Pokémon with\\ncertain Abilities.",
+  "iconPic": "gItemIcon_BoosterEnergy",
+  "iconPalette": "gItemIconPalette_BoosterEnergy",
+  "icon_png": "graphics/items/icons/booster_energy.png",
+  "icon_pal": "graphics/items/icon_palettes/booster_energy.pal"
+ },
+ "ITEM_RED_NECTAR": {
+  "name": "Red Nectar",
+  "price": 300,
+  "description": "Flower nectar that\\nchanges the form\\nof certain Pokémon.",
+  "iconPic": "gItemIcon_Nectar",
+  "iconPalette": "gItemIconPalette_RedNectar",
+  "icon_png": "graphics/items/icons/nectar.png",
+  "icon_pal": "graphics/items/icon_palettes/red_nectar.pal"
+ },
+ "ITEM_YELLOW_NECTAR": {
+  "name": "Yellow Nectar",
+  "price": 300,
+  "description": "Flower nectar that\\nchanges the form\\nof certain Pokémon.",
+  "iconPic": "gItemIcon_Nectar",
+  "iconPalette": "gItemIconPalette_YellowNectar",
+  "icon_png": "graphics/items/icons/nectar.png",
+  "icon_pal": "graphics/items/icon_palettes/yellow_nectar.pal"
+ },
+ "ITEM_PINK_NECTAR": {
+  "name": "Pink Nectar",
+  "price": 300,
+  "description": "Flower nectar that\\nchanges the form\\nof certain Pokémon.",
+  "iconPic": "gItemIcon_Nectar",
+  "iconPalette": "gItemIconPalette_PinkNectar",
+  "icon_png": "graphics/items/icons/nectar.png",
+  "icon_pal": "graphics/items/icon_palettes/pink_nectar.pal"
+ },
+ "ITEM_PURPLE_NECTAR": {
+  "name": "Purple Nectar",
+  "price": 300,
+  "description": "Flower nectar that\\nchanges the form\\nof certain Pokémon.",
+  "iconPic": "gItemIcon_Nectar",
+  "iconPalette": "gItemIconPalette_PurpleNectar",
+  "icon_png": "graphics/items/icons/nectar.png",
+  "icon_pal": "graphics/items/icon_palettes/purple_nectar.pal"
+ },
+ "ITEM_ASSAULT_VEST": {
+  "name": "Assault Vest",
+  "price": 0,
+  "description": "Boosts Sp. Def, but\\nprevents the use\\nof status moves.",
+  "iconPic": "gItemIcon_AssaultVest",
+  "iconPalette": "gItemIconPalette_AssaultVest",
+  "icon_png": "graphics/items/icons/assault_vest.png",
+  "icon_pal": "graphics/items/icon_palettes/assault_vest.pal"
+ },
+ "ITEM_ROCKY_HELMET": {
+  "name": "Rocky Helmet",
+  "price": 50000,
+  "description": "Damages foes that\\nmake contact with\\nthe holder.",
+  "iconPic": "gItemIcon_RockyHelmet",
+  "iconPalette": "gItemIconPalette_RockyHelmet",
+  "icon_png": "graphics/items/icons/rocky_helmet.png",
+  "icon_pal": "graphics/items/icon_palettes/rocky_helmet.pal"
+ },
+ "ITEM_AIR_BALLOON": {
+  "name": "Air Balloon",
+  "price": 15000,
+  "description": "Makes the holder\\nfloat, but bursts\\nif hit by an attack.",
+  "iconPic": "gItemIcon_AirBalloon",
+  "iconPalette": "gItemIconPalette_AirBalloon",
+  "icon_png": "graphics/items/icons/air_balloon.png",
+  "icon_pal": "graphics/items/icon_palettes/air_balloon.pal"
+ },
+ "ITEM_WEAKNESS_POLICY": {
+  "name": "Weakness Policy",
+  "price": 0,
+  "description": "If hit super\\neffectively, ups\\noffenses sharply.",
+  "iconPic": "gItemIcon_WeaknessPolicy",
+  "iconPalette": "gItemIconPalette_WeaknessPolicy",
+  "icon_png": "graphics/items/icons/weakness_policy.png",
+  "icon_pal": "graphics/items/icon_palettes/weakness_policy.pal"
+ },
+ "ITEM_HEAVY_DUTY_BOOTS": {
+  "name": "Heavy-Duty Boots",
+  "price": 0,
+  "description": "Protects from the\\neffects of traps\\nset on the field.",
+  "iconPic": "gItemIcon_HeavyDutyBoots",
+  "iconPalette": "gItemIconPalette_HeavyDutyBoots",
+  "icon_png": "graphics/items/icons/heavy_duty_boots.png",
+  "icon_pal": "graphics/items/icon_palettes/heavy_duty_boots.pal"
+ },
+ "ITEM_PIXIE_PLATE": {
+  "name": "Pixie Plate",
+  "price": 1000,
+  "description": "A held item that\\nraises the power of\\nFairy-type moves.",
+  "iconPic": "gItemIcon_Plate",
+  "iconPalette": "gItemIconPalette_PixiePlate",
+  "icon_png": "graphics/items/icons/plate.png",
+  "icon_pal": "graphics/items/icon_palettes/pixie_plate.pal"
+ },
+ "ITEM_FAIRY_FEATHER": {
+  "name": "Fairy Feather",
+  "price": 1000,
+  "description": "A held item that\\nraises the power of\\nFairy-type moves.",
+  "iconPic": "gItemIcon_FairyFeather",
+  "iconPalette": "gItemIconPalette_FairyFeather",
+  "icon_png": "graphics/items/icons/fairy_feather.png",
+  "icon_pal": "graphics/items/icon_palettes/fairy_feather.pal"
+ },
+ "ITEM_GIMMIGHOUL_COIN": {
+  "name": "Gimmighoul Coin",
+  "price": 400,
+  "description": "A dropped material\\nGimmighoul hoard\\nand treasure.",
+  "iconPic": "gItemIcon_GimmighoulCoin",
+  "iconPalette": "gItemIconPalette_GimmighoulCoin",
+  "icon_png": "graphics/items/icons/gimmighoul_coin.png",
+  "icon_pal": "graphics/items/icon_palettes/gimmighoul_coin.pal"
+ },
+ "ITEM_LEADERS_CREST": {
+  "name": "Leader's Crest",
+  "price": 3000,
+  "description": "A shard of a blade.\\nBisharp that head\\na group hold it.",
+  "iconPic": "gItemIcon_LeadersCrest",
+  "iconPalette": "gItemIconPalette_LeadersCrest",
+  "icon_png": "graphics/items/icons/leaders_crest.png",
+  "icon_pal": "graphics/items/icon_palettes/leaders_crest.pal"
+ }
+}
