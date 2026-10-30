@@ -235,6 +235,7 @@ struct MpConfig
     u8 levelScaling;          // OPTIONS > GAME > LEVEL SCALING (online the room host's counts; mp_levelscale.c)
     u8 moveSplit;             // Moemon Kai: OPTIONS > GAME > MOVE KIND (1 = Gen 4's physical / special per move)
     u8 generation;            // Moemon Kai: OPTIONS > GAME > GENERATION (3-9; online the room host's; mp_region.c)
+    u8 gimmicks;              // Moemon Kai: OPTIONS > GAME > MEGA / Z-MOVES / DYNAMAX / TERA: 2 bits each, GIMMICK_SET_* (battle_gimmick.h)
     u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
     u8 spectateScale;         // ... each 1-4 times 240x160 (the size for friends without their own)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)

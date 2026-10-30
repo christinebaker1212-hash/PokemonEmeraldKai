@@ -1,0 +1,6 @@
+# DYNAMAX: START picks it (no MEGA STONE, no Z-CRYSTAL); three turns, then it returns to its normal size. A wild
+# WAILORD only SPLASHes
+MODE=1
+TMO=250
+ENV_A="MOEMON_DEBUG_PARTY=25:50 MOEMON_BATTLETEXT=1 MOEMON_GIMMICKS=1111"
+EXPECT_A=("gimmick: battler 0 chose 3" "DYNAMAXING" "used TACKLE" "returned" "normal size")

@@ -1,0 +1,26 @@
+pressuntil A field 5000
+mp teach 0 33
+mp wild 321:90 150
+pressuntil A action 4000
+wait 20
+press A 2
+wait 30
+press START 2
+wait 10
+shot menu
+press A 2
+waitlog 2500 DYNAMAXING
+wait 30
+shot dyna
+pressuntil A action 3000
+press A 2
+wait 30
+press A 2
+pressuntil A action 3000
+press A 2
+wait 30
+press A 2
+waitlog 3000 normal size
+pressuntil A action 3000
+shot after
+quit

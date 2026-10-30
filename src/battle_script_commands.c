@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle_gen4.h"
 #include "battle_gen59.h"
+#include "battle_gimmick.h"
 #include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "mp/mp_join.h"
@@ -1432,8 +1433,7 @@ static void Cmd_typecalc(void)
     GET_MOVE_TYPE(gCurrentMove, moveType);
 
     // check stab
-    if (IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
-        gBattleMoveDamage = MP_Gen4_Stab(gBattleMoveDamage, gBattlerAttacker);   // Moemon Kai: ADAPTABILITY
+    gBattleMoveDamage = MP_Gimmick_Stab(gBattleMoveDamage, gBattlerAttacker, moveType);   // Moemon Kai: ADAPTABILITY, TERA
 
     if (moveType == TYPE_GROUND && Gen4GroundImmune(gBattlerAttacker, gBattlerTarget))   // Moemon Kai: MAGNET RISE, MOLD BREAKER, GRAVITY
     {
@@ -4433,7 +4433,8 @@ static void Cmd_playanimation(void)
 
     if (gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT] == B_ANIM_STATS_CHANGE
      || gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT] == B_ANIM_SNATCH_MOVE
-     || gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT] == B_ANIM_SUBSTITUTE_FADE)
+     || gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT] == B_ANIM_SUBSTITUTE_FADE
+     || gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT] == B_ANIM_MP_GIMMICK)   // Moemon Kai: it changes the picture
     {
         SAFE_BtlController_EmitBattleAnimation(B_COMM_TO_CONTROLLER, gBattlescriptCurrInstr[DSIZE8BIT + DSIZE8BIT]);
         MarkBattlerForControllerExec(gActiveBattler);

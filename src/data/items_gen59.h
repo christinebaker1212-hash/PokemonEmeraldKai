@@ -494,3 +494,718 @@
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
 
+    [ITEM_VENUSAURITE] =
+    {
+        .name = _("VENUSAURITE"),
+        .itemId = ITEM_VENUSAURITE,
+        .price = 10000,
+        .description = sVenusauriteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_CHARIZARDITE_X] =
+    {
+        .name = _("CHARZARDITE X"),
+        .itemId = ITEM_CHARIZARDITE_X,
+        .price = 10000,
+        .description = sCharizarditeXDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_CHARIZARDITE_Y] =
+    {
+        .name = _("CHARZARDITE Y"),
+        .itemId = ITEM_CHARIZARDITE_Y,
+        .price = 10000,
+        .description = sCharizarditeYDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BLASTOISINITE] =
+    {
+        .name = _("BLASTOISINITE"),
+        .itemId = ITEM_BLASTOISINITE,
+        .price = 10000,
+        .description = sBlastoisiniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BEEDRILLITE] =
+    {
+        .name = _("BEEDRILLITE"),
+        .itemId = ITEM_BEEDRILLITE,
+        .price = 10000,
+        .description = sBeedrilliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_PIDGEOTITE] =
+    {
+        .name = _("PIDGEOTITE"),
+        .itemId = ITEM_PIDGEOTITE,
+        .price = 10000,
+        .description = sPidgeotiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ALAKAZITE] =
+    {
+        .name = _("ALAKAZITE"),
+        .itemId = ITEM_ALAKAZITE,
+        .price = 10000,
+        .description = sAlakaziteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SLOWBRONITE] =
+    {
+        .name = _("SLOWBRONITE"),
+        .itemId = ITEM_SLOWBRONITE,
+        .price = 10000,
+        .description = sSlowbroniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GENGARITE] =
+    {
+        .name = _("GENGARITE"),
+        .itemId = ITEM_GENGARITE,
+        .price = 10000,
+        .description = sGengariteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_KANGASKHANITE] =
+    {
+        .name = _("KANGASKHANITE"),
+        .itemId = ITEM_KANGASKHANITE,
+        .price = 10000,
+        .description = sKangaskhaniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_PINSIRITE] =
+    {
+        .name = _("PINSIRITE"),
+        .itemId = ITEM_PINSIRITE,
+        .price = 10000,
+        .description = sPinsiriteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GYARADOSITE] =
+    {
+        .name = _("GYARADOSITE"),
+        .itemId = ITEM_GYARADOSITE,
+        .price = 10000,
+        .description = sGyaradositeDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_AERODACTYLITE] =
+    {
+        .name = _("AERODACTYLITE"),
+        .itemId = ITEM_AERODACTYLITE,
+        .price = 10000,
+        .description = sAerodactyliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MEWTWONITE_X] =
+    {
+        .name = _("MEWTWONITE X"),
+        .itemId = ITEM_MEWTWONITE_X,
+        .price = 10000,
+        .description = sMewtwoniteXDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MEWTWONITE_Y] =
+    {
+        .name = _("MEWTWONITE Y"),
+        .itemId = ITEM_MEWTWONITE_Y,
+        .price = 10000,
+        .description = sMewtwoniteYDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_AMPHAROSITE] =
+    {
+        .name = _("AMPHAROSITE"),
+        .itemId = ITEM_AMPHAROSITE,
+        .price = 10000,
+        .description = sAmpharositeDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_STEELIXITE] =
+    {
+        .name = _("STEELIXITE"),
+        .itemId = ITEM_STEELIXITE,
+        .price = 10000,
+        .description = sSteelixiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SCIZORITE] =
+    {
+        .name = _("SCIZORITE"),
+        .itemId = ITEM_SCIZORITE,
+        .price = 10000,
+        .description = sScizoriteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_HERACRONITE] =
+    {
+        .name = _("HERACRONITE"),
+        .itemId = ITEM_HERACRONITE,
+        .price = 10000,
+        .description = sHeracroniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_HOUNDOOMINITE] =
+    {
+        .name = _("HOUNDOOMINITE"),
+        .itemId = ITEM_HOUNDOOMINITE,
+        .price = 10000,
+        .description = sHoundoominiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_TYRANITARITE] =
+    {
+        .name = _("TYRANITARITE"),
+        .itemId = ITEM_TYRANITARITE,
+        .price = 10000,
+        .description = sTyranitariteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SCEPTILITE] =
+    {
+        .name = _("SCEPTILITE"),
+        .itemId = ITEM_SCEPTILITE,
+        .price = 10000,
+        .description = sSceptiliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BLAZIKENITE] =
+    {
+        .name = _("BLAZIKENITE"),
+        .itemId = ITEM_BLAZIKENITE,
+        .price = 10000,
+        .description = sBlazikeniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SWAMPERTITE] =
+    {
+        .name = _("SWAMPERTITE"),
+        .itemId = ITEM_SWAMPERTITE,
+        .price = 10000,
+        .description = sSwampertiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GARDEVOIRITE] =
+    {
+        .name = _("GARDEVOIRITE"),
+        .itemId = ITEM_GARDEVOIRITE,
+        .price = 10000,
+        .description = sGardevoiriteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SABLENITE] =
+    {
+        .name = _("SABLENITE"),
+        .itemId = ITEM_SABLENITE,
+        .price = 10000,
+        .description = sSableniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MAWILITE] =
+    {
+        .name = _("MAWILITE"),
+        .itemId = ITEM_MAWILITE,
+        .price = 10000,
+        .description = sMawiliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_AGGRONITE] =
+    {
+        .name = _("AGGRONITE"),
+        .itemId = ITEM_AGGRONITE,
+        .price = 10000,
+        .description = sAggroniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MEDICHAMITE] =
+    {
+        .name = _("MEDICHAMITE"),
+        .itemId = ITEM_MEDICHAMITE,
+        .price = 10000,
+        .description = sMedichamiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MANECTITE] =
+    {
+        .name = _("MANECTITE"),
+        .itemId = ITEM_MANECTITE,
+        .price = 10000,
+        .description = sManectiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SHARPEDONITE] =
+    {
+        .name = _("SHARPEDONITE"),
+        .itemId = ITEM_SHARPEDONITE,
+        .price = 10000,
+        .description = sSharpedoniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_CAMERUPTITE] =
+    {
+        .name = _("CAMERUPTITE"),
+        .itemId = ITEM_CAMERUPTITE,
+        .price = 10000,
+        .description = sCameruptiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ALTARIANITE] =
+    {
+        .name = _("ALTARIANITE"),
+        .itemId = ITEM_ALTARIANITE,
+        .price = 10000,
+        .description = sAltarianiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BANETTITE] =
+    {
+        .name = _("BANETTITE"),
+        .itemId = ITEM_BANETTITE,
+        .price = 10000,
+        .description = sBanettiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ABSOLITE] =
+    {
+        .name = _("ABSOLITE"),
+        .itemId = ITEM_ABSOLITE,
+        .price = 10000,
+        .description = sAbsoliteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GLALITITE] =
+    {
+        .name = _("GLALITITE"),
+        .itemId = ITEM_GLALITITE,
+        .price = 10000,
+        .description = sGlalititeDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SALAMENCITE] =
+    {
+        .name = _("SALAMENCITE"),
+        .itemId = ITEM_SALAMENCITE,
+        .price = 10000,
+        .description = sSalamenciteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_METAGROSSITE] =
+    {
+        .name = _("METAGROSSITE"),
+        .itemId = ITEM_METAGROSSITE,
+        .price = 10000,
+        .description = sMetagrossiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_LATIASITE] =
+    {
+        .name = _("LATIASITE"),
+        .itemId = ITEM_LATIASITE,
+        .price = 10000,
+        .description = sLatiasiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_LATIOSITE] =
+    {
+        .name = _("LATIOSITE"),
+        .itemId = ITEM_LATIOSITE,
+        .price = 10000,
+        .description = sLatiositeDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_LOPUNNITE] =
+    {
+        .name = _("LOPUNNITE"),
+        .itemId = ITEM_LOPUNNITE,
+        .price = 10000,
+        .description = sLopunniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GARCHOMPITE] =
+    {
+        .name = _("GARCHOMPITE"),
+        .itemId = ITEM_GARCHOMPITE,
+        .price = 10000,
+        .description = sGarchompiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_LUCARIONITE] =
+    {
+        .name = _("LUCARIONITE"),
+        .itemId = ITEM_LUCARIONITE,
+        .price = 10000,
+        .description = sLucarioniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ABOMASITE] =
+    {
+        .name = _("ABOMASITE"),
+        .itemId = ITEM_ABOMASITE,
+        .price = 10000,
+        .description = sAbomasiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GALLADITE] =
+    {
+        .name = _("GALLADITE"),
+        .itemId = ITEM_GALLADITE,
+        .price = 10000,
+        .description = sGalladiteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_AUDINITE] =
+    {
+        .name = _("AUDINITE"),
+        .itemId = ITEM_AUDINITE,
+        .price = 10000,
+        .description = sAudiniteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_DIANCITE] =
+    {
+        .name = _("DIANCITE"),
+        .itemId = ITEM_DIANCITE,
+        .price = 10000,
+        .description = sDianciteDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_NORMALIUM_Z] =
+    {
+        .name = _("NORMALIUM Z"),
+        .itemId = ITEM_NORMALIUM_Z,
+        .price = 10000,
+        .description = sNormaliumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FIGHTINIUM_Z] =
+    {
+        .name = _("FIGHTINIUM Z"),
+        .itemId = ITEM_FIGHTINIUM_Z,
+        .price = 10000,
+        .description = sFightiniumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FLYINIUM_Z] =
+    {
+        .name = _("FLYINIUM Z"),
+        .itemId = ITEM_FLYINIUM_Z,
+        .price = 10000,
+        .description = sFlyiniumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_POISONIUM_Z] =
+    {
+        .name = _("POISONIUM Z"),
+        .itemId = ITEM_POISONIUM_Z,
+        .price = 10000,
+        .description = sPoisoniumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GROUNDIUM_Z] =
+    {
+        .name = _("GROUNDIUM Z"),
+        .itemId = ITEM_GROUNDIUM_Z,
+        .price = 10000,
+        .description = sGroundiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ROCKIUM_Z] =
+    {
+        .name = _("ROCKIUM Z"),
+        .itemId = ITEM_ROCKIUM_Z,
+        .price = 10000,
+        .description = sRockiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BUGINIUM_Z] =
+    {
+        .name = _("BUGINIUM Z"),
+        .itemId = ITEM_BUGINIUM_Z,
+        .price = 10000,
+        .description = sBuginiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GHOSTIUM_Z] =
+    {
+        .name = _("GHOSTIUM Z"),
+        .itemId = ITEM_GHOSTIUM_Z,
+        .price = 10000,
+        .description = sGhostiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_STEELIUM_Z] =
+    {
+        .name = _("STEELIUM Z"),
+        .itemId = ITEM_STEELIUM_Z,
+        .price = 10000,
+        .description = sSteeliumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FIRIUM_Z] =
+    {
+        .name = _("FIRIUM Z"),
+        .itemId = ITEM_FIRIUM_Z,
+        .price = 10000,
+        .description = sFiriumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_WATERIUM_Z] =
+    {
+        .name = _("WATERIUM Z"),
+        .itemId = ITEM_WATERIUM_Z,
+        .price = 10000,
+        .description = sWateriumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GRASSIUM_Z] =
+    {
+        .name = _("GRASSIUM Z"),
+        .itemId = ITEM_GRASSIUM_Z,
+        .price = 10000,
+        .description = sGrassiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ELECTRIUM_Z] =
+    {
+        .name = _("ELECTRIUM Z"),
+        .itemId = ITEM_ELECTRIUM_Z,
+        .price = 10000,
+        .description = sElectriumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_PSYCHIUM_Z] =
+    {
+        .name = _("PSYCHIUM Z"),
+        .itemId = ITEM_PSYCHIUM_Z,
+        .price = 10000,
+        .description = sPsychiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_ICIUM_Z] =
+    {
+        .name = _("ICIUM Z"),
+        .itemId = ITEM_ICIUM_Z,
+        .price = 10000,
+        .description = sIciumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_DRAGONIUM_Z] =
+    {
+        .name = _("DRAGONIUM Z"),
+        .itemId = ITEM_DRAGONIUM_Z,
+        .price = 10000,
+        .description = sDragoniumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_DARKINIUM_Z] =
+    {
+        .name = _("DARKINIUM Z"),
+        .itemId = ITEM_DARKINIUM_Z,
+        .price = 10000,
+        .description = sDarkiniumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FAIRIUM_Z] =
+    {
+        .name = _("FAIRIUM Z"),
+        .itemId = ITEM_FAIRIUM_Z,
+        .price = 10000,
+        .description = sFairiumZDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+

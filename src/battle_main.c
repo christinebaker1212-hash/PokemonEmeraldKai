@@ -4,6 +4,7 @@
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
 #include "battle_gen4.h"
 #include "battle_gen59.h"   // Moemon Kai: Gen 5-9
+#include "battle_gimmick.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -731,6 +732,8 @@ void CB2_MpJoinBattle(void)
 static void CB2_InitBattleInternal(void)
 {
     s32 i;
+
+    MP_Gimmick_ResetPictures();   // Moemon Kai: no MEGA pictures from the last battle
 
     SetHBlankCallback(NULL);
     SetVBlankCallback(NULL);
@@ -4782,6 +4785,12 @@ static void HandleTurnActionSelectionState(void)
                         return;
                     default:
                         RecordedBattle_CheckMovesetChanges(B_RECORD_MODE_PLAYBACK);
+                        // Moemon Kai: the gimmick chosen with the move (its bits 4-6; battle_gimmick.h)
+                        if ((gBattleBufferB[gActiveBattler][2] | (gBattleBufferB[gActiveBattler][3] << 8)) != 0xFFFF)
+                        {
+                            MP_Gimmick_Choose(gActiveBattler, gBattleBufferB[gActiveBattler][2] >> GIMMICK_MOVE_SHIFT);
+                            gBattleBufferB[gActiveBattler][2] &= (1 << GIMMICK_MOVE_SHIFT) - 1;
+                        }
                         if ((gBattleBufferB[gActiveBattler][2] | (gBattleBufferB[gActiveBattler][3] << 8)) == 0xFFFF)
                         {
                             gBattleCommunication[gActiveBattler] = STATE_BEFORE_ACTION_CHOSEN;
@@ -5272,6 +5281,7 @@ static void SetActionsAndBattlersTurnOrder(void)
             }
             gBattleMainFunc = CheckFocusPunch_ClearVarsBeforeTurnStarts;
             gBattleStruct->focusPunchBattlerId = 0;
+            MP_Gimmick_TurnStartReset();
             return;
         }
         else
@@ -5311,6 +5321,7 @@ static void SetActionsAndBattlersTurnOrder(void)
     }
     gBattleMainFunc = CheckFocusPunch_ClearVarsBeforeTurnStarts;
     gBattleStruct->focusPunchBattlerId = 0;
+    MP_Gimmick_TurnStartReset();
 }
 
 static void TurnValuesCleanUp(bool8 var0)
@@ -5366,6 +5377,8 @@ static void CheckFocusPunch_ClearVarsBeforeTurnStarts(void)
 {
     if (!(gHitMarker & HITMARKER_RUN))
     {
+        if (MP_Gimmick_TurnStart())   // Moemon Kai: MEGA EVOLUTION, TERA, DYNAMAX, Z-POWER before any move
+            return;
         while (gBattleStruct->focusPunchBattlerId < gBattlersCount)
         {
             gActiveBattler = gBattlerAttacker = gBattleStruct->focusPunchBattlerId;

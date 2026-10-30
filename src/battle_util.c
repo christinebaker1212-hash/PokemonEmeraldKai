@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle_gen4.h"
 #include "battle_gen59.h"
+#include "battle_gimmick.h"
 #include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "battle.h"
@@ -141,6 +142,11 @@ void HandleAction_UseMove(void)
     else
     {
         gCurrentMove = gChosenMove = gBattleMons[gBattlerAttacker].moves[gCurrMovePos];
+    }
+    if (MP_Gimmick_MoveUsed(gBattlerAttacker, gCurrentMove) != gCurrentMove)
+    {
+        gCurrentMove = gChosenMove = MP_Gimmick_MoveUsed(gBattlerAttacker, gCurrentMove);   // Moemon Kai: MAX GUARD
+        *(gBattleStruct->moveTarget + gBattlerAttacker) = gBattlerAttacker;
     }
 
     if (gBattleMons[gBattlerAttacker].hp != 0)

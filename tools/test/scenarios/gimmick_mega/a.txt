@@ -1,0 +1,24 @@
+pressuntil A field 5000
+mp hold 0 554
+mp teach 0 33
+mp wild 321:100 150
+pressuntil A action 4000
+wait 20
+press A 2
+wait 30
+press START 2
+wait 10
+shot menu
+press A 2
+waitlog 2500 MEGA EVOLVED
+wait 40
+shot mega
+pressuntil A action 3000
+mp bhp
+press A 2
+wait 30
+press A 2
+pressuntil A action 3000
+wait 10
+shot later
+quit

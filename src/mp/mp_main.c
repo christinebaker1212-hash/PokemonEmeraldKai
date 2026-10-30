@@ -133,7 +133,9 @@ static u8 sRoomScale[MP_SCALE_COUNT - 1];   // ... LEVEL SCALING's settings
 static void LevelRulesFromEnv(void);
 static bool8 sRoomLevelScaling;
 static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
-static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_RULES last byte)
+static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_RULES byte 5 + MP_SCALE_COUNT)
+static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES last byte)
+static u8 OwnGimmicks(void);
 static u8 sLeaveForRegion;   // Moemon Kai: 1 + the host's region when it isn't ours (we leave the room)
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
@@ -404,6 +406,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "level_scaling") == 0) gMpConfig.levelScaling = atoi(val) != 0;
         else if (strcmp(key, "move_split") == 0) gMpConfig.moveSplit = atoi(val) != 0;
         else if (strcmp(key, "generation") == 0) gMpConfig.generation = atoi(val) >= 3 && atoi(val) <= 9 ? atoi(val) : 3;
+        else if (strcmp(key, "gimmicks") == 0) gMpConfig.gimmicks = atoi(val) & 0xFF;
         else if (strcmp(key, "level_scaling_rules") == 0)
         {
             int v[MP_SCALE_COUNT - 1], k;
@@ -543,6 +546,8 @@ void MP_SaveConfig(void)
         "move_split = %d\n"
         "; OPTIONS > GAME > GENERATION: 3-9, the Pokemon, moves, abilities and types the game shows (online, the host's)\n"
         "generation = %d\n"
+        "; OPTIONS > GAME > MEGA / Z-MOVES / DYNAMAX / TERA: 2 bits each (0 AUTO from its generation, 1 on, 2 off)\n"
+        "gimmicks = %d\n"
         "; its settings: wild (0 off, 1 low, 2 medium, 3 high), trainers (0 off, 1 below, 2 even, 3 above), boss margin\n"
         "; (0 auto, 1-9 = +0 to +8), badge caps (0 / 1), past 8 badges (0 capped until the League, 1 free, 2 always capped)\n"
         "level_scaling_rules = %d %d %d %d %d\n"
@@ -574,7 +579,7 @@ void MP_SaveConfig(void)
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, MOEMON_DEV_BUILD ? sMainAutosaveMinutes : gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.generation,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.generation, gMpConfig.gimmicks,
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
@@ -1321,6 +1326,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
                 sLeaveForRegion = 1 + data[4 + MP_SCALE_COUNT];   // Moemon Kai: the room is in another region
             sRoomGeneration = len >= 6 + MP_SCALE_COUNT && data[5 + MP_SCALE_COUNT] >= 3 && data[5 + MP_SCALE_COUNT] <= 9
                             ? data[5 + MP_SCALE_COUNT] : 3;   // Moemon Kai: GENERATION
+            sRoomGimmicks = len >= 7 + MP_SCALE_COUNT ? data[6 + MP_SCALE_COUNT] : 0;   // Moemon Kai: GIMMICKS (AUTO before)
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1445,12 +1451,13 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[6 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        u8 rules[7 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
         rules[4 + MP_SCALE_COUNT] = MP_Region_Current();   // Moemon Kai: the room is in its host's region
         rules[5 + MP_SCALE_COUNT] = OwnGeneration();
+        rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
         MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
@@ -1552,6 +1559,27 @@ static u8 OwnGeneration(void)
     return gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3;
 }
 
+// Moemon Kai: OPTIONS > GAME > MEGA / Z-MOVES / DYNAMAX / TERA (AUTO, ON or OFF each; battle_gimmick.h). Online, the host's.
+static u8 OwnGimmicks(void)
+{
+    if (getenv("MOEMON_GIMMICKS"))   // tests: 4 digits (MEGA, Z, DYNAMAX, TERA), each 0 AUTO / 1 ON / 2 OFF
+    {
+        const char *v = getenv("MOEMON_GIMMICKS");
+        u8 bits = 0, i;
+        for (i = 0; i < 4 && v[i]; i++)
+            bits |= ((v[i] - '0') & 3) << (2 * i);
+        return bits;
+    }
+    return gMpConfig.gimmicks;
+}
+
+u8 MP_Gimmick_Setting(u8 gimmick)
+{
+    u8 bits = (!sLobby.creator && sRoomRulesHeard) ? sRoomGimmicks : OwnGimmicks();
+    u8 v = gimmick >= 1 && gimmick <= 4 ? (bits >> (2 * (gimmick - 1))) & 3 : 0;
+    return v <= 2 ? v : 0;
+}
+
 u8 MP_Generation(void)
 {
     if (!sLobby.creator && sRoomRulesHeard)
@@ -1633,7 +1661,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[6 + MP_SCALE_COUNT];
+    u8 rules[7 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1646,6 +1674,7 @@ void MP_SendRoomRules(void)
     memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
     rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
     rules[5 + MP_SCALE_COUNT] = OwnGeneration();
+    rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             MP_SendRelay(i, rules, sizeof(rules));

@@ -23,7 +23,7 @@ SCRIPT = {
     'MortalSpin': 'BattleScript_EffectRapidSpin', 'PhantomForce': 'BattleScript_EffectShadowForce',
     'ReflectDamage': 'BattleScript_EffectMetalBurst', 'SpeciesPowerOverride': 'BattleScript_EffectMultiHit',
     'PopulationBomb': 'BattleScript_EffectMultiHit', 'ScaleShot': 'BattleScript_EffectMultiHit',
-    'SurgingStrikes': 'BattleScript_EffectMultiHit',
+    'SurgingStrikes': 'BattleScript_EffectMultiHit', 'ShedTail': 'BattleScript_EffectSubstitute',
     # generic Gen 5-9 ones
     'MaxHp50Recoil': 'BattleScript_G59HitHalfRecoil', 'Chloroblast': 'BattleScript_G59HitHalfRecoil',
     'HitSwitchTarget': 'BattleScript_G59HitDrag', 'FinalGambit': 'BattleScript_G59FinalGambit',
@@ -415,6 +415,28 @@ BattleScript_G59Flee::
 	waitstate
 	setoutcomeonteleport BS_TARGET
 	finishaction
+
+@ a battle gimmick at the turn's start (MEGA EVOLUTION, TERASTALLIZATION, DYNAMAX: the picture changes on every screen)
+BattleScript_G59Gimmick::
+	playanimation BS_SCRIPTING, B_ANIM_MP_GIMMICK, sB_ANIM_ARG1
+	waitanimation
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ Z-POWER at the turn's start
+BattleScript_G59GimmickSay::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ DYNAMAX ends at the turn's end
+BattleScript_G59DynamaxEnd::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ATTACKER, B_ANIM_MP_GIMMICK, sB_ANIM_ARG1
+	waitanimation
+	end2
 '''
 
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gimmick.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "bg.h"
@@ -255,6 +256,7 @@ u8 GetBattlerYDelta(u8 battler, u16 species)
             ret = gMonFrontPicCoords[species].y_offset;
         }
     }
+    ret = MP_Gimmick_YDelta(battler, ret);   // Moemon Kai: a MEGA's picture
     return ret;
 }
 

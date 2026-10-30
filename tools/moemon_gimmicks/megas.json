@@ -1,0 +1,1006 @@
+{
+ "data": {
+  "SPECIES_VENUSAUR_MEGA": {
+   "stats": [
+    80,
+    100,
+    123,
+    80,
+    122,
+    120
+   ],
+   "types": [
+    "TYPE_GRASS",
+    "TYPE_POISON"
+   ],
+   "ability": "ABILITY_THICK_FAT"
+  },
+  "SPECIES_CHARIZARD_MEGA_X": {
+   "stats": [
+    78,
+    130,
+    111,
+    100,
+    130,
+    85
+   ],
+   "types": [
+    "TYPE_FIRE",
+    "TYPE_DRAGON"
+   ],
+   "ability": "ABILITY_TOUGH_CLAWS"
+  },
+  "SPECIES_CHARIZARD_MEGA_Y": {
+   "stats": [
+    78,
+    104,
+    78,
+    100,
+    159,
+    115
+   ],
+   "types": [
+    "TYPE_FIRE",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_DROUGHT"
+  },
+  "SPECIES_BLASTOISE_MEGA": {
+   "stats": [
+    79,
+    103,
+    120,
+    78,
+    135,
+    115
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_WATER"
+   ],
+   "ability": "ABILITY_MEGA_LAUNCHER"
+  },
+  "SPECIES_BEEDRILL_MEGA": {
+   "stats": [
+    65,
+    150,
+    40,
+    145,
+    15,
+    80
+   ],
+   "types": [
+    "TYPE_BUG",
+    "TYPE_POISON"
+   ],
+   "ability": "ABILITY_ADAPTABILITY"
+  },
+  "SPECIES_PIDGEOT_MEGA": {
+   "stats": [
+    83,
+    80,
+    80,
+    121,
+    135,
+    80
+   ],
+   "types": [
+    "TYPE_NORMAL",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_NO_GUARD"
+  },
+  "SPECIES_ALAKAZAM_MEGA": {
+   "stats": [
+    55,
+    50,
+    65,
+    150,
+    175,
+    105
+   ],
+   "types": [
+    "TYPE_PSYCHIC",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_TRACE"
+  },
+  "SPECIES_SLOWBRO_MEGA": {
+   "stats": [
+    95,
+    75,
+    180,
+    30,
+    130,
+    80
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_SHELL_ARMOR"
+  },
+  "SPECIES_GENGAR_MEGA": {
+   "stats": [
+    60,
+    65,
+    80,
+    130,
+    170,
+    95
+   ],
+   "types": [
+    "TYPE_GHOST",
+    "TYPE_POISON"
+   ],
+   "ability": "ABILITY_SHADOW_TAG"
+  },
+  "SPECIES_KANGASKHAN_MEGA": {
+   "stats": [
+    105,
+    125,
+    100,
+    100,
+    60,
+    100
+   ],
+   "types": [
+    "TYPE_NORMAL",
+    "TYPE_NORMAL"
+   ],
+   "ability": "ABILITY_PARENTAL_BOND"
+  },
+  "SPECIES_PINSIR_MEGA": {
+   "stats": [
+    65,
+    155,
+    120,
+    105,
+    65,
+    90
+   ],
+   "types": [
+    "TYPE_BUG",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_AERILATE"
+  },
+  "SPECIES_GYARADOS_MEGA": {
+   "stats": [
+    95,
+    155,
+    109,
+    81,
+    70,
+    130
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_DARK"
+   ],
+   "ability": "ABILITY_MOLD_BREAKER"
+  },
+  "SPECIES_AERODACTYL_MEGA": {
+   "stats": [
+    80,
+    135,
+    85,
+    150,
+    70,
+    95
+   ],
+   "types": [
+    "TYPE_ROCK",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_TOUGH_CLAWS"
+  },
+  "SPECIES_MEWTWO_MEGA_X": {
+   "stats": [
+    106,
+    190,
+    100,
+    130,
+    154,
+    100
+   ],
+   "types": [
+    "TYPE_PSYCHIC",
+    "TYPE_FIGHTING"
+   ],
+   "ability": "ABILITY_STEADFAST"
+  },
+  "SPECIES_MEWTWO_MEGA_Y": {
+   "stats": [
+    106,
+    150,
+    70,
+    140,
+    194,
+    120
+   ],
+   "types": [
+    "TYPE_PSYCHIC",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_INSOMNIA"
+  },
+  "SPECIES_AMPHAROS_MEGA": {
+   "stats": [
+    90,
+    95,
+    105,
+    45,
+    165,
+    110
+   ],
+   "types": [
+    "TYPE_ELECTRIC",
+    "TYPE_DRAGON"
+   ],
+   "ability": "ABILITY_MOLD_BREAKER"
+  },
+  "SPECIES_STEELIX_MEGA": {
+   "stats": [
+    75,
+    125,
+    230,
+    30,
+    55,
+    95
+   ],
+   "types": [
+    "TYPE_STEEL",
+    "TYPE_GROUND"
+   ],
+   "ability": "ABILITY_SAND_FORCE"
+  },
+  "SPECIES_SCIZOR_MEGA": {
+   "stats": [
+    70,
+    150,
+    140,
+    75,
+    65,
+    100
+   ],
+   "types": [
+    "TYPE_BUG",
+    "TYPE_STEEL"
+   ],
+   "ability": "ABILITY_TECHNICIAN"
+  },
+  "SPECIES_HERACROSS_MEGA": {
+   "stats": [
+    80,
+    185,
+    115,
+    75,
+    40,
+    105
+   ],
+   "types": [
+    "TYPE_BUG",
+    "TYPE_FIGHTING"
+   ],
+   "ability": "ABILITY_SKILL_LINK"
+  },
+  "SPECIES_HOUNDOOM_MEGA": {
+   "stats": [
+    75,
+    90,
+    90,
+    115,
+    140,
+    90
+   ],
+   "types": [
+    "TYPE_DARK",
+    "TYPE_FIRE"
+   ],
+   "ability": "ABILITY_SOLAR_POWER"
+  },
+  "SPECIES_TYRANITAR_MEGA": {
+   "stats": [
+    100,
+    164,
+    150,
+    71,
+    95,
+    120
+   ],
+   "types": [
+    "TYPE_ROCK",
+    "TYPE_DARK"
+   ],
+   "ability": "ABILITY_SAND_STREAM"
+  },
+  "SPECIES_SCEPTILE_MEGA": {
+   "stats": [
+    70,
+    110,
+    75,
+    145,
+    145,
+    85
+   ],
+   "types": [
+    "TYPE_GRASS",
+    "TYPE_DRAGON"
+   ],
+   "ability": "ABILITY_LIGHTNING_ROD"
+  },
+  "SPECIES_BLAZIKEN_MEGA": {
+   "stats": [
+    80,
+    160,
+    80,
+    100,
+    130,
+    80
+   ],
+   "types": [
+    "TYPE_FIRE",
+    "TYPE_FIGHTING"
+   ],
+   "ability": "ABILITY_SPEED_BOOST"
+  },
+  "SPECIES_SWAMPERT_MEGA": {
+   "stats": [
+    100,
+    150,
+    110,
+    70,
+    95,
+    110
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_GROUND"
+   ],
+   "ability": "ABILITY_SWIFT_SWIM"
+  },
+  "SPECIES_GARDEVOIR_MEGA": {
+   "stats": [
+    68,
+    85,
+    65,
+    100,
+    165,
+    135
+   ],
+   "types": [
+    "TYPE_PSYCHIC",
+    "TYPE_FAIRY"
+   ],
+   "ability": "ABILITY_PIXILATE"
+  },
+  "SPECIES_SABLEYE_MEGA": {
+   "stats": [
+    50,
+    85,
+    125,
+    20,
+    85,
+    115
+   ],
+   "types": [
+    "TYPE_DARK",
+    "TYPE_GHOST"
+   ],
+   "ability": "ABILITY_MAGIC_BOUNCE"
+  },
+  "SPECIES_MAWILE_MEGA": {
+   "stats": [
+    50,
+    105,
+    125,
+    50,
+    55,
+    95
+   ],
+   "types": [
+    "TYPE_STEEL",
+    "TYPE_FAIRY"
+   ],
+   "ability": "ABILITY_HUGE_POWER"
+  },
+  "SPECIES_AGGRON_MEGA": {
+   "stats": [
+    70,
+    140,
+    230,
+    50,
+    60,
+    80
+   ],
+   "types": [
+    "TYPE_STEEL",
+    "TYPE_STEEL"
+   ],
+   "ability": "ABILITY_FILTER"
+  },
+  "SPECIES_MEDICHAM_MEGA": {
+   "stats": [
+    60,
+    100,
+    85,
+    100,
+    80,
+    85
+   ],
+   "types": [
+    "TYPE_FIGHTING",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_PURE_POWER"
+  },
+  "SPECIES_MANECTRIC_MEGA": {
+   "stats": [
+    70,
+    75,
+    80,
+    135,
+    135,
+    80
+   ],
+   "types": [
+    "TYPE_ELECTRIC",
+    "TYPE_ELECTRIC"
+   ],
+   "ability": "ABILITY_INTIMIDATE"
+  },
+  "SPECIES_SHARPEDO_MEGA": {
+   "stats": [
+    70,
+    140,
+    70,
+    105,
+    110,
+    65
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_DARK"
+   ],
+   "ability": "ABILITY_STRONG_JAW"
+  },
+  "SPECIES_CAMERUPT_MEGA": {
+   "stats": [
+    70,
+    120,
+    100,
+    20,
+    145,
+    105
+   ],
+   "types": [
+    "TYPE_FIRE",
+    "TYPE_GROUND"
+   ],
+   "ability": "ABILITY_SHEER_FORCE"
+  },
+  "SPECIES_ALTARIA_MEGA": {
+   "stats": [
+    75,
+    110,
+    110,
+    80,
+    110,
+    105
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_FAIRY"
+   ],
+   "ability": "ABILITY_PIXILATE"
+  },
+  "SPECIES_BANETTE_MEGA": {
+   "stats": [
+    64,
+    165,
+    75,
+    75,
+    93,
+    83
+   ],
+   "types": [
+    "TYPE_GHOST",
+    "TYPE_GHOST"
+   ],
+   "ability": "ABILITY_PRANKSTER"
+  },
+  "SPECIES_ABSOL_MEGA": {
+   "stats": [
+    65,
+    150,
+    60,
+    115,
+    115,
+    60
+   ],
+   "types": [
+    "TYPE_DARK",
+    "TYPE_DARK"
+   ],
+   "ability": "ABILITY_MAGIC_BOUNCE"
+  },
+  "SPECIES_GLALIE_MEGA": {
+   "stats": [
+    80,
+    120,
+    80,
+    100,
+    120,
+    80
+   ],
+   "types": [
+    "TYPE_ICE",
+    "TYPE_ICE"
+   ],
+   "ability": "ABILITY_REFRIGERATE"
+  },
+  "SPECIES_SALAMENCE_MEGA": {
+   "stats": [
+    95,
+    145,
+    130,
+    120,
+    120,
+    90
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_AERILATE"
+  },
+  "SPECIES_METAGROSS_MEGA": {
+   "stats": [
+    80,
+    145,
+    150,
+    110,
+    105,
+    110
+   ],
+   "types": [
+    "TYPE_STEEL",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_TOUGH_CLAWS"
+  },
+  "SPECIES_LATIAS_MEGA": {
+   "stats": [
+    80,
+    100,
+    120,
+    110,
+    140,
+    150
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_LEVITATE"
+  },
+  "SPECIES_LATIOS_MEGA": {
+   "stats": [
+    80,
+    130,
+    100,
+    110,
+    160,
+    120
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_PSYCHIC"
+   ],
+   "ability": "ABILITY_LEVITATE"
+  },
+  "SPECIES_LOPUNNY_MEGA": {
+   "stats": [
+    65,
+    136,
+    94,
+    135,
+    54,
+    96
+   ],
+   "types": [
+    "TYPE_NORMAL",
+    "TYPE_FIGHTING"
+   ],
+   "ability": "ABILITY_SCRAPPY"
+  },
+  "SPECIES_GARCHOMP_MEGA": {
+   "stats": [
+    108,
+    170,
+    115,
+    92,
+    120,
+    95
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_GROUND"
+   ],
+   "ability": "ABILITY_SAND_FORCE"
+  },
+  "SPECIES_LUCARIO_MEGA": {
+   "stats": [
+    70,
+    145,
+    88,
+    112,
+    140,
+    70
+   ],
+   "types": [
+    "TYPE_FIGHTING",
+    "TYPE_STEEL"
+   ],
+   "ability": "ABILITY_ADAPTABILITY"
+  },
+  "SPECIES_ABOMASNOW_MEGA": {
+   "stats": [
+    90,
+    132,
+    105,
+    30,
+    132,
+    105
+   ],
+   "types": [
+    "TYPE_GRASS",
+    "TYPE_ICE"
+   ],
+   "ability": "ABILITY_SNOW_WARNING"
+  },
+  "SPECIES_GALLADE_MEGA": {
+   "stats": [
+    68,
+    165,
+    95,
+    110,
+    65,
+    115
+   ],
+   "types": [
+    "TYPE_PSYCHIC",
+    "TYPE_FIGHTING"
+   ],
+   "ability": "ABILITY_INNER_FOCUS"
+  },
+  "SPECIES_AUDINO_MEGA": {
+   "stats": [
+    103,
+    60,
+    126,
+    50,
+    80,
+    126
+   ],
+   "types": [
+    "TYPE_NORMAL",
+    "TYPE_FAIRY"
+   ],
+   "ability": "ABILITY_HEALER"
+  },
+  "SPECIES_DIANCIE_MEGA": {
+   "stats": [
+    50,
+    160,
+    110,
+    110,
+    160,
+    110
+   ],
+   "types": [
+    "TYPE_ROCK",
+    "TYPE_FAIRY"
+   ],
+   "ability": "ABILITY_MAGIC_BOUNCE"
+  },
+  "SPECIES_RAYQUAZA_MEGA": {
+   "stats": [
+    105,
+    180,
+    100,
+    115,
+    180,
+    100
+   ],
+   "types": [
+    "TYPE_DRAGON",
+    "TYPE_FLYING"
+   ],
+   "ability": "ABILITY_DELTA_STREAM"
+  },
+  "SPECIES_KYOGRE_PRIMAL": {
+   "stats": [
+    100,
+    150,
+    90,
+    90,
+    180,
+    160
+   ],
+   "types": [
+    "TYPE_WATER",
+    "TYPE_WATER"
+   ],
+   "ability": "ABILITY_PRIMORDIAL_SEA"
+  },
+  "SPECIES_GROUDON_PRIMAL": {
+   "stats": [
+    100,
+    180,
+    160,
+    90,
+    150,
+    90
+   ],
+   "types": [
+    "TYPE_GROUND",
+    "TYPE_FIRE"
+   ],
+   "ability": "ABILITY_DESOLATE_LAND"
+  }
+ },
+ "art": {
+  "SPECIES_VENUSAUR_MEGA": {
+   "dir": "graphics/moemon/mega/venusaur_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_CHARIZARD_MEGA_X": {
+   "dir": "graphics/moemon/mega/charizard_mega_x",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_CHARIZARD_MEGA_Y": {
+   "dir": "graphics/moemon/mega/charizard_mega_y",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_BLASTOISE_MEGA": {
+   "dir": "graphics/moemon/mega/blastoise_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_BEEDRILL_MEGA": {
+   "dir": "graphics/moemon/mega/beedrill_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_PIDGEOT_MEGA": {
+   "dir": "graphics/moemon/mega/pidgeot_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_ALAKAZAM_MEGA": {
+   "dir": "graphics/moemon/mega/alakazam_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SLOWBRO_MEGA": {
+   "dir": "graphics/moemon/mega/slowbro_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GENGAR_MEGA": {
+   "dir": "graphics/moemon/mega/gengar_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_KANGASKHAN_MEGA": {
+   "dir": "graphics/moemon/mega/kangaskhan_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_PINSIR_MEGA": {
+   "dir": "graphics/moemon/mega/pinsir_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GYARADOS_MEGA": {
+   "dir": "graphics/moemon/mega/gyarados_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_AERODACTYL_MEGA": {
+   "dir": "graphics/moemon/mega/aerodactyl_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_MEWTWO_MEGA_X": {
+   "dir": "graphics/moemon/mega/mewtwo_mega_x",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_MEWTWO_MEGA_Y": {
+   "dir": "graphics/moemon/mega/mewtwo_mega_y",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_AMPHAROS_MEGA": {
+   "dir": "graphics/moemon/mega/ampharos_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_STEELIX_MEGA": {
+   "dir": "graphics/moemon/mega/steelix_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SCIZOR_MEGA": {
+   "dir": "graphics/moemon/mega/scizor_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_HERACROSS_MEGA": {
+   "dir": "graphics/moemon/mega/heracross_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_HOUNDOOM_MEGA": {
+   "dir": "graphics/moemon/mega/houndoom_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_TYRANITAR_MEGA": {
+   "dir": "graphics/moemon/mega/tyranitar_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SCEPTILE_MEGA": {
+   "dir": "graphics/moemon/mega/sceptile_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_BLAZIKEN_MEGA": {
+   "dir": "graphics/moemon/mega/blaziken_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SWAMPERT_MEGA": {
+   "dir": "graphics/moemon/mega/swampert_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GARDEVOIR_MEGA": {
+   "dir": "graphics/moemon/mega/gardevoir_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SABLEYE_MEGA": {
+   "dir": "graphics/moemon/mega/sableye_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_MAWILE_MEGA": {
+   "dir": "graphics/moemon/mega/mawile_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_AGGRON_MEGA": {
+   "dir": "graphics/moemon/mega/aggron_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_MEDICHAM_MEGA": {
+   "dir": "graphics/moemon/mega/medicham_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_MANECTRIC_MEGA": {
+   "dir": "graphics/moemon/mega/manectric_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SHARPEDO_MEGA": {
+   "dir": "graphics/moemon/mega/sharpedo_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_CAMERUPT_MEGA": {
+   "dir": "graphics/moemon/mega/camerupt_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_ALTARIA_MEGA": {
+   "dir": "graphics/moemon/mega/altaria_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_BANETTE_MEGA": {
+   "dir": "graphics/moemon/mega/banette_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_ABSOL_MEGA": {
+   "dir": "graphics/moemon/mega/absol_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GLALIE_MEGA": {
+   "dir": "graphics/moemon/mega/glalie_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_SALAMENCE_MEGA": {
+   "dir": "graphics/moemon/mega/salamence_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_METAGROSS_MEGA": {
+   "dir": "graphics/moemon/mega/metagross_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_LATIAS_MEGA": {
+   "dir": "graphics/moemon/mega/latias_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_LATIOS_MEGA": {
+   "dir": "graphics/moemon/mega/latios_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_LOPUNNY_MEGA": {
+   "dir": "graphics/moemon/mega/lopunny_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GARCHOMP_MEGA": {
+   "dir": "graphics/moemon/mega/garchomp_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_LUCARIO_MEGA": {
+   "dir": "graphics/moemon/mega/lucario_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_ABOMASNOW_MEGA": {
+   "dir": "graphics/moemon/mega/abomasnow_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GALLADE_MEGA": {
+   "dir": "graphics/moemon/mega/gallade_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_AUDINO_MEGA": {
+   "dir": "graphics/moemon/mega/audino_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_DIANCIE_MEGA": {
+   "dir": "graphics/moemon/mega/diancie_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_RAYQUAZA_MEGA": {
+   "dir": "graphics/moemon/mega/rayquaza_mega",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_KYOGRE_PRIMAL": {
+   "dir": "graphics/moemon/mega/kyogre_primal",
+   "frontY": 0,
+   "backY": 0
+  },
+  "SPECIES_GROUDON_PRIMAL": {
+   "dir": "graphics/moemon/mega/groudon_primal",
+   "frontY": 0,
+   "backY": 0
+  }
+ }
+}

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gimmick.h"
 #include "mp_region.h"
 #include "mp.h"
 #include "battle.h"
@@ -1569,7 +1570,7 @@ void BtlController_EmitChooseMove(u8 bufferId, bool8 isDoubleBattle, bool8 noPPN
     sBattleBuffersTransferData[0] = CONTROLLER_CHOOSEMOVE;
     sBattleBuffersTransferData[1] = isDoubleBattle;
     sBattleBuffersTransferData[2] = noPPNumber;
-    sBattleBuffersTransferData[3] = 0;
+    sBattleBuffersTransferData[3] = MP_Gimmick_Available(gActiveBattler);   // Moemon Kai: the gimmicks it may use
     for (i = 0; i < sizeof(*movePPData); i++)
         sBattleBuffersTransferData[4 + i] = *((u8 *)(movePPData) + i);
     PrepareBufferDataTransfer(bufferId, sBattleBuffersTransferData, sizeof(*movePPData) + 4);

@@ -1,0 +1,6 @@
+# MEGA EVOLUTION: CHARIZARD holding CHARIZARDITE X picks MEGA with START in the move list; it MEGA EVOLVES before
+# its move (its MOéMON MEGA picture), and stays MEGA the next turn. A wild WAILORD only SPLASHes
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:60 MOEMON_BATTLETEXT=1 MOEMON_GIMMICKS=1111"
+EXPECT_A=("gimmick: battler 0 chose 1" "btext: CHARIZARD has" "MEGA EVOLVED" "btext: CHARIZARD used TACKLE")

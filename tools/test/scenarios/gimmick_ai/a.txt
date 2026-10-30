@@ -1,0 +1,7 @@
+pressuntil A field 5000
+mp moves 0 44
+mp battlestyle 1
+mp trainer 1
+pressuntil A field 20000
+mp savesum
+quit

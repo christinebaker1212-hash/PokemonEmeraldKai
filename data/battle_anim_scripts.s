@@ -412,6 +412,7 @@ gBattleAnims_General::
 	ptrvalue General_FocusPunchSetUp          /* B_ANIM_FOCUS_PUNCH_SETUP*/
 	ptrvalue General_IngrainHeal              /* B_ANIM_INGRAIN_HEAL*/
 	ptrvalue General_WishHeal                 /* B_ANIM_WISH_HEAL*/
+	ptrvalue General_MpGimmick                /* B_ANIM_MP_GIMMICK*/
 
 	.align 2
 gBattleAnims_Special::
@@ -10659,6 +10660,20 @@ General_IngrainHeal:
 	waitforvisualfinish
 	clearmonbg ANIM_DEF_PARTNER
 	blendoff
+	end
+
+@ Moemon Kai: a battle gimmick (MEGA EVOLUTION, TERASTALLIZATION, DYNAMAX): stars, and a flash that changes the picture
+General_MpGimmick:
+	loadspritegfx ANIM_TAG_SPARKLE_2
+	simple_palette_blend selector=F_PAL_BG, delay=2, initial_blend_y=0, target_blend_y=8, color=RGB_BLACK
+	waitforvisualfinish
+	playsewithpan SE_M_MEGA_KICK, SOUND_PAN_ATTACKER
+	call GrantingStarsEffect
+	createvisualtask AnimTask_MpGimmick, 2
+	waitforvisualfinish
+	unloadspritegfx ANIM_TAG_SPARKLE_2
+	simple_palette_blend selector=F_PAL_BG, delay=2, initial_blend_y=8, target_blend_y=0, color=RGB_BLACK
+	waitforvisualfinish
 	end
 
 General_WishHeal:

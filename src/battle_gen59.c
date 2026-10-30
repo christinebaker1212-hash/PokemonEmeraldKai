@@ -5,6 +5,9 @@
 #include "battle_gen4.h"
 #include "battle_gen59.h"
 #include "mail.h"
+#include "battle_gimmick.h"
+#include "mp.h"
+#include "battle_util.h"
 #include "mp_region.h"
 #include "battle_controllers.h"
 #include "battle_main.h"
@@ -158,7 +161,24 @@ static EWRAM_DATA bool8 sStatDown = FALSE;
     X(FLED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} fled\nfrom battle!") \
     X(GULP, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} caught\nsomething in its mouth!") \
     X(GULP_SPIT, "{B_ATK_NAME_WITH_PREFIX} was hit by\nwhat GULP MISSILE spat out!") \
-    X(HANGRY, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} got\nhungry!")
+    X(HANGRY, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} got\nhungry!") \
+    X(SEEDED, "{B_DEF_NAME_WITH_PREFIX} was seeded!") \
+    X(PP_REDUCED, "It reduced the PP of {B_DEF_NAME_WITH_PREFIX}'s\n{B_BUFF1} by 3!") \
+    X(ABILITY_SUPPRESSED, "{B_DEF_NAME_WITH_PREFIX}'s ability\nwas suppressed!") \
+    X(MEGA, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} has\nMEGA EVOLVED!") \
+    X(PRIMAL, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} returned\nto its primal form!") \
+    X(TERA, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} terastallized\ninto the {B_BUFF1} type!") \
+    X(DYNAMAX, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} is\nDYNAMAXING!") \
+    X(DYNAMAX_END, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} returned\nto its normal size!") \
+    X(Z_POWER, "{B_SCR_ACTIVE_NAME_WITH_PREFIX} surrounded\nitself with its Z-POWER!") \
+    X(SUN_UP, "The sunlight turned harsh!") \
+    X(RAIN_UP, "It started to rain!") \
+    X(HAIL_UP, "It started to hail!") \
+    X(TEAM_STAT_UP, "{B_ATK_NAME_WITH_PREFIX}'s side's {B_BUFF1}\nrose!") \
+    X(FOES_STAT_DOWN, "The foes' {B_BUFF1}\nfell!") \
+    X(HEAVY_RAIN, "A heavy rain began to fall!") \
+    X(HARSH_SUN, "The sunlight turned\nextremely harsh!") \
+    X(STRONG_WINDS, "Mysterious strong winds are\nprotecting FLYING POKéMON!")
 
 #define G59_ENUM(name, text) G59_MSG_##name,
 enum { G59_TEXTS(G59_ENUM) G59_MSG_COUNT };
@@ -370,6 +390,8 @@ static u8 FormSay(u8 b, u8 msg, bool8 end3);
 static const u8 *CheekPouch(u8 b, bool8 end3);
 static const u8 *MoveEndMore(u8 atk, u8 def);
 static bool8 Unswappable(u16 a);
+static const u8 *GimmickMoveEnd(u8 atk, u8 def);
+static const u8 *GimmickEndTurn(void);
 
 void MP_Gen59_BattleStart(void)
 {
@@ -379,12 +401,14 @@ void MP_Gen59_BattleStart(void)
     memset(&gGen59Field, 0, sizeof(gGen59Field));
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
         gGen59Battlers[i].thirdType = TYPE_MYSTERY;
+    MP_Gimmick_BattleStart();
 }
 
 void MP_Gen59_SwitchIn(u8 battler)
 {
     memset(&gGen59Battlers[battler], 0, sizeof(gGen59Battlers[battler]));
     gGen59Battlers[battler].thirdType = TYPE_MYSTERY;
+    MP_Gimmick_SwitchIn(battler);   // MEGA and TERA stay with the Pokémon, DYNAMAX ends
 }
 
 void MP_Gen59_TurnEnd(void)
@@ -485,6 +509,8 @@ bool8 MP_Gen59_IsGrounded(u8 battler)
 bool8 MP_Gen59_StatusBlocked(u8 battler, u8 moveEffect)
 {
     bool8 status = moveEffect >= MOVE_EFFECT_SLEEP && moveEffect <= MOVE_EFFECT_TOXIC;
+    if (moveEffect == MOVE_EFFECT_FLINCH && MP_Gimmick_Dynamaxed(battler))
+        return TRUE;
     switch (MP_Gen4_TargetAbility(gBattlerAttacker, battler))
     {
     case ABILITY_COMATOSE:
@@ -595,6 +621,16 @@ const u8 *MP_Gen59_FieldEndTurn(void)
                 return BattleScript_G59EndTurnSay;
             }
             break;
+        case 7:
+        {
+            const u8 *script = GimmickEndTurn();   // DYNAMAX counts down
+            if (script)
+            {
+                sEndStep = 7;   // (again, for the next battler)
+                return script;
+            }
+            break;
+        }
         default:
             sEndStep = 0;
             sEndBattler = 0;
@@ -664,7 +700,14 @@ s8 MP_Gen59_IsPhysical(u16 move, u8 battler)
     return -1;
 }
 
+static u16 MovePower(u16 move, u8 attacker, u8 target, u16 power);
+
 u16 MP_Gen59_MovePower(u16 move, u8 attacker, u8 target, u16 power)
+{
+    return MP_Gimmick_MovePower(move, attacker, MovePower(move, attacker, target, power));   // Z-MOVES, MAX MOVES, TERA
+}
+
+static u16 MovePower(u16 move, u8 attacker, u8 target, u16 power)
 {
     const struct Gen59Move *d = Data(move);
     u32 p = power, r;
@@ -910,6 +953,14 @@ s32 MP_Gen59_FinalDamage(s32 damage, u16 move, u8 type, u8 attacker, u8 target, 
         return damage;
     if (Effect(move) == EFFECT_COLLISION_COURSE && (resultFlags & MOVE_RESULT_SUPER_EFFECTIVE))
         damage = damage * 4 / 3;
+    if (gGen59Battlers[target].glaiveRush)
+        damage *= 2;
+    if (MP_Gimmick_Dynamaxed(target) && damage > 1)
+        damage /= 2;   // (DYNAMAX: twice the HP)
+    if (gBattleMons[attacker].ability == ABILITY_PARENTAL_BOND && gBattleMoves[move].effect != EFFECT_MULTI_HIT
+     && gBattleMoves[move].effect != EFFECT_DOUBLE_HIT && gBattleMoves[move].effect != EFFECT_TRIPLE_KICK
+     && !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+        damage = damage * 5 / 4;   // (its second hit at a quarter, as part of the one)
     if (type == TYPE_FIRE && gGen59Battlers[target].tarShot)
         damage *= 2;
     // AURORA VEIL: like REFLECT and LIGHT SCREEN at once (not on top of them; INFILTRATOR goes through)
@@ -1280,6 +1331,34 @@ static u8 AfterHit(void)
         return 0;
     case EFFECT_SYRUP_BOMB:
         return 1;
+    case EFFECT_SAPPY_SEED:
+        if (gBattleMons[def].hp == 0 || TargetBehindSubstitute() || (gStatuses3[def] & STATUS3_LEECHSEED) || HasType(def, TYPE_GRASS))
+            return 1;
+        gStatuses3[def] |= STATUS3_LEECHSEED | STATUS3_LEECHSEED_FROM(atk);
+        Say(G59_MSG_SEEDED);
+        return 0;
+    case EFFECT_EERIE_SPELL:
+        if (gBattleMons[def].hp == 0 || gLastMoves[def] == MOVE_NONE || gLastMoves[def] == 0xFFFF)
+            return 1;
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            if (gBattleMons[def].moves[i] == gLastMoves[def] && gBattleMons[def].pp[i] != 0)
+            {
+                gBattleMons[def].pp[i] = gBattleMons[def].pp[i] > 3 ? gBattleMons[def].pp[i] - 3 : 0;
+                gActiveBattler = def;
+                BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_PPMOVE1_BATTLE + i, 0, sizeof(gBattleMons[def].pp[i]), &gBattleMons[def].pp[i]);
+                MarkBattlerForControllerExec(def);
+                PREPARE_MOVE_BUFFER(gBattleTextBuff1, gLastMoves[def]);
+                Say(G59_MSG_PP_REDUCED);
+                return 0;
+            }
+        return 1;
+    case EFFECT_CORE_ENFORCER:
+        if (gBattleMons[def].hp == 0 || !gGen4Battlers[def].movedThisTurn || Unswappable(gBattleMons[def].ability)
+         || gBattleMons[def].ability == ABILITY_NONE)
+            return 1;
+        gBattleMons[def].ability = ABILITY_NONE;
+        Say(G59_MSG_ABILITY_SUPPRESSED);
+        return 0;
     case EFFECT_PSYCHIC_NOISE:
         if (gBattleMons[def].hp == 0 || gGen4Battlers[def].healBlock)
             return 1;
@@ -1812,6 +1891,7 @@ void MP_Gen59_OnMoveStart(u8 battler, u16 move)
     u16 ability = gBattleMons[battler].ability;
     gGen59Field.moveEndDone = 0;
     gGen59Field.danced = 0;
+    gGen59Battlers[battler].glaiveRush = move == MOVE_GLAIVE_RUSH;   // (until its next move)
     if (ability == ABILITY_STANCE_CHANGE && move != MOVE_NONE)
     {
         if (move == MOVE_KINGS_SHIELD)   // (quietly: a script can't start here)
@@ -2015,6 +2095,15 @@ u8 MP_Gen59_SwitchInAbility(u8 battler)
     case ABILITY_PROTOSYNTHESIS:
     case ABILITY_QUARK_DRIVE:
         return TryBoost(battler);
+    case ABILITY_PRIMORDIAL_SEA:   // (heavy rain and harsh sun as lasting rain and sun)
+        gBattleWeather = B_WEATHER_RAIN_PERMANENT;
+        return SayOnArrival(battler, G59_MSG_HEAVY_RAIN);
+    case ABILITY_DESOLATE_LAND:
+        gBattleWeather = B_WEATHER_SUN_PERMANENT;
+        return SayOnArrival(battler, G59_MSG_HARSH_SUN);
+    case ABILITY_DELTA_STREAM:
+        gBattleWeather = 0;
+        return SayOnArrival(battler, G59_MSG_STRONG_WINDS);
     }
     return 0;
 }
@@ -2028,7 +2117,8 @@ u8 MP_Gen59_SwitchInAbility(u8 battler)
 #define G59M_INNARDS (1 << 6)
 #define G59M_DEFIANT (1 << 7)
 #define G59M_SOUL    (1 << 8)
-#define G59M_MORE    (1 << 9)   // MoveEndMore: CHEEK POUCH, DANCER, OPPORTUNIST, EMERGENCY EXIT...
+#define G59M_MORE    (1 << 9)
+#define G59M_GIMMICK (1 << 10)  // a MAX MOVE's effect   // MoveEndMore: CHEEK POUCH, DANCER, OPPORTUNIST, EMERGENCY EXIT...
 
 // a stat change by an ability at a move's end (BY < 0 lowers): its message on gBattleScripting.battler
 static const u8 *AbilityStat(u8 battler, u8 stat, s8 by, u8 ability)
@@ -2394,6 +2484,13 @@ const u8 *MP_Gen59_MoveEnd(void)
                 }
         }
     }
+    if (!(gGen59Field.moveEndDone & G59M_GIMMICK))
+    {
+        const u8 *script = GimmickMoveEnd(atk, def);
+        gGen59Field.moveEndDone |= G59M_GIMMICK;
+        if (script)
+            return script;
+    }
     if (!(gGen59Field.moveEndDone & G59M_MORE))
     {
         const u8 *script = MoveEndMore(atk, def);
@@ -2603,6 +2700,10 @@ bool8 MP_Gen59_BlockMove(u8 battler, u16 move)
     case ABILITY_TELEPATHY:
         block = GetBattlerSide(atk) == GetBattlerSide(battler) && gBattleMoves[move].power != 0;
         break;
+    case ABILITY_MAGIC_BOUNCE:   // (the move is kept off, not sent back)
+        block = GetBattlerSide(atk) != GetBattlerSide(battler) && gBattleMoves[move].power == 0
+             && gBattleMoves[move].target != MOVE_TARGET_USER;
+        break;
     }
     if (!block && GetBattlerSide(atk) != GetBattlerSide(battler) && MP_Gen59_Priority(atk, move) > 0
      && (SideHas(battler, ABILITY_QUEENLY_MAJESTY) || SideHas(battler, ABILITY_DAZZLING) || SideHas(battler, ABILITY_ARMOR_TAIL)))
@@ -2619,6 +2720,8 @@ bool8 MP_Gen59_BlockMove(u8 battler, u16 move)
 // VICTORY STAR (the user's side x1.1), WONDER SKIN (a status move at most 50%)
 u32 MP_Gen59_Accuracy(u8 attacker, u8 target, u16 move, u32 acc)
 {
+    if (gGen59Battlers[target].glaiveRush)
+        return 100 * 2;   // (GLAIVE RUSH: can't miss it)
     if (SideHas(attacker, ABILITY_VICTORY_STAR))
         acc = acc * 11 / 10;
     if (gBattleMoves[move].power == 0 && MP_Gen4_TargetAbility(attacker, target) == ABILITY_WONDER_SKIN && acc > 50)
@@ -2956,5 +3059,397 @@ static const u8 *MoveEndMore(u8 atk, u8 def)
         Say(G59_MSG_EMERGENCY_EXIT);
         return BattleScript_G59EmergencyExit;
     }
+    return NULL;
+}
+
+// ---------------------------------------------------------------------------------------------- GIMMICKS (the battle)
+// MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION: each trainer one of them once a battle (include/battle_gimmick.h).
+// A MEGA form isn't a species: the battler takes its types, ability and stats (and every screen its picture, through
+// the animation); MEGA and TERA stay with the Pokémon (by party slot) when it switches, DYNAMAX ends.
+
+struct GimmickState
+{
+    u8 wanted[MAX_BATTLERS_COUNT];   // the gimmick chosen with this turn's move
+    u8 dynamax[MAX_BATTLERS_COUNT];  // turns left
+    u8 zNow[MAX_BATTLERS_COUNT];     // Z-POWER on this turn's move (the crystal's type + 1)
+    u8 used;                         // trainers (Owner bits) that used theirs
+    u8 next;                         // MP_Gimmick_TurnStart's place in the turn order
+    u8 abilityNext;                  // a new MEGA ability to start (battler + 1)
+    u8 dynaDone;                     // the end of turn's DYNAMAX count (battler bits)
+    u8 megaOf[2][PARTY_SIZE];        // MEGA form + 1, by side and party slot
+    u8 teraOf[2][PARTY_SIZE];        // TERA type + 1
+};
+static EWRAM_DATA struct GimmickState sG = {0};
+
+static u8 Owner(u8 b)
+{
+    if (GetBattlerSide(b) == B_SIDE_PLAYER)
+        return (gBattleTypeFlags & (BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER)) || gMpCoopBattle || IS_TRIPLE_BATTLE() ? b : 0;
+    return (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? b : 1;
+}
+
+static bool8 GimmickBattle(void)
+{
+    return !(gBattleTypeFlags & (BATTLE_TYPE_SAFARI | BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE
+                                 | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED));
+}
+
+static u8 FindMega(u8 b)
+{
+    u32 i, k;
+    for (i = 0; i < MP_Mega_Count(); i++)
+    {
+        const struct MegaForm *f = MP_Mega_Get(i);
+        if (f->species != gBattleMons[b].species)
+            continue;
+        if (f->stone != ITEM_NONE && f->stone == gBattleMons[b].item)
+            return i;
+        if ((f->stone == ITEM_RED_ORB || f->stone == ITEM_BLUE_ORB) && GetBattlerSide(b) == B_SIDE_PLAYER
+         && CheckBagHasItem(f->stone, 1))
+            return i;   // (Emerald's orbs are KEY ITEMS: in the bag is enough)
+        if (f->stone == ITEM_NONE)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+                if (gBattleMons[b].moves[k] == MOVE_DRAGON_ASCENT)
+                    return i;
+    }
+    return 0xFF;
+}
+
+static u8 *MegaSlot(u8 b) { return &sG.megaOf[GetBattlerSide(b)][gBattlerPartyIndexes[b] % PARTY_SIZE]; }
+static u8 *TeraSlot(u8 b) { return &sG.teraOf[GetBattlerSide(b)][gBattlerPartyIndexes[b] % PARTY_SIZE]; }
+
+static u8 ZType(u16 item)
+{
+    u8 i;
+    if (item < ITEM_NORMALIUM_Z || item > ITEM_FAIRIUM_Z)
+        return TYPE_MYSTERY;
+    i = item - ITEM_NORMALIUM_Z;
+    return i < TYPE_MYSTERY ? i : i + 1;   // (the crystals skip MYSTERY)
+}
+
+u8 MP_Gimmick_TeraType(u8 b)
+{
+    u8 t = b < gBattlersCount ? *TeraSlot(b) : 0;
+    return t ? t - 1 : TYPE_MYSTERY;
+}
+
+bool8 MP_Gimmick_Dynamaxed(u8 b)
+{
+    return b < gBattlersCount && sG.dynamax[b] != 0;
+}
+
+u8 MP_Gimmick_Available(u8 b)
+{
+    u8 avail = 0, z;
+    if (!GimmickBattle() || (sG.used & (1 << Owner(b))) || (gBattleMons[b].status2 & STATUS2_TRANSFORMED))
+        return 0;
+    if (MP_Gimmick_On(GIMMICK_MEGA) && !*MegaSlot(b) && FindMega(b) != 0xFF)
+        avail |= GIMMICK_AVAIL_MEGA;
+    if (MP_Gimmick_On(GIMMICK_DYNAMAX) && !*MegaSlot(b) && !sG.dynamax[b])
+        avail |= GIMMICK_AVAIL_DYNAMAX;
+    if (MP_Gimmick_On(GIMMICK_TERA) && !*TeraSlot(b))
+        avail |= GIMMICK_AVAIL_TERA;
+    z = ZType(gBattleMons[b].item);
+    if (MP_Gimmick_On(GIMMICK_Z) && z != TYPE_MYSTERY && !gGen4Battlers[b].embargo)
+        avail |= (z + 1) << 3;
+    return avail;
+}
+
+void MP_Gimmick_Choose(u8 b, u8 gimmick)
+{
+    if (b < MAX_BATTLERS_COUNT)
+        sG.wanted[b] = gimmick < GIMMICK_COUNT ? gimmick : GIMMICK_NONE;
+}
+
+void MP_Gimmick_BattleStart(void)
+{
+    memset(&sG, 0, sizeof(sG));
+}
+
+void MP_Gimmick_TurnStartReset(void)
+{
+    sG.next = 0;
+}
+
+// what MEGA and TERA leave on the Pokémon: again each time it comes in
+static void ApplyMega(u8 b, u8 form)
+{
+    const struct MegaForm *f = MP_Mega_Get(form);
+    struct Pokemon *mon = BattlerMon(b);
+    static const u8 sStatOf[5] = {STAT_ATK, STAT_DEF, STAT_SPEED, STAT_SPATK, STAT_SPDEF};
+    u32 k;
+    gBattleMons[b].types[0] = f->types[0];
+    gBattleMons[b].types[1] = f->types[1];
+    if (f->ability != ABILITY_NONE)
+        gBattleMons[b].ability = f->ability;
+    for (k = 0; k < 5; k++)
+    {
+        u8 st = sStatOf[k];
+        u32 iv = GetMonData(mon, MON_DATA_HP_IV + st, NULL), ev = GetMonData(mon, MON_DATA_HP_EV + st, NULL);
+        u16 v = ModifyStatByNature(GetNature(mon), ((2 * f->stats[k] + iv + ev / 4) * gBattleMons[b].level) / 100 + 5, st);
+        switch (st)
+        {
+        case STAT_ATK:   gBattleMons[b].attack = v;    break;
+        case STAT_DEF:   gBattleMons[b].defense = v;   break;
+        case STAT_SPEED: gBattleMons[b].speed = v;     break;
+        case STAT_SPATK: gBattleMons[b].spAttack = v;  break;
+        case STAT_SPDEF: gBattleMons[b].spDefense = v; break;
+        }
+    }
+}
+
+void MP_Gimmick_SwitchIn(u8 b)
+{
+    u8 m, t;
+    if (b >= MAX_BATTLERS_COUNT)
+        return;
+    sG.dynamax[b] = 0;
+    sG.zNow[b] = 0;
+    if (b >= gBattlersCount || gBattleMons[b].species == SPECIES_NONE)
+        return;
+    m = *MegaSlot(b);
+    t = *TeraSlot(b);
+    if (m && m - 1 < MP_Mega_Count() && MP_Mega_Get(m - 1)->species == gBattleMons[b].species)
+        ApplyMega(b, m - 1);
+    if (t)
+        SetTypes(b, t - 1, t - 1);
+}
+
+static u8 GimmickSay(u8 b, u8 msg, u8 animKind, u8 animValue)
+{
+    gBattleScripting.battler = gBattlerAttacker = b;
+    gBattleScripting.animArg1 = animValue;
+    gBattleScripting.animArg2 = animKind;
+    Say(msg);
+    BattleScriptExecute(animKind ? BattleScript_G59Gimmick : BattleScript_G59GimmickSay);
+    return TRUE;
+}
+
+// at the turn's start, in the turn's order (after switches and items, before any move)
+bool8 MP_Gimmick_TurnStart(void)
+{
+    if (sG.abilityNext)
+    {
+        u8 b = sG.abilityNext - 1;
+        sG.abilityNext = 0;
+        gGen59Battlers[b].arrived = FALSE;
+        if (AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, b, 0, 0, 0))
+            return TRUE;
+    }
+    while (sG.next < gBattlersCount)
+    {
+        u8 b = gBattlerByTurnOrder[sG.next++], want = sG.wanted[b], avail;
+        sG.wanted[b] = GIMMICK_NONE;
+        if (want == GIMMICK_NONE || gBattleMons[b].hp == 0 || gChosenActionByBattler[b] != B_ACTION_USE_MOVE)
+            continue;
+        avail = MP_Gimmick_Available(b);
+        switch (want)
+        {
+        case GIMMICK_MEGA:
+        {
+            u8 form = FindMega(b);
+            if (!(avail & GIMMICK_AVAIL_MEGA) || form == 0xFF)
+                break;
+            sG.used |= 1 << Owner(b);
+            *MegaSlot(b) = form + 1;
+            ApplyMega(b, form);
+            sG.abilityNext = b + 1;
+            gLastUsedItem = gBattleMons[b].item;
+            return GimmickSay(b, MP_Mega_Get(form)->stone == ITEM_RED_ORB || MP_Mega_Get(form)->stone == ITEM_BLUE_ORB
+                                 ? G59_MSG_PRIMAL : G59_MSG_MEGA, GIMMICK_ANIM_MEGA, form);
+        }
+        case GIMMICK_TERA:
+        {
+            u8 type = gSpeciesInfo[gBattleMons[b].species].types[0];
+            if (!(avail & GIMMICK_AVAIL_TERA))
+                break;
+            if (type == TYPE_MYSTERY)
+                type = TYPE_NORMAL;
+            sG.used |= 1 << Owner(b);
+            *TeraSlot(b) = type + 1;
+            SetTypes(b, type, type);
+            gGen59Battlers[b].thirdType = TYPE_MYSTERY;
+            PREPARE_TYPE_BUFFER(gBattleTextBuff1, type);
+            return GimmickSay(b, G59_MSG_TERA, GIMMICK_ANIM_TERA, type);
+        }
+        case GIMMICK_DYNAMAX:
+            if (!(avail & GIMMICK_AVAIL_DYNAMAX))
+                break;
+            sG.used |= 1 << Owner(b);
+            sG.dynamax[b] = 3;
+            return GimmickSay(b, G59_MSG_DYNAMAX, GIMMICK_ANIM_DYNAMAX, 0);
+        case GIMMICK_Z:
+        {
+            u16 move = gBattleMons[b].moves[gBattleStruct->chosenMovePositions[b] % MAX_MON_MOVES];
+            if (!(avail >> 3) || !IsDamaging(move) || MP_Gen4_MoveType(move, b) != GIMMICK_AVAIL_Z_TYPE(avail))
+                break;
+            sG.used |= 1 << Owner(b);
+            sG.zNow[b] = GIMMICK_AVAIL_Z_TYPE(avail) + 1;
+            return GimmickSay(b, G59_MSG_Z_POWER, 0, 0);
+        }
+        }
+    }
+    return FALSE;
+}
+
+s32 MP_Gimmick_Stab(s32 damage, u8 atk, u8 moveType)
+{
+    u8 tera = MP_Gimmick_TeraType(atk);
+    if (tera != TYPE_MYSTERY)
+    {
+        const u8 *own = gSpeciesInfo[gBattleMons[atk].species].types;
+        bool8 orig = own[0] == moveType || own[1] == moveType;
+        if (moveType == tera)
+            return orig ? damage * 2 : damage * 15 / 10;
+        return orig ? damage * 15 / 10 : damage;
+    }
+    if (IS_BATTLER_OF_TYPE(atk, moveType))
+        return MP_Gen4_Stab(damage, atk);
+    return damage;
+}
+
+// Z-MOVES' and MAX MOVES' power from the move's own
+static u16 ZPower(u16 p)
+{
+    static const u8 sUpTo[] = {55, 65, 75, 85, 95, 100, 110, 125, 130};
+    static const u8 sZ[] = {100, 120, 140, 160, 175, 180, 185, 190, 195};
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUpTo); i++)
+        if (p <= sUpTo[i])
+            return sZ[i];
+    return 200;
+}
+
+static u16 MaxPower(u16 p, u8 type)
+{
+    static const u8 sUpTo[] = {40, 50, 60, 70, 100, 140};
+    static const u8 sMax[] = {90, 100, 110, 120, 130, 140};
+    static const u8 sWeak[] = {70, 75, 80, 85, 90, 95};   // FIGHTING and POISON
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUpTo); i++)
+        if (p <= sUpTo[i])
+            return (type == TYPE_FIGHTING || type == TYPE_POISON) ? sWeak[i] : sMax[i];
+    return (type == TYPE_FIGHTING || type == TYPE_POISON) ? 100 : 150;
+}
+
+u16 MP_Gimmick_MovePower(u16 move, u8 atk, u16 power)
+{
+    u8 type;
+    if (power == 0 || atk >= gBattlersCount)
+        return power;
+    type = MP_Gen4_MoveType(move, atk);
+    if (sG.dynamax[atk])
+        return MaxPower(gBattleMoves[move].power > 1 ? gBattleMoves[move].power : 100, type);
+    if (sG.zNow[atk] && sG.zNow[atk] - 1 == type)
+        return ZPower(gBattleMoves[move].power > 1 ? gBattleMoves[move].power : 100);
+    if (MP_Gimmick_TeraType(atk) == type && power < 60 && MP_Gen59_Priority(atk, move) <= 0
+     && gBattleMoves[move].effect != EFFECT_MULTI_HIT && gBattleMoves[move].effect != EFFECT_DOUBLE_HIT
+     && gBattleMoves[move].effect != EFFECT_TRIPLE_KICK)
+        return 60;
+    return power;
+}
+
+u16 MP_Gimmick_MoveUsed(u8 b, u16 move)
+{
+    if (b < gBattlersCount && sG.dynamax[b] && move != MOVE_NONE && move != MOVE_STRUGGLE && !IsDamaging(move))
+        return MOVE_PROTECT;   // MAX GUARD
+    return move;
+}
+
+// a MAX MOVE's own effect after it hit (its type's): NULL when none
+static const u8 *MaxMoveEffect(u8 atk)
+{
+    static const s8 sStat[NUMBER_OF_MON_TYPES][2] = {   // {stat, +1 the user's side / -1 the foes'}
+        [TYPE_NORMAL] = {STAT_SPEED, -1}, [TYPE_FIGHTING] = {STAT_ATK, 1}, [TYPE_FLYING] = {STAT_SPEED, 1},
+        [TYPE_POISON] = {STAT_SPATK, 1}, [TYPE_GROUND] = {STAT_SPDEF, 1}, [TYPE_BUG] = {STAT_SPATK, -1},
+        [TYPE_GHOST] = {STAT_DEF, -1}, [TYPE_STEEL] = {STAT_DEF, 1}, [TYPE_DRAGON] = {STAT_ATK, -1},
+        [TYPE_DARK] = {STAT_SPDEF, -1},
+    };
+    u8 type = MP_Gen4_MoveType(gCurrentMove, atk), side = GetBattlerSide(atk);
+    u32 i;
+    bool8 weather = WEATHER_HAS_EFFECT2;
+    switch (type)
+    {
+    case TYPE_FIRE:
+    case TYPE_WATER:
+    case TYPE_ROCK:
+    case TYPE_ICE:
+    {
+        u16 w = type == TYPE_FIRE ? B_WEATHER_SUN_TEMPORARY : type == TYPE_WATER ? B_WEATHER_RAIN_TEMPORARY
+              : type == TYPE_ROCK ? B_WEATHER_SANDSTORM_TEMPORARY : B_WEATHER_HAIL_TEMPORARY;
+        if (!weather || (gBattleWeather & w))
+            return NULL;
+        gBattleWeather = w;
+        gWishFutureKnock.weatherDuration = 5;
+        Say(type == TYPE_FIRE ? G59_MSG_SUN_UP : type == TYPE_WATER ? G59_MSG_RAIN_UP
+            : type == TYPE_ROCK ? G59_MSG_SANDSTORM_UP : G59_MSG_HAIL_UP);
+        return BattleScript_G59AbilitySayMoveEnd;
+    }
+    case TYPE_GRASS:
+    case TYPE_ELECTRIC:
+    case TYPE_PSYCHIC:
+    case TYPE_FAIRY:
+    {
+        u8 t = type == TYPE_GRASS ? G59_TERRAIN_GRASSY : type == TYPE_ELECTRIC ? G59_TERRAIN_ELECTRIC
+             : type == TYPE_PSYCHIC ? G59_TERRAIN_PSYCHIC : G59_TERRAIN_MISTY;
+        if (gGen59Field.terrain == t)
+            return NULL;
+        gGen59Field.terrain = t;
+        gGen59Field.terrainTurns = 5;
+        Say(sTerrainMsg[t]);
+        return BattleScript_G59AbilitySayMoveEnd;
+    }
+    }
+    if (type >= NUMBER_OF_MON_TYPES || sStat[type][1] == 0)
+        return NULL;
+    {
+        u8 stat = sStat[type][0];
+        bool8 any = FALSE, up = sStat[type][1] > 0;
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (!Alive(i) || (GetBattlerSide(i) == side) != up)
+                continue;
+            if (up && gBattleMons[i].statStages[stat] < MAX_STAT_STAGE)
+                gBattleMons[i].statStages[stat]++, any = TRUE;
+            else if (!up && gBattleMons[i].statStages[stat] > MIN_STAT_STAGE && !(gBattleMons[i].status2 & STATUS2_SUBSTITUTE))
+                gBattleMons[i].statStages[stat]--, any = TRUE;
+        }
+        if (!any)
+            return NULL;
+        PREPARE_STAT_BUFFER(gBattleTextBuff1, stat);
+        Say(up ? G59_MSG_TEAM_STAT_UP : G59_MSG_FOES_STAT_DOWN);
+        return BattleScript_G59AbilitySayMoveEnd;
+    }
+}
+
+// the move's end: a MAX MOVE's effect, Z-POWER spent
+static const u8 *GimmickMoveEnd(u8 atk, u8 def)
+{
+    bool8 hit = def < gBattlersCount && atk != def && IsDamaging(gCurrentMove) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT);
+    sG.zNow[atk] = 0;
+    if (sG.dynamax[atk] && hit && Alive(atk))
+        return MaxMoveEffect(atk);
+    return NULL;
+}
+
+// the end of the turn: DYNAMAX counts down (NULL when nothing is left to say)
+static const u8 *GimmickEndTurn(void)
+{
+    u32 i;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (!sG.dynamax[i] || (sG.dynaDone & (1 << i)))
+            continue;
+        sG.dynaDone |= 1 << i;
+        if (--sG.dynamax[i] == 0 && gBattleMons[i].hp != 0)
+        {
+            gBattlerAttacker = gBattleScripting.battler = i;
+            gBattleScripting.animArg1 = 0;
+            gBattleScripting.animArg2 = GIMMICK_ANIM_DYNAMAX_END;
+            Say(G59_MSG_DYNAMAX_END);
+            return BattleScript_G59DynamaxEnd;
+        }
+    }
+    sG.dynaDone = 0;
     return NULL;
 }

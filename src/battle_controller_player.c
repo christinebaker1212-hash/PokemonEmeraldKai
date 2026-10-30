@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "battle_gimmick.h"
 #include "mp.h"
 #include "mp_life_battle.h"
 #include "battle.h"
@@ -102,6 +103,12 @@ static void HandleInputChooseTarget(void);
 static void HandleInputChooseAction(void);
 static void HandleInputChooseMove(void);
 static bool8 sMpMoveInfo;   // Moemon Co-op QoL: move info view (R)
+// Moemon Kai: START in the move list picks a gimmick to use with the move (battle_gimmick.h); its line shows it
+static u8 sMpGimmick;
+static u16 sMpGimmickHint;
+static u8 MpGimmickTake(void);
+static bool8 MpGimmickFits(u8 gimmick);
+static u8 MpGimmickNext(u8 from);
 static u16 sMpQuickBall;    // Moemon Co-op QoL: ball thrown with L
 static bool8 sMpPartnerGlance;   // Moemon Co-op QoL: partner's team on the prompt (R)
 
@@ -637,7 +644,7 @@ static void HandleInputChooseTargetTriple(void)
     {
         PlaySE(SE_SELECT);
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
-        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (MpGimmickTake() << GIMMICK_MOVE_SHIFT) | (gMultiUsePlayerCursor << 8));
         MP_Coop_SetIntent(MP_INTENT_MOVE, MpChosenMove(), gMultiUsePlayerCursor);
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
         sMpTargetShown = 0xFF;
@@ -710,7 +717,7 @@ static void HandleInputChooseTarget(void)
     {
         PlaySE(SE_SELECT);
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
-        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+        BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (MpGimmickTake() << GIMMICK_MOVE_SHIFT) | (gMultiUsePlayerCursor << 8));
         MP_Coop_SetIntent(MP_INTENT_MOVE, GetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_MOVE1 + gMoveSelectionCursor[gActiveBattler]), gMultiUsePlayerCursor);
         EndBounceEffect(gMultiUsePlayerCursor, BOUNCE_HEALTHBOX);
         PlayerBufferExecCompleted();
@@ -824,6 +831,26 @@ static void HandleInputChooseMove(void)
     else
         gPlayerDpadHoldFrames = 0;
 
+    // Moemon Kai: START: the next gimmick it may use (or none); the hint line turns every 90 frames
+    if (JOY_NEW(START_BUTTON) && gBattleBufferA[gActiveBattler][3])
+    {
+        u8 next = MpGimmickNext(sMpGimmick);
+        if (next != sMpGimmick)
+        {
+            sMpGimmick = next;
+            PlaySE(SE_SELECT);
+            MoveSelectionDisplayMoveType();
+        }
+        return;
+    }
+    if (gBattleBufferA[gActiveBattler][3] && !sMpGimmick && ++sMpGimmickHint % 90 == 0)
+        MoveSelectionDisplayMoveType();
+    if (sMpGimmick && !MpGimmickFits(sMpGimmick))
+    {
+        sMpGimmick = GIMMICK_NONE;   // (a Z-MOVE needs a move of its crystal's type)
+        MoveSelectionDisplayMoveType();
+    }
+
     // Moemon Co-op QoL: R flips between PP/type and power/accuracy/category
     if (JOY_NEW(R_BUTTON))
     {
@@ -885,7 +912,7 @@ static void HandleInputChooseMove(void)
                       moveTarget, canSelectTarget, gBattleBufferA[gActiveBattler][1]);
         if (!canSelectTarget)
         {
-            BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (gMultiUsePlayerCursor << 8));
+            BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, gMoveSelectionCursor[gActiveBattler] | (MpGimmickTake() << GIMMICK_MOVE_SHIFT) | (gMultiUsePlayerCursor << 8));
             MP_Coop_SetIntent(MP_INTENT_MOVE, moveInfo->moves[gMoveSelectionCursor[gActiveBattler]], gMultiUsePlayerCursor);
             PlayerBufferExecCompleted();
         }
@@ -2035,6 +2062,22 @@ static void MoveSelectionDisplayMoveType(void)
 
     if (sMpMoveInfo && gBattleBufferA[gActiveBattler][2] != TRUE)
         return;   // MpDisplayMoveInfo drew this window
+
+    // Moemon Kai: the gimmick chosen, or every other 90 frames which one START would pick
+    if (sMpGimmick || (gBattleBufferA[gActiveBattler][3] && (sMpGimmickHint / 90) % 2 && MpGimmickNext(GIMMICK_NONE)))
+    {
+        static const u8 sStart[] = _("START: ");
+        u8 g = sMpGimmick ? sMpGimmick : MpGimmickNext(GIMMICK_NONE);
+        txtPtr = gDisplayedStringBattle;
+        *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;
+        *(txtPtr)++ = EXT_CTRL_CODE_FONT;
+        *(txtPtr)++ = FONT_NARROW;
+        if (!sMpGimmick)
+            txtPtr = StringCopy(txtPtr, sStart);
+        StringCopy(txtPtr, MP_Gimmick_MenuLabel(g, moveInfo->monTypes[0]));
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+        return;
+    }
 
     txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
     *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;
@@ -3200,6 +3243,8 @@ static void PlayerHandleChooseMove(void)
 
 void InitMoveSelectionsVarsAndStrings(void)
 {
+    sMpGimmick = GIMMICK_NONE;
+    sMpGimmickHint = 0;
     MoveSelectionDisplayMoveNames();
     gMultiUsePlayerCursor = 0xFF;
     MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 0);
@@ -3756,4 +3801,48 @@ bool8 MP_Test_IsChoosingAction(void)
             return TRUE;
     }
     return FALSE;
+}
+
+// ---------------------------------------------------------------------------------------------- Moemon Kai: gimmicks
+
+static bool8 MpGimmickFits(u8 gimmick)
+{
+    u8 avail = gBattleBufferA[gActiveBattler][3];
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler] % MAX_MON_MOVES];
+    switch (gimmick)
+    {
+    case GIMMICK_MEGA:    return (avail & GIMMICK_AVAIL_MEGA) != 0;
+    case GIMMICK_DYNAMAX: return (avail & GIMMICK_AVAIL_DYNAMAX) != 0;
+    case GIMMICK_TERA:    return (avail & GIMMICK_AVAIL_TERA) != 0;
+    case GIMMICK_Z:
+        return (avail >> 3) && gBattleMoves[move].power != 0 && gBattleMoves[move].type == GIMMICK_AVAIL_Z_TYPE(avail);
+    }
+    return FALSE;
+}
+
+// the gimmick after FROM (MEGA, Z-MOVE, DYNAMAX, TERA, then none) that it may use with the move under the cursor
+static u8 MpGimmickNext(u8 from)
+{
+    static const u8 sOrder[] = {GIMMICK_NONE, GIMMICK_MEGA, GIMMICK_Z, GIMMICK_DYNAMAX, GIMMICK_TERA};
+    u8 i, at = 0;
+    for (i = 0; i < ARRAY_COUNT(sOrder); i++)
+        if (sOrder[i] == from)
+            at = i;
+    for (i = 1; i < ARRAY_COUNT(sOrder); i++)
+    {
+        u8 g = sOrder[(at + i) % ARRAY_COUNT(sOrder)];
+        if (g == GIMMICK_NONE || MpGimmickFits(g))
+            return g;
+    }
+    return GIMMICK_NONE;
+}
+
+static u8 MpGimmickTake(void)
+{
+    u8 g = sMpGimmick && MpGimmickFits(sMpGimmick) ? sMpGimmick : GIMMICK_NONE;
+    if (g)
+        MPNet_Log("gimmick: battler %d chose %d", gActiveBattler, g);
+    sMpGimmick = GIMMICK_NONE;
+    return g;
 }

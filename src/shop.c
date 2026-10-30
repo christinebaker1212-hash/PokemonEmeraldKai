@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp_region.h"
+#include "battle_gimmick.h"
 #include "mp.h"
 #include "bg.h"
 #include "data.h"
@@ -1278,6 +1279,21 @@ static const u16 sMpShopEvolutionItems[] = {
     ITEM_STAR_SWEET, ITEM_RIBBON_SWEET, ITEM_AUSPICIOUS_ARMOR, ITEM_MALICIOUS_ARMOR, ITEM_RED_NECTAR,
     ITEM_YELLOW_NECTAR, ITEM_PINK_NECTAR, ITEM_PURPLE_NECTAR, ITEM_LEADERS_CREST,
 };
+// Moemon Kai: MEGA STONES, the orbs and Z-CRYSTALS while their gimmicks are on (battle_gimmick.h)
+static const u16 sMpShopGimmickItems[] = {
+    ITEM_VENUSAURITE, ITEM_CHARIZARDITE_X, ITEM_CHARIZARDITE_Y, ITEM_BLASTOISINITE, ITEM_BEEDRILLITE, ITEM_PIDGEOTITE,
+    ITEM_ALAKAZITE, ITEM_SLOWBRONITE, ITEM_GENGARITE, ITEM_KANGASKHANITE, ITEM_PINSIRITE, ITEM_GYARADOSITE,
+    ITEM_AERODACTYLITE, ITEM_MEWTWONITE_X, ITEM_MEWTWONITE_Y, ITEM_AMPHAROSITE, ITEM_STEELIXITE, ITEM_SCIZORITE,
+    ITEM_HERACRONITE, ITEM_HOUNDOOMINITE, ITEM_TYRANITARITE, ITEM_SCEPTILITE, ITEM_BLAZIKENITE, ITEM_SWAMPERTITE,
+    ITEM_GARDEVOIRITE, ITEM_SABLENITE, ITEM_MAWILITE, ITEM_AGGRONITE, ITEM_MEDICHAMITE, ITEM_MANECTITE,
+    ITEM_SHARPEDONITE, ITEM_CAMERUPTITE, ITEM_ALTARIANITE, ITEM_BANETTITE, ITEM_ABSOLITE, ITEM_GLALITITE,
+    ITEM_SALAMENCITE, ITEM_METAGROSSITE, ITEM_LATIASITE, ITEM_LATIOSITE, ITEM_LOPUNNITE, ITEM_GARCHOMPITE,
+    ITEM_LUCARIONITE, ITEM_ABOMASITE, ITEM_GALLADITE, ITEM_AUDINITE, ITEM_DIANCITE,
+    ITEM_NORMALIUM_Z, ITEM_FIGHTINIUM_Z, ITEM_FLYINIUM_Z, ITEM_POISONIUM_Z, ITEM_GROUNDIUM_Z, ITEM_ROCKIUM_Z,
+    ITEM_BUGINIUM_Z, ITEM_GHOSTIUM_Z, ITEM_STEELIUM_Z, ITEM_FIRIUM_Z, ITEM_WATERIUM_Z, ITEM_GRASSIUM_Z,
+    ITEM_ELECTRIUM_Z, ITEM_PSYCHIUM_Z, ITEM_ICIUM_Z, ITEM_DRAGONIUM_Z, ITEM_DARKINIUM_Z, ITEM_FAIRIUM_Z,
+};
+
 static const struct { u16 map; const u16 *items; u8 count; } sMpShopExtras[] = {
     {MAP_LILYCOVE_CITY_DEPARTMENT_STORE_3F, sMpShopBattleItems, ARRAY_COUNT(sMpShopBattleItems)},
     {MAP_JOHTO_GOLDENROD_DEPT_STORE3F, sMpShopBattleItems, ARRAY_COUNT(sMpShopBattleItems)},
@@ -1285,6 +1301,9 @@ static const struct { u16 map; const u16 *items; u8 count; } sMpShopExtras[] = {
     {MAP_LILYCOVE_CITY_DEPARTMENT_STORE_2F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
     {MAP_JOHTO_GOLDENROD_DEPT_STORE4F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
     {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_4F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
+    {MAP_LILYCOVE_CITY_DEPARTMENT_STORE_3F, sMpShopGimmickItems, ARRAY_COUNT(sMpShopGimmickItems)},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE3F, sMpShopGimmickItems, ARRAY_COUNT(sMpShopGimmickItems)},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_3F, sMpShopGimmickItems, ARRAY_COUNT(sMpShopGimmickItems)},
 };
 
 static const u16 *MP_ShopItems(const u16 *items)
@@ -1304,7 +1323,7 @@ static const u16 *MP_ShopItems(const u16 *items)
             u16 item = sMpShopExtras[i].items[j];
             for (k = 0; k < n && sItems[k] != item; k++)
                 ;
-            if (k == n && MP_Gen_ItemAllowed(item) && GetItemPrice(item) != 0)
+            if (k == n && MP_Gen_ItemAllowed(item) && MP_Gimmick_ItemAllowed(item) && GetItemPrice(item) != 0)
                 sItems[n++] = item;
         }
     }

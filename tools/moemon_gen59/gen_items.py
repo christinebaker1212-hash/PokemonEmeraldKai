@@ -39,7 +39,24 @@ HELD = ['ITEM_FLOAT_STONE', 'ITEM_ABSORB_BULB', 'ITEM_CELL_BATTERY', 'ITEM_SNOWB
         'ITEM_YELLOW_NECTAR', 'ITEM_PINK_NECTAR', 'ITEM_PURPLE_NECTAR', 'ITEM_ASSAULT_VEST', 'ITEM_ROCKY_HELMET',
         'ITEM_AIR_BALLOON', 'ITEM_WEAKNESS_POLICY', 'ITEM_HEAVY_DUTY_BOOTS', 'ITEM_PIXIE_PLATE', 'ITEM_FAIRY_FEATHER']
 OTHER = ['ITEM_GIMMIGHOUL_COIN', 'ITEM_LEADERS_CREST']
-ITEMS = [(c, 'stone') for c in STONES] + [(c, 'held') for c in HELD] + [(c, 'other') for c in OTHER]
+# MEGA EVOLUTION's stones, in Moemon Quetzal's order of its MEGA forms (src/battle_gimmick.c)
+MEGA = ['ITEM_VENUSAURITE', 'ITEM_CHARIZARDITE_X', 'ITEM_CHARIZARDITE_Y', 'ITEM_BLASTOISINITE', 'ITEM_BEEDRILLITE',
+        'ITEM_PIDGEOTITE', 'ITEM_ALAKAZITE', 'ITEM_SLOWBRONITE', 'ITEM_GENGARITE', 'ITEM_KANGASKHANITE', 'ITEM_PINSIRITE',
+        'ITEM_GYARADOSITE', 'ITEM_AERODACTYLITE', 'ITEM_MEWTWONITE_X', 'ITEM_MEWTWONITE_Y', 'ITEM_AMPHAROSITE',
+        'ITEM_STEELIXITE', 'ITEM_SCIZORITE', 'ITEM_HERACRONITE', 'ITEM_HOUNDOOMINITE', 'ITEM_TYRANITARITE',
+        'ITEM_SCEPTILITE', 'ITEM_BLAZIKENITE', 'ITEM_SWAMPERTITE', 'ITEM_GARDEVOIRITE', 'ITEM_SABLENITE', 'ITEM_MAWILITE',
+        'ITEM_AGGRONITE', 'ITEM_MEDICHAMITE', 'ITEM_MANECTITE', 'ITEM_SHARPEDONITE', 'ITEM_CAMERUPTITE',
+        'ITEM_ALTARIANITE', 'ITEM_BANETTITE', 'ITEM_ABSOLITE', 'ITEM_GLALITITE', 'ITEM_SALAMENCITE', 'ITEM_METAGROSSITE',
+        'ITEM_LATIASITE', 'ITEM_LATIOSITE', 'ITEM_LOPUNNITE', 'ITEM_GARCHOMPITE', 'ITEM_LUCARIONITE', 'ITEM_ABOMASITE',
+        'ITEM_GALLADITE', 'ITEM_AUDINITE', 'ITEM_DIANCITE']   # (KYOGRE / GROUDON: Emerald's own BLUE / RED ORB)
+# Z-MOVES' crystals, one a type (in TYPE_* order, without MYSTERY)
+ZCRYSTALS = ['ITEM_NORMALIUM_Z', 'ITEM_FIGHTINIUM_Z', 'ITEM_FLYINIUM_Z', 'ITEM_POISONIUM_Z', 'ITEM_GROUNDIUM_Z',
+             'ITEM_ROCKIUM_Z', 'ITEM_BUGINIUM_Z', 'ITEM_GHOSTIUM_Z', 'ITEM_STEELIUM_Z', 'ITEM_FIRIUM_Z', 'ITEM_WATERIUM_Z',
+             'ITEM_GRASSIUM_Z', 'ITEM_ELECTRIUM_Z', 'ITEM_PSYCHIUM_Z', 'ITEM_ICIUM_Z', 'ITEM_DRAGONIUM_Z', 'ITEM_DARKINIUM_Z',
+             'ITEM_FAIRIUM_Z']
+GIMMICK_PRICE = 10000   # (the newer games give them; here the big department stores sell them while the gimmick is on)
+ITEMS = [(c, 'stone') for c in STONES] + [(c, 'held') for c in HELD] + [(c, 'other') for c in OTHER] + \
+        [(c, 'mega') for c in MEGA] + [(c, 'z') for c in ZCRYSTALS]
 
 
 def parse_expansion(exp):
@@ -111,8 +128,11 @@ def main():
                     'AUSPICIOUS ARMOR': 'AUSPIC.ARMOR', 'MALICIOUS ARMOR': 'MALIC. ARMOR',
                     'STRAWBERRY SWEET': 'STRAWBRY SWT', 'HEAVY-DUTY BOOTS': 'HEAVYDTYBOOTS',
                     'WEAKNESS POLICY': 'WEAKNESS POL.', 'GIMMIGHOUL COIN': 'GIMMI. COIN', 'BOOSTER ENERGY': 'BOOSTER ENRGY',
-                    "LEADER'S CREST": "LEADER'SCREST"}.get(name, name[:13])
-        price = e['price'] or SHOP_PRICES.get(const, 0)   # (points-only items in the newer games: a shop price here)
+                    "LEADER'S CREST": "LEADER'SCREST", 'CHARIZARDITE X': 'CHARZARDITE X',
+                    'CHARIZARDITE Y': 'CHARZARDITE Y'}.get(name, name[:13])
+        price = e['price'] or SHOP_PRICES.get(const, 0)
+        if kind in ('mega', 'z'):
+            price = GIMMICK_PRICE   # (points-only items in the newer games: a shop price here)
         lines = ['        .name = _("%s"),' % name, '        .itemId = %s,' % const, '        .price = %d,' % price,
                  '        .description = s%sDesc,' % sym]
         if kind == 'stone':

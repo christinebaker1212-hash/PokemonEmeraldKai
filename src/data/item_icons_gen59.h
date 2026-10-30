@@ -89,6 +89,136 @@ extern const u32 gItemIcon_GimmighoulCoin[];
 extern const u32 gItemIconPalette_GimmighoulCoin[];
 extern const u32 gItemIcon_LeadersCrest[];
 extern const u32 gItemIconPalette_LeadersCrest[];
+extern const u32 gItemIcon_Venusaurite[];
+extern const u32 gItemIconPalette_Venusaurite[];
+extern const u32 gItemIcon_CharizarditeX[];
+extern const u32 gItemIconPalette_CharizarditeX[];
+extern const u32 gItemIcon_CharizarditeY[];
+extern const u32 gItemIconPalette_CharizarditeY[];
+extern const u32 gItemIcon_Blastoisinite[];
+extern const u32 gItemIconPalette_Blastoisinite[];
+extern const u32 gItemIcon_Beedrillite[];
+extern const u32 gItemIconPalette_Beedrillite[];
+extern const u32 gItemIcon_Pidgeotite[];
+extern const u32 gItemIconPalette_Pidgeotite[];
+extern const u32 gItemIcon_Alakazite[];
+extern const u32 gItemIconPalette_Alakazite[];
+extern const u32 gItemIcon_Slowbronite[];
+extern const u32 gItemIconPalette_Slowbronite[];
+extern const u32 gItemIcon_Gengarite[];
+extern const u32 gItemIconPalette_Gengarite[];
+extern const u32 gItemIcon_Kangaskhanite[];
+extern const u32 gItemIconPalette_Kangaskhanite[];
+extern const u32 gItemIcon_Pinsirite[];
+extern const u32 gItemIconPalette_Pinsirite[];
+extern const u32 gItemIcon_Gyaradosite[];
+extern const u32 gItemIconPalette_Gyaradosite[];
+extern const u32 gItemIcon_Aerodactylite[];
+extern const u32 gItemIconPalette_Aerodactylite[];
+extern const u32 gItemIcon_MewtwoniteX[];
+extern const u32 gItemIconPalette_MewtwoniteX[];
+extern const u32 gItemIcon_MewtwoniteY[];
+extern const u32 gItemIconPalette_MewtwoniteY[];
+extern const u32 gItemIcon_Ampharosite[];
+extern const u32 gItemIconPalette_Ampharosite[];
+extern const u32 gItemIcon_Steelixite[];
+extern const u32 gItemIconPalette_Steelixite[];
+extern const u32 gItemIcon_Scizorite[];
+extern const u32 gItemIconPalette_Scizorite[];
+extern const u32 gItemIcon_Heracronite[];
+extern const u32 gItemIconPalette_Heracronite[];
+extern const u32 gItemIcon_Houndoominite[];
+extern const u32 gItemIconPalette_Houndoominite[];
+extern const u32 gItemIcon_Tyranitarite[];
+extern const u32 gItemIconPalette_Tyranitarite[];
+extern const u32 gItemIcon_Sceptilite[];
+extern const u32 gItemIconPalette_Sceptilite[];
+extern const u32 gItemIcon_Blazikenite[];
+extern const u32 gItemIconPalette_Blazikenite[];
+extern const u32 gItemIcon_Swampertite[];
+extern const u32 gItemIconPalette_Swampertite[];
+extern const u32 gItemIcon_Gardevoirite[];
+extern const u32 gItemIconPalette_Gardevoirite[];
+extern const u32 gItemIcon_Sablenite[];
+extern const u32 gItemIconPalette_Sablenite[];
+extern const u32 gItemIcon_Mawilite[];
+extern const u32 gItemIconPalette_Mawilite[];
+extern const u32 gItemIcon_Aggronite[];
+extern const u32 gItemIconPalette_Aggronite[];
+extern const u32 gItemIcon_Medichamite[];
+extern const u32 gItemIconPalette_Medichamite[];
+extern const u32 gItemIcon_Manectite[];
+extern const u32 gItemIconPalette_Manectite[];
+extern const u32 gItemIcon_Sharpedonite[];
+extern const u32 gItemIconPalette_Sharpedonite[];
+extern const u32 gItemIcon_Cameruptite[];
+extern const u32 gItemIconPalette_Cameruptite[];
+extern const u32 gItemIcon_Altarianite[];
+extern const u32 gItemIconPalette_Altarianite[];
+extern const u32 gItemIcon_Banettite[];
+extern const u32 gItemIconPalette_Banettite[];
+extern const u32 gItemIcon_Absolite[];
+extern const u32 gItemIconPalette_Absolite[];
+extern const u32 gItemIcon_Glalitite[];
+extern const u32 gItemIconPalette_Glalitite[];
+extern const u32 gItemIcon_Salamencite[];
+extern const u32 gItemIconPalette_Salamencite[];
+extern const u32 gItemIcon_Metagrossite[];
+extern const u32 gItemIconPalette_Metagrossite[];
+extern const u32 gItemIcon_Latiasite[];
+extern const u32 gItemIconPalette_Latiasite[];
+extern const u32 gItemIcon_Latiosite[];
+extern const u32 gItemIconPalette_Latiosite[];
+extern const u32 gItemIcon_Lopunnite[];
+extern const u32 gItemIconPalette_Lopunnite[];
+extern const u32 gItemIcon_Garchompite[];
+extern const u32 gItemIconPalette_Garchompite[];
+extern const u32 gItemIcon_Lucarionite[];
+extern const u32 gItemIconPalette_Lucarionite[];
+extern const u32 gItemIcon_Abomasite[];
+extern const u32 gItemIconPalette_Abomasite[];
+extern const u32 gItemIcon_Galladite[];
+extern const u32 gItemIconPalette_Galladite[];
+extern const u32 gItemIcon_Audinite[];
+extern const u32 gItemIconPalette_Audinite[];
+extern const u32 gItemIcon_Diancite[];
+extern const u32 gItemIconPalette_Diancite[];
+extern const u32 gItemIcon_NormaliumZ[];
+extern const u32 gItemIconPalette_NormaliumZ[];
+extern const u32 gItemIcon_FightiniumZ[];
+extern const u32 gItemIconPalette_FightiniumZ[];
+extern const u32 gItemIcon_FlyiniumZ[];
+extern const u32 gItemIconPalette_FlyiniumZ[];
+extern const u32 gItemIcon_PoisoniumZ[];
+extern const u32 gItemIconPalette_PoisoniumZ[];
+extern const u32 gItemIcon_GroundiumZ[];
+extern const u32 gItemIconPalette_GroundiumZ[];
+extern const u32 gItemIcon_RockiumZ[];
+extern const u32 gItemIconPalette_RockiumZ[];
+extern const u32 gItemIcon_BuginiumZ[];
+extern const u32 gItemIconPalette_BuginiumZ[];
+extern const u32 gItemIcon_GhostiumZ[];
+extern const u32 gItemIconPalette_GhostiumZ[];
+extern const u32 gItemIcon_SteeliumZ[];
+extern const u32 gItemIconPalette_SteeliumZ[];
+extern const u32 gItemIcon_FiriumZ[];
+extern const u32 gItemIconPalette_FiriumZ[];
+extern const u32 gItemIcon_WateriumZ[];
+extern const u32 gItemIconPalette_WateriumZ[];
+extern const u32 gItemIcon_GrassiumZ[];
+extern const u32 gItemIconPalette_GrassiumZ[];
+extern const u32 gItemIcon_ElectriumZ[];
+extern const u32 gItemIconPalette_ElectriumZ[];
+extern const u32 gItemIcon_PsychiumZ[];
+extern const u32 gItemIconPalette_PsychiumZ[];
+extern const u32 gItemIcon_IciumZ[];
+extern const u32 gItemIconPalette_IciumZ[];
+extern const u32 gItemIcon_DragoniumZ[];
+extern const u32 gItemIconPalette_DragoniumZ[];
+extern const u32 gItemIcon_DarkiniumZ[];
+extern const u32 gItemIconPalette_DarkiniumZ[];
+extern const u32 gItemIcon_FairiumZ[];
+extern const u32 gItemIconPalette_FairiumZ[];
 #define ITEM_ICONS_GEN59 \
     [ITEM_ICE_STONE] = {gItemIcon_IceStone, gItemIconPalette_IceStone}, \
     [ITEM_SWEET_APPLE] = {gItemIcon_SweetApple, gItemIconPalette_SweetApple}, \
@@ -134,4 +264,69 @@ extern const u32 gItemIconPalette_LeadersCrest[];
     [ITEM_PIXIE_PLATE] = {gItemIcon_PixiePlate, gItemIconPalette_PixiePlate}, \
     [ITEM_FAIRY_FEATHER] = {gItemIcon_FairyFeather, gItemIconPalette_FairyFeather}, \
     [ITEM_GIMMIGHOUL_COIN] = {gItemIcon_GimmighoulCoin, gItemIconPalette_GimmighoulCoin}, \
-    [ITEM_LEADERS_CREST] = {gItemIcon_LeadersCrest, gItemIconPalette_LeadersCrest},
+    [ITEM_LEADERS_CREST] = {gItemIcon_LeadersCrest, gItemIconPalette_LeadersCrest}, \
+    [ITEM_VENUSAURITE] = {gItemIcon_Venusaurite, gItemIconPalette_Venusaurite}, \
+    [ITEM_CHARIZARDITE_X] = {gItemIcon_CharizarditeX, gItemIconPalette_CharizarditeX}, \
+    [ITEM_CHARIZARDITE_Y] = {gItemIcon_CharizarditeY, gItemIconPalette_CharizarditeY}, \
+    [ITEM_BLASTOISINITE] = {gItemIcon_Blastoisinite, gItemIconPalette_Blastoisinite}, \
+    [ITEM_BEEDRILLITE] = {gItemIcon_Beedrillite, gItemIconPalette_Beedrillite}, \
+    [ITEM_PIDGEOTITE] = {gItemIcon_Pidgeotite, gItemIconPalette_Pidgeotite}, \
+    [ITEM_ALAKAZITE] = {gItemIcon_Alakazite, gItemIconPalette_Alakazite}, \
+    [ITEM_SLOWBRONITE] = {gItemIcon_Slowbronite, gItemIconPalette_Slowbronite}, \
+    [ITEM_GENGARITE] = {gItemIcon_Gengarite, gItemIconPalette_Gengarite}, \
+    [ITEM_KANGASKHANITE] = {gItemIcon_Kangaskhanite, gItemIconPalette_Kangaskhanite}, \
+    [ITEM_PINSIRITE] = {gItemIcon_Pinsirite, gItemIconPalette_Pinsirite}, \
+    [ITEM_GYARADOSITE] = {gItemIcon_Gyaradosite, gItemIconPalette_Gyaradosite}, \
+    [ITEM_AERODACTYLITE] = {gItemIcon_Aerodactylite, gItemIconPalette_Aerodactylite}, \
+    [ITEM_MEWTWONITE_X] = {gItemIcon_MewtwoniteX, gItemIconPalette_MewtwoniteX}, \
+    [ITEM_MEWTWONITE_Y] = {gItemIcon_MewtwoniteY, gItemIconPalette_MewtwoniteY}, \
+    [ITEM_AMPHAROSITE] = {gItemIcon_Ampharosite, gItemIconPalette_Ampharosite}, \
+    [ITEM_STEELIXITE] = {gItemIcon_Steelixite, gItemIconPalette_Steelixite}, \
+    [ITEM_SCIZORITE] = {gItemIcon_Scizorite, gItemIconPalette_Scizorite}, \
+    [ITEM_HERACRONITE] = {gItemIcon_Heracronite, gItemIconPalette_Heracronite}, \
+    [ITEM_HOUNDOOMINITE] = {gItemIcon_Houndoominite, gItemIconPalette_Houndoominite}, \
+    [ITEM_TYRANITARITE] = {gItemIcon_Tyranitarite, gItemIconPalette_Tyranitarite}, \
+    [ITEM_SCEPTILITE] = {gItemIcon_Sceptilite, gItemIconPalette_Sceptilite}, \
+    [ITEM_BLAZIKENITE] = {gItemIcon_Blazikenite, gItemIconPalette_Blazikenite}, \
+    [ITEM_SWAMPERTITE] = {gItemIcon_Swampertite, gItemIconPalette_Swampertite}, \
+    [ITEM_GARDEVOIRITE] = {gItemIcon_Gardevoirite, gItemIconPalette_Gardevoirite}, \
+    [ITEM_SABLENITE] = {gItemIcon_Sablenite, gItemIconPalette_Sablenite}, \
+    [ITEM_MAWILITE] = {gItemIcon_Mawilite, gItemIconPalette_Mawilite}, \
+    [ITEM_AGGRONITE] = {gItemIcon_Aggronite, gItemIconPalette_Aggronite}, \
+    [ITEM_MEDICHAMITE] = {gItemIcon_Medichamite, gItemIconPalette_Medichamite}, \
+    [ITEM_MANECTITE] = {gItemIcon_Manectite, gItemIconPalette_Manectite}, \
+    [ITEM_SHARPEDONITE] = {gItemIcon_Sharpedonite, gItemIconPalette_Sharpedonite}, \
+    [ITEM_CAMERUPTITE] = {gItemIcon_Cameruptite, gItemIconPalette_Cameruptite}, \
+    [ITEM_ALTARIANITE] = {gItemIcon_Altarianite, gItemIconPalette_Altarianite}, \
+    [ITEM_BANETTITE] = {gItemIcon_Banettite, gItemIconPalette_Banettite}, \
+    [ITEM_ABSOLITE] = {gItemIcon_Absolite, gItemIconPalette_Absolite}, \
+    [ITEM_GLALITITE] = {gItemIcon_Glalitite, gItemIconPalette_Glalitite}, \
+    [ITEM_SALAMENCITE] = {gItemIcon_Salamencite, gItemIconPalette_Salamencite}, \
+    [ITEM_METAGROSSITE] = {gItemIcon_Metagrossite, gItemIconPalette_Metagrossite}, \
+    [ITEM_LATIASITE] = {gItemIcon_Latiasite, gItemIconPalette_Latiasite}, \
+    [ITEM_LATIOSITE] = {gItemIcon_Latiosite, gItemIconPalette_Latiosite}, \
+    [ITEM_LOPUNNITE] = {gItemIcon_Lopunnite, gItemIconPalette_Lopunnite}, \
+    [ITEM_GARCHOMPITE] = {gItemIcon_Garchompite, gItemIconPalette_Garchompite}, \
+    [ITEM_LUCARIONITE] = {gItemIcon_Lucarionite, gItemIconPalette_Lucarionite}, \
+    [ITEM_ABOMASITE] = {gItemIcon_Abomasite, gItemIconPalette_Abomasite}, \
+    [ITEM_GALLADITE] = {gItemIcon_Galladite, gItemIconPalette_Galladite}, \
+    [ITEM_AUDINITE] = {gItemIcon_Audinite, gItemIconPalette_Audinite}, \
+    [ITEM_DIANCITE] = {gItemIcon_Diancite, gItemIconPalette_Diancite}, \
+    [ITEM_NORMALIUM_Z] = {gItemIcon_NormaliumZ, gItemIconPalette_NormaliumZ}, \
+    [ITEM_FIGHTINIUM_Z] = {gItemIcon_FightiniumZ, gItemIconPalette_FightiniumZ}, \
+    [ITEM_FLYINIUM_Z] = {gItemIcon_FlyiniumZ, gItemIconPalette_FlyiniumZ}, \
+    [ITEM_POISONIUM_Z] = {gItemIcon_PoisoniumZ, gItemIconPalette_PoisoniumZ}, \
+    [ITEM_GROUNDIUM_Z] = {gItemIcon_GroundiumZ, gItemIconPalette_GroundiumZ}, \
+    [ITEM_ROCKIUM_Z] = {gItemIcon_RockiumZ, gItemIconPalette_RockiumZ}, \
+    [ITEM_BUGINIUM_Z] = {gItemIcon_BuginiumZ, gItemIconPalette_BuginiumZ}, \
+    [ITEM_GHOSTIUM_Z] = {gItemIcon_GhostiumZ, gItemIconPalette_GhostiumZ}, \
+    [ITEM_STEELIUM_Z] = {gItemIcon_SteeliumZ, gItemIconPalette_SteeliumZ}, \
+    [ITEM_FIRIUM_Z] = {gItemIcon_FiriumZ, gItemIconPalette_FiriumZ}, \
+    [ITEM_WATERIUM_Z] = {gItemIcon_WateriumZ, gItemIconPalette_WateriumZ}, \
+    [ITEM_GRASSIUM_Z] = {gItemIcon_GrassiumZ, gItemIconPalette_GrassiumZ}, \
+    [ITEM_ELECTRIUM_Z] = {gItemIcon_ElectriumZ, gItemIconPalette_ElectriumZ}, \
+    [ITEM_PSYCHIUM_Z] = {gItemIcon_PsychiumZ, gItemIconPalette_PsychiumZ}, \
+    [ITEM_ICIUM_Z] = {gItemIcon_IciumZ, gItemIconPalette_IciumZ}, \
+    [ITEM_DRAGONIUM_Z] = {gItemIcon_DragoniumZ, gItemIconPalette_DragoniumZ}, \
+    [ITEM_DARKINIUM_Z] = {gItemIcon_DarkiniumZ, gItemIconPalette_DarkiniumZ}, \
+    [ITEM_FAIRIUM_Z] = {gItemIcon_FairiumZ, gItemIconPalette_FairiumZ},

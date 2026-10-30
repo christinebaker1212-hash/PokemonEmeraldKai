@@ -403,5 +403,608 @@
   "iconPalette": "gItemIconPalette_LeadersCrest",
   "icon_png": "graphics/items/icons/leaders_crest.png",
   "icon_pal": "graphics/items/icon_palettes/leaders_crest.pal"
+ },
+ "ITEM_VENUSAURITE": {
+  "name": "Venusaurite",
+  "price": 0,
+  "description": "This stone enables\\nVenusaur to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Venusaurite",
+  "iconPalette": "gItemIconPalette_Venusaurite",
+  "icon_png": "graphics/items/icons/venusaurite.png",
+  "icon_pal": "graphics/items/icon_palettes/venusaurite.pal"
+ },
+ "ITEM_CHARIZARDITE_X": {
+  "name": "Charizardite X",
+  "price": 0,
+  "description": "This stone enables\\nCharizard to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_CharizarditeX",
+  "iconPalette": "gItemIconPalette_CharizarditeX",
+  "icon_png": "graphics/items/icons/charizardite_x.png",
+  "icon_pal": "graphics/items/icon_palettes/charizardite_x.pal"
+ },
+ "ITEM_CHARIZARDITE_Y": {
+  "name": "Charizardite Y",
+  "price": 0,
+  "description": "This stone enables\\nCharizard to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_CharizarditeY",
+  "iconPalette": "gItemIconPalette_CharizarditeY",
+  "icon_png": "graphics/items/icons/charizardite_y.png",
+  "icon_pal": "graphics/items/icon_palettes/charizardite_y.pal"
+ },
+ "ITEM_BLASTOISINITE": {
+  "name": "Blastoisinite",
+  "price": 0,
+  "description": "This stone enables\\nBlastoise to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Blastoisinite",
+  "iconPalette": "gItemIconPalette_Blastoisinite",
+  "icon_png": "graphics/items/icons/blastoisinite.png",
+  "icon_pal": "graphics/items/icon_palettes/blastoisinite.pal"
+ },
+ "ITEM_BEEDRILLITE": {
+  "name": "Beedrillite",
+  "price": 0,
+  "description": "This stone enables\\nBeedrill to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Beedrillite",
+  "iconPalette": "gItemIconPalette_Beedrillite",
+  "icon_png": "graphics/items/icons/beedrillite.png",
+  "icon_pal": "graphics/items/icon_palettes/beedrillite.pal"
+ },
+ "ITEM_PIDGEOTITE": {
+  "name": "Pidgeotite",
+  "price": 0,
+  "description": "This stone enables\\nPidgeot to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Pidgeotite",
+  "iconPalette": "gItemIconPalette_Pidgeotite",
+  "icon_png": "graphics/items/icons/pidgeotite.png",
+  "icon_pal": "graphics/items/icon_palettes/pidgeotite.pal"
+ },
+ "ITEM_ALAKAZITE": {
+  "name": "Alakazite",
+  "price": 0,
+  "description": "This stone enables\\nAlakazam to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Alakazite",
+  "iconPalette": "gItemIconPalette_Alakazite",
+  "icon_png": "graphics/items/icons/alakazite.png",
+  "icon_pal": "graphics/items/icon_palettes/alakazite.pal"
+ },
+ "ITEM_SLOWBRONITE": {
+  "name": "Slowbronite",
+  "price": 0,
+  "description": "This stone enables\\nSlowbro to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Slowbronite",
+  "iconPalette": "gItemIconPalette_Slowbronite",
+  "icon_png": "graphics/items/icons/slowbronite.png",
+  "icon_pal": "graphics/items/icon_palettes/slowbronite.pal"
+ },
+ "ITEM_GENGARITE": {
+  "name": "Gengarite",
+  "price": 0,
+  "description": "This stone enables\\nGengar to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Gengarite",
+  "iconPalette": "gItemIconPalette_Gengarite",
+  "icon_png": "graphics/items/icons/gengarite.png",
+  "icon_pal": "graphics/items/icon_palettes/gengarite.pal"
+ },
+ "ITEM_KANGASKHANITE": {
+  "name": "Kangaskhanite",
+  "price": 0,
+  "description": "This stone enables\\nKangaskhan to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Kangaskhanite",
+  "iconPalette": "gItemIconPalette_Kangaskhanite",
+  "icon_png": "graphics/items/icons/kangaskhanite.png",
+  "icon_pal": "graphics/items/icon_palettes/kangaskhanite.pal"
+ },
+ "ITEM_PINSIRITE": {
+  "name": "Pinsirite",
+  "price": 0,
+  "description": "This stone enables\\nPinsir to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Pinsirite",
+  "iconPalette": "gItemIconPalette_Pinsirite",
+  "icon_png": "graphics/items/icons/pinsirite.png",
+  "icon_pal": "graphics/items/icon_palettes/pinsirite.pal"
+ },
+ "ITEM_GYARADOSITE": {
+  "name": "Gyaradosite",
+  "price": 0,
+  "description": "This stone enables\\nGyarados to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Gyaradosite",
+  "iconPalette": "gItemIconPalette_Gyaradosite",
+  "icon_png": "graphics/items/icons/gyaradosite.png",
+  "icon_pal": "graphics/items/icon_palettes/gyaradosite.pal"
+ },
+ "ITEM_AERODACTYLITE": {
+  "name": "Aerodactylite",
+  "price": 0,
+  "description": "This stone enables\\nAerodactyl to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Aerodactylite",
+  "iconPalette": "gItemIconPalette_Aerodactylite",
+  "icon_png": "graphics/items/icons/aerodactylite.png",
+  "icon_pal": "graphics/items/icon_palettes/aerodactylite.pal"
+ },
+ "ITEM_MEWTWONITE_X": {
+  "name": "Mewtwonite X",
+  "price": 0,
+  "description": "This stone enables\\nMewtwo to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_MewtwoniteX",
+  "iconPalette": "gItemIconPalette_MewtwoniteX",
+  "icon_png": "graphics/items/icons/mewtwonite_x.png",
+  "icon_pal": "graphics/items/icon_palettes/mewtwonite_x.pal"
+ },
+ "ITEM_MEWTWONITE_Y": {
+  "name": "Mewtwonite Y",
+  "price": 0,
+  "description": "This stone enables\\nMewtwo to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_MewtwoniteY",
+  "iconPalette": "gItemIconPalette_MewtwoniteY",
+  "icon_png": "graphics/items/icons/mewtwonite_y.png",
+  "icon_pal": "graphics/items/icon_palettes/mewtwonite_y.pal"
+ },
+ "ITEM_AMPHAROSITE": {
+  "name": "Ampharosite",
+  "price": 0,
+  "description": "This stone enables\\nAmpharos to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Ampharosite",
+  "iconPalette": "gItemIconPalette_Ampharosite",
+  "icon_png": "graphics/items/icons/ampharosite.png",
+  "icon_pal": "graphics/items/icon_palettes/ampharosite.pal"
+ },
+ "ITEM_STEELIXITE": {
+  "name": "Steelixite",
+  "price": 0,
+  "description": "This stone enables\\nSteelix to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Steelixite",
+  "iconPalette": "gItemIconPalette_Steelixite",
+  "icon_png": "graphics/items/icons/steelixite.png",
+  "icon_pal": "graphics/items/icon_palettes/steelixite.pal"
+ },
+ "ITEM_SCIZORITE": {
+  "name": "Scizorite",
+  "price": 0,
+  "description": "This stone enables\\nScizor to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Scizorite",
+  "iconPalette": "gItemIconPalette_Scizorite",
+  "icon_png": "graphics/items/icons/scizorite.png",
+  "icon_pal": "graphics/items/icon_palettes/scizorite.pal"
+ },
+ "ITEM_HERACRONITE": {
+  "name": "Heracronite",
+  "price": 0,
+  "description": "This stone enables\\nHeracross to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Heracronite",
+  "iconPalette": "gItemIconPalette_Heracronite",
+  "icon_png": "graphics/items/icons/heracronite.png",
+  "icon_pal": "graphics/items/icon_palettes/heracronite.pal"
+ },
+ "ITEM_HOUNDOOMINITE": {
+  "name": "Houndoominite",
+  "price": 0,
+  "description": "This stone enables\\nHoundoom to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Houndoominite",
+  "iconPalette": "gItemIconPalette_Houndoominite",
+  "icon_png": "graphics/items/icons/houndoominite.png",
+  "icon_pal": "graphics/items/icon_palettes/houndoominite.pal"
+ },
+ "ITEM_TYRANITARITE": {
+  "name": "Tyranitarite",
+  "price": 0,
+  "description": "This stone enables\\nTyranitar to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Tyranitarite",
+  "iconPalette": "gItemIconPalette_Tyranitarite",
+  "icon_png": "graphics/items/icons/tyranitarite.png",
+  "icon_pal": "graphics/items/icon_palettes/tyranitarite.pal"
+ },
+ "ITEM_SCEPTILITE": {
+  "name": "Sceptilite",
+  "price": 0,
+  "description": "This stone enables\\nSceptile to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Sceptilite",
+  "iconPalette": "gItemIconPalette_Sceptilite",
+  "icon_png": "graphics/items/icons/sceptilite.png",
+  "icon_pal": "graphics/items/icon_palettes/sceptilite.pal"
+ },
+ "ITEM_BLAZIKENITE": {
+  "name": "Blazikenite",
+  "price": 0,
+  "description": "This stone enables\\nBlaziken to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Blazikenite",
+  "iconPalette": "gItemIconPalette_Blazikenite",
+  "icon_png": "graphics/items/icons/blazikenite.png",
+  "icon_pal": "graphics/items/icon_palettes/blazikenite.pal"
+ },
+ "ITEM_SWAMPERTITE": {
+  "name": "Swampertite",
+  "price": 0,
+  "description": "This stone enables\\nSwampert to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Swampertite",
+  "iconPalette": "gItemIconPalette_Swampertite",
+  "icon_png": "graphics/items/icons/swampertite.png",
+  "icon_pal": "graphics/items/icon_palettes/swampertite.pal"
+ },
+ "ITEM_GARDEVOIRITE": {
+  "name": "Gardevoirite",
+  "price": 0,
+  "description": "This stone enables\\nGardevoir to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Gardevoirite",
+  "iconPalette": "gItemIconPalette_Gardevoirite",
+  "icon_png": "graphics/items/icons/gardevoirite.png",
+  "icon_pal": "graphics/items/icon_palettes/gardevoirite.pal"
+ },
+ "ITEM_SABLENITE": {
+  "name": "Sablenite",
+  "price": 0,
+  "description": "This stone enables\\nSableye to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Sablenite",
+  "iconPalette": "gItemIconPalette_Sablenite",
+  "icon_png": "graphics/items/icons/sablenite.png",
+  "icon_pal": "graphics/items/icon_palettes/sablenite.pal"
+ },
+ "ITEM_MAWILITE": {
+  "name": "Mawilite",
+  "price": 0,
+  "description": "This stone enables\\nMawile to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Mawilite",
+  "iconPalette": "gItemIconPalette_Mawilite",
+  "icon_png": "graphics/items/icons/mawilite.png",
+  "icon_pal": "graphics/items/icon_palettes/mawilite.pal"
+ },
+ "ITEM_AGGRONITE": {
+  "name": "Aggronite",
+  "price": 0,
+  "description": "This stone enables\\nAggron to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Aggronite",
+  "iconPalette": "gItemIconPalette_Aggronite",
+  "icon_png": "graphics/items/icons/aggronite.png",
+  "icon_pal": "graphics/items/icon_palettes/aggronite.pal"
+ },
+ "ITEM_MEDICHAMITE": {
+  "name": "Medichamite",
+  "price": 0,
+  "description": "This stone enables\\nMedicham to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Medichamite",
+  "iconPalette": "gItemIconPalette_Medichamite",
+  "icon_png": "graphics/items/icons/medichamite.png",
+  "icon_pal": "graphics/items/icon_palettes/medichamite.pal"
+ },
+ "ITEM_MANECTITE": {
+  "name": "Manectite",
+  "price": 0,
+  "description": "This stone enables\\nManectric to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Manectite",
+  "iconPalette": "gItemIconPalette_Manectite",
+  "icon_png": "graphics/items/icons/manectite.png",
+  "icon_pal": "graphics/items/icon_palettes/manectite.pal"
+ },
+ "ITEM_SHARPEDONITE": {
+  "name": "Sharpedonite",
+  "price": 0,
+  "description": "This stone enables\\nSharpedo to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Sharpedonite",
+  "iconPalette": "gItemIconPalette_Sharpedonite",
+  "icon_png": "graphics/items/icons/sharpedonite.png",
+  "icon_pal": "graphics/items/icon_palettes/sharpedonite.pal"
+ },
+ "ITEM_CAMERUPTITE": {
+  "name": "Cameruptite",
+  "price": 0,
+  "description": "This stone enables\\nCamerupt to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Cameruptite",
+  "iconPalette": "gItemIconPalette_Cameruptite",
+  "icon_png": "graphics/items/icons/cameruptite.png",
+  "icon_pal": "graphics/items/icon_palettes/cameruptite.pal"
+ },
+ "ITEM_ALTARIANITE": {
+  "name": "Altarianite",
+  "price": 0,
+  "description": "This stone enables\\nAltaria to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Altarianite",
+  "iconPalette": "gItemIconPalette_Altarianite",
+  "icon_png": "graphics/items/icons/altarianite.png",
+  "icon_pal": "graphics/items/icon_palettes/altarianite.pal"
+ },
+ "ITEM_BANETTITE": {
+  "name": "Banettite",
+  "price": 0,
+  "description": "This stone enables\\nBanette to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Banettite",
+  "iconPalette": "gItemIconPalette_Banettite",
+  "icon_png": "graphics/items/icons/banettite.png",
+  "icon_pal": "graphics/items/icon_palettes/banettite.pal"
+ },
+ "ITEM_ABSOLITE": {
+  "name": "Absolite",
+  "price": 0,
+  "description": "This stone enables\\nAbsol to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Absolite",
+  "iconPalette": "gItemIconPalette_Absolite",
+  "icon_png": "graphics/items/icons/absolite.png",
+  "icon_pal": "graphics/items/icon_palettes/absolite.pal"
+ },
+ "ITEM_GLALITITE": {
+  "name": "Glalitite",
+  "price": 0,
+  "description": "This stone enables\\nGlalie to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Glalitite",
+  "iconPalette": "gItemIconPalette_Glalitite",
+  "icon_png": "graphics/items/icons/glalitite.png",
+  "icon_pal": "graphics/items/icon_palettes/glalitite.pal"
+ },
+ "ITEM_SALAMENCITE": {
+  "name": "Salamencite",
+  "price": 0,
+  "description": "This stone enables\\nSalamence to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Salamencite",
+  "iconPalette": "gItemIconPalette_Salamencite",
+  "icon_png": "graphics/items/icons/salamencite.png",
+  "icon_pal": "graphics/items/icon_palettes/salamencite.pal"
+ },
+ "ITEM_METAGROSSITE": {
+  "name": "Metagrossite",
+  "price": 0,
+  "description": "This stone enables\\nMetagross to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Metagrossite",
+  "iconPalette": "gItemIconPalette_Metagrossite",
+  "icon_png": "graphics/items/icons/metagrossite.png",
+  "icon_pal": "graphics/items/icon_palettes/metagrossite.pal"
+ },
+ "ITEM_LATIASITE": {
+  "name": "Latiasite",
+  "price": 0,
+  "description": "This stone enables\\nLatias to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Latiasite",
+  "iconPalette": "gItemIconPalette_Latiasite",
+  "icon_png": "graphics/items/icons/latiasite.png",
+  "icon_pal": "graphics/items/icon_palettes/latiasite.pal"
+ },
+ "ITEM_LATIOSITE": {
+  "name": "Latiosite",
+  "price": 0,
+  "description": "This stone enables\\nLatios to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Latiosite",
+  "iconPalette": "gItemIconPalette_Latiosite",
+  "icon_png": "graphics/items/icons/latiosite.png",
+  "icon_pal": "graphics/items/icon_palettes/latiosite.pal"
+ },
+ "ITEM_LOPUNNITE": {
+  "name": "Lopunnite",
+  "price": 0,
+  "description": "This stone enables\\nLopunny to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Lopunnite",
+  "iconPalette": "gItemIconPalette_Lopunnite",
+  "icon_png": "graphics/items/icons/lopunnite.png",
+  "icon_pal": "graphics/items/icon_palettes/lopunnite.pal"
+ },
+ "ITEM_GARCHOMPITE": {
+  "name": "Garchompite",
+  "price": 0,
+  "description": "This stone enables\\nGarchomp to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Garchompite",
+  "iconPalette": "gItemIconPalette_Garchompite",
+  "icon_png": "graphics/items/icons/garchompite.png",
+  "icon_pal": "graphics/items/icon_palettes/garchompite.pal"
+ },
+ "ITEM_LUCARIONITE": {
+  "name": "Lucarionite",
+  "price": 0,
+  "description": "This stone enables\\nLucario to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Lucarionite",
+  "iconPalette": "gItemIconPalette_Lucarionite",
+  "icon_png": "graphics/items/icons/lucarionite.png",
+  "icon_pal": "graphics/items/icon_palettes/lucarionite.pal"
+ },
+ "ITEM_ABOMASITE": {
+  "name": "Abomasite",
+  "price": 0,
+  "description": "This stone enables\\nAbomasnow to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Abomasite",
+  "iconPalette": "gItemIconPalette_Abomasite",
+  "icon_png": "graphics/items/icons/abomasite.png",
+  "icon_pal": "graphics/items/icon_palettes/abomasite.pal"
+ },
+ "ITEM_GALLADITE": {
+  "name": "Galladite",
+  "price": 0,
+  "description": "This stone enables\\nGallade to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Galladite",
+  "iconPalette": "gItemIconPalette_Galladite",
+  "icon_png": "graphics/items/icons/galladite.png",
+  "icon_pal": "graphics/items/icon_palettes/galladite.pal"
+ },
+ "ITEM_AUDINITE": {
+  "name": "Audinite",
+  "price": 0,
+  "description": "This stone enables\\nAudino to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Audinite",
+  "iconPalette": "gItemIconPalette_Audinite",
+  "icon_png": "graphics/items/icons/audinite.png",
+  "icon_pal": "graphics/items/icon_palettes/audinite.pal"
+ },
+ "ITEM_DIANCITE": {
+  "name": "Diancite",
+  "price": 0,
+  "description": "This stone enables\\nDiancie to Mega\\nEvolve in battle.",
+  "iconPic": "gItemIcon_Diancite",
+  "iconPalette": "gItemIconPalette_Diancite",
+  "icon_png": "graphics/items/icons/diancite.png",
+  "icon_pal": "graphics/items/icon_palettes/diancite.pal"
+ },
+ "ITEM_BLUE_ORB": {
+  "name": "Blue Orb",
+  "price": 0,
+  "description": "A blue, glowing orb\\nsaid to contain an\\nancient power.",
+  "iconPic": "gItemIcon_BlueOrb",
+  "iconPalette": "gItemIconPalette_BlueOrb",
+  "icon_png": "graphics/items/icons/blue_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/blue_orb.pal"
+ },
+ "ITEM_RED_ORB": {
+  "name": "Red Orb",
+  "price": 0,
+  "description": "A red, glowing orb\\nsaid to contain an\\nancient power.",
+  "iconPic": "gItemIcon_RedOrb",
+  "iconPalette": "gItemIconPalette_RedOrb",
+  "icon_png": "graphics/items/icons/red_orb.png",
+  "icon_pal": "graphics/items/icon_palettes/red_orb.pal"
+ },
+ "ITEM_NORMALIUM_Z": {
+  "name": "Normalium Z",
+  "price": 0,
+  "description": "Upgrades Normal-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_NormaliumZ",
+  "iconPalette": "gItemIconPalette_NormaliumZ",
+  "icon_png": "graphics/items/icons/normalium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/normalium_z.pal"
+ },
+ "ITEM_FIGHTINIUM_Z": {
+  "name": "Fightinium Z",
+  "price": 0,
+  "description": "Upgrades Fighting-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_FightiniumZ",
+  "iconPalette": "gItemIconPalette_FightiniumZ",
+  "icon_png": "graphics/items/icons/fightinium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/fightinium_z.pal"
+ },
+ "ITEM_FLYINIUM_Z": {
+  "name": "Flyinium Z",
+  "price": 0,
+  "description": "Upgrades Flying-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_FlyiniumZ",
+  "iconPalette": "gItemIconPalette_FlyiniumZ",
+  "icon_png": "graphics/items/icons/flyinium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/flyinium_z.pal"
+ },
+ "ITEM_POISONIUM_Z": {
+  "name": "Poisonium Z",
+  "price": 0,
+  "description": "Upgrades Poison-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_PoisoniumZ",
+  "iconPalette": "gItemIconPalette_PoisoniumZ",
+  "icon_png": "graphics/items/icons/poisonium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/poisonium_z.pal"
+ },
+ "ITEM_GROUNDIUM_Z": {
+  "name": "Groundium Z",
+  "price": 0,
+  "description": "Upgrades Ground-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_GroundiumZ",
+  "iconPalette": "gItemIconPalette_GroundiumZ",
+  "icon_png": "graphics/items/icons/groundium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/groundium_z.pal"
+ },
+ "ITEM_ROCKIUM_Z": {
+  "name": "Rockium Z",
+  "price": 0,
+  "description": "Upgrades Rock-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_RockiumZ",
+  "iconPalette": "gItemIconPalette_RockiumZ",
+  "icon_png": "graphics/items/icons/rockium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/rockium_z.pal"
+ },
+ "ITEM_BUGINIUM_Z": {
+  "name": "Buginium Z",
+  "price": 0,
+  "description": "Upgrades Bug-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_BuginiumZ",
+  "iconPalette": "gItemIconPalette_BuginiumZ",
+  "icon_png": "graphics/items/icons/buginium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/buginium_z.pal"
+ },
+ "ITEM_GHOSTIUM_Z": {
+  "name": "Ghostium Z",
+  "price": 0,
+  "description": "Upgrades Ghost-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_GhostiumZ",
+  "iconPalette": "gItemIconPalette_GhostiumZ",
+  "icon_png": "graphics/items/icons/ghostium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/ghostium_z.pal"
+ },
+ "ITEM_STEELIUM_Z": {
+  "name": "Steelium Z",
+  "price": 0,
+  "description": "Upgrades Steel-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_SteeliumZ",
+  "iconPalette": "gItemIconPalette_SteeliumZ",
+  "icon_png": "graphics/items/icons/steelium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/steelium_z.pal"
+ },
+ "ITEM_FIRIUM_Z": {
+  "name": "Firium Z",
+  "price": 0,
+  "description": "Upgrades Fire-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_FiriumZ",
+  "iconPalette": "gItemIconPalette_FiriumZ",
+  "icon_png": "graphics/items/icons/firium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/firium_z.pal"
+ },
+ "ITEM_WATERIUM_Z": {
+  "name": "Waterium Z",
+  "price": 0,
+  "description": "Upgrades Water-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_WateriumZ",
+  "iconPalette": "gItemIconPalette_WateriumZ",
+  "icon_png": "graphics/items/icons/waterium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/waterium_z.pal"
+ },
+ "ITEM_GRASSIUM_Z": {
+  "name": "Grassium Z",
+  "price": 0,
+  "description": "Upgrades Grass-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_GrassiumZ",
+  "iconPalette": "gItemIconPalette_GrassiumZ",
+  "icon_png": "graphics/items/icons/grassium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/grassium_z.pal"
+ },
+ "ITEM_ELECTRIUM_Z": {
+  "name": "Electrium Z",
+  "price": 0,
+  "description": "Upgrades Electric-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_ElectriumZ",
+  "iconPalette": "gItemIconPalette_ElectriumZ",
+  "icon_png": "graphics/items/icons/electrium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/electrium_z.pal"
+ },
+ "ITEM_PSYCHIUM_Z": {
+  "name": "Psychium Z",
+  "price": 0,
+  "description": "Upgrades Psychic-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_PsychiumZ",
+  "iconPalette": "gItemIconPalette_PsychiumZ",
+  "icon_png": "graphics/items/icons/psychium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/psychium_z.pal"
+ },
+ "ITEM_ICIUM_Z": {
+  "name": "Icium Z",
+  "price": 0,
+  "description": "Upgrades Ice-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_IciumZ",
+  "iconPalette": "gItemIconPalette_IciumZ",
+  "icon_png": "graphics/items/icons/icium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/icium_z.pal"
+ },
+ "ITEM_DRAGONIUM_Z": {
+  "name": "Dragonium Z",
+  "price": 0,
+  "description": "Upgrades Dragon-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_DragoniumZ",
+  "iconPalette": "gItemIconPalette_DragoniumZ",
+  "icon_png": "graphics/items/icons/dragonium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/dragonium_z.pal"
+ },
+ "ITEM_DARKINIUM_Z": {
+  "name": "Darkinium Z",
+  "price": 0,
+  "description": "Upgrades Dark-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_DarkiniumZ",
+  "iconPalette": "gItemIconPalette_DarkiniumZ",
+  "icon_png": "graphics/items/icons/darkinium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/darkinium_z.pal"
+ },
+ "ITEM_FAIRIUM_Z": {
+  "name": "Fairium Z",
+  "price": 0,
+  "description": "Upgrades Fairy-\\ntype moves to\\nZ-Moves.",
+  "iconPic": "gItemIcon_FairiumZ",
+  "iconPalette": "gItemIconPalette_FairiumZ",
+  "icon_png": "graphics/items/icons/fairium_z.png",
+  "icon_pal": "graphics/items/icon_palettes/fairium_z.pal"
  }
 }

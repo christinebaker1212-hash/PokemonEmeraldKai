@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_gimmick.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_controllers.h"
@@ -547,6 +548,7 @@ static bool8 ShouldAnimBeDoneRegardlessOfSubstitute(u8 animId)
     case B_ANIM_SANDSTORM_CONTINUES:
     case B_ANIM_HAIL_CONTINUES:
     case B_ANIM_SNATCH_MOVE:
+    case B_ANIM_MP_GIMMICK:   // Moemon Kai: the picture changes either way
         return TRUE;
     default:
         return FALSE;
@@ -666,6 +668,7 @@ void BattleLoadOpponentMonSpriteGfx(struct Pokemon *mon, u8 battler)
         BlendPalette(paletteOffset, 16, 6, RGB_WHITE);
         CpuCopy32(&gPlttBufferFaded[paletteOffset], &gPlttBufferUnfaded[paletteOffset], PLTT_SIZEOF(16));
     }
+    MP_Gimmick_AfterMonGfx(mon, battler);   // Moemon Kai: a MEGA's picture, TERA / DYNAMAX tints
 }
 
 void BattleLoadPlayerMonSpriteGfx(struct Pokemon *mon, u8 battler)
@@ -729,6 +732,7 @@ void BattleLoadPlayerMonSpriteGfx(struct Pokemon *mon, u8 battler)
         BlendPalette(paletteOffset, 16, 6, RGB_WHITE);
         CpuCopy32(&gPlttBufferFaded[paletteOffset], &gPlttBufferUnfaded[paletteOffset], PLTT_SIZEOF(16));
     }
+    MP_Gimmick_AfterMonGfx(mon, battler);   // Moemon Kai: a MEGA's picture, TERA / DYNAMAX tints
 }
 
 static void UNUSED BattleGfxSfxDummy1(void)

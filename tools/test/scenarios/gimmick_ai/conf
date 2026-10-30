@@ -1,0 +1,5 @@
+# The trainer AI terastallizes its last POKéMON (TERA on, the others off); the battle runs to its end
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=150:100 MOEMON_BATTLETEXT=1 MOEMON_GIMMICKS=2221"
+EXPECT_A=("terastallized" "savesum")

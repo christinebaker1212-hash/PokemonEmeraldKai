@@ -5,6 +5,7 @@
 // (friends' screens with a page per friend online, new friends' size, autosave, the BATTLE FLAG's range).
 // L / R switch tabs. Values change live with Left / Right (or A); B or CLOSE saves and leaves.
 #include "global.h"
+#include "battle_gimmick.h"
 #include "mp_region.h"
 #include "option_menu.h"
 #include "bg.h"
@@ -60,6 +61,10 @@ enum
     OPT_LEVELSCALE,
     OPT_MOVESPLIT,
     OPT_GENERATION,
+    OPT_MEGA,         // Moemon Kai: the battle gimmicks, AUTO / ON / OFF each (battle_gimmick.h)
+    OPT_ZMOVES,
+    OPT_DYNAMAX,
+    OPT_TERA,
     OPT_CARDSCALE,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
@@ -178,6 +183,10 @@ static const u8 sText_MoveSplit[] = _("MOVE KIND");
 static const u8 sText_MoveSplitGen3[] = _("GEN 3");
 static const u8 sText_MoveSplitGen4[] = _("GEN 4");
 static const u8 sText_Generation[] = _("GENERATION");
+static const u8 sText_Mega[] = _("MEGA EVOLUTION");
+static const u8 sText_ZMoves[] = _("Z-MOVES");
+static const u8 sText_Dynamax[] = _("DYNAMAX");
+static const u8 sText_Tera[] = _("TERASTALLIZE");
 static const u8 sText_Gen3[] = _("GEN 3");
 static const u8 sText_Gen5[] = _("GEN 5");
 static const u8 sText_Gen6[] = _("GEN 6");
@@ -371,6 +380,10 @@ static void BuildRows(void)
         AddRow(OPT_BATTLESTYLE, 0);
         AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
         AddRow(OPT_GENERATION, 0);  // Moemon Kai: which generations' Pokémon, moves and types (mp_region.c)
+        AddRow(OPT_MEGA, 0);
+        AddRow(OPT_ZMOVES, 0);
+        AddRow(OPT_DYNAMAX, 0);
+        AddRow(OPT_TERA, 0);
         AddRow(OPT_SOUND, 0);
         AddRow(OPT_BUTTONMODE, 0);
         AddRow(OPT_FRAME, 0);
@@ -478,6 +491,12 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MOVESPLIT:
         names[0] = sText_MoveSplitGen3, names[1] = sText_MoveSplitGen4;
         return 2;
+    case OPT_MEGA:
+    case OPT_ZMOVES:
+    case OPT_DYNAMAX:
+    case OPT_TERA:
+        names[0] = sText_Auto, names[1] = sText_On, names[2] = sText_Off;
+        return 3;
     case OPT_GENERATION:
         names[0] = sText_Gen3, names[1] = sText_MoveSplitGen4, names[2] = sText_Gen5, names[3] = sText_Gen6;
         names[4] = sText_Gen7, names[5] = sText_Gen8, names[6] = sText_Gen9;
@@ -670,6 +689,8 @@ static u8 Current(u8 row)
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
     case OPT_GENERATION:  return MP_Generation() - 3;
+    case OPT_MEGA: case OPT_ZMOVES: case OPT_DYNAMAX: case OPT_TERA:
+        return MP_Gimmick_Setting(GIMMICK_MEGA + sRows[row].opt - OPT_MEGA);
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
@@ -739,6 +760,17 @@ static void Change(u8 row, int dir)
         }
         break;
     case OPT_MOVESPLIT:   gMpConfig.moveSplit = !gMpConfig.moveSplit; MP_SendRoomRules(); break;
+    case OPT_MEGA: case OPT_ZMOVES: case OPT_DYNAMAX: case OPT_TERA:
+    {
+        u8 g = sRows[row].opt - OPT_MEGA, v;
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            break;   // online, the host's
+        v = Wrap(MP_Gimmick_Setting(GIMMICK_MEGA + g) + dir, 3);
+        gMpConfig.gimmicks = (gMpConfig.gimmicks & ~(3 << (2 * g))) | (v << (2 * g));
+        MPNet_Log("gimmick %d: %d", GIMMICK_MEGA + g, v);
+        MP_SendRoomRules();
+        break;
+    }
     case OPT_GENERATION:
         if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
             break;   // online, the host's
@@ -831,6 +863,10 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_MOVESPLIT:   return sText_MoveSplit;
     case OPT_GENERATION:  return sText_Generation;
+    case OPT_MEGA:        return sText_Mega;
+    case OPT_ZMOVES:      return sText_ZMoves;
+    case OPT_DYNAMAX:     return sText_Dynamax;
+    case OPT_TERA:        return sText_Tera;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
     case OPT_FIGHTKEYS:   return sText_FightKeys;
     case OPT_FB_BIND:     return sFightButtonNames[sRows[row].arg % FIGHT_BIND_COUNT];
@@ -991,6 +1027,17 @@ static void DrawHint(void)
     else if (opt == OPT_GENERATION)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: GEN %d"
                  : "POKEMON, MOVES AND TYPES UP TO GEN %d", MP_Generation());
+    else if (opt >= OPT_MEGA && opt <= OPT_TERA)
+    {
+        static const char *const sWhat[] = {"MEGA STONES", "Z-CRYSTALS", "ANY POKEMON", "ANY POKEMON"};
+        u8 g = opt - OPT_MEGA;
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            snprintf(ascii, sizeof(ascii), "ONLINE, THE HOST'S IS USED: %s", MP_Gimmick_On(GIMMICK_MEGA + g) ? "ON" : "OFF");
+        else if (MP_Gimmick_Setting(GIMMICK_MEGA + g) == GIMMICK_SET_AUTO)
+            snprintf(ascii, sizeof(ascii), "AUTO: ON FROM GEN %d. START IN BATTLE", 6 + g);
+        else
+            snprintf(ascii, sizeof(ascii), "START IN THE MOVE LIST: %s", sWhat[g]);
+    }
     else if (opt == OPT_BUTTONICONS)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)

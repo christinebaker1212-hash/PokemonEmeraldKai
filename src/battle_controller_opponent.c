@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "global.h"
+#include "battle_gimmick.h"
 #include "mp.h"
 #include "mp_life_battle.h"
 #include "battle.h"
@@ -1612,7 +1613,7 @@ static void OpponentHandleChooseMove(void)
                     if (IS_TRIPLE_BATTLE() && (gAbsentBattlerFlags & gBitTable[gBattlerTarget]))
                         gBattlerTarget = GetRandomFoe(gActiveBattler);   // Moemon Co-op: the center one
                 }
-                BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (gBattlerTarget << 8));
+                BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (MP_Gimmick_AiPick(gActiveBattler, moveInfo->moves[chosenMoveId]) << GIMMICK_MOVE_SHIFT) | (gBattlerTarget << 8));   // Moemon Kai: gimmicks
                 break;
             }
             OpponentBufferExecCompleted();

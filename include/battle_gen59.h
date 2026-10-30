@@ -51,6 +51,7 @@ struct Gen59Battler
     u8 cheekPouch:1;       // CHEEK POUCH: a BERRY was just eaten
     u8 emergencyExit:1;    // EMERGENCY EXIT / WIMP OUT: fell below half this move
     u8 copyPending:1;      // OPPORTUNIST: a foe's stats rose
+    u8 glaiveRush:1;       // GLAIVE RUSH: hits on it never miss and do double
     u8 received:1;         // RECEIVER / POWER OF ALCHEMY took a fallen ally's ability (its message)
     s8 copyStages[NUM_BATTLE_STATS];
 };

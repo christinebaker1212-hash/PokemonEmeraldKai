@@ -530,7 +530,7 @@ BattleScript_EffectCollisionCourse::
 	goto BattleScript_G59Hit
 
 BattleScript_EffectShedTail::
-	goto BattleScript_G59StatusMove
+	goto BattleScript_EffectSubstitute
 
 BattleScript_EffectWeatherAndSwitch::
 	goto BattleScript_G59StatusMove
@@ -970,3 +970,25 @@ BattleScript_G59Flee::
 	waitstate
 	setoutcomeonteleport BS_TARGET
 	finishaction
+
+@ a battle gimmick at the turn's start (MEGA EVOLUTION, TERASTALLIZATION, DYNAMAX: the picture changes on every screen)
+BattleScript_G59Gimmick::
+	playanimation BS_SCRIPTING, B_ANIM_MP_GIMMICK, sB_ANIM_ARG1
+	waitanimation
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ Z-POWER at the turn's start
+BattleScript_G59GimmickSay::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
+@ DYNAMAX ends at the turn's end
+BattleScript_G59DynamaxEnd::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ATTACKER, B_ANIM_MP_GIMMICK, sB_ANIM_ARG1
+	waitanimation
+	end2
