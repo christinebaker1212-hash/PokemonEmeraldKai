@@ -63,6 +63,7 @@ bool8 MP_Gimmick_Dynamaxed(u8 battler);
 u8 MP_Gimmick_TeraType(u8 battler);            // TYPE_MYSTERY when not terastallized
 void MP_Gimmick_BattleStart(void);
 void MP_Gimmick_SwitchIn(u8 battler);
+void MP_Gimmick_TurnEnd(void);
 
 // the screens (src/battle_gimmick.c): every machine in a link battle runs these through the animation
 void MP_Gimmick_ResetPictures(void);

@@ -438,6 +438,7 @@ void MP_Gen59_TurnEnd(void)
     }
     gGen59Field.echoedThisTurn = FALSE;
     gGen59Field.ionDeluge = FALSE;
+    MP_Gimmick_TurnEnd();   // (Z-POWER unspent by a Pokémon that couldn't move is gone)
     if (gGen59Field.fairyLock)
         gGen59Field.fairyLock--;
 }
@@ -3420,6 +3421,11 @@ static const u8 *MaxMoveEffect(u8 atk)
         Say(up ? G59_MSG_TEAM_STAT_UP : G59_MSG_FOES_STAT_DOWN);
         return BattleScript_G59AbilitySayMoveEnd;
     }
+}
+
+void MP_Gimmick_TurnEnd(void)
+{
+    memset(sG.zNow, 0, sizeof(sG.zNow));
 }
 
 // the move's end: a MAX MOVE's effect, Z-POWER spent
