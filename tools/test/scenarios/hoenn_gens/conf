@@ -1,0 +1,10 @@
+# HOENN by GENERATION (gen_hoenn_modern.py): ROUTE 101's rarer slots bring newer POKéMON at GEN 9 and none at GEN 3;
+# ROXANNE's first two at GEN 9 are newer ROCK types (her ace NOSEPASS stays)
+MODE=1
+GEN=9
+TMO=120
+WARP=0,16,10,10
+ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100"
+EXPECT_A=("trainer battle 265" "battler 1 hp")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/hoenn_gens/check.py"

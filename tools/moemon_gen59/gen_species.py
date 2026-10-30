@@ -485,12 +485,14 @@ def main():
             return by_name[k]
         if k in old_species:
             return old_species[k]
-        base = re.sub(r'_(ALOLA|GALAR|HISUI|PALDEA\w*|\w+_FORM|\w+_STRIPED|\w+_CREAM|\w+_SWEET|\w+)$', '', t)
+        base = re.sub(r'_(ALOLA|GALAR|HISUI|PALDEA\w*|\w+_FORM|\w+_STRIPED|\w+_CREAM|\w+_SWEET|[A-Z0-9]+)$', '', t)
         while base != 'SPECIES' and key(base) not in by_name and key(base) not in old_species:
             base = base.rsplit('_', 1)[0]
         return by_name.get(key(base)) or old_species.get(key(base))
     for e in species:
         rows = []
+        if e['const'] == 'SPECIES_FURFROU':
+            continue   # (the expansion's macros hand it ESPURR's evolutions: it doesn't evolve)
         for ev in e['evolutions']:
             tgt = target(ev['target'])
             if not tgt or tgt == e['const']:

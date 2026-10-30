@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp wildroll 600
+mp gensetting 3
+mp wildroll 600
+mp gensetting 9
+mp moves 0 44
+mp moves 1 44
+mp battlestyle 1
+mp trainer 265
+pressuntil A action 3000
+mp bhp
+quit

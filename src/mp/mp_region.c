@@ -765,9 +765,13 @@ static bool8 RegionUsesModern(void)
     return MP_Region_Current() != REGION_HOENN && MP_Gen_Cap(MP_Region_Current()) >= 5;
 }
 
+static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info);
+
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
+    if (info != NULL && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
+        return HoennModernWild(info);
     if (info != NULL && RegionUsesModern())
     {
         // Quetzal's own Pokémon where their generation is allowed, the Gen 4 cap's elsewhere
@@ -877,10 +881,124 @@ static const struct Trainer *ModernTeam(u16 trainerNum)
     return t;
 }
 
+// ---------------------------------------------------------------------------------------------------- HOENN by GENERATION
+// HOENN has no newer tables of its own: tools/moemon_gen59/gen_hoenn_modern.py gives rarer wild slots and some team
+// members a generation 4-9 and a newer POKéMON of the same type and stage; each shows from its generation on
+#include "../data/hoenn_modern.h"
+
+static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info)
+{
+    static struct WildPokemon sMons[12];
+    static struct WildPokemonInfo sInfo;
+    u8 cap = MP_Gen_Cap(REGION_HOENN);
+    bool8 any = FALSE;
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sHoennModernWild); i++)
+    {
+        const struct HoennModernWild *e = &sHoennModernWild[i];
+        if (e->info != info || e->gen > cap || !MP_Gen_Allowed(e->species))
+            continue;
+        if (!any)
+        {
+            memcpy(sMons, info->wildPokemon, min(e->count, ARRAY_COUNT(sMons)) * sizeof(sMons[0]));
+            any = TRUE;
+        }
+        if (e->slot < ARRAY_COUNT(sMons))
+            sMons[e->slot].species = e->species;   // (the table is in generation order: a later one wins its slot)
+    }
+    if (!any)
+        return info;
+    sInfo.encounterRate = info->encounterRate;
+    sInfo.wildPokemon = sMons;
+    return &sInfo;
+}
+
+// The last 4 level-up moves up to LVL the GENERATION allows (as a POKéMON made at that level knows)
+static void LevelUpMoves(u16 species, u8 lvl, u16 *moves)
+{
+    u32 i, n = 0;
+    memset(moves, 0, MAX_MON_MOVES * sizeof(u16));
+    for (i = 0; gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
+    {
+        u16 move = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
+        u32 k;
+        if ((gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV) > LEVEL_UP_LV(lvl))
+            break;
+        if (!MP_Gen_MoveAllowed(move))
+            continue;
+        for (k = 0; k < MAX_MON_MOVES && moves[k] != move; k++)
+            ;
+        if (k < MAX_MON_MOVES)
+            continue;
+        if (n < MAX_MON_MOVES)
+            moves[n++] = move;
+        else
+        {
+            memmove(moves, moves + 1, (MAX_MON_MOVES - 1) * sizeof(u16));
+            moves[MAX_MON_MOVES - 1] = move;
+        }
+    }
+}
+
+static const struct Trainer *HoennModernTeam(u16 trainerNum)
+{
+    static struct Trainer sCopy;
+    static struct TrainerMonItemCustomMoves sCustom[PARTY_SIZE];
+    const struct Trainer *t = &gTrainers[trainerNum];
+    u8 cap = MP_Gen_Cap(REGION_HOENN);
+    bool8 any = FALSE, custom = (t->partyFlags & F_TRAINER_PARTY_CUSTOM_MOVESET) != 0;
+    u32 i, j;
+
+    for (j = 0; j < t->partySize && j < PARTY_SIZE; j++)
+    {
+        struct TrainerMonItemCustomMoves *m = &sCustom[j];
+        memset(m, 0, sizeof(*m));
+        switch (t->partyFlags)
+        {
+        case 0:
+            m->species = t->party.NoItemDefaultMoves[j].species, m->lvl = t->party.NoItemDefaultMoves[j].lvl;
+            m->iv = t->party.NoItemDefaultMoves[j].iv;
+            break;
+        case F_TRAINER_PARTY_CUSTOM_MOVESET:
+            m->species = t->party.NoItemCustomMoves[j].species, m->lvl = t->party.NoItemCustomMoves[j].lvl;
+            m->iv = t->party.NoItemCustomMoves[j].iv;
+            memcpy(m->moves, t->party.NoItemCustomMoves[j].moves, sizeof(m->moves));
+            break;
+        case F_TRAINER_PARTY_HELD_ITEM:
+            m->species = t->party.ItemDefaultMoves[j].species, m->lvl = t->party.ItemDefaultMoves[j].lvl;
+            m->iv = t->party.ItemDefaultMoves[j].iv, m->heldItem = t->party.ItemDefaultMoves[j].heldItem;
+            break;
+        default:
+            *m = t->party.ItemCustomMoves[j];
+            break;
+        }
+        if (!custom)
+            LevelUpMoves(m->species, m->lvl, m->moves);   // (the copy always names its moves)
+        for (i = 0; i < ARRAY_COUNT(sHoennModernTrainers); i++)
+        {
+            const struct HoennModernMon *e = &sHoennModernTrainers[i];
+            if (e->trainerId == trainerNum && e->slot == j && e->gen <= cap && MP_Gen_Allowed(e->species))
+            {
+                m->species = e->species;
+                LevelUpMoves(m->species, m->lvl, m->moves);
+                any = TRUE;
+            }
+        }
+    }
+    if (!any)
+        return t;
+    sCopy = *t;
+    sCopy.partyFlags = F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM;
+    sCopy.party.ItemCustomMoves = sCustom;
+    return &sCopy;
+}
+
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
 {
     static struct Trainer sCopy;
     u32 i;
+    if (trainerNum < MAX_TRAINERS_COUNT && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
+        return HoennModernTeam(trainerNum);
     if (trainerNum >= sQzGen2Parties[0].trainerId && RegionUsesModern())
         return ModernTeam(trainerNum);
     if (trainerNum < sQzGen2Parties[0].trainerId || !RegionUsesGen2())
