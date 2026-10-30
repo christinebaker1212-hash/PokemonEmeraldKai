@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+mp teach 0 33
+wait 300
+mp wilddouble 0
+mp wild 321:100 150
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 10
+pressuntillog A 4000 MEGA EVOLVED
+wait 60
+shot a_mega
+wait 600
+quit
