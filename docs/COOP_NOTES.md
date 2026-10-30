@@ -2537,6 +2537,26 @@ TCG_LINK_VERSION 15.
   G_TextAlpha in tcg_gfx.c: text drawn from then on at that alpha). G_ResultScreen's timing for both tables: the
   banner alone for a second, then the box with its words (G_RESULT_BOX), A leaves from G_RESULT_READY; test scripts
   wait 320 frames after `mp ygo win` / `mp cards win`.
+- 1.57.0: the middle line's words show only in the Main Phases, faded in once its sweep is gone, out (as fast as a
+  sweep's band opens) in every other phase; what to pick when the player is asked always shows. Cards turning over
+  (FX_FLIP: a Flip Summon, a Set card flipped by an attack or an effect, one turned face-down) go edge-on and show
+  their other side (Turn, Animated). A Tribute (YGO_EV_TO_GRAVE with YGO_REASON_TRIBUTE) goes white and up as light
+  toward the middle of its side's Monster Zones (FX_TRIBUTE: the event waits for all of it, Advance moves it to the
+  Graveyard after, so the table never catches up mid-way); a Tribute Summon gathers the light on its zone and bursts
+  (FX_GATHER), then its picture big as TRIBUTE SUMMON. No beams of light: a Summon is a ring.
+- 1.57.0, the AI's "wait, what?" moves (ygo_ai.c): it reads a card's purpose from its words (Says): an Equip Spell
+  goes on its own monster unless it cripples (HarmfulEquip: Paralyzing Potion, Germ Infection, Flint, Snatch Steal...),
+  a boost (Boost: Rush Recklessly, Reinforcements) on its own; Pointless keeps back Life Point gains above 6000 LP,
+  a field wipe that takes more of its own, an Equip with nothing of the right side, battle tricks (ForBattle:
+  Waboku, Negate Attack...) away from a battle, and a boost on its own turn unless in Main Phase 1 it turns a battle
+  around. It never chains to its own link (one answer to an attack: Magic Cylinder and Mirror Force aren't both
+  spent). A FLIP monster is Flip Summoned when its effect has something to work on. The "second best" slip only
+  swaps two close choices on the same side. Scenarios in tools/ygo/test_edo_cards.c ("ai ...").
+- 1.57.0, the POKeMON AI (tcg_ai.c): Energy goes only where it brings an attack closer, its own or an Evolution's in
+  the hand (EnergyHelps / Unmet; Hydro Pump-style attacks take up to two more), else it stays in the hand; Potion /
+  Super Potion only on a hurt Pokemon (Super Potion for 40 or more), Defender on the Active when the opponent has
+  Energy, Full Heal on a condition, POKeMON CENTER only when 50+ is healed and two Energy or fewer are lost
+  (tools/tcg/test_ai.c). Ratings rerun (tcg_ratings.c, tcg_levels.c, the Yu-Gi-Oh! decks and cards).
 
 ## Rare card foil (1.56.0)
 

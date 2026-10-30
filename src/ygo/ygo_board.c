@@ -135,7 +135,11 @@ enum
     FX_SHUFFLE,
     FX_IMPACT,   /* an attack landing: a burst and the table shaking (value: frames before it lands) */
     FX_SHARDS,   /* a card destroyed: it breaks apart */
-    FX_RISE,     /* a monster Summoned: a ring of light and a beam */
+    FX_RISE,     /* a monster Summoned: a ring of light */
+    FX_FLIP,     /* a card turning over on the table: edge-on, then its other side (value 1: to its face, 0: to its back) */
+    FX_TRIBUTE,  /* a Tribute: the card glows white and goes up as light toward (x2, y2), then to the Graveyard */
+    FX_GATHER,   /* a Tribute Summon: the light gathers on the zone and bursts, the monster appears (card: its
+                    picture, shown big after) */
     FX_SWEEP     /* a turn or a phase beginning: a band across the middle, its name sweeping through (as the
                     POKeMON card table's YOUR TURN) */
 };
@@ -191,7 +195,7 @@ static struct
     int timer, settled;
     uint8_t phase, turnPlayer;
     uint16_t turn;
-    float infoFade;      /* the middle line's words about the card: 1 shown, 0 faded while banners play */
+    float infoFade;      /* the middle line's words about the card: shown in the Main Phases, faded in the others */
     struct Fx fx[FX_MAX];
     /* input */
     int mode, cursorKind, cursorSide, cursorIndex;
@@ -530,6 +534,25 @@ static void BigCard(unsigned card, const char *label, unsigned color, int life)
     f->color = color;
     snprintf(f->text, sizeof(f->text), "%s", label);
 }
+/* A card on the table turning over (to its face, or to its back) */
+static void Turn(unsigned o, int toFace)
+{
+    unsigned i;
+    struct Fx *f;
+    for (i = 0; i < FX_MAX; i++)
+        if (B.fx[i].life && B.fx[i].kind == FX_FLIP && B.fx[i].obj == o)
+            B.fx[i].life = 0;
+    f = AddFx(FX_FLIP, 0, 0, Frames(16));
+    if (f)
+        f->obj = (uint8_t)o, f->value = toFace;
+}
+/* Where a side's Tributes gather: the middle of its Monster Zones */
+static void GatherPoint(unsigned side, int *x, int *y)
+{
+    struct Rect r = ZoneRect(side, 0, 2);
+    *x = r.x + r.w / 2;
+    *y = r.y + r.h / 2;
+}
 static void Banner(const char *text, unsigned color, int life)
 {
     struct Fx *f = AddFx(FX_BANNER, 120, 66, life);
@@ -599,14 +622,28 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_SUMMON:
         if (o >= B.objCount)
             return 0;
+        /* (a Flip Summon: the Set card turns over where it lies) */
+        if (B.shown[o].loc == YGO_LOC_MZONE && !B.shown[o].faceUp)
+            Turn(o, 1);
         MoveShown(o, YGO_LOC_MZONE, e->player);
         B.shown[o].faceUp = 1;
         PlaySE(SE_M_TELEPORT);
         Log("%s %s %s!", Who(e->player), e->value == YGO_SUMMON_FLIP ? "Flip Summoned" : e->value == YGO_SUMMON_TRIBUTE ? "Tribute Summoned" :
                          e->value == YGO_SUMMON_FUSION ? "Fusion Summoned" : e->value == YGO_SUMMON_RITUAL ? "Ritual Summoned" :
                          e->value == YGO_SUMMON_NORMAL ? "Normal Summoned" : "Special Summoned", c ? c->name : "a monster");
-        if (c && (e->value == YGO_SUMMON_FUSION || e->value == YGO_SUMMON_RITUAL || e->value == YGO_SUMMON_TRIBUTE ||
-                  c->level >= 7))
+        if (c && e->value == YGO_SUMMON_TRIBUTE)
+        {
+            /* the Tributes' light gathers on the zone, bursts, and the monster is there; then its picture big */
+            struct Fx *f;
+            int life = Frames(30);
+            ObjCenter(o, &x, &y);
+            B.spr[o].placed = 0;   /* (it appears in its zone, it doesn't fly there) */
+            f = AddFx(FX_GATHER, x, y, life);
+            if (f)
+                f->obj = (uint8_t)o, f->card = c->id, f->color = e->player == B.me ? 0x80c8ff : 0xff9080;
+            return life + Frames(36);
+        }
+        if (c && (e->value == YGO_SUMMON_FUSION || e->value == YGO_SUMMON_RITUAL || c->level >= 7))
         {
             BigCard(c->id, e->value == YGO_SUMMON_FUSION ? "FUSION SUMMON" : e->value == YGO_SUMMON_RITUAL ? "RITUAL SUMMON"
                                                                                                          : "SUMMON",
@@ -624,6 +661,8 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_SET:
         if (o >= B.objCount)
             return 0;
+        if ((B.shown[o].loc == YGO_LOC_MZONE || B.shown[o].loc == YGO_LOC_SZONE) && B.shown[o].faceUp)
+            Turn(o, 0);
         MoveShown(o, c && Ygo_IsMonster(c) && T()->objs[o].location != YGO_LOC_SZONE ? YGO_LOC_MZONE : YGO_LOC_SZONE,
                   e->player);
         B.shown[o].faceUp = 0;
@@ -635,8 +674,9 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_FLIP:
         if (o >= B.objCount)
             return 0;
+        if (!B.shown[o].faceUp)
+            Turn(o, 1);
         B.shown[o].faceUp = 1;
-        Flash(o, 0xffffff, Frames(14));
         PlaySE(SE_RG_CARD_FLIP);
         Log("%s was flipped face-up.", c ? c->name : "A card");
         return Frames(18);
@@ -645,7 +685,11 @@ static int Present(const struct YgoEvent *e)
             return 0;
         B.shown[o].attackPos ^= 1;
         if (T()->objs[o].location == YGO_LOC_MZONE)
+        {
+            if (B.shown[o].faceUp != T()->objs[o].faceUp)
+                Turn(o, T()->objs[o].faceUp);
             B.shown[o].attackPos = T()->objs[o].attackPos, B.shown[o].faceUp = T()->objs[o].faceUp;
+        }
         PlaySE(SE_M_HARDEN);
         Log("%s changed %s to %s Position.", Who(e->player), NameOf(o), B.shown[o].attackPos ? "Attack" : "Defense");
         return Frames(12);
@@ -733,6 +777,20 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_TO_GRAVE:
         if (o >= B.objCount)
             return 0;
+        if ((e->flags & YGO_REASON_TRIBUTE) && B.shown[o].loc == YGO_LOC_MZONE && ObjCenter(o, &x, &y))
+        {
+            /* a Tribute: it goes up as light where it stands (Advance sends it to the Graveyard after) */
+            struct Fx *f = AddFx(FX_TRIBUTE, x, y, Frames(24));
+            if (f)
+            {
+                f->obj = (uint8_t)o;
+                f->side = (uint8_t)SideOf(B.shown[o].controller);
+                GatherPoint(f->side, &f->x2, &f->y2);
+                PlaySE(SE_M_DETECT);
+                Log("%s was Tributed.", NameOf(o));
+                return f->life;   /* (the whole of it: the table doesn't catch up with the duel while it's going up) */
+            }
+        }
         MoveShown(o, YGO_LOC_GRAVE, T()->objs[o].owner);
         return Frames(12);
     case YGO_EV_TO_HAND:
@@ -1257,7 +1315,6 @@ void YgoBoard_Begin(const struct YgoDuel *truth, unsigned me, const char *oppone
     memset(&B, 0, sizeof(B));
     B.fast = fast;
     B.active = 1;
-    B.infoFade = 1;
     B.online = online;
     B.theme = (uint8_t)(online ? YGO_BG_ONLINE : sNextTheme);
     sNextTheme = YGO_BG_PLAIN;
@@ -1362,7 +1419,17 @@ static void Advance(void)
             if (B.fx[i].kind == FX_IMPACT && B.fx[i].t == B.fx[i].value)
                 PlaySE(SE_M_MEGA_KICK);   /* the blow, as the card slams home */
             if (B.fx[i].t >= B.fx[i].life)
+            {
                 B.fx[i].life = 0;
+                /* a Tribute gone up: now it's in the Graveyard (there at once); a Tribute Summon: its picture */
+                if (B.fx[i].kind == FX_TRIBUTE && B.fx[i].obj < B.objCount)
+                {
+                    MoveShown(B.fx[i].obj, YGO_LOC_GRAVE, T()->objs[B.fx[i].obj].owner);
+                    B.spr[B.fx[i].obj].placed = 0;
+                }
+                if (B.fx[i].kind == FX_GATHER)
+                    BigCard(B.fx[i].card, "TRIBUTE SUMMON", 0xf0c040, Frames(34));
+            }
         }
     for (i = 0; i < 2; i++)
         if (B.lp[i] != B.lpGoal[i])
@@ -1392,14 +1459,16 @@ static void Advance(void)
     }
     if (B.seq >= s->eventSeq && B.timer <= 0 && !B.settled)
         Settle();
-    /* the words about the card fade while a banner plays, and come back as it ends */
+    /* the words about the card: faded in once a Main Phase has begun (its banner gone), out in every other phase */
     {
-        int banner = 0;
-        for (i = 0; i < FX_MAX; i++)
+        int shown = B.phase == YGO_PHASE_MAIN1 || B.phase == YGO_PHASE_MAIN2;
+        for (i = 0; i < FX_MAX && shown; i++)
             if (B.fx[i].life && B.fx[i].kind == FX_SWEEP)
-                banner = 1;
-        if (banner)
-            B.infoFade = B.infoFade > 0.15f ? B.infoFade - 0.15f : 0;
+                shown = 0;
+        /* (out as fast as a banner's band opens: a tenth of its life) */
+        float out = Fast() ? 0.3f : 0.2f;
+        if (!shown)
+            B.infoFade = B.infoFade > out ? B.infoFade - out : 0;
         else if (B.infoFade < 1)
             B.infoFade = B.infoFade < 0.9f ? B.infoFade + 0.1f : 1;
     }
@@ -2466,6 +2535,63 @@ static void Attackers(void)
             DrawObj(f->obj, x, y, sp->w, sp->h, sp->angle, 255, FlashOf(f->obj));
         }
 }
+/* A card in the middle of turning over, going up as a Tribute, or appearing from a Tribute Summon's light: where and
+ * how it's drawn now. face: -1 as it is, 0 its back, 1 its face. 0 when it isn't to be drawn this frame. */
+static unsigned sWhite;   /* (Animated: white light laid over the card, how much) */
+static int sNoStats;      /* (Animated: its ATK / DEF not shown) */
+static int Animated(unsigned o, float *x, float *y, float *w, float *h, float angle, unsigned *alpha, unsigned *flash,
+                    int *face)
+{
+    unsigned i;
+    *face = -1;
+    sWhite = 0;
+    sNoStats = 0;
+    for (i = 0; i < FX_MAX; i++)
+    {
+        const struct Fx *f = &B.fx[i];
+        float t;
+        if (!f->life || f->obj != o)
+            continue;
+        t = (float)f->t / f->life;
+        if (f->kind == FX_FLIP)
+        {
+            /* edge-on halfway: the side it had, then the side it turns to (across the screen, lying or standing) */
+            float k = SDL_fabsf(SDL_cosf(3.14159f * t));
+            if (k < 0.06f)
+                k = 0.06f;
+            if (Across(angle))
+                *y += *h * (1 - k) / 2, *h *= k;
+            else
+                *x += *w * (1 - k) / 2, *w *= k;
+            *face = t < 0.5f ? !f->value : f->value;
+            if (t > 0.4f && t < 0.75f)
+                *flash = (unsigned)(160 * (1 - SDL_fabsf(t - 0.55f) / 0.2f));
+        }
+        else if (f->kind == FX_TRIBUTE)
+        {
+            /* white, then smaller and fainter as its light goes up, gone */
+            float gone = t < 0.3f ? 0 : (t - 0.3f) / 0.6f, k;
+            if (gone > 1 || B.shown[o].loc != YGO_LOC_MZONE)
+                return 0;
+            k = 1 - 0.4f * gone;
+            *x += *w * (1 - k) / 2, *y += *h * (1 - k) / 2 - 4 * gone, *w *= k, *h *= k;
+            *flash = 255;
+            sWhite = (unsigned)(t < 0.3f ? 220 * t / 0.3f : 220);
+            *alpha = (unsigned)(255 * (1 - gone));
+            sNoStats = 1;
+        }
+        else if (f->kind == FX_GATHER)
+        {
+            /* nothing until the light bursts, then the monster, glowing */
+            if (t < 0.5f)
+                return 0;
+            sNoStats = t < 0.7f;
+            *alpha = (unsigned)(255 * (t < 0.7f ? (t - 0.5f) / 0.2f : 1));
+            *flash = (unsigned)(255 * (1 - (t - 0.5f) / 0.5f));
+        }
+    }
+    return 1;
+}
 static void Cards(void)
 {
     unsigned o, pass;
@@ -2503,9 +2629,29 @@ static void Cards(void)
                     y += dy * k;
                     attackLunge = 1;
                 }
-            if (moving || attackLunge)
-                G_FillA((int)x + 2, (int)y + 3, (int)sp->w, (int)sp->h, 0x000000, attackLunge ? 90 : 70);
-            DrawObj(o, x, y, sp->w, sp->h, sp->angle, 255, FlashOf(o));
+            {
+                float w = sp->w, h = sp->h;
+                unsigned alpha = 255, flash = FlashOf(o);
+                int face;
+                if (!Animated(o, &x, &y, &w, &h, sp->angle, &alpha, &flash, &face))
+                    continue;
+                if (moving || attackLunge)
+                    G_FillA((int)x + 2, (int)y + 3, (int)w, (int)h, 0x000000, attackLunge ? 90 : 70);
+                if (face < 0)
+                    DrawObj(o, x, y, w, h, sp->angle, alpha, flash);
+                else
+                    Ygo_DrawCard(face && (SeesFace(o) || B.shown[o].faceUp) ? T()->objs[o].card : 0, x, y, w, h,
+                                 sp->angle, alpha, flash);
+                if (sWhite)
+                {
+                    /* (lying sideways: the light on the turned card's own rectangle) */
+                    float cx = x + w / 2, cy = y + h / 2, ww = Across(sp->angle) ? h : w, hh = Across(sp->angle) ? w : h;
+                    G_FillAdd((int)(cx - ww / 2), (int)(cy - hh / 2), (int)ww, (int)hh, 0xffffff,
+                              sWhite * alpha / 255);
+                }
+                if (sNoStats)
+                    continue;
+            }
             if (field && !moving)
             {
                 float a;
@@ -2652,10 +2798,12 @@ static void Gap(void)
         }
         else if (cur >= 0 && B.spots[cur].kind == SP_DIRECT)
             snprintf(line, sizeof(line), "A direct attack on their Life Points");
-        G_TextAlpha((unsigned)(255 * B.infoFade));
-        if (first && B.infoFade > 0)
+        /* (what to pick, when we're asked, always shows) */
+        float fade = B.mode == M_PICK_FIELD || B.mode == M_PICK_GRID || B.mode == M_ZONE || B.mode == M_PILE ? 1 : B.infoFade;
+        G_TextAlpha((unsigned)(255 * fade));
+        if (first && fade > 0)
             Line(4, GAP_Y, firstColor, first, 146);
-        if (line[0] && B.infoFade > 0)
+        if (line[0] && fade > 0)
             Line(4, GAP_Y + 10, 0xc8d0e0, line, 112);
         G_TextAlpha(255);
     }
@@ -2887,16 +3035,59 @@ static void Fxs(void)
         }
         case FX_RISE:
         {
-            /* a ring opening on the zone, a beam of light going up */
+            /* a ring opening on the zone */
             unsigned a = (unsigned)(200 * (1 - t));
             Circle(f->x, f->y, 4 + 18 * t, f->color, a);
             Circle(f->x, f->y, 2 + 11 * t, 0xffffff, a / 2);
-            if (t < 0.6f)
+            break;
+        }
+        case FX_TRIBUTE:
+        {
+            /* motes of light leaving the card and drifting to where the new monster will stand */
+            unsigned k;
+            for (k = 0; k < 14; k++)
             {
-                int bw = (int)(14 * (1 - t / 0.6f)) + 2;
-                G_FillA(f->x - bw / 2, f->y - 26 - (int)(10 * t), bw, 40, f->color, (unsigned)(90 * (1 - t / 0.6f)));
-                G_FillA(f->x - bw / 4, f->y - 26 - (int)(10 * t), bw / 2 > 1 ? bw / 2 : 1, 40, 0xffffff,
-                        (unsigned)(110 * (1 - t / 0.6f)));
+                unsigned h = (unsigned)(f->obj * 2654435761u + k * 40503u);
+                float start = 0.15f + (float)(h % 40) / 100.0f, u = (t - start) / 0.5f;
+                int sx = f->x - 7 + (int)(h >> 8) % 15, sy = f->y - 10 + (int)(h >> 12) % 21;
+                float e, px, py;
+                if (u <= 0 || u >= 1)
+                    continue;
+                e = u * u * (3 - 2 * u);
+                px = sx + (f->x2 - sx) * e;
+                py = sy + (f->y2 - sy) * e - 14 * SDL_sinf(3.14159f * u);   /* (an arc: up, then down to the zone) */
+                G_FillAdd((int)px, (int)py, 2, 2, k & 1 ? 0xfff0c0 : 0xffffff, (unsigned)(230 * (1 - u * 0.5f)));
+                G_FillAdd((int)px - 1, (int)py - 1, 4, 4, 0xf0c040, (unsigned)(70 * (1 - u)));
+            }
+            break;
+        }
+        case FX_GATHER:
+        {
+            /* light drawn in from all round, then a burst and a ring */
+            unsigned k;
+            if (t < 0.5f)
+            {
+                float u = t / 0.5f, r = 34 * (1 - u * u);
+                for (k = 0; k < 16; k++)
+                {
+                    float a = 6.2832f * k / 16 + u * 1.6f;
+                    int px = f->x + (int)(SDL_cosf(a) * r), py = f->y + (int)(SDL_sinf(a) * r * 0.8f);
+                    G_FillAdd(px, py, 2, 2, k & 1 ? 0xfff0c0 : f->color, (unsigned)(120 + 135 * u));
+                }
+                G_FillAdd(f->x - (int)(6 * u), f->y - (int)(6 * u), (int)(12 * u) + 1, (int)(12 * u) + 1, 0xfff0c0,
+                          (unsigned)(160 * u));
+            }
+            else
+            {
+                float u = (t - 0.5f) / 0.5f;
+                unsigned a = (unsigned)(230 * (1 - u));
+                Circle(f->x, f->y, 6 + 30 * u, 0xf0c040, a);
+                Circle(f->x, f->y, 3 + 20 * u, 0xffffff, a / 2);
+                if (u < 0.35f)
+                {
+                    int g = (int)(10 * (1 - u / 0.35f)) + 2;
+                    G_FillAdd(f->x - g, f->y - g, 2 * g, 2 * g, 0xfff0c0, (unsigned)(150 * (1 - u / 0.35f)));
+                }
             }
             break;
         }

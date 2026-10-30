@@ -184,6 +184,38 @@ static int SawEvent(unsigned type)
 }
 #define LIST(...) ((const char *const[]){__VA_ARGS__, NULL})
 
+/* The AI plays for whoever is asked until player gets a question of type */
+static void AiUntil(unsigned player, unsigned type)
+{
+    unsigned guard = 0;
+    while (!(D.query.player == player && D.query.type == type))
+    {
+        struct YgoAnswer a;
+        CHECK(D.query.type != YGO_Q_NONE && guard++ < 300);
+        YgoDuel_AiAnswer(&D, &a);
+        Answer(&a);
+    }
+}
+static unsigned Activations(unsigned player, uint32_t since)
+{
+    uint32_t seq;
+    unsigned n = 0;
+    for (seq = since; seq < D.s.eventSeq; seq++)
+    {
+        const struct YgoEvent *e = YgoDuel_GetEvent(&D.s, seq);
+        n += e && e->type == YGO_EV_ACTIVATE && e->player == player;
+    }
+    return n;
+}
+static int Atk(unsigned p, const char *name)
+{
+    unsigned i;
+    for (i = 0; i < YGO_ZONES; i++)
+        if (D.s.players[p].monsters[i] && !strcmp(Ygo_Card(D.s.objs[D.s.players[p].monsters[i] - 1].card)->name, name))
+            return YgoDuel_Atk(&D.s, D.s.players[p].monsters[i] - 1);
+    return -1;
+}
+
 int main(void)
 {
     /* A Normal Summon on turn 1, a direct attack on turn 3 */
@@ -513,6 +545,71 @@ int main(void)
             Answer(&a);
         }
         CHECK(named && SawEvent(YGO_EV_DECLARE));
+    }
+    printf("ok   %s\n", sScenario);
+
+    /* The AI: one answer to an attack (Magic Cylinder and Mirror Force aren't both spent on it) */
+    sScenario = "ai one answer";
+    Start(LIST("Celtic Guardian"), LIST("Magic Cylinder", "Mirror Force"), NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_SUMMON, "Celtic Guardian");
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_END_TURN, NULL);
+    Until(1, YGO_Q_IDLE);
+    Act(YGO_ACT_SET_SPELL, "Magic Cylinder");
+    Until(1, YGO_Q_IDLE);
+    Act(YGO_ACT_SET_SPELL, "Mirror Force");
+    Until(1, YGO_Q_IDLE);
+    Act(YGO_ACT_END_TURN, NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_TO_BATTLE, NULL);
+    Until(0, YGO_Q_BATTLE);
+    {
+        uint32_t since = D.s.eventSeq;
+        unsigned guard = 0;
+        Act(YGO_ACT_ATTACK, "Celtic Guardian");
+        while (!(D.query.player == 0 && (D.query.type == YGO_Q_BATTLE || D.query.type == YGO_Q_IDLE)) && guard++ < 30)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && D.query.type == YGO_Q_CHAIN)
+                Pass();
+            else
+            {
+                YgoDuel_AiAnswer(&D, &a);
+                Answer(&a);
+            }
+        }
+        CHECK(Activations(1, since) == 1);
+    }
+    printf("ok   %s\n", sScenario);
+
+    /* The AI: an Equip Spell that helps goes on its own monster, never on the opponent's */
+    sScenario = "ai equips its own";
+    Start(LIST("Celtic Guardian"), LIST("Gemini Elf", "Axe of Despair"), NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_SUMMON, "Celtic Guardian");
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_END_TURN, NULL);
+    AiUntil(0, YGO_Q_IDLE);
+    CHECK(Atk(0, "Celtic Guardian") <= 1400);
+    CHECK(Atk(1, "Gemini Elf") == 2900);
+    printf("ok   %s\n", sScenario);
+
+    /* The AI: a battle trick is kept for a battle (Waboku isn't spent on a Summon) */
+    sScenario = "ai keeps waboku";
+    Start(LIST("Pot of Greed", "Celtic Guardian"), LIST("Waboku"), NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_END_TURN, NULL);
+    Until(1, YGO_Q_IDLE);
+    Act(YGO_ACT_SET_SPELL, "Waboku");
+    Until(1, YGO_Q_IDLE);
+    Act(YGO_ACT_END_TURN, NULL);
+    Until(0, YGO_Q_IDLE);
+    {
+        uint32_t since = D.s.eventSeq;
+        Act(YGO_ACT_SUMMON, "Celtic Guardian");
+        AiUntil(0, YGO_Q_IDLE);
+        CHECK(Activations(1, since) == 0 && !InGrave(1, "Waboku"));
     }
     printf("ok   %s\n", sScenario);
 

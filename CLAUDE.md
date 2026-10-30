@@ -204,6 +204,9 @@ only from what both can see), hidden power ratings from AI duels blended with th
 (tools/tt/rate_cards.sh, tools/ygo/rate_cards.sh, tools/tcg/rate_cards.sh: audits in docs/audit_*.txt; rerun after
 rules / AI / card changes), CARD SCALING fits with a slight player edge, and the challenge screen's live difficulty
 for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power ratings and how a match looks".
+No "wait, what?" moves (1.57.0): the Yu-Gi-Oh! AI reads a card's purpose from its words (ygo_ai.c Says / Boost /
+HarmfulEquip / Pointless / ForBattle) and never chains to its own link; the POKéMON AI attaches Energy only where it
+brings an attack closer (tcg_ai.c EnergyHelps); scenarios "ai ..." in tools/ygo/test_edo_cards.c, tools/tcg/test_ai.c.
 HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
 card games together").
 SEARCH & SORT (src/tcg/tcg_search.c: L2 / F in the BINDER and deck builders of all three, PLATFORM_KEY_SEARCH; each game's

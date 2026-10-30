@@ -2,4 +2,4 @@
  * gives away against the best, in rating points (Game Boy decks, both seats). Do not edit. */
 #include "tcg/scale.h"
 
-const int16_t gTcgLevelRating[4] = {-148, -70, -17, 0};
+const int16_t gTcgLevelRating[4] = {-152, -79, -14, 0};

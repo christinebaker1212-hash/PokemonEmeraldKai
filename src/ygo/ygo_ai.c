@@ -142,6 +142,124 @@ static unsigned CardsOn(const struct YgoState *s, unsigned p)
         n += s->players[p].spells[i] != 0;
     return n;
 }
+/* What a card's text says (any case): the AI reads a card's purpose from its words */
+static int Says(const struct YgoCard *c, const char *phrase)
+{
+    const char *t;
+    size_t n = strlen(phrase);
+    if (!c || !c->text)
+        return 0;
+    for (t = c->text; *t; t++)
+    {
+        size_t k;
+        for (k = 0; k < n; k++)
+        {
+            char a = t[k], b = phrase[k];
+            if (!a)
+                return 0;
+            if (a >= 'A' && a <= 'Z')
+                a += 32;
+            if (b >= 'A' && b <= 'Z')
+                b += 32;
+            if (a != b)
+                break;
+        }
+        if (k == n)
+            return 1;
+    }
+    return 0;
+}
+/* An Equip Spell that cripples the monster it's on (Paralyzing Potion, Germ Infection, Flint, Snatch Steal...);
+ * every other one is for a monster of its own */
+static int HarmfulEquip(const struct YgoCard *c)
+{
+    return Says(c, "equipped monster cannot attack") || Says(c, "equipped with this card cannot attack") ||
+           Says(c, "or declare an attack") || Says(c, "is decreased by") || Says(c, "take control");
+}
+/* An effect that only helps what it picks (Rush Recklessly, Reinforcements, Mist Body...) */
+static int Boost(const struct YgoCard *c)
+{
+    if (!c)
+        return 0;
+    if (c->property == YGO_PROP_EQUIP)
+        return !HarmfulEquip(c);
+    return (Says(c, "gains") || Says(c, "increase") || Says(c, "cannot be destroyed")) && !Says(c, "destroy that") &&
+           !Says(c, "destroy 1") && !Says(c, "destroy it") && !Says(c, "loses") && !Says(c, "decrease") &&
+           !Says(c, "control of") && !Says(c, "banish") && !Says(c, "return") && !Says(c, "negate") &&
+           !Says(c, "face-down");
+}
+/* A card that's only any use while a monster is attacking (Waboku, Negate Attack, Sakuretsu Armor...) */
+static int ForBattle(const struct YgoCard *c)
+{
+    return Says(c, "battle damage") || Says(c, "declares an attack") || Says(c, "attacks") ||
+           Says(c, "an attack") || Says(c, "battle phase") || Says(c, "attacking monster");
+}
+/* The sum of what each side has among its monsters, as each player sees them */
+static int MonsterWorth(const struct YgoState *s, unsigned me, unsigned p)
+{
+    unsigned i;
+    int v = 0;
+    for (i = 0; i < YGO_ZONES; i++)
+        if (s->players[p].monsters[i])
+            v += Value(s, me, s->players[p].monsters[i] - 1);
+    return v;
+}
+static unsigned SpellTraps(const struct YgoState *s, unsigned p, unsigned except)
+{
+    unsigned i, n = 0;
+    for (i = 0; i < YGO_FIELD_ZONE; i++)
+        n += s->players[p].spells[i] && s->players[p].spells[i] - 1 != except;
+    return n;
+}
+static int FaceUpMonster(const struct YgoState *s, unsigned p)
+{
+    unsigned i;
+    for (i = 0; i < YGO_ZONES; i++)
+        if (s->players[p].monsters[i] && s->objs[s->players[p].monsters[i] - 1].faceUp)
+            return 1;
+    return 0;
+}
+/* Is playing this Spell or Trap now a waste, or worse? (each check is a card's own words: a mistake no player
+ * would make) */
+static int Pointless(const struct YgoState *s, unsigned me, unsigned o, const struct YgoCard *c, int myTurn)
+{
+    if (!c || Ygo_IsMonster(c))
+        return 0;
+    /* Life Points with plenty left */
+    if ((Says(c, "increase your life points") || Says(c, "gain") ) && Says(c, "life points") &&
+        !Says(c, "destroy") && !Says(c, "draw") && s->players[me].lp >= 6000)
+        return 1;
+    /* clearing the field when it takes more of ours than theirs */
+    if (Says(c, "destroy all monsters on the field") && MonsterWorth(s, me, me) >= MonsterWorth(s, me, me ^ 1))
+        return 1;
+    if ((Says(c, "destroy all spell and trap cards on the field") || Says(c, "destroy all spell/trap cards on the field")) &&
+        SpellTraps(s, me, o) >= SpellTraps(s, me ^ 1, NO_OBJ))
+        return 1;
+    /* an Equip Spell with nothing of the right side to go on */
+    if (c->property == YGO_PROP_EQUIP && !Says(c, "special summon"))
+        return HarmfulEquip(c) ? !FaceUpMonster(s, me ^ 1) : !FaceUpMonster(s, me);
+    /* battle tricks away from a battle; a boost on its own turn only before its attacks, when it turns a battle its
+       monster would lose into one it wins */
+    if (myTurn && (c->frame == YGO_TRAP || c->property == YGO_PROP_QUICK) && ForBattle(c))
+        return 1;
+    if (myTurn && (c->frame == YGO_TRAP || c->property == YGO_PROP_QUICK) && Boost(c))
+    {
+        int theirBest = TheirBest(s, me, NULL);
+        unsigned i;
+        if (s->phase != YGO_PHASE_MAIN1)
+            return 1;
+        for (i = 0; i < YGO_ZONES; i++)
+        {
+            unsigned m = s->players[me].monsters[i];
+            if (m && s->objs[m - 1].faceUp && s->objs[m - 1].attackPos && Atk(s, m - 1) <= theirBest &&
+                Atk(s, m - 1) + 800 > theirBest)
+                return 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 /* The best target an attacker has: object, NO_OBJ for a direct attack, or -1 when no attack is worth it */
 static int BestTarget(const struct YgoState *s, unsigned me, unsigned attacker, int direct)
 {
@@ -220,9 +338,8 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
             if (UsedOften(s, c, 0))
                 break;
             score = 900;
-            /* a Spell that clears the field hurts its user when they have more there */
-            if (card && card->frame == YGO_SPELL && CardsOn(s, me) > CardsOn(s, me ^ 1) + 1)
-                score = 300;
+            if (Pointless(s, me, c->obj, card, 1))
+                score = 0;
             break;
         case YGO_ACT_SPECIAL:
             score = 800;
@@ -252,8 +369,16 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
                 score = 300;
             break;
         case YGO_ACT_FLIP_SUMMON:
-            if (card && ((card->abilities & YGO_ABILITY_FLIP) || card->atk > theirBest))
+            /* a FLIP effect when it has something to work on (a monster-destroying one with their monsters there),
+               or a monster that wins its battles */
+            if (card && card->atk != YGO_STAT_UNKNOWN && card->atk > theirBest && theirMonsters)
                 score = 350;
+            else if (card && (card->abilities & YGO_ABILITY_FLIP))
+            {
+                int needsTheirs = Says(card, "destroy") || Says(card, "return") || Says(card, "banish") ||
+                                  Says(card, "control");
+                score = !needsTheirs || theirMonsters || CardsOn(s, me ^ 1) ? 380 : 0;
+            }
             break;
         case YGO_ACT_POSITION:
             if (c->obj < s->objCount)
@@ -347,8 +472,10 @@ static int Pressure(const struct YgoDuel *d, unsigned me)
 {
     const struct YgoState *s = &d->s;
     uint32_t seq;
-    if (s->chainCount && s->chain[s->chainCount - 1].player != me)
-        return 1;
+    /* (never onto its own link: one answer to an attack or an effect is enough, Magic Cylinder and Mirror Force
+       aren't both spent on one attack) */
+    if (s->chainCount)
+        return s->chain[s->chainCount - 1].player != me;
     if (s->attacker && s->objs[s->attacker - 1].controller != me)
         return 1;
     for (seq = s->eventSeq; seq > 0 && s->eventSeq - seq < 6; seq--)
@@ -385,6 +512,19 @@ static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
         static const uint8_t sMiss[4] = {60, 38, 16, 3};
         if (Chance(sMiss))
             continue;
+        /* battle tricks only in a battle, and a boost only for a monster of its own in it */
+        if (card && (card->frame == YGO_TRAP || card->property == YGO_PROP_QUICK))
+        {
+            int battling = s->attacker != 0;
+            int mineIn = battling && ((s->objs[s->attacker - 1].controller == me) ||
+                                      (s->attackTarget && s->objs[s->attackTarget - 1].controller == me));
+            if (ForBattle(card) && !battling)
+                continue;
+            if (Boost(card) && !mineIn)
+                continue;
+            if (Pointless(s, me, c->obj, card, 0))
+                continue;
+        }
         if (Pressure(d, me) || (card && card->frame != YGO_TRAP && card->property != YGO_PROP_QUICK &&
                                 s->chainCount == 0 && !YgoDuel_QuietChance(d)))
         {
@@ -421,9 +561,21 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
     for (i = 0; i < n; i++)
     {
         unsigned o = q->items[i].obj;
-        const struct YgoCard *c = Ygo_Card(q->items[i].card);
+        const struct YgoCard *c = Ygo_Card(q->items[i].card), *source = Ygo_Card(q->card);
         int v = o == NO_OBJ ? (c ? 1000 + (c->atk == YGO_STAT_UNKNOWN ? 0 : c->atk) : 2500) : Value(s, me, o);
         int mine = o != NO_OBJ && o < s->objCount && s->objs[o].controller == me;
+        int onField = o != NO_OBJ && o < s->objCount &&
+                      (s->objs[o].location == YGO_LOC_MZONE || s->objs[o].location == YGO_LOC_SZONE);
+        /* an effect that helps what it picks: its own monsters (the stronger the better), never theirs; one that
+           hurts: theirs */
+        if (onField && (q->prompt == YGO_P_EQUIP || q->prompt == YGO_P_TARGET || q->prompt == YGO_P_NONE) &&
+            source && (q->prompt == YGO_P_EQUIP ? 1 : Boost(source)))
+        {
+            int helps = q->prompt == YGO_P_EQUIP ? !HarmfulEquip(source) : 1;
+            value[i] = (mine == helps ? v : -v) - (q->items[i].flags & YGO_IF_PICKED ? 100000 : 0);
+            order[i] = (uint8_t)i;
+            continue;
+        }
         switch (q->prompt)
         {
         case YGO_P_TRIBUTE:
@@ -460,7 +612,10 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
     /* now and then the second best first (a target misjudged) */
     {
         static const uint8_t sSwap[4] = {50, 32, 15, 5};
-        if (n >= 2 && value[order[1]] > -50000 && Chance(sSwap))
+        /* (only between two that are close: never a target on the wrong side) */
+        int a0 = value[order[0]], a1 = n >= 2 ? value[order[1]] : 0;
+        if (n >= 2 && a1 > -50000 && (a0 >= 0) == (a1 >= 0) && a0 - a1 <= (a0 < 0 ? -a0 : a0) / 4 + 200 &&
+            Chance(sSwap))
         {
             uint8_t t = order[0];
             order[0] = order[1];

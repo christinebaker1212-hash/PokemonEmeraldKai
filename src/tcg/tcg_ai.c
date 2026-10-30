@@ -1,6 +1,7 @@
 #include "mp_version.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
+#include <stdio.h>
 #include <string.h>
 /* Decisions use public opposing cards/counts and the AI's own cards only.
  * Never score the outcome of a simulated coin flip or inspect the opponent's
@@ -163,6 +164,13 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
         for (i = 1; i < TCG_FIELD_SIZE; i++)
             if (p->field[i].stackSize && p->field[i].damage > p->field[best].damage)
                 best = i;
+        /* (only on a Pokemon that has been hurt: Super Potion's Energy is worth it for 40 or more; Defender on the
+           Active, which the next attack hits) */
+        if (id == TCG_CARD_DEFENDER)
+            best = 0;
+        if (!p->field[best].damage || (id == TCG_CARD_SUPER_POTION && p->field[best].damage < 40) ||
+            (id == TCG_CARD_DEFENDER && (p->field[0].defender || !op->field[0].attachedSize)))
+            return 0;
         a->slot = best;
         if (id == TCG_CARD_SUPER_POTION)
         {
@@ -179,8 +187,20 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
             return 0;
         break;
     case TCG_CARD_FULL_HEAL:
-    case TCG_CARD_POKEMON_CENTER:
+        if (!p->field[0].condition && !p->field[0].poison)
+            return 0;
         break;
+    case TCG_CARD_POKEMON_CENTER:
+    {
+        /* (it heals every Pokemon and discards their Energy: only when much is healed and little lost) */
+        unsigned healed = 0, energy = 0;
+        for (i = 0; i < TCG_FIELD_SIZE; i++)
+            if (p->field[i].stackSize && p->field[i].damage)
+                healed += p->field[i].damage, energy += TcgDuel_Energy(g, g->current, i, TCG_NONE);
+        if (healed < 50 || energy > 2)
+            return 0;
+        break;
+    }
     case TCG_CARD_CLEFAIRY_DOLL:
     case TCG_CARD_MYSTERIOUS_FOSSIL:
         return 0; /* Avoid filling the bench without a deck-specific purpose. */
@@ -459,6 +479,69 @@ static unsigned NeedMost(const struct TcgCard *c, unsigned type)
             most = need;
     }
     return most;
+}
+/* How much Energy an attack still lacks with what's attached (plus `add` more of type `type`): its typed cost first,
+ * then whatever is left over for its Colorless */
+static unsigned Unmet(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgAttack *m, unsigned type,
+                      unsigned add)
+{
+    unsigned t, have, typed = 0, spare = 0;
+    for (t = 0; t < TCG_TYPES; t++)
+    {
+        have = TcgDuel_Energy(g, who, slot, t) + (t == type ? add : 0);
+        if (t == TCG_COLORLESS)
+            spare += have;
+        else if (have < m->cost[t])
+            typed += m->cost[t] - have;
+        else
+            spare += have - m->cost[t];
+    }
+    return typed + (m->cost[TCG_COLORLESS] > spare ? m->cost[TCG_COLORLESS] - spare : 0);
+}
+/* An attack that does more for Energy beyond its cost (Hydro Pump, Water Gun...) */
+static int MoreForEnergy(const struct TcgCard *c, const struct TcgAttack *m)
+{
+    char self[48];
+    snprintf(self, sizeof(self), "attached to %s", c->name);
+    return m->description && strstr(m->description, "for each") && strstr(m->description, self);
+}
+static int HelpsCard(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *c, unsigned type,
+                     unsigned add)
+{
+    unsigned k, t, total = TcgDuel_Energy(g, who, slot, TCG_NONE), cost;
+    for (k = 0; c && k < 2; k++)
+    {
+        const struct TcgAttack *m = &c->attacks[k];
+        if (!m->name[0] || m->category == TCG_POKEMON_POWER)
+            continue;
+        if (Unmet(g, who, slot, m, type, add) < Unmet(g, who, slot, m, type, 0))
+            return 1;
+        for (t = cost = 0; t < TCG_TYPES; t++)
+            cost += m->cost[t];
+        if (MoreForEnergy(c, m) && total < cost + 2)
+            return 1;
+    }
+    return 0;
+}
+/* Does this Energy bring a Pokemon closer to an attack: its own, or one of an Evolution card in the hand? (Energy
+ * that does nothing there stays in the hand for a Pokemon still to come) */
+static int EnergyHelps(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *energy)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgCard *c = TcgDuel_Field(g, who, slot);
+    unsigned i, add = energy->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1;
+    if (!c || c->kind != TCG_POKEMON)
+        return 0;
+    if (HelpsCard(g, who, slot, c, energy->type, add))
+        return 1;
+    for (i = 0; i < p->handSize; i++)
+    {
+        const struct TcgCard *e = Tcg_Card(p->cards[p->hand[i]]);
+        if (e->kind == TCG_POKEMON && e->stage && e->evolvesFrom && !strcmp(e->evolvesFrom, c->name) &&
+            HelpsCard(g, who, slot, e, energy->type, add))
+            return 1;
+    }
+    return 0;
 }
 /* A Pokemon Power worth using now: one action at a time, each a plain gain (Shift, Peek
  * and Cowardice are left to people). */
@@ -750,7 +833,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
             {
                 const struct TcgCard *c = TcgDuel_Field(g, g->current, s);
                 int score;
-                if (!c || c->kind != TCG_POKEMON)
+                if (!c || c->kind != TCG_POKEMON || !EnergyHelps(g, g->current, s, energy))
                     continue;
                 score = s == 0 ? 40 : 0;
                 for (attack = 0; attack < 2; attack++)
