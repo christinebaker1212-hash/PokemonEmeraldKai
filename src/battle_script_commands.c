@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle_gen4.h"
-#include "battle_gen59.h"   // Moemon Kai: Gen 5-9
+#include "battle_gen59.h"
+#include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -5104,6 +5105,7 @@ static void Cmd_switchindataupdate(void)
     gBattleMons[gActiveBattler].types[0] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[0];
     gBattleMons[gActiveBattler].types[1] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[1];
     gBattleMons[gActiveBattler].ability = GetAbilityBySpecies(gBattleMons[gActiveBattler].species, gBattleMons[gActiveBattler].abilityNum);
+    MP_Gen_FitBattler(gActiveBattler);   // Moemon Kai: GENERATION
 
     // check knocked off item
     i = GetBattlerSide(gActiveBattler);

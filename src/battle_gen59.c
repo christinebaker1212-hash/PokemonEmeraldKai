@@ -4,6 +4,7 @@
 #include "battle.h"
 #include "battle_gen4.h"
 #include "battle_gen59.h"
+#include "mp_region.h"
 #include "battle_controllers.h"
 #include "battle_main.h"
 #include "battle_anim.h"
@@ -460,6 +461,7 @@ u8 MP_Gen59_MoveType(u16 move, u8 battler, u8 type)
         break;
     }
     type = MP_Gen59_AteType(move, battler, type);
+    type = MP_Gen_MoveType(type);   // FAIRY moves are NORMAL before Gen 6
     if (gGen59Field.ionDeluge && type == TYPE_NORMAL)
         type = TYPE_ELECTRIC;
     return type;

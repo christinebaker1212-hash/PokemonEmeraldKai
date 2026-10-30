@@ -58,6 +58,7 @@ enum
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
     OPT_MOVESPLIT,
+    OPT_GENERATION,
     OPT_CARDSCALE,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
@@ -175,6 +176,13 @@ static const u8 sText_LevelScale[] = _("LEVEL SCALING");
 static const u8 sText_MoveSplit[] = _("MOVE KIND");
 static const u8 sText_MoveSplitGen3[] = _("GEN 3");
 static const u8 sText_MoveSplitGen4[] = _("GEN 4");
+static const u8 sText_Generation[] = _("GENERATION");
+static const u8 sText_Gen3[] = _("GEN 3");
+static const u8 sText_Gen5[] = _("GEN 5");
+static const u8 sText_Gen6[] = _("GEN 6");
+static const u8 sText_Gen7[] = _("GEN 7");
+static const u8 sText_Gen8[] = _("GEN 8");
+static const u8 sText_Gen9[] = _("GEN 9");
 static const u8 sText_ScWild[] = _("WILD");
 static const u8 sText_ScTrainers[] = _("TRAINERS");
 static const u8 sText_ScBoss[] = _("BOSS MARGIN");
@@ -361,6 +369,7 @@ static void BuildRows(void)
         AddRow(OPT_BATTLESCENE, 0);
         AddRow(OPT_BATTLESTYLE, 0);
         AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
+        AddRow(OPT_GENERATION, 0);  // Moemon Kai: which generations' Pokémon, moves and types (mp_region.c)
         AddRow(OPT_SOUND, 0);
         AddRow(OPT_BUTTONMODE, 0);
         AddRow(OPT_FRAME, 0);
@@ -468,6 +477,10 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MOVESPLIT:
         names[0] = sText_MoveSplitGen3, names[1] = sText_MoveSplitGen4;
         return 2;
+    case OPT_GENERATION:
+        names[0] = sText_Gen3, names[1] = sText_MoveSplitGen4, names[2] = sText_Gen5, names[3] = sText_Gen6;
+        names[4] = sText_Gen7, names[5] = sText_Gen8, names[6] = sText_Gen9;
+        return 7;
     case OPT_CARDART:
         names[0] = sText_CardArtPrinted, names[1] = sText_CardArtGameBoy, names[2] = sText_CardArtFull;
         return 3;
@@ -655,6 +668,7 @@ static u8 Current(u8 row)
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
+    case OPT_GENERATION:  return MP_Generation() - 3;
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
@@ -724,6 +738,13 @@ static void Change(u8 row, int dir)
         }
         break;
     case OPT_MOVESPLIT:   gMpConfig.moveSplit = !gMpConfig.moveSplit; MP_SendRoomRules(); break;
+    case OPT_GENERATION:
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            break;   // online, the host's
+        gMpConfig.generation = 3 + Wrap(MP_Generation() - 3 + dir, 7);
+        MPNet_Log("generation: %d", gMpConfig.generation);
+        MP_SendRoomRules();
+        break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
@@ -807,6 +828,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_MOVESPLIT:   return sText_MoveSplit;
+    case OPT_GENERATION:  return sText_Generation;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
     case OPT_FIGHTKEYS:   return sText_FightKeys;
     case OPT_FB_BIND:     return sFightButtonNames[sRows[row].arg % FIGHT_BIND_COUNT];
@@ -964,6 +986,9 @@ static void DrawHint(void)
     else if (opt == OPT_MOVESPLIT)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
                  : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");
+    else if (opt == OPT_GENERATION)
+        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: GEN %d"
+                 : "POKEMON, MOVES AND TYPES UP TO GEN %d", MP_Generation());
     else if (opt == OPT_BUTTONICONS)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)

@@ -234,6 +234,7 @@ struct MpConfig
     u8 animSpeed;             // host setting: battle animations this many percent faster (0, 25, 30; ANIM SPEED)
     u8 levelScaling;          // OPTIONS > GAME > LEVEL SCALING (online the room host's counts; mp_levelscale.c)
     u8 moveSplit;             // Moemon Kai: OPTIONS > GAME > MOVE KIND (1 = Gen 4's physical / special per move)
+    u8 generation;            // Moemon Kai: OPTIONS > GAME > GENERATION (3-9; online the room host's; mp_region.c)
     u8 spectatePanel;         // CO-OP > SPECTATE: friends' screens in a panel under yours (mp_spectate.c)
     u8 spectateScale;         // ... each 1-4 times 240x160 (the size for friends without their own)
     struct MpCreated custom[MP_CREATED_SLOTS];   // LOOK > CREATE presets (CUSTOM 1-3)
@@ -316,7 +317,8 @@ s8 MP_RoomHostId(void);          // online in a room someone else made: the host
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
 bool8 MP_LevelScaling(void);
-bool8 MP_MoveSplit(void);   // Moemon Kai: OPTIONS > GAME > MOVE KIND (the host's online)     // ... and LEVEL SCALING
+bool8 MP_MoveSplit(void);   // Moemon Kai: OPTIONS > GAME > MOVE KIND (the host's online)
+u8 MP_Generation(void);     // Moemon Kai: OPTIONS > GAME > GENERATION (the host's online)
 bool8 MP_LevelScalingIsOurs(void);
 void MP_SendRoomRules(void);     // the host tells everyone again (a setting changed)
 // mp_levelscale.c: FF8-style level scaling

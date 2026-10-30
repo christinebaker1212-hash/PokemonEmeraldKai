@@ -493,16 +493,22 @@ u16 MP_RegionPartyCount(void)
 // below Gen 4 (tools/quetzal_port/gen_gen2.py), its Gen 4 cap from there.
 #include "wild_encounter.h"
 #include "data.h"
+#include "battle.h"
+#include "constants/abilities.h"
 #include "../data/wild_qz_gen2.h"
 #include "../data/trainer_parties_qz_gen2.h"
+#include "../data/wild_qz_modern.h"
+#include "../data/trainer_parties_qz_modern.h"
 
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 
-u8 gMpGenSetting = 3;
+u8 gMpGenSetting = 0;   // tests (mp gen N): overrides OPTIONS > GAME > GENERATION / the room's
 
 u8 MP_Gen_Cap(u8 region)
 {
-    u8 g = gMpGenSetting < 3 ? 3 : gMpGenSetting;
+    u8 g = gMpGenSetting ? gMpGenSetting : MP_Generation();
+    if (g < 3)
+        g = 3;
     if (region != REGION_HOENN && g <= 3)
         return 2;
     return g;
@@ -519,6 +525,86 @@ u8 MP_Gen_OfSpecies(u16 species)
         if (nat <= sLast[g])
             return g + 1;
     return ARRAY_COUNT(sLast) + 1;
+}
+
+// The generation a move comes from (Kai's ids are the national ones to Gen 4, then pokeemerald-expansion's)
+u8 MP_Gen_OfMove(u16 move)
+{
+    static const u16 sLast[] = {165, 251, 354, 467, 559, 621, 689, 778};
+    u8 g;
+    for (g = 0; g < ARRAY_COUNT(sLast); g++)
+        if (move <= sLast[g])
+            return g + 1;
+    return ARRAY_COUNT(sLast) + 1;
+}
+
+u8 MP_Gen_OfAbility(u16 ability)
+{
+    static const u16 sLast[] = {0, 0, ABILITY_AIR_LOCK, ABILITY_BAD_DREAMS, ABILITY_AROMA_VEIL - 1, ABILITY_STAMINA - 1,
+                                ABILITY_INTREPID_SWORD - 1, ABILITY_LINGERING_AROMA - 1};
+    u8 g;
+    for (g = 2; g < ARRAY_COUNT(sLast); g++)
+        if (ability <= sLast[g])
+            return g + 1;
+    return ARRAY_COUNT(sLast) + 1;
+}
+
+// What a Pokémon already has is never held back below Gen 4: Kai had Gen 4's Pokémon, moves and abilities before
+// GENERATION existed, so its default (3) keeps them working
+static u8 UseCap(void)
+{
+    u8 cap = MP_Gen_Cap(MP_Region_Current());
+    return cap < 4 ? 4 : cap;
+}
+
+bool8 MP_Gen_MoveAllowed(u16 move)
+{
+    return MP_Gen_OfMove(move) <= UseCap();
+}
+
+// FAIRY came in Gen 6: before it a Pokémon or move takes its older type; from it the older Pokémon that became FAIRY
+// take it (Kai's own data has them as Gen 3 had them)
+static const struct {u16 species; u8 type1, type2;} sFairyFromGen6[] = {
+    {SPECIES_CLEFAIRY, TYPE_FAIRY, TYPE_FAIRY}, {SPECIES_CLEFABLE, TYPE_FAIRY, TYPE_FAIRY}, {SPECIES_CLEFFA, TYPE_FAIRY, TYPE_FAIRY},
+    {SPECIES_JIGGLYPUFF, TYPE_NORMAL, TYPE_FAIRY}, {SPECIES_WIGGLYTUFF, TYPE_NORMAL, TYPE_FAIRY}, {SPECIES_IGGLYBUFF, TYPE_NORMAL, TYPE_FAIRY},
+    {SPECIES_MR_MIME, TYPE_PSYCHIC, TYPE_FAIRY}, {SPECIES_MIME_JR, TYPE_PSYCHIC, TYPE_FAIRY},
+    {SPECIES_TOGEPI, TYPE_FAIRY, TYPE_FAIRY}, {SPECIES_TOGETIC, TYPE_FAIRY, TYPE_FLYING}, {SPECIES_TOGEKISS, TYPE_FAIRY, TYPE_FLYING},
+    {SPECIES_SNUBBULL, TYPE_FAIRY, TYPE_FAIRY}, {SPECIES_GRANBULL, TYPE_FAIRY, TYPE_FAIRY},
+    {SPECIES_MARILL, TYPE_WATER, TYPE_FAIRY}, {SPECIES_AZUMARILL, TYPE_WATER, TYPE_FAIRY}, {SPECIES_AZURILL, TYPE_NORMAL, TYPE_FAIRY},
+    {SPECIES_MAWILE, TYPE_STEEL, TYPE_FAIRY},
+    {SPECIES_RALTS, TYPE_PSYCHIC, TYPE_FAIRY}, {SPECIES_KIRLIA, TYPE_PSYCHIC, TYPE_FAIRY}, {SPECIES_GARDEVOIR, TYPE_PSYCHIC, TYPE_FAIRY},
+};
+
+u8 MP_Gen_SpeciesType(u16 species, u8 which)
+{
+    u8 type = gSpeciesInfo[species].types[which & 1], other = gSpeciesInfo[species].types[!(which & 1)];
+    u32 i;
+    if (MP_Gen_Cap(MP_Region_Current()) >= 6)
+    {
+        for (i = 0; i < ARRAY_COUNT(sFairyFromGen6); i++)
+            if (sFairyFromGen6[i].species == species)
+                return (which & 1) ? sFairyFromGen6[i].type2 : sFairyFromGen6[i].type1;
+        return type;
+    }
+    if (type == TYPE_FAIRY)
+        return other != TYPE_FAIRY ? other : TYPE_NORMAL;
+    return type;
+}
+
+u8 MP_Gen_MoveType(u8 type)
+{
+    if (type == TYPE_FAIRY && MP_Gen_Cap(MP_Region_Current()) < 6)
+        return TYPE_NORMAL;
+    return type;
+}
+
+// A battler's types and ability as the generation has them (past the cap: no ability)
+void MP_Gen_FitBattler(u8 battler)
+{
+    gBattleMons[battler].types[0] = MP_Gen_SpeciesType(gBattleMons[battler].species, 0);
+    gBattleMons[battler].types[1] = MP_Gen_SpeciesType(gBattleMons[battler].species, 1);
+    if (MP_Gen_OfAbility(gBattleMons[battler].ability) > UseCap())
+        gBattleMons[battler].ability = ABILITY_NONE;
 }
 
 // A Pokémon of a generation the region the player is in shows
@@ -555,9 +641,37 @@ static bool8 RegionUsesGen2(void)
     return MP_Region_Current() != REGION_HOENN && MP_Gen_Cap(MP_Region_Current()) < 4;
 }
 
+static bool8 RegionUsesModern(void)
+{
+    return MP_Region_Current() != REGION_HOENN && MP_Gen_Cap(MP_Region_Current()) >= 5;
+}
+
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
+    if (info != NULL && RegionUsesModern())
+    {
+        // Quetzal's own Pokémon where their generation is allowed, the Gen 4 cap's elsewhere
+        static struct WildPokemon sMons[12];
+        static struct WildPokemonInfo sInfo;
+        for (i = 0; i < ARRAY_COUNT(sQzModernWild); i++)
+        {
+            if (sQzModernWild[i].gen4 == info)
+            {
+                u8 j, n = min(sQzModernWild[i].count, ARRAY_COUNT(sMons));
+                for (j = 0; j < n; j++)
+                {
+                    sMons[j] = info->wildPokemon[j];
+                    if (MP_Gen_Allowed(sQzModernWild[i].species[j]))
+                        sMons[j].species = sQzModernWild[i].species[j];
+                }
+                sInfo.encounterRate = info->encounterRate;
+                sInfo.wildPokemon = sMons;
+                return &sInfo;
+            }
+        }
+        return info;
+    }
     if (info == NULL || !RegionUsesGen2())
         return info;
     for (i = 0; i < ARRAY_COUNT(sQzGen2Wild); i++)
@@ -566,10 +680,90 @@ const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *i
     return info;
 }
 
+// Quetzal's own team where each Pokémon's generation is allowed, the Gen 4 cap's elsewhere; moves past the cap are
+// the Gen 4 cap's in the same slot
+static const struct Trainer *ModernTeam(u16 trainerNum)
+{
+    static struct Trainer sCopy;
+    static struct TrainerMonItemCustomMoves sCustom[PARTY_SIZE];
+    static struct TrainerMonItemDefaultMoves sDefault[PARTY_SIZE];
+    const struct Trainer *t = &gTrainers[trainerNum];
+    bool8 custom = (t->partyFlags & F_TRAINER_PARTY_CUSTOM_MOVESET) != 0;
+    u32 i, j, k;
+
+    for (i = 0; i < ARRAY_COUNT(sQzModernParties); i++)
+    {
+        const struct QzModernMon *m;
+        if (sQzModernParties[i].trainerId != trainerNum)
+            continue;
+        m = sQzModernParties[i].mons;
+        for (j = 0; j < t->partySize && j < PARTY_SIZE; j++)
+        {
+            u16 species, item = ITEM_NONE, moves[MAX_MON_MOVES] = {0};
+            u8 lvl, iv;
+            switch (t->partyFlags)
+            {
+            case 0:
+                species = t->party.NoItemDefaultMoves[j].species, lvl = t->party.NoItemDefaultMoves[j].lvl, iv = t->party.NoItemDefaultMoves[j].iv;
+                break;
+            case F_TRAINER_PARTY_CUSTOM_MOVESET:
+                species = t->party.NoItemCustomMoves[j].species, lvl = t->party.NoItemCustomMoves[j].lvl, iv = t->party.NoItemCustomMoves[j].iv;
+                memcpy(moves, t->party.NoItemCustomMoves[j].moves, sizeof(moves));
+                break;
+            case F_TRAINER_PARTY_HELD_ITEM:
+                species = t->party.ItemDefaultMoves[j].species, lvl = t->party.ItemDefaultMoves[j].lvl, iv = t->party.ItemDefaultMoves[j].iv;
+                item = t->party.ItemDefaultMoves[j].heldItem;
+                break;
+            default:
+                species = t->party.ItemCustomMoves[j].species, lvl = t->party.ItemCustomMoves[j].lvl, iv = t->party.ItemCustomMoves[j].iv;
+                item = t->party.ItemCustomMoves[j].heldItem;
+                memcpy(moves, t->party.ItemCustomMoves[j].moves, sizeof(moves));
+                break;
+            }
+            if (j < sQzModernParties[i].count && MP_Gen_Allowed(m[j].species))
+            {
+                bool8 any = FALSE;
+                if (m[j].species != species)
+                    item = m[j].heldItem;
+                species = m[j].species;
+                lvl = m[j].lvl;
+                for (k = 0; k < MAX_MON_MOVES; k++)
+                {
+                    if (m[j].moves[k] != MOVE_NONE && MP_Gen_MoveAllowed(m[j].moves[k]))
+                        moves[k] = m[j].moves[k];
+                    any |= moves[k] != MOVE_NONE;
+                }
+                if (custom && !any)
+                    custom = FALSE;   // (none of its moves fits: the level-up ones)
+            }
+            sCustom[j].iv = sDefault[j].iv = iv;
+            sCustom[j].lvl = sDefault[j].lvl = lvl;
+            sCustom[j].species = sDefault[j].species = species;
+            sCustom[j].heldItem = sDefault[j].heldItem = item;
+            memcpy(sCustom[j].moves, moves, sizeof(moves));
+        }
+        sCopy = *t;
+        if (custom)
+        {
+            sCopy.partyFlags = F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM;
+            sCopy.party.ItemCustomMoves = sCustom;
+        }
+        else
+        {
+            sCopy.partyFlags = F_TRAINER_PARTY_HELD_ITEM;
+            sCopy.party.ItemDefaultMoves = sDefault;
+        }
+        return &sCopy;
+    }
+    return t;
+}
+
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
 {
     static struct Trainer sCopy;
     u32 i;
+    if (trainerNum >= sQzGen2Parties[0].trainerId && RegionUsesModern())
+        return ModernTeam(trainerNum);
     if (trainerNum < sQzGen2Parties[0].trainerId || !RegionUsesGen2())
         return &gTrainers[trainerNum];
     for (i = 0; i < ARRAY_COUNT(sQzGen2Parties); i++)

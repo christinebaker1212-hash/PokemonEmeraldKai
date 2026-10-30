@@ -1,6 +1,7 @@
 #include "global.h"
 #include "battle_gen4.h"
-#include "battle_gen59.h"   // Moemon Kai: Gen 5-9
+#include "battle_gen59.h"
+#include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -1229,6 +1230,8 @@ u8 CheckMoveLimitations(u8 battler, u8 unusableMoves, u8 check)
         // No PP
         if (gBattleMons[battler].pp[i] == 0 && check & MOVE_LIMITATION_PP)
             unusableMoves |= gBitTable[i];
+        if (gBattleMons[battler].moves[i] != MOVE_NONE && !MP_Gen_MoveAllowed(gBattleMons[battler].moves[i]) && check & MOVE_LIMITATION_PP)
+            unusableMoves |= gBitTable[i];   // Moemon Kai: a move past the GENERATION, greyed out
         // Disable
         if (gBattleMons[battler].moves[i] == gDisableStructs[battler].disabledMove && check & MOVE_LIMITATION_DISABLED)
             unusableMoves |= gBitTable[i];

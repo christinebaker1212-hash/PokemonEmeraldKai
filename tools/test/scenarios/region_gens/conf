@@ -1,5 +1,6 @@
 # Generations per region: JOHTO shows Gen 1-2 (the rip's Gen 2 tables) whatever Elite Fours are beaten; the
-# GENERATION setting at 4 brings Gen 4 (STARLY / SHINX on ROUTE 29). A Pokémon met there is MET_GAME 14 (JOHTO)
+# GENERATION setting at 4 brings Gen 4 (STARLY / SHINX on ROUTE 29), at 5 and 9 Quetzal's own Pokémon of those
+# generations (LILLIPUP, APPLIN). A Pokémon met there is MET_GAME 14 (JOHTO)
 MODE=1
 TMO=90
 CHECK="python3 tools/test/scenarios/region_gens/check.py"

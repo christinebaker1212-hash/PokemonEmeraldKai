@@ -1133,7 +1133,7 @@ static void ShowPatchReader(bool8 on)
 // HOST A GAME > GAME RULES: the room's rules, for everyone (TEAM PADDING, ANIM SPEED and LEVEL SCALING's settings;
 // playing alone, OPTIONS > GAME has the level scaling ones)
 
-enum { RULE_PADDING, RULE_ANIM, RULE_SCALE_FIRST, RULE_BACK = RULE_SCALE_FIRST + MP_SCALE_COUNT, RULE_ROWS };
+enum { RULE_PADDING, RULE_ANIM, RULE_SCALE_FIRST, RULE_GEN = RULE_SCALE_FIRST + MP_SCALE_COUNT, RULE_BACK, RULE_ROWS };
 #define RULE_LINE_H 10
 
 static void RuleValue(u8 row, char *out, int len)
@@ -1146,7 +1146,9 @@ static void RuleValue(u8 row, char *out, int len)
         snprintf(out, len, "%s", gMpConfig.trainerPadding ? "ON" : "OFF");
     else if (row == RULE_ANIM)
         snprintf(out, len, "%s", gMpConfig.animSpeed == 30 ? "+30%" : gMpConfig.animSpeed == 25 ? "+25%" : "NORMAL");
-    else if (row >= RULE_SCALE_FIRST && row < RULE_BACK)
+    else if (row == RULE_GEN)
+        snprintf(out, len, "GEN %d", gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3);
+    else if (row >= RULE_SCALE_FIRST && row < RULE_GEN)
     {
         u8 rule = row - RULE_SCALE_FIRST;
         v = MP_LevelScaleOwnRule(rule);
@@ -1167,7 +1169,7 @@ static void RuleValue(u8 row, char *out, int len)
 static void DrawRules(void)
 {
     static const char *const labels[RULE_ROWS] = {"TEAM PADDING", "ANIM SPEED", "LEVEL SCALING", "  WILD", "  TRAINERS",
-                                                  "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "BACK"};
+                                                  "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "GENERATION", "BACK"};
     static const char *const help[RULE_ROWS] = {
         "ON: trainers get one extra Moemon when friends team up.",
         "How much faster battle animations play, for everyone.",
@@ -1177,6 +1179,7 @@ static void DrawRules(void)
         "Extra levels for GYM LEADERS, rivals, ELITE FOUR. AUTO: +2 to +5.",
         "Nothing scales past a level that rises with the badges.",
         "8 badges: capped to the LEAGUE then free, FREE, or ALWAYS capped.",
+        "The Moemon, moves and types of these generations, for everyone.",
         "Back to HOST A GAME.",
     };
     u8 i;
@@ -1185,7 +1188,7 @@ static void DrawRules(void)
     {
         u8 y = 1 + RULE_LINE_H * i;
         char value[24];
-        bool8 off = i > RULE_SCALE_FIRST && i < RULE_BACK && !MP_LevelScaleOwnRule(MP_SCALE_ON);
+        bool8 off = i > RULE_SCALE_FIRST && i < RULE_GEN && !MP_LevelScaleOwnRule(MP_SCALE_ON);
         Print(WIN_FULL, labels[i], 14, y, off ? sHostDisabled : sHostNormal);
         RuleValue(i, value, sizeof(value));
         if (value[0])
@@ -1229,6 +1232,11 @@ static void HandleRules(void)
             u8 i = gMpConfig.animSpeed == 30 ? 2 : gMpConfig.animSpeed == 25 ? 1 : 0;
             gMpConfig.animSpeed = sSpeeds[(i + (dir < 0 ? 2 : 1)) % 3];
         }
+        else if (row == RULE_GEN)
+        {
+            u8 g = gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3;
+            gMpConfig.generation = 3 + (g - 3 + 7 + dir) % 7;
+        }
         else
         {
             u8 rule = row - RULE_SCALE_FIRST, n = MP_LevelScaleRuleCount(rule);
@@ -1238,7 +1246,7 @@ static void HandleRules(void)
         PlaySE(SE_SELECT);
         DrawScreen();
         MPNet_Log("setup: rule %d now %d", row, row == RULE_PADDING ? gMpConfig.trainerPadding : row == RULE_ANIM ? gMpConfig.animSpeed
-                  : MP_LevelScaleOwnRule(row - RULE_SCALE_FIRST));
+                  : row == RULE_GEN ? gMpConfig.generation : MP_LevelScaleOwnRule(row - RULE_SCALE_FIRST));
     }
 }
 

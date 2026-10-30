@@ -2729,3 +2729,42 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - Not done yet: the Bug-Catching Contest, Ruins of Alph puzzles, Quetzal's postgame and time-travel events (their
   specials are still stubs), HEADBUTT trees, FRLG door animations, 3x2 map borders, the sightseeing walk on a first
   arrival, a SAFFRON station, everyone following the host on a trip, per-region co-op shared PCs.
+
+## Gens 5-9 and GENERATION (1.61.0)
+Pokémon 494-1025 (species 519-1050: VICTINI..PECHARUNT; the EGG is 1051 and Unown's letters follow), moves 468-847,
+abilities 125-311, items 508-552 and the FAIRY type (18), from pokeemerald-expansion's data and Moemon Quetzal's art.
+Old saves need nothing: eggs and Unown keep their real species in the save.
+- Data generators: tools/moemon_gen58/ (moves: expansion_moves.py -> moves.json, gen_moves.py; per-move effect data
+  gen_effect_data.py -> src/data/battle_moves_gen59_data.h; effect scripts gen_effect_scripts.py ->
+  data/battle_scripts_gen58.inc) and tools/moemon_gen59/ (gen_species.py --expansion DIR [--rom QUETZAL]:
+  species, learnsets, evolutions, dex, cries, graphics; gen_abilities.py, gen_items.py, gen_dex_orders.py).
+  Gen 8-9 sprites have one frame in the expansion: gen_species.py stacks it twice for anim_front.png.
+- Sizes past the old limits: abilities are u16 everywhere (BattlePokemon, SpeciesInfo, battle message buffers:
+  PREPARE_ABILITY_BUFFER writes two bytes), level-up learnsets are u32 (LEVEL_UP_MOVE(lvl, move) = lvl << 16 | move).
+  The HALL OF FAME's 9-bit species keep their high bits in the save's free space after the 50 teams (hall_of_fame.c
+  HofSpecies; zero in old saves), and a co-op Hall of Fame team is 126 bytes.
+- Battles (src/battle_gen59.c, include/battle_gen59.h): Gen 4's hooks call in (MP_Gen59_MovePower, AttackStats,
+  FinalDamage, MoveType, IsPhysical, the field end of turn, arrival, move end). Most moves are data: gGen59Moves holds
+  their stat changes on the user and target (with chances) and secondary status, worked through by the generic
+  scripts (BattleScript_G59StatusMove / G59Hit / G59TwoTurns / G59Heal* / G59PayHpStats...) with `gen4 G59_*` modes.
+  Per-effect code: power formulas (HEAVY SLAM, ELECTRO BALL, STORED POWER, HEX, ACROBATICS, RAGE FIST, LAST
+  RESPECTS...), PSYSHOCK / FOUL PLAY / BODY PRESS stats, always-crit moves, terrains (5 turns; boosts, GRASSY healing,
+  MISTY / ELECTRIC blocking status), WONDER / MAGIC ROOM, AURORA VEIL, STICKY WEB, type and ability moves, healing
+  moves, SMACK DOWN, SALT CURE... Messages are gGen59StringIds (STRINGID_G59_* after Gen 4's, printfromtable, so
+  co-op screens print the same).
+- Abilities: the SURGES, INTREPID SWORD / DAUNTLESS SHIELD on arrival (MP_Gen59_SwitchInAbility), MOXIE / BEAST BOOST,
+  PRANKSTER / GALE WINGS / TRIAGE priority (MP_Gen59_Priority in GetWhoStrikesFirst), SAND RUSH / SLUSH RUSH / SURGE
+  SURFER, PROTEAN / LIBERO, the -ATE abilities, STRONG JAW / MEGA LAUNCHER / SHARPNESS, TOUGH CLAWS, SHEER FORCE,
+  MULTISCALE, FLUFFY, REGENERATOR, IRON BARBS... Items: ASSAULT VEST, ROCKY HELMET, AIR BALLOON, WEAKNESS POLICY,
+  HEAVY-DUTY BOOTS, ABSORB BULB / CELL BATTERY / SNOWBALL, PIXIE PLATE, FAIRY FEATHER, FLOAT STONE.
+- Followers: Quetzal's overworld sprites for 387-1025 (tools/moemon_gen4/gen_followers.py; OGERPON has none).
+- GENERATION: OPTIONS > GAME > GENERATION and HOST A GAME > GAME RULES (gMpConfig.generation 3-9, "generation" in
+  the config; online the host's: MPR_RULES' last byte, protocol 67). MP_Gen_Cap: HOENN shows up to it, JOHTO / KANTO
+  Gen 1-2 at 3, up to it from 4. From 5, JOHTO / KANTO wild slots and trainers' Pokémon are Quetzal's own where their
+  generation is allowed, the Gen 4 cap's elsewhere (tools/quetzal_port/gen_modern.py -> src/data/wild_qz_modern.h,
+  trainer_parties_qz_modern.h). FAIRY exists from Gen 6 (MP_Gen_SpeciesType / MoveType; Kai's older FAIRY Pokémon
+  take it from 6). Moves and abilities past the cap don't work (greyed in CheckMoveLimitations; MP_Gen_FitBattler),
+  but never below Gen 4: Kai had Gen 4 before GENERATION. Not done yet: sealing Pokémon past a lowered cap, items past
+  the cap, the GIMMICKS (MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION).
+- Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
+- Tests: gen59_moves, region_gens.

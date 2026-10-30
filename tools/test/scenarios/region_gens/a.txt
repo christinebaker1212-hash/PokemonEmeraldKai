@@ -7,4 +7,8 @@ mp regionclear 0
 mp wildroll 80
 mp gensetting 4
 mp wildroll 80
+mp gensetting 5
+mp wildroll 120
+mp gensetting 9
+mp wildroll 120
 quit
