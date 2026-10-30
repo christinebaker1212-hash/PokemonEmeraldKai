@@ -18,16 +18,7 @@
   "SPECIES_SWINUB",
   "SPECIES_TYROGUE",
   "SPECIES_ELEKID",
-  "SPECIES_MAGBY",
-  "SPECIES_TREECKO",
-  "SPECIES_TORCHIC",
-  "SPECIES_MUDKIP",
-  "SPECIES_RALTS",
-  "SPECIES_AZURILL",
-  "SPECIES_ARON",
-  "SPECIES_ELECTRIKE",
-  "SPECIES_TRAPINCH",
-  "SPECIES_SPHEAL"
+  "SPECIES_MAGBY"
  ],
  "starter_choices_hoenn": [
   "SPECIES_BULBASAUR",
@@ -47,15 +38,7 @@
   "SPECIES_SWINUB",
   "SPECIES_TYROGUE",
   "SPECIES_ELEKID",
-  "SPECIES_MAGBY",
-  "SPECIES_TREECKO",
-  "SPECIES_TORCHIC",
-  "SPECIES_MUDKIP",
-  "SPECIES_RALTS",
-  "SPECIES_ARON",
-  "SPECIES_ELECTRIKE",
-  "SPECIES_TRAPINCH",
-  "SPECIES_SPHEAL"
+  "SPECIES_MAGBY"
  ],
  "static_encounters": [
   {
@@ -314,7 +297,8 @@
     "0x11FE"
    ],
    "kind": 8,
-   "raw": "233e1200790132000000fc11fd11fe1108000500000000007610000000000008"
+   "raw": "233e1200790132000000fc11fd11fe1108000500000000007610000000000008",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -331,7 +315,8 @@
     "0x1201"
    ],
    "kind": 8,
-   "raw": "233e13007a0132000000ff110012011208000f00000000007810000000000008"
+   "raw": "233e13007a0132000000ff110012011208000f00000000007810000000000008",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -348,7 +333,8 @@
     "0x1204"
    ],
    "kind": 8,
-   "raw": "233e14007b013200000002120312041208000800000000007910000000000008"
+   "raw": "233e14007b013200000002120312041208000800000000007910000000000008",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -365,7 +351,8 @@
     "0x1207"
    ],
    "kind": 84,
-   "raw": "231d0d007c012d0000000512061207120800ff00000000000000000000000054"
+   "raw": "231d0d007c012d0000000512061207120800ff00000000000000000000000054",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -382,7 +369,8 @@
     "0x120A"
    ],
    "kind": 84,
-   "raw": "231906007d012d000000081209120a120800ff00000000000000000000000054"
+   "raw": "231906007d012d000000081209120a120800ff00000000000000000000000054",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -399,7 +387,8 @@
     "0x120D"
    ],
    "kind": 104,
-   "raw": "222d01007e01460000000b120c120d120801ff00000000001213000000000068"
+   "raw": "222d01007e01460000000b120c120d120801ff00000000001213000000000068",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -416,7 +405,8 @@
     "0x1210"
    ],
    "kind": 104,
-   "raw": "222d02007f01460000000e120f1210120801ff00000000001113000000000068"
+   "raw": "222d02007f01460000000e120f1210120801ff00000000001113000000000068",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -433,7 +423,8 @@
     "0x1213"
    ],
    "kind": 104,
-   "raw": "222d03008001460000001112121213120801ff00000000000000000000000368"
+   "raw": "222d03008001460000001112121213120801ff00000000000000000000000368",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -450,7 +441,8 @@
     "0x1216"
    ],
    "kind": 108,
-   "raw": "227301008101460000001412151216120001ff0000000000000000000000006c"
+   "raw": "227301008101460000001412151216120001ff0000000000000000000000006c",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -467,7 +459,8 @@
     "0x1219"
    ],
    "kind": 0,
-   "raw": "227202008201460000001712181219120001ff00000000002414000000000000"
+   "raw": "227202008201460000001712181219120001ff00000000002414000000000000",
+   "scrapped": "Gen 3"
   },
   {
    "region": "johto",
@@ -2055,7 +2048,8 @@
     "0x2126"
    ],
    "byte_0xC": 0,
-   "raw": "82013421362384212621253500000000"
+   "raw": "82013421362384212621253500000000",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -2119,7 +2113,8 @@
     "0x0"
    ],
    "byte_0xC": 1,
-   "raw": "790141234223402300002518013c0500"
+   "raw": "790141234223402300002518013c0500",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -2135,7 +2130,8 @@
     "0x0"
    ],
    "byte_0xC": 2,
-   "raw": "7a0144234523432300002518023c0f00"
+   "raw": "7a0144234523432300002518023c0f00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -2151,7 +2147,8 @@
     "0x0"
    ],
    "byte_0xC": 3,
-   "raw": "7b0147234823462300002518033c0800"
+   "raw": "7b0147234823462300002518033c0800",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -2711,7 +2708,8 @@
     "0x0"
    ],
    "byte_0xC": 3,
-   "raw": "7f01aa23ab23a9230000272303460400"
+   "raw": "7f01aa23ab23a9230000272303460400",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -3507,7 +3505,8 @@
     "0x0"
    ],
    "byte_0xC": 6,
-   "raw": "8101f12df22df02d00002604063c0e00"
+   "raw": "8101f12df22df02d00002604063c0e00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -3659,7 +3658,8 @@
     "0x0"
    ],
    "byte_0xC": 6,
-   "raw": "7d010c2e0d2e0b2e000025610628ff00"
+   "raw": "7d010c2e0d2e0b2e000025610628ff00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -3675,7 +3675,8 @@
     "0x0"
    ],
    "byte_0xC": 7,
-   "raw": "7c01102e112e0f2e000025600728ff00"
+   "raw": "7c01102e112e0f2e000025600728ff00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -3708,7 +3709,8 @@
     "0x0"
    ],
    "byte_0xC": 4,
-   "raw": "7e013b2e3c2e3a2e0000272304460b00"
+   "raw": "7e013b2e3c2e3a2e0000272304460b00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -3724,7 +3726,8 @@
     "0x0"
    ],
    "byte_0xC": 1,
-   "raw": "8001a92eaa2ea82e000027240146ff00"
+   "raw": "8001a92eaa2ea82e000027240146ff00",
+   "scrapped": "Gen 3"
   },
   {
    "region": "kanto",
@@ -4021,7 +4024,7 @@
    "index": 0,
    "nickname": "Gastly",
    "species": "SPECIES_GASTLY",
-   "requested_species": "SPECIES_RALTS",
+   "requested_species": "SPECIES_SMOOCHUM",
    "held_item": "ITEM_NONE",
    "ivs": [
     15,
@@ -4042,7 +4045,7 @@
    "index": 1,
    "nickname": "Kangaskhan",
    "species": "SPECIES_KANGASKHAN",
-   "requested_species": "SPECIES_KECLEON",
+   "requested_species": "SPECIES_PERSIAN",
    "held_item": "ITEM_NONE",
    "ivs": [
     10,
@@ -4103,8 +4106,8 @@
   },
   {
    "index": 4,
-   "nickname": "SPHEAL",
-   "species": "SPECIES_SPHEAL",
+   "nickname": "BELLSPROUT",
+   "species": "SPECIES_BELLSPROUT",
    "requested_species": "SPECIES_BELLSPROUT",
    "held_item": "ITEM_NONE",
    "ivs": [
@@ -4243,7 +4246,7 @@
    "index": 10,
    "nickname": "FARFETCH’D",
    "species": "SPECIES_FARFETCHD",
-   "requested_species": "SPECIES_TAILLOW",
+   "requested_species": "SPECIES_SPEAROW",
    "held_item": "ITEM_NONE",
    "ivs": [
     31,

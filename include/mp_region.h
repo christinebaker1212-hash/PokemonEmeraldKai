@@ -32,7 +32,7 @@ u16 MP_Region_BadgeFlag(u8 region, u8 badge);
 u8 MP_Region_BadgeCount(u8 region);
 bool8 MP_Region_Cleared(u8 region);
 void MP_Region_SetCleared(u8 region);
-bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (Gen 4 Pokémon appear)
+bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)
 u8 MP_Region_Current(void);          // the region of the map the player is on
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
@@ -56,7 +56,11 @@ void MP_Region_Travel(u8 from, u8 to);             // PC boxes change places, th
 struct WildPokemonInfo;
 struct Trainer;
 void MP_Region_TagMet(struct BoxPokemon *b);      // met / hatched here: JOHTO's places get MP_METGAME_JOHTO
-bool8 MP_Region_Gen4Open(void);                    // an Elite Four beaten in another region (or in HOENN)
+extern u8 gMpGenSetting;                           // GENERATION (3 = the vanilla game)
+u8 MP_Gen_Cap(u8 region);                          // the last generation a region shows: HOENN 3, JOHTO / KANTO 2
+u8 MP_Gen_OfSpecies(u16 species);
+bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the player is in
+u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it
 #endif

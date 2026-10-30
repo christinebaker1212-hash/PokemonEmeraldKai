@@ -486,34 +486,83 @@ u16 MP_RegionPartyCount(void)
     return gSpecialVar_Result = CalculatePlayerPartyCount();
 }
 
-// ---------------------------------------------------------------------------------------------------- Gen 4
-// Gen 4 Pokémon appear in JOHTO and KANTO only once the player has beaten an Elite Four in another region (a game
-// can start there). Before that their wild tables and trainers' teams are the rip's Gen 3 versions where they differ
-// (tools/quetzal_port/gen_gen3.py).
+// ---------------------------------------------------------------------------------------------------- generations
+// Which Pokémon generations a region shows (docs/REGIONS_PLAN.md "Generations per region"): HOENN its own Gen 1-3,
+// JOHTO and KANTO Gen 1-2. The GENERATION setting (gMpGenSetting, 3 = the vanilla game) raises them: at 4 and up
+// every region shows up to that generation. Johto's / Kanto's wild tables and trainers' teams are the rip's Gen 2 cap
+// below Gen 4 (tools/quetzal_port/gen_gen2.py), its Gen 4 cap from there.
 #include "wild_encounter.h"
 #include "data.h"
-#include "../data/wild_qz_gen3.h"
-#include "../data/trainer_parties_qz_gen3.h"
+#include "../data/wild_qz_gen2.h"
+#include "../data/trainer_parties_qz_gen2.h"
 
-bool8 MP_Region_Gen4Open(void)
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
+
+u8 gMpGenSetting = 3;
+
+u8 MP_Gen_Cap(u8 region)
 {
-    u8 cur = MP_Region_Current(), r;
-    if (cur == REGION_HOENN)
-        return TRUE;
-    for (r = 0; r < REGION_COUNT; r++)
-        if (r != cur && MP_Region_Cleared(r))
-            return TRUE;
-    return FALSE;
+    u8 g = gMpGenSetting < 3 ? 3 : gMpGenSetting;
+    if (region != REGION_HOENN && g <= 3)
+        return 2;
+    return g;
+}
+
+u8 MP_Gen_OfSpecies(u16 species)
+{
+    static const u16 sLast[] = {151, 251, 386, 493, 649, 721, 809, 905, 1025};
+    u16 nat = SpeciesToNationalPokedexNum(species);
+    u8 g;
+    if (nat == 0)
+        return 0;   // (the EGG, none)
+    for (g = 0; g < ARRAY_COUNT(sLast); g++)
+        if (nat <= sLast[g])
+            return g + 1;
+    return ARRAY_COUNT(sLast) + 1;
+}
+
+// A Pokémon of a generation the region the player is in shows
+bool8 MP_Gen_Allowed(u16 species)
+{
+    return MP_Gen_OfSpecies(species) <= MP_Gen_Cap(MP_Region_Current());
+}
+
+// The nearest earlier form the region shows (a MAMOSWINE in a Gen 2 region is a PILOSWINE); the species itself when
+// it's allowed or nothing before it is
+u16 MP_Gen_StandIn(u16 species)
+{
+    u16 s = species, depth;
+    for (depth = 0; depth < 4 && !MP_Gen_Allowed(s); depth++)
+    {
+        u16 from = SPECIES_NONE, i;
+        u8 j;
+        for (i = 1; i < NUM_SPECIES && from == SPECIES_NONE; i++)
+            for (j = 0; j < EVOS_PER_MON; j++)
+                if (gEvolutionTable[i][j].targetSpecies == s)
+                {
+                    from = i;
+                    break;
+                }
+        if (from == SPECIES_NONE)
+            return species;
+        s = from;
+    }
+    return MP_Gen_Allowed(s) ? s : species;
+}
+
+static bool8 RegionUsesGen2(void)
+{
+    return MP_Region_Current() != REGION_HOENN && MP_Gen_Cap(MP_Region_Current()) < 4;
 }
 
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
-    if (info == NULL || MP_Region_Gen4Open())
+    if (info == NULL || !RegionUsesGen2())
         return info;
-    for (i = 0; i < ARRAY_COUNT(sQzGen3Wild); i++)
-        if (sQzGen3Wild[i].gen4 == info)
-            return sQzGen3Wild[i].gen3;
+    for (i = 0; i < ARRAY_COUNT(sQzGen2Wild); i++)
+        if (sQzGen2Wild[i].gen4 == info)
+            return sQzGen2Wild[i].gen2;
     return info;
 }
 
@@ -521,16 +570,16 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
 {
     static struct Trainer sCopy;
     u32 i;
-    if (trainerNum < sQzGen3Parties[0].trainerId || MP_Region_Gen4Open())
+    if (trainerNum < sQzGen2Parties[0].trainerId || !RegionUsesGen2())
         return &gTrainers[trainerNum];
-    for (i = 0; i < ARRAY_COUNT(sQzGen3Parties); i++)
+    for (i = 0; i < ARRAY_COUNT(sQzGen2Parties); i++)
     {
-        if (sQzGen3Parties[i].trainerId == trainerNum)
+        if (sQzGen2Parties[i].trainerId == trainerNum)
         {
             sCopy = gTrainers[trainerNum];
-            sCopy.party = sQzGen3Parties[i].party;
-            sCopy.partySize = sQzGen3Parties[i].partySize;
-            sCopy.partyFlags = sQzGen3Parties[i].partyFlags;
+            sCopy.party = sQzGen2Parties[i].party;
+            sCopy.partySize = sQzGen2Parties[i].partySize;
+            sCopy.partyFlags = sQzGen2Parties[i].partyFlags;
             return &sCopy;
         }
     }

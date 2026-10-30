@@ -52,12 +52,13 @@ class / sprite), CARD CLUBs and Triple Triad sellers in Pokémon Centers, the Yu
 Triad's regions with their own rules for Johto's and Kanto's areas (the CARD QUEEN travels there too), the Game Corners
 (Goldenrod, Celadon, Two Island).
 
-## Gen 4
-Gen 4 Pokémon only after an Elite Four, outside the region you cleared. Since a game can start in Johto or Kanto, a
-Gen 4 Pokémon in those regions' wild tables or trainer teams is swapped for its Gen 1-3 stand-in until the player has
-beaten an Elite Four somewhere else (the stand-ins come from the Gen 3 cap of the same rip: quetzal_rip/gen3,
-tools/quetzal_port/gen_gen3.py; mp_region.c MP_Region_WildInfo / MP_Region_TrainerData; test region_gen4). Gifts and
-static encounters in scripts are not swapped yet.
+## Generations per region (the user's rule, replacing "Gen 4 after an Elite Four")
+HOENN shows Gen 1-3 and JOHTO / KANTO Gen 1-2: wild Pokémon, trainers' teams, starters, legendaries, scripted wild
+battles and evolutions (an evolution into a later generation waits). Later generations open with the GENERATION
+setting (gMpGenSetting, 3 = this vanilla rule; at 4 and up every region shows up to it). Johto's and Kanto's tables
+are the rip's Gen 2 cap below Gen 4 (quetzal_rip/gen2, tools/quetzal_port/gen_gen2.py) and its Gen 4 cap from 4;
+mp_region.c MP_Gen_Cap / MP_Gen_Allowed / MP_Gen_StandIn; test region_gens. Not covered yet: eggs, in-game trades,
+Pokémon from Kai's own Hoenn extras (MoeGatcha, Garden eggs).
 
 ## Build order
 1. Engine: region id, FRLG-style 640-tile primaries per layout, 16-bit object graphics ids, flags 0x1000-0x3FFF and

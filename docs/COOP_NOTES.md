@@ -2717,12 +2717,14 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   personal PC and fits levels (MP_Region_FitBoxMon: Lv 5 the first time); entering another region on foot does the
   same (MP_Region_OnMapLoaded). First trips go to MP_Region_GoToStartHouse.
 - New game: PROF. BIRCH's region question (main_menu.c), MP_Region_StartNewGame; harness MOEMON_DEBUG_REGION=N.
-- Gen 4 before an Elite Four elsewhere: MP_Region_WildInfo / MP_Region_TrainerData (tools/quetzal_port/gen_gen3.py).
+- Generations per region: HOENN Gen 1-3, JOHTO / KANTO Gen 1-2 (gMpGenSetting raises them; MP_Gen_Cap / Allowed /
+  StandIn; Johto / Kanto tables swap to the Gen 2 cap: MP_Region_WildInfo / TrainerData, tools/quetzal_port/gen_gen2.py;
+  evolutions into a later generation wait: GetEvolutionTargetSpecies).
 - Town map / Fly: region_map.c sShownMap (QZMAP_*), data src/data/region_map/qz_region_maps.h.
 - Card games: Tcg_LookGfx (Quetzal sprites -> Kai look-alikes), TT_REGION_JOHTO / KANTO, KAI_PEOPLE in import.py.
 - Co-op: MPR_RULES' last byte is the host's region; a player elsewhere leaves (protocol 66).
-- Harness: mp regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
-- Tests: region_walk, region_fly, region_travel, region_globalpc, region_gen4, region_starter, region_newgame,
+- Harness: mp gensetting N / regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
+- Tests: region_walk, region_fly, region_travel, region_globalpc, region_gens, region_starter, region_newgame,
   region_train, region_coop.
 - Not done yet: the Bug-Catching Contest, Ruins of Alph puzzles, Quetzal's postgame and time-travel events (their
   specials are still stubs), HEADBUTT trees, FRLG door animations, 3x2 map borders, the sightseeing walk on a first

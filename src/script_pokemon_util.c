@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_gfx_sfx_util.h"
@@ -140,6 +141,7 @@ void CreateScriptedWildMon(u16 species, u8 level, u16 item)
     u8 heldItem[2];
 
     ZeroEnemyPartyMons();
+    species = MP_Gen_StandIn(species);   // Moemon Kai: the region's generations (a MAMOSWINE in JOHTO is a PILOSWINE)
     level = MP_LevelScale_Wild(level);   // Moemon Co-op: level scaling (mp_levelscale.c)
     CreateMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, 0, 0, OT_ID_PLAYER_ID, 0);
     MP_LevelScale_WildMade(&gEnemyParty[0]);

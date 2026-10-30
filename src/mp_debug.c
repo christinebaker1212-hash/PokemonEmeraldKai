@@ -2501,6 +2501,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (n > 0)
             printf("[test] wildroll met game %d location %d\n", (int)GetMonData(&mon, MON_DATA_MET_GAME), (int)GetMonData(&mon, MON_DATA_MET_LOCATION));
     }
+    else if (strcmp(cmd, "gensetting") == 0)
+    {
+        // gensetting N: the GENERATION setting (3 = vanilla: HOENN Gen 1-3, JOHTO / KANTO Gen 1-2)
+        gMpGenSetting = atoi(arg);
+    }
     else if (strcmp(cmd, "regionclear") == 0)
     {
         // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)

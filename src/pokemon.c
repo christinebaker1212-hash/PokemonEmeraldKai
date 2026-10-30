@@ -5851,6 +5851,9 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
         break;
     }
 
+    if (targetSpecies != SPECIES_NONE && !MP_Gen_Allowed(targetSpecies))
+        targetSpecies = SPECIES_NONE;   // Moemon Kai: a later generation than the region shows waits (MP_Gen_Cap)
+
     return targetSpecies;
 }
 

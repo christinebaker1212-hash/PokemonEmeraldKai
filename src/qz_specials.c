@@ -359,7 +359,7 @@ static u16 QzClearStaticFlagAfterWildBattle_(void)
     return TRUE;
 }
 
-// On entering a map: a done Pokémon stays hidden; a Gen 4 one waits until an Elite Four is beaten somewhere
+// On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap)
 static u16 RefreshStatics(void)
 {
     u32 i;
@@ -368,7 +368,7 @@ static u16 RefreshStatics(void)
         const struct QzStatic *e = &sQzStatics[i];
         if (!HereIs(e))
             continue;
-        if (FlagGet(e->doneFlag) || (IS_GEN4_SPECIES(e->species) && !MP_Region_AnyCleared()))
+        if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species))
             FlagSet(e->objFlag);
         else
             FlagClear(e->objFlag);
@@ -911,7 +911,7 @@ static u16 QzTravelToRegion_(void)
     return 1;
 }
 
-// After the Hall of Fame: the region counts as cleared (its boat, the GLOBAL PC, Gen 4 elsewhere) and the game is
+// After the Hall of Fame: the region counts as cleared (its boat, the GLOBAL PC) and the game is
 // saved. RESULT 1 = saved.
 static u16 QzSaveLeagueVictoryRecord_(void)
 {
@@ -924,8 +924,8 @@ u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
 u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }
 
 // ---------------------------------------------------------------------------------------------------- starters
-// Quetzal's starter choice (ELM / OAK): any of its 36 starters (gifts.json starter_choices), Gen 4 ones only once
-// Gen 4 is open here (docs/REGIONS_PLAN.md "Gen 4"). A list of names; RESULT = the species, 0 for B.
+// Quetzal's starter choice (ELM / OAK): any of its 36 starters (gifts.json starter_choices) of the generations the
+// region shows (Gen 1-2 by default) (docs/REGIONS_PLAN.md "Gen 4"). A list of names; RESULT = the species, 0 for B.
 extern u16 (*gQzScrollResult)(u16 choice);
 static const u16 sQzStarters[] = {
     SPECIES_BULBASAUR,
@@ -978,7 +978,7 @@ static u16 QzChooseStarter_(void)
     u8 i, n = 0;
     for (i = 0; i < ARRAY_COUNT(sQzStarters) && n < QZ_SCROLL_MAX; i++)
     {
-        if (!MP_Region_Gen4Open() && SpeciesToNationalPokedexNum(sQzStarters[i]) > 386)
+        if (!MP_Gen_Allowed(sQzStarters[i]))
             continue;
         sQzStarterRows[n] = sQzStarters[i];
         GetSpeciesName(sQzStarterNames[n], sQzStarters[i]);

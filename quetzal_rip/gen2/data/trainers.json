@@ -112,8 +112,8 @@
      "moves": [
       "MOVE_THUNDERBOLT",
       "MOVE_SHADOW_BALL",
-      "MOVE_HYPER_VOICE",
-      "MOVE_THUNDER_WAVE"
+      "MOVE_THUNDER_WAVE",
+      "MOVE_THUNDER_FANG"
      ]
     }
    ],
@@ -200,7 +200,7 @@
     {
      "iv": 0,
      "lvl": 7,
-     "species": "SPECIES_DUSKULL"
+     "species": "SPECIES_BELLSPROUT"
     }
    ],
    "gencap_reference": "crystal: Sage TROY"
@@ -266,7 +266,7 @@
     {
      "iv": 0,
      "lvl": 7,
-     "species": "SPECIES_TAILLOW"
+     "species": "SPECIES_PIDGEY"
     },
     {
      "iv": 0,
@@ -398,9 +398,9 @@
      "species": "SPECIES_UMBREON",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_TAUNT",
       "MOVE_ASSURANCE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_QUICK_ATTACK"
      ]
     }
    ],
@@ -472,9 +472,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_STEEL_WING",
-      "MOVE_ROCK_TOMB",
       "MOVE_SWIFT",
-      "MOVE_SAND_ATTACK"
+      "MOVE_SAND_ATTACK",
+      "MOVE_PECK"
      ]
     }
    ],
@@ -678,7 +678,7 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_DUSKULL"
+     "species": "SPECIES_MISDREAVUS"
     }
    ],
    "gencap_reference": "crystal: Sage JEFFREY"
@@ -820,7 +820,7 @@
     {
      "iv": 0,
      "lvl": 31,
-     "species": "SPECIES_SEVIPER"
+     "species": "SPECIES_CROBAT"
     }
    ],
    "gencap_reference": "crystal: GruntM GRUNT"
@@ -963,7 +963,7 @@
     {
      "iv": 0,
      "lvl": 42,
-     "species": "SPECIES_ALTARIA"
+     "species": "SPECIES_DRAGONAIR"
     },
     {
      "iv": 0,
@@ -1459,7 +1459,7 @@
     {
      "iv": 0,
      "lvl": 7,
-     "species": "SPECIES_WINGULL"
+     "species": "SPECIES_ZUBAT"
     }
    ],
    "gencap_reference": "crystal: Youngster ALBERT"
@@ -1620,10 +1620,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
-      "MOVE_DOUBLE_EDGE",
-      "MOVE_KNOCK_OFF",
-      "MOVE_TAUNT"
+      "MOVE_FEINT",
+      "MOVE_NIGHT_SLASH",
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -1689,10 +1689,10 @@
      "held_item": "ITEM_FLAME_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FACADE",
       "MOVE_ICE_PUNCH",
       "MOVE_HAMMER_ARM",
-      "MOVE_THRASH"
+      "MOVE_THRASH",
+      "MOVE_SNORE"
      ]
     },
     {
@@ -1706,16 +1706,16 @@
       0
      ],
      "lvl": 100,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 3,
      "ability_num": 1,
      "held_item": "ITEM_BLACK_GLASSES",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_PERISH_SONG",
-      "MOVE_PSYCHO_CUT",
-      "MOVE_ME_FIRST"
+      "MOVE_NASTY_PLOT",
+      "MOVE_CRUNCH",
+      "MOVE_FLAMETHROWER",
+      "MOVE_EMBARGO"
      ]
     },
     {
@@ -2152,9 +2152,9 @@
      "species": "SPECIES_MURKROW",
      "moves": [
       "MOVE_DRILL_PECK",
-      "MOVE_HEAT_WAVE",
       "MOVE_ASSURANCE",
-      "MOVE_NIGHT_SHADE"
+      "MOVE_NIGHT_SHADE",
+      "MOVE_WING_ATTACK"
      ]
     },
     {
@@ -2241,7 +2241,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_DELCATTY"
+     "species": "SPECIES_PIDGEOTTO"
     }
    ],
    "gencap_reference": "crystal: Lass BRIDGET"
@@ -2513,12 +2513,12 @@
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_SEALEO"
+     "species": "SPECIES_SHELLDER"
     },
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_SHELLDER"
+     "species": "SPECIES_SMOOCHUM"
     },
     {
      "iv": 0,
@@ -3125,16 +3125,16 @@
       252
      ],
      "lvl": 50,
-     "species": "SPECIES_NINJASK",
+     "species": "SPECIES_CROBAT",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BATON_PASS",
-      "MOVE_AGILITY",
-      "MOVE_SLASH",
-      "MOVE_SWORDS_DANCE"
+      "MOVE_HAZE",
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -3179,8 +3179,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
-      "MOVE_EXPLOSION"
+      "MOVE_EXPLOSION",
+      "MOVE_DOUBLE_HIT"
      ]
     },
     {
@@ -3203,7 +3203,7 @@
       "MOVE_PSYCHIC",
       "MOVE_SURF",
       "MOVE_ICE_BEAM",
-      "MOVE_SLACK_OFF"
+      "MOVE_SWAGGER"
      ]
     },
     {
@@ -3240,16 +3240,16 @@
       252
      ],
      "lvl": 52,
-     "species": "SPECIES_CROBAT",
+     "species": "SPECIES_ARIADOS",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_AIR_SLASH",
-      "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_JAB",
+      "MOVE_PSYCHIC",
+      "MOVE_PIN_MISSILE"
      ]
     }
    ],
@@ -3462,8 +3462,8 @@
      "moves": [
       "MOVE_PSYCHIC",
       "MOVE_SHADOW_BALL",
-      "MOVE_CALM_MIND",
-      "MOVE_FUTURE_SIGHT"
+      "MOVE_FUTURE_SIGHT",
+      "MOVE_PSYBEAM"
      ]
     }
    ],
@@ -3606,17 +3606,17 @@
     {
      "iv": 0,
      "lvl": 3,
-     "species": "SPECIES_SEEDOT"
-    },
-    {
-     "iv": 0,
-     "lvl": 4,
      "species": "SPECIES_BELLSPROUT"
     },
     {
      "iv": 0,
-     "lvl": 3,
+     "lvl": 4,
      "species": "SPECIES_GASTLY"
+    },
+    {
+     "iv": 0,
+     "lvl": 3,
+     "species": "SPECIES_BULBASAUR"
     }
    ],
    "gencap_reference": "crystal: Sage NICO"
@@ -3739,10 +3739,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_METAL_CLAW",
       "MOVE_BEAT_UP",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_ICY_WIND"
      ]
     },
     {
@@ -3762,10 +3762,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_HAZE",
       "MOVE_POISON_FANG",
-      "MOVE_MEAN_LOOK"
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -3855,9 +3855,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SCREECH",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -3895,7 +3895,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_PLUSLE"
+     "species": "SPECIES_LANTURN"
     }
    ],
    "gencap_reference": "crystal: PokefanM DEREK"
@@ -3942,10 +3942,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -3988,10 +3988,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_FEINT",
       "MOVE_NIGHT_SLASH",
-      "MOVE_CAPTIVATE"
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -4058,9 +4058,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SUPERPOWER",
-      "MOVE_AQUA_TAIL"
+      "MOVE_AQUA_TAIL",
+      "MOVE_THRASH"
      ]
     }
    ]
@@ -4153,10 +4153,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
-      "MOVE_FLARE_BLITZ"
+      "MOVE_FLARE_BLITZ",
+      "MOVE_HEAT_WAVE",
+      "MOVE_FIRE_SPIN"
      ]
     },
     {
@@ -4307,7 +4307,7 @@
     {
      "iv": 0,
      "lvl": 43,
-     "species": "SPECIES_BRELOOM"
+     "species": "SPECIES_EXEGGUTOR"
     },
     {
      "iv": 0,
@@ -4610,10 +4610,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_EARTHQUAKE",
       "MOVE_FIRE_PUNCH",
-      "MOVE_FIRE_SPIN"
+      "MOVE_FIRE_SPIN",
+      "MOVE_FLAMETHROWER"
      ]
     },
     {
@@ -4673,16 +4673,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_SALAMENCE",
+     "species": "SPECIES_KINGDRA",
      "nature": 10,
      "ability_num": 1,
      "held_item": "ITEM_DRAGON_FANG",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FLAMETHROWER",
-      "MOVE_CRUNCH",
-      "MOVE_FLY",
-      "MOVE_SCARY_FACE"
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_BRINE",
+      "MOVE_TWISTER"
      ]
     },
     {
@@ -4776,10 +4776,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_EARTHQUAKE",
       "MOVE_FIRE_PUNCH",
-      "MOVE_FIRE_SPIN"
+      "MOVE_FIRE_SPIN",
+      "MOVE_FLAMETHROWER"
      ]
     },
     {
@@ -4839,16 +4839,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_SALAMENCE",
+     "species": "SPECIES_KINGDRA",
      "nature": 10,
      "ability_num": 1,
      "held_item": "ITEM_DRAGON_FANG",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FLAMETHROWER",
-      "MOVE_CRUNCH",
-      "MOVE_FLY",
-      "MOVE_SCARY_FACE"
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_BRINE",
+      "MOVE_TWISTER"
      ]
     },
     {
@@ -5015,10 +5015,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_ASTONISH",
+      "MOVE_SUPERSONIC",
+      "MOVE_LEECH_LIFE"
      ]
     },
     {
@@ -5038,10 +5038,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_ROAR",
       "MOVE_SMOG",
-      "MOVE_HOWL"
+      "MOVE_HOWL",
+      "MOVE_EMBER"
      ]
     },
     {
@@ -5135,9 +5135,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_ODOR_SLEUTH",
-      "MOVE_BITE"
+      "MOVE_BITE",
+      "MOVE_ROAR"
      ]
     },
     {
@@ -5160,7 +5160,7 @@
       "MOVE_SHADOW_BALL",
       "MOVE_SLUDGE_BOMB",
       "MOVE_ICY_WIND",
-      "MOVE_TAUNT"
+      "MOVE_SUCKER_PUNCH"
      ]
     },
     {
@@ -5180,10 +5180,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_THUNDER_WAVE",
       "MOVE_TRI_ATTACK",
-      "MOVE_SPARK"
+      "MOVE_SPARK",
+      "MOVE_SONIC_BOOM"
      ]
     },
     {
@@ -5204,9 +5204,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
-      "MOVE_CRUNCH",
-      "MOVE_TAUNT"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_BITE",
+      "MOVE_ASTONISH"
      ]
     },
     {
@@ -5423,8 +5423,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
-      "MOVE_DOUBLE_HIT"
+      "MOVE_DOUBLE_HIT",
+      "MOVE_HAZE"
      ]
     }
    ]
@@ -5483,8 +5483,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
-      "MOVE_PAIN_SPLIT"
+      "MOVE_PAIN_SPLIT",
+      "MOVE_DOUBLE_HIT"
      ]
     },
     {
@@ -5653,7 +5653,7 @@
     {
      "iv": 0,
      "lvl": 12,
-     "species": "SPECIES_DUSTOX"
+     "species": "SPECIES_PARAS"
     }
    ],
    "gencap_reference": "crystal: BugCatcher JOSH"
@@ -5772,9 +5772,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_ODOR_SLEUTH",
-      "MOVE_BITE"
+      "MOVE_BITE",
+      "MOVE_ROAR"
      ]
     },
     {
@@ -5797,7 +5797,7 @@
       "MOVE_SHADOW_BALL",
       "MOVE_SLUDGE_BOMB",
       "MOVE_ICY_WIND",
-      "MOVE_TAUNT"
+      "MOVE_SUCKER_PUNCH"
      ]
     },
     {
@@ -5817,10 +5817,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_THUNDER_WAVE",
       "MOVE_TRI_ATTACK",
-      "MOVE_SPARK"
+      "MOVE_SPARK",
+      "MOVE_SONIC_BOOM"
      ]
     },
     {
@@ -5841,9 +5841,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
-      "MOVE_CRUNCH",
-      "MOVE_TAUNT"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_BITE",
+      "MOVE_ASTONISH"
      ]
     },
     {
@@ -6023,7 +6023,7 @@
     {
      "iv": 0,
      "lvl": 24,
-     "species": "SPECIES_MAWILE"
+     "species": "SPECIES_MAGNEMITE"
     }
    ],
    "gencap_reference": "crystal: Pokemaniac ANDREW"
@@ -6061,7 +6061,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_WHISMUR"
+     "species": "SPECIES_ZUBAT"
     }
    ],
    "gencap_reference": "crystal: Camper IVAN"
@@ -6304,7 +6304,7 @@
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_GLALIE"
+     "species": "SPECIES_DEWGONG"
     },
     {
      "iv": 0,
@@ -6356,10 +6356,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_ASTONISH",
+      "MOVE_SUPERSONIC",
+      "MOVE_LEECH_LIFE"
      ]
     },
     {
@@ -6379,10 +6379,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_ROAR",
       "MOVE_SMOG",
-      "MOVE_HOWL"
+      "MOVE_HOWL",
+      "MOVE_EMBER"
      ]
     },
     {
@@ -6646,7 +6646,7 @@
     {
      "iv": 0,
      "lvl": 9,
-     "species": "SPECIES_BELDUM"
+     "species": "SPECIES_SMOOCHUM"
     }
    ],
    "gencap_reference": "crystal: Sage LI"
@@ -6789,16 +6789,16 @@
       0
      ],
      "lvl": 48,
-     "species": "SPECIES_METAGROSS",
+     "species": "SPECIES_JYNX",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_METAL_COAT",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_METEOR_MASH",
-      "MOVE_EARTHQUAKE",
       "MOVE_ICE_PUNCH",
-      "MOVE_HAMMER_ARM"
+      "MOVE_WRING_OUT",
+      "MOVE_BODY_SLAM",
+      "MOVE_AVALANCHE"
      ]
     },
     {
@@ -6812,16 +6812,16 @@
       252
      ],
      "lvl": 49,
-     "species": "SPECIES_JYNX",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
+      "MOVE_FLAMETHROWER",
       "MOVE_SHADOW_BALL",
-      "MOVE_PERISH_SONG",
-      "MOVE_WRING_OUT",
-      "MOVE_BODY_SLAM"
+      "MOVE_EMBARGO",
+      "MOVE_FIRE_FANG"
      ]
     },
     {
@@ -6925,10 +6925,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BULK_UP",
       "MOVE_ICE_PUNCH",
       "MOVE_PUNISHMENT",
-      "MOVE_THRASH"
+      "MOVE_THRASH",
+      "MOVE_CROSS_CHOP"
      ]
     },
     {
@@ -6942,7 +6942,7 @@
       0
      ],
      "lvl": 52,
-     "species": "SPECIES_HARIYAMA",
+     "species": "SPECIES_MACHAMP",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
@@ -6950,48 +6950,25 @@
      "moves": [
       "MOVE_THUNDER_PUNCH",
       "MOVE_ICE_PUNCH",
-      "MOVE_CLOSE_COMBAT",
-      "MOVE_ENDURE"
-     ]
-    },
-    {
-     "iv": 255,
-     "evs": [
-      252,
-      252,
-      0,
-      0,
-      4,
-      0
-     ],
-     "lvl": 53,
-     "species": "SPECIES_MACHAMP",
-     "nature": 3,
-     "ability_num": 0,
-     "held_item": "ITEM_BLACK_SLUDGE",
-     "unknown_0x10": 0,
-     "moves": [
-      "MOVE_ICE_PUNCH",
       "MOVE_DYNAMIC_PUNCH",
-      "MOVE_SCARY_FACE",
-      "MOVE_CROSS_CHOP"
+      "MOVE_SCARY_FACE"
      ]
     },
     {
      "iv": 255,
      "evs": [
       252,
-      0,
       252,
+      0,
       0,
       4,
       0
      ],
      "lvl": 53,
      "species": "SPECIES_HITMONTOP",
-     "nature": 8,
-     "ability_num": 2,
-     "held_item": "ITEM_SITRUS_BERRY",
+     "nature": 3,
+     "ability_num": 0,
+     "held_item": "ITEM_BLACK_SLUDGE",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CLOSE_COMBAT",
@@ -7003,18 +6980,18 @@
     {
      "iv": 255,
      "evs": [
-      4,
       252,
       0,
+      252,
       0,
-      0,
-      252
+      4,
+      0
      ],
      "lvl": 53,
      "species": "SPECIES_HITMONLEE",
-     "nature": 13,
-     "ability_num": 0,
-     "held_item": "ITEM_CHOICE_SCARF",
+     "nature": 8,
+     "ability_num": 2,
+     "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CLOSE_COMBAT",
@@ -7033,17 +7010,40 @@
       0,
       252
      ],
+     "lvl": 53,
+     "species": "SPECIES_HITMONCHAN",
+     "nature": 13,
+     "ability_num": 0,
+     "held_item": "ITEM_CHOICE_SCARF",
+     "unknown_0x10": 0,
+     "moves": [
+      "MOVE_ICE_PUNCH",
+      "MOVE_COUNTER",
+      "MOVE_DETECT",
+      "MOVE_MEGA_PUNCH"
+     ]
+    },
+    {
+     "iv": 255,
+     "evs": [
+      4,
+      252,
+      0,
+      0,
+      0,
+      252
+     ],
      "lvl": 54,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_STEELIX",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_PROTECT",
-      "MOVE_BRAVE_BIRD",
-      "MOVE_SLASH"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH"
      ]
     }
    ],
@@ -7091,10 +7091,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BULK_UP",
       "MOVE_ICE_PUNCH",
       "MOVE_PUNISHMENT",
-      "MOVE_THRASH"
+      "MOVE_THRASH",
+      "MOVE_CROSS_CHOP"
      ]
     },
     {
@@ -7108,7 +7108,7 @@
       0
      ],
      "lvl": 52,
-     "species": "SPECIES_HARIYAMA",
+     "species": "SPECIES_MACHAMP",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
@@ -7116,48 +7116,25 @@
      "moves": [
       "MOVE_THUNDER_PUNCH",
       "MOVE_ICE_PUNCH",
-      "MOVE_CLOSE_COMBAT",
-      "MOVE_ENDURE"
-     ]
-    },
-    {
-     "iv": 255,
-     "evs": [
-      252,
-      252,
-      0,
-      0,
-      4,
-      0
-     ],
-     "lvl": 53,
-     "species": "SPECIES_MACHAMP",
-     "nature": 3,
-     "ability_num": 0,
-     "held_item": "ITEM_BLACK_SLUDGE",
-     "unknown_0x10": 0,
-     "moves": [
-      "MOVE_ICE_PUNCH",
       "MOVE_DYNAMIC_PUNCH",
-      "MOVE_SCARY_FACE",
-      "MOVE_CROSS_CHOP"
+      "MOVE_SCARY_FACE"
      ]
     },
     {
      "iv": 255,
      "evs": [
       252,
-      0,
       252,
+      0,
       0,
       4,
       0
      ],
      "lvl": 53,
      "species": "SPECIES_HITMONTOP",
-     "nature": 8,
-     "ability_num": 2,
-     "held_item": "ITEM_SITRUS_BERRY",
+     "nature": 3,
+     "ability_num": 0,
+     "held_item": "ITEM_BLACK_SLUDGE",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CLOSE_COMBAT",
@@ -7169,18 +7146,18 @@
     {
      "iv": 255,
      "evs": [
-      4,
       252,
       0,
+      252,
       0,
-      0,
-      252
+      4,
+      0
      ],
      "lvl": 53,
      "species": "SPECIES_HITMONLEE",
-     "nature": 13,
-     "ability_num": 0,
-     "held_item": "ITEM_CHOICE_SCARF",
+     "nature": 8,
+     "ability_num": 2,
+     "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CLOSE_COMBAT",
@@ -7199,17 +7176,40 @@
       0,
       252
      ],
+     "lvl": 53,
+     "species": "SPECIES_HITMONCHAN",
+     "nature": 13,
+     "ability_num": 0,
+     "held_item": "ITEM_CHOICE_SCARF",
+     "unknown_0x10": 0,
+     "moves": [
+      "MOVE_ICE_PUNCH",
+      "MOVE_COUNTER",
+      "MOVE_DETECT",
+      "MOVE_MEGA_PUNCH"
+     ]
+    },
+    {
+     "iv": 255,
+     "evs": [
+      4,
+      252,
+      0,
+      0,
+      0,
+      252
+     ],
      "lvl": 54,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_STEELIX",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_PROTECT",
-      "MOVE_BRAVE_BIRD",
-      "MOVE_SLASH"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH"
      ]
     }
    ],
@@ -7320,16 +7320,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_SALAMENCE",
+     "species": "SPECIES_MURKROW",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 1,
      "moves": [
-      "MOVE_CRUNCH",
-      "MOVE_EARTHQUAKE",
-      "MOVE_FLY",
-      "MOVE_SCARY_FACE"
+      "MOVE_SUCKER_PUNCH",
+      "MOVE_MEAN_LOOK",
+      "MOVE_TAUNT",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -7343,16 +7343,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_MURKROW",
+     "species": "SPECIES_VILEPLUME",
      "nature": 14,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SUCKER_PUNCH",
-      "MOVE_MEAN_LOOK",
-      "MOVE_TAUNT",
-      "MOVE_ASSURANCE"
+      "MOVE_PETAL_DANCE",
+      "MOVE_POISON_POWDER",
+      "MOVE_STUN_SPORE",
+      "MOVE_AROMATHERAPY"
      ]
     },
     {
@@ -7366,16 +7366,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_VILEPLUME",
+     "species": "SPECIES_TYRANITAR",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SLUDGE_BOMB",
-      "MOVE_PETAL_DANCE",
-      "MOVE_POISON_POWDER",
-      "MOVE_STUN_SPORE"
+      "MOVE_STONE_EDGE",
+      "MOVE_EARTHQUAKE",
+      "MOVE_CRUNCH",
+      "MOVE_PAYBACK"
      ]
     }
    ],
@@ -7486,16 +7486,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_SALAMENCE",
+     "species": "SPECIES_MURKROW",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 1,
      "moves": [
-      "MOVE_CRUNCH",
-      "MOVE_EARTHQUAKE",
-      "MOVE_FLY",
-      "MOVE_SCARY_FACE"
+      "MOVE_SUCKER_PUNCH",
+      "MOVE_MEAN_LOOK",
+      "MOVE_TAUNT",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -7509,16 +7509,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_MURKROW",
+     "species": "SPECIES_VILEPLUME",
      "nature": 14,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SUCKER_PUNCH",
-      "MOVE_MEAN_LOOK",
-      "MOVE_TAUNT",
-      "MOVE_ASSURANCE"
+      "MOVE_PETAL_DANCE",
+      "MOVE_POISON_POWDER",
+      "MOVE_STUN_SPORE",
+      "MOVE_AROMATHERAPY"
      ]
     },
     {
@@ -7532,16 +7532,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_VILEPLUME",
+     "species": "SPECIES_TYRANITAR",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SLUDGE_BOMB",
-      "MOVE_PETAL_DANCE",
-      "MOVE_POISON_POWDER",
-      "MOVE_STUN_SPORE"
+      "MOVE_STONE_EDGE",
+      "MOVE_EARTHQUAKE",
+      "MOVE_CRUNCH",
+      "MOVE_PAYBACK"
      ]
     }
    ],
@@ -7583,16 +7583,16 @@
       252
      ],
      "lvl": 50,
-     "species": "SPECIES_NINJASK",
+     "species": "SPECIES_CROBAT",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BATON_PASS",
-      "MOVE_AGILITY",
-      "MOVE_SLASH",
-      "MOVE_SWORDS_DANCE"
+      "MOVE_HAZE",
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -7637,8 +7637,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
-      "MOVE_EXPLOSION"
+      "MOVE_EXPLOSION",
+      "MOVE_DOUBLE_HIT"
      ]
     },
     {
@@ -7661,7 +7661,7 @@
       "MOVE_PSYCHIC",
       "MOVE_SURF",
       "MOVE_ICE_BEAM",
-      "MOVE_SLACK_OFF"
+      "MOVE_SWAGGER"
      ]
     },
     {
@@ -7698,16 +7698,16 @@
       252
      ],
      "lvl": 52,
-     "species": "SPECIES_CROBAT",
+     "species": "SPECIES_ARIADOS",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_AIR_SLASH",
-      "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_JAB",
+      "MOVE_PSYCHIC",
+      "MOVE_PIN_MISSILE"
      ]
     }
    ],
@@ -7774,7 +7774,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_GROVYLE"
+     "species": "SPECIES_IVYSAUR"
     },
     {
      "iv": 0,
@@ -7985,7 +7985,7 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_MIGHTYENA"
+     "species": "SPECIES_RATICATE"
     }
    ],
    "gencap_reference": "crystal: GruntM GRUNT"
@@ -8487,7 +8487,7 @@
     {
      "iv": 0,
      "lvl": 45,
-     "species": "SPECIES_BANETTE"
+     "species": "SPECIES_MISDREAVUS"
     }
    ],
    "gencap_reference": "crystal: CooltrainerF BETH"
@@ -8525,7 +8525,7 @@
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_SABLEYE"
+     "species": "SPECIES_GASTLY"
     }
    ],
    "gencap_reference": "crystal: Medium GRACE"
@@ -8601,7 +8601,7 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_WAILMER"
+     "species": "SPECIES_STARYU"
     }
    ],
    "gencap_reference": "crystal: SwimmerF KARA"
@@ -8729,9 +8729,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_WILL_O_WISP",
       "MOVE_FLAMETHROWER",
-      "MOVE_HAZE"
+      "MOVE_HAZE",
+      "MOVE_SLUDGE"
      ]
     },
     {
@@ -8741,8 +8741,8 @@
      "moves": [
       "MOVE_THUNDERBOLT",
       "MOVE_THUNDER_WAVE",
-      "MOVE_TAUNT",
-      "MOVE_SELF_DESTRUCT"
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_CHARGE_BEAM"
      ]
     },
     {
@@ -8812,19 +8812,19 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
-      "MOVE_DOUBLE_HIT"
+      "MOVE_DOUBLE_HIT",
+      "MOVE_HAZE"
      ]
     },
     {
      "iv": 255,
      "lvl": 38,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_HOUNDOOM",
      "moves": [
-      "MOVE_SLASH",
-      "MOVE_DOUBLE_TEAM",
-      "MOVE_BITE",
-      "MOVE_SWORDS_DANCE"
+      "MOVE_FIRE_FANG",
+      "MOVE_BEAT_UP",
+      "MOVE_ODOR_SLEUTH",
+      "MOVE_BITE"
      ]
     },
     {
@@ -8921,7 +8921,7 @@
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_SHUPPET"
+     "species": "SPECIES_GASTLY"
     }
    ],
    "gencap_reference": "crystal: Medium MARTHA"
@@ -9068,7 +9068,7 @@
     {
      "iv": 0,
      "lvl": 37,
-     "species": "SPECIES_MANECTRIC"
+     "species": "SPECIES_BLASTOISE"
     },
     {
      "iv": 0,
@@ -9111,7 +9111,7 @@
     {
      "iv": 0,
      "lvl": 12,
-     "species": "SPECIES_SURSKIT"
+     "species": "SPECIES_LEDYBA"
     },
     {
      "iv": 0,
@@ -9149,12 +9149,12 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_PLUSLE"
+     "species": "SPECIES_CLEFAIRY"
     },
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_MINUN"
+     "species": "SPECIES_JIGGLYPUFF"
     }
    ],
    "gencap_reference": "crystal: Twins ANN & ANNE"
@@ -9187,7 +9187,7 @@
     {
      "iv": 0,
      "lvl": 23,
-     "species": "SPECIES_SKITTY"
+     "species": "SPECIES_PIKACHU"
     }
    ],
    "gencap_reference": "crystal: PokefanF RUTH"
@@ -9268,7 +9268,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_MAKUHITA"
+     "species": "SPECIES_POLIWHIRL"
     }
    ],
    "gencap_reference": "crystal: Sailor HUEY"
@@ -9344,7 +9344,7 @@
     {
      "iv": 0,
      "lvl": 42,
-     "species": "SPECIES_FLYGON"
+     "species": "SPECIES_DRAGONAIR"
     },
     {
      "iv": 0,
@@ -9546,10 +9546,10 @@
      "lvl": 48,
      "species": "SPECIES_FLAREON",
      "moves": [
-      "MOVE_SUPERPOWER",
       "MOVE_QUICK_ATTACK",
       "MOVE_FIRE_FANG",
-      "MOVE_FIRE_SPIN"
+      "MOVE_FIRE_SPIN",
+      "MOVE_BITE"
      ]
     }
    ],
@@ -9702,9 +9702,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_FIRE_FANG",
-      "MOVE_BEAT_UP"
+      "MOVE_BEAT_UP",
+      "MOVE_ODOR_SLEUTH"
      ]
     },
     {
@@ -9770,10 +9770,10 @@
      "held_item": "ITEM_BLACK_GLASSES",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_BEAT_UP",
       "MOVE_SLASH",
-      "MOVE_ICY_WIND"
+      "MOVE_ICY_WIND",
+      "MOVE_AGILITY"
      ]
     },
     {
@@ -9817,9 +9817,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WATERFALL",
-      "MOVE_DOUBLE_EDGE",
       "MOVE_ICE_PUNCH",
-      "MOVE_DRAGON_DANCE"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -10020,12 +10020,12 @@
     {
      "iv": 0,
      "lvl": 41,
-     "species": "SPECIES_SHELGON"
+     "species": "SPECIES_DRAGONAIR"
     },
     {
      "iv": 0,
      "lvl": 42,
-     "species": "SPECIES_ALTARIA"
+     "species": "SPECIES_DRAGONAIR"
     },
     {
      "iv": 0,
@@ -10739,9 +10739,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_FIRE_FANG",
-      "MOVE_BEAT_UP"
+      "MOVE_BEAT_UP",
+      "MOVE_ODOR_SLEUTH"
      ]
     },
     {
@@ -10807,10 +10807,10 @@
      "held_item": "ITEM_BLACK_GLASSES",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_BEAT_UP",
       "MOVE_SLASH",
-      "MOVE_ICY_WIND"
+      "MOVE_ICY_WIND",
+      "MOVE_AGILITY"
      ]
     },
     {
@@ -10854,9 +10854,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WATERFALL",
-      "MOVE_DOUBLE_EDGE",
       "MOVE_ICE_PUNCH",
-      "MOVE_DRAGON_DANCE"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -10903,10 +10903,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_METAL_CLAW",
       "MOVE_BEAT_UP",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_ICY_WIND"
      ]
     },
     {
@@ -10926,10 +10926,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_HAZE",
       "MOVE_POISON_FANG",
-      "MOVE_MEAN_LOOK"
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -11019,9 +11019,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SCREECH",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -11068,10 +11068,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -11114,10 +11114,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_FEINT",
       "MOVE_NIGHT_SLASH",
-      "MOVE_CAPTIVATE"
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -11184,9 +11184,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SUPERPOWER",
-      "MOVE_AQUA_TAIL"
+      "MOVE_AQUA_TAIL",
+      "MOVE_THRASH"
      ]
     }
    ]
@@ -12071,7 +12071,7 @@
     {
      "iv": 0,
      "lvl": 38,
-     "species": "SPECIES_KECLEON"
+     "species": "SPECIES_BLISSEY"
     }
    ],
    "gencap_reference": "crystal: Pokemaniac ZACH"
@@ -12165,9 +12165,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FURY_CUTTER",
-      "MOVE_BRICK_BREAK",
       "MOVE_FALSE_SWIPE",
-      "MOVE_PURSUIT"
+      "MOVE_PURSUIT",
+      "MOVE_FOCUS_ENERGY"
      ]
     }
    ],
@@ -12762,9 +12762,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_FIRE_FANG",
-      "MOVE_BEAT_UP"
+      "MOVE_BEAT_UP",
+      "MOVE_ODOR_SLEUTH"
      ]
     },
     {
@@ -12830,10 +12830,10 @@
      "held_item": "ITEM_BLACK_GLASSES",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_BEAT_UP",
       "MOVE_SLASH",
-      "MOVE_ICY_WIND"
+      "MOVE_ICY_WIND",
+      "MOVE_AGILITY"
      ]
     },
     {
@@ -12877,9 +12877,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WATERFALL",
-      "MOVE_DOUBLE_EDGE",
       "MOVE_ICE_PUNCH",
-      "MOVE_DRAGON_DANCE"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -12926,10 +12926,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_METAL_CLAW",
       "MOVE_BEAT_UP",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_ICY_WIND"
      ]
     },
     {
@@ -12949,10 +12949,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_HAZE",
       "MOVE_POISON_FANG",
-      "MOVE_MEAN_LOOK"
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -13042,9 +13042,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SCREECH",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_CRUNCH"
      ]
     }
    ]
@@ -13091,10 +13091,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -13137,10 +13137,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_FEINT",
       "MOVE_NIGHT_SLASH",
-      "MOVE_CAPTIVATE"
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -13207,9 +13207,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_SUPERPOWER",
-      "MOVE_AQUA_TAIL"
+      "MOVE_AQUA_TAIL",
+      "MOVE_THRASH"
      ]
     }
    ]
@@ -13256,10 +13256,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_ASTONISH",
+      "MOVE_SUPERSONIC",
+      "MOVE_LEECH_LIFE"
      ]
     },
     {
@@ -13279,10 +13279,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_ROAR",
       "MOVE_SMOG",
-      "MOVE_HOWL"
+      "MOVE_HOWL",
+      "MOVE_EMBER"
      ]
     },
     {
@@ -14194,7 +14194,7 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_ABSOL"
+     "species": "SPECIES_SNEASEL"
     }
    ]
   },
@@ -14335,16 +14335,16 @@
       0
      ],
      "lvl": 48,
-     "species": "SPECIES_METAGROSS",
+     "species": "SPECIES_JYNX",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_METAL_COAT",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_METEOR_MASH",
-      "MOVE_EARTHQUAKE",
       "MOVE_ICE_PUNCH",
-      "MOVE_HAMMER_ARM"
+      "MOVE_WRING_OUT",
+      "MOVE_BODY_SLAM",
+      "MOVE_AVALANCHE"
      ]
     },
     {
@@ -14358,16 +14358,16 @@
       252
      ],
      "lvl": 49,
-     "species": "SPECIES_JYNX",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
+      "MOVE_FLAMETHROWER",
       "MOVE_SHADOW_BALL",
-      "MOVE_PERISH_SONG",
-      "MOVE_WRING_OUT",
-      "MOVE_BODY_SLAM"
+      "MOVE_EMBARGO",
+      "MOVE_FIRE_FANG"
      ]
     },
     {
@@ -14467,12 +14467,12 @@
     {
      "iv": 0,
      "lvl": 33,
-     "species": "SPECIES_LINOONE"
+     "species": "SPECIES_ARBOK"
     },
     {
      "iv": 0,
      "lvl": 33,
-     "species": "SPECIES_ARBOK"
+     "species": "SPECIES_CROBAT"
     }
    ],
    "gencap_reference": "crystal: GruntM GRUNT"
@@ -14591,7 +14591,7 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_TAILLOW"
+     "species": "SPECIES_SPEAROW"
     },
     {
      "iv": 0,
@@ -14644,9 +14644,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_ODOR_SLEUTH",
-      "MOVE_BITE"
+      "MOVE_BITE",
+      "MOVE_ROAR"
      ]
     },
     {
@@ -14669,7 +14669,7 @@
       "MOVE_SHADOW_BALL",
       "MOVE_SLUDGE_BOMB",
       "MOVE_ICY_WIND",
-      "MOVE_TAUNT"
+      "MOVE_SUCKER_PUNCH"
      ]
     },
     {
@@ -14689,10 +14689,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_THUNDER_WAVE",
       "MOVE_TRI_ATTACK",
-      "MOVE_SPARK"
+      "MOVE_SPARK",
+      "MOVE_SONIC_BOOM"
      ]
     },
     {
@@ -14713,9 +14713,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
-      "MOVE_CRUNCH",
-      "MOVE_TAUNT"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_BITE",
+      "MOVE_ASTONISH"
      ]
     },
     {
@@ -15216,7 +15216,7 @@
     {
      "iv": 0,
      "lvl": 6,
-     "species": "SPECIES_MEDITITE"
+     "species": "SPECIES_BELLSPROUT"
     }
    ],
    "gencap_reference": "crystal: Sage JIN"
@@ -15391,7 +15391,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_SPOINK"
+     "species": "SPECIES_DROWZEE"
     },
     {
      "iv": 0,
@@ -15662,7 +15662,7 @@
     {
      "iv": 0,
      "lvl": 35,
-     "species": "SPECIES_LINOONE"
+     "species": "SPECIES_CROBAT"
     }
    ],
    "gencap_reference": "crystal: GruntM GRUNT"
@@ -15806,16 +15806,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_GROUDON",
+     "species": "SPECIES_STEELIX",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_RED_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FIRE_PUNCH",
-      "MOVE_SOLAR_BEAM",
-      "MOVE_FISSURE",
-      "MOVE_REST"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH",
+      "MOVE_IRON_TAIL"
      ]
     },
     {
@@ -15852,16 +15852,16 @@
       252
      ],
      "lvl": 70,
-     "species": "SPECIES_NINJASK",
+     "species": "SPECIES_HERACROSS",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_EXPERT_BELT",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_LEECH_LIFE",
-      "MOVE_X_SCISSOR",
-      "MOVE_BATON_PASS",
-      "MOVE_AGILITY"
+      "MOVE_MEGAHORN",
+      "MOVE_FEINT",
+      "MOVE_REVERSAL",
+      "MOVE_CLOSE_COMBAT"
      ]
     },
     {
@@ -15921,16 +15921,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_CAMERUPT",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 15,
      "ability_num": 1,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_ANCIENT_POWER",
-      "MOVE_FISSURE",
-      "MOVE_ERUPTION"
+      "MOVE_NASTY_PLOT",
+      "MOVE_CRUNCH",
+      "MOVE_EMBARGO"
      ]
     }
    ]
@@ -15971,16 +15971,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_KYOGRE",
+     "species": "SPECIES_SUICUNE",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_BLUE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_THUNDER",
       "MOVE_ICE_BEAM",
-      "MOVE_CALM_MIND",
-      "MOVE_DOUBLE_EDGE"
+      "MOVE_EXTRASENSORY",
+      "MOVE_TAILWIND",
+      "MOVE_ICE_FANG"
      ]
     },
     {
@@ -16086,16 +16086,16 @@
       252
      ],
      "lvl": 70,
-     "species": "SPECIES_SHARPEDO",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CRUNCH",
-      "MOVE_NIGHT_SLASH",
-      "MOVE_SKULL_BASH",
-      "MOVE_AGILITY"
+      "MOVE_NASTY_PLOT",
+      "MOVE_FLAMETHROWER",
+      "MOVE_EMBARGO"
      ]
     }
    ]
@@ -16142,10 +16142,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
-      "MOVE_DOUBLE_EDGE",
-      "MOVE_KNOCK_OFF",
-      "MOVE_TAUNT"
+      "MOVE_FEINT",
+      "MOVE_NIGHT_SLASH",
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -16211,10 +16211,10 @@
      "held_item": "ITEM_FLAME_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FACADE",
       "MOVE_ICE_PUNCH",
       "MOVE_HAMMER_ARM",
-      "MOVE_THRASH"
+      "MOVE_THRASH",
+      "MOVE_SNORE"
      ]
     },
     {
@@ -16228,16 +16228,16 @@
       0
      ],
      "lvl": 100,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 3,
      "ability_num": 1,
      "held_item": "ITEM_BLACK_GLASSES",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_PERISH_SONG",
-      "MOVE_PSYCHO_CUT",
-      "MOVE_ME_FIRST"
+      "MOVE_NASTY_PLOT",
+      "MOVE_CRUNCH",
+      "MOVE_FLAMETHROWER",
+      "MOVE_EMBARGO"
      ]
     },
     {
@@ -16377,9 +16377,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_KNOCK_OFF",
       "MOVE_HARDEN",
-      "MOVE_SAND_ATTACK"
+      "MOVE_SAND_ATTACK",
+      "MOVE_POISON_STING"
      ]
     },
     {
@@ -16422,10 +16422,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_HEAT_WAVE",
       "MOVE_GUST",
       "MOVE_SAND_ATTACK",
-      "MOVE_QUICK_ATTACK"
+      "MOVE_QUICK_ATTACK",
+      "MOVE_TACKLE"
      ]
     }
    ],
@@ -16559,16 +16559,16 @@
       252
      ],
      "lvl": 16,
-     "species": "SPECIES_NINJASK",
+     "species": "SPECIES_BUTTERFREE",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_LEECH_LIFE",
-      "MOVE_FURY_SWIPES",
-      "MOVE_SAND_ATTACK",
-      "MOVE_HARDEN"
+      "MOVE_GUST",
+      "MOVE_SLEEP_POWDER",
+      "MOVE_STUN_SPORE",
+      "MOVE_POISON_POWDER"
      ]
     },
     {
@@ -16822,16 +16822,16 @@
       252
      ],
      "lvl": 24,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_GASTLY",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_PURSUIT",
-      "MOVE_RAZOR_WIND",
-      "MOVE_QUICK_ATTACK"
+      "MOVE_SUCKER_PUNCH",
+      "MOVE_CONFUSE_RAY",
+      "MOVE_NIGHT_SHADE",
+      "MOVE_CURSE"
      ]
     },
     {
@@ -16845,16 +16845,16 @@
       252
      ],
      "lvl": 24,
-     "species": "SPECIES_GASTLY",
+     "species": "SPECIES_MISDREAVUS",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SUCKER_PUNCH",
+      "MOVE_PSYBEAM",
+      "MOVE_MEAN_LOOK",
       "MOVE_CONFUSE_RAY",
-      "MOVE_NIGHT_SHADE",
-      "MOVE_CURSE"
+      "MOVE_ASTONISH"
      ]
     },
     {
@@ -16891,16 +16891,16 @@
       252
      ],
      "lvl": 24,
-     "species": "SPECIES_MISDREAVUS",
+     "species": "SPECIES_GYARADOS",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SHADOW_BALL",
-      "MOVE_CALM_MIND",
-      "MOVE_PSYBEAM",
-      "MOVE_MEAN_LOOK"
+      "MOVE_DRAGON_RAGE",
+      "MOVE_BITE",
+      "MOVE_THRASH",
+      "MOVE_NONE"
      ]
     },
     {
@@ -17177,16 +17177,16 @@
       252
      ],
      "lvl": 36,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_MACHAMP",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BLAZE_KICK",
-      "MOVE_QUICK_ATTACK",
-      "MOVE_BULK_UP",
-      "MOVE_SAND_ATTACK"
+      "MOVE_WAKE_UP_SLAP",
+      "MOVE_SUBMISSION",
+      "MOVE_VITAL_THROW",
+      "MOVE_REVENGE"
      ]
     },
     {
@@ -17343,16 +17343,16 @@
       252
      ],
      "lvl": 37,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_MACHAMP",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_BLAZE_KICK",
-      "MOVE_QUICK_ATTACK",
-      "MOVE_BULK_UP",
-      "MOVE_SAND_ATTACK"
+      "MOVE_WAKE_UP_SLAP",
+      "MOVE_SUBMISSION",
+      "MOVE_VITAL_THROW",
+      "MOVE_REVENGE"
      ]
     },
     {
@@ -18225,10 +18225,10 @@
      "held_item": "ITEM_KINGS_ROCK",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICICLE_SPEAR",
       "MOVE_TAKE_DOWN",
       "MOVE_SHEER_COLD",
-      "MOVE_BRINE"
+      "MOVE_BRINE",
+      "MOVE_AQUA_JET"
      ]
     },
     {
@@ -18391,10 +18391,10 @@
      "held_item": "ITEM_KINGS_ROCK",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICICLE_SPEAR",
       "MOVE_TAKE_DOWN",
       "MOVE_SHEER_COLD",
-      "MOVE_BRINE"
+      "MOVE_BRINE",
+      "MOVE_AQUA_JET"
      ]
     },
     {
@@ -18528,16 +18528,16 @@
       252
      ],
      "lvl": 44,
-     "species": "SPECIES_FLYGON",
+     "species": "SPECIES_DRAGONAIR",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_SCREECH",
-      "MOVE_DRAGON_BREATH",
-      "MOVE_SUPERSONIC"
+      "MOVE_DRAGON_RUSH",
+      "MOVE_AQUA_TAIL",
+      "MOVE_AGILITY"
      ]
     },
     {
@@ -18551,16 +18551,16 @@
       252
      ],
      "lvl": 44,
-     "species": "SPECIES_ALTARIA",
+     "species": "SPECIES_DRAGONAIR",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
-      "MOVE_DRAGON_BREATH",
-      "MOVE_NATURAL_GIFT"
+      "MOVE_DRAGON_RUSH",
+      "MOVE_AQUA_TAIL",
+      "MOVE_AGILITY",
+      "MOVE_SLAM"
      ]
     },
     {
@@ -18740,16 +18740,16 @@
       252
      ],
      "lvl": 50,
-     "species": "SPECIES_LATIAS",
+     "species": "SPECIES_MEWTWO",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_PSYCHO_SHIFT",
-      "MOVE_RECOVER",
-      "MOVE_ZEN_HEADBUTT"
+      "MOVE_PSYCHO_CUT",
+      "MOVE_MIST",
+      "MOVE_MIRACLE_EYE"
      ]
     }
    ],
@@ -18906,16 +18906,16 @@
       252
      ],
      "lvl": 50,
-     "species": "SPECIES_LATIAS",
+     "species": "SPECIES_MEWTWO",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_PSYCHO_SHIFT",
-      "MOVE_RECOVER",
-      "MOVE_ZEN_HEADBUTT"
+      "MOVE_PSYCHO_CUT",
+      "MOVE_MIST",
+      "MOVE_MIRACLE_EYE"
      ]
     }
    ],
@@ -19381,16 +19381,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_HITMONCHAN",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHARCOAL",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_PROTECT",
-      "MOVE_BRAVE_BIRD",
-      "MOVE_SLASH"
+      "MOVE_COUNTER",
+      "MOVE_DETECT",
+      "MOVE_MEGA_PUNCH"
      ]
     },
     {
@@ -19404,16 +19404,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_HITMONCHAN",
+     "species": "SPECIES_STEELIX",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICE_PUNCH",
-      "MOVE_COUNTER",
-      "MOVE_DETECT",
-      "MOVE_MEGA_PUNCH"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH",
+      "MOVE_IRON_TAIL"
      ]
     }
    ],
@@ -19547,16 +19547,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_BLAZIKEN",
+     "species": "SPECIES_HITMONCHAN",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHARCOAL",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_PROTECT",
-      "MOVE_BRAVE_BIRD",
-      "MOVE_SLASH"
+      "MOVE_COUNTER",
+      "MOVE_DETECT",
+      "MOVE_MEGA_PUNCH"
      ]
     },
     {
@@ -19570,16 +19570,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_HITMONCHAN",
+     "species": "SPECIES_STEELIX",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICE_PUNCH",
-      "MOVE_COUNTER",
-      "MOVE_DETECT",
-      "MOVE_MEGA_PUNCH"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH",
+      "MOVE_IRON_TAIL"
      ]
     }
    ],
@@ -19621,16 +19621,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_UMBREON",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_NIGHT_SLASH",
-      "MOVE_DETECT",
-      "MOVE_SUCKER_PUNCH"
+      "MOVE_LAST_RESORT",
+      "MOVE_ASSURANCE",
+      "MOVE_CONFUSE_RAY",
+      "MOVE_QUICK_ATTACK"
      ]
     },
     {
@@ -19644,69 +19644,46 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_UMBREON",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 14,
      "ability_num": 2,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_LAST_RESORT",
-      "MOVE_ASSURANCE",
-      "MOVE_CONFUSE_RAY",
-      "MOVE_QUICK_ATTACK"
-     ]
-    },
-    {
-     "iv": 255,
-     "evs": [
-      4,
-      252,
-      0,
-      0,
-      0,
-      252
-     ],
-     "lvl": 54,
-     "species": "SPECIES_HOUNDOOM",
-     "nature": 13,
-     "ability_num": 0,
-     "held_item": "ITEM_FOCUS_SASH",
-     "unknown_0x10": 0,
-     "moves": [
-      "MOVE_CRUNCH",
       "MOVE_FLAMETHROWER",
       "MOVE_EMBARGO",
-      "MOVE_FIRE_FANG"
+      "MOVE_FIRE_FANG",
+      "MOVE_BEAT_UP"
      ]
     },
     {
      "iv": 255,
      "evs": [
-      0,
       4,
-      0,
       252,
+      0,
+      0,
       0,
       252
      ],
      "lvl": 54,
      "species": "SPECIES_MURKROW",
-     "nature": 14,
+     "nature": 13,
      "ability_num": 0,
-     "held_item": "ITEM_LIFE_ORB",
-     "unknown_0x10": 1,
+     "held_item": "ITEM_FOCUS_SASH",
+     "unknown_0x10": 0,
      "moves": [
-      "MOVE_HEAT_WAVE",
-      "MOVE_STEEL_WING",
       "MOVE_SUCKER_PUNCH",
-      "MOVE_MEAN_LOOK"
+      "MOVE_MEAN_LOOK",
+      "MOVE_TAUNT",
+      "MOVE_ASSURANCE"
      ]
     },
     {
      "iv": 255,
      "evs": [
-      4,
       0,
+      4,
       0,
       252,
       0,
@@ -19714,15 +19691,38 @@
      ],
      "lvl": 54,
      "species": "SPECIES_GENGAR",
+     "nature": 14,
+     "ability_num": 0,
+     "held_item": "ITEM_LIFE_ORB",
+     "unknown_0x10": 1,
+     "moves": [
+      "MOVE_DESTINY_BOND",
+      "MOVE_DARK_PULSE",
+      "MOVE_DREAM_EATER",
+      "MOVE_SHADOW_BALL"
+     ]
+    },
+    {
+     "iv": 255,
+     "evs": [
+      4,
+      0,
+      0,
+      252,
+      0,
+      252
+     ],
+     "lvl": 54,
+     "species": "SPECIES_VILEPLUME",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_DESTINY_BOND",
-      "MOVE_DARK_PULSE",
-      "MOVE_DREAM_EATER"
+      "MOVE_PETAL_DANCE",
+      "MOVE_POISON_POWDER",
+      "MOVE_STUN_SPORE"
      ]
     },
     {
@@ -19736,16 +19736,16 @@
       0
      ],
      "lvl": 55,
-     "species": "SPECIES_VILEPLUME",
+     "species": "SPECIES_FORRETRESS",
      "nature": 3,
      "ability_num": 1,
      "held_item": "ITEM_CHOPLE_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_PETAL_DANCE",
-      "MOVE_POISON_POWDER",
-      "MOVE_STUN_SPORE"
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_GYRO_BALL",
+      "MOVE_IRON_DEFENSE",
+      "MOVE_EXPLOSION"
      ]
     }
    ],
@@ -19787,16 +19787,16 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_UMBREON",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_NIGHT_SLASH",
-      "MOVE_DETECT",
-      "MOVE_SUCKER_PUNCH"
+      "MOVE_LAST_RESORT",
+      "MOVE_ASSURANCE",
+      "MOVE_CONFUSE_RAY",
+      "MOVE_QUICK_ATTACK"
      ]
     },
     {
@@ -19810,69 +19810,46 @@
       252
      ],
      "lvl": 53,
-     "species": "SPECIES_UMBREON",
+     "species": "SPECIES_HOUNDOOM",
      "nature": 14,
      "ability_num": 2,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_LAST_RESORT",
-      "MOVE_ASSURANCE",
-      "MOVE_CONFUSE_RAY",
-      "MOVE_QUICK_ATTACK"
-     ]
-    },
-    {
-     "iv": 255,
-     "evs": [
-      4,
-      252,
-      0,
-      0,
-      0,
-      252
-     ],
-     "lvl": 54,
-     "species": "SPECIES_HOUNDOOM",
-     "nature": 13,
-     "ability_num": 0,
-     "held_item": "ITEM_FOCUS_SASH",
-     "unknown_0x10": 0,
-     "moves": [
-      "MOVE_CRUNCH",
       "MOVE_FLAMETHROWER",
       "MOVE_EMBARGO",
-      "MOVE_FIRE_FANG"
+      "MOVE_FIRE_FANG",
+      "MOVE_BEAT_UP"
      ]
     },
     {
      "iv": 255,
      "evs": [
-      0,
       4,
-      0,
       252,
+      0,
+      0,
       0,
       252
      ],
      "lvl": 54,
      "species": "SPECIES_MURKROW",
-     "nature": 14,
+     "nature": 13,
      "ability_num": 0,
-     "held_item": "ITEM_LIFE_ORB",
-     "unknown_0x10": 1,
+     "held_item": "ITEM_FOCUS_SASH",
+     "unknown_0x10": 0,
      "moves": [
-      "MOVE_HEAT_WAVE",
-      "MOVE_STEEL_WING",
       "MOVE_SUCKER_PUNCH",
-      "MOVE_MEAN_LOOK"
+      "MOVE_MEAN_LOOK",
+      "MOVE_TAUNT",
+      "MOVE_ASSURANCE"
      ]
     },
     {
      "iv": 255,
      "evs": [
-      4,
       0,
+      4,
       0,
       252,
       0,
@@ -19880,15 +19857,38 @@
      ],
      "lvl": 54,
      "species": "SPECIES_GENGAR",
+     "nature": 14,
+     "ability_num": 0,
+     "held_item": "ITEM_LIFE_ORB",
+     "unknown_0x10": 1,
+     "moves": [
+      "MOVE_DESTINY_BOND",
+      "MOVE_DARK_PULSE",
+      "MOVE_DREAM_EATER",
+      "MOVE_SHADOW_BALL"
+     ]
+    },
+    {
+     "iv": 255,
+     "evs": [
+      4,
+      0,
+      0,
+      252,
+      0,
+      252
+     ],
+     "lvl": 54,
+     "species": "SPECIES_VILEPLUME",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_DESTINY_BOND",
-      "MOVE_DARK_PULSE",
-      "MOVE_DREAM_EATER"
+      "MOVE_PETAL_DANCE",
+      "MOVE_POISON_POWDER",
+      "MOVE_STUN_SPORE"
      ]
     },
     {
@@ -19902,16 +19902,16 @@
       0
      ],
      "lvl": 55,
-     "species": "SPECIES_VILEPLUME",
+     "species": "SPECIES_FORRETRESS",
      "nature": 3,
      "ability_num": 1,
      "held_item": "ITEM_CHOPLE_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_PETAL_DANCE",
-      "MOVE_POISON_POWDER",
-      "MOVE_STUN_SPORE"
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_GYRO_BALL",
+      "MOVE_IRON_DEFENSE",
+      "MOVE_EXPLOSION"
      ]
     }
    ],
@@ -20005,10 +20005,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_FIRE_SPIN",
       "MOVE_FLAMETHROWER",
-      "MOVE_WING_ATTACK"
+      "MOVE_WING_ATTACK",
+      "MOVE_SLASH"
      ]
     },
     {
@@ -20022,16 +20022,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_RAYQUAZA",
+     "species": "SPECIES_AERODACTYL",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
-      "MOVE_REST",
-      "MOVE_FLY"
+      "MOVE_IRON_HEAD",
+      "MOVE_TAKE_DOWN",
+      "MOVE_CRUNCH"
      ]
     },
     {
@@ -20045,16 +20045,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_AERODACTYL",
+     "species": "SPECIES_KINGDRA",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_YACHE_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_IRON_HEAD",
-      "MOVE_TAKE_DOWN",
-      "MOVE_CRUNCH",
-      "MOVE_ANCIENT_POWER"
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_BRINE",
+      "MOVE_TWISTER"
      ]
     },
     {
@@ -20171,10 +20171,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_FIRE_SPIN",
       "MOVE_FLAMETHROWER",
-      "MOVE_WING_ATTACK"
+      "MOVE_WING_ATTACK",
+      "MOVE_SLASH"
      ]
     },
     {
@@ -20188,16 +20188,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_RAYQUAZA",
+     "species": "SPECIES_AERODACTYL",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
-      "MOVE_REST",
-      "MOVE_FLY"
+      "MOVE_IRON_HEAD",
+      "MOVE_TAKE_DOWN",
+      "MOVE_CRUNCH"
      ]
     },
     {
@@ -20211,16 +20211,16 @@
       252
      ],
      "lvl": 55,
-     "species": "SPECIES_AERODACTYL",
+     "species": "SPECIES_KINGDRA",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_YACHE_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_IRON_HEAD",
-      "MOVE_TAKE_DOWN",
-      "MOVE_CRUNCH",
-      "MOVE_ANCIENT_POWER"
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_BRINE",
+      "MOVE_TWISTER"
      ]
     },
     {
@@ -20291,10 +20291,10 @@
      "held_item": "ITEM_BLACK_SLUDGE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -20314,10 +20314,10 @@
      "held_item": "ITEM_BLACK_SLUDGE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -20338,9 +20338,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_WILL_O_WISP",
       "MOVE_FLAMETHROWER",
-      "MOVE_PAIN_SPLIT"
+      "MOVE_PAIN_SPLIT",
+      "MOVE_MEMENTO"
      ]
     }
    ],
@@ -20388,10 +20388,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -20434,10 +20434,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_FEINT",
       "MOVE_NIGHT_SLASH",
-      "MOVE_CAPTIVATE"
+      "MOVE_CAPTIVATE",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -20481,9 +20481,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_SWORDS_DANCE",
-      "MOVE_KNOCK_OFF",
       "MOVE_ICE_SHARD",
-      "MOVE_METAL_CLAW"
+      "MOVE_METAL_CLAW",
+      "MOVE_BEAT_UP"
      ]
     },
     {
@@ -20504,9 +20504,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_DANCE",
       "MOVE_HYDRO_PUMP",
-      "MOVE_SUPERPOWER"
+      "MOVE_SUPERPOWER",
+      "MOVE_AQUA_TAIL"
      ]
     }
    ]
@@ -20554,9 +20554,9 @@
      "unknown_0x10": 1,
      "moves": [
       "MOVE_ERUPTION",
-      "MOVE_HEAT_WAVE",
       "MOVE_DOUBLE_EDGE",
-      "MOVE_ROLLOUT"
+      "MOVE_ROLLOUT",
+      "MOVE_FLAMETHROWER"
      ]
     },
     {
@@ -20719,10 +20719,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
-      "MOVE_KNOCK_OFF",
       "MOVE_ICY_WIND",
-      "MOVE_TAUNT"
+      "MOVE_FEINT",
+      "MOVE_NIGHT_SLASH",
+      "MOVE_CAPTIVATE"
      ]
     },
     {
@@ -20924,16 +20924,16 @@
       252
      ],
      "lvl": 100,
-     "species": "SPECIES_METAGROSS",
+     "species": "SPECIES_WEEZING",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_METEOR_MASH",
-      "MOVE_EARTHQUAKE",
-      "MOVE_HYPER_BEAM",
-      "MOVE_ZEN_HEADBUTT"
+      "MOVE_MEMENTO",
+      "MOVE_DESTINY_BOND",
+      "MOVE_SLUDGE_BOMB",
+      "MOVE_EXPLOSION"
      ]
     }
    ],
@@ -20982,9 +20982,9 @@
      "unknown_0x10": 1,
      "moves": [
       "MOVE_ICE_PUNCH",
-      "MOVE_DRAGON_DANCE",
       "MOVE_PROTECT",
-      "MOVE_HYDRO_PUMP"
+      "MOVE_HYDRO_PUMP",
+      "MOVE_SUPERPOWER"
      ]
     },
     {
@@ -21004,10 +21004,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_AIR_SLASH",
       "MOVE_HAZE",
-      "MOVE_POISON_FANG"
+      "MOVE_POISON_FANG",
+      "MOVE_MEAN_LOOK"
      ]
     },
     {
@@ -21027,10 +21027,10 @@
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
-      "MOVE_KNOCK_OFF",
       "MOVE_ICE_SHARD",
-      "MOVE_METAL_CLAW"
+      "MOVE_METAL_CLAW",
+      "MOVE_BEAT_UP",
+      "MOVE_SLASH"
      ]
     }
    ]
@@ -21094,16 +21094,16 @@
       0
      ],
      "lvl": 12,
-     "species": "SPECIES_LILEEP",
+     "species": "SPECIES_RHYHORN",
      "nature": 20,
      "ability_num": 2,
      "held_item": "ITEM_EVIOLITE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_GIGA_DRAIN",
       "MOVE_ANCIENT_POWER",
-      "MOVE_RECOVER",
-      "MOVE_ACID"
+      "MOVE_STOMP",
+      "MOVE_TAIL_WHIP",
+      "MOVE_HORN_ATTACK"
      ]
     },
     {
@@ -21117,16 +21117,16 @@
       252
      ],
      "lvl": 13,
-     "species": "SPECIES_RHYHORN",
+     "species": "SPECIES_AERODACTYL",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_CRUNCH",
-      "MOVE_FURY_ATTACK",
-      "MOVE_STOMP"
+      "MOVE_ROAR",
+      "MOVE_SCARY_FACE",
+      "MOVE_BITE"
      ]
     },
     {
@@ -21169,10 +21169,10 @@
      "held_item": "ITEM_EVIOLITE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ROCK_BLAST",
-      "MOVE_TAUNT",
       "MOVE_RAGE",
-      "MOVE_ROCK_THROW"
+      "MOVE_ROCK_THROW",
+      "MOVE_SCREECH",
+      "MOVE_BIND"
      ]
     },
     {
@@ -21237,16 +21237,16 @@
       0
      ],
      "lvl": 18,
-     "species": "SPECIES_PELIPPER",
+     "species": "SPECIES_STARYU",
      "nature": 15,
      "ability_num": 1,
      "held_item": "ITEM_DAMP_ROCK",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_ICE_BEAM",
-      "MOVE_MIST",
-      "MOVE_WING_ATTACK",
-      "MOVE_SUPERSONIC"
+      "MOVE_RECOVER",
+      "MOVE_RAPID_SPIN",
+      "MOVE_WATER_GUN"
      ]
     },
     {
@@ -21283,16 +21283,16 @@
       252
      ],
      "lvl": 19,
-     "species": "SPECIES_LUDICOLO",
+     "species": "SPECIES_TANGELA",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_MIRACLE_SEED",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICE_BEAM",
-      "MOVE_NATURE_POWER",
-      "MOVE_MEGA_DRAIN",
-      "MOVE_GROWL"
+      "MOVE_VINE_WHIP",
+      "MOVE_POISON_POWDER",
+      "MOVE_GROWTH",
+      "MOVE_ABSORB"
      ]
     },
     {
@@ -21313,9 +21313,9 @@
      "unknown_0x10": 1,
      "moves": [
       "MOVE_WATERFALL",
-      "MOVE_BOUNCE",
       "MOVE_EARTHQUAKE",
-      "MOVE_CRUNCH"
+      "MOVE_BITE",
+      "MOVE_THRASH"
      ]
     },
     {
@@ -21426,16 +21426,16 @@
       0
      ],
      "lvl": 20,
-     "species": "SPECIES_HARIYAMA",
+     "species": "SPECIES_PIKACHU",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_THUNDER_PUNCH",
-      "MOVE_ICE_PUNCH",
-      "MOVE_KNOCK_OFF",
-      "MOVE_WHIRLWIND"
+      "MOVE_DOUBLE_TEAM",
+      "MOVE_QUICK_ATTACK",
+      "MOVE_THUNDER_WAVE"
      ]
     },
     {
@@ -21449,16 +21449,16 @@
       0
      ],
      "lvl": 21,
-     "species": "SPECIES_PIKACHU",
+     "species": "SPECIES_TANGELA",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_MIRACLE_SEED",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_THUNDERBOLT",
-      "MOVE_SLAM",
-      "MOVE_DOUBLE_TEAM",
-      "MOVE_QUICK_ATTACK"
+      "MOVE_VINE_WHIP",
+      "MOVE_POISON_POWDER",
+      "MOVE_GROWTH",
+      "MOVE_ABSORB"
      ]
     },
     {
@@ -21524,10 +21524,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_THUNDERBOLT",
       "MOVE_QUICK_ATTACK",
-      "MOVE_TAIL_WHIP"
+      "MOVE_TAIL_WHIP",
+      "MOVE_THUNDER_SHOCK"
      ]
     }
    ],
@@ -21615,16 +21615,16 @@
       252
      ],
      "lvl": 26,
-     "species": "SPECIES_LUDICOLO",
+     "species": "SPECIES_TANGELA",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
       "MOVE_GIGA_DRAIN",
-      "MOVE_ICE_BEAM",
-      "MOVE_NATURE_POWER",
-      "MOVE_MEGA_DRAIN"
+      "MOVE_MEGA_DRAIN",
+      "MOVE_BIND",
+      "MOVE_VINE_WHIP"
      ]
     },
     {
@@ -21638,16 +21638,16 @@
       252
      ],
      "lvl": 27,
-     "species": "SPECIES_TANGELA",
+     "species": "SPECIES_STARMIE",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_MEGA_DRAIN",
-      "MOVE_BIND",
-      "MOVE_VINE_WHIP",
-      "MOVE_POISON_POWDER"
+      "MOVE_SWIFT",
+      "MOVE_RECOVER",
+      "MOVE_RAPID_SPIN",
+      "MOVE_WATER_GUN"
      ]
     },
     {
@@ -21690,10 +21690,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_RAZOR_LEAF",
       "MOVE_SWEET_SCENT",
-      "MOVE_SLEEP_POWDER"
+      "MOVE_SLEEP_POWDER",
+      "MOVE_VINE_WHIP"
      ]
     }
    ],
@@ -21953,10 +21953,10 @@
      "held_item": "ITEM_TANGA_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_CALM_MIND",
       "MOVE_PSYCHO_CUT",
-      "MOVE_RECOVER"
+      "MOVE_RECOVER",
+      "MOVE_REFLECT"
      ]
     },
     {
@@ -22256,7 +22256,7 @@
       0
      ],
      "lvl": 44,
-     "species": "SPECIES_GROUDON",
+     "species": "SPECIES_NIDOKING",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
@@ -22264,8 +22264,8 @@
      "moves": [
       "MOVE_FIRE_PUNCH",
       "MOVE_THUNDER_PUNCH",
-      "MOVE_EARTHQUAKE",
-      "MOVE_BULK_UP"
+      "MOVE_EARTH_POWER",
+      "MOVE_THRASH"
      ]
     },
     {
@@ -22302,16 +22302,16 @@
       0
      ],
      "lvl": 46,
-     "species": "SPECIES_NIDOKING",
+     "species": "SPECIES_DUGTRIO",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_SPELL_TAG",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ICE_PUNCH",
-      "MOVE_EARTH_POWER",
-      "MOVE_THRASH",
-      "MOVE_POISON_STING"
+      "MOVE_EARTHQUAKE",
+      "MOVE_SLASH",
+      "MOVE_MUD_BOMB",
+      "MOVE_EARTH_POWER"
      ]
     },
     {
@@ -22325,16 +22325,16 @@
       252
      ],
      "lvl": 48,
-     "species": "SPECIES_DUGTRIO",
+     "species": "SPECIES_RHYDON",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_ROCK_SLIDE",
-      "MOVE_EARTHQUAKE",
-      "MOVE_SLASH",
-      "MOVE_MUD_BOMB"
+      "MOVE_SWORDS_DANCE",
+      "MOVE_STONE_EDGE",
+      "MOVE_HAMMER_ARM"
      ]
     },
     {
@@ -22731,16 +22731,16 @@
       252
      ],
      "lvl": 54,
-     "species": "SPECIES_ABSOL",
+     "species": "SPECIES_GENGAR",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_FOCUS_SASH",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SWORDS_DANCE",
-      "MOVE_NIGHT_SLASH",
-      "MOVE_DETECT",
-      "MOVE_SUCKER_PUNCH"
+      "MOVE_DESTINY_BOND",
+      "MOVE_DARK_PULSE",
+      "MOVE_DREAM_EATER",
+      "MOVE_SHADOW_BALL"
      ]
     },
     {
@@ -22966,16 +22966,16 @@
       252
      ],
      "lvl": 58,
-     "species": "SPECIES_RAYQUAZA",
+     "species": "SPECIES_AERODACTYL",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_SWORDS_DANCE",
-      "MOVE_REST",
-      "MOVE_FLY"
+      "MOVE_HYPER_BEAM",
+      "MOVE_IRON_HEAD",
+      "MOVE_TAKE_DOWN"
      ]
     },
     {
@@ -22989,16 +22989,16 @@
       252
      ],
      "lvl": 57,
-     "species": "SPECIES_AERODACTYL",
+     "species": "SPECIES_KINGDRA",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_KINGS_ROCK",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_HYPER_BEAM",
-      "MOVE_IRON_HEAD",
-      "MOVE_TAKE_DOWN",
-      "MOVE_CRUNCH"
+      "MOVE_DRAGON_PULSE",
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_BRINE"
      ]
     },
     {
@@ -23012,16 +23012,16 @@
       252
      ],
      "lvl": 60,
-     "species": "SPECIES_KINGDRA",
+     "species": "SPECIES_DRAGONITE",
      "nature": 10,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_PULSE",
+      "MOVE_FLAMETHROWER",
+      "MOVE_WING_ATTACK",
       "MOVE_DRAGON_DANCE",
-      "MOVE_HYDRO_PUMP",
-      "MOVE_BRINE"
+      "MOVE_SAFEGUARD"
      ]
     }
    ],
@@ -23063,16 +23063,16 @@
       0
      ],
      "lvl": 59,
-     "species": "SPECIES_METAGROSS",
+     "species": "SPECIES_STEELIX",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_METEOR_MASH",
-      "MOVE_HAMMER_ARM",
-      "MOVE_AGILITY",
-      "MOVE_IRON_DEFENSE"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH",
+      "MOVE_IRON_TAIL"
      ]
     },
     {
@@ -23132,16 +23132,16 @@
       0
      ],
      "lvl": 59,
-     "species": "SPECIES_GROUDON",
+     "species": "SPECIES_ARCANINE",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_SHUCA_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FIRE_PUNCH",
-      "MOVE_REST",
-      "MOVE_FIRE_BLAST",
-      "MOVE_EARTHQUAKE"
+      "MOVE_EXTREME_SPEED",
+      "MOVE_ODOR_SLEUTH",
+      "MOVE_FIRE_FANG",
+      "MOVE_ROAR"
      ]
     },
     {
@@ -23178,16 +23178,16 @@
       252
      ],
      "lvl": 63,
-     "species": "SPECIES_JIRACHI",
+     "species": "SPECIES_SCIZOR",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_COSMIC_POWER",
-      "MOVE_FUTURE_SIGHT",
-      "MOVE_HEALING_WISH",
-      "MOVE_GRAVITY"
+      "MOVE_SWORDS_DANCE",
+      "MOVE_FEINT",
+      "MOVE_IRON_HEAD",
+      "MOVE_DOUBLE_HIT"
      ]
     }
    ]
@@ -23410,7 +23410,7 @@
     {
      "iv": 0,
      "lvl": 17,
-     "species": "SPECIES_CORPHISH"
+     "species": "SPECIES_SLOWPOKE"
     }
    ],
    "gencap_reference": "firered: YOUNGSTER DAN"
@@ -23514,7 +23514,7 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_SEVIPER"
+     "species": "SPECIES_EKANS"
     }
    ],
    "gencap_reference": "firered: YOUNGSTER EDDIE"
@@ -23790,7 +23790,7 @@
     {
      "iv": 0,
      "lvl": 10,
-     "species": "SPECIES_NINCADA"
+     "species": "SPECIES_BUTTERFREE"
     }
    ],
    "gencap_reference": "firered: BUG_CATCHER COLTON"
@@ -23833,7 +23833,7 @@
     {
      "iv": 0,
      "lvl": 9,
-     "species": "SPECIES_WURMPLE"
+     "species": "SPECIES_KAKUNA"
     },
     {
      "iv": 0,
@@ -23952,7 +23952,7 @@
     {
      "iv": 0,
      "lvl": 10,
-     "species": "SPECIES_SURSKIT"
+     "species": "SPECIES_BUTTERFREE"
     },
     {
      "iv": 0,
@@ -24038,7 +24038,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_DUSTOX"
+     "species": "SPECIES_BEEDRILL"
     },
     {
      "iv": 0,
@@ -24081,7 +24081,7 @@
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_BEAUTIFLY"
+     "species": "SPECIES_BUTTERFREE"
     }
    ],
    "gencap_reference": "firered: BUG_CATCHER ELIJAH"
@@ -24119,7 +24119,7 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_BEAUTIFLY"
+     "species": "SPECIES_BEEDRILL"
     }
    ],
    "gencap_reference": "firered: BUG_CATCHER BRENT"
@@ -24200,7 +24200,7 @@
     {
      "iv": 0,
      "lvl": 9,
-     "species": "SPECIES_TAILLOW"
+     "species": "SPECIES_RATTATA"
     }
    ],
    "gencap_reference": "firered: LASS JANICE"
@@ -24233,7 +24233,7 @@
     {
      "iv": 0,
      "lvl": 10,
-     "species": "SPECIES_SKITTY"
+     "species": "SPECIES_RATTATA"
     },
     {
      "iv": 0,
@@ -24309,7 +24309,7 @@
     {
      "iv": 0,
      "lvl": 31,
-     "species": "SPECIES_BRELOOM"
+     "species": "SPECIES_PARASECT"
     },
     {
      "iv": 0,
@@ -24586,12 +24586,12 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_SKITTY"
+     "species": "SPECIES_RATTATA"
     },
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_SPOINK"
+     "species": "SPECIES_PIKACHU"
     }
    ],
    "gencap_reference": "firered: LASS DAWN"
@@ -24910,7 +24910,7 @@
     {
      "iv": 0,
      "lvl": 17,
-     "species": "SPECIES_MAKUHITA"
+     "species": "SPECIES_MACHOP"
     },
     {
      "iv": 0,
@@ -25067,7 +25067,7 @@
     {
      "iv": 0,
      "lvl": 17,
-     "species": "SPECIES_CLAMPERL"
+     "species": "SPECIES_HORSEA"
     },
     {
      "iv": 0,
@@ -25231,7 +25231,7 @@
     {
      "iv": 0,
      "lvl": 14,
-     "species": "SPECIES_SHROOMISH"
+     "species": "SPECIES_EKANS"
     }
    ],
    "gencap_reference": "firered: CAMPER SHANE"
@@ -25297,7 +25297,7 @@
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_PLUSLE"
+     "species": "SPECIES_WARTORTLE"
     }
    ],
    "gencap_reference": "firered: CAMPER RICKY"
@@ -25335,7 +25335,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_LINOONE"
+     "species": "SPECIES_RATICATE"
     }
    ],
    "gencap_reference": "firered: CAMPER JEFF"
@@ -25406,7 +25406,7 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_LINOONE"
+     "species": "SPECIES_RATTATA"
     },
     {
      "iv": 0,
@@ -25421,7 +25421,7 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_RATTATA"
+     "species": "SPECIES_EKANS"
     }
    ],
    "gencap_reference": "firered: CAMPER DREW"
@@ -25487,12 +25487,12 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_MINUN"
+     "species": "SPECIES_PIKACHU"
     },
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_ROSELIA"
+     "species": "SPECIES_RATTATA"
     }
    ],
    "gencap_reference": "firered: PICNICKER NANCY"
@@ -25535,7 +25535,7 @@
     {
      "iv": 0,
      "lvl": 16,
-     "species": "SPECIES_SWABLU"
+     "species": "SPECIES_PIDGEOTTO"
     }
    ],
    "gencap_reference": "firered: PICNICKER ISABELLE"
@@ -25568,12 +25568,12 @@
     {
      "iv": 0,
      "lvl": 15,
-     "species": "SPECIES_ILLUMISE"
+     "species": "SPECIES_NIDORAN_F"
     },
     {
      "iv": 0,
      "lvl": 15,
-     "species": "SPECIES_NIDORAN_F"
+     "species": "SPECIES_NIDORAN_M"
     }
    ],
    "gencap_reference": "firered: PICNICKER KELSEY"
@@ -25606,11 +25606,6 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_CACNEA"
-    },
-    {
-     "iv": 0,
-     "lvl": 18,
      "species": "SPECIES_ODDISH"
     },
     {
@@ -25621,7 +25616,12 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_ROSELIA"
+     "species": "SPECIES_PARAS"
+    },
+    {
+     "iv": 0,
+     "lvl": 18,
+     "species": "SPECIES_IVYSAUR"
     }
    ],
    "gencap_reference": "firered: PICNICKER ALICIA"
@@ -25725,7 +25725,7 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_SWABLU"
+     "species": "SPECIES_PIDGEOTTO"
     },
     {
      "iv": 0,
@@ -25811,7 +25811,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_SHROOMISH"
+     "species": "SPECIES_IVYSAUR"
     }
    ],
    "gencap_reference": "firered: PICNICKER MARTHA"
@@ -25884,10 +25884,10 @@
      "lvl": 29,
      "species": "SPECIES_LICKITUNG",
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_SLAM",
       "MOVE_DISABLE",
-      "MOVE_STOMP"
+      "MOVE_STOMP",
+      "MOVE_WRAP"
      ]
     },
     {
@@ -26143,8 +26143,8 @@
      "moves": [
       "MOVE_BONE_CLUB",
       "MOVE_HEADBUTT",
-      "MOVE_ROCK_TOMB",
-      "MOVE_DETECT"
+      "MOVE_RAGE",
+      "MOVE_BONEMERANG"
      ]
     },
     {
@@ -26272,10 +26272,10 @@
      "lvl": 20,
      "species": "SPECIES_VOLTORB",
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_SONIC_BOOM",
       "MOVE_THUNDER_WAVE",
-      "MOVE_ROLLOUT"
+      "MOVE_ROLLOUT",
+      "MOVE_SCREECH"
      ]
     },
     {
@@ -26305,10 +26305,10 @@
      "lvl": 20,
      "species": "SPECIES_MAGNEMITE",
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_THUNDER_WAVE",
       "MOVE_SONIC_BOOM",
-      "MOVE_SUPERSONIC"
+      "MOVE_SUPERSONIC",
+      "MOVE_THUNDER_SHOCK"
      ]
     }
    ],
@@ -26388,9 +26388,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE",
-      "MOVE_SHOCK_WAVE",
       "MOVE_SELF_DESTRUCT",
-      "MOVE_ASSURANCE"
+      "MOVE_ASSURANCE",
+      "MOVE_SMOKESCREEN"
      ]
     }
    ],
@@ -26472,7 +26472,7 @@
     {
      "iv": 0,
      "lvl": 34,
-     "species": "SPECIES_CAMERUPT"
+     "species": "SPECIES_PONYTA"
     },
     {
      "iv": 0,
@@ -26482,7 +26482,7 @@
     {
      "iv": 0,
      "lvl": 34,
-     "species": "SPECIES_PONYTA"
+     "species": "SPECIES_ARCANINE"
     }
    ],
    "gencap_reference": "firered: SUPER_NERD AVERY"
@@ -26567,10 +26567,10 @@
      "lvl": 37,
      "species": "SPECIES_ARCANINE",
      "moves": [
-      "MOVE_OVERHEAT",
       "MOVE_ODOR_SLEUTH",
       "MOVE_FIRE_FANG",
-      "MOVE_ROAR"
+      "MOVE_ROAR",
+      "MOVE_BITE"
      ]
     }
    ],
@@ -26614,7 +26614,7 @@
     {
      "iv": 0,
      "lvl": 10,
-     "species": "SPECIES_ARON"
+     "species": "SPECIES_MAGNEMITE"
     }
    ],
    "gencap_reference": "firered: HIKER MARCOS"
@@ -26647,7 +26647,7 @@
     {
      "iv": 0,
      "lvl": 15,
-     "species": "SPECIES_MAKUHITA"
+     "species": "SPECIES_MACHOP"
     },
     {
      "iv": 0,
@@ -26700,7 +26700,7 @@
     {
      "iv": 0,
      "lvl": 13,
-     "species": "SPECIES_NUMEL"
+     "species": "SPECIES_CHARMANDER"
     }
    ],
    "gencap_reference": "firered: HIKER NOB"
@@ -26766,12 +26766,12 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_NOSEPASS",
+     "species": "SPECIES_GEODUDE",
      "moves": [
-      "MOVE_ROCK_TOMB",
-      "MOVE_SPARK",
-      "MOVE_THUNDER_WAVE",
-      "MOVE_BLOCK"
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_MAGNITUDE",
+      "MOVE_ROCK_THROW",
+      "MOVE_ROCK_POLISH"
      ]
     },
     {
@@ -26779,10 +26779,10 @@
      "lvl": 21,
      "species": "SPECIES_ONIX",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_DIG",
-      "MOVE_DRAGON_BREATH",
-      "MOVE_BIND"
+      "MOVE_BIND",
+      "MOVE_ROCK_TOMB",
+      "MOVE_RAGE"
      ]
     }
    ],
@@ -26821,12 +26821,12 @@
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_MAKUHITA"
+     "species": "SPECIES_MACHOP"
     },
     {
      "iv": 0,
      "lvl": 20,
-     "species": "SPECIES_BALTOY"
+     "species": "SPECIES_ONIX"
     }
    ],
    "gencap_reference": "firered: HIKER BRICE"
@@ -26859,12 +26859,12 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_NOSEPASS",
+     "species": "SPECIES_ONIX",
      "moves": [
       "MOVE_ROCK_TOMB",
-      "MOVE_SPARK",
-      "MOVE_THUNDER_WAVE",
-      "MOVE_BLOCK"
+      "MOVE_RAGE",
+      "MOVE_ROCK_THROW",
+      "MOVE_SCREECH"
      ]
     },
     {
@@ -26872,10 +26872,10 @@
      "lvl": 21,
      "species": "SPECIES_RHYHORN",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_DIG",
       "MOVE_HORN_ATTACK",
-      "MOVE_SCARY_FACE"
+      "MOVE_SCARY_FACE",
+      "MOVE_FURY_ATTACK"
      ]
     }
    ],
@@ -26909,12 +26909,12 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_BALTOY"
+     "species": "SPECIES_ONIX"
     },
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_NUMEL"
+     "species": "SPECIES_GEODUDE"
     }
    ],
    "gencap_reference": "firered: HIKER TRENT"
@@ -26960,10 +26960,10 @@
      "lvl": 21,
      "species": "SPECIES_GEODUDE",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_MUD_SLAP",
       "MOVE_SELF_DESTRUCT",
-      "MOVE_MAGNITUDE"
+      "MOVE_MAGNITUDE",
+      "MOVE_ROCK_THROW"
      ]
     },
     {
@@ -26971,10 +26971,10 @@
      "lvl": 21,
      "species": "SPECIES_RHYHORN",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_DIG",
       "MOVE_HORN_ATTACK",
-      "MOVE_STOMP"
+      "MOVE_STOMP",
+      "MOVE_SCARY_FACE"
      ]
     }
    ],
@@ -27090,17 +27090,17 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_MAKUHITA"
-    },
-    {
-     "iv": 0,
-     "lvl": 19,
      "species": "SPECIES_MACHOP"
     },
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_ARON"
+     "species": "SPECIES_ONIX"
+    },
+    {
+     "iv": 0,
+     "lvl": 19,
+     "species": "SPECIES_MAGNEMITE"
     }
    ],
    "gencap_reference": "firered: HIKER LENNY"
@@ -27178,21 +27178,21 @@
      "lvl": 21,
      "species": "SPECIES_GRAVELER",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_DIG",
-      "MOVE_BRICK_BREAK",
-      "MOVE_DEFENSE_CURL"
+      "MOVE_DEFENSE_CURL",
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_MAGNITUDE"
      ]
     },
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_LAIRON",
+     "species": "SPECIES_GEODUDE",
      "moves": [
-      "MOVE_ROCK_TOMB",
-      "MOVE_METAL_CLAW",
-      "MOVE_HEADBUTT",
-      "MOVE_ROAR"
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_MAGNITUDE",
+      "MOVE_ROCK_THROW",
+      "MOVE_ROCK_POLISH"
      ]
     }
    ],
@@ -27229,9 +27229,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_SHOCK_WAVE",
       "MOVE_HAZE",
-      "MOVE_SLUDGE"
+      "MOVE_SLUDGE",
+      "MOVE_SELF_DESTRUCT"
      ]
     },
     {
@@ -27239,10 +27239,10 @@
      "lvl": 28,
      "species": "SPECIES_KOFFING",
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_HAZE",
       "MOVE_SLUDGE",
-      "MOVE_SELF_DESTRUCT"
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_ASSURANCE"
      ]
     },
     {
@@ -27289,10 +27289,10 @@
      "lvl": 29,
      "species": "SPECIES_GRIMER",
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_FLING",
       "MOVE_MUD_BOMB",
-      "MOVE_SLUDGE"
+      "MOVE_SLUDGE",
+      "MOVE_MINIMIZE"
      ]
     },
     {
@@ -27370,12 +27370,12 @@
     {
      "iv": 0,
      "lvl": 25,
-     "species": "SPECIES_TRAPINCH",
+     "species": "SPECIES_SANDSLASH",
      "moves": [
-      "MOVE_BITE",
       "MOVE_DIG",
-      "MOVE_ROCK_TOMB",
-      "MOVE_SAND_ATTACK"
+      "MOVE_SAND_ATTACK",
+      "MOVE_CRUSH_CLAW",
+      "MOVE_ROLLOUT"
      ]
     },
     {
@@ -27384,9 +27384,9 @@
      "species": "SPECIES_GOLBAT",
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_HAZE"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_ASTONISH"
      ]
     }
    ],
@@ -27422,10 +27422,10 @@
      "lvl": 28,
      "species": "SPECIES_PERSIAN",
      "moves": [
-      "MOVE_FAKE_OUT",
-      "MOVE_AERIAL_ACE",
       "MOVE_TAUNT",
-      "MOVE_SCREECH"
+      "MOVE_SCREECH",
+      "MOVE_FURY_SWIPES",
+      "MOVE_FAKE_OUT"
      ]
     },
     {
@@ -27445,9 +27445,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_SHOCK_WAVE",
       "MOVE_HAZE",
-      "MOVE_SLUDGE"
+      "MOVE_SLUDGE",
+      "MOVE_SELF_DESTRUCT"
      ]
     }
    ],
@@ -27577,9 +27577,9 @@
      "species": "SPECIES_GOLBAT",
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_AIR_CUTTER"
      ]
     },
     {
@@ -27670,10 +27670,10 @@
      "lvl": 29,
      "species": "SPECIES_MAGNETON",
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_SONIC_BOOM",
       "MOVE_THUNDER_WAVE",
-      "MOVE_LOCK_ON"
+      "MOVE_LOCK_ON",
+      "MOVE_SPARK"
      ]
     }
    ],
@@ -27721,9 +27721,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_SHOCK_WAVE",
       "MOVE_HAZE",
-      "MOVE_SLUDGE"
+      "MOVE_SLUDGE",
+      "MOVE_SELF_DESTRUCT"
      ]
     }
    ],
@@ -27803,10 +27803,10 @@
      "lvl": 25,
      "species": "SPECIES_MUK",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_MUD_BOMB",
       "MOVE_SLUDGE",
-      "MOVE_MINIMIZE"
+      "MOVE_MINIMIZE",
+      "MOVE_DISABLE"
      ]
     }
    ],
@@ -27853,10 +27853,10 @@
      "lvl": 26,
      "species": "SPECIES_GRIMER",
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_MUD_BOMB",
       "MOVE_SLUDGE",
-      "MOVE_MINIMIZE"
+      "MOVE_MINIMIZE",
+      "MOVE_DISABLE"
      ]
     },
     {
@@ -27873,12 +27873,12 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_NUZLEAF",
+     "species": "SPECIES_HOUNDOOM",
      "moves": [
-      "MOVE_TORMENT",
-      "MOVE_FAKE_OUT",
-      "MOVE_NATURE_POWER",
-      "MOVE_GROWTH"
+      "MOVE_ODOR_SLEUTH",
+      "MOVE_BITE",
+      "MOVE_ROAR",
+      "MOVE_SMOG"
      ]
     }
    ],
@@ -27936,10 +27936,10 @@
      "lvl": 28,
      "species": "SPECIES_KOFFING",
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_HAZE",
       "MOVE_SLUDGE",
-      "MOVE_SELF_DESTRUCT"
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_ASSURANCE"
      ]
     }
    ],
@@ -28137,7 +28137,7 @@
     {
      "iv": 0,
      "lvl": 34,
-     "species": "SPECIES_SABLEYE"
+     "species": "SPECIES_CHARMELEON"
     },
     {
      "iv": 0,
@@ -28178,9 +28178,9 @@
      "species": "SPECIES_NINETALES",
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_EXTRASENSORY",
       "MOVE_SAFEGUARD",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_QUICK_ATTACK"
      ]
     }
    ],
@@ -28228,9 +28228,9 @@
      "species": "SPECIES_ARCANINE",
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_ODOR_SLEUTH",
-      "MOVE_FIRE_FANG"
+      "MOVE_FIRE_FANG",
+      "MOVE_ROAR"
      ]
     }
    ],
@@ -28340,7 +28340,7 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_BELDUM"
+     "species": "SPECIES_SKARMORY"
     },
     {
      "iv": 0,
@@ -28474,7 +28474,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_BARBOACH"
+     "species": "SPECIES_HORSEA"
     }
    ],
    "gencap_reference": "firered: FISHERMAN NED"
@@ -28512,7 +28512,7 @@
     {
      "iv": 0,
      "lvl": 24,
-     "species": "SPECIES_CORPHISH"
+     "species": "SPECIES_GOLDEEN"
     }
    ],
    "gencap_reference": "firered: FISHERMAN CHIP"
@@ -28679,7 +28679,7 @@
     {
      "iv": 0,
      "lvl": 31,
-     "species": "SPECIES_HUNTAIL"
+     "species": "SPECIES_SHELLDER"
     }
    ],
    "gencap_reference": "firered: FISHERMAN CLAUDE"
@@ -28717,7 +28717,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_FEEBAS"
+     "species": "SPECIES_HORSEA"
     },
     {
      "iv": 0,
@@ -28737,7 +28737,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_HORSEA"
+     "species": "SPECIES_POLIWHIRL"
     }
    ],
    "gencap_reference": "firered: FISHERMAN WADE"
@@ -29132,7 +29132,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_CARVANHA"
+     "species": "SPECIES_HORSEA"
     },
     {
      "iv": 0,
@@ -29147,7 +29147,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_HORSEA"
+     "species": "SPECIES_STARYU"
     },
     {
      "iv": 0,
@@ -29419,7 +29419,7 @@
     {
      "iv": 0,
      "lvl": 32,
-     "species": "SPECIES_PELIPPER"
+     "species": "SPECIES_SEADRA"
     },
     {
      "iv": 0,
@@ -29429,7 +29429,7 @@
     {
      "iv": 0,
      "lvl": 32,
-     "species": "SPECIES_SEADRA"
+     "species": "SPECIES_POLIWRATH"
     }
    ],
    "gencap_reference": "firered: SWIMMER_M ROLAND"
@@ -29505,7 +29505,7 @@
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_BRELOOM"
+     "species": "SPECIES_PRIMEAPE"
     },
     {
      "iv": 0,
@@ -29659,10 +29659,10 @@
      "lvl": 33,
      "species": "SPECIES_MACHOKE",
      "moves": [
-      "MOVE_BRICK_BREAK",
       "MOVE_ROCK_SLIDE",
-      "MOVE_BULK_UP",
-      "MOVE_SUBMISSION"
+      "MOVE_SUBMISSION",
+      "MOVE_VITAL_THROW",
+      "MOVE_REVENGE"
      ]
     }
    ],
@@ -29744,12 +29744,12 @@
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_LINOONE"
+     "species": "SPECIES_PRIMEAPE"
     },
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_PRIMEAPE"
+     "species": "SPECIES_MACHOKE"
     }
    ],
    "gencap_reference": "firered: CUE_BALL COREY"
@@ -29787,7 +29787,7 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_LOMBRE"
+     "species": "SPECIES_POLIWAG"
     }
    ],
    "gencap_reference": "firered: GAMER HUGO"
@@ -29825,7 +29825,7 @@
     {
      "iv": 0,
      "lvl": 18,
-     "species": "SPECIES_NUZLEAF"
+     "species": "SPECIES_ODDISH"
     }
    ],
    "gencap_reference": "firered: GAMER JASPER"
@@ -30015,7 +30015,7 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_ROSELIA"
+     "species": "SPECIES_GLOOM"
     },
     {
      "iv": 0,
@@ -30248,12 +30248,12 @@
     {
      "iv": 0,
      "lvl": 30,
-     "species": "SPECIES_GOREBYSS",
+     "species": "SPECIES_SHELLDER",
      "moves": [
-      "MOVE_WATER_PULSE",
-      "MOVE_PSYCHIC",
       "MOVE_ICY_WIND",
-      "MOVE_CAPTIVATE"
+      "MOVE_ICE_SHARD",
+      "MOVE_CLAMP",
+      "MOVE_LEER"
      ]
     },
     {
@@ -30270,12 +30270,12 @@
     {
      "iv": 0,
      "lvl": 30,
-     "species": "SPECIES_HUNTAIL",
+     "species": "SPECIES_DEWGONG",
      "moves": [
-      "MOVE_DIVE",
-      "MOVE_BRINE",
-      "MOVE_ICE_FANG",
-      "MOVE_SCARY_FACE"
+      "MOVE_AURORA_BEAM",
+      "MOVE_AQUA_RING",
+      "MOVE_REST",
+      "MOVE_ICE_SHARD"
      ]
     }
    ],
@@ -30322,10 +30322,10 @@
      "lvl": 31,
      "species": "SPECIES_OMASTAR",
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ANCIENT_POWER",
-      "MOVE_MUD_SHOT",
-      "MOVE_BITE"
+      "MOVE_BITE",
+      "MOVE_BRINE",
+      "MOVE_MUD_SHOT"
      ]
     }
    ],
@@ -30435,7 +30435,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_WAILMER"
+     "species": "SPECIES_GOLDEEN"
     },
     {
      "iv": 0,
@@ -30445,7 +30445,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_GOLDEEN"
+     "species": "SPECIES_POLIWHIRL"
     },
     {
      "iv": 0,
@@ -30528,10 +30528,10 @@
      "lvl": 29,
      "species": "SPECIES_LAPRAS",
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ICY_WIND",
       "MOVE_BODY_SLAM",
-      "MOVE_SING"
+      "MOVE_SING",
+      "MOVE_PERISH_SONG"
      ]
     },
     {
@@ -30539,10 +30539,10 @@
      "lvl": 29,
      "species": "SPECIES_LANTURN",
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_RAIN_DANCE",
       "MOVE_SPIT_UP",
-      "MOVE_SWALLOW"
+      "MOVE_SWALLOW",
+      "MOVE_STOCKPILE"
      ]
     },
     {
@@ -30587,7 +30587,7 @@
     {
      "iv": 0,
      "lvl": 30,
-     "species": "SPECIES_SEALEO"
+     "species": "SPECIES_HORSEA"
     },
     {
      "iv": 0,
@@ -30726,7 +30726,7 @@
     {
      "iv": 50,
      "lvl": 33,
-     "species": "SPECIES_MEDICHAM"
+     "species": "SPECIES_KADABRA"
     }
    ],
    "gencap_reference": "firered: PSYCHIC CAMERON"
@@ -30879,12 +30879,12 @@
     {
      "iv": 0,
      "lvl": 41,
-     "species": "SPECIES_GRUMPIG"
+     "species": "SPECIES_HYPNO"
     },
     {
      "iv": 0,
      "lvl": 41,
-     "species": "SPECIES_HYPNO"
+     "species": "SPECIES_ALAKAZAM"
     },
     {
      "iv": 0,
@@ -31058,23 +31058,23 @@
     {
      "iv": 0,
      "lvl": 46,
-     "species": "SPECIES_CLAYDOL",
+     "species": "SPECIES_MR_MIME",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_ICE_BEAM",
-      "MOVE_RAPID_SPIN",
-      "MOVE_SANDSTORM"
+      "MOVE_BATON_PASS",
+      "MOVE_ROLE_PLAY",
+      "MOVE_TRICK"
      ]
     },
     {
      "iv": 0,
      "lvl": 47,
-     "species": "SPECIES_MR_MIME",
+     "species": "SPECIES_ELECTRODE",
      "moves": [
-      "MOVE_PSYCHIC",
-      "MOVE_ENCORE",
-      "MOVE_BATON_PASS",
-      "MOVE_ROLE_PLAY"
+      "MOVE_GYRO_BALL",
+      "MOVE_MAGNET_RISE",
+      "MOVE_SWIFT",
+      "MOVE_SELF_DESTRUCT"
      ]
     },
     {
@@ -31123,8 +31123,8 @@
      "moves": [
       "MOVE_PSYCHIC",
       "MOVE_FLAMETHROWER",
-      "MOVE_YAWN",
-      "MOVE_ZEN_HEADBUTT"
+      "MOVE_ZEN_HEADBUTT",
+      "MOVE_WATER_PULSE"
      ]
     }
    ],
@@ -31198,10 +31198,10 @@
      "lvl": 34,
      "species": "SPECIES_ARBOK",
      "moves": [
-      "MOVE_POISON_FANG",
       "MOVE_GLARE",
       "MOVE_MUD_BOMB",
-      "MOVE_SPIT_UP"
+      "MOVE_SPIT_UP",
+      "MOVE_SWALLOW"
      ]
     },
     {
@@ -31246,17 +31246,17 @@
     {
      "iv": 40,
      "lvl": 33,
-     "species": "SPECIES_SEVIPER"
-    },
-    {
-     "iv": 40,
-     "lvl": 33,
      "species": "SPECIES_ARBOK"
     },
     {
      "iv": 40,
      "lvl": 33,
      "species": "SPECIES_SANDSLASH"
+    },
+    {
+     "iv": 40,
+     "lvl": 33,
+     "species": "SPECIES_WEEZING"
     }
    ],
    "gencap_reference": "firered: TAMER EDGAR"
@@ -31291,10 +31291,10 @@
      "lvl": 43,
      "species": "SPECIES_RHYDON",
      "moves": [
-      "MOVE_UPROAR",
       "MOVE_HAMMER_ARM",
       "MOVE_HORN_DRILL",
-      "MOVE_TAKE_DOWN"
+      "MOVE_TAKE_DOWN",
+      "MOVE_ROCK_BLAST"
      ]
     }
    ],
@@ -31442,7 +31442,7 @@
     {
      "iv": 0,
      "lvl": 25,
-     "species": "SPECIES_TAILLOW"
+     "species": "SPECIES_FEAROW"
     },
     {
      "iv": 0,
@@ -31576,12 +31576,12 @@
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_SWELLOW"
+     "species": "SPECIES_FEAROW"
     },
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_ALTARIA"
+     "species": "SPECIES_FEAROW"
     }
    ],
    "gencap_reference": "firered: BIRD_KEEPER BENNY"
@@ -31619,7 +31619,7 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_SWABLU"
+     "species": "SPECIES_DODUO"
     },
     {
      "iv": 0,
@@ -31629,7 +31629,7 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_DODUO"
+     "species": "SPECIES_PIDGEOTTO"
     }
    ],
    "gencap_reference": "firered: BIRD_KEEPER EDWIN"
@@ -31672,7 +31672,7 @@
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_SWELLOW"
+     "species": "SPECIES_DODUO"
     }
    ],
    "gencap_reference": "firered: BIRD_KEEPER CHESTER"
@@ -31707,10 +31707,10 @@
      "lvl": 29,
      "species": "SPECIES_FEAROW",
      "moves": [
-      "MOVE_AERIAL_ACE",
-      "MOVE_FACADE",
       "MOVE_QUICK_ATTACK",
-      "MOVE_AGILITY"
+      "MOVE_AGILITY",
+      "MOVE_MIRROR_MOVE",
+      "MOVE_AERIAL_ACE"
      ]
     },
     {
@@ -31836,17 +31836,17 @@
     {
      "iv": 0,
      "lvl": 30,
-     "species": "SPECIES_PELIPPER"
-    },
-    {
-     "iv": 0,
-     "lvl": 30,
      "species": "SPECIES_FEAROW"
     },
     {
      "iv": 0,
      "lvl": 30,
      "species": "SPECIES_PIDGEOTTO"
+    },
+    {
+     "iv": 0,
+     "lvl": 30,
+     "species": "SPECIES_DODRIO"
     }
    ],
    "gencap_reference": "firered: BIRD_KEEPER ROGER"
@@ -31879,17 +31879,17 @@
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_PELIPPER"
-    },
-    {
-     "iv": 0,
-     "lvl": 28,
      "species": "SPECIES_PIDGEOTTO"
     },
     {
      "iv": 0,
      "lvl": 28,
      "species": "SPECIES_DODUO"
+    },
+    {
+     "iv": 0,
+     "lvl": 28,
+     "species": "SPECIES_PIDGEOTTO"
     }
    ],
    "gencap_reference": "firered: BIRD_KEEPER CARTER"
@@ -32078,9 +32078,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_HIGH_JUMP_KICK",
-      "MOVE_KNOCK_OFF",
-      "MOVE_FAKE_OUT",
-      "MOVE_FORESIGHT"
+      "MOVE_FORESIGHT",
+      "MOVE_MIND_READER",
+      "MOVE_FEINT"
      ]
     },
     {
@@ -32149,7 +32149,7 @@
     {
      "iv": 100,
      "lvl": 31,
-     "species": "SPECIES_BRELOOM",
+     "species": "SPECIES_PRIMEAPE",
      "held_item": "ITEM_BLACK_BELT"
     }
    ],
@@ -32226,10 +32226,10 @@
      "species": "SPECIES_MACHAMP",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_BRICK_BREAK",
       "MOVE_ROCK_SLIDE",
       "MOVE_WAKE_UP_SLAP",
-      "MOVE_SUBMISSION"
+      "MOVE_SUBMISSION",
+      "MOVE_VITAL_THROW"
      ]
     }
    ],
@@ -32312,10 +32312,10 @@
      "species": "SPECIES_MACHAMP",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_SUPERPOWER",
       "MOVE_ROCK_SLIDE",
       "MOVE_CROSS_CHOP",
-      "MOVE_WAKE_UP_SLAP"
+      "MOVE_WAKE_UP_SLAP",
+      "MOVE_SUBMISSION"
      ]
     },
     {
@@ -32324,10 +32324,10 @@
      "species": "SPECIES_DONPHAN",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_SCARY_FACE",
       "MOVE_ASSURANCE",
-      "MOVE_FURY_ATTACK"
+      "MOVE_FURY_ATTACK",
+      "MOVE_SLAM"
      ]
     }
    ],
@@ -32404,10 +32404,10 @@
      "species": "SPECIES_SANDSLASH",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_BRICK_BREAK",
       "MOVE_ROCK_SLIDE",
       "MOVE_SAND_TOMB",
-      "MOVE_FURY_CUTTER"
+      "MOVE_FURY_CUTTER",
+      "MOVE_CRUSH_CLAW"
      ]
     },
     {
@@ -32662,10 +32662,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ICY_WIND",
       "MOVE_BUBBLE",
-      "MOVE_TAIL_WHIP"
+      "MOVE_TAIL_WHIP",
+      "MOVE_TACKLE"
      ]
     }
    ]
@@ -32833,10 +32833,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_PSYBEAM",
-      "MOVE_SHOCK_WAVE",
       "MOVE_REFLECT",
-      "MOVE_ENCORE"
+      "MOVE_ENCORE",
+      "MOVE_CONFUSION",
+      "MOVE_KINESIS"
      ]
     },
     {
@@ -32856,10 +32856,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_FURY_ATTACK",
       "MOVE_STOMP",
-      "MOVE_TAIL_WHIP"
+      "MOVE_TAIL_WHIP",
+      "MOVE_HORN_ATTACK"
      ]
     },
     {
@@ -32879,10 +32879,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_BITE",
       "MOVE_ICY_WIND",
-      "MOVE_WATER_GUN"
+      "MOVE_WATER_GUN",
+      "MOVE_WITHDRAW"
      ]
     }
    ]
@@ -33224,9 +33224,9 @@
      "species": "SPECIES_WEEZING",
      "moves": [
       "MOVE_SLUDGE_BOMB",
-      "MOVE_SHOCK_WAVE",
       "MOVE_HAZE",
-      "MOVE_SLUDGE"
+      "MOVE_SLUDGE",
+      "MOVE_SELF_DESTRUCT"
      ]
     }
    ],
@@ -33324,9 +33324,9 @@
      "species": "SPECIES_MAGNETON",
      "moves": [
       "MOVE_THUNDER_SHOCK",
-      "MOVE_METAL_SOUND",
       "MOVE_SPARK",
-      "MOVE_THUNDER_WAVE"
+      "MOVE_THUNDER_WAVE",
+      "MOVE_SONIC_BOOM"
      ]
     },
     {
@@ -33385,9 +33385,9 @@
      "species": "SPECIES_SANDSLASH",
      "moves": [
       "MOVE_METAL_CLAW",
-      "MOVE_BRICK_BREAK",
       "MOVE_RAPID_SPIN",
-      "MOVE_CRUSH_CLAW"
+      "MOVE_CRUSH_CLAW",
+      "MOVE_ROLLOUT"
      ]
     },
     {
@@ -33396,9 +33396,9 @@
      "species": "SPECIES_PORYGON",
      "moves": [
       "MOVE_PSYBEAM",
-      "MOVE_SHOCK_WAVE",
       "MOVE_ICE_BEAM",
-      "MOVE_RECOVER"
+      "MOVE_RECOVER",
+      "MOVE_MAGNET_RISE"
      ]
     },
     {
@@ -33406,10 +33406,10 @@
      "lvl": 25,
      "species": "SPECIES_MAGNEMITE",
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_SONIC_BOOM",
       "MOVE_THUNDER_WAVE",
-      "MOVE_SPARK"
+      "MOVE_SPARK",
+      "MOVE_SUPERSONIC"
      ]
     },
     {
@@ -33545,8 +33545,8 @@
      "moves": [
       "MOVE_FLAMETHROWER",
       "MOVE_SHADOW_BALL",
-      "MOVE_WILL_O_WISP",
-      "MOVE_HAZE"
+      "MOVE_HAZE",
+      "MOVE_SLUDGE"
      ]
     },
     {
@@ -33554,10 +33554,10 @@
      "lvl": 28,
      "species": "SPECIES_VOLTORB",
      "moves": [
-      "MOVE_SIGNAL_BEAM",
       "MOVE_CHARGE_BEAM",
       "MOVE_LIGHT_SCREEN",
-      "MOVE_SCREECH"
+      "MOVE_SCREECH",
+      "MOVE_ROLLOUT"
      ]
     }
    ],
@@ -33591,12 +33591,12 @@
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_METANG"
+     "species": "SPECIES_MAGNEMITE"
     },
     {
      "iv": 0,
      "lvl": 29,
-     "species": "SPECIES_MAGNEMITE"
+     "species": "SPECIES_KOFFING"
     }
    ],
    "gencap_reference": "firered: SCIENTIST TRAVIS"
@@ -33629,7 +33629,7 @@
     {
      "iv": 0,
      "lvl": 33,
-     "species": "SPECIES_METANG"
+     "species": "SPECIES_MAGNETON"
     },
     {
      "iv": 0,
@@ -33770,10 +33770,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
       "MOVE_DIZZY_PUNCH",
       "MOVE_RAGE",
-      "MOVE_MEGA_PUNCH"
+      "MOVE_MEGA_PUNCH",
+      "MOVE_BITE"
      ]
     }
    ],
@@ -33845,9 +33845,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_CRUNCH",
-      "MOVE_FAKE_OUT",
       "MOVE_ENDURE",
-      "MOVE_DIZZY_PUNCH"
+      "MOVE_DIZZY_PUNCH",
+      "MOVE_RAGE"
      ]
     },
     {
@@ -33867,10 +33867,10 @@
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
-      "MOVE_SUPERPOWER",
       "MOVE_THRASH",
       "MOVE_POISON_STING",
-      "MOVE_DOUBLE_KICK"
+      "MOVE_DOUBLE_KICK",
+      "MOVE_FOCUS_ENERGY"
      ]
     },
     {
@@ -34783,7 +34783,7 @@
     {
      "iv": 0,
      "lvl": 23,
-     "species": "SPECIES_SEVIPER"
+     "species": "SPECIES_ARBOK"
     },
     {
      "iv": 0,
@@ -34831,7 +34831,7 @@
     {
      "iv": 0,
      "lvl": 21,
-     "species": "SPECIES_SABLEYE"
+     "species": "SPECIES_DROWZEE"
     }
    ],
    "gencap_reference": "firered: TEAM_ROCKET GRUNT"
@@ -35086,10 +35086,10 @@
      "lvl": 28,
      "species": "SPECIES_RATICATE",
      "moves": [
-      "MOVE_TAUNT",
       "MOVE_CRUNCH",
       "MOVE_SCARY_FACE",
-      "MOVE_SUCKER_PUNCH"
+      "MOVE_SUCKER_PUNCH",
+      "MOVE_HYPER_FANG"
      ]
     },
     {
@@ -35106,12 +35106,12 @@
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_MIGHTYENA",
+     "species": "SPECIES_HOUNDOOM",
      "moves": [
       "MOVE_ROAR",
       "MOVE_SWAGGER",
-      "MOVE_ODOR_SLEUTH",
-      "MOVE_BITE"
+      "MOVE_BEAT_UP",
+      "MOVE_ODOR_SLEUTH"
      ]
     }
    ],
@@ -35183,7 +35183,7 @@
     {
      "iv": 0,
      "lvl": 28,
-     "species": "SPECIES_SEVIPER"
+     "species": "SPECIES_HYPNO"
     },
     {
      "iv": 0,
@@ -35263,8 +35263,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_FLAMETHROWER",
-      "MOVE_SHOCK_WAVE",
-      "MOVE_HAZE"
+      "MOVE_HAZE",
+      "MOVE_DOUBLE_HIT"
      ]
     }
    ],
@@ -35379,12 +35379,12 @@
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_MIGHTYENA",
+     "species": "SPECIES_KOFFING",
      "moves": [
-      "MOVE_HOWL",
-      "MOVE_ROAR",
-      "MOVE_ODOR_SLEUTH",
-      "MOVE_BITE"
+      "MOVE_SLUDGE",
+      "MOVE_SELF_DESTRUCT",
+      "MOVE_ASSURANCE",
+      "MOVE_SMOKESCREEN"
      ]
     },
     {
@@ -35392,21 +35392,21 @@
      "lvl": 26,
      "species": "SPECIES_ARBOK",
      "moves": [
-      "MOVE_POISON_FANG",
       "MOVE_CRUNCH",
       "MOVE_GLARE",
-      "MOVE_ACID"
+      "MOVE_ACID",
+      "MOVE_SCREECH"
      ]
     },
     {
      "iv": 0,
      "lvl": 26,
-     "species": "SPECIES_KOFFING",
+     "species": "SPECIES_HYPNO",
      "moves": [
-      "MOVE_SCREECH",
-      "MOVE_SLUDGE",
-      "MOVE_SELF_DESTRUCT",
-      "MOVE_ASSURANCE"
+      "MOVE_HEADBUTT",
+      "MOVE_MEDITATE",
+      "MOVE_POISON_GAS",
+      "MOVE_CONFUSION"
      ]
     },
     {
@@ -35415,9 +35415,9 @@
      "species": "SPECIES_GOLBAT",
      "moves": [
       "MOVE_WING_ATTACK",
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_ASTONISH"
      ]
     }
    ],
@@ -35844,12 +35844,12 @@
     {
      "iv": 100,
      "lvl": 37,
-     "species": "SPECIES_WHISCASH",
+     "species": "SPECIES_SANDSLASH",
      "moves": [
-      "MOVE_ICE_BEAM",
-      "MOVE_AMNESIA",
-      "MOVE_SNORE",
-      "MOVE_REST"
+      "MOVE_SAND_TOMB",
+      "MOVE_FURY_CUTTER",
+      "MOVE_CRUSH_CLAW",
+      "MOVE_ROLLOUT"
      ]
     },
     {
@@ -35866,12 +35866,12 @@
     {
      "iv": 100,
      "lvl": 39,
-     "species": "SPECIES_CAMERUPT",
+     "species": "SPECIES_RHYHORN",
      "moves": [
       "MOVE_FLAMETHROWER",
       "MOVE_ROCK_SLIDE",
-      "MOVE_YAWN",
-      "MOVE_EARTH_POWER"
+      "MOVE_HORN_DRILL",
+      "MOVE_TAKE_DOWN"
      ]
     },
     {
@@ -35952,9 +35952,9 @@
      "species": "SPECIES_ELECTRODE",
      "moves": [
       "MOVE_THUNDERBOLT",
-      "MOVE_TAUNT",
       "MOVE_MAGNET_RISE",
-      "MOVE_SWIFT"
+      "MOVE_SWIFT",
+      "MOVE_SELF_DESTRUCT"
      ]
     },
     {
@@ -35999,12 +35999,12 @@
     {
      "iv": 100,
      "lvl": 41,
-     "species": "SPECIES_CRAWDAUNT",
+     "species": "SPECIES_KINGLER",
      "moves": [
       "MOVE_CRABHAMMER",
-      "MOVE_KNOCK_OFF",
       "MOVE_SWORDS_DANCE",
-      "MOVE_NIGHT_SLASH"
+      "MOVE_GUILLOTINE",
+      "MOVE_PROTECT"
      ]
     },
     {
@@ -36013,9 +36013,9 @@
      "species": "SPECIES_POLIWRATH",
      "moves": [
       "MOVE_ICE_PUNCH",
-      "MOVE_BULK_UP",
       "MOVE_SUBMISSION",
-      "MOVE_DOUBLE_SLAP"
+      "MOVE_DOUBLE_SLAP",
+      "MOVE_HYPNOSIS"
      ]
     },
     {
@@ -36082,12 +36082,12 @@
     {
      "iv": 100,
      "lvl": 42,
-     "species": "SPECIES_LINOONE",
+     "species": "SPECIES_RATICATE",
      "moves": [
-      "MOVE_SLASH",
-      "MOVE_COVET",
-      "MOVE_FURY_SWIPES",
-      "MOVE_MUD_SPORT"
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_SUPER_FANG",
+      "MOVE_ASSURANCE",
+      "MOVE_CRUNCH"
      ]
     },
     {
@@ -36108,8 +36108,8 @@
      "moves": [
       "MOVE_WATERFALL",
       "MOVE_CRUNCH",
-      "MOVE_DRAGON_DANCE",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_AGILITY"
      ]
     },
     {
@@ -36179,8 +36179,8 @@
      "species": "SPECIES_QUAGSIRE",
      "moves": [
       "MOVE_ICE_BEAM",
-      "MOVE_YAWN",
       "MOVE_EARTHQUAKE",
+      "MOVE_YAWN",
       "MOVE_AMNESIA"
      ]
     },
@@ -36248,20 +36248,9 @@
     {
      "iv": 100,
      "lvl": 37,
-     "species": "SPECIES_CLAYDOL",
-     "moves": [
-      "MOVE_PSYCHIC",
-      "MOVE_ICE_BEAM",
-      "MOVE_REFLECT",
-      "MOVE_HYPER_BEAM"
-     ]
-    },
-    {
-     "iv": 100,
-     "lvl": 37,
      "species": "SPECIES_MAROWAK",
      "moves": [
-      "MOVE_EARTHQUAKE",
+      "MOVE_ICE_BEAM",
       "MOVE_FLING",
       "MOVE_THRASH",
       "MOVE_FALSE_SWIPE"
@@ -36269,13 +36258,24 @@
     },
     {
      "iv": 100,
-     "lvl": 38,
+     "lvl": 37,
      "species": "SPECIES_RHYHORN",
      "moves": [
-      "MOVE_ROCK_SLIDE",
+      "MOVE_EARTHQUAKE",
       "MOVE_HORN_DRILL",
       "MOVE_TAKE_DOWN",
       "MOVE_ROCK_BLAST"
+     ]
+    },
+    {
+     "iv": 100,
+     "lvl": 38,
+     "species": "SPECIES_NIDOQUEEN",
+     "moves": [
+      "MOVE_ROCK_SLIDE",
+      "MOVE_BODY_SLAM",
+      "MOVE_POISON_STING",
+      "MOVE_DOUBLE_KICK"
      ]
     },
     {
@@ -36344,10 +36344,10 @@
      "lvl": 22,
      "species": "SPECIES_WEEPINBELL",
      "moves": [
-      "MOVE_RAZOR_LEAF",
-      "MOVE_ACID",
-      "MOVE_KNOCK_OFF",
-      "MOVE_SLEEP_POWDER"
+      "MOVE_SLEEP_POWDER",
+      "MOVE_STUN_SPORE",
+      "MOVE_POISON_POWDER",
+      "MOVE_WRAP"
      ]
     },
     {
@@ -36364,23 +36364,23 @@
     {
      "iv": 100,
      "lvl": 22,
-     "species": "SPECIES_ROSELIA",
+     "species": "SPECIES_GLOOM",
      "moves": [
-      "MOVE_MAGICAL_LEAF",
       "MOVE_STUN_SPORE",
-      "MOVE_LEECH_SEED",
-      "MOVE_GRASS_WHISTLE"
+      "MOVE_SLEEP_POWDER",
+      "MOVE_POISON_POWDER",
+      "MOVE_ACID"
      ]
     },
     {
      "iv": 100,
      "lvl": 22,
-     "species": "SPECIES_BRELOOM",
+     "species": "SPECIES_GLOOM",
      "moves": [
-      "MOVE_MACH_PUNCH",
-      "MOVE_BULLET_SEED",
-      "MOVE_ROCK_TOMB",
-      "MOVE_STUN_SPORE"
+      "MOVE_STUN_SPORE",
+      "MOVE_SLEEP_POWDER",
+      "MOVE_POISON_POWDER",
+      "MOVE_ACID"
      ]
     }
    ],
@@ -36425,12 +36425,12 @@
     {
      "iv": 100,
      "lvl": 42,
-     "species": "SPECIES_CRADILY",
+     "species": "SPECIES_VICTREEBEL",
      "moves": [
       "MOVE_GIGA_DRAIN",
-      "MOVE_ROCK_SLIDE",
-      "MOVE_RECOVER",
-      "MOVE_ANCIENT_POWER"
+      "MOVE_RAZOR_LEAF",
+      "MOVE_SWEET_SCENT",
+      "MOVE_SLEEP_POWDER"
      ]
     },
     {
@@ -36582,10 +36582,10 @@
      "lvl": 42,
      "species": "SPECIES_PERSIAN",
      "moves": [
-      "MOVE_FAKE_OUT",
       "MOVE_SLASH",
       "MOVE_POWER_GEM",
-      "MOVE_TAUNT"
+      "MOVE_TAUNT",
+      "MOVE_SCREECH"
      ]
     },
     {
@@ -36627,9 +36627,9 @@
      "species": "SPECIES_NINETALES",
      "moves": [
       "MOVE_FLAMETHROWER",
-      "MOVE_WILL_O_WISP",
       "MOVE_SAFEGUARD",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_QUICK_ATTACK"
      ]
     }
    ],
@@ -37055,10 +37055,10 @@
      "held_item": "ITEM_LEFTOVERS",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WILL_O_WISP",
       "MOVE_DESTINY_BOND",
       "MOVE_DARK_PULSE",
-      "MOVE_DREAM_EATER"
+      "MOVE_DREAM_EATER",
+      "MOVE_SHADOW_BALL"
      ]
     },
     {
@@ -37221,10 +37221,10 @@
      "held_item": "ITEM_CHOICE_SCARF",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_IRON_HEAD",
       "MOVE_TAKE_DOWN",
-      "MOVE_CRUNCH"
+      "MOVE_CRUNCH",
+      "MOVE_ANCIENT_POWER"
      ]
     },
     {
@@ -37267,10 +37267,10 @@
      "held_item": "ITEM_POISON_BARB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_DRAGON_CLAW",
       "MOVE_EARTHQUAKE",
+      "MOVE_WING_ATTACK",
       "MOVE_DRAGON_DANCE",
-      "MOVE_WING_ATTACK"
+      "MOVE_SAFEGUARD"
      ]
     },
     {
@@ -37335,16 +37335,16 @@
       0
      ],
      "lvl": 12,
-     "species": "SPECIES_LILEEP",
+     "species": "SPECIES_GEODUDE",
      "nature": 20,
      "ability_num": 2,
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_MEGA_DRAIN",
       "MOVE_ANCIENT_POWER",
-      "MOVE_ACID",
-      "MOVE_MUD_SHOT"
+      "MOVE_ROCK_THROW",
+      "MOVE_ROCK_POLISH",
+      "MOVE_MUD_SPORT"
      ]
     },
     {
@@ -37364,10 +37364,10 @@
      "held_item": "ITEM_EVIOLITE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_ROCK_TOMB",
       "MOVE_RAGE",
       "MOVE_ROCK_THROW",
-      "MOVE_SCREECH"
+      "MOVE_SCREECH",
+      "MOVE_BIND"
      ]
     }
    ],
@@ -37415,10 +37415,10 @@
      "held_item": "ITEM_ORAN_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
-      "MOVE_SHOCK_WAVE",
       "MOVE_ICY_WIND",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_CONFUSE_RAY",
+      "MOVE_WATER_GUN",
+      "MOVE_FLAIL"
      ]
     },
     {
@@ -37535,10 +37535,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_THUNDERBOLT",
       "MOVE_QUICK_ATTACK",
-      "MOVE_TAIL_WHIP"
+      "MOVE_TAIL_WHIP",
+      "MOVE_THUNDER_SHOCK"
      ]
     }
    ],
@@ -37580,16 +37580,16 @@
       0
      ],
      "lvl": 29,
-     "species": "SPECIES_CRADILY",
+     "species": "SPECIES_VILEPLUME",
      "nature": 15,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_GIGA_DRAIN",
-      "MOVE_ANCIENT_POWER",
-      "MOVE_AMNESIA",
-      "MOVE_CONFUSE_RAY"
+      "MOVE_POISON_POWDER",
+      "MOVE_STUN_SPORE",
+      "MOVE_AROMATHERAPY"
      ]
     },
     {
@@ -37632,10 +37632,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_SLEEP_POWDER",
       "MOVE_RAZOR_LEAF",
-      "MOVE_SWEET_SCENT"
+      "MOVE_SWEET_SCENT",
+      "MOVE_VINE_WHIP"
      ]
     }
    ],
@@ -37826,10 +37826,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 1,
      "moves": [
-      "MOVE_OVERHEAT",
       "MOVE_FURY_ATTACK",
       "MOVE_FIRE_BLAST",
-      "MOVE_AGILITY"
+      "MOVE_AGILITY",
+      "MOVE_TAKE_DOWN"
      ]
     },
     {
@@ -38152,10 +38152,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_AERIAL_ACE",
       "MOVE_QUICK_ATTACK",
       "MOVE_STEEL_WING",
-      "MOVE_WHIRLWIND"
+      "MOVE_WHIRLWIND",
+      "MOVE_GUST"
      ]
     },
     {
@@ -38198,10 +38198,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_PSYBEAM",
-      "MOVE_SHOCK_WAVE",
       "MOVE_REFLECT",
-      "MOVE_ENCORE"
+      "MOVE_ENCORE",
+      "MOVE_DISABLE",
+      "MOVE_CONFUSION"
      ]
     },
     {
@@ -38221,10 +38221,10 @@
      "held_item": "ITEM_NONE",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ICY_WIND",
       "MOVE_RAPID_SPIN",
-      "MOVE_BITE"
+      "MOVE_BITE",
+      "MOVE_WATER_GUN"
      ]
     }
    ]
@@ -38434,10 +38434,10 @@
      "held_item": "ITEM_TWISTED_SPOON",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_SHOCK_WAVE",
       "MOVE_SHADOW_BALL",
       "MOVE_ENCORE",
-      "MOVE_DISABLE"
+      "MOVE_DISABLE",
+      "MOVE_CONFUSION"
      ]
     },
     {
@@ -38703,10 +38703,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ICE_BEAM",
       "MOVE_SKULL_BASH",
-      "MOVE_AQUA_TAIL"
+      "MOVE_AQUA_TAIL",
+      "MOVE_WATER_PULSE"
      ]
     }
    ]
@@ -38972,10 +38972,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_ICE_BEAM",
       "MOVE_RAIN_DANCE",
-      "MOVE_IRON_DEFENSE"
+      "MOVE_IRON_DEFENSE",
+      "MOVE_SKULL_BASH"
      ]
     }
    ]
@@ -39010,10 +39010,10 @@
      "lvl": 47,
      "species": "SPECIES_PIDGEOT",
      "moves": [
-      "MOVE_FEATHER_DANCE",
       "MOVE_WING_ATTACK",
       "MOVE_GUST",
-      "MOVE_QUICK_ATTACK"
+      "MOVE_QUICK_ATTACK",
+      "MOVE_ROOST"
      ]
     },
     {
@@ -39023,8 +39023,8 @@
      "moves": [
       "MOVE_TAKE_DOWN",
       "MOVE_HORN_DRILL",
-      "MOVE_ROCK_BLAST",
-      "MOVE_FURY_ATTACK"
+      "MOVE_FURY_ATTACK",
+      "MOVE_STONE_EDGE"
      ]
     },
     {
@@ -39055,9 +39055,9 @@
      "species": "SPECIES_ALAKAZAM",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_CALM_MIND",
       "MOVE_FUTURE_SIGHT",
-      "MOVE_DISABLE"
+      "MOVE_DISABLE",
+      "MOVE_TRICK"
      ]
     },
     {
@@ -39103,10 +39103,10 @@
      "lvl": 47,
      "species": "SPECIES_PIDGEOT",
      "moves": [
-      "MOVE_FEATHER_DANCE",
       "MOVE_WING_ATTACK",
       "MOVE_GUST",
-      "MOVE_QUICK_ATTACK"
+      "MOVE_QUICK_ATTACK",
+      "MOVE_ROOST"
      ]
     },
     {
@@ -39116,8 +39116,8 @@
      "moves": [
       "MOVE_TAKE_DOWN",
       "MOVE_HORN_DRILL",
-      "MOVE_ROCK_BLAST",
-      "MOVE_FURY_ATTACK"
+      "MOVE_FURY_ATTACK",
+      "MOVE_STONE_EDGE"
      ]
     },
     {
@@ -39148,9 +39148,9 @@
      "species": "SPECIES_ALAKAZAM",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_CALM_MIND",
       "MOVE_FUTURE_SIGHT",
-      "MOVE_DISABLE"
+      "MOVE_DISABLE",
+      "MOVE_TRICK"
      ]
     },
     {
@@ -39208,10 +39208,10 @@
      "held_item": "ITEM_CHOICE_BAND",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_SOLAR_BEAM",
       "MOVE_SYNTHESIS",
-      "MOVE_WORRY_SEED"
+      "MOVE_WORRY_SEED",
+      "MOVE_PETAL_DANCE"
      ]
     },
     {
@@ -39294,16 +39294,16 @@
       252
      ],
      "lvl": 61,
-     "species": "SPECIES_SALAMENCE",
+     "species": "SPECIES_GYARADOS",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 1,
      "moves": [
-      "MOVE_DRAGON_CLAW",
-      "MOVE_BRICK_BREAK",
-      "MOVE_CRUNCH",
-      "MOVE_FLY"
+      "MOVE_HYPER_BEAM",
+      "MOVE_DRAGON_DANCE",
+      "MOVE_HYDRO_PUMP",
+      "MOVE_RAIN_DANCE"
      ]
     },
     {
@@ -39323,10 +39323,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_WATER_PULSE",
       "MOVE_HYDRO_PUMP",
       "MOVE_RAIN_DANCE",
-      "MOVE_IRON_DEFENSE"
+      "MOVE_IRON_DEFENSE",
+      "MOVE_SKULL_BASH"
      ]
     }
    ]
@@ -39362,10 +39362,10 @@
      "species": "SPECIES_PIDGEOT",
      "held_item": "ITEM_NONE",
      "moves": [
-      "MOVE_AERIAL_ACE",
-      "MOVE_FEATHER_DANCE",
       "MOVE_SAND_ATTACK",
-      "MOVE_WHIRLWIND"
+      "MOVE_WHIRLWIND",
+      "MOVE_MIRROR_MOVE",
+      "MOVE_TAILWIND"
      ]
     },
     {
@@ -39388,8 +39388,8 @@
      "moves": [
       "MOVE_TAKE_DOWN",
       "MOVE_EARTHQUAKE",
-      "MOVE_ROCK_TOMB",
-      "MOVE_SCARY_FACE"
+      "MOVE_SCARY_FACE",
+      "MOVE_MEGAHORN"
      ]
     },
     {
@@ -39461,10 +39461,10 @@
      "species": "SPECIES_PIDGEOT",
      "held_item": "ITEM_NONE",
      "moves": [
-      "MOVE_AERIAL_ACE",
-      "MOVE_FEATHER_DANCE",
       "MOVE_SAND_ATTACK",
-      "MOVE_WHIRLWIND"
+      "MOVE_WHIRLWIND",
+      "MOVE_MIRROR_MOVE",
+      "MOVE_TAILWIND"
      ]
     },
     {
@@ -39487,8 +39487,8 @@
      "moves": [
       "MOVE_TAKE_DOWN",
       "MOVE_EARTHQUAKE",
-      "MOVE_ROCK_TOMB",
-      "MOVE_SCARY_FACE"
+      "MOVE_SCARY_FACE",
+      "MOVE_MEGAHORN"
      ]
     },
     {
@@ -39522,9 +39522,9 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "moves": [
       "MOVE_FIRE_BLAST",
-      "MOVE_AERIAL_ACE",
       "MOVE_SLASH",
-      "MOVE_FIRE_SPIN"
+      "MOVE_FIRE_SPIN",
+      "MOVE_HEAT_WAVE"
      ]
     }
    ]
@@ -39623,7 +39623,7 @@
     {
      "iv": 0,
      "lvl": 23,
-     "species": "SPECIES_SHUPPET"
+     "species": "SPECIES_GASTLY"
     }
    ],
    "gencap_reference": "firered: CHANNELER HOPE"
@@ -39727,7 +39727,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_DUSKULL"
+     "species": "SPECIES_GASTLY"
     }
    ],
    "gencap_reference": "firered: CHANNELER JODY"
@@ -39760,7 +39760,7 @@
     {
      "iv": 0,
      "lvl": 23,
-     "species": "SPECIES_DUSCLOPS"
+     "species": "SPECIES_HAUNTER"
     }
    ],
    "gencap_reference": "firered: CHANNELER TAMMY"
@@ -39897,7 +39897,7 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_SHUPPET"
+     "species": "SPECIES_MISDREAVUS"
     },
     {
      "iv": 0,
@@ -39968,7 +39968,7 @@
     {
      "iv": 0,
      "lvl": 24,
-     "species": "SPECIES_BANETTE"
+     "species": "SPECIES_GASTLY"
     }
    ],
    "gencap_reference": "firered: CHANNELER JENNIFER"
@@ -40012,12 +40012,12 @@
     {
      "iv": 0,
      "lvl": 34,
-     "species": "SPECIES_GRUMPIG",
+     "species": "SPECIES_HAUNTER",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_AMNESIA",
-      "MOVE_SNORE",
-      "MOVE_REST"
+      "MOVE_SHADOW_BALL",
+      "MOVE_PAYBACK",
+      "MOVE_SHADOW_PUNCH"
      ]
     }
    ],
@@ -40299,7 +40299,12 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_SKITTY"
+     "species": "SPECIES_PIDGEOTTO"
+    },
+    {
+     "iv": 0,
+     "lvl": 27,
+     "species": "SPECIES_MEOWTH"
     },
     {
      "iv": 0,
@@ -40309,12 +40314,7 @@
     {
      "iv": 0,
      "lvl": 27,
-     "species": "SPECIES_SWABLU"
-    },
-    {
-     "iv": 0,
-     "lvl": 27,
-     "species": "SPECIES_MEOWTH"
+     "species": "SPECIES_PIDGEOTTO"
     }
    ],
    "gencap_reference": "firered: PICNICKER GWEN"
@@ -40362,8 +40362,8 @@
      "moves": [
       "MOVE_CRUNCH",
       "MOVE_DIG",
-      "MOVE_ROCK_TOMB",
-      "MOVE_ROCK_BLAST"
+      "MOVE_ROCK_BLAST",
+      "MOVE_SCARY_FACE"
      ]
     },
     {
@@ -40408,7 +40408,7 @@
     {
      "iv": 0,
      "lvl": 14,
-     "species": "SPECIES_VOLBEAT"
+     "species": "SPECIES_EKANS"
     },
     {
      "iv": 0,
@@ -40484,7 +40484,7 @@
     {
      "iv": 0,
      "lvl": 30,
-     "species": "SPECIES_SEALEO"
+     "species": "SPECIES_TENTACRUEL"
     },
     {
      "iv": 0,
@@ -40570,7 +40570,7 @@
     {
      "iv": 0,
      "lvl": 19,
-     "species": "SPECIES_TAILLOW"
+     "species": "SPECIES_PIDGEOTTO"
     },
     {
      "iv": 0,
@@ -40922,12 +40922,12 @@
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_PLUSLE"
+     "species": "SPECIES_CLEFAIRY"
     },
     {
      "iv": 0,
      "lvl": 22,
-     "species": "SPECIES_MINUN"
+     "species": "SPECIES_JIGGLYPUFF"
     }
    ],
    "gencap_reference": "firered: TWINS ELI & ANNE"
@@ -40960,21 +40960,21 @@
     {
      "iv": 100,
      "lvl": 45,
-     "species": "SPECIES_GARDEVOIR",
+     "species": "SPECIES_NIDOQUEEN",
      "moves": [
-      "MOVE_PSYCHIC",
-      "MOVE_HELPING_HAND",
-      "MOVE_FUTURE_SIGHT",
-      "MOVE_IMPRISON"
+      "MOVE_EARTH_POWER",
+      "MOVE_BODY_SLAM",
+      "MOVE_POISON_STING",
+      "MOVE_DOUBLE_KICK"
      ]
     },
     {
      "iv": 100,
      "lvl": 45,
-     "species": "SPECIES_NIDOQUEEN",
+     "species": "SPECIES_NIDOKING",
      "moves": [
       "MOVE_EARTH_POWER",
-      "MOVE_BODY_SLAM",
+      "MOVE_THRASH",
       "MOVE_POISON_STING",
       "MOVE_DOUBLE_KICK"
      ]
@@ -41014,8 +41014,8 @@
      "moves": [
       "MOVE_DOUBLE_KICK",
       "MOVE_HORN_ATTACK",
-      "MOVE_HELPING_HAND",
-      "MOVE_FURY_ATTACK"
+      "MOVE_FURY_ATTACK",
+      "MOVE_POISON_STING"
      ]
     },
     {
@@ -41023,10 +41023,10 @@
      "lvl": 24,
      "species": "SPECIES_NIDORINA",
      "moves": [
-      "MOVE_POISON_FANG",
       "MOVE_BITE",
       "MOVE_ICE_BEAM",
-      "MOVE_HELPING_HAND"
+      "MOVE_FURY_SWIPES",
+      "MOVE_POISON_STING"
      ]
     }
    ],
@@ -41113,10 +41113,10 @@
      "species": "SPECIES_HITMONTOP",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_BRICK_BREAK",
       "MOVE_RAPID_SPIN",
-      "MOVE_FAKE_OUT",
-      "MOVE_COUNTER"
+      "MOVE_COUNTER",
+      "MOVE_TRIPLE_KICK",
+      "MOVE_QUICK_ATTACK"
      ]
     }
    ],
@@ -41153,9 +41153,9 @@
      "species": "SPECIES_ESPEON",
      "moves": [
       "MOVE_SWIFT",
-      "MOVE_HELPING_HAND",
       "MOVE_QUICK_ATTACK",
-      "MOVE_CONFUSION"
+      "MOVE_CONFUSION",
+      "MOVE_SAND_ATTACK"
      ]
     },
     {
@@ -41317,9 +41317,9 @@
      "species": "SPECIES_XATU",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_HEAT_WAVE",
       "MOVE_TELEPORT",
-      "MOVE_OMINOUS_WIND"
+      "MOVE_OMINOUS_WIND",
+      "MOVE_FUTURE_SIGHT"
      ]
     },
     {
@@ -41329,18 +41329,18 @@
      "moves": [
       "MOVE_PSYCHIC",
       "MOVE_ICE_BEAM",
-      "MOVE_SLACK_OFF",
-      "MOVE_AMNESIA"
+      "MOVE_AMNESIA",
+      "MOVE_SLACK_OFF"
      ]
     },
     {
      "iv": 100,
      "lvl": 49,
-     "species": "SPECIES_GARDEVOIR",
+     "species": "SPECIES_ALAKAZAM",
      "moves": [
       "MOVE_TELEPORT",
+      "MOVE_TRICK",
       "MOVE_FUTURE_SIGHT",
-      "MOVE_IMPRISON",
       "MOVE_PSYCHIC"
      ]
     }
@@ -41501,12 +41501,12 @@
     {
      "iv": 100,
      "lvl": 51,
-     "species": "SPECIES_FLYGON",
+     "species": "SPECIES_VICTREEBEL",
      "moves": [
-      "MOVE_DRAGON_CLAW",
-      "MOVE_EARTHQUAKE",
-      "MOVE_ROCK_SLIDE",
-      "MOVE_SANDSTORM"
+      "MOVE_LEAF_BLADE",
+      "MOVE_LEAF_STORM",
+      "MOVE_RAZOR_LEAF",
+      "MOVE_SWEET_SCENT"
      ]
     },
     {
@@ -41566,8 +41566,8 @@
      "moves": [
       "MOVE_EXTREME_SPEED",
       "MOVE_CRUNCH",
-      "MOVE_WILL_O_WISP",
-      "MOVE_ODOR_SLEUTH"
+      "MOVE_ODOR_SLEUTH",
+      "MOVE_FIRE_FANG"
      ]
     }
    ],
@@ -41661,7 +41661,7 @@
     {
      "iv": 0,
      "lvl": 48,
-     "species": "SPECIES_CRADILY"
+     "species": "SPECIES_GOLEM"
     }
    ],
    "gencap_reference": "firered: RUIN_MANIAC STANLY"
@@ -41749,9 +41749,9 @@
      "species": "SPECIES_MR_MIME",
      "moves": [
       "MOVE_PSYCHIC",
-      "MOVE_FAKE_OUT",
       "MOVE_SAFEGUARD",
-      "MOVE_BATON_PASS"
+      "MOVE_BATON_PASS",
+      "MOVE_ROLE_PLAY"
      ]
     }
    ],
@@ -41949,7 +41949,7 @@
     {
      "iv": 0,
      "lvl": 7,
-     "species": "SPECIES_WURMPLE"
+     "species": "SPECIES_METAPOD"
     },
     {
      "iv": 0,
@@ -41992,7 +41992,7 @@
     {
      "iv": 0,
      "lvl": 33,
-     "species": "SPECIES_MIGHTYENA"
+     "species": "SPECIES_ARBOK"
     },
     {
      "iv": 0,
@@ -42194,7 +42194,7 @@
     {
      "iv": 0,
      "lvl": 35,
-     "species": "SPECIES_MIGHTYENA"
+     "species": "SPECIES_SANDSLASH"
     }
    ],
    "gencap_reference": "firered: TEAM_ROCKET GRUNT"
@@ -42249,12 +42249,12 @@
     {
      "iv": 0,
      "lvl": 38,
-     "species": "SPECIES_GLALIE",
+     "species": "SPECIES_CROBAT",
      "moves": [
-      "MOVE_ICE_BEAM",
-      "MOVE_CRUNCH",
-      "MOVE_BODY_SLAM",
-      "MOVE_SPIKES"
+      "MOVE_MEAN_LOOK",
+      "MOVE_AIR_CUTTER",
+      "MOVE_CONFUSE_RAY",
+      "MOVE_WING_ATTACK"
      ]
     }
    ],
@@ -42662,9 +42662,9 @@
      "unknown_0x10": 0,
      "moves": [
       "MOVE_THUNDERBOLT",
-      "MOVE_TAUNT",
       "MOVE_MIRROR_COAT",
-      "MOVE_EXPLOSION"
+      "MOVE_EXPLOSION",
+      "MOVE_GYRO_BALL"
      ]
     },
     {
@@ -42724,16 +42724,16 @@
       252
      ],
      "lvl": 62,
-     "species": "SPECIES_METAGROSS",
+     "species": "SPECIES_MAGNETON",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_METEOR_MASH",
-      "MOVE_EARTHQUAKE",
-      "MOVE_ICE_PUNCH",
-      "MOVE_ZEN_HEADBUTT"
+      "MOVE_ZAP_CANNON",
+      "MOVE_GYRO_BALL",
+      "MOVE_MAGNET_RISE",
+      "MOVE_MIRROR_SHOT"
      ]
     }
    ],
@@ -42815,7 +42815,7 @@
     {
      "iv": 0,
      "lvl": 37,
-     "species": "SPECIES_GOREBYSS"
+     "species": "SPECIES_KINGDRA"
     }
    ],
    "gencap_reference": "firered: SWIMMER_F MARIA"
@@ -42987,7 +42987,7 @@
     {
      "iv": 0,
      "lvl": 35,
-     "species": "SPECIES_SHARPEDO"
+     "species": "SPECIES_SEAKING"
     }
    ],
    "gencap_reference": "firered: FISHERMAN TOMMY"
@@ -43075,10 +43075,10 @@
      "species": "SPECIES_MACHAMP",
      "held_item": "ITEM_BLACK_BELT",
      "moves": [
-      "MOVE_BULK_UP",
       "MOVE_WAKE_UP_SLAP",
       "MOVE_SUBMISSION",
-      "MOVE_VITAL_THROW"
+      "MOVE_VITAL_THROW",
+      "MOVE_REVENGE"
      ]
     }
    ],
@@ -43344,7 +43344,7 @@
     {
      "iv": 0,
      "lvl": 34,
-     "species": "SPECIES_CRAWDAUNT"
+     "species": "SPECIES_STARMIE"
     },
     {
      "iv": 0,
@@ -43636,7 +43636,7 @@
     {
      "iv": 0,
      "lvl": 48,
-     "species": "SPECIES_GOREBYSS"
+     "species": "SPECIES_POLIWRATH"
     },
     {
      "iv": 0,
@@ -43904,12 +43904,12 @@
     {
      "iv": 0,
      "lvl": 47,
-     "species": "SPECIES_ALTARIA",
+     "species": "SPECIES_NOCTOWL",
      "moves": [
-      "MOVE_AERIAL_ACE",
-      "MOVE_FEATHER_DANCE",
-      "MOVE_REFRESH",
-      "MOVE_DRAGON_DANCE"
+      "MOVE_PSYCHO_SHIFT",
+      "MOVE_EXTRASENSORY",
+      "MOVE_ZEN_HEADBUTT",
+      "MOVE_AIR_SLASH"
      ]
     },
     {
@@ -43917,10 +43917,10 @@
      "lvl": 49,
      "species": "SPECIES_NOCTOWL",
      "moves": [
-      "MOVE_UPROAR",
       "MOVE_HYPNOSIS",
       "MOVE_PSYCHO_SHIFT",
-      "MOVE_EXTRASENSORY"
+      "MOVE_EXTRASENSORY",
+      "MOVE_ZEN_HEADBUTT"
      ]
     }
    ],
@@ -43997,7 +43997,7 @@
     {
      "iv": 0,
      "lvl": 49,
-     "species": "SPECIES_WAILORD"
+     "species": "SPECIES_BLASTOISE"
     }
    ],
    "gencap_reference": "firered: SWIMMER_M MYMO"
@@ -44063,12 +44063,12 @@
     {
      "iv": 0,
      "lvl": 50,
-     "species": "SPECIES_GOREBYSS"
+     "species": "SPECIES_STARMIE"
     },
     {
      "iv": 0,
      "lvl": 50,
-     "species": "SPECIES_HUNTAIL"
+     "species": "SPECIES_POLIWRATH"
     }
    ],
    "gencap_reference": "firered: SIS_AND_BRO AVA & GEB"
@@ -44331,12 +44331,12 @@
     {
      "iv": 0,
      "lvl": 49,
-     "species": "SPECIES_SOLROCK"
+     "species": "SPECIES_MACHAMP"
     },
     {
      "iv": 0,
      "lvl": 49,
-     "species": "SPECIES_LUNATONE"
+     "species": "SPECIES_MACHAMP"
     }
    ],
    "gencap_reference": "firered: RUIN_MANIAC LARRY"
@@ -44540,12 +44540,12 @@
     {
      "iv": 0,
      "lvl": 50,
-     "species": "SPECIES_CACTURNE"
+     "species": "SPECIES_BELLOSSOM"
     },
     {
      "iv": 0,
      "lvl": 50,
-     "species": "SPECIES_BELLOSSOM"
+     "species": "SPECIES_SUNFLORA"
     }
    ],
    "gencap_reference": "firered: AROMA_LADY MIAH"
@@ -44582,8 +44582,8 @@
      "moves": [
       "MOVE_SLUDGE_BOMB",
       "MOVE_ICE_BEAM",
-      "MOVE_HELPING_HAND",
-      "MOVE_EARTH_POWER"
+      "MOVE_EARTH_POWER",
+      "MOVE_BODY_SLAM"
      ]
     },
     {
@@ -44642,9 +44642,9 @@
      "species": "SPECIES_ELECTRODE",
      "moves": [
       "MOVE_THUNDERBOLT",
-      "MOVE_TAUNT",
       "MOVE_GYRO_BALL",
-      "MOVE_MAGNET_RISE"
+      "MOVE_MAGNET_RISE",
+      "MOVE_SWIFT"
      ]
     },
     {
@@ -44661,12 +44661,12 @@
     {
      "iv": 0,
      "lvl": 47,
-     "species": "SPECIES_EXPLOUD",
+     "species": "SPECIES_ELECTRODE",
      "moves": [
-      "MOVE_FLAMETHROWER",
-      "MOVE_ICE_BEAM",
-      "MOVE_ROAR",
-      "MOVE_CRUNCH"
+      "MOVE_GYRO_BALL",
+      "MOVE_MAGNET_RISE",
+      "MOVE_SWIFT",
+      "MOVE_SELF_DESTRUCT"
      ]
     }
    ],
@@ -44841,12 +44841,12 @@
     {
      "iv": 100,
      "lvl": 37,
-     "species": "SPECIES_TORKOAL",
+     "species": "SPECIES_EXEGGUTOR",
      "moves": [
-      "MOVE_YAWN",
-      "MOVE_PROTECT",
-      "MOVE_BODY_SLAM",
-      "MOVE_FLAMETHROWER"
+      "MOVE_WOOD_HAMMER",
+      "MOVE_EGG_BOMB",
+      "MOVE_STOMP",
+      "MOVE_CONFUSION"
      ]
     },
     {
@@ -44913,12 +44913,12 @@
     {
      "iv": 100,
      "lvl": 49,
-     "species": "SPECIES_CRADILY",
+     "species": "SPECIES_EXEGGUTOR",
      "moves": [
       "MOVE_GIGA_DRAIN",
-      "MOVE_ROCK_SLIDE",
-      "MOVE_RECOVER",
-      "MOVE_GASTRO_ACID"
+      "MOVE_LEAF_STORM",
+      "MOVE_WOOD_HAMMER",
+      "MOVE_EGG_BOMB"
      ]
     }
    ],
@@ -44952,7 +44952,7 @@
     {
      "iv": 100,
      "lvl": 38,
-     "species": "SPECIES_CACTURNE"
+     "species": "SPECIES_VILEPLUME"
     },
     {
      "iv": 100,
@@ -45049,8 +45049,8 @@
      "moves": [
       "MOVE_PSYCHIC",
       "MOVE_FLAMETHROWER",
-      "MOVE_SLACK_OFF",
-      "MOVE_AMNESIA"
+      "MOVE_AMNESIA",
+      "MOVE_SLACK_OFF"
      ]
     },
     {
@@ -45059,9 +45059,9 @@
      "species": "SPECIES_KANGASKHAN",
      "moves": [
       "MOVE_DOUBLE_EDGE",
-      "MOVE_FAKE_OUT",
       "MOVE_SUCKER_PUNCH",
-      "MOVE_DOUBLE_HIT"
+      "MOVE_DOUBLE_HIT",
+      "MOVE_OUTRAGE"
      ]
     },
     {
@@ -45119,21 +45119,21 @@
      "lvl": 47,
      "species": "SPECIES_PERSIAN",
      "moves": [
-      "MOVE_KNOCK_OFF",
       "MOVE_NASTY_PLOT",
       "MOVE_SLASH",
-      "MOVE_POWER_GEM"
+      "MOVE_POWER_GEM",
+      "MOVE_TAUNT"
      ]
     },
     {
      "iv": 100,
      "lvl": 47,
-     "species": "SPECIES_MILOTIC",
+     "species": "SPECIES_DEWGONG",
      "moves": [
       "MOVE_ICE_BEAM",
-      "MOVE_RECOVER",
-      "MOVE_SAFEGUARD",
-      "MOVE_ATTRACT"
+      "MOVE_AQUA_TAIL",
+      "MOVE_DIVE",
+      "MOVE_TAKE_DOWN"
      ]
     },
     {
@@ -45283,12 +45283,12 @@
     {
      "iv": 0,
      "lvl": 48,
-     "species": "SPECIES_CLAYDOL",
+     "species": "SPECIES_GOLEM",
      "moves": [
-      "MOVE_PSYCHIC",
-      "MOVE_ICE_BEAM",
-      "MOVE_COSMIC_POWER",
-      "MOVE_SANDSTORM"
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_EXPLOSION",
+      "MOVE_EARTHQUAKE",
+      "MOVE_ROCK_BLAST"
      ]
     },
     {
@@ -45435,10 +45435,10 @@
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FAKE_OUT",
       "MOVE_ASSURANCE",
       "MOVE_NASTY_PLOT",
-      "MOVE_SLASH"
+      "MOVE_SLASH",
+      "MOVE_POWER_GEM"
      ]
     },
     {
@@ -45452,7 +45452,7 @@
       252
      ],
      "lvl": 52,
-     "species": "SPECIES_EXPLOUD",
+     "species": "SPECIES_CLEFABLE",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
@@ -45460,8 +45460,8 @@
      "moves": [
       "MOVE_STRENGTH",
       "MOVE_ICE_PUNCH",
-      "MOVE_ROAR",
-      "MOVE_CRUNCH"
+      "MOVE_METRONOME",
+      "MOVE_MINIMIZE"
      ]
     }
    ],
@@ -45543,7 +45543,7 @@
     {
      "iv": 100,
      "lvl": 48,
-     "species": "SPECIES_CHIMECHO"
+     "species": "SPECIES_XATU"
     },
     {
      "iv": 100,
@@ -45708,17 +45708,17 @@
     {
      "iv": 0,
      "lvl": 45,
-     "species": "SPECIES_MASQUERAIN"
-    },
-    {
-     "iv": 0,
-     "lvl": 45,
      "species": "SPECIES_YANMA"
     },
     {
      "iv": 0,
-     "lvl": 46,
+     "lvl": 45,
      "species": "SPECIES_BEEDRILL"
+    },
+    {
+     "iv": 0,
+     "lvl": 46,
+     "species": "SPECIES_VENOMOTH"
     },
     {
      "iv": 0,
@@ -46174,16 +46174,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_TORKOAL",
+     "species": "SPECIES_MAGMAR",
      "nature": 5,
      "ability_num": 1,
      "held_item": "ITEM_HEAT_ROCK",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_RAPID_SPIN",
-      "MOVE_YAWN",
-      "MOVE_HEAT_WAVE",
-      "MOVE_FLAIL"
+      "MOVE_FIRE_BLAST",
+      "MOVE_SUNNY_DAY",
+      "MOVE_FLAMETHROWER",
+      "MOVE_LAVA_PLUME"
      ]
     },
     {
@@ -46220,16 +46220,16 @@
       252
      ],
      "lvl": 70,
-     "species": "SPECIES_FLYGON",
+     "species": "SPECIES_STEELIX",
      "nature": 13,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_EARTHQUAKE",
-      "MOVE_DRAGON_CLAW",
-      "MOVE_HYPER_BEAM",
-      "MOVE_SANDSTORM"
+      "MOVE_STONE_EDGE",
+      "MOVE_DOUBLE_EDGE",
+      "MOVE_CRUNCH"
      ]
     },
     {
@@ -46289,16 +46289,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_CAMERUPT",
+     "species": "SPECIES_SANDSLASH",
      "nature": 15,
      "ability_num": 1,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_FLAMETHROWER",
-      "MOVE_ANCIENT_POWER",
-      "MOVE_FISSURE",
-      "MOVE_ERUPTION"
+      "MOVE_SANDSTORM",
+      "MOVE_GYRO_BALL",
+      "MOVE_SLASH",
+      "MOVE_SAND_TOMB"
      ]
     }
    ]
@@ -46339,16 +46339,16 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_PELIPPER",
+     "species": "SPECIES_MANTINE",
      "nature": 5,
      "ability_num": 1,
      "held_item": "ITEM_DAMP_ROCK",
      "unknown_0x10": 0,
      "moves": [
       "MOVE_HYDRO_PUMP",
-      "MOVE_TAILWIND",
-      "MOVE_FLING",
-      "MOVE_SPIT_UP"
+      "MOVE_AQUA_RING",
+      "MOVE_BOUNCE",
+      "MOVE_CONFUSE_RAY"
      ]
     },
     {
@@ -46385,16 +46385,16 @@
       252
      ],
      "lvl": 70,
-     "species": "SPECIES_LUDICOLO",
+     "species": "SPECIES_VILEPLUME",
      "nature": 15,
      "ability_num": 0,
      "held_item": "ITEM_LIFE_ORB",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_HYDRO_PUMP",
       "MOVE_GIGA_DRAIN",
-      "MOVE_ICE_BEAM",
-      "MOVE_RAIN_DANCE"
+      "MOVE_SOLAR_BEAM",
+      "MOVE_PETAL_DANCE",
+      "MOVE_POISON_POWDER"
      ]
     },
     {
@@ -46431,7 +46431,7 @@
       0
      ],
      "lvl": 70,
-     "species": "SPECIES_SWAMPERT",
+     "species": "SPECIES_QUAGSIRE",
      "nature": 3,
      "ability_num": 0,
      "held_item": "ITEM_LEFTOVERS",
@@ -46440,7 +46440,7 @@
       "MOVE_WATERFALL",
       "MOVE_EARTHQUAKE",
       "MOVE_ICE_PUNCH",
-      "MOVE_HAMMER_ARM"
+      "MOVE_MUDDY_WATER"
      ]
     },
     {
@@ -46454,16 +46454,16 @@
       252
      ],
      "lvl": 70,
-     "species": "SPECIES_SHARPEDO",
+     "species": "SPECIES_SEAKING",
      "nature": 13,
      "ability_num": 2,
      "held_item": "ITEM_SITRUS_BERRY",
      "unknown_0x10": 0,
      "moves": [
-      "MOVE_CRUNCH",
       "MOVE_PROTECT",
-      "MOVE_NIGHT_SLASH",
-      "MOVE_SKULL_BASH"
+      "MOVE_MEGAHORN",
+      "MOVE_AGILITY",
+      "MOVE_HORN_DRILL"
      ]
     }
    ]

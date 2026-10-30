@@ -5,4 +5,6 @@ wait 120
 mp wildroll 80
 mp regionclear 0
 mp wildroll 80
+mp gensetting 4
+mp wildroll 80
 quit
