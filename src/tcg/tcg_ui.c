@@ -27,6 +27,7 @@
 #include "tcg_board.h"
 #include "tcg_gfx.h"
 #include "tcg_ui_kit.h"
+#include "tcg_guide.h"
 #include "platform_text.h"
 #include "tcg_structure_decks.h"
 #include "ygo/integration.h"
@@ -846,6 +847,8 @@ static void ListBox(int x, int y, int w, int h)
     G_FillA(x + 2, y + 2, w - 4, 2, 0xd8e0e8, 255);
 }
 /* One row: red frame when chosen (as in the BAG), grey when it can't be used. */
+static int sRowDown;
+void TcgUi_RowDown(int on) { sRowDown = on ? 1 : 0; }
 static void Row(int x, int y, int w, int on, int enabled, const char *label, const char *right)
 {
     /* One line, always (a wrapped label ran onto the next row): what's left of the right-hand text, the narrow font
@@ -870,8 +873,9 @@ static void Row(int x, int y, int w, int on, int enabled, const char *label, con
     if (on)
     {
         int pulse = (U.frame / 16) % 2;
-        G_RoundFrame(x, y, w, ROW_H - 1, 0xe82820, 255);
-        G_RoundFrame(x + 1, y + 1, w - 2, ROW_H - 3, pulse ? 0xf86850 : 0xe82820, 255);
+        /* (the case's menu and its Decks / Booster pages: 1 px lower, TcgUi_RowDown) */
+        G_RoundFrame(x, y + sRowDown, w, ROW_H - 1, 0xe82820, 255);
+        G_RoundFrame(x + 1, y + 1 + sRowDown, w - 2, ROW_H - 3, pulse ? 0xf86850 : 0xe82820, 255);
     }
     G_Text(x + 6, y + 1 + (font == TF_NARROW), enabled ? G_INK : 0xa8a8a8, enabled ? G_INK_SHADOW : G_NO_SHADOW, fit, 0,
            font);
@@ -1373,7 +1377,7 @@ static void HomeScreen(void)
     }
     snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[U.cursor], have, total, c->dust);
     Strip(0, line);
-    Hints("{L}{R} OTHER GAMES");
+    Hints("{SELECT} HOW TO PLAY  {L}{R} OTHER GAMES");
 }
 
 /* A challenge: who it is, what they play, what's in it for you, your deck. */
@@ -1882,7 +1886,7 @@ static void BinderScreen(void)
         if (on)
         {
             int o = (U.frame / 8) % 2;
-            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+            G_Frame(x - 2 - o, y - 1 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
     if (!n)
@@ -2092,7 +2096,7 @@ static void PacksScreen(void)
         snprintf(line, sizeof(line), "x%u", c->packs[i]);
         G_TextAlign(x + 22, 88, TA_CENTER, c->packs[i] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
         if (on)
-            G_Frame(x - 3, 26 - bob - 3, 50, 64, 0xe82820, 255);
+            G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
     }
     Strip(0, c->packs[U.cursor] ? "Open this pack!" : "Win card duels to earn booster packs.");
     Hints("{LEFTRIGHT} CHOOSE  {A} OPEN  {B} BACK");
@@ -3114,6 +3118,14 @@ int Tcg_Step(unsigned keys)
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned pressed = keys & ~U.previousKeys;
     U.previousKeys = keys;
+    /* HOW TO PLAY over any of the three games' first screens: it has the buttons while it's open */
+    if (TcgGuide_Active())
+    {
+        U.frame++;
+        MP_Sound_TickFanfare();
+        TcgGuide_Step(pressed, keys);
+        return 1;
+    }
     if (YgoUi_Active())
     {
         U.frame++;
@@ -3181,7 +3193,9 @@ int Tcg_Step(unsigned keys)
     {
     case UI_HOME:
         MoveCursor(pressed, HOME_ROWS, 1);
-        if (pressed & (KEY_L | KEY_R))
+        if (pressed & KEY_SELECT)
+            TcgGuide_Open(KIT_GAME_POKEMON);
+        else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
             ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : KIT_GAME_TRIAD);
@@ -3796,16 +3810,23 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     if (game)
         SDL_RenderCopy(r, game, NULL, NULL);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+    if (TcgGuide_Active())
+        TcgGuide_Draw();
+    else
     switch (U.screen)
     {
     case UI_HOME:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         HomeScreen();
+        TcgUi_RowDown(0);
         break;
     case UI_CHALLENGE:
         ChallengeScreen();
         break;
     case UI_DECKS:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         DecksScreen();
+        TcgUi_RowDown(0);
         break;
     case UI_RECIPES:
         RecipesScreen();
@@ -3826,7 +3847,9 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
         ArtScreen();
         break;
     case UI_PACKS:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         PacksScreen();
+        TcgUi_RowDown(0);
         break;
     case UI_REVEAL:
         RevealScreen();

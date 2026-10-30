@@ -27,6 +27,7 @@
 #include "tt/rating.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
+#include "../tcg/tcg_guide.h"
 #include "tt_board.h"
 #include "tt_gfx.h"
 
@@ -835,7 +836,7 @@ static void HomeScreen(void)
         snprintf(line, sizeof(line), "%s\nCARDS %u/%u", sHomeHelp[U.cursor], have, total);
         Strip(0, line);
     }
-    TcgUi_Hints("{L}{R} OTHER GAMES");
+    TcgUi_Hints("{SELECT} HOW TO PLAY  {L}{R} OTHER GAMES");
 }
 
 /* DECKS: six slots of five cards */
@@ -1011,7 +1012,7 @@ static void ListScreen(void)
         if (on)
         {
             int o = (U.frame / 8) % 2;
-            G_Frame(x + 4 - o, y - 1 - o, 22 + 2 * o, 22 + 2 * o, 0xe82820, 255);
+            G_Frame(x + 4 - o, y - o, 22 + 2 * o, 22 + 2 * o, 0xe82820, 255);
         }
     }
     if (n)
@@ -1826,12 +1827,12 @@ void TtUi_Draw(void)
 {
     switch (U.screen)
     {
-    case T_HOME: HomeScreen(); break;
-    case T_DECKS: DecksScreen(); break;
+    case T_HOME: TcgUi_RowDown(1), HomeScreen(), TcgUi_RowDown(0); break;   // (the row cursor 1 px lower)
+    case T_DECKS: TcgUi_RowDown(1), DecksScreen(), TcgUi_RowDown(0); break;   // (the row cursor 1 px lower)
     case T_BUILDER: BuilderScreen(); break;
     case T_LIST: ListScreen(); break;
     case T_INSPECT: InspectScreen(); break;
-    case T_PACKS: PacksScreen(); break;
+    case T_PACKS: TcgUi_RowDown(1), PacksScreen(), TcgUi_RowDown(0); break;   // (the row cursor 1 px lower)
     case T_REVEAL: RevealScreen(); break;
     case T_RULES: RulesScreen(); break;
     case T_CHALLENGE: ChallengeScreen(); break;
@@ -2167,7 +2168,9 @@ int TtUi_Step(unsigned keys)
     {
     case T_HOME:
         MoveCursor(pressed, HOME_ROWS, 1);
-        if (pressed & (KEY_L | KEY_R))
+        if (pressed & KEY_SELECT)
+            TcgGuide_Open(KIT_GAME_TRIAD);
+        else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
             ToSide((pressed & KEY_R) != 0);

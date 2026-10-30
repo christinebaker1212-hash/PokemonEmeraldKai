@@ -415,3 +415,51 @@ expect queen 'region MAUVILLE rules [0-9a-f]* trade 3'
 expect queen 'queen LAVARIDGE'
 echo 'PASS the CARD QUEEN: a favor (the TRADE RULE ALL), a journey'
 fi
+
+# HOW TO PLAY: SELECT on the case's first screen, every page, B: back on the same screen (the case still open)
+if only guide; then
+cat > "$OUT/guide.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp tt starter
+mp tt case
+wait 30
+press SELECT 2
+wait 40
+rendershot guide_first
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+wait 60
+rendershot guide_last
+press LEFT 2
+wait 10
+press B 4
+wait 30
+mp tt state
+rendershot guide_closed
+quit
+SCRIPT
+run guide
+expect guide 'HOW TO PLAY opened (game 2, 10 pages)'
+expect guide 'page 10: CONTROLS'
+expect guide 'guide\] closed'
+expect guide 'tt\] screen 1 '
+refuse guide "words don't fit"
+echo 'PASS HOW TO PLAY: every page, then back on the case'
+fi

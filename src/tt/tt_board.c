@@ -99,6 +99,14 @@ static SDL_Texture *sSoft;   // a soft round light (glows, sparks)
 static int Side(unsigned seat) { return seat == B.me ? 0 : 1; }
 static unsigned SeatOf(int side) { return side ? B.me ^ 1 : B.me; }
 static int Dur(int frames) { return B.fast ? (frames + 1) / 2 : frames; }
+/* Who starts: the light runs from side to side, slowing down. Its phase counts the runs (whole = at a name), from
+   the left name (0) at the start to whoever starts at the stop: an even count ends on the left, an odd one on the
+   right. The tick plays as it reaches each name, so the sound slows with the light and stops with it. */
+static float SpinPhase(int t, int stop, int first)
+{
+    float k = t >= stop ? 1.0f : (float)t / (float)stop;
+    return (1 - (1 - k) * (1 - k)) * (first ? 7.0f : 8.0f);
+}
 static float Ease(float t) { t = t < 0 ? 0 : t > 1 ? 1 : t; return 1 - (1 - t) * (1 - t) * (1 - t); }
 static float EaseInOut(float t)
 {
@@ -727,8 +735,9 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
     case PH_SPIN:
     {
         int len = Dur(80);
-        if (B.t % 6 == 0 && B.t < len - Dur(20))
-            PlaySE(SE_ROULETTE_BALL);
+        if (B.t > 0 && B.t < len - Dur(18) &&
+            (int)SpinPhase(B.t, len - Dur(18), B.spinFirst) > (int)SpinPhase(B.t - 1, len - Dur(18), B.spinFirst))
+            PlaySE(SE_RG_BAG_CURSOR);   // (the light reached a name)
         if (B.t == len - Dur(18))
         {
             PlaySE(SE_PIN);
@@ -1369,7 +1378,7 @@ static void RulesPanel(void)
 static void Spin(void)
 {
     int len = Dur(80), stop = len - Dur(18), i;
-    float t = (float)B.t / (float)stop, pos;
+    float pos;
     for (i = 0; i < 2; i++)
     {
         int x = i ? 132 : 16, w = 92;
@@ -1380,13 +1389,7 @@ static void Spin(void)
     }
     // the light runs back and forth, slowing down, and stops on whoever starts
     if (B.t < stop)
-    {
-        float swings = 7.5f + (B.spinFirst ? 0 : 0.5f);
-        float phase = (1 - (1 - t) * (1 - t)) * swings;
-        pos = 0.5f - 0.5f * cosf(phase * 3.14159f);
-        if (B.spinFirst == 0)
-            pos = 1 - pos;
-    }
+        pos = 0.5f - 0.5f * cosf(SpinPhase(B.t, stop, B.spinFirst) * 3.14159f);
     else
         pos = (float)B.spinFirst;
     {

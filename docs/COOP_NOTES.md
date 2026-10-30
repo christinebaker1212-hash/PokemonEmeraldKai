@@ -2139,6 +2139,9 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
   (gStringVar1-3: region, rules, trade rule), Tt_SellerStarter, Tt_SellerShop, Tt_MapSetup, Tt_QueenTalk /
   Here / FirstMeeting. FLAG_TT_QUEEN_AWAY (FLAG_UNUSED_0x022) hides the queen outside her region; the region is
   the map section's (Tt_CurrentRegion; buildings of no town keep the last region).
+- Who starts (1.53.0): tt_board.c SpinPhase: the light runs side to side, an even count of runs ends on the left
+  (you), odd on the right, so it stops where it lands (it used to jump at the end); the tick plays as it reaches each
+  name and the pin when it stops. The deal and the spin can't be skipped.
 - Music: every game plays a battle song (1.52.2): ordinary players and friends MUS_RG_VS_TRAINER, specials their own
   (MUS_VS_GYM_LEADER, MUS_VS_CHAMPION...), a win MUS_VICTORY_TRAINER; as the `tt` scene, `@tt` files replace them.
 - Achievements: the TRIPLE TRIAD tab (counters ttwin, ttsame, ttplus, ttcombo, ttspread, ttabolish, ttspecial,
@@ -2194,6 +2197,17 @@ What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like o
   deal, a state being presented, the queue, a drawn card's spotlight; not the sprites still gliding after a cursor
   move, which would make the cursor slow). Yu-Gi-Oh!: !YgoBoard_Idle (events left or the timer running). Triple
   Triad: a card flying or a banner up, and the deal and the spin can no longer be skipped (the rules page still can).
+
+- HOW TO PLAY (1.53.0): SELECT on any game's first CARD CASE screen opens src/tcg/tcg_guide.c over it (Tcg_Step
+  gives it the buttons first; the canvas draws it instead of the screen). Pages per game (sPokemon, sYugioh, sTriad):
+  a title, a few words in the strip (two lines of the small font or three of the narrow one: opening it logs
+  "page N's words don't fit" otherwise, and the tests refuse that), and a stage drawn from the page's own frame count
+  with the games' own card faces. Triple Triad's examples use real cards whose numbers fit (FindCards: a plain capture,
+  SAME, PLUS, a COMBO corner). LEFT / RIGHT / L / R / A turn pages, B or SELECT close it once let go (so the screen under
+  it never sees the press). The narrow font has no "=": labels say "BEATS", "AND", "BOTH". Tests: each game's test_ui
+  "guide".
+- The case's menu and its Decks / Booster pages draw the row cursor 1 px lower (TcgUi_RowDown around those three
+  screens' draws; the deck builder keeps its own), the binders' and Pokemon / Yu-Gi-Oh! booster pages' card frames too.
 
 ## Every POKéMON card attack (1.46.0)
 - The last 20 command lists from the original's effect_functions.asm (pret/poketcg), as FX_* kinds in

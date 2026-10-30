@@ -22,6 +22,7 @@ void TcgUi_SidePanel(const char *title, unsigned color);
 void TcgUi_CaseTabs(unsigned game, unsigned color);
 void TcgUi_ListBox(int x, int y, int w, int h);
 void TcgUi_Row(int x, int y, int w, int on, int enabled, const char *label, const char *right);
+void TcgUi_RowDown(int on);   // the case's menu and its Decks / Booster pages: the row cursor 1 px lower
 /* The bottom strip; card: a card face drawn at its left by draw (G_Card, Ygo_DrawCard), 0 none */
 void TcgUi_Strip(void (*draw)(unsigned, float, float, float, float, double, unsigned, unsigned), unsigned card,
                  const char *text);

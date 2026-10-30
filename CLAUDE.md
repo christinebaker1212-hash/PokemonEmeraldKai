@@ -197,6 +197,8 @@ only from what both can see), hidden power ratings from AI duels blended with th
 (tools/tt/rate_cards.sh, tools/ygo/rate_cards.sh, tools/tcg/rate_cards.sh: audits in docs/audit_*.txt; rerun after
 rules / AI / card changes), CARD SCALING fits with a slight player edge, and the challenge screen's live difficulty
 for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power ratings and how a match looks".
+HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
+card games together").
 
 Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
 XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->

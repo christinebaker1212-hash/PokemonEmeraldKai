@@ -25,6 +25,7 @@
 #include "ygo/npc.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
+#include "../tcg/tcg_guide.h"
 #include "ygo_board.h"
 #include "ygo_internal.h"
 #include "ygo_gfx.h"
@@ -986,7 +987,7 @@ static void HomeScreen(void)
         snprintf(line, sizeof(line), "%s\nCARDS %u/%u   CARD POINTS %u", sHomeHelp[Y.cursor], have, total, Points());
         Strip(0, line);
     }
-    TcgUi_Hints("{L}{R} OTHER GAMES");
+    TcgUi_Hints("{SELECT} HOW TO PLAY  {L}{R} OTHER GAMES");
 }
 
 static void Portrait(int x, int y)
@@ -1584,7 +1585,7 @@ static void BinderScreen(void)
         if (on)
         {
             int o = (Y.frame / 8) % 2;
-            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+            G_Frame(x - 2 - o, y - 1 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
     if (!n)
@@ -1800,7 +1801,7 @@ static void PacksScreen(void)
         snprintf(line, sizeof(line), "x%u", C()->packs[set]);
         G_TextAlign(x + 22, 88, TA_CENTER, C()->packs[set] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
         if (on)
-            G_Frame(x - 3, 26 - bob - 3, 50, 64, 0xe82820, 255);
+            G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
     }
     if (n)
     {
@@ -2686,7 +2687,9 @@ int YgoUi_Step(unsigned keys)
     {
     case Y_HOME:
         MoveCursor(pressed, HOME_ROWS, 1);
-        if (pressed & (KEY_L | KEY_R))
+        if (pressed & KEY_SELECT)
+            TcgGuide_Open(KIT_GAME_YUGIOH);
+        else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
             ToSide(pressed & KEY_R ? KIT_GAME_TRIAD : KIT_GAME_POKEMON);
@@ -3352,13 +3355,17 @@ void YgoUi_Draw(void)
     switch (Y.screen)
     {
     case Y_HOME:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         HomeScreen();
+        TcgUi_RowDown(0);
         break;
     case Y_CHALLENGE:
         ChallengeScreen();
         break;
     case Y_DECKS:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         DecksScreen();
+        TcgUi_RowDown(0);
         break;
     case Y_RECIPES:
         RecipesScreen();
@@ -3382,7 +3389,9 @@ void YgoUi_Draw(void)
         ArtScreen();
         break;
     case Y_PACKS:
+        TcgUi_RowDown(1);   // (the case's menu and its Decks / Booster pages: the row cursor 1 px lower)
         PacksScreen();
+        TcgUi_RowDown(0);
         break;
     case Y_REVEAL:
         RevealScreen();

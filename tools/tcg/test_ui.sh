@@ -529,4 +529,47 @@ run holo
 expect holo 'opened pack 0'
 expect holo 'set complete: 0'
 echo 'PASS a holo the set was missing: NEW, HOLO!, the set complete'
+# HOW TO PLAY: SELECT on the case's first screen, every page, B: back on the same screen (the case still open)
+cat > "$OUT/guide.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp cards starter 0
+mp cards case
+wait 30
+press SELECT 2
+wait 40
+rendershot guide_first
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+press RIGHT 2
+wait 12
+wait 60
+rendershot guide_last
+press LEFT 2
+wait 10
+press B 4
+wait 30
+mp cards state
+rendershot guide_closed
+quit
+SCRIPT
+run guide
+expect guide 'HOW TO PLAY opened (game 0, 9 pages)'
+expect guide 'page 9: CONTROLS'
+expect guide 'guide\] closed'
+expect guide 'tcg\] screen 1 '
+if grep -q "words don't fit" "$OUT/guide/log.txt"; then echo "FAIL guide: a page's words don't fit"; exit 1; fi
+echo 'PASS HOW TO PLAY: every page, then back on the case'
 echo "Screenshots and logs: $OUT"
