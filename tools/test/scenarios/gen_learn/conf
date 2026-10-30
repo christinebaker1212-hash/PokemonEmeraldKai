@@ -1,0 +1,7 @@
+# GENERATION 3: a Pokémon never gets a move past it. ABSOL made at Lv. 50 skips FEINT and SUCKER PUNCH (Gen 4); one
+# reaching Lv. 44 in battle passes SUCKER PUNCH by (it used to learn it and become SEALED)
+MODE=1
+GEN=3
+ENV_A="MOEMON_DEBUG_PARTY=376:43+,376:50"
+EXPECT_A=("monmoves: slot 1 species 376 moves 104 163 248 195" "gencheck: cap 3 sealed 0 0" "monmoves: slot 0 species 376 moves 61 104 163 248")
+UNEXPECT_A=("gencheck: cap 3 sealed 1" "gencheck: cap 3 sealed 0 1" "species 376 moves 389")

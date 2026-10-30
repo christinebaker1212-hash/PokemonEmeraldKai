@@ -319,7 +319,14 @@
    "dir": "graphics/pokemon/snivy",
    "icon_png": "graphics/pokemon/snivy/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/snivy.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_SERVINE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -544,7 +551,14 @@
    "dir": "graphics/pokemon/servine",
    "icon_png": "graphics/pokemon/servine/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/servine.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SERPERIOR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -982,7 +996,14 @@
    "dir": "graphics/pokemon/tepig",
    "icon_png": "graphics/pokemon/tepig/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tepig.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_PIGNITE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -1211,7 +1232,14 @@
    "dir": "graphics/pokemon/pignite",
    "icon_png": "graphics/pokemon/pignite/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pignite.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_EMBOAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -1707,7 +1735,14 @@
    "dir": "graphics/pokemon/oshawott",
    "icon_png": "graphics/pokemon/oshawott/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/oshawott.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_DEWOTT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -1934,7 +1969,30 @@
    "dir": "graphics/pokemon/dewott",
    "icon_png": "graphics/pokemon/dewott/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dewott.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SAMUROTT",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SAMUROTT_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -2394,7 +2452,14 @@
    "dir": "graphics/pokemon/patrat",
    "icon_png": "graphics/pokemon/patrat/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/patrat.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_WATCHOG",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -2877,7 +2942,14 @@
    "dir": "graphics/pokemon/lillipup",
    "icon_png": "graphics/pokemon/lillipup/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/lillipup.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_HERDIER",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -3086,7 +3158,14 @@
    "dir": "graphics/pokemon/herdier",
    "icon_png": "graphics/pokemon/herdier/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/herdier.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_STOUTLAND",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -3497,7 +3576,14 @@
    "dir": "graphics/pokemon/purrloin",
    "icon_png": "graphics/pokemon/purrloin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/purrloin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_LIEPARD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -3916,7 +4002,14 @@
    "dir": "graphics/pokemon/pansage",
    "icon_png": "graphics/pokemon/pansage/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pansage.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_LEAF_STONE",
+     "target": "SPECIES_SIMISAGE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -4330,7 +4423,14 @@
    "dir": "graphics/pokemon/pansear",
    "icon_png": "graphics/pokemon/pansear/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pansear.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_FIRE_STONE",
+     "target": "SPECIES_SIMISEAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -4748,7 +4848,14 @@
    "dir": "graphics/pokemon/panpour",
    "icon_png": "graphics/pokemon/panpour/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/panpour.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_WATER_STONE",
+     "target": "SPECIES_SIMIPOUR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -5168,7 +5275,14 @@
    "dir": "graphics/pokemon/munna",
    "icon_png": "graphics/pokemon/munna/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/munna.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_MOON_STONE",
+     "target": "SPECIES_MUSHARNA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -5613,7 +5727,14 @@
    "dir": "graphics/pokemon/pidove",
    "icon_png": "graphics/pokemon/pidove/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pidove.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "21",
+     "target": "SPECIES_TRANQUILL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -5806,7 +5927,14 @@
    "dir": "graphics/pokemon/tranquill",
    "icon_png": "graphics/pokemon/tranquill/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tranquill.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_UNFEZANT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -6178,7 +6306,14 @@
    "dir": "graphics/pokemon/blitzle",
    "icon_png": "graphics/pokemon/blitzle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/blitzle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "27",
+     "target": "SPECIES_ZEBSTRIKA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -6585,7 +6720,14 @@
    "dir": "graphics/pokemon/roggenrola",
    "icon_png": "graphics/pokemon/roggenrola/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/roggenrola.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_BOLDORE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -6777,7 +6919,20 @@
    "dir": "graphics/pokemon/boldore",
    "icon_png": "graphics/pokemon/boldore/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/boldore.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_GIGALITH",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_LINKING_CORD",
+     "target": "SPECIES_GIGALITH",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -7168,7 +7323,19 @@
    "dir": "graphics/pokemon/woobat",
    "icon_png": "graphics/pokemon/woobat/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/woobat.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_SWOOBAT",
+     "conds": [
+      [
+       "IF_MIN_FRIENDSHIP",
+       "FRIENDSHIP_EVO_THRESHOLD"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -7628,7 +7795,14 @@
    "dir": "graphics/pokemon/drilbur",
    "icon_png": "graphics/pokemon/drilbur/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/drilbur.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "31",
+     "target": "SPECIES_EXCADRILL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -8326,7 +8500,14 @@
    "dir": "graphics/pokemon/timburr",
    "icon_png": "graphics/pokemon/timburr/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/timburr.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_GURDURR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -8554,7 +8735,20 @@
    "dir": "graphics/pokemon/gurdurr",
    "icon_png": "graphics/pokemon/gurdurr/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/gurdurr.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_CONKELDURR",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_LINKING_CORD",
+     "target": "SPECIES_CONKELDURR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -8995,7 +9189,14 @@
    "dir": "graphics/pokemon/tympole",
    "icon_png": "graphics/pokemon/tympole/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tympole.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_PALPITOAD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -9193,7 +9394,14 @@
    "dir": "graphics/pokemon/palpitoad",
    "icon_png": "graphics/pokemon/palpitoad/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/palpitoad.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SEISMITOAD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -10015,7 +10223,14 @@
    "dir": "graphics/pokemon/sewaddle",
    "icon_png": "graphics/pokemon/sewaddle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sewaddle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_SWADLOON",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -10208,7 +10423,19 @@
    "dir": "graphics/pokemon/swadloon",
    "icon_png": "graphics/pokemon/swadloon/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/swadloon.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_LEAVANNY",
+     "conds": [
+      [
+       "IF_MIN_FRIENDSHIP",
+       "FRIENDSHIP_EVO_THRESHOLD"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      0,
@@ -10621,7 +10848,14 @@
    "dir": "graphics/pokemon/venipede",
    "icon_png": "graphics/pokemon/venipede/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/venipede.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "22",
+     "target": "SPECIES_WHIRLIPEDE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -10814,7 +11048,14 @@
    "dir": "graphics/pokemon/whirlipede",
    "icon_png": "graphics/pokemon/whirlipede/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/whirlipede.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_SCOLIPEDE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -11229,7 +11470,14 @@
    "dir": "graphics/pokemon/cottonee",
    "icon_png": "graphics/pokemon/cottonee/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cottonee.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SUN_STONE",
+     "target": "SPECIES_WHIMSICOTT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -11691,7 +11939,30 @@
    "dir": "graphics/pokemon/petilil",
    "icon_png": "graphics/pokemon/petilil/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/petilil.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SUN_STONE",
+     "target": "SPECIES_LILLIGANT",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SUN_STONE",
+     "target": "SPECIES_LILLIGANT_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -12373,7 +12644,14 @@
    "dir": "graphics/pokemon/sandile",
    "icon_png": "graphics/pokemon/sandile/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sandile.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "29",
+     "target": "SPECIES_KROKOROK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -12609,7 +12887,14 @@
    "dir": "graphics/pokemon/krokorok",
    "icon_png": "graphics/pokemon/krokorok/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/krokorok.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_KROOKODILE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -13103,7 +13388,14 @@
    "dir": "graphics/pokemon/darumaka",
    "icon_png": "graphics/pokemon/darumaka/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/darumaka.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_DARMANITAN_STANDARD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -13787,7 +14079,14 @@
    "dir": "graphics/pokemon/dwebble",
    "icon_png": "graphics/pokemon/dwebble/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dwebble.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_CRUSTLE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -14199,7 +14498,14 @@
    "dir": "graphics/pokemon/scraggy",
    "icon_png": "graphics/pokemon/scraggy/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/scraggy.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_SCRAFTY",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -14943,7 +15249,14 @@
    "dir": "graphics/pokemon/yamask",
    "icon_png": "graphics/pokemon/yamask/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/yamask.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_COFAGRIGUS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -15405,7 +15718,14 @@
    "dir": "graphics/pokemon/tirtouga",
    "icon_png": "graphics/pokemon/tirtouga/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tirtouga.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_CARRACOSTA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -15860,7 +16180,14 @@
    "dir": "graphics/pokemon/archen",
    "icon_png": "graphics/pokemon/archen/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/archen.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_ARCHEOPS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -16324,7 +16651,14 @@
    "dir": "graphics/pokemon/trubbish",
    "icon_png": "graphics/pokemon/trubbish/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/trubbish.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_GARBODOR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -16778,7 +17112,14 @@
    "dir": "graphics/pokemon/zorua",
    "icon_png": "graphics/pokemon/zorua/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/zorua.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_ZOROARK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -17246,7 +17587,14 @@
    "dir": "graphics/pokemon/minccino",
    "icon_png": "graphics/pokemon/minccino/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/minccino.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SHINY_STONE",
+     "target": "SPECIES_CINCCINO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -17685,7 +18033,14 @@
    "dir": "graphics/pokemon/gothita",
    "icon_png": "graphics/pokemon/gothita/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/gothita.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_GOTHORITA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -17917,7 +18272,14 @@
    "dir": "graphics/pokemon/gothorita",
    "icon_png": "graphics/pokemon/gothorita/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/gothorita.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "41",
+     "target": "SPECIES_GOTHITELLE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -18372,7 +18734,14 @@
    "dir": "graphics/pokemon/solosis",
    "icon_png": "graphics/pokemon/solosis/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/solosis.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_DUOSION",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -18600,7 +18969,14 @@
    "dir": "graphics/pokemon/duosion",
    "icon_png": "graphics/pokemon/duosion/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/duosion.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "41",
+     "target": "SPECIES_REUNICLUS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -19063,7 +19439,14 @@
    "dir": "graphics/pokemon/ducklett",
    "icon_png": "graphics/pokemon/ducklett/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/ducklett.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_SWANNA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -19474,7 +19857,14 @@
    "dir": "graphics/pokemon/vanillite",
    "icon_png": "graphics/pokemon/vanillite/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/vanillite.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_VANILLISH",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -19671,7 +20061,14 @@
    "dir": "graphics/pokemon/vanillish",
    "icon_png": "graphics/pokemon/vanillish/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/vanillish.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "47",
+     "target": "SPECIES_VANILLUXE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -20070,7 +20467,14 @@
    "dir": "graphics/pokemon/deerling",
    "icon_png": "graphics/pokemon/deerling/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/deerling.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_SAWSBUCK_SPRING",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -20716,7 +21120,19 @@
    "dir": "graphics/pokemon/karrablast",
    "icon_png": "graphics/pokemon/karrablast/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/karrablast.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_ESCAVALIER",
+     "conds": [
+      [
+       "IF_TRADE_PARTNER_SPECIES",
+       "SPECIES_SHELMET"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -21151,7 +21567,14 @@
    "dir": "graphics/pokemon/foongus",
    "icon_png": "graphics/pokemon/foongus/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/foongus.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_AMOONGUSS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -21549,7 +21972,14 @@
    "dir": "graphics/pokemon/frillish",
    "icon_png": "graphics/pokemon/frillish/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/frillish.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_JELLICENT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -22198,7 +22628,14 @@
    "dir": "graphics/pokemon/joltik",
    "icon_png": "graphics/pokemon/joltik/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/joltik.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_GALVANTULA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -22628,7 +23065,14 @@
    "dir": "graphics/pokemon/ferroseed",
    "icon_png": "graphics/pokemon/ferroseed/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/ferroseed.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_FERROTHORN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -23038,7 +23482,14 @@
    "dir": "graphics/pokemon/klink",
    "icon_png": "graphics/pokemon/klink/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/klink.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_KLANG",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -23226,7 +23677,14 @@
    "dir": "graphics/pokemon/klang",
    "icon_png": "graphics/pokemon/klang/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/klang.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "49",
+     "target": "SPECIES_KLINKLANG",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -23622,7 +24080,14 @@
    "dir": "graphics/pokemon/tynamo",
    "icon_png": "graphics/pokemon/tynamo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tynamo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_EELEKTRIK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -23726,7 +24191,14 @@
    "dir": "graphics/pokemon/eelektrik",
    "icon_png": "graphics/pokemon/eelektrik/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/eelektrik.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_THUNDER_STONE",
+     "target": "SPECIES_EELEKTROSS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -24146,7 +24618,14 @@
    "dir": "graphics/pokemon/elgyem",
    "icon_png": "graphics/pokemon/elgyem/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/elgyem.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "42",
+     "target": "SPECIES_BEHEEYEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -24594,7 +25073,14 @@
    "dir": "graphics/pokemon/litwick",
    "icon_png": "graphics/pokemon/litwick/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/litwick.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "41",
+     "target": "SPECIES_LAMPENT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -24822,7 +25308,14 @@
    "dir": "graphics/pokemon/lampent",
    "icon_png": "graphics/pokemon/lampent/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/lampent.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_DUSK_STONE",
+     "target": "SPECIES_CHANDELURE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -25266,7 +25759,14 @@
    "dir": "graphics/pokemon/axew",
    "icon_png": "graphics/pokemon/axew/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/axew.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_FRAXURE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -25509,7 +26009,14 @@
    "dir": "graphics/pokemon/fraxure",
    "icon_png": "graphics/pokemon/fraxure/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fraxure.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "48",
+     "target": "SPECIES_HAXORUS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -25984,7 +26491,14 @@
    "dir": "graphics/pokemon/cubchoo",
    "icon_png": "graphics/pokemon/cubchoo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cubchoo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_BEARTIC",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -26702,7 +27216,19 @@
    "dir": "graphics/pokemon/shelmet",
    "icon_png": "graphics/pokemon/shelmet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/shelmet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_ACCELGOR",
+     "conds": [
+      [
+       "IF_TRADE_PARTNER_SPECIES",
+       "SPECIES_KARRABLAST"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -27364,7 +27890,14 @@
    "dir": "graphics/pokemon/mienfoo",
    "icon_png": "graphics/pokemon/mienfoo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/mienfoo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "50",
+     "target": "SPECIES_MIENSHAO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -28064,7 +28597,14 @@
    "dir": "graphics/pokemon/golett",
    "icon_png": "graphics/pokemon/golett/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/golett.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "43",
+     "target": "SPECIES_GOLURK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -28554,7 +29094,14 @@
    "dir": "graphics/pokemon/pawniard",
    "icon_png": "graphics/pokemon/pawniard/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pawniard.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "52",
+     "target": "SPECIES_BISHARP",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -29248,7 +29795,30 @@
    "dir": "graphics/pokemon/rufflet",
    "icon_png": "graphics/pokemon/rufflet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rufflet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "54",
+     "target": "SPECIES_BRAVIARY",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "54",
+     "target": "SPECIES_BRAVIARY_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -29666,7 +30236,14 @@
    "dir": "graphics/pokemon/vullaby",
    "icon_png": "graphics/pokemon/vullaby/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/vullaby.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "54",
+     "target": "SPECIES_MANDIBUZZ",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -30562,7 +31139,14 @@
    "dir": "graphics/pokemon/deino",
    "icon_png": "graphics/pokemon/deino/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/deino.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "50",
+     "target": "SPECIES_ZWEILOUS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -30789,7 +31373,14 @@
    "dir": "graphics/pokemon/zweilous",
    "icon_png": "graphics/pokemon/zweilous/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/zweilous.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "64",
+     "target": "SPECIES_HYDREIGON",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -31279,7 +31870,14 @@
    "dir": "graphics/pokemon/larvesta",
    "icon_png": "graphics/pokemon/larvesta/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/larvesta.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "59",
+     "target": "SPECIES_VOLCARONA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -34240,7 +34838,14 @@
    "dir": "graphics/pokemon/genesect",
    "icon_png": "graphics/pokemon/genesect/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/genesect.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_QUILLADIN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -34468,7 +35073,14 @@
    "dir": "graphics/pokemon/chespin",
    "icon_png": "graphics/pokemon/chespin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/chespin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_QUILLADIN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -34702,7 +35314,14 @@
    "dir": "graphics/pokemon/quilladin",
    "icon_png": "graphics/pokemon/quilladin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/quilladin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_CHESNAUGHT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -35205,7 +35824,14 @@
    "dir": "graphics/pokemon/fennekin",
    "icon_png": "graphics/pokemon/fennekin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fennekin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_BRAIXEN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -35421,7 +36047,14 @@
    "dir": "graphics/pokemon/braixen",
    "icon_png": "graphics/pokemon/braixen/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/braixen.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_DELPHOX",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -35914,7 +36547,14 @@
    "dir": "graphics/pokemon/froakie",
    "icon_png": "graphics/pokemon/froakie/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/froakie.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_FROGADIER",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -36137,7 +36777,14 @@
    "dir": "graphics/pokemon/frogadier",
    "icon_png": "graphics/pokemon/frogadier/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/frogadier.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_GRENINJA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -36623,7 +37270,14 @@
    "dir": "graphics/pokemon/bunnelby",
    "icon_png": "graphics/pokemon/bunnelby/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/bunnelby.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_DIGGERSBY",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -37070,7 +37724,14 @@
    "dir": "graphics/pokemon/fletchling",
    "icon_png": "graphics/pokemon/fletchling/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fletchling.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_FLETCHINDER",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -37262,7 +37923,14 @@
    "dir": "graphics/pokemon/fletchinder",
    "icon_png": "graphics/pokemon/fletchinder/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fletchinder.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_TALONFLAME",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -38126,7 +38794,14 @@
    "dir": "graphics/pokemon/litleo",
    "icon_png": "graphics/pokemon/litleo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/litleo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_PYROAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -39199,7 +39874,14 @@
    "dir": "graphics/pokemon/skiddo",
    "icon_png": "graphics/pokemon/skiddo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/skiddo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_GOGOAT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -39643,7 +40325,19 @@
    "dir": "graphics/pokemon/pancham",
    "icon_png": "graphics/pokemon/pancham/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pancham.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_PANGORO",
+     "conds": [
+      [
+       "IF_TYPE_IN_PARTY",
+       "TYPE_DARK"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -40142,7 +40836,30 @@
    "dir": "graphics/pokemon/furfrou/debutante",
    "icon_png": "graphics/pokemon/furfrou/debutante/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/furfrou.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_MEOWSTIC_M",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_MALE"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_MEOWSTIC_F",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_FEMALE"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -40343,7 +41060,30 @@
    "dir": "graphics/pokemon/espurr",
    "icon_png": "graphics/pokemon/espurr/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/espurr.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_MEOWSTIC_M",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_MALE"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_MEOWSTIC_F",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_FEMALE"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -40806,7 +41546,14 @@
    "dir": "graphics/pokemon/honedge",
    "icon_png": "graphics/pokemon/honedge/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/honedge.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_DOUBLADE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -41005,7 +41752,14 @@
    "dir": "graphics/pokemon/doublade",
    "icon_png": "graphics/pokemon/doublade/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/doublade.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_DUSK_STONE",
+     "target": "SPECIES_AEGISLASH_SHIELD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -41413,7 +42167,25 @@
    "dir": "graphics/pokemon/spritzee",
    "icon_png": "graphics/pokemon/spritzee/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/spritzee.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_AROMATISSE",
+     "conds": [
+      [
+       "IF_HOLD_ITEM",
+       "ITEM_SACHET"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SACHET",
+     "target": "SPECIES_AROMATISSE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -41845,7 +42617,25 @@
    "dir": "graphics/pokemon/swirlix",
    "icon_png": "graphics/pokemon/swirlix/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/swirlix.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_SLURPUFF",
+     "conds": [
+      [
+       "IF_HOLD_ITEM",
+       "ITEM_WHIPPED_DREAM"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_WHIPPED_DREAM",
+     "target": "SPECIES_SLURPUFF",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -42260,7 +43050,14 @@
    "dir": "graphics/pokemon/inkay",
    "icon_png": "graphics/pokemon/inkay/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/inkay.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_MALAMAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -42742,7 +43539,14 @@
    "dir": "graphics/pokemon/binacle",
    "icon_png": "graphics/pokemon/binacle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/binacle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_BARBARACLE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -43214,7 +44018,14 @@
    "dir": "graphics/pokemon/skrelp",
    "icon_png": "graphics/pokemon/skrelp/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/skrelp.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "48",
+     "target": "SPECIES_DRAGALGE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -43636,7 +44447,14 @@
    "dir": "graphics/pokemon/clauncher",
    "icon_png": "graphics/pokemon/clauncher/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/clauncher.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_CLAWITZER",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -44061,7 +44879,14 @@
    "dir": "graphics/pokemon/helioptile",
    "icon_png": "graphics/pokemon/helioptile/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/helioptile.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SUN_STONE",
+     "target": "SPECIES_HELIOLISK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -44487,7 +45312,19 @@
    "dir": "graphics/pokemon/tyrunt",
    "icon_png": "graphics/pokemon/tyrunt/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tyrunt.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_TYRANTRUM",
+     "conds": [
+      [
+       "IF_NOT_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -44932,7 +45769,19 @@
    "dir": "graphics/pokemon/amaura",
    "icon_png": "graphics/pokemon/amaura/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/amaura.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "39",
+     "target": "SPECIES_AURORUS",
+     "conds": [
+      [
+       "IF_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -46354,7 +47203,30 @@
    "dir": "graphics/pokemon/goomy",
    "icon_png": "graphics/pokemon/goomy/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/goomy.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_SLIGGOO",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_SLIGGOO_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -46542,7 +47414,30 @@
    "dir": "graphics/pokemon/sliggoo",
    "icon_png": "graphics/pokemon/sliggoo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sliggoo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "50",
+     "target": "SPECIES_GOODRA",
+     "conds": [
+      [
+       "IF_WEATHER",
+       "WEATHER_RAIN"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "50",
+     "target": "SPECIES_GOODRA",
+     "conds": [
+      [
+       "IF_WEATHER",
+       "WEATHER_FOG"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      0,
@@ -47179,7 +48074,20 @@
    "dir": "graphics/pokemon/phantump",
    "icon_png": "graphics/pokemon/phantump/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/phantump.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_TREVENANT",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_LINKING_CORD",
+     "target": "SPECIES_TREVENANT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -47662,7 +48570,20 @@
    "dir": "graphics/pokemon/pumpkaboo",
    "icon_png": "graphics/pokemon/pumpkaboo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pumpkaboo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_TRADE",
+     "param": "0",
+     "target": "SPECIES_GOURGEIST_AVERAGE",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_LINKING_CORD",
+     "target": "SPECIES_GOURGEIST_AVERAGE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -48121,7 +49042,30 @@
    "dir": "graphics/pokemon/bergmite",
    "icon_png": "graphics/pokemon/bergmite/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/bergmite.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_AVALUGG",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "37",
+     "target": "SPECIES_AVALUGG_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -48568,7 +49512,14 @@
    "dir": "graphics/pokemon/noibat",
    "icon_png": "graphics/pokemon/noibat/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/noibat.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "48",
+     "target": "SPECIES_NOIVERN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -50419,7 +51370,14 @@
    "dir": "graphics/pokemon/rowlet",
    "icon_png": "graphics/pokemon/rowlet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rowlet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_DARTRIX",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -50639,7 +51597,30 @@
    "dir": "graphics/pokemon/dartrix",
    "icon_png": "graphics/pokemon/dartrix/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dartrix.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_DECIDUEYE",
+     "conds": [
+      [
+       "IF_NOT_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_DECIDUEYE_HISUI",
+     "conds": [
+      [
+       "IF_REGION",
+       "REGION_HISUI"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -51104,7 +52085,14 @@
    "dir": "graphics/pokemon/litten",
    "icon_png": "graphics/pokemon/litten/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/litten.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_TORRACAT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -51311,7 +52299,14 @@
    "dir": "graphics/pokemon/torracat",
    "icon_png": "graphics/pokemon/torracat/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/torracat.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_INCINEROAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -51770,7 +52765,14 @@
    "dir": "graphics/pokemon/popplio",
    "icon_png": "graphics/pokemon/popplio/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/popplio.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "17",
+     "target": "SPECIES_BRIONNE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -51980,7 +52982,14 @@
    "dir": "graphics/pokemon/brionne",
    "icon_png": "graphics/pokemon/brionne/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/brionne.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_PRIMARINA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -52414,7 +53423,14 @@
    "dir": "graphics/pokemon/pikipek",
    "icon_png": "graphics/pokemon/pikipek/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pikipek.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "14",
+     "target": "SPECIES_TRUMBEAK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -52610,7 +53626,14 @@
    "dir": "graphics/pokemon/trumbeak",
    "icon_png": "graphics/pokemon/trumbeak/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/trumbeak.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "28",
+     "target": "SPECIES_TOUCANNON",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -53017,7 +54040,19 @@
    "dir": "graphics/pokemon/yungoos",
    "icon_png": "graphics/pokemon/yungoos/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/yungoos.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_GUMSHOOS",
+     "conds": [
+      [
+       "IF_NOT_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -53445,7 +54480,14 @@
    "dir": "graphics/pokemon/grubbin",
    "icon_png": "graphics/pokemon/grubbin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/grubbin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_CHARJABUG",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -53623,7 +54665,31 @@
    "dir": "graphics/pokemon/charjabug",
    "icon_png": "graphics/pokemon/charjabug/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/charjabug.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_VIKAVOLT",
+     "conds": [
+      [
+       "IF_IN_MAPSEC",
+       "MAPSEC_NEW_MAUVILLE"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_THUNDER_STONE",
+     "target": "SPECIES_VIKAVOLT",
+     "conds": []
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_VIKAVOLT_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -54048,7 +55114,25 @@
    "dir": "graphics/pokemon/crabrawler",
    "icon_png": "graphics/pokemon/crabrawler/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/crabrawler.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_CRABOMINABLE",
+     "conds": [
+      [
+       "IF_IN_MAP",
+       "MAP_SHOAL_CAVE_LOW_TIDE_ICE_ROOM"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_ICE_STONE",
+     "target": "SPECIES_CRABOMINABLE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -54686,7 +55770,20 @@
    "dir": "graphics/pokemon/cutiefly",
    "icon_png": "graphics/pokemon/cutiefly/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cutiefly.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_RIBOMBEE",
+     "conds": []
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_RIBOMBEE_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -55122,7 +56219,30 @@
    "dir": "graphics/pokemon/rockruff",
    "icon_png": "graphics/pokemon/rockruff/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rockruff.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_LYCANROC_MIDDAY",
+     "conds": [
+      [
+       "IF_NOT_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_LYCANROC_MIDNIGHT",
+     "conds": [
+      [
+       "IF_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -55750,7 +56870,14 @@
    "dir": "graphics/pokemon/mareanie",
    "icon_png": "graphics/pokemon/mareanie/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/mareanie.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_TOXAPEX",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -56156,7 +57283,14 @@
    "dir": "graphics/pokemon/mudbray",
    "icon_png": "graphics/pokemon/mudbray/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/mudbray.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_MUDSDALE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -56548,7 +57682,20 @@
    "dir": "graphics/pokemon/dewpider",
    "icon_png": "graphics/pokemon/dewpider/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dewpider.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "22",
+     "target": "SPECIES_ARAQUANID",
+     "conds": []
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_ARAQUANID_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -56969,7 +58116,25 @@
    "dir": "graphics/pokemon/fomantis",
    "icon_png": "graphics/pokemon/fomantis/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fomantis.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_LURANTIS",
+     "conds": [
+      [
+       "IF_NOT_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_LURANTIS_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -57377,7 +58542,14 @@
    "dir": "graphics/pokemon/morelull",
    "icon_png": "graphics/pokemon/morelull/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/morelull.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_SHIINOTIC",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -57766,7 +58938,25 @@
    "dir": "graphics/pokemon/salandit",
    "icon_png": "graphics/pokemon/salandit/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/salandit.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "33",
+     "target": "SPECIES_SALAZZLE",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_FEMALE"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_SALAZZLE_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -58242,7 +59432,14 @@
    "dir": "graphics/pokemon/stufful",
    "icon_png": "graphics/pokemon/stufful/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/stufful.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "27",
+     "target": "SPECIES_BEWEAR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -58666,7 +59863,14 @@
    "dir": "graphics/pokemon/bounsweet",
    "icon_png": "graphics/pokemon/bounsweet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/bounsweet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_STEENEE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -58846,7 +60050,19 @@
    "dir": "graphics/pokemon/steenee",
    "icon_png": "graphics/pokemon/steenee/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/steenee.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_TSAREENA",
+     "conds": [
+      [
+       "IF_KNOWS_MOVE",
+       "MOVE_STOMP"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -59960,7 +61176,14 @@
    "dir": "graphics/pokemon/wimpod",
    "icon_png": "graphics/pokemon/wimpod/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/wimpod.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_GOLISOPOD",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -60331,7 +61554,14 @@
    "dir": "graphics/pokemon/sandygast",
    "icon_png": "graphics/pokemon/sandygast/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sandygast.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "42",
+     "target": "SPECIES_PALOSSAND",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -60941,7 +62171,19 @@
    "dir": "graphics/pokemon/type_null",
    "icon_png": "graphics/pokemon/type_null/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/type_null.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_SILVALLY_NORMAL",
+     "conds": [
+      [
+       "IF_MIN_FRIENDSHIP",
+       "FRIENDSHIP_EVO_THRESHOLD"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -63179,7 +64421,14 @@
    "dir": "graphics/pokemon/jangmo_o",
    "icon_png": "graphics/pokemon/jangmo_o/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/jangmo_o.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_HAKAMO_O",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -63381,7 +64630,20 @@
    "dir": "graphics/pokemon/hakamo_o",
    "icon_png": "graphics/pokemon/hakamo_o/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/hakamo_o.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "45",
+     "target": "SPECIES_KOMMO_O",
+     "conds": []
+    },
+    {
+     "method": "EVO_NONE",
+     "param": "0",
+     "target": "SPECIES_KOMMO_O_TOTEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -64753,7 +66015,14 @@
    "dir": "graphics/pokemon/cosmog",
    "icon_png": "graphics/pokemon/cosmog/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cosmog.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "43",
+     "target": "SPECIES_COSMOEM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -64842,7 +66111,30 @@
    "dir": "graphics/pokemon/cosmoem",
    "icon_png": "graphics/pokemon/cosmoem/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cosmoem.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "53",
+     "target": "SPECIES_SOLGALEO",
+     "conds": [
+      [
+       "IF_NOT_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "53",
+     "target": "SPECIES_LUNALA",
+     "conds": [
+      [
+       "IF_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      0,
@@ -67583,7 +68875,19 @@
    "dir": "graphics/pokemon/poipole",
    "icon_png": "graphics/pokemon/poipole/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/poipole.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_NAGANADEL",
+     "conds": [
+      [
+       "IF_KNOWS_MOVE",
+       "MOVE_DRAGON_PULSE"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -68956,7 +70260,14 @@
    "dir": "graphics/pokemon/grookey",
    "icon_png": "graphics/pokemon/grookey/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/grookey.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_THWACKEY",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -69146,7 +70457,14 @@
    "dir": "graphics/pokemon/thwackey",
    "icon_png": "graphics/pokemon/thwackey/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/thwackey.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_RILLABOOM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -69563,7 +70881,14 @@
    "dir": "graphics/pokemon/scorbunny",
    "icon_png": "graphics/pokemon/scorbunny/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/scorbunny.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_RABOOT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -69748,7 +71073,14 @@
    "dir": "graphics/pokemon/raboot",
    "icon_png": "graphics/pokemon/raboot/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/raboot.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_CINDERACE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -70145,7 +71477,14 @@
    "dir": "graphics/pokemon/sobble",
    "icon_png": "graphics/pokemon/sobble/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sobble.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_DRIZZILE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -70323,7 +71662,14 @@
    "dir": "graphics/pokemon/drizzile",
    "icon_png": "graphics/pokemon/drizzile/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/drizzile.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_INTELEON",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -70703,7 +72049,14 @@
    "dir": "graphics/pokemon/skwovet",
    "icon_png": "graphics/pokemon/skwovet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/skwovet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_GREEDENT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -71086,7 +72439,14 @@
    "dir": "graphics/pokemon/rookidee",
    "icon_png": "graphics/pokemon/rookidee/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rookidee.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_CORVISQUIRE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -71264,7 +72624,14 @@
    "dir": "graphics/pokemon/corvisquire",
    "icon_png": "graphics/pokemon/corvisquire/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/corvisquire.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_CORVIKNIGHT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -71644,7 +73011,14 @@
    "dir": "graphics/pokemon/blipbug",
    "icon_png": "graphics/pokemon/blipbug/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/blipbug.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "10",
+     "target": "SPECIES_DOTTLER",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -71738,7 +73112,14 @@
    "dir": "graphics/pokemon/dottler",
    "icon_png": "graphics/pokemon/dottler/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dottler.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_ORBEETLE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -72095,7 +73476,14 @@
    "dir": "graphics/pokemon/nickit",
    "icon_png": "graphics/pokemon/nickit/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/nickit.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_THIEVUL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -72453,7 +73841,14 @@
    "dir": "graphics/pokemon/gossifleur",
    "icon_png": "graphics/pokemon/gossifleur/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/gossifleur.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "20",
+     "target": "SPECIES_ELDEGOSS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -72810,7 +74205,14 @@
    "dir": "graphics/pokemon/wooloo",
    "icon_png": "graphics/pokemon/wooloo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/wooloo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_DUBWOOL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -73149,7 +74551,14 @@
    "dir": "graphics/pokemon/chewtle",
    "icon_png": "graphics/pokemon/chewtle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/chewtle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "22",
+     "target": "SPECIES_DREDNAW",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -73529,7 +74938,14 @@
    "dir": "graphics/pokemon/yamper",
    "icon_png": "graphics/pokemon/yamper/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/yamper.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_BOLTUND",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -73880,7 +75296,14 @@
    "dir": "graphics/pokemon/rolycoly",
    "icon_png": "graphics/pokemon/rolycoly/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rolycoly.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_CARKOL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -74047,7 +75470,14 @@
    "dir": "graphics/pokemon/carkol",
    "icon_png": "graphics/pokemon/carkol/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/carkol.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_COALOSSAL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -74431,7 +75861,26 @@
    "dir": "graphics/pokemon/applin",
    "icon_png": "graphics/pokemon/applin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/applin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_TART_APPLE",
+     "target": "SPECIES_FLAPPLE",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SWEET_APPLE",
+     "target": "SPECIES_APPLETUN",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SYRUPY_APPLE",
+     "target": "SPECIES_DIPPLIN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -74951,7 +76400,14 @@
    "dir": "graphics/pokemon/silicobra",
    "icon_png": "graphics/pokemon/silicobra/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/silicobra.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SANDACONDA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -75521,7 +76977,14 @@
    "dir": "graphics/pokemon/arrokuda",
    "icon_png": "graphics/pokemon/arrokuda/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/arrokuda.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "26",
+     "target": "SPECIES_BARRASKEWDA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -75876,7 +77339,30 @@
    "dir": "graphics/pokemon/toxel",
    "icon_png": "graphics/pokemon/toxel/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/toxel.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_TOXTRICITY_AMPED",
+     "conds": [
+      [
+       "IF_AMPED_NATURE",
+       ""
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_TOXTRICITY_LOW_KEY",
+     "conds": [
+      [
+       "IF_LOW_KEY_NATURE",
+       ""
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -76263,7 +77749,14 @@
    "dir": "graphics/pokemon/sizzlipede",
    "icon_png": "graphics/pokemon/sizzlipede/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sizzlipede.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "28",
+     "target": "SPECIES_CENTISKORCH",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -76628,7 +78121,19 @@
    "dir": "graphics/pokemon/clobbopus",
    "icon_png": "graphics/pokemon/clobbopus/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/clobbopus.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_GRAPPLOCT",
+     "conds": [
+      [
+       "IF_KNOWS_MOVE",
+       "MOVE_TAUNT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -77007,7 +78512,14 @@
    "dir": "graphics/pokemon/sinistea",
    "icon_png": "graphics/pokemon/sinistea/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sinistea.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_CRACKED_POT",
+     "target": "SPECIES_POLTEAGEIST_PHONY",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -77380,7 +78892,14 @@
    "dir": "graphics/pokemon/hatenna",
    "icon_png": "graphics/pokemon/hatenna/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/hatenna.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_HATTREM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -77564,7 +79083,14 @@
    "dir": "graphics/pokemon/hattrem",
    "icon_png": "graphics/pokemon/hattrem/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/hattrem.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "42",
+     "target": "SPECIES_HATTERENE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -77960,7 +79486,14 @@
    "dir": "graphics/pokemon/impidimp",
    "icon_png": "graphics/pokemon/impidimp/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/impidimp.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "32",
+     "target": "SPECIES_MORGREM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -78148,7 +79681,14 @@
    "dir": "graphics/pokemon/morgrem",
    "icon_png": "graphics/pokemon/morgrem/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/morgrem.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "42",
+     "target": "SPECIES_GRIMMSNARL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -80772,7 +82312,23 @@
    "dir": "graphics/pokemon/snom",
    "icon_png": "graphics/pokemon/snom/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/snom.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_FROSMOTH",
+     "conds": [
+      [
+       "IF_MIN_FRIENDSHIP",
+       "FRIENDSHIP_EVO_THRESHOLD"
+      ],
+      [
+       "IF_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -81913,7 +83469,14 @@
    "dir": "graphics/pokemon/cufant",
    "icon_png": "graphics/pokemon/cufant/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cufant.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "34",
+     "target": "SPECIES_COPPERAJAH",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -83287,7 +84850,14 @@
    "dir": "graphics/pokemon/dreepy",
    "icon_png": "graphics/pokemon/dreepy/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dreepy.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "50",
+     "target": "SPECIES_DRAKLOAK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -83423,7 +84993,14 @@
    "dir": "graphics/pokemon/drakloak",
    "icon_png": "graphics/pokemon/drakloak/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/drakloak.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "60",
+     "target": "SPECIES_DRAGAPULT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -84475,7 +86052,32 @@
    "dir": "graphics/pokemon/kubfu",
    "icon_png": "graphics/pokemon/kubfu/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/kubfu.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_SCRIPT_TRIGGER",
+     "param": "EVO_TRIGGER_DARK_SCROLL",
+     "target": "SPECIES_URSHIFU_SINGLE_STRIKE",
+     "conds": []
+    },
+    {
+     "method": "EVO_SCRIPT_TRIGGER",
+     "param": "EVO_TRIGGER_WATER_SCROLL",
+     "target": "SPECIES_URSHIFU_RAPID_STRIKE",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SCROLL_OF_DARKNESS",
+     "target": "SPECIES_URSHIFU_SINGLE_STRIKE",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_SCROLL_OF_WATERS",
+     "target": "SPECIES_URSHIFU_RAPID_STRIKE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -87649,7 +89251,14 @@
    "dir": "graphics/pokemon/sprigatito",
    "icon_png": "graphics/pokemon/sprigatito/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/sprigatito.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_FLORAGATO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -87838,7 +89447,14 @@
    "dir": "graphics/pokemon/floragato",
    "icon_png": "graphics/pokemon/floragato/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/floragato.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_MEOWSCARADA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -88271,7 +89887,14 @@
    "dir": "graphics/pokemon/fuecoco",
    "icon_png": "graphics/pokemon/fuecoco/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fuecoco.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_CROCALOR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -88453,7 +90076,14 @@
    "dir": "graphics/pokemon/crocalor",
    "icon_png": "graphics/pokemon/crocalor/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/crocalor.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_SKELEDIRGE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -88869,7 +90499,14 @@
    "dir": "graphics/pokemon/quaxly",
    "icon_png": "graphics/pokemon/quaxly/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/quaxly.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "16",
+     "target": "SPECIES_QUAXWELL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -89048,7 +90685,14 @@
    "dir": "graphics/pokemon/quaxwell",
    "icon_png": "graphics/pokemon/quaxwell/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/quaxwell.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "36",
+     "target": "SPECIES_QUAQUAVAL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -89473,7 +91117,30 @@
    "dir": "graphics/pokemon/lechonk",
    "icon_png": "graphics/pokemon/lechonk/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/lechonk.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_OINKOLOGNE_M",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_MALE"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_OINKOLOGNE_F",
+     "conds": [
+      [
+       "IF_GENDER",
+       "MON_FEMALE"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -89816,7 +91483,14 @@
    "dir": "graphics/pokemon/tarountula",
    "icon_png": "graphics/pokemon/tarountula/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tarountula.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "15",
+     "target": "SPECIES_SPIDOPS",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -90207,7 +91881,14 @@
    "dir": "graphics/pokemon/nymble",
    "icon_png": "graphics/pokemon/nymble/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/nymble.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_LOKIX",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -90589,7 +92270,14 @@
    "dir": "graphics/pokemon/pawmi",
    "icon_png": "graphics/pokemon/pawmi/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pawmi.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "18",
+     "target": "SPECIES_PAWMO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -90788,7 +92476,19 @@
    "dir": "graphics/pokemon/pawmo",
    "icon_png": "graphics/pokemon/pawmo/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/pawmo.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_PAWMOT",
+     "conds": [
+      [
+       "IF_MIN_OVERWORLD_STEPS",
+       "1000"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      0,
@@ -91230,7 +92930,30 @@
    "dir": "graphics/pokemon/tandemaus",
    "icon_png": "graphics/pokemon/tandemaus/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tandemaus.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL_BATTLE_ONLY",
+     "param": "25",
+     "target": "SPECIES_MAUSHOLD_FOUR",
+     "conds": [
+      [
+       "IF_PID_MODULO_100_GT",
+       "0"
+      ]
+     ]
+    },
+    {
+     "method": "EVO_LEVEL_BATTLE_ONLY",
+     "param": "25",
+     "target": "SPECIES_MAUSHOLD_THREE",
+     "conds": [
+      [
+       "IF_PID_MODULO_100_EQ",
+       "0"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -91631,7 +93354,14 @@
    "dir": "graphics/pokemon/fidough",
    "icon_png": "graphics/pokemon/fidough/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/fidough.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "26",
+     "target": "SPECIES_DACHSBUN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -92028,7 +93758,14 @@
    "dir": "graphics/pokemon/smoliv",
    "icon_png": "graphics/pokemon/smoliv/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/smoliv.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_DOLLIV",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -92206,7 +93943,14 @@
    "dir": "graphics/pokemon/dolliv",
    "icon_png": "graphics/pokemon/dolliv/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dolliv.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_ARBOLIVA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -92784,7 +94528,14 @@
    "dir": "graphics/pokemon/nacli",
    "icon_png": "graphics/pokemon/nacli/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/nacli.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_NACLSTACK",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -92968,7 +94719,14 @@
    "dir": "graphics/pokemon/naclstack",
    "icon_png": "graphics/pokemon/naclstack/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/naclstack.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_GARGANACL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      0,
@@ -93375,7 +95133,20 @@
    "dir": "graphics/pokemon/charcadet",
    "icon_png": "graphics/pokemon/charcadet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/charcadet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_AUSPICIOUS_ARMOR",
+     "target": "SPECIES_ARMAROUGE",
+     "conds": []
+    },
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_MALICIOUS_ARMOR",
+     "target": "SPECIES_CERULEDGE",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -93969,7 +95740,14 @@
    "dir": "graphics/pokemon/tadbulb",
    "icon_png": "graphics/pokemon/tadbulb/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tadbulb.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_THUNDER_STONE",
+     "target": "SPECIES_BELLIBOLT",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -94331,7 +96109,14 @@
    "dir": "graphics/pokemon/wattrel",
    "icon_png": "graphics/pokemon/wattrel/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/wattrel.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "25",
+     "target": "SPECIES_KILOWATTREL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -94708,7 +96493,14 @@
    "dir": "graphics/pokemon/maschiff",
    "icon_png": "graphics/pokemon/maschiff/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/maschiff.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_MABOSSTIFF",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -95105,7 +96897,14 @@
    "dir": "graphics/pokemon/shroodle",
    "icon_png": "graphics/pokemon/shroodle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/shroodle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "28",
+     "target": "SPECIES_GRAFAIAI",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -95515,7 +97314,19 @@
    "dir": "graphics/pokemon/bramblin",
    "icon_png": "graphics/pokemon/bramblin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/bramblin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_BRAMBLEGHAST",
+     "conds": [
+      [
+       "IF_MIN_OVERWORLD_STEPS",
+       "1000"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -95902,7 +97713,14 @@
    "dir": "graphics/pokemon/toedscool",
    "icon_png": "graphics/pokemon/toedscool/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/toedscool.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_TOEDSCRUEL",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -96543,7 +98361,14 @@
    "dir": "graphics/pokemon/capsakid",
    "icon_png": "graphics/pokemon/capsakid/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/capsakid.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_FIRE_STONE",
+     "target": "SPECIES_SCOVILLAIN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -96924,7 +98749,19 @@
    "dir": "graphics/pokemon/rellor",
    "icon_png": "graphics/pokemon/rellor/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/rellor.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_RABSCA",
+     "conds": [
+      [
+       "IF_MIN_OVERWORLD_STEPS",
+       "1000"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -97318,7 +99155,14 @@
    "dir": "graphics/pokemon/flittle",
    "icon_png": "graphics/pokemon/flittle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/flittle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_ESPATHRA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -97705,7 +99549,14 @@
    "dir": "graphics/pokemon/tinkatink",
    "icon_png": "graphics/pokemon/tinkatink/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tinkatink.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "24",
+     "target": "SPECIES_TINKATUFF",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -97904,7 +99755,14 @@
    "dir": "graphics/pokemon/tinkatuff",
    "icon_png": "graphics/pokemon/tinkatuff/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/tinkatuff.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_TINKATON",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -98304,7 +100162,14 @@
    "dir": "graphics/pokemon/wiglett",
    "icon_png": "graphics/pokemon/wiglett/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/wiglett.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "26",
+     "target": "SPECIES_WUGTRIO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -98874,7 +100739,14 @@
    "dir": "graphics/pokemon/finizen",
    "icon_png": "graphics/pokemon/finizen/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/finizen.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "38",
+     "target": "SPECIES_PALAFIN_ZERO",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -99280,7 +101152,14 @@
    "dir": "graphics/pokemon/varoom",
    "icon_png": "graphics/pokemon/varoom/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/varoom.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "40",
+     "target": "SPECIES_REVAVROOM",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -100079,7 +101958,14 @@
    "dir": "graphics/pokemon/glimmet",
    "icon_png": "graphics/pokemon/glimmet/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/glimmet.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_GLIMMORA",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -100466,7 +102352,19 @@
    "dir": "graphics/pokemon/greavard",
    "icon_png": "graphics/pokemon/greavard/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/greavard.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "30",
+     "target": "SPECIES_HOUNDSTONE",
+     "conds": [
+      [
+       "IF_TIME",
+       "TIME_NIGHT"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -101078,7 +102976,14 @@
    "dir": "graphics/pokemon/cetoddle",
    "icon_png": "graphics/pokemon/cetoddle/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/cetoddle.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_ITEM",
+     "param": "ITEM_ICE_STONE",
+     "target": "SPECIES_CETITAN",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -105692,7 +107597,14 @@
    "dir": "graphics/pokemon/frigibax",
    "icon_png": "graphics/pokemon/frigibax/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/frigibax.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "35",
+     "target": "SPECIES_ARCTIBAX",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -105870,7 +107782,14 @@
    "dir": "graphics/pokemon/arctibax",
    "icon_png": "graphics/pokemon/arctibax/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/arctibax.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "54",
+     "target": "SPECIES_BAXCALIBUR",
+     "conds": []
+    }
+   ],
    "level": [
     [
      1,
@@ -106251,7 +108170,19 @@
    "dir": "graphics/pokemon/gimmighoul",
    "icon_png": "graphics/pokemon/gimmighoul/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/gimmighoul_chest.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_GHOLDENGO",
+     "conds": [
+      [
+       "IF_BAG_ITEM_COUNT",
+       "ITEM_GIMMIGHOUL_COIN, 999"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      1,
@@ -108694,7 +110625,19 @@
    "dir": "graphics/pokemon/dipplin",
    "icon_png": "graphics/pokemon/dipplin/icon.png",
    "cry_wav": "sound/direct_sound_samples/cries/dipplin.wav",
-   "evolutions": [],
+   "evolutions": [
+    {
+     "method": "EVO_LEVEL",
+     "param": "0",
+     "target": "SPECIES_HYDRAPPLE",
+     "conds": [
+      [
+       "IF_KNOWS_MOVE",
+       "MOVE_DRAGON_CHEER"
+      ]
+     ]
+    }
+   ],
    "level": [
     [
      0,

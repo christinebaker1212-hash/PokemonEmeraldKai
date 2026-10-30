@@ -3101,6 +3101,8 @@ void GiveBoxMonInitialMoveset(struct BoxPokemon *boxMon)
             break;
 
         move = (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
+        if (!MP_Gen_MoveAllowed(move))   // Moemon Kai: never a move past the GENERATION (it would be SEALED)
+            continue;
 
         if (GiveMoveToBoxMon(boxMon, move) == MON_HAS_MAX_MOVES)
             DeleteFirstMoveAndGiveMoveToBoxMon(boxMon, move);
@@ -3128,6 +3130,11 @@ u16 MonTryLearningNewMove(struct Pokemon *mon, bool8 firstMove)
                 return MOVE_NONE;
         }
     }
+
+    // Moemon Kai: a move past the GENERATION is passed over (learning it would SEAL the Pokémon)
+    while ((gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_LV) == LEVEL_UP_LV(level)
+        && !MP_Gen_MoveAllowed(gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_ID))
+        sLearningMoveTableID++;
 
     if ((gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_LV) == LEVEL_UP_LV(level))
     {
@@ -6580,7 +6587,7 @@ u8 GetMoveRelearnerMoves(struct Pokemon *mon, u16 *moves)
 
         moveLevel = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV;
 
-        if (moveLevel <= LEVEL_UP_LV(level))
+        if (moveLevel <= LEVEL_UP_LV(level) && MP_Gen_MoveAllowed(gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID))
         {
             for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
                 ;
@@ -6634,7 +6641,7 @@ u8 GetNumberOfRelearnableMoves(struct Pokemon *mon)
 
         moveLevel = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV;
 
-        if (moveLevel <= LEVEL_UP_LV(level))
+        if (moveLevel <= LEVEL_UP_LV(level) && MP_Gen_MoveAllowed(gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID))
         {
             for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
                 ;

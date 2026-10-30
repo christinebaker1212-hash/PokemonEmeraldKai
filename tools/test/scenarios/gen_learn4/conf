@@ -1,0 +1,5 @@
+# GENERATION 4: the same ABSOL learns SUCKER PUNCH at Lv. 44 (forgetting its first move) and nothing is SEALED
+MODE=1
+GEN=4
+ENV_A="MOEMON_DEBUG_PARTY=376:43+,376:50"
+EXPECT_A=("monmoves: slot 0 species 376 moves 389 104 163 248" "gencheck: cap 4 sealed 0 0")

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "mp_life.h"   // Moemon Co-op
 #include "pokemon.h"
@@ -667,7 +668,7 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
             {
                 if (sHatchedEggFatherMoves[i] == sHatchedEggEggMoves[j])
                 {
-                    if (GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)
+                    if (MP_Gen_MoveAllowed(sHatchedEggFatherMoves[i]) && GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
                         DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFatherMoves[i]);
                     break;
                 }
@@ -686,7 +687,7 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
             {
                 if (sHatchedEggFatherMoves[i] == ItemIdToBattleMoveId(ITEM_TM01 + j) && CanMonLearnTMHM(egg, j))
                 {
-                    if (GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)
+                    if (MP_Gen_MoveAllowed(sHatchedEggFatherMoves[i]) && GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
                         DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFatherMoves[i]);
                 }
             }
@@ -711,7 +712,7 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
         {
             if (sHatchedEggLevelUpMoves[j] != MOVE_NONE && sHatchedEggFinalMoves[i] == sHatchedEggLevelUpMoves[j])
             {
-                if (GiveMoveToMon(egg, sHatchedEggFinalMoves[i]) == MON_HAS_MAX_MOVES)
+                if (MP_Gen_MoveAllowed(sHatchedEggFinalMoves[i]) && GiveMoveToMon(egg, sHatchedEggFinalMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
                     DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFinalMoves[i]);
                 break;
             }

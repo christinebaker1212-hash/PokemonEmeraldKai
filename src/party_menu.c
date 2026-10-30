@@ -2245,6 +2245,8 @@ static u8 CanMonLearnTMTutor(struct Pokemon *mon, u16 item, u8 tutor)
             move = GetTutorMove(tutor);
     }
 
+    if (!MP_Gen_MoveAllowed(move))   // Moemon Kai: past the GENERATION
+        return CANNOT_LEARN_MOVE;
     if (MonKnowsMove(mon, move) == TRUE)
         return ALREADY_KNOWS_MOVE;
     else

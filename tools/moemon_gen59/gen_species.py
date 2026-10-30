@@ -109,7 +109,7 @@ def from_expansion(exp):
                                               and 'GMAX' not in x), None)
         if k is None:
             raise SystemExit('no expansion species for %s' % const)
-        body = src.split('[%s] =' % k, 1)[1].split('\n    },\n', 1)[0]
+        body = src.split('[%s] =' % k, 1)[1].split('\n    },\n', 1)[0] + '\n'   # (the last field ends with ',\n' too)
         body = expand_macros(body, macros)
         body = re.sub(r'[ \t]*#if[^\n]*\n(.*?)[ \t]*#else[^\n]*\n.*?[ \t]*#endif[^\n]*\n', r'\1', body, flags=re.S)
         body = re.sub(r'[ \t]*#if[^\n]*\n(.*?)[ \t]*#endif[^\n]*\n', r'\1', body, flags=re.S)
@@ -530,6 +530,11 @@ def main():
         rows = list(dict.fromkeys(rows))[:8]
         if rows:
             evo.append('    [%s] = {%s},\n' % (e['const'], ', '.join('{%s, %s, %s}' % r for r in rows)))
+    # older POKéMON that got a new evolution in Gen 8-9 (no row of their own in evolution.h / evolution_gen4.h); by
+    # a move in Scarlet / Violet, which their older learnsets don't teach: the level that move comes at instead
+    for frm, lvl, to in (('SPECIES_PRIMEAPE', 35, 'SPECIES_ANNIHILAPE'), ('SPECIES_GIRAFARIG', 32, 'SPECIES_FARIGIRAF'),
+                         ('SPECIES_DUNSPARCE', 32, 'SPECIES_DUDUNSPARCE'), ('SPECIES_STANTLER', 31, 'SPECIES_WYRDEER')):
+        evo.append('    [%s] = {{EVO_LEVEL, %d, %s}},\n' % (frm, lvl, to))
     write('src/data/pokemon/evolution_gen59.h', ''.join(evo))
 
     # ---- pokedex
