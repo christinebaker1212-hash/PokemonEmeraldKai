@@ -494,6 +494,7 @@ static void Inspect(unsigned id, int back)
 {
     Y.card = (int)id;
     Y.back = back;
+    printf("[ygo] inspect card %u from screen %d\n", id, back);
     Y.inspectScroll = 0;
     Y.zoom = Y.panX = Y.panY = 0;
     Y.screen = Y_INSPECT;
@@ -3193,7 +3194,7 @@ int YgoUi_Step(unsigned keys)
             Y.cursor -= 5, PlaySE(SE_SELECT);
         if (pressed & KEY_DOWN && Y.cursor < 4)
             Y.cursor += 5, PlaySE(SE_SELECT);
-        if (pressed & (KEY_A | KEY_START))
+        if (pressed & (KEY_A | KEY_START | KEY_INSPECT))
             Inspect(Y.revealed[Y.cursor], Y_REVEAL);
         else if (pressed & KEY_B)
         {
@@ -3212,7 +3213,7 @@ int YgoUi_Step(unsigned keys)
         GridMove(pressed, Y.spoilCount, 7);
         if (pressed & KEY_A && Y.spoilCount)
             Ask(ACT_TAKE_SPOIL, Y.cursor, "Take %s?", Ygo_Card(Y.spoils[Y.cursor])->name);
-        else if (pressed & KEY_START && Y.spoilCount)
+        else if (pressed & (KEY_START | KEY_INSPECT) && Y.spoilCount)
             Inspect(Y.spoils[Y.cursor], Y_SPOILS);
         break;
     case Y_COUNTER:
@@ -3254,7 +3255,7 @@ int YgoUi_Step(unsigned keys)
                 else
                     Ask(ACT_GC_DECK, Y.cursor, "The %s for \xa5%u?", gYgoSets[sStarters[Y.cursor]].name, GC_DECK_PRICE);
             }
-            else if (pressed & KEY_START)
+            else if (pressed & (KEY_START | KEY_INSPECT))
             {
                 uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
                 StarterDeckOf(sStarters[Y.cursor], main, extra);
@@ -3323,7 +3324,7 @@ int YgoUi_Step(unsigned keys)
             else
                 Ask(ACT_STARTER, Y.cursor, "Take the %s?", gYgoSets[sStarters[Y.cursor]].name);
         }
-        else if (pressed & KEY_START)
+        else if (pressed & (KEY_START | KEY_INSPECT))
         {
             uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
             StarterDeckOf(sStarters[Y.cursor], main, extra);

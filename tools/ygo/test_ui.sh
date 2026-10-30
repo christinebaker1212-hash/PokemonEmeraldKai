@@ -109,6 +109,11 @@ wait 30
 press A 2
 wait 10
 rendershot spoils
+press INSPECT 2
+wait 20
+rendershot spoils_look
+press B 2
+wait 20
 press A 2
 wait 10
 press A 2
@@ -122,6 +127,7 @@ SCRIPT
 run challenge 2,4,7,3
 expect challenge '\[ygo\] challenge: CARD CLUB'
 expect challenge 'victory vs CARD CLUB'
+expect challenge 'inspect card [0-9]* from screen'   # R2 on the card to take
 expect challenge 'screen 0 opted 1 .* packs 1 wins 1 '
 echo 'PASS a challenge with the registered CARD CASE: which game, a win, a booster and one card of their deck'
 fi

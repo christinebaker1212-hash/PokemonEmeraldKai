@@ -499,6 +499,7 @@ static void Inspect(unsigned id, int back)
         return;
     U.card = (int)id;
     U.back = back;
+    printf("[tcg] inspect card %u from screen %d\n", id, back);
     U.inspectScroll = U.inspectMax = U.zoom = U.panX = U.panY = 0;
     U.screen = UI_INSPECT;
     U.age = 0;
@@ -652,9 +653,9 @@ static void Rewards(void)
             unsigned id = U.opp.deck[i];
             const struct TcgCard *card = Tcg_Card(id);
             int seen = 0;
-            /* Basic Energy is free; promo cards only from the trainer who holds them; holos only
-             * from packs and trades. */
-            if (!card || id <= 6 || (card->set == 4 && id != U.opp.promo) || Tcg_IsHolo(id))
+            /* Basic Energy is free; a promo card only as its trainer's first-win gift (never from their
+             * deck as well: no second copy that way); holos only from packs and trades. */
+            if (!card || id <= 6 || card->set == 4 || Tcg_IsHolo(id))
                 continue;
             for (j = 0; j < (unsigned)U.spoilCount; j++)
                 seen |= U.spoils[j] == id;
@@ -3663,7 +3664,7 @@ int Tcg_Step(unsigned keys)
             break;
         }
         GridMove(pressed, 10, 5);
-        if (pressed & (KEY_A | KEY_START))
+        if (pressed & (KEY_A | KEY_START | KEY_INSPECT))
             Inspect(U.revealed[U.cursor], UI_REVEAL);
         if (pressed & KEY_B)
         {
@@ -3676,7 +3677,7 @@ int Tcg_Step(unsigned keys)
         GridMove(pressed, U.spoilCount, 7);
         if (pressed & KEY_A && U.spoilCount)
             Ask(ACT_TAKE_SPOIL, U.cursor, "Take %s?", Tcg_Card(U.spoils[U.cursor])->name);
-        if (pressed & KEY_START && U.spoilCount)
+        if (pressed & (KEY_START | KEY_INSPECT) && U.spoilCount)
             Inspect(U.spoils[U.cursor], UI_SPOILS);
         break;
     case UI_GCSHOP:
@@ -3709,7 +3710,7 @@ int Tcg_Step(unsigned keys)
                 PlaySE(SE_SELECT);
             if (pressed & KEY_A)
                 Ask(ACT_STARTER, U.starterChoice, "Take the %s deck?", sStarterNames[U.starterChoice]);
-            else if (pressed & KEY_START)
+            else if (pressed & (KEY_START | KEY_INSPECT))
                 Inspect(sStarterIds[U.starterChoice], UI_STARTER);
         }
         else if (pressed & KEY_A && U.age > 30)

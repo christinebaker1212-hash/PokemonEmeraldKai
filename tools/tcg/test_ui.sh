@@ -90,6 +90,11 @@ press A 2
 wait 30
 press A 2
 wait 10
+press INSPECT 2
+wait 20
+rendershot spoils_look
+press B 2
+wait 20
 press A 2
 wait 10
 press A 2
@@ -109,6 +114,7 @@ run challenge
 expect challenge 'asked MANIAC: duel'
 expect challenge 'challenge picture: graphics [0-9]*, trainer picture [0-9]'   # their battle picture, cut to the window
 expect challenge 'victory vs MANIAC: pack 3'
+expect challenge 'inspect card [0-9]* from screen'   # R2 on the card to take
 expect challenge 'took card'
 expect challenge 'screen 0 opted 1 .* wins 1 .* packs 0001'
 echo 'PASS a challenge with the registered CARD CASE: a win, a booster and one card of their deck'
