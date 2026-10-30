@@ -51,6 +51,7 @@ u16 MP_Region_GlobalFree(void);
 bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region);   // its EXP for that region (Lv 5 the first time)
 void MP_Region_FitMon(struct Pokemon *mon, u8 region);
 void MP_Region_FitAll(void);                       // party + own boxes at the current region's levels
+void MP_Region_OnMapLoaded(void);                  // entering another region on foot: as a trip
 void MP_Region_Travel(u8 from, u8 to);             // PC boxes change places, the party takes the new levels
 struct WildPokemonInfo;
 struct Trainer;

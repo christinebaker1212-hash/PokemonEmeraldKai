@@ -543,3 +543,12 @@ void MP_Region_TagMet(struct BoxPokemon *b)
     if (gMapHeader.regionMapSectionId >= MAPSEC_JOHTO_FIRST && gMapHeader.regionMapSectionId < MAPSEC_JOHTO_END)
         SetBoxMonData(b, MON_DATA_MET_GAME, &game);
 }
+
+// A map of another region was entered without the boat (ROUTE 22's gate, the debug warp): the same change of PC
+// boxes and levels as a trip
+void MP_Region_OnMapLoaded(void)
+{
+    u8 cur = MP_Region_Current();
+    if (cur != gRegionState.current && gRegionState.current < REGION_COUNT)
+        MP_Region_Travel(gRegionState.current, cur);
+}
