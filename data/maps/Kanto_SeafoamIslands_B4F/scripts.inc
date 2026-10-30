@@ -125,7 +125,7 @@ Kanto_SeafoamIslands_B4F_EventScript_8412E73::
 	special QzQuestLogNop
 	lock
 	faceplayer
-	setvar VAR_0x8004, 0x90
+	setvar VAR_0x8004, SPECIES_ARTICUNO
 	setvar VAR_0x8005, 0x32
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

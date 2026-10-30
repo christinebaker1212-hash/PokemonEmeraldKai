@@ -83,7 +83,7 @@ Kanto_FuchsiaCity_EventScript_8416AC6::
 @ Kanto_FuchsiaCity sign / bg event at 41,10
 Kanto_FuchsiaCity_EventScript_8416ADE::
 	lockall
-	setvar VAR_0x8004, 0x71
+	setvar VAR_0x8004, SPECIES_CHANSEY
 	special QzSetSeenMon
 	showmonpic SPECIES_CHANSEY, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_8430985, MSGBOX_DEFAULT
@@ -94,7 +94,7 @@ Kanto_FuchsiaCity_EventScript_8416ADE::
 @ Kanto_FuchsiaCity sign / bg event at 35,10
 Kanto_FuchsiaCity_EventScript_8416AF7::
 	lockall
-	setvar VAR_0x8004, 0x64
+	setvar VAR_0x8004, SPECIES_VOLTORB
 	special QzSetSeenMon
 	showmonpic SPECIES_VOLTORB, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_84309B5, MSGBOX_DEFAULT
@@ -105,7 +105,7 @@ Kanto_FuchsiaCity_EventScript_8416AF7::
 @ Kanto_FuchsiaCity sign / bg event at 17,10
 Kanto_FuchsiaCity_EventScript_8416B10::
 	lockall
-	setvar VAR_0x8004, 0x73
+	setvar VAR_0x8004, SPECIES_KANGASKHAN
 	special QzSetSeenMon
 	showmonpic SPECIES_KANGASKHAN, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_84309E2, MSGBOX_DEFAULT
@@ -116,7 +116,7 @@ Kanto_FuchsiaCity_EventScript_8416B10::
 @ Kanto_FuchsiaCity sign / bg event at 38,16
 Kanto_FuchsiaCity_EventScript_8416B29::
 	lockall
-	setvar VAR_0x8004, 0x4F
+	setvar VAR_0x8004, SPECIES_SLOWPOKE
 	special QzSetSeenMon
 	showmonpic SPECIES_SLOWPOKE, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_8430A35, MSGBOX_DEFAULT
@@ -127,7 +127,7 @@ Kanto_FuchsiaCity_EventScript_8416B29::
 @ Kanto_FuchsiaCity sign / bg event at 17,18
 Kanto_FuchsiaCity_EventScript_8416B42::
 	lockall
-	setvar VAR_0x8004, 0x83
+	setvar VAR_0x8004, SPECIES_LAPRAS
 	special QzSetSeenMon
 	showmonpic SPECIES_LAPRAS, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_8430A63, MSGBOX_DEFAULT
@@ -139,7 +139,7 @@ Kanto_FuchsiaCity_EventScript_8416B42::
 Kanto_FuchsiaCity_EventScript_8416B5B::
 	lockall
 	goto_if_set FLAG_QZ_0x2144, Kanto_FuchsiaCity_EventScript_8416B7D
-	setvar VAR_0x8004, 0x8C
+	setvar VAR_0x8004, SPECIES_KABUTO
 	special QzSetSeenMon
 	showmonpic SPECIES_KABUTO, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_8430AD6, MSGBOX_DEFAULT
@@ -148,7 +148,7 @@ Kanto_FuchsiaCity_EventScript_8416B5B::
 	end
 
 Kanto_FuchsiaCity_EventScript_8416B7D::
-	setvar VAR_0x8004, 0x8A
+	setvar VAR_0x8004, SPECIES_OMANYTE
 	special QzSetSeenMon
 	showmonpic SPECIES_OMANYTE, 0xA, 3
 	msgbox Kanto_FuchsiaCity_Text_8430A8A, MSGBOX_DEFAULT

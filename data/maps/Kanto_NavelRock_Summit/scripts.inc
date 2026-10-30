@@ -52,14 +52,14 @@ Kanto_NavelRock_Summit_EventScript_8414DDA::
 	delay 0x1E
 	waitmoncry
 	delay 0x3C
-	setvar VAR_0x8004, 3
+	setvar VAR_0x8004, SPECIES_VENUSAUR
 	setvar VAR_0x8005, 0x23
 	special LoopWingFlapSE
 	applymovement LOCALID_CAMERA, Kanto_NavelRock_Summit_Movement_8414ECE
 	applymovement 1, Kanto_NavelRock_Summit_Movement_8414ED4
 	waitmovement 0
 	special RemoveCameraObject
-	setvar VAR_0x8004, 0xFA
+	setvar VAR_0x8004, SPECIES_HO_OH
 	setvar VAR_0x8005, 0x46
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

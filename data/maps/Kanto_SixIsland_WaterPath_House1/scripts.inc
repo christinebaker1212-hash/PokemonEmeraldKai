@@ -8,7 +8,7 @@ Kanto_SixIsland_WaterPath_House1_EventScript_8421DCF::
 	specialvar VAR_RESULT, QzReturnZero
 	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
 	goto_if_set FLAG_QZ_0x2158, Kanto_SixIsland_WaterPath_House1_EventScript_8421E26
-	setvar VAR_0x8004, 0xD6
+	setvar VAR_0x8004, SPECIES_HERACROSS
 	specialvar VAR_RESULT, QzPartyHasSpecies
 	goto_if_eq VAR_RESULT, 0, Kanto_SixIsland_WaterPath_House1_EventScript_8421E30
 	msgbox Kanto_SixIsland_WaterPath_House1_Text_8421F1E, MSGBOX_DEFAULT

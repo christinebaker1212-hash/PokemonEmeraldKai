@@ -40,7 +40,7 @@ Kanto_PowerPlant_EventScript_84134CA::
 	special QzQuestLogNop
 	lock
 	faceplayer
-	setvar VAR_0x8004, 0x91
+	setvar VAR_0x8004, SPECIES_ZAPDOS
 	setvar VAR_0x8005, 0x32
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

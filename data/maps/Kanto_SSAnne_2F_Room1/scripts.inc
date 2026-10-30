@@ -7,7 +7,7 @@ Kanto_SSAnne_2F_Room1_EventScript_8410810::
 	faceplayer
 	message Kanto_SSAnne_2F_Room1_Text_8424298
 	waitmessage
-	setvar VAR_0x8004, 0x8F
+	setvar VAR_0x8004, SPECIES_SNORLAX
 	special QzSetSeenMon
 	showmonpic SPECIES_SNORLAX, 0xA, 3
 	waitbuttonpress

@@ -86,7 +86,7 @@ Kanto_BirthIsland_Exterior_EventScript_84150EE::
 	delay 0x28
 	waitmoncry
 	setvar VAR_LAST_TALKED, 2
-	setvar VAR_0x8004, 0x182
+	setvar VAR_0x8004, SPECIES_DEOXYS
 	setvar VAR_0x8005, 0x1E
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

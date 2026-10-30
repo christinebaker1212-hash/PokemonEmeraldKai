@@ -36,7 +36,7 @@ Kanto_CeruleanCave_B1F_EventScript_8412253::
 	delay 0x14
 	playbgm MUS_RG_ENCOUNTER_GYM_LEADER, 0
 	waitbuttonpress
-	setvar VAR_0x8004, 0x96
+	setvar VAR_0x8004, SPECIES_MEWTWO
 	setvar VAR_0x8005, 0x46
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

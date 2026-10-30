@@ -164,3 +164,12 @@ void MP_Region_SetCleared(u8 region)
     if (region < REGION_COUNT)
         gRegionState.cleared |= 1 << region;
 }
+
+bool8 MP_Region_AnyCleared(void)
+{
+    u8 r;
+    for (r = 0; r < REGION_COUNT; r++)
+        if (MP_Region_Cleared(r))
+            return TRUE;
+    return FALSE;
+}

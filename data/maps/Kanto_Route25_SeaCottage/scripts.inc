@@ -222,7 +222,7 @@ Kanto_Route25_SeaCottage_EventScript_8420973::
 	showmonpic SPECIES_EEVEE, 0xA, 3
 	waitbuttonpress
 	hidemonpic
-	setvar VAR_0x8004, 0x85
+	setvar VAR_0x8004, SPECIES_EEVEE
 	special QzSetSeenMon
 	goto Kanto_Route25_SeaCottage_EventScript_842091F
 
@@ -230,7 +230,7 @@ Kanto_Route25_SeaCottage_EventScript_8420988::
 	showmonpic SPECIES_FLAREON, 0xA, 3
 	waitbuttonpress
 	hidemonpic
-	setvar VAR_0x8004, 0x88
+	setvar VAR_0x8004, SPECIES_FLAREON
 	special QzSetSeenMon
 	goto Kanto_Route25_SeaCottage_EventScript_842091F
 
@@ -238,7 +238,7 @@ Kanto_Route25_SeaCottage_EventScript_842099D::
 	showmonpic SPECIES_JOLTEON, 0xA, 3
 	waitbuttonpress
 	hidemonpic
-	setvar VAR_0x8004, 0x87
+	setvar VAR_0x8004, SPECIES_JOLTEON
 	special QzSetSeenMon
 	goto Kanto_Route25_SeaCottage_EventScript_842091F
 
@@ -246,7 +246,7 @@ Kanto_Route25_SeaCottage_EventScript_84209B2::
 	showmonpic SPECIES_VAPOREON, 0xA, 3
 	waitbuttonpress
 	hidemonpic
-	setvar VAR_0x8004, 0x86
+	setvar VAR_0x8004, SPECIES_VAPOREON
 	special QzSetSeenMon
 	goto Kanto_Route25_SeaCottage_EventScript_842091F
 

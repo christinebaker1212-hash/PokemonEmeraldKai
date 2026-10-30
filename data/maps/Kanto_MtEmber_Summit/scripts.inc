@@ -28,7 +28,7 @@ Kanto_MtEmber_Summit_EventScript_84138AC::
 	special QzQuestLogNop
 	lock
 	faceplayer
-	setvar VAR_0x8004, 0x92
+	setvar VAR_0x8004, SPECIES_MOLTRES
 	setvar VAR_0x8005, 0x32
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies

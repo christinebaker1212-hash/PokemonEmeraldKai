@@ -9,7 +9,7 @@ Kanto_Route15_WestEntrance_2F_EventScript_84200F7::
 	delay 0x14
 	waitbuttonpress
 	hidemonpic
-	setvar VAR_0x8004, 0x90
+	setvar VAR_0x8004, SPECIES_ARTICUNO
 	special QzSetSeenMon
 	releaseall
 	end

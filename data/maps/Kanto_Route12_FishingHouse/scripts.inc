@@ -39,7 +39,7 @@ Kanto_Route12_FishingHouse_EventScript_841FF16::
 	specialvar VAR_RESULT, QzReturnZero
 	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
 	goto_if_set FLAG_QZ_0x2160, Kanto_Route12_FishingHouse_EventScript_841FF6B
-	setvar VAR_0x8004, 0x81
+	setvar VAR_0x8004, SPECIES_MAGIKARP
 	specialvar VAR_RESULT, QzPartyHasSpecies
 	goto_if_eq VAR_RESULT, 0, Kanto_Route12_FishingHouse_EventScript_841FF75
 	msgbox Kanto_Route12_FishingHouse_Text_842004E, MSGBOX_DEFAULT

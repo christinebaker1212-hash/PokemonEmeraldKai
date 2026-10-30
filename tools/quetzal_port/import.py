@@ -265,6 +265,7 @@ class Ids:
         self.cap = gencap.Capper(4)
         names = load(os.path.join(RIP, 'data', 'names.json'))
         self.item_by_id = {i: c for i, c, n in names['items']}
+        self.species_by_id = {x[0]: x[1] for x in names['species']}
         def consts(f, pre):
             return set(re.findall(r'#define (%s\w+)' % pre, open(os.path.join(REPO, f), encoding='utf-8').read()))
         self.kai = consts('include/constants/items.h', 'ITEM_') | consts('include/constants/moves.h', 'MOVE_') | \
@@ -299,6 +300,20 @@ class Ids:
             return m.group(1) + (self.item(c, where) if c else m.group(2))
         text = re.sub(r'(setorcopyvar VAR_0x8000, )(0x[0-9A-Fa-f]+|\d+)(?=\n\tsetorcopyvar VAR_0x8001, \w+\n\tcallstd STD_(?:OBTAIN|FIND)_ITEM)',
                       raw, text)
+        # species written as Quetzal numbers (national order) for the specials that read VAR_0x8004 as a species
+        def raw_species(m):
+            follow = text[m.end():m.end() + 400].split('\n\n')[0]
+            if not re.search(r'special(?:var VAR_RESULT,)? (?:QzSetSeenMon|QzKantoStaticEncounterLookupBySpecies|'
+                             r'CreateEnemyEventMon|QzPartyHasSpecies)\b', follow):
+                return m.group(0)
+            c = self.species_by_id.get(int(m.group(2), 0))
+            if not c:
+                return m.group(0)
+            c = self.cap.cap_species(c, where)
+            if c not in self.kai:
+                self.missing.setdefault(c, set()).add(where)
+            return m.group(1) + c
+        text = re.sub(r'(setvar VAR_0x8004, )(0x[0-9A-Fa-f]+|\d+)$', raw_species, text, flags=re.M)
         text = re.sub(r'\bITEM_\w+\b', lambda m: self.item(m.group(0), where) if m.group(0) not in
                       ('ITEM_NONE', 'ITEM_USE_FIELD') else m.group(0), text)
         text = re.sub(r'\bMOVE_[A-Z0-9_]+\b', lambda m: self.move(m.group(0), where), text)

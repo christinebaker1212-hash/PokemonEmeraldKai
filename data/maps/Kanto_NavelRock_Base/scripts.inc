@@ -44,7 +44,7 @@ Kanto_NavelRock_Base_EventScript_8414F31::
 	special ShakeCamera
 	delay 0x1E
 	playse SE_THUNDERSTORM_STOP
-	setvar VAR_0x8004, 0
+	setvar VAR_0x8004, SPECIES_NONE
 	setvar VAR_0x8005, 3
 	setvar VAR_0x8006, 4
 	setvar VAR_0x8007, 2
@@ -55,7 +55,7 @@ Kanto_NavelRock_Base_EventScript_8414F31::
 	playmoncry SPECIES_LUGIA, 2
 	waitmoncry
 	delay 0x14
-	setvar VAR_0x8004, 0xF9
+	setvar VAR_0x8004, SPECIES_LUGIA
 	setvar VAR_0x8005, 0x46
 	setvar VAR_0x8006, 0
 	special QzKantoStaticEncounterLookupBySpecies
