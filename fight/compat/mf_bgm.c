@@ -248,7 +248,19 @@ static double MfBgm_Measure(MfBgm *b, const char *path)
     return level;
 }
 
+static int MfBgm_OpenSong(void *instance, const BgmPluginIo *io, BgmInfo *info, BgmOpenResult *out);
+
+/* Moemon Fight: every open, done or failed, is counted (MfMix_MusicOpens): the match load waits for the stage's */
 static int __cdecl MfBgm_Open(void *instance, const BgmPluginIo *io, BgmInfo *info, BgmOpenResult *out)
+{
+    int r;
+    MfMix_SetMusicLevel(0.0);
+    r = MfBgm_OpenSong(instance, io, info, out);
+    MfMix_MusicOpened();
+    return r;
+}
+
+static int MfBgm_OpenSong(void *instance, const BgmPluginIo *io, BgmInfo *info, BgmOpenResult *out)
 {
     MfBgm *b = instance;
     const char *ext;

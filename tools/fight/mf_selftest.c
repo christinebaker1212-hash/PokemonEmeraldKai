@@ -10,6 +10,11 @@
  * SEED), printing MfEngine_Hash every 60 frames; with BACK > 0, every 7 frames it goes BACK frames back, runs
  * them again with other buttons, goes back again and runs them with the right ones (a misprediction and its
  * correction): the hashes must be those of BACK 0.
+ * Audit (tools/fight/audit_chars.sh, with MOEMON_FIGHT_PICK / MOEMON_FIGHT_WATCH): "audit N" steps up to N frames
+ * with no buttons and reports what looks wrong: a fighter out of control in one state for 15 s of fighting, intros
+ * over 20 s, a round paused over half its first minute, a
+ * position off the stage or not a number, a state that doesn't exist, more than 40 helpers at once, a frame that takes over a second, a
+ * round over 3 minutes, then the states each fighter visited.
  * Run from the repository root (mugen/ is read from there).
  */
 #include <stdio.h>
@@ -20,6 +25,8 @@
 #include <malloc.h>
 #endif
 
+#include <math.h>
+#include <time.h>
 #include "mf_engine.h"
 #include "../../fight/host/mf_rollback.h"
 
@@ -193,7 +200,9 @@ int main(int argc, char **argv)
             unsigned int oldest = 0;
             sscanf(line, "%*s %ld", &n);
             while (n-- > 0 && MfEngine_IsActive() && !MfEngine_Kept(&oldest)) {
-                MfEngine_Step(none);
+                while (!MfEngine_Step(none)) {
+                    usleep(1000);   /* still loading */
+                }
                 frame++;
             }
             printf("wait_kept: kept=%d frame %u\n", MfEngine_Kept(&oldest), MfEngine_FrameCount());
@@ -205,7 +214,9 @@ int main(int argc, char **argv)
             for (i = 0; i < (unsigned int)n && MfEngine_IsActive(); i++) {
                 unsigned int f = MfEngine_FrameCount();   /* frames done: this step runs frame f + 1 */
                 Fight_Buttons(f + 1, seed, buttons);
-                MfEngine_Step(buttons);
+                while (!MfEngine_Step(buttons)) {
+                    usleep(1000);   /* still loading */
+                }
                 frame++;
                 if (back > 0 && i % 7 == 6 && MfEngine_Kept(NULL)) {
                     unsigned int now = MfEngine_FrameCount(), to = now - back;
@@ -247,6 +258,138 @@ int main(int argc, char **argv)
             printf("rbstats: %lu frames kept, %.1f pages a frame (most %lu), %lu rewinds (%lu frames back), "
                    "globals %zu bytes, heap copy %zu KB\n", st.frames, st.frames ? (double)st.pages / st.frames : 0.0,
                    st.most_pages, st.rewinds, st.frames_back, st.globals, st.shadow / 1024);
+        } else if (strcmp(cmd, "audit") == 0) {
+            unsigned short none[2] = { 0, 0 };
+            static unsigned char seen[2][10000];
+            int stuck_state[2] = { -1, -1 }, stuck_for[2] = { 0, 0 }, reported[2] = { 0, 0 };
+            int most_helpers = 0, issues = 0, round_frames = 0, rounds = 0, last_rs = -1, intro_frames = 0, p, i2;
+            int last_life[2] = { 0, 0 }, paused_frames = 0;
+            sscanf(line, "%*s %ld", &n);
+            memset(seen, 0, sizeof(seen));
+            while (n-- > 0 && MfEngine_IsActive()) {
+                struct timespec t0, t1;
+                int rs, helpers = 0;
+                clock_gettime(CLOCK_MONOTONIC, &t0);
+                while (!MfEngine_Step(none)) {
+                    usleep(1000);
+                }
+                clock_gettime(CLOCK_MONOTONIC, &t1);
+                frame++;
+                if ((t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9 > 1.0) {
+                    printf("audit ISSUE frame %ld took %.1f s\n", frame,
+                           (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9);
+                    issues++;
+                }
+                rs = MfEngine_RoundState();
+                if (rs == 1) {
+                    if (++intro_frames == 60 * 20) {
+                        printf("audit ISSUE frame %ld: the intros have gone on for 20 s\n", frame);
+                        issues++;
+                    }
+                } else {
+                    intro_frames = 0;
+                }
+                if (rs == 2) {
+                    round_frames++;
+                    paused_frames += MfEngine_Paused();
+                    if (round_frames == 3600 && paused_frames > 1800) {
+                        printf("audit ISSUE frame %ld: the fight has been paused %d of the round's first 60 s (a Pause "
+                               "or SuperPause kept starting again)\n", frame, paused_frames / 60);
+                        issues++;
+                    }
+                    if (round_frames % 1800 == 0) {
+                        printf("audit round: %d s in, %d s paused, time left %d\n", round_frames / 60,
+                               paused_frames / 60, MfEngine_RoundTime());
+                    }
+                    if (round_frames == 60 * 180) {
+                        struct MfPlayerInfo a, b;
+                        MfEngine_PlayerInfo(1, &a);
+                        MfEngine_PlayerInfo(2, &b);
+                        printf("audit ISSUE frame %ld: a round has gone on for 3 minutes (%s state %d time %d life %d, "
+                               "%s state %d time %d life %d)\n", frame, a.name, a.state, a.state_time, a.life, b.name,
+                               b.state, b.state_time, b.life);
+                        issues++;
+                    }
+                } else if (last_rs == 2) {
+                    rounds++;
+                    round_frames = 0;
+                    paused_frames = 0;
+                }
+                last_rs = rs;
+                for (i2 = 3; i2 <= MfEngine_PlayerSlots() && i2 <= 64; i2++) {
+                    struct MfPlayerInfo h;
+                    helpers += MfEngine_PlayerInfo(i2, &h) && h.helper;
+                }
+                if (helpers > most_helpers) {
+                    most_helpers = helpers;
+                    if (most_helpers == 41) {
+                        printf("audit ISSUE frame %ld: over 40 helpers at once\n", frame);
+                        issues++;
+                    }
+                }
+                /* each hit: who took how much, while the attacker (the other fighter) was in which state */
+                for (p = 0; p < 2; p++) {
+                    struct MfPlayerInfo me, foe;
+                    if (MfEngine_PlayerInfo(p + 1, &me) && MfEngine_PlayerInfo(2 - p, &foe)) {
+                        if (last_life[p] > 0 && me.life < last_life[p] && rs == 2) {
+                            printf("audithit %s state %d -> %s state %d damage %d\n", foe.name, foe.state, me.name,
+                                   me.state, last_life[p] - me.life);
+                        }
+                        last_life[p] = me.life;
+                    }
+                }
+                for (p = 0; p < 2; p++) {
+                    struct MfPlayerInfo pi;
+                    if (!MfEngine_PlayerInfo(p + 1, &pi)) {
+                        continue;
+                    }
+                    if (pi.state >= 0 && pi.state < 10000) {
+                        if (pi.state_missing && seen[p][pi.state] != 2) {
+                            printf("audit ISSUE frame %ld: %s in state %d, which doesn't exist (from %d)\n", frame,
+                                   pi.name, pi.state, pi.prev_state);
+                            issues++;
+                            seen[p][pi.state] = 2;
+                        } else if (!seen[p][pi.state]) {
+                            seen[p][pi.state] = 1;
+                        }
+                    }
+                    if (isnan(pi.x) || isnan(pi.y) || fabsf(pi.x) > 4000.0f || pi.y < -4000.0f || pi.y > 400.0f) {
+                        printf("audit ISSUE frame %ld: %s at %.1f,%.1f (state %d)\n", frame, pi.name, pi.x, pi.y,
+                               pi.state);
+                        issues++;
+                    }
+                    /* one stay in a state (its time keeps counting) of 15 s of fighting without control */
+                    if (rs == 2 && !pi.ctrl && pi.alive && pi.state_time >= 900 && !reported[p]) {
+                        printf("audit ISSUE frame %ld: %s out of control in state %d for 15 s (from %d, movetype %d, "
+                               "at %.0f,%.0f)\n", frame, pi.name, pi.state, pi.prev_state, pi.movetype, pi.x, pi.y);
+                        reported[p] = 1;
+                        issues++;
+                    }
+                    if (pi.state_time < 900) {
+                        reported[p] = 0;
+                    }
+                    stuck_state[p] = pi.state;
+                    stuck_for[p] = 0;
+                }
+            }
+            for (p = 0; p < 2; p++) {
+                int k, count = 0;
+                printf("audit states p%d:", p + 1);
+                for (k = 0; k < 10000; k++) {
+                    if (seen[p][k]) {
+                        printf(" %d", k);
+                        count++;
+                    }
+                }
+                printf(" (%d)\n", count);
+            }
+            printf("audit: %ld frames, %d rounds, most helpers %d, %d issue(s), result %d\n", frame, rounds,
+                   most_helpers, issues, MfEngine_Result());
+        } else if (strcmp(cmd, "roster") == 0) {
+            struct MfPack pack;
+            if (MfEngine_PackSummary("mauville_gc", &pack)) {
+                printf("roster %d characters %d stages\n", pack.chars, pack.stages);
+            }
         } else if (strcmp(cmd, "result") == 0) {
             printf("result %d error \"%s\"\n", MfEngine_Result(), MfEngine_Error());
         }

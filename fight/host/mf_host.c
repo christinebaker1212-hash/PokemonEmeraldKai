@@ -947,6 +947,73 @@ static void Host_ApplyCabinet(const char *cabinet)
     MfFit_Hud(hud_top);
 }
 
+/*
+ * Tests (the 6.4 audit, tools/fight/audit_chars.sh): MOEMON_FIGHT_PICK="P1,P2[,STAGE]" skips the select screen with
+ * those characters (select list numbers from 0) on palette 1, and the stage (cabinet list number, or a .def path);
+ * MOEMON_FIGHT_WATCH=1 has the CPU play both sides (Players_ForceAi).
+ */
+static int Host_TestPicks(void)
+{
+    GameVars *g = g_game;
+    const char *env = getenv("MOEMON_FIGHT_PICK");
+    int pick[2], side;
+
+    if (env == NULL || sscanf(env, "%d,%d", &pick[0], &pick[1]) != 2) {
+        return 0;
+    }
+    g->team_variant = 0;
+    g->arcade_side = 0;
+    for (side = 0; side < 2; side++) {
+        TeamSel *t = &g->teams[side];
+        TeamSlot *slot = &t->members[0].slots[0];
+        int c = pick[side] >= 0 && pick[side] < g->char_count ? pick[side] : 0;
+        t->member_count = 1;
+        t->members[0].count = 1;
+        t->members[0].mode = TEAM_SINGLE;
+        t->char_count = 1;
+        slot->player = side + 1;
+        slot->side = side;
+        slot->char_index = c;
+        slot->pal = PalReserve_Request(c, 0);
+        g->player_sides[side] = side;
+    }
+    memcpy(&g->match_members[0], &g->teams[0].members[0], sizeof(TeamMember));
+    memcpy(&g->match_members[1], &g->teams[1].members[0], sizeof(TeamMember));
+    return 1;
+}
+
+static void Host_TestStage(void)
+{
+    GameVars *g = g_game;
+    const char *env = getenv("MOEMON_FIGHT_PICK");
+    const char *stage;
+    int n;
+
+    if (env == NULL || (stage = strchr(env, ',')) == NULL || (stage = strchr(stage + 1, ',')) == NULL) {
+        return;
+    }
+    stage++;
+    if (sscanf(stage, "%d", &n) == 1 && strchr(stage, '.') == NULL) {
+        if (sStageCount > 0 && n >= 0 && n < sStageCount) {
+            stage = sStages[n];
+        } else {
+            return;
+        }
+    }
+    g->select_stage[0] = '\0';
+    strncat(g->select_stage, stage, sizeof(g->select_stage) - 1);
+    g->arcade_music[0] = '\0';
+}
+
+int MfHost_TestWatch(void)
+{
+    static int watch = -1;
+    if (watch < 0) {
+        watch = getenv("MOEMON_FIGHT_WATCH") != NULL;
+    }
+    return watch;
+}
+
 static int Host_RunSession(const struct MfSession *s)
 {
     GameVars *g = g_game;
@@ -969,6 +1036,10 @@ static int Host_RunSession(const struct MfSession *s)
             break;
         case 7:
             sMotifScreen = 1;
+            if (Host_TestPicks()) {
+                state = 8;      /* tests: the fighters were given (MOEMON_FIGHT_PICK) */
+                break;
+            }
             state = Charsel_Run();
             if (state != 8) {
                 return MF_RESULT_CANCELLED;
@@ -979,6 +1050,7 @@ static int Host_RunSession(const struct MfSession *s)
             if (s->mode != MF_MODE_CPU || !sCpuHomeStage) {
                 Host_PickStage();
             }
+            Host_TestStage();
             Host_NameStage();
             state = 10;
             break;
@@ -1536,4 +1608,53 @@ void MfEngine_MixAudio(short *stereo, int frames, int rate)
     if (sState == HOST_RUNNING || sState == HOST_READY) {
         MfMix_Render(stereo, frames, rate);
     }
+}
+
+/* Tests: what the character audit reads (tools/fight/audit_chars.sh, mf_selftest's "audit") */
+int MfEngine_PlayerInfo(int n, struct MfPlayerInfo *out)
+{
+    GameVars *g = g_game;
+    Player *p;
+
+    memset(out, 0, sizeof(*out));
+    if (g == NULL || n < 1 || n > g->player_slots || n > 64 || (p = g->players[n]) == NULL || !p->active) {
+        return 0;
+    }
+    out->helper = p->helper;
+    out->state = p->state_no;
+    out->prev_state = p->prev_state_no;
+    out->state_time = p->state_time;
+    out->ctrl = p->ctrl;
+    out->statetype = p->statetype;
+    out->movetype = p->movetype;
+    out->life = p->life;
+    out->life_max = p->life_max;
+    out->power = p->power;
+    out->alive = p->alive;
+    out->hitpause = p->hitpause_time;
+    out->state_missing = !p->state_exists;
+    out->x = p->pos.x;
+    out->y = p->pos.y;
+    snprintf(out->name, sizeof(out->name), "%s", p->name);
+    return 1;
+}
+
+int MfEngine_PlayerSlots(void)
+{
+    return g_game != NULL ? g_game->player_slots : 0;
+}
+
+int MfEngine_RoundState(void)
+{
+    return g_game != NULL ? g_game->round_state : -1;
+}
+
+int MfEngine_RoundTime(void)
+{
+    return g_game != NULL ? g_game->round_time : -1;
+}
+
+int MfEngine_Paused(void)
+{
+    return g_game != NULL && g_game->pause_kind >= 0;
 }

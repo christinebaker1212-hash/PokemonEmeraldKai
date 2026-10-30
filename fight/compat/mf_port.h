@@ -69,6 +69,7 @@ void MfHost_KeepBackground(void);
 void MfHost_FillSides(void);
 /* The fight is on screen (Fight_DrawHud) */
 void MfHost_MatchShown(void);
+int MfHost_TestWatch(void);     /* tests: the CPU plays both sides (MOEMON_FIGHT_WATCH) */
 /* A character one of the online players lacks (greyed out, never picked at random) */
 int MfHost_CharOff(int char_index);
 /* The stage's name for the VS screen ("" none), where (motif coordinates) and in which font (font, bank, align;

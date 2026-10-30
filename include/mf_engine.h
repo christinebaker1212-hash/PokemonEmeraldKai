@@ -71,6 +71,20 @@ int MfEngine_PackSummary(const char *cabinet, struct MfPack *out);
 // The cabinet's section of mugen/cabinets.ini as text, with its [name] line; 0 when there's none
 int MfEngine_CabinetText(const char *cabinet, char *out, int size);
 
+// Tests (the character audit): player n (1, 2; helpers above) as the engine has it now. 0 when there's none
+struct MfPlayerInfo
+{
+    int helper, state, prev_state, state_time, ctrl, statetype, movetype, life, life_max, power, alive, hitpause;
+    int state_missing;   // in a state number neither the character nor common1.cns defines
+    float x, y;
+    char name[48];
+};
+int MfEngine_PlayerInfo(int n, struct MfPlayerInfo *out);
+int MfEngine_PlayerSlots(void);     // the highest player number there can be
+int MfEngine_RoundState(void);      // the round: 0 starting, 1 intros, 2 fighting, 3 over, 4 results (RoundState)
+int MfEngine_RoundTime(void);       // ticks of round time left (-1: none); MfEngine_Paused: a Pause / SuperPause runs
+int MfEngine_Paused(void);
+
 // Starts a session (loading the engine the first time). Returns 0 when the engine can't run.
 int MfEngine_Begin(const struct MfSession *session);
 // A session is running (select, versus, fight, victory).

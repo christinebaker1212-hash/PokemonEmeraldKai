@@ -393,7 +393,7 @@ text = "var(20)=%d,var(21)=%d var(22)=%d,var(23)=%d var(24)=%d \n"
 params = var(20),var(21),var(22),var(23),var(24)
 
 [State -2, クリップボード（追加専用）]
-type = AppendToClipboard
+type = null;AppendToClipboard ;Moemon Fight: debug text only, and every frame it asked for helper 8011 (a warning when it is gone)
 trigger1 = 1
 text = "time = %d numtarget = %d var(4)= %d var(13) = %d RecoverTime = %d  \n"
 params = helper(8011),time,numtarget,var(4),var(13),(enemynear,GetHitVar(RecoverTime))

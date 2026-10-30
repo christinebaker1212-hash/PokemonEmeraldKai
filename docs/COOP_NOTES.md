@@ -2021,6 +2021,10 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
   in softrender.c / softblend.c / bg.c; MOEMON_FIGHT_NEAREST=1 for MUGEN's nearest), and the picture goes
   through display.c's own path (srcW x srcH 480x320): FIGHT_DECISIONS "Pixels". Tests fight_display,
   tools/fight/test_softscale.c.
+- Character audit and balance audit (1.51.0): tools/fight/check_chars.py (static), tools/fight/audit_chars.sh (every
+  pairing CPU against CPU plus a rollback check, via mf_selftest's `audit`; hooks MOEMON_FIGHT_PICK, MOEMON_FIGHT_WATCH,
+  MOEMON_FIGHT_WARN), tools/fight/balance_audit.py (docs/FIGHT_BALANCE.md; baseline tools/fight/balance_baseline.json),
+  all reading the pack through tools/fight/mugen_files.py. Patterns found: docs/FIGHT_AUDIT.md.
 - `MOEMON_FIGHT_SEED=N` (tests) fixes an online fight's seed, so its picks are the same every run
   (fight_online_lag pins one: with seed 1998331917, a Ryu mirror, the round can run past the test's wait, 1.49.3 too).
 

@@ -27,6 +27,8 @@ double MfMix_GatedLevel(double *ms, int count);           /* a song's from the m
 void MfMix_SetVoiceLevel(double level);     /* engine thread: the fighters' voices at the volume they play */
 void MfMix_SetMusicLevel(double level);     /* BGM thread: the song just opened, at full volume */
 double MfMix_MusicLevel(void);
+void MfMix_MusicOpened(void);              /* BGM thread: a song was opened (or failed to) */
+int MfMix_MusicOpens(void);                 /* how many so far */
 double MfMix_MusicGain(void);               /* what the stage music is multiplied by now */
 
 #endif /* MF_COMPAT_H */

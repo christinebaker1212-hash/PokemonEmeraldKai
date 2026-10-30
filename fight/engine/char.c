@@ -2248,7 +2248,7 @@ void PersistVars_Save(const Player *p, PersistVars *dst)
 void Players_ForceAi(void)
 {
     GameVars *g = g_game;
-    int force = g->stresstest != 0 || g->demo_mode != 0;
+    int force = g->stresstest != 0 || g->demo_mode != 0 || MfHost_TestWatch();   /* Moemon Fight: tests */
     int t, i;
 
     for (t = 0; t < 2; t++) {

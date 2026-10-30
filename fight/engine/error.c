@@ -242,6 +242,19 @@ void Player_Warn(Player *p, const char *msg)
 }
 
 /* 0x0040BAE0: the message is not terminated when it fills the buffer. */
+/* Moemon Fight: tests (the character audit) see the players' warnings: MOEMON_FIGHT_WARN=1 prints them */
+static void Error_TestWarn(Player *p, int line, const char *msg)
+{
+    static int on = -1;
+    if (on < 0) {
+        on = getenv("MOEMON_FIGHT_WARN") != NULL;
+    }
+    if (on && p != NULL) {
+        printf("fightwarn: %s in state %d%s%.0d: %s%s", p->name, p->state_no, line != -1 ? " line " : "",
+               line != -1 ? line : 0, msg, msg[0] != '\0' && msg[strlen(msg) - 1] == '\n' ? "" : "\n");
+    }
+}
+
 void Player_Warnf(Player *p, const char *fmt, ...)
 {
     char msg[0x800];
@@ -251,6 +264,7 @@ void Player_Warnf(Player *p, const char *fmt, ...)
         va_start(ap, fmt);
         _vsnprintf(msg, sizeof(msg), fmt, ap);
         TextRing_Printf(g_game->clipboard, PLAYER_WARNING, g_game->frames, p->name, p->id, p->state_no, msg);
+        Error_TestWarn(p, -1, msg);
     }
 }
 
@@ -269,6 +283,7 @@ void Player_WarnAt(Player *p, const StateCtrl *sc, const char *fmt, ...)
     }
     va_start(ap, fmt);
     _vsnprintf(msg, sizeof(msg), fmt, ap);
+    Error_TestWarn(p, line, msg);
     if (line != -1) {
         TextRing_Printf(g_game->clipboard, "%-4i: Warning: Player %s (%i) in state %i (line %i): %s\n",
                         g_game->frames, p->name, p->id, p->state_no, line, msg);
@@ -281,6 +296,7 @@ void Player_WarnAt(Player *p, const StateCtrl *sc, const char *fmt, ...)
 void Player_WarnRedirected(Player *p, Player *from, const char *msg)
 {
     if (p != NULL) {
+        Error_TestWarn(p, -1, msg);
         TextRing_Printf(g_game->clipboard,
                         "%-4i: Warning: Player %s (%i) in state %i: in redirected trigger from player %s (%i) in state %i: %s\n",
                         g_game->frames, p->name, p->id, p->state_no, from->name, from->id, from->state_no, msg);

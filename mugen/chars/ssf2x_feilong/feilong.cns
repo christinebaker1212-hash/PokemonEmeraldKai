@@ -3100,7 +3100,7 @@ var(5) = 1
 type = TargetState
 trigger1 = var(5) = 1
 trigger1 = AnimElem = 6
-value = 935
+value = 930 ;Moemon Fight: was 935, a state Fei Long lacks (his escape is 930, as Ryu's)
 
 [State 1201, 2]
 type = Playerpush
@@ -3177,7 +3177,7 @@ time = -1
 
 [State 901,1]
 type = targetBind
-trigger1 = AnimElem) = 7
+trigger1 = AnimElem = 7 ;Moemon Fight: was "AnimElem) = 7"
 pos = ceil(91*const(size.xscale)), ceil(-93*const(size.yscale))
 postype = P1
 time = -1

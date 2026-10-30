@@ -249,6 +249,18 @@ double MfMix_MusicLevel(void)
     return sMusicLevel;
 }
 
+static volatile int sMusicOpens;
+
+void MfMix_MusicOpened(void)
+{
+    sMusicOpens++;
+}
+
+int MfMix_MusicOpens(void)
+{
+    return sMusicOpens;
+}
+
 /* At most 1: the song at its volume stays MF_BGM_UNDER_VOICES_DB under the voices. */
 double MfMix_MusicGain(void)
 {
