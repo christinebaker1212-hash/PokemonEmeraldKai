@@ -1258,7 +1258,7 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   of that card, ALL SPARES at the end of the list all of
                   them; the same on the Yu-Gi-Oh! counter), which sells
                   commons and uncommons for them.
-  Packs           5 commons, 3 uncommons, a rare and an Energy. One pack in
+  Packs           6 commons, 3 uncommons and a rare. One pack in
                   three has a HOLO rare instead of a plain one: holos only
                   come from packs and trades. After 20 packs of a set without
                   a holo you didn't have, the next pack brings one. Cards you

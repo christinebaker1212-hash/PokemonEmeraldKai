@@ -61,15 +61,14 @@ int main(int argc, char **argv)
         assert(Tcg_OpenPack(&c, p, a));
         assert(Tcg_OpenPack(&other, p, b));
         assert(!memcmp(a, b, sizeof(a)));
-        for (i = 0; i < 9; i++)
+        for (i = 0; i < 10; i++)
         {
             const struct TcgCard *d = Tcg_Card(a[i]);
             assert(Tcg_InPack(a[i], p));
             assert(d->kind != TCG_ENERGY);
             rarities[d->rarity]++;
         }
-        assert(rarities[0] == 5 && rarities[1] == 3 && rarities[2] == 1);
-        assert(a[9] >= 1 && a[9] <= 6);
+        assert(rarities[0] == 6 && rarities[1] == 3 && rarities[2] == 1 && Tcg_Card(a[9])->rarity == 2);
         assert(total(&c) == count + 10);
         assert(!Tcg_OpenPack(&c, p, a));
     }
@@ -105,7 +104,7 @@ int main(int argc, char **argv)
                     missingBefore += Tcg_IsHolo(k) && Tcg_Card(k)->set == set && !h.owned[k];
                 assert(Tcg_AwardPack(&h, set) && Tcg_OpenPack(&h, set, r));
                 opened++;
-                holos += Tcg_IsHolo(r[8]);
+                holos += Tcg_IsHolo(r[9]);
                 for (k = 1; k <= TCG_CARD_COUNT; k++)
                     newHolo += Tcg_IsHolo(k) && Tcg_Card(k)->set == set && !h.owned[k];
                 if (missingBefore)

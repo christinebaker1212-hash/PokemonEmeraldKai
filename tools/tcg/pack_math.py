@@ -46,7 +46,7 @@ def report(name, m, n=2000):
     e = sorted(x[0] for x in r); b = sorted(x[1] for x in r); l = sorted(x[2] for x in r)
     print("%-40s won packs: median %4d 90%% %4d (+%3d bought) | last rare: median %3d 90%% %3d" %
           (name, e[n//2], e[n*9//10], b[n//2], l[n//2], l[n*9//10]))
-now = dict(nc=5, nu=3, holo=None, cp=True, val={'c':1,'u':3,'h':10,'r':10}, cost={'c':5,'u':15,'h':50,'r':50}, packcost=12)
+now = dict(nc=6, nu=3, holo=None, cp=True, val={'c':1,'u':3,'h':10,'r':10}, cost={'c':5,'u':15,'h':50,'r':50}, packcost=12)
 report("NOW", now)
 report("NOW, no CARD POINTS", dict(now, cp=False))
 report("WotC (holo 1/3, no CP)", dict(nc=5, nu=3, holo=1/3, cp=False, packcost=0))
@@ -58,4 +58,4 @@ for pity, val, cost, pc in [
         (25, {'c':0,'u':1,'h':10,'r':4}, {'c':5,'u':15,'h':0,'r':80}, 60),
         (30, {'c':0,'u':1,'h':10,'r':4}, {'c':5,'u':15,'h':0,'r':80}, 60)]:
     report("pity %2d holo val %2d pack %2d C%d U%d" % (pity, val['h'], pc, val['c'], val['u']),
-           dict(nc=5, nu=3, holo=1/3, pity=pity, cp=True, val=val, cost=cost, packcost=pc))
+           dict(nc=6, nu=3, holo=1/3, pity=pity, cp=True, val=val, cost=cost, packcost=pc))

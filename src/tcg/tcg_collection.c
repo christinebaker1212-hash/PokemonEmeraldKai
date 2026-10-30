@@ -157,10 +157,11 @@ int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
     next = *c;
     if (next.drought[pack] < 255)
         next.drought[pack]++;
+    /* six commons, three uncommons, the rare last (no Basic Energy: it's free and endless at the deck builder) */
     for (i = 0; i < 10; i++)
     {
-        unsigned pool = i < 5 ? 0 : i < 8 ? 1 : 2, id;
-        if (i == 8)
+        unsigned pool = i < 6 ? 0 : i < 9 ? 1 : 2, id;
+        if (i == 9)
         {
             /* The rare: a holo one pack in TCG_HOLO_ODDS (a new one after a long wait) */
             if (sizes[4] && next.drought[pack] >= TCG_HOLO_PITY)
@@ -168,7 +169,7 @@ int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
             else if (!sizes[2] || (sizes[3] && Tcg_RandomBelow(&next.rng, TCG_HOLO_ODDS) == 0))
                 pool = 3;
         }
-        id = i == 9 ? 1 + Tcg_RandomBelow(&next.rng, 6) : pools[pool][Tcg_RandomBelow(&next.rng, sizes[pool])];
+        id = pools[pool][Tcg_RandomBelow(&next.rng, sizes[pool])];
         if (next.owned[id] >= TCG_COLLECTION_MAX)
             return 0;
         if (pool >= 3 && !next.owned[id])
