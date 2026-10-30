@@ -1,0 +1,7 @@
+# Gen 5-9 POKéMON evolve: SNIVY one EXP point short of Lv. 17 wins a battle and becomes SERVINE
+MODE=1
+GEN=9
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=520:16+"
+EXPECT_A=("party: 521(")
+UNEXPECT_A=("[crash]")
