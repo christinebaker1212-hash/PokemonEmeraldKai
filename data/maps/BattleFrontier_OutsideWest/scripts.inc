@@ -4,6 +4,7 @@ BattleFrontier_OutsideWest_MapScripts::
 
 BattleFrontier_OutsideWest_OnTransition:
 	setvar VAR_BRAVO_TRAINER_BATTLE_TOWER_ON, 0
+	special Tcg_FrontierSetup  @ Moemon Kai: the Frontier Brains out with their cards
 	setflag FLAG_HIDE_BATTLE_TOWER_REPORTER
 	end
 

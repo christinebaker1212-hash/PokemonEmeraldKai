@@ -2545,6 +2545,12 @@ TCG_LINK_VERSION 15.
   toward the middle of its side's Monster Zones (FX_TRIBUTE: the event waits for all of it, Advance moves it to the
   Graveyard after, so the table never catches up mid-way); a Tribute Summon gathers the light on its zone and bursts
   (FX_GATHER), then its picture big as TRIBUTE SUMMON. No beams of light: a Summon is a ring.
+- 1.59.0, the Frontier Brains out with their cards: each stands by their facility's door on BATTLE FRONTIER's outside
+  maps (map.json objects, hidden by FLAG_FRONTIER_CARDS_* = FLAG_UNUSED_0x023-0x028) once the player holds that
+  facility's silver symbol. tcg_field.c Tcg_FrontierSetup (both maps' ON_TRANSITION) puts (n + 1) / 2 of the n beaten
+  Brains out each day, a window over them that moves one along per Tcg_Today() (online: the room host's day). Their
+  talk lines are data/scripts/frontier_cards.inc; the CARD CASE finds their decks by graphics id as before (sSpecials,
+  sDuelists). Test scenario frontier_cards.
 - 1.58.0, every POKeMON card can be had: the 17 Game Boy 2 promos no trainer handed over are milestone prizes under
   PRIZES (tcg_ui.c sMilestonePromos: duels won, packs opened, special trainers beaten, the four ELITE FOUR decks,
   the CLEAN SWEEP / PURE ENERGY achievements, booster sets complete), counted from what the collection and the

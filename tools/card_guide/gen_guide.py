@@ -84,12 +84,12 @@ TCG_SPECIALS = [
     ('WALLY', '', 'wherever you meet him (Mauville City, Victory Road)', 'any time'),
     ('MAXIE', 'Magma Leader', 'wherever you meet him', 'any time'),
     ('ARCHIE', 'Aqua Leader', 'wherever you meet him', 'any time'),
-    ('ANABEL', 'Salon Maiden', 'the Battle Frontier', 'any time'),
-    ('TUCKER', 'Dome Ace', 'the Battle Frontier', 'any time'),
-    ('SPENSER', 'Palace Maven', 'the Battle Frontier', 'any time'),
-    ('GRETA', 'Arena Tycoon', 'the Battle Frontier', 'any time'),
-    ('NOLAND', 'Factory Head', 'the Battle Frontier', 'any time'),
-    ('LUCY', 'Pike Queen', 'the Battle Frontier', 'any time'),
+    ('ANABEL', 'Salon Maiden', 'outside the Battle Tower, Battle Frontier', 'after winning the Tower silver symbol; about half the Brains are out each day'),
+    ('TUCKER', 'Dome Ace', 'outside the Battle Dome, Battle Frontier', 'after winning the Dome silver symbol; about half the Brains are out each day'),
+    ('SPENSER', 'Palace Maven', 'outside the Battle Palace, Battle Frontier', 'after winning the Palace silver symbol; about half the Brains are out each day'),
+    ('GRETA', 'Arena Tycoon', 'outside the Battle Arena, Battle Frontier', 'after winning the Arena silver symbol; about half the Brains are out each day'),
+    ('NOLAND', 'Factory Head', 'outside the Battle Factory, Battle Frontier', 'after winning the Factory silver symbol; about half the Brains are out each day'),
+    ('LUCY', 'Pike Queen', 'outside the Battle Pike, Battle Frontier', 'after winning the Pike silver symbol; about half the Brains are out each day'),
 ]
 # (tcg_ui.c sSetPromos: 75% of a booster's cards; GYM_SWEEP_BIT: every Gym Leader's deck beaten)
 SET_PROMOS = [64, 118, 145, 200, 319, 421, 315, 384, 418, 401, 441]
@@ -224,12 +224,12 @@ YGO_SPECIALS = [
     ('DRAKE', 'Elite Four', 'his room at the POKéMON LEAGUE', 'after you beat him in a Pokémon battle', 'Horus the Black Flame Dragon LV8'),
     ('MAXIE', 'Magma Leader', 'wherever you meet him', 'any time', 'Hino-Kagu-Tsuchi'),
     ('ARCHIE', 'Aqua Leader', 'wherever you meet him', 'any time', 'Water Dragon'),
-    ('ANABEL', 'Salon Maiden', 'the Battle Frontier', 'any time', 'Silent Magician LV8'),
-    ('TUCKER', 'Dome Ace', 'the Battle Frontier', 'any time', 'Gate Guardian'),
-    ('SPENSER', 'Palace Maven', 'the Battle Frontier', 'any time', 'Fairy King Truesdale'),
-    ('GRETA', 'Arena Tycoon', 'the Battle Frontier', 'any time', 'Mystical Knight of Jackal'),
-    ('NOLAND', 'Factory Head', 'the Battle Frontier', 'any time', 'Perfect Machine King'),
-    ('LUCY', 'Pike Queen', 'the Battle Frontier', 'any time', 'Gogiga Gagagigo'),
+    ('ANABEL', 'Salon Maiden', 'outside the Battle Tower, Battle Frontier', 'after winning the Tower silver symbol; about half the Brains are out each day', 'Silent Magician LV8'),
+    ('TUCKER', 'Dome Ace', 'outside the Battle Dome, Battle Frontier', 'after winning the Dome silver symbol; about half the Brains are out each day', 'Gate Guardian'),
+    ('SPENSER', 'Palace Maven', 'outside the Battle Palace, Battle Frontier', 'after winning the Palace silver symbol; about half the Brains are out each day', 'Fairy King Truesdale'),
+    ('GRETA', 'Arena Tycoon', 'outside the Battle Arena, Battle Frontier', 'after winning the Arena silver symbol; about half the Brains are out each day', 'Mystical Knight of Jackal'),
+    ('NOLAND', 'Factory Head', 'outside the Battle Factory, Battle Frontier', 'after winning the Factory silver symbol; about half the Brains are out each day', 'Perfect Machine King'),
+    ('LUCY', 'Pike Queen', 'outside the Battle Pike, Battle Frontier', 'after winning the Pike silver symbol; about half the Brains are out each day', 'Gogiga Gagagigo'),
     ('STEVEN', '', 'wherever you meet him (Granite Cave, his house in Mossdeep, Meteor Falls)', 'any time', 'Valkyrion the Magna Warrior'),
     ('Your rival (MAY / BRENDAN)', '', 'their house in Littleroot Town, or wherever you meet them', 'any time', 'Theinen the Great Sphinx'),
     ('WALLY', '', 'wherever you meet him (Mauville City, Victory Road)', 'any time', 'Guardian Angel Joan'),
@@ -489,7 +489,7 @@ for i, (who, title, where, when) in enumerate(TCG_SPECIALS):
     p = tcg['special'][i]['promo']
     st_rows.append([who, title or '-', where, when, tname(cards[p]) if p else '-'])
 page.append(table('pkmn-trainers', ['Trainer', 'Title', 'Where', 'Duels you', 'First-win promo'], st_rows))
-page.append('<p class="soft">The Frontier Brains are only met inside Battle Frontier challenges.</p>')
+page.append('<p class="soft">Each Frontier Brain waits outside their own facility once you hold its silver symbol. About half of the Brains you have beaten are out on any day, and the lineup shifts daily.</p>')
 if non_promo_special:
     page.append('<h3>Other cards outside packs, shops and ordinary duelists</h3>')
     page.append(table('pkmn-other', ['Card', 'Type', 'Rarity', 'Packs', 'Shops', 'Duelists', 'Special trainers',

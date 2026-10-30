@@ -1,0 +1,7 @@
+# The Frontier Brains out by their facilities with their cards: ANABEL alone once the TOWER's silver symbol is held
+# (talk, then the CARD CASE asks her for a duel); then all six symbols, three of them out on the day
+MODE=1
+WARP=26,14,18,20
+TMO=150
+EXPECT_A=("frontier brain out today" "ANABEL")
+UNEXPECT_A=("[crash]")

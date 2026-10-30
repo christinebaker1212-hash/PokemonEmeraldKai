@@ -1066,6 +1066,7 @@ Common_EventScript_LegendaryFlewAway::
 	.include "data/scripts/card_club.inc"
 	.include "data/scripts/ygo_club.inc"
 	.include "data/scripts/tt_seller.inc"
+	.include "data/scripts/frontier_cards.inc"
 	.include "data/scripts/vs_cabinet.inc"
 	.include "data/scripts/dance_machine.inc"
 	.include "data/scripts/battle_sim.inc"

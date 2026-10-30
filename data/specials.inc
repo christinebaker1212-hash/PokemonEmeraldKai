@@ -581,6 +581,7 @@ gSpecials::
 	def_special Tt_QueenHere
 	def_special Tt_QueenTalk, waitstate=1
 	def_special Tt_QueenFirstMeeting
+	def_special Tcg_FrontierSetup
 	def_special MP_Fight_StartCpu, waitstate=1
 	def_special MP_Fight_Result
 	def_special MP_Fight_SeatCheck

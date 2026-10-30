@@ -210,6 +210,8 @@ brings an attack closer (tcg_ai.c EnergyHelps); scenarios "ai ..." in tools/ygo/
 Every card's sources for players: docs/CARD_GUIDE.html (tools/card_guide/build.sh, from the game's own tables; rerun
 after card, deck, shop or reward changes). The POKéMON promos no trainer gives are milestone prizes (tcg_ui.c
 sMilestonePromos, TcgCollection.rewards).
+The Frontier Brains play cards outside their facilities once beaten (silver symbol), about half a day in a shifting
+lineup (tcg_field.c Tcg_FrontierSetup; COOP_NOTES 1.59.0).
 HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
 card games together").
 SEARCH & SORT (src/tcg/tcg_search.c: L2 / F in the BINDER and deck builders of all three, PLATFORM_KEY_SEARCH; each game's

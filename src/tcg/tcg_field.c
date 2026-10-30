@@ -331,6 +331,32 @@ unsigned Tcg_Today(void)
     return (unsigned)gLocalTime.days;
 }
 
+/* Map setup (BATTLE FRONTIER outside, east and west): a Frontier Brain whose facility's silver symbol the player has
+   stands by its door with a deck. About half of those are out on any day, a lineup that shifts by one each day. */
+void Tcg_FrontierSetup(void)
+{
+    static const u16 sSilver[6] = {FLAG_SYS_TOWER_SILVER, FLAG_SYS_DOME_SILVER, FLAG_SYS_PALACE_SILVER,
+                                   FLAG_SYS_ARENA_SILVER, FLAG_SYS_FACTORY_SILVER, FLAG_SYS_PIKE_SILVER};
+    static const u16 sAway[6] = {FLAG_FRONTIER_CARDS_ANABEL, FLAG_FRONTIER_CARDS_TUCKER, FLAG_FRONTIER_CARDS_SPENSER,
+                                 FLAG_FRONTIER_CARDS_GRETA, FLAG_FRONTIER_CARDS_NOLAND, FLAG_FRONTIER_CARDS_LUCY};
+    u8 won[6], n = 0, i;
+    for (i = 0; i < 6; i++)
+    {
+        FlagSet(sAway[i]);
+        if (FlagGet(sSilver[i]))
+            won[n++] = i;
+    }
+    if (n)
+    {
+        unsigned day = Tcg_Today(), out = (n + 1) / 2;
+        for (i = 0; i < out; i++)
+        {
+            FlagClear(sAway[won[(day + i) % n]]);
+            printf("[tcg] frontier brain out today (day %u): %u\n", day, won[(day + i) % n]);
+        }
+    }
+}
+
 static const struct TcgDeckDefinition *DeckNamed(const char *name)
 {
     unsigned i;
