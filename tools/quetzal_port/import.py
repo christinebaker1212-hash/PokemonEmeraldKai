@@ -351,6 +351,39 @@ def script_text(text, where=''):
     return IDS.fix(text, where)
 
 
+# Kai's own people in Johto / Kanto (docs/REGIONS_PLAN.md "The three card games"): the CARD CLUB staff, TRIPLE TRIAD
+# sellers and the CARD QUEEN (in the region she's in: Tt_MapSetup) in POKeMON CENTERs, the Yu-Gi-Oh! duelist in the
+# department stores. (x, y, graphics, movement, script, flag); placed on free floor of each layout.
+KAI_PEOPLE = {
+    'Johto_GoldenrodPokecenter1F': [(1, 3, 'MANIAC', 'RIGHT', 'EventScript_CardClub', '0'),
+                                    (14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                    (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Johto_EcruteakPokecenter1F': [(14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                   (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Johto_OlivinePokecenter1F': [(14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                  (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Johto_GoldenrodDeptStore1F': [(8, 7, 'MAN_5', 'RIGHT', 'EventScript_YgoClub', '0')],
+    'Kanto_CeladonCity_PokemonCenter_1F': [(0, 3, 'MANIAC', 'RIGHT', 'EventScript_CardClub', '0'),
+                                           (14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                           (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Kanto_SaffronCity_PokemonCenter_1F': [(14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                           (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Kanto_CeruleanCity_PokemonCenter_1F': [(14, 3, 'GENTLEMAN', 'LEFT', 'EventScript_TtSeller', '0'),
+                                            (14, 7, 'BEAUTY', 'LEFT', 'EventScript_TtQueen', 'FLAG_TT_QUEEN_AWAY')],
+    'Kanto_CeladonCity_DepartmentStore_1F': [(12, 6, 'MAN_5', 'LEFT', 'EventScript_YgoClub', '0')],
+}
+
+
+def add_kai_people(m, mj):
+    objs = mj.setdefault('object_events', [])
+    elev = max(set(o.get('elevation', 0) for o in objs) or {0}, key=lambda e: sum(o.get('elevation', 0) == e for o in objs))
+    for x, y, gfx, face, script, flag in KAI_PEOPLE.get(m, []):
+        objs.append({'graphics_id': 'OBJ_EVENT_GFX_' + gfx, 'x': x, 'y': y, 'elevation': elev,
+                     'movement_type': 'MOVEMENT_TYPE_FACE_' + face, 'movement_range_x': 0, 'movement_range_y': 0,
+                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0', 'script': script,
+                     'flag': flag})
+
+
 def import_maps():
     groups_path = os.path.join(REPO, 'data', 'maps', 'map_groups.json')
     groups = load(groups_path)
@@ -381,6 +414,7 @@ def import_maps():
         dst = os.path.join(REPO, 'data', 'maps', m)
         os.makedirs(dst, exist_ok=True)
         mj = json.loads(IDS.fix(json.dumps(mj, ensure_ascii=False), m))
+        add_kai_people(m, mj)
         dump(mj, os.path.join(dst, 'map.json'))
         sp = rip_path('maps/%s/scripts.inc' % m)
         s = script_text(open(sp, encoding='utf-8').read(), m) if os.path.exists(sp) else '%s_MapScripts::\n\t.byte 0\n' % m

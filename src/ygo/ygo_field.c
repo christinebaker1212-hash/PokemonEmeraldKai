@@ -661,7 +661,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle: a real trainer
         {
             u16 id = script[2] | script[3] << 8;
-            u8 cls = id < TRAINERS_COUNT ? gTrainers[id].trainerClass : 0;
+            u8 cls = Tcg_IsTrainerId(id) ? gTrainers[id].trainerClass : 0;
             for (i = 0; i < ARRAY_COUNT(sClasses); i++)
                 if (sClasses[i].trainerClass == cls)
                     theme = ThemeAt(sClasses[i].theme, sClasses[i].alt, h);
@@ -686,12 +686,12 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         else
         {
             for (i = 0; i < ARRAY_COUNT(sTownsfolk); i++)
-                if (sTownsfolk[i].gfx == OBJ_GFX_ID(npc))
+                if (sTownsfolk[i].gfx == Tcg_LookGfx(npc))
                 {
                     theme = ThemeAt(sTownsfolk[i].theme, sTownsfolk[i].alt, h);
                     label = sTownsfolk[i].label;
-                    team = OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_M || OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_F ||
-                           OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_M || OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_F;
+                    team = Tcg_LookGfx(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_M || Tcg_LookGfx(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_F ||
+                           Tcg_LookGfx(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_M || Tcg_LookGfx(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_F;
                 }
             if (theme == 0xFF)
                 return 0;
@@ -705,7 +705,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         }
         if (team)
             o->music = MUS_VS_AQUA_MAGMA;
-        o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(OBJ_GFX_ID(npc));
+        o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(Tcg_LookGfx(npc));
         o->quoteWho[0] = 0;
         *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, NULL, o->voice, team ? sText_DuelTeam : sDuelLines[(h >> 20) % 3], h);
         return PLAY_YGO;

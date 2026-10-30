@@ -17,6 +17,9 @@ int CardTable_Goodbye(char *out, unsigned long size, const char *name, uint32_t 
                       unsigned voice, int theyWon, uint32_t pick);
 /* A map person's kind of talk (QUOTE_VOICE_*), by how they look (tcg_field.c's people) */
 unsigned Tcg_VoiceOf(unsigned graphicsId);
+struct ObjectEvent;
+unsigned Tcg_LookGfx(const struct ObjectEvent *npc);   // Moemon Kai: a Johto / Kanto sprite's Kai look-alike
+int Tcg_IsTrainerId(unsigned id);
 /* The CARD CASE's button on the map: ask the person (or friend) in front for a
  * card duel; 0 when nobody's there (the case opens instead). */
 int Tcg_FieldChallenge(void);

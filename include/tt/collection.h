@@ -11,7 +11,7 @@
 #define TT_CARD_BYTES ((TT_CARD_MAX + 8) / 8)
 #define TT_REGION_MAX_RULES 7   /* a region never holds more (Final Fantasy VIII's busiest held all seven) */
 
-/* HOENN's regions, each with its own rules (like Final Fantasy VIII's Balamb, Galbadia, Dollet...) */
+/* HOENN's regions (then JOHTO and KANTO, one each), each with its own rules (like Final Fantasy VIII's Balamb, Galbadia, Dollet...) */
 enum
 {
     TT_REGION_PETALBURG,   /* LITTLEROOT, OLDALE, PETALBURG and their routes */
@@ -22,6 +22,8 @@ enum
     TT_REGION_LILYCOVE,    /* FORTREE, LILYCOVE, ROUTES 119-121, MT. PYRE, the SAFARI ZONE */
     TT_REGION_SOOTOPOLIS,  /* MOSSDEEP, SOOTOPOLIS, PACIFIDLOG and the eastern seas */
     TT_REGION_EVER_GRANDE, /* EVER GRANDE, VICTORY ROAD, the BATTLE FRONTIER */
+    TT_REGION_JOHTO,       /* Moemon Kai: all of JOHTO */
+    TT_REGION_KANTO,       /* Moemon Kai: all of KANTO and the SEVII ISLANDS */
     TT_REGIONS,
     TT_REGION_NONE = 0xFF
 };

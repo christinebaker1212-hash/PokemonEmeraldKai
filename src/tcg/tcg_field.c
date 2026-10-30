@@ -409,6 +409,25 @@ static const u8 *Hello(struct TcgOpponent *o, const u8 *usual, u32 h)
 {
     return CardTable_Hello(o->key, QUOTE_GAME_POKEMON, o->quoteWho[0] ? o->quoteWho : NULL, o->voice, usual, h);
 }
+// Moemon Kai: Johto's and Kanto's people by look (their sprites' Kai look-alikes: tools/quetzal_port/gen_cardlooks.py)
+#include "../data/qz_card_looks.h"
+unsigned Tcg_LookGfx(const struct ObjectEvent *npc)
+{
+    u16 g = OBJ_GFX_ID(npc);
+    u32 i;
+    if (g >= OBJ_EVENT_GFX_QZ_FIRST)
+        for (i = 0; i < ARRAY_COUNT(sQzCardLooks); i++)
+            if (sQzCardLooks[i].qz == g)
+                return sQzCardLooks[i].kai;
+    return g;
+}
+
+// A trainer id with a struct in gTrainers (Kai's, then Johto's / Kanto's)
+int Tcg_IsTrainerId(unsigned id)
+{
+    return id < TRAINERS_COUNT || (id >= FIRST_QZ_TRAINER && id < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT + 1);
+}
+
 unsigned Tcg_VoiceOf(unsigned graphicsId)
 {
     unsigned i;
@@ -723,7 +742,7 @@ static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
     if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle
     {
         u16 id = script[2] | script[3] << 8;
-        if (id < TRAINERS_COUNT)
+        if (Tcg_IsTrainerId(id))
             pic = gTrainers[id].trainerPic;
     }
     if (pic == 0xFFFF && OBJ_GFX_ID(npc) < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[OBJ_GFX_ID(npc)])
@@ -896,7 +915,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
     }
     o->special = TCG_SPECIAL_NONE;
     for (i = 0; i < ARRAY_COUNT(sPeople); i++)
-        if (sPeople[i].gfx == OBJ_GFX_ID(npc))
+        if (sPeople[i].gfx == Tcg_LookGfx(npc))
         {
             cat = sPeople[i].cat;
             deck = sPeople[i].deck;
@@ -918,7 +937,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
             *answer = ASK_NO;
             return cat == CAT_REFINED || cat == CAT_STYLISH ? sText_BattleFirstPolite : sText_BattleFirst;
         }
-        if (id < TRAINERS_COUNT)
+        if (Tcg_IsTrainerId(id))
         {
             char cls[16], who[16];
             MP_GameToAscii(cls, gTrainerClassNames[gTrainers[id].trainerClass], sizeof(cls));

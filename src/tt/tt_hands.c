@@ -51,11 +51,21 @@ static unsigned Take(const uint16_t *list, unsigned n, unsigned start, unsigned 
     return have;
 }
 
+// The card pool a region's players carry: JOHTO's are MAUVILLE's kind, KANTO's LILYCOVE's (gen_pools.py makes HOENN's 8)
+static unsigned Tt_PoolOf(unsigned region)
+{
+    if (region == TT_REGION_JOHTO)
+        return TT_REGION_MAUVILLE;
+    if (region == TT_REGION_KANTO)
+        return TT_REGION_LILYCOVE;
+    return region <= TT_REGION_EVER_GRANDE ? region : 0;
+}
+
 void Tt_RegionHand(unsigned region, uint32_t h, unsigned tier, unsigned day, uint16_t hand[TT_HAND])
 {
     static const uint8_t sLo[4] = {1, 1, 1, 2}, sHi[4] = {2, 3, 3, 3}, sFours[4] = {0, 0, 1, 2};
     static uint16_t low[TT_CARD_MAX + 1], four[TT_CARD_MAX + 1];
-    const uint16_t *pool = gTtRegionPool[region < TT_REGIONS ? region : 0];
+    const uint16_t *pool = gTtRegionPool[Tt_PoolOf(region)];
     unsigned nl, nf, have = 0, fours;
     if (tier > 3)
         tier = 3;
@@ -207,7 +217,7 @@ int Tt_DealFair(const uint8_t *owned, uint32_t seed, int target, uint16_t hand[T
 void Tt_DealRegion(unsigned region, uint32_t seed, int target, uint16_t hand[TT_HAND])
 {
     static uint8_t pool[TT_CARD_MAX + 1];
-    const uint16_t *list = gTtRegionPool[region < TT_REGIONS ? region : 0];
+    const uint16_t *list = gTtRegionPool[Tt_PoolOf(region)];
     unsigned i, n = 0;
     memset(pool, 0, sizeof(pool));
     for (i = 0; list[i]; i++)

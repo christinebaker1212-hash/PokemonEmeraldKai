@@ -549,6 +549,11 @@ void MP_Region_TagMet(struct BoxPokemon *b)
 void MP_Region_OnMapLoaded(void)
 {
     u8 cur = MP_Region_Current();
+    if (cur != REGION_HOENN)
+    {
+        void Tt_MapSetup(void);
+        Tt_MapSetup();   // the CARD QUEEN shows in JOHTO's / KANTO's POKeMON CENTERs while she's there
+    }
     if (cur != gRegionState.current && gRegionState.current < REGION_COUNT)
         MP_Region_Travel(gRegionState.current, cur);
 }

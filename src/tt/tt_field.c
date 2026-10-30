@@ -70,6 +70,10 @@ static unsigned RegionOfMapsec(unsigned mapsec)
     case MAPSEC_EVER_GRANDE_CITY: case MAPSEC_VICTORY_ROAD: case MAPSEC_BATTLE_FRONTIER: case MAPSEC_SOUTHERN_ISLAND:
         return TT_REGION_EVER_GRANDE;
     default:
+        if (mapsec >= MAPSEC_JOHTO_FIRST && mapsec < MAPSEC_JOHTO_END)
+            return TT_REGION_JOHTO;   // Moemon Kai
+        if (mapsec >= KANTO_MAPSEC_START && mapsec <= KANTO_MAPSEC_END)
+            return TT_REGION_KANTO;
         return TT_REGION_NONE;
     }
 }
@@ -391,7 +395,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
         if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle: a real trainer
         {
             u16 id = script[2] | script[3] << 8;
-            u8 cls = id < TRAINERS_COUNT ? gTrainers[id].trainerClass : 0;
+            u8 cls = Tcg_IsTrainerId(id) ? gTrainers[id].trainerClass : 0;
             for (i = 0; i < ARRAY_COUNT(sClasses); i++)
                 if (sClasses[i].trainerClass == cls)
                 {
@@ -417,7 +421,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
         else
         {
             for (i = 0; i < ARRAY_COUNT(sTownsfolk); i++)
-                if (sTownsfolk[i].gfx == OBJ_GFX_ID(npc))
+                if (sTownsfolk[i].gfx == Tcg_LookGfx(npc))
                 {
                     play = sTownsfolk[i].play;
                     sTalk = sTownsfolk[i].talk;
